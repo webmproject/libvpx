@@ -160,6 +160,15 @@ int vp9_rc_clamp_pframe_target_size(const struct VP9_COMP *const cpi,
 // This function is called only from the vp9_rc_get_..._params() functions.
 void vp9_rc_set_frame_target(struct VP9_COMP *cpi, int target);
 
+// Computes a q delta (in "q index" terms) to get from a starting q value
+// to a target q value
+int vp9_compute_qdelta(const RATE_CONTROL *rc, double qstart, double qtarget);
+
+// Computes a q delta (in "q index" terms) to get from a starting q value
+// to a value that should equate to the given rate ratio.
+int vp9_compute_qdelta_by_rate(const RATE_CONTROL *rc, FRAME_TYPE frame_type,
+                               int qindex, double rate_target_ratio);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

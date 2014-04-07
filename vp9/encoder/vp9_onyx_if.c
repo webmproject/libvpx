@@ -255,56 +255,6 @@ static void restore_coding_context(VP9_COMP *cpi) {
   cm->fc = cc->fc;
 }
 
-// Computes a q delta (in "q index" terms) to get from a starting q value
-// to a target q value
-int vp9_compute_qdelta(const VP9_COMP *cpi, double qstart, double qtarget) {
-  const RATE_CONTROL *const rc = &cpi->rc;
-  int start_index = rc->worst_quality;
-  int target_index = rc->worst_quality;
-  int i;
-
-  // Convert the average q value to an index.
-  for (i = rc->best_quality; i < rc->worst_quality; ++i) {
-    start_index = i;
-    if (vp9_convert_qindex_to_q(i) >= qstart)
-      break;
-  }
-
-  // Convert the q target to an index
-  for (i = rc->best_quality; i < rc->worst_quality; ++i) {
-    target_index = i;
-    if (vp9_convert_qindex_to_q(i) >= qtarget)
-      break;
-  }
-
-  return target_index - start_index;
-}
-
-// Computes a q delta (in "q index" terms) to get from a starting q value
-// to a value that should equate to the given rate ratio.
-int vp9_compute_qdelta_by_rate(VP9_COMP *cpi, int qindex,
-                               double rate_target_ratio) {
-  const FRAME_TYPE frame_type = cpi->common.frame_type;
-  const RATE_CONTROL *const rc = &cpi->rc;
-  int target_index = rc->worst_quality;
-  int i;
-
-  // Look up the current projected bits per block for the base index
-  const int base_bits_per_mb = vp9_rc_bits_per_mb(frame_type, qindex, 1.0);
-
-  // Find the target bits per mb based on the base value and given ratio.
-  const int target_bits_per_mb = (int)(rate_target_ratio * base_bits_per_mb);
-
-  // Convert the q target to an index
-  for (i = rc->best_quality; i < rc->worst_quality; ++i) {
-    target_index = i;
-    if (vp9_rc_bits_per_mb(frame_type, i, 1.0) <= target_bits_per_mb )
-      break;
-  }
-
-  return target_index - qindex;
-}
-
 static void configure_static_seg_features(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   const RATE_CONTROL *const rc = &cpi->rc;
@@ -348,7 +298,7 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
       seg->update_map = 1;
       seg->update_data = 1;
 
-      qi_delta = vp9_compute_qdelta(cpi, rc->avg_q, rc->avg_q * 0.875);
+      qi_delta = vp9_compute_qdelta(rc, rc->avg_q, rc->avg_q * 0.875);
       vp9_set_segdata(seg, 1, SEG_LVL_ALT_Q, qi_delta - 2);
       vp9_set_segdata(seg, 1, SEG_LVL_ALT_LF, -2);
 
@@ -369,7 +319,7 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
         seg->update_data = 1;
         seg->abs_delta = SEGMENT_DELTADATA;
 
-        qi_delta = vp9_compute_qdelta(cpi, rc->avg_q, rc->avg_q * 1.125);
+        qi_delta = vp9_compute_qdelta(rc, rc->avg_q, rc->avg_q * 1.125);
         vp9_set_segdata(seg, 1, SEG_LVL_ALT_Q, qi_delta + 2);
         vp9_enable_segfeature(seg, 1, SEG_LVL_ALT_Q);
 

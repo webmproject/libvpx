@@ -99,7 +99,7 @@ void vp9_vaq_frame_setup(VP9_COMP *cpi) {
         continue;
       }
 
-      qindex_delta = vp9_compute_qdelta(cpi, base_q, base_q * Q_RATIO(i));
+      qindex_delta = vp9_compute_qdelta(&cpi->rc, base_q, base_q * Q_RATIO(i));
       vp9_set_segdata(seg, SEGMENT_ID(i), SEG_LVL_ALT_Q, qindex_delta);
       vp9_enable_segfeature(seg, SEGMENT_ID(i), SEG_LVL_ALT_Q);
 

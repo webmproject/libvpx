@@ -460,7 +460,7 @@ static int rc_pick_q_and_bounds_one_pass_cbr(const VP9_COMP *cpi,
     if (rc->this_key_frame_forced) {
       int qindex = rc->last_boosted_qindex;
       double last_boosted_q = vp9_convert_qindex_to_q(qindex);
-      int delta_qindex = vp9_compute_qdelta(cpi, last_boosted_q,
+      int delta_qindex = vp9_compute_qdelta(rc, last_boosted_q,
                                             (last_boosted_q * 0.75));
       active_best_quality = MAX(qindex + delta_qindex, rc->best_quality);
     } else if (cm->current_video_frame > 0) {
@@ -482,8 +482,8 @@ static int rc_pick_q_and_bounds_one_pass_cbr(const VP9_COMP *cpi,
       // Convert the adjustment factor to a qindex delta
       // on active_best_quality.
       q_val = vp9_convert_qindex_to_q(active_best_quality);
-      active_best_quality += vp9_compute_qdelta(cpi, q_val, q_val *
-                                                   q_adj_factor);
+      active_best_quality += vp9_compute_qdelta(rc, q_val,
+                                                q_val * q_adj_factor);
     }
   } else if (!rc->is_src_frame_alt_ref &&
              !cpi->use_svc &&
@@ -572,8 +572,8 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP9_COMP *cpi,
     if (rc->this_key_frame_forced) {
       int qindex = rc->last_boosted_qindex;
       double last_boosted_q = vp9_convert_qindex_to_q(qindex);
-      int delta_qindex = vp9_compute_qdelta(cpi, last_boosted_q,
-                                            (last_boosted_q * 0.75));
+      int delta_qindex = vp9_compute_qdelta(rc, last_boosted_q,
+                                            last_boosted_q * 0.75);
       active_best_quality = MAX(qindex + delta_qindex, rc->best_quality);
     } else if (cm->current_video_frame > 0) {
       // not first frame of one pass and kf_boost is set
@@ -594,15 +594,15 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP9_COMP *cpi,
       // Convert the adjustment factor to a qindex delta
       // on active_best_quality.
       q_val = vp9_convert_qindex_to_q(active_best_quality);
-      active_best_quality += vp9_compute_qdelta(cpi, q_val, q_val *
-                                                   q_adj_factor);
+      active_best_quality += vp9_compute_qdelta(rc, q_val,
+                                                q_val * q_adj_factor);
     }
 #else
     double current_q;
     // Force the KF quantizer to be 30% of the active_worst_quality.
     current_q = vp9_convert_qindex_to_q(active_worst_quality);
     active_best_quality = active_worst_quality
-        + vp9_compute_qdelta(cpi, current_q, current_q * 0.3);
+        + vp9_compute_qdelta(rc, current_q, current_q * 0.3);
 #endif
   } else if (!rc->is_src_frame_alt_ref &&
              (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)) {
@@ -721,7 +721,7 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP9_COMP *cpi,
     assert(level >= 0);
     new_q = current_q * (1.0 - (0.2 * (cpi->max_arf_level - level)));
     q = active_worst_quality +
-        vp9_compute_qdelta(cpi, current_q, new_q);
+        vp9_compute_qdelta(rc, current_q, new_q);
 
     *bottom_index = q;
     *top_index    = q;
@@ -754,8 +754,8 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi,
     if (rc->this_key_frame_forced) {
       int qindex = rc->last_boosted_qindex;
       double last_boosted_q = vp9_convert_qindex_to_q(qindex);
-      int delta_qindex = vp9_compute_qdelta(cpi, last_boosted_q,
-                                            (last_boosted_q * 0.75));
+      int delta_qindex = vp9_compute_qdelta(rc, last_boosted_q,
+                                            last_boosted_q * 0.75);
       active_best_quality = MAX(qindex + delta_qindex, rc->best_quality);
     } else {
       // Not forced keyframe.
@@ -779,15 +779,15 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi,
       // Convert the adjustment factor to a qindex delta
       // on active_best_quality.
       q_val = vp9_convert_qindex_to_q(active_best_quality);
-      active_best_quality += vp9_compute_qdelta(cpi, q_val, q_val *
-                                                   q_adj_factor);
+      active_best_quality += vp9_compute_qdelta(rc, q_val,
+                                                q_val * q_adj_factor);
     }
 #else
     double current_q;
     // Force the KF quantizer to be 30% of the active_worst_quality.
     current_q = vp9_convert_qindex_to_q(active_worst_quality);
     active_best_quality = active_worst_quality
-        + vp9_compute_qdelta(cpi, current_q, current_q * 0.3);
+        + vp9_compute_qdelta(rc, current_q, current_q * 0.3);
 #endif
   } else if (!rc->is_src_frame_alt_ref &&
              (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)) {
@@ -904,7 +904,7 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi,
     assert(level >= 0);
     new_q = current_q * (1.0 - (0.2 * (cpi->max_arf_level - level)));
     q = active_worst_quality +
-        vp9_compute_qdelta(cpi, current_q, new_q);
+        vp9_compute_qdelta(rc, current_q, new_q);
 
     *bottom_index = q;
     *top_index    = q;
@@ -1281,4 +1281,47 @@ void vp9_rc_get_one_pass_cbr_params(VP9_COMP *cpi) {
   // Don't use gf_update by default in CBR mode.
   rc->frames_till_gf_update_due = INT_MAX;
   rc->baseline_gf_interval = INT_MAX;
+}
+
+int vp9_compute_qdelta(const RATE_CONTROL *rc, double qstart, double qtarget) {
+  int start_index = rc->worst_quality;
+  int target_index = rc->worst_quality;
+  int i;
+
+  // Convert the average q value to an index.
+  for (i = rc->best_quality; i < rc->worst_quality; ++i) {
+    start_index = i;
+    if (vp9_convert_qindex_to_q(i) >= qstart)
+      break;
+  }
+
+  // Convert the q target to an index
+  for (i = rc->best_quality; i < rc->worst_quality; ++i) {
+    target_index = i;
+    if (vp9_convert_qindex_to_q(i) >= qtarget)
+      break;
+  }
+
+  return target_index - start_index;
+}
+
+int vp9_compute_qdelta_by_rate(const RATE_CONTROL *rc, FRAME_TYPE frame_type,
+                               int qindex, double rate_target_ratio) {
+  int target_index = rc->worst_quality;
+  int i;
+
+  // Look up the current projected bits per block for the base index
+  const int base_bits_per_mb = vp9_rc_bits_per_mb(frame_type, qindex, 1.0);
+
+  // Find the target bits per mb based on the base value and given ratio.
+  const int target_bits_per_mb = (int)(rate_target_ratio * base_bits_per_mb);
+
+  // Convert the q target to an index
+  for (i = rc->best_quality; i < rc->worst_quality; ++i) {
+    target_index = i;
+    if (vp9_rc_bits_per_mb(frame_type, i, 1.0) <= target_bits_per_mb )
+      break;
+  }
+
+  return target_index - qindex;
 }
