@@ -89,6 +89,8 @@ static vpx_codec_err_t decoder_destroy(vpx_codec_alg_priv_t *ctx) {
     ctx->pbi = NULL;
   }
 
+  vpx_free(ctx);
+
   return VPX_CODEC_OK;
 }
 
