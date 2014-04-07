@@ -3040,14 +3040,10 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
 // end RTC play code
 
 static void encode_frame_internal(VP9_COMP *cpi) {
-  int mi_row;
+  SPEED_FEATURES *const sf = &cpi->sf;
   MACROBLOCK *const x = &cpi->mb;
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
-
-//  fprintf(stderr, "encode_frame_internal frame %d (%d) type %d\n",
-//           cpi->common.current_video_frame, cpi->common.show_frame,
-//           cm->frame_type);
 
   xd->mi = cm->mi_grid_visible;
   xd->mi[0] = cm->mi;
@@ -3055,38 +3051,31 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   vp9_zero(cm->counts);
   vp9_zero(cpi->coef_counts);
   vp9_zero(cpi->tx_stepdown_count);
+  vp9_zero(cpi->rd_comp_pred_diff);
+  vp9_zero(cpi->rd_filter_diff);
+  vp9_zero(cpi->rd_tx_select_diff);
+  vp9_zero(cpi->rd_tx_select_threshes);
 
-  // Set frame level transform size use case
   cm->tx_mode = select_tx_mode(cpi);
 
-  cpi->mb.e_mbd.lossless = cm->base_qindex == 0 && cm->y_dc_delta_q == 0
-      && cm->uv_dc_delta_q == 0 && cm->uv_ac_delta_q == 0;
+  cpi->mb.e_mbd.lossless = cm->base_qindex == 0 &&
+                           cm->y_dc_delta_q == 0 &&
+                           cm->uv_dc_delta_q == 0 &&
+                           cm->uv_ac_delta_q == 0;
   switch_lossless_mode(cpi, cpi->mb.e_mbd.lossless);
 
   vp9_frame_init_quantizer(cpi);
 
   vp9_initialize_rd_consts(cpi);
   vp9_initialize_me_consts(cpi, cm->base_qindex);
-
-  if (cpi->oxcf.tuning == VP8_TUNE_SSIM) {
-    // Initialize encode frame context.
-    init_encode_frame_mb_context(cpi);
-
-    // Build a frame level activity map
-    build_activity_map(cpi);
-  }
-
-  // Re-initialize encode frame context.
   init_encode_frame_mb_context(cpi);
 
-  vp9_zero(cpi->rd_comp_pred_diff);
-  vp9_zero(cpi->rd_filter_diff);
-  vp9_zero(cpi->rd_tx_select_diff);
-  vp9_zero(cpi->rd_tx_select_threshes);
+  if (cpi->oxcf.tuning == VP8_TUNE_SSIM)
+    build_activity_map(cpi);
 
   set_prev_mi(cm);
 
-  if (cpi->sf.use_nonrd_pick_mode) {
+  if (sf->use_nonrd_pick_mode) {
     // Initialize internal buffer pointers for rtc coding, where non-RD
     // mode decision is used and hence no buffer pointer swap needed.
     int i;
@@ -3118,12 +3107,13 @@ static void encode_frame_internal(VP9_COMP *cpi) {
         for (tile_col = 0; tile_col < tile_cols; tile_col++) {
           TileInfo tile;
           TOKENEXTRA *tp_old = tp;
+          int mi_row;
 
           // For each row of SBs in the frame
           vp9_tile_init(&tile, cm, tile_row, tile_col);
           for (mi_row = tile.mi_row_start;
                mi_row < tile.mi_row_end; mi_row += MI_BLOCK_SIZE) {
-            if (cpi->sf.use_nonrd_pick_mode && cm->frame_type != KEY_FRAME)
+            if (sf->use_nonrd_pick_mode && cm->frame_type != KEY_FRAME)
               encode_nonrd_sb_row(cpi, &tile, mi_row, &tp);
             else
               encode_rd_sb_row(cpi, &tile, mi_row, &tp);
@@ -3138,18 +3128,18 @@ static void encode_frame_internal(VP9_COMP *cpi) {
     cpi->time_encode_sb_row += vpx_usec_timer_elapsed(&emr_timer);
   }
 
-  if (cpi->sf.skip_encode_sb) {
+  if (sf->skip_encode_sb) {
     int j;
     unsigned int intra_count = 0, inter_count = 0;
     for (j = 0; j < INTRA_INTER_CONTEXTS; ++j) {
       intra_count += cm->counts.intra_inter[j][0];
       inter_count += cm->counts.intra_inter[j][1];
     }
-    cpi->sf.skip_encode_frame = (intra_count << 2) < inter_count &&
-                                cm->frame_type != KEY_FRAME &&
-                                cm->show_frame;
+    sf->skip_encode_frame = (intra_count << 2) < inter_count &&
+                            cm->frame_type != KEY_FRAME &&
+                            cm->show_frame;
   } else {
-    cpi->sf.skip_encode_frame = 0;
+    sf->skip_encode_frame = 0;
   }
 
 #if 0
