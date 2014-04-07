@@ -281,15 +281,15 @@ static INLINE void set_mi_row_col(MACROBLOCKD *xd, const TileInfo *const tile,
   xd->left_available  = (mi_col > tile->mi_col_start);
 }
 
-static INLINE void set_prev_mi(VP9_COMMON *cm) {
-  const int use_prev_in_find_mv_refs = cm->width == cm->last_width &&
-                                       cm->height == cm->last_height &&
-                                       !cm->intra_only &&
-                                       cm->last_show_frame;
+static INLINE MODE_INFO *get_prev_mi(VP9_COMMON *cm) {
+  const int use_prev_mi = cm->coding_use_prev_mi &&
+                          cm->width == cm->last_width &&
+                          cm->height == cm->last_height &&
+                          !cm->intra_only &&
+                          cm->last_show_frame;
   // Special case: set prev_mi to NULL when the previous mode info
   // context cannot be used.
-  cm->prev_mi = use_prev_in_find_mv_refs ?
-                  cm->prev_mip + cm->mi_stride + 1 : NULL;
+  return use_prev_mi ? &cm->prev_mip[cm->mi_stride + 1] : NULL;
 }
 
 static INLINE int frame_is_intra_only(const VP9_COMMON *const cm) {
