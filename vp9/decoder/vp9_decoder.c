@@ -110,8 +110,8 @@ void vp9_initialize_dec() {
   }
 }
 
-VP9D_COMP *vp9_create_decompressor(const VP9D_CONFIG *oxcf) {
-  VP9D_COMP *const pbi = vpx_memalign(32, sizeof(VP9D_COMP));
+VP9D_COMP *vp9_decoder_create(const VP9D_CONFIG *oxcf) {
+  VP9D_COMP *const pbi = vpx_memalign(32, sizeof(*pbi));
   VP9_COMMON *const cm = pbi ? &pbi->common : NULL;
 
   if (!cm)
@@ -119,12 +119,9 @@ VP9D_COMP *vp9_create_decompressor(const VP9D_CONFIG *oxcf) {
 
   vp9_zero(*pbi);
 
-  // Initialize the references to not point to any frame buffers.
-  memset(&cm->ref_frame_map, -1, sizeof(cm->ref_frame_map));
-
   if (setjmp(cm->error.jmp)) {
     cm->error.setjmp = 0;
-    vp9_remove_decompressor(pbi);
+    vp9_decoder_remove(pbi);
     return NULL;
   }
 
@@ -133,9 +130,13 @@ VP9D_COMP *vp9_create_decompressor(const VP9D_CONFIG *oxcf) {
 
   vp9_rtcd();
 
+  // Initialize the references to not point to any frame buffers.
+  vpx_memset(&cm->ref_frame_map, -1, sizeof(cm->ref_frame_map));
+
+  cm->current_video_frame = 0;
   pbi->oxcf = *oxcf;
   pbi->ready_for_new_data = 1;
-  cm->current_video_frame = 0;
+  pbi->decoded_key_frame = 0;
 
   // vp9_init_dequantizer() is first called here. Add check in
   // frame_init_dequantizer() to avoid unnecessary calling of
@@ -145,14 +146,13 @@ VP9D_COMP *vp9_create_decompressor(const VP9D_CONFIG *oxcf) {
   vp9_loop_filter_init(cm);
 
   cm->error.setjmp = 0;
-  pbi->decoded_key_frame = 0;
 
   vp9_worker_init(&pbi->lf_worker);
 
   return pbi;
 }
 
-void vp9_remove_decompressor(VP9D_COMP *pbi) {
+void vp9_decoder_remove(VP9D_COMP *pbi) {
   VP9_COMMON *const cm = &pbi->common;
   int i;
 
