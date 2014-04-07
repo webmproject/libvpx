@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//vLw\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1009,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-07T23:20:30Z",
+      "side": 1,
+      "message": "int profile \u003d vp9_rb_read_bit(rb);",
+      "revId": "7133eefacefc5ab0381e36acede457b241505a96",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//vLs\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1012,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-07T23:20:30Z",
+      "side": 1,
+      "message": "PROFILE_2 instead of 2?",
+      "revId": "7133eefacefc5ab0381e36acede457b241505a96",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//vLo\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1015,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-07T23:20:30Z",
+      "side": 1,
+      "message": "The function should return profile and assignment should be outside of the function to avoid side effects, i.e. cm-\u003eprofile \u003d read_profile(cm, rb).",
+      "revId": "7133eefacefc5ab0381e36acede457b241505a96",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//vLk\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1056,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-07T23:20:30Z",
+      "side": 1,
+      "message": "Outer parens are not required.",
+      "revId": "7133eefacefc5ab0381e36acede457b241505a96",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//vLg\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1037,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-07T23:20:30Z",
+      "side": 1,
+      "message": "It seems better to move these comments to the enum BITSTREAM_PROFILE.",
+      "revId": "7133eefacefc5ab0381e36acede457b241505a96",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//vLc\u003d",
+        "filename": "vp9/encoder/vp9_onyx_int.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-07T23:20:30Z",
+      "side": 1,
+      "message": "I think the comment is redundant here, everyone could just go and see how BITSTREAM_PROFILE is defined.",
+      "revId": "7133eefacefc5ab0381e36acede457b241505a96",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//vLY\u003d",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 257,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-07T23:20:30Z",
+      "side": 1,
+      "message": "PROFILE_1 instead of 1?",
+      "revId": "7133eefacefc5ab0381e36acede457b241505a96",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
