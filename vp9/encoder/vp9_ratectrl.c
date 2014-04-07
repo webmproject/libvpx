@@ -106,51 +106,6 @@ int vp9_rc_bits_per_mb(FRAME_TYPE frame_type, int qindex,
   return (int)(0.5 + (enumerator * correction_factor / q));
 }
 
-void vp9_save_coding_context(VP9_COMP *cpi) {
-  CODING_CONTEXT *const cc = &cpi->coding_context;
-  VP9_COMMON *cm = &cpi->common;
-
-  // Stores a snapshot of key state variables which can subsequently be
-  // restored with a call to vp9_restore_coding_context. These functions are
-  // intended for use in a re-code loop in vp9_compress_frame where the
-  // quantizer value is adjusted between loop iterations.
-  vp9_copy(cc->nmvjointcost,  cpi->mb.nmvjointcost);
-  vp9_copy(cc->nmvcosts,  cpi->mb.nmvcosts);
-  vp9_copy(cc->nmvcosts_hp,  cpi->mb.nmvcosts_hp);
-
-  vp9_copy(cc->segment_pred_probs, cm->seg.pred_probs);
-
-  vpx_memcpy(cpi->coding_context.last_frame_seg_map_copy,
-             cm->last_frame_seg_map, (cm->mi_rows * cm->mi_cols));
-
-  vp9_copy(cc->last_ref_lf_deltas, cm->lf.last_ref_deltas);
-  vp9_copy(cc->last_mode_lf_deltas, cm->lf.last_mode_deltas);
-
-  cc->fc = cm->fc;
-}
-
-void vp9_restore_coding_context(VP9_COMP *cpi) {
-  CODING_CONTEXT *const cc = &cpi->coding_context;
-  VP9_COMMON *cm = &cpi->common;
-
-  // Restore key state variables to the snapshot state stored in the
-  // previous call to vp9_save_coding_context.
-  vp9_copy(cpi->mb.nmvjointcost, cc->nmvjointcost);
-  vp9_copy(cpi->mb.nmvcosts, cc->nmvcosts);
-  vp9_copy(cpi->mb.nmvcosts_hp, cc->nmvcosts_hp);
-
-  vp9_copy(cm->seg.pred_probs, cc->segment_pred_probs);
-
-  vpx_memcpy(cm->last_frame_seg_map,
-             cpi->coding_context.last_frame_seg_map_copy,
-             (cm->mi_rows * cm->mi_cols));
-
-  vp9_copy(cm->lf.last_ref_deltas, cc->last_ref_lf_deltas);
-  vp9_copy(cm->lf.last_mode_deltas, cc->last_mode_lf_deltas);
-
-  cm->fc = cc->fc;
-}
-
 static int estimate_bits_at_q(int frame_kind, int q, int mbs,
                               double correction_factor) {
   const int bpm = (int)(vp9_rc_bits_per_mb(frame_kind, q, correction_factor));
