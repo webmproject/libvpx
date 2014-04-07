@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//vMA\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1010,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-04-07T23:11:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//vX0\u003d",
+      "revId": "1ed42c511977a2b14e1a914e25689fb8d8e2b6d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//vQc\u003d",
         "filename": "vp9/decoder/vp9_decodeframe.c",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2014-04-07T19:43:33Z",
       "side": 1,
       "message": "Unnecessary ( )",
+      "revId": "1ed42c511977a2b14e1a914e25689fb8d8e2b6d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//vNE\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1011,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-04-07T23:11:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//vQc\u003d",
       "revId": "1ed42c511977a2b14e1a914e25689fb8d8e2b6d6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//vL8\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1038,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-04-07T23:11:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//vX4\u003d",
+      "revId": "1ed42c511977a2b14e1a914e25689fb8d8e2b6d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//vQg\u003d",
         "filename": "vp9/encoder/vp9_bitstream.c",
         "patchSetId": 3
@@ -64,6 +118,24 @@
       "writtenOn": "2014-04-07T19:43:33Z",
       "side": 1,
       "message": "Why the conditional and not just:\nvp9_wb_write_bit(wb, version \u0026 1);\nvp9_wb_write_bit(wb, version \u003e\u003e 1);",
+      "revId": "1ed42c511977a2b14e1a914e25689fb8d8e2b6d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//vM0\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1048,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-04-07T23:11:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//vQg\u003d",
       "revId": "1ed42c511977a2b14e1a914e25689fb8d8e2b6d6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//vMs\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1068,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-04-07T23:11:35Z",
+      "side": 1,
+      "message": "Yes - that is what i am proposing in this patch.\nAn alternative is to still allow 8-bits in profile 2, but with 8 bits we will use higher precision internal buffers. However, let\u0027s hold off on that until we see any gains if we do that.\n\nassert added.",
+      "parentUuid": "AAAAdn//vQY\u003d",
+      "revId": "1ed42c511977a2b14e1a914e25689fb8d8e2b6d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//vXw\u003d",
         "filename": "vp9/encoder/vp9_onyx_int.h",
         "patchSetId": 3
@@ -98,6 +188,24 @@
       "writtenOn": "2014-04-05T03:20:36Z",
       "side": 1,
       "message": "profile?",
+      "revId": "1ed42c511977a2b14e1a914e25689fb8d8e2b6d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//vMk\u003d",
+        "filename": "vp9/encoder/vp9_onyx_int.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-04-07T23:11:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//vXw\u003d",
       "revId": "1ed42c511977a2b14e1a914e25689fb8d8e2b6d6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
