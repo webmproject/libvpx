@@ -14,21 +14,22 @@
 #include "vp9/encoder/vp9_svc_layercontext.h"
 
 void vp9_init_layer_context(VP9_COMP *const cpi) {
+  SVC *const svc = &cpi->svc;
   const VP9_CONFIG *const oxcf = &cpi->oxcf;
   int layer;
   int layer_end;
 
-  cpi->svc.spatial_layer_id = 0;
-  cpi->svc.temporal_layer_id = 0;
+  svc->spatial_layer_id = 0;
+  svc->temporal_layer_id = 0;
 
-  if (cpi->svc.number_temporal_layers > 1) {
-    layer_end = cpi->svc.number_temporal_layers;
+  if (svc->number_temporal_layers > 1) {
+    layer_end = svc->number_temporal_layers;
   } else {
-    layer_end = cpi->svc.number_spatial_layers;
+    layer_end = svc->number_spatial_layers;
   }
 
   for (layer = 0; layer < layer_end; ++layer) {
-    LAYER_CONTEXT *const lc = &cpi->svc.layer_context[layer];
+    LAYER_CONTEXT *const lc = &svc->layer_context[layer];
     RATE_CONTROL *const lrc = &lc->rc;
     lc->current_video_frame_in_layer = 0;
     lrc->avg_frame_qindex[INTER_FRAME] = q_trans[oxcf->worst_allowed_q];
@@ -44,7 +45,7 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
     lrc->rate_correction_factor = 1.0;
     lrc->key_frame_rate_correction_factor = 1.0;
 
-    if (cpi->svc.number_temporal_layers > 1) {
+    if (svc->number_temporal_layers > 1) {
       lc->target_bandwidth = oxcf->ts_target_bitrate[layer] * 1000;
       lrc->last_q[INTER_FRAME] = q_trans[oxcf->worst_allowed_q];
     } else {
@@ -63,23 +64,24 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
 // Update the layer context from a change_config() call.
 void vp9_update_layer_context_change_config(VP9_COMP *const cpi,
                                             const int target_bandwidth) {
+  SVC *const svc = &cpi->svc;
   const VP9_CONFIG *const oxcf = &cpi->oxcf;
   const RATE_CONTROL *const rc = &cpi->rc;
   int layer;
   int layer_end;
   float bitrate_alloc = 1.0;
 
-  if (cpi->svc.number_temporal_layers > 1) {
-    layer_end = cpi->svc.number_temporal_layers;
+  if (svc->number_temporal_layers > 1) {
+    layer_end = svc->number_temporal_layers;
   } else {
-    layer_end = cpi->svc.number_spatial_layers;
+    layer_end = svc->number_spatial_layers;
   }
 
   for (layer = 0; layer < layer_end; ++layer) {
-    LAYER_CONTEXT *const lc = &cpi->svc.layer_context[layer];
+    LAYER_CONTEXT *const lc = &svc->layer_context[layer];
     RATE_CONTROL *const lrc = &lc->rc;
 
-    if (cpi->svc.number_temporal_layers > 1) {
+    if (svc->number_temporal_layers > 1) {
       lc->target_bandwidth = oxcf->ts_target_bitrate[layer] * 1000;
     } else {
       lc->target_bandwidth = oxcf->ss_target_bitrate[layer] * 1000;
@@ -95,7 +97,7 @@ void vp9_update_layer_context_change_config(VP9_COMP *const cpi,
     lrc->bits_off_target = MIN(lrc->bits_off_target, lc->maximum_buffer_size);
     lrc->buffer_level = MIN(lrc->buffer_level, lc->maximum_buffer_size);
     // Update framerate-related quantities.
-    if (cpi->svc.number_temporal_layers > 1) {
+    if (svc->number_temporal_layers > 1) {
       lc->framerate = oxcf->framerate / oxcf->ts_rate_decimator[layer];
     } else {
       lc->framerate = oxcf->framerate;
@@ -115,10 +117,11 @@ static LAYER_CONTEXT *get_layer_context(SVC *svc) {
 }
 
 void vp9_update_temporal_layer_framerate(VP9_COMP *const cpi) {
-  const int layer = cpi->svc.temporal_layer_id;
+  SVC *const svc = &cpi->svc;
   const VP9_CONFIG *const oxcf = &cpi->oxcf;
-  LAYER_CONTEXT *const lc = get_layer_context(&cpi->svc);
+  LAYER_CONTEXT *const lc = get_layer_context(svc);
   RATE_CONTROL *const lrc = &lc->rc;
+  const int layer = svc->temporal_layer_id;
 
   lc->framerate = oxcf->framerate / oxcf->ts_rate_decimator[layer];
   lrc->av_per_frame_bandwidth = (int)(lc->target_bandwidth / lc->framerate);
@@ -198,15 +201,17 @@ void vp9_save_layer_context(VP9_COMP *const cpi) {
 }
 
 void vp9_init_second_pass_spatial_svc(VP9_COMP *cpi) {
+  SVC *const svc = &cpi->svc;
   int i;
-  for (i = 0; i < cpi->svc.number_spatial_layers; ++i) {
-    struct twopass_rc *const twopass = &cpi->svc.layer_context[i].twopass;
 
-    cpi->svc.spatial_layer_id = i;
+  for (i = 0; i < svc->number_spatial_layers; ++i) {
+    struct twopass_rc *const twopass = &svc->layer_context[i].twopass;
+
+    svc->spatial_layer_id = i;
     vp9_init_second_pass(cpi);
 
     twopass->total_stats.spatial_layer_id = i;
     twopass->total_left_stats.spatial_layer_id = i;
   }
-  cpi->svc.spatial_layer_id = 0;
+  svc->spatial_layer_id = 0;
 }

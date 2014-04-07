@@ -941,16 +941,17 @@ int vp9_twopass_worst_quality(VP9_COMP *cpi, FIRSTPASS_STATS *fpstats,
 extern void vp9_new_framerate(VP9_COMP *cpi, double framerate);
 
 void vp9_init_second_pass(VP9_COMP *cpi) {
+  SVC *const svc = &cpi->svc;
   FIRSTPASS_STATS this_frame;
   const FIRSTPASS_STATS *start_pos;
   struct twopass_rc *twopass = &cpi->twopass;
   const VP9_CONFIG *const oxcf = &cpi->oxcf;
-  const int is_spatial_svc = (cpi->svc.number_spatial_layers > 1) &&
-                             (cpi->svc.number_temporal_layers == 1);
+  const int is_spatial_svc = (svc->number_spatial_layers > 1) &&
+                             (svc->number_temporal_layers == 1);
   double frame_rate;
 
   if (is_spatial_svc) {
-    twopass = &cpi->svc.layer_context[cpi->svc.spatial_layer_id].twopass;
+    twopass = &svc->layer_context[svc->spatial_layer_id].twopass;
   }
 
   zero_stats(&twopass->total_stats);
@@ -974,7 +975,7 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
     vp9_update_spatial_layer_framerate(cpi, frame_rate);
     twopass->bits_left =
         (int64_t)(twopass->total_stats.duration *
-        cpi->svc.layer_context[cpi->svc.spatial_layer_id].target_bandwidth /
+        svc->layer_context[svc->spatial_layer_id].target_bandwidth /
         10000000.0);
   } else {
     vp9_new_framerate(cpi, frame_rate);
