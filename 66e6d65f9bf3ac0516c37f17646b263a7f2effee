@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//u9s\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 350,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-04-08T23:12:46Z",
+      "side": 1,
+      "message": "I suggest do not do this. I am talking about Android. If you allocate this chunk of memory at the beginning of the whole video decode, you are more likely to get a continues chunk of memory. But if you do this allocation every time, there are two problems. One is it will lead to a lot of delay due to memory allocation for a lot of blocks. Another is the memory you get may be fragmented which will hurt the cache performance.  I could give you the test code which will show this impact on Android.",
+      "revId": "66e6d65f9bf3ac0516c37f17646b263a7f2effee",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
