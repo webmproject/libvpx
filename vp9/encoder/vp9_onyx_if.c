@@ -41,6 +41,9 @@
 #include "vp9/encoder/vp9_rdopt.h"
 #include "vp9/encoder/vp9_segmentation.h"
 #include "vp9/encoder/vp9_speed_features.h"
+#if CONFIG_INTERNAL_STATS
+#include "vp9/encoder/vp9_ssim.h"
+#endif
 #include "vp9/encoder/vp9_temporal_filter.h"
 #include "vp9/encoder/vp9_resize.h"
 #include "vp9/encoder/vp9_svc_layercontext.h"
@@ -62,19 +65,6 @@ void vp9_coef_tree_initialize();
 // (1920 * 1080 / (16 * 16)) * MAX_MB_RATE bits per MB
 #define MAX_MB_RATE 250
 #define MAXRATE_1080P 2025000
-
-#if CONFIG_INTERNAL_STATS
-extern double vp9_calc_ssim(YV12_BUFFER_CONFIG *source,
-                            YV12_BUFFER_CONFIG *dest, int lumamask,
-                            double *weight);
-
-
-extern double vp9_calc_ssimg(YV12_BUFFER_CONFIG *source,
-                             YV12_BUFFER_CONFIG *dest, double *ssim_y,
-                             double *ssim_u, double *ssim_v);
-
-
-#endif
 
 // #define OUTPUT_YUV_REC
 
