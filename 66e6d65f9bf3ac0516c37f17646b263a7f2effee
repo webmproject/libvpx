@@ -16,6 +16,24 @@
       "revId": "66e6d65f9bf3ac0516c37f17646b263a7f2effee",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//u88\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 350,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-08T23:41:21Z",
+      "side": 1,
+      "message": "Sure, if you already know  that it\u0027s going to hurt the cache performance. I\u0027d like to notice that there is no real memory allocation here. The buffer is on the stack, so \"allocation\" is just an increment of stack pointer and it is really cheap.",
+      "parentUuid": "AAAAdn//u9s\u003d",
+      "revId": "66e6d65f9bf3ac0516c37f17646b263a7f2effee",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
