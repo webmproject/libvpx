@@ -917,9 +917,7 @@ int vp9_twopass_worst_quality(VP9_COMP *cpi, FIRSTPASS_STATS *fpstats,
     return rc->worst_quality;          // Highest value allowed
 
   target_norm_bits_per_mb =
-      section_target_bandwitdh < (1 << 20)
-      ? (section_target_bandwitdh << BPER_MB_NORMBITS) / num_mbs
-      : (section_target_bandwitdh / num_mbs) << BPER_MB_NORMBITS;
+      ((uint64_t)section_target_bandwitdh << BPER_MB_NORMBITS) / num_mbs;
 
   // Try and pick a max Q that will be high enough to encode the
   // content at the given rate.
