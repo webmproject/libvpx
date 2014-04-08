@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//vJ8\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1009,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-08T00:49:16Z",
+      "side": 1,
+      "message": "It is better to save one line and initialize profile var immediately:\n\nint profile \u003d vp9_rb_read_bit(rb);  \n\nprofile |\u003d vp9_rb_read_bit(rb) \u003c\u003c 1",
+      "revId": "eeed7b28d92d913143b5a4dfd770199822e02e7b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//vJ4\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1036,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-08T00:49:16Z",
+      "side": 1,
+      "message": "Now this is a duplicated comment, I think it should be removed from here.",
+      "revId": "eeed7b28d92d913143b5a4dfd770199822e02e7b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
