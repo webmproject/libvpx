@@ -48,8 +48,7 @@ void vp9_setup_in_frame_q_adj(VP9_COMP *cpi) {
     // Use some of the segments for in frame Q adjustment.
     for (segment = 1; segment < 2; segment++) {
       const int qindex_delta =
-          vp9_compute_qdelta_by_rate(cpi,
-                                     cm->base_qindex,
+          vp9_compute_qdelta_by_rate(&cpi->rc, cm->frame_type, cm->base_qindex,
                                      in_frame_q_adj_ratio[segment]);
       vp9_enable_segfeature(seg, segment, SEG_LVL_ALT_Q);
       vp9_set_segdata(seg, segment, SEG_LVL_ALT_Q, qindex_delta);

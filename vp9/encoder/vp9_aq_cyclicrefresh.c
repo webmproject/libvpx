@@ -241,7 +241,7 @@ void vp9_cyclic_refresh_setup(VP9_COMP *const cpi) {
     vp9_enable_segfeature(seg, 1, SEG_LVL_ALT_Q);
 
     // Set the q delta for segment 1.
-    qindex_delta = vp9_compute_qdelta_by_rate(cpi,
+    qindex_delta = vp9_compute_qdelta_by_rate(rc, cm->frame_type,
                                               cm->base_qindex,
                                               rate_ratio_qdelta);
     // TODO(marpan): Incorporate the actual-vs-target rate over/undershoot from
