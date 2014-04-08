@@ -103,10 +103,9 @@ int vp9_rc_bits_per_mb(FRAME_TYPE frame_type, int qindex,
   return (int)(0.5 + (enumerator * correction_factor / q));
 }
 
-static int estimate_bits_at_q(int frame_kind, int q, int mbs,
+static int estimate_bits_at_q(FRAME_TYPE frame_type, int q, int mbs,
                               double correction_factor) {
-  const int bpm = (int)(vp9_rc_bits_per_mb(frame_kind, q, correction_factor));
-
+  const int bpm = (int)(vp9_rc_bits_per_mb(frame_type, q, correction_factor));
   return ((uint64_t)bpm * mbs) >> BPER_MB_NORMBITS;
 }
 
@@ -144,13 +143,12 @@ int vp9_rc_clamp_iframe_target_size(const VP9_COMP *const cpi, int target) {
 
 
 // Update the buffer level for higher layers, given the encoded current layer.
-static void update_layer_buffer_level(VP9_COMP *const cpi,
-                                      int encoded_frame_size) {
+static void update_layer_buffer_level(SVC *svc, int encoded_frame_size) {
   int temporal_layer = 0;
-  int current_temporal_layer = cpi->svc.temporal_layer_id;
+  int current_temporal_layer = svc->temporal_layer_id;
   for (temporal_layer = current_temporal_layer + 1;
-      temporal_layer < cpi->svc.number_temporal_layers; ++temporal_layer) {
-    LAYER_CONTEXT *lc = &cpi->svc.layer_context[temporal_layer];
+      temporal_layer < svc->number_temporal_layers; ++temporal_layer) {
+    LAYER_CONTEXT *lc = &svc->layer_context[temporal_layer];
     RATE_CONTROL *lrc = &lc->rc;
     int bits_off_for_this_layer = (int)(lc->target_bandwidth / lc->framerate -
         encoded_frame_size);
@@ -180,7 +178,7 @@ static void update_buffer_level(VP9_COMP *cpi, int encoded_frame_size) {
   rc->buffer_level = rc->bits_off_target;
 
   if (cpi->use_svc && cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) {
-    update_layer_buffer_level(cpi, encoded_frame_size);
+    update_layer_buffer_level(&cpi->svc, encoded_frame_size);
   }
 }
 
@@ -249,7 +247,7 @@ static void set_rate_correction_factor(VP9_COMP *cpi, double factor) {
 }
 
 void vp9_rc_update_rate_correction_factors(VP9_COMP *cpi, int damp_var) {
-  const int q = cpi->common.base_qindex;
+  const VP9_COMMON *const cm = &cpi->common;
   int correction_factor = 100;
   double rate_correction_factor = get_rate_correction_factor(cpi);
   double adjustment_limit;
@@ -262,8 +260,8 @@ void vp9_rc_update_rate_correction_factors(VP9_COMP *cpi, int damp_var) {
   // Work out how big we would have expected the frame to be at this Q given
   // the current correction factor.
   // Stay in double to avoid int overflow when values are large
-  projected_size_based_on_q = estimate_bits_at_q(cpi->common.frame_type, q,
-                                                 cpi->common.MBs,
+  projected_size_based_on_q = estimate_bits_at_q(cm->frame_type,
+                                                 cm->base_qindex, cm->MBs,
                                                  rate_correction_factor);
   // Work out a size correction factor.
   if (projected_size_based_on_q > 0)
@@ -287,20 +285,18 @@ void vp9_rc_update_rate_correction_factors(VP9_COMP *cpi, int damp_var) {
 
   if (correction_factor > 102) {
     // We are not already at the worst allowable quality
-    correction_factor =
-        (int)(100 + ((correction_factor - 100) * adjustment_limit));
-    rate_correction_factor =
-        ((rate_correction_factor * correction_factor) / 100);
+    correction_factor = (int)(100 + ((correction_factor - 100) *
+                                  adjustment_limit));
+    rate_correction_factor = (rate_correction_factor * correction_factor) / 100;
 
     // Keep rate_correction_factor within limits
     if (rate_correction_factor > MAX_BPB_FACTOR)
       rate_correction_factor = MAX_BPB_FACTOR;
   } else if (correction_factor < 99) {
     // We are not already at the best allowable quality
-    correction_factor =
-        (int)(100 - ((100 - correction_factor) * adjustment_limit));
-    rate_correction_factor =
-        ((rate_correction_factor * correction_factor) / 100);
+    correction_factor = (int)(100 - ((100 - correction_factor) *
+                                  adjustment_limit));
+    rate_correction_factor = (rate_correction_factor * correction_factor) / 100;
 
     // Keep rate_correction_factor within limits
     if (rate_correction_factor < MIN_BPB_FACTOR)
@@ -389,6 +385,7 @@ static int calc_active_worst_quality_one_pass_cbr(const VP9_COMP *cpi) {
   // If buffer is below the optimal level, let the active_worst_quality go from
   // ambient Q (at buffer = optimal level) to worst_quality level
   // (at buffer = critical level).
+  const VP9_COMMON *const cm = &cpi->common;
   const VP9_CONFIG *oxcf = &cpi->oxcf;
   const RATE_CONTROL *rc = &cpi->rc;
   // Buffer level below which we push active_worst to worst_quality.
@@ -396,9 +393,9 @@ static int calc_active_worst_quality_one_pass_cbr(const VP9_COMP *cpi) {
   int64_t buff_lvl_step = 0;
   int adjustment = 0;
   int active_worst_quality;
-  if (cpi->common.frame_type == KEY_FRAME)
+  if (cm->frame_type == KEY_FRAME)
     return rc->worst_quality;
-  if (cpi->common.current_video_frame > 1)
+  if (cm->current_video_frame > 1)
     active_worst_quality = MIN(rc->worst_quality,
                                rc->avg_frame_qindex[INTER_FRAME] * 5 / 4);
   else
@@ -531,7 +528,7 @@ static int rc_pick_q_and_bounds_one_pass_cbr(const VP9_COMP *cpi,
                           active_best_quality, active_worst_quality);
     if (q > *top_index) {
       // Special case when we are targeting the max allowed rate
-      if (cpi->rc.this_frame_target >= cpi->rc.max_frame_bandwidth)
+      if (rc->this_frame_target >= rc->max_frame_bandwidth)
         *top_index = q;
       else
         q = *top_index;
@@ -697,7 +694,7 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP9_COMP *cpi,
                           active_best_quality, active_worst_quality);
     if (q > *top_index) {
       // Special case when we are targeting the max allowed rate
-      if (cpi->rc.this_frame_target >= cpi->rc.max_frame_bandwidth)
+      if (rc->this_frame_target >= rc->max_frame_bandwidth)
         *top_index = q;
       else
         q = *top_index;
@@ -912,8 +909,7 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi,
 }
 
 int vp9_rc_pick_q_and_bounds(const VP9_COMP *cpi,
-                             int *bottom_index,
-                             int *top_index) {
+                             int *bottom_index, int *top_index) {
   int q;
   if (cpi->pass == 0) {
     if (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER)
@@ -981,16 +977,17 @@ void vp9_rc_set_frame_target(VP9_COMP *cpi, int target) {
 
 static void update_alt_ref_frame_stats(VP9_COMP *cpi) {
   // this frame refreshes means next frames don't unless specified by user
-  cpi->rc.frames_since_golden = 0;
+  RATE_CONTROL *const rc = &cpi->rc;
+  rc->frames_since_golden = 0;
 
 #if CONFIG_MULTIPLE_ARF
   if (!cpi->multi_arf_enabled)
 #endif
     // Clear the alternate reference update pending flag.
-    cpi->rc.source_alt_ref_pending = 0;
+    rc->source_alt_ref_pending = 0;
 
   // Set the alternate reference frame active flag
-  cpi->rc.source_alt_ref_active = 1;
+  rc->source_alt_ref_active = 1;
 }
 
 static void update_golden_frame_stats(VP9_COMP *cpi) {
@@ -1019,6 +1016,7 @@ static void update_golden_frame_stats(VP9_COMP *cpi) {
 
 void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
   VP9_COMMON *const cm = &cpi->common;
+  const VP9_CONFIG *const oxcf = &cpi->oxcf;
   RATE_CONTROL *const rc = &cpi->rc;
 
   cm->last_frame_type = cm->frame_type;
@@ -1028,7 +1026,7 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
   // Post encode loop adjustment of Q prediction.
   vp9_rc_update_rate_correction_factors(
       cpi, (cpi->sf.recode_loop >= ALLOW_RECODE_KFARFGF ||
-            cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) ? 2 : 0);
+            oxcf->end_usage == USAGE_STREAM_FROM_SERVER) ? 2 : 0);
 
   // Keep a record of last Q and ambient average Q.
   if (cm->frame_type == KEY_FRAME) {
@@ -1037,7 +1035,7 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
         3 * rc->avg_frame_qindex[KEY_FRAME] + cm->base_qindex, 2);
   } else if (!rc->is_src_frame_alt_ref &&
       (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame) &&
-      !(cpi->use_svc && cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER)) {
+      !(cpi->use_svc && oxcf->end_usage == USAGE_STREAM_FROM_SERVER)) {
     rc->last_q[2] = cm->base_qindex;
     rc->avg_frame_qindex[2] = ROUND_POWER_OF_TWO(
         3 * rc->avg_frame_qindex[2] + cm->base_qindex, 2);
@@ -1087,7 +1085,7 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
 
   rc->total_target_vs_actual = rc->total_actual_bits - rc->total_target_bits;
 
-  if (cpi->oxcf.play_alternate && cpi->refresh_alt_ref_frame &&
+  if (oxcf->play_alternate && cpi->refresh_alt_ref_frame &&
       (cm->frame_type != KEY_FRAME))
     // Update the alternate reference frame stats as appropriate.
     update_alt_ref_frame_stats(cpi);
@@ -1180,18 +1178,19 @@ void vp9_rc_get_one_pass_vbr_params(VP9_COMP *cpi) {
 static int calc_pframe_target_size_one_pass_cbr(const VP9_COMP *cpi) {
   const VP9_CONFIG *oxcf = &cpi->oxcf;
   const RATE_CONTROL *rc = &cpi->rc;
+  const SVC *const svc = &cpi->svc;
   const int64_t diff = oxcf->optimal_buffer_level - rc->buffer_level;
   const int64_t one_pct_bits = 1 + oxcf->optimal_buffer_level / 100;
   int min_frame_target = MAX(rc->av_per_frame_bandwidth >> 4,
                              FRAME_OVERHEAD_BITS);
   int target = rc->av_per_frame_bandwidth;
-  if (cpi->svc.number_temporal_layers > 1 &&
-      cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) {
+  if (svc->number_temporal_layers > 1 &&
+      oxcf->end_usage == USAGE_STREAM_FROM_SERVER) {
     // Note that for layers, av_per_frame_bandwidth is the cumulative
     // per-frame-bandwidth. For the target size of this frame, use the
     // layer average frame size (i.e., non-cumulative per-frame-bw).
-    int current_temporal_layer = cpi->svc.temporal_layer_id;
-    const LAYER_CONTEXT *lc = &cpi->svc.layer_context[current_temporal_layer];
+    int current_temporal_layer = svc->temporal_layer_id;
+    const LAYER_CONTEXT *lc = &svc->layer_context[current_temporal_layer];
     target = lc->avg_frame_size;
     min_frame_target = MAX(lc->avg_frame_size >> 4, FRAME_OVERHEAD_BITS);
   }
