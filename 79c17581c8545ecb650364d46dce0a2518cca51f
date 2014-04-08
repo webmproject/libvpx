@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//vEQ\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-04-08T15:30:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//vKU\u003d",
+      "revId": "79c17581c8545ecb650364d46dce0a2518cca51f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//vKI\u003d",
         "filename": "vp9/decoder/vp9_decodeframe.c",
         "patchSetId": 2
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//vEg\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 889,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-04-08T15:30:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//vKI\u003d",
+      "revId": "79c17581c8545ecb650364d46dce0a2518cca51f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//vKE\u003d",
         "filename": "vp9/decoder/vp9_dthread.c",
         "patchSetId": 2
@@ -47,6 +83,24 @@
       "writtenOn": "2014-04-08T00:35:37Z",
       "side": 1,
       "message": "num_tile_workers should still be safe to use here, no?",
+      "revId": "79c17581c8545ecb650364d46dce0a2518cca51f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//vEY\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-04-08T15:30:07Z",
+      "side": 1,
+      "message": "It is safe, but with this CL if we set -t 4 and play a 2 tiled video, num_workers \u003d2 and num_tile_workers \u003d 4, which hurts perf currently. I also observed the same behavior on my x86 with -t 8 and 4 tiles. This could change in the future. I added a comment as to why we are not using num_tile_workers.",
+      "parentUuid": "AAAAdn//vKE\u003d",
       "revId": "79c17581c8545ecb650364d46dce0a2518cca51f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
