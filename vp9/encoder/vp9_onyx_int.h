@@ -185,7 +185,7 @@ typedef enum {
   AQ_MODE_COUNT  // This should always be the last member of the enum
 } AQ_MODE;
 
-typedef struct {
+typedef struct VP9_CONFIG {
   int version;  // 4 versions of bitstream defined:
                 //   0 - best quality/slowest decode,
                 //   3 - lowest quality/fastest decode
