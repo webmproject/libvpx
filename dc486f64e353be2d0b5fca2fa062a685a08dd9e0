@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//vAw\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 275,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-04-08T23:49:37Z",
+      "side": 1,
+      "message": "Good ideas. Will experiment them and see how it comes out.",
+      "parentUuid": "AAAAdn//vA8\u003d",
+      "revId": "dc486f64e353be2d0b5fca2fa062a685a08dd9e0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//vBA\u003d",
         "filename": "vp9/encoder/vp9_pickmode.c",
         "patchSetId": 5
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//u80\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-04-08T23:49:37Z",
+      "side": 1,
+      "message": "The normal function that determines sub-pixel/full-pixel is for both luma and chroma components, hence checking the last four bits. Here we need it to check only for luma (the last three bits). Didn\u0027t find a good define that fit in, so put a comment here.",
+      "parentUuid": "AAAAdn//vBA\u003d",
+      "revId": "dc486f64e353be2d0b5fca2fa062a685a08dd9e0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//vBE\u003d",
         "filename": "vp9/encoder/vp9_pickmode.c",
         "patchSetId": 5
@@ -47,6 +83,24 @@
       "writtenOn": "2014-04-08T19:29:45Z",
       "side": 1,
       "message": "do we need the initialization here? i.e. are they always overwritten?",
+      "revId": "dc486f64e353be2d0b5fca2fa062a685a08dd9e0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//u8w\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 343,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-04-08T23:49:37Z",
+      "side": 1,
+      "message": "They are not needed in this current version. Might need these for later options that skip certain prediction filter type check.",
+      "parentUuid": "AAAAdn//vBE\u003d",
       "revId": "dc486f64e353be2d0b5fca2fa062a685a08dd9e0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
