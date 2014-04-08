@@ -22,6 +22,9 @@ extern "C" {
 
 #define FRAME_OVERHEAD_BITS 200
 
+// Bits Per MB at different Q (Multiplied by 512)
+#define BPER_MB_NORMBITS    9
+
 typedef struct {
   // Rate targetting variables
   int this_frame_target;

@@ -35,9 +35,6 @@
 #define MIN_BPB_FACTOR 0.005
 #define MAX_BPB_FACTOR 50
 
-// Bits Per MB at different Q (Multiplied by 512)
-#define BPER_MB_NORMBITS    9
-
 // Tables relating active max Q to active min Q
 static int kf_low_motion_minq[QINDEX_RANGE];
 static int kf_high_motion_minq[QINDEX_RANGE];
