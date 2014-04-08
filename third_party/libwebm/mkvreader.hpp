@@ -21,6 +21,7 @@ class MkvReader : public IMkvReader
     MkvReader& operator=(const MkvReader&);
 public:
     MkvReader();
+    MkvReader(FILE* fp);
     virtual ~MkvReader();
 
     int Open(const char*);
@@ -29,8 +30,15 @@ public:
     virtual int Read(long long position, long length, unsigned char* buffer);
     virtual int Length(long long* total, long long* available);
 private:
+
+    // Determines the size of the file. This is called either by the constructor
+    // or by the Open function depending on file ownership. Returns true on
+    // success.
+    bool GetFileSize();
+
     long long m_length;
     FILE* m_file;
+    bool reader_owns_file_;
 };
 
 }  //end namespace mkvparser
