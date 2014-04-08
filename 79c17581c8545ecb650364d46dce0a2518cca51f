@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//vKU\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-08T00:33:15Z",
+      "side": 1,
+      "message": "the core issue is the memory is moving during realloc, so the worker the thread loop is using is stale. so to use realloc the threads should be end()ed or we could move to separate allocs for the workers...",
+      "revId": "79c17581c8545ecb650364d46dce0a2518cca51f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
