@@ -16,6 +16,40 @@
       "revId": "79c17581c8545ecb650364d46dce0a2518cca51f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//vKI\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 889,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-08T00:35:37Z",
+      "side": 1,
+      "message": "just change this to a malloc() as it stands realloc() isn\u0027t safe",
+      "revId": "79c17581c8545ecb650364d46dce0a2518cca51f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//vKE\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-08T00:35:37Z",
+      "side": 1,
+      "message": "num_tile_workers should still be safe to use here, no?",
+      "revId": "79c17581c8545ecb650364d46dce0a2518cca51f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
