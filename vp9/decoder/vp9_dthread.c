@@ -132,7 +132,7 @@ static int loop_filter_row_worker(void *arg1, void *arg2) {
 
 // VP9 decoder: Implement multi-threaded loopfilter that uses the tile
 // threads.
-void vp9_loop_filter_frame_mt(VP9D_COMP *pbi,
+void vp9_loop_filter_frame_mt(VP9Decoder *pbi,
                               VP9_COMMON *cm,
                               MACROBLOCKD *xd,
                               int frame_filter_level,

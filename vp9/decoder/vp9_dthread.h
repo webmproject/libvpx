@@ -18,7 +18,7 @@
 
 struct macroblockd;
 struct VP9Common;
-struct VP9Decompressor;
+struct VP9Decoder;
 
 typedef struct TileWorkerData {
   struct VP9Common *cm;
@@ -50,7 +50,7 @@ void vp9_loop_filter_alloc(struct VP9Common *cm, struct VP9LfSyncData *lf_sync,
 void vp9_loop_filter_dealloc(struct VP9LfSyncData *lf_sync, int rows);
 
 // Multi-threaded loopfilter that uses the tile threads.
-void vp9_loop_filter_frame_mt(struct VP9Decompressor *pbi,
+void vp9_loop_filter_frame_mt(struct VP9Decoder *pbi,
                               struct VP9Common *cm,
                               struct macroblockd *xd,
                               int frame_filter_level,

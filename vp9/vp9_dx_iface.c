@@ -33,7 +33,7 @@ struct vpx_codec_alg_priv {
   vpx_codec_dec_cfg_t     cfg;
   vp9_stream_info_t       si;
   int                     decoder_init;
-  struct VP9Decompressor *pbi;
+  struct VP9Decoder *pbi;
   int                     postproc_cfg_set;
   vp8_postproc_cfg_t      postproc_cfg;
 #if CONFIG_POSTPROC_VISUALIZER

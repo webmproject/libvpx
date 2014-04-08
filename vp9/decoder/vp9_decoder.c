@@ -110,8 +110,8 @@ void vp9_initialize_dec() {
   }
 }
 
-VP9D_COMP *vp9_decoder_create(const VP9D_CONFIG *oxcf) {
-  VP9D_COMP *const pbi = vpx_memalign(32, sizeof(*pbi));
+VP9Decoder *vp9_decoder_create(const VP9D_CONFIG *oxcf) {
+  VP9Decoder *const pbi = vpx_memalign(32, sizeof(*pbi));
   VP9_COMMON *const cm = pbi ? &pbi->common : NULL;
 
   if (!cm)
@@ -152,7 +152,7 @@ VP9D_COMP *vp9_decoder_create(const VP9D_CONFIG *oxcf) {
   return pbi;
 }
 
-void vp9_decoder_remove(VP9D_COMP *pbi) {
+void vp9_decoder_remove(VP9Decoder *pbi) {
   VP9_COMMON *const cm = &pbi->common;
   int i;
 
@@ -182,7 +182,7 @@ static int equal_dimensions(const YV12_BUFFER_CONFIG *a,
            a->uv_height == b->uv_height && a->uv_width == b->uv_width;
 }
 
-vpx_codec_err_t vp9_copy_reference_dec(VP9D_COMP *pbi,
+vpx_codec_err_t vp9_copy_reference_dec(VP9Decoder *pbi,
                                        VP9_REFFRAME ref_frame_flag,
                                        YV12_BUFFER_CONFIG *sd) {
   VP9_COMMON *cm = &pbi->common;
@@ -252,7 +252,7 @@ vpx_codec_err_t vp9_set_reference_dec(VP9_COMMON *cm,
 }
 
 
-int vp9_get_reference_dec(VP9D_COMP *pbi, int index, YV12_BUFFER_CONFIG **fb) {
+int vp9_get_reference_dec(VP9Decoder *pbi, int index, YV12_BUFFER_CONFIG **fb) {
   VP9_COMMON *cm = &pbi->common;
 
   if (index < 0 || index >= REF_FRAMES)
@@ -263,7 +263,7 @@ int vp9_get_reference_dec(VP9D_COMP *pbi, int index, YV12_BUFFER_CONFIG **fb) {
 }
 
 /* If any buffer updating is signaled it should be done here. */
-static void swap_frame_buffers(VP9D_COMP *pbi) {
+static void swap_frame_buffers(VP9Decoder *pbi) {
   int ref_index = 0, mask;
   VP9_COMMON *const cm = &pbi->common;
 
@@ -287,7 +287,7 @@ static void swap_frame_buffers(VP9D_COMP *pbi) {
     cm->frame_refs[ref_index].idx = INT_MAX;
 }
 
-int vp9_receive_compressed_data(VP9D_COMP *pbi,
+int vp9_receive_compressed_data(VP9Decoder *pbi,
                                 size_t size, const uint8_t **psource,
                                 int64_t time_stamp) {
   VP9_COMMON *const cm = &pbi->common;
@@ -403,7 +403,7 @@ int vp9_receive_compressed_data(VP9D_COMP *pbi,
   return retcode;
 }
 
-int vp9_get_raw_frame(VP9D_COMP *pbi, YV12_BUFFER_CONFIG *sd,
+int vp9_get_raw_frame(VP9Decoder *pbi, YV12_BUFFER_CONFIG *sd,
                       int64_t *time_stamp, int64_t *time_end_stamp,
                       vp9_ppflags_t *flags) {
   int ret = -1;

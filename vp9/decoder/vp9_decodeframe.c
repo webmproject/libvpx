@@ -671,7 +671,7 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
   setup_display_size(cm, rb);
 }
 
-static void decode_tile(VP9D_COMP *pbi, const TileInfo *const tile,
+static void decode_tile(VP9Decoder *pbi, const TileInfo *const tile,
                         vp9_reader *r) {
   const int num_threads = pbi->oxcf.max_threads;
   VP9_COMMON *const cm = &pbi->common;
@@ -776,7 +776,7 @@ typedef struct TileBuffer {
   int col;  // only used with multi-threaded decoding
 } TileBuffer;
 
-static const uint8_t *decode_tiles(VP9D_COMP *pbi,
+static const uint8_t *decode_tiles(VP9Decoder *pbi,
                                    const uint8_t *data,
                                    const uint8_t *data_end) {
   VP9_COMMON *const cm = &pbi->common;
@@ -865,7 +865,7 @@ static int compare_tile_buffers(const void *a, const void *b) {
   }
 }
 
-static const uint8_t *decode_tiles_mt(VP9D_COMP *pbi,
+static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
                                       const uint8_t *data,
                                       const uint8_t *data_end) {
   VP9_COMMON *const cm = &pbi->common;
@@ -1010,7 +1010,7 @@ static void error_handler(void *data) {
       vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM, \
                          "Reserved bit must be unset")
 
-static size_t read_uncompressed_header(VP9D_COMP *pbi,
+static size_t read_uncompressed_header(VP9Decoder *pbi,
                                        struct vp9_read_bit_buffer *rb) {
   VP9_COMMON *const cm = &pbi->common;
   size_t sz;
@@ -1147,7 +1147,7 @@ static size_t read_uncompressed_header(VP9D_COMP *pbi,
   return sz;
 }
 
-static int read_compressed_header(VP9D_COMP *pbi, const uint8_t *data,
+static int read_compressed_header(VP9Decoder *pbi, const uint8_t *data,
                                   size_t partition_size) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
@@ -1247,7 +1247,7 @@ static void debug_check_frame_counts(const VP9_COMMON *const cm) {
 }
 #endif  // NDEBUG
 
-int vp9_decode_frame(VP9D_COMP *pbi,
+int vp9_decode_frame(VP9Decoder *pbi,
                      const uint8_t *data, const uint8_t *data_end,
                      const uint8_t **p_data_end) {
   VP9_COMMON *const cm = &pbi->common;
