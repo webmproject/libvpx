@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//vA8\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 275,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-04-08T19:29:45Z",
+      "side": 1,
+      "message": "I am curious about what is the best strategy here: \na. to reduce search time of best filter type, could we choose one as long as there is one selected filter type available either  above or left?\nb. for better compression, maybe we can limit search of best filter type to the ones used in above or left if one or both available?",
+      "revId": "dc486f64e353be2d0b5fca2fa062a685a08dd9e0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//vBA\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-04-08T19:29:45Z",
+      "side": 1,
+      "message": "Would it better if the magic number 7 replaced by a meaningful define?",
+      "revId": "dc486f64e353be2d0b5fca2fa062a685a08dd9e0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//vBE\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 343,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-04-08T19:29:45Z",
+      "side": 1,
+      "message": "do we need the initialization here? i.e. are they always overwritten?",
+      "revId": "dc486f64e353be2d0b5fca2fa062a685a08dd9e0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
