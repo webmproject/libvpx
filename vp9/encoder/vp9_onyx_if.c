@@ -2759,10 +2759,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     if (cpi->use_svc)
       vp9_inc_frame_in_layer(&cpi->svc);
   }
-
-  // restore prev_mi
-  cm->prev_mi = cm->prev_mip + cm->mi_stride + 1;
-  cm->prev_mi_grid_visible = cm->prev_mi_grid_base + cm->mi_stride + 1;
 }
 
 static void SvcEncode(VP9_COMP *cpi, size_t *size, uint8_t *dest,
