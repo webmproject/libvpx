@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//uu4\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3307,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-04-09T23:57:06Z",
+      "side": 1,
+      "message": "I don\u0027t think this is correct. First, there are still a bunch of ways all modes can get mask off even with this particular feature skipped. Second, this fix prevents us from short circuiting out of the esoteric modes once we\u0027ve found something valid because this rd check is only made at mode_index \u003d\u003d mode_skip_start instead of at the end of each \"mode family\" after mode_skip_start. What\u0027s the concrete case where we are bugging out before this fix. Does it have to do with the problematic zeromv equivalence code?",
+      "revId": "4f95a7fe3ef8e786dbb6c9c1dc3240da24538f92",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
