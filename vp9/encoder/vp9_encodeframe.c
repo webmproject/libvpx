@@ -1466,8 +1466,7 @@ static void set_source_var_based_partition(VP9_COMP *cpi,
                                            int mi_row, int mi_col) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *x = &cpi->mb;
-
-  const int mis = cm->mode_info_stride;
+  const int mis = cm->mi_stride;
   int row8x8_remaining = tile->mi_row_end - mi_row;
   int col8x8_remaining = tile->mi_col_end - mi_col;
   int r, c;
