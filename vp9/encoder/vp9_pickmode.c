@@ -233,8 +233,8 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   const int64_t intra_mode_cost = 50;
 
   unsigned char segment_id = mbmi->segment_id;
-  const int *const rd_threshes = cpi->rd_threshes[segment_id][bsize];
-  const int *const rd_thresh_freq_fact = cpi->rd_thresh_freq_fact[bsize];
+  const int *const rd_threshes = cpi->rd.threshes[segment_id][bsize];
+  const int *const rd_thresh_freq_fact = cpi->rd.thresh_freq_fact[bsize];
   // Mode index conversion form THR_MODES to MB_PREDICTION_MODE for a ref frame.
   int mode_idx[MB_MODE_COUNT] = {0};
   INTERP_FILTER filter_ref = SWITCHABLE;

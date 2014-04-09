@@ -245,6 +245,7 @@ void vp9_initialize_me_consts(VP9_COMP *cpi, int qindex) {
 
 static void set_block_thresholds(VP9_COMP *cpi) {
   const VP9_COMMON *const cm = &cpi->common;
+  RD_OPT *const rd = &cpi->rd;
   int i, bsize, segment_id;
 
   for (segment_id = 0; segment_id < MAX_SEGMENTS; ++segment_id) {
@@ -260,14 +261,14 @@ static void set_block_thresholds(VP9_COMP *cpi) {
       const int thresh_max = INT_MAX / t;
 
       for (i = 0; i < MAX_MODES; ++i)
-        cpi->rd_threshes[segment_id][bsize][i] =
-            cpi->rd_thresh_mult[i] < thresh_max ? cpi->rd_thresh_mult[i] * t / 4
+        rd->threshes[segment_id][bsize][i] =
+            rd->thresh_mult[i] < thresh_max ? rd->thresh_mult[i] * t / 4
                                             : INT_MAX;
 
       for (i = 0; i < MAX_REFS; ++i) {
-        cpi->rd_thresh_sub8x8[segment_id][bsize][i] =
-            cpi->rd_thresh_mult_sub8x8[i] < thresh_max
-                ? cpi->rd_thresh_mult_sub8x8[i] * t / 4
+        rd->thresh_sub8x8[segment_id][bsize][i] =
+            rd->thresh_mult_sub8x8[i] < thresh_max
+                ? rd->thresh_mult_sub8x8[i] * t / 4
                 : INT_MAX;
       }
     }
@@ -281,10 +282,10 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
 
   vp9_clear_system_state();
 
-  cpi->RDDIV = RDDIV_BITS;  // in bits (to multiply D by 128)
-  cpi->RDMULT = vp9_compute_rd_mult(cpi, cm->base_qindex + cm->y_dc_delta_q);
+  cpi->rd.RDDIV = RDDIV_BITS;  // in bits (to multiply D by 128)
+  cpi->rd.RDMULT = vp9_compute_rd_mult(cpi, cm->base_qindex + cm->y_dc_delta_q);
 
-  x->errorperbit = cpi->RDMULT / RD_MULT_EPB_RATIO;
+  x->errorperbit = cpi->rd.RDMULT / RD_MULT_EPB_RATIO;
   x->errorperbit += (x->errorperbit == 0);
 
   x->select_txfm_size = (cpi->sf.tx_size_search_method == USE_LARGESTALL &&
@@ -2699,6 +2700,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                  int64_t *psse,
                                  const int64_t ref_best_rd) {
   VP9_COMMON *cm = &cpi->common;
+  RD_OPT *rd_opt = &cpi->rd;
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
   const int is_comp_pred = has_second_ref(mbmi);
@@ -2796,14 +2798,13 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
   // Search for best switchable filter by checking the variance of
   // pred error irrespective of whether the filter will be used
-  cpi->mask_filter_rd = 0;
+  rd_opt->mask_filter = 0;
   for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
-    cpi->rd_filter_cache[i] = INT64_MAX;
+    rd_opt->filter_cache[i] = INT64_MAX;
 
   if (cm->interp_filter != BILINEAR) {
     *best_filter = EIGHTTAP;
-    if (x->source_variance <
-        cpi->sf.disable_filter_search_var_thresh) {
+    if (x->source_variance < cpi->sf.disable_filter_search_var_thresh) {
       *best_filter = EIGHTTAP;
     } else {
       int newbest;
@@ -2819,12 +2820,12 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
         if (i > 0 && intpel_mv) {
           rd = RDCOST(x->rdmult, x->rddiv, tmp_rate_sum, tmp_dist_sum);
-          cpi->rd_filter_cache[i] = rd;
-          cpi->rd_filter_cache[SWITCHABLE_FILTERS] =
-              MIN(cpi->rd_filter_cache[SWITCHABLE_FILTERS], rd + rs_rd);
+          rd_opt->filter_cache[i] = rd;
+          rd_opt->filter_cache[SWITCHABLE_FILTERS] =
+              MIN(rd_opt->filter_cache[SWITCHABLE_FILTERS], rd + rs_rd);
           if (cm->interp_filter == SWITCHABLE)
             rd += rs_rd;
-          cpi->mask_filter_rd = MAX(cpi->mask_filter_rd, rd);
+          rd_opt->mask_filter = MAX(rd_opt->mask_filter, rd);
         } else {
           int rate_sum = 0;
           int64_t dist_sum = 0;
@@ -2844,12 +2845,12 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           model_rd_for_sb(cpi, bsize, x, xd, &rate_sum, &dist_sum);
 
           rd = RDCOST(x->rdmult, x->rddiv, rate_sum, dist_sum);
-          cpi->rd_filter_cache[i] = rd;
-          cpi->rd_filter_cache[SWITCHABLE_FILTERS] =
-              MIN(cpi->rd_filter_cache[SWITCHABLE_FILTERS], rd + rs_rd);
+          rd_opt->filter_cache[i] = rd;
+          rd_opt->filter_cache[SWITCHABLE_FILTERS] =
+              MIN(rd_opt->filter_cache[SWITCHABLE_FILTERS], rd + rs_rd);
           if (cm->interp_filter == SWITCHABLE)
             rd += rs_rd;
-          cpi->mask_filter_rd = MAX(cpi->mask_filter_rd, rd);
+          rd_opt->mask_filter = MAX(rd_opt->mask_filter, rd);
 
           if (i == 0 && intpel_mv) {
             tmp_rate_sum = rate_sum;
@@ -3126,6 +3127,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                   PICK_MODE_CONTEXT *ctx,
                                   int64_t best_rd_so_far) {
   VP9_COMMON *const cm = &cpi->common;
+  RD_OPT *const rd_opt = &cpi->rd;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
   const struct segmentation *const seg = &cm->seg;
@@ -3165,8 +3167,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int best_skip2 = 0;
   int mode_skip_mask = 0;
   int mode_skip_start = cpi->sf.mode_skip_start + 1;
-  const int *const rd_threshes = cpi->rd_threshes[segment_id][bsize];
-  const int *const rd_thresh_freq_fact = cpi->rd_thresh_freq_fact[bsize];
+  const int *const rd_threshes = rd_opt->threshes[segment_id][bsize];
+  const int *const rd_thresh_freq_fact = rd_opt->thresh_freq_fact[bsize];
   const int mode_search_skip_flags = cpi->sf.mode_search_skip_flags;
   const int intra_y_mode_mask =
       cpi->sf.intra_y_mode_mask[max_txsize_lookup[bsize]];
@@ -3611,21 +3613,21 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
       /* keep record of best filter type */
       if (!mode_excluded && cm->interp_filter != BILINEAR) {
-        int64_t ref = cpi->rd_filter_cache[cm->interp_filter == SWITCHABLE ?
+        int64_t ref = rd_opt->filter_cache[cm->interp_filter == SWITCHABLE ?
                               SWITCHABLE_FILTERS : cm->interp_filter];
 
         for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; i++) {
           int64_t adj_rd;
           if (ref == INT64_MAX)
             adj_rd = 0;
-          else if (cpi->rd_filter_cache[i] == INT64_MAX)
+          else if (rd_opt->filter_cache[i] == INT64_MAX)
             // when early termination is triggered, the encoder does not have
             // access to the rate-distortion cost. it only knows that the cost
             // should be above the maximum valid value. hence it takes the known
             // maximum plus an arbitrary constant as the rate-distortion cost.
-            adj_rd = cpi->mask_filter_rd - ref + 10;
+            adj_rd = rd_opt->mask_filter - ref + 10;
           else
-            adj_rd = cpi->rd_filter_cache[i] - ref;
+            adj_rd = rd_opt->filter_cache[i] - ref;
 
           adj_rd += this_rd;
           best_filter_rd[i] = MIN(best_filter_rd[i], adj_rd);
@@ -3687,7 +3689,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   // combination that wins out.
   if (cpi->sf.adaptive_rd_thresh) {
     for (mode_index = 0; mode_index < MAX_MODES; ++mode_index) {
-      int *const fact = &cpi->rd_thresh_freq_fact[bsize][mode_index];
+      int *const fact = &rd_opt->thresh_freq_fact[bsize][mode_index];
 
       if (mode_index == best_mode_index) {
         *fact -= (*fact >> 3);
@@ -3759,6 +3761,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
                                       PICK_MODE_CONTEXT *ctx,
                                       int64_t best_rd_so_far) {
   VP9_COMMON *const cm = &cpi->common;
+  RD_OPT *const rd_opt = &cpi->rd;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
   const struct segmentation *const seg = &cm->seg;
@@ -3880,9 +3883,9 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 
     // Test best rd so far against threshold for trying this mode.
     if ((best_rd <
-         ((int64_t)cpi->rd_thresh_sub8x8[segment_id][bsize][mode_index] *
-          cpi->rd_thresh_freq_sub8x8[bsize][mode_index] >> 5)) ||
-        cpi->rd_thresh_sub8x8[segment_id][bsize][mode_index] == INT_MAX)
+         ((int64_t)rd_opt->thresh_sub8x8[segment_id][bsize][mode_index] *
+          rd_opt->thresh_freq_sub8x8[bsize][mode_index] >> 5)) ||
+        rd_opt->thresh_sub8x8[segment_id][bsize][mode_index] == INT_MAX)
       continue;
 
     if (ref_frame > INTRA_FRAME &&
@@ -4011,14 +4014,13 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       int uv_skippable;
 
       this_rd_thresh = (ref_frame == LAST_FRAME) ?
-          cpi->rd_thresh_sub8x8[segment_id][bsize][THR_LAST] :
-          cpi->rd_thresh_sub8x8[segment_id][bsize][THR_ALTR];
+          rd_opt->thresh_sub8x8[segment_id][bsize][THR_LAST] :
+          rd_opt->thresh_sub8x8[segment_id][bsize][THR_ALTR];
       this_rd_thresh = (ref_frame == GOLDEN_FRAME) ?
-          cpi->rd_thresh_sub8x8[segment_id][bsize][THR_GOLD] : this_rd_thresh;
-
-      cpi->mask_filter_rd = 0;
+      rd_opt->thresh_sub8x8[segment_id][bsize][THR_GOLD] : this_rd_thresh;
+      rd_opt->mask_filter = 0;
       for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
-        cpi->rd_filter_cache[i] = INT64_MAX;
+        rd_opt->filter_cache[i] = INT64_MAX;
 
       if (cm->interp_filter != BILINEAR) {
         tmp_best_filter = EIGHTTAP;
@@ -4051,14 +4053,14 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
               continue;
             rs = vp9_get_switchable_rate(x);
             rs_rd = RDCOST(x->rdmult, x->rddiv, rs, 0);
-            cpi->rd_filter_cache[switchable_filter_index] = tmp_rd;
-            cpi->rd_filter_cache[SWITCHABLE_FILTERS] =
-                MIN(cpi->rd_filter_cache[SWITCHABLE_FILTERS],
+            rd_opt->filter_cache[switchable_filter_index] = tmp_rd;
+            rd_opt->filter_cache[SWITCHABLE_FILTERS] =
+                MIN(rd_opt->filter_cache[SWITCHABLE_FILTERS],
                     tmp_rd + rs_rd);
             if (cm->interp_filter == SWITCHABLE)
               tmp_rd += rs_rd;
 
-            cpi->mask_filter_rd = MAX(cpi->mask_filter_rd, tmp_rd);
+            rd_opt->mask_filter = MAX(rd_opt->mask_filter, tmp_rd);
 
             newbest = (tmp_rd < tmp_best_rd);
             if (newbest) {
@@ -4292,20 +4294,20 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     /* keep record of best filter type */
     if (!mode_excluded && !disable_skip && ref_frame != INTRA_FRAME &&
         cm->interp_filter != BILINEAR) {
-      int64_t ref = cpi->rd_filter_cache[cm->interp_filter == SWITCHABLE ?
+      int64_t ref = rd_opt->filter_cache[cm->interp_filter == SWITCHABLE ?
                               SWITCHABLE_FILTERS : cm->interp_filter];
       int64_t adj_rd;
       for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; i++) {
         if (ref == INT64_MAX)
           adj_rd = 0;
-        else if (cpi->rd_filter_cache[i] == INT64_MAX)
+        else if (rd_opt->filter_cache[i] == INT64_MAX)
           // when early termination is triggered, the encoder does not have
           // access to the rate-distortion cost. it only knows that the cost
           // should be above the maximum valid value. hence it takes the known
           // maximum plus an arbitrary constant as the rate-distortion cost.
-          adj_rd = cpi->mask_filter_rd - ref + 10;
+          adj_rd = rd_opt->mask_filter - ref + 10;
         else
-          adj_rd = cpi->rd_filter_cache[i] - ref;
+          adj_rd = rd_opt->filter_cache[i] - ref;
 
         adj_rd += this_rd;
         best_filter_rd[i] = MIN(best_filter_rd[i], adj_rd);
@@ -4352,7 +4354,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   // combination that wins out.
   if (cpi->sf.adaptive_rd_thresh) {
     for (mode_index = 0; mode_index < MAX_REFS; ++mode_index) {
-      int *const fact = &cpi->rd_thresh_freq_sub8x8[bsize][mode_index];
+      int *const fact = &rd_opt->thresh_freq_sub8x8[bsize][mode_index];
 
       if (mode_index == best_mode_index) {
         *fact -= (*fact >> 3);

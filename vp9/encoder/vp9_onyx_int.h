@@ -185,6 +185,7 @@ typedef enum {
   AQ_MODE_COUNT  // This should always be the last member of the enum
 } AQ_MODE;
 
+
 typedef struct VP9_CONFIG {
   BITSTREAM_PROFILE profile;
   BIT_DEPTH bit_depth;
@@ -281,6 +282,35 @@ typedef struct VP9_CONFIG {
   vp8e_tuning tuning;
 } VP9_CONFIG;
 
+
+typedef struct RD_OPT {
+  // Thresh_mult is used to set a threshold for the rd score. A higher value
+  // means that we will accept the best mode so far more often. This number
+  // is used in combination with the current block size, and thresh_freq_fact
+  // to pick a threshold.
+  int thresh_mult[MAX_MODES];
+  int thresh_mult_sub8x8[MAX_REFS];
+
+  int threshes[MAX_SEGMENTS][BLOCK_SIZES][MAX_MODES];
+  int thresh_freq_fact[BLOCK_SIZES][MAX_MODES];
+  int thresh_sub8x8[MAX_SEGMENTS][BLOCK_SIZES][MAX_REFS];
+  int thresh_freq_sub8x8[BLOCK_SIZES][MAX_REFS];
+
+  int64_t comp_pred_diff[REFERENCE_MODES];
+  int64_t prediction_type_threshes[MAX_REF_FRAMES][REFERENCE_MODES];
+  int64_t tx_select_diff[TX_MODES];
+  // FIXME(rbultje) can this overflow?
+  int tx_select_threshes[MAX_REF_FRAMES][TX_MODES];
+
+  int64_t filter_diff[SWITCHABLE_FILTER_CONTEXTS];
+  int64_t filter_threshes[MAX_REF_FRAMES][SWITCHABLE_FILTER_CONTEXTS];
+  int64_t filter_cache[SWITCHABLE_FILTER_CONTEXTS];
+  int64_t mask_filter;
+
+  int RDMULT;
+  int RDDIV;
+} RD_OPT;
+
 typedef struct VP9_COMP {
   QUANTS quants;
   MACROBLOCK mb;
@@ -343,31 +373,7 @@ typedef struct VP9_COMP {
   // Ambient reconstruction err target for force key frames
   int ambient_err;
 
-  // Thresh_mult is used to set a threshold for the rd score. A higher value
-  // means that we will accept the best mode so far more often. This number
-  // is used in combination with the current block size, and thresh_freq_fact
-  // to pick a threshold.
-  int rd_thresh_mult[MAX_MODES];
-  int rd_thresh_mult_sub8x8[MAX_REFS];
-
-  int rd_threshes[MAX_SEGMENTS][BLOCK_SIZES][MAX_MODES];
-  int rd_thresh_freq_fact[BLOCK_SIZES][MAX_MODES];
-  int rd_thresh_sub8x8[MAX_SEGMENTS][BLOCK_SIZES][MAX_REFS];
-  int rd_thresh_freq_sub8x8[BLOCK_SIZES][MAX_REFS];
-
-  int64_t rd_comp_pred_diff[REFERENCE_MODES];
-  int64_t rd_prediction_type_threshes[MAX_REF_FRAMES][REFERENCE_MODES];
-  int64_t rd_tx_select_diff[TX_MODES];
-  // FIXME(rbultje) can this overflow?
-  int rd_tx_select_threshes[MAX_REF_FRAMES][TX_MODES];
-
-  int64_t rd_filter_diff[SWITCHABLE_FILTER_CONTEXTS];
-  int64_t rd_filter_threshes[MAX_REF_FRAMES][SWITCHABLE_FILTER_CONTEXTS];
-  int64_t rd_filter_cache[SWITCHABLE_FILTER_CONTEXTS];
-  int64_t mask_filter_rd;
-
-  int RDMULT;
-  int RDDIV;
+  RD_OPT rd;
 
   CODING_CONTEXT coding_context;
 
