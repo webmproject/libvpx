@@ -324,9 +324,9 @@ static vpx_codec_err_t set_encoder_config(
   oxcf->target_bandwidth         = cfg->rc_target_bitrate;
   oxcf->rc_max_intra_bitrate_pct = extra_cfg->rc_max_intra_bitrate_pct;
 
-  oxcf->best_allowed_q          = q_trans[cfg->rc_min_quantizer];
-  oxcf->worst_allowed_q         = q_trans[cfg->rc_max_quantizer];
-  oxcf->cq_level                = q_trans[extra_cfg->cq_level];
+  oxcf->best_allowed_q  = vp9_quantizer_to_qindex(cfg->rc_min_quantizer);
+  oxcf->worst_allowed_q = vp9_quantizer_to_qindex(cfg->rc_max_quantizer);
+  oxcf->cq_level        = vp9_quantizer_to_qindex(extra_cfg->cq_level);
   oxcf->fixed_q = -1;
 
   oxcf->under_shoot_pct         = cfg->rc_undershoot_pct;
@@ -449,10 +449,6 @@ static vpx_codec_err_t encoder_set_config(vpx_codec_alg_priv_t *ctx,
   return res;
 }
 
-
-int vp9_reverse_trans(int q);
-
-
 static vpx_codec_err_t ctrl_get_param(vpx_codec_alg_priv_t *ctx, int ctrl_id,
                                  va_list args) {
   void *arg = va_arg(args, void *);
@@ -465,7 +461,7 @@ static vpx_codec_err_t ctrl_get_param(vpx_codec_alg_priv_t *ctx, int ctrl_id,
   switch (ctrl_id) {
     MAP(VP8E_GET_LAST_QUANTIZER, vp9_get_quantizer(ctx->cpi));
     MAP(VP8E_GET_LAST_QUANTIZER_64,
-        vp9_reverse_trans(vp9_get_quantizer(ctx->cpi)));
+        vp9_qindex_to_quantizer(vp9_get_quantizer(ctx->cpi)));
   }
 
   return VPX_CODEC_OK;

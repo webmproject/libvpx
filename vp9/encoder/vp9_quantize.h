@@ -52,6 +52,10 @@ void vp9_init_quantizer(struct VP9_COMP *cpi);
 
 void vp9_set_quantizer(struct VP9Common *cm, int q);
 
+int vp9_quantizer_to_qindex(int quantizer);
+
+int vp9_qindex_to_quantizer(int qindex);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
