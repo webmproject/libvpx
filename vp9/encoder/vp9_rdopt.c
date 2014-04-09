@@ -2367,7 +2367,6 @@ int vp9_get_switchable_rate(const MACROBLOCK *x) {
 }
 
 static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
-                                 const TileInfo *const tile,
                                  BLOCK_SIZE bsize,
                                  int mi_row, int mi_col,
                                  int_mv *tmp_mv, int *rate_mv) {
@@ -2685,7 +2684,6 @@ static INLINE void restore_dst_buf(MACROBLOCKD *xd,
 }
 
 static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
-                                 const TileInfo *const tile,
                                  BLOCK_SIZE bsize,
                                  int64_t txfm_cache[],
                                  int *rate2, int64_t *distortion,
@@ -2747,7 +2745,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       *rate2 += rate_mv;
     } else {
       int_mv tmp_mv;
-      single_motion_search(cpi, x, tile, bsize, mi_row, mi_col,
+      single_motion_search(cpi, x, bsize, mi_row, mi_col,
                            &tmp_mv, &rate_mv);
       if (tmp_mv.as_int == INVALID_MV)
         return INT64_MAX;
@@ -3437,7 +3435,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         rate2 += intra_cost_penalty;
       distortion2 = distortion_y + distortion_uv;
     } else {
-      this_rd = handle_inter_mode(cpi, x, tile, bsize,
+      this_rd = handle_inter_mode(cpi, x, bsize,
                                   tx_cache,
                                   &rate2, &distortion2, &skippable,
                                   &rate_y, &distortion_y,
