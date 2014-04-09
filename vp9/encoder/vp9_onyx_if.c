@@ -744,7 +744,8 @@ static void init_config(struct VP9_COMP *cpi, VP9_CONFIG *oxcf) {
 
   cpi->oxcf = *oxcf;
 
-  cm->version = oxcf->version;
+  cm->profile = oxcf->profile;
+  cm->bit_depth = oxcf->bit_depth;
 
   cm->width = oxcf->width;
   cm->height = oxcf->height;
@@ -784,8 +785,14 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9_CONFIG *oxcf) {
   VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
 
-  if (cm->version != oxcf->version)
-    cm->version = oxcf->version;
+  if (cm->profile != oxcf->profile)
+    cm->profile = oxcf->profile;
+  cm->bit_depth = oxcf->bit_depth;
+
+  if (cm->profile <= PROFILE_1)
+    assert(cm->bit_depth == BITS_8);
+  else
+    assert(cm->bit_depth > BITS_8);
 
   cpi->oxcf = *oxcf;
 
@@ -2837,7 +2844,7 @@ int vp9_receive_raw_frame(VP9_COMP *cpi, unsigned int frame_flags,
   vpx_usec_timer_mark(&timer);
   cpi->time_receive_data += vpx_usec_timer_elapsed(&timer);
 
-  if (cm->version == 0 && (subsampling_x != 1 || subsampling_y != 1)) {
+  if (cm->profile == PROFILE_0 && (subsampling_x != 1 || subsampling_y != 1)) {
     vpx_internal_error(&cm->error, VPX_CODEC_INVALID_PARAM,
                        "Non-4:2:0 color space requires profile >= 1");
     res = -1;

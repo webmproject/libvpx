@@ -186,9 +186,8 @@ typedef enum {
 } AQ_MODE;
 
 typedef struct VP9_CONFIG {
-  int version;  // 4 versions of bitstream defined:
-                //   0 - best quality/slowest decode,
-                //   3 - lowest quality/fastest decode
+  BITSTREAM_PROFILE profile;
+  BIT_DEPTH bit_depth;
   int width;  // width of data passed to the compressor
   int height;  // height of data passed to the compressor
   double framerate;  // set to passed in framerate
