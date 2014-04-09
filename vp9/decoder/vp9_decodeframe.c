@@ -882,7 +882,7 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
   assert(tile_rows == 1);
   (void)tile_rows;
 
-  // TODO(jzen): See if we can remove the restriction of passing in max
+  // TODO(jzern): See if we can remove the restriction of passing in max
   // threads to the decoder.
   if (pbi->num_tile_workers == 0) {
     const int num_threads = pbi->oxcf.max_threads & ~1;
