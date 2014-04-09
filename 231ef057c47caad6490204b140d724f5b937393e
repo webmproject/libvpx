@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//u7Q\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 345,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-04-09T01:19:12Z",
+      "side": 1,
+      "message": "can we call clamp() to do the same thing?",
+      "revId": "231ef057c47caad6490204b140d724f5b937393e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
