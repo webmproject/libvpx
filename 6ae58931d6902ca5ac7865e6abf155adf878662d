@@ -34,6 +34,24 @@
       "revId": "6ae58931d6902ca5ac7865e6abf155adf878662d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//u3M\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 885,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-04-09T15:49:43Z",
+      "side": 1,
+      "message": "Fixed. https://gerrit.chromium.org/gerrit/#/c/69543/1",
+      "parentUuid": "AAAAdn//u78\u003d",
+      "revId": "6ae58931d6902ca5ac7865e6abf155adf878662d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
