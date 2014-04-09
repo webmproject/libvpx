@@ -3757,10 +3757,10 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
                                       BLOCK_SIZE bsize,
                                       PICK_MODE_CONTEXT *ctx,
                                       int64_t best_rd_so_far) {
-  VP9_COMMON *cm = &cpi->common;
-  MACROBLOCKD *xd = &x->e_mbd;
-  MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
-  const struct segmentation *seg = &cm->seg;
+  VP9_COMMON *const cm = &cpi->common;
+  MACROBLOCKD *const xd = &x->e_mbd;
+  MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
+  const struct segmentation *const seg = &cm->seg;
   MV_REFERENCE_FRAME ref_frame, second_ref_frame;
   unsigned char segment_id = mbmi->segment_id;
   int comp_pred, i;
@@ -3853,10 +3853,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     int64_t total_sse = INT_MAX;
     int early_term = 0;
 
-    for (i = 0; i < TX_MODES; ++i)
-      tx_cache[i] = INT64_MAX;
-
-    x->skip = 0;
     ref_frame = vp9_ref_order[mode_index].ref_frame[0];
     second_ref_frame = vp9_ref_order[mode_index].ref_frame[1];
 
@@ -3893,70 +3889,43 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
         cpi->rd_thresh_sub8x8[segment_id][bsize][mode_index] == INT_MAX)
       continue;
 
-    // Do not allow compound prediction if the segment level reference
-    // frame feature is in use as in this case there can only be one reference.
-    if ((second_ref_frame > INTRA_FRAME) &&
-         vp9_segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME))
-      continue;
-
-    mbmi->ref_frame[0] = ref_frame;
-    mbmi->ref_frame[1] = second_ref_frame;
-
-    if (!(ref_frame == INTRA_FRAME
-        || (cpi->ref_frame_flags & flag_list[ref_frame]))) {
-      continue;
-    }
-    if (!(second_ref_frame == NONE
-        || (cpi->ref_frame_flags & flag_list[second_ref_frame]))) {
+    if (ref_frame > INTRA_FRAME &&
+        !(cpi->ref_frame_flags & flag_list[ref_frame])) {
       continue;
     }
 
     comp_pred = second_ref_frame > INTRA_FRAME;
     if (comp_pred) {
-      if (cpi->sf.mode_search_skip_flags & FLAG_SKIP_COMP_BESTINTRA)
-        if (vp9_ref_order[best_mode_index].ref_frame[0] == INTRA_FRAME)
-          continue;
-      if (cpi->sf.mode_search_skip_flags & FLAG_SKIP_COMP_REFMISMATCH)
-        if (ref_frame != best_inter_ref_frame &&
-            second_ref_frame != best_inter_ref_frame)
-          continue;
+      if (!(cpi->ref_frame_flags & flag_list[second_ref_frame]))
+        continue;
+      // Do not allow compound prediction if the segment level reference frame
+      // feature is in use as in this case there can only be one reference.
+      if (vp9_segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME))
+        continue;
+      if ((cpi->sf.mode_search_skip_flags & FLAG_SKIP_COMP_BESTINTRA) &&
+          vp9_ref_order[best_mode_index].ref_frame[0] == INTRA_FRAME)
+        continue;
+      if ((cpi->sf.mode_search_skip_flags & FLAG_SKIP_COMP_REFMISMATCH) &&
+          ref_frame != best_inter_ref_frame &&
+          second_ref_frame != best_inter_ref_frame)
+        continue;
     }
 
     // TODO(jingning, jkoleszar): scaling reference frame not supported for
     // sub8x8 blocks.
-    if (ref_frame > 0 && vp9_is_scaled(&cm->frame_refs[ref_frame - 1].sf))
+    if (ref_frame > NONE && vp9_is_scaled(&cm->frame_refs[ref_frame - 1].sf))
       continue;
 
-    if (second_ref_frame > 0 &&
+    if (second_ref_frame > NONE &&
         vp9_is_scaled(&cm->frame_refs[second_ref_frame - 1].sf))
       continue;
 
-    set_ref_ptrs(cm, xd, ref_frame, second_ref_frame);
-    mbmi->uv_mode = DC_PRED;
-
-    // Evaluate all sub-pel filters irrespective of whether we can use
-    // them for this frame.
-    mbmi->interp_filter = cm->interp_filter == SWITCHABLE ? EIGHTTAP
-                                                          : cm->interp_filter;
-
     if (comp_pred) {
-      if (!(cpi->ref_frame_flags & flag_list[second_ref_frame]))
-        continue;
-
       mode_excluded = mode_excluded ? mode_excluded
                                     : cm->reference_mode == SINGLE_REFERENCE;
-    } else {
-      if (ref_frame != INTRA_FRAME && second_ref_frame != INTRA_FRAME) {
-        mode_excluded = mode_excluded ?
-            mode_excluded : cm->reference_mode == COMPOUND_REFERENCE;
-      }
-    }
-
-    // Select prediction reference frames.
-    for (i = 0; i < MAX_MB_PLANE; i++) {
-      xd->plane[i].pre[0] = yv12_mb[ref_frame][i];
-      if (comp_pred)
-        xd->plane[i].pre[1] = yv12_mb[second_ref_frame][i];
+    } else if (ref_frame != INTRA_FRAME) {
+      mode_excluded = mode_excluded ? mode_excluded
+                                    : cm->reference_mode == COMPOUND_REFERENCE;
     }
 
     // If the segment reference frame feature is enabled....
@@ -3983,6 +3952,27 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
         continue;
     }
 
+    mbmi->tx_size = TX_4X4;
+    mbmi->uv_mode = DC_PRED;
+    mbmi->ref_frame[0] = ref_frame;
+    mbmi->ref_frame[1] = second_ref_frame;
+    // Evaluate all sub-pel filters irrespective of whether we can use
+    // them for this frame.
+    mbmi->interp_filter = cm->interp_filter == SWITCHABLE ? EIGHTTAP
+                                                          : cm->interp_filter;
+    x->skip = 0;
+    set_ref_ptrs(cm, xd, ref_frame, second_ref_frame);
+
+    // Select prediction reference frames.
+    for (i = 0; i < MAX_MB_PLANE; i++) {
+      xd->plane[i].pre[0] = yv12_mb[ref_frame][i];
+      if (comp_pred)
+        xd->plane[i].pre[1] = yv12_mb[second_ref_frame][i];
+    }
+
+    for (i = 0; i < TX_MODES; ++i)
+      tx_cache[i] = INT64_MAX;
+
 #ifdef MODE_TEST_HIT_STATS
     // TEST/DEBUG CODE
     // Keep a rcord of the number of test hits at each size
@@ -3991,7 +3981,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 
     if (ref_frame == INTRA_FRAME) {
       int rate;
-      mbmi->tx_size = TX_4X4;
       if (rd_pick_intra_sub_8x8_y_mode(cpi, x, &rate, &rate_y,
                                        &distortion_y, best_rd) >= best_rd)
         continue;
@@ -4036,7 +4025,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
           cpi->rd_thresh_sub8x8[segment_id][bsize][THR_ALTR];
       this_rd_thresh = (ref_frame == GOLDEN_FRAME) ?
           cpi->rd_thresh_sub8x8[segment_id][bsize][THR_GOLD] : this_rd_thresh;
-      xd->mi[0]->mbmi.tx_size = TX_4X4;
 
       cpi->mask_filter_rd = 0;
       for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
@@ -4044,8 +4032,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 
       if (cm->interp_filter != BILINEAR) {
         tmp_best_filter = EIGHTTAP;
-        if (x->source_variance <
-            cpi->sf.disable_filter_search_var_thresh) {
+        if (x->source_variance < cpi->sf.disable_filter_search_var_thresh) {
           tmp_best_filter = EIGHTTAP;
         } else if (cpi->sf.adaptive_pred_interp_filter == 1 &&
                    ctx->pred_interp_filter < SWITCHABLE) {
@@ -4230,8 +4217,8 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     }
 
     // Keep record of best inter rd with single reference
-    if (is_inter_block(&xd->mi[0]->mbmi) &&
-        !has_second_ref(&xd->mi[0]->mbmi) &&
+    if (is_inter_block(mbmi) &&
+        !has_second_ref(mbmi) &&
         !mode_excluded &&
         this_rd < best_inter_rd) {
       best_inter_rd = this_rd;
@@ -4267,7 +4254,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
         best_skip2 = this_skip2;
         if (!x->select_txfm_size)
           swap_block_ptr(x, ctx, max_plane);
-        vpx_memcpy(ctx->zcoeff_blk, x->zcoeff_blk[mbmi->tx_size],
+        vpx_memcpy(ctx->zcoeff_blk, x->zcoeff_blk[TX_4X4],
                    sizeof(uint8_t) * ctx->num_4x4_blk);
 
         for (i = 0; i < 4; i++)
@@ -4307,11 +4294,9 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       single_rd = RDCOST(x->rdmult, x->rddiv, single_rate, distortion2);
       hybrid_rd = RDCOST(x->rdmult, x->rddiv, hybrid_rate, distortion2);
 
-      if (second_ref_frame <= INTRA_FRAME &&
-          single_rd < best_pred_rd[SINGLE_REFERENCE]) {
+      if (!comp_pred && single_rd < best_pred_rd[SINGLE_REFERENCE]) {
         best_pred_rd[SINGLE_REFERENCE] = single_rd;
-      } else if (second_ref_frame > INTRA_FRAME &&
-                 single_rd < best_pred_rd[COMPOUND_REFERENCE]) {
+      } else if (comp_pred && single_rd < best_pred_rd[COMPOUND_REFERENCE]) {
         best_pred_rd[COMPOUND_REFERENCE] = single_rd;
       }
       if (hybrid_rd < best_pred_rd[REFERENCE_MODE_SELECT])
@@ -4342,13 +4327,9 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     }
 
     /* keep record of best txfm size */
-    if (bsize < BLOCK_32X32) {
-      if (bsize < BLOCK_16X16) {
-        tx_cache[ALLOW_8X8] = tx_cache[ONLY_4X4];
-        tx_cache[ALLOW_16X16] = tx_cache[ALLOW_8X8];
-      }
-      tx_cache[ALLOW_32X32] = tx_cache[ALLOW_16X16];
-    }
+    tx_cache[ALLOW_8X8] = tx_cache[ONLY_4X4];
+    tx_cache[ALLOW_16X16] = tx_cache[ALLOW_8X8];
+    tx_cache[ALLOW_32X32] = tx_cache[ALLOW_16X16];
     if (!mode_excluded && this_rd != INT64_MAX) {
       for (i = 0; i < TX_MODES && tx_cache[i] < INT64_MAX; i++) {
         int64_t adj_rd = INT64_MAX;
@@ -4387,7 +4368,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     }
   }
 
-  if (best_rd == INT64_MAX && bsize < BLOCK_8X8) {
+  if (best_rd == INT64_MAX) {
     *returnrate = INT_MAX;
     *returndistortion = INT64_MAX;
     return best_rd;
@@ -4445,11 +4426,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     }
     if (cm->interp_filter == SWITCHABLE)
       assert(best_filter_diff[SWITCHABLE_FILTERS] == 0);
-  } else {
-    vp9_zero(best_filter_diff);
-  }
-
-  if (!x->skip) {
     for (i = 0; i < TX_MODES; i++) {
       if (best_tx_rd[i] == INT64_MAX)
         best_tx_diff[i] = 0;
@@ -4457,6 +4433,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
         best_tx_diff[i] = best_rd - best_tx_rd[i];
     }
   } else {
+    vp9_zero(best_filter_diff);
     vp9_zero(best_tx_diff);
   }
 
