@@ -821,10 +821,6 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9_CONFIG *oxcf) {
       break;
   }
 
-  cpi->oxcf.worst_allowed_q = q_trans[oxcf->worst_allowed_q];
-  cpi->oxcf.best_allowed_q = q_trans[oxcf->best_allowed_q];
-  cpi->oxcf.cq_level = q_trans[cpi->oxcf.cq_level];
-
   cpi->oxcf.lossless = oxcf->lossless;
   if (cpi->oxcf.lossless) {
     // In lossless mode, make sure right quantizer range and correct transform

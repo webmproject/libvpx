@@ -32,8 +32,8 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
     LAYER_CONTEXT *const lc = &svc->layer_context[layer];
     RATE_CONTROL *const lrc = &lc->rc;
     lc->current_video_frame_in_layer = 0;
-    lrc->avg_frame_qindex[INTER_FRAME] = q_trans[oxcf->worst_allowed_q];
-    lrc->ni_av_qi = q_trans[oxcf->worst_allowed_q];
+    lrc->avg_frame_qindex[INTER_FRAME] = oxcf->worst_allowed_q;
+    lrc->ni_av_qi = oxcf->worst_allowed_q;
     lrc->total_actual_bits = 0;
     lrc->total_target_vs_actual = 0;
     lrc->ni_tot_qi = 0;
@@ -47,12 +47,12 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
 
     if (svc->number_temporal_layers > 1) {
       lc->target_bandwidth = oxcf->ts_target_bitrate[layer] * 1000;
-      lrc->last_q[INTER_FRAME] = q_trans[oxcf->worst_allowed_q];
+      lrc->last_q[INTER_FRAME] = oxcf->worst_allowed_q;
     } else {
       lc->target_bandwidth = oxcf->ss_target_bitrate[layer] * 1000;
-      lrc->last_q[0] = q_trans[oxcf->best_allowed_q];
-      lrc->last_q[1] = q_trans[oxcf->best_allowed_q];
-      lrc->last_q[2] = q_trans[oxcf->best_allowed_q];
+      lrc->last_q[0] = oxcf->best_allowed_q;
+      lrc->last_q[1] = oxcf->best_allowed_q;
+      lrc->last_q[2] = oxcf->best_allowed_q;
     }
 
     lrc->buffer_level = vp9_rescale((int)(oxcf->starting_buffer_level),
