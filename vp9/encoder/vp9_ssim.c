@@ -8,8 +8,9 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include "./vp9_rtcd.h"
 
-#include "vp9/encoder/vp9_onyx_int.h"
+#include "vp9/encoder/vp9_ssim.h"
 
 void vp9_ssim_parms_16x16_c(uint8_t *s, int sp, uint8_t *r,
                             int rp, unsigned long *sum_s, unsigned long *sum_r,
