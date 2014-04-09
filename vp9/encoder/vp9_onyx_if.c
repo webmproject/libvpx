@@ -2756,15 +2756,8 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     // Don't increment frame counters if this was an altref buffer
     // update not a real frame
     ++cm->current_video_frame;
-    if (cpi->use_svc) {
-      LAYER_CONTEXT *lc;
-      if (cpi->svc.number_temporal_layers > 1) {
-        lc = &cpi->svc.layer_context[cpi->svc.temporal_layer_id];
-      } else {
-        lc = &cpi->svc.layer_context[cpi->svc.spatial_layer_id];
-      }
-      ++lc->current_video_frame_in_layer;
-    }
+    if (cpi->use_svc)
+      vp9_inc_frame_in_layer(&cpi->svc);
   }
 
   // restore prev_mi

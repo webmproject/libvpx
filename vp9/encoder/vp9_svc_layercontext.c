@@ -215,3 +215,10 @@ void vp9_init_second_pass_spatial_svc(VP9_COMP *cpi) {
   }
   svc->spatial_layer_id = 0;
 }
+
+void vp9_inc_frame_in_layer(SVC *svc) {
+  LAYER_CONTEXT *const lc = (svc->number_temporal_layers > 1)
+      ? &svc->layer_context[svc->temporal_layer_id]
+      : &svc->layer_context[svc->spatial_layer_id];
+  ++lc->current_video_frame_in_layer;
+}

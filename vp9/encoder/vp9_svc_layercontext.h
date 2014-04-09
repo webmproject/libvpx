@@ -70,6 +70,9 @@ void vp9_save_layer_context(struct VP9_COMP *const cpi);
 // Initialize second pass rc for spatial svc.
 void vp9_init_second_pass_spatial_svc(struct VP9_COMP *cpi);
 
+// Increment number of video frames in layer
+void vp9_inc_frame_in_layer(SVC *svc);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
