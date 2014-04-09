@@ -2763,10 +2763,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
       ++lc->current_video_frame_in_layer;
     }
   }
-
-  // restore prev_mi
-  cm->prev_mi = cm->prev_mip + cm->mi_stride + 1;
-  cm->prev_mi_grid_visible = cm->prev_mi_grid_base + cm->mi_stride + 1;
 }
 
 static void SvcEncode(VP9_COMP *cpi, size_t *size, uint8_t *dest,
