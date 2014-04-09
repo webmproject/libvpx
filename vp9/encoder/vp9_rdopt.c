@@ -3304,7 +3304,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
     // Look at the reference frame of the best mode so far and set the
     // skip mask to look at a subset of the remaining modes.
-    if (mode_index == mode_skip_start) {
+    if (mode_index == mode_skip_start && best_rd < INT64_MAX) {
       switch (vp9_mode_order[best_mode_index].ref_frame[0]) {
         case INTRA_FRAME:
           break;
