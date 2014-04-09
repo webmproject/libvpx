@@ -367,8 +367,8 @@ int vp9_rc_regulate_q(const VP9_COMP *cpi, int target_bits_per_frame,
 
   // Calculate required scaling factor based on target frame size and size of
   // frame produced using previous Q.
-    target_bits_per_mb =
-        ((uint64_t)target_bits_per_frame << BPER_MB_NORMBITS) / cm->MBs;
+  target_bits_per_mb =
+      ((uint64_t)target_bits_per_frame << BPER_MB_NORMBITS) / cm->MBs;
 
   i = active_best_quality;
 
