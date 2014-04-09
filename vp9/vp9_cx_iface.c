@@ -324,9 +324,9 @@ static vpx_codec_err_t set_encoder_config(
   oxcf->target_bandwidth         = cfg->rc_target_bitrate;
   oxcf->rc_max_intra_bitrate_pct = extra_cfg->rc_max_intra_bitrate_pct;
 
-  oxcf->best_allowed_q          = cfg->rc_min_quantizer;
-  oxcf->worst_allowed_q         = cfg->rc_max_quantizer;
-  oxcf->cq_level                = extra_cfg->cq_level;
+  oxcf->best_allowed_q          = q_trans[cfg->rc_min_quantizer];
+  oxcf->worst_allowed_q         = q_trans[cfg->rc_max_quantizer];
+  oxcf->cq_level                = q_trans[extra_cfg->cq_level];
   oxcf->fixed_q = -1;
 
   oxcf->under_shoot_pct         = cfg->rc_undershoot_pct;
