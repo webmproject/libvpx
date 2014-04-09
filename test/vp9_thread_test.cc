@@ -153,6 +153,26 @@ TEST(VP9DecodeMTTest, MTDecode2) {
   }
 }
 
+// Test tile quantity changes within one file.
+TEST(VP9DecodeMTTest, MTDecode3) {
+  static const struct {
+    const char *name;
+    const char *expected_md5;
+  } files[] = {
+    { "vp90-2-14-resize-1280x720-848x480.webm",
+      "1fe742b0c5d9ed92314b7bc68bbea153" },
+    { "vp90-2-14-resize-848x480-1280x720.webm",
+      "0f163f491617f0ebcb80f1033eeb5d40" },
+  };
+
+  for (int i = 0; i < static_cast<int>(sizeof(files) / sizeof(files[0])); ++i) {
+    for (int t = 2; t <= 8; ++t) {
+      EXPECT_STREQ(files[i].expected_md5, DecodeFile(files[i].name, t).c_str())
+          << "threads = " << t;
+    }
+  }
+}
+
 INSTANTIATE_TEST_CASE_P(Synchronous, VP9WorkerThreadTest, ::testing::Bool());
 
 }  // namespace

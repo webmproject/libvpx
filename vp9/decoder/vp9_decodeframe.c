@@ -882,12 +882,16 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
   assert(tile_rows == 1);
   (void)tile_rows;
 
-  if (num_workers > pbi->num_tile_workers) {
+  // TODO(jzen): See if we can remove the restriction of passing in max
+  // threads to the decoder.
+  if (pbi->num_tile_workers == 0) {
+    const int num_threads = pbi->oxcf.max_threads & ~1;
     int i;
+    // TODO(jzern): Allocate one less worker, as in the current code we only
+    // use num_threads - 1 workers.
     CHECK_MEM_ERROR(cm, pbi->tile_workers,
-                    vpx_realloc(pbi->tile_workers,
-                                num_workers * sizeof(*pbi->tile_workers)));
-    for (i = pbi->num_tile_workers; i < num_workers; ++i) {
+                    vpx_malloc(num_threads * sizeof(*pbi->tile_workers)));
+    for (i = 0; i < num_threads; ++i) {
       VP9Worker *const worker = &pbi->tile_workers[i];
       ++pbi->num_tile_workers;
 
@@ -895,7 +899,7 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
       CHECK_MEM_ERROR(cm, worker->data1,
                       vpx_memalign(32, sizeof(TileWorkerData)));
       CHECK_MEM_ERROR(cm, worker->data2, vpx_malloc(sizeof(TileInfo)));
-      if (i < num_workers - 1 && !vp9_worker_reset(worker)) {
+      if (i < num_threads - 1 && !vp9_worker_reset(worker)) {
         vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
                            "Tile decoder thread creation failed");
       }
@@ -903,7 +907,7 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
   }
 
   // Reset tile decoding hook
-  for (n = 0; n < pbi->num_tile_workers; ++n) {
+  for (n = 0; n < num_workers; ++n) {
     pbi->tile_workers[n].hook = (VP9WorkerHook)tile_worker_hook;
   }
 
