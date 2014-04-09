@@ -1288,7 +1288,11 @@ int vp9_decode_frame(VP9D_COMP *pbi,
   }
 
   init_macroblockd(cm, &pbi->mb);
-  cm->prev_mi = get_prev_mi(cm);
+
+  if (cm->coding_use_prev_mi)
+    set_prev_mi(cm);
+  else
+    cm->prev_mi = NULL;
 
   setup_plane_dequants(cm, xd, cm->base_qindex);
   vp9_setup_block_planes(xd, cm->subsampling_x, cm->subsampling_y);
