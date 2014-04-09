@@ -232,6 +232,11 @@ typedef struct VP9_CONFIG {
   int lossless;
   AQ_MODE aq_mode;  // Adaptive Quantization mode
 
+  // Internal frame size scaling.
+  int allow_spatial_resampling;
+  int scaled_frame_width;
+  int scaled_frame_height;
+
   // Enable feature to reduce the frame quantization every x frames.
   int frame_periodic_boost;
 
