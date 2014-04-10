@@ -1065,11 +1065,10 @@ static void update_golden_frame_stats(VP9_COMP *cpi) {
 }
 
 void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
-  VP9_COMMON *const cm = &cpi->common;
+  const VP9_COMMON *const cm = &cpi->common;
   const VP9_CONFIG *const oxcf = &cpi->oxcf;
   RATE_CONTROL *const rc = &cpi->rc;
 
-  cm->last_frame_type = cm->frame_type;
   // Update rate control heuristics
   rc->projected_frame_size = (int)(bytes_used << 3);
 
