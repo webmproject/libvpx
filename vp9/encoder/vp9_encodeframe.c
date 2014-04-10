@@ -1456,11 +1456,10 @@ static void set_source_var_based_partition(VP9_COMP *cpi,
                                            MODE_INFO **mi_8x8,
                                            int mi_row, int mi_col) {
   VP9_COMMON *const cm = &cpi->common;
-  MACROBLOCK *x = &cpi->mb;
+  MACROBLOCK *const x = &cpi->mb;
   const int mis = cm->mi_stride;
-  int row8x8_remaining = tile->mi_row_end - mi_row;
-  int col8x8_remaining = tile->mi_col_end - mi_col;
-  int r, c;
+  const int row8x8_remaining = tile->mi_row_end - mi_row;
+  const int col8x8_remaining = tile->mi_col_end - mi_col;
   MODE_INFO *mi_upper_left = cm->mi + mi_row * mis + mi_col;
 
   vp9_setup_src_planes(x, cpi->Source, mi_row, mi_col);
@@ -1543,16 +1542,13 @@ static void set_source_var_based_partition(VP9_COMP *cpi,
     BLOCK_SIZE bsize = BLOCK_16X16;
     int bh = num_8x8_blocks_high_lookup[bsize];
     int bw = num_8x8_blocks_wide_lookup[bsize];
-
+    int r, c;
     for (r = 0; r < MI_BLOCK_SIZE; r += bh) {
       for (c = 0; c < MI_BLOCK_SIZE; c += bw) {
-        int index = r * mis + c;
-        // Find a partition size that fits
-        bsize = find_partition_size(bsize,
-                                    (row8x8_remaining - r),
-                                    (col8x8_remaining - c), &bh, &bw);
+        const int index = r * mis + c;
         mi_8x8[index] = mi_upper_left + index;
-        mi_8x8[index]->mbmi.sb_type = bsize;
+        mi_8x8[index]->mbmi.sb_type = find_partition_size(bsize,
+            row8x8_remaining - r, col8x8_remaining - c, &bh, &bw);
       }
     }
   }
