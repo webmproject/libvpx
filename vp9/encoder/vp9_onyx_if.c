@@ -135,6 +135,24 @@ static void setup_inter_frame(VP9_COMMON *cm) {
   cm->fc = cm->frame_contexts[cm->frame_context_idx];
 }
 
+static void setup_frame(VP9_COMP *cpi) {
+  VP9_COMMON *const cm = &cpi->common;
+  // Set up entropy context depending on frame type. The decoder mandates
+  // the use of the default context, index 0, for keyframes and inter
+  // frames where the error_resilient_mode or intra_only flag is set. For
+  // other inter-frames the encoder currently uses only two contexts;
+  // context 1 for ALTREF frames and context 0 for the others.
+  if (cm->frame_type == KEY_FRAME) {
+    setup_key_frame(cpi);
+  } else {
+    if (!cm->intra_only && !cm->error_resilient_mode && !cpi->use_svc)
+        cm->frame_context_idx = cpi->refresh_alt_ref_frame;
+     setup_inter_frame(cm);
+  }
+}
+
+
+
 void vp9_initialize_enc() {
   static int init_done = 0;
 
@@ -2119,20 +2137,7 @@ static void encode_without_recode_loop(VP9_COMP *cpi,
   VP9_COMMON *const cm = &cpi->common;
   vp9_clear_system_state();
   vp9_set_quantizer(cm, q);
-
-  // Set up entropy context depending on frame type. The decoder mandates
-  // the use of the default context, index 0, for keyframes and inter
-  // frames where the error_resilient_mode or intra_only flag is set. For
-  // other inter-frames the encoder currently uses only two contexts;
-  // context 1 for ALTREF frames and context 0 for the others.
-  if (cm->frame_type == KEY_FRAME) {
-    setup_key_frame(cpi);
-  } else {
-    if (!cm->intra_only && !cm->error_resilient_mode && !cpi->use_svc)
-      cm->frame_context_idx = cpi->refresh_alt_ref_frame;
-
-    setup_inter_frame(cm);
-  }
+  setup_frame(cpi);
   // Variance adaptive and in frame q adjustment experiments are mutually
   // exclusive.
   if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
@@ -2177,21 +2182,8 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
 
     vp9_set_quantizer(cm, q);
 
-    if (loop_count == 0) {
-      // Set up entropy context depending on frame type. The decoder mandates
-      // the use of the default context, index 0, for keyframes and inter
-      // frames where the error_resilient_mode or intra_only flag is set. For
-      // other inter-frames the encoder currently uses only two contexts;
-      // context 1 for ALTREF frames and context 0 for the others.
-      if (cm->frame_type == KEY_FRAME) {
-        setup_key_frame(cpi);
-      } else {
-        if (!cm->intra_only && !cm->error_resilient_mode && !cpi->use_svc)
-          cpi->common.frame_context_idx = cpi->refresh_alt_ref_frame;
-
-        setup_inter_frame(cm);
-      }
-    }
+    if (loop_count == 0)
+      setup_frame(cpi);
 
     // Variance adaptive and in frame q adjustment experiments are mutually
     // exclusive.
@@ -2487,7 +2479,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
   // Set various flags etc to special state if it is a key frame.
   if (frame_is_intra_only(cm)) {
-    setup_key_frame(cpi);
     // Reset the loop filter deltas and segmentation map.
     vp9_reset_segment_features(&cm->seg);
 
