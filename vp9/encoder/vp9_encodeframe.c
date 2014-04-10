@@ -3266,7 +3266,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   if (cpi->oxcf.tuning == VP8_TUNE_SSIM)
     build_activity_map(cpi);
 
-  cm->prev_mi = get_prev_mi(cm);
+  set_prev_mi(cm);
 
   if (sf->use_nonrd_pick_mode) {
     // Initialize internal buffer pointers for rtc coding, where non-RD
