@@ -13,13 +13,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#if defined(_MSC_VER)
-/* MSVS doesn't define off_t */
-typedef __int64 off_t;
-#else
-#include <stdint.h>
-#endif
-
 #include "tools_common.h"
 #include "vpx/vpx_encoder.h"
 
@@ -27,40 +20,13 @@ typedef __int64 off_t;
 extern "C" {
 #endif
 
-typedef off_t EbmlLoc;
-
-struct cue_entry {
-  unsigned int time;
-  uint64_t loc;
-};
-
+/* TODO(vigneshv): Rename this struct */
 struct EbmlGlobal {
   int debug;
-
   FILE *stream;
-  int64_t last_pts_ms;
-  vpx_rational_t framerate;
-
-  /* These pointers are to the start of an element */
-  off_t position_reference;
-  off_t seek_info_pos;
-  off_t segment_info_pos;
-  off_t track_pos;
-  off_t cue_pos;
-  off_t cluster_pos;
-
-  /* This pointer is to a specific element to be serialized */
-  off_t track_id_pos;
-
-  /* These pointers are to the size field of the element */
-  EbmlLoc startSegment;
-  EbmlLoc startCluster;
-
-  uint32_t cluster_timecode;
-  int cluster_open;
-
-  struct cue_entry *cue_list;
-  unsigned int cues;
+  int64_t last_pts_ns;
+  void *writer;
+  void *segment;
 };
 
 /* Stereo 3D packed frame format */
@@ -72,10 +38,6 @@ typedef enum stereo_format {
   STEREO_FORMAT_RIGHT_LEFT = 11
 } stereo_format_t;
 
-void write_webm_seek_element(struct EbmlGlobal *ebml,
-                             unsigned int id,
-                             off_t pos);
-
 void write_webm_file_header(struct EbmlGlobal *glob,
                             const vpx_codec_enc_cfg_t *cfg,
                             const struct vpx_rational *fps,
@@ -86,7 +48,7 @@ void write_webm_block(struct EbmlGlobal *glob,
                       const vpx_codec_enc_cfg_t *cfg,
                       const vpx_codec_cx_pkt_t *pkt);
 
-void write_webm_file_footer(struct EbmlGlobal *glob, int hash);
+void write_webm_file_footer(struct EbmlGlobal *glob);
 
 #ifdef __cplusplus
 }  // extern "C"

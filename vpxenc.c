@@ -123,55 +123,6 @@ int fourcc_is_ivf(const char detect[4]) {
   return 0;
 }
 
-#if CONFIG_WEBM_IO
-/* Murmur hash derived from public domain reference implementation at
- *   http:// sites.google.com/site/murmurhash/
- */
-static unsigned int murmur(const void *key, int len, unsigned int seed) {
-  const unsigned int m = 0x5bd1e995;
-  const int r = 24;
-
-  unsigned int h = seed ^ len;
-
-  const unsigned char *data = (const unsigned char *)key;
-
-  while (len >= 4) {
-    unsigned int k;
-
-    k  = (unsigned int)data[0];
-    k |= (unsigned int)data[1] << 8;
-    k |= (unsigned int)data[2] << 16;
-    k |= (unsigned int)data[3] << 24;
-
-    k *= m;
-    k ^= k >> r;
-    k *= m;
-
-    h *= m;
-    h ^= k;
-
-    data += 4;
-    len -= 4;
-  }
-
-  switch (len) {
-    case 3:
-      h ^= data[2] << 16;
-    case 2:
-      h ^= data[1] << 8;
-    case 1:
-      h ^= data[0];
-      h *= m;
-  };
-
-  h ^= h >> 13;
-  h *= m;
-  h ^= h >> 15;
-
-  return h;
-}
-#endif  // CONFIG_WEBM_IO
-
 static const arg_def_t debugmode = ARG_DEF("D", "debug", 0,
                                            "Debug mode (makes output deterministic)");
 static const arg_def_t outputfile = ARG_DEF("o", "output", 1,
@@ -619,7 +570,6 @@ struct stream_state {
   FILE                     *file;
   struct rate_hist         *rate_hist;
   struct EbmlGlobal         ebml;
-  uint32_t                  hash;
   uint64_t                  psnr_sse_total;
   uint64_t                  psnr_samples_total;
   double                    psnr_totals[4];
@@ -841,7 +791,9 @@ static struct stream_state *new_stream(struct VpxEncoderConfig *global,
     stream->config.stereo_fmt = STEREO_FORMAT_MONO;
     stream->config.write_webm = 1;
 #if CONFIG_WEBM_IO
-    stream->ebml.last_pts_ms = -1;
+    stream->ebml.last_pts_ns = -1;
+    stream->ebml.writer = NULL;
+    stream->ebml.segment = NULL;
 #endif
 
     /* Allows removal of the application version from the EBML tags */
@@ -1176,9 +1128,7 @@ static void close_output_file(struct stream_state *stream,
 
 #if CONFIG_WEBM_IO
   if (stream->config.write_webm) {
-    write_webm_file_footer(&stream->ebml, stream->hash);
-    free(stream->ebml.cue_list);
-    stream->ebml.cue_list = NULL;
+    write_webm_file_footer(&stream->ebml);
   }
 #endif
 
@@ -1334,12 +1284,6 @@ static void get_cx_data(struct stream_state *stream,
         update_rate_histogram(stream->rate_hist, cfg, pkt);
 #if CONFIG_WEBM_IO
         if (stream->config.write_webm) {
-          /* Update the hash */
-          if (!stream->ebml.debug)
-            stream->hash = murmur(pkt->data.frame.buf,
-                                  (int)pkt->data.frame.sz,
-                                  stream->hash);
-
           write_webm_block(&stream->ebml, cfg, pkt);
         }
 #endif
