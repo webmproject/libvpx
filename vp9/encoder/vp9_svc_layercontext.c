@@ -178,7 +178,6 @@ void vp9_restore_layer_context(VP9_COMP *const cpi) {
   cpi->oxcf.starting_buffer_level = lc->starting_buffer_level;
   cpi->oxcf.optimal_buffer_level = lc->optimal_buffer_level;
   cpi->oxcf.maximum_buffer_size = lc->maximum_buffer_size;
-  cpi->output_framerate = lc->framerate;
   // Reset the frames_since_key and frames_to_key counters to their values
   // before the layer restore. Keep these defined for the stream (not layer).
   if (cpi->svc.number_temporal_layers > 1) {
@@ -197,7 +196,6 @@ void vp9_save_layer_context(VP9_COMP *const cpi) {
   lc->starting_buffer_level = oxcf->starting_buffer_level;
   lc->optimal_buffer_level = oxcf->optimal_buffer_level;
   lc->maximum_buffer_size = oxcf->maximum_buffer_size;
-  lc->framerate = cpi->output_framerate;
 }
 
 void vp9_init_second_pass_spatial_svc(VP9_COMP *cpi) {

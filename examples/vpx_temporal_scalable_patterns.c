@@ -526,7 +526,7 @@ int main(int argc, char **argv) {
   // Enable error resilient mode.
   cfg.g_error_resilient = 1;
   cfg.g_lag_in_frames   = 0;
-  cfg.kf_mode = VPX_KF_DISABLED;
+  cfg.kf_mode = VPX_KF_AUTO;
 
   // Disable automatic keyframe placement.
   cfg.kf_min_dist = cfg.kf_max_dist = 3000;
