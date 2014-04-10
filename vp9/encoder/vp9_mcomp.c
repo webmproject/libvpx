@@ -993,20 +993,21 @@ int vp9_diamond_search_sad_c(const MACROBLOCK *x,
   const MV fcenter_mv = {center_mv->row >> 3, center_mv->col >> 3};
   const int *mvjsadcost = x->nmvjointsadcost;
   int *mvsadcost[2] = {x->nmvsadcost[0], x->nmvsadcost[1]};
-  const uint8_t *best_address;
+  const uint8_t *best_address, *in_what_ref;
   int best_sad = INT_MAX;
   int best_site = 0;
   int last_site = 0;
   int i, j, step;
 
   clamp_mv(ref_mv, x->mv_col_min, x->mv_col_max, x->mv_row_min, x->mv_row_max);
-  best_address = get_buf_from_mv(in_what, ref_mv);
+  in_what_ref = get_buf_from_mv(in_what, ref_mv);
+  best_address = in_what_ref;
   *num00 = 0;
   *best_mv = *ref_mv;
 
   // Check the starting position
   best_sad = fn_ptr->sdf(what->buf, what->stride,
-                        in_what->buf, in_what->stride, 0x7fffffff) +
+                         best_address, in_what->stride, 0x7fffffff) +
       mvsad_err_cost(best_mv, &fcenter_mv, mvjsadcost, mvsadcost, sad_per_bit);
 
   i = 1;
@@ -1060,7 +1061,7 @@ int vp9_diamond_search_sad_c(const MACROBLOCK *x,
         break;
       };
 #endif
-    } else if (best_address == in_what->buf) {
+    } else if (best_address == in_what_ref) {
       (*num00)++;
     }
   }
