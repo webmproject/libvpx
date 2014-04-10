@@ -16,6 +16,24 @@
       "revId": "4f95a7fe3ef8e786dbb6c9c1dc3240da24538f92",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//uuk\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3307,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-04-10T00:11:35Z",
+      "side": 1,
+      "message": "The intention of this section was to use the \"best_mode\" so far as a prediction for the rest of the modes to be tested. ie. where only the ones with same reference frame as the \"best_mode\" so far get tested and the rest are masked out. However the old logic had a problem when there is no mode tested so far at all. \n\nThe particular bug case was on a \"overlay\" frame, i.e. when the src frame was coded as an alt_ref.  For the overlay frame, only alt_ref and zero_mv is allowed for the entire frame. However because no mode is tested so far when code flow get here, the section would use best_mode_index\u003d0 as if it is the selected mode, and ends up masking out all alt ref based modes. And no valid mode is chosen and asserts.\n\nmaybe a better fix is to initialize best_mode_index as \"none\" or \"invalid\" and check against that?",
+      "parentUuid": "AAAAdn//uu4\u003d",
+      "revId": "4f95a7fe3ef8e786dbb6c9c1dc3240da24538f92",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
