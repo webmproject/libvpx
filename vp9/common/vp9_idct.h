@@ -95,6 +95,12 @@ void vp9_idct16x16_add(const int16_t *input, uint8_t *dest, int stride, int
 void vp9_idct32x32_add(const int16_t *input, uint8_t *dest, int stride,
                        int eob);
 
+#if CONFIG_EXT_TX
+void vp9_idst_add(const int16_t *input, uint8_t *dest, int stride,
+                  int eob, int size);
+#endif
+
+
 void vp9_iht4x4_add(TX_TYPE tx_type, const int16_t *input, uint8_t *dest,
                     int stride, int eob);
 void vp9_iht8x8_add(TX_TYPE tx_type, const int16_t *input, uint8_t *dest,

@@ -2054,6 +2054,7 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
   vp9_zero(cpi->comp_ref_count);
   vp9_zero(cm->counts.tx);
   vp9_zero(cm->counts.mbskip);
+
 #if CONFIG_FILTERINTRA
   vp9_zero(cm->counts.filterintra);
 #endif
@@ -2068,6 +2069,9 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
   vp9_zero(cpi->masked_interintra_count);
   vp9_zero(cpi->masked_interintra_select_count);
 #endif
+#endif
+#if CONFIG_EXT_TX
+  vp9_zero(cm->counts.ext_tx);
 #endif
 
   // Note: this memset assumes above_context[0], [1] and [2]
@@ -2122,6 +2126,9 @@ static void encode_frame_internal(VP9_COMP *cpi) {
 #endif
 
   vp9_zero(cm->counts.switchable_interp);
+#if CONFIG_EXT_TX
+  vp9_zero(cm->counts.ext_tx);
+#endif
   vp9_zero(cpi->tx_stepdown_count);
 
   xd->mi_8x8 = cm->mi_grid_visible;
@@ -2724,5 +2731,19 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
           if (mi_col + x < cm->mi_cols && mi_row + y < cm->mi_rows)
             mi_8x8[mis * y + x]->mbmi.tx_size = tx_size;
     }
+
+#if CONFIG_EXT_TX
+#if CONFIG_EXT_TX_DST32
+    if (is_inter_block(mbmi) &&
+            !mbmi->skip_coeff &&
+            !vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
+#else
+    if (is_inter_block(mbmi) && mbmi->tx_size <= TX_16X16 &&
+        !mbmi->skip_coeff &&
+        !vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
+#endif
+      ++cm->counts.ext_tx[mbmi->ext_txfrm];
+    }
+#endif
   }
 }

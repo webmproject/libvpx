@@ -544,7 +544,6 @@ void vp9_first_pass(VP9_COMP *cpi) {
   }
   x->skip_recode = 0;
 
-
   // Initialise the MV cost table to the defaults
   // if( cm->current_video_frame == 0)
   // if ( 0 )

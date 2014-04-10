@@ -44,6 +44,10 @@
 #include "./webmenc.h"
 #include "./y4minput.h"
 
+#if CONFIG_EXT_TX
+extern int block_index;
+#endif
+
 /* Swallow warnings about unused results of fread/fwrite */
 static size_t wrap_fread(void *ptr, size_t size, size_t nmemb,
                          FILE *stream) {

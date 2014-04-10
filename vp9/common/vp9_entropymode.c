@@ -30,6 +30,9 @@ static const vp9_prob default_masked_interintra_prob[BLOCK_SIZES] = {
 };
 #endif
 #endif
+#if CONFIG_EXT_TX
+const vp9_prob default_ext_tx_prob = 204;  // 0.6 = 153, 0.7 = 178, 0.8 = 204
+#endif
 
 const vp9_prob vp9_kf_y_mode_prob[INTRA_MODES][INTRA_MODES][INTRA_MODES - 1] = {
   {  // above = dc
@@ -366,6 +369,9 @@ void vp9_init_mbmode_probs(VP9_COMMON *cm) {
   vp9_copy(cm->fc.masked_interintra_prob, default_masked_interintra_prob);
 #endif
 #endif
+#if CONFIG_EXT_TX
+  cm->fc.ext_tx_prob = default_ext_tx_prob;
+#endif
 }
 
 const vp9_tree_index vp9_switchable_interp_tree
@@ -425,9 +431,10 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
                 counts->partition[i], fc->partition_prob[i]);
 
   if (cm->mcomp_filter_type == SWITCHABLE) {
-    for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; i++)
+    for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; i++) {
       adapt_probs(vp9_switchable_interp_tree, pre_fc->switchable_interp_prob[i],
                   counts->switchable_interp[i], fc->switchable_interp_prob[i]);
+    }
   }
 
   if (cm->tx_mode == TX_MODE_SELECT) {
@@ -494,6 +501,10 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
     }
 #endif
   }
+#endif
+
+#if CONFIG_EXT_TX
+  fc->ext_tx_prob = adapt_prob(pre_fc->ext_tx_prob, counts->ext_tx);
 #endif
 }
 

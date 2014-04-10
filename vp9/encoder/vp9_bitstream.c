@@ -343,6 +343,20 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, MODE_INFO *m, vp9_writer *bc) {
     encode_ref_frame(cpi, bc);
     mv_ref_p = cpi->common.fc.inter_mode_probs[mi->mode_context[rf]];
 
+#if CONFIG_EXT_TX
+    assert(is_inter_block(mi));
+#if CONFIG_EXT_TX_DST32
+    if (
+#else
+    if (mi->tx_size <= TX_16X16 &&
+#endif
+        !mi->skip_coeff &&
+        !vp9_segfeature_active(&cm->seg, mi->segment_id, SEG_LVL_SKIP)) {
+//      printf("enc: writing bit\n");
+      vp9_write(bc, mi->ext_txfrm, cm->fc.ext_tx_prob);
+    }
+#endif
+
 #ifdef ENTROPY_STATS
     active_section = 3;
 #endif
@@ -1309,6 +1323,10 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
     int i;
 #ifdef ENTROPY_STATS
     active_section = 1;
+#endif
+
+#if CONFIG_EXT_TX
+    vp9_cond_prob_diff_update(&header_bc, &fc->ext_tx_prob, cm->counts.ext_tx);
 #endif
 
     for (i = 0; i < INTER_MODE_CONTEXTS; ++i)

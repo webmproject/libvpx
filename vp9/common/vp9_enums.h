@@ -79,6 +79,14 @@ typedef enum {
   TX_TYPES = 4
 } TX_TYPE;
 
+#if CONFIG_EXT_TX
+typedef enum {
+  NORM   = 0,
+  ALT = 1,
+  EXT_TX_TYPES = 2
+} EXT_TX_TYPE;
+#endif
+
 typedef enum {
   UNKNOWN    = 0,
   BT_601     = 1,  // YUV

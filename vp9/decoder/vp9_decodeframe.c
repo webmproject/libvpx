@@ -264,8 +264,19 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
         vp9_iht16x16_add(tx_type, dqcoeff, dst, stride, eob);
         break;
       case TX_32X32:
+#if !CONFIG_EXT_TX
         tx_type = DCT_DCT;
         vp9_idct32x32_add(dqcoeff, dst, stride, eob);
+#else
+        tx_type = get_tx_type_32x32(plane_type, xd);
+        if (tx_type == DCT_DCT)
+          vp9_idct32x32_add(dqcoeff, dst, stride, eob);
+        else if (tx_type == ADST_ADST)
+          // yongzhe: temporarily signaled as ADST_ADST
+          vp9_idst_add(dqcoeff, dst, stride, eob, 32);
+        else
+          assert(0 && "Invalid transform type");
+#endif
         break;
       default:
         assert(0 && "Invalid transform size");
@@ -1277,6 +1288,10 @@ static int read_compressed_header(VP9D_COMP *pbi, const uint8_t *data,
     nmv_context *const nmvc = &fc->nmvc;
     int i, j;
 
+#if CONFIG_EXT_TX
+    vp9_diff_update_prob(&r, &fc->ext_tx_prob);
+#endif
+
     read_inter_mode_probs(fc, &r);
 
     if (cm->mcomp_filter_type == SWITCHABLE)
@@ -1379,6 +1394,10 @@ static void debug_check_frame_counts(const VP9_COMMON *const cm) {
                  sizeof(cm->counts.eob_branch)));
   assert(!memcmp(cm->counts.switchable_interp, zero_counts.switchable_interp,
                  sizeof(cm->counts.switchable_interp)));
+#if CONFIG_EXT_TX
+  assert(!memcmp(cm->counts.ext_tx, zero_counts.ext_tx,
+                 sizeof(cm->counts.ext_tx)));
+#endif
   assert(!memcmp(cm->counts.inter_mode, zero_counts.inter_mode,
                  sizeof(cm->counts.inter_mode)));
   assert(!memcmp(cm->counts.intra_inter, zero_counts.intra_inter,

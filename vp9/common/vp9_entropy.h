@@ -97,6 +97,10 @@ struct VP9Common;
 void vp9_default_coef_probs(struct VP9Common *cm);
 void vp9_adapt_coef_probs(struct VP9Common *cm);
 
+#if CONFIG_EXT_TX
+void vp9_init_ext_tx_prob(struct VP9Common *cm);
+#endif
+
 static INLINE void reset_skip_context(MACROBLOCKD *xd, BLOCK_SIZE bsize) {
   int i;
   for (i = 0; i < MAX_MB_PLANE; i++) {

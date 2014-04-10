@@ -260,7 +260,10 @@ EXPERIMENT_LIST="
     interintra
     masked_interintra
     filterintra
+    ext_tx
+    ext_tx_dst32
 "
+
 CONFIG_LIST="
     external_build
     install_docs

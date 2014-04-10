@@ -203,6 +203,10 @@ typedef struct {
 
   INTERPOLATION_TYPE interp_filter;
 
+#if CONFIG_EXT_TX
+  EXT_TX_TYPE ext_txfrm;
+#endif
+
   BLOCK_SIZE sb_type;
 #if CONFIG_MASKED_INTERINTER
   int use_masked_interinter;
@@ -357,6 +361,7 @@ static BLOCK_SIZE get_subsize(BLOCK_SIZE bsize, PARTITION_TYPE partition) {
 
 extern const TX_TYPE mode2txfm_map[MB_MODE_COUNT];
 
+#if !CONFIG_EXT_TX
 static INLINE TX_TYPE get_tx_type_4x4(PLANE_TYPE plane_type,
                                       const MACROBLOCKD *xd, int ib) {
   const MODE_INFO *const mi = xd->mi_8x8[0];
@@ -368,18 +373,85 @@ static INLINE TX_TYPE get_tx_type_4x4(PLANE_TYPE plane_type,
   return mode2txfm_map[mbmi->sb_type < BLOCK_8X8 ? mi->bmi[ib].as_mode
                                                  : mbmi->mode];
 }
+#else
+static INLINE TX_TYPE get_tx_type_4x4(PLANE_TYPE plane_type,
+                                      const MACROBLOCKD *xd, int ib) {
+  const MODE_INFO *const mi = xd->mi_8x8[0];
+  const MB_MODE_INFO *const mbmi = &mi->mbmi;
 
+  if (plane_type != PLANE_TYPE_Y || xd->lossless)
+    return DCT_DCT;
+
+  if (is_inter_block(mbmi)) {
+    if (mbmi->ext_txfrm == NORM)
+      return DCT_DCT;
+    else
+      return ADST_ADST;
+  }
+
+  return mode2txfm_map[mbmi->sb_type < BLOCK_8X8 ? mi->bmi[ib].as_mode
+                                                 : mbmi->mode];
+}
+#endif
+
+#if !CONFIG_EXT_TX
 static INLINE TX_TYPE get_tx_type_8x8(PLANE_TYPE plane_type,
                                       const MACROBLOCKD *xd) {
   return plane_type == PLANE_TYPE_Y ? mode2txfm_map[xd->mi_8x8[0]->mbmi.mode]
                                     : DCT_DCT;
 }
+#else
+static INLINE TX_TYPE get_tx_type_8x8(PLANE_TYPE plane_type,
+                                      const MACROBLOCKD *xd) {
+  const MODE_INFO *const mi = xd->mi_8x8[0];
+  const MB_MODE_INFO *const mbmi = &mi->mbmi;
+  if (!is_inter_block(mbmi) || plane_type != PLANE_TYPE_Y) {
+    return plane_type == PLANE_TYPE_Y ? mode2txfm_map[xd->mi_8x8[0]->mbmi.mode]
+                                    : DCT_DCT;
+  } else {
+    if (mbmi->ext_txfrm == NORM)
+      return DCT_DCT;
+    else
+      return ADST_ADST;
+  }
+}
+#endif
 
+#if !CONFIG_EXT_TX
 static INLINE TX_TYPE get_tx_type_16x16(PLANE_TYPE plane_type,
                                         const MACROBLOCKD *xd) {
   return plane_type == PLANE_TYPE_Y ? mode2txfm_map[xd->mi_8x8[0]->mbmi.mode]
                                     : DCT_DCT;
 }
+#else
+static INLINE TX_TYPE get_tx_type_16x16(PLANE_TYPE plane_type,
+                                        const MACROBLOCKD *xd) {
+  const MODE_INFO *const mi = xd->mi_8x8[0];
+  const MB_MODE_INFO *const mbmi = &mi->mbmi;
+  if (!is_inter_block(mbmi) || plane_type != PLANE_TYPE_Y) {
+    return plane_type == PLANE_TYPE_Y ? mode2txfm_map[xd->mi_8x8[0]->mbmi.mode]
+                                    : DCT_DCT;
+  } else {
+    if (mbmi->ext_txfrm == NORM)
+      return DCT_DCT;
+    else
+      return ADST_ADST;
+  }
+}
+static INLINE TX_TYPE get_tx_type_32x32(PLANE_TYPE plane_type,
+                                        const MACROBLOCKD *xd) {
+  const MODE_INFO *const mi = xd->mi_8x8[0];
+  const MB_MODE_INFO *const mbmi = &mi->mbmi;
+  if (!is_inter_block(mbmi) || plane_type != PLANE_TYPE_Y) {
+    return DCT_DCT;
+  } else {
+    if (mbmi->ext_txfrm == NORM)
+      return DCT_DCT;
+    else
+      return ADST_ADST;
+  }
+}
+#endif
 
 static void setup_block_dptrs(MACROBLOCKD *xd, int ss_x, int ss_y) {
   int i;

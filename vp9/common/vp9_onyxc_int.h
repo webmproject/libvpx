@@ -70,6 +70,9 @@ typedef struct frame_contexts {
   vp9_prob masked_interintra_prob[BLOCK_SIZES];
 #endif
 #endif
+#if CONFIG_EXT_TX
+  vp9_prob ext_tx_prob;
+#endif
 } FRAME_CONTEXT;
 
 typedef struct {
@@ -100,6 +103,9 @@ typedef struct {
 #if CONFIG_MASKED_INTERINTRA
   unsigned int masked_interintra[BLOCK_SIZES][2];
 #endif
+#endif
+#if CONFIG_EXT_TX
+  unsigned int ext_tx[2];
 #endif
 } FRAME_COUNTS;
 

@@ -1378,6 +1378,54 @@ void vp9_idct32x32_add(const int16_t *input, uint8_t *dest, int stride,
     vp9_idct32x32_1024_add(input, dest, stride);
 }
 
+#if CONFIG_EXT_TX
+static double tmp[32*32];
+static double tmp2[32*32];
+extern double dstmtx32[32*32];
+
+void vp9_idst_add(const int16_t *input, uint8_t *dest, int stride,
+                  int eob, int size) {
+  int i, j, k;
+
+  double *basis;
+  int factor = (size == 32) ? 4 : 8;
+
+  switch (size) {
+    case 32:
+      basis = dstmtx32;
+      break;
+    default:
+      assert(0);
+      break;
+  }
+
+  for (i = 0; i < size; i++) {
+    for (j = 0; j < size; j++) {
+      tmp[i*size+j] = 0;
+      for (k = 0; k < size; k++) {
+        tmp[i*size+j] += input[i*size+k] * basis[j*size+k];  // row
+      }
+    }
+  }
+
+  for (i = 0; i < size; i++) {
+    for (j = 0; j < size; j++) {
+      tmp2[i*size+j] = 0;
+      for (k = 0; k < size; k++) {
+        tmp2[i*size+j] += basis[i*size+k] * tmp[k*size+j];  // col
+      }
+      if (tmp2[i*size+j] >= 0)
+        dest[i*stride+j] = clip_pixel((int)dest[i*stride+j] +
+                                      (int)(tmp2[i*size+j] / factor + 0.5));
+      else
+        dest[i*stride+j] = clip_pixel((int)dest[i*stride+j] +
+                                      (int)(tmp2[i*size+j] / factor - 0.5));
+    }
+  }
+}
+
+#endif
+
 // iht
 void vp9_iht4x4_add(TX_TYPE tx_type, const int16_t *input, uint8_t *dest,
                     int stride, int eob) {
