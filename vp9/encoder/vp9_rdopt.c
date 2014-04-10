@@ -3147,7 +3147,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t best_filter_rd[SWITCHABLE_FILTER_CONTEXTS];
   int64_t best_filter_diff[SWITCHABLE_FILTER_CONTEXTS];
   MB_MODE_INFO best_mbmode = { 0 };
-  int mode_index, best_mode_index = 0;
+  int mode_index, best_mode_index = -1;
   unsigned int ref_costs_single[MAX_REF_FRAMES], ref_costs_comp[MAX_REF_FRAMES];
   vp9_prob comp_mode_p;
   int64_t best_intra_rd = INT64_MAX;
@@ -3304,7 +3304,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
     // Look at the reference frame of the best mode so far and set the
     // skip mask to look at a subset of the remaining modes.
-    if (mode_index == mode_skip_start && best_rd < INT64_MAX) {
+    if (mode_index == mode_skip_start && best_mode_index >= 0) {
       switch (vp9_mode_order[best_mode_index].ref_frame[0]) {
         case INTRA_FRAME:
           break;
@@ -3341,6 +3341,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     comp_pred = second_ref_frame > INTRA_FRAME;
     if (comp_pred) {
       if ((mode_search_skip_flags & FLAG_SKIP_COMP_BESTINTRA) &&
+          best_mode_index >=0 &&
           vp9_mode_order[best_mode_index].ref_frame[0] == INTRA_FRAME)
         continue;
       if ((mode_search_skip_flags & FLAG_SKIP_COMP_REFMISMATCH) &&
@@ -3368,7 +3369,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         // one of the neighboring directional modes
         if ((mode_search_skip_flags & FLAG_SKIP_INTRA_BESTINTER) &&
             (this_mode >= D45_PRED && this_mode <= TM_PRED)) {
-          if (vp9_mode_order[best_mode_index].ref_frame[0] > INTRA_FRAME)
+          if (best_mode_index >= 0 &&
+              vp9_mode_order[best_mode_index].ref_frame[0] > INTRA_FRAME)
             continue;
         }
         if (mode_search_skip_flags & FLAG_SKIP_INTRA_DIRMISMATCH) {
@@ -3656,7 +3658,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       break;
   }
 
-  if (best_rd >= best_rd_so_far)
+  if (best_mode_index < 0 || best_rd >= best_rd_so_far)
     return INT64_MAX;
 
   // If we used an estimate for the uv intra rd in the loop above...
