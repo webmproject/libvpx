@@ -1483,8 +1483,8 @@ static void set_source_var_based_partition(VP9_COMP *cpi,
     const int pre_offset = (mi_row * MI_SIZE) * pre_stride +
                            (mi_col * MI_SIZE);
     const uint8_t *pre_src = cpi->Last_Source->y_buffer + pre_offset;
-    const int thr_32x32 = cpi->sf.source_var_thresh;
-    const int thr_64x64 = thr_32x32 << 1;
+    const unsigned int thr_32x32 = cpi->sf.source_var_thresh;
+    const unsigned int thr_64x64 = thr_32x32 << 1;
     int i, j;
     int index;
     diff d32[4];

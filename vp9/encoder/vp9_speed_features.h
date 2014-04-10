@@ -344,7 +344,7 @@ typedef struct {
   int search_type_check_frequency;
 
   // The threshold used in SOURCE_VAR_BASED_PARTITION search type.
-  int source_var_thresh;
+  unsigned int source_var_thresh;
 } SPEED_FEATURES;
 
 struct VP9_COMP;
