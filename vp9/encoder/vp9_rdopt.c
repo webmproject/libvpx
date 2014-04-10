@@ -2268,7 +2268,7 @@ static void store_coding_context(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
                          int_mv *ref_mv,
                          int_mv *second_ref_mv,
                          int64_t comp_pred_diff[REFERENCE_MODES],
-                         int64_t tx_size_diff[TX_MODES],
+                         const int64_t tx_size_diff[TX_MODES],
                          int64_t best_filter_diff[SWITCHABLE_FILTER_CONTEXTS]) {
   MACROBLOCKD *const xd = &x->e_mbd;
 
@@ -3771,8 +3771,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
                                     VP9_ALT_FLAG };
   int64_t best_rd = best_rd_so_far;
   int64_t best_yrd = best_rd_so_far;  // FIXME(rbultje) more precise
-  int64_t best_tx_rd[TX_MODES];
-  int64_t best_tx_diff[TX_MODES];
+  static const int64_t best_tx_diff[TX_MODES] = { 0 };
   int64_t best_pred_diff[REFERENCE_MODES];
   int64_t best_pred_rd[REFERENCE_MODES];
   int64_t best_filter_rd[SWITCHABLE_FILTER_CONTEXTS];
@@ -3784,10 +3783,10 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t best_inter_rd = INT64_MAX;
   MV_REFERENCE_FRAME best_inter_ref_frame = LAST_FRAME;
   INTERP_FILTER tmp_best_filter = SWITCHABLE;
-  int rate_uv_intra[TX_SIZES], rate_uv_tokenonly[TX_SIZES];
-  int64_t dist_uv[TX_SIZES];
-  int skip_uv[TX_SIZES];
-  MB_PREDICTION_MODE mode_uv[TX_SIZES] = { 0 };
+  int rate_uv_intra, rate_uv_tokenonly;
+  int64_t dist_uv;
+  int skip_uv;
+  MB_PREDICTION_MODE mode_uv = DC_PRED;
   int intra_cost_penalty = 20 * vp9_dc_quant(cm->base_qindex, cm->y_dc_delta_q);
   int_mv seg_mvs[4][MAX_REF_FRAMES];
   b_mode_info best_bmodes[4];
@@ -3809,12 +3808,9 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 
   for (i = 0; i < REFERENCE_MODES; ++i)
     best_pred_rd[i] = INT64_MAX;
-  for (i = 0; i < TX_MODES; i++)
-    best_tx_rd[i] = INT64_MAX;
   for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; i++)
     best_filter_rd[i] = INT64_MAX;
-  for (i = 0; i < TX_SIZES; i++)
-    rate_uv_intra[i] = INT_MAX;
+  rate_uv_intra = INT_MAX;
 
   *returnrate = INT_MAX;
 
@@ -3848,7 +3844,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     int rate2 = 0, rate_y = 0, rate_uv = 0;
     int64_t distortion2 = 0, distortion_y = 0, distortion_uv = 0;
     int skippable = 0;
-    int64_t tx_cache[TX_MODES];
     int i;
     int this_skip2 = 0;
     int64_t total_sse = INT_MAX;
@@ -3971,9 +3966,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
         xd->plane[i].pre[1] = yv12_mb[second_ref_frame][i];
     }
 
-    for (i = 0; i < TX_MODES; ++i)
-      tx_cache[i] = INT64_MAX;
-
 #ifdef MODE_TEST_HIT_STATS
     // TEST/DEBUG CODE
     // Keep a rcord of the number of test hits at each size
@@ -3989,21 +3981,18 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       rate2 += intra_cost_penalty;
       distortion2 += distortion_y;
 
-      if (rate_uv_intra[TX_4X4] == INT_MAX) {
+      if (rate_uv_intra == INT_MAX) {
         choose_intra_uv_mode(cpi, ctx, bsize, TX_4X4,
-                             &rate_uv_intra[TX_4X4],
-                             &rate_uv_tokenonly[TX_4X4],
-                             &dist_uv[TX_4X4], &skip_uv[TX_4X4],
-                             &mode_uv[TX_4X4]);
+                             &rate_uv_intra,
+                             &rate_uv_tokenonly,
+                             &dist_uv, &skip_uv,
+                             &mode_uv);
       }
-      rate2 += rate_uv_intra[TX_4X4];
-      rate_uv = rate_uv_tokenonly[TX_4X4];
-      distortion2 += dist_uv[TX_4X4];
-      distortion_uv = dist_uv[TX_4X4];
-      mbmi->uv_mode = mode_uv[TX_4X4];
-      tx_cache[ONLY_4X4] = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
-      for (i = 0; i < TX_MODES; ++i)
-        tx_cache[i] = tx_cache[ONLY_4X4];
+      rate2 += rate_uv_intra;
+      rate_uv = rate_uv_tokenonly;
+      distortion2 += dist_uv;
+      distortion_uv = dist_uv;
+      mbmi->uv_mode = mode_uv;
     } else {
       int rate;
       int64_t distortion;
@@ -4166,10 +4155,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
         distortion2 += distortion_uv;
         skippable = skippable && uv_skippable;
         total_sse += uv_sse;
-
-        tx_cache[ONLY_4X4] = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
-        for (i = 0; i < TX_MODES; ++i)
-          tx_cache[i] = tx_cache[ONLY_4X4];
       }
     }
 
@@ -4327,23 +4312,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       }
     }
 
-    /* keep record of best txfm size */
-    tx_cache[ALLOW_8X8] = tx_cache[ONLY_4X4];
-    tx_cache[ALLOW_16X16] = tx_cache[ALLOW_8X8];
-    tx_cache[ALLOW_32X32] = tx_cache[ALLOW_16X16];
-    if (!mode_excluded && this_rd != INT64_MAX) {
-      for (i = 0; i < TX_MODES && tx_cache[i] < INT64_MAX; i++) {
-        int64_t adj_rd = INT64_MAX;
-        if (ref_frame > INTRA_FRAME)
-          adj_rd = this_rd + tx_cache[i] - tx_cache[cm->tx_mode];
-        else
-          adj_rd = this_rd;
-
-        if (adj_rd < best_tx_rd[i])
-          best_tx_rd[i] = adj_rd;
-      }
-    }
-
     if (early_term)
       break;
 
@@ -4358,14 +4326,12 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   if (cpi->sf.use_uv_intra_rd_estimate) {
     // Do Intra UV best rd mode selection if best mode choice above was intra.
     if (vp9_ref_order[best_mode_index].ref_frame[0] == INTRA_FRAME) {
-      TX_SIZE uv_tx_size;
       *mbmi = best_mbmode;
-      uv_tx_size = get_uv_tx_size(mbmi);
-      rd_pick_intra_sbuv_mode(cpi, x, ctx, &rate_uv_intra[uv_tx_size],
-                              &rate_uv_tokenonly[uv_tx_size],
-                              &dist_uv[uv_tx_size],
-                              &skip_uv[uv_tx_size],
-                              BLOCK_8X8, uv_tx_size);
+      rd_pick_intra_sbuv_mode(cpi, x, ctx, &rate_uv_intra,
+                              &rate_uv_tokenonly,
+                              &dist_uv,
+                              &skip_uv,
+                              BLOCK_8X8, TX_4X4);
     }
   }
 
@@ -4427,15 +4393,8 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     }
     if (cm->interp_filter == SWITCHABLE)
       assert(best_filter_diff[SWITCHABLE_FILTERS] == 0);
-    for (i = 0; i < TX_MODES; i++) {
-      if (best_tx_rd[i] == INT64_MAX)
-        best_tx_diff[i] = 0;
-      else
-        best_tx_diff[i] = best_rd - best_tx_rd[i];
-    }
   } else {
     vp9_zero(best_filter_diff);
-    vp9_zero(best_tx_diff);
   }
 
   set_ref_ptrs(cm, xd, mbmi->ref_frame[0], mbmi->ref_frame[1]);
