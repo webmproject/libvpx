@@ -16,6 +16,24 @@
       "revId": "409f8da265275e81221aa568dd07f8409af01edd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//uhQ\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 910,
+      "author": {
+        "id": 1116023
+      },
+      "writtenOn": "2014-04-10T22:18:43Z",
+      "side": 1,
+      "message": "This definition is correct, M_LOG2_E has the same meaning as M_LN2 and that\u0027s the way it\u0027s defined in math.h: https://code.google.com/p/chromium/codesearch#chromium/src/out/Debug/gen/sdk/toolchain/linux_pnacl/usr/include/math.h\u0026q\u003dM_LOG2_E\u0026sq\u003dpackage:chromium\u0026type\u003dcs\u0026l\u003d569",
+      "parentUuid": "AAAAdn//uiE\u003d",
+      "revId": "409f8da265275e81221aa568dd07f8409af01edd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
