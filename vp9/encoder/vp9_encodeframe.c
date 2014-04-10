@@ -3284,9 +3284,9 @@ static void encode_frame_internal(VP9_COMP *cpi) {
     }
     vp9_zero(x->zcoeff_blk);
 
-    if (cpi->sf.partition_search_type == SOURCE_VAR_BASED_PARTITION &&
+    if (sf->partition_search_type == SOURCE_VAR_BASED_PARTITION &&
         cm->current_video_frame > 0) {
-      int check_freq = cpi->sf.search_type_check_frequency;
+      int check_freq = sf->search_type_check_frequency;
 
       if ((cm->current_video_frame - 1) % check_freq == 0) {
         cpi->use_large_partition_rate = 0;
@@ -3303,7 +3303,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
 
       if ((cm->current_video_frame - 1) % check_freq >= 1) {
         if (cpi->use_large_partition_rate < 15)
-          cpi->sf.partition_search_type = FIXED_PARTITION;
+          sf->partition_search_type = FIXED_PARTITION;
       }
     }
   }
