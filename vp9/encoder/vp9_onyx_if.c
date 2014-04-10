@@ -1386,8 +1386,6 @@ VP9_COMP *vp9_create_compressor(VP9_CONFIG *oxcf) {
 
   cm->error.setjmp = 0;
 
-  vp9_zero(cpi->common.counts.uv_mode);
-
 #ifdef MODE_TEST_HIT_STATS
   vp9_zero(cpi->mode_test_hits);
 #endif
