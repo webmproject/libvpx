@@ -376,7 +376,6 @@ typedef struct VP9_COMP {
   int active_arnr_frames;           // <= cpi->oxcf.arnr_max_frames
   int active_arnr_strength;         // <= cpi->oxcf.arnr_max_strength
 
-  double output_framerate;
   int64_t last_time_stamp_seen;
   int64_t last_end_time_stamp_seen;
   int64_t first_time_stamp_ever;
