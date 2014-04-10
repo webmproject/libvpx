@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//uis\u003d",
+        "filename": "examples/vpx_temporal_scalable_patterns.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 529,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-04-10T21:24:38Z",
+      "side": 1,
+      "message": "separate patch? So we can test the bahavior only of the frame rate changes independent of the Keyframing.",
+      "revId": "a39b201344b2a7aebb0bde8deae3914504f48478",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//uiw\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1270,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-04-10T21:24:38Z",
+      "side": 1,
+      "message": "Would it be better here \u0026 elsewhere to use the layer-based data structure even for single layer encodes (where we\u0027d always reference layer 0)?\ni.e. consider the single layer to be a special case of the N-layer case.\nIt might get rid of a lot of tests for \"svc-\u003enumber_temporal_layers \u003e 1\"?",
+      "revId": "a39b201344b2a7aebb0bde8deae3914504f48478",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
