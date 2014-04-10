@@ -2647,14 +2647,14 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   output_frame_level_debug_stats(cpi);
 #endif
   if (cpi->refresh_golden_frame == 1)
-    cm->frame_flags |= FRAMEFLAGS_GOLDEN;
+    cpi->frame_flags |= FRAMEFLAGS_GOLDEN;
   else
-    cm->frame_flags &= ~FRAMEFLAGS_GOLDEN;
+    cpi->frame_flags &= ~FRAMEFLAGS_GOLDEN;
 
   if (cpi->refresh_alt_ref_frame == 1)
-    cm->frame_flags |= FRAMEFLAGS_ALTREF;
+    cpi->frame_flags |= FRAMEFLAGS_ALTREF;
   else
-    cm->frame_flags &= ~FRAMEFLAGS_ALTREF;
+    cpi->frame_flags &= ~FRAMEFLAGS_ALTREF;
 
   get_ref_frame_flags(cpi);
 
@@ -2662,7 +2662,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
   if (cm->frame_type == KEY_FRAME) {
     // Tell the caller that the frame was coded as a key frame
-    *frame_flags = cm->frame_flags | FRAMEFLAGS_KEY;
+    *frame_flags = cpi->frame_flags | FRAMEFLAGS_KEY;
 
 #if CONFIG_MULTIPLE_ARF
     // Reset the sequence number.
@@ -2673,7 +2673,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     }
 #endif
   } else {
-    *frame_flags = cm->frame_flags&~FRAMEFLAGS_KEY;
+    *frame_flags = cpi->frame_flags & ~FRAMEFLAGS_KEY;
 
 #if CONFIG_MULTIPLE_ARF
     /* Increment position in the coded frame sequence. */
@@ -3042,7 +3042,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   }
 #endif
 
-  cm->frame_flags = *frame_flags;
+  cpi->frame_flags = *frame_flags;
 
   // Reset the frame pointers to the current frame size
   vp9_realloc_frame_buffer(get_frame_new_buffer(cm),

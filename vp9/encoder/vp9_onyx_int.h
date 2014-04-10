@@ -498,6 +498,8 @@ typedef struct VP9_COMP {
 
   int use_large_partition_rate;
 
+  int frame_flags;
+
 #if CONFIG_MULTIPLE_ARF
   // ARF tracking variables.
   int multi_arf_enabled;

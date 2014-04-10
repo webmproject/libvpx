@@ -1196,7 +1196,7 @@ void vp9_rc_get_one_pass_vbr_params(VP9_COMP *cpi) {
   int target;
   if (!cpi->refresh_alt_ref_frame &&
       (cm->current_video_frame == 0 ||
-       (cm->frame_flags & FRAMEFLAGS_KEY) ||
+       (cpi->frame_flags & FRAMEFLAGS_KEY) ||
        rc->frames_to_key == 0 ||
        (cpi->oxcf.auto_key && test_for_kf_one_pass(cpi)))) {
     cm->frame_type = KEY_FRAME;
@@ -1280,7 +1280,7 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
   RATE_CONTROL *const rc = &cpi->rc;
   int target = rc->av_per_frame_bandwidth;
   if ((cm->current_video_frame == 0) ||
-      (cm->frame_flags & FRAMEFLAGS_KEY) ||
+      (cpi->frame_flags & FRAMEFLAGS_KEY) ||
       (cpi->oxcf.auto_key && (rc->frames_since_key %
                               cpi->key_frame_frequency == 0))) {
     cm->frame_type = KEY_FRAME;
@@ -1304,7 +1304,7 @@ void vp9_rc_get_one_pass_cbr_params(VP9_COMP *cpi) {
   RATE_CONTROL *const rc = &cpi->rc;
   int target;
   if ((cm->current_video_frame == 0 ||
-      (cm->frame_flags & FRAMEFLAGS_KEY) ||
+      (cpi->frame_flags & FRAMEFLAGS_KEY) ||
       rc->frames_to_key == 0 ||
       (cpi->oxcf.auto_key && test_for_kf_one_pass(cpi)))) {
     cm->frame_type = KEY_FRAME;
