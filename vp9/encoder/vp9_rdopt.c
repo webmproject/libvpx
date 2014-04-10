@@ -81,7 +81,7 @@ struct rdcost_block_args {
   const scan_order *so;
 };
 
-const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
+static const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
   {NEARESTMV, {LAST_FRAME,   NONE}},
   {NEARESTMV, {ALTREF_FRAME, NONE}},
   {NEARESTMV, {GOLDEN_FRAME, NONE}},
@@ -121,7 +121,7 @@ const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
   {D45_PRED,  {INTRA_FRAME,  NONE}},
 };
 
-const REF_DEFINITION vp9_ref_order[MAX_REFS] = {
+static const REF_DEFINITION vp9_ref_order[MAX_REFS] = {
   {{LAST_FRAME,   NONE}},
   {{GOLDEN_FRAME, NONE}},
   {{ALTREF_FRAME, NONE}},
@@ -134,8 +134,9 @@ const REF_DEFINITION vp9_ref_order[MAX_REFS] = {
 // certain modes are assumed to be based on 8x8 blocks.
 // This table is used to correct for blocks size.
 // The factors here are << 2 (2 = x0.5, 32 = x8 etc).
-static int rd_thresh_block_size_factor[BLOCK_SIZES] =
-  {2, 3, 3, 4, 6, 6, 8, 12, 12, 16, 24, 24, 32};
+static const uint8_t rd_thresh_block_size_factor[BLOCK_SIZES] = {
+  2, 3, 3, 4, 6, 6, 8, 12, 12, 16, 24, 24, 32
+};
 
 static int raster_block_offset(BLOCK_SIZE plane_bsize,
                                int raster_block, int stride) {
@@ -192,7 +193,7 @@ static void fill_token_costs(vp9_coeff_cost *c,
           }
 }
 
-static const int rd_iifactor[32] = {
+static const uint8_t rd_iifactor[32] = {
   4, 4, 3, 2, 1, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0,
