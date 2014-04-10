@@ -1012,10 +1012,14 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
 
   x->source_variance = get_sby_perpixel_variance(cpi, &x->plane[0].src, bsize);
 
+  // Save rdmult before it might be changed, so it can be restored later.
+  orig_rdmult = x->rdmult;
+  if (cpi->oxcf.tuning == VP8_TUNE_SSIM)
+    activity_masking(cpi, x);
+
   if (aq_mode == VARIANCE_AQ) {
     const int energy = bsize <= BLOCK_16X16 ? x->mb_energy
                                             : vp9_block_energy(cpi, x, bsize);
-
     if (cm->frame_type == KEY_FRAME ||
         cpi->refresh_alt_ref_frame ||
         (cpi->refresh_golden_frame && !cpi->rc.is_src_frame_alt_ref)) {
@@ -1028,14 +1032,6 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
 
     rdmult_ratio = vp9_vaq_rdmult_ratio(energy);
     vp9_init_plane_quantizers(cpi, x);
-  }
-
-  // Save rdmult before it might be changed, so it can be restored later.
-  orig_rdmult = x->rdmult;
-  if (cpi->oxcf.tuning == VP8_TUNE_SSIM)
-    activity_masking(cpi, x);
-
-  if (aq_mode == VARIANCE_AQ) {
     vp9_clear_system_state();
     x->rdmult = (int)round(x->rdmult * rdmult_ratio);
   } else if (aq_mode == COMPLEXITY_AQ) {
@@ -1067,14 +1063,11 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
                                     totaldist, bsize, ctx, best_rd);
   }
 
-  if (aq_mode == VARIANCE_AQ) {
-    x->rdmult = orig_rdmult;
-    if (*totalrate != INT_MAX) {
-      vp9_clear_system_state();
-      *totalrate = (int)round(*totalrate * rdmult_ratio);
-    }
-  } else if (aq_mode == COMPLEXITY_AQ || aq_mode == CYCLIC_REFRESH_AQ) {
-    x->rdmult = orig_rdmult;
+  x->rdmult = orig_rdmult;
+
+  if (aq_mode == VARIANCE_AQ && *totalrate != INT_MAX) {
+    vp9_clear_system_state();
+    *totalrate = (int)round(*totalrate * rdmult_ratio);
   }
 }
 
