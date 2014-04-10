@@ -614,8 +614,6 @@ void vp9_scale_references(VP9_COMP *cpi);
 
 void vp9_update_reference_frames(VP9_COMP *cpi);
 
-extern const int q_trans[];
-
 int64_t vp9_rescale(int64_t val, int64_t num, int denom);
 
 static INLINE void set_ref_ptrs(VP9_COMMON *cm, MACROBLOCKD *xd,

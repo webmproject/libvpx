@@ -284,3 +284,30 @@ void vp9_set_quantizer(VP9_COMMON *cm, int q) {
   cm->uv_dc_delta_q = 0;
   cm->uv_ac_delta_q = 0;
 }
+
+// Table that converts 0-63 Q-range values passed in outside to the Qindex
+// range used internally.
+static const int quantizer_to_qindex[] = {
+  0,    4,   8,  12,  16,  20,  24,  28,
+  32,   36,  40,  44,  48,  52,  56,  60,
+  64,   68,  72,  76,  80,  84,  88,  92,
+  96,  100, 104, 108, 112, 116, 120, 124,
+  128, 132, 136, 140, 144, 148, 152, 156,
+  160, 164, 168, 172, 176, 180, 184, 188,
+  192, 196, 200, 204, 208, 212, 216, 220,
+  224, 228, 232, 236, 240, 244, 249, 255,
+};
+
+int vp9_quantizer_to_qindex(int quantizer) {
+  return quantizer_to_qindex[quantizer];
+}
+
+int vp9_qindex_to_quantizer(int qindex) {
+  int quantizer;
+
+  for (quantizer = 0; quantizer < 64; ++quantizer)
+    if (quantizer_to_qindex[quantizer] >= qindex)
+      return quantizer;
+
+  return 63;
+}
