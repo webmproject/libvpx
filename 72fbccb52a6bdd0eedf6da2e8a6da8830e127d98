@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//uj0\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1000,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-10T18:45:44Z",
+      "side": 1,
+      "message": "Maybe, zero should be replaced with cpi-\u003erc.min_frame_bandwidth?",
+      "revId": "72fbccb52a6bdd0eedf6da2e8a6da8830e127d98",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
