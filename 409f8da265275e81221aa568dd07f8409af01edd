@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//uiE\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 910,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-10T21:44:48Z",
+      "side": 1,
+      "message": "I\u0027ll bet this is wrong, since it\u0027s ln 2 (\u003d\u003d M_LN2)\nfrom math.h this is 1.44... i.e., log2 e as expected",
+      "revId": "409f8da265275e81221aa568dd07f8409af01edd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
