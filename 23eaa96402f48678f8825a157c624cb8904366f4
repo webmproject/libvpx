@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//uk4\u003d",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-04-10T17:44:45Z",
+      "side": 1,
+      "message": "Why does this need to be aligned?",
+      "revId": "23eaa96402f48678f8825a157c624cb8904366f4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//uk8\u003d",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-04-10T17:44:45Z",
+      "side": 1,
+      "message": "Was this not released before? Is it already released somewhere else?",
+      "revId": "23eaa96402f48678f8825a157c624cb8904366f4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ulE\u003d",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 374,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-04-10T17:44:45Z",
+      "side": 1,
+      "message": "I think prevailing style prefers \u0026\u0026 on the second line",
+      "revId": "23eaa96402f48678f8825a157c624cb8904366f4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ulA\u003d",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-04-10T17:44:45Z",
+      "side": 1,
+      "message": "Same for |",
+      "revId": "23eaa96402f48678f8825a157c624cb8904366f4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
