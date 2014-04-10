@@ -81,8 +81,6 @@ FILE *kf_list;
 FILE *keyfile;
 #endif
 
-void vp9_init_quantizer(VP9_COMP *cpi);
-
 static INLINE void Scale2Ratio(VPX_SCALING mode, int *hr, int *hs) {
   switch (mode) {
     case NORMAL:
@@ -365,27 +363,6 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
       seg->update_data = 0;
     }
   }
-}
-
-// DEBUG: Print out the segment id of each MB in the current frame.
-static void print_seg_map(VP9_COMP *cpi) {
-  VP9_COMMON *cm = &cpi->common;
-  int row, col;
-  int map_index = 0;
-  FILE *statsfile = fopen("segmap.stt", "a");
-
-  fprintf(statsfile, "%10d\n", cm->current_video_frame);
-
-  for (row = 0; row < cpi->common.mi_rows; row++) {
-    for (col = 0; col < cpi->common.mi_cols; col++) {
-      fprintf(statsfile, "%10d", cpi->segmentation_map[map_index]);
-      map_index++;
-    }
-    fprintf(statsfile, "\n");
-  }
-  fprintf(statsfile, "\n");
-
-  fclose(statsfile);
 }
 
 static void update_reference_segmentation_map(VP9_COMP *cpi) {
