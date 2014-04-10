@@ -103,34 +103,31 @@ static const uint8_t VP9_VAR_OFFS[64] = {
 };
 
 static unsigned int get_sby_perpixel_variance(VP9_COMP *cpi,
-                                              MACROBLOCK *x,
+                                              const struct buf_2d *ref,
                                               BLOCK_SIZE bs) {
-  unsigned int var, sse;
-  var = cpi->fn_ptr[bs].vf(x->plane[0].src.buf, x->plane[0].src.stride,
-                           VP9_VAR_OFFS, 0, &sse);
+  unsigned int sse;
+  const unsigned int var = cpi->fn_ptr[bs].vf(ref->buf, ref->stride,
+                                              VP9_VAR_OFFS, 0, &sse);
   return ROUND_POWER_OF_TWO(var, num_pels_log2_lookup[bs]);
 }
 
 static unsigned int get_sby_perpixel_diff_variance(VP9_COMP *cpi,
-                                                   MACROBLOCK *x,
-                                                   int mi_row,
-                                                   int mi_col,
+                                                   const struct buf_2d *ref,
+                                                   int mi_row, int mi_col,
                                                    BLOCK_SIZE bs) {
-  const YV12_BUFFER_CONFIG *yv12 = get_ref_frame_buffer(cpi, LAST_FRAME);
-  int offset = (mi_row * MI_SIZE) * yv12->y_stride + (mi_col * MI_SIZE);
-  unsigned int var, sse;
-  var = cpi->fn_ptr[bs].vf(x->plane[0].src.buf,
-                           x->plane[0].src.stride,
-                           yv12->y_buffer + offset,
-                           yv12->y_stride,
-                           &sse);
+  const YV12_BUFFER_CONFIG *last = get_ref_frame_buffer(cpi, LAST_FRAME);
+  const uint8_t* last_y = &last->y_buffer[mi_row * MI_SIZE * last->y_stride +
+                                              mi_col * MI_SIZE];
+  unsigned int sse;
+  const unsigned int var = cpi->fn_ptr[bs].vf(ref->buf, ref->stride,
+                                              last_y, last->y_stride, &sse);
   return ROUND_POWER_OF_TWO(var, num_pels_log2_lookup[bs]);
 }
 
 static BLOCK_SIZE get_rd_var_based_fixed_partition(VP9_COMP *cpi,
                                                    int mi_row,
                                                    int mi_col) {
-  unsigned int var = get_sby_perpixel_diff_variance(cpi, &cpi->mb,
+  unsigned int var = get_sby_perpixel_diff_variance(cpi, &cpi->mb.plane[0].src,
                                                     mi_row, mi_col,
                                                     BLOCK_64X64);
   if (var < 8)
@@ -146,7 +143,7 @@ static BLOCK_SIZE get_rd_var_based_fixed_partition(VP9_COMP *cpi,
 static BLOCK_SIZE get_nonrd_var_based_fixed_partition(VP9_COMP *cpi,
                                                       int mi_row,
                                                       int mi_col) {
-  unsigned int var = get_sby_perpixel_diff_variance(cpi, &cpi->mb,
+  unsigned int var = get_sby_perpixel_diff_variance(cpi, &cpi->mb.plane[0].src,
                                                     mi_row, mi_col,
                                                     BLOCK_64X64);
   if (var < 4)
@@ -1013,7 +1010,7 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
   // Set to zero to make sure we do not use the previous encoded frame stats
   mbmi->skip = 0;
 
-  x->source_variance = get_sby_perpixel_variance(cpi, x, bsize);
+  x->source_variance = get_sby_perpixel_variance(cpi, &x->plane[0].src, bsize);
 
   if (aq_mode == VARIANCE_AQ) {
     const int energy = bsize <= BLOCK_16X16 ? x->mb_energy
@@ -2234,7 +2231,7 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
   if (cpi->sf.disable_split_var_thresh && partition_none_allowed) {
     unsigned int source_variancey;
     vp9_setup_src_planes(x, cpi->Source, mi_row, mi_col);
-    source_variancey = get_sby_perpixel_variance(cpi, x, bsize);
+    source_variancey = get_sby_perpixel_variance(cpi, &x->plane[0].src, bsize);
     if (source_variancey < cpi->sf.disable_split_var_thresh) {
       do_split = 0;
       if (source_variancey < cpi->sf.disable_split_var_thresh / 2)
