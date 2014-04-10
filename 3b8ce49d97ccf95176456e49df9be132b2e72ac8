@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//uto\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3343,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-04-10T00:59:04Z",
+      "side": 1,
+      "message": "added a check in patch #2.",
+      "parentUuid": "AAAAdn//uuE\u003d",
+      "revId": "3b8ce49d97ccf95176456e49df9be132b2e72ac8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//uuA\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-04-10T00:39:38Z",
       "side": 1,
       "message": "same",
+      "revId": "3b8ce49d97ccf95176456e49df9be132b2e72ac8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//utk\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3370,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-04-10T00:59:04Z",
+      "side": 1,
+      "message": "added a check of valid best_mode_index as well.",
+      "parentUuid": "AAAAdn//uuA\u003d",
       "revId": "3b8ce49d97ccf95176456e49df9be132b2e72ac8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
