@@ -170,14 +170,13 @@ static INLINE int sp(int x) {
   return (x & 7) << 1;
 }
 
-static INLINE const uint8_t *pre(const uint8_t *buf, int stride, int r, int c,
-                                 int offset) {
-  return &buf[(r >> 3) * stride + (c >> 3) - offset];
+static INLINE const uint8_t *pre(const uint8_t *buf, int stride, int r, int c) {
+  return &buf[(r >> 3) * stride + (c >> 3)];
 }
 
 /* returns subpixel variance error function */
 #define DIST(r, c) \
-    vfp->svf(pre(y, y_stride, r, c, offset), y_stride, sp(c), sp(r), z, \
+    vfp->svf(pre(y, y_stride, r, c), y_stride, sp(c), sp(r), z, \
              src_stride, &sse)
 
 /* checks if (r, c) has better score than previous best */
@@ -270,7 +269,7 @@ int vp9_find_best_sub_pixel_tree(const MACROBLOCK *x,
                                  int *mvjcost, int *mvcost[2],
                                  int *distortion,
                                  unsigned int *sse1) {
-  const uint8_t *z = x->plane[0].src.buf;
+  const uint8_t *const z = x->plane[0].src.buf;
   const int src_stride = x->plane[0].src.stride;
   const MACROBLOCKD *xd = &x->e_mbd;
   unsigned int besterr = INT_MAX;
@@ -283,7 +282,7 @@ int vp9_find_best_sub_pixel_tree(const MACROBLOCK *x,
 
   const int y_stride = xd->plane[0].pre[0].stride;
   const int offset = bestmv->row * y_stride + bestmv->col;
-  const uint8_t *y = xd->plane[0].pre[0].buf + offset;
+  const uint8_t *const y = xd->plane[0].pre[0].buf;
 
   int rr = ref_mv->row;
   int rc = ref_mv->col;
@@ -303,7 +302,7 @@ int vp9_find_best_sub_pixel_tree(const MACROBLOCK *x,
   bestmv->col *= 8;
 
   // calculate central point error
-  besterr = vfp->vf(y, y_stride, z, src_stride, sse1);
+  besterr = vfp->vf(y + offset, y_stride, z, src_stride, sse1);
   *distortion = besterr;
   besterr += mv_err_cost(bestmv, ref_mv, mvjcost, mvcost, error_per_bit);
 
@@ -353,7 +352,7 @@ int vp9_find_best_sub_pixel_tree(const MACROBLOCK *x,
 #undef DIST
 /* returns subpixel variance error function */
 #define DIST(r, c) \
-    vfp->svaf(pre(y, y_stride, r, c, offset), y_stride, sp(c), sp(r), \
+    vfp->svaf(pre(y, y_stride, r, c), y_stride, sp(c), sp(r), \
               z, src_stride, &sse, second_pred)
 
 int vp9_find_best_sub_pixel_comp_tree(const MACROBLOCK *x,
@@ -368,7 +367,7 @@ int vp9_find_best_sub_pixel_comp_tree(const MACROBLOCK *x,
                                       unsigned int *sse1,
                                       const uint8_t *second_pred,
                                       int w, int h) {
-  const uint8_t *z = x->plane[0].src.buf;
+  const uint8_t *const z = x->plane[0].src.buf;
   const int src_stride = x->plane[0].src.stride;
   const MACROBLOCKD *xd = &x->e_mbd;
   unsigned int besterr = INT_MAX;
@@ -382,7 +381,7 @@ int vp9_find_best_sub_pixel_comp_tree(const MACROBLOCK *x,
   DECLARE_ALIGNED_ARRAY(16, uint8_t, comp_pred, 64 * 64);
   const int y_stride = xd->plane[0].pre[0].stride;
   const int offset = bestmv->row * y_stride + bestmv->col;
-  const uint8_t *y = xd->plane[0].pre[0].buf + offset;
+  const uint8_t *const y = xd->plane[0].pre[0].buf;
 
   int rr = ref_mv->row;
   int rc = ref_mv->col;
@@ -404,7 +403,7 @@ int vp9_find_best_sub_pixel_comp_tree(const MACROBLOCK *x,
   // calculate central point error
   // TODO(yunqingwang): central pointer error was already calculated in full-
   // pixel search, and can be passed in this function.
-  vp9_comp_avg_pred(comp_pred, second_pred, w, h, y, y_stride);
+  vp9_comp_avg_pred(comp_pred, second_pred, w, h, y + offset, y_stride);
   besterr = vfp->vf(comp_pred, w, z, src_stride, sse1);
   *distortion = besterr;
   besterr += mv_err_cost(bestmv, ref_mv, mvjcost, mvcost, error_per_bit);
