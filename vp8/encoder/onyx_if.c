@@ -1761,8 +1761,11 @@ void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
 
 }
 
+#ifndef M_LOG2_E
 #define M_LOG2_E 0.693147180559945309417
+#endif
 #define log2f(x) (log (x) / (float) M_LOG2_E)
+
 static void cal_mvsadcosts(int *mvsadcost[2])
 {
     int i = 1;
