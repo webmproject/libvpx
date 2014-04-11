@@ -298,8 +298,6 @@ typedef struct RD_OPT {
 
   int threshes[MAX_SEGMENTS][BLOCK_SIZES][MAX_MODES];
   int thresh_freq_fact[BLOCK_SIZES][MAX_MODES];
-  int thresh_sub8x8[MAX_SEGMENTS][BLOCK_SIZES][MAX_REFS];
-  int thresh_freq_sub8x8[BLOCK_SIZES][MAX_REFS];
 
   int64_t comp_pred_diff[REFERENCE_MODES];
   int64_t prediction_type_threshes[MAX_REF_FRAMES][REFERENCE_MODES];
