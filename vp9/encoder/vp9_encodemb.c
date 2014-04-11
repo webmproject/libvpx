@@ -105,9 +105,8 @@ static int trellis_get_coeff_context(const int16_t *scan,
   return pt;
 }
 
-static void optimize_b(int plane, int block, BLOCK_SIZE plane_bsize,
-                       TX_SIZE tx_size, MACROBLOCK *mb,
-                       ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l) {
+static int optimize_b(MACROBLOCK *mb, int plane, int block,
+                      BLOCK_SIZE plane_bsize, TX_SIZE tx_size, int ctx) {
   MACROBLOCKD *const xd = &mb->e_mbd;
   struct macroblock_plane *p = &mb->plane[plane];
   struct macroblockd_plane *pd = &xd->plane[plane];
@@ -172,12 +171,10 @@ static void optimize_b(int plane, int block, BLOCK_SIZE plane_bsize,
       if (next < default_eob) {
         band = band_translate[i + 1];
         pt = trellis_get_coeff_context(scan, nb, i, t0, token_cache);
-        rate0 +=
-          mb->token_costs[tx_size][type][ref][band][0][pt]
-                         [tokens[next][0].token];
-        rate1 +=
-          mb->token_costs[tx_size][type][ref][band][0][pt]
-                         [tokens[next][1].token];
+        rate0 += mb->token_costs[tx_size][type][ref][band][0][pt]
+                                [tokens[next][0].token];
+        rate1 += mb->token_costs[tx_size][type][ref][band][0][pt]
+                                [tokens[next][1].token];
       }
       UPDATE_RD_COST();
       /* And pick the best. */
@@ -274,15 +271,14 @@ static void optimize_b(int plane, int block, BLOCK_SIZE plane_bsize,
 
   /* Now pick the best path through the whole trellis. */
   band = band_translate[i + 1];
-  pt = combine_entropy_contexts(*a, *l);
   rate0 = tokens[next][0].rate;
   rate1 = tokens[next][1].rate;
   error0 = tokens[next][0].error;
   error1 = tokens[next][1].error;
   t0 = tokens[next][0].token;
   t1 = tokens[next][1].token;
-  rate0 += mb->token_costs[tx_size][type][ref][band][0][pt][t0];
-  rate1 += mb->token_costs[tx_size][type][ref][band][0][pt][t1];
+  rate0 += mb->token_costs[tx_size][type][ref][band][0][ctx][t0];
+  rate1 += mb->token_costs[tx_size][type][ref][band][0][ctx][t1];
   UPDATE_RD_COST();
   best = rd_cost1 < rd_cost0;
   final_eob = i0 - 1;
@@ -303,7 +299,7 @@ static void optimize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   final_eob++;
 
   mb->plane[plane].eobs[block] = final_eob;
-  *a = *l = (final_eob > 0);
+  return final_eob;
 }
 
 static INLINE void fdct32x32(int rd_transform,
@@ -393,7 +389,8 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
     vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
 
   if (x->optimize && (!x->skip_recode || !x->skip_optimize)) {
-    optimize_b(plane, block, plane_bsize, tx_size, x, a, l);
+    const int ctx = combine_entropy_contexts(*a, *l);
+    *a = *l = optimize_b(x, plane, block, plane_bsize, tx_size, ctx) > 0;
   } else {
     *a = *l = p->eobs[block] > 0;
   }
