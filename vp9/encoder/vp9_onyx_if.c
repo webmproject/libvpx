@@ -1788,7 +1788,9 @@ static void scale_and_extend_frame_nonnormative(YV12_BUFFER_CONFIG *src_fb,
                        dsts[i], out_h_uv, out_w_uv, dst_strides[i]);
     }
   }
-  vp8_yv12_extend_frame_borders(dst_fb);
+  // TODO(hkuang): Call C version explicitly
+  // as neon version only expand border size 32.
+  vp8_yv12_extend_frame_borders_c(dst_fb);
 }
 
 static void scale_and_extend_frame(YV12_BUFFER_CONFIG *src_fb,
@@ -1829,7 +1831,9 @@ static void scale_and_extend_frame(YV12_BUFFER_CONFIG *src_fb,
     }
   }
 
-  vp8_yv12_extend_frame_borders(dst_fb);
+  // TODO(hkuang): Call C version explicitly
+  // as neon version only expand border size 32.
+  vp8_yv12_extend_frame_borders_c(dst_fb);
 }
 
 static int find_fp_qindex() {
