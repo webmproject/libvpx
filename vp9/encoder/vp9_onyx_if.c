@@ -61,11 +61,6 @@ void vp9_coef_tree_initialize();
                                          // now so that HIGH_PRECISION is always
                                          // chosen.
 
-// Max rate target for 1080P and below encodes under normal circumstances
-// (1920 * 1080 / (16 * 16)) * MAX_MB_RATE bits per MB
-#define MAX_MB_RATE 250
-#define MAXRATE_1080P 2025000
-
 // #define OUTPUT_YUV_REC
 
 #ifdef OUTPUT_YUV_SRC
@@ -629,49 +624,8 @@ static void update_frame_size(VP9_COMP *cpi) {
 }
 
 void vp9_new_framerate(VP9_COMP *cpi, double framerate) {
-  VP9_COMMON *const cm = &cpi->common;
-  RATE_CONTROL *const rc = &cpi->rc;
-  VP9_CONFIG *const oxcf = &cpi->oxcf;
-  int vbr_max_bits;
-
-  oxcf->framerate = framerate < 0.1 ? 30 : framerate;
-  rc->av_per_frame_bandwidth = (int)(oxcf->target_bandwidth /
-                                   oxcf->framerate);
-  rc->min_frame_bandwidth = (int)(rc->av_per_frame_bandwidth *
-                                  oxcf->two_pass_vbrmin_section / 100);
-
-  rc->min_frame_bandwidth = MAX(rc->min_frame_bandwidth, FRAME_OVERHEAD_BITS);
-
-  // A maximum bitrate for a frame is defined.
-  // The baseline for this aligns with HW implementations that
-  // can support decode of 1080P content up to a bitrate of MAX_MB_RATE bits
-  // per 16x16 MB (averaged over a frame). However this limit is extended if
-  // a very high rate is given on the command line or the the rate cannnot
-  // be acheived because of a user specificed max q (e.g. when the user
-  // specifies lossless encode.
-  //
-  vbr_max_bits = (int)(((int64_t)rc->av_per_frame_bandwidth *
-      oxcf->two_pass_vbrmax_section) / 100);
-  rc->max_frame_bandwidth = MAX(MAX((cm->MBs * MAX_MB_RATE), MAXRATE_1080P),
-                                vbr_max_bits);
-
-  // Set Maximum gf/arf interval
-  rc->max_gf_interval = 16;
-
-  // Extended interval for genuinely static scenes
-  rc->static_scene_max_gf_interval = cpi->key_frame_frequency >> 1;
-
-  // Special conditions when alt ref frame enabled in lagged compress mode
-  if (oxcf->play_alternate && oxcf->lag_in_frames) {
-    if (rc->max_gf_interval > oxcf->lag_in_frames - 1)
-      rc->max_gf_interval = oxcf->lag_in_frames - 1;
-
-    if (rc->static_scene_max_gf_interval > oxcf->lag_in_frames - 1)
-      rc->static_scene_max_gf_interval = oxcf->lag_in_frames - 1;
-  }
-
-  if (rc->max_gf_interval > rc->static_scene_max_gf_interval)
-    rc->max_gf_interval = rc->static_scene_max_gf_interval;
+  cpi->oxcf.framerate = framerate < 0.1 ? 30 : framerate;
+  vp9_rc_update_framerate(cpi);
 }
 
 int64_t vp9_rescale(int64_t val, int64_t num, int denom) {
