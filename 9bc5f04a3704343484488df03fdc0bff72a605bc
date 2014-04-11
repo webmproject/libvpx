@@ -16,6 +16,24 @@
       "revId": "9bc5f04a3704343484488df03fdc0bff72a605bc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//uU4\u003d",
+        "filename": "vp9/encoder/vp9_onyx_int.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-11T18:00:46Z",
+      "side": 1,
+      "message": "I think we should but I prefer to do this in a separate patch. Right now I\u0027m just moving members from one struct to another with no logical changes.",
+      "parentUuid": "AAAAdn//uXM\u003d",
+      "revId": "9bc5f04a3704343484488df03fdc0bff72a605bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
