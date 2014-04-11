@@ -23,7 +23,7 @@
 #include "vp9/encoder/vp9_picklpf.h"
 #include "vp9/encoder/vp9_quantize.h"
 
-static int get_max_filter_level(VP9_COMP *cpi) {
+static int get_max_filter_level(const VP9_COMP *cpi) {
   return cpi->twopass.section_intra_rating > 8 ? MAX_LOOP_FILTER * 3 / 4
                                                : MAX_LOOP_FILTER;
 }
@@ -43,15 +43,15 @@ static int try_filter_frame(const YV12_BUFFER_CONFIG *sd, VP9_COMP *const cpi,
   return filt_err;
 }
 
-static void search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
-                                int partial_frame) {
-  VP9_COMMON *const cm = &cpi->common;
-  struct loopfilter *const lf = &cm->lf;
+static int search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
+                               int partial_frame) {
+  const VP9_COMMON *const cm = &cpi->common;
+  const struct loopfilter *const lf = &cm->lf;
   const int min_filter_level = 0;
   const int max_filter_level = get_max_filter_level(cpi);
-  int best_err;
-  int filt_best;
   int filt_direction = 0;
+  int best_err, filt_best;
+
   // Start the search at the previous frame filter level unless it is now out of
   // range.
   int filt_mid = clamp(lf->filter_level, min_filter_level, max_filter_level);
@@ -128,7 +128,7 @@ static void search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
     }
   }
 
-  lf->filter_level = filt_best;
+  return filt_best;
 }
 
 void vp9_pick_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
@@ -150,6 +150,7 @@ void vp9_pick_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
       filt_guess -= 4;
     lf->filter_level = clamp(filt_guess, min_filter_level, max_filter_level);
   } else {
-    search_filter_level(sd, cpi, method == LPF_PICK_FROM_SUBIMAGE);
+    lf->filter_level = search_filter_level(sd, cpi,
+                                           method == LPF_PICK_FROM_SUBIMAGE);
   }
 }
