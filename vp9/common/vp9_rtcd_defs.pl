@@ -13,7 +13,6 @@ struct macroblockd;
 struct macroblock;
 struct vp9_variance_vtable;
 
-#define DEC_MVCOSTS int *mvjcost, int *mvcost[2]
 struct mv;
 union int_mv;
 struct yv12_buffer_config;
@@ -758,20 +757,20 @@ specialize qw/vp9_fdct32x32_rd sse2 avx2/;
 #
 # Motion search
 #
-add_proto qw/int vp9_full_search_sad/, "const struct macroblock *x, const struct mv *ref_mv, int sad_per_bit, int distance, const struct vp9_variance_vtable *fn_ptr, DEC_MVCOSTS, const struct mv *center_mv, struct mv *best_mv";
+add_proto qw/int vp9_full_search_sad/, "const struct macroblock *x, const struct mv *ref_mv, int sad_per_bit, int distance, const struct vp9_variance_vtable *fn_ptr, const struct mv *center_mv, struct mv *best_mv";
 specialize qw/vp9_full_search_sad sse3 sse4_1/;
 $vp9_full_search_sad_sse3=vp9_full_search_sadx3;
 $vp9_full_search_sad_sse4_1=vp9_full_search_sadx8;
 
-add_proto qw/int vp9_refining_search_sad/, "const struct macroblock *x, struct mv *ref_mv, int sad_per_bit, int distance, const struct vp9_variance_vtable *fn_ptr, DEC_MVCOSTS, const struct mv *center_mv";
+add_proto qw/int vp9_refining_search_sad/, "const struct macroblock *x, struct mv *ref_mv, int sad_per_bit, int distance, const struct vp9_variance_vtable *fn_ptr, const struct mv *center_mv";
 specialize qw/vp9_refining_search_sad sse3/;
 $vp9_refining_search_sad_sse3=vp9_refining_search_sadx4;
 
-add_proto qw/int vp9_diamond_search_sad/, "const struct macroblock *x, struct mv *ref_mv, struct mv *best_mv, int search_param, int sad_per_bit, int *num00, const struct vp9_variance_vtable *fn_ptr, DEC_MVCOSTS, const struct mv *center_mv";
+add_proto qw/int vp9_diamond_search_sad/, "const struct macroblock *x, struct mv *ref_mv, struct mv *best_mv, int search_param, int sad_per_bit, int *num00, const struct vp9_variance_vtable *fn_ptr, const struct mv *center_mv";
 specialize qw/vp9_diamond_search_sad sse3/;
 $vp9_diamond_search_sad_sse3=vp9_diamond_search_sadx4;
 
-add_proto qw/int vp9_full_range_search/, "const struct macroblock *x, struct mv *ref_mv, struct mv *best_mv, int search_param, int sad_per_bit, int *num00, const struct vp9_variance_vtable *fn_ptr, DEC_MVCOSTS, const struct mv *center_mv";
+add_proto qw/int vp9_full_range_search/, "const struct macroblock *x, struct mv *ref_mv, struct mv *best_mv, int search_param, int sad_per_bit, int *num00, const struct vp9_variance_vtable *fn_ptr, const struct mv *center_mv";
 specialize qw/vp9_full_range_search/;
 
 add_proto qw/void vp9_temporal_filter_apply/, "uint8_t *frame1, unsigned int stride, uint8_t *frame2, unsigned int block_size, int strength, int filter_weight, unsigned int *accumulator, uint16_t *count";

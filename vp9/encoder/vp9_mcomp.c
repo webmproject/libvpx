@@ -880,7 +880,6 @@ int vp9_fast_dia_search(const MACROBLOCK *x,
 int vp9_full_range_search_c(const MACROBLOCK *x, MV *ref_mv, MV *best_mv,
                             int search_param, int sad_per_bit, int *num00,
                             const vp9_variance_fn_ptr_t *fn_ptr,
-                            int *mvjcost, int *mvcost[2],
                             const MV *center_mv) {
   const MACROBLOCKD *const xd = &x->e_mbd;
   const uint8_t *what = x->plane[0].src.buf;
@@ -979,7 +978,6 @@ int vp9_diamond_search_sad_c(const MACROBLOCK *x,
                              MV *ref_mv, MV *best_mv,
                              int search_param, int sad_per_bit, int *num00,
                              const vp9_variance_fn_ptr_t *fn_ptr,
-                             int *mvjcost, int *mvcost[2],
                              const MV *center_mv) {
   const MACROBLOCKD *const xd = &x->e_mbd;
   const struct buf_2d *const what = &x->plane[0].src;
@@ -1072,7 +1070,6 @@ int vp9_diamond_search_sadx4(const MACROBLOCK *x,
                              MV *ref_mv, MV *best_mv, int search_param,
                              int sad_per_bit, int *num00,
                              const vp9_variance_fn_ptr_t *fn_ptr,
-                             int *mvjcost, int *mvcost[2],
                              const MV *center_mv) {
   int i, j, step;
 
@@ -1232,8 +1229,7 @@ int vp9_full_pixel_diamond(const VP9_COMP *cpi, MACROBLOCK *x,
   int thissme, n, num00 = 0;
   int bestsme = cpi->diamond_search_sad(x, mvp_full, &temp_mv,
                                         step_param, sadpb, &n,
-                                        fn_ptr, x->nmvjointcost,
-                                        x->mvcost, ref_mv);
+                                        fn_ptr, ref_mv);
   if (bestsme < INT_MAX)
     bestsme = vp9_get_mvpred_var(x, &temp_mv, ref_mv, fn_ptr, 1);
   *dst_mv = temp_mv;
@@ -1251,8 +1247,7 @@ int vp9_full_pixel_diamond(const VP9_COMP *cpi, MACROBLOCK *x,
     } else {
       thissme = cpi->diamond_search_sad(x, mvp_full, &temp_mv,
                                         step_param + n, sadpb, &num00,
-                                        fn_ptr, x->nmvjointcost, x->mvcost,
-                                        ref_mv);
+                                        fn_ptr, ref_mv);
       if (thissme < INT_MAX)
         thissme = vp9_get_mvpred_var(x, &temp_mv, ref_mv, fn_ptr, 1);
 
@@ -1272,8 +1267,7 @@ int vp9_full_pixel_diamond(const VP9_COMP *cpi, MACROBLOCK *x,
     const int search_range = 8;
     MV best_mv = *dst_mv;
     thissme = cpi->refining_search_sad(x, &best_mv, sadpb, search_range,
-                                       fn_ptr, x->nmvjointcost, x->mvcost,
-                                       ref_mv);
+                                       fn_ptr, ref_mv);
     if (thissme < INT_MAX)
       thissme = vp9_get_mvpred_var(x, &best_mv, ref_mv, fn_ptr, 1);
     if (thissme < bestsme) {
@@ -1287,7 +1281,6 @@ int vp9_full_pixel_diamond(const VP9_COMP *cpi, MACROBLOCK *x,
 int vp9_full_search_sad_c(const MACROBLOCK *x, const MV *ref_mv,
                           int sad_per_bit, int distance,
                           const vp9_variance_fn_ptr_t *fn_ptr,
-                          int *mvjcost, int *mvcost[2],
                           const MV *center_mv, MV *best_mv) {
   int r, c;
   const MACROBLOCKD *const xd = &x->e_mbd;
@@ -1325,7 +1318,6 @@ int vp9_full_search_sad_c(const MACROBLOCK *x, const MV *ref_mv,
 int vp9_full_search_sadx3(const MACROBLOCK *x, const MV *ref_mv,
                           int sad_per_bit, int distance,
                           const vp9_variance_fn_ptr_t *fn_ptr,
-                          int *mvjcost, int *mvcost[2],
                           const MV *center_mv, MV *best_mv) {
   const MACROBLOCKD *const xd = &x->e_mbd;
   const uint8_t *const what = x->plane[0].src.buf;
@@ -1417,7 +1409,6 @@ int vp9_full_search_sadx3(const MACROBLOCK *x, const MV *ref_mv,
 int vp9_full_search_sadx8(const MACROBLOCK *x, const MV *ref_mv,
                           int sad_per_bit, int distance,
                           const vp9_variance_fn_ptr_t *fn_ptr,
-                          int *mvjcost, int *mvcost[2],
                           const MV *center_mv, MV *best_mv) {
   const MACROBLOCKD *const xd = &x->e_mbd;
   const uint8_t *const what = x->plane[0].src.buf;
@@ -1537,7 +1528,6 @@ int vp9_refining_search_sad_c(const MACROBLOCK *x,
                               MV *ref_mv, int error_per_bit,
                               int search_range,
                               const vp9_variance_fn_ptr_t *fn_ptr,
-                              int *mvjcost, int *mvcost[2],
                               const MV *center_mv) {
   const MV neighbors[4] = {{ -1, 0}, {0, -1}, {0, 1}, {1, 0}};
   const MACROBLOCKD *const xd = &x->e_mbd;
@@ -1587,7 +1577,6 @@ int vp9_refining_search_sadx4(const MACROBLOCK *x,
                               MV *ref_mv, int error_per_bit,
                               int search_range,
                               const vp9_variance_fn_ptr_t *fn_ptr,
-                              int *mvjcost, int *mvcost[2],
                               const MV *center_mv) {
   const MACROBLOCKD *const xd = &x->e_mbd;
   const MV neighbors[4] = {{ -1, 0}, {0, -1}, {0, 1}, {1, 0}};
@@ -1673,7 +1662,6 @@ int vp9_refining_search_8p_c(const MACROBLOCK *x,
                              MV *ref_mv, int error_per_bit,
                              int search_range,
                              const vp9_variance_fn_ptr_t *fn_ptr,
-                             int *mvjcost, int *mvcost[2],
                              const MV *center_mv,
                              const uint8_t *second_pred, int w, int h) {
   const MV neighbors[8] = {{-1, 0}, {0, -1}, {0, 1}, {1, 0},

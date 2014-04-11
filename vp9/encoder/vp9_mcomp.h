@@ -110,14 +110,12 @@ typedef int (*vp9_full_search_fn_t)(const MACROBLOCK *x,
                                     const MV *ref_mv, int sad_per_bit,
                                     int distance,
                                     const vp9_variance_fn_ptr_t *fn_ptr,
-                                    int *mvjcost, int *mvcost[2],
                                     const MV *center_mv, MV *best_mv);
 
 typedef int (*vp9_refining_search_fn_t)(const MACROBLOCK *x,
                                         MV *ref_mv, int sad_per_bit,
                                         int distance,
                                         const vp9_variance_fn_ptr_t *fn_ptr,
-                                        int *mvjcost, int *mvcost[2],
                                         const MV *center_mv);
 
 typedef int (*vp9_diamond_search_fn_t)(const MACROBLOCK *x,
@@ -125,14 +123,12 @@ typedef int (*vp9_diamond_search_fn_t)(const MACROBLOCK *x,
                                        int search_param, int sad_per_bit,
                                        int *num00,
                                        const vp9_variance_fn_ptr_t *fn_ptr,
-                                       int *mvjcost, int *mvcost[2],
                                        const MV *center_mv);
 
 int vp9_refining_search_8p_c(const MACROBLOCK *x,
                              MV *ref_mv, int error_per_bit,
                              int search_range,
                              const vp9_variance_fn_ptr_t *fn_ptr,
-                             int *mvjcost, int *mvcost[2],
                              const MV *center_mv, const uint8_t *second_pred,
                              int w, int h);
 #ifdef __cplusplus
