@@ -45,12 +45,6 @@ typedef void (*vp9_sad_multi_fn_t)(const uint8_t *src_ptr,
                                    int  ref_stride,
                                    unsigned int *sad_array);
 
-typedef void (*vp9_sad_multi1_fn_t)(const uint8_t *src_ptr,
-                                    int source_stride,
-                                    const uint8_t *ref_ptr,
-                                    int  ref_stride,
-                                    unsigned int *sad_array);
-
 typedef void (*vp9_sad_multi_d_fn_t)(const uint8_t *src_ptr,
                                      int source_stride,
                                      const uint8_t* const ref_ptr[],
@@ -96,7 +90,7 @@ typedef struct vp9_variance_vtable {
   vp9_variance_fn_t          svf_halfpix_v;
   vp9_variance_fn_t          svf_halfpix_hv;
   vp9_sad_multi_fn_t         sdx3f;
-  vp9_sad_multi1_fn_t        sdx8f;
+  vp9_sad_multi_fn_t         sdx8f;
   vp9_sad_multi_d_fn_t       sdx4df;
 } vp9_variance_fn_ptr_t;
 
