@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//ucQ\u003d",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-11T00:52:57Z",
+      "side": 1,
+      "message": "This is because mem_req_t has alignment parameter and it was equal to 8 before the removal:\n{VP8_SEG_ALG_PRIV,    0, 8, VPX_CODEC_MEM_ZERO, vp8_priv_sz},",
+      "parentUuid": "AAAAdn//uk4\u003d",
+      "revId": "23eaa96402f48678f8825a157c624cb8904366f4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//uk8\u003d",
         "filename": "vp8/vp8_dx_iface.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2014-04-10T17:44:45Z",
       "side": 1,
       "message": "Was this not released before? Is it already released somewhere else?",
+      "revId": "23eaa96402f48678f8825a157c624cb8904366f4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ucM\u003d",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-11T00:52:57Z",
+      "side": 1,
+      "message": "We have to release it here (the same in VP9), it was released before by calling ctx-\u003emmaps[i].dtor(\u0026ctx-\u003emmaps[i]).",
+      "parentUuid": "AAAAdn//uk8\u003d",
       "revId": "23eaa96402f48678f8825a157c624cb8904366f4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//ucE\u003d",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 374,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-11T00:52:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//ulE\u003d",
+      "revId": "23eaa96402f48678f8825a157c624cb8904366f4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//ulA\u003d",
         "filename": "vp8/vp8_dx_iface.c",
         "patchSetId": 2
@@ -64,6 +118,24 @@
       "writtenOn": "2014-04-10T17:44:45Z",
       "side": 1,
       "message": "Same for |",
+      "revId": "23eaa96402f48678f8825a157c624cb8904366f4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ucI\u003d",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-11T00:52:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//ulA\u003d",
       "revId": "23eaa96402f48678f8825a157c624cb8904366f4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
