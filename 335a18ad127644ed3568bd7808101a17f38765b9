@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//uPk\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 628,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-04-11T21:30:35Z",
+      "side": 1,
+      "message": "we should use a better name for this. Framerate is set/updated in previous line. The rest of this function update average/max/min frame bandwidth and max_gf_interval.",
+      "revId": "335a18ad127644ed3568bd7808101a17f38765b9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
