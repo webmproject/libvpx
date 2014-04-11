@@ -243,8 +243,8 @@ static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
   vp9_setup_src_planes(x, cpi->Source, mi_row, mi_col);
 
   // R/D setup.
-  x->rddiv = cpi->RDDIV;
-  x->rdmult = cpi->RDMULT;
+  x->rddiv = cpi->rd.RDDIV;
+  x->rdmult = cpi->rd.RDMULT;
 
   // Setup segment ID.
   if (seg->enabled) {
@@ -819,6 +819,7 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
                          int output_enabled) {
   int i, x_idx, y;
   VP9_COMMON *const cm = &cpi->common;
+  RD_OPT *const rd_opt = &cpi->rd;
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   struct macroblock_plane *const p = x->plane;
@@ -904,7 +905,7 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
 
   if (!vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
     for (i = 0; i < TX_MODES; i++)
-      cpi->rd_tx_select_diff[i] += ctx->tx_rd_diff[i];
+      rd_opt->tx_select_diff[i] += ctx->tx_rd_diff[i];
   }
 
 #if CONFIG_INTERNAL_STATS
@@ -937,12 +938,12 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
       }
     }
 
-    cpi->rd_comp_pred_diff[SINGLE_REFERENCE] += ctx->single_pred_diff;
-    cpi->rd_comp_pred_diff[COMPOUND_REFERENCE] += ctx->comp_pred_diff;
-    cpi->rd_comp_pred_diff[REFERENCE_MODE_SELECT] += ctx->hybrid_pred_diff;
+    rd_opt->comp_pred_diff[SINGLE_REFERENCE] += ctx->single_pred_diff;
+    rd_opt->comp_pred_diff[COMPOUND_REFERENCE] += ctx->comp_pred_diff;
+    rd_opt->comp_pred_diff[REFERENCE_MODE_SELECT] += ctx->hybrid_pred_diff;
 
     for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
-      cpi->rd_filter_diff[i] += ctx->best_filter_diff[i];
+      rd_opt->filter_diff[i] += ctx->best_filter_diff[i];
   }
 }
 
@@ -2658,9 +2659,10 @@ static TX_MODE select_tx_mode(const VP9_COMP *cpi) {
     if (cpi->sf.tx_size_search_method == USE_LARGESTALL) {
       return ALLOW_32X32;
     } else if (cpi->sf.tx_size_search_method == USE_FULL_RD) {
+      const RD_OPT *const rd_opt = &cpi->rd;
       const MV_REFERENCE_FRAME frame_type = get_frame_type(cpi);
-      return cpi->rd_tx_select_threshes[frame_type][ALLOW_32X32] >
-                 cpi->rd_tx_select_threshes[frame_type][TX_MODE_SELECT] ?
+      return rd_opt->tx_select_threshes[frame_type][ALLOW_32X32] >
+                 rd_opt->tx_select_threshes[frame_type][TX_MODE_SELECT] ?
                      ALLOW_32X32 : TX_MODE_SELECT;
     } else {
       unsigned int total = 0;
@@ -3224,6 +3226,7 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
 
 static void encode_frame_internal(VP9_COMP *cpi) {
   SPEED_FEATURES *const sf = &cpi->sf;
+  RD_OPT *const rd_opt = &cpi->rd;
   MACROBLOCK *const x = &cpi->mb;
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -3234,10 +3237,10 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   vp9_zero(cm->counts);
   vp9_zero(cpi->coef_counts);
   vp9_zero(cpi->tx_stepdown_count);
-  vp9_zero(cpi->rd_comp_pred_diff);
-  vp9_zero(cpi->rd_filter_diff);
-  vp9_zero(cpi->rd_tx_select_diff);
-  vp9_zero(cpi->rd_tx_select_threshes);
+  vp9_zero(rd_opt->comp_pred_diff);
+  vp9_zero(rd_opt->filter_diff);
+  vp9_zero(rd_opt->tx_select_diff);
+  vp9_zero(rd_opt->tx_select_threshes);
 
   cm->tx_mode = select_tx_mode(cpi);
 
@@ -3356,6 +3359,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
 
 void vp9_encode_frame(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
+  RD_OPT *const rd_opt = &cpi->rd;
 
   // In the longer term the encoder should be generalized to match the
   // decoder such that we allow compound where one of the 3 buffers has a
@@ -3388,8 +3392,8 @@ void vp9_encode_frame(VP9_COMP *cpi) {
     // that for subsequent frames.
     // It does the same analysis for transform size selection also.
     const MV_REFERENCE_FRAME frame_type = get_frame_type(cpi);
-    const int64_t *mode_thresh = cpi->rd_prediction_type_threshes[frame_type];
-    const int64_t *filter_thresh = cpi->rd_filter_threshes[frame_type];
+    const int64_t *mode_thresh = rd_opt->prediction_type_threshes[frame_type];
+    const int64_t *filter_thresh = rd_opt->filter_threshes[frame_type];
 
     /* prediction (compound, single or hybrid) mode selection */
     if (frame_type == ALTREF_FRAME || !cm->allow_comp_inter_inter)
@@ -3422,25 +3426,25 @@ void vp9_encode_frame(VP9_COMP *cpi) {
     encode_frame_internal(cpi);
 
     for (i = 0; i < REFERENCE_MODES; ++i) {
-      const int diff = (int) (cpi->rd_comp_pred_diff[i] / cm->MBs);
-      cpi->rd_prediction_type_threshes[frame_type][i] += diff;
-      cpi->rd_prediction_type_threshes[frame_type][i] >>= 1;
+      const int diff = (int) (rd_opt->comp_pred_diff[i] / cm->MBs);
+      rd_opt->prediction_type_threshes[frame_type][i] += diff;
+      rd_opt->prediction_type_threshes[frame_type][i] >>= 1;
     }
 
     for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; i++) {
-      const int64_t diff = cpi->rd_filter_diff[i] / cm->MBs;
-      cpi->rd_filter_threshes[frame_type][i] =
-          (cpi->rd_filter_threshes[frame_type][i] + diff) / 2;
+      const int64_t diff = rd_opt->filter_diff[i] / cm->MBs;
+      rd_opt->filter_threshes[frame_type][i] =
+          (rd_opt->filter_threshes[frame_type][i] + diff) / 2;
     }
 
     for (i = 0; i < TX_MODES; ++i) {
-      int64_t pd = cpi->rd_tx_select_diff[i];
+      int64_t pd = rd_opt->tx_select_diff[i];
       int diff;
       if (i == TX_MODE_SELECT)
         pd -= RDCOST(cpi->mb.rdmult, cpi->mb.rddiv, 2048 * (TX_SIZES - 1), 0);
       diff = (int) (pd / cm->MBs);
-      cpi->rd_tx_select_threshes[frame_type][i] += diff;
-      cpi->rd_tx_select_threshes[frame_type][i] /= 2;
+      rd_opt->tx_select_threshes[frame_type][i] += diff;
+      rd_opt->tx_select_threshes[frame_type][i] /= 2;
     }
 
     if (cm->reference_mode == REFERENCE_MODE_SELECT) {
