@@ -12,11 +12,9 @@
 #define VP9_DECODER_VP9_DTHREAD_H_
 
 #include "./vpx_config.h"
-#include "vp9/common/vp9_loopfilter.h"
 #include "vp9/decoder/vp9_reader.h"
 #include "vp9/decoder/vp9_thread.h"
 
-struct macroblockd;
 struct VP9Common;
 struct VP9Decoder;
 
@@ -43,16 +41,15 @@ typedef struct VP9LfSyncData {
 } VP9LfSync;
 
 // Allocate memory for loopfilter row synchronization.
-void vp9_loop_filter_alloc(struct VP9Common *cm, struct VP9LfSyncData *lf_sync,
+void vp9_loop_filter_alloc(struct VP9Common *cm, VP9LfSync *lf_sync,
                            int rows, int width);
 
 // Deallocate loopfilter synchronization related mutex and data.
-void vp9_loop_filter_dealloc(struct VP9LfSyncData *lf_sync, int rows);
+void vp9_loop_filter_dealloc(VP9LfSync *lf_sync, int rows);
 
 // Multi-threaded loopfilter that uses the tile threads.
 void vp9_loop_filter_frame_mt(struct VP9Decoder *pbi,
                               struct VP9Common *cm,
-                              struct macroblockd *xd,
                               int frame_filter_level,
                               int y_only, int partial_frame);
 
