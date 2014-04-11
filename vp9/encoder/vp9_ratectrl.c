@@ -1094,6 +1094,7 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
   const VP9_COMMON *const cm = &cpi->common;
   const VP9_CONFIG *const oxcf = &cpi->oxcf;
   RATE_CONTROL *const rc = &cpi->rc;
+  const int qindex = cm->base_qindex;
 
   // Update rate control heuristics
   rc->projected_frame_size = (int)(bytes_used << 3);
@@ -1105,25 +1106,24 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
 
   // Keep a record of last Q and ambient average Q.
   if (cm->frame_type == KEY_FRAME) {
-    rc->last_q[KEY_FRAME] = cm->base_qindex;
-    rc->avg_frame_qindex[KEY_FRAME] = ROUND_POWER_OF_TWO(
-        3 * rc->avg_frame_qindex[KEY_FRAME] + cm->base_qindex, 2);
+    rc->last_q[KEY_FRAME] = qindex;
+    rc->avg_frame_qindex[KEY_FRAME] =
+        ROUND_POWER_OF_TWO(3 * rc->avg_frame_qindex[KEY_FRAME] + qindex, 2);
   } else if (!rc->is_src_frame_alt_ref &&
-      (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame) &&
-      !(cpi->use_svc && oxcf->end_usage == USAGE_STREAM_FROM_SERVER)) {
-    rc->last_q[2] = cm->base_qindex;
-    rc->avg_frame_qindex[2] = ROUND_POWER_OF_TWO(
-        3 * rc->avg_frame_qindex[2] + cm->base_qindex, 2);
+             (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame) &&
+             !(cpi->use_svc && oxcf->end_usage == USAGE_STREAM_FROM_SERVER)) {
+    rc->last_q[2] = qindex;
+    rc->avg_frame_qindex[2] =
+        ROUND_POWER_OF_TWO(3 * rc->avg_frame_qindex[2] + qindex, 2);
   } else {
-    rc->last_q[INTER_FRAME] = cm->base_qindex;
-    rc->avg_frame_qindex[INTER_FRAME] = ROUND_POWER_OF_TWO(
-        3 * rc->avg_frame_qindex[INTER_FRAME] + cm->base_qindex, 2);
+    rc->last_q[INTER_FRAME] = qindex;
+    rc->avg_frame_qindex[INTER_FRAME] =
+        ROUND_POWER_OF_TWO(3 * rc->avg_frame_qindex[INTER_FRAME] + qindex, 2);
     rc->ni_frames++;
-    rc->tot_q += vp9_convert_qindex_to_q(cm->base_qindex);
-    rc->avg_q = rc->tot_q / (double)rc->ni_frames;
-
+    rc->tot_q += vp9_convert_qindex_to_q(qindex);
+    rc->avg_q = rc->tot_q / rc->ni_frames;
     // Calculate the average Q for normal inter frames (not key or GFU frames).
-    rc->ni_tot_qi += cm->base_qindex;
+    rc->ni_tot_qi += qindex;
     rc->ni_av_qi = rc->ni_tot_qi / rc->ni_frames;
   }
 
@@ -1132,11 +1132,11 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
   // If all mbs in this group are skipped only update if the Q value is
   // better than that already stored.
   // This is used to help set quality in forced key frames to reduce popping
-  if ((cm->base_qindex < rc->last_boosted_qindex) ||
+  if ((qindex < rc->last_boosted_qindex) ||
       ((cpi->static_mb_pct < 100) &&
        ((cm->frame_type == KEY_FRAME) || cpi->refresh_alt_ref_frame ||
         (cpi->refresh_golden_frame && !rc->is_src_frame_alt_ref)))) {
-    rc->last_boosted_qindex = cm->base_qindex;
+    rc->last_boosted_qindex = qindex;
   }
 
   update_buffer_level(cpi, rc->projected_frame_size);
