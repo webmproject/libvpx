@@ -10,8 +10,8 @@
 
 #include "vp9/common/vp9_blockd.h"
 
-MB_PREDICTION_MODE vp9_left_block_mode(const MODE_INFO *cur_mi,
-                                       const MODE_INFO *left_mi, int b) {
+PREDICTION_MODE vp9_left_block_mode(const MODE_INFO *cur_mi,
+                                    const MODE_INFO *left_mi, int b) {
   if (b == 0 || b == 2) {
     if (!left_mi || is_inter_block(&left_mi->mbmi))
       return DC_PRED;
@@ -23,8 +23,8 @@ MB_PREDICTION_MODE vp9_left_block_mode(const MODE_INFO *cur_mi,
   }
 }
 
-MB_PREDICTION_MODE vp9_above_block_mode(const MODE_INFO *cur_mi,
-                                        const MODE_INFO *above_mi, int b) {
+PREDICTION_MODE vp9_above_block_mode(const MODE_INFO *cur_mi,
+                                     const MODE_INFO *above_mi, int b) {
   if (b == 0 || b == 1) {
     if (!above_mi || is_inter_block(&above_mi->mbmi))
       return DC_PRED;

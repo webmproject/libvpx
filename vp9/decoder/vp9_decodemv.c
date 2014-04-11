@@ -23,30 +23,29 @@
 #include "vp9/decoder/vp9_decodeframe.h"
 #include "vp9/decoder/vp9_reader.h"
 
-static MB_PREDICTION_MODE read_intra_mode(vp9_reader *r, const vp9_prob *p) {
-  return (MB_PREDICTION_MODE)vp9_read_tree(r, vp9_intra_mode_tree, p);
+static PREDICTION_MODE read_intra_mode(vp9_reader *r, const vp9_prob *p) {
+  return (PREDICTION_MODE)vp9_read_tree(r, vp9_intra_mode_tree, p);
 }
 
-static MB_PREDICTION_MODE read_intra_mode_y(VP9_COMMON *cm, vp9_reader *r,
+static PREDICTION_MODE read_intra_mode_y(VP9_COMMON *cm, vp9_reader *r,
                                             int size_group) {
-  const MB_PREDICTION_MODE y_mode = read_intra_mode(r,
-                                        cm->fc.y_mode_prob[size_group]);
+  const PREDICTION_MODE y_mode =
+      read_intra_mode(r, cm->fc.y_mode_prob[size_group]);
   if (!cm->frame_parallel_decoding_mode)
     ++cm->counts.y_mode[size_group][y_mode];
   return y_mode;
 }
 
-static MB_PREDICTION_MODE read_intra_mode_uv(VP9_COMMON *cm, vp9_reader *r,
-                                             MB_PREDICTION_MODE y_mode) {
-  const MB_PREDICTION_MODE uv_mode = read_intra_mode(r,
+static PREDICTION_MODE read_intra_mode_uv(VP9_COMMON *cm, vp9_reader *r,
+                                          PREDICTION_MODE y_mode) {
+  const PREDICTION_MODE uv_mode = read_intra_mode(r,
                                          cm->fc.uv_mode_prob[y_mode]);
   if (!cm->frame_parallel_decoding_mode)
     ++cm->counts.uv_mode[y_mode][uv_mode];
   return uv_mode;
 }
 
-static MB_PREDICTION_MODE read_inter_mode(VP9_COMMON *cm, vp9_reader *r,
-                                          int ctx) {
+static PREDICTION_MODE read_inter_mode(VP9_COMMON *cm, vp9_reader *r, int ctx) {
   const int mode = vp9_read_tree(r, vp9_inter_mode_tree,
                                  cm->fc.inter_mode_probs[ctx]);
   if (!cm->frame_parallel_decoding_mode)
@@ -362,7 +361,7 @@ static INLINE int is_mv_valid(const MV *mv) {
          mv->col > MV_LOW && mv->col < MV_UPP;
 }
 
-static INLINE int assign_mv(VP9_COMMON *cm, MB_PREDICTION_MODE mode,
+static INLINE int assign_mv(VP9_COMMON *cm, PREDICTION_MODE mode,
                             int_mv mv[2], int_mv ref_mv[2],
                             int_mv nearest_mv[2], int_mv near_mv[2],
                             int is_compound, int allow_hp, vp9_reader *r) {
@@ -469,7 +468,7 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
     const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];  // 1 or 2
     const int num_4x4_h = num_4x4_blocks_high_lookup[bsize];  // 1 or 2
     int idx, idy;
-    MB_PREDICTION_MODE b_mode;
+    PREDICTION_MODE b_mode;
     int_mv nearest_sub8x8[2], near_sub8x8[2];
     for (idy = 0; idy < 2; idy += num_4x4_h) {
       for (idx = 0; idx < 2; idx += num_4x4_w) {

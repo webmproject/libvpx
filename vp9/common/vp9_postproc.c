@@ -34,7 +34,7 @@
 
 /* global constants */
 #if 0 && CONFIG_POSTPROC_VISUALIZER
-static const unsigned char MB_PREDICTION_MODE_colors[MB_MODE_COUNT][3] = {
+static const unsigned char PREDICTION_MODE_colors[MB_MODE_COUNT][3] = {
   { RGB_TO_YUV(0x98FB98) },   /* PaleGreen */
   { RGB_TO_YUV(0x00FF00) },   /* Green */
   { RGB_TO_YUV(0xADFF2F) },   /* GreenYellow */
@@ -911,9 +911,9 @@ int vp9_post_proc_frame(struct VP9Common *cm,
             vl += y_stride * 1;
           }
         } else if (ppflags->display_mb_modes_flag & (1 << mi->mbmi.mode)) {
-          Y = MB_PREDICTION_MODE_colors[mi->mbmi.mode][0];
-          U = MB_PREDICTION_MODE_colors[mi->mbmi.mode][1];
-          V = MB_PREDICTION_MODE_colors[mi->mbmi.mode][2];
+          Y = PREDICTION_MODE_colors[mi->mbmi.mode][0];
+          U = PREDICTION_MODE_colors[mi->mbmi.mode][1];
+          V = PREDICTION_MODE_colors[mi->mbmi.mode][2];
 
           vp9_blend_mb_inner(y_ptr + x, u_ptr + (x >> 1), v_ptr + (x >> 1),
                              Y, U, V, 0xc000, y_stride);

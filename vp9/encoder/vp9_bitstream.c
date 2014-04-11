@@ -47,12 +47,12 @@ void vp9_entropy_mode_init() {
   vp9_tokens_from_tree(inter_mode_encodings, vp9_inter_mode_tree);
 }
 
-static void write_intra_mode(vp9_writer *w, MB_PREDICTION_MODE mode,
+static void write_intra_mode(vp9_writer *w, PREDICTION_MODE mode,
                              const vp9_prob *probs) {
   vp9_write_token(w, vp9_intra_mode_tree, probs, &intra_mode_encodings[mode]);
 }
 
-static void write_inter_mode(vp9_writer *w, MB_PREDICTION_MODE mode,
+static void write_inter_mode(vp9_writer *w, PREDICTION_MODE mode,
                              const vp9_prob *probs) {
   assert(is_inter_mode(mode));
   vp9_write_token(w, vp9_inter_mode_tree, probs,
@@ -233,7 +233,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
   const MACROBLOCKD *const xd = &x->e_mbd;
   const struct segmentation *const seg = &cm->seg;
   const MB_MODE_INFO *const mbmi = &mi->mbmi;
-  const MB_PREDICTION_MODE mode = mbmi->mode;
+  const PREDICTION_MODE mode = mbmi->mode;
   const int segment_id = mbmi->segment_id;
   const BLOCK_SIZE bsize = mbmi->sb_type;
   const int allow_hp = cm->allow_high_precision_mv;
@@ -273,7 +273,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
       const int num_4x4_h = num_4x4_blocks_high_lookup[bsize];
       for (idy = 0; idy < 2; idy += num_4x4_h) {
         for (idx = 0; idx < 2; idx += num_4x4_w) {
-          const MB_PREDICTION_MODE b_mode = mi->bmi[idy * 2 + idx].as_mode;
+          const PREDICTION_MODE b_mode = mi->bmi[idy * 2 + idx].as_mode;
           write_intra_mode(w, b_mode, cm->fc.y_mode_prob[0]);
         }
       }
@@ -308,7 +308,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
       for (idy = 0; idy < 2; idy += num_4x4_h) {
         for (idx = 0; idx < 2; idx += num_4x4_w) {
           const int j = idy * 2 + idx;
-          const MB_PREDICTION_MODE b_mode = mi->bmi[j].as_mode;
+          const PREDICTION_MODE b_mode = mi->bmi[j].as_mode;
           write_inter_mode(w, b_mode, inter_probs);
           ++cm->counts.inter_mode[mode_ctx][INTER_OFFSET(b_mode)];
           if (b_mode == NEWMV) {
