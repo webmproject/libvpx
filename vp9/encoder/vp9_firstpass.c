@@ -376,15 +376,12 @@ static vp9_variance_fn_t get_block_variance_fn(BLOCK_SIZE bsize) {
   }
 }
 
-static unsigned int zz_motion_search(const MACROBLOCK *x) {
-  const MACROBLOCKD *const xd = &x->e_mbd;
-  const uint8_t *const src = x->plane[0].src.buf;
-  const int src_stride = x->plane[0].src.stride;
-  const uint8_t *const ref = xd->plane[0].pre[0].buf;
-  const int ref_stride = xd->plane[0].pre[0].stride;
+static unsigned int get_prediction_error(BLOCK_SIZE bsize,
+                                         const struct buf_2d *src,
+                                         const struct buf_2d *ref) {
   unsigned int sse;
-  vp9_variance_fn_t fn = get_block_variance_fn(xd->mi[0]->mbmi.sb_type);
-  fn(src, src_stride, ref, ref_stride, &sse);
+  const vp9_variance_fn_t fn = get_block_variance_fn(bsize);
+  fn(src->buf, src->stride, ref->buf, ref->stride, &sse);
   return sse;
 }
 
@@ -632,7 +629,8 @@ void vp9_first_pass(VP9_COMP *cpi) {
         int_mv mv, tmp_mv;
 
         xd->plane[0].pre[0].buf = first_ref_buf->y_buffer + recon_yoffset;
-        motion_error = zz_motion_search(x);
+        motion_error = get_prediction_error(bsize, &x->plane[0].src,
+                                            &xd->plane[0].pre[0]);
         // Assume 0,0 motion with no mv overhead.
         mv.as_int = tmp_mv.as_int = 0;
 
@@ -668,7 +666,8 @@ void vp9_first_pass(VP9_COMP *cpi) {
           int gf_motion_error;
 
           xd->plane[0].pre[0].buf = gld_yv12->y_buffer + recon_yoffset;
-          gf_motion_error = zz_motion_search(x);
+          gf_motion_error = get_prediction_error(bsize, &x->plane[0].src,
+                                                 &xd->plane[0].pre[0]);
 
           first_pass_motion_search(cpi, x, &zero_mv, &tmp_mv.as_mv,
                                    &gf_motion_error);
