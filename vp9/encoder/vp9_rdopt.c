@@ -2580,7 +2580,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     struct buf_2d ref_yv12[2];
     int bestsme = INT_MAX;
     int sadpb = x->sadperbit16;
-    int_mv tmp_mv;
+    MV tmp_mv;
     int search_range = 3;
 
     int tmp_col_min = x->mv_col_min;
@@ -2609,20 +2609,20 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     vp9_set_mv_search_range(x, &ref_mv[id].as_mv);
 
     // Use mv result from single mode as mvp.
-    tmp_mv.as_int = frame_mv[refs[id]].as_int;
+    tmp_mv = frame_mv[refs[id]].as_mv;
 
-    tmp_mv.as_mv.col >>= 3;
-    tmp_mv.as_mv.row >>= 3;
+    tmp_mv.col >>= 3;
+    tmp_mv.row >>= 3;
 
     // Small-range full-pixel motion search
-    bestsme = vp9_refining_search_8p_c(x, &tmp_mv.as_mv, sadpb,
+    bestsme = vp9_refining_search_8p_c(x, &tmp_mv, sadpb,
                                        search_range,
                                        &cpi->fn_ptr[bsize],
                                        x->nmvjointcost, x->mvcost,
                                        &ref_mv[id].as_mv, second_pred,
                                        pw, ph);
     if (bestsme < INT_MAX)
-      bestsme = vp9_get_mvpred_av_var(x, &tmp_mv.as_mv, &ref_mv[id].as_mv,
+      bestsme = vp9_get_mvpred_av_var(x, &tmp_mv, &ref_mv[id].as_mv,
                                       second_pred, &cpi->fn_ptr[bsize], 1);
 
     x->mv_col_min = tmp_col_min;
@@ -2634,7 +2634,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
       int dis; /* TODO: use dis in distortion calculation later. */
       unsigned int sse;
       bestsme = cpi->find_fractional_mv_step_comp(
-          x, &tmp_mv.as_mv,
+          x, &tmp_mv,
           &ref_mv[id].as_mv,
           cpi->common.allow_high_precision_mv,
           x->errorperbit,
@@ -2649,7 +2649,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
       xd->plane[0].pre[0] = scaled_first_yv12;
 
     if (bestsme < last_besterr[id]) {
-      frame_mv[refs[id]].as_int = tmp_mv.as_int;
+      frame_mv[refs[id]].as_mv = tmp_mv;
       last_besterr[id] = bestsme;
     } else {
       break;
