@@ -27,20 +27,20 @@
 extern "C" {
 #endif
 
-typedef struct {
+typedef struct VP9DecoderConfig {
   int width;
   int height;
   int version;
   int max_threads;
   int inv_tile_order;
-} VP9D_CONFIG;
+} VP9DecoderConfig;
 
 typedef struct VP9Decoder {
   DECLARE_ALIGNED(16, MACROBLOCKD, mb);
 
   DECLARE_ALIGNED(16, VP9_COMMON, common);
 
-  VP9D_CONFIG oxcf;
+  VP9DecoderConfig oxcf;
 
   int64_t last_time_stamp;
   int ready_for_new_data;
@@ -81,7 +81,7 @@ int vp9_get_reference_dec(struct VP9Decoder *pbi,
                           int index, YV12_BUFFER_CONFIG **fb);
 
 
-struct VP9Decoder *vp9_decoder_create(const VP9D_CONFIG *oxcf);
+struct VP9Decoder *vp9_decoder_create(const VP9DecoderConfig *oxcf);
 
 void vp9_decoder_remove(struct VP9Decoder *pbi);
 

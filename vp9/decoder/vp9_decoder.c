@@ -110,7 +110,7 @@ void vp9_initialize_dec() {
   }
 }
 
-VP9Decoder *vp9_decoder_create(const VP9D_CONFIG *oxcf) {
+VP9Decoder *vp9_decoder_create(const VP9DecoderConfig *oxcf) {
   VP9Decoder *const pbi = vpx_memalign(32, sizeof(*pbi));
   VP9_COMMON *const cm = pbi ? &pbi->common : NULL;
 
