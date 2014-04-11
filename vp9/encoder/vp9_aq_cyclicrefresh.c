@@ -200,6 +200,7 @@ void vp9_cyclic_refresh_setup(VP9_COMP *const cpi) {
 
     // Rate target ratio to set q delta.
     const float rate_ratio_qdelta = 2.0;
+    const double q = vp9_convert_qindex_to_q(cm->base_qindex);
     vp9_clear_system_state();
     // Some of these parameters may be set via codec-control function later.
     cr->max_sbs_perframe = 10;
@@ -209,14 +210,12 @@ void vp9_cyclic_refresh_setup(VP9_COMP *const cpi) {
     // Set rate threshold to some fraction of target (and scaled by 256).
     cr->thresh_rate_sb = (rc->sb64_target_rate * 256) >> 2;
     // Distortion threshold, quadratic in Q, scale factor to be adjusted.
-    cr->thresh_dist_sb = 8 * (int)(vp9_convert_qindex_to_q(cm->base_qindex) *
-        vp9_convert_qindex_to_q(cm->base_qindex));
+    cr->thresh_dist_sb = 8 * (int)(q * q);
     if (cpi->sf.use_nonrd_pick_mode) {
       // May want to be more conservative with thresholds in non-rd mode for now
       // as rate/distortion are derived from model based on prediction residual.
       cr->thresh_rate_sb = (rc->sb64_target_rate * 256) >> 3;
-      cr->thresh_dist_sb = 4 * (int)(vp9_convert_qindex_to_q(cm->base_qindex) *
-          vp9_convert_qindex_to_q(cm->base_qindex));
+      cr->thresh_dist_sb = 4 * (int)(q * q);
     }
 
     cr->num_seg_blocks = 0;
