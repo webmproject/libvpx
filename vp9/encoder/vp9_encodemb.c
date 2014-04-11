@@ -63,24 +63,17 @@ void vp9_subtract_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
 }
 
 #define RDTRUNC(RM, DM, R, D) ((128 + (R) * (RM)) & 0xFF)
-typedef struct vp9_token_state vp9_token_state;
 
-struct vp9_token_state {
+typedef struct vp9_token_state {
   int           rate;
   int           error;
   int           next;
   signed char   token;
   short         qc;
-};
+} vp9_token_state;
 
 // TODO(jimbankoski): experiment to find optimal RD numbers.
-#define Y1_RD_MULT 4
-#define UV_RD_MULT 2
-
-static const int plane_rd_mult[4] = {
-  Y1_RD_MULT,
-  UV_RD_MULT,
-};
+static const int plane_rd_mult[PLANE_TYPES] = { 4, 2 };
 
 #define UPDATE_RD_COST()\
 {\
@@ -108,56 +101,53 @@ static int trellis_get_coeff_context(const int16_t *scan,
 static int optimize_b(MACROBLOCK *mb, int plane, int block,
                       BLOCK_SIZE plane_bsize, TX_SIZE tx_size, int ctx) {
   MACROBLOCKD *const xd = &mb->e_mbd;
-  struct macroblock_plane *p = &mb->plane[plane];
-  struct macroblockd_plane *pd = &xd->plane[plane];
+  struct macroblock_plane *const p = &mb->plane[plane];
+  struct macroblockd_plane *const pd = &xd->plane[plane];
   const int ref = is_inter_block(&xd->mi[0]->mbmi);
   vp9_token_state tokens[1025][2];
   unsigned best_index[1025][2];
-  const int16_t *coeff = BLOCK_OFFSET(mb->plane[plane].coeff, block);
-  int16_t *qcoeff = BLOCK_OFFSET(p->qcoeff, block);
-  int16_t *dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
-  int eob = p->eobs[block], final_eob, sz = 0;
-  const int i0 = 0;
-  int rc, x, next, i;
-  int64_t rdmult, rddiv, rd_cost0, rd_cost1;
-  int rate0, rate1, error0, error1, t0, t1;
-  int best, band, pt;
-  PLANE_TYPE type = pd->plane_type;
-  int err_mult = plane_rd_mult[type];
+  uint8_t token_cache[1024];
+  const int16_t *const coeff = BLOCK_OFFSET(mb->plane[plane].coeff, block);
+  int16_t *const qcoeff = BLOCK_OFFSET(p->qcoeff, block);
+  int16_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
+  const int eob = p->eobs[block];
+  const PLANE_TYPE type = pd->plane_type;
   const int default_eob = 16 << (tx_size << 1);
   const int mul = 1 + (tx_size == TX_32X32);
-  uint8_t token_cache[1024];
   const int16_t *dequant_ptr = pd->dequant;
   const uint8_t *const band_translate = get_band_translate(tx_size);
-  const scan_order *so = get_scan(xd, tx_size, type, block);
-  const int16_t *scan = so->scan;
-  const int16_t *nb = so->neighbors;
+  const scan_order *const so = get_scan(xd, tx_size, type, block);
+  const int16_t *const scan = so->scan;
+  const int16_t *const nb = so->neighbors;
+  int next = eob, sz = 0;
+  int64_t rdmult = mb->rdmult * plane_rd_mult[type], rddiv = mb->rddiv;
+  int64_t rd_cost0, rd_cost1;
+  int rate0, rate1, error0, error1, t0, t1;
+  int best, band, pt, i, final_eob;
 
   assert((!type && !plane) || (type && plane));
   assert(eob <= default_eob);
 
   /* Now set up a Viterbi trellis to evaluate alternative roundings. */
-  rdmult = mb->rdmult * err_mult;
-  if (!is_inter_block(&mb->e_mbd.mi[0]->mbmi))
+  if (!ref)
     rdmult = (rdmult * 9) >> 4;
-  rddiv = mb->rddiv;
+
   /* Initialize the sentinel node of the trellis. */
   tokens[eob][0].rate = 0;
   tokens[eob][0].error = 0;
   tokens[eob][0].next = default_eob;
   tokens[eob][0].token = EOB_TOKEN;
   tokens[eob][0].qc = 0;
-  *(tokens[eob] + 1) = *(tokens[eob] + 0);
-  next = eob;
+  tokens[eob][1] = tokens[eob][0];
+
   for (i = 0; i < eob; i++)
-    token_cache[scan[i]] = vp9_pt_energy_class[vp9_dct_value_tokens_ptr[
-        qcoeff[scan[i]]].token];
+    token_cache[scan[i]] =
+        vp9_pt_energy_class[vp9_dct_value_tokens_ptr[qcoeff[scan[i]]].token];
 
-  for (i = eob; i-- > i0;) {
+  for (i = eob; i-- > 0;) {
     int base_bits, d2, dx;
-
-    rc = scan[i];
-    x = qcoeff[rc];
+    const int rc = scan[i];
+    int x = qcoeff[rc];
     /* Only add a trellis state for non-zero coefficients. */
     if (x) {
       int shortcut = 0;
@@ -179,7 +169,7 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
       UPDATE_RD_COST();
       /* And pick the best. */
       best = rd_cost1 < rd_cost0;
-      base_bits = *(vp9_dct_value_cost_ptr + x);
+      base_bits = vp9_dct_value_cost_ptr[x];
       dx = mul * (dqcoeff[rc] - coeff[rc]);
       d2 = dx * dx;
       tokens[i][0].rate = base_bits + (best ? rate1 : rate0);
@@ -193,9 +183,9 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
       rate0 = tokens[next][0].rate;
       rate1 = tokens[next][1].rate;
 
-      if ((abs(x)*dequant_ptr[rc != 0] > abs(coeff[rc]) * mul) &&
-          (abs(x)*dequant_ptr[rc != 0] < abs(coeff[rc]) * mul +
-                                         dequant_ptr[rc != 0]))
+      if ((abs(x) * dequant_ptr[rc != 0] > abs(coeff[rc]) * mul) &&
+          (abs(x) * dequant_ptr[rc != 0] < abs(coeff[rc]) * mul +
+                                               dequant_ptr[rc != 0]))
         shortcut = 1;
       else
         shortcut = 0;
@@ -232,7 +222,7 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
       UPDATE_RD_COST();
       /* And pick the best. */
       best = rd_cost1 < rd_cost0;
-      base_bits = *(vp9_dct_value_cost_ptr + x);
+      base_bits = vp9_dct_value_cost_ptr[x];
 
       if (shortcut) {
         dx -= (dequant_ptr[rc != 0] + sz) ^ sz;
@@ -281,15 +271,16 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
   rate1 += mb->token_costs[tx_size][type][ref][band][0][ctx][t1];
   UPDATE_RD_COST();
   best = rd_cost1 < rd_cost0;
-  final_eob = i0 - 1;
+  final_eob = -1;
   vpx_memset(qcoeff, 0, sizeof(*qcoeff) * (16 << (tx_size * 2)));
   vpx_memset(dqcoeff, 0, sizeof(*dqcoeff) * (16 << (tx_size * 2)));
   for (i = next; i < eob; i = next) {
-    x = tokens[i][best].qc;
+    const int x = tokens[i][best].qc;
+    const int rc = scan[i];
     if (x) {
       final_eob = i;
     }
-    rc = scan[i];
+
     qcoeff[rc] = x;
     dqcoeff[rc] = (x * dequant_ptr[rc != 0]) / mul;
 
