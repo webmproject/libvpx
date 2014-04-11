@@ -1891,7 +1891,6 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
                      x->mv_row_min, x->mv_row_max);
             thissme = cpi->full_search_sad(x, &mvp_full,
                                            sadpb, 16, v_fn_ptr,
-                                           x->nmvjointcost, x->mvcost,
                                            &bsi->ref_mv[0]->as_mv,
                                            &best_mv->as_mv);
             if (thissme < bestsme) {
@@ -2618,7 +2617,6 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     bestsme = vp9_refining_search_8p_c(x, &tmp_mv, sadpb,
                                        search_range,
                                        &cpi->fn_ptr[bsize],
-                                       x->nmvjointcost, x->mvcost,
                                        &ref_mv[id].as_mv, second_pred,
                                        pw, ph);
     if (bestsme < INT_MAX)
