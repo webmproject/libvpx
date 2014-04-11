@@ -981,8 +981,6 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
                                    oxcf->target_bandwidth / 10000000.0);
   }
 
-  cpi->output_framerate = oxcf->framerate;
-
   // Calculate a minimum intra value to be used in determining the IIratio
   // scores used in the second pass. We have this minimum to make sure
   // that clips that are static but "low complexity" in the intra domain
