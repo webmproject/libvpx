@@ -2658,6 +2658,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
   get_ref_frame_flags(cpi);
 
+  cm->last_frame_type = cm->frame_type;
   vp9_rc_postencode_update(cpi, *size);
 
   if (cm->frame_type == KEY_FRAME) {

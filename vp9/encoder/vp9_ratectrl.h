@@ -125,8 +125,7 @@ void vp9_rc_get_svc_params(struct VP9_COMP *cpi);
 
 // Post encode update of the rate control parameters based
 // on bytes used
-void vp9_rc_postencode_update(struct VP9_COMP *cpi,
-                              uint64_t bytes_used);
+void vp9_rc_postencode_update(struct VP9_COMP *cpi, uint64_t bytes_used);
 // Post encode update of the rate control parameters for dropped frames
 void vp9_rc_postencode_update_drop_frame(struct VP9_COMP *cpi);
 
