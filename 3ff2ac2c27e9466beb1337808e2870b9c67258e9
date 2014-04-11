@@ -1,0 +1,174 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//uVo\u003d",
+        "filename": "vp9/encoder/vp9_block.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-11T17:54:55Z",
+      "side": 1,
+      "message": "We should use the same name for the struct and for the typedef to avoid confusion.",
+      "revId": "3ff2ac2c27e9466beb1337808e2870b9c67258e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//uVk\u003d",
+        "filename": "vp9/encoder/vp9_context_tree.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-11T17:54:55Z",
+      "side": 1,
+      "message": "You could add is_square_block() function to common part. This would be useful is several another places, especially for asserts because sometimes we expect only square blocks.",
+      "revId": "3ff2ac2c27e9466beb1337808e2870b9c67258e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//uVQ\u003d",
+        "filename": "vp9/encoder/vp9_context_tree.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-11T17:54:55Z",
+      "side": 1,
+      "message": "It seems you could pass VP9_COMMON* and MACROBLOCK* instead of VP9_COMP*. The idea is to avoid VP9_COMP as much as possible.",
+      "revId": "3ff2ac2c27e9466beb1337808e2870b9c67258e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//uVg\u003d",
+        "filename": "vp9/encoder/vp9_context_tree.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-11T17:54:55Z",
+      "side": 1,
+      "message": "spaces around \u003d, add const",
+      "revId": "3ff2ac2c27e9466beb1337808e2870b9c67258e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//uVc\u003d",
+        "filename": "vp9/encoder/vp9_context_tree.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-11T17:54:55Z",
+      "side": 1,
+      "message": "we usually use name x for MACROBLOCK, spaces around \u003d, add const.",
+      "revId": "3ff2ac2c27e9466beb1337808e2870b9c67258e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//uVU\u003d",
+        "filename": "vp9/encoder/vp9_context_tree.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-11T17:54:55Z",
+      "side": 1,
+      "message": "It seems you could just pass MACROBLOCK* instead of VP9_COMP*.",
+      "revId": "3ff2ac2c27e9466beb1337808e2870b9c67258e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//uVY\u003d",
+        "filename": "vp9/encoder/vp9_context_tree.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-11T17:54:55Z",
+      "side": 1,
+      "message": "we usually use name x, spaces around \u003d",
+      "revId": "3ff2ac2c27e9466beb1337808e2870b9c67258e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//uVM\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1238,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-11T17:54:55Z",
+      "side": 1,
+      "message": "Can be const? May be name it pc_tree instead of this_context?",
+      "revId": "3ff2ac2c27e9466beb1337808e2870b9c67258e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//uVI\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1458,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-11T17:54:55Z",
+      "side": 1,
+      "message": "pc_tree?",
+      "revId": "3ff2ac2c27e9466beb1337808e2870b9c67258e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//uVE\u003d",
+        "filename": "vp9/vp9cx.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-11T17:54:55Z",
+      "side": 1,
+      "message": "encoder/vp9_context_tree.h should be also included.",
+      "revId": "3ff2ac2c27e9466beb1337808e2870b9c67258e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
