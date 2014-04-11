@@ -697,8 +697,6 @@ CODEC_INTERFACE(vpx_codec_vp9_dx) = {
   decoder_init,       // vpx_codec_init_fn_t
   decoder_destroy,    // vpx_codec_destroy_fn_t
   decoder_ctrl_maps,  // vpx_codec_ctrl_fn_map_t
-  NOT_IMPLEMENTED,    // vpx_codec_get_mmap_fn_t
-  NOT_IMPLEMENTED,    // vpx_codec_set_mmap_fn_t
   { // NOLINT
     decoder_peek_si,    // vpx_codec_peek_si_fn_t
     decoder_get_si,     // vpx_codec_get_si_fn_t

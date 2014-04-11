@@ -1330,8 +1330,6 @@ CODEC_INTERFACE(vpx_codec_vp9_cx) = {
   encoder_init,       // vpx_codec_init_fn_t
   encoder_destroy,    // vpx_codec_destroy_fn_t
   encoder_ctrl_maps,  // vpx_codec_ctrl_fn_map_t
-  NOT_IMPLEMENTED,    // vpx_codec_get_mmap_fn_t
-  NOT_IMPLEMENTED,    // vpx_codec_set_mmap_fn_t
   {  // NOLINT
     NOT_IMPLEMENTED,  // vpx_codec_peek_si_fn_t
     NOT_IMPLEMENTED,  // vpx_codec_get_si_fn_t

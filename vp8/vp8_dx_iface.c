@@ -794,8 +794,6 @@ CODEC_INTERFACE(vpx_codec_vp8_dx) =
     vp8_init,         /* vpx_codec_init_fn_t       init; */
     vp8_destroy,      /* vpx_codec_destroy_fn_t    destroy; */
     vp8_ctf_maps,     /* vpx_codec_ctrl_fn_map_t  *ctrl_maps; */
-    NOT_IMPLEMENTED,  /* vpx_codec_get_mmap_fn_t   get_mmap; */
-    NOT_IMPLEMENTED,  /* vpx_codec_set_mmap_fn_t   set_mmap; */
     {
         vp8_peek_si,      /* vpx_codec_peek_si_fn_t    peek_si; */
         vp8_get_si,       /* vpx_codec_get_si_fn_t     get_si; */
