@@ -3910,10 +3910,11 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 
     // TODO(jingning, jkoleszar): scaling reference frame not supported for
     // sub8x8 blocks.
-    if (ref_frame > NONE && vp9_is_scaled(&cm->frame_refs[ref_frame - 1].sf))
+    if (ref_frame > INTRA_FRAME &&
+        vp9_is_scaled(&cm->frame_refs[ref_frame - 1].sf))
       continue;
 
-    if (second_ref_frame > NONE &&
+    if (second_ref_frame > INTRA_FRAME &&
         vp9_is_scaled(&cm->frame_refs[second_ref_frame - 1].sf))
       continue;
 
