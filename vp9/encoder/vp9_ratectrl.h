@@ -174,6 +174,8 @@ int vp9_compute_qdelta(const RATE_CONTROL *rc, double qstart, double qtarget);
 int vp9_compute_qdelta_by_rate(const RATE_CONTROL *rc, FRAME_TYPE frame_type,
                                int qindex, double rate_target_ratio);
 
+void vp9_rc_update_framerate(struct VP9_COMP *cpi);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

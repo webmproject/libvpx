@@ -27,6 +27,11 @@
 #include "vp9/encoder/vp9_encodemv.h"
 #include "vp9/encoder/vp9_ratectrl.h"
 
+// Max rate target for 1080P and below encodes under normal circumstances
+// (1920 * 1080 / (16 * 16)) * MAX_MB_RATE bits per MB
+#define MAX_MB_RATE 250
+#define MAXRATE_1080P 2025000
+
 #define DEFAULT_KF_BOOST 2000
 #define DEFAULT_GF_BOOST 2000
 
@@ -1398,4 +1403,47 @@ int vp9_compute_qdelta_by_rate(const RATE_CONTROL *rc, FRAME_TYPE frame_type,
   }
 
   return target_index - qindex;
+}
+
+void vp9_rc_update_framerate(VP9_COMP *cpi) {
+  const VP9_COMMON *const cm = &cpi->common;
+  const VP9_CONFIG *const oxcf = &cpi->oxcf;
+  RATE_CONTROL *const rc = &cpi->rc;
+  int vbr_max_bits;
+
+  rc->av_per_frame_bandwidth = (int)(oxcf->target_bandwidth / oxcf->framerate);
+  rc->min_frame_bandwidth = (int)(rc->av_per_frame_bandwidth *
+                                oxcf->two_pass_vbrmin_section / 100);
+
+  rc->min_frame_bandwidth = MAX(rc->min_frame_bandwidth, FRAME_OVERHEAD_BITS);
+
+  // A maximum bitrate for a frame is defined.
+  // The baseline for this aligns with HW implementations that
+  // can support decode of 1080P content up to a bitrate of MAX_MB_RATE bits
+  // per 16x16 MB (averaged over a frame). However this limit is extended if
+  // a very high rate is given on the command line or the the rate cannnot
+  // be acheived because of a user specificed max q (e.g. when the user
+  // specifies lossless encode.
+  vbr_max_bits = (int)(((int64_t)rc->av_per_frame_bandwidth *
+                     oxcf->two_pass_vbrmax_section) / 100);
+  rc->max_frame_bandwidth = MAX(MAX((cm->MBs * MAX_MB_RATE), MAXRATE_1080P),
+                                    vbr_max_bits);
+
+  // Set Maximum gf/arf interval
+  rc->max_gf_interval = 16;
+
+  // Extended interval for genuinely static scenes
+  rc->static_scene_max_gf_interval = cpi->key_frame_frequency >> 1;
+
+  // Special conditions when alt ref frame enabled in lagged compress mode
+  if (oxcf->play_alternate && oxcf->lag_in_frames) {
+    if (rc->max_gf_interval > oxcf->lag_in_frames - 1)
+      rc->max_gf_interval = oxcf->lag_in_frames - 1;
+
+    if (rc->static_scene_max_gf_interval > oxcf->lag_in_frames - 1)
+      rc->static_scene_max_gf_interval = oxcf->lag_in_frames - 1;
+  }
+
+  if (rc->max_gf_interval > rc->static_scene_max_gf_interval)
+    rc->max_gf_interval = rc->static_scene_max_gf_interval;
 }
