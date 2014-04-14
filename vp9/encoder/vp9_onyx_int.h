@@ -596,7 +596,7 @@ static INLINE YV12_BUFFER_CONFIG *get_ref_frame_buffer(
 
 // Intra only frames, golden frames (except alt ref overlays) and
 // alt ref frames tend to be coded at a higher than ambient quality
-static INLINE int vp9_frame_is_boosted(const VP9_COMP *cpi) {
+static INLINE int frame_is_boosted(const VP9_COMP *cpi) {
   return frame_is_intra_only(&cpi->common) || cpi->refresh_alt_ref_frame ||
          (cpi->refresh_golden_frame && !cpi->rc.is_src_frame_alt_ref);
 }
