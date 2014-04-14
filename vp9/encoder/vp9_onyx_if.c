@@ -376,7 +376,7 @@ static void update_reference_segmentation_map(VP9_COMP *cpi) {
   }
 }
 static int is_slowest_mode(int mode) {
-  return (mode == MODE_SECONDPASS_BEST || mode == MODE_BESTQUALITY);
+  return (mode == TWO_PASS_SECOND_BEST || mode == ONE_PASS_BEST);
 }
 
 static void set_rd_speed_thresholds(VP9_COMP *cpi) {
@@ -670,7 +670,7 @@ static void init_config(struct VP9_COMP *cpi, VP9_CONFIG *oxcf) {
   if ((cpi->svc.number_temporal_layers > 1 &&
       cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) ||
       (cpi->svc.number_spatial_layers > 1 &&
-      cpi->oxcf.mode == MODE_SECONDPASS_BEST)) {
+      cpi->oxcf.mode == TWO_PASS_SECOND_BEST)) {
     vp9_init_layer_context(cpi);
   }
 
@@ -710,29 +710,29 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9_CONFIG *oxcf) {
 
   switch (cpi->oxcf.mode) {
       // Real time and one pass deprecated in test code base
-    case MODE_GOODQUALITY:
+    case ONE_PASS_GOOD:
       cpi->pass = 0;
       cpi->oxcf.cpu_used = clamp(cpi->oxcf.cpu_used, -5, 5);
       break;
 
-    case MODE_BESTQUALITY:
+    case ONE_PASS_BEST:
       cpi->pass = 0;
       break;
 
-    case MODE_FIRSTPASS:
+    case TWO_PASS_FIRST:
       cpi->pass = 1;
       break;
 
-    case MODE_SECONDPASS:
+    case TWO_PASS_SECOND_GOOD:
       cpi->pass = 2;
       cpi->oxcf.cpu_used = clamp(cpi->oxcf.cpu_used, -5, 5);
       break;
 
-    case MODE_SECONDPASS_BEST:
+    case TWO_PASS_SECOND_BEST:
       cpi->pass = 2;
       break;
 
-    case MODE_REALTIME:
+    case REALTIME:
       cpi->pass = 0;
       break;
   }

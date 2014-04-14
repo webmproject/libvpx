@@ -300,13 +300,13 @@ static vpx_codec_err_t set_encoder_config(
 
   switch (cfg->g_pass) {
     case VPX_RC_ONE_PASS:
-      oxcf->mode = MODE_GOODQUALITY;
+      oxcf->mode = ONE_PASS_GOOD;
       break;
     case VPX_RC_FIRST_PASS:
-      oxcf->mode = MODE_FIRSTPASS;
+      oxcf->mode = TWO_PASS_FIRST;
       break;
     case VPX_RC_LAST_PASS:
-      oxcf->mode = MODE_SECONDPASS_BEST;
+      oxcf->mode = TWO_PASS_SECOND_BEST;
       break;
   }
 
@@ -591,7 +591,7 @@ static void pick_quickcompress_mode(vpx_codec_alg_priv_t  *ctx,
                                     unsigned long duration,
                                     unsigned long deadline) {
   // Use best quality mode if no deadline is given.
-  MODE new_qc = MODE_BESTQUALITY;
+  MODE new_qc = ONE_PASS_BEST;
 
   if (deadline) {
     // Convert duration parameter from stream timebase to microseconds
@@ -601,14 +601,14 @@ static void pick_quickcompress_mode(vpx_codec_alg_priv_t  *ctx,
 
     // If the deadline is more that the duration this frame is to be shown,
     // use good quality mode. Otherwise use realtime mode.
-    new_qc = (deadline > duration_us) ? MODE_GOODQUALITY : MODE_REALTIME;
+    new_qc = (deadline > duration_us) ? ONE_PASS_GOOD : REALTIME;
   }
 
   if (ctx->cfg.g_pass == VPX_RC_FIRST_PASS)
-    new_qc = MODE_FIRSTPASS;
+    new_qc = TWO_PASS_FIRST;
   else if (ctx->cfg.g_pass == VPX_RC_LAST_PASS)
-    new_qc = (new_qc == MODE_BESTQUALITY) ? MODE_SECONDPASS_BEST
-                                          : MODE_SECONDPASS;
+    new_qc = (new_qc == ONE_PASS_BEST) ? TWO_PASS_SECOND_BEST
+                                          : TWO_PASS_SECOND_GOOD;
 
   if (ctx->oxcf.mode != new_qc) {
     ctx->oxcf.mode = new_qc;

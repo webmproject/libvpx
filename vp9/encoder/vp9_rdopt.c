@@ -1806,8 +1806,8 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
           if (best_rd < label_mv_thresh)
             break;
 
-          if (cpi->oxcf.mode != MODE_SECONDPASS_BEST &&
-              cpi->oxcf.mode != MODE_BESTQUALITY) {
+          if (cpi->oxcf.mode != TWO_PASS_SECOND_BEST &&
+              cpi->oxcf.mode != ONE_PASS_BEST) {
             // use previous block's result as next block's MV predictor.
             if (i > 0) {
               bsi->mvp.as_int = mi->bmi[i - 1].as_mv[0].as_int;
@@ -1883,8 +1883,8 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
           }
 
           // Should we do a full search (best quality only)
-          if (cpi->oxcf.mode == MODE_BESTQUALITY ||
-              cpi->oxcf.mode == MODE_SECONDPASS_BEST) {
+          if (cpi->oxcf.mode == ONE_PASS_BEST ||
+              cpi->oxcf.mode == TWO_PASS_SECOND_BEST) {
             int_mv *const best_mv = &mi->bmi[i].as_mv[0];
             /* Check if mvp_full is within the range. */
             clamp_mv(&mvp_full, x->mv_col_min, x->mv_col_max,

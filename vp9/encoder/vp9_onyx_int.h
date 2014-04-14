@@ -142,33 +142,33 @@ typedef enum {
   // Good Quality Fast Encoding. The encoder balances quality with the
   // amount of time it takes to encode the output. (speed setting
   // controls how fast)
-  MODE_GOODQUALITY = 1,
+  ONE_PASS_GOOD = 1,
 
   // One Pass - Best Quality. The encoder places priority on the
   // quality of the output over encoding speed. The output is compressed
   // at the highest possible quality. This option takes the longest
   // amount of time to encode. (speed setting ignored)
-  MODE_BESTQUALITY = 2,
+  ONE_PASS_BEST = 2,
 
   // Two Pass - First Pass. The encoder generates a file of statistics
   // for use in the second encoding pass. (speed setting controls how fast)
-  MODE_FIRSTPASS = 3,
+  TWO_PASS_FIRST = 3,
 
   // Two Pass - Second Pass. The encoder uses the statistics that were
   // generated in the first encoding pass to create the compressed
   // output. (speed setting controls how fast)
-  MODE_SECONDPASS = 4,
+  TWO_PASS_SECOND_GOOD = 4,
 
   // Two Pass - Second Pass Best.  The encoder uses the statistics that
   // were generated in the first encoding pass to create the compressed
   // output using the highest possible quality, and taking a
   // longer amount of time to encode. (speed setting ignored)
-  MODE_SECONDPASS_BEST = 5,
+  TWO_PASS_SECOND_BEST = 5,
 
   // Realtime/Live Encoding. This mode is optimized for realtime
   // encoding (for example, capturing a television signal or feed from
   // a live camera). (speed setting controls how fast)
-  MODE_REALTIME = 6,
+  REALTIME = 6,
 } MODE;
 
 typedef enum {
