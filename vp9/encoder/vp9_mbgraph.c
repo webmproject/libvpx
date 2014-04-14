@@ -77,12 +77,12 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
           INT_MAX);
 }
 
-static int do_16x16_motion_search(VP9_COMP *cpi, const int_mv *ref_mv,
+static int do_16x16_motion_search(VP9_COMP *cpi, const MV *ref_mv,
                                   int_mv *dst_mv, int mb_row, int mb_col) {
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   unsigned int err, tmp_err;
-  int_mv tmp_mv;
+  MV tmp_mv;
 
   // Try zero MV first
   // FIXME should really use something like near/nearest MV and/or MV prediction
@@ -93,24 +93,22 @@ static int do_16x16_motion_search(VP9_COMP *cpi, const int_mv *ref_mv,
 
   // Test last reference frame using the previous best mv as the
   // starting point (best reference) for the search
-  tmp_err = do_16x16_motion_iteration(cpi, &ref_mv->as_mv, &tmp_mv.as_mv,
-                                      mb_row, mb_col);
+  tmp_err = do_16x16_motion_iteration(cpi, ref_mv, &tmp_mv, mb_row, mb_col);
   if (tmp_err < err) {
     err = tmp_err;
-    dst_mv->as_int = tmp_mv.as_int;
+    dst_mv->as_mv = tmp_mv;
   }
 
   // If the current best reference mv is not centered on 0,0 then do a 0,0
   // based search as well.
-  if (ref_mv->as_int) {
+  if (ref_mv->row != 0 || ref_mv->col != 0) {
     unsigned int tmp_err;
-    int_mv zero_ref_mv, tmp_mv;
+    MV zero_ref_mv = {0, 0}, tmp_mv;
 
-    zero_ref_mv.as_int = 0;
-    tmp_err = do_16x16_motion_iteration(cpi, &zero_ref_mv.as_mv, &tmp_mv.as_mv,
+    tmp_err = do_16x16_motion_iteration(cpi, &zero_ref_mv, &tmp_mv,
                                         mb_row, mb_col);
     if (tmp_err < err) {
-      dst_mv->as_int = tmp_mv.as_int;
+      dst_mv->as_mv = tmp_mv;
       err = tmp_err;
     }
   }
@@ -173,7 +171,7 @@ static void update_mbgraph_mb_stats
   YV12_BUFFER_CONFIG *buf,
   int mb_y_offset,
   YV12_BUFFER_CONFIG *golden_ref,
-  int_mv *prev_golden_ref_mv,
+  const MV *prev_golden_ref_mv,
   YV12_BUFFER_CONFIG *alt_ref,
   int mb_row,
   int mb_col
@@ -239,13 +237,11 @@ static void update_mbgraph_frame_stats(VP9_COMP *cpi,
 
   int mb_col, mb_row, offset = 0;
   int mb_y_offset = 0, arf_y_offset = 0, gld_y_offset = 0;
-  int_mv arf_top_mv, gld_top_mv;
+  MV arf_top_mv = {0, 0}, gld_top_mv = {0, 0};
   MODE_INFO mi_local = { { 0 } };
 
   // Set up limit values for motion vectors to prevent them extending outside
   // the UMV borders.
-  arf_top_mv.as_int = 0;
-  gld_top_mv.as_int = 0;
   x->mv_row_min     = -BORDER_MV_PIXELS_B16;
   x->mv_row_max     = (cm->mb_rows - 1) * 8 + BORDER_MV_PIXELS_B16;
   xd->up_available  = 0;
@@ -258,15 +254,13 @@ static void update_mbgraph_frame_stats(VP9_COMP *cpi,
   mi_local.mbmi.ref_frame[1] = NONE;
 
   for (mb_row = 0; mb_row < cm->mb_rows; mb_row++) {
-    int_mv arf_left_mv, gld_left_mv;
+    MV arf_left_mv = arf_top_mv, gld_left_mv = gld_top_mv;
     int mb_y_in_offset  = mb_y_offset;
     int arf_y_in_offset = arf_y_offset;
     int gld_y_in_offset = gld_y_offset;
 
     // Set up limit values for motion vectors to prevent them extending outside
     // the UMV borders.
-    arf_left_mv.as_int = arf_top_mv.as_int;
-    gld_left_mv.as_int = gld_top_mv.as_int;
     x->mv_col_min      = -BORDER_MV_PIXELS_B16;
     x->mv_col_max      = (cm->mb_cols - 1) * 8 + BORDER_MV_PIXELS_B16;
     xd->left_available = 0;
@@ -277,11 +271,11 @@ static void update_mbgraph_frame_stats(VP9_COMP *cpi,
       update_mbgraph_mb_stats(cpi, mb_stats, buf, mb_y_in_offset,
                               golden_ref, &gld_left_mv, alt_ref,
                               mb_row, mb_col);
-      arf_left_mv.as_int = mb_stats->ref[ALTREF_FRAME].m.mv.as_int;
-      gld_left_mv.as_int = mb_stats->ref[GOLDEN_FRAME].m.mv.as_int;
+      arf_left_mv = mb_stats->ref[ALTREF_FRAME].m.mv.as_mv;
+      gld_left_mv = mb_stats->ref[GOLDEN_FRAME].m.mv.as_mv;
       if (mb_col == 0) {
-        arf_top_mv.as_int = arf_left_mv.as_int;
-        gld_top_mv.as_int = gld_left_mv.as_int;
+        arf_top_mv = arf_left_mv;
+        gld_top_mv = gld_left_mv;
       }
       xd->left_available = 1;
       mb_y_in_offset    += 16;
