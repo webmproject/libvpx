@@ -815,10 +815,7 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9_CONFIG *oxcf) {
   cm->display_width = cpi->oxcf.width;
   cm->display_height = cpi->oxcf.height;
 
-  // VP8 sharpness level mapping 0-7 (vs 0-10 in general VPx dialogs)
-  cpi->oxcf.sharpness = MIN(7, cpi->oxcf.sharpness);
-
-  cpi->common.lf.sharpness_level = cpi->oxcf.sharpness;
+  cm->lf.sharpness_level = cpi->oxcf.sharpness;
 
   if (cpi->initial_width) {
     // Increasing the size of the frame beyond the first seen frame, or some
@@ -837,10 +834,6 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9_CONFIG *oxcf) {
   }
 
   cpi->speed = abs(cpi->oxcf.cpu_used);
-
-  // Limit on lag buffers as these are not currently dynamically allocated.
-  if (cpi->oxcf.lag_in_frames > MAX_LAG_BUFFERS)
-    cpi->oxcf.lag_in_frames = MAX_LAG_BUFFERS;
 
 #if CONFIG_MULTIPLE_ARF
   vp9_zero(cpi->alt_ref_source);
