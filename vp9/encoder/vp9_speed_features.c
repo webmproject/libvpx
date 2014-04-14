@@ -73,8 +73,8 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
   }
 
   if (speed >= 2) {
-    sf->tx_size_search_method = vp9_frame_is_boosted(cpi) ? USE_FULL_RD
-                                                          : USE_LARGESTALL;
+    sf->tx_size_search_method = frame_is_intra_only(cm) ? USE_FULL_RD
+                                                        : USE_LARGESTALL;
 
     if (MIN(cm->width, cm->height) >= 720)
       sf->disable_split_mask = cm->show_frame ? DISABLE_ALL_SPLIT
