@@ -235,6 +235,10 @@ static const arg_def_t dropframe_thresh   = ARG_DEF(NULL, "drop-frame", 1,
                                                     "Temporal resampling threshold (buf %)");
 static const arg_def_t resize_allowed     = ARG_DEF(NULL, "resize-allowed", 1,
                                                     "Spatial resampling enabled (bool)");
+static const arg_def_t resize_width       = ARG_DEF(NULL, "resize-width", 1,
+                                                    "Width of encoded frame");
+static const arg_def_t resize_height      = ARG_DEF(NULL, "resize-height", 1,
+                                                    "Height of encoded frame");
 static const arg_def_t resize_up_thresh   = ARG_DEF(NULL, "resize-up", 1,
                                                     "Upscale threshold (buf %)");
 static const arg_def_t resize_down_thresh = ARG_DEF(NULL, "resize-down", 1,
@@ -265,10 +269,10 @@ static const arg_def_t buf_initial_sz     = ARG_DEF(NULL, "buf-initial-sz", 1,
 static const arg_def_t buf_optimal_sz     = ARG_DEF(NULL, "buf-optimal-sz", 1,
                                                     "Client optimal buffer size (ms)");
 static const arg_def_t *rc_args[] = {
-  &dropframe_thresh, &resize_allowed, &resize_up_thresh, &resize_down_thresh,
-  &end_usage, &target_bitrate, &min_quantizer, &max_quantizer,
-  &undershoot_pct, &overshoot_pct, &buf_sz, &buf_initial_sz, &buf_optimal_sz,
-  NULL
+  &dropframe_thresh, &resize_allowed, &resize_width, &resize_height,
+  &resize_up_thresh, &resize_down_thresh, &end_usage, &target_bitrate,
+  &min_quantizer, &max_quantizer, &undershoot_pct, &overshoot_pct, &buf_sz,
+  &buf_initial_sz, &buf_optimal_sz, NULL
 };
 
 
@@ -883,6 +887,10 @@ static int parse_stream_params(struct VpxEncoderConfig *global,
       config->cfg.rc_dropframe_thresh = arg_parse_uint(&arg);
     } else if (arg_match(&arg, &resize_allowed, argi)) {
       config->cfg.rc_resize_allowed = arg_parse_uint(&arg);
+    } else if (arg_match(&arg, &resize_width, argi)) {
+      config->cfg.rc_scaled_width = arg_parse_uint(&arg);
+    } else if (arg_match(&arg, &resize_height, argi)) {
+      config->cfg.rc_scaled_height = arg_parse_uint(&arg);
     } else if (arg_match(&arg, &resize_up_thresh, argi)) {
       config->cfg.rc_resize_up_thresh = arg_parse_uint(&arg);
     } else if (arg_match(&arg, &resize_down_thresh, argi)) {
@@ -1067,6 +1075,8 @@ static void show_stream_config(struct stream_state *stream,
   SHOW(g_lag_in_frames);
   SHOW(rc_dropframe_thresh);
   SHOW(rc_resize_allowed);
+  SHOW(rc_scaled_width);
+  SHOW(rc_scaled_height);
   SHOW(rc_resize_up_thresh);
   SHOW(rc_resize_down_thresh);
   SHOW(rc_end_usage);

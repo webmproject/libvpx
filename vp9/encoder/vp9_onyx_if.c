@@ -2997,6 +2997,15 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
   cm->frame_flags = *frame_flags;
 
+  if (cpi->pass == 2 &&
+      cm->current_video_frame == 0 &&
+      cpi->oxcf.allow_spatial_resampling &&
+      cpi->oxcf.end_usage == USAGE_LOCAL_FILE_PLAYBACK) {
+    // Internal scaling is triggered on the first frame.
+    vp9_set_size_literal(cpi, cpi->oxcf.scaled_frame_width,
+                         cpi->oxcf.scaled_frame_height);
+  }
+
   // Reset the frame pointers to the current frame size
   vp9_realloc_frame_buffer(get_frame_new_buffer(cm),
                            cm->width, cm->height,

@@ -396,6 +396,19 @@ extern "C" {
      */
     unsigned int           rc_resize_allowed;
 
+    /*!\brief Internal coded frame width.
+     *
+     * If spatial resampling is enabled this specifies the width of the
+     * encoded frame.
+     */
+    unsigned int           rc_scaled_width;
+
+    /*!\brief Internal coded frame height.
+     *
+     * If spatial resampling is enabled this specifies the height of the
+     * encoded frame.
+     */
+    unsigned int           rc_scaled_height;
 
     /*!\brief Spatial resampling up watermark.
      *
