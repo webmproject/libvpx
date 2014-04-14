@@ -1677,14 +1677,14 @@ static INLINE int mv_has_subpel(const MV *mv) {
 static int check_best_zero_mv(
     const VP9_COMP *cpi, const uint8_t mode_context[MAX_REF_FRAMES],
     int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES],
-    int disable_inter_mode_mask, int this_mode, int ref_frame,
-    int second_ref_frame) {
+    int disable_inter_mode_mask, int this_mode,
+    const MV_REFERENCE_FRAME ref_frames[2]) {
   if (!(disable_inter_mode_mask & (1 << INTER_OFFSET(ZEROMV))) &&
       (this_mode == NEARMV || this_mode == NEARESTMV || this_mode == ZEROMV) &&
-      frame_mv[this_mode][ref_frame].as_int == 0 &&
-      (second_ref_frame == NONE ||
-       frame_mv[this_mode][second_ref_frame].as_int == 0)) {
-    int rfc = mode_context[ref_frame];
+      frame_mv[this_mode][ref_frames[0]].as_int == 0 &&
+      (ref_frames[1] == NONE ||
+       frame_mv[this_mode][ref_frames[1]].as_int == 0)) {
+    int rfc = mode_context[ref_frames[0]];
     int c1 = cost_mv_ref(cpi, NEARMV, rfc);
     int c2 = cost_mv_ref(cpi, NEARESTMV, rfc);
     int c3 = cost_mv_ref(cpi, ZEROMV, rfc);
@@ -1695,15 +1695,15 @@ static int check_best_zero_mv(
       if (c2 > c3) return 0;
     } else {
       assert(this_mode == ZEROMV);
-      if (second_ref_frame == NONE) {
-        if ((c3 >= c2 && frame_mv[NEARESTMV][ref_frame].as_int == 0) ||
-            (c3 >= c1 && frame_mv[NEARMV][ref_frame].as_int == 0))
+      if (ref_frames[1] == NONE) {
+        if ((c3 >= c2 && frame_mv[NEARESTMV][ref_frames[0]].as_int == 0) ||
+            (c3 >= c1 && frame_mv[NEARMV][ref_frames[0]].as_int == 0))
           return 0;
       } else {
-        if ((c3 >= c2 && frame_mv[NEARESTMV][ref_frame].as_int == 0 &&
-             frame_mv[NEARESTMV][second_ref_frame].as_int == 0) ||
-            (c3 >= c1 && frame_mv[NEARMV][ref_frame].as_int == 0 &&
-             frame_mv[NEARMV][second_ref_frame].as_int == 0))
+        if ((c3 >= c2 && frame_mv[NEARESTMV][ref_frames[0]].as_int == 0 &&
+             frame_mv[NEARESTMV][ref_frames[1]].as_int == 0) ||
+            (c3 >= c1 && frame_mv[NEARMV][ref_frames[0]].as_int == 0 &&
+             frame_mv[NEARMV][ref_frames[1]].as_int == 0))
           return 0;
       }
     }
@@ -1781,8 +1781,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
 
         if (!check_best_zero_mv(cpi, mbmi->mode_context, frame_mv,
                                 disable_inter_mode_mask,
-                                this_mode, mbmi->ref_frame[0],
-                                mbmi->ref_frame[1]))
+                                this_mode, mbmi->ref_frame))
           continue;
 
         vpx_memcpy(orig_pre, pd->pre, sizeof(orig_pre));
@@ -3379,11 +3378,12 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       }
     } else {
       if (x->in_active_map &&
-          !vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP))
+          !vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
+        const MV_REFERENCE_FRAME ref_frames[2] = {ref_frame, second_ref_frame};
         if (!check_best_zero_mv(cpi, mbmi->mode_context, frame_mv,
-                                disable_inter_mode_mask, this_mode, ref_frame,
-                                second_ref_frame))
+                                disable_inter_mode_mask, this_mode, ref_frames))
           continue;
+      }
     }
 
     mbmi->mode = this_mode;
