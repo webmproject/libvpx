@@ -114,6 +114,7 @@ int webm_read_frame(struct WebmInputContext *webm_ctx,
                     size_t *buffer_size) {
   if (webm_ctx->chunk >= webm_ctx->chunks) {
     uint32_t track;
+    int status;
 
     do {
       /* End of this packet, get another. */
@@ -122,21 +123,23 @@ int webm_read_frame(struct WebmInputContext *webm_ctx,
         webm_ctx->pkt = NULL;
       }
 
-      if (nestegg_read_packet(webm_ctx->nestegg_ctx, &webm_ctx->pkt) <= 0 ||
-          nestegg_packet_track(webm_ctx->pkt, &track)) {
-        return 1;
-      }
+      status = nestegg_read_packet(webm_ctx->nestegg_ctx, &webm_ctx->pkt);
+      if (status <= 0)
+        return status ? status : 1;
+
+      if (nestegg_packet_track(webm_ctx->pkt, &track))
+        return -1;
     } while (track != webm_ctx->video_track);
 
     if (nestegg_packet_count(webm_ctx->pkt, &webm_ctx->chunks))
-      return 1;
+      return -1;
 
     webm_ctx->chunk = 0;
   }
 
   if (nestegg_packet_data(webm_ctx->pkt, webm_ctx->chunk,
                           buffer, bytes_in_buffer)) {
-    return 1;
+    return -1;
   }
 
   webm_ctx->chunk++;
