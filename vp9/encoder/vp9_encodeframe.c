@@ -1355,6 +1355,25 @@ static void set_fixed_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
   }
 }
 
+static void copy_partitioning(VP9_COMMON *cm, MODE_INFO **mi_8x8,
+  MODE_INFO **prev_mi_8x8) {
+  const int mis = cm->mi_stride;
+  int block_row, block_col;
+
+  for (block_row = 0; block_row < 8; ++block_row) {
+    for (block_col = 0; block_col < 8; ++block_col) {
+      MODE_INFO *const prev_mi = prev_mi_8x8[block_row * mis + block_col];
+      const BLOCK_SIZE sb_type = prev_mi ? prev_mi->mbmi.sb_type : 0;
+
+      if (prev_mi) {
+        const ptrdiff_t offset = prev_mi - cm->prev_mi;
+        mi_8x8[block_row * mis + block_col] = cm->mi + offset;
+        mi_8x8[block_row * mis + block_col]->mbmi.sb_type = sb_type;
+      }
+    }
+  }
+}
+
 static void constrain_copy_partitioning(VP9_COMP *const cpi,
                                         const TileInfo *const tile,
                                         MODE_INFO **mi_8x8,
@@ -1404,38 +1423,10 @@ static void constrain_copy_partitioning(VP9_COMP *const cpi,
     }
   } else {
     // Else this is a partial SB64, copy previous partition.
-    for (block_row = 0; block_row < 8; ++block_row) {
-      for (block_col = 0; block_col < 8; ++block_col) {
-        MODE_INFO *const prev_mi = prev_mi_8x8[block_row * mis + block_col];
-        const BLOCK_SIZE sb_type = prev_mi ? prev_mi->mbmi.sb_type : 0;
-        if (prev_mi) {
-          const ptrdiff_t offset = prev_mi - cm->prev_mi;
-          mi_8x8[block_row * mis + block_col] = cm->mi + offset;
-          mi_8x8[block_row * mis + block_col]->mbmi.sb_type = sb_type;
-        }
-      }
-    }
+    copy_partitioning(cm, mi_8x8, prev_mi_8x8);
   }
 }
 
-static void copy_partitioning(VP9_COMMON *cm, MODE_INFO **mi_8x8,
-                              MODE_INFO **prev_mi_8x8) {
-  const int mis = cm->mi_stride;
-  int block_row, block_col;
-
-  for (block_row = 0; block_row < 8; ++block_row) {
-    for (block_col = 0; block_col < 8; ++block_col) {
-      MODE_INFO *const prev_mi = prev_mi_8x8[block_row * mis + block_col];
-      const BLOCK_SIZE sb_type = prev_mi ? prev_mi->mbmi.sb_type : 0;
-
-      if (prev_mi) {
-        const ptrdiff_t offset = prev_mi - cm->prev_mi;
-        mi_8x8[block_row * mis + block_col] = cm->mi + offset;
-        mi_8x8[block_row * mis + block_col]->mbmi.sb_type = sb_type;
-      }
-    }
-  }
-}
 
 const struct {
   int row;
