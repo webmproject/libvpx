@@ -76,14 +76,6 @@ static INLINE uint8_t *get_sb_index(MACROBLOCK *x, BLOCK_SIZE subsize) {
 static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
                               int mi_row, int mi_col, BLOCK_SIZE bsize);
 
-static void adjust_act_zbin(VP9_COMP *cpi, MACROBLOCK *x);
-
-// activity_avg must be positive, or flat regions could get a zero weight
-//  (infinite lambda), which confounds analysis.
-// This also avoids the need for divide by zero checks in
-//  vp9_activity_masking().
-#define ACTIVITY_AVG_MIN 64
-
 // Motion vector component magnitude threshold for defining fast motion.
 #define FAST_MOTION_MV_THRESH 24
 
@@ -209,15 +201,11 @@ static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
   MB_MODE_INFO *mbmi;
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
-  const int mb_row = mi_row >> 1;
-  const int mb_col = mi_col >> 1;
-  const int idx_map = mb_row * cm->mb_cols + mb_col;
   const struct segmentation *const seg = &cm->seg;
 
   set_skip_context(xd, mi_row, mi_col);
 
   // Activity map pointer
-  x->mb_activity_ptr = &cpi->mb_activity_map[idx_map];
   x->in_active_map = check_active_map(cpi, x, mi_row, mi_col, bsize);
 
   set_modeinfo_offsets(cm, xd, mi_row, mi_col);
@@ -601,219 +589,6 @@ static unsigned int alt_activity_measure(MACROBLOCK *x, int use_dc_pred) {
   return vp9_encode_intra(x, use_dc_pred);
 }
 
-// Measure the activity of the current macroblock
-// What we measure here is TBD so abstracted to this function
-#define ALT_ACT_MEASURE 1
-static unsigned int mb_activity_measure(MACROBLOCK *x, int mb_row, int mb_col) {
-  unsigned int mb_activity;
-
-  if (ALT_ACT_MEASURE) {
-    const int use_dc_pred = (mb_col || mb_row) && (!mb_col || !mb_row);
-
-    // Or use and alternative.
-    mb_activity = alt_activity_measure(x, use_dc_pred);
-  } else {
-    // Original activity measure from Tim T's code.
-    mb_activity = tt_activity_measure(x);
-  }
-
-  return MAX(mb_activity, ACTIVITY_AVG_MIN);
-}
-
-// Calculate an "average" mb activity value for the frame
-#define ACT_MEDIAN 0
-static void calc_av_activity(VP9_COMP *cpi, int64_t activity_sum) {
-#if ACT_MEDIAN
-  // Find median: Simple n^2 algorithm for experimentation
-  {
-    unsigned int median;
-    unsigned int i, j;
-    unsigned int *sortlist;
-    unsigned int tmp;
-
-    // Create a list to sort to
-    CHECK_MEM_ERROR(&cpi->common, sortlist, vpx_calloc(sizeof(unsigned int),
-                    cpi->common.MBs));
-
-    // Copy map to sort list
-    vpx_memcpy(sortlist, cpi->mb_activity_map,
-        sizeof(unsigned int) * cpi->common.MBs);
-
-    // Ripple each value down to its correct position
-    for (i = 1; i < cpi->common.MBs; i ++) {
-      for (j = i; j > 0; j --) {
-        if (sortlist[j] < sortlist[j - 1]) {
-          // Swap values
-          tmp = sortlist[j - 1];
-          sortlist[j - 1] = sortlist[j];
-          sortlist[j] = tmp;
-        } else {
-          break;
-        }
-      }
-    }
-
-    // Even number MBs so estimate median as mean of two either side.
-    median = (1 + sortlist[cpi->common.MBs >> 1] +
-        sortlist[(cpi->common.MBs >> 1) + 1]) >> 1;
-
-    cpi->activity_avg = median;
-
-    vpx_free(sortlist);
-  }
-#else
-  // Simple mean for now
-  cpi->activity_avg = (unsigned int) (activity_sum / cpi->common.MBs);
-#endif  // ACT_MEDIAN
-
-  if (cpi->activity_avg < ACTIVITY_AVG_MIN)
-    cpi->activity_avg = ACTIVITY_AVG_MIN;
-
-  // Experimental code: return fixed value normalized for several clips
-  if (ALT_ACT_MEASURE)
-    cpi->activity_avg = 100000;
-}
-
-#define USE_ACT_INDEX   0
-#define OUTPUT_NORM_ACT_STATS   0
-
-#if USE_ACT_INDEX
-// Calculate an activity index for each mb
-static void calc_activity_index(VP9_COMP *cpi, MACROBLOCK *x) {
-  VP9_COMMON *const cm = &cpi->common;
-  int mb_row, mb_col;
-
-  int64_t act;
-  int64_t a;
-  int64_t b;
-
-#if OUTPUT_NORM_ACT_STATS
-  FILE *f = fopen("norm_act.stt", "a");
-  fprintf(f, "\n%12d\n", cpi->activity_avg);
-#endif
-
-  // Reset pointers to start of activity map
-  x->mb_activity_ptr = cpi->mb_activity_map;
-
-  // Calculate normalized mb activity number.
-  for (mb_row = 0; mb_row < cm->mb_rows; mb_row++) {
-    // for each macroblock col in image
-    for (mb_col = 0; mb_col < cm->mb_cols; mb_col++) {
-      // Read activity from the map
-      act = *(x->mb_activity_ptr);
-
-      // Calculate a normalized activity number
-      a = act + 4 * cpi->activity_avg;
-      b = 4 * act + cpi->activity_avg;
-
-      if (b >= a)
-      *(x->activity_ptr) = (int)((b + (a >> 1)) / a) - 1;
-      else
-      *(x->activity_ptr) = 1 - (int)((a + (b >> 1)) / b);
-
-#if OUTPUT_NORM_ACT_STATS
-      fprintf(f, " %6d", *(x->mb_activity_ptr));
-#endif
-      // Increment activity map pointers
-      x->mb_activity_ptr++;
-    }
-
-#if OUTPUT_NORM_ACT_STATS
-    fprintf(f, "\n");
-#endif
-  }
-
-#if OUTPUT_NORM_ACT_STATS
-  fclose(f);
-#endif
-}
-#endif  // USE_ACT_INDEX
-
-// Loop through all MBs. Note activity of each, average activity and
-// calculate a normalized activity for each
-static void build_activity_map(VP9_COMP *cpi) {
-  MACROBLOCK *const x = &cpi->mb;
-  MACROBLOCKD *xd = &x->e_mbd;
-  VP9_COMMON *const cm = &cpi->common;
-
-#if ALT_ACT_MEASURE
-  YV12_BUFFER_CONFIG *new_yv12 = get_frame_new_buffer(cm);
-  int recon_yoffset;
-  int recon_y_stride = new_yv12->y_stride;
-#endif
-
-  int mb_row, mb_col;
-  unsigned int mb_activity;
-  int64_t activity_sum = 0;
-
-  x->mb_activity_ptr = cpi->mb_activity_map;
-
-  // for each macroblock row in image
-  for (mb_row = 0; mb_row < cm->mb_rows; mb_row++) {
-#if ALT_ACT_MEASURE
-    // reset above block coeffs
-    xd->up_available = (mb_row != 0);
-    recon_yoffset = (mb_row * recon_y_stride * 16);
-#endif
-    // for each macroblock col in image
-    for (mb_col = 0; mb_col < cm->mb_cols; mb_col++) {
-#if ALT_ACT_MEASURE
-      xd->plane[0].dst.buf = new_yv12->y_buffer + recon_yoffset;
-      xd->left_available = (mb_col != 0);
-      recon_yoffset += 16;
-#endif
-
-      // measure activity
-      mb_activity = mb_activity_measure(x, mb_row, mb_col);
-
-      // Keep frame sum
-      activity_sum += mb_activity;
-
-      // Store MB level activity details.
-      *x->mb_activity_ptr = mb_activity;
-
-      // Increment activity map pointer
-      x->mb_activity_ptr++;
-
-      // adjust to the next column of source macroblocks
-      x->plane[0].src.buf += 16;
-    }
-
-    // adjust to the next row of mbs
-    x->plane[0].src.buf += 16 * x->plane[0].src.stride - 16 * cm->mb_cols;
-  }
-
-  // Calculate an "average" MB activity
-  calc_av_activity(cpi, activity_sum);
-
-#if USE_ACT_INDEX
-  // Calculate an activity index number of each mb
-  calc_activity_index(cpi, x);
-#endif
-}
-
-// Macroblock activity masking
-static void activity_masking(VP9_COMP *cpi, MACROBLOCK *x) {
-#if USE_ACT_INDEX
-  x->rdmult += *(x->mb_activity_ptr) * (x->rdmult >> 2);
-  x->errorperbit = x->rdmult * 100 / (110 * x->rddiv);
-  x->errorperbit += (x->errorperbit == 0);
-#else
-  const int64_t act = *(x->mb_activity_ptr);
-
-  // Apply the masking to the RD multiplier.
-  const int64_t a = act + (2 * cpi->activity_avg);
-  const int64_t b = (2 * act) + cpi->activity_avg;
-
-  x->rdmult = (unsigned int) (((int64_t) x->rdmult * b + (a >> 1)) / a);
-  x->errorperbit = x->rdmult * 100 / (110 * x->rddiv);
-  x->errorperbit += (x->errorperbit == 0);
-#endif
-
-  // Activity based Zbin adjustment
-  adjust_act_zbin(cpi, x);
-}
-
 static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
                          int mi_row, int mi_col, BLOCK_SIZE bsize,
                          int output_enabled) {
@@ -1015,8 +790,6 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
 
   // Save rdmult before it might be changed, so it can be restored later.
   orig_rdmult = x->rdmult;
-  if (cpi->oxcf.tuning == VP8_TUNE_SSIM)
-    activity_masking(cpi, x);
 
   if (aq_mode == VARIANCE_AQ) {
     const int energy = bsize <= BLOCK_16X16 ? x->mb_energy
@@ -2564,8 +2337,6 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
   MACROBLOCKD *const xd = &x->e_mbd;
   const int aligned_mi_cols = mi_cols_aligned_to_sb(cm->mi_cols);
 
-  x->act_zbin_adj = 0;
-
   // Copy data over into macro block data structures.
   vp9_setup_src_planes(x, cpi->Source, 0, 0);
 
@@ -3257,10 +3028,6 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   vp9_initialize_rd_consts(cpi);
   vp9_initialize_me_consts(cpi, cm->base_qindex);
   init_encode_frame_mb_context(cpi);
-
-  if (cpi->oxcf.tuning == VP8_TUNE_SSIM)
-    build_activity_map(cpi);
-
   set_prev_mi(cm);
 
   if (sf->use_nonrd_pick_mode) {
@@ -3516,24 +3283,6 @@ static void sum_intra_stats(FRAME_COUNTS *counts, const MODE_INFO *mi) {
   ++counts->uv_mode[y_mode][uv_mode];
 }
 
-// Experimental stub function to create a per MB zbin adjustment based on
-// some previously calculated measure of MB activity.
-static void adjust_act_zbin(VP9_COMP *cpi, MACROBLOCK *x) {
-#if USE_ACT_INDEX
-  x->act_zbin_adj = *(x->mb_activity_ptr);
-#else
-  // Apply the masking to the RD multiplier.
-  const int64_t act = *(x->mb_activity_ptr);
-  const int64_t a = act + 4 * cpi->activity_avg;
-  const int64_t b = 4 * act + cpi->activity_avg;
-
-  if (act > cpi->activity_avg)
-    x->act_zbin_adj = (int) (((int64_t) b + (a >> 1)) / a) - 1;
-  else
-    x->act_zbin_adj = 1 - (int) (((int64_t) a + (b >> 1)) / b);
-#endif
-}
-
 static int get_zbin_mode_boost(const MB_MODE_INFO *mbmi, int enabled) {
   if (enabled) {
     if (is_inter_block(mbmi)) {
@@ -3580,25 +3329,13 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
   if (x->skip_encode)
     return;
 
-  if (cm->frame_type == KEY_FRAME) {
-    if (cpi->oxcf.tuning == VP8_TUNE_SSIM) {
-      adjust_act_zbin(cpi, x);
-      vp9_update_zbin_extra(cpi, x);
-    }
-  } else {
-    set_ref_ptrs(cm, xd, mbmi->ref_frame[0], mbmi->ref_frame[1]);
+  set_ref_ptrs(cm, xd, mbmi->ref_frame[0], mbmi->ref_frame[1]);
 
-    if (cpi->oxcf.tuning == VP8_TUNE_SSIM) {
-      // Adjust the zbin based on this MB rate.
-      adjust_act_zbin(cpi, x);
-    }
-
-    // Experimental code. Special case for gf and arf zeromv modes.
-    // Increase zbin size to suppress noise
-    cpi->zbin_mode_boost = get_zbin_mode_boost(mbmi,
-                                               cpi->zbin_mode_boost_enabled);
-    vp9_update_zbin_extra(cpi, x);
-  }
+  // Experimental code. Special case for gf and arf zeromv modes.
+  // Increase zbin size to suppress noise
+  cpi->zbin_mode_boost = get_zbin_mode_boost(mbmi,
+                                             cpi->zbin_mode_boost_enabled);
+  vp9_update_zbin_extra(cpi, x);
 
   if (!is_inter_block(mbmi)) {
     int plane;

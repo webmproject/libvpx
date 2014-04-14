@@ -488,11 +488,6 @@ typedef struct VP9_COMP {
 #endif
   int b_calculate_psnr;
 
-  // Per MB activity measurement
-  unsigned int activity_avg;
-  unsigned int *mb_activity_map;
-  int *mb_norm_activity_map;
-
   int droppable;
 
   int dummy_packing;    /* flag to indicate if packing is dummy */
