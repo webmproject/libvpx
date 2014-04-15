@@ -87,8 +87,6 @@ VP9_CX_SRCS-yes += encoder/vp9_temporal_filter.h
 VP9_CX_SRCS-yes += encoder/vp9_mbgraph.c
 VP9_CX_SRCS-yes += encoder/vp9_mbgraph.h
 
-
-VP9_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/vp9_mcomp_x86.h
 VP9_CX_SRCS-$(HAVE_MMX) += encoder/x86/vp9_variance_mmx.c
 VP9_CX_SRCS-$(HAVE_MMX) += encoder/x86/vp9_variance_impl_mmx.asm
 VP9_CX_SRCS-$(HAVE_MMX) += encoder/x86/vp9_sad_mmx.asm
