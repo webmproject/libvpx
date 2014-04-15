@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//tc4\u003d",
+        "filename": "build/make/Makefile",
+        "patchSetId": 1
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-15T23:36:13Z",
+      "side": 1,
+      "message": "why not just move the rule to libs.mk?",
+      "revId": "62a8fd290cba84330ab8e8c5828f89e7f140233d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//tc0\u003d",
+        "filename": "build/make/Makefile",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-15T23:36:13Z",
+      "side": 1,
+      "message": "note testdata will be blank if unit-tests are disabled",
+      "revId": "62a8fd290cba84330ab8e8c5828f89e7f140233d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//tcw\u003d",
+        "filename": "build/make/Makefile",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-15T23:36:13Z",
+      "side": 1,
+      "message": "could qexec this + split the long line",
+      "revId": "62a8fd290cba84330ab8e8c5828f89e7f140233d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
