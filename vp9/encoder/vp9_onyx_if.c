@@ -2364,6 +2364,17 @@ static void set_ext_overrides(VP9_COMP *cpi) {
   }
 }
 
+static YV12_BUFFER_CONFIG *scale_if_required(VP9_COMMON *cm,
+  YV12_BUFFER_CONFIG *unscaled, YV12_BUFFER_CONFIG *scaled) {
+  if (cm->mi_cols * MI_SIZE != unscaled->y_width ||
+      cm->mi_rows * MI_SIZE != unscaled->y_height) {
+    scale_and_extend_frame_nonnormative(unscaled, scaled);
+    return scaled;
+  } else {
+    return unscaled;
+  }
+}
+
 static void encode_frame_to_data_rate(VP9_COMP *cpi,
                                       size_t *size,
                                       uint8_t *dest,
@@ -2377,30 +2388,14 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   const SPEED_FEATURES *const sf = &cpi->sf;
   const unsigned int max_mv_def = MIN(cm->width, cm->height);
   struct segmentation *const seg = &cm->seg;
-
   set_ext_overrides(cpi);
 
-  /* Scale the source buffer, if required. */
-  if (cm->mi_cols * MI_SIZE != cpi->un_scaled_source->y_width ||
-      cm->mi_rows * MI_SIZE != cpi->un_scaled_source->y_height) {
-    scale_and_extend_frame_nonnormative(cpi->un_scaled_source,
-                                        &cpi->scaled_source);
-    cpi->Source = &cpi->scaled_source;
-  } else {
-    cpi->Source = cpi->un_scaled_source;
-  }
+  cpi->Source = scale_if_required(cm, cpi->un_scaled_source,
+                                  &cpi->scaled_source);
 
-  // Scale the last source buffer, if required.
-  if (cpi->unscaled_last_source != NULL) {
-    if (cm->mi_cols * MI_SIZE != cpi->unscaled_last_source->y_width ||
-        cm->mi_rows * MI_SIZE != cpi->unscaled_last_source->y_height) {
-      scale_and_extend_frame_nonnormative(cpi->unscaled_last_source,
-                                          &cpi->scaled_last_source);
-      cpi->Last_Source = &cpi->scaled_last_source;
-    } else {
-      cpi->Last_Source = cpi->unscaled_last_source;
-    }
-  }
+  if (cpi->unscaled_last_source != NULL)
+    cpi->Last_Source = scale_if_required(cm, cpi->unscaled_last_source,
+                                         &cpi->scaled_last_source);
 
   vp9_scale_references(cpi);
 
