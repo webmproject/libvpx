@@ -1310,6 +1310,22 @@ static BLOCK_SIZE find_partition_size(BLOCK_SIZE bsize,
   return bsize;
 }
 
+static void set_partial_b64x64_partition(MODE_INFO *mi, int mis,
+    int bh_in, int bw_in, int row8x8_remaining, int col8x8_remaining,
+    BLOCK_SIZE bsize, MODE_INFO **mi_8x8) {
+  int bh = bh_in;
+  int r, c;
+  for (r = 0; r < MI_BLOCK_SIZE; r += bh) {
+    int bw = bw_in;
+    for (c = 0; c < MI_BLOCK_SIZE; c += bw) {
+      const int index = r * mis + c;
+      mi_8x8[index] = mi + index;
+      mi_8x8[index]->mbmi.sb_type = find_partition_size(bsize,
+          row8x8_remaining - r, col8x8_remaining - c, &bh, &bw);
+    }
+  }
+}
+
 // This function attempts to set all mode info entries in a given SB64
 // to the same block partition size.
 // However, at the bottom and right borders of the image the requested size
@@ -1341,17 +1357,8 @@ static void set_fixed_partitioning(VP9_COMP *cpi, const TileInfo *const tile,
     }
   } else {
     // Else this is a partial SB64.
-    for (block_row = 0; block_row < MI_BLOCK_SIZE; block_row += bh) {
-      for (block_col = 0; block_col < MI_BLOCK_SIZE; block_col += bw) {
-        int index = block_row * mis + block_col;
-        // Find a partition size that fits
-        bsize = find_partition_size(bsize,
-                                    (row8x8_remaining - block_row),
-                                    (col8x8_remaining - block_col), &bh, &bw);
-        mi_8x8[index] = mi_upper_left + index;
-        mi_8x8[index]->mbmi.sb_type = bsize;
-      }
-    }
+    set_partial_b64x64_partition(mi_upper_left, mis, bh, bw, row8x8_remaining,
+        col8x8_remaining, bsize, mi_8x8);
   }
 }
 
@@ -1530,18 +1537,10 @@ static void set_source_var_based_partition(VP9_COMP *cpi,
       }
     }
   } else {   // partial in-image SB64
-    BLOCK_SIZE bsize = BLOCK_16X16;
-    int bh = num_8x8_blocks_high_lookup[bsize];
-    int bw = num_8x8_blocks_wide_lookup[bsize];
-    int r, c;
-    for (r = 0; r < MI_BLOCK_SIZE; r += bh) {
-      for (c = 0; c < MI_BLOCK_SIZE; c += bw) {
-        const int index = r * mis + c;
-        mi_8x8[index] = mi_upper_left + index;
-        mi_8x8[index]->mbmi.sb_type = find_partition_size(bsize,
-            row8x8_remaining - r, col8x8_remaining - c, &bh, &bw);
-      }
-    }
+    int bh = num_8x8_blocks_high_lookup[BLOCK_16X16];
+    int bw = num_8x8_blocks_wide_lookup[BLOCK_16X16];
+    set_partial_b64x64_partition(mi_upper_left, mis, bh, bw,
+        row8x8_remaining, col8x8_remaining, BLOCK_16X16, mi_8x8);
   }
 }
 
