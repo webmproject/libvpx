@@ -1,0 +1,174 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//tsU\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-04-15T17:22:57Z",
+      "side": 1,
+      "message": "Can you use anonymous namespaces here?",
+      "revId": "3fcc680881da184d7c06a61f57c586da5797016f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//tsM\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-04-15T17:22:57Z",
+      "side": 1,
+      "message": "You use struct WebmInputContext other places in the file.",
+      "revId": "3fcc680881da184d7c06a61f57c586da5797016f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//trI\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-04-15T17:22:57Z",
+      "side": 1,
+      "message": "return bool",
+      "revId": "3fcc680881da184d7c06a61f57c586da5797016f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//trM\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-04-15T17:22:57Z",
+      "side": 1,
+      "message": "Just add the rewind call to the reset function?",
+      "revId": "3fcc680881da184d7c06a61f57c586da5797016f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//tsA\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-04-15T17:22:57Z",
+      "side": 1,
+      "message": "duped code with function below.",
+      "revId": "3fcc680881da184d7c06a61f57c586da5797016f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//tr8\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-04-15T17:22:57Z",
+      "side": 1,
+      "message": "no reset()?",
+      "revId": "3fcc680881da184d7c06a61f57c586da5797016f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//tq0\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-04-15T17:22:57Z",
+      "side": 1,
+      "message": "I think you can simplfy this loop. What about?\ndo {\nif (block_entry \u003d\u003d NULL) {\n  long status \u003d cluster-\u003eGetFirst(block_entry);\n} else if (block_entry-\u003eEOS()) {\n  cluster \u003d parser_segment-\u003eGetNext(cluster);\n  long status \u003d cluster-\u003eGetFirst(block_entry);\n} else {\n  status \u003d cluster-\u003eGetNext(block_entry, block_entry);\n}\n\nblock \u003d block_entry-\u003eGetBlock();\n} while (block-\u003eGetTrackNumber() !\u003d webm_ctx-\u003evideo_track_index);",
+      "revId": "3fcc680881da184d7c06a61f57c586da5797016f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//tr0\u003d",
+        "filename": "webmdec.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-04-15T17:22:57Z",
+      "side": 1,
+      "message": "Probably should add comments to this file. Especially function comments.",
+      "revId": "3fcc680881da184d7c06a61f57c586da5797016f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//trw\u003d",
+        "filename": "webmdec.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-04-15T17:22:57Z",
+      "side": 1,
+      "message": "Can you add a TODO to change this to bool. Also add a TODO to change this function name. I don\u0027t like that we do a lot of work in a function that looks like we are just checking to see if the file is a webm file. Maybe parse_webm_file() or break this up into 2 functions is_file_webm() and parse_webm_file()",
+      "revId": "3fcc680881da184d7c06a61f57c586da5797016f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//trY\u003d",
+        "filename": "webmdec.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-04-15T17:22:57Z",
+      "side": 1,
+      "message": "Can you add a TODO to change this to bool.",
+      "revId": "3fcc680881da184d7c06a61f57c586da5797016f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
