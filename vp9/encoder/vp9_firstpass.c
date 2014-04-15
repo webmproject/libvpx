@@ -896,39 +896,38 @@ static double calc_correction_factor(double err_per_mb,
   return fclamp(pow(error_term, power_term), 0.05, 5.0);
 }
 
-int vp9_twopass_worst_quality(VP9_COMP *cpi, FIRSTPASS_STATS *fpstats,
-                              int section_target_bandwitdh) {
-  int q;
-  const int num_mbs = cpi->common.MBs;
-  int target_norm_bits_per_mb;
+static int get_twopass_worst_quality(const VP9_COMP *cpi,
+                                     const FIRSTPASS_STATS *stats,
+                                     int section_target_bandwidth) {
   const RATE_CONTROL *const rc = &cpi->rc;
 
-  const double section_err = fpstats->coded_error / fpstats->count;
-  const double err_per_mb = section_err / num_mbs;
-  const double speed_term = 1.0 + ((double)cpi->speed * 0.04);
+  if (section_target_bandwidth <= 0) {
+    return rc->worst_quality;  // Highest value allowed
+  } else {
+    const int num_mbs = cpi->common.MBs;
+    const double section_err = stats->coded_error / stats->count;
+    const double err_per_mb = section_err / num_mbs;
+    const double speed_term = 1.0 + 0.04 * cpi->speed;
+    const int target_norm_bits_per_mb = ((uint64_t)section_target_bandwidth <<
+                                            BPER_MB_NORMBITS) / num_mbs;
+    int q;
 
-  if (section_target_bandwitdh <= 0)
-    return rc->worst_quality;          // Highest value allowed
+    // Try and pick a max Q that will be high enough to encode the
+    // content at the given rate.
+    for (q = rc->best_quality; q < rc->worst_quality; ++q) {
+      const double factor = calc_correction_factor(err_per_mb, ERR_DIVISOR,
+                                                   0.5, 0.90, q);
+      const int bits_per_mb = vp9_rc_bits_per_mb(INTER_FRAME, q,
+                                                 factor * speed_term);
+      if (bits_per_mb <= target_norm_bits_per_mb)
+        break;
+    }
 
-  target_norm_bits_per_mb =
-      ((uint64_t)section_target_bandwitdh << BPER_MB_NORMBITS) / num_mbs;
-
-  // Try and pick a max Q that will be high enough to encode the
-  // content at the given rate.
-  for (q = rc->best_quality; q < rc->worst_quality; ++q) {
-    const double err_correction_factor = calc_correction_factor(err_per_mb,
-                                             ERR_DIVISOR, 0.5, 0.90, q);
-    const int bits_per_mb_at_this_q =
-      vp9_rc_bits_per_mb(INTER_FRAME, q, (err_correction_factor * speed_term));
-    if (bits_per_mb_at_this_q <= target_norm_bits_per_mb)
-      break;
+    // Restriction on active max q for constrained quality mode.
+    if (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY)
+      q = MAX(q, cpi->cq_target_quality);
+    return q;
   }
-
-  // Restriction on active max q for constrained quality mode.
-  if (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY)
-    q = MAX(q, cpi->cq_target_quality);
-
-  return q;
 }
 
 extern void vp9_new_framerate(VP9_COMP *cpi, double framerate);
@@ -2235,7 +2234,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
     // Special case code for first frame.
     const int section_target_bandwidth = (int)(twopass->bits_left /
                                                frames_left);
-    const int tmp_q = vp9_twopass_worst_quality(cpi, &twopass->total_left_stats,
+    const int tmp_q = get_twopass_worst_quality(cpi, &twopass->total_left_stats,
                                                 section_target_bandwidth);
     twopass->active_worst_quality = tmp_q;
     rc->ni_av_qi = tmp_q;
