@@ -3212,6 +3212,20 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
 }
 // end RTC play code
 
+static int get_skip_encode_frame(const VP9_COMMON *cm) {
+  unsigned int intra_count = 0, inter_count = 0;
+  int j;
+
+  for (j = 0; j < INTRA_INTER_CONTEXTS; ++j) {
+    intra_count += cm->counts.intra_inter[j][0];
+    inter_count += cm->counts.intra_inter[j][1];
+  }
+
+  return (intra_count << 2) < inter_count &&
+         cm->frame_type != KEY_FRAME &&
+         cm->show_frame;
+}
+
 static void encode_frame_internal(VP9_COMP *cpi) {
   SPEED_FEATURES *const sf = &cpi->sf;
   RD_OPT *const rd_opt = &cpi->rd;
@@ -3325,19 +3339,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
     cpi->time_encode_sb_row += vpx_usec_timer_elapsed(&emr_timer);
   }
 
-  if (sf->skip_encode_sb) {
-    int j;
-    unsigned int intra_count = 0, inter_count = 0;
-    for (j = 0; j < INTRA_INTER_CONTEXTS; ++j) {
-      intra_count += cm->counts.intra_inter[j][0];
-      inter_count += cm->counts.intra_inter[j][1];
-    }
-    sf->skip_encode_frame = (intra_count << 2) < inter_count &&
-                            cm->frame_type != KEY_FRAME &&
-                            cm->show_frame;
-  } else {
-    sf->skip_encode_frame = 0;
-  }
+  sf->skip_encode_frame = sf->skip_encode_sb ? get_skip_encode_frame(cm) : 0;
 
 #if 0
   // Keep record of the total distortion this time around for future use
