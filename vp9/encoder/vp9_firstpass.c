@@ -385,25 +385,31 @@ static unsigned int get_prediction_error(BLOCK_SIZE bsize,
   return sse;
 }
 
+// Refine the motion search range according to the frame dimension
+// for first pass test.
+static int get_search_range(const VP9_COMMON *cm) {
+  int sr = 0;
+  const int dim = MIN(cm->width, cm->height);
+
+  while ((dim << sr) < MAX_FULL_PEL_VAL)
+    ++sr;
+  return sr;
+}
+
 static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                      const MV *ref_mv, MV *best_mv,
                                      int *best_motion_err) {
   MACROBLOCKD *const xd = &x->e_mbd;
   MV tmp_mv = {0, 0};
   MV ref_mv_full = {ref_mv->row >> 3, ref_mv->col >> 3};
-  int num00, tmp_err, n, sr = 0;
-  int step_param = 3;
-  int further_steps = (MAX_MVSEARCH_STEPS - 1) - step_param;
+  int num00, tmp_err, n;
   const BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
   vp9_variance_fn_ptr_t v_fn_ptr = cpi->fn_ptr[bsize];
-  int new_mv_mode_penalty = 256;
-  const int quart_frm = MIN(cpi->common.width, cpi->common.height);
+  const int new_mv_mode_penalty = 256;
 
-  // Refine the motion search range according to the frame dimension
-  // for first pass test.
-  while ((quart_frm << sr) < MAX_FULL_PEL_VAL)
-    ++sr;
-
+  int step_param = 3;
+  int further_steps = (MAX_MVSEARCH_STEPS - 1) - step_param;
+  const int sr = get_search_range(&cpi->common);
   step_param += sr;
   further_steps -= sr;
 
@@ -421,8 +427,7 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
 
   if (tmp_err < *best_motion_err) {
     *best_motion_err = tmp_err;
-    best_mv->row = tmp_mv.row;
-    best_mv->col = tmp_mv.col;
+    *best_mv = tmp_mv;
   }
 
   // Carry out further step/diamond searches as necessary.
@@ -445,8 +450,7 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
 
       if (tmp_err < *best_motion_err) {
         *best_motion_err = tmp_err;
-        best_mv->row = tmp_mv.row;
-        best_mv->col = tmp_mv.col;
+        *best_mv = tmp_mv;
       }
     }
   }
