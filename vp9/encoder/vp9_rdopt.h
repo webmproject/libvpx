@@ -83,6 +83,10 @@ void vp9_get_entropy_contexts(BLOCK_SIZE bsize, TX_SIZE tx_size,
                               ENTROPY_CONTEXT t_above[16],
                               ENTROPY_CONTEXT t_left[16]);
 
+void vp9_set_rd_speed_thresholds(VP9_COMP *cpi);
+
+void vp9_set_rd_speed_thresholds_sub8x8(VP9_COMP *cpi);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

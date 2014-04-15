@@ -373,122 +373,6 @@ static void update_reference_segmentation_map(VP9_COMP *cpi) {
   }
 }
 
-static void set_rd_speed_thresholds(VP9_COMP *cpi) {
-  int i;
-  RD_OPT *const rd = &cpi->rd;
-
-  // Set baseline threshold values
-  for (i = 0; i < MAX_MODES; ++i)
-    rd->thresh_mult[i] = is_best_mode(cpi->oxcf.mode) ? -500 : 0;
-
-  rd->thresh_mult[THR_NEARESTMV] = 0;
-  rd->thresh_mult[THR_NEARESTG] = 0;
-  rd->thresh_mult[THR_NEARESTA] = 0;
-
-  rd->thresh_mult[THR_DC] += 1000;
-
-  rd->thresh_mult[THR_NEWMV] += 1000;
-  rd->thresh_mult[THR_NEWA] += 1000;
-  rd->thresh_mult[THR_NEWG] += 1000;
-
-  rd->thresh_mult[THR_NEARMV] += 1000;
-  rd->thresh_mult[THR_NEARA] += 1000;
-  rd->thresh_mult[THR_COMP_NEARESTLA] += 1000;
-  rd->thresh_mult[THR_COMP_NEARESTGA] += 1000;
-
-  rd->thresh_mult[THR_TM] += 1000;
-
-  rd->thresh_mult[THR_COMP_NEARLA] += 1500;
-  rd->thresh_mult[THR_COMP_NEWLA] += 2000;
-  rd->thresh_mult[THR_NEARG] += 1000;
-  rd->thresh_mult[THR_COMP_NEARGA] += 1500;
-  rd->thresh_mult[THR_COMP_NEWGA] += 2000;
-
-  rd->thresh_mult[THR_ZEROMV] += 2000;
-  rd->thresh_mult[THR_ZEROG] += 2000;
-  rd->thresh_mult[THR_ZEROA] += 2000;
-  rd->thresh_mult[THR_COMP_ZEROLA] += 2500;
-  rd->thresh_mult[THR_COMP_ZEROGA] += 2500;
-
-  rd->thresh_mult[THR_H_PRED] += 2000;
-  rd->thresh_mult[THR_V_PRED] += 2000;
-  rd->thresh_mult[THR_D45_PRED ] += 2500;
-  rd->thresh_mult[THR_D135_PRED] += 2500;
-  rd->thresh_mult[THR_D117_PRED] += 2500;
-  rd->thresh_mult[THR_D153_PRED] += 2500;
-  rd->thresh_mult[THR_D207_PRED] += 2500;
-  rd->thresh_mult[THR_D63_PRED] += 2500;
-
-  /* disable frame modes if flags not set */
-  if (!(cpi->ref_frame_flags & VP9_LAST_FLAG)) {
-    rd->thresh_mult[THR_NEWMV    ] = INT_MAX;
-    rd->thresh_mult[THR_NEARESTMV] = INT_MAX;
-    rd->thresh_mult[THR_ZEROMV   ] = INT_MAX;
-    rd->thresh_mult[THR_NEARMV   ] = INT_MAX;
-  }
-  if (!(cpi->ref_frame_flags & VP9_GOLD_FLAG)) {
-    rd->thresh_mult[THR_NEARESTG ] = INT_MAX;
-    rd->thresh_mult[THR_ZEROG    ] = INT_MAX;
-    rd->thresh_mult[THR_NEARG    ] = INT_MAX;
-    rd->thresh_mult[THR_NEWG     ] = INT_MAX;
-  }
-  if (!(cpi->ref_frame_flags & VP9_ALT_FLAG)) {
-    rd->thresh_mult[THR_NEARESTA ] = INT_MAX;
-    rd->thresh_mult[THR_ZEROA    ] = INT_MAX;
-    rd->thresh_mult[THR_NEARA    ] = INT_MAX;
-    rd->thresh_mult[THR_NEWA     ] = INT_MAX;
-  }
-
-  if ((cpi->ref_frame_flags & (VP9_LAST_FLAG | VP9_ALT_FLAG)) !=
-      (VP9_LAST_FLAG | VP9_ALT_FLAG)) {
-    rd->thresh_mult[THR_COMP_ZEROLA   ] = INT_MAX;
-    rd->thresh_mult[THR_COMP_NEARESTLA] = INT_MAX;
-    rd->thresh_mult[THR_COMP_NEARLA   ] = INT_MAX;
-    rd->thresh_mult[THR_COMP_NEWLA    ] = INT_MAX;
-  }
-  if ((cpi->ref_frame_flags & (VP9_GOLD_FLAG | VP9_ALT_FLAG)) !=
-      (VP9_GOLD_FLAG | VP9_ALT_FLAG)) {
-    rd->thresh_mult[THR_COMP_ZEROGA   ] = INT_MAX;
-    rd->thresh_mult[THR_COMP_NEARESTGA] = INT_MAX;
-    rd->thresh_mult[THR_COMP_NEARGA   ] = INT_MAX;
-    rd->thresh_mult[THR_COMP_NEWGA    ] = INT_MAX;
-  }
-}
-
-static void set_rd_speed_thresholds_sub8x8(VP9_COMP *cpi) {
-  const SPEED_FEATURES *const sf = &cpi->sf;
-  RD_OPT *const rd = &cpi->rd;
-  int i;
-
-  for (i = 0; i < MAX_REFS; ++i)
-    rd->thresh_mult_sub8x8[i] = is_best_mode(cpi->oxcf.mode)  ? -500 : 0;
-
-  rd->thresh_mult_sub8x8[THR_LAST] += 2500;
-  rd->thresh_mult_sub8x8[THR_GOLD] += 2500;
-  rd->thresh_mult_sub8x8[THR_ALTR] += 2500;
-  rd->thresh_mult_sub8x8[THR_INTRA] += 2500;
-  rd->thresh_mult_sub8x8[THR_COMP_LA] += 4500;
-  rd->thresh_mult_sub8x8[THR_COMP_GA] += 4500;
-
-  // Check for masked out split cases.
-  for (i = 0; i < MAX_REFS; i++)
-    if (sf->disable_split_mask & (1 << i))
-      rd->thresh_mult_sub8x8[i] = INT_MAX;
-
-  // disable mode test if frame flag is not set
-  if (!(cpi->ref_frame_flags & VP9_LAST_FLAG))
-    rd->thresh_mult_sub8x8[THR_LAST] = INT_MAX;
-  if (!(cpi->ref_frame_flags & VP9_GOLD_FLAG))
-    rd->thresh_mult_sub8x8[THR_GOLD] = INT_MAX;
-  if (!(cpi->ref_frame_flags & VP9_ALT_FLAG))
-    rd->thresh_mult_sub8x8[THR_ALTR] = INT_MAX;
-  if ((cpi->ref_frame_flags & (VP9_LAST_FLAG | VP9_ALT_FLAG)) !=
-      (VP9_LAST_FLAG | VP9_ALT_FLAG))
-    rd->thresh_mult_sub8x8[THR_COMP_LA] = INT_MAX;
-  if ((cpi->ref_frame_flags & (VP9_GOLD_FLAG | VP9_ALT_FLAG)) !=
-      (VP9_GOLD_FLAG | VP9_ALT_FLAG))
-    rd->thresh_mult_sub8x8[THR_COMP_GA] = INT_MAX;
-}
 
 static void set_speed_features(VP9_COMP *cpi) {
 #if CONFIG_INTERNAL_STATS
@@ -500,8 +384,8 @@ static void set_speed_features(VP9_COMP *cpi) {
   vp9_set_speed_features(cpi);
 
   // Set rd thresholds based on mode and speed setting
-  set_rd_speed_thresholds(cpi);
-  set_rd_speed_thresholds_sub8x8(cpi);
+  vp9_set_rd_speed_thresholds(cpi);
+  vp9_set_rd_speed_thresholds_sub8x8(cpi);
 
   cpi->mb.fwd_txm4x4 = vp9_fdct4x4;
   if (cpi->oxcf.lossless || cpi->mb.e_mbd.lossless) {
@@ -566,7 +450,6 @@ void vp9_alloc_compressor_data(VP9_COMP *cpi) {
 
   vp9_setup_pc_tree(&cpi->common, &cpi->mb);
 }
-
 
 static void update_frame_size(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
