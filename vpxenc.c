@@ -355,11 +355,11 @@ static const arg_def_t frame_parallel_decoding = ARG_DEF(
     NULL, "frame-parallel", 1, "Enable frame parallel decodability features");
 static const arg_def_t aq_mode = ARG_DEF(
     NULL, "aq-mode", 1,
-    "Adaptive q mode (0: off (by default), 1: variance 2: complexity, "
+    "Adaptive quantization mode (0: off (default), 1: variance 2: complexity, "
     "3: cyclic refresh)");
 static const arg_def_t frame_periodic_boost = ARG_DEF(
     NULL, "frame_boost", 1,
-    "Enable frame periodic boost (0: off (by default), 1: on)");
+    "Enable frame periodic boost (0: off (default), 1: on)");
 
 static const arg_def_t *vp9_args[] = {
   &cpu_used, &auto_altref, &noise_sens, &sharpness, &static_thresh,
