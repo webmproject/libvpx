@@ -1043,6 +1043,7 @@ void vp9_rc_set_frame_target(VP9_COMP *cpi, int target) {
   RATE_CONTROL *const rc = &cpi->rc;
 
   rc->this_frame_target = target;
+
   // Target rate per SB64 (including partial SB64s.
   rc->sb64_target_rate = ((int64_t)rc->this_frame_target * 64 * 64) /
                              (cm->width * cm->height);

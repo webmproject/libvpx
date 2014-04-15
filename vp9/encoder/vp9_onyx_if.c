@@ -1997,8 +1997,8 @@ static void output_frame_level_debug_stats(VP9_COMP *cpi) {
   recon_err = vp9_get_y_sse(cpi->Source, get_frame_new_buffer(cm));
 
   if (cpi->twopass.total_left_stats.coded_error != 0.0)
-    fprintf(f, "%10u %10d %10d %10d %10d %10d "
-        "%10"PRId64" %10"PRId64" %10d "
+    fprintf(f, "%10u %10d %10d %10d %10d"
+        "%10"PRId64" %10"PRId64" %10"PRId64" %10"PRId64" %10d "
         "%7.2lf %7.2lf %7.2lf %7.2lf %7.2lf"
         "%6d %6d %5d %5d %5d "
         "%10"PRId64" %10.3lf"
@@ -2007,6 +2007,7 @@ static void output_frame_level_debug_stats(VP9_COMP *cpi) {
         cpi->rc.projected_frame_size,
         cpi->rc.projected_frame_size / cpi->common.MBs,
         (cpi->rc.projected_frame_size - cpi->rc.this_frame_target),
+        cpi->rc.vbr_bits_off_target,
         cpi->rc.total_target_vs_actual,
         (cpi->oxcf.starting_buffer_level - cpi->rc.bits_off_target),
         cpi->rc.total_actual_bits, cm->base_qindex,
