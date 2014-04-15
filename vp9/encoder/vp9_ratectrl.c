@@ -1018,31 +1018,19 @@ int vp9_rc_pick_q_and_bounds(const VP9_COMP *cpi,
 }
 
 void vp9_rc_compute_frame_size_bounds(const VP9_COMP *cpi,
-                                      int this_frame_target,
+                                      int frame_target,
                                       int *frame_under_shoot_limit,
                                       int *frame_over_shoot_limit) {
-  // Set-up bounds on acceptable frame size:
   if (cpi->oxcf.end_usage == USAGE_CONSTANT_QUALITY) {
     *frame_under_shoot_limit = 0;
     *frame_over_shoot_limit  = INT_MAX;
   } else {
-    int recode_tolerance =
-      (cpi->sf.recode_tolerance * this_frame_target) / 100;
-
-    *frame_over_shoot_limit = this_frame_target + recode_tolerance;
-    *frame_under_shoot_limit = this_frame_target - recode_tolerance;
-
     // For very small rate targets where the fractional adjustment
     // may be tiny make sure there is at least a minimum range.
-    *frame_over_shoot_limit += 200;
-    *frame_under_shoot_limit -= 200;
-    if (*frame_under_shoot_limit < 0)
-      *frame_under_shoot_limit = 0;
-
-    // Clip to maximum allowed rate for a frame.
-    if (*frame_over_shoot_limit > cpi->rc.max_frame_bandwidth) {
-      *frame_over_shoot_limit = cpi->rc.max_frame_bandwidth;
-    }
+    const int tolerance = (cpi->sf.recode_tolerance * frame_target) / 100;
+    *frame_under_shoot_limit = MAX(frame_target - tolerance - 200, 0);
+    *frame_over_shoot_limit = MIN(frame_target + tolerance + 200,
+                                  cpi->rc.max_frame_bandwidth);
   }
 }
 
