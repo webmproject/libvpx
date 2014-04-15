@@ -120,7 +120,6 @@ typedef struct VP9Common {
   // frame header, 3 reset all contexts.
   int reset_frame_context;
 
-  int frame_flags;
   // MBs, mb_rows/cols is in 16-pixel units; mi_rows/cols is in
   // MODE_INFO (8-pixel) units.
   int MBs;

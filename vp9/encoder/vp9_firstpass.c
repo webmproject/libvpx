@@ -2180,7 +2180,7 @@ void vp9_rc_get_first_pass_params(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   if (!cpi->refresh_alt_ref_frame &&
       (cm->current_video_frame == 0 ||
-       (cm->frame_flags & FRAMEFLAGS_KEY))) {
+       (cpi->frame_flags & FRAMEFLAGS_KEY))) {
     cm->frame_type = KEY_FRAME;
   } else {
     cm->frame_type = INTER_FRAME;
@@ -2250,7 +2250,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
 
   // Keyframe and section processing.
   if (rc->frames_to_key == 0 ||
-      (cm->frame_flags & FRAMEFLAGS_KEY)) {
+      (cpi->frame_flags & FRAMEFLAGS_KEY)) {
     // Define next KF group and assign bits to it.
     this_frame_copy = this_frame;
     find_next_key_frame(cpi, &this_frame_copy);
