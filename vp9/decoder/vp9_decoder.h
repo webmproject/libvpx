@@ -56,6 +56,9 @@ typedef struct VP9Decoder {
   int num_tile_workers;
 
   VP9LfSync lf_row_sync;
+
+  vpx_decrypt_cb decrypt_cb;
+  void *decrypt_state;
 } VP9Decoder;
 
 void vp9_initialize_dec();
