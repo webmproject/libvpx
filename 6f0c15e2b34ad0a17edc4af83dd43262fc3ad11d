@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//tS8\u003d",
+        "filename": "test/webm_video_source.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-04-16T21:57:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//tUs\u003d",
+      "revId": "6f0c15e2b34ad0a17edc4af83dd43262fc3ad11d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//tXs\u003d",
         "filename": "test/webm_video_source.h",
         "patchSetId": 4
@@ -83,6 +101,24 @@
       "writtenOn": "2014-04-16T20:05:20Z",
       "side": 1,
       "message": "struct isn\u0027t technically necessary here",
+      "revId": "6f0c15e2b34ad0a17edc4af83dd43262fc3ad11d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//tS4\u003d",
+        "filename": "test/webm_video_source.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-04-16T21:57:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//tUk\u003d",
       "revId": "6f0c15e2b34ad0a17edc4af83dd43262fc3ad11d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
