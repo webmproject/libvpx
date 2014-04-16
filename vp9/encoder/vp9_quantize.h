@@ -11,6 +11,7 @@
 #ifndef VP9_ENCODER_VP9_QUANTIZE_H_
 #define VP9_ENCODER_VP9_QUANTIZE_H_
 
+#include "./vpx_config.h"
 #include "vp9/encoder/vp9_block.h"
 
 #ifdef __cplusplus

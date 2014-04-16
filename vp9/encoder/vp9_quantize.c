@@ -242,10 +242,10 @@ void vp9_init_plane_quantizers(VP9_COMP *cpi, MACROBLOCK *x) {
   }
 
 #if CONFIG_ALPHA
-  x->plane[3].quant = cpi->a_quant[qindex];
-  x->plane[3].quant_shift = cpi->a_quant_shift[qindex];
-  x->plane[3].zbin = cpi->a_zbin[qindex];
-  x->plane[3].round = cpi->a_round[qindex];
+  x->plane[3].quant = quants->a_quant[qindex];
+  x->plane[3].quant_shift = quants->a_quant_shift[qindex];
+  x->plane[3].zbin = quants->a_zbin[qindex];
+  x->plane[3].round = quants->a_round[qindex];
   x->plane[3].zbin_extra = (int16_t)((cm->a_dequant[qindex][1] * zbin) >> 7);
   xd->plane[3].dequant = cm->a_dequant[qindex];
 #endif
