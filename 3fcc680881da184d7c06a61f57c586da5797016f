@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//tYM\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-04-16T23:16:42Z",
+      "side": 1,
+      "message": "I tried, the linker doesn\u0027t seem to like it. I think since the .h file is going to be included from C programs, it\u0027s not possible to put them in a namespace.",
+      "parentUuid": "AAAAdn//tsU\u003d",
+      "revId": "3fcc680881da184d7c06a61f57c586da5797016f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//tsM\u003d",
         "filename": "webmdec.cc",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2014-04-15T17:22:57Z",
       "side": 1,
       "message": "You use struct WebmInputContext other places in the file.",
+      "revId": "3fcc680881da184d7c06a61f57c586da5797016f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//tYI\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-04-16T23:16:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//tsM\u003d",
       "revId": "3fcc680881da184d7c06a61f57c586da5797016f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//tX4\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-04-16T23:16:42Z",
+      "side": 1,
+      "message": "Moot now.",
+      "parentUuid": "AAAAdn//trI\u003d",
+      "revId": "3fcc680881da184d7c06a61f57c586da5797016f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//trM\u003d",
         "filename": "webmdec.cc",
         "patchSetId": 2
@@ -64,6 +118,24 @@
       "writtenOn": "2014-04-15T17:22:57Z",
       "side": 1,
       "message": "Just add the rewind call to the reset function?",
+      "revId": "3fcc680881da184d7c06a61f57c586da5797016f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//tYE\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-04-16T23:16:42Z",
+      "side": 1,
+      "message": "Reset just resets the WebMInputContext. I did it this way so that VpxInputContext need not be passed to reset. Refactoring this to a new function rewind_and_reset().\n\nDone.",
+      "parentUuid": "AAAAdn//trM\u003d",
       "revId": "3fcc680881da184d7c06a61f57c586da5797016f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//tX0\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-04-16T23:16:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//tsA\u003d",
+      "revId": "3fcc680881da184d7c06a61f57c586da5797016f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//tr8\u003d",
         "filename": "webmdec.cc",
         "patchSetId": 2
@@ -98,6 +188,24 @@
       "writtenOn": "2014-04-15T17:22:57Z",
       "side": 1,
       "message": "no reset()?",
+      "revId": "3fcc680881da184d7c06a61f57c586da5797016f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//tX8\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-04-16T23:16:42Z",
+      "side": 1,
+      "message": "reset was done in get_first_cluster_and_block_entry() if it went wrong. anyway, it\u0027s moot now.",
+      "parentUuid": "AAAAdn//tr8\u003d",
       "revId": "3fcc680881da184d7c06a61f57c586da5797016f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//tRU\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-04-16T23:16:42Z",
+      "side": 1,
+      "message": "It\u0027s not as simple as what you\u0027ve mentioned. But i\u0027ve used that as a base and this is the simplest i could achieve.",
+      "parentUuid": "AAAAdn//tq0\u003d",
+      "revId": "3fcc680881da184d7c06a61f57c586da5797016f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//tr0\u003d",
         "filename": "webmdec.h",
         "patchSetId": 2
@@ -132,6 +258,24 @@
       "writtenOn": "2014-04-15T17:22:57Z",
       "side": 1,
       "message": "Probably should add comments to this file. Especially function comments.",
+      "revId": "3fcc680881da184d7c06a61f57c586da5797016f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//tRI\u003d",
+        "filename": "webmdec.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-04-16T23:16:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//tr0\u003d",
       "revId": "3fcc680881da184d7c06a61f57c586da5797016f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//tRM\u003d",
+        "filename": "webmdec.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-04-16T23:16:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//trw\u003d",
+      "revId": "3fcc680881da184d7c06a61f57c586da5797016f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//trY\u003d",
         "filename": "webmdec.h",
         "patchSetId": 2
@@ -166,6 +328,24 @@
       "writtenOn": "2014-04-15T17:22:57Z",
       "side": 1,
       "message": "Can you add a TODO to change this to bool.",
+      "revId": "3fcc680881da184d7c06a61f57c586da5797016f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//tRA\u003d",
+        "filename": "webmdec.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-04-16T23:16:42Z",
+      "side": 1,
+      "message": "We are going to be calling this from C. So not sure if that\u0027s even possible. Same goes for the above.",
+      "parentUuid": "AAAAdn//trY\u003d",
       "revId": "3fcc680881da184d7c06a61f57c586da5797016f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
