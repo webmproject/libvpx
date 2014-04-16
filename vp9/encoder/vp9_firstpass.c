@@ -2198,7 +2198,7 @@ void vp9_rc_get_first_pass_params(VP9_COMP *cpi) {
 // For VBR...adjustment to the frame target based on error from previous frames
 void vbr_rate_correction(int * this_frame_target,
                          const int64_t vbr_bits_off_target) {
-  int max_delta = *this_frame_target / 10;
+  int max_delta = (*this_frame_target * 15) / 100;
 
   // vbr_bits_off_target > 0 means we have extra bits to spend
   if (vbr_bits_off_target > 0) {
@@ -2370,10 +2370,17 @@ void vp9_twopass_postencode_update(VP9_COMP *cpi) {
   // kf_group_bits & gf_group_bits to reflect any deviation from the target
   // rate in this frame. This alters the allocation of bits to the
   // remaning frames in the group / clip.
+  //
   // This method can give rise to unstable behaviour near the end of a clip
   // or kf/gf group of frames where any accumulated error is corrected over an
-  // ever decreasing number of frames.
-  const int bits_used = rc->projected_frame_size;
+  // ever decreasing number of frames. Hence we change the balance of target
+  // vs. actual bitrate gradually as we progress towards the end of the
+  // sequence in order to mitigate this effect.
+  const double progress =
+      (double)(cpi->twopass.stats_in - cpi->twopass.stats_in_start) /
+              (cpi->twopass.stats_in_end - cpi->twopass.stats_in_start);
+  const int bits_used = progress * cpi->rc.this_frame_target +
+                        (1.0 - progress) * cpi->rc.projected_frame_size;
 #endif
 
   cpi->twopass.bits_left -= bits_used;
