@@ -227,7 +227,7 @@ static void set_ppflags(const vpx_codec_alg_priv_t *ctx,
 }
 
 static void init_decoder(vpx_codec_alg_priv_t *ctx) {
-  VP9D_CONFIG oxcf;
+  VP9DecoderConfig oxcf;
   oxcf.width = ctx->si.w;
   oxcf.height = ctx->si.h;
   oxcf.version = 9;
