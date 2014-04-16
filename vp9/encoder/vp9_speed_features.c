@@ -353,16 +353,16 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->recode_tolerance = 25;
 
   switch (oxcf->mode) {
-    case MODE_BESTQUALITY:
-    case MODE_SECONDPASS_BEST:  // This is the best quality mode.
+    case ONE_PASS_BEST:
+    case TWO_PASS_SECOND_BEST:  // This is the best quality mode.
       cpi->diamond_search_sad = vp9_full_range_search;
       break;
-    case MODE_FIRSTPASS:
-    case MODE_GOODQUALITY:
-    case MODE_SECONDPASS:
+    case TWO_PASS_FIRST:
+    case ONE_PASS_GOOD:
+    case TWO_PASS_SECOND_GOOD:
       set_good_speed_feature(cpi, cm, sf, speed);
       break;
-    case MODE_REALTIME:
+    case REALTIME:
       set_rt_speed_feature(cm, sf, speed);
       break;
   }
@@ -385,7 +385,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
 
   cpi->mb.optimize = sf->optimize_coefficients == 1 && cpi->pass != 1;
 
-  if (cpi->encode_breakout && oxcf->mode == MODE_REALTIME &&
+  if (cpi->encode_breakout && oxcf->mode == REALTIME &&
       sf->encode_breakout_thresh > cpi->encode_breakout)
     cpi->encode_breakout = sf->encode_breakout_thresh;
 
