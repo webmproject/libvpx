@@ -31,6 +31,11 @@ struct WebmInputContext {
 int file_is_webm(struct WebmInputContext *webm_ctx,
                  struct VpxInputContext *vpx_ctx);
 
+/* Reads a WebM video frame. Return values:
+ *   0 - Success
+ *   1 - End of File
+ *  -1 - Error
+ */
 int webm_read_frame(struct WebmInputContext *webm_ctx,
                     uint8_t **buffer,
                     size_t *bytes_in_buffer,
