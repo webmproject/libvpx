@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//tTk\u003d",
+        "filename": "vp9/decoder/vp9_decoder.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-04-16T21:15:05Z",
+      "side": 1,
+      "message": "I hope we have a consistent naming for the following case:\ntypedef struct XxxYY {\n.....\n} XxxYY\n\nas of now , there are too many variations.",
+      "revId": "ab3d8e6fc569ff7bc94080c4ce2d7ded13f4f234",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
