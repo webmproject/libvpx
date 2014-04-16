@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//tUQ\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1570,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-04-16T21:05:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//tWM\u003d",
+      "revId": "751ebaa8eef6553da79b27ee337e1162555fd69b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//tWE\u003d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 2
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//tUM\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1574,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-04-16T21:05:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//tWE\u003d",
+      "revId": "751ebaa8eef6553da79b27ee337e1162555fd69b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//tWU\u003d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 2
@@ -47,6 +83,24 @@
       "writtenOn": "2014-04-16T19:38:39Z",
       "side": 1,
       "message": "Instead of dividing, how about multiply the threshold with the number of pixels?\n\nAlso what about the case when row8x8_remaining or col8x8_remaining is odd?",
+      "revId": "751ebaa8eef6553da79b27ee337e1162555fd69b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//tUA\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1597,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-04-16T21:05:25Z",
+      "side": 1,
+      "message": "Done\n\nThe calculation is on 16x16 basis, so as to maximize the SSE computation efficiency. If row8x8_remaining or col8x8_remaining is odd, then also include the extended boundary blocks in the calculation.",
+      "parentUuid": "AAAAdn//tWU\u003d",
       "revId": "751ebaa8eef6553da79b27ee337e1162555fd69b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
