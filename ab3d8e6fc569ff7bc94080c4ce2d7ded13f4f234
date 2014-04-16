@@ -16,6 +16,24 @@
       "revId": "ab3d8e6fc569ff7bc94080c4ce2d7ded13f4f234",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//tTc\u003d",
+        "filename": "vp9/decoder/vp9_decoder.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-16T21:21:30Z",
+      "side": 1,
+      "message": "The goal is to use CamelCase everywhere and use the same name for the typedef.",
+      "parentUuid": "AAAAdn//tTk\u003d",
+      "revId": "ab3d8e6fc569ff7bc94080c4ce2d7ded13f4f234",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
