@@ -72,7 +72,7 @@ static int apply_cyclic_refresh_bitrate(const VP9_COMMON *cm,
   // Turn off cyclic refresh if bits available per frame is not sufficiently
   // larger than bit cost of segmentation. Segment map bit cost should scale
   // with number of seg blocks, so compare available bits to number of blocks.
-  // Average bits available per frame = av_per_frame_bandwidth
+  // Average bits available per frame = avg_frame_bandwidth
   // Number of (8x8) blocks in frame = mi_rows * mi_cols;
   const float factor  = 0.5;
   const int number_blocks = cm->mi_rows  * cm->mi_cols;
@@ -80,7 +80,7 @@ static int apply_cyclic_refresh_bitrate(const VP9_COMMON *cm,
   // ~24kbps for CIF, 72kbps for VGA (at 30fps).
   // Also turn off at very small frame sizes, to avoid too large fraction of
   // superblocks to be refreshed per frame. Threshold below is less than QCIF.
-  if (rc->av_per_frame_bandwidth < factor * number_blocks ||
+  if (rc->avg_frame_bandwidth < factor * number_blocks ||
       number_blocks / 64 < 5)
     return 0;
   else

@@ -337,7 +337,7 @@ static double simple_weight(const YV12_BUFFER_CONFIG *buf) {
 
 // This function returns the maximum target rate per frame.
 static int frame_max_bits(const RATE_CONTROL *rc, const VP9_CONFIG *oxcf) {
-  int64_t max_bits = ((int64_t)rc->av_per_frame_bandwidth *
+  int64_t max_bits = ((int64_t)rc->avg_frame_bandwidth *
                           (int64_t)oxcf->two_pass_vbrmax_section) / 100;
   if (max_bits < 0)
     max_bits = 0;
