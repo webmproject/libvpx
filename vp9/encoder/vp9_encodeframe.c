@@ -1273,7 +1273,6 @@ static void set_source_var_based_partition(VP9_COMP *cpi,
 
 static int is_background(VP9_COMP *cpi, const TileInfo *const tile,
                          int mi_row, int mi_col) {
-  MACROBLOCK *const x = &cpi->mb;
   uint8_t *src, *pre;
   int src_stride, pre_stride;
 
@@ -1283,11 +1282,10 @@ static int is_background(VP9_COMP *cpi, const TileInfo *const tile,
   int this_sad = 0;
   int threshold = 0;
 
-  vp9_setup_src_planes(x, cpi->Source, mi_row, mi_col);
-
-  src_stride = x->plane[0].src.stride;
-  src = x->plane[0].src.buf;
-
+  // This assumes the input source frames are of the same dimension.
+  src_stride = cpi->Source->y_stride;
+  src = cpi->Source->y_buffer + (mi_row * MI_SIZE) * src_stride +
+            (mi_col * MI_SIZE);
   pre_stride = cpi->Last_Source->y_stride;
   pre = cpi->Last_Source->y_buffer + (mi_row * MI_SIZE) * pre_stride +
           (mi_col * MI_SIZE);
