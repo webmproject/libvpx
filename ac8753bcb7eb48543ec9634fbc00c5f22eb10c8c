@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//tWc\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1773,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-04-16T19:48:15Z",
+      "side": 1,
+      "message": "vp9_convert_qindex_to_q returns Q as a double to 0.25 precision (eg 2.25)",
+      "revId": "ac8753bcb7eb48543ec9634fbc00c5f22eb10c8c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
