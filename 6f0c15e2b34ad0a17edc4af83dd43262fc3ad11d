@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAdn//tUs\u003d",
+        "filename": "test/webm_video_source.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-16T20:05:20Z",
+      "side": 1,
+      "message": "!\u003d NULL",
+      "revId": "6f0c15e2b34ad0a17edc4af83dd43262fc3ad11d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//tXs\u003d",
         "filename": "test/webm_video_source.h",
         "patchSetId": 4
@@ -31,6 +48,41 @@
       "side": 1,
       "message": "it\u0027s cleared inside nestegg_* now. the 4th parameter is unused in webm_read_frame. so i think this is correct.",
       "parentUuid": "AAAAdn//tXs\u003d",
+      "revId": "6f0c15e2b34ad0a17edc4af83dd43262fc3ad11d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//tVE\u003d",
+        "filename": "test/webm_video_source.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-16T20:05:20Z",
+      "side": 1,
+      "message": "looks like vpxdec is concerned with the 3rd parameter, so should be ok;\n\nconst int again",
+      "parentUuid": "AAAAdn//tXM\u003d",
+      "revId": "6f0c15e2b34ad0a17edc4af83dd43262fc3ad11d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//tUk\u003d",
+        "filename": "test/webm_video_source.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-16T20:05:20Z",
+      "side": 1,
+      "message": "struct isn\u0027t technically necessary here",
       "revId": "6f0c15e2b34ad0a17edc4af83dd43262fc3ad11d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
