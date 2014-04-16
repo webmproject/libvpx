@@ -179,12 +179,6 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   vpx_free(cpi->tok);
   cpi->tok = 0;
 
-  // Activity mask based per mb zbin adjustments
-  vpx_free(cpi->mb_activity_map);
-  cpi->mb_activity_map = 0;
-  vpx_free(cpi->mb_norm_activity_map);
-  cpi->mb_norm_activity_map = 0;
-
   for (i = 0; i < cpi->svc.number_spatial_layers; ++i) {
     LAYER_CONTEXT *const lc = &cpi->svc.layer_context[i];
     vpx_free(lc->rc_twopass_stats_in.buf);
@@ -569,16 +563,6 @@ void vp9_alloc_compressor_data(VP9_COMP *cpi) {
 
     CHECK_MEM_ERROR(cm, cpi->tok, vpx_calloc(tokens, sizeof(*cpi->tok)));
   }
-
-  vpx_free(cpi->mb_activity_map);
-  CHECK_MEM_ERROR(cm, cpi->mb_activity_map,
-                  vpx_calloc(sizeof(unsigned int),
-                             cm->mb_rows * cm->mb_cols));
-
-  vpx_free(cpi->mb_norm_activity_map);
-  CHECK_MEM_ERROR(cm, cpi->mb_norm_activity_map,
-                  vpx_calloc(sizeof(unsigned int),
-                             cm->mb_rows * cm->mb_cols));
 }
 
 
@@ -1081,8 +1065,6 @@ VP9_COMP *vp9_create_compressor(VP9_CONFIG *oxcf) {
                                sizeof(*cpi->mbgraph_stats[i].mb_stats), 1));
   }
 
-  /*Initialize the feed-forward activity masking.*/
-  cpi->activity_avg = 90 << 12;
   cpi->key_frame_frequency = cpi->oxcf.key_freq;
   cpi->refresh_alt_ref_frame = 0;
 
