@@ -1713,18 +1713,28 @@ static int check_best_zero_mv(
   return 1;
 }
 
-static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
-                                    const TileInfo *const tile,
-                                    BEST_SEG_INFO *bsi_buf, int filter_idx,
-                                    int_mv seg_mvs[4][MAX_REF_FRAMES],
-                                    int mi_row, int mi_col) {
+static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
+                                        const TileInfo * const tile,
+                                        int_mv *best_ref_mv,
+                                        int_mv *second_best_ref_mv,
+                                        int64_t best_rd, int *returntotrate,
+                                        int *returnyrate,
+                                        int64_t *returndistortion,
+                                        int *skippable, int64_t *psse,
+                                        int mvthresh,
+                                        int_mv seg_mvs[4][MAX_REF_FRAMES],
+                                        BEST_SEG_INFO *bsi_buf, int filter_idx,
+                                        int mi_row, int mi_col) {
+  int i;
+  BEST_SEG_INFO *bsi = bsi_buf + filter_idx;
+  MACROBLOCKD *xd = &x->e_mbd;
+  MODE_INFO *mi = xd->mi[0];
+  MB_MODE_INFO *mbmi = &mi->mbmi;
+  int mode_idx;
   int k, br = 0, idx, idy;
   int64_t bd = 0, block_sse = 0;
   MB_PREDICTION_MODE this_mode;
-  MACROBLOCKD *xd = &x->e_mbd;
   VP9_COMMON *cm = &cpi->common;
-  MODE_INFO *mi = xd->mi[0];
-  MB_MODE_INFO *const mbmi = &mi->mbmi;
   struct macroblock_plane *const p = &x->plane[0];
   struct macroblockd_plane *const pd = &xd->plane[0];
   const int label_count = 4;
@@ -1736,11 +1746,20 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
   const int num_4x4_blocks_high = num_4x4_blocks_high_lookup[bsize];
   vp9_variance_fn_ptr_t *v_fn_ptr = &cpi->fn_ptr[bsize];
   ENTROPY_CONTEXT t_above[2], t_left[2];
-  BEST_SEG_INFO *bsi = bsi_buf + filter_idx;
-  int mode_idx;
   int subpelmv = 1, have_ref = 0;
   const int has_second_rf = has_second_ref(mbmi);
   const int disable_inter_mode_mask = cpi->sf.disable_inter_mode_mask[bsize];
+
+  vp9_zero(*bsi);
+
+  bsi->segment_rd = best_rd;
+  bsi->ref_mv[0] = best_ref_mv;
+  bsi->ref_mv[1] = second_best_ref_mv;
+  bsi->mvp.as_int = best_ref_mv->as_int;
+  bsi->mvthresh = mvthresh;
+
+  for (i = 0; i < 4; i++)
+    bsi->modes[i] = ZEROMV;
 
   vpx_memcpy(t_above, pd->above_context, sizeof(t_above));
   vpx_memcpy(t_left, pd->left_context, sizeof(t_left));
@@ -2044,7 +2063,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
           for (midx = 0; midx < INTER_MODES; ++midx)
             bsi->rdstat[iy][midx].brdcost = INT64_MAX;
         bsi->segment_rd = INT64_MAX;
-        return;
+        return INT64_MAX;;
       }
 
       mode_idx = INTER_OFFSET(mode_selected);
@@ -2067,7 +2086,7 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
           for (midx = 0; midx < INTER_MODES; ++midx)
             bsi->rdstat[iy][midx].brdcost = INT64_MAX;
         bsi->segment_rd = INT64_MAX;
-        return;
+        return INT64_MAX;;
       }
     }
   } /* for each label */
@@ -2081,42 +2100,6 @@ static void rd_check_segment_txsize(VP9_COMP *cpi, MACROBLOCK *x,
   // update the coding decisions
   for (k = 0; k < 4; ++k)
     bsi->modes[k] = mi->bmi[k].as_mode;
-}
-
-static int64_t rd_pick_best_mbsegmentation(VP9_COMP *cpi, MACROBLOCK *x,
-                                           const TileInfo *const tile,
-                                           int_mv *best_ref_mv,
-                                           int_mv *second_best_ref_mv,
-                                           int64_t best_rd,
-                                           int *returntotrate,
-                                           int *returnyrate,
-                                           int64_t *returndistortion,
-                                           int *skippable, int64_t *psse,
-                                           int mvthresh,
-                                           int_mv seg_mvs[4][MAX_REF_FRAMES],
-                                           BEST_SEG_INFO *bsi_buf,
-                                           int filter_idx,
-                                           int mi_row, int mi_col) {
-  int i;
-  BEST_SEG_INFO *bsi = bsi_buf + filter_idx;
-  MACROBLOCKD *xd = &x->e_mbd;
-  MODE_INFO *mi = xd->mi[0];
-  MB_MODE_INFO *mbmi = &mi->mbmi;
-  int mode_idx;
-
-  vp9_zero(*bsi);
-
-  bsi->segment_rd = best_rd;
-  bsi->ref_mv[0] = best_ref_mv;
-  bsi->ref_mv[1] = second_best_ref_mv;
-  bsi->mvp.as_int = best_ref_mv->as_int;
-  bsi->mvthresh = mvthresh;
-
-  for (i = 0; i < 4; i++)
-    bsi->modes[i] = ZEROMV;
-
-  rd_check_segment_txsize(cpi, x, tile, bsi_buf, filter_idx, seg_mvs,
-                          mi_row, mi_col);
 
   if (bsi->segment_rd > best_rd)
     return INT64_MAX;
@@ -4050,15 +4033,14 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
             int newbest, rs;
             int64_t rs_rd;
             mbmi->interp_filter = switchable_filter_index;
-            tmp_rd = rd_pick_best_mbsegmentation(cpi, x, tile,
-                                                 &mbmi->ref_mvs[ref_frame][0],
-                                                 second_ref,
-                                                 best_yrd,
-                                                 &rate, &rate_y, &distortion,
-                                                 &skippable, &total_sse,
-                                                 (int)this_rd_thresh, seg_mvs,
-                                                 bsi, switchable_filter_index,
-                                                 mi_row, mi_col);
+            tmp_rd = rd_pick_best_sub8x8_mode(cpi, x, tile,
+                                              &mbmi->ref_mvs[ref_frame][0],
+                                              second_ref, best_yrd, &rate,
+                                              &rate_y, &distortion,
+                                              &skippable, &total_sse,
+                                              (int) this_rd_thresh, seg_mvs,
+                                              bsi, switchable_filter_index,
+                                              mi_row, mi_col);
 
             if (tmp_rd == INT64_MAX)
               continue;
@@ -4117,15 +4099,12 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       if (!pred_exists) {
         // Handles the special case when a filter that is not in the
         // switchable list (bilinear, 6-tap) is indicated at the frame level
-        tmp_rd = rd_pick_best_mbsegmentation(cpi, x, tile,
-                     &mbmi->ref_mvs[ref_frame][0],
-                     second_ref,
-                     best_yrd,
-                     &rate, &rate_y, &distortion,
-                     &skippable, &total_sse,
-                     (int)this_rd_thresh, seg_mvs,
-                     bsi, 0,
-                     mi_row, mi_col);
+        tmp_rd = rd_pick_best_sub8x8_mode(cpi, x, tile,
+                                          &mbmi->ref_mvs[ref_frame][0],
+                                          second_ref, best_yrd, &rate, &rate_y,
+                                          &distortion, &skippable, &total_sse,
+                                          (int) this_rd_thresh, seg_mvs, bsi, 0,
+                                          mi_row, mi_col);
         if (tmp_rd == INT64_MAX)
           continue;
       } else {
