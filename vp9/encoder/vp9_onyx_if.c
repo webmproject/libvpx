@@ -372,9 +372,6 @@ static void update_reference_segmentation_map(VP9_COMP *cpi) {
     cache_ptr += cm->mi_cols;
   }
 }
-static int is_slowest_mode(int mode) {
-  return (mode == TWO_PASS_SECOND_BEST || mode == ONE_PASS_BEST);
-}
 
 static void set_rd_speed_thresholds(VP9_COMP *cpi) {
   int i;
@@ -382,7 +379,7 @@ static void set_rd_speed_thresholds(VP9_COMP *cpi) {
 
   // Set baseline threshold values
   for (i = 0; i < MAX_MODES; ++i)
-    rd->thresh_mult[i] = is_slowest_mode(cpi->oxcf.mode) ? -500 : 0;
+    rd->thresh_mult[i] = is_best_mode(cpi->oxcf.mode) ? -500 : 0;
 
   rd->thresh_mult[THR_NEARESTMV] = 0;
   rd->thresh_mult[THR_NEARESTG] = 0;
@@ -464,7 +461,7 @@ static void set_rd_speed_thresholds_sub8x8(VP9_COMP *cpi) {
   int i;
 
   for (i = 0; i < MAX_REFS; ++i)
-    rd->thresh_mult_sub8x8[i] = is_slowest_mode(cpi->oxcf.mode)  ? -500 : 0;
+    rd->thresh_mult_sub8x8[i] = is_best_mode(cpi->oxcf.mode)  ? -500 : 0;
 
   rd->thresh_mult_sub8x8[THR_LAST] += 2500;
   rd->thresh_mult_sub8x8[THR_GOLD] += 2500;

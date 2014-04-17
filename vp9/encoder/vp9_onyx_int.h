@@ -287,6 +287,9 @@ typedef struct VP9_CONFIG {
   vp8e_tuning tuning;
 } VP9_CONFIG;
 
+static INLINE int is_best_mode(MODE mode) {
+  return mode == ONE_PASS_BEST || mode == TWO_PASS_SECOND_BEST;
+}
 
 typedef struct RD_OPT {
   // Thresh_mult is used to set a threshold for the rd score. A higher value
