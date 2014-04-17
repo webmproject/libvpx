@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//tK4\u003d",
+        "filename": "vp9/encoder/vp9_block.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-04-17T13:35:17Z",
+      "side": 1,
+      "message": "Dmitry suggested this format for now for me and a revised patch.   It is a TODO,  but I think the TODO is camelcase on all structures not one just here.   Putting one here seems unnecessary as the global todo is already in progress.",
+      "parentUuid": "AAAAdn//tV4\u003d",
+      "revId": "98ad4d8e136ad699631a96b9f6421487f295336a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//tVw\u003d",
         "filename": "vp9/encoder/vp9_context_tree.c",
         "patchSetId": 15
@@ -47,6 +65,24 @@
       "writtenOn": "2014-04-16T21:24:36Z",
       "side": 1,
       "message": "*const cm?",
+      "revId": "98ad4d8e136ad699631a96b9f6421487f295336a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//tK8\u003d",
+        "filename": "vp9/encoder/vp9_context_tree.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-04-17T13:35:17Z",
+      "side": 1,
+      "message": "personally I see little value in doing that kind of thing but if you want it done lets be consistent and do it everywhere in a separate patch.  \n\nTo me its way more important to make it clear that the data pointed to is not changed than the value of the local pointer parameter variable.",
+      "parentUuid": "AAAAdn//tVw\u003d",
       "revId": "98ad4d8e136ad699631a96b9f6421487f295336a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -70,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//tLE\u003d",
+        "filename": "vp9/encoder/vp9_context_tree.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-04-17T13:35:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//tT8\u003d",
+      "revId": "98ad4d8e136ad699631a96b9f6421487f295336a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//tT4\u003d",
         "filename": "vp9/encoder/vp9_context_tree.h",
         "patchSetId": 15
@@ -81,6 +135,24 @@
       "writtenOn": "2014-04-16T21:24:36Z",
       "side": 1,
       "message": "same as bove",
+      "revId": "98ad4d8e136ad699631a96b9f6421487f295336a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//tLA\u003d",
+        "filename": "vp9/encoder/vp9_context_tree.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-04-17T13:35:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//tT4\u003d",
       "revId": "98ad4d8e136ad699631a96b9f6421487f295336a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
