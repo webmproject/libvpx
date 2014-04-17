@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//tFg\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-04-17T21:56:36Z",
+      "side": 1,
+      "message": "a slightly shorter (\u003c52char) summary line would fit better for \"git log --online\"",
+      "revId": "fba9b09f7ef3ba12ab1fc4a8f30725b21676b326",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
