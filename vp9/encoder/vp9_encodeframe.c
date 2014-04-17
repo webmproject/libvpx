@@ -1284,8 +1284,10 @@ static int is_background(VP9_COMP *cpi, const TileInfo *const tile,
   int threshold = 0;
 
   vp9_setup_src_planes(x, cpi->Source, mi_row, mi_col);
+
   src_stride = x->plane[0].src.stride;
   src = x->plane[0].src.buf;
+
   pre_stride = cpi->Last_Source->y_stride;
   pre = cpi->Last_Source->y_buffer + (mi_row * MI_SIZE) * pre_stride +
           (mi_col * MI_SIZE);
@@ -2307,15 +2309,7 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
   // Copy data over into macro block data structures.
   vp9_setup_src_planes(x, cpi->Source, 0, 0);
 
-  // TODO(jkoleszar): are these initializations required?
-  vp9_setup_pre_planes(xd, 0, get_ref_frame_buffer(cpi, LAST_FRAME), 0, 0,
-                       NULL);
-  vp9_setup_dst_planes(xd, get_frame_new_buffer(cm), 0, 0);
-
   vp9_setup_block_planes(&x->e_mbd, cm->subsampling_x, cm->subsampling_y);
-
-  xd->mi[0]->mbmi.mode = DC_PRED;
-  xd->mi[0]->mbmi.uv_mode = DC_PRED;
 
   // Note: this memset assumes above_context[0], [1] and [2]
   // are allocated as part of the same buffer.
