@@ -1281,7 +1281,7 @@ static void get_cx_data(struct stream_state *stream,
   *got_data = 0;
   while ((pkt = vpx_codec_get_cx_data(&stream->encoder, &iter))) {
     static size_t fsize = 0;
-    static off_t ivf_header_pos = 0;
+    static int64_t ivf_header_pos = 0;
 
     switch (pkt->kind) {
       case VPX_CODEC_CX_FRAME_PKT:
@@ -1307,7 +1307,7 @@ static void get_cx_data(struct stream_state *stream,
             fsize += pkt->data.frame.sz;
 
             if (!(pkt->data.frame.flags & VPX_FRAME_IS_FRAGMENT)) {
-              off_t currpos = ftello(stream->file);
+              const int64_t currpos = ftello(stream->file);
               fseeko(stream->file, ivf_header_pos, SEEK_SET);
               ivf_write_frame_size(stream->file, fsize);
               fseeko(stream->file, currpos, SEEK_SET);
@@ -1534,7 +1534,7 @@ int main(int argc, const char **argv_) {
     int frames_in = 0, seen_frames = 0;
     int64_t estimated_time_left = -1;
     int64_t average_rate = -1;
-    off_t lagged_count = 0;
+    int64_t lagged_count = 0;
 
     open_input_file(&input);
 
@@ -1667,15 +1667,15 @@ int main(int argc, const char **argv_) {
           int64_t rate;
 
           if (global.limit) {
-            off_t frame_in_lagged = (seen_frames - lagged_count) * 1000;
+            const int64_t frame_in_lagged = (seen_frames - lagged_count) * 1000;
 
             rate = cx_time ? frame_in_lagged * (int64_t)1000000 / cx_time : 0;
             remaining = 1000 * (global.limit - global.skip_frames
                                 - seen_frames + lagged_count);
           } else {
-            off_t input_pos = ftello(input.file);
-            off_t input_pos_lagged = input_pos - lagged_count;
-            int64_t limit = input.length;
+            const int64_t input_pos = ftello(input.file);
+            const int64_t input_pos_lagged = input_pos - lagged_count;
+            const int64_t limit = input.length;
 
             rate = cx_time ? input_pos_lagged * (int64_t)1000000 / cx_time : 0;
             remaining = limit - input_pos + lagged_count;
