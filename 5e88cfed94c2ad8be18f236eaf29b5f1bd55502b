@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//tIo\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1283,
+      "author": {
+        "id": 1001183
+      },
+      "writtenOn": "2014-04-17T18:20:09Z",
+      "side": 1,
+      "message": "In practice, I\u0027ve seen header sizes that are 18 bytes long.  80 is based on walking through all possible code paths and determining what the maximum number of bits is that could be read by \"rb\".  The result I came up with is 78 bytes + 4 bits.  This can probably be double-checked against the VP9 standard, but I have not done so.\n\nAs for moving decryption to read_uncompressed_header, that function uses the bit buffer \"rb\" to read in the data.  As an alternative that does not require a fixed byte count, we could  add a decrypt callback to the bit buffer instead.  The down side is that we are then decrypting 1 byte at a time in vp9_rb_read_bit.\n\nThoughts?",
+      "parentUuid": "AAAAdn//tKQ\u003d",
+      "revId": "5e88cfed94c2ad8be18f236eaf29b5f1bd55502b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//tO0\u003d",
         "filename": "vp9/decoder/vp9_reader.c",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2014-04-17T01:07:45Z",
       "side": 1,
       "message": "const size_t n \u003d MIN(sizeof(r-\u003eclear_buffer), bytes_left)",
+      "revId": "5e88cfed94c2ad8be18f236eaf29b5f1bd55502b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//tIk\u003d",
+        "filename": "vp9/decoder/vp9_reader.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1001183
+      },
+      "writtenOn": "2014-04-17T18:20:09Z",
+      "side": 1,
+      "message": "Done, here and in vp8.",
+      "parentUuid": "AAAAdn//tO0\u003d",
       "revId": "5e88cfed94c2ad8be18f236eaf29b5f1bd55502b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//tIg\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1001183
+      },
+      "writtenOn": "2014-04-17T18:20:09Z",
+      "side": 1,
+      "message": "Done, here and in vp8.",
+      "parentUuid": "AAAAdn//tOc\u003d",
+      "revId": "5e88cfed94c2ad8be18f236eaf29b5f1bd55502b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//tOw\u003d",
         "filename": "vpx/vp8dx.h",
         "patchSetId": 3
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//tIY\u003d",
+        "filename": "vpx/vp8dx.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1001183
+      },
+      "writtenOn": "2014-04-17T18:20:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//tOw\u003d",
+      "revId": "5e88cfed94c2ad8be18f236eaf29b5f1bd55502b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//tOs\u003d",
         "filename": "vpx/vp8dx.h",
         "patchSetId": 3
@@ -81,6 +153,24 @@
       "writtenOn": "2014-04-17T01:07:45Z",
       "side": 1,
       "message": "It would be nice to rename vp8_decrypt_init to vpx_decrypt_init (or even vpx_decryptor). Technically it will break compatibility, so we actually could wait until libvpx 2.0 release.",
+      "revId": "5e88cfed94c2ad8be18f236eaf29b5f1bd55502b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//tIc\u003d",
+        "filename": "vpx/vp8dx.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1001183
+      },
+      "writtenOn": "2014-04-17T18:20:09Z",
+      "side": 1,
+      "message": "I\u0027ve gone ahead and renamed everything in the new patch set, with typedefs and such for backward compatibility.  Does this work for you?",
+      "parentUuid": "AAAAdn//tOs\u003d",
       "revId": "5e88cfed94c2ad8be18f236eaf29b5f1bd55502b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
