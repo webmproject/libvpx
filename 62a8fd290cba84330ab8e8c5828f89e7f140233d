@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//tNA\u003d",
+        "filename": "build/make/Makefile",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-17T02:35:46Z",
+      "side": 1,
+      "message": "just simply testing the config before defining the rule might be enough for now: you need unit-tests + examples here, otherwise a dummy with a help message should work",
+      "parentUuid": "AAAAdn//tNg\u003d",
+      "revId": "62a8fd290cba84330ab8e8c5828f89e7f140233d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//tcw\u003d",
         "filename": "build/make/Makefile",
         "patchSetId": 1
