@@ -145,7 +145,7 @@ TEST_P(DatarateTestLarge, BasicBufferModel) {
     cfg_.rc_target_bitrate = i;
     ResetModel();
     ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-    ASSERT_GE(cfg_.rc_target_bitrate, effective_datarate_)
+    ASSERT_GE(cfg_.rc_target_bitrate, effective_datarate_ * 0.95)
         << " The datarate for the file exceeds the target!";
 
     ASSERT_LE(cfg_.rc_target_bitrate, file_datarate_ * 1.3)
