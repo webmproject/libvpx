@@ -1474,13 +1474,12 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                 int_mv single_newmv[MAX_REF_FRAMES],
                                 int *rate_mv);
 
-static int labels2mode(VP9_COMP *cpi, MACROBLOCKD *xd, int i,
-                       MB_PREDICTION_MODE mode,
-                       int_mv this_mv[2],
-                       int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES],
-                       int_mv seg_mvs[MAX_REF_FRAMES],
-                       int_mv *best_ref_mv[2],
-                       const int *mvjcost, int *mvcost[2]) {
+static int set_and_cost_bmi_mvs(VP9_COMP *cpi, MACROBLOCKD *xd, int i,
+                                MB_PREDICTION_MODE mode, int_mv this_mv[2],
+                                int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES],
+                                int_mv seg_mvs[MAX_REF_FRAMES],
+                                int_mv *best_ref_mv[2], const int *mvjcost,
+                                int *mvcost[2]) {
   MODE_INFO *const mic = xd->mi[0];
   const MB_MODE_INFO *const mbmi = &mic->mbmi;
   int thismvcost = 0;
@@ -1489,8 +1488,6 @@ static int labels2mode(VP9_COMP *cpi, MACROBLOCKD *xd, int i,
   const int num_4x4_blocks_high = num_4x4_blocks_high_lookup[mbmi->sb_type];
   const int is_compound = has_second_ref(mbmi);
 
-  // the only time we should do costing for new motion vector or mode
-  // is when we are on a new label  (jbb May 08, 2007)
   switch (mode) {
     case NEWMV:
       this_mv[0].as_int = seg_mvs[mbmi->ref_frame[0]].as_int;
@@ -1502,15 +1499,11 @@ static int labels2mode(VP9_COMP *cpi, MACROBLOCKD *xd, int i,
                                       mvjcost, mvcost, MV_COST_WEIGHT_SUB);
       }
       break;
-    case NEARESTMV:
-      this_mv[0].as_int = frame_mv[NEARESTMV][mbmi->ref_frame[0]].as_int;
-      if (is_compound)
-        this_mv[1].as_int = frame_mv[NEARESTMV][mbmi->ref_frame[1]].as_int;
-      break;
     case NEARMV:
-      this_mv[0].as_int = frame_mv[NEARMV][mbmi->ref_frame[0]].as_int;
+    case NEARESTMV:
+      this_mv[0].as_int = frame_mv[mode][mbmi->ref_frame[0]].as_int;
       if (is_compound)
-        this_mv[1].as_int = frame_mv[NEARMV][mbmi->ref_frame[1]].as_int;
+        this_mv[1].as_int = frame_mv[mode][mbmi->ref_frame[1]].as_int;
       break;
     case ZEROMV:
       this_mv[0].as_int = 0;
@@ -1973,8 +1966,9 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
         }
 
         bsi->rdstat[i][mode_idx].brate =
-            labels2mode(cpi, xd, i, this_mode, mode_mv[this_mode], frame_mv,
-                        seg_mvs[i], bsi->ref_mv, x->nmvjointcost, x->mvcost);
+            set_and_cost_bmi_mvs(cpi, xd, i, this_mode, mode_mv[this_mode],
+                                 frame_mv, seg_mvs[i], bsi->ref_mv,
+                                 x->nmvjointcost, x->mvcost);
 
         for (ref = 0; ref < 1 + has_second_rf; ++ref) {
           bsi->rdstat[i][mode_idx].mvs[ref].as_int =
@@ -2070,9 +2064,9 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
       vpx_memcpy(t_above, bsi->rdstat[i][mode_idx].ta, sizeof(t_above));
       vpx_memcpy(t_left, bsi->rdstat[i][mode_idx].tl, sizeof(t_left));
 
-      labels2mode(cpi, xd, i, mode_selected, mode_mv[mode_selected],
-                  frame_mv, seg_mvs[i], bsi->ref_mv, x->nmvjointcost,
-                  x->mvcost);
+      set_and_cost_bmi_mvs(cpi, xd, i, mode_selected, mode_mv[mode_selected],
+                           frame_mv, seg_mvs[i], bsi->ref_mv, x->nmvjointcost,
+                           x->mvcost);
 
       br += bsi->rdstat[i][mode_idx].brate;
       bd += bsi->rdstat[i][mode_idx].bdist;
