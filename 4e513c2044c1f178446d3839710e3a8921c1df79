@@ -16,6 +16,23 @@
       "revId": "4e513c2044c1f178446d3839710e3a8921c1df79",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//tJE\u003d",
+        "filename": "webmdec.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-04-17T16:17:36Z",
+      "side": 1,
+      "message": "There is a lot going on in this function, with a lot of potential dependencies. I don\u0027t think users will be able to allocate their own memory. buffer_size is an input and output. What about first time use? This function really needs a comment.",
+      "revId": "4e513c2044c1f178446d3839710e3a8921c1df79",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
