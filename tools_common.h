@@ -25,15 +25,10 @@
 /* MSVS uses _f{seek,tell}i64. */
 #define fseeko _fseeki64
 #define ftello _ftelli64
-typedef long _off_t;  // NOLINT - MSVS compatible type
-typedef __int64 off_t;  // fseeki64 compatible type
-#define _OFF_T_DEFINED
 #elif defined(_WIN32)
-/* MinGW defines off_t as long and uses f{seek,tell}o64/off64_t for large
- * files. */
+/* MinGW uses f{seek,tell}o64 for large files. */
 #define fseeko fseeko64
 #define ftello ftello64
-#define off_t off64_t
 #endif  /* _WIN32 */
 
 #if CONFIG_OS_SUPPORT
@@ -50,7 +45,6 @@ typedef __int64 off_t;  // fseeki64 compatible type
 /* Use 32-bit file operations in WebM file format when building ARM
  * executables (.axf) with RVCT. */
 #if !CONFIG_OS_SUPPORT
-typedef long off_t;  /* NOLINT */
 #define fseeko fseek
 #define ftello ftell
 #endif  /* CONFIG_OS_SUPPORT */
@@ -90,7 +84,7 @@ struct VpxRational {
 struct VpxInputContext {
   const char *filename;
   FILE *file;
-  off_t length;
+  int64_t length;
   struct FileTypeDetectionBuffer detect;
   enum VideoFileType file_type;
   uint32_t width;
