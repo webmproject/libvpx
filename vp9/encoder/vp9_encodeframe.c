@@ -1317,6 +1317,42 @@ static void set_source_var_based_partition(VP9_COMP *cpi,
   }
 }
 
+static int is_background(VP9_COMP *cpi, const TileInfo *const tile,
+                         int mi_row, int mi_col) {
+  MACROBLOCK *const x = &cpi->mb;
+  uint8_t *src, *pre;
+  int src_stride, pre_stride;
+
+  const int row8x8_remaining = tile->mi_row_end - mi_row;
+  const int col8x8_remaining = tile->mi_col_end - mi_col;
+
+  int this_sad = 0;
+  int threshold = 0;
+
+  vp9_setup_src_planes(x, cpi->Source, mi_row, mi_col);
+  src_stride = x->plane[0].src.stride;
+  src = x->plane[0].src.buf;
+  pre_stride = cpi->Last_Source->y_stride;
+  pre = cpi->Last_Source->y_buffer + (mi_row * MI_SIZE) * pre_stride +
+          (mi_col * MI_SIZE);
+
+  if (row8x8_remaining >= MI_BLOCK_SIZE &&
+      col8x8_remaining >= MI_BLOCK_SIZE) {
+    this_sad = cpi->fn_ptr[BLOCK_64X64].sdf(src, src_stride,
+                                            pre, pre_stride, 0x7fffffff);
+    threshold = (1 << 12);
+  } else {
+    int r, c;
+    for (r = 0; r < row8x8_remaining; r += 2)
+      for (c = 0; c < col8x8_remaining; c += 2)
+        this_sad += cpi->fn_ptr[BLOCK_16X16].sdf(src, src_stride, pre,
+                                                 pre_stride, 0x7fffffff);
+    threshold = (row8x8_remaining * col8x8_remaining) << 6;
+  }
+
+  return (this_sad < 2 * threshold);
+}
+
 static int sb_has_motion(const VP9_COMMON *cm, MODE_INFO **prev_mi_8x8) {
   const int mis = cm->mi_stride;
   int block_row, block_col;
@@ -2966,7 +3002,8 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
                             1, &dummy_rate, &dummy_dist);
         break;
       case REFERENCE_PARTITION:
-        if (cpi->sf.partition_check || sb_has_motion(cm, prev_mi_8x8)) {
+        if (cpi->sf.partition_check ||
+            !is_background(cpi, tile, mi_row, mi_col)) {
           nonrd_pick_partition(cpi, tile, tp, mi_row, mi_col, BLOCK_64X64,
                                &dummy_rate, &dummy_dist, 1, INT64_MAX);
         } else {
