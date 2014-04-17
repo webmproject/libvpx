@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//tO0\u003d",
+        "filename": "vp9/decoder/vp9_reader.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-17T01:07:45Z",
+      "side": 1,
+      "message": "const size_t n \u003d MIN(sizeof(r-\u003eclear_buffer), bytes_left)",
+      "revId": "5e88cfed94c2ad8be18f236eaf29b5f1bd55502b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//tOc\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-17T01:07:45Z",
+      "side": 1,
+      "message": "data_sz \u003d MIN(data_sz, 9)",
+      "revId": "5e88cfed94c2ad8be18f236eaf29b5f1bd55502b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//tOw\u003d",
+        "filename": "vpx/vp8dx.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-17T01:07:45Z",
+      "side": 1,
+      "message": "vp8 -\u003evpx, i.e vpx_decrypt_cb because it is used for both vp8 and vp9.",
+      "revId": "5e88cfed94c2ad8be18f236eaf29b5f1bd55502b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//tOs\u003d",
+        "filename": "vpx/vp8dx.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-17T01:07:45Z",
+      "side": 1,
+      "message": "It would be nice to rename vp8_decrypt_init to vpx_decrypt_init (or even vpx_decryptor). Technically it will break compatibility, so we actually could wait until libvpx 2.0 release.",
+      "revId": "5e88cfed94c2ad8be18f236eaf29b5f1bd55502b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
