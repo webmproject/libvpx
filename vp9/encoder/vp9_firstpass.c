@@ -474,7 +474,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
   TileInfo tile;
   struct macroblock_plane *const p = x->plane;
   struct macroblockd_plane *const pd = xd->plane;
-  const PICK_MODE_CONTEXT *ctx = &x->sb64_context;
+  const PICK_MODE_CONTEXT *ctx = &x->pc_root->none;
   int i;
 
   int recon_yoffset, recon_uvoffset;

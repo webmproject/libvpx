@@ -31,6 +31,7 @@
 #include "vp9/encoder/vp9_aq_cyclicrefresh.h"
 #include "vp9/encoder/vp9_aq_variance.h"
 #include "vp9/encoder/vp9_bitstream.h"
+#include "vp9/encoder/vp9_context_tree.h"
 #include "vp9/encoder/vp9_encodeframe.h"
 #include "vp9/encoder/vp9_encodemv.h"
 #include "vp9/encoder/vp9_firstpass.h"
@@ -178,6 +179,8 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
 
   vpx_free(cpi->tok);
   cpi->tok = 0;
+
+  vp9_free_pc_tree(&cpi->mb);
 
   for (i = 0; i < cpi->svc.number_spatial_layers; ++i) {
     LAYER_CONTEXT *const lc = &cpi->svc.layer_context[i];
@@ -563,6 +566,8 @@ void vp9_alloc_compressor_data(VP9_COMP *cpi) {
 
     CHECK_MEM_ERROR(cm, cpi->tok, vpx_calloc(tokens, sizeof(*cpi->tok)));
   }
+
+  vp9_setup_pc_tree(&cpi->common, &cpi->mb);
 }
 
 
@@ -880,124 +885,6 @@ static void cal_nmvsadcosts_hp(int *mvsadcost[2]) {
   } while (++i <= MV_MAX);
 }
 
-static void alloc_mode_context(VP9_COMMON *cm, int num_4x4_blk,
-                               PICK_MODE_CONTEXT *ctx) {
-  int num_pix = num_4x4_blk << 4;
-  int i, k;
-  ctx->num_4x4_blk = num_4x4_blk;
-
-  CHECK_MEM_ERROR(cm, ctx->zcoeff_blk,
-                  vpx_calloc(num_4x4_blk, sizeof(uint8_t)));
-  for (i = 0; i < MAX_MB_PLANE; ++i) {
-    for (k = 0; k < 3; ++k) {
-      CHECK_MEM_ERROR(cm, ctx->coeff[i][k],
-                      vpx_memalign(16, num_pix * sizeof(int16_t)));
-      CHECK_MEM_ERROR(cm, ctx->qcoeff[i][k],
-                      vpx_memalign(16, num_pix * sizeof(int16_t)));
-      CHECK_MEM_ERROR(cm, ctx->dqcoeff[i][k],
-                      vpx_memalign(16, num_pix * sizeof(int16_t)));
-      CHECK_MEM_ERROR(cm, ctx->eobs[i][k],
-                      vpx_memalign(16, num_pix * sizeof(uint16_t)));
-      ctx->coeff_pbuf[i][k]   = ctx->coeff[i][k];
-      ctx->qcoeff_pbuf[i][k]  = ctx->qcoeff[i][k];
-      ctx->dqcoeff_pbuf[i][k] = ctx->dqcoeff[i][k];
-      ctx->eobs_pbuf[i][k]    = ctx->eobs[i][k];
-    }
-  }
-}
-
-static void free_mode_context(PICK_MODE_CONTEXT *ctx) {
-  int i, k;
-  vpx_free(ctx->zcoeff_blk);
-  ctx->zcoeff_blk = 0;
-  for (i = 0; i < MAX_MB_PLANE; ++i) {
-    for (k = 0; k < 3; ++k) {
-      vpx_free(ctx->coeff[i][k]);
-      ctx->coeff[i][k] = 0;
-      vpx_free(ctx->qcoeff[i][k]);
-      ctx->qcoeff[i][k] = 0;
-      vpx_free(ctx->dqcoeff[i][k]);
-      ctx->dqcoeff[i][k] = 0;
-      vpx_free(ctx->eobs[i][k]);
-      ctx->eobs[i][k] = 0;
-    }
-  }
-}
-
-static void init_pick_mode_context(VP9_COMP *cpi) {
-  int i;
-  VP9_COMMON *const cm = &cpi->common;
-  MACROBLOCK *const x  = &cpi->mb;
-
-  for (i = 0; i < BLOCK_SIZES; ++i) {
-    const int num_4x4_w = num_4x4_blocks_wide_lookup[i];
-    const int num_4x4_h = num_4x4_blocks_high_lookup[i];
-    const int num_4x4_blk = MAX(4, num_4x4_w * num_4x4_h);
-    if (i < BLOCK_16X16) {
-      for (x->sb_index = 0; x->sb_index < 4; ++x->sb_index) {
-        for (x->mb_index = 0; x->mb_index < 4; ++x->mb_index) {
-          for (x->b_index = 0; x->b_index < 16 / num_4x4_blk; ++x->b_index) {
-            PICK_MODE_CONTEXT *ctx = get_block_context(x, i);
-            alloc_mode_context(cm, num_4x4_blk, ctx);
-          }
-        }
-      }
-    } else if (i < BLOCK_32X32) {
-      for (x->sb_index = 0; x->sb_index < 4; ++x->sb_index) {
-        for (x->mb_index = 0; x->mb_index < 64 / num_4x4_blk; ++x->mb_index) {
-          PICK_MODE_CONTEXT *ctx = get_block_context(x, i);
-          ctx->num_4x4_blk = num_4x4_blk;
-          alloc_mode_context(cm, num_4x4_blk, ctx);
-        }
-      }
-    } else if (i < BLOCK_64X64) {
-      for (x->sb_index = 0; x->sb_index < 256 / num_4x4_blk; ++x->sb_index) {
-        PICK_MODE_CONTEXT *ctx = get_block_context(x, i);
-        ctx->num_4x4_blk = num_4x4_blk;
-        alloc_mode_context(cm, num_4x4_blk, ctx);
-      }
-    } else {
-      PICK_MODE_CONTEXT *ctx = get_block_context(x, i);
-      ctx->num_4x4_blk = num_4x4_blk;
-      alloc_mode_context(cm, num_4x4_blk, ctx);
-    }
-  }
-}
-
-static void free_pick_mode_context(MACROBLOCK *x) {
-  int i;
-
-  for (i = 0; i < BLOCK_SIZES; ++i) {
-    const int num_4x4_w = num_4x4_blocks_wide_lookup[i];
-    const int num_4x4_h = num_4x4_blocks_high_lookup[i];
-    const int num_4x4_blk = MAX(4, num_4x4_w * num_4x4_h);
-    if (i < BLOCK_16X16) {
-      for (x->sb_index = 0; x->sb_index < 4; ++x->sb_index) {
-        for (x->mb_index = 0; x->mb_index < 4; ++x->mb_index) {
-          for (x->b_index = 0; x->b_index < 16 / num_4x4_blk; ++x->b_index) {
-            PICK_MODE_CONTEXT *ctx = get_block_context(x, i);
-            free_mode_context(ctx);
-          }
-        }
-      }
-    } else if (i < BLOCK_32X32) {
-      for (x->sb_index = 0; x->sb_index < 4; ++x->sb_index) {
-        for (x->mb_index = 0; x->mb_index < 64 / num_4x4_blk; ++x->mb_index) {
-          PICK_MODE_CONTEXT *ctx = get_block_context(x, i);
-          free_mode_context(ctx);
-        }
-      }
-    } else if (i < BLOCK_64X64) {
-      for (x->sb_index = 0; x->sb_index < 256 / num_4x4_blk; ++x->sb_index) {
-        PICK_MODE_CONTEXT *ctx = get_block_context(x, i);
-        free_mode_context(ctx);
-      }
-    } else {
-      PICK_MODE_CONTEXT *ctx = get_block_context(x, i);
-      free_mode_context(ctx);
-    }
-  }
-}
 
 VP9_COMP *vp9_create_compressor(VP9_CONFIG *oxcf) {
   int i, j;
@@ -1026,7 +913,6 @@ VP9_COMP *vp9_create_compressor(VP9_CONFIG *oxcf) {
 
   init_config(cpi, oxcf);
   vp9_rc_init(&cpi->oxcf, cpi->pass, &cpi->rc);
-  init_pick_mode_context(cpi);
 
   cm->current_video_frame = 0;
 
@@ -1418,7 +1304,6 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
 #endif
   }
 
-  free_pick_mode_context(&cpi->mb);
   dealloc_compressor_data(cpi);
   vpx_free(cpi->mb.ss);
   vpx_free(cpi->tok);

@@ -79,6 +79,18 @@ struct macroblock_plane {
   // Zbin Over Quant value
   int16_t zbin_extra;
 };
+typedef struct PC_TREE {
+  int index;
+  PARTITION_TYPE partitioning;
+  BLOCK_SIZE block_size;
+  PICK_MODE_CONTEXT none;
+  PICK_MODE_CONTEXT horizontal[2];
+  PICK_MODE_CONTEXT vertical[2];
+  union {
+    struct PC_TREE *split[4];
+    PICK_MODE_CONTEXT *leaf_split[4];
+  };
+} PC_TREE;
 
 /* The [2] dimension is for whether we skip the EOB node (i.e. if previous
  * coefficient in this block was zero) or not. */
@@ -133,11 +145,6 @@ struct macroblock {
   int y_mode_costs[INTRA_MODES][INTRA_MODES][INTRA_MODES];
   int switchable_interp_costs[SWITCHABLE_FILTER_CONTEXTS][SWITCHABLE_FILTERS];
 
-  unsigned char sb_index;   // index of 32x32 block inside the 64x64 block
-  unsigned char mb_index;   // index of 16x16 block inside the 32x32 block
-  unsigned char b_index;    // index of 8x8 block inside the 16x16 block
-  unsigned char ab_index;   // index of 4x4 block inside the 8x8 block
-
   // These define limits to motion vector components to prevent them
   // from extending outside the UMV borders
   int mv_col_min;
@@ -164,69 +171,14 @@ struct macroblock {
   // Used to store sub partition's choices.
   int_mv pred_mv[MAX_REF_FRAMES];
 
-  // TODO(jingning): Need to refactor the structure arrays that buffers the
-  // coding mode decisions of each partition type.
-  PICK_MODE_CONTEXT ab4x4_context[4][4][4];
-  PICK_MODE_CONTEXT sb8x4_context[4][4][4];
-  PICK_MODE_CONTEXT sb4x8_context[4][4][4];
-  PICK_MODE_CONTEXT sb8x8_context[4][4][4];
-  PICK_MODE_CONTEXT sb8x16_context[4][4][2];
-  PICK_MODE_CONTEXT sb16x8_context[4][4][2];
-  PICK_MODE_CONTEXT mb_context[4][4];
-  PICK_MODE_CONTEXT sb32x16_context[4][2];
-  PICK_MODE_CONTEXT sb16x32_context[4][2];
-  // when 4 MBs share coding parameters:
-  PICK_MODE_CONTEXT sb32_context[4];
-  PICK_MODE_CONTEXT sb32x64_context[2];
-  PICK_MODE_CONTEXT sb64x32_context[2];
-  PICK_MODE_CONTEXT sb64_context;
+  PICK_MODE_CONTEXT *leaf_tree;
+  PC_TREE *pc_tree;
+  PC_TREE *pc_root;
   int partition_cost[PARTITION_CONTEXTS][PARTITION_TYPES];
-
-  BLOCK_SIZE b_partitioning[4][4][4];
-  BLOCK_SIZE mb_partitioning[4][4];
-  BLOCK_SIZE sb_partitioning[4];
-  BLOCK_SIZE sb64_partitioning;
 
   void (*fwd_txm4x4)(const int16_t *input, int16_t *output, int stride);
 };
 
-// TODO(jingning): the variables used here are little complicated. need further
-// refactoring on organizing the temporary buffers, when recursive
-// partition down to 4x4 block size is enabled.
-static INLINE PICK_MODE_CONTEXT *get_block_context(MACROBLOCK *x,
-                                                   BLOCK_SIZE bsize) {
-  switch (bsize) {
-    case BLOCK_64X64:
-      return &x->sb64_context;
-    case BLOCK_64X32:
-      return &x->sb64x32_context[x->sb_index];
-    case BLOCK_32X64:
-      return &x->sb32x64_context[x->sb_index];
-    case BLOCK_32X32:
-      return &x->sb32_context[x->sb_index];
-    case BLOCK_32X16:
-      return &x->sb32x16_context[x->sb_index][x->mb_index];
-    case BLOCK_16X32:
-      return &x->sb16x32_context[x->sb_index][x->mb_index];
-    case BLOCK_16X16:
-      return &x->mb_context[x->sb_index][x->mb_index];
-    case BLOCK_16X8:
-      return &x->sb16x8_context[x->sb_index][x->mb_index][x->b_index];
-    case BLOCK_8X16:
-      return &x->sb8x16_context[x->sb_index][x->mb_index][x->b_index];
-    case BLOCK_8X8:
-      return &x->sb8x8_context[x->sb_index][x->mb_index][x->b_index];
-    case BLOCK_8X4:
-      return &x->sb8x4_context[x->sb_index][x->mb_index][x->b_index];
-    case BLOCK_4X8:
-      return &x->sb4x8_context[x->sb_index][x->mb_index][x->b_index];
-    case BLOCK_4X4:
-      return &x->ab4x4_context[x->sb_index][x->mb_index][x->b_index];
-    default:
-      assert(0);
-      return NULL;
-  }
-}
 
 #ifdef __cplusplus
 }  // extern "C"
