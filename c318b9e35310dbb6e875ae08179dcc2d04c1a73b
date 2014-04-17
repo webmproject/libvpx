@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//tOE\u003d",
+        "filename": "vp9/encoder/vp9_mbgraph.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-17T01:31:21Z",
+      "side": 1,
+      "message": "It\u0027s not just a clamp, this expression actually converts speed into 0, 1, 2 values. Now speed \u003c 8 is always true, so removing opposite branch.",
+      "parentUuid": "AAAAdn//tPM\u003d",
+      "revId": "c318b9e35310dbb6e875ae08179dcc2d04c1a73b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//tPI\u003d",
         "filename": "vp9/encoder/vp9_temporal_filter.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2014-04-17T00:24:14Z",
       "side": 1,
       "message": "You are clamping this on input to 0-7. If this is the only range we will use then this if then else seems not to be needed.",
+      "revId": "c318b9e35310dbb6e875ae08179dcc2d04c1a73b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//tOA\u003d",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-17T01:31:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//tPI\u003d",
       "revId": "c318b9e35310dbb6e875ae08179dcc2d04c1a73b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
