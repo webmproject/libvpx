@@ -705,14 +705,10 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9_CONFIG *oxcf) {
 
   cpi->oxcf = *oxcf;
 
-  if (cpi->oxcf.cpu_used == -6)
-    cpi->oxcf.play_alternate = 0;
-
   switch (cpi->oxcf.mode) {
       // Real time and one pass deprecated in test code base
     case ONE_PASS_GOOD:
       cpi->pass = 0;
-      cpi->oxcf.cpu_used = clamp(cpi->oxcf.cpu_used, -5, 5);
       break;
 
     case ONE_PASS_BEST:
@@ -725,7 +721,6 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9_CONFIG *oxcf) {
 
     case TWO_PASS_SECOND_GOOD:
       cpi->pass = 2;
-      cpi->oxcf.cpu_used = clamp(cpi->oxcf.cpu_used, -5, 5);
       break;
 
     case TWO_PASS_SECOND_BEST:
@@ -734,6 +729,7 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9_CONFIG *oxcf) {
 
     case REALTIME:
       cpi->pass = 0;
+      cpi->oxcf.play_alternate = 0;
       break;
   }
 
@@ -832,8 +828,6 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9_CONFIG *oxcf) {
     vp9_update_layer_context_change_config(cpi,
                                            (int)cpi->oxcf.target_bandwidth);
   }
-
-  cpi->speed = abs(cpi->oxcf.cpu_used);
 
 #if CONFIG_MULTIPLE_ARF
   vp9_zero(cpi->alt_ref_source);

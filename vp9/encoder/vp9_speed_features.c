@@ -289,7 +289,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   SPEED_FEATURES *const sf = &cpi->sf;
   VP9_COMMON *const cm = &cpi->common;
   const VP9_CONFIG *const oxcf = &cpi->oxcf;
-  const int speed = cpi->speed < 0 ? -cpi->speed : cpi->speed;
   int i;
 
   // best quality defaults
@@ -360,10 +359,10 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
     case TWO_PASS_FIRST:
     case ONE_PASS_GOOD:
     case TWO_PASS_SECOND_GOOD:
-      set_good_speed_feature(cpi, cm, sf, speed);
+      set_good_speed_feature(cpi, cm, sf, oxcf->speed);
       break;
     case REALTIME:
-      set_rt_speed_feature(cm, sf, speed);
+      set_rt_speed_feature(cm, sf, oxcf->speed);
       break;
   }
 
