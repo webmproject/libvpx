@@ -911,7 +911,7 @@ static int get_twopass_worst_quality(const VP9_COMP *cpi,
     const int num_mbs = cpi->common.MBs;
     const double section_err = stats->coded_error / stats->count;
     const double err_per_mb = section_err / num_mbs;
-    const double speed_term = 1.0 + 0.04 * cpi->speed;
+    const double speed_term = 1.0 + 0.04 * cpi->oxcf.speed;
     const int target_norm_bits_per_mb = ((uint64_t)section_target_bandwidth <<
                                             BPER_MB_NORMBITS) / num_mbs;
     int q;

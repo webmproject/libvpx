@@ -451,7 +451,7 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
       x->pred_sse[ref] = sse;
 
     // Fast approximate the modelling function.
-    if (cpi->speed > 4) {
+    if (cpi->oxcf.speed > 4) {
       int64_t rate;
       int64_t dist;
       int64_t square_error = sse;

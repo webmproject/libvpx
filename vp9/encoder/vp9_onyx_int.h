@@ -196,7 +196,7 @@ typedef struct VP9_CONFIG {
 
   int noise_sensitivity;  // pre processing blur: recommendation 0
   int sharpness;  // sharpening output: recommendation 0:
-  int cpu_used;
+  int speed;
   unsigned int rc_max_intra_bitrate_pct;
 
   MODE mode;
@@ -402,10 +402,6 @@ typedef struct VP9_COMP {
   int mbgraph_n_frames;             // number of frames filled in the above
   int static_mb_pct;                // % forced skip mbs by segmentation
 
-  // for real time encoding
-  int speed;
-
-  int cpu_used;
   int pass;
 
   int ref_frame_flags;
