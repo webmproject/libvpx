@@ -938,17 +938,13 @@ extern void vp9_new_framerate(VP9_COMP *cpi, double framerate);
 
 void vp9_init_second_pass(VP9_COMP *cpi) {
   SVC *const svc = &cpi->svc;
-  FIRSTPASS_STATS this_frame;
-  const FIRSTPASS_STATS *start_pos;
-  struct twopass_rc *twopass = &cpi->twopass;
   const VP9_CONFIG *const oxcf = &cpi->oxcf;
   const int is_spatial_svc = (svc->number_spatial_layers > 1) &&
                              (svc->number_temporal_layers == 1);
+  struct twopass_rc *const twopass = is_spatial_svc ?
+      &svc->layer_context[svc->spatial_layer_id].twopass : &cpi->twopass;
   double frame_rate;
-
-  if (is_spatial_svc) {
-    twopass = &svc->layer_context[svc->spatial_layer_id].twopass;
-  }
+  FIRSTPASS_STATS *stats;
 
   zero_stats(&twopass->total_stats);
   zero_stats(&twopass->total_left_stats);
@@ -956,11 +952,12 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
   if (!twopass->stats_in_end)
     return;
 
-  twopass->total_stats = *twopass->stats_in_end;
-  twopass->total_left_stats = twopass->total_stats;
+  stats = &twopass->total_stats;
 
-  frame_rate = 10000000.0 * twopass->total_stats.count /
-               twopass->total_stats.duration;
+  *stats = *twopass->stats_in_end;
+  twopass->total_left_stats = *stats;
+
+  frame_rate = 10000000.0 * stats->count / stats->duration;
   // Each frame can have a different duration, as the frame rate in the source
   // isn't guaranteed to be constant. The frame rate prior to the first frame
   // encoded in the second pass is a guess. However, the sum duration is not.
@@ -969,14 +966,13 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
 
   if (is_spatial_svc) {
     vp9_update_spatial_layer_framerate(cpi, frame_rate);
-    twopass->bits_left =
-        (int64_t)(twopass->total_stats.duration *
+    twopass->bits_left = (int64_t)(stats->duration *
         svc->layer_context[svc->spatial_layer_id].target_bandwidth /
         10000000.0);
   } else {
     vp9_new_framerate(cpi, frame_rate);
-    twopass->bits_left = (int64_t)(twopass->total_stats.duration *
-                                   oxcf->target_bandwidth / 10000000.0);
+    twopass->bits_left = (int64_t)(stats->duration * oxcf->target_bandwidth /
+                             10000000.0);
   }
 
   // Calculate a minimum intra value to be used in determining the IIratio
@@ -996,8 +992,9 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
   // Scan the first pass file and calculate an average Intra / Inter error
   // score ratio for the sequence.
   {
+    const FIRSTPASS_STATS *const start_pos = twopass->stats_in;
+    FIRSTPASS_STATS this_frame;
     double sum_iiratio = 0.0;
-    start_pos = twopass->stats_in;
 
     while (input_stats(twopass, &this_frame) != EOF) {
       const double iiratio = this_frame.intra_error /
@@ -1006,7 +1003,7 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
     }
 
     twopass->avg_iiratio = sum_iiratio /
-        DOUBLE_DIVIDE_CHECK((double)twopass->total_stats.count);
+                               DOUBLE_DIVIDE_CHECK((double)stats->count);
 
     reset_fpf_position(twopass, start_pos);
   }
@@ -1014,16 +1011,17 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
   // Scan the first pass file and calculate a modified total error based upon
   // the bias/power function used to allocate bits.
   {
-    double av_error = twopass->total_stats.ssim_weighted_pred_err /
-                      DOUBLE_DIVIDE_CHECK(twopass->total_stats.count);
+    const FIRSTPASS_STATS *const start_pos = twopass->stats_in;
+    FIRSTPASS_STATS this_frame;
+    const double av_error = stats->ssim_weighted_pred_err /
+                                DOUBLE_DIVIDE_CHECK(stats->count);
 
-    start_pos = twopass->stats_in;
 
     twopass->modified_error_total = 0.0;
     twopass->modified_error_min =
-      (av_error * oxcf->two_pass_vbrmin_section) / 100;
+        (av_error * oxcf->two_pass_vbrmin_section) / 100;
     twopass->modified_error_max =
-      (av_error * oxcf->two_pass_vbrmax_section) / 100;
+        (av_error * oxcf->two_pass_vbrmax_section) / 100;
 
     while (input_stats(twopass, &this_frame) != EOF) {
       twopass->modified_error_total +=
