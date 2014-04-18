@@ -154,7 +154,7 @@ int webm_guess_framerate(struct WebmInputContext *webm_ctx,
 
   /* Check to see if we can seek before we parse any data. */
   if (nestegg_track_seek(webm_ctx->nestegg_ctx, webm_ctx->video_track, 0)) {
-    warn("Failed to guess framerate (no Cues), set to 30fps.\n");
+    fprintf(stderr, "Failed to guess framerate (no Cues), set to 30fps.\n");
     vpx_ctx->framerate.numerator = 30;
     vpx_ctx->framerate.denominator  = 1;
     return 0;
