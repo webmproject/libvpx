@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//s5o\u003d",
+        "filename": "vp9/encoder/vp9_variance.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 879,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-04-18T23:59:05Z",
+      "side": 1,
+      "message": "every other places seems to have const int16_t *const except this function, is there a good reason?",
+      "revId": "613aefbe0dfcee0b91110e7ed28c9130d0123b22",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
