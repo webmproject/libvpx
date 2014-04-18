@@ -904,6 +904,7 @@ static int get_twopass_worst_quality(const VP9_COMP *cpi,
                                      const FIRSTPASS_STATS *stats,
                                      int section_target_bandwidth) {
   const RATE_CONTROL *const rc = &cpi->rc;
+  const VP9_CONFIG *const oxcf = &cpi->oxcf;
 
   if (section_target_bandwidth <= 0) {
     return rc->worst_quality;  // Highest value allowed
@@ -911,7 +912,7 @@ static int get_twopass_worst_quality(const VP9_COMP *cpi,
     const int num_mbs = cpi->common.MBs;
     const double section_err = stats->coded_error / stats->count;
     const double err_per_mb = section_err / num_mbs;
-    const double speed_term = 1.0 + 0.04 * cpi->oxcf.speed;
+    const double speed_term = 1.0 + 0.04 * oxcf->speed;
     const int target_norm_bits_per_mb = ((uint64_t)section_target_bandwidth <<
                                             BPER_MB_NORMBITS) / num_mbs;
     int q;
@@ -928,8 +929,8 @@ static int get_twopass_worst_quality(const VP9_COMP *cpi,
     }
 
     // Restriction on active max q for constrained quality mode.
-    if (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY)
-      q = MAX(q, cpi->cq_target_quality);
+    if (oxcf->end_usage == USAGE_CONSTRAINED_QUALITY)
+      q = MAX(q, oxcf->cq_level);
     return q;
   }
 }

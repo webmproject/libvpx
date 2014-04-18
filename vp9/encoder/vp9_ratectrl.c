@@ -613,6 +613,7 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP9_COMP *cpi,
   const VP9_COMMON *const cm = &cpi->common;
   const RATE_CONTROL *const rc = &cpi->rc;
   const VP9_CONFIG *const oxcf = &cpi->oxcf;
+  const int cq_level = oxcf->cq_level;
   int active_best_quality;
   int active_worst_quality = calc_active_worst_quality_one_pass_vbr(cpi);
   int q;
@@ -671,8 +672,8 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP9_COMP *cpi,
     }
     // For constrained quality dont allow Q less than the cq level
     if (oxcf->end_usage == USAGE_CONSTRAINED_QUALITY) {
-      if (q < cpi->cq_target_quality)
-        q = cpi->cq_target_quality;
+      if (q < cq_level)
+        q = cq_level;
       if (rc->frames_since_key > 1) {
         active_best_quality = get_active_quality(q, rc->gfu_boost,
                                                  gf_low, gf_high,
@@ -689,7 +690,7 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP9_COMP *cpi,
 
     } else if (oxcf->end_usage == USAGE_CONSTANT_QUALITY) {
       if (!cpi->refresh_alt_ref_frame) {
-        active_best_quality = cpi->cq_target_quality;
+        active_best_quality = cq_level;
       } else {
         if (rc->frames_since_key > 1) {
           active_best_quality = get_active_quality(
@@ -708,7 +709,7 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP9_COMP *cpi,
     }
   } else {
     if (oxcf->end_usage == USAGE_CONSTANT_QUALITY) {
-      active_best_quality = cpi->cq_target_quality;
+      active_best_quality = cq_level;
     } else {
       // Use the lower of active_worst_quality and recent/average Q.
       if (cm->current_video_frame > 1)
@@ -718,14 +719,8 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP9_COMP *cpi,
       // For the constrained quality mode we don't want
       // q to fall below the cq level.
       if ((oxcf->end_usage == USAGE_CONSTRAINED_QUALITY) &&
-          (active_best_quality < cpi->cq_target_quality)) {
-        // If we are strongly undershooting the target rate in the last
-        // frames then use the user passed in cq value not the auto
-        // cq value.
-        if (rc->rolling_actual_bits < rc->min_frame_bandwidth)
-          active_best_quality = oxcf->cq_level;
-        else
-          active_best_quality = cpi->cq_target_quality;
+          (active_best_quality < cq_level)) {
+        active_best_quality = cq_level;
       }
     }
   }
@@ -807,6 +802,7 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi,
   const VP9_COMMON *const cm = &cpi->common;
   const RATE_CONTROL *const rc = &cpi->rc;
   const VP9_CONFIG *const oxcf = &cpi->oxcf;
+  const int cq_level = oxcf->cq_level;
   int active_best_quality;
   int active_worst_quality = cpi->twopass.active_worst_quality;
   int q;
@@ -867,8 +863,8 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi,
     }
     // For constrained quality dont allow Q less than the cq level
     if (oxcf->end_usage == USAGE_CONSTRAINED_QUALITY) {
-      if (q < cpi->cq_target_quality)
-        q = cpi->cq_target_quality;
+      if (q < cq_level)
+        q = cq_level;
       if (rc->frames_since_key > 1) {
         active_best_quality = get_active_quality(q, rc->gfu_boost,
                                                  gf_low, gf_high,
@@ -885,7 +881,7 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi,
 
     } else if (oxcf->end_usage == USAGE_CONSTANT_QUALITY) {
       if (!cpi->refresh_alt_ref_frame) {
-        active_best_quality = cpi->cq_target_quality;
+        active_best_quality = cq_level;
       } else {
         if (rc->frames_since_key > 1) {
           active_best_quality = get_active_quality(
@@ -904,21 +900,15 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi,
     }
   } else {
     if (oxcf->end_usage == USAGE_CONSTANT_QUALITY) {
-      active_best_quality = cpi->cq_target_quality;
+      active_best_quality = cq_level;
     } else {
       active_best_quality = inter_minq[active_worst_quality];
 
       // For the constrained quality mode we don't want
       // q to fall below the cq level.
       if ((oxcf->end_usage == USAGE_CONSTRAINED_QUALITY) &&
-          (active_best_quality < cpi->cq_target_quality)) {
-        // If we are strongly undershooting the target rate in the last
-        // frames then use the user passed in cq value not the auto
-        // cq value.
-        if (rc->rolling_actual_bits < rc->min_frame_bandwidth)
-          active_best_quality = oxcf->cq_level;
-        else
-          active_best_quality = cpi->cq_target_quality;
+          (active_best_quality < cq_level)) {
+        active_best_quality = cq_level;
       }
     }
   }

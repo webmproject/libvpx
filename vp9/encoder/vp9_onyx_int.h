@@ -394,8 +394,6 @@ typedef struct VP9_COMP {
 
   RATE_CONTROL rc;
 
-  int cq_target_quality;
-
   vp9_coeff_count coef_counts[TX_SIZES][PLANE_TYPES];
   vp9_coeff_probs_model frame_coef_probs[TX_SIZES][PLANE_TYPES];
 

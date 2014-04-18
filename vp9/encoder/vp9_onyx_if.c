@@ -788,10 +788,6 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9_CONFIG *oxcf) {
   rc->worst_quality = cpi->oxcf.worst_allowed_q;
   rc->best_quality = cpi->oxcf.best_allowed_q;
 
-  // active values should only be modified if out of new range
-
-  cpi->cq_target_quality = cpi->oxcf.cq_level;
-
   cm->interp_filter = DEFAULT_INTERP_FILTER;
 
   cm->display_width = cpi->oxcf.width;
@@ -1695,6 +1691,7 @@ static int recode_loop_test(const VP9_COMP *cpi,
                             int q, int maxq, int minq) {
   const VP9_COMMON *const cm = &cpi->common;
   const RATE_CONTROL *const rc = &cpi->rc;
+  const VP9_CONFIG *const oxcf = &cpi->oxcf;
   int force_recode = 0;
 
   // Special case trap if maximum allowed frame size exceeded.
@@ -1712,10 +1709,10 @@ static int recode_loop_test(const VP9_COMP *cpi,
     if ((rc->projected_frame_size > high_limit && q < maxq) ||
         (rc->projected_frame_size < low_limit && q > minq)) {
       force_recode = 1;
-    } else if (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY) {
+    } else if (oxcf->end_usage == USAGE_CONSTRAINED_QUALITY) {
       // Deal with frame undershoot and whether or not we are
       // below the automatically set cq level.
-      if (q > cpi->cq_target_quality &&
+      if (q > oxcf->cq_level &&
           rc->projected_frame_size < ((rc->this_frame_target * 7) >> 3)) {
         force_recode = 1;
       }
@@ -1890,7 +1887,7 @@ static void output_frame_level_debug_stats(VP9_COMP *cpi) {
         (double)vp9_dc_quant(cm->base_qindex, 0) / 4.0,
         cpi->rc.avg_q,
         vp9_convert_qindex_to_q(cpi->rc.ni_av_qi),
-        vp9_convert_qindex_to_q(cpi->cq_target_quality),
+        vp9_convert_qindex_to_q(cpi->oxcf.cq_level),
         cpi->refresh_last_frame, cpi->refresh_golden_frame,
         cpi->refresh_alt_ref_frame, cm->frame_type, cpi->rc.gfu_boost,
         cpi->twopass.bits_left,
