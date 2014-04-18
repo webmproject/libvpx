@@ -16,6 +16,24 @@
       "revId": "bda2417bfb944076b7530a2649453948d672179e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//tBs\u003d",
+        "filename": "webmdec.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-04-18T04:41:36Z",
+      "side": 1,
+      "message": "hmm, good point. i think this is fine for now since webm_guess_framerate is never called from webm_video_source.h. this code is going to go away soon, so let\u0027s leave it as it is for now.",
+      "parentUuid": "AAAAdn//tDg\u003d",
+      "revId": "bda2417bfb944076b7530a2649453948d672179e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
