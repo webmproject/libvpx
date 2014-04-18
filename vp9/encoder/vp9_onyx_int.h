@@ -618,6 +618,10 @@ void vp9_update_reference_frames(VP9_COMP *cpi);
 
 int64_t vp9_rescale(int64_t val, int64_t num, int denom);
 
+YV12_BUFFER_CONFIG *vp9_scale_if_required(VP9_COMMON *cm,
+                                          YV12_BUFFER_CONFIG *unscaled,
+                                          YV12_BUFFER_CONFIG *scaled);
+
 static INLINE void set_ref_ptrs(VP9_COMMON *cm, MACROBLOCKD *xd,
                                 MV_REFERENCE_FRAME ref0,
                                 MV_REFERENCE_FRAME ref1) {

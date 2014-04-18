@@ -532,6 +532,9 @@ void vp9_first_pass(VP9_COMP *cpi) {
     // Disable golden frame for svc first pass for now.
     gld_yv12 = NULL;
     set_ref_ptrs(cm, xd, ref_frame, NONE);
+
+    cpi->Source = vp9_scale_if_required(cm, cpi->un_scaled_source,
+                                        &cpi->scaled_source);
   }
 
   vp9_setup_src_planes(x, cpi->Source, 0, 0);
@@ -848,14 +851,14 @@ void vp9_first_pass(VP9_COMP *cpi) {
     ++twopass->sr_update_lag;
   }
 
+  vp9_extend_frame_borders(new_yv12);
+
   if (cpi->use_svc && cpi->svc.number_temporal_layers == 1) {
     vp9_update_reference_frames(cpi);
   } else {
     // Swap frame pointers so last frame refers to the frame we just compressed.
     swap_yv12(lst_yv12, new_yv12);
   }
-
-  vp9_extend_frame_borders(lst_yv12);
 
   // Special case for the first frame. Copy into the GF buffer as a second
   // reference.

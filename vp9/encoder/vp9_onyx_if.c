@@ -2209,8 +2209,9 @@ static void set_ext_overrides(VP9_COMP *cpi) {
   }
 }
 
-static YV12_BUFFER_CONFIG *scale_if_required(VP9_COMMON *cm,
-  YV12_BUFFER_CONFIG *unscaled, YV12_BUFFER_CONFIG *scaled) {
+YV12_BUFFER_CONFIG *vp9_scale_if_required(VP9_COMMON *cm,
+                                          YV12_BUFFER_CONFIG *unscaled,
+                                          YV12_BUFFER_CONFIG *scaled) {
   if (cm->mi_cols * MI_SIZE != unscaled->y_width ||
       cm->mi_rows * MI_SIZE != unscaled->y_height) {
     scale_and_extend_frame_nonnormative(unscaled, scaled);
@@ -2235,12 +2236,12 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   struct segmentation *const seg = &cm->seg;
   set_ext_overrides(cpi);
 
-  cpi->Source = scale_if_required(cm, cpi->un_scaled_source,
-                                  &cpi->scaled_source);
+  cpi->Source = vp9_scale_if_required(cm, cpi->un_scaled_source,
+                                      &cpi->scaled_source);
 
   if (cpi->unscaled_last_source != NULL)
-    cpi->Last_Source = scale_if_required(cm, cpi->unscaled_last_source,
-                                         &cpi->scaled_last_source);
+    cpi->Last_Source = vp9_scale_if_required(cm, cpi->unscaled_last_source,
+                                             &cpi->scaled_last_source);
 
   vp9_scale_references(cpi);
 
