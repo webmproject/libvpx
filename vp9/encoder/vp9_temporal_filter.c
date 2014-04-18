@@ -27,8 +27,6 @@
 #include "vpx_ports/vpx_timer.h"
 #include "vpx_scale/vpx_scale.h"
 
-#define ALT_REF_MC_ENABLED 1    // dis/enable MC in AltRef filtering
-
 static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
                                             uint8_t *y_mb_ptr,
                                             uint8_t *u_mb_ptr,
@@ -122,8 +120,6 @@ void vp9_temporal_filter_apply_c(uint8_t *frame1,
   }
 }
 
-#if ALT_REF_MC_ENABLED
-
 static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
                                               uint8_t *arf_frame_buf,
                                               uint8_t *frame_ptr_buf,
@@ -133,6 +129,8 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
   int step_param;
   int sadpb = x->sadperbit16;
   int bestsme = INT_MAX;
+  int distortion;
+  unsigned int sse;
 
   MV best_ref_mv1 = {0, 0};
   MV best_ref_mv1_full; /* full-pixel value of best_ref_mv1 */
@@ -154,26 +152,19 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
   step_param = cpi->sf.reduce_first_step_size + (cpi->oxcf.speed > 5 ? 1 : 0);
   step_param = MIN(step_param, cpi->sf.max_step_search_steps - 2);
 
-  /*cpi->sf.search_method == HEX*/
   // Ignore mv costing by sending NULL pointer instead of cost arrays
   vp9_hex_search(x, &best_ref_mv1_full, step_param, sadpb, 1,
                  &cpi->fn_ptr[BLOCK_16X16], 0, &best_ref_mv1, ref_mv);
 
-  // Try sub-pixel MC?
-  // if (bestsme > error_thresh && bestsme < INT_MAX)
-  {
-    int distortion;
-    unsigned int sse;
-    // Ignore mv costing by sending NULL pointer instead of cost array
-    bestsme = cpi->find_fractional_mv_step(x, ref_mv,
-                                           &best_ref_mv1,
-                                           cpi->common.allow_high_precision_mv,
-                                           x->errorperbit,
-                                           &cpi->fn_ptr[BLOCK_16X16],
-                                           0, cpi->sf.subpel_iters_per_step,
-                                           NULL, NULL,
-                                           &distortion, &sse);
-  }
+  // Ignore mv costing by sending NULL pointer instead of cost array
+  bestsme = cpi->find_fractional_mv_step(x, ref_mv,
+                                         &best_ref_mv1,
+                                         cpi->common.allow_high_precision_mv,
+                                         x->errorperbit,
+                                         &cpi->fn_ptr[BLOCK_16X16],
+                                         0, cpi->sf.subpel_iters_per_step,
+                                         NULL, NULL,
+                                         &distortion, &sse);
 
   // Restore input state
   x->plane[0].src = src;
@@ -181,7 +172,6 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
 
   return bestsme;
 }
-#endif
 
 static void temporal_filter_iterate_c(VP9_COMP *cpi,
                                       int frame_count,
@@ -215,8 +205,7 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
     input_buffer[i] = mbd->plane[i].pre[0].buf;
 
   for (mb_row = 0; mb_row < mb_rows; mb_row++) {
-#if ALT_REF_MC_ENABLED
-    // Source frames are extended to 16 pixels.  This is different than
+    // Source frames are extended to 16 pixels. This is different than
     //  L/A/G reference frames that have a border of 32 (VP9ENCBORDERINPIXELS)
     // A 6/8 tap filter is used for motion search.  This requires 2 pixels
     //  before and 3 pixels after.  So the largest Y mv on a border would
@@ -230,7 +219,6 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
     cpi->mb.mv_row_min = -((mb_row * 16) + (17 - 2 * VP9_INTERP_EXTEND));
     cpi->mb.mv_row_max = ((cpi->common.mb_rows - 1 - mb_row) * 16)
                          + (17 - 2 * VP9_INTERP_EXTEND);
-#endif
 
     for (mb_col = 0; mb_col < mb_cols; mb_col++) {
       int i, j, k;
@@ -239,13 +227,14 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
       vpx_memset(accumulator, 0, 16 * 16 * 3 * sizeof(accumulator[0]));
       vpx_memset(count, 0, 16 * 16 * 3 * sizeof(count[0]));
 
-#if ALT_REF_MC_ENABLED
       cpi->mb.mv_col_min = -((mb_col * 16) + (17 - 2 * VP9_INTERP_EXTEND));
       cpi->mb.mv_col_max = ((cpi->common.mb_cols - 1 - mb_col) * 16)
                            + (17 - 2 * VP9_INTERP_EXTEND);
-#endif
 
       for (frame = 0; frame < frame_count; frame++) {
+        const int thresh_low  = 10000;
+        const int thresh_high = 20000;
+
         if (cpi->frames[frame] == NULL)
           continue;
 
@@ -255,38 +244,31 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
         if (frame == alt_ref_index) {
           filter_weight = 2;
         } else {
-          int err = 0;
-#if ALT_REF_MC_ENABLED
-#define THRESH_LOW   10000
-#define THRESH_HIGH  20000
-
           // Find best match in this frame by MC
-          err = temporal_filter_find_matching_mb_c
-                (cpi,
-                 cpi->frames[alt_ref_index]->y_buffer + mb_y_offset,
-                 cpi->frames[frame]->y_buffer + mb_y_offset,
-                 cpi->frames[frame]->y_stride);
-#endif
+          int err = temporal_filter_find_matching_mb_c(cpi,
+              cpi->frames[alt_ref_index]->y_buffer + mb_y_offset,
+              cpi->frames[frame]->y_buffer + mb_y_offset,
+              cpi->frames[frame]->y_stride);
+
           // Assign higher weight to matching MB if it's error
           // score is lower. If not applying MC default behavior
           // is to weight all MBs equal.
-          filter_weight = err < THRESH_LOW
-                          ? 2 : err < THRESH_HIGH ? 1 : 0;
+          filter_weight = err < thresh_low
+                          ? 2 : err < thresh_high ? 1 : 0;
         }
 
         if (filter_weight != 0) {
           // Construct the predictors
-          temporal_filter_predictors_mb_c
-          (mbd,
-           cpi->frames[frame]->y_buffer + mb_y_offset,
-           cpi->frames[frame]->u_buffer + mb_uv_offset,
-           cpi->frames[frame]->v_buffer + mb_uv_offset,
-           cpi->frames[frame]->y_stride,
-           mb_uv_height,
-           mbd->mi[0]->bmi[0].as_mv[0].as_mv.row,
-           mbd->mi[0]->bmi[0].as_mv[0].as_mv.col,
-           predictor, scale,
-           mb_col * 16, mb_row * 16);
+          temporal_filter_predictors_mb_c(mbd,
+              cpi->frames[frame]->y_buffer + mb_y_offset,
+              cpi->frames[frame]->u_buffer + mb_uv_offset,
+              cpi->frames[frame]->v_buffer + mb_uv_offset,
+              cpi->frames[frame]->y_stride,
+              mb_uv_height,
+              mbd->mi[0]->bmi[0].as_mv[0].as_mv.row,
+              mbd->mi[0]->bmi[0].as_mv[0].as_mv.col,
+              predictor, scale,
+              mb_col * 16, mb_row * 16);
 
           // Apply the filter (YUV)
           vp9_temporal_filter_apply(f->y_buffer + mb_y_offset, f->y_stride,
@@ -320,7 +302,6 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
           // move to next pixel
           byte++;
         }
-
         byte += stride - 16;
       }
 
@@ -347,14 +328,11 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
           // move to next pixel
           byte++;
         }
-
         byte += stride - mb_uv_height;
       }
-
       mb_y_offset += 16;
       mb_uv_offset += mb_uv_height;
     }
-
     mb_y_offset += 16 * (f->y_stride - mb_cols);
     mb_uv_offset += mb_uv_height * (f->uv_stride - mb_cols);
   }
@@ -366,18 +344,14 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
 
 void vp9_temporal_filter_prepare(VP9_COMP *cpi, int distance) {
   VP9_COMMON *const cm = &cpi->common;
-
   int frame = 0;
-
   int frames_to_blur_backward = 0;
   int frames_to_blur_forward = 0;
   int frames_to_blur = 0;
   int start_frame = 0;
-
   int strength = cpi->active_arnr_strength;
   int blur_type = cpi->oxcf.arnr_type;
   int max_frames = cpi->active_arnr_frames;
-
   const int num_frames_backward = distance;
   const int num_frames_forward = vp9_lookahead_depth(cpi->lookahead)
                                - (num_frames_backward + 1);
