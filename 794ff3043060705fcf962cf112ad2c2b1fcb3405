@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//s/8\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-04-18T14:48:59Z",
+      "side": 1,
+      "message": "This is going to leak.",
+      "revId": "794ff3043060705fcf962cf112ad2c2b1fcb3405",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//s/4\u003d",
+        "filename": "webmdec.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-04-18T14:48:59Z",
+      "side": 1,
+      "message": "Not needed anymore?",
+      "revId": "794ff3043060705fcf962cf112ad2c2b1fcb3405",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//s/w\u003d",
+        "filename": "webmdec.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-04-18T14:48:59Z",
+      "side": 1,
+      "message": "You should also add info on either passing in all 0\u0027s and NULL for the first call. Or if the app creates it\u0027s own memory it has to use new []. Also that the app is responsible for deleting the memory when it is done.",
+      "revId": "794ff3043060705fcf962cf112ad2c2b1fcb3405",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//s/0\u003d",
+        "filename": "webmdec.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-04-18T14:48:59Z",
+      "side": 1,
+      "message": "I don\u0027t think the pointer is owned by webmdec.",
+      "revId": "794ff3043060705fcf962cf112ad2c2b1fcb3405",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
