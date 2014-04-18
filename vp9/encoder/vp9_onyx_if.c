@@ -511,7 +511,7 @@ static void set_speed_features(VP9_COMP *cpi) {
 
 static void alloc_raw_frame_buffers(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
-  const VP9_CONFIG *oxcf = &cpi->oxcf;
+  const VP9EncoderConfig *oxcf = &cpi->oxcf;
 
   cpi->lookahead = vp9_lookahead_init(oxcf->width, oxcf->height,
                                       cm->subsampling_x, cm->subsampling_y,
@@ -633,7 +633,7 @@ static void set_tile_limits(VP9_COMP *cpi) {
   cm->log2_tile_rows = cpi->oxcf.tile_rows;
 }
 
-static void init_config(struct VP9_COMP *cpi, VP9_CONFIG *oxcf) {
+static void init_config(struct VP9_COMP *cpi, VP9EncoderConfig *oxcf) {
   VP9_COMMON *const cm = &cpi->common;
   int i;
 
@@ -693,7 +693,7 @@ static int get_pass(MODE mode) {
   return -1;
 }
 
-void vp9_change_config(struct VP9_COMP *cpi, const VP9_CONFIG *oxcf) {
+void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
 
@@ -865,7 +865,7 @@ static void cal_nmvsadcosts_hp(int *mvsadcost[2]) {
 }
 
 
-VP9_COMP *vp9_create_compressor(VP9_CONFIG *oxcf) {
+VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
   int i, j;
   VP9_COMP *const cpi = vpx_memalign(32, sizeof(VP9_COMP));
   VP9_COMMON *const cm = cpi != NULL ? &cpi->common : NULL;
@@ -1683,7 +1683,7 @@ static int recode_loop_test(const VP9_COMP *cpi,
                             int q, int maxq, int minq) {
   const VP9_COMMON *const cm = &cpi->common;
   const RATE_CONTROL *const rc = &cpi->rc;
-  const VP9_CONFIG *const oxcf = &cpi->oxcf;
+  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   int force_recode = 0;
 
   // Special case trap if maximum allowed frame size exceeded.

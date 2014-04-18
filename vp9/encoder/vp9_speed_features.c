@@ -288,7 +288,7 @@ static void set_rt_speed_feature(VP9_COMMON *cm, SPEED_FEATURES *sf,
 void vp9_set_speed_features(VP9_COMP *cpi) {
   SPEED_FEATURES *const sf = &cpi->sf;
   VP9_COMMON *const cm = &cpi->common;
-  const VP9_CONFIG *const oxcf = &cpi->oxcf;
+  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   int i;
 
   // best quality defaults

@@ -134,7 +134,7 @@ int vp9_rc_clamp_pframe_target_size(const VP9_COMP *const cpi, int target) {
 
 int vp9_rc_clamp_iframe_target_size(const VP9_COMP *const cpi, int target) {
   const RATE_CONTROL *rc = &cpi->rc;
-  const VP9_CONFIG *oxcf = &cpi->oxcf;
+  const VP9EncoderConfig *oxcf = &cpi->oxcf;
   if (oxcf->rc_max_intra_bitrate_pct) {
     const int max_rate = rc->avg_frame_bandwidth *
                              oxcf->rc_max_intra_bitrate_pct / 100;
@@ -167,7 +167,7 @@ static void update_layer_buffer_level(SVC *svc, int encoded_frame_size) {
 // Update the buffer level: leaky bucket model.
 static void update_buffer_level(VP9_COMP *cpi, int encoded_frame_size) {
   const VP9_COMMON *const cm = &cpi->common;
-  const VP9_CONFIG *oxcf = &cpi->oxcf;
+  const VP9EncoderConfig *oxcf = &cpi->oxcf;
   RATE_CONTROL *const rc = &cpi->rc;
 
   // Non-viewable frames are a special case and are treated as pure overhead.
@@ -186,7 +186,7 @@ static void update_buffer_level(VP9_COMP *cpi, int encoded_frame_size) {
   }
 }
 
-void vp9_rc_init(const VP9_CONFIG *oxcf, int pass, RATE_CONTROL *rc) {
+void vp9_rc_init(const VP9EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
   if (pass == 0 && oxcf->end_usage == USAGE_STREAM_FROM_SERVER) {
     rc->avg_frame_qindex[0] = oxcf->worst_allowed_q;
     rc->avg_frame_qindex[1] = oxcf->worst_allowed_q;
@@ -237,7 +237,7 @@ void vp9_rc_init(const VP9_CONFIG *oxcf, int pass, RATE_CONTROL *rc) {
 }
 
 int vp9_rc_drop_frame(VP9_COMP *cpi) {
-  const VP9_CONFIG *oxcf = &cpi->oxcf;
+  const VP9EncoderConfig *oxcf = &cpi->oxcf;
   RATE_CONTROL *const rc = &cpi->rc;
 
   if (!oxcf->drop_frames_water_mark) {
@@ -444,7 +444,7 @@ static int calc_active_worst_quality_one_pass_cbr(const VP9_COMP *cpi) {
   // ambient Q (at buffer = optimal level) to worst_quality level
   // (at buffer = critical level).
   const VP9_COMMON *const cm = &cpi->common;
-  const VP9_CONFIG *oxcf = &cpi->oxcf;
+  const VP9EncoderConfig *oxcf = &cpi->oxcf;
   const RATE_CONTROL *rc = &cpi->rc;
   // Buffer level below which we push active_worst to worst_quality.
   int64_t critical_level = oxcf->optimal_buffer_level >> 2;
@@ -612,7 +612,7 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP9_COMP *cpi,
                                              int *top_index) {
   const VP9_COMMON *const cm = &cpi->common;
   const RATE_CONTROL *const rc = &cpi->rc;
-  const VP9_CONFIG *const oxcf = &cpi->oxcf;
+  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   const int cq_level = oxcf->cq_level;
   int active_best_quality;
   int active_worst_quality = calc_active_worst_quality_one_pass_vbr(cpi);
@@ -801,7 +801,7 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi,
                                          int *top_index) {
   const VP9_COMMON *const cm = &cpi->common;
   const RATE_CONTROL *const rc = &cpi->rc;
-  const VP9_CONFIG *const oxcf = &cpi->oxcf;
+  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   const int cq_level = oxcf->cq_level;
   int active_best_quality;
   int active_worst_quality = cpi->twopass.active_worst_quality;
@@ -1079,7 +1079,7 @@ static void update_golden_frame_stats(VP9_COMP *cpi) {
 
 void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
   const VP9_COMMON *const cm = &cpi->common;
-  const VP9_CONFIG *const oxcf = &cpi->oxcf;
+  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   RATE_CONTROL *const rc = &cpi->rc;
   const int qindex = cm->base_qindex;
 
@@ -1238,7 +1238,7 @@ void vp9_rc_get_one_pass_vbr_params(VP9_COMP *cpi) {
 }
 
 static int calc_pframe_target_size_one_pass_cbr(const VP9_COMP *cpi) {
-  const VP9_CONFIG *oxcf = &cpi->oxcf;
+  const VP9EncoderConfig *oxcf = &cpi->oxcf;
   const RATE_CONTROL *rc = &cpi->rc;
   const SVC *const svc = &cpi->svc;
   const int64_t diff = oxcf->optimal_buffer_level - rc->buffer_level;
@@ -1269,7 +1269,7 @@ static int calc_pframe_target_size_one_pass_cbr(const VP9_COMP *cpi) {
 
 static int calc_iframe_target_size_one_pass_cbr(const VP9_COMP *cpi) {
   const RATE_CONTROL *rc = &cpi->rc;
-  const VP9_CONFIG *oxcf = &cpi->oxcf;
+  const VP9EncoderConfig *oxcf = &cpi->oxcf;
   const SVC *const svc = &cpi->svc;
   int target;
   if (cpi->common.current_video_frame == 0) {
@@ -1388,7 +1388,7 @@ int vp9_compute_qdelta_by_rate(const RATE_CONTROL *rc, FRAME_TYPE frame_type,
 
 void vp9_rc_update_framerate(VP9_COMP *cpi) {
   const VP9_COMMON *const cm = &cpi->common;
-  const VP9_CONFIG *const oxcf = &cpi->oxcf;
+  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   RATE_CONTROL *const rc = &cpi->rc;
   int vbr_max_bits;
 

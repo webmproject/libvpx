@@ -186,7 +186,7 @@ typedef enum {
 } AQ_MODE;
 
 
-typedef struct VP9_CONFIG {
+typedef struct VP9EncoderConfig {
   BITSTREAM_PROFILE profile;
   BIT_DEPTH bit_depth;
   int width;  // width of data passed to the compressor
@@ -285,7 +285,7 @@ typedef struct VP9_CONFIG {
   struct vpx_codec_pkt_list  *output_pkt_list;
 
   vp8e_tuning tuning;
-} VP9_CONFIG;
+} VP9EncoderConfig;
 
 static INLINE int is_best_mode(MODE mode) {
   return mode == ONE_PASS_BEST || mode == TWO_PASS_SECOND_BEST;
@@ -321,7 +321,7 @@ typedef struct VP9_COMP {
   QUANTS quants;
   MACROBLOCK mb;
   VP9_COMMON common;
-  VP9_CONFIG oxcf;
+  VP9EncoderConfig oxcf;
   struct lookahead_ctx    *lookahead;
   struct lookahead_entry  *source;
 #if CONFIG_MULTIPLE_ARF
@@ -521,10 +521,10 @@ typedef struct VP9_COMP {
 
 void vp9_initialize_enc();
 
-struct VP9_COMP *vp9_create_compressor(VP9_CONFIG *oxcf);
+struct VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf);
 void vp9_remove_compressor(VP9_COMP *cpi);
 
-void vp9_change_config(VP9_COMP *cpi, const VP9_CONFIG *oxcf);
+void vp9_change_config(VP9_COMP *cpi, const VP9EncoderConfig *oxcf);
 
   // receive a frames worth of data. caller can assume that a copy of this
   // frame is made and not just a copy of the pointer..

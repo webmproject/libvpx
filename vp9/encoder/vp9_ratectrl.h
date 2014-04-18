@@ -87,9 +87,10 @@ typedef struct {
 } RATE_CONTROL;
 
 struct VP9_COMP;
-struct VP9_CONFIG;
+struct VP9EncoderConfig;
 
-void vp9_rc_init(const struct VP9_CONFIG *oxcf, int pass, RATE_CONTROL *rc);
+void vp9_rc_init(const struct VP9EncoderConfig *oxcf, int pass,
+                 RATE_CONTROL *rc);
 
 double vp9_convert_qindex_to_q(int qindex);
 

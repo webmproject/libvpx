@@ -77,7 +77,7 @@ struct vpx_codec_alg_priv {
   vpx_codec_priv_t        base;
   vpx_codec_enc_cfg_t     cfg;
   struct vp9_extracfg     extra_cfg;
-  VP9_CONFIG              oxcf;
+  VP9EncoderConfig        oxcf;
   VP9_COMP               *cpi;
   unsigned char          *cx_data;
   size_t                  cx_data_sz;
@@ -291,7 +291,7 @@ static vpx_codec_err_t validate_img(vpx_codec_alg_priv_t *ctx,
 
 
 static vpx_codec_err_t set_encoder_config(
-    VP9_CONFIG *oxcf,
+    VP9EncoderConfig *oxcf,
     const vpx_codec_enc_cfg_t *cfg,
     const struct vp9_extracfg *extra_cfg) {
   oxcf->profile = cfg->g_profile;

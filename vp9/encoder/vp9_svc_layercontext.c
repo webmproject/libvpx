@@ -15,7 +15,7 @@
 
 void vp9_init_layer_context(VP9_COMP *const cpi) {
   SVC *const svc = &cpi->svc;
-  const VP9_CONFIG *const oxcf = &cpi->oxcf;
+  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   int layer;
   int layer_end;
 
@@ -65,7 +65,7 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
 void vp9_update_layer_context_change_config(VP9_COMP *const cpi,
                                             const int target_bandwidth) {
   SVC *const svc = &cpi->svc;
-  const VP9_CONFIG *const oxcf = &cpi->oxcf;
+  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   const RATE_CONTROL *const rc = &cpi->rc;
   int layer;
   int layer_end;
@@ -118,7 +118,7 @@ static LAYER_CONTEXT *get_layer_context(SVC *svc) {
 
 void vp9_update_temporal_layer_framerate(VP9_COMP *const cpi) {
   SVC *const svc = &cpi->svc;
-  const VP9_CONFIG *const oxcf = &cpi->oxcf;
+  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   LAYER_CONTEXT *const lc = get_layer_context(svc);
   RATE_CONTROL *const lrc = &lc->rc;
   const int layer = svc->temporal_layer_id;
@@ -141,7 +141,7 @@ void vp9_update_temporal_layer_framerate(VP9_COMP *const cpi) {
 }
 
 void vp9_update_spatial_layer_framerate(VP9_COMP *const cpi, double framerate) {
-  const VP9_CONFIG *const oxcf = &cpi->oxcf;
+  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   LAYER_CONTEXT *const lc = get_layer_context(&cpi->svc);
   RATE_CONTROL *const lrc = &lc->rc;
 
@@ -187,7 +187,7 @@ void vp9_restore_layer_context(VP9_COMP *const cpi) {
 }
 
 void vp9_save_layer_context(VP9_COMP *const cpi) {
-  const VP9_CONFIG *const oxcf = &cpi->oxcf;
+  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   LAYER_CONTEXT *const lc = get_layer_context(&cpi->svc);
 
   lc->rc = cpi->rc;
