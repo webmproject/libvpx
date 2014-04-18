@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//s+Q\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-04-18T17:49:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//s/8\u003d",
+      "revId": "794ff3043060705fcf962cf112ad2c2b1fcb3405",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//s/4\u003d",
         "filename": "webmdec.h",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2014-04-18T14:48:59Z",
       "side": 1,
       "message": "Not needed anymore?",
+      "revId": "794ff3043060705fcf962cf112ad2c2b1fcb3405",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//s+k\u003d",
+        "filename": "webmdec.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-04-18T17:49:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//s/4\u003d",
       "revId": "794ff3043060705fcf962cf112ad2c2b1fcb3405",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//s+U\u003d",
+        "filename": "webmdec.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-04-18T17:49:37Z",
+      "side": 1,
+      "message": "I don\u0027t think the app should be allowed to create memory. It will complicate things. Because this function will call delete[] on the pointer if the frame size is larger than the given size. So i have documented how this is supposed to be used (with the assumption that the only way is to let this function manage the memory).",
+      "parentUuid": "AAAAdn//s/w\u003d",
+      "revId": "794ff3043060705fcf962cf112ad2c2b1fcb3405",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//s/0\u003d",
         "filename": "webmdec.h",
         "patchSetId": 4
@@ -64,6 +118,24 @@
       "writtenOn": "2014-04-18T14:48:59Z",
       "side": 1,
       "message": "I don\u0027t think the pointer is owned by webmdec.",
+      "revId": "794ff3043060705fcf962cf112ad2c2b1fcb3405",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//s+Y\u003d",
+        "filename": "webmdec.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-04-18T17:49:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//s/0\u003d",
       "revId": "794ff3043060705fcf962cf112ad2c2b1fcb3405",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
