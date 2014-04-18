@@ -49,6 +49,9 @@ NESTEGG_SRCS                           += ../third_party/nestegg/halloc/src/hlis
 NESTEGG_SRCS                           += ../third_party/nestegg/include/nestegg/nestegg.h
 NESTEGG_SRCS                           += ../third_party/nestegg/src/nestegg.c
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += $(NESTEGG_SRCS)
+LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += ../tools_common.h
+LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += ../webmdec.c
+LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += ../webmdec.h
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += webm_video_source.h
 
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += test_vector_test.cc
