@@ -676,6 +676,23 @@ static void init_config(struct VP9_COMP *cpi, VP9_CONFIG *oxcf) {
     cpi->fixed_divide[i] = 0x80000 / i;
 }
 
+static int get_pass(MODE mode) {
+  switch (mode) {
+    case REALTIME:
+    case ONE_PASS_GOOD:
+    case ONE_PASS_BEST:
+      return 0;
+
+    case TWO_PASS_FIRST:
+      return 1;
+
+    case TWO_PASS_SECOND_GOOD:
+    case TWO_PASS_SECOND_BEST:
+      return 2;
+  }
+  return -1;
+}
+
 void vp9_change_config(struct VP9_COMP *cpi, const VP9_CONFIG *oxcf) {
   VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
@@ -690,34 +707,9 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9_CONFIG *oxcf) {
     assert(cm->bit_depth > BITS_8);
 
   cpi->oxcf = *oxcf;
-
-  switch (cpi->oxcf.mode) {
-      // Real time and one pass deprecated in test code base
-    case ONE_PASS_GOOD:
-      cpi->pass = 0;
-      break;
-
-    case ONE_PASS_BEST:
-      cpi->pass = 0;
-      break;
-
-    case TWO_PASS_FIRST:
-      cpi->pass = 1;
-      break;
-
-    case TWO_PASS_SECOND_GOOD:
-      cpi->pass = 2;
-      break;
-
-    case TWO_PASS_SECOND_BEST:
-      cpi->pass = 2;
-      break;
-
-    case REALTIME:
-      cpi->pass = 0;
-      cpi->oxcf.play_alternate = 0;
-      break;
-  }
+  cpi->pass = get_pass(cpi->oxcf.mode);
+  if (cpi->oxcf.mode == REALTIME)
+    cpi->oxcf.play_alternate = 0;
 
   cpi->oxcf.lossless = oxcf->lossless;
   if (cpi->oxcf.lossless) {
