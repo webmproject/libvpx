@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//s/g\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1283,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-04-18T15:52:46Z",
+      "side": 1,
+      "message": "I don\u0027t want to change vp9_rb_read_bit to read one byte at a time.\n\nSo I guess the 80 is fine. I would just change it to something like.\nconst int MAX_VP9_HEADER_SIZE \u003d 80;\nThen someone can check against the standard.",
+      "parentUuid": "AAAAdn//tIo\u003d",
+      "revId": "5e88cfed94c2ad8be18f236eaf29b5f1bd55502b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//tO0\u003d",
         "filename": "vp9/decoder/vp9_reader.c",
         "patchSetId": 3
