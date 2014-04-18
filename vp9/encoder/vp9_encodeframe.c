@@ -2004,17 +2004,16 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
       if (cpi->sf.adaptive_pred_interp_filter && partition_none_allowed)
         pc_tree->leaf_split[0]->pred_interp_filter =
             ctx->mic.mbmi.interp_filter;
-
       rd_pick_sb_modes(cpi, tile, mi_row, mi_col, &sum_rate, &sum_dist, subsize,
                        pc_tree->leaf_split[0], best_rd, 0);
-
       if (sum_rate == INT_MAX) {
         sum_rd = INT64_MAX;
       } else {
         sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
         if (sum_rd < best_rd) {
-          update_state(cpi, ctx, mi_row, mi_col, bsize, 0);
-          encode_superblock(cpi, tp, 0, mi_row, mi_col, subsize, ctx);
+          update_state(cpi, pc_tree->leaf_split[0], mi_row, mi_col, subsize, 0);
+          encode_superblock(cpi, tp, 0, mi_row, mi_col, subsize,
+                            pc_tree->leaf_split[0]);
           update_partition_context(xd, mi_row, mi_col, subsize, bsize);
         }
       }
@@ -2042,6 +2041,7 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
         }
       }
     }
+
     if (sum_rd < best_rd && i == 4) {
       pl = partition_plane_context(xd, mi_row, mi_col, bsize);
       sum_rate += x->partition_cost[pl][PARTITION_SPLIT];
@@ -2060,6 +2060,7 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     }
     restore_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
   }
+
   // PARTITION_HORZ
   if (partition_horz_allowed && do_rect) {
     subsize = get_subsize(bsize, PARTITION_HORZ);
@@ -2130,11 +2131,11 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
         load_pred_mv(x, ctx);
       if (cpi->sf.adaptive_pred_interp_filter && bsize == BLOCK_8X8 &&
           partition_none_allowed)
-        pc_tree->vertical[bsize > BLOCK_8X8].pred_interp_filter =
+        pc_tree->vertical[1].pred_interp_filter =
             ctx->mic.mbmi.interp_filter;
       rd_pick_sb_modes(cpi, tile, mi_row, mi_col + mi_step, &this_rate,
                        &this_dist, subsize,
-                       &pc_tree->vertical[bsize > BLOCK_8X8], best_rd - sum_rd,
+                       &pc_tree->vertical[1], best_rd - sum_rd,
                        1);
       if (this_rate == INT_MAX) {
         sum_rd = INT64_MAX;
@@ -2171,19 +2172,16 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     // Check the projected output rate for this SB against it's target
     // and and if necessary apply a Q delta using segmentation to get
     // closer to the target.
-    if ((cpi->oxcf.aq_mode == COMPLEXITY_AQ) && cm->seg.update_map) {
+    if ((cpi->oxcf.aq_mode == COMPLEXITY_AQ) && cm->seg.update_map)
       vp9_select_in_frame_q_segment(cpi, mi_row, mi_col, output_enabled,
                                     best_rate);
-    }
     if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ)
       vp9_cyclic_refresh_set_rate_and_dist_sb(cpi->cyclic_refresh,
                                               best_rate, best_dist);
-    if (bsize == BLOCK_4X4)
-      encode_b(cpi, tile, tp, mi_row, mi_col, output_enabled, bsize, ctx);
-    else
-      encode_sb(cpi, tile, tp, mi_row, mi_col, output_enabled, bsize, pc_tree);
 
+    encode_sb(cpi, tile, tp, mi_row, mi_col, output_enabled, bsize, pc_tree);
   }
+
   if (bsize == BLOCK_64X64) {
     assert(tp_orig < *tp);
     assert(best_rate < INT_MAX);
