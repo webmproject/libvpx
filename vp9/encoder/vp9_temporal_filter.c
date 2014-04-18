@@ -345,73 +345,32 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
 void vp9_temporal_filter_prepare(VP9_COMP *cpi, int distance) {
   VP9_COMMON *const cm = &cpi->common;
   int frame = 0;
-  int frames_to_blur_backward = 0;
-  int frames_to_blur_forward = 0;
   int frames_to_blur = 0;
   int start_frame = 0;
   int strength = cpi->active_arnr_strength;
-  int blur_type = cpi->oxcf.arnr_type;
   int max_frames = cpi->active_arnr_frames;
-  const int num_frames_backward = distance;
-  const int num_frames_forward = vp9_lookahead_depth(cpi->lookahead)
-                               - (num_frames_backward + 1);
+  int frames_to_blur_backward = distance;
+  int frames_to_blur_forward = vp9_lookahead_depth(cpi->lookahead)
+                                   - (distance + 1);
   struct scale_factors sf;
 
-  switch (blur_type) {
-    case 1:
-      // Backward Blur
-      frames_to_blur_backward = num_frames_backward;
+  // Determine which input frames to filter.
+  if (frames_to_blur_forward > frames_to_blur_backward)
+    frames_to_blur_forward = frames_to_blur_backward;
 
-      if (frames_to_blur_backward >= max_frames)
-        frames_to_blur_backward = max_frames - 1;
+  if (frames_to_blur_backward > frames_to_blur_forward)
+    frames_to_blur_backward = frames_to_blur_forward;
 
-      frames_to_blur = frames_to_blur_backward + 1;
-      break;
+  // When max_frames is even we have 1 more frame backward than forward
+  if (frames_to_blur_forward > (max_frames - 1) / 2)
+    frames_to_blur_forward = (max_frames - 1) / 2;
 
-    case 2:
-      // Forward Blur
-      frames_to_blur_forward = num_frames_forward;
+  if (frames_to_blur_backward > (max_frames / 2))
+    frames_to_blur_backward = max_frames / 2;
 
-      if (frames_to_blur_forward >= max_frames)
-        frames_to_blur_forward = max_frames - 1;
-
-      frames_to_blur = frames_to_blur_forward + 1;
-      break;
-
-    case 3:
-    default:
-      // Center Blur
-      frames_to_blur_forward = num_frames_forward;
-      frames_to_blur_backward = num_frames_backward;
-
-      if (frames_to_blur_forward > frames_to_blur_backward)
-        frames_to_blur_forward = frames_to_blur_backward;
-
-      if (frames_to_blur_backward > frames_to_blur_forward)
-        frames_to_blur_backward = frames_to_blur_forward;
-
-      // When max_frames is even we have 1 more frame backward than forward
-      if (frames_to_blur_forward > (max_frames - 1) / 2)
-        frames_to_blur_forward = ((max_frames - 1) / 2);
-
-      if (frames_to_blur_backward > (max_frames / 2))
-        frames_to_blur_backward = (max_frames / 2);
-
-      frames_to_blur = frames_to_blur_backward + frames_to_blur_forward + 1;
-      break;
-  }
+  frames_to_blur = frames_to_blur_backward + frames_to_blur_forward + 1;
 
   start_frame = distance + frames_to_blur_forward;
-
-#ifdef DEBUGFWG
-  // DEBUG FWG
-  printf(
-      "max:%d FBCK:%d FFWD:%d ftb:%d ftbbck:%d ftbfwd:%d sei:%d lasei:%d "
-      "start:%d",
-      max_frames, num_frames_backward, num_frames_forward, frames_to_blur,
-      frames_to_blur_backward, frames_to_blur_forward, cpi->source_encode_index,
-      cpi->last_alt_ref_sei, start_frame);
-#endif
 
   // Setup scaling factors. Scaling on each of the arnr frames is not supported
   vp9_setup_scale_factors_for_frame(&sf,
@@ -421,7 +380,7 @@ void vp9_temporal_filter_prepare(VP9_COMP *cpi, int distance) {
 
   // Setup frame pointers, NULL indicates frame not included in filter
   vp9_zero(cpi->frames);
-  for (frame = 0; frame < frames_to_blur; frame++) {
+  for (frame = 0; frame < frames_to_blur; ++frame) {
     int which_buffer = start_frame - frame;
     struct lookahead_entry *buf = vp9_lookahead_peek(cpi->lookahead,
                                                      which_buffer);
@@ -435,11 +394,11 @@ void vp9_temporal_filter_prepare(VP9_COMP *cpi, int distance) {
 void vp9_configure_arnr_filter(VP9_COMP *cpi,
                                const unsigned int frames_to_arnr,
                                const int group_boost) {
+  int q;
   int half_gf_int;
   int frames_after_arf;
-  int frames_bwd = cpi->oxcf.arnr_max_frames - 1;
-  int frames_fwd = cpi->oxcf.arnr_max_frames - 1;
-  int q;
+  int frames_bwd;
+  int frames_fwd = (cpi->oxcf.arnr_max_frames - 1) >> 1;
 
   // Define the arnr filter width for this group of frames. We only
   // filter frames that lie within a distance of half the GF interval
@@ -451,47 +410,26 @@ void vp9_configure_arnr_filter(VP9_COMP *cpi,
   frames_after_arf = vp9_lookahead_depth(cpi->lookahead)
       - frames_to_arnr - 1;
 
-  switch (cpi->oxcf.arnr_type) {
-    case 1:  // Backward filter
-      frames_fwd = 0;
-      if (frames_bwd > half_gf_int)
-        frames_bwd = half_gf_int;
-      break;
+  if (frames_fwd > frames_after_arf)
+    frames_fwd = frames_after_arf;
+  if (frames_fwd > half_gf_int)
+    frames_fwd = half_gf_int;
 
-    case 2:  // Forward filter
-      if (frames_fwd > half_gf_int)
-        frames_fwd = half_gf_int;
-      if (frames_fwd > frames_after_arf)
-        frames_fwd = frames_after_arf;
-      frames_bwd = 0;
-      break;
+  frames_bwd = frames_fwd;
 
-    case 3:  // Centered filter
-    default:
-      frames_fwd >>= 1;
-      if (frames_fwd > frames_after_arf)
-        frames_fwd = frames_after_arf;
-      if (frames_fwd > half_gf_int)
-        frames_fwd = half_gf_int;
-
-      frames_bwd = frames_fwd;
-
-      // For even length filter there is one more frame backward
-      // than forward: e.g. len=6 ==> bbbAff, len=7 ==> bbbAfff.
-      if (frames_bwd < half_gf_int)
-        frames_bwd += (cpi->oxcf.arnr_max_frames + 1) & 0x1;
-      break;
-  }
+  // For even length filter there is one more frame backward
+  // than forward: e.g. len=6 ==> bbbAff, len=7 ==> bbbAfff.
+  if (frames_bwd < half_gf_int)
+    frames_bwd += (cpi->oxcf.arnr_max_frames + 1) & 0x1;
 
   cpi->active_arnr_frames = frames_bwd + 1 + frames_fwd;
 
   // Adjust the strength based on active max q
   if (cpi->common.current_video_frame > 1)
-    q = ((int)vp9_convert_qindex_to_q(
-        cpi->rc.avg_frame_qindex[INTER_FRAME]));
+    q = ((int)vp9_convert_qindex_to_q(cpi->rc.avg_frame_qindex[INTER_FRAME]));
   else
-    q = ((int)vp9_convert_qindex_to_q(
-        cpi->rc.avg_frame_qindex[KEY_FRAME]));
+    q = ((int)vp9_convert_qindex_to_q(cpi->rc.avg_frame_qindex[KEY_FRAME]));
+
   if (q > 16) {
     cpi->active_arnr_strength = cpi->oxcf.arnr_strength;
   } else {

@@ -276,7 +276,6 @@ typedef struct VP9_CONFIG {
 
   int arnr_max_frames;
   int arnr_strength;
-  int arnr_type;
 
   int tile_columns;
   int tile_rows;
