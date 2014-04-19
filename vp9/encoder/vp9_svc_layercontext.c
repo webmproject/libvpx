@@ -10,7 +10,7 @@
 
 #include <math.h>
 
-#include "vp9/encoder/vp9_onyx_int.h"
+#include "vp9/encoder/vp9_encoder.h"
 #include "vp9/encoder/vp9_svc_layercontext.h"
 
 void vp9_init_layer_context(VP9_COMP *const cpi) {

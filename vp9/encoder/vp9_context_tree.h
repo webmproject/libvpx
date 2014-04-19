@@ -11,7 +11,7 @@
 #ifndef VP9_ENCODER_VP9_CONTEXT_TREE_H_
 #define VP9_ENCODER_VP9_CONTEXT_TREE_H_
 
-#include "vp9/encoder/vp9_onyx_int.h"
+#include "vp9/encoder/vp9_encoder.h"
 
 void vp9_setup_pc_tree(VP9_COMMON *cm, MACROBLOCK *x);
 void vp9_free_pc_tree(MACROBLOCK *x);

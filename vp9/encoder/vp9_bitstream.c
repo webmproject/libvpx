@@ -903,7 +903,7 @@ static int get_refresh_mask(VP9_COMP *cpi) {
       // other uses are implemented (like RTC/temporal scaling)
       //
       // gld_fb_idx and alt_fb_idx need to be swapped for future frames, but
-      // that happens in vp9_onyx_if.c:update_reference_frames() so that it can
+      // that happens in vp9_encoder.c:update_reference_frames() so that it can
       // be done outside of the recode loop.
       return (cpi->refresh_last_frame << cpi->lst_fb_idx) |
              (cpi->refresh_golden_frame << cpi->alt_fb_idx);

@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_ENCODER_VP9_ONYX_INT_H_
-#define VP9_ENCODER_VP9_ONYX_INT_H_
+#ifndef VP9_ENCODER_VP9_ENCODER_H_
+#define VP9_ENCODER_VP9_ENCODER_H_
 
 #include <stdio.h>
 
@@ -634,4 +634,4 @@ static INLINE void set_ref_ptrs(VP9_COMMON *cm, MACROBLOCKD *xd,
 }  // extern "C"
 #endif
 
-#endif  // VP9_ENCODER_VP9_ONYX_INT_H_
+#endif  // VP9_ENCODER_VP9_ENCODER_H_
