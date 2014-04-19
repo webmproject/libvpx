@@ -37,6 +37,7 @@ class WebMVideoSource : public CompressedVideoSource {
   virtual ~WebMVideoSource() {
     if (vpx_ctx_->file != NULL)
       fclose(vpx_ctx_->file);
+    webm_free(webm_ctx_);
     delete vpx_ctx_;
     delete webm_ctx_;
   }
