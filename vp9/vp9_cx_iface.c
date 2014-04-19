@@ -521,7 +521,8 @@ static vpx_codec_err_t ctrl_set_param(vpx_codec_alg_priv_t *ctx, int ctrl_id,
 #undef MAP
 }
 
-static vpx_codec_err_t encoder_common_init(vpx_codec_ctx_t *ctx) {
+static vpx_codec_err_t encoder_init(vpx_codec_ctx_t *ctx,
+                                    vpx_codec_priv_enc_mr_cfg_t *data) {
   vpx_codec_err_t res = VPX_CODEC_OK;
 
   if (ctx->priv == NULL) {
@@ -529,7 +530,8 @@ static vpx_codec_err_t encoder_common_init(vpx_codec_ctx_t *ctx) {
     vpx_codec_enc_cfg_t *cfg;
     struct vpx_codec_alg_priv *priv = calloc(1, sizeof(*priv));
 
-    if (priv == NULL) return VPX_CODEC_MEM_ERROR;
+    if (priv == NULL)
+      return VPX_CODEC_MEM_ERROR;
 
     ctx->priv = &priv->base;
     ctx->priv->sz = sizeof(*ctx->priv);
@@ -539,8 +541,7 @@ static vpx_codec_err_t encoder_common_init(vpx_codec_ctx_t *ctx) {
     ctx->priv->enc.total_encoders = 1;
 
     if (ctx->config.enc) {
-      // Update the reference to the config structure to an
-      // internal copy.
+      // Update the reference to the config structure to an internal copy.
       ctx->priv->alg_priv->cfg = *ctx->config.enc;
       ctx->config.enc = &ctx->priv->alg_priv->cfg;
     }
@@ -556,11 +557,11 @@ static vpx_codec_err_t encoder_common_init(vpx_codec_ctx_t *ctx) {
 
     priv->extra_cfg = extracfg_map[i].cfg;
     priv->extra_cfg.pkt_list = &priv->pkt_list.head;
-
-    // Maximum buffer size approximated based on having multiple ARF.
+     // Maximum buffer size approximated based on having multiple ARF.
     priv->cx_data_sz = priv->cfg.g_w * priv->cfg.g_h * 3 / 2 * 8;
 
-    if (priv->cx_data_sz < 4096) priv->cx_data_sz = 4096;
+    if (priv->cx_data_sz < 4096)
+      priv->cx_data_sz = 4096;
 
     priv->cx_data = (unsigned char *)malloc(priv->cx_data_sz);
     if (priv->cx_data == NULL)
@@ -573,8 +574,8 @@ static vpx_codec_err_t encoder_common_init(vpx_codec_ctx_t *ctx) {
     if (res == VPX_CODEC_OK) {
       VP9_COMP *cpi;
       set_encoder_config(&ctx->priv->alg_priv->oxcf,
-                      &ctx->priv->alg_priv->cfg,
-                      &ctx->priv->alg_priv->extra_cfg);
+                         &ctx->priv->alg_priv->cfg,
+                         &ctx->priv->alg_priv->extra_cfg);
       cpi = vp9_create_compressor(&ctx->priv->alg_priv->oxcf);
       if (cpi == NULL)
         res = VPX_CODEC_MEM_ERROR;
@@ -584,12 +585,6 @@ static vpx_codec_err_t encoder_common_init(vpx_codec_ctx_t *ctx) {
   }
 
   return res;
-}
-
-
-static vpx_codec_err_t encoder_init(vpx_codec_ctx_t *ctx,
-                                    vpx_codec_priv_enc_mr_cfg_t *data) {
-  return encoder_common_init(ctx);
 }
 
 static vpx_codec_err_t encoder_destroy(vpx_codec_alg_priv_t *ctx) {
@@ -865,7 +860,6 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
 
   return res;
 }
-
 
 static const vpx_codec_cx_pkt_t *encoder_get_cxdata(vpx_codec_alg_priv_t  *ctx,
                                                     vpx_codec_iter_t *iter) {
