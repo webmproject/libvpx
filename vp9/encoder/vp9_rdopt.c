@@ -243,9 +243,7 @@ void vp9_initialize_me_consts(VP9_COMP *cpi, int qindex) {
   cpi->mb.sadperbit4 = sad_per_bit4lut[qindex];
 }
 
-static void set_block_thresholds(VP9_COMP *cpi) {
-  const VP9_COMMON *const cm = &cpi->common;
-  RD_OPT *const rd = &cpi->rd;
+static void set_block_thresholds(const VP9_COMMON *cm, RD_OPT *rd) {
   int i, bsize, segment_id;
 
   for (segment_id = 0; segment_id < MAX_SEGMENTS; ++segment_id) {
@@ -280,20 +278,21 @@ static void set_block_thresholds(VP9_COMP *cpi) {
 void vp9_initialize_rd_consts(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
+  RD_OPT *const rd = &cpi->rd;
   int i;
 
   vp9_clear_system_state();
 
-  cpi->rd.RDDIV = RDDIV_BITS;  // in bits (to multiply D by 128)
-  cpi->rd.RDMULT = vp9_compute_rd_mult(cpi, cm->base_qindex + cm->y_dc_delta_q);
+  rd->RDDIV = RDDIV_BITS;  // in bits (to multiply D by 128)
+  rd->RDMULT = vp9_compute_rd_mult(cpi, cm->base_qindex + cm->y_dc_delta_q);
 
-  x->errorperbit = cpi->rd.RDMULT / RD_MULT_EPB_RATIO;
+  x->errorperbit = rd->RDMULT / RD_MULT_EPB_RATIO;
   x->errorperbit += (x->errorperbit == 0);
 
   x->select_txfm_size = (cpi->sf.tx_size_search_method == USE_LARGESTALL &&
                          cm->frame_type != KEY_FRAME) ? 0 : 1;
 
-  set_block_thresholds(cpi);
+  set_block_thresholds(cm, rd);
 
   if (!cpi->sf.use_nonrd_pick_mode || cm->frame_type == KEY_FRAME) {
     fill_token_costs(x->token_costs, cm->fc.coef_probs);
@@ -2178,12 +2177,12 @@ static void mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
   x->pred_mv_sad[ref_frame] = best_sad;
 }
 
-static void estimate_ref_frame_costs(VP9_COMP *cpi, int segment_id,
+static void estimate_ref_frame_costs(const VP9_COMMON *cm,
+                                     const MACROBLOCKD *xd,
+                                     int segment_id,
                                      unsigned int *ref_costs_single,
                                      unsigned int *ref_costs_comp,
                                      vp9_prob *comp_mode_p) {
-  VP9_COMMON *const cm = &cpi->common;
-  MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   int seg_ref_active = vp9_segfeature_active(&cm->seg, segment_id,
                                              SEG_LVL_REF_FRAME);
   if (seg_ref_active) {
@@ -2348,7 +2347,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                  int mi_row, int mi_col,
                                  int_mv *tmp_mv, int *rate_mv) {
   MACROBLOCKD *xd = &x->e_mbd;
-  VP9_COMMON *cm = &cpi->common;
+  const VP9_COMMON *cm = &cpi->common;
   MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
   struct buf_2d backup_yv12[MAX_MB_PLANE] = {{0}};
   int bestsme = INT_MAX;
@@ -2386,7 +2385,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
 
   // Work out the size of the first step in the mv step search.
   // 0 here is maximum length first step. 1 is MAX >> 1 etc.
-  if (cpi->sf.auto_mv_step_size && cpi->common.show_frame) {
+  if (cpi->sf.auto_mv_step_size && cm->show_frame) {
     // Take wtd average of the step_params based on the last frame's
     // max mv magnitude and that based on the best ref mvs of the current
     // block for the given reference.
@@ -2397,7 +2396,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   if (cpi->sf.adaptive_motion_search && bsize < BLOCK_64X64 &&
-      cpi->common.show_frame) {
+      cm->show_frame) {
     int boffset = 2 * (b_width_log2(BLOCK_64X64) - MIN(b_height_log2(bsize),
                                                        b_width_log2(bsize)));
     step_param = MAX(step_param, boffset);
@@ -2412,7 +2411,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     if (tlevel < 5)
       step_param += 2;
 
-    for (i = LAST_FRAME; i <= ALTREF_FRAME && cpi->common.show_frame; ++i) {
+    for (i = LAST_FRAME; i <= ALTREF_FRAME && cm->show_frame; ++i) {
       if ((x->pred_mv_sad[ref] >> 3) > x->pred_mv_sad[i]) {
         x->pred_mv[ref].as_int = 0;
         tmp_mv->as_int = INVALID_MV;
@@ -2496,7 +2495,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   *rate_mv = vp9_mv_bit_cost(&tmp_mv->as_mv, &ref_mv,
                              x->nmvjointcost, x->mvcost, MV_COST_WEIGHT);
 
-  if (cpi->sf.adaptive_motion_search && cpi->common.show_frame)
+  if (cpi->sf.adaptive_motion_search && cm->show_frame)
     x->pred_mv[ref].as_int = tmp_mv->as_int;
 
   if (scaled_ref_frame) {
@@ -3104,13 +3103,13 @@ static INLINE int rd_less_than_thresh(int64_t best_rd, int thresh,
 // combination that wins out.
 static void update_rd_thresh_fact(VP9_COMP *cpi, int bsize,
                                   int best_mode_index) {
-  if (cpi->sf.adaptive_rd_thresh) {
+  if (cpi->sf.adaptive_rd_thresh > 0) {
     const int top_mode = bsize < BLOCK_8X8 ? MAX_REFS : MAX_MODES;
-    int mode_index;
-    for (mode_index = 0; mode_index < top_mode; ++mode_index) {
-      int *const fact = &cpi->rd.thresh_freq_fact[bsize][mode_index];
+    int mode;
+    for (mode = 0; mode < top_mode; ++mode) {
+      int *const fact = &cpi->rd.thresh_freq_fact[bsize][mode];
 
-      if (mode_index == best_mode_index) {
+      if (mode == best_mode_index) {
         *fact -= (*fact >> 3);
       } else {
         *fact = MIN(*fact + RD_THRESH_INC,
@@ -3178,7 +3177,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
   x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
 
-  estimate_ref_frame_costs(cpi, segment_id, ref_costs_single, ref_costs_comp,
+  estimate_ref_frame_costs(cm, xd, segment_id, ref_costs_single, ref_costs_comp,
                            &comp_mode_p);
 
   for (i = 0; i < REFERENCE_MODES; ++i)
@@ -3792,7 +3791,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       seg_mvs[i][j].as_int = INVALID_MV;
   }
 
-  estimate_ref_frame_costs(cpi, segment_id, ref_costs_single, ref_costs_comp,
+  estimate_ref_frame_costs(cm, xd, segment_id, ref_costs_single, ref_costs_comp,
                            &comp_mode_p);
 
   for (i = 0; i < REFERENCE_MODES; ++i)
