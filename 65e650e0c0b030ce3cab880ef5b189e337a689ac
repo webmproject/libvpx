@@ -16,6 +16,24 @@
       "revId": "65e650e0c0b030ce3cab880ef5b189e337a689ac",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//s3g\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2490,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-04-21T15:45:29Z",
+      "side": 0,
+      "message": "We also shouldn\u0027t call setup_key_frame() here because it sets the refresh_golden_frame \u0026 refresh_alt_ref_frame flags even for\nframes that are encoded intra_only.",
+      "parentUuid": "AAAAdn//uq0\u003d",
+      "revId": "65e650e0c0b030ce3cab880ef5b189e337a689ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
