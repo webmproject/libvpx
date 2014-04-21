@@ -85,7 +85,7 @@ void vp9_rc_init_minq_luts() {
     gf_high_motion_minq[i] = get_minq_index(maxq, 0.0000021, -0.00125, 0.50);
     afq_low_motion_minq[i] = get_minq_index(maxq, 0.0000015, -0.0009, 0.33);
     afq_high_motion_minq[i] = get_minq_index(maxq, 0.0000021, -0.00125, 0.55);
-    inter_minq[i] = get_minq_index(maxq, 0.00000271, -0.00113, 0.55);
+    inter_minq[i] = get_minq_index(maxq, 0.00000271, -0.00113, 0.75);
   }
 }
 
