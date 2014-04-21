@@ -17,14 +17,10 @@
 extern "C" {
 #endif
 
-void variance(const uint8_t *src_ptr,
-              int  source_stride,
-              const uint8_t *ref_ptr,
-              int  recon_stride,
-              int  w,
-              int  h,
-              unsigned int *sse,
-              int *sum);
+void variance(const uint8_t *a, int a_stride,
+              const uint8_t *b, int b_stride,
+              int  w, int  h,
+              unsigned int *sse, int *sum);
 
 typedef unsigned int(*vp9_sad_fn_t)(const uint8_t *src_ptr,
                                     int source_stride,
