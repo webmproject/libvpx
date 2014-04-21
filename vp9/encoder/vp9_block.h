@@ -162,6 +162,8 @@ struct macroblock {
   // note that token_costs is the cost when eob node is skipped
   vp9_coeff_cost token_costs[TX_SIZES];
 
+  int in_static_area;
+
   int optimize;
 
   // indicate if it is in the rd search loop or encoding process
