@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//s34\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1308,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-04-21T15:19:21Z",
+      "side": 1,
+      "message": "I  would have prefered separate lines:\nx-\u003ein_static_area \u003d (this_sad \u003c 2 * threshold);\nreturn  x-\u003ein_static_area;",
+      "revId": "a47a044152017860e1bd94c53a9d3097f27cacf3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
