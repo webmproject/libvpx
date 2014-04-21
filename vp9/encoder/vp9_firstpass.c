@@ -61,7 +61,7 @@
 #define MIN_GF_INTERVAL             4
 #endif
 
-#define DISABLE_RC_LONG_TERM_MEM
+#define LONG_TERM_VBR_CORRECTION
 
 static void swap_yv12(YV12_BUFFER_CONFIG *a, YV12_BUFFER_CONFIG *b) {
   YV12_BUFFER_CONFIG temp = *a;
@@ -1033,6 +1033,9 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
 
     reset_fpf_position(twopass, start_pos);
   }
+
+  // Reset the vbr bits off target counter
+  cpi->rc.vbr_bits_off_target = 0;
 }
 
 // This function gives an estimate of how badly we believe the prediction
@@ -2192,6 +2195,23 @@ void vp9_rc_get_first_pass_params(VP9_COMP *cpi) {
   cpi->rc.frames_to_key = INT_MAX;
 }
 
+// For VBR...adjustment to the frame target based on error from previous frames
+void vbr_rate_correction(int * this_frame_target,
+                         const int64_t vbr_bits_off_target) {
+  int max_delta = *this_frame_target / 10;
+
+  // vbr_bits_off_target > 0 means we have extra bits to spend
+  if (vbr_bits_off_target > 0) {
+    *this_frame_target +=
+      (vbr_bits_off_target > max_delta) ? max_delta
+                                        : (int)vbr_bits_off_target;
+  } else {
+    *this_frame_target -=
+      (vbr_bits_off_target < -max_delta) ? max_delta
+                                         : (int)-vbr_bits_off_target;
+  }
+}
+
 void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
@@ -2219,8 +2239,15 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
     return;
 
   if (cpi->refresh_alt_ref_frame) {
+    int modified_target = twopass->gf_bits;
+    rc->base_frame_target = twopass->gf_bits;
     cm->frame_type = INTER_FRAME;
-    vp9_rc_set_frame_target(cpi, twopass->gf_bits);
+#ifdef LONG_TERM_VBR_CORRECTION
+    // Correction to rate target based on prior over or under shoot.
+    if (cpi->oxcf.end_usage == USAGE_LOCAL_FILE_PLAYBACK)
+      vbr_rate_correction(&modified_target, rc->vbr_bits_off_target);
+#endif
+    vp9_rc_set_frame_target(cpi, modified_target);
     return;
   }
 
@@ -2315,6 +2342,13 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
     target = vp9_rc_clamp_iframe_target_size(cpi, rc->this_frame_target);
   else
     target = vp9_rc_clamp_pframe_target_size(cpi, rc->this_frame_target);
+
+  rc->base_frame_target = target;
+#ifdef LONG_TERM_VBR_CORRECTION
+  // Correction to rate target based on prior over or under shoot.
+  if (cpi->oxcf.end_usage == USAGE_LOCAL_FILE_PLAYBACK)
+    vbr_rate_correction(&target, rc->vbr_bits_off_target);
+#endif
   vp9_rc_set_frame_target(cpi, target);
 
   // Update the total stats remaining structure.
@@ -2322,20 +2356,38 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
 }
 
 void vp9_twopass_postencode_update(VP9_COMP *cpi) {
-#ifdef DISABLE_RC_LONG_TERM_MEM
-  const uint64_t bits_used = cpi->rc.this_frame_target;
+  RATE_CONTROL *const rc = &cpi->rc;
+#ifdef LONG_TERM_VBR_CORRECTION
+  // In this experimental mode, the VBR correction is done exclusively through
+  // rc->vbr_bits_off_target. Based on the sign of this value, a limited %
+  // adjustment is made to the target rate of subsequent frames, to try and
+  // push it back towards 0. This mode is less likely to suffer from
+  // extreme behaviour at the end of a clip or group of frames.
+  const int bits_used = rc->base_frame_target;
+  rc->vbr_bits_off_target += rc->base_frame_target - rc->projected_frame_size;
 #else
-  const uint64_t bits_used = cpi->rc.projected_frame_size;
+  // In this mode, VBR correction is acheived by altering bits_left,
+  // kf_group_bits & gf_group_bits to reflect any deviation from the target
+  // rate in this frame. This alters the allocation of bits to the
+  // remaning frames in the group / clip.
+  // This method can give rise to unstable behaviour near the end of a clip
+  // or kf/gf group of frames where any accumulated error is corrected over an
+  // ever decreasing number of frames.
+  const int bits_used = rc->projected_frame_size;
 #endif
+
   cpi->twopass.bits_left -= bits_used;
   cpi->twopass.bits_left = MAX(cpi->twopass.bits_left, 0);
-  // Update bits left to the kf and gf groups to account for overshoot or
-  // undershoot on these frames.
+
+#ifdef LONG_TERM_VBR_CORRECTION
+  if (cpi->common.frame_type != KEY_FRAME) {
+#else
   if (cpi->common.frame_type == KEY_FRAME) {
     // For key frames kf_group_bits already had the target bits subtracted out.
     // So now update to the correct value based on the actual bits used.
     cpi->twopass.kf_group_bits += cpi->rc.this_frame_target - bits_used;
   } else {
+#endif
     cpi->twopass.kf_group_bits -= bits_used;
     cpi->twopass.gf_group_bits -= bits_used;
     cpi->twopass.gf_group_bits = MAX(cpi->twopass.gf_group_bits, 0);

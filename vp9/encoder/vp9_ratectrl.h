@@ -27,7 +27,9 @@ extern "C" {
 
 typedef struct {
   // Rate targetting variables
-  int this_frame_target;
+  int base_frame_target;           // A baseline frame target before adjustment
+                                   // for previous under or over shoot.
+  int this_frame_target;           // Actual frame target after rc adjustment.
   int projected_frame_size;
   int sb64_target_rate;
   int last_q[3];                   // Separate values for Intra/Inter/ARF-GF
@@ -67,6 +69,7 @@ typedef struct {
 
   int64_t buffer_level;
   int64_t bits_off_target;
+  int64_t vbr_bits_off_target;
 
   int decimation_factor;
   int decimation_count;
