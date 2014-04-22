@@ -122,45 +122,44 @@ unsigned int vp9_variance64x32_c(const uint8_t *src_ptr,
   return (var - (((int64_t)avg * avg) >> 11));
 }
 
-unsigned int vp9_sub_pixel_variance64x32_c(const uint8_t *src_ptr,
-                                           int  src_pixels_per_line,
-                                           int  xoffset,
-                                           int  yoffset,
-                                           const uint8_t *dst_ptr,
-                                           int dst_pixels_per_line,
-                                           unsigned int *sse) {
-  uint16_t fdata3[65 * 64];
-  uint8_t temp2[68 * 64];
-  const int16_t *const hfilter = BILINEAR_FILTERS_2TAP(xoffset);
-  const int16_t *const vfilter = BILINEAR_FILTERS_2TAP(yoffset);
-
-  var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
-                                    1, 33, 64, hfilter);
-  var_filter_block2d_bil_second_pass(fdata3, temp2, 64, 64, 32, 64, vfilter);
-
-  return vp9_variance64x32(temp2, 64, dst_ptr, dst_pixels_per_line, sse);
+#define SUBPIX_VAR(W, H) \
+unsigned int vp9_sub_pixel_variance##W##x##H##_c( \
+  const uint8_t *src, int  src_stride, \
+  int xoffset, int  yoffset, \
+  const uint8_t *dst, int dst_stride, \
+  unsigned int *sse) { \
+  uint16_t fdata3[(H + 1) * W]; \
+  uint8_t temp2[H * W]; \
+\
+  var_filter_block2d_bil_first_pass(src, fdata3, src_stride, 1, H + 1, W, \
+                                    BILINEAR_FILTERS_2TAP(xoffset)); \
+  var_filter_block2d_bil_second_pass(fdata3, temp2, W, W, H, W, \
+                                     BILINEAR_FILTERS_2TAP(yoffset)); \
+\
+  return vp9_variance##W##x##H##_c(temp2, W, dst, dst_stride, sse); \
 }
 
-unsigned int vp9_sub_pixel_avg_variance64x32_c(const uint8_t *src_ptr,
-                                               int  src_pixels_per_line,
-                                               int  xoffset,
-                                               int  yoffset,
-                                               const uint8_t *dst_ptr,
-                                               int dst_pixels_per_line,
-                                               unsigned int *sse,
-                                               const uint8_t *second_pred) {
-  uint16_t fdata3[65 * 64];
-  uint8_t temp2[68 * 64];
-  DECLARE_ALIGNED_ARRAY(16, uint8_t, temp3, 64 * 64);
-  const int16_t *const hfilter = BILINEAR_FILTERS_2TAP(xoffset);
-  const int16_t *const vfilter = BILINEAR_FILTERS_2TAP(yoffset);
-
-  var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
-                                    1, 33, 64, hfilter);
-  var_filter_block2d_bil_second_pass(fdata3, temp2, 64, 64, 32, 64, vfilter);
-  vp9_comp_avg_pred(temp3, second_pred, 64, 32, temp2, 64);
-  return vp9_variance64x32(temp3, 64, dst_ptr, dst_pixels_per_line, sse);
+#define SUBPIX_AVG_VAR(W, H) \
+unsigned int vp9_sub_pixel_avg_variance##W##x##H##_c( \
+  const uint8_t *src, int  src_stride, \
+  int xoffset, int  yoffset, \
+  const uint8_t *dst, int dst_stride, \
+  unsigned int *sse, \
+  const uint8_t *second_pred) { \
+  uint16_t fdata3[(H + 1) * W]; \
+  uint8_t temp2[H * W]; \
+  DECLARE_ALIGNED_ARRAY(16, uint8_t, temp3, H * W); \
+\
+  var_filter_block2d_bil_first_pass(src, fdata3, src_stride, 1, H + 1, W, \
+                                    BILINEAR_FILTERS_2TAP(xoffset)); \
+  var_filter_block2d_bil_second_pass(fdata3, temp2, W, W, H, W, \
+                                     BILINEAR_FILTERS_2TAP(yoffset)); \
+\
+  vp9_comp_avg_pred(temp3, second_pred, W, H, temp2, W); \
+\
+  return vp9_variance##W##x##H##_c(temp3, W, dst, dst_stride, sse); \
 }
+
 
 unsigned int vp9_variance32x64_c(const uint8_t *src_ptr,
                                  int  source_stride,
@@ -173,46 +172,6 @@ unsigned int vp9_variance32x64_c(const uint8_t *src_ptr,
   variance(src_ptr, source_stride, ref_ptr, recon_stride, 32, 64, &var, &avg);
   *sse = var;
   return (var - (((int64_t)avg * avg) >> 11));
-}
-
-unsigned int vp9_sub_pixel_variance32x64_c(const uint8_t *src_ptr,
-                                           int  src_pixels_per_line,
-                                           int  xoffset,
-                                           int  yoffset,
-                                           const uint8_t *dst_ptr,
-                                           int dst_pixels_per_line,
-                                           unsigned int *sse) {
-  uint16_t fdata3[65 * 64];
-  uint8_t temp2[68 * 64];
-  const int16_t *const hfilter = BILINEAR_FILTERS_2TAP(xoffset);
-  const int16_t *const vfilter = BILINEAR_FILTERS_2TAP(yoffset);
-
-  var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
-                                    1, 65, 32, hfilter);
-  var_filter_block2d_bil_second_pass(fdata3, temp2, 32, 32, 64, 32, vfilter);
-
-  return vp9_variance32x64(temp2, 32, dst_ptr, dst_pixels_per_line, sse);
-}
-
-unsigned int vp9_sub_pixel_avg_variance32x64_c(const uint8_t *src_ptr,
-                                               int  src_pixels_per_line,
-                                               int  xoffset,
-                                               int  yoffset,
-                                               const uint8_t *dst_ptr,
-                                               int dst_pixels_per_line,
-                                               unsigned int *sse,
-                                               const uint8_t *second_pred) {
-  uint16_t fdata3[65 * 64];
-  uint8_t temp2[68 * 64];
-  DECLARE_ALIGNED_ARRAY(16, uint8_t, temp3, 32 * 64);
-  const int16_t *const hfilter = BILINEAR_FILTERS_2TAP(xoffset);
-  const int16_t *const vfilter = BILINEAR_FILTERS_2TAP(yoffset);
-
-  var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
-                                    1, 65, 32, hfilter);
-  var_filter_block2d_bil_second_pass(fdata3, temp2, 32, 32, 64, 32, vfilter);
-  vp9_comp_avg_pred(temp3, second_pred, 32, 64, temp2, 32);
-  return vp9_variance32x64(temp3, 32, dst_ptr, dst_pixels_per_line, sse);
 }
 
 unsigned int vp9_variance32x16_c(const uint8_t *src_ptr,
@@ -228,46 +187,6 @@ unsigned int vp9_variance32x16_c(const uint8_t *src_ptr,
   return (var - (((int64_t)avg * avg) >> 9));
 }
 
-unsigned int vp9_sub_pixel_variance32x16_c(const uint8_t *src_ptr,
-                                           int  src_pixels_per_line,
-                                           int  xoffset,
-                                           int  yoffset,
-                                           const uint8_t *dst_ptr,
-                                           int dst_pixels_per_line,
-                                           unsigned int *sse) {
-  uint16_t fdata3[33 * 32];
-  uint8_t temp2[36 * 32];
-  const int16_t *const hfilter = BILINEAR_FILTERS_2TAP(xoffset);
-  const int16_t *const vfilter = BILINEAR_FILTERS_2TAP(yoffset);
-
-  var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
-                                    1, 17, 32, hfilter);
-  var_filter_block2d_bil_second_pass(fdata3, temp2, 32, 32, 16, 32, vfilter);
-
-  return vp9_variance32x16(temp2, 32, dst_ptr, dst_pixels_per_line, sse);
-}
-
-unsigned int vp9_sub_pixel_avg_variance32x16_c(const uint8_t *src_ptr,
-                                               int  src_pixels_per_line,
-                                               int  xoffset,
-                                               int  yoffset,
-                                               const uint8_t *dst_ptr,
-                                               int dst_pixels_per_line,
-                                               unsigned int *sse,
-                                               const uint8_t *second_pred) {
-  uint16_t fdata3[33 * 32];
-  uint8_t temp2[36 * 32];
-  DECLARE_ALIGNED_ARRAY(16, uint8_t, temp3, 32 * 16);
-  const int16_t *const hfilter = BILINEAR_FILTERS_2TAP(xoffset);
-  const int16_t *const vfilter = BILINEAR_FILTERS_2TAP(yoffset);
-
-  var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
-                                    1, 17, 32, hfilter);
-  var_filter_block2d_bil_second_pass(fdata3, temp2, 32, 32, 16, 32, vfilter);
-  vp9_comp_avg_pred(temp3, second_pred, 32, 16, temp2, 32);
-  return vp9_variance32x16(temp3, 32, dst_ptr, dst_pixels_per_line, sse);
-}
-
 unsigned int vp9_variance16x32_c(const uint8_t *src_ptr,
                                  int  source_stride,
                                  const uint8_t *ref_ptr,
@@ -279,46 +198,6 @@ unsigned int vp9_variance16x32_c(const uint8_t *src_ptr,
   variance(src_ptr, source_stride, ref_ptr, recon_stride, 16, 32, &var, &avg);
   *sse = var;
   return (var - (((int64_t)avg * avg) >> 9));
-}
-
-unsigned int vp9_sub_pixel_variance16x32_c(const uint8_t *src_ptr,
-                                           int  src_pixels_per_line,
-                                           int  xoffset,
-                                           int  yoffset,
-                                           const uint8_t *dst_ptr,
-                                           int dst_pixels_per_line,
-                                           unsigned int *sse) {
-  uint16_t fdata3[33 * 32];
-  uint8_t temp2[36 * 32];
-  const int16_t *const hfilter = BILINEAR_FILTERS_2TAP(xoffset);
-  const int16_t *const vfilter = BILINEAR_FILTERS_2TAP(yoffset);
-
-  var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
-                                    1, 33, 16, hfilter);
-  var_filter_block2d_bil_second_pass(fdata3, temp2, 16, 16, 32, 16, vfilter);
-
-  return vp9_variance16x32(temp2, 16, dst_ptr, dst_pixels_per_line, sse);
-}
-
-unsigned int vp9_sub_pixel_avg_variance16x32_c(const uint8_t *src_ptr,
-                                               int  src_pixels_per_line,
-                                               int  xoffset,
-                                               int  yoffset,
-                                               const uint8_t *dst_ptr,
-                                               int dst_pixels_per_line,
-                                               unsigned int *sse,
-                                               const uint8_t *second_pred) {
-  uint16_t fdata3[33 * 32];
-  uint8_t temp2[36 * 32];
-  DECLARE_ALIGNED_ARRAY(16, uint8_t, temp3, 16 * 32);
-  const int16_t *const hfilter = BILINEAR_FILTERS_2TAP(xoffset);
-  const int16_t *const vfilter = BILINEAR_FILTERS_2TAP(yoffset);
-
-  var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
-                                    1, 33, 16, hfilter);
-  var_filter_block2d_bil_second_pass(fdata3, temp2, 16, 16, 32, 16, vfilter);
-  vp9_comp_avg_pred(temp3, second_pred, 16, 32, temp2, 16);
-  return vp9_variance16x32(temp3, 16, dst_ptr, dst_pixels_per_line, sse);
 }
 
 unsigned int vp9_variance64x64_c(const uint8_t *src_ptr,
@@ -503,207 +382,44 @@ unsigned int vp9_mse8x8_c(const uint8_t *src_ptr,
   return var;
 }
 
+SUBPIX_VAR(4, 4)
+SUBPIX_AVG_VAR(4, 4)
 
-unsigned int vp9_sub_pixel_variance4x4_c(const uint8_t *src_ptr,
-                                         int  src_pixels_per_line,
-                                         int  xoffset,
-                                         int  yoffset,
-                                         const uint8_t *dst_ptr,
-                                         int dst_pixels_per_line,
-                                         unsigned int *sse) {
-  uint8_t temp2[20 * 16];
-  uint16_t fdata3[5 * 4];
-  const int16_t *const hfilter = BILINEAR_FILTERS_2TAP(xoffset);
-  const int16_t *const vfilter = BILINEAR_FILTERS_2TAP(yoffset);
+SUBPIX_VAR(4, 8)
+SUBPIX_AVG_VAR(4, 8)
 
-  var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
-                                    1, 5, 4, hfilter);
-  var_filter_block2d_bil_second_pass(fdata3, temp2, 4,  4,  4,  4, vfilter);
+SUBPIX_VAR(8, 4)
+SUBPIX_AVG_VAR(8, 4)
 
-  return vp9_variance4x4(temp2, 4, dst_ptr, dst_pixels_per_line, sse);
-}
+SUBPIX_VAR(8, 8)
+SUBPIX_AVG_VAR(8, 8)
 
-unsigned int vp9_sub_pixel_avg_variance4x4_c(const uint8_t *src_ptr,
-                                             int  src_pixels_per_line,
-                                             int  xoffset,
-                                             int  yoffset,
-                                             const uint8_t *dst_ptr,
-                                             int dst_pixels_per_line,
-                                             unsigned int *sse,
-                                             const uint8_t *second_pred) {
-  uint8_t temp2[20 * 16];
-  DECLARE_ALIGNED_ARRAY(16, uint8_t, temp3, 4 * 4);
-  uint16_t fdata3[5 * 4];
-  const int16_t *const hfilter = BILINEAR_FILTERS_2TAP(xoffset);
-  const int16_t *const vfilter = BILINEAR_FILTERS_2TAP(yoffset);
+SUBPIX_VAR(8, 16)
+SUBPIX_AVG_VAR(8, 16)
 
-  var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
-                                    1, 5, 4, hfilter);
-  var_filter_block2d_bil_second_pass(fdata3, temp2, 4,  4,  4,  4, vfilter);
-  vp9_comp_avg_pred(temp3, second_pred, 4, 4, temp2, 4);
-  return vp9_variance4x4(temp3, 4, dst_ptr, dst_pixels_per_line, sse);
-}
+SUBPIX_VAR(16, 8)
+SUBPIX_AVG_VAR(16, 8)
 
-unsigned int vp9_sub_pixel_variance8x8_c(const uint8_t *src_ptr,
-                                         int  src_pixels_per_line,
-                                         int  xoffset,
-                                         int  yoffset,
-                                         const uint8_t *dst_ptr,
-                                         int dst_pixels_per_line,
-                                         unsigned int *sse) {
-  uint16_t fdata3[9 * 8];
-  uint8_t temp2[20 * 16];
-  const int16_t *const hfilter = BILINEAR_FILTERS_2TAP(xoffset);
-  const int16_t *const vfilter = BILINEAR_FILTERS_2TAP(yoffset);
+SUBPIX_VAR(16, 16)
+SUBPIX_AVG_VAR(16, 16)
 
-  var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
-                                    1, 9, 8, hfilter);
-  var_filter_block2d_bil_second_pass(fdata3, temp2, 8, 8, 8, 8, vfilter);
-  return vp9_variance8x8(temp2, 8, dst_ptr, dst_pixels_per_line, sse);
-}
+SUBPIX_VAR(16, 32)
+SUBPIX_AVG_VAR(16, 32)
 
-unsigned int vp9_sub_pixel_avg_variance8x8_c(const uint8_t *src_ptr,
-                                             int  src_pixels_per_line,
-                                             int  xoffset,
-                                             int  yoffset,
-                                             const uint8_t *dst_ptr,
-                                             int dst_pixels_per_line,
-                                             unsigned int *sse,
-                                             const uint8_t *second_pred) {
-  uint16_t fdata3[9 * 8];
-  uint8_t temp2[20 * 16];
-  DECLARE_ALIGNED_ARRAY(16, uint8_t, temp3, 8 * 8);
-  const int16_t *const hfilter = BILINEAR_FILTERS_2TAP(xoffset);
-  const int16_t *const vfilter = BILINEAR_FILTERS_2TAP(yoffset);
+SUBPIX_VAR(32, 16)
+SUBPIX_AVG_VAR(32, 16)
 
-  var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
-                                    1, 9, 8, hfilter);
-  var_filter_block2d_bil_second_pass(fdata3, temp2, 8, 8, 8, 8, vfilter);
-  vp9_comp_avg_pred(temp3, second_pred, 8, 8, temp2, 8);
+SUBPIX_VAR(32, 32)
+SUBPIX_AVG_VAR(32, 32)
 
-  return vp9_variance8x8(temp3, 8, dst_ptr, dst_pixels_per_line, sse);
-}
+SUBPIX_VAR(32, 64)
+SUBPIX_AVG_VAR(32, 64)
 
-unsigned int vp9_sub_pixel_variance16x16_c(const uint8_t *src_ptr,
-                                           int  src_pixels_per_line,
-                                           int  xoffset,
-                                           int  yoffset,
-                                           const uint8_t *dst_ptr,
-                                           int dst_pixels_per_line,
-                                           unsigned int *sse) {
-  uint16_t fdata3[17 * 16];
-  uint8_t temp2[20 * 16];
-  const int16_t *const hfilter = BILINEAR_FILTERS_2TAP(xoffset);
-  const int16_t *const vfilter = BILINEAR_FILTERS_2TAP(yoffset);
+SUBPIX_VAR(64, 32)
+SUBPIX_AVG_VAR(64, 32)
 
-  var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
-                                    1, 17, 16, hfilter);
-  var_filter_block2d_bil_second_pass(fdata3, temp2, 16, 16, 16, 16, vfilter);
-
-  return vp9_variance16x16(temp2, 16, dst_ptr, dst_pixels_per_line, sse);
-}
-
-unsigned int vp9_sub_pixel_avg_variance16x16_c(const uint8_t *src_ptr,
-                                               int  src_pixels_per_line,
-                                               int  xoffset,
-                                               int  yoffset,
-                                               const uint8_t *dst_ptr,
-                                               int dst_pixels_per_line,
-                                               unsigned int *sse,
-                                               const uint8_t *second_pred) {
-  uint16_t fdata3[17 * 16];
-  uint8_t temp2[20 * 16];
-  DECLARE_ALIGNED_ARRAY(16, uint8_t, temp3, 16 * 16);
-  const int16_t *const hfilter = BILINEAR_FILTERS_2TAP(xoffset);
-  const int16_t *const vfilter = BILINEAR_FILTERS_2TAP(yoffset);
-
-  var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
-                                    1, 17, 16, hfilter);
-  var_filter_block2d_bil_second_pass(fdata3, temp2, 16, 16, 16, 16, vfilter);
-
-  vp9_comp_avg_pred(temp3, second_pred, 16, 16, temp2, 16);
-  return vp9_variance16x16(temp3, 16, dst_ptr, dst_pixels_per_line, sse);
-}
-
-unsigned int vp9_sub_pixel_variance64x64_c(const uint8_t *src_ptr,
-                                           int  src_pixels_per_line,
-                                           int  xoffset,
-                                           int  yoffset,
-                                           const uint8_t *dst_ptr,
-                                           int dst_pixels_per_line,
-                                           unsigned int *sse) {
-  uint16_t fdata3[65 * 64];  // Temp data buffer used in filtering
-  uint8_t temp2[68 * 64];
-  const int16_t *const hfilter = BILINEAR_FILTERS_2TAP(xoffset);
-  const int16_t *const vfilter = BILINEAR_FILTERS_2TAP(yoffset);
-
-  var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
-                                    1, 65, 64, hfilter);
-  var_filter_block2d_bil_second_pass(fdata3, temp2, 64, 64, 64, 64, vfilter);
-
-  return vp9_variance64x64(temp2, 64, dst_ptr, dst_pixels_per_line, sse);
-}
-
-unsigned int vp9_sub_pixel_avg_variance64x64_c(const uint8_t *src_ptr,
-                                               int  src_pixels_per_line,
-                                               int  xoffset,
-                                               int  yoffset,
-                                               const uint8_t *dst_ptr,
-                                               int dst_pixels_per_line,
-                                               unsigned int *sse,
-                                               const uint8_t *second_pred) {
-  uint16_t fdata3[65 * 64];
-  uint8_t temp2[68 * 64];
-  DECLARE_ALIGNED_ARRAY(16, uint8_t, temp3, 64 * 64);
-  const int16_t *const hfilter = BILINEAR_FILTERS_2TAP(xoffset);
-  const int16_t *const vfilter = BILINEAR_FILTERS_2TAP(yoffset);
-
-  var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
-                                    1, 65, 64, hfilter);
-  var_filter_block2d_bil_second_pass(fdata3, temp2, 64, 64, 64, 64, vfilter);
-  vp9_comp_avg_pred(temp3, second_pred, 64, 64, temp2, 64);
-  return vp9_variance64x64(temp3, 64, dst_ptr, dst_pixels_per_line, sse);
-}
-
-unsigned int vp9_sub_pixel_variance32x32_c(const uint8_t *src_ptr,
-                                           int  src_pixels_per_line,
-                                           int  xoffset,
-                                           int  yoffset,
-                                           const uint8_t *dst_ptr,
-                                           int dst_pixels_per_line,
-                                           unsigned int *sse) {
-  uint16_t fdata3[33 * 32];
-  uint8_t temp2[36 * 32];
-  const int16_t *const hfilter = BILINEAR_FILTERS_2TAP(xoffset);
-  const int16_t *const vfilter = BILINEAR_FILTERS_2TAP(yoffset);
-
-  var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
-                                    1, 33, 32, hfilter);
-  var_filter_block2d_bil_second_pass(fdata3, temp2, 32, 32, 32, 32, vfilter);
-
-  return vp9_variance32x32(temp2, 32, dst_ptr, dst_pixels_per_line, sse);
-}
-
-unsigned int vp9_sub_pixel_avg_variance32x32_c(const uint8_t *src_ptr,
-                                               int  src_pixels_per_line,
-                                               int  xoffset,
-                                               int  yoffset,
-                                               const uint8_t *dst_ptr,
-                                               int dst_pixels_per_line,
-                                               unsigned int *sse,
-                                               const uint8_t *second_pred) {
-  uint16_t fdata3[33 * 32];
-  uint8_t temp2[36 * 32];
-  DECLARE_ALIGNED_ARRAY(16, uint8_t, temp3, 32 * 32);
-  const int16_t *const hfilter = BILINEAR_FILTERS_2TAP(xoffset);
-  const int16_t *const vfilter = BILINEAR_FILTERS_2TAP(yoffset);
-
-  var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
-                                    1, 33, 32, hfilter);
-  var_filter_block2d_bil_second_pass(fdata3, temp2, 32, 32, 32, 32, vfilter);
-  vp9_comp_avg_pred(temp3, second_pred, 32, 32, temp2, 32);
-  return vp9_variance32x32(temp3, 32, dst_ptr, dst_pixels_per_line, sse);
-}
+SUBPIX_VAR(64, 64)
+SUBPIX_AVG_VAR(64, 64)
 
 unsigned int vp9_variance_halfpixvar16x16_h_c(const uint8_t *src_ptr,
                                               int  source_stride,
@@ -824,169 +540,6 @@ unsigned int vp9_sub_pixel_mse64x64_c(const uint8_t *src_ptr,
                                 dst_pixels_per_line, sse);
   return *sse;
 }
-
-unsigned int vp9_sub_pixel_variance16x8_c(const uint8_t *src_ptr,
-                                          int  src_pixels_per_line,
-                                          int  xoffset,
-                                          int  yoffset,
-                                          const uint8_t *dst_ptr,
-                                          int dst_pixels_per_line,
-                                          unsigned int *sse) {
-  uint16_t fdata3[16 * 9];
-  uint8_t temp2[20 * 16];
-  const int16_t *const hfilter = BILINEAR_FILTERS_2TAP(xoffset);
-  const int16_t *const vfilter = BILINEAR_FILTERS_2TAP(yoffset);
-
-  var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
-                                    1, 9, 16, hfilter);
-  var_filter_block2d_bil_second_pass(fdata3, temp2, 16, 16, 8, 16, vfilter);
-
-  return vp9_variance16x8(temp2, 16, dst_ptr, dst_pixels_per_line, sse);
-}
-
-unsigned int vp9_sub_pixel_avg_variance16x8_c(const uint8_t *src_ptr,
-                                              int  src_pixels_per_line,
-                                              int  xoffset,
-                                              int  yoffset,
-                                              const uint8_t *dst_ptr,
-                                              int dst_pixels_per_line,
-                                              unsigned int *sse,
-                                              const uint8_t *second_pred) {
-  uint16_t fdata3[16 * 9];
-  uint8_t temp2[20 * 16];
-  DECLARE_ALIGNED_ARRAY(16, uint8_t, temp3, 16 * 8);
-  const int16_t *const hfilter = BILINEAR_FILTERS_2TAP(xoffset);
-  const int16_t *const vfilter = BILINEAR_FILTERS_2TAP(yoffset);
-
-  var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
-                                    1, 9, 16, hfilter);
-  var_filter_block2d_bil_second_pass(fdata3, temp2, 16, 16, 8, 16, vfilter);
-  vp9_comp_avg_pred(temp3, second_pred, 16, 8, temp2, 16);
-  return vp9_variance16x8(temp3, 16, dst_ptr, dst_pixels_per_line, sse);
-}
-
-unsigned int vp9_sub_pixel_variance8x16_c(const uint8_t *src_ptr,
-                                          int  src_pixels_per_line,
-                                          int  xoffset,
-                                          int  yoffset,
-                                          const uint8_t *dst_ptr,
-                                          int dst_pixels_per_line,
-                                          unsigned int *sse) {
-  uint16_t fdata3[9 * 16];  // Temp data buffer used in filtering
-  uint8_t temp2[20 * 16];
-  const int16_t *const hfilter = BILINEAR_FILTERS_2TAP(xoffset);
-  const int16_t *const vfilter = BILINEAR_FILTERS_2TAP(yoffset);
-
-  var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
-                                    1, 17, 8, hfilter);
-  var_filter_block2d_bil_second_pass(fdata3, temp2, 8, 8, 16, 8, vfilter);
-
-  return vp9_variance8x16(temp2, 8, dst_ptr, dst_pixels_per_line, sse);
-}
-
-unsigned int vp9_sub_pixel_avg_variance8x16_c(const uint8_t *src_ptr,
-                                              int  src_pixels_per_line,
-                                              int  xoffset,
-                                              int  yoffset,
-                                              const uint8_t *dst_ptr,
-                                              int dst_pixels_per_line,
-                                              unsigned int *sse,
-                                              const uint8_t *second_pred) {
-  uint16_t fdata3[9 * 16];
-  uint8_t temp2[20 * 16];
-  DECLARE_ALIGNED_ARRAY(16, uint8_t, temp3, 8 * 16);
-  const int16_t *const hfilter = BILINEAR_FILTERS_2TAP(xoffset);
-  const int16_t *const vfilter = BILINEAR_FILTERS_2TAP(yoffset);
-
-  var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
-                                    1, 17, 8, hfilter);
-  var_filter_block2d_bil_second_pass(fdata3, temp2, 8, 8, 16, 8, vfilter);
-  vp9_comp_avg_pred(temp3, second_pred, 8, 16, temp2, 8);
-  return vp9_variance8x16(temp3, 8, dst_ptr, dst_pixels_per_line, sse);
-}
-
-unsigned int vp9_sub_pixel_variance8x4_c(const uint8_t *src_ptr,
-                                         int  src_pixels_per_line,
-                                         int  xoffset,
-                                         int  yoffset,
-                                         const uint8_t *dst_ptr,
-                                         int dst_pixels_per_line,
-                                         unsigned int *sse) {
-  uint16_t fdata3[8 * 5];
-  uint8_t temp2[20 * 16];
-  const int16_t *const hfilter = BILINEAR_FILTERS_2TAP(xoffset);
-  const int16_t *const vfilter = BILINEAR_FILTERS_2TAP(yoffset);
-
-  var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
-                                    1, 5, 8, hfilter);
-  var_filter_block2d_bil_second_pass(fdata3, temp2, 8, 8, 4, 8, vfilter);
-
-  return vp9_variance8x4(temp2, 8, dst_ptr, dst_pixels_per_line, sse);
-}
-
-unsigned int vp9_sub_pixel_avg_variance8x4_c(const uint8_t *src_ptr,
-                                             int  src_pixels_per_line,
-                                             int  xoffset,
-                                             int  yoffset,
-                                             const uint8_t *dst_ptr,
-                                             int dst_pixels_per_line,
-                                             unsigned int *sse,
-                                             const uint8_t *second_pred) {
-  uint16_t fdata3[8 * 5];
-  uint8_t temp2[20 * 16];
-  DECLARE_ALIGNED_ARRAY(16, uint8_t, temp3, 8 * 4);
-  const int16_t *const hfilter = BILINEAR_FILTERS_2TAP(xoffset);
-  const int16_t *const vfilter = BILINEAR_FILTERS_2TAP(yoffset);
-
-  var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
-                                    1, 5, 8, hfilter);
-  var_filter_block2d_bil_second_pass(fdata3, temp2, 8, 8, 4, 8, vfilter);
-  vp9_comp_avg_pred(temp3, second_pred, 8, 4, temp2, 8);
-  return vp9_variance8x4(temp3, 8, dst_ptr, dst_pixels_per_line, sse);
-}
-
-unsigned int vp9_sub_pixel_variance4x8_c(const uint8_t *src_ptr,
-                                         int  src_pixels_per_line,
-                                         int  xoffset,
-                                         int  yoffset,
-                                         const uint8_t *dst_ptr,
-                                         int dst_pixels_per_line,
-                                         unsigned int *sse) {
-  uint16_t fdata3[5 * 8];
-  // FIXME(jingning,rbultje): this temp2 buffer probably doesn't need to be
-  // of this big? same issue appears in all other block size settings.
-  uint8_t temp2[20 * 16];
-  const int16_t *const hfilter = BILINEAR_FILTERS_2TAP(xoffset);
-  const int16_t *const vfilter = BILINEAR_FILTERS_2TAP(yoffset);
-
-  var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
-                                    1, 9, 4, hfilter);
-  var_filter_block2d_bil_second_pass(fdata3, temp2, 4, 4, 8, 4, vfilter);
-
-  return vp9_variance4x8(temp2, 4, dst_ptr, dst_pixels_per_line, sse);
-}
-
-unsigned int vp9_sub_pixel_avg_variance4x8_c(const uint8_t *src_ptr,
-                                             int  src_pixels_per_line,
-                                             int  xoffset,
-                                             int  yoffset,
-                                             const uint8_t *dst_ptr,
-                                             int dst_pixels_per_line,
-                                             unsigned int *sse,
-                                             const uint8_t *second_pred) {
-  uint16_t fdata3[5 * 8];
-  uint8_t temp2[20 * 16];
-  DECLARE_ALIGNED_ARRAY(16, uint8_t, temp3, 4 * 8);
-  const int16_t *const hfilter = BILINEAR_FILTERS_2TAP(xoffset);
-  const int16_t *const vfilter = BILINEAR_FILTERS_2TAP(yoffset);
-
-  var_filter_block2d_bil_first_pass(src_ptr, fdata3, src_pixels_per_line,
-                                    1, 9, 4, hfilter);
-  var_filter_block2d_bil_second_pass(fdata3, temp2, 4, 4, 8, 4, vfilter);
-  vp9_comp_avg_pred(temp3, second_pred, 4, 8, temp2, 4);
-  return vp9_variance4x8(temp3, 4, dst_ptr, dst_pixels_per_line, sse);
-}
-
 
 void vp9_comp_avg_pred(uint8_t *comp_pred, const uint8_t *pred, int width,
                        int height, const uint8_t *ref, int ref_stride) {
