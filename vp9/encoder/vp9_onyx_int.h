@@ -132,11 +132,11 @@ typedef enum {
 } VPX_SCALING;
 
 typedef enum {
-  USAGE_LOCAL_FILE_PLAYBACK = 0,
-  USAGE_STREAM_FROM_SERVER  = 1,
-  USAGE_CONSTRAINED_QUALITY = 2,
-  USAGE_CONSTANT_QUALITY    = 3,
-} END_USAGE;
+  RC_MODE_VBR = 0,
+  RC_MODE_CBR = 1,
+  RC_MODE_CONSTRAINED_QUALITY = 2,
+  RC_MODE_CONSTANT_QUALITY    = 3,
+} RC_MODE;
 
 typedef enum {
   // Good Quality Fast Encoding. The encoder balances quality with the
@@ -210,7 +210,7 @@ typedef struct VP9EncoderConfig {
   // ----------------------------------------------------------------
   // DATARATE CONTROL OPTIONS
 
-  END_USAGE end_usage;  // vbr or cbr
+  RC_MODE rc_mode;  // vbr, cbr, constrained quality or constant quality
 
   // buffer targeting aggressiveness
   int under_shoot_pct;

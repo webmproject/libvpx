@@ -555,7 +555,7 @@ static void init_config(struct VP9_COMP *cpi, VP9EncoderConfig *oxcf) {
   cpi->svc.number_temporal_layers = oxcf->ts_number_layers;
 
   if ((cpi->svc.number_temporal_layers > 1 &&
-      cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) ||
+      cpi->oxcf.rc_mode == RC_MODE_CBR) ||
       (cpi->svc.number_spatial_layers > 1 &&
       cpi->oxcf.mode == TWO_PASS_SECOND_BEST)) {
     vp9_init_layer_context(cpi);
@@ -642,7 +642,7 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   cpi->encode_breakout = cpi->oxcf.encode_breakout;
 
   // local file playback mode == really big buffer
-  if (cpi->oxcf.end_usage == USAGE_LOCAL_FILE_PLAYBACK) {
+  if (cpi->oxcf.rc_mode == RC_MODE_VBR) {
     cpi->oxcf.starting_buffer_level   = 60000;
     cpi->oxcf.optimal_buffer_level    = 60000;
     cpi->oxcf.maximum_buffer_size     = 240000;
@@ -696,7 +696,7 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   update_frame_size(cpi);
 
   if ((cpi->svc.number_temporal_layers > 1 &&
-      cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) ||
+      cpi->oxcf.rc_mode == RC_MODE_CBR) ||
       (cpi->svc.number_spatial_layers > 1 && cpi->pass == 2)) {
     vp9_update_layer_context_change_config(cpi,
                                            (int)cpi->oxcf.target_bandwidth);
@@ -1600,7 +1600,7 @@ static int recode_loop_test(const VP9_COMP *cpi,
     if ((rc->projected_frame_size > high_limit && q < maxq) ||
         (rc->projected_frame_size < low_limit && q > minq)) {
       force_recode = 1;
-    } else if (oxcf->end_usage == USAGE_CONSTRAINED_QUALITY) {
+    } else if (cpi->oxcf.rc_mode == RC_MODE_CONSTRAINED_QUALITY) {
       // Deal with frame undershoot and whether or not we are
       // below the automatically set cq level.
       if (q > oxcf->cq_level &&
@@ -1897,7 +1897,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
         frame_over_shoot_limit = 1;
     }
 
-    if (cpi->oxcf.end_usage == USAGE_CONSTANT_QUALITY) {
+    if (cpi->oxcf.rc_mode == RC_MODE_CONSTANT_QUALITY) {
       loop = 0;
     } else {
       if ((cm->frame_type == KEY_FRAME) &&
@@ -1995,7 +1995,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
             // This should only trigger where there is very substantial
             // undershoot on a frame and the auto cq level is above
             // the user passsed in value.
-            if (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY &&
+            if (cpi->oxcf.rc_mode == RC_MODE_CONSTRAINED_QUALITY &&
                 q < q_low) {
               q_low = q;
             }
@@ -2192,7 +2192,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   // For 1 pass CBR, check if we are dropping this frame.
   // Never drop on key frame.
   if (cpi->pass == 0 &&
-      cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER &&
+      cpi->oxcf.rc_mode == RC_MODE_CBR &&
       cm->frame_type != KEY_FRAME) {
     if (vp9_rc_drop_frame(cpi)) {
       vp9_rc_postencode_update_drop_frame(cpi);
@@ -2389,7 +2389,7 @@ static void SvcEncode(VP9_COMP *cpi, size_t *size, uint8_t *dest,
 
 static void Pass0Encode(VP9_COMP *cpi, size_t *size, uint8_t *dest,
                         unsigned int *frame_flags) {
-  if (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) {
+  if (cpi->oxcf.rc_mode == RC_MODE_CBR) {
     vp9_rc_get_one_pass_cbr_params(cpi);
   } else {
     vp9_rc_get_one_pass_vbr_params(cpi);
@@ -2680,7 +2680,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   }
 
   if (cpi->svc.number_temporal_layers > 1 &&
-      cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) {
+      cpi->oxcf.rc_mode == RC_MODE_CBR) {
     vp9_update_temporal_layer_framerate(cpi);
     vp9_restore_layer_context(cpi);
   }
@@ -2713,7 +2713,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   if (cpi->pass == 2 &&
       cm->current_video_frame == 0 &&
       cpi->oxcf.allow_spatial_resampling &&
-      cpi->oxcf.end_usage == USAGE_LOCAL_FILE_PLAYBACK) {
+      cpi->oxcf.rc_mode == RC_MODE_VBR) {
     // Internal scaling is triggered on the first frame.
     vp9_set_size_literal(cpi, cpi->oxcf.scaled_frame_width,
                          cpi->oxcf.scaled_frame_height);
@@ -2772,7 +2772,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
   // Save layer specific state.
   if ((cpi->svc.number_temporal_layers > 1 &&
-      cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) ||
+      cpi->oxcf.rc_mode == RC_MODE_CBR) ||
       (cpi->svc.number_spatial_layers > 1 && cpi->pass == 2)) {
     vp9_save_layer_context(cpi);
   }
