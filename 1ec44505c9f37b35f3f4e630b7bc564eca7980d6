@@ -16,6 +16,24 @@
       "revId": "1ec44505c9f37b35f3f4e630b7bc564eca7980d6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//swo\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2212,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-04-22T17:49:40Z",
+      "side": 1,
+      "message": "I need this functions in vp9_firstpass.c in my patch.",
+      "parentUuid": "AAAAdn//sxY\u003d",
+      "revId": "1ec44505c9f37b35f3f4e630b7bc564eca7980d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
