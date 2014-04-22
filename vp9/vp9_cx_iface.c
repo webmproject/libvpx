@@ -623,7 +623,8 @@ static void pick_quickcompress_mode(vpx_codec_alg_priv_t  *ctx,
   }
 }
 
-
+// Turn on to test if supplemental superframe data breaks decoding
+// #define TEST_SUPPLEMENTAL_SUPERFRAME_DATA
 static int write_superframe_index(vpx_codec_alg_priv_t *ctx) {
   uint8_t marker = 0xc0;
   unsigned int mask;
@@ -649,6 +650,20 @@ static int write_superframe_index(vpx_codec_alg_priv_t *ctx) {
   if (ctx->pending_cx_data_sz + index_sz < ctx->cx_data_sz) {
     uint8_t *x = ctx->pending_cx_data + ctx->pending_cx_data_sz;
     int i, j;
+#ifdef TEST_SUPPLEMENTAL_SUPERFRAME_DATA
+    uint8_t marker_test = 0xc0;
+    int mag_test = 2;     // 1 - 4
+    int frames_test = 4;  // 1 - 8
+    int index_sz_test = 2 + mag_test * frames_test;
+    marker_test |= frames_test - 1;
+    marker_test |= (mag_test - 1) << 3;
+    *x++ = marker_test;
+    for (i = 0; i < mag_test * frames_test; ++i)
+      *x++ = 0;  // fill up with arbitrary data
+    *x++ = marker_test;
+    ctx->pending_cx_data_sz += index_sz_test;
+    printf("Added supplemental superframe data\n");
+#endif
 
     *x++ = marker;
     for (i = 0; i < ctx->pending_frame_count; i++) {
@@ -661,6 +676,9 @@ static int write_superframe_index(vpx_codec_alg_priv_t *ctx) {
     }
     *x++ = marker;
     ctx->pending_cx_data_sz += index_sz;
+#ifdef TEST_SUPPLEMENTAL_SUPERFRAME_DATA
+    index_sz += index_sz_test;
+#endif
   }
   return index_sz;
 }
