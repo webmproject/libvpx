@@ -29,18 +29,6 @@ void vp9_disable_segmentation(struct segmentation *seg) {
   seg->enabled = 0;
 }
 
-void vp9_set_segmentation_map(VP9_COMP *cpi, unsigned char *segmentation_map) {
-  struct segmentation *const seg = &cpi->common.seg;
-
-  // Copy in the new segmentation map
-  vpx_memcpy(cpi->segmentation_map, segmentation_map,
-             (cpi->common.mi_rows * cpi->common.mi_cols));
-
-  // Signal that the map should be updated.
-  seg->update_map = 1;
-  seg->update_data = 1;
-}
-
 void vp9_set_segment_data(struct segmentation *seg,
                           signed char *feature_data,
                           unsigned char abs_delta) {
