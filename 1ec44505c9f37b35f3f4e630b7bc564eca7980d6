@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//sxY\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2212,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-04-22T17:07:15Z",
+      "side": 1,
+      "message": "I don\u0027t see why this function needs the vp9_ prefix and declaration in the header file. It is only used locally isn\u0027t it?",
+      "revId": "1ec44505c9f37b35f3f4e630b7bc564eca7980d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
