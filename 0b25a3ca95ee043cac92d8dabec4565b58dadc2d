@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//sys\u003d",
+        "filename": "vp9/encoder/vp9_onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2908,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-22T03:24:10Z",
+      "side": 1,
+      "message": "seg-\u003eupdate_map \u003d 1 and seg-\u003eupdate_data \u003d 1 are executed from vp9_enable_segmentation(seg); (next line).",
+      "revId": "0b25a3ca95ee043cac92d8dabec4565b58dadc2d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
