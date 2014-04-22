@@ -306,19 +306,13 @@ TEST_P(ConvolveTest, Copy2D) {
           << "(" << x << "," << y << ")";
 }
 
-const int16_t (*kTestFilterList[])[8] = {
-  vp9_bilinear_filters,
-  vp9_sub_pel_filters_8,
-  vp9_sub_pel_filters_8s,
-  vp9_sub_pel_filters_8lp
-};
-const int kNumFilterBanks = sizeof(kTestFilterList) /
-                            sizeof(kTestFilterList[0]);
+const int kNumFilterBanks = 4;
 const int kNumFilters = 16;
 
 TEST(ConvolveTest, FiltersWontSaturateWhenAddedPairwise) {
   for (int filter_bank = 0; filter_bank < kNumFilterBanks; ++filter_bank) {
-    const int16_t (*filters)[8] = kTestFilterList[filter_bank];
+    const InterpKernel *filters =
+        vp9_get_interp_kernel(static_cast<INTERP_FILTER>(filter_bank));
     for (int i = 0; i < kNumFilters; i++) {
       const int p0 = filters[i][0] + filters[i][1];
       const int p1 = filters[i][2] + filters[i][3];
@@ -345,8 +339,8 @@ TEST_P(ConvolveTest, MatchesReferenceSubpixelFilter) {
 
 
   for (int filter_bank = 0; filter_bank < kNumFilterBanks; ++filter_bank) {
-    const int16_t (*filters)[8] = kTestFilterList[filter_bank];
-
+    const InterpKernel *filters =
+        vp9_get_interp_kernel(static_cast<INTERP_FILTER>(filter_bank));
     for (int filter_x = 0; filter_x < kNumFilters; ++filter_x) {
       for (int filter_y = 0; filter_y < kNumFilters; ++filter_y) {
         filter_block2d_8_c(in, kInputStride,
@@ -399,12 +393,9 @@ TEST_P(ConvolveTest, MatchesReferenceAveragingSubpixelFilter) {
     }
   }
 
-  const int kNumFilterBanks = sizeof(kTestFilterList) /
-      sizeof(kTestFilterList[0]);
-
   for (int filter_bank = 0; filter_bank < kNumFilterBanks; ++filter_bank) {
-    const int16_t (*filters)[8] = kTestFilterList[filter_bank];
-    const int kNumFilters = 16;
+    const InterpKernel *filters =
+        vp9_get_interp_kernel(static_cast<INTERP_FILTER>(filter_bank));
 
     for (int filter_x = 0; filter_x < kNumFilters; ++filter_x) {
       for (int filter_y = 0; filter_y < kNumFilters; ++filter_y) {
