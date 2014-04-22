@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//sxc\u003d",
+        "filename": "vp8/encoder/arm/neon/denoising_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-04-22T17:05:44Z",
+      "side": 1,
+      "message": "Can we use running_avg_y_start and sig_start instead of reversing pointer updates, as you did in sse2 and c version.",
+      "revId": "fb22f2abd10eb43e405a6bc95bc19e1ba5bf7dc5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
