@@ -2894,9 +2894,10 @@ int vp9_set_roimap(VP9_COMP *cpi, unsigned char *map, unsigned int rows,
                    unsigned int threshold[MAX_SEGMENTS]) {
   signed char feature_data[SEG_LVL_MAX][MAX_SEGMENTS];
   struct segmentation *seg = &cpi->common.seg;
+  const VP9_COMMON *const cm = &cpi->common;
   int i;
 
-  if (cpi->common.mb_rows != rows || cpi->common.mb_cols != cols)
+  if (cm->mb_rows != rows || cm->mb_cols != cols)
     return -1;
 
   if (!map) {
@@ -2904,8 +2905,7 @@ int vp9_set_roimap(VP9_COMP *cpi, unsigned char *map, unsigned int rows,
     return 0;
   }
 
-  // Set the segmentation Map
-  vp9_set_segmentation_map(cpi, map);
+  vpx_memcpy(cpi->segmentation_map, map, cm->mi_rows * cm->mi_cols);
 
   // Activate segmentation.
   vp9_enable_segmentation(seg);
