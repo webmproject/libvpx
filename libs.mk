@@ -531,3 +531,28 @@ $(OBJS-yes:.o=.d): $(RTCD)
 
 ## Update the global src list
 SRCS += $(CODEC_SRCS) $(LIBVPX_TEST_SRCS) $(GTEST_SRCS)
+
+##
+## vpxdec/vpxenc tests.
+##
+ifeq ($(CONFIG_UNIT_TESTS),yes)
+TEST_BIN_PATH = .
+ifeq ($(CONFIG_MSVS),yes)
+# MSVC will build both Debug and Release configurations of tools in a
+# sub directory named for the current target. Assume the user wants to
+# run the Release tools, and assign TEST_BIN_PATH accordingly.
+# TODO(tomfinegan): Is this adequate for ARM?
+# TODO(tomfinegan): Support running the debug versions of tools?
+TEST_BIN_PATH := $(addsuffix /$(TGT_OS:win64=x64)/Release, $(TEST_BIN_PATH))
+endif
+utiltest: testdata
+	$(qexec)$(SRC_PATH_BARE)/test/vpxdec.sh \
+		--test-data-path $(LIBVPX_TEST_DATA_PATH) \
+		--bin-path $(TEST_BIN_PATH)
+	$(qexec)$(SRC_PATH_BARE)/test/vpxenc.sh \
+		--test-data-path $(LIBVPX_TEST_DATA_PATH) \
+		--bin-path $(TEST_BIN_PATH)
+else
+utiltest:
+	@echo Unit tests must be enabled to make the utiltest target.
+endif

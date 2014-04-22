@@ -22,6 +22,7 @@ clean:: .DEFAULT
 install:: .DEFAULT
 test:: .DEFAULT
 testdata:: .DEFAULT
+utiltest: .DEFAULT
 
 
 # Note: md5sum is not installed on OS X, but openssl is. Openssl may not be
@@ -52,8 +53,6 @@ dist:
                 | sed -e 's/MD5(\(.*\))= \([0-9a-f]\{32\}\)/\2  \1/' \
                 > md5sums.txt;\
         fi
-
-
 endif
 
 ifneq ($(target),)
@@ -112,6 +111,8 @@ install::
 test::
 .PHONY: testdata
 testdata::
+.PHONY: utiltest
+utiltest:
 
 # Add compiler flags for intrinsic files
 $(BUILD_PFX)%_mmx.c.d: CFLAGS += -mmmx
