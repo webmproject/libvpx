@@ -23,7 +23,7 @@ typedef enum {
   kFilterNone = 0,  // Point sample; Fastest
   kFilterBilinear = 1,  // Faster than box, but lower quality scaling down.
   kFilterBox = 2  // Highest quality
-}FilterMode;
+} FilterModeEnum;
 
 // Scales a YUV 4:2:0 image from the src width and height to the
 // dst width and height.
@@ -43,7 +43,7 @@ int I420Scale(const uint8* src_y, int src_stride_y,
               uint8* dst_u, int dst_stride_u,
               uint8* dst_v, int dst_stride_v,
               int dst_width, int dst_height,
-              FilterMode filtering);
+              FilterModeEnum filtering);
 
 // Legacy API.  Deprecated
 int Scale(const uint8* src_y, const uint8* src_u, const uint8* src_v,
