@@ -11,7 +11,7 @@
 #ifndef VP9_ENCODER_VP9_PICKMODE_H_
 #define VP9_ENCODER_VP9_PICKMODE_H_
 
-#include "vp9/encoder/vp9_onyx_int.h"
+#include "vp9/encoder/vp9_encoder.h"
 
 #ifdef __cplusplus
 extern "C" {

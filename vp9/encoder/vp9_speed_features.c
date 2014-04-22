@@ -10,7 +10,7 @@
 
 #include <limits.h>
 
-#include "vp9/encoder/vp9_onyx_int.h"
+#include "vp9/encoder/vp9_encoder.h"
 #include "vp9/encoder/vp9_speed_features.h"
 
 enum {
