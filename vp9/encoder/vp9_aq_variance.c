@@ -35,6 +35,10 @@ static int segment_id[MAX_SEGMENTS] = { 5, 3, 1, 0, 2, 4, 6, 7 };
 
 DECLARE_ALIGNED(16, static const uint8_t, vp9_64_zeros[64]) = {0};
 
+#if CONFIG_VP9_HIGH
+DECLARE_ALIGNED(16, static const uint16_t, vp9_high_64_zeros[64]) = {0};
+#endif
+
 unsigned int vp9_vaq_segment_id(int energy) {
   ENERGY_IN_BOUNDS(energy);
 
@@ -125,14 +129,36 @@ static unsigned int block_variance(VP9_COMP *cpi, MACROBLOCK *x,
     const int bw = 8 * num_8x8_blocks_wide_lookup[bs] - right_overflow;
     const int bh = 8 * num_8x8_blocks_high_lookup[bs] - bottom_overflow;
     int avg;
+#if CONFIG_VP9_HIGH
+    if (xd->cur_buf->flags&YV12_FLAG_HIGH) {
+      variance(x->plane[0].src.buf, x->plane[0].src.stride,
+             CONVERT_TO_BYTEPTR(vp9_high_64_zeros), 0, bw, bh, &sse, &avg);
+    } else {
+      variance(x->plane[0].src.buf, x->plane[0].src.stride,
+             vp9_64_zeros, 0, bw, bh, &sse, &avg);
+    }
+#else
     variance(x->plane[0].src.buf, x->plane[0].src.stride,
              vp9_64_zeros, 0, bw, bh, &sse, &avg);
+#endif
     var = sse - (((int64_t)avg * avg) / (bw * bh));
     return (256 * var) / (bw * bh);
   } else {
+#if CONFIG_VP9_HIGH
+    if (xd->cur_buf->flags&YV12_FLAG_HIGH) {
+      var = cpi->fn_ptr[bs].vf(x->plane[0].src.buf,
+                             x->plane[0].src.stride,
+                             CONVERT_TO_BYTEPTR(vp9_high_64_zeros), 0, &sse);
+    } else {
+      var = cpi->fn_ptr[bs].vf(x->plane[0].src.buf,
+                             x->plane[0].src.stride,
+                             vp9_64_zeros, 0, &sse);
+    }
+#else
     var = cpi->fn_ptr[bs].vf(x->plane[0].src.buf,
                              x->plane[0].src.stride,
                              vp9_64_zeros, 0, &sse);
+#endif
     return (256 * var) >> num_pels_log2_lookup[bs];
   }
 }

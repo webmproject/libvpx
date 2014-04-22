@@ -1068,6 +1068,9 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
   const int num_4x4_blocks_high = num_4x4_blocks_high_lookup[bsize];
   int idx, idy;
   uint8_t best_dst[8 * 8];
+#if CONFIG_VP9_HIGH
+  uint16_t best_dst16[8 * 8];
+#endif
 
   assert(ib < 4);
 
@@ -1108,7 +1111,17 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
                                 x->skip_encode ? src : dst,
                                 x->skip_encode ? src_stride : dst_stride,
                                 dst, dst_stride, idx, idy, 0);
+#if CONFIG_VP9_HIGH
+        if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+          vp9_high_subtract_block(4, 4, src_diff, 8, src, src_stride,
+                                  dst, dst_stride, xd->bps);
+        } else {
+          vp9_subtract_block(4, 4, src_diff, 8, src, src_stride,
+                             dst, dst_stride);
+        }
+#else
         vp9_subtract_block(4, 4, src_diff, 8, src, src_stride, dst, dst_stride);
+#endif
 
         if (xd->lossless) {
           const scan_order *so = &vp9_default_scan_orders[TX_4X4];
@@ -1119,8 +1132,19 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
                                cpi->sf.use_fast_coef_costing);
           if (RDCOST(x->rdmult, x->rddiv, ratey, distortion) >= best_rd)
             goto next;
+#if CONFIG_VP9_HIGH
+          if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+            vp9_high_iwht4x4_add(BLOCK_OFFSET(pd->dqcoeff, block),
+                                 dst, dst_stride,
+                                 p->eobs[block], xd->bps);
+          } else {
+            vp9_iwht4x4_add(BLOCK_OFFSET(pd->dqcoeff, block), dst, dst_stride,
+                            p->eobs[block]);
+          }
+#else
           vp9_iwht4x4_add(BLOCK_OFFSET(pd->dqcoeff, block), dst, dst_stride,
                           p->eobs[block]);
+#endif
         } else {
           int64_t unused;
           const TX_TYPE tx_type = get_tx_type_4x4(PLANE_TYPE_Y, xd, block);
@@ -1134,8 +1158,18 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
                                         16, &unused) >> 2;
           if (RDCOST(x->rdmult, x->rddiv, ratey, distortion) >= best_rd)
             goto next;
+#if CONFIG_VP9_HIGH
+          if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+            vp9_high_iht4x4_add(tx_type, BLOCK_OFFSET(pd->dqcoeff, block),
+                         dst, dst_stride, p->eobs[block], xd->bps);
+          } else {
+            vp9_iht4x4_add(tx_type, BLOCK_OFFSET(pd->dqcoeff, block),
+                         dst, dst_stride, p->eobs[block]);
+          }
+#else
           vp9_iht4x4_add(tx_type, BLOCK_OFFSET(pd->dqcoeff, block),
                          dst, dst_stride, p->eobs[block]);
+#endif
         }
       }
     }
@@ -1151,20 +1185,45 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
       *best_mode = mode;
       vpx_memcpy(a, tempa, sizeof(tempa));
       vpx_memcpy(l, templ, sizeof(templ));
+#if CONFIG_VP9_HIGH
+      if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+        for (idy = 0; idy < num_4x4_blocks_high * 4; ++idy)
+          vpx_memcpy(best_dst16 + idy * 8,
+                     CONVERT_TO_SHORTPTR(dst_init + idy * dst_stride),
+                     num_4x4_blocks_wide * 4 * sizeof(uint16_t));
+      } else {
+        for (idy = 0; idy < num_4x4_blocks_high * 4; ++idy)
+          vpx_memcpy(best_dst + idy * 8, dst_init + idy * dst_stride,
+                   num_4x4_blocks_wide * 4);
+      }
+#else
       for (idy = 0; idy < num_4x4_blocks_high * 4; ++idy)
         vpx_memcpy(best_dst + idy * 8, dst_init + idy * dst_stride,
                    num_4x4_blocks_wide * 4);
+#endif
     }
   next:
     {}
   }
-
   if (best_rd >= rd_thresh || x->skip_encode)
     return best_rd;
 
+#if CONFIG_VP9_HIGH
+  if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+    for (idy = 0; idy < num_4x4_blocks_high * 4; ++idy)
+      vpx_memcpy(CONVERT_TO_SHORTPTR(dst_init + idy * dst_stride),
+                 best_dst16 + idy * 8,
+                 num_4x4_blocks_wide * 4 * sizeof(uint16_t));
+  } else {
+    for (idy = 0; idy < num_4x4_blocks_high * 4; ++idy)
+      vpx_memcpy(dst_init + idy * dst_stride, best_dst + idy * 8,
+                 num_4x4_blocks_wide * 4);
+  }
+#else
   for (idy = 0; idy < num_4x4_blocks_high * 4; ++idy)
     vpx_memcpy(dst_init + idy * dst_stride, best_dst + idy * 8,
                num_4x4_blocks_wide * 4);
+#endif
 
   return best_rd;
 }
@@ -1560,6 +1619,16 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
   for (ref = 0; ref < 1 + is_compound; ++ref) {
     const uint8_t *pre = &pd->pre[ref].buf[raster_block_offset(BLOCK_8X8, i,
                                                pd->pre[ref].stride)];
+#if CONFIG_VP9_HIGH
+  if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+    vp9_high_build_inter_predictor(pre, pd->pre[ref].stride,
+                              dst, pd->dst.stride,
+                              &mi->bmi[i].as_mv[ref].as_mv,
+                              &xd->block_refs[ref]->sf, width, height, ref,
+                              kernel, MV_PRECISION_Q3,
+                              mi_col * MI_SIZE + 4 * (i % 2),
+                              mi_row * MI_SIZE + 4 * (i / 2), xd->bps);
+  } else {
     vp9_build_inter_predictor(pre, pd->pre[ref].stride,
                               dst, pd->dst.stride,
                               &mi->bmi[i].as_mv[ref].as_mv,
@@ -1568,12 +1637,34 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
                               mi_col * MI_SIZE + 4 * (i % 2),
                               mi_row * MI_SIZE + 4 * (i / 2));
   }
-
+#else
+    vp9_build_inter_predictor(pre, pd->pre[ref].stride,
+                              dst, pd->dst.stride,
+                              &mi->bmi[i].as_mv[ref].as_mv,
+                              &xd->block_refs[ref]->sf, width, height, ref,
+                              kernel, MV_PRECISION_Q3,
+                              mi_col * MI_SIZE + 4 * (i % 2),
+                              mi_row * MI_SIZE + 4 * (i / 2));
+#endif
+  }
+#if CONFIG_VP9_HIGH
+  if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+    vp9_high_subtract_block(height, width,
+               raster_block_offset_int16(BLOCK_8X8, i, p->src_diff), 8,
+               src, p->src.stride,
+               dst, pd->dst.stride, xd->bps);
+  } else {
+    vp9_subtract_block(height, width,
+               raster_block_offset_int16(BLOCK_8X8, i, p->src_diff), 8,
+               src, p->src.stride,
+               dst, pd->dst.stride);
+  }
+#else
   vp9_subtract_block(height, width,
                      raster_block_offset_int16(BLOCK_8X8, i, p->src_diff), 8,
                      src, p->src.stride,
                      dst, pd->dst.stride);
-
+#endif
   k = i;
   for (idy = 0; idy < height / 4; ++idy) {
     for (idx = 0; idx < width / 4; ++idx) {
@@ -2520,9 +2611,13 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   int_mv ref_mv[2];
   int ite, ref;
   // Prediction buffer from second frame.
+#if CONFIG_VP9_HIGH
+  uint8_t *second_pred;
+  uint8_t *second_pred_alloc;
+#else
   uint8_t *second_pred = vpx_memalign(16, pw * ph * sizeof(uint8_t));
+#endif
   const InterpKernel *kernel = vp9_get_interp_kernel(mbmi->interp_filter);
-
   // Do joint motion search in compound mode to get more accurate mv.
   struct buf_2d backup_yv12[2][MAX_MB_PLANE];
   struct buf_2d scaled_first_yv12 = xd->plane[0].pre[0];
@@ -2531,6 +2626,15 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     vp9_get_scaled_ref_frame(cpi, mbmi->ref_frame[0]),
     vp9_get_scaled_ref_frame(cpi, mbmi->ref_frame[1])
   };
+#if CONFIG_VP9_HIGH
+  if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+    second_pred_alloc = vpx_memalign(16, pw * ph * sizeof(uint16_t));
+    second_pred = CONVERT_TO_BYTEPTR(second_pred_alloc);
+  } else {
+    second_pred_alloc = vpx_memalign(16, pw * ph * sizeof(uint8_t));
+    second_pred = second_pred_alloc;
+  }
+#endif
 
   for (ref = 0; ref < 2; ++ref) {
     ref_mv[ref] = mbmi->ref_mvs[refs[ref]][0];
@@ -2567,7 +2671,27 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     // Initialized here because of compiler problem in Visual Studio.
     ref_yv12[0] = xd->plane[0].pre[0];
     ref_yv12[1] = xd->plane[0].pre[1];
-
+#if CONFIG_VP9_HIGH
+    if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+      vp9_high_build_inter_predictor(ref_yv12[!id].buf,
+                              ref_yv12[!id].stride,
+                              second_pred, pw,
+                              &frame_mv[refs[!id]].as_mv,
+                              &xd->block_refs[!id]->sf,
+                              pw, ph, 0,
+                              kernel, MV_PRECISION_Q3,
+                              mi_col * MI_SIZE, mi_row * MI_SIZE, xd->bps);
+    } else {
+      vp9_build_inter_predictor(ref_yv12[!id].buf,
+                              ref_yv12[!id].stride,
+                              second_pred, pw,
+                              &frame_mv[refs[!id]].as_mv,
+                              &xd->block_refs[!id]->sf,
+                              pw, ph, 0,
+                              kernel, MV_PRECISION_Q3,
+                              mi_col * MI_SIZE, mi_row * MI_SIZE);
+    }
+#else
     // Get pred block from second frame.
     vp9_build_inter_predictor(ref_yv12[!id].buf,
                               ref_yv12[!id].stride,
@@ -2577,6 +2701,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                               pw, ph, 0,
                               kernel, MV_PRECISION_Q3,
                               mi_col * MI_SIZE, mi_row * MI_SIZE);
+#endif
 
     // Compound motion search on first ref frame.
     if (id)
@@ -2644,8 +2769,11 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                 &mbmi->ref_mvs[refs[ref]][0].as_mv,
                                 x->nmvjointcost, x->mvcost, MV_COST_WEIGHT);
   }
-
+#if CONFIG_VP9_HIGH
+  vpx_free(second_pred_alloc);
+#else
   vpx_free(second_pred);
+#endif
 }
 
 static INLINE void restore_dst_buf(MACROBLOCKD *xd,
@@ -2685,7 +2813,13 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     (mbmi->ref_frame[1] < 0 ? 0 : mbmi->ref_frame[1]) };
   int_mv cur_mv[2];
   int64_t this_rd = 0;
+#if CONFIG_VP9_HIGH
+  DECLARE_ALIGNED_ARRAY(16, uint16_t, tmp_buf16, MAX_MB_PLANE * 64 * 64);
+  DECLARE_ALIGNED_ARRAY(16, uint8_t, tmp_buf8, MAX_MB_PLANE * 64 * 64);
+  uint8_t *tmp_buf = tmp_buf8;
+#else
   DECLARE_ALIGNED_ARRAY(16, uint8_t, tmp_buf, MAX_MB_PLANE * 64 * 64);
+#endif
   int pred_exists = 0;
   int intpel_mv;
   int64_t rd, best_rd = INT64_MAX;
@@ -2693,6 +2827,13 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   uint8_t *orig_dst[MAX_MB_PLANE];
   int orig_dst_stride[MAX_MB_PLANE];
   int rs = 0;
+#if CONFIG_VP9_HIGH
+  if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+    tmp_buf = CONVERT_TO_BYTEPTR(tmp_buf16);
+  } else {
+    tmp_buf = tmp_buf8;
+  }
+#endif
 
   if (is_comp_pred) {
     if (frame_mv[refs[0]].as_int == INVALID_MV ||

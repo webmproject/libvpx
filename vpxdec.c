@@ -79,8 +79,12 @@ static const arg_def_t scalearg = ARG_DEF("S", "scale", 0,
 static const arg_def_t fb_arg =
     ARG_DEF(NULL, "frame-buffers", 1, "Number of frame buffers to use");
 
-static const arg_def_t md5arg = ARG_DEF(NULL, "md5", 0,
-                                        "Compute the MD5 sum of the decoded frame");
+static const arg_def_t md5arg = ARG_DEF(
+    NULL, "md5", 0, "Compute the MD5 sum of the decoded frame");
+#if CONFIG_VP9_HIGH
+static const arg_def_t outputshiftarg = ARG_DEF(
+    NULL, "output-shift", 1, "Amount to downshift output images");
+#endif
 
 static const arg_def_t *all_args[] = {
   &codecarg, &use_yv12, &use_i420, &flipuvarg, &noblitarg,
@@ -88,6 +92,9 @@ static const arg_def_t *all_args[] = {
   &threadsarg, &verbosearg, &scalearg, &fb_arg,
   &md5arg,
   &error_concealment,
+#if CONFIG_VP9_HIGH
+  &outputshiftarg,
+#endif
   NULL
 };
 
@@ -483,6 +490,48 @@ static FILE *open_outfile(const char *name) {
   }
 }
 
+#if CONFIG_VP9_HIGH
+static void img_convert_16_to_8(vpx_image_t *dst, vpx_image_t *src,
+                                int output_shift) {
+  int plane;
+  // int offset = 0;
+  // if (output_shift>0)
+  //  offset = 1<<(output_shift-1);
+  if (src->fmt != dst->fmt + VPX_IMG_FMT_HIGH ||
+      dst->d_w != src->d_w || dst->d_h != src->d_h ||
+      dst->x_chroma_shift != src->x_chroma_shift ||
+      dst->y_chroma_shift != src->y_chroma_shift) {
+    fatal("Unsupported image conversion");
+  }
+  switch (dst->fmt) {
+    case VPX_IMG_FMT_I420:
+    case VPX_IMG_FMT_I422:
+    case VPX_IMG_FMT_I444:
+      break;
+    default:
+      fatal("Unsupported image conversion");
+      break;
+  }
+  for (plane = 0; plane < 3; plane++) {
+    int w = src->d_w;
+    int h = src->d_h;
+    int x, y;
+    if (plane) {
+      w >>= src->x_chroma_shift;
+      h >>= src->y_chroma_shift;
+    }
+    for (y = 0; y < h; y++) {
+      unsigned char *p_dst = dst->planes[plane] + y * dst->stride[plane];
+      uint16_t *p_src = (uint16_t *)(src->planes[plane] +
+                                     y * src->stride[plane]);
+      for (x = 0; x < w; x++) {
+        *p_dst++ = (*p_src++) >> output_shift;
+      }
+    }
+  }
+}
+#endif
+
 int main_loop(int argc, const char **argv_) {
   vpx_codec_ctx_t       decoder;
   char                  *fn = NULL;
@@ -504,6 +553,9 @@ int main_loop(int argc, const char **argv_) {
   int                     single_file;
   int                     use_y4m = 1;
   vpx_codec_dec_cfg_t     cfg = {0};
+#if CONFIG_VP9_HIGH
+  int output_shift         = 0;
+#endif
 #if CONFIG_VP8_DECODER
   vp8_postproc_cfg_t      vp8_pp_cfg = {0};
   int                     vp8_dbg_color_ref_frame = 0;
@@ -515,6 +567,9 @@ int main_loop(int argc, const char **argv_) {
   int                     dec_flags = 0;
   int                     do_scale = 0;
   vpx_image_t             *scaled_img = NULL;
+#if CONFIG_VP9_HIGH
+  vpx_image_t             *img_8bit = NULL;
+#endif
   int                     frame_avail, got_data;
   int                     num_external_frame_buffers = 0;
   struct ExternalFrameBufferList ext_fb_list = {0};
@@ -578,6 +633,12 @@ int main_loop(int argc, const char **argv_) {
       do_scale = 1;
     else if (arg_match(&arg, &fb_arg, argi))
       num_external_frame_buffers = arg_parse_uint(&arg);
+
+#if CONFIG_VP9_HIGH
+    else if (arg_match(&arg, &outputshiftarg, argi)) {
+      output_shift = arg_parse_uint(&arg);
+    }
+#endif
 
 #if CONFIG_VP8_DECODER
     else if (arg_match(&arg, &addnoise_level, argi)) {
@@ -873,7 +934,25 @@ int main_loop(int argc, const char **argv_) {
           img = scaled_img;
         }
       }
-
+#if CONFIG_VP9_HIGH
+      if (output_shift) {
+        // Convert to an 8bit image
+        if (img->fmt & VPX_IMG_FMT_HIGH) {
+          if (!img_8bit) {
+            img_8bit = vpx_img_alloc(NULL, img->fmt - VPX_IMG_FMT_HIGH,
+                                     img->d_w, img->d_h, 16);
+          }
+          img_convert_16_to_8(img_8bit, img, output_shift);
+          img = img_8bit;
+        } else {
+          warn("Cannot use output-shift with 8 bit output frames");
+          goto fail;
+        }
+      } else if (img->fmt & VPX_IMG_FMT_HIGH) {
+        warn("Must use output-shift with 10 or 12 bit output frames");
+        goto fail;
+      }
+#endif
       if (single_file) {
         if (use_y4m) {
           char buf[Y4M_BUFFER_SIZE] = {0};
@@ -959,6 +1038,9 @@ fail:
     free(buf);
 
   if (scaled_img) vpx_img_free(scaled_img);
+#if CONFIG_VP9_HIGH
+  if (img_8bit) vpx_img_free(img_8bit);
+#endif
 
   for (i = 0; i < ext_fb_list.num_external_frame_buffers; ++i) {
     free(ext_fb_list.ext_fb[i].data);

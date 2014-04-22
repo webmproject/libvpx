@@ -259,9 +259,16 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
   if (cfg->g_profile <= (unsigned int)PROFILE_1 &&
       extra_cfg->bit_depth > BITS_8)
     ERROR("High bit-depth not supported in profile < 2");
+
+  // TODO(Peter): PFCD at the moment this triggers wrongly because profile
+  // is set in global parameters, but bit-depth via a configuration control
+  /*
   if (cfg->g_profile > (unsigned int)PROFILE_1 &&
       extra_cfg->bit_depth == BITS_8)
     ERROR("Bit-depth 8 not supported in profile > 1");
+  */
+  if ( extra_cfg->bit_depth > BITS_12)
+    ERROR("Bit-depth option must be 0(BITS_8),1(BITS_10), or 2(BITS_12)");
 
   return VPX_CODEC_OK;
 }
@@ -274,6 +281,9 @@ static vpx_codec_err_t validate_img(vpx_codec_alg_priv_t *ctx,
     case VPX_IMG_FMT_I420:
     case VPX_IMG_FMT_I422:
     case VPX_IMG_FMT_I444:
+    case VPX_IMG_FMT_I42016:
+    case VPX_IMG_FMT_I42216:
+    case VPX_IMG_FMT_I44416:
       break;
     default:
       ERROR("Invalid image format. Only YV12, I420, I422, I444 images are "
@@ -501,7 +511,10 @@ static vpx_codec_err_t ctrl_set_param(vpx_codec_alg_priv_t *ctx, int ctrl_id,
     MAP(VP9E_SET_FRAME_PARALLEL_DECODING,
         extra_cfg.frame_parallel_decoding_mode);
     MAP(VP9E_SET_AQ_MODE,                 extra_cfg.aq_mode);
-    MAP(VP9E_SET_FRAME_PERIODIC_BOOST,   extra_cfg.frame_periodic_boost);
+    MAP(VP9E_SET_FRAME_PERIODIC_BOOST,    extra_cfg.frame_periodic_boost);
+#if CONFIG_VP9_HIGH
+    MAP(VP9E_SET_BIT_DEPTH,               extra_cfg.bit_depth);
+#endif
   }
 
   res = validate_config(ctx, &ctx->cfg, &extra_cfg);
@@ -555,6 +568,12 @@ static vpx_codec_err_t encoder_init(vpx_codec_ctx_t *ctx,
      // Maximum buffer size approximated based on having multiple ARF.
     priv->cx_data_sz = priv->cfg.g_w * priv->cfg.g_h * 3 / 2 * 8;
 
+#if CONFIG_VP9_HIGH
+    if (ctx->init_flags&VPX_CODEC_USE_HIGH) {
+      priv->cx_data_sz <<= 1;
+    }
+#endif
+
     if (priv->cx_data_sz < 4096)
       priv->cx_data_sz = 4096;
 
@@ -571,6 +590,10 @@ static vpx_codec_err_t encoder_init(vpx_codec_ctx_t *ctx,
       set_encoder_config(&ctx->priv->alg_priv->oxcf,
                          &ctx->priv->alg_priv->cfg,
                          &ctx->priv->alg_priv->extra_cfg);
+#if CONFIG_VP9_HIGH
+      ctx->priv->alg_priv->oxcf.use_high =
+          (ctx->init_flags & VPX_CODEC_USE_HIGH) ? 1 : 0;
+#endif
       cpi = vp9_create_compressor(&ctx->priv->alg_priv->oxcf);
       if (cpi == NULL)
         res = VPX_CODEC_MEM_ERROR;
@@ -1114,6 +1137,9 @@ static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   {VP9E_SET_FRAME_PARALLEL_DECODING,  ctrl_set_param},
   {VP9E_SET_AQ_MODE,                  ctrl_set_param},
   {VP9E_SET_FRAME_PERIODIC_BOOST,     ctrl_set_param},
+#if CONFIG_VP9_HIGH
+  {VP9E_SET_BIT_DEPTH,                ctrl_set_param},
+#endif
   {VP9E_SET_SVC,                      ctrl_set_svc},
   {VP9E_SET_SVC_PARAMETERS,           ctrl_set_svc_parameters},
   {VP9E_SET_SVC_LAYER_ID,             ctrl_set_svc_layer_id},
@@ -1195,7 +1221,12 @@ static vpx_codec_enc_cfg_map_t encoder_usage_cfg_map[] = {
 CODEC_INTERFACE(vpx_codec_vp9_cx) = {
   "WebM Project VP9 Encoder" VERSION_STRING,
   VPX_CODEC_INTERNAL_ABI_VERSION,
+#if CONFIG_VP9_HIGH
+  VPX_CODEC_CAP_HIGH |
+#endif
   VPX_CODEC_CAP_ENCODER | VPX_CODEC_CAP_PSNR,  // vpx_codec_caps_t
+
+
   encoder_init,       // vpx_codec_init_fn_t
   encoder_destroy,    // vpx_codec_destroy_fn_t
   encoder_ctrl_maps,  // vpx_codec_ctrl_fn_map_t

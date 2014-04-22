@@ -87,6 +87,10 @@ typedef struct VP9Common {
   int subsampling_x;
   int subsampling_y;
 
+#if CONFIG_VP9_HIGH
+  int use_high; /* Marks if we need to use 16bit frame buffers */
+#endif
+
   YV12_BUFFER_CONFIG *frame_to_show;
 
   RefCntBuffer frame_bufs[FRAME_BUFFERS];

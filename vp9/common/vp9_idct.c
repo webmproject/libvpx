@@ -18,6 +18,21 @@
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_idct.h"
 
+static INLINE uint16_t APPLY_CLIP(uint16_t dest, int16_t trans, int bps) {
+  int val;
+  switch (bps) {
+    default:
+      val = dest + trans;
+      return (val > 255) ? 255u : (val < 0) ? 0u : val;
+    case 10:
+      val = dest + (trans << 2);
+      return (val > 0x3ff) ? 0x3ff : (val < 0) ? 0u : val;
+    case 12:
+      val = dest + (trans << 4);
+      return (val > 0xfff) ? 0xfff : (val < 0) ? 0u : val;
+  }
+}
+
 void vp9_iwht4x4_16_add_c(const int16_t *input, uint8_t *dest, int stride) {
 /* 4-point reversible, orthonormal inverse Walsh-Hadamard in 3.5 adds,
    0.5 shifts per pixel. */
@@ -860,7 +875,7 @@ void vp9_idct16x16_10_add_c(const int16_t *input, uint8_t *dest, int stride) {
     idct16(temp_in, temp_out);
     for (j = 0; j < 16; ++j)
       dest[j * stride + i] = clip_pixel(ROUND_POWER_OF_TWO(temp_out[j], 6)
-                                  + dest[j * stride + i]);
+                                        + dest[j * stride + i]);
   }
 }
 
@@ -1302,7 +1317,7 @@ void vp9_idct32x32_34_add_c(const int16_t *input, uint8_t *dest, int stride) {
     idct32(temp_in, temp_out);
     for (j = 0; j < 32; ++j)
       dest[j * stride + i] = clip_pixel(ROUND_POWER_OF_TWO(temp_out[j], 6)
-                                  + dest[j * stride + i]);
+                                        + dest[j * stride + i]);
   }
 }
 
@@ -1404,3 +1419,537 @@ void vp9_iht16x16_add(TX_TYPE tx_type, const int16_t *input, uint8_t *dest,
     vp9_iht16x16_256_add(input, dest, stride, tx_type);
   }
 }
+
+#if CONFIG_VP9_HIGH
+
+void vp9_high_iwht4x4_16_add_c(const int16_t *input, uint8_t *dest8,
+                               int stride, int bps) {
+  /* 4-point reversible, orthonormal inverse Walsh-Hadamard in 3.5 adds,
+     0.5 shifts per pixel. */
+  int i;
+  int16_t output[16];
+  int a1, b1, c1, d1, e1;
+  const int16_t *ip = input;
+  int16_t *op = output;
+  uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
+
+  for (i = 0; i < 4; i++) {
+    a1 = ip[0] >> UNIT_QUANT_SHIFT;
+    c1 = ip[1] >> UNIT_QUANT_SHIFT;
+    d1 = ip[2] >> UNIT_QUANT_SHIFT;
+    b1 = ip[3] >> UNIT_QUANT_SHIFT;
+    a1 += c1;
+    d1 -= b1;
+    e1 = (a1 - d1) >> 1;
+    b1 = e1 - b1;
+    c1 = e1 - c1;
+    a1 -= b1;
+    d1 += c1;
+    op[0] = a1;
+    op[1] = b1;
+    op[2] = c1;
+    op[3] = d1;
+    ip += 4;
+    op += 4;
+  }
+
+  ip = output;
+  for (i = 0; i < 4; i++) {
+    a1 = ip[4 * 0];
+    c1 = ip[4 * 1];
+    d1 = ip[4 * 2];
+    b1 = ip[4 * 3];
+    a1 += c1;
+    d1 -= b1;
+    e1 = (a1 - d1) >> 1;
+    b1 = e1 - b1;
+    c1 = e1 - c1;
+    a1 -= b1;
+    d1 += c1;
+    dest[stride * 0] = APPLY_CLIP(dest[stride * 0] , a1, bps);
+    dest[stride * 1] = APPLY_CLIP(dest[stride * 1] , b1, bps);
+    dest[stride * 2] = APPLY_CLIP(dest[stride * 2] , c1, bps);
+    dest[stride * 3] = APPLY_CLIP(dest[stride * 3] , d1, bps);
+
+    ip++;
+    dest++;
+  }
+}
+
+void vp9_high_iwht4x4_1_add_c(const int16_t *in, uint8_t *dest8,
+                              int dest_stride, int bps) {
+  int i;
+  int a1, e1;
+  int16_t tmp[4];
+  const int16_t *ip = in;
+  int16_t *op = tmp;
+  uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
+
+  a1 = ip[0] >> UNIT_QUANT_SHIFT;
+  e1 = a1 >> 1;
+  a1 -= e1;
+  op[0] = a1;
+  op[1] = op[2] = op[3] = e1;
+
+  ip = tmp;
+  for (i = 0; i < 4; i++) {
+    e1 = ip[0] >> 1;
+    a1 = ip[0] - e1;
+    dest[dest_stride * 0] = APPLY_CLIP(dest[dest_stride * 0] , a1, bps);
+    dest[dest_stride * 1] = APPLY_CLIP(dest[dest_stride * 1] , e1, bps);
+    dest[dest_stride * 2] = APPLY_CLIP(dest[dest_stride * 2] , e1, bps);
+    dest[dest_stride * 3] = APPLY_CLIP(dest[dest_stride * 3] , e1, bps);
+    ip++;
+    dest++;
+  }
+}
+
+void vp9_high_idct4x4_16_add_c(const int16_t *input, uint8_t *dest8,
+                               int stride, int bps) {
+  int16_t out[4 * 4];
+  int16_t *outptr = out;
+  int i, j;
+  int16_t temp_in[4], temp_out[4];
+  uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
+
+  // Rows
+  for (i = 0; i < 4; ++i) {
+    idct4(input, outptr);
+    input += 4;
+    outptr += 4;
+  }
+
+  // Columns
+  for (i = 0; i < 4; ++i) {
+    for (j = 0; j < 4; ++j)
+      temp_in[j] = out[j * 4 + i];
+    idct4(temp_in, temp_out);
+    for (j = 0; j < 4; ++j)
+      dest[j * stride + i] = APPLY_CLIP(dest[j * stride + i],
+                                        ROUND_POWER_OF_TWO(temp_out[j], 4),
+                                        bps);
+  }
+}
+
+void vp9_high_idct4x4_1_add_c(const int16_t *input, uint8_t *dest8,
+                              int dest_stride, int bps) {
+  int i;
+  int a1;
+  int16_t out = dct_const_round_shift(input[0] * cospi_16_64);
+  uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
+
+  out = dct_const_round_shift(out * cospi_16_64);
+  a1 = ROUND_POWER_OF_TWO(out, 4);
+
+  for (i = 0; i < 4; i++) {
+    dest[0] = APPLY_CLIP(dest[0], a1, bps);
+    dest[1] = APPLY_CLIP(dest[1], a1, bps);
+    dest[2] = APPLY_CLIP(dest[2], a1, bps);
+    dest[3] = APPLY_CLIP(dest[3], a1, bps);
+    dest += dest_stride;
+  }
+}
+
+void vp9_high_idct8x8_64_add_c(const int16_t *input, uint8_t *dest8,
+                               int stride, int bps) {
+  int16_t out[8 * 8];
+  int16_t *outptr = out;
+  int i, j;
+  int16_t temp_in[8], temp_out[8];
+  uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
+
+  // First transform rows
+  for (i = 0; i < 8; ++i) {
+    idct8(input, outptr);
+    input += 8;
+    outptr += 8;
+  }
+
+  // Then transform columns
+  for (i = 0; i < 8; ++i) {
+    for (j = 0; j < 8; ++j)
+      temp_in[j] = out[j * 8 + i];
+    idct8(temp_in, temp_out);
+    for (j = 0; j < 8; ++j)
+      dest[j * stride + i] = APPLY_CLIP(dest[j * stride + i],
+                                        ROUND_POWER_OF_TWO(temp_out[j], 5),
+                                        bps);
+  }
+}
+
+void vp9_high_idct8x8_1_add_c(const int16_t *input, uint8_t *dest8,
+                              int stride, int bps) {
+  int i, j;
+  int a1;
+  int16_t out = dct_const_round_shift(input[0] * cospi_16_64);
+  uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
+  out = dct_const_round_shift(out * cospi_16_64);
+  a1 = ROUND_POWER_OF_TWO(out, 5);
+  for (j = 0; j < 8; ++j) {
+    for (i = 0; i < 8; ++i)
+      dest[i] = APPLY_CLIP(dest[i], a1, bps);
+    dest += stride;
+  }
+}
+
+void vp9_high_iht4x4_16_add_c(const int16_t *input, uint8_t *dest8, int stride,
+                         int tx_type, int bps) {
+  const transform_2d IHT_4[] = {
+    { idct4, idct4  },    // DCT_DCT  = 0
+    { iadst4, idct4 },   // ADST_DCT = 1
+    { idct4, iadst4 },    // DCT_ADST = 2
+    { iadst4, iadst4 }    // ADST_ADST = 3
+  };
+  uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
+
+  int i, j;
+  int16_t out[4 * 4];
+  int16_t *outptr = out;
+  int16_t temp_in[4], temp_out[4];
+
+  // inverse transform row vectors
+  for (i = 0; i < 4; ++i) {
+    IHT_4[tx_type].rows(input, outptr);
+    input  += 4;
+    outptr += 4;
+  }
+
+  // inverse transform column vectors
+  for (i = 0; i < 4; ++i) {
+    for (j = 0; j < 4; ++j)
+      temp_in[j] = out[j * 4 + i];
+    IHT_4[tx_type].cols(temp_in, temp_out);
+    for (j = 0; j < 4; ++j)
+      dest[j * stride + i] = APPLY_CLIP(dest[j * stride + i],
+                                ROUND_POWER_OF_TWO(temp_out[j], 4),
+                                bps);
+  }
+}
+
+void vp9_high_iht8x8_64_add_c(const int16_t *input, uint8_t *dest8, int stride,
+                              int tx_type, int bps) {
+  int i, j;
+  int16_t out[8 * 8];
+  int16_t *outptr = out;
+  int16_t temp_in[8], temp_out[8];
+  const transform_2d ht = IHT_8[tx_type];
+  uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
+
+  // inverse transform row vectors
+  for (i = 0; i < 8; ++i) {
+    ht.rows(input, outptr);
+    input += 8;
+    outptr += 8;
+  }
+
+  // inverse transform column vectors
+  for (i = 0; i < 8; ++i) {
+    for (j = 0; j < 8; ++j)
+      temp_in[j] = out[j * 8 + i];
+    ht.cols(temp_in, temp_out);
+    for (j = 0; j < 8; ++j)
+      dest[j * stride + i] = APPLY_CLIP(dest[j * stride + i],
+                ROUND_POWER_OF_TWO(temp_out[j], 5),
+                bps);
+  }
+}
+
+void vp9_high_idct8x8_10_add_c(const int16_t *input, uint8_t *dest8,
+                               int stride, int bps) {
+  int16_t out[8 * 8] = { 0 };
+  int16_t *outptr = out;
+  int i, j;
+  int16_t temp_in[8], temp_out[8];
+  uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
+
+  // First transform rows
+  // only first 4 row has non-zero coefs
+  for (i = 0; i < 4; ++i) {
+    idct8(input, outptr);
+    input += 8;
+    outptr += 8;
+  }
+  // Then transform columns
+  for (i = 0; i < 8; ++i) {
+    for (j = 0; j < 8; ++j)
+      temp_in[j] = out[j * 8 + i];
+    idct8(temp_in, temp_out);
+    for (j = 0; j < 8; ++j)
+      dest[j * stride + i] = APPLY_CLIP(dest[j * stride + i],
+                                        ROUND_POWER_OF_TWO(temp_out[j], 5),
+                                        bps);
+  }
+}
+
+void vp9_high_idct16x16_256_add_c(const int16_t *input, uint8_t *dest8,
+                                  int stride, int bps) {
+  int16_t out[16 * 16];
+  int16_t *outptr = out;
+  int i, j;
+  int16_t temp_in[16], temp_out[16];
+  uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
+
+  // First transform rows
+  for (i = 0; i < 16; ++i) {
+    idct16(input, outptr);
+    input += 16;
+    outptr += 16;
+  }
+
+  // Then transform columns
+  for (i = 0; i < 16; ++i) {
+    for (j = 0; j < 16; ++j)
+      temp_in[j] = out[j * 16 + i];
+    idct16(temp_in, temp_out);
+    for (j = 0; j < 16; ++j)
+      dest[j * stride + i] = APPLY_CLIP(dest[j * stride + i],
+                      ROUND_POWER_OF_TWO(temp_out[j], 6),
+                      bps);
+  }
+}
+
+
+void vp9_high_iht16x16_256_add_c(const int16_t *input, uint8_t *dest8,
+                                 int stride, int tx_type, int bps) {
+  int i, j;
+  int16_t out[16 * 16];
+  int16_t *outptr = out;
+  int16_t temp_in[16], temp_out[16];
+  const transform_2d ht = IHT_16[tx_type];
+  uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
+
+  // Rows
+  for (i = 0; i < 16; ++i) {
+    ht.rows(input, outptr);
+    input += 16;
+    outptr += 16;
+  }
+
+  // Columns
+  for (i = 0; i < 16; ++i) {
+    for (j = 0; j < 16; ++j)
+      temp_in[j] = out[j * 16 + i];
+    ht.cols(temp_in, temp_out);
+    for (j = 0; j < 16; ++j)
+      dest[j * stride + i] = APPLY_CLIP(dest[j * stride + i],
+                    ROUND_POWER_OF_TWO(temp_out[j], 6),
+                    bps);
+  }
+}
+
+void vp9_high_idct16x16_10_add_c(const int16_t *input, uint8_t *dest8,
+                                 int stride, int bps) {
+  int16_t out[16 * 16] = { 0 };
+  int16_t *outptr = out;
+  int i, j;
+  int16_t temp_in[16], temp_out[16];
+  uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
+
+  // First transform rows. Since all non-zero dct coefficients are in
+  // upper-left 4x4 area, we only need to calculate first 4 rows here.
+  for (i = 0; i < 4; ++i) {
+    idct16(input, outptr);
+    input += 16;
+    outptr += 16;
+  }
+
+  // Then transform columns
+  for (i = 0; i < 16; ++i) {
+    for (j = 0; j < 16; ++j)
+      temp_in[j] = out[j*16 + i];
+    idct16(temp_in, temp_out);
+    for (j = 0; j < 16; ++j)
+      dest[j * stride + i] = APPLY_CLIP(dest[j * stride + i],
+                                  ROUND_POWER_OF_TWO(temp_out[j], 6),
+                                  bps);
+  }
+}
+
+void vp9_high_idct16x16_1_add_c(const int16_t *input, uint8_t *dest8,
+                                int stride, int bps) {
+  int i, j;
+  int a1;
+  int16_t out = dct_const_round_shift(input[0] * cospi_16_64);
+  uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
+
+  out = dct_const_round_shift(out * cospi_16_64);
+  a1 = ROUND_POWER_OF_TWO(out, 6);
+  for (j = 0; j < 16; ++j) {
+    for (i = 0; i < 16; ++i)
+      dest[i] = APPLY_CLIP(dest[i], a1, bps);
+    dest += stride;
+  }
+}
+
+void vp9_high_idct32x32_1024_add_c(const int16_t *input, uint8_t *dest8,
+                                   int stride, int bps) {
+  int16_t out[32 * 32];
+  int16_t *outptr = out;
+  int i, j;
+  int16_t temp_in[32], temp_out[32];
+  uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
+
+  // Rows
+  for (i = 0; i < 32; ++i) {
+    int16_t zero_coeff[16];
+    for (j = 0; j < 16; ++j)
+      zero_coeff[j] = input[2 * j] | input[2 * j + 1];
+    for (j = 0; j < 8; ++j)
+      zero_coeff[j] = zero_coeff[2 * j] | zero_coeff[2 * j + 1];
+    for (j = 0; j < 4; ++j)
+      zero_coeff[j] = zero_coeff[2 * j] | zero_coeff[2 * j + 1];
+    for (j = 0; j < 2; ++j)
+      zero_coeff[j] = zero_coeff[2 * j] | zero_coeff[2 * j + 1];
+
+    if (zero_coeff[0] | zero_coeff[1])
+      idct32(input, outptr);
+    else
+      vpx_memset(outptr, 0, sizeof(int16_t) * 32);
+    input += 32;
+    outptr += 32;
+  }
+
+  // Columns
+  for (i = 0; i < 32; ++i) {
+    for (j = 0; j < 32; ++j)
+      temp_in[j] = out[j * 32 + i];
+    idct32(temp_in, temp_out);
+    for (j = 0; j < 32; ++j)
+      dest[j * stride + i] = APPLY_CLIP(dest[j * stride + i],
+                              ROUND_POWER_OF_TWO(temp_out[j], 6),
+                              bps);
+  }
+}
+
+void vp9_high_idct32x32_34_add_c(const int16_t *input, uint8_t *dest8,
+                                 int stride, int bps) {
+  int16_t out[32 * 32] = {0};
+  int16_t *outptr = out;
+  int i, j;
+  int16_t temp_in[32], temp_out[32];
+  uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
+
+  // Rows
+  // only upper-left 8x8 has non-zero coeff
+  for (i = 0; i < 8; ++i) {
+    idct32(input, outptr);
+    input += 32;
+    outptr += 32;
+  }
+  // Columns
+  for (i = 0; i < 32; ++i) {
+    for (j = 0; j < 32; ++j)
+      temp_in[j] = out[j * 32 + i];
+    idct32(temp_in, temp_out);
+    for (j = 0; j < 32; ++j)
+      dest[j * stride + i] = APPLY_CLIP(dest[j * stride + i],
+                                ROUND_POWER_OF_TWO(temp_out[j], 6),
+                                bps);
+  }
+}
+
+void vp9_high_idct32x32_1_add_c(const int16_t *input, uint8_t *dest8,
+                                int stride, int bps) {
+  int i, j;
+  int a1;
+  uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
+
+  int16_t out = dct_const_round_shift(input[0] * cospi_16_64);
+  out = dct_const_round_shift(out * cospi_16_64);
+  a1 = ROUND_POWER_OF_TWO(out, 6);
+
+  for (j = 0; j < 32; ++j) {
+    for (i = 0; i < 32; ++i)
+      dest[i] = APPLY_CLIP(dest[i], a1, bps);
+    dest += stride;
+  }
+}
+
+// idct
+void vp9_high_idct4x4_add(const int16_t *input, uint8_t *dest, int stride,
+                          int eob, int bps) {
+  if (eob > 1)
+    vp9_high_idct4x4_16_add(input, dest, stride, bps);
+  else
+    vp9_high_idct4x4_1_add(input, dest, stride, bps);
+}
+
+
+void vp9_high_iwht4x4_add(const int16_t *input, uint8_t *dest, int stride,
+                          int eob, int bps) {
+  if (eob > 1)
+    vp9_high_iwht4x4_16_add(input, dest, stride, bps);
+  else
+    vp9_high_iwht4x4_1_add(input, dest, stride, bps);
+}
+
+void vp9_high_idct8x8_add(const int16_t *input, uint8_t *dest, int stride,
+                          int eob, int bps) {
+  // If dc is 1, then input[0] is the reconstructed value, do not need
+  // dequantization. Also, when dc is 1, dc is counted in eobs, namely eobs >=1.
+
+  // The calculation can be simplified if there are not many non-zero dct
+  // coefficients. Use eobs to decide what to do.
+  // TODO(yunqingwang): "eobs = 1" case is also handled in vp9_short_idct8x8_c.
+  // Combine that with code here.
+  if (eob == 1)
+    // DC only DCT coefficient
+    vp9_high_idct8x8_1_add(input, dest, stride, bps);
+  else if (eob <= 10)
+    vp9_high_idct8x8_10_add(input, dest, stride, bps);
+  else
+    vp9_high_idct8x8_64_add(input, dest, stride, bps);
+}
+
+void vp9_high_idct16x16_add(const int16_t *input, uint8_t *dest, int stride,
+                       int eob, int bps) {
+  /* The calculation can be simplified if there are not many non-zero dct
+   * coefficients. Use eobs to separate different cases. */
+  if (eob == 1)
+    /* DC only DCT coefficient. */
+    vp9_high_idct16x16_1_add(input, dest, stride, bps);
+  else if (eob <= 10)
+    vp9_high_idct16x16_10_add(input, dest, stride, bps);
+  else
+    vp9_high_idct16x16_256_add(input, dest, stride, bps);
+}
+
+void vp9_high_idct32x32_add(const int16_t *input, uint8_t *dest, int stride,
+                       int eob, int bps) {
+  if (eob == 1)
+    vp9_high_idct32x32_1_add(input, dest, stride, bps);
+  else if (eob <= 34)
+    // non-zero coeff only in upper-left 8x8
+    vp9_high_idct32x32_34_add(input, dest, stride, bps);
+  else
+    vp9_high_idct32x32_1024_add(input, dest, stride, bps);
+}
+
+// iht
+void vp9_high_iht4x4_add(TX_TYPE tx_type, const int16_t *input, uint8_t *dest,
+                    int stride, int eob, int bps) {
+  if (tx_type == DCT_DCT)
+    vp9_high_idct4x4_add(input, dest, stride, eob, bps);
+  else
+    vp9_high_iht4x4_16_add(input, dest, stride, tx_type, bps);
+}
+
+void vp9_high_iht8x8_add(TX_TYPE tx_type, const int16_t *input, uint8_t *dest,
+                    int stride, int eob, int bps) {
+  if (tx_type == DCT_DCT) {
+    vp9_high_idct8x8_add(input, dest, stride, eob, bps);
+  } else {
+    vp9_high_iht8x8_64_add(input, dest, stride, tx_type, bps);
+  }
+}
+
+void vp9_high_iht16x16_add(TX_TYPE tx_type, const int16_t *input, uint8_t *dest,
+                      int stride, int eob, int bps) {
+  if (tx_type == DCT_DCT) {
+    vp9_high_idct16x16_add(input, dest, stride, eob, bps);
+  } else {
+    vp9_high_iht16x16_256_add(input, dest, stride, tx_type, bps);
+  }
+}
+
+#endif

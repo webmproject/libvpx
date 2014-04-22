@@ -335,11 +335,45 @@ static double simple_weight(const YV12_BUFFER_CONFIG *buf) {
   return MAX(0.1, sum / (w * h));
 }
 
+#if CONFIG_VP9_HIGH
+static double high_simple_weight(const YV12_BUFFER_CONFIG *buf,
+                                 BIT_DEPTH bit_depth) {
+  int i, j;
+  double sum = 0.0;
+  const int w = buf->y_crop_width;
+  const int h = buf->y_crop_height;
+  const uint8_t *row = buf->y_buffer;
+  int shift;
+  uint16_t *row16 = CONVERT_TO_SHORTPTR(row);
+  switch (bit_depth) {
+    default:
+      shift = 0;
+      break;
+    case BITS_10:
+      shift = 2;
+      break;
+    case BITS_12:
+      shift = 4;
+      break;
+  }
+
+  for (i = 0; i < h; ++i) {
+    const uint16_t *pixel = row16;
+    // TODO(Peter): is this appropriate for high bitdepth images?
+    for (j = 0; j < w; ++j)
+      sum += weight_table[*pixel++ >> shift];
+    row16 += buf->y_stride;
+  }
+
+  return MAX(0.1, sum / (w * h));
+}
+#endif
+
 // This function returns the maximum target rate per frame.
 static int frame_max_bits(const RATE_CONTROL *rc,
                           const VP9EncoderConfig *oxcf) {
   int64_t max_bits = ((int64_t)rc->avg_frame_bandwidth *
-                          (int64_t)oxcf->two_pass_vbrmax_section) / 100;
+                      (int64_t)oxcf->two_pass_vbrmax_section) / 100;
   if (max_bits < 0)
     max_bits = 0;
   else if (max_bits > rc->max_frame_bandwidth)
@@ -376,6 +410,86 @@ static vp9_variance_fn_t get_block_variance_fn(BLOCK_SIZE bsize) {
       return vp9_mse16x16;
   }
 }
+
+#if CONFIG_VP9_HIGH
+
+#define MAKE_MSE_WRAPPER(fnname) \
+static unsigned int fnname##_bits10(const uint8_t *src_ptr, \
+                                    int source_stride, \
+                                    const uint8_t *ref_ptr, \
+                                    int ref_stride, \
+                                    unsigned int *sse) {  \
+  unsigned int val = fnname(src_ptr, source_stride, ref_ptr, ref_stride, sse); \
+  *sse >>= 4; \
+  return val >> 4; \
+} \
+static unsigned int fnname##_bits12(const uint8_t *src_ptr, \
+                                    int source_stride, \
+                                    const uint8_t *ref_ptr, \
+                                    int ref_stride, \
+                                    unsigned int *sse) {  \
+  unsigned int val = fnname(src_ptr, source_stride, ref_ptr, ref_stride, sse); \
+  *sse >>= 8; \
+  return val >> 8; \
+}
+
+MAKE_MSE_WRAPPER(vp9_high_mse8x8)
+MAKE_MSE_WRAPPER(vp9_high_mse16x8)
+MAKE_MSE_WRAPPER(vp9_high_mse8x16)
+MAKE_MSE_WRAPPER(vp9_high_mse16x16)
+
+static vp9_variance_fn_t high_get_block_variance_fn(BLOCK_SIZE bsize, int bps) {
+  switch (bps) {
+    default:
+      switch (bsize) {
+        case BLOCK_8X8:
+          return vp9_high_mse8x8;
+        case BLOCK_16X8:
+          return vp9_high_mse16x8;
+        case BLOCK_8X16:
+          return vp9_high_mse8x16;
+        default:
+          return vp9_high_mse16x16;
+      }
+      break;
+    case 10:
+      switch (bsize) {
+        case BLOCK_8X8:
+          return vp9_high_mse8x8_bits10;
+        case BLOCK_16X8:
+          return vp9_high_mse16x8_bits10;
+        case BLOCK_8X16:
+          return vp9_high_mse8x16_bits10;
+        default:
+          return vp9_high_mse16x16_bits10;
+      }
+      break;
+    case 12:
+      switch (bsize) {
+        case BLOCK_8X8:
+          return vp9_high_mse8x8_bits12;
+        case BLOCK_16X8:
+          return vp9_high_mse16x8_bits12;
+        case BLOCK_8X16:
+          return vp9_high_mse8x16_bits12;
+        default:
+          return vp9_high_mse16x16_bits12;
+      }
+      break;
+  }
+}
+
+static unsigned int high_get_prediction_error(BLOCK_SIZE bsize,
+                                              const struct buf_2d *src,
+                                              const struct buf_2d *ref,
+                                              int bps) {
+  unsigned int sse;
+  const vp9_variance_fn_t fn = high_get_block_variance_fn(bsize, bps);
+  fn(src->buf, src->stride, ref->buf, ref->stride, &sse);
+  return sse;
+}
+
+#endif
 
 static unsigned int get_prediction_error(BLOCK_SIZE bsize,
                                          const struct buf_2d *src,
@@ -416,6 +530,11 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
 
   // Override the default variance function to use MSE.
   v_fn_ptr.vf = get_block_variance_fn(bsize);
+#if CONFIG_VP9_HIGH
+  if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+    v_fn_ptr.vf = high_get_block_variance_fn(xd->mi[0]->mbmi.sb_type, xd->bps);
+  }
+#endif
 
   // Center the initial step/diamond search on best mv.
   tmp_err = cpi->diamond_search_sad(x, &ref_mv_full, &tmp_mv,
@@ -460,10 +579,10 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
 static BLOCK_SIZE get_bsize(const VP9_COMMON *cm, int mb_row, int mb_col) {
   if (2 * mb_col + 1 < cm->mi_cols) {
     return 2 * mb_row + 1 < cm->mi_rows ? BLOCK_16X16
-                                        : BLOCK_16X8;
+        : BLOCK_16X8;
   } else {
     return 2 * mb_row + 1 < cm->mi_rows ? BLOCK_8X16
-                                        : BLOCK_8X8;
+        : BLOCK_8X8;
   }
 }
 
@@ -633,8 +752,18 @@ void vp9_first_pass(VP9_COMP *cpi) {
         int_mv mv, tmp_mv;
 
         xd->plane[0].pre[0].buf = first_ref_buf->y_buffer + recon_yoffset;
+#if CONFIG_VP9_HIGH
+        if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+          motion_error = high_get_prediction_error(bsize, &x->plane[0].src,
+                                            &xd->plane[0].pre[0], xd->bps);
+        } else {
+          motion_error = get_prediction_error(bsize, &x->plane[0].src,
+                                            &xd->plane[0].pre[0]);
+        }
+#else
         motion_error = get_prediction_error(bsize, &x->plane[0].src,
                                             &xd->plane[0].pre[0]);
+#endif
         // Assume 0,0 motion with no mv overhead.
         mv.as_int = tmp_mv.as_int = 0;
 
@@ -670,9 +799,18 @@ void vp9_first_pass(VP9_COMP *cpi) {
           int gf_motion_error;
 
           xd->plane[0].pre[0].buf = gld_yv12->y_buffer + recon_yoffset;
+#if CONFIG_VP9_HIGH
+          if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+            gf_motion_error = high_get_prediction_error(
+                bsize, &x->plane[0].src, &xd->plane[0].pre[0], xd->bps);
+          } else {
+            gf_motion_error = get_prediction_error(
+                bsize, &x->plane[0].src, &xd->plane[0].pre[0]);
+          }
+#else
           gf_motion_error = get_prediction_error(bsize, &x->plane[0].src,
                                                  &xd->plane[0].pre[0]);
-
+#endif
           first_pass_motion_search(cpi, x, &zero_mv, &tmp_mv.as_mv,
                                    &gf_motion_error);
           if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
@@ -798,7 +936,16 @@ void vp9_first_pass(VP9_COMP *cpi) {
     fps.intra_error = (double)(intra_error >> 8);
     fps.coded_error = (double)(coded_error >> 8);
     fps.sr_coded_error = (double)(sr_coded_error >> 8);
+#if CONFIG_VP9_HIGH
+    if (cm->use_high) {
+      fps.ssim_weighted_pred_err = fps.coded_error *
+          high_simple_weight(cpi->Source, cm->bit_depth);
+    } else {
+      fps.ssim_weighted_pred_err = fps.coded_error * simple_weight(cpi->Source);
+    }
+#else
     fps.ssim_weighted_pred_err = fps.coded_error * simple_weight(cpi->Source);
+#endif
     fps.count = 1.0;
     fps.pcnt_inter = (double)intercount / cm->MBs;
     fps.pcnt_second_ref = (double)second_ref_count / cm->MBs;

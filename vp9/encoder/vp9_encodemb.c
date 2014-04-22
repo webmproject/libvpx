@@ -51,6 +51,28 @@ void vp9_subtract_block_c(int rows, int cols,
   }
 }
 
+#if CONFIG_VP9_HIGH
+void vp9_high_subtract_block_c(int rows, int cols,
+                               int16_t *diff, ptrdiff_t diff_stride,
+                               const uint8_t *src8, ptrdiff_t src_stride,
+                               const uint8_t *pred8, ptrdiff_t pred_stride,
+                               int bps) {
+  int r, c;
+  int shift = bps - 8;
+  uint16_t *src = CONVERT_TO_SHORTPTR(src8);
+  uint16_t *pred = CONVERT_TO_SHORTPTR(pred8);
+  for (r = 0; r < rows; r++) {
+    for (c = 0; c < cols; c++) {
+      diff[c] = ((int)src[c] - (int)pred[c]) >> shift;
+    }
+
+    diff += diff_stride;
+    pred += pred_stride;
+    src  += src_stride;
+  }
+}
+#endif
+
 void vp9_subtract_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
   struct macroblock_plane *const p = &x->plane[plane];
   const struct macroblockd_plane *const pd = &x->e_mbd.plane[plane];
@@ -58,6 +80,13 @@ void vp9_subtract_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
   const int bw = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
   const int bh = 4 * num_4x4_blocks_high_lookup[plane_bsize];
 
+#if CONFIG_VP9_HIGH
+  if (x->e_mbd.cur_buf->flags&YV12_FLAG_HIGH) {
+    vp9_high_subtract_block(bh, bw, p->src_diff, bw, p->src.buf, p->src.stride,
+                     pd->dst.buf, pd->dst.stride, x->e_mbd.bps);
+    return;
+  }
+#endif
   vp9_subtract_block(bh, bw, p->src_diff, bw, p->src.buf, p->src.stride,
                      pd->dst.buf, pd->dst.stride);
 }
@@ -301,6 +330,16 @@ static INLINE void fdct32x32(int rd_transform,
     vp9_fdct32x32(src, dst, src_stride);
 }
 
+#if CONFIG_VP9_HIGH
+static INLINE void high_fdct32x32(int rd_transform,
+                             const int16_t *src, int16_t *dst, int src_stride) {
+  if (rd_transform)
+    vp9_high_fdct32x32_rd(src, dst, src_stride);
+  else
+    vp9_high_fdct32x32(src, dst, src_stride);
+}
+#endif
+
 void vp9_xform_quant(MACROBLOCK *x, int plane, int block,
                      BLOCK_SIZE plane_bsize, TX_SIZE tx_size) {
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -317,6 +356,43 @@ void vp9_xform_quant(MACROBLOCK *x, int plane, int block,
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &i, &j);
   src_diff = &p->src_diff[4 * (j * diff_stride + i)];
 
+#if CONFIG_VP9_HIGH
+  if (xd->cur_buf->flags&YV12_FLAG_HIGH) {
+     switch (tx_size) {
+      case TX_32X32:
+        high_fdct32x32(x->use_lp32x32fdct, src_diff, coeff, diff_stride);
+        vp9_quantize_b_32x32(coeff, 1024, x->skip_block, p->zbin, p->round,
+                             p->quant, p->quant_shift, qcoeff, dqcoeff,
+                             pd->dequant, p->zbin_extra, eob, scan_order->scan,
+                             scan_order->iscan);
+        break;
+      case TX_16X16:
+        vp9_high_fdct16x16(src_diff, coeff, diff_stride);
+        vp9_quantize_b(coeff, 256, x->skip_block, p->zbin, p->round,
+                       p->quant, p->quant_shift, qcoeff, dqcoeff,
+                       pd->dequant, p->zbin_extra, eob,
+                       scan_order->scan, scan_order->iscan);
+        break;
+      case TX_8X8:
+        vp9_high_fdct8x8(src_diff, coeff, diff_stride);
+        vp9_quantize_b(coeff, 64, x->skip_block, p->zbin, p->round,
+                       p->quant, p->quant_shift, qcoeff, dqcoeff,
+                       pd->dequant, p->zbin_extra, eob,
+                       scan_order->scan, scan_order->iscan);
+        break;
+      case TX_4X4:
+        x->fwd_txm4x4(src_diff, coeff, diff_stride);
+        vp9_quantize_b(coeff, 16, x->skip_block, p->zbin, p->round,
+                       p->quant, p->quant_shift, qcoeff, dqcoeff,
+                       pd->dequant, p->zbin_extra, eob,
+                       scan_order->scan, scan_order->iscan);
+        break;
+      default:
+        assert(0);
+    }
+    return;
+  }
+#endif
   switch (tx_size) {
     case TX_32X32:
       fdct32x32(x->use_lp32x32fdct, src_diff, coeff, diff_stride);
@@ -392,6 +468,34 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
   if (x->skip_encode || p->eobs[block] == 0)
     return;
 
+#if CONFIG_VP9_HIGH
+  if (xd->cur_buf->flags&YV12_FLAG_HIGH) {
+    switch (tx_size) {
+      case TX_32X32:
+        vp9_high_idct32x32_add(dqcoeff, dst, pd->dst.stride,
+                               p->eobs[block], xd->bps);
+        break;
+      case TX_16X16:
+        vp9_high_idct16x16_add(dqcoeff, dst, pd->dst.stride,
+                               p->eobs[block], xd->bps);
+        break;
+      case TX_8X8:
+        vp9_high_idct8x8_add(dqcoeff, dst, pd->dst.stride,
+                             p->eobs[block], xd->bps);
+        break;
+      case TX_4X4:
+        // this is like vp9_short_idct4x4 but has a special case around eob<=1
+        // which is significant (not just an optimization) for the lossless
+        // case.
+        xd->high_itxm_add(dqcoeff, dst, pd->dst.stride,
+                          p->eobs[block], xd->bps);
+        break;
+      default:
+        assert(0 && "Invalid transform size");
+    }
+    return;
+  }
+#endif
   switch (tx_size) {
     case TX_32X32:
       vp9_idct32x32_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
@@ -427,8 +531,15 @@ static void encode_block_pass1(int plane, int block, BLOCK_SIZE plane_bsize,
 
   vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
 
-  if (p->eobs[block] > 0)
+  if (p->eobs[block] > 0) {
+#if CONFIG_VP9_HIGH
+    if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+       xd->high_itxm_add(dqcoeff, dst, pd->dst.stride, p->eobs[block], xd->bps);
+       return;
+    }
+#endif
     xd->itxm_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
+  }
 }
 
 void vp9_encode_sby_pass1(MACROBLOCK *x, BLOCK_SIZE bsize) {
@@ -496,16 +607,35 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                               x->skip_encode ? src_stride : dst_stride,
                               dst, dst_stride, i, j, plane);
       if (!x->skip_recode) {
+#if CONFIG_VP9_HIGH
+        if (xd->cur_buf->flags&YV12_FLAG_HIGH) {
+           vp9_high_subtract_block(32, 32, src_diff, diff_stride,
+                           src, src_stride, dst, dst_stride, xd->bps);
+        } else {
+           vp9_subtract_block(32, 32, src_diff, diff_stride,
+                           src, src_stride, dst, dst_stride);
+        }
+#else
         vp9_subtract_block(32, 32, src_diff, diff_stride,
                            src, src_stride, dst, dst_stride);
+#endif
         fdct32x32(x->use_lp32x32fdct, src_diff, coeff, diff_stride);
         vp9_quantize_b_32x32(coeff, 1024, x->skip_block, p->zbin, p->round,
                              p->quant, p->quant_shift, qcoeff, dqcoeff,
                              pd->dequant, p->zbin_extra, eob, scan_order->scan,
                              scan_order->iscan);
       }
-      if (!x->skip_encode && *eob)
+      if (!x->skip_encode && *eob) {
+#if CONFIG_VP9_HIGH
+        if (xd->cur_buf->flags&YV12_FLAG_HIGH) {
+           vp9_high_idct32x32_add(dqcoeff, dst, dst_stride, *eob, xd->bps);
+        } else {
+           vp9_idct32x32_add(dqcoeff, dst, dst_stride, *eob);
+        }
+#else
         vp9_idct32x32_add(dqcoeff, dst, dst_stride, *eob);
+#endif
+      }
       break;
     case TX_16X16:
       tx_type = get_tx_type(pd->plane_type, xd);
@@ -516,16 +646,36 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                               x->skip_encode ? src_stride : dst_stride,
                               dst, dst_stride, i, j, plane);
       if (!x->skip_recode) {
+#if CONFIG_VP9_HIGH
+        if (xd->cur_buf->flags&YV12_FLAG_HIGH) {
+           vp9_high_subtract_block(16, 16, src_diff, diff_stride,
+                           src, src_stride, dst, dst_stride, xd->bps);
+        } else {
+           vp9_subtract_block(16, 16, src_diff, diff_stride,
+                           src, src_stride, dst, dst_stride);
+        }
+#else
         vp9_subtract_block(16, 16, src_diff, diff_stride,
                            src, src_stride, dst, dst_stride);
+#endif
         vp9_fht16x16(src_diff, coeff, diff_stride, tx_type);
         vp9_quantize_b(coeff, 256, x->skip_block, p->zbin, p->round,
                        p->quant, p->quant_shift, qcoeff, dqcoeff,
                        pd->dequant, p->zbin_extra, eob, scan_order->scan,
                        scan_order->iscan);
       }
-      if (!x->skip_encode && *eob)
+      if (!x->skip_encode && *eob) {
+#if CONFIG_VP9_HIGH
+        if (xd->cur_buf->flags&YV12_FLAG_HIGH) {
+           vp9_high_iht16x16_add(tx_type, dqcoeff, dst, dst_stride,
+                                 *eob, xd->bps);
+        } else {
+           vp9_iht16x16_add(tx_type, dqcoeff, dst, dst_stride, *eob);
+        }
+#else
         vp9_iht16x16_add(tx_type, dqcoeff, dst, dst_stride, *eob);
+#endif
+      }
       break;
     case TX_8X8:
       tx_type = get_tx_type(pd->plane_type, xd);
@@ -536,16 +686,36 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                               x->skip_encode ? src_stride : dst_stride,
                               dst, dst_stride, i, j, plane);
       if (!x->skip_recode) {
+#if CONFIG_VP9_HIGH
+        if (xd->cur_buf->flags&YV12_FLAG_HIGH) {
+           vp9_high_subtract_block(8, 8, src_diff, diff_stride,
+                           src, src_stride, dst, dst_stride, xd->bps);
+        } else {
+           vp9_subtract_block(8, 8, src_diff, diff_stride,
+                           src, src_stride, dst, dst_stride);
+        }
+#else
         vp9_subtract_block(8, 8, src_diff, diff_stride,
                            src, src_stride, dst, dst_stride);
+#endif
         vp9_fht8x8(src_diff, coeff, diff_stride, tx_type);
         vp9_quantize_b(coeff, 64, x->skip_block, p->zbin, p->round, p->quant,
                        p->quant_shift, qcoeff, dqcoeff,
                        pd->dequant, p->zbin_extra, eob, scan_order->scan,
                        scan_order->iscan);
       }
-      if (!x->skip_encode && *eob)
+      if (!x->skip_encode && *eob) {
+#if CONFIG_VP9_HIGH
+        if (xd->cur_buf->flags&YV12_FLAG_HIGH) {
+           vp9_high_iht8x8_add(tx_type, dqcoeff, dst, dst_stride, *eob,
+                               xd->bps);
+        } else {
+           vp9_iht8x8_add(tx_type, dqcoeff, dst, dst_stride, *eob);
+        }
+#else
         vp9_iht8x8_add(tx_type, dqcoeff, dst, dst_stride, *eob);
+#endif
+      }
       break;
     case TX_4X4:
       tx_type = get_tx_type_4x4(pd->plane_type, xd, block);
@@ -557,8 +727,18 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                               dst, dst_stride, i, j, plane);
 
       if (!x->skip_recode) {
+#if CONFIG_VP9_HIGH
+        if (xd->cur_buf->flags&YV12_FLAG_HIGH) {
+           vp9_high_subtract_block(4, 4, src_diff, diff_stride,
+                           src, src_stride, dst, dst_stride, xd->bps);
+        } else {
+           vp9_subtract_block(4, 4, src_diff, diff_stride,
+                           src, src_stride, dst, dst_stride);
+        }
+#else
         vp9_subtract_block(4, 4, src_diff, diff_stride,
                            src, src_stride, dst, dst_stride);
+#endif
         if (tx_type != DCT_DCT)
           vp9_fht4x4(src_diff, coeff, diff_stride, tx_type);
         else
@@ -570,13 +750,30 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
       }
 
       if (!x->skip_encode && *eob) {
-        if (tx_type == DCT_DCT)
+        if (tx_type == DCT_DCT) {
           // this is like vp9_short_idct4x4 but has a special case around eob<=1
           // which is significant (not just an optimization) for the lossless
           // case.
+#if CONFIG_VP9_HIGH
+          if (xd->cur_buf->flags&YV12_FLAG_HIGH) {
+            xd->high_itxm_add(dqcoeff, dst, dst_stride, *eob, xd->bps);
+          } else {
+            xd->itxm_add(dqcoeff, dst, dst_stride, *eob);
+          }
+#else
           xd->itxm_add(dqcoeff, dst, dst_stride, *eob);
-        else
+#endif
+        } else {
+#if CONFIG_VP9_HIGH
+          if (xd->cur_buf->flags&YV12_FLAG_HIGH) {
+             vp9_high_iht4x4_16_add(dqcoeff, dst, dst_stride, tx_type, xd->bps);
+          } else {
+             vp9_iht4x4_16_add(dqcoeff, dst, dst_stride, tx_type);
+          }
+#else
           vp9_iht4x4_16_add(dqcoeff, dst, dst_stride, tx_type);
+#endif
+        }
       }
       break;
     default:

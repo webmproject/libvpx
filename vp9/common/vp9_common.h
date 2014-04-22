@@ -56,6 +56,17 @@ static INLINE int clamp(int value, int low, int high) {
   return value < low ? low : (value > high ? high : value);
 }
 
+static INLINE uint16_t clip_pixel_bps(int val, int bps) {
+  switch (bps) {
+    default:
+      return clamp(val, 0, 255);
+    case 10:
+      return clamp(val, 0, 1023);
+    case 12:
+      return clamp(val, 0, 4095);
+  }
+}
+
 static INLINE double fclamp(double value, double low, double high) {
   return value < low ? low : (value > high ? high : value);
 }
@@ -63,6 +74,12 @@ static INLINE double fclamp(double value, double low, double high) {
 static INLINE int get_unsigned_bits(unsigned int num_values) {
   return num_values > 0 ? get_msb(num_values) + 1 : 0;
 }
+
+#if CONFIG_VP9_HIGH
+  #define CONVERT_TO_SHORTPTR(x) ((uint16_t*)(((uint64_t)x) << 1))
+  #define CONVERT_TO_BYTEPTR(x) ((uint8_t*)((((uint64_t)x) >> 1 ) + \
+                                            0x8000000000000000))
+#endif
 
 #if CONFIG_DEBUG
 #define CHECK_MEM_ERROR(cm, lval, expr) do { \

@@ -376,9 +376,11 @@ int vp9_find_best_sub_pixel_comp_tree(const MACROBLOCK *x,
   const unsigned int halfiters = iters_per_step;
   const unsigned int quarteriters = iters_per_step;
   const unsigned int eighthiters = iters_per_step;
-
-  DECLARE_ALIGNED_ARRAY(16, uint8_t, comp_pred, 64 * 64);
   const int y_stride = xd->plane[0].pre[0].stride;
+  DECLARE_ALIGNED_ARRAY(16, uint8_t, comp_pred, 64 * 64);
+#if CONFIG_VP9_HIGH
+  DECLARE_ALIGNED_ARRAY(16, uint16_t, comp_pred16, 64 * 64);
+#endif
   const int offset = bestmv->row * y_stride + bestmv->col;
   const uint8_t *const y = xd->plane[0].pre[0].buf;
 
@@ -399,11 +401,21 @@ int vp9_find_best_sub_pixel_comp_tree(const MACROBLOCK *x,
   bestmv->row *= 8;
   bestmv->col *= 8;
 
+#if CONFIG_VP9_HIGH
+  if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+    high_comp_avg_pred(comp_pred16, second_pred, w, h, y + offset, y_stride);
+    besterr = vfp->vf(CONVERT_TO_BYTEPTR(comp_pred16), w, z, src_stride, sse1);
+  } else {
+    vp9_comp_avg_pred(comp_pred, second_pred, w, h, y + offset, y_stride);
+    besterr = vfp->vf(comp_pred, w, z, src_stride, sse1);
+  }
+#else
   // calculate central point error
   // TODO(yunqingwang): central pointer error was already calculated in full-
   // pixel search, and can be passed in this function.
   vp9_comp_avg_pred(comp_pred, second_pred, w, h, y + offset, y_stride);
   besterr = vfp->vf(comp_pred, w, z, src_stride, sse1);
+#endif
   *distortion = besterr;
   besterr += mv_err_cost(bestmv, ref_mv, mvjcost, mvcost, error_per_bit);
 

@@ -80,6 +80,9 @@ extern "C" {
    */
 #define VPX_CODEC_CAP_OUTPUT_PARTITION  0x20000
 
+  /*! Can support input images at greater than 8 bitdepth.
+   */
+#define VPX_CODEC_CAP_HIGH  0x40000
 
   /*! \brief Initialization-time Feature Enabling
    *
@@ -91,7 +94,7 @@ extern "C" {
 #define VPX_CODEC_USE_PSNR  0x10000 /**< Calculate PSNR on each frame */
 #define VPX_CODEC_USE_OUTPUT_PARTITION  0x20000 /**< Make the encoder output one
   partition at a time. */
-
+#define VPX_CODEC_USE_HIGH 0x40000 /**< Use high bitdepth */
 
   /*!\brief Generic fixed size buffer structure
    *

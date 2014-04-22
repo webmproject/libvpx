@@ -120,6 +120,9 @@ int vp9_resize_frame_buffers(VP9_COMMON *cm, int width, int height) {
   const int ss_y = cm->subsampling_y;
 
   if (vp9_realloc_frame_buffer(&cm->post_proc_buffer, width, height, ss_x, ss_y,
+#if CONFIG_VP9_HIGH
+                               cm->use_high,
+#endif
                                VP9_DEC_BORDER_IN_PIXELS, NULL, NULL, NULL) < 0)
     goto fail;
 
@@ -171,7 +174,11 @@ int vp9_alloc_frame_buffers(VP9_COMMON *cm, int width, int height) {
   for (i = 0; i < FRAME_BUFFERS; i++) {
     cm->frame_bufs[i].ref_count = 0;
     if (vp9_alloc_frame_buffer(&cm->frame_bufs[i].buf, width, height,
-                               ss_x, ss_y, VP9_ENC_BORDER_IN_PIXELS) < 0)
+                               ss_x, ss_y,
+#if CONFIG_VP9_HIGH
+                               cm->use_high,
+#endif
+                               VP9_ENC_BORDER_IN_PIXELS) < 0)
       goto fail;
   }
 
@@ -184,6 +191,9 @@ int vp9_alloc_frame_buffers(VP9_COMMON *cm, int width, int height) {
   }
 
   if (vp9_alloc_frame_buffer(&cm->post_proc_buffer, width, height, ss_x, ss_y,
+#if CONFIG_VP9_HIGH
+                             cm->use_high,
+#endif
                              VP9_ENC_BORDER_IN_PIXELS) < 0)
     goto fail;
 

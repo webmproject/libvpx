@@ -70,6 +70,43 @@ static const uint8_t VP9_VAR_OFFS[64] = {
   128, 128, 128, 128, 128, 128, 128, 128
 };
 
+#if CONFIG_VP9_HIGH
+// TODO(Peter): should these value scale with bit depth?
+static const uint16_t VP9_HIGH_VAR_OFFS_8[64] = {
+  128, 128, 128, 128, 128, 128, 128, 128,
+  128, 128, 128, 128, 128, 128, 128, 128,
+  128, 128, 128, 128, 128, 128, 128, 128,
+  128, 128, 128, 128, 128, 128, 128, 128,
+  128, 128, 128, 128, 128, 128, 128, 128,
+  128, 128, 128, 128, 128, 128, 128, 128,
+  128, 128, 128, 128, 128, 128, 128, 128,
+  128, 128, 128, 128, 128, 128, 128, 128
+};
+
+static const uint16_t VP9_HIGH_VAR_OFFS_10[64] = {
+  128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4,
+  128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4,
+  128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4,
+  128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4,
+  128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4,
+  128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4,
+  128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4,
+  128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4
+};
+
+static const uint16_t VP9_HIGH_VAR_OFFS_12[64] = {
+  128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16,
+  128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16,
+  128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16,
+  128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16,
+  128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16,
+  128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16,
+  128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16,
+  128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16
+};
+#endif
+
+
 static unsigned int get_sby_perpixel_variance(VP9_COMP *cpi,
                                               const struct buf_2d *ref,
                                               BLOCK_SIZE bs) {
@@ -78,6 +115,29 @@ static unsigned int get_sby_perpixel_variance(VP9_COMP *cpi,
                                               VP9_VAR_OFFS, 0, &sse);
   return ROUND_POWER_OF_TWO(var, num_pels_log2_lookup[bs]);
 }
+
+#if CONFIG_VP9_HIGH
+static unsigned int high_get_sby_perpixel_variance(VP9_COMP *cpi,
+                                              const struct buf_2d *ref,
+                                              BLOCK_SIZE bs, int bps) {
+  unsigned int var, sse;
+  switch (bps) {
+    default:
+      var = cpi->fn_ptr[bs].vf(ref->buf, ref->stride,
+                         CONVERT_TO_BYTEPTR(VP9_HIGH_VAR_OFFS_8), 0, &sse);
+      break;
+    case 10:
+      var = cpi->fn_ptr[bs].vf(ref->buf, ref->stride,
+                         CONVERT_TO_BYTEPTR(VP9_HIGH_VAR_OFFS_10), 0, &sse);
+      break;
+    case 12:
+      var = cpi->fn_ptr[bs].vf(ref->buf, ref->stride,
+                         CONVERT_TO_BYTEPTR(VP9_HIGH_VAR_OFFS_12), 0, &sse);
+      break;
+  }
+  return ROUND_POWER_OF_TWO(var, num_pels_log2_lookup[bs]);
+}
+#endif
 
 static unsigned int get_sby_perpixel_diff_variance(VP9_COMP *cpi,
                                                    const struct buf_2d *ref,
@@ -459,6 +519,21 @@ static void choose_partitioning(VP9_COMP *cpi,
   } else {
     d = VP9_VAR_OFFS;
     dp = 0;
+#if CONFIG_VP9_HIGH
+    if (xd->cur_buf->flags&YV12_FLAG_HIGH) {
+      switch (xd->bps) {
+      default:
+        d = CONVERT_TO_BYTEPTR(VP9_HIGH_VAR_OFFS_8);
+        break;
+      case 10:
+        d = CONVERT_TO_BYTEPTR(VP9_HIGH_VAR_OFFS_10);
+        break;
+      case 12:
+        d = CONVERT_TO_BYTEPTR(VP9_HIGH_VAR_OFFS_12);
+        break;
+      }
+    }
+#endif
   }
 
   // Fill in the entire tree of 8x8 variances for splits.
@@ -553,9 +628,39 @@ static unsigned int tt_activity_measure(MACROBLOCK *x) {
   // Another option is to compute four 8x8 variances, and pick a single
   // lambda using a non-linear combination (e.g., the smallest, or second
   // smallest, etc.).
+#if CONFIG_VP9_HIGH
+  unsigned int act;
+  if (x->e_mbd.cur_buf->flags & YV12_FLAG_HIGH) {
+    switch (x->e_mbd.bps) {
+      default:
+        act = vp9_high_variance16x16(x->plane[0].src.buf,
+                                     x->plane[0].src.stride,
+                                     CONVERT_TO_BYTEPTR(VP9_HIGH_VAR_OFFS_8),
+                                     0, &sse) << 4;
+        break;
+      case 10:
+        act = vp9_high_variance16x16(x->plane[0].src.buf,
+                                     x->plane[0].src.stride,
+                                     CONVERT_TO_BYTEPTR(VP9_HIGH_VAR_OFFS_10),
+                                     0, &sse);
+        break;
+      case 12:
+        act = vp9_high_variance16x16(x->plane[0].src.buf,
+                                     x->plane[0].src.stride,
+                                     CONVERT_TO_BYTEPTR(VP9_HIGH_VAR_OFFS_12),
+                                     0, &sse) >> 4;
+        break;
+    }
+  } else {
+    act = vp9_variance16x16(x->plane[0].src.buf,
+                            x->plane[0].src.stride,
+                            VP9_VAR_OFFS, 0, &sse) << 4;
+  }
+#else
   const unsigned int act = vp9_variance16x16(x->plane[0].src.buf,
                                              x->plane[0].src.stride,
                                              VP9_VAR_OFFS, 0, &sse) << 4;
+#endif
   // If the region is flat, lower the activity some more.
   return act < (8 << 12) ? MIN(act, 5 << 12) : act;
 }
@@ -764,8 +869,18 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
 
   // Set to zero to make sure we do not use the previous encoded frame stats
   mbmi->skip = 0;
-
-  x->source_variance = get_sby_perpixel_variance(cpi, &x->plane[0].src, bsize);
+#if CONFIG_VP9_HIGH
+  if (xd->cur_buf->flags&YV12_FLAG_HIGH) {
+    x->source_variance = high_get_sby_perpixel_variance(
+        cpi, &x->plane[0].src, bsize, xd->bps);
+  } else {
+    x->source_variance = get_sby_perpixel_variance(
+        cpi, &x->plane[0].src, bsize);
+  }
+#else
+  x->source_variance = get_sby_perpixel_variance(
+      cpi, &x->plane[0].src, bsize);
+#endif
 
   // Save rdmult before it might be changed, so it can be restored later.
   orig_rdmult = x->rdmult;
@@ -1941,7 +2056,17 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
   if (cpi->sf.disable_split_var_thresh && partition_none_allowed) {
     unsigned int source_variancey;
     vp9_setup_src_planes(x, cpi->Source, mi_row, mi_col);
+#if CONFIG_VP9_HIGH
+    if (xd->cur_buf->flags&YV12_FLAG_HIGH) {
+      source_variancey = high_get_sby_perpixel_variance(cpi, &x->plane[0].src,
+                                                        bsize, xd->bps);
+    } else {
+      source_variancey = get_sby_perpixel_variance(cpi, &x->plane[0].src,
+                                                   bsize);
+    }
+#else
     source_variancey = get_sby_perpixel_variance(cpi, &x->plane[0].src, bsize);
+#endif
     if (source_variancey < cpi->sf.disable_split_var_thresh) {
       do_split = 0;
       if (source_variancey < cpi->sf.disable_split_var_thresh / 2)
@@ -2323,6 +2448,12 @@ static void switch_lossless_mode(VP9_COMP *cpi, int lossless) {
     // printf("Switching to lossless\n");
     cpi->mb.fwd_txm4x4 = vp9_fwht4x4;
     cpi->mb.e_mbd.itxm_add = vp9_iwht4x4_add;
+#if CONFIG_VP9_HIGH
+    if (cpi->oxcf.use_high) {
+      cpi->mb.fwd_txm4x4 = vp9_high_fwht4x4;
+      cpi->mb.e_mbd.high_itxm_add = vp9_high_iwht4x4_add;
+    }
+#endif
     cpi->mb.optimize = 0;
     cpi->common.lf.filter_level = 0;
     cpi->zbin_mode_boost_enabled = 0;
@@ -2331,6 +2462,12 @@ static void switch_lossless_mode(VP9_COMP *cpi, int lossless) {
     // printf("Not lossless\n");
     cpi->mb.fwd_txm4x4 = vp9_fdct4x4;
     cpi->mb.e_mbd.itxm_add = vp9_idct4x4_add;
+#if CONFIG_VP9_HIGH
+    if (cpi->oxcf.use_high) {
+      cpi->mb.fwd_txm4x4 = vp9_high_fdct4x4;
+      cpi->mb.e_mbd.high_itxm_add = vp9_high_idct4x4_add;
+    }
+#endif
   }
 }
 

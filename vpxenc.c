@@ -187,6 +187,10 @@ static const arg_def_t experimental_bitstream =
     ARG_DEF(NULL, "experimental-bitstream", 0,
             "Allow experimental bitstream features.");
 
+#if CONFIG_VP9_HIGH
+static const arg_def_t inputshiftarg = ARG_DEF(NULL, "input-shift", 1,
+                                          "Amount to upshift input images");
+#endif
 
 static const arg_def_t *main_args[] = {
   &debugmode,
@@ -228,6 +232,9 @@ static const arg_def_t *global_args[] = {
   &use_yv12, &use_i420, &usage, &threads, &profile,
   &width, &height, &stereo_mode, &timebase, &framerate,
   &error_resilient,
+#if CONFIG_VP9_HIGH
+  &inputshiftarg,
+#endif
   &lag_in_frames, NULL
 };
 
@@ -361,11 +368,21 @@ static const arg_def_t frame_periodic_boost = ARG_DEF(
     NULL, "frame_boost", 1,
     "Enable frame periodic boost (0: off (default), 1: on)");
 
+#if CONFIG_VP9_HIGH
+static const arg_def_t bitdeptharg = ARG_DEF(
+    NULL, "bit-depth", 1,
+    "Bit depth used to use (0=BITS_8 for version <=1, "
+    "1=BITS_10 or 2=BITS_12 for version 2)");
+#endif
+
 static const arg_def_t *vp9_args[] = {
   &cpu_used, &auto_altref, &noise_sens, &sharpness, &static_thresh,
   &tile_cols, &tile_rows, &arnr_maxframes, &arnr_strength,
   &tune_ssim, &cq_level, &max_intra_rate_pct, &lossless,
   &frame_parallel_decoding, &aq_mode, &frame_periodic_boost,
+#if CONFIG_VP9_HIGH
+  &bitdeptharg,
+#endif
   NULL
 };
 static const int vp9_arg_ctrl_map[] = {
@@ -376,6 +393,9 @@ static const int vp9_arg_ctrl_map[] = {
   VP8E_SET_TUNING, VP8E_SET_CQ_LEVEL, VP8E_SET_MAX_INTRA_BITRATE_PCT,
   VP9E_SET_LOSSLESS, VP9E_SET_FRAME_PARALLEL_DECODING, VP9E_SET_AQ_MODE,
   VP9E_SET_FRAME_PERIODIC_BOOST,
+#if CONFIG_VP9_HIGH
+  VP9E_SET_BIT_DEPTH,
+#endif
   0
 };
 #endif
@@ -564,6 +584,10 @@ struct stream_config {
   int                       arg_ctrl_cnt;
   int                       write_webm;
   int                       have_kf_max_dist;
+#if CONFIG_VP9_HIGH
+  int                       use_high;
+  int                       input_shift;
+#endif
 };
 
 
@@ -934,6 +958,11 @@ static int parse_stream_params(struct VpxEncoderConfig *global,
       config->have_kf_max_dist = 1;
     } else if (arg_match(&arg, &kf_disabled, argi)) {
       config->cfg.kf_mode = VPX_KF_DISABLED;
+#if CONFIG_VP9_HIGH
+    } else if (arg_match(&arg, &inputshiftarg, argi)) {
+      config->use_high = 1;
+      config->input_shift = arg_parse_uint(&arg);
+#endif
     } else {
       int i, match = 0;
       for (i = 0; ctrl_args[i]; i++) {
@@ -1184,6 +1213,9 @@ static void initialize_encoder(struct stream_state *stream,
 
   flags |= global->show_psnr ? VPX_CODEC_USE_PSNR : 0;
   flags |= global->out_part ? VPX_CODEC_USE_OUTPUT_PARTITION : 0;
+#if CONFIG_VP9_HIGH
+  flags |= stream->config.use_high ? VPX_CODEC_USE_HIGH : 0;
+#endif
 
   /* Construct Encoder Context */
   vpx_codec_enc_init(&stream->encoder, global->codec->interface(),
@@ -1225,10 +1257,34 @@ static void encode_frame(struct stream_state *stream,
                  * global->framerate.den)
                 / cfg->g_timebase.num / global->framerate.num;
   next_frame_start = (cfg->g_timebase.den * (int64_t)(frames_in)
-                      * global->framerate.den)
-                     / cfg->g_timebase.num / global->framerate.num;
+                      * global->framerate.den) /
+                     cfg->g_timebase.num / global->framerate.num;
 
   /* Scale if necessary */
+#if CONFIG_VP9_HIGH
+  if (img) {
+    if ((img->fmt & VPX_IMG_FMT_HIGH) &&
+        (img->d_w != cfg->g_w || img->d_h != cfg->g_h)) {
+      if (!stream->img)
+        stream->img = vpx_img_alloc(NULL, VPX_IMG_FMT_I42016,
+                                    cfg->g_w, cfg->g_h, 16);
+      assert(0 && "Resizing of 16bit images not yet supported");
+      /*I42016Scale(img->planes[VPX_PLANE_Y], img->stride[VPX_PLANE_Y],
+        img->planes[VPX_PLANE_U], img->stride[VPX_PLANE_U],
+        img->planes[VPX_PLANE_V], img->stride[VPX_PLANE_V],
+        img->d_w, img->d_h,
+        stream->img->planes[VPX_PLANE_Y],
+        stream->img->stride[VPX_PLANE_Y],
+        stream->img->planes[VPX_PLANE_U],
+        stream->img->stride[VPX_PLANE_U],
+        stream->img->planes[VPX_PLANE_V],
+        stream->img->stride[VPX_PLANE_V],
+        stream->img->d_w, stream->img->d_h,
+        kFilterBox);*/
+      img = stream->img;
+    }
+  }
+#endif
   if (img && (img->d_w != cfg->g_w || img->d_h != cfg->g_h)) {
     if (!stream->img)
       stream->img = vpx_img_alloc(NULL, VPX_IMG_FMT_I420,
@@ -1464,10 +1520,54 @@ static void print_time(const char *label, int64_t etl) {
   }
 }
 
+#if CONFIG_VP9_HIGH
+static void img_convert_8_to_16(vpx_image_t  *dst, vpx_image_t *src,
+                                int input_shift) {
+  int plane;
+  if (dst->fmt != src->fmt + VPX_IMG_FMT_HIGH ||
+      dst->w != src->w || dst->h != src->h ||
+      dst->x_chroma_shift != src->x_chroma_shift ||
+      dst->y_chroma_shift != src->y_chroma_shift) {
+    fatal("Unsupported image conversion");
+  }
+  switch (src->fmt) {
+    case VPX_IMG_FMT_I420:
+    case VPX_IMG_FMT_I422:
+    case VPX_IMG_FMT_I444:
+      break;
+    default:
+      fatal("Unsupported image conversion");
+      break;
+  }
+  for (plane = 0; plane < 3; plane++) {
+    int w = src->w;
+    int h = src->h;
+    int x, y;
+    if (plane) {
+      w >>= src->x_chroma_shift;
+      h >>= src->y_chroma_shift;
+    }
+    for (y = 0; y < h; y++) {
+      unsigned char *p_src = src->planes[plane] + y * src->stride[plane];
+      uint16_t *p_dst = (uint16_t *)(dst->planes[plane] +
+                                     y * dst->stride[plane]);
+      for (x = 0; x < w; x++) {
+        *p_dst++ = *p_src++ << input_shift;
+      }
+    }
+  }
+}
+#endif
 
 int main(int argc, const char **argv_) {
   int pass;
   vpx_image_t raw;
+#if CONFIG_VP9_HIGH
+  vpx_image_t raw_high;
+  int allocated_raw_high = 0;
+  int use_high = 0;
+  int input_shift = 0;
+#endif
   int frame_avail, got_data;
 
   struct VpxInputContext input = {0};
@@ -1538,11 +1638,21 @@ int main(int argc, const char **argv_) {
 
     open_input_file(&input);
 
+#if CONFIG_VP9_HIGH
+    FOREACH_STREAM({
+      if (stream->config.use_high) {
+        use_high = stream->config.use_high;
+        input_shift = stream->config.input_shift;
+        break;
+      }
+    });
+#endif
+
     /* If the input file doesn't specify its w/h (raw files), try to get
      * the data from the first stream's configuration.
      */
     if (!input.width || !input.height)
-      FOREACH_STREAM( {
+      FOREACH_STREAM({
       if (stream->config.cfg.g_w && stream->config.cfg.g_h) {
         input.width = stream->config.cfg.g_w;
         input.height = stream->config.cfg.g_h;
@@ -1649,9 +1759,27 @@ int main(int argc, const char **argv_) {
 
       if (frames_in > global.skip_frames) {
         vpx_usec_timer_start(&timer);
+#if CONFIG_VP9_HIGH
+        if (use_high) {
+          if (!allocated_raw_high) {
+            vpx_img_alloc(&raw_high, raw.fmt | VPX_IMG_FMT_HIGH,
+                          input.width, input.height, 32);
+            allocated_raw_high = 1;
+          }
+          img_convert_8_to_16(&raw_high, &raw, input_shift);
+          FOREACH_STREAM(encode_frame(stream, &global,
+                                      frame_avail ? &raw_high : NULL,
+                                      frames_in));
+        } else {
+          FOREACH_STREAM(encode_frame(stream, &global,
+                                      frame_avail ? &raw : NULL,
+                                      frames_in));
+        }
+#else
         FOREACH_STREAM(encode_frame(stream, &global,
                                     frame_avail ? &raw : NULL,
                                     frames_in));
+#endif
         vpx_usec_timer_mark(&timer);
         cx_time += vpx_usec_timer_elapsed(&timer);
 
@@ -1668,7 +1796,6 @@ int main(int argc, const char **argv_) {
 
           if (global.limit) {
             const int64_t frame_in_lagged = (seen_frames - lagged_count) * 1000;
-
             rate = cx_time ? frame_in_lagged * (int64_t)1000000 / cx_time : 0;
             remaining = 1000 * (global.limit - global.skip_frames
                                 - seen_frames + lagged_count);
@@ -1676,11 +1803,9 @@ int main(int argc, const char **argv_) {
             const int64_t input_pos = ftello(input.file);
             const int64_t input_pos_lagged = input_pos - lagged_count;
             const int64_t limit = input.length;
-
             rate = cx_time ? input_pos_lagged * (int64_t)1000000 / cx_time : 0;
             remaining = limit - input_pos + lagged_count;
           }
-
           average_rate = (average_rate <= 0)
               ? rate
               : (average_rate * 7 + rate) / 8;
@@ -1690,7 +1815,6 @@ int main(int argc, const char **argv_) {
         if (got_data && global.test_decode != TEST_DECODE_OFF)
           FOREACH_STREAM(test_decode(stream, global.test_decode, global.codec));
       }
-
       fflush(stdout);
     }
 
@@ -1762,6 +1886,10 @@ int main(int argc, const char **argv_) {
     });
 #endif
 
+#if CONFIG_VP9_HIGH
+  if (allocated_raw_high)
+    vpx_img_free(&raw_high);
+#endif
   vpx_img_free(&raw);
   free(argv);
   free(streams);

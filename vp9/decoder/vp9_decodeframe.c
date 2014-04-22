@@ -195,6 +195,57 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
     TX_TYPE tx_type;
     const PLANE_TYPE plane_type = pd->plane_type;
     int16_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
+#if CONFIG_VP9_HIGH
+    if (xd->cur_buf->flags&YV12_FLAG_HIGH) {
+      switch (tx_size) {
+        case TX_4X4:
+          tx_type = get_tx_type_4x4(plane_type, xd, block);
+          if (tx_type == DCT_DCT)
+            xd->high_itxm_add(dqcoeff, dst, stride, eob, xd->bps);
+          else
+            vp9_high_iht4x4_16_add(dqcoeff, dst, stride, tx_type, xd->bps);
+          break;
+        case TX_8X8:
+          tx_type = get_tx_type(plane_type, xd);
+          vp9_high_iht8x8_add(tx_type, dqcoeff, dst, stride, eob, xd->bps);
+          break;
+        case TX_16X16:
+          tx_type = get_tx_type(plane_type, xd);
+          vp9_high_iht16x16_add(tx_type, dqcoeff, dst, stride, eob, xd->bps);
+          break;
+        case TX_32X32:
+          tx_type = DCT_DCT;
+          vp9_high_idct32x32_add(dqcoeff, dst, stride, eob, xd->bps);
+          break;
+        default:
+          assert(0 && "Invalid transform size");
+      }
+    } else {
+      switch (tx_size) {
+        case TX_4X4:
+          tx_type = get_tx_type_4x4(plane_type, xd, block);
+          if (tx_type == DCT_DCT)
+            xd->itxm_add(dqcoeff, dst, stride, eob);
+          else
+            vp9_iht4x4_16_add(dqcoeff, dst, stride, tx_type);
+          break;
+        case TX_8X8:
+          tx_type = get_tx_type(plane_type, xd);
+          vp9_iht8x8_add(tx_type, dqcoeff, dst, stride, eob);
+          break;
+        case TX_16X16:
+          tx_type = get_tx_type(plane_type, xd);
+          vp9_iht16x16_add(tx_type, dqcoeff, dst, stride, eob);
+          break;
+        case TX_32X32:
+          tx_type = DCT_DCT;
+          vp9_idct32x32_add(dqcoeff, dst, stride, eob);
+          break;
+        default:
+          assert(0 && "Invalid transform size");
+      }
+    }
+#else
     switch (tx_size) {
       case TX_4X4:
         tx_type = get_tx_type_4x4(plane_type, xd, block);
@@ -218,7 +269,7 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
       default:
         assert(0 && "Invalid transform size");
     }
-
+#endif
     if (eob == 1) {
       vpx_memset(dqcoeff, 0, 2 * sizeof(dqcoeff[0]));
     } else {
@@ -586,6 +637,21 @@ static void setup_quantization(VP9_COMMON *const cm, MACROBLOCKD *const xd,
                  cm->uv_ac_delta_q == 0;
 
   xd->itxm_add = xd->lossless ? vp9_iwht4x4_add : vp9_idct4x4_add;
+#if CONFIG_VP9_HIGH
+  xd->high_itxm_add = xd->lossless ?  vp9_high_iwht4x4_add :
+      vp9_high_idct4x4_add;
+  switch (cm->bit_depth) {
+    case BITS_8:
+      xd->bps = 8;
+      break;
+    case BITS_10:
+      xd->bps = 10;
+      break;
+    case BITS_12:
+      xd->bps = 12;
+      break;
+  }
+#endif
 }
 
 static INTERP_FILTER read_interp_filter(struct vp9_read_bit_buffer *rb) {
@@ -630,10 +696,14 @@ static void apply_frame_size(VP9_COMMON *cm, int width, int height) {
   }
 
   if (vp9_realloc_frame_buffer(
-          get_frame_new_buffer(cm), cm->width, cm->height,
-          cm->subsampling_x, cm->subsampling_y, VP9_DEC_BORDER_IN_PIXELS,
-          &cm->frame_bufs[cm->new_fb_idx].raw_frame_buffer, cm->get_fb_cb,
-          cm->cb_priv)) {
+      get_frame_new_buffer(cm), cm->width, cm->height,
+      cm->subsampling_x, cm->subsampling_y,
+#if CONFIG_VP9_HIGH
+      cm->use_high,
+#endif
+      VP9_DEC_BORDER_IN_PIXELS,
+      &cm->frame_bufs[cm->new_fb_idx].raw_frame_buffer,
+      cm->get_fb_cb, cm->cb_priv)) {
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate frame buffer");
   }
@@ -1055,8 +1125,17 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
 
   if (cm->frame_type == KEY_FRAME) {
     check_sync_code(cm, rb);
-    if (cm->profile > PROFILE_1)
+    if (cm->profile > PROFILE_1) {
       cm->bit_depth = vp9_rb_read_bit(rb) ? BITS_12 : BITS_10;
+#if CONFIG_VP9_HIGH
+      cm->use_high = 1;
+#endif
+    } else {
+#if CONFIG_VP9_HIGH
+      cm->use_high = 0;
+#endif
+      cm->bit_depth = BITS_8;
+    }
     cm->color_space = (COLOR_SPACE)vp9_rb_read_literal(rb, 3);
     if (cm->color_space != SRGB) {
       vp9_rb_read_bit(rb);  // [16,235] (including xvycc) vs [0,255] range
@@ -1114,10 +1193,17 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
 
       for (i = 0; i < REFS_PER_FRAME; ++i) {
         RefBuffer *const ref_buf = &cm->frame_refs[i];
+#if CONFIG_VP9_HIGH
+        vp9_setup_scale_factors_for_frame(&ref_buf->sf,
+                                          ref_buf->buf->y_crop_width,
+                                          ref_buf->buf->y_crop_height,
+                                          cm->width, cm->height, cm->use_high);
+#else
         vp9_setup_scale_factors_for_frame(&ref_buf->sf,
                                           ref_buf->buf->y_crop_width,
                                           ref_buf->buf->y_crop_height,
                                           cm->width, cm->height);
+#endif
         if (vp9_is_scaled(&ref_buf->sf))
           vp9_extend_frame_borders(ref_buf->buf);
       }

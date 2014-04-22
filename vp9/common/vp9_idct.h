@@ -106,6 +106,25 @@ void vp9_iht8x8_add(TX_TYPE tx_type, const int16_t *input, uint8_t *dest,
 void vp9_iht16x16_add(TX_TYPE tx_type, const int16_t *input, uint8_t *dest,
                       int stride, int eob);
 
+#if CONFIG_VP9_HIGH
+void vp9_high_iwht4x4_add(const int16_t *input, uint8_t *dest, int stride,
+                          int eob, int bps);
+void vp9_high_idct4x4_add(const int16_t *input, uint8_t *dest, int stride,
+                          int eob, int bps);
+void vp9_high_idct8x8_add(const int16_t *input, uint8_t *dest, int stride,
+                          int eob, int bps);
+void vp9_high_idct16x16_add(const int16_t *input, uint8_t *dest, int stride,
+                            int eob, int bps);
+void vp9_high_idct32x32_add(const int16_t *input, uint8_t *dest, int stride,
+                            int eob, int bps);
+void vp9_high_iht4x4_add(TX_TYPE tx_type, const int16_t *input, uint8_t *dest,
+                         int stride, int eob, int bps);
+void vp9_high_iht8x8_add(TX_TYPE tx_type, const int16_t *input, uint8_t *dest,
+                         int stride, int eob, int bps);
+void vp9_high_iht16x16_add(TX_TYPE tx_type, const int16_t *input, uint8_t *dest,
+                           int stride, int eob, int bps);
+#endif
+
 
 #ifdef __cplusplus
 }  // extern "C"

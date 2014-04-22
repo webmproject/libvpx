@@ -266,6 +266,7 @@ HAVE_LIST="
 EXPERIMENT_LIST="
     multiple_arf
     alpha
+    vp9_high
 "
 CONFIG_LIST="
     external_build

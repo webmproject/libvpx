@@ -77,6 +77,10 @@ FILE *kf_list;
 FILE *keyfile;
 #endif
 
+#if CONFIG_VP9_HIGH
+static void high_set_var_fns(VP9_COMP *const cpi);
+#endif
+
 static INLINE void Scale2Ratio(VPX_SCALING mode, int *hr, int *hs) {
   switch (mode) {
     case NORMAL:
@@ -409,6 +413,14 @@ static void set_speed_features(VP9_COMP *cpi) {
   if (cpi->oxcf.lossless || cpi->mb.e_mbd.lossless) {
     cpi->mb.fwd_txm4x4 = vp9_fwht4x4;
   }
+#if CONFIG_VP9_HIGH
+  if (cpi->oxcf.use_high) {
+    cpi->mb.fwd_txm4x4 = vp9_high_fdct4x4;
+    if (cpi->oxcf.lossless || cpi->mb.e_mbd.lossless) {
+      cpi->mb.fwd_txm4x4 = vp9_high_fwht4x4;
+    }
+  }
+#endif
 }
 
 static void alloc_raw_frame_buffers(VP9_COMP *cpi) {
@@ -417,6 +429,9 @@ static void alloc_raw_frame_buffers(VP9_COMP *cpi) {
 
   cpi->lookahead = vp9_lookahead_init(oxcf->width, oxcf->height,
                                       cm->subsampling_x, cm->subsampling_y,
+#if CONFIG_VP9_HIGH
+                                      cm->use_high,
+#endif
                                       oxcf->lag_in_frames);
   if (!cpi->lookahead)
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
@@ -425,6 +440,9 @@ static void alloc_raw_frame_buffers(VP9_COMP *cpi) {
   if (vp9_realloc_frame_buffer(&cpi->alt_ref_buffer,
                                oxcf->width, oxcf->height,
                                cm->subsampling_x, cm->subsampling_y,
+#if CONFIG_VP9_HIGH
+                               cm->use_high,
+#endif
                                VP9_ENC_BORDER_IN_PIXELS, NULL, NULL, NULL))
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate altref buffer");
@@ -440,6 +458,9 @@ void vp9_alloc_compressor_data(VP9_COMP *cpi) {
   if (vp9_alloc_frame_buffer(&cpi->last_frame_uf,
                              cm->width, cm->height,
                              cm->subsampling_x, cm->subsampling_y,
+#if CONFIG_VP9_HIGH
+                             cm->use_high,
+#endif
                              VP9_ENC_BORDER_IN_PIXELS))
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate last frame buffer");
@@ -447,6 +468,9 @@ void vp9_alloc_compressor_data(VP9_COMP *cpi) {
   if (vp9_alloc_frame_buffer(&cpi->scaled_source,
                              cm->width, cm->height,
                              cm->subsampling_x, cm->subsampling_y,
+#if CONFIG_VP9_HIGH
+                             cm->use_high,
+#endif
                              VP9_ENC_BORDER_IN_PIXELS))
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate scaled source buffer");
@@ -454,6 +478,9 @@ void vp9_alloc_compressor_data(VP9_COMP *cpi) {
   if (vp9_alloc_frame_buffer(&cpi->scaled_last_source,
                              cm->width, cm->height,
                              cm->subsampling_x, cm->subsampling_y,
+#if CONFIG_VP9_HIGH
+                             cm->use_high,
+#endif
                              VP9_ENC_BORDER_IN_PIXELS))
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate scaled last source buffer");
@@ -479,6 +506,9 @@ static void update_frame_size(VP9_COMP *cpi) {
   if (vp9_realloc_frame_buffer(&cpi->last_frame_uf,
                                cm->width, cm->height,
                                cm->subsampling_x, cm->subsampling_y,
+#if CONFIG_VP9_HIGH
+                               cm->use_high,
+#endif
                                VP9_ENC_BORDER_IN_PIXELS, NULL, NULL, NULL))
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to reallocate last frame buffer");
@@ -486,6 +516,9 @@ static void update_frame_size(VP9_COMP *cpi) {
   if (vp9_realloc_frame_buffer(&cpi->scaled_source,
                                cm->width, cm->height,
                                cm->subsampling_x, cm->subsampling_y,
+#if CONFIG_VP9_HIGH
+                               cm->use_high,
+#endif
                                VP9_ENC_BORDER_IN_PIXELS, NULL, NULL, NULL))
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to reallocate scaled source buffer");
@@ -493,6 +526,9 @@ static void update_frame_size(VP9_COMP *cpi) {
   if (vp9_realloc_frame_buffer(&cpi->scaled_last_source,
                                cm->width, cm->height,
                                cm->subsampling_x, cm->subsampling_y,
+#if CONFIG_VP9_HIGH
+                               cm->use_high,
+#endif
                                VP9_ENC_BORDER_IN_PIXELS, NULL, NULL, NULL))
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to reallocate scaled last source buffer");
@@ -542,6 +578,9 @@ static void init_config(struct VP9_COMP *cpi, VP9EncoderConfig *oxcf) {
 
   cm->profile = oxcf->profile;
   cm->bit_depth = oxcf->bit_depth;
+#if CONFIG_VP9_HIGH
+  cm->use_high = oxcf->use_high;
+#endif
 
   cm->width = oxcf->width;
   cm->height = oxcf->height;
@@ -602,10 +641,15 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
     cm->profile = oxcf->profile;
   cm->bit_depth = oxcf->bit_depth;
 
+  // TODO(Peter): PFCD at the moment this triggers wrongly because profile is
+  // set in global parameters, but bit-depth via a configuration control
+  /*
   if (cm->profile <= PROFILE_1)
     assert(cm->bit_depth == BITS_8);
   else
     assert(cm->bit_depth > BITS_8);
+  */
+  assert(cm->bit_depth <= BITS_12);
 
   cpi->oxcf = *oxcf;
   cpi->pass = get_pass(cpi->oxcf.mode);
@@ -622,6 +666,23 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   } else {
     cpi->mb.e_mbd.itxm_add = vp9_idct4x4_add;
   }
+#if CONFIG_VP9_HIGH
+  if (cpi->oxcf.use_high) {
+    cpi->mb.e_mbd.high_itxm_add = cpi->oxcf.lossless ? vp9_high_iwht4x4_add
+        : vp9_high_idct4x4_add;
+    switch (cm->bit_depth) {
+      case BITS_8:
+        cpi->mb.e_mbd.bps = 8;
+        break;
+      case BITS_10:
+        cpi->mb.e_mbd.bps = 10;
+        break;
+      case BITS_12:
+        cpi->mb.e_mbd.bps = 12;
+        break;
+    }
+  }
+#endif
   rc->baseline_gf_interval = DEFAULT_GF_INTERVAL;
   cpi->ref_frame_flags = VP9_ALT_FLAG | VP9_GOLD_FLAG | VP9_LAST_FLAG;
 
@@ -719,6 +780,10 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
 
   cpi->ext_refresh_frame_flags_pending = 0;
   cpi->ext_refresh_frame_context_pending = 0;
+
+#if CONFIG_VP9_HIGH
+  high_set_var_fns(cpi);
+#endif
 }
 
 #ifndef M_LOG2_E
@@ -763,6 +828,761 @@ static void cal_nmvsadcosts_hp(int *mvsadcost[2]) {
   } while (++i <= MV_MAX);
 }
 
+#if CONFIG_VP9_HIGH
+
+#define HIGH_BFP(BT, SDF, SDAF, VF, SVF, SVAF, SVFHH, SVFHV, SVFHHV, \
+            SDX3F, SDX8F, SDX4DF)\
+    cpi->fn_ptr[BT].sdf            = SDF; \
+    cpi->fn_ptr[BT].sdaf           = SDAF; \
+    cpi->fn_ptr[BT].vf             = VF; \
+    cpi->fn_ptr[BT].svf            = SVF; \
+    cpi->fn_ptr[BT].svaf           = SVAF; \
+    cpi->fn_ptr[BT].svf_halfpix_h  = SVFHH; \
+    cpi->fn_ptr[BT].svf_halfpix_v  = SVFHV; \
+    cpi->fn_ptr[BT].svf_halfpix_hv = SVFHHV; \
+    cpi->fn_ptr[BT].sdx3f          = SDX3F; \
+    cpi->fn_ptr[BT].sdx8f          = SDX8F; \
+    cpi->fn_ptr[BT].sdx4df         = SDX4DF;
+
+#define MAKE_BFP_SAD_WRAPPER(fnname) \
+static unsigned int fnname##_bits8(const uint8_t *src_ptr, \
+                                   int source_stride, \
+                                   const uint8_t *ref_ptr, \
+                                   int ref_stride, \
+                                   unsigned int max_sad) {  \
+  return fnname(src_ptr, source_stride, ref_ptr, ref_stride, max_sad); \
+} \
+static unsigned int fnname##_bits10(const uint8_t *src_ptr, \
+                                    int source_stride, \
+                                    const uint8_t *ref_ptr, \
+                                    int ref_stride, \
+                                    unsigned int max_sad) {  \
+  return fnname(src_ptr, source_stride, ref_ptr, ref_stride, max_sad) >> 2; \
+} \
+static unsigned int fnname##_bits12(const uint8_t *src_ptr, \
+                                    int source_stride, \
+                                    const uint8_t *ref_ptr, \
+                                    int ref_stride, \
+                                    unsigned int max_sad) {  \
+  return fnname(src_ptr, source_stride, ref_ptr, \
+                ref_stride, max_sad) >> 4; \
+}
+
+#define MAKE_BFP_SADAVG_WRAPPER(fnname) static unsigned int \
+fnname##_bits8(const uint8_t *src_ptr, \
+               int source_stride, \
+               const uint8_t *ref_ptr, \
+               int ref_stride, \
+               const uint8_t *second_pred, \
+               unsigned int max_sad) {  \
+  return fnname(src_ptr, source_stride, ref_ptr, ref_stride, \
+                second_pred, max_sad); \
+} \
+static unsigned int fnname##_bits10(const uint8_t *src_ptr, \
+                                    int source_stride, \
+                                    const uint8_t *ref_ptr, \
+                                    int ref_stride, \
+                                    const uint8_t *second_pred, \
+                                    unsigned int max_sad) {  \
+  return fnname(src_ptr, source_stride, ref_ptr, ref_stride, \
+                second_pred, max_sad) >> 2; \
+} \
+static unsigned int fnname##_bits12(const uint8_t *src_ptr, \
+                                    int source_stride, \
+                                    const uint8_t *ref_ptr, \
+                                    int ref_stride, \
+                                    const uint8_t *second_pred, \
+                                    unsigned int max_sad) {  \
+  return fnname(src_ptr, source_stride, ref_ptr, ref_stride, \
+                second_pred, max_sad) >> 4; \
+}
+
+#define MAKE_BFP_SAD3_WRAPPER(fnname) \
+static void fnname##_bits8(const uint8_t *src_ptr, \
+                           int source_stride, \
+                           const uint8_t *ref_ptr, \
+                           int  ref_stride, \
+                           unsigned int *sad_array) {  \
+  fnname(src_ptr, source_stride, ref_ptr, ref_stride, sad_array); \
+} \
+static void fnname##_bits10(const uint8_t *src_ptr, \
+                            int source_stride, \
+                            const uint8_t *ref_ptr, \
+                            int  ref_stride, \
+                            unsigned int *sad_array) {  \
+  int i; \
+  fnname(src_ptr, source_stride, ref_ptr, ref_stride, sad_array); \
+  for (i = 0; i < 3; i++) \
+  sad_array[i] >>= 2; \
+} \
+static void fnname##_bits12(const uint8_t *src_ptr, \
+                            int source_stride, \
+                            const uint8_t *ref_ptr, \
+                            int  ref_stride, \
+                            unsigned int *sad_array) {  \
+  int i; \
+  fnname(src_ptr, source_stride, ref_ptr, ref_stride, sad_array); \
+  for (i = 0; i < 3; i++) \
+  sad_array[i] >>= 4; \
+}
+
+#define MAKE_BFP_SAD8_WRAPPER(fnname) \
+static void fnname##_bits8(const uint8_t *src_ptr, \
+                           int source_stride, \
+                           const uint8_t *ref_ptr, \
+                           int  ref_stride, \
+                           unsigned int *sad_array) {  \
+  fnname(src_ptr, source_stride, ref_ptr, ref_stride, sad_array); \
+} \
+static void fnname##_bits10(const uint8_t *src_ptr, \
+                            int source_stride, \
+                            const uint8_t *ref_ptr, \
+                            int  ref_stride, \
+                            unsigned int *sad_array) {  \
+  int i; \
+  fnname(src_ptr, source_stride, ref_ptr, ref_stride, sad_array); \
+  for (i = 0; i < 8; i++) \
+  sad_array[i] >>= 2; \
+} \
+static void fnname##_bits12(const uint8_t *src_ptr, \
+                            int source_stride, \
+                            const uint8_t *ref_ptr, \
+                            int  ref_stride, \
+                            unsigned int *sad_array) {  \
+  int i; \
+  fnname(src_ptr, source_stride, ref_ptr, ref_stride, sad_array); \
+  for (i = 0; i < 8; i++) \
+  sad_array[i] >>= 4; \
+}
+#define MAKE_BFP_SAD4D_WRAPPER(fnname) \
+static void fnname##_bits8(const uint8_t *src_ptr, \
+                           int source_stride, \
+                           const uint8_t* const ref_ptr[], \
+                           int  ref_stride, \
+                           unsigned int *sad_array) {  \
+  fnname(src_ptr, source_stride, ref_ptr, ref_stride, sad_array); \
+} \
+static void fnname##_bits10(const uint8_t *src_ptr, \
+                            int source_stride, \
+                            const uint8_t* const ref_ptr[], \
+                            int  ref_stride, \
+                            unsigned int *sad_array) {  \
+  int i; \
+  fnname(src_ptr, source_stride, ref_ptr, ref_stride, sad_array); \
+  for (i = 0; i < 8; i++) \
+  sad_array[i] >>= 2; \
+} \
+static void fnname##_bits12(const uint8_t *src_ptr, \
+                            int source_stride, \
+                            const uint8_t* const ref_ptr[], \
+                            int  ref_stride, \
+                            unsigned int *sad_array) {  \
+  int i; \
+  fnname(src_ptr, source_stride, ref_ptr, ref_stride, sad_array); \
+  for (i = 0; i < 8; i++) \
+  sad_array[i] >>= 4; \
+}
+
+#define MAKE_BFP_WRAPPER(fnname) \
+static unsigned int fnname##_bits8(const uint8_t *src_ptr, \
+                                   int source_stride, \
+                                   const uint8_t *ref_ptr, \
+                                   int ref_stride, \
+                                   unsigned int *sse) {  \
+  unsigned int val = fnname(src_ptr, source_stride, ref_ptr, ref_stride, sse); \
+  return val; \
+} \
+static unsigned int fnname##_bits10(const uint8_t *src_ptr, \
+                                    int source_stride, \
+                                    const uint8_t *ref_ptr, \
+                                    int ref_stride, \
+                                    unsigned int *sse) {  \
+  unsigned int val = fnname(src_ptr, source_stride, ref_ptr, ref_stride, sse); \
+  *sse >>= 4; \
+  return val >> 4; \
+} \
+static unsigned int fnname##_bits12(const uint8_t *src_ptr, \
+                                    int source_stride, \
+                                    const uint8_t *ref_ptr, \
+                                    int ref_stride, \
+                                    unsigned int *sse) {  \
+  unsigned int val = fnname(src_ptr, source_stride, ref_ptr, ref_stride, sse); \
+  *sse >>= 8; \
+  return val >> 8; \
+}
+
+#define MAKE_BFP_SUB_WRAPPER(fnname) \
+static unsigned int fnname##_bits8(const uint8_t *src_ptr, \
+                                   int source_stride, \
+                                   int xoffset, \
+                                   int yoffset, \
+                                   const uint8_t *ref_ptr, \
+                                   int ref_stride, \
+                                   unsigned int *sse) {  \
+  unsigned int val = fnname(src_ptr, source_stride, xoffset, yoffset, ref_ptr, \
+                            ref_stride, sse); \
+  return val; \
+} \
+static unsigned int fnname##_bits10(const uint8_t *src_ptr, \
+                                    int source_stride, \
+                                    int xoffset, \
+                                    int yoffset, \
+                                    const uint8_t *ref_ptr, \
+                                    int ref_stride, \
+                                    unsigned int *sse) {  \
+  unsigned int val = fnname(src_ptr, source_stride, xoffset, yoffset, ref_ptr, \
+                            ref_stride, sse); \
+  *sse >>= 4; \
+  return val >> 4; \
+} \
+static unsigned int fnname##_bits12(const uint8_t *src_ptr, \
+                                    int source_stride, \
+                                    int xoffset, \
+                                    int yoffset, \
+                                    const uint8_t *ref_ptr, \
+                                    int ref_stride, \
+                                    unsigned int *sse) {  \
+  unsigned int val = fnname(src_ptr, source_stride, xoffset, yoffset, ref_ptr, \
+                            ref_stride, sse); \
+  *sse >>= 8; \
+  return val >> 8; \
+}
+
+#define MAKE_BFP_SUB_AVG_WRAPPER(fnname) \
+static unsigned int fnname##_bits8(const uint8_t *src_ptr, \
+                                   int source_stride, \
+                                   int xoffset, \
+                                   int yoffset, \
+                                   const uint8_t *ref_ptr, \
+                                   int ref_stride, \
+                                   unsigned int *sse, \
+                                   const uint8_t *second_pred) {  \
+  unsigned int val = fnname(src_ptr, source_stride, xoffset, yoffset, ref_ptr, \
+                            ref_stride, sse, second_pred); \
+  return val; \
+} \
+static unsigned int fnname##_bits10(const uint8_t *src_ptr, \
+                                    int source_stride, \
+                                    int xoffset, \
+                                    int yoffset, \
+                                    const uint8_t *ref_ptr, \
+                                    int ref_stride, \
+                                    unsigned int *sse, \
+                                    const uint8_t *second_pred) {  \
+  unsigned int val = fnname(src_ptr, source_stride, xoffset, yoffset, \
+                            ref_ptr, ref_stride, sse, second_pred); \
+  *sse >>= 4; \
+  return val >> 4; \
+} \
+static unsigned int fnname##_bits12(const uint8_t *src_ptr, \
+                                    int source_stride, \
+                                    int xoffset, \
+                                    int yoffset, \
+                                    const uint8_t *ref_ptr, \
+                                    int ref_stride, \
+                                    unsigned int *sse, \
+                                    const uint8_t *second_pred) {  \
+  unsigned int val = fnname(src_ptr, source_stride, xoffset, yoffset, \
+                            ref_ptr, ref_stride, sse, second_pred); \
+  *sse >>= 8; \
+  return val >> 8; \
+}
+
+MAKE_BFP_SUB_WRAPPER(vp9_high_sub_pixel_variance32x16)
+MAKE_BFP_SUB_AVG_WRAPPER(vp9_high_sub_pixel_avg_variance32x16)
+MAKE_BFP_SUB_WRAPPER(vp9_high_sub_pixel_variance16x32)
+MAKE_BFP_SUB_AVG_WRAPPER(vp9_high_sub_pixel_avg_variance16x32)
+MAKE_BFP_SUB_WRAPPER(vp9_high_sub_pixel_variance64x32)
+MAKE_BFP_SUB_AVG_WRAPPER(vp9_high_sub_pixel_avg_variance64x32)
+MAKE_BFP_SUB_WRAPPER(vp9_high_sub_pixel_variance32x64)
+MAKE_BFP_SUB_AVG_WRAPPER(vp9_high_sub_pixel_avg_variance32x64)
+MAKE_BFP_SUB_WRAPPER(vp9_high_sub_pixel_variance32x32)
+MAKE_BFP_SUB_AVG_WRAPPER(vp9_high_sub_pixel_avg_variance32x32)
+MAKE_BFP_WRAPPER(vp9_high_variance_halfpixvar32x32_h)
+MAKE_BFP_WRAPPER(vp9_high_variance_halfpixvar32x32_v)
+MAKE_BFP_WRAPPER(vp9_high_variance_halfpixvar32x32_hv)
+MAKE_BFP_SUB_WRAPPER(vp9_high_sub_pixel_variance64x64)
+MAKE_BFP_SUB_AVG_WRAPPER(vp9_high_sub_pixel_avg_variance64x64)
+MAKE_BFP_WRAPPER(vp9_high_variance_halfpixvar64x64_h)
+MAKE_BFP_WRAPPER(vp9_high_variance_halfpixvar64x64_v)
+MAKE_BFP_WRAPPER(vp9_high_variance_halfpixvar64x64_hv)
+MAKE_BFP_SUB_WRAPPER(vp9_high_sub_pixel_variance16x16)
+MAKE_BFP_SUB_AVG_WRAPPER(vp9_high_sub_pixel_avg_variance16x16)
+MAKE_BFP_WRAPPER(vp9_high_variance_halfpixvar16x16_h)
+MAKE_BFP_WRAPPER(vp9_high_variance_halfpixvar16x16_v)
+MAKE_BFP_WRAPPER(vp9_high_variance_halfpixvar16x16_hv)
+MAKE_BFP_SUB_WRAPPER(vp9_high_sub_pixel_variance16x8)
+MAKE_BFP_WRAPPER(vp9_high_variance16x8)
+MAKE_BFP_SUB_AVG_WRAPPER(vp9_high_sub_pixel_avg_variance16x8)
+MAKE_BFP_SUB_WRAPPER(vp9_high_sub_pixel_variance8x16)
+MAKE_BFP_SUB_AVG_WRAPPER(vp9_high_sub_pixel_avg_variance8x16)
+MAKE_BFP_WRAPPER(vp9_high_variance8x16)
+MAKE_BFP_WRAPPER(vp9_high_variance8x8)
+MAKE_BFP_SUB_WRAPPER(vp9_high_sub_pixel_variance8x8)
+MAKE_BFP_SUB_AVG_WRAPPER(vp9_high_sub_pixel_avg_variance8x8)
+MAKE_BFP_WRAPPER(vp9_high_variance8x4)
+MAKE_BFP_SUB_WRAPPER(vp9_high_sub_pixel_variance8x4)
+MAKE_BFP_SUB_AVG_WRAPPER(vp9_high_sub_pixel_avg_variance8x4)
+MAKE_BFP_WRAPPER(vp9_high_variance4x8)
+MAKE_BFP_SUB_WRAPPER(vp9_high_sub_pixel_variance4x8)
+MAKE_BFP_SUB_AVG_WRAPPER(vp9_high_sub_pixel_avg_variance4x8)
+MAKE_BFP_WRAPPER(vp9_high_variance4x4)
+MAKE_BFP_SUB_WRAPPER(vp9_high_sub_pixel_variance4x4)
+MAKE_BFP_SUB_AVG_WRAPPER(vp9_high_sub_pixel_avg_variance4x4)
+MAKE_BFP_WRAPPER(vp9_high_variance32x16)
+MAKE_BFP_WRAPPER(vp9_high_variance16x32)
+MAKE_BFP_WRAPPER(vp9_high_variance64x32)
+MAKE_BFP_WRAPPER(vp9_high_variance32x64)
+MAKE_BFP_WRAPPER(vp9_high_variance32x32)
+MAKE_BFP_WRAPPER(vp9_high_variance64x64)
+MAKE_BFP_WRAPPER(vp9_high_variance16x16)
+MAKE_BFP_SAD_WRAPPER(vp9_high_sad32x16)
+MAKE_BFP_SADAVG_WRAPPER(vp9_high_sad32x16_avg)
+MAKE_BFP_SAD4D_WRAPPER(vp9_high_sad32x16x4d)
+MAKE_BFP_SAD_WRAPPER(vp9_high_sad16x32)
+MAKE_BFP_SADAVG_WRAPPER(vp9_high_sad16x32_avg)
+MAKE_BFP_SAD4D_WRAPPER(vp9_high_sad16x32x4d)
+MAKE_BFP_SAD_WRAPPER(vp9_high_sad64x32)
+MAKE_BFP_SADAVG_WRAPPER(vp9_high_sad64x32_avg)
+MAKE_BFP_SAD4D_WRAPPER(vp9_high_sad64x32x4d)
+MAKE_BFP_SAD_WRAPPER(vp9_high_sad32x64)
+MAKE_BFP_SADAVG_WRAPPER(vp9_high_sad32x64_avg)
+MAKE_BFP_SAD4D_WRAPPER(vp9_high_sad32x64x4d)
+MAKE_BFP_SAD_WRAPPER(vp9_high_sad32x32)
+MAKE_BFP_SADAVG_WRAPPER(vp9_high_sad32x32_avg)
+MAKE_BFP_SAD3_WRAPPER(vp9_high_sad32x32x3)
+MAKE_BFP_SAD8_WRAPPER(vp9_high_sad32x32x8)
+MAKE_BFP_SAD4D_WRAPPER(vp9_high_sad32x32x4d)
+MAKE_BFP_SAD_WRAPPER(vp9_high_sad64x64)
+MAKE_BFP_SADAVG_WRAPPER(vp9_high_sad64x64_avg)
+MAKE_BFP_SAD3_WRAPPER(vp9_high_sad64x64x3)
+MAKE_BFP_SAD8_WRAPPER(vp9_high_sad64x64x8)
+MAKE_BFP_SAD4D_WRAPPER(vp9_high_sad64x64x4d)
+MAKE_BFP_SAD_WRAPPER(vp9_high_sad16x16)
+MAKE_BFP_SADAVG_WRAPPER(vp9_high_sad16x16_avg)
+MAKE_BFP_SAD3_WRAPPER(vp9_high_sad16x16x3)
+MAKE_BFP_SAD8_WRAPPER(vp9_high_sad16x16x8)
+MAKE_BFP_SAD4D_WRAPPER(vp9_high_sad16x16x4d)
+MAKE_BFP_SAD_WRAPPER(vp9_high_sad16x8)
+MAKE_BFP_SADAVG_WRAPPER(vp9_high_sad16x8_avg)
+MAKE_BFP_SAD3_WRAPPER(vp9_high_sad16x8x3)
+MAKE_BFP_SAD8_WRAPPER(vp9_high_sad16x8x8)
+MAKE_BFP_SAD4D_WRAPPER(vp9_high_sad16x8x4d)
+MAKE_BFP_SAD_WRAPPER(vp9_high_sad8x16)
+MAKE_BFP_SADAVG_WRAPPER(vp9_high_sad8x16_avg)
+MAKE_BFP_SAD3_WRAPPER(vp9_high_sad8x16x3)
+MAKE_BFP_SAD8_WRAPPER(vp9_high_sad8x16x8)
+MAKE_BFP_SAD4D_WRAPPER(vp9_high_sad8x16x4d)
+MAKE_BFP_SAD_WRAPPER(vp9_high_sad8x8)
+MAKE_BFP_SADAVG_WRAPPER(vp9_high_sad8x8_avg)
+MAKE_BFP_SAD3_WRAPPER(vp9_high_sad8x8x3)
+MAKE_BFP_SAD8_WRAPPER(vp9_high_sad8x8x8)
+MAKE_BFP_SAD4D_WRAPPER(vp9_high_sad8x8x4d)
+MAKE_BFP_SAD_WRAPPER(vp9_high_sad8x4)
+MAKE_BFP_SADAVG_WRAPPER(vp9_high_sad8x4_avg)
+MAKE_BFP_SAD8_WRAPPER(vp9_high_sad8x4x8)
+MAKE_BFP_SAD4D_WRAPPER(vp9_high_sad8x4x4d)
+MAKE_BFP_SAD_WRAPPER(vp9_high_sad4x8)
+MAKE_BFP_SADAVG_WRAPPER(vp9_high_sad4x8_avg)
+MAKE_BFP_SAD8_WRAPPER(vp9_high_sad4x8x8)
+MAKE_BFP_SAD4D_WRAPPER(vp9_high_sad4x8x4d)
+MAKE_BFP_SAD_WRAPPER(vp9_high_sad4x4)
+MAKE_BFP_SADAVG_WRAPPER(vp9_high_sad4x4_avg)
+MAKE_BFP_SAD3_WRAPPER(vp9_high_sad4x4x3)
+MAKE_BFP_SAD8_WRAPPER(vp9_high_sad4x4x8)
+MAKE_BFP_SAD4D_WRAPPER(vp9_high_sad4x4x4d)
+
+static void high_set_var_fns(VP9_COMP *const cpi) {
+  VP9_COMMON *const cm = &cpi->common;
+  if (cm->use_high) {
+    switch (cm->bit_depth) {
+      default:
+        HIGH_BFP(BLOCK_32X16, vp9_high_sad32x16_bits8,
+                 vp9_high_sad32x16_avg_bits8,
+                 vp9_high_variance32x16_bits8,
+                 vp9_high_sub_pixel_variance32x16_bits8,
+                 vp9_high_sub_pixel_avg_variance32x16_bits8,
+                 NULL, NULL, NULL, NULL, NULL,
+                 vp9_high_sad32x16x4d_bits8)
+
+        HIGH_BFP(BLOCK_16X32, vp9_high_sad16x32_bits8,
+                 vp9_high_sad16x32_avg_bits8,
+                 vp9_high_variance16x32_bits8,
+                 vp9_high_sub_pixel_variance16x32_bits8,
+                 vp9_high_sub_pixel_avg_variance16x32_bits8,
+                 NULL, NULL, NULL, NULL, NULL,
+                 vp9_high_sad16x32x4d_bits8)
+
+        HIGH_BFP(BLOCK_64X32, vp9_high_sad64x32_bits8,
+                 vp9_high_sad64x32_avg_bits8,
+                 vp9_high_variance64x32_bits8,
+                 vp9_high_sub_pixel_variance64x32_bits8,
+                 vp9_high_sub_pixel_avg_variance64x32_bits8,
+                 NULL, NULL, NULL, NULL, NULL,
+                 vp9_high_sad64x32x4d_bits8)
+
+        HIGH_BFP(BLOCK_32X64, vp9_high_sad32x64_bits8,
+                 vp9_high_sad32x64_avg_bits8,
+                 vp9_high_variance32x64_bits8,
+                 vp9_high_sub_pixel_variance32x64_bits8,
+                 vp9_high_sub_pixel_avg_variance32x64_bits8,
+                 NULL, NULL, NULL, NULL, NULL,
+                 vp9_high_sad32x64x4d_bits8)
+
+        HIGH_BFP(BLOCK_32X32, vp9_high_sad32x32_bits8,
+                 vp9_high_sad32x32_avg_bits8,
+                 vp9_high_variance32x32_bits8,
+                 vp9_high_sub_pixel_variance32x32_bits8,
+                 vp9_high_sub_pixel_avg_variance32x32_bits8,
+                 vp9_high_variance_halfpixvar32x32_h_bits8,
+                 vp9_high_variance_halfpixvar32x32_v_bits8,
+                 vp9_high_variance_halfpixvar32x32_hv_bits8,
+                 vp9_high_sad32x32x3_bits8,
+                 vp9_high_sad32x32x8_bits8,
+                 vp9_high_sad32x32x4d_bits8)
+
+        HIGH_BFP(BLOCK_64X64, vp9_high_sad64x64_bits8,
+                 vp9_high_sad64x64_avg_bits8,
+                 vp9_high_variance64x64_bits8,
+                 vp9_high_sub_pixel_variance64x64_bits8,
+                 vp9_high_sub_pixel_avg_variance64x64_bits8,
+                 vp9_high_variance_halfpixvar64x64_h_bits8,
+                 vp9_high_variance_halfpixvar64x64_v_bits8,
+                 vp9_high_variance_halfpixvar64x64_hv_bits8,
+                 vp9_high_sad64x64x3_bits8,
+                 vp9_high_sad64x64x8_bits8,
+                 vp9_high_sad64x64x4d_bits8)
+
+        HIGH_BFP(BLOCK_16X16, vp9_high_sad16x16_bits8,
+                 vp9_high_sad16x16_avg_bits8,
+                 vp9_high_variance16x16_bits8,
+                 vp9_high_sub_pixel_variance16x16_bits8,
+                 vp9_high_sub_pixel_avg_variance16x16_bits8,
+                 vp9_high_variance_halfpixvar16x16_h_bits8,
+                 vp9_high_variance_halfpixvar16x16_v_bits8,
+                 vp9_high_variance_halfpixvar16x16_hv_bits8,
+                 vp9_high_sad16x16x3_bits8,
+                 vp9_high_sad16x16x8_bits8,
+                 vp9_high_sad16x16x4d_bits8)
+
+        HIGH_BFP(BLOCK_16X8, vp9_high_sad16x8_bits8,
+                 vp9_high_sad16x8_avg_bits8,
+                 vp9_high_variance16x8_bits8,
+                 vp9_high_sub_pixel_variance16x8_bits8,
+                 vp9_high_sub_pixel_avg_variance16x8_bits8,
+                 NULL, NULL, NULL,
+                 vp9_high_sad16x8x3_bits8,
+                 vp9_high_sad16x8x8_bits8,
+                 vp9_high_sad16x8x4d_bits8)
+
+        HIGH_BFP(BLOCK_8X16, vp9_high_sad8x16_bits8,
+                 vp9_high_sad8x16_avg_bits8,
+                 vp9_high_variance8x16_bits8,
+                 vp9_high_sub_pixel_variance8x16_bits8,
+                 vp9_high_sub_pixel_avg_variance8x16_bits8,
+                 NULL, NULL, NULL,
+                 vp9_high_sad8x16x3_bits8,
+                 vp9_high_sad8x16x8_bits8,
+                 vp9_high_sad8x16x4d_bits8)
+
+        HIGH_BFP(BLOCK_8X8, vp9_high_sad8x8_bits8,
+                 vp9_high_sad8x8_avg_bits8,
+                 vp9_high_variance8x8_bits8,
+                 vp9_high_sub_pixel_variance8x8_bits8,
+                 vp9_high_sub_pixel_avg_variance8x8_bits8,
+                 NULL, NULL, NULL,
+                 vp9_high_sad8x8x3_bits8,
+                 vp9_high_sad8x8x8_bits8,
+                 vp9_high_sad8x8x4d_bits8)
+
+        HIGH_BFP(BLOCK_8X4, vp9_high_sad8x4_bits8,
+                 vp9_high_sad8x4_avg_bits8,
+                 vp9_high_variance8x4_bits8,
+                 vp9_high_sub_pixel_variance8x4_bits8,
+                 vp9_high_sub_pixel_avg_variance8x4_bits8,
+                 NULL, NULL, NULL, NULL,
+                 vp9_high_sad8x4x8_bits8,
+                 vp9_high_sad8x4x4d_bits8)
+
+        HIGH_BFP(BLOCK_4X8, vp9_high_sad4x8_bits8,
+                 vp9_high_sad4x8_avg_bits8,
+                 vp9_high_variance4x8_bits8,
+                 vp9_high_sub_pixel_variance4x8_bits8,
+                 vp9_high_sub_pixel_avg_variance4x8_bits8,
+                 NULL, NULL, NULL, NULL,
+                 vp9_high_sad4x8x8_bits8,
+                 vp9_high_sad4x8x4d_bits8)
+
+        HIGH_BFP(BLOCK_4X4, vp9_high_sad4x4_bits8,
+                 vp9_high_sad4x4_avg_bits8,
+                 vp9_high_variance4x4_bits8,
+                 vp9_high_sub_pixel_variance4x4_bits8,
+                 vp9_high_sub_pixel_avg_variance4x4_bits8,
+                 NULL, NULL, NULL,
+                 vp9_high_sad4x4x3_bits8,
+                 vp9_high_sad4x4x8_bits8,
+                 vp9_high_sad4x4x4d_bits8)
+        break;
+
+      case BITS_10:
+        HIGH_BFP(BLOCK_32X16, vp9_high_sad32x16_bits10,
+                 vp9_high_sad32x16_avg_bits10,
+                 vp9_high_variance32x16_bits10,
+                 vp9_high_sub_pixel_variance32x16_bits10,
+                 vp9_high_sub_pixel_avg_variance32x16_bits10,
+                 NULL, NULL, NULL, NULL, NULL,
+                 vp9_high_sad32x16x4d_bits10)
+
+        HIGH_BFP(BLOCK_16X32, vp9_high_sad16x32_bits10,
+                 vp9_high_sad16x32_avg_bits10,
+                 vp9_high_variance16x32_bits10,
+                 vp9_high_sub_pixel_variance16x32_bits10,
+                 vp9_high_sub_pixel_avg_variance16x32_bits10,
+                 NULL, NULL, NULL, NULL, NULL,
+                 vp9_high_sad16x32x4d_bits10)
+
+        HIGH_BFP(BLOCK_64X32, vp9_high_sad64x32_bits10,
+                 vp9_high_sad64x32_avg_bits10,
+                 vp9_high_variance64x32_bits10,
+                 vp9_high_sub_pixel_variance64x32_bits10,
+                 vp9_high_sub_pixel_avg_variance64x32_bits10,
+                 NULL, NULL, NULL, NULL, NULL,
+                 vp9_high_sad64x32x4d_bits10)
+
+        HIGH_BFP(BLOCK_32X64, vp9_high_sad32x64_bits10,
+                 vp9_high_sad32x64_avg_bits10,
+                 vp9_high_variance32x64_bits10,
+                 vp9_high_sub_pixel_variance32x64_bits10,
+                 vp9_high_sub_pixel_avg_variance32x64_bits10,
+                 NULL, NULL, NULL, NULL, NULL,
+                 vp9_high_sad32x64x4d_bits10)
+
+        HIGH_BFP(BLOCK_32X32, vp9_high_sad32x32_bits10,
+                 vp9_high_sad32x32_avg_bits10,
+                 vp9_high_variance32x32_bits10,
+                 vp9_high_sub_pixel_variance32x32_bits10,
+                 vp9_high_sub_pixel_avg_variance32x32_bits10,
+                 vp9_high_variance_halfpixvar32x32_h_bits10,
+                 vp9_high_variance_halfpixvar32x32_v_bits10,
+                 vp9_high_variance_halfpixvar32x32_hv_bits10,
+                 vp9_high_sad32x32x3_bits10,
+                 vp9_high_sad32x32x8_bits10,
+                 vp9_high_sad32x32x4d_bits10)
+
+        HIGH_BFP(BLOCK_64X64, vp9_high_sad64x64_bits10,
+                 vp9_high_sad64x64_avg_bits10,
+                 vp9_high_variance64x64_bits10,
+                 vp9_high_sub_pixel_variance64x64_bits10,
+                 vp9_high_sub_pixel_avg_variance64x64_bits10,
+                 vp9_high_variance_halfpixvar64x64_h_bits10,
+                 vp9_high_variance_halfpixvar64x64_v_bits10,
+                 vp9_high_variance_halfpixvar64x64_hv_bits10,
+                 vp9_high_sad64x64x3_bits10,
+                 vp9_high_sad64x64x8_bits10,
+                 vp9_high_sad64x64x4d_bits10)
+
+        HIGH_BFP(BLOCK_16X16, vp9_high_sad16x16_bits10,
+                 vp9_high_sad16x16_avg_bits10,
+                 vp9_high_variance16x16_bits10,
+                 vp9_high_sub_pixel_variance16x16_bits10,
+                 vp9_high_sub_pixel_avg_variance16x16_bits10,
+                 vp9_high_variance_halfpixvar16x16_h_bits10,
+                 vp9_high_variance_halfpixvar16x16_v_bits10,
+                 vp9_high_variance_halfpixvar16x16_hv_bits10,
+                 vp9_high_sad16x16x3_bits10,
+                 vp9_high_sad16x16x8_bits10,
+                 vp9_high_sad16x16x4d_bits10)
+
+        HIGH_BFP(BLOCK_16X8, vp9_high_sad16x8_bits10,
+                 vp9_high_sad16x8_avg_bits10,
+                 vp9_high_variance16x8_bits10,
+                 vp9_high_sub_pixel_variance16x8_bits10,
+                 vp9_high_sub_pixel_avg_variance16x8_bits10,
+                 NULL, NULL, NULL,
+                 vp9_high_sad16x8x3_bits10,
+                 vp9_high_sad16x8x8_bits10,
+                 vp9_high_sad16x8x4d_bits10)
+
+        HIGH_BFP(BLOCK_8X16, vp9_high_sad8x16_bits10,
+                 vp9_high_sad8x16_avg_bits10,
+                 vp9_high_variance8x16_bits10,
+                 vp9_high_sub_pixel_variance8x16_bits10,
+                 vp9_high_sub_pixel_avg_variance8x16_bits10,
+                 NULL, NULL, NULL,
+                 vp9_high_sad8x16x3_bits10,
+                 vp9_high_sad8x16x8_bits10,
+                 vp9_high_sad8x16x4d_bits10)
+
+        HIGH_BFP(BLOCK_8X8, vp9_high_sad8x8_bits10,
+                 vp9_high_sad8x8_avg_bits10,
+                 vp9_high_variance8x8_bits10,
+                 vp9_high_sub_pixel_variance8x8_bits10,
+                 vp9_high_sub_pixel_avg_variance8x8_bits10,
+                 NULL, NULL, NULL,
+                 vp9_high_sad8x8x3_bits10,
+                 vp9_high_sad8x8x8_bits10,
+                 vp9_high_sad8x8x4d_bits10)
+
+        HIGH_BFP(BLOCK_8X4, vp9_high_sad8x4_bits10,
+                 vp9_high_sad8x4_avg_bits10,
+                 vp9_high_variance8x4_bits10,
+                 vp9_high_sub_pixel_variance8x4_bits10,
+                 vp9_high_sub_pixel_avg_variance8x4_bits10,
+                 NULL, NULL, NULL, NULL,
+                 vp9_high_sad8x4x8_bits10,
+                 vp9_high_sad8x4x4d_bits10)
+
+        HIGH_BFP(BLOCK_4X8, vp9_high_sad4x8_bits10,
+                 vp9_high_sad4x8_avg_bits10,
+                 vp9_high_variance4x8_bits10,
+                 vp9_high_sub_pixel_variance4x8_bits10,
+                 vp9_high_sub_pixel_avg_variance4x8_bits10,
+                 NULL, NULL, NULL, NULL,
+                 vp9_high_sad4x8x8_bits10,
+                 vp9_high_sad4x8x4d_bits10)
+
+        HIGH_BFP(BLOCK_4X4, vp9_high_sad4x4_bits10,
+                 vp9_high_sad4x4_avg_bits10,
+                 vp9_high_variance4x4_bits10,
+                 vp9_high_sub_pixel_variance4x4_bits10,
+                 vp9_high_sub_pixel_avg_variance4x4_bits10,
+                 NULL, NULL, NULL,
+                 vp9_high_sad4x4x3_bits10,
+                 vp9_high_sad4x4x8_bits10,
+                 vp9_high_sad4x4x4d_bits10)
+        break;
+
+      case BITS_12:
+        HIGH_BFP(BLOCK_32X16, vp9_high_sad32x16_bits12,
+                 vp9_high_sad32x16_avg_bits12,
+                 vp9_high_variance32x16_bits12,
+                 vp9_high_sub_pixel_variance32x16_bits12,
+                 vp9_high_sub_pixel_avg_variance32x16_bits12,
+                 NULL, NULL, NULL, NULL, NULL,
+                 vp9_high_sad32x16x4d_bits12)
+
+        HIGH_BFP(BLOCK_16X32, vp9_high_sad16x32_bits12,
+                 vp9_high_sad16x32_avg_bits12,
+                 vp9_high_variance16x32_bits12,
+                 vp9_high_sub_pixel_variance16x32_bits12,
+                 vp9_high_sub_pixel_avg_variance16x32_bits12,
+                 NULL, NULL, NULL, NULL, NULL,
+                 vp9_high_sad16x32x4d_bits12)
+
+        HIGH_BFP(BLOCK_64X32, vp9_high_sad64x32_bits12,
+                 vp9_high_sad64x32_avg_bits12,
+                 vp9_high_variance64x32_bits12,
+                 vp9_high_sub_pixel_variance64x32_bits12,
+                 vp9_high_sub_pixel_avg_variance64x32_bits12,
+                 NULL, NULL, NULL, NULL, NULL,
+                 vp9_high_sad64x32x4d_bits12)
+
+        HIGH_BFP(BLOCK_32X64, vp9_high_sad32x64_bits12,
+                 vp9_high_sad32x64_avg_bits12,
+                 vp9_high_variance32x64_bits12,
+                 vp9_high_sub_pixel_variance32x64_bits12,
+                 vp9_high_sub_pixel_avg_variance32x64_bits12,
+                 NULL, NULL, NULL, NULL, NULL,
+                 vp9_high_sad32x64x4d_bits12)
+
+        HIGH_BFP(BLOCK_32X32, vp9_high_sad32x32_bits12,
+                 vp9_high_sad32x32_avg_bits12,
+                 vp9_high_variance32x32_bits12,
+                 vp9_high_sub_pixel_variance32x32_bits12,
+                 vp9_high_sub_pixel_avg_variance32x32_bits12,
+                 vp9_high_variance_halfpixvar32x32_h_bits12,
+                 vp9_high_variance_halfpixvar32x32_v_bits12,
+                 vp9_high_variance_halfpixvar32x32_hv_bits12,
+                 vp9_high_sad32x32x3_bits12,
+                 vp9_high_sad32x32x8_bits12,
+                 vp9_high_sad32x32x4d_bits12)
+
+        HIGH_BFP(BLOCK_64X64, vp9_high_sad64x64_bits12,
+                 vp9_high_sad64x64_avg_bits12,
+                 vp9_high_variance64x64_bits12,
+                 vp9_high_sub_pixel_variance64x64_bits12,
+                 vp9_high_sub_pixel_avg_variance64x64_bits12,
+                 vp9_high_variance_halfpixvar64x64_h_bits12,
+                 vp9_high_variance_halfpixvar64x64_v_bits12,
+                 vp9_high_variance_halfpixvar64x64_hv_bits12,
+                 vp9_high_sad64x64x3_bits12,
+                 vp9_high_sad64x64x8_bits12,
+                 vp9_high_sad64x64x4d_bits12)
+
+        HIGH_BFP(BLOCK_16X16, vp9_high_sad16x16_bits12,
+                 vp9_high_sad16x16_avg_bits12,
+                 vp9_high_variance16x16_bits12,
+                 vp9_high_sub_pixel_variance16x16_bits12,
+                 vp9_high_sub_pixel_avg_variance16x16_bits12,
+                 vp9_high_variance_halfpixvar16x16_h_bits12,
+                 vp9_high_variance_halfpixvar16x16_v_bits12,
+                 vp9_high_variance_halfpixvar16x16_hv_bits12,
+                 vp9_high_sad16x16x3_bits12,
+                 vp9_high_sad16x16x8_bits12,
+                 vp9_high_sad16x16x4d_bits12)
+
+        HIGH_BFP(BLOCK_16X8, vp9_high_sad16x8_bits12,
+                 vp9_high_sad16x8_avg_bits12,
+                 vp9_high_variance16x8_bits12,
+                 vp9_high_sub_pixel_variance16x8_bits12,
+                 vp9_high_sub_pixel_avg_variance16x8_bits12,
+                 NULL, NULL, NULL,
+                 vp9_high_sad16x8x3_bits12,
+                 vp9_high_sad16x8x8_bits12,
+                 vp9_high_sad16x8x4d_bits12)
+
+        HIGH_BFP(BLOCK_8X16, vp9_high_sad8x16_bits12,
+                 vp9_high_sad8x16_avg_bits12,
+                 vp9_high_variance8x16_bits12,
+                 vp9_high_sub_pixel_variance8x16_bits12,
+                 vp9_high_sub_pixel_avg_variance8x16_bits12,
+                 NULL, NULL, NULL,
+                 vp9_high_sad8x16x3_bits12,
+                 vp9_high_sad8x16x8_bits12,
+                 vp9_high_sad8x16x4d_bits12)
+
+        HIGH_BFP(BLOCK_8X8, vp9_high_sad8x8_bits12,
+                 vp9_high_sad8x8_avg_bits12,
+                 vp9_high_variance8x8_bits12,
+                 vp9_high_sub_pixel_variance8x8_bits12,
+                 vp9_high_sub_pixel_avg_variance8x8_bits12,
+                 NULL, NULL, NULL,
+                 vp9_high_sad8x8x3_bits12,
+                 vp9_high_sad8x8x8_bits12,
+                 vp9_high_sad8x8x4d_bits12)
+
+        HIGH_BFP(BLOCK_8X4, vp9_high_sad8x4_bits12,
+                 vp9_high_sad8x4_avg_bits12,
+                 vp9_high_variance8x4_bits12,
+                 vp9_high_sub_pixel_variance8x4_bits12,
+                 vp9_high_sub_pixel_avg_variance8x4_bits12,
+                 NULL, NULL, NULL, NULL,
+                 vp9_high_sad8x4x8_bits12,
+                 vp9_high_sad8x4x4d_bits12)
+
+        HIGH_BFP(BLOCK_4X8, vp9_high_sad4x8_bits12,
+                 vp9_high_sad4x8_avg_bits12,
+                 vp9_high_variance4x8_bits12,
+                 vp9_high_sub_pixel_variance4x8_bits12,
+                 vp9_high_sub_pixel_avg_variance4x8_bits12,
+                 NULL, NULL, NULL, NULL,
+                 vp9_high_sad4x8x8_bits12,
+                 vp9_high_sad4x8x4d_bits12)
+
+        HIGH_BFP(BLOCK_4X4, vp9_high_sad4x4_bits12,
+                 vp9_high_sad4x4_avg_bits12,
+                 vp9_high_variance4x4_bits12,
+                 vp9_high_sub_pixel_variance4x4_bits12,
+                 vp9_high_sub_pixel_avg_variance4x4_bits12,
+                 NULL, NULL, NULL,
+                 vp9_high_sad4x4x3_bits12,
+                 vp9_high_sad4x4x8_bits12,
+                 vp9_high_sad4x4x4d_bits12)
+        break;
+    }
+  }
+}
+#endif
 
 VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
   int i, j;
@@ -1065,6 +1885,10 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
       vp9_sub_pixel_avg_variance4x4, NULL, NULL, NULL,
       vp9_sad4x4x3, vp9_sad4x4x8, vp9_sad4x4x4d)
 
+#if CONFIG_VP9_HIGH
+  high_set_var_fns(cpi);
+#endif
+
   cpi->full_search_sad = vp9_full_search_sad;
   cpi->diamond_search_sad = vp9_diamond_search_sad;
   cpi->refining_search_sad = vp9_refining_search_sad;
@@ -1255,6 +2079,49 @@ static int64_t get_sse(const uint8_t *a, int a_stride,
   return total_sse;
 }
 
+#if CONFIG_VP9_HIGH
+static int64_t high_get_sse(const uint8_t *a, int a_stride,
+                       const uint8_t *b, int b_stride,
+                       int width, int height) {
+  const int dw = width % 16;
+  const int dh = height % 16;
+  int64_t total_sse = 0;
+  unsigned int sse = 0;
+  int sum = 0;
+  int x, y;
+
+  if (dw > 0) {
+    high_variance(&a[width - dw], a_stride, &b[width - dw], b_stride,
+             dw, height, &sse, &sum);
+    total_sse += sse;
+  }
+
+  if (dh > 0) {
+    high_variance(&a[(height - dh) * a_stride], a_stride,
+             &b[(height - dh) * b_stride], b_stride,
+             width - dw, dh, &sse, &sum);
+    total_sse += sse;
+  }
+
+  for (y = 0; y < height / 16; ++y) {
+    const uint8_t *pa = a;
+    const uint8_t *pb = b;
+    for (x = 0; x < width / 16; ++x) {
+      vp9_high_mse16x16(pa, a_stride, pb, b_stride, &sse);
+      total_sse += sse;
+
+      pa += 16;
+      pb += 16;
+    }
+
+    a += 16 * a_stride;
+    b += 16 * b_stride;
+  }
+
+  return total_sse;
+}
+#endif
+
 typedef struct {
   double psnr[4];       // total/y/u/v
   uint64_t sse[4];      // total/y/u/v
@@ -1277,9 +2144,22 @@ static void calc_psnr(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b,
     const int w = widths[i];
     const int h = heights[i];
     const uint32_t samples = w * h;
+#if CONFIG_VP9_HIGH
+    uint64_t sse;
+    if (a->flags & YV12_FLAG_HIGH) {
+      sse = high_get_sse(a_planes[i], a_strides[i],
+                                 b_planes[i], b_strides[i],
+                                 w, h);
+    } else {
+      sse = get_sse(a_planes[i], a_strides[i],
+                                 b_planes[i], b_strides[i],
+                                 w, h);
+    }
+#else
     const uint64_t sse = get_sse(a_planes[i], a_strides[i],
                                  b_planes[i], b_strides[i],
                                  w, h);
+#endif
     psnr->sse[1 + i] = sse;
     psnr->samples[1 + i] = samples;
     psnr->psnr[1 + i] = vpx_sse_to_psnr(samples, 255.0, (double)sse);
@@ -1710,6 +2590,9 @@ void vp9_scale_references(VP9_COMP *cpi) {
       vp9_realloc_frame_buffer(&cm->frame_bufs[new_fb].buf,
                                cm->width, cm->height,
                                cm->subsampling_x, cm->subsampling_y,
+#if CONFIG_VP9_HIGH
+                               cm->use_high,
+#endif
                                VP9_ENC_BORDER_IN_PIXELS, NULL, NULL, NULL);
       scale_and_extend_frame(ref, &cm->frame_bufs[new_fb].buf);
       cpi->scaled_ref_idx[ref_frame - 1] = new_fb;
@@ -2257,6 +3140,20 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   // the force key frame
   if (cpi->rc.next_key_frame_forced && cpi->rc.frames_to_key == 1) {
     cpi->ambient_err = vp9_get_y_sse(cpi->Source, get_frame_new_buffer(cm));
+#if CONFIG_VP9_HIGH
+    if (cm->use_high) {
+      switch (cm->bit_depth) {
+      default:
+        break;
+      case BITS_10:
+        cpi->ambient_err >>= 4;
+        break;
+      case BITS_12:
+        cpi->ambient_err >>= 8;
+        break;
+      }
+    }
+#endif
   }
 
   // If the encoder forced a KEY_FRAME decision
@@ -2420,12 +3317,19 @@ static void Pass2Encode(VP9_COMP *cpi, size_t *size,
 }
 
 static void check_initial_width(VP9_COMP *cpi, int subsampling_x,
-                                int subsampling_y) {
+                                int subsampling_y
+#if CONFIG_VP9_HIGH
+                                , int use_high
+#endif
+                                ) {
   VP9_COMMON *const cm = &cpi->common;
 
   if (!cpi->initial_width) {
     cm->subsampling_x = subsampling_x;
     cm->subsampling_y = subsampling_y;
+#if CONFIG_VP9_HIGH
+    cm->use_high = use_high;
+#endif
     alloc_raw_frame_buffers(cpi);
     cpi->initial_width = cm->width;
     cpi->initial_height = cm->height;
@@ -2441,8 +3345,15 @@ int vp9_receive_raw_frame(VP9_COMP *cpi, unsigned int frame_flags,
   int res = 0;
   const int subsampling_x = sd->uv_width  < sd->y_width;
   const int subsampling_y = sd->uv_height < sd->y_height;
+#if CONFIG_VP9_HIGH
+  const int use_high = sd->flags & YV12_FLAG_HIGH;
+#endif
 
+#if CONFIG_VP9_HIGH
+  check_initial_width(cpi, subsampling_x, subsampling_y, use_high);
+#else
   check_initial_width(cpi, subsampling_x, subsampling_y);
+#endif
   vpx_usec_timer_start(&timer);
   if (vp9_lookahead_push(cpi->lookahead,
                          sd, time_stamp, end_time, frame_flags))
@@ -2724,6 +3635,9 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   vp9_realloc_frame_buffer(get_frame_new_buffer(cm),
                            cm->width, cm->height,
                            cm->subsampling_x, cm->subsampling_y,
+#if CONFIG_VP9_HIGH
+                           cm->use_high,
+#endif
                            VP9_ENC_BORDER_IN_PIXELS, NULL, NULL, NULL);
 
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
@@ -2732,9 +3646,16 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     RefBuffer *const ref_buf = &cm->frame_refs[ref_frame - 1];
     ref_buf->buf = buf;
     ref_buf->idx = idx;
+#if CONFIG_VP9_HIGH
+    vp9_setup_scale_factors_for_frame(&ref_buf->sf,
+                                      buf->y_crop_width, buf->y_crop_height,
+                                      cm->width, cm->height,
+                                      (buf->flags & YV12_FLAG_HIGH) ? 1 : 0);
+#else
     vp9_setup_scale_factors_for_frame(&ref_buf->sf,
                                       buf->y_crop_width, buf->y_crop_height,
                                       cm->width, cm->height);
+#endif
 
     if (vp9_is_scaled(&ref_buf->sf))
       vp9_extend_frame_borders(buf);
@@ -2980,7 +3901,12 @@ int vp9_set_size_literal(VP9_COMP *cpi, unsigned int width,
                          unsigned int height) {
   VP9_COMMON *cm = &cpi->common;
 
+#if CONFIG_VP9_HIGH
+  // The internal bitdepth should be overwritten when the first frame arrives
+  check_initial_width(cpi, 1, 1, 0);
+#else
   check_initial_width(cpi, 1, 1);
+#endif
 
   if (width) {
     cm->width = width;
@@ -3020,11 +3946,17 @@ void vp9_set_svc(VP9_COMP *cpi, int use_svc) {
 int vp9_get_y_sse(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b) {
   assert(a->y_crop_width == b->y_crop_width);
   assert(a->y_crop_height == b->y_crop_height);
+#if CONFIG_VP9_HIGH
+  if (a->flags & YV12_FLAG_HIGH) {
+    return (int) high_get_sse(a->y_buffer, a->y_stride, b->y_buffer,
+                              b->y_stride, a->y_crop_width,
+                              a->y_crop_height);
+  }
+#endif
 
   return (int)get_sse(a->y_buffer, a->y_stride, b->y_buffer, b->y_stride,
                       a->y_crop_width, a->y_crop_height);
 }
-
 
 int vp9_get_quantizer(VP9_COMP *cpi) {
   return cpi->common.base_qindex;
