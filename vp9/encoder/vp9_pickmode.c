@@ -238,6 +238,9 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   // Mode index conversion form THR_MODES to PREDICTION_MODE for a ref frame.
   int mode_idx[MB_MODE_COUNT] = {0};
   INTERP_FILTER filter_ref = SWITCHABLE;
+  int bsl = mi_width_log2_lookup[bsize];
+  int pred_filter_search = (((mi_row + mi_col) >> bsl) +
+                            cpi->sf.chessboard_index) & 0x01;
 
   x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
 
@@ -338,6 +341,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       // motion vector is at sub-pixel accuracy level for luma component, i.e.,
       // the last three bits are all zeros.
       if ((this_mode == NEWMV || filter_ref == SWITCHABLE) &&
+          pred_filter_search &&
           ((mbmi->mv[0].as_mv.row & 0x07) != 0 ||
            (mbmi->mv[0].as_mv.col & 0x07) != 0)) {
         int64_t tmp_rdcost1 = INT64_MAX;

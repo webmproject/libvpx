@@ -268,6 +268,7 @@ static void set_rt_speed_feature(VP9_COMMON *cm, SPEED_FEATURES *sf,
     sf->use_nonrd_pick_mode = 1;
     sf->search_method = FAST_DIAMOND;
     sf->allow_skip_recode = 0;
+    sf->chessboard_index = cm->current_video_frame & 0x01;
   }
 
   if (speed >= 6) {
