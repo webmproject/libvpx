@@ -130,11 +130,9 @@ is_windows_target() {
 # Echoes yes to stdout when the file named by positional parameter one exists
 # in LIBVPX_BIN_PATH, and is executable.
 vpx_tool_available() {
-  tool_name="${1}"
-  if [ "$(is_windows_target)" = "yes" ]; then
-    tool_name="${tool_name}.exe"
-  fi
-  [ -x "${LIBVPX_BIN_PATH}/${1}" ] && echo yes
+  local tool_name="$1"
+  local tool="${LIBVPX_BIN_PATH}/${tool_name}${VPX_TEST_EXE_SUFFIX}"
+  [ -x "${tool}" ] && echo yes
 }
 
 # Echoes yes to stdout when vpx_config_option_enabled() reports yes for
@@ -178,8 +176,8 @@ vpxdec_available() {
 # present, is interpreted as a boolean flag that means the input should be sent
 # to vpxdec via pipe from cat instead of directly.
 vpxdec() {
-  input="${1}"
-  pipe_input=${2}
+  local input="${1}"
+  local pipe_input=${2}
 
   if [ $# -gt 2 ]; then
     # shift away $1 and $2 so the remaining arguments can be passed to vpxdec
@@ -187,11 +185,7 @@ vpxdec() {
     shift 2
   fi
 
-  decoder="${LIBVPX_BIN_PATH}/vpxdec"
-
-  if [ "$(is_windows_target)" = "yes" ]; then
-    decoder="${decoder}.exe"
-  fi
+  local decoder="${LIBVPX_BIN_PATH}/vpxdec${VPX_TEST_EXE_SUFFIX}"
 
   if [ -z "${pipe_input}" ]; then
     "${decoder}" "$input" --summary --noblit "$@" > /dev/null 2>&1
@@ -218,18 +212,14 @@ vpxenc_available() {
 #       Note: Extra flags currently supports a special case: when set to "-"
 #             input is piped to vpxenc via cat.
 vpxenc() {
-  encoder="${LIBVPX_BIN_PATH}/vpxenc"
-  codec="${1}"
-  width=${2}
-  height=${3}
-  frames=${4}
-  input=${5}
-  output="${VPX_TEST_OUTPUT_DIR}/${6}"
-  extra_flags=${7}
-
-  if [ "$(is_windows_target)" = "yes" ]; then
-    encoder="${encoder}.exe"
-  fi
+  local encoder="${LIBVPX_BIN_PATH}/vpxenc${VPX_TEST_EXE_SUFFIX}"
+  local codec="${1}"
+  local width=${2}
+  local height=${3}
+  local frames=${4}
+  local input=${5}
+  local output="${VPX_TEST_OUTPUT_DIR}/${6}"
+  local extra_flags=${7}
 
   # Because --ivf must be within the command line to get IVF from vpxenc.
   if echo "${output}" | egrep -q 'ivf$'; then
@@ -419,6 +409,10 @@ if ! mkdir -p "${VPX_TEST_OUTPUT_DIR}" || \
   echo "${0##*/}: Cannot create output directory, giving up."
   echo "${0##*/}:   VPX_TEST_OUTPUT_DIR=${VPX_TEST_OUTPUT_DIR}"
   exit 1
+fi
+
+if [ "$(is_windows_target)" = "yes" ]; then
+  VPX_TEST_EXE_SUFFIX=".exe"
 fi
 
 trap cleanup EXIT
