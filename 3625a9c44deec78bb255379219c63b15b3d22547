@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//smM\u003d",
+        "filename": "build/make/gen_msvs_vcxproj.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-04-23T16:59:53Z",
+      "side": 1,
+      "message": "Would be nice if we had a common utils script... looks like that ship sailed long ago, though.",
+      "revId": "3625a9c44deec78bb255379219c63b15b3d22547",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//smI\u003d",
+        "filename": "build/make/gen_msvs_vcxproj.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-04-23T16:59:53Z",
+      "side": 1,
+      "message": "Same as the other one: not sure if this need changing given the environment it\u0027s in.",
+      "revId": "3625a9c44deec78bb255379219c63b15b3d22547",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
