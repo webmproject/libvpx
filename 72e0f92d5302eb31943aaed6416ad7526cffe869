@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//shk\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 1281,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-23T21:10:03Z",
+      "side": 1,
+      "message": "Let\u0027s avoid adding new braces... What about using new function to initialize bit buffer:\n\nstatic struct vp9_read_bit_buffer *init_read_bit_buffer(VP9Decoder *pbi,\n    struct vp9_read_bit_buffer *rb,\n    const uint8_t *data, const uint8_t *data_end, uint8_t *clear_data) {\n  rb-\u003ebit_offset \u003d 0;\n  rb-\u003eerror_handler \u003d error_handler;\n  rb-\u003eerror_handler_data \u003d \u0026pbi-\u003ecommon;\n  if (pbi-\u003edecrypt_cb) {\n    const int n \u003d MIN(MAX_VP9_HEADER_SIZE, data_end - data);\n    pbi-\u003edecrypt_cb(pbi-\u003edecrypt_state, data, clear_data, n);\n    rb-\u003ebit_buffer \u003d clear_data;\n    rb-\u003ebit_buffer_end \u003d clear_data + n;\n  } else {\n    rb-\u003ebit_buffer \u003d data;\n    rb-\u003ebit_buffer_end \u003d data_end;\n  }\n  return rb;\n}\n\nAnd then:\n\n  VP9_COMMON *const cm \u003d \u0026pbi-\u003ecommon;\n  MACROBLOCKD *const xd \u003d \u0026pbi-\u003emb;\n  struct vp9_read_bit_buffer rb \u003d { 0 };\n  uint8_t clear_data[MAX_VP9_HEADER_SIZE];\n  const size_t first_partition_size \u003d read_uncompressed_header(pbi,\n      init_read_bit_buffer(pbi, \u0026rb, data, data_end, clear_data));\n  const int keyframe \u003d cm-\u003eframe_type \u003d\u003d KEY_FRAME;\n...",
+      "revId": "72e0f92d5302eb31943aaed6416ad7526cffe869",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//shI\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 323,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-23T21:10:03Z",
+      "side": 1,
+      "message": "use INLINE macro instead.",
+      "revId": "72e0f92d5302eb31943aaed6416ad7526cffe869",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//shQ\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 634,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-23T21:10:03Z",
+      "side": 1,
+      "message": "Please use ternary operator:\n\nctx-\u003edecrypt_cb \u003d init ? init-\u003edecrypt_cb : NULL;\n\nctx_decrypt_state \u003d init ? init-\u003edecrypt_state : NULL;",
+      "revId": "72e0f92d5302eb31943aaed6416ad7526cffe869",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//shc\u003d",
+        "filename": "vpx/vp8dx.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-23T21:10:03Z",
+      "side": 1,
+      "message": "Remove this line because VP8D_SET_DECRYPTOR \u003d\u003d VPXD_SET_DECRYPTOR.",
+      "revId": "72e0f92d5302eb31943aaed6416ad7526cffe869",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
