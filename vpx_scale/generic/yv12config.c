@@ -183,8 +183,7 @@ int vp9_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
       ybf->buffer_alloc = (uint8_t *)yv12_align_addr(fb->data, 32);
     } else if (frame_size > ybf->buffer_alloc_sz) {
       // Allocation to hold larger frame, or first allocation.
-      if (ybf->buffer_alloc)
-        vpx_free(ybf->buffer_alloc);
+      vpx_free(ybf->buffer_alloc);
       ybf->buffer_alloc = (uint8_t *)vpx_memalign(32, frame_size);
       if (!ybf->buffer_alloc)
         return -1;
