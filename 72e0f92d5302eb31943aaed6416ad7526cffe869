@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//sfM\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 1281,
+      "author": {
+        "id": 1001183
+      },
+      "writtenOn": "2014-04-23T22:13:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//shk\u003d",
+      "revId": "72e0f92d5302eb31943aaed6416ad7526cffe869",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//shI\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 11
@@ -30,6 +48,24 @@
       "writtenOn": "2014-04-23T21:10:03Z",
       "side": 1,
       "message": "use INLINE macro instead.",
+      "revId": "72e0f92d5302eb31943aaed6416ad7526cffe869",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sfk\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 323,
+      "author": {
+        "id": 1001183
+      },
+      "writtenOn": "2014-04-23T22:13:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//shI\u003d",
       "revId": "72e0f92d5302eb31943aaed6416ad7526cffe869",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//sfg\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 634,
+      "author": {
+        "id": 1001183
+      },
+      "writtenOn": "2014-04-23T22:13:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//shQ\u003d",
+      "revId": "72e0f92d5302eb31943aaed6416ad7526cffe869",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//shc\u003d",
         "filename": "vpx/vp8dx.h",
         "patchSetId": 11
@@ -64,6 +118,24 @@
       "writtenOn": "2014-04-23T21:10:03Z",
       "side": 1,
       "message": "Remove this line because VP8D_SET_DECRYPTOR \u003d\u003d VPXD_SET_DECRYPTOR.",
+      "revId": "72e0f92d5302eb31943aaed6416ad7526cffe869",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sfc\u003d",
+        "filename": "vpx/vp8dx.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1001183
+      },
+      "writtenOn": "2014-04-23T22:13:51Z",
+      "side": 1,
+      "message": "Without this line, we lose backward compatibility when VPX_DISABLE_CTRL_TYPECHECKS is 0.  If type-checking is on, vpx_codec_control(VP8D_SET_DECRYPTOR, ...) expands to vpx_codec_control_VP8D_SET_DECRYPTOR, which is only defined by VPX_CTRL_USE_TYPE.\n\nAt what point is it okay to break compatibility?  v2.0?  If we assume that Widevine is the only user of this feature, we can go ahead and drop the old definition now.  I thought it better to be conservative and not to make that assumption, but I could easily drop VP8D_SET_DECRYPTOR if you prefer.",
+      "parentUuid": "AAAAdn//shc\u003d",
       "revId": "72e0f92d5302eb31943aaed6416ad7526cffe869",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
