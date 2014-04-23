@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//slQ\u003d",
+        "filename": "test/vp8_decrypt_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-23T18:14:57Z",
+      "side": 1,
+      "message": "The same comment as for vp9_decrypt_test.cc.",
+      "revId": "304b24e131653da1dabad044013710c870c5c643",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//slU\u003d",
+        "filename": "test/vp9_decrypt_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-23T18:14:57Z",
+      "side": 1,
+      "message": "Please remove CONFIG_DECRYPT (search for \"decrypt\" in configure file). The original idea was to completely disable decryption feature with \"#if CONFIG_DECRYPT\". Now decryption is disabled just by setting callback to NULL.",
+      "revId": "304b24e131653da1dabad044013710c870c5c643",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//slI\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 333,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-23T18:14:57Z",
+      "side": 1,
+      "message": "These 5 lines are repeated every time:\nif (decrypt_cb) {\t\n  decrypt_cb(decrypt_state, data + data_sz - index_sz, \u0026marker2, 1);\t\n } else {\t\n   marker2 \u003d data[data_sz - index_sz];\n }\n\nCould you add an inline function read_marker() and use it like const uint8_t marker \u003d read_marker() ?",
+      "revId": "304b24e131653da1dabad044013710c870c5c643",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//slM\u003d",
+        "filename": "vpx/vp8dx.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-23T18:14:57Z",
+      "side": 1,
+      "message": "Could it be a better name for decrypt_state? It looks like this is just a pointer to the beginning of buffer with encrypted data.",
+      "revId": "304b24e131653da1dabad044013710c870c5c643",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
