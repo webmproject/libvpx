@@ -56,7 +56,7 @@
 #define MIN_EARLY_TERM_INDEX    3
 
 typedef struct {
-  MB_PREDICTION_MODE mode;
+  PREDICTION_MODE mode;
   MV_REFERENCE_FRAME ref_frame[2];
 } MODE_DEFINITION;
 
@@ -1021,8 +1021,8 @@ static void intra_super_block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
 }
 
 
-static int conditional_skipintra(MB_PREDICTION_MODE mode,
-                                 MB_PREDICTION_MODE best_intra_mode) {
+static int conditional_skipintra(PREDICTION_MODE mode,
+                                 PREDICTION_MODE best_intra_mode) {
   if (mode == D117_PRED &&
       best_intra_mode != V_PRED &&
       best_intra_mode != D135_PRED)
@@ -1043,13 +1043,13 @@ static int conditional_skipintra(MB_PREDICTION_MODE mode,
 }
 
 static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
-                                     MB_PREDICTION_MODE *best_mode,
+                                     PREDICTION_MODE *best_mode,
                                      const int *bmode_costs,
                                      ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
                                      int *bestrate, int *bestratey,
                                      int64_t *bestdistortion,
                                      BLOCK_SIZE bsize, int64_t rd_thresh) {
-  MB_PREDICTION_MODE mode;
+  PREDICTION_MODE mode;
   MACROBLOCKD *const xd = &x->e_mbd;
   int64_t best_rd = rd_thresh;
 
@@ -1195,13 +1195,13 @@ static int64_t rd_pick_intra_sub_8x8_y_mode(VP9_COMP *cpi, MACROBLOCK *mb,
   // Pick modes for each sub-block (of size 4x4, 4x8, or 8x4) in an 8x8 block.
   for (idy = 0; idy < 2; idy += num_4x4_blocks_high) {
     for (idx = 0; idx < 2; idx += num_4x4_blocks_wide) {
-      MB_PREDICTION_MODE best_mode = DC_PRED;
+      PREDICTION_MODE best_mode = DC_PRED;
       int r = INT_MAX, ry = INT_MAX;
       int64_t d = INT64_MAX, this_rd = INT64_MAX;
       i = idy * 2 + idx;
       if (cpi->common.frame_type == KEY_FRAME) {
-        const MB_PREDICTION_MODE A = vp9_above_block_mode(mic, above_mi, i);
-        const MB_PREDICTION_MODE L = vp9_left_block_mode(mic, left_mi, i);
+        const PREDICTION_MODE A = vp9_above_block_mode(mic, above_mi, i);
+        const PREDICTION_MODE L = vp9_left_block_mode(mic, left_mi, i);
 
         bmode_costs  = mb->y_mode_costs[A][L];
       }
@@ -1242,8 +1242,8 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                       BLOCK_SIZE bsize,
                                       int64_t tx_cache[TX_MODES],
                                       int64_t best_rd) {
-  MB_PREDICTION_MODE mode;
-  MB_PREDICTION_MODE mode_selected = DC_PRED;
+  PREDICTION_MODE mode;
+  PREDICTION_MODE mode_selected = DC_PRED;
   MACROBLOCKD *const xd = &x->e_mbd;
   MODE_INFO *const mic = xd->mi[0];
   int this_rate, this_rate_tokenonly, s;
@@ -1266,8 +1266,8 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
       continue;
 
     if (cpi->common.frame_type == KEY_FRAME) {
-      const MB_PREDICTION_MODE A = vp9_above_block_mode(mic, above_mi, 0);
-      const MB_PREDICTION_MODE L = vp9_left_block_mode(mic, left_mi, 0);
+      const PREDICTION_MODE A = vp9_above_block_mode(mic, above_mi, 0);
+      const PREDICTION_MODE L = vp9_left_block_mode(mic, left_mi, 0);
 
       bmode_costs = x->y_mode_costs[A][L];
     }
@@ -1361,8 +1361,8 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                        int64_t *distortion, int *skippable,
                                        BLOCK_SIZE bsize, TX_SIZE max_tx_size) {
   MACROBLOCKD *xd = &x->e_mbd;
-  MB_PREDICTION_MODE mode;
-  MB_PREDICTION_MODE mode_selected = DC_PRED;
+  PREDICTION_MODE mode;
+  PREDICTION_MODE mode_selected = DC_PRED;
   int64_t best_rd = INT64_MAX, this_rd;
   int this_rate_tokenonly, this_rate, s;
   int64_t this_distortion, this_sse;
@@ -1434,7 +1434,7 @@ static void choose_intra_uv_mode(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
                                  BLOCK_SIZE bsize, TX_SIZE max_tx_size,
                                  int *rate_uv, int *rate_uv_tokenonly,
                                  int64_t *dist_uv, int *skip_uv,
-                                 MB_PREDICTION_MODE *mode_uv) {
+                                 PREDICTION_MODE *mode_uv) {
   MACROBLOCK *const x = &cpi->mb;
 
   // Use an estimated rd for uv_intra based on DC_PRED if the
@@ -1452,7 +1452,7 @@ static void choose_intra_uv_mode(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   *mode_uv = x->e_mbd.mi[0]->mbmi.uv_mode;
 }
 
-static int cost_mv_ref(const VP9_COMP *cpi, MB_PREDICTION_MODE mode,
+static int cost_mv_ref(const VP9_COMP *cpi, PREDICTION_MODE mode,
                        int mode_context) {
   const MACROBLOCK *const x = &cpi->mb;
   const int segment_id = x->e_mbd.mi[0]->mbmi.segment_id;
@@ -1474,7 +1474,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                 int *rate_mv);
 
 static int set_and_cost_bmi_mvs(VP9_COMP *cpi, MACROBLOCKD *xd, int i,
-                                MB_PREDICTION_MODE mode, int_mv this_mv[2],
+                                PREDICTION_MODE mode, int_mv this_mv[2],
                                 int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES],
                                 int_mv seg_mvs[MAX_REF_FRAMES],
                                 int_mv *best_ref_mv[2], const int *mvjcost,
@@ -1627,7 +1627,7 @@ typedef struct {
   int64_t d;
   int64_t sse;
   int segment_yrate;
-  MB_PREDICTION_MODE modes[4];
+  PREDICTION_MODE modes[4];
   SEG_RDSTAT rdstat[4][INTER_MODES];
   int mvthresh;
 } BEST_SEG_INFO;
@@ -1725,7 +1725,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int mode_idx;
   int k, br = 0, idx, idy;
   int64_t bd = 0, block_sse = 0;
-  MB_PREDICTION_MODE this_mode;
+  PREDICTION_MODE this_mode;
   VP9_COMMON *cm = &cpi->common;
   struct macroblock_plane *const p = &x->plane[0];
   struct macroblockd_plane *const pd = &xd->plane[0];
@@ -1769,7 +1769,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
       // loop for 4x4/4x8/8x4 block coding. to be replaced with new rd loop
       int_mv mode_mv[MB_MODE_COUNT][2];
       int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES];
-      MB_PREDICTION_MODE mode_selected = ZEROMV;
+      PREDICTION_MODE mode_selected = ZEROMV;
       int64_t best_rd = INT64_MAX;
       const int i = idy * 2 + idx;
       int ref;
@@ -3132,7 +3132,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
   const struct segmentation *const seg = &cm->seg;
-  MB_PREDICTION_MODE this_mode;
+  PREDICTION_MODE this_mode;
   MV_REFERENCE_FRAME ref_frame, second_ref_frame;
   unsigned char segment_id = mbmi->segment_id;
   int comp_pred, i;
@@ -3154,13 +3154,13 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   vp9_prob comp_mode_p;
   int64_t best_intra_rd = INT64_MAX;
   int64_t best_inter_rd = INT64_MAX;
-  MB_PREDICTION_MODE best_intra_mode = DC_PRED;
+  PREDICTION_MODE best_intra_mode = DC_PRED;
   MV_REFERENCE_FRAME best_inter_ref_frame = LAST_FRAME;
   INTERP_FILTER tmp_best_filter = SWITCHABLE;
   int rate_uv_intra[TX_SIZES], rate_uv_tokenonly[TX_SIZES];
   int64_t dist_uv[TX_SIZES];
   int skip_uv[TX_SIZES];
-  MB_PREDICTION_MODE mode_uv[TX_SIZES];
+  PREDICTION_MODE mode_uv[TX_SIZES];
   int64_t mode_distortions[MB_MODE_COUNT] = {-1};
   int intra_cost_penalty = 20 * vp9_dc_quant(cm->base_qindex, cm->y_dc_delta_q);
   const int bws = num_8x8_blocks_wide_lookup[bsize] / 2;
@@ -3774,7 +3774,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   int rate_uv_intra, rate_uv_tokenonly;
   int64_t dist_uv;
   int skip_uv;
-  MB_PREDICTION_MODE mode_uv = DC_PRED;
+  PREDICTION_MODE mode_uv = DC_PRED;
   int intra_cost_penalty = 20 * vp9_dc_quant(cm->base_qindex, cm->y_dc_delta_q);
   int_mv seg_mvs[4][MAX_REF_FRAMES];
   b_mode_info best_bmodes[4];

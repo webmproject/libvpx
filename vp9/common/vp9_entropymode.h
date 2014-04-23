@@ -101,8 +101,8 @@ static INLINE const vp9_prob *get_y_mode_probs(const MODE_INFO *mi,
                                                const MODE_INFO *above_mi,
                                                const MODE_INFO *left_mi,
                                                int block) {
-  const MB_PREDICTION_MODE above = vp9_above_block_mode(mi, above_mi, block);
-  const MB_PREDICTION_MODE left = vp9_left_block_mode(mi, left_mi, block);
+  const PREDICTION_MODE above = vp9_above_block_mode(mi, above_mi, block);
+  const PREDICTION_MODE left = vp9_left_block_mode(mi, left_mi, block);
   return vp9_kf_y_mode_prob[above][left];
 }
 

@@ -131,11 +131,10 @@ static int do_16x16_zerozero_search(VP9_COMP *cpi, int_mv *dst_mv) {
 
   return err;
 }
-static int find_best_16x16_intra(VP9_COMP *cpi,
-                                 MB_PREDICTION_MODE *pbest_mode) {
+static int find_best_16x16_intra(VP9_COMP *cpi, PREDICTION_MODE *pbest_mode) {
   MACROBLOCK   *const x  = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
-  MB_PREDICTION_MODE best_mode = -1, mode;
+  PREDICTION_MODE best_mode = -1, mode;
   unsigned int best_err = INT_MAX;
 
   // calculate SATD for each intra prediction mode;

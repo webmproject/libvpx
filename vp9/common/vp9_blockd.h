@@ -77,9 +77,9 @@ typedef enum {
   ZEROMV,
   NEWMV,
   MB_MODE_COUNT
-} MB_PREDICTION_MODE;
+} PREDICTION_MODE;
 
-static INLINE int is_inter_mode(MB_PREDICTION_MODE mode) {
+static INLINE int is_inter_mode(PREDICTION_MODE mode) {
   return mode >= NEARESTMV && mode <= NEWMV;
 }
 
@@ -94,7 +94,7 @@ static INLINE int is_inter_mode(MB_PREDICTION_MODE mode) {
    is a single probability table. */
 
 typedef struct {
-  MB_PREDICTION_MODE as_mode;
+  PREDICTION_MODE as_mode;
   int_mv as_mv[2];  // first, second inter predictor motion vectors
 } b_mode_info;
 
@@ -122,14 +122,14 @@ static INLINE int mi_width_log2(BLOCK_SIZE sb_type) {
 typedef struct {
   // Common for both INTER and INTRA blocks
   BLOCK_SIZE sb_type;
-  MB_PREDICTION_MODE mode;
+  PREDICTION_MODE mode;
   TX_SIZE tx_size;
   uint8_t skip;
   uint8_t segment_id;
   uint8_t seg_id_predicted;  // valid only when temporal_update is enabled
 
   // Only for INTRA blocks
-  MB_PREDICTION_MODE uv_mode;
+  PREDICTION_MODE uv_mode;
 
   // Only for INTER blocks
   MV_REFERENCE_FRAME ref_frame[2];
@@ -144,7 +144,7 @@ typedef struct {
   b_mode_info bmi[4];
 } MODE_INFO;
 
-static INLINE MB_PREDICTION_MODE get_y_mode(const MODE_INFO *mi, int block) {
+static INLINE PREDICTION_MODE get_y_mode(const MODE_INFO *mi, int block) {
   return mi->mbmi.sb_type < BLOCK_8X8 ? mi->bmi[block].as_mode
                                       : mi->mbmi.mode;
 }
@@ -157,11 +157,11 @@ static INLINE int has_second_ref(const MB_MODE_INFO *mbmi) {
   return mbmi->ref_frame[1] > INTRA_FRAME;
 }
 
-MB_PREDICTION_MODE vp9_left_block_mode(const MODE_INFO *cur_mi,
-                                       const MODE_INFO *left_mi, int b);
+PREDICTION_MODE vp9_left_block_mode(const MODE_INFO *cur_mi,
+                                    const MODE_INFO *left_mi, int b);
 
-MB_PREDICTION_MODE vp9_above_block_mode(const MODE_INFO *cur_mi,
-                                        const MODE_INFO *above_mi, int b);
+PREDICTION_MODE vp9_above_block_mode(const MODE_INFO *cur_mi,
+                                     const MODE_INFO *above_mi, int b);
 
 enum mv_precision {
   MV_PRECISION_Q3,

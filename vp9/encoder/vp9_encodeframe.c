@@ -2412,7 +2412,7 @@ typedef enum {
 } motion_vector_context;
 
 static void set_mode_info(MB_MODE_INFO *mbmi, BLOCK_SIZE bsize,
-                          MB_PREDICTION_MODE mode) {
+                          PREDICTION_MODE mode) {
   mbmi->mode = mode;
   mbmi->uv_mode = mode;
   mbmi->mv[0].as_int = 0;
@@ -2444,8 +2444,7 @@ static void nonrd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
     vp9_pick_inter_mode(cpi, x, tile, mi_row, mi_col,
                         rate, dist, bsize);
   } else {
-    MB_PREDICTION_MODE intramode = DC_PRED;
-    set_mode_info(&xd->mi[0]->mbmi, bsize, intramode);
+    set_mode_info(&xd->mi[0]->mbmi, bsize, DC_PRED);
   }
   duplicate_mode_info_in_sb(cm, xd, mi_row, mi_col, bsize);
 }
@@ -3209,8 +3208,8 @@ void vp9_encode_frame(VP9_COMP *cpi) {
 }
 
 static void sum_intra_stats(FRAME_COUNTS *counts, const MODE_INFO *mi) {
-  const MB_PREDICTION_MODE y_mode = mi->mbmi.mode;
-  const MB_PREDICTION_MODE uv_mode = mi->mbmi.uv_mode;
+  const PREDICTION_MODE y_mode = mi->mbmi.mode;
+  const PREDICTION_MODE uv_mode = mi->mbmi.uv_mode;
   const BLOCK_SIZE bsize = mi->mbmi.sb_type;
 
   if (bsize < BLOCK_8X8) {
