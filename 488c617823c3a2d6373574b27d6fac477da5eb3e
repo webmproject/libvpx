@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//smc\u003d",
+        "filename": "build/make/gen_msvs_proj.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-04-23T16:54:24Z",
+      "side": 1,
+      "message": "break before pipe? (not sure if 80 col applies here, since it\u0027s seems to be violated within a few lines of here)",
+      "revId": "488c617823c3a2d6373574b27d6fac477da5eb3e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
