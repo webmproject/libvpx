@@ -119,7 +119,7 @@ static const arg_def_t *vp8_pp_args[] = {
 #endif
 
 static int vpx_image_scale(vpx_image_t *src, vpx_image_t *dst,
-                           FilterMode mode) {
+                           FilterModeEnum mode) {
   assert(src->fmt == VPX_IMG_FMT_I420);
   assert(dst->fmt == VPX_IMG_FMT_I420);
   return I420Scale(src->planes[VPX_PLANE_Y], src->stride[VPX_PLANE_Y],
