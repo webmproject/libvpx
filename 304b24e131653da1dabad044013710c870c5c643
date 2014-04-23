@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//sk4\u003d",
+        "filename": "test/vp8_decrypt_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1001183
+      },
+      "writtenOn": "2014-04-23T18:54:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//slQ\u003d",
+      "revId": "304b24e131653da1dabad044013710c870c5c643",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//slU\u003d",
         "filename": "test/vp9_decrypt_test.cc",
         "patchSetId": 9
@@ -30,6 +48,24 @@
       "writtenOn": "2014-04-23T18:14:57Z",
       "side": 1,
       "message": "Please remove CONFIG_DECRYPT (search for \"decrypt\" in configure file). The original idea was to completely disable decryption feature with \"#if CONFIG_DECRYPT\". Now decryption is disabled just by setting callback to NULL.",
+      "revId": "304b24e131653da1dabad044013710c870c5c643",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sk0\u003d",
+        "filename": "test/vp9_decrypt_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1001183
+      },
+      "writtenOn": "2014-04-23T18:54:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//slU\u003d",
       "revId": "304b24e131653da1dabad044013710c870c5c643",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//skw\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 333,
+      "author": {
+        "id": 1001183
+      },
+      "writtenOn": "2014-04-23T18:54:24Z",
+      "side": 1,
+      "message": "Great idea.  Done.",
+      "parentUuid": "AAAAdn//slI\u003d",
+      "revId": "304b24e131653da1dabad044013710c870c5c643",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//slM\u003d",
         "filename": "vpx/vp8dx.h",
         "patchSetId": 9
@@ -64,6 +118,24 @@
       "writtenOn": "2014-04-23T18:14:57Z",
       "side": 1,
       "message": "Could it be a better name for decrypt_state? It looks like this is just a pointer to the beginning of buffer with encrypted data.",
+      "revId": "304b24e131653da1dabad044013710c870c5c643",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sks\u003d",
+        "filename": "vpx/vp8dx.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1001183
+      },
+      "writtenOn": "2014-04-23T18:54:24Z",
+      "side": 1,
+      "message": "Although a buffer pointer may be used as the value of decrypt_state, in general it is an opaque state pointer for the callback.  Widevine, for instance, uses decryptor_state to pass back a pointer to the C++ object that owns vpx_codec_ctx_t.",
+      "parentUuid": "AAAAdn//slM\u003d",
       "revId": "304b24e131653da1dabad044013710c870c5c643",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
