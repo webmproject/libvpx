@@ -308,6 +308,7 @@ run_tests() {
   # Run tests.
   for test in ${tests_to_run}; do
     test_begin "${test}"
+    [ "${VPX_TEST_VERBOSE_OUTPUT}" = "yes" ] && echo "  RUN  ${test}"
     "${test}"
     [ "${VPX_TEST_VERBOSE_OUTPUT}" = "yes" ] && echo "  PASS ${test}"
     test_end "${test}"
