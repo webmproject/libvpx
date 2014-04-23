@@ -139,6 +139,24 @@
       "revId": "72e0f92d5302eb31943aaed6416ad7526cffe869",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ses\u003d",
+        "filename": "vpx/vp8dx.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-23T23:06:43Z",
+      "side": 1,
+      "message": "I see, let\u0027s preserve it for now. We are going to release 2.0 soon, so we could do all these incompatible changes at that time.",
+      "parentUuid": "AAAAdn//sfc\u003d",
+      "revId": "72e0f92d5302eb31943aaed6416ad7526cffe869",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
