@@ -1,0 +1,208 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//sg0\u003d",
+        "filename": "third_party/libyuv/include/libyuv/scale.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-23T21:37:09Z",
+      "side": 1,
+      "message": "This is a third party library. It probably shouldn\u0027t be modified or at least it should be a separate patch.",
+      "revId": "832cd6483d164087510bae4c0593a4fd188c7c48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sgw\u003d",
+        "filename": "vp9/common/vp9_common.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-23T21:37:09Z",
+      "side": 1,
+      "message": "Please use clamp() function which is already defined in vp9_common.h.",
+      "revId": "832cd6483d164087510bae4c0593a4fd188c7c48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sgo\u003d",
+        "filename": "vp9/common/vp9_common.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-23T21:37:09Z",
+      "side": 1,
+      "message": "You should try to follow our code style, add spaces around \u0027\u003c\u003c\u0027 operator.",
+      "revId": "832cd6483d164087510bae4c0593a4fd188c7c48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sgk\u003d",
+        "filename": "vp9/common/vp9_common.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-23T21:37:09Z",
+      "side": 1,
+      "message": "Redundant spaces around parens.",
+      "revId": "832cd6483d164087510bae4c0593a4fd188c7c48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sgE\u003d",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-23T21:37:09Z",
+      "side": 1,
+      "message": "There is already bit_depth filed in this struct. Define helper function instead, like this:\nstatic INLINE int use_high_profile(const VP9_COMMON *cm) {\n  return cm-\u003ebit_depth !\u003d BITS_8;\n}",
+      "revId": "832cd6483d164087510bae4c0593a4fd188c7c48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sgA\u003d",
+        "filename": "vp9/common/vp9_reconintra.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-23T21:37:09Z",
+      "side": 1,
+      "message": "You should probably put all these functions in a new file.",
+      "revId": "832cd6483d164087510bae4c0593a4fd188c7c48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sgI\u003d",
+        "filename": "vp9/encoder/vp9_dct.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1391,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-23T21:37:09Z",
+      "side": 1,
+      "message": "Space after every comma.",
+      "revId": "832cd6483d164087510bae4c0593a4fd188c7c48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sf8\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3788,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-23T21:37:09Z",
+      "side": 1,
+      "message": "You should remove all spaces at line ends.",
+      "revId": "832cd6483d164087510bae4c0593a4fd188c7c48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sgM\u003d",
+        "filename": "vp9/encoder/vp9_sad.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-23T21:37:09Z",
+      "side": 1,
+      "message": "Use macros for all these functions. Just look how it is implemented now.",
+      "revId": "832cd6483d164087510bae4c0593a4fd188c7c48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sgQ\u003d",
+        "filename": "vp9/encoder/vp9_variance.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 561,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-23T21:37:09Z",
+      "side": 1,
+      "message": "Please use the same approach as we use: define HIGH_VAR, HIGH_SUBPIX_VAR, HIGH_SUBPIX_AVG_VAR macros.",
+      "revId": "832cd6483d164087510bae4c0593a4fd188c7c48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sgg\u003d",
+        "filename": "vpx/vpx_image.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-23T21:37:09Z",
+      "side": 1,
+      "message": "vpx_image update should be done in a separate patch.",
+      "revId": "832cd6483d164087510bae4c0593a4fd188c7c48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sgU\u003d",
+        "filename": "vpx_scale/generic/yv12config.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-04-23T21:37:09Z",
+      "side": 1,
+      "message": "We are going to use vpx_image instead of YV12_BUFFER_CONFIG in VP9 soon. So be prepared for rebase.",
+      "revId": "832cd6483d164087510bae4c0593a4fd188c7c48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
