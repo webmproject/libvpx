@@ -1215,7 +1215,7 @@ void vp9_rc_get_one_pass_vbr_params(VP9_COMP *cpi) {
     cm->frame_type = KEY_FRAME;
     rc->this_key_frame_forced = cm->current_video_frame != 0 &&
                                 rc->frames_to_key == 0;
-    rc->frames_to_key = cpi->key_frame_frequency;
+    rc->frames_to_key = cpi->oxcf.key_freq;
     rc->kf_boost = DEFAULT_KF_BOOST;
     rc->source_alt_ref_active = 0;
   } else {
@@ -1302,7 +1302,7 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
   if ((cm->current_video_frame == 0) ||
       (cpi->frame_flags & FRAMEFLAGS_KEY) ||
       (cpi->oxcf.auto_key && (rc->frames_since_key %
-                              cpi->key_frame_frequency == 0))) {
+          cpi->oxcf.key_freq == 0))) {
     cm->frame_type = KEY_FRAME;
     rc->source_alt_ref_active = 0;
     if (cpi->pass == 0 && cpi->oxcf.rc_mode == RC_MODE_CBR) {
@@ -1330,7 +1330,7 @@ void vp9_rc_get_one_pass_cbr_params(VP9_COMP *cpi) {
     cm->frame_type = KEY_FRAME;
     rc->this_key_frame_forced = cm->current_video_frame != 0 &&
                                 rc->frames_to_key == 0;
-    rc->frames_to_key = cpi->key_frame_frequency;
+    rc->frames_to_key = cpi->oxcf.key_freq;
     rc->kf_boost = DEFAULT_KF_BOOST;
     rc->source_alt_ref_active = 0;
     target = calc_iframe_target_size_one_pass_cbr(cpi);
@@ -1415,7 +1415,7 @@ void vp9_rc_update_framerate(VP9_COMP *cpi) {
   rc->max_gf_interval = 16;
 
   // Extended interval for genuinely static scenes
-  rc->static_scene_max_gf_interval = cpi->key_frame_frequency >> 1;
+  rc->static_scene_max_gf_interval = cpi->oxcf.key_freq >> 1;
 
   // Special conditions when alt ref frame enabled in lagged compress mode
   if (oxcf->play_alternate && oxcf->lag_in_frames) {

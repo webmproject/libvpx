@@ -153,7 +153,7 @@ void vp9_update_spatial_layer_framerate(VP9_COMP *const cpi, double framerate) {
                                    oxcf->two_pass_vbrmax_section) / 100);
   lrc->max_gf_interval = 16;
 
-  lrc->static_scene_max_gf_interval = cpi->key_frame_frequency >> 1;
+  lrc->static_scene_max_gf_interval = cpi->oxcf.key_freq >> 1;
 
   if (oxcf->play_alternate && oxcf->lag_in_frames) {
     if (lrc->max_gf_interval > oxcf->lag_in_frames - 1)

@@ -337,8 +337,6 @@ typedef struct VP9_COMP {
   YV12_BUFFER_CONFIG *unscaled_last_source;
   YV12_BUFFER_CONFIG scaled_last_source;
 
-  int key_frame_frequency;
-
   int gold_is_last;  // gold same as last frame ( short circuit gold searches)
   int alt_is_last;  // Alt same as last ( short circuit altref search)
   int gold_is_alt;  // don't do both alt and gold search ( just do gold).

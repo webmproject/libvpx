@@ -829,7 +829,6 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
                                sizeof(*cpi->mbgraph_stats[i].mb_stats), 1));
   }
 
-  cpi->key_frame_frequency = cpi->oxcf.key_freq;
   cpi->refresh_alt_ref_frame = 0;
 
 #if CONFIG_MULTIPLE_ARF
