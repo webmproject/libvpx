@@ -14,6 +14,12 @@ self=$0
 self_basename=${self##*/}
 self_dirname=$(dirname "$0")
 EOL=$'\n'
+if [ "$(uname -o 2>/dev/null)" = "Cygwin" ] \
+   && cygpath --help >/dev/null 2>&1; then
+    FIXPATH='cygpath -m'
+else
+    FIXPATH='echo'
+fi
 
 show_help() {
     cat <<EOF
@@ -52,6 +58,10 @@ die_unknown(){
     echo "Unknown option \"$1\"." >&2
     echo "See ${self_basename} --help for available options." >&2
     exit 1
+}
+
+fix_path() {
+    $FIXPATH "$1"
 }
 
 generate_uuid() {
@@ -143,8 +153,8 @@ generate_filter() {
             if [ "${f##*.}" == "$pat" ]; then
                 unset file_list[i]
 
-                objf=$(echo ${f%.*}.obj | sed -e 's/^[\./]\+//g' -e 's,/,_,g')
-                open_tag File RelativePath="./$f"
+                objf=$(echo ${f%.*}.obj | sed -e 's/^[\./]\+//g' -e 's,[:/],_,g')
+                open_tag File RelativePath="$f"
 
                 if [ "$pat" == "asm" ] && $asm_use_custom_step; then
                     for plat in "${platforms[@]}"; do
@@ -211,7 +221,7 @@ for opt in "$@"; do
         ;;
         --lib) proj_kind="lib"
         ;;
-        --src-path-bare=*) src_path_bare="$optval"
+        --src-path-bare=*) src_path_bare=$(fix_path "$optval")
         ;;
         --static-crt) use_static_runtime=true
         ;;
@@ -226,8 +236,10 @@ for opt in "$@"; do
         ;;
         -I*)
             opt="${opt%/}"
-            incs="${incs}${incs:+;}&quot;${opt##-I}&quot;"
-            yasmincs="${yasmincs} ${opt}"
+            opt=${opt##-I}
+            opt=$(fix_path "$opt")
+            incs="${incs}${incs:+;}&quot;${opt}&quot;"
+            yasmincs="${yasmincs} -I${opt}"
         ;;
         -D*) defines="${defines}${defines:+;}${opt##-D}"
         ;;
@@ -236,9 +248,11 @@ for opt in "$@"; do
                 libdirs="${libdirs}${libdirs:+;}&quot;\$(OutDir)&quot;"
             else
                  # Also try directories for this platform/configuration
-                 libdirs="${libdirs}${libdirs:+;}&quot;${opt##-L}&quot;"
-                 libdirs="${libdirs}${libdirs:+;}&quot;${opt##-L}/\$(PlatformName)/\$(ConfigurationName)&quot;"
-                 libdirs="${libdirs}${libdirs:+;}&quot;${opt##-L}/\$(PlatformName)&quot;"
+                 opt=${opt##-L}
+                 opt=$(fix_path "$opt")
+                 libdirs="${libdirs}${libdirs:+;}&quot;${opt}&quot;"
+                 libdirs="${libdirs}${libdirs:+;}&quot;${opt}/\$(PlatformName)/\$(ConfigurationName)&quot;"
+                 libdirs="${libdirs}${libdirs:+;}&quot;${opt}/\$(PlatformName)&quot;"
             fi
         ;;
         -l*) libs="${libs}${libs:+ }${opt##-l}.lib"
@@ -246,7 +260,7 @@ for opt in "$@"; do
         -*) die_unknown $opt
         ;;
         *)
-            file_list[${#file_list[@]}]="$opt"
+            file_list[${#file_list[@]}]="$(fix_path $opt)"
             case "$opt" in
                  *.asm) uses_asm=true
                  ;;
