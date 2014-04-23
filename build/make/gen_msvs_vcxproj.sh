@@ -14,6 +14,12 @@ self=$0
 self_basename=${self##*/}
 self_dirname=$(dirname "$0")
 EOL=$'\n'
+if [ "$(uname -o 2>/dev/null)" = "Cygwin" ] \
+   && cygpath --help >/dev/null 2>&1; then
+    FIXPATH='cygpath -m'
+else
+    FIXPATH='echo'
+fi
 
 show_help() {
     cat <<EOF
@@ -53,6 +59,10 @@ die_unknown(){
     echo "Unknown option \"$1\"." >&2
     echo "See ${self_basename} --help for available options." >&2
     exit 1
+}
+
+fix_path() {
+    $FIXPATH "$1"
 }
 
 generate_uuid() {
@@ -154,7 +164,7 @@ generate_filter() {
             if [ "${f##*.}" == "$pat" ]; then
                 unset file_list[i]
 
-                objf=$(echo ${f%.*}.obj | sed -e 's/^[\./]\+//g' -e 's,/,_,g')
+                objf=$(echo ${f%.*}.obj | sed -e 's/^[\./]\+//g' -e 's,[:/],_,g')
 
                 if ([ "$pat" == "asm" ] || [ "$pat" == "s" ]) && $asm_use_custom_step; then
                     # Avoid object file name collisions, i.e. vpx_config.c and
@@ -162,7 +172,7 @@ generate_filter() {
                     # this additional suffix.
                     objf=${objf%.obj}_asm.obj
                     open_tag CustomBuild \
-                        Include=".\\$f"
+                        Include="$f"
                     for plat in "${platforms[@]}"; do
                         for cfg in Debug Release; do
                             tag_content Message "Assembling %(Filename)%(Extension)" \
@@ -177,7 +187,7 @@ generate_filter() {
                 elif [ "$pat" == "c" ] || \
                      [ "$pat" == "cc" ] || [ "$pat" == "cpp" ]; then
                     open_tag ClCompile \
-                        Include=".\\$f"
+                        Include="$f"
                     # Separate file names with Condition?
                     tag_content ObjectFileName "\$(IntDir)$objf"
                     # Check for AVX and turn it on to avoid warnings.
@@ -187,7 +197,7 @@ generate_filter() {
                     close_tag ClCompile
                 elif [ "$pat" == "h" ] ; then
                     tag ClInclude \
-                        Include=".\\$f"
+                        Include="$f"
                 elif [ "$pat" == "vcxproj" ] ; then
                     open_tag ProjectReference \
                         Include="$f"
@@ -197,7 +207,7 @@ generate_filter() {
                     close_tag ProjectReference
                 else
                     tag None \
-                        Include=".\\$f"
+                        Include="$f"
                 fi
 
                 break
@@ -231,7 +241,7 @@ for opt in "$@"; do
         ;;
         --lib) proj_kind="lib"
         ;;
-        --src-path-bare=*) src_path_bare="$optval"
+        --src-path-bare=*) src_path_bare=$(fix_path "$optval")
         ;;
         --static-crt) use_static_runtime=true
         ;;
@@ -248,19 +258,23 @@ for opt in "$@"; do
         ;;
         -I*)
             opt="${opt%/}"
-            incs="${incs}${incs:+;}${opt##-I}"
-            yasmincs="${yasmincs} ${opt}"
+            opt=${opt##-I}
+            opt=$(fix_path "$opt")
+            incs="${incs}${incs:+;}&quot;${opt}&quot;"
+            yasmincs="${yasmincs} -I${opt}"
         ;;
         -D*) defines="${defines}${defines:+;}${opt##-D}"
         ;;
         -L*) # fudge . to $(OutDir)
             if [ "${opt##-L}" == "." ]; then
-                libdirs="${libdirs}${libdirs:+;}\$(OutDir)"
+                libdirs="${libdirs}${libdirs:+;}&quot;\$(OutDir)&quot;"
             else
                  # Also try directories for this platform/configuration
-                 libdirs="${libdirs}${libdirs:+;}${opt##-L}"
-                 libdirs="${libdirs}${libdirs:+;}${opt##-L}/\$(PlatformName)/\$(Configuration)"
-                 libdirs="${libdirs}${libdirs:+;}${opt##-L}/\$(PlatformName)"
+                 opt=${opt##-L}
+                 opt=$(fix_path "$opt")
+                 libdirs="${libdirs}${libdirs:+;}&quot;${opt}&quot;"
+                 libdirs="${libdirs}${libdirs:+;}&quot;${opt}/\$(PlatformName)/\$(Configuration)&quot;"
+                 libdirs="${libdirs}${libdirs:+;}&quot;${opt}/\$(PlatformName)&quot;"
             fi
         ;;
         -l*) libs="${libs}${libs:+ }${opt##-l}.lib"
@@ -268,7 +282,7 @@ for opt in "$@"; do
         -*) die_unknown $opt
         ;;
         *)
-            file_list[${#file_list[@]}]="$opt"
+            file_list[${#file_list[@]}]="$(fix_path $opt)"
             case "$opt" in
                  *.asm|*.s) uses_asm=true
                  ;;
