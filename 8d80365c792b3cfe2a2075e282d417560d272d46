@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//sRo\u003d",
+        "filename": "test/simple_encoder.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-04-24T23:22:51Z",
+      "side": 1,
+      "message": "Abusing set -e from tools_common.sh: replacing this with running false fails the test.",
+      "parentUuid": "AAAAdn//sR0\u003d",
+      "revId": "8d80365c792b3cfe2a2075e282d417560d272d46",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//sR4\u003d",
         "filename": "test/simple_encoder.sh",
         "patchSetId": 3
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//sRM\u003d",
+        "filename": "test/simple_encoder.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-04-24T23:22:51Z",
+      "side": 1,
+      "message": "Ack\u0027d/agreed and noted in todo list",
+      "parentUuid": "AAAAdn//sR4\u003d",
+      "revId": "8d80365c792b3cfe2a2075e282d417560d272d46",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//sRw\u003d",
         "filename": "test/simple_encoder.sh",
         "patchSetId": 3
@@ -47,6 +83,24 @@
       "writtenOn": "2014-04-24T23:11:29Z",
       "side": 1,
       "message": "indent",
+      "revId": "8d80365c792b3cfe2a2075e282d417560d272d46",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sRY\u003d",
+        "filename": "test/simple_encoder.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-04-24T23:22:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//sRw\u003d",
       "revId": "8d80365c792b3cfe2a2075e282d417560d272d46",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
