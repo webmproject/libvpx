@@ -185,7 +185,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
         ERROR("ts_rate_decimator factors are not powers of 2");
   }
 
-  // VP8 does not support a lower bound on the keyframe interval in
+  // VP9 does not support a lower bound on the keyframe interval in
   // automatic keyframe placement mode.
   if (cfg->kf_mode != VPX_KF_DISABLED &&
       cfg->kf_min_dist != cfg->kf_max_dist &&
