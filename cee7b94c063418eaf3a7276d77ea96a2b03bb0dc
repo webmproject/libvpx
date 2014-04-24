@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//sRk\u003d",
+        "filename": "test/decode_to_md5.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-24T23:21:09Z",
+      "side": 1,
+      "message": "unless you have \u0027set -e\u0027 set you could drop the ||; the return is the last statement executed in the function",
+      "revId": "cee7b94c063418eaf3a7276d77ea96a2b03bb0dc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
