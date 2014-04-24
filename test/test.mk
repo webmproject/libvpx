@@ -42,6 +42,7 @@ LIBVPX_TEST_SRCS-yes                   += encode_test_driver.cc
 LIBVPX_TEST_SRCS-yes                   += encode_test_driver.h
 
 ## WebM Parsing
+ifeq ($(CONFIG_WEBM_IO), yes)
 NESTEGG_SRCS                           += ../third_party/nestegg/halloc/halloc.h
 NESTEGG_SRCS                           += ../third_party/nestegg/halloc/src/align.h
 NESTEGG_SRCS                           += ../third_party/nestegg/halloc/src/halloc.c
@@ -53,11 +54,14 @@ LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += ../tools_common.h
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += ../webmdec.c
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += ../webmdec.h
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += webm_video_source.h
+endif
 
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += test_vector_test.cc
 
-# Currently we only support decoder perf tests for vp9
-ifeq ($(CONFIG_DECODE_PERF_TESTS)$(CONFIG_VP9_DECODER), yesyes)
+# Currently we only support decoder perf tests for vp9. Also they read from WebM
+# files, so WebM IO is required.
+ifeq ($(CONFIG_DECODE_PERF_TESTS)$(CONFIG_VP9_DECODER)$(CONFIG_WEBM_IO), \
+      yesyesyes)
 LIBVPX_TEST_SRCS-yes                   += decode_perf_test.cc
 endif
 
