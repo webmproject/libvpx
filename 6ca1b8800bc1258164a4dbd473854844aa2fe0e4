@@ -1,0 +1,242 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//sWk\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-24T18:23:24Z",
+      "side": 1,
+      "message": "these could be in an anonymous namespace",
+      "revId": "6ca1b8800bc1258164a4dbd473854844aa2fe0e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sWw\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-24T18:23:24Z",
+      "side": 1,
+      "message": "!\u003d NULL",
+      "revId": "6ca1b8800bc1258164a4dbd473854844aa2fe0e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sWs\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-24T18:23:24Z",
+      "side": 1,
+      "message": "!\u003d NULL",
+      "revId": "6ca1b8800bc1258164a4dbd473854844aa2fe0e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sWo\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-24T18:23:24Z",
+      "side": 1,
+      "message": "!\u003d NULL",
+      "revId": "6ca1b8800bc1258164a4dbd473854844aa2fe0e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sWc\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-24T18:23:24Z",
+      "side": 1,
+      "message": "*const here and in the other private functions",
+      "revId": "6ca1b8800bc1258164a4dbd473854844aa2fe0e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sWY\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-24T18:23:24Z",
+      "side": 1,
+      "message": "*const",
+      "revId": "6ca1b8800bc1258164a4dbd473854844aa2fe0e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sWU\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-24T18:23:24Z",
+      "side": 1,
+      "message": "*const",
+      "revId": "6ca1b8800bc1258164a4dbd473854844aa2fe0e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sWQ\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-24T18:23:24Z",
+      "side": 1,
+      "message": "this can got to line 69",
+      "revId": "6ca1b8800bc1258164a4dbd473854844aa2fe0e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sWI\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-24T18:23:24Z",
+      "side": 1,
+      "message": "the \u0027*\u0027 should be associated with the variable/const in this project",
+      "revId": "6ca1b8800bc1258164a4dbd473854844aa2fe0e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sWM\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-24T18:23:24Z",
+      "side": 1,
+      "message": "prefer preincrement",
+      "revId": "6ca1b8800bc1258164a4dbd473854844aa2fe0e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sWE\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-24T18:23:24Z",
+      "side": 1,
+      "message": "probably more readable if you break after \u0027\u003d\u0027 instead here",
+      "revId": "6ca1b8800bc1258164a4dbd473854844aa2fe0e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sWA\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-24T18:23:24Z",
+      "side": 1,
+      "message": "preincrement",
+      "revId": "6ca1b8800bc1258164a4dbd473854844aa2fe0e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sV8\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-24T18:23:24Z",
+      "side": 1,
+      "message": "\u003d\u003d NULL + {}s",
+      "revId": "6ca1b8800bc1258164a4dbd473854844aa2fe0e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sV4\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-24T18:23:24Z",
+      "side": 1,
+      "message": "could be:\nreturn frame.Read() ? -1 : 0;",
+      "revId": "6ca1b8800bc1258164a4dbd473854844aa2fe0e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
