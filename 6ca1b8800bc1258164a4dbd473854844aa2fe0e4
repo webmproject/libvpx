@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//sUM\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-24T18:56:01Z",
+      "side": 1,
+      "message": "I\u0027m talking about an anonymous namespace -\u003e namespace { } for just the statics. that\u0027s local to this module and obviates \u0027static\u0027",
+      "parentUuid": "AAAAdn//sVY\u003d",
+      "revId": "6ca1b8800bc1258164a4dbd473854844aa2fe0e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//sWw\u003d",
         "filename": "webmdec.cc",
         "patchSetId": 6
