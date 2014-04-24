@@ -15,9 +15,6 @@
 ##
 . $(dirname $0)/tools_common.sh
 
-YUV_RAW_INPUT="${LIBVPX_TEST_DATA_PATH}/hantro_collage_w352h288.yuv"
-YUV_RAW_INPUT_WIDTH=352
-YUV_RAW_INPUT_HEIGHT=288
 TEST_FRAMES=10
 
 # Environment check: Make sure input is available.

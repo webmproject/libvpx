@@ -14,9 +14,6 @@
 ##
 . $(dirname $0)/tools_common.sh
 
-VP8_IVF_FILE="${LIBVPX_TEST_DATA_PATH}/vp80-00-comprehensive-001.ivf"
-VP9_WEBM_FILE="${LIBVPX_TEST_DATA_PATH}/vp90-2-00-quantizer-00.webm"
-
 # Environment check: Make sure input is available.
 vpxdec_verify_environment() {
   if [ ! -e "${VP8_IVF_FILE}" ] || [ ! -e "${VP9_WEBM_FILE}" ]; then

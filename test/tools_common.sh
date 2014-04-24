@@ -416,6 +416,17 @@ if [ "$(is_windows_target)" = "yes" ]; then
   VPX_TEST_EXE_SUFFIX=".exe"
 fi
 
+# Variables shared by tests.
+VP8_IVF_FILE="${LIBVPX_TEST_DATA_PATH}/vp80-00-comprehensive-001.ivf"
+VP9_IVF_FILE="${LIBVPX_TEST_DATA_PATH}/vp90-2-09-subpixel-00.ivf"
+
+VP9_WEBM_FILE="${LIBVPX_TEST_DATA_PATH}/vp90-2-00-quantizer-00.webm"
+
+YUV_RAW_INPUT="${LIBVPX_TEST_DATA_PATH}/hantro_collage_w352h288.yuv"
+YUV_RAW_INPUT_WIDTH=352
+YUV_RAW_INPUT_HEIGHT=288
+
+# Setup a trap function to clean up after tests complete.
 trap cleanup EXIT
 
 if [ "${VPX_TEST_VERBOSE_OUTPUT}" = "yes" ]; then
