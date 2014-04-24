@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//sTU\u003d",
+        "filename": "vp8/encoder/arm/neon/denoising_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2014-04-24T20:07:10Z",
+      "side": 0,
+      "message": "Was just discussing this with James.  Not sure why the pairwise was not used, unless there was some weird intrinsic issue.  I\u0027ll rework this code and test.",
+      "parentUuid": "AAAAdn//sTk\u003d",
+      "revId": "fb22f2abd10eb43e405a6bc95bc19e1ba5bf7dc5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//sTg\u003d",
         "filename": "vp8/encoder/arm/neon/denoising_neon.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-04-24T19:29:11Z",
       "side": 0,
       "message": "keeps sum_diff in a neon register and doing this work should be better as well.",
+      "revId": "fb22f2abd10eb43e405a6bc95bc19e1ba5bf7dc5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sTQ\u003d",
+        "filename": "vp8/encoder/arm/neon/denoising_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2014-04-24T20:07:10Z",
+      "side": 0,
+      "message": "yep",
+      "parentUuid": "AAAAdn//sTg\u003d",
       "revId": "fb22f2abd10eb43e405a6bc95bc19e1ba5bf7dc5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
