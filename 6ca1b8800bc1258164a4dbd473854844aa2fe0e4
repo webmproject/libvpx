@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//sVY\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-04-24T18:38:34Z",
+      "side": 1,
+      "message": "frank already mentioned this. putting this in a namespace breaks when including the .h file from C files. any standard way of doing this?",
+      "parentUuid": "AAAAdn//sWk\u003d",
+      "revId": "6ca1b8800bc1258164a4dbd473854844aa2fe0e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//sWw\u003d",
         "filename": "webmdec.cc",
         "patchSetId": 6
@@ -30,6 +48,24 @@
       "writtenOn": "2014-04-24T18:23:24Z",
       "side": 1,
       "message": "!\u003d NULL",
+      "revId": "6ca1b8800bc1258164a4dbd473854844aa2fe0e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sVU\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-04-24T18:38:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//sWw\u003d",
       "revId": "6ca1b8800bc1258164a4dbd473854844aa2fe0e4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//sVQ\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-04-24T18:38:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//sWs\u003d",
+      "revId": "6ca1b8800bc1258164a4dbd473854844aa2fe0e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//sWo\u003d",
         "filename": "webmdec.cc",
         "patchSetId": 6
@@ -64,6 +118,24 @@
       "writtenOn": "2014-04-24T18:23:24Z",
       "side": 1,
       "message": "!\u003d NULL",
+      "revId": "6ca1b8800bc1258164a4dbd473854844aa2fe0e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sVM\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-04-24T18:38:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//sWo\u003d",
       "revId": "6ca1b8800bc1258164a4dbd473854844aa2fe0e4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//sVI\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-04-24T18:38:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//sWc\u003d",
+      "revId": "6ca1b8800bc1258164a4dbd473854844aa2fe0e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//sWY\u003d",
         "filename": "webmdec.cc",
         "patchSetId": 6
@@ -98,6 +188,24 @@
       "writtenOn": "2014-04-24T18:23:24Z",
       "side": 1,
       "message": "*const",
+      "revId": "6ca1b8800bc1258164a4dbd473854844aa2fe0e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sVE\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-04-24T18:38:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//sWY\u003d",
       "revId": "6ca1b8800bc1258164a4dbd473854844aa2fe0e4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//sVA\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-04-24T18:38:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//sWU\u003d",
+      "revId": "6ca1b8800bc1258164a4dbd473854844aa2fe0e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//sWQ\u003d",
         "filename": "webmdec.cc",
         "patchSetId": 6
@@ -132,6 +258,24 @@
       "writtenOn": "2014-04-24T18:23:24Z",
       "side": 1,
       "message": "this can got to line 69",
+      "revId": "6ca1b8800bc1258164a4dbd473854844aa2fe0e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sU8\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-04-24T18:38:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//sWQ\u003d",
       "revId": "6ca1b8800bc1258164a4dbd473854844aa2fe0e4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//sU4\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-04-24T18:38:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//sWI\u003d",
+      "revId": "6ca1b8800bc1258164a4dbd473854844aa2fe0e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//sWM\u003d",
         "filename": "webmdec.cc",
         "patchSetId": 6
@@ -166,6 +328,24 @@
       "writtenOn": "2014-04-24T18:23:24Z",
       "side": 1,
       "message": "prefer preincrement",
+      "revId": "6ca1b8800bc1258164a4dbd473854844aa2fe0e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sU0\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-04-24T18:38:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//sWM\u003d",
       "revId": "6ca1b8800bc1258164a4dbd473854844aa2fe0e4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//sUw\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-04-24T18:38:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//sWE\u003d",
+      "revId": "6ca1b8800bc1258164a4dbd473854844aa2fe0e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//sWA\u003d",
         "filename": "webmdec.cc",
         "patchSetId": 6
@@ -200,6 +398,24 @@
       "writtenOn": "2014-04-24T18:23:24Z",
       "side": 1,
       "message": "preincrement",
+      "revId": "6ca1b8800bc1258164a4dbd473854844aa2fe0e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sUs\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-04-24T18:38:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//sWA\u003d",
       "revId": "6ca1b8800bc1258164a4dbd473854844aa2fe0e4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -223,6 +439,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//sUo\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-04-24T18:38:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//sV8\u003d",
+      "revId": "6ca1b8800bc1258164a4dbd473854844aa2fe0e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//sV4\u003d",
         "filename": "webmdec.cc",
         "patchSetId": 6
@@ -234,6 +468,24 @@
       "writtenOn": "2014-04-24T18:23:24Z",
       "side": 1,
       "message": "could be:\nreturn frame.Read() ? -1 : 0;",
+      "revId": "6ca1b8800bc1258164a4dbd473854844aa2fe0e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sUk\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2014-04-24T18:38:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//sV4\u003d",
       "revId": "6ca1b8800bc1258164a4dbd473854844aa2fe0e4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
