@@ -357,45 +357,6 @@ unsigned int vp9_variance_halfpixvar64x64_hv_c(const uint8_t *src_ptr,
                                        ref_ptr, recon_stride, sse);
 }
 
-unsigned int vp9_sub_pixel_mse16x16_c(const uint8_t *src_ptr,
-                                      int  src_pixels_per_line,
-                                      int  xoffset,
-                                      int  yoffset,
-                                      const uint8_t *dst_ptr,
-                                      int dst_pixels_per_line,
-                                      unsigned int *sse) {
-  vp9_sub_pixel_variance16x16_c(src_ptr, src_pixels_per_line,
-                                xoffset, yoffset, dst_ptr,
-                                dst_pixels_per_line, sse);
-  return *sse;
-}
-
-unsigned int vp9_sub_pixel_mse32x32_c(const uint8_t *src_ptr,
-                                      int  src_pixels_per_line,
-                                      int  xoffset,
-                                      int  yoffset,
-                                      const uint8_t *dst_ptr,
-                                      int dst_pixels_per_line,
-                                      unsigned int *sse) {
-  vp9_sub_pixel_variance32x32_c(src_ptr, src_pixels_per_line,
-                                xoffset, yoffset, dst_ptr,
-                                dst_pixels_per_line, sse);
-  return *sse;
-}
-
-unsigned int vp9_sub_pixel_mse64x64_c(const uint8_t *src_ptr,
-                                      int  src_pixels_per_line,
-                                      int  xoffset,
-                                      int  yoffset,
-                                      const uint8_t *dst_ptr,
-                                      int dst_pixels_per_line,
-                                      unsigned int *sse) {
-  vp9_sub_pixel_variance64x64_c(src_ptr, src_pixels_per_line,
-                                xoffset, yoffset, dst_ptr,
-                                dst_pixels_per_line, sse);
-  return *sse;
-}
-
 void vp9_comp_avg_pred(uint8_t *comp_pred, const uint8_t *pred, int width,
                        int height, const uint8_t *ref, int ref_stride) {
   int i, j;
