@@ -43,12 +43,12 @@ void test_decrypt_cb(void *decrypt_state, const uint8_t *input,
 
 namespace libvpx_test {
 
-TEST(TestDecrypt, DecryptWorksVp8) {
-  libvpx_test::IVFVideoSource video("vp80-00-comprehensive-001.ivf");
+TEST(TestDecrypt, DecryptWorksVp9) {
+  libvpx_test::IVFVideoSource video("vp90-2-05-resize.ivf");
   video.Init();
 
   vpx_codec_dec_cfg_t dec_cfg = {0};
-  VP8Decoder decoder(dec_cfg, 0);
+  VP9Decoder decoder(dec_cfg, 0);
 
   video.Begin();
 

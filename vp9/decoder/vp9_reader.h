@@ -16,6 +16,7 @@
 
 #include "./vpx_config.h"
 #include "vpx_ports/mem.h"
+#include "vpx/vp8dx.h"
 #include "vpx/vpx_integer.h"
 
 #include "vp9/common/vp9_prob.h"
@@ -31,12 +32,19 @@ typedef size_t BD_VALUE;
 typedef struct {
   const uint8_t *buffer_end;
   const uint8_t *buffer;
+  uint8_t clear_buffer[sizeof(BD_VALUE) + 1];
   BD_VALUE value;
   int count;
   unsigned int range;
+  vpx_decrypt_cb decrypt_cb;
+  void *decrypt_state;
 } vp9_reader;
 
-int vp9_reader_init(vp9_reader *r, const uint8_t *buffer, size_t size);
+int vp9_reader_init(vp9_reader *r,
+                    const uint8_t *buffer,
+                    size_t size,
+                    vpx_decrypt_cb decrypt_cb,
+                    void *decrypt_state);
 
 void vp9_reader_fill(vp9_reader *r);
 
