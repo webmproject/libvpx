@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//sOI\u003d",
+        "filename": "vp9/encoder/x86/vp9_variance_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-04-25T15:59:45Z",
+      "side": 1,
+      "message": "In some of these functions, there are different alignment for src and ref, i.e. src_ptr maybe aligned to certain byte boundary (16/8), the explicit information is harder to track now with *a and *b. Yunqing, correct me if I am wrong?",
+      "revId": "ed9273ce805da7b93f76b14e22d3807c0d1447ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
