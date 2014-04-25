@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//sPk\u003d",
+        "filename": "build/make/msvs_common.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-04-25T05:35:59Z",
+      "side": 1,
+      "message": "Is that EOL assignment not actually necessary? (line 16 in vcxproj.sh)",
+      "revId": "092a20f0a6ea0ee58bbe799afd01ddd284527779",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
