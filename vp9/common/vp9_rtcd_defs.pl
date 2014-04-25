@@ -563,33 +563,6 @@ specialize qw/vp9_sad4x8_avg/, "$sse_x86inc";
 add_proto qw/unsigned int vp9_sad4x4_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *second_pred, unsigned int max_sad";
 specialize qw/vp9_sad4x4_avg/, "$sse_x86inc";
 
-add_proto qw/unsigned int vp9_variance_halfpixvar16x16_h/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-specialize qw/vp9_variance_halfpixvar16x16_h/, "$sse2_x86inc";
-
-add_proto qw/unsigned int vp9_variance_halfpixvar16x16_v/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-specialize qw/vp9_variance_halfpixvar16x16_v/, "$sse2_x86inc";
-
-add_proto qw/unsigned int vp9_variance_halfpixvar16x16_hv/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-specialize qw/vp9_variance_halfpixvar16x16_hv/, "$sse2_x86inc";
-
-add_proto qw/unsigned int vp9_variance_halfpixvar64x64_h/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-specialize qw/vp9_variance_halfpixvar64x64_h/;
-
-add_proto qw/unsigned int vp9_variance_halfpixvar64x64_v/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-specialize qw/vp9_variance_halfpixvar64x64_v/;
-
-add_proto qw/unsigned int vp9_variance_halfpixvar64x64_hv/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-specialize qw/vp9_variance_halfpixvar64x64_hv/;
-
-add_proto qw/unsigned int vp9_variance_halfpixvar32x32_h/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-specialize qw/vp9_variance_halfpixvar32x32_h/;
-
-add_proto qw/unsigned int vp9_variance_halfpixvar32x32_v/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-specialize qw/vp9_variance_halfpixvar32x32_v/;
-
-add_proto qw/unsigned int vp9_variance_halfpixvar32x32_hv/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-specialize qw/vp9_variance_halfpixvar32x32_hv/;
-
 add_proto qw/void vp9_sad64x64x3/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, unsigned int *sad_array";
 specialize qw/vp9_sad64x64x3/;
 
