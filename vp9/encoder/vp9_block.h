@@ -20,12 +20,6 @@
 extern "C" {
 #endif
 
-// motion search site
-typedef struct {
-  MV mv;
-  int offset;
-} search_site;
-
 // Structure to hold snapshot of coding context during the mode picking process
 typedef struct {
   MODE_INFO mic;
@@ -107,10 +101,6 @@ struct macroblock {
   int skip_recode;
   int skip_optimize;
   int q_index;
-
-  search_site *ss;
-  int ss_count;
-  int searches_per_step;
 
   int errorperbit;
   int sadperbit16;

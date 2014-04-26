@@ -101,32 +101,32 @@ static int mvsad_err_cost(const MACROBLOCK *x, const MV *mv, const MV *ref,
   return 0;
 }
 
-void vp9_init_dsmotion_compensation(MACROBLOCK *x, int stride) {
+void vp9_init_dsmotion_compensation(search_site_config *cfg, int stride) {
   int len, ss_count = 1;
 
-  x->ss[0].mv.col = x->ss[0].mv.row = 0;
-  x->ss[0].offset = 0;
+  cfg->ss[0].mv.col = cfg->ss[0].mv.row = 0;
+  cfg->ss[0].offset = 0;
 
   for (len = MAX_FIRST_STEP; len > 0; len /= 2) {
     // Generate offsets for 4 search sites per step.
     const MV ss_mvs[] = {{-len, 0}, {len, 0}, {0, -len}, {0, len}};
     int i;
     for (i = 0; i < 4; ++i) {
-      search_site *const ss = &x->ss[ss_count++];
+      search_site *const ss = &cfg->ss[ss_count++];
       ss->mv = ss_mvs[i];
       ss->offset = ss->mv.row * stride + ss->mv.col;
     }
   }
 
-  x->ss_count = ss_count;
-  x->searches_per_step = 4;
+  cfg->ss_count = ss_count;
+  cfg->searches_per_step = 4;
 }
 
-void vp9_init3smotion_compensation(MACROBLOCK *x, int stride) {
+void vp9_init3smotion_compensation(search_site_config *cfg, int stride) {
   int len, ss_count = 1;
 
-  x->ss[0].mv.col = x->ss[0].mv.row = 0;
-  x->ss[0].offset = 0;
+  cfg->ss[0].mv.col = cfg->ss[0].mv.row = 0;
+  cfg->ss[0].offset = 0;
 
   for (len = MAX_FIRST_STEP; len > 0; len /= 2) {
     // Generate offsets for 8 search sites per step.
@@ -136,14 +136,14 @@ void vp9_init3smotion_compensation(MACROBLOCK *x, int stride) {
     };
     int i;
     for (i = 0; i < 8; ++i) {
-      search_site *const ss = &x->ss[ss_count++];
+      search_site *const ss = &cfg->ss[ss_count++];
       ss->mv = ss_mvs[i];
       ss->offset = ss->mv.row * stride + ss->mv.col;
     }
   }
 
-  x->ss_count = ss_count;
-  x->searches_per_step = 8;
+  cfg->ss_count = ss_count;
+  cfg->searches_per_step = 8;
 }
 
 /*
@@ -871,7 +871,9 @@ int vp9_fast_dia_search(const MACROBLOCK *x,
 
 #undef CHECK_BETTER
 
-int vp9_full_range_search_c(const MACROBLOCK *x, MV *ref_mv, MV *best_mv,
+int vp9_full_range_search_c(const MACROBLOCK *x,
+                            const search_site_config *cfg,
+                            MV *ref_mv, MV *best_mv,
                             int search_param, int sad_per_bit, int *num00,
                             const vp9_variance_fn_ptr_t *fn_ptr,
                             const MV *center_mv) {
@@ -962,6 +964,7 @@ int vp9_full_range_search_c(const MACROBLOCK *x, MV *ref_mv, MV *best_mv,
 }
 
 int vp9_diamond_search_sad_c(const MACROBLOCK *x,
+                             const search_site_config *cfg,
                              MV *ref_mv, MV *best_mv,
                              int search_param, int sad_per_bit, int *num00,
                              const vp9_variance_fn_ptr_t *fn_ptr,
@@ -973,8 +976,8 @@ int vp9_diamond_search_sad_c(const MACROBLOCK *x,
   // of iterations
   // 0 = initial step (MAX_FIRST_STEP) pel : 1 = (MAX_FIRST_STEP/2) pel, 2 =
   // (MAX_FIRST_STEP/4) pel... etc.
-  const search_site *const ss = &x->ss[search_param * x->searches_per_step];
-  const int tot_steps = (x->ss_count / x->searches_per_step) - search_param;
+  const search_site *const ss = &cfg->ss[search_param * cfg->searches_per_step];
+  const int tot_steps = (cfg->ss_count / cfg->searches_per_step) - search_param;
   const MV fcenter_mv = {center_mv->row >> 3, center_mv->col >> 3};
   const uint8_t *best_address, *in_what_ref;
   int best_sad = INT_MAX;
@@ -996,7 +999,7 @@ int vp9_diamond_search_sad_c(const MACROBLOCK *x,
   i = 1;
 
   for (step = 0; step < tot_steps; step++) {
-    for (j = 0; j < x->searches_per_step; j++) {
+    for (j = 0; j < cfg->searches_per_step; j++) {
       const MV mv = {best_mv->row + ss[i].mv.row,
                      best_mv->col + ss[i].mv.col};
       if (is_mv_in(x, &mv)) {
@@ -1050,6 +1053,7 @@ int vp9_diamond_search_sad_c(const MACROBLOCK *x,
 }
 
 int vp9_diamond_search_sadx4(const MACROBLOCK *x,
+                             const search_site_config *cfg,
                              MV *ref_mv, MV *best_mv, int search_param,
                              int sad_per_bit, int *num00,
                              const vp9_variance_fn_ptr_t *fn_ptr,
@@ -1075,8 +1079,8 @@ int vp9_diamond_search_sadx4(const MACROBLOCK *x,
   // 0 = initial step (MAX_FIRST_STEP) pel
   // 1 = (MAX_FIRST_STEP/2) pel,
   // 2 = (MAX_FIRST_STEP/4) pel...
-  const search_site *ss = &x->ss[search_param * x->searches_per_step];
-  const int tot_steps = (x->ss_count / x->searches_per_step) - search_param;
+  const search_site *ss = &cfg->ss[search_param * cfg->searches_per_step];
+  const int tot_steps = (cfg->ss_count / cfg->searches_per_step) - search_param;
 
   const MV fcenter_mv = {center_mv->row >> 3, center_mv->col >> 3};
   clamp_mv(ref_mv, x->mv_col_min, x->mv_col_max, x->mv_row_min, x->mv_row_max);
@@ -1112,7 +1116,7 @@ int vp9_diamond_search_sadx4(const MACROBLOCK *x,
     if (all_in) {
       unsigned int sad_array[4];
 
-      for (j = 0; j < x->searches_per_step; j += 4) {
+      for (j = 0; j < cfg->searches_per_step; j += 4) {
         unsigned char const *block_offset[4];
 
         for (t = 0; t < 4; t++)
@@ -1135,7 +1139,7 @@ int vp9_diamond_search_sadx4(const MACROBLOCK *x,
         }
       }
     } else {
-      for (j = 0; j < x->searches_per_step; j++) {
+      for (j = 0; j < cfg->searches_per_step; j++) {
         // Trap illegal vectors
         const MV this_mv = {best_mv->row + ss[i].mv.row,
                             best_mv->col + ss[i].mv.col};
@@ -1202,7 +1206,7 @@ int vp9_full_pixel_diamond(const VP9_COMP *cpi, MACROBLOCK *x,
                            const MV *ref_mv, MV *dst_mv) {
   MV temp_mv;
   int thissme, n, num00 = 0;
-  int bestsme = cpi->diamond_search_sad(x, mvp_full, &temp_mv,
+  int bestsme = cpi->diamond_search_sad(x, &cpi->ss_cfg, mvp_full, &temp_mv,
                                         step_param, sadpb, &n,
                                         fn_ptr, ref_mv);
   if (bestsme < INT_MAX)
@@ -1220,7 +1224,7 @@ int vp9_full_pixel_diamond(const VP9_COMP *cpi, MACROBLOCK *x,
     if (num00) {
       num00--;
     } else {
-      thissme = cpi->diamond_search_sad(x, mvp_full, &temp_mv,
+      thissme = cpi->diamond_search_sad(x, &cpi->ss_cfg, mvp_full, &temp_mv,
                                         step_param + n, sadpb, &num00,
                                         fn_ptr, ref_mv);
       if (thissme < INT_MAX)

@@ -497,6 +497,8 @@ typedef struct VP9_COMP {
 
   int frame_flags;
 
+  search_site_config ss_cfg;
+
 #if CONFIG_MULTIPLE_ARF
   // ARF tracking variables.
   int multi_arf_enabled;

@@ -501,9 +501,9 @@ static void update_frame_size(VP9_COMP *cpi) {
     int y_stride = cpi->scaled_source.y_stride;
 
     if (cpi->sf.search_method == NSTEP) {
-      vp9_init3smotion_compensation(&cpi->mb, y_stride);
+      vp9_init3smotion_compensation(&cpi->ss_cfg, y_stride);
     } else if (cpi->sf.search_method == DIAMOND) {
-      vp9_init_dsmotion_compensation(&cpi->mb, y_stride);
+      vp9_init_dsmotion_compensation(&cpi->ss_cfg, y_stride);
     }
   }
 
@@ -781,9 +781,6 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
   }
 
   cm->error.setjmp = 1;
-
-  CHECK_MEM_ERROR(cm, cpi->mb.ss, vpx_calloc(sizeof(search_site),
-                                             (MAX_MVSEARCH_STEPS * 8) + 1));
 
   vp9_rtcd();
 
@@ -1182,7 +1179,6 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
   }
 
   dealloc_compressor_data(cpi);
-  vpx_free(cpi->mb.ss);
   vpx_free(cpi->tok);
 
   for (i = 0; i < sizeof(cpi->mbgraph_stats) /
