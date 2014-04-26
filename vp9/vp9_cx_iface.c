@@ -818,7 +818,7 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
         }
 
         // Add the frame packet to the list of returned packets.
-        round = (vpx_codec_pts_t)1000000 * ctx->cfg.g_timebase.num / 2 - 1;
+        round = (vpx_codec_pts_t)10000000 * ctx->cfg.g_timebase.num / 2 - 1;
         delta = (dst_end_time_stamp - dst_time_stamp);
         pkt.kind = VPX_CODEC_CX_FRAME_PKT;
         pkt.data.frame.pts =
