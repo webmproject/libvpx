@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//sCA\u003d",
+        "filename": "third_party/libyuv/include/libyuv/scale.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1115299
+      },
+      "writtenOn": "2014-04-28T09:52:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//sg0\u003d",
+      "revId": "832cd6483d164087510bae4c0593a4fd188c7c48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//sgw\u003d",
         "filename": "vp9/common/vp9_common.h",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-04-23T21:37:09Z",
       "side": 1,
       "message": "Please use clamp() function which is already defined in vp9_common.h.",
+      "revId": "832cd6483d164087510bae4c0593a4fd188c7c48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sB8\u003d",
+        "filename": "vp9/common/vp9_common.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1115299
+      },
+      "writtenOn": "2014-04-28T09:52:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//sgw\u003d",
       "revId": "832cd6483d164087510bae4c0593a4fd188c7c48",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//sB4\u003d",
+        "filename": "vp9/common/vp9_common.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1115299
+      },
+      "writtenOn": "2014-04-28T09:52:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//sgo\u003d",
+      "revId": "832cd6483d164087510bae4c0593a4fd188c7c48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//sgk\u003d",
         "filename": "vp9/common/vp9_common.h",
         "patchSetId": 1
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//sB0\u003d",
+        "filename": "vp9/common/vp9_common.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1115299
+      },
+      "writtenOn": "2014-04-28T09:52:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//sgk\u003d",
+      "revId": "832cd6483d164087510bae4c0593a4fd188c7c48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//sgE\u003d",
         "filename": "vp9/common/vp9_onyxc_int.h",
         "patchSetId": 1
@@ -81,6 +153,24 @@
       "writtenOn": "2014-04-23T21:37:09Z",
       "side": 1,
       "message": "There is already bit_depth filed in this struct. Define helper function instead, like this:\nstatic INLINE int use_high_profile(const VP9_COMMON *cm) {\n  return cm-\u003ebit_depth !\u003d BITS_8;\n}",
+      "revId": "832cd6483d164087510bae4c0593a4fd188c7c48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sBw\u003d",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1115299
+      },
+      "writtenOn": "2014-04-28T09:52:23Z",
+      "side": 1,
+      "message": "We will want to make this change eventually, but at the moment it is very useful for verification to be able to compare encoding  using bit_depth\u003dBITS_8 and use_high\u003d0, with encoding using bit_depth\u003dBITS_8 and use_high\u003d1.\n(The encoder should produce bit-identical results in these two cases.)",
+      "parentUuid": "AAAAdn//sgE\u003d",
       "revId": "832cd6483d164087510bae4c0593a4fd188c7c48",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +211,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//sBs\u003d",
+        "filename": "vp9/encoder/vp9_dct.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1391,
+      "author": {
+        "id": 1115299
+      },
+      "writtenOn": "2014-04-28T09:52:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//sgI\u003d",
+      "revId": "832cd6483d164087510bae4c0593a4fd188c7c48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//sf8\u003d",
         "filename": "vp9/encoder/vp9_encoder.c",
         "patchSetId": 1
@@ -132,6 +240,24 @@
       "writtenOn": "2014-04-23T21:37:09Z",
       "side": 1,
       "message": "You should remove all spaces at line ends.",
+      "revId": "832cd6483d164087510bae4c0593a4fd188c7c48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sBo\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3788,
+      "author": {
+        "id": 1115299
+      },
+      "writtenOn": "2014-04-28T09:52:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//sf8\u003d",
       "revId": "832cd6483d164087510bae4c0593a4fd188c7c48",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +281,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//sBk\u003d",
+        "filename": "vp9/encoder/vp9_sad.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1115299
+      },
+      "writtenOn": "2014-04-28T09:52:23Z",
+      "side": 1,
+      "message": "Agreed, we followed the style from two weeks ago before the rebase.  We have modified code that follows the new style that we plan to submit as a new change once the first change id has been accepted.",
+      "parentUuid": "AAAAdn//sgM\u003d",
+      "revId": "832cd6483d164087510bae4c0593a4fd188c7c48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//sgQ\u003d",
         "filename": "vp9/encoder/vp9_variance.c",
         "patchSetId": 1
@@ -166,6 +310,24 @@
       "writtenOn": "2014-04-23T21:37:09Z",
       "side": 1,
       "message": "Please use the same approach as we use: define HIGH_VAR, HIGH_SUBPIX_VAR, HIGH_SUBPIX_AVG_VAR macros.",
+      "revId": "832cd6483d164087510bae4c0593a4fd188c7c48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//sBg\u003d",
+        "filename": "vp9/encoder/vp9_variance.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 561,
+      "author": {
+        "id": 1115299
+      },
+      "writtenOn": "2014-04-28T09:52:23Z",
+      "side": 1,
+      "message": "Agreed, we followed the style from two weeks ago before the rebase.  We have modified code that follows the new style that we plan to submit as a new change once the first change id has been accepted.",
+      "parentUuid": "AAAAdn//sgQ\u003d",
       "revId": "832cd6483d164087510bae4c0593a4fd188c7c48",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
