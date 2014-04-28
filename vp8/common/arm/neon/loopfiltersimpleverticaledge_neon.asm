@@ -9,7 +9,6 @@
 ;
 
 
-    ;EXPORT  |vp8_loop_filter_simple_vertical_edge_neon|
     EXPORT |vp8_loop_filter_bvs_neon|
     EXPORT |vp8_loop_filter_mbvs_neon|
     ARM
@@ -22,6 +21,8 @@
 ; q1    limit, PRESERVE
 
 |vp8_loop_filter_simple_vertical_edge_neon| PROC
+    vpush       {d8-d15}
+
     sub         r0, r0, #2                  ; move src pointer down by 2 columns
     add         r12, r1, r1
     add         r3, r0, r1
@@ -120,6 +121,7 @@
     vst2.8      {d14[6], d15[6]}, [r0], r12
     vst2.8      {d14[7], d15[7]}, [r3]
 
+    vpop        {d8-d15}
     bx          lr
     ENDP        ; |vp8_loop_filter_simple_vertical_edge_neon|
 

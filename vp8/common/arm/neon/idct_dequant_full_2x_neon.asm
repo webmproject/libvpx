@@ -22,6 +22,8 @@
 ; r2    *dst
 ; r3    stride
 |idct_dequant_full_2x_neon| PROC
+    vpush           {d8-d15}
+
     vld1.16         {q0, q1}, [r1]          ; dq (same l/r)
     vld1.16         {q2, q3}, [r0]          ; l q
     add             r0, r0, #32
@@ -184,6 +186,7 @@
     vst1.32         {d3[0]}, [r2]
     vst1.32         {d3[1]}, [r1]
 
+    vpop            {d8-d15}
     bx             lr
 
     ENDP           ; |idct_dequant_full_2x_neon|

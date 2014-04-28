@@ -26,6 +26,7 @@
 ; r3    int  recon_stride
 ; stack unsigned int *sse
 |vp8_variance16x16_neon| PROC
+    vpush           {q5}
     vmov.i8         q8, #0                      ;q8 - sum
     vmov.i8         q9, #0                      ;q9, q10 - sse
     vmov.i8         q10, #0
@@ -67,7 +68,7 @@ variance16x16_neon_loop
     vadd.u32        q10, q9, q10                ;accumulate sse
     vpaddl.s32      q0, q8                      ;accumulate sum
 
-    ldr             r12, [sp]                   ;load *sse from stack
+    ldr             r12, [sp, #16]              ;load *sse from stack
 
     vpaddl.u32      q1, q10
     vadd.s64        d0, d0, d1
@@ -87,6 +88,8 @@ variance16x16_neon_loop
     vsub.u32        d0, d1, d10
 
     vmov.32         r0, d0[0]                   ;return
+
+    vpop            {q5}
     bx              lr
 
     ENDP
@@ -99,6 +102,8 @@ variance16x16_neon_loop
 ;    int  recon_stride,
 ;   unsigned int *sse)
 |vp8_variance16x8_neon| PROC
+    vpush           {q5}
+
     vmov.i8         q8, #0                      ;q8 - sum
     vmov.i8         q9, #0                      ;q9, q10 - sse
     vmov.i8         q10, #0
@@ -137,7 +142,7 @@ variance16x8_neon_loop
     vadd.u32        q10, q9, q10                ;accumulate sse
     vpaddl.s32      q0, q8                      ;accumulate sum
 
-    ldr             r12, [sp]                   ;load *sse from stack
+    ldr             r12, [sp, #16]              ;load *sse from stack
 
     vpaddl.u32      q1, q10
     vadd.s64        d0, d0, d1
@@ -149,6 +154,8 @@ variance16x8_neon_loop
     vsub.u32        d0, d1, d10
 
     vmov.32         r0, d0[0]                   ;return
+
+    vpop            {q5}
     bx              lr
 
     ENDP
@@ -162,6 +169,8 @@ variance16x8_neon_loop
 ;   unsigned int *sse)
 
 |vp8_variance8x16_neon| PROC
+    vpush           {q5}
+
     vmov.i8         q8, #0                      ;q8 - sum
     vmov.i8         q9, #0                      ;q9, q10 - sse
     vmov.i8         q10, #0
@@ -192,7 +201,7 @@ variance8x16_neon_loop
     vadd.u32        q10, q9, q10                ;accumulate sse
     vpaddl.s32      q0, q8                      ;accumulate sum
 
-    ldr             r12, [sp]                   ;load *sse from stack
+    ldr             r12, [sp, #16]              ;load *sse from stack
 
     vpaddl.u32      q1, q10
     vadd.s64        d0, d0, d1
@@ -204,6 +213,8 @@ variance8x16_neon_loop
     vsub.u32        d0, d1, d10
 
     vmov.32         r0, d0[0]                   ;return
+
+    vpop            {q5}
     bx              lr
 
     ENDP
@@ -215,6 +226,8 @@ variance8x16_neon_loop
 ; r3    int  recon_stride
 ; stack unsigned int *sse
 |vp8_variance8x8_neon| PROC
+    vpush           {q5}
+
     vmov.i8         q8, #0                      ;q8 - sum
     vmov.i8         q9, #0                      ;q9, q10 - sse
     vmov.i8         q10, #0
@@ -257,7 +270,7 @@ variance8x8_neon_loop
     vadd.u32        q10, q9, q10                ;accumulate sse
     vpaddl.s32      q0, q8                      ;accumulate sum
 
-    ldr             r12, [sp]                   ;load *sse from stack
+    ldr             r12, [sp, #16]              ;load *sse from stack
 
     vpaddl.u32      q1, q10
     vadd.s64        d0, d0, d1
@@ -269,6 +282,8 @@ variance8x8_neon_loop
     vsub.u32        d0, d1, d10
 
     vmov.32         r0, d0[0]                   ;return
+
+    vpop            {q5}
     bx              lr
 
     ENDP

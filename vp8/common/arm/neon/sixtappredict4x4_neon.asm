@@ -35,10 +35,11 @@ filter4_coeff
 
 |vp8_sixtap_predict4x4_neon| PROC
     push            {r4, lr}
+    vpush           {d8-d15}
 
     adr             r12, filter4_coeff
-    ldr             r4, [sp, #8]            ;load parameters from stack
-    ldr             lr, [sp, #12]           ;load parameters from stack
+    ldr             r4, [sp, #72]            ;load parameters from stack
+    ldr             lr, [sp, #76]           ;load parameters from stack
 
     cmp             r2, #0                  ;skip first_pass filter if xoffset=0
     beq             secondpass_filter4x4_only
@@ -261,6 +262,7 @@ filter4_coeff
     vst1.32         {d4[0]}, [r1]
     vst1.32         {d4[1]}, [r2]
 
+    vpop            {d8-d15}
     pop             {r4, pc}
 
 
@@ -348,6 +350,7 @@ firstpass_filter4x4_only
     vst1.32         {d28[0]}, [r1]
     vst1.32         {d28[1]}, [r2]
 
+    vpop            {d8-d15}
     pop             {r4, pc}
 
 
@@ -413,6 +416,7 @@ secondpass_filter4x4_only
     vst1.32         {d4[0]}, [r1]
     vst1.32         {d4[1]}, [r2]
 
+    vpop            {d8-d15}
     pop             {r4, pc}
 
     ENDP
