@@ -30,6 +30,7 @@ struct vp9_extracfg {
   unsigned int                tile_rows;
   unsigned int                arnr_max_frames;
   unsigned int                arnr_strength;
+  unsigned int                arnr_type;
   vp8e_tuning                 tuning;
   unsigned int                cq_level;  // constrained quality level
   unsigned int                rc_max_intra_bitrate_pct;
@@ -59,6 +60,7 @@ static const struct extraconfig_map extracfg_map[] = {
       0,                          // tile_rows
       7,                          // arnr_max_frames
       5,                          // arnr_strength
+      3,                          // arnr_type
       VP8_TUNE_PSNR,              // tuning
       10,                         // cq_level
       0,                          // rc_max_intra_bitrate_pct
@@ -201,6 +203,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
   RANGE_CHECK_HI(extra_cfg, sharpness, 7);
   RANGE_CHECK(extra_cfg, arnr_max_frames, 0, 15);
   RANGE_CHECK_HI(extra_cfg, arnr_strength, 6);
+  RANGE_CHECK(extra_cfg, arnr_type, 1, 3);
   RANGE_CHECK(extra_cfg, cq_level, 0, 63);
 
   // TODO(yaowu): remove this when ssim tuning is implemented for vp9
@@ -364,6 +367,7 @@ static vpx_codec_err_t set_encoder_config(
 
   oxcf->arnr_max_frames = extra_cfg->arnr_max_frames;
   oxcf->arnr_strength   = extra_cfg->arnr_strength;
+  oxcf->arnr_type       = extra_cfg->arnr_type;
 
   oxcf->tuning = extra_cfg->tuning;
 
@@ -494,6 +498,7 @@ static vpx_codec_err_t ctrl_set_param(vpx_codec_alg_priv_t *ctx, int ctrl_id,
     MAP(VP9E_SET_TILE_ROWS,               extra_cfg.tile_rows);
     MAP(VP8E_SET_ARNR_MAXFRAMES,          extra_cfg.arnr_max_frames);
     MAP(VP8E_SET_ARNR_STRENGTH,           extra_cfg.arnr_strength);
+    MAP(VP8E_SET_ARNR_TYPE,               extra_cfg.arnr_type);
     MAP(VP8E_SET_TUNING,                  extra_cfg.tuning);
     MAP(VP8E_SET_CQ_LEVEL,                extra_cfg.cq_level);
     MAP(VP8E_SET_MAX_INTRA_BITRATE_PCT,   extra_cfg.rc_max_intra_bitrate_pct);
@@ -1107,6 +1112,7 @@ static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   {VP9E_SET_TILE_ROWS,                ctrl_set_param},
   {VP8E_SET_ARNR_MAXFRAMES,           ctrl_set_param},
   {VP8E_SET_ARNR_STRENGTH,            ctrl_set_param},
+  {VP8E_SET_ARNR_TYPE,                ctrl_set_param},
   {VP8E_SET_TUNING,                   ctrl_set_param},
   {VP8E_SET_CQ_LEVEL,                 ctrl_set_param},
   {VP8E_SET_MAX_INTRA_BITRATE_PCT,    ctrl_set_param},
