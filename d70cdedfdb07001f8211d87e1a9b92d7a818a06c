@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//r9U\u003d",
+        "filename": "vp9/common/vp9_rtcd_defs.pl",
+        "patchSetId": 3
+      },
+      "lineNbr": 707,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-04-28T22:40:49Z",
+      "side": 1,
+      "message": "Better to use avx2 instead of \"$avx2_x86inc\" since you don\u0027t use X86INC.",
+      "revId": "d70cdedfdb07001f8211d87e1a9b92d7a818a06c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//r9E\u003d",
+        "filename": "vp9/encoder/x86/vp9_error_intrin_avx2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-04-28T22:40:49Z",
+      "side": 1,
+      "message": "2014",
+      "revId": "d70cdedfdb07001f8211d87e1a9b92d7a818a06c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//r9I\u003d",
+        "filename": "vp9/encoder/x86/vp9_error_intrin_avx2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-04-28T22:40:49Z",
+      "side": 1,
+      "message": "Do you need to include vp9_tokenize.h?",
+      "revId": "d70cdedfdb07001f8211d87e1a9b92d7a818a06c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//r9M\u003d",
+        "filename": "vp9/encoder/x86/vp9_error_intrin_avx2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-04-28T22:40:49Z",
+      "side": 1,
+      "message": "May move zero_reg out since it is constant.",
+      "revId": "d70cdedfdb07001f8211d87e1a9b92d7a818a06c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//r9A\u003d",
+        "filename": "vp9/encoder/x86/vp9_error_intrin_avx2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-04-28T22:40:49Z",
+      "side": 1,
+      "message": "space before {",
+      "revId": "d70cdedfdb07001f8211d87e1a9b92d7a818a06c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//r9Q\u003d",
+        "filename": "vp9/encoder/x86/vp9_error_intrin_avx2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-04-28T22:40:49Z",
+      "side": 1,
+      "message": "Can above 2 lines be moved to the top of the file?",
+      "revId": "d70cdedfdb07001f8211d87e1a9b92d7a818a06c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//r88\u003d",
+        "filename": "vp9/encoder/x86/vp9_error_intrin_avx2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-04-28T22:40:49Z",
+      "side": 1,
+      "message": "indent",
+      "revId": "d70cdedfdb07001f8211d87e1a9b92d7a818a06c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//r84\u003d",
+        "filename": "vp9/encoder/x86/vp9_error_intrin_avx2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-04-28T22:40:49Z",
+      "side": 1,
+      "message": "remove space after (__m128i *)",
+      "revId": "d70cdedfdb07001f8211d87e1a9b92d7a818a06c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//r80\u003d",
+        "filename": "vp9/encoder/x86/vp9_error_intrin_avx2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-04-28T22:40:49Z",
+      "side": 1,
+      "message": "same as above",
+      "revId": "d70cdedfdb07001f8211d87e1a9b92d7a818a06c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
