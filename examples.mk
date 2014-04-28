@@ -25,6 +25,11 @@ LIBWEBM_MUXER_SRCS += third_party/libwebm/mkvmuxer.cpp \
                       third_party/libwebm/mkvwriter.hpp \
                       third_party/libwebm/webmids.hpp
 
+LIBWEBM_PARSER_SRCS = third_party/libwebm/mkvparser.cpp \
+                      third_party/libwebm/mkvreader.cpp \
+                      third_party/libwebm/mkvparser.hpp \
+                      third_party/libwebm/mkvreader.hpp
+
 # List of examples to build. UTILS are tools meant for distribution
 # while EXAMPLES demonstrate specific portions of the API.
 UTILS-$(CONFIG_DECODERS)    += vpxdec.c
@@ -39,14 +44,8 @@ vpxdec.SRCS                 += tools_common.c tools_common.h
 vpxdec.SRCS                 += y4menc.c y4menc.h
 vpxdec.SRCS                 += $(LIBYUV_SRCS)
 ifeq ($(CONFIG_WEBM_IO),yes)
-  vpxdec.SRCS                 += third_party/nestegg/halloc/halloc.h
-  vpxdec.SRCS                 += third_party/nestegg/halloc/src/align.h
-  vpxdec.SRCS                 += third_party/nestegg/halloc/src/halloc.c
-  vpxdec.SRCS                 += third_party/nestegg/halloc/src/hlist.h
-  vpxdec.SRCS                 += third_party/nestegg/halloc/src/macros.h
-  vpxdec.SRCS                 += third_party/nestegg/include/nestegg/nestegg.h
-  vpxdec.SRCS                 += third_party/nestegg/src/nestegg.c
-  vpxdec.SRCS                 += webmdec.c webmdec.h
+  vpxdec.SRCS                 += $(LIBWEBM_PARSER_SRCS)
+  vpxdec.SRCS                 += webmdec.cc webmdec.h
 endif
 vpxdec.GUID                  = BA5FE66F-38DD-E034-F542-B1578C5FB950
 vpxdec.DESCRIPTION           = Full featured decoder
