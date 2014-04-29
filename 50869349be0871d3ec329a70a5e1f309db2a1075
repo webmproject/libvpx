@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//r7c\u003d",
+        "filename": "test/decode_with_drops.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-29T00:32:25Z",
+      "side": 1,
+      "message": "you could just shift 2 and pass \"$@\" in case there were additional parameters added",
+      "revId": "50869349be0871d3ec329a70a5e1f309db2a1075",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//r7Y\u003d",
+        "filename": "test/decode_with_drops.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-29T00:32:25Z",
+      "side": 1,
+      "message": "just testing the presence is OK to start, but it might be nice to verify this to ensure the treatment of the parameters hasn\u0027t changed.",
+      "revId": "50869349be0871d3ec329a70a5e1f309db2a1075",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
