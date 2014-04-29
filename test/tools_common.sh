@@ -9,6 +9,11 @@
 ##  be found in the AUTHORS file in the root of the source tree.
 ##
 ##  This file contains shell code shared by test scripts for libvpx tools.
+
+# Use $VPX_TEST_TOOLS_COMMON_SH as a pseudo include guard.
+if [ -z "${VPX_TEST_TOOLS_COMMON_SH}" ]; then
+VPX_TEST_TOOLS_COMMON_SH=included
+
 set -e
 
 # Sets $VPX_TOOL_TEST to the name specified by positional parameter one.
@@ -441,3 +446,5 @@ $(basename "${0%.*}") test configuration:
   VPX_TEST_RUN_DISABLED_TESTS=${VPX_TEST_RUN_DISABLED_TESTS}
 EOF
 fi
+
+fi  # End $VPX_TEST_TOOLS_COMMON_SH pseudo include guard.
