@@ -24,6 +24,7 @@
 ; r3    int  ref_stride
 |vp8_sad16x16_neon| PROC
 ;;
+    vpush           {d8-d15}
     vld1.8          {q0}, [r0], r1
     vld1.8          {q4}, [r2], r3
 
@@ -132,6 +133,7 @@
 
     vmov.32         r0, d0[0]
 
+    vpop            {d8-d15}
     bx              lr
 
     ENDP
@@ -143,6 +145,8 @@
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride)
 |vp8_sad16x8_neon| PROC
+    vpush           {d8-d15}
+
     vld1.8          {q0}, [r0], r1
     vld1.8          {q4}, [r2], r3
 
@@ -200,6 +204,7 @@
 
     vmov.32         r0, d0[0]
 
+    vpop            {d8-d15}
     bx              lr
 
     ENDP

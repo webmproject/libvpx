@@ -25,6 +25,7 @@
 ;    int  ref_stride)
 
 |vp8_sad8x8_neon| PROC
+    vpush           {d8-d15}
     vld1.8          {d0}, [r0], r1
     vld1.8          {d8}, [r2], r3
 
@@ -70,6 +71,7 @@
 
     vmov.32         r0, d0[0]
 
+    vpop            {d8-d15}
     bx              lr
 
     ENDP
@@ -82,6 +84,7 @@
 ;    int  ref_stride)
 
 |vp8_sad8x16_neon| PROC
+    vpush           {d8-d15}
     vld1.8          {d0}, [r0], r1
     vld1.8          {d8}, [r2], r3
 
@@ -167,6 +170,7 @@
 
     vmov.32         r0, d0[0]
 
+    vpop            {d8-d15}
     bx              lr
 
     ENDP
@@ -179,6 +183,7 @@
 ;    int  ref_stride)
 
 |vp8_sad4x4_neon| PROC
+    vpush           {d8-d15}
     vld1.8          {d0}, [r0], r1
     vld1.8          {d8}, [r2], r3
 
@@ -202,6 +207,7 @@
     vpaddl.u32      d0, d1
     vmov.32         r0, d0[0]
 
+    vpop            {d8-d15}
     bx              lr
 
     ENDP

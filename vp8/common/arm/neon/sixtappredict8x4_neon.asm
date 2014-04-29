@@ -35,10 +35,11 @@ filter8_coeff
 
 |vp8_sixtap_predict8x4_neon| PROC
     push            {r4-r5, lr}
+    vpush           {d8-d15}
 
     adr             r12, filter8_coeff
-    ldr             r4, [sp, #12]           ;load parameters from stack
-    ldr             r5, [sp, #16]           ;load parameters from stack
+    ldr             r4, [sp, #76]           ;load parameters from stack
+    ldr             r5, [sp, #80]           ;load parameters from stack
 
     cmp             r2, #0                  ;skip first_pass filter if xoffset=0
     beq             secondpass_filter8x4_only
@@ -297,6 +298,8 @@ filter8_coeff
     vst1.u8         {d9}, [r4], r5
 
     add             sp, sp, #32
+
+    vpop            {d8-d15}
     pop             {r4-r5,pc}
 
 ;--------------------
@@ -392,6 +395,7 @@ firstpass_filter8x4_only
     vst1.u8         {d24}, [r4], r5
     vst1.u8         {d25}, [r4], r5
 
+    vpop            {d8-d15}
     pop             {r4-r5,pc}
 
 ;---------------------
@@ -464,6 +468,7 @@ secondpass_filter8x4_only
     vst1.u8         {d8}, [r4], r5
     vst1.u8         {d9}, [r4], r5
 
+    vpop            {d8-d15}
     pop             {r4-r5,pc}
 
     ENDP

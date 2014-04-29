@@ -22,6 +22,7 @@
 ; r3   stride
 |idct_dequant_0_2x_neon| PROC
     push            {r4, r5}
+    vpush           {d8-d15}
 
     add             r12, r2, #4
     vld1.32         {d2[0]}, [r2], r3
@@ -72,6 +73,7 @@
     vst1.32         {d4[1]}, [r2]
     vst1.32         {d10[1]}, [r0]
 
+    vpop            {d8-d15}
     pop             {r4, r5}
     bx              lr
 

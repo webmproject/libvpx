@@ -31,9 +31,10 @@
 ;================================================
 |vp8_variance_halfpixvar16x16_h_neon| PROC
     push            {lr}
+    vpush           {d8-d15}
 
     mov             r12, #4                  ;loop counter
-    ldr             lr, [sp, #4]           ;load *sse from stack
+    ldr             lr, [sp, #68]            ;load *sse from stack
     vmov.i8         q8, #0                      ;q8 - sum
     vmov.i8         q9, #0                      ;q9, q10 - sse
     vmov.i8         q10, #0
@@ -116,6 +117,8 @@ vp8_filt_fpo16x16s_4_0_loop_neon
     vsub.u32        d0, d1, d10
 
     vmov.32         r0, d0[0]                   ;return
+
+    vpop            {d8-d15}
     pop             {pc}
     ENDP
 
@@ -131,11 +134,12 @@ vp8_filt_fpo16x16s_4_0_loop_neon
 ;================================================
 |vp8_variance_halfpixvar16x16_v_neon| PROC
     push            {lr}
+    vpush           {d8-d15}
 
     mov             r12, #4                     ;loop counter
 
     vld1.u8         {q0}, [r0], r1              ;load src data
-    ldr             lr, [sp, #4]                ;load *sse from stack
+    ldr             lr, [sp, #68]               ;load *sse from stack
 
     vmov.i8         q8, #0                      ;q8 - sum
     vmov.i8         q9, #0                      ;q9, q10 - sse
@@ -212,6 +216,8 @@ vp8_filt_spo16x16s_0_4_loop_neon
     vsub.u32        d0, d1, d10
 
     vmov.32         r0, d0[0]                   ;return
+
+    vpop            {d8-d15}
     pop             {pc}
     ENDP
 
@@ -227,10 +233,11 @@ vp8_filt_spo16x16s_0_4_loop_neon
 ;================================================
 |vp8_variance_halfpixvar16x16_hv_neon| PROC
     push            {lr}
+    vpush           {d8-d15}
 
     vld1.u8         {d0, d1, d2, d3}, [r0], r1      ;load src data
 
-    ldr             lr, [sp, #4]           ;load *sse from stack
+    ldr             lr, [sp, #68]           ;load *sse from stack
     vmov.i8         q13, #0                      ;q8 - sum
     vext.8          q1, q0, q1, #1          ;construct src_ptr[1]
 
@@ -331,6 +338,8 @@ vp8_filt16x16s_4_4_loop_neon
     vsub.u32        d0, d1, d10
 
     vmov.32         r0, d0[0]                   ;return
+
+    vpop            {d8-d15}
     pop             {pc}
     ENDP
 
@@ -349,10 +358,11 @@ vp8_filt16x16s_4_4_loop_neon
 
 |vp8_sub_pixel_variance16x16s_neon| PROC
     push            {r4, lr}
+    vpush           {d8-d15}
 
-    ldr             r4, [sp, #8]            ;load *dst_ptr from stack
-    ldr             r12, [sp, #12]          ;load dst_pixels_per_line from stack
-    ldr             lr, [sp, #16]           ;load *sse from stack
+    ldr             r4, [sp, #72]           ;load *dst_ptr from stack
+    ldr             r12, [sp, #76]          ;load dst_pixels_per_line from stack
+    ldr             lr, [sp, #80]           ;load *sse from stack
 
     cmp             r2, #0                  ;skip first_pass filter if xoffset=0
     beq             secondpass_bfilter16x16s_only
@@ -566,6 +576,7 @@ sub_pixel_variance16x16s_neon_loop
     add             sp, sp, #256
     vmov.32         r0, d0[0]                   ;return
 
+    vpop            {d8-d15}
     pop             {r4, pc}
     ENDP
 
