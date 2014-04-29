@@ -601,15 +601,3 @@ void vp9_encode_intra_block_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
   vp9_foreach_transformed_block_in_plane(xd, bsize, plane, encode_block_intra,
                                          &arg);
 }
-
-int vp9_encode_intra(MACROBLOCK *x, int use_16x16_pred) {
-  MB_MODE_INFO * mbmi = &x->e_mbd.mi[0]->mbmi;
-  x->skip_encode = 0;
-  mbmi->mode = DC_PRED;
-  mbmi->ref_frame[0] = INTRA_FRAME;
-  mbmi->tx_size = use_16x16_pred ? (mbmi->sb_type >= BLOCK_16X16 ? TX_16X16
-                                                                 : TX_8X8)
-                                   : TX_4X4;
-  vp9_encode_intra_block_plane(x, mbmi->sb_type, 0);
-  return vp9_get_mb_ss(x->plane[0].src_diff);
-}

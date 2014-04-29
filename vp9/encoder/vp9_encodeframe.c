@@ -560,11 +560,6 @@ static unsigned int tt_activity_measure(MACROBLOCK *x) {
   return act < (8 << 12) ? MIN(act, 5 << 12) : act;
 }
 
-// Stub for alternative experimental activity measures.
-static unsigned int alt_activity_measure(MACROBLOCK *x, int use_dc_pred) {
-  return vp9_encode_intra(x, use_dc_pred);
-}
-
 static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
                          int mi_row, int mi_col, BLOCK_SIZE bsize,
                          int output_enabled) {

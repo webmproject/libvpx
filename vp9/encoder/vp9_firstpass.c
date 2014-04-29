@@ -604,7 +604,13 @@ void vp9_first_pass(VP9_COMP *cpi) {
       }
 
       // Do intra 16x16 prediction.
-      this_error = vp9_encode_intra(x, use_dc_pred);
+      x->skip_encode = 0;
+      xd->mi[0]->mbmi.mode = DC_PRED;
+      xd->mi[0]->mbmi.tx_size = use_dc_pred ?
+         (bsize >= BLOCK_16X16 ? TX_16X16 : TX_8X8) : TX_4X4;
+      vp9_encode_intra_block_plane(x, bsize, 0);
+      this_error = vp9_get_mb_ss(x->plane[0].src_diff);
+
       if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
         vp9_clear_system_state();
         this_error = (int)(this_error * error_weight);
