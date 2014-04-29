@@ -16,6 +16,23 @@
       "revId": "ed9273ce805da7b93f76b14e22d3807c0d1447ef",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//rz0\u003d",
+        "filename": "vp9/encoder/x86/vp9_variance_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-04-29T18:11:06Z",
+      "side": 1,
+      "message": "Yes. It makes more sense to use src \u0026 ref, and also it may be better to keep using sse.",
+      "revId": "ed9273ce805da7b93f76b14e22d3807c0d1447ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
