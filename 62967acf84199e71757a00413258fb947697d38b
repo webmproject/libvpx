@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//ryM\u003d",
+        "filename": "vp8/encoder/arm/neon/denoising_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-29T20:02:15Z",
+      "side": 1,
+      "message": "you could take the declaration from 77 and move it here",
+      "revId": "62967acf84199e71757a00413258fb947697d38b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ryI\u003d",
+        "filename": "vp8/encoder/arm/neon/denoising_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-04-29T20:02:15Z",
+      "side": 1,
+      "message": "this could be a const in the block below I think",
+      "revId": "62967acf84199e71757a00413258fb947697d38b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
