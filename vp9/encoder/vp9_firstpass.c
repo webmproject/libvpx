@@ -418,7 +418,7 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   v_fn_ptr.vf = get_block_variance_fn(bsize);
 
   // Center the initial step/diamond search on best mv.
-  tmp_err = cpi->diamond_search_sad(x, &ref_mv_full, &tmp_mv,
+  tmp_err = cpi->diamond_search_sad(x, &cpi->ss_cfg, &ref_mv_full, &tmp_mv,
                                     step_param,
                                     x->sadperbit16, &num00, &v_fn_ptr, ref_mv);
   if (tmp_err < INT_MAX)
@@ -441,7 +441,7 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     if (num00) {
       --num00;
     } else {
-      tmp_err = cpi->diamond_search_sad(x, &ref_mv_full, &tmp_mv,
+      tmp_err = cpi->diamond_search_sad(x, &cpi->ss_cfg, &ref_mv_full, &tmp_mv,
                                         step_param + n, x->sadperbit16,
                                         &num00, &v_fn_ptr, ref_mv);
       if (tmp_err < INT_MAX)
