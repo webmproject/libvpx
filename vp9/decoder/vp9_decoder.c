@@ -331,10 +331,6 @@ int vp9_get_raw_frame(VP9Decoder *pbi, YV12_BUFFER_CONFIG *sd,
   ret = vp9_post_proc_frame(&pbi->common, sd, flags);
 #else
     *sd = *pbi->common.frame_to_show;
-    sd->y_width = pbi->common.width;
-    sd->y_height = pbi->common.height;
-    sd->uv_width = sd->y_width >> pbi->common.subsampling_x;
-    sd->uv_height = sd->y_height >> pbi->common.subsampling_y;
     ret = 0;
 #endif /*!CONFIG_POSTPROC*/
   vp9_clear_system_state();
