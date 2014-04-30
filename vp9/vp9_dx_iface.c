@@ -375,80 +375,68 @@ static void parse_superframe_index(const uint8_t *data, size_t data_sz,
   }
 }
 
+static vpx_codec_err_t decode_one_iter(vpx_codec_alg_priv_t *ctx,
+                                       const uint8_t **data_start_ptr,
+                                       const uint8_t *data_end,
+                                       uint32_t frame_size, void *user_priv,
+                                       long deadline) {
+  const vpx_codec_err_t res = decode_one(ctx, data_start_ptr, frame_size,
+                                         user_priv, deadline);
+  if (res != VPX_CODEC_OK)
+    return res;
+
+  // Account for suboptimal termination by the encoder.
+  while (*data_start_ptr < data_end) {
+    const uint8_t marker = read_marker(ctx->decrypt_cb, ctx->decrypt_state,
+                                       *data_start_ptr);
+    if (marker)
+      break;
+    (*data_start_ptr)++;
+  }
+
+  return VPX_CODEC_OK;
+}
+
 static vpx_codec_err_t decoder_decode(vpx_codec_alg_priv_t *ctx,
                                       const uint8_t *data, unsigned int data_sz,
                                       void *user_priv, long deadline) {
   const uint8_t *data_start = data;
-  const uint8_t *data_end = data + data_sz;
-  vpx_codec_err_t res = VPX_CODEC_OK;
-  uint32_t sizes[8];
-  int frames_this_pts, frame_count = 0;
+  const uint8_t *const data_end = data + data_sz;
+  vpx_codec_err_t res;
+  uint32_t frame_sizes[8];
+  int frame_count;
 
   if (data == NULL || data_sz == 0)
     return VPX_CODEC_INVALID_PARAM;
 
-  parse_superframe_index(data, data_sz, sizes, &frames_this_pts,
+  parse_superframe_index(data, data_sz, frame_sizes, &frame_count,
                          ctx->decrypt_cb, ctx->decrypt_state);
 
-  do {
-    if (data_sz) {
-      uint8_t marker = read_marker(ctx->decrypt_cb, ctx->decrypt_state,
-                                   data_start);
-      // Skip over the superframe index, if present
-      if ((marker & 0xe0) == 0xc0) {
-        const uint32_t frames = (marker & 0x7) + 1;
-        const uint32_t mag = ((marker >> 3) & 0x3) + 1;
-        const uint32_t index_sz = 2 + mag * frames;
+  if (frame_count > 0) {
+    int i;
 
-        if (data_sz >= index_sz) {
-          uint8_t marker2 = read_marker(ctx->decrypt_cb, ctx->decrypt_state,
-                                        data_start + index_sz - 1);
-          if (marker2 == marker) {
-            data_start += index_sz;
-            data_sz -= index_sz;
-            if (data_start < data_end)
-              continue;
-            else
-              break;
-          }
-        }
-      }
-    }
-
-    // Use the correct size for this frame, if an index is present.
-    if (frames_this_pts) {
-      uint32_t this_sz = sizes[frame_count];
-
-      if (data_sz < this_sz) {
+    for (i = 0; i < frame_count; ++i) {
+      const uint32_t frame_size = frame_sizes[i];
+      if (data_start < data || data_start + frame_size >= data_end) {
         ctx->base.err_detail = "Invalid frame size in index";
         return VPX_CODEC_CORRUPT_FRAME;
       }
 
-      data_sz = this_sz;
-      frame_count++;
+      res = decode_one_iter(ctx, &data_start, data_end, frame_size,
+                            user_priv, deadline);
+      if (res != VPX_CODEC_OK)
+        return res;
     }
-
-    res = decode_one(ctx, &data_start, data_sz, user_priv, deadline);
-    assert(data_start >= data);
-    assert(data_start <= data_end);
-
-    // Early exit if there was a decode error
-    if (res)
-      break;
-
-    // Account for suboptimal termination by the encoder.
+  } else {
     while (data_start < data_end) {
-      uint8_t marker3 = read_marker(ctx->decrypt_cb, ctx->decrypt_state,
-                                    data_start);
-      if (marker3)
-        break;
-      data_start++;
+      res = decode_one_iter(ctx, &data_start, data_end, data_end - data_start,
+                            user_priv, deadline);
+      if (res != VPX_CODEC_OK)
+        return res;
     }
+  }
 
-    data_sz = (unsigned int)(data_end - data_start);
-  } while (data_start < data_end);
-
-  return res;
+  return VPX_CODEC_OK;
 }
 
 static vpx_image_t *decoder_get_frame(vpx_codec_alg_priv_t *ctx,
