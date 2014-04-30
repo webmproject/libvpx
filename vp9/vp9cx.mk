@@ -112,6 +112,7 @@ endif
 
 ifeq ($(ARCH_X86_64),yes)
 VP9_CX_SRCS-$(HAVE_SSSE3) += encoder/x86/vp9_quantize_ssse3.asm
+VP9_CX_SRCS-$(HAVE_SSSE3) += encoder/x86/vp9_dct_ssse3.asm
 endif
 VP9_CX_SRCS-$(HAVE_SSSE3) += encoder/x86/vp9_sad_ssse3.asm
 VP9_CX_SRCS-$(HAVE_SSE4_1) += encoder/x86/vp9_sad_sse4.asm
