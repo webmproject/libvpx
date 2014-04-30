@@ -108,8 +108,8 @@ int file_is_webm(struct WebmInputContext *webm_ctx,
 
   vpx_ctx->framerate.denominator = 0;
   vpx_ctx->framerate.numerator = 0;
-  vpx_ctx->width = video_track->GetWidth();
-  vpx_ctx->height = video_track->GetHeight();
+  vpx_ctx->width = static_cast<uint32_t>(video_track->GetWidth());
+  vpx_ctx->height = static_cast<uint32_t>(video_track->GetHeight());
 
   get_first_cluster(webm_ctx);
 
