@@ -40,8 +40,6 @@
 extern "C" {
 #endif
 
-// #define MODE_TEST_HIT_STATS
-
 #define DEFAULT_GF_INTERVAL         10
 
 #define MAX_MODES 30
@@ -510,11 +508,6 @@ typedef struct VP9_COMP {
   int arf_buffered;
   int this_frame_weight;
   int max_arf_level;
-#endif
-
-#ifdef MODE_TEST_HIT_STATS
-  // Debug / test stats
-  int64_t mode_test_hits[BLOCK_SIZES];
 #endif
 } VP9_COMP;
 

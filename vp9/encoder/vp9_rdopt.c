@@ -3410,12 +3410,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     for (i = 0; i < TX_MODES; ++i)
       tx_cache[i] = INT64_MAX;
 
-#ifdef MODE_TEST_HIT_STATS
-    // TEST/DEBUG CODE
-    // Keep a rcord of the number of test hits at each size
-    cpi->mode_test_hits[bsize]++;
-#endif
-
     if (ref_frame == INTRA_FRAME) {
       TX_SIZE uv_tx;
       intra_super_block_yrd(cpi, x, &rate_y, &distortion_y, &skippable, NULL,
@@ -3953,12 +3947,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       if (comp_pred)
         xd->plane[i].pre[1] = yv12_mb[second_ref_frame][i];
     }
-
-#ifdef MODE_TEST_HIT_STATS
-    // TEST/DEBUG CODE
-    // Keep a rcord of the number of test hits at each size
-    cpi->mode_test_hits[bsize]++;
-#endif
 
     if (ref_frame == INTRA_FRAME) {
       int rate;
