@@ -1806,7 +1806,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
         // motion search for newmv (single predictor case only)
         if (!has_second_rf && this_mode == NEWMV &&
             seg_mvs[i][mbmi->ref_frame[0]].as_int == INVALID_MV) {
-          int_mv *const new_mv = &mode_mv[NEWMV][0];
+          MV *const new_mv = &mode_mv[NEWMV][0].as_mv;
           int step_param = 0;
           int further_steps;
           int thissme, bestsme = INT_MAX;
@@ -1862,9 +1862,9 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                      step_param,
                                      sadpb, 1, v_fn_ptr, 1,
                                      &bsi->ref_mv[0]->as_mv,
-                                     &new_mv->as_mv);
+                                     new_mv);
             if (bestsme < INT_MAX)
-              bestsme = vp9_get_mvpred_var(x, &new_mv->as_mv,
+              bestsme = vp9_get_mvpred_var(x, new_mv,
                                            &bsi->ref_mv[0]->as_mv,
                                            v_fn_ptr, 1);
           } else if (cpi->sf.search_method == SQUARE) {
@@ -1872,9 +1872,9 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                         step_param,
                                         sadpb, 1, v_fn_ptr, 1,
                                         &bsi->ref_mv[0]->as_mv,
-                                        &new_mv->as_mv);
+                                        new_mv);
             if (bestsme < INT_MAX)
-              bestsme = vp9_get_mvpred_var(x, &new_mv->as_mv,
+              bestsme = vp9_get_mvpred_var(x, new_mv,
                                            &bsi->ref_mv[0]->as_mv,
                                            v_fn_ptr, 1);
           } else if (cpi->sf.search_method == BIGDIA) {
@@ -1882,16 +1882,16 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                         step_param,
                                         sadpb, 1, v_fn_ptr, 1,
                                         &bsi->ref_mv[0]->as_mv,
-                                        &new_mv->as_mv);
+                                        new_mv);
             if (bestsme < INT_MAX)
-              bestsme = vp9_get_mvpred_var(x, &new_mv->as_mv,
+              bestsme = vp9_get_mvpred_var(x, new_mv,
                                            &bsi->ref_mv[0]->as_mv,
                                            v_fn_ptr, 1);
           } else {
             bestsme = vp9_full_pixel_diamond(cpi, x, &mvp_full, step_param,
                                              sadpb, further_steps, 0, v_fn_ptr,
                                              &bsi->ref_mv[0]->as_mv,
-                                             &new_mv->as_mv);
+                                             new_mv);
           }
 
           // Should we do a full search (best quality only)
@@ -1906,18 +1906,18 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                            &best_mv->as_mv);
             if (thissme < bestsme) {
               bestsme = thissme;
-              new_mv->as_int = best_mv->as_int;
+              *new_mv = best_mv->as_mv;
             } else {
               // The full search result is actually worse so re-instate the
               // previous best vector
-              best_mv->as_int = new_mv->as_int;
+              best_mv->as_mv = *new_mv;
             }
           }
 
           if (bestsme < INT_MAX) {
             int distortion;
             cpi->find_fractional_mv_step(x,
-                                         &new_mv->as_mv,
+                                         new_mv,
                                          &bsi->ref_mv[0]->as_mv,
                                          cm->allow_high_precision_mv,
                                          x->errorperbit, v_fn_ptr,
@@ -1928,11 +1928,11 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                          &x->pred_sse[mbmi->ref_frame[0]]);
 
             // save motion search result for use in compound prediction
-            seg_mvs[i][mbmi->ref_frame[0]].as_int = new_mv->as_int;
+            seg_mvs[i][mbmi->ref_frame[0]].as_mv = *new_mv;
           }
 
           if (cpi->sf.adaptive_motion_search)
-            x->pred_mv[mbmi->ref_frame[0]].as_int = new_mv->as_int;
+            x->pred_mv[mbmi->ref_frame[0]].as_mv = *new_mv;
 
           // restore src pointers
           mi_buf_restore(x, orig_src, orig_pre);
