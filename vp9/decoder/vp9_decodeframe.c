@@ -1370,7 +1370,8 @@ int vp9_decode_frame(VP9Decoder *pbi,
                          "A stream must start with a complete key frame");
   }
 
-  if (!cm->error_resilient_mode && !cm->frame_parallel_decoding_mode) {
+  if (!cm->error_resilient_mode && !cm->frame_parallel_decoding_mode &&
+      !new_fb->corrupted) {
     vp9_adapt_coef_probs(cm);
 
     if (!frame_is_intra_only(cm)) {
