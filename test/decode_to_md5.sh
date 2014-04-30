@@ -24,22 +24,25 @@ decode_to_md5_verify_environment() {
   fi
 }
 
-# Runs decode_to_md5 on $1 and echoes the MD5 sum for the final frame. $2 is
-# interpreted as codec name and used solely to name the output file.
+# Runs decode_to_md5 on $1 and captures the md5 sum for the final frame. $2 is
+# interpreted as codec name and used solely to name the output file. $3 is the
+# expected md5 sum: It must match that of the final frame.
 decode_to_md5() {
   local decoder="${LIBVPX_BIN_PATH}/decode_to_md5${VPX_TEST_EXE_SUFFIX}"
   local input_file="$1"
   local codec="$2"
+  local expected_md5="$3"
   local output_file="${VPX_TEST_OUTPUT_DIR}/decode_to_md5_${codec}"
 
   [ -x "${decoder}" ] || return 1
 
-  "${decoder}" "${input_file}" "${output_file}" > /dev/null 2>&1
+  eval "${decoder}" "${input_file}" "${output_file}" ${devnull}
 
   [ -e "${output_file}" ] || return 1
 
   local md5_last_frame=$(tail -n1 "${output_file}")
-  echo "${md5_last_frame% *}" | tr -d [:space:]
+  local actual_md5=$(echo "${md5_last_frame% *}" | tr -d [:space:])
+  [ "${actual_md5}" = "${expected_md5}" ] || return 1
 }
 
 decode_to_md5_vp8() {
@@ -47,8 +50,7 @@ decode_to_md5_vp8() {
   local expected_md5="56794d911b02190212bca92f88ad60c6"
 
   if [ "$(vp8_decode_available)" = "yes" ]; then
-    local actual_md5="$(decode_to_md5 "${VP8_IVF_FILE}" vp8)" || return 1
-    [ "${actual_md5}" = "${expected_md5}" ] || return 1
+    decode_to_md5 "${VP8_IVF_FILE}" "vp8" "${expected_md5}"
   fi
 }
 
@@ -57,8 +59,7 @@ decode_to_md5_vp9() {
   local expected_md5="2952c0eae93f3dadd1aa84c50d3fd6d2"
 
   if [ "$(vp9_decode_available)" = "yes" ]; then
-    local actual_md5="$(decode_to_md5 "${VP9_IVF_FILE}" vp9)" || return 1
-    [ "${actual_md5}" = "${expected_md5}" ] || return 1
+    decode_to_md5 "${VP9_IVF_FILE}" "vp9" "${expected_md5}"
   fi
 }
 

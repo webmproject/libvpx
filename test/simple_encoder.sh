@@ -31,8 +31,9 @@ simple_encoder() {
 
   [ -x "${encoder}" ] || return 1
 
-  "${encoder}" "${codec}" "${YUV_RAW_INPUT_WIDTH}" "${YUV_RAW_INPUT_HEIGHT}" \
-      "${YUV_RAW_INPUT}" "${output_file}" 9999 > /dev/null 2>&1
+  eval "${encoder}" "${codec}" "${YUV_RAW_INPUT_WIDTH}" \
+      "${YUV_RAW_INPUT_HEIGHT}" "${YUV_RAW_INPUT}" "${output_file}" 9999 \
+      ${devnull}
 
   [ -e "${output_file}" ] || return 1
 }

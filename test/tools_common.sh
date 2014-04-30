@@ -15,6 +15,7 @@ if [ -z "${VPX_TEST_TOOLS_COMMON_SH}" ]; then
 VPX_TEST_TOOLS_COMMON_SH=included
 
 set -e
+devnull='> /dev/null 2>&1'
 
 vlog() {
   [ "${VPX_TEST_VERBOSE_OUTPUT}" = "yes" ] && echo "$@"
@@ -197,9 +198,9 @@ vpxdec() {
   local decoder="${LIBVPX_BIN_PATH}/vpxdec${VPX_TEST_EXE_SUFFIX}"
 
   if [ -z "${pipe_input}" ]; then
-    "${decoder}" "$input" --summary --noblit "$@" > /dev/null 2>&1
+    eval "${decoder}" "$input" --summary --noblit "$@" ${devnull}
   else
-    cat "${input}" | "${decoder}" - --summary --noblit "$@" > /dev/null 2>&1
+    cat "${input}" | eval "${decoder}" - --summary --noblit "$@" ${devnull}
   fi
 }
 
@@ -245,14 +246,16 @@ vpxenc() {
   fi
 
   if [ -z "${pipe_input}" ]; then
-    "${encoder}" --codec=${codec} --width=${width} --height=${height} \
+    eval "${encoder}" --codec=${codec} --width=${width} --height=${height} \
         --limit=${frames} ${use_ivf} ${extra_flags} --output="${output}" \
-        "${input}" > /dev/null 2>&1
+        "${input}" \
+        ${devnull}
   else
     cat "${input}" \
-        | "${encoder}" --codec=${codec} --width=${width} --height=${height} \
-            --limit=${frames} ${use_ivf} ${extra_flags} --output="${output}" - \
-            > /dev/null 2>&1
+        | eval "${encoder}" --codec=${codec} --width=${width} \
+              --height=${height} --limit=${frames} ${use_ivf} ${extra_flags} \
+              --output="${output}" - \
+              ${devnull}
   fi
 
   if [ ! -e "${output}" ]; then
@@ -336,6 +339,7 @@ cat << EOF
     --run-disabled-tests: Run disabled tests.
     --help: Display this message and exit.
     --test-data-path <path to libvpx test data directory>
+    --show-program-output: Shows output from all programs being tested.
     --verbose: Verbose output.
 
     When the --bin-path option is not specified the script attempts to use
@@ -387,6 +391,9 @@ while [ -n "$1" ]; do
       ;;
     --verbose)
       VPX_TEST_VERBOSE_OUTPUT=yes
+      ;;
+    --show-program-output)
+      devnull=
       ;;
     *)
       vpx_test_usage
@@ -445,6 +452,7 @@ vlog "$(basename "${0%.*}") test configuration:
   VPX_TEST_OUTPUT_DIR=${VPX_TEST_OUTPUT_DIR}
   VPX_TEST_VERBOSE_OUTPUT=${VPX_TEST_VERBOSE_OUTPUT}
   VPX_TEST_FILTER=${VPX_TEST_FILTER}
-  VPX_TEST_RUN_DISABLED_TESTS=${VPX_TEST_RUN_DISABLED_TESTS}"
+  VPX_TEST_RUN_DISABLED_TESTS=${VPX_TEST_RUN_DISABLED_TESTS}
+  VPX_TEST_SHOW_PROGRAM_OUTPUT=${VPX_TEST_SHOW_PROGRAM_OUTPUT}"
 
 fi  # End $VPX_TEST_TOOLS_COMMON_SH pseudo include guard.

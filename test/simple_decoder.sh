@@ -34,7 +34,7 @@ simple_decoder() {
 
   [ -x "${decoder}" ] || return 1
 
-  "${decoder}" "${input_file}" "${output_file}" > /dev/null 2>&1
+  eval "${decoder}" "${input_file}" "${output_file}" ${devnull}
 
   [ -e "${output_file}" ] || return 1
 }

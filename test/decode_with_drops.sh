@@ -36,7 +36,7 @@ decode_with_drops() {
 
   [ -x "${decoder}" ] || return 1
 
-  "${decoder}" "${input_file}" "${output_file}" "${drop_mode}" > /dev/null 2>&1
+  eval "${decoder}" "${input_file}" "${output_file}" "${drop_mode}" ${devnull}
 
   [ -e "${output_file}" ] || return 1
 }
