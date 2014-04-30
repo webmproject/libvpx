@@ -16,6 +16,10 @@ VPX_TEST_TOOLS_COMMON_SH=included
 
 set -e
 
+vlog() {
+  [ "${VPX_TEST_VERBOSE_OUTPUT}" = "yes" ] && echo "$@"
+}
+
 # Sets $VPX_TOOL_TEST to the name specified by positional parameter one.
 test_begin() {
   VPX_TOOL_TEST="${1}"
@@ -313,9 +317,9 @@ run_tests() {
   # Run tests.
   for test in ${tests_to_run}; do
     test_begin "${test}"
-    [ "${VPX_TEST_VERBOSE_OUTPUT}" = "yes" ] && echo "  RUN  ${test}"
+    vlog "  RUN  ${test}"
     "${test}"
-    [ "${VPX_TEST_VERBOSE_OUTPUT}" = "yes" ] && echo "  PASS ${test}"
+    vlog "  PASS ${test}"
     test_end "${test}"
   done
 
@@ -434,17 +438,13 @@ YUV_RAW_INPUT_HEIGHT=288
 # Setup a trap function to clean up after tests complete.
 trap cleanup EXIT
 
-if [ "${VPX_TEST_VERBOSE_OUTPUT}" = "yes" ]; then
-cat << EOF
-$(basename "${0%.*}") test configuration:
+vlog "$(basename "${0%.*}") test configuration:
   LIBVPX_BIN_PATH=${LIBVPX_BIN_PATH}
   LIBVPX_CONFIG_PATH=${LIBVPX_CONFIG_PATH}
   LIBVPX_TEST_DATA_PATH=${LIBVPX_TEST_DATA_PATH}
   VPX_TEST_OUTPUT_DIR=${VPX_TEST_OUTPUT_DIR}
   VPX_TEST_VERBOSE_OUTPUT=${VPX_TEST_VERBOSE_OUTPUT}
   VPX_TEST_FILTER=${VPX_TEST_FILTER}
-  VPX_TEST_RUN_DISABLED_TESTS=${VPX_TEST_RUN_DISABLED_TESTS}
-EOF
-fi
+  VPX_TEST_RUN_DISABLED_TESTS=${VPX_TEST_RUN_DISABLED_TESTS}"
 
 fi  # End $VPX_TEST_TOOLS_COMMON_SH pseudo include guard.
