@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//rq0\u003d",
+        "filename": "test/decode_to_md5.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-04-30T18:29:57Z",
+      "side": 1,
+      "message": "Had to rework this a little bit because of the devnull fun (without devnull/aka with --show-program-output the output was going to stdout, and breaking the comparison in the caller).",
+      "revId": "5ae987e925dc4ce99aa18c6799eb9ec3bdd15759",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
