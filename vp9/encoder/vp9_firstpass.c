@@ -920,12 +920,19 @@ static int get_twopass_worst_quality(const VP9_COMP *cpi,
     const int target_norm_bits_per_mb = ((uint64_t)section_target_bandwidth <<
                                             BPER_MB_NORMBITS) / num_mbs;
     int q;
+    int is_svc_upper_layer = 0;
+    if (cpi->use_svc && cpi->svc.number_temporal_layers == 1 &&
+        cpi->svc.spatial_layer_id > 0) {
+      is_svc_upper_layer = 1;
+    }
 
     // Try and pick a max Q that will be high enough to encode the
     // content at the given rate.
     for (q = rc->best_quality; q < rc->worst_quality; ++q) {
-      const double factor = calc_correction_factor(err_per_mb, ERR_DIVISOR,
-                                                   0.5, 0.90, q);
+      const double factor =
+          calc_correction_factor(err_per_mb, ERR_DIVISOR,
+                                 is_svc_upper_layer ? 0.8 : 0.5,
+                                 is_svc_upper_layer ? 1.0 : 0.90, q);
       const int bits_per_mb = vp9_rc_bits_per_mb(INTER_FRAME, q,
                                                  factor * speed_term);
       if (bits_per_mb <= target_norm_bits_per_mb)
