@@ -96,7 +96,6 @@ VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_variance_impl_sse2.asm
 VP9_CX_SRCS-$(HAVE_AVX2) += encoder/x86/vp9_variance_impl_intrin_avx2.c
 VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_sad4d_sse2.asm
 VP9_CX_SRCS-$(HAVE_AVX2) += encoder/x86/vp9_sad4d_intrin_avx2.c
-VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_subpel_variance_impl_sse2.asm
 VP9_CX_SRCS-$(HAVE_AVX2) += encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c
 VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_temporal_filter_apply_sse2.asm
 VP9_CX_SRCS-$(HAVE_SSE3) += encoder/x86/vp9_sad_sse3.asm

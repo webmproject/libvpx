@@ -42,66 +42,6 @@ unsigned int vp9_get8x8var_sse2
   unsigned int *SSE,
   int *Sum
 );
-void vp9_half_horiz_vert_variance8x_h_sse2
-(
-  const unsigned char *ref_ptr,
-  int ref_pixels_per_line,
-  const unsigned char *src_ptr,
-  int src_pixels_per_line,
-  unsigned int Height,
-  int *sum,
-  unsigned int *sumsquared
-);
-void vp9_half_horiz_vert_variance16x_h_sse2
-(
-  const unsigned char *ref_ptr,
-  int ref_pixels_per_line,
-  const unsigned char *src_ptr,
-  int src_pixels_per_line,
-  unsigned int Height,
-  int *sum,
-  unsigned int *sumsquared
-);
-void vp9_half_horiz_variance8x_h_sse2
-(
-  const unsigned char *ref_ptr,
-  int ref_pixels_per_line,
-  const unsigned char *src_ptr,
-  int src_pixels_per_line,
-  unsigned int Height,
-  int *sum,
-  unsigned int *sumsquared
-);
-void vp9_half_horiz_variance16x_h_sse2
-(
-  const unsigned char *ref_ptr,
-  int ref_pixels_per_line,
-  const unsigned char *src_ptr,
-  int src_pixels_per_line,
-  unsigned int Height,
-  int *sum,
-  unsigned int *sumsquared
-);
-void vp9_half_vert_variance8x_h_sse2
-(
-  const unsigned char *ref_ptr,
-  int ref_pixels_per_line,
-  const unsigned char *src_ptr,
-  int src_pixels_per_line,
-  unsigned int Height,
-  int *sum,
-  unsigned int *sumsquared
-);
-void vp9_half_vert_variance16x_h_sse2
-(
-  const unsigned char *ref_ptr,
-  int ref_pixels_per_line,
-  const unsigned char *src_ptr,
-  int src_pixels_per_line,
-  unsigned int Height,
-  int *sum,
-  unsigned int *sumsquared
-);
 
 typedef unsigned int (*get_var_sse2) (
   const unsigned char *src_ptr,
