@@ -485,8 +485,8 @@ static void write_modes(VP9_COMP *cpi,
 }
 
 static void build_tree_distribution(VP9_COMP *cpi, TX_SIZE tx_size,
-                                    vp9_coeff_stats *coef_branch_ct) {
-  vp9_coeff_probs_model *coef_probs = cpi->frame_coef_probs[tx_size];
+                                    vp9_coeff_stats *coef_branch_ct,
+                                    vp9_coeff_probs_model *coef_probs) {
   vp9_coeff_count *coef_counts = cpi->coef_counts[tx_size];
   unsigned int (*eob_branch_ct)[REF_TYPES][COEF_BANDS][COEFF_CONTEXTS] =
       cpi->common.counts.eob_branch[tx_size];
@@ -513,10 +513,9 @@ static void build_tree_distribution(VP9_COMP *cpi, TX_SIZE tx_size,
 
 static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
                                      TX_SIZE tx_size,
-                                     vp9_coeff_stats *frame_branch_ct) {
-  vp9_coeff_probs_model *new_frame_coef_probs = cpi->frame_coef_probs[tx_size];
-  vp9_coeff_probs_model *old_frame_coef_probs =
-      cpi->common.fc.coef_probs[tx_size];
+                                     vp9_coeff_stats *frame_branch_ct,
+                                     vp9_coeff_probs_model *new_coef_probs) {
+  vp9_coeff_probs_model *old_coef_probs = cpi->common.fc.coef_probs[tx_size];
   const vp9_prob upd = DIFF_UPDATE_PROB;
   const int entropy_nodes_update = UNCONSTRAINED_NODES;
   int i, j, k, l, t;
@@ -530,14 +529,14 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
           for (k = 0; k < COEF_BANDS; ++k) {
             for (l = 0; l < BAND_COEFF_CONTEXTS(k); ++l) {
               for (t = 0; t < entropy_nodes_update; ++t) {
-                vp9_prob newp = new_frame_coef_probs[i][j][k][l][t];
-                const vp9_prob oldp = old_frame_coef_probs[i][j][k][l][t];
+                vp9_prob newp = new_coef_probs[i][j][k][l][t];
+                const vp9_prob oldp = old_coef_probs[i][j][k][l][t];
                 int s;
                 int u = 0;
                 if (t == PIVOT_NODE)
                   s = vp9_prob_diff_update_savings_search_model(
                       frame_branch_ct[i][j][k][l][0],
-                      old_frame_coef_probs[i][j][k][l], &newp, upd);
+                      old_coef_probs[i][j][k][l], &newp, upd);
                 else
                   s = vp9_prob_diff_update_savings_search(
                       frame_branch_ct[i][j][k][l][t], oldp, &newp, upd);
@@ -567,15 +566,15 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
             for (l = 0; l < BAND_COEFF_CONTEXTS(k); ++l) {
               // calc probs and branch cts for this frame only
               for (t = 0; t < entropy_nodes_update; ++t) {
-                vp9_prob newp = new_frame_coef_probs[i][j][k][l][t];
-                vp9_prob *oldp = old_frame_coef_probs[i][j][k][l] + t;
+                vp9_prob newp = new_coef_probs[i][j][k][l][t];
+                vp9_prob *oldp = old_coef_probs[i][j][k][l] + t;
                 const vp9_prob upd = DIFF_UPDATE_PROB;
                 int s;
                 int u = 0;
                 if (t == PIVOT_NODE)
                   s = vp9_prob_diff_update_savings_search_model(
                       frame_branch_ct[i][j][k][l][0],
-                      old_frame_coef_probs[i][j][k][l], &newp, upd);
+                      old_coef_probs[i][j][k][l], &newp, upd);
                 else
                   s = vp9_prob_diff_update_savings_search(
                       frame_branch_ct[i][j][k][l][t],
@@ -612,8 +611,8 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
             for (l = 0; l < BAND_COEFF_CONTEXTS(k); ++l) {
               // calc probs and branch cts for this frame only
               for (t = 0; t < entropy_nodes_update; ++t) {
-                vp9_prob newp = new_frame_coef_probs[i][j][k][l][t];
-                vp9_prob *oldp = old_frame_coef_probs[i][j][k][l] + t;
+                vp9_prob newp = new_coef_probs[i][j][k][l][t];
+                vp9_prob *oldp = old_coef_probs[i][j][k][l] + t;
                 int s;
                 int u = 0;
                 if (l >= prev_coef_contexts_to_update ||
@@ -623,7 +622,7 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
                   if (t == PIVOT_NODE)
                     s = vp9_prob_diff_update_savings_search_model(
                         frame_branch_ct[i][j][k][l][0],
-                        old_frame_coef_probs[i][j][k][l], &newp, upd);
+                        old_coef_probs[i][j][k][l], &newp, upd);
                   else
                     s = vp9_prob_diff_update_savings_search(
                         frame_branch_ct[i][j][k][l][t],
@@ -670,14 +669,17 @@ static void update_coef_probs(VP9_COMP *cpi, vp9_writer* w) {
   const TX_SIZE max_tx_size = tx_mode_to_biggest_tx_size[tx_mode];
   TX_SIZE tx_size;
   vp9_coeff_stats frame_branch_ct[TX_SIZES][PLANE_TYPES];
+  vp9_coeff_probs_model frame_coef_probs[TX_SIZES][PLANE_TYPES];
 
   vp9_clear_system_state();
 
   for (tx_size = TX_4X4; tx_size <= TX_32X32; ++tx_size)
-    build_tree_distribution(cpi, tx_size, frame_branch_ct[tx_size]);
+    build_tree_distribution(cpi, tx_size, frame_branch_ct[tx_size],
+                            frame_coef_probs[tx_size]);
 
   for (tx_size = TX_4X4; tx_size <= max_tx_size; ++tx_size)
-    update_coef_probs_common(w, cpi, tx_size, frame_branch_ct[tx_size]);
+    update_coef_probs_common(w, cpi, tx_size, frame_branch_ct[tx_size],
+                             frame_coef_probs[tx_size]);
 }
 
 static void encode_loopfilter(struct loopfilter *lf,
