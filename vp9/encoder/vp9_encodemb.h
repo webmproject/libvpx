@@ -34,8 +34,6 @@ void vp9_encode_block_intra(MACROBLOCK *x, int plane, int block,
 
 void vp9_encode_intra_block_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane);
 
-int vp9_encode_intra(MACROBLOCK *x, int use_16x16_pred);
-
 #ifdef __cplusplus
 }  // extern "C"
 #endif
