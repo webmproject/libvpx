@@ -477,6 +477,7 @@ static vpx_codec_err_t ctrl_get_param(vpx_codec_alg_priv_t *ctx, int ctrl_id,
     return VPX_CODEC_INVALID_PARAM;
 
   switch (ctrl_id) {
+    MAP(VP9E_GET_BIT_DEPTH,      ctx->extra_cfg.bit_depth);
     MAP(VP8E_GET_LAST_QUANTIZER, vp9_get_quantizer(ctx->cpi));
     MAP(VP8E_GET_LAST_QUANTIZER_64,
         vp9_qindex_to_quantizer(vp9_get_quantizer(ctx->cpi)));
@@ -1147,6 +1148,7 @@ static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   // Getters
   {VP8E_GET_LAST_QUANTIZER,           ctrl_get_param},
   {VP8E_GET_LAST_QUANTIZER_64,        ctrl_get_param},
+  {VP9E_GET_BIT_DEPTH,                ctrl_get_param},
   {VP9_GET_REFERENCE,                 ctrl_get_reference},
 
   { -1, NULL},
