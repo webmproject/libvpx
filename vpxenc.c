@@ -1420,7 +1420,7 @@ static void get_cx_data(struct stream_state *stream,
 }
 
 
-static void show_psnr(struct stream_state  *stream) {
+static void show_psnr(struct stream_state *stream, double peak) {
   int i;
   double ovpsnr;
 
@@ -1428,7 +1428,7 @@ static void show_psnr(struct stream_state  *stream) {
     return;
 
   fprintf(stderr, "Stream %d PSNR (Overall/Avg/Y/U/V)", stream->index);
-  ovpsnr = sse_to_psnr((double)stream->psnr_samples_total, 255.0,
+  ovpsnr = sse_to_psnr((double)stream->psnr_samples_total, peak,
                        (double)stream->psnr_sse_total);
   fprintf(stderr, " %.3f", ovpsnr);
 
@@ -1837,8 +1837,32 @@ int main(int argc, const char **argv_) {
                        usec_to_fps(stream->cx_time, seen_frames));
                     );
 
-    if (global.show_psnr)
-      FOREACH_STREAM(show_psnr(stream));
+    if (global.show_psnr) {
+      if (global.codec->fourcc == VP9_FOURCC) {
+        FOREACH_STREAM({
+          unsigned int bit_depth;
+          double peak;
+          vpx_codec_control_(&stream->encoder, VP9E_GET_BIT_DEPTH, &bit_depth);
+          switch (bit_depth) {
+            case 0:  // BITS_8
+              peak = 255.0;
+              break;
+            case 1:  // BITS_10
+              peak = 1023.0;
+              break;
+            case 2:  // BITS_12
+              peak = 4095.0;
+              break;
+            default:
+              peak = 255.0;
+              break;
+          }
+          show_psnr(stream, peak);
+        });
+      } else {
+        FOREACH_STREAM(show_psnr(stream, 255.0));
+      }
+    }
 
     FOREACH_STREAM(vpx_codec_destroy(&stream->encoder));
 

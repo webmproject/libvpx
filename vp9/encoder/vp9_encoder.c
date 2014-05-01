@@ -1931,13 +1931,27 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
                                   cpi->time_compress_data)   / 1000.000;
       double dr = (double)cpi->bytes * (double) 8 / (double)1000
                   / time_encoded;
+      double peak;
+      switch (cpi->common.bit_depth) {
+        case BITS_8:
+          peak = 255.0;
+          break;
+        case BITS_10:
+          peak = 1023.0;
+          break;
+        case BITS_12:
+          peak = 4095.0;
+          break;
+        default:
+          assert(0 && "bit_depth should be BITS_8, BITS_10 or BITS_12");
+      }
 
       if (cpi->b_calculate_psnr) {
         const double total_psnr =
-            vpx_sse_to_psnr((double)cpi->total_samples, 255.0,
+            vpx_sse_to_psnr((double)cpi->total_samples, peak,
                             (double)cpi->total_sq_error);
         const double totalp_psnr =
-            vpx_sse_to_psnr((double)cpi->totalp_samples, 255.0,
+            vpx_sse_to_psnr((double)cpi->totalp_samples, peak,
                             (double)cpi->totalp_sq_error);
         const double total_ssim = 100 * pow(cpi->summed_quality /
                                                 cpi->summed_weights, 8.0);
@@ -2129,7 +2143,7 @@ typedef struct {
 } PSNR_STATS;
 
 static void calc_psnr(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b,
-                      PSNR_STATS *psnr) {
+                      PSNR_STATS *psnr, BIT_DEPTH bit_depth) {
   const int widths[3]        = {a->y_width,  a->uv_width,  a->uv_width };
   const int heights[3]       = {a->y_height, a->uv_height, a->uv_height};
   const uint8_t *a_planes[3] = {a->y_buffer, a->u_buffer,  a->v_buffer };
@@ -2139,6 +2153,20 @@ static void calc_psnr(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b,
   int i;
   uint64_t total_sse = 0;
   uint32_t total_samples = 0;
+  double peak;
+  switch (bit_depth) {
+    case BITS_8:
+      peak = 255.0;
+      break;
+    case BITS_10:
+      peak = 1023.0;
+      break;
+    case BITS_12:
+      peak = 4095.0;
+      break;
+    default:
+      assert(0 && "bit_depth should be BITS_8, BITS_10 or BITS_12");
+  }
 
   for (i = 0; i < 3; ++i) {
     const int w = widths[i];
@@ -2162,7 +2190,7 @@ static void calc_psnr(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b,
 #endif
     psnr->sse[1 + i] = sse;
     psnr->samples[1 + i] = samples;
-    psnr->psnr[1 + i] = vpx_sse_to_psnr(samples, 255.0, (double)sse);
+    psnr->psnr[1 + i] = vpx_sse_to_psnr(samples, peak, (double)sse);
 
     total_sse += sse;
     total_samples += samples;
@@ -2170,7 +2198,7 @@ static void calc_psnr(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b,
 
   psnr->sse[0] = total_sse;
   psnr->samples[0] = total_samples;
-  psnr->psnr[0] = vpx_sse_to_psnr((double)total_samples, 255.0,
+  psnr->psnr[0] = vpx_sse_to_psnr((double)total_samples, peak,
                                   (double)total_sse);
 }
 
@@ -2178,7 +2206,8 @@ static void generate_psnr_packet(VP9_COMP *cpi) {
   struct vpx_codec_cx_pkt pkt;
   int i;
   PSNR_STATS psnr;
-  calc_psnr(cpi->Source, cpi->common.frame_to_show, &psnr);
+  calc_psnr(cpi->Source, cpi->common.frame_to_show, &psnr,
+            cpi->common.bit_depth);
   for (i = 0; i < 4; ++i) {
     pkt.data.psnr.samples[i] = psnr.samples[i];
     pkt.data.psnr.sse[i] = psnr.sse[i];
@@ -3718,7 +3747,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
         YV12_BUFFER_CONFIG *recon = cpi->common.frame_to_show;
         YV12_BUFFER_CONFIG *pp = &cm->post_proc_buffer;
         PSNR_STATS psnr;
-        calc_psnr(orig, recon, &psnr);
+        calc_psnr(orig, recon, &psnr, cm->bit_depth);
 
         cpi->total += psnr.psnr[0];
         cpi->total_y += psnr.psnr[1];
@@ -3736,7 +3765,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 #endif
           vp9_clear_system_state();
 
-          calc_psnr(orig, pp, &psnr2);
+          calc_psnr(orig, pp, &psnr2, cm->bit_depth);
 
           cpi->totalp += psnr2.psnr[0];
           cpi->totalp_y += psnr2.psnr[1];
