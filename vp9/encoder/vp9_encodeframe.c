@@ -3052,6 +3052,23 @@ static void encode_frame_internal(VP9_COMP *cpi) {
 #endif
 }
 
+static INTERP_FILTER get_interp_filter(
+    const int64_t threshes[SWITCHABLE_FILTER_CONTEXTS], int is_alt_ref) {
+  if (!is_alt_ref &&
+      threshes[EIGHTTAP_SMOOTH] > threshes[EIGHTTAP] &&
+      threshes[EIGHTTAP_SMOOTH] > threshes[EIGHTTAP_SHARP] &&
+      threshes[EIGHTTAP_SMOOTH] > threshes[SWITCHABLE - 1]) {
+    return EIGHTTAP_SMOOTH;
+  } else if (threshes[EIGHTTAP_SHARP] > threshes[EIGHTTAP] &&
+             threshes[EIGHTTAP_SHARP] > threshes[SWITCHABLE - 1]) {
+    return EIGHTTAP_SHARP;
+  } else if (threshes[EIGHTTAP] > threshes[SWITCHABLE - 1]) {
+    return EIGHTTAP;
+  } else {
+    return SWITCHABLE;
+  }
+}
+
 void vp9_encode_frame(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   RD_OPT *const rd_opt = &cpi->rd;
@@ -3087,59 +3104,41 @@ void vp9_encode_frame(VP9_COMP *cpi) {
     // that for subsequent frames.
     // It does the same analysis for transform size selection also.
     const MV_REFERENCE_FRAME frame_type = get_frame_type(cpi);
-    const int64_t *mode_thresh = rd_opt->prediction_type_threshes[frame_type];
-    const int64_t *filter_thresh = rd_opt->filter_threshes[frame_type];
+    int64_t *const mode_thrs = rd_opt->prediction_type_threshes[frame_type];
+    int64_t *const filter_thrs = rd_opt->filter_threshes[frame_type];
+    int *const tx_thrs = rd_opt->tx_select_threshes[frame_type];
+    const int is_alt_ref = frame_type == ALTREF_FRAME;
 
     /* prediction (compound, single or hybrid) mode selection */
-    if (frame_type == ALTREF_FRAME || !cm->allow_comp_inter_inter)
+    if (is_alt_ref || !cm->allow_comp_inter_inter)
       cm->reference_mode = SINGLE_REFERENCE;
-    else if (mode_thresh[COMPOUND_REFERENCE] > mode_thresh[SINGLE_REFERENCE] &&
-             mode_thresh[COMPOUND_REFERENCE] >
-                 mode_thresh[REFERENCE_MODE_SELECT] &&
+    else if (mode_thrs[COMPOUND_REFERENCE] > mode_thrs[SINGLE_REFERENCE] &&
+             mode_thrs[COMPOUND_REFERENCE] >
+                 mode_thrs[REFERENCE_MODE_SELECT] &&
              check_dual_ref_flags(cpi) &&
              cpi->static_mb_pct == 100)
       cm->reference_mode = COMPOUND_REFERENCE;
-    else if (mode_thresh[SINGLE_REFERENCE] > mode_thresh[REFERENCE_MODE_SELECT])
+    else if (mode_thrs[SINGLE_REFERENCE] > mode_thrs[REFERENCE_MODE_SELECT])
       cm->reference_mode = SINGLE_REFERENCE;
     else
       cm->reference_mode = REFERENCE_MODE_SELECT;
 
-    if (cm->interp_filter == SWITCHABLE) {
-      if (frame_type != ALTREF_FRAME &&
-          filter_thresh[EIGHTTAP_SMOOTH] > filter_thresh[EIGHTTAP] &&
-          filter_thresh[EIGHTTAP_SMOOTH] > filter_thresh[EIGHTTAP_SHARP] &&
-          filter_thresh[EIGHTTAP_SMOOTH] > filter_thresh[SWITCHABLE - 1]) {
-        cm->interp_filter = EIGHTTAP_SMOOTH;
-      } else if (filter_thresh[EIGHTTAP_SHARP] > filter_thresh[EIGHTTAP] &&
-          filter_thresh[EIGHTTAP_SHARP] > filter_thresh[SWITCHABLE - 1]) {
-        cm->interp_filter = EIGHTTAP_SHARP;
-      } else if (filter_thresh[EIGHTTAP] > filter_thresh[SWITCHABLE - 1]) {
-        cm->interp_filter = EIGHTTAP;
-      }
-    }
+    if (cm->interp_filter == SWITCHABLE)
+      cm->interp_filter = get_interp_filter(filter_thrs, is_alt_ref);
 
     encode_frame_internal(cpi);
 
-    for (i = 0; i < REFERENCE_MODES; ++i) {
-      const int diff = (int) (rd_opt->comp_pred_diff[i] / cm->MBs);
-      rd_opt->prediction_type_threshes[frame_type][i] += diff;
-      rd_opt->prediction_type_threshes[frame_type][i] >>= 1;
-    }
+    for (i = 0; i < REFERENCE_MODES; ++i)
+      mode_thrs[i] = (mode_thrs[i] + rd_opt->comp_pred_diff[i] / cm->MBs) / 2;
 
-    for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; i++) {
-      const int64_t diff = rd_opt->filter_diff[i] / cm->MBs;
-      rd_opt->filter_threshes[frame_type][i] =
-          (rd_opt->filter_threshes[frame_type][i] + diff) / 2;
-    }
+    for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
+      filter_thrs[i] = (filter_thrs[i] + rd_opt->filter_diff[i] / cm->MBs) / 2;
 
     for (i = 0; i < TX_MODES; ++i) {
       int64_t pd = rd_opt->tx_select_diff[i];
-      int diff;
       if (i == TX_MODE_SELECT)
         pd -= RDCOST(cpi->mb.rdmult, cpi->mb.rddiv, 2048 * (TX_SIZES - 1), 0);
-      diff = (int) (pd / cm->MBs);
-      rd_opt->tx_select_threshes[frame_type][i] += diff;
-      rd_opt->tx_select_threshes[frame_type][i] /= 2;
+      tx_thrs[i] = (tx_thrs[i] + (int)(pd / cm->MBs)) / 2;
     }
 
     if (cm->reference_mode == REFERENCE_MODE_SELECT) {
