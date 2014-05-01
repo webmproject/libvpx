@@ -320,8 +320,8 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         if (frame_mv[NEWMV][ref_frame].as_int == INVALID_MV)
           continue;
 
-        rate_mode = x->inter_mode_cost[mbmi->mode_context[ref_frame]]
-                                      [INTER_OFFSET(this_mode)];
+        rate_mode = cpi->inter_mode_cost[mbmi->mode_context[ref_frame]]
+                                        [INTER_OFFSET(this_mode)];
         if (RDCOST(x->rdmult, x->rddiv, rate_mv + rate_mode, 0) > best_rd)
           continue;
 
@@ -355,24 +355,24 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         model_rd_for_sb_y(cpi, bsize, x, xd, &pf_rate[EIGHTTAP],
                           &pf_dist[EIGHTTAP]);
         tmp_rdcost1 = RDCOST(x->rdmult, x->rddiv,
-                             vp9_get_switchable_rate(x) + pf_rate[EIGHTTAP],
+                             vp9_get_switchable_rate(cpi) + pf_rate[EIGHTTAP],
                              pf_dist[EIGHTTAP]);
 
         mbmi->interp_filter = EIGHTTAP_SHARP;
         vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
         model_rd_for_sb_y(cpi, bsize, x, xd, &pf_rate[EIGHTTAP_SHARP],
                           &pf_dist[EIGHTTAP_SHARP]);
-        tmp_rdcost2 = RDCOST(x->rdmult, x->rddiv,
-                          vp9_get_switchable_rate(x) + pf_rate[EIGHTTAP_SHARP],
-                          pf_dist[EIGHTTAP_SHARP]);
+        tmp_rdcost2 = RDCOST(x->rdmult, x->rddiv, vp9_get_switchable_rate(cpi) +
+                                 pf_rate[EIGHTTAP_SHARP],
+                             pf_dist[EIGHTTAP_SHARP]);
 
         mbmi->interp_filter = EIGHTTAP_SMOOTH;
         vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
         model_rd_for_sb_y(cpi, bsize, x, xd, &pf_rate[EIGHTTAP_SMOOTH],
                           &pf_dist[EIGHTTAP_SMOOTH]);
-        tmp_rdcost3 = RDCOST(x->rdmult, x->rddiv,
-                          vp9_get_switchable_rate(x) + pf_rate[EIGHTTAP_SMOOTH],
-                          pf_dist[EIGHTTAP_SMOOTH]);
+        tmp_rdcost3 = RDCOST(x->rdmult, x->rddiv, vp9_get_switchable_rate(cpi) +
+                                 pf_rate[EIGHTTAP_SMOOTH],
+                             pf_dist[EIGHTTAP_SMOOTH]);
 
         if (tmp_rdcost2 < tmp_rdcost1) {
           if (tmp_rdcost2 < tmp_rdcost3)
@@ -395,7 +395,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       }
 
       rate += rate_mv;
-      rate += x->inter_mode_cost[mbmi->mode_context[ref_frame]]
+      rate += cpi->inter_mode_cost[mbmi->mode_context[ref_frame]]
                                 [INTER_OFFSET(this_mode)];
       this_rd = RDCOST(x->rdmult, x->rddiv, rate, dist);
 
@@ -426,7 +426,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                               &pd->dst.buf[0], pd->dst.stride, 0, 0, 0);
 
       model_rd_for_sb_y(cpi, bsize, x, xd, &rate, &dist);
-      rate += x->mbmode_cost[this_mode];
+      rate += cpi->mbmode_cost[this_mode];
       rate += intra_cost_penalty;
       this_rd = RDCOST(x->rdmult, x->rddiv, rate, dist);
 

@@ -499,6 +499,12 @@ typedef struct VP9_COMP {
 
   search_site_config ss_cfg;
 
+  int mbmode_cost[INTRA_MODES];
+  unsigned inter_mode_cost[INTER_MODE_CONTEXTS][INTER_MODES];
+  int intra_uv_mode_cost[FRAME_TYPES][INTRA_MODES];
+  int y_mode_costs[INTRA_MODES][INTRA_MODES][INTRA_MODES];
+  int switchable_interp_costs[SWITCHABLE_FILTER_CONTEXTS][SWITCHABLE_FILTERS];
+
 #if CONFIG_MULTIPLE_ARF
   // ARF tracking variables.
   int multi_arf_enabled;
