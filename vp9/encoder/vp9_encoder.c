@@ -969,7 +969,7 @@ static void fnname##_bits10(const uint8_t *src_ptr, \
                             unsigned int *sad_array) {  \
   int i; \
   fnname(src_ptr, source_stride, ref_ptr, ref_stride, sad_array); \
-  for (i = 0; i < 8; i++) \
+  for (i = 0; i < 4; i++) \
   sad_array[i] >>= 2; \
 } \
 static void fnname##_bits12(const uint8_t *src_ptr, \
@@ -979,7 +979,7 @@ static void fnname##_bits12(const uint8_t *src_ptr, \
                             unsigned int *sad_array) {  \
   int i; \
   fnname(src_ptr, source_stride, ref_ptr, ref_stride, sad_array); \
-  for (i = 0; i < 8; i++) \
+  for (i = 0; i < 4; i++) \
   sad_array[i] >>= 4; \
 }
 
