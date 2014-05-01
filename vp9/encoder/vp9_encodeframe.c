@@ -1330,12 +1330,37 @@ static void set_source_var_based_partition(VP9_COMP *cpi,
         int b_mi_col = coord_lookup[i * 4 + j].col;
         int b_offset = b_mi_row * MI_SIZE * src_stride +
                        b_mi_col * MI_SIZE;
-
+#if CONFIG_VP9_HIGH
+        if (cm->use_high) {
+          vp9_high_get_sse_sum_16x16(src + b_offset,
+                                     src_stride,
+                                     pre_src + b_offset,
+                                     pre_stride, &d16[j].sse, &d16[j].sum);
+          switch (cm->bit_depth) {
+            case BITS_10:
+              d16[j].sse >>= 4;
+              d16[j].sum >>= 2;
+              break;
+            case BITS_12:
+              d16[j].sse >>= 8;
+              d16[j].sum >>= 4;
+              break;
+            default:
+            case BITS_8:
+              break;
+          }
+        } else {
+          vp9_get_sse_sum_16x16(src + b_offset,
+                                src_stride,
+                                pre_src + b_offset,
+                                pre_stride, &d16[j].sse, &d16[j].sum);
+        }
+#else
         vp9_get_sse_sum_16x16(src + b_offset,
                               src_stride,
                               pre_src + b_offset,
                               pre_stride, &d16[j].sse, &d16[j].sum);
-
+#endif
         d16[j].var = d16[j].sse -
             (((uint32_t)d16[j].sum * d16[j].sum) >> 8);
 
