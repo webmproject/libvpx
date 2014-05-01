@@ -16,6 +16,24 @@
       "revId": "1d29ce53fe75cf03481f6044caa2b1cbbfc08c92",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//rks\u003d",
+        "filename": "test/decode_to_md5.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-05-01T05:28:56Z",
+      "side": 1,
+      "message": "TODO\u0027ified (locally). Landing.",
+      "parentUuid": "AAAAdn//rlM\u003d",
+      "revId": "1d29ce53fe75cf03481f6044caa2b1cbbfc08c92",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
