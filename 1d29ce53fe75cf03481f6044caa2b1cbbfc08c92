@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//rlM\u003d",
+        "filename": "test/decode_to_md5.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-05-01T01:44:13Z",
+      "side": 1,
+      "message": "note, awk/cut could simplify things here",
+      "revId": "1d29ce53fe75cf03481f6044caa2b1cbbfc08c92",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
