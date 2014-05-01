@@ -20,6 +20,12 @@
 extern "C" {
 #endif
 
+typedef struct {
+  unsigned int sse;
+  int sum;
+  unsigned int var;
+} diff;
+
 struct macroblock_plane {
   DECLARE_ALIGNED(16, int16_t, src_diff[64 * 64]);
   int16_t *qcoeff;

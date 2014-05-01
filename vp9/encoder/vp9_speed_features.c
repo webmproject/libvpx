@@ -270,7 +270,6 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     // Adaptively switch between SOURCE_VAR_BASED_PARTITION and FIXED_PARTITION.
     sf->partition_search_type = SOURCE_VAR_BASED_PARTITION;
     sf->search_type_check_frequency = 50;
-    sf->source_var_thresh = 360;
 
     sf->tx_size_search_method = (cm->frame_type == KEY_FRAME) ?
         USE_LARGESTALL : USE_TX_8X8;
@@ -350,7 +349,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   // to FIXED_PARTITION.
   sf->always_this_block_size = BLOCK_16X16;
   sf->search_type_check_frequency = 50;
-  sf->source_var_thresh = 100;
 
   // Recode loop tolerence %.
   sf->recode_tolerance = 25;

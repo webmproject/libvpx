@@ -576,7 +576,7 @@ TEST_P(DatarateTestVP9Large, BasicRateTargeting3TemporalLayersFrameDropping) {
     // Expect some frame drops in this test: for this 200 frames test,
     // expect at least 10% and not more than 60% drops.
     ASSERT_GE(num_drops_, 20);
-    ASSERT_LE(num_drops_, 120);
+    ASSERT_LE(num_drops_, 130);
   }
 }
 

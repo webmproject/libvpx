@@ -353,9 +353,6 @@ typedef struct SPEED_FEATURES {
   // FIXED_PARTITION search type should be used.
   int search_type_check_frequency;
 
-  // The threshold used in SOURCE_VAR_BASED_PARTITION search type.
-  unsigned int source_var_thresh;
-
   // When partition is pre-set, the inter prediction result from pick_inter_mode
   // can be reused in final block encoding process. It is enabled only for real-
   // time mode speed 6.

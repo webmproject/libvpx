@@ -194,6 +194,11 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
     lc->rc_twopass_stats_in.buf = NULL;
     lc->rc_twopass_stats_in.sz = 0;
   }
+
+  if (cpi->source_diff_var != NULL) {
+    vpx_free(cpi->source_diff_var);
+    cpi->source_diff_var = NULL;
+  }
 }
 
 static void save_coding_context(VP9_COMP *cpi) {
@@ -906,6 +911,12 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
   }
 
   set_speed_features(cpi);
+
+  // Allocate memory to store variances for a frame.
+  CHECK_MEM_ERROR(cm, cpi->source_diff_var,
+                  vpx_calloc(cm->MBs, sizeof(diff)));
+  cpi->source_var_thresh = 0;
+  cpi->frames_till_next_var_check = 0;
 
   // Default rd threshold factors for mode selection
   for (i = 0; i < BLOCK_SIZES; ++i) {
