@@ -45,6 +45,16 @@ int I420Scale(const uint8* src_y, int src_stride_y,
               int dst_width, int dst_height,
               FilterMode filtering);
 
+int I42016Scale(const uint16* src_y, int src_stride_y,
+                const uint16* src_u, int src_stride_u,
+                const uint16* src_v, int src_stride_v,
+                int src_width, int src_height,
+                uint16* dst_y, int dst_stride_y,
+                uint16* dst_u, int dst_stride_u,
+                uint16* dst_v, int dst_stride_v,
+                int dst_width, int dst_height,
+                FilterMode filtering);
+
 // Legacy API.  Deprecated
 int Scale(const uint8* src_y, const uint8* src_u, const uint8* src_v,
           int src_stride_y, int src_stride_u, int src_stride_v,

@@ -3878,6 +3878,487 @@ int ScaleOffset(const uint8* src, int src_width, int src_height,
   }
 }
 
+// 16bit scaling functions
+__inline static uint32 SumBox16(int iboxwidth, int iboxheight,
+                                int src_stride, const uint16* src_ptr) {
+  int x, y;
+  uint32 sum;
+  assert(iboxwidth > 0);
+  assert(iboxheight > 0);
+  sum = 0u;
+  for (y = 0; y < iboxheight; ++y) {
+    for (x = 0; x < iboxwidth; ++x) {
+      sum += src_ptr[x];
+    }
+    src_ptr += src_stride;
+  }
+  return sum;
+}
+
+static void ScalePlaneBoxRow16(int dst_width, int boxheight,
+                               int dx, int src_stride,
+                               const uint16* src_ptr, uint16* dst_ptr) {
+  int x = 0;
+  int i;
+  for (i = 0; i < dst_width; ++i) {
+    int ix = x >> 16;
+    int boxwidth;
+    x += dx;
+    boxwidth = (x >> 16) - ix;
+    *dst_ptr++ = SumBox16(boxwidth, boxheight, src_stride, src_ptr + ix) /
+        (boxwidth * boxheight);
+  }
+}
+
+__inline static uint32 SumPixels32(int iboxwidth, const uint32* src_ptr) {
+  uint32 sum;
+  int x;
+  assert(iboxwidth > 0);
+  sum = 0u;
+  for (x = 0; x < iboxwidth; ++x) {
+    sum += src_ptr[x];
+  }
+  return sum;
+}
+
+static void ScaleAddCols2_16_C(int dst_width, int boxheight, int dx,
+                               const uint32* src_ptr, uint16* dst_ptr) {
+  int scaletbl[2];
+  int minboxwidth = (dx >> 16);
+  scaletbl[0] = 65536 / (minboxwidth * boxheight);
+  scaletbl[1] = 65536 / ((minboxwidth + 1) * boxheight);
+  {
+  int *scaleptr = scaletbl - minboxwidth;
+  int x = 0;
+    int i;
+    for (i = 0; i < dst_width; ++i) {
+    int ix = x >> 16;
+      int boxwidth;
+    x += dx;
+      boxwidth = (x >> 16) - ix;
+    *dst_ptr++ = SumPixels32(boxwidth, src_ptr + ix) * scaleptr[boxwidth] >> 16;
+    }
+  }
+}
+
+static void ScaleAddCols1_16_C(int dst_width, int boxheight, int dx,
+                               const uint32* src_ptr, uint16* dst_ptr) {
+  int boxwidth = (dx >> 16);
+  int scaleval = 65536 / (boxwidth * boxheight);
+  int x = 0;
+  int i;
+  for (i = 0; i < dst_width; ++i) {
+    *dst_ptr++ = SumPixels32(boxwidth, src_ptr + x) * scaleval >> 16;
+    x += boxwidth;
+  }
+}
+
+static void ScaleAddRows16_C(const uint16* src_ptr, int src_stride,
+                             uint32* dst_ptr, int src_width, int src_height) {
+  int x, y;
+  assert(src_width > 0);
+  assert(src_height > 0);
+  for (x = 0; x < src_width; ++x) {
+    const uint16* s = src_ptr + x;
+    int sum = 0;
+    for (y = 0; y < src_height; ++y) {
+      sum += s[0];
+      s += src_stride;
+    }
+    dst_ptr[x] = sum;
+  }
+}
+
+/**
+ * Scale plane down to any dimensions, with interpolation.
+ * (boxfilter).
+ *
+ * Same method as SimpleScale, which is fixed point, outputting
+ * one pixel of destination using fixed point (16.16) to step
+ * through source, sampling a box of pixel with simple
+ * averaging.
+ */
+static void ScalePlaneBox16(int src_width, int src_height,
+                            int dst_width, int dst_height,
+                            int src_stride, int dst_stride,
+                            const uint16* src_ptr, uint16* dst_ptr) {
+  int dx, dy;
+  assert(dst_width > 0);
+  assert(dst_height > 0);
+  dy = (src_height << 16) / dst_height;
+  dx = (src_width << 16) / dst_width;
+  if (!IS_ALIGNED(src_width, 16) || (src_width > kMaxInputWidth) ||
+      dst_height * 2 > src_height) {
+    uint16* dst = dst_ptr;
+    int dy = (src_height << 16) / dst_height;
+    int dx = (src_width << 16) / dst_width;
+    int y = 0;
+    int j;
+    for (j = 0; j < dst_height; ++j) {
+      int iy = y >> 16;
+      const uint16* const src = src_ptr + iy * src_stride;
+      int boxheight;
+      y += dy;
+      if (y > (src_height << 16)) {
+        y = (src_height << 16);
+      }
+      boxheight = (y >> 16) - iy;
+      ScalePlaneBoxRow16(dst_width, boxheight,
+                         dx, src_stride,
+                         src, dst);
+
+      dst += dst_stride;
+    }
+  } else {
+    ALIGN16(uint32 row[kMaxInputWidth]);
+
+    void (*ScaleAddCols)(int dst_width, int boxheight, int dx,
+                         const uint32* src_ptr, uint16* dst_ptr);
+
+    if (dx & 0xffff) {
+      ScaleAddCols = ScaleAddCols2_16_C;
+    } else {
+      ScaleAddCols = ScaleAddCols1_16_C;
+    }
+
+    {
+    int y = 0;
+      int j;
+      for (j = 0; j < dst_height; ++j) {
+      int iy = y >> 16;
+      const uint16* const src = src_ptr + iy * src_stride;
+        int boxheight;
+      y += dy;
+      if (y > (src_height << 16)) {
+        y = (src_height << 16);
+      }
+        boxheight = (y >> 16) - iy;
+      ScaleAddRows16_C(src, src_stride, row, src_width, boxheight);
+      ScaleAddCols(dst_width, boxheight, dx, row, dst_ptr);
+      dst_ptr += dst_stride;
+      }
+    }
+  }
+}
+
+/**
+ * Scale plane to/from any dimensions, with interpolation.
+ */
+static void ScalePlaneBilinearSimple16(int src_width, int src_height,
+                                       int dst_width, int dst_height,
+                                       int src_stride, int dst_stride,
+                                       const uint16* src_ptr, uint16* dst_ptr) {
+  int i, j;
+  uint16* dst = dst_ptr;
+  int dx = (src_width << 16) / dst_width;
+  int dy = (src_height << 16) / dst_height;
+  int maxx = ((src_width - 1) << 16) - 1;
+  int maxy = ((src_height - 1) << 16) - 1;
+  int y = (dst_height < src_height) ? 32768 :
+      (src_height << 16) / dst_height - 32768;
+  for (i = 0; i < dst_height; ++i) {
+    int cy = (y < 0) ? 0 : y;
+    int yi = cy >> 16;
+    int yf = cy & 0xffff;
+    const uint16* const src = src_ptr + yi * src_stride;
+    int x = (dst_width < src_width) ? 32768 :
+        (src_width << 16) / dst_width - 32768;
+    for (j = 0; j < dst_width; ++j) {
+      int cx = (x < 0) ? 0 : x;
+      int xi = cx >> 16;
+      int xf = cx & 0xffff;
+      int r0 = (src[xi] * (65536 - xf) + src[xi + 1] * xf) >> 16;
+      int r1 = (src[xi + src_stride] * (65536 - xf) +
+          src[xi + src_stride + 1] * xf) >> 16;
+      *dst++ = (r0 * (65536 - yf) + r1 * yf) >> 16;
+      x += dx;
+      if (x > maxx)
+        x = maxx;
+    }
+    dst += dst_stride - dst_width;
+    y += dy;
+    if (y > maxy)
+      y = maxy;
+  }
+}
+
+static void ScaleFilterCols16_C(uint16* dst_ptr, const uint16* src_ptr,
+                                int dst_width, int dx) {
+  int x = 0;
+  int j;
+  for (j = 0; j < dst_width; ++j) {
+    int xi = x >> 16;
+    int xf1 = x & 0xffff;
+    int xf0 = 65536 - xf1;
+
+    *dst_ptr++ = (src_ptr[xi] * xf0 + src_ptr[xi + 1] * xf1) >> 16;
+    x += dx;
+  }
+}
+
+// C version 8x2 -> 8x1
+static void ScaleFilterRows16_C(uint16* dst_ptr,
+                                const uint16* src_ptr, int src_stride,
+                                int dst_width, int source_y_fraction) {
+  int y1_fraction;
+  int y0_fraction;
+  const uint16* src_ptr1;
+  uint16* end;
+  assert(dst_width > 0);
+  y1_fraction = source_y_fraction;
+  y0_fraction = 256 - y1_fraction;
+  src_ptr1 = src_ptr + src_stride;
+  end = dst_ptr + dst_width;
+  do {
+    dst_ptr[0] = (src_ptr[0] * y0_fraction + src_ptr1[0] * y1_fraction) >> 8;
+    dst_ptr[1] = (src_ptr[1] * y0_fraction + src_ptr1[1] * y1_fraction) >> 8;
+    dst_ptr[2] = (src_ptr[2] * y0_fraction + src_ptr1[2] * y1_fraction) >> 8;
+    dst_ptr[3] = (src_ptr[3] * y0_fraction + src_ptr1[3] * y1_fraction) >> 8;
+    dst_ptr[4] = (src_ptr[4] * y0_fraction + src_ptr1[4] * y1_fraction) >> 8;
+    dst_ptr[5] = (src_ptr[5] * y0_fraction + src_ptr1[5] * y1_fraction) >> 8;
+    dst_ptr[6] = (src_ptr[6] * y0_fraction + src_ptr1[6] * y1_fraction) >> 8;
+    dst_ptr[7] = (src_ptr[7] * y0_fraction + src_ptr1[7] * y1_fraction) >> 8;
+    src_ptr += 8;
+    src_ptr1 += 8;
+    dst_ptr += 8;
+  } while (dst_ptr < end);
+  dst_ptr[0] = dst_ptr[-1];
+}
+
+/**
+ * Scale plane to/from any dimensions, with bilinear
+ * interpolation.
+ */
+static void ScalePlaneBilinear16(int src_width, int src_height,
+                                 int dst_width, int dst_height,
+                                 int src_stride, int dst_stride,
+                                 const uint16* src_ptr, uint16* dst_ptr) {
+  int dy;
+  int dx;
+  assert(dst_width > 0);
+  assert(dst_height > 0);
+  dy = (src_height << 16) / dst_height;
+  dx = (src_width << 16) / dst_width;
+  if (!IS_ALIGNED(src_width, 8) || (src_width > kMaxInputWidth)) {
+    ScalePlaneBilinearSimple16(src_width, src_height, dst_width, dst_height,
+                               src_stride, dst_stride, src_ptr, dst_ptr);
+
+  } else {
+    ALIGN16(uint16 row[kMaxInputWidth + 1]);
+
+    int y = 0;
+    int maxy = ((src_height - 1) << 16) - 1;  // max is filter of last 2 rows.
+    int j;
+    for (j = 0; j < dst_height; ++j) {
+      int iy = y >> 16;
+      int fy = (y >> 8) & 255;
+      const uint16* const src = src_ptr + iy * src_stride;
+      ScaleFilterRows16_C(row, src, src_stride, src_width, fy);
+      ScaleFilterCols16_C(dst_ptr, row, dst_width, dx);
+      dst_ptr += dst_stride;
+      y += dy;
+      if (y > maxy) {
+        y = maxy;
+      }
+    }
+  }
+}
+
+/**
+ * Scale plane to/from any dimensions, without interpolation.
+ * Fixed point math is used for performance: The upper 16 bits
+ * of x and dx is the integer part of the source position and
+ * the lower 16 bits are the fixed decimal part.
+ */
+static void ScalePlaneSimple16(int src_width, int src_height,
+                               int dst_width, int dst_height,
+                               int src_stride, int dst_stride,
+                               const uint16* src_ptr, uint16* dst_ptr) {
+  uint16* dst = dst_ptr;
+  int dx = (src_width << 16) / dst_width;
+  int y;
+  for (y = 0; y < dst_height; ++y) {
+    const uint16* const src = src_ptr + (y * src_height / dst_height) *
+        src_stride;
+    // TODO(fbarchard): Round X coordinate by setting x=0x8000.
+    int x = 0;
+    int i;
+    for (i = 0; i < dst_width; ++i) {
+      *dst++ = src[x >> 16];
+      x += dx;
+    }
+    dst += dst_stride - dst_width;
+  }
+}
+
+/**
+ * Scale plane down, any size
+ *
+ * This is an optimized version for scaling down a plane to any size.
+ * The current implementation is ~10 times faster compared to the
+ * reference implementation for e.g. XGA->LowResPAL
+ *
+ */
+static void ScalePlaneDown16(int src_width, int src_height,
+                             int dst_width, int dst_height,
+                             int src_stride, int dst_stride,
+                             const uint16* src_ptr, uint16* dst_ptr,
+                             FilterMode filtering) {
+  if (!filtering) {
+    ScalePlaneSimple16(src_width, src_height, dst_width, dst_height,
+                       src_stride, dst_stride, src_ptr, dst_ptr);
+  } else if (filtering == kFilterBilinear || src_height * 2 > dst_height) {
+    // between 1/2x and 1x use bilinear
+    ScalePlaneBilinear16(src_width, src_height, dst_width, dst_height,
+                         src_stride, dst_stride, src_ptr, dst_ptr);
+  } else {
+    ScalePlaneBox16(src_width, src_height, dst_width, dst_height,
+                    src_stride, dst_stride, src_ptr, dst_ptr);
+  }
+}
+
+/**
+ * Scale plane to/from any dimensions.
+ */
+static void ScalePlaneAnySize16(int src_width, int src_height,
+                                int dst_width, int dst_height,
+                                int src_stride, int dst_stride,
+                                const uint16* src_ptr, uint16* dst_ptr,
+                                FilterMode filtering) {
+  if (!filtering) {
+    ScalePlaneSimple16(src_width, src_height, dst_width, dst_height,
+                       src_stride, dst_stride, src_ptr, dst_ptr);
+  } else {
+    // fall back to non-optimized version
+    ScalePlaneBilinear16(src_width, src_height, dst_width, dst_height,
+                         src_stride, dst_stride, src_ptr, dst_ptr);
+  }
+}
+
+static void CopyPlane16(int src_width, int src_height,
+                        int dst_width, int dst_height,
+                        int src_stride, int dst_stride,
+                        const uint16* src_ptr, uint16* dst_ptr) {
+  if (src_stride == src_width && dst_stride == dst_width) {
+    // All contiguous, so can use REALLY fast path.
+    memcpy(dst_ptr, src_ptr, src_width * src_height);
+  } else {
+    // Not all contiguous; must copy scanlines individually
+    const uint16* src = src_ptr;
+    uint16* dst = dst_ptr;
+    int i;
+    for (i = 0; i < src_height; ++i) {
+      memcpy(dst, src, src_width);
+      dst += dst_stride;
+      src += src_stride;
+    }
+  }
+}
+
+static void ScalePlane16(const uint16* src, int src_stride,
+                         int src_width, int src_height,
+                         uint16* dst, int dst_stride,
+                         int dst_width, int dst_height,
+                         FilterMode filtering, int use_ref) {
+  if (dst_width == src_width && dst_height == src_height) {
+    // Straight copy.
+    CopyPlane16(src_width, src_height, dst_width, dst_height, src_stride,
+                dst_stride, src, dst);
+  } else if (dst_width <= src_width && dst_height <= src_height) {
+    // Scale down.
+    if (use_ref) {
+      // For testing, allow the optimized versions to be disabled.
+      ScalePlaneDown16(src_width, src_height, dst_width, dst_height,
+                       src_stride, dst_stride, src, dst, filtering);
+#if 0
+    } else if (4 * dst_width == 3 * src_width &&
+               4 * dst_height == 3 * src_height) {
+      // optimized, 3/4
+      ScalePlaneDown34(src_width, src_height, dst_width, dst_height,
+                       src_stride, dst_stride, src, dst, filtering);
+    } else if (2 * dst_width == src_width && 2 * dst_height == src_height) {
+      // optimized, 1/2
+      ScalePlaneDown2(src_width, src_height, dst_width, dst_height,
+                      src_stride, dst_stride, src, dst, filtering);
+    // 3/8 rounded up for odd sized chroma height.
+    } else if (8 * dst_width == 3 * src_width &&
+               dst_height == ((src_height * 3 + 7) / 8)) {
+      // optimized, 3/8
+      ScalePlaneDown38(src_width, src_height, dst_width, dst_height,
+                       src_stride, dst_stride, src, dst, filtering);
+    } else if (4 * dst_width == src_width && 4 * dst_height == src_height) {
+      // optimized, 1/4
+      ScalePlaneDown4(src_width, src_height, dst_width, dst_height,
+                      src_stride, dst_stride, src, dst, filtering);
+    } else if (8 * dst_width == src_width && 8 * dst_height == src_height) {
+      // optimized, 1/8
+      ScalePlaneDown8(src_width, src_height, dst_width, dst_height,
+                      src_stride, dst_stride, src, dst, filtering);
+#endif
+    } else {
+      // Arbitrary downsample
+      ScalePlaneDown16(src_width, src_height, dst_width, dst_height,
+                       src_stride, dst_stride, src, dst, filtering);
+    }
+  } else {
+    // Arbitrary scale up and/or down.
+    ScalePlaneAnySize16(src_width, src_height, dst_width, dst_height,
+                        src_stride, dst_stride, src, dst, filtering);
+  }
+}
+
+/**
+ * Scale a plane.
+ *
+ * This function in turn calls a scaling function
+ * suitable for handling the desired resolutions.
+ *
+ */
+
+int I42016Scale(const uint16* src_y, int src_stride_y,
+                const uint16* src_u, int src_stride_u,
+                const uint16* src_v, int src_stride_v,
+                int src_width, int src_height,
+                uint16* dst_y, int dst_stride_y,
+                uint16* dst_u, int dst_stride_u,
+                uint16* dst_v, int dst_stride_v,
+                int dst_width, int dst_height,
+                FilterMode filtering) {
+  if (!src_y || !src_u || !src_v || src_width <= 0 || src_height == 0 ||
+      !dst_y || !dst_u || !dst_v || dst_width <= 0 || dst_height <= 0) {
+    return -1;
+  }
+  // Negative height means invert the image.
+  if (src_height < 0) {
+    int halfheight;
+    src_height = -src_height;
+    halfheight = (src_height + 1) >> 1;
+    src_y = src_y + (src_height - 1) * src_stride_y;
+    src_u = src_u + (halfheight - 1) * src_stride_u;
+    src_v = src_v + (halfheight - 1) * src_stride_v;
+    src_stride_y = -src_stride_y;
+    src_stride_u = -src_stride_u;
+    src_stride_v = -src_stride_v;
+  }
+  {
+  int src_halfwidth = (src_width + 1) >> 1;
+  int src_halfheight = (src_height + 1) >> 1;
+  int dst_halfwidth = (dst_width + 1) >> 1;
+  int dst_halfheight = (dst_height + 1) >> 1;
+
+  ScalePlane16(src_y, src_stride_y, src_width, src_height,
+               dst_y, dst_stride_y, dst_width, dst_height,
+               filtering, use_reference_impl_);
+  ScalePlane16(src_u, src_stride_u, src_halfwidth, src_halfheight,
+               dst_u, dst_stride_u, dst_halfwidth, dst_halfheight,
+               filtering, use_reference_impl_);
+  ScalePlane16(src_v, src_stride_v, src_halfwidth, src_halfheight,
+               dst_v, dst_stride_v, dst_halfwidth, dst_halfheight,
+               filtering, use_reference_impl_);
+  }
+  return 0;
+}
+
 #ifdef __cplusplus
 }  // extern "C"
 }  // namespace libyuv
