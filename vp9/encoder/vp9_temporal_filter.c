@@ -27,6 +27,8 @@
 #include "vpx_ports/vpx_timer.h"
 #include "vpx_scale/vpx_scale.h"
 
+static int fixed_divide[512];
+
 static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
                                             uint8_t *y_mb_ptr,
                                             uint8_t *u_mb_ptr,
@@ -76,6 +78,14 @@ static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
                             uv_block_size, uv_block_size,
                             which_mv,
                             kernel, mv_precision_uv, x, y);
+}
+
+void vp9_temporal_filter_init() {
+  int i;
+
+  fixed_divide[0] = 0;
+  for (i = 1; i < 512; ++i)
+    fixed_divide[i] = 0x80000 / i;
 }
 
 void vp9_temporal_filter_apply_c(uint8_t *frame1,
@@ -294,7 +304,7 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
       for (i = 0, k = 0; i < 16; i++) {
         for (j = 0; j < 16; j++, k++) {
           unsigned int pval = accumulator[k] + (count[k] >> 1);
-          pval *= cpi->fixed_divide[count[k]];
+          pval *= fixed_divide[count[k]];
           pval >>= 19;
 
           dst1[byte] = (uint8_t)pval;
@@ -315,13 +325,13 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
 
           // U
           unsigned int pval = accumulator[k] + (count[k] >> 1);
-          pval *= cpi->fixed_divide[count[k]];
+          pval *= fixed_divide[count[k]];
           pval >>= 19;
           dst1[byte] = (uint8_t)pval;
 
           // V
           pval = accumulator[m] + (count[m] >> 1);
-          pval *= cpi->fixed_divide[count[m]];
+          pval *= fixed_divide[count[m]];
           pval >>= 19;
           dst2[byte] = (uint8_t)pval;
 
