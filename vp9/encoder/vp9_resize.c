@@ -15,6 +15,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "./vpx_config.h"
+
 #include "vp9/common/vp9_common.h"
 #include "vp9/encoder/vp9_resize.h"
 
@@ -528,6 +530,301 @@ void vp9_resize_plane(const uint8_t *const input,
   free(tmpbuf);
   free(arrbuf);
 }
+
+#if CONFIG_VP9_HIGH
+static void high_interpolate(const uint16_t *const input, int inlength,
+                             uint16_t *output, int outlength, int bps) {
+  const int64_t delta = (((uint64_t)inlength << 32) + outlength / 2) /
+      outlength;
+  const int64_t offset = inlength > outlength ?
+      (((int64_t)(inlength - outlength) << 31) + outlength / 2) / outlength :
+      -(((int64_t)(outlength - inlength) << 31) + outlength / 2) / outlength;
+  uint16_t *optr = output;
+  int x, x1, x2, sum, k, int_pel, sub_pel;
+  int64_t y;
+
+  const interp_kernel *interp_filters =
+      choose_interp_filter(inlength, outlength);
+
+  x = 0;
+  y = offset;
+  while ((y >> INTERP_PRECISION_BITS) < (INTERP_TAPS / 2 - 1)) {
+    x++;
+    y += delta;
+  }
+  x1 = x;
+  x = outlength - 1;
+  y = delta * x + offset;
+  while ((y >> INTERP_PRECISION_BITS) +
+         (int64_t)(INTERP_TAPS / 2) >= inlength) {
+    x--;
+    y -= delta;
+  }
+  x2 = x;
+  if (x1 > x2) {
+    for (x = 0, y = offset; x < outlength; ++x, y += delta) {
+      const int16_t *filter;
+      int_pel = y >> INTERP_PRECISION_BITS;
+      sub_pel = (y >> (INTERP_PRECISION_BITS - SUBPEL_BITS)) & SUBPEL_MASK;
+      filter = interp_filters[sub_pel];
+      sum = 0;
+      for (k = 0; k < INTERP_TAPS; ++k) {
+        const int pk = int_pel - INTERP_TAPS / 2 + 1 + k;
+        sum += filter[k] * input[(pk < 0 ? 0 :
+                                  (pk >= inlength ? inlength - 1 : pk))];
+      }
+      *optr++ = clip_pixel_bps(ROUND_POWER_OF_TWO(sum, FILTER_BITS), bps);
+    }
+  } else {
+    // Initial part.
+    for (x = 0, y = offset; x < x1; ++x, y += delta) {
+      const int16_t *filter;
+      int_pel = y >> INTERP_PRECISION_BITS;
+      sub_pel = (y >> (INTERP_PRECISION_BITS - SUBPEL_BITS)) & SUBPEL_MASK;
+      filter = interp_filters[sub_pel];
+      sum = 0;
+      for (k = 0; k < INTERP_TAPS; ++k)
+        sum += filter[k] * input[(int_pel - INTERP_TAPS / 2 + 1 + k < 0 ?
+                                  0 :
+                                  int_pel - INTERP_TAPS / 2 + 1 + k)];
+      *optr++ = clip_pixel_bps(ROUND_POWER_OF_TWO(sum, FILTER_BITS), bps);
+    }
+    // Middle part.
+    for (; x <= x2; ++x, y += delta) {
+      const int16_t *filter;
+      int_pel = y >> INTERP_PRECISION_BITS;
+      sub_pel = (y >> (INTERP_PRECISION_BITS - SUBPEL_BITS)) & SUBPEL_MASK;
+      filter = interp_filters[sub_pel];
+      sum = 0;
+      for (k = 0; k < INTERP_TAPS; ++k)
+        sum += filter[k] * input[int_pel - INTERP_TAPS / 2 + 1 + k];
+      *optr++ = clip_pixel_bps(ROUND_POWER_OF_TWO(sum, FILTER_BITS), bps);
+    }
+    // End part.
+    for (; x < outlength; ++x, y += delta) {
+      const int16_t *filter;
+      int_pel = y >> INTERP_PRECISION_BITS;
+      sub_pel = (y >> (INTERP_PRECISION_BITS - SUBPEL_BITS)) & SUBPEL_MASK;
+      filter = interp_filters[sub_pel];
+      sum = 0;
+      for (k = 0; k < INTERP_TAPS; ++k)
+        sum += filter[k] * input[(int_pel - INTERP_TAPS / 2 + 1 + k >=
+                                  inlength ?  inlength - 1 :
+                                  int_pel - INTERP_TAPS / 2 + 1 + k)];
+      *optr++ = clip_pixel_bps(ROUND_POWER_OF_TWO(sum, FILTER_BITS), bps);
+    }
+  }
+}
+
+static void high_down2_symeven(const uint16_t *const input, int length,
+                               uint16_t *output, int bps) {
+  // Actual filter len = 2 * filter_len_half.
+  static const int16_t *filter = vp9_down2_symeven_half_filter;
+  const int filter_len_half = sizeof(vp9_down2_symeven_half_filter) / 2;
+  int i, j;
+  uint16_t *optr = output;
+  int l1 = filter_len_half;
+  int l2 = (length - filter_len_half);
+  l1 += (l1 & 1);
+  l2 += (l2 & 1);
+  if (l1 > l2) {
+    // Short input length.
+    for (i = 0; i < length; i += 2) {
+      int sum = (1 << (FILTER_BITS - 1));
+      for (j = 0; j < filter_len_half; ++j) {
+        sum += (input[(i - j < 0 ? 0 : i - j)] +
+                input[(i + 1 + j >= length ? length - 1 : i + 1 + j)]) *
+            filter[j];
+      }
+      sum >>= FILTER_BITS;
+      *optr++ = clip_pixel_bps(sum, bps);
+    }
+  } else {
+    // Initial part.
+    for (i = 0; i < l1; i += 2) {
+      int sum = (1 << (FILTER_BITS - 1));
+      for (j = 0; j < filter_len_half; ++j) {
+        sum += (input[(i - j < 0 ? 0 : i - j)] + input[i + 1 + j]) * filter[j];
+      }
+      sum >>= FILTER_BITS;
+      *optr++ = clip_pixel_bps(sum, bps);
+    }
+    // Middle part.
+    for (; i < l2; i += 2) {
+      int sum = (1 << (FILTER_BITS - 1));
+      for (j = 0; j < filter_len_half; ++j) {
+        sum += (input[i - j] + input[i + 1 + j]) * filter[j];
+      }
+      sum >>= FILTER_BITS;
+      *optr++ = clip_pixel_bps(sum, bps);
+    }
+    // End part.
+    for (; i < length; i += 2) {
+      int sum = (1 << (FILTER_BITS - 1));
+      for (j = 0; j < filter_len_half; ++j) {
+        sum += (input[i - j] +
+                input[(i + 1 + j >= length ? length - 1 : i + 1 + j)]) *
+            filter[j];
+      }
+      sum >>= FILTER_BITS;
+      *optr++ = clip_pixel_bps(sum, bps);
+    }
+  }
+}
+
+static void high_down2_symodd(const uint16_t *const input, int length,
+                              uint16_t *output, int bps) {
+  // Actual filter len = 2 * filter_len_half - 1.
+  static const int16_t *filter = vp9_down2_symodd_half_filter;
+  const int filter_len_half = sizeof(vp9_down2_symodd_half_filter) / 2;
+  int i, j;
+  uint16_t *optr = output;
+  int l1 = filter_len_half - 1;
+  int l2 = (length - filter_len_half + 1);
+  l1 += (l1 & 1);
+  l2 += (l2 & 1);
+  if (l1 > l2) {
+    // Short input length.
+    for (i = 0; i < length; i += 2) {
+      int sum = (1 << (FILTER_BITS - 1)) + input[i] * filter[0];
+      for (j = 1; j < filter_len_half; ++j) {
+        sum += (input[(i - j < 0 ? 0 : i - j)] +
+                input[(i + j >= length ? length - 1 : i + j)]) *
+            filter[j];
+      }
+      sum >>= FILTER_BITS;
+      *optr++ = clip_pixel_bps(sum, bps);
+    }
+  } else {
+    // Initial part.
+    for (i = 0; i < l1; i += 2) {
+      int sum = (1 << (FILTER_BITS - 1)) + input[i] * filter[0];
+      for (j = 1; j < filter_len_half; ++j) {
+        sum += (input[(i - j < 0 ? 0 : i - j)] + input[i + j]) * filter[j];
+      }
+      sum >>= FILTER_BITS;
+      *optr++ = clip_pixel_bps(sum, bps);
+    }
+    // Middle part.
+    for (; i < l2; i += 2) {
+      int sum = (1 << (FILTER_BITS - 1)) + input[i] * filter[0];
+      for (j = 1; j < filter_len_half; ++j) {
+        sum += (input[i - j] + input[i + j]) * filter[j];
+      }
+      sum >>= FILTER_BITS;
+      *optr++ = clip_pixel_bps(sum, bps);
+    }
+    // End part.
+    for (; i < length; i += 2) {
+      int sum = (1 << (FILTER_BITS - 1)) + input[i] * filter[0];
+      for (j = 1; j < filter_len_half; ++j) {
+        sum += (input[i - j] + input[(i + j >= length ? length - 1 : i + j)]) *
+            filter[j];
+      }
+      sum >>= FILTER_BITS;
+      *optr++ = clip_pixel_bps(sum, bps);
+    }
+  }
+}
+
+static void high_resize_multistep(const uint16_t *const input,
+                                  int length,
+                                  uint16_t *output,
+                                  int olength,
+                                  uint16_t *buf,
+                                  int bps) {
+  int steps;
+  if (length == olength) {
+    memcpy(output, input, sizeof(uint16_t) * length);
+    return;
+  }
+  steps = get_down2_steps(length, olength);
+
+  if (steps > 0) {
+    int s;
+    uint16_t *out = NULL;
+    uint16_t *tmpbuf = NULL;
+    uint16_t *otmp, *otmp2;
+    int filteredlength = length;
+    if (!tmpbuf) {
+      tmpbuf = (uint16_t *)malloc(sizeof(uint16_t) * length);
+      otmp = tmpbuf;
+    } else {
+      otmp = buf;
+    }
+    otmp2 = otmp + get_down2_length(length, 1);
+    for (s = 0; s < steps; ++s) {
+      const int proj_filteredlength = get_down2_length(filteredlength, 1);
+      const uint16_t *const in = (s == 0 ? input : out);
+      if (s == steps - 1 && proj_filteredlength == olength)
+        out = output;
+      else
+        out = (s & 1 ? otmp2 : otmp);
+      if (filteredlength & 1)
+        high_down2_symodd(in, filteredlength, out, bps);
+      else
+        high_down2_symeven(in, filteredlength, out, bps);
+      filteredlength = proj_filteredlength;
+    }
+    if (filteredlength != olength) {
+      high_interpolate(out, filteredlength, output, olength, bps);
+    }
+    if (tmpbuf)
+      free(tmpbuf);
+  } else {
+    high_interpolate(input, length, output, olength, bps);
+  }
+}
+
+static void high_fill_col_to_arr(uint16_t *img, int stride, int len,
+                                 uint16_t *arr) {
+  int i;
+  uint16_t *iptr = img;
+  uint16_t *aptr = arr;
+  for (i = 0; i < len; ++i, iptr += stride) {
+    *aptr++ = *iptr;
+  }
+}
+
+static void high_fill_arr_to_col(uint16_t *img, int stride, int len,
+                                 uint16_t *arr) {
+  int i;
+  uint16_t *iptr = img;
+  uint16_t *aptr = arr;
+  for (i = 0; i < len; ++i, iptr += stride) {
+    *iptr = *aptr++;
+  }
+}
+
+void vp9_high_resize_plane(const uint8_t *const input,
+                           int height,
+                           int width,
+                           int in_stride,
+                           uint8_t *output,
+                           int height2,
+                           int width2,
+                           int out_stride,
+                           int bps) {
+  int i;
+  uint16_t *intbuf = (uint16_t *)malloc(sizeof(uint16_t) * width2 * height);
+  uint16_t *tmpbuf = (uint16_t *)malloc(sizeof(uint16_t) *
+                                        (width < height ? height : width));
+  uint16_t *arrbuf = (uint16_t *)malloc(sizeof(uint16_t) * (height + height2));
+  for (i = 0; i < height; ++i)
+    high_resize_multistep(CONVERT_TO_SHORTPTR(input + in_stride * i), width,
+                          intbuf + width2 * i, width2, tmpbuf, bps);
+  for (i = 0; i < width2; ++i) {
+    high_fill_col_to_arr(intbuf + i, width2, height, arrbuf);
+    high_resize_multistep(arrbuf, height, arrbuf + height, height2, tmpbuf,
+                          bps);
+    high_fill_arr_to_col(CONVERT_TO_SHORTPTR(output + i), out_stride, height2,
+                         arrbuf + height);
+  }
+  free(intbuf);
+  free(tmpbuf);
+  free(arrbuf);
+}
+#endif
 
 void vp9_resize_frame420(const uint8_t *const y,
                          int y_stride,

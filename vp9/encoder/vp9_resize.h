@@ -11,6 +11,8 @@
 #ifndef VP9_ENCODER_VP9_RESIZE_H_
 #define VP9_ENCODER_VP9_RESIZE_H_
 
+#include "./vpx_config.h"
+
 #include <stdio.h>
 #include "vpx/vpx_integer.h"
 
@@ -64,5 +66,17 @@ void vp9_resize_frame444(const uint8_t *const y,
                          int ouv_stride,
                          int oheight,
                          int owidth);
+
+#if CONFIG_VP9_HIGH
+void vp9_high_resize_plane(const uint8_t *const input,
+                           int height,
+                           int width,
+                           int in_stride,
+                           uint8_t *output,
+                           int height2,
+                           int width2,
+                           int out_stride,
+                           int bps);
+#endif
 
 #endif    // VP9_ENCODER_VP9_RESIZE_H_

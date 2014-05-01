@@ -2354,8 +2354,14 @@ void vp9_write_yuv_rec_frame(VP9_COMMON *cm) {
 }
 #endif
 
+#if CONFIG_VP9_HIGH
+static void scale_and_extend_frame_nonnormative(YV12_BUFFER_CONFIG *src_fb,
+                                                YV12_BUFFER_CONFIG *dst_fb,
+                                                int bps) {
+#else
 static void scale_and_extend_frame_nonnormative(YV12_BUFFER_CONFIG *src_fb,
                                                 YV12_BUFFER_CONFIG *dst_fb) {
+#endif
   const int in_w = src_fb->y_crop_width;
   const int in_h = src_fb->y_crop_height;
   const int out_w = dst_fb->y_crop_width;
@@ -2378,13 +2384,38 @@ static void scale_and_extend_frame_nonnormative(YV12_BUFFER_CONFIG *src_fb,
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
     if (i == 0 || i == 3) {
-      // Y and alpha planes
-      vp9_resize_plane(srcs[i], in_h, in_w, src_strides[i],
-                       dsts[i], out_h, out_w, dst_strides[i]);
+#if CONFIG_VP9_HIGH
+      if (src_fb->flags & YV12_FLAG_HIGH) {
+        // Y and alpha planes
+        vp9_high_resize_plane(srcs[i], in_h, in_w, src_strides[i],
+                              dsts[i], out_h, out_w, dst_strides[i], bps);
+      } else {
+        // Y and alpha planes
+        vp9_resize_plane(srcs[i], in_h, in_w, src_strides[i],
+                         dsts[i], out_h, out_w, dst_strides[i]);
+      }
+#else
+     // Y and alpha planes
+     vp9_resize_plane(srcs[i], in_h, in_w, src_strides[i],
+                      dsts[i], out_h, out_w, dst_strides[i]);
+#endif
     } else {
+#if CONFIG_VP9_HIGH
+      if (src_fb->flags & YV12_FLAG_HIGH) {
+        // Chroma planes
+        vp9_high_resize_plane(srcs[i], in_h_uv, in_w_uv, src_strides[i],
+                              dsts[i], out_h_uv, out_w_uv, dst_strides[i],
+                              bps);
+      } else {
+        // Chroma planes
+        vp9_resize_plane(srcs[i], in_h_uv, in_w_uv, src_strides[i],
+                         dsts[i], out_h_uv, out_w_uv, dst_strides[i]);
+      }
+#else
       // Chroma planes
       vp9_resize_plane(srcs[i], in_h_uv, in_w_uv, src_strides[i],
                        dsts[i], out_h_uv, out_w_uv, dst_strides[i]);
+#endif
     }
   }
   // TODO(hkuang): Call C version explicitly
@@ -2392,8 +2423,13 @@ static void scale_and_extend_frame_nonnormative(YV12_BUFFER_CONFIG *src_fb,
   vp8_yv12_extend_frame_borders_c(dst_fb);
 }
 
+#if CONFIG_VP9_HIGH
+static void scale_and_extend_frame(YV12_BUFFER_CONFIG *src_fb,
+                                   YV12_BUFFER_CONFIG *dst_fb, int bps) {
+#else
 static void scale_and_extend_frame(YV12_BUFFER_CONFIG *src_fb,
                                    YV12_BUFFER_CONFIG *dst_fb) {
+#endif
   const int in_w = src_fb->y_crop_width;
   const int in_h = src_fb->y_crop_height;
   const int out_w = dst_fb->y_crop_width;
@@ -2421,11 +2457,18 @@ static void scale_and_extend_frame(YV12_BUFFER_CONFIG *src_fb,
         uint8_t *src = srcs[i] + y / factor * in_h / out_h * src_stride +
                                  x / factor * in_w / out_w;
         uint8_t *dst = dsts[i] + y / factor * dst_stride + x / factor;
-
+#if CONFIG_VP9_HIGH
+        vp9_high_convolve8(src, src_stride, dst, dst_stride,
+                           vp9_sub_pel_filters_8[x_q4 & 0xf],
+                           16 * in_w / out_w,
+                           vp9_sub_pel_filters_8[y_q4 & 0xf],
+                           16 * in_h / out_h, 16 / factor, 16 / factor, bps);
+#else
         vp9_convolve8(src, src_stride, dst, dst_stride,
                       vp9_sub_pel_filters_8[x_q4 & 0xf], 16 * in_w / out_w,
                       vp9_sub_pel_filters_8[y_q4 & 0xf], 16 * in_h / out_h,
                       16 / factor, 16 / factor);
+#endif
       }
     }
   }
@@ -2608,6 +2651,23 @@ static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
 void vp9_scale_references(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
   MV_REFERENCE_FRAME ref_frame;
+#if CONFIG_VP9_HIGH
+  int bps;
+  switch (cm->bit_depth) {
+    case BITS_8:
+      bps = 8;
+      break;
+    case BITS_10:
+      bps = 10;
+      break;
+    case BITS_12:
+      bps = 12;
+      break;
+    default:
+      bps = 8;
+      break;
+  }
+#endif
 
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
     const int idx = cm->ref_frame_map[get_ref_frame_idx(cpi, ref_frame)];
@@ -2623,7 +2683,11 @@ void vp9_scale_references(VP9_COMP *cpi) {
                                cm->use_high,
 #endif
                                VP9_ENC_BORDER_IN_PIXELS, NULL, NULL, NULL);
+#if CONFIG_VP9_HIGH
+      scale_and_extend_frame(ref, &cm->frame_bufs[new_fb].buf, bps);
+#else
       scale_and_extend_frame(ref, &cm->frame_bufs[new_fb].buf);
+#endif
       cpi->scaled_ref_idx[ref_frame - 1] = new_fb;
     } else {
       cpi->scaled_ref_idx[ref_frame - 1] = idx;
@@ -3000,7 +3064,26 @@ YV12_BUFFER_CONFIG *vp9_scale_if_required(VP9_COMMON *cm,
                                           YV12_BUFFER_CONFIG *scaled) {
   if (cm->mi_cols * MI_SIZE != unscaled->y_width ||
       cm->mi_rows * MI_SIZE != unscaled->y_height) {
+#if CONFIG_VP9_HIGH
+    int bps;
+    switch (cm->bit_depth) {
+      case BITS_8:
+        bps = 8;
+        break;
+      case BITS_10:
+        bps = 10;
+        break;
+      case BITS_12:
+        bps = 12;
+        break;
+      default:
+        bps = 8;
+        break;
+    }
+    scale_and_extend_frame_nonnormative(unscaled, scaled, bps);
+#else
     scale_and_extend_frame_nonnormative(unscaled, scaled);
+#endif
     return scaled;
   } else {
     return unscaled;
