@@ -807,7 +807,7 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi,
   int active_worst_quality = cpi->twopass.active_worst_quality;
   int q;
 
-  if (frame_is_intra_only(cm)) {
+  if (frame_is_intra_only(cm) || vp9_is_upper_layer_key_frame(cpi)) {
 #if !CONFIG_MULTIPLE_ARF
     // Handle the special case for key frames forced when we have75 reached
     // the maximum key frame interval. Here force the Q to a range
@@ -928,7 +928,8 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi,
     vp9_clear_system_state();
 
     // Limit Q range for the adaptive loop.
-    if (cm->frame_type == KEY_FRAME && !rc->this_key_frame_forced) {
+    if ((cm->frame_type == KEY_FRAME || vp9_is_upper_layer_key_frame(cpi)) &&
+        !rc->this_key_frame_forced) {
       qdelta = vp9_compute_qdelta_by_rate(&cpi->rc, cm->frame_type,
                                           active_worst_quality, 2.0);
     } else if (!rc->is_src_frame_alt_ref &&
