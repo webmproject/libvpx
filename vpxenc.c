@@ -1268,19 +1268,21 @@ static void encode_frame(struct stream_state *stream,
       if (!stream->img)
         stream->img = vpx_img_alloc(NULL, VPX_IMG_FMT_I42016,
                                     cfg->g_w, cfg->g_h, 16);
-      assert(0 && "Resizing of 16bit images not yet supported");
-      /*I42016Scale(img->planes[VPX_PLANE_Y], img->stride[VPX_PLANE_Y],
-        img->planes[VPX_PLANE_U], img->stride[VPX_PLANE_U],
-        img->planes[VPX_PLANE_V], img->stride[VPX_PLANE_V],
-        img->d_w, img->d_h,
-        stream->img->planes[VPX_PLANE_Y],
-        stream->img->stride[VPX_PLANE_Y],
-        stream->img->planes[VPX_PLANE_U],
-        stream->img->stride[VPX_PLANE_U],
-        stream->img->planes[VPX_PLANE_V],
-        stream->img->stride[VPX_PLANE_V],
-        stream->img->d_w, stream->img->d_h,
-        kFilterBox);*/
+      I42016Scale((uint16*)img->planes[VPX_PLANE_Y],
+                  img->stride[VPX_PLANE_Y]/2,
+                  (uint16*)img->planes[VPX_PLANE_U],
+                  img->stride[VPX_PLANE_U]/2,
+                  (uint16*)img->planes[VPX_PLANE_V],
+                  img->stride[VPX_PLANE_V]/2,
+                  img->d_w, img->d_h,
+                  (uint16*)stream->img->planes[VPX_PLANE_Y],
+                  stream->img->stride[VPX_PLANE_Y]/2,
+                  (uint16*)stream->img->planes[VPX_PLANE_U],
+                  stream->img->stride[VPX_PLANE_U]/2,
+                  (uint16*)stream->img->planes[VPX_PLANE_V],
+                  stream->img->stride[VPX_PLANE_V]/2,
+                  stream->img->d_w, stream->img->d_h,
+                  kFilterBox);
       img = stream->img;
     }
   }
