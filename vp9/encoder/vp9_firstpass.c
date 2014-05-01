@@ -61,7 +61,7 @@
 #define MIN_GF_INTERVAL             4
 #endif
 
-#define LONG_TERM_VBR_CORRECTION
+// #define LONG_TERM_VBR_CORRECTION
 
 static void swap_yv12(YV12_BUFFER_CONFIG *a, YV12_BUFFER_CONFIG *b) {
   YV12_BUFFER_CONFIG temp = *a;
@@ -2402,8 +2402,8 @@ void vp9_twopass_postencode_update(VP9_COMP *cpi) {
   const double progress =
       (double)(cpi->twopass.stats_in - cpi->twopass.stats_in_start) /
               (cpi->twopass.stats_in_end - cpi->twopass.stats_in_start);
-  const int bits_used = progress * cpi->rc.this_frame_target +
-                        (1.0 - progress) * cpi->rc.projected_frame_size;
+  const int bits_used = progress * rc->this_frame_target +
+                        (1.0 - progress) * rc->projected_frame_size;
 #endif
 
   cpi->twopass.bits_left -= bits_used;
