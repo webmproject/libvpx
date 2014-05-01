@@ -2097,7 +2097,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   cm->lf.mode_ref_delta_update = 0;
 
   // Initialize cpi->mv_step_param to default based on max resolution.
-  cpi->mv_step_param = vp9_init_search_range(cpi, max_mv_def);
+  cpi->mv_step_param = vp9_init_search_range(sf, max_mv_def);
   // Initialize cpi->max_mv_magnitude and cpi->mv_step_param if appropriate.
   if (sf->auto_mv_step_size) {
     if (frame_is_intra_only(cm)) {
@@ -2109,7 +2109,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
         // Allow mv_steps to correspond to twice the max mv magnitude found
         // in the previous frame, capped by the default max_mv_magnitude based
         // on resolution.
-        cpi->mv_step_param = vp9_init_search_range(cpi, MIN(max_mv_def, 2 *
+        cpi->mv_step_param = vp9_init_search_range(sf, MIN(max_mv_def, 2 *
                                  cpi->max_mv_magnitude));
       cpi->max_mv_magnitude = 0;
     }

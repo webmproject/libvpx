@@ -51,7 +51,7 @@ void vp9_set_mv_search_range(MACROBLOCK *x, const MV *mv) {
     x->mv_row_max = row_max;
 }
 
-int vp9_init_search_range(VP9_COMP *cpi, int size) {
+int vp9_init_search_range(const SPEED_FEATURES *sf, int size) {
   int sr = 0;
 
   // Minimum search size no matter what the passed in value.
@@ -60,8 +60,8 @@ int vp9_init_search_range(VP9_COMP *cpi, int size) {
   while ((size << sr) < MAX_FULL_PEL_VAL)
     sr++;
 
-  sr += cpi->sf.reduce_first_step_size;
-  sr = MIN(sr, (cpi->sf.max_step_search_steps - 2));
+  sr += sf->reduce_first_step_size;
+  sr = MIN(sr, (sf->max_step_search_steps - 2));
   return sr;
 }
 
