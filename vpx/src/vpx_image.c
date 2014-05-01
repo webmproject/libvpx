@@ -95,9 +95,11 @@ static vpx_image_t *img_alloc_helper(vpx_image_t  *img,
     case VPX_IMG_FMT_VPXYV12:
       bps = 12;
       break;
+    case VPX_IMG_FMT_I422:
     case VPX_IMG_FMT_I42216:
       bps = 16;
       break;
+    case VPX_IMG_FMT_I444:
     case VPX_IMG_FMT_I44416:
       bps = 24;
       break;
@@ -112,6 +114,7 @@ static vpx_image_t *img_alloc_helper(vpx_image_t  *img,
     case VPX_IMG_FMT_YV12:
     case VPX_IMG_FMT_VPXI420:
     case VPX_IMG_FMT_VPXYV12:
+    case VPX_IMG_FMT_I422:
     case VPX_IMG_FMT_I42016:
     case VPX_IMG_FMT_I42216:
       xcs = 1;
