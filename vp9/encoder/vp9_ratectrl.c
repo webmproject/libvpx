@@ -1306,11 +1306,26 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
           cpi->oxcf.key_freq == 0))) {
     cm->frame_type = KEY_FRAME;
     rc->source_alt_ref_active = 0;
+
+    if (cpi->use_svc && cpi->svc.number_temporal_layers == 1) {
+      cpi->svc.layer_context[cpi->svc.spatial_layer_id].is_key_frame = 1;
+    }
+
     if (cpi->pass == 0 && cpi->oxcf.rc_mode == RC_MODE_CBR) {
       target = calc_iframe_target_size_one_pass_cbr(cpi);
     }
   } else {
     cm->frame_type = INTER_FRAME;
+
+    if (cpi->use_svc && cpi->svc.number_temporal_layers == 1) {
+      LAYER_CONTEXT *lc = &cpi->svc.layer_context[cpi->svc.spatial_layer_id];
+      if (cpi->svc.spatial_layer_id == 0) {
+        lc->is_key_frame = 0;
+      } else {
+        lc->is_key_frame = cpi->svc.layer_context[0].is_key_frame;
+      }
+    }
+
     if (cpi->pass == 0 && cpi->oxcf.rc_mode == RC_MODE_CBR) {
       target = calc_pframe_target_size_one_pass_cbr(cpi);
     }
