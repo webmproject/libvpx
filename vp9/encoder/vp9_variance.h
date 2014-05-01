@@ -23,14 +23,10 @@ void variance(const uint8_t *a, int a_stride,
               unsigned int *sse, int *sum);
 
 #if CONFIG_VP9_HIGH
-void high_variance(const uint8_t *src_ptr,
-              int  source_stride,
-              const uint8_t *ref_ptr,
-              int  recon_stride,
-              int  w,
-              int  h,
-              unsigned int *sse,
-              int *sum);
+void high_variance(const uint8_t *a8, int a_stride,
+                   const uint8_t *b8, int b_stride,
+                   int  w, int  h,
+                   unsigned int *sse, int *sum);
 #endif
 
 
@@ -114,9 +110,8 @@ static void high_comp_avg_pred(uint16_t *comp_pred, const uint8_t *pred8,
   uint16_t *ref = CONVERT_TO_SHORTPTR(ref8);
   for (i = 0; i < height; i++) {
     for (j = 0; j < width; j++) {
-      int tmp;
-      tmp = pred[j] + ref[j];
-      comp_pred[j] = (tmp + 1) >> 1;
+      const int tmp = pred[j] + ref[j];
+      comp_pred[j] = ROUND_POWER_OF_TWO(tmp, 1);
     }
     comp_pred += width;
     pred += width;
