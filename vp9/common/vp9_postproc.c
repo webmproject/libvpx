@@ -24,6 +24,10 @@
 #include "vp9/common/vp9_systemdependent.h"
 #include "vp9/common/vp9_textblit.h"
 
+#if CONFIG_VP9_HIGH
+#include "vp9/common/vp9_common.h"
+#endif
+
 #define RGB_TO_YUV(t)                                            \
   ( (0.257*(float)(t >> 16))  + (0.504*(float)(t >> 8 & 0xff)) + \
     (0.098*(float)(t & 0xff)) + 16),                             \
@@ -206,6 +210,86 @@ void vp9_post_proc_down_and_across_c(const uint8_t *src_ptr,
   }
 }
 
+#if CONFIG_VP9_HIGH
+
+void vp9_high_post_proc_down_and_across_c(const uint16_t *src_ptr,
+                                          uint16_t *dst_ptr,
+                                          int src_pixels_per_line,
+                                          int dst_pixels_per_line,
+                                          int rows,
+                                          int cols,
+                                          int flimit) {
+  uint16_t const *p_src;
+  uint16_t *p_dst;
+  int row;
+  int col;
+  int i;
+  int v;
+  int pitch = src_pixels_per_line;
+  uint16_t d[8];
+  (void)dst_pixels_per_line;
+
+  for (row = 0; row < rows; row++) {
+    /* post_proc_down for one row */
+    p_src = src_ptr;
+    p_dst = dst_ptr;
+
+    for (col = 0; col < cols; col++) {
+      int kernel = 4;
+      int v = p_src[col];
+
+      for (i = -2; i <= 2; i++) {
+        if (abs(v - p_src[col + i * pitch]) > flimit)
+          goto down_skip_convolve;
+
+        kernel += kernel5[2 + i] * p_src[col + i * pitch];
+      }
+
+      v = (kernel >> 3);
+    down_skip_convolve:
+      p_dst[col] = v;
+    }
+
+    /* now post_proc_across */
+    p_src = dst_ptr;
+    p_dst = dst_ptr;
+
+    for (i = 0; i < 8; i++)
+      d[i] = p_src[i];
+
+    for (col = 0; col < cols; col++) {
+      int kernel = 4;
+      v = p_src[col];
+
+      d[col & 7] = v;
+
+      for (i = -2; i <= 2; i++) {
+        if (abs(v - p_src[col + i]) > flimit)
+          goto across_skip_convolve;
+
+        kernel += kernel5[2 + i] * p_src[col + i];
+      }
+
+      d[col & 7] = (kernel >> 3);
+    across_skip_convolve:
+
+      if (col >= 2)
+        p_dst[col - 2] = d[(col - 2) & 7];
+    }
+
+    /* handle the last two pixels */
+    p_dst[col - 2] = d[(col - 2) & 7];
+    p_dst[col - 1] = d[(col - 1) & 7];
+
+
+    /* next row */
+    src_ptr += pitch;
+    dst_ptr += pitch;
+  }
+}
+
+#endif
+
 static int q2mbl(int x) {
   if (x < 20) x = 20;
 
@@ -331,10 +415,25 @@ void vp9_deblock(const YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst,
   const int dst_strides[4] = {dst->y_stride, dst->uv_stride, dst->uv_stride,
                               dst->alpha_stride};
 
-  for (i = 0; i < MAX_MB_PLANE; ++i)
+  for (i = 0; i < MAX_MB_PLANE; ++i) {
+#if CONFIG_VP9_HIGH
+    assert((src->flags & YV12_FLAG_HIGH) == (dst->flags & YV12_FLAG_HIGH));
+    if (src->flags & YV12_FLAG_HIGH) {
+      vp9_high_post_proc_down_and_across(CONVERT_TO_SHORTPTR(srcs[i]),
+                                         CONVERT_TO_SHORTPTR(dsts[i]),
+                                         src_strides[i], dst_strides[i],
+                                         src_heights[i], src_widths[i], ppl);
+    } else {
+      vp9_post_proc_down_and_across(srcs[i], dsts[i],
+                                    src_strides[i], dst_strides[i],
+                                    src_heights[i], src_widths[i], ppl);
+    }
+#else
     vp9_post_proc_down_and_across(srcs[i], dsts[i],
                                   src_strides[i], dst_strides[i],
                                   src_heights[i], src_widths[i], ppl);
+#endif
+  }
 }
 
 void vp9_denoise(const YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst,
@@ -359,15 +458,33 @@ void vp9_denoise(const YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst,
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
     const int src_stride = src_strides[i];
-    const uint8_t *const src = srcs[i] + 2 * src_stride + 2;
     const int src_width = src_widths[i] - 4;
     const int src_height = src_heights[i] - 4;
 
     const int dst_stride = dst_strides[i];
+
+#if CONFIG_VP9_HIGH
+    assert((src->flags & YV12_FLAG_HIGH) == (dst->flags & YV12_FLAG_HIGH));
+    if (src->flags & YV12_FLAG_HIGH) {
+      const uint16_t *const src = CONVERT_TO_SHORTPTR(srcs[i] + 2 * src_stride
+                                                      + 2);
+      uint16_t *const dst = CONVERT_TO_SHORTPTR(dsts[i] + 2 * dst_stride + 2);
+      vp9_high_post_proc_down_and_across(src, dst, src_stride, dst_stride,
+                                         src_height, src_width, ppl);
+    } else {
+      const uint8_t *const src = srcs[i] + 2 * src_stride + 2;
+      uint8_t *const dst = dsts[i] + 2 * dst_stride + 2;
+
+      vp9_post_proc_down_and_across(src, dst, src_stride, dst_stride,
+                                    src_height, src_width, ppl);
+    }
+#else
+    const uint8_t *const src = srcs[i] + 2 * src_stride + 2;
     uint8_t *const dst = dsts[i] + 2 * dst_stride + 2;
 
     vp9_post_proc_down_and_across(src, dst, src_stride, dst_stride,
                                   src_height, src_width, ppl);
+#endif
   }
 }
 
