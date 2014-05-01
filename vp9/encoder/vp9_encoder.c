@@ -3773,13 +3773,29 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
           cpi->totalp_v += psnr2.psnr[3];
           cpi->totalp_sq_error += psnr2.sse[0];
           cpi->totalp_samples += psnr2.samples[0];
-
+#if CONFIG_VP9_HIGH
+          if (cm->use_high) {
+            frame_ssim2 = vp9_high_calc_ssim(orig, recon, 1, &weight, xd->bps);
+          } else {
+            frame_ssim2 = vp9_calc_ssim(orig, recon, 1, &weight);
+          }
+#else
           frame_ssim2 = vp9_calc_ssim(orig, recon, 1, &weight);
-
+#endif
           cpi->summed_quality += frame_ssim2 * weight;
           cpi->summed_weights += weight;
 
+#if CONFIG_VP9_HIGH
+          if (cm->use_high) {
+            frame_ssim2 = vp9_high_calc_ssim(orig, &cm->post_proc_buffer, 1,
+                                             &weight, xd->bps);
+          } else {
+            frame_ssim2 = vp9_calc_ssim(orig, &cm->post_proc_buffer, 1,
+                                        &weight);
+          }
+#else
           frame_ssim2 = vp9_calc_ssim(orig, &cm->post_proc_buffer, 1, &weight);
+#endif
 
           cpi->summedp_quality += frame_ssim2 * weight;
           cpi->summedp_weights += weight;
@@ -3797,7 +3813,17 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
       if (cpi->b_calculate_ssimg) {
         double y, u, v, frame_all;
+#if CONFIG_VP9_HIGH
+        if (cm->use_high) {
+          frame_all = vp9_high_calc_ssimg(cpi->Source, cm->frame_to_show, &y,
+                                          &u, &v, xd->bps);
+        } else {
+          frame_all = vp9_calc_ssimg(cpi->Source, cm->frame_to_show, &y, &u,
+                                     &v);
+        }
+#else
         frame_all = vp9_calc_ssimg(cpi->Source, cm->frame_to_show, &y, &u, &v);
+#endif
         cpi->total_ssimg_y += y;
         cpi->total_ssimg_u += u;
         cpi->total_ssimg_v += v;
