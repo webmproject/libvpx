@@ -16,6 +16,24 @@
       "revId": "b035e2f9ae7f83f1cc88b79ff73f3786ff5e27ab",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//rbA\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 672,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-05-02T01:27:40Z",
+      "side": 1,
+      "message": "There is no memory allocation here. This is just an increment of stack pointer. I don\u0027t expect any performance changes here, actually. The array is pretty small, by the way.",
+      "parentUuid": "AAAAdn//rbQ\u003d",
+      "revId": "b035e2f9ae7f83f1cc88b79ff73f3786ff5e27ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
