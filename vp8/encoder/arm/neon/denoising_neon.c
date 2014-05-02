@@ -45,10 +45,12 @@
  *      [16, 255]       3               6                    7
  */
 
-int vp8_denoiser_filter_neon(YV12_BUFFER_CONFIG *mc_running_avg,
-                             YV12_BUFFER_CONFIG *running_avg,
-                             MACROBLOCK *signal, unsigned int motion_magnitude,
-                             int y_offset, int uv_offset) {
+int vp8_denoiser_filter_neon(unsigned char *mc_running_avg_y,
+                             int mc_running_avg_y_stride,
+                             unsigned char *running_avg_y,
+                             int running_avg_y_stride,
+                             unsigned char *sig, int sig_stride,
+                             unsigned int motion_magnitude) {
     /* If motion_magnitude is small, making the denoiser more aggressive by
      * increasing the adjustment for each level, level1 adjustment is
      * increased, the deltas stay the same.
@@ -60,14 +62,6 @@ int vp8_denoiser_filter_neon(YV12_BUFFER_CONFIG *mc_running_avg,
     const uint8x16_t v_level1_threshold = vdupq_n_u8(4);
     const uint8x16_t v_level2_threshold = vdupq_n_u8(8);
     const uint8x16_t v_level3_threshold = vdupq_n_u8(16);
-
-    /* Local variables for array pointers and strides. */
-    unsigned char *sig = signal->thismb;
-    int            sig_stride = 16;
-    unsigned char *mc_running_avg_y = mc_running_avg->y_buffer + y_offset;
-    int            mc_running_avg_y_stride = mc_running_avg->y_stride;
-    unsigned char *running_avg_y = running_avg->y_buffer + y_offset;
-    int            running_avg_y_stride = running_avg->y_stride;
     int64x2_t v_sum_diff_total = vdupq_n_s64(0);
 
     /* Go over lines. */
