@@ -68,14 +68,11 @@ int vp8_denoiser_filter_neon(YV12_BUFFER_CONFIG *mc_running_avg,
     int            mc_running_avg_y_stride = mc_running_avg->y_stride;
     unsigned char *running_avg_y = running_avg->y_buffer + y_offset;
     int            running_avg_y_stride = running_avg->y_stride;
+    int64x2_t v_sum_diff_total = vdupq_n_s64(0);
 
     /* Go over lines. */
     int i;
-    int sum_diff = 0;
     for (i = 0; i < 16; ++i) {
-        int8x16_t v_sum_diff = vdupq_n_s8(0);
-        uint8x16_t v_running_avg_y;
-
         /* Load inputs. */
         const uint8x16_t v_sig = vld1q_u8(sig);
         const uint8x16_t v_mc_running_avg_y = vld1q_u8(mc_running_avg_y);
@@ -117,12 +114,9 @@ int vp8_denoiser_filter_neon(YV12_BUFFER_CONFIG *mc_running_avg,
                                                      v_abs_adjustment);
         const uint8x16_t v_neg_adjustment = vandq_u8(v_diff_neg_mask,
                                                      v_abs_adjustment);
-        v_running_avg_y = vqaddq_u8(v_sig, v_pos_adjustment);
+
+        uint8x16_t v_running_avg_y = vqaddq_u8(v_sig, v_pos_adjustment);
         v_running_avg_y = vqsubq_u8(v_running_avg_y, v_neg_adjustment);
-        v_sum_diff = vqaddq_s8(v_sum_diff,
-                               vreinterpretq_s8_u8(v_pos_adjustment));
-        v_sum_diff = vqsubq_s8(v_sum_diff,
-                               vreinterpretq_s8_u8(v_neg_adjustment));
 
         /* Store results. */
         vst1q_u8(running_avg_y, v_running_avg_y);
@@ -131,23 +125,19 @@ int vp8_denoiser_filter_neon(YV12_BUFFER_CONFIG *mc_running_avg,
          * for this macroblock.
          */
         {
-            int s0 = vgetq_lane_s8(v_sum_diff,  0) +
-                     vgetq_lane_s8(v_sum_diff,  1) +
-                     vgetq_lane_s8(v_sum_diff,  2) +
-                     vgetq_lane_s8(v_sum_diff,  3);
-            int s1 = vgetq_lane_s8(v_sum_diff,  4) +
-                     vgetq_lane_s8(v_sum_diff,  5) +
-                     vgetq_lane_s8(v_sum_diff,  6) +
-                     vgetq_lane_s8(v_sum_diff,  7);
-            int s2 = vgetq_lane_s8(v_sum_diff,  8) +
-                     vgetq_lane_s8(v_sum_diff,  9) +
-                     vgetq_lane_s8(v_sum_diff, 10) +
-                     vgetq_lane_s8(v_sum_diff, 11);
-            int s3 = vgetq_lane_s8(v_sum_diff, 12) +
-                     vgetq_lane_s8(v_sum_diff, 13) +
-                     vgetq_lane_s8(v_sum_diff, 14) +
-                     vgetq_lane_s8(v_sum_diff, 15);
-            sum_diff += s0 + s1+ s2 + s3;
+            const int8x16_t v_sum_diff =
+                vqsubq_s8(vreinterpretq_s8_u8(v_pos_adjustment),
+                          vreinterpretq_s8_u8(v_neg_adjustment));
+
+            const int16x8_t fe_dc_ba_98_76_54_32_10 = vpaddlq_s8(v_sum_diff);
+
+            const int32x4_t fedc_ba98_7654_3210 =
+                vpaddlq_s16(fe_dc_ba_98_76_54_32_10);
+
+            const int64x2_t fedcba98_76543210 =
+                vpaddlq_s32(fedc_ba98_7654_3210);
+
+            v_sum_diff_total = vqaddq_s64(v_sum_diff_total, fedcba98_76543210);
         }
 
         /* Update pointers for next iteration. */
@@ -157,11 +147,20 @@ int vp8_denoiser_filter_neon(YV12_BUFFER_CONFIG *mc_running_avg,
     }
 
     /* Too much adjustments => copy block. */
-    if (abs(sum_diff) > SUM_DIFF_THRESHOLD)
-        return COPY_BLOCK;
+    {
+        const int64x1_t x = vqadd_s64(vget_high_s64(v_sum_diff_total),
+                                      vget_low_s64(v_sum_diff_total));
+        const int s0 = vget_lane_s32(vabs_s32(vreinterpret_s32_s64(x)), 0);
+
+        if (s0 > SUM_DIFF_THRESHOLD)
+            return COPY_BLOCK;
+    }
 
     /* Tell above level that block was filtered. */
-    vp8_copy_mem16x16(running_avg->y_buffer + y_offset, running_avg_y_stride,
-                      signal->thismb, sig_stride);
+    running_avg_y -= running_avg_y_stride * 16;
+    sig -= sig_stride * 16;
+
+    vp8_copy_mem16x16(running_avg_y, running_avg_y_stride, sig, sig_stride);
+
     return FILTER_BLOCK;
 }
