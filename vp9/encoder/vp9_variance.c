@@ -156,19 +156,6 @@ unsigned int vp9_sub_pixel_avg_variance##W##x##H##_c( \
   return vp9_variance##W##x##H##_c(temp3, W, dst, dst_stride, sse); \
 }
 
-
-void vp9_get_sse_sum_16x16_c(const uint8_t *src_ptr, int source_stride,
-                             const uint8_t *ref_ptr, int ref_stride,
-                             unsigned int *sse, int *sum) {
-  variance(src_ptr, source_stride, ref_ptr, ref_stride, 16, 16, sse, sum);
-}
-
-void vp9_get_sse_sum_8x8_c(const uint8_t *src_ptr, int source_stride,
-                       const uint8_t *ref_ptr, int ref_stride,
-                       unsigned int *sse, int *sum) {
-  variance(src_ptr, source_stride, ref_ptr, ref_stride, 8, 8, sse, sum);
-}
-
 unsigned int vp9_mse16x16_c(const uint8_t *src, int src_stride,
                             const uint8_t *ref, int ref_stride,
                             unsigned int *sse) {
