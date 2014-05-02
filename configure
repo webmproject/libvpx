@@ -709,6 +709,7 @@ process_toolchain() {
             soft_enable webm_io
         ;;
         *-android-*)
+            soft_enable webm_io
             # GTestLog must be modified to use Android logging utilities.
         ;;
         *-darwin-*)
