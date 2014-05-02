@@ -592,16 +592,20 @@ DECLARE_ARG 7, 8, 9, 10, 11, 12, 13, 14
         CAT_XDEFINE cglobaled_, %1, 1
     %endif
     %xdefine current_function %1
-    %ifidn __OUTPUT_FORMAT__,elf
-        global %1:function hidden
-    %elifidn __OUTPUT_FORMAT__,elf32
-        global %1:function hidden
-    %elifidn __OUTPUT_FORMAT__,elf64
-        global %1:function hidden
-    %elifidn __OUTPUT_FORMAT__,macho32
-        global %1:private_extern
-    %elifidn __OUTPUT_FORMAT__,macho64
-        global %1:private_extern
+    %ifdef CHROMIUM
+        %ifidn __OUTPUT_FORMAT__,elf
+            global %1:function hidden
+        %elifidn __OUTPUT_FORMAT__,elf32
+            global %1:function hidden
+        %elifidn __OUTPUT_FORMAT__,elf64
+            global %1:function hidden
+        %elifidn __OUTPUT_FORMAT__,macho32
+            global %1:private_extern
+        %elifidn __OUTPUT_FORMAT__,macho64
+            global %1:private_extern
+        %else
+            global %1
+        %endif
     %else
         global %1
     %endif
