@@ -313,7 +313,7 @@ add_proto qw/void vp9_idct8x8_64_add/, "const int16_t *input, uint8_t *dest, int
 specialize qw/vp9_idct8x8_64_add sse2 neon dspr2/, "$ssse3_x86_64";
 
 add_proto qw/void vp9_idct8x8_10_add/, "const int16_t *input, uint8_t *dest, int dest_stride";
-specialize qw/vp9_idct8x8_10_add sse2 neon dspr2/;
+specialize qw/vp9_idct8x8_10_add sse2 neon dspr2/, "$ssse3_x86_64";
 
 add_proto qw/void vp9_idct16x16_1_add/, "const int16_t *input, uint8_t *dest, int dest_stride";
 specialize qw/vp9_idct16x16_1_add sse2 neon dspr2/;
