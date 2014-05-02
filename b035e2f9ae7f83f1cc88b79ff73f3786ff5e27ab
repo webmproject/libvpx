@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//rbQ\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 672,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-05-02T01:18:13Z",
+      "side": 1,
+      "message": "This requires to re-allocate memory space for frame_coef_probs array every frame. Would be good to test it on various platforms and see how the speed change(?)",
+      "revId": "b035e2f9ae7f83f1cc88b79ff73f3786ff5e27ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
