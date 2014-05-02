@@ -3250,9 +3250,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     // an unfiltered alternative. We allow near/nearest as well
     // because they may result in zero-zero MVs but be cheaper.
     if (cpi->rc.is_src_frame_alt_ref && (cpi->oxcf.arnr_max_frames == 0)) {
-      const int altref_zero_mask =
+      mode_skip_mask =
           ~((1 << THR_NEARESTA) | (1 << THR_NEARA) | (1 << THR_ZEROA));
-      mode_skip_mask |= altref_zero_mask;
       if (frame_mv[NEARMV][ALTREF_FRAME].as_int != 0)
         mode_skip_mask |= (1 << THR_NEARA);
       if (frame_mv[NEARESTMV][ALTREF_FRAME].as_int != 0)
