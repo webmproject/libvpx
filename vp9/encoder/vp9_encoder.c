@@ -162,6 +162,7 @@ void vp9_initialize_enc() {
     vp9_rc_init_minq_luts();
     vp9_entropy_mv_init();
     vp9_entropy_mode_init();
+    vp9_temporal_filter_init();
     init_done = 1;
   }
 }
@@ -536,7 +537,6 @@ static void set_tile_limits(VP9_COMP *cpi) {
 
 static void init_config(struct VP9_COMP *cpi, VP9EncoderConfig *oxcf) {
   VP9_COMMON *const cm = &cpi->common;
-  int i;
 
   cpi->oxcf = *oxcf;
 
@@ -571,10 +571,6 @@ static void init_config(struct VP9_COMP *cpi, VP9EncoderConfig *oxcf) {
   cpi->alt_fb_idx = 2;
 
   set_tile_limits(cpi);
-
-  cpi->fixed_divide[0] = 0;
-  for (i = 1; i < 512; i++)
-    cpi->fixed_divide[i] = 0x80000 / i;
 }
 
 static int get_pass(MODE mode) {
