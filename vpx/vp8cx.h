@@ -160,8 +160,10 @@ enum vp8e_enc_control_id {
                                           scale as used by the rc_*_quantizer config
                                           parameters */
   VP8E_SET_ARNR_MAXFRAMES,         /**< control function to set the max number of frames blurred creating arf*/
-  VP8E_SET_ARNR_STRENGTH,         /**< control function to set the filter strength for the arf */
-  VP8E_SET_ARNR_TYPE,         /**< control function to set the type of filter to use for the arf*/
+  VP8E_SET_ARNR_STRENGTH,          //!< control function to set the filter
+                                   //!< strength for the arf
+  VP8E_SET_ARNR_TYPE,              //!< control function to set the type of
+                                   //!< filter to use for the arf
   VP8E_SET_TUNING,                 /**< control function to set visual tuning */
   /*!\brief control function to set constrained quality level
    *

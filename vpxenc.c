@@ -363,7 +363,7 @@ static const arg_def_t frame_periodic_boost = ARG_DEF(
 
 static const arg_def_t *vp9_args[] = {
   &cpu_used, &auto_altref, &noise_sens, &sharpness, &static_thresh,
-  &tile_cols, &tile_rows, &arnr_maxframes, &arnr_strength,
+  &tile_cols, &tile_rows, &arnr_maxframes, &arnr_strength, &arnr_type,
   &tune_ssim, &cq_level, &max_intra_rate_pct, &lossless,
   &frame_parallel_decoding, &aq_mode, &frame_periodic_boost,
   NULL
@@ -372,7 +372,7 @@ static const int vp9_arg_ctrl_map[] = {
   VP8E_SET_CPUUSED, VP8E_SET_ENABLEAUTOALTREF,
   VP8E_SET_NOISE_SENSITIVITY, VP8E_SET_SHARPNESS, VP8E_SET_STATIC_THRESHOLD,
   VP9E_SET_TILE_COLUMNS, VP9E_SET_TILE_ROWS,
-  VP8E_SET_ARNR_MAXFRAMES, VP8E_SET_ARNR_STRENGTH,
+  VP8E_SET_ARNR_MAXFRAMES, VP8E_SET_ARNR_STRENGTH, VP8E_SET_ARNR_TYPE,
   VP8E_SET_TUNING, VP8E_SET_CQ_LEVEL, VP8E_SET_MAX_INTRA_BITRATE_PCT,
   VP9E_SET_LOSSLESS, VP9E_SET_FRAME_PARALLEL_DECODING, VP9E_SET_AQ_MODE,
   VP9E_SET_FRAME_PERIODIC_BOOST,
