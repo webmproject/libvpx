@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//rUc\u003d",
+        "filename": "vp9/encoder/vp9_ssim.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-05-02T09:35:36Z",
+      "side": 1,
+      "message": "can we fix the style issues?",
+      "revId": "5130e4e927d09fed5155dbc064e7184bc6c599ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
