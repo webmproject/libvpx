@@ -20,9 +20,6 @@ extern "C" {
 
 #define MAX_LAG_BUFFERS 25
 
-// The max of past frames we want to keep in the queue.
-#define MAX_PRE_FRAMES 1
-
 struct lookahead_entry {
   YV12_BUFFER_CONFIG  img;
   int64_t             ts_start;
