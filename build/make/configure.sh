@@ -859,6 +859,13 @@ EOF
             msvs_arch_dir=arm-msvs
             disable_feature multithread
             disable_feature unit_tests
+            vs_version=${tgt_cc##vs}
+            if [ $vs_version -ge 12 ]; then
+                # MSVC 2013 doesn't allow doing plain .exe projects for ARM,
+                # only "AppContainerApplication" which requires an AppxManifest.
+                # Therefore disable the examples, just build the library.
+                disable_feature examples
+            fi
             ;;
         rvct)
             CC=armcc
