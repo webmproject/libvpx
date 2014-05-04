@@ -160,8 +160,6 @@ VP8_COMMON_SRCS-$(HAVE_MEDIA)  += common/arm/armv6/vp8_variance_halfpixvar16x16_
 
 # common (neon)
 VP8_COMMON_SRCS-$(HAVE_NEON)  += common/arm/neon/shortidct4x4llm_neon$(ASM)
-VP8_COMMON_SRCS-$(HAVE_NEON)  += common/arm/neon/sad8_neon$(ASM)
-VP8_COMMON_SRCS-$(HAVE_NEON)  += common/arm/neon/sad16_neon$(ASM)
 VP8_COMMON_SRCS-$(HAVE_NEON)  += common/arm/neon/sixtappredict4x4_neon$(ASM)
 VP8_COMMON_SRCS-$(HAVE_NEON)  += common/arm/neon/sixtappredict8x4_neon$(ASM)
 VP8_COMMON_SRCS-$(HAVE_NEON)  += common/arm/neon/sixtappredict8x8_neon$(ASM)
@@ -186,6 +184,7 @@ VP8_COMMON_SRCS-$(HAVE_NEON)  += common/arm/neon/loopfilter_neon.c
 VP8_COMMON_SRCS-$(HAVE_NEON)  += common/arm/neon/loopfiltersimplehorizontaledge_neon.c
 VP8_COMMON_SRCS-$(HAVE_NEON)  += common/arm/neon/loopfiltersimpleverticaledge_neon.c
 VP8_COMMON_SRCS-$(HAVE_NEON)  += common/arm/neon/mbloopfilter_neon.c
+VP8_COMMON_SRCS-$(HAVE_NEON)  += common/arm/neon/sad_neon.c
 
 
 $(eval $(call rtcd_h_template,vp8_rtcd,vp8/common/rtcd_defs.pl))
