@@ -9,8 +9,9 @@
  */
 
 #include <arm_neon.h>
+#include "./vpx_config.h"
 
-static inline void vp8_loop_filter_neon(
+static INLINE void vp8_loop_filter_neon(
         uint8x16_t qblimit,  // flimit
         uint8x16_t qlimit,   // limit
         uint8x16_t qthresh,  // thresh
