@@ -352,20 +352,28 @@ void vp8_mbloop_filter_vertical_edge_y_neon(
     q9 = vcombine_u8(d18, d19);
     q10 = vcombine_u8(d20, d21);
 
-    q2tmp0 = vtrnq_u32((uint32x4_t)q3, (uint32x4_t)q7);
-    q2tmp1 = vtrnq_u32((uint32x4_t)q4, (uint32x4_t)q8);
-    q2tmp2 = vtrnq_u32((uint32x4_t)q5, (uint32x4_t)q9);
-    q2tmp3 = vtrnq_u32((uint32x4_t)q6, (uint32x4_t)q10);
+    q2tmp0 = vtrnq_u32(vreinterpretq_u32_u8(q3), vreinterpretq_u32_u8(q7));
+    q2tmp1 = vtrnq_u32(vreinterpretq_u32_u8(q4), vreinterpretq_u32_u8(q8));
+    q2tmp2 = vtrnq_u32(vreinterpretq_u32_u8(q5), vreinterpretq_u32_u8(q9));
+    q2tmp3 = vtrnq_u32(vreinterpretq_u32_u8(q6), vreinterpretq_u32_u8(q10));
 
-    q2tmp4 = vtrnq_u16((uint16x8_t)q2tmp0.val[0], (uint16x8_t)q2tmp2.val[0]);
-    q2tmp5 = vtrnq_u16((uint16x8_t)q2tmp1.val[0], (uint16x8_t)q2tmp3.val[0]);
-    q2tmp6 = vtrnq_u16((uint16x8_t)q2tmp0.val[1], (uint16x8_t)q2tmp2.val[1]);
-    q2tmp7 = vtrnq_u16((uint16x8_t)q2tmp1.val[1], (uint16x8_t)q2tmp3.val[1]);
+    q2tmp4 = vtrnq_u16(vreinterpretq_u16_u32(q2tmp0.val[0]),
+                       vreinterpretq_u16_u32(q2tmp2.val[0]));
+    q2tmp5 = vtrnq_u16(vreinterpretq_u16_u32(q2tmp1.val[0]),
+                       vreinterpretq_u16_u32(q2tmp3.val[0]));
+    q2tmp6 = vtrnq_u16(vreinterpretq_u16_u32(q2tmp0.val[1]),
+                       vreinterpretq_u16_u32(q2tmp2.val[1]));
+    q2tmp7 = vtrnq_u16(vreinterpretq_u16_u32(q2tmp1.val[1]),
+                       vreinterpretq_u16_u32(q2tmp3.val[1]));
 
-    q2tmp8  = vtrnq_u8((uint8x16_t)q2tmp4.val[0], (uint8x16_t)q2tmp5.val[0]);
-    q2tmp9  = vtrnq_u8((uint8x16_t)q2tmp4.val[1], (uint8x16_t)q2tmp5.val[1]);
-    q2tmp10 = vtrnq_u8((uint8x16_t)q2tmp6.val[0], (uint8x16_t)q2tmp7.val[0]);
-    q2tmp11 = vtrnq_u8((uint8x16_t)q2tmp6.val[1], (uint8x16_t)q2tmp7.val[1]);
+    q2tmp8  = vtrnq_u8(vreinterpretq_u8_u16(q2tmp4.val[0]),
+                       vreinterpretq_u8_u16(q2tmp5.val[0]));
+    q2tmp9  = vtrnq_u8(vreinterpretq_u8_u16(q2tmp4.val[1]),
+                       vreinterpretq_u8_u16(q2tmp5.val[1]));
+    q2tmp10 = vtrnq_u8(vreinterpretq_u8_u16(q2tmp6.val[0]),
+                       vreinterpretq_u8_u16(q2tmp7.val[0]));
+    q2tmp11 = vtrnq_u8(vreinterpretq_u8_u16(q2tmp6.val[1]),
+                       vreinterpretq_u8_u16(q2tmp7.val[1]));
 
     q3 = q2tmp8.val[0];
     q4 = q2tmp8.val[1];
@@ -380,20 +388,28 @@ void vp8_mbloop_filter_vertical_edge_y_neon(
                          q5, q6, q7, q8, q9, q10,
                          &q4, &q5, &q6, &q7, &q8, &q9);
 
-    q2tmp0 = vtrnq_u32((uint32x4_t)q3, (uint32x4_t)q7);
-    q2tmp1 = vtrnq_u32((uint32x4_t)q4, (uint32x4_t)q8);
-    q2tmp2 = vtrnq_u32((uint32x4_t)q5, (uint32x4_t)q9);
-    q2tmp3 = vtrnq_u32((uint32x4_t)q6, (uint32x4_t)q10);
+    q2tmp0 = vtrnq_u32(vreinterpretq_u32_u8(q3), vreinterpretq_u32_u8(q7));
+    q2tmp1 = vtrnq_u32(vreinterpretq_u32_u8(q4), vreinterpretq_u32_u8(q8));
+    q2tmp2 = vtrnq_u32(vreinterpretq_u32_u8(q5), vreinterpretq_u32_u8(q9));
+    q2tmp3 = vtrnq_u32(vreinterpretq_u32_u8(q6), vreinterpretq_u32_u8(q10));
 
-    q2tmp4 = vtrnq_u16((uint16x8_t)q2tmp0.val[0], (uint16x8_t)q2tmp2.val[0]);
-    q2tmp5 = vtrnq_u16((uint16x8_t)q2tmp1.val[0], (uint16x8_t)q2tmp3.val[0]);
-    q2tmp6 = vtrnq_u16((uint16x8_t)q2tmp0.val[1], (uint16x8_t)q2tmp2.val[1]);
-    q2tmp7 = vtrnq_u16((uint16x8_t)q2tmp1.val[1], (uint16x8_t)q2tmp3.val[1]);
+    q2tmp4 = vtrnq_u16(vreinterpretq_u16_u32(q2tmp0.val[0]),
+                       vreinterpretq_u16_u32(q2tmp2.val[0]));
+    q2tmp5 = vtrnq_u16(vreinterpretq_u16_u32(q2tmp1.val[0]),
+                       vreinterpretq_u16_u32(q2tmp3.val[0]));
+    q2tmp6 = vtrnq_u16(vreinterpretq_u16_u32(q2tmp0.val[1]),
+                       vreinterpretq_u16_u32(q2tmp2.val[1]));
+    q2tmp7 = vtrnq_u16(vreinterpretq_u16_u32(q2tmp1.val[1]),
+                       vreinterpretq_u16_u32(q2tmp3.val[1]));
 
-    q2tmp8  = vtrnq_u8((uint8x16_t)q2tmp4.val[0], (uint8x16_t)q2tmp5.val[0]);
-    q2tmp9  = vtrnq_u8((uint8x16_t)q2tmp4.val[1], (uint8x16_t)q2tmp5.val[1]);
-    q2tmp10 = vtrnq_u8((uint8x16_t)q2tmp6.val[0], (uint8x16_t)q2tmp7.val[0]);
-    q2tmp11 = vtrnq_u8((uint8x16_t)q2tmp6.val[1], (uint8x16_t)q2tmp7.val[1]);
+    q2tmp8  = vtrnq_u8(vreinterpretq_u8_u16(q2tmp4.val[0]),
+                       vreinterpretq_u8_u16(q2tmp5.val[0]));
+    q2tmp9  = vtrnq_u8(vreinterpretq_u8_u16(q2tmp4.val[1]),
+                       vreinterpretq_u8_u16(q2tmp5.val[1]));
+    q2tmp10 = vtrnq_u8(vreinterpretq_u8_u16(q2tmp6.val[0]),
+                       vreinterpretq_u8_u16(q2tmp7.val[0]));
+    q2tmp11 = vtrnq_u8(vreinterpretq_u8_u16(q2tmp6.val[1]),
+                       vreinterpretq_u8_u16(q2tmp7.val[1]));
 
     q3 = q2tmp8.val[0];
     q4 = q2tmp8.val[1];
@@ -503,20 +519,28 @@ void vp8_mbloop_filter_vertical_edge_uv_neon(
     q9 = vcombine_u8(d18, d19);
     q10 = vcombine_u8(d20, d21);
 
-    q2tmp0 = vtrnq_u32((uint32x4_t)q3, (uint32x4_t)q7);
-    q2tmp1 = vtrnq_u32((uint32x4_t)q4, (uint32x4_t)q8);
-    q2tmp2 = vtrnq_u32((uint32x4_t)q5, (uint32x4_t)q9);
-    q2tmp3 = vtrnq_u32((uint32x4_t)q6, (uint32x4_t)q10);
+    q2tmp0 = vtrnq_u32(vreinterpretq_u32_u8(q3), vreinterpretq_u32_u8(q7));
+    q2tmp1 = vtrnq_u32(vreinterpretq_u32_u8(q4), vreinterpretq_u32_u8(q8));
+    q2tmp2 = vtrnq_u32(vreinterpretq_u32_u8(q5), vreinterpretq_u32_u8(q9));
+    q2tmp3 = vtrnq_u32(vreinterpretq_u32_u8(q6), vreinterpretq_u32_u8(q10));
 
-    q2tmp4 = vtrnq_u16((uint16x8_t)q2tmp0.val[0], (uint16x8_t)q2tmp2.val[0]);
-    q2tmp5 = vtrnq_u16((uint16x8_t)q2tmp1.val[0], (uint16x8_t)q2tmp3.val[0]);
-    q2tmp6 = vtrnq_u16((uint16x8_t)q2tmp0.val[1], (uint16x8_t)q2tmp2.val[1]);
-    q2tmp7 = vtrnq_u16((uint16x8_t)q2tmp1.val[1], (uint16x8_t)q2tmp3.val[1]);
+    q2tmp4 = vtrnq_u16(vreinterpretq_u16_u32(q2tmp0.val[0]),
+                       vreinterpretq_u16_u32(q2tmp2.val[0]));
+    q2tmp5 = vtrnq_u16(vreinterpretq_u16_u32(q2tmp1.val[0]),
+                       vreinterpretq_u16_u32(q2tmp3.val[0]));
+    q2tmp6 = vtrnq_u16(vreinterpretq_u16_u32(q2tmp0.val[1]),
+                       vreinterpretq_u16_u32(q2tmp2.val[1]));
+    q2tmp7 = vtrnq_u16(vreinterpretq_u16_u32(q2tmp1.val[1]),
+                       vreinterpretq_u16_u32(q2tmp3.val[1]));
 
-    q2tmp8  = vtrnq_u8((uint8x16_t)q2tmp4.val[0], (uint8x16_t)q2tmp5.val[0]);
-    q2tmp9  = vtrnq_u8((uint8x16_t)q2tmp4.val[1], (uint8x16_t)q2tmp5.val[1]);
-    q2tmp10 = vtrnq_u8((uint8x16_t)q2tmp6.val[0], (uint8x16_t)q2tmp7.val[0]);
-    q2tmp11 = vtrnq_u8((uint8x16_t)q2tmp6.val[1], (uint8x16_t)q2tmp7.val[1]);
+    q2tmp8  = vtrnq_u8(vreinterpretq_u8_u16(q2tmp4.val[0]),
+                       vreinterpretq_u8_u16(q2tmp5.val[0]));
+    q2tmp9  = vtrnq_u8(vreinterpretq_u8_u16(q2tmp4.val[1]),
+                       vreinterpretq_u8_u16(q2tmp5.val[1]));
+    q2tmp10 = vtrnq_u8(vreinterpretq_u8_u16(q2tmp6.val[0]),
+                       vreinterpretq_u8_u16(q2tmp7.val[0]));
+    q2tmp11 = vtrnq_u8(vreinterpretq_u8_u16(q2tmp6.val[1]),
+                       vreinterpretq_u8_u16(q2tmp7.val[1]));
 
     q3 = q2tmp8.val[0];
     q4 = q2tmp8.val[1];
@@ -531,20 +555,28 @@ void vp8_mbloop_filter_vertical_edge_uv_neon(
                          q5, q6, q7, q8, q9, q10,
                          &q4, &q5, &q6, &q7, &q8, &q9);
 
-    q2tmp0 = vtrnq_u32((uint32x4_t)q3, (uint32x4_t)q7);
-    q2tmp1 = vtrnq_u32((uint32x4_t)q4, (uint32x4_t)q8);
-    q2tmp2 = vtrnq_u32((uint32x4_t)q5, (uint32x4_t)q9);
-    q2tmp3 = vtrnq_u32((uint32x4_t)q6, (uint32x4_t)q10);
+    q2tmp0 = vtrnq_u32(vreinterpretq_u32_u8(q3), vreinterpretq_u32_u8(q7));
+    q2tmp1 = vtrnq_u32(vreinterpretq_u32_u8(q4), vreinterpretq_u32_u8(q8));
+    q2tmp2 = vtrnq_u32(vreinterpretq_u32_u8(q5), vreinterpretq_u32_u8(q9));
+    q2tmp3 = vtrnq_u32(vreinterpretq_u32_u8(q6), vreinterpretq_u32_u8(q10));
 
-    q2tmp4 = vtrnq_u16((uint16x8_t)q2tmp0.val[0], (uint16x8_t)q2tmp2.val[0]);
-    q2tmp5 = vtrnq_u16((uint16x8_t)q2tmp1.val[0], (uint16x8_t)q2tmp3.val[0]);
-    q2tmp6 = vtrnq_u16((uint16x8_t)q2tmp0.val[1], (uint16x8_t)q2tmp2.val[1]);
-    q2tmp7 = vtrnq_u16((uint16x8_t)q2tmp1.val[1], (uint16x8_t)q2tmp3.val[1]);
+    q2tmp4 = vtrnq_u16(vreinterpretq_u16_u32(q2tmp0.val[0]),
+                       vreinterpretq_u16_u32(q2tmp2.val[0]));
+    q2tmp5 = vtrnq_u16(vreinterpretq_u16_u32(q2tmp1.val[0]),
+                       vreinterpretq_u16_u32(q2tmp3.val[0]));
+    q2tmp6 = vtrnq_u16(vreinterpretq_u16_u32(q2tmp0.val[1]),
+                       vreinterpretq_u16_u32(q2tmp2.val[1]));
+    q2tmp7 = vtrnq_u16(vreinterpretq_u16_u32(q2tmp1.val[1]),
+                       vreinterpretq_u16_u32(q2tmp3.val[1]));
 
-    q2tmp8  = vtrnq_u8((uint8x16_t)q2tmp4.val[0], (uint8x16_t)q2tmp5.val[0]);
-    q2tmp9  = vtrnq_u8((uint8x16_t)q2tmp4.val[1], (uint8x16_t)q2tmp5.val[1]);
-    q2tmp10 = vtrnq_u8((uint8x16_t)q2tmp6.val[0], (uint8x16_t)q2tmp7.val[0]);
-    q2tmp11 = vtrnq_u8((uint8x16_t)q2tmp6.val[1], (uint8x16_t)q2tmp7.val[1]);
+    q2tmp8  = vtrnq_u8(vreinterpretq_u8_u16(q2tmp4.val[0]),
+                       vreinterpretq_u8_u16(q2tmp5.val[0]));
+    q2tmp9  = vtrnq_u8(vreinterpretq_u8_u16(q2tmp4.val[1]),
+                       vreinterpretq_u8_u16(q2tmp5.val[1]));
+    q2tmp10 = vtrnq_u8(vreinterpretq_u8_u16(q2tmp6.val[0]),
+                       vreinterpretq_u8_u16(q2tmp7.val[0]));
+    q2tmp11 = vtrnq_u8(vreinterpretq_u8_u16(q2tmp6.val[1]),
+                       vreinterpretq_u8_u16(q2tmp7.val[1]));
 
     q3 = q2tmp8.val[0];
     q4 = q2tmp8.val[1];
