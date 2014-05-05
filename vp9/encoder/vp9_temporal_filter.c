@@ -99,6 +99,7 @@ void vp9_temporal_filter_apply_c(uint8_t *frame1,
   unsigned int i, j, k;
   int modifier;
   int byte = 0;
+  const int rounding = strength > 0 ? 1 << (strength - 1) : 0;
 
   for (i = 0, k = 0; i < block_size; i++) {
     for (j = 0; j < block_size; j++, k++) {
@@ -111,7 +112,7 @@ void vp9_temporal_filter_apply_c(uint8_t *frame1,
       // modifier =  (int)roundf(coeff > 16 ? 0 : 16-coeff);
       modifier  *= modifier;
       modifier  *= 3;
-      modifier  += 1 << (strength - 1);
+      modifier  += rounding;
       modifier >>= strength;
 
       if (modifier > 16)
