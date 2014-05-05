@@ -22,17 +22,14 @@ union sum_union {
     signed char e[16];
 };
 
-int vp8_denoiser_filter_sse2(YV12_BUFFER_CONFIG *mc_running_avg,
-                             YV12_BUFFER_CONFIG *running_avg,
-                             MACROBLOCK *signal, unsigned int motion_magnitude,
-                             int y_offset, int uv_offset)
+int vp8_denoiser_filter_sse2(unsigned char *mc_running_avg_y,
+                             int mc_avg_y_stride,
+                             unsigned char *running_avg_y, int avg_y_stride,
+                             unsigned char *sig, int sig_stride,
+                             unsigned int motion_magnitude)
 {
-    unsigned char *sig = signal->thismb;
-    int sig_stride = 16;
-    unsigned char *mc_running_avg_y = mc_running_avg->y_buffer + y_offset;
-    int mc_avg_y_stride = mc_running_avg->y_stride;
-    unsigned char *running_avg_y = running_avg->y_buffer + y_offset;
-    int avg_y_stride = running_avg->y_stride;
+    unsigned char *running_avg_y_start = running_avg_y;
+    unsigned char *sig_start = sig;
     int r;
     __m128i acc_diff = _mm_setzero_si128();
     const __m128i k_0 = _mm_setzero_si128();
@@ -114,7 +111,6 @@ int vp8_denoiser_filter_sse2(YV12_BUFFER_CONFIG *mc_running_avg,
         }
     }
 
-    vp8_copy_mem16x16(running_avg->y_buffer + y_offset, avg_y_stride,
-                      signal->thismb, sig_stride);
+    vp8_copy_mem16x16(running_avg_y_start, avg_y_stride, sig_start, sig_stride);
     return FILTER_BLOCK;
 }
