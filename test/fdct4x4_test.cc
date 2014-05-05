@@ -48,6 +48,10 @@ void fht4x4_ref(const int16_t *in, int16_t *out, int stride, int tx_type) {
   vp9_fht4x4_c(in, out, stride, tx_type);
 }
 
+void fwht4x4_ref(const int16_t *in, int16_t *out, int stride, int tx_type) {
+  vp9_fwht4x4_c(in, out, stride);
+}
+
 class Trans4x4TestBase {
  public:
   virtual ~Trans4x4TestBase() {}
@@ -57,7 +61,7 @@ class Trans4x4TestBase {
 
   virtual void RunInvTxfm(const int16_t *out, uint8_t *dst, int stride) = 0;
 
-  void RunAccuracyCheck() {
+  void RunAccuracyCheck(int limit) {
     ACMRandom rnd(ACMRandom::DeterministicSeed());
     uint32_t max_error = 0;
     int64_t total_error = 0;
@@ -88,11 +92,13 @@ class Trans4x4TestBase {
       }
     }
 
-    EXPECT_GE(1u, max_error)
-        << "Error: 4x4 FHT/IHT has an individual round trip error > 1";
+    EXPECT_GE(static_cast<uint32_t>(limit), max_error)
+        << "Error: 4x4 FHT/IHT has an individual round trip error > "
+        << limit;
 
-    EXPECT_GE(count_test_block , total_error)
-        << "Error: 4x4 FHT/IHT has average round trip error > 1 per block";
+    EXPECT_GE(count_test_block * limit, total_error)
+        << "Error: 4x4 FHT/IHT has average round trip error > " << limit
+        << " per block";
   }
 
   void RunCoeffCheck() {
@@ -150,7 +156,7 @@ class Trans4x4TestBase {
     }
   }
 
-  void RunInvAccuracyCheck() {
+  void RunInvAccuracyCheck(int limit) {
     ACMRandom rnd(ACMRandom::DeterministicSeed());
     const int count_test_block = 1000;
     DECLARE_ALIGNED_ARRAY(16, int16_t, in, kNumCoeffs);
@@ -173,8 +179,8 @@ class Trans4x4TestBase {
       for (int j = 0; j < kNumCoeffs; ++j) {
         const uint32_t diff = dst[j] - src[j];
         const uint32_t error = diff * diff;
-        EXPECT_GE(1u, error)
-            << "Error: 16x16 IDCT has error " << error
+        EXPECT_GE(static_cast<uint32_t>(limit), error)
+            << "Error: 4x4 IDCT has error " << error
             << " at index " << j;
       }
     }
@@ -213,7 +219,7 @@ class Trans4x4DCT
 };
 
 TEST_P(Trans4x4DCT, AccuracyCheck) {
-  RunAccuracyCheck();
+  RunAccuracyCheck(1);
 }
 
 TEST_P(Trans4x4DCT, CoeffCheck) {
@@ -225,7 +231,7 @@ TEST_P(Trans4x4DCT, MemCheck) {
 }
 
 TEST_P(Trans4x4DCT, InvAccuracyCheck) {
-  RunInvAccuracyCheck();
+  RunInvAccuracyCheck(1);
 }
 
 class Trans4x4HT
@@ -257,7 +263,7 @@ class Trans4x4HT
 };
 
 TEST_P(Trans4x4HT, AccuracyCheck) {
-  RunAccuracyCheck();
+  RunAccuracyCheck(1);
 }
 
 TEST_P(Trans4x4HT, CoeffCheck) {
@@ -269,9 +275,51 @@ TEST_P(Trans4x4HT, MemCheck) {
 }
 
 TEST_P(Trans4x4HT, InvAccuracyCheck) {
-  RunInvAccuracyCheck();
+  RunInvAccuracyCheck(1);
 }
 
+class Trans4x4WHT
+    : public Trans4x4TestBase,
+      public ::testing::TestWithParam<dct_4x4_param_t> {
+ public:
+  virtual ~Trans4x4WHT() {}
+
+  virtual void SetUp() {
+    fwd_txfm_ = GET_PARAM(0);
+    inv_txfm_ = GET_PARAM(1);
+    tx_type_  = GET_PARAM(2);
+    pitch_    = 4;
+    fwd_txfm_ref = fwht4x4_ref;
+  }
+  virtual void TearDown() { libvpx_test::ClearSystemState(); }
+
+ protected:
+  void RunFwdTxfm(const int16_t *in, int16_t *out, int stride) {
+    fwd_txfm_(in, out, stride);
+  }
+  void RunInvTxfm(const int16_t *out, uint8_t *dst, int stride) {
+    inv_txfm_(out, dst, stride);
+  }
+
+  fdct_t fwd_txfm_;
+  idct_t inv_txfm_;
+};
+
+TEST_P(Trans4x4WHT, AccuracyCheck) {
+  RunAccuracyCheck(0);
+}
+
+TEST_P(Trans4x4WHT, CoeffCheck) {
+  RunCoeffCheck();
+}
+
+TEST_P(Trans4x4WHT, MemCheck) {
+  RunMemCheck();
+}
+
+TEST_P(Trans4x4WHT, InvAccuracyCheck) {
+  RunInvAccuracyCheck(0);
+}
 using std::tr1::make_tuple;
 
 INSTANTIATE_TEST_CASE_P(
@@ -285,6 +333,10 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_fht4x4_c, &vp9_iht4x4_16_add_c, 1),
         make_tuple(&vp9_fht4x4_c, &vp9_iht4x4_16_add_c, 2),
         make_tuple(&vp9_fht4x4_c, &vp9_iht4x4_16_add_c, 3)));
+INSTANTIATE_TEST_CASE_P(
+    C, Trans4x4WHT,
+    ::testing::Values(
+        make_tuple(&vp9_fwht4x4_c, &vp9_iwht4x4_16_add_c, 0)));
 
 #if HAVE_NEON
 INSTANTIATE_TEST_CASE_P(
