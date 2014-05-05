@@ -310,6 +310,7 @@ void vp8_mbpost_proc_down_c(unsigned char *dst, int pitch, int rows, int cols, i
     }
 }
 
+#if CONFIG_POSTPROC
 static void vp8_de_mblock(YV12_BUFFER_CONFIG         *post,
                           int                         q)
 {
@@ -382,6 +383,7 @@ void vp8_deblock(VP8_COMMON                 *cm,
         vp8_yv12_copy_frame(source, post);
     }
 }
+#endif
 
 #if !(CONFIG_TEMPORAL_DENOISING)
 void vp8_de_noise(VP8_COMMON                 *cm,

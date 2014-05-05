@@ -5227,7 +5227,7 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
                 int y_samples = orig->y_height * orig->y_width ;
                 int uv_samples = orig->uv_height * orig->uv_width ;
                 int t_samples = y_samples + 2 * uv_samples;
-                double sq_error, sq_error2;
+                double sq_error;
 
                 ye = calc_plane_error(orig->y_buffer, orig->y_stride,
                   recon->y_buffer, recon->y_stride, orig->y_width, orig->y_height);
@@ -5250,6 +5250,7 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
 #if CONFIG_POSTPROC
                 {
                     YV12_BUFFER_CONFIG      *pp = &cm->post_proc_buffer;
+                    double sq_error2;
                     double frame_psnr2, frame_ssim2 = 0;
                     double weight = 0;
 
