@@ -9,8 +9,9 @@
  */
 
 #include <arm_neon.h>
+#include "./vpx_config.h"
 
-static inline void vp8_loop_filter_simple_vertical_edge_neon(
+static INLINE void vp8_loop_filter_simple_vertical_edge_neon(
         unsigned char *s,
         int p,
         const unsigned char *blimit) {
