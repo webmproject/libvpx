@@ -701,7 +701,7 @@ add_proto qw/void vp9_fht16x16/, "const int16_t *input, int16_t *output, int str
 specialize qw/vp9_fht16x16 sse2 avx2/;
 
 add_proto qw/void vp9_fwht4x4/, "const int16_t *input, int16_t *output, int stride";
-specialize qw/vp9_fwht4x4/;
+specialize qw/vp9_fwht4x4 mmx/;
 
 add_proto qw/void vp9_fdct4x4/, "const int16_t *input, int16_t *output, int stride";
 specialize qw/vp9_fdct4x4 sse2 avx2/;

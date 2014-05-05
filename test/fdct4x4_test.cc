@@ -353,6 +353,13 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_fht4x4_c, &vp9_iht4x4_16_add_neon, 3)));
 #endif
 
+#if HAVE_MMX
+INSTANTIATE_TEST_CASE_P(
+    MMX, Trans4x4WHT,
+    ::testing::Values(
+        make_tuple(&vp9_fwht4x4_mmx, &vp9_iwht4x4_16_add_c, 0)));
+#endif
+
 #if HAVE_SSE2
 INSTANTIATE_TEST_CASE_P(
     SSE2, Trans4x4DCT,
