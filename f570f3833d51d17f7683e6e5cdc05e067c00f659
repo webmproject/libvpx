@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//qy8\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 481,
+      "author": {
+        "id": 1003095
+      },
+      "writtenOn": "2014-05-05T23:06:16Z",
+      "side": 1,
+      "message": "Based on a test I\u0027m doing, I think \"bitrate\" should be \"bitrates\" here.",
+      "revId": "f570f3833d51d17f7683e6e5cdc05e067c00f659",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
