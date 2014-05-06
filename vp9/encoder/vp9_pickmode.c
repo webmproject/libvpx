@@ -194,7 +194,13 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
   int var = cpi->fn_ptr[bsize].vf(p->src.buf, p->src.stride,
                                   pd->dst.buf, pd->dst.stride, &sse);
 
-  vp9_model_rd_from_var_lapndz(sse + var, 1 << num_pels_log2_lookup[bsize],
+  // TODO(jingning) This is a temporary solution to account for frames with
+  // light changes. Need to customize the rate-distortion modeling for non-RD
+  // mode decision.
+  if ((sse >> 3) > var)
+    sse = var;
+
+  vp9_model_rd_from_var_lapndz(var + sse, 1 << num_pels_log2_lookup[bsize],
                                pd->dequant[1] >> 3, &rate, &dist);
   *out_rate_sum = rate;
   *out_dist_sum = dist << 3;
