@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//qo8\u003d",
+        "filename": "build/make/gen_msvs_vcxproj.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 439,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-05-06T21:24:54Z",
+      "side": 1,
+      "message": "These don\u0027t appear to be restricted to ARM builds. They\u0027re safe for all platforms and VS versions?",
+      "revId": "65f13afd7d543a088e179758063e51bae0b25570",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
