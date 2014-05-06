@@ -10,7 +10,7 @@
 %include "third_party/x86inc/x86inc.asm"
 
 ; This file provides SSSE3 version of the forward transformation. Part
-; of the macro definitions are originally derived from ffmpeg project.
+; of the macro definitions are originally derived from the ffmpeg project.
 ; The current version applies to x86 64-bit only.
 
 SECTION_RODATA
