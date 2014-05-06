@@ -16,6 +16,24 @@
       "revId": "5130e4e927d09fed5155dbc064e7184bc6c599ff",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//qvE\u003d",
+        "filename": "vp9/encoder/vp9_ssim.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1115299
+      },
+      "writtenOn": "2014-05-06T09:15:11Z",
+      "side": 1,
+      "message": "I think this is an artifact.",
+      "parentUuid": "AAAAdn//rUc\u003d",
+      "revId": "5130e4e927d09fed5155dbc064e7184bc6c599ff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
