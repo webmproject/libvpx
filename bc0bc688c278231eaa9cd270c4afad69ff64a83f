@@ -16,6 +16,24 @@
       "revId": "bc0bc688c278231eaa9cd270c4afad69ff64a83f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//qwc\u003d",
+        "filename": "third_party/libyuv/source/scale.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3883,
+      "author": {
+        "id": 1115299
+      },
+      "writtenOn": "2014-05-06T09:05:42Z",
+      "side": 1,
+      "message": "I am not sure I understand what is going on here.\nIf I view this file in IE, or checkout the change, then the code appears correctly aligned!  (And I have checked that the spaces are real spaces and not tabs.)\nPerhaps there is a problem with the Gerrit font width in Chrome? (Perhaps bold characters are wider - but IE ignores the bolding?)",
+      "parentUuid": "AAAAdn//rUI\u003d",
+      "revId": "bc0bc688c278231eaa9cd270c4afad69ff64a83f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
