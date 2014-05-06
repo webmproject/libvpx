@@ -16,6 +16,24 @@
       "revId": "87a268a198aef51a9db2e727a7ef6f0ab71f1977",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//qqw\u003d",
+        "filename": "test/decode_with_partial_drops.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-05-06T18:14:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//rkc\u003d",
+      "revId": "87a268a198aef51a9db2e727a7ef6f0ab71f1977",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
