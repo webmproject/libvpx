@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//qjk\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1317,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-05-07T17:36:01Z",
+      "side": 1,
+      "message": "\"!keyframe \u0026\u0026 !cm-\u003eintra_only\" should be replaced with !frame_is_intra_only(cm) for consistency.",
+      "revId": "b021b9d9375e3bd52e26b9dfa109f90348b0a69d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//qjo\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1366,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-05-07T17:36:01Z",
+      "side": 1,
+      "message": "\"keyframe || cm-\u003eintra_only\" should be replaced with frame_is_intra_only(cm) for consistency.",
+      "revId": "b021b9d9375e3bd52e26b9dfa109f90348b0a69d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
