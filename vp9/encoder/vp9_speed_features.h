@@ -129,7 +129,7 @@ typedef enum {
   ONE_LOOP_REDUCED = 2
 } FAST_COEFF_UPDATE;
 
-typedef struct {
+typedef struct SPEED_FEATURES {
   // Frame level coding parameter update
   int frame_parameter_update;
 
