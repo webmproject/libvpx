@@ -10,6 +10,10 @@
 
 #include <arm_neon.h>
 
+#ifdef _MSC_VER
+#define __builtin_prefetch(x)
+#endif
+
 static const int8_t vp8_sub_pel_filters[8][8] = {
     {0,  0,  128,   0,   0, 0, 0, 0},  /* note that 1/8 pel positionyys are */
     {0, -6,  123,  12,  -1, 0, 0, 0},  /*    just as per alpha -0.5 bicubic */
