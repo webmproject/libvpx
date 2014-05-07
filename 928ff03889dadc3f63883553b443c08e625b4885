@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//qjc\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1040,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-05-07T17:37:51Z",
+      "side": 0,
+      "message": "It tried to do something similar... and it didn\u0027t work like in you case. It should be a one place in the code where we update all last_* variables (last_frame_type, last_width, last_height, etc). No we do these updates in random places.",
+      "revId": "928ff03889dadc3f63883553b443c08e625b4885",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
