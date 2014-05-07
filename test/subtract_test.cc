@@ -105,7 +105,7 @@ TEST_P(SubtractBlockTest, SimpleSubtract) {
 INSTANTIATE_TEST_CASE_P(C, SubtractBlockTest,
                         ::testing::Values(vp8_subtract_b_c));
 
-#if HAVE_NEON
+#if HAVE_NEON_ASM
 INSTANTIATE_TEST_CASE_P(NEON, SubtractBlockTest,
                         ::testing::Values(vp8_subtract_b_neon));
 #endif

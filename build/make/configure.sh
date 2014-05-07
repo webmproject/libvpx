@@ -792,8 +792,12 @@ process_common_toolchain() {
     arm*)
         # on arm, isa versions are supersets
         case ${tgt_isa} in
+        armv8)
+            soft_enable neon
+            ;;
         armv7)
             soft_enable neon
+            soft_enable neon_asm
             soft_enable media
             soft_enable edsp
             soft_enable fast_unaligned

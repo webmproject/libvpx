@@ -239,6 +239,7 @@ ARCH_EXT_LIST="
     edsp
     media
     neon
+    neon_asm
 
     mips32
     dspr2
