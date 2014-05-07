@@ -10,6 +10,10 @@
 
 #include <arm_neon.h>
 
+#ifdef _MSC_VER
+#define __builtin_prefetch(x)
+#endif
+
 unsigned int vp8_variance16x16_neon(
         const unsigned char *src_ptr,
         int source_stride,
