@@ -294,60 +294,41 @@ TEST_P(VP8VarianceTest, Zero) { ZeroTest(); }
 TEST_P(VP8VarianceTest, Ref) { RefTest(); }
 TEST_P(VP8VarianceTest, OneQuarter) { OneQuarterTest(); }
 
-const vp8_variance_fn_t variance4x4_c = vp8_variance4x4_c;
-const vp8_variance_fn_t variance8x8_c = vp8_variance8x8_c;
-const vp8_variance_fn_t variance8x16_c = vp8_variance8x16_c;
-const vp8_variance_fn_t variance16x8_c = vp8_variance16x8_c;
-const vp8_variance_fn_t variance16x16_c = vp8_variance16x16_c;
 INSTANTIATE_TEST_CASE_P(
     C, VP8VarianceTest,
-    ::testing::Values(make_tuple(2, 2, variance4x4_c),
-                      make_tuple(3, 3, variance8x8_c),
-                      make_tuple(3, 4, variance8x16_c),
-                      make_tuple(4, 3, variance16x8_c),
-                      make_tuple(4, 4, variance16x16_c)));
+    ::testing::Values(make_tuple(2, 2, vp8_variance4x4_c),
+                      make_tuple(3, 3, vp8_variance8x8_c),
+                      make_tuple(3, 4, vp8_variance8x16_c),
+                      make_tuple(4, 3, vp8_variance16x8_c),
+                      make_tuple(4, 4, vp8_variance16x16_c)));
 
 #if HAVE_NEON
-const vp8_variance_fn_t variance8x8_neon = vp8_variance8x8_neon;
-const vp8_variance_fn_t variance8x16_neon = vp8_variance8x16_neon;
-const vp8_variance_fn_t variance16x8_neon = vp8_variance16x8_neon;
-const vp8_variance_fn_t variance16x16_neon = vp8_variance16x16_neon;
 INSTANTIATE_TEST_CASE_P(
     NEON, VP8VarianceTest,
-    ::testing::Values(make_tuple(3, 3, variance8x8_neon),
-                      make_tuple(3, 4, variance8x16_neon),
-                      make_tuple(4, 3, variance16x8_neon),
-                      make_tuple(4, 4, variance16x16_neon)));
+    ::testing::Values(make_tuple(3, 3, vp8_variance8x8_neon),
+                      make_tuple(3, 4, vp8_variance8x16_neon),
+                      make_tuple(4, 3, vp8_variance16x8_neon),
+                      make_tuple(4, 4, vp8_variance16x16_neon)));
 #endif
 
 #if HAVE_MMX
-const vp8_variance_fn_t variance4x4_mmx = vp8_variance4x4_mmx;
-const vp8_variance_fn_t variance8x8_mmx = vp8_variance8x8_mmx;
-const vp8_variance_fn_t variance8x16_mmx = vp8_variance8x16_mmx;
-const vp8_variance_fn_t variance16x8_mmx = vp8_variance16x8_mmx;
-const vp8_variance_fn_t variance16x16_mmx = vp8_variance16x16_mmx;
 INSTANTIATE_TEST_CASE_P(
     MMX, VP8VarianceTest,
-    ::testing::Values(make_tuple(2, 2, variance4x4_mmx),
-                      make_tuple(3, 3, variance8x8_mmx),
-                      make_tuple(3, 4, variance8x16_mmx),
-                      make_tuple(4, 3, variance16x8_mmx),
-                      make_tuple(4, 4, variance16x16_mmx)));
+    ::testing::Values(make_tuple(2, 2, vp8_variance4x4_mmx),
+                      make_tuple(3, 3, vp8_variance8x8_mmx),
+                      make_tuple(3, 4, vp8_variance8x16_mmx),
+                      make_tuple(4, 3, vp8_variance16x8_mmx),
+                      make_tuple(4, 4, vp8_variance16x16_mmx)));
 #endif
 
 #if HAVE_SSE2
-const vp8_variance_fn_t variance4x4_wmt = vp8_variance4x4_wmt;
-const vp8_variance_fn_t variance8x8_wmt = vp8_variance8x8_wmt;
-const vp8_variance_fn_t variance8x16_wmt = vp8_variance8x16_wmt;
-const vp8_variance_fn_t variance16x8_wmt = vp8_variance16x8_wmt;
-const vp8_variance_fn_t variance16x16_wmt = vp8_variance16x16_wmt;
 INSTANTIATE_TEST_CASE_P(
     SSE2, VP8VarianceTest,
-    ::testing::Values(make_tuple(2, 2, variance4x4_wmt),
-                      make_tuple(3, 3, variance8x8_wmt),
-                      make_tuple(3, 4, variance8x16_wmt),
-                      make_tuple(4, 3, variance16x8_wmt),
-                      make_tuple(4, 4, variance16x16_wmt)));
+    ::testing::Values(make_tuple(2, 2, vp8_variance4x4_wmt),
+                      make_tuple(3, 3, vp8_variance8x8_wmt),
+                      make_tuple(3, 4, vp8_variance8x16_wmt),
+                      make_tuple(4, 3, vp8_variance16x8_wmt),
+                      make_tuple(4, 4, vp8_variance16x16_wmt)));
 #endif
 #endif  // CONFIG_VP8_ENCODER
 
@@ -369,337 +350,150 @@ TEST_P(VP9SubpelVarianceTest, Ref) { RefTest(); }
 TEST_P(VP9SubpelAvgVarianceTest, Ref) { RefTest(); }
 TEST_P(VP9VarianceTest, OneQuarter) { OneQuarterTest(); }
 
-const vp9_variance_fn_t variance4x4_c = vp9_variance4x4_c;
-const vp9_variance_fn_t variance4x8_c = vp9_variance4x8_c;
-const vp9_variance_fn_t variance8x4_c = vp9_variance8x4_c;
-const vp9_variance_fn_t variance8x8_c = vp9_variance8x8_c;
-const vp9_variance_fn_t variance8x16_c = vp9_variance8x16_c;
-const vp9_variance_fn_t variance16x8_c = vp9_variance16x8_c;
-const vp9_variance_fn_t variance16x16_c = vp9_variance16x16_c;
-const vp9_variance_fn_t variance16x32_c = vp9_variance16x32_c;
-const vp9_variance_fn_t variance32x16_c = vp9_variance32x16_c;
-const vp9_variance_fn_t variance32x32_c = vp9_variance32x32_c;
-const vp9_variance_fn_t variance32x64_c = vp9_variance32x64_c;
-const vp9_variance_fn_t variance64x32_c = vp9_variance64x32_c;
-const vp9_variance_fn_t variance64x64_c = vp9_variance64x64_c;
 INSTANTIATE_TEST_CASE_P(
     C, VP9VarianceTest,
-    ::testing::Values(make_tuple(2, 2, variance4x4_c),
-                      make_tuple(2, 3, variance4x8_c),
-                      make_tuple(3, 2, variance8x4_c),
-                      make_tuple(3, 3, variance8x8_c),
-                      make_tuple(3, 4, variance8x16_c),
-                      make_tuple(4, 3, variance16x8_c),
-                      make_tuple(4, 4, variance16x16_c),
-                      make_tuple(4, 5, variance16x32_c),
-                      make_tuple(5, 4, variance32x16_c),
-                      make_tuple(5, 5, variance32x32_c),
-                      make_tuple(5, 6, variance32x64_c),
-                      make_tuple(6, 5, variance64x32_c),
-                      make_tuple(6, 6, variance64x64_c)));
+    ::testing::Values(make_tuple(2, 2, vp9_variance4x4_c),
+                      make_tuple(2, 3, vp9_variance4x8_c),
+                      make_tuple(3, 2, vp9_variance8x4_c),
+                      make_tuple(3, 3, vp9_variance8x8_c),
+                      make_tuple(3, 4, vp9_variance8x16_c),
+                      make_tuple(4, 3, vp9_variance16x8_c),
+                      make_tuple(4, 4, vp9_variance16x16_c),
+                      make_tuple(4, 5, vp9_variance16x32_c),
+                      make_tuple(5, 4, vp9_variance32x16_c),
+                      make_tuple(5, 5, vp9_variance32x32_c),
+                      make_tuple(5, 6, vp9_variance32x64_c),
+                      make_tuple(6, 5, vp9_variance64x32_c),
+                      make_tuple(6, 6, vp9_variance64x64_c)));
 
-const vp9_subpixvariance_fn_t subpel_variance4x4_c =
-    vp9_sub_pixel_variance4x4_c;
-const vp9_subpixvariance_fn_t subpel_variance4x8_c =
-    vp9_sub_pixel_variance4x8_c;
-const vp9_subpixvariance_fn_t subpel_variance8x4_c =
-    vp9_sub_pixel_variance8x4_c;
-const vp9_subpixvariance_fn_t subpel_variance8x8_c =
-    vp9_sub_pixel_variance8x8_c;
-const vp9_subpixvariance_fn_t subpel_variance8x16_c =
-    vp9_sub_pixel_variance8x16_c;
-const vp9_subpixvariance_fn_t subpel_variance16x8_c =
-    vp9_sub_pixel_variance16x8_c;
-const vp9_subpixvariance_fn_t subpel_variance16x16_c =
-    vp9_sub_pixel_variance16x16_c;
-const vp9_subpixvariance_fn_t subpel_variance16x32_c =
-    vp9_sub_pixel_variance16x32_c;
-const vp9_subpixvariance_fn_t subpel_variance32x16_c =
-    vp9_sub_pixel_variance32x16_c;
-const vp9_subpixvariance_fn_t subpel_variance32x32_c =
-    vp9_sub_pixel_variance32x32_c;
-const vp9_subpixvariance_fn_t subpel_variance32x64_c =
-    vp9_sub_pixel_variance32x64_c;
-const vp9_subpixvariance_fn_t subpel_variance64x32_c =
-    vp9_sub_pixel_variance64x32_c;
-const vp9_subpixvariance_fn_t subpel_variance64x64_c =
-    vp9_sub_pixel_variance64x64_c;
 INSTANTIATE_TEST_CASE_P(
     C, VP9SubpelVarianceTest,
-    ::testing::Values(make_tuple(2, 2, subpel_variance4x4_c),
-                      make_tuple(2, 3, subpel_variance4x8_c),
-                      make_tuple(3, 2, subpel_variance8x4_c),
-                      make_tuple(3, 3, subpel_variance8x8_c),
-                      make_tuple(3, 4, subpel_variance8x16_c),
-                      make_tuple(4, 3, subpel_variance16x8_c),
-                      make_tuple(4, 4, subpel_variance16x16_c),
-                      make_tuple(4, 5, subpel_variance16x32_c),
-                      make_tuple(5, 4, subpel_variance32x16_c),
-                      make_tuple(5, 5, subpel_variance32x32_c),
-                      make_tuple(5, 6, subpel_variance32x64_c),
-                      make_tuple(6, 5, subpel_variance64x32_c),
-                      make_tuple(6, 6, subpel_variance64x64_c)));
+    ::testing::Values(make_tuple(2, 2, vp9_sub_pixel_variance4x4_c),
+                      make_tuple(2, 3, vp9_sub_pixel_variance4x8_c),
+                      make_tuple(3, 2, vp9_sub_pixel_variance8x4_c),
+                      make_tuple(3, 3, vp9_sub_pixel_variance8x8_c),
+                      make_tuple(3, 4, vp9_sub_pixel_variance8x16_c),
+                      make_tuple(4, 3, vp9_sub_pixel_variance16x8_c),
+                      make_tuple(4, 4, vp9_sub_pixel_variance16x16_c),
+                      make_tuple(4, 5, vp9_sub_pixel_variance16x32_c),
+                      make_tuple(5, 4, vp9_sub_pixel_variance32x16_c),
+                      make_tuple(5, 5, vp9_sub_pixel_variance32x32_c),
+                      make_tuple(5, 6, vp9_sub_pixel_variance32x64_c),
+                      make_tuple(6, 5, vp9_sub_pixel_variance64x32_c),
+                      make_tuple(6, 6, vp9_sub_pixel_variance64x64_c)));
 
-const vp9_subp_avg_variance_fn_t subpel_avg_variance4x4_c =
-    vp9_sub_pixel_avg_variance4x4_c;
-const vp9_subp_avg_variance_fn_t subpel_avg_variance4x8_c =
-    vp9_sub_pixel_avg_variance4x8_c;
-const vp9_subp_avg_variance_fn_t subpel_avg_variance8x4_c =
-    vp9_sub_pixel_avg_variance8x4_c;
-const vp9_subp_avg_variance_fn_t subpel_avg_variance8x8_c =
-    vp9_sub_pixel_avg_variance8x8_c;
-const vp9_subp_avg_variance_fn_t subpel_avg_variance8x16_c =
-    vp9_sub_pixel_avg_variance8x16_c;
-const vp9_subp_avg_variance_fn_t subpel_avg_variance16x8_c =
-    vp9_sub_pixel_avg_variance16x8_c;
-const vp9_subp_avg_variance_fn_t subpel_avg_variance16x16_c =
-    vp9_sub_pixel_avg_variance16x16_c;
-const vp9_subp_avg_variance_fn_t subpel_avg_variance16x32_c =
-    vp9_sub_pixel_avg_variance16x32_c;
-const vp9_subp_avg_variance_fn_t subpel_avg_variance32x16_c =
-    vp9_sub_pixel_avg_variance32x16_c;
-const vp9_subp_avg_variance_fn_t subpel_avg_variance32x32_c =
-    vp9_sub_pixel_avg_variance32x32_c;
-const vp9_subp_avg_variance_fn_t subpel_avg_variance32x64_c =
-    vp9_sub_pixel_avg_variance32x64_c;
-const vp9_subp_avg_variance_fn_t subpel_avg_variance64x32_c =
-    vp9_sub_pixel_avg_variance64x32_c;
-const vp9_subp_avg_variance_fn_t subpel_avg_variance64x64_c =
-    vp9_sub_pixel_avg_variance64x64_c;
 INSTANTIATE_TEST_CASE_P(
     C, VP9SubpelAvgVarianceTest,
-    ::testing::Values(make_tuple(2, 2, subpel_avg_variance4x4_c),
-                      make_tuple(2, 3, subpel_avg_variance4x8_c),
-                      make_tuple(3, 2, subpel_avg_variance8x4_c),
-                      make_tuple(3, 3, subpel_avg_variance8x8_c),
-                      make_tuple(3, 4, subpel_avg_variance8x16_c),
-                      make_tuple(4, 3, subpel_avg_variance16x8_c),
-                      make_tuple(4, 4, subpel_avg_variance16x16_c),
-                      make_tuple(4, 5, subpel_avg_variance16x32_c),
-                      make_tuple(5, 4, subpel_avg_variance32x16_c),
-                      make_tuple(5, 5, subpel_avg_variance32x32_c),
-                      make_tuple(5, 6, subpel_avg_variance32x64_c),
-                      make_tuple(6, 5, subpel_avg_variance64x32_c),
-                      make_tuple(6, 6, subpel_avg_variance64x64_c)));
+    ::testing::Values(make_tuple(2, 2, vp9_sub_pixel_avg_variance4x4_c),
+                      make_tuple(2, 3, vp9_sub_pixel_avg_variance4x8_c),
+                      make_tuple(3, 2, vp9_sub_pixel_avg_variance8x4_c),
+                      make_tuple(3, 3, vp9_sub_pixel_avg_variance8x8_c),
+                      make_tuple(3, 4, vp9_sub_pixel_avg_variance8x16_c),
+                      make_tuple(4, 3, vp9_sub_pixel_avg_variance16x8_c),
+                      make_tuple(4, 4, vp9_sub_pixel_avg_variance16x16_c),
+                      make_tuple(4, 5, vp9_sub_pixel_avg_variance16x32_c),
+                      make_tuple(5, 4, vp9_sub_pixel_avg_variance32x16_c),
+                      make_tuple(5, 5, vp9_sub_pixel_avg_variance32x32_c),
+                      make_tuple(5, 6, vp9_sub_pixel_avg_variance32x64_c),
+                      make_tuple(6, 5, vp9_sub_pixel_avg_variance64x32_c),
+                      make_tuple(6, 6, vp9_sub_pixel_avg_variance64x64_c)));
 
 #if HAVE_MMX
-const vp9_variance_fn_t variance4x4_mmx = vp9_variance4x4_mmx;
-const vp9_variance_fn_t variance8x8_mmx = vp9_variance8x8_mmx;
-const vp9_variance_fn_t variance8x16_mmx = vp9_variance8x16_mmx;
-const vp9_variance_fn_t variance16x8_mmx = vp9_variance16x8_mmx;
-const vp9_variance_fn_t variance16x16_mmx = vp9_variance16x16_mmx;
 INSTANTIATE_TEST_CASE_P(
     MMX, VP9VarianceTest,
-    ::testing::Values(make_tuple(2, 2, variance4x4_mmx),
-                      make_tuple(3, 3, variance8x8_mmx),
-                      make_tuple(3, 4, variance8x16_mmx),
-                      make_tuple(4, 3, variance16x8_mmx),
-                      make_tuple(4, 4, variance16x16_mmx)));
+    ::testing::Values(make_tuple(2, 2, vp9_variance4x4_mmx),
+                      make_tuple(3, 3, vp9_variance8x8_mmx),
+                      make_tuple(3, 4, vp9_variance8x16_mmx),
+                      make_tuple(4, 3, vp9_variance16x8_mmx),
+                      make_tuple(4, 4, vp9_variance16x16_mmx)));
 #endif
 
 #if HAVE_SSE2
 #if CONFIG_USE_X86INC
-const vp9_variance_fn_t variance4x4_sse2 = vp9_variance4x4_sse2;
-const vp9_variance_fn_t variance4x8_sse2 = vp9_variance4x8_sse2;
-const vp9_variance_fn_t variance8x4_sse2 = vp9_variance8x4_sse2;
-const vp9_variance_fn_t variance8x8_sse2 = vp9_variance8x8_sse2;
-const vp9_variance_fn_t variance8x16_sse2 = vp9_variance8x16_sse2;
-const vp9_variance_fn_t variance16x8_sse2 = vp9_variance16x8_sse2;
-const vp9_variance_fn_t variance16x16_sse2 = vp9_variance16x16_sse2;
-const vp9_variance_fn_t variance16x32_sse2 = vp9_variance16x32_sse2;
-const vp9_variance_fn_t variance32x16_sse2 = vp9_variance32x16_sse2;
-const vp9_variance_fn_t variance32x32_sse2 = vp9_variance32x32_sse2;
-const vp9_variance_fn_t variance32x64_sse2 = vp9_variance32x64_sse2;
-const vp9_variance_fn_t variance64x32_sse2 = vp9_variance64x32_sse2;
-const vp9_variance_fn_t variance64x64_sse2 = vp9_variance64x64_sse2;
 INSTANTIATE_TEST_CASE_P(
     SSE2, VP9VarianceTest,
-    ::testing::Values(make_tuple(2, 2, variance4x4_sse2),
-                      make_tuple(2, 3, variance4x8_sse2),
-                      make_tuple(3, 2, variance8x4_sse2),
-                      make_tuple(3, 3, variance8x8_sse2),
-                      make_tuple(3, 4, variance8x16_sse2),
-                      make_tuple(4, 3, variance16x8_sse2),
-                      make_tuple(4, 4, variance16x16_sse2),
-                      make_tuple(4, 5, variance16x32_sse2),
-                      make_tuple(5, 4, variance32x16_sse2),
-                      make_tuple(5, 5, variance32x32_sse2),
-                      make_tuple(5, 6, variance32x64_sse2),
-                      make_tuple(6, 5, variance64x32_sse2),
-                      make_tuple(6, 6, variance64x64_sse2)));
+    ::testing::Values(make_tuple(2, 2, vp9_variance4x4_sse2),
+                      make_tuple(2, 3, vp9_variance4x8_sse2),
+                      make_tuple(3, 2, vp9_variance8x4_sse2),
+                      make_tuple(3, 3, vp9_variance8x8_sse2),
+                      make_tuple(3, 4, vp9_variance8x16_sse2),
+                      make_tuple(4, 3, vp9_variance16x8_sse2),
+                      make_tuple(4, 4, vp9_variance16x16_sse2),
+                      make_tuple(4, 5, vp9_variance16x32_sse2),
+                      make_tuple(5, 4, vp9_variance32x16_sse2),
+                      make_tuple(5, 5, vp9_variance32x32_sse2),
+                      make_tuple(5, 6, vp9_variance32x64_sse2),
+                      make_tuple(6, 5, vp9_variance64x32_sse2),
+                      make_tuple(6, 6, vp9_variance64x64_sse2)));
 
-const vp9_subpixvariance_fn_t subpel_variance4x4_sse =
-    vp9_sub_pixel_variance4x4_sse;
-const vp9_subpixvariance_fn_t subpel_variance4x8_sse =
-    vp9_sub_pixel_variance4x8_sse;
-const vp9_subpixvariance_fn_t subpel_variance8x4_sse2 =
-    vp9_sub_pixel_variance8x4_sse2;
-const vp9_subpixvariance_fn_t subpel_variance8x8_sse2 =
-    vp9_sub_pixel_variance8x8_sse2;
-const vp9_subpixvariance_fn_t subpel_variance8x16_sse2 =
-    vp9_sub_pixel_variance8x16_sse2;
-const vp9_subpixvariance_fn_t subpel_variance16x8_sse2 =
-    vp9_sub_pixel_variance16x8_sse2;
-const vp9_subpixvariance_fn_t subpel_variance16x16_sse2 =
-    vp9_sub_pixel_variance16x16_sse2;
-const vp9_subpixvariance_fn_t subpel_variance16x32_sse2 =
-    vp9_sub_pixel_variance16x32_sse2;
-const vp9_subpixvariance_fn_t subpel_variance32x16_sse2 =
-    vp9_sub_pixel_variance32x16_sse2;
-const vp9_subpixvariance_fn_t subpel_variance32x32_sse2 =
-    vp9_sub_pixel_variance32x32_sse2;
-const vp9_subpixvariance_fn_t subpel_variance32x64_sse2 =
-    vp9_sub_pixel_variance32x64_sse2;
-const vp9_subpixvariance_fn_t subpel_variance64x32_sse2 =
-    vp9_sub_pixel_variance64x32_sse2;
-const vp9_subpixvariance_fn_t subpel_variance64x64_sse2 =
-    vp9_sub_pixel_variance64x64_sse2;
 INSTANTIATE_TEST_CASE_P(
     SSE2, VP9SubpelVarianceTest,
-    ::testing::Values(make_tuple(2, 2, subpel_variance4x4_sse),
-                      make_tuple(2, 3, subpel_variance4x8_sse),
-                      make_tuple(3, 2, subpel_variance8x4_sse2),
-                      make_tuple(3, 3, subpel_variance8x8_sse2),
-                      make_tuple(3, 4, subpel_variance8x16_sse2),
-                      make_tuple(4, 3, subpel_variance16x8_sse2),
-                      make_tuple(4, 4, subpel_variance16x16_sse2),
-                      make_tuple(4, 5, subpel_variance16x32_sse2),
-                      make_tuple(5, 4, subpel_variance32x16_sse2),
-                      make_tuple(5, 5, subpel_variance32x32_sse2),
-                      make_tuple(5, 6, subpel_variance32x64_sse2),
-                      make_tuple(6, 5, subpel_variance64x32_sse2),
-                      make_tuple(6, 6, subpel_variance64x64_sse2)));
+    ::testing::Values(make_tuple(2, 2, vp9_sub_pixel_variance4x4_sse),
+                      make_tuple(2, 3, vp9_sub_pixel_variance4x8_sse),
+                      make_tuple(3, 2, vp9_sub_pixel_variance8x4_sse2),
+                      make_tuple(3, 3, vp9_sub_pixel_variance8x8_sse2),
+                      make_tuple(3, 4, vp9_sub_pixel_variance8x16_sse2),
+                      make_tuple(4, 3, vp9_sub_pixel_variance16x8_sse2),
+                      make_tuple(4, 4, vp9_sub_pixel_variance16x16_sse2),
+                      make_tuple(4, 5, vp9_sub_pixel_variance16x32_sse2),
+                      make_tuple(5, 4, vp9_sub_pixel_variance32x16_sse2),
+                      make_tuple(5, 5, vp9_sub_pixel_variance32x32_sse2),
+                      make_tuple(5, 6, vp9_sub_pixel_variance32x64_sse2),
+                      make_tuple(6, 5, vp9_sub_pixel_variance64x32_sse2),
+                      make_tuple(6, 6, vp9_sub_pixel_variance64x64_sse2)));
 
-const vp9_subp_avg_variance_fn_t subpel_avg_variance4x4_sse =
-    vp9_sub_pixel_avg_variance4x4_sse;
-const vp9_subp_avg_variance_fn_t subpel_avg_variance4x8_sse =
-    vp9_sub_pixel_avg_variance4x8_sse;
-const vp9_subp_avg_variance_fn_t subpel_avg_variance8x4_sse2 =
-    vp9_sub_pixel_avg_variance8x4_sse2;
-const vp9_subp_avg_variance_fn_t subpel_avg_variance8x8_sse2 =
-    vp9_sub_pixel_avg_variance8x8_sse2;
-const vp9_subp_avg_variance_fn_t subpel_avg_variance8x16_sse2 =
-    vp9_sub_pixel_avg_variance8x16_sse2;
-const vp9_subp_avg_variance_fn_t subpel_avg_variance16x8_sse2 =
-    vp9_sub_pixel_avg_variance16x8_sse2;
-const vp9_subp_avg_variance_fn_t subpel_avg_variance16x16_sse2 =
-    vp9_sub_pixel_avg_variance16x16_sse2;
-const vp9_subp_avg_variance_fn_t subpel_avg_variance16x32_sse2 =
-    vp9_sub_pixel_avg_variance16x32_sse2;
-const vp9_subp_avg_variance_fn_t subpel_avg_variance32x16_sse2 =
-    vp9_sub_pixel_avg_variance32x16_sse2;
-const vp9_subp_avg_variance_fn_t subpel_avg_variance32x32_sse2 =
-    vp9_sub_pixel_avg_variance32x32_sse2;
-const vp9_subp_avg_variance_fn_t subpel_avg_variance32x64_sse2 =
-    vp9_sub_pixel_avg_variance32x64_sse2;
-const vp9_subp_avg_variance_fn_t subpel_avg_variance64x32_sse2 =
-    vp9_sub_pixel_avg_variance64x32_sse2;
-const vp9_subp_avg_variance_fn_t subpel_avg_variance64x64_sse2 =
-    vp9_sub_pixel_avg_variance64x64_sse2;
 INSTANTIATE_TEST_CASE_P(
     SSE2, VP9SubpelAvgVarianceTest,
-    ::testing::Values(make_tuple(2, 2, subpel_avg_variance4x4_sse),
-                      make_tuple(2, 3, subpel_avg_variance4x8_sse),
-                      make_tuple(3, 2, subpel_avg_variance8x4_sse2),
-                      make_tuple(3, 3, subpel_avg_variance8x8_sse2),
-                      make_tuple(3, 4, subpel_avg_variance8x16_sse2),
-                      make_tuple(4, 3, subpel_avg_variance16x8_sse2),
-                      make_tuple(4, 4, subpel_avg_variance16x16_sse2),
-                      make_tuple(4, 5, subpel_avg_variance16x32_sse2),
-                      make_tuple(5, 4, subpel_avg_variance32x16_sse2),
-                      make_tuple(5, 5, subpel_avg_variance32x32_sse2),
-                      make_tuple(5, 6, subpel_avg_variance32x64_sse2),
-                      make_tuple(6, 5, subpel_avg_variance64x32_sse2),
-                      make_tuple(6, 6, subpel_avg_variance64x64_sse2)));
+    ::testing::Values(make_tuple(2, 2, vp9_sub_pixel_avg_variance4x4_sse),
+                      make_tuple(2, 3, vp9_sub_pixel_avg_variance4x8_sse),
+                      make_tuple(3, 2, vp9_sub_pixel_avg_variance8x4_sse2),
+                      make_tuple(3, 3, vp9_sub_pixel_avg_variance8x8_sse2),
+                      make_tuple(3, 4, vp9_sub_pixel_avg_variance8x16_sse2),
+                      make_tuple(4, 3, vp9_sub_pixel_avg_variance16x8_sse2),
+                      make_tuple(4, 4, vp9_sub_pixel_avg_variance16x16_sse2),
+                      make_tuple(4, 5, vp9_sub_pixel_avg_variance16x32_sse2),
+                      make_tuple(5, 4, vp9_sub_pixel_avg_variance32x16_sse2),
+                      make_tuple(5, 5, vp9_sub_pixel_avg_variance32x32_sse2),
+                      make_tuple(5, 6, vp9_sub_pixel_avg_variance32x64_sse2),
+                      make_tuple(6, 5, vp9_sub_pixel_avg_variance64x32_sse2),
+                      make_tuple(6, 6, vp9_sub_pixel_avg_variance64x64_sse2)));
 #endif
 #endif
 
 #if HAVE_SSSE3
 #if CONFIG_USE_X86INC
 
-const vp9_subpixvariance_fn_t subpel_variance4x4_ssse3 =
-    vp9_sub_pixel_variance4x4_ssse3;
-const vp9_subpixvariance_fn_t subpel_variance4x8_ssse3 =
-    vp9_sub_pixel_variance4x8_ssse3;
-const vp9_subpixvariance_fn_t subpel_variance8x4_ssse3 =
-    vp9_sub_pixel_variance8x4_ssse3;
-const vp9_subpixvariance_fn_t subpel_variance8x8_ssse3 =
-    vp9_sub_pixel_variance8x8_ssse3;
-const vp9_subpixvariance_fn_t subpel_variance8x16_ssse3 =
-    vp9_sub_pixel_variance8x16_ssse3;
-const vp9_subpixvariance_fn_t subpel_variance16x8_ssse3 =
-    vp9_sub_pixel_variance16x8_ssse3;
-const vp9_subpixvariance_fn_t subpel_variance16x16_ssse3 =
-    vp9_sub_pixel_variance16x16_ssse3;
-const vp9_subpixvariance_fn_t subpel_variance16x32_ssse3 =
-    vp9_sub_pixel_variance16x32_ssse3;
-const vp9_subpixvariance_fn_t subpel_variance32x16_ssse3 =
-    vp9_sub_pixel_variance32x16_ssse3;
-const vp9_subpixvariance_fn_t subpel_variance32x32_ssse3 =
-    vp9_sub_pixel_variance32x32_ssse3;
-const vp9_subpixvariance_fn_t subpel_variance32x64_ssse3 =
-    vp9_sub_pixel_variance32x64_ssse3;
-const vp9_subpixvariance_fn_t subpel_variance64x32_ssse3 =
-    vp9_sub_pixel_variance64x32_ssse3;
-const vp9_subpixvariance_fn_t subpel_variance64x64_ssse3 =
-    vp9_sub_pixel_variance64x64_ssse3;
 INSTANTIATE_TEST_CASE_P(
     SSSE3, VP9SubpelVarianceTest,
-    ::testing::Values(make_tuple(2, 2, subpel_variance4x4_ssse3),
-                      make_tuple(2, 3, subpel_variance4x8_ssse3),
-                      make_tuple(3, 2, subpel_variance8x4_ssse3),
-                      make_tuple(3, 3, subpel_variance8x8_ssse3),
-                      make_tuple(3, 4, subpel_variance8x16_ssse3),
-                      make_tuple(4, 3, subpel_variance16x8_ssse3),
-                      make_tuple(4, 4, subpel_variance16x16_ssse3),
-                      make_tuple(4, 5, subpel_variance16x32_ssse3),
-                      make_tuple(5, 4, subpel_variance32x16_ssse3),
-                      make_tuple(5, 5, subpel_variance32x32_ssse3),
-                      make_tuple(5, 6, subpel_variance32x64_ssse3),
-                      make_tuple(6, 5, subpel_variance64x32_ssse3),
-                      make_tuple(6, 6, subpel_variance64x64_ssse3)));
+    ::testing::Values(make_tuple(2, 2, vp9_sub_pixel_variance4x4_ssse3),
+                      make_tuple(2, 3, vp9_sub_pixel_variance4x8_ssse3),
+                      make_tuple(3, 2, vp9_sub_pixel_variance8x4_ssse3),
+                      make_tuple(3, 3, vp9_sub_pixel_variance8x8_ssse3),
+                      make_tuple(3, 4, vp9_sub_pixel_variance8x16_ssse3),
+                      make_tuple(4, 3, vp9_sub_pixel_variance16x8_ssse3),
+                      make_tuple(4, 4, vp9_sub_pixel_variance16x16_ssse3),
+                      make_tuple(4, 5, vp9_sub_pixel_variance16x32_ssse3),
+                      make_tuple(5, 4, vp9_sub_pixel_variance32x16_ssse3),
+                      make_tuple(5, 5, vp9_sub_pixel_variance32x32_ssse3),
+                      make_tuple(5, 6, vp9_sub_pixel_variance32x64_ssse3),
+                      make_tuple(6, 5, vp9_sub_pixel_variance64x32_ssse3),
+                      make_tuple(6, 6, vp9_sub_pixel_variance64x64_ssse3)));
 
-const vp9_subp_avg_variance_fn_t subpel_avg_variance4x4_ssse3 =
-    vp9_sub_pixel_avg_variance4x4_ssse3;
-const vp9_subp_avg_variance_fn_t subpel_avg_variance4x8_ssse3 =
-    vp9_sub_pixel_avg_variance4x8_ssse3;
-const vp9_subp_avg_variance_fn_t subpel_avg_variance8x4_ssse3 =
-    vp9_sub_pixel_avg_variance8x4_ssse3;
-const vp9_subp_avg_variance_fn_t subpel_avg_variance8x8_ssse3 =
-    vp9_sub_pixel_avg_variance8x8_ssse3;
-const vp9_subp_avg_variance_fn_t subpel_avg_variance8x16_ssse3 =
-    vp9_sub_pixel_avg_variance8x16_ssse3;
-const vp9_subp_avg_variance_fn_t subpel_avg_variance16x8_ssse3 =
-    vp9_sub_pixel_avg_variance16x8_ssse3;
-const vp9_subp_avg_variance_fn_t subpel_avg_variance16x16_ssse3 =
-    vp9_sub_pixel_avg_variance16x16_ssse3;
-const vp9_subp_avg_variance_fn_t subpel_avg_variance16x32_ssse3 =
-    vp9_sub_pixel_avg_variance16x32_ssse3;
-const vp9_subp_avg_variance_fn_t subpel_avg_variance32x16_ssse3 =
-    vp9_sub_pixel_avg_variance32x16_ssse3;
-const vp9_subp_avg_variance_fn_t subpel_avg_variance32x32_ssse3 =
-    vp9_sub_pixel_avg_variance32x32_ssse3;
-const vp9_subp_avg_variance_fn_t subpel_avg_variance32x64_ssse3 =
-    vp9_sub_pixel_avg_variance32x64_ssse3;
-const vp9_subp_avg_variance_fn_t subpel_avg_variance64x32_ssse3 =
-    vp9_sub_pixel_avg_variance64x32_ssse3;
-const vp9_subp_avg_variance_fn_t subpel_avg_variance64x64_ssse3 =
-    vp9_sub_pixel_avg_variance64x64_ssse3;
 INSTANTIATE_TEST_CASE_P(
     SSSE3, VP9SubpelAvgVarianceTest,
-    ::testing::Values(make_tuple(2, 2, subpel_avg_variance4x4_ssse3),
-                      make_tuple(2, 3, subpel_avg_variance4x8_ssse3),
-                      make_tuple(3, 2, subpel_avg_variance8x4_ssse3),
-                      make_tuple(3, 3, subpel_avg_variance8x8_ssse3),
-                      make_tuple(3, 4, subpel_avg_variance8x16_ssse3),
-                      make_tuple(4, 3, subpel_avg_variance16x8_ssse3),
-                      make_tuple(4, 4, subpel_avg_variance16x16_ssse3),
-                      make_tuple(4, 5, subpel_avg_variance16x32_ssse3),
-                      make_tuple(5, 4, subpel_avg_variance32x16_ssse3),
-                      make_tuple(5, 5, subpel_avg_variance32x32_ssse3),
-                      make_tuple(5, 6, subpel_avg_variance32x64_ssse3),
-                      make_tuple(6, 5, subpel_avg_variance64x32_ssse3),
-                      make_tuple(6, 6, subpel_avg_variance64x64_ssse3)));
+    ::testing::Values(make_tuple(2, 2, vp9_sub_pixel_avg_variance4x4_ssse3),
+                      make_tuple(2, 3, vp9_sub_pixel_avg_variance4x8_ssse3),
+                      make_tuple(3, 2, vp9_sub_pixel_avg_variance8x4_ssse3),
+                      make_tuple(3, 3, vp9_sub_pixel_avg_variance8x8_ssse3),
+                      make_tuple(3, 4, vp9_sub_pixel_avg_variance8x16_ssse3),
+                      make_tuple(4, 3, vp9_sub_pixel_avg_variance16x8_ssse3),
+                      make_tuple(4, 4, vp9_sub_pixel_avg_variance16x16_ssse3),
+                      make_tuple(4, 5, vp9_sub_pixel_avg_variance16x32_ssse3),
+                      make_tuple(5, 4, vp9_sub_pixel_avg_variance32x16_ssse3),
+                      make_tuple(5, 5, vp9_sub_pixel_avg_variance32x32_ssse3),
+                      make_tuple(5, 6, vp9_sub_pixel_avg_variance32x64_ssse3),
+                      make_tuple(6, 5, vp9_sub_pixel_avg_variance64x32_ssse3),
+                      make_tuple(6, 6, vp9_sub_pixel_avg_variance64x64_ssse3)));
 #endif
 #endif
 #endif  // CONFIG_VP9_ENCODER
