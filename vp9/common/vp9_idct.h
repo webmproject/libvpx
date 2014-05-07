@@ -33,9 +33,6 @@ extern "C" {
 #define pair_set_epi16(a, b) \
   _mm_set_epi16(b, a, b, a, b, a, b, a)
 
-#define pair_set_epi32(a, b) \
-  _mm_set_epi32(b, a, b, a)
-
 // Constants:
 //  for (int i = 1; i< 32; ++i)
 //    printf("static const int cospi_%d_64 = %.0f;\n", i,
