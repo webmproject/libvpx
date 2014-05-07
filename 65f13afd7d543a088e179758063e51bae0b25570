@@ -16,6 +16,24 @@
       "revId": "65f13afd7d543a088e179758063e51bae0b25570",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//qmY\u003d",
+        "filename": "build/make/gen_msvs_vcxproj.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 439,
+      "author": {
+        "id": 1002325
+      },
+      "writtenOn": "2014-05-07T08:10:30Z",
+      "side": 1,
+      "message": "They\u0027re safe for other platforms yes; we only add them if $vs_ver \u003e\u003d 11, aka \u003e\u003d 2012.\n\nThe values that we set here are the default when AppContainerApplication isn\u0027t set - we override them here to get back to the normal behaviour even we\u0027ve set AppContainerApplication (which is required in order to build code for arm at all in VS2013).\n\nAlso, for reference, the badly named CompileAsWinRT option is the one that controls the /ZW option for the C++ extension as discussed in the other change - we disable it here since you can\u0027t build C code if that\u0027s enabled, and it\u0027s only necessary if you actually use the Windows Runtime C++ extensions.",
+      "parentUuid": "AAAAdn//qo8\u003d",
+      "revId": "65f13afd7d543a088e179758063e51bae0b25570",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
