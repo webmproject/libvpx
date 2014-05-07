@@ -146,7 +146,6 @@ static void set_rt_speed_feature(VP9_COMMON *cm, SPEED_FEATURES *sf,
                                  int speed) {
   sf->static_segmentation = 0;
   sf->adaptive_rd_thresh = 1;
-  sf->encode_breakout_thresh = 1;
   sf->use_fast_coef_costing = 1;
 
   if (speed == 1) {
@@ -169,7 +168,6 @@ static void set_rt_speed_feature(VP9_COMMON *cm, SPEED_FEATURES *sf,
     sf->intra_y_mode_mask[TX_32X32] = INTRA_DC_H_V;
     sf->intra_uv_mode_mask[TX_32X32] = INTRA_DC_H_V;
     sf->intra_uv_mode_mask[TX_16X16] = INTRA_DC_H_V;
-    sf->encode_breakout_thresh = 8;
   }
 
   if (speed >= 2) {
@@ -208,7 +206,6 @@ static void set_rt_speed_feature(VP9_COMMON *cm, SPEED_FEATURES *sf,
     sf->intra_y_mode_mask[TX_16X16] = INTRA_DC_H_V;
     sf->intra_uv_mode_mask[TX_32X32] = INTRA_DC_H_V;
     sf->intra_uv_mode_mask[TX_16X16] = INTRA_DC_H_V;
-    sf->encode_breakout_thresh = 200;
   }
 
   if (speed >= 3) {
@@ -226,7 +223,6 @@ static void set_rt_speed_feature(VP9_COMMON *cm, SPEED_FEATURES *sf,
     sf->optimize_coefficients = 0;
     sf->disable_split_mask = DISABLE_ALL_SPLIT;
     sf->lpf_pick = LPF_PICK_FROM_Q;
-    sf->encode_breakout_thresh = 700;
   }
 
   if (speed >= 4) {
@@ -245,7 +241,6 @@ static void set_rt_speed_feature(VP9_COMMON *cm, SPEED_FEATURES *sf,
     }
     sf->intra_y_mode_mask[TX_32X32] = INTRA_DC_ONLY;
     sf->frame_parameter_update = 0;
-    sf->encode_breakout_thresh = 1000;
     sf->search_method = FAST_HEX;
     sf->disable_inter_mode_mask[BLOCK_32X32] = 1 << INTER_OFFSET(ZEROMV);
     sf->disable_inter_mode_mask[BLOCK_32X64] = ~(1 << INTER_OFFSET(NEARESTMV));
@@ -338,7 +333,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->use_fast_coef_costing = 0;
   sf->mode_skip_start = MAX_MODES;  // Mode index at which mode skip mask set
   sf->use_nonrd_pick_mode = 0;
-  sf->encode_breakout_thresh = 0;
   for (i = 0; i < BLOCK_SIZES; ++i)
     sf->disable_inter_mode_mask[i] = 0;
   sf->max_intra_bsize = BLOCK_64X64;
@@ -383,10 +377,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   }
 
   cpi->mb.optimize = sf->optimize_coefficients == 1 && cpi->pass != 1;
-
-  if (cpi->encode_breakout && oxcf->mode == REALTIME &&
-      sf->encode_breakout_thresh > cpi->encode_breakout)
-    cpi->encode_breakout = sf->encode_breakout_thresh;
 
   if (sf->disable_split_mask == DISABLE_ALL_SPLIT)
     sf->adaptive_pred_interp_filter = 0;
