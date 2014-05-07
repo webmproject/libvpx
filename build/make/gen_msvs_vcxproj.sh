@@ -292,6 +292,18 @@ generate_vcxproj() {
         tag_content ProjectGuid "{${guid}}"
         tag_content RootNamespace ${name}
         tag_content Keyword ManagedCProj
+        if [ $vs_ver -ge 12 ] && [ "${platforms[0]}" = "ARM" ]; then
+            tag_content AppContainerApplication true
+            # The application type can be one of "Windows Store",
+            # "Windows Phone" or "Windows Phone Silverlight". The
+            # actual value doesn't matter from the libvpx point of view,
+            # since a static library built for one works on the others.
+            # The PlatformToolset field needs to be set in sync with this;
+            # for Windows Store and Windows Phone Silverlight it should be
+            # v120 while it should be v120_wp81 if the type is Windows Phone.
+            tag_content ApplicationType "Windows Store"
+            tag_content ApplicationTypeRevision 8.1
+        fi
     close_tag PropertyGroup
 
     tag Import \
@@ -324,18 +336,10 @@ generate_vcxproj() {
                 fi
             fi
             if [ "$vs_ver" = "12" ]; then
-                if [ "$plat" = "ARM" ]; then
-                    # Setting the wp80 toolchain automatically sets the
-                    # WINAPI_FAMILY define, which is required for building
-                    # code for arm with the windows headers. Alternatively,
-                    # one could add AppContainerApplication=true in the Globals
-                    # section and add PrecompiledHeader=NotUsing and
-                    # CompileAsWinRT=false in ClCompile and SubSystem=Console
-                    # in Link.
-                    tag_content PlatformToolset v120_wp80
-                else
-                    tag_content PlatformToolset v120
-                fi
+                # Setting a PlatformToolset indicating windows phone isn't
+                # enough to build code for arm with MSVC 2013, one strictly
+                # has to enable AppContainerApplication as well.
+                tag_content PlatformToolset v120
             fi
             tag_content CharacterSet Unicode
             if [ "$config" = "Release" ]; then
@@ -427,15 +431,25 @@ generate_vcxproj() {
             if ${werror:-false}; then
                 tag_content TreatWarningAsError true
             fi
+            if [ $vs_ver -ge 11 ]; then
+                # We need to override the defaults for these settings
+                # if AppContainerApplication is set.
+                tag_content CompileAsWinRT false
+                tag_content PrecompiledHeader NotUsing
+                tag_content SDLCheck false
+            fi
             close_tag ClCompile
             case "$proj_kind" in
             exe)
                 open_tag Link
                 if [ "$name" != "obj_int_extract" ]; then
-                    tag_content AdditionalDependencies "$curlibs"
+                    tag_content AdditionalDependencies "$curlibs;%(AdditionalDependencies)"
                     tag_content AdditionalLibraryDirectories "$libdirs;%(AdditionalLibraryDirectories)"
                 fi
                 tag_content GenerateDebugInformation true
+                # Console is the default normally, but if
+                # AppContainerApplication is set, we need to override it.
+                tag_content SubSystem Console
                 close_tag Link
                 ;;
             dll)
