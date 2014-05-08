@@ -18,7 +18,9 @@ set -e
 devnull='> /dev/null 2>&1'
 
 vlog() {
-  [ "${VPX_TEST_VERBOSE_OUTPUT}" = "yes" ] && echo "$@"
+  if [ "${VPX_TEST_VERBOSE_OUTPUT}" = "yes" ]; then
+    echo "$@"
+  fi
 }
 
 # Sets $VPX_TOOL_TEST to the name specified by positional parameter one.
