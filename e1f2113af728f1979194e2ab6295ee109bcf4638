@@ -33,6 +33,24 @@
       "revId": "e1f2113af728f1979194e2ab6295ee109bcf4638",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//qXM\u003d",
+        "filename": "vp8/encoder/x86/quantize_ssse3.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-05-08T21:54:41Z",
+      "side": 1,
+      "message": "We still have solaris targets. I dunno whether they work or not ... configure could use some housecleaning\n\nYeah, I copied it straight from vpx_ports/x86.h",
+      "parentUuid": "AAAAdn//qXc\u003d",
+      "revId": "e1f2113af728f1979194e2ab6295ee109bcf4638",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
