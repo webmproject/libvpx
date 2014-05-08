@@ -4241,14 +4241,14 @@ static void CopyPlane16(int src_width, int src_height,
                         const uint16* src_ptr, uint16* dst_ptr) {
   if (src_stride == src_width && dst_stride == dst_width) {
     // All contiguous, so can use REALLY fast path.
-    memcpy(dst_ptr, src_ptr, src_width * src_height);
+    memcpy(dst_ptr, src_ptr, src_width * src_height * sizeof(*src_ptr));
   } else {
     // Not all contiguous; must copy scanlines individually
     const uint16* src = src_ptr;
     uint16* dst = dst_ptr;
     int i;
     for (i = 0; i < src_height; ++i) {
-      memcpy(dst, src, src_width);
+      memcpy(dst, src, src_width * sizeof(*src));
       dst += dst_stride;
       src += src_stride;
     }
