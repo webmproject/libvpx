@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//qWY\u003d",
+        "filename": "test/fdct8x8_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-05-08T22:46:29Z",
+      "side": 1,
+      "message": "Yes, it is needed. The SSSE3 version was written for 64-bit only.",
+      "parentUuid": "AAAAdn//qWw\u003d",
+      "revId": "b466ad5efc0cee97b5e3e31f7aeb72685beed45e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//qWs\u003d",
         "filename": "test/partial_idct_test.cc",
         "patchSetId": 1
