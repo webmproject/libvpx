@@ -2458,11 +2458,18 @@ static void scale_and_extend_frame(YV12_BUFFER_CONFIG *src_fb,
                                  x / factor * in_w / out_w;
         uint8_t *dst = dsts[i] + y / factor * dst_stride + x / factor;
 #if CONFIG_VP9_HIGH
-        vp9_high_convolve8(src, src_stride, dst, dst_stride,
-                           vp9_sub_pel_filters_8[x_q4 & 0xf],
-                           16 * in_w / out_w,
-                           vp9_sub_pel_filters_8[y_q4 & 0xf],
-                           16 * in_h / out_h, 16 / factor, 16 / factor, bps);
+        if (src_fb->flags & YV12_FLAG_HIGH) {
+          vp9_high_convolve8(src, src_stride, dst, dst_stride,
+                             vp9_sub_pel_filters_8[x_q4 & 0xf],
+                             16 * in_w / out_w,
+                             vp9_sub_pel_filters_8[y_q4 & 0xf],
+                             16 * in_h / out_h, 16 / factor, 16 / factor, bps);
+        } else {
+          vp9_convolve8(src, src_stride, dst, dst_stride,
+                        vp9_sub_pel_filters_8[x_q4 & 0xf], 16 * in_w / out_w,
+                        vp9_sub_pel_filters_8[y_q4 & 0xf], 16 * in_h / out_h,
+                        16 / factor, 16 / factor);
+        }
 #else
         vp9_convolve8(src, src_stride, dst, dst_stride,
                       vp9_sub_pel_filters_8[x_q4 & 0xf], 16 * in_w / out_w,
