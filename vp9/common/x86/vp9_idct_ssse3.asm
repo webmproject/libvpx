@@ -185,7 +185,7 @@ cglobal idct8x8_64_add, 3, 5, 13, input, output, stride
   RET
 
 ; inverse 8x8 2D-DCT transform with only first 10 coeffs non-zero
-cglobal idct8x8_10_add, 3, 5, 13, input, output, stride
+cglobal idct8x8_12_add, 3, 5, 13, input, output, stride
   mova       m8, [pd_8192]
   mova      m11, [pw_16]
   mova      m12, [pw_11585x2]
