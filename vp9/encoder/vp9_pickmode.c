@@ -161,8 +161,8 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
   struct macroblock_plane *const p = &x->plane[0];
   struct macroblockd_plane *const pd = &xd->plane[0];
 
-  int var = cpi->fn_ptr[bsize].vf(p->src.buf, p->src.stride,
-                                  pd->dst.buf, pd->dst.stride, &sse);
+  unsigned int var = cpi->fn_ptr[bsize].vf(p->src.buf, p->src.stride,
+                                           pd->dst.buf, pd->dst.stride, &sse);
 
   // TODO(jingning) This is a temporary solution to account for frames with
   // light changes. Need to customize the rate-distortion modeling for non-RD
