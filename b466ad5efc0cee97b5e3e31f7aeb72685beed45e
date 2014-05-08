@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//qWw\u003d",
+        "filename": "test/fdct8x8_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-05-08T22:19:55Z",
+      "side": 1,
+      "message": "is ARCH_X86_64 necessary here?",
+      "revId": "b466ad5efc0cee97b5e3e31f7aeb72685beed45e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//qWs\u003d",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-05-08T22:19:55Z",
+      "side": 1,
+      "message": "is ARCH_X86_64 necessary here",
+      "revId": "b466ad5efc0cee97b5e3e31f7aeb72685beed45e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
