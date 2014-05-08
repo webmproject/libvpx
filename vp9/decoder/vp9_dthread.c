@@ -140,7 +140,7 @@ void vp9_loop_filter_frame_mt(VP9Decoder *pbi,
   // Number of superblock rows and cols
   const int sb_rows = mi_cols_aligned_to_sb(cm->mi_rows) >> MI_BLOCK_SIZE_LOG2;
   const int tile_cols = 1 << cm->log2_tile_cols;
-  const int num_workers = MIN(pbi->oxcf.max_threads & ~1, tile_cols);
+  const int num_workers = MIN(pbi->max_threads & ~1, tile_cols);
   int i;
 
   // Allocate memory used in thread synchronization.

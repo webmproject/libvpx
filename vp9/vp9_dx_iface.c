@@ -245,16 +245,12 @@ static void set_ppflags(const vpx_codec_alg_priv_t *ctx,
 }
 
 static void init_decoder(vpx_codec_alg_priv_t *ctx) {
-  VP9DecoderConfig oxcf;
-  oxcf.width = ctx->si.w;
-  oxcf.height = ctx->si.h;
-  oxcf.version = 9;
-  oxcf.max_threads = ctx->cfg.threads;
-  oxcf.inv_tile_order = ctx->invert_tile_order;
-
-  ctx->pbi = vp9_decoder_create(&oxcf);
+  ctx->pbi = vp9_decoder_create();
   if (ctx->pbi == NULL)
     return;
+
+  ctx->pbi->max_threads = ctx->cfg.threads;
+  ctx->pbi->inv_tile_order = ctx->invert_tile_order;
 
   vp9_initialize_dec();
 
