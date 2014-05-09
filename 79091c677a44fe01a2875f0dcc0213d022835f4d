@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//qSo\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1423,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-05-09T16:09:00Z",
+      "side": 1,
+      "message": "Both rc \u0026 twopass could also have const prepended to their declaration:\nconst RATE_CONTROL *const rc \u003d \u0026cpi-\u003erc;\nconst struct twopass_rc *const twopass \u003d \u0026cpi-\u003etwopass;",
+      "revId": "79091c677a44fe01a2875f0dcc0213d022835f4d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//qSs\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1441,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-05-09T16:09:00Z",
+      "side": 1,
+      "message": "full-stop at end of comment.",
+      "revId": "79091c677a44fe01a2875f0dcc0213d022835f4d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
