@@ -19,6 +19,23 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//qOU\u003d",
+        "filename": "vp9/common/vp9_rtcd_defs.pl",
+        "patchSetId": 5
+      },
+      "lineNbr": 708,
+      "author": {
+        "id": 1108495
+      },
+      "writtenOn": "2014-05-09T23:12:41Z",
+      "side": 1,
+      "message": "I get an error compilation when I do that:\nspecialize qw/vp9_block_error avx2/, \"$sse2_x86inc\";",
+      "revId": "670747102dc15f02b43070b6fcda66b71cdc735e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//qk4\u003d",
         "filename": "vp9/encoder/x86/vp9_error_intrin_avx2.c",
         "patchSetId": 5
