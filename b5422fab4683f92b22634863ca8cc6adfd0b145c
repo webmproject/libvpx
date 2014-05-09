@@ -52,6 +52,24 @@
       "revId": "b5422fab4683f92b22634863ca8cc6adfd0b145c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//qQ4\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_mmx.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-05-09T17:29:04Z",
+      "side": 1,
+      "message": "For assembly using our own abi (you can look at assembly code in VP8), we did this right. But some assembly using x86inc.asm in VP9 did not handle that correctly. It is not safe. It works now, but once a negative int is passed in (such as a negative stride), the error will occur. Yaowu, is it true that the stride will always be positive?",
+      "parentUuid": "AAAAdn//qRY\u003d",
+      "revId": "b5422fab4683f92b22634863ca8cc6adfd0b145c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
