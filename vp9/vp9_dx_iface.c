@@ -417,7 +417,8 @@ static vpx_codec_err_t decoder_decode(vpx_codec_alg_priv_t *ctx,
 
     for (i = 0; i < frame_count; ++i) {
       const uint32_t frame_size = frame_sizes[i];
-      if (data_start < data || data_start + frame_size >= data_end) {
+      if (data_start < data ||
+          frame_size > (uint32_t)(data_end - data_start)) {
         ctx->base.err_detail = "Invalid frame size in index";
         return VPX_CODEC_CORRUPT_FRAME;
       }
