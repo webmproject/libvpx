@@ -81,11 +81,6 @@ ifneq ($(CONFIG_SHARED),yes)
 EXAMPLES-$(CONFIG_VP9_ENCODER)    += resize_util.c
 endif
 
-# XMA example disabled for now, not used in VP8
-#UTILS-$(CONFIG_DECODERS)    += example_xma.c
-#example_xma.GUID             = A955FC4A-73F1-44F7-135E-30D84D32F022
-#example_xma.DESCRIPTION      = External Memory Allocation mode usage
-
 EXAMPLES-$(CONFIG_ENCODERS)         += vpx_temporal_scalable_patterns.c
 vpx_temporal_scalable_patterns.SRCS += ivfenc.c ivfenc.h
 vpx_temporal_scalable_patterns.SRCS += tools_common.c tools_common.h
