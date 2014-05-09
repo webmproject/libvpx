@@ -1417,6 +1417,30 @@ void define_fixed_arf_period(VP9_COMP *cpi) {
 }
 #endif
 
+// Calculate a section intra ratio used in setting max loop filter.
+static void calculate_section_intra_ratio(struct twopass_rc *twopass,
+                                          const FIRSTPASS_STATS *start_pos,
+                                          int section_length) {
+  FIRSTPASS_STATS next_frame = { 0 };
+  FIRSTPASS_STATS sectionstats = { 0 };
+  int i;
+
+  reset_fpf_position(twopass, start_pos);
+
+  for (i = 0; i < section_length; ++i) {
+    input_stats(twopass, &next_frame);
+    accumulate_stats(&sectionstats, &next_frame);
+  }
+
+  avg_stats(&sectionstats);
+
+  twopass->section_intra_rating =
+    (int)(sectionstats.intra_error /
+          DOUBLE_DIVIDE_CHECK(sectionstats.coded_error));
+
+  reset_fpf_position(twopass, start_pos);
+}
+
 // Calculate the total bits to allocate in this GF/ARF group.
 static int64_t calculate_total_gf_group_bits(VP9_COMP *cpi,
                                              double gf_group_err) {
@@ -1795,24 +1819,9 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     }
   }
 
+  // Calculate a section intra ratio used in setting max loop filter.
   if (cpi->common.frame_type != KEY_FRAME) {
-    FIRSTPASS_STATS sectionstats;
-
-    zero_stats(&sectionstats);
-    reset_fpf_position(twopass, start_pos);
-
-    for (i = 0; i < rc->baseline_gf_interval; ++i) {
-      input_stats(twopass, &next_frame);
-      accumulate_stats(&sectionstats, &next_frame);
-    }
-
-    avg_stats(&sectionstats);
-
-    twopass->section_intra_rating = (int)
-      (sectionstats.intra_error /
-      DOUBLE_DIVIDE_CHECK(sectionstats.coded_error));
-
-    reset_fpf_position(twopass, start_pos);
+    calculate_section_intra_ratio(twopass, start_pos, rc->baseline_gf_interval);
   }
 }
 
@@ -2108,25 +2117,8 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     }
   }
 
-  {
-    FIRSTPASS_STATS sectionstats;
-
-    zero_stats(&sectionstats);
-    reset_fpf_position(twopass, start_position);
-
-    for (i = 0; i < rc->frames_to_key; ++i) {
-      input_stats(twopass, &next_frame);
-      accumulate_stats(&sectionstats, &next_frame);
-    }
-
-    avg_stats(&sectionstats);
-
-    twopass->section_intra_rating = (int) (sectionstats.intra_error /
-        DOUBLE_DIVIDE_CHECK(sectionstats.coded_error));
-  }
-
-  // Reset the first pass file position.
-  reset_fpf_position(twopass, start_position);
+  // Calculate a section intra ratio used in setting max loop filter.
+  calculate_section_intra_ratio(twopass, start_position, rc->frames_to_key);
 
   // Work out how many bits to allocate for the key frame itself.
   if (1) {

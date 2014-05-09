@@ -24,8 +24,12 @@
 #include "vp9/encoder/vp9_quantize.h"
 
 static int get_max_filter_level(const VP9_COMP *cpi) {
-  return cpi->twopass.section_intra_rating > 8 ? MAX_LOOP_FILTER * 3 / 4
-                                               : MAX_LOOP_FILTER;
+  if (cpi->pass == 2) {
+    return cpi->twopass.section_intra_rating > 8 ? MAX_LOOP_FILTER * 3 / 4
+                                                 : MAX_LOOP_FILTER;
+  } else {
+    return MAX_LOOP_FILTER;
+  }
 }
 
 
@@ -77,8 +81,8 @@ static int search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
     // Bias against raising loop filter in favor of lowering it.
     int bias = (best_err >> (15 - (filt_mid / 8))) * filter_step;
 
-    if (cpi->twopass.section_intra_rating < 20)
-      bias = bias * cpi->twopass.section_intra_rating / 20;
+    if ((cpi->pass == 2) && (cpi->twopass.section_intra_rating < 20))
+      bias = (bias * cpi->twopass.section_intra_rating) / 20;
 
     // yx, bias less for large block size
     if (cm->tx_mode != ONLY_4X4)
