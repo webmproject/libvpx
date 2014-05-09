@@ -995,7 +995,7 @@ void vp9_iht8x8_64_add_sse2(const int16_t *input, uint8_t *dest, int stride,
   RECON_AND_STORE(dest, in[7]);
 }
 
-void vp9_idct8x8_10_add_sse2(const int16_t *input, uint8_t *dest, int stride) {
+void vp9_idct8x8_12_add_sse2(const int16_t *input, uint8_t *dest, int stride) {
   const __m128i zero = _mm_setzero_si128();
   const __m128i rounding = _mm_set1_epi32(DCT_CONST_ROUNDING);
   const __m128i final_rounding = _mm_set1_epi16(1<<4);
