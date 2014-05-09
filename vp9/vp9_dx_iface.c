@@ -429,7 +429,8 @@ static vpx_codec_err_t decoder_decode(vpx_codec_alg_priv_t *ctx,
     }
   } else {
     while (data_start < data_end) {
-      res = decode_one_iter(ctx, &data_start, data_end, data_end - data_start,
+      res = decode_one_iter(ctx, &data_start, data_end,
+                            (uint32_t)(data_end - data_start),
                             user_priv, deadline);
       if (res != VPX_CODEC_OK)
         return res;
