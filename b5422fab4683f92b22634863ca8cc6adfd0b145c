@@ -34,6 +34,24 @@
       "revId": "b5422fab4683f92b22634863ca8cc6adfd0b145c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//qRY\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_mmx.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-05-09T17:04:21Z",
+      "side": 1,
+      "message": "That makes sense. We seem to use strideq directly lots of other places, so I don\u0027t think forcing an extend with movsxd is necessary.",
+      "parentUuid": "AAAAdn//qZI\u003d",
+      "revId": "b5422fab4683f92b22634863ca8cc6adfd0b145c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
