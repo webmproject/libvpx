@@ -961,7 +961,7 @@ static void inter_super_block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
 
   vp9_subtract_plane(x, bs, 0);
 
-  if (cpi->sf.tx_size_search_method == USE_LARGESTALL) {
+  if (cpi->sf.tx_size_search_method == USE_LARGESTALL || xd->lossless) {
     vpx_memset(txfm_cache, 0, TX_MODES * sizeof(int64_t));
     choose_largest_txfm_size(cpi, x, rate, distortion, skip, sse,
                              ref_best_rd, bs);
@@ -999,7 +999,7 @@ static void intra_super_block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
 
   assert(bs == mbmi->sb_type);
-  if (cpi->sf.tx_size_search_method != USE_FULL_RD) {
+  if (cpi->sf.tx_size_search_method != USE_FULL_RD || xd->lossless) {
     vpx_memset(txfm_cache, 0, TX_MODES * sizeof(int64_t));
     choose_largest_txfm_size(cpi, x, rate, distortion, skip, sse,
                              ref_best_rd, bs);
