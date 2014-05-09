@@ -972,11 +972,7 @@ int vp9_rc_pick_q_and_bounds(const VP9_COMP *cpi,
     q = rc_pick_q_and_bounds_two_pass(cpi, bottom_index, top_index);
   }
 
-  // Q of 0 is disabled because we force tx size to be
-  // 16x16...
   if (cpi->sf.use_nonrd_pick_mode) {
-    if (q == 0)
-      q++;
     if (cpi->sf.force_frame_boost == 1)
       q -= cpi->sf.max_delta_qindex;
 
