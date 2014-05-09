@@ -1417,6 +1417,34 @@ void define_fixed_arf_period(VP9_COMP *cpi) {
 }
 #endif
 
+// Calculate the total bits to allocate in this GF/ARF group.
+static int64_t calculate_total_gf_group_bits(VP9_COMP *cpi,
+                                             double gf_group_err) {
+  const RATE_CONTROL *const rc = &cpi->rc;
+  const struct twopass_rc *const twopass = &cpi->twopass;
+  const int max_bits = frame_max_bits(rc, &cpi->oxcf);
+  int64_t total_group_bits;
+
+  // Calculate the bits to be allocated to the group as a whole.
+  if ((twopass->kf_group_bits > 0) && (twopass->kf_group_error_left > 0)) {
+    total_group_bits = (int64_t)(twopass->kf_group_bits *
+                                 (gf_group_err / twopass->kf_group_error_left));
+  } else {
+    total_group_bits = 0;
+  }
+
+  // Clamp odd edge cases.
+  total_group_bits = (total_group_bits < 0) ?
+     0 : (total_group_bits > twopass->kf_group_bits) ?
+     twopass->kf_group_bits : total_group_bits;
+
+  // Clip based on user supplied data rate variability limit.
+  if (total_group_bits > (int64_t)max_bits * rc->baseline_gf_interval)
+    total_group_bits = (int64_t)max_bits * rc->baseline_gf_interval;
+
+  return total_group_bits;
+}
+
 // Analyse and define a gf/arf group.
 static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   RATE_CONTROL *const rc = &cpi->rc;
@@ -1442,8 +1470,6 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   double mv_in_out_accumulator = 0.0;
   double abs_mv_in_out_accumulator = 0.0;
   double mv_ratio_accumulator_thresh;
-  // Max bits for a single frame.
-  const int max_bits = frame_max_bits(rc, oxcf);
   unsigned int allow_alt_ref = oxcf->play_alternate && oxcf->lag_in_frames;
 
   int f_boost = 0;
@@ -1658,21 +1684,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 #endif
 #endif
 
-  // Calculate the bits to be allocated to the group as a whole.
-  if (twopass->kf_group_bits > 0 && twopass->kf_group_error_left > 0) {
-    twopass->gf_group_bits = (int64_t)(twopass->kf_group_bits *
-                (gf_group_err / twopass->kf_group_error_left));
-  } else {
-    twopass->gf_group_bits = 0;
-  }
-  twopass->gf_group_bits = (twopass->gf_group_bits < 0) ?
-     0 : (twopass->gf_group_bits > twopass->kf_group_bits) ?
-     twopass->kf_group_bits : twopass->gf_group_bits;
-
-  // Clip cpi->twopass.gf_group_bits based on user supplied data rate
-  // variability limit, cpi->oxcf.two_pass_vbrmax_section.
-  if (twopass->gf_group_bits > (int64_t)max_bits * rc->baseline_gf_interval)
-    twopass->gf_group_bits = (int64_t)max_bits * rc->baseline_gf_interval;
+  // Calculate the bits to be allocated to the gf/arf group as a whole
+  twopass->gf_group_bits = calculate_total_gf_group_bits(cpi, gf_group_err);
 
   // Reset the file position.
   reset_fpf_position(twopass, start_pos);
