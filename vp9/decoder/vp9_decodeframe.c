@@ -677,7 +677,7 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
 
 static void decode_tile(VP9Decoder *pbi, const TileInfo *const tile,
                         vp9_reader *r) {
-  const int num_threads = pbi->oxcf.max_threads;
+  const int num_threads = pbi->max_threads;
   VP9_COMMON *const cm = &pbi->common;
   int mi_row, mi_col;
   MACROBLOCKD *xd = &pbi->mb;
@@ -828,8 +828,7 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
   // Decode tiles using data from tile_buffers
   for (tile_row = 0; tile_row < tile_rows; ++tile_row) {
     for (tile_col = 0; tile_col < tile_cols; ++tile_col) {
-      const int col = pbi->oxcf.inv_tile_order ? tile_cols - tile_col - 1
-                                               : tile_col;
+      const int col = pbi->inv_tile_order ? tile_cols - tile_col - 1 : tile_col;
       const int last_tile = tile_row == tile_rows - 1 &&
                                  col == tile_cols - 1;
       const TileBuffer *const buf = &tile_buffers[tile_row][col];
@@ -887,7 +886,7 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
   const int aligned_mi_cols = mi_cols_aligned_to_sb(cm->mi_cols);
   const int tile_cols = 1 << cm->log2_tile_cols;
   const int tile_rows = 1 << cm->log2_tile_rows;
-  const int num_workers = MIN(pbi->oxcf.max_threads & ~1, tile_cols);
+  const int num_workers = MIN(pbi->max_threads & ~1, tile_cols);
   TileBuffer tile_buffers[1 << 6];
   int n;
   int final_worker = -1;
@@ -899,7 +898,7 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
   // TODO(jzern): See if we can remove the restriction of passing in max
   // threads to the decoder.
   if (pbi->num_tile_workers == 0) {
-    const int num_threads = pbi->oxcf.max_threads & ~1;
+    const int num_threads = pbi->max_threads & ~1;
     int i;
     // TODO(jzern): Allocate one less worker, as in the current code we only
     // use num_threads - 1 workers.
@@ -1328,7 +1327,7 @@ int vp9_decode_frame(VP9Decoder *pbi,
     CHECK_MEM_ERROR(cm, pbi->lf_worker.data1,
                     vpx_memalign(32, sizeof(LFWorkerData)));
     pbi->lf_worker.hook = (VP9WorkerHook)vp9_loop_filter_worker;
-    if (pbi->oxcf.max_threads > 1 && !vp9_worker_reset(&pbi->lf_worker)) {
+    if (pbi->max_threads > 1 && !vp9_worker_reset(&pbi->lf_worker)) {
       vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
                          "Loop filter thread creation failed");
     }
@@ -1353,7 +1352,7 @@ int vp9_decode_frame(VP9Decoder *pbi,
 
   // TODO(jzern): remove frame_parallel_decoding_mode restriction for
   // single-frame tile decoding.
-  if (pbi->oxcf.max_threads > 1 && tile_rows == 1 && tile_cols > 1 &&
+  if (pbi->max_threads > 1 && tile_rows == 1 && tile_cols > 1 &&
       cm->frame_parallel_decoding_mode) {
     *p_data_end = decode_tiles_mt(pbi, data + first_partition_size, data_end);
   } else {

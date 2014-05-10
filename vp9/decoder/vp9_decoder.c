@@ -42,7 +42,7 @@ void vp9_initialize_dec() {
   }
 }
 
-VP9Decoder *vp9_decoder_create(const VP9DecoderConfig *oxcf) {
+VP9Decoder *vp9_decoder_create() {
   VP9Decoder *const pbi = vpx_memalign(32, sizeof(*pbi));
   VP9_COMMON *const cm = pbi ? &pbi->common : NULL;
 
@@ -66,7 +66,6 @@ VP9Decoder *vp9_decoder_create(const VP9DecoderConfig *oxcf) {
   vpx_memset(&cm->ref_frame_map, -1, sizeof(cm->ref_frame_map));
 
   cm->current_video_frame = 0;
-  pbi->oxcf = *oxcf;
   pbi->ready_for_new_data = 1;
   pbi->decoded_key_frame = 0;
 

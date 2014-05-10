@@ -27,20 +27,10 @@
 extern "C" {
 #endif
 
-typedef struct VP9DecoderConfig {
-  int width;
-  int height;
-  int version;
-  int max_threads;
-  int inv_tile_order;
-} VP9DecoderConfig;
-
 typedef struct VP9Decoder {
   DECLARE_ALIGNED(16, MACROBLOCKD, mb);
 
   DECLARE_ALIGNED(16, VP9_COMMON, common);
-
-  VP9DecoderConfig oxcf;
 
   int64_t last_time_stamp;
   int ready_for_new_data;
@@ -59,6 +49,9 @@ typedef struct VP9Decoder {
 
   vpx_decrypt_cb decrypt_cb;
   void *decrypt_state;
+
+  int max_threads;
+  int inv_tile_order;
 } VP9Decoder;
 
 void vp9_initialize_dec();
@@ -83,8 +76,7 @@ vpx_codec_err_t vp9_set_reference_dec(VP9_COMMON *cm,
 int vp9_get_reference_dec(struct VP9Decoder *pbi,
                           int index, YV12_BUFFER_CONFIG **fb);
 
-
-struct VP9Decoder *vp9_decoder_create(const VP9DecoderConfig *oxcf);
+struct VP9Decoder *vp9_decoder_create();
 
 void vp9_decoder_remove(struct VP9Decoder *pbi);
 
