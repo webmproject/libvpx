@@ -33,7 +33,9 @@
 #include "./md5_utils.h"
 
 #include "./tools_common.h"
+#if CONFIG_WEBM_IO
 #include "./webmdec.h"
+#endif
 #include "./y4menc.h"
 
 static const char *exec_name;
@@ -528,9 +530,11 @@ int main_loop(int argc, const char **argv_) {
 
   struct VpxDecInputContext input = {0};
   struct VpxInputContext vpx_input_ctx = {0};
+#if CONFIG_WEBM_IO
   struct WebmInputContext webm_ctx = {0};
-  input.vpx_input_ctx = &vpx_input_ctx;
   input.webm_ctx = &webm_ctx;
+#endif
+  input.vpx_input_ctx = &vpx_input_ctx;
 
   /* Parse command line */
   exec_name = argv_[0];
