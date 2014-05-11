@@ -1369,16 +1369,17 @@ int vp9_decode_frame(VP9Decoder *pbi,
                          "A stream must start with a complete key frame");
   }
 
-  if (!cm->error_resilient_mode && !cm->frame_parallel_decoding_mode &&
-      !new_fb->corrupted) {
-    vp9_adapt_coef_probs(cm);
+  if (!new_fb->corrupted) {
+    if (!cm->error_resilient_mode && !cm->frame_parallel_decoding_mode) {
+      vp9_adapt_coef_probs(cm);
 
-    if (!frame_is_intra_only(cm)) {
-      vp9_adapt_mode_probs(cm);
-      vp9_adapt_mv_probs(cm, cm->allow_high_precision_mv);
+      if (!frame_is_intra_only(cm)) {
+        vp9_adapt_mode_probs(cm);
+        vp9_adapt_mv_probs(cm, cm->allow_high_precision_mv);
+      }
+    } else {
+      debug_check_frame_counts(cm);
     }
-  } else {
-    debug_check_frame_counts(cm);
   }
 
   if (cm->refresh_frame_context)
