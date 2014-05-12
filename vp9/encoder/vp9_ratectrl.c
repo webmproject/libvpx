@@ -48,6 +48,7 @@ static int kf_high_motion_minq[QINDEX_RANGE];
 static int arfgf_low_motion_minq[QINDEX_RANGE];
 static int arfgf_high_motion_minq[QINDEX_RANGE];
 static int inter_minq[QINDEX_RANGE];
+static int rtc_minq[QINDEX_RANGE];
 static int gf_high = 2000;
 static int gf_low = 400;
 static int kf_high = 5000;
@@ -84,6 +85,7 @@ void vp9_rc_init_minq_luts() {
     arfgf_low_motion_minq[i] = get_minq_index(maxq, 0.0000015, -0.0009, 0.30);
     arfgf_high_motion_minq[i] = get_minq_index(maxq, 0.0000021, -0.00125, 0.50);
     inter_minq[i] = get_minq_index(maxq, 0.00000271, -0.00113, 0.90);
+    rtc_minq[i] = get_minq_index(maxq, 0.00000271, -0.00113, 0.70);
   }
 }
 
@@ -549,14 +551,14 @@ static int rc_pick_q_and_bounds_one_pass_cbr(const VP9_COMP *cpi,
     // Use the lower of active_worst_quality and recent/average Q.
     if (cm->current_video_frame > 1) {
       if (rc->avg_frame_qindex[INTER_FRAME] < active_worst_quality)
-        active_best_quality = inter_minq[rc->avg_frame_qindex[INTER_FRAME]];
+        active_best_quality = rtc_minq[rc->avg_frame_qindex[INTER_FRAME]];
       else
-        active_best_quality = inter_minq[active_worst_quality];
+        active_best_quality = rtc_minq[active_worst_quality];
     } else {
       if (rc->avg_frame_qindex[KEY_FRAME] < active_worst_quality)
-        active_best_quality = inter_minq[rc->avg_frame_qindex[KEY_FRAME]];
+        active_best_quality = rtc_minq[rc->avg_frame_qindex[KEY_FRAME]];
       else
-        active_best_quality = inter_minq[active_worst_quality];
+        active_best_quality = rtc_minq[active_worst_quality];
     }
   }
 
