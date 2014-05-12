@@ -335,16 +335,92 @@ void vp9_mbpost_proc_across_ip_c(uint8_t *src, int pitch,
   }
 }
 
+#if CONFIG_VP9_HIGH
+
+void vp9_high_mbpost_proc_across_ip_c(uint16_t *src, int pitch,
+                                      int rows, int cols, int flimit) {
+  int r, c, i;
+
+  uint16_t *s = src;
+  uint16_t d[16];
+
+
+  for (r = 0; r < rows; r++) {
+    int sumsq = 0;
+    int sum   = 0;
+
+    for (i = -8; i <= 6; i++) {
+      sumsq += s[i] * s[i];
+      sum   += s[i];
+      d[i + 8] = 0;
+    }
+
+    for (c = 0; c < cols + 8; c++) {
+      int x = s[c + 7] - s[c - 8];
+      int y = s[c + 7] + s[c - 8];
+
+      sum  += x;
+      sumsq += x * y;
+
+      d[c & 15] = s[c];
+
+      if (sumsq * 15 - sum * sum < flimit) {
+        d[c & 15] = (8 + sum + s[c]) >> 4;
+      }
+
+      s[c - 8] = d[(c - 8) & 15];
+    }
+
+    s += pitch;
+  }
+}
+
+#endif
+
 void vp9_mbpost_proc_down_c(uint8_t *dst, int pitch,
                             int rows, int cols, int flimit) {
   int r, c, i;
-  const short *rv3 = &vp9_rv[63 & rand()]; // NOLINT
+  const int16_t *rv3 = &vp9_rv[63 & rand()]; // NOLINT
 
   for (c = 0; c < cols; c++) {
     uint8_t *s = &dst[c];
     int sumsq = 0;
     int sum   = 0;
     uint8_t d[16];
+    const int16_t *rv2 = rv3 + ((c * 17) & 127);
+
+    for (i = -8; i <= 6; i++) {
+      sumsq += s[i * pitch] * s[i * pitch];
+      sum   += s[i * pitch];
+    }
+
+    for (r = 0; r < rows + 8; r++) {
+      sumsq += s[7 * pitch] * s[ 7 * pitch] - s[-8 * pitch] * s[-8 * pitch];
+      sum  += s[7 * pitch] - s[-8 * pitch];
+      d[r & 15] = s[0];
+
+      if (sumsq * 15 - sum * sum < flimit) {
+        d[r & 15] = (rv2[r & 127] + sum + s[0]) >> 4;
+      }
+
+      s[-8 * pitch] = d[(r - 8) & 15];
+      s += pitch;
+    }
+  }
+}
+
+#if CONFIG_VP9_HIGH
+
+void vp9_high_mbpost_proc_down_c(uint16_t *dst, int pitch,
+                                 int rows, int cols, int flimit) {
+  int r, c, i;
+  const short *rv3 = &vp9_rv[63 & rand()]; // NOLINT
+
+  for (c = 0; c < cols; c++) {
+    uint16_t *s = &dst[c];
+    int sumsq = 0;
+    int sum   = 0;
+    uint16_t d[16];
     const short *rv2 = rv3 + ((c * 17) & 127);
 
     for (i = -8; i <= 6; i++) {
@@ -367,6 +443,8 @@ void vp9_mbpost_proc_down_c(uint8_t *dst, int pitch,
   }
 }
 
+#endif
+
 static void deblock_and_de_macro_block(YV12_BUFFER_CONFIG   *source,
                                        YV12_BUFFER_CONFIG   *post,
                                        int                   q,
@@ -376,7 +454,50 @@ static void deblock_and_de_macro_block(YV12_BUFFER_CONFIG   *source,
   int ppl = (int)(level + .5);
   (void) low_var_thresh;
   (void) flag;
+#if CONFIG_VP9_HIGH
+  if (source->flags & YV12_FLAG_HIGH) {
+    vp9_high_post_proc_down_and_across(CONVERT_TO_SHORTPTR(source->y_buffer),
+                                       CONVERT_TO_SHORTPTR(post->y_buffer),
+                                       source->y_stride, post->y_stride,
+                                       source->y_height, source->y_width, ppl);
 
+    vp9_high_mbpost_proc_across_ip(CONVERT_TO_SHORTPTR(post->y_buffer),
+                                   post->y_stride, post->y_height,
+                                   post->y_width, q2mbl(q));
+
+    vp9_high_mbpost_proc_down(CONVERT_TO_SHORTPTR(post->y_buffer),
+                              post->y_stride, post->y_height,
+                              post->y_width, q2mbl(q));
+
+    vp9_high_post_proc_down_and_across(CONVERT_TO_SHORTPTR(source->u_buffer),
+                                       CONVERT_TO_SHORTPTR(post->u_buffer),
+                                       source->uv_stride, post->uv_stride,
+                                       source->uv_height, source->uv_width,
+                                       ppl);
+    vp9_high_post_proc_down_and_across(CONVERT_TO_SHORTPTR(source->v_buffer),
+                                       CONVERT_TO_SHORTPTR(post->v_buffer),
+                                       source->uv_stride, post->uv_stride,
+                                       source->uv_height, source->uv_width,
+                                       ppl);
+  } else {
+    vp9_post_proc_down_and_across(source->y_buffer, post->y_buffer,
+                                  source->y_stride, post->y_stride,
+                                  source->y_height, source->y_width, ppl);
+
+    vp9_mbpost_proc_across_ip(post->y_buffer, post->y_stride, post->y_height,
+                              post->y_width, q2mbl(q));
+
+    vp9_mbpost_proc_down(post->y_buffer, post->y_stride, post->y_height,
+                         post->y_width, q2mbl(q));
+
+    vp9_post_proc_down_and_across(source->u_buffer, post->u_buffer,
+                                  source->uv_stride, post->uv_stride,
+                                  source->uv_height, source->uv_width, ppl);
+    vp9_post_proc_down_and_across(source->v_buffer, post->v_buffer,
+                                  source->uv_stride, post->uv_stride,
+                                  source->uv_height, source->uv_width, ppl);
+  }
+#else
   vp9_post_proc_down_and_across(source->y_buffer, post->y_buffer,
                                 source->y_stride, post->y_stride,
                                 source->y_height, source->y_width, ppl);
@@ -393,6 +514,7 @@ static void deblock_and_de_macro_block(YV12_BUFFER_CONFIG   *source,
   vp9_post_proc_down_and_across(source->v_buffer, post->v_buffer,
                                 source->uv_stride, post->uv_stride,
                                 source->uv_height, source->uv_width, ppl);
+#endif
 }
 
 void vp9_deblock(const YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst,
