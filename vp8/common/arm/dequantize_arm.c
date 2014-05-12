@@ -12,7 +12,7 @@
 #include "vpx_config.h"
 #include "vp8/common/blockd.h"
 
-#if HAVE_NEON
+#if HAVE_NEON_ASM
 extern void vp8_dequantize_b_loop_neon(short *Q, short *DQC, short *DQ);
 #endif
 
@@ -20,7 +20,7 @@ extern void vp8_dequantize_b_loop_neon(short *Q, short *DQC, short *DQ);
 extern void vp8_dequantize_b_loop_v6(short *Q, short *DQC, short *DQ);
 #endif
 
-#if HAVE_NEON
+#if HAVE_NEON_ASM
 
 void vp8_dequantize_b_neon(BLOCKD *d, short *DQC)
 {

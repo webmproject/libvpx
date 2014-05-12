@@ -61,6 +61,9 @@ ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
 else ifeq  ($(TARGET_ARCH_ABI),armeabi)
   include $(CONFIG_DIR)libs-armv5te-android-gcc.mk
   LOCAL_ARM_MODE := arm
+else ifeq  ($(TARGET_ARCH_ABI),arm64-v8a)
+  include $(CONFIG_DIR)libs-armv8-android-gcc.mk
+  LOCAL_ARM_MODE := arm
 else ifeq ($(TARGET_ARCH_ABI),x86)
   include $(CONFIG_DIR)libs-x86-android-gcc.mk
 else ifeq ($(TARGET_ARCH_ABI),mips)
@@ -126,7 +129,7 @@ endef
 ifeq ($(CONFIG_VP8_ENCODER), yes)
   ASM_CNV_OFFSETS_DEPEND += $(ASM_CNV_PATH)/vp8_asm_enc_offsets.asm
 endif
-ifeq ($(HAVE_NEON), yes)
+ifeq ($(HAVE_NEON_ASM), yes)
   ASM_CNV_OFFSETS_DEPEND += $(ASM_CNV_PATH)/vpx_scale_asm_offsets.asm
 endif
 
@@ -153,7 +156,11 @@ LOCAL_NEON_SRCS_C = $(filter %_neon.c, $(CODEC_SRCS_C))
 LOCAL_CODEC_SRCS_C = $(filter-out vpx_config.c %_neon.c, $(CODEC_SRCS_C))
 
 LOCAL_SRC_FILES += $(foreach file, $(LOCAL_CODEC_SRCS_C), libvpx/$(file))
-LOCAL_SRC_FILES += $(foreach file, $(LOCAL_NEON_SRCS_C), libvpx/$(file).neon)
+ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
+  LOCAL_SRC_FILES += $(foreach file, $(LOCAL_NEON_SRCS_C), libvpx/$(file).neon)
+else # If there are neon sources then we are building for arm64 and do not need to specify .neon
+  LOCAL_SRC_FILES += $(foreach file, $(LOCAL_NEON_SRCS_C), libvpx/$(file))
+endif
 
 # Pull out assembly files, splitting NEON from the rest.  This is
 # done to specify that the NEON assembly files use NEON assembler flags.

@@ -248,7 +248,7 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_fdct32x32_c, &vp9_idct32x32_1024_add_c, 0),
         make_tuple(&vp9_fdct32x32_rd_c, &vp9_idct32x32_1024_add_c, 1)));
 
-#if HAVE_NEON
+#if HAVE_NEON_ASM
 INSTANTIATE_TEST_CASE_P(
     NEON, Trans32x32Test,
     ::testing::Values(

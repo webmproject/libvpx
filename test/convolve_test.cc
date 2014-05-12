@@ -634,7 +634,7 @@ INSTANTIATE_TEST_CASE_P(SSSE3, ConvolveTest, ::testing::Values(
     make_tuple(64, 64, &convolve8_ssse3)));
 #endif
 
-#if HAVE_NEON
+#if HAVE_NEON_ASM
 const ConvolveFunctions convolve8_neon(
     vp9_convolve8_horiz_neon, vp9_convolve8_avg_horiz_neon,
     vp9_convolve8_vert_neon, vp9_convolve8_avg_vert_neon,

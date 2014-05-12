@@ -512,7 +512,7 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_fht16x16_c, &vp9_iht16x16_256_add_c, 2),
         make_tuple(&vp9_fht16x16_c, &vp9_iht16x16_256_add_c, 3)));
 
-#if HAVE_NEON
+#if HAVE_NEON_ASM
 INSTANTIATE_TEST_CASE_P(
     NEON, Trans16x16DCT,
     ::testing::Values(
