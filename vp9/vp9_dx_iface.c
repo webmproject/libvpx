@@ -371,34 +371,11 @@ static void parse_superframe_index(const uint8_t *data, size_t data_sz,
   }
 }
 
-static vpx_codec_err_t decode_one_iter(vpx_codec_alg_priv_t *ctx,
-                                       const uint8_t **data_start_ptr,
-                                       const uint8_t *data_end,
-                                       uint32_t frame_size, void *user_priv,
-                                       long deadline) {
-  const vpx_codec_err_t res = decode_one(ctx, data_start_ptr, frame_size,
-                                         user_priv, deadline);
-  if (res != VPX_CODEC_OK)
-    return res;
-
-  // Account for suboptimal termination by the encoder.
-  while (*data_start_ptr < data_end) {
-    const uint8_t marker = read_marker(ctx->decrypt_cb, ctx->decrypt_state,
-                                       *data_start_ptr);
-    if (marker)
-      break;
-    (*data_start_ptr)++;
-  }
-
-  return VPX_CODEC_OK;
-}
-
 static vpx_codec_err_t decoder_decode(vpx_codec_alg_priv_t *ctx,
                                       const uint8_t *data, unsigned int data_sz,
                                       void *user_priv, long deadline) {
   const uint8_t *data_start = data;
   const uint8_t *const data_end = data + data_sz;
-  vpx_codec_err_t res;
   uint32_t frame_sizes[8];
   int frame_count;
 
@@ -412,25 +389,37 @@ static vpx_codec_err_t decoder_decode(vpx_codec_alg_priv_t *ctx,
     int i;
 
     for (i = 0; i < frame_count; ++i) {
+      const uint8_t *data_start_copy = data_start;
       const uint32_t frame_size = frame_sizes[i];
+      vpx_codec_err_t res;
       if (data_start < data ||
           frame_size > (uint32_t)(data_end - data_start)) {
         ctx->base.err_detail = "Invalid frame size in index";
         return VPX_CODEC_CORRUPT_FRAME;
       }
 
-      res = decode_one_iter(ctx, &data_start, data_end, frame_size,
-                            user_priv, deadline);
+      res = decode_one(ctx, &data_start_copy, frame_size, user_priv, deadline);
       if (res != VPX_CODEC_OK)
         return res;
+
+      data_start += frame_size;
     }
   } else {
     while (data_start < data_end) {
-      res = decode_one_iter(ctx, &data_start, data_end,
-                            (uint32_t)(data_end - data_start),
-                            user_priv, deadline);
+      const uint32_t frame_size = (uint32_t)(data_end - data_start);
+      const vpx_codec_err_t res = decode_one(ctx, &data_start, frame_size,
+                                             user_priv, deadline);
       if (res != VPX_CODEC_OK)
         return res;
+
+      // Account for suboptimal termination by the encoder.
+      while (data_start < data_end) {
+        const uint8_t marker = read_marker(ctx->decrypt_cb, ctx->decrypt_state,
+                                           data_start);
+        if (marker)
+          break;
+        ++data_start;
+      }
     }
   }
 
