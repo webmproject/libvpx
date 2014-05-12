@@ -61,9 +61,13 @@ void vp9_high_subtract_block_c(int rows, int cols,
   int shift = bps - 8;
   uint16_t *src = CONVERT_TO_SHORTPTR(src8);
   uint16_t *pred = CONVERT_TO_SHORTPTR(pred8);
+  int rnd = 0;
+  if (shift >= 1) {
+    rnd = 1 << (shift - 1);
+  }
   for (r = 0; r < rows; r++) {
     for (c = 0; c < cols; c++) {
-      diff[c] = ((int)src[c] - (int)pred[c]) >> shift;
+      diff[c] = ((int)src[c] - (int)pred[c] + rnd) >> shift;
     }
 
     diff += diff_stride;
