@@ -42,7 +42,7 @@ struct vp9_extracfg {
 };
 
 struct extraconfig_map {
-  int usage;
+  unsigned int usage;
   struct vp9_extracfg cfg;
 };
 
@@ -245,7 +245,8 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
         layer_id = (int)stats->spatial_layer_id;
 
         if (layer_id >= cfg->ss_number_layers
-            ||(int)(stats->count + 0.5) != n_packets_per_layer[layer_id] - 1)
+            ||(unsigned int)(stats->count + 0.5) !=
+               n_packets_per_layer[layer_id] - 1)
           ERROR("rc_twopass_stats_in missing EOS stats packet");
       }
     } else {
