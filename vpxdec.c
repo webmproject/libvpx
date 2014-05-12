@@ -262,6 +262,11 @@ static void update_image_md5(const vpx_image_t *img, const int planes[3],
 static void write_image_file(const vpx_image_t *img, const int planes[3],
                              FILE *file) {
   int i, y;
+  int bytes_per_sample = 1;
+#if CONFIG_VP9_HIGH
+  if (img->fmt & VPX_IMG_FMT_HIGH)
+    bytes_per_sample = 2;
+#endif
 
   for (i = 0; i < 3; ++i) {
     const int plane = planes[i];
@@ -271,7 +276,7 @@ static void write_image_file(const vpx_image_t *img, const int planes[3],
     const int h = vpx_img_plane_height(img, plane);
 
     for (y = 0; y < h; ++y) {
-      fwrite(buf, 1, w, file);
+      fwrite(buf, bytes_per_sample, w, file);
       buf += stride;
     }
   }
@@ -948,9 +953,6 @@ int main_loop(int argc, const char **argv_) {
           warn("Cannot use output-shift with 8 bit output frames");
           goto fail;
         }
-      } else if (img->fmt & VPX_IMG_FMT_HIGH) {
-        warn("Must use output-shift with 10 or 12 bit output frames");
-        goto fail;
       }
 #endif
       if (single_file) {
