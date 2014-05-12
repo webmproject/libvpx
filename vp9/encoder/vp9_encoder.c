@@ -2316,35 +2316,64 @@ void vp9_write_yuv_frame(YV12_BUFFER_CONFIG *s) {
 void vp9_write_yuv_rec_frame(VP9_COMMON *cm) {
   YV12_BUFFER_CONFIG *s = cm->frame_to_show;
   uint8_t *src = s->y_buffer;
-  int h = cm->height;
+  int h = s->y_crop_height;
+#if CONFIG_VP9_HIGH
+  if (s->flags & YV12_FLAG_HIGH) {
+    uint16_t *src16 = CONVERT_TO_SHORTPTR(s->y_buffer);
+
+    do {
+      fwrite(src16, s->y_crop_width, 2,  yuv_rec_file);
+      src16 += s->y_stride;
+    } while (--h);
+
+    src16 = CONVERT_TO_SHORTPTR(s->u_buffer);
+    h = s->uv_crop_height;
+
+    do {
+      fwrite(src16, s->uv_crop_width, 2,  yuv_rec_file);
+      src16 += s->uv_stride;
+    } while (--h);
+
+    src16 = CONVERT_TO_SHORTPTR(s->v_buffer);
+    h = s->uv_crop_height;
+
+    do {
+      fwrite(src16, s->uv_crop_width, 2, yuv_rec_file);
+      src16 += s->uv_stride;
+    } while (--h);
+
+    fflush(yuv_rec_file);
+    return;
+  }
+#endif
 
   do {
-    fwrite(src, s->y_width, 1,  yuv_rec_file);
+    fwrite(src, s->y_crop_width, 1,  yuv_rec_file);
     src += s->y_stride;
   } while (--h);
 
   src = s->u_buffer;
-  h = s->uv_height;
+  h = s->uv_crop_height;
 
   do {
-    fwrite(src, s->uv_width, 1,  yuv_rec_file);
+    fwrite(src, s->uv_crop_width, 1,  yuv_rec_file);
     src += s->uv_stride;
   } while (--h);
 
   src = s->v_buffer;
-  h = s->uv_height;
+  h = s->uv_crop_height;
 
   do {
-    fwrite(src, s->uv_width, 1, yuv_rec_file);
+    fwrite(src, s->uv_crop_width, 1, yuv_rec_file);
     src += s->uv_stride;
   } while (--h);
 
 #if CONFIG_ALPHA
   if (s->alpha_buffer) {
     src = s->alpha_buffer;
-    h = s->alpha_height;
+    h = s->alpha_crop_height;
     do {
-      fwrite(src, s->alpha_width, 1,  yuv_rec_file);
+      fwrite(src, s->alpha_crop_width, 1,  yuv_rec_file);
       src += s->alpha_stride;
     } while (--h);
   }
@@ -3396,6 +3425,11 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     if (cpi->use_svc)
       vp9_inc_frame_in_layer(&cpi->svc);
   }
+
+#if OUTPUT_YUV_REC
+  if (cm->show_frame)
+    vp9_write_yuv_rec_frame(cm);
+#endif
 }
 
 static void SvcEncode(VP9_COMP *cpi, size_t *size, uint8_t *dest,
