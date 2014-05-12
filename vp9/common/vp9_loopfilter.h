@@ -104,7 +104,8 @@ void vp9_loop_filter_init(struct VP9Common *cm);
 // calls this function directly.
 void vp9_loop_filter_frame_init(struct VP9Common *cm, int default_filt_lvl);
 
-void vp9_loop_filter_frame(struct VP9Common *cm,
+void vp9_loop_filter_frame(YV12_BUFFER_CONFIG *frame,
+                           struct VP9Common *cm,
                            struct macroblockd *mbd,
                            int filter_level,
                            int y_only, int partial_frame);
