@@ -176,7 +176,7 @@ typedef struct SPEED_FEATURES {
   // a log search that iterates 4 times (check around mv for last for best
   // error of combined predictor then check around mv for alt). If 0 we
   // we just use the best motion vector found for each frame by itself.
-  int comp_inter_joint_search_thresh;
+  BLOCK_SIZE comp_inter_joint_search_thresh;
 
   // This variable is used to cap the maximum number of times we skip testing a
   // mode to be evaluated. A high value means we will be faster.
