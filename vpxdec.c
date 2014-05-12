@@ -127,6 +127,26 @@ static const arg_def_t *vp8_pp_args[] = {
 
 static int vpx_image_scale(vpx_image_t *src, vpx_image_t *dst,
                            FilterMode mode) {
+#if CONFIG_VP9_HIGH
+  if (src->fmt == VPX_IMG_FMT_I42016) {
+    assert(dst->fmt == VPX_IMG_FMT_I42016);
+    return I42016Scale((uint16_t*)src->planes[VPX_PLANE_Y],
+                       src->stride[VPX_PLANE_Y]/2,
+                       (uint16_t*)src->planes[VPX_PLANE_U],
+                       src->stride[VPX_PLANE_U]/2,
+                       (uint16_t*)src->planes[VPX_PLANE_V],
+                       src->stride[VPX_PLANE_V]/2,
+                       src->d_w, src->d_h,
+                       (uint16_t*)dst->planes[VPX_PLANE_Y],
+                       dst->stride[VPX_PLANE_Y]/2,
+                       (uint16_t*)dst->planes[VPX_PLANE_U],
+                       dst->stride[VPX_PLANE_U]/2,
+                       (uint16_t*)dst->planes[VPX_PLANE_V],
+                       dst->stride[VPX_PLANE_V]/2,
+                       dst->d_w, dst->d_h,
+                       mode);
+  }
+#endif
   assert(src->fmt == VPX_IMG_FMT_I420);
   assert(dst->fmt == VPX_IMG_FMT_I420);
   return I420Scale(src->planes[VPX_PLANE_Y], src->stride[VPX_PLANE_Y],
@@ -930,8 +950,18 @@ int main_loop(int argc, const char **argv_) {
               display_height = display_size[1];
             }
           }
+#if CONFIG_VP9_HIGH
+          if (img->fmt & VPX_IMG_FMT_HIGH) {
+            scaled_img = vpx_img_alloc(NULL, VPX_IMG_FMT_I42016, display_width,
+                                       display_height, 16);
+          } else {
+            scaled_img = vpx_img_alloc(NULL, VPX_IMG_FMT_I420, display_width,
+                                       display_height, 16);
+          }
+#else
           scaled_img = vpx_img_alloc(NULL, VPX_IMG_FMT_I420, display_width,
                                      display_height, 16);
+#endif
         }
 
         if (img->d_w != scaled_img->d_w || img->d_h != scaled_img->d_h) {
