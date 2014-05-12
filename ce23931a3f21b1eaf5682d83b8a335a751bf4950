@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//qFU\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-05-12T21:44:13Z",
+      "side": 1,
+      "message": "does .neon not work? would be simpler without the conditional.",
+      "revId": "ce23931a3f21b1eaf5682d83b8a335a751bf4950",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//qFM\u003d",
+        "filename": "vp8/vp8cx_arm.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-05-12T21:44:13Z",
+      "side": 1,
+      "message": "HAVE_NEON? a few others are like this; do these just call through to some .asm functions?",
+      "revId": "ce23931a3f21b1eaf5682d83b8a335a751bf4950",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
