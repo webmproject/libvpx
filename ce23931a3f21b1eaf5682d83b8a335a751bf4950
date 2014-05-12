@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//qE4\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-05-12T21:52:45Z",
+      "side": 1,
+      "message": "Errors out for arm64 builds. I should file a bug",
+      "parentUuid": "AAAAdn//qFU\u003d",
+      "revId": "ce23931a3f21b1eaf5682d83b8a335a751bf4950",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//qEw\u003d",
         "filename": "configure",
         "patchSetId": 4
@@ -36,6 +54,58 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//qEk\u003d",
+        "filename": "configure",
+        "patchSetId": 4
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-05-12T21:52:45Z",
+      "side": 1,
+      "message": "Don\u0027t have a functioning native build yet. Configure can be forced with --force-target but it\u0027s not all there.",
+      "parentUuid": "AAAAdn//qEw\u003d",
+      "revId": "ce23931a3f21b1eaf5682d83b8a335a751bf4950",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//qEs\u003d",
+        "filename": "vp8/common/arm/dequantize_arm.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-05-12T21:52:45Z",
+      "side": 1,
+      "message": "In cases like this the file is included with HAVE_ARM. When it only contains neon, the file itself is excluded",
+      "revId": "ce23931a3f21b1eaf5682d83b8a335a751bf4950",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//qEg\u003d",
+        "filename": "vp8/vp8_common.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-05-12T21:52:45Z",
+      "side": 1,
+      "message": "this one is double guarded. it\u0027s excluded here and has an ifdef neon_asm in the file",
+      "revId": "ce23931a3f21b1eaf5682d83b8a335a751bf4950",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//qFM\u003d",
         "filename": "vp8/vp8cx_arm.mk",
         "patchSetId": 4
@@ -47,6 +117,24 @@
       "writtenOn": "2014-05-12T21:44:13Z",
       "side": 1,
       "message": "HAVE_NEON? a few others are like this; do these just call through to some .asm functions?",
+      "revId": "ce23931a3f21b1eaf5682d83b8a335a751bf4950",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//qE0\u003d",
+        "filename": "vp8/vp8cx_arm.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-05-12T21:52:45Z",
+      "side": 1,
+      "message": "Yup, the C files with the ASM define are just stub functions.",
+      "parentUuid": "AAAAdn//qFM\u003d",
       "revId": "ce23931a3f21b1eaf5682d83b8a335a751bf4950",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
