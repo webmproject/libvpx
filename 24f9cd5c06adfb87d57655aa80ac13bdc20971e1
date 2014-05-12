@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//qJk\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-05-12T15:02:03Z",
+      "side": 1,
+      "message": "Remove the \u0027|\u0027 from around the variable names and macro.",
+      "revId": "24f9cd5c06adfb87d57655aa80ac13bdc20971e1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
