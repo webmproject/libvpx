@@ -99,7 +99,7 @@ static int trellis_get_coeff_context(const int16_t *scan,
 }
 
 static int optimize_b(MACROBLOCK *mb, int plane, int block,
-                      BLOCK_SIZE plane_bsize, TX_SIZE tx_size, int ctx) {
+                      TX_SIZE tx_size, int ctx) {
   MACROBLOCKD *const xd = &mb->e_mbd;
   struct macroblock_plane *const p = &mb->plane[plane];
   struct macroblockd_plane *const pd = &xd->plane[plane];
@@ -381,7 +381,7 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
 
   if (x->optimize && (!x->skip_recode || !x->skip_optimize)) {
     const int ctx = combine_entropy_contexts(*a, *l);
-    *a = *l = optimize_b(x, plane, block, plane_bsize, tx_size, ctx) > 0;
+    *a = *l = optimize_b(x, plane, block, tx_size, ctx) > 0;
   } else {
     *a = *l = p->eobs[block] > 0;
   }
