@@ -16,6 +16,24 @@
       "revId": "6e88f7285df3864b1c495f65c8dc6eff4d0bf316",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//p8Y\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1150,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-05-13T19:24:00Z",
+      "side": 1,
+      "message": "Removed the function as you suggested in patch#2. Thanks.",
+      "parentUuid": "AAAAdn//p88\u003d",
+      "revId": "6e88f7285df3864b1c495f65c8dc6eff4d0bf316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
