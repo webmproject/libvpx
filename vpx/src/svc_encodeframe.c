@@ -234,7 +234,8 @@ static void svc_log_reset(SvcContext *svc_ctx) {
   si->message_buffer[0] = '\0';
 }
 
-static int svc_log(SvcContext *svc_ctx, int level, const char *fmt, ...) {
+static int svc_log(SvcContext *svc_ctx, SVC_LOG_LEVEL level,
+                   const char *fmt, ...) {
   char buf[512];
   int retval = 0;
   va_list ap;
