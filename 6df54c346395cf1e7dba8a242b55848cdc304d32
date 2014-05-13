@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//p/U\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1756,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-05-13T17:01:02Z",
+      "side": 1,
+      "message": "I don\u0027t think we deal with intra-only frames in the rate targeting right now, but should we test for !frame_is_intra_only(cm) here?",
+      "revId": "6df54c346395cf1e7dba8a242b55848cdc304d32",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
