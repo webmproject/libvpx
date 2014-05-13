@@ -749,14 +749,20 @@ static void setup_tile_info(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
     cm->log2_tile_rows += vp9_rb_read_bit(rb);
 }
 
+typedef struct TileBuffer {
+  const uint8_t *data;
+  size_t size;
+  int col;  // only used with multi-threaded decoding
+} TileBuffer;
+
 // Reads the next tile returning its size and adjusting '*data' accordingly
 // based on 'is_last'.
-static size_t get_tile(const uint8_t *const data_end,
-                       int is_last,
-                       struct vpx_internal_error_info *error_info,
-                       const uint8_t **data,
-                       vpx_decrypt_cb decrypt_cb,
-                       void *decrypt_state) {
+static void get_tile_buffer(const uint8_t *const data_end,
+                            int is_last,
+                            struct vpx_internal_error_info *error_info,
+                            const uint8_t **data,
+                            vpx_decrypt_cb decrypt_cb, void *decrypt_state,
+                            TileBuffer *buf) {
   size_t size;
 
   if (!is_last) {
@@ -779,14 +785,29 @@ static size_t get_tile(const uint8_t *const data_end,
   } else {
     size = data_end - *data;
   }
-  return size;
+
+  buf->data = *data;
+  buf->size = size;
+
+  *data += size;
 }
 
-typedef struct TileBuffer {
-  const uint8_t *data;
-  size_t size;
-  int col;  // only used with multi-threaded decoding
-} TileBuffer;
+static void get_tile_buffers(VP9Decoder *pbi,
+                             const uint8_t *data, const uint8_t *data_end,
+                             int tile_cols, int tile_rows,
+                             TileBuffer (*tile_buffers)[1 << 6]) {
+  int r, c;
+
+  for (r = 0; r < tile_rows; ++r) {
+    for (c = 0; c < tile_cols; ++c) {
+      const int is_last = (r == tile_rows - 1) && (c == tile_cols - 1);
+      TileBuffer *const buf = &tile_buffers[r][c];
+      buf->col = c;
+      get_tile_buffer(data_end, is_last, &pbi->common.error, &data,
+                      pbi->decrypt_cb, pbi->decrypt_state, buf);
+    }
+  }
+}
 
 static const uint8_t *decode_tiles(VP9Decoder *pbi,
                                    const uint8_t *data,
@@ -811,19 +832,7 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
   vpx_memset(cm->above_seg_context, 0,
              sizeof(*cm->above_seg_context) * aligned_cols);
 
-  // Load tile data into tile_buffers
-  for (tile_row = 0; tile_row < tile_rows; ++tile_row) {
-    for (tile_col = 0; tile_col < tile_cols; ++tile_col) {
-      const int last_tile = tile_row == tile_rows - 1 &&
-                            tile_col == tile_cols - 1;
-      const size_t size = get_tile(data_end, last_tile, &cm->error, &data,
-                                   pbi->decrypt_cb, pbi->decrypt_state);
-      TileBuffer *const buf = &tile_buffers[tile_row][tile_col];
-      buf->data = data;
-      buf->size = size;
-      data += size;
-    }
-  }
+  get_tile_buffers(pbi, data, data_end, tile_cols, tile_rows, tile_buffers);
 
   // Decode tiles using data from tile_buffers
   for (tile_row = 0; tile_row < tile_rows; ++tile_row) {
@@ -887,7 +896,7 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
   const int tile_cols = 1 << cm->log2_tile_cols;
   const int tile_rows = 1 << cm->log2_tile_rows;
   const int num_workers = MIN(pbi->max_threads & ~1, tile_cols);
-  TileBuffer tile_buffers[1 << 6];
+  TileBuffer tile_buffers[1][1 << 6];
   int n;
   int final_worker = -1;
 
@@ -932,19 +941,11 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
              sizeof(*cm->above_seg_context) * aligned_mi_cols);
 
   // Load tile data into tile_buffers
-  for (n = 0; n < tile_cols; ++n) {
-    const size_t size =
-        get_tile(data_end, n == tile_cols - 1, &cm->error, &data,
-                 pbi->decrypt_cb, pbi->decrypt_state);
-    TileBuffer *const buf = &tile_buffers[n];
-    buf->data = data;
-    buf->size = size;
-    buf->col = n;
-    data += size;
-  }
+  get_tile_buffers(pbi, data, data_end, tile_cols, tile_rows, tile_buffers);
 
   // Sort the buffers based on size in descending order.
-  qsort(tile_buffers, tile_cols, sizeof(tile_buffers[0]), compare_tile_buffers);
+  qsort(tile_buffers[0], tile_cols, sizeof(tile_buffers[0][0]),
+        compare_tile_buffers);
 
   // Rearrange the tile buffers such that per-tile group the largest, and
   // presumably the most difficult, tile will be decoded in the main thread.
@@ -953,11 +954,11 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
   {
     int group_start = 0;
     while (group_start < tile_cols) {
-      const TileBuffer largest = tile_buffers[group_start];
+      const TileBuffer largest = tile_buffers[0][group_start];
       const int group_end = MIN(group_start + num_workers, tile_cols) - 1;
-      memmove(tile_buffers + group_start, tile_buffers + group_start + 1,
-              (group_end - group_start) * sizeof(tile_buffers[0]));
-      tile_buffers[group_end] = largest;
+      memmove(tile_buffers[0] + group_start, tile_buffers[0] + group_start + 1,
+              (group_end - group_start) * sizeof(tile_buffers[0][0]));
+      tile_buffers[0][group_end] = largest;
       group_start = group_end + 1;
     }
   }
@@ -969,7 +970,7 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
       VP9Worker *const worker = &pbi->tile_workers[i];
       TileWorkerData *const tile_data = (TileWorkerData*)worker->data1;
       TileInfo *const tile = (TileInfo*)worker->data2;
-      TileBuffer *const buf = &tile_buffers[n];
+      TileBuffer *const buf = &tile_buffers[0][n];
 
       tile_data->cm = cm;
       tile_data->xd = pbi->mb;
