@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//p2k\u003d",
+        "filename": "examples/set_maps.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-05-13T23:42:01Z",
+      "side": 1,
+      "message": "these 3 have init functions as part of the api",
+      "revId": "e5e8fe19178978caa34e04bb68502fbdf84caf42",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
