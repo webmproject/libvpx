@@ -2236,9 +2236,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     }
   }
 
-#if 0
-  output_frame_level_debug_stats(cpi);
-#endif
   if (cpi->refresh_golden_frame == 1)
     cpi->frame_flags |= FRAMEFLAGS_GOLDEN;
   else
@@ -2253,6 +2250,10 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
   cm->last_frame_type = cm->frame_type;
   vp9_rc_postencode_update(cpi, *size);
+
+#if 0
+  output_frame_level_debug_stats(cpi);
+#endif
 
   if (cm->frame_type == KEY_FRAME) {
     // Tell the caller that the frame was coded as a key frame
