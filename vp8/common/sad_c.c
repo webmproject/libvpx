@@ -16,7 +16,7 @@
 
 static unsigned int sad_mx_n_c(const unsigned char *src_ptr, int src_stride,
                                const unsigned char *ref_ptr, int ref_stride,
-                               unsigned int max_sad, int m, int n)
+                               int m, int n)
 {
     int r, c;
     unsigned int sad = 0;
@@ -27,9 +27,6 @@ static unsigned int sad_mx_n_c(const unsigned char *src_ptr, int src_stride,
         {
             sad += abs(src_ptr[c] - ref_ptr[c]);
         }
-
-        if (sad > max_sad)
-          break;
 
         src_ptr += src_stride;
         ref_ptr += ref_stride;
@@ -43,204 +40,199 @@ static unsigned int sad_mx_n_c(const unsigned char *src_ptr, int src_stride,
  */
 
 unsigned int vp8_sad16x16_c(const unsigned char *src_ptr, int src_stride,
-                            const unsigned char *ref_ptr, int ref_stride,
-                            unsigned int max_sad)
+                            const unsigned char *ref_ptr, int ref_stride)
 {
-    return sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride, max_sad, 16, 16);
+    return sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride, 16, 16);
 }
 
 unsigned int vp8_sad8x8_c(const unsigned char *src_ptr, int src_stride,
-                          const unsigned char *ref_ptr, int ref_stride,
-                          unsigned int max_sad)
+                          const unsigned char *ref_ptr, int ref_stride)
 {
-    return sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride, max_sad, 8, 8);
+    return sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride, 8, 8);
 }
 
 unsigned int vp8_sad16x8_c(const unsigned char *src_ptr, int src_stride,
-                           const unsigned char *ref_ptr, int ref_stride,
-                           unsigned int max_sad)
+                           const unsigned char *ref_ptr, int ref_stride)
 {
-    return sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride, max_sad, 16, 8);
+    return sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride, 16, 8);
 
 }
 
 unsigned int vp8_sad8x16_c(const unsigned char *src_ptr, int src_stride,
-                           const unsigned char *ref_ptr, int ref_stride,
-                           unsigned int max_sad)
+                           const unsigned char *ref_ptr, int ref_stride)
 {
-    return sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride, max_sad, 8, 16);
+    return sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride, 8, 16);
 }
 
 unsigned int vp8_sad4x4_c(const unsigned char *src_ptr, int src_stride,
-                          const unsigned char *ref_ptr, int ref_stride,
-                          unsigned int max_sad)
+                          const unsigned char *ref_ptr, int ref_stride)
 {
-    return sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride, max_sad, 4, 4);
+    return sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride, 4, 4);
 }
 
 void vp8_sad16x16x3_c(const unsigned char *src_ptr, int src_stride,
                       const unsigned char *ref_ptr, int ref_stride,
                       unsigned int *sad_array)
 {
-    sad_array[0] = vp8_sad16x16_c(src_ptr, src_stride, ref_ptr + 0, ref_stride, UINT_MAX);
-    sad_array[1] = vp8_sad16x16_c(src_ptr, src_stride, ref_ptr + 1, ref_stride, UINT_MAX);
-    sad_array[2] = vp8_sad16x16_c(src_ptr, src_stride, ref_ptr + 2, ref_stride, UINT_MAX);
+    sad_array[0] = vp8_sad16x16_c(src_ptr, src_stride, ref_ptr + 0, ref_stride);
+    sad_array[1] = vp8_sad16x16_c(src_ptr, src_stride, ref_ptr + 1, ref_stride);
+    sad_array[2] = vp8_sad16x16_c(src_ptr, src_stride, ref_ptr + 2, ref_stride);
 }
 
 void vp8_sad16x16x8_c(const unsigned char *src_ptr, int src_stride,
                       const unsigned char *ref_ptr, int ref_stride,
                       unsigned short *sad_array)
 {
-    sad_array[0] = (unsigned short)vp8_sad16x16_c(src_ptr, src_stride, ref_ptr + 0, ref_stride, UINT_MAX);
-    sad_array[1] = (unsigned short)vp8_sad16x16_c(src_ptr, src_stride, ref_ptr + 1, ref_stride, UINT_MAX);
-    sad_array[2] = (unsigned short)vp8_sad16x16_c(src_ptr, src_stride, ref_ptr + 2, ref_stride, UINT_MAX);
-    sad_array[3] = (unsigned short)vp8_sad16x16_c(src_ptr, src_stride, ref_ptr + 3, ref_stride, UINT_MAX);
-    sad_array[4] = (unsigned short)vp8_sad16x16_c(src_ptr, src_stride, ref_ptr + 4, ref_stride, UINT_MAX);
-    sad_array[5] = (unsigned short)vp8_sad16x16_c(src_ptr, src_stride, ref_ptr + 5, ref_stride, UINT_MAX);
-    sad_array[6] = (unsigned short)vp8_sad16x16_c(src_ptr, src_stride, ref_ptr + 6, ref_stride, UINT_MAX);
-    sad_array[7] = (unsigned short)vp8_sad16x16_c(src_ptr, src_stride, ref_ptr + 7, ref_stride, UINT_MAX);
+    sad_array[0] = (unsigned short)vp8_sad16x16_c(src_ptr, src_stride, ref_ptr + 0, ref_stride);
+    sad_array[1] = (unsigned short)vp8_sad16x16_c(src_ptr, src_stride, ref_ptr + 1, ref_stride);
+    sad_array[2] = (unsigned short)vp8_sad16x16_c(src_ptr, src_stride, ref_ptr + 2, ref_stride);
+    sad_array[3] = (unsigned short)vp8_sad16x16_c(src_ptr, src_stride, ref_ptr + 3, ref_stride);
+    sad_array[4] = (unsigned short)vp8_sad16x16_c(src_ptr, src_stride, ref_ptr + 4, ref_stride);
+    sad_array[5] = (unsigned short)vp8_sad16x16_c(src_ptr, src_stride, ref_ptr + 5, ref_stride);
+    sad_array[6] = (unsigned short)vp8_sad16x16_c(src_ptr, src_stride, ref_ptr + 6, ref_stride);
+    sad_array[7] = (unsigned short)vp8_sad16x16_c(src_ptr, src_stride, ref_ptr + 7, ref_stride);
 }
 
 void vp8_sad16x8x3_c(const unsigned char *src_ptr, int src_stride,
                      const unsigned char *ref_ptr, int ref_stride,
                      unsigned int *sad_array)
 {
-    sad_array[0] = vp8_sad16x8_c(src_ptr, src_stride, ref_ptr + 0, ref_stride, UINT_MAX);
-    sad_array[1] = vp8_sad16x8_c(src_ptr, src_stride, ref_ptr + 1, ref_stride, UINT_MAX);
-    sad_array[2] = vp8_sad16x8_c(src_ptr, src_stride, ref_ptr + 2, ref_stride, UINT_MAX);
+    sad_array[0] = vp8_sad16x8_c(src_ptr, src_stride, ref_ptr + 0, ref_stride);
+    sad_array[1] = vp8_sad16x8_c(src_ptr, src_stride, ref_ptr + 1, ref_stride);
+    sad_array[2] = vp8_sad16x8_c(src_ptr, src_stride, ref_ptr + 2, ref_stride);
 }
 
 void vp8_sad16x8x8_c(const unsigned char *src_ptr, int src_stride,
                      const unsigned char *ref_ptr, int ref_stride,
                      unsigned short *sad_array)
 {
-    sad_array[0] = (unsigned short)vp8_sad16x8_c(src_ptr, src_stride, ref_ptr + 0, ref_stride, UINT_MAX);
-    sad_array[1] = (unsigned short)vp8_sad16x8_c(src_ptr, src_stride, ref_ptr + 1, ref_stride, UINT_MAX);
-    sad_array[2] = (unsigned short)vp8_sad16x8_c(src_ptr, src_stride, ref_ptr + 2, ref_stride, UINT_MAX);
-    sad_array[3] = (unsigned short)vp8_sad16x8_c(src_ptr, src_stride, ref_ptr + 3, ref_stride, UINT_MAX);
-    sad_array[4] = (unsigned short)vp8_sad16x8_c(src_ptr, src_stride, ref_ptr + 4, ref_stride, UINT_MAX);
-    sad_array[5] = (unsigned short)vp8_sad16x8_c(src_ptr, src_stride, ref_ptr + 5, ref_stride, UINT_MAX);
-    sad_array[6] = (unsigned short)vp8_sad16x8_c(src_ptr, src_stride, ref_ptr + 6, ref_stride, UINT_MAX);
-    sad_array[7] = (unsigned short)vp8_sad16x8_c(src_ptr, src_stride, ref_ptr + 7, ref_stride, UINT_MAX);
+    sad_array[0] = (unsigned short)vp8_sad16x8_c(src_ptr, src_stride, ref_ptr + 0, ref_stride);
+    sad_array[1] = (unsigned short)vp8_sad16x8_c(src_ptr, src_stride, ref_ptr + 1, ref_stride);
+    sad_array[2] = (unsigned short)vp8_sad16x8_c(src_ptr, src_stride, ref_ptr + 2, ref_stride);
+    sad_array[3] = (unsigned short)vp8_sad16x8_c(src_ptr, src_stride, ref_ptr + 3, ref_stride);
+    sad_array[4] = (unsigned short)vp8_sad16x8_c(src_ptr, src_stride, ref_ptr + 4, ref_stride);
+    sad_array[5] = (unsigned short)vp8_sad16x8_c(src_ptr, src_stride, ref_ptr + 5, ref_stride);
+    sad_array[6] = (unsigned short)vp8_sad16x8_c(src_ptr, src_stride, ref_ptr + 6, ref_stride);
+    sad_array[7] = (unsigned short)vp8_sad16x8_c(src_ptr, src_stride, ref_ptr + 7, ref_stride);
 }
 
 void vp8_sad8x8x3_c(const unsigned char *src_ptr, int src_stride,
                     const unsigned char *ref_ptr, int ref_stride,
                     unsigned int *sad_array)
 {
-    sad_array[0] = vp8_sad8x8_c(src_ptr, src_stride, ref_ptr + 0, ref_stride, UINT_MAX);
-    sad_array[1] = vp8_sad8x8_c(src_ptr, src_stride, ref_ptr + 1, ref_stride, UINT_MAX);
-    sad_array[2] = vp8_sad8x8_c(src_ptr, src_stride, ref_ptr + 2, ref_stride, UINT_MAX);
+    sad_array[0] = vp8_sad8x8_c(src_ptr, src_stride, ref_ptr + 0, ref_stride);
+    sad_array[1] = vp8_sad8x8_c(src_ptr, src_stride, ref_ptr + 1, ref_stride);
+    sad_array[2] = vp8_sad8x8_c(src_ptr, src_stride, ref_ptr + 2, ref_stride);
 }
 
 void vp8_sad8x8x8_c(const unsigned char *src_ptr, int src_stride,
                     const unsigned char *ref_ptr, int ref_stride,
                     unsigned short *sad_array)
 {
-    sad_array[0] = (unsigned short)vp8_sad8x8_c(src_ptr, src_stride, ref_ptr + 0, ref_stride, UINT_MAX);
-    sad_array[1] = (unsigned short)vp8_sad8x8_c(src_ptr, src_stride, ref_ptr + 1, ref_stride, UINT_MAX);
-    sad_array[2] = (unsigned short)vp8_sad8x8_c(src_ptr, src_stride, ref_ptr + 2, ref_stride, UINT_MAX);
-    sad_array[3] = (unsigned short)vp8_sad8x8_c(src_ptr, src_stride, ref_ptr + 3, ref_stride, UINT_MAX);
-    sad_array[4] = (unsigned short)vp8_sad8x8_c(src_ptr, src_stride, ref_ptr + 4, ref_stride, UINT_MAX);
-    sad_array[5] = (unsigned short)vp8_sad8x8_c(src_ptr, src_stride, ref_ptr + 5, ref_stride, UINT_MAX);
-    sad_array[6] = (unsigned short)vp8_sad8x8_c(src_ptr, src_stride, ref_ptr + 6, ref_stride, UINT_MAX);
-    sad_array[7] = (unsigned short)vp8_sad8x8_c(src_ptr, src_stride, ref_ptr + 7, ref_stride, UINT_MAX);
+    sad_array[0] = (unsigned short)vp8_sad8x8_c(src_ptr, src_stride, ref_ptr + 0, ref_stride);
+    sad_array[1] = (unsigned short)vp8_sad8x8_c(src_ptr, src_stride, ref_ptr + 1, ref_stride);
+    sad_array[2] = (unsigned short)vp8_sad8x8_c(src_ptr, src_stride, ref_ptr + 2, ref_stride);
+    sad_array[3] = (unsigned short)vp8_sad8x8_c(src_ptr, src_stride, ref_ptr + 3, ref_stride);
+    sad_array[4] = (unsigned short)vp8_sad8x8_c(src_ptr, src_stride, ref_ptr + 4, ref_stride);
+    sad_array[5] = (unsigned short)vp8_sad8x8_c(src_ptr, src_stride, ref_ptr + 5, ref_stride);
+    sad_array[6] = (unsigned short)vp8_sad8x8_c(src_ptr, src_stride, ref_ptr + 6, ref_stride);
+    sad_array[7] = (unsigned short)vp8_sad8x8_c(src_ptr, src_stride, ref_ptr + 7, ref_stride);
 }
 
 void vp8_sad8x16x3_c(const unsigned char *src_ptr, int src_stride,
                      const unsigned char *ref_ptr, int ref_stride,
                      unsigned int *sad_array)
 {
-    sad_array[0] = vp8_sad8x16_c(src_ptr, src_stride, ref_ptr + 0, ref_stride, UINT_MAX);
-    sad_array[1] = vp8_sad8x16_c(src_ptr, src_stride, ref_ptr + 1, ref_stride, UINT_MAX);
-    sad_array[2] = vp8_sad8x16_c(src_ptr, src_stride, ref_ptr + 2, ref_stride, UINT_MAX);
+    sad_array[0] = vp8_sad8x16_c(src_ptr, src_stride, ref_ptr + 0, ref_stride);
+    sad_array[1] = vp8_sad8x16_c(src_ptr, src_stride, ref_ptr + 1, ref_stride);
+    sad_array[2] = vp8_sad8x16_c(src_ptr, src_stride, ref_ptr + 2, ref_stride);
 }
 
 void vp8_sad8x16x8_c(const unsigned char *src_ptr, int src_stride,
                      const unsigned char *ref_ptr, int ref_stride,
                      unsigned short *sad_array)
 {
-    sad_array[0] = (unsigned short)vp8_sad8x16_c(src_ptr, src_stride, ref_ptr + 0, ref_stride, UINT_MAX);
-    sad_array[1] = (unsigned short)vp8_sad8x16_c(src_ptr, src_stride, ref_ptr + 1, ref_stride, UINT_MAX);
-    sad_array[2] = (unsigned short)vp8_sad8x16_c(src_ptr, src_stride, ref_ptr + 2, ref_stride, UINT_MAX);
-    sad_array[3] = (unsigned short)vp8_sad8x16_c(src_ptr, src_stride, ref_ptr + 3, ref_stride, UINT_MAX);
-    sad_array[4] = (unsigned short)vp8_sad8x16_c(src_ptr, src_stride, ref_ptr + 4, ref_stride, UINT_MAX);
-    sad_array[5] = (unsigned short)vp8_sad8x16_c(src_ptr, src_stride, ref_ptr + 5, ref_stride, UINT_MAX);
-    sad_array[6] = (unsigned short)vp8_sad8x16_c(src_ptr, src_stride, ref_ptr + 6, ref_stride, UINT_MAX);
-    sad_array[7] = (unsigned short)vp8_sad8x16_c(src_ptr, src_stride, ref_ptr + 7, ref_stride, UINT_MAX);
+    sad_array[0] = (unsigned short)vp8_sad8x16_c(src_ptr, src_stride, ref_ptr + 0, ref_stride);
+    sad_array[1] = (unsigned short)vp8_sad8x16_c(src_ptr, src_stride, ref_ptr + 1, ref_stride);
+    sad_array[2] = (unsigned short)vp8_sad8x16_c(src_ptr, src_stride, ref_ptr + 2, ref_stride);
+    sad_array[3] = (unsigned short)vp8_sad8x16_c(src_ptr, src_stride, ref_ptr + 3, ref_stride);
+    sad_array[4] = (unsigned short)vp8_sad8x16_c(src_ptr, src_stride, ref_ptr + 4, ref_stride);
+    sad_array[5] = (unsigned short)vp8_sad8x16_c(src_ptr, src_stride, ref_ptr + 5, ref_stride);
+    sad_array[6] = (unsigned short)vp8_sad8x16_c(src_ptr, src_stride, ref_ptr + 6, ref_stride);
+    sad_array[7] = (unsigned short)vp8_sad8x16_c(src_ptr, src_stride, ref_ptr + 7, ref_stride);
 }
 
 void vp8_sad4x4x3_c(const unsigned char *src_ptr, int src_stride,
                     const unsigned char *ref_ptr, int ref_stride,
                     unsigned int *sad_array)
 {
-    sad_array[0] = vp8_sad4x4_c(src_ptr, src_stride, ref_ptr + 0, ref_stride, UINT_MAX);
-    sad_array[1] = vp8_sad4x4_c(src_ptr, src_stride, ref_ptr + 1, ref_stride, UINT_MAX);
-    sad_array[2] = vp8_sad4x4_c(src_ptr, src_stride, ref_ptr + 2, ref_stride, UINT_MAX);
+    sad_array[0] = vp8_sad4x4_c(src_ptr, src_stride, ref_ptr + 0, ref_stride);
+    sad_array[1] = vp8_sad4x4_c(src_ptr, src_stride, ref_ptr + 1, ref_stride);
+    sad_array[2] = vp8_sad4x4_c(src_ptr, src_stride, ref_ptr + 2, ref_stride);
 }
 
 void vp8_sad4x4x8_c(const unsigned char *src_ptr, int src_stride,
                     const unsigned char *ref_ptr, int ref_stride,
                     unsigned short *sad_array)
 {
-    sad_array[0] = (unsigned short)vp8_sad4x4_c(src_ptr, src_stride, ref_ptr + 0, ref_stride, UINT_MAX);
-    sad_array[1] = (unsigned short)vp8_sad4x4_c(src_ptr, src_stride, ref_ptr + 1, ref_stride, UINT_MAX);
-    sad_array[2] = (unsigned short)vp8_sad4x4_c(src_ptr, src_stride, ref_ptr + 2, ref_stride, UINT_MAX);
-    sad_array[3] = (unsigned short)vp8_sad4x4_c(src_ptr, src_stride, ref_ptr + 3, ref_stride, UINT_MAX);
-    sad_array[4] = (unsigned short)vp8_sad4x4_c(src_ptr, src_stride, ref_ptr + 4, ref_stride, UINT_MAX);
-    sad_array[5] = (unsigned short)vp8_sad4x4_c(src_ptr, src_stride, ref_ptr + 5, ref_stride, UINT_MAX);
-    sad_array[6] = (unsigned short)vp8_sad4x4_c(src_ptr, src_stride, ref_ptr + 6, ref_stride, UINT_MAX);
-    sad_array[7] = (unsigned short)vp8_sad4x4_c(src_ptr, src_stride, ref_ptr + 7, ref_stride, UINT_MAX);
+    sad_array[0] = (unsigned short)vp8_sad4x4_c(src_ptr, src_stride, ref_ptr + 0, ref_stride);
+    sad_array[1] = (unsigned short)vp8_sad4x4_c(src_ptr, src_stride, ref_ptr + 1, ref_stride);
+    sad_array[2] = (unsigned short)vp8_sad4x4_c(src_ptr, src_stride, ref_ptr + 2, ref_stride);
+    sad_array[3] = (unsigned short)vp8_sad4x4_c(src_ptr, src_stride, ref_ptr + 3, ref_stride);
+    sad_array[4] = (unsigned short)vp8_sad4x4_c(src_ptr, src_stride, ref_ptr + 4, ref_stride);
+    sad_array[5] = (unsigned short)vp8_sad4x4_c(src_ptr, src_stride, ref_ptr + 5, ref_stride);
+    sad_array[6] = (unsigned short)vp8_sad4x4_c(src_ptr, src_stride, ref_ptr + 6, ref_stride);
+    sad_array[7] = (unsigned short)vp8_sad4x4_c(src_ptr, src_stride, ref_ptr + 7, ref_stride);
 }
 
 void vp8_sad16x16x4d_c(const unsigned char *src_ptr, int src_stride,
                        const unsigned char * const ref_ptr[], int ref_stride,
                        unsigned int *sad_array)
 {
-    sad_array[0] = vp8_sad16x16_c(src_ptr, src_stride, ref_ptr[0], ref_stride, UINT_MAX);
-    sad_array[1] = vp8_sad16x16_c(src_ptr, src_stride, ref_ptr[1], ref_stride, UINT_MAX);
-    sad_array[2] = vp8_sad16x16_c(src_ptr, src_stride, ref_ptr[2], ref_stride, UINT_MAX);
-    sad_array[3] = vp8_sad16x16_c(src_ptr, src_stride, ref_ptr[3], ref_stride, UINT_MAX);
+    sad_array[0] = vp8_sad16x16_c(src_ptr, src_stride, ref_ptr[0], ref_stride);
+    sad_array[1] = vp8_sad16x16_c(src_ptr, src_stride, ref_ptr[1], ref_stride);
+    sad_array[2] = vp8_sad16x16_c(src_ptr, src_stride, ref_ptr[2], ref_stride);
+    sad_array[3] = vp8_sad16x16_c(src_ptr, src_stride, ref_ptr[3], ref_stride);
 }
 
 void vp8_sad16x8x4d_c(const unsigned char *src_ptr, int src_stride,
                       const unsigned char * const ref_ptr[], int ref_stride,
                       unsigned int *sad_array)
 {
-    sad_array[0] = vp8_sad16x8_c(src_ptr, src_stride, ref_ptr[0], ref_stride, UINT_MAX);
-    sad_array[1] = vp8_sad16x8_c(src_ptr, src_stride, ref_ptr[1], ref_stride, UINT_MAX);
-    sad_array[2] = vp8_sad16x8_c(src_ptr, src_stride, ref_ptr[2], ref_stride, UINT_MAX);
-    sad_array[3] = vp8_sad16x8_c(src_ptr, src_stride, ref_ptr[3], ref_stride, UINT_MAX);
+    sad_array[0] = vp8_sad16x8_c(src_ptr, src_stride, ref_ptr[0], ref_stride);
+    sad_array[1] = vp8_sad16x8_c(src_ptr, src_stride, ref_ptr[1], ref_stride);
+    sad_array[2] = vp8_sad16x8_c(src_ptr, src_stride, ref_ptr[2], ref_stride);
+    sad_array[3] = vp8_sad16x8_c(src_ptr, src_stride, ref_ptr[3], ref_stride);
 }
 
 void vp8_sad8x8x4d_c(const unsigned char *src_ptr, int src_stride,
                      const unsigned char * const ref_ptr[], int ref_stride,
                      unsigned int *sad_array)
 {
-    sad_array[0] = vp8_sad8x8_c(src_ptr, src_stride, ref_ptr[0], ref_stride, UINT_MAX);
-    sad_array[1] = vp8_sad8x8_c(src_ptr, src_stride, ref_ptr[1], ref_stride, UINT_MAX);
-    sad_array[2] = vp8_sad8x8_c(src_ptr, src_stride, ref_ptr[2], ref_stride, UINT_MAX);
-    sad_array[3] = vp8_sad8x8_c(src_ptr, src_stride, ref_ptr[3], ref_stride, UINT_MAX);
+    sad_array[0] = vp8_sad8x8_c(src_ptr, src_stride, ref_ptr[0], ref_stride);
+    sad_array[1] = vp8_sad8x8_c(src_ptr, src_stride, ref_ptr[1], ref_stride);
+    sad_array[2] = vp8_sad8x8_c(src_ptr, src_stride, ref_ptr[2], ref_stride);
+    sad_array[3] = vp8_sad8x8_c(src_ptr, src_stride, ref_ptr[3], ref_stride);
 }
 
 void vp8_sad8x16x4d_c(const unsigned char *src_ptr, int src_stride,
                       const unsigned char * const ref_ptr[], int ref_stride,
                       unsigned int *sad_array)
 {
-    sad_array[0] = vp8_sad8x16_c(src_ptr, src_stride, ref_ptr[0], ref_stride, UINT_MAX);
-    sad_array[1] = vp8_sad8x16_c(src_ptr, src_stride, ref_ptr[1], ref_stride, UINT_MAX);
-    sad_array[2] = vp8_sad8x16_c(src_ptr, src_stride, ref_ptr[2], ref_stride, UINT_MAX);
-    sad_array[3] = vp8_sad8x16_c(src_ptr, src_stride, ref_ptr[3], ref_stride, UINT_MAX);
+    sad_array[0] = vp8_sad8x16_c(src_ptr, src_stride, ref_ptr[0], ref_stride);
+    sad_array[1] = vp8_sad8x16_c(src_ptr, src_stride, ref_ptr[1], ref_stride);
+    sad_array[2] = vp8_sad8x16_c(src_ptr, src_stride, ref_ptr[2], ref_stride);
+    sad_array[3] = vp8_sad8x16_c(src_ptr, src_stride, ref_ptr[3], ref_stride);
 }
 
 void vp8_sad4x4x4d_c(const unsigned char *src_ptr, int src_stride,
                      const unsigned char * const ref_ptr[], int  ref_stride,
                      unsigned int *sad_array)
 {
-    sad_array[0] = vp8_sad4x4_c(src_ptr, src_stride, ref_ptr[0], ref_stride, UINT_MAX);
-    sad_array[1] = vp8_sad4x4_c(src_ptr, src_stride, ref_ptr[1], ref_stride, UINT_MAX);
-    sad_array[2] = vp8_sad4x4_c(src_ptr, src_stride, ref_ptr[2], ref_stride, UINT_MAX);
-    sad_array[3] = vp8_sad4x4_c(src_ptr, src_stride, ref_ptr[3], ref_stride, UINT_MAX);
+    sad_array[0] = vp8_sad4x4_c(src_ptr, src_stride, ref_ptr[0], ref_stride);
+    sad_array[1] = vp8_sad4x4_c(src_ptr, src_stride, ref_ptr[1], ref_stride);
+    sad_array[2] = vp8_sad4x4_c(src_ptr, src_stride, ref_ptr[2], ref_stride);
+    sad_array[3] = vp8_sad4x4_c(src_ptr, src_stride, ref_ptr[3], ref_stride);
 }
 
 /* Copy 2 macroblocks to a buffer */
