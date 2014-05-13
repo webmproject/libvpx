@@ -1350,7 +1350,7 @@ int vp9_decode_frame(VP9Decoder *pbi,
     *p_data_end = decode_tiles_mt(pbi, data + first_partition_size, data_end);
     // If multiple threads are used to decode tiles, then we use those threads
     // to do parallel loopfiltering.
-    vp9_loop_filter_frame_mt(new_fb, pbi, cm, cm->lf.filter_level, 0, 0);
+    vp9_loop_filter_frame_mt(new_fb, pbi, cm, cm->lf.filter_level, 0);
   } else {
     if (do_loopfilter_inline && pbi->lf_worker.data1 == NULL) {
       CHECK_MEM_ERROR(cm, pbi->lf_worker.data1,
