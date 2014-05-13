@@ -1279,6 +1279,7 @@ static struct vp9_read_bit_buffer* init_read_bit_buffer(
     const uint8_t *data,
     const uint8_t *data_end,
     uint8_t *clear_data /* buffer size MAX_VP9_HEADER_SIZE */) {
+  vp9_zero(*rb);
   rb->bit_offset = 0;
   rb->error_handler = error_handler;
   rb->error_handler_data = &pbi->common;
@@ -1299,7 +1300,7 @@ int vp9_decode_frame(VP9Decoder *pbi,
                      const uint8_t **p_data_end) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
-  struct vp9_read_bit_buffer rb = { 0 };
+  struct vp9_read_bit_buffer rb;
   uint8_t clear_data[MAX_VP9_HEADER_SIZE];
   const size_t first_partition_size = read_uncompressed_header(pbi,
       init_read_bit_buffer(pbi, &rb, data, data_end, clear_data));
