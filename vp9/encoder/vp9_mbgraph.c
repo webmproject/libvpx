@@ -20,7 +20,6 @@
 #include "vp9/common/vp9_systemdependent.h"
 
 
-
 static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
                                               const MV *ref_mv,
                                               MV *dst_mv,
@@ -237,8 +236,9 @@ static void update_mbgraph_frame_stats(VP9_COMP *cpi,
   int mb_col, mb_row, offset = 0;
   int mb_y_offset = 0, arf_y_offset = 0, gld_y_offset = 0;
   MV arf_top_mv = {0, 0}, gld_top_mv = {0, 0};
-  MODE_INFO mi_local = { { 0 } };
+  MODE_INFO mi_local;
 
+  vp9_zero(mi_local);
   // Set up limit values for motion vectors to prevent them extending outside
   // the UMV borders.
   x->mv_row_min     = -BORDER_MV_PIXELS_B16;
