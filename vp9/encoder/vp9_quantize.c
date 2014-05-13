@@ -32,6 +32,7 @@ void vp9_quantize_b_c(const int16_t *coeff_ptr, intptr_t count,
                          zbin_ptr[1] + zbin_oq_value };
   const int nzbins[2] = { zbins[0] * -1,
                           zbins[1] * -1 };
+  (void)iscan;
 
   vpx_memset(qcoeff_ptr, 0, count * sizeof(int16_t));
   vpx_memset(dqcoeff_ptr, 0, count * sizeof(int16_t));
@@ -87,6 +88,7 @@ void vp9_quantize_b_32x32_c(const int16_t *coeff_ptr, intptr_t n_coeffs,
   int idx = 0;
   int idx_arr[1024];
   int i, eob = -1;
+  (void)iscan;
 
   vpx_memset(qcoeff_ptr, 0, n_coeffs * sizeof(int16_t));
   vpx_memset(dqcoeff_ptr, 0, n_coeffs * sizeof(int16_t));
