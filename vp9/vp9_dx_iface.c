@@ -559,6 +559,24 @@ static vpx_codec_err_t ctrl_get_display_size(vpx_codec_alg_priv_t *ctx,
   }
 }
 
+static vpx_codec_err_t ctrl_get_bit_depth(vpx_codec_alg_priv_t *ctx,
+                                          int ctrl_id, va_list args) {
+  unsigned int *const bit_depth = va_arg(args, unsigned int *);
+
+  if (bit_depth) {
+    if (ctx->pbi) {
+      const VP9_COMMON *const cm = &ctx->pbi->common;
+      *bit_depth = cm->bit_depth;
+    } else {
+      return VPX_CODEC_ERROR;
+    }
+    return VPX_CODEC_OK;
+  } else {
+    return VPX_CODEC_INVALID_PARAM;
+  }
+}
+
+
 static vpx_codec_err_t ctrl_set_invert_tile_order(vpx_codec_alg_priv_t *ctx,
                                                   int ctr_id, va_list args) {
   ctx->invert_tile_order = va_arg(args, int);
@@ -582,6 +600,7 @@ static vpx_codec_ctrl_fn_map_t decoder_ctrl_maps[] = {
   {VP8D_GET_FRAME_CORRUPTED,      ctrl_get_frame_corrupted},
   {VP9_GET_REFERENCE,             ctrl_get_reference},
   {VP9D_GET_DISPLAY_SIZE,         ctrl_get_display_size},
+  {VP9D_GET_BIT_DEPTH,            ctrl_get_bit_depth},
 
   { -1, NULL},
 };
