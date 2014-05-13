@@ -42,7 +42,9 @@
 #include "./rate_hist.h"
 #include "./vpxstats.h"
 #include "./warnings.h"
+#if CONFIG_WEBM_IO
 #include "./webmenc.h"
+#endif
 #include "./y4minput.h"
 
 /* Swallow warnings about unused results of fread/fwrite */
@@ -207,6 +209,7 @@ static const arg_def_t width            = ARG_DEF("w", "width", 1,
                                                   "Frame width");
 static const arg_def_t height           = ARG_DEF("h", "height", 1,
                                                   "Frame height");
+#if CONFIG_WEBM_IO
 static const struct arg_enum_list stereo_mode_enum[] = {
   {"mono", STEREO_FORMAT_MONO},
   {"left-right", STEREO_FORMAT_LEFT_RIGHT},
@@ -217,6 +220,7 @@ static const struct arg_enum_list stereo_mode_enum[] = {
 };
 static const arg_def_t stereo_mode      = ARG_DEF_ENUM(NULL, "stereo-mode", 1,
                                                        "Stereo 3D video format", stereo_mode_enum);
+#endif
 static const arg_def_t timebase         = ARG_DEF(NULL, "timebase", 1,
                                                   "Output timestamp precision (fractional seconds)");
 static const arg_def_t error_resilient  = ARG_DEF(NULL, "error-resilient", 1,
@@ -226,7 +230,11 @@ static const arg_def_t lag_in_frames    = ARG_DEF(NULL, "lag-in-frames", 1,
 
 static const arg_def_t *global_args[] = {
   &use_yv12, &use_i420, &usage, &threads, &profile,
-  &width, &height, &stereo_mode, &timebase, &framerate,
+  &width, &height,
+#if CONFIG_WEBM_IO
+  &stereo_mode,
+#endif
+  &timebase, &framerate,
   &error_resilient,
   &lag_in_frames, NULL
 };
@@ -554,6 +562,11 @@ static int compare_img(const vpx_image_t *const img1,
                              NELEMENTS(vp9_arg_ctrl_map))
 #endif
 
+#if !CONFIG_WEBM_IO
+typedef int stereo_format_t;
+struct EbmlGlobal { int debug; };
+#endif
+
 /* Per-stream configuration */
 struct stream_config {
   struct vpx_codec_enc_cfg  cfg;
@@ -792,9 +805,9 @@ static struct stream_state *new_stream(struct VpxEncoderConfig *global,
     stream->config.cfg.g_h = 0;
 
     /* Initialize remaining stream parameters */
-    stream->config.stereo_fmt = STEREO_FORMAT_MONO;
     stream->config.write_webm = 1;
 #if CONFIG_WEBM_IO
+    stream->config.stereo_fmt = STEREO_FORMAT_MONO;
     stream->ebml.last_pts_ns = -1;
     stream->ebml.writer = NULL;
     stream->ebml.segment = NULL;
@@ -869,8 +882,10 @@ static int parse_stream_params(struct VpxEncoderConfig *global,
       config->cfg.g_w = arg_parse_uint(&arg);
     } else if (arg_match(&arg, &height, argi)) {
       config->cfg.g_h = arg_parse_uint(&arg);
+#if CONFIG_WEBM_IO
     } else if (arg_match(&arg, &stereo_mode, argi)) {
       config->stereo_fmt = arg_parse_enum_or_int(&arg);
+#endif
     } else if (arg_match(&arg, &timebase, argi)) {
       config->cfg.g_timebase = arg_parse_rational(&arg);
       validate_positive_rational(arg.name, &config->cfg.g_timebase);
