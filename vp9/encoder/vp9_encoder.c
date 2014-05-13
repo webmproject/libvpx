@@ -115,22 +115,6 @@ static void set_high_precision_mv(VP9_COMP *cpi, int allow_high_precision_mv) {
   }
 }
 
-static void setup_key_frame(VP9_COMP *cpi) {
-  vp9_setup_past_independence(&cpi->common);
-
-  // All buffers are implicitly updated on key frames.
-  cpi->refresh_golden_frame = 1;
-  cpi->refresh_alt_ref_frame = 1;
-}
-
-static void setup_inter_frame(VP9_COMMON *cm) {
-  if (cm->error_resilient_mode || cm->intra_only)
-    vp9_setup_past_independence(cm);
-
-  assert(cm->frame_context_idx < FRAME_CONTEXTS);
-  cm->fc = cm->frame_contexts[cm->frame_context_idx];
-}
-
 static void setup_frame(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   // Set up entropy context depending on frame type. The decoder mandates
@@ -138,16 +122,20 @@ static void setup_frame(VP9_COMP *cpi) {
   // frames where the error_resilient_mode or intra_only flag is set. For
   // other inter-frames the encoder currently uses only two contexts;
   // context 1 for ALTREF frames and context 0 for the others.
-  if (cm->frame_type == KEY_FRAME) {
-    setup_key_frame(cpi);
+  if (frame_is_intra_only(cm) || cm->error_resilient_mode) {
+    vp9_setup_past_independence(cm);
   } else {
-    if (!cm->intra_only && !cm->error_resilient_mode && !cpi->use_svc)
-        cm->frame_context_idx = cpi->refresh_alt_ref_frame;
-     setup_inter_frame(cm);
+    if (!cpi->use_svc)
+      cm->frame_context_idx = cpi->refresh_alt_ref_frame;
+  }
+
+  if (cm->frame_type == KEY_FRAME) {
+    cpi->refresh_golden_frame = 1;
+    cpi->refresh_alt_ref_frame = 1;
+  } else {
+    cm->fc = cm->frame_contexts[cm->frame_context_idx];
   }
 }
-
-
 
 void vp9_initialize_enc() {
   static int init_done = 0;
