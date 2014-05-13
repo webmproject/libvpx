@@ -72,8 +72,7 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
   x->mv_row_max = tmp_row_max;
 
   return vp9_sad16x16(x->plane[0].src.buf, x->plane[0].src.stride,
-          xd->plane[0].dst.buf, xd->plane[0].dst.stride,
-          INT_MAX);
+          xd->plane[0].dst.buf, xd->plane[0].dst.stride);
 }
 
 static int do_16x16_motion_search(VP9_COMP *cpi, const MV *ref_mv,
@@ -86,8 +85,7 @@ static int do_16x16_motion_search(VP9_COMP *cpi, const MV *ref_mv,
   // Try zero MV first
   // FIXME should really use something like near/nearest MV and/or MV prediction
   err = vp9_sad16x16(x->plane[0].src.buf, x->plane[0].src.stride,
-                     xd->plane[0].pre[0].buf, xd->plane[0].pre[0].stride,
-                     INT_MAX);
+                     xd->plane[0].pre[0].buf, xd->plane[0].pre[0].stride);
   dst_mv->as_int = 0;
 
   // Test last reference frame using the previous best mv as the
@@ -123,8 +121,7 @@ static int do_16x16_zerozero_search(VP9_COMP *cpi, int_mv *dst_mv) {
   // Try zero MV first
   // FIXME should really use something like near/nearest MV and/or MV prediction
   err = vp9_sad16x16(x->plane[0].src.buf, x->plane[0].src.stride,
-                     xd->plane[0].pre[0].buf, xd->plane[0].pre[0].stride,
-                     INT_MAX);
+                     xd->plane[0].pre[0].buf, xd->plane[0].pre[0].stride);
 
   dst_mv->as_int = 0;
 
@@ -147,7 +144,7 @@ static int find_best_16x16_intra(VP9_COMP *cpi, PREDICTION_MODE *pbest_mode) {
                             xd->plane[0].dst.buf, xd->plane[0].dst.stride,
                             0, 0, 0);
     err = vp9_sad16x16(x->plane[0].src.buf, x->plane[0].src.stride,
-                       xd->plane[0].dst.buf, xd->plane[0].dst.stride, best_err);
+                       xd->plane[0].dst.buf, xd->plane[0].dst.stride);
 
     // find best
     if (err < best_err) {
