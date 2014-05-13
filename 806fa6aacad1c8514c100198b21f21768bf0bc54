@@ -16,6 +16,24 @@
       "revId": "806fa6aacad1c8514c100198b21f21768bf0bc54",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//p1s\u003d",
+        "filename": "vp9/common/vp9_reconintra.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-05-13T23:51:55Z",
+      "side": 1,
+      "message": "\u003e Can all these void declarations be at very beginning, i.e. \n\u003e  (void) above;\n\u003e  int r, c;\n\nNo. that\u0027s not c89/90 compatible",
+      "parentUuid": "AAAAdn//p2Q\u003d",
+      "revId": "806fa6aacad1c8514c100198b21f21768bf0bc54",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
