@@ -61,6 +61,7 @@
 #define MIN_GF_INTERVAL             4
 #endif
 
+
 // #define LONG_TERM_VBR_CORRECTION
 
 static void swap_yv12(YV12_BUFFER_CONFIG *a, YV12_BUFFER_CONFIG *b) {
@@ -1421,9 +1422,12 @@ void define_fixed_arf_period(VP9_COMP *cpi) {
 static void calculate_section_intra_ratio(struct twopass_rc *twopass,
                                           const FIRSTPASS_STATS *start_pos,
                                           int section_length) {
-  FIRSTPASS_STATS next_frame = { 0 };
-  FIRSTPASS_STATS sectionstats = { 0 };
+  FIRSTPASS_STATS next_frame;
+  FIRSTPASS_STATS sectionstats;
   int i;
+
+  vp9_zero(next_frame);
+  vp9_zero(sectionstats);
 
   reset_fpf_position(twopass, start_pos);
 
@@ -1497,7 +1501,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   RATE_CONTROL *const rc = &cpi->rc;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   struct twopass_rc *const twopass = &cpi->twopass;
-  FIRSTPASS_STATS next_frame = { 0 };
+  FIRSTPASS_STATS next_frame;
   const FIRSTPASS_STATS *start_pos;
   int i;
   double boost_score = 0.0;
@@ -1524,10 +1528,10 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   int flash_detected;
   int active_max_gf_interval;
 
-  twopass->gf_group_bits = 0;
-
   vp9_clear_system_state();
+  vp9_zero(next_frame);
 
+  twopass->gf_group_bits = 0;
   start_pos = twopass->stats_in;
 
   // Load stats for the current frame.
