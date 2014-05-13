@@ -64,7 +64,8 @@ void usage_exit() {
 static void set_roi_map(const vpx_codec_enc_cfg_t *cfg,
                         vpx_codec_ctx_t *codec) {
   unsigned int i;
-  vpx_roi_map_t roi = {0};
+  vpx_roi_map_t roi;
+  memset(&roi, 0, sizeof(roi));
 
   roi.rows = (cfg->g_h + 15) / 16;
   roi.cols = (cfg->g_w + 15) / 16;
@@ -97,7 +98,7 @@ static void set_roi_map(const vpx_codec_enc_cfg_t *cfg,
 static void set_active_map(const vpx_codec_enc_cfg_t *cfg,
                            vpx_codec_ctx_t *codec) {
   unsigned int i;
-  vpx_active_map_t map = {0};
+  vpx_active_map_t map = {0, 0, 0};
 
   map.rows = (cfg->g_h + 15) / 16;
   map.cols = (cfg->g_w + 15) / 16;
@@ -114,7 +115,7 @@ static void set_active_map(const vpx_codec_enc_cfg_t *cfg,
 
 static void unset_active_map(const vpx_codec_enc_cfg_t *cfg,
                              vpx_codec_ctx_t *codec) {
-  vpx_active_map_t map = {0};
+  vpx_active_map_t map = {0, 0, 0};
 
   map.rows = (cfg->g_h + 15) / 16;
   map.cols = (cfg->g_w + 15) / 16;
@@ -153,21 +154,22 @@ static void encode_frame(vpx_codec_ctx_t *codec,
 
 int main(int argc, char **argv) {
   FILE *infile = NULL;
-  vpx_codec_ctx_t codec = {0};
-  vpx_codec_enc_cfg_t cfg = {0};
+  vpx_codec_ctx_t codec;
+  vpx_codec_enc_cfg_t cfg;
   int frame_count = 0;
-  vpx_image_t raw = {0};
+  vpx_image_t raw;
   vpx_codec_err_t res;
-  VpxVideoInfo info = {0};
+  VpxVideoInfo info;
   VpxVideoWriter *writer = NULL;
   const VpxInterface *encoder = NULL;
   const int fps = 2;        // TODO(dkovalev) add command line argument
   const double bits_per_pixel_per_frame = 0.067;
 
   exec_name = argv[0];
-
   if (argc != 6)
     die("Invalid number of arguments");
+
+  memset(&info, 0, sizeof(info));
 
   encoder = get_vpx_encoder_by_name(argv[1]);
   if (!encoder)
