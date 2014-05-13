@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//p2w\u003d",
+        "filename": "test/resize_util.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-05-13T23:34:17Z",
+      "side": 1,
+      "message": "could add some whitespace around the operators",
+      "revId": "eae175691cf2c4439a0fe30837337f206c00da5e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//p2s\u003d",
+        "filename": "test/resize_util.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-05-13T23:34:17Z",
+      "side": 1,
+      "message": "here too",
+      "revId": "eae175691cf2c4439a0fe30837337f206c00da5e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
