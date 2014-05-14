@@ -32,7 +32,6 @@ typedef struct VP9Decoder {
 
   DECLARE_ALIGNED(16, VP9_COMMON, common);
 
-  int64_t last_time_stamp;
   int ready_for_new_data;
 
   int refresh_frame_flags;
@@ -56,12 +55,9 @@ typedef struct VP9Decoder {
 void vp9_initialize_dec();
 
 int vp9_receive_compressed_data(struct VP9Decoder *pbi,
-                                size_t size, const uint8_t **dest,
-                                int64_t time_stamp);
+                                size_t size, const uint8_t **dest);
 
-int vp9_get_raw_frame(struct VP9Decoder *pbi,
-                      YV12_BUFFER_CONFIG *sd,
-                      int64_t *time_stamp, int64_t *time_end_stamp,
+int vp9_get_raw_frame(struct VP9Decoder *pbi, YV12_BUFFER_CONFIG *sd,
                       vp9_ppflags_t *flags);
 
 vpx_codec_err_t vp9_copy_reference_dec(struct VP9Decoder *pbi,
