@@ -24,10 +24,9 @@ static void log_frame_info(VP9_COMMON *cm, const char *str, FILE *f) {
  */
 static void print_mi_data(VP9_COMMON *cm, FILE *file, const char *descriptor,
                           size_t member_offset) {
-  int mi_row;
-  int mi_col;
+  int mi_row, mi_col;
   int mi_index = 0;
-  MODE_INFO **mi_8x8 = cm->mi_grid_visible;
+  MODE_INFO **mi = cm->mi_grid_visible;
   int rows = cm->mi_rows;
   int cols = cm->mi_cols;
   char prefix = descriptor[0];
@@ -38,7 +37,7 @@ static void print_mi_data(VP9_COMMON *cm, FILE *file, const char *descriptor,
     fprintf(file, "%c ", prefix);
     for (mi_col = 0; mi_col < cols; mi_col++) {
       fprintf(file, "%2d ",
-              *((int*) ((char *) (&mi_8x8[mi_index]->mbmi) +
+              *((int*) ((char *) (&mi[mi_index]->mbmi) +
                         member_offset)));
       mi_index++;
     }
@@ -52,7 +51,7 @@ void vp9_print_modes_and_motion_vectors(VP9_COMMON *cm, const char *file) {
   int mi_col;
   int mi_index = 0;
   FILE *mvs = fopen(file, "a");
-  MODE_INFO **mi_8x8 = cm->mi_grid_visible;
+  MODE_INFO **mi = cm->mi_grid_visible;
   int rows = cm->mi_rows;
   int cols = cm->mi_cols;
 
@@ -67,8 +66,8 @@ void vp9_print_modes_and_motion_vectors(VP9_COMMON *cm, const char *file) {
   for (mi_row = 0; mi_row < rows; mi_row++) {
     fprintf(mvs, "V ");
     for (mi_col = 0; mi_col < cols; mi_col++) {
-      fprintf(mvs, "%4d:%4d ", mi_8x8[mi_index]->mbmi.mv[0].as_mv.row,
-                               mi_8x8[mi_index]->mbmi.mv[0].as_mv.col);
+      fprintf(mvs, "%4d:%4d ", mi[mi_index]->mbmi.mv[0].as_mv.row,
+                               mi[mi_index]->mbmi.mv[0].as_mv.col);
       mi_index++;
     }
     fprintf(mvs, "\n");
