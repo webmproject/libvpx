@@ -2803,57 +2803,7 @@ int vp9_get_preview_raw_frame(VP9_COMP *cpi, YV12_BUFFER_CONFIG *dest,
   }
 }
 
-int vp9_set_roimap(VP9_COMP *cpi, unsigned char *map, unsigned int rows,
-                   unsigned int cols, int delta_q[MAX_SEGMENTS],
-                   int delta_lf[MAX_SEGMENTS],
-                   unsigned int threshold[MAX_SEGMENTS]) {
-  signed char feature_data[SEG_LVL_MAX][MAX_SEGMENTS];
-  struct segmentation *seg = &cpi->common.seg;
-  const VP9_COMMON *const cm = &cpi->common;
-  int i;
-
-  if (cm->mb_rows != rows || cm->mb_cols != cols)
-    return -1;
-
-  if (!map) {
-    vp9_disable_segmentation(seg);
-    return 0;
-  }
-
-  vpx_memcpy(cpi->segmentation_map, map, cm->mi_rows * cm->mi_cols);
-
-  // Activate segmentation.
-  vp9_enable_segmentation(seg);
-
-  // Set up the quant, LF and breakout threshold segment data
-  for (i = 0; i < MAX_SEGMENTS; i++) {
-    feature_data[SEG_LVL_ALT_Q][i] = delta_q[i];
-    feature_data[SEG_LVL_ALT_LF][i] = delta_lf[i];
-    cpi->segment_encode_breakout[i] = threshold[i];
-  }
-
-  // Enable the loop and quant changes in the feature mask
-  for (i = 0; i < MAX_SEGMENTS; i++) {
-    if (delta_q[i])
-      vp9_enable_segfeature(seg, i, SEG_LVL_ALT_Q);
-    else
-      vp9_disable_segfeature(seg, i, SEG_LVL_ALT_Q);
-
-    if (delta_lf[i])
-      vp9_enable_segfeature(seg, i, SEG_LVL_ALT_LF);
-    else
-      vp9_disable_segfeature(seg, i, SEG_LVL_ALT_LF);
-  }
-
-  // Initialize the feature data structure
-  // SEGMENT_DELTADATA    0, SEGMENT_ABSDATA      1
-  vp9_set_segment_data(seg, &feature_data[0][0], SEGMENT_DELTADATA);
-
-  return 0;
-}
-
-int vp9_set_active_map(VP9_COMP *cpi, unsigned char *map,
-                       unsigned int rows, unsigned int cols) {
+int vp9_set_active_map(VP9_COMP *cpi, unsigned char *map, int rows, int cols) {
   if (rows == cpi->common.mb_rows && cols == cpi->common.mb_cols) {
     if (map) {
       vpx_memcpy(cpi->active_map, map, rows * cols);
