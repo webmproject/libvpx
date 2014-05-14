@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//pwI\u003d",
+        "filename": "vpxdec.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-05-14T10:02:16Z",
+      "side": 1,
+      "message": "I assume you want to keep this for testing purposes, but can you rename it to --convert_to_8bit, since that is what it is doing now.",
+      "revId": "d239b03b74d0435b0b3abc52045c3228988bc444",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
