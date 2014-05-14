@@ -1551,7 +1551,7 @@ int vp9_refining_search_8p_c(const MACROBLOCK *x,
                              int search_range,
                              const vp9_variance_fn_ptr_t *fn_ptr,
                              const MV *center_mv,
-                             const uint8_t *second_pred, int w, int h) {
+                             const uint8_t *second_pred) {
   const MV neighbors[8] = {{-1, 0}, {0, -1}, {0, 1}, {1, 0},
                            {-1, -1}, {1, -1}, {-1, 1}, {1, 1}};
   const MACROBLOCKD *const xd = &x->e_mbd;

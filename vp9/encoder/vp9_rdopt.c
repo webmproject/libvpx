@@ -2514,8 +2514,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     bestsme = vp9_refining_search_8p_c(x, &tmp_mv, sadpb,
                                        search_range,
                                        &cpi->fn_ptr[bsize],
-                                       &ref_mv[id].as_mv, second_pred,
-                                       pw, ph);
+                                       &ref_mv[id].as_mv, second_pred);
     if (bestsme < INT_MAX)
       bestsme = vp9_get_mvpred_av_var(x, &tmp_mv, &ref_mv[id].as_mv,
                                       second_pred, &cpi->fn_ptr[bsize], 1);

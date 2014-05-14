@@ -144,8 +144,7 @@ int vp9_refining_search_8p_c(const MACROBLOCK *x,
                              MV *ref_mv, int error_per_bit,
                              int search_range,
                              const vp9_variance_fn_ptr_t *fn_ptr,
-                             const MV *center_mv, const uint8_t *second_pred,
-                             int w, int h);
+                             const MV *center_mv, const uint8_t *second_pred);
 #ifdef __cplusplus
 }  // extern "C"
 #endif
