@@ -39,7 +39,6 @@ typedef struct VP9Decoder {
 
   int decoded_key_frame;
 
-  int do_loopfilter_inline;  // apply loopfilter to available rows immediately
   VP9Worker lf_worker;
 
   VP9Worker *tile_workers;

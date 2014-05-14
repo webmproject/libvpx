@@ -132,8 +132,8 @@ static int loop_filter_row_worker(void *arg1, void *arg2) {
 
 // VP9 decoder: Implement multi-threaded loopfilter that uses the tile
 // threads.
-void vp9_loop_filter_frame_mt(VP9Decoder *pbi,
-                              VP9_COMMON *cm,
+void vp9_loop_filter_frame_mt(YV12_BUFFER_CONFIG *frame,
+                              VP9Decoder *pbi, VP9_COMMON *cm,
                               int frame_filter_level,
                               int y_only, int partial_frame) {
   VP9LfSync *const lf_sync = &pbi->lf_row_sync;
@@ -184,7 +184,7 @@ void vp9_loop_filter_frame_mt(VP9Decoder *pbi,
     worker->hook = (VP9WorkerHook)loop_filter_row_worker;
 
     // Loopfilter data
-    lf_data->frame_buffer = get_frame_new_buffer(cm);
+    lf_data->frame_buffer = frame;
     lf_data->cm = cm;
     lf_data->xd = pbi->mb;
     lf_data->start = i;

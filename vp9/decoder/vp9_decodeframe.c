@@ -676,13 +676,13 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
 }
 
 static void decode_tile(VP9Decoder *pbi, const TileInfo *const tile,
-                        vp9_reader *r) {
+                        int do_loopfilter_inline, vp9_reader *r) {
   const int num_threads = pbi->max_threads;
   VP9_COMMON *const cm = &pbi->common;
   int mi_row, mi_col;
   MACROBLOCKD *xd = &pbi->mb;
 
-  if (pbi->do_loopfilter_inline) {
+  if (do_loopfilter_inline) {
     LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
     lf_data->frame_buffer = get_frame_new_buffer(cm);
     lf_data->cm = cm;
@@ -702,7 +702,7 @@ static void decode_tile(VP9Decoder *pbi, const TileInfo *const tile,
       decode_partition(cm, xd, tile, mi_row, mi_col, r, BLOCK_64X64);
     }
 
-    if (pbi->do_loopfilter_inline) {
+    if (do_loopfilter_inline) {
       const int lf_start = mi_row - MI_BLOCK_SIZE;
       LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
 
@@ -723,7 +723,7 @@ static void decode_tile(VP9Decoder *pbi, const TileInfo *const tile,
     }
   }
 
-  if (pbi->do_loopfilter_inline) {
+  if (do_loopfilter_inline) {
     LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
 
     vp9_worker_sync(&pbi->lf_worker);
@@ -811,7 +811,8 @@ static void get_tile_buffers(VP9Decoder *pbi,
 
 static const uint8_t *decode_tiles(VP9Decoder *pbi,
                                    const uint8_t *data,
-                                   const uint8_t *data_end) {
+                                   const uint8_t *data_end,
+                                   int do_loopfilter_inline) {
   VP9_COMMON *const cm = &pbi->common;
   const int aligned_cols = mi_cols_aligned_to_sb(cm->mi_cols);
   const int tile_cols = 1 << cm->log2_tile_cols;
@@ -846,7 +847,7 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
       vp9_tile_init(&tile, cm, tile_row, col);
       setup_token_decoder(buf->data, data_end, buf->size, &cm->error, &r,
                           pbi->decrypt_cb, pbi->decrypt_state);
-      decode_tile(pbi, &tile, &r);
+      decode_tile(pbi, &tile, do_loopfilter_inline, &r);
 
       if (last_tile)
         end = vp9_reader_find_end(&r);
@@ -1306,6 +1307,8 @@ int vp9_decode_frame(VP9Decoder *pbi,
   const int tile_rows = 1 << cm->log2_tile_rows;
   const int tile_cols = 1 << cm->log2_tile_cols;
   YV12_BUFFER_CONFIG *const new_fb = get_frame_new_buffer(cm);
+  const int do_loopfilter_inline = tile_rows == 1 && tile_cols == 1 &&
+                                   cm->lf.filter_level;
   xd->cur_buf = new_fb;
 
   if (!first_partition_size) {
@@ -1322,9 +1325,7 @@ int vp9_decode_frame(VP9Decoder *pbi,
     vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
                        "Truncated packet or corrupt header length");
 
-  pbi->do_loopfilter_inline =
-      (cm->log2_tile_rows | cm->log2_tile_cols) == 0 && cm->lf.filter_level;
-  if (pbi->do_loopfilter_inline && pbi->lf_worker.data1 == NULL) {
+  if (do_loopfilter_inline && pbi->lf_worker.data1 == NULL) {
     CHECK_MEM_ERROR(cm, pbi->lf_worker.data1,
                     vpx_memalign(32, sizeof(LFWorkerData)));
     pbi->lf_worker.hook = (VP9WorkerHook)vp9_loop_filter_worker;
@@ -1357,7 +1358,8 @@ int vp9_decode_frame(VP9Decoder *pbi,
       cm->frame_parallel_decoding_mode) {
     *p_data_end = decode_tiles_mt(pbi, data + first_partition_size, data_end);
   } else {
-    *p_data_end = decode_tiles(pbi, data + first_partition_size, data_end);
+    *p_data_end = decode_tiles(pbi, data + first_partition_size, data_end,
+                               do_loopfilter_inline);
   }
 
   new_fb->corrupted |= xd->corrupted;
@@ -1385,6 +1387,17 @@ int vp9_decode_frame(VP9Decoder *pbi,
 
   if (cm->refresh_frame_context)
     cm->frame_contexts[cm->frame_context_idx] = cm->fc;
+
+  // Loopfilter
+  if (!do_loopfilter_inline) {
+    // If multiple threads are used to decode tiles, then we use those threads
+    // to do parallel loopfiltering.
+    if (pbi->num_tile_workers) {
+      vp9_loop_filter_frame_mt(new_fb, pbi, cm, cm->lf.filter_level, 0, 0);
+    } else {
+      vp9_loop_filter_frame(new_fb, cm, &pbi->mb, cm->lf.filter_level, 0, 0);
+    }
+  }
 
   return 0;
 }
