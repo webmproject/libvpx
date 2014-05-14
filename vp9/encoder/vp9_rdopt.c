@@ -2124,8 +2124,7 @@ static void mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
 
     // Find sad for current vector.
     this_sad = cpi->fn_ptr[block_size].sdf(src_y_ptr, x->plane[0].src.stride,
-                                           ref_y_ptr, ref_y_stride,
-                                           0x7fffffff);
+                                           ref_y_ptr, ref_y_stride);
 
     // Note if it is the best so far.
     if (this_sad < best_sad) {

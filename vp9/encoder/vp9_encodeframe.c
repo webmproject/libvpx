@@ -1297,14 +1297,14 @@ static int is_background(VP9_COMP *cpi, const TileInfo *const tile,
   if (row8x8_remaining >= MI_BLOCK_SIZE &&
       col8x8_remaining >= MI_BLOCK_SIZE) {
     this_sad = cpi->fn_ptr[BLOCK_64X64].sdf(src, src_stride,
-                                            pre, pre_stride, 0x7fffffff);
+                                            pre, pre_stride);
     threshold = (1 << 12);
   } else {
     int r, c;
     for (r = 0; r < row8x8_remaining; r += 2)
       for (c = 0; c < col8x8_remaining; c += 2)
-        this_sad += cpi->fn_ptr[BLOCK_16X16].sdf(src, src_stride, pre,
-                                                 pre_stride, 0x7fffffff);
+        this_sad += cpi->fn_ptr[BLOCK_16X16].sdf(src, src_stride,
+                                                 pre, pre_stride);
     threshold = (row8x8_remaining * col8x8_remaining) << 6;
   }
 
