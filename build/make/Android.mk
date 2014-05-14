@@ -38,8 +38,9 @@
 # For this we import the 'cpufeatures' module from the NDK sources.
 # libvpx can also be configured without this runtime detection method.
 # Configuring with --disable-runtime-cpu-detect will assume presence of NEON.
-# Configuring with --disable-runtime-cpu-detect --disable-neon will remove any
-# NEON dependency.
+# Configuring with --disable-runtime-cpu-detect --disable-neon \
+#     --disable-neon-asm
+# will remove any NEON dependency.
 
 # To change to building armeabi, run ./libvpx/configure again, but with
 # --target=arm5te-android-gcc and modify the Application.mk file to
