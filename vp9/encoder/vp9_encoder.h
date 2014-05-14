@@ -552,14 +552,7 @@ int vp9_set_reference_enc(VP9_COMP *cpi, VP9_REFFRAME ref_frame_flag,
 
 int vp9_update_entropy(VP9_COMP *cpi, int update);
 
-int vp9_set_roimap(VP9_COMP *cpi, unsigned char *map,
-                   unsigned int rows, unsigned int cols,
-                   int delta_q[MAX_SEGMENTS],
-                   int delta_lf[MAX_SEGMENTS],
-                   unsigned int threshold[MAX_SEGMENTS]);
-
-int vp9_set_active_map(VP9_COMP *cpi, unsigned char *map,
-                       unsigned int rows, unsigned int cols);
+int vp9_set_active_map(VP9_COMP *cpi, unsigned char *map, int rows, int cols);
 
 int vp9_set_internal_size(VP9_COMP *cpi,
                           VPX_SCALING horiz_mode, VPX_SCALING vert_mode);
