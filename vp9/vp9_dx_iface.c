@@ -252,8 +252,6 @@ static void init_decoder(vpx_codec_alg_priv_t *ctx) {
   ctx->pbi->max_threads = ctx->cfg.threads;
   ctx->pbi->inv_tile_order = ctx->invert_tile_order;
 
-  vp9_initialize_dec();
-
   // If postprocessing was enabled by the application and a
   // configuration has not been provided, default it.
   if (!ctx->postproc_cfg_set &&
