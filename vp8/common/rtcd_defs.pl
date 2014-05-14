@@ -532,7 +532,7 @@ specialize qw/vp8_yv12_copy_partial_frame neon/;
 # Denoiser filter
 #
 if (vpx_config("CONFIG_TEMPORAL_DENOISING") eq "yes") {
-    add_proto qw/int vp8_denoiser_filter/, "struct yv12_buffer_config* mc_running_avg, struct yv12_buffer_config* running_avg, struct macroblock* signal, unsigned int motion_magnitude2, int y_offset, int uv_offset";
+    add_proto qw/int vp8_denoiser_filter/, "unsigned char *mc_running_avg_y, int mc_avg_y_stride, unsigned char *running_avg_y, int avg_y_stride, unsigned char *sig, int sig_stride, unsigned int motion_magnitude";
     specialize qw/vp8_denoiser_filter sse2 neon/;
 }
 

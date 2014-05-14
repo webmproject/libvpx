@@ -51,17 +51,13 @@ static const unsigned int SSE_THRESHOLD = 16 * 16 * 40;
  * [16, 255]              6                                    7
  */
 
-int vp8_denoiser_filter_c(YV12_BUFFER_CONFIG *mc_running_avg,
-                          YV12_BUFFER_CONFIG *running_avg, MACROBLOCK *signal,
-                          unsigned int motion_magnitude, int y_offset,
-                          int uv_offset)
+int vp8_denoiser_filter_c(unsigned char *mc_running_avg_y, int mc_avg_y_stride,
+                          unsigned char *running_avg_y, int avg_y_stride,
+                          unsigned char *sig, int sig_stride,
+                          unsigned int motion_magnitude)
 {
-    unsigned char *sig = signal->thismb;
-    int sig_stride = 16;
-    unsigned char *mc_running_avg_y = mc_running_avg->y_buffer + y_offset;
-    int mc_avg_y_stride = mc_running_avg->y_stride;
-    unsigned char *running_avg_y = running_avg->y_buffer + y_offset;
-    int avg_y_stride = running_avg->y_stride;
+    unsigned char *running_avg_y_start = running_avg_y;
+    unsigned char *sig_start = sig;
     int r, c, i;
     int sum_diff = 0;
     int adj_val[3] = {3, 4, 6};
@@ -130,8 +126,7 @@ int vp8_denoiser_filter_c(YV12_BUFFER_CONFIG *mc_running_avg,
     if (abs(sum_diff) > SUM_DIFF_THRESHOLD)
         return COPY_BLOCK;
 
-    vp8_copy_mem16x16(running_avg->y_buffer + y_offset, avg_y_stride,
-                      signal->thismb, sig_stride);
+    vp8_copy_mem16x16(running_avg_y_start, avg_y_stride, sig_start, sig_stride);
     return FILTER_BLOCK;
 }
 
@@ -285,12 +280,17 @@ void vp8_denoiser_denoise_mb(VP8_DENOISER *denoiser,
 
     if (decision == FILTER_BLOCK)
     {
+        unsigned char *mc_running_avg_y =
+            denoiser->yv12_mc_running_avg.y_buffer + recon_yoffset;
+        int mc_avg_y_stride = denoiser->yv12_mc_running_avg.y_stride;
+        unsigned char *running_avg_y =
+            denoiser->yv12_running_avg[INTRA_FRAME].y_buffer + recon_yoffset;
+        int avg_y_stride = denoiser->yv12_running_avg[INTRA_FRAME].y_stride;
+
         /* Filter. */
-        decision = vp8_denoiser_filter(&denoiser->yv12_mc_running_avg,
-                                       &denoiser->yv12_running_avg[INTRA_FRAME],
-                                       x,
-                                       motion_magnitude2,
-                                       recon_yoffset, recon_uvoffset);
+        decision = vp8_denoiser_filter(mc_running_avg_y, mc_avg_y_stride,
+                                         running_avg_y, avg_y_stride,
+                                         x->thismb, 16, motion_magnitude2);
     }
     if (decision == COPY_BLOCK)
     {
