@@ -1725,8 +1725,6 @@ static void output_frame_level_debug_stats(VP9_COMP *cpi) {
 #endif
 
 static void encode_without_recode_loop(VP9_COMP *cpi,
-                                       size_t *size,
-                                       uint8_t *dest,
                                        int q) {
   VP9_COMMON *const cm = &cpi->common;
   vp9_clear_system_state();
@@ -2162,7 +2160,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   }
 
   if (cpi->sf.recode_loop == DISALLOW_RECODE) {
-    encode_without_recode_loop(cpi, size, dest, q);
+    encode_without_recode_loop(cpi, q);
   } else {
     encode_with_recode_loop(cpi, size, dest, q, bottom_index, top_index);
   }
