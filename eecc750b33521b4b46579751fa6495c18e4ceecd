@@ -16,6 +16,24 @@
       "revId": "eecc750b33521b4b46579751fa6495c18e4ceecd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ppI\u003d",
+        "filename": "vp9/decoder/vp9_dthread.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-05-14T17:50:29Z",
+      "side": 0,
+      "message": "I agree with this, better to address the root causes of the duplication of xd itself.",
+      "parentUuid": "AAAAdn//prI\u003d",
+      "revId": "eecc750b33521b4b46579751fa6495c18e4ceecd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
