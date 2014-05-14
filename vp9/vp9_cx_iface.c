@@ -211,8 +211,8 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
       ERROR("Option --tune=ssim is not currently supported in VP9.");
 
   if (cfg->g_pass == VPX_RC_LAST_PASS) {
-    size_t           packet_sz = sizeof(FIRSTPASS_STATS);
-    int              n_packets = (int)(cfg->rc_twopass_stats_in.sz / packet_sz);
+    const size_t packet_sz = sizeof(FIRSTPASS_STATS);
+    const int n_packets = (int)(cfg->rc_twopass_stats_in.sz / packet_sz);
     const FIRSTPASS_STATS *stats;
 
     if (cfg->rc_twopass_stats_in.buf == NULL)
@@ -464,7 +464,7 @@ static vpx_codec_err_t encoder_set_config(vpx_codec_alg_priv_t *ctx,
 
 static vpx_codec_err_t ctrl_get_param(vpx_codec_alg_priv_t *ctx, int ctrl_id,
                                  va_list args) {
-  void *arg = va_arg(args, void *);
+  void *const arg = va_arg(args, void *);
 
 #define MAP(id, var) case id: *(RECAST(id, arg)) = var; break
 
@@ -525,6 +525,7 @@ static vpx_codec_err_t ctrl_set_param(vpx_codec_alg_priv_t *ctx, int ctrl_id,
 static vpx_codec_err_t encoder_init(vpx_codec_ctx_t *ctx,
                                     vpx_codec_priv_enc_mr_cfg_t *data) {
   vpx_codec_err_t res = VPX_CODEC_OK;
+  (void)data;
 
   if (ctx->priv == NULL) {
     int i;
@@ -880,14 +881,15 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
   return res;
 }
 
-static const vpx_codec_cx_pkt_t *encoder_get_cxdata(vpx_codec_alg_priv_t  *ctx,
+static const vpx_codec_cx_pkt_t *encoder_get_cxdata(vpx_codec_alg_priv_t *ctx,
                                                     vpx_codec_iter_t *iter) {
   return vpx_codec_pkt_list_get(&ctx->pkt_list.head, iter);
 }
 
 static vpx_codec_err_t ctrl_set_reference(vpx_codec_alg_priv_t *ctx,
-                                          int ctr_id, va_list args) {
+                                          int ctrl_id, va_list args) {
   vpx_ref_frame_t *const frame = va_arg(args, vpx_ref_frame_t *);
+  (void)ctrl_id;
 
   if (frame != NULL) {
     YV12_BUFFER_CONFIG sd;
@@ -902,8 +904,9 @@ static vpx_codec_err_t ctrl_set_reference(vpx_codec_alg_priv_t *ctx,
 }
 
 static vpx_codec_err_t ctrl_copy_reference(vpx_codec_alg_priv_t *ctx,
-                                           int ctr_id, va_list args) {
+                                           int ctrl_id, va_list args) {
   vpx_ref_frame_t *const frame = va_arg(args, vpx_ref_frame_t *);
+  (void)ctrl_id;
 
   if (frame != NULL) {
     YV12_BUFFER_CONFIG sd;
@@ -918,11 +921,12 @@ static vpx_codec_err_t ctrl_copy_reference(vpx_codec_alg_priv_t *ctx,
 }
 
 static vpx_codec_err_t ctrl_get_reference(vpx_codec_alg_priv_t *ctx,
-                                          int ctr_id, va_list args) {
-  vp9_ref_frame_t *frame = va_arg(args, vp9_ref_frame_t *);
+                                          int ctrl_id, va_list args) {
+  vp9_ref_frame_t *const frame = va_arg(args, vp9_ref_frame_t *);
+  (void)ctrl_id;
 
   if (frame != NULL) {
-    YV12_BUFFER_CONFIG* fb;
+    YV12_BUFFER_CONFIG *fb;
 
     vp9_get_reference_enc(ctx->cpi, frame->idx, &fb);
     yuvconfig2image(&frame->img, fb, NULL);
@@ -955,7 +959,8 @@ static vpx_codec_err_t ctrl_set_previewpp(vpx_codec_alg_priv_t *ctx,
 
 static vpx_image_t *encoder_get_preview(vpx_codec_alg_priv_t *ctx) {
   YV12_BUFFER_CONFIG sd;
-  vp9_ppflags_t flags = {0};
+  vp9_ppflags_t flags;
+  vp9_zero(flags);
 
   if (ctx->preview_ppcfg.post_proc_flag) {
     flags.post_proc_flag   = ctx->preview_ppcfg.post_proc_flag;
@@ -972,36 +977,47 @@ static vpx_image_t *encoder_get_preview(vpx_codec_alg_priv_t *ctx) {
 }
 
 static vpx_codec_err_t ctrl_update_entropy(vpx_codec_alg_priv_t *ctx,
-                                           int ctr_id, va_list args) {
+                                           int ctrl_id, va_list args) {
   const int update = va_arg(args, int);
+  (void)ctrl_id;
+
   vp9_update_entropy(ctx->cpi, update);
   return VPX_CODEC_OK;
 }
 
 static vpx_codec_err_t ctrl_update_reference(vpx_codec_alg_priv_t *ctx,
-                                             int ctr_id, va_list args) {
+                                             int ctrl_id, va_list args) {
   const int ref_frame_flags = va_arg(args, int);
+  (void)ctrl_id;
+
   vp9_update_reference(ctx->cpi, ref_frame_flags);
   return VPX_CODEC_OK;
 }
 
 static vpx_codec_err_t ctrl_use_reference(vpx_codec_alg_priv_t *ctx,
-                                          int ctr_id, va_list args) {
+                                          int ctrl_id, va_list args) {
   const int reference_flag = va_arg(args, int);
+  (void)ctrl_id;
+
   vp9_use_as_reference(ctx->cpi, reference_flag);
   return VPX_CODEC_OK;
 }
 
 static vpx_codec_err_t ctrl_set_roi_map(vpx_codec_alg_priv_t *ctx,
-                                        int ctr_id, va_list args) {
+                                        int ctrl_id, va_list args) {
+  (void)ctx;
+  (void)ctrl_id;
+  (void)args;
+
   // TODO(yaowu): Need to re-implement and test for VP9.
   return VPX_CODEC_INVALID_PARAM;
 }
 
 
 static vpx_codec_err_t ctrl_set_active_map(vpx_codec_alg_priv_t *ctx,
-                                           int ctr_id, va_list args) {
+                                           int ctrl_id, va_list args) {
   vpx_active_map_t *const map = va_arg(args, vpx_active_map_t *);
+  (void)ctrl_id;
 
   if (map) {
     if (!vp9_set_active_map(ctx->cpi, map->active_map,
@@ -1015,8 +1031,9 @@ static vpx_codec_err_t ctrl_set_active_map(vpx_codec_alg_priv_t *ctx,
 }
 
 static vpx_codec_err_t ctrl_set_scale_mode(vpx_codec_alg_priv_t *ctx,
-                                           int ctr_id, va_list args) {
+                                           int ctrl_id, va_list args) {
   vpx_scaling_mode_t *const mode = va_arg(args, vpx_scaling_mode_t *);
+  (void)ctrl_id;
 
   if (mode) {
     const int res = vp9_set_internal_size(ctx->cpi,
@@ -1028,10 +1045,12 @@ static vpx_codec_err_t ctrl_set_scale_mode(vpx_codec_alg_priv_t *ctx,
   }
 }
 
-static vpx_codec_err_t ctrl_set_svc(vpx_codec_alg_priv_t *ctx, int ctr_id,
+static vpx_codec_err_t ctrl_set_svc(vpx_codec_alg_priv_t *ctx, int ctrl_id,
                                     va_list args) {
   int data = va_arg(args, int);
   const vpx_codec_enc_cfg_t *cfg = &ctx->cfg;
+  (void)ctrl_id;
+
   vp9_set_svc(ctx->cpi, data);
   // CBR or two pass mode for SVC with both temporal and spatial layers
   // not yet supported.
@@ -1047,11 +1066,12 @@ static vpx_codec_err_t ctrl_set_svc(vpx_codec_alg_priv_t *ctx, int ctr_id,
 }
 
 static vpx_codec_err_t ctrl_set_svc_layer_id(vpx_codec_alg_priv_t *ctx,
-                                             int ctr_id,
-                                             va_list args) {
+                                             int ctrl_id, va_list args) {
   vpx_svc_layer_id_t *const data = va_arg(args, vpx_svc_layer_id_t *);
   VP9_COMP *const cpi = (VP9_COMP *)ctx->cpi;
   SVC *const svc = &cpi->svc;
+  (void)ctrl_id;
+
   svc->spatial_layer_id = data->spatial_layer_id;
   svc->temporal_layer_id = data->temporal_layer_id;
   // Checks on valid layer_id input.
@@ -1067,9 +1087,10 @@ static vpx_codec_err_t ctrl_set_svc_layer_id(vpx_codec_alg_priv_t *ctx,
 }
 
 static vpx_codec_err_t ctrl_set_svc_parameters(vpx_codec_alg_priv_t *ctx,
-                                               int ctr_id, va_list args) {
+                                               int ctrl_id, va_list args) {
   VP9_COMP *const cpi = ctx->cpi;
   vpx_svc_parameters_t *const params = va_arg(args, vpx_svc_parameters_t *);
+  (void)ctrl_id;
 
   if (params == NULL)
     return VPX_CODEC_INVALID_PARAM;
@@ -1214,6 +1235,7 @@ CODEC_INTERFACE(vpx_codec_vp9_cx) = {
     NOT_IMPLEMENTED,  // vpx_codec_get_si_fn_t
     NOT_IMPLEMENTED,  // vpx_codec_decode_fn_t
     NOT_IMPLEMENTED,  // vpx_codec_frame_get_fn_t
+    NOT_IMPLEMENTED   // vpx_codec_set_fb_fn_t
   },
   {  // NOLINT
     encoder_usage_cfg_map,  // vpx_codec_enc_cfg_map_t
@@ -1222,6 +1244,6 @@ CODEC_INTERFACE(vpx_codec_vp9_cx) = {
     encoder_set_config,     // vpx_codec_enc_config_set_fn_t
     NOT_IMPLEMENTED,        // vpx_codec_get_global_headers_fn_t
     encoder_get_preview,    // vpx_codec_get_preview_frame_fn_t
-    NOT_IMPLEMENTED ,       // vpx_codec_enc_mr_get_mem_loc_fn_t
+    NOT_IMPLEMENTED         // vpx_codec_enc_mr_get_mem_loc_fn_t
   }
 };
