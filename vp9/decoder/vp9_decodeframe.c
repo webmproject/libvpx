@@ -1325,16 +1325,6 @@ int vp9_decode_frame(VP9Decoder *pbi,
     vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
                        "Truncated packet or corrupt header length");
 
-  if (do_loopfilter_inline && pbi->lf_worker.data1 == NULL) {
-    CHECK_MEM_ERROR(cm, pbi->lf_worker.data1,
-                    vpx_memalign(32, sizeof(LFWorkerData)));
-    pbi->lf_worker.hook = (VP9WorkerHook)vp9_loop_filter_worker;
-    if (pbi->max_threads > 1 && !vp9_worker_reset(&pbi->lf_worker)) {
-      vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
-                         "Loop filter thread creation failed");
-    }
-  }
-
   init_macroblockd(cm, &pbi->mb);
 
   if (cm->coding_use_prev_mi)
@@ -1357,9 +1347,23 @@ int vp9_decode_frame(VP9Decoder *pbi,
   if (pbi->max_threads > 1 && tile_rows == 1 && tile_cols > 1 &&
       cm->frame_parallel_decoding_mode) {
     *p_data_end = decode_tiles_mt(pbi, data + first_partition_size, data_end);
+    // If multiple threads are used to decode tiles, then we use those threads
+    // to do parallel loopfiltering.
+    vp9_loop_filter_frame_mt(new_fb, pbi, cm, cm->lf.filter_level, 0, 0);
   } else {
+    if (do_loopfilter_inline && pbi->lf_worker.data1 == NULL) {
+      CHECK_MEM_ERROR(cm, pbi->lf_worker.data1,
+                      vpx_memalign(32, sizeof(LFWorkerData)));
+      pbi->lf_worker.hook = (VP9WorkerHook)vp9_loop_filter_worker;
+      if (pbi->max_threads > 1 && !vp9_worker_reset(&pbi->lf_worker)) {
+        vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
+                           "Loop filter thread creation failed");
+      }
+    }
     *p_data_end = decode_tiles(pbi, data + first_partition_size, data_end,
                                do_loopfilter_inline);
+    if (!do_loopfilter_inline)
+      vp9_loop_filter_frame(new_fb, cm, &pbi->mb, cm->lf.filter_level, 0, 0);
   }
 
   new_fb->corrupted |= xd->corrupted;
@@ -1387,17 +1391,6 @@ int vp9_decode_frame(VP9Decoder *pbi,
 
   if (cm->refresh_frame_context)
     cm->frame_contexts[cm->frame_context_idx] = cm->fc;
-
-  // Loopfilter
-  if (!do_loopfilter_inline) {
-    // If multiple threads are used to decode tiles, then we use those threads
-    // to do parallel loopfiltering.
-    if (pbi->num_tile_workers) {
-      vp9_loop_filter_frame_mt(new_fb, pbi, cm, cm->lf.filter_level, 0, 0);
-    } else {
-      vp9_loop_filter_frame(new_fb, cm, &pbi->mb, cm->lf.filter_level, 0, 0);
-    }
-  }
 
   return 0;
 }
