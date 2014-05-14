@@ -1474,7 +1474,8 @@ static int calculate_boost_bits(int frame_count,
                                 int boost, int64_t total_group_bits) {
   int allocation_chunks;
 
-  if (!boost)
+  // return 0 for invalid inputs (could arise e.g. through rounding errors)
+  if (!boost || (total_group_bits <= 0) || (frame_count <= 0) )
     return 0;
 
   allocation_chunks = (frame_count * 100) + boost;
@@ -2030,15 +2031,15 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   } else {
     twopass->kf_group_bits = 0;
   }
+  twopass->kf_group_bits = MAX(0, twopass->kf_group_bits);
+
   // Reset the first pass file position.
   reset_fpf_position(twopass, start_position);
 
-  // Determine how big to make this keyframe based on how well the subsequent
-  // frames use inter blocks.
+  // Scan through the kf group collating various stats used to deteermine
+  // how many bits to spend on it.
   decay_accumulator = 1.0;
   boost_score = 0.0;
-
-  // Scan through the kf group collating various stats.
   for (i = 0; i < rc->frames_to_key; ++i) {
     if (EOF == input_stats(twopass, &next_frame))
       break;
@@ -2075,84 +2076,27 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     }
   }
 
+  // Store the zero motion percentage
+  twopass->kf_zeromotion_pct = (int)(zero_motion_accumulator * 100.0);
+
   // Calculate a section intra ratio used in setting max loop filter.
   calculate_section_intra_ratio(twopass, start_position, rc->frames_to_key);
 
   // Work out how many bits to allocate for the key frame itself.
-  if (1) {
-    int kf_boost = (int)boost_score;
-    int allocation_chunks;
+  rc->kf_boost = (int)boost_score;
 
-    if (kf_boost < (rc->frames_to_key * 3))
-      kf_boost = (rc->frames_to_key * 3);
+  if (rc->kf_boost  < (rc->frames_to_key * 3))
+    rc->kf_boost  = (rc->frames_to_key * 3);
+  if (rc->kf_boost   < MIN_KF_BOOST)
+    rc->kf_boost = MIN_KF_BOOST;
 
-    if (kf_boost < MIN_KF_BOOST)
-      kf_boost = MIN_KF_BOOST;
+  twopass->kf_bits = calculate_boost_bits((rc->frames_to_key - 1),
+                                          rc->kf_boost, twopass->kf_group_bits);
 
-    // Make a note of baseline boost and the zero motion
-    // accumulator value for use elsewhere.
-    rc->kf_boost = kf_boost;
-    twopass->kf_zeromotion_pct = (int)(zero_motion_accumulator * 100.0);
+  twopass->kf_group_bits -= twopass->kf_bits;
 
-    // Key frame size depends on:
-    // (1) the error score for the whole key frame group,
-    // (2) the key frames' own error if this is smaller than the
-    //     average for the group (optional),
-    // (3) insuring that the frame receives at least the allocation it would
-    //     have received based on its own error score vs the error score
-    //     remaining.
-    // Special case:
-    // If the sequence appears almost totally static we want to spend almost
-    // all of the bits on the key frame.
-    //
-    // We use (cpi->rc.frames_to_key - 1) below because the key frame itself is
-    // taken care of by kf_boost.
-    if (zero_motion_accumulator >= 0.99) {
-      allocation_chunks = ((rc->frames_to_key - 1) * 10) + kf_boost;
-    } else {
-      allocation_chunks = ((rc->frames_to_key - 1) * 100) + kf_boost;
-    }
-
-    // Prevent overflow.
-    if (kf_boost > 1028) {
-      const int divisor = kf_boost >> 10;
-      kf_boost /= divisor;
-      allocation_chunks /= divisor;
-    }
-
-    twopass->kf_group_bits = MAX(0, twopass->kf_group_bits);
-    // Calculate the number of bits to be spent on the key frame.
-    twopass->kf_bits = (int)((double)kf_boost *
-        ((double)twopass->kf_group_bits / allocation_chunks));
-
-    // If the key frame is actually easier than the average for the
-    // kf group (which does sometimes happen, e.g. a blank intro frame)
-    // then use an alternate calculation based on the kf error score
-    // which should give a smaller key frame.
-    if (kf_mod_err < kf_group_err / rc->frames_to_key) {
-      double alt_kf_grp_bits = ((double)twopass->bits_left *
-         (kf_mod_err * (double)rc->frames_to_key) /
-         DOUBLE_DIVIDE_CHECK(twopass->modified_error_left));
-
-      const int alt_kf_bits = (int)((double)kf_boost *
-                          (alt_kf_grp_bits / (double)allocation_chunks));
-
-      if (twopass->kf_bits > alt_kf_bits)
-        twopass->kf_bits = alt_kf_bits;
-    } else {
-      // Else if it is much harder than other frames in the group make sure
-      // it at least receives an allocation in keeping with its relative
-      // error score.
-      const int alt_kf_bits = (int)((double)twopass->bits_left * (kf_mod_err /
-               DOUBLE_DIVIDE_CHECK(twopass->modified_error_left)));
-
-      if (alt_kf_bits > twopass->kf_bits)
-        twopass->kf_bits = alt_kf_bits;
-    }
-    twopass->kf_group_bits -= twopass->kf_bits;
-    // Per frame bit target for this frame.
-    vp9_rc_set_frame_target(cpi, twopass->kf_bits);
-  }
+  // Per frame bit target for this frame.
+  vp9_rc_set_frame_target(cpi, twopass->kf_bits);
 
   // Note the total error score of the kf group minus the key frame itself.
   twopass->kf_group_error_left = (int)(kf_group_err - kf_mod_err);
