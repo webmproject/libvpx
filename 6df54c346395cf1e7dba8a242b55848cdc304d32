@@ -16,6 +16,24 @@
       "revId": "6df54c346395cf1e7dba8a242b55848cdc304d32",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//pv4\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1756,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-05-14T10:58:04Z",
+      "side": 1,
+      "message": "Not as things stand. If we decide to implement out of order kf coding as part of a pyramid style scheme then we will need to address this but I do not think it is not pertinent to this initial clean up as is.\n\nIn a later patch I hope to move to further refactor the code in regard to the multiple calls to  vp9_rc_set_frame_target().",
+      "parentUuid": "AAAAdn//p/U\u003d",
+      "revId": "6df54c346395cf1e7dba8a242b55848cdc304d32",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
