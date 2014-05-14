@@ -81,13 +81,13 @@ ifneq ($(CONFIG_SHARED),yes)
 EXAMPLES-$(CONFIG_VP9_ENCODER)    += resize_util.c
 endif
 
-EXAMPLES-$(CONFIG_ENCODERS)         += vpx_temporal_scalable_patterns.c
-vpx_temporal_scalable_patterns.SRCS += ivfenc.c ivfenc.h
-vpx_temporal_scalable_patterns.SRCS += tools_common.c tools_common.h
-vpx_temporal_scalable_patterns.SRCS += video_common.h
-vpx_temporal_scalable_patterns.SRCS += video_writer.h video_writer.c
-vpx_temporal_scalable_patterns.GUID  = B18C08F2-A439-4502-A78E-849BE3D60947
-vpx_temporal_scalable_patterns.DESCRIPTION = Temporal Scalability Encoder
+EXAMPLES-$(CONFIG_ENCODERS)          += vpx_temporal_svc_encoder.c
+vpx_temporal_svc_encoder.SRCS        += ivfenc.c ivfenc.h
+vpx_temporal_svc_encoder.SRCS        += tools_common.c tools_common.h
+vpx_temporal_svc_encoder.SRCS        += video_common.h
+vpx_temporal_svc_encoder.SRCS        += video_writer.h video_writer.c
+vpx_temporal_svc_encoder.GUID        = B18C08F2-A439-4502-A78E-849BE3D60947
+vpx_temporal_svc_encoder.DESCRIPTION = Temporal SVC Encoder
 EXAMPLES-$(CONFIG_VP8_DECODER)     += simple_decoder.c
 simple_decoder.GUID                 = D3BBF1E9-2427-450D-BBFF-B2843C1D44CC
 simple_decoder.SRCS                += ivfdec.h ivfdec.c

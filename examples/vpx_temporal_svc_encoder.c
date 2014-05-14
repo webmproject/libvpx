@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-//  This is an example demonstrating how to implement a multi-layer VP9
+//  This is an example demonstrating how to implement a multi-layer VPx
 //  encoding scheme based on temporal scalability for video applications
 //  that benefit from a scalable bitstream.
 
