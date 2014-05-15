@@ -27,6 +27,13 @@
 extern "C" {
 #endif
 
+// TODO(hkuang): combine this with TileWorkerData.
+typedef struct TileData {
+  VP9_COMMON *cm;
+  vp9_reader bit_reader;
+  DECLARE_ALIGNED(16, MACROBLOCKD, xd);
+} TileData;
+
 typedef struct VP9Decoder {
   DECLARE_ALIGNED(16, MACROBLOCKD, mb);
 
@@ -40,9 +47,11 @@ typedef struct VP9Decoder {
   int decoded_key_frame;
 
   VP9Worker lf_worker;
-
   VP9Worker *tile_workers;
   int num_tile_workers;
+
+  TileData *tile_data;
+  int total_tiles;
 
   VP9LfSync lf_row_sync;
 
