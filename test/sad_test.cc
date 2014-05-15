@@ -32,7 +32,8 @@
 typedef unsigned int (*sad_m_by_n_fn_t)(const unsigned char *source_ptr,
                                         int source_stride,
                                         const unsigned char *reference_ptr,
-                                        int reference_stride);
+                                        int reference_stride,
+                                        unsigned int max_sad);
 typedef std::tr1::tuple<int, int, sad_m_by_n_fn_t> sad_m_by_n_test_param_t;
 
 typedef void (*sad_n_by_n_by_4_fn_t)(const uint8_t *src_ptr,
@@ -86,7 +87,7 @@ class SADTestBase : public ::testing::Test {
 
   // Sum of Absolute Differences. Given two blocks, calculate the absolute
   // difference between two pixels in the same relative location; accumulate.
-  unsigned int ReferenceSAD(int block_idx = 0) {
+  unsigned int ReferenceSAD(unsigned int max_sad, int block_idx = 0) {
     unsigned int sad = 0;
     const uint8_t* const reference = GetReference(block_idx);
 
@@ -94,6 +95,9 @@ class SADTestBase : public ::testing::Test {
       for (int w = 0; w < width_; ++w) {
         sad += abs(source_data_[h * source_stride_ + w]
                - reference[h * reference_stride_ + w]);
+      }
+      if (sad > max_sad) {
+        break;
       }
     }
     return sad;
@@ -130,20 +134,21 @@ class SADTest : public SADTestBase,
   SADTest() : SADTestBase(GET_PARAM(0), GET_PARAM(1)) {}
 
  protected:
-  unsigned int SAD(int block_idx = 0) {
+  unsigned int SAD(unsigned int max_sad, int block_idx = 0) {
     unsigned int ret;
     const uint8_t* const reference = GetReference(block_idx);
 
     REGISTER_STATE_CHECK(ret = GET_PARAM(2)(source_data_, source_stride_,
-                                            reference, reference_stride_));
+                                            reference, reference_stride_,
+                                            max_sad));
     return ret;
   }
 
   void CheckSad(unsigned int max_sad) {
     unsigned int reference_sad, exp_sad;
 
-    reference_sad = ReferenceSAD();
-    exp_sad = SAD();
+    reference_sad = ReferenceSAD(max_sad);
+    exp_sad = SAD(max_sad);
 
     if (reference_sad <= max_sad) {
       ASSERT_EQ(exp_sad, reference_sad);
@@ -174,7 +179,7 @@ class SADx4Test : public SADTestBase,
 
     SADs(exp_sad);
     for (int block = 0; block < 4; block++) {
-      reference_sad = ReferenceSAD(block);
+      reference_sad = ReferenceSAD(UINT_MAX, block);
 
       EXPECT_EQ(exp_sad[block], reference_sad) << "block " << block;
     }
