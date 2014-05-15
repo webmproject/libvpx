@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//pV8\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 521,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-05-15T22:17:32Z",
+      "side": 1,
+      "message": "necessary? seems opt would have been --disable-* given the checks",
+      "revId": "4dcc6d9707f8b3525c8f30c9189ce212416fc406",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
