@@ -41,7 +41,6 @@ typedef struct {
 struct twopass_rc {
   unsigned int section_intra_rating;
   unsigned int next_iiratio;
-  unsigned int this_iiratio;
   FIRSTPASS_STATS total_stats;
   FIRSTPASS_STATS this_frame_stats;
   const FIRSTPASS_STATS *stats_in;
@@ -50,8 +49,6 @@ struct twopass_rc {
   FIRSTPASS_STATS total_left_stats;
   int first_pass_done;
   int64_t bits_left;
-  int64_t clip_bits_total;
-  double avg_iiratio;
   double modified_error_min;
   double modified_error_max;
   double modified_error_total;
@@ -72,7 +69,6 @@ struct twopass_rc {
   int64_t gf_group_bits;
   // Bits for the golden frame or ARF - 2 pass only
   int gf_bits;
-  int alt_extra_bits;
 
   int sr_update_lag;
 

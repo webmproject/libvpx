@@ -1007,25 +1007,6 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
   // This variable monitors how far behind the second ref update is lagging.
   twopass->sr_update_lag = 1;
 
-  // Scan the first pass file and calculate an average Intra / Inter error
-  // score ratio for the sequence.
-  {
-    const FIRSTPASS_STATS *const start_pos = twopass->stats_in;
-    FIRSTPASS_STATS this_frame;
-    double sum_iiratio = 0.0;
-
-    while (input_stats(twopass, &this_frame) != EOF) {
-      const double iiratio = this_frame.intra_error /
-                                 DOUBLE_DIVIDE_CHECK(this_frame.coded_error);
-      sum_iiratio += fclamp(iiratio, 1.0, 20.0);
-    }
-
-    twopass->avg_iiratio = sum_iiratio /
-                               DOUBLE_DIVIDE_CHECK((double)stats->count);
-
-    reset_fpf_position(twopass, start_pos);
-  }
-
   // Scan the first pass file and calculate a modified total error based upon
   // the bias/power function used to allocate bits.
   {
@@ -2145,8 +2126,6 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
   FIRSTPASS_STATS this_frame;
   FIRSTPASS_STATS this_frame_copy;
 
-  double this_frame_intra_error;
-  double this_frame_coded_error;
   int target;
   LAYER_CONTEXT *lc = NULL;
   int is_spatial_svc = (cpi->use_svc && cpi->svc.number_temporal_layers == 1);
@@ -2199,9 +2178,6 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
   vp9_zero(this_frame);
   if (EOF == input_stats(twopass, &this_frame))
     return;
-
-  this_frame_intra_error = this_frame.intra_error;
-  this_frame_coded_error = this_frame.coded_error;
 
   // Keyframe and section processing.
   if (rc->frames_to_key == 0 ||
@@ -2257,9 +2233,6 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
     assign_std_frame_bits(cpi, &this_frame_copy);
   }
 
-  // Keep a globally available copy of this and the next frame's iiratio.
-  twopass->this_iiratio = (int)(this_frame_intra_error /
-                              DOUBLE_DIVIDE_CHECK(this_frame_coded_error));
   {
     FIRSTPASS_STATS next_frame;
     if (lookup_next_frame_stats(twopass, &next_frame) != EOF) {
