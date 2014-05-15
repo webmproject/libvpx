@@ -83,7 +83,8 @@ static const arg_def_t md5arg = ARG_DEF(
     NULL, "md5", 0, "Compute the MD5 sum of the decoded frame");
 #if CONFIG_VP9_HIGH
 static const arg_def_t outputshiftarg = ARG_DEF(
-    NULL, "output-shift", 1, "Amount to downshift output images");
+    NULL, "convert-to-8bit", 0,
+    "Output 8-bit frames even for high bitdepth streams");
 #endif
 
 static const arg_def_t *all_args[] = {
@@ -519,9 +520,9 @@ static FILE *open_outfile(const char *name) {
 static void img_convert_16_to_8(vpx_image_t *dst, vpx_image_t *src,
                                 int output_shift) {
   int plane;
-  // int offset = 0;
-  // if (output_shift>0)
-  //  offset = 1<<(output_shift-1);
+  int offset = 0;
+  if (output_shift > 0)
+    offset = 1 << (output_shift - 1);
   if (src->fmt != dst->fmt + VPX_IMG_FMT_HIGH ||
       dst->d_w != src->d_w || dst->d_h != src->d_h ||
       dst->x_chroma_shift != src->x_chroma_shift ||
@@ -550,7 +551,8 @@ static void img_convert_16_to_8(vpx_image_t *dst, vpx_image_t *src,
       uint16_t *p_src = (uint16_t *)(src->planes[plane] +
                                      y * src->stride[plane]);
       for (x = 0; x < w; x++) {
-        *p_dst++ = (*p_src++) >> output_shift;
+        int pix_val = (*p_src++ + offset) >> output_shift;
+        *p_dst++ = pix_val > 255 ? 255 : pix_val;
       }
     }
   }
@@ -661,7 +663,7 @@ int main_loop(int argc, const char **argv_) {
 
 #if CONFIG_VP9_HIGH
     else if (arg_match(&arg, &outputshiftarg, argi)) {
-      output_shift = arg_parse_uint(&arg);
+      output_shift = 1;
     }
 #endif
 
@@ -973,15 +975,26 @@ int main_loop(int argc, const char **argv_) {
       if (output_shift) {
         // Convert to an 8bit image
         if (img->fmt & VPX_IMG_FMT_HIGH) {
+          unsigned int bit_depth;
+          unsigned int shift = 0;  // BITS_8 default
+          if (vpx_codec_control(&decoder, VP9D_GET_BIT_DEPTH, &bit_depth)) {
+            // Fallback to 8bit
+            bit_depth = 0;
+          }
+          switch (bit_depth) {
+            case 1:  // BITS_10
+              shift = 2;
+              break;
+            case 2:  // BITS_12
+              shift = 4;
+              break;
+          }
           if (!img_8bit) {
             img_8bit = vpx_img_alloc(NULL, img->fmt - VPX_IMG_FMT_HIGH,
                                      img->d_w, img->d_h, 16);
           }
-          img_convert_16_to_8(img_8bit, img, output_shift);
+          img_convert_16_to_8(img_8bit, img, shift);
           img = img_8bit;
-        } else {
-          warn("Cannot use output-shift with 8 bit output frames");
-          goto fail;
         }
       }
 #endif
