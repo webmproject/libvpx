@@ -265,8 +265,9 @@ HAVE_LIST="
     unistd_h
 "
 EXPERIMENT_LIST="
-    multiple_arf
     alpha
+    multiple_arf
+    spatial_svc
 "
 CONFIG_LIST="
     external_build
