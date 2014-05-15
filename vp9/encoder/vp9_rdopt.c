@@ -242,6 +242,31 @@ void vp9_initialize_me_consts(VP9_COMP *cpi, int qindex) {
   cpi->mb.sadperbit4 = sad_per_bit4lut[qindex];
 }
 
+static void swap_block_ptr(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
+                           int m, int n, int min_plane, int max_plane) {
+  int i;
+
+  for (i = min_plane; i < max_plane; ++i) {
+    struct macroblock_plane *const p = &x->plane[i];
+    struct macroblockd_plane *const pd = &x->e_mbd.plane[i];
+
+    p->coeff    = ctx->coeff_pbuf[i][m];
+    p->qcoeff   = ctx->qcoeff_pbuf[i][m];
+    pd->dqcoeff = ctx->dqcoeff_pbuf[i][m];
+    p->eobs     = ctx->eobs_pbuf[i][m];
+
+    ctx->coeff_pbuf[i][m]   = ctx->coeff_pbuf[i][n];
+    ctx->qcoeff_pbuf[i][m]  = ctx->qcoeff_pbuf[i][n];
+    ctx->dqcoeff_pbuf[i][m] = ctx->dqcoeff_pbuf[i][n];
+    ctx->eobs_pbuf[i][m]    = ctx->eobs_pbuf[i][n];
+
+    ctx->coeff_pbuf[i][n]   = p->coeff;
+    ctx->qcoeff_pbuf[i][n]  = p->qcoeff;
+    ctx->dqcoeff_pbuf[i][n] = pd->dqcoeff;
+    ctx->eobs_pbuf[i][n]    = p->eobs;
+  }
+}
+
 static void set_block_thresholds(const VP9_COMMON *cm, RD_OPT *rd) {
   int i, bsize, segment_id;
 
@@ -1387,27 +1412,8 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
       *rate_tokenonly = this_rate_tokenonly;
       *distortion     = this_distortion;
       *skippable      = s;
-      if (!x->select_txfm_size) {
-        int i;
-        struct macroblock_plane *const p = x->plane;
-        struct macroblockd_plane *const pd = xd->plane;
-        for (i = 1; i < MAX_MB_PLANE; ++i) {
-          p[i].coeff    = ctx->coeff_pbuf[i][2];
-          p[i].qcoeff   = ctx->qcoeff_pbuf[i][2];
-          pd[i].dqcoeff = ctx->dqcoeff_pbuf[i][2];
-          p[i].eobs    = ctx->eobs_pbuf[i][2];
-
-          ctx->coeff_pbuf[i][2]   = ctx->coeff_pbuf[i][0];
-          ctx->qcoeff_pbuf[i][2]  = ctx->qcoeff_pbuf[i][0];
-          ctx->dqcoeff_pbuf[i][2] = ctx->dqcoeff_pbuf[i][0];
-          ctx->eobs_pbuf[i][2]    = ctx->eobs_pbuf[i][0];
-
-          ctx->coeff_pbuf[i][0]   = p[i].coeff;
-          ctx->qcoeff_pbuf[i][0]  = p[i].qcoeff;
-          ctx->dqcoeff_pbuf[i][0] = pd[i].dqcoeff;
-          ctx->eobs_pbuf[i][0]    = p[i].eobs;
-        }
-      }
+      if (!x->select_txfm_size)
+        swap_block_ptr(x, ctx, 2, 0, 1, MAX_MB_PLANE);
     }
   }
 
@@ -2929,30 +2935,6 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   return this_rd;  // if 0, this will be re-calculated by caller
 }
 
-static void swap_block_ptr(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
-                           int max_plane) {
-  struct macroblock_plane *const p = x->plane;
-  struct macroblockd_plane *const pd = x->e_mbd.plane;
-  int i;
-
-  for (i = 0; i < max_plane; ++i) {
-    p[i].coeff    = ctx->coeff_pbuf[i][1];
-    p[i].qcoeff  = ctx->qcoeff_pbuf[i][1];
-    pd[i].dqcoeff = ctx->dqcoeff_pbuf[i][1];
-    p[i].eobs    = ctx->eobs_pbuf[i][1];
-
-    ctx->coeff_pbuf[i][1]   = ctx->coeff_pbuf[i][0];
-    ctx->qcoeff_pbuf[i][1]  = ctx->qcoeff_pbuf[i][0];
-    ctx->dqcoeff_pbuf[i][1] = ctx->dqcoeff_pbuf[i][0];
-    ctx->eobs_pbuf[i][1]    = ctx->eobs_pbuf[i][0];
-
-    ctx->coeff_pbuf[i][0]   = p[i].coeff;
-    ctx->qcoeff_pbuf[i][0]  = p[i].qcoeff;
-    ctx->dqcoeff_pbuf[i][0] = pd[i].dqcoeff;
-    ctx->eobs_pbuf[i][0]    = p[i].eobs;
-  }
-}
-
 void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                int *returnrate, int64_t *returndist,
                                BLOCK_SIZE bsize,
@@ -3474,7 +3456,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         best_mbmode = *mbmi;
         best_skip2 = this_skip2;
         if (!x->select_txfm_size)
-          swap_block_ptr(x, ctx, max_plane);
+          swap_block_ptr(x, ctx, 1, 0, 0, max_plane);
         vpx_memcpy(ctx->zcoeff_blk, x->zcoeff_blk[mbmi->tx_size],
                    sizeof(uint8_t) * ctx->num_4x4_blk);
 
@@ -4128,7 +4110,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
         best_mbmode = *mbmi;
         best_skip2 = this_skip2;
         if (!x->select_txfm_size)
-          swap_block_ptr(x, ctx, max_plane);
+          swap_block_ptr(x, ctx, 1, 0, 0, max_plane);
         vpx_memcpy(ctx->zcoeff_blk, x->zcoeff_blk[TX_4X4],
                    sizeof(uint8_t) * ctx->num_4x4_blk);
 
