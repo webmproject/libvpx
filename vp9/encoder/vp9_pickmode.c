@@ -318,48 +318,27 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           pred_filter_search &&
           ((mbmi->mv[0].as_mv.row & 0x07) != 0 ||
            (mbmi->mv[0].as_mv.col & 0x07) != 0)) {
-        int64_t tmp_rdcost1 = INT64_MAX;
-        int64_t tmp_rdcost2 = INT64_MAX;
-        int64_t tmp_rdcost3 = INT64_MAX;
         int pf_rate[3];
         int64_t pf_dist[3];
+        int64_t best_cost = INT64_MAX;
+        INTERP_FILTER best_filter = SWITCHABLE, filter;
 
-        mbmi->interp_filter = EIGHTTAP;
-        vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
-        model_rd_for_sb_y(cpi, bsize, x, xd, &pf_rate[EIGHTTAP],
-                          &pf_dist[EIGHTTAP]);
-        tmp_rdcost1 = RDCOST(x->rdmult, x->rddiv,
-                             vp9_get_switchable_rate(cpi) + pf_rate[EIGHTTAP],
-                             pf_dist[EIGHTTAP]);
-
-        mbmi->interp_filter = EIGHTTAP_SHARP;
-        vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
-        model_rd_for_sb_y(cpi, bsize, x, xd, &pf_rate[EIGHTTAP_SHARP],
-                          &pf_dist[EIGHTTAP_SHARP]);
-        tmp_rdcost2 = RDCOST(x->rdmult, x->rddiv, vp9_get_switchable_rate(cpi) +
-                                 pf_rate[EIGHTTAP_SHARP],
-                             pf_dist[EIGHTTAP_SHARP]);
-
-        mbmi->interp_filter = EIGHTTAP_SMOOTH;
-        vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
-        model_rd_for_sb_y(cpi, bsize, x, xd, &pf_rate[EIGHTTAP_SMOOTH],
-                          &pf_dist[EIGHTTAP_SMOOTH]);
-        tmp_rdcost3 = RDCOST(x->rdmult, x->rddiv, vp9_get_switchable_rate(cpi) +
-                                 pf_rate[EIGHTTAP_SMOOTH],
-                             pf_dist[EIGHTTAP_SMOOTH]);
-
-        if (tmp_rdcost2 < tmp_rdcost1) {
-          if (tmp_rdcost2 < tmp_rdcost3)
-            mbmi->interp_filter = EIGHTTAP_SHARP;
-          else
-            mbmi->interp_filter = EIGHTTAP_SMOOTH;
-        } else {
-          if (tmp_rdcost1 < tmp_rdcost3)
-            mbmi->interp_filter = EIGHTTAP;
-          else
-            mbmi->interp_filter = EIGHTTAP_SMOOTH;
+        for (filter = EIGHTTAP; filter <= EIGHTTAP_SHARP; ++filter) {
+          int64_t cost;
+          mbmi->interp_filter = filter;
+          vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
+          model_rd_for_sb_y(cpi, bsize, x, xd, &pf_rate[filter],
+                            &pf_dist[filter]);
+          cost = RDCOST(x->rdmult, x->rddiv,
+                        vp9_get_switchable_rate(cpi) + pf_rate[filter],
+                        pf_dist[filter]);
+          if (cost < best_cost) {
+              best_filter = filter;
+              best_cost = cost;
+          }
         }
 
+        mbmi->interp_filter = best_filter;
         rate = pf_rate[mbmi->interp_filter];
         dist = pf_dist[mbmi->interp_filter];
       } else {
