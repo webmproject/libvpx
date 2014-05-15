@@ -24,6 +24,7 @@
 #include "vp9/common/vp9_onyxc_int.h"
 
 #include "vp9/encoder/vp9_aq_cyclicrefresh.h"
+#include "vp9/encoder/vp9_context_tree.h"
 #include "vp9/encoder/vp9_encodemb.h"
 #include "vp9/encoder/vp9_firstpass.h"
 #include "vp9/encoder/vp9_lookahead.h"
@@ -501,6 +502,11 @@ typedef struct VP9_COMP {
   int intra_uv_mode_cost[FRAME_TYPES][INTRA_MODES];
   int y_mode_costs[INTRA_MODES][INTRA_MODES][INTRA_MODES];
   int switchable_interp_costs[SWITCHABLE_FILTER_CONTEXTS][SWITCHABLE_FILTERS];
+
+  PICK_MODE_CONTEXT *leaf_tree;
+  PC_TREE *pc_tree;
+  PC_TREE *pc_root;
+  int partition_cost[PARTITION_CONTEXTS][PARTITION_TYPES];
 
 #if CONFIG_MULTIPLE_ARF
   // ARF tracking variables.

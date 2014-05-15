@@ -11,9 +11,61 @@
 #ifndef VP9_ENCODER_VP9_CONTEXT_TREE_H_
 #define VP9_ENCODER_VP9_CONTEXT_TREE_H_
 
-#include "vp9/encoder/vp9_encoder.h"
+#include "vp9/common/vp9_onyxc_int.h"
 
-void vp9_setup_pc_tree(VP9_COMMON *cm, MACROBLOCK *x);
-void vp9_free_pc_tree(MACROBLOCK *x);
+struct VP9_COMP;
+
+// Structure to hold snapshot of coding context during the mode picking process
+typedef struct {
+  MODE_INFO mic;
+  uint8_t *zcoeff_blk;
+  int16_t *coeff[MAX_MB_PLANE][3];
+  int16_t *qcoeff[MAX_MB_PLANE][3];
+  int16_t *dqcoeff[MAX_MB_PLANE][3];
+  uint16_t *eobs[MAX_MB_PLANE][3];
+
+  // dual buffer pointers, 0: in use, 1: best in store
+  int16_t *coeff_pbuf[MAX_MB_PLANE][3];
+  int16_t *qcoeff_pbuf[MAX_MB_PLANE][3];
+  int16_t *dqcoeff_pbuf[MAX_MB_PLANE][3];
+  uint16_t *eobs_pbuf[MAX_MB_PLANE][3];
+
+  int is_coded;
+  int num_4x4_blk;
+  int skip;
+  int_mv best_ref_mv[2];
+  int_mv ref_mvs[MAX_REF_FRAMES][MAX_MV_REF_CANDIDATES];
+  int rate;
+  int distortion;
+  int best_mode_index;
+  int rddiv;
+  int rdmult;
+  int hybrid_pred_diff;
+  int comp_pred_diff;
+  int single_pred_diff;
+  int64_t tx_rd_diff[TX_MODES];
+  int64_t best_filter_diff[SWITCHABLE_FILTER_CONTEXTS];
+
+  // motion vector cache for adaptive motion search control in partition
+  // search loop
+  int_mv pred_mv[MAX_REF_FRAMES];
+  INTERP_FILTER pred_interp_filter;
+} PICK_MODE_CONTEXT;
+
+typedef struct PC_TREE {
+  int index;
+  PARTITION_TYPE partitioning;
+  BLOCK_SIZE block_size;
+  PICK_MODE_CONTEXT none;
+  PICK_MODE_CONTEXT horizontal[2];
+  PICK_MODE_CONTEXT vertical[2];
+  union {
+    struct PC_TREE *split[4];
+    PICK_MODE_CONTEXT *leaf_split[4];
+  };
+} PC_TREE;
+
+void vp9_setup_pc_tree(struct VP9Common *cm, struct VP9_COMP *cpi);
+void vp9_free_pc_tree(struct VP9_COMP *cpi);
 
 #endif /* VP9_ENCODER_VP9_CONTEXT_TREE_H_ */

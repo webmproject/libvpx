@@ -187,7 +187,7 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   vpx_free(cpi->tok);
   cpi->tok = 0;
 
-  vp9_free_pc_tree(&cpi->mb);
+  vp9_free_pc_tree(cpi);
 
   for (i = 0; i < cpi->svc.number_spatial_layers; ++i) {
     LAYER_CONTEXT *const lc = &cpi->svc.layer_context[i];
@@ -455,7 +455,7 @@ void vp9_alloc_compressor_data(VP9_COMP *cpi) {
     CHECK_MEM_ERROR(cm, cpi->tok, vpx_calloc(tokens, sizeof(*cpi->tok)));
   }
 
-  vp9_setup_pc_tree(&cpi->common, &cpi->mb);
+  vp9_setup_pc_tree(&cpi->common, cpi);
 }
 
 static void update_frame_size(VP9_COMP *cpi) {
