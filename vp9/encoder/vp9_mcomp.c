@@ -524,7 +524,9 @@ static int vp9_pattern_search(const MACROBLOCK *x,
 
   // Work out the start point for the search
   bestsad = vfp->sdf(what->buf, what->stride,
-                     get_buf_from_mv(in_what, ref_mv), in_what->stride);
+                     get_buf_from_mv(in_what, ref_mv), in_what->stride,
+                     0x7fffffff) + mvsad_err_cost(x, ref_mv, &fcenter_mv,
+                                                  sad_per_bit);
 
   // Search all possible scales upto the search param around the center point
   // pick the scale of the point that is best as the starting scale of
@@ -540,7 +542,7 @@ static int vp9_pattern_search(const MACROBLOCK *x,
                               bc + candidates[t][i].col};
           thissad = vfp->sdf(what->buf, what->stride,
                              get_buf_from_mv(in_what, &this_mv),
-                             in_what->stride);
+                             in_what->stride, bestsad);
           CHECK_BETTER
         }
       } else {
@@ -551,7 +553,7 @@ static int vp9_pattern_search(const MACROBLOCK *x,
             continue;
           thissad = vfp->sdf(what->buf, what->stride,
                              get_buf_from_mv(in_what, &this_mv),
-                             in_what->stride);
+                             in_what->stride, bestsad);
           CHECK_BETTER
         }
       }
@@ -583,7 +585,7 @@ static int vp9_pattern_search(const MACROBLOCK *x,
                                 bc + candidates[s][i].col};
             thissad = vfp->sdf(what->buf, what->stride,
                                get_buf_from_mv(in_what, &this_mv),
-                               in_what->stride);
+                               in_what->stride, bestsad);
             CHECK_BETTER
           }
         } else {
@@ -594,7 +596,7 @@ static int vp9_pattern_search(const MACROBLOCK *x,
               continue;
             thissad = vfp->sdf(what->buf, what->stride,
                                get_buf_from_mv(in_what, &this_mv),
-                               in_what->stride);
+                               in_what->stride, bestsad);
             CHECK_BETTER
           }
         }
@@ -621,7 +623,7 @@ static int vp9_pattern_search(const MACROBLOCK *x,
                                 bc + candidates[s][next_chkpts_indices[i]].col};
             thissad = vfp->sdf(what->buf, what->stride,
                                get_buf_from_mv(in_what, &this_mv),
-                               in_what->stride);
+                               in_what->stride, bestsad);
             CHECK_BETTER
           }
         } else {
@@ -632,7 +634,7 @@ static int vp9_pattern_search(const MACROBLOCK *x,
               continue;
             thissad = vfp->sdf(what->buf, what->stride,
                                get_buf_from_mv(in_what, &this_mv),
-                               in_what->stride);
+                               in_what->stride, bestsad);
             CHECK_BETTER
           }
         }
@@ -659,7 +661,7 @@ static int vp9_pattern_search(const MACROBLOCK *x,
                               bc + neighbors[i].col};
           thissad = vfp->sdf(what->buf, what->stride,
                              get_buf_from_mv(in_what, &this_mv),
-                             in_what->stride);
+                             in_what->stride, bestsad);
           CHECK_BETTER
         }
       } else {
@@ -670,7 +672,7 @@ static int vp9_pattern_search(const MACROBLOCK *x,
             continue;
           thissad = vfp->sdf(what->buf, what->stride,
                              get_buf_from_mv(in_what, &this_mv),
-                             in_what->stride);
+                             in_what->stride, bestsad);
           CHECK_BETTER
         }
       }
@@ -888,7 +890,8 @@ int vp9_full_range_search_c(const MACROBLOCK *x,
   *best_mv = *ref_mv;
   *num00 = 11;
   best_sad = fn_ptr->sdf(what->buf, what->stride,
-                         get_buf_from_mv(in_what, ref_mv), in_what->stride) +
+                         get_buf_from_mv(in_what, ref_mv), in_what->stride,
+                         0x7fffffff) +
                  mvsad_err_cost(x, ref_mv, &fcenter_mv, sad_per_bit);
   start_row = MAX(-range, x->mv_row_min - ref_mv->row);
   start_col = MAX(-range, x->mv_col_min - ref_mv->col);
@@ -922,7 +925,7 @@ int vp9_full_range_search_c(const MACROBLOCK *x,
         for (i = 0; i < end_col - c; ++i) {
           const MV mv = {ref_mv->row + r, ref_mv->col + c + i};
           unsigned int sad = fn_ptr->sdf(what->buf, what->stride,
-              get_buf_from_mv(in_what, &mv), in_what->stride);
+              get_buf_from_mv(in_what, &mv), in_what->stride, best_sad);
           if (sad < best_sad) {
             sad += mvsad_err_cost(x, &mv, &fcenter_mv, sad_per_bit);
             if (sad < best_sad) {
@@ -968,7 +971,7 @@ int vp9_diamond_search_sad_c(const MACROBLOCK *x,
 
   // Check the starting position
   best_sad = fn_ptr->sdf(what->buf, what->stride,
-                         best_address, in_what->stride) +
+                         best_address, in_what->stride, 0x7fffffff) +
       mvsad_err_cost(x, best_mv, &fcenter_mv, sad_per_bit);
 
   i = 1;
@@ -979,7 +982,8 @@ int vp9_diamond_search_sad_c(const MACROBLOCK *x,
                      best_mv->col + ss[i].mv.col};
       if (is_mv_in(x, &mv)) {
        int sad = fn_ptr->sdf(what->buf, what->stride,
-                             best_address + ss[i].offset, in_what->stride);
+                             best_address + ss[i].offset, in_what->stride,
+                             best_sad);
         if (sad < best_sad) {
           sad += mvsad_err_cost(x, &mv, &fcenter_mv, sad_per_bit);
           if (sad < best_sad) {
@@ -1004,7 +1008,7 @@ int vp9_diamond_search_sad_c(const MACROBLOCK *x,
         if (is_mv_in(x, &this_mv)) {
           int sad = fn_ptr->sdf(what->buf, what->stride,
                                 best_address + ss[best_site].offset,
-                                in_what->stride);
+                                in_what->stride, best_sad);
           if (sad < best_sad) {
             sad += mvsad_err_cost(x, &this_mv, &fcenter_mv, sad_per_bit);
             if (sad < best_sad) {
@@ -1069,7 +1073,7 @@ int vp9_diamond_search_sadx4(const MACROBLOCK *x,
   best_address = in_what;
 
   // Check the starting position
-  bestsad = fn_ptr->sdf(what, what_stride, in_what, in_what_stride)
+  bestsad = fn_ptr->sdf(what, what_stride, in_what, in_what_stride, 0x7fffffff)
                 + mvsad_err_cost(x, best_mv, &fcenter_mv, sad_per_bit);
 
   i = 1;
@@ -1121,7 +1125,7 @@ int vp9_diamond_search_sadx4(const MACROBLOCK *x,
         if (is_mv_in(x, &this_mv)) {
           const uint8_t *const check_here = ss[i].offset + best_address;
           unsigned int thissad = fn_ptr->sdf(what, what_stride, check_here,
-                                             in_what_stride);
+                                             in_what_stride, bestsad);
 
           if (thissad < bestsad) {
             thissad += mvsad_err_cost(x, &this_mv, &fcenter_mv, sad_per_bit);
@@ -1146,7 +1150,7 @@ int vp9_diamond_search_sadx4(const MACROBLOCK *x,
         if (is_mv_in(x, &this_mv)) {
           const uint8_t *const check_here = ss[best_site].offset + best_address;
           unsigned int thissad = fn_ptr->sdf(what, what_stride, check_here,
-                                             in_what_stride);
+                                             in_what_stride, bestsad);
           if (thissad < bestsad) {
             thissad += mvsad_err_cost(&this_mv, &fcenter_mv,
                                       mvjsadcost, mvsadcost, sad_per_bit);
@@ -1245,7 +1249,7 @@ int vp9_full_search_sad_c(const MACROBLOCK *x, const MV *ref_mv,
   const int col_max = MIN(ref_mv->col + distance, x->mv_col_max);
   const MV fcenter_mv = {center_mv->row >> 3, center_mv->col >> 3};
   int best_sad = fn_ptr->sdf(what->buf, what->stride,
-      get_buf_from_mv(in_what, ref_mv), in_what->stride) +
+      get_buf_from_mv(in_what, ref_mv), in_what->stride, 0x7fffffff) +
       mvsad_err_cost(x, ref_mv, &fcenter_mv, sad_per_bit);
   *best_mv = *ref_mv;
 
@@ -1253,7 +1257,7 @@ int vp9_full_search_sad_c(const MACROBLOCK *x, const MV *ref_mv,
     for (c = col_min; c < col_max; ++c) {
       const MV mv = {r, c};
       const int sad = fn_ptr->sdf(what->buf, what->stride,
-          get_buf_from_mv(in_what, &mv), in_what->stride) +
+          get_buf_from_mv(in_what, &mv), in_what->stride, best_sad) +
               mvsad_err_cost(x, &mv, &fcenter_mv, sad_per_bit);
       if (sad < best_sad) {
         best_sad = sad;
@@ -1278,7 +1282,7 @@ int vp9_full_search_sadx3(const MACROBLOCK *x, const MV *ref_mv,
   const int col_max = MIN(ref_mv->col + distance, x->mv_col_max);
   const MV fcenter_mv = {center_mv->row >> 3, center_mv->col >> 3};
   unsigned int best_sad = fn_ptr->sdf(what->buf, what->stride,
-      get_buf_from_mv(in_what, ref_mv), in_what->stride) +
+      get_buf_from_mv(in_what, ref_mv), in_what->stride, 0x7fffffff) +
       mvsad_err_cost(x, ref_mv, &fcenter_mv, sad_per_bit);
   *best_mv = *ref_mv;
 
@@ -1312,7 +1316,7 @@ int vp9_full_search_sadx3(const MACROBLOCK *x, const MV *ref_mv,
 
     while (c < col_max) {
       unsigned int sad = fn_ptr->sdf(what->buf, what->stride,
-                                     check_here, in_what->stride);
+                                     check_here, in_what->stride, best_sad);
       if (sad < best_sad) {
         const MV mv = {r, c};
         sad += mvsad_err_cost(x, &mv, &fcenter_mv, sad_per_bit);
@@ -1343,7 +1347,7 @@ int vp9_full_search_sadx8(const MACROBLOCK *x, const MV *ref_mv,
   const int col_max = MIN(ref_mv->col + distance, x->mv_col_max);
   const MV fcenter_mv = {center_mv->row >> 3, center_mv->col >> 3};
   unsigned int best_sad = fn_ptr->sdf(what->buf, what->stride,
-      get_buf_from_mv(in_what, ref_mv), in_what->stride) +
+      get_buf_from_mv(in_what, ref_mv), in_what->stride, 0x7fffffff) +
       mvsad_err_cost(x, ref_mv, &fcenter_mv, sad_per_bit);
   *best_mv = *ref_mv;
 
@@ -1401,7 +1405,7 @@ int vp9_full_search_sadx8(const MACROBLOCK *x, const MV *ref_mv,
 
     while (c < col_max) {
       unsigned int sad = fn_ptr->sdf(what->buf, what->stride,
-                                     check_here, in_what->stride);
+                                     check_here, in_what->stride, best_sad);
       if (sad < best_sad) {
         const MV mv = {r, c};
         sad += mvsad_err_cost(x, &mv, &fcenter_mv, sad_per_bit);
@@ -1430,7 +1434,7 @@ int vp9_refining_search_sad_c(const MACROBLOCK *x,
   const MV fcenter_mv = {center_mv->row >> 3, center_mv->col >> 3};
   unsigned int best_sad = fn_ptr->sdf(what->buf, what->stride,
                                      get_buf_from_mv(in_what, ref_mv),
-                                     in_what->stride) +
+                                     in_what->stride, 0x7fffffff) +
       mvsad_err_cost(x, ref_mv, &fcenter_mv, error_per_bit);
   int i, j;
 
@@ -1442,7 +1446,7 @@ int vp9_refining_search_sad_c(const MACROBLOCK *x,
                      ref_mv->col + neighbors[j].col};
       if (is_mv_in(x, &mv)) {
         unsigned int sad = fn_ptr->sdf(what->buf, what->stride,
-            get_buf_from_mv(in_what, &mv), in_what->stride);
+            get_buf_from_mv(in_what, &mv), in_what->stride, best_sad);
         if (sad < best_sad) {
           sad += mvsad_err_cost(x, &mv, &fcenter_mv, error_per_bit);
           if (sad < best_sad) {
@@ -1475,7 +1479,7 @@ int vp9_refining_search_sadx4(const MACROBLOCK *x,
   const MV fcenter_mv = {center_mv->row >> 3, center_mv->col >> 3};
   const uint8_t *best_address = get_buf_from_mv(in_what, ref_mv);
   unsigned int best_sad = fn_ptr->sdf(what->buf, what->stride, best_address,
-                                    in_what->stride) +
+                                    in_what->stride, 0x7fffffff) +
       mvsad_err_cost(x, ref_mv, &fcenter_mv, error_per_bit);
   int i, j;
 
@@ -1516,7 +1520,7 @@ int vp9_refining_search_sadx4(const MACROBLOCK *x,
         if (is_mv_in(x, &mv)) {
           unsigned int sad = fn_ptr->sdf(what->buf, what->stride,
                                          get_buf_from_mv(in_what, &mv),
-                                         in_what->stride);
+                                         in_what->stride, best_sad);
           if (sad < best_sad) {
             sad += mvsad_err_cost(x, &mv, &fcenter_mv, error_per_bit);
             if (sad < best_sad) {
@@ -1555,7 +1559,8 @@ int vp9_refining_search_8p_c(const MACROBLOCK *x,
   const struct buf_2d *const in_what = &xd->plane[0].pre[0];
   const MV fcenter_mv = {center_mv->row >> 3, center_mv->col >> 3};
   unsigned int best_sad = fn_ptr->sdaf(what->buf, what->stride,
-      get_buf_from_mv(in_what, ref_mv), in_what->stride, second_pred) +
+      get_buf_from_mv(in_what, ref_mv), in_what->stride,
+      second_pred, 0x7fffffff) +
       mvsad_err_cost(x, ref_mv, &fcenter_mv, error_per_bit);
   int i, j;
 
@@ -1568,7 +1573,8 @@ int vp9_refining_search_8p_c(const MACROBLOCK *x,
 
       if (is_mv_in(x, &mv)) {
         unsigned int sad = fn_ptr->sdaf(what->buf, what->stride,
-            get_buf_from_mv(in_what, &mv), in_what->stride, second_pred);
+            get_buf_from_mv(in_what, &mv), in_what->stride,
+            second_pred, best_sad);
         if (sad < best_sad) {
           sad += mvsad_err_cost(x, &mv, &fcenter_mv, error_per_bit);
           if (sad < best_sad) {

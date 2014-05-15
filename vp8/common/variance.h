@@ -22,7 +22,8 @@ typedef unsigned int(*vp8_sad_fn_t)(
     const unsigned char *src_ptr,
     int source_stride,
     const unsigned char *ref_ptr,
-    int ref_stride);
+    int ref_stride,
+    unsigned int max_sad);
 
 typedef void (*vp8_copy32xn_fn_t)(
     const unsigned char *src_ptr,
