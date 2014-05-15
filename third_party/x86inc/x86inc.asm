@@ -395,6 +395,23 @@ DECLARE_REG_TMP_SIZE 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14
     %assign n_arg_names %0
 %endmacro
 
+%if ARCH_X86_64
+%macro ALLOC_STACK 2  ; stack_size, num_regs
+  %assign %%stack_aligment ((mmsize + 15) & ~15)
+  %assign stack_size_padded %1
+
+  %assign %%reg_num (%2 - 1)
+  %xdefine rsp_tmp r %+ %%reg_num
+  mov  rsp_tmp, rsp
+  sub  rsp, stack_size_padded
+  and  rsp, ~(%%stack_aligment - 1)
+%endmacro
+
+%macro RESTORE_STACK 0  ; reset rsp register
+  mov  rsp, rsp_tmp
+%endmacro
+%endif
+
 %if WIN64 ; Windows x64 ;=================================================
 
 DECLARE_REG 0,  rcx, ecx,  cx,   cl
