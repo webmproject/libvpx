@@ -567,10 +567,7 @@ static void init_intra_pred_fn_ptrs(void) {
   intra_pred_allsizes(dc_pred[1][0], dc_left);
   intra_pred_allsizes(dc_pred[1][1], dc);
 #undef intra_pred_allsizes
-}
-
 #if CONFIG_VP9_HIGH
-static void init_intra_high_pred_fn_ptrs(void) {
 #define intra_pred_allsizes(l, type) \
   l[0] = vp9_##type##_predictor_4x4; \
   l[1] = vp9_##type##_predictor_8x8; \
@@ -592,8 +589,8 @@ static void init_intra_high_pred_fn_ptrs(void) {
   intra_pred_allsizes(dc_pred_high[1][0], high_dc_left);
   intra_pred_allsizes(dc_pred_high[1][1], high_dc);
 #undef intra_pred_allsizes
-}
 #endif
+}
 
 #if CONFIG_VP9_HIGH
 static void build_intra_predictors_high(const MACROBLOCKD *xd,
@@ -627,7 +624,7 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
   // 129  E   F  ..  U   V
   // 129  G   H  ..  S   T   T   T   T   T
 
-  once(init_intra_high_pred_fn_ptrs);
+  once(init_intra_pred_fn_ptrs);
 
   // Get current frame pointer, width and height.
   if (plane == 0) {
