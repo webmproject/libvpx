@@ -46,7 +46,6 @@ struct vpx_codec_alg_priv {
   vpx_decrypt_cb          decrypt_cb;
   void                   *decrypt_state;
   vpx_image_t             img;
-  int                     img_setup;
   int                     img_avail;
   int                     invert_tile_order;
 
