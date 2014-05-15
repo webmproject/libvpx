@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//pc8\u003d",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-05-15T15:04:12Z",
+      "side": 1,
+      "message": "Consider computing the rounding value outside the loop to avoid the additional \u0027if\u0027:\nconst int rounding \u003d strength \u003e 0 ? 1 \u003c\u003c (strength - 1) : 0;\n...\nmodifier  +\u003d rounding;",
+      "revId": "1e0ab6c69706a021cd3b48f75eac3d3f7ab643be",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
