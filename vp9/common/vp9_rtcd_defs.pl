@@ -703,7 +703,7 @@ specialize qw/vp9_get_mb_ss mmx sse2/;
 # ENCODEMB INVOKE
 
 add_proto qw/int64_t vp9_block_error/, "const int16_t *coeff, const int16_t *dqcoeff, intptr_t block_size, int64_t *ssz";
-specialize qw/vp9_block_error/, "$sse2_x86inc";
+specialize qw/vp9_block_error avx2/, "$sse2_x86inc";
 
 add_proto qw/void vp9_subtract_block/, "int rows, int cols, int16_t *diff_ptr, ptrdiff_t diff_stride, const uint8_t *src_ptr, ptrdiff_t src_stride, const uint8_t *pred_ptr, ptrdiff_t pred_stride";
 specialize qw/vp9_subtract_block/, "$sse2_x86inc";
