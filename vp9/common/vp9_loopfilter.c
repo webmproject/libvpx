@@ -1192,11 +1192,12 @@ void vp9_filter_block_plane(VP9_COMMON *const cm,
 }
 
 void vp9_loop_filter_rows(const YV12_BUFFER_CONFIG *frame_buffer,
-                          VP9_COMMON *cm, MACROBLOCKD *xd,
+                          VP9_COMMON *cm,
+                          struct macroblockd_plane planes[MAX_MB_PLANE],
                           int start, int stop, int y_only) {
   const int num_planes = y_only ? 1 : MAX_MB_PLANE;
-  const int use_420 = y_only || (xd->plane[1].subsampling_y == 1 &&
-                                 xd->plane[1].subsampling_x == 1);
+  const int use_420 = y_only || (planes[1].subsampling_y == 1 &&
+                                 planes[1].subsampling_x == 1);
   LOOP_FILTER_MASK lfm;
   int mi_row, mi_col;
 
@@ -1206,7 +1207,7 @@ void vp9_loop_filter_rows(const YV12_BUFFER_CONFIG *frame_buffer,
     for (mi_col = 0; mi_col < cm->mi_cols; mi_col += MI_BLOCK_SIZE) {
       int plane;
 
-      vp9_setup_dst_planes(xd, frame_buffer, mi_row, mi_col);
+      vp9_setup_dst_planes(planes, frame_buffer, mi_row, mi_col);
 
       // TODO(JBB): Make setup_mask work for non 420.
       if (use_420)
@@ -1215,9 +1216,9 @@ void vp9_loop_filter_rows(const YV12_BUFFER_CONFIG *frame_buffer,
 
       for (plane = 0; plane < num_planes; ++plane) {
         if (use_420)
-          vp9_filter_block_plane(cm, &xd->plane[plane], mi_row, &lfm);
+          vp9_filter_block_plane(cm, &planes[plane], mi_row, &lfm);
         else
-          filter_block_plane_non420(cm, &xd->plane[plane], mi + mi_col,
+          filter_block_plane_non420(cm, &planes[plane], mi + mi_col,
                                     mi_row, mi_col);
       }
     }
@@ -1239,7 +1240,7 @@ void vp9_loop_filter_frame(YV12_BUFFER_CONFIG *frame,
   }
   end_mi_row = start_mi_row + mi_rows_to_filter;
   vp9_loop_filter_frame_init(cm, frame_filter_level);
-  vp9_loop_filter_rows(frame, cm, xd,
+  vp9_loop_filter_rows(frame, cm, xd->plane,
                        start_mi_row, end_mi_row,
                        y_only);
 }
@@ -1247,7 +1248,7 @@ void vp9_loop_filter_frame(YV12_BUFFER_CONFIG *frame,
 int vp9_loop_filter_worker(void *arg1, void *arg2) {
   LFWorkerData *const lf_data = (LFWorkerData*)arg1;
   (void)arg2;
-  vp9_loop_filter_rows(lf_data->frame_buffer, lf_data->cm, &lf_data->xd,
+  vp9_loop_filter_rows(lf_data->frame_buffer, lf_data->cm, lf_data->planes,
                        lf_data->start, lf_data->stop, lf_data->y_only);
   return 1;
 }

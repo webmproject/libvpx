@@ -316,7 +316,7 @@ static MB_MODE_INFO *set_offsets(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   // as they are always compared to values that are in 1/8th pel units
   set_mi_row_col(xd, tile, mi_row, bh, mi_col, bw, cm->mi_rows, cm->mi_cols);
 
-  vp9_setup_dst_planes(xd, get_frame_new_buffer(cm), mi_row, mi_col);
+  vp9_setup_dst_planes(xd->plane, get_frame_new_buffer(cm), mi_row, mi_col);
   return &xd->mi[0]->mbmi;
 }
 
@@ -686,7 +686,7 @@ static void decode_tile(VP9Decoder *pbi, const TileInfo *const tile,
     LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
     lf_data->frame_buffer = get_frame_new_buffer(cm);
     lf_data->cm = cm;
-    lf_data->xd = pbi->mb;
+    vp9_copy(lf_data->planes, pbi->mb.plane);
     lf_data->stop = 0;
     lf_data->y_only = 0;
     vp9_loop_filter_frame_init(cm, cm->lf.filter_level);

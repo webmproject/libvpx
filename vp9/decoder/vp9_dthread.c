@@ -89,7 +89,8 @@ static INLINE void sync_write(VP9LfSync *const lf_sync, int r, int c,
 
 // Implement row loopfiltering for each thread.
 static void loop_filter_rows_mt(const YV12_BUFFER_CONFIG *const frame_buffer,
-                                VP9_COMMON *const cm, MACROBLOCKD *const xd,
+                                VP9_COMMON *const cm,
+                                struct macroblockd_plane planes[MAX_MB_PLANE],
                                 int start, int stop, int y_only,
                                 VP9LfSync *const lf_sync, int num_lf_workers) {
   const int num_planes = y_only ? 1 : MAX_MB_PLANE;
@@ -107,11 +108,11 @@ static void loop_filter_rows_mt(const YV12_BUFFER_CONFIG *const frame_buffer,
 
       sync_read(lf_sync, r, c);
 
-      vp9_setup_dst_planes(xd, frame_buffer, mi_row, mi_col);
+      vp9_setup_dst_planes(planes, frame_buffer, mi_row, mi_col);
       vp9_setup_mask(cm, mi_row, mi_col, mi + mi_col, cm->mi_stride, &lfm);
 
       for (plane = 0; plane < num_planes; ++plane) {
-        vp9_filter_block_plane(cm, &xd->plane[plane], mi_row, &lfm);
+        vp9_filter_block_plane(cm, &planes[plane], mi_row, &lfm);
       }
 
       sync_write(lf_sync, r, c, sb_cols);
@@ -124,7 +125,7 @@ static int loop_filter_row_worker(void *arg1, void *arg2) {
   TileWorkerData *const tile_data = (TileWorkerData*)arg1;
   LFWorkerData *const lf_data = &tile_data->lfdata;
 
-  loop_filter_rows_mt(lf_data->frame_buffer, lf_data->cm, &lf_data->xd,
+  loop_filter_rows_mt(lf_data->frame_buffer, lf_data->cm, lf_data->planes,
                       lf_data->start, lf_data->stop, lf_data->y_only,
                       lf_data->lf_sync, lf_data->num_lf_workers);
   return 1;
@@ -186,7 +187,7 @@ void vp9_loop_filter_frame_mt(YV12_BUFFER_CONFIG *frame,
     // Loopfilter data
     lf_data->frame_buffer = frame;
     lf_data->cm = cm;
-    lf_data->xd = pbi->mb;
+    vp9_copy(lf_data->planes, pbi->mb.plane);
     lf_data->start = i;
     lf_data->stop = sb_rows;
     lf_data->y_only = y_only;   // always do all planes in decoder
