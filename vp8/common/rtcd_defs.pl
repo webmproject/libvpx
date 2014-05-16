@@ -29,9 +29,8 @@ $vp8_clear_system_state_mmx=vpx_reset_mmx_state;
 # Dequant
 #
 add_proto qw/void vp8_dequantize_b/, "struct blockd*, short *dqc";
-specialize qw/vp8_dequantize_b mmx media neon_asm/;
+specialize qw/vp8_dequantize_b mmx media neon/;
 $vp8_dequantize_b_media=vp8_dequantize_b_v6;
-$vp8_dequantize_b_neon_asm=vp8_dequantize_b_neon;
 
 add_proto qw/void vp8_dequant_idct_add/, "short *input, short *dq, unsigned char *output, int stride";
 specialize qw/vp8_dequant_idct_add mmx media neon dspr2/;
