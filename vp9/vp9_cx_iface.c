@@ -141,7 +141,8 @@ static vpx_codec_err_t update_error_state(vpx_codec_alg_priv_t *ctx,
 
 static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
                                        const vpx_codec_enc_cfg_t *cfg,
-                                       const struct vp9_extracfg *extra_cfg) {
+                                       const struct vp9_extracfg *extra_cfg,
+                                       int pre_ctrl_setting) {
   RANGE_CHECK(cfg, g_w,                   1, 65535);  // 16 bits available
   RANGE_CHECK(cfg, g_h,                   1, 65535);  // 16 bits available
   RANGE_CHECK(cfg, g_timebase.den,        1, 1000000000);
@@ -202,6 +203,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
   RANGE_CHECK(extra_cfg, arnr_max_frames, 0, 15);
   RANGE_CHECK_HI(extra_cfg, arnr_strength, 6);
   RANGE_CHECK(extra_cfg, cq_level, 0, 63);
+  RANGE_CHECK(extra_cfg, bit_depth, BITS_8, BITS_12);
 
   // TODO(yaowu): remove this when ssim tuning is implemented for vp9
   if (extra_cfg->tuning == VP8_TUNE_SSIM)
@@ -256,19 +258,16 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
         ERROR("rc_twopass_stats_in missing EOS stats packet");
     }
   }
-  if (cfg->g_profile <= (unsigned int)PROFILE_1 &&
-      extra_cfg->bit_depth > BITS_8)
-    ERROR("High bit-depth not supported in profile < 2");
 
-  // TODO(Peter): PFCD at the moment this triggers wrongly because profile
-  // is set in global parameters, but bit-depth via a configuration control
-  /*
-  if (cfg->g_profile > (unsigned int)PROFILE_1 &&
-      extra_cfg->bit_depth == BITS_8)
-    ERROR("Bit-depth 8 not supported in profile > 1");
-  */
-  if ( extra_cfg->bit_depth > BITS_12)
-    ERROR("Bit-depth option must be 0(BITS_8),1(BITS_10), or 2(BITS_12)");
+  // Consistency checks that are enabled after the controls are set.
+  if (!pre_ctrl_setting) {
+    if (cfg->g_profile <= (unsigned int)PROFILE_1 &&
+        extra_cfg->bit_depth > BITS_8)
+      ERROR("High bit-depth not supported in profile < 2");
+    if (cfg->g_profile > (unsigned int)PROFILE_1 &&
+        extra_cfg->bit_depth == BITS_8)
+      ERROR("Bit-depth 8 not supported in profile > 1");
+  }
 
   return VPX_CODEC_OK;
 }
@@ -456,7 +455,7 @@ static vpx_codec_err_t encoder_set_config(vpx_codec_alg_priv_t *ctx,
   if (cfg->g_lag_in_frames > ctx->cfg.g_lag_in_frames)
     ERROR("Cannot increase lag_in_frames");
 
-  res = validate_config(ctx, cfg, &ctx->extra_cfg);
+  res = validate_config(ctx, cfg, &ctx->extra_cfg, 0);
 
   if (res == VPX_CODEC_OK) {
     ctx->cfg = *cfg;
@@ -518,7 +517,7 @@ static vpx_codec_err_t ctrl_set_param(vpx_codec_alg_priv_t *ctx, int ctrl_id,
 #endif
   }
 
-  res = validate_config(ctx, &ctx->cfg, &extra_cfg);
+  res = validate_config(ctx, &ctx->cfg, &extra_cfg, 0);
 
   if (res == VPX_CODEC_OK) {
     ctx->extra_cfg = extra_cfg;
@@ -584,7 +583,7 @@ static vpx_codec_err_t encoder_init(vpx_codec_ctx_t *ctx,
 
     vp9_initialize_enc();
 
-    res = validate_config(priv, &priv->cfg, &priv->extra_cfg);
+    res = validate_config(priv, &priv->cfg, &priv->extra_cfg, 1);
 
     if (res == VPX_CODEC_OK) {
       VP9_COMP *cpi;

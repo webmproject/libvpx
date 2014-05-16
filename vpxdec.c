@@ -82,7 +82,7 @@ static const arg_def_t fb_arg =
 static const arg_def_t md5arg = ARG_DEF(
     NULL, "md5", 0, "Compute the MD5 sum of the decoded frame");
 #if CONFIG_VP9_HIGH
-static const arg_def_t outputshiftarg = ARG_DEF(
+static const arg_def_t convertto8bitarg = ARG_DEF(
     NULL, "convert-to-8bit", 0,
     "Output 8-bit frames even for high bitdepth streams");
 #endif
@@ -94,7 +94,7 @@ static const arg_def_t *all_args[] = {
   &md5arg,
   &error_concealment,
 #if CONFIG_VP9_HIGH
-  &outputshiftarg,
+  &convertto8bitarg,
 #endif
   NULL
 };
@@ -521,7 +521,7 @@ static void img_convert_16_to_8(vpx_image_t *dst, vpx_image_t *src,
                                 int output_shift) {
   int plane;
   int offset = 0;
-  if (output_shift > 0)
+  if (output_shift  > 0)
     offset = 1 << (output_shift - 1);
   if (src->fmt != dst->fmt + VPX_IMG_FMT_HIGH ||
       dst->d_w != src->d_w || dst->d_h != src->d_h ||
@@ -581,7 +581,7 @@ int main_loop(int argc, const char **argv_) {
   int                     use_y4m = 1;
   vpx_codec_dec_cfg_t     cfg = {0};
 #if CONFIG_VP9_HIGH
-  int output_shift         = 0;
+  int                     convert_to_8bit = 0;
 #endif
 #if CONFIG_VP8_DECODER
   vp8_postproc_cfg_t      vp8_pp_cfg = {0};
@@ -662,8 +662,8 @@ int main_loop(int argc, const char **argv_) {
       num_external_frame_buffers = arg_parse_uint(&arg);
 
 #if CONFIG_VP9_HIGH
-    else if (arg_match(&arg, &outputshiftarg, argi)) {
-      output_shift = 1;
+    else if (arg_match(&arg, &convertto8bitarg, argi)) {
+      convert_to_8bit = 1;
     }
 #endif
 
@@ -972,7 +972,7 @@ int main_loop(int argc, const char **argv_) {
         }
       }
 #if CONFIG_VP9_HIGH
-      if (output_shift) {
+      if (convert_to_8bit) {
         // Convert to an 8bit image
         if (img->fmt & VPX_IMG_FMT_HIGH) {
           unsigned int bit_depth;
