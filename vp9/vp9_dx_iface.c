@@ -32,7 +32,6 @@ struct vpx_codec_alg_priv {
   vpx_codec_priv_t        base;
   vpx_codec_dec_cfg_t     cfg;
   vp9_stream_info_t       si;
-  int                     decoder_init;
   struct VP9Decoder *pbi;
   int                     postproc_cfg_set;
   vp8_postproc_cfg_t      postproc_cfg;
@@ -265,12 +264,10 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t *ctx,
   }
 
   // Initialize the decoder instance on the first frame
-  if (!ctx->decoder_init) {
+  if (ctx->pbi == NULL) {
     init_decoder(ctx);
     if (ctx->pbi == NULL)
       return VPX_CODEC_ERROR;
-
-    ctx->decoder_init = 1;
   }
 
   // Set these even if already initialized.  The caller may have changed the
