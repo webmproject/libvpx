@@ -36,13 +36,6 @@ struct vpx_codec_alg_priv {
   struct VP9Decoder *pbi;
   int                     postproc_cfg_set;
   vp8_postproc_cfg_t      postproc_cfg;
-#if CONFIG_POSTPROC_VISUALIZER
-  unsigned int            dbg_postproc_flag;
-  int                     dbg_color_ref_frame_flag;
-  int                     dbg_color_mb_modes_flag;
-  int                     dbg_color_b_modes_flag;
-  int                     dbg_display_mv_flag;
-#endif
   vpx_decrypt_cb          decrypt_cb;
   void                   *decrypt_state;
   vpx_image_t             img;
@@ -225,22 +218,10 @@ static void set_default_ppflags(vp8_postproc_cfg_t *cfg) {
 static void set_ppflags(const vpx_codec_alg_priv_t *ctx,
                         vp9_ppflags_t *flags) {
   flags->post_proc_flag =
-#if CONFIG_POSTPROC_VISUALIZER
-      (ctx->dbg_color_ref_frame_flag ? VP9D_DEBUG_CLR_FRM_REF_BLKS : 0) |
-      (ctx->dbg_color_mb_modes_flag ? VP9D_DEBUG_CLR_BLK_MODES : 0) |
-      (ctx->dbg_color_b_modes_flag ? VP9D_DEBUG_CLR_BLK_MODES : 0) |
-      (ctx->dbg_display_mv_flag ? VP9D_DEBUG_DRAW_MV : 0) |
-#endif
       ctx->postproc_cfg.post_proc_flag;
 
   flags->deblocking_level = ctx->postproc_cfg.deblocking_level;
   flags->noise_level = ctx->postproc_cfg.noise_level;
-#if CONFIG_POSTPROC_VISUALIZER
-  flags->display_ref_frame_flag = ctx->dbg_color_ref_frame_flag;
-  flags->display_mb_modes_flag = ctx->dbg_color_mb_modes_flag;
-  flags->display_b_modes_flag = ctx->dbg_color_b_modes_flag;
-  flags->display_mv_flag = ctx->dbg_display_mv_flag;
-#endif
 }
 
 static void init_decoder(vpx_codec_alg_priv_t *ctx) {
@@ -538,22 +519,7 @@ static vpx_codec_err_t ctrl_set_postproc(vpx_codec_alg_priv_t *ctx,
 
 static vpx_codec_err_t ctrl_set_dbg_options(vpx_codec_alg_priv_t *ctx,
                                             int ctrl_id, va_list args) {
-#if CONFIG_POSTPROC_VISUALIZER && CONFIG_POSTPROC
-  int data = va_arg(args, int);
-
-#define MAP(id, var) case id: var = data; break;
-
-  switch (ctrl_id) {
-      MAP(VP8_SET_DBG_COLOR_REF_FRAME,   ctx->dbg_color_ref_frame_flag);
-      MAP(VP8_SET_DBG_COLOR_MB_MODES,    ctx->dbg_color_mb_modes_flag);
-      MAP(VP8_SET_DBG_COLOR_B_MODES,     ctx->dbg_color_b_modes_flag);
-      MAP(VP8_SET_DBG_DISPLAY_MV,        ctx->dbg_display_mv_flag);
-  }
-
-  return VPX_CODEC_OK;
-#else
   return VPX_CODEC_INCAPABLE;
-#endif
 }
 
 static vpx_codec_err_t ctrl_get_last_ref_updates(vpx_codec_alg_priv_t *ctx,
