@@ -11,6 +11,8 @@
 #ifndef VP9_ENCODER_VP9_FIRSTPASS_H_
 #define VP9_ENCODER_VP9_FIRSTPASS_H_
 
+#include "vp9/encoder/vp9_lookahead.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -54,7 +56,7 @@ typedef struct {
   double modified_error_left;
   double kf_intra_err_min;
   double gf_intra_err_min;
-  int kf_bits;
+
   // Remaining error from uncoded frames in a gf group. Two pass use only
   int64_t gf_group_error_left;
 
@@ -75,6 +77,9 @@ typedef struct {
   int gf_zeromotion_pct;
 
   int active_worst_quality;
+
+  int gf_group_index;
+  int gf_group_bit_allocation[MAX_LAG_BUFFERS * 2];
 } TWO_PASS;
 
 struct VP9_COMP;
