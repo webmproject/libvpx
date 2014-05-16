@@ -619,12 +619,12 @@ static void build_y_mask(const loop_filter_info_n *const lfi_n,
 // by mi_row, mi_col.
 // TODO(JBB): This function only works for yv12.
 void vp9_setup_mask(VP9_COMMON *const cm, const int mi_row, const int mi_col,
-                    MODE_INFO **mi_8x8, const int mode_info_stride,
+                    MODE_INFO **mi, const int mode_info_stride,
                     LOOP_FILTER_MASK *lfm) {
   int idx_32, idx_16, idx_8;
   const loop_filter_info_n *const lfi_n = &cm->lf_info;
-  MODE_INFO **mip = mi_8x8;
-  MODE_INFO **mip2 = mi_8x8;
+  MODE_INFO **mip = mi;
+  MODE_INFO **mip2 = mi;
 
   // These are offsets to the next mi in the 64x64 block. It is what gets
   // added to the mi ptr as we go through each loop.  It helps us to avoids
@@ -1195,13 +1195,13 @@ void vp9_loop_filter_rows(const YV12_BUFFER_CONFIG *frame_buffer,
                           VP9_COMMON *cm, MACROBLOCKD *xd,
                           int start, int stop, int y_only) {
   const int num_planes = y_only ? 1 : MAX_MB_PLANE;
-  int mi_row, mi_col;
+  const int use_420 = y_only || (xd->plane[1].subsampling_y == 1 &&
+                                 xd->plane[1].subsampling_x == 1);
   LOOP_FILTER_MASK lfm;
-  int use_420 = y_only || (xd->plane[1].subsampling_y == 1 &&
-      xd->plane[1].subsampling_x == 1);
+  int mi_row, mi_col;
 
   for (mi_row = start; mi_row < stop; mi_row += MI_BLOCK_SIZE) {
-    MODE_INFO **mi_8x8 = cm->mi_grid_visible + mi_row * cm->mi_stride;
+    MODE_INFO **mi = cm->mi_grid_visible + mi_row * cm->mi_stride;
 
     for (mi_col = 0; mi_col < cm->mi_cols; mi_col += MI_BLOCK_SIZE) {
       int plane;
@@ -1210,14 +1210,14 @@ void vp9_loop_filter_rows(const YV12_BUFFER_CONFIG *frame_buffer,
 
       // TODO(JBB): Make setup_mask work for non 420.
       if (use_420)
-        vp9_setup_mask(cm, mi_row, mi_col, mi_8x8 + mi_col, cm->mi_stride,
+        vp9_setup_mask(cm, mi_row, mi_col, mi + mi_col, cm->mi_stride,
                        &lfm);
 
       for (plane = 0; plane < num_planes; ++plane) {
         if (use_420)
           vp9_filter_block_plane(cm, &xd->plane[plane], mi_row, &lfm);
         else
-          filter_block_plane_non420(cm, &xd->plane[plane], mi_8x8 + mi_col,
+          filter_block_plane_non420(cm, &xd->plane[plane], mi + mi_col,
                                     mi_row, mi_col);
       }
     }
