@@ -2153,8 +2153,8 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
   double this_frame_coded_error;
   int target;
   LAYER_CONTEXT *lc = NULL;
-  int is_spatial_svc = (cpi->use_svc && cpi->svc.number_temporal_layers == 1);
-
+  const int is_spatial_svc = (cpi->use_svc &&
+                              cpi->svc.number_temporal_layers == 1);
   if (is_spatial_svc) {
     lc = &cpi->svc.layer_context[cpi->svc.spatial_layer_id];
     frames_left = (int)(twopass->total_stats.count -
@@ -2214,14 +2214,14 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
     this_frame_copy = this_frame;
     find_next_key_frame(cpi, &this_frame_copy);
     // Don't place key frame in any enhancement layers in spatial svc
-    if (cpi->use_svc && cpi->svc.number_temporal_layers == 1) {
+    if (is_spatial_svc) {
       lc->is_key_frame = 1;
       if (cpi->svc.spatial_layer_id > 0) {
         cm->frame_type = INTER_FRAME;
       }
     }
   } else {
-    if (cpi->use_svc && cpi->svc.number_temporal_layers == 1) {
+    if (is_spatial_svc) {
       lc->is_key_frame = 0;
     }
     cm->frame_type = INTER_FRAME;
