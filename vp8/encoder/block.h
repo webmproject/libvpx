@@ -125,6 +125,7 @@ typedef struct macroblock
 
     int optimize;
     int q_index;
+    int increase_denoising;
 
 #if CONFIG_TEMPORAL_DENOISING
     MB_PREDICTION_MODE best_sse_inter_mode;
