@@ -24,5 +24,6 @@ done
 
 for test in ${example_tests}; do
   # Source each test script so that exporting variables can be avoided.
+  VPX_TEST_NAME="$(basename ${test%.*})"
   . "${test}"
 done
