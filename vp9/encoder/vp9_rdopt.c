@@ -745,7 +745,8 @@ static void txfm_rd_in_plane(MACROBLOCK *x,
                              int use_fast_coef_casting) {
   MACROBLOCKD *const xd = &x->e_mbd;
   const struct macroblockd_plane *const pd = &xd->plane[plane];
-  struct rdcost_block_args args = { 0 };
+  struct rdcost_block_args args;
+  vp9_zero(args);
   args.x = x;
   args.best_rd = ref_best_rd;
   args.use_fast_coef_costing = use_fast_coef_casting;
@@ -2312,7 +2313,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   MACROBLOCKD *xd = &x->e_mbd;
   const VP9_COMMON *cm = &cpi->common;
   MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
-  struct buf_2d backup_yv12[MAX_MB_PLANE] = {{0}};
+  struct buf_2d backup_yv12[MAX_MB_PLANE] = {{0, 0}};
   int bestsme = INT_MAX;
   int step_param;
   int sadpb = x->sadperbit16;
@@ -3068,7 +3069,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t best_pred_rd[REFERENCE_MODES];
   int64_t best_filter_rd[SWITCHABLE_FILTER_CONTEXTS];
   int64_t best_filter_diff[SWITCHABLE_FILTER_CONTEXTS];
-  MB_MODE_INFO best_mbmode = { 0 };
+  MB_MODE_INFO best_mbmode;
   int mode_index, best_mode_index = -1;
   unsigned int ref_costs_single[MAX_REF_FRAMES], ref_costs_comp[MAX_REF_FRAMES];
   vp9_prob comp_mode_p;
@@ -3094,7 +3095,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   const int intra_y_mode_mask =
       cpi->sf.intra_y_mode_mask[max_txsize_lookup[bsize]];
   int disable_inter_mode_mask = cpi->sf.disable_inter_mode_mask[bsize];
-
+  vp9_zero(best_mbmode);
   x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
 
   estimate_ref_frame_costs(cm, xd, segment_id, ref_costs_single, ref_costs_comp,
@@ -3677,7 +3678,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t best_pred_rd[REFERENCE_MODES];
   int64_t best_filter_rd[SWITCHABLE_FILTER_CONTEXTS];
   int64_t best_filter_diff[SWITCHABLE_FILTER_CONTEXTS];
-  MB_MODE_INFO best_mbmode = { 0 };
+  MB_MODE_INFO best_mbmode;
   int ref_index, best_ref_index = 0;
   unsigned int ref_costs_single[MAX_REF_FRAMES], ref_costs_comp[MAX_REF_FRAMES];
   vp9_prob comp_mode_p;
@@ -3697,6 +3698,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 
   x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
   vpx_memset(x->zcoeff_blk[TX_4X4], 0, 4);
+  vp9_zero(best_mbmode);
 
   for (i = 0; i < 4; i++) {
     int j;
