@@ -112,15 +112,15 @@ void vp9_loop_filter_frame(YV12_BUFFER_CONFIG *frame,
 
 // Apply the loop filter to [start, stop) macro block rows in frame_buffer.
 void vp9_loop_filter_rows(const YV12_BUFFER_CONFIG *frame_buffer,
-                          struct VP9Common *cm, struct macroblockd *xd,
+                          struct VP9Common *cm,
+                          struct macroblockd_plane planes[MAX_MB_PLANE],
                           int start, int stop, int y_only);
 
 typedef struct LoopFilterWorkerData {
   const YV12_BUFFER_CONFIG *frame_buffer;
   struct VP9Common *cm;
-  struct macroblockd xd;  // TODO(jzern): most of this is unnecessary to the
-                          // loopfilter. the planes are necessary as their state
-                          // is changed during decode.
+  struct macroblockd_plane planes[MAX_MB_PLANE];
+
   int start;
   int stop;
   int y_only;

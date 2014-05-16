@@ -201,7 +201,7 @@ static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
   mbmi = &xd->mi[0]->mbmi;
 
   // Set up destination pointers.
-  vp9_setup_dst_planes(xd, get_frame_new_buffer(cm), mi_row, mi_col);
+  vp9_setup_dst_planes(xd->plane, get_frame_new_buffer(cm), mi_row, mi_col);
 
   // Set up limit values for MV components.
   // Mv beyond the range do not produce new/different prediction block.
