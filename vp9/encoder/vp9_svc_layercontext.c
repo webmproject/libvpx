@@ -203,7 +203,7 @@ void vp9_init_second_pass_spatial_svc(VP9_COMP *cpi) {
   int i;
 
   for (i = 0; i < svc->number_spatial_layers; ++i) {
-    struct twopass_rc *const twopass = &svc->layer_context[i].twopass;
+    TWO_PASS *const twopass = &svc->layer_context[i].twopass;
 
     svc->spatial_layer_id = i;
     vp9_init_second_pass(cpi);

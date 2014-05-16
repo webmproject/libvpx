@@ -79,12 +79,12 @@ static int gfboost_qadjust(int qindex) {
 
 // Resets the first pass file to the given position using a relative seek from
 // the current position.
-static void reset_fpf_position(struct twopass_rc *p,
+static void reset_fpf_position(TWO_PASS *p,
                                const FIRSTPASS_STATS *position) {
   p->stats_in = position;
 }
 
-static int lookup_next_frame_stats(const struct twopass_rc *p,
+static int lookup_next_frame_stats(const TWO_PASS *p,
                                    FIRSTPASS_STATS *next_frame) {
   if (p->stats_in >= p->stats_in_end)
     return EOF;
@@ -95,7 +95,7 @@ static int lookup_next_frame_stats(const struct twopass_rc *p,
 
 
 // Read frame stats at an offset from the current position.
-static int read_frame_stats(const struct twopass_rc *p,
+static int read_frame_stats(const TWO_PASS *p,
                             FIRSTPASS_STATS *frame_stats, int offset) {
   const FIRSTPASS_STATS *fps_ptr = p->stats_in;
 
@@ -112,7 +112,7 @@ static int read_frame_stats(const struct twopass_rc *p,
   return 1;
 }
 
-static int input_stats(struct twopass_rc *p, FIRSTPASS_STATS *fps) {
+static int input_stats(TWO_PASS *p, FIRSTPASS_STATS *fps) {
   if (p->stats_in >= p->stats_in_end)
     return EOF;
 
@@ -258,7 +258,7 @@ static void avg_stats(FIRSTPASS_STATS *section) {
 // harder frames.
 static double calculate_modified_err(const VP9_COMP *cpi,
                                      const FIRSTPASS_STATS *this_frame) {
-  const struct twopass_rc *twopass = &cpi->twopass;
+  const TWO_PASS *twopass = &cpi->twopass;
   const SVC *const svc = &cpi->svc;
   const FIRSTPASS_STATS *stats;
   double av_err;
@@ -501,7 +501,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
   int new_mv_count = 0;
   int sum_in_vectors = 0;
   uint32_t lastmv_as_int = 0;
-  struct twopass_rc *twopass = &cpi->twopass;
+  TWO_PASS *twopass = &cpi->twopass;
   const MV zero_mv = {0, 0};
   const YV12_BUFFER_CONFIG *first_ref_buf = lst_yv12;
 
@@ -960,7 +960,7 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   const int is_spatial_svc = (svc->number_spatial_layers > 1) &&
                              (svc->number_temporal_layers == 1);
-  struct twopass_rc *const twopass = is_spatial_svc ?
+  TWO_PASS *const twopass = is_spatial_svc ?
       &svc->layer_context[svc->spatial_layer_id].twopass : &cpi->twopass;
   double frame_rate;
   FIRSTPASS_STATS *stats;
@@ -1073,7 +1073,7 @@ static double get_prediction_decay_rate(const VP9_COMMON *cm,
 // Function to test for a condition where a complex transition is followed
 // by a static section. For example in slide shows where there is a fade
 // between slides. This is to help with more optimal kf and gf positioning.
-static int detect_transition_to_still(struct twopass_rc *twopass,
+static int detect_transition_to_still(TWO_PASS *twopass,
                                       int frame_interval, int still_interval,
                                       double loop_decay_rate,
                                       double last_decay_rate) {
@@ -1111,7 +1111,7 @@ static int detect_transition_to_still(struct twopass_rc *twopass,
 // This function detects a flash through the high relative pcnt_second_ref
 // score in the frame following a flash frame. The offset passed in should
 // reflect this.
-static int detect_flash(const struct twopass_rc *twopass, int offset) {
+static int detect_flash(const TWO_PASS *twopass, int offset) {
   FIRSTPASS_STATS next_frame;
 
   int flash_detected = 0;
@@ -1197,7 +1197,7 @@ static int calc_arf_boost(VP9_COMP *cpi, int offset,
                           int f_frames, int b_frames,
                           int *f_boost, int *b_boost) {
   FIRSTPASS_STATS this_frame;
-  struct twopass_rc *const twopass = &cpi->twopass;
+  TWO_PASS *const twopass = &cpi->twopass;
   int i;
   double boost_score = 0.0;
   double mv_ratio_accumulator = 0.0;
@@ -1419,7 +1419,7 @@ void define_fixed_arf_period(VP9_COMP *cpi) {
 #endif
 
 // Calculate a section intra ratio used in setting max loop filter.
-static void calculate_section_intra_ratio(struct twopass_rc *twopass,
+static void calculate_section_intra_ratio(TWO_PASS *twopass,
                                           const FIRSTPASS_STATS *start_pos,
                                           int section_length) {
   FIRSTPASS_STATS next_frame;
@@ -1449,7 +1449,7 @@ static void calculate_section_intra_ratio(struct twopass_rc *twopass,
 static int64_t calculate_total_gf_group_bits(VP9_COMP *cpi,
                                              double gf_group_err) {
   const RATE_CONTROL *const rc = &cpi->rc;
-  const struct twopass_rc *const twopass = &cpi->twopass;
+  const TWO_PASS *const twopass = &cpi->twopass;
   const int max_bits = frame_max_bits(rc, &cpi->oxcf);
   int64_t total_group_bits;
 
@@ -1500,7 +1500,7 @@ static int calculate_boost_bits(int frame_count,
 static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   RATE_CONTROL *const rc = &cpi->rc;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
-  struct twopass_rc *const twopass = &cpi->twopass;
+  TWO_PASS *const twopass = &cpi->twopass;
   FIRSTPASS_STATS next_frame;
   const FIRSTPASS_STATS *start_pos;
   int i;
@@ -1790,7 +1790,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
 // Allocate bits to a normal frame that is neither a gf an arf or a key frame.
 static void assign_std_frame_bits(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
-  struct twopass_rc *twopass = &cpi->twopass;
+  TWO_PASS *twopass = &cpi->twopass;
   // For a single frame.
   const int max_bits = frame_max_bits(&cpi->rc, &cpi->oxcf);
   // Calculate modified prediction error used in bit allocation.
@@ -1819,7 +1819,7 @@ static void assign_std_frame_bits(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   vp9_rc_set_frame_target(cpi, target_frame_size);
 }
 
-static int test_candidate_kf(struct twopass_rc *twopass,
+static int test_candidate_kf(TWO_PASS *twopass,
                              const FIRSTPASS_STATS *last_frame,
                              const FIRSTPASS_STATS *this_frame,
                              const FIRSTPASS_STATS *next_frame) {
@@ -1899,7 +1899,7 @@ static int test_candidate_kf(struct twopass_rc *twopass,
 static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   int i, j;
   RATE_CONTROL *const rc = &cpi->rc;
-  struct twopass_rc *const twopass = &cpi->twopass;
+  TWO_PASS *const twopass = &cpi->twopass;
   const FIRSTPASS_STATS first_frame = *this_frame;
   const FIRSTPASS_STATS *start_position = twopass->stats_in;
   FIRSTPASS_STATS next_frame;
@@ -2144,7 +2144,7 @@ void vbr_rate_correction(int * this_frame_target,
 void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
-  struct twopass_rc *const twopass = &cpi->twopass;
+  TWO_PASS *const twopass = &cpi->twopass;
   int frames_left;
   FIRSTPASS_STATS this_frame;
   FIRSTPASS_STATS this_frame_copy;
