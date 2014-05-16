@@ -52,6 +52,6 @@ void vp9_loop_filter_frame_mt(YV12_BUFFER_CONFIG *frame,
                               struct VP9Decoder *pbi,
                               struct VP9Common *cm,
                               int frame_filter_level,
-                              int y_only, int partial_frame);
+                              int y_only);
 
 #endif  // VP9_DECODER_VP9_DTHREAD_H_

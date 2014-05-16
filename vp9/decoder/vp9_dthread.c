@@ -135,7 +135,7 @@ static int loop_filter_row_worker(void *arg1, void *arg2) {
 void vp9_loop_filter_frame_mt(YV12_BUFFER_CONFIG *frame,
                               VP9Decoder *pbi, VP9_COMMON *cm,
                               int frame_filter_level,
-                              int y_only, int partial_frame) {
+                              int y_only) {
   VP9LfSync *const lf_sync = &pbi->lf_row_sync;
   // Number of superblock rows and cols
   const int sb_rows = mi_cols_aligned_to_sb(cm->mi_rows) >> MI_BLOCK_SIZE_LOG2;
