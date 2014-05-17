@@ -9,6 +9,7 @@
  */
 
 #include "vp9/encoder/vp9_context_tree.h"
+#include "vp9/encoder/vp9_encoder.h"
 
 static const BLOCK_SIZE square[] = {
   BLOCK_8X8,
@@ -86,7 +87,7 @@ static void free_tree_contexts(PC_TREE *tree) {
 // partition level. There are contexts for none, horizontal, vertical, and
 // split.  Along with a block_size value and a selected block_size which
 // represents the state of our search.
-void vp9_setup_pc_tree(VP9_COMMON *cm, MACROBLOCK *x) {
+void vp9_setup_pc_tree(VP9_COMMON *cm, VP9_COMP *cpi) {
   int i, j;
   const int leaf_nodes = 64;
   const int tree_nodes = 64 + 16 + 4 + 1;
@@ -96,23 +97,24 @@ void vp9_setup_pc_tree(VP9_COMMON *cm, MACROBLOCK *x) {
   int square_index = 1;
   int nodes;
 
-  vpx_free(x->leaf_tree);
-  CHECK_MEM_ERROR(cm, x->leaf_tree, vpx_calloc(leaf_nodes,
-                                               sizeof(*x->leaf_tree)));
-  vpx_free(x->pc_tree);
-  CHECK_MEM_ERROR(cm, x->pc_tree, vpx_calloc(tree_nodes, sizeof(*x->pc_tree)));
+  vpx_free(cpi->leaf_tree);
+  CHECK_MEM_ERROR(cm, cpi->leaf_tree, vpx_calloc(leaf_nodes,
+                                                 sizeof(*cpi->leaf_tree)));
+  vpx_free(cpi->pc_tree);
+  CHECK_MEM_ERROR(cm, cpi->pc_tree, vpx_calloc(tree_nodes,
+                                               sizeof(*cpi->pc_tree)));
 
-  this_pc = &x->pc_tree[0];
-  this_leaf = &x->leaf_tree[0];
+  this_pc = &cpi->pc_tree[0];
+  this_leaf = &cpi->leaf_tree[0];
 
   // 4x4 blocks smaller than 8x8 but in the same 8x8 block share the same
   // context so we only need to allocate 1 for each 8x8 block.
   for (i = 0; i < leaf_nodes; ++i)
-    alloc_mode_context(cm, 1, &x->leaf_tree[i]);
+    alloc_mode_context(cm, 1, &cpi->leaf_tree[i]);
 
   // Sets up all the leaf nodes in the tree.
   for (pc_tree_index = 0; pc_tree_index < leaf_nodes; ++pc_tree_index) {
-    PC_TREE *const tree = &x->pc_tree[pc_tree_index];
+    PC_TREE *const tree = &cpi->pc_tree[pc_tree_index];
     tree->block_size = square[0];
     alloc_tree_contexts(cm, tree, 4);
     tree->leaf_split[0] = this_leaf++;
@@ -124,7 +126,7 @@ void vp9_setup_pc_tree(VP9_COMMON *cm, MACROBLOCK *x) {
   // from leafs to the root.
   for (nodes = 16; nodes > 0; nodes >>= 2) {
     for (i = 0; i < nodes; ++i) {
-      PC_TREE *const tree = &x->pc_tree[pc_tree_index];
+      PC_TREE *const tree = &cpi->pc_tree[pc_tree_index];
       alloc_tree_contexts(cm, tree, 4 << (2 * square_index));
       tree->block_size = square[square_index];
       for (j = 0; j < 4; j++)
@@ -133,24 +135,24 @@ void vp9_setup_pc_tree(VP9_COMMON *cm, MACROBLOCK *x) {
     }
     ++square_index;
   }
-  x->pc_root = &x->pc_tree[tree_nodes - 1];
-  x->pc_root[0].none.best_mode_index = 2;
+  cpi->pc_root = &cpi->pc_tree[tree_nodes - 1];
+  cpi->pc_root[0].none.best_mode_index = 2;
 }
 
-void vp9_free_pc_tree(MACROBLOCK *x) {
+void vp9_free_pc_tree(VP9_COMP *cpi) {
   const int tree_nodes = 64 + 16 + 4 + 1;
   int i;
 
   // Set up all 4x4 mode contexts
   for (i = 0; i < 64; ++i)
-    free_mode_context(&x->leaf_tree[i]);
+    free_mode_context(&cpi->leaf_tree[i]);
 
   // Sets up all the leaf nodes in the tree.
   for (i = 0; i < tree_nodes; ++i)
-    free_tree_contexts(&x->pc_tree[i]);
+    free_tree_contexts(&cpi->pc_tree[i]);
 
-  vpx_free(x->pc_tree);
-  x->pc_tree = NULL;
-  vpx_free(x->leaf_tree);
-  x->leaf_tree = NULL;
+  vpx_free(cpi->pc_tree);
+  cpi->pc_tree = NULL;
+  vpx_free(cpi->leaf_tree);
+  cpi->leaf_tree = NULL;
 }

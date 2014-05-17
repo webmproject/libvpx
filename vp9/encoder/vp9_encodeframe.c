@@ -1538,7 +1538,7 @@ static void rd_use_partition(VP9_COMP *cpi,
       pl = partition_plane_context(xd, mi_row, mi_col, bsize);
 
       if (none_rate < INT_MAX) {
-        none_rate += x->partition_cost[pl][PARTITION_NONE];
+        none_rate += cpi->partition_cost[pl][PARTITION_NONE];
         none_rd = RDCOST(x->rdmult, x->rddiv, none_rate, none_dist);
       }
 
@@ -1636,7 +1636,7 @@ static void rd_use_partition(VP9_COMP *cpi,
 
   pl = partition_plane_context(xd, mi_row, mi_col, bsize);
   if (last_part_rate < INT_MAX) {
-    last_part_rate += x->partition_cost[pl][partition];
+    last_part_rate += cpi->partition_cost[pl][partition];
     last_part_rd = RDCOST(x->rdmult, x->rddiv, last_part_rate, last_part_dist);
   }
 
@@ -1689,11 +1689,11 @@ static void rd_use_partition(VP9_COMP *cpi,
 
       pl = partition_plane_context(xd, mi_row + y_idx, mi_col + x_idx,
                                    split_subsize);
-      chosen_rate += x->partition_cost[pl][PARTITION_NONE];
+      chosen_rate += cpi->partition_cost[pl][PARTITION_NONE];
     }
     pl = partition_plane_context(xd, mi_row, mi_col, bsize);
     if (chosen_rate < INT_MAX) {
-      chosen_rate += x->partition_cost[pl][PARTITION_SPLIT];
+      chosen_rate += cpi->partition_cost[pl][PARTITION_SPLIT];
       chosen_rd = RDCOST(x->rdmult, x->rddiv, chosen_rate, chosen_dist);
     }
   }
@@ -2015,7 +2015,7 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     if (this_rate != INT_MAX) {
       if (bsize >= BLOCK_8X8) {
         pl = partition_plane_context(xd, mi_row, mi_col, bsize);
-        this_rate += x->partition_cost[pl][PARTITION_NONE];
+        this_rate += cpi->partition_cost[pl][PARTITION_NONE];
       }
       sum_rd = RDCOST(x->rdmult, x->rddiv, this_rate, this_dist);
       if (sum_rd < best_rd) {
@@ -2103,7 +2103,7 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
 
     if (sum_rd < best_rd && i == 4) {
       pl = partition_plane_context(xd, mi_row, mi_col, bsize);
-      sum_rate += x->partition_cost[pl][PARTITION_SPLIT];
+      sum_rate += cpi->partition_cost[pl][PARTITION_SPLIT];
       sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
       if (sum_rd < best_rd) {
         best_rate = sum_rate;
@@ -2157,7 +2157,7 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     }
     if (sum_rd < best_rd) {
       pl = partition_plane_context(xd, mi_row, mi_col, bsize);
-      sum_rate += x->partition_cost[pl][PARTITION_HORZ];
+      sum_rate += cpi->partition_cost[pl][PARTITION_HORZ];
       sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
       if (sum_rd < best_rd) {
         best_rd = sum_rd;
@@ -2206,7 +2206,7 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     }
     if (sum_rd < best_rd) {
       pl = partition_plane_context(xd, mi_row, mi_col, bsize);
-      sum_rate += x->partition_cost[pl][PARTITION_VERT];
+      sum_rate += cpi->partition_cost[pl][PARTITION_VERT];
       sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
       if (sum_rd < best_rd) {
         best_rate = sum_rate;
@@ -2268,17 +2268,16 @@ static void encode_rd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
     int64_t dummy_dist;
 
     int i;
-    MACROBLOCK *x = &cpi->mb;
 
     if (sf->adaptive_pred_interp_filter) {
       for (i = 0; i < 64; ++i)
-        x->leaf_tree[i].pred_interp_filter = SWITCHABLE;
+        cpi->leaf_tree[i].pred_interp_filter = SWITCHABLE;
 
       for (i = 0; i < 64; ++i) {
-        x->pc_tree[i].vertical[0].pred_interp_filter = SWITCHABLE;
-        x->pc_tree[i].vertical[1].pred_interp_filter = SWITCHABLE;
-        x->pc_tree[i].horizontal[0].pred_interp_filter = SWITCHABLE;
-        x->pc_tree[i].horizontal[1].pred_interp_filter = SWITCHABLE;
+        cpi->pc_tree[i].vertical[0].pred_interp_filter = SWITCHABLE;
+        cpi->pc_tree[i].vertical[1].pred_interp_filter = SWITCHABLE;
+        cpi->pc_tree[i].horizontal[0].pred_interp_filter = SWITCHABLE;
+        cpi->pc_tree[i].horizontal[1].pred_interp_filter = SWITCHABLE;
       }
     }
 
@@ -2298,18 +2297,18 @@ static void encode_rd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
         set_fixed_partitioning(cpi, tile, mi, mi_row, mi_col,
                                sf->always_this_block_size);
         rd_use_partition(cpi, tile, mi, tp, mi_row, mi_col, BLOCK_64X64,
-                         &dummy_rate, &dummy_dist, 1, x->pc_root);
+                         &dummy_rate, &dummy_dist, 1, cpi->pc_root);
       } else if (sf->partition_search_type == VAR_BASED_FIXED_PARTITION) {
         BLOCK_SIZE bsize;
         set_offsets(cpi, tile, mi_row, mi_col, BLOCK_64X64);
         bsize = get_rd_var_based_fixed_partition(cpi, mi_row, mi_col);
         set_fixed_partitioning(cpi, tile, mi, mi_row, mi_col, bsize);
         rd_use_partition(cpi, tile, mi, tp, mi_row, mi_col, BLOCK_64X64,
-                         &dummy_rate, &dummy_dist, 1, x->pc_root);
+                         &dummy_rate, &dummy_dist, 1, cpi->pc_root);
       } else if (sf->partition_search_type == VAR_BASED_PARTITION) {
         choose_partitioning(cpi, tile, mi_row, mi_col);
         rd_use_partition(cpi, tile, mi, tp, mi_row, mi_col, BLOCK_64X64,
-                         &dummy_rate, &dummy_dist, 1, x->pc_root);
+                         &dummy_rate, &dummy_dist, 1, cpi->pc_root);
       } else {
         if ((cm->current_video_frame
             % sf->last_partitioning_redo_frequency) == 0
@@ -2328,7 +2327,8 @@ static void encode_rd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
                                     &sf->max_partition_size);
           }
           rd_pick_partition(cpi, tile, tp, mi_row, mi_col, BLOCK_64X64,
-                            &dummy_rate, &dummy_dist, 1, INT64_MAX, x->pc_root);
+                            &dummy_rate, &dummy_dist, 1, INT64_MAX,
+                            cpi->pc_root);
         } else {
           if (sf->constrain_copy_partition &&
               sb_has_motion(cm, prev_mi))
@@ -2337,7 +2337,7 @@ static void encode_rd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
           else
             copy_partitioning(cm, mi, prev_mi);
           rd_use_partition(cpi, tile, mi, tp, mi_row, mi_col, BLOCK_64X64,
-                           &dummy_rate, &dummy_dist, 1, x->pc_root);
+                           &dummy_rate, &dummy_dist, 1, cpi->pc_root);
         }
       }
     } else {
@@ -2349,7 +2349,7 @@ static void encode_rd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
                                 &sf->max_partition_size);
       }
       rd_pick_partition(cpi, tile, tp, mi_row, mi_col, BLOCK_64X64,
-                        &dummy_rate, &dummy_dist, 1, INT64_MAX, x->pc_root);
+                        &dummy_rate, &dummy_dist, 1, INT64_MAX, cpi->pc_root);
     }
   }
 }
@@ -2627,7 +2627,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
 
     if (this_rate != INT_MAX) {
       int pl = partition_plane_context(xd, mi_row, mi_col, bsize);
-      this_rate += x->partition_cost[pl][PARTITION_NONE];
+      this_rate += cpi->partition_cost[pl][PARTITION_NONE];
       sum_rd = RDCOST(x->rdmult, x->rddiv, this_rate, this_dist);
       if (sum_rd < best_rd) {
         int64_t stop_thresh = 4096;
@@ -2665,7 +2665,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
   sum_rd = 0;
   if (do_split) {
     int pl = partition_plane_context(xd, mi_row, mi_col, bsize);
-    sum_rate += x->partition_cost[pl][PARTITION_SPLIT];
+    sum_rate += cpi->partition_cost[pl][PARTITION_SPLIT];
     subsize = get_subsize(bsize, PARTITION_SPLIT);
     for (i = 0; i < 4 && sum_rd < best_rd; ++i) {
       const int x_idx = (i & 1) * ms;
@@ -2724,7 +2724,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
         sum_rd = INT64_MAX;
       } else {
         int pl = partition_plane_context(xd, mi_row, mi_col, bsize);
-        this_rate += x->partition_cost[pl][PARTITION_HORZ];
+        this_rate += cpi->partition_cost[pl][PARTITION_HORZ];
         sum_rate += this_rate;
         sum_dist += this_dist;
         sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
@@ -2758,7 +2758,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
         sum_rd = INT64_MAX;
       } else {
         int pl = partition_plane_context(xd, mi_row, mi_col, bsize);
-        this_rate += x->partition_cost[pl][PARTITION_VERT];
+        this_rate += cpi->partition_cost[pl][PARTITION_VERT];
         sum_rate += this_rate;
         sum_dist += this_dist;
         sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
@@ -2944,12 +2944,12 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
       case VAR_BASED_PARTITION:
         choose_partitioning(cpi, tile, mi_row, mi_col);
         nonrd_use_partition(cpi, tile, mi, tp, mi_row, mi_col, BLOCK_64X64,
-                            1, &dummy_rate, &dummy_dist, x->pc_root);
+                            1, &dummy_rate, &dummy_dist, cpi->pc_root);
         break;
       case SOURCE_VAR_BASED_PARTITION:
         set_source_var_based_partition(cpi, tile, mi, mi_row, mi_col);
         nonrd_use_partition(cpi, tile, mi, tp, mi_row, mi_col, BLOCK_64X64,
-                            1, &dummy_rate, &dummy_dist, x->pc_root);
+                            1, &dummy_rate, &dummy_dist, cpi->pc_root);
         break;
       case VAR_BASED_FIXED_PARTITION:
       case FIXED_PARTITION:
@@ -2958,7 +2958,7 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
                 get_nonrd_var_based_fixed_partition(cpi, mi_row, mi_col);
         set_fixed_partitioning(cpi, tile, mi, mi_row, mi_col, bsize);
         nonrd_use_partition(cpi, tile, mi, tp, mi_row, mi_col, BLOCK_64X64,
-                            1, &dummy_rate, &dummy_dist, x->pc_root);
+                            1, &dummy_rate, &dummy_dist, cpi->pc_root);
         break;
       case REFERENCE_PARTITION:
         if (cpi->sf.partition_check ||
@@ -2969,12 +2969,12 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
                                &cpi->sf.max_partition_size);
           nonrd_pick_partition(cpi, tile, tp, mi_row, mi_col, BLOCK_64X64,
                                &dummy_rate, &dummy_dist, 1, INT64_MAX,
-                               x->pc_root);
+                               cpi->pc_root);
         } else {
           copy_partitioning(cm, mi, prev_mi);
           nonrd_use_partition(cpi, tile, mi, tp, mi_row, mi_col,
                               BLOCK_64X64, 1, &dummy_rate, &dummy_dist,
-                              x->pc_root);
+                              cpi->pc_root);
         }
         break;
       default:
@@ -3037,7 +3037,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
     int i;
     struct macroblock_plane *const p = x->plane;
     struct macroblockd_plane *const pd = xd->plane;
-    PICK_MODE_CONTEXT *ctx = &x->pc_root->none;
+    PICK_MODE_CONTEXT *ctx = &cpi->pc_root->none;
 
     for (i = 0; i < MAX_MB_PLANE; ++i) {
       p[i].coeff = ctx->coeff_pbuf[i][0];

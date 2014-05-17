@@ -297,7 +297,7 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
     fill_token_costs(x->token_costs, cm->fc.coef_probs);
 
     for (i = 0; i < PARTITION_CONTEXTS; i++)
-      vp9_cost_tokens(x->partition_cost[i], get_partition_probs(cm, i),
+      vp9_cost_tokens(cpi->partition_cost[i], get_partition_probs(cm, i),
                       vp9_partition_tree);
   }
 
