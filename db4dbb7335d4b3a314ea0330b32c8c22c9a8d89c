@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//pFs\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-05-17T02:00:03Z",
+      "side": 1,
+      "message": "just say r973, the rest is meaningless externally",
+      "revId": "db4dbb7335d4b3a314ea0330b32c8c22c9a8d89c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//pFk\u003d",
+        "filename": "examples.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-05-17T02:00:03Z",
+      "side": 1,
+      "message": "use spaces not tabs",
+      "revId": "db4dbb7335d4b3a314ea0330b32c8c22c9a8d89c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//pFo\u003d",
+        "filename": "third_party/libyuv/README.libvpx",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-05-17T02:00:03Z",
+      "side": 1,
+      "message": "the last sentence can go now",
+      "revId": "db4dbb7335d4b3a314ea0330b32c8c22c9a8d89c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
