@@ -50,7 +50,8 @@ int vp8_denoiser_filter_neon(unsigned char *mc_running_avg_y,
                              unsigned char *running_avg_y,
                              int running_avg_y_stride,
                              unsigned char *sig, int sig_stride,
-                             unsigned int motion_magnitude) {
+                             unsigned int motion_magnitude,
+                             int increase_denoising) {
     /* If motion_magnitude is small, making the denoiser more aggressive by
      * increasing the adjustment for each level, level1 adjustment is
      * increased, the deltas stay the same.
