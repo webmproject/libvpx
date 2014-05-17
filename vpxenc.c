@@ -1264,6 +1264,10 @@ static void encode_frame(struct stream_state *stream,
 
   /* Scale if necessary */
   if (img && (img->d_w != cfg->g_w || img->d_h != cfg->g_h)) {
+    if (img->fmt != VPX_IMG_FMT_I420 && img->fmt != VPX_IMG_FMT_YV12) {
+      fprintf(stderr, "%s can only scale 4:2:0 8bpp inputs\n", exec_name);
+      exit(EXIT_FAILURE);
+    }
     if (!stream->img)
       stream->img = vpx_img_alloc(NULL, VPX_IMG_FMT_I420,
                                   cfg->g_w, cfg->g_h, 16);
