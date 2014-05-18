@@ -188,8 +188,8 @@ static const arg_def_t experimental_bitstream =
             "Allow experimental bitstream features.");
 
 #if CONFIG_VP9_HIGH
-static const arg_def_t testhighinternalarg = ARG_DEF(
-    NULL, "test-high-internal", 0, "Force use of 16 bit internal buffer");
+static const arg_def_t test16bitinternalarg = ARG_DEF(
+    NULL, "test-16bit-internal", 0, "Force use of 16 bit internal buffer");
 #endif
 
 static const arg_def_t *main_args[] = {
@@ -233,7 +233,7 @@ static const arg_def_t *global_args[] = {
   &width, &height, &stereo_mode, &timebase, &framerate,
   &error_resilient,
 #if CONFIG_VP9_HIGH
-  &testhighinternalarg,
+  &test16bitinternalarg,
 #endif
   &lag_in_frames, NULL
 };
@@ -959,7 +959,7 @@ static int parse_stream_params(struct VpxEncoderConfig *global,
   struct stream_config    *config = &stream->config;
   int                      eos_mark_found = 0;
 #if CONFIG_VP9_HIGH
-  int                      test_high_internal = 0;
+  int                      test_16bit_internal = 0;
 #endif
 
   // Handle codec specific options
@@ -1071,9 +1071,9 @@ static int parse_stream_params(struct VpxEncoderConfig *global,
     } else if (arg_match(&arg, &kf_disabled, argi)) {
       config->cfg.kf_mode = VPX_KF_DISABLED;
 #if CONFIG_VP9_HIGH
-    } else if (arg_match(&arg, &testhighinternalarg, argi)) {
+    } else if (arg_match(&arg, &test16bitinternalarg, argi)) {
       if (strcmp(global->codec->name, "vp9") == 0) {
-        test_high_internal = 1;
+        test_16bit_internal = 1;
       }
 #endif
     } else {
@@ -1106,7 +1106,7 @@ static int parse_stream_params(struct VpxEncoderConfig *global,
   }
 #if CONFIG_VP9_HIGH
   if (strcmp(global->codec->name, "vp9") == 0) {
-    config->use_16bit_internal = test_high_internal |
+    config->use_16bit_internal = test_16bit_internal |
                                  (config->cfg.g_profile > 1);
   }
 #endif
