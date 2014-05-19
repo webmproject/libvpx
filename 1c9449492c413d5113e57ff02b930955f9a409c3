@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//o00\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 940,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-05-19T20:36:09Z",
+      "side": 1,
+      "message": "Suggest adding static consts at the top of the file with descriptive names for these constants. I know it needs to be done for this entire file, but let\u0027s start doing it for the new constants we are adding.",
+      "revId": "1c9449492c413d5113e57ff02b930955f9a409c3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
