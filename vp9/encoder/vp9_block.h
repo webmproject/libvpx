@@ -106,7 +106,7 @@ struct macroblock {
   int skip_encode;
 
   // Used to store sub partition's choices.
-  int_mv pred_mv[MAX_REF_FRAMES];
+  MV pred_mv[MAX_REF_FRAMES];
 
   void (*fwd_txm4x4)(const int16_t *input, int16_t *output, int stride);
 };
