@@ -53,8 +53,6 @@ typedef struct VP9Decoder {
   int inv_tile_order;
 } VP9Decoder;
 
-void vp9_initialize_dec();
-
 int vp9_receive_compressed_data(struct VP9Decoder *pbi,
                                 size_t size, const uint8_t **dest,
                                 int64_t time_stamp);

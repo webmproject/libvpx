@@ -32,7 +32,7 @@
 #include "vp9/decoder/vp9_detokenize.h"
 #include "vp9/decoder/vp9_dthread.h"
 
-void vp9_initialize_dec() {
+static void initialize_dec() {
   static int init_done = 0;
 
   if (!init_done) {
@@ -58,7 +58,7 @@ VP9Decoder *vp9_decoder_create() {
   }
 
   cm->error.setjmp = 1;
-  vp9_initialize_dec();
+  initialize_dec();
 
   vp9_rtcd();
 
