@@ -33,6 +33,24 @@
       "revId": "e55c9f0654072936c94acff429f9dc3549e50d41",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ox4\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 491,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-05-19T23:47:22Z",
+      "side": 1,
+      "message": "ok having thought again about it.   I think it should be \n\nif (ctrl_id !\u003d VP8_COPY_REFERENCE) \n  return VPX_CODEC_INVALID_PARAM;\n\nsimilar for all of these.   to me it seems like roughly 20 lines in this file and another 20 in the cx...",
+      "parentUuid": "AAAAdn//oyw\u003d",
+      "revId": "e55c9f0654072936c94acff429f9dc3549e50d41",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
