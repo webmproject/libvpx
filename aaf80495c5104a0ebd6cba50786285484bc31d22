@@ -16,6 +16,24 @@
       "revId": "aaf80495c5104a0ebd6cba50786285484bc31d22",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//o1o\u003d",
+        "filename": "third_party/x86inc/x86inc.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 415,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-05-19T20:02:49Z",
+      "side": 1,
+      "message": "Yes, it was done assuming the previous stack pointer value.\nSince we move the pointer to the lower address now, seems need to do it again.",
+      "parentUuid": "AAAAdn//o2A\u003d",
+      "revId": "aaf80495c5104a0ebd6cba50786285484bc31d22",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
