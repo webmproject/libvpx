@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//o64\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1023,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-05-19T10:10:41Z",
+      "side": 0,
+      "message": "I think the original intent of this was as an extra data point when choosing the active max q. I am not sure when or if it was tested  but we can revisit this and re-instate it if we need to, so for now I am happy for it to be removed.",
+      "parentUuid": "AAAAdn//pag\u003d",
+      "revId": "1fe6496b176d20c8adf02ccfe00fb61d2097af96",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//pac\u003d",
         "filename": "vp9/encoder/vp9_firstpass.c",
         "patchSetId": 3
