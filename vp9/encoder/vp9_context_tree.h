@@ -33,13 +33,7 @@ typedef struct {
   int is_coded;
   int num_4x4_blk;
   int skip;
-  int_mv best_ref_mv[2];
-  int_mv ref_mvs[MAX_REF_FRAMES][MAX_MV_REF_CANDIDATES];
-  int rate;
-  int distortion;
   int best_mode_index;
-  int rddiv;
-  int rdmult;
   int hybrid_pred_diff;
   int comp_pred_diff;
   int single_pred_diff;
