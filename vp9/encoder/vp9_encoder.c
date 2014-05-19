@@ -1414,6 +1414,7 @@ static void scale_and_extend_frame(const YV12_BUFFER_CONFIG *src,
                             dst->alpha_buffer};
   const int dst_strides[4] = {dst->y_stride, dst->uv_stride, dst->uv_stride,
                               dst->alpha_stride};
+  const InterpKernel *const kernel = vp9_get_interp_kernel(EIGHTTAP);
   int x, y, i;
 
   for (y = 0; y < dst_h; y += 16) {
@@ -1429,8 +1430,8 @@ static void scale_and_extend_frame(const YV12_BUFFER_CONFIG *src,
         uint8_t *dst_ptr = dsts[i] + (y / factor) * dst_stride + (x / factor);
 
         vp9_convolve8(src_ptr, src_stride, dst_ptr, dst_stride,
-                      vp9_sub_pel_filters_8[x_q4 & 0xf], 16 * src_w / dst_w,
-                      vp9_sub_pel_filters_8[y_q4 & 0xf], 16 * src_h / dst_h,
+                      kernel[x_q4 & 0xf], 16 * src_w / dst_w,
+                      kernel[y_q4 & 0xf], 16 * src_h / dst_h,
                       16 / factor, 16 / factor);
       }
     }
