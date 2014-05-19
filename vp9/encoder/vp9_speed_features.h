@@ -321,10 +321,6 @@ typedef struct SPEED_FEATURES {
   // This flag controls the use of non-RD mode decision.
   int use_nonrd_pick_mode;
 
-  // This variable sets the encode_breakout threshold. Currently, it is only
-  // enabled in real time mode.
-  int encode_breakout_thresh;
-
   // A binary mask indicating if NEARESTMV, NEARMV, ZEROMV, NEWMV
   // modes are disabled in order from LSB to MSB for each BLOCK_SIZE.
   int disable_inter_mode_mask[BLOCK_SIZES];

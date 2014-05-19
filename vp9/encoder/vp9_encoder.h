@@ -411,8 +411,8 @@ typedef struct VP9_COMP {
   // Default value is 1. From first pass stats, encode_breakout may be disabled.
   ENCODE_BREAKOUT_TYPE allow_encode_breakout;
 
-  // Get threshold from external input. In real time mode, it can be
-  // overwritten according to encoding speed.
+  // Get threshold from external input. A suggested threshold is 800 for HD
+  // clips, and 300 for < HD clips.
   int encode_breakout;
 
   unsigned char *segmentation_map;
