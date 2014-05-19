@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//o2A\u003d",
+        "filename": "third_party/x86inc/x86inc.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 415,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-05-19T19:59:42Z",
+      "side": 1,
+      "message": "Is this(WIN64_PUSH_XMM) already handled in Prologue?",
+      "revId": "aaf80495c5104a0ebd6cba50786285484bc31d22",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
