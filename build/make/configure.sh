@@ -1284,8 +1284,8 @@ print_config_mk() {
     local makefile=$2
     shift 2
     for cfg; do
-        upname="`toupper $cfg`"
         if enabled $cfg; then
+            upname="`toupper $cfg`"
             echo "${prefix}_${upname}=yes" >> $makefile
         fi
     done
