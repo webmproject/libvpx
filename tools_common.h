@@ -89,7 +89,7 @@ struct VpxInputContext {
   enum VideoFileType file_type;
   uint32_t width;
   uint32_t height;
-  int use_i420;
+  vpx_img_fmt_t fmt;
   int only_i420;
   uint32_t fourcc;
   struct VpxRational framerate;

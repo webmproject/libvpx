@@ -755,7 +755,7 @@ void open_input_file(struct VpxInputContext *input) {
       input->height = input->y4m.pic_h;
       input->framerate.numerator = input->y4m.fps_n;
       input->framerate.denominator = input->y4m.fps_d;
-      input->use_i420 = 0;
+      input->fmt = input->y4m.vpx_fmt;
     } else
       fatal("Unsupported Y4M stream.");
   } else if (input->detect.buf_read == 4 && fourcc_is_ivf(input->detect.buf)) {
@@ -1059,6 +1059,23 @@ static void set_default_kf_interval(struct stream_state *stream,
   }
 }
 
+static const char* file_type_to_string(enum VideoFileType t) {
+  switch (t) {
+    case FILE_TYPE_RAW: return "RAW";
+    case FILE_TYPE_Y4M: return "Y4M";
+    default: return "Other";
+  }
+}
+
+static const char* image_format_to_string(vpx_img_fmt_t f) {
+  switch (f) {
+    case VPX_IMG_FMT_I420: return "I420";
+    case VPX_IMG_FMT_I422: return "I422";
+    case VPX_IMG_FMT_I444: return "I444";
+    case VPX_IMG_FMT_YV12: return "YV12";
+    default: return "Other";
+  }
+}
 
 static void show_stream_config(struct stream_state *stream,
                                struct VpxEncoderConfig *global,
@@ -1070,8 +1087,10 @@ static void show_stream_config(struct stream_state *stream,
   if (stream->index == 0) {
     fprintf(stderr, "Codec: %s\n",
             vpx_codec_iface_name(global->codec->interface()));
-    fprintf(stderr, "Source file: %s Format: %s\n", input->filename,
-            input->use_i420 ? "I420" : "YV12");
+    fprintf(stderr, "Source file: %s File Type: %s Format: %s\n",
+            input->filename,
+            file_type_to_string(input->file_type),
+            image_format_to_string(input->fmt));
   }
   if (stream->next || stream->index)
     fprintf(stderr, "\nStream Index: %d\n", stream->index);
@@ -1501,7 +1520,6 @@ int main(int argc, const char **argv_) {
   /* Setup default input stream settings */
   input.framerate.numerator = 30;
   input.framerate.denominator = 1;
-  input.use_i420 = 1;
   input.only_i420 = 1;
 
   /* First parse the global configuration values, because we want to apply
@@ -1511,6 +1529,7 @@ int main(int argc, const char **argv_) {
   argv = argv_dup(argc - 1, argv_ + 1);
   parse_global_config(&global, argv);
 
+  input.fmt = global.use_i420 ? VPX_IMG_FMT_I420 : VPX_IMG_FMT_YV12;
 
   {
     /* Now parse each stream's parameters. Using a local scope here
@@ -1611,10 +1630,7 @@ int main(int argc, const char **argv_) {
            frames.*/
         memset(&raw, 0, sizeof(raw));
       else
-        vpx_img_alloc(&raw,
-                      input.use_i420 ? VPX_IMG_FMT_I420
-                      : VPX_IMG_FMT_YV12,
-                      input.width, input.height, 32);
+        vpx_img_alloc(&raw, input.fmt, input.width, input.height, 32);
 
       FOREACH_STREAM(stream->rate_hist =
                          init_rate_histogram(&stream->config.cfg,
