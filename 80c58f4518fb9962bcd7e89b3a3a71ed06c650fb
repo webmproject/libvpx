@@ -16,6 +16,24 @@
       "revId": "80c58f4518fb9962bcd7e89b3a3a71ed06c650fb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//o2Q\u003d",
+        "filename": "vp8/common/x86/variance_impl_mmx.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-05-19T19:47:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//o24\u003d",
+      "revId": "80c58f4518fb9962bcd7e89b3a3a71ed06c650fb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
