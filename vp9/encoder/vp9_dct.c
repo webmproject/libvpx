@@ -445,20 +445,20 @@ void vp9_fdct16x16_c(const int16_t *input, int16_t *output, int stride) {
         step3[7] = step1[7] + step2[4];
         // step 4
         temp1 = step3[1] *  -cospi_8_64 + step3[6] * cospi_24_64;
-        temp2 = step3[2] * -cospi_24_64 - step3[5] *  cospi_8_64;
+        temp2 = step3[2] * cospi_24_64 + step3[5] *  cospi_8_64;
         step2[1] = fdct_round_shift(temp1);
         step2[2] = fdct_round_shift(temp2);
-        temp1 = step3[2] * -cospi_8_64 + step3[5] * cospi_24_64;
+        temp1 = step3[2] * cospi_8_64 - step3[5] * cospi_24_64;
         temp2 = step3[1] * cospi_24_64 + step3[6] *  cospi_8_64;
         step2[5] = fdct_round_shift(temp1);
         step2[6] = fdct_round_shift(temp2);
         // step 5
         step1[0] = step3[0] + step2[1];
         step1[1] = step3[0] - step2[1];
-        step1[2] = step3[3] - step2[2];
-        step1[3] = step3[3] + step2[2];
-        step1[4] = step3[4] + step2[5];
-        step1[5] = step3[4] - step2[5];
+        step1[2] = step3[3] + step2[2];
+        step1[3] = step3[3] - step2[2];
+        step1[4] = step3[4] - step2[5];
+        step1[5] = step3[4] + step2[5];
         step1[6] = step3[7] - step2[6];
         step1[7] = step3[7] + step2[6];
         // step 6
@@ -755,10 +755,10 @@ static void fdct16(const int16_t in[16], int16_t out[16]) {
 
   // step 4
   temp1 = step3[1] *  -cospi_8_64 + step3[6] * cospi_24_64;
-  temp2 = step3[2] * -cospi_24_64 - step3[5] *  cospi_8_64;
+  temp2 = step3[2] * cospi_24_64 + step3[5] *  cospi_8_64;
   step2[1] = fdct_round_shift(temp1);
   step2[2] = fdct_round_shift(temp2);
-  temp1 = step3[2] * -cospi_8_64 + step3[5] * cospi_24_64;
+  temp1 = step3[2] * cospi_8_64 - step3[5] * cospi_24_64;
   temp2 = step3[1] * cospi_24_64 + step3[6] *  cospi_8_64;
   step2[5] = fdct_round_shift(temp1);
   step2[6] = fdct_round_shift(temp2);
@@ -766,10 +766,10 @@ static void fdct16(const int16_t in[16], int16_t out[16]) {
   // step 5
   step1[0] = step3[0] + step2[1];
   step1[1] = step3[0] - step2[1];
-  step1[2] = step3[3] - step2[2];
-  step1[3] = step3[3] + step2[2];
-  step1[4] = step3[4] + step2[5];
-  step1[5] = step3[4] - step2[5];
+  step1[2] = step3[3] + step2[2];
+  step1[3] = step3[3] - step2[2];
+  step1[4] = step3[4] - step2[5];
+  step1[5] = step3[4] + step2[5];
   step1[6] = step3[7] - step2[6];
   step1[7] = step3[7] + step2[6];
 
