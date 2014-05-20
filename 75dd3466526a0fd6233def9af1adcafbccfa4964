@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//onA\u003d",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-05-20T20:39:08Z",
+      "side": 1,
+      "message": "Removed duplication - handles sse2 code now.",
+      "parentUuid": "AAAAdn//oog\u003d",
+      "revId": "75dd3466526a0fd6233def9af1adcafbccfa4964",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//ooc\u003d",
         "filename": "vp9/encoder/vp9_temporal_filter.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-05-20T19:01:48Z",
       "side": 1,
       "message": "Best to remove this assert and the TODO above it. You\u0027ve already added a new TODO for the work that still remains.",
+      "revId": "75dd3466526a0fd6233def9af1adcafbccfa4964",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//om4\u003d",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-05-20T20:39:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//ooc\u003d",
       "revId": "75dd3466526a0fd6233def9af1adcafbccfa4964",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
