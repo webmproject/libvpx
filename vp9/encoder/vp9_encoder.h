@@ -438,7 +438,7 @@ typedef struct VP9_COMP {
   uint64_t time_pick_lpf;
   uint64_t time_encode_sb_row;
 
-  struct twopass_rc twopass;
+  TWO_PASS twopass;
 
   YV12_BUFFER_CONFIG alt_ref_buffer;
   YV12_BUFFER_CONFIG *frames[MAX_LAG_BUFFERS];

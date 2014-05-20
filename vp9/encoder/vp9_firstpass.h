@@ -38,7 +38,7 @@ typedef struct {
   int64_t spatial_layer_id;
 } FIRSTPASS_STATS;
 
-struct twopass_rc {
+typedef struct {
   unsigned int section_intra_rating;
   unsigned int next_iiratio;
   FIRSTPASS_STATS total_stats;
@@ -76,7 +76,7 @@ struct twopass_rc {
   int gf_zeromotion_pct;
 
   int active_worst_quality;
-};
+} TWO_PASS;
 
 struct VP9_COMP;
 
