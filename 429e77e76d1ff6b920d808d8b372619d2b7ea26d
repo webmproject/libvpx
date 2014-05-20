@@ -16,6 +16,24 @@
       "revId": "429e77e76d1ff6b920d808d8b372619d2b7ea26d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ojo\u003d",
+        "filename": "vp9/encoder/x86/vp9_temporal_filter_apply_sse2.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-05-20T22:21:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//omI\u003d",
+      "revId": "429e77e76d1ff6b920d808d8b372619d2b7ea26d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
