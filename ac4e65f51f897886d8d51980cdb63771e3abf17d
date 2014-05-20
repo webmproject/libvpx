@@ -16,6 +16,24 @@
       "revId": "ac4e65f51f897886d8d51980cdb63771e3abf17d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//olY\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 803,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-05-20T21:19:00Z",
+      "side": 1,
+      "message": "for reference:\nhttp://google-styleguide.googlecode.com/svn/trunk/cppguide.xml#Function_Declarations_and_Definitions",
+      "parentUuid": "AAAAdn//ol8\u003d",
+      "revId": "ac4e65f51f897886d8d51980cdb63771e3abf17d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
