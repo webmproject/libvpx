@@ -46,6 +46,9 @@
 #define GF_RMAX    96.0
 #define ERR_DIVISOR   150.0
 #define MIN_DECAY_FACTOR 0.1
+#define SVC_FACTOR_PT_LOW 0.45
+#define FACTOR_PT_LOW 0.5
+#define FACTOR_PT_HIGH 0.9
 
 #define KF_MB_INTRA_MIN 150
 #define GF_MB_INTRA_MIN 100
@@ -938,8 +941,8 @@ static int get_twopass_worst_quality(const VP9_COMP *cpi,
     for (q = rc->best_quality; q < rc->worst_quality; ++q) {
       const double factor =
           calc_correction_factor(err_per_mb, ERR_DIVISOR,
-                                 is_svc_upper_layer ? 0.8 : 0.5,
-                                 is_svc_upper_layer ? 1.0 : 0.90, q);
+                                 is_svc_upper_layer ? SVC_FACTOR_PT_LOW :
+                                 FACTOR_PT_LOW, FACTOR_PT_HIGH, q);
       const int bits_per_mb = vp9_rc_bits_per_mb(INTER_FRAME, q,
                                                  factor * speed_term);
       if (bits_per_mb <= target_norm_bits_per_mb)
@@ -2189,18 +2192,21 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
     // Define next KF group and assign bits to it.
     this_frame_copy = this_frame;
     find_next_key_frame(cpi, &this_frame_copy);
-    // Don't place key frame in any enhancement layers in spatial svc
-    if (is_spatial_svc) {
-      lc->is_key_frame = 1;
-      if (cpi->svc.spatial_layer_id > 0) {
-        cm->frame_type = INTER_FRAME;
+  } else {
+    cm->frame_type = INTER_FRAME;
+  }
+
+  if (is_spatial_svc) {
+    if (cpi->svc.spatial_layer_id == 0) {
+      lc->is_key_frame = (cm->frame_type == KEY_FRAME);
+    } else {
+      cm->frame_type = INTER_FRAME;
+      lc->is_key_frame = cpi->svc.layer_context[0].is_key_frame;
+
+      if (lc->is_key_frame) {
+        cpi->ref_frame_flags &= (~VP9_LAST_FLAG);
       }
     }
-  } else {
-    if (is_spatial_svc) {
-      lc->is_key_frame = 0;
-    }
-    cm->frame_type = INTER_FRAME;
   }
 
   // Is this frame a GF / ARF? (Note: a key frame is always also a GF).
