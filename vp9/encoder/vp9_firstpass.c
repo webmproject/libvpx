@@ -2269,6 +2269,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
 }
 
 void vp9_twopass_postencode_update(VP9_COMP *cpi) {
+  TWO_PASS *const twopass = &cpi->twopass;
   RATE_CONTROL *const rc = &cpi->rc;
 #ifdef LONG_TERM_VBR_CORRECTION
   // In this experimental mode, the VBR correction is done exclusively through
@@ -2290,14 +2291,13 @@ void vp9_twopass_postencode_update(VP9_COMP *cpi) {
   // vs. actual bitrate gradually as we progress towards the end of the
   // sequence in order to mitigate this effect.
   const double progress =
-      (double)(cpi->twopass.stats_in - cpi->twopass.stats_in_start) /
-              (cpi->twopass.stats_in_end - cpi->twopass.stats_in_start);
+      (double)(twopass->stats_in - twopass->stats_in_start) /
+              (twopass->stats_in_end - twopass->stats_in_start);
   const int bits_used = (int)(progress * rc->this_frame_target +
                              (1.0 - progress) * rc->projected_frame_size);
 #endif
 
-  cpi->twopass.bits_left -= bits_used;
-  cpi->twopass.bits_left = MAX(cpi->twopass.bits_left, 0);
+  twopass->bits_left = MAX(twopass->bits_left - bits_used, 0);
 
 #ifdef LONG_TERM_VBR_CORRECTION
   if (cpi->common.frame_type != KEY_FRAME &&
@@ -2307,12 +2307,12 @@ void vp9_twopass_postencode_update(VP9_COMP *cpi) {
       vp9_is_upper_layer_key_frame(cpi)) {
     // For key frames kf_group_bits already had the target bits subtracted out.
     // So now update to the correct value based on the actual bits used.
-    cpi->twopass.kf_group_bits += cpi->rc.this_frame_target - bits_used;
+    twopass->kf_group_bits += rc->this_frame_target - bits_used;
   } else {
 #endif
-    cpi->twopass.kf_group_bits -= bits_used;
-    cpi->twopass.gf_group_bits -= bits_used;
-    cpi->twopass.gf_group_bits = MAX(cpi->twopass.gf_group_bits, 0);
+    twopass->kf_group_bits -= bits_used;
+    twopass->gf_group_bits -= bits_used;
+    twopass->gf_group_bits = MAX(twopass->gf_group_bits, 0);
   }
-  cpi->twopass.kf_group_bits = MAX(cpi->twopass.kf_group_bits, 0);
+  twopass->kf_group_bits = MAX(twopass->kf_group_bits, 0);
 }
