@@ -16,6 +16,24 @@
       "revId": "e93f933ef75b5b44821df640bfaf1c517eca06be",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ojE\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1412,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-05-20T22:31:31Z",
+      "side": 1,
+      "message": "How can I fix the code in this case?",
+      "parentUuid": "AAAAdn//olw\u003d",
+      "revId": "e93f933ef75b5b44821df640bfaf1c517eca06be",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
