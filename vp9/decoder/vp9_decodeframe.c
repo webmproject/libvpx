@@ -675,64 +675,6 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
   setup_display_size(cm, rb);
 }
 
-static void decode_tile(VP9Decoder *pbi, const TileInfo *const tile,
-                        int do_loopfilter_inline, vp9_reader *r) {
-  const int num_threads = pbi->max_threads;
-  VP9_COMMON *const cm = &pbi->common;
-  int mi_row, mi_col;
-  MACROBLOCKD *xd = &pbi->mb;
-
-  if (do_loopfilter_inline) {
-    LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
-    lf_data->frame_buffer = get_frame_new_buffer(cm);
-    lf_data->cm = cm;
-    vp9_copy(lf_data->planes, pbi->mb.plane);
-    lf_data->stop = 0;
-    lf_data->y_only = 0;
-    vp9_loop_filter_frame_init(cm, cm->lf.filter_level);
-  }
-
-  for (mi_row = tile->mi_row_start; mi_row < tile->mi_row_end;
-       mi_row += MI_BLOCK_SIZE) {
-    // For a SB there are 2 left contexts, each pertaining to a MB row within
-    vp9_zero(xd->left_context);
-    vp9_zero(xd->left_seg_context);
-    for (mi_col = tile->mi_col_start; mi_col < tile->mi_col_end;
-         mi_col += MI_BLOCK_SIZE) {
-      decode_partition(cm, xd, tile, mi_row, mi_col, r, BLOCK_64X64);
-    }
-
-    if (do_loopfilter_inline) {
-      const int lf_start = mi_row - MI_BLOCK_SIZE;
-      LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
-
-      // delay the loopfilter by 1 macroblock row.
-      if (lf_start < 0) continue;
-
-      // decoding has completed: finish up the loop filter in this thread.
-      if (mi_row + MI_BLOCK_SIZE >= tile->mi_row_end) continue;
-
-      vp9_worker_sync(&pbi->lf_worker);
-      lf_data->start = lf_start;
-      lf_data->stop = mi_row;
-      if (num_threads > 1) {
-        vp9_worker_launch(&pbi->lf_worker);
-      } else {
-        vp9_worker_execute(&pbi->lf_worker);
-      }
-    }
-  }
-
-  if (do_loopfilter_inline) {
-    LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
-
-    vp9_worker_sync(&pbi->lf_worker);
-    lf_data->start = lf_data->stop;
-    lf_data->stop = cm->mi_rows;
-    vp9_worker_execute(&pbi->lf_worker);
-  }
-}
-
 static void setup_tile_info(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
   int min_log2_tile_cols, max_log2_tile_cols, max_ones;
   vp9_get_tile_n_bits(cm->mi_cols, &min_log2_tile_cols, &max_log2_tile_cols);
@@ -811,16 +753,35 @@ static void get_tile_buffers(VP9Decoder *pbi,
 
 static const uint8_t *decode_tiles(VP9Decoder *pbi,
                                    const uint8_t *data,
-                                   const uint8_t *data_end,
-                                   int do_loopfilter_inline) {
+                                   const uint8_t *data_end) {
   VP9_COMMON *const cm = &pbi->common;
   const int aligned_cols = mi_cols_aligned_to_sb(cm->mi_cols);
   const int tile_cols = 1 << cm->log2_tile_cols;
   const int tile_rows = 1 << cm->log2_tile_rows;
   TileBuffer tile_buffers[4][1 << 6];
   int tile_row, tile_col;
-  const uint8_t *end = NULL;
-  vp9_reader r;
+  int mi_row, mi_col;
+  TileData *tile_data = NULL;
+
+  if (cm->lf.filter_level && pbi->lf_worker.data1 == NULL) {
+    CHECK_MEM_ERROR(cm, pbi->lf_worker.data1,
+                    vpx_memalign(32, sizeof(LFWorkerData)));
+    pbi->lf_worker.hook = (VP9WorkerHook)vp9_loop_filter_worker;
+    if (pbi->max_threads > 1 && !vp9_worker_reset(&pbi->lf_worker)) {
+      vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
+                         "Loop filter thread creation failed");
+    }
+  }
+
+  if (cm->lf.filter_level) {
+    LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
+    lf_data->frame_buffer = get_frame_new_buffer(cm);
+    lf_data->cm = cm;
+    vp9_copy(lf_data->planes, pbi->mb.plane);
+    lf_data->stop = 0;
+    lf_data->y_only = 0;
+    vp9_loop_filter_frame_init(cm, cm->lf.filter_level);
+  }
 
   assert(tile_rows <= 4);
   assert(tile_cols <= (1 << 6));
@@ -835,26 +796,88 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
 
   get_tile_buffers(pbi, data, data_end, tile_cols, tile_rows, tile_buffers);
 
-  // Decode tiles using data from tile_buffers
+  if (pbi->tile_data == NULL ||
+      (tile_cols * tile_rows) != pbi->total_tiles) {
+    vpx_free(pbi->tile_data);
+    CHECK_MEM_ERROR(
+        cm,
+        pbi->tile_data,
+        vpx_malloc(tile_cols * tile_rows * (sizeof(*pbi->tile_data))));
+    pbi->total_tiles = tile_rows * tile_cols;
+  }
+
+  // Load all tile information into tile_data.
   for (tile_row = 0; tile_row < tile_rows; ++tile_row) {
     for (tile_col = 0; tile_col < tile_cols; ++tile_col) {
-      const int col = pbi->inv_tile_order ? tile_cols - tile_col - 1 : tile_col;
-      const int last_tile = tile_row == tile_rows - 1 &&
-                                 col == tile_cols - 1;
-      const TileBuffer *const buf = &tile_buffers[tile_row][col];
       TileInfo tile;
-
-      vp9_tile_init(&tile, cm, tile_row, col);
-      setup_token_decoder(buf->data, data_end, buf->size, &cm->error, &r,
-                          pbi->decrypt_cb, pbi->decrypt_state);
-      decode_tile(pbi, &tile, do_loopfilter_inline, &r);
-
-      if (last_tile)
-        end = vp9_reader_find_end(&r);
+      const TileBuffer *const buf = &tile_buffers[tile_row][tile_col];
+      tile_data = pbi->tile_data + tile_cols * tile_row + tile_col;
+      tile_data->cm = cm;
+      tile_data->xd = pbi->mb;
+      tile_data->xd.corrupted = 0;
+      vp9_tile_init(&tile, tile_data->cm, tile_row, tile_col);
+      setup_token_decoder(buf->data, data_end, buf->size, &cm->error,
+                          &tile_data->bit_reader, pbi->decrypt_cb,
+                          pbi->decrypt_state);
+      init_macroblockd(cm, &tile_data->xd);
+      vp9_zero(tile_data->xd.dqcoeff);
     }
   }
 
-  return end;
+  for (tile_row = 0; tile_row < tile_rows; ++tile_row) {
+    TileInfo tile;
+    vp9_tile_set_row(&tile, cm, tile_row);
+    for (mi_row = tile.mi_row_start; mi_row < tile.mi_row_end;
+         mi_row += MI_BLOCK_SIZE) {
+      for (tile_col = 0; tile_col < tile_cols; ++tile_col) {
+        const int col = pbi->inv_tile_order ?
+                        tile_cols - tile_col - 1 : tile_col;
+        tile_data = pbi->tile_data + tile_cols * tile_row + col;
+        vp9_tile_set_col(&tile, tile_data->cm, col);
+        vp9_zero(tile_data->xd.left_context);
+        vp9_zero(tile_data->xd.left_seg_context);
+        for (mi_col = tile.mi_col_start; mi_col < tile.mi_col_end;
+             mi_col += MI_BLOCK_SIZE) {
+          decode_partition(tile_data->cm, &tile_data->xd, &tile, mi_row, mi_col,
+                           &tile_data->bit_reader, BLOCK_64X64);
+        }
+      }
+      // Loopfilter one row.
+      if (cm->lf.filter_level) {
+        const int lf_start = mi_row - MI_BLOCK_SIZE;
+        LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
+
+        // delay the loopfilter by 1 macroblock row.
+        if (lf_start < 0) continue;
+
+        // decoding has completed: finish up the loop filter in this thread.
+        if (mi_row + MI_BLOCK_SIZE >= cm->mi_rows) continue;
+
+        vp9_worker_sync(&pbi->lf_worker);
+        lf_data->start = lf_start;
+        lf_data->stop = mi_row;
+        if (pbi->max_threads > 1) {
+          vp9_worker_launch(&pbi->lf_worker);
+        } else {
+          vp9_worker_execute(&pbi->lf_worker);
+        }
+      }
+    }
+  }
+
+  // Loopfilter remaining rows in the frame.
+  if (cm->lf.filter_level) {
+    LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
+    vp9_worker_sync(&pbi->lf_worker);
+    lf_data->start = lf_data->stop;
+    lf_data->stop = cm->mi_rows;
+    vp9_worker_execute(&pbi->lf_worker);
+  }
+
+  // Get last tile data.
+  tile_data = pbi->tile_data + tile_cols * tile_rows - 1;
+
+  return vp9_reader_find_end(&tile_data->bit_reader);
 }
 
 static int tile_worker_hook(void *arg1, void *arg2) {
@@ -1279,7 +1302,6 @@ static struct vp9_read_bit_buffer* init_read_bit_buffer(
     const uint8_t *data,
     const uint8_t *data_end,
     uint8_t *clear_data /* buffer size MAX_VP9_HEADER_SIZE */) {
-  vp9_zero(*rb);
   rb->bit_offset = 0;
   rb->error_handler = error_handler;
   rb->error_handler_data = &pbi->common;
@@ -1300,7 +1322,7 @@ int vp9_decode_frame(VP9Decoder *pbi,
                      const uint8_t **p_data_end) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
-  struct vp9_read_bit_buffer rb;
+  struct vp9_read_bit_buffer rb = { 0 };
   uint8_t clear_data[MAX_VP9_HEADER_SIZE];
   const size_t first_partition_size = read_uncompressed_header(pbi,
       init_read_bit_buffer(pbi, &rb, data, data_end, clear_data));
@@ -1308,8 +1330,6 @@ int vp9_decode_frame(VP9Decoder *pbi,
   const int tile_rows = 1 << cm->log2_tile_rows;
   const int tile_cols = 1 << cm->log2_tile_cols;
   YV12_BUFFER_CONFIG *const new_fb = get_frame_new_buffer(cm);
-  const int do_loopfilter_inline = tile_rows == 1 && tile_cols == 1 &&
-                                   cm->lf.filter_level;
   xd->cur_buf = new_fb;
 
   if (!first_partition_size) {
@@ -1352,19 +1372,7 @@ int vp9_decode_frame(VP9Decoder *pbi,
     // to do parallel loopfiltering.
     vp9_loop_filter_frame_mt(new_fb, pbi, cm, cm->lf.filter_level, 0);
   } else {
-    if (do_loopfilter_inline && pbi->lf_worker.data1 == NULL) {
-      CHECK_MEM_ERROR(cm, pbi->lf_worker.data1,
-                      vpx_memalign(32, sizeof(LFWorkerData)));
-      pbi->lf_worker.hook = (VP9WorkerHook)vp9_loop_filter_worker;
-      if (pbi->max_threads > 1 && !vp9_worker_reset(&pbi->lf_worker)) {
-        vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
-                           "Loop filter thread creation failed");
-      }
-    }
-    *p_data_end = decode_tiles(pbi, data + first_partition_size, data_end,
-                               do_loopfilter_inline);
-    if (!do_loopfilter_inline)
-      vp9_loop_filter_frame(new_fb, cm, &pbi->mb, cm->lf.filter_level, 0, 0);
+    *p_data_end = decode_tiles(pbi, data + first_partition_size, data_end);
   }
 
   new_fb->corrupted |= xd->corrupted;
