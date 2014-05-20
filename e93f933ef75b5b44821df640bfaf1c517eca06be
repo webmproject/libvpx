@@ -34,6 +34,24 @@
       "revId": "e93f933ef75b5b44821df640bfaf1c517eca06be",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//oiw\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1412,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-05-20T22:41:32Z",
+      "side": 1,
+      "message": "Just accumulate the two values that you require in the loop; intra_error and coded_error.\n\n  // Init out of the loop:\n  double intra_error \u003d 0.0;\n  double coded_error \u003d 0.0;\n  ...\n  // In the loop:\n  intra_error +\u003d s-\u003eintra_error;\n  coded_error +\u003d s-\u003ecoded_error;\n\nand divide by i when the loop ends instead of the call to avg_stats.",
+      "parentUuid": "AAAAdn//ojE\u003d",
+      "revId": "e93f933ef75b5b44821df640bfaf1c517eca06be",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
