@@ -556,3 +556,26 @@ else
 utiltest:
 	@echo Unit tests must be enabled to make the utiltest target.
 endif
+
+##
+## Example tests.
+##
+ifeq ($(CONFIG_UNIT_TESTS),yes)
+# All non-MSVC targets output example targets in a sub dir named examples.
+EXAMPLES_BIN_PATH = examples
+ifeq ($(CONFIG_MSVS),yes)
+# MSVC will build both Debug and Release configurations of the examples in a
+# sub directory named for the current target. Assume the user wants to
+# run the Release tools, and assign EXAMPLES_BIN_PATH accordingly.
+# TODO(tomfinegan): Is this adequate for ARM?
+# TODO(tomfinegan): Support running the debug versions of tools?
+EXAMPLES_BIN_PATH := $(TGT_OS:win64=x64)/Release
+endif
+exampletest: examples testdata
+	$(qexec)$(SRC_PATH_BARE)/test/examples.sh \
+		--test-data-path $(LIBVPX_TEST_DATA_PATH) \
+		--bin-path $(EXAMPLES_BIN_PATH)
+else
+exampletest:
+	@echo Unit tests must be enabled to make the exampletest target.
+endif

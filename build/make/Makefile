@@ -19,6 +19,7 @@ ifeq ($(target),)
         done
 all: .DEFAULT
 clean:: .DEFAULT
+exampletest: .DEFAULT
 install:: .DEFAULT
 test:: .DEFAULT
 testdata:: .DEFAULT
@@ -105,6 +106,8 @@ distclean: clean
 
 .PHONY: dist
 dist:
+.PHONY: exampletest
+exampletest:
 .PHONY: install
 install::
 .PHONY: test
