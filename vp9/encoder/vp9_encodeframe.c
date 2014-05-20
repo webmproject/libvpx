@@ -1312,7 +1312,8 @@ static int is_background(VP9_COMP *cpi, const TileInfo *const tile,
   return x->in_static_area;
 }
 
-static int sb_has_motion(const VP9_COMMON *cm, MODE_INFO **prev_mi_8x8) {
+static int sb_has_motion(const VP9_COMMON *cm, MODE_INFO **prev_mi_8x8,
+                         const int motion_thresh) {
   const int mis = cm->mi_stride;
   int block_row, block_col;
 
@@ -1321,8 +1322,8 @@ static int sb_has_motion(const VP9_COMMON *cm, MODE_INFO **prev_mi_8x8) {
       for (block_col = 0; block_col < 8; ++block_col) {
         const MODE_INFO *prev_mi = prev_mi_8x8[block_row * mis + block_col];
         if (prev_mi) {
-          if (abs(prev_mi->mbmi.mv[0].as_mv.row) >= 8 ||
-              abs(prev_mi->mbmi.mv[0].as_mv.col) >= 8)
+          if (abs(prev_mi->mbmi.mv[0].as_mv.row) > motion_thresh ||
+              abs(prev_mi->mbmi.mv[0].as_mv.col) > motion_thresh)
             return 1;
         }
       }
@@ -2318,7 +2319,7 @@ static void encode_rd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
             || cpi->rc.is_src_frame_alt_ref
             || ((sf->use_lastframe_partitioning ==
                  LAST_FRAME_PARTITION_LOW_MOTION) &&
-                 sb_has_motion(cm, prev_mi))) {
+                 sb_has_motion(cm, prev_mi, sf->lf_motion_threshold))) {
           // If required set upper and lower partition size limits
           if (sf->auto_min_max_partition_size) {
             set_offsets(cpi, tile, mi_row, mi_col, BLOCK_64X64);
@@ -2331,7 +2332,7 @@ static void encode_rd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
                             cpi->pc_root);
         } else {
           if (sf->constrain_copy_partition &&
-              sb_has_motion(cm, prev_mi))
+              sb_has_motion(cm, prev_mi, sf->lf_motion_threshold))
             constrain_copy_partitioning(cpi, tile, mi, prev_mi,
                                         mi_row, mi_col, BLOCK_16X16);
           else

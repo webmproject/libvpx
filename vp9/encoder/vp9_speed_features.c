@@ -80,12 +80,16 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
   }
 
   if (speed >= 2) {
-    if (MIN(cm->width, cm->height) >= 720)
+    if (MIN(cm->width, cm->height) >= 720) {
+      sf->lf_motion_threshold = LOW_MOITION_THRESHOLD;
+      sf->last_partitioning_redo_frequency = 3;
       sf->disable_split_mask = cm->show_frame ? DISABLE_ALL_SPLIT
                                               : DISABLE_ALL_INTER_SPLIT;
-    else
+    } else {
       sf->disable_split_mask = LAST_AND_INTRA_SPLIT_ONLY;
-
+      sf->last_partitioning_redo_frequency = 2;
+      sf->lf_motion_threshold = NO_MOITION_THRESHOLD;
+    }
     sf->adaptive_pred_interp_filter = 2;
     sf->reference_masking = 1;
     sf->mode_search_skip_flags = FLAG_SKIP_INTRA_DIRMISMATCH |
@@ -97,7 +101,6 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
     sf->auto_min_max_partition_size = RELAXED_NEIGHBORING_MIN_MAX;
     sf->use_lastframe_partitioning = LAST_FRAME_PARTITION_LOW_MOTION;
     sf->adjust_partitioning_from_last_frame = 1;
-    sf->last_partitioning_redo_frequency = 3;
   }
 
   if (speed >= 3) {
@@ -108,6 +111,8 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
     else
       sf->disable_split_mask = DISABLE_ALL_INTER_SPLIT;
 
+    sf->lf_motion_threshold = LOW_MOITION_THRESHOLD;
+    sf->last_partitioning_redo_frequency = 3;
     sf->recode_loop = ALLOW_RECODE_KFMAXBW;
     sf->adaptive_rd_thresh = 3;
     sf->mode_skip_start = 6;
@@ -198,6 +203,7 @@ static void set_rt_speed_feature(VP9_COMMON *cm, SPEED_FEATURES *sf,
 
     sf->auto_min_max_partition_size = RELAXED_NEIGHBORING_MIN_MAX;
     sf->use_lastframe_partitioning = LAST_FRAME_PARTITION_LOW_MOTION;
+    sf->lf_motion_threshold = LOW_MOITION_THRESHOLD;
     sf->adjust_partitioning_from_last_frame = 1;
     sf->last_partitioning_redo_frequency = 3;
 

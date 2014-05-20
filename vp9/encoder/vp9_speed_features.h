@@ -44,6 +44,11 @@ typedef enum {
 } SUBPEL_SEARCH_METHODS;
 
 typedef enum {
+  NO_MOITION_THRESHOLD = 0,
+  LOW_MOITION_THRESHOLD = 7
+} MOTION_THRESHOLD;
+
+typedef enum {
   LAST_FRAME_PARTITION_OFF = 0,
   LAST_FRAME_PARTITION_LOW_MOTION = 1,
   LAST_FRAME_PARTITION_ALL = 2
@@ -199,6 +204,10 @@ typedef struct SPEED_FEATURES {
   // enables us to adjust up or down one partitioning from the last frames
   // partitioning.
   LAST_FRAME_PARTITION_METHOD use_lastframe_partitioning;
+
+  // The threshold is to determine how slow the motino is, it is used when
+  // use_lastframe_partitioning is set to LAST_FRAME_PARTITION_LOW_MOTION
+  MOTION_THRESHOLD lf_motion_threshold;
 
   // Determine which method we use to determine transform size. We can choose
   // between options like full rd, largest for prediction size, largest
