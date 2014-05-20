@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//ovQ\u003d",
+        "filename": "configure",
+        "patchSetId": 4
+      },
+      "lineNbr": 735,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-05-20T05:42:04Z",
+      "side": 1,
+      "message": "ok.",
+      "parentUuid": "AAAAdn//ozM\u003d",
+      "revId": "9d9249cbae79f2678500246ffc1a65e92e83de88",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//ozI\u003d",
         "filename": "vpxdec.c",
         "patchSetId": 4
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//ovY\u003d",
+        "filename": "vpxdec.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 880,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-05-20T05:42:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//ozI\u003d",
+      "revId": "9d9249cbae79f2678500246ffc1a65e92e83de88",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//ozE\u003d",
         "filename": "vpxenc.c",
         "patchSetId": 4
@@ -47,6 +83,24 @@
       "writtenOn": "2014-05-19T23:12:24Z",
       "side": 1,
       "message": "normalize this with the message in vpxenc",
+      "revId": "9d9249cbae79f2678500246ffc1a65e92e83de88",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ovU\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1269,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-05-20T05:42:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//ozE\u003d",
       "revId": "9d9249cbae79f2678500246ffc1a65e92e83de88",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
