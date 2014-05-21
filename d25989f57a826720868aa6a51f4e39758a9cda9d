@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//oVw\u003d",
+        "filename": "vp8/vp8_cx_iface.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 493,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-05-21T23:27:57Z",
+      "side": 1,
+      "message": "drop this line",
+      "revId": "d25989f57a826720868aa6a51f4e39758a9cda9d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//oVo\u003d",
+        "filename": "vp8/vp8_cx_iface.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 497,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-05-21T23:27:57Z",
+      "side": 1,
+      "message": "const",
+      "revId": "d25989f57a826720868aa6a51f4e39758a9cda9d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//oVs\u003d",
+        "filename": "vp8/vp8_cx_iface.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 498,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-05-21T23:27:57Z",
+      "side": 1,
+      "message": "\u003d\u003d VPX_CODEC_OK",
+      "revId": "d25989f57a826720868aa6a51f4e39758a9cda9d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//oVk\u003d",
+        "filename": "vp8/vp8_cx_iface.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 507,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-05-21T23:27:57Z",
+      "side": 1,
+      "message": "I\u0027m OK with changing the {} formatting, but a follow-up should be done to normalize this file at least",
+      "revId": "d25989f57a826720868aa6a51f4e39758a9cda9d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//oVY\u003d",
+        "filename": "vp8/vp8_cx_iface.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 515,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-05-21T23:27:57Z",
+      "side": 1,
+      "message": "xcfg here, extra_cfg in vp9; be nice to normalize these (later)",
+      "revId": "d25989f57a826720868aa6a51f4e39758a9cda9d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//oVg\u003d",
+        "filename": "vp8/vp8_cx_iface.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 529,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-05-21T23:27:57Z",
+      "side": 1,
+      "message": "this should be renamed later",
+      "revId": "d25989f57a826720868aa6a51f4e39758a9cda9d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
