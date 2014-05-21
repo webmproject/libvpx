@@ -1850,8 +1850,8 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
           mvp_full.col = bsi->mvp.as_mv.col >> 3;
 
           if (cpi->sf.adaptive_motion_search && cm->show_frame) {
-            mvp_full.row = x->pred_mv[mbmi->ref_frame[0]].as_mv.row >> 3;
-            mvp_full.col = x->pred_mv[mbmi->ref_frame[0]].as_mv.col >> 3;
+            mvp_full.row = x->pred_mv[mbmi->ref_frame[0]].row >> 3;
+            mvp_full.col = x->pred_mv[mbmi->ref_frame[0]].col >> 3;
             step_param = MAX(step_param, 8);
           }
 
@@ -1902,7 +1902,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
           }
 
           if (cpi->sf.adaptive_motion_search)
-            x->pred_mv[mbmi->ref_frame[0]].as_mv = *new_mv;
+            x->pred_mv[mbmi->ref_frame[0]] = *new_mv;
 
           // restore src pointers
           mi_buf_restore(x, orig_src, orig_pre);
@@ -2108,14 +2108,14 @@ static void mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
                      cpi->common.show_frame &&
                      block_size < cpi->sf.max_partition_size);
 
-  int_mv pred_mv[3];
-  pred_mv[0] = mbmi->ref_mvs[ref_frame][0];
-  pred_mv[1] = mbmi->ref_mvs[ref_frame][1];
+  MV pred_mv[3];
+  pred_mv[0] = mbmi->ref_mvs[ref_frame][0].as_mv;
+  pred_mv[1] = mbmi->ref_mvs[ref_frame][1].as_mv;
   pred_mv[2] = x->pred_mv[ref_frame];
 
   // Get the sad for each candidate reference mv
   for (i = 0; i < num_mv_refs; i++) {
-    this_mv.as_int = pred_mv[i].as_int;
+    this_mv.as_mv = pred_mv[i];
 
     max_mv = MAX(max_mv,
                  MAX(abs(this_mv.as_mv.row), abs(this_mv.as_mv.col)) >> 3);
@@ -2334,7 +2334,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   MV pred_mv[3];
   pred_mv[0] = mbmi->ref_mvs[ref][0].as_mv;
   pred_mv[1] = mbmi->ref_mvs[ref][1].as_mv;
-  pred_mv[2] = x->pred_mv[ref].as_mv;
+  pred_mv[2] = x->pred_mv[ref];
 
   if (scaled_ref_frame) {
     int i;
@@ -2379,7 +2379,8 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
 
     for (i = LAST_FRAME; i <= ALTREF_FRAME && cm->show_frame; ++i) {
       if ((x->pred_mv_sad[ref] >> 3) > x->pred_mv_sad[i]) {
-        x->pred_mv[ref].as_int = 0;
+        x->pred_mv[ref].row = 0;
+        x->pred_mv[ref].col = 0;
         tmp_mv->as_int = INVALID_MV;
 
         if (scaled_ref_frame) {
@@ -2420,7 +2421,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                              x->nmvjointcost, x->mvcost, MV_COST_WEIGHT);
 
   if (cpi->sf.adaptive_motion_search && cm->show_frame)
-    x->pred_mv[ref].as_int = tmp_mv->as_int;
+    x->pred_mv[ref] = tmp_mv->as_mv;
 
   if (scaled_ref_frame) {
     int i;

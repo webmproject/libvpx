@@ -79,7 +79,7 @@ static void full_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   if (x->mv_best_ref_index[ref] < 2)
     mvp_full = mbmi->ref_mvs[ref][x->mv_best_ref_index[ref]].as_mv;
   else
-    mvp_full = x->pred_mv[ref].as_mv;
+    mvp_full = x->pred_mv[ref];
 
   mvp_full.col >>= 3;
   mvp_full.row >>= 3;
@@ -143,7 +143,7 @@ static void sub_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
       xd->plane[i].pre[0] = backup_yv12[i];
   }
 
-  x->pred_mv[ref].as_mv = *tmp_mv;
+  x->pred_mv[ref] = *tmp_mv;
 }
 
 static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
