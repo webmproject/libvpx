@@ -220,8 +220,7 @@ static void swap_frame_buffers(VP9Decoder *pbi) {
 }
 
 int vp9_receive_compressed_data(VP9Decoder *pbi,
-                                size_t size, const uint8_t **psource,
-                                int64_t time_stamp) {
+                                size_t size, const uint8_t **psource) {
   VP9_COMMON *const cm = &pbi->common;
   const uint8_t *source = *psource;
   int retcode = 0;
@@ -295,14 +294,12 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
   }
 
   pbi->ready_for_new_data = 0;
-  pbi->last_time_stamp = time_stamp;
 
   cm->error.setjmp = 0;
   return retcode;
 }
 
 int vp9_get_raw_frame(VP9Decoder *pbi, YV12_BUFFER_CONFIG *sd,
-                      int64_t *time_stamp, int64_t *time_end_stamp,
                       vp9_ppflags_t *flags) {
   int ret = -1;
 #if !CONFIG_VP9_POSTPROC
@@ -317,8 +314,6 @@ int vp9_get_raw_frame(VP9Decoder *pbi, YV12_BUFFER_CONFIG *sd,
     return ret;
 
   pbi->ready_for_new_data = 1;
-  *time_stamp = pbi->last_time_stamp;
-  *time_end_stamp = 0;
 
 #if CONFIG_VP9_POSTPROC
   ret = vp9_post_proc_frame(&pbi->common, sd, flags);

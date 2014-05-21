@@ -244,9 +244,10 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t *ctx,
                                   const uint8_t **data, unsigned int data_sz,
                                   void *user_priv, int64_t deadline) {
   YV12_BUFFER_CONFIG sd = { 0 };
-  int64_t time_stamp = 0, time_end_stamp = 0;
   vp9_ppflags_t flags = {0};
   VP9_COMMON *cm = NULL;
+
+  (void)deadline;
 
   ctx->img_avail = 0;
 
@@ -275,13 +276,13 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t *ctx,
 
   cm = &ctx->pbi->common;
 
-  if (vp9_receive_compressed_data(ctx->pbi, data_sz, data, deadline))
+  if (vp9_receive_compressed_data(ctx->pbi, data_sz, data))
     return update_error_state(ctx, &cm->error);
 
   if (ctx->base.init_flags & VPX_CODEC_USE_POSTPROC)
     set_ppflags(ctx, &flags);
 
-  if (vp9_get_raw_frame(ctx->pbi, &sd, &time_stamp, &time_end_stamp, &flags))
+  if (vp9_get_raw_frame(ctx->pbi, &sd, &flags))
     return update_error_state(ctx, &cm->error);
 
   yuvconfig2image(&ctx->img, &sd, user_priv);
