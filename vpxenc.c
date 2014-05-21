@@ -1268,6 +1268,7 @@ static void encode_frame(struct stream_state *stream,
       fprintf(stderr, "%s can only scale 4:2:0 8bpp inputs\n", exec_name);
       exit(EXIT_FAILURE);
     }
+#if CONFIG_LIBYUV
     if (!stream->img)
       stream->img = vpx_img_alloc(NULL, VPX_IMG_FMT_I420,
                                   cfg->g_w, cfg->g_h, 16);
@@ -1283,8 +1284,15 @@ static void encode_frame(struct stream_state *stream,
               stream->img->stride[VPX_PLANE_V],
               stream->img->d_w, stream->img->d_h,
               kFilterBox);
-
     img = stream->img;
+#else
+    stream->encoder.err = 1;
+    ctx_exit_on_error(&stream->encoder,
+                      "Stream %d: Failed to encode frame.\n"
+                      "Scaling disabled in this configuration. \n"
+                      "To enable, configure with --enable-libyuv\n",
+                      stream->index);
+#endif
   }
 
   vpx_usec_timer_start(&timer);

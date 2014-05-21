@@ -873,8 +873,16 @@ int main_loop(int argc, const char **argv_) {
         }
 
         if (img->d_w != scaled_img->d_w || img->d_h != scaled_img->d_h) {
+#if CONFIG_LIBYUV
           vpx_image_scale(img, scaled_img, kFilterBox);
           img = scaled_img;
+#else
+          fprintf(stderr, "Failed  to scale output frame: %s.\n"
+                  "Scaling is disabled in this configuration. "
+                  "To enable scaling, configure with --enable-libyuv\n",
+                  vpx_codec_error(&decoder));
+          return EXIT_FAILURE;
+#endif
         }
       }
 
