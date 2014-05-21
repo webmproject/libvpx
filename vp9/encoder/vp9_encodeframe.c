@@ -70,6 +70,12 @@ static const uint8_t VP9_VAR_OFFS[64] = {
   128, 128, 128, 128, 128, 128, 128, 128
 };
 
+typedef struct {
+  unsigned int sse;
+  int sum;
+  unsigned int var;
+} diff;
+
 static void get_sse_sum_8x8(const uint8_t *src, int src_stride,
                             const uint8_t *ref, int ref_stride,
                             unsigned int *sse, int *sum) {
