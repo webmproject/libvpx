@@ -40,6 +40,8 @@
 #define MIN_BPB_FACTOR 0.005
 #define MAX_BPB_FACTOR 50
 
+#define FRAME_OVERHEAD_BITS 200
+
 // Tables relating active max Q to active min Q
 static int kf_low_motion_minq[QINDEX_RANGE];
 static int kf_high_motion_minq[QINDEX_RANGE];
@@ -807,7 +809,7 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi,
   int active_worst_quality = cpi->twopass.active_worst_quality;
   int q;
 
-  if (frame_is_intra_only(cm)) {
+  if (frame_is_intra_only(cm) || vp9_is_upper_layer_key_frame(cpi)) {
 #if !CONFIG_MULTIPLE_ARF
     // Handle the special case for key frames forced when we have75 reached
     // the maximum key frame interval. Here force the Q to a range
@@ -928,7 +930,8 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi,
     vp9_clear_system_state();
 
     // Limit Q range for the adaptive loop.
-    if (cm->frame_type == KEY_FRAME && !rc->this_key_frame_forced) {
+    if ((cm->frame_type == KEY_FRAME || vp9_is_upper_layer_key_frame(cpi)) &&
+        !rc->this_key_frame_forced) {
       qdelta = vp9_compute_qdelta_by_rate(&cpi->rc, cm->frame_type,
                                           active_worst_quality, 2.0);
     } else if (!rc->is_src_frame_alt_ref &&
@@ -1215,7 +1218,7 @@ void vp9_rc_get_one_pass_vbr_params(VP9_COMP *cpi) {
     cm->frame_type = KEY_FRAME;
     rc->this_key_frame_forced = cm->current_video_frame != 0 &&
                                 rc->frames_to_key == 0;
-    rc->frames_to_key = cpi->key_frame_frequency;
+    rc->frames_to_key = cpi->oxcf.key_freq;
     rc->kf_boost = DEFAULT_KF_BOOST;
     rc->source_alt_ref_active = 0;
   } else {
@@ -1302,14 +1305,29 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
   if ((cm->current_video_frame == 0) ||
       (cpi->frame_flags & FRAMEFLAGS_KEY) ||
       (cpi->oxcf.auto_key && (rc->frames_since_key %
-                              cpi->key_frame_frequency == 0))) {
+          cpi->oxcf.key_freq == 0))) {
     cm->frame_type = KEY_FRAME;
     rc->source_alt_ref_active = 0;
+
+    if (cpi->use_svc && cpi->svc.number_temporal_layers == 1) {
+      cpi->svc.layer_context[cpi->svc.spatial_layer_id].is_key_frame = 1;
+    }
+
     if (cpi->pass == 0 && cpi->oxcf.rc_mode == RC_MODE_CBR) {
       target = calc_iframe_target_size_one_pass_cbr(cpi);
     }
   } else {
     cm->frame_type = INTER_FRAME;
+
+    if (cpi->use_svc && cpi->svc.number_temporal_layers == 1) {
+      LAYER_CONTEXT *lc = &cpi->svc.layer_context[cpi->svc.spatial_layer_id];
+      if (cpi->svc.spatial_layer_id == 0) {
+        lc->is_key_frame = 0;
+      } else {
+        lc->is_key_frame = cpi->svc.layer_context[0].is_key_frame;
+      }
+    }
+
     if (cpi->pass == 0 && cpi->oxcf.rc_mode == RC_MODE_CBR) {
       target = calc_pframe_target_size_one_pass_cbr(cpi);
     }
@@ -1330,7 +1348,7 @@ void vp9_rc_get_one_pass_cbr_params(VP9_COMP *cpi) {
     cm->frame_type = KEY_FRAME;
     rc->this_key_frame_forced = cm->current_video_frame != 0 &&
                                 rc->frames_to_key == 0;
-    rc->frames_to_key = cpi->key_frame_frequency;
+    rc->frames_to_key = cpi->oxcf.key_freq;
     rc->kf_boost = DEFAULT_KF_BOOST;
     rc->source_alt_ref_active = 0;
     target = calc_iframe_target_size_one_pass_cbr(cpi);
@@ -1415,7 +1433,7 @@ void vp9_rc_update_framerate(VP9_COMP *cpi) {
   rc->max_gf_interval = 16;
 
   // Extended interval for genuinely static scenes
-  rc->static_scene_max_gf_interval = cpi->key_frame_frequency >> 1;
+  rc->static_scene_max_gf_interval = cpi->oxcf.key_freq >> 1;
 
   // Special conditions when alt ref frame enabled in lagged compress mode
   if (oxcf->play_alternate && oxcf->lag_in_frames) {

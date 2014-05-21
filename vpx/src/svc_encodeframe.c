@@ -1000,8 +1000,10 @@ vpx_codec_err_t vpx_svc_encode(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
               (int)si->frame_size, (int)pts);
     }
   }
-  ++si->frame_within_gop;
-  ++si->encode_frame_count;
+  if (rawimg != NULL) {
+    ++si->frame_within_gop;
+    ++si->encode_frame_count;
+  }
 
   return VPX_CODEC_OK;
 }

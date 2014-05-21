@@ -92,11 +92,11 @@ VP9_CX_SRCS-yes += encoder/vp9_mbgraph.h
 VP9_CX_SRCS-$(HAVE_MMX) += encoder/x86/vp9_variance_mmx.c
 VP9_CX_SRCS-$(HAVE_MMX) += encoder/x86/vp9_variance_impl_mmx.asm
 VP9_CX_SRCS-$(HAVE_MMX) += encoder/x86/vp9_sad_mmx.asm
+VP9_CX_SRCS-$(HAVE_MMX) += encoder/x86/vp9_dct_mmx.c
 VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_variance_impl_sse2.asm
 VP9_CX_SRCS-$(HAVE_AVX2) += encoder/x86/vp9_variance_impl_intrin_avx2.c
 VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_sad4d_sse2.asm
 VP9_CX_SRCS-$(HAVE_AVX2) += encoder/x86/vp9_sad4d_intrin_avx2.c
-VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_subpel_variance_impl_sse2.asm
 VP9_CX_SRCS-$(HAVE_AVX2) += encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c
 VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_temporal_filter_apply_sse2.asm
 VP9_CX_SRCS-$(HAVE_SSE3) += encoder/x86/vp9_sad_sse3.asm
@@ -112,6 +112,7 @@ endif
 
 ifeq ($(ARCH_X86_64),yes)
 VP9_CX_SRCS-$(HAVE_SSSE3) += encoder/x86/vp9_quantize_ssse3.asm
+VP9_CX_SRCS-$(HAVE_SSSE3) += encoder/x86/vp9_dct_ssse3.asm
 endif
 VP9_CX_SRCS-$(HAVE_SSSE3) += encoder/x86/vp9_sad_ssse3.asm
 VP9_CX_SRCS-$(HAVE_SSE4_1) += encoder/x86/vp9_sad_sse4.asm

@@ -9,7 +9,17 @@
 ##  be found in the AUTHORS file in the root of the source tree.
 ##
 ##  This file contains shell code shared by test scripts for libvpx tools.
+
+# Use $VPX_TEST_TOOLS_COMMON_SH as a pseudo include guard.
+if [ -z "${VPX_TEST_TOOLS_COMMON_SH}" ]; then
+VPX_TEST_TOOLS_COMMON_SH=included
+
 set -e
+devnull='> /dev/null 2>&1'
+
+vlog() {
+  [ "${VPX_TEST_VERBOSE_OUTPUT}" = "yes" ] && echo "$@"
+}
 
 # Sets $VPX_TOOL_TEST to the name specified by positional parameter one.
 test_begin() {
@@ -188,9 +198,9 @@ vpxdec() {
   local decoder="${LIBVPX_BIN_PATH}/vpxdec${VPX_TEST_EXE_SUFFIX}"
 
   if [ -z "${pipe_input}" ]; then
-    "${decoder}" "$input" --summary --noblit "$@" > /dev/null 2>&1
+    eval "${decoder}" "$input" --summary --noblit "$@" ${devnull}
   else
-    cat "${input}" | "${decoder}" - --summary --noblit "$@" > /dev/null 2>&1
+    cat "${input}" | eval "${decoder}" - --summary --noblit "$@" ${devnull}
   fi
 }
 
@@ -236,14 +246,16 @@ vpxenc() {
   fi
 
   if [ -z "${pipe_input}" ]; then
-    "${encoder}" --codec=${codec} --width=${width} --height=${height} \
+    eval "${encoder}" --codec=${codec} --width=${width} --height=${height} \
         --limit=${frames} ${use_ivf} ${extra_flags} --output="${output}" \
-        "${input}" > /dev/null 2>&1
+        "${input}" \
+        ${devnull}
   else
     cat "${input}" \
-        | "${encoder}" --codec=${codec} --width=${width} --height=${height} \
-            --limit=${frames} ${use_ivf} ${extra_flags} --output="${output}" - \
-            > /dev/null 2>&1
+        | eval "${encoder}" --codec=${codec} --width=${width} \
+              --height=${height} --limit=${frames} ${use_ivf} ${extra_flags} \
+              --output="${output}" - \
+              ${devnull}
   fi
 
   if [ ! -e "${output}" ]; then
@@ -308,8 +320,9 @@ run_tests() {
   # Run tests.
   for test in ${tests_to_run}; do
     test_begin "${test}"
+    vlog "  RUN  ${test}"
     "${test}"
-    [ "${VPX_TEST_VERBOSE_OUTPUT}" = "yes" ] && echo "  PASS ${test}"
+    vlog "  PASS ${test}"
     test_end "${test}"
   done
 
@@ -326,6 +339,7 @@ cat << EOF
     --run-disabled-tests: Run disabled tests.
     --help: Display this message and exit.
     --test-data-path <path to libvpx test data directory>
+    --show-program-output: Shows output from all programs being tested.
     --verbose: Verbose output.
 
     When the --bin-path option is not specified the script attempts to use
@@ -378,6 +392,9 @@ while [ -n "$1" ]; do
     --verbose)
       VPX_TEST_VERBOSE_OUTPUT=yes
       ;;
+    --show-program-output)
+      devnull=
+      ;;
     *)
       vpx_test_usage
       exit 1
@@ -415,11 +432,20 @@ if [ "$(is_windows_target)" = "yes" ]; then
   VPX_TEST_EXE_SUFFIX=".exe"
 fi
 
+# Variables shared by tests.
+VP8_IVF_FILE="${LIBVPX_TEST_DATA_PATH}/vp80-00-comprehensive-001.ivf"
+VP9_IVF_FILE="${LIBVPX_TEST_DATA_PATH}/vp90-2-09-subpixel-00.ivf"
+
+VP9_WEBM_FILE="${LIBVPX_TEST_DATA_PATH}/vp90-2-00-quantizer-00.webm"
+
+YUV_RAW_INPUT="${LIBVPX_TEST_DATA_PATH}/hantro_collage_w352h288.yuv"
+YUV_RAW_INPUT_WIDTH=352
+YUV_RAW_INPUT_HEIGHT=288
+
+# Setup a trap function to clean up after tests complete.
 trap cleanup EXIT
 
-if [ "${VPX_TEST_VERBOSE_OUTPUT}" = "yes" ]; then
-cat << EOF
-$(basename "${0%.*}") test configuration:
+vlog "$(basename "${0%.*}") test configuration:
   LIBVPX_BIN_PATH=${LIBVPX_BIN_PATH}
   LIBVPX_CONFIG_PATH=${LIBVPX_CONFIG_PATH}
   LIBVPX_TEST_DATA_PATH=${LIBVPX_TEST_DATA_PATH}
@@ -427,5 +453,6 @@ $(basename "${0%.*}") test configuration:
   VPX_TEST_VERBOSE_OUTPUT=${VPX_TEST_VERBOSE_OUTPUT}
   VPX_TEST_FILTER=${VPX_TEST_FILTER}
   VPX_TEST_RUN_DISABLED_TESTS=${VPX_TEST_RUN_DISABLED_TESTS}
-EOF
-fi
+  VPX_TEST_SHOW_PROGRAM_OUTPUT=${VPX_TEST_SHOW_PROGRAM_OUTPUT}"
+
+fi  # End $VPX_TEST_TOOLS_COMMON_SH pseudo include guard.

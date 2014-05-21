@@ -42,22 +42,24 @@ LIBVPX_TEST_SRCS-yes                   += encode_test_driver.cc
 LIBVPX_TEST_SRCS-yes                   += encode_test_driver.h
 
 ## WebM Parsing
-NESTEGG_SRCS                           += ../third_party/nestegg/halloc/halloc.h
-NESTEGG_SRCS                           += ../third_party/nestegg/halloc/src/align.h
-NESTEGG_SRCS                           += ../third_party/nestegg/halloc/src/halloc.c
-NESTEGG_SRCS                           += ../third_party/nestegg/halloc/src/hlist.h
-NESTEGG_SRCS                           += ../third_party/nestegg/include/nestegg/nestegg.h
-NESTEGG_SRCS                           += ../third_party/nestegg/src/nestegg.c
-LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += $(NESTEGG_SRCS)
+ifeq ($(CONFIG_WEBM_IO), yes)
+LIBWEBM_PARSER_SRCS                    += ../third_party/libwebm/mkvparser.cpp
+LIBWEBM_PARSER_SRCS                    += ../third_party/libwebm/mkvreader.cpp
+LIBWEBM_PARSER_SRCS                    += ../third_party/libwebm/mkvparser.hpp
+LIBWEBM_PARSER_SRCS                    += ../third_party/libwebm/mkvreader.hpp
+LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += $(LIBWEBM_PARSER_SRCS)
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += ../tools_common.h
-LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += ../webmdec.c
+LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += ../webmdec.cc
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += ../webmdec.h
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += webm_video_source.h
+endif
 
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += test_vector_test.cc
 
-# Currently we only support decoder perf tests for vp9
-ifeq ($(CONFIG_DECODE_PERF_TESTS)$(CONFIG_VP9_DECODER), yesyes)
+# Currently we only support decoder perf tests for vp9. Also they read from WebM
+# files, so WebM IO is required.
+ifeq ($(CONFIG_DECODE_PERF_TESTS)$(CONFIG_VP9_DECODER)$(CONFIG_WEBM_IO), \
+      yesyesyes)
 LIBVPX_TEST_SRCS-yes                   += decode_perf_test.cc
 endif
 
@@ -106,6 +108,7 @@ endif
 
 LIBVPX_TEST_SRCS-$(CONFIG_VP9)         += convolve_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_DECODER) += vp9_thread_test.cc
+LIBVPX_TEST_SRCS-$(CONFIG_VP9_DECODER) += vp9_decrypt_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += dct16x16_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += dct32x32_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += fdct4x4_test.cc

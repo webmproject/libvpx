@@ -153,7 +153,7 @@ void vp9_update_spatial_layer_framerate(VP9_COMP *const cpi, double framerate) {
                                    oxcf->two_pass_vbrmax_section) / 100);
   lrc->max_gf_interval = 16;
 
-  lrc->static_scene_max_gf_interval = cpi->key_frame_frequency >> 1;
+  lrc->static_scene_max_gf_interval = cpi->oxcf.key_freq >> 1;
 
   if (oxcf->play_alternate && oxcf->lag_in_frames) {
     if (lrc->max_gf_interval > oxcf->lag_in_frames - 1)
@@ -219,4 +219,11 @@ void vp9_inc_frame_in_layer(SVC *svc) {
       ? &svc->layer_context[svc->temporal_layer_id]
       : &svc->layer_context[svc->spatial_layer_id];
   ++lc->current_video_frame_in_layer;
+}
+
+int vp9_is_upper_layer_key_frame(const VP9_COMP *cpi) {
+  return cpi->use_svc &&
+         cpi->svc.number_temporal_layers == 1 &&
+         cpi->svc.spatial_layer_id > 0 &&
+         cpi->svc.layer_context[cpi->svc.spatial_layer_id].is_key_frame;
 }

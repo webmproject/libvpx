@@ -13,18 +13,18 @@
 // A macro to disallow the copy constructor and operator= functions
 // This should be used in the private: declarations for a class
 #define LIBWEBM_DISALLOW_COPY_AND_ASSIGN(TypeName) \
-  TypeName(const TypeName&);               \
+  TypeName(const TypeName&);                       \
   void operator=(const TypeName&)
 
 namespace mkvmuxer {
 
-typedef unsigned char      uint8;
-typedef short              int16;
-typedef int                int32;
-typedef unsigned int       uint32;
-typedef long long          int64;
+typedef unsigned char uint8;
+typedef short int16;
+typedef int int32;
+typedef unsigned int uint32;
+typedef long long int64;
 typedef unsigned long long uint64;
 
-}  //end namespace mkvmuxer
+}  // end namespace mkvmuxer
 
-#endif // MKVMUXERTYPES_HPP
+#endif  // MKVMUXERTYPES_HPP

@@ -9,11 +9,11 @@
 ##  be found in the AUTHORS file in the root of the source tree.
 ##
 
-
 self=$0
 self_basename=${self##*/}
 self_dirname=$(dirname "$0")
-EOL=$'\n'
+
+. "$self_dirname/msvs_common.sh"|| exit 127
 
 show_help() {
     cat <<EOF
@@ -43,82 +43,6 @@ EOF
     exit 1
 }
 
-die() {
-    echo "${self_basename}: $@" >&2
-    exit 1
-}
-
-die_unknown(){
-    echo "Unknown option \"$1\"." >&2
-    echo "See ${self_basename} --help for available options." >&2
-    exit 1
-}
-
-generate_uuid() {
-    local hex="0123456789ABCDEF"
-    local i
-    local uuid=""
-    local j
-    #93995380-89BD-4b04-88EB-625FBE52EBFB
-    for ((i=0; i<32; i++)); do
-        (( j = $RANDOM % 16 ))
-        uuid="${uuid}${hex:$j:1}"
-    done
-    echo "${uuid:0:8}-${uuid:8:4}-${uuid:12:4}-${uuid:16:4}-${uuid:20:12}"
-}
-
-indent1="    "
-indent=""
-indent_push() {
-    indent="${indent}${indent1}"
-}
-indent_pop() {
-    indent="${indent%${indent1}}"
-}
-
-tag_attributes() {
-    for opt in "$@"; do
-        optval="${opt#*=}"
-        [ -n "${optval}" ] ||
-            die "Missing attribute value in '$opt' while generating $tag tag"
-        echo "${indent}${opt%%=*}=\"${optval}\""
-    done
-}
-
-open_tag() {
-    local tag=$1
-    shift
-    if [ $# -ne 0 ]; then
-        echo "${indent}<${tag}"
-        indent_push
-        tag_attributes "$@"
-        echo "${indent}>"
-    else
-        echo "${indent}<${tag}>"
-        indent_push
-    fi
-}
-
-close_tag() {
-    local tag=$1
-    indent_pop
-    echo "${indent}</${tag}>"
-}
-
-tag() {
-    local tag=$1
-    shift
-    if [ $# -ne 0 ]; then
-        echo "${indent}<${tag}"
-        indent_push
-        tag_attributes "$@"
-        indent_pop
-        echo "${indent}/>"
-    else
-        echo "${indent}<${tag}/>"
-    fi
-}
-
 generate_filter() {
     local var=$1
     local name=$2
@@ -143,8 +67,8 @@ generate_filter() {
             if [ "${f##*.}" == "$pat" ]; then
                 unset file_list[i]
 
-                objf=$(echo ${f%.*}.obj | sed -e 's/^[\./]\+//g' -e 's,/,_,g')
-                open_tag File RelativePath="./$f"
+                objf=$(echo ${f%.*}.obj | sed -e 's/^[\./]\+//g' -e 's,[:/],_,g')
+                open_tag File RelativePath="$f"
 
                 if [ "$pat" == "asm" ] && $asm_use_custom_step; then
                     for plat in "${platforms[@]}"; do
@@ -211,7 +135,7 @@ for opt in "$@"; do
         ;;
         --lib) proj_kind="lib"
         ;;
-        --src-path-bare=*) src_path_bare="$optval"
+        --src-path-bare=*) src_path_bare=$(fix_path "$optval")
         ;;
         --static-crt) use_static_runtime=true
         ;;
@@ -226,8 +150,10 @@ for opt in "$@"; do
         ;;
         -I*)
             opt="${opt%/}"
-            incs="${incs}${incs:+;}&quot;${opt##-I}&quot;"
-            yasmincs="${yasmincs} ${opt}"
+            opt=${opt##-I}
+            opt=$(fix_path "$opt")
+            incs="${incs}${incs:+;}&quot;${opt}&quot;"
+            yasmincs="${yasmincs} -I${opt}"
         ;;
         -D*) defines="${defines}${defines:+;}${opt##-D}"
         ;;
@@ -236,9 +162,11 @@ for opt in "$@"; do
                 libdirs="${libdirs}${libdirs:+;}&quot;\$(OutDir)&quot;"
             else
                  # Also try directories for this platform/configuration
-                 libdirs="${libdirs}${libdirs:+;}&quot;${opt##-L}&quot;"
-                 libdirs="${libdirs}${libdirs:+;}&quot;${opt##-L}/\$(PlatformName)/\$(ConfigurationName)&quot;"
-                 libdirs="${libdirs}${libdirs:+;}&quot;${opt##-L}/\$(PlatformName)&quot;"
+                 opt=${opt##-L}
+                 opt=$(fix_path "$opt")
+                 libdirs="${libdirs}${libdirs:+;}&quot;${opt}&quot;"
+                 libdirs="${libdirs}${libdirs:+;}&quot;${opt}/\$(PlatformName)/\$(ConfigurationName)&quot;"
+                 libdirs="${libdirs}${libdirs:+;}&quot;${opt}/\$(PlatformName)&quot;"
             fi
         ;;
         -l*) libs="${libs}${libs:+ }${opt##-l}.lib"
@@ -246,7 +174,7 @@ for opt in "$@"; do
         -*) die_unknown $opt
         ;;
         *)
-            file_list[${#file_list[@]}]="$opt"
+            file_list[${#file_list[@]}]="$(fix_path $opt)"
             case "$opt" in
                  *.asm) uses_asm=true
                  ;;

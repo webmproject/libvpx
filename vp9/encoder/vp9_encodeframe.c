@@ -106,6 +106,31 @@ static const uint16_t VP9_HIGH_VAR_OFFS_12[64] = {
 };
 #endif
 
+static void get_sse_sum_8x8(const uint8_t *src, int src_stride,
+                            const uint8_t *ref, int ref_stride,
+                            unsigned int *sse, int *sum) {
+  variance(src, src_stride, ref, ref_stride, 8, 8, sse, sum);
+}
+
+static void get_sse_sum_16x16(const uint8_t *src, int src_stride,
+                              const uint8_t *ref, int ref_stride,
+                              unsigned int *sse, int *sum) {
+  variance(src, src_stride, ref, ref_stride, 16, 16, sse, sum);
+}
+
+#if CONFIG_VP9_HIGH
+static void high_get_sse_sum_8x8(const uint8_t *src, int src_stride,
+                                 const uint8_t *ref, int ref_stride,
+                                 unsigned int *sse, int *sum) {
+  high_variance(src, src_stride, ref, ref_stride, 8, 8, sse, sum);
+}
+
+static void high_get_sse_sum_16x16(const uint8_t *src, int src_stride,
+                                   const uint8_t *ref, int ref_stride,
+                                   unsigned int *sse, int *sum) {
+  high_variance(src, src_stride, ref, ref_stride, 16, 16, sse, sum);
+}
+#endif
 
 static unsigned int get_sby_perpixel_variance(VP9_COMP *cpi,
                                               const struct buf_2d *ref,
@@ -550,8 +575,8 @@ static void choose_partitioning(VP9_COMP *cpi,
         unsigned int sse = 0;
         int sum = 0;
         if (x_idx < pixels_wide && y_idx < pixels_high)
-          vp9_get_sse_sum_8x8(s + y_idx * sp + x_idx, sp,
-                              d + y_idx * dp + x_idx, dp, &sse, &sum);
+          get_sse_sum_8x8(s + y_idx * sp + x_idx, sp,
+                          d + y_idx * dp + x_idx, dp, &sse, &sum);
         fill_variance(sse, sum, 64, &vst->split[k].part_variances.none);
       }
     }
@@ -663,11 +688,6 @@ static unsigned int tt_activity_measure(MACROBLOCK *x) {
 #endif
   // If the region is flat, lower the activity some more.
   return act < (8 << 12) ? MIN(act, 5 << 12) : act;
-}
-
-// Stub for alternative experimental activity measures.
-static unsigned int alt_activity_measure(MACROBLOCK *x, int use_dc_pred) {
-  return vp9_encode_intra(x, use_dc_pred);
 }
 
 static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
@@ -1332,10 +1352,9 @@ static void set_source_var_based_partition(VP9_COMP *cpi,
                        b_mi_col * MI_SIZE;
 #if CONFIG_VP9_HIGH
         if (cm->use_high) {
-          vp9_high_get_sse_sum_16x16(src + b_offset,
-                                     src_stride,
-                                     pre_src + b_offset,
-                                     pre_stride, &d16[j].sse, &d16[j].sum);
+          high_get_sse_sum_16x16(src + b_offset, src_stride,
+                                 pre_src + b_offset, pre_stride,
+                                 &d16[j].sse, &d16[j].sum);
           switch (cm->bit_depth) {
             case BITS_10:
               d16[j].sse >>= 4;
@@ -1350,16 +1369,14 @@ static void set_source_var_based_partition(VP9_COMP *cpi,
               break;
           }
         } else {
-          vp9_get_sse_sum_16x16(src + b_offset,
-                                src_stride,
-                                pre_src + b_offset,
-                                pre_stride, &d16[j].sse, &d16[j].sum);
+          get_sse_sum_16x16(src + b_offset, src_stride,
+                            pre_src + b_offset, pre_stride,
+                            &d16[j].sse, &d16[j].sum);
         }
 #else
-        vp9_get_sse_sum_16x16(src + b_offset,
-                              src_stride,
-                              pre_src + b_offset,
-                              pre_stride, &d16[j].sse, &d16[j].sum);
+        get_sse_sum_16x16(src + b_offset, src_stride,
+                          pre_src + b_offset, pre_stride,
+                          &d16[j].sse, &d16[j].sum);
 #endif
         d16[j].var = d16[j].sse -
             (((uint32_t)d16[j].sum * d16[j].sum) >> 8);

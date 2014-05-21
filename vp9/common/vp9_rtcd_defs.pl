@@ -12,7 +12,7 @@ struct macroblockd;
 /* Encoder forward decls */
 struct macroblock;
 struct vp9_variance_vtable;
-
+struct search_site_config;
 struct mv;
 union int_mv;
 struct yv12_buffer_config;
@@ -310,10 +310,10 @@ add_proto qw/void vp9_idct8x8_1_add/, "const int16_t *input, uint8_t *dest, int 
 specialize qw/vp9_idct8x8_1_add sse2 neon dspr2/;
 
 add_proto qw/void vp9_idct8x8_64_add/, "const int16_t *input, uint8_t *dest, int dest_stride";
-specialize qw/vp9_idct8x8_64_add sse2 neon dspr2/;
+specialize qw/vp9_idct8x8_64_add sse2 neon dspr2/, "$ssse3_x86_64";
 
 add_proto qw/void vp9_idct8x8_10_add/, "const int16_t *input, uint8_t *dest, int dest_stride";
-specialize qw/vp9_idct8x8_10_add sse2 neon dspr2/;
+specialize qw/vp9_idct8x8_10_add sse2 neon dspr2/, "$ssse3_x86_64";
 
 add_proto qw/void vp9_idct16x16_1_add/, "const int16_t *input, uint8_t *dest, int dest_stride";
 specialize qw/vp9_idct16x16_1_add sse2 neon dspr2/;
@@ -681,10 +681,6 @@ specialize qw/vp9_variance64x64/, "$sse2_x86inc", "$avx2_x86inc";
 add_proto qw/unsigned int vp9_variance16x16/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
 specialize qw/vp9_variance16x16 mmx/, "$sse2_x86inc", "$avx2_x86inc";
 
-add_proto qw/void vp9_get_sse_sum_16x16/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, int *sum";
-specialize qw/vp9_get_sse_sum_16x16 sse2/;
-$vp9_get_sse_sum_16x16_sse2=vp9_get16x16var_sse2;
-
 add_proto qw/unsigned int vp9_variance16x8/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
 specialize qw/vp9_variance16x8 mmx/, "$sse2_x86inc";
 
@@ -693,10 +689,6 @@ specialize qw/vp9_variance8x16 mmx/, "$sse2_x86inc";
 
 add_proto qw/unsigned int vp9_variance8x8/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
 specialize qw/vp9_variance8x8 mmx/, "$sse2_x86inc";
-
-add_proto qw/void vp9_get_sse_sum_8x8/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, int *sum";
-specialize qw/vp9_get_sse_sum_8x8 sse2/;
-$vp9_get_sse_sum_8x8_sse2=vp9_get8x8var_sse2;
 
 add_proto qw/unsigned int vp9_variance8x4/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
 specialize qw/vp9_variance8x4/, "$sse2_x86inc";
@@ -865,33 +857,6 @@ specialize qw/vp9_sad4x8_avg/, "$sse_x86inc";
 add_proto qw/unsigned int vp9_sad4x4_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *second_pred, unsigned int max_sad";
 specialize qw/vp9_sad4x4_avg/, "$sse_x86inc";
 
-add_proto qw/unsigned int vp9_variance_halfpixvar16x16_h/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-specialize qw/vp9_variance_halfpixvar16x16_h/, "$sse2_x86inc";
-
-add_proto qw/unsigned int vp9_variance_halfpixvar16x16_v/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-specialize qw/vp9_variance_halfpixvar16x16_v/, "$sse2_x86inc";
-
-add_proto qw/unsigned int vp9_variance_halfpixvar16x16_hv/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-specialize qw/vp9_variance_halfpixvar16x16_hv/, "$sse2_x86inc";
-
-add_proto qw/unsigned int vp9_variance_halfpixvar64x64_h/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-specialize qw/vp9_variance_halfpixvar64x64_h/;
-
-add_proto qw/unsigned int vp9_variance_halfpixvar64x64_v/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-specialize qw/vp9_variance_halfpixvar64x64_v/;
-
-add_proto qw/unsigned int vp9_variance_halfpixvar64x64_hv/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-specialize qw/vp9_variance_halfpixvar64x64_hv/;
-
-add_proto qw/unsigned int vp9_variance_halfpixvar32x32_h/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-specialize qw/vp9_variance_halfpixvar32x32_h/;
-
-add_proto qw/unsigned int vp9_variance_halfpixvar32x32_v/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-specialize qw/vp9_variance_halfpixvar32x32_v/;
-
-add_proto qw/unsigned int vp9_variance_halfpixvar32x32_hv/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-specialize qw/vp9_variance_halfpixvar32x32_hv/;
-
 add_proto qw/void vp9_sad64x64x3/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, unsigned int *sad_array";
 specialize qw/vp9_sad64x64x3/;
 
@@ -980,9 +945,6 @@ specialize qw/vp9_sad4x8x4d sse/;
 add_proto qw/void vp9_sad4x4x4d/, "const uint8_t *src_ptr, int  src_stride, const uint8_t* const ref_ptr[], int  ref_stride, unsigned int *sad_array";
 specialize qw/vp9_sad4x4x4d sse/;
 
-#add_proto qw/unsigned int vp9_sub_pixel_mse16x16/, "const uint8_t *src_ptr, int  src_pixels_per_line, int  xoffset, int  yoffset, const uint8_t *dst_ptr, int dst_pixels_per_line, unsigned int *sse";
-#specialize qw/vp9_sub_pixel_mse16x16 sse2 mmx/;
-
 add_proto qw/unsigned int vp9_mse16x16/, "const uint8_t *src_ptr, int  source_stride, const uint8_t *ref_ptr, int  recon_stride, unsigned int *sse";
 specialize qw/vp9_mse16x16 mmx/, "$sse2_x86inc", "$avx2_x86inc";
 
@@ -994,12 +956,6 @@ specialize qw/vp9_mse16x8/;
 
 add_proto qw/unsigned int vp9_mse8x8/, "const uint8_t *src_ptr, int  source_stride, const uint8_t *ref_ptr, int  recon_stride, unsigned int *sse";
 specialize qw/vp9_mse8x8/;
-
-add_proto qw/unsigned int vp9_sub_pixel_mse64x64/, "const uint8_t *src_ptr, int  source_stride, int  xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-specialize qw/vp9_sub_pixel_mse64x64/;
-
-add_proto qw/unsigned int vp9_sub_pixel_mse32x32/, "const uint8_t *src_ptr, int  source_stride, int  xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-specialize qw/vp9_sub_pixel_mse32x32/;
 
 add_proto qw/unsigned int vp9_get_mb_ss/, "const int16_t *";
 specialize qw/vp9_get_mb_ss mmx sse2/;
@@ -1039,13 +995,13 @@ add_proto qw/void vp9_fht16x16/, "const int16_t *input, int16_t *output, int str
 specialize qw/vp9_fht16x16 sse2 avx2/;
 
 add_proto qw/void vp9_fwht4x4/, "const int16_t *input, int16_t *output, int stride";
-specialize qw/vp9_fwht4x4/;
+specialize qw/vp9_fwht4x4 mmx/;
 
 add_proto qw/void vp9_fdct4x4/, "const int16_t *input, int16_t *output, int stride";
 specialize qw/vp9_fdct4x4 sse2 avx2/;
 
 add_proto qw/void vp9_fdct8x8/, "const int16_t *input, int16_t *output, int stride";
-specialize qw/vp9_fdct8x8 sse2 avx2/;
+specialize qw/vp9_fdct8x8 sse2 avx2/, "$ssse3_x86_64";
 
 add_proto qw/void vp9_fdct16x16/, "const int16_t *input, int16_t *output, int stride";
 specialize qw/vp9_fdct16x16 sse2 avx2/;
@@ -1068,11 +1024,11 @@ add_proto qw/int vp9_refining_search_sad/, "const struct macroblock *x, struct m
 specialize qw/vp9_refining_search_sad sse3/;
 $vp9_refining_search_sad_sse3=vp9_refining_search_sadx4;
 
-add_proto qw/int vp9_diamond_search_sad/, "const struct macroblock *x, struct mv *ref_mv, struct mv *best_mv, int search_param, int sad_per_bit, int *num00, const struct vp9_variance_vtable *fn_ptr, const struct mv *center_mv";
+add_proto qw/int vp9_diamond_search_sad/, "const struct macroblock *x, const struct search_site_config *cfg,  struct mv *ref_mv, struct mv *best_mv, int search_param, int sad_per_bit, int *num00, const struct vp9_variance_vtable *fn_ptr, const struct mv *center_mv";
 specialize qw/vp9_diamond_search_sad sse3/;
 $vp9_diamond_search_sad_sse3=vp9_diamond_search_sadx4;
 
-add_proto qw/int vp9_full_range_search/, "const struct macroblock *x, struct mv *ref_mv, struct mv *best_mv, int search_param, int sad_per_bit, int *num00, const struct vp9_variance_vtable *fn_ptr, const struct mv *center_mv";
+add_proto qw/int vp9_full_range_search/, "const struct macroblock *x, const struct search_site_config *cfg, struct mv *ref_mv, struct mv *best_mv, int search_param, int sad_per_bit, int *num00, const struct vp9_variance_vtable *fn_ptr, const struct mv *center_mv";
 specialize qw/vp9_full_range_search/;
 
 add_proto qw/void vp9_temporal_filter_apply/, "uint8_t *frame1, unsigned int stride, uint8_t *frame2, unsigned int block_size, int strength, int filter_weight, unsigned int *accumulator, uint16_t *count";
@@ -1102,9 +1058,6 @@ specialize qw/vp9_high_variance64x64/;
 add_proto qw/unsigned int vp9_high_variance16x16/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
 specialize qw/vp9_high_variance16x16/;
 
-add_proto qw/void vp9_high_get_sse_sum_16x16/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, int *sum";
-specialize qw/vp9_high_get_sse_sum_16x16/;
-
 add_proto qw/unsigned int vp9_high_variance16x8/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
 specialize qw/vp9_high_variance16x8/;
 
@@ -1113,9 +1066,6 @@ specialize qw/vp9_high_variance8x16/;
 
 add_proto qw/unsigned int vp9_high_variance8x8/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
 specialize qw/vp9_high_variance8x8/;
-
-add_proto qw/void vp9_high_get_sse_sum_8x8/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, int *sum";
-specialize qw/vp9_high_get_sse_sum_8x8/;
 
 add_proto qw/unsigned int vp9_high_variance8x4/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
 specialize qw/vp9_high_variance8x4/;

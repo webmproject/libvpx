@@ -14,6 +14,7 @@
 #include "onyx_int.h"
 #include "modecosts.h"
 #include "encodeintra.h"
+#include "vp8/common/common.h"
 #include "vp8/common/entropymode.h"
 #include "pickinter.h"
 #include "vp8/common/findnearmv.h"

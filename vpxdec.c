@@ -127,7 +127,7 @@ static const arg_def_t *vp8_pp_args[] = {
 #endif
 
 static int vpx_image_scale(vpx_image_t *src, vpx_image_t *dst,
-                           FilterMode mode) {
+                           FilterModeEnum mode) {
 #if CONFIG_VP9_HIGH
   if (src->fmt == VPX_IMG_FMT_I42016) {
     assert(dst->fmt == VPX_IMG_FMT_I42016);

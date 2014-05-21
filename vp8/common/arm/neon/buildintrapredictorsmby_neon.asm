@@ -26,6 +26,7 @@
 
 |vp8_build_intra_predictors_mby_neon_func| PROC
     push            {r4-r8, lr}
+    vpush           {d8-d15}
 
     cmp             r3, #0
     beq             case_dc_pred
@@ -37,8 +38,8 @@
     beq             case_tm_pred
 
 case_dc_pred
-    ldr             r4, [sp, #24]       ; Up
-    ldr             r5, [sp, #28]       ; Left
+    ldr             r4, [sp, #88]       ; Up
+    ldr             r5, [sp, #92]       ; Left
 
     ; Default the DC average to 128
     mov             r12, #128
@@ -143,6 +144,7 @@ skip_dc_pred_up_left
     vst1.u8         {q0}, [r1]!
     vst1.u8         {q0}, [r1]!
 
+    vpop            {d8-d15}
     pop             {r4-r8,pc}
 case_v_pred
     ; Copy down above row
@@ -165,6 +167,7 @@ case_v_pred
     vst1.u8         {q0}, [r1]!
     vst1.u8         {q0}, [r1]!
     vst1.u8         {q0}, [r1]!
+    vpop            {d8-d15}
     pop             {r4-r8,pc}
 
 case_h_pred
@@ -224,6 +227,7 @@ case_h_pred
     vst1.u8         {q2}, [r1]!
     vst1.u8         {q3}, [r1]!
 
+    vpop            {d8-d15}
     pop             {r4-r8,pc}
 
 case_tm_pred
@@ -293,6 +297,7 @@ case_tm_pred_loop
     subs            r12, r12, #1
     bne             case_tm_pred_loop
 
+    vpop            {d8-d15}
     pop             {r4-r8,pc}
 
     ENDP
@@ -307,6 +312,7 @@ case_tm_pred_loop
 
 |vp8_build_intra_predictors_mby_s_neon_func| PROC
     push            {r4-r8, lr}
+    vpush           {d8-d15}
 
     mov             r1, r0      ;   unsigned char *ypred_ptr = x->dst.y_buffer; //x->Predictor;
 
@@ -320,8 +326,8 @@ case_tm_pred_loop
     beq             case_tm_pred_s
 
 case_dc_pred_s
-    ldr             r4, [sp, #24]       ; Up
-    ldr             r5, [sp, #28]       ; Left
+    ldr             r4, [sp, #88]       ; Up
+    ldr             r5, [sp, #92]       ; Left
 
     ; Default the DC average to 128
     mov             r12, #128
@@ -426,6 +432,7 @@ skip_dc_pred_up_left_s
     vst1.u8         {q0}, [r1], r2
     vst1.u8         {q0}, [r1], r2
 
+    vpop            {d8-d15}
     pop             {r4-r8,pc}
 case_v_pred_s
     ; Copy down above row
@@ -448,6 +455,8 @@ case_v_pred_s
     vst1.u8         {q0}, [r1], r2
     vst1.u8         {q0}, [r1], r2
     vst1.u8         {q0}, [r1], r2
+
+    vpop            {d8-d15}
     pop             {r4-r8,pc}
 
 case_h_pred_s
@@ -507,6 +516,7 @@ case_h_pred_s
     vst1.u8         {q2}, [r1], r2
     vst1.u8         {q3}, [r1], r2
 
+    vpop            {d8-d15}
     pop             {r4-r8,pc}
 
 case_tm_pred_s
@@ -576,6 +586,7 @@ case_tm_pred_loop_s
     subs            r12, r12, #1
     bne             case_tm_pred_loop_s
 
+    vpop            {d8-d15}
     pop             {r4-r8,pc}
 
     ENDP

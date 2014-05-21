@@ -11,10 +11,13 @@
 #include <string>
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
+#include "./vpx_config.h"
 #include "test/codec_factory.h"
 #include "test/decode_test_driver.h"
 #include "test/md5_helper.h"
+#if CONFIG_WEBM_IO
 #include "test/webm_video_source.h"
+#endif
 #include "vp9/decoder/vp9_thread.h"
 
 namespace {
@@ -97,6 +100,7 @@ TEST_P(VP9WorkerThreadTest, HookFailure) {
 // -----------------------------------------------------------------------------
 // Multi-threaded decode tests
 
+#if CONFIG_WEBM_IO
 // Decodes |filename| with |num_threads|. Returns the md5 of the decoded frames.
 string DecodeFile(const string& filename, int num_threads) {
   libvpx_test::WebMVideoSource video(filename);
@@ -212,6 +216,7 @@ TEST(VP9DecodeMTTest, MTDecode3) {
     }
   }
 }
+#endif  // CONFIG_WEBM_IO
 
 INSTANTIATE_TEST_CASE_P(Synchronous, VP9WorkerThreadTest, ::testing::Bool());
 

@@ -10,13 +10,16 @@
 
 #include <string>
 
+#include "./vpx_config.h"
 #include "test/codec_factory.h"
 #include "test/decode_test_driver.h"
 #include "test/ivf_video_source.h"
 #include "test/md5_helper.h"
 #include "test/test_vectors.h"
 #include "test/util.h"
+#if CONFIG_WEBM_IO
 #include "test/webm_video_source.h"
+#endif
 
 namespace {
 
@@ -267,6 +270,7 @@ class ExternalFrameBufferMD5Test
   ExternalFrameBufferList fb_list_;
 };
 
+#if CONFIG_WEBM_IO
 // Class for testing passing in external frame buffers to libvpx.
 class ExternalFrameBufferTest : public ::testing::Test {
  protected:
@@ -340,6 +344,7 @@ class ExternalFrameBufferTest : public ::testing::Test {
   int num_buffers_;
   ExternalFrameBufferList fb_list_;
 };
+#endif  // CONFIG_WEBM_IO
 
 // This test runs through the set of test vectors, and decodes them.
 // Libvpx will call into the application to allocate a frame buffer when
@@ -366,7 +371,13 @@ TEST_P(ExternalFrameBufferMD5Test, ExtFBMD5Match) {
   if (filename.substr(filename.length() - 3, 3) == "ivf") {
     video = new libvpx_test::IVFVideoSource(filename);
   } else {
+#if CONFIG_WEBM_IO
     video = new libvpx_test::WebMVideoSource(filename);
+#else
+    fprintf(stderr, "WebM IO is disabled, skipping test vector %s\n",
+            filename.c_str());
+    return;
+#endif
   }
   ASSERT_TRUE(video != NULL);
   video->Init();
@@ -380,6 +391,7 @@ TEST_P(ExternalFrameBufferMD5Test, ExtFBMD5Match) {
   delete video;
 }
 
+#if CONFIG_WEBM_IO
 TEST_F(ExternalFrameBufferTest, MinFrameBuffers) {
   // Minimum number of external frame buffers for VP9 is
   // #VP9_MAXIMUM_REF_BUFFERS + #VPX_MAXIMUM_WORK_BUFFERS.
@@ -460,6 +472,7 @@ TEST_F(ExternalFrameBufferTest, SetAfterDecode) {
             SetFrameBufferFunctions(
                 num_buffers, get_vp9_frame_buffer, release_vp9_frame_buffer));
 }
+#endif  // CONFIG_WEBM_IO
 
 VP9_INSTANTIATE_TEST_CASE(ExternalFrameBufferMD5Test,
                           ::testing::ValuesIn(libvpx_test::kVP9TestVectors,

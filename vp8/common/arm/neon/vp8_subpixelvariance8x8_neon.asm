@@ -26,11 +26,12 @@
 
 |vp8_sub_pixel_variance8x8_neon| PROC
     push            {r4-r5, lr}
+    vpush           {d8-d15}
 
     adr             r12, bilinear_taps_coeff
-    ldr             r4, [sp, #12]           ;load *dst_ptr from stack
-    ldr             r5, [sp, #16]           ;load dst_pixels_per_line from stack
-    ldr             lr, [sp, #20]           ;load *sse from stack
+    ldr             r4, [sp, #76]           ;load *dst_ptr from stack
+    ldr             r5, [sp, #80]           ;load dst_pixels_per_line from stack
+    ldr             lr, [sp, #84]           ;load *sse from stack
 
     cmp             r2, #0                  ;skip first_pass filter if xoffset=0
     beq             skip_firstpass_filter
@@ -210,6 +211,8 @@ sub_pixel_variance8x8_neon_loop
     vsub.u32        d0, d1, d10
 
     vmov.32         r0, d0[0]                   ;return
+
+    vpop            {d8-d15}
     pop             {r4-r5, pc}
 
     ENDP

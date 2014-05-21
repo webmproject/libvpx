@@ -18,6 +18,9 @@
 #include "vp9/encoder/vp9_extend.h"
 #include "vp9/encoder/vp9_lookahead.h"
 
+// The max of past frames we want to keep in the queue.
+#define MAX_PRE_FRAMES 1
+
 struct lookahead_ctx {
   unsigned int max_sz;         /* Absolute size of the queue */
   unsigned int sz;             /* Number of buffers currently in the queue */

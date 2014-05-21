@@ -864,7 +864,7 @@ EOF
             CC=armcc
             AR=armar
             AS=armasm
-            LD=${source_path}/build/make/armlink_adapter.sh
+            LD="${source_path}/build/make/armlink_adapter.sh"
             STRIP=arm-none-linux-gnueabi-strip
             NM=arm-none-linux-gnueabi-nm
             tune_cflags="--cpu="
@@ -1339,10 +1339,10 @@ process() {
     if enabled source_path_used; then
     # Prepare the PWD for building.
     for f in ${OOT_INSTALLS}; do
-            install -D ${source_path}/$f $f
+            install -D "${source_path}/$f" "$f"
     done
     fi
-    cp ${source_path}/build/make/Makefile .
+    cp "${source_path}/build/make/Makefile" .
 
     clean_temp_files
     true

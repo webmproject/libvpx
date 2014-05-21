@@ -4820,32 +4820,10 @@ static void Pass2Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest,
 }
 #endif
 
-/* For ARM NEON, d8-d15 are callee-saved registers, and need to be saved. */
-#if HAVE_NEON
-extern void vp8_push_neon(int64_t *store);
-extern void vp8_pop_neon(int64_t *store);
-#endif
-
-
 int vp8_receive_raw_frame(VP8_COMP *cpi, unsigned int frame_flags, YV12_BUFFER_CONFIG *sd, int64_t time_stamp, int64_t end_time)
 {
-#if HAVE_NEON
-    int64_t store_reg[8];
-#if CONFIG_RUNTIME_CPU_DETECT
-    VP8_COMMON            *cm = &cpi->common;
-#endif
-#endif
     struct vpx_usec_timer  timer;
     int                    res = 0;
-
-#if HAVE_NEON
-#if CONFIG_RUNTIME_CPU_DETECT
-    if (cm->cpu_caps & HAS_NEON)
-#endif
-    {
-        vp8_push_neon(store_reg);
-    }
-#endif
 
     vpx_usec_timer_start(&timer);
 
@@ -4862,15 +4840,6 @@ int vp8_receive_raw_frame(VP8_COMP *cpi, unsigned int frame_flags, YV12_BUFFER_C
         res = -1;
     vpx_usec_timer_mark(&timer);
     cpi->time_receive_data += vpx_usec_timer_elapsed(&timer);
-
-#if HAVE_NEON
-#if CONFIG_RUNTIME_CPU_DETECT
-    if (cm->cpu_caps & HAS_NEON)
-#endif
-    {
-        vp8_pop_neon(store_reg);
-    }
-#endif
 
     return res;
 }
@@ -4892,9 +4861,6 @@ static int frame_is_reference(const VP8_COMP *cpi)
 
 int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned long *size, unsigned char *dest, unsigned char *dest_end, int64_t *time_stamp, int64_t *time_end, int flush)
 {
-#if HAVE_NEON
-    int64_t store_reg[8];
-#endif
     VP8_COMMON *cm;
     struct vpx_usec_timer  tsctimer;
     struct vpx_usec_timer  ticktimer;
@@ -4913,15 +4879,6 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
     }
 
     cpi->common.error.setjmp = 1;
-
-#if HAVE_NEON
-#if CONFIG_RUNTIME_CPU_DETECT
-    if (cm->cpu_caps & HAS_NEON)
-#endif
-    {
-        vp8_push_neon(store_reg);
-    }
-#endif
 
     vpx_usec_timer_start(&cmptimer);
 
@@ -5005,14 +4962,6 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
 
 #endif
 
-#if HAVE_NEON
-#if CONFIG_RUNTIME_CPU_DETECT
-        if (cm->cpu_caps & HAS_NEON)
-#endif
-        {
-            vp8_pop_neon(store_reg);
-        }
-#endif
         return -1;
     }
 
@@ -5278,7 +5227,7 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
                 int y_samples = orig->y_height * orig->y_width ;
                 int uv_samples = orig->uv_height * orig->uv_width ;
                 int t_samples = y_samples + 2 * uv_samples;
-                double sq_error, sq_error2;
+                double sq_error;
 
                 ye = calc_plane_error(orig->y_buffer, orig->y_stride,
                   recon->y_buffer, recon->y_stride, orig->y_width, orig->y_height);
@@ -5301,6 +5250,7 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
 #if CONFIG_POSTPROC
                 {
                     YV12_BUFFER_CONFIG      *pp = &cm->post_proc_buffer;
+                    double sq_error2;
                     double frame_psnr2, frame_ssim2 = 0;
                     double weight = 0;
 
@@ -5414,15 +5364,6 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
     }
 
 #endif
-#endif
-
-#if HAVE_NEON
-#if CONFIG_RUNTIME_CPU_DETECT
-    if (cm->cpu_caps & HAS_NEON)
-#endif
-    {
-        vp8_pop_neon(store_reg);
-    }
 #endif
 
     cpi->common.error.setjmp = 0;

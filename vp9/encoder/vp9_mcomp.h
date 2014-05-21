@@ -31,6 +31,20 @@ extern "C" {
 // for Block_16x16
 #define BORDER_MV_PIXELS_B16 (16 + VP9_INTERP_EXTEND)
 
+// motion search site
+typedef struct search_site {
+  MV mv;
+  int offset;
+} search_site;
+
+typedef struct search_site_config {
+  search_site ss[8 * MAX_MVSEARCH_STEPS + 1];
+  int ss_count;
+  int searches_per_step;
+} search_site_config;
+
+void vp9_init_dsmotion_compensation(search_site_config *cfg, int stride);
+void vp9_init3smotion_compensation(search_site_config *cfg,  int stride);
 
 void vp9_set_mv_search_range(MACROBLOCK *x, const MV *mv);
 int vp9_mv_bit_cost(const MV *mv, const MV *ref,
@@ -46,8 +60,6 @@ int vp9_get_mvpred_av_var(const MACROBLOCK *x,
                           const uint8_t *second_pred,
                           const vp9_variance_fn_ptr_t *vfp,
                           int use_mvcost);
-void vp9_init_dsmotion_compensation(MACROBLOCK *x, int stride);
-void vp9_init3smotion_compensation(MACROBLOCK *x,  int stride);
 
 struct VP9_COMP;
 int vp9_init_search_range(struct VP9_COMP *cpi, int size);
@@ -119,6 +131,7 @@ typedef int (*vp9_refining_search_fn_t)(const MACROBLOCK *x,
                                         const MV *center_mv);
 
 typedef int (*vp9_diamond_search_fn_t)(const MACROBLOCK *x,
+                                       const search_site_config *cfg,
                                        MV *ref_mv, MV *best_mv,
                                        int search_param, int sad_per_bit,
                                        int *num00,

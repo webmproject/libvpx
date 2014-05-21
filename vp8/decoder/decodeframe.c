@@ -17,6 +17,7 @@
 #include "vp8/common/reconintra4x4.h"
 #include "vp8/common/reconinter.h"
 #include "detokenize.h"
+#include "vp8/common/common.h"
 #include "vp8/common/invtrans.h"
 #include "vp8/common/alloccommon.h"
 #include "vp8/common/entropymode.h"
@@ -1018,8 +1019,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
         const unsigned char *clear = data;
         if (pbi->decrypt_cb)
         {
-            int n = (int)(data_end - data);
-            if (n > 10) n = 10;
+            int n = (int)MIN(sizeof(clear_buffer), data_end - data);
             pbi->decrypt_cb(pbi->decrypt_state, data, clear_buffer, n);
             clear = clear_buffer;
         }

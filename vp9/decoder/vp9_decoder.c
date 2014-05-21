@@ -32,74 +32,6 @@
 #include "vp9/decoder/vp9_detokenize.h"
 #include "vp9/decoder/vp9_dthread.h"
 
-#define WRITE_RECON_BUFFER 0
-#if WRITE_RECON_BUFFER == 1
-static void recon_write_yuv_frame(const char *name,
-                                  const YV12_BUFFER_CONFIG *s,
-                                  int w, int _h) {
-  FILE *yuv_file = fopen(name, "ab");
-  const uint8_t *src = s->y_buffer;
-  int h = _h;
-
-  do {
-    fwrite(src, w, 1,  yuv_file);
-    src += s->y_stride;
-  } while (--h);
-
-  src = s->u_buffer;
-  h = (_h + 1) >> 1;
-  w = (w + 1) >> 1;
-
-  do {
-    fwrite(src, w, 1,  yuv_file);
-    src += s->uv_stride;
-  } while (--h);
-
-  src = s->v_buffer;
-  h = (_h + 1) >> 1;
-
-  do {
-    fwrite(src, w, 1, yuv_file);
-    src += s->uv_stride;
-  } while (--h);
-
-  fclose(yuv_file);
-}
-#endif
-#if WRITE_RECON_BUFFER == 2
-void write_dx_frame_to_file(YV12_BUFFER_CONFIG *frame, int this_frame) {
-  // write the frame
-  FILE *yframe;
-  int i;
-  char filename[255];
-
-  snprintf(filename, sizeof(filename)-1, "dx\\y%04d.raw", this_frame);
-  yframe = fopen(filename, "wb");
-
-  for (i = 0; i < frame->y_height; i++)
-    fwrite(frame->y_buffer + i * frame->y_stride,
-           frame->y_width, 1, yframe);
-
-  fclose(yframe);
-  snprintf(filename, sizeof(filename)-1, "dx\\u%04d.raw", this_frame);
-  yframe = fopen(filename, "wb");
-
-  for (i = 0; i < frame->uv_height; i++)
-    fwrite(frame->u_buffer + i * frame->uv_stride,
-           frame->uv_width, 1, yframe);
-
-  fclose(yframe);
-  snprintf(filename, sizeof(filename)-1, "dx\\v%04d.raw", this_frame);
-  yframe = fopen(filename, "wb");
-
-  for (i = 0; i < frame->uv_height; i++)
-    fwrite(frame->v_buffer + i * frame->uv_stride,
-           frame->uv_width, 1, yframe);
-
-  fclose(yframe);
-}
-#endif
-
 void vp9_initialize_dec() {
   static int init_done = 0;
 
@@ -348,15 +280,6 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
 
   swap_frame_buffers(pbi);
 
-#if WRITE_RECON_BUFFER == 2
-  if (cm->show_frame)
-    write_dx_frame_to_file(cm->frame_to_show,
-                           cm->current_video_frame);
-  else
-    write_dx_frame_to_file(cm->frame_to_show,
-                           cm->current_video_frame + 1000);
-#endif
-
   if (!pbi->do_loopfilter_inline) {
     // If multiple threads are used to decode tiles, then we use those threads
     // to do parallel loopfiltering.
@@ -366,21 +289,6 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
       vp9_loop_filter_frame(cm, &pbi->mb, cm->lf.filter_level, 0, 0);
     }
   }
-
-#if WRITE_RECON_BUFFER == 2
-  if (cm->show_frame)
-    write_dx_frame_to_file(cm->frame_to_show,
-                           cm->current_video_frame + 2000);
-  else
-    write_dx_frame_to_file(cm->frame_to_show,
-                           cm->current_video_frame + 3000);
-#endif
-
-#if WRITE_RECON_BUFFER == 1
-  if (cm->show_frame)
-    recon_write_yuv_frame("recon.yuv", cm->frame_to_show,
-                          cm->width, cm->height);
-#endif
 
   vp9_clear_system_state();
 
@@ -423,10 +331,6 @@ int vp9_get_raw_frame(VP9Decoder *pbi, YV12_BUFFER_CONFIG *sd,
   ret = vp9_post_proc_frame(&pbi->common, sd, flags);
 #else
     *sd = *pbi->common.frame_to_show;
-    sd->y_width = pbi->common.width;
-    sd->y_height = pbi->common.height;
-    sd->uv_width = sd->y_width >> pbi->common.subsampling_x;
-    sd->uv_height = sd->y_height >> pbi->common.subsampling_y;
     ret = 0;
 #endif /*!CONFIG_POSTPROC*/
   vp9_clear_system_state();

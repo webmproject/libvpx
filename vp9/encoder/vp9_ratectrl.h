@@ -20,8 +20,6 @@
 extern "C" {
 #endif
 
-#define FRAME_OVERHEAD_BITS 200
-
 // Bits Per MB at different Q (Multiplied by 512)
 #define BPER_MB_NORMBITS    9
 

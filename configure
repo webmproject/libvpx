@@ -158,7 +158,7 @@ all_targets="libs examples docs"
 
 # all targets available are enabled, by default.
 for t in ${all_targets}; do
-    [ -f ${source_path}/${t}.mk ] && enable_feature ${t}
+    [ -f "${source_path}/${t}.mk" ] && enable_feature ${t}
 done
 
 if ! perl --version >/dev/null; then
@@ -166,9 +166,9 @@ if ! perl --version >/dev/null; then
 fi
 
 
-if [ "`cd ${source_path} && pwd`" != "`pwd`" ]; then
+if [ "`cd \"${source_path}\" && pwd`" != "`pwd`" ]; then
   # test to see if source_path already configured
-  if [ -f ${source_path}/vpx_config.h ]; then
+  if [ -f "${source_path}/vpx_config.h" ]; then
     die "source directory already configured; run 'make distclean' there first"
   fi
 fi
@@ -201,27 +201,27 @@ enable_feature multithread
 enable_feature os_support
 enable_feature temporal_denoising
 
-[ -d ${source_path}/../include ] && enable_feature alt_tree_layout
+[ -d "${source_path}/../include" ] && enable_feature alt_tree_layout
 for d in vp8 vp9; do
-    [ -d ${source_path}/${d} ] && disable_feature alt_tree_layout;
+    [ -d "${source_path}/${d}" ] && disable_feature alt_tree_layout;
 done
 
 if ! enabled alt_tree_layout; then
 # development environment
-[ -d ${source_path}/vp8 ] && CODECS="${CODECS} vp8_encoder vp8_decoder"
-[ -d ${source_path}/vp9 ] && CODECS="${CODECS} vp9_encoder vp9_decoder"
+[ -d "${source_path}/vp8" ] && CODECS="${CODECS} vp8_encoder vp8_decoder"
+[ -d "${source_path}/vp9" ] && CODECS="${CODECS} vp9_encoder vp9_decoder"
 else
 # customer environment
-[ -f ${source_path}/../include/vpx/vp8cx.h ] && CODECS="${CODECS} vp8_encoder"
-[ -f ${source_path}/../include/vpx/vp8dx.h ] && CODECS="${CODECS} vp8_decoder"
-[ -f ${source_path}/../include/vpx/vp9cx.h ] && CODECS="${CODECS} vp9_encoder"
-[ -f ${source_path}/../include/vpx/vp9dx.h ] && CODECS="${CODECS} vp9_decoder"
-[ -f ${source_path}/../include/vpx/vp8cx.h ] || disable_feature vp8_encoder
-[ -f ${source_path}/../include/vpx/vp8dx.h ] || disable_feature vp8_decoder
-[ -f ${source_path}/../include/vpx/vp9cx.h ] || disable_feature vp9_encoder
-[ -f ${source_path}/../include/vpx/vp9dx.h ] || disable_feature vp9_decoder
+[ -f "${source_path}/../include/vpx/vp8cx.h" ] && CODECS="${CODECS} vp8_encoder"
+[ -f "${source_path}/../include/vpx/vp8dx.h" ] && CODECS="${CODECS} vp8_decoder"
+[ -f "${source_path}/../include/vpx/vp9cx.h" ] && CODECS="${CODECS} vp9_encoder"
+[ -f "${source_path}/../include/vpx/vp9dx.h" ] && CODECS="${CODECS} vp9_decoder"
+[ -f "${source_path}/../include/vpx/vp8cx.h" ] || disable_feature vp8_encoder
+[ -f "${source_path}/../include/vpx/vp8dx.h" ] || disable_feature vp8_decoder
+[ -f "${source_path}/../include/vpx/vp9cx.h" ] || disable_feature vp9_encoder
+[ -f "${source_path}/../include/vpx/vp9dx.h" ] || disable_feature vp9_decoder
 
-[ -f ${source_path}/../lib/*/*mt.lib ] && soft_enable static_msvcrt
+[ -f "${source_path}/../lib/*/*mt.lib" ] && soft_enable static_msvcrt
 fi
 
 CODECS="$(echo ${CODECS} | tr ' ' '\n')"
@@ -318,7 +318,6 @@ CONFIG_LIST="
     multi_res_encoding
     temporal_denoising
     experimental
-    decrypt
     ${EXPERIMENT_LIST}
 "
 CMDLINE_SELECT="
@@ -372,7 +371,6 @@ CMDLINE_SELECT="
     multi_res_encoding
     temporal_denoising
     experimental
-    decrypt
 "
 
 process_cmdline() {
@@ -469,7 +467,7 @@ process_targets() {
           ;;
     esac
     if [ -f "${source_path}/build/make/version.sh" ]; then
-        local ver=`"$source_path/build/make/version.sh" --bare $source_path`
+        local ver=`"$source_path/build/make/version.sh" --bare "$source_path"`
         DIST_DIR="${DIST_DIR}-${ver}"
         VERSION_STRING=${ver}
         ver=${ver%%-*}
@@ -712,6 +710,7 @@ process_toolchain() {
             soft_enable webm_io
         ;;
         *-android-*)
+            soft_enable webm_io
             # GTestLog must be modified to use Android logging utilities.
         ;;
         *-darwin-*)

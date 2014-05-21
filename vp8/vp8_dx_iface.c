@@ -16,9 +16,10 @@
 #include "vpx/vp8dx.h"
 #include "vpx/internal/vpx_codec_internal.h"
 #include "vpx_version.h"
+#include "common/alloccommon.h"
+#include "common/common.h"
 #include "common/onyxd.h"
 #include "decoder/onyxd_int.h"
-#include "common/alloccommon.h"
 #include "vpx_mem/vpx_mem.h"
 #if CONFIG_ERROR_CONCEALMENT
 #include "decoder/error_concealment.h"
@@ -56,7 +57,7 @@ struct vpx_codec_alg_priv
     int                     dbg_color_b_modes_flag;
     int                     dbg_display_mv_flag;
 #endif
-    vp8_decrypt_cb          *decrypt_cb;
+    vpx_decrypt_cb          decrypt_cb;
     void                    *decrypt_state;
     vpx_image_t             img;
     int                     img_setup;
@@ -156,7 +157,7 @@ static vpx_codec_err_t vp8_destroy(vpx_codec_alg_priv_t *ctx)
 static vpx_codec_err_t vp8_peek_si_internal(const uint8_t *data,
                                             unsigned int data_sz,
                                             vpx_codec_stream_info_t *si,
-                                            vp8_decrypt_cb *decrypt_cb,
+                                            vpx_decrypt_cb decrypt_cb,
                                             void *decrypt_state)
 {
     vpx_codec_err_t res = VPX_CODEC_OK;
@@ -177,7 +178,7 @@ static vpx_codec_err_t vp8_peek_si_internal(const uint8_t *data,
         const uint8_t *clear = data;
         if (decrypt_cb)
         {
-            int n = data_sz > 10 ? 10 : data_sz;
+            int n = MIN(sizeof(clear_buffer), data_sz);
             decrypt_cb(decrypt_state, data, clear_buffer, n);
             clear = clear_buffer;
         }
@@ -379,11 +380,14 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t  *ctx,
        }
 
        res = vp8_create_decoder_instances(&ctx->yv12_frame_buffers, &oxcf);
-       ctx->yv12_frame_buffers.pbi[0]->decrypt_cb = ctx->decrypt_cb;
-       ctx->yv12_frame_buffers.pbi[0]->decrypt_state = ctx->decrypt_state;
-
        ctx->decoder_init = 1;
     }
+
+    /* Set these even if already initialized.  The caller may have changed the
+     * decrypt config between frames.
+     */
+    ctx->yv12_frame_buffers.pbi[0]->decrypt_cb = ctx->decrypt_cb;
+    ctx->yv12_frame_buffers.pbi[0]->decrypt_state = ctx->decrypt_state;
 
     if (!res)
     {
@@ -722,7 +726,7 @@ static vpx_codec_err_t vp8_set_decryptor(vpx_codec_alg_priv_t *ctx,
                                          int ctrl_id,
                                          va_list args)
 {
-    vp8_decrypt_init *init = va_arg(args, vp8_decrypt_init *);
+    vpx_decrypt_init *init = va_arg(args, vpx_decrypt_init *);
 
     if (init)
     {
@@ -749,7 +753,7 @@ vpx_codec_ctrl_fn_map_t vp8_ctf_maps[] =
     {VP8D_GET_LAST_REF_UPDATES,     vp8_get_last_ref_updates},
     {VP8D_GET_FRAME_CORRUPTED,      vp8_get_frame_corrupted},
     {VP8D_GET_LAST_REF_USED,        vp8_get_last_ref_frame},
-    {VP8D_SET_DECRYPTOR,            vp8_set_decryptor},
+    {VPXD_SET_DECRYPTOR,            vp8_set_decryptor},
     { -1, NULL},
 };
 

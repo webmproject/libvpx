@@ -20,12 +20,6 @@
 extern "C" {
 #endif
 
-// motion search site
-typedef struct {
-  MV mv;
-  int offset;
-} search_site;
-
 // Structure to hold snapshot of coding context during the mode picking process
 typedef struct {
   MODE_INFO mic;
@@ -108,10 +102,6 @@ struct macroblock {
   int skip_optimize;
   int q_index;
 
-  search_site *ss;
-  int ss_count;
-  int searches_per_step;
-
   int errorperbit;
   int sadperbit16;
   int sadperbit4;
@@ -138,12 +128,6 @@ struct macroblock {
   int nmvsadcosts_hp[2][MV_VALS];
   int *nmvsadcost_hp[2];
   int **mvsadcost;
-
-  int mbmode_cost[INTRA_MODES];
-  unsigned inter_mode_cost[INTER_MODE_CONTEXTS][INTER_MODES];
-  int intra_uv_mode_cost[FRAME_TYPES][INTRA_MODES];
-  int y_mode_costs[INTRA_MODES][INTRA_MODES][INTRA_MODES];
-  int switchable_interp_costs[SWITCHABLE_FILTER_CONTEXTS][SWITCHABLE_FILTERS];
 
   // These define limits to motion vector components to prevent them
   // from extending outside the UMV borders

@@ -344,7 +344,7 @@ int main(int argc, const char **argv) {
     }
 
     res = vpx_svc_encode(&svc_ctx, &codec, (end_of_stream ? NULL : &raw),
-                         pts, frame_duration, VPX_DL_REALTIME);
+                         pts, frame_duration, VPX_DL_GOOD_QUALITY);
     printf("%s", vpx_svc_get_message(&svc_ctx));
     if (res != VPX_CODEC_OK) {
       die_codec(&codec, "Failed to encode frame");

@@ -29,6 +29,13 @@
 
 namespace mkvmuxer {
 
+namespace {
+
+// Date elements are always 8 octets in size.
+const int kDateElementSize = 8;
+
+}  // namespace
+
 int32 GetCodedUIntSize(uint64 value) {
   if (value < 0x000000000000007FULL)
     return 1;
@@ -92,7 +99,7 @@ uint64 EbmlElementSize(uint64 type, uint64 value) {
   return ebml_size;
 }
 
-uint64 EbmlElementSize(uint64 type, float /* value */ ) {
+uint64 EbmlElementSize(uint64 type, float /* value */) {
   // Size of EBML ID
   uint64 ebml_size = GetUIntSize(type);
 
@@ -133,6 +140,19 @@ uint64 EbmlElementSize(uint64 type, const uint8* value, uint64 size) {
 
   // Size of Datasize
   ebml_size += GetCodedUIntSize(size);
+
+  return ebml_size;
+}
+
+uint64 EbmlDateElementSize(uint64 type, int64 value) {
+  // Size of EBML ID
+  uint64 ebml_size = GetUIntSize(type);
+
+  // Datasize
+  ebml_size += kDateElementSize;
+
+  // Size of Datasize
+  ebml_size++;
 
   return ebml_size;
 }
@@ -302,9 +322,7 @@ bool WriteEbmlElement(IMkvWriter* writer, uint64 type, const char* value) {
   return true;
 }
 
-bool WriteEbmlElement(IMkvWriter* writer,
-                      uint64 type,
-                      const uint8* value,
+bool WriteEbmlElement(IMkvWriter* writer, uint64 type, const uint8* value,
                       uint64 size) {
   if (!writer || !value || size < 1)
     return false;
@@ -321,12 +339,24 @@ bool WriteEbmlElement(IMkvWriter* writer,
   return true;
 }
 
-uint64 WriteSimpleBlock(IMkvWriter* writer,
-                        const uint8* data,
-                        uint64 length,
-                        uint64 track_number,
-                        int64 timecode,
-                        uint64 is_key) {
+bool WriteEbmlDateElement(IMkvWriter* writer, uint64 type, int64 value) {
+  if (!writer)
+    return false;
+
+  if (WriteID(writer, type))
+    return false;
+
+  if (WriteUInt(writer, kDateElementSize))
+    return false;
+
+  if (SerializeInt(writer, value, kDateElementSize))
+    return false;
+
+  return true;
+}
+
+uint64 WriteSimpleBlock(IMkvWriter* writer, const uint8* data, uint64 length,
+                        uint64 track_number, int64 timecode, uint64 is_key) {
   if (!writer)
     return false;
 
@@ -372,7 +402,7 @@ uint64 WriteSimpleBlock(IMkvWriter* writer,
     return 0;
 
   const uint64 element_size =
-    GetUIntSize(kMkvSimpleBlock) + GetCodedUIntSize(size) + 4 + length;
+      GetUIntSize(kMkvSimpleBlock) + GetCodedUIntSize(size) + 4 + length;
 
   return element_size;
 }
@@ -391,11 +421,8 @@ uint64 WriteSimpleBlock(IMkvWriter* writer,
 //     Duration size
 //     (duration payload)
 //
-uint64 WriteMetadataBlock(IMkvWriter* writer,
-                          const uint8* data,
-                          uint64 length,
-                          uint64 track_number,
-                          int64 timecode,
+uint64 WriteMetadataBlock(IMkvWriter* writer, const uint8* data, uint64 length,
+                          uint64 track_number, int64 timecode,
                           uint64 duration) {
   // We don't backtrack when writing to the stream, so we must
   // pre-compute the BlockGroup size, by summing the sizes of each
@@ -487,47 +514,37 @@ uint64 WriteMetadataBlock(IMkvWriter* writer,
 //        1 (Denotes Alpha)
 //      BlockAdditional
 //        Data
-uint64 WriteBlockWithAdditional(IMkvWriter* writer,
-                                const uint8* data,
-                                uint64 length,
-                                const uint8* additional,
-                                uint64 additional_length,
-                                uint64 add_id,
-                                uint64 track_number,
-                                int64 timecode,
+uint64 WriteBlockWithAdditional(IMkvWriter* writer, const uint8* data,
+                                uint64 length, const uint8* additional,
+                                uint64 additional_length, uint64 add_id,
+                                uint64 track_number, int64 timecode,
                                 uint64 is_key) {
   if (!data || !additional || length < 1 || additional_length < 1)
     return 0;
 
   const uint64 block_payload_size = 4 + length;
-  const uint64 block_elem_size = EbmlMasterElementSize(kMkvBlock,
-                                                       block_payload_size) +
-                                 block_payload_size;
-  const uint64 block_additional_elem_size = EbmlElementSize(kMkvBlockAdditional,
-                                                            additional,
-                                                            additional_length);
+  const uint64 block_elem_size =
+      EbmlMasterElementSize(kMkvBlock, block_payload_size) + block_payload_size;
+  const uint64 block_additional_elem_size =
+      EbmlElementSize(kMkvBlockAdditional, additional, additional_length);
   const uint64 block_addid_elem_size = EbmlElementSize(kMkvBlockAddID, add_id);
 
-  const uint64 block_more_payload_size = block_addid_elem_size +
-                                         block_additional_elem_size;
-  const uint64 block_more_elem_size = EbmlMasterElementSize(
-                                          kMkvBlockMore,
-                                          block_more_payload_size) +
-                                      block_more_payload_size;
+  const uint64 block_more_payload_size =
+      block_addid_elem_size + block_additional_elem_size;
+  const uint64 block_more_elem_size =
+      EbmlMasterElementSize(kMkvBlockMore, block_more_payload_size) +
+      block_more_payload_size;
   const uint64 block_additions_payload_size = block_more_elem_size;
-  const uint64 block_additions_elem_size = EbmlMasterElementSize(
-                                               kMkvBlockAdditions,
-                                               block_additions_payload_size) +
-                                           block_additions_payload_size;
-  const uint64 block_group_payload_size = block_elem_size +
-                                          block_additions_elem_size;
-  const uint64 block_group_elem_size = EbmlMasterElementSize(
-                                           kMkvBlockGroup,
-                                           block_group_payload_size) +
-                                       block_group_payload_size;
+  const uint64 block_additions_elem_size =
+      EbmlMasterElementSize(kMkvBlockAdditions, block_additions_payload_size) +
+      block_additions_payload_size;
+  const uint64 block_group_payload_size =
+      block_elem_size + block_additions_elem_size;
+  const uint64 block_group_elem_size =
+      EbmlMasterElementSize(kMkvBlockGroup, block_group_payload_size) +
+      block_group_payload_size;
 
-  if (!WriteEbmlMasterElement(writer, kMkvBlockGroup,
-                              block_group_payload_size))
+  if (!WriteEbmlMasterElement(writer, kMkvBlockGroup, block_group_payload_size))
     return 0;
 
   if (!WriteEbmlMasterElement(writer, kMkvBlock, block_payload_size))
@@ -558,8 +575,8 @@ uint64 WriteBlockWithAdditional(IMkvWriter* writer,
   if (!WriteEbmlElement(writer, kMkvBlockAddID, add_id))
     return 0;
 
-  if (!WriteEbmlElement(writer, kMkvBlockAdditional,
-                        additional, additional_length))
+  if (!WriteEbmlElement(writer, kMkvBlockAdditional, additional,
+                        additional_length))
     return 0;
 
   return block_group_elem_size;
@@ -571,31 +588,25 @@ uint64 WriteBlockWithAdditional(IMkvWriter* writer,
 //  Block
 //    Data
 //  DiscardPadding
-uint64 WriteBlockWithDiscardPadding(IMkvWriter* writer,
-                                    const uint8* data,
-                                    uint64 length,
-                                    int64 discard_padding,
-                                    uint64 track_number,
-                                    int64 timecode,
+uint64 WriteBlockWithDiscardPadding(IMkvWriter* writer, const uint8* data,
+                                    uint64 length, int64 discard_padding,
+                                    uint64 track_number, int64 timecode,
                                     uint64 is_key) {
   if (!data || length < 1 || discard_padding <= 0)
     return 0;
 
   const uint64 block_payload_size = 4 + length;
-  const uint64 block_elem_size = EbmlMasterElementSize(kMkvBlock,
-                                                       block_payload_size) +
-                                 block_payload_size;
-  const uint64 discard_padding_elem_size = EbmlElementSize(kMkvDiscardPadding,
-                                                           discard_padding);
-  const uint64 block_group_payload_size = block_elem_size +
-                                          discard_padding_elem_size;
-  const uint64 block_group_elem_size = EbmlMasterElementSize(
-                                           kMkvBlockGroup,
-                                           block_group_payload_size) +
-                                       block_group_payload_size;
+  const uint64 block_elem_size =
+      EbmlMasterElementSize(kMkvBlock, block_payload_size) + block_payload_size;
+  const uint64 discard_padding_elem_size =
+      EbmlElementSize(kMkvDiscardPadding, discard_padding);
+  const uint64 block_group_payload_size =
+      block_elem_size + discard_padding_elem_size;
+  const uint64 block_group_elem_size =
+      EbmlMasterElementSize(kMkvBlockGroup, block_group_payload_size) +
+      block_group_payload_size;
 
-  if (!WriteEbmlMasterElement(writer, kMkvBlockGroup,
-                              block_group_payload_size))
+  if (!WriteEbmlMasterElement(writer, kMkvBlockGroup, block_group_payload_size))
     return 0;
 
   if (!WriteEbmlMasterElement(writer, kMkvBlock, block_payload_size))
@@ -634,9 +645,9 @@ uint64 WriteVoidElement(IMkvWriter* writer, uint64 size) {
     return false;
 
   // Subtract one for the void ID and the coded size.
-  uint64 void_entry_size = size - 1 - GetCodedUIntSize(size-1);
-  uint64 void_size = EbmlMasterElementSize(kMkvVoid, void_entry_size) +
-                     void_entry_size;
+  uint64 void_entry_size = size - 1 - GetCodedUIntSize(size - 1);
+  uint64 void_size =
+      EbmlMasterElementSize(kMkvVoid, void_entry_size) + void_entry_size;
 
   if (void_size != size)
     return 0;
@@ -684,13 +695,13 @@ mkvmuxer::uint64 mkvmuxer::MakeUID(unsigned int* seed) {
   for (int i = 0; i < 7; ++i) {  // avoid problems with 8-byte values
     uid <<= 8;
 
-    // TODO(fgalligan): Move random number generation to platform specific code.
+// TODO(fgalligan): Move random number generation to platform specific code.
 #ifdef _MSC_VER
     (void)seed;
     unsigned int random_value;
     const errno_t e = rand_s(&random_value);
     (void)e;
-    const int32 nn  = random_value;
+    const int32 nn = random_value;
 #elif __ANDROID__
     int32 temp_num = 1;
     int fd = open("/dev/urandom", O_RDONLY);
