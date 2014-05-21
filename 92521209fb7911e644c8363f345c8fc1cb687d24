@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//oWY\u003d",
+        "filename": "vpx/internal/vpx_codec_internal.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-05-21T22:49:35Z",
+      "side": 1,
+      "message": "I didn\u0027t find better place for this function. Maybe another file? Or create a new file (e.g. vpx_system_independent.h) ?",
+      "revId": "92521209fb7911e644c8363f345c8fc1cb687d24",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
