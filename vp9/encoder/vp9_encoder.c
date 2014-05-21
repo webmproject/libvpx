@@ -1442,21 +1442,6 @@ static void scale_and_extend_frame(const YV12_BUFFER_CONFIG *src,
   vp8_yv12_extend_frame_borders_c(dst);
 }
 
-static int find_fp_qindex() {
-  int i;
-
-  for (i = 0; i < QINDEX_RANGE; i++) {
-    if (vp9_convert_qindex_to_q(i) >= 30.0) {
-      break;
-    }
-  }
-
-  if (i == QINDEX_RANGE)
-    i--;
-
-  return i;
-}
-
 #define WRITE_RECON_BUFFER 0
 #if WRITE_RECON_BUFFER
 void write_cx_frame_to_file(YV12_BUFFER_CONFIG *frame, int this_frame) {
@@ -2313,17 +2298,6 @@ static void Pass0Encode(VP9_COMP *cpi, size_t *size, uint8_t *dest,
   encode_frame_to_data_rate(cpi, size, dest, frame_flags);
 }
 
-static void Pass1Encode(VP9_COMP *cpi, size_t *size, uint8_t *dest,
-                        unsigned int *frame_flags) {
-  (void) size;
-  (void) dest;
-  (void) frame_flags;
-
-  vp9_rc_get_first_pass_params(cpi);
-  vp9_set_quantizer(&cpi->common, find_fp_qindex());
-  vp9_first_pass(cpi);
-}
-
 static void Pass2Encode(VP9_COMP *cpi, size_t *size,
                         uint8_t *dest, unsigned int *frame_flags) {
   cpi->allow_encode_breakout = ENCODE_BREAKOUT_ENABLED;
@@ -2663,7 +2637,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
   if (cpi->pass == 1 &&
       (!cpi->use_svc || cpi->svc.number_temporal_layers == 1)) {
-    Pass1Encode(cpi, size, dest, frame_flags);
+    vp9_first_pass(cpi);
   } else if (cpi->pass == 2 &&
       (!cpi->use_svc || cpi->svc.number_temporal_layers == 1)) {
     Pass2Encode(cpi, size, dest, frame_flags);
