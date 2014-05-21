@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//oZI\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-05-21T18:59:54Z",
+      "side": 1,
+      "message": "change to abs(sum_diff) to be explicit.",
+      "revId": "760df734567bf8e4f16be18929fd7474f0c52196",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
