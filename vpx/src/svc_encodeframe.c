@@ -580,7 +580,6 @@ vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
   // TODO(ivanmaltz): determine if these values need to be set explicitly for
   // svc, or if the normal default/override mechanism can be used
   enc_cfg->rc_dropframe_thresh = 0;
-  enc_cfg->rc_end_usage = VPX_CBR;
   enc_cfg->rc_resize_allowed = 0;
 
   if (enc_cfg->g_pass == VPX_RC_ONE_PASS) {
