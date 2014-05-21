@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//oeI\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-05-21T01:39:49Z",
+      "side": 1,
+      "message": "It is more logical to have \"stats\" as a first argument for consistency with zero_stats() and avg_stats(). It is not really an output argument, we are just passing input argument by non-const pointer.",
+      "parentUuid": "AAAAdn//oek\u003d",
+      "revId": "c0a3662a9b99ae52f4be0f5e989d737cb5ba61e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//oeg\u003d",
         "filename": "vp9/encoder/vp9_firstpass.c",
         "patchSetId": 1
