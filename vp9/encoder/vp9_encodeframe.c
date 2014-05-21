@@ -2384,7 +2384,7 @@ static void switch_lossless_mode(VP9_COMP *cpi, int lossless) {
   if (lossless) {
     // printf("Switching to lossless\n");
     cpi->mb.fwd_txm4x4 = vp9_fwht4x4;
-    cpi->mb.e_mbd.itxm_add = vp9_iwht4x4_add;
+    cpi->mb.itxm_add = vp9_iwht4x4_add;
     cpi->mb.optimize = 0;
     cpi->common.lf.filter_level = 0;
     cpi->zbin_mode_boost_enabled = 0;
@@ -2392,7 +2392,7 @@ static void switch_lossless_mode(VP9_COMP *cpi, int lossless) {
   } else {
     // printf("Not lossless\n");
     cpi->mb.fwd_txm4x4 = vp9_fdct4x4;
-    cpi->mb.e_mbd.itxm_add = vp9_idct4x4_add;
+    cpi->mb.itxm_add = vp9_idct4x4_add;
   }
 }
 

@@ -109,6 +109,7 @@ struct macroblock {
   MV pred_mv[MAX_REF_FRAMES];
 
   void (*fwd_txm4x4)(const int16_t *input, int16_t *output, int stride);
+  void (*itxm_add)(const int16_t *input, uint8_t *dest, int stride, int eob);
 };
 
 #ifdef __cplusplus
