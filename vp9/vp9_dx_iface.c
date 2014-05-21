@@ -260,6 +260,9 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t *ctx,
                                  ctx->decrypt_state);
     if (res != VPX_CODEC_OK)
       return res;
+
+    if (!ctx->si.is_kf)
+      return VPX_CODEC_ERROR;
   }
 
   // Initialize the decoder instance on the first frame

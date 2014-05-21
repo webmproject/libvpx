@@ -43,8 +43,6 @@ typedef struct VP9Decoder {
 
   int refresh_frame_flags;
 
-  int decoded_key_frame;
-
   VP9Worker lf_worker;
   VP9Worker *tile_workers;
   int num_tile_workers;
