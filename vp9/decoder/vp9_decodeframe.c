@@ -802,7 +802,7 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
     CHECK_MEM_ERROR(
         cm,
         pbi->tile_data,
-        vpx_malloc(tile_cols * tile_rows * (sizeof(*pbi->tile_data))));
+        vpx_memalign(32, tile_cols * tile_rows * (sizeof(*pbi->tile_data))));
     pbi->total_tiles = tile_rows * tile_cols;
   }
 
