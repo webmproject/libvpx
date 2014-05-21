@@ -16,6 +16,24 @@
       "revId": "760df734567bf8e4f16be18929fd7474f0c52196",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//oV4\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-05-21T23:11:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//oZI\u003d",
+      "revId": "760df734567bf8e4f16be18929fd7474f0c52196",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
