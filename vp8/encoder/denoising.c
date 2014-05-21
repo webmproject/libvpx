@@ -136,8 +136,56 @@ int vp8_denoiser_filter_c(unsigned char *mc_running_avg_y, int mc_avg_y_stride,
 
     sum_diff_thresh= SUM_DIFF_THRESHOLD;
     if (increase_denoising) sum_diff_thresh = SUM_DIFF_THRESHOLD_HIGH;
-    if (abs(sum_diff) > sum_diff_thresh)
+    if (abs(sum_diff) > sum_diff_thresh) {
+      // Before returning to copy the block (i.e., apply no denoising), check
+      // if we can still apply some (weaker) temporal filtering to this block,
+      // that would otherwise not be denoised at all. Simplest is to apply
+      // an additional adjustment to running_avg_y to bring it closer to sig.
+      // The adjustment is capped by a maximum delta, and chosen such that
+      // in most cases the resulting sum_diff will be within the
+      // accceptable range given by sum_diff_thresh.
+
+      // The delta is set by the excess of absolute pixel diff over threshold.
+      int delta = ((abs(sum_diff) - sum_diff_thresh) >> 8) + 1;
+      // Only apply the adjustment for max delta up to 3.
+      if (delta < 4) {
+        sig -= sig_stride * 16;
+        mc_running_avg_y -= mc_avg_y_stride * 16;
+        running_avg_y -= avg_y_stride * 16;
+        for (r = 0; r < 16; ++r) {
+          for (c = 0; c < 16; ++c) {
+            int diff = mc_running_avg_y[c] - sig[c];
+            int adjustment = abs(diff);
+            if (adjustment > delta)
+              adjustment = delta;
+            if (diff > 0) {
+              // Bring denoised signal down.
+              if (running_avg_y[c] - adjustment < 0)
+                running_avg_y[c] = 0;
+              else
+                running_avg_y[c] = running_avg_y[c] - adjustment;
+              sum_diff -= adjustment;
+            } else if (diff < 0) {
+              // Bring denoised signal up.
+              if (running_avg_y[c] + adjustment > 255)
+                running_avg_y[c] = 255;
+              else
+                running_avg_y[c] = running_avg_y[c] + adjustment;
+              sum_diff += adjustment;
+            }
+          }
+          // TODO(marpan): Check here if abs(sum_diff) has gone below the
+          // threshold sum_diff_thresh, and if so, we can exit the row loop.
+          sig += sig_stride;
+          mc_running_avg_y += mc_avg_y_stride;
+          running_avg_y += avg_y_stride;
+        }
+        if (abs(sum_diff) > sum_diff_thresh)
+          return COPY_BLOCK;
+      } else {
         return COPY_BLOCK;
+      }
+    }
 
     vp8_copy_mem16x16(running_avg_y_start, avg_y_stride, sig_start, sig_stride);
     return FILTER_BLOCK;
