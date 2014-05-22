@@ -51,7 +51,6 @@ typedef struct {
   int64_t bits_left;
   double modified_error_min;
   double modified_error_max;
-  double modified_error_total;
   double modified_error_left;
   double kf_intra_err_min;
   double gf_intra_err_min;
