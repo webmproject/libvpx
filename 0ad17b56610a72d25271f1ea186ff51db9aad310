@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//oFs\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 617,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-05-22T22:49:35Z",
+      "side": 1,
+      "message": "Please add the (double) conversion back.",
+      "revId": "0ad17b56610a72d25271f1ea186ff51db9aad310",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
