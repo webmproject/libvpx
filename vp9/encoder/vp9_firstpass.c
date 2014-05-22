@@ -1153,16 +1153,17 @@ static void accumulate_frame_motion_stats(
 }
 
 // Calculate a baseline boost number for the current frame.
-static double calc_frame_boost(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame,
+static double calc_frame_boost(const TWO_PASS *twopass,
+                               const FIRSTPASS_STATS *this_frame,
                                double this_frame_mv_in_out) {
   double frame_boost;
 
   // Underlying boost factor is based on inter intra error ratio.
-  if (this_frame->intra_error > cpi->twopass.gf_intra_err_min)
+  if (this_frame->intra_error > twopass->gf_intra_err_min)
     frame_boost = (IIFACTOR * this_frame->intra_error /
                    DOUBLE_DIVIDE_CHECK(this_frame->coded_error));
   else
-    frame_boost = (IIFACTOR * cpi->twopass.gf_intra_err_min /
+    frame_boost = (IIFACTOR * twopass->gf_intra_err_min /
                    DOUBLE_DIVIDE_CHECK(this_frame->coded_error));
 
   // Increase boost for frames where new data coming into frame (e.g. zoom out).
@@ -1215,8 +1216,8 @@ static int calc_arf_boost(VP9_COMP *cpi, int offset,
                           ? MIN_DECAY_FACTOR : decay_accumulator;
     }
 
-    boost_score += (decay_accumulator *
-                    calc_frame_boost(cpi, &this_frame, this_frame_mv_in_out));
+    boost_score += decay_accumulator * calc_frame_boost(twopass, &this_frame,
+                                                        this_frame_mv_in_out);
   }
 
   *f_boost = (int)boost_score;
@@ -1252,8 +1253,8 @@ static int calc_arf_boost(VP9_COMP *cpi, int offset,
                               ? MIN_DECAY_FACTOR : decay_accumulator;
     }
 
-    boost_score += (decay_accumulator *
-                    calc_frame_boost(cpi, &this_frame, this_frame_mv_in_out));
+    boost_score += decay_accumulator * calc_frame_boost(twopass, &this_frame,
+                                                        this_frame_mv_in_out);
   }
   *b_boost = (int)boost_score;
 
@@ -1590,8 +1591,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     }
 
     // Calculate a boost number for this frame.
-    boost_score += (decay_accumulator *
-       calc_frame_boost(cpi, &next_frame, this_frame_mv_in_out));
+    boost_score += decay_accumulator * calc_frame_boost(twopass, &next_frame,
+                                                        this_frame_mv_in_out);
 
     // Break out conditions.
     if (
