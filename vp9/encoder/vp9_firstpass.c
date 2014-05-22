@@ -1003,25 +1003,19 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
   // Scan the first pass file and calculate a modified total error based upon
   // the bias/power function used to allocate bits.
   {
-    const FIRSTPASS_STATS *const start_pos = twopass->stats_in;
-    FIRSTPASS_STATS this_frame;
-    const double av_error = stats->ssim_weighted_pred_err /
-                                DOUBLE_DIVIDE_CHECK(stats->count);
-
-
-    twopass->modified_error_total = 0.0;
-    twopass->modified_error_min =
-        (av_error * oxcf->two_pass_vbrmin_section) / 100;
-    twopass->modified_error_max =
-        (av_error * oxcf->two_pass_vbrmax_section) / 100;
-
-    while (input_stats(twopass, &this_frame) != EOF) {
-      twopass->modified_error_total += calculate_modified_err(twopass, oxcf,
-                                                              &this_frame);
+    const double avg_error = stats->ssim_weighted_pred_err /
+                                 DOUBLE_DIVIDE_CHECK(stats->count);
+    const FIRSTPASS_STATS *s = twopass->stats_in;
+    double modified_error_total = 0.0;
+    twopass->modified_error_min = (avg_error *
+                                      oxcf->two_pass_vbrmin_section) / 100;
+    twopass->modified_error_max = (avg_error *
+                                      oxcf->two_pass_vbrmax_section) / 100;
+    while (s < twopass->stats_in_end) {
+      modified_error_total += calculate_modified_err(twopass, oxcf, s);
+      ++s;
     }
-    twopass->modified_error_left = twopass->modified_error_total;
-
-    reset_fpf_position(twopass, start_pos);
+    twopass->modified_error_left = modified_error_total;
   }
 
   // Reset the vbr bits off target counter
