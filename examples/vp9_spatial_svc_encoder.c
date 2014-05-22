@@ -150,6 +150,7 @@ static void parse_command_line(int argc, const char **argv_,
   enc_cfg->rc_target_bitrate = default_bitrate;
   enc_cfg->kf_min_dist = default_kf_dist;
   enc_cfg->kf_max_dist = default_kf_dist;
+  enc_cfg->rc_end_usage = VPX_CQ;
 
   // initialize AppInput with default values
   app_input->frames_to_code = default_frames_to_code;
