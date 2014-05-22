@@ -213,6 +213,7 @@ void vp9_rc_init(const VP9EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
   rc->long_rolling_actual_bits = rc->avg_frame_bandwidth;
 
   rc->total_actual_bits = 0;
+  rc->total_target_bits = 0;
   rc->total_target_vs_actual = 0;
 
   rc->baseline_gf_interval = DEFAULT_GF_INTERVAL;
@@ -611,7 +612,8 @@ static int get_active_cq_level(const RATE_CONTROL *rc,
                                const VP9EncoderConfig *const oxcf) {
   static const double cq_adjust_threshold = 0.5;
   int active_cq_level = oxcf->cq_level;
-  if (oxcf->rc_mode == RC_MODE_CONSTRAINED_QUALITY) {
+  if (oxcf->rc_mode == RC_MODE_CONSTRAINED_QUALITY &&
+      rc->total_target_bits > 0) {
     const double x = (double)rc->total_actual_bits / rc->total_target_bits;
     if (x < cq_adjust_threshold) {
       active_cq_level = (int)(active_cq_level * x / cq_adjust_threshold);
