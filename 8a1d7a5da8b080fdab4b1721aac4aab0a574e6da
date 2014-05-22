@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//oNk\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1505,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-05-22T16:52:43Z",
+      "side": 1,
+      "message": "++group_frame_index",
+      "revId": "8a1d7a5da8b080fdab4b1721aac4aab0a574e6da",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//oNs\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1520,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-05-22T16:52:43Z",
+      "side": 1,
+      "message": "I might be wrong here, but the sum of the modified errors for the frame will not sum to group_error will it? So you might under/overallocate bits to the group overall?\n\nalso, DOUBLE_DIVIDE_CHECK required here?",
+      "revId": "8a1d7a5da8b080fdab4b1721aac4aab0a574e6da",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//oNo\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1528,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-05-22T16:52:43Z",
+      "side": 1,
+      "message": "++group_frame_index",
+      "revId": "8a1d7a5da8b080fdab4b1721aac4aab0a574e6da",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
