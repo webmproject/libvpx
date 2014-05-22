@@ -307,7 +307,7 @@ run_tests() {
   local test_name="${VPX_TEST_NAME}"
 
   if [ -z "${test_name}" ]; then
-    test_name="$(basename \"${0%.*}\")"
+    test_name="$(basename "${0%.*}")"
   fi
 
   if [ "${VPX_TEST_RUN_DISABLED_TESTS}" != "yes" ]; then
