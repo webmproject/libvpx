@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//oHg\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 615,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-05-22T21:46:51Z",
+      "side": 1,
+      "message": "Done, and yes, agreed-- wasn\u0027t thinking about that. Was only thinking about avoiding the brokenness.",
+      "parentUuid": "AAAAdn//oIA\u003d",
+      "revId": "9a047b64b0f2cf68babd164dc37731358e1ee10c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//oH8\u003d",
         "filename": "vp9/encoder/vp9_ratectrl.c",
         "patchSetId": 1
