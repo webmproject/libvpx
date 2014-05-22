@@ -2870,7 +2870,7 @@ static void nonrd_use_partition(VP9_COMP *cpi,
       if (mi_row + hbs < cm->mi_rows) {
         nonrd_pick_sb_modes(cpi, tile, mi_row + hbs, mi_col,
                             &rate, &dist, subsize);
-        pc_tree->horizontal[1].mic.mbmi = mi[0]->mbmi;
+        pc_tree->horizontal[1].mic.mbmi = xd->mi[0]->mbmi;
         if (rate != INT_MAX && dist != INT64_MAX &&
             *totrate != INT_MAX && *totdist != INT64_MAX) {
           *totrate += rate;
