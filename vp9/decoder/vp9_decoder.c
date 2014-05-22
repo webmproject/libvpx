@@ -67,7 +67,6 @@ VP9Decoder *vp9_decoder_create() {
 
   cm->current_video_frame = 0;
   pbi->ready_for_new_data = 1;
-  pbi->decoded_key_frame = 0;
 
   // vp9_init_dequantizer() is first called here. Add check in
   // frame_init_dequantizer() to avoid unnecessary calling of
@@ -267,15 +266,7 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
 
   cm->error.setjmp = 1;
 
-  retcode = vp9_decode_frame(pbi, source, source + size, psource);
-
-  if (retcode < 0) {
-    cm->error.error_code = VPX_CODEC_ERROR;
-    cm->error.setjmp = 0;
-    if (cm->frame_bufs[cm->new_fb_idx].ref_count > 0)
-      cm->frame_bufs[cm->new_fb_idx].ref_count--;
-    return retcode;
-  }
+  vp9_decode_frame(pbi, source, source + size, psource);
 
   swap_frame_buffers(pbi);
 
