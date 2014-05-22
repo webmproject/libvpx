@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//oTo\u003d",
+        "filename": "vp8/vp8_cx_iface.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 493,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-05-22T00:45:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//oVw\u003d",
+      "revId": "d25989f57a826720868aa6a51f4e39758a9cda9d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//oVo\u003d",
         "filename": "vp8/vp8_cx_iface.c",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2014-05-21T23:27:57Z",
       "side": 1,
       "message": "const",
+      "revId": "d25989f57a826720868aa6a51f4e39758a9cda9d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//oTg\u003d",
+        "filename": "vp8/vp8_cx_iface.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 497,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-05-22T00:45:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//oVo\u003d",
       "revId": "d25989f57a826720868aa6a51f4e39758a9cda9d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//oTk\u003d",
+        "filename": "vp8/vp8_cx_iface.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 498,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-05-22T00:45:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//oVs\u003d",
+      "revId": "d25989f57a826720868aa6a51f4e39758a9cda9d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//oVk\u003d",
         "filename": "vp8/vp8_cx_iface.c",
         "patchSetId": 5
@@ -64,6 +118,24 @@
       "writtenOn": "2014-05-21T23:27:57Z",
       "side": 1,
       "message": "I\u0027m OK with changing the {} formatting, but a follow-up should be done to normalize this file at least",
+      "revId": "d25989f57a826720868aa6a51f4e39758a9cda9d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//oTU\u003d",
+        "filename": "vp8/vp8_cx_iface.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 507,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-05-22T00:45:35Z",
+      "side": 1,
+      "message": "I don\u0027t have time to fix the formatting in the whole file, so returned back to the original vp8 style. We could fix everything at once later.",
+      "parentUuid": "AAAAdn//oVk\u003d",
       "revId": "d25989f57a826720868aa6a51f4e39758a9cda9d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//oTc\u003d",
+        "filename": "vp8/vp8_cx_iface.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 515,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-05-22T00:45:35Z",
+      "side": 1,
+      "message": "Fixed everywhere.",
+      "parentUuid": "AAAAdn//oVY\u003d",
+      "revId": "d25989f57a826720868aa6a51f4e39758a9cda9d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//oVg\u003d",
         "filename": "vp8/vp8_cx_iface.c",
         "patchSetId": 5
@@ -98,6 +188,24 @@
       "writtenOn": "2014-05-21T23:27:57Z",
       "side": 1,
       "message": "this should be renamed later",
+      "revId": "d25989f57a826720868aa6a51f4e39758a9cda9d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//oTY\u003d",
+        "filename": "vp8/vp8_cx_iface.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 529,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-05-22T00:45:35Z",
+      "side": 1,
+      "message": "Yeah, we still have capitalized variable names. Will try to fix them later.",
+      "parentUuid": "AAAAdn//oVg\u003d",
       "revId": "d25989f57a826720868aa6a51f4e39758a9cda9d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
