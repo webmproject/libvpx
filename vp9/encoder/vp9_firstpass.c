@@ -1403,22 +1403,30 @@ void define_fixed_arf_period(VP9_COMP *cpi) {
 #endif
 
 // Calculate a section intra ratio used in setting max loop filter.
-static int calculate_section_intra_ratio(const FIRSTPASS_STATS *begin,
-                                         const FIRSTPASS_STATS *end,
-                                         int section_length) {
-  const FIRSTPASS_STATS *s = begin;
-  double intra_error = 0.0;
-  double coded_error = 0.0;
-  int i = 0;
+static void calculate_section_intra_ratio(TWO_PASS *twopass,
+                                          const FIRSTPASS_STATS *start_pos,
+                                          int section_length) {
+  FIRSTPASS_STATS next_frame;
+  FIRSTPASS_STATS sectionstats;
+  int i;
 
-  while (s < end && i < section_length) {
-    intra_error += s->intra_error;
-    coded_error += s->coded_error;
-    ++s;
-    ++i;
+  vp9_zero(next_frame);
+  vp9_zero(sectionstats);
+
+  reset_fpf_position(twopass, start_pos);
+
+  for (i = 0; i < section_length; ++i) {
+    input_stats(twopass, &next_frame);
+    accumulate_stats(&sectionstats, &next_frame);
   }
 
-  return (int)(intra_error / DOUBLE_DIVIDE_CHECK(coded_error));
+  avg_stats(&sectionstats);
+
+  twopass->section_intra_rating =
+    (int)(sectionstats.intra_error /
+          DOUBLE_DIVIDE_CHECK(sectionstats.coded_error));
+
+  reset_fpf_position(twopass, start_pos);
 }
 
 // Calculate the total bits to allocate in this GF/ARF group.
@@ -1478,7 +1486,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   TWO_PASS *const twopass = &cpi->twopass;
   FIRSTPASS_STATS next_frame;
-  const FIRSTPASS_STATS *const start_pos = twopass->stats_in;
+  const FIRSTPASS_STATS *start_pos;
   int i;
   double boost_score = 0.0;
   double old_boost_score = 0.0;
@@ -1508,6 +1516,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   vp9_zero(next_frame);
 
   twopass->gf_group_bits = 0;
+  start_pos = twopass->stats_in;
 
   // Load stats for the current frame.
   mod_frame_err = calculate_modified_err(cpi, this_frame);
@@ -1759,9 +1768,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
   // Calculate a section intra ratio used in setting max loop filter.
   if (cpi->common.frame_type != KEY_FRAME) {
-    twopass->section_intra_rating =
-        calculate_section_intra_ratio(start_pos, twopass->stats_in_end,
-                                      rc->baseline_gf_interval);
+    calculate_section_intra_ratio(twopass, start_pos, rc->baseline_gf_interval);
   }
 }
 
@@ -1878,7 +1885,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   RATE_CONTROL *const rc = &cpi->rc;
   TWO_PASS *const twopass = &cpi->twopass;
   const FIRSTPASS_STATS first_frame = *this_frame;
-  const FIRSTPASS_STATS *const start_position = twopass->stats_in;
+  const FIRSTPASS_STATS *start_position = twopass->stats_in;
   FIRSTPASS_STATS next_frame;
   FIRSTPASS_STATS last_frame;
   double decay_accumulator = 1.0;
@@ -2061,9 +2068,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   twopass->kf_zeromotion_pct = (int)(zero_motion_accumulator * 100.0);
 
   // Calculate a section intra ratio used in setting max loop filter.
-  twopass->section_intra_rating =
-      calculate_section_intra_ratio(start_position, twopass->stats_in_end,
-                                    rc->frames_to_key);
+  calculate_section_intra_ratio(twopass, start_position, rc->frames_to_key);
 
   // Work out how many bits to allocate for the key frame itself.
   rc->kf_boost = (int)boost_score;
