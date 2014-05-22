@@ -663,5 +663,6 @@ int main(int argc, char **argv) {
   for (i = 0; i < cfg.ts_number_layers; ++i)
     vpx_video_writer_close(outfile[i]);
 
+  vpx_img_free(&raw);
   return EXIT_SUCCESS;
 }
