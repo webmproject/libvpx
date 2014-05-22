@@ -607,13 +607,26 @@ static int rc_pick_q_and_bounds_one_pass_cbr(const VP9_COMP *cpi,
   return q;
 }
 
+static int get_active_cq_level(const RATE_CONTROL *rc,
+                               const VP9EncoderConfig *const oxcf) {
+  static const double cq_adjust_threshold = 0.5;
+  int active_cq_level = oxcf->cq_level;
+  if (oxcf->rc_mode == RC_MODE_CONSTRAINED_QUALITY) {
+    const double x = rc->total_actual_bits / rc->total_target_bits;
+    if (x < cq_adjust_threshold) {
+      active_cq_level = active_cq_level * x / cq_adjust_threshold;
+    }
+  }
+  return active_cq_level;
+}
+
 static int rc_pick_q_and_bounds_one_pass_vbr(const VP9_COMP *cpi,
                                              int *bottom_index,
                                              int *top_index) {
   const VP9_COMMON *const cm = &cpi->common;
   const RATE_CONTROL *const rc = &cpi->rc;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
-  const int cq_level = oxcf->cq_level;
+  const int cq_level = get_active_cq_level(rc, oxcf);
   int active_best_quality;
   int active_worst_quality = calc_active_worst_quality_one_pass_vbr(cpi);
   int q;
@@ -791,7 +804,7 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi,
   const VP9_COMMON *const cm = &cpi->common;
   const RATE_CONTROL *const rc = &cpi->rc;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
-  const int cq_level = oxcf->cq_level;
+  const int cq_level = get_active_cq_level(rc, oxcf);
   int active_best_quality;
   int active_worst_quality = cpi->twopass.active_worst_quality;
   int q;
