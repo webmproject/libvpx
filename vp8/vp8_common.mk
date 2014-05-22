@@ -115,7 +115,7 @@ VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/postproc_sse2.asm
 endif
 
 ifeq ($(ARCH_X86_64),yes)
-VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/loopfilter_block_sse2.asm
+VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/loopfilter_block_sse2_x86_64.asm
 endif
 
 # common (c)

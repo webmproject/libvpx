@@ -121,7 +121,7 @@ VP9_COMMON_SRCS-$(HAVE_DSPR2)  += common/mips/dspr2/vp9_mblpf_vert_loopfilter_ds
 VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_idct_intrin_sse2.c
 
 ifeq ($(ARCH_X86_64), yes)
-VP9_COMMON_SRCS-$(HAVE_SSSE3) += common/x86/vp9_idct_ssse3.asm
+VP9_COMMON_SRCS-$(HAVE_SSSE3) += common/x86/vp9_idct_ssse3_x86_64.asm
 endif
 
 VP9_COMMON_SRCS-$(HAVE_NEON_ASM) += common/arm/neon/vp9_convolve_neon.c
