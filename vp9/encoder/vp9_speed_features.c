@@ -147,8 +147,11 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
   }
 }
 
-static void set_rt_speed_feature(VP9_COMMON *cm, SPEED_FEATURES *sf,
+static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
                                  int speed) {
+  VP9_COMMON *const cm = &cpi->common;
+  const int frames_since_key =
+      cm->frame_type == KEY_FRAME ? 0 : cpi->rc.frames_since_key;
   sf->static_segmentation = 0;
   sf->adaptive_rd_thresh = 1;
   sf->use_fast_coef_costing = 1;
@@ -239,7 +242,7 @@ static void set_rt_speed_feature(VP9_COMMON *cm, SPEED_FEATURES *sf,
     sf->auto_min_max_partition_size = STRICT_NEIGHBORING_MIN_MAX;
     sf->adjust_partitioning_from_last_frame =
         cm->last_frame_type != cm->frame_type || (0 ==
-        (cm->current_video_frame + 1) % sf->last_partitioning_redo_frequency);
+        (frames_since_key + 1) % sf->last_partitioning_redo_frequency);
     sf->subpel_force_stop = 1;
     for (i = 0; i < TX_SIZES; i++) {
       sf->intra_y_mode_mask[i] = INTRA_DC_H_V;
@@ -260,9 +263,9 @@ static void set_rt_speed_feature(VP9_COMMON *cm, SPEED_FEATURES *sf,
     sf->max_partition_size = BLOCK_32X32;
     sf->min_partition_size = BLOCK_8X8;
     sf->partition_check =
-        (cm->current_video_frame % sf->last_partitioning_redo_frequency == 1);
+        (frames_since_key % sf->last_partitioning_redo_frequency == 1);
     sf->force_frame_boost = cm->frame_type == KEY_FRAME ||
-        (cm->current_video_frame %
+        (frames_since_key %
             (sf->last_partitioning_redo_frequency << 1) == 1);
     sf->max_delta_qindex = (cm->frame_type == KEY_FRAME) ? 20 : 15;
     sf->partition_search_type = REFERENCE_PARTITION;
@@ -362,7 +365,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
       set_good_speed_feature(cpi, cm, sf, oxcf->speed);
       break;
     case REALTIME:
-      set_rt_speed_feature(cm, sf, oxcf->speed);
+      set_rt_speed_feature(cpi, sf, oxcf->speed);
       break;
   }
 
