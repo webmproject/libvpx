@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//oEo\u003d",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-05-22T23:51:17Z",
+      "side": 1,
+      "message": "Here the frame type check I mentioned is used instead, but I will change it for consistency and to avoid a repartition twice in a row case.",
+      "parentUuid": "AAAAdn//oFE\u003d",
+      "revId": "5e0603462808f16351fd50b0d08dad1ce0d76a5a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//oFI\u003d",
         "filename": "vp9/encoder/vp9_speed_features.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-05-22T23:12:04Z",
       "side": 1,
       "message": "const",
+      "revId": "5e0603462808f16351fd50b0d08dad1ce0d76a5a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//oEs\u003d",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 261,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-05-22T23:51:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//oFI\u003d",
       "revId": "5e0603462808f16351fd50b0d08dad1ce0d76a5a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
