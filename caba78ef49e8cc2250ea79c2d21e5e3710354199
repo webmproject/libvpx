@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//oBA\u003d",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 389,
+      "author": {
+        "id": 1001183
+      },
+      "writtenOn": "2014-05-23T16:35:46Z",
+      "side": 1,
+      "message": "To me, if decoder_init \u003d\u003d 0 here, it implies we had a failure somewhere above (res !\u003d 0).  Otherwise, if !res \u0026\u0026 !decoder_init, we enter the block above and set decoder_init \u003d 1 at the bottom of it.\n\nIs pbi[0] NULL if decoder_init is 0?  That\u0027s the only way I can figure that this change would make sense.",
+      "revId": "caba78ef49e8cc2250ea79c2d21e5e3710354199",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
