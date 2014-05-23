@@ -38,7 +38,6 @@ struct vpx_codec_alg_priv {
   vpx_decrypt_cb          decrypt_cb;
   void                   *decrypt_state;
   vpx_image_t             img;
-  int                     img_avail;
   int                     invert_tile_order;
 
   // External frame buffer info to save for VP9 common.
@@ -245,14 +244,10 @@ static void init_decoder(vpx_codec_alg_priv_t *ctx) {
 static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t *ctx,
                                   const uint8_t **data, unsigned int data_sz,
                                   void *user_priv, int64_t deadline) {
-  YV12_BUFFER_CONFIG sd;
-  vp9_ppflags_t flags = {0, 0, 0};
+  vp9_ppflags_t flags = {0};
   VP9_COMMON *cm = NULL;
 
   (void)deadline;
-
-  vp9_zero(sd);
-  ctx->img_avail = 0;
 
   // Determine the stream parameters. Note that we rely on peek_si to
   // validate that we have a buffer that does not wrap around the top
@@ -287,13 +282,6 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t *ctx,
 
   if (ctx->base.init_flags & VPX_CODEC_USE_POSTPROC)
     set_ppflags(ctx, &flags);
-
-  if (vp9_get_raw_frame(ctx->pbi, &sd, &flags))
-    return update_error_state(ctx, &cm->error);
-
-  yuvconfig2image(&ctx->img, &sd, user_priv);
-  ctx->img.fb_priv = cm->frame_bufs[cm->new_fb_idx].raw_frame_buffer.priv;
-  ctx->img_avail = 1;
 
   return VPX_CODEC_OK;
 }
@@ -423,15 +411,20 @@ static vpx_image_t *decoder_get_frame(vpx_codec_alg_priv_t *ctx,
                                       vpx_codec_iter_t *iter) {
   vpx_image_t *img = NULL;
 
-  if (ctx->img_avail) {
-    // iter acts as a flip flop, so an image is only returned on the first
-    // call to get_frame.
-    if (!(*iter)) {
+  // iter acts as a flip flop, so an image is only returned on the first
+  // call to get_frame.
+  if (*iter == NULL && ctx->pbi != NULL) {
+    YV12_BUFFER_CONFIG sd;
+    vp9_ppflags_t flags = {0, 0, 0};
+
+    if (vp9_get_raw_frame(ctx->pbi, &sd, &flags) == 0) {
+      VP9_COMMON *cm = &ctx->pbi->common;
+      yuvconfig2image(&ctx->img, &sd, NULL);
+      ctx->img.fb_priv = cm->frame_bufs[cm->new_fb_idx].raw_frame_buffer.priv;
       img = &ctx->img;
       *iter = img;
     }
   }
-  ctx->img_avail = 0;
 
   return img;
 }
