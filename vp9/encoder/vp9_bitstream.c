@@ -20,7 +20,6 @@
 #include "vp9/common/vp9_entropymode.h"
 #include "vp9/common/vp9_entropymv.h"
 #include "vp9/common/vp9_mvref_common.h"
-#include "vp9/common/vp9_pragmas.h"
 #include "vp9/common/vp9_pred_common.h"
 #include "vp9/common/vp9_seg_common.h"
 #include "vp9/common/vp9_systemdependent.h"

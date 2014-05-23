@@ -11,7 +11,6 @@
 #include "./vpx_config.h"
 
 #include "vp9/encoder/vp9_variance.h"
-#include "vp9/common/vp9_pragmas.h"
 #include "vpx_ports/mem.h"
 
 extern unsigned int vp9_get4x4var_mmx
