@@ -356,7 +356,7 @@ specialize qw/vp9_idct16x16_1_add sse2 neon_asm dspr2/;
 $vp9_idct16x16_1_add_neon_asm=vp9_idct16x16_1_add_neon;
 
 add_proto qw/void vp9_idct16x16_256_add/, "const int16_t *input, uint8_t *dest, int dest_stride";
-specialize qw/vp9_idct16x16_256_add sse2 neon_asm dspr2/;
+specialize qw/vp9_idct16x16_256_add sse2 ssse3 neon_asm dspr2/;
 $vp9_idct16x16_256_add_neon_asm=vp9_idct16x16_256_add_neon;
 
 add_proto qw/void vp9_idct16x16_10_add/, "const int16_t *input, uint8_t *dest, int dest_stride";
