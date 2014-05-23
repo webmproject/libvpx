@@ -221,8 +221,12 @@ class ConvolveTest : public ::testing::TestWithParam<convolve_param_t> {
     }
 
     ::libvpx_test::ACMRandom prng;
-    for (int i = 0; i < kInputBufferSize; ++i)
-      input_[i] = prng.Rand8Extremes();
+    for (int i = 0; i < kInputBufferSize; ++i) {
+      if (i & 1)
+        input_[i] = 255;
+      else
+        input_[i] = prng.Rand8Extremes();
+    }
   }
 
   void SetConstantInput(int value) {
