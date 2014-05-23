@@ -1757,23 +1757,14 @@ static void assign_std_frame_bits(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   const int max_bits = frame_max_bits(&cpi->rc, oxcf);
   // Calculate modified prediction error used in bit allocation.
   const double modified_err = calculate_modified_err(twopass, oxcf, this_frame);
-  int target_frame_size;
-  double err_fraction;
-
-  if (twopass->gf_group_error_left > 0)
-    // What portion of the remaining GF group error is used by this frame.
-    err_fraction = modified_err / twopass->gf_group_error_left;
-  else
-    err_fraction = 0.0;
-
-  // How many of those bits available for allocation should we give it?
-  target_frame_size = (int)((double)twopass->gf_group_bits * err_fraction);
-
-  // Clip target size to 0 - max_bits (or cpi->twopass.gf_group_bits) at
-  // the top end.
-  target_frame_size = clamp(target_frame_size, 0,
-                            MIN(max_bits, (int)twopass->gf_group_bits));
-
+  // What portion of the remaining GF group error is used by this frame.
+  const double err_fraction = twopass->gf_group_error_left > 0 ?
+      modified_err / twopass->gf_group_error_left : 0.0;
+  // How many of those bits available for allocation should we give it? Clip
+  // target size to 0 - max_bits (or cpi->twopass.gf_group_bits) at the top end.
+  const int target_frame_size =
+     clamp((int)(twopass->gf_group_bits * err_fraction),
+           0, MIN(max_bits, (int)twopass->gf_group_bits));
   // Adjust error and bits remaining.
   twopass->gf_group_error_left -= (int64_t)modified_err;
 
