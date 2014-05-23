@@ -16,6 +16,24 @@
       "revId": "caba78ef49e8cc2250ea79c2d21e5e3710354199",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//oAs\u003d",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 389,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-05-23T16:55:31Z",
+      "side": 1,
+      "message": "When the new libvpx code is move to google3, a test video/processing/static_image/vp8_convert_test that presents the decoder with short (\u003c 10 bytes) of data will crash, because the code does not go into the previous loop, but this code tries to access pbi[0] which is null. In any case, this section should be protected with either if (ctx-\u003edecoder_init) or if (ctx-\u003eyv12_frame_buffers.pbi[0]).",
+      "parentUuid": "AAAAdn//oBA\u003d",
+      "revId": "caba78ef49e8cc2250ea79c2d21e5e3710354199",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
