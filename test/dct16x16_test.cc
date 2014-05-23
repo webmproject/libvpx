@@ -512,9 +512,7 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_fht16x16_c, &vp9_iht16x16_256_add_c, 2),
         make_tuple(&vp9_fht16x16_c, &vp9_iht16x16_256_add_c, 3)));
 
-// FIXME (jingning, fgalligan): need to simplify the corresponding steps
-// in neov version accordingly, and re-enable the unit test
-#if HAVE_NEON_ASM && 0
+#if HAVE_NEON_ASM
 INSTANTIATE_TEST_CASE_P(
     NEON, Trans16x16DCT,
     ::testing::Values(
@@ -535,5 +533,12 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_fht16x16_sse2, &vp9_iht16x16_256_add_sse2, 1),
         make_tuple(&vp9_fht16x16_sse2, &vp9_iht16x16_256_add_sse2, 2),
         make_tuple(&vp9_fht16x16_sse2, &vp9_iht16x16_256_add_sse2, 3)));
+#endif
+
+#if HAVE_SSSE3
+INSTANTIATE_TEST_CASE_P(
+    SSSE3, Trans16x16DCT,
+    ::testing::Values(
+        make_tuple(&vp9_fdct16x16_c, &vp9_idct16x16_256_add_ssse3, 0)));
 #endif
 }  // namespace
