@@ -327,7 +327,8 @@ static vpx_codec_err_t set_encoder_config(
   else if (cfg->rc_end_usage == VPX_CBR)
     oxcf->rc_mode = RC_MODE_CBR;
 
-  oxcf->target_bandwidth         = cfg->rc_target_bitrate;
+  // Convert target bandwidth from Kbit/s to Bit/s
+  oxcf->target_bandwidth = 1000 * cfg->rc_target_bitrate;
   oxcf->rc_max_intra_bitrate_pct = extra_cfg->rc_max_intra_bitrate_pct;
 
   oxcf->best_allowed_q  = vp9_quantizer_to_qindex(cfg->rc_min_quantizer);
@@ -387,7 +388,9 @@ static vpx_codec_err_t set_encoder_config(
   oxcf->ss_number_layers = cfg->ss_number_layers;
 
   if (oxcf->ss_number_layers > 1) {
-    vp9_copy(oxcf->ss_target_bitrate, cfg->ss_target_bitrate);
+    int i;
+    for (i = 0; i < VPX_SS_MAX_LAYERS; ++i)
+      oxcf->ss_target_bitrate[i] =  1000 * cfg->ss_target_bitrate[i];
   } else if (oxcf->ss_number_layers == 1) {
     oxcf->ss_target_bitrate[0] = (int)oxcf->target_bandwidth;
   }
@@ -395,8 +398,11 @@ static vpx_codec_err_t set_encoder_config(
   oxcf->ts_number_layers = cfg->ts_number_layers;
 
   if (oxcf->ts_number_layers > 1) {
-    vp9_copy(oxcf->ts_target_bitrate, cfg->ts_target_bitrate);
-    vp9_copy(oxcf->ts_rate_decimator, cfg->ts_rate_decimator);
+    int i;
+    for (i = 0; i < VPX_TS_MAX_LAYERS; ++i) {
+      oxcf->ts_target_bitrate[i] = 1000 * cfg->ts_target_bitrate[i];
+      oxcf->ts_rate_decimator[i] = cfg->ts_rate_decimator[i];
+    }
   } else if (oxcf->ts_number_layers == 1) {
     oxcf->ts_target_bitrate[0] = (int)oxcf->target_bandwidth;
     oxcf->ts_rate_decimator[0] = 1;

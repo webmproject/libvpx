@@ -632,9 +632,6 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
     cpi->oxcf.maximum_buffer_size     = 240000;
   }
 
-  // Convert target bandwidth from Kbit/s to Bit/s
-  cpi->oxcf.target_bandwidth       *= 1000;
-
   cpi->oxcf.starting_buffer_level =
       vp9_rescale(cpi->oxcf.starting_buffer_level,
                   cpi->oxcf.target_bandwidth, 1000);
