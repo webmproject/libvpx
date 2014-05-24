@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//n1U\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 411,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-05-24T01:27:16Z",
+      "side": 1,
+      "message": "Please remove \" \u003d {0}\" and initialize with vp9_zero(sd). This is just to avoid -Wextra warnings.",
+      "revId": "ad7ed98be1805ef633603a8b5d03106274394ea5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//n1Q\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 412,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-05-24T01:27:16Z",
+      "side": 1,
+      "message": "To avoid -Wextra wornings this should be  \"\u003d {0, 0, 0}\"",
+      "revId": "ad7ed98be1805ef633603a8b5d03106274394ea5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//n1c\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 418,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-05-24T01:27:16Z",
+      "side": 1,
+      "message": "if (vp9_get_raw_frame(...) \u003d\u003d 0) {\n}",
+      "revId": "ad7ed98be1805ef633603a8b5d03106274394ea5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//n1Y\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 420,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-05-24T01:27:16Z",
+      "side": 1,
+      "message": "Could you remove ctx-\u003eimg as well? It seems you don\u0027t need it anymore.",
+      "revId": "ad7ed98be1805ef633603a8b5d03106274394ea5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
