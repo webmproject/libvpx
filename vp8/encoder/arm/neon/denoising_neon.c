@@ -56,11 +56,13 @@ int vp8_denoiser_filter_neon(unsigned char *mc_running_avg_y,
      * increasing the adjustment for each level, level1 adjustment is
      * increased, the deltas stay the same.
      */
-    const uint8x16_t v_level1_adjustment = vdupq_n_u8(
-        (motion_magnitude <= MOTION_MAGNITUDE_THRESHOLD) ? 4 : 3);
+    int shift_inc  = (increase_denoising &&
+        motion_magnitude <= MOTION_MAGNITUDE_THRESHOLD) ? 1 : 0;
+    const uint8x16_t v_level1_adjustment = vmovq_n_u8(
+        (motion_magnitude <= MOTION_MAGNITUDE_THRESHOLD) ? 4 + shift_inc : 3);
     const uint8x16_t v_delta_level_1_and_2 = vdupq_n_u8(1);
     const uint8x16_t v_delta_level_2_and_3 = vdupq_n_u8(2);
-    const uint8x16_t v_level1_threshold = vdupq_n_u8(4);
+    const uint8x16_t v_level1_threshold = vmovq_n_u8(4 + shift_inc);
     const uint8x16_t v_level2_threshold = vdupq_n_u8(8);
     const uint8x16_t v_level3_threshold = vdupq_n_u8(16);
     int64x2_t v_sum_diff_total = vdupq_n_s64(0);
@@ -146,8 +148,10 @@ int vp8_denoiser_filter_neon(unsigned char *mc_running_avg_y,
         const int64x1_t x = vqadd_s64(vget_high_s64(v_sum_diff_total),
                                       vget_low_s64(v_sum_diff_total));
         const int s0 = vget_lane_s32(vabs_s32(vreinterpret_s32_s64(x)), 0);
+        int sum_diff_thresh = SUM_DIFF_THRESHOLD;
 
-        if (s0 > SUM_DIFF_THRESHOLD)
+        if (increase_denoising) sum_diff_thresh = SUM_DIFF_THRESHOLD_HIGH;
+        if (s0 > sum_diff_thresh)
             return COPY_BLOCK;
     }
 
