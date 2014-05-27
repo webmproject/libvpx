@@ -16,6 +16,24 @@
       "revId": "b8a32cdcd57bcbb6226e364f9d32ebe2a772b8de",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//npY\u003d",
+        "filename": "vp9/common/x86/vp9_idct_intrin_ssse3.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-05-27T23:00:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//nrA\u003d",
+      "revId": "b8a32cdcd57bcbb6226e364f9d32ebe2a772b8de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
