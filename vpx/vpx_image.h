@@ -30,7 +30,6 @@ extern "C" {
    */
 #define VPX_IMAGE_ABI_VERSION (2) /**<\hideinitializer*/
 
-
 #define VPX_IMG_FMT_PLANAR     0x100  /**< Image is a planar format */
 #define VPX_IMG_FMT_UV_FLIP    0x200  /**< V plane precedes U plane in memory */
 #define VPX_IMG_FMT_HAS_ALPHA  0x400  /**< Image has an alpha channel component */
@@ -103,16 +102,17 @@ extern "C" {
     vpx_img_fmt_t fmt; /**< Image Format */
 
     /* Image storage dimensions */
-    unsigned int  w;   /**< Stored image width */
-    unsigned int  h;   /**< Stored image height */
+    unsigned int    w;           /**< Stored image width */
+    unsigned int    h;           /**< Stored image height */
+    unsigned int    bit_depth;   /**< Stored image bit-depth */
 
     /* Image display dimensions */
-    unsigned int  d_w;   /**< Displayed image width */
-    unsigned int  d_h;   /**< Displayed image height */
+    unsigned int    d_w;   /**< Displayed image width */
+    unsigned int    d_h;   /**< Displayed image height */
 
     /* Chroma subsampling info */
-    unsigned int  x_chroma_shift;   /**< subsampling order, X */
-    unsigned int  y_chroma_shift;   /**< subsampling order, Y */
+    unsigned int    x_chroma_shift;   /**< subsampling order, X */
+    unsigned int    y_chroma_shift;   /**< subsampling order, Y */
 
     /* Image data pointers. */
 #define VPX_PLANE_PACKED 0   /**< To be used for all packed formats */

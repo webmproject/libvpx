@@ -213,6 +213,7 @@ static const arg_def_t width            = ARG_DEF("w", "width", 1,
                                                   "Frame width");
 static const arg_def_t height           = ARG_DEF("h", "height", 1,
                                                   "Frame height");
+
 #if CONFIG_WEBM_IO
 static const struct arg_enum_list stereo_mode_enum[] = {
   {"mono", STEREO_FORMAT_MONO},
@@ -384,10 +385,13 @@ static const struct arg_enum_list bitdepth_enum[] = {
   {NULL, 0}
 };
 
-static const arg_def_t bitdeptharg = ARG_DEF_ENUM(
-    NULL, "bit-depth", 1,
-    "Bit depth used to use (0=BITS_8 for version <=1, "
-    "1=BITS_10 or 2=BITS_12 for version 2)", bitdepth_enum);
+static const arg_def_t bitdeptharg   = ARG_DEF_ENUM(NULL, "bit-depth", 1,
+                                                    "Bit depth for codec "
+                                                    "(8 for version <=1, "
+                                                    "10 or 12 for version 2)",
+                                                    bitdepth_enum);
+static const arg_def_t inbitdeptharg = ARG_DEF("b", "input-bit-depth", 1,
+                                               "Bit depth of input");
 #endif
 
 static const arg_def_t *vp9_args[] = {
@@ -396,7 +400,7 @@ static const arg_def_t *vp9_args[] = {
   &tune_ssim, &cq_level, &max_intra_rate_pct, &lossless,
   &frame_parallel_decoding, &aq_mode, &frame_periodic_boost,
 #if CONFIG_VP9_HIGH
-  &bitdeptharg,
+  &bitdeptharg, &inbitdeptharg,
 #endif
   NULL
 };
@@ -408,9 +412,6 @@ static const int vp9_arg_ctrl_map[] = {
   VP8E_SET_TUNING, VP8E_SET_CQ_LEVEL, VP8E_SET_MAX_INTRA_BITRATE_PCT,
   VP9E_SET_LOSSLESS, VP9E_SET_FRAME_PARALLEL_DECODING, VP9E_SET_AQ_MODE,
   VP9E_SET_FRAME_PERIODIC_BOOST,
-#if CONFIG_VP9_HIGH
-  VP9E_SET_BIT_DEPTH,
-#endif
   0
 };
 #endif
@@ -889,6 +890,10 @@ void open_input_file(struct VpxInputContext *input) {
       input->framerate.numerator = input->y4m.fps_n;
       input->framerate.denominator = input->y4m.fps_d;
       input->fmt = input->y4m.vpx_fmt;
+      // TODO(Peter/Debargha): Set bit_depth of the input correctly
+      // when we have extended y4m to read high-bit-depth input.
+      // Currently assume it is 8.
+      input->bit_depth = 8;
     } else
       fatal("Unsupported Y4M stream.");
   } else if (input->detect.buf_read == 4 && fourcc_is_ivf(input->detect.buf)) {
@@ -936,6 +941,7 @@ static struct stream_state *new_stream(struct VpxEncoderConfig *global,
      */
     stream->config.cfg.g_w = 0;
     stream->config.cfg.g_h = 0;
+    stream->config.cfg.g_in_bit_depth = 0;
 
     /* Initialize remaining stream parameters */
     stream->config.write_webm = 1;
@@ -1018,6 +1024,12 @@ static int parse_stream_params(struct VpxEncoderConfig *global,
       config->cfg.g_w = arg_parse_uint(&arg);
     } else if (arg_match(&arg, &height, argi)) {
       config->cfg.g_h = arg_parse_uint(&arg);
+#if CONFIG_VP9_HIGH
+    } else if (arg_match(&arg, &bitdeptharg, argi)) {
+      config->cfg.g_bit_depth = arg_parse_enum(&arg);
+    } else if (arg_match(&arg, &inbitdeptharg, argi)) {
+      config->cfg.g_in_bit_depth = arg_parse_uint(&arg);
+#endif
 #if CONFIG_WEBM_IO
     } else if (arg_match(&arg, &stereo_mode, argi)) {
       config->stereo_fmt = arg_parse_enum_or_int(&arg);
@@ -1193,7 +1205,6 @@ static void set_stream_dimensions(struct stream_state *stream,
   }
 }
 
-
 static void set_default_kf_interval(struct stream_state *stream,
                                     struct VpxEncoderConfig *global) {
   /* Use a max keyframe interval of 5 seconds, if none was
@@ -1249,6 +1260,8 @@ static void show_stream_config(struct stream_state *stream,
   SHOW(g_profile);
   SHOW(g_w);
   SHOW(g_h);
+  SHOW(g_bit_depth * 2 + 8);  // tricks the macro to display in bits
+  SHOW(g_in_bit_depth);
   SHOW(g_timebase.num);
   SHOW(g_timebase.den);
   SHOW(g_error_resilient);
@@ -1811,6 +1824,7 @@ int main(int argc, const char **argv_) {
   input.framerate.numerator = 30;
   input.framerate.denominator = 1;
   input.only_i420 = 1;
+  input.bit_depth = 0;
 
   /* First parse the global configuration values, because we want to apply
    * other parameters on top of the default configuration provided by the
@@ -1878,6 +1892,29 @@ int main(int argc, const char **argv_) {
     if (!input.width || !input.height)
       fatal("Specify stream dimensions with --width (-w) "
             " and --height (-h)");
+
+    /* If input file does not specify bit-depth but input-bit-depth parameter
+     * exists, assume that to be the input bit-depth. However, if the
+     * input-bit-depth paramter does not exist, assume the input bit-depth
+     * to be the same as the codec bit-depth.
+     */
+    if (!input.bit_depth) {
+      FOREACH_STREAM({
+        if (stream->config.cfg.g_in_bit_depth)
+          input.bit_depth = stream->config.cfg.g_in_bit_depth;
+        else if (stream->config.cfg.g_bit_depth == VPX_BITS_8)
+          input.bit_depth = stream->config.cfg.g_in_bit_depth = 8;
+        else if (stream->config.cfg.g_bit_depth == VPX_BITS_10)
+          input.bit_depth = stream->config.cfg.g_in_bit_depth = 10;
+        else if (stream->config.cfg.g_bit_depth == VPX_BITS_12)
+          input.bit_depth = stream->config.cfg.g_in_bit_depth = 12;
+      });
+    } else {
+      FOREACH_STREAM({
+        stream->config.cfg.g_in_bit_depth = input.bit_depth;
+      });
+    }
+
     FOREACH_STREAM(set_stream_dimensions(stream, input.width, input.height));
     FOREACH_STREAM(validate_stream_config(stream, &global));
 
@@ -1909,10 +1946,6 @@ int main(int argc, const char **argv_) {
 
     FOREACH_STREAM(set_default_kf_interval(stream, &global));
 
-    /* Show configuration */
-    if (global.verbose && pass == 0)
-      FOREACH_STREAM(show_stream_config(stream, &global, &input));
-
     if (pass == (global.pass ? global.pass - 1 : 0)) {
       if (input.file_type == FILE_TYPE_Y4M)
         /*The Y4M reader does its own allocation.
@@ -1923,13 +1956,17 @@ int main(int argc, const char **argv_) {
         vpx_img_alloc(&raw, input.fmt, input.width, input.height, 32);
 
       FOREACH_STREAM(stream->rate_hist =
-                         init_rate_histogram(&stream->config.cfg,
-                                             &global.framerate));
+                     init_rate_histogram(&stream->config.cfg,
+                                         &global.framerate));
     }
 
     FOREACH_STREAM(setup_pass(stream, &global, pass));
     FOREACH_STREAM(open_output_file(stream, &global));
     FOREACH_STREAM(initialize_encoder(stream, &global));
+
+    /* Show configuration */
+    if (global.verbose && pass == 0)
+      FOREACH_STREAM(show_stream_config(stream, &global, &input));
 
 #if CONFIG_VP9_HIGH
     if (strcmp(global.codec->name, "vp9") == 0) {
@@ -1941,12 +1978,8 @@ int main(int argc, const char **argv_) {
           if (stream->config.cfg.g_profile <= 1) {
             input_shift = 0;
           } else {
-            // TODO(Peter): Decide this based on the input-bit-depth.
-            // Currently we assume input-bit-depth = 8, but that will change.
-            unsigned int bit_depth;
-            vpx_codec_control_(&stream->encoder, VP9E_GET_BIT_DEPTH,
-                               &bit_depth);
-            input_shift = bit_depth * 2;
+            input_shift = (stream->config.cfg.g_bit_depth * 2 + 8) -
+                          stream->config.cfg.g_in_bit_depth;
           }
           use_16bit_internal = 1;
           break;
@@ -2082,17 +2115,16 @@ int main(int argc, const char **argv_) {
     if (global.show_psnr) {
       if (global.codec->fourcc == VP9_FOURCC) {
         FOREACH_STREAM({
-          unsigned int bit_depth;
+          const unsigned int bit_depth = stream->config.cfg.g_bit_depth;
           double peak;
-          vpx_codec_control_(&stream->encoder, VP9E_GET_BIT_DEPTH, &bit_depth);
           switch (bit_depth) {
-            case 0:  // BITS_8
+            case VPX_BITS_8:
               peak = 255.0;
               break;
-            case 1:  // BITS_10
+            case VPX_BITS_10:
               peak = 1023.0;
               break;
-            case 2:  // BITS_12
+            case VPX_BITS_12:
               peak = 4095.0;
               break;
             default:

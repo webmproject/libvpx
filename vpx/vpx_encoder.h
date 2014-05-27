@@ -248,13 +248,14 @@ extern "C" {
 
   /*!\brief Bit depth for codec
    *
-   * This enumeration determines the bit depth of the codec internally.
+   * This enumeration determines the bit depth of the codec.
    */
-  enum vpx_bit_depth {
+  typedef enum vpx_bit_depth {
     VPX_BITS_8,   /**< 8 bits  */
     VPX_BITS_10,  /**< 10 bits */
     VPX_BITS_12   /**< 12 bits */
-  };
+  } vpx_bit_depth_t;
+
 
   /*!\brief Encoded Frame Flags
    *
@@ -308,7 +309,6 @@ extern "C" {
     unsigned int           g_profile;  /**< profile of bitstream to use */
 
 
-
     /*!\brief Width of the frame
      *
      * This value identifies the presentation resolution of the frame,
@@ -327,6 +327,23 @@ extern "C" {
      * resolution, independent of any spatial resampling the encoder may do.
      */
     unsigned int           g_h;
+
+
+    /*!\brief Bit-depth of the codec
+     *
+     * This value identifies the bit_depth of the codec,
+     * Only certain bit-depths are supported as identified in the
+     * vpx_bit_depth_t enum.
+     */
+    vpx_bit_depth_t        g_bit_depth;
+
+    /*!\brief Bit-depth of the input frames
+     *
+     * This value identifies the bit_depth of the input frames in bits.
+     * Note that the frames passed as input to the encoder must have
+     * this bit-depth.
+     */
+    unsigned int           g_in_bit_depth;
 
 
     /*!\brief Stream timebase units
