@@ -36,6 +36,23 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//nsU\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 417,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-05-27T22:04:37Z",
+      "side": 1,
+      "message": "this is becoming symmetrical to vp8; c.f.,  e278673 \u0026 75f647f. there\u0027s an extra buffer check there, is it necessary here?",
+      "revId": "ad7ed98be1805ef633603a8b5d03106274394ea5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//n1c\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 2
