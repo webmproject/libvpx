@@ -2115,8 +2115,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
   vp9_clear_system_state();
 
-  vp9_zero(cpi->rd.tx_select_threshes);
-
 #if CONFIG_VP9_POSTPROC
   if (cpi->oxcf.noise_sensitivity > 0) {
     int l = 0;
