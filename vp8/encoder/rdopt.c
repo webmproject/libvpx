@@ -15,7 +15,6 @@
 #include <assert.h>
 #include "vpx_config.h"
 #include "vp8_rtcd.h"
-#include "vp8/common/pragmas.h"
 #include "tokenize.h"
 #include "treewriter.h"
 #include "onyx_int.h"
