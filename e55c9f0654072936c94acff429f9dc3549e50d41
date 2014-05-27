@@ -105,6 +105,24 @@
       "revId": "e55c9f0654072936c94acff429f9dc3549e50d41",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//nxI\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 491,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-05-27T18:07:28Z",
+      "side": 1,
+      "message": "Waiting for https://gerrit.chromium.org/gerrit/#/c/70224/ to land first.",
+      "parentUuid": "AAAAdn//ny0\u003d",
+      "revId": "e55c9f0654072936c94acff429f9dc3549e50d41",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
