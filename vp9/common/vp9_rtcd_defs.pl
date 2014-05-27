@@ -520,82 +520,82 @@ specialize qw/vp9_sub_pixel_variance4x4/, "$sse_x86inc", "$ssse3_x86inc";
 add_proto qw/unsigned int vp9_sub_pixel_avg_variance4x4/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
 specialize qw/vp9_sub_pixel_avg_variance4x4/, "$sse_x86inc", "$ssse3_x86inc";
 
-add_proto qw/unsigned int vp9_sad64x64/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, unsigned int max_sad";
+add_proto qw/unsigned int vp9_sad64x64/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride";
 specialize qw/vp9_sad64x64/, "$sse2_x86inc";
 
-add_proto qw/unsigned int vp9_sad32x64/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int max_sad";
+add_proto qw/unsigned int vp9_sad32x64/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride";
 specialize qw/vp9_sad32x64/, "$sse2_x86inc";
 
-add_proto qw/unsigned int vp9_sad64x32/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int max_sad";
+add_proto qw/unsigned int vp9_sad64x32/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride";
 specialize qw/vp9_sad64x32/, "$sse2_x86inc";
 
-add_proto qw/unsigned int vp9_sad32x16/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int max_sad";
+add_proto qw/unsigned int vp9_sad32x16/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride";
 specialize qw/vp9_sad32x16/, "$sse2_x86inc";
 
-add_proto qw/unsigned int vp9_sad16x32/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int max_sad";
+add_proto qw/unsigned int vp9_sad16x32/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride";
 specialize qw/vp9_sad16x32/, "$sse2_x86inc";
 
-add_proto qw/unsigned int vp9_sad32x32/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, unsigned int max_sad";
+add_proto qw/unsigned int vp9_sad32x32/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride";
 specialize qw/vp9_sad32x32/, "$sse2_x86inc";
 
-add_proto qw/unsigned int vp9_sad16x16/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, unsigned int max_sad";
+add_proto qw/unsigned int vp9_sad16x16/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride";
 specialize qw/vp9_sad16x16 mmx/, "$sse2_x86inc";
 
-add_proto qw/unsigned int vp9_sad16x8/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, unsigned int max_sad";
+add_proto qw/unsigned int vp9_sad16x8/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride";
 specialize qw/vp9_sad16x8 mmx/, "$sse2_x86inc";
 
-add_proto qw/unsigned int vp9_sad8x16/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, unsigned int max_sad";
+add_proto qw/unsigned int vp9_sad8x16/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride";
 specialize qw/vp9_sad8x16 mmx/, "$sse2_x86inc";
 
-add_proto qw/unsigned int vp9_sad8x8/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, unsigned int max_sad";
+add_proto qw/unsigned int vp9_sad8x8/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride";
 specialize qw/vp9_sad8x8 mmx/, "$sse2_x86inc";
 
-add_proto qw/unsigned int vp9_sad8x4/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int max_sad";
+add_proto qw/unsigned int vp9_sad8x4/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride";
 specialize qw/vp9_sad8x4/, "$sse2_x86inc";
 
-add_proto qw/unsigned int vp9_sad4x8/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int max_sad";
+add_proto qw/unsigned int vp9_sad4x8/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride";
 specialize qw/vp9_sad4x8/, "$sse_x86inc";
 
-add_proto qw/unsigned int vp9_sad4x4/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, unsigned int max_sad";
+add_proto qw/unsigned int vp9_sad4x4/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride";
 specialize qw/vp9_sad4x4 mmx/, "$sse_x86inc";
 
-add_proto qw/unsigned int vp9_sad64x64_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *second_pred, unsigned int max_sad";
+add_proto qw/unsigned int vp9_sad64x64_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *second_pred";
 specialize qw/vp9_sad64x64_avg/, "$sse2_x86inc";
 
-add_proto qw/unsigned int vp9_sad32x64_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred, unsigned int max_sad";
+add_proto qw/unsigned int vp9_sad32x64_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred";
 specialize qw/vp9_sad32x64_avg/, "$sse2_x86inc";
 
-add_proto qw/unsigned int vp9_sad64x32_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred, unsigned int max_sad";
+add_proto qw/unsigned int vp9_sad64x32_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred";
 specialize qw/vp9_sad64x32_avg/, "$sse2_x86inc";
 
-add_proto qw/unsigned int vp9_sad32x16_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred, unsigned int max_sad";
+add_proto qw/unsigned int vp9_sad32x16_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred";
 specialize qw/vp9_sad32x16_avg/, "$sse2_x86inc";
 
-add_proto qw/unsigned int vp9_sad16x32_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred, unsigned int max_sad";
+add_proto qw/unsigned int vp9_sad16x32_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred";
 specialize qw/vp9_sad16x32_avg/, "$sse2_x86inc";
 
-add_proto qw/unsigned int vp9_sad32x32_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *second_pred, unsigned int max_sad";
+add_proto qw/unsigned int vp9_sad32x32_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *second_pred";
 specialize qw/vp9_sad32x32_avg/, "$sse2_x86inc";
 
-add_proto qw/unsigned int vp9_sad16x16_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *second_pred, unsigned int max_sad";
+add_proto qw/unsigned int vp9_sad16x16_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *second_pred";
 specialize qw/vp9_sad16x16_avg/, "$sse2_x86inc";
 
-add_proto qw/unsigned int vp9_sad16x8_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *second_pred, unsigned int max_sad";
+add_proto qw/unsigned int vp9_sad16x8_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *second_pred";
 specialize qw/vp9_sad16x8_avg/, "$sse2_x86inc";
 
-add_proto qw/unsigned int vp9_sad8x16_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *second_pred, unsigned int max_sad";
+add_proto qw/unsigned int vp9_sad8x16_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *second_pred";
 specialize qw/vp9_sad8x16_avg/, "$sse2_x86inc";
 
-add_proto qw/unsigned int vp9_sad8x8_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *second_pred, unsigned int max_sad";
+add_proto qw/unsigned int vp9_sad8x8_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *second_pred";
 specialize qw/vp9_sad8x8_avg/, "$sse2_x86inc";
 
-add_proto qw/unsigned int vp9_sad8x4_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred, unsigned int max_sad";
+add_proto qw/unsigned int vp9_sad8x4_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred";
 specialize qw/vp9_sad8x4_avg/, "$sse2_x86inc";
 
-add_proto qw/unsigned int vp9_sad4x8_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred, unsigned int max_sad";
+add_proto qw/unsigned int vp9_sad4x8_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred";
 specialize qw/vp9_sad4x8_avg/, "$sse_x86inc";
 
-add_proto qw/unsigned int vp9_sad4x4_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *second_pred, unsigned int max_sad";
+add_proto qw/unsigned int vp9_sad4x4_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *second_pred";
 specialize qw/vp9_sad4x4_avg/, "$sse_x86inc";
 
 add_proto qw/void vp9_sad64x64x3/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, unsigned int *sad_array";
