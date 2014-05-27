@@ -422,6 +422,10 @@ specialize qw/vp9_variance64x64/, "$sse2_x86inc", "$avx2_x86inc";
 add_proto qw/unsigned int vp9_variance16x16/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
 specialize qw/vp9_variance16x16 mmx/, "$sse2_x86inc", "$avx2_x86inc";
 
+add_proto qw/void vp9_get_sse_sum_16x16/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, int *sum";
+specialize qw/vp9_get_sse_sum_16x16 sse2/;
+$vp9_get_sse_sum_16x16_sse2=vp9_get16x16var_sse2;
+
 add_proto qw/unsigned int vp9_variance16x8/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
 specialize qw/vp9_variance16x8 mmx/, "$sse2_x86inc";
 
@@ -430,6 +434,10 @@ specialize qw/vp9_variance8x16 mmx/, "$sse2_x86inc";
 
 add_proto qw/unsigned int vp9_variance8x8/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
 specialize qw/vp9_variance8x8 mmx/, "$sse2_x86inc";
+
+add_proto qw/void vp9_get_sse_sum_8x8/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, int *sum";
+specialize qw/vp9_get_sse_sum_8x8 sse2/;
+$vp9_get_sse_sum_8x8_sse2=vp9_get8x8var_sse2;
 
 add_proto qw/unsigned int vp9_variance8x4/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
 specialize qw/vp9_variance8x4/, "$sse2_x86inc";
