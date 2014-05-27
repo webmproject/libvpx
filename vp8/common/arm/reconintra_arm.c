@@ -14,7 +14,7 @@
 #include "vp8/common/blockd.h"
 #include "vpx_mem/vpx_mem.h"
 
-#if HAVE_NEON
+#if HAVE_NEON_ASM
 extern void vp8_build_intra_predictors_mby_neon_func(
     unsigned char *y_buffer,
     unsigned char *ypred_ptr,

@@ -1177,6 +1177,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             x->best_reference_frame = best_mbmode.ref_frame;
             best_sse = best_rd_sse;
         }
+        x->increase_denoising = 0;
         vp8_denoiser_denoise_mb(&cpi->denoiser, x, best_sse, zero_mv_sse,
                                 recon_yoffset, recon_uvoffset);
 

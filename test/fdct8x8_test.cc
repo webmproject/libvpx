@@ -313,7 +313,7 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_fht8x8_c, &vp9_iht8x8_64_add_c, 2),
         make_tuple(&vp9_fht8x8_c, &vp9_iht8x8_64_add_c, 3)));
 
-#if HAVE_NEON
+#if HAVE_NEON_ASM
 INSTANTIATE_TEST_CASE_P(
     NEON, FwdTrans8x8DCT,
     ::testing::Values(
@@ -339,5 +339,12 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_fht8x8_sse2, &vp9_iht8x8_64_add_sse2, 1),
         make_tuple(&vp9_fht8x8_sse2, &vp9_iht8x8_64_add_sse2, 2),
         make_tuple(&vp9_fht8x8_sse2, &vp9_iht8x8_64_add_sse2, 3)));
+#endif
+
+#if HAVE_SSSE3 && ARCH_X86_64
+INSTANTIATE_TEST_CASE_P(
+    SSSE3, FwdTrans8x8DCT,
+    ::testing::Values(
+        make_tuple(&vp9_fdct8x8_ssse3, &vp9_idct8x8_64_add_ssse3, 0)));
 #endif
 }  // namespace

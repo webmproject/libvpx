@@ -11,6 +11,8 @@
 #ifndef VP9_ENCODER_VP9_FIRSTPASS_H_
 #define VP9_ENCODER_VP9_FIRSTPASS_H_
 
+#include "vp9/encoder/vp9_lookahead.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -38,10 +40,9 @@ typedef struct {
   int64_t spatial_layer_id;
 } FIRSTPASS_STATS;
 
-struct twopass_rc {
+typedef struct {
   unsigned int section_intra_rating;
   unsigned int next_iiratio;
-  unsigned int this_iiratio;
   FIRSTPASS_STATS total_stats;
   FIRSTPASS_STATS this_frame_stats;
   const FIRSTPASS_STATS *stats_in;
@@ -50,37 +51,27 @@ struct twopass_rc {
   FIRSTPASS_STATS total_left_stats;
   int first_pass_done;
   int64_t bits_left;
-  int64_t clip_bits_total;
-  double avg_iiratio;
   double modified_error_min;
   double modified_error_max;
-  double modified_error_total;
   double modified_error_left;
   double kf_intra_err_min;
   double gf_intra_err_min;
-  int kf_bits;
-  // Remaining error from uncoded frames in a gf group. Two pass use only
-  int64_t gf_group_error_left;
 
   // Projected total bits available for a key frame group of frames
   int64_t kf_group_bits;
 
   // Error score of frames still to be coded in kf group
   int64_t kf_group_error_left;
-
-  // Projected Bits available for a group of frames including 1 GF or ARF
-  int64_t gf_group_bits;
-  // Bits for the golden frame or ARF - 2 pass only
-  int gf_bits;
-  int alt_extra_bits;
-
   int sr_update_lag;
 
   int kf_zeromotion_pct;
   int gf_zeromotion_pct;
 
   int active_worst_quality;
-};
+
+  int gf_group_index;
+  int gf_group_bit_allocation[MAX_LAG_BUFFERS * 2];
+} TWO_PASS;
 
 struct VP9_COMP;
 

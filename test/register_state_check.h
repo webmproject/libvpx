@@ -82,8 +82,8 @@ class RegisterStateCheck {
 
 }  // namespace libvpx_test
 
-#elif defined(CONFIG_SHARED) && defined(HAVE_NEON) && defined(CONFIG_VP9) \
-      && !CONFIG_SHARED && HAVE_NEON && CONFIG_VP9
+#elif defined(CONFIG_SHARED) && defined(HAVE_NEON_ASM) && defined(CONFIG_VP9) \
+      && !CONFIG_SHARED && HAVE_NEON_ASM && CONFIG_VP9
 
 #include "vpx/vpx_integer.h"
 

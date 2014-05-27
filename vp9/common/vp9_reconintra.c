@@ -31,6 +31,9 @@ const TX_TYPE intra_mode_to_tx_type_lookup[INTRA_MODES] = {
   ADST_ADST,  // TM
 };
 
+// This serves as a wrapper function, so that all the prediction functions
+// can be unified and accessed as a pointer array. Note that the boundary
+// above and left are not necessarily used all the time.
 #define intra_pred_sized(type, size) \
   void vp9_##type##_predictor_##size##x##size##_c(uint8_t *dst, \
                                                   ptrdiff_t stride, \
@@ -301,7 +304,7 @@ static INLINE void high_dc_predictor(uint16_t *dst, ptrdiff_t stride,
 static INLINE void d207_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
                                   const uint8_t *above, const uint8_t *left) {
   int r, c;
-
+  (void) above;
   // first column
   for (r = 0; r < bs - 1; ++r)
     dst[r * stride] = ROUND_POWER_OF_TWO(left[r] + left[r + 1], 1);
@@ -330,6 +333,7 @@ intra_pred_allsizes(d207)
 static INLINE void d63_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
                                  const uint8_t *above, const uint8_t *left) {
   int r, c;
+  (void) left;
   for (r = 0; r < bs; ++r) {
     for (c = 0; c < bs; ++c)
       dst[c] = r & 1 ? ROUND_POWER_OF_TWO(above[r/2 + c] +
@@ -345,6 +349,7 @@ intra_pred_allsizes(d63)
 static INLINE void d45_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
                                  const uint8_t *above, const uint8_t *left) {
   int r, c;
+  (void) left;
   for (r = 0; r < bs; ++r) {
     for (c = 0; c < bs; ++c)
       dst[c] = r + c + 2 < bs * 2 ?  ROUND_POWER_OF_TWO(above[r + c] +
@@ -437,6 +442,7 @@ intra_pred_allsizes(d153)
 static INLINE void v_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
                                const uint8_t *above, const uint8_t *left) {
   int r;
+  (void) left;
 
   for (r = 0; r < bs; r++) {
     vpx_memcpy(dst, above, bs);
@@ -448,6 +454,7 @@ intra_pred_allsizes(v)
 static INLINE void h_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
                                const uint8_t *above, const uint8_t *left) {
   int r;
+  (void) above;
 
   for (r = 0; r < bs; r++) {
     vpx_memset(dst, left[r], bs);
@@ -472,6 +479,8 @@ intra_pred_allsizes(tm)
 static INLINE void dc_128_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
                                     const uint8_t *above, const uint8_t *left) {
   int r;
+  (void) above;
+  (void) left;
 
   for (r = 0; r < bs; r++) {
     vpx_memset(dst, 128, bs);
@@ -484,6 +493,7 @@ static INLINE void dc_left_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
                                      const uint8_t *above,
                                      const uint8_t *left) {
   int i, r, expected_dc, sum = 0;
+  (void) above;
 
   for (i = 0; i < bs; i++)
     sum += left[i];
@@ -499,6 +509,7 @@ intra_pred_allsizes(dc_left)
 static INLINE void dc_top_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
                                     const uint8_t *above, const uint8_t *left) {
   int i, r, expected_dc, sum = 0;
+  (void) left;
 
   for (i = 0; i < bs; i++)
     sum += above[i];

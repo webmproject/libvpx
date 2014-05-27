@@ -52,6 +52,7 @@ Advanced options:
   ${toggle_multi_res_encoding}    enable multiple-resolution encoding
   ${toggle_temporal_denoising}    enable temporal denoising and disable the spatial denoiser
   ${toggle_webm_io}               enable input from and output to WebM container
+  ${toggle_libyuv}                enable libyuv
 
 Codecs:
   Codecs can be selectively enabled or disabled individually, or by family:
@@ -189,7 +190,7 @@ fi
 # install everything except the sources, by default. sources will have
 # to be enabled when doing dist builds, since that's no longer a common
 # case.
-enabled doxygen && php -v >/dev/null 2>&1 && enable_feature install_docs
+enabled doxygen && enable_feature install_docs
 enable_feature install_bins
 enable_feature install_libs
 
@@ -239,6 +240,7 @@ ARCH_EXT_LIST="
     edsp
     media
     neon
+    neon_asm
 
     mips32
     dspr2
@@ -264,9 +266,10 @@ HAVE_LIST="
     unistd_h
 "
 EXPERIMENT_LIST="
-    multiple_arf
     alpha
     vp9_high
+    multiple_arf
+    spatial_svc
 "
 CONFIG_LIST="
     external_build
@@ -314,6 +317,7 @@ CONFIG_LIST="
     os_support
     unit_tests
     webm_io
+    libyuv
     decode_perf_tests
     multi_res_encoding
     temporal_denoising
@@ -367,6 +371,7 @@ CMDLINE_SELECT="
     postproc_visualizer
     unit_tests
     webm_io
+    libyuv
     decode_perf_tests
     multi_res_encoding
     temporal_denoising
@@ -708,9 +713,11 @@ process_toolchain() {
         *-vs*)
             soft_enable unit_tests
             soft_enable webm_io
+            soft_enable libyuv
         ;;
         *-android-*)
             soft_enable webm_io
+            soft_enable libyuv
             # GTestLog must be modified to use Android logging utilities.
         ;;
         *-darwin-*)
@@ -727,12 +734,18 @@ EOF
             check_cxx "$@" <<EOF && soft_enable webm_io
 int z;
 EOF
+            check_cxx "$@" <<EOF && soft_enable libyuv
+int z;
+EOF
         ;;
         *)
             enabled pthread_h && check_cxx "$@" <<EOF && soft_enable unit_tests
 int z;
 EOF
             check_cxx "$@" <<EOF && soft_enable webm_io
+int z;
+EOF
+            check_cxx "$@" <<EOF && soft_enable libyuv
 int z;
 EOF
         ;;

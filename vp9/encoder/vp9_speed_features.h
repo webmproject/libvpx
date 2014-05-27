@@ -44,6 +44,11 @@ typedef enum {
 } SUBPEL_SEARCH_METHODS;
 
 typedef enum {
+  NO_MOITION_THRESHOLD = 0,
+  LOW_MOITION_THRESHOLD = 7
+} MOTION_THRESHOLD;
+
+typedef enum {
   LAST_FRAME_PARTITION_OFF = 0,
   LAST_FRAME_PARTITION_LOW_MOTION = 1,
   LAST_FRAME_PARTITION_ALL = 2
@@ -129,7 +134,7 @@ typedef enum {
   ONE_LOOP_REDUCED = 2
 } FAST_COEFF_UPDATE;
 
-typedef struct {
+typedef struct SPEED_FEATURES {
   // Frame level coding parameter update
   int frame_parameter_update;
 
@@ -176,7 +181,7 @@ typedef struct {
   // a log search that iterates 4 times (check around mv for last for best
   // error of combined predictor then check around mv for alt). If 0 we
   // we just use the best motion vector found for each frame by itself.
-  int comp_inter_joint_search_thresh;
+  BLOCK_SIZE comp_inter_joint_search_thresh;
 
   // This variable is used to cap the maximum number of times we skip testing a
   // mode to be evaluated. A high value means we will be faster.
@@ -199,6 +204,10 @@ typedef struct {
   // enables us to adjust up or down one partitioning from the last frames
   // partitioning.
   LAST_FRAME_PARTITION_METHOD use_lastframe_partitioning;
+
+  // The threshold is to determine how slow the motino is, it is used when
+  // use_lastframe_partitioning is set to LAST_FRAME_PARTITION_LOW_MOTION
+  MOTION_THRESHOLD lf_motion_threshold;
 
   // Determine which method we use to determine transform size. We can choose
   // between options like full rd, largest for prediction size, largest
@@ -320,10 +329,6 @@ typedef struct {
 
   // This flag controls the use of non-RD mode decision.
   int use_nonrd_pick_mode;
-
-  // This variable sets the encode_breakout threshold. Currently, it is only
-  // enabled in real time mode.
-  int encode_breakout_thresh;
 
   // A binary mask indicating if NEARESTMV, NEARMV, ZEROMV, NEWMV
   // modes are disabled in order from LSB to MSB for each BLOCK_SIZE.

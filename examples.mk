@@ -10,10 +10,24 @@
 
 LIBYUV_SRCS +=  third_party/libyuv/include/libyuv/basic_types.h  \
                 third_party/libyuv/include/libyuv/cpu_id.h  \
+                third_party/libyuv/include/libyuv/planar_functions.h  \
+                third_party/libyuv/include/libyuv/row.h  \
                 third_party/libyuv/include/libyuv/scale.h  \
-                third_party/libyuv/source/row.h \
-                third_party/libyuv/source/scale.c  \
-                third_party/libyuv/source/cpu_id.c
+                third_party/libyuv/include/libyuv/scale_row.h  \
+                third_party/libyuv/source/cpu_id.cc \
+                third_party/libyuv/source/planar_functions.cc \
+                third_party/libyuv/source/row_any.cc \
+                third_party/libyuv/source/row_common.cc \
+                third_party/libyuv/source/row_mips.cc \
+                third_party/libyuv/source/row_neon.cc \
+                third_party/libyuv/source/row_posix.cc \
+                third_party/libyuv/source/row_win.cc \
+                third_party/libyuv/source/scale.cc  \
+                third_party/libyuv/source/scale_common.cc \
+                third_party/libyuv/source/scale_mips.cc \
+                third_party/libyuv/source/scale_neon.cc \
+                third_party/libyuv/source/scale_posix.cc \
+                third_party/libyuv/source/scale_win.cc
 
 LIBWEBM_MUXER_SRCS += third_party/libwebm/mkvmuxer.cpp \
                       third_party/libwebm/mkvmuxerutil.cpp \
@@ -42,7 +56,9 @@ vpxdec.SRCS                 += args.c args.h
 vpxdec.SRCS                 += ivfdec.c ivfdec.h
 vpxdec.SRCS                 += tools_common.c tools_common.h
 vpxdec.SRCS                 += y4menc.c y4menc.h
-vpxdec.SRCS                 += $(LIBYUV_SRCS)
+ifeq ($(CONFIG_LIBYUV),yes)
+  vpxdec.SRCS                 += $(LIBYUV_SRCS)
+endif
 ifeq ($(CONFIG_WEBM_IO),yes)
   vpxdec.SRCS                 += $(LIBWEBM_PARSER_SRCS)
   vpxdec.SRCS                 += webmdec.cc webmdec.h
@@ -60,39 +76,38 @@ vpxenc.SRCS                 += vpx_ports/mem_ops.h
 vpxenc.SRCS                 += vpx_ports/mem_ops_aligned.h
 vpxenc.SRCS                 += vpx_ports/vpx_timer.h
 vpxenc.SRCS                 += vpxstats.c vpxstats.h
-vpxenc.SRCS                 += $(LIBYUV_SRCS)
+ifeq ($(CONFIG_LIBYUV),yes)
+  vpxenc.SRCS                 += $(LIBYUV_SRCS)
+endif
 ifeq ($(CONFIG_WEBM_IO),yes)
   vpxenc.SRCS                 += $(LIBWEBM_MUXER_SRCS)
   vpxenc.SRCS                 += webmenc.cc webmenc.h
 endif
 vpxenc.GUID                  = 548DEC74-7A15-4B2B-AFC3-AA102E7C25C1
 vpxenc.DESCRIPTION           = Full featured encoder
-EXAMPLES-$(CONFIG_VP9_ENCODER)    += vp9_spatial_scalable_encoder.c
-vp9_spatial_scalable_encoder.SRCS += args.c args.h
-vp9_spatial_scalable_encoder.SRCS += ivfenc.c ivfenc.h
-vp9_spatial_scalable_encoder.SRCS += tools_common.c tools_common.h
-vp9_spatial_scalable_encoder.SRCS += video_common.h
-vp9_spatial_scalable_encoder.SRCS += video_writer.h video_writer.c
-vp9_spatial_scalable_encoder.SRCS += vpxstats.c vpxstats.h
-vp9_spatial_scalable_encoder.GUID   = 4A38598D-627D-4505-9C7B-D4020C84100D
-vp9_spatial_scalable_encoder.DESCRIPTION = Spatial Scalable Encoder
+ifeq ($(CONFIG_SPATIAL_SVC),yes)
+  EXAMPLES-$(CONFIG_VP9_ENCODER)      += vp9_spatial_svc_encoder.c
+  vp9_spatial_svc_encoder.SRCS        += args.c args.h
+  vp9_spatial_svc_encoder.SRCS        += ivfenc.c ivfenc.h
+  vp9_spatial_svc_encoder.SRCS        += tools_common.c tools_common.h
+  vp9_spatial_svc_encoder.SRCS        += video_common.h
+  vp9_spatial_svc_encoder.SRCS        += video_writer.h video_writer.c
+  vp9_spatial_svc_encoder.SRCS        += vpxstats.c vpxstats.h
+  vp9_spatial_svc_encoder.GUID        = 4A38598D-627D-4505-9C7B-D4020C84100D
+  vp9_spatial_svc_encoder.DESCRIPTION = VP9 Spatial SVC Encoder
+endif
 
 ifneq ($(CONFIG_SHARED),yes)
 EXAMPLES-$(CONFIG_VP9_ENCODER)    += resize_util.c
 endif
 
-# XMA example disabled for now, not used in VP8
-#UTILS-$(CONFIG_DECODERS)    += example_xma.c
-#example_xma.GUID             = A955FC4A-73F1-44F7-135E-30D84D32F022
-#example_xma.DESCRIPTION      = External Memory Allocation mode usage
-
-EXAMPLES-$(CONFIG_ENCODERS)         += vpx_temporal_scalable_patterns.c
-vpx_temporal_scalable_patterns.SRCS += ivfenc.c ivfenc.h
-vpx_temporal_scalable_patterns.SRCS += tools_common.c tools_common.h
-vpx_temporal_scalable_patterns.SRCS += video_common.h
-vpx_temporal_scalable_patterns.SRCS += video_writer.h video_writer.c
-vpx_temporal_scalable_patterns.GUID  = B18C08F2-A439-4502-A78E-849BE3D60947
-vpx_temporal_scalable_patterns.DESCRIPTION = Temporal Scalability Encoder
+EXAMPLES-$(CONFIG_ENCODERS)          += vpx_temporal_svc_encoder.c
+vpx_temporal_svc_encoder.SRCS        += ivfenc.c ivfenc.h
+vpx_temporal_svc_encoder.SRCS        += tools_common.c tools_common.h
+vpx_temporal_svc_encoder.SRCS        += video_common.h
+vpx_temporal_svc_encoder.SRCS        += video_writer.h video_writer.c
+vpx_temporal_svc_encoder.GUID        = B18C08F2-A439-4502-A78E-849BE3D60947
+vpx_temporal_svc_encoder.DESCRIPTION = Temporal SVC Encoder
 EXAMPLES-$(CONFIG_VP8_DECODER)     += simple_decoder.c
 simple_decoder.GUID                 = D3BBF1E9-2427-450D-BBFF-B2843C1D44CC
 simple_decoder.SRCS                += ivfdec.h ivfdec.c
@@ -146,11 +161,6 @@ decode_with_drops.SRCS          += vpx_ports/mem_ops_aligned.h
 endif
 decode_with_drops.GUID           = CE5C53C4-8DDA-438A-86ED-0DDD3CDB8D26
 decode_with_drops.DESCRIPTION    = Drops frames while decoding
-ifeq ($(CONFIG_VP8_DECODER),yes)
-EXAMPLES-$(CONFIG_ERROR_CONCEALMENT)    += decode_with_partial_drops.c
-endif
-decode_with_partial_drops.GUID           = 61C2D026-5754-46AC-916F-1343ECC5537E
-decode_with_partial_drops.DESCRIPTION    = Drops parts of frames while decoding
 EXAMPLES-$(CONFIG_ENCODERS)        += set_maps.c
 set_maps.SRCS                      += ivfenc.h ivfenc.c
 set_maps.SRCS                      += tools_common.h tools_common.c
@@ -168,10 +178,12 @@ vp8cx_set_ref.DESCRIPTION           = VP8 set encoder reference frame
 
 
 ifeq ($(CONFIG_MULTI_RES_ENCODING),yes)
+ifeq ($(CONFIG_LIBYUV),yes)
 EXAMPLES-$(CONFIG_VP8_DECODER)          += vp8_multi_resolution_encoder.c
 vp8_multi_resolution_encoder.SRCS       += $(LIBYUV_SRCS)
 vp8_multi_resolution_encoder.GUID        = 04f8738e-63c8-423b-90fa-7c2703a374de
 vp8_multi_resolution_encoder.DESCRIPTION = VP8 Multiple-resolution Encoding
+endif
 endif
 
 # Handle extra library flags depending on codec configuration

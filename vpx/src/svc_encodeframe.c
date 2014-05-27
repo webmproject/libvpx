@@ -234,7 +234,8 @@ static void svc_log_reset(SvcContext *svc_ctx) {
   si->message_buffer[0] = '\0';
 }
 
-static int svc_log(SvcContext *svc_ctx, int level, const char *fmt, ...) {
+static int svc_log(SvcContext *svc_ctx, SVC_LOG_LEVEL level,
+                   const char *fmt, ...) {
   char buf[512];
   int retval = 0;
   va_list ap;
@@ -495,7 +496,6 @@ vpx_codec_err_t vpx_svc_set_scale_factors(SvcContext *svc_ctx,
 vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
                              vpx_codec_iface_t *iface,
                              vpx_codec_enc_cfg_t *enc_cfg) {
-  int max_intra_size_pct;
   vpx_codec_err_t res;
   SvcInternal *const si = get_svc_internal(svc_ctx);
   if (svc_ctx == NULL || codec_ctx == NULL || iface == NULL ||
@@ -574,14 +574,12 @@ vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
   // modify encoder configuration
   enc_cfg->ss_number_layers = si->layers;
   enc_cfg->ts_number_layers = 1;  // Temporal layers not used in this encoder.
-  enc_cfg->kf_mode = VPX_KF_DISABLED;
   // Lag in frames not currently supported
   enc_cfg->g_lag_in_frames = 0;
 
   // TODO(ivanmaltz): determine if these values need to be set explicitly for
   // svc, or if the normal default/override mechanism can be used
   enc_cfg->rc_dropframe_thresh = 0;
-  enc_cfg->rc_end_usage = VPX_CBR;
   enc_cfg->rc_resize_allowed = 0;
 
   if (enc_cfg->g_pass == VPX_RC_ONE_PASS) {
@@ -604,16 +602,9 @@ vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
   }
 
   vpx_codec_control(codec_ctx, VP9E_SET_SVC, 1);
-  vpx_codec_control(codec_ctx, VP8E_SET_CPUUSED, 1);
-  vpx_codec_control(codec_ctx, VP8E_SET_STATIC_THRESHOLD, 1);
-  vpx_codec_control(codec_ctx, VP8E_SET_NOISE_SENSITIVITY, 1);
   vpx_codec_control(codec_ctx, VP8E_SET_TOKEN_PARTITIONS, 1);
+  vpx_codec_control(codec_ctx, VP8E_SET_ENABLEAUTOALTREF, 0);
 
-  max_intra_size_pct =
-      (int)(((double)enc_cfg->rc_buf_optimal_sz * 0.5) *
-            ((double)enc_cfg->g_timebase.den / enc_cfg->g_timebase.num) / 10.0);
-  vpx_codec_control(codec_ctx, VP8E_SET_MAX_INTRA_BITRATE_PCT,
-                    max_intra_size_pct);
   return VPX_CODEC_OK;
 }
 
@@ -868,8 +859,7 @@ vpx_codec_err_t vpx_svc_encode(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
   si->rc_stats_buf_used = 0;
 
   si->layers = svc_ctx->spatial_layers;
-  if (si->frame_within_gop >= si->kf_dist ||
-      si->encode_frame_count == 0) {
+  if (si->encode_frame_count == 0) {
     si->frame_within_gop = 0;
   }
   si->is_keyframe = (si->frame_within_gop == 0);

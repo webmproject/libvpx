@@ -617,7 +617,7 @@ void vp9_iht8x8_64_add_dspr2(const int16_t *input, uint8_t *dest,
   }
 }
 
-void vp9_idct8x8_10_add_dspr2(const int16_t *input, uint8_t *dest,
+void vp9_idct8x8_12_add_dspr2(const int16_t *input, uint8_t *dest,
                               int dest_stride) {
   DECLARE_ALIGNED(32, int16_t, out[8 * 8]);
   int16_t *outptr = out;

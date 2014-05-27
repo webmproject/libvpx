@@ -18,7 +18,9 @@ set -e
 devnull='> /dev/null 2>&1'
 
 vlog() {
-  [ "${VPX_TEST_VERBOSE_OUTPUT}" = "yes" ] && echo "$@"
+  if [ "${VPX_TEST_VERBOSE_OUTPUT}" = "yes" ]; then
+    echo "$@"
+  fi
 }
 
 # Sets $VPX_TOOL_TEST to the name specified by positional parameter one.
@@ -300,8 +302,13 @@ filter_strings() {
 # functions and are run unconditionally. Functions in positional parameter two
 # are run according to the rules specified in vpx_test_usage().
 run_tests() {
-  env_tests="verify_vpx_test_environment ${1}"
-  tests_to_filter="${2}"
+  local env_tests="verify_vpx_test_environment $1"
+  local tests_to_filter="$2"
+  local test_name="${VPX_TEST_NAME}"
+
+  if [ -z "${test_name}" ]; then
+    test_name="$(basename "${0%.*}")"
+  fi
 
   if [ "${VPX_TEST_RUN_DISABLED_TESTS}" != "yes" ]; then
     # Filter out DISABLED tests.
@@ -313,7 +320,7 @@ run_tests() {
     tests_to_filter=$(filter_strings "${tests_to_filter}" ${VPX_TEST_FILTER})
   fi
 
-  tests_to_run="${env_tests} ${tests_to_filter}"
+  local tests_to_run="${env_tests} ${tests_to_filter}"
 
   check_git_hashes
 
@@ -326,8 +333,8 @@ run_tests() {
     test_end "${test}"
   done
 
-  tested_config="$(test_configuration_target) @ $(current_hash)"
-  echo $(basename "${0%.*}"): Done, all tests pass for ${tested_config}.
+  local tested_config="$(test_configuration_target) @ $(current_hash)"
+  echo "${test_name}: Done, all tests pass for ${tested_config}."
 }
 
 vpx_test_usage() {

@@ -18,6 +18,7 @@ extern "C" {
 #endif
 
 #define SUM_DIFF_THRESHOLD (16 * 16 * 2)
+#define SUM_DIFF_THRESHOLD_HIGH (16 * 16 * 3)
 #define MOTION_MAGNITUDE_THRESHOLD (8*3)
 
 enum vp8_denoiser_decision

@@ -10,6 +10,10 @@
 
 #include <arm_neon.h>
 
+#ifdef _MSC_VER
+#define __builtin_prefetch(x)
+#endif
+
 unsigned int vp8_variance16x16_neon(
         const unsigned char *src_ptr,
         int source_stride,
@@ -19,7 +23,7 @@ unsigned int vp8_variance16x16_neon(
     int i;
     int16x4_t d22s16, d23s16, d24s16, d25s16, d26s16, d27s16, d28s16, d29s16;
     uint32x2_t d0u32, d10u32;
-    int64_t d0s64, d1s64;
+    int64x1_t d0s64, d1s64;
     uint8x16_t q0u8, q1u8, q2u8, q3u8;
     uint16x8_t q11u16, q12u16, q13u16, q14u16;
     int32x4_t q8s32, q9s32, q10s32;
@@ -98,7 +102,7 @@ unsigned int vp8_variance16x8_neon(
     int i;
     int16x4_t d22s16, d23s16, d24s16, d25s16, d26s16, d27s16, d28s16, d29s16;
     uint32x2_t d0u32, d10u32;
-    int64_t d0s64, d1s64;
+    int64x1_t d0s64, d1s64;
     uint8x16_t q0u8, q1u8, q2u8, q3u8;
     uint16x8_t q11u16, q12u16, q13u16, q14u16;
     int32x4_t q8s32, q9s32, q10s32;
@@ -178,7 +182,7 @@ unsigned int vp8_variance8x16_neon(
     uint8x8_t d0u8, d2u8, d4u8, d6u8;
     int16x4_t d22s16, d23s16, d24s16, d25s16;
     uint32x2_t d0u32, d10u32;
-    int64_t d0s64, d1s64;
+    int64x1_t d0s64, d1s64;
     uint16x8_t q11u16, q12u16;
     int32x4_t q8s32, q9s32, q10s32;
     int64x2_t q0s64, q1s64, q5s64;
@@ -243,7 +247,7 @@ unsigned int vp8_variance8x8_neon(
     uint8x8_t d0u8, d1u8, d2u8, d3u8, d4u8, d5u8, d6u8, d7u8;
     int16x4_t d22s16, d23s16, d24s16, d25s16, d26s16, d27s16, d28s16, d29s16;
     uint32x2_t d0u32, d10u32;
-    int64_t d0s64, d1s64;
+    int64x1_t d0s64, d1s64;
     uint16x8_t q11u16, q12u16, q13u16, q14u16;
     int32x4_t q8s32, q9s32, q10s32;
     int64x2_t q0s64, q1s64, q5s64;

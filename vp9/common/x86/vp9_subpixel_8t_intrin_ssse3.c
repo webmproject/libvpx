@@ -44,7 +44,7 @@ void vp9_filter_block1d4_h8_intrin_ssse3(unsigned char *src_ptr,
                                          unsigned int output_pitch,
                                          unsigned int output_height,
                                          int16_t *filter) {
-  __m128i firstFilters, secondFilters, thirdFilters, forthFilters;
+  __m128i firstFilters, secondFilters, shuffle1, shuffle2;
   __m128i srcRegFilt1, srcRegFilt2, srcRegFilt3, srcRegFilt4;
   __m128i addFilterReg64, filtersReg, srcReg, minReg;
   unsigned int i;
@@ -61,20 +61,22 @@ void vp9_filter_block1d4_h8_intrin_ssse3(unsigned char *src_ptr,
   // duplicate only the third 16 bit in the filter into the first lane
   secondFilters = _mm_shufflelo_epi16(filtersReg, 0xAAu);
   // duplicate only the seconds 16 bits in the filter into the second lane
+  // firstFilters: k0 k1 k0 k1 k0 k1 k0 k1 k2 k3 k2 k3 k2 k3 k2 k3
   firstFilters = _mm_shufflehi_epi16(firstFilters, 0x55u);
   // duplicate only the forth 16 bits in the filter into the second lane
+  // secondFilters: k4 k5 k4 k5 k4 k5 k4 k5 k6 k7 k6 k7 k6 k7 k6 k7
   secondFilters = _mm_shufflehi_epi16(secondFilters, 0xFFu);
 
   // loading the local filters
-  thirdFilters =_mm_load_si128((__m128i const *)filt1_4_h8);
-  forthFilters = _mm_load_si128((__m128i const *)filt2_4_h8);
+  shuffle1 =_mm_load_si128((__m128i const *)filt1_4_h8);
+  shuffle2 = _mm_load_si128((__m128i const *)filt2_4_h8);
 
   for (i = 0; i < output_height; i++) {
     srcReg = _mm_loadu_si128((__m128i *)(src_ptr-3));
 
     // filter the source buffer
-    srcRegFilt1= _mm_shuffle_epi8(srcReg, thirdFilters);
-    srcRegFilt2= _mm_shuffle_epi8(srcReg, forthFilters);
+    srcRegFilt1= _mm_shuffle_epi8(srcReg, shuffle1);
+    srcRegFilt2= _mm_shuffle_epi8(srcReg, shuffle2);
 
     // multiply 2 adjacent elements with the filter and add the result
     srcRegFilt1 = _mm_maddubs_epi16(srcRegFilt1, firstFilters);
@@ -164,12 +166,12 @@ void vp9_filter_block1d8_h8_intrin_ssse3(unsigned char *src_ptr,
     srcRegFilt4 = _mm_maddubs_epi16(srcRegFilt4, forthFilters);
 
     // add and saturate all the results together
-    minReg = _mm_min_epi16(srcRegFilt4, srcRegFilt3);
-    srcRegFilt1 = _mm_adds_epi16(srcRegFilt1, srcRegFilt2);
-
-    srcRegFilt4= _mm_max_epi16(srcRegFilt4, srcRegFilt3);
-    srcRegFilt1 = _mm_adds_epi16(srcRegFilt1, minReg);
+    minReg = _mm_min_epi16(srcRegFilt2, srcRegFilt3);
     srcRegFilt1 = _mm_adds_epi16(srcRegFilt1, srcRegFilt4);
+
+    srcRegFilt2= _mm_max_epi16(srcRegFilt2, srcRegFilt3);
+    srcRegFilt1 = _mm_adds_epi16(srcRegFilt1, minReg);
+    srcRegFilt1 = _mm_adds_epi16(srcRegFilt1, srcRegFilt2);
     srcRegFilt1 = _mm_adds_epi16(srcRegFilt1, addFilterReg64);
 
     // shift by 7 bit each 16 bits
@@ -229,21 +231,21 @@ void vp9_filter_block1d16_h8_intrin_ssse3(unsigned char *src_ptr,
 
     // filter the source buffer
     srcRegFilt1_1= _mm_shuffle_epi8(srcReg1, filt1Reg);
-    srcRegFilt2= _mm_shuffle_epi8(srcReg1, filt2Reg);
+    srcRegFilt2= _mm_shuffle_epi8(srcReg1, filt4Reg);
 
     // multiply 2 adjacent elements with the filter and add the result
     srcRegFilt1_1 = _mm_maddubs_epi16(srcRegFilt1_1, firstFilters);
-    srcRegFilt2 = _mm_maddubs_epi16(srcRegFilt2, secondFilters);
+    srcRegFilt2 = _mm_maddubs_epi16(srcRegFilt2, forthFilters);
 
     // add and saturate the results together
     srcRegFilt1_1 = _mm_adds_epi16(srcRegFilt1_1, srcRegFilt2);
 
     // filter the source buffer
-    srcRegFilt3= _mm_shuffle_epi8(srcReg1, filt4Reg);
+    srcRegFilt3= _mm_shuffle_epi8(srcReg1, filt2Reg);
     srcRegFilt2= _mm_shuffle_epi8(srcReg1, filt3Reg);
 
     // multiply 2 adjacent elements with the filter and add the result
-    srcRegFilt3 = _mm_maddubs_epi16(srcRegFilt3, forthFilters);
+    srcRegFilt3 = _mm_maddubs_epi16(srcRegFilt3, secondFilters);
     srcRegFilt2 = _mm_maddubs_epi16(srcRegFilt2, thirdFilters);
 
     // add and saturate the results together
@@ -260,21 +262,21 @@ void vp9_filter_block1d16_h8_intrin_ssse3(unsigned char *src_ptr,
 
     // filter the source buffer
     srcRegFilt2_1= _mm_shuffle_epi8(srcReg2, filt1Reg);
-    srcRegFilt2= _mm_shuffle_epi8(srcReg2, filt2Reg);
+    srcRegFilt2= _mm_shuffle_epi8(srcReg2, filt4Reg);
 
     // multiply 2 adjacent elements with the filter and add the result
     srcRegFilt2_1 = _mm_maddubs_epi16(srcRegFilt2_1, firstFilters);
-    srcRegFilt2 = _mm_maddubs_epi16(srcRegFilt2, secondFilters);
+    srcRegFilt2 = _mm_maddubs_epi16(srcRegFilt2, forthFilters);
 
     // add and saturate the results together
     srcRegFilt2_1 = _mm_adds_epi16(srcRegFilt2_1, srcRegFilt2);
 
     // filter the source buffer
-    srcRegFilt3= _mm_shuffle_epi8(srcReg2, filt4Reg);
+    srcRegFilt3= _mm_shuffle_epi8(srcReg2, filt2Reg);
     srcRegFilt2= _mm_shuffle_epi8(srcReg2, filt3Reg);
 
     // multiply 2 adjacent elements with the filter and add the result
-    srcRegFilt3 = _mm_maddubs_epi16(srcRegFilt3, forthFilters);
+    srcRegFilt3 = _mm_maddubs_epi16(srcRegFilt3, secondFilters);
     srcRegFilt2 = _mm_maddubs_epi16(srcRegFilt2, thirdFilters);
 
     // add and saturate the results together

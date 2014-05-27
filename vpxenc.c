@@ -42,7 +42,9 @@
 #include "./rate_hist.h"
 #include "./vpxstats.h"
 #include "./warnings.h"
+#if CONFIG_WEBM_IO
 #include "./webmenc.h"
+#endif
 #include "./y4minput.h"
 
 /* Swallow warnings about unused results of fread/fwrite */
@@ -211,6 +213,7 @@ static const arg_def_t width            = ARG_DEF("w", "width", 1,
                                                   "Frame width");
 static const arg_def_t height           = ARG_DEF("h", "height", 1,
                                                   "Frame height");
+#if CONFIG_WEBM_IO
 static const struct arg_enum_list stereo_mode_enum[] = {
   {"mono", STEREO_FORMAT_MONO},
   {"left-right", STEREO_FORMAT_LEFT_RIGHT},
@@ -221,6 +224,7 @@ static const struct arg_enum_list stereo_mode_enum[] = {
 };
 static const arg_def_t stereo_mode      = ARG_DEF_ENUM(NULL, "stereo-mode", 1,
                                                        "Stereo 3D video format", stereo_mode_enum);
+#endif
 static const arg_def_t timebase         = ARG_DEF(NULL, "timebase", 1,
                                                   "Output timestamp precision (fractional seconds)");
 static const arg_def_t error_resilient  = ARG_DEF(NULL, "error-resilient", 1,
@@ -230,7 +234,11 @@ static const arg_def_t lag_in_frames    = ARG_DEF(NULL, "lag-in-frames", 1,
 
 static const arg_def_t *global_args[] = {
   &use_yv12, &use_i420, &usage, &threads, &profile,
-  &width, &height, &stereo_mode, &timebase, &framerate,
+  &width, &height,
+#if CONFIG_WEBM_IO
+  &stereo_mode,
+#endif
+  &timebase, &framerate,
   &error_resilient,
 #if CONFIG_VP9_HIGH
   &test16bitinternalarg,
@@ -685,6 +693,11 @@ static int compare_img(const vpx_image_t *const img1,
                              NELEMENTS(vp9_arg_ctrl_map))
 #endif
 
+#if !CONFIG_WEBM_IO
+typedef int stereo_format_t;
+struct EbmlGlobal { int debug; };
+#endif
+
 /* Per-stream configuration */
 struct stream_config {
   struct vpx_codec_enc_cfg  cfg;
@@ -875,7 +888,7 @@ void open_input_file(struct VpxInputContext *input) {
       input->height = input->y4m.pic_h;
       input->framerate.numerator = input->y4m.fps_n;
       input->framerate.denominator = input->y4m.fps_d;
-      input->use_i420 = 0;
+      input->fmt = input->y4m.vpx_fmt;
     } else
       fatal("Unsupported Y4M stream.");
   } else if (input->detect.buf_read == 4 && fourcc_is_ivf(input->detect.buf)) {
@@ -925,9 +938,9 @@ static struct stream_state *new_stream(struct VpxEncoderConfig *global,
     stream->config.cfg.g_h = 0;
 
     /* Initialize remaining stream parameters */
-    stream->config.stereo_fmt = STEREO_FORMAT_MONO;
     stream->config.write_webm = 1;
 #if CONFIG_WEBM_IO
+    stream->config.stereo_fmt = STEREO_FORMAT_MONO;
     stream->ebml.last_pts_ns = -1;
     stream->ebml.writer = NULL;
     stream->ebml.segment = NULL;
@@ -1005,8 +1018,10 @@ static int parse_stream_params(struct VpxEncoderConfig *global,
       config->cfg.g_w = arg_parse_uint(&arg);
     } else if (arg_match(&arg, &height, argi)) {
       config->cfg.g_h = arg_parse_uint(&arg);
+#if CONFIG_WEBM_IO
     } else if (arg_match(&arg, &stereo_mode, argi)) {
       config->stereo_fmt = arg_parse_enum_or_int(&arg);
+#endif
     } else if (arg_match(&arg, &timebase, argi)) {
       config->cfg.g_timebase = arg_parse_rational(&arg);
       validate_positive_rational(arg.name, &config->cfg.g_timebase);
@@ -1191,6 +1206,23 @@ static void set_default_kf_interval(struct stream_state *stream,
   }
 }
 
+static const char* file_type_to_string(enum VideoFileType t) {
+  switch (t) {
+    case FILE_TYPE_RAW: return "RAW";
+    case FILE_TYPE_Y4M: return "Y4M";
+    default: return "Other";
+  }
+}
+
+static const char* image_format_to_string(vpx_img_fmt_t f) {
+  switch (f) {
+    case VPX_IMG_FMT_I420: return "I420";
+    case VPX_IMG_FMT_I422: return "I422";
+    case VPX_IMG_FMT_I444: return "I444";
+    case VPX_IMG_FMT_YV12: return "YV12";
+    default: return "Other";
+  }
+}
 
 static void show_stream_config(struct stream_state *stream,
                                struct VpxEncoderConfig *global,
@@ -1202,8 +1234,10 @@ static void show_stream_config(struct stream_state *stream,
   if (stream->index == 0) {
     fprintf(stderr, "Codec: %s\n",
             vpx_codec_iface_name(global->codec->interface()));
-    fprintf(stderr, "Source file: %s Format: %s\n", input->filename,
-            input->use_i420 ? "I420" : "YV12");
+    fprintf(stderr, "Source file: %s File Type: %s Format: %s\n",
+            input->filename,
+            file_type_to_string(input->file_type),
+            image_format_to_string(input->fmt));
   }
   if (stream->next || stream->index)
     fprintf(stderr, "\nStream Index: %d\n", stream->index);
@@ -1386,26 +1420,31 @@ static void encode_frame(struct stream_state *stream,
       if (!stream->img)
         stream->img = vpx_img_alloc(NULL, VPX_IMG_FMT_I42016,
                                     cfg->g_w, cfg->g_h, 16);
-      I42016Scale((uint16*)img->planes[VPX_PLANE_Y],
-                  img->stride[VPX_PLANE_Y]/2,
-                  (uint16*)img->planes[VPX_PLANE_U],
-                  img->stride[VPX_PLANE_U]/2,
-                  (uint16*)img->planes[VPX_PLANE_V],
-                  img->stride[VPX_PLANE_V]/2,
-                  img->d_w, img->d_h,
-                  (uint16*)stream->img->planes[VPX_PLANE_Y],
-                  stream->img->stride[VPX_PLANE_Y]/2,
-                  (uint16*)stream->img->planes[VPX_PLANE_U],
-                  stream->img->stride[VPX_PLANE_U]/2,
-                  (uint16*)stream->img->planes[VPX_PLANE_V],
-                  stream->img->stride[VPX_PLANE_V]/2,
-                  stream->img->d_w, stream->img->d_h,
-                  kFilterBox);
+      I420Scale_16((uint16*)img->planes[VPX_PLANE_Y],
+                   img->stride[VPX_PLANE_Y]/2,
+                   (uint16*)img->planes[VPX_PLANE_U],
+                   img->stride[VPX_PLANE_U]/2,
+                   (uint16*)img->planes[VPX_PLANE_V],
+                   img->stride[VPX_PLANE_V]/2,
+                   img->d_w, img->d_h,
+                   (uint16*)stream->img->planes[VPX_PLANE_Y],
+                   stream->img->stride[VPX_PLANE_Y]/2,
+                   (uint16*)stream->img->planes[VPX_PLANE_U],
+                   stream->img->stride[VPX_PLANE_U]/2,
+                   (uint16*)stream->img->planes[VPX_PLANE_V],
+                   stream->img->stride[VPX_PLANE_V]/2,
+                   stream->img->d_w, stream->img->d_h,
+                   kFilterBox);
       img = stream->img;
     }
   }
 #endif
   if (img && (img->d_w != cfg->g_w || img->d_h != cfg->g_h)) {
+    if (img->fmt != VPX_IMG_FMT_I420 && img->fmt != VPX_IMG_FMT_YV12) {
+      fprintf(stderr, "%s can only scale 4:2:0 8bpp inputs\n", exec_name);
+      exit(EXIT_FAILURE);
+    }
+#if CONFIG_LIBYUV
     if (!stream->img)
       stream->img = vpx_img_alloc(NULL, VPX_IMG_FMT_I420,
                                   cfg->g_w, cfg->g_h, 16);
@@ -1421,8 +1460,15 @@ static void encode_frame(struct stream_state *stream,
               stream->img->stride[VPX_PLANE_V],
               stream->img->d_w, stream->img->d_h,
               kFilterBox);
-
     img = stream->img;
+#else
+    stream->encoder.err = 1;
+    ctx_exit_on_error(&stream->encoder,
+                      "Stream %d: Failed to encode frame.\n"
+                      "Scaling disabled in this configuration. \n"
+                      "To enable, configure with --enable-libyuv\n",
+                      stream->index);
+#endif
   }
 
   vpx_usec_timer_start(&timer);
@@ -1764,7 +1810,6 @@ int main(int argc, const char **argv_) {
   /* Setup default input stream settings */
   input.framerate.numerator = 30;
   input.framerate.denominator = 1;
-  input.use_i420 = 1;
   input.only_i420 = 1;
 
   /* First parse the global configuration values, because we want to apply
@@ -1774,6 +1819,7 @@ int main(int argc, const char **argv_) {
   argv = argv_dup(argc - 1, argv_ + 1);
   parse_global_config(&global, argv);
 
+  input.fmt = global.use_i420 ? VPX_IMG_FMT_I420 : VPX_IMG_FMT_YV12;
 
   {
     /* Now parse each stream's parameters. Using a local scope here
@@ -1874,10 +1920,7 @@ int main(int argc, const char **argv_) {
            frames.*/
         memset(&raw, 0, sizeof(raw));
       else
-        vpx_img_alloc(&raw,
-                      input.use_i420 ? VPX_IMG_FMT_I420
-                      : VPX_IMG_FMT_YV12,
-                      input.width, input.height, 32);
+        vpx_img_alloc(&raw, input.fmt, input.width, input.height, 32);
 
       FOREACH_STREAM(stream->rate_hist =
                          init_rate_histogram(&stream->config.cfg,

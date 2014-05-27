@@ -386,8 +386,10 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t  *ctx,
     /* Set these even if already initialized.  The caller may have changed the
      * decrypt config between frames.
      */
-    ctx->yv12_frame_buffers.pbi[0]->decrypt_cb = ctx->decrypt_cb;
-    ctx->yv12_frame_buffers.pbi[0]->decrypt_state = ctx->decrypt_state;
+    if (ctx->decoder_init) {
+      ctx->yv12_frame_buffers.pbi[0]->decrypt_cb = ctx->decrypt_cb;
+      ctx->yv12_frame_buffers.pbi[0]->decrypt_state = ctx->decrypt_state;
+    }
 
     if (!res)
     {

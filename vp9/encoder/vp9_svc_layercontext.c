@@ -203,7 +203,7 @@ void vp9_init_second_pass_spatial_svc(VP9_COMP *cpi) {
   int i;
 
   for (i = 0; i < svc->number_spatial_layers; ++i) {
-    struct twopass_rc *const twopass = &svc->layer_context[i].twopass;
+    TWO_PASS *const twopass = &svc->layer_context[i].twopass;
 
     svc->spatial_layer_id = i;
     vp9_init_second_pass(cpi);
@@ -221,7 +221,7 @@ void vp9_inc_frame_in_layer(SVC *svc) {
   ++lc->current_video_frame_in_layer;
 }
 
-int vp9_is_upper_layer_key_frame(const VP9_COMP *cpi) {
+int vp9_is_upper_layer_key_frame(const VP9_COMP *const cpi) {
   return cpi->use_svc &&
          cpi->svc.number_temporal_layers == 1 &&
          cpi->svc.spatial_layer_id > 0 &&

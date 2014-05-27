@@ -338,7 +338,7 @@ INSTANTIATE_TEST_CASE_P(
     ::testing::Values(
         make_tuple(&vp9_fwht4x4_c, &vp9_iwht4x4_16_add_c, 0)));
 
-#if HAVE_NEON
+#if HAVE_NEON_ASM
 INSTANTIATE_TEST_CASE_P(
     NEON, Trans4x4DCT,
     ::testing::Values(
@@ -353,7 +353,7 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_fht4x4_c, &vp9_iht4x4_16_add_neon, 3)));
 #endif
 
-#if HAVE_MMX
+#if CONFIG_USE_X86INC && HAVE_MMX
 INSTANTIATE_TEST_CASE_P(
     MMX, Trans4x4WHT,
     ::testing::Values(

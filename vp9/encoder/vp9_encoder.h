@@ -24,6 +24,7 @@
 #include "vp9/common/vp9_onyxc_int.h"
 
 #include "vp9/encoder/vp9_aq_cyclicrefresh.h"
+#include "vp9/encoder/vp9_context_tree.h"
 #include "vp9/encoder/vp9_encodemb.h"
 #include "vp9/encoder/vp9_firstpass.h"
 #include "vp9/encoder/vp9_lookahead.h"
@@ -39,8 +40,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-// #define MODE_TEST_HIT_STATS
 
 #define DEFAULT_GF_INTERVAL         10
 
@@ -395,7 +394,6 @@ typedef struct VP9_COMP {
   RATE_CONTROL rc;
 
   vp9_coeff_count coef_counts[TX_SIZES][PLANE_TYPES];
-  vp9_coeff_probs_model frame_coef_probs[TX_SIZES][PLANE_TYPES];
 
   struct vpx_codec_pkt_list  *output_pkt_list;
 
@@ -415,8 +413,8 @@ typedef struct VP9_COMP {
   // Default value is 1. From first pass stats, encode_breakout may be disabled.
   ENCODE_BREAKOUT_TYPE allow_encode_breakout;
 
-  // Get threshold from external input. In real time mode, it can be
-  // overwritten according to encoding speed.
+  // Get threshold from external input. A suggested threshold is 800 for HD
+  // clips, and 300 for < HD clips.
   int encode_breakout;
 
   unsigned char *segmentation_map;
@@ -442,7 +440,7 @@ typedef struct VP9_COMP {
   uint64_t time_pick_lpf;
   uint64_t time_encode_sb_row;
 
-  struct twopass_rc twopass;
+  TWO_PASS twopass;
 
   YV12_BUFFER_CONFIG alt_ref_buffer;
   YV12_BUFFER_CONFIG *frames[MAX_LAG_BUFFERS];
@@ -507,6 +505,11 @@ typedef struct VP9_COMP {
   int y_mode_costs[INTRA_MODES][INTRA_MODES][INTRA_MODES];
   int switchable_interp_costs[SWITCHABLE_FILTER_CONTEXTS][SWITCHABLE_FILTERS];
 
+  PICK_MODE_CONTEXT *leaf_tree;
+  PC_TREE *pc_tree;
+  PC_TREE *pc_root;
+  int partition_cost[PARTITION_CONTEXTS][PARTITION_TYPES];
+
 #if CONFIG_MULTIPLE_ARF
   // ARF tracking variables.
   int multi_arf_enabled;
@@ -518,11 +521,6 @@ typedef struct VP9_COMP {
   int arf_buffered;
   int this_frame_weight;
   int max_arf_level;
-#endif
-
-#ifdef MODE_TEST_HIT_STATS
-  // Debug / test stats
-  int64_t mode_test_hits[BLOCK_SIZES];
 #endif
 } VP9_COMP;
 
@@ -561,14 +559,7 @@ int vp9_set_reference_enc(VP9_COMP *cpi, VP9_REFFRAME ref_frame_flag,
 
 int vp9_update_entropy(VP9_COMP *cpi, int update);
 
-int vp9_set_roimap(VP9_COMP *cpi, unsigned char *map,
-                   unsigned int rows, unsigned int cols,
-                   int delta_q[MAX_SEGMENTS],
-                   int delta_lf[MAX_SEGMENTS],
-                   unsigned int threshold[MAX_SEGMENTS]);
-
-int vp9_set_active_map(VP9_COMP *cpi, unsigned char *map,
-                       unsigned int rows, unsigned int cols);
+int vp9_set_active_map(VP9_COMP *cpi, unsigned char *map, int rows, int cols);
 
 int vp9_set_internal_size(VP9_COMP *cpi,
                           VPX_SCALING horiz_mode, VPX_SCALING vert_mode);

@@ -113,9 +113,12 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += dct16x16_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += dct32x32_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += fdct4x4_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += fdct8x8_test.cc
-LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += svc_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += variance_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_subtract_test.cc
+
+ifeq ($(CONFIG_VP9_ENCODER),yes)
+LIBVPX_TEST_SRCS-$(CONFIG_SPATIAL_SVC) += svc_test.cc
+endif
 
 endif # VP9
 
@@ -748,6 +751,10 @@ LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-14-resize-fp-tiles-1-2-4-8-16.w
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-14-resize-fp-tiles-1-2-4-8-16.webm.md5
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-14-resize-fp-tiles-16-8-4-2-1.webm
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-14-resize-fp-tiles-16-8-4-2-1.webm.md5
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-15-segkey.webm
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-15-segkey.webm.md5
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-15-segkey_adpq.webm
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-15-segkey_adpq.webm.md5
 
 ifeq ($(CONFIG_DECODE_PERF_TESTS),yes)
 # BBB VP9 streams

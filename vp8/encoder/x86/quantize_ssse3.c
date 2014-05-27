@@ -27,7 +27,11 @@ static int bsr(int mask) {
 #else
 static int bsr(int mask) {
   int eob;
+#if defined(__GNUC__) && __GNUC__
+  __asm__ __volatile__("bsr %1, %0" : "=r" (eob) : "r" (mask) : "flags");
+#elif defined(__SUNPRO_C) || defined(__SUNPRO_CC)
   asm volatile("bsr %1, %0" : "=r" (eob) : "r" (mask) : "flags");
+#endif
   eob++;
   if (mask == 0)
     eob = 0;

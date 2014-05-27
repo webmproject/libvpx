@@ -221,8 +221,12 @@ class ConvolveTest : public ::testing::TestWithParam<convolve_param_t> {
     }
 
     ::libvpx_test::ACMRandom prng;
-    for (int i = 0; i < kInputBufferSize; ++i)
-      input_[i] = prng.Rand8Extremes();
+    for (int i = 0; i < kInputBufferSize; ++i) {
+      if (i & 1)
+        input_[i] = 255;
+      else
+        input_[i] = prng.Rand8Extremes();
+    }
   }
 
   void SetConstantInput(int value) {
@@ -341,6 +345,9 @@ TEST_P(ConvolveTest, MatchesReferenceSubpixelFilter) {
   for (int filter_bank = 0; filter_bank < kNumFilterBanks; ++filter_bank) {
     const InterpKernel *filters =
         vp9_get_interp_kernel(static_cast<INTERP_FILTER>(filter_bank));
+    const InterpKernel *const eighttap_smooth =
+        vp9_get_interp_kernel(EIGHTTAP_SMOOTH);
+
     for (int filter_x = 0; filter_x < kNumFilters; ++filter_x) {
       for (int filter_y = 0; filter_y < kNumFilters; ++filter_y) {
         filter_block2d_8_c(in, kInputStride,
@@ -348,7 +355,7 @@ TEST_P(ConvolveTest, MatchesReferenceSubpixelFilter) {
                            ref, kOutputStride,
                            Width(), Height());
 
-        if (filters == vp9_sub_pel_filters_8lp || (filter_x && filter_y))
+        if (filters == eighttap_smooth || (filter_x && filter_y))
           REGISTER_STATE_CHECK(
               UUT_->hv8_(in, kInputStride, out, kOutputStride,
                          filters[filter_x], 16, filters[filter_y], 16,
@@ -396,6 +403,8 @@ TEST_P(ConvolveTest, MatchesReferenceAveragingSubpixelFilter) {
   for (int filter_bank = 0; filter_bank < kNumFilterBanks; ++filter_bank) {
     const InterpKernel *filters =
         vp9_get_interp_kernel(static_cast<INTERP_FILTER>(filter_bank));
+    const InterpKernel *const eighttap_smooth =
+        vp9_get_interp_kernel(EIGHTTAP_SMOOTH);
 
     for (int filter_x = 0; filter_x < kNumFilters; ++filter_x) {
       for (int filter_y = 0; filter_y < kNumFilters; ++filter_y) {
@@ -404,7 +413,7 @@ TEST_P(ConvolveTest, MatchesReferenceAveragingSubpixelFilter) {
                                    ref, kOutputStride,
                                    Width(), Height());
 
-        if (filters == vp9_sub_pel_filters_8lp || (filter_x && filter_y))
+        if (filters == eighttap_smooth || (filter_x && filter_y))
           REGISTER_STATE_CHECK(
               UUT_->hv8_avg_(in, kInputStride, out, kOutputStride,
                              filters[filter_x], 16, filters[filter_y], 16,
@@ -544,6 +553,7 @@ TEST_P(ConvolveTest, ChangeFilterWorks) {
 TEST_P(ConvolveTest, CheckScalingFiltering) {
   uint8_t* const in = input();
   uint8_t* const out = output();
+  const InterpKernel *const eighttap = vp9_get_interp_kernel(EIGHTTAP);
 
   SetConstantInput(127);
 
@@ -551,8 +561,8 @@ TEST_P(ConvolveTest, CheckScalingFiltering) {
     for (int step = 1; step <= 32; ++step) {
       /* Test the horizontal and vertical filters in combination. */
       REGISTER_STATE_CHECK(UUT_->hv8_(in, kInputStride, out, kOutputStride,
-                                      vp9_sub_pel_filters_8[frac], step,
-                                      vp9_sub_pel_filters_8[frac], step,
+                                      eighttap[frac], step,
+                                      eighttap[frac], step,
                                       Width(), Height()));
 
       CheckGuardBlocks();
@@ -634,7 +644,7 @@ INSTANTIATE_TEST_CASE_P(SSSE3, ConvolveTest, ::testing::Values(
     make_tuple(64, 64, &convolve8_ssse3)));
 #endif
 
-#if HAVE_NEON
+#if HAVE_NEON_ASM
 const ConvolveFunctions convolve8_neon(
     vp9_convolve8_horiz_neon, vp9_convolve8_avg_horiz_neon,
     vp9_convolve8_vert_neon, vp9_convolve8_avg_vert_neon,

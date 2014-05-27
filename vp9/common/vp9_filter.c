@@ -32,7 +32,8 @@ const InterpKernel vp9_bilinear_filters[SUBPEL_SHIFTS] = {
 };
 
 // Lagrangian interpolation filter
-const InterpKernel vp9_sub_pel_filters_8[SUBPEL_SHIFTS] = {
+DECLARE_ALIGNED(256, const InterpKernel,
+                vp9_sub_pel_filters_8[SUBPEL_SHIFTS]) = {
   { 0,   0,   0, 128,   0,   0,   0,  0},
   { 0,   1,  -5, 126,   8,  -3,   1,  0},
   { -1,   3, -10, 122,  18,  -6,   2,  0},
@@ -52,7 +53,8 @@ const InterpKernel vp9_sub_pel_filters_8[SUBPEL_SHIFTS] = {
 };
 
 // DCT based filter
-const InterpKernel vp9_sub_pel_filters_8s[SUBPEL_SHIFTS] = {
+DECLARE_ALIGNED(256, const InterpKernel,
+                vp9_sub_pel_filters_8s[SUBPEL_SHIFTS]) = {
   {0,   0,   0, 128,   0,   0,   0, 0},
   {-1,   3,  -7, 127,   8,  -3,   1, 0},
   {-2,   5, -13, 125,  17,  -6,   3, -1},
@@ -72,7 +74,8 @@ const InterpKernel vp9_sub_pel_filters_8s[SUBPEL_SHIFTS] = {
 };
 
 // freqmultiplier = 0.5
-const InterpKernel vp9_sub_pel_filters_8lp[SUBPEL_SHIFTS] = {
+DECLARE_ALIGNED(256, const InterpKernel,
+                vp9_sub_pel_filters_8lp[SUBPEL_SHIFTS]) = {
   { 0,  0,  0, 128,  0,  0,  0,  0},
   {-3, -1, 32,  64, 38,  1, -3,  0},
   {-2, -2, 29,  63, 41,  2, -3,  0},

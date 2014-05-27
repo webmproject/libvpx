@@ -170,8 +170,8 @@ typedef vpx_codec_err_t (*vpx_codec_control_fn_t)(vpx_codec_alg_priv_t  *ctx,
  * \ref MUST be non-zero.
  */
 typedef const struct vpx_codec_ctrl_fn_map {
-  int                    ctrl_id;
-  vpx_codec_control_fn_t   fn;
+  int ctrl_id;
+  vpx_codec_control_fn_t fn;
 } vpx_codec_ctrl_fn_map_t;
 
 /*!\brief decode data function pointer prototype

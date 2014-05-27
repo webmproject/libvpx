@@ -62,7 +62,9 @@ int vp9_get_mvpred_av_var(const MACROBLOCK *x,
                           int use_mvcost);
 
 struct VP9_COMP;
-int vp9_init_search_range(struct VP9_COMP *cpi, int size);
+struct SPEED_FEATURES;
+
+int vp9_init_search_range(const struct SPEED_FEATURES *sf, int size);
 
 // Runs sequence of diamond searches in smaller steps for RD
 int vp9_full_pixel_diamond(const struct VP9_COMP *cpi, MACROBLOCK *x,
@@ -142,8 +144,7 @@ int vp9_refining_search_8p_c(const MACROBLOCK *x,
                              MV *ref_mv, int error_per_bit,
                              int search_range,
                              const vp9_variance_fn_ptr_t *fn_ptr,
-                             const MV *center_mv, const uint8_t *second_pred,
-                             int w, int h);
+                             const MV *center_mv, const uint8_t *second_pred);
 #ifdef __cplusplus
 }  // extern "C"
 #endif

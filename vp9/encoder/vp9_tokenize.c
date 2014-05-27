@@ -232,7 +232,6 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
       cpi->common.fc.coef_probs[tx_size][type][ref];
   unsigned int (*const eob_branch)[COEFF_CONTEXTS] =
       cpi->common.counts.eob_branch[tx_size][type][ref];
-
   const uint8_t *const band = get_band_translate(tx_size);
   const int seg_eob = get_tx_eob(&cpi->common.seg, segment_id, tx_size);
 
@@ -289,14 +288,17 @@ struct is_skippable_args {
   MACROBLOCK *x;
   int *skippable;
 };
-
 static void is_skippable(int plane, int block,
                          BLOCK_SIZE plane_bsize, TX_SIZE tx_size,
                          void *argv) {
   struct is_skippable_args *args = argv;
+  (void)plane_bsize;
+  (void)tx_size;
   args->skippable[0] &= (!args->x->plane[plane].eobs[block]);
 }
 
+// TODO(yaowu): rewrite and optimize this function to remove the usage of
+//              vp9_foreach_transform_block() and simplify is_skippable().
 int vp9_is_skippable_in_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
   int result = 1;
   struct is_skippable_args args = {x, &result};

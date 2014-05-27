@@ -27,7 +27,7 @@ typedef struct {
   int64_t maximum_buffer_size;
   double framerate;
   int avg_frame_size;
-  struct twopass_rc twopass;
+  TWO_PASS twopass;
   struct vpx_fixed_buf rc_twopass_stats_in;
   unsigned int current_video_frame_in_layer;
   int is_key_frame;

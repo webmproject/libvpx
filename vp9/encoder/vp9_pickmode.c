@@ -27,12 +27,11 @@
 #include "vp9/encoder/vp9_rdopt.h"
 
 static void full_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
-                                    const TileInfo *const tile,
                                     BLOCK_SIZE bsize, int mi_row, int mi_col,
                                     int_mv *tmp_mv, int *rate_mv) {
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
-  struct buf_2d backup_yv12[MAX_MB_PLANE] = {{0}};
+  struct buf_2d backup_yv12[MAX_MB_PLANE] = {{0, 0}};
   int step_param;
   int sadpb = x->sadperbit16;
   MV mvp_full;
@@ -80,44 +79,14 @@ static void full_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   if (x->mv_best_ref_index[ref] < 2)
     mvp_full = mbmi->ref_mvs[ref][x->mv_best_ref_index[ref]].as_mv;
   else
-    mvp_full = x->pred_mv[ref].as_mv;
+    mvp_full = x->pred_mv[ref];
 
   mvp_full.col >>= 3;
   mvp_full.row >>= 3;
 
-  if (cpi->sf.search_method == FAST_DIAMOND) {
-    // NOTE: this returns SAD
-    vp9_fast_dia_search(x, &mvp_full, step_param, sadpb, 0,
-                        &cpi->fn_ptr[bsize], 1,
-                        &ref_mv, &tmp_mv->as_mv);
-  } else if (cpi->sf.search_method == FAST_HEX) {
-    // NOTE: this returns SAD
-    vp9_fast_hex_search(x, &mvp_full, step_param, sadpb, 0,
-                        &cpi->fn_ptr[bsize], 1,
-                        &ref_mv, &tmp_mv->as_mv);
-  } else if (cpi->sf.search_method == HEX) {
-    // NOTE: this returns SAD
-    vp9_hex_search(x, &mvp_full, step_param, sadpb, 1,
-                   &cpi->fn_ptr[bsize], 1,
-                   &ref_mv, &tmp_mv->as_mv);
-  } else if (cpi->sf.search_method == SQUARE) {
-    // NOTE: this returns SAD
-    vp9_square_search(x, &mvp_full, step_param, sadpb, 1,
-                      &cpi->fn_ptr[bsize], 1,
-                      &ref_mv, &tmp_mv->as_mv);
-  } else if (cpi->sf.search_method == BIGDIA) {
-    // NOTE: this returns SAD
-    vp9_bigdia_search(x, &mvp_full, step_param, sadpb, 1,
-                      &cpi->fn_ptr[bsize], 1,
-                      &ref_mv, &tmp_mv->as_mv);
-  } else {
-    int further_steps = (cpi->sf.max_step_search_steps - 1) - step_param;
-    // NOTE: this returns variance
-    vp9_full_pixel_diamond(cpi, x, &mvp_full, step_param,
-                           sadpb, further_steps, 1,
-                           &cpi->fn_ptr[bsize],
-                           &ref_mv, &tmp_mv->as_mv);
-  }
+  full_pixel_search(cpi, x, bsize, &mvp_full, step_param, sadpb, &ref_mv,
+                    &tmp_mv->as_mv, INT_MAX, 0);
+
   x->mv_col_min = tmp_col_min;
   x->mv_col_max = tmp_col_max;
   x->mv_row_min = tmp_row_min;
@@ -137,12 +106,11 @@ static void full_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
 }
 
 static void sub_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
-                                    const TileInfo *const tile,
                                     BLOCK_SIZE bsize, int mi_row, int mi_col,
                                     MV *tmp_mv) {
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
-  struct buf_2d backup_yv12[MAX_MB_PLANE] = {{0}};
+  struct buf_2d backup_yv12[MAX_MB_PLANE] = {{0, 0}};
   int ref = mbmi->ref_frame[0];
   MV ref_mv = mbmi->ref_mvs[ref][0].as_mv;
   int dis;
@@ -175,12 +143,13 @@ static void sub_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
       xd->plane[i].pre[0] = backup_yv12[i];
   }
 
-  x->pred_mv[ref].as_mv = *tmp_mv;
+  x->pred_mv[ref] = *tmp_mv;
 }
 
 static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
                               MACROBLOCK *x, MACROBLOCKD *xd,
-                              int *out_rate_sum, int64_t *out_dist_sum) {
+                              int *out_rate_sum, int64_t *out_dist_sum,
+                              unsigned int *var_y, unsigned int *sse_y) {
   // Note our transform coeffs are 8 times an orthogonal transform.
   // Hence quantizer step is also 8 times. To get effective quantizer
   // we need to divide by 8 before sending to modeling function.
@@ -191,10 +160,19 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
   struct macroblock_plane *const p = &x->plane[0];
   struct macroblockd_plane *const pd = &xd->plane[0];
 
-  int var = cpi->fn_ptr[bsize].vf(p->src.buf, p->src.stride,
-                                  pd->dst.buf, pd->dst.stride, &sse);
+  unsigned int var = cpi->fn_ptr[bsize].vf(p->src.buf, p->src.stride,
+                                           pd->dst.buf, pd->dst.stride, &sse);
 
-  vp9_model_rd_from_var_lapndz(sse + var, 1 << num_pels_log2_lookup[bsize],
+  *var_y = var;
+  *sse_y = sse;
+
+  // TODO(jingning) This is a temporary solution to account for frames with
+  // light changes. Need to customize the rate-distortion modeling for non-RD
+  // mode decision.
+  if ((sse >> 3) > var)
+    sse = var;
+
+  vp9_model_rd_from_var_lapndz(var + sse, 1 << num_pels_log2_lookup[bsize],
                                pd->dequant[1] >> 3, &rate, &dist);
   *out_rate_sum = rate;
   *out_dist_sum = dist << 3;
@@ -224,6 +202,9 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
   int rate = INT_MAX;
   int64_t dist = INT64_MAX;
+  // var_y and sse_y are saved to be used in skipping checking
+  unsigned int var_y = UINT_MAX;
+  unsigned int sse_y = UINT_MAX;
 
   VP9_COMMON *cm = &cpi->common;
   int intra_cost_penalty = 20 * vp9_dc_quant(cm->base_qindex, cm->y_dc_delta_q);
@@ -245,8 +226,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
 
   x->skip = 0;
-  if (!x->in_active_map)
-    x->skip = 1;
+
   // initialize mode decisions
   *returnrate = INT_MAX;
   *returndistortion = INT64_MAX;
@@ -314,7 +294,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         if (this_rd < (int64_t)(1 << num_pels_log2_lookup[bsize]))
           continue;
 
-        full_pixel_motion_search(cpi, x, tile, bsize, mi_row, mi_col,
+        full_pixel_motion_search(cpi, x, bsize, mi_row, mi_col,
                                  &frame_mv[NEWMV][ref_frame], &rate_mv);
 
         if (frame_mv[NEWMV][ref_frame].as_int == INVALID_MV)
@@ -325,7 +305,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         if (RDCOST(x->rdmult, x->rddiv, rate_mv + rate_mode, 0) > best_rd)
           continue;
 
-        sub_pixel_motion_search(cpi, x, tile, bsize, mi_row, mi_col,
+        sub_pixel_motion_search(cpi, x, bsize, mi_row, mi_col,
                                 &frame_mv[NEWMV][ref_frame].as_mv);
       }
 
@@ -344,54 +324,37 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           pred_filter_search &&
           ((mbmi->mv[0].as_mv.row & 0x07) != 0 ||
            (mbmi->mv[0].as_mv.col & 0x07) != 0)) {
-        int64_t tmp_rdcost1 = INT64_MAX;
-        int64_t tmp_rdcost2 = INT64_MAX;
-        int64_t tmp_rdcost3 = INT64_MAX;
         int pf_rate[3];
         int64_t pf_dist[3];
+        unsigned int pf_var[3];
+        unsigned int pf_sse[3];
+        int64_t best_cost = INT64_MAX;
+        INTERP_FILTER best_filter = SWITCHABLE, filter;
 
-        mbmi->interp_filter = EIGHTTAP;
-        vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
-        model_rd_for_sb_y(cpi, bsize, x, xd, &pf_rate[EIGHTTAP],
-                          &pf_dist[EIGHTTAP]);
-        tmp_rdcost1 = RDCOST(x->rdmult, x->rddiv,
-                             vp9_get_switchable_rate(cpi) + pf_rate[EIGHTTAP],
-                             pf_dist[EIGHTTAP]);
-
-        mbmi->interp_filter = EIGHTTAP_SHARP;
-        vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
-        model_rd_for_sb_y(cpi, bsize, x, xd, &pf_rate[EIGHTTAP_SHARP],
-                          &pf_dist[EIGHTTAP_SHARP]);
-        tmp_rdcost2 = RDCOST(x->rdmult, x->rddiv, vp9_get_switchable_rate(cpi) +
-                                 pf_rate[EIGHTTAP_SHARP],
-                             pf_dist[EIGHTTAP_SHARP]);
-
-        mbmi->interp_filter = EIGHTTAP_SMOOTH;
-        vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
-        model_rd_for_sb_y(cpi, bsize, x, xd, &pf_rate[EIGHTTAP_SMOOTH],
-                          &pf_dist[EIGHTTAP_SMOOTH]);
-        tmp_rdcost3 = RDCOST(x->rdmult, x->rddiv, vp9_get_switchable_rate(cpi) +
-                                 pf_rate[EIGHTTAP_SMOOTH],
-                             pf_dist[EIGHTTAP_SMOOTH]);
-
-        if (tmp_rdcost2 < tmp_rdcost1) {
-          if (tmp_rdcost2 < tmp_rdcost3)
-            mbmi->interp_filter = EIGHTTAP_SHARP;
-          else
-            mbmi->interp_filter = EIGHTTAP_SMOOTH;
-        } else {
-          if (tmp_rdcost1 < tmp_rdcost3)
-            mbmi->interp_filter = EIGHTTAP;
-          else
-            mbmi->interp_filter = EIGHTTAP_SMOOTH;
+        for (filter = EIGHTTAP; filter <= EIGHTTAP_SHARP; ++filter) {
+          int64_t cost;
+          mbmi->interp_filter = filter;
+          vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
+          model_rd_for_sb_y(cpi, bsize, x, xd, &pf_rate[filter],
+                            &pf_dist[filter], &pf_var[filter], &pf_sse[filter]);
+          cost = RDCOST(x->rdmult, x->rddiv,
+                        vp9_get_switchable_rate(cpi) + pf_rate[filter],
+                        pf_dist[filter]);
+          if (cost < best_cost) {
+              best_filter = filter;
+              best_cost = cost;
+          }
         }
 
+        mbmi->interp_filter = best_filter;
         rate = pf_rate[mbmi->interp_filter];
         dist = pf_dist[mbmi->interp_filter];
+        var_y = pf_var[mbmi->interp_filter];
+        sse_y = pf_sse[mbmi->interp_filter];
       } else {
         mbmi->interp_filter = (filter_ref == SWITCHABLE) ? EIGHTTAP: filter_ref;
         vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
-        model_rd_for_sb_y(cpi, bsize, x, xd, &rate, &dist);
+        model_rd_for_sb_y(cpi, bsize, x, xd, &rate, &dist, &var_y, &sse_y);
       }
 
       rate += rate_mv;
@@ -399,7 +362,78 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                 [INTER_OFFSET(this_mode)];
       this_rd = RDCOST(x->rdmult, x->rddiv, rate, dist);
 
-      if (this_rd < best_rd) {
+      // Skipping checking: test to see if this block can be reconstructed by
+      // prediction only.
+      if (!x->in_active_map) {
+        x->skip = 1;
+      } else if (cpi->allow_encode_breakout && x->encode_breakout) {
+        const BLOCK_SIZE uv_size = get_plane_block_size(bsize, &xd->plane[1]);
+        unsigned int var = var_y, sse = sse_y;
+        // Skipping threshold for ac.
+        unsigned int thresh_ac;
+        // Skipping threshold for dc.
+        unsigned int thresh_dc;
+        // Set a maximum for threshold to avoid big PSNR loss in low bit rate
+        // case. Use extreme low threshold for static frames to limit skipping.
+        const unsigned int max_thresh = 36000;
+        // The encode_breakout input
+        const unsigned int min_thresh =
+            MIN(((unsigned int)x->encode_breakout << 4), max_thresh);
+
+        // Calculate threshold according to dequant value.
+        thresh_ac = (xd->plane[0].dequant[1] * xd->plane[0].dequant[1]) / 9;
+        thresh_ac = clamp(thresh_ac, min_thresh, max_thresh);
+
+        // Adjust ac threshold according to partition size.
+        thresh_ac >>= 8 - (b_width_log2_lookup[bsize] +
+            b_height_log2_lookup[bsize]);
+
+        thresh_dc = (xd->plane[0].dequant[0] * xd->plane[0].dequant[0] >> 6);
+
+        // Y skipping condition checking for ac and dc.
+        if (var <= thresh_ac && (sse - var) <= thresh_dc) {
+          unsigned int sse_u, sse_v;
+          unsigned int var_u, var_v;
+
+          // Skip u v prediction for less calculation, that won't affect
+          // result much.
+          var_u = cpi->fn_ptr[uv_size].vf(x->plane[1].src.buf,
+                                          x->plane[1].src.stride,
+                                          xd->plane[1].dst.buf,
+                                          xd->plane[1].dst.stride, &sse_u);
+
+          // U skipping condition checking
+          if ((var_u * 4 <= thresh_ac) && (sse_u - var_u <= thresh_dc)) {
+            var_v = cpi->fn_ptr[uv_size].vf(x->plane[2].src.buf,
+                                            x->plane[2].src.stride,
+                                            xd->plane[2].dst.buf,
+                                            xd->plane[2].dst.stride, &sse_v);
+
+            // V skipping condition checking
+            if ((var_v * 4 <= thresh_ac) && (sse_v - var_v <= thresh_dc)) {
+              x->skip = 1;
+
+              // The cost of skip bit needs to be added.
+              rate = rate_mv;
+              rate += cpi->inter_mode_cost[mbmi->mode_context[ref_frame]]
+                                           [INTER_OFFSET(this_mode)];
+
+              // More on this part of rate
+              // rate += vp9_cost_bit(vp9_get_skip_prob(cm, xd), 1);
+
+              // Scaling factor for SSE from spatial domain to frequency
+              // domain is 16. Adjust distortion accordingly.
+              // TODO(yunqingwang): In this function, only y-plane dist is
+              // calculated.
+              dist = (sse << 4);  // + ((sse_u + sse_v) << 4);
+              this_rd = RDCOST(x->rdmult, x->rddiv, rate, dist);
+              // *disable_skip = 1;
+            }
+          }
+        }
+      }
+
+      if (this_rd < best_rd || x->skip) {
         best_rd = this_rd;
         *returnrate = rate;
         *returndistortion = dist;
@@ -407,6 +441,9 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         best_pred_filter = mbmi->interp_filter;
         best_ref_frame = ref_frame;
       }
+
+      if (x->skip)
+        break;
     }
   }
 
@@ -418,14 +455,15 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
   // Perform intra prediction search, if the best SAD is above a certain
   // threshold.
-  if (best_rd > inter_mode_thresh && bsize < cpi->sf.max_intra_bsize) {
+  if (!x->skip && best_rd > inter_mode_thresh &&
+      bsize < cpi->sf.max_intra_bsize) {
     for (this_mode = DC_PRED; this_mode <= DC_PRED; ++this_mode) {
       vp9_predict_intra_block(xd, 0, b_width_log2(bsize),
                               mbmi->tx_size, this_mode,
                               &p->src.buf[0], p->src.stride,
                               &pd->dst.buf[0], pd->dst.stride, 0, 0, 0);
 
-      model_rd_for_sb_y(cpi, bsize, x, xd, &rate, &dist);
+      model_rd_for_sb_y(cpi, bsize, x, xd, &rate, &dist, &var_y, &sse_y);
       rate += cpi->mbmode_cost[this_mode];
       rate += intra_cost_penalty;
       this_rd = RDCOST(x->rdmult, x->rddiv, rate, dist);

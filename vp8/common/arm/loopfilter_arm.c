@@ -25,20 +25,24 @@ extern prototype_loopfilter(vp8_mbloop_filter_horizontal_edge_armv6);
 extern prototype_loopfilter(vp8_mbloop_filter_vertical_edge_armv6);
 #endif
 
-#if HAVE_NEON
+#if HAVE_NEON_ASM || HAVE_NEON
 typedef void loopfilter_y_neon(unsigned char *src, int pitch,
         unsigned char blimit, unsigned char limit, unsigned char thresh);
 typedef void loopfilter_uv_neon(unsigned char *u, int pitch,
         unsigned char blimit, unsigned char limit, unsigned char thresh,
         unsigned char *v);
+#endif
 
+#if HAVE_NEON_ASM
 extern loopfilter_y_neon vp8_loop_filter_horizontal_edge_y_neon;
 extern loopfilter_y_neon vp8_loop_filter_vertical_edge_y_neon;
-extern loopfilter_y_neon vp8_mbloop_filter_horizontal_edge_y_neon;
-extern loopfilter_y_neon vp8_mbloop_filter_vertical_edge_y_neon;
-
 extern loopfilter_uv_neon vp8_loop_filter_horizontal_edge_uv_neon;
 extern loopfilter_uv_neon vp8_loop_filter_vertical_edge_uv_neon;
+#endif
+
+#if HAVE_NEON
+extern loopfilter_y_neon vp8_mbloop_filter_horizontal_edge_y_neon;
+extern loopfilter_y_neon vp8_mbloop_filter_vertical_edge_y_neon;
 extern loopfilter_uv_neon vp8_mbloop_filter_horizontal_edge_uv_neon;
 extern loopfilter_uv_neon vp8_mbloop_filter_vertical_edge_uv_neon;
 #endif
@@ -146,7 +150,9 @@ void vp8_loop_filter_mbv_neon(unsigned char *y_ptr, unsigned char *u_ptr, unsign
     if (u_ptr)
         vp8_mbloop_filter_vertical_edge_uv_neon(u_ptr, uv_stride, mblim, lim, hev_thr, v_ptr);
 }
+#endif
 
+#if HAVE_NEON_ASM
 /* Horizontal B Filtering */
 void vp8_loop_filter_bh_neon(unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr,
                              int y_stride, int uv_stride, loop_filter_info *lfi)
