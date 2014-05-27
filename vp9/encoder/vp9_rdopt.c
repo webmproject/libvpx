@@ -2207,8 +2207,6 @@ static void estimate_ref_frame_costs(const VP9_COMMON *cm,
 
 static void store_coding_context(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
                          int mode_index,
-                         int_mv *ref_mv,
-                         int_mv *second_ref_mv,
                          int64_t comp_pred_diff[REFERENCE_MODES],
                          const int64_t tx_size_diff[TX_MODES],
                          int64_t best_filter_diff[SWITCHABLE_FILTER_CONTEXTS]) {
@@ -3613,9 +3611,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
   set_ref_ptrs(cm, xd, mbmi->ref_frame[0], mbmi->ref_frame[1]);
   store_coding_context(x, ctx, best_mode_index,
-                       &mbmi->ref_mvs[mbmi->ref_frame[0]][0],
-                       &mbmi->ref_mvs[mbmi->ref_frame[1] < 0 ? 0 :
-                                      mbmi->ref_frame[1]][0],
                        best_pred_diff, best_tx_diff, best_filter_diff);
 
   return best_rd;
@@ -4246,9 +4241,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 
   set_ref_ptrs(cm, xd, mbmi->ref_frame[0], mbmi->ref_frame[1]);
   store_coding_context(x, ctx, best_ref_index,
-                       &mbmi->ref_mvs[mbmi->ref_frame[0]][0],
-                       &mbmi->ref_mvs[mbmi->ref_frame[1] < 0 ? 0 :
-                                      mbmi->ref_frame[1]][0],
                        best_pred_diff, best_tx_diff, best_filter_diff);
 
   return best_rd;
