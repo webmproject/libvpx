@@ -87,6 +87,24 @@
       "revId": "e55c9f0654072936c94acff429f9dc3549e50d41",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ny0\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 491,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-05-27T13:27:14Z",
+      "side": 1,
+      "message": "Why not abandon this patch ?",
+      "parentUuid": "AAAAdn//oaw\u003d",
+      "revId": "e55c9f0654072936c94acff429f9dc3549e50d41",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
