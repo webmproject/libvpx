@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//nv0\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-05-27T20:08:05Z",
+      "side": 1,
+      "message": "these 2 could be combined with the declaration and made const",
+      "revId": "916550428db803c54c993ff9d3c34b9b0bcebb7c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//nvw\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-05-27T20:08:05Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "916550428db803c54c993ff9d3c34b9b0bcebb7c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
