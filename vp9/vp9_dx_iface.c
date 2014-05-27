@@ -452,7 +452,7 @@ static vpx_codec_err_t decoder_set_fb_fn(
 }
 
 static vpx_codec_err_t ctrl_set_reference(vpx_codec_alg_priv_t *ctx,
-                                          int ctr_id, va_list args) {
+                                          va_list args) {
   vpx_ref_frame_t *const data = va_arg(args, vpx_ref_frame_t *);
 
   if (data) {
@@ -468,7 +468,7 @@ static vpx_codec_err_t ctrl_set_reference(vpx_codec_alg_priv_t *ctx,
 }
 
 static vpx_codec_err_t ctrl_copy_reference(vpx_codec_alg_priv_t *ctx,
-                                           int ctr_id, va_list args) {
+                                           va_list args) {
   vpx_ref_frame_t *data = va_arg(args, vpx_ref_frame_t *);
 
   if (data) {
@@ -485,7 +485,7 @@ static vpx_codec_err_t ctrl_copy_reference(vpx_codec_alg_priv_t *ctx,
 }
 
 static vpx_codec_err_t ctrl_get_reference(vpx_codec_alg_priv_t *ctx,
-                                          int ctr_id, va_list args) {
+                                          va_list args) {
   vp9_ref_frame_t *data = va_arg(args, vp9_ref_frame_t *);
 
   if (data) {
@@ -500,7 +500,7 @@ static vpx_codec_err_t ctrl_get_reference(vpx_codec_alg_priv_t *ctx,
 }
 
 static vpx_codec_err_t ctrl_set_postproc(vpx_codec_alg_priv_t *ctx,
-                                         int ctr_id, va_list args) {
+                                         va_list args) {
 #if CONFIG_VP9_POSTPROC
   vp8_postproc_cfg_t *data = va_arg(args, vp8_postproc_cfg_t *);
 
@@ -512,17 +512,21 @@ static vpx_codec_err_t ctrl_set_postproc(vpx_codec_alg_priv_t *ctx,
     return VPX_CODEC_INVALID_PARAM;
   }
 #else
+  (void)ctx;
+  (void)args;
   return VPX_CODEC_INCAPABLE;
 #endif
 }
 
 static vpx_codec_err_t ctrl_set_dbg_options(vpx_codec_alg_priv_t *ctx,
-                                            int ctrl_id, va_list args) {
+                                            va_list args) {
+  (void)ctx;
+  (void)args;
   return VPX_CODEC_INCAPABLE;
 }
 
 static vpx_codec_err_t ctrl_get_last_ref_updates(vpx_codec_alg_priv_t *ctx,
-                                                 int ctrl_id, va_list args) {
+                                                 va_list args) {
   int *const update_info = va_arg(args, int *);
 
   if (update_info) {
@@ -538,7 +542,7 @@ static vpx_codec_err_t ctrl_get_last_ref_updates(vpx_codec_alg_priv_t *ctx,
 
 
 static vpx_codec_err_t ctrl_get_frame_corrupted(vpx_codec_alg_priv_t *ctx,
-                                                int ctrl_id, va_list args) {
+                                                va_list args) {
   int *corrupted = va_arg(args, int *);
 
   if (corrupted) {
@@ -553,7 +557,7 @@ static vpx_codec_err_t ctrl_get_frame_corrupted(vpx_codec_alg_priv_t *ctx,
 }
 
 static vpx_codec_err_t ctrl_get_display_size(vpx_codec_alg_priv_t *ctx,
-                                             int ctrl_id, va_list args) {
+                                             va_list args) {
   int *const display_size = va_arg(args, int *);
 
   if (display_size) {
@@ -571,13 +575,12 @@ static vpx_codec_err_t ctrl_get_display_size(vpx_codec_alg_priv_t *ctx,
 }
 
 static vpx_codec_err_t ctrl_set_invert_tile_order(vpx_codec_alg_priv_t *ctx,
-                                                  int ctr_id, va_list args) {
+                                                  va_list args) {
   ctx->invert_tile_order = va_arg(args, int);
   return VPX_CODEC_OK;
 }
 
 static vpx_codec_err_t ctrl_set_decryptor(vpx_codec_alg_priv_t *ctx,
-                                          int ctrl_id,
                                           va_list args) {
   vpx_decrypt_init *init = va_arg(args, vpx_decrypt_init *);
   ctx->decrypt_cb = init ? init->decrypt_cb : NULL;

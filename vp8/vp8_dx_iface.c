@@ -576,8 +576,7 @@ static vpx_codec_err_t image2yuvconfig(const vpx_image_t   *img,
 
 
 static vpx_codec_err_t vp8_set_reference(vpx_codec_alg_priv_t *ctx,
-        int ctr_id,
-        va_list args)
+                                         va_list args)
 {
 
     vpx_ref_frame_t *data = va_arg(args, vpx_ref_frame_t *);
@@ -598,8 +597,7 @@ static vpx_codec_err_t vp8_set_reference(vpx_codec_alg_priv_t *ctx,
 }
 
 static vpx_codec_err_t vp8_get_reference(vpx_codec_alg_priv_t *ctx,
-        int ctr_id,
-        va_list args)
+                                         va_list args)
 {
 
     vpx_ref_frame_t *data = va_arg(args, vpx_ref_frame_t *);
@@ -620,7 +618,6 @@ static vpx_codec_err_t vp8_get_reference(vpx_codec_alg_priv_t *ctx,
 }
 
 static vpx_codec_err_t vp8_set_postproc(vpx_codec_alg_priv_t *ctx,
-                                        int ctr_id,
                                         va_list args)
 {
 #if CONFIG_POSTPROC
@@ -640,31 +637,56 @@ static vpx_codec_err_t vp8_set_postproc(vpx_codec_alg_priv_t *ctx,
 #endif
 }
 
-static vpx_codec_err_t vp8_set_dbg_options(vpx_codec_alg_priv_t *ctx,
-                                        int ctrl_id,
-                                        va_list args)
-{
+
+static vpx_codec_err_t vp8_set_dbg_color_ref_frame(vpx_codec_alg_priv_t *ctx,
+                                                   va_list args) {
 #if CONFIG_POSTPROC_VISUALIZER && CONFIG_POSTPROC
-    int data = va_arg(args, int);
-
-#define MAP(id, var) case id: var = data; break;
-
-    switch (ctrl_id)
-    {
-        MAP (VP8_SET_DBG_COLOR_REF_FRAME,   ctx->dbg_color_ref_frame_flag);
-        MAP (VP8_SET_DBG_COLOR_MB_MODES,    ctx->dbg_color_mb_modes_flag);
-        MAP (VP8_SET_DBG_COLOR_B_MODES,     ctx->dbg_color_b_modes_flag);
-        MAP (VP8_SET_DBG_DISPLAY_MV,        ctx->dbg_display_mv_flag);
-    }
-
-    return VPX_CODEC_OK;
+  ctx->dbg_color_ref_frame_flag = va_arg(args, int);
+  return VPX_CODEC_OK;
 #else
-    return VPX_CODEC_INCAPABLE;
+  (void)ctx;
+  (void)args;
+  return VPX_CODEC_INCAPABLE;
+#endif
+}
+
+static vpx_codec_err_t vp8_set_dbg_color_mb_modes(vpx_codec_alg_priv_t *ctx,
+                                                  va_list args) {
+#if CONFIG_POSTPROC_VISUALIZER && CONFIG_POSTPROC
+  ctx->dbg_color_mb_modes_flag = va_arg(args, int);
+  return VPX_CODEC_OK;
+#else
+  (void)ctx;
+  (void)args;
+  return VPX_CODEC_INCAPABLE;
+#endif
+}
+
+static vpx_codec_err_t vp8_set_dbg_color_b_modes(vpx_codec_alg_priv_t *ctx,
+                                                 va_list args) {
+#if CONFIG_POSTPROC_VISUALIZER && CONFIG_POSTPROC
+  ctx->dbg_color_b_modes_flag = va_arg(args, int);
+  return VPX_CODEC_OK;
+#else
+  (void)ctx;
+  (void)args;
+  return VPX_CODEC_INCAPABLE;
+#endif
+}
+
+static vpx_codec_err_t vp8_set_dbg_display_mv(vpx_codec_alg_priv_t *ctx,
+                                              va_list args) {
+#if CONFIG_POSTPROC_VISUALIZER && CONFIG_POSTPROC
+  ctx->dbg_display_mv_flag = va_arg(args, int);
+  return VPX_CODEC_OK;
+#else
+  (void)ctx;
+  (void)args;
+  return VPX_CODEC_INCAPABLE;
 #endif
 }
 
 static vpx_codec_err_t vp8_get_last_ref_updates(vpx_codec_alg_priv_t *ctx,
-                                                int ctrl_id,
                                                 va_list args)
 {
     int *update_info = va_arg(args, int *);
@@ -685,7 +707,6 @@ static vpx_codec_err_t vp8_get_last_ref_updates(vpx_codec_alg_priv_t *ctx,
 
 extern int vp8dx_references_buffer( VP8_COMMON *oci, int ref_frame );
 static vpx_codec_err_t vp8_get_last_ref_frame(vpx_codec_alg_priv_t *ctx,
-                                              int ctrl_id,
                                               va_list args)
 {
     int *ref_info = va_arg(args, int *);
@@ -706,7 +727,6 @@ static vpx_codec_err_t vp8_get_last_ref_frame(vpx_codec_alg_priv_t *ctx,
 }
 
 static vpx_codec_err_t vp8_get_frame_corrupted(vpx_codec_alg_priv_t *ctx,
-                                               int ctrl_id,
                                                va_list args)
 {
 
@@ -725,7 +745,6 @@ static vpx_codec_err_t vp8_get_frame_corrupted(vpx_codec_alg_priv_t *ctx,
 }
 
 static vpx_codec_err_t vp8_set_decryptor(vpx_codec_alg_priv_t *ctx,
-                                         int ctrl_id,
                                          va_list args)
 {
     vpx_decrypt_init *init = va_arg(args, vpx_decrypt_init *);
@@ -748,10 +767,10 @@ vpx_codec_ctrl_fn_map_t vp8_ctf_maps[] =
     {VP8_SET_REFERENCE,             vp8_set_reference},
     {VP8_COPY_REFERENCE,            vp8_get_reference},
     {VP8_SET_POSTPROC,              vp8_set_postproc},
-    {VP8_SET_DBG_COLOR_REF_FRAME,   vp8_set_dbg_options},
-    {VP8_SET_DBG_COLOR_MB_MODES,    vp8_set_dbg_options},
-    {VP8_SET_DBG_COLOR_B_MODES,     vp8_set_dbg_options},
-    {VP8_SET_DBG_DISPLAY_MV,        vp8_set_dbg_options},
+    {VP8_SET_DBG_COLOR_REF_FRAME,   vp8_set_dbg_color_ref_frame},
+    {VP8_SET_DBG_COLOR_MB_MODES,    vp8_set_dbg_color_mb_modes},
+    {VP8_SET_DBG_COLOR_B_MODES,     vp8_set_dbg_color_b_modes},
+    {VP8_SET_DBG_DISPLAY_MV,        vp8_set_dbg_display_mv},
     {VP8D_GET_LAST_REF_UPDATES,     vp8_get_last_ref_updates},
     {VP8D_GET_FRAME_CORRUPTED,      vp8_get_frame_corrupted},
     {VP8D_GET_LAST_REF_USED,        vp8_get_last_ref_frame},
