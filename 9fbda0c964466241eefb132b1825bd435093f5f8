@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//nyc\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1404,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-05-27T15:45:42Z",
+      "side": 1,
+      "message": "This maybe unnecessary given max_gf_interval will be capped below anyway by static_scene_max_gf_interval?",
+      "revId": "9fbda0c964466241eefb132b1825bd435093f5f8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
