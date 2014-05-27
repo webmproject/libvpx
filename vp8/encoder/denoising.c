@@ -201,6 +201,7 @@ void vp8_denoiser_denoise_mb(VP8_DENOISER *denoiser,
     int mv_col;
     unsigned int motion_magnitude2;
     unsigned int sse_thresh;
+    int sse_diff_thresh = 0;
     MV_REFERENCE_FRAME frame = x->best_reference_frame;
     MV_REFERENCE_FRAME zero_frame = x->best_zeromv_reference_frame;
 
@@ -225,11 +226,16 @@ void vp8_denoiser_denoise_mb(VP8_DENOISER *denoiser,
         mbmi->need_to_clamp_mvs = x->need_to_clamp_best_mvs;
         mv_col = x->best_sse_mv.as_mv.col;
         mv_row = x->best_sse_mv.as_mv.row;
+        // Bias to zero_mv if small amount of motion.
+        // Note sse_diff_thresh is intialized to zero, so this ensures
+        // we will always choose zero_mv for denoising if
+        // zero_mv_see <= best_sse (i.e., sse_diff <= 0).
+        if ((unsigned int)(mv_row * mv_row + mv_col * mv_col)
+            <= NOISE_MOTION_THRESHOLD)
+            sse_diff_thresh = (int)SSE_DIFF_THRESHOLD;
 
         if (frame == INTRA_FRAME ||
-            ((unsigned int)(mv_row *mv_row + mv_col *mv_col)
-              <= NOISE_MOTION_THRESHOLD &&
-             sse_diff < (int)SSE_DIFF_THRESHOLD))
+            sse_diff <= sse_diff_thresh)
         {
             /*
              * Handle intra blocks as referring to last frame with zero motion
