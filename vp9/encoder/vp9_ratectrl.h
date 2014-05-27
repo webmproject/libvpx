@@ -178,6 +178,9 @@ int vp9_compute_qdelta_by_rate(const RATE_CONTROL *rc, FRAME_TYPE frame_type,
 
 void vp9_rc_update_framerate(struct VP9_COMP *cpi);
 
+void vp9_rc_set_gf_max_interval(const struct VP9EncoderConfig *const oxcf,
+                                RATE_CONTROL *const rc);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

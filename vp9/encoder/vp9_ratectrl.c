@@ -1390,6 +1390,24 @@ int vp9_compute_qdelta_by_rate(const RATE_CONTROL *rc, FRAME_TYPE frame_type,
   return target_index - qindex;
 }
 
+void vp9_rc_set_gf_max_interval(const VP9EncoderConfig *const oxcf,
+                                RATE_CONTROL *const rc) {
+  // Set Maximum gf/arf interval
+  rc->max_gf_interval = 16;
+
+  // Extended interval for genuinely static scenes
+  rc->static_scene_max_gf_interval = oxcf->key_freq >> 1;
+
+  // Special conditions when alt ref frame enabled
+  if (oxcf->play_alternate && oxcf->lag_in_frames) {
+    if (rc->static_scene_max_gf_interval > oxcf->lag_in_frames - 1)
+      rc->static_scene_max_gf_interval = oxcf->lag_in_frames - 1;
+  }
+
+  if (rc->max_gf_interval > rc->static_scene_max_gf_interval)
+    rc->max_gf_interval = rc->static_scene_max_gf_interval;
+}
+
 void vp9_rc_update_framerate(VP9_COMP *cpi) {
   const VP9_COMMON *const cm = &cpi->common;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
@@ -1414,21 +1432,5 @@ void vp9_rc_update_framerate(VP9_COMP *cpi) {
   rc->max_frame_bandwidth = MAX(MAX((cm->MBs * MAX_MB_RATE), MAXRATE_1080P),
                                     vbr_max_bits);
 
-  // Set Maximum gf/arf interval
-  rc->max_gf_interval = 16;
-
-  // Extended interval for genuinely static scenes
-  rc->static_scene_max_gf_interval = cpi->oxcf.key_freq >> 1;
-
-  // Special conditions when alt ref frame enabled in lagged compress mode
-  if (oxcf->play_alternate && oxcf->lag_in_frames) {
-    if (rc->max_gf_interval > oxcf->lag_in_frames - 1)
-      rc->max_gf_interval = oxcf->lag_in_frames - 1;
-
-    if (rc->static_scene_max_gf_interval > oxcf->lag_in_frames - 1)
-      rc->static_scene_max_gf_interval = oxcf->lag_in_frames - 1;
-  }
-
-  if (rc->max_gf_interval > rc->static_scene_max_gf_interval)
-    rc->max_gf_interval = rc->static_scene_max_gf_interval;
+  vp9_rc_set_gf_max_interval(oxcf, rc);
 }

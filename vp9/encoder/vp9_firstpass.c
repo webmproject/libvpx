@@ -1578,7 +1578,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
     // Break out conditions.
     if (
-      // Break at cpi->max_gf_interval unless almost totally static.
+      // Break at active_max_gf_interval unless almost totally static.
       (i >= active_max_gf_interval && (zero_motion_accumulator < 0.995)) ||
       (
         // Don't break out with a very short interval.
