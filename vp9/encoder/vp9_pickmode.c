@@ -284,9 +284,8 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           (1 << INTER_OFFSET(this_mode)))
         continue;
 
-      if (best_rd < ((int64_t)rd_threshes[mode_idx[this_mode]] *
-          rd_thresh_freq_fact[this_mode] >> 5) ||
-          rd_threshes[mode_idx[this_mode]] == INT_MAX)
+      if (rd_less_than_thresh(best_rd, rd_threshes[mode_idx[this_mode]],
+                              rd_thresh_freq_fact[this_mode]))
         continue;
 
       if (this_mode == NEWMV) {

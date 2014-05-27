@@ -9,7 +9,6 @@
  */
 
 #include <assert.h>
-#include <limits.h>
 #include <math.h>
 #include <stdio.h>
 
@@ -2990,11 +2989,6 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   ctx->mic = *xd->mi[0];
 }
 
-static INLINE int rd_less_than_thresh(int64_t best_rd, int thresh,
-                                      int thresh_fact) {
-    return best_rd < ((int64_t)thresh * thresh_fact >> 5) || thresh == INT_MAX;
-}
-
 // Updating rd_thresh_freq_fact[] here means that the different
 // partition/block sizes are handled independently based on the best
 // choice for the current partition. It may well be better to keep a scaled
@@ -3227,7 +3221,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
     // Test best rd so far against threshold for trying this mode.
     if (rd_less_than_thresh(best_rd, rd_threshes[mode_index],
-        rd_thresh_freq_fact[mode_index]))
+                            rd_thresh_freq_fact[mode_index]))
       continue;
 
     this_mode = vp9_mode_order[mode_index].mode;
