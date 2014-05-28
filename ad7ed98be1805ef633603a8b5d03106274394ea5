@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//niI\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 411,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-05-28T17:30:55Z",
+      "side": 1,
+      "message": "The original code is like this.Do I need to change it to be this way now?",
+      "parentUuid": "AAAAdn//n1U\u003d",
+      "revId": "ad7ed98be1805ef633603a8b5d03106274394ea5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//n1Q\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2014-05-24T01:27:16Z",
       "side": 1,
       "message": "To avoid -Wextra wornings this should be  \"\u003d {0, 0, 0}\"",
+      "revId": "ad7ed98be1805ef633603a8b5d03106274394ea5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//niE\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 412,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-05-28T17:30:55Z",
+      "side": 1,
+      "message": "The original code is like this.Do I need to change it to be this way now?",
+      "parentUuid": "AAAAdn//n1Q\u003d",
       "revId": "ad7ed98be1805ef633603a8b5d03106274394ea5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//nho\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 417,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-05-28T17:30:55Z",
+      "side": 1,
+      "message": "Done. Add a NULL check for ctx-\u003epbi.",
+      "parentUuid": "AAAAdn//nsU\u003d",
+      "revId": "ad7ed98be1805ef633603a8b5d03106274394ea5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//n1c\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 2
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//nh0\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 418,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-05-28T17:30:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//n1c\u003d",
+      "revId": "ad7ed98be1805ef633603a8b5d03106274394ea5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//n1Y\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 2
@@ -81,6 +153,24 @@
       "writtenOn": "2014-05-24T01:27:16Z",
       "side": 1,
       "message": "Could you remove ctx-\u003eimg as well? It seems you don\u0027t need it anymore.",
+      "revId": "ad7ed98be1805ef633603a8b5d03106274394ea5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//nhw\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 420,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-05-28T17:30:55Z",
+      "side": 1,
+      "message": "Seems not as  ctx-\u003eimg.fb_priv is still needed for external frame buffer.",
+      "parentUuid": "AAAAdn//n1Y\u003d",
       "revId": "ad7ed98be1805ef633603a8b5d03106274394ea5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
