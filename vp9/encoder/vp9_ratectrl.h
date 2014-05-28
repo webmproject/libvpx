@@ -30,7 +30,7 @@ typedef struct {
   int this_frame_target;           // Actual frame target after rc adjustment.
   int projected_frame_size;
   int sb64_target_rate;
-  int last_q[3];                   // Separate values for Intra/Inter/ARF-GF
+  int last_q[FRAME_TYPES];         // Separate values for Intra/Inter
   int last_boosted_qindex;         // Last boosted GF/KF/ARF q
 
   int gfu_boost;
