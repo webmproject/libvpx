@@ -169,7 +169,6 @@ static void zero_stats(FIRSTPASS_STATS *section) {
   section->intra_error = 0.0;
   section->coded_error = 0.0;
   section->sr_coded_error = 0.0;
-  section->ssim_weighted_pred_err = 0.0;
   section->pcnt_inter  = 0.0;
   section->pcnt_motion  = 0.0;
   section->pcnt_second_ref = 0.0;
@@ -194,7 +193,6 @@ static void accumulate_stats(FIRSTPASS_STATS *section,
   section->intra_error += frame->intra_error;
   section->coded_error += frame->coded_error;
   section->sr_coded_error += frame->sr_coded_error;
-  section->ssim_weighted_pred_err += frame->ssim_weighted_pred_err;
   section->pcnt_inter  += frame->pcnt_inter;
   section->pcnt_motion += frame->pcnt_motion;
   section->pcnt_second_ref += frame->pcnt_second_ref;
@@ -217,7 +215,6 @@ static void subtract_stats(FIRSTPASS_STATS *section,
   section->intra_error -= frame->intra_error;
   section->coded_error -= frame->coded_error;
   section->sr_coded_error -= frame->sr_coded_error;
-  section->ssim_weighted_pred_err -= frame->ssim_weighted_pred_err;
   section->pcnt_inter  -= frame->pcnt_inter;
   section->pcnt_motion -= frame->pcnt_motion;
   section->pcnt_second_ref -= frame->pcnt_second_ref;
@@ -241,7 +238,6 @@ static void avg_stats(FIRSTPASS_STATS *section) {
   section->intra_error /= section->count;
   section->coded_error /= section->count;
   section->sr_coded_error /= section->count;
-  section->ssim_weighted_pred_err /= section->count;
   section->pcnt_inter  /= section->count;
   section->pcnt_second_ref /= section->count;
   section->pcnt_neutral /= section->count;
@@ -262,69 +258,12 @@ static double calculate_modified_err(const TWO_PASS *twopass,
                                      const VP9EncoderConfig *oxcf,
                                      const FIRSTPASS_STATS *this_frame) {
   const FIRSTPASS_STATS *const stats = &twopass->total_stats;
-  const double av_err = stats->ssim_weighted_pred_err / stats->count;
+  const double av_err = stats->coded_error / stats->count;
   const double modified_error = av_err *
-      pow(this_frame->ssim_weighted_pred_err / DOUBLE_DIVIDE_CHECK(av_err),
+      pow(this_frame->coded_error / DOUBLE_DIVIDE_CHECK(av_err),
           oxcf->two_pass_vbrbias / 100.0);
   return fclamp(modified_error,
                 twopass->modified_error_min, twopass->modified_error_max);
-}
-
-static const double weight_table[256] = {
-  0.020000, 0.020000, 0.020000, 0.020000, 0.020000, 0.020000, 0.020000,
-  0.020000, 0.020000, 0.020000, 0.020000, 0.020000, 0.020000, 0.020000,
-  0.020000, 0.020000, 0.020000, 0.020000, 0.020000, 0.020000, 0.020000,
-  0.020000, 0.020000, 0.020000, 0.020000, 0.020000, 0.020000, 0.020000,
-  0.020000, 0.020000, 0.020000, 0.020000, 0.020000, 0.031250, 0.062500,
-  0.093750, 0.125000, 0.156250, 0.187500, 0.218750, 0.250000, 0.281250,
-  0.312500, 0.343750, 0.375000, 0.406250, 0.437500, 0.468750, 0.500000,
-  0.531250, 0.562500, 0.593750, 0.625000, 0.656250, 0.687500, 0.718750,
-  0.750000, 0.781250, 0.812500, 0.843750, 0.875000, 0.906250, 0.937500,
-  0.968750, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
-  1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
-  1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
-  1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
-  1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
-  1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
-  1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
-  1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
-  1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
-  1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
-  1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
-  1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
-  1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
-  1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
-  1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
-  1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
-  1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
-  1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
-  1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
-  1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
-  1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
-  1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
-  1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
-  1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
-  1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
-  1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
-  1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
-  1.000000, 1.000000, 1.000000, 1.000000
-};
-
-static double simple_weight(const YV12_BUFFER_CONFIG *buf) {
-  int i, j;
-  double sum = 0.0;
-  const int w = buf->y_crop_width;
-  const int h = buf->y_crop_height;
-  const uint8_t *row = buf->y_buffer;
-
-  for (i = 0; i < h; ++i) {
-    const uint8_t *pixel = row;
-    for (j = 0; j < w; ++j)
-      sum += weight_table[*pixel++];
-    row += buf->y_stride;
-  }
-
-  return MAX(0.1, sum / (w * h));
 }
 
 // This function returns the maximum target rate per frame.
@@ -796,7 +735,6 @@ void vp9_first_pass(VP9_COMP *cpi) {
     fps.intra_error = (double)(intra_error >> 8);
     fps.coded_error = (double)(coded_error >> 8);
     fps.sr_coded_error = (double)(sr_coded_error >> 8);
-    fps.ssim_weighted_pred_err = fps.coded_error * simple_weight(cpi->Source);
     fps.count = 1.0;
     fps.pcnt_inter = (double)intercount / cm->MBs;
     fps.pcnt_second_ref = (double)second_ref_count / cm->MBs;
@@ -1002,8 +940,8 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
   // Scan the first pass file and calculate a modified total error based upon
   // the bias/power function used to allocate bits.
   {
-    const double avg_error = stats->ssim_weighted_pred_err /
-                                 DOUBLE_DIVIDE_CHECK(stats->count);
+    const double avg_error = stats->coded_error /
+                             DOUBLE_DIVIDE_CHECK(stats->count);
     const FIRSTPASS_STATS *s = twopass->stats_in;
     double modified_error_total = 0.0;
     twopass->modified_error_min = (avg_error *
@@ -1523,6 +1461,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   FIRSTPASS_STATS next_frame;
   const FIRSTPASS_STATS *const start_pos = twopass->stats_in;
   int i;
+
   double boost_score = 0.0;
   double old_boost_score = 0.0;
   double gf_group_err = 0.0;
