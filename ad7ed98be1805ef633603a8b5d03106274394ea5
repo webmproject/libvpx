@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//ngg\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 412,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-05-28T18:18:31Z",
+      "side": 1,
+      "message": "I fix it in my patch -- https://gerrit.chromium.org/gerrit/#/c/70327/",
+      "parentUuid": "AAAAdn//niE\u003d",
+      "revId": "ad7ed98be1805ef633603a8b5d03106274394ea5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//nsU\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 2
