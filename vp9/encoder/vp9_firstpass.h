@@ -44,7 +44,6 @@ typedef struct {
   unsigned int section_intra_rating;
   unsigned int next_iiratio;
   FIRSTPASS_STATS total_stats;
-  FIRSTPASS_STATS this_frame_stats;
   const FIRSTPASS_STATS *stats_in;
   const FIRSTPASS_STATS *stats_in_start;
   const FIRSTPASS_STATS *stats_in_end;
