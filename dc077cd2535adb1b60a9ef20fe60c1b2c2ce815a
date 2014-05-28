@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//ncw\u003d",
+        "filename": "vp9/encoder/x86/vp9_temporal_filter_apply_sse2.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-05-28T21:49:17Z",
+      "side": 1,
+      "message": "If you like using xmm6 here that\u0027s fine but:\n        mov         edx,            arg(4)\n        mov         [rsp + block_height], rdx\nfeels more idiomatic to me",
+      "revId": "dc077cd2535adb1b60a9ef20fe60c1b2c2ce815a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
