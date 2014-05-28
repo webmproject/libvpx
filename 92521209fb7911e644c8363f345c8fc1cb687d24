@@ -16,6 +16,24 @@
       "revId": "92521209fb7911e644c8363f345c8fc1cb687d24",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ni0\u003d",
+        "filename": "vpx/internal/vpx_codec_internal.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-05-28T15:54:17Z",
+      "side": 1,
+      "message": "It was discussed that common code from vp8 and vp9 shall be extracted into a folder \"vpx_util\" to exist at the same level of vp8 and vp9.",
+      "parentUuid": "AAAAdn//oWY\u003d",
+      "revId": "92521209fb7911e644c8363f345c8fc1cb687d24",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
