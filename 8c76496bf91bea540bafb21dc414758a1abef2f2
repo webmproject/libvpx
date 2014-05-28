@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//nhY\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-05-28T17:47:27Z",
+      "side": 1,
+      "message": "Add space around the operators.",
+      "revId": "8c76496bf91bea540bafb21dc414758a1abef2f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
