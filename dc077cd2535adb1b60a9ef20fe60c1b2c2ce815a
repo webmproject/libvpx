@@ -16,6 +16,24 @@
       "revId": "dc077cd2535adb1b60a9ef20fe60c1b2c2ce815a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//nb8\u003d",
+        "filename": "vp9/encoder/x86/vp9_temporal_filter_apply_sse2.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-05-28T22:53:52Z",
+      "side": 1,
+      "message": "Yes, I like your fix better too. In patch 3, I did the same for the arg(3) too.",
+      "parentUuid": "AAAAdn//ncw\u003d",
+      "revId": "dc077cd2535adb1b60a9ef20fe60c1b2c2ce815a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
