@@ -3129,6 +3129,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   if (vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP)) {
     const int inter_non_zero_mode_mask = 0x1F7F7;
     mode_skip_mask |= inter_non_zero_mode_mask;
+    mode_skip_mask &= ~(1 << THR_ZEROMV);
+    disable_inter_mode_mask = ~(1 << INTER_OFFSET(ZEROMV));
   }
 
   // Disable this drop out case if the ref frame
