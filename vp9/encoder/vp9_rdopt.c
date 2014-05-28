@@ -3162,7 +3162,11 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   if (bsize > cpi->sf.max_intra_bsize) {
-    mode_skip_mask |= 0xFF30808;
+    const int all_intra_modes = (1 << THR_DC) | (1 << THR_TM) |
+        (1 << THR_H_PRED) | (1 << THR_V_PRED) | (1 << THR_D135_PRED) |
+        (1 << THR_D207_PRED) | (1 << THR_D153_PRED) | (1 << THR_D63_PRED) |
+        (1 << THR_D117_PRED) | (1 << THR_D45_PRED);
+    mode_skip_mask |= all_intra_modes;
   }
 
   if (!x->in_active_map) {
