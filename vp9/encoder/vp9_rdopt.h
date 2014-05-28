@@ -99,40 +99,43 @@ static INLINE int full_pixel_search(VP9_COMP *cpi, MACROBLOCK *x,
                                     int step_param, int error_per_bit,
                                     const MV *ref_mv, MV *tmp_mv,
                                     int var_max, int rd) {
+  const SPEED_FEATURES *const sf = &cpi->sf;
+  const SEARCH_METHODS method = sf->search_method;
+  vp9_variance_fn_ptr_t *fn_ptr = &cpi->fn_ptr[bsize];
   int var = 0;
 
-  if (cpi->sf.search_method == FAST_DIAMOND) {
-    var = vp9_fast_dia_search(x, mvp_full, step_param, error_per_bit, 0,
-                              &cpi->fn_ptr[bsize], 1, ref_mv, tmp_mv);
-    if (rd && var < var_max)
-      var = vp9_get_mvpred_var(x, tmp_mv, ref_mv, &cpi->fn_ptr[bsize], 1);
-  } else if (cpi->sf.search_method == FAST_HEX) {
-    var = vp9_fast_hex_search(x, mvp_full, step_param, error_per_bit, 0,
-                              &cpi->fn_ptr[bsize], 1, ref_mv, tmp_mv);
-    if (rd && var < var_max)
-      var = vp9_get_mvpred_var(x, tmp_mv, ref_mv, &cpi->fn_ptr[bsize], 1);
-  } else if (cpi->sf.search_method == HEX) {
-    var = vp9_hex_search(x, mvp_full, step_param, error_per_bit, 1,
-                         &cpi->fn_ptr[bsize], 1, ref_mv, tmp_mv);
-    if (rd && var < var_max)
-      var = vp9_get_mvpred_var(x, tmp_mv, ref_mv, &cpi->fn_ptr[bsize], 1);
-  } else if (cpi->sf.search_method == SQUARE) {
-    var = vp9_square_search(x, mvp_full, step_param, error_per_bit, 1,
-                            &cpi->fn_ptr[bsize], 1, ref_mv, tmp_mv);
-    if (rd && var < var_max)
-      var = vp9_get_mvpred_var(x, tmp_mv, ref_mv, &cpi->fn_ptr[bsize], 1);
-  } else if (cpi->sf.search_method == BIGDIA) {
-    var = vp9_bigdia_search(x, mvp_full, step_param, error_per_bit, 1,
-                            &cpi->fn_ptr[bsize], 1, ref_mv, tmp_mv);
-    if (rd && var < var_max)
-      var = vp9_get_mvpred_var(x, tmp_mv, ref_mv, &cpi->fn_ptr[bsize], 1);
-  } else {
-    int further_steps = (cpi->sf.max_step_search_steps - 1) - step_param;
-
-    var = vp9_full_pixel_diamond(cpi, x, mvp_full, step_param, error_per_bit,
-                                 further_steps, 1, &cpi->fn_ptr[bsize],
-                                 ref_mv, tmp_mv);
+  switch (method) {
+    case FAST_DIAMOND:
+      var = vp9_fast_dia_search(x, mvp_full, step_param, error_per_bit, 0,
+                                fn_ptr, 1, ref_mv, tmp_mv);
+      break;
+    case FAST_HEX:
+      var = vp9_fast_hex_search(x, mvp_full, step_param, error_per_bit, 0,
+                                fn_ptr, 1, ref_mv, tmp_mv);
+      break;
+    case HEX:
+      var = vp9_hex_search(x, mvp_full, step_param, error_per_bit, 1,
+                           fn_ptr, 1, ref_mv, tmp_mv);
+      break;
+    case SQUARE:
+      var = vp9_square_search(x, mvp_full, step_param, error_per_bit, 1,
+                              fn_ptr, 1, ref_mv, tmp_mv);
+      break;
+    case BIGDIA:
+      var = vp9_bigdia_search(x, mvp_full, step_param, error_per_bit, 1,
+                              fn_ptr, 1, ref_mv, tmp_mv);
+      break;
+    case NSTEP:
+      var = vp9_full_pixel_diamond(cpi, x, mvp_full, step_param, error_per_bit,
+                                   (sf->max_step_search_steps - 1) - step_param,
+                                   1, fn_ptr, ref_mv, tmp_mv);
+      break;
+    default:
+      assert(!"Invalid search method.");
   }
+
+  if (method != NSTEP && rd && var < var_max)
+    var = vp9_get_mvpred_var(x, tmp_mv, ref_mv, fn_ptr, 1);
 
   return var;
 }
