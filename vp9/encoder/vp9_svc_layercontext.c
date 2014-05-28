@@ -50,9 +50,8 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
       lrc->last_q[INTER_FRAME] = oxcf->worst_allowed_q;
     } else {
       lc->target_bandwidth = oxcf->ss_target_bitrate[layer];
-      lrc->last_q[0] = oxcf->best_allowed_q;
-      lrc->last_q[1] = oxcf->best_allowed_q;
-      lrc->last_q[2] = oxcf->best_allowed_q;
+      lrc->last_q[KEY_FRAME] = oxcf->best_allowed_q;
+      lrc->last_q[INTER_FRAME] = oxcf->best_allowed_q;
     }
 
     lrc->buffer_level = vp9_rescale((int)(oxcf->starting_buffer_level),

@@ -200,9 +200,8 @@ void vp9_rc_init(const VP9EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
                                    oxcf->best_allowed_q) / 2;
   }
 
-  rc->last_q[0] = oxcf->best_allowed_q;
-  rc->last_q[1] = oxcf->best_allowed_q;
-  rc->last_q[2] = oxcf->best_allowed_q;
+  rc->last_q[KEY_FRAME] = oxcf->best_allowed_q;
+  rc->last_q[INTER_FRAME] = oxcf->best_allowed_q;
 
   rc->buffer_level =    oxcf->starting_buffer_level;
   rc->bits_off_target = oxcf->starting_buffer_level;
@@ -1090,7 +1089,6 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
   } else if (!rc->is_src_frame_alt_ref &&
              (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame) &&
              !(cpi->use_svc && oxcf->rc_mode == RC_MODE_CBR)) {
-    rc->last_q[2] = qindex;
     rc->avg_frame_qindex[2] =
         ROUND_POWER_OF_TWO(3 * rc->avg_frame_qindex[2] + qindex, 2);
   } else {
