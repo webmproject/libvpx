@@ -31,6 +31,12 @@ enum {
 };
 
 enum {
+  INTER_ALL = (1 << NEARESTMV) | (1 << NEARMV) | (1 << ZEROMV) | (1 << NEWMV),
+  INTER_NEAREST = (1 << NEARESTMV),
+  INTER_NEAREST_NEAR_NEW = (1 << NEARESTMV) | (1 << NEARMV) | (1 << NEWMV)
+};
+
+enum {
   DISABLE_ALL_INTER_SPLIT   = (1 << THR_COMP_GA) |
                               (1 << THR_COMP_LA) |
                               (1 << THR_ALTR) |
@@ -237,10 +243,10 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->intra_y_mode_mask[TX_32X32] = INTRA_DC_ONLY;
     sf->frame_parameter_update = 0;
     sf->search_method = FAST_HEX;
-    sf->disable_inter_mode_mask[BLOCK_32X32] = 1 << INTER_OFFSET(ZEROMV);
-    sf->disable_inter_mode_mask[BLOCK_32X64] = ~(1 << INTER_OFFSET(NEARESTMV));
-    sf->disable_inter_mode_mask[BLOCK_64X32] = ~(1 << INTER_OFFSET(NEARESTMV));
-    sf->disable_inter_mode_mask[BLOCK_64X64] = ~(1 << INTER_OFFSET(NEARESTMV));
+    sf->inter_mode_mask[BLOCK_32X32] = INTER_NEAREST_NEAR_NEW;
+    sf->inter_mode_mask[BLOCK_32X64] = INTER_NEAREST;
+    sf->inter_mode_mask[BLOCK_64X32] = INTER_NEAREST;
+    sf->inter_mode_mask[BLOCK_64X64] = INTER_NEAREST;
     sf->max_intra_bsize = BLOCK_32X32;
     sf->allow_skip_recode = 1;
   }
@@ -271,7 +277,7 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
   if (speed >= 7) {
     int i;
     for (i = 0; i < BLOCK_SIZES; ++i)
-      sf->disable_inter_mode_mask[i] = ~(1 << INTER_OFFSET(NEARESTMV));
+      sf->inter_mode_mask[i] = INTER_NEAREST;
   }
 }
 
@@ -329,7 +335,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->mode_skip_start = MAX_MODES;  // Mode index at which mode skip mask set
   sf->use_nonrd_pick_mode = 0;
   for (i = 0; i < BLOCK_SIZES; ++i)
-    sf->disable_inter_mode_mask[i] = 0;
+    sf->inter_mode_mask[i] = INTER_ALL;
   sf->max_intra_bsize = BLOCK_64X64;
   // This setting only takes effect when partition_search_type is set
   // to FIXED_PARTITION.

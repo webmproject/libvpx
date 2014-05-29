@@ -280,8 +280,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     for (this_mode = NEARESTMV; this_mode <= NEWMV; ++this_mode) {
       int rate_mv = 0;
 
-      if (cpi->sf.disable_inter_mode_mask[bsize] &
-          (1 << INTER_OFFSET(this_mode)))
+      if (!(cpi->sf.inter_mode_mask[bsize] & (1 << this_mode)))
         continue;
 
       if (rd_less_than_thresh(best_rd, rd_threshes[mode_idx[this_mode]],
