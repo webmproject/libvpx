@@ -14,20 +14,17 @@
 #include "vp9/encoder/vp9_speed_features.h"
 
 enum {
-  ALL_INTRA_MODES = (1 << DC_PRED) |
+  INTRA_ALL       = (1 << DC_PRED) |
                     (1 << V_PRED) | (1 << H_PRED) |
                     (1 << D45_PRED) | (1 << D135_PRED) |
                     (1 << D117_PRED) | (1 << D153_PRED) |
                     (1 << D207_PRED) | (1 << D63_PRED) |
                     (1 << TM_PRED),
-
-  INTRA_DC_ONLY   = (1 << DC_PRED),
-
-  INTRA_DC_TM     = (1 << TM_PRED) | (1 << DC_PRED),
-
+  INTRA_DC        = (1 << DC_PRED),
+  INTRA_DC_TM     = (1 << DC_PRED) | (1 << TM_PRED),
   INTRA_DC_H_V    = (1 << DC_PRED) | (1 << V_PRED) | (1 << H_PRED),
-
-  INTRA_DC_TM_H_V = INTRA_DC_TM | (1 << V_PRED) | (1 << H_PRED)
+  INTRA_DC_TM_H_V = (1 << DC_PRED) | (1 << TM_PRED) | (1 << V_PRED) |
+                    (1 << H_PRED)
 };
 
 enum {
@@ -140,8 +137,8 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
     sf->search_method = HEX;
     sf->disable_filter_search_var_thresh = 500;
     for (i = 0; i < TX_SIZES; ++i) {
-      sf->intra_y_mode_mask[i] = INTRA_DC_ONLY;
-      sf->intra_uv_mode_mask[i] = INTRA_DC_ONLY;
+      sf->intra_y_mode_mask[i] = INTRA_DC;
+      sf->intra_uv_mode_mask[i] = INTRA_DC;
     }
     cpi->allow_encode_breakout = ENCODE_BREAKOUT_ENABLED;
   }
@@ -232,9 +229,9 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->subpel_force_stop = 1;
     for (i = 0; i < TX_SIZES; i++) {
       sf->intra_y_mode_mask[i] = INTRA_DC_H_V;
-      sf->intra_uv_mode_mask[i] = INTRA_DC_ONLY;
+      sf->intra_uv_mode_mask[i] = INTRA_DC;
     }
-    sf->intra_y_mode_mask[TX_32X32] = INTRA_DC_ONLY;
+    sf->intra_y_mode_mask[TX_32X32] = INTRA_DC;
     sf->frame_parameter_update = 0;
     sf->search_method = FAST_HEX;
     sf->disable_inter_mode_mask[BLOCK_32X32] = 1 << INTER_OFFSET(ZEROMV);
@@ -316,8 +313,8 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->disable_split_var_thresh = 0;
   sf->disable_filter_search_var_thresh = 0;
   for (i = 0; i < TX_SIZES; i++) {
-    sf->intra_y_mode_mask[i] = ALL_INTRA_MODES;
-    sf->intra_uv_mode_mask[i] = ALL_INTRA_MODES;
+    sf->intra_y_mode_mask[i] = INTRA_ALL;
+    sf->intra_uv_mode_mask[i] = INTRA_ALL;
   }
   sf->use_rd_breakout = 0;
   sf->skip_encode_sb = 0;
