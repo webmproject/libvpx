@@ -27,11 +27,13 @@ double vp9_calc_ssimg(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest,
 
 #if CONFIG_VP9_HIGH
 double vp9_high_calc_ssim(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest,
-                          int lumamask, double *weight, int bps);
+                          int lumamask, double *weight,
+                          unsigned int bps, unsigned int shift);
 
 double vp9_high_calc_ssimg(YV12_BUFFER_CONFIG *source,
                            YV12_BUFFER_CONFIG *dest, double *ssim_y,
-                           double *ssim_u, double *ssim_v, int bps);
+                           double *ssim_u, double *ssim_v,
+                           unsigned int bps, unsigned int shift);
 #endif
 
 #ifdef __cplusplus

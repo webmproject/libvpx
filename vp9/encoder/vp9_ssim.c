@@ -60,6 +60,28 @@ void vp9_high_ssim_parms_8x8_c(uint16_t *s, int sp, uint16_t *r, int rp,
     }
   }
 }
+
+void vp9_high_ssim_parms_8x8_shift_c(uint16_t *s, int sp, uint16_t *r, int rp,
+                                     uint32_t *sum_s, uint32_t *sum_r,
+                                     uint32_t *sum_sq_s, uint32_t *sum_sq_r,
+                                     uint32_t *sum_sxr, unsigned int bps,
+                                     unsigned int shift) {
+  int i, j;
+  const int offset = (1 << (shift - 1));
+  const int max_val = (1 << bps) - 1;
+  for (i = 0; i < 8; i++, s += sp, r += rp) {
+    for (j = 0; j < 8; j++) {
+      int sj = s[j];
+      int rj = r[j] + offset;
+      rj = ((rj > max_val ? max_val : rj) >> shift) << shift;
+      *sum_s += sj;
+      *sum_r += rj;
+      *sum_sq_s += sj * sj;
+      *sum_sq_r += rj * rj;
+      *sum_sxr += sj * rj;
+    }
+  }
+}
 #endif
 
 static const int64_t cc1 =  26634;  // (64^2*(.01*255)^2
@@ -93,13 +115,25 @@ static double ssim_8x8(uint8_t *s, int sp, uint8_t *r, int rp) {
 }
 
 #if CONFIG_VP9_HIGH
-static double high_ssim_8x8(uint16_t *s, int sp, uint16_t *r, int rp, int bps) {
+static double high_ssim_8x8_shift(uint16_t *s, int sp, uint16_t *r, int rp,
+                                  unsigned int bps, unsigned int shift) {
   uint32_t sum_s = 0, sum_r = 0, sum_sq_s = 0, sum_sq_r = 0, sum_sxr = 0;
-  int shift = bps - 8;
+  const int oshift = bps - 8;
+  vp9_high_ssim_parms_8x8_shift(s, sp, r, rp, &sum_s,
+                                &sum_r, &sum_sq_s, &sum_sq_r,
+                                &sum_sxr, bps, shift);
+  return similarity(sum_s >> oshift, sum_r >> oshift, sum_sq_s >> (2 * oshift),
+                    sum_sq_r >> (2 * oshift), sum_sxr >> (2 * oshift), 64);
+}
+
+static double high_ssim_8x8(uint16_t *s, int sp, uint16_t *r, int rp,
+                            unsigned int bps) {
+  uint32_t sum_s = 0, sum_r = 0, sum_sq_s = 0, sum_sq_r = 0, sum_sxr = 0;
+  const int oshift = bps - 8;
   vp9_high_ssim_parms_8x8(s, sp, r, rp, &sum_s, &sum_r, &sum_sq_s, &sum_sq_r,
                           &sum_sxr);
-  return similarity(sum_s >> shift, sum_r >> shift, sum_sq_s >> (2 * shift),
-                    sum_sq_r >> (2 * shift), sum_sxr >> (2 * shift), 64);
+  return similarity(sum_s >> oshift, sum_r >> oshift, sum_sq_s >> (2 * oshift),
+                    sum_sq_r >> (2 * oshift), sum_sxr >> (2 * oshift), 64);
 }
 #endif
 
@@ -127,20 +161,37 @@ double vp9_ssim2(uint8_t *img1, uint8_t *img2, int stride_img1,
 
 #if CONFIG_VP9_HIGH
 double vp9_high_ssim2(uint8_t *img1, uint8_t *img2, int stride_img1,
-                      int stride_img2, int width, int height, int bps) {
+                      int stride_img2, int width, int height,
+                      unsigned int bps, unsigned int shift) {
   int i, j;
   int samples = 0;
   double ssim_total = 0;
 
-  // sample point start with each 4x4 location
-  for (i = 0; i <= height - 8;
-       i += 4, img1 += stride_img1 * 4, img2 += stride_img2 * 4) {
-    for (j = 0; j <= width - 8; j += 4) {
-      double v = high_ssim_8x8(CONVERT_TO_SHORTPTR(img1 + j), stride_img1,
-                               CONVERT_TO_SHORTPTR(img2 + j), stride_img2,
-                               bps);
-      ssim_total += v;
-      samples++;
+  if (shift) {
+    // sample point start with each 4x4 location
+    for (i = 0; i <= height - 8;
+         i += 4, img1 += stride_img1 * 4, img2 += stride_img2 * 4) {
+      for (j = 0; j <= width - 8; j += 4) {
+        double v = high_ssim_8x8_shift(CONVERT_TO_SHORTPTR(img1 + j),
+                                       stride_img1,
+                                       CONVERT_TO_SHORTPTR(img2 + j),
+                                       stride_img2,
+                                       bps, shift);
+        ssim_total += v;
+        samples++;
+      }
+    }
+  } else {
+    // sample point start with each 4x4 location
+    for (i = 0; i <= height - 8;
+         i += 4, img1 += stride_img1 * 4, img2 += stride_img2 * 4) {
+      for (j = 0; j <= width - 8; j += 4) {
+        double v = high_ssim_8x8(CONVERT_TO_SHORTPTR(img1 + j), stride_img1,
+                                 CONVERT_TO_SHORTPTR(img2 + j), stride_img2,
+                                 bps);
+        ssim_total += v;
+        samples++;
+      }
     }
   }
   ssim_total /= samples;
@@ -198,21 +249,22 @@ double vp9_calc_ssimg(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest,
 
 #if CONFIG_VP9_HIGH
 double vp9_high_calc_ssim(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest,
-                     int lumamask, double *weight, int bps) {
+                          int lumamask, double *weight,
+                          unsigned int bps, unsigned int shift) {
   double a, b, c;
   double ssimv;
 
   a = vp9_high_ssim2(source->y_buffer, dest->y_buffer,
                      source->y_stride, dest->y_stride,
-                     source->y_crop_width, source->y_crop_height, bps);
+                     source->y_crop_width, source->y_crop_height, bps, shift);
 
   b = vp9_high_ssim2(source->u_buffer, dest->u_buffer,
                      source->uv_stride, dest->uv_stride,
-                     source->uv_crop_width, source->uv_crop_height, bps);
+                     source->uv_crop_width, source->uv_crop_height, bps, shift);
 
   c = vp9_high_ssim2(source->v_buffer, dest->v_buffer,
                      source->uv_stride, dest->uv_stride,
-                     source->uv_crop_width, source->uv_crop_height, bps);
+                     source->uv_crop_width, source->uv_crop_height, bps, shift);
 
   ssimv = a * .8 + .1 * (b + c);
 
@@ -223,21 +275,22 @@ double vp9_high_calc_ssim(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest,
 
 double vp9_high_calc_ssimg(YV12_BUFFER_CONFIG *source,
                            YV12_BUFFER_CONFIG *dest, double *ssim_y,
-                           double *ssim_u, double *ssim_v, int bps) {
+                           double *ssim_u, double *ssim_v,
+                           unsigned int bps, unsigned int shift) {
   double ssim_all = 0;
   double a, b, c;
 
   a = vp9_high_ssim2(source->y_buffer, dest->y_buffer,
                      source->y_stride, dest->y_stride,
-                     source->y_crop_width, source->y_crop_height, bps);
+                     source->y_crop_width, source->y_crop_height, bps, shift);
 
   b = vp9_high_ssim2(source->u_buffer, dest->u_buffer,
                      source->uv_stride, dest->uv_stride,
-                     source->uv_crop_width, source->uv_crop_height, bps);
+                     source->uv_crop_width, source->uv_crop_height, bps, shift);
 
   c = vp9_high_ssim2(source->v_buffer, dest->v_buffer,
                      source->uv_stride, dest->uv_stride,
-                     source->uv_crop_width, source->uv_crop_height, bps);
+                     source->uv_crop_width, source->uv_crop_height, bps, shift);
   *ssim_y = a;
   *ssim_u = b;
   *ssim_v = c;

@@ -2115,7 +2115,7 @@ int main(int argc, const char **argv_) {
     if (global.show_psnr) {
       if (global.codec->fourcc == VP9_FOURCC) {
         FOREACH_STREAM({
-          const unsigned int bit_depth = stream->config.cfg.g_bit_depth;
+          const unsigned int bit_depth = stream->config.cfg.g_in_bit_depth;
           double peak;
           switch (bit_depth) {
             case VPX_BITS_8:
