@@ -48,10 +48,12 @@ struct vpx_codec_alg_priv {
 };
 
 static vpx_codec_err_t decoder_init(vpx_codec_ctx_t *ctx,
-                            vpx_codec_priv_enc_mr_cfg_t *data) {
+                                    vpx_codec_priv_enc_mr_cfg_t *data) {
   // This function only allocates space for the vpx_codec_alg_priv_t
   // structure. More memory may be required at the time the stream
   // information becomes known.
+  (void)data;
+
   if (!ctx->priv) {
     vpx_codec_alg_priv_t *alg_priv = vpx_memalign(32, sizeof(*alg_priv));
     if (alg_priv == NULL)
@@ -243,12 +245,13 @@ static void init_decoder(vpx_codec_alg_priv_t *ctx) {
 static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t *ctx,
                                   const uint8_t **data, unsigned int data_sz,
                                   void *user_priv, int64_t deadline) {
-  YV12_BUFFER_CONFIG sd = { 0 };
-  vp9_ppflags_t flags = {0};
+  YV12_BUFFER_CONFIG sd;
+  vp9_ppflags_t flags = {0, 0, 0};
   VP9_COMMON *cm = NULL;
 
   (void)deadline;
 
+  vp9_zero(sd);
   ctx->img_avail = 0;
 
   // Determine the stream parameters. Note that we rely on peek_si to
@@ -631,11 +634,12 @@ CODEC_INTERFACE(vpx_codec_vp9_dx) = {
     decoder_set_fb_fn,  // vpx_codec_set_fb_fn_t
   },
   { // NOLINT
-    NOT_IMPLEMENTED,
-    NOT_IMPLEMENTED,
-    NOT_IMPLEMENTED,
-    NOT_IMPLEMENTED,
-    NOT_IMPLEMENTED,
-    NOT_IMPLEMENTED
+    NOT_IMPLEMENTED,  // vpx_codec_enc_cfg_map_t
+    NOT_IMPLEMENTED,  // vpx_codec_encode_fn_t
+    NOT_IMPLEMENTED,  // vpx_codec_get_cx_data_fn_t
+    NOT_IMPLEMENTED,  // vpx_codec_enc_config_set_fn_t
+    NOT_IMPLEMENTED,  // vpx_codec_get_global_headers_fn_t
+    NOT_IMPLEMENTED,  // vpx_codec_get_preview_frame_fn_t
+    NOT_IMPLEMENTED   // vpx_codec_enc_mr_get_mem_loc_fn_t
   }
 };
