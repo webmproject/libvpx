@@ -3357,7 +3357,8 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
       vp9_tokenize_sb(cpi, t, !output_enabled, MAX(bsize, BLOCK_8X8));
     } else {
       mbmi->skip = 1;
-      if (output_enabled)
+      if (output_enabled &&
+          !vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP))
         cm->counts.skip[vp9_get_skip_context(xd)][1]++;
       reset_skip_context(xd, MAX(bsize, BLOCK_8X8));
     }
