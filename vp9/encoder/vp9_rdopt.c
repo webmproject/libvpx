@@ -3665,7 +3665,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   int_mv seg_mvs[4][MAX_REF_FRAMES];
   b_mode_info best_bmodes[4];
   int best_skip2 = 0;
-  int ref_frame_mask = 0;
   int mode_skip_mask = 0;
 
   x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
@@ -3698,17 +3697,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     }
     frame_mv[NEWMV][ref_frame].as_int = INVALID_MV;
     frame_mv[ZEROMV][ref_frame].as_int = 0;
-  }
-
-  for (ref_frame = LAST_FRAME;
-       ref_frame <= ALTREF_FRAME && cpi->sf.reference_masking; ++ref_frame) {
-    int i;
-    for (i = LAST_FRAME; i <= ALTREF_FRAME; ++i) {
-      if ((x->pred_mv_sad[ref_frame] >> 1) > x->pred_mv_sad[i]) {
-        ref_frame_mask |= (1 << ref_frame);
-        break;
-      }
-    }
   }
 
   for (ref_index = 0; ref_index < MAX_REFS; ++ref_index) {
