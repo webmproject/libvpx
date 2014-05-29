@@ -43,9 +43,9 @@ sym(vp9_temporal_filter_apply_sse2):
     mov         [rsp + rbp_backup], rbp
     ; end prolog
 
-        mov         rdx,            arg(3)
+        mov         edx,            arg(3)
         mov         [rsp + block_width], rdx
-        mov         rdx,            arg(4)
+        mov         edx,            arg(4)
         mov         [rsp + block_height], rdx
         movd        xmm6,           arg(5)
         movdqa      [rsp + strength], xmm6 ; where strength is used, all 16 bytes are read
