@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//nV0\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 415,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-05-29T23:12:02Z",
+      "side": 1,
+      "message": "this and the above decls can be brought into the inner blocks",
+      "revId": "a602b1f8fd8e99aa82e53de975e597c73e0cb2a7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//nV8\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 419,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-05-29T23:12:02Z",
+      "side": 1,
+      "message": "drop the inner ()s and use !\u003d NULL for both",
+      "revId": "a602b1f8fd8e99aa82e53de975e597c73e0cb2a7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//nV4\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 422,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-05-29T23:12:02Z",
+      "side": 1,
+      "message": "move this line up one and bring the declaration local to this block",
+      "revId": "a602b1f8fd8e99aa82e53de975e597c73e0cb2a7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
