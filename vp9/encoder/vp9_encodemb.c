@@ -406,7 +406,7 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
       // this is like vp9_short_idct4x4 but has a special case around eob<=1
       // which is significant (not just an optimization) for the lossless
       // case.
-      xd->itxm_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
+      x->itxm_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
       break;
     default:
       assert(0 && "Invalid transform size");
@@ -428,7 +428,7 @@ static void encode_block_pass1(int plane, int block, BLOCK_SIZE plane_bsize,
   vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
 
   if (p->eobs[block] > 0)
-    xd->itxm_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
+    x->itxm_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
 }
 
 void vp9_encode_sby_pass1(MACROBLOCK *x, BLOCK_SIZE bsize) {
@@ -574,7 +574,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
           // this is like vp9_short_idct4x4 but has a special case around eob<=1
           // which is significant (not just an optimization) for the lossless
           // case.
-          xd->itxm_add(dqcoeff, dst, dst_stride, *eob);
+          x->itxm_add(dqcoeff, dst, dst_stride, *eob);
         else
           vp9_iht4x4_16_add(dqcoeff, dst, dst_stride, tx_type);
       }

@@ -195,30 +195,32 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
   struct macroblockd_plane *const pd = &xd->plane[plane];
   if (eob > 0) {
     TX_TYPE tx_type;
-    const PLANE_TYPE plane_type = pd->plane_type;
     int16_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
-    switch (tx_size) {
-      case TX_4X4:
-        tx_type = get_tx_type_4x4(plane_type, xd, block);
-        if (tx_type == DCT_DCT)
-          xd->itxm_add(dqcoeff, dst, stride, eob);
-        else
+    if (xd->lossless) {
+      tx_type = DCT_DCT;
+      vp9_iwht4x4_add(dqcoeff, dst, stride, eob);
+    } else {
+      const PLANE_TYPE plane_type = pd->plane_type;
+      switch (tx_size) {
+        case TX_4X4:
+          tx_type = get_tx_type_4x4(plane_type, xd, block);
           vp9_iht4x4_16_add(dqcoeff, dst, stride, tx_type);
-        break;
-      case TX_8X8:
-        tx_type = get_tx_type(plane_type, xd);
-        vp9_iht8x8_add(tx_type, dqcoeff, dst, stride, eob);
-        break;
-      case TX_16X16:
-        tx_type = get_tx_type(plane_type, xd);
-        vp9_iht16x16_add(tx_type, dqcoeff, dst, stride, eob);
-        break;
-      case TX_32X32:
-        tx_type = DCT_DCT;
-        vp9_idct32x32_add(dqcoeff, dst, stride, eob);
-        break;
-      default:
-        assert(0 && "Invalid transform size");
+          break;
+        case TX_8X8:
+          tx_type = get_tx_type(plane_type, xd);
+          vp9_iht8x8_add(tx_type, dqcoeff, dst, stride, eob);
+          break;
+        case TX_16X16:
+          tx_type = get_tx_type(plane_type, xd);
+          vp9_iht16x16_add(tx_type, dqcoeff, dst, stride, eob);
+          break;
+        case TX_32X32:
+          tx_type = DCT_DCT;
+          vp9_idct32x32_add(dqcoeff, dst, stride, eob);
+          break;
+        default:
+          assert(0 && "Invalid transform size");
+      }
     }
 
     if (eob == 1) {
@@ -588,8 +590,6 @@ static void setup_quantization(VP9_COMMON *const cm, MACROBLOCKD *const xd,
                  cm->y_dc_delta_q == 0 &&
                  cm->uv_dc_delta_q == 0 &&
                  cm->uv_ac_delta_q == 0;
-
-  xd->itxm_add = xd->lossless ? vp9_iwht4x4_add : vp9_idct4x4_add;
 }
 
 static INTERP_FILTER read_interp_filter(struct vp9_read_bit_buffer *rb) {
