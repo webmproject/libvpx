@@ -98,6 +98,9 @@ extern double vp8_calc_ssimg
 #ifdef OUTPUT_YUV_SRC
 FILE *yuv_file;
 #endif
+#ifdef OUTPUT_YUV_DENOISED
+FILE *yuv_denoised_file;
+#endif
 
 #if 0
 FILE *framepsnr;
@@ -1961,6 +1964,9 @@ struct VP8_COMP* vp8_create_compressor(VP8_CONFIG *oxcf)
 #ifdef OUTPUT_YUV_SRC
     yuv_file = fopen("bd.yuv", "ab");
 #endif
+#ifdef OUTPUT_YUV_DENOISED
+    yuv_denoised_file = fopen("denoised.yuv", "ab");
+#endif
 
 #if 0
     framepsnr = fopen("framepsnr.stt", "a");
@@ -2410,6 +2416,9 @@ void vp8_remove_compressor(VP8_COMP **ptr)
 #ifdef OUTPUT_YUV_SRC
     fclose(yuv_file);
 #endif
+#ifdef OUTPUT_YUV_DENOISED
+    fclose(yuv_denoised_file);
+#endif
 
 #if 0
 
@@ -2610,7 +2619,7 @@ int vp8_update_entropy(VP8_COMP *cpi, int update)
 }
 
 
-#if OUTPUT_YUV_SRC
+#if defined(OUTPUT_YUV_SRC) || defined(OUTPUT_YUV_DENOISED)
 void vp8_write_yuv_frame(FILE *yuv_file, YV12_BUFFER_CONFIG *s)
 {
     unsigned char *src = s->y_buffer;
@@ -4429,6 +4438,11 @@ static void encode_frame_to_data_rate
     }
 
     update_reference_frames(cpi);
+
+#ifdef OUTPUT_YUV_DENOISED
+    vp8_write_yuv_frame(yuv_denoised_file,
+                        &cpi->denoiser.yv12_running_avg[INTRA_FRAME]);
+#endif
 
 #if !(CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING)
     if (cpi->oxcf.error_resilient_mode)
