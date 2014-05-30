@@ -1338,6 +1338,7 @@ static void update_state_rt(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   }
 
   x->skip = ctx->skip;
+  x->skip_txfm = mbmi->segment_id ? 0 : ctx->skip_txfm;
 }
 
 static void encode_b_rt(VP9_COMP *cpi, const TileInfo *const tile,
@@ -2577,6 +2578,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     nonrd_pick_sb_modes(cpi, tile, mi_row, mi_col,
                         &this_rate, &this_dist, bsize);
     ctx->mic.mbmi = xd->mi[0]->mbmi;
+    ctx->skip_txfm = x->skip_txfm;
 
     if (this_rate != INT_MAX) {
       int pl = partition_plane_context(xd, mi_row, mi_col, bsize);
@@ -2663,6 +2665,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
                         &this_rate, &this_dist, subsize);
 
     pc_tree->horizontal[0].mic.mbmi = xd->mi[0]->mbmi;
+    pc_tree->horizontal[0].skip_txfm = x->skip_txfm;
 
     sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
 
@@ -2672,6 +2675,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
                           &this_rate, &this_dist, subsize);
 
       pc_tree->horizontal[1].mic.mbmi = xd->mi[0]->mbmi;
+      pc_tree->horizontal[1].skip_txfm = x->skip_txfm;
 
       if (this_rate == INT_MAX) {
         sum_rd = INT64_MAX;
@@ -2701,12 +2705,14 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     nonrd_pick_sb_modes(cpi, tile, mi_row, mi_col,
                         &this_rate, &this_dist, subsize);
     pc_tree->vertical[0].mic.mbmi = xd->mi[0]->mbmi;
+    pc_tree->vertical[0].skip_txfm = x->skip_txfm;
     sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
     if (sum_rd < best_rd && mi_col + ms < cm->mi_cols) {
       load_pred_mv(x, ctx);
       nonrd_pick_sb_modes(cpi, tile, mi_row, mi_col + ms,
                           &this_rate, &this_dist, subsize);
       pc_tree->vertical[1].mic.mbmi = xd->mi[0]->mbmi;
+      pc_tree->vertical[1].skip_txfm = x->skip_txfm;
       if (this_rate == INT_MAX) {
         sum_rd = INT64_MAX;
       } else {
@@ -2795,14 +2801,17 @@ static void nonrd_use_partition(VP9_COMP *cpi,
     case PARTITION_NONE:
       nonrd_pick_sb_modes(cpi, tile, mi_row, mi_col, totrate, totdist, subsize);
       pc_tree->none.mic.mbmi = xd->mi[0]->mbmi;
+      pc_tree->none.skip_txfm = x->skip_txfm;
       break;
     case PARTITION_VERT:
       nonrd_pick_sb_modes(cpi, tile, mi_row, mi_col, totrate, totdist, subsize);
       pc_tree->vertical[0].mic.mbmi = xd->mi[0]->mbmi;
+      pc_tree->vertical[0].skip_txfm = x->skip_txfm;
       if (mi_col + hbs < cm->mi_cols) {
         nonrd_pick_sb_modes(cpi, tile, mi_row, mi_col + hbs,
                             &rate, &dist, subsize);
         pc_tree->vertical[1].mic.mbmi = xd->mi[0]->mbmi;
+        pc_tree->vertical[1].skip_txfm = x->skip_txfm;
         if (rate != INT_MAX && dist != INT64_MAX &&
             *totrate != INT_MAX && *totdist != INT64_MAX) {
           *totrate += rate;
@@ -2813,10 +2822,12 @@ static void nonrd_use_partition(VP9_COMP *cpi,
     case PARTITION_HORZ:
       nonrd_pick_sb_modes(cpi, tile, mi_row, mi_col, totrate, totdist, subsize);
       pc_tree->horizontal[0].mic.mbmi = xd->mi[0]->mbmi;
+      pc_tree->horizontal[0].skip_txfm = x->skip_txfm;
       if (mi_row + hbs < cm->mi_rows) {
         nonrd_pick_sb_modes(cpi, tile, mi_row + hbs, mi_col,
                             &rate, &dist, subsize);
         pc_tree->horizontal[1].mic.mbmi = xd->mi[0]->mbmi;
+        pc_tree->horizontal[1].skip_txfm = x->skip_txfm;
         if (rate != INT_MAX && dist != INT64_MAX &&
             *totrate != INT_MAX && *totdist != INT64_MAX) {
           *totrate += rate;
@@ -3019,6 +3030,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   init_encode_frame_mb_context(cpi);
   set_prev_mi(cm);
 
+  x->skip_txfm = 0;
   if (sf->use_nonrd_pick_mode) {
     // Initialize internal buffer pointers for rtc coding, where non-RD
     // mode decision is used and hence no buffer pointer swap needed.

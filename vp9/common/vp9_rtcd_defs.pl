@@ -744,14 +744,26 @@ specialize qw/vp9_fht16x16 sse2 avx2/;
 add_proto qw/void vp9_fwht4x4/, "const int16_t *input, int16_t *output, int stride";
 specialize qw/vp9_fwht4x4/, "$mmx_x86inc";
 
+add_proto qw/void vp9_fdct4x4_1/, "const int16_t *input, int16_t *output, int stride";
+specialize qw/vp9_fdct4x4_1 sse2/;
+
 add_proto qw/void vp9_fdct4x4/, "const int16_t *input, int16_t *output, int stride";
 specialize qw/vp9_fdct4x4 sse2 avx2/;
+
+add_proto qw/void vp9_fdct8x8_1/, "const int16_t *input, int16_t *output, int stride";
+specialize qw/vp9_fdct8x8_1 sse2/;
 
 add_proto qw/void vp9_fdct8x8/, "const int16_t *input, int16_t *output, int stride";
 specialize qw/vp9_fdct8x8 sse2 avx2/, "$ssse3_x86_64";
 
+add_proto qw/void vp9_fdct16x16_1/, "const int16_t *input, int16_t *output, int stride";
+specialize qw/vp9_fdct16x16_1 sse2/;
+
 add_proto qw/void vp9_fdct16x16/, "const int16_t *input, int16_t *output, int stride";
 specialize qw/vp9_fdct16x16 sse2 avx2/;
+
+add_proto qw/void vp9_fdct32x32_1/, "const int16_t *input, int16_t *output, int stride";
+specialize qw/vp9_fdct32x32_1 sse2/;
 
 add_proto qw/void vp9_fdct32x32/, "const int16_t *input, int16_t *output, int stride";
 specialize qw/vp9_fdct32x32 sse2 avx2/;

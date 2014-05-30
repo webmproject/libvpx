@@ -28,6 +28,7 @@ struct macroblock_plane {
   struct buf_2d src;
 
   // Quantizer setings
+  int16_t *quant_fp;
   int16_t *quant;
   int16_t *quant_shift;
   int16_t *zbin;
@@ -104,6 +105,9 @@ struct macroblock {
   // indicate if it is in the rd search loop or encoding process
   int use_lp32x32fdct;
   int skip_encode;
+
+  // skip forward transform and quantization
+  int skip_txfm;
 
   // Used to store sub partition's choices.
   MV pred_mv[MAX_REF_FRAMES];
