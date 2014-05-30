@@ -1,5 +1,4 @@
-vpx Multi-Format Codec SDK
-README - 1 August 2013
+README - 30 May 2014
 
 Welcome to the WebM VP8/VP9 Codec SDK!
 
@@ -130,6 +129,14 @@ COMPILING THE APPLICATIONS/LIBRARIES:
   If the configuration step fails, the first step is to look in the error log.
   This defaults to config.log. This should give a good indication of what went
   wrong. If not, contact us for support.
+
+VP8/VP9 TEST VECTORS:
+  The test vectors can be downloaded and verified using the build system after
+  running configure. To specify an alternate directory the
+  LIBVPX_TEST_DATA_PATH environment variable can be used.
+
+  $ ./configure --enable-unit-tests
+  $ LIBVPX_TEST_DATA_PATH=../libvpx-test-data make testdata
 
 SUPPORT
   This library is an open source project supported by its community. Please
