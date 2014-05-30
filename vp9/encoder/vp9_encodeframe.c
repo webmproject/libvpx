@@ -697,6 +697,38 @@ void vp9_setup_src_planes(MACROBLOCK *x, const YV12_BUFFER_CONFIG *src,
                      x->e_mbd.plane[i].subsampling_y);
 }
 
+static void set_mode_info_seg_skip(MACROBLOCK *x, TX_MODE tx_mode, int *rate,
+                                   int64_t *dist, BLOCK_SIZE bsize) {
+  MACROBLOCKD *const xd = &x->e_mbd;
+  MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
+  INTERP_FILTER filter_ref;
+
+  if (xd->up_available)
+    filter_ref = xd->mi[-xd->mi_stride]->mbmi.interp_filter;
+  else if (xd->left_available)
+    filter_ref = xd->mi[-1]->mbmi.interp_filter;
+  else
+    filter_ref = EIGHTTAP;
+
+  mbmi->sb_type = bsize;
+  mbmi->mode = ZEROMV;
+  mbmi->tx_size = MIN(max_txsize_lookup[bsize],
+                      tx_mode_to_biggest_tx_size[tx_mode]);
+  mbmi->skip = 1;
+  mbmi->uv_mode = DC_PRED;
+  mbmi->ref_frame[0] = LAST_FRAME;
+  mbmi->ref_frame[1] = NONE;
+  mbmi->mv[0].as_int = 0;
+  mbmi->interp_filter = filter_ref;
+
+  xd->mi[0]->bmi[0].as_mv[0].as_int = 0;
+  x->skip = 1;
+  x->skip_encode = 1;
+
+  *rate = 0;
+  *dist = 0;
+}
+
 static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
                              int mi_row, int mi_col,
                              int *totalrate, int64_t *totaldist,
@@ -2441,17 +2473,21 @@ static void nonrd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
+  MB_MODE_INFO *mbmi;
   set_offsets(cpi, tile, mi_row, mi_col, bsize);
-  xd->mi[0]->mbmi.sb_type = bsize;
+  mbmi = &xd->mi[0]->mbmi;
+  mbmi->sb_type = bsize;
 
   if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cm->seg.enabled) {
-    if (xd->mi[0]->mbmi.segment_id && x->in_static_area)
+    if (mbmi->segment_id && x->in_static_area)
       x->rdmult = vp9_cyclic_refresh_get_rdmult(cpi->cyclic_refresh);
   }
 
   if (!frame_is_intra_only(cm)) {
-    vp9_pick_inter_mode(cpi, x, tile, mi_row, mi_col,
-                        rate, dist, bsize);
+    if (vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP))
+      set_mode_info_seg_skip(x, cm->tx_mode, rate, dist, bsize);
+    else
+      vp9_pick_inter_mode(cpi, x, tile, mi_row, mi_col, rate, dist, bsize);
   } else {
     set_mode_info(&xd->mi[0]->mbmi, bsize, DC_PRED);
   }
