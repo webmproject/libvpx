@@ -12,4 +12,4 @@ failures, various options for running the tests, and XML test report
 generation.
 
 Local Modifications:
-None.
+Removed unused declarations of kPathSeparatorString to have warning free build.
