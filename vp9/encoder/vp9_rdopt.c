@@ -1447,16 +1447,8 @@ static void choose_intra_uv_mode(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
 
 static int cost_mv_ref(const VP9_COMP *cpi, PREDICTION_MODE mode,
                        int mode_context) {
-  const MACROBLOCK *const x = &cpi->mb;
-  const int segment_id = x->e_mbd.mi[0]->mbmi.segment_id;
-
-  // Don't account for mode here if segment skip is enabled.
-  if (!vp9_segfeature_active(&cpi->common.seg, segment_id, SEG_LVL_SKIP)) {
-    assert(is_inter_mode(mode));
-    return cpi->inter_mode_cost[mode_context][INTER_OFFSET(mode)];
-  } else {
-    return 0;
-  }
+  assert(is_inter_mode(mode));
+  return cpi->inter_mode_cost[mode_context][INTER_OFFSET(mode)];
 }
 
 static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
@@ -2799,8 +2791,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     *rate2 += vp9_get_switchable_rate(cpi);
 
   if (!is_comp_pred) {
-    if (!x->in_active_map ||
-        vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
+    if (!x->in_active_map) {
       if (psse)
         *psse = 0;
       *distortion = 0;
@@ -3114,13 +3105,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     }
   }
 
-  // If the segment skip feature is enabled....
-  // then do nothing if the current mode is not allowed..
-  if (vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP)) {
-    mode_skip_mask = ~(1 << THR_ZEROMV);
-    inter_mode_mask = (1 << ZEROMV);
-  }
-
   // Disable this drop out case if the ref frame
   // segment level feature is enabled for this segment. This is to
   // prevent the possibility that we end up unable to pick any mode.
@@ -3263,8 +3247,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         }
       }
     } else {
-      if (x->in_active_map &&
-          !vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
+      if (x->in_active_map) {
         const MV_REFERENCE_FRAME ref_frames[2] = {ref_frame, second_ref_frame};
         if (!check_best_zero_mv(cpi, mbmi->mode_context, frame_mv,
                                 inter_mode_mask, this_mode, ref_frames))
@@ -3345,31 +3328,20 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     }
 
     if (!disable_skip) {
-      // Test for the condition where skip block will be activated
-      // because there are no non zero coefficients and make any
-      // necessary adjustment for rate. Ignore if skip is coded at
-      // segment level as the cost wont have been added in.
-      // Is Mb level skip allowed (i.e. not coded at segment level).
-      const int mb_skip_allowed = !vp9_segfeature_active(seg, segment_id,
-                                                         SEG_LVL_SKIP);
-
       if (skippable) {
+        vp9_prob skip_prob = vp9_get_skip_prob(cm, xd);
+
         // Back out the coefficient coding costs
         rate2 -= (rate_y + rate_uv);
         // for best yrd calculation
         rate_uv = 0;
 
-        if (mb_skip_allowed) {
-          int prob_skip_cost;
-
-          // Cost the skip mb case
-          vp9_prob skip_prob = vp9_get_skip_prob(cm, xd);
-          if (skip_prob) {
-            prob_skip_cost = vp9_cost_bit(skip_prob, 1);
-            rate2 += prob_skip_cost;
-          }
+        // Cost the skip mb case
+        if (skip_prob) {
+          int prob_skip_cost = vp9_cost_bit(skip_prob, 1);
+          rate2 += prob_skip_cost;
         }
-      } else if (mb_skip_allowed && ref_frame != INTRA_FRAME && !xd->lossless) {
+      } else if (ref_frame != INTRA_FRAME && !xd->lossless) {
         if (RDCOST(x->rdmult, x->rddiv, rate_y + rate_uv, distortion2) <
             RDCOST(x->rdmult, x->rddiv, 0, total_sse)) {
           // Add in the cost of the no skip flag.
@@ -3384,7 +3356,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
           rate_uv = 0;
           this_skip2 = 1;
         }
-      } else if (mb_skip_allowed) {
+      } else {
         // Add in the cost of the no skip flag.
         rate2 += vp9_cost_bit(vp9_get_skip_prob(cm, xd), 0);
       }
@@ -3610,6 +3582,113 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   return best_rd;
 }
 
+int64_t vp9_rd_pick_inter_mode_sb_seg_skip(VP9_COMP *cpi, MACROBLOCK *x,
+                                           const TileInfo *const tile,
+                                           int mi_row, int mi_col,
+                                           int *returnrate,
+                                           int64_t *returndistortion,
+                                           BLOCK_SIZE bsize,
+                                           PICK_MODE_CONTEXT *ctx,
+                                           int64_t best_rd_so_far) {
+  VP9_COMMON *const cm = &cpi->common;
+  RD_OPT *const rd_opt = &cpi->rd;
+  MACROBLOCKD *const xd = &x->e_mbd;
+  MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
+  const struct segmentation *const seg = &cm->seg;
+  unsigned char segment_id = mbmi->segment_id;
+  const int comp_pred = 0;
+  int i;
+  int64_t best_tx_diff[TX_MODES];
+  int64_t best_pred_diff[REFERENCE_MODES];
+  int64_t best_filter_diff[SWITCHABLE_FILTER_CONTEXTS];
+  unsigned int ref_costs_single[MAX_REF_FRAMES], ref_costs_comp[MAX_REF_FRAMES];
+  vp9_prob comp_mode_p;
+  INTERP_FILTER best_filter = SWITCHABLE;
+  int64_t this_rd = INT64_MAX;
+  int rate2 = 0;
+  const int64_t distortion2 = 0;
+
+  x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
+
+  estimate_ref_frame_costs(cm, xd, segment_id, ref_costs_single, ref_costs_comp,
+                           &comp_mode_p);
+
+  for (i = 0; i < MAX_REF_FRAMES; ++i)
+    x->pred_sse[i] = INT_MAX;
+  for (i = LAST_FRAME; i < MAX_REF_FRAMES; ++i)
+    x->pred_mv_sad[i] = INT_MAX;
+
+  *returnrate = INT_MAX;
+
+  assert(vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP));
+
+  mbmi->mode = ZEROMV;
+  mbmi->uv_mode = DC_PRED;
+  mbmi->ref_frame[0] = LAST_FRAME;
+  mbmi->ref_frame[1] = NONE;
+  mbmi->mv[0].as_int = 0;
+  x->skip = 1;
+
+  // Search for best switchable filter by checking the variance of
+  // pred error irrespective of whether the filter will be used
+  rd_opt->mask_filter = 0;
+  for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
+    rd_opt->filter_cache[i] = INT64_MAX;
+
+  if (cm->interp_filter != BILINEAR) {
+    best_filter = EIGHTTAP;
+    if (cm->interp_filter == SWITCHABLE &&
+        x->source_variance >= cpi->sf.disable_filter_search_var_thresh) {
+      int rs;
+      int best_rs = INT_MAX;
+      for (i = 0; i < SWITCHABLE_FILTERS; ++i) {
+        mbmi->interp_filter = i;
+        rs = vp9_get_switchable_rate(cpi);
+        if (rs < best_rs) {
+          best_rs = rs;
+          best_filter = mbmi->interp_filter;
+        }
+      }
+    }
+  }
+  // Set the appropriate filter
+  if (cm->interp_filter == SWITCHABLE) {
+    mbmi->interp_filter = best_filter;
+    rate2 += vp9_get_switchable_rate(cpi);
+  } else {
+    mbmi->interp_filter = cm->interp_filter;
+  }
+
+  if (cm->reference_mode == REFERENCE_MODE_SELECT)
+    rate2 += vp9_cost_bit(comp_mode_p, comp_pred);
+
+  // Estimate the reference frame signaling cost and add it
+  // to the rolling cost variable.
+  rate2 += ref_costs_single[LAST_FRAME];
+  this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
+
+  *returnrate = rate2;
+  *returndistortion = distortion2;
+
+  if (this_rd >= best_rd_so_far)
+    return INT64_MAX;
+
+  assert((cm->interp_filter == SWITCHABLE) ||
+         (cm->interp_filter == mbmi->interp_filter));
+
+  update_rd_thresh_fact(cpi, bsize, THR_ZEROMV);
+
+  vp9_zero(best_pred_diff);
+  vp9_zero(best_filter_diff);
+  vp9_zero(best_tx_diff);
+
+  if (!x->select_tx_size)
+    swap_block_ptr(x, ctx, 1, 0, 0, MAX_MB_PLANE);
+  store_coding_context(x, ctx, THR_ZEROMV,
+                       best_pred_diff, best_tx_diff, best_filter_diff);
+
+  return this_rd;
+}
 
 int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
                                       const TileInfo *const tile,
