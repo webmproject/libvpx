@@ -1675,9 +1675,9 @@ static INLINE int mv_has_subpel(const MV *mv) {
 static int check_best_zero_mv(
     const VP9_COMP *cpi, const uint8_t mode_context[MAX_REF_FRAMES],
     int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES],
-    int disable_inter_mode_mask, int this_mode,
+    int inter_mode_mask, int this_mode,
     const MV_REFERENCE_FRAME ref_frames[2]) {
-  if (!(disable_inter_mode_mask & (1 << INTER_OFFSET(ZEROMV))) &&
+  if ((inter_mode_mask & (1 << ZEROMV)) &&
       (this_mode == NEARMV || this_mode == NEARESTMV || this_mode == ZEROMV) &&
       frame_mv[this_mode][ref_frames[0]].as_int == 0 &&
       (ref_frames[1] == NONE ||
@@ -1743,7 +1743,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
   ENTROPY_CONTEXT t_above[2], t_left[2];
   int subpelmv = 1, have_ref = 0;
   const int has_second_rf = has_second_ref(mbmi);
-  const int disable_inter_mode_mask = cpi->sf.disable_inter_mode_mask[bsize];
+  const int inter_mode_mask = cpi->sf.inter_mode_mask[bsize];
 
   vp9_zero(*bsi);
 
@@ -1792,11 +1792,11 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
         mode_idx = INTER_OFFSET(this_mode);
         bsi->rdstat[i][mode_idx].brdcost = INT64_MAX;
-        if (disable_inter_mode_mask & (1 << mode_idx))
+        if (!(inter_mode_mask & (1 << this_mode)))
           continue;
 
         if (!check_best_zero_mv(cpi, mbmi->mode_context, frame_mv,
-                                disable_inter_mode_mask,
+                                inter_mode_mask,
                                 this_mode, mbmi->ref_frame))
           continue;
 
@@ -3063,7 +3063,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   const int mode_search_skip_flags = cpi->sf.mode_search_skip_flags;
   const int intra_y_mode_mask =
       cpi->sf.intra_y_mode_mask[max_txsize_lookup[bsize]];
-  int disable_inter_mode_mask = cpi->sf.disable_inter_mode_mask[bsize];
+  int inter_mode_mask = cpi->sf.inter_mode_mask[bsize];
   vp9_zero(best_mbmode);
   x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
 
@@ -3130,7 +3130,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     const int inter_non_zero_mode_mask = 0x1F7F7;
     mode_skip_mask |= inter_non_zero_mode_mask;
     mode_skip_mask &= ~(1 << THR_ZEROMV);
-    disable_inter_mode_mask = ~(1 << INTER_OFFSET(ZEROMV));
+    inter_mode_mask = (1 << ZEROMV);
   }
 
   // Disable this drop out case if the ref frame
@@ -3182,7 +3182,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       mode_index = THR_ZEROMV;
     mode_skip_mask = ~(1 << mode_index);
     mode_skip_start = MAX_MODES;
-    disable_inter_mode_mask = 0;
+    inter_mode_mask = (1 << NEARESTMV) | (1 << NEARMV) | (1 << ZEROMV) |
+                      (1 << NEWMV);
   }
 
   for (mode_index = 0; mode_index < MAX_MODES; ++mode_index) {
@@ -3229,8 +3230,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
     this_mode = vp9_mode_order[mode_index].mode;
     ref_frame = vp9_mode_order[mode_index].ref_frame[0];
-    if (ref_frame != INTRA_FRAME &&
-        disable_inter_mode_mask & (1 << INTER_OFFSET(this_mode)))
+    if (ref_frame != INTRA_FRAME && !(inter_mode_mask & (1 << this_mode)))
       continue;
     second_ref_frame = vp9_mode_order[mode_index].ref_frame[1];
 
@@ -3279,7 +3279,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
           !vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
         const MV_REFERENCE_FRAME ref_frames[2] = {ref_frame, second_ref_frame};
         if (!check_best_zero_mv(cpi, mbmi->mode_context, frame_mv,
-                                disable_inter_mode_mask, this_mode, ref_frames))
+                                inter_mode_mask, this_mode, ref_frames))
           continue;
       }
     }

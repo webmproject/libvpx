@@ -331,8 +331,8 @@ typedef struct SPEED_FEATURES {
   int use_nonrd_pick_mode;
 
   // A binary mask indicating if NEARESTMV, NEARMV, ZEROMV, NEWMV
-  // modes are disabled in order from LSB to MSB for each BLOCK_SIZE.
-  int disable_inter_mode_mask[BLOCK_SIZES];
+  // modes are used in order from LSB to MSB for each BLOCK_SIZE.
+  int inter_mode_mask[BLOCK_SIZES];
 
   // This feature controls whether we do the expensive context update and
   // calculation in the rd coefficient costing loop.
