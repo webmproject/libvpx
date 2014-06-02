@@ -16,6 +16,24 @@
       "revId": "d85af81485887ccf112a6c83b4660feca4e2c763",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//nJA\u003d",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 528,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-06-02T20:52:31Z",
+      "side": 1,
+      "message": "did 4-space indenting.",
+      "parentUuid": "AAAAdn//nJY\u003d",
+      "revId": "d85af81485887ccf112a6c83b4660feca4e2c763",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
