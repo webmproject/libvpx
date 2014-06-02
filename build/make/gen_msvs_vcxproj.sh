@@ -78,7 +78,7 @@ generate_filter() {
             if [ "${f##*.}" == "$pat" ]; then
                 unset file_list[i]
 
-                objf=$(echo ${f%.*}.obj | sed -e 's/^[\./]\+//g' -e 's,[:/],_,g')
+                objf=$(echo ${f%.*}.obj | sed -e 's/^[\./]\+//g' -e 's,[:/ ],_,g')
 
                 if ([ "$pat" == "asm" ] || [ "$pat" == "s" ]) && $asm_use_custom_step; then
                     # Avoid object file name collisions, i.e. vpx_config.c and
@@ -175,7 +175,7 @@ for opt in "$@"; do
             opt=${opt##-I}
             opt=$(fix_path "$opt")
             incs="${incs}${incs:+;}&quot;${opt}&quot;"
-            yasmincs="${yasmincs} -I${opt}"
+            yasmincs="${yasmincs} -I&quot;${opt}&quot;"
         ;;
         -D*) defines="${defines}${defines:+;}${opt##-D}"
         ;;
@@ -392,7 +392,7 @@ generate_vcxproj() {
                     hostplat=Win32
                 fi
                 open_tag PreBuildEvent
-                tag_content Command "call obj_int_extract.bat $src_path_bare $hostplat\\\$(Configuration)"
+                tag_content Command "call obj_int_extract.bat &quot;$src_path_bare&quot; $hostplat\\\$(Configuration)"
                 close_tag PreBuildEvent
             fi
             open_tag ClCompile

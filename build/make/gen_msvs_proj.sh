@@ -67,7 +67,7 @@ generate_filter() {
             if [ "${f##*.}" == "$pat" ]; then
                 unset file_list[i]
 
-                objf=$(echo ${f%.*}.obj | sed -e 's/^[\./]\+//g' -e 's,[:/],_,g')
+                objf=$(echo ${f%.*}.obj | sed -e 's/^[\./]\+//g' -e 's,[:/ ],_,g')
                 open_tag File RelativePath="$f"
 
                 if [ "$pat" == "asm" ] && $asm_use_custom_step; then
@@ -153,7 +153,7 @@ for opt in "$@"; do
             opt=${opt##-I}
             opt=$(fix_path "$opt")
             incs="${incs}${incs:+;}&quot;${opt}&quot;"
-            yasmincs="${yasmincs} -I${opt}"
+            yasmincs="${yasmincs} -I&quot;${opt}&quot;"
         ;;
         -D*) defines="${defines}${defines:+;}${opt##-D}"
         ;;
@@ -300,7 +300,7 @@ generate_vcproj() {
                     vpx)
                         tag Tool \
                             Name="VCPreBuildEventTool" \
-                            CommandLine="call obj_int_extract.bat $src_path_bare $plat_no_ws\\\$(ConfigurationName)" \
+                            CommandLine="call obj_int_extract.bat &quot;$src_path_bare&quot; $plat_no_ws\\\$(ConfigurationName)" \
 
                         tag Tool \
                             Name="VCCLCompilerTool" \
