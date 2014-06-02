@@ -136,12 +136,13 @@ class Trans4x4TestBase {
         input_block[j] = rnd.Rand8() - rnd.Rand8();
         input_extreme_block[j] = rnd.Rand8() % 2 ? 255 : -255;
       }
-      if (i == 0)
+      if (i == 0) {
         for (int j = 0; j < kNumCoeffs; ++j)
           input_extreme_block[j] = 255;
-      if (i == 1)
+      } else if (i == 1) {
         for (int j = 0; j < kNumCoeffs; ++j)
           input_extreme_block[j] = -255;
+      }
 
       fwd_txfm_ref(input_extreme_block, output_ref_block, pitch_, tx_type_);
       REGISTER_STATE_CHECK(RunFwdTxfm(input_extreme_block,
