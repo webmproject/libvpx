@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//m7A\u003d",
+        "filename": "build/arm-msvs/obj_int_extract.bat",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-03T23:26:32Z",
+      "side": 1,
+      "message": "%1 will be quoted now, so we can take it as is in the first...it really only matters in paths with spaces",
+      "parentUuid": "AAAAdn//m7c\u003d",
+      "revId": "1e3d9b9e5dd03e5b5547585cf757044bb828334a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//m7Y\u003d",
         "filename": "build/make/gen_msvs_proj.sh",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-06-03T23:20:11Z",
       "side": 1,
       "message": "Was going to say wrap this, and then looked around... your choice.",
+      "revId": "1e3d9b9e5dd03e5b5547585cf757044bb828334a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//m68\u003d",
+        "filename": "build/make/gen_msvs_proj.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-03T23:26:32Z",
+      "side": 1,
+      "message": "follow-up makes an addition and wraps this",
+      "parentUuid": "AAAAdn//m7Y\u003d",
       "revId": "1e3d9b9e5dd03e5b5547585cf757044bb828334a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
