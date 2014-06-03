@@ -3794,11 +3794,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
         vp9_get_segdata(seg, segment_id, SEG_LVL_REF_FRAME) !=
             (int)ref_frame) {
       continue;
-    // If the segment skip feature is enabled....
-    // then do nothing if the current mode is not allowed..
-    } else if (vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP) &&
-               ref_frame != INTRA_FRAME) {
-      continue;
     // Disable this drop out case if the ref frame
     // segment level feature is enabled for this segment. This is to
     // prevent the possibility that we end up unable to pick any mode.
@@ -4023,15 +4018,10 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     }
 
     if (!disable_skip) {
-      // Test for the condition where skip block will be activated
-      // because there are no non zero coefficients and make any
-      // necessary adjustment for rate. Ignore if skip is coded at
-      // segment level as the cost wont have been added in.
-      // Is Mb level skip allowed (i.e. not coded at segment level).
-      const int mb_skip_allowed = !vp9_segfeature_active(seg, segment_id,
-                                                         SEG_LVL_SKIP);
+      // Skip is never coded at the segment level for sub8x8 blocks and instead
+      // always coded in the bitstream at the mode info level.
 
-      if (mb_skip_allowed && ref_frame != INTRA_FRAME && !xd->lossless) {
+      if (ref_frame != INTRA_FRAME && !xd->lossless) {
         if (RDCOST(x->rdmult, x->rddiv, rate_y + rate_uv, distortion2) <
             RDCOST(x->rdmult, x->rddiv, 0, total_sse)) {
           // Add in the cost of the no skip flag.
@@ -4046,7 +4036,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
           rate_uv = 0;
           this_skip2 = 1;
         }
-      } else if (mb_skip_allowed) {
+      } else {
         // Add in the cost of the no skip flag.
         rate2 += vp9_cost_bit(vp9_get_skip_prob(cm, xd), 0);
       }
