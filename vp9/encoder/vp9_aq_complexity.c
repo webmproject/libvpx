@@ -47,11 +47,21 @@ void vp9_setup_in_frame_q_adj(VP9_COMP *cpi) {
 
     // Use some of the segments for in frame Q adjustment.
     for (segment = 1; segment < 2; segment++) {
-      const int qindex_delta =
+      int qindex_delta =
           vp9_compute_qdelta_by_rate(&cpi->rc, cm->frame_type, cm->base_qindex,
                                      in_frame_q_adj_ratio[segment]);
-      vp9_enable_segfeature(seg, segment, SEG_LVL_ALT_Q);
-      vp9_set_segdata(seg, segment, SEG_LVL_ALT_Q, qindex_delta);
+
+      // For AQ mode 2, we dont allow Q0 in a segment if the base Q is not 0.
+      // Q0 (lossless) implies 4x4 only and in AQ mode 2 a segment Q delta
+      // is sometimes applied without going back around the rd loop.
+      // This could lead to an illegal combination of partition size and q.
+      if ((cm->base_qindex != 0) && ((cm->base_qindex + qindex_delta) == 0)) {
+        qindex_delta = -cm->base_qindex + 1;
+      }
+      if ((cm->base_qindex + qindex_delta) > 0) {
+        vp9_enable_segfeature(seg, segment, SEG_LVL_ALT_Q);
+        vp9_set_segdata(seg, segment, SEG_LVL_ALT_Q, qindex_delta);
+      }
     }
   }
 }
