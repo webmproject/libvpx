@@ -22,7 +22,6 @@ typedef struct {
   double intra_error;
   double coded_error;
   double sr_coded_error;
-  double ssim_weighted_pred_err;
   double pcnt_inter;
   double pcnt_motion;
   double pcnt_second_ref;

@@ -137,14 +137,13 @@ static void output_stats(FIRSTPASS_STATS *stats,
     FILE *fpfile;
     fpfile = fopen("firstpass.stt", "a");
 
-    fprintf(fpfile, "%12.0f %12.0f %12.0f %12.0f %12.0f %12.4f %12.4f"
+    fprintf(fpfile, "%12.0f %12.0f %12.0f %12.0f %12.4f %12.4f"
             "%12.4f %12.4f %12.4f %12.4f %12.4f %12.4f %12.4f"
             "%12.0f %12.0f %12.4f %12.0f %12.0f %12.4f\n",
             stats->frame,
             stats->intra_error,
             stats->coded_error,
             stats->sr_coded_error,
-            stats->ssim_weighted_pred_err,
             stats->pcnt_inter,
             stats->pcnt_motion,
             stats->pcnt_second_ref,
