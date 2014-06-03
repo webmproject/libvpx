@@ -179,12 +179,13 @@ TEST_P(Trans32x32Test, MemCheck) {
       input_block[j] = rnd.Rand8() - rnd.Rand8();
       input_extreme_block[j] = rnd.Rand8() & 1 ? 255 : -255;
     }
-    if (i == 0)
+    if (i == 0) {
       for (int j = 0; j < kNumCoeffs; ++j)
         input_extreme_block[j] = 255;
-    if (i == 1)
+    } else if (i == 1) {
       for (int j = 0; j < kNumCoeffs; ++j)
         input_extreme_block[j] = -255;
+    }
 
     const int stride = 32;
     vp9_fdct32x32_c(input_extreme_block, output_ref_block, stride);

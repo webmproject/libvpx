@@ -177,9 +177,11 @@ class FwdTrans8x8TestBase {
     ACMRandom rnd(ACMRandom::DeterministicSeed());
     int max_error = 0;
     int total_error = 0;
+    int total_coeff_error = 0;
     const int count_test_block = 100000;
     DECLARE_ALIGNED_ARRAY(16, int16_t, test_input_block, 64);
     DECLARE_ALIGNED_ARRAY(16, int16_t, test_temp_block, 64);
+    DECLARE_ALIGNED_ARRAY(16, int16_t, ref_temp_block, 64);
     DECLARE_ALIGNED_ARRAY(16, uint8_t, dst, 64);
     DECLARE_ALIGNED_ARRAY(16, uint8_t, src, 64);
 
@@ -187,12 +189,23 @@ class FwdTrans8x8TestBase {
       // Initialize a test block with input range [-255, 255].
       for (int j = 0; j < 64; ++j) {
         src[j] = rnd.Rand8() % 2 ? 255 : 0;
-        dst[j] = src[j] > 0 ? 0 : 255;
+        dst[j] = rnd.Rand8() % 2 ? 255 : 0;
+
+        if (i == 0) {
+          src[j] = 255;
+          dst[j] = 0;
+        } else if (i == 1) {
+          src[j] = 0;
+          dst[j] = 255;
+        }
+
         test_input_block[j] = src[j] - dst[j];
       }
 
       REGISTER_STATE_CHECK(
           RunFwdTxfm(test_input_block, test_temp_block, pitch_));
+      REGISTER_STATE_CHECK(
+          fwd_txfm_ref(test_input_block, ref_temp_block, pitch_, tx_type_));
       REGISTER_STATE_CHECK(
           RunInvTxfm(test_temp_block, dst, pitch_));
 
@@ -202,6 +215,9 @@ class FwdTrans8x8TestBase {
         if (max_error < error)
           max_error = error;
         total_error += error;
+
+        const int coeff_diff = test_temp_block[j] - ref_temp_block[j];
+        total_coeff_error += abs(coeff_diff);
       }
 
       EXPECT_GE(1, max_error)
@@ -211,6 +227,10 @@ class FwdTrans8x8TestBase {
       EXPECT_GE(count_test_block/5, total_error)
           << "Error: Extremal 8x8 FDCT/IDCT or FHT/IHT has average"
           << " roundtrip error > 1/5 per block";
+
+      EXPECT_EQ(0, total_coeff_error)
+          << "Error: Extremal 8x8 FDCT/FHT has"
+          << "overflow issues in the intermediate steps > 1";
     }
   }
 
@@ -343,7 +363,7 @@ INSTANTIATE_TEST_CASE_P(
 
 #if HAVE_SSSE3 && ARCH_X86_64
 INSTANTIATE_TEST_CASE_P(
-    SSSE3, FwdTrans8x8DCT,
+    DISABLED_SSSE3, FwdTrans8x8DCT,
     ::testing::Values(
         make_tuple(&vp9_fdct8x8_ssse3, &vp9_idct8x8_64_add_ssse3, 0)));
 #endif
