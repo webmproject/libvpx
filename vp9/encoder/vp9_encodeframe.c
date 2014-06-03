@@ -478,8 +478,8 @@ static void choose_partitioning(VP9_COMP *cpi,
         unsigned int sse = 0;
         int sum = 0;
         if (x_idx < pixels_wide && y_idx < pixels_high)
-          vp9_get_sse_sum_8x8(s + y_idx * sp + x_idx, sp,
-                              d + y_idx * dp + x_idx, dp, &sse, &sum);
+          vp9_get8x8var(s + y_idx * sp + x_idx, sp,
+                        d + y_idx * dp + x_idx, dp, &sse, &sum);
         fill_variance(sse, sum, 64, &vst->split[k].part_variances.none);
       }
     }
@@ -1214,9 +1214,9 @@ static void set_source_var_based_partition(VP9_COMP *cpi,
         int b_offset = b_mi_row * MI_SIZE * src_stride +
                        b_mi_col * MI_SIZE;
 
-        vp9_get_sse_sum_16x16(src + b_offset, src_stride,
-                              pre_src + b_offset, pre_stride,
-                              &d16[j].sse, &d16[j].sum);
+        vp9_get16x16var(src + b_offset, src_stride,
+                        pre_src + b_offset, pre_stride,
+                        &d16[j].sse, &d16[j].sum);
 
         d16[j].var = d16[j].sse -
             (((uint32_t)d16[j].sum * d16[j].sum) >> 8);
