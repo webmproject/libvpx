@@ -84,6 +84,10 @@ typedef struct {
 
   int worst_quality;
   int best_quality;
+
+  int64_t starting_buffer_level;
+  int64_t optimal_buffer_level;
+  int64_t maximum_buffer_size;
   // int active_best_quality;
 } RATE_CONTROL;
 

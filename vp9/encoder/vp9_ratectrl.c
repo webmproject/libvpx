@@ -159,7 +159,7 @@ static void update_layer_buffer_level(SVC *svc, int encoded_frame_size) {
     lrc->bits_off_target += bits_off_for_this_layer;
 
     // Clip buffer level to maximum buffer size for the layer.
-    lrc->bits_off_target = MIN(lrc->bits_off_target, lc->maximum_buffer_size);
+    lrc->bits_off_target = MIN(lrc->bits_off_target, lrc->maximum_buffer_size);
     lrc->buffer_level = lrc->bits_off_target;
   }
 }
@@ -167,7 +167,6 @@ static void update_layer_buffer_level(SVC *svc, int encoded_frame_size) {
 // Update the buffer level: leaky bucket model.
 static void update_buffer_level(VP9_COMP *cpi, int encoded_frame_size) {
   const VP9_COMMON *const cm = &cpi->common;
-  const VP9EncoderConfig *oxcf = &cpi->oxcf;
   RATE_CONTROL *const rc = &cpi->rc;
 
   // Non-viewable frames are a special case and are treated as pure overhead.
@@ -178,7 +177,7 @@ static void update_buffer_level(VP9_COMP *cpi, int encoded_frame_size) {
   }
 
   // Clip the buffer level to the maximum specified buffer size.
-  rc->bits_off_target = MIN(rc->bits_off_target, oxcf->maximum_buffer_size);
+  rc->bits_off_target = MIN(rc->bits_off_target, rc->maximum_buffer_size);
   rc->buffer_level = rc->bits_off_target;
 
   if (cpi->use_svc && cpi->oxcf.rc_mode == RC_MODE_CBR) {
@@ -203,8 +202,8 @@ void vp9_rc_init(const VP9EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
   rc->last_q[KEY_FRAME] = oxcf->best_allowed_q;
   rc->last_q[INTER_FRAME] = oxcf->best_allowed_q;
 
-  rc->buffer_level =    oxcf->starting_buffer_level;
-  rc->bits_off_target = oxcf->starting_buffer_level;
+  rc->buffer_level =    rc->starting_buffer_level;
+  rc->bits_off_target = rc->starting_buffer_level;
 
   rc->rolling_target_bits      = rc->avg_frame_bandwidth;
   rc->rolling_actual_bits      = rc->avg_frame_bandwidth;
@@ -250,7 +249,7 @@ int vp9_rc_drop_frame(VP9_COMP *cpi) {
       // If buffer is below drop_mark, for now just drop every other frame
       // (starting with the next frame) until it increases back over drop_mark.
       int drop_mark = (int)(oxcf->drop_frames_water_mark *
-          oxcf->optimal_buffer_level / 100);
+          rc->optimal_buffer_level / 100);
       if ((rc->buffer_level > drop_mark) &&
           (rc->decimation_factor > 0)) {
         --rc->decimation_factor;
@@ -444,10 +443,9 @@ static int calc_active_worst_quality_one_pass_cbr(const VP9_COMP *cpi) {
   // ambient Q (at buffer = optimal level) to worst_quality level
   // (at buffer = critical level).
   const VP9_COMMON *const cm = &cpi->common;
-  const VP9EncoderConfig *oxcf = &cpi->oxcf;
   const RATE_CONTROL *rc = &cpi->rc;
   // Buffer level below which we push active_worst to worst_quality.
-  int64_t critical_level = oxcf->optimal_buffer_level >> 2;
+  int64_t critical_level = rc->optimal_buffer_level >> 2;
   int64_t buff_lvl_step = 0;
   int adjustment = 0;
   int active_worst_quality;
@@ -459,26 +457,26 @@ static int calc_active_worst_quality_one_pass_cbr(const VP9_COMP *cpi) {
   else
     active_worst_quality = MIN(rc->worst_quality,
                                rc->avg_frame_qindex[KEY_FRAME] * 3 / 2);
-  if (rc->buffer_level > oxcf->optimal_buffer_level) {
+  if (rc->buffer_level > rc->optimal_buffer_level) {
     // Adjust down.
     // Maximum limit for down adjustment, ~30%.
     int max_adjustment_down = active_worst_quality / 3;
     if (max_adjustment_down) {
-      buff_lvl_step = ((oxcf->maximum_buffer_size -
-                        oxcf->optimal_buffer_level) / max_adjustment_down);
+      buff_lvl_step = ((rc->maximum_buffer_size -
+                        rc->optimal_buffer_level) / max_adjustment_down);
       if (buff_lvl_step)
-        adjustment = (int)((rc->buffer_level - oxcf->optimal_buffer_level) /
+        adjustment = (int)((rc->buffer_level - rc->optimal_buffer_level) /
                             buff_lvl_step);
       active_worst_quality -= adjustment;
     }
   } else if (rc->buffer_level > critical_level) {
     // Adjust up from ambient Q.
     if (critical_level) {
-      buff_lvl_step = (oxcf->optimal_buffer_level - critical_level);
+      buff_lvl_step = (rc->optimal_buffer_level - critical_level);
       if (buff_lvl_step) {
         adjustment =
             (int)((rc->worst_quality - rc->avg_frame_qindex[INTER_FRAME]) *
-                  (oxcf->optimal_buffer_level - rc->buffer_level) /
+                  (rc->optimal_buffer_level - rc->buffer_level) /
                   buff_lvl_step);
       }
       active_worst_quality = rc->avg_frame_qindex[INTER_FRAME] + adjustment;
@@ -1227,8 +1225,8 @@ static int calc_pframe_target_size_one_pass_cbr(const VP9_COMP *cpi) {
   const VP9EncoderConfig *oxcf = &cpi->oxcf;
   const RATE_CONTROL *rc = &cpi->rc;
   const SVC *const svc = &cpi->svc;
-  const int64_t diff = oxcf->optimal_buffer_level - rc->buffer_level;
-  const int64_t one_pct_bits = 1 + oxcf->optimal_buffer_level / 100;
+  const int64_t diff = rc->optimal_buffer_level - rc->buffer_level;
+  const int64_t one_pct_bits = 1 + rc->optimal_buffer_level / 100;
   int min_frame_target = MAX(rc->avg_frame_bandwidth >> 4, FRAME_OVERHEAD_BITS);
   int target = rc->avg_frame_bandwidth;
   if (svc->number_temporal_layers > 1 &&
@@ -1259,8 +1257,8 @@ static int calc_iframe_target_size_one_pass_cbr(const VP9_COMP *cpi) {
   const SVC *const svc = &cpi->svc;
   int target;
   if (cpi->common.current_video_frame == 0) {
-    target = ((cpi->oxcf.starting_buffer_level / 2) > INT_MAX)
-      ? INT_MAX : (int)(cpi->oxcf.starting_buffer_level / 2);
+    target = ((rc->starting_buffer_level / 2) > INT_MAX)
+      ? INT_MAX : (int)(rc->starting_buffer_level / 2);
   } else {
     int kf_boost = 32;
     double framerate = oxcf->framerate;

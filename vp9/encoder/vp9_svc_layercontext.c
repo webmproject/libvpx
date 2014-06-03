@@ -54,7 +54,7 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
       lrc->last_q[INTER_FRAME] = oxcf->best_allowed_q;
     }
 
-    lrc->buffer_level = vp9_rescale((int)(oxcf->starting_buffer_level),
+    lrc->buffer_level = vp9_rescale((int)(oxcf->starting_buffer_level_ms),
                                     lc->target_bandwidth, 1000);
     lrc->bits_off_target = lrc->buffer_level;
   }
@@ -87,14 +87,14 @@ void vp9_update_layer_context_change_config(VP9_COMP *const cpi,
     }
     bitrate_alloc = (float)lc->target_bandwidth / target_bandwidth;
     // Update buffer-related quantities.
-    lc->starting_buffer_level =
-        (int64_t)(oxcf->starting_buffer_level * bitrate_alloc);
-    lc->optimal_buffer_level =
-        (int64_t)(oxcf->optimal_buffer_level * bitrate_alloc);
-    lc->maximum_buffer_size =
-        (int64_t)(oxcf->maximum_buffer_size * bitrate_alloc);
-    lrc->bits_off_target = MIN(lrc->bits_off_target, lc->maximum_buffer_size);
-    lrc->buffer_level = MIN(lrc->buffer_level, lc->maximum_buffer_size);
+    lrc->starting_buffer_level =
+        (int64_t)(rc->starting_buffer_level * bitrate_alloc);
+    lrc->optimal_buffer_level =
+        (int64_t)(rc->optimal_buffer_level * bitrate_alloc);
+    lrc->maximum_buffer_size =
+        (int64_t)(rc->maximum_buffer_size * bitrate_alloc);
+    lrc->bits_off_target = MIN(lrc->bits_off_target, lrc->maximum_buffer_size);
+    lrc->buffer_level = MIN(lrc->buffer_level, lrc->maximum_buffer_size);
     // Update framerate-related quantities.
     if (svc->number_temporal_layers > 1) {
       lc->framerate = oxcf->framerate / oxcf->ts_rate_decimator[layer];
@@ -160,9 +160,6 @@ void vp9_restore_layer_context(VP9_COMP *const cpi) {
   cpi->rc = lc->rc;
   cpi->twopass = lc->twopass;
   cpi->oxcf.target_bandwidth = lc->target_bandwidth;
-  cpi->oxcf.starting_buffer_level = lc->starting_buffer_level;
-  cpi->oxcf.optimal_buffer_level = lc->optimal_buffer_level;
-  cpi->oxcf.maximum_buffer_size = lc->maximum_buffer_size;
   // Reset the frames_since_key and frames_to_key counters to their values
   // before the layer restore. Keep these defined for the stream (not layer).
   if (cpi->svc.number_temporal_layers > 1) {
@@ -178,9 +175,6 @@ void vp9_save_layer_context(VP9_COMP *const cpi) {
   lc->rc = cpi->rc;
   lc->twopass = cpi->twopass;
   lc->target_bandwidth = (int)oxcf->target_bandwidth;
-  lc->starting_buffer_level = oxcf->starting_buffer_level;
-  lc->optimal_buffer_level = oxcf->optimal_buffer_level;
-  lc->maximum_buffer_size = oxcf->maximum_buffer_size;
 }
 
 void vp9_init_second_pass_spatial_svc(VP9_COMP *cpi) {

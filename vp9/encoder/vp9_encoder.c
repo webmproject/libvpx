@@ -627,33 +627,30 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
 
   // local file playback mode == really big buffer
   if (cpi->oxcf.rc_mode == RC_MODE_VBR) {
-    cpi->oxcf.starting_buffer_level   = 60000;
-    cpi->oxcf.optimal_buffer_level    = 60000;
-    cpi->oxcf.maximum_buffer_size     = 240000;
+    cpi->oxcf.starting_buffer_level_ms = 60000;
+    cpi->oxcf.optimal_buffer_level_ms = 60000;
+    cpi->oxcf.maximum_buffer_size_ms = 240000;
   }
 
-  cpi->oxcf.starting_buffer_level =
-      vp9_rescale(cpi->oxcf.starting_buffer_level,
-                  cpi->oxcf.target_bandwidth, 1000);
+  rc->starting_buffer_level = vp9_rescale(cpi->oxcf.starting_buffer_level_ms,
+                                          cpi->oxcf.target_bandwidth, 1000);
 
   // Set or reset optimal and maximum buffer levels.
-  if (cpi->oxcf.optimal_buffer_level == 0)
-    cpi->oxcf.optimal_buffer_level = cpi->oxcf.target_bandwidth / 8;
+  if (cpi->oxcf.optimal_buffer_level_ms == 0)
+    rc->optimal_buffer_level = cpi->oxcf.target_bandwidth / 8;
   else
-    cpi->oxcf.optimal_buffer_level =
-        vp9_rescale(cpi->oxcf.optimal_buffer_level,
-                    cpi->oxcf.target_bandwidth, 1000);
+    rc->optimal_buffer_level = vp9_rescale(cpi->oxcf.optimal_buffer_level_ms,
+                                           cpi->oxcf.target_bandwidth, 1000);
 
-  if (cpi->oxcf.maximum_buffer_size == 0)
-    cpi->oxcf.maximum_buffer_size = cpi->oxcf.target_bandwidth / 8;
+  if (cpi->oxcf.maximum_buffer_size_ms == 0)
+    rc->maximum_buffer_size = cpi->oxcf.target_bandwidth / 8;
   else
-    cpi->oxcf.maximum_buffer_size =
-        vp9_rescale(cpi->oxcf.maximum_buffer_size,
-                    cpi->oxcf.target_bandwidth, 1000);
+    rc->maximum_buffer_size = vp9_rescale(cpi->oxcf.maximum_buffer_size_ms,
+                                          cpi->oxcf.target_bandwidth, 1000);
   // Under a configuration change, where maximum_buffer_size may change,
   // keep buffer level clipped to the maximum allowed buffer size.
-  rc->bits_off_target = MIN(rc->bits_off_target, cpi->oxcf.maximum_buffer_size);
-  rc->buffer_level = MIN(rc->buffer_level, cpi->oxcf.maximum_buffer_size);
+  rc->bits_off_target = MIN(rc->bits_off_target, rc->maximum_buffer_size);
+  rc->buffer_level = MIN(rc->buffer_level, rc->maximum_buffer_size);
 
   // Set up frame rate and related parameters rate control values.
   vp9_new_framerate(cpi, cpi->oxcf.framerate);

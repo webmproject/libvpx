@@ -343,9 +343,9 @@ static vpx_codec_err_t set_encoder_config(
   oxcf->scaled_frame_width       = cfg->rc_scaled_width;
   oxcf->scaled_frame_height      = cfg->rc_scaled_height;
 
-  oxcf->maximum_buffer_size     = cfg->rc_buf_sz;
-  oxcf->starting_buffer_level   = cfg->rc_buf_initial_sz;
-  oxcf->optimal_buffer_level    = cfg->rc_buf_optimal_sz;
+  oxcf->maximum_buffer_size_ms   = cfg->rc_buf_sz;
+  oxcf->starting_buffer_level_ms = cfg->rc_buf_initial_sz;
+  oxcf->optimal_buffer_level_ms  = cfg->rc_buf_optimal_sz;
 
   oxcf->drop_frames_water_mark   = cfg->rc_dropframe_thresh;
 

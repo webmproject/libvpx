@@ -22,9 +22,6 @@ extern "C" {
 typedef struct {
   RATE_CONTROL rc;
   int target_bandwidth;
-  int64_t starting_buffer_level;
-  int64_t optimal_buffer_level;
-  int64_t maximum_buffer_size;
   double framerate;
   int avg_frame_size;
   TWO_PASS twopass;
