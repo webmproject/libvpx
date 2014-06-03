@@ -184,7 +184,7 @@ unsigned int vp9_high_sad##m##x##n##_avg_c(const uint8_t *src, int src_stride, \
                                       const uint8_t *second_pred, \
                                       unsigned int max_sad) { \
   uint16_t comp_pred[m * n]; \
-  high_comp_avg_pred(comp_pred, second_pred, m, n, ref, ref_stride); \
+  vp9_high_comp_avg_pred(comp_pred, second_pred, m, n, ref, ref_stride); \
   return high_sadb(src, src_stride, comp_pred, m, m, n); \
 }
 

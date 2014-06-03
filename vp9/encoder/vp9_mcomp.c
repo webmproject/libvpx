@@ -403,7 +403,8 @@ int vp9_find_best_sub_pixel_comp_tree(const MACROBLOCK *x,
 
 #if CONFIG_VP9_HIGH
   if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
-    high_comp_avg_pred(comp_pred16, second_pred, w, h, y + offset, y_stride);
+    vp9_high_comp_avg_pred(comp_pred16, second_pred, w, h, y + offset,
+                           y_stride);
     besterr = vfp->vf(CONVERT_TO_BYTEPTR(comp_pred16), w, z, src_stride, sse1);
   } else {
     vp9_comp_avg_pred(comp_pred, second_pred, w, h, y + offset, y_stride);

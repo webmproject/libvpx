@@ -405,31 +405,6 @@ static vp9_variance_fn_t get_block_variance_fn(BLOCK_SIZE bsize) {
 
 #if CONFIG_VP9_HIGH
 
-#define MAKE_MSE_WRAPPER(fnname) \
-static unsigned int fnname##_bits10(const uint8_t *src_ptr, \
-                                    int source_stride, \
-                                    const uint8_t *ref_ptr, \
-                                    int ref_stride, \
-                                    unsigned int *sse) {  \
-  unsigned int val = fnname(src_ptr, source_stride, ref_ptr, ref_stride, sse); \
-  *sse >>= 4; \
-  return val >> 4; \
-} \
-static unsigned int fnname##_bits12(const uint8_t *src_ptr, \
-                                    int source_stride, \
-                                    const uint8_t *ref_ptr, \
-                                    int ref_stride, \
-                                    unsigned int *sse) {  \
-  unsigned int val = fnname(src_ptr, source_stride, ref_ptr, ref_stride, sse); \
-  *sse >>= 8; \
-  return val >> 8; \
-}
-
-MAKE_MSE_WRAPPER(vp9_high_mse8x8)
-MAKE_MSE_WRAPPER(vp9_high_mse16x8)
-MAKE_MSE_WRAPPER(vp9_high_mse8x16)
-MAKE_MSE_WRAPPER(vp9_high_mse16x16)
-
 static vp9_variance_fn_t high_get_block_variance_fn(BLOCK_SIZE bsize, int bps) {
   switch (bps) {
     default:
@@ -447,25 +422,25 @@ static vp9_variance_fn_t high_get_block_variance_fn(BLOCK_SIZE bsize, int bps) {
     case 10:
       switch (bsize) {
         case BLOCK_8X8:
-          return vp9_high_mse8x8_bits10;
+          return vp9_high_10_mse8x8;
         case BLOCK_16X8:
-          return vp9_high_mse16x8_bits10;
+          return vp9_high_10_mse16x8;
         case BLOCK_8X16:
-          return vp9_high_mse8x16_bits10;
+          return vp9_high_10_mse8x16;
         default:
-          return vp9_high_mse16x16_bits10;
+          return vp9_high_10_mse16x16;
       }
       break;
     case 12:
       switch (bsize) {
         case BLOCK_8X8:
-          return vp9_high_mse8x8_bits12;
+          return vp9_high_12_mse8x8;
         case BLOCK_16X8:
-          return vp9_high_mse16x8_bits12;
+          return vp9_high_12_mse16x8;
         case BLOCK_8X16:
-          return vp9_high_mse8x16_bits12;
+          return vp9_high_12_mse8x16;
         default:
-          return vp9_high_mse16x16_bits12;
+          return vp9_high_12_mse16x16;
       }
       break;
   }

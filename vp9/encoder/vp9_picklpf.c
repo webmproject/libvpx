@@ -40,8 +40,15 @@ static int try_filter_frame(const YV12_BUFFER_CONFIG *sd, VP9_COMP *const cpi,
 
   vp9_loop_filter_frame(cm->frame_to_show, cm, &cpi->mb.e_mbd, filt_level, 1,
                         partial_frame);
+#if CONFIG_VP9_HIGH
+  if (cm->use_high) {
+    filt_err = vp9_high_get_y_sse(sd, cm->frame_to_show, cm->bit_depth);
+  } else {
+    filt_err = vp9_get_y_sse(sd, cm->frame_to_show);
+  }
+#else
   filt_err = vp9_get_y_sse(sd, cm->frame_to_show);
-
+#endif
   // Re-instate the unfiltered frame
   vpx_yv12_copy_y(&cpi->last_frame_uf, cm->frame_to_show);
 

@@ -25,8 +25,18 @@ void variance(const uint8_t *a, int a_stride,
 #if CONFIG_VP9_HIGH
 void high_variance(const uint8_t *a8, int a_stride,
                    const uint8_t *b8, int b_stride,
-                   int  w, int  h,
+                   int w, int h,
                    unsigned int *sse, int *sum);
+
+void high_10_variance(const uint8_t *a8, int a_stride,
+                      const uint8_t *b8, int b_stride,
+                      int w, int h,
+                      unsigned int *sse, int *sum);
+
+void high_12_variance(const uint8_t *a8, int a_stride,
+                      const uint8_t *b8, int b_stride,
+                      int w, int h,
+                      unsigned int *sse, int *sum);
 #endif
 
 
@@ -91,23 +101,9 @@ typedef struct vp9_variance_vtable {
 void vp9_comp_avg_pred(uint8_t *comp_pred, const uint8_t *pred, int width,
                        int height, const uint8_t *ref, int ref_stride);
 
-#if defined(CONVERT_TO_SHORTPTR) && CONFIG_VP9_HIGH
-static void high_comp_avg_pred(uint16_t *comp_pred, const uint8_t *pred8,
-                               int width, int height, const uint8_t *ref8,
-                               int ref_stride) {
-  int i, j;
-  uint16_t *pred = CONVERT_TO_SHORTPTR(pred8);
-  uint16_t *ref = CONVERT_TO_SHORTPTR(ref8);
-  for (i = 0; i < height; i++) {
-    for (j = 0; j < width; j++) {
-      const int tmp = pred[j] + ref[j];
-      comp_pred[j] = ROUND_POWER_OF_TWO(tmp, 1);
-    }
-    comp_pred += width;
-    pred += width;
-    ref += ref_stride;
-  }
-}
+#if CONFIG_VP9_HIGH
+void vp9_high_comp_avg_pred(uint16_t *comp_pred, const uint8_t *pred, int width,
+                            int height, const uint8_t *ref, int ref_stride);
 #endif
 
 #ifdef __cplusplus
