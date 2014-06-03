@@ -21,6 +21,7 @@
 #include "vp9/common/vp9_common_data.h"
 #include "vp9/common/vp9_enums.h"
 #include "vp9/common/vp9_filter.h"
+#include "vp9/common/vp9_idct.h"
 #include "vp9/common/vp9_mv.h"
 #include "vp9/common/vp9_scale.h"
 #include "vp9/common/vp9_seg_common.h"
@@ -180,7 +181,7 @@ struct buf_2d {
 };
 
 struct macroblockd_plane {
-  int16_t *dqcoeff;
+  tran_low_t *dqcoeff;
   PLANE_TYPE plane_type;
   int subsampling_x;
   int subsampling_y;
@@ -227,7 +228,7 @@ typedef struct macroblockd {
 #if CONFIG_VP9_HIGH
   /* Bits per sample 8, 10, 12 */
   int bps;
-  void (*high_itxm_add)(const int16_t *input, uint8_t *dest, int stride,
+  void (*high_itxm_add)(const tran_low_t *input, uint8_t *dest, int stride,
                         int eob, int bps);
   DECLARE_ALIGNED(16, uint16_t, mc_buf_high[80 * 2 * 80 * 2]);
 #endif
@@ -237,11 +238,11 @@ typedef struct macroblockd {
 
   int lossless;
   /* Inverse transform function pointers. */
-  void (*itxm_add)(const int16_t *input, uint8_t *dest, int stride, int eob);
+  void (*itxm_add)(const tran_low_t *input, uint8_t *dest, int stride, int eob);
 
   int corrupted;
 
-  DECLARE_ALIGNED(16, int16_t, dqcoeff[MAX_MB_PLANE][64 * 64]);
+  DECLARE_ALIGNED(16, tran_low_t, dqcoeff[MAX_MB_PLANE][64 * 64]);
 
   ENTROPY_CONTEXT *above_context[MAX_MB_PLANE];
   ENTROPY_CONTEXT left_context[MAX_MB_PLANE][16];

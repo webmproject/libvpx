@@ -94,7 +94,7 @@ void vp9_rc_init_minq_luts() {
 // tables if and when things settle down in the experimental bitstream
 double vp9_convert_qindex_to_q(int qindex) {
   // Convert the index to a real Q value (scaled down to match old Q values)
-  return vp9_ac_quant(qindex, 0) / 4.0;
+  return vp9_ac_quant(qindex, 0, VPX_BITS_8) / 4.0;
 }
 
 int vp9_rc_bits_per_mb(FRAME_TYPE frame_type, int qindex,

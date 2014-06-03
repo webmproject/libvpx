@@ -13,6 +13,7 @@
 
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/common/vp9_common.h"
+#include "vp9/common/vp9_idct.h"
 
 #include "vp9/decoder/vp9_detokenize.h"
 
@@ -80,7 +81,7 @@ static const vp9_prob cat6_prob[15] = {
   } while (0)
 
 static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd, PLANE_TYPE type,
-                       int16_t *dqcoeff, TX_SIZE tx_size, const int16_t *dq,
+                       tran_low_t *dqcoeff, TX_SIZE tx_size, const int16_t *dq,
                        int ctx, const int16_t *scan, const int16_t *nb,
                        vp9_reader *r) {
   const int max_eob = 16 << (tx_size << 1);

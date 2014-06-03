@@ -71,25 +71,41 @@ void reference_32x32_dct_2d(const int16_t input[kNumCoeffs],
   }
 }
 
-typedef void (*fwd_txfm_t)(const int16_t *in, int16_t *out, int stride);
-typedef void (*inv_txfm_t)(const int16_t *in, uint8_t *out, int stride);
+typedef void (*fwd_txfm_t)(const int16_t *in, tran_low_t *out, int stride);
+typedef void (*inv_txfm_t)(const tran_low_t *in, uint8_t *out, int stride);
 
-typedef std::tr1::tuple<fwd_txfm_t, inv_txfm_t, int> trans_32x32_param_t;
+typedef std::tr1::tuple<fwd_txfm_t, inv_txfm_t, int, int> trans_32x32_param_t;
+
+#if CONFIG_VP9_HIGH
+
+void idct32x32_10(const tran_low_t *in, uint8_t *out, int stride) {
+  vp9_high_idct32x32_1024_add_c(in, out, stride, 10);
+}
+
+void idct32x32_12(const tran_low_t *in, uint8_t *out, int stride) {
+  vp9_high_idct32x32_1024_add_c(in, out, stride, 12);
+}
+
+#endif
 
 class Trans32x32Test : public ::testing::TestWithParam<trans_32x32_param_t> {
  public:
   virtual ~Trans32x32Test() {}
   virtual void SetUp() {
-    fwd_txfm_ = GET_PARAM(0);
-    inv_txfm_ = GET_PARAM(1);
-    version_  = GET_PARAM(2);  // 0: high precision forward transform
-                               // 1: low precision version for rd loop
+    fwd_txfm_  = GET_PARAM(0);
+    inv_txfm_  = GET_PARAM(1);
+    version_   = GET_PARAM(2);  // 0: high precision forward transform
+                                // 1: low precision version for rd loop
+    bit_depth_ = GET_PARAM(3);
+    mask_ = (1 << bit_depth_) - 1;
   }
 
   virtual void TearDown() { libvpx_test::ClearSystemState(); }
 
  protected:
   int version_;
+  int bit_depth_;
+  int mask_;
   fwd_txfm_t fwd_txfm_;
   inv_txfm_t inv_txfm_;
 };
@@ -100,23 +116,38 @@ TEST_P(Trans32x32Test, AccuracyCheck) {
   int64_t total_error = 0;
   const int count_test_block = 1000;
   DECLARE_ALIGNED_ARRAY(16, int16_t, test_input_block, kNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(16, int16_t, test_temp_block, kNumCoeffs);
+  DECLARE_ALIGNED_ARRAY(16, tran_low_t, test_temp_block, kNumCoeffs);
   DECLARE_ALIGNED_ARRAY(16, uint8_t, dst, kNumCoeffs);
+  DECLARE_ALIGNED_ARRAY(16, uint16_t, dst16, kNumCoeffs);
   DECLARE_ALIGNED_ARRAY(16, uint8_t, src, kNumCoeffs);
+  DECLARE_ALIGNED_ARRAY(16, uint16_t, src16, kNumCoeffs);
 
   for (int i = 0; i < count_test_block; ++i) {
     // Initialize a test block with input range [-255, 255].
     for (int j = 0; j < kNumCoeffs; ++j) {
-      src[j] = rnd.Rand8();
-      dst[j] = rnd.Rand8();
-      test_input_block[j] = src[j] - dst[j];
+      if (bit_depth_ == 8) {
+        src[j] = rnd.Rand8();
+        dst[j] = rnd.Rand8();
+        test_input_block[j] = src[j] - dst[j];
+      } else {
+        src16[j] = rnd.Rand16() & mask_;
+        dst16[j] = rnd.Rand16() & mask_;
+        test_input_block[j] = src16[j] - dst16[j];
+      }
     }
 
     REGISTER_STATE_CHECK(fwd_txfm_(test_input_block, test_temp_block, 32));
-    REGISTER_STATE_CHECK(inv_txfm_(test_temp_block, dst, 32));
+    if (bit_depth_ == 8)
+      REGISTER_STATE_CHECK(inv_txfm_(test_temp_block, dst, 32));
+#if CONFIG_VP9_HIGH
+    else
+      REGISTER_STATE_CHECK(inv_txfm_(test_temp_block,
+                                     CONVERT_TO_BYTEPTR(dst16), 32));
+#endif
 
     for (int j = 0; j < kNumCoeffs; ++j) {
-      const uint32_t diff = dst[j] - src[j];
+      const uint32_t diff = bit_depth_ == 8 ? dst[j] - src[j] :
+                                              dst16[j] - src16[j];
       const uint32_t error = diff * diff;
       if (max_error < error)
         max_error = error;
@@ -141,12 +172,12 @@ TEST_P(Trans32x32Test, CoeffCheck) {
   const int count_test_block = 1000;
 
   DECLARE_ALIGNED_ARRAY(16, int16_t, input_block, kNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(16, int16_t, output_ref_block, kNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(16, int16_t, output_block, kNumCoeffs);
+  DECLARE_ALIGNED_ARRAY(16, tran_low_t, output_ref_block, kNumCoeffs);
+  DECLARE_ALIGNED_ARRAY(16, tran_low_t, output_block, kNumCoeffs);
 
   for (int i = 0; i < count_test_block; ++i) {
     for (int j = 0; j < kNumCoeffs; ++j)
-      input_block[j] = rnd.Rand8() - rnd.Rand8();
+      input_block[j] = (rnd.Rand16() & mask_) - (rnd.Rand16() & mask_);
 
     const int stride = 32;
     vp9_fdct32x32_c(input_block, output_ref_block, stride);
@@ -170,21 +201,21 @@ TEST_P(Trans32x32Test, MemCheck) {
 
   DECLARE_ALIGNED_ARRAY(16, int16_t, input_block, kNumCoeffs);
   DECLARE_ALIGNED_ARRAY(16, int16_t, input_extreme_block, kNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(16, int16_t, output_ref_block, kNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(16, int16_t, output_block, kNumCoeffs);
+  DECLARE_ALIGNED_ARRAY(16, tran_low_t, output_ref_block, kNumCoeffs);
+  DECLARE_ALIGNED_ARRAY(16, tran_low_t, output_block, kNumCoeffs);
 
   for (int i = 0; i < count_test_block; ++i) {
-    // Initialize a test block with input range [-255, 255].
+    // Initialize a test block with input range [-mask_, mask_].
     for (int j = 0; j < kNumCoeffs; ++j) {
-      input_block[j] = rnd.Rand8() - rnd.Rand8();
-      input_extreme_block[j] = rnd.Rand8() & 1 ? 255 : -255;
+      input_block[j] = (rnd.Rand16() & mask_) - (rnd.Rand16() & mask_);
+      input_extreme_block[j] = rnd.Rand8() & 1 ? mask_ : -mask_;
     }
     if (i == 0)
       for (int j = 0; j < kNumCoeffs; ++j)
-        input_extreme_block[j] = 255;
+        input_extreme_block[j] = mask_;
     if (i == 1)
       for (int j = 0; j < kNumCoeffs; ++j)
-        input_extreme_block[j] = -255;
+        input_extreme_block[j] = -mask_;
 
     const int stride = 32;
     vp9_fdct32x32_c(input_extreme_block, output_ref_block, stride);
@@ -212,26 +243,40 @@ TEST_P(Trans32x32Test, InverseAccuracy) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   const int count_test_block = 1000;
   DECLARE_ALIGNED_ARRAY(16, int16_t, in, kNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(16, int16_t, coeff, kNumCoeffs);
+  DECLARE_ALIGNED_ARRAY(16, tran_low_t, coeff, kNumCoeffs);
   DECLARE_ALIGNED_ARRAY(16, uint8_t, dst, kNumCoeffs);
+  DECLARE_ALIGNED_ARRAY(16, uint16_t, dst16, kNumCoeffs);
   DECLARE_ALIGNED_ARRAY(16, uint8_t, src, kNumCoeffs);
+  DECLARE_ALIGNED_ARRAY(16, uint16_t, src16, kNumCoeffs);
 
   for (int i = 0; i < count_test_block; ++i) {
     double out_r[kNumCoeffs];
 
     // Initialize a test block with input range [-255, 255]
     for (int j = 0; j < kNumCoeffs; ++j) {
-      src[j] = rnd.Rand8();
-      dst[j] = rnd.Rand8();
-      in[j] = src[j] - dst[j];
+      if (bit_depth_ == 8) {
+        src[j] = rnd.Rand8();
+        dst[j] = rnd.Rand8();
+        in[j] = src[j] - dst[j];
+      } else {
+        src16[j] = rnd.Rand16() & mask_;
+        dst16[j] = rnd.Rand16() & mask_;
+        in[j] = src16[j] - dst16[j];
+      }
     }
 
     reference_32x32_dct_2d(in, out_r);
     for (int j = 0; j < kNumCoeffs; ++j)
       coeff[j] = round(out_r[j]);
-    REGISTER_STATE_CHECK(inv_txfm_(coeff, dst, 32));
+
+    if (bit_depth_ == 8)
+      REGISTER_STATE_CHECK(inv_txfm_(coeff, dst, 32));
+#if CONFIG_VP9_HIGH
+    else
+      REGISTER_STATE_CHECK(inv_txfm_(coeff, CONVERT_TO_BYTEPTR(dst16), 32));
+#endif
     for (int j = 0; j < kNumCoeffs; ++j) {
-      const int diff = dst[j] - src[j];
+      const int diff = bit_depth_ == 8 ? dst[j] - src[j] : dst16[j] - src16[j];
       const int error = diff * diff;
       EXPECT_GE(1, error)
           << "Error: 32x32 IDCT has error " << error
@@ -245,36 +290,45 @@ using std::tr1::make_tuple;
 INSTANTIATE_TEST_CASE_P(
     C, Trans32x32Test,
     ::testing::Values(
-        make_tuple(&vp9_fdct32x32_c, &vp9_idct32x32_1024_add_c, 0),
-        make_tuple(&vp9_fdct32x32_rd_c, &vp9_idct32x32_1024_add_c, 1)));
+#if CONFIG_VP9_HIGH
+        make_tuple(&vp9_fdct32x32_c, &vp9_idct32x32_1024_add_c, 0, 8),
+        make_tuple(&vp9_fdct32x32_rd_c, &vp9_idct32x32_1024_add_c, 1, 8),
+        make_tuple(&vp9_high_fdct32x32_c, &idct32x32_10, 0, 10),
+        make_tuple(&vp9_high_fdct32x32_rd_c, &idct32x32_10, 1, 10),
+        make_tuple(&vp9_high_fdct32x32_c, &idct32x32_12, 0, 12),
+        make_tuple(&vp9_high_fdct32x32_rd_c, &idct32x32_12, 1, 12)));
+#else
+        make_tuple(&vp9_fdct32x32_c, &vp9_idct32x32_1024_add_c, 0, 8),
+        make_tuple(&vp9_fdct32x32_rd_c, &vp9_idct32x32_1024_add_c, 1, 8)));
+#endif
 
-#if HAVE_NEON_ASM
+#if HAVE_NEON_ASM && !CONFIG_HIGH_TRANSFORMS
 INSTANTIATE_TEST_CASE_P(
     NEON, Trans32x32Test,
     ::testing::Values(
         make_tuple(&vp9_fdct32x32_c,
-                   &vp9_idct32x32_1024_add_neon, 0),
+                   &vp9_idct32x32_1024_add_neon, 0, 8),
         make_tuple(&vp9_fdct32x32_rd_c,
-                   &vp9_idct32x32_1024_add_neon, 1)));
+                   &vp9_idct32x32_1024_add_neon, 1, 8)));
 #endif
 
-#if HAVE_SSE2
+#if HAVE_SSE2 && !CONFIG_HIGH_TRANSFORMS
 INSTANTIATE_TEST_CASE_P(
     SSE2, Trans32x32Test,
     ::testing::Values(
         make_tuple(&vp9_fdct32x32_sse2,
-                   &vp9_idct32x32_1024_add_sse2, 0),
+                   &vp9_idct32x32_1024_add_sse2, 0, 8),
         make_tuple(&vp9_fdct32x32_rd_sse2,
-                   &vp9_idct32x32_1024_add_sse2, 1)));
+                   &vp9_idct32x32_1024_add_sse2, 1, 8)));
 #endif
 
-#if HAVE_AVX2
+#if HAVE_AVX2 && !CONFIG_HIGH_TRANSFORMS
 INSTANTIATE_TEST_CASE_P(
     AVX2, Trans32x32Test,
     ::testing::Values(
         make_tuple(&vp9_fdct32x32_avx2,
-                   &vp9_idct32x32_1024_add_sse2, 0),
+                   &vp9_idct32x32_1024_add_sse2, 0, 8),
         make_tuple(&vp9_fdct32x32_rd_avx2,
-                   &vp9_idct32x32_1024_add_sse2, 1)));
+                   &vp9_idct32x32_1024_add_sse2, 1, 8)));
 #endif
 }  // namespace

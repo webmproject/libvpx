@@ -270,6 +270,7 @@ EXPERIMENT_LIST="
     vp9_high
     multiple_arf
     spatial_svc
+    high_transforms
 "
 CONFIG_LIST="
     external_build

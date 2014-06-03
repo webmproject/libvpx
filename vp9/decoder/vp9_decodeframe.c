@@ -196,7 +196,7 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
   if (eob > 0) {
     TX_TYPE tx_type;
     const PLANE_TYPE plane_type = pd->plane_type;
-    int16_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
+    tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
 #if CONFIG_VP9_HIGH
     if (xd->cur_buf->flags&YV12_FLAG_HIGH) {
       switch (tx_size) {
@@ -1166,6 +1166,10 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
 #endif
       cm->bit_depth = VPX_BITS_8;
     }
+    // TODO(peter.derivaz): Don't really want to call this for every frame, but
+    // need the bit depth to init dequantizers
+    vp9_init_dequantizer(cm);
+
     cm->color_space = (COLOR_SPACE)vp9_rb_read_literal(rb, 3);
     if (cm->color_space != SRGB) {
       vp9_rb_read_bit(rb);  // [16,235] (including xvycc) vs [0,255] range
@@ -1327,11 +1331,11 @@ void vp9_init_dequantizer(VP9_COMMON *cm) {
   int q;
 
   for (q = 0; q < QINDEX_RANGE; q++) {
-    cm->y_dequant[q][0] = vp9_dc_quant(q, cm->y_dc_delta_q);
-    cm->y_dequant[q][1] = vp9_ac_quant(q, 0);
+    cm->y_dequant[q][0] = vp9_dc_quant(q, cm->y_dc_delta_q, cm->bit_depth);
+    cm->y_dequant[q][1] = vp9_ac_quant(q, 0, cm->bit_depth);
 
-    cm->uv_dequant[q][0] = vp9_dc_quant(q, cm->uv_dc_delta_q);
-    cm->uv_dequant[q][1] = vp9_ac_quant(q, cm->uv_ac_delta_q);
+    cm->uv_dequant[q][0] = vp9_dc_quant(q, cm->uv_dc_delta_q, cm->bit_depth);
+    cm->uv_dequant[q][1] = vp9_ac_quant(q, cm->uv_ac_delta_q, cm->bit_depth);
   }
 }
 

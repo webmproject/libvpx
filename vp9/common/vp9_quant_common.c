@@ -121,12 +121,38 @@ void vp9_init_quant_tables() {
 }
 #endif
 
-int16_t vp9_dc_quant(int qindex, int delta) {
+int16_t vp9_dc_quant(int qindex, int delta, vpx_bit_depth_t bit_depth) {
+#if CONFIG_HIGH_TRANSFORMS
+  switch (bit_depth) {
+    default:
+    case VPX_BITS_8:
+      return dc_qlookup[clamp(qindex + delta, 0, MAXQ)];
+    case VPX_BITS_10:
+      return dc_qlookup[clamp(qindex + delta, 0, MAXQ)] << 2;
+    case VPX_BITS_12:
+      return dc_qlookup[clamp(qindex + delta, 0, MAXQ)] << 4;
+  }
+#else
+  (void) bit_depth;
   return dc_qlookup[clamp(qindex + delta, 0, MAXQ)];
+#endif
 }
 
-int16_t vp9_ac_quant(int qindex, int delta) {
+int16_t vp9_ac_quant(int qindex, int delta, vpx_bit_depth_t bit_depth) {
+#if CONFIG_HIGH_TRANSFORMS
+  switch (bit_depth) {
+    default:
+    case VPX_BITS_8:
+      return ac_qlookup[clamp(qindex + delta, 0, MAXQ)];
+    case VPX_BITS_10:
+      return ac_qlookup[clamp(qindex + delta, 0, MAXQ)] << 2;
+    case VPX_BITS_12:
+      return ac_qlookup[clamp(qindex + delta, 0, MAXQ)] << 4;
+  }
+#else
+  (void) bit_depth;
   return ac_qlookup[clamp(qindex + delta, 0, MAXQ)];
+#endif
 }
 
 

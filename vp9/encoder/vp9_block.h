@@ -11,6 +11,7 @@
 #ifndef VP9_ENCODER_VP9_BLOCK_H_
 #define VP9_ENCODER_VP9_BLOCK_H_
 
+#include "vp9/common/vp9_idct.h"
 #include "vp9/common/vp9_entropymv.h"
 #include "vp9/common/vp9_entropy.h"
 #include "vpx_ports/mem.h"
@@ -22,8 +23,8 @@ extern "C" {
 
 struct macroblock_plane {
   DECLARE_ALIGNED(16, int16_t, src_diff[64 * 64]);
-  int16_t *qcoeff;
-  int16_t *coeff;
+  tran_low_t *qcoeff;
+  tran_low_t *coeff;
   uint16_t *eobs;
   struct buf_2d src;
 
@@ -108,7 +109,7 @@ struct macroblock {
   // Used to store sub partition's choices.
   MV pred_mv[MAX_REF_FRAMES];
 
-  void (*fwd_txm4x4)(const int16_t *input, int16_t *output, int stride);
+  void (*fwd_txm4x4)(const int16_t *input, tran_low_t *output, int stride);
 };
 
 #ifdef __cplusplus
