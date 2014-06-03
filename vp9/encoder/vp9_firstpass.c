@@ -1064,38 +1064,30 @@ static int detect_flash(const TWO_PASS *twopass, int offset) {
 }
 
 // Update the motion related elements to the GF arf boost calculation.
-static void accumulate_frame_motion_stats(
-  FIRSTPASS_STATS *this_frame,
-  double *this_frame_mv_in_out,
-  double *mv_in_out_accumulator,
-  double *abs_mv_in_out_accumulator,
-  double *mv_ratio_accumulator) {
-  double motion_pct;
-
-  // Accumulate motion stats.
-  motion_pct = this_frame->pcnt_motion;
+static void accumulate_frame_motion_stats(const FIRSTPASS_STATS *stats,
+                                          double *mv_in_out,
+                                          double *mv_in_out_accumulator,
+                                          double *abs_mv_in_out_accumulator,
+                                          double *mv_ratio_accumulator) {
+  const double pct = stats->pcnt_motion;
 
   // Accumulate Motion In/Out of frame stats.
-  *this_frame_mv_in_out = this_frame->mv_in_out_count * motion_pct;
-  *mv_in_out_accumulator += this_frame->mv_in_out_count * motion_pct;
-  *abs_mv_in_out_accumulator += fabs(this_frame->mv_in_out_count * motion_pct);
+  *mv_in_out = stats->mv_in_out_count * pct;
+  *mv_in_out_accumulator += *mv_in_out;
+  *abs_mv_in_out_accumulator += fabs(*mv_in_out);
 
-  // Accumulate a measure of how uniform (or conversely how random)
-  // the motion field is (a ratio of absmv / mv).
-  if (motion_pct > 0.05) {
-    const double this_frame_mvr_ratio = fabs(this_frame->mvr_abs) /
-                           DOUBLE_DIVIDE_CHECK(fabs(this_frame->MVr));
+  // Accumulate a measure of how uniform (or conversely how random) the motion
+  // field is (a ratio of abs(mv) / mv).
+  if (pct > 0.05) {
+    const double mvr_ratio = fabs(stats->mvr_abs) /
+                                 DOUBLE_DIVIDE_CHECK(fabs(stats->MVr));
+    const double mvc_ratio = fabs(stats->mvc_abs) /
+                                 DOUBLE_DIVIDE_CHECK(fabs(stats->MVc));
 
-    const double this_frame_mvc_ratio = fabs(this_frame->mvc_abs) /
-                           DOUBLE_DIVIDE_CHECK(fabs(this_frame->MVc));
-
-    *mv_ratio_accumulator += (this_frame_mvr_ratio < this_frame->mvr_abs)
-      ? (this_frame_mvr_ratio * motion_pct)
-      : this_frame->mvr_abs * motion_pct;
-
-    *mv_ratio_accumulator += (this_frame_mvc_ratio < this_frame->mvc_abs)
-      ? (this_frame_mvc_ratio * motion_pct)
-      : this_frame->mvc_abs * motion_pct;
+    *mv_ratio_accumulator += pct * (mvr_ratio < stats->mvr_abs ?
+                                       mvr_ratio : stats->mvr_abs);
+    *mv_ratio_accumulator += pct * (mvc_ratio < stats->mvc_abs ?
+                                       mvc_ratio : stats->mvc_abs);
   }
 }
 
