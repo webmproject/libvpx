@@ -374,22 +374,23 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
 
 #if CONFIG_VP9_HIGH
           if (mbd->cur_buf->flags & YV12_FLAG_HIGH) {
+            int adj_strength = strength + mbd->bps - 8;
             // Apply the filter (YUV)
             vp9_high_temporal_filter_apply(f->y_buffer + mb_y_offset,
                                            f->y_stride,
-                                           predictor, 16, 16, strength,
+                                           predictor, 16, 16, adj_strength,
                                            filter_weight,
                                            accumulator, count);
             vp9_high_temporal_filter_apply(f->u_buffer + mb_uv_offset,
                                            f->uv_stride, predictor + 256,
                                            mb_uv_width, mb_uv_height,
-                                           strength,
+                                           adj_strength,
                                            filter_weight, accumulator + 256,
                                            count + 256);
             vp9_high_temporal_filter_apply(f->v_buffer + mb_uv_offset,
                                            f->uv_stride, predictor + 512,
                                            mb_uv_width, mb_uv_height,
-                                           strength, filter_weight,
+                                           adj_strength, filter_weight,
                                            accumulator + 512, count + 512);
           } else {
             // Apply the filter (YUV)
