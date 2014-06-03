@@ -174,7 +174,8 @@ for opt in "$@"; do
         -*) die_unknown $opt
         ;;
         *)
-            file_list[${#file_list[@]}]="$(fix_path $opt)"
+            # The paths in file_list are fixed outside of the loop.
+            file_list[${#file_list[@]}]="$opt"
             case "$opt" in
                  *.asm) uses_asm=true
                  ;;
@@ -182,6 +183,10 @@ for opt in "$@"; do
         ;;
     esac
 done
+
+# Make one call to fix_path for file_list to improve performance.
+fix_file_list
+
 outfile=${outfile:-/dev/stdout}
 guid=${guid:-`generate_uuid`}
 asm_use_custom_step=false
