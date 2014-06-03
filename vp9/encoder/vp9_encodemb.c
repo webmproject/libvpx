@@ -67,7 +67,7 @@ void vp9_high_subtract_block_c(int rows, int cols,
   }
   for (r = 0; r < rows; r++) {
     for (c = 0; c < cols; c++) {
-      diff[c] = ((int)src[c] - (int)pred[c] + rnd) >> shift;
+      diff[c] = ((src[c] + rnd) >> shift) - ((pred[c] + rnd) >> shift);
     }
 
     diff += diff_stride;
