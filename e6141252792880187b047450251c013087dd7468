@@ -33,6 +33,23 @@
       "revId": "e6141252792880187b047450251c013087dd7468",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//nCQ\u003d",
+        "filename": "test/fdct8x8_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-06-03T13:30:33Z",
+      "side": 1,
+      "message": "Shall we do the same for transform in other size? i.e. testing extreme values for 16x16, 32x32 and so on..",
+      "revId": "e6141252792880187b047450251c013087dd7468",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
