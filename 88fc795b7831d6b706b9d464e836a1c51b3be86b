@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//nC4\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 727,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-06-03T12:23:00Z",
+      "side": 1,
+      "message": "Does the setting of the filter type have meaning when we are coding 0,0 mv?  I.e. does the bitstream define that in the 0,0 case we propagate the above or left if available.",
+      "revId": "88fc795b7831d6b706b9d464e836a1c51b3be86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
