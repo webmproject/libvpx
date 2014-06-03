@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//m+Q\u003d",
+        "filename": "test/fdct8x8_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-03T18:22:13Z",
+      "side": 1,
+      "message": "be good to normalize the formatting in the other files if it doesn\u0027t match this update",
+      "revId": "1b049c8fcd6d951c2e5daf6de0729829d58d4e82",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//m+U\u003d",
+        "filename": "test/fdct8x8_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 364,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-03T18:22:13Z",
+      "side": 1,
+      "message": "drop the \u0026\u0026 0",
+      "revId": "1b049c8fcd6d951c2e5daf6de0729829d58d4e82",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
