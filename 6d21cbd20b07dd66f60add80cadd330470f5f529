@@ -16,6 +16,24 @@
       "revId": "6d21cbd20b07dd66f60add80cadd330470f5f529",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//m58\u003d",
+        "filename": "vp9/common/vp9_idct.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-06-03T23:51:21Z",
+      "side": 1,
+      "message": "they are only used by forward and inverse transforms.",
+      "parentUuid": "AAAAdn//m6Y\u003d",
+      "revId": "6d21cbd20b07dd66f60add80cadd330470f5f529",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
