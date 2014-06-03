@@ -2369,22 +2369,6 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
              sizeof(*xd->above_seg_context) * aligned_mi_cols);
 }
 
-static void switch_lossless_mode(VP9_COMP *cpi, int lossless) {
-  if (lossless) {
-    // printf("Switching to lossless\n");
-    cpi->mb.fwd_txm4x4 = vp9_fwht4x4;
-    cpi->mb.itxm_add = vp9_iwht4x4_add;
-    cpi->mb.optimize = 0;
-    cpi->common.lf.filter_level = 0;
-    cpi->zbin_mode_boost_enabled = 0;
-    cpi->common.tx_mode = ONLY_4X4;
-  } else {
-    // printf("Not lossless\n");
-    cpi->mb.fwd_txm4x4 = vp9_fdct4x4;
-    cpi->mb.itxm_add = vp9_idct4x4_add;
-  }
-}
-
 static int check_dual_ref_flags(VP9_COMP *cpi) {
   const int ref_flags = cpi->ref_frame_flags;
 
@@ -2421,7 +2405,7 @@ static MV_REFERENCE_FRAME get_frame_type(const VP9_COMP *cpi) {
 }
 
 static TX_MODE select_tx_mode(const VP9_COMP *cpi) {
-  if (cpi->oxcf.lossless) {
+  if (cpi->mb.e_mbd.lossless) {
     return ONLY_4X4;
   } else if (cpi->common.current_video_frame == 0) {
     return TX_MODE_SELECT;
@@ -3011,13 +2995,21 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   vp9_zero(rd_opt->tx_select_diff);
   vp9_zero(rd_opt->tx_select_threshes);
 
-  cm->tx_mode = select_tx_mode(cpi);
-
   cpi->mb.e_mbd.lossless = cm->base_qindex == 0 &&
                            cm->y_dc_delta_q == 0 &&
                            cm->uv_dc_delta_q == 0 &&
                            cm->uv_ac_delta_q == 0;
-  switch_lossless_mode(cpi, cpi->mb.e_mbd.lossless);
+
+  cm->tx_mode = select_tx_mode(cpi);
+
+  cpi->mb.fwd_txm4x4 = cpi->mb.e_mbd.lossless ? vp9_fwht4x4 : vp9_fdct4x4;
+  cpi->mb.itxm_add = cpi->mb.e_mbd.lossless ? vp9_iwht4x4_add : vp9_idct4x4_add;
+
+  if (cpi->mb.e_mbd.lossless) {
+    cpi->mb.optimize = 0;
+    cpi->common.lf.filter_level = 0;
+    cpi->zbin_mode_boost_enabled = 0;
+  }
 
   vp9_frame_init_quantizer(cpi);
 

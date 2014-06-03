@@ -291,7 +291,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->subpel_search_method = SUBPEL_TREE;
   sf->subpel_iters_per_step = 2;
   sf->subpel_force_stop = 0;
-  sf->optimize_coefficients = !oxcf->lossless;
+  sf->optimize_coefficients = !is_lossless_requested(&cpi->oxcf);
   sf->reduce_first_step_size = 0;
   sf->auto_mv_step_size = 0;
   sf->max_step_search_steps = MAX_MVSEARCH_STEPS;

@@ -393,11 +393,6 @@ static void set_speed_features(VP9_COMP *cpi) {
   // Set rd thresholds based on mode and speed setting
   vp9_set_rd_speed_thresholds(cpi);
   vp9_set_rd_speed_thresholds_sub8x8(cpi);
-
-  cpi->mb.fwd_txm4x4 = vp9_fdct4x4;
-  if (cpi->oxcf.lossless || cpi->mb.e_mbd.lossless) {
-    cpi->mb.fwd_txm4x4 = vp9_fwht4x4;
-  }
 }
 
 static void alloc_raw_frame_buffers(VP9_COMP *cpi) {
@@ -596,16 +591,6 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   if (cpi->oxcf.mode == REALTIME)
     cpi->oxcf.play_alternate = 0;
 
-  cpi->oxcf.lossless = oxcf->lossless;
-  if (cpi->oxcf.lossless) {
-    // In lossless mode, make sure right quantizer range and correct transform
-    // is set.
-    cpi->oxcf.worst_allowed_q = 0;
-    cpi->oxcf.best_allowed_q = 0;
-    cpi->mb.itxm_add = vp9_iwht4x4_add;
-  } else {
-    cpi->mb.itxm_add = vp9_idct4x4_add;
-  }
   rc->baseline_gf_interval = DEFAULT_GF_INTERVAL;
   cpi->ref_frame_flags = VP9_ALT_FLAG | VP9_GOLD_FLAG | VP9_LAST_FLAG;
 
@@ -2632,6 +2617,9 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
   if (cpi->pass == 1 &&
       (!cpi->use_svc || cpi->svc.number_temporal_layers == 1)) {
+    const int lossless = is_lossless_requested(&cpi->oxcf);
+    cpi->mb.fwd_txm4x4 = lossless ? vp9_fwht4x4 : vp9_fdct4x4;
+    cpi->mb.itxm_add = lossless ? vp9_iwht4x4_add : vp9_idct4x4_add;
     vp9_first_pass(cpi);
   } else if (cpi->pass == 2 &&
       (!cpi->use_svc || cpi->svc.number_temporal_layers == 1)) {

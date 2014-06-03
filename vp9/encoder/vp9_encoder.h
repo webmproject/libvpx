@@ -228,7 +228,6 @@ typedef struct VP9EncoderConfig {
   int worst_allowed_q;
   int best_allowed_q;
   int cq_level;
-  int lossless;
   AQ_MODE aq_mode;  // Adaptive Quantization mode
 
   // Internal frame size scaling.
@@ -285,6 +284,10 @@ typedef struct VP9EncoderConfig {
 
   vp8e_tuning tuning;
 } VP9EncoderConfig;
+
+static INLINE int is_lossless_requested(const VP9EncoderConfig *cfg) {
+  return cfg->best_allowed_q == 0 && cfg->worst_allowed_q == 0;
+}
 
 static INLINE int is_best_mode(MODE mode) {
   return mode == ONE_PASS_BEST || mode == TWO_PASS_SECOND_BEST;

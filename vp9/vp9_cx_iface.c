@@ -331,8 +331,10 @@ static vpx_codec_err_t set_encoder_config(
   oxcf->target_bandwidth = 1000 * cfg->rc_target_bitrate;
   oxcf->rc_max_intra_bitrate_pct = extra_cfg->rc_max_intra_bitrate_pct;
 
-  oxcf->best_allowed_q  = vp9_quantizer_to_qindex(cfg->rc_min_quantizer);
-  oxcf->worst_allowed_q = vp9_quantizer_to_qindex(cfg->rc_max_quantizer);
+  oxcf->best_allowed_q =
+      extra_cfg->lossless ? 0 : vp9_quantizer_to_qindex(cfg->rc_min_quantizer);
+  oxcf->worst_allowed_q =
+      extra_cfg->lossless ? 0 : vp9_quantizer_to_qindex(cfg->rc_max_quantizer);
   oxcf->cq_level        = vp9_quantizer_to_qindex(extra_cfg->cq_level);
   oxcf->fixed_q = -1;
 
@@ -375,8 +377,6 @@ static vpx_codec_err_t set_encoder_config(
 
   oxcf->tile_columns = extra_cfg->tile_columns;
   oxcf->tile_rows    = extra_cfg->tile_rows;
-
-  oxcf->lossless = extra_cfg->lossless;
 
   oxcf->error_resilient_mode         = cfg->g_error_resilient;
   oxcf->frame_parallel_decoding_mode = extra_cfg->frame_parallel_decoding_mode;
