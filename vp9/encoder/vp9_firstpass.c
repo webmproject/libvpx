@@ -398,6 +398,32 @@ static BLOCK_SIZE get_bsize(const VP9_COMMON *cm, int mb_row, int mb_col) {
   }
 }
 
+static int find_fp_qindex() {
+  int i;
+
+  for (i = 0; i < QINDEX_RANGE; ++i)
+    if (vp9_convert_qindex_to_q(i) >= 30.0)
+      break;
+
+  if (i == QINDEX_RANGE)
+    i--;
+
+  return i;
+}
+
+static void set_first_pass_params(VP9_COMP *cpi) {
+  VP9_COMMON *const cm = &cpi->common;
+  if (!cpi->refresh_alt_ref_frame &&
+      (cm->current_video_frame == 0 ||
+       (cpi->frame_flags & FRAMEFLAGS_KEY))) {
+    cm->frame_type = KEY_FRAME;
+  } else {
+    cm->frame_type = INTER_FRAME;
+  }
+  // Do not use periodic key frames.
+  cpi->rc.frames_to_key = INT_MAX;
+}
+
 void vp9_first_pass(VP9_COMP *cpi) {
   int mb_row, mb_col;
   MACROBLOCK *const x = &cpi->mb;
@@ -437,6 +463,9 @@ void vp9_first_pass(VP9_COMP *cpi) {
   FIRSTPASS_STATS fps;
 
   vp9_clear_system_state();
+
+  set_first_pass_params(cpi);
+  vp9_set_quantizer(cm, find_fp_qindex());
 
   if (cpi->use_svc && cpi->svc.number_temporal_layers == 1) {
     MV_REFERENCE_FRAME ref_frame = LAST_FRAME;
@@ -2049,19 +2078,6 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // The count of bits left is adjusted elsewhere based on real coded frame
   // sizes.
   twopass->modified_error_left -= kf_group_err;
-}
-
-void vp9_rc_get_first_pass_params(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
-  if (!cpi->refresh_alt_ref_frame &&
-      (cm->current_video_frame == 0 ||
-       (cpi->frame_flags & FRAMEFLAGS_KEY))) {
-    cm->frame_type = KEY_FRAME;
-  } else {
-    cm->frame_type = INTER_FRAME;
-  }
-  // Do not use periodic key frames.
-  cpi->rc.frames_to_key = INT_MAX;
 }
 
 // For VBR...adjustment to the frame target based on error from previous frames
