@@ -991,13 +991,13 @@ int main_loop(int argc, const char **argv_) {
           unsigned int shift = 0;  // BITS_8 default
           if (vpx_codec_control(&decoder, VP9D_GET_BIT_DEPTH, &bit_depth)) {
             // Fallback to 8bit
-            bit_depth = 0;
+            bit_depth = VPX_BITS_8;
           }
           switch (bit_depth) {
-            case 1:  // BITS_10
+            case VPX_BITS_10:  // BITS_10
               shift = 2;
               break;
-            case 2:  // BITS_12
+            case VPX_BITS_12:  // BITS_12
               shift = 4;
               break;
           }
@@ -1016,10 +1016,20 @@ int main_loop(int argc, const char **argv_) {
           size_t len = 0;
           if (frame_out == 1) {
             // Y4M file header
+            vpx_bit_depth_t bit_depth = VPX_BITS_8;
+#if CONFIG_VP9_HIGH
+            if (img->fmt & VPX_IMG_FMT_HIGH) {
+              if (vpx_codec_control(&decoder, VP9D_GET_BIT_DEPTH, &bit_depth)) {
+                // Fallback to 8bit
+                bit_depth = VPX_BITS_8;
+              }
+            }
+#endif
             len = y4m_write_file_header(buf, sizeof(buf),
                                         vpx_input_ctx.width,
                                         vpx_input_ctx.height,
-                                        &vpx_input_ctx.framerate, img->fmt);
+                                        &vpx_input_ctx.framerate, img->fmt,
+                                        bit_depth);
             if (do_md5) {
               MD5Update(&md5_ctx, (md5byte *)buf, (unsigned int)len);
             } else {

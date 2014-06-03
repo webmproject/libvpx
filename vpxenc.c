@@ -890,10 +890,7 @@ void open_input_file(struct VpxInputContext *input) {
       input->framerate.numerator = input->y4m.fps_n;
       input->framerate.denominator = input->y4m.fps_d;
       input->fmt = input->y4m.vpx_fmt;
-      // TODO(Peter/Debargha): Set bit_depth of the input correctly
-      // when we have extended y4m to read high-bit-depth input.
-      // Currently assume it is 8.
-      input->bit_depth = 8;
+      input->bit_depth = input->y4m.vpx_bit_depth;
     } else
       fatal("Unsupported Y4M stream.");
   } else if (input->detect.buf_read == 4 && fourcc_is_ivf(input->detect.buf)) {
@@ -1162,6 +1159,14 @@ static void validate_stream_config(const struct stream_state *stream,
     fatal("Stream %d: profile %d is experimental and requires the --%s flag",
           stream->index, stream->config.cfg.g_profile,
           experimental_bitstream.long_name);
+  }
+
+  // Check that the stream bit depth is greater than the input bit depth
+  if (stream->config.cfg.g_in_bit_depth >
+      stream->config.cfg.g_bit_depth * 2 + 8) {
+    fatal("Stream %d: input bit depth (%d) less than stream bit depth (%d)",
+          stream->config.cfg.g_in_bit_depth,
+          stream->config.cfg.g_bit_depth * 2 + 8);
   }
 
   for (streami = stream; streami; streami = streami->next) {
@@ -1972,7 +1977,7 @@ int main(int argc, const char **argv_) {
     if (strcmp(global.codec->name, "vp9") == 0) {
       // Check to see if at least one stream uses 16 bit internal.
       // Currently assume that the bit_depths for all streams using
-      // highbitdepth are the smae.
+      // highbitdepth are the same.
       FOREACH_STREAM({
         if (stream->config.use_16bit_internal) {
           if (stream->config.cfg.g_profile <= 1) {
@@ -2029,21 +2034,27 @@ int main(int argc, const char **argv_) {
         vpx_usec_timer_start(&timer);
 #if CONFIG_VP9_HIGH
         if (use_16bit_internal) {
-          if (!allocated_raw_high) {
-            vpx_img_alloc(&raw_high, raw.fmt | VPX_IMG_FMT_HIGH,
-                          input.width, input.height, 32);
-            allocated_raw_high = 1;
+          vpx_image_t *high_frame;
+          // TODO(peter.derivaz): Currently we only shift up 8 bit images
+          // Add support for upshifting and downshifting 10/12bit images
+          if (raw.fmt & VPX_IMG_FMT_HIGH) {
+            high_frame = &raw;
+          } else {
+            if (!allocated_raw_high) {
+              vpx_img_alloc(&raw_high, raw.fmt | VPX_IMG_FMT_HIGH,
+                            input.width, input.height, 32);
+              allocated_raw_high = 1;
+            }
+            img_convert_8_to_16(&raw_high, &raw, input_shift);
+            high_frame = &raw_high;
           }
-          img_convert_8_to_16(&raw_high, &raw, input_shift);
           FOREACH_STREAM({
             if (stream->config.use_16bit_internal)
               encode_frame(stream, &global,
-                           frame_avail ? &raw_high : NULL,
+                           frame_avail ? high_frame : NULL,
                            frames_in);
             else
-              encode_frame(stream, &global,
-                           frame_avail ? &raw : NULL,
-                           frames_in);
+              assert(0);
           });
         } else {
           FOREACH_STREAM(encode_frame(stream, &global,
@@ -2116,22 +2127,7 @@ int main(int argc, const char **argv_) {
       if (global.codec->fourcc == VP9_FOURCC) {
         FOREACH_STREAM({
           const unsigned int bit_depth = stream->config.cfg.g_in_bit_depth;
-          double peak;
-          switch (bit_depth) {
-            case VPX_BITS_8:
-              peak = 255.0;
-              break;
-            case VPX_BITS_10:
-              peak = 1023.0;
-              break;
-            case VPX_BITS_12:
-              peak = 4095.0;
-              break;
-            default:
-              peak = 255.0;
-              break;
-          }
-          show_psnr(stream, peak);
+          show_psnr(stream, (1 << bit_depth) - 1);
         });
       } else {
         FOREACH_STREAM(show_psnr(stream, 255.0));
