@@ -1057,8 +1057,8 @@ static void write_uncompressed_header(VP9_COMP *cpi,
     const COLOR_SPACE cs = UNKNOWN;
     write_sync_code(wb);
     if (cm->profile > PROFILE_1) {
-      assert(cm->bit_depth > BITS_8);
-      vp9_wb_write_bit(wb, cm->bit_depth - BITS_10);
+      assert(cm->bit_depth > VPX_BITS_8);
+      vp9_wb_write_bit(wb, cm->bit_depth - VPX_BITS_10);
     }
     vp9_wb_write_literal(wb, cs, 3);
     if (cs != SRGB) {

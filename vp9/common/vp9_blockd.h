@@ -225,7 +225,7 @@ typedef struct macroblockd {
   const YV12_BUFFER_CONFIG *cur_buf;
 
 #if CONFIG_VP9_HIGH
-  /* Bits per sample 8,10,12 */
+  /* Bits per sample 8, 10, 12 */
   int bps;
   void (*high_itxm_add)(const int16_t *input, uint8_t *dest, int stride,
                         int eob, int bps);

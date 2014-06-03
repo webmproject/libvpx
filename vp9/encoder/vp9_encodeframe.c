@@ -1359,16 +1359,16 @@ static void set_source_var_based_partition(VP9_COMP *cpi,
                                  pre_src + b_offset, pre_stride,
                                  &d16[j].sse, &d16[j].sum);
           switch (cm->bit_depth) {
-            case BITS_10:
+            case VPX_BITS_10:
               d16[j].sse >>= 4;
               d16[j].sum >>= 2;
               break;
-            case BITS_12:
+            case VPX_BITS_12:
               d16[j].sse >>= 8;
               d16[j].sum >>= 4;
               break;
+            case VPX_BITS_8:
             default:
-            case BITS_8:
               break;
           }
         } else {

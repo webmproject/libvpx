@@ -644,17 +644,7 @@ static void setup_quantization(VP9_COMMON *const cm, MACROBLOCKD *const xd,
 #if CONFIG_VP9_HIGH
   xd->high_itxm_add = xd->lossless ?  vp9_high_iwht4x4_add :
       vp9_high_idct4x4_add;
-  switch (cm->bit_depth) {
-    case BITS_8:
-      xd->bps = 8;
-      break;
-    case BITS_10:
-      xd->bps = 10;
-      break;
-    case BITS_12:
-      xd->bps = 12;
-      break;
-  }
+  xd->bps = bit_depth_to_bps(cm->bit_depth);
 #endif
 }
 
@@ -1166,7 +1156,7 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
   if (cm->frame_type == KEY_FRAME) {
     check_sync_code(cm, rb);
     if (cm->profile > PROFILE_1) {
-      cm->bit_depth = vp9_rb_read_bit(rb) ? BITS_12 : BITS_10;
+      cm->bit_depth = vp9_rb_read_bit(rb) ? VPX_BITS_12 : VPX_BITS_10;
 #if CONFIG_VP9_HIGH
       cm->use_high = 1;
 #endif
@@ -1174,7 +1164,7 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
 #if CONFIG_VP9_HIGH
       cm->use_high = 0;
 #endif
-      cm->bit_depth = BITS_8;
+      cm->bit_depth = VPX_BITS_8;
     }
     cm->color_space = (COLOR_SPACE)vp9_rb_read_literal(rb, 3);
     if (cm->color_space != SRGB) {

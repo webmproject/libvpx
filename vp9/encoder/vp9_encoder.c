@@ -617,25 +617,6 @@ static int get_pass(MODE mode) {
   return -1;
 }
 
-static unsigned int bit_depth_to_bps(BIT_DEPTH bit_depth) {
-  int bps;
-  switch (bit_depth) {
-    case BITS_8:
-      bps = 8;
-      break;
-    case BITS_10:
-      bps = 10;
-      break;
-    case BITS_12:
-      bps = 12;
-      break;
-    default:
-      assert(0 && "bit_depth should be BITS_8, BITS_10 or BITS_12");
-      break;
-  }
-  return bps;
-}
-
 void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
@@ -644,15 +625,7 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
     cm->profile = oxcf->profile;
   cm->bit_depth = oxcf->bit_depth;
 
-  // TODO(Peter): PFCD at the moment this triggers wrongly because profile is
-  // set in global parameters, but bit-depth via a configuration control
-  /*
-  if (cm->profile <= PROFILE_1)
-    assert(cm->bit_depth == BITS_8);
-  else
-    assert(cm->bit_depth > BITS_8);
-  */
-  assert(cm->bit_depth <= BITS_12);
+  assert(cm->bit_depth <= VPX_BITS_12);
 
   cpi->oxcf = *oxcf;
   cpi->pass = get_pass(cpi->oxcf.mode);
@@ -1141,7 +1114,7 @@ static void high_set_var_fns(VP9_COMP *const cpi) {
                  vp9_high_sad4x4x4d_bits8)
         break;
 
-      case BITS_10:
+      case VPX_BITS_10:
         HIGH_BFP(BLOCK_32X16, vp9_high_sad32x16_bits10,
                  vp9_high_sad32x16_avg_bits10,
                  vp9_high_10_variance32x16,
@@ -1250,7 +1223,7 @@ static void high_set_var_fns(VP9_COMP *const cpi) {
                  vp9_high_sad4x4x4d_bits10)
         break;
 
-      case BITS_12:
+      case VPX_BITS_12:
         HIGH_BFP(BLOCK_32X16, vp9_high_sad32x16_bits12,
                  vp9_high_sad32x16_avg_bits12,
                  vp9_high_12_variance32x16,
@@ -3801,7 +3774,7 @@ int vp9_get_y_sse(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b) {
 }
 #if CONFIG_VP9_HIGH
 int vp9_high_get_y_sse(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b,
-                       BIT_DEPTH bit_depth) {
+                       vpx_bit_depth_t bit_depth) {
   unsigned int sse;
   int sum;
   assert(a->y_crop_width == b->y_crop_width);
@@ -3810,15 +3783,15 @@ int vp9_high_get_y_sse(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b,
   assert((b->flags & YV12_FLAG_HIGH) != 0);
   switch (bit_depth) {
     default:
-    case BITS_8:
+    case VPX_BITS_8:
       high_variance(a->y_buffer, a->y_stride, b->y_buffer, b->y_stride,
                     a->y_crop_width, a->y_crop_height, &sse, &sum);
       return (int) sse;
-    case BITS_10:
+    case VPX_BITS_10:
       high_10_variance(a->y_buffer, a->y_stride, b->y_buffer, b->y_stride,
                        a->y_crop_width, a->y_crop_height, &sse, &sum);
       return (int) sse;
-    case BITS_12:
+    case VPX_BITS_12:
       high_12_variance(a->y_buffer, a->y_stride, b->y_buffer, b->y_stride,
                        a->y_crop_width, a->y_crop_height, &sse, &sum);
       return (int) sse;

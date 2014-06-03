@@ -329,7 +329,7 @@ static double simple_weight(const YV12_BUFFER_CONFIG *buf) {
 
 #if CONFIG_VP9_HIGH
 static double high_simple_weight(const YV12_BUFFER_CONFIG *buf,
-                                 BIT_DEPTH bit_depth) {
+                                 vpx_bit_depth_t bit_depth) {
   int i, j;
   double sum = 0.0;
   const int w = buf->y_crop_width;
@@ -338,14 +338,14 @@ static double high_simple_weight(const YV12_BUFFER_CONFIG *buf,
   int shift;
   uint16_t *row16 = CONVERT_TO_SHORTPTR(row);
   switch (bit_depth) {
-    default:
-      shift = 0;
-      break;
-    case BITS_10:
+    case VPX_BITS_10:
       shift = 2;
       break;
-    case BITS_12:
+    case VPX_BITS_12:
       shift = 4;
+      break;
+    default:
+      shift = 0;
       break;
   }
 

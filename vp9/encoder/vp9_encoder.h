@@ -187,7 +187,7 @@ typedef enum {
 
 typedef struct VP9EncoderConfig {
   BITSTREAM_PROFILE profile;
-  BIT_DEPTH bit_depth;
+  vpx_bit_depth_t bit_depth;
   int width;  // width of data passed to the compressor
   int height;  // height of data passed to the compressor
   unsigned int in_bit_depth;  // input bit depth
@@ -612,7 +612,7 @@ int vp9_get_y_sse(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b);
 
 #if CONFIG_VP9_HIGH
 int vp9_high_get_y_sse(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b,
-                  BIT_DEPTH bit_depth);
+                       vpx_bit_depth_t bit_depth);
 #endif
 
 void vp9_alloc_compressor_data(VP9_COMP *cpi);

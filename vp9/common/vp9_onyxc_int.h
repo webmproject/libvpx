@@ -184,8 +184,8 @@ typedef struct VP9Common {
   unsigned int current_video_frame;
   BITSTREAM_PROFILE profile;
 
-  // BITS_8 in versions 0 and 1, BITS_10 or BITS_12 in version 2
-  BIT_DEPTH bit_depth;
+  // VPX_BITS_8 in versions 0 and 1, VPX_BITS_10/VPX_BITS_12 in version 2
+  vpx_bit_depth_t bit_depth;
 
 #if CONFIG_VP9_POSTPROC
   struct postproc_state  postproc_state;
@@ -341,6 +341,27 @@ static INLINE int partition_plane_context(const MACROBLOCKD *xd,
 
   return (left * 2 + above) + bsl * PARTITION_PLOFFSET;
 }
+
+#if CONFIG_VP9_HIGH
+static INLINE unsigned int bit_depth_to_bps(vpx_bit_depth_t bit_depth) {
+  int bps;
+  switch (bit_depth) {
+    case VPX_BITS_8:
+      bps = 8;
+      break;
+    case VPX_BITS_10:
+      bps = 10;
+      break;
+    case VPX_BITS_12:
+      bps = 12;
+      break;
+    default:
+      assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10 or VPX_BITS_12");
+      break;
+  }
+  return bps;
+}
+#endif  // CONFIG_VP9_HIGH
 
 #ifdef __cplusplus
 }  // extern "C"

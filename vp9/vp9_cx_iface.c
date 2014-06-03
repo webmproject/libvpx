@@ -204,6 +204,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
   RANGE_CHECK(extra_cfg, arnr_type, 1, 3);
   RANGE_CHECK(extra_cfg, cq_level, 0, 63);
   RANGE_CHECK(cfg, g_bit_depth, VPX_BITS_8, VPX_BITS_12);
+  RANGE_CHECK(cfg, g_in_bit_depth, 8, 12);
 
   // TODO(yaowu): remove this when ssim tuning is implemented for vp9
   if (extra_cfg->tuning == VP8_TUNE_SSIM)
@@ -262,10 +263,13 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
 
   if (cfg->g_profile <= (unsigned int)PROFILE_1 &&
       cfg->g_bit_depth > VPX_BITS_8)
-    ERROR("High bit-depth not supported in profile < 2");
+    ERROR("Codec high bit-depth not supported in profile < 2");
+  if (cfg->g_profile <= (unsigned int)PROFILE_1 &&
+      cfg->g_in_bit_depth > 8)
+    ERROR("Source high bit-depth not supported in profile < 2");
   if (cfg->g_profile > (unsigned int)PROFILE_1 &&
       cfg->g_bit_depth == VPX_BITS_8)
-    ERROR("Bit-depth 8 not supported in profile > 1");
+    ERROR("Codec bit-depth 8 not supported in profile > 1");
 
   return VPX_CODEC_OK;
 }
@@ -300,17 +304,7 @@ static vpx_codec_err_t set_encoder_config(
   oxcf->profile = cfg->g_profile;
   oxcf->width   = cfg->g_w;
   oxcf->height  = cfg->g_h;
-  switch (cfg->g_bit_depth) {
-    case VPX_BITS_8:
-      oxcf->bit_depth = BITS_8;
-      break;
-    case VPX_BITS_10:
-      oxcf->bit_depth = BITS_10;
-      break;
-    case VPX_BITS_12:
-      oxcf->bit_depth = BITS_12;
-      break;
-  }
+  oxcf->bit_depth = cfg->g_bit_depth;
   oxcf->in_bit_depth = cfg->g_in_bit_depth;
   // guess a frame rate if out of whack, use 30
   oxcf->framerate = (double)cfg->g_timebase.den / cfg->g_timebase.num;
