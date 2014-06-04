@@ -357,8 +357,10 @@ static INLINE int8_t high_filter_mask(uint8_t limit, uint8_t blimit,
                                       uint16_t p3, uint16_t p2,
                                       uint16_t p1, uint16_t p0,
                                       uint16_t q0, uint16_t q1,
-                                      uint16_t q2, uint16_t q3) {
+                                      uint16_t q2, uint16_t q3, int bps) {
   int8_t mask = 0;
+  limit <<= bps - 8;
+  blimit <<= bps - 8;
   mask |= (abs(p3 - p2) > limit) * -1;
   mask |= (abs(p2 - p1) > limit) * -1;
   mask |= (abs(p1 - p0) > limit) * -1;
@@ -373,8 +375,9 @@ static INLINE int8_t high_flat_mask4(uint8_t thresh,
                                      uint16_t p3, uint16_t p2,
                                      uint16_t p1, uint16_t p0,
                                      uint16_t q0, uint16_t q1,
-                                     uint16_t q2, uint16_t q3) {
+                                     uint16_t q2, uint16_t q3, int bps) {
   int8_t mask = 0;
+  thresh <<= bps - 8;
   mask |= (abs(p1 - p0) > thresh) * -1;
   mask |= (abs(q1 - q0) > thresh) * -1;
   mask |= (abs(p2 - p0) > thresh) * -1;
@@ -389,8 +392,9 @@ static INLINE int8_t high_flat_mask5(uint8_t thresh,
                                      uint16_t p2, uint16_t p1,
                                      uint16_t p0, uint16_t q0,
                                      uint16_t q1, uint16_t q2,
-                                     uint16_t q3, uint16_t q4) {
-  int8_t mask = ~high_flat_mask4(thresh, p3, p2, p1, p0, q0, q1, q2, q3);
+                                     uint16_t q3, uint16_t q4, int bps) {
+  int8_t mask = ~high_flat_mask4(thresh, p3, p2, p1, p0, q0, q1, q2, q3, bps);
+  thresh <<= bps - 8;
   mask |= (abs(p4 - p0) > thresh) * -1;
   mask |= (abs(q4 - q0) > thresh) * -1;
   return ~mask;
@@ -399,8 +403,9 @@ static INLINE int8_t high_flat_mask5(uint8_t thresh,
 // is there high edge variance internal edge:
 // 11111111_11111111 yes, 00000000_00000000 no
 static INLINE int16_t high_hev_mask(uint8_t thresh, uint16_t p1, uint16_t p0,
-                                    uint16_t q0, uint16_t q1) {
+                                    uint16_t q0, uint16_t q1, int bps) {
   int16_t hev = 0;
+  thresh <<= bps - 8;
   hev  |= (abs(p1 - p0) > thresh) * -1;
   hev  |= (abs(q1 - q0) > thresh) * -1;
   return hev;
@@ -409,16 +414,15 @@ static INLINE int16_t high_hev_mask(uint8_t thresh, uint16_t p1, uint16_t p0,
 static INLINE void high_filter4(int8_t mask, uint8_t thresh, uint16_t *op1,
                                 uint16_t *op0, uint16_t *oq0, uint16_t *oq1,
                                 int bps) {
-  int8_t filter1, filter2;
+  int16_t filter1, filter2;
   // ^0x80 equivalent to subtracting 0x80 from the values to turn them
   // into -128 to +127 instead of 0 to 255
-  // TODO(Peter): the subtraction should depend on bitdepth
-  int shift = bps-8;
+  int shift = bps - 8;
   const int16_t ps1 = (int16_t) *op1 - (0x80 << shift);
   const int16_t ps0 = (int16_t) *op0 - (0x80 << shift);
   const int16_t qs0 = (int16_t) *oq0 - (0x80 << shift);
   const int16_t qs1 = (int16_t) *oq1 - (0x80 << shift);
-  const uint16_t hev = high_hev_mask(thresh, *op1, *op0, *oq0, *oq1);
+  const uint16_t hev = high_hev_mask(thresh, *op1, *op0, *oq0, *oq1, bps);
 
   // add outer taps if we have high edge variance
   int16_t filter = signed_char_clamp_bps(ps1 - qs1, bps) & hev;
@@ -453,7 +457,7 @@ void vp9_high_lpf_horizontal_4_c(uint16_t *s, int p /* pitch */,
     const uint16_t p3 = s[-4 * p], p2 = s[-3 * p], p1 = s[-2 * p], p0 = s[-p];
     const uint16_t q0 = s[0 * p], q1 = s[1 * p], q2 = s[2 * p], q3 = s[3 * p];
     const int8_t mask = high_filter_mask(*limit, *blimit,
-                                         p3, p2, p1, p0, q0, q1, q2, q3);
+                                         p3, p2, p1, p0, q0, q1, q2, q3, bps);
     high_filter4(mask, *thresh, s - 2 * p, s - 1 * p, s, s + 1 * p, bps);
     ++s;
   }
@@ -482,7 +486,7 @@ void vp9_high_lpf_vertical_4_c(uint16_t *s, int pitch, const uint8_t *blimit,
     const uint16_t p3 = s[-4], p2 = s[-3], p1 = s[-2], p0 = s[-1];
     const uint16_t q0 = s[0],  q1 = s[1],  q2 = s[2],  q3 = s[3];
     const int8_t mask = high_filter_mask(*limit, *blimit,
-                                         p3, p2, p1, p0, q0, q1, q2, q3);
+                                         p3, p2, p1, p0, q0, q1, q2, q3, bps);
     high_filter4(mask, *thresh, s - 2, s - 1, s, s + 1, bps);
     s += pitch;
   }
@@ -534,8 +538,8 @@ void vp9_high_lpf_horizontal_8_c(uint16_t *s, int p, const uint8_t *blimit,
     const uint16_t q0 = s[0 * p], q1 = s[1 * p], q2 = s[2 * p], q3 = s[3 * p];
 
     const int8_t mask = high_filter_mask(*limit, *blimit,
-                                         p3, p2, p1, p0, q0, q1, q2, q3);
-    const int8_t flat = high_flat_mask4(1, p3, p2, p1, p0, q0, q1, q2, q3);
+                                         p3, p2, p1, p0, q0, q1, q2, q3, bps);
+    const int8_t flat = high_flat_mask4(1, p3, p2, p1, p0, q0, q1, q2, q3, bps);
     high_filter8(mask, *thresh, flat,
                  s - 4 * p, s - 3 * p, s - 2 * p, s - 1 * p,
                  s, s + 1 * p, s + 2 * p, s + 3 * p, bps);
@@ -564,8 +568,8 @@ void vp9_high_lpf_vertical_8_c(uint16_t *s, int pitch, const uint8_t *blimit,
     const uint16_t p3 = s[-4], p2 = s[-3], p1 = s[-2], p0 = s[-1];
     const uint16_t q0 = s[0], q1 = s[1], q2 = s[2], q3 = s[3];
     const int8_t mask = high_filter_mask(*limit, *blimit,
-                                         p3, p2, p1, p0, q0, q1, q2, q3);
-    const int8_t flat = high_flat_mask4(1, p3, p2, p1, p0, q0, q1, q2, q3);
+                                         p3, p2, p1, p0, q0, q1, q2, q3, bps);
+    const int8_t flat = high_flat_mask4(1, p3, p2, p1, p0, q0, q1, q2, q3, bps);
     high_filter8(mask, *thresh, flat, s - 4, s - 3, s - 2, s - 1,
                                  s,     s + 1, s + 2, s + 3, bps);
     s += pitch;
@@ -648,11 +652,11 @@ void vp9_high_lpf_horizontal_16_c(uint16_t *s, int p, const uint8_t *blimit,
     const uint16_t p3 = s[-4 * p], p2 = s[-3 * p], p1 = s[-2 * p], p0 = s[-p];
     const uint16_t q0 = s[0 * p], q1 = s[1 * p], q2 = s[2 * p], q3 = s[3 * p];
     const int8_t mask = high_filter_mask(*limit, *blimit,
-                                    p3, p2, p1, p0, q0, q1, q2, q3);
-    const int8_t flat = high_flat_mask4(1, p3, p2, p1, p0, q0, q1, q2, q3);
+                                    p3, p2, p1, p0, q0, q1, q2, q3, bps);
+    const int8_t flat = high_flat_mask4(1, p3, p2, p1, p0, q0, q1, q2, q3, bps);
     const int8_t flat2 = high_flat_mask5(
         1, s[-8 * p], s[-7 * p], s[-6 * p], s[-5 * p], p0,
-        q0, s[4 * p], s[5 * p], s[6 * p], s[7 * p]);
+        q0, s[4 * p], s[5 * p], s[6 * p], s[7 * p], bps);
 
     high_filter16(mask, *thresh, flat, flat2,
                   s - 8 * p, s - 7 * p, s - 6 * p, s - 5 * p,
@@ -674,10 +678,10 @@ static void high_mb_lpf_vertical_edge_w(uint16_t *s, int p,
     const uint16_t p3 = s[-4], p2 = s[-3], p1 = s[-2], p0 = s[-1];
     const uint16_t q0 = s[0], q1 = s[1],  q2 = s[2], q3 = s[3];
     const int8_t mask = high_filter_mask(*limit, *blimit,
-                                    p3, p2, p1, p0, q0, q1, q2, q3);
-    const int8_t flat = high_flat_mask4(1, p3, p2, p1, p0, q0, q1, q2, q3);
+                                    p3, p2, p1, p0, q0, q1, q2, q3, bps);
+    const int8_t flat = high_flat_mask4(1, p3, p2, p1, p0, q0, q1, q2, q3, bps);
     const int8_t flat2 = high_flat_mask5(1, s[-8], s[-7], s[-6], s[-5], p0,
-                                    q0, s[4], s[5], s[6], s[7]);
+                                    q0, s[4], s[5], s[6], s[7], bps);
 
     high_filter16(mask, *thresh, flat, flat2,
              s - 8, s - 7, s - 6, s - 5, s - 4, s - 3, s - 2, s - 1,
