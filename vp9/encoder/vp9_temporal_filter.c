@@ -460,7 +460,7 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
         stride = cpi->alt_ref_buffer.uv_stride;
         byte = mb_uv_offset;
         for (i = 0, k = 256; i < mb_uv_height; i++) {
-          for (j = 0; j < mb_uv_height; j++, k++) {
+          for (j = 0; j < mb_uv_width; j++, k++) {
             int m = k + 256;
 
             // U
@@ -479,7 +479,7 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
             byte++;
           }
 
-          byte += stride - mb_uv_height;
+          byte += stride - mb_uv_width;
         }
       } else {
         // Normalize filter output to produce AltRef frame
@@ -497,7 +497,6 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
             // move to next pixel
             byte++;
           }
-
           byte += stride - 16;
         }
 
@@ -506,7 +505,7 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
         stride = cpi->alt_ref_buffer.uv_stride;
         byte = mb_uv_offset;
         for (i = 0, k = 256; i < mb_uv_height; i++) {
-          for (j = 0; j < mb_uv_height; j++, k++) {
+          for (j = 0; j < mb_uv_width; j++, k++) {
             int m = k + 256;
 
             // U
@@ -524,8 +523,7 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
             // move to next pixel
             byte++;
           }
-
-          byte += stride - mb_uv_height;
+          byte += stride - mb_uv_width;
         }
       }
 #else
