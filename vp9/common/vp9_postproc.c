@@ -95,7 +95,6 @@ void vp9_post_proc_down_and_across_c(const uint8_t *src_ptr,
   int v;
   int pitch = src_pixels_per_line;
   uint8_t d[8];
-  (void)dst_pixels_per_line;
 
   for (row = 0; row < rows; row++) {
     /* post_proc_down for one row */
@@ -152,7 +151,7 @@ void vp9_post_proc_down_and_across_c(const uint8_t *src_ptr,
 
     /* next row */
     src_ptr += pitch;
-    dst_ptr += pitch;
+    dst_ptr += dst_pixels_per_line;
   }
 }
 
@@ -173,7 +172,6 @@ void vp9_high_post_proc_down_and_across_c(const uint16_t *src_ptr,
   int v;
   int pitch = src_pixels_per_line;
   uint16_t d[8];
-  (void)dst_pixels_per_line;
 
   for (row = 0; row < rows; row++) {
     /* post_proc_down for one row */
@@ -230,7 +228,7 @@ void vp9_high_post_proc_down_and_across_c(const uint16_t *src_ptr,
 
     /* next row */
     src_ptr += pitch;
-    dst_ptr += pitch;
+    dst_ptr += dst_pixels_per_line;
   }
 }
 
