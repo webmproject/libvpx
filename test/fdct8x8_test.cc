@@ -188,15 +188,15 @@ class FwdTrans8x8TestBase {
     for (int i = 0; i < count_test_block; ++i) {
       // Initialize a test block with input range [-255, 255].
       for (int j = 0; j < 64; ++j) {
-        src[j] = rnd.Rand8() % 2 ? 255 : 0;
-        dst[j] = rnd.Rand8() % 2 ? 255 : 0;
-
         if (i == 0) {
           src[j] = 255;
           dst[j] = 0;
         } else if (i == 1) {
           src[j] = 0;
           dst[j] = 255;
+        } else {
+          src[j] = rnd.Rand8() % 2 ? 255 : 0;
+          dst[j] = rnd.Rand8() % 2 ? 255 : 0;
         }
 
         test_input_block[j] = src[j] - dst[j];
@@ -363,7 +363,7 @@ INSTANTIATE_TEST_CASE_P(
 
 #if HAVE_SSSE3 && ARCH_X86_64
 INSTANTIATE_TEST_CASE_P(
-    DISABLED_SSSE3, FwdTrans8x8DCT,
+    SSSE3, FwdTrans8x8DCT,
     ::testing::Values(
         make_tuple(&vp9_fdct8x8_ssse3, &vp9_idct8x8_64_add_ssse3, 0)));
 #endif
