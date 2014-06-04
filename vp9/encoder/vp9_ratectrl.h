@@ -61,7 +61,7 @@ typedef struct {
   int ni_av_qi;
   int ni_tot_qi;
   int ni_frames;
-  int avg_frame_qindex[3];        // 0 - KEY, 1 - INTER, 2 - ARF/GF
+  int avg_frame_qindex[FRAME_TYPES];
   double tot_q;
   double avg_q;
 

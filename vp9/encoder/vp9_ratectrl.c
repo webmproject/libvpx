@@ -187,16 +187,13 @@ static void update_buffer_level(VP9_COMP *cpi, int encoded_frame_size) {
 
 void vp9_rc_init(const VP9EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
   if (pass == 0 && oxcf->rc_mode == RC_MODE_CBR) {
-    rc->avg_frame_qindex[0] = oxcf->worst_allowed_q;
-    rc->avg_frame_qindex[1] = oxcf->worst_allowed_q;
-    rc->avg_frame_qindex[2] = oxcf->worst_allowed_q;
+    rc->avg_frame_qindex[KEY_FRAME] = oxcf->worst_allowed_q;
+    rc->avg_frame_qindex[INTER_FRAME] = oxcf->worst_allowed_q;
   } else {
-    rc->avg_frame_qindex[0] = (oxcf->worst_allowed_q +
-                                   oxcf->best_allowed_q) / 2;
-    rc->avg_frame_qindex[1] = (oxcf->worst_allowed_q +
-                                   oxcf->best_allowed_q) / 2;
-    rc->avg_frame_qindex[2] = (oxcf->worst_allowed_q +
-                                   oxcf->best_allowed_q) / 2;
+    rc->avg_frame_qindex[KEY_FRAME] = (oxcf->worst_allowed_q +
+                                           oxcf->best_allowed_q) / 2;
+    rc->avg_frame_qindex[INTER_FRAME] = (oxcf->worst_allowed_q +
+                                           oxcf->best_allowed_q) / 2;
   }
 
   rc->last_q[KEY_FRAME] = oxcf->best_allowed_q;
@@ -1084,21 +1081,21 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
     rc->last_q[KEY_FRAME] = qindex;
     rc->avg_frame_qindex[KEY_FRAME] =
         ROUND_POWER_OF_TWO(3 * rc->avg_frame_qindex[KEY_FRAME] + qindex, 2);
-  } else if (!rc->is_src_frame_alt_ref &&
-             (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame) &&
-             !(cpi->use_svc && oxcf->rc_mode == RC_MODE_CBR)) {
-    rc->avg_frame_qindex[2] =
-        ROUND_POWER_OF_TWO(3 * rc->avg_frame_qindex[2] + qindex, 2);
   } else {
-    rc->last_q[INTER_FRAME] = qindex;
-    rc->avg_frame_qindex[INTER_FRAME] =
+    if (rc->is_src_frame_alt_ref ||
+        !(cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame) ||
+        (cpi->use_svc && oxcf->rc_mode == RC_MODE_CBR)) {
+      rc->last_q[INTER_FRAME] = qindex;
+      rc->avg_frame_qindex[INTER_FRAME] =
         ROUND_POWER_OF_TWO(3 * rc->avg_frame_qindex[INTER_FRAME] + qindex, 2);
-    rc->ni_frames++;
-    rc->tot_q += vp9_convert_qindex_to_q(qindex);
-    rc->avg_q = rc->tot_q / rc->ni_frames;
-    // Calculate the average Q for normal inter frames (not key or GFU frames).
-    rc->ni_tot_qi += qindex;
-    rc->ni_av_qi = rc->ni_tot_qi / rc->ni_frames;
+      rc->ni_frames++;
+      rc->tot_q += vp9_convert_qindex_to_q(qindex);
+      rc->avg_q = rc->tot_q / rc->ni_frames;
+      // Calculate the average Q for normal inter frames (not key or GFU
+      // frames).
+      rc->ni_tot_qi += qindex;
+      rc->ni_av_qi = rc->ni_tot_qi / rc->ni_frames;
+    }
   }
 
   // Keep record of last boosted (KF/KF/ARF) Q value.
