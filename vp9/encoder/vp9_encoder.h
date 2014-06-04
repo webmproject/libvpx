@@ -256,7 +256,6 @@ typedef struct VP9EncoderConfig {
 
   // these parameters aren't to be used in final build don't use!!!
   int play_alternate;
-  int alt_freq;
 
   int encode_breakout;  // early breakout : for video conf recommend 800
 
