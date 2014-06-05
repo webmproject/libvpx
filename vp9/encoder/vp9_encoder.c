@@ -1653,7 +1653,7 @@ static void output_frame_level_debug_stats(VP9_COMP *cpi) {
         (cpi->rc.projected_frame_size - cpi->rc.this_frame_target),
         cpi->rc.vbr_bits_off_target,
         cpi->rc.total_target_vs_actual,
-        (cpi->oxcf.starting_buffer_level - cpi->rc.bits_off_target),
+        (cpi->rc.starting_buffer_level - cpi->rc.bits_off_target),
         cpi->rc.total_actual_bits, cm->base_qindex,
         vp9_convert_qindex_to_q(cm->base_qindex),
         (double)vp9_dc_quant(cm->base_qindex, 0) / 4.0,
