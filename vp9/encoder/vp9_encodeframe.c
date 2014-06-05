@@ -547,22 +547,6 @@ static void choose_partitioning(VP9_COMP *cpi,
   }
 }
 
-// Original activity measure from Tim T's code.
-static unsigned int tt_activity_measure(MACROBLOCK *x) {
-  unsigned int sse;
-  // TODO: This could also be done over smaller areas (8x8), but that would
-  // require extensive changes elsewhere, as lambda is assumed to be fixed
-  // over an entire MB in most of the code.
-  // Another option is to compute four 8x8 variances, and pick a single
-  // lambda using a non-linear combination (e.g., the smallest, or second
-  // smallest, etc.).
-  const unsigned int act = vp9_variance16x16(x->plane[0].src.buf,
-                                             x->plane[0].src.stride,
-                                             VP9_VAR_OFFS, 0, &sse) << 4;
-  // If the region is flat, lower the activity some more.
-  return act < (8 << 12) ? MIN(act, 5 << 12) : act;
-}
-
 static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
                          int mi_row, int mi_col, BLOCK_SIZE bsize,
                          int output_enabled) {
