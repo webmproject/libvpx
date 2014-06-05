@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//m00\u003d",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-05T01:01:02Z",
+      "side": 1,
+      "message": "indent is weird",
+      "revId": "7eaad70bf771e5e28f21863f6b316770f0779d24",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
