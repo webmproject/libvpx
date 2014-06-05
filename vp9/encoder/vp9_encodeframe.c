@@ -2434,18 +2434,6 @@ static TX_MODE select_tx_mode(const VP9_COMP *cpi) {
   }
 }
 
-// Start RTC Exploration
-typedef enum {
-  BOTH_ZERO = 0,
-  ZERO_PLUS_PREDICTED = 1,
-  BOTH_PREDICTED = 2,
-  NEW_PLUS_NON_INTRA = 3,
-  BOTH_NEW = 4,
-  INTRA_PLUS_NON_INTRA = 5,
-  BOTH_INTRA = 6,
-  INVALID_CASE = 9
-} motion_vector_context;
-
 static void set_mode_info(MB_MODE_INFO *mbmi, BLOCK_SIZE bsize,
                           PREDICTION_MODE mode) {
   mbmi->mode = mode;
