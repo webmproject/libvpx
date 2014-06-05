@@ -1781,16 +1781,12 @@ static int64_t high_get_sse_shift(const uint8_t *a8, int a_stride,
                                   unsigned int input_shift) {
   const uint16_t *a = CONVERT_TO_SHORTPTR(a8);
   const uint16_t *b = CONVERT_TO_SHORTPTR(b8);
-  const int offset = (1 << (input_shift - 1));
-  const int max_val = (1 << bit_depth) - 1;
   int64_t total_sse = 0;
   int x, y;
   for (y = 0; y < height; ++y) {
     for (x = 0; x < width; ++x) {
       int64_t diff;
-      int16_t pix_val = (b[x] + offset);
-      pix_val = pix_val > max_val ? max_val : pix_val;
-      diff = (a[x] >> input_shift) - (pix_val >> input_shift);
+      diff = (a[x] >> input_shift) - (b[x] >> input_shift);
       total_sse += diff * diff;
     }
     a += a_stride;

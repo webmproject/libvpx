@@ -1630,6 +1630,8 @@ static float usec_to_fps(uint64_t usec, unsigned int frames) {
 #if CONFIG_VP9_HIGH
 static void img_convert_8_to_16(vpx_image_t  *dst, vpx_image_t *src,
                                 int input_shift) {
+  // Note the offset is 1 less than half
+  const int offset = input_shift > 0 ? (1 << (input_shift - 1)) - 1 : 0;
   int plane;
   if (dst->fmt != src->fmt + VPX_IMG_FMT_HIGH ||
       dst->w != src->w || dst->h != src->h ||
@@ -1659,7 +1661,7 @@ static void img_convert_8_to_16(vpx_image_t  *dst, vpx_image_t *src,
       uint16_t *p_dst = (uint16_t *)(dst->planes[plane] +
                                      y * dst->stride[plane]);
       for (x = 0; x < w; x++) {
-        *p_dst++ = *p_src++ << input_shift;
+        *p_dst++ = (*p_src++ << input_shift) + offset;
       }
     }
   }

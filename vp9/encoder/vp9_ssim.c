@@ -67,13 +67,11 @@ void vp9_high_ssim_parms_8x8_shift_c(uint16_t *s, int sp, uint16_t *r, int rp,
                                      uint32_t *sum_sxr, unsigned int bps,
                                      unsigned int shift) {
   int i, j;
-  const int offset = (1 << (shift - 1));
   const int max_val = (1 << bps) - 1;
   for (i = 0; i < 8; i++, s += sp, r += rp) {
     for (j = 0; j < 8; j++) {
       int sj = s[j];
-      int rj = r[j] + offset;
-      rj = ((rj > max_val ? max_val : rj) >> shift) << shift;
+      int rj = r[j];
       *sum_s += sj;
       *sum_r += rj;
       *sum_sq_s += sj * sj;

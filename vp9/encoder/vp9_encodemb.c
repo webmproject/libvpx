@@ -72,7 +72,7 @@ void vp9_high_subtract_block_c(int rows, int cols,
 #if CONFIG_HIGH_TRANSFORMS
       diff[c] = src[c] - pred[c];
 #else
-      diff[c] = ((src[c] + rnd) >> shift) - ((pred[c] + rnd) >> shift);
+      diff[c] = (src[c] - pred[c] + rnd) >> shift;
 #endif
     }
 
@@ -93,7 +93,7 @@ void vp9_subtract_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
 #if CONFIG_VP9_HIGH
   if (x->e_mbd.cur_buf->flags&YV12_FLAG_HIGH) {
     vp9_high_subtract_block(bh, bw, p->src_diff, bw, p->src.buf, p->src.stride,
-                     pd->dst.buf, pd->dst.stride, x->e_mbd.bps);
+                            pd->dst.buf, pd->dst.stride, x->e_mbd.bps);
     return;
   }
 #endif
