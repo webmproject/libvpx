@@ -590,9 +590,9 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     int distortion2;
     int bestsme = INT_MAX;
     int best_mode_index = 0;
-    unsigned int sse = INT_MAX, best_rd_sse = INT_MAX;
+    unsigned int sse = UINT_MAX, best_rd_sse = UINT_MAX;
 #if CONFIG_TEMPORAL_DENOISING
-    unsigned int zero_mv_sse = INT_MAX, best_sse = INT_MAX;
+    unsigned int zero_mv_sse = UINT_MAX, best_sse = UINT_MAX;
 #endif
 
     int sf_improved_mv_pred = cpi->sf.improved_mv_pred;
