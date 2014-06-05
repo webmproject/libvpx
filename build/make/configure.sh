@@ -774,6 +774,13 @@ process_common_toolchain() {
             add_cflags  "-mmacosx-version-min=10.9"
             add_ldflags "-mmacosx-version-min=10.9"
             ;;
+        *-iphonesimulator-*)
+            add_cflags  "-miphoneos-version-min=5.0"
+            add_ldflags "-miphoneos-version-min=5.0"
+            osx_sdk_dir="$(xcrun --sdk iphonesimulator --show-sdk-path)"
+            add_cflags  "-isysroot ${osx_sdk_dir}"
+            add_ldflags "-isysroot ${osx_sdk_dir}"
+            ;;
     esac
 
     # Handle Solaris variants. Solaris 10 needs -lposix4
@@ -1164,6 +1171,12 @@ EOF
                 # enabled icc && ! enabled pic && add_cflags -fno-pic -mdynamic-no-pic
                 enabled icc && ! enabled pic && add_cflags -fno-pic
             ;;
+            iphonesimulator)
+                add_asflags -f macho32
+                sim_arch="-arch i386"
+                add_cflags  ${sim_arch}
+                add_ldflags ${sim_arch}
+           ;;
             os2)
                 add_asflags -f aout
                 enabled debug && add_asflags -g

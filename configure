@@ -120,6 +120,7 @@ all_platforms="${all_platforms} x86-darwin10-gcc"
 all_platforms="${all_platforms} x86-darwin11-gcc"
 all_platforms="${all_platforms} x86-darwin12-gcc"
 all_platforms="${all_platforms} x86-darwin13-gcc"
+all_platforms="${all_platforms} x86-iphonesimulator-gcc"
 all_platforms="${all_platforms} x86-linux-gcc"
 all_platforms="${all_platforms} x86-linux-icc"
 all_platforms="${all_platforms} x86-os2-gcc"
@@ -722,6 +723,10 @@ process_toolchain() {
         *-darwin-*)
             # iOS/ARM builds do not work with gtest. This does not match
             # x86 targets.
+        ;;
+        *-iphonesimulator-*)
+            soft_enable webm_io
+            soft_enable libyuv
         ;;
         *-win*)
             # Some mingw toolchains don't have pthread available by default.
