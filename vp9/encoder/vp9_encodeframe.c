@@ -2977,6 +2977,33 @@ static int get_skip_encode_frame(const VP9_COMMON *cm) {
          cm->show_frame;
 }
 
+static void encode_tiles(VP9_COMP *cpi) {
+  const VP9_COMMON *const cm = &cpi->common;
+  const int tile_cols = 1 << cm->log2_tile_cols;
+  const int tile_rows = 1 << cm->log2_tile_rows;
+  int tile_col, tile_row;
+  TOKENEXTRA *tok = cpi->tok;
+
+  for (tile_row = 0; tile_row < tile_rows; ++tile_row) {
+    for (tile_col = 0; tile_col < tile_cols; ++tile_col) {
+      TileInfo tile;
+      TOKENEXTRA *old_tok = tok;
+      int mi_row;
+
+      vp9_tile_init(&tile, cm, tile_row, tile_col);
+      for (mi_row = tile.mi_row_start; mi_row < tile.mi_row_end;
+           mi_row += MI_BLOCK_SIZE) {
+        if (cpi->sf.use_nonrd_pick_mode && cm->frame_type != KEY_FRAME)
+          encode_nonrd_sb_row(cpi, &tile, mi_row, &tok);
+        else
+          encode_rd_sb_row(cpi, &tile, mi_row, &tok);
+      }
+      cpi->tok_count[tile_row][tile_col] = (unsigned int)(tok - old_tok);
+      assert(tok - cpi->tok <= get_token_alloc(cm->mb_rows, cm->mb_cols));
+    }
+  }
+}
+
 static void encode_frame_internal(VP9_COMP *cpi) {
   SPEED_FEATURES *const sf = &cpi->sf;
   RD_OPT *const rd_opt = &cpi->rd;
@@ -3062,33 +3089,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
     struct vpx_usec_timer emr_timer;
     vpx_usec_timer_start(&emr_timer);
 
-    {
-      // Take tiles into account and give start/end MB
-      int tile_col, tile_row;
-      TOKENEXTRA *tp = cpi->tok;
-      const int tile_cols = 1 << cm->log2_tile_cols;
-      const int tile_rows = 1 << cm->log2_tile_rows;
-
-      for (tile_row = 0; tile_row < tile_rows; tile_row++) {
-        for (tile_col = 0; tile_col < tile_cols; tile_col++) {
-          TileInfo tile;
-          TOKENEXTRA *tp_old = tp;
-          int mi_row;
-
-          // For each row of SBs in the frame
-          vp9_tile_init(&tile, cm, tile_row, tile_col);
-          for (mi_row = tile.mi_row_start;
-               mi_row < tile.mi_row_end; mi_row += MI_BLOCK_SIZE) {
-            if (sf->use_nonrd_pick_mode && cm->frame_type != KEY_FRAME)
-              encode_nonrd_sb_row(cpi, &tile, mi_row, &tp);
-            else
-              encode_rd_sb_row(cpi, &tile, mi_row, &tp);
-          }
-          cpi->tok_count[tile_row][tile_col] = (unsigned int)(tp - tp_old);
-          assert(tp - cpi->tok <= get_token_alloc(cm->mb_rows, cm->mb_cols));
-        }
-      }
-    }
+    encode_tiles(cpi);
 
     vpx_usec_timer_mark(&emr_timer);
     cpi->time_encode_sb_row += vpx_usec_timer_elapsed(&emr_timer);
