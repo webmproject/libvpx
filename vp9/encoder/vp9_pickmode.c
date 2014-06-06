@@ -220,8 +220,8 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int mode_idx[MB_MODE_COUNT] = {0};
   INTERP_FILTER filter_ref = SWITCHABLE;
   int bsl = mi_width_log2_lookup[bsize];
-  int pred_filter_search = (((mi_row + mi_col) >> bsl) +
-                            cpi->sf.chessboard_index) & 0x01;
+  const int pred_filter_search = (((mi_row + mi_col) >> bsl) +
+                                      get_chessboard_index(cm)) % 2;
 
   x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
 

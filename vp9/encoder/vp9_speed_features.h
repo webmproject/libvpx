@@ -283,9 +283,6 @@ typedef struct SPEED_FEATURES {
   // encoding process for RTC.
   int partition_check;
 
-  // Chessboard pattern index
-  int chessboard_index;
-
   // Use finer quantizer in every other few frames that run variable block
   // partition type search.
   int force_frame_boost;
