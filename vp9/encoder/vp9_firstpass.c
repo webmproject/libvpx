@@ -495,7 +495,6 @@ void vp9_first_pass(VP9_COMP *cpi) {
   TWO_PASS *twopass = &cpi->twopass;
   const MV zero_mv = {0, 0};
   const YV12_BUFFER_CONFIG *first_ref_buf = lst_yv12;
-  FIRSTPASS_STATS fps;
 
   vp9_clear_system_state();
 
@@ -790,6 +789,8 @@ void vp9_first_pass(VP9_COMP *cpi) {
 
   vp9_clear_system_state();
   {
+    FIRSTPASS_STATS fps;
+
     fps.frame = cm->current_video_frame;
     fps.spatial_layer_id = cpi->svc.spatial_layer_id;
     fps.intra_error = (double)(intra_error >> 8);
@@ -829,7 +830,8 @@ void vp9_first_pass(VP9_COMP *cpi) {
     fps.duration = (double)(cpi->source->ts_end - cpi->source->ts_start);
 
     // Don't want to do output stats with a stack variable!
-    output_stats(&fps, cpi->output_pkt_list);
+    twopass->this_frame_stats = fps;
+    output_stats(&twopass->this_frame_stats, cpi->output_pkt_list);
     accumulate_stats(&twopass->total_stats, &fps);
   }
 
@@ -837,9 +839,9 @@ void vp9_first_pass(VP9_COMP *cpi) {
   // the prediction is good enough... but also don't allow it to lag too far.
   if ((twopass->sr_update_lag > 3) ||
       ((cm->current_video_frame > 0) &&
-       (fps.pcnt_inter > 0.20) &&
-       ((fps.intra_error /
-         DOUBLE_DIVIDE_CHECK(fps.coded_error)) > 2.0))) {
+       (twopass->this_frame_stats.pcnt_inter > 0.20) &&
+       ((twopass->this_frame_stats.intra_error /
+         DOUBLE_DIVIDE_CHECK(twopass->this_frame_stats.coded_error)) > 2.0))) {
     if (gld_yv12 != NULL) {
       vp8_yv12_copy_frame(lst_yv12, gld_yv12);
     }
