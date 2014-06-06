@@ -11,8 +11,8 @@ REM Arguments:
 REM   %1 - Relative path to the directory containing the vp8 and vpx_scale
 REM        source directories.
 REM   %2 - Path to obj_int_extract.exe.
-cl /I "./" /I "%1" /nologo /c /DWINAPI_FAMILY=WINAPI_FAMILY_PHONE_APP "%1/vp8/encoder/vp8_asm_enc_offsets.c"
+cl /I. /I%1 /nologo /c /DWINAPI_FAMILY=WINAPI_FAMILY_PHONE_APP "%~1/vp8/encoder/vp8_asm_enc_offsets.c"
 %2\obj_int_extract.exe rvds "vp8_asm_enc_offsets.obj" > "vp8_asm_enc_offsets.asm"
 
-cl /I "./" /I "%1" /nologo /c /DWINAPI_FAMILY=WINAPI_FAMILY_PHONE_APP "%1/vpx_scale/vpx_scale_asm_offsets.c"
+cl /I. /I%1 /nologo /c /DWINAPI_FAMILY=WINAPI_FAMILY_PHONE_APP "%~1/vpx_scale/vpx_scale_asm_offsets.c"
 %2\obj_int_extract.exe rvds "vpx_scale_asm_offsets.obj" > "vpx_scale_asm_offsets.asm"

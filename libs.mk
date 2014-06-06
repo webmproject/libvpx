@@ -222,6 +222,7 @@ obj_int_extract.$(VCPROJ_SFX): $(SRC_PATH_BARE)/build/make/obj_int_extract.c
     --name=obj_int_extract \
     --ver=$(CONFIG_VS_VERSION) \
     --proj-guid=E1360C65-D375-4335-8057-7ED99CC3F9B2 \
+    --src-path-bare="$(SRC_PATH_BARE)" \
     $(if $(CONFIG_STATIC_MSVCRT),--static-crt) \
     --out=$@ $^ \
     -I. \
@@ -253,6 +254,7 @@ vpx.$(VCPROJ_SFX): $(CODEC_SRCS) vpx.def obj_int_extract.$(VCPROJ_SFX)
             --proj-guid=DCE19DAF-69AC-46DB-B14A-39F0FAA5DB74 \
             --module-def=vpx.def \
             --ver=$(CONFIG_VS_VERSION) \
+            --src-path-bare="$(SRC_PATH_BARE)" \
             --out=$@ $(CFLAGS) \
             $(filter-out $(addprefix %, $(ASM_INCLUDES)), $^) \
             --src-path-bare="$(SRC_PATH_BARE)" \
@@ -447,6 +449,7 @@ test_libvpx.$(VCPROJ_SFX): $(LIBVPX_TEST_SRCS) vpx.$(VCPROJ_SFX) gtest.$(VCPROJ_
             -D_VARIADIC_MAX=10 \
             --proj-guid=CD837F5F-52D8-4314-A370-895D614166A7 \
             --ver=$(CONFIG_VS_VERSION) \
+            --src-path-bare="$(SRC_PATH_BARE)" \
             $(if $(CONFIG_STATIC_MSVCRT),--static-crt) \
             --out=$@ $(INTERNAL_CFLAGS) $(CFLAGS) \
             -I. -I"$(SRC_PATH_BARE)/third_party/googletest/src/include" \
