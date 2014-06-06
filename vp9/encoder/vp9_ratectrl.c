@@ -428,7 +428,6 @@ static int calc_active_worst_quality_one_pass_vbr(const VP9_COMP *cpi) {
                                              : rc->last_q[INTER_FRAME] * 2;
     }
   }
-
   return MIN(active_worst_quality, rc->worst_quality);
 }
 
@@ -639,7 +638,7 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP9_COMP *cpi,
       int delta_qindex = vp9_compute_qdelta(rc, last_boosted_q,
                                             last_boosted_q * 0.75);
       active_best_quality = MAX(qindex + delta_qindex, rc->best_quality);
-    } else if (cm->current_video_frame > 0) {
+    } else {
       // not first frame of one pass and kf_boost is set
       double q_adj_factor = 1.0;
       double q_val;
@@ -982,7 +981,6 @@ int vp9_rc_pick_q_and_bounds(const VP9_COMP *cpi,
   } else {
     q = rc_pick_q_and_bounds_two_pass(cpi, bottom_index, top_index);
   }
-
   if (cpi->sf.use_nonrd_pick_mode) {
     if (cpi->sf.force_frame_boost == 1)
       q -= cpi->sf.max_delta_qindex;
