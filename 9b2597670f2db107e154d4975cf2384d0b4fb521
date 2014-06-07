@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//mmw\u003d",
+        "filename": "configure",
+        "patchSetId": 1
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-07T00:01:35Z",
+      "side": 1,
+      "message": "gcc aka clang now",
+      "revId": "9b2597670f2db107e154d4975cf2384d0b4fb521",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
