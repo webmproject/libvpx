@@ -16,6 +16,24 @@
       "revId": "c0ff4163ed9702aac5539420df8349249d58c373",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//mmE\u003d",
+        "filename": "build/make/msvs_common.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-07T19:18:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//mmg\u003d",
+      "revId": "c0ff4163ed9702aac5539420df8349249d58c373",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
