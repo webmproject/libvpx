@@ -16,6 +16,24 @@
       "revId": "9b2597670f2db107e154d4975cf2384d0b4fb521",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//mmo\u003d",
+        "filename": "configure",
+        "patchSetId": 1
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-06-07T00:17:14Z",
+      "side": 1,
+      "message": "Yeah... I didn\u0027t want to go down that rabbit hole, but I\u0027ve been thinking that calling it gcc when we mean clang isn\u0027t really helping anyone or anything.",
+      "parentUuid": "AAAAdn//mmw\u003d",
+      "revId": "9b2597670f2db107e154d4975cf2384d0b4fb521",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
