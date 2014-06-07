@@ -13,7 +13,7 @@ if [ "$(uname -o 2>/dev/null)" = "Cygwin" ] \
    && cygpath --help >/dev/null 2>&1; then
     FIXPATH='cygpath -m'
 else
-    FIXPATH='echo'
+    FIXPATH='echo_path'
 fi
 
 die() {
@@ -27,8 +27,23 @@ die_unknown(){
     exit 1
 }
 
+echo_path() {
+    for path; do
+        echo "$path"
+    done
+}
+
+# Output one, possibly changed based on the system, path per line.
 fix_path() {
-    $FIXPATH "$1"
+    $FIXPATH "$@"
+}
+
+# Corrects the paths in file_list in one pass for efficiency.
+fix_file_list() {
+    # TODO(jzern): this could be more generic and take the array as a param.
+    files=$(fix_path "${file_list[@]}")
+    local IFS=$'\n'
+    file_list=($files)
 }
 
 generate_uuid() {
