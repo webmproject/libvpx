@@ -627,4 +627,24 @@ INSTANTIATE_TEST_CASE_P(SSE3, SADTest, ::testing::Values(
 #endif  // CONFIG_USE_X86INC
 #endif  // HAVE_SSSE3
 
+#if HAVE_AVX2
+#if CONFIG_VP9_ENCODER
+// TODO(jzern): these prototypes can be removed after the avx2 versions are
+// reenabled in vp9_rtcd_defs.pl.
+extern "C" {
+void vp9_sad32x32x4d_avx2(const uint8_t *src_ptr, int src_stride,
+                          const uint8_t *const ref_ptr[], int ref_stride,
+                          unsigned int *sad_array);
+void vp9_sad64x64x4d_avx2(const uint8_t *src_ptr, int src_stride,
+                          const uint8_t *const ref_ptr[], int ref_stride,
+                          unsigned int *sad_array);
+}
+const sad_n_by_n_by_4_fn_t sad_64x64x4d_avx2 = vp9_sad64x64x4d_avx2;
+const sad_n_by_n_by_4_fn_t sad_32x32x4d_avx2 = vp9_sad32x32x4d_avx2;
+INSTANTIATE_TEST_CASE_P(DISABLED_AVX2, SADx4Test, ::testing::Values(
+                        make_tuple(32, 32, sad_32x32x4d_avx2),
+                        make_tuple(64, 64, sad_64x64x4d_avx2)));
+#endif  // CONFIG_VP9_ENCODER
+#endif  // HAVE_AVX2
+
 }  // namespace
