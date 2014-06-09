@@ -26,6 +26,42 @@ extern "C" {
 void vp9_idct8x8_64_add_c(const tran_low_t *input, uint8_t *output, int pitch);
 }
 
+const int kNumCoeffs = 64;
+const double kPi = 3.141592653589793238462643383279502884;
+void reference_8x8_dct_1d(const double in[8], double out[8], int stride) {
+  const double kInvSqrt2 = 0.707106781186547524400844362104;
+  for (int k = 0; k < 8; k++) {
+    out[k] = 0.0;
+    for (int n = 0; n < 8; n++)
+      out[k] += in[n] * cos(kPi * (2 * n + 1) * k / 16.0);
+    if (k == 0)
+      out[k] = out[k] * kInvSqrt2;
+  }
+}
+
+void reference_8x8_dct_2d(const int16_t input[kNumCoeffs],
+                            double output[kNumCoeffs]) {
+  // First transform columns
+  for (int i = 0; i < 8; ++i) {
+    double temp_in[8], temp_out[8];
+    for (int j = 0; j < 8; ++j)
+      temp_in[j] = input[j*8 + i];
+    reference_8x8_dct_1d(temp_in, temp_out, 1);
+    for (int j = 0; j < 8; ++j)
+      output[j * 8 + i] = temp_out[j];
+  }
+  // Then transform rows
+  for (int i = 0; i < 8; ++i) {
+    double temp_in[8], temp_out[8];
+    for (int j = 0; j < 8; ++j)
+      temp_in[j] = output[j + i*8];
+    reference_8x8_dct_1d(temp_in, temp_out, 1);
+    // Scale by some magic number
+    for (int j = 0; j < 8; ++j)
+      output[j + i * 8] = temp_out[j] * 2;
+  }
+}
+
 using libvpx_test::ACMRandom;
 
 namespace {
@@ -103,7 +139,7 @@ class FwdTrans8x8TestBase {
     for (int j = 0; j < 64; ++j) {
       const int diff = abs(count_sign_block[j][0] - count_sign_block[j][1]);
       const int max_diff = 1125;
-      EXPECT_LT(diff, max_diff)
+      EXPECT_LT(diff, max_diff << (bit_depth_ - 8))
           << "Error: 8x8 FDCT/FHT has a sign bias > "
           << 1. * max_diff / count_test_block * 100 << "%"
           << " for input range [-255, 255] at index " << j
@@ -133,7 +169,7 @@ class FwdTrans8x8TestBase {
     for (int j = 0; j < 64; ++j) {
       const int diff = abs(count_sign_block[j][0] - count_sign_block[j][1]);
       const int max_diff = 10000;
-      EXPECT_LT(diff, max_diff)
+      EXPECT_LT(diff, max_diff << (bit_depth_ - 8))
           << "Error: 4x4 FDCT/FHT has a sign bias > "
           << 1. * max_diff / count_test_block * 100 << "%"
           << " for input range [-15, 15] at index " << j
@@ -201,11 +237,11 @@ class FwdTrans8x8TestBase {
       }
     }
 
-    EXPECT_GE(1 << (bit_depth_ - 8), max_error)
+    EXPECT_GE(1 << 2 * (bit_depth_ - 8), max_error)
       << "Error: 8x8 FDCT/IDCT or FHT/IHT has an individual"
       << " roundtrip error > 1";
 
-    EXPECT_GE((count_test_block << (bit_depth_ - 8))/5, total_error)
+    EXPECT_GE((count_test_block << 2 * (bit_depth_ - 8))/5, total_error)
       << "Error: 8x8 FDCT/IDCT or FHT/IHT has average roundtrip "
       << "error > 1/5 per block";
   }
@@ -256,13 +292,92 @@ class FwdTrans8x8TestBase {
         total_error += error;
       }
 
-      EXPECT_GE(1 << (bit_depth_ - 8), max_error)
+      EXPECT_GE(1 << 2 * (bit_depth_ - 8), max_error)
           << "Error: Extremal 8x8 FDCT/IDCT or FHT/IHT has"
           << "an individual roundtrip error > 1";
 
-      EXPECT_GE((count_test_block << (bit_depth_ - 8))/5, total_error)
+      EXPECT_GE((count_test_block << 2 * (bit_depth_ - 8))/5, total_error)
           << "Error: Extremal 8x8 FDCT/IDCT or FHT/IHT has average"
           << " roundtrip error > 1/5 per block";
+    }
+  }
+
+  void RunInvAccuracyCheck() {
+    ACMRandom rnd(ACMRandom::DeterministicSeed());
+    const int count_test_block = 1000;
+    DECLARE_ALIGNED_ARRAY(16, int16_t, in, kNumCoeffs);
+    DECLARE_ALIGNED_ARRAY(16, tran_low_t, coeff, kNumCoeffs);
+    DECLARE_ALIGNED_ARRAY(16, uint8_t, dst, kNumCoeffs);
+    DECLARE_ALIGNED_ARRAY(16, uint16_t, dst16, kNumCoeffs);
+    DECLARE_ALIGNED_ARRAY(16, uint8_t, src, kNumCoeffs);
+    DECLARE_ALIGNED_ARRAY(16, uint16_t, src16, kNumCoeffs);
+
+    for (int i = 0; i < count_test_block; ++i) {
+      double out_r[kNumCoeffs];
+
+      // Initialize a test block with input range [-255, 255].
+      for (int j = 0; j < kNumCoeffs; ++j) {
+        if (bit_depth_ == 8) {
+          src[j] = rnd.Rand8() % 2 ? 255 : 0;
+          dst[j] = src[j] > 0 ? 0 : 255;
+          in[j] = src[j] - dst[j];
+        } else {
+          src16[j] = rnd.Rand8() % 2 ? mask_ : 0;
+          dst16[j] = src16[j] > 0 ? 0 : mask_;
+          in[j] = src16[j] - dst16[j];
+        }
+      }
+
+      reference_8x8_dct_2d(in, out_r);
+      for (int j = 0; j < kNumCoeffs; ++j)
+        coeff[j] = round(out_r[j]);
+
+      if (bit_depth_ == 8)
+        REGISTER_STATE_CHECK(RunInvTxfm(coeff, dst, pitch_));
+#if CONFIG_VP9_HIGH
+      else
+        REGISTER_STATE_CHECK(RunInvTxfm(coeff, CONVERT_TO_BYTEPTR(dst16),
+                                        pitch_));
+#endif
+
+      for (int j = 0; j < kNumCoeffs; ++j) {
+        const uint32_t diff = bit_depth_ == 8 ? dst[j] - src[j] :
+                                                dst16[j] - src16[j];
+        const uint32_t error = diff * diff;
+        EXPECT_GE(1u << 2 * (bit_depth_ - 8), error)
+            << "Error: 8x8 IDCT has error " << error
+            << " at index " << j;
+      }
+    }
+  }
+
+  void RunFwdAccuracyCheck() {
+    ACMRandom rnd(ACMRandom::DeterministicSeed());
+    const int count_test_block = 1000;
+    DECLARE_ALIGNED_ARRAY(16, int16_t, in, kNumCoeffs);
+    DECLARE_ALIGNED_ARRAY(16, tran_low_t, coeff_r, kNumCoeffs);
+    DECLARE_ALIGNED_ARRAY(16, tran_low_t, coeff, kNumCoeffs);
+
+    for (int i = 0; i < count_test_block; ++i) {
+      double out_r[kNumCoeffs];
+
+      // Initialize a test block with input range [-255, 255].
+      for (int j = 0; j < kNumCoeffs; ++j) {
+        in[j] = rnd.Rand8() % 2 == 0 ? mask_ : -mask_;
+      }
+
+      RunFwdTxfm(in, coeff, pitch_);
+      reference_8x8_dct_2d(in, out_r);
+      for (int j = 0; j < kNumCoeffs; ++j)
+        coeff_r[j] = round(out_r[j]);
+
+      for (int j = 0; j < kNumCoeffs; ++j) {
+        const uint32_t diff = coeff[j] - coeff_r[j];
+        const uint32_t error = diff * diff;
+        EXPECT_GE(9u << 2 * (bit_depth_ - 8), error)
+            << "Error: 8x8 DCT has error " << error
+            << " at index " << j;
+      }
     }
   }
 
@@ -315,6 +430,14 @@ TEST_P(FwdTrans8x8DCT, ExtremalCheck) {
   RunExtremalCheck();
 }
 
+TEST_P(FwdTrans8x8DCT, FwdAccuracyCheck) {
+  RunFwdAccuracyCheck();
+}
+
+TEST_P(FwdTrans8x8DCT, InvAccuracyCheck) {
+  RunInvAccuracyCheck();
+}
+
 class FwdTrans8x8HT
     : public FwdTrans8x8TestBase,
       public ::testing::TestWithParam<ht_8x8_param_t> {
@@ -362,7 +485,7 @@ using std::tr1::make_tuple;
 INSTANTIATE_TEST_CASE_P(
     C, FwdTrans8x8DCT,
     ::testing::Values(
-#if CONFIG_VP9_HIGH
+#if CONFIG_HIGH_TRANSFORMS && CONFIG_VP9_HIGH
         make_tuple(&vp9_fdct8x8_c, &vp9_idct8x8_64_add_c, 0, 8),
         make_tuple(&vp9_high_fdct8x8_c, &idct8x8_10, 0, 10),
         make_tuple(&vp9_high_fdct8x8_c, &idct8x8_12, 0, 12)));
@@ -372,7 +495,7 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     C, FwdTrans8x8HT,
     ::testing::Values(
-#if CONFIG_VP9_HIGH
+#if CONFIG_HIGH_TRANSFORMS && CONFIG_VP9_HIGH
         make_tuple(&vp9_fht8x8_c, &vp9_iht8x8_64_add_c, 0, 8),
         make_tuple(&vp9_fht8x8_c, &vp9_iht8x8_64_add_c, 1, 8),
         make_tuple(&vp9_fht8x8_c, &vp9_iht8x8_64_add_c, 2, 8),

@@ -354,10 +354,10 @@ class Trans16x16TestBase {
       }
     }
 
-    EXPECT_GE(1u, max_error)
+    EXPECT_GE(1u  << 2 * (bit_depth_ - 8), max_error)
         << "Error: 16x16 FHT/IHT has an individual round trip error > 1";
 
-    EXPECT_GE(count_test_block , total_error)
+    EXPECT_GE(count_test_block << 2 * (bit_depth_ - 8), total_error)
         << "Error: 16x16 FHT/IHT has average round trip error > 1 per block";
   }
 
@@ -410,7 +410,7 @@ class Trans16x16TestBase {
       // The minimum quant value is 4.
       for (int j = 0; j < kNumCoeffs; ++j) {
         EXPECT_EQ(output_block[j], output_ref_block[j]);
-        EXPECT_GE(4 * DCT_MAX_VALUE, abs(output_block[j]))
+        EXPECT_GE(4 * DCT_MAX_VALUE << (bit_depth_ - 8), abs(output_block[j]))
             << "Error: 16x16 FDCT has coefficient larger than 4*DCT_MAX_VALUE";
       }
     }
@@ -561,7 +561,7 @@ using std::tr1::make_tuple;
 INSTANTIATE_TEST_CASE_P(
     C, Trans16x16DCT,
     ::testing::Values(
-#if CONFIG_VP9_HIGH
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
         make_tuple(&vp9_fdct16x16_c, &vp9_idct16x16_256_add_c, 0, 8),
         make_tuple(&vp9_high_fdct16x16_c, &idct16x16_10, 0, 10),
         make_tuple(&vp9_high_fdct16x16_c, &idct16x16_12, 0, 12)));
@@ -571,7 +571,7 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     C, Trans16x16HT,
     ::testing::Values(
-#if CONFIG_VP9_HIGH
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
         make_tuple(&vp9_fht16x16_c, &vp9_iht16x16_256_add_c, 0, 8),
         make_tuple(&vp9_fht16x16_c, &vp9_iht16x16_256_add_c, 1, 8),
         make_tuple(&vp9_fht16x16_c, &vp9_iht16x16_256_add_c, 2, 8),

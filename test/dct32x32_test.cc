@@ -160,10 +160,10 @@ TEST_P(Trans32x32Test, AccuracyCheck) {
     total_error /= 45;
   }
 
-  EXPECT_GE(1u, max_error)
+  EXPECT_GE(1u << 2 * (bit_depth_ - 8), max_error)
       << "Error: 32x32 FDCT/IDCT has an individual round-trip error > 1";
 
-  EXPECT_GE(count_test_block, total_error)
+  EXPECT_GE(count_test_block << 2 * (bit_depth_ - 8), total_error)
       << "Error: 32x32 FDCT/IDCT has average round-trip error > 1 per block";
 }
 
@@ -230,9 +230,9 @@ TEST_P(Trans32x32Test, MemCheck) {
         EXPECT_GE(6, abs(output_block[j] - output_ref_block[j]))
             << "Error: 32x32 FDCT rd has mismatched coefficients";
       }
-      EXPECT_GE(4 * DCT_MAX_VALUE, abs(output_ref_block[j]))
+      EXPECT_GE(4 * DCT_MAX_VALUE << (bit_depth_ - 8), abs(output_ref_block[j]))
           << "Error: 32x32 FDCT C has coefficient larger than 4*DCT_MAX_VALUE";
-      EXPECT_GE(4 * DCT_MAX_VALUE, abs(output_block[j]))
+      EXPECT_GE(4 * DCT_MAX_VALUE << (bit_depth_ - 8), abs(output_block[j]))
           << "Error: 32x32 FDCT has coefficient larger than "
           << "4*DCT_MAX_VALUE";
     }
@@ -290,7 +290,7 @@ using std::tr1::make_tuple;
 INSTANTIATE_TEST_CASE_P(
     C, Trans32x32Test,
     ::testing::Values(
-#if CONFIG_VP9_HIGH
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
         make_tuple(&vp9_fdct32x32_c, &vp9_idct32x32_1024_add_c, 0, 8),
         make_tuple(&vp9_fdct32x32_rd_c, &vp9_idct32x32_1024_add_c, 1, 8),
         make_tuple(&vp9_high_fdct32x32_c, &idct32x32_10, 0, 10),

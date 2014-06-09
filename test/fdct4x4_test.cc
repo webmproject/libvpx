@@ -191,7 +191,7 @@ class Trans4x4TestBase {
       // The minimum quant value is 4.
       for (int j = 0; j < kNumCoeffs; ++j) {
         EXPECT_EQ(output_block[j], output_ref_block[j]);
-        EXPECT_GE(4 * DCT_MAX_VALUE, abs(output_block[j]))
+        EXPECT_GE(4 * DCT_MAX_VALUE << (bit_depth_ - 8), abs(output_block[j]))
             << "Error: 4x4 FDCT has coefficient larger than 4*DCT_MAX_VALUE";
       }
     }
@@ -390,7 +390,7 @@ using std::tr1::make_tuple;
 INSTANTIATE_TEST_CASE_P(
     C, Trans4x4DCT,
     ::testing::Values(
-#if CONFIG_VP9_HIGH
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
         make_tuple(&vp9_fdct4x4_c, &vp9_idct4x4_16_add_c, 0, 8),
         make_tuple(&vp9_high_fdct4x4_c, &idct4x4_10, 0, 10),
         make_tuple(&vp9_high_fdct4x4_c, &idct4x4_12, 0, 12)));
@@ -400,7 +400,7 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     C, Trans4x4HT,
     ::testing::Values(
-#if CONFIG_VP9_HIGH
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
         make_tuple(&vp9_fht4x4_c, &vp9_iht4x4_16_add_c, 0, 8),
         make_tuple(&vp9_fht4x4_c, &vp9_iht4x4_16_add_c, 1, 8),
         make_tuple(&vp9_fht4x4_c, &vp9_iht4x4_16_add_c, 2, 8),
@@ -422,7 +422,7 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     C, Trans4x4WHT,
     ::testing::Values(
-#if CONFIG_VP9_HIGH
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
         make_tuple(&vp9_fwht4x4_c, &vp9_iwht4x4_16_add_c, 0, 8),
         make_tuple(&vp9_high_fwht4x4_c, &iwht4x4_10, 0, 10),
         make_tuple(&vp9_high_fwht4x4_c, &iwht4x4_12, 0, 12)));
