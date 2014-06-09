@@ -53,32 +53,41 @@ static void setup_mi(VP9_COMMON *cm) {
 }
 
 static int alloc_mi(VP9_COMMON *cm, int mi_size) {
-  cm->mip = (MODE_INFO *)vpx_calloc(mi_size, sizeof(*cm->mip));
-  if (cm->mip == NULL)
-    return 1;
+  int i;
 
-  cm->prev_mip = (MODE_INFO *)vpx_calloc(mi_size, sizeof(*cm->prev_mip));
-  if (cm->prev_mip == NULL)
-    return 1;
+  for (i = 0; i < 2; ++i) {
+    cm->mip_array[i] =
+        (MODE_INFO *)vpx_calloc(mi_size, sizeof(*cm->mip));
+    if (cm->mip_array[i] == NULL)
+      return 1;
 
-  cm->mi_grid_base =
-      (MODE_INFO **)vpx_calloc(mi_size, sizeof(*cm->mi_grid_base));
-  if (cm->mi_grid_base == NULL)
-    return 1;
+    cm->mi_grid_base_array[i] =
+        (MODE_INFO **)vpx_calloc(mi_size, sizeof(*cm->mi_grid_base));
+    if (cm->mi_grid_base_array[i] == NULL)
+      return 1;
+  }
 
-  cm->prev_mi_grid_base =
-      (MODE_INFO **)vpx_calloc(mi_size, sizeof(*cm->prev_mi_grid_base));
-  if (cm->prev_mi_grid_base == NULL)
-    return 1;
+  // Init the index.
+  cm->mi_idx = 0;
+  cm->prev_mi_idx = 1;
+
+  cm->mip = cm->mip_array[cm->mi_idx];
+  cm->prev_mip = cm->mip_array[cm->prev_mi_idx];
+  cm->mi_grid_base = cm->mi_grid_base_array[cm->mi_idx];
+  cm->prev_mi_grid_base = cm->mi_grid_base_array[cm->prev_mi_idx];
 
   return 0;
 }
 
 static void free_mi(VP9_COMMON *cm) {
-  vpx_free(cm->mip);
-  vpx_free(cm->prev_mip);
-  vpx_free(cm->mi_grid_base);
-  vpx_free(cm->prev_mi_grid_base);
+  int i;
+
+  for (i = 0; i < 2; ++i) {
+    vpx_free(cm->mip_array[i]);
+    cm->mip_array[i] = NULL;
+    vpx_free(cm->mi_grid_base_array[i]);
+    cm->mi_grid_base_array[i] = NULL;
+  }
 
   cm->mip = NULL;
   cm->prev_mip = NULL;
@@ -237,13 +246,16 @@ void vp9_update_frame_size(VP9_COMMON *cm) {
 }
 
 void vp9_swap_mi_and_prev_mi(VP9_COMMON *cm) {
+  // Swap indices.
+  const int tmp = cm->mi_idx;
+  cm->mi_idx = cm->prev_mi_idx;
+  cm->prev_mi_idx = tmp;
+
   // Current mip will be the prev_mip for the next frame.
-  MODE_INFO *temp = cm->prev_mip;
-  MODE_INFO **temp2 = cm->prev_mi_grid_base;
-  cm->prev_mip = cm->mip;
-  cm->mip = temp;
-  cm->prev_mi_grid_base = cm->mi_grid_base;
-  cm->mi_grid_base = temp2;
+  cm->mip = cm->mip_array[cm->mi_idx];
+  cm->prev_mip = cm->mip_array[cm->prev_mi_idx];
+  cm->mi_grid_base = cm->mi_grid_base_array[cm->mi_idx];
+  cm->prev_mi_grid_base = cm->mi_grid_base_array[cm->prev_mi_idx];
 
   // Update the upper left visible macroblock ptrs.
   cm->mi = cm->mip + cm->mi_stride + 1;
