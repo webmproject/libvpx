@@ -2402,6 +2402,8 @@ static TX_MODE select_tx_mode(const VP9_COMP *cpi) {
       return rd_opt->tx_select_threshes[frame_type][ALLOW_32X32] >
                  rd_opt->tx_select_threshes[frame_type][TX_MODE_SELECT] ?
                      ALLOW_32X32 : TX_MODE_SELECT;
+    } else if (cpi->sf.tx_size_search_method == USE_TX_8X8) {
+      return ALLOW_8X8;
     } else {
       unsigned int total = 0;
       int i;

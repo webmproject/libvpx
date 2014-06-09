@@ -269,6 +269,8 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->partition_search_type = SOURCE_VAR_BASED_PARTITION;
     sf->search_type_check_frequency = 50;
     sf->source_var_thresh = 360;
+
+    sf->tx_size_search_method = USE_TX_8X8;
   }
 
   if (speed >= 7) {
