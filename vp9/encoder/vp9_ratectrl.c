@@ -186,6 +186,8 @@ static void update_buffer_level(VP9_COMP *cpi, int encoded_frame_size) {
 }
 
 void vp9_rc_init(const VP9EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
+  int i;
+
   if (pass == 0 && oxcf->rc_mode == VPX_CBR) {
     rc->avg_frame_qindex[KEY_FRAME] = oxcf->worst_allowed_q;
     rc->avg_frame_qindex[INTER_FRAME] = oxcf->worst_allowed_q;
@@ -227,9 +229,9 @@ void vp9_rc_init(const VP9EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
   rc->tot_q = 0.0;
   rc->avg_q = vp9_convert_qindex_to_q(oxcf->worst_allowed_q);
 
-  rc->rate_correction_factor = 1.0;
-  rc->key_frame_rate_correction_factor = 1.0;
-  rc->gf_rate_correction_factor = 1.0;
+  for (i = 0; i < RATE_FACTOR_LEVELS; ++i) {
+    rc->rate_correction_factors[i] = 1.0;
+  }
 }
 
 int vp9_rc_drop_frame(VP9_COMP *cpi) {
@@ -271,28 +273,40 @@ int vp9_rc_drop_frame(VP9_COMP *cpi) {
 }
 
 static double get_rate_correction_factor(const VP9_COMP *cpi) {
+  const RATE_CONTROL *const rc = &cpi->rc;
+
   if (cpi->common.frame_type == KEY_FRAME) {
-    return cpi->rc.key_frame_rate_correction_factor;
+    return rc->rate_correction_factors[KF_STD];
+  } else if (cpi->pass == 2) {
+    RATE_FACTOR_LEVEL rf_lvl =
+      cpi->twopass.gf_group.rf_level[cpi->twopass.gf_group.index];
+    return rc->rate_correction_factors[rf_lvl];
   } else {
     if ((cpi->refresh_alt_ref_frame || cpi->refresh_golden_frame) &&
-        !cpi->rc.is_src_frame_alt_ref &&
+        !rc->is_src_frame_alt_ref &&
         !(cpi->use_svc && cpi->oxcf.rc_mode == VPX_CBR))
-      return cpi->rc.gf_rate_correction_factor;
+      return rc->rate_correction_factors[GF_ARF_STD];
     else
-      return cpi->rc.rate_correction_factor;
+      return rc->rate_correction_factors[INTER_NORMAL];
   }
 }
 
 static void set_rate_correction_factor(VP9_COMP *cpi, double factor) {
+  RATE_CONTROL *const rc = &cpi->rc;
+
   if (cpi->common.frame_type == KEY_FRAME) {
-    cpi->rc.key_frame_rate_correction_factor = factor;
+    rc->rate_correction_factors[KF_STD] = factor;
+  } else if (cpi->pass == 2) {
+    RATE_FACTOR_LEVEL rf_lvl =
+      cpi->twopass.gf_group.rf_level[cpi->twopass.gf_group.index];
+    rc->rate_correction_factors[rf_lvl] = factor;
   } else {
     if ((cpi->refresh_alt_ref_frame || cpi->refresh_golden_frame) &&
-        !cpi->rc.is_src_frame_alt_ref &&
+        !rc->is_src_frame_alt_ref &&
         !(cpi->use_svc && cpi->oxcf.rc_mode == VPX_CBR))
-      cpi->rc.gf_rate_correction_factor = factor;
+      rc->rate_correction_factors[GF_ARF_STD] = factor;
     else
-      cpi->rc.rate_correction_factor = factor;
+      rc->rate_correction_factors[INTER_NORMAL] = factor;
   }
 }
 
@@ -920,7 +934,7 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi,
                                           active_worst_quality, 2.0);
     } else if (!rc->is_src_frame_alt_ref &&
                (oxcf->rc_mode != VPX_CBR) &&
-               (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)) {
+               (cpi->refresh_alt_ref_frame)) {
       qdelta = vp9_compute_qdelta_by_rate(&cpi->rc, cm->frame_type,
                                           active_worst_quality, 1.75);
     }
@@ -1026,11 +1040,8 @@ static void update_alt_ref_frame_stats(VP9_COMP *cpi) {
   RATE_CONTROL *const rc = &cpi->rc;
   rc->frames_since_golden = 0;
 
-#if CONFIG_MULTIPLE_ARF
-  if (!cpi->multi_arf_enabled)
-#endif
-    // Clear the alternate reference update pending flag.
-    rc->source_alt_ref_pending = 0;
+  // Mark the alt ref as done (setting to 0 means no further alt refs pending).
+  rc->source_alt_ref_pending = 0;
 
   // Set the alternate reference frame active flag
   rc->source_alt_ref_active = 1;
@@ -1044,8 +1055,13 @@ static void update_golden_frame_stats(VP9_COMP *cpi) {
     // this frame refreshes means next frames don't unless specified by user
     rc->frames_since_golden = 0;
 
-    if (!rc->source_alt_ref_pending)
+    if (cpi->pass == 2) {
+      if (!rc->source_alt_ref_pending &&
+          cpi->twopass.gf_group.rf_level[0] == GF_ARF_STD)
       rc->source_alt_ref_active = 0;
+    } else if (!rc->source_alt_ref_pending) {
+      rc->source_alt_ref_active = 0;
+    }
 
     // Decrement count down till next gf
     if (rc->frames_till_gf_update_due > 0)

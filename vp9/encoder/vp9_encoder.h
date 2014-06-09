@@ -430,9 +430,9 @@ typedef struct VP9_COMP {
   PC_TREE *pc_root;
   int partition_cost[PARTITION_CONTEXTS][PARTITION_TYPES];
 
+  int multi_arf_enabled;
 #if CONFIG_MULTIPLE_ARF
   // ARF tracking variables.
-  int multi_arf_enabled;
   unsigned int frame_coding_order_period;
   unsigned int new_frame_coding_order_period;
   int frame_coding_order[MAX_LAG_BUFFERS * 2];

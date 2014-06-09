@@ -895,8 +895,8 @@ static int get_refresh_mask(VP9_COMP *cpi) {
     if (!cpi->multi_arf_enabled && cpi->refresh_golden_frame &&
         !cpi->refresh_alt_ref_frame) {
 #else
-    if (cpi->refresh_golden_frame && !cpi->refresh_alt_ref_frame &&
-        !cpi->use_svc) {
+    if (!cpi->multi_arf_enabled && cpi->refresh_golden_frame &&
+        cpi->rc.is_src_frame_alt_ref && !cpi->use_svc) {
 #endif
       // Preserve the previously existing golden frame and update the frame in
       // the alt ref slot instead. This is highly specific to the use of
@@ -919,6 +919,11 @@ static int get_refresh_mask(VP9_COMP *cpi) {
             cpi->arf_buffer_idx[sn];
       }
 #endif
+      if ((cpi->pass == 2) && cpi->multi_arf_enabled) {
+        GF_GROUP *gf_group = &cpi->twopass.gf_group;
+        arf_idx = gf_group->arf_update_idx[gf_group->index];
+      }
+
       return (cpi->refresh_last_frame << cpi->lst_fb_idx) |
              (cpi->refresh_golden_frame << cpi->gld_fb_idx) |
              (cpi->refresh_alt_ref_frame << arf_idx);

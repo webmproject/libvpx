@@ -766,6 +766,10 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
 
   cpi->refresh_alt_ref_frame = 0;
 
+  if (cpi->pass == 2)
+    cpi->multi_arf_enabled = 0;
+  else
+    cpi->multi_arf_enabled = 0;
 #if CONFIG_MULTIPLE_ARF
   // Turn multiple ARF usage on/off. This is a quick hack for the initial test
   // version. It should eventually be set via the codec API.
@@ -1492,8 +1496,8 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
   else if (!cpi->multi_arf_enabled && cpi->refresh_golden_frame &&
       !cpi->refresh_alt_ref_frame) {
 #else
-  else if (cpi->refresh_golden_frame && !cpi->refresh_alt_ref_frame &&
-           !cpi->use_svc) {
+  else if (!cpi->multi_arf_enabled && cpi->refresh_golden_frame &&
+           cpi->rc.is_src_frame_alt_ref && !cpi->use_svc) {
 #endif
     /* Preserve the previously existing golden frame and update the frame in
      * the alt ref slot instead. This is highly specific to the current use of
@@ -1520,6 +1524,11 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
         arf_idx = cpi->arf_buffer_idx[cpi->sequence_number + 1];
       }
 #endif
+      if ((cpi->pass == 2) && cpi->multi_arf_enabled) {
+        GF_GROUP *gf_group = &cpi->twopass.gf_group;
+        arf_idx = gf_group->arf_update_idx[gf_group->index];
+      }
+
       ref_cnt_fb(cm->frame_bufs,
                  &cm->ref_frame_map[arf_idx], cm->new_fb_idx);
     }
@@ -2397,6 +2406,66 @@ void adjust_frame_rate(VP9_COMP *cpi) {
   cpi->last_end_time_stamp_seen = cpi->source->ts_end;
 }
 
+// Returns 0 if this is not an alt ref else the offset of the source frame
+// used as the arf midpoint.
+static int get_arf_src_index(VP9_COMP *cpi) {
+  RATE_CONTROL *const rc = &cpi->rc;
+  int arf_src_index = 0;
+  if (is_altref_enabled(&cpi->oxcf)) {
+    if (cpi->pass == 2) {
+      const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
+      if (gf_group->update_type[gf_group->index] == ARF_UPDATE) {
+        arf_src_index = gf_group->arf_src_offset[gf_group->index];
+      }
+    } else if (rc->source_alt_ref_pending) {
+      arf_src_index = rc->frames_till_gf_update_due;
+    }
+  }
+  return arf_src_index;
+}
+
+static void is_src_altref(VP9_COMP *cpi) {
+  RATE_CONTROL *const rc = &cpi->rc;
+
+#if CONFIG_MULTIPLE_ARF
+  int i;
+  // Is this frame the ARF overlay.
+  rc->is_src_frame_alt_ref = 0;
+  for (i = 0; i < cpi->arf_buffered; ++i) {
+    if (cpi->source == cpi->alt_ref_source[i]) {
+      rc->is_src_frame_alt_ref = 1;
+      cpi->refresh_golden_frame = 1;
+      break;
+    }
+  }
+#else
+  if (cpi->pass == 2) {
+    GF_GROUP *gf_group = &cpi->twopass.gf_group;
+    rc->is_src_frame_alt_ref =
+      (gf_group->update_type[gf_group->index] == OVERLAY_UPDATE);
+  } else {
+    rc->is_src_frame_alt_ref = cpi->alt_ref_source &&
+                               (cpi->source == cpi->alt_ref_source);
+  }
+#endif
+
+  if (rc->is_src_frame_alt_ref) {
+    // Current frame is an ARF overlay frame.
+#if CONFIG_MULTIPLE_ARF
+    cpi->alt_ref_source[i] = NULL;
+#else
+    cpi->alt_ref_source = NULL;
+#endif
+    // Don't refresh the last buffer for an ARF overlay frame. It will
+    // become the GF so preserve last as an alternative prediction option.
+    cpi->refresh_last_frame = 0;
+  }
+
+#if CONFIG_MULTIPLE_ARF
+  ++cpi->next_frame_in_order;
+#endif
+}
+
 int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
                             size_t *size, uint8_t *dest,
                             int64_t *time_stamp, int64_t *time_end, int flush) {
@@ -2406,6 +2475,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   struct vpx_usec_timer  cmptimer;
   YV12_BUFFER_CONFIG *force_src_buffer = NULL;
   MV_REFERENCE_FRAME ref_frame;
+  int arf_src_index;
 
   if (!cpi)
     return -1;
@@ -2428,24 +2498,12 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   cpi->refresh_golden_frame = 0;
   cpi->refresh_alt_ref_frame = 0;
 
-  // Should we code an alternate reference frame.
-  if (is_altref_enabled(&cpi->oxcf) && rc->source_alt_ref_pending) {
-    int frames_to_arf;
+  // Should we encode an arf frame.
+  arf_src_index = get_arf_src_index(cpi);
+  if (arf_src_index) {
+    assert(arf_src_index <= rc->frames_to_key);
 
-#if CONFIG_MULTIPLE_ARF
-    assert(!cpi->multi_arf_enabled ||
-           cpi->frame_coding_order[cpi->sequence_number] < 0);
-
-    if (cpi->multi_arf_enabled && (cpi->pass == 2))
-      frames_to_arf = (-cpi->frame_coding_order[cpi->sequence_number])
-          - cpi->next_frame_in_order;
-    else
-#endif
-      frames_to_arf = rc->frames_till_gf_update_due;
-
-    assert(frames_to_arf <= rc->frames_to_key);
-
-    if ((cpi->source = vp9_lookahead_peek(cpi->lookahead, frames_to_arf))) {
+    if ((cpi->source = vp9_lookahead_peek(cpi->lookahead, arf_src_index))) {
 #if CONFIG_MULTIPLE_ARF
       cpi->alt_ref_source[cpi->arf_buffered] = cpi->source;
 #else
@@ -2455,8 +2513,8 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
       if (cpi->oxcf.arnr_max_frames > 0) {
         // Produce the filtered ARF frame.
         // TODO(agrange) merge these two functions.
-        vp9_configure_arnr_filter(cpi, frames_to_arf, rc->gfu_boost);
-        vp9_temporal_filter_prepare(cpi, frames_to_arf);
+        vp9_configure_arnr_filter(cpi, arf_src_index, rc->gfu_boost);
+        vp9_temporal_filter_prepare(cpi, arf_src_index);
         vp9_extend_frame_borders(&cpi->alt_ref_buffer);
         force_src_buffer = &cpi->alt_ref_buffer;
       }
@@ -2466,59 +2524,28 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
       cpi->refresh_golden_frame = 0;
       cpi->refresh_last_frame = 0;
       rc->is_src_frame_alt_ref = 0;
-
-#if CONFIG_MULTIPLE_ARF
-      if (!cpi->multi_arf_enabled)
-#endif
-        rc->source_alt_ref_pending = 0;
+      rc->source_alt_ref_pending = 0;
     } else {
       rc->source_alt_ref_pending = 0;
     }
   }
 
   if (!cpi->source) {
-#if CONFIG_MULTIPLE_ARF
-    int i;
-#endif
-
     // Get last frame source.
     if (cm->current_video_frame > 0) {
       if ((cpi->last_source = vp9_lookahead_peek(cpi->lookahead, -1)) == NULL)
         return -1;
     }
 
+    // Read in the source frame.
     if ((cpi->source = vp9_lookahead_pop(cpi->lookahead, flush))) {
       cm->show_frame = 1;
       cm->intra_only = 0;
 
-#if CONFIG_MULTIPLE_ARF
-      // Is this frame the ARF overlay.
-      rc->is_src_frame_alt_ref = 0;
-      for (i = 0; i < cpi->arf_buffered; ++i) {
-        if (cpi->source == cpi->alt_ref_source[i]) {
-          rc->is_src_frame_alt_ref = 1;
-          cpi->refresh_golden_frame = 1;
-          break;
-        }
-      }
-#else
-      rc->is_src_frame_alt_ref = cpi->alt_ref_source &&
-                                 (cpi->source == cpi->alt_ref_source);
-#endif
-      if (rc->is_src_frame_alt_ref) {
-        // Current frame is an ARF overlay frame.
-#if CONFIG_MULTIPLE_ARF
-        cpi->alt_ref_source[i] = NULL;
-#else
-        cpi->alt_ref_source = NULL;
-#endif
-        // Don't refresh the last buffer for an ARF overlay frame. It will
-        // become the GF so preserve last as an alternative prediction option.
-        cpi->refresh_last_frame = 0;
-      }
-#if CONFIG_MULTIPLE_ARF
-      ++cpi->next_frame_in_order;
-#endif
+      // Check to see if the frame to be encoded is an overlay
+      // for a previous arf frame and if so configure it as such.
+      if (cpi->pass == 0)
+        is_src_altref(cpi);
     }
   }
 
@@ -2587,6 +2614,11 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     cpi->alt_fb_idx = cpi->arf_buffer_idx[cpi->sequence_number];
   }
 #endif
+  if (cpi->multi_arf_enabled && (cm->frame_type != KEY_FRAME) &&
+      (cpi->pass == 2)) {
+    const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
+    cpi->alt_fb_idx = gf_group->arf_ref_idx[gf_group->index];
+  }
 
   cpi->frame_flags = *frame_flags;
 

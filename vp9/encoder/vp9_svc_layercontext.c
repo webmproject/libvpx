@@ -31,6 +31,7 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
   for (layer = 0; layer < layer_end; ++layer) {
     LAYER_CONTEXT *const lc = &svc->layer_context[layer];
     RATE_CONTROL *const lrc = &lc->rc;
+    int i;
     lc->current_video_frame_in_layer = 0;
     lrc->avg_frame_qindex[INTER_FRAME] = oxcf->worst_allowed_q;
     lrc->ni_av_qi = oxcf->worst_allowed_q;
@@ -42,8 +43,10 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
     lrc->ni_frames = 0;
     lrc->decimation_count = 0;
     lrc->decimation_factor = 0;
-    lrc->rate_correction_factor = 1.0;
-    lrc->key_frame_rate_correction_factor = 1.0;
+
+    for (i = 0; i < RATE_FACTOR_LEVELS; ++i) {
+      lrc->rate_correction_factors[i] = 1.0;
+    }
 
     if (svc->number_temporal_layers > 1) {
       lc->target_bandwidth = oxcf->ts_target_bitrate[layer];
