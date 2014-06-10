@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//mao\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 388,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-10T22:47:54Z",
+      "side": 1,
+      "message": "const",
+      "revId": "8dcb864343d2dec1c1519a34be4a272570c67da8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//mak\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 403,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-10T22:47:54Z",
+      "side": 1,
+      "message": "a string might work here, then passing \u0026data[0]; this code should be in a function reused at 386",
+      "revId": "8dcb864343d2dec1c1519a34be4a272570c67da8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
