@@ -172,8 +172,20 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
   if ((sse >> 3) > var)
     sse = var;
 
+#if CONFIG_HIGH_TRANSFORMS && CONFIG_VP9_HIGH
+  if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+    vp9_model_rd_from_var_lapndz(var + sse,
+                                 1 << num_pels_log2_lookup[bsize],
+                                 pd->dequant[1] >> (xd->bps - 5),
+                                 &rate, &dist);
+  } else {
+    vp9_model_rd_from_var_lapndz(var + sse, 1 << num_pels_log2_lookup[bsize],
+                                 pd->dequant[1] >> 3, &rate, &dist);
+  }
+#else
   vp9_model_rd_from_var_lapndz(var + sse, 1 << num_pels_log2_lookup[bsize],
                                pd->dequant[1] >> 3, &rate, &dist);
+#endif
   *out_rate_sum = rate;
   *out_dist_sum = dist << 3;
 }
@@ -380,16 +392,30 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         // The encode_breakout input
         const unsigned int min_thresh =
             MIN(((unsigned int)x->encode_breakout << 4), max_thresh);
+#if CONFIG_HIGH_TRANSFORMS && CONFIG_VP9_HIGH
+        const int shift = 2 * xd->bps - 16;
+#endif
 
         // Calculate threshold according to dequant value.
         thresh_ac = (xd->plane[0].dequant[1] * xd->plane[0].dequant[1]) / 9;
+#if CONFIG_HIGH_TRANSFORMS && CONFIG_VP9_HIGH
+        if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+          if (shift > 0)
+            thresh_ac = ROUND_POWER_OF_TWO(thresh_ac, shift);
+        }
+#endif
         thresh_ac = clamp(thresh_ac, min_thresh, max_thresh);
-
         // Adjust ac threshold according to partition size.
         thresh_ac >>= 8 - (b_width_log2_lookup[bsize] +
             b_height_log2_lookup[bsize]);
 
         thresh_dc = (xd->plane[0].dequant[0] * xd->plane[0].dequant[0] >> 6);
+#if CONFIG_HIGH_TRANSFORMS && CONFIG_VP9_HIGH
+        if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+          if (shift > 0)
+            thresh_dc = ROUND_POWER_OF_TWO(thresh_dc, shift);
+        }
+#endif
 
         // Y skipping condition checking for ac and dc.
         if (var <= thresh_ac && (sse - var) <= thresh_dc) {

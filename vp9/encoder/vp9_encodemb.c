@@ -210,6 +210,11 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
       best = rd_cost1 < rd_cost0;
       base_bits = vp9_dct_value_cost_ptr[x];
       dx = mul * (dqcoeff[rc] - coeff[rc]);
+#if CONFIG_HIGH_TRANSFORMS && CONFIG_VP9_HIGH
+      if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+        dx >>= xd->bps - 8;
+      }
+#endif
       d2 = dx * dx;
       tokens[i][0].rate = base_bits + (best ? rate1 : rate0);
       tokens[i][0].error = d2 + (best ? error1 : error0);
@@ -264,7 +269,15 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
       base_bits = vp9_dct_value_cost_ptr[x];
 
       if (shortcut) {
+#if CONFIG_HIGH_TRANSFORMS && CONFIG_VP9_HIGH
+        if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+          dx -= ((dequant_ptr[rc != 0] >> (xd->bps - 8)) + sz) ^ sz;
+        } else {
+          dx -= (dequant_ptr[rc != 0] + sz) ^ sz;
+        }
+#else
         dx -= (dequant_ptr[rc != 0] + sz) ^ sz;
+#endif
         d2 = dx * dx;
       }
       tokens[i][1].rate = base_bits + (best ? rate1 : rate0);
