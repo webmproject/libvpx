@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//mb0\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 484,
+      "author": {
+        "id": 1115299
+      },
+      "writtenOn": "2014-06-10T18:50:40Z",
+      "side": 1,
+      "message": "Is this shifting too much?\nPerhaps it should be:\nquantizer \u003e\u003e\u003d (xd-\u003ebps - 8);",
+      "revId": "2c7ca4722fa939641427c3048e7e99792197a644",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
