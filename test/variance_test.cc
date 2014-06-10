@@ -702,6 +702,57 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(6, 6, subpel_avg_variance64x64_ssse3)));
 #endif
 #endif
+
+#if HAVE_AVX2
+// TODO(jzern): these prototypes can be removed after the avx2 versions are
+// reenabled in vp9_rtcd_defs.pl.
+extern "C" {
+unsigned int vp9_sub_pixel_variance32x32_avx2(
+    const uint8_t *src_ptr, int source_stride, int xoffset, int yoffset,
+    const uint8_t *ref_ptr, int ref_stride, unsigned int *sse);
+unsigned int vp9_sub_pixel_variance64x64_avx2(
+    const uint8_t *src_ptr, int source_stride, int xoffset, int yoffset,
+    const uint8_t *ref_ptr, int ref_stride, unsigned int *sse);
+unsigned int vp9_sub_pixel_avg_variance32x32_avx2(
+    const uint8_t *src_ptr, int source_stride, int xoffset, int yoffset,
+    const uint8_t *ref_ptr, int ref_stride, unsigned int *sse,
+    const uint8_t *second_pred);
+unsigned int vp9_sub_pixel_avg_variance64x64_avx2(
+    const uint8_t *src_ptr, int source_stride, int xoffset, int yoffset,
+    const uint8_t *ref_ptr, int ref_stride, unsigned int *sse,
+    const uint8_t *second_pred);
+}
+const vp9_variance_fn_t variance16x16_avx2 = vp9_variance16x16_avx2;
+const vp9_variance_fn_t variance32x16_avx2 = vp9_variance32x16_avx2;
+const vp9_variance_fn_t variance32x32_avx2 = vp9_variance32x32_avx2;
+const vp9_variance_fn_t variance64x32_avx2 = vp9_variance64x32_avx2;
+const vp9_variance_fn_t variance64x64_avx2 = vp9_variance64x64_avx2;
+INSTANTIATE_TEST_CASE_P(
+    AVX2, VP9VarianceTest,
+    ::testing::Values(make_tuple(4, 4, variance16x16_avx2),
+                      make_tuple(5, 4, variance32x16_avx2),
+                      make_tuple(5, 5, variance32x32_avx2),
+                      make_tuple(6, 5, variance64x32_avx2),
+                      make_tuple(6, 6, variance64x64_avx2)));
+
+const vp9_subpixvariance_fn_t subpel_variance32x32_avx2 =
+    vp9_sub_pixel_variance32x32_avx2;
+const vp9_subpixvariance_fn_t subpel_variance64x64_avx2 =
+    vp9_sub_pixel_variance64x64_avx2;
+INSTANTIATE_TEST_CASE_P(
+    DISABLED_AVX2, VP9SubpelVarianceTest,
+    ::testing::Values(make_tuple(5, 5, subpel_variance32x32_avx2),
+                      make_tuple(6, 6, subpel_variance64x64_avx2)));
+
+const vp9_subp_avg_variance_fn_t subpel_avg_variance32x32_avx2 =
+    vp9_sub_pixel_avg_variance32x32_avx2;
+const vp9_subp_avg_variance_fn_t subpel_avg_variance64x64_avx2 =
+    vp9_sub_pixel_avg_variance64x64_avx2;
+INSTANTIATE_TEST_CASE_P(
+    DISABLED_AVX2, VP9SubpelAvgVarianceTest,
+    ::testing::Values(make_tuple(5, 5, subpel_avg_variance32x32_avx2),
+                      make_tuple(6, 6, subpel_avg_variance64x64_avx2)));
+#endif  // HAVE_AVX2
 #endif  // CONFIG_VP9_ENCODER
 
 }  // namespace vp9
