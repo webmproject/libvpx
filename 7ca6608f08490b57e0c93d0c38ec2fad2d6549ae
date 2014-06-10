@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//mfA\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-06-10T17:18:15Z",
+      "side": 1,
+      "message": "pd-\u003edequant[1] \u003e\u003e (xd-\u003ebps - 5)",
+      "revId": "7ca6608f08490b57e0c93d0c38ec2fad2d6549ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//mfE\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 522,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-06-10T17:18:15Z",
+      "side": 1,
+      "message": "Can we just use pd-\u003edequant[1] \u003e\u003e (xd-\u003ebps - 5) ?",
+      "revId": "7ca6608f08490b57e0c93d0c38ec2fad2d6549ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//mfM\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 592,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-06-10T17:18:15Z",
+      "side": 1,
+      "message": "Can we just use pd-\u003edequant[1] \u003e\u003e (xd-\u003ebps - 5) ?",
+      "revId": "7ca6608f08490b57e0c93d0c38ec2fad2d6549ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//mfI\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 775,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-06-10T17:18:15Z",
+      "side": 1,
+      "message": "p \u003e\u003e\u003d ((xd-\u003ebps-8) * 2) ?",
+      "revId": "7ca6608f08490b57e0c93d0c38ec2fad2d6549ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
