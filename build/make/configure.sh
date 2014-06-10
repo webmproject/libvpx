@@ -1172,8 +1172,8 @@ EOF
                 enabled icc && ! enabled pic && add_cflags -fno-pic
             ;;
             iphonesimulator)
-                add_asflags -f macho32
-                sim_arch="-arch i386"
+                add_asflags -f macho${bits}
+                enabled x86 && sim_arch="-arch i386" || sim_arch="-arch x86_64"
                 add_cflags  ${sim_arch}
                 add_ldflags ${sim_arch}
            ;;
