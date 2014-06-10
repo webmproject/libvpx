@@ -142,6 +142,11 @@ typedef struct VP9Common {
   /* We allocate a MODE_INFO struct for each macroblock, together with
      an extra row on top and column on the left to simplify prediction. */
 
+  int mi_idx;
+  int prev_mi_idx;
+  MODE_INFO *mip_array[2];
+  MODE_INFO **mi_grid_base_array[2];
+
   MODE_INFO *mip; /* Base of allocated array */
   MODE_INFO *mi;  /* Corresponds to upper left visible macroblock */
   MODE_INFO *prev_mip; /* MODE_INFO array 'mip' from last decoded frame */
