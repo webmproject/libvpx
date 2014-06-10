@@ -18,12 +18,15 @@ extern "C" {
 
 struct VP9Common;
 struct VP9Decoder;
+struct vp9_read_bit_buffer;
 
 void vp9_init_dequantizer(struct VP9Common *cm);
 
 void vp9_decode_frame(struct VP9Decoder *pbi,
                       const uint8_t *data, const uint8_t *data_end,
                       const uint8_t **p_data_end);
+
+BITSTREAM_PROFILE vp9_read_profile(struct vp9_read_bit_buffer *rb);
 
 #ifdef __cplusplus
 }  // extern "C"
