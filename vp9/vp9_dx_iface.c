@@ -39,6 +39,7 @@ struct vpx_codec_alg_priv {
   void                   *decrypt_state;
   vpx_image_t             img;
   int                     invert_tile_order;
+  int                     frame_parallel_decode;  // frame-based threading.
 
   // External frame buffer info to save for VP9 common.
   void *ext_priv;  // Private data associated with the external frame buffers.
@@ -66,6 +67,11 @@ static vpx_codec_err_t decoder_init(vpx_codec_ctx_t *ctx,
     ctx->priv->alg_priv = alg_priv;
     ctx->priv->alg_priv->si.sz = sizeof(ctx->priv->alg_priv->si);
     ctx->priv->init_flags = ctx->init_flags;
+    ctx->priv->alg_priv->frame_parallel_decode =
+        (ctx->init_flags & VPX_CODEC_USE_FRAME_THREADING);
+
+    // Disable frame parallel decoding for now.
+    ctx->priv->alg_priv->frame_parallel_decode = 0;
 
     if (ctx->config.dec) {
       // Update the reference to the config structure to an internal copy.
@@ -231,6 +237,7 @@ static void init_decoder(vpx_codec_alg_priv_t *ctx) {
 
   ctx->pbi->max_threads = ctx->cfg.threads;
   ctx->pbi->inv_tile_order = ctx->invert_tile_order;
+  ctx->pbi->frame_parallel_decode = ctx->frame_parallel_decode;
 
   // If postprocessing was enabled by the application and a
   // configuration has not been provided, default it.
