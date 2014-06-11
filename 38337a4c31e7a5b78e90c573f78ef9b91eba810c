@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//mWM\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 812,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-11T01:33:13Z",
+      "side": 1,
+      "message": "for now could just be an \u0027| armv7s\u0027 at 805",
+      "revId": "38337a4c31e7a5b78e90c573f78ef9b91eba810c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
