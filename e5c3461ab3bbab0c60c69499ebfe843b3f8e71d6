@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//mRE\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-06-11T23:53:35Z",
+      "side": 1,
+      "message": "s/Initially adding/Add/",
+      "revId": "e5c3461ab3bbab0c60c69499ebfe843b3f8e71d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//mRA\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-06-11T23:53:35Z",
+      "side": 1,
+      "message": "I would word this as:\n\nStub flag temporarily set to 0 until frame parallel decoding implementations are finished.",
+      "revId": "e5c3461ab3bbab0c60c69499ebfe843b3f8e71d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//mRI\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-06-11T23:53:35Z",
+      "side": 1,
+      "message": "I\u0027m not familiar with this section of the code: Why does frame_parallel_decode need to exist in VP9Decoder and vpx_codec_alg_priv?",
+      "revId": "e5c3461ab3bbab0c60c69499ebfe843b3f8e71d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//mRM\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-06-11T23:53:35Z",
+      "side": 1,
+      "message": "IIUC you just need this flag to pass a unit test elsewhere, and as long as it\u0027s 0 everything is OK: Why not just omit these lines and let the vp9_zero() call take care of it?",
+      "revId": "e5c3461ab3bbab0c60c69499ebfe843b3f8e71d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
