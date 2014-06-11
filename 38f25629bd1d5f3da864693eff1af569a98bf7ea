@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//mWk\u003d",
+        "filename": "iosbuild.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-06-11T01:24:00Z",
+      "side": 1,
+      "message": "Note: This doesn\u0027t exist outside of my working copy...\n\nIt\u0027s just a convenience target; lipo and code dislike things without it:\n\n- lipo won\u0027t let you insert an armv7 lib as armv7s (well... had to try)\n- xcodebuild gets angry if there\u0027s no armv7s lib in your framework (at least with ios 7 as the target)",
+      "revId": "38f25629bd1d5f3da864693eff1af569a98bf7ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
