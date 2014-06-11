@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//mW0\u003d",
+        "filename": "iosbuild.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-11T01:31:21Z",
+      "side": 1,
+      "message": "does it really need to be a in tree build?",
+      "revId": "8ed7b2c84ca24262e924618e77fc404208901fde",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//mWs\u003d",
+        "filename": "iosbuild.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-11T01:31:21Z",
+      "side": 1,
+      "message": "note a newline here isn\u0027t necessary given the usage, but this is ok for readability",
+      "revId": "8ed7b2c84ca24262e924618e77fc404208901fde",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//mWU\u003d",
+        "filename": "iosbuild.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-11T01:31:21Z",
+      "side": 1,
+      "message": "maybe a cleanup() + trap?",
+      "revId": "8ed7b2c84ca24262e924618e77fc404208901fde",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
