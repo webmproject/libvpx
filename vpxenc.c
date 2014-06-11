@@ -362,6 +362,13 @@ static const int vp8_arg_ctrl_map[] = {
 #endif
 
 #if CONFIG_VP9_ENCODER
+static const struct arg_enum_list aq_mode_enum[] = {
+  {"off", 0},
+  {"variance", 1},
+  {"complexity", 2},
+  {"cyclic", 3},
+  {NULL, 0}
+};
 static const arg_def_t tile_cols =
     ARG_DEF(NULL, "tile-columns", 1, "Number of tile columns to use, log2");
 static const arg_def_t tile_rows =
@@ -369,10 +376,8 @@ static const arg_def_t tile_rows =
 static const arg_def_t lossless = ARG_DEF(NULL, "lossless", 1, "Lossless mode");
 static const arg_def_t frame_parallel_decoding = ARG_DEF(
     NULL, "frame-parallel", 1, "Enable frame parallel decodability features");
-static const arg_def_t aq_mode = ARG_DEF(
-    NULL, "aq-mode", 1,
-    "Adaptive quantization mode (0: off (default), 1: variance 2: complexity, "
-    "3: cyclic refresh)");
+static const arg_def_t aq_mode = ARG_DEF_ENUM(
+    NULL, "aq-mode", 1, "Adaptive quantization mode", aq_mode_enum);
 static const arg_def_t frame_periodic_boost = ARG_DEF(
     NULL, "frame_boost", 1,
     "Enable frame periodic boost (0: off (default), 1: on)");
@@ -385,12 +390,12 @@ static const struct arg_enum_list bitdepth_enum[] = {
   {NULL, 0}
 };
 
-static const arg_def_t bitdeptharg   = ARG_DEF_ENUM(NULL, "bit-depth", 1,
+static const arg_def_t bitdeptharg   = ARG_DEF_ENUM("b", "bit-depth", 1,
                                                     "Bit depth for codec "
                                                     "(8 for version <=1, "
                                                     "10 or 12 for version 2)",
                                                     bitdepth_enum);
-static const arg_def_t inbitdeptharg = ARG_DEF("b", "input-bit-depth", 1,
+static const arg_def_t inbitdeptharg = ARG_DEF(NULL, "input-bit-depth", 1,
                                                "Bit depth of input");
 #endif
 
@@ -1161,7 +1166,7 @@ static void validate_stream_config(const struct stream_state *stream,
           experimental_bitstream.long_name);
   }
 
-  // Check that the stream bit depth is greater than the input bit depth
+  // Check that the codec bit depth is greater than the input bit depth
   if (stream->config.cfg.g_in_bit_depth >
       stream->config.cfg.g_bit_depth * 2 + 8) {
     fatal("Stream %d: input bit depth (%d) less than stream bit depth (%d)",
