@@ -994,21 +994,13 @@ static void inter_super_block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
     return;
   }
 
-  if (cpi->sf.tx_size_search_method == USE_LARGESTINTRA_MODELINTER) {
-    for (tx_size = TX_4X4; tx_size <= max_tx_size; ++tx_size)
-      model_rd_for_sb_y_tx(cpi, bs, tx_size, x, xd,
-                           &r[tx_size][0], &d[tx_size], &s[tx_size]);
-    choose_txfm_size_from_modelrd(cpi, x, r, rate, d, distortion, s,
-                                  skip, sse, ref_best_rd, bs);
-  } else {
-    for (tx_size = TX_4X4; tx_size <= max_tx_size; ++tx_size)
-      txfm_rd_in_plane(x, &r[tx_size][0], &d[tx_size],
-                       &s[tx_size], &sse[tx_size],
-                       ref_best_rd, 0, bs, tx_size,
-                       cpi->sf.use_fast_coef_costing);
-    choose_txfm_size_from_rd(cpi, x, r, rate, d, distortion, s,
-                             skip, txfm_cache, bs);
-  }
+  for (tx_size = TX_4X4; tx_size <= max_tx_size; ++tx_size)
+    txfm_rd_in_plane(x, &r[tx_size][0], &d[tx_size], &s[tx_size],
+                     &sse[tx_size], ref_best_rd, 0, bs, tx_size,
+                     cpi->sf.use_fast_coef_costing);
+  choose_txfm_size_from_rd(cpi, x, r, rate, d, distortion, s,
+                           skip, txfm_cache, bs);
+
   if (psse)
     *psse = sse[mbmi->tx_size];
 }
