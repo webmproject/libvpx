@@ -280,11 +280,20 @@ static vpx_codec_err_t validate_img(vpx_codec_alg_priv_t *ctx,
   switch (img->fmt) {
     case VPX_IMG_FMT_YV12:
     case VPX_IMG_FMT_I420:
+    case VPX_IMG_FMT_I42016:
+      break;
     case VPX_IMG_FMT_I422:
     case VPX_IMG_FMT_I444:
-    case VPX_IMG_FMT_I42016:
+      if (ctx->cfg.g_profile != (unsigned int)PROFILE_1)
+        ERROR("Invalid image format. I422, I444 images are "
+              "not supported in profile.");
+      break;
     case VPX_IMG_FMT_I42216:
     case VPX_IMG_FMT_I44416:
+      if (ctx->cfg.g_profile != (unsigned int)PROFILE_1 &&
+          ctx->cfg.g_profile != (unsigned int)PROFILE_3)
+        ERROR("Invalid image format. 16-bit I422, I444 images are "
+              "not supported in profile.");
       break;
     default:
       ERROR("Invalid image format. Only YV12, I420, I422, I444 images are "
