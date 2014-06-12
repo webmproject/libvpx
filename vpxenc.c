@@ -1169,9 +1169,9 @@ static void validate_stream_config(const struct stream_state *stream,
   // Check that the codec bit depth is greater than the input bit depth
   if (stream->config.cfg.g_in_bit_depth >
       stream->config.cfg.g_bit_depth * 2 + 8) {
-    fatal("Stream %d: input bit depth (%d) less than stream bit depth (%d)",
-          stream->config.cfg.g_in_bit_depth,
-          stream->config.cfg.g_bit_depth * 2 + 8);
+    fatal("Stream %d: codec bit depth (%d) less than input bit depth (%d)",
+          stream->index, stream->config.cfg.g_bit_depth * 2 + 8,
+          stream->config.cfg.g_in_bit_depth);
   }
 
   for (streami = stream; streami; streami = streami->next) {
@@ -1633,15 +1633,55 @@ static float usec_to_fps(uint64_t usec, unsigned int frames) {
 }
 
 #if CONFIG_VP9_HIGH
-static void img_convert_8_to_16(vpx_image_t  *dst, vpx_image_t *src,
-                                int input_shift) {
+static void high_img_upshift(vpx_image_t *dst, vpx_image_t *src,
+                             int input_shift) {
   // Note the offset is 1 less than half
   const int offset = input_shift > 0 ? (1 << (input_shift - 1)) - 1 : 0;
   int plane;
-  if (dst->fmt != src->fmt + VPX_IMG_FMT_HIGH ||
-      dst->w != src->w || dst->h != src->h ||
+  if (dst->w != src->w || dst->h != src->h ||
       dst->x_chroma_shift != src->x_chroma_shift ||
-      dst->y_chroma_shift != src->y_chroma_shift) {
+      dst->y_chroma_shift != src->y_chroma_shift ||
+      dst->fmt != src->fmt || input_shift < 0) {
+    fatal("Unsupported image conversion");
+  }
+  switch (src->fmt) {
+    case VPX_IMG_FMT_I42016:
+    case VPX_IMG_FMT_I42216:
+    case VPX_IMG_FMT_I44416:
+      break;
+    default:
+      fatal("Unsupported image conversion");
+      break;
+  }
+  for (plane = 0; plane < 3; plane++) {
+    int w = src->w;
+    int h = src->h;
+    int x, y;
+    if (plane) {
+      w >>= src->x_chroma_shift;
+      h >>= src->y_chroma_shift;
+    }
+    for (y = 0; y < h; y++) {
+      uint16_t *p_src = (uint16_t *)(src->planes[plane] +
+                                     y * src->stride[plane]);
+      uint16_t *p_dst = (uint16_t *)(dst->planes[plane] +
+                                     y * dst->stride[plane]);
+      for (x = 0; x < w; x++)
+        *p_dst++ = (*p_src++ << input_shift) + offset;
+    }
+  }
+}
+
+static void low_img_upshift(vpx_image_t *dst, vpx_image_t *src,
+                            int input_shift) {
+  // Note the offset is 1 less than half
+  const int offset = input_shift > 0 ? (1 << (input_shift - 1)) - 1 : 0;
+  int plane;
+  if (dst->w != src->w || dst->h != src->h ||
+      dst->x_chroma_shift != src->x_chroma_shift ||
+      dst->y_chroma_shift != src->y_chroma_shift ||
+      dst->fmt + VPX_IMG_FMT_HIGH != src->fmt ||
+      input_shift < 0) {
     fatal("Unsupported image conversion");
   }
   switch (src->fmt) {
@@ -1662,13 +1702,22 @@ static void img_convert_8_to_16(vpx_image_t  *dst, vpx_image_t *src,
       h >>= src->y_chroma_shift;
     }
     for (y = 0; y < h; y++) {
-      unsigned char *p_src = src->planes[plane] + y * src->stride[plane];
+      uint8_t *p_src = src->planes[plane] + y * src->stride[plane];
       uint16_t *p_dst = (uint16_t *)(dst->planes[plane] +
                                      y * dst->stride[plane]);
       for (x = 0; x < w; x++) {
         *p_dst++ = (*p_src++ << input_shift) + offset;
       }
     }
+  }
+}
+
+static void img_upshift(vpx_image_t *dst, vpx_image_t *src,
+                        int input_shift) {
+  if (src->fmt & VPX_IMG_FMT_HIGH) {
+    high_img_upshift(dst, src, input_shift);
+  } else {
+    low_img_upshift(dst, src, input_shift);
   }
 }
 
@@ -1812,8 +1861,8 @@ int main(int argc, const char **argv_) {
   int pass;
   vpx_image_t raw;
 #if CONFIG_VP9_HIGH
-  vpx_image_t raw_high;
-  int allocated_raw_high = 0;
+  vpx_image_t raw_shift;
+  int allocated_raw_shift = 0;
   int use_16bit_internal = 0;
   int input_shift = 0;
 #endif
@@ -1987,14 +2036,13 @@ int main(int argc, const char **argv_) {
       // highbitdepth are the same.
       FOREACH_STREAM({
         if (stream->config.use_16bit_internal) {
-          if (stream->config.cfg.g_profile <= 1) {
-            input_shift = 0;
-          } else {
-            input_shift = (stream->config.cfg.g_bit_depth * 2 + 8) -
-                          stream->config.cfg.g_in_bit_depth;
-          }
           use_16bit_internal = 1;
-          break;
+        }
+        if (stream->config.cfg.g_profile == 0) {
+          input_shift = 0;
+        } else {
+          input_shift = (stream->config.cfg.g_bit_depth * 2 + 8) -
+                        stream->config.cfg.g_in_bit_depth;
         }
       });
     }
@@ -2038,34 +2086,37 @@ int main(int argc, const char **argv_) {
         frame_avail = 0;
 
       if (frames_in > global.skip_frames) {
-        vpx_usec_timer_start(&timer);
 #if CONFIG_VP9_HIGH
-        if (use_16bit_internal) {
-          vpx_image_t *high_frame;
-          // TODO(peter.derivaz): Currently we only shift up 8 bit images
-          // Add support for upshifting and downshifting 10/12bit images
-          if (raw.fmt & VPX_IMG_FMT_HIGH) {
-            high_frame = &raw;
-          } else {
-            if (!allocated_raw_high) {
-              vpx_img_alloc(&raw_high, raw.fmt | VPX_IMG_FMT_HIGH,
-                            input.width, input.height, 32);
-              allocated_raw_high = 1;
-            }
-            img_convert_8_to_16(&raw_high, &raw, input_shift);
-            high_frame = &raw_high;
+        vpx_image_t *frame_to_encode;
+        if (input_shift || (use_16bit_internal && input.bit_depth == 8)) {
+          assert(use_16bit_internal);
+          // Input bit depth and stream bit depth do not match, so up
+          // shift frame to stream bit depth
+          if (!allocated_raw_shift) {
+            vpx_img_alloc(&raw_shift, raw.fmt | VPX_IMG_FMT_HIGH,
+                          input.width, input.height, 32);
+            allocated_raw_shift = 1;
           }
+          img_upshift(&raw_shift, &raw, input_shift);
+          frame_to_encode = &raw_shift;
+        } else {
+          frame_to_encode = &raw;
+        }
+        vpx_usec_timer_start(&timer);
+        if (use_16bit_internal) {
+          assert(frame_to_encode->fmt & VPX_IMG_FMT_HIGH);
           FOREACH_STREAM({
             if (stream->config.use_16bit_internal)
               encode_frame(stream, &global,
-                           frame_avail ? high_frame : NULL,
+                           frame_avail ? frame_to_encode : NULL,
                            frames_in);
             else
               assert(0);
           });
         } else {
+          assert((frame_to_encode->fmt & VPX_IMG_FMT_HIGH) == 0);
           FOREACH_STREAM(encode_frame(stream, &global,
-                                      frame_avail ? &raw : NULL,
+                                      frame_avail ? frame_to_encode : NULL,
                                       frames_in));
         }
 #else
@@ -2188,8 +2239,8 @@ int main(int argc, const char **argv_) {
 #endif
 
 #if CONFIG_VP9_HIGH
-  if (allocated_raw_high)
-    vpx_img_free(&raw_high);
+  if (allocated_raw_shift)
+    vpx_img_free(&raw_shift);
 #endif
   vpx_img_free(&raw);
   free(argv);
