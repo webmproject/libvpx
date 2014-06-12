@@ -24,6 +24,11 @@ typedef struct {
   DECLARE_ALIGNED(16, int16_t, y_zbin[QINDEX_RANGE][8]);
   DECLARE_ALIGNED(16, int16_t, y_round[QINDEX_RANGE][8]);
 
+  // TODO(jingning): in progress of re-working the quantization. will decide
+  // if we want to deprecate the current use of y_quant.
+  DECLARE_ALIGNED(16, int16_t, y_quant_fp[QINDEX_RANGE][8]);
+  DECLARE_ALIGNED(16, int16_t, uv_quant_fp[QINDEX_RANGE][8]);
+
   DECLARE_ALIGNED(16, int16_t, uv_quant[QINDEX_RANGE][8]);
   DECLARE_ALIGNED(16, int16_t, uv_quant_shift[QINDEX_RANGE][8]);
   DECLARE_ALIGNED(16, int16_t, uv_zbin[QINDEX_RANGE][8]);
@@ -37,6 +42,14 @@ typedef struct {
 #endif
 } QUANTS;
 
+void vp9_quantize_dc(const int16_t *coeff_ptr, int skip_block,
+                     const int16_t *round_ptr, const int16_t quant_ptr,
+                     int16_t *qcoeff_ptr, int16_t *dqcoeff_ptr,
+                     const int16_t dequant_ptr, uint16_t *eob_ptr);
+void vp9_quantize_dc_32x32(const int16_t *coeff_ptr, int skip_block,
+                           const int16_t *round_ptr, const int16_t quant_ptr,
+                           int16_t *qcoeff_ptr, int16_t *dqcoeff_ptr,
+                           const int16_t dequant_ptr, uint16_t *eob_ptr);
 void vp9_regular_quantize_b_4x4(MACROBLOCK *x, int plane, int block,
                                 const int16_t *scan, const int16_t *iscan);
 

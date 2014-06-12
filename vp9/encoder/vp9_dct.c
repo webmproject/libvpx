@@ -43,6 +43,17 @@ static void fdct4(const int16_t *input, int16_t *output) {
   output[3] = fdct_round_shift(temp2);
 }
 
+void vp9_fdct4x4_1_c(const int16_t *input, int16_t *output, int stride) {
+  int r, c;
+  int16_t sum = 0;
+  for (r = 0; r < 4; ++r)
+    for (c = 0; c < 4; ++c)
+      sum += input[r * stride + c];
+
+  output[0] = sum << 3;
+  output[1] = 0;
+}
+
 void vp9_fdct4x4_c(const int16_t *input, int16_t *output, int stride) {
   // The 2D transform is done with two passes which are actually pretty
   // similar. In the first one, we transform the columns and transpose
@@ -240,6 +251,17 @@ static void fdct8(const int16_t *input, int16_t *output) {
   output[7] = fdct_round_shift(t3);
 }
 
+void vp9_fdct8x8_1_c(const int16_t *input, int16_t *output, int stride) {
+  int r, c;
+  int16_t sum = 0;
+  for (r = 0; r < 8; ++r)
+    for (c = 0; c < 8; ++c)
+      sum += input[r * stride + c];
+
+  output[0] = sum * 8;
+  output[1] = 0;
+}
+
 void vp9_fdct8x8_c(const int16_t *input, int16_t *final_output, int stride) {
   int i, j;
   int16_t intermediate[64];
@@ -309,6 +331,17 @@ void vp9_fdct8x8_c(const int16_t *input, int16_t *final_output, int stride) {
     for (j = 0; j < 8; ++j)
       final_output[j + i * 8] /= 2;
   }
+}
+
+void vp9_fdct16x16_1_c(const int16_t *input, int16_t *output, int stride) {
+  int r, c;
+  int16_t sum = 0;
+  for (r = 0; r < 16; ++r)
+    for (c = 0; c < 16; ++c)
+      sum += input[r * stride + c];
+
+  output[0] = sum * 8;
+  output[1] = 0;
 }
 
 void vp9_fdct16x16_c(const int16_t *input, int16_t *output, int stride) {
@@ -1327,6 +1360,17 @@ static void fdct32(const int *input, int *output, int round) {
   output[23] = dct_32_round(step[29] * cospi_23_64 + step[18] * -cospi_9_64);
   output[15] = dct_32_round(step[30] * cospi_15_64 + step[17] * -cospi_17_64);
   output[31] = dct_32_round(step[31] * cospi_31_64 + step[16] * -cospi_1_64);
+}
+
+void vp9_fdct32x32_1_c(const int16_t *input, int16_t *output, int stride) {
+  int r, c;
+  int16_t sum = 0;
+  for (r = 0; r < 32; ++r)
+    for (c = 0; c < 32; ++c)
+      sum += input[r * stride + c];
+
+  output[0] = sum << 2;
+  output[1] = 0;
 }
 
 void vp9_fdct32x32_c(const int16_t *input, int16_t *out, int stride) {

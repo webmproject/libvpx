@@ -156,24 +156,28 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
   unsigned int sse;
   int rate;
   int64_t dist;
-
   struct macroblock_plane *const p = &x->plane[0];
   struct macroblockd_plane *const pd = &xd->plane[0];
-
+  const int quant = pd->dequant[1];
   unsigned int var = cpi->fn_ptr[bsize].vf(p->src.buf, p->src.stride,
                                            pd->dst.buf, pd->dst.stride, &sse);
-
   *var_y = var;
   *sse_y = sse;
+
+  if (sse < pd->dequant[0] * pd->dequant[0] >> 6)
+    x->skip_txfm = 1;
+  else if (var < quant * quant >> 6)
+    x->skip_txfm = 2;
+  else
+    x->skip_txfm = 0;
 
   // TODO(jingning) This is a temporary solution to account for frames with
   // light changes. Need to customize the rate-distortion modeling for non-RD
   // mode decision.
   if ((sse >> 3) > var)
     sse = var;
-
   vp9_model_rd_from_var_lapndz(var + sse, 1 << num_pels_log2_lookup[bsize],
-                               pd->dequant[1] >> 3, &rate, &dist);
+                               quant >> 3, &rate, &dist);
   *out_rate_sum = rate;
   *out_dist_sum = dist << 3;
 }
@@ -199,6 +203,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                     VP9_ALT_FLAG };
   int64_t best_rd = INT64_MAX;
   int64_t this_rd = INT64_MAX;
+  int skip_txfm = 0;
 
   int rate = INT_MAX;
   int64_t dist = INT64_MAX;
@@ -341,6 +346,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           if (cost < best_cost) {
               best_filter = filter;
               best_cost = cost;
+              skip_txfm = x->skip_txfm;
           }
         }
 
@@ -349,6 +355,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         dist = pf_dist[mbmi->interp_filter];
         var_y = pf_var[mbmi->interp_filter];
         sse_y = pf_sse[mbmi->interp_filter];
+        x->skip_txfm = skip_txfm;
       } else {
         mbmi->interp_filter = (filter_ref == SWITCHABLE) ? EIGHTTAP: filter_ref;
         vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
@@ -438,6 +445,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         best_mode = this_mode;
         best_pred_filter = mbmi->interp_filter;
         best_ref_frame = ref_frame;
+        skip_txfm = x->skip_txfm;
       }
 
       if (x->skip)
@@ -450,6 +458,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   mbmi->ref_frame[0] = best_ref_frame;
   mbmi->mv[0].as_int = frame_mv[best_mode][best_ref_frame].as_int;
   xd->mi[0]->bmi[0].as_mv[0].as_int = mbmi->mv[0].as_int;
+  x->skip_txfm = skip_txfm;
 
   // Perform intra prediction search, if the best SAD is above a certain
   // threshold.
@@ -474,6 +483,8 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         mbmi->ref_frame[0] = INTRA_FRAME;
         mbmi->uv_mode = this_mode;
         mbmi->mv[0].as_int = INVALID_MV;
+      } else {
+        x->skip_txfm = skip_txfm;
       }
     }
   }
