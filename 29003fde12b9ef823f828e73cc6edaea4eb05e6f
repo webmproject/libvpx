@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAdn//mIg\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-12T19:50:11Z",
+      "side": 1,
+      "message": "fuzz",
+      "revId": "29003fde12b9ef823f828e73cc6edaea4eb05e6f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//mIc\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-12T19:50:11Z",
+      "side": 1,
+      "message": "you can just say crbug.com/376802",
+      "revId": "29003fde12b9ef823f828e73cc6edaea4eb05e6f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//mI4\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 1
