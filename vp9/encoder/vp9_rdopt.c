@@ -2802,7 +2802,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     *rate2 += vp9_get_switchable_rate(cpi);
 
   if (!is_comp_pred) {
-    if (!x->in_active_map) {
+    if (!x->in_active_map ||
+        vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
       if (psse)
         *psse = 0;
       *distortion = 0;
@@ -3119,9 +3120,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   // If the segment skip feature is enabled....
   // then do nothing if the current mode is not allowed..
   if (vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP)) {
-    const int inter_non_zero_mode_mask = 0x1F7F7;
-    mode_skip_mask |= inter_non_zero_mode_mask;
-    mode_skip_mask &= ~(1 << THR_ZEROMV);
+    mode_skip_mask = ~(1 << THR_ZEROMV);
     inter_mode_mask = (1 << ZEROMV);
   }
 
