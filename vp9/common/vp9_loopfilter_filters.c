@@ -359,15 +359,15 @@ static INLINE int8_t high_filter_mask(uint8_t limit, uint8_t blimit,
                                       uint16_t q0, uint16_t q1,
                                       uint16_t q2, uint16_t q3, int bps) {
   int8_t mask = 0;
-  limit <<= bps - 8;
-  blimit <<= bps - 8;
-  mask |= (abs(p3 - p2) > limit) * -1;
-  mask |= (abs(p2 - p1) > limit) * -1;
-  mask |= (abs(p1 - p0) > limit) * -1;
-  mask |= (abs(q1 - q0) > limit) * -1;
-  mask |= (abs(q2 - q1) > limit) * -1;
-  mask |= (abs(q3 - q2) > limit) * -1;
-  mask |= (abs(p0 - q0) * 2 + abs(p1 - q1) / 2  > blimit) * -1;
+  int16_t limit16 = (uint16_t)limit << (bps - 8);
+  int16_t blimit16 = (uint16_t)blimit << (bps - 8);
+  mask |= (abs(p3 - p2) > limit16) * -1;
+  mask |= (abs(p2 - p1) > limit16) * -1;
+  mask |= (abs(p1 - p0) > limit16) * -1;
+  mask |= (abs(q1 - q0) > limit16) * -1;
+  mask |= (abs(q2 - q1) > limit16) * -1;
+  mask |= (abs(q3 - q2) > limit16) * -1;
+  mask |= (abs(p0 - q0) * 2 + abs(p1 - q1) / 2  > blimit16) * -1;
   return ~mask;
 }
 
@@ -377,13 +377,13 @@ static INLINE int8_t high_flat_mask4(uint8_t thresh,
                                      uint16_t q0, uint16_t q1,
                                      uint16_t q2, uint16_t q3, int bps) {
   int8_t mask = 0;
-  thresh <<= bps - 8;
-  mask |= (abs(p1 - p0) > thresh) * -1;
-  mask |= (abs(q1 - q0) > thresh) * -1;
-  mask |= (abs(p2 - p0) > thresh) * -1;
-  mask |= (abs(q2 - q0) > thresh) * -1;
-  mask |= (abs(p3 - p0) > thresh) * -1;
-  mask |= (abs(q3 - q0) > thresh) * -1;
+  int16_t thresh16 = (uint16_t)thresh << (bps - 8);
+  mask |= (abs(p1 - p0) > thresh16) * -1;
+  mask |= (abs(q1 - q0) > thresh16) * -1;
+  mask |= (abs(p2 - p0) > thresh16) * -1;
+  mask |= (abs(q2 - q0) > thresh16) * -1;
+  mask |= (abs(p3 - p0) > thresh16) * -1;
+  mask |= (abs(q3 - q0) > thresh16) * -1;
   return ~mask;
 }
 
@@ -394,9 +394,9 @@ static INLINE int8_t high_flat_mask5(uint8_t thresh,
                                      uint16_t q1, uint16_t q2,
                                      uint16_t q3, uint16_t q4, int bps) {
   int8_t mask = ~high_flat_mask4(thresh, p3, p2, p1, p0, q0, q1, q2, q3, bps);
-  thresh <<= bps - 8;
-  mask |= (abs(p4 - p0) > thresh) * -1;
-  mask |= (abs(q4 - q0) > thresh) * -1;
+  int16_t thresh16 = (uint16_t)thresh << (bps - 8);
+  mask |= (abs(p4 - p0) > thresh16) * -1;
+  mask |= (abs(q4 - q0) > thresh16) * -1;
   return ~mask;
 }
 
@@ -405,9 +405,9 @@ static INLINE int8_t high_flat_mask5(uint8_t thresh,
 static INLINE int16_t high_hev_mask(uint8_t thresh, uint16_t p1, uint16_t p0,
                                     uint16_t q0, uint16_t q1, int bps) {
   int16_t hev = 0;
-  thresh <<= bps - 8;
-  hev  |= (abs(p1 - p0) > thresh) * -1;
-  hev  |= (abs(q1 - q0) > thresh) * -1;
+  int16_t thresh16 = (uint16_t)thresh << (bps - 8);
+  hev  |= (abs(p1 - p0) > thresh16) * -1;
+  hev  |= (abs(q1 - q0) > thresh16) * -1;
   return hev;
 }
 
