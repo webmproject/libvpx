@@ -1850,9 +1850,9 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
           vp9_set_mv_search_range(x, &bsi->ref_mv[0]->as_mv);
 
-          bestsme = full_pixel_search(cpi, x, bsize, &mvp_full, step_param,
-                                      sadpb, &bsi->ref_mv[0]->as_mv, new_mv,
-                                      INT_MAX, 1);
+          bestsme = vp9_full_pixel_search(cpi, x, bsize, &mvp_full, step_param,
+                                          sadpb, &bsi->ref_mv[0]->as_mv, new_mv,
+                                          INT_MAX, 1);
 
           // Should we do a full search (best quality only)
           if (is_best_mode(cpi->oxcf.mode)) {
@@ -2385,8 +2385,8 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   mvp_full.col >>= 3;
   mvp_full.row >>= 3;
 
-  bestsme = full_pixel_search(cpi, x, bsize, &mvp_full, step_param, sadpb,
-                              &ref_mv, &tmp_mv->as_mv, INT_MAX, 1);
+  bestsme = vp9_full_pixel_search(cpi, x, bsize, &mvp_full, step_param, sadpb,
+                                  &ref_mv, &tmp_mv->as_mv, INT_MAX, 1);
 
   x->mv_col_min = tmp_col_min;
   x->mv_col_max = tmp_col_max;
