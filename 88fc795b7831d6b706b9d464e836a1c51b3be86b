@@ -16,6 +16,24 @@
       "revId": "88fc795b7831d6b706b9d464e836a1c51b3be86b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//mQE\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 727,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-06-12T00:49:23Z",
+      "side": 1,
+      "message": "My understanding of the bitstream code is that the filter is written/read for all inter modes even ZEROMV and 0,0-NEARESTMV, even when segskip is set.",
+      "parentUuid": "AAAAdn//nC4\u003d",
+      "revId": "88fc795b7831d6b706b9d464e836a1c51b3be86b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
