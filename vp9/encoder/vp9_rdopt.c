@@ -311,8 +311,8 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
   x->errorperbit = rd->RDMULT / RD_MULT_EPB_RATIO;
   x->errorperbit += (x->errorperbit == 0);
 
-  x->select_txfm_size = (cpi->sf.tx_size_search_method == USE_LARGESTALL &&
-                         cm->frame_type != KEY_FRAME) ? 0 : 1;
+  x->select_tx_size = (cpi->sf.tx_size_search_method == USE_LARGESTALL &&
+                       cm->frame_type != KEY_FRAME) ? 0 : 1;
 
   set_block_thresholds(cm, rd);
 
@@ -796,11 +796,11 @@ static void txfm_rd_in_plane(MACROBLOCK *x,
   }
 }
 
-static void choose_largest_txfm_size(VP9_COMP *cpi, MACROBLOCK *x,
-                                     int *rate, int64_t *distortion,
-                                     int *skip, int64_t *sse,
-                                     int64_t ref_best_rd,
-                                     BLOCK_SIZE bs) {
+static void choose_largest_tx_size(VP9_COMP *cpi, MACROBLOCK *x,
+                                   int *rate, int64_t *distortion,
+                                   int *skip, int64_t *sse,
+                                   int64_t ref_best_rd,
+                                   BLOCK_SIZE bs) {
   const TX_SIZE max_tx_size = max_txsize_lookup[bs];
   VP9_COMMON *const cm = &cpi->common;
   const TX_SIZE largest_tx_size = tx_mode_to_biggest_tx_size[cm->tx_mode];
@@ -815,12 +815,12 @@ static void choose_largest_txfm_size(VP9_COMP *cpi, MACROBLOCK *x,
   cpi->tx_stepdown_count[0]++;
 }
 
-static void choose_txfm_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
-                                     int (*r)[2], int *rate,
-                                     int64_t *d, int64_t *distortion,
-                                     int *s, int *skip,
-                                     int64_t tx_cache[TX_MODES],
-                                     BLOCK_SIZE bs) {
+static void choose_tx_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
+                                   int (*r)[2], int *rate,
+                                   int64_t *d, int64_t *distortion,
+                                   int *s, int *skip,
+                                   int64_t tx_cache[TX_MODES],
+                                   BLOCK_SIZE bs) {
   const TX_SIZE max_tx_size = max_txsize_lookup[bs];
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -898,12 +898,12 @@ static int64_t scaled_rd_cost(int rdmult, int rddiv,
   return (int64_t) (RDCOST(rdmult, rddiv, rate, dist) * scale);
 }
 
-static void choose_txfm_size_from_modelrd(VP9_COMP *cpi, MACROBLOCK *x,
-                                          int (*r)[2], int *rate,
-                                          int64_t *d, int64_t *distortion,
-                                          int *s, int *skip, int64_t *sse,
-                                          int64_t ref_best_rd,
-                                          BLOCK_SIZE bs) {
+static void choose_tx_size_from_modelrd(VP9_COMP *cpi, MACROBLOCK *x,
+                                        int (*r)[2], int *rate,
+                                        int64_t *d, int64_t *distortion,
+                                        int *s, int *skip, int64_t *sse,
+                                        int64_t ref_best_rd,
+                                        BLOCK_SIZE bs) {
   const TX_SIZE max_tx_size = max_txsize_lookup[bs];
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -987,8 +987,8 @@ static void inter_super_block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
 
   if (cpi->sf.tx_size_search_method == USE_LARGESTALL || xd->lossless) {
     vpx_memset(txfm_cache, 0, TX_MODES * sizeof(int64_t));
-    choose_largest_txfm_size(cpi, x, rate, distortion, skip, sse,
-                             ref_best_rd, bs);
+    choose_largest_tx_size(cpi, x, rate, distortion, skip, sse, ref_best_rd,
+                           bs);
     if (psse)
       *psse = sse[mbmi->tx_size];
     return;
@@ -998,8 +998,8 @@ static void inter_super_block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
     txfm_rd_in_plane(x, &r[tx_size][0], &d[tx_size], &s[tx_size],
                      &sse[tx_size], ref_best_rd, 0, bs, tx_size,
                      cpi->sf.use_fast_coef_costing);
-  choose_txfm_size_from_rd(cpi, x, r, rate, d, distortion, s,
-                           skip, txfm_cache, bs);
+  choose_tx_size_from_rd(cpi, x, r, rate, d, distortion, s,
+                         skip, txfm_cache, bs);
 
   if (psse)
     *psse = sse[mbmi->tx_size];
@@ -1017,8 +1017,8 @@ static void intra_super_block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
   assert(bs == mbmi->sb_type);
   if (cpi->sf.tx_size_search_method != USE_FULL_RD || xd->lossless) {
     vpx_memset(txfm_cache, 0, TX_MODES * sizeof(int64_t));
-    choose_largest_txfm_size(cpi, x, rate, distortion, skip, sse,
-                             ref_best_rd, bs);
+    choose_largest_tx_size(cpi, x, rate, distortion, skip, sse, ref_best_rd,
+                           bs);
   } else {
     int r[TX_SIZES][2], s[TX_SIZES];
     int64_t d[TX_SIZES];
@@ -1028,8 +1028,8 @@ static void intra_super_block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
                        &s[tx_size], &sse[tx_size],
                        ref_best_rd, 0, bs, tx_size,
                        cpi->sf.use_fast_coef_costing);
-    choose_txfm_size_from_rd(cpi, x, r, rate, d, distortion, s,
-                             skip, txfm_cache, bs);
+    choose_tx_size_from_rd(cpi, x, r, rate, d, distortion, s, skip, txfm_cache,
+                           bs);
   }
   if (psse)
     *psse = sse[mbmi->tx_size];
@@ -1330,7 +1330,7 @@ static void super_block_uvrd(const VP9_COMP *cpi, MACROBLOCK *x,
                              int64_t ref_best_rd) {
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
-  TX_SIZE uv_txfm_size = get_uv_tx_size(mbmi);
+  const TX_SIZE uv_tx_size = get_uv_tx_size(mbmi);
   int plane;
   int pnrate = 0, pnskip = 1;
   int64_t pndist = 0, pnsse = 0;
@@ -1351,7 +1351,7 @@ static void super_block_uvrd(const VP9_COMP *cpi, MACROBLOCK *x,
 
   for (plane = 1; plane < MAX_MB_PLANE; ++plane) {
     txfm_rd_in_plane(x, &pnrate, &pndist, &pnskip, &pnsse,
-                     ref_best_rd, plane, bsize, uv_txfm_size,
+                     ref_best_rd, plane, bsize, uv_tx_size,
                      cpi->sf.use_fast_coef_costing);
     if (pnrate == INT_MAX)
       goto term;
@@ -1403,7 +1403,7 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
       *rate_tokenonly = this_rate_tokenonly;
       *distortion     = this_distortion;
       *skippable      = s;
-      if (!x->select_txfm_size)
+      if (!x->select_tx_size)
         swap_block_ptr(x, ctx, 2, 0, 1, MAX_MB_PLANE);
     }
   }
@@ -3441,7 +3441,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         best_rd = this_rd;
         best_mbmode = *mbmi;
         best_skip2 = this_skip2;
-        if (!x->select_txfm_size)
+        if (!x->select_tx_size)
           swap_block_ptr(x, ctx, 1, 0, 0, max_plane);
         vpx_memcpy(ctx->zcoeff_blk, x->zcoeff_blk[mbmi->tx_size],
                    sizeof(uint8_t) * ctx->num_4x4_blk);
@@ -4071,7 +4071,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
                    RDCOST(x->rdmult, x->rddiv, rate_uv, distortion_uv);
         best_mbmode = *mbmi;
         best_skip2 = this_skip2;
-        if (!x->select_txfm_size)
+        if (!x->select_tx_size)
           swap_block_ptr(x, ctx, 1, 0, 0, max_plane);
         vpx_memcpy(ctx->zcoeff_blk, x->zcoeff_blk[TX_4X4],
                    sizeof(uint8_t) * ctx->num_4x4_blk);
