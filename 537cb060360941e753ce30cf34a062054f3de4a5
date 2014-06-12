@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//mPg\u003d",
+        "filename": "vp9/decoder/vp9_decoder.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-06-12T03:12:36Z",
+      "side": 1,
+      "message": "Maybe, remove the comment? I doesn\u0027t add any valuable information :)",
+      "revId": "537cb060360941e753ce30cf34a062054f3de4a5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//mPc\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-06-12T03:12:36Z",
+      "side": 1,
+      "message": "The same about the comment.",
+      "revId": "537cb060360941e753ce30cf34a062054f3de4a5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
