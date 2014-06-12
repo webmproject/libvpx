@@ -40,13 +40,13 @@ static void img_buf_free(void *memblk) {
   }
 }
 
-static vpx_image_t *img_alloc_helper(vpx_image_t  *img,
-                                     vpx_img_fmt_t fmt,
-                                     unsigned int  d_w,
-                                     unsigned int  d_h,
-                                     unsigned int  buf_align,
-                                     unsigned int  stride_align,
-                                     unsigned char      *img_data) {
+static vpx_image_t *img_alloc_helper(vpx_image_t   *img,
+                                     vpx_img_fmt_t  fmt,
+                                     unsigned int   d_w,
+                                     unsigned int   d_h,
+                                     unsigned int   buf_align,
+                                     unsigned int   stride_align,
+                                     unsigned char *img_data) {
 
   unsigned int  h, w, s, xcs, ycs, bps;
   int           align;
@@ -94,6 +94,21 @@ static vpx_image_t *img_alloc_helper(vpx_image_t  *img,
     case VPX_IMG_FMT_VPXYV12:
       bps = 12;
       break;
+    case VPX_IMG_FMT_I422:
+      bps = 16;
+      break;
+    case VPX_IMG_FMT_I444:
+      bps = 24;
+      break;
+    case VPX_IMG_FMT_I42016:
+      bps = 24;
+      break;
+    case VPX_IMG_FMT_I42216:
+      bps = 32;
+      break;
+    case VPX_IMG_FMT_I44416:
+      bps = 48;
+      break;
     default:
       bps = 16;
       break;
@@ -105,6 +120,9 @@ static vpx_image_t *img_alloc_helper(vpx_image_t  *img,
     case VPX_IMG_FMT_YV12:
     case VPX_IMG_FMT_VPXI420:
     case VPX_IMG_FMT_VPXYV12:
+    case VPX_IMG_FMT_I422:
+    case VPX_IMG_FMT_I42016:
+    case VPX_IMG_FMT_I42216:
       xcs = 1;
       break;
     default:
@@ -156,6 +174,7 @@ static vpx_image_t *img_alloc_helper(vpx_image_t  *img,
     goto fail;
 
   img->fmt = fmt;
+  img->bit_depth = (fmt & VPX_IMG_FMT_HIGH) ? 16 : 8;
   img->w = w;
   img->h = h;
   img->x_chroma_shift = xcs;
