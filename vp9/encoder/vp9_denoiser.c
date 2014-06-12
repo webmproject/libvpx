@@ -55,19 +55,46 @@ int update_running_avg(uint8_t *mc_avg, int mc_avg_stride, uint8_t *avg,
 void vp9_denoiser_denoise(VP9_DENOISER *denoiser,
                           MACROBLOCK *mb, MODE_INFO **grid,
                           int mi_row, int mi_col, BLOCK_SIZE bs) {
-  update_running_avg(denoiser->mc_running_avg_y.buf,
-                     denoiser->mc_running_avg_y.stride,
-                     denoiser->running_avg_y.buf,
-                     denoiser->running_avg_y.stride,
+  update_running_avg(denoiser->mc_running_avg_y.y_buffer,
+                     denoiser->mc_running_avg_y.y_stride,
+                     denoiser->running_avg_y[INTRA_FRAME].y_buffer,
+                     denoiser->running_avg_y[INTRA_FRAME].y_stride,
                      mb->plane[0].src.buf, mb->plane[0].src.stride, bs);
   return;
 }
 
+void copy_frame(YV12_BUFFER_CONFIG dest, YV12_BUFFER_CONFIG src) {
+  memcpy(dest.buffer_alloc, src.buffer_alloc, src.buffer_alloc_sz);
+}
+
 void vp9_denoiser_update_frame_info(VP9_DENOISER *denoiser,
+                                    YV12_BUFFER_CONFIG src,
                                     FRAME_TYPE frame_type,
                                     int refresh_alt_ref_frame,
                                     int refresh_golden_frame,
                                     int refresh_last_frame) {
+  int i;
+  if (frame_type == KEY_FRAME) {
+    copy_frame(denoiser->running_avg_y[LAST_FRAME], src);
+    for (i = 2; i < MAX_REF_FRAMES - 1; i++) {
+      copy_frame(denoiser->running_avg_y[i],
+                 denoiser->running_avg_y[LAST_FRAME]);
+    }
+  } else { /* For non key frames */
+    if (refresh_alt_ref_frame) {
+      copy_frame(denoiser->running_avg_y[ALTREF_FRAME],
+                 denoiser->running_avg_y[INTRA_FRAME]);
+    }
+    if (refresh_golden_frame) {
+      copy_frame(denoiser->running_avg_y[GOLDEN_FRAME],
+                 denoiser->running_avg_y[INTRA_FRAME]);
+    }
+    if (refresh_last_frame) {
+      copy_frame(denoiser->running_avg_y[LAST_FRAME],
+                 denoiser->running_avg_y[INTRA_FRAME]);
+    }
+  }
+
   return;
 }
 
@@ -76,23 +103,22 @@ void vp9_denoiser_update_frame_stats() {
 }
 
 int vp9_denoiser_alloc(VP9_DENOISER *denoiser, int width, int height,
-                       int border) {
+                       int ssx, int ssy, int border) {
+  int i, fail;
   assert(denoiser);
 
-  denoiser->running_avg_y.stride = width + 2 * border;
-
-  denoiser->running_avg_y.buf = calloc(
-      ((2 * border) + width) * ((2 * border) + height), sizeof(uint8_t));
-  if (denoiser->running_avg_y.buf == NULL) {
-    vp9_denoiser_free(denoiser);
-    return 1;
+  for (i = 0; i < MAX_REF_FRAMES; ++i) {
+    fail = vp9_alloc_frame_buffer(&denoiser->running_avg_y[i], width, height,
+                                ssx, ssy, border);
+    if (fail) {
+      vp9_denoiser_free(denoiser);
+      return 1;
+    }
   }
 
-  denoiser->mc_running_avg_y.stride = width + 2 * border;
-
-  denoiser->mc_running_avg_y.buf = calloc(
-      ((2 * border) + width) * ((2 * border) + height), sizeof(uint8_t));
-  if (denoiser->mc_running_avg_y.buf == NULL) {
+  fail = vp9_alloc_frame_buffer(&denoiser->mc_running_avg_y, width, height,
+                              ssx, ssy, border);
+  if (fail) {
     vp9_denoiser_free(denoiser);
     return 1;
   }
@@ -101,11 +127,14 @@ int vp9_denoiser_alloc(VP9_DENOISER *denoiser, int width, int height,
 }
 
 void vp9_denoiser_free(VP9_DENOISER *denoiser) {
-  if (denoiser->running_avg_y.buf != NULL) {
-    free(denoiser->running_avg_y.buf);
+  int i;
+  for (i = 0; i < MAX_REF_FRAMES; ++i) {
+    if (&denoiser->running_avg_y[i] != NULL) {
+      vp9_free_frame_buffer(&denoiser->running_avg_y[i]);
+    }
   }
-  if (denoiser->mc_running_avg_y.buf != NULL) {
-    free(denoiser->mc_running_avg_y.buf);
+  if (&denoiser->mc_running_avg_y != NULL) {
+    vp9_free_frame_buffer(&denoiser->mc_running_avg_y);
   }
   return;
 }

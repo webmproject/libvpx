@@ -683,6 +683,12 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
 
 #if CONFIG_DENOISING
   vp9_denoiser_alloc(&(cpi->denoiser), cm->width, cm->height,
+                     // TODO(tkopp) An unrelated bug causes
+                     // cm->subsampling_{x,y} to be uninitialized at this point
+                     // in execution. For now we assume YUV-420, which is x/y
+                     // subsampling of 1.
+                     1, 1,
+                     // cm->subsampling_x, cm->subsampling_y,
                      VP9_ENC_BORDER_IN_PIXELS);
 #endif
 }
@@ -1558,6 +1564,7 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
   }
 #if CONFIG_DENOISING
   vp9_denoiser_update_frame_info(&cpi->denoiser,
+                                *cpi->Source,
                                 cpi->common.frame_type,
                                 cpi->refresh_alt_ref_frame,
                                 cpi->refresh_golden_frame,
