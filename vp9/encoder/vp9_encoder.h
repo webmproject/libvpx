@@ -284,6 +284,10 @@ typedef struct VP9EncoderConfig {
   vp8e_tuning tuning;
 } VP9EncoderConfig;
 
+static INLINE int is_altref_enabled(const VP9EncoderConfig *cfg) {
+  return cfg->mode != REALTIME && cfg->play_alternate && cfg->lag_in_frames > 0;
+}
+
 static INLINE int is_lossless_requested(const VP9EncoderConfig *cfg) {
   return cfg->best_allowed_q == 0 && cfg->worst_allowed_q == 0;
 }
