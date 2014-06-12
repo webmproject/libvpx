@@ -756,6 +756,7 @@ void open_input_file(struct VpxInputContext *input) {
       input->framerate.numerator = input->y4m.fps_n;
       input->framerate.denominator = input->y4m.fps_d;
       input->fmt = input->y4m.vpx_fmt;
+      input->bit_depth = input->y4m.bit_depth;
     } else
       fatal("Unsupported Y4M stream.");
   } else if (input->detect.buf_read == 4 && fourcc_is_ivf(input->detect.buf)) {
@@ -1533,6 +1534,7 @@ int main(int argc, const char **argv_) {
   input.framerate.numerator = 30;
   input.framerate.denominator = 1;
   input.only_i420 = 1;
+  input.bit_depth = 0;
 
   /* First parse the global configuration values, because we want to apply
    * other parameters on top of the default configuration provided by the

@@ -895,7 +895,8 @@ int main_loop(int argc, const char **argv_) {
             len = y4m_write_file_header(buf, sizeof(buf),
                                         vpx_input_ctx.width,
                                         vpx_input_ctx.height,
-                                        &vpx_input_ctx.framerate, img->fmt);
+                                        &vpx_input_ctx.framerate,
+                                        img->fmt, 8);
             if (do_md5) {
               MD5Update(&md5_ctx, (md5byte *)buf, (unsigned int)len);
             } else {

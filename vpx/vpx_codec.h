@@ -212,6 +212,15 @@ extern "C" {
     vpx_codec_priv_t        *priv;        /**< Algorithm private storage */
   } vpx_codec_ctx_t;
 
+  /*!\brief Bit depth for codec
+   * *
+   * This enumeration determines the bit depth of the codec.
+   */
+  typedef enum vpx_bit_depth {
+    VPX_BITS_8,   /**< 8 bits  */
+    VPX_BITS_10,  /**< 10 bits */
+    VPX_BITS_12   /**< 12 bits */
+  } vpx_bit_depth_t;
 
   /*
    * Library Version Number Interface
