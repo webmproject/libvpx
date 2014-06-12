@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//mCo\u003d",
+        "filename": "vp9/encoder/vp9_aq_complexity.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-06-12T23:08:27Z",
+      "side": 1,
+      "message": "should these be in a structure?",
+      "revId": "4bfffa87de9ed89c1921b65479acaf46e3bb3694",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//mGQ\u003d",
+        "filename": "vp9/encoder/vp9_aq_complexity.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-06-12T23:08:27Z",
+      "side": 1,
+      "message": "formatting ( spaces wrong)",
+      "revId": "4bfffa87de9ed89c1921b65479acaf46e3bb3694",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//mCs\u003d",
+        "filename": "vp9/encoder/vp9_aq_complexity.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-06-12T23:08:27Z",
+      "side": 1,
+      "message": "I do not understand what this is trying to do. \nmaybe more comments would help   : \n\nUsing the numbers from the table we\u0027ll have if \n\nprojected \u003c 1/4 target then break  \nprojected \u003c 1/2 target  then break \nprojected \u003c target    then break \n\nIf projected is at 1/4 the target rate we\u0027ll use all 3 active segements?",
+      "revId": "4bfffa87de9ed89c1921b65479acaf46e3bb3694",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
