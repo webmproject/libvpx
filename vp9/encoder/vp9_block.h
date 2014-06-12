@@ -49,7 +49,7 @@ struct macroblock {
 
   MACROBLOCKD e_mbd;
   int skip_block;
-  int select_txfm_size;
+  int select_tx_size;
   int skip_recode;
   int skip_optimize;
   int q_index;
