@@ -134,8 +134,8 @@ static unsigned int block_variance(VP9_COMP *cpi, MACROBLOCK *x,
       high_variance(x->plane[0].src.buf, x->plane[0].src.stride,
                     CONVERT_TO_BYTEPTR(vp9_high_64_zeros), 0, bw, bh, &sse,
                     &avg);
-      sse >>= 2 * (8 - xd->bps);
-      avg >>= (8 - xd->bps);
+      sse >>= 2 * (xd->bps - 8);
+      avg >>= (xd->bps - 8);
     } else {
       variance(x->plane[0].src.buf, x->plane[0].src.stride,
                vp9_64_zeros, 0, bw, bh, &sse, &avg);
