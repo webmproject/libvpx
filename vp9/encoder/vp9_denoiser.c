@@ -52,14 +52,46 @@ int update_running_avg(uint8_t *mc_avg, int mc_avg_stride, uint8_t *avg,
   return total_adj;
 }
 
+uint8_t *block_start(uint8_t *framebuf, int stride, int mi_row, int mi_col) {
+  return framebuf + (stride * mi_row) + mi_col;
+}
+
+void copy_block(uint8_t *dest, int dest_stride,
+                uint8_t *src, int src_stride, BLOCK_SIZE bs) {
+  int r, c;
+  for (r = 0; r < heights[bs]; ++r) {
+    for (c = 0; c < widths[bs]; ++c) {
+      dest[c] = src[c];
+    }
+    dest += dest_stride;
+    src += src_stride;
+  }
+  return;
+}
+
 void vp9_denoiser_denoise(VP9_DENOISER *denoiser,
                           MACROBLOCK *mb, MODE_INFO **grid,
                           int mi_row, int mi_col, BLOCK_SIZE bs) {
+  int decision = COPY_BLOCK;
+
+  YV12_BUFFER_CONFIG avg = denoiser->running_avg_y[INTRA_FRAME];
+  struct buf_2d src = mb->plane[0].src;
+
   update_running_avg(denoiser->mc_running_avg_y.y_buffer,
                      denoiser->mc_running_avg_y.y_stride,
                      denoiser->running_avg_y[INTRA_FRAME].y_buffer,
                      denoiser->running_avg_y[INTRA_FRAME].y_stride,
                      mb->plane[0].src.buf, mb->plane[0].src.stride, bs);
+
+  if (decision == FILTER_BLOCK) {
+  }
+  if (decision == COPY_BLOCK) {
+    copy_block(block_start(avg.y_buffer, avg.y_stride, mi_row, mi_col),
+               avg.y_stride,
+               block_start(src.buf, src.stride, mi_row, mi_col),
+               src.stride,
+               bs);
+  }
   return;
 }
 
