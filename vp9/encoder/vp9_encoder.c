@@ -588,8 +588,6 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
 
   cpi->oxcf = *oxcf;
   cpi->pass = get_pass(cpi->oxcf.mode);
-  if (cpi->oxcf.mode == REALTIME)
-    cpi->oxcf.play_alternate = 0;
 
   rc->baseline_gf_interval = DEFAULT_GF_INTERVAL;
   cpi->ref_frame_flags = VP9_ALT_FLAG | VP9_GOLD_FLAG | VP9_LAST_FLAG;
@@ -2416,7 +2414,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   cpi->refresh_alt_ref_frame = 0;
 
   // Should we code an alternate reference frame.
-  if (cpi->oxcf.play_alternate && rc->source_alt_ref_pending) {
+  if (is_altref_enabled(&cpi->oxcf) && rc->source_alt_ref_pending) {
     int frames_to_arf;
 
 #if CONFIG_MULTIPLE_ARF

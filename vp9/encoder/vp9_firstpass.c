@@ -1526,7 +1526,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   double mv_in_out_accumulator = 0.0;
   double abs_mv_in_out_accumulator = 0.0;
   double mv_ratio_accumulator_thresh;
-  unsigned int allow_alt_ref = oxcf->play_alternate && oxcf->lag_in_frames;
+  unsigned int allow_alt_ref = is_altref_enabled(oxcf);
 
   int f_boost = 0;
   int b_boost = 0;

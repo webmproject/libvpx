@@ -1129,7 +1129,7 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
 
   rc->total_target_vs_actual = rc->total_actual_bits - rc->total_target_bits;
 
-  if (oxcf->play_alternate && cpi->refresh_alt_ref_frame &&
+  if (is_altref_enabled(oxcf) && cpi->refresh_alt_ref_frame &&
       (cm->frame_type != KEY_FRAME))
     // Update the alternate reference frame stats as appropriate.
     update_alt_ref_frame_stats(cpi);
@@ -1389,8 +1389,7 @@ void vp9_rc_set_gf_max_interval(const VP9EncoderConfig *const oxcf,
   // Extended interval for genuinely static scenes
   rc->static_scene_max_gf_interval = oxcf->key_freq >> 1;
 
-  // Special conditions when alt ref frame enabled
-  if (oxcf->play_alternate && oxcf->lag_in_frames) {
+  if (is_altref_enabled(oxcf)) {
     if (rc->static_scene_max_gf_interval > oxcf->lag_in_frames - 1)
       rc->static_scene_max_gf_interval = oxcf->lag_in_frames - 1;
   }
