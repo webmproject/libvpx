@@ -60,8 +60,8 @@ int vp9_init_search_range(const SPEED_FEATURES *sf, int size) {
   while ((size << sr) < MAX_FULL_PEL_VAL)
     sr++;
 
-  sr += sf->reduce_first_step_size;
-  sr = MIN(sr, (sf->max_step_search_steps - 2));
+  sr += sf->mv.reduce_first_step_size;
+  sr = MIN(sr, (sf->mv.max_step_search_steps - 2));
   return sr;
 }
 
@@ -1600,7 +1600,7 @@ int vp9_full_pixel_search(VP9_COMP *cpi, MACROBLOCK *x,
                           const MV *ref_mv, MV *tmp_mv,
                           int var_max, int rd) {
   const SPEED_FEATURES *const sf = &cpi->sf;
-  const SEARCH_METHODS method = sf->search_method;
+  const SEARCH_METHODS method = sf->mv.search_method;
   vp9_variance_fn_ptr_t *fn_ptr = &cpi->fn_ptr[bsize];
   int var = 0;
 
@@ -1627,7 +1627,8 @@ int vp9_full_pixel_search(VP9_COMP *cpi, MACROBLOCK *x,
       break;
     case NSTEP:
       var = vp9_full_pixel_diamond(cpi, x, mvp_full, step_param, error_per_bit,
-                                   (sf->max_step_search_steps - 1) - step_param,
+                                   (sf->mv.max_step_search_steps - 1) -
+                                       step_param,
                                    1, fn_ptr, ref_mv, tmp_mv);
       break;
     default:
