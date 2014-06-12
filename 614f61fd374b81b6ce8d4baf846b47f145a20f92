@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//mKw\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 325,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-06-12T18:12:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//mLI\u003d",
+      "revId": "614f61fd374b81b6ce8d4baf846b47f145a20f92",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//mLE\u003d",
         "filename": "vp9/encoder/vp9_pickmode.c",
         "patchSetId": 6
@@ -30,6 +48,24 @@
       "writtenOn": "2014-06-12T18:04:54Z",
       "side": 1,
       "message": "const",
+      "revId": "614f61fd374b81b6ce8d4baf846b47f145a20f92",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//mKs\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-06-12T18:12:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//mLE\u003d",
       "revId": "614f61fd374b81b6ce8d4baf846b47f145a20f92",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//mKk\u003d",
+        "filename": "vp9/encoder/vp9_quantize.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-06-12T18:12:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//mLA\u003d",
+      "revId": "614f61fd374b81b6ce8d4baf846b47f145a20f92",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//mK8\u003d",
         "filename": "vp9/encoder/vp9_quantize.c",
         "patchSetId": 6
@@ -64,6 +118,24 @@
       "writtenOn": "2014-06-12T18:04:54Z",
       "side": 1,
       "message": "ditto.",
+      "revId": "614f61fd374b81b6ce8d4baf846b47f145a20f92",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//mKo\u003d",
+        "filename": "vp9/encoder/vp9_quantize.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-06-12T18:12:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//mK8\u003d",
       "revId": "614f61fd374b81b6ce8d4baf846b47f145a20f92",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
