@@ -312,31 +312,33 @@ static void parse_superframe_index(const uint8_t *data, size_t data_sz,
     const uint32_t mag = ((marker >> 3) & 0x3) + 1;
     const size_t index_sz = 2 + mag * frames;
 
-    uint8_t marker2 = read_marker(decrypt_cb, decrypt_state,
-                                  data + data_sz - index_sz);
+    if (data_sz >= index_sz) {
+      uint8_t marker2 = read_marker(decrypt_cb, decrypt_state,
+                                    data + data_sz - index_sz);
 
-    if (data_sz >= index_sz && marker2 == marker) {
-      // found a valid superframe index
-      uint32_t i, j;
-      const uint8_t *x = &data[data_sz - index_sz + 1];
+      if (marker == marker2) {
+        // Found a valid superframe index.
+        uint32_t i, j;
+        const uint8_t *x = &data[data_sz - index_sz + 1];
 
-      // frames has a maximum of 8 and mag has a maximum of 4.
-      uint8_t clear_buffer[32];
-      assert(sizeof(clear_buffer) >= frames * mag);
-      if (decrypt_cb) {
-        decrypt_cb(decrypt_state, x, clear_buffer, frames * mag);
-        x = clear_buffer;
+        // Frames has a maximum of 8 and mag has a maximum of 4.
+        uint8_t clear_buffer[32];
+        assert(sizeof(clear_buffer) >= frames * mag);
+        if (decrypt_cb) {
+          decrypt_cb(decrypt_state, x, clear_buffer, frames * mag);
+          x = clear_buffer;
+        }
+
+        for (i = 0; i < frames; ++i) {
+          uint32_t this_sz = 0;
+
+          for (j = 0; j < mag; ++j)
+            this_sz |= (*x++) << (j * 8);
+          sizes[i] = this_sz;
+        }
+
+        *count = frames;
       }
-
-      for (i = 0; i < frames; i++) {
-        uint32_t this_sz = 0;
-
-        for (j = 0; j < mag; j++)
-          this_sz |= (*x++) << (j * 8);
-        sizes[i] = this_sz;
-      }
-
-      *count = frames;
     }
   }
 }
