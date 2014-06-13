@@ -93,20 +93,21 @@ void vp9_denoiser_denoise(VP9_DENOISER *denoiser, MACROBLOCK *mb,
   int decision = COPY_BLOCK;
 
   YV12_BUFFER_CONFIG avg = denoiser->running_avg_y[INTRA_FRAME];
+  YV12_BUFFER_CONFIG mc_avg = denoiser->mc_running_avg_y;
+  uint8_t *avg_start = block_start(avg.y_buffer, avg.y_stride, mi_row, mi_col);
+  uint8_t *mc_avg_start = block_start(mc_avg.y_buffer, mc_avg.y_stride,
+                                          mi_row, mi_col);
   struct buf_2d src = mb->plane[0].src;
 
-  update_running_avg(denoiser->mc_running_avg_y.y_buffer,
-                     denoiser->mc_running_avg_y.y_stride,
-                     denoiser->running_avg_y[INTRA_FRAME].y_buffer,
-                     denoiser->running_avg_y[INTRA_FRAME].y_stride,
+
+  update_running_avg(mc_avg_start, mc_avg.y_stride, avg_start, avg.y_stride,
                      mb->plane[0].src.buf, mb->plane[0].src.stride, 0, bs);
 
   if (decision == FILTER_BLOCK) {
     // TODO(tkopp)
   }
   if (decision == COPY_BLOCK) {
-    copy_block(block_start(avg.y_buffer, avg.y_stride, mi_row, mi_col),
-               avg.y_stride, src.buf, src.stride, bs);
+    copy_block(avg_start, avg.y_stride, src.buf, src.stride, bs);
   }
 }
 
