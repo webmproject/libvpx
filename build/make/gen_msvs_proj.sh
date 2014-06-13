@@ -137,7 +137,9 @@ for opt in "$@"; do
         ;;
         --lib) proj_kind="lib"
         ;;
-        --src-path-bare=*) src_path_bare=$(fix_path "$optval")
+        --src-path-bare=*)
+            src_path_bare=$(fix_path "$optval")
+            src_path_bare=${src_path_bare%/}
         ;;
         --static-crt) use_static_runtime=true
         ;;
@@ -151,9 +153,9 @@ for opt in "$@"; do
             esac
         ;;
         -I*)
-            opt="${opt%/}"
             opt=${opt##-I}
             opt=$(fix_path "$opt")
+            opt="${opt%/}"
             incs="${incs}${incs:+;}&quot;${opt}&quot;"
             yasmincs="${yasmincs} -I&quot;${opt}&quot;"
         ;;
@@ -414,7 +416,7 @@ generate_vcproj() {
                     vpx)
                         tag Tool \
                             Name="VCPreBuildEventTool" \
-                            CommandLine="call obj_int_extract.bat $src_path_bare $plat_no_ws\\\$(ConfigurationName)" \
+                            CommandLine="call obj_int_extract.bat &quot;$src_path_bare&quot; $plat_no_ws\\\$(ConfigurationName)" \
 
                         tag Tool \
                             Name="VCCLCompilerTool" \
