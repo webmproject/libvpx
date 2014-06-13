@@ -22,7 +22,7 @@ DIST_DIR="_dist"
 FRAMEWORK_DIR="VPX.framework"
 HEADER_DIR="${FRAMEWORK_DIR}/Headers/vpx"
 MAKE_JOBS=1
-LIBVPX_SOURCE_DIR=$(dirname "$0")
+LIBVPX_SOURCE_DIR=$(dirname "$0" | sed -e s,/build/make,,)
 LIPO=$(xcrun -sdk iphoneos${SDK} -find lipo)
 ORIG_PWD="$(pwd)"
 TARGETS="armv6-darwin-gcc
@@ -30,14 +30,6 @@ TARGETS="armv6-darwin-gcc
          armv7s-darwin-gcc
          x86-iphonesimulator-gcc
          x86_64-iphonesimulator-gcc"
-
-# This variable is set to the last dist dir used with make dist, and reused when
-# populating the framework directory to get the path to the most recent
-# includes.
-TARGET_DIST_DIR=""
-
-# List of library files passed to lipo.
-LIBS=""
 
 build_target() {
   local target="$1"
@@ -57,8 +49,10 @@ build_target() {
 }
 
 build_targets() {
+  local lib_list=""
   local targets="$1"
-  local target
+  local target=""
+  local target_dist_dir=""
 
   # Clean up from previous build(s).
   rm -rf "${BUILD_ROOT}" "${FRAMEWORK_DIR}"
@@ -71,11 +65,28 @@ build_targets() {
 
   for target in ${targets}; do
     build_target "${target}"
-    TARGET_DIST_DIR="${BUILD_ROOT}/${target}/${DIST_DIR}"
-    LIBS="${LIBS} ${TARGET_DIST_DIR}/lib/libvpx.a"
+    target_dist_dir="${BUILD_ROOT}/${target}/${DIST_DIR}"
+    lib_list="${lib_list} ${target_dist_dir}/lib/libvpx.a"
   done
 
   cd "${ORIG_PWD}"
+
+  # Includes are identical for all platforms, and according to dist target
+  # behavior vpx_config.h and vpx_version.h aren't actually necessary for user
+  # apps built with libvpx. So, just copy the includes from the last target
+  # built.
+  # TODO(tomfinegan): The above is a lame excuse. Build common config/version
+  # includes that use the preprocessor to include the correct file.
+  cp -p "${target_dist_dir}"/include/vpx/* "${HEADER_DIR}"
+  ${LIPO} -create ${lib_list} -output ${FRAMEWORK_DIR}/VPX
+
+  vlog "Created fat library ${FRAMEWORK_DIR}/VPX containing:"
+  for lib in ${lib_list}; do
+    vlog "  $(echo ${lib} | awk -F / '{print $2, $NF}')"
+  done
+
+  # TODO(tomfinegan): Verify that expected targets are included within
+  # VPX.framework/VPX via lipo -info.
 }
 
 cleanup() {
@@ -150,16 +161,3 @@ EOF
 fi
 
 build_targets "${TARGETS}"
-
-# Includes are identical for all platforms, and according to dist target
-# behavior vpx_config.h and vpx_version.h aren't actually necessary for user
-# apps built with libvpx. So, just copy the includes from the last target built.
-# TODO(tomfinegan): The above is a lame excuse. Build common config/version
-# includes that use the preprocessor to include the correct file.
-cp -p "${TARGET_DIST_DIR}"/include/vpx/* "${HEADER_DIR}"
-${LIPO} -create ${LIBS} -output ${FRAMEWORK_DIR}/VPX
-
-vlog "Created fat library ${FRAMEWORK_DIR}/VPX containing:"
-for lib in ${LIBS}; do
-  vlog "  $(echo ${lib} | awk -F / '{print $2, $NF}')"
-done
