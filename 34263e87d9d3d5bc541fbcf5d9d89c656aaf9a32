@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//l84\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-06-13T17:05:33Z",
+      "side": 1,
+      "message": "My bad. Copy \u0026 paste error that fail to put the !pbi-\u003eframe_parallel_decode there.",
+      "parentUuid": "AAAAdn//l9c\u003d",
+      "revId": "34263e87d9d3d5bc541fbcf5d9d89c656aaf9a32",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//l9Y\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2014-06-13T15:58:14Z",
       "side": 1,
       "message": "Can last_show_frame be set to an altref frame? Looks like it can.",
+      "revId": "34263e87d9d3d5bc541fbcf5d9d89c656aaf9a32",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//l8g\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 443,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-06-13T17:05:33Z",
+      "side": 1,
+      "message": "last_show_frame will not be an altref frame as vp9_get_raw_frame will only return a displayable frame from a frame chunk.  The altref frame\u0027s show_frame will be false which will be release in the following code in vp9_decoder.c\n\nif (!pbi-\u003eframe_parallel_decode || !cm-\u003eshow_frame) {\n    cm-\u003eframe_bufs[cm-\u003enew_fb_idx].ref_count--;\n}",
+      "parentUuid": "AAAAdn//l9Y\u003d",
       "revId": "34263e87d9d3d5bc541fbcf5d9d89c656aaf9a32",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
