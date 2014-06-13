@@ -1751,7 +1751,8 @@ void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
       {
         int width = (cpi->oxcf.Width + 15) & ~15;
         int height = (cpi->oxcf.Height + 15) & ~15;
-        vp8_denoiser_allocate(&cpi->denoiser, width, height);
+        vp8_denoiser_allocate(&cpi->denoiser, width, height,
+                              cpi->common.mb_rows, cpi->common.mb_cols);
       }
     }
 #endif

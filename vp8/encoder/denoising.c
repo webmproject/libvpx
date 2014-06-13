@@ -191,10 +191,12 @@ int vp8_denoiser_filter_c(unsigned char *mc_running_avg_y, int mc_avg_y_stride,
     return FILTER_BLOCK;
 }
 
-int vp8_denoiser_allocate(VP8_DENOISER *denoiser, int width, int height)
+int vp8_denoiser_allocate(VP8_DENOISER *denoiser, int width, int height,
+                          int num_mb_rows, int num_mb_cols)
 {
     int i;
     assert(denoiser);
+    denoiser->num_mb_cols = num_mb_cols;
 
     for (i = 0; i < MAX_REF_FRAMES; i++)
     {
@@ -222,6 +224,10 @@ int vp8_denoiser_allocate(VP8_DENOISER *denoiser, int width, int height)
 
     vpx_memset(denoiser->yv12_mc_running_avg.buffer_alloc, 0,
                denoiser->yv12_mc_running_avg.frame_size);
+
+    denoiser->denoise_state = vpx_calloc((num_mb_rows * num_mb_cols), 1);
+    vpx_memset(denoiser->denoise_state, 0, (num_mb_rows * num_mb_cols));
+
     return 0;
 }
 
@@ -243,13 +249,20 @@ void vp8_denoiser_denoise_mb(VP8_DENOISER *denoiser,
                              unsigned int best_sse,
                              unsigned int zero_mv_sse,
                              int recon_yoffset,
-                             int recon_uvoffset)
+                             int recon_uvoffset,
+                             loop_filter_info_n *lfi_n,
+                             int mb_row,
+                             int mb_col,
+                             int block_index)
 {
     int mv_row;
     int mv_col;
     unsigned int motion_magnitude2;
     unsigned int sse_thresh;
     int sse_diff_thresh = 0;
+    // Spatial loop filter: only applied selectively based on
+    // temporal filter state of block relative to top/left neighbors.
+    int apply_spatial_loop_filter = 1;
     MV_REFERENCE_FRAME frame = x->best_reference_frame;
     MV_REFERENCE_FRAME zero_frame = x->best_zeromv_reference_frame;
 
@@ -362,6 +375,8 @@ void vp8_denoiser_denoise_mb(VP8_DENOISER *denoiser,
                                          running_avg_y, avg_y_stride,
                                          x->thismb, 16, motion_magnitude2,
                                          x->increase_denoising);
+        denoiser->denoise_state[block_index] = motion_magnitude2 > 0 ?
+            kFilterNonZeroMV : kFilterZeroMV;
     }
     if (decision == COPY_BLOCK)
     {
@@ -372,5 +387,59 @@ void vp8_denoiser_denoise_mb(VP8_DENOISER *denoiser,
                 x->thismb, 16,
                 denoiser->yv12_running_avg[INTRA_FRAME].y_buffer + recon_yoffset,
                 denoiser->yv12_running_avg[INTRA_FRAME].y_stride);
+        denoiser->denoise_state[block_index] = kNoFilter;
+    }
+    // Option to selectively deblock the denoised signal.
+    if (apply_spatial_loop_filter) {
+      loop_filter_info lfi;
+      int apply_filter_col = 0;
+      int apply_filter_row = 0;
+      int apply_filter = 0;
+      int y_stride = denoiser->yv12_running_avg[INTRA_FRAME].y_stride;
+      int uv_stride =denoiser->yv12_running_avg[INTRA_FRAME].uv_stride;
+
+      // Fix filter level to some nominal value for now.
+      int filter_level = 32;
+
+      int hev_index = lfi_n->hev_thr_lut[INTER_FRAME][filter_level];
+      lfi.mblim = lfi_n->mblim[filter_level];
+      lfi.blim = lfi_n->blim[filter_level];
+      lfi.lim = lfi_n->lim[filter_level];
+      lfi.hev_thr = lfi_n->hev_thr[hev_index];
+
+      // Apply filter if there is a difference in the denoiser filter state
+      // between the current and left/top block, or if non-zero motion vector
+      // is used for the motion-compensated filtering.
+      if (mb_col > 0) {
+        apply_filter_col = !((denoiser->denoise_state[block_index] ==
+            denoiser->denoise_state[block_index - 1]) &&
+            denoiser->denoise_state[block_index] != kFilterNonZeroMV);
+        if (apply_filter_col) {
+          // Filter left vertical edge.
+          apply_filter = 1;
+          vp8_loop_filter_mbv(
+              denoiser->yv12_running_avg[INTRA_FRAME].y_buffer + recon_yoffset,
+              NULL, NULL, y_stride, uv_stride, &lfi);
+        }
+      }
+      if (mb_row > 0) {
+        apply_filter_row = !((denoiser->denoise_state[block_index] ==
+            denoiser->denoise_state[block_index - denoiser->num_mb_cols]) &&
+            denoiser->denoise_state[block_index] != kFilterNonZeroMV);
+        if (apply_filter_row) {
+          // Filter top horizontal edge.
+          apply_filter = 1;
+          vp8_loop_filter_mbh(
+              denoiser->yv12_running_avg[INTRA_FRAME].y_buffer + recon_yoffset,
+              NULL, NULL, y_stride, uv_stride, &lfi);
+        }
+      }
+      if (apply_filter) {
+        // Update the signal block |x|. Pixel changes are only to top and/or
+        // left boundary pixels: can we avoid full block copy here.
+        vp8_copy_mem16x16(
+            denoiser->yv12_running_avg[INTRA_FRAME].y_buffer + recon_yoffset,
+            y_stride, x->thismb, 16);
+      }
     }
 }
