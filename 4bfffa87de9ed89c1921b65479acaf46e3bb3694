@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//l+0\u003d",
+        "filename": "vp9/encoder/vp9_aq_complexity.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-06-13T10:59:19Z",
+      "side": 1,
+      "message": "They could be yes.",
+      "parentUuid": "AAAAdn//mCo\u003d",
+      "revId": "4bfffa87de9ed89c1921b65479acaf46e3bb3694",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//mGQ\u003d",
         "filename": "vp9/encoder/vp9_aq_complexity.c",
         "patchSetId": 6
@@ -47,6 +65,24 @@
       "writtenOn": "2014-06-12T23:08:27Z",
       "side": 1,
       "message": "I do not understand what this is trying to do. \nmaybe more comments would help   : \n\nUsing the numbers from the table we\u0027ll have if \n\nprojected \u003c 1/4 target then break  \nprojected \u003c 1/2 target  then break \nprojected \u003c target    then break \n\nIf projected is at 1/4 the target rate we\u0027ll use all 3 active segements?",
+      "revId": "4bfffa87de9ed89c1921b65479acaf46e3bb3694",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//l+w\u003d",
+        "filename": "vp9/encoder/vp9_aq_complexity.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-06-13T10:59:19Z",
+      "side": 1,
+      "message": "No. At this point there may be 1, 2 or 3 segments.\n\nAQ strength defines how many segments are in use and the transition points.\n\nThe code then checks the projected rate vs target ratio against transition points for the active number of segments (1,2 or 3)\n\nIf strength 0 then we only have one segment (segment 0): We never enter the while loop as segment starts at 0.\n\nIf strength is 1 then there are two active segments. The loop starts at 1 and sets segment 1 iff projected rate \u003c 1/4 else segment 0.\n\nIf strength is 2 then 3 segments are active at \u003c 1/4 (segment 2) \u003c 1/2 segment 1 and \u003e\u003d 1/2 segment 0.\n\nThis mechanism allows testing multiple strengths and numbers of segments with different transition points easily just by changing the numbers in the table.\n\nHowever, at the moment this loop would not work for Q boosts at projected rates \u003e 1.0X target as noted.",
+      "parentUuid": "AAAAdn//mCs\u003d",
       "revId": "4bfffa87de9ed89c1921b65479acaf46e3bb3694",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
