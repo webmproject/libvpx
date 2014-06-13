@@ -495,8 +495,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     }
   }
 #if CONFIG_DENOISING
-  vp9_denoiser_denoise(&cpi->denoiser, x, cpi->common.mi_grid_visible, mi_row,
-                       mi_col, bsize);
+  vp9_denoiser_denoise(&cpi->denoiser, x, mi_row, mi_col, bsize);
 #endif
 
   return INT64_MAX;

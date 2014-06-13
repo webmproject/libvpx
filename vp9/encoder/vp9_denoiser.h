@@ -35,8 +35,7 @@ void vp9_denoiser_update_frame_info(VP9_DENOISER *denoiser,
                                     int refresh_golden_frame,
                                     int refresh_last_frame);
 
-void vp9_denoiser_denoise(VP9_DENOISER *denoiser,
-                          MACROBLOCK *mb, MODE_INFO **grid,
+void vp9_denoiser_denoise(VP9_DENOISER *denoiser, MACROBLOCK *mb,
                           int mi_row, int mi_col, BLOCK_SIZE bs);
 
 void vp9_denoiser_update_frame_stats();
