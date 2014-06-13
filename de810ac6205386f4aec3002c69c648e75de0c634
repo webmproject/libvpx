@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//l98\u003d",
+        "filename": "configure",
+        "patchSetId": 2
+      },
+      "lineNbr": 274,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-06-13T14:00:39Z",
+      "side": 1,
+      "message": "Why is this called transcode?   Transcode means to take something that\u0027s encoded in one format and convert it to another format?  This isn\u0027t whats happening here.  This is enabling us to force use of modes and motion vectors from an external source.",
+      "revId": "de810ac6205386f4aec3002c69c648e75de0c634",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
