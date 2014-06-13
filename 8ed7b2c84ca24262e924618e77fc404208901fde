@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//mAk\u003d",
+        "filename": "iosbuild.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-06-13T03:45:09Z",
+      "side": 1,
+      "message": "Nope/done.",
+      "parentUuid": "AAAAdn//mW0\u003d",
+      "revId": "8ed7b2c84ca24262e924618e77fc404208901fde",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//mWs\u003d",
         "filename": "iosbuild.sh",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//mAg\u003d",
+        "filename": "iosbuild.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-06-13T03:45:09Z",
+      "side": 1,
+      "message": "yeah, I just like the readability... it makes more sense when there are 5 of them. :)",
+      "parentUuid": "AAAAdn//mWs\u003d",
+      "revId": "8ed7b2c84ca24262e924618e77fc404208901fde",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//mWU\u003d",
         "filename": "iosbuild.sh",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2014-06-11T01:31:21Z",
       "side": 1,
       "message": "maybe a cleanup() + trap?",
+      "revId": "8ed7b2c84ca24262e924618e77fc404208901fde",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//mAc\u003d",
+        "filename": "iosbuild.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-06-13T03:45:09Z",
+      "side": 1,
+      "message": "Added a trap function that cleans up the build dir.",
+      "parentUuid": "AAAAdn//mWU\u003d",
       "revId": "8ed7b2c84ca24262e924618e77fc404208901fde",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
