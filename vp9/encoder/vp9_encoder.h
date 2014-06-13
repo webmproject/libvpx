@@ -134,13 +134,6 @@ typedef enum {
 } VPX_SCALING;
 
 typedef enum {
-  RC_MODE_VBR = 0,
-  RC_MODE_CBR = 1,
-  RC_MODE_CONSTRAINED_QUALITY = 2,
-  RC_MODE_CONSTANT_QUALITY    = 3,
-} RC_MODE;
-
-typedef enum {
   // Good Quality Fast Encoding. The encoder balances quality with the
   // amount of time it takes to encode the output. (speed setting
   // controls how fast)
@@ -212,7 +205,8 @@ typedef struct VP9EncoderConfig {
   // ----------------------------------------------------------------
   // DATARATE CONTROL OPTIONS
 
-  RC_MODE rc_mode;  // vbr, cbr, constrained quality or constant quality
+  // vbr, cbr, constrained quality or constant quality
+  enum vpx_rc_mode rc_mode;
 
   // buffer targeting aggressiveness
   int under_shoot_pct;

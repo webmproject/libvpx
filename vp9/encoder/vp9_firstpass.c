@@ -922,7 +922,7 @@ static int get_twopass_worst_quality(const VP9_COMP *cpi,
     }
 
     // Restriction on active max q for constrained quality mode.
-    if (cpi->oxcf.rc_mode == RC_MODE_CONSTRAINED_QUALITY)
+    if (cpi->oxcf.rc_mode == VPX_CQ)
       q = MAX(q, oxcf->cq_level);
     return q;
   }
@@ -2144,7 +2144,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
     rc->base_frame_target = target_rate;
 #ifdef LONG_TERM_VBR_CORRECTION
     // Correction to rate target based on prior over or under shoot.
-    if (cpi->oxcf.rc_mode == RC_MODE_VBR)
+    if (cpi->oxcf.rc_mode == VPX_VBR)
       vbr_rate_correction(&target_rate, rc->vbr_bits_off_target);
 #endif
     vp9_rc_set_frame_target(cpi, target_rate);
@@ -2159,7 +2159,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
     twopass->gf_intra_err_min = GF_MB_INTRA_MIN * cpi->common.MBs;
   }
 
-  if (cpi->oxcf.rc_mode == RC_MODE_CONSTANT_QUALITY) {
+  if (cpi->oxcf.rc_mode == VPX_Q) {
     twopass->active_worst_quality = cpi->oxcf.cq_level;
   } else if (cm->current_video_frame == 0 ||
              (is_spatial_svc && lc->current_video_frame_in_layer == 0)) {
@@ -2244,7 +2244,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
   rc->base_frame_target = target_rate;
 #ifdef LONG_TERM_VBR_CORRECTION
   // Correction to rate target based on prior over or under shoot.
-  if (cpi->oxcf.rc_mode == RC_MODE_VBR)
+  if (cpi->oxcf.rc_mode == VPX_VBR)
     vbr_rate_correction(&target_rate, rc->vbr_bits_off_target);
 #endif
   vp9_rc_set_frame_target(cpi, target_rate);
