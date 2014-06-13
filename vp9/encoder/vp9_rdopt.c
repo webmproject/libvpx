@@ -1826,7 +1826,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
           else
             max_mv = MAX(abs(bsi->mvp.as_mv.row), abs(bsi->mvp.as_mv.col)) >> 3;
 
-          if (cpi->sf.auto_mv_step_size && cm->show_frame) {
+          if (cpi->sf.mv.auto_mv_step_size && cm->show_frame) {
             // Take wtd average of the step_params based on the last frame's
             // max mv magnitude and the best ref mvs of the current block for
             // the given reference.
@@ -1881,8 +1881,8 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                          &bsi->ref_mv[0]->as_mv,
                                          cm->allow_high_precision_mv,
                                          x->errorperbit, &cpi->fn_ptr[bsize],
-                                         cpi->sf.subpel_force_stop,
-                                         cpi->sf.subpel_iters_per_step,
+                                         cpi->sf.mv.subpel_force_stop,
+                                         cpi->sf.mv.subpel_iters_per_step,
                                          x->nmvjointcost, x->mvcost,
                                          &distortion,
                                          &x->pred_sse[mbmi->ref_frame[0]]);
@@ -2338,7 +2338,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
 
   // Work out the size of the first step in the mv step search.
   // 0 here is maximum length first step. 1 is MAX >> 1 etc.
-  if (cpi->sf.auto_mv_step_size && cm->show_frame) {
+  if (cpi->sf.mv.auto_mv_step_size && cm->show_frame) {
     // Take wtd average of the step_params based on the last frame's
     // max mv magnitude and that based on the best ref mvs of the current
     // block for the given reference.
@@ -2399,8 +2399,8 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                  cm->allow_high_precision_mv,
                                  x->errorperbit,
                                  &cpi->fn_ptr[bsize],
-                                 cpi->sf.subpel_force_stop,
-                                 cpi->sf.subpel_iters_per_step,
+                                 cpi->sf.mv.subpel_force_stop,
+                                 cpi->sf.mv.subpel_iters_per_step,
                                  x->nmvjointcost, x->mvcost,
                                  &dis, &x->pred_sse[ref]);
   }
@@ -2524,7 +2524,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
           cpi->common.allow_high_precision_mv,
           x->errorperbit,
           &cpi->fn_ptr[bsize],
-          0, cpi->sf.subpel_iters_per_step,
+          0, cpi->sf.mv.subpel_iters_per_step,
           x->nmvjointcost, x->mvcost,
           &dis, &sse, second_pred,
           pw, ph);

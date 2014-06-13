@@ -484,9 +484,9 @@ static void update_frame_size(VP9_COMP *cpi) {
   {
     int y_stride = cpi->scaled_source.y_stride;
 
-    if (cpi->sf.search_method == NSTEP) {
+    if (cpi->sf.mv.search_method == NSTEP) {
       vp9_init3smotion_compensation(&cpi->ss_cfg, y_stride);
-    } else if (cpi->sf.search_method == DIAMOND) {
+    } else if (cpi->sf.mv.search_method == DIAMOND) {
       vp9_init_dsmotion_compensation(&cpi->ss_cfg, y_stride);
     }
   }
@@ -2012,7 +2012,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   // Initialize cpi->mv_step_param to default based on max resolution.
   cpi->mv_step_param = vp9_init_search_range(sf, max_mv_def);
   // Initialize cpi->max_mv_magnitude and cpi->mv_step_param if appropriate.
-  if (sf->auto_mv_step_size) {
+  if (sf->mv.auto_mv_step_size) {
     if (frame_is_intra_only(cm)) {
       // Initialize max_mv_magnitude for use in the first INTER frame
       // after a key/intra-only frame.

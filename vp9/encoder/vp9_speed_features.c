@@ -69,9 +69,9 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
       sf->disable_split_mask = DISABLE_COMPOUND_SPLIT;
     sf->use_rd_breakout = 1;
     sf->adaptive_motion_search = 1;
-    sf->auto_mv_step_size = 1;
+    sf->mv.auto_mv_step_size = 1;
     sf->adaptive_rd_thresh = 2;
-    sf->subpel_iters_per_step = 1;
+    sf->mv.subpel_iters_per_step = 1;
     sf->mode_skip_start = 10;
     sf->adaptive_pred_interp_filter = 1;
 
@@ -140,7 +140,7 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
 
     sf->partition_search_type = FIXED_PARTITION;
     sf->optimize_coefficients = 0;
-    sf->search_method = HEX;
+    sf->mv.search_method = HEX;
     sf->disable_filter_search_var_thresh = 500;
     for (i = 0; i < TX_SIZES; ++i) {
       sf->intra_y_mode_mask[i] = INTRA_DC;
@@ -174,7 +174,7 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->use_rd_breakout = 1;
     sf->adaptive_motion_search = 1;
     sf->adaptive_pred_interp_filter = 1;
-    sf->auto_mv_step_size = 1;
+    sf->mv.auto_mv_step_size = 1;
     sf->adaptive_rd_thresh = 2;
     sf->intra_y_mode_mask[TX_32X32] = INTRA_DC_H_V;
     sf->intra_uv_mode_mask[TX_32X32] = INTRA_DC_H_V;
@@ -213,7 +213,7 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->constrain_copy_partition = 1;
     sf->use_uv_intra_rd_estimate = 1;
     sf->skip_encode_sb = 1;
-    sf->subpel_iters_per_step = 1;
+    sf->mv.subpel_iters_per_step = 1;
     sf->use_fast_coef_updates = ONE_LOOP_REDUCED;
     sf->adaptive_rd_thresh = 4;
     sf->mode_skip_start = 6;
@@ -232,14 +232,14 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->adjust_partitioning_from_last_frame =
         cm->last_frame_type != cm->frame_type || (0 ==
         (frames_since_key + 1) % sf->last_partitioning_redo_frequency);
-    sf->subpel_force_stop = 1;
+    sf->mv.subpel_force_stop = 1;
     for (i = 0; i < TX_SIZES; i++) {
       sf->intra_y_mode_mask[i] = INTRA_DC_H_V;
       sf->intra_uv_mode_mask[i] = INTRA_DC;
     }
     sf->intra_y_mode_mask[TX_32X32] = INTRA_DC;
     sf->frame_parameter_update = 0;
-    sf->search_method = FAST_HEX;
+    sf->mv.search_method = FAST_HEX;
     sf->inter_mode_mask[BLOCK_32X32] = INTER_NEAREST_NEAR_NEW;
     sf->inter_mode_mask[BLOCK_32X64] = INTER_NEAREST;
     sf->inter_mode_mask[BLOCK_64X32] = INTER_NEAREST;
@@ -259,7 +259,7 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->max_delta_qindex = (cm->frame_type == KEY_FRAME) ? 20 : 15;
     sf->partition_search_type = REFERENCE_PARTITION;
     sf->use_nonrd_pick_mode = 1;
-    sf->search_method = FAST_DIAMOND;
+    sf->mv.search_method = FAST_DIAMOND;
     sf->allow_skip_recode = 0;
   }
 
@@ -287,15 +287,15 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
 
   // best quality defaults
   sf->frame_parameter_update = 1;
-  sf->search_method = NSTEP;
+  sf->mv.search_method = NSTEP;
   sf->recode_loop = ALLOW_RECODE;
-  sf->subpel_search_method = SUBPEL_TREE;
-  sf->subpel_iters_per_step = 2;
-  sf->subpel_force_stop = 0;
+  sf->mv.subpel_search_method = SUBPEL_TREE;
+  sf->mv.subpel_iters_per_step = 2;
+  sf->mv.subpel_force_stop = 0;
   sf->optimize_coefficients = !is_lossless_requested(&cpi->oxcf);
-  sf->reduce_first_step_size = 0;
-  sf->auto_mv_step_size = 0;
-  sf->max_step_search_steps = MAX_MVSEARCH_STEPS;
+  sf->mv.reduce_first_step_size = 0;
+  sf->mv.auto_mv_step_size = 0;
+  sf->mv.max_step_search_steps = MAX_MVSEARCH_STEPS;
   sf->comp_inter_joint_search_thresh = BLOCK_4X4;
   sf->adaptive_rd_thresh = 0;
   sf->use_lastframe_partitioning = LAST_FRAME_PARTITION_OFF;
@@ -370,7 +370,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
     sf->optimize_coefficients = 0;
   }
 
-  if (sf->subpel_search_method == SUBPEL_TREE) {
+  if (sf->mv.subpel_search_method == SUBPEL_TREE) {
     cpi->find_fractional_mv_step = vp9_find_best_sub_pixel_tree;
     cpi->find_fractional_mv_step_comp = vp9_find_best_sub_pixel_comp_tree;
   }

@@ -132,8 +132,8 @@ static void sub_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                cpi->common.allow_high_precision_mv,
                                x->errorperbit,
                                &cpi->fn_ptr[bsize],
-                               cpi->sf.subpel_force_stop,
-                               cpi->sf.subpel_iters_per_step,
+                               cpi->sf.mv.subpel_force_stop,
+                               cpi->sf.mv.subpel_iters_per_step,
                                x->nmvjointcost, x->mvcost,
                                &dis, &x->pred_sse[ref]);
 
