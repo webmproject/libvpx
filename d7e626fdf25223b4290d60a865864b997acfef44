@@ -16,6 +16,24 @@
       "revId": "d7e626fdf25223b4290d60a865864b997acfef44",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//mBA\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-06-13T02:29:08Z",
+      "side": 1,
+      "message": "Undocumented in the sense that it was added to work around an issue where rand() wasn\u0027t available in the NDK but _rand() was",
+      "parentUuid": "AAAAdn//mBI\u003d",
+      "revId": "d7e626fdf25223b4290d60a865864b997acfef44",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
