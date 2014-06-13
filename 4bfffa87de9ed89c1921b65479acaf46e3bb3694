@@ -86,6 +86,24 @@
       "revId": "4bfffa87de9ed89c1921b65479acaf46e3bb3694",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//l+M\u003d",
+        "filename": "vp9/encoder/vp9_aq_complexity.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-06-13T14:18:05Z",
+      "side": 1,
+      "message": "Why not explain this in a comment? Granted I decided to do code reviews late yesterday and as previously noted I become more and more of an idiot as the day progresses and that may have been part of  the problem. \n\nLet me see if I have it right:\n\nThis code determines which segment to put the block in based on the ratio of the number of bits we think it will be using the current quantizer ( projected_rate ) divided by the average number of bits we should use for blocks of this size ( target _rate).   The aq_c_transitions hold the position at which we switch between each segment.   This while loop goes through each of the transitions to determine which segment this block belongs to by comparing the projected rate to the target * the value in aq_c_transitions..\n\nThe aq_strength determines how many segments are supported and thus which set of transitions to use.",
+      "parentUuid": "AAAAdn//l+w\u003d",
+      "revId": "4bfffa87de9ed89c1921b65479acaf46e3bb3694",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
