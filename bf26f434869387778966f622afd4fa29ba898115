@@ -1,0 +1,293 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//l24\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-13T21:24:28Z",
+      "side": 1,
+      "message": "these can be sorted",
+      "revId": "bf26f434869387778966f622afd4fa29ba898115",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//l2U\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-13T21:24:28Z",
+      "side": 1,
+      "message": "add some whitespace after the \u0027,\u0027s",
+      "revId": "bf26f434869387778966f622afd4fa29ba898115",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//l2Q\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-13T21:24:28Z",
+      "side": 1,
+      "message": "break?",
+      "revId": "bf26f434869387778966f622afd4fa29ba898115",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//l2Y\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-13T21:24:28Z",
+      "side": 1,
+      "message": "unneeded",
+      "revId": "bf26f434869387778966f622afd4fa29ba898115",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//l2M\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-13T21:24:28Z",
+      "side": 1,
+      "message": "const",
+      "revId": "bf26f434869387778966f622afd4fa29ba898115",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//l2I\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-13T21:24:28Z",
+      "side": 1,
+      "message": "unimplemented sections are ok, but it\u0027s good to leave a TODO(username): ... for reference",
+      "revId": "bf26f434869387778966f622afd4fa29ba898115",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//l2c\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-13T21:24:28Z",
+      "side": 1,
+      "message": "unneeded",
+      "revId": "bf26f434869387778966f622afd4fa29ba898115",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//l2E\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-13T21:24:28Z",
+      "side": 1,
+      "message": "const",
+      "revId": "bf26f434869387778966f622afd4fa29ba898115",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//l10\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-13T21:24:28Z",
+      "side": 1,
+      "message": "include assert.h explicitly above. generally it\u0027s ok to inherit project includes, but to be safe you should name your system includes\n\nsee:\nhttp://google-styleguide.googlecode.com/svn/trunk/cppguide.xml#Forward_Declarations\n\nhttp://google-styleguide.googlecode.com/svn/trunk/cppguide.xml#Names_and_Order_of_Includes",
+      "revId": "bf26f434869387778966f622afd4fa29ba898115",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//l2g\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-13T21:24:28Z",
+      "side": 1,
+      "message": "unneeded",
+      "revId": "bf26f434869387778966f622afd4fa29ba898115",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//l2k\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-13T21:24:28Z",
+      "side": 1,
+      "message": "this can be localized to the key_frame block",
+      "revId": "bf26f434869387778966f622afd4fa29ba898115",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//l2A\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-13T21:24:28Z",
+      "side": 1,
+      "message": "2 spaces before comments",
+      "revId": "bf26f434869387778966f622afd4fa29ba898115",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//l2o\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-13T21:24:28Z",
+      "side": 1,
+      "message": "unneeded",
+      "revId": "bf26f434869387778966f622afd4fa29ba898115",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//l2s\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-13T21:24:28Z",
+      "side": 1,
+      "message": "unneeded. I assume this will do something at some point",
+      "revId": "bf26f434869387778966f622afd4fa29ba898115",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//l18\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-13T21:24:28Z",
+      "side": 1,
+      "message": "!\u003d NULL",
+      "revId": "bf26f434869387778966f622afd4fa29ba898115",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//l20\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-13T21:24:28Z",
+      "side": 1,
+      "message": "fix the alignment here and at 177 while you\u0027re here",
+      "revId": "bf26f434869387778966f622afd4fa29ba898115",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//l2w\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-13T21:24:28Z",
+      "side": 1,
+      "message": "unneeded",
+      "revId": "bf26f434869387778966f622afd4fa29ba898115",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
