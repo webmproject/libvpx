@@ -438,6 +438,10 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         }
       }
 
+#if CONFIG_DENOISING
+    vp9_denoiser_update_frame_stats();
+#endif
+
       if (this_rd < best_rd || x->skip) {
         best_rd = this_rd;
         *returnrate = rate;
@@ -452,6 +456,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         break;
     }
   }
+
 
   mbmi->mode = best_mode;
   mbmi->interp_filter = best_pred_filter;
@@ -488,6 +493,10 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       }
     }
   }
+#if CONFIG_DENOISING
+  vp9_denoiser_denoise(&cpi->denoiser, x, cpi->common.mi_grid_visible, mi_row,
+                       mi_col, bsize);
+#endif
 
   return INT64_MAX;
 }
