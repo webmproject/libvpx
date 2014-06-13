@@ -32,6 +32,8 @@
 #include "vp9/decoder/vp9_detokenize.h"
 #include "vp9/decoder/vp9_dthread.h"
 
+#include <stdio.h>
+
 static void initialize_dec() {
   static int init_done = 0;
 
@@ -79,12 +81,19 @@ VP9Decoder *vp9_decoder_create() {
 
   vp9_worker_init(&pbi->lf_worker);
 
+#if CONFIG_TRANSCODE
+  cm->mi_array_pf = fopen("mode_info_array_2.bin", "rb");
+#endif
   return pbi;
 }
 
 void vp9_decoder_remove(VP9Decoder *pbi) {
   VP9_COMMON *const cm = &pbi->common;
   int i;
+
+#if CONFIG_TRANSCODE
+  fclose(cm->mi_array_pf);
+#endif
 
   vp9_remove_common(cm);
   vp9_worker_end(&pbi->lf_worker);

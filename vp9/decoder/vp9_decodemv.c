@@ -497,6 +497,10 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
           mi->bmi[j + 2] = mi->bmi[j];
         if (num_4x4_w == 2)
           mi->bmi[j + 1] = mi->bmi[j];
+
+#if CONFIG_TRANSCODE
+        mi->bmi[j].as_mode = b_mode;
+#endif
       }
     }
 
