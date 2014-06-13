@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//l0E\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2410,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2014-06-13T22:27:01Z",
+      "side": 1,
+      "message": "missing #ifdef CONFIG_SPATIAL_SVC ?",
+      "revId": "0cbece2b16af691a8ea5e39bc2ee831048b0f5bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//l0Y\u003d",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 270,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2014-06-13T22:27:01Z",
+      "side": 1,
+      "message": "Please add a comment explaining this code",
+      "revId": "0cbece2b16af691a8ea5e39bc2ee831048b0f5bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//lz0\u003d",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 872,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2014-06-13T22:27:01Z",
+      "side": 1,
+      "message": "Is this change in the meaning of the calling parameters to vp9_receive_raw_frame?\n\nIf so, vp9_receive_raw_frame should be commented or the formal parameter name changed to make it clear what has changed.",
+      "revId": "0cbece2b16af691a8ea5e39bc2ee831048b0f5bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//l1Q\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2014-06-13T22:27:01Z",
+      "side": 1,
+      "message": "libvpx convention is to put * adjacent to variable name void *buf",
+      "revId": "0cbece2b16af691a8ea5e39bc2ee831048b0f5bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//l1M\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2014-06-13T22:27:01Z",
+      "side": 1,
+      "message": "nit: space before FrameData",
+      "revId": "0cbece2b16af691a8ea5e39bc2ee831048b0f5bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//l1A\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 930,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2014-06-13T22:27:01Z",
+      "side": 1,
+      "message": "Add a comment explaining how this works with multiple buffers.",
+      "revId": "0cbece2b16af691a8ea5e39bc2ee831048b0f5bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//l1I\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 955,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2014-06-13T22:27:01Z",
+      "side": 1,
+      "message": "I see that this routine no longer uses SvcInternal.is_keyframe. The continued existence of that member variable is confusing. I suggest removing it.\n\nHowever, I see is_keyframe is still used with ALT_INTER_LAYER_PREDICTION_IP. Perhaps it would be best to also remove that code and its related obsolete buffer strategy.",
+      "revId": "0cbece2b16af691a8ea5e39bc2ee831048b0f5bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//l00\u003d",
+        "filename": "vpx/svc_context.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2014-06-13T22:27:01Z",
+      "side": 1,
+      "message": "add comment explaining usage.",
+      "revId": "0cbece2b16af691a8ea5e39bc2ee831048b0f5bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
