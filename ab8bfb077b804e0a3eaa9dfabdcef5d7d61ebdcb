@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//l5Y\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-13T18:34:47Z",
+      "side": 1,
+      "message": "not needed currently",
+      "revId": "ab8bfb077b804e0a3eaa9dfabdcef5d7d61ebdcb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//l5c\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-13T18:34:47Z",
+      "side": 1,
+      "message": "you should be using vpx_integer.h; this won\u0027t compile under visual studio",
+      "revId": "ab8bfb077b804e0a3eaa9dfabdcef5d7d61ebdcb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
