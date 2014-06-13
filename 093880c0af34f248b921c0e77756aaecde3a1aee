@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//l9M\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1671,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-06-13T17:35:41Z",
+      "side": 1,
+      "message": "Can we use rounding here? I guess the psnr/ssim also needs to be changed accordingly.",
+      "revId": "093880c0af34f248b921c0e77756aaecde3a1aee",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//l9E\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1707,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-06-13T17:35:41Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "093880c0af34f248b921c0e77756aaecde3a1aee",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}

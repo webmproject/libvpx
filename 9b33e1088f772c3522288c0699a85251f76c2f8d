@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//l7c\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1175,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-06-13T17:35:41Z",
+      "side": 0,
+      "message": "I am a little uncomfortable about losing data in the pre-encoding process by downshifting which can be confusing for the user. If we want to support the case where the input bit-depth is \u003e codec bit depth, at least we want to do a warning with the a prompt for the user. (Check the check_encoder_config()) function.",
+      "revId": "9b33e1088f772c3522288c0699a85251f76c2f8d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
