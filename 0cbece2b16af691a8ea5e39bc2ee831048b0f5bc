@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//lwo\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2410,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-06-14T00:55:19Z",
+      "side": 1,
+      "message": "We don\u0027t need it because it in if(is_patial_svc). I added it to somewhere else just to make sure don\u0027t change anything in vp9 encode.",
+      "parentUuid": "AAAAdn//l0E\u003d",
+      "revId": "0cbece2b16af691a8ea5e39bc2ee831048b0f5bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//l0Y\u003d",
         "filename": "vp9/encoder/vp9_svc_layercontext.c",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2014-06-13T22:27:01Z",
       "side": 1,
       "message": "Please add a comment explaining this code",
+      "revId": "0cbece2b16af691a8ea5e39bc2ee831048b0f5bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//lwg\u003d",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 270,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-06-14T00:55:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//l0Y\u003d",
       "revId": "0cbece2b16af691a8ea5e39bc2ee831048b0f5bc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//lwc\u003d",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 872,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-06-14T00:55:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//lz0\u003d",
+      "revId": "0cbece2b16af691a8ea5e39bc2ee831048b0f5bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//l1Q\u003d",
         "filename": "vpx/src/svc_encodeframe.c",
         "patchSetId": 5
@@ -64,6 +118,24 @@
       "writtenOn": "2014-06-13T22:27:01Z",
       "side": 1,
       "message": "libvpx convention is to put * adjacent to variable name void *buf",
+      "revId": "0cbece2b16af691a8ea5e39bc2ee831048b0f5bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//lwY\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-06-14T00:55:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//l1Q\u003d",
       "revId": "0cbece2b16af691a8ea5e39bc2ee831048b0f5bc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//lwU\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-06-14T00:55:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//l1M\u003d",
+      "revId": "0cbece2b16af691a8ea5e39bc2ee831048b0f5bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//l1A\u003d",
         "filename": "vpx/src/svc_encodeframe.c",
         "patchSetId": 5
@@ -98,6 +188,24 @@
       "writtenOn": "2014-06-13T22:27:01Z",
       "side": 1,
       "message": "Add a comment explaining how this works with multiple buffers.",
+      "revId": "0cbece2b16af691a8ea5e39bc2ee831048b0f5bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//lv4\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 930,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-06-14T00:55:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//l1A\u003d",
       "revId": "0cbece2b16af691a8ea5e39bc2ee831048b0f5bc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//lv8\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 955,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-06-14T00:55:19Z",
+      "side": 1,
+      "message": "I will do it in another CL to remove ALT_INTER_LAYER_PREDICTION_IP and key frame qp setting since no is using them right now. I don\u0027t want to make this CL too big.",
+      "parentUuid": "AAAAdn//l1I\u003d",
+      "revId": "0cbece2b16af691a8ea5e39bc2ee831048b0f5bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//l00\u003d",
         "filename": "vpx/svc_context.h",
         "patchSetId": 5
@@ -132,6 +258,24 @@
       "writtenOn": "2014-06-13T22:27:01Z",
       "side": 1,
       "message": "add comment explaining usage.",
+      "revId": "0cbece2b16af691a8ea5e39bc2ee831048b0f5bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//lv0\u003d",
+        "filename": "vpx/svc_context.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-06-14T00:55:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//l00\u003d",
       "revId": "0cbece2b16af691a8ea5e39bc2ee831048b0f5bc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
