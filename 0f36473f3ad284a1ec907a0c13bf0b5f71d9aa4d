@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//lwE\u003d",
+        "filename": "test/vp8cx_set_ref.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-14T00:47:18Z",
+      "side": 1,
+      "message": "; is unneeded here and elsewhere",
+      "revId": "0f36473f3ad284a1ec907a0c13bf0b5f71d9aa4d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
