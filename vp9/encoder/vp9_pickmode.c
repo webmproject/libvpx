@@ -158,15 +158,16 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
   int64_t dist;
   struct macroblock_plane *const p = &x->plane[0];
   struct macroblockd_plane *const pd = &xd->plane[0];
-  const int quant = pd->dequant[1];
+  const uint32_t dc_quant = pd->dequant[0];
+  const uint32_t ac_quant = pd->dequant[1];
   unsigned int var = cpi->fn_ptr[bsize].vf(p->src.buf, p->src.stride,
                                            pd->dst.buf, pd->dst.stride, &sse);
   *var_y = var;
   *sse_y = sse;
 
-  if (sse < pd->dequant[0] * pd->dequant[0] >> 6)
+  if (sse < dc_quant * dc_quant >> 6)
     x->skip_txfm = 1;
-  else if (var < quant * quant >> 6)
+  else if (var < ac_quant * ac_quant >> 6)
     x->skip_txfm = 2;
   else
     x->skip_txfm = 0;
@@ -177,7 +178,7 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
   if ((sse >> 3) > var)
     sse = var;
   vp9_model_rd_from_var_lapndz(var + sse, 1 << num_pels_log2_lookup[bsize],
-                               quant >> 3, &rate, &dist);
+                               ac_quant >> 3, &rate, &dist);
   *out_rate_sum = rate;
   *out_dist_sum = dist << 3;
 }
