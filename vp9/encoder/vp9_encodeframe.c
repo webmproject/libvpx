@@ -1368,8 +1368,10 @@ static void set_source_var_based_partition(VP9_COMP *cpi,
               d16[j].sum >>= 4;
               break;
             case VPX_BITS_8:
-            default:
               break;
+            default:
+              assert(0 && "cm->bit_depth should be VPX_BITS_8, "
+                          "VPX_BITS_10 or VPX_BITS_12");
           }
         } else {
           get_sse_sum_16x16(src + b_offset, src_stride,

@@ -14,6 +14,7 @@
 #include <stdio.h>
 
 #include "./vp9_rtcd.h"
+#include "./vpx_config.h"
 
 #include "vpx_mem/vpx_mem.h"
 
@@ -34,6 +35,7 @@
 #include "vp9/encoder/vp9_encodemv.h"
 #include "vp9/encoder/vp9_encoder.h"
 #include "vp9/encoder/vp9_mcomp.h"
+#include "vp9/encoder/vp9_pickmode.h"
 #include "vp9/encoder/vp9_quantize.h"
 #include "vp9/encoder/vp9_ratectrl.h"
 #include "vp9/encoder/vp9_rdopt.h"
@@ -201,26 +203,62 @@ static const uint8_t rd_iifactor[32] = {
 // 3* dc_qlookup[Q]*dc_qlookup[Q];
 
 /* values are now correlated to quantizer */
-static int sad_per_bit16lut[QINDEX_RANGE];
-static int sad_per_bit4lut[QINDEX_RANGE];
+static int sad_per_bit16lut_8[QINDEX_RANGE];
+static int sad_per_bit4lut_8[QINDEX_RANGE];
 
-void vp9_init_me_luts() {
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+static int sad_per_bit16lut_10[QINDEX_RANGE_10];
+static int sad_per_bit4lut_10[QINDEX_RANGE_10];
+
+static int sad_per_bit16lut_12[QINDEX_RANGE_12];
+static int sad_per_bit4lut_12[QINDEX_RANGE_12];
+#endif
+
+static void init_me_luts_bd(int *bit16lut, int *bit4lut, int range,
+                            vpx_bit_depth_t bit_depth) {
   int i;
-
   // Initialize the sad lut tables using a formulaic calculation for now
   // This is to make it easier to resolve the impact of experimental changes
   // to the quantizer tables.
-  for (i = 0; i < QINDEX_RANGE; i++) {
-    const double q = vp9_convert_qindex_to_q(i);
-    sad_per_bit16lut[i] = (int)(0.0418 * q + 2.4107);
-    sad_per_bit4lut[i] = (int)(0.063 * q + 2.742);
+  for (i = 0; i < range; i++) {
+    const double q = vp9_convert_qindex_to_q(i, bit_depth);
+    bit16lut[i] = (int)(0.0418 * q + 2.4107);
+    bit4lut[i] = (int)(0.063 * q + 2.742);
   }
 }
 
+void vp9_init_me_luts() {
+  init_me_luts_bd(sad_per_bit16lut_8, sad_per_bit4lut_8, QINDEX_RANGE,
+                  VPX_BITS_8);
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+  init_me_luts_bd(sad_per_bit16lut_10, sad_per_bit4lut_10, QINDEX_RANGE_10,
+                  VPX_BITS_10);
+  init_me_luts_bd(sad_per_bit16lut_12, sad_per_bit4lut_12, QINDEX_RANGE_12,
+                  VPX_BITS_12);
+#endif
+}
+
 int vp9_compute_rd_mult(const VP9_COMP *cpi, int qindex) {
-  const int q = vp9_dc_quant(qindex, 0, VPX_BITS_8);
+  int rdmult;
+  const int64_t q = vp9_dc_quant(qindex, 0, cpi->common.bit_depth);
   // TODO(debargha): Adjust the function below
-  int rdmult = 88 * q * q / 25;
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+  switch (cpi->common.bit_depth) {
+    case VPX_BITS_8:
+      rdmult = 88 * q * q / 25;
+      break;
+    case VPX_BITS_10:
+      rdmult = ROUND_POWER_OF_TWO(88 * q * q / 25, 4);
+      break;
+    case VPX_BITS_12:
+      rdmult = ROUND_POWER_OF_TWO(88 * q * q / 25, 8);
+      break;
+    default:
+      assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10 or VPX_BITS_12");
+  }
+#else
+  rdmult = 88 * q * q / 25;
+#endif
   if (cpi->pass == 2 && (cpi->common.frame_type != KEY_FRAME)) {
     if (cpi->twopass.next_iiratio > 31)
       rdmult += (rdmult * rd_iifactor[31]) >> 4;
@@ -230,16 +268,52 @@ int vp9_compute_rd_mult(const VP9_COMP *cpi, int qindex) {
   return rdmult;
 }
 
-static int compute_rd_thresh_factor(int qindex) {
+static int compute_rd_thresh_factor(int qindex, vpx_bit_depth_t bit_depth) {
+  double q;
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+  switch (bit_depth) {
+    case VPX_BITS_8:
+      q = vp9_dc_quant(qindex, 0, VPX_BITS_8) / 4.0;
+      break;
+    case VPX_BITS_10:
+      q = vp9_dc_quant(qindex, 0, VPX_BITS_10) / 16.0;
+      break;
+    case VPX_BITS_12:
+      q = vp9_dc_quant(qindex, 0, VPX_BITS_12) / 64.0;
+      break;
+    default:
+      assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10 or VPX_BITS_12");
+  }
+#else
+  (void) bit_depth;
+  q = vp9_dc_quant(qindex, 0, VPX_BITS_8) / 4.0;
+#endif
   // TODO(debargha): Adjust the function below
-  const int q = (int)(pow(vp9_dc_quant(qindex, 0, VPX_BITS_8) / 4.0,
-                          RD_THRESH_POW) * 5.12);
-  return MAX(q, 8);
+  return MAX((int)(pow(q, RD_THRESH_POW) * 5.12), 8);
 }
 
 void vp9_initialize_me_consts(VP9_COMP *cpi, int qindex) {
-  cpi->mb.sadperbit16 = sad_per_bit16lut[qindex];
-  cpi->mb.sadperbit4 = sad_per_bit4lut[qindex];
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+  switch (cpi->common.bit_depth) {
+    case VPX_BITS_8:
+      cpi->mb.sadperbit16 = sad_per_bit16lut_8[qindex];
+      cpi->mb.sadperbit4 = sad_per_bit4lut_8[qindex];
+      break;
+    case VPX_BITS_10:
+      cpi->mb.sadperbit16 = sad_per_bit16lut_10[qindex];
+      cpi->mb.sadperbit4 = sad_per_bit4lut_10[qindex];
+      break;
+    case VPX_BITS_12:
+      cpi->mb.sadperbit16 = sad_per_bit16lut_12[qindex];
+      cpi->mb.sadperbit4 = sad_per_bit4lut_12[qindex];
+      break;
+    default:
+      assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10 or VPX_BITS_12");
+  }
+#else
+  cpi->mb.sadperbit16 = sad_per_bit16lut_8[qindex];
+  cpi->mb.sadperbit4 = sad_per_bit4lut_8[qindex];
+#endif
 }
 
 static void swap_block_ptr(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
@@ -271,10 +345,11 @@ static void set_block_thresholds(const VP9_COMMON *cm, RD_OPT *rd) {
   int i, bsize, segment_id;
 
   for (segment_id = 0; segment_id < MAX_SEGMENTS; ++segment_id) {
-    const int qindex = clamp(vp9_get_qindex(&cm->seg, segment_id,
-                                            cm->base_qindex) + cm->y_dc_delta_q,
-                             0, MAXQ);
-    const int q = compute_rd_thresh_factor(qindex);
+    const int qindex = clamp(
+      vp9_get_qindex(&cm->seg, segment_id, cm->base_qindex, cm->bit_depth) +
+      cm->y_dc_delta_q, 0, vp9_get_maxq(cm->bit_depth));
+
+    const int q = compute_rd_thresh_factor(qindex, cm->bit_depth);
 
     for (bsize = 0; bsize < BLOCK_SIZES; ++bsize) {
       // Threshold here seems unnecessarily harsh but fine given actual
@@ -495,7 +570,7 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
     } else {
       int rate;
       int64_t dist;
-#if CONFIG_HIGH_TRANSFORMS && CONFIG_VP9_HIGH
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
       if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
         vp9_model_rd_from_var_lapndz(sse, 1 << num_pels_log2_lookup[bs],
                                      pd->dequant[1] >> (xd->bps - 5),
@@ -554,7 +629,7 @@ static void model_rd_for_sb_y_tx(VP9_COMP *cpi, BLOCK_SIZE bsize,
                          &pd->dst.buf[j * pd->dst.stride + k], pd->dst.stride,
                          &sse);
       // sse works better than var, since there is no dc prediction used
-#if CONFIG_HIGH_TRANSFORMS && CONFIG_VP9_HIGH
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
       if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
         vp9_model_rd_from_var_lapndz(sse, t * t,
                                      pd->dequant[1] >> (xd->bps - 5),
@@ -646,9 +721,24 @@ static INLINE int cost_coeffs(MACROBLOCK *x,
   uint8_t token_cache[32 * 32];
   int pt = combine_entropy_contexts(*A, *L);
   int c, cost;
+  const TOKENVALUE *dct_value_tokens;
+  const int16_t *dct_value_cost;
   // Check for consistency of tx_size with mode info
   assert(type == PLANE_TYPE_Y ? mbmi->tx_size == tx_size
                               : get_uv_tx_size(mbmi) == tx_size);
+
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
+  if (xd->bps > 8) {
+    dct_value_tokens = vp9_dct_value_tokens_high_ptr;
+    dct_value_cost = vp9_dct_value_cost_high_ptr;
+  } else {
+    dct_value_tokens = vp9_dct_value_tokens_ptr;
+    dct_value_cost = vp9_dct_value_cost_ptr;
+  }
+#else
+  dct_value_tokens = vp9_dct_value_tokens_ptr;
+  dct_value_cost = vp9_dct_value_cost_ptr;
+#endif
 
   if (eob == 0) {
     // single eob token
@@ -659,8 +749,8 @@ static INLINE int cost_coeffs(MACROBLOCK *x,
 
     // dc token
     int v = qcoeff[0];
-    int prev_t = vp9_dct_value_tokens_ptr[v].token;
-    cost = (*token_costs)[0][pt][prev_t] + vp9_dct_value_cost_ptr[v];
+    int prev_t = dct_value_tokens[v].token;
+    cost = (*token_costs)[0][pt][prev_t] + dct_value_cost[v];
     token_cache[0] = vp9_pt_energy_class[prev_t];
     ++token_costs;
 
@@ -670,12 +760,12 @@ static INLINE int cost_coeffs(MACROBLOCK *x,
       int t;
 
       v = qcoeff[rc];
-      t = vp9_dct_value_tokens_ptr[v].token;
+      t = dct_value_tokens[v].token;
       if (use_fast_coef_costing) {
-        cost += (*token_costs)[!prev_t][!prev_t][t] + vp9_dct_value_cost_ptr[v];
+        cost += (*token_costs)[!prev_t][!prev_t][t] + dct_value_cost[v];
       } else {
         pt = get_coef_context(nb, token_cache, c);
-        cost += (*token_costs)[!prev_t][pt][t] + vp9_dct_value_cost_ptr[v];
+        cost += (*token_costs)[!prev_t][pt][t] + dct_value_cost[v];
         token_cache[rc] = vp9_pt_energy_class[t];
       }
       prev_t = t;
@@ -1235,7 +1325,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
             ratey += cost_coeffs(x, 0, block, tempa + idx, templ + idy, TX_4X4,
                                so->scan, so->neighbors,
                                cpi->sf.use_fast_coef_costing);
-#if CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
             distortion += vp9_high_block_error(coeff,
                             BLOCK_OFFSET(pd->dqcoeff, block), 16, &unused,
                             xd->bps) >> 2;
@@ -3109,7 +3199,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
       // Calculate threshold according to dequant value.
       thresh_ac = (xd->plane[0].dequant[1] * xd->plane[0].dequant[1]) / 9;
-#if CONFIG_HIGH_TRANSFORMS && CONFIG_VP9_HIGH
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
       if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
         const int shift = 2 * xd->bps - 16;
         if (shift > 0)
@@ -3132,7 +3222,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         unsigned int thresh_dc;
 
         thresh_dc = (xd->plane[0].dequant[0] * xd->plane[0].dequant[0] >> 6);
-#if CONFIG_HIGH_TRANSFORMS && CONFIG_VP9_HIGH
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
         if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
           const int shift = 2 * xd->bps - 16;
           if (shift > 0)
@@ -3349,8 +3439,9 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int skip_uv[TX_SIZES];
   PREDICTION_MODE mode_uv[TX_SIZES];
   int64_t mode_distortions[MB_MODE_COUNT] = {-1};
-  int intra_cost_penalty = 20 * vp9_dc_quant(cm->base_qindex, cm->y_dc_delta_q,
-                                             VPX_BITS_8);
+  int intra_cost_penalty = vp9_get_intra_cost_penalty(cm->base_qindex,
+                                                      cm->y_dc_delta_q,
+                                                      cm->bit_depth);
   const int bws = num_8x8_blocks_wide_lookup[bsize] / 2;
   const int bhs = num_8x8_blocks_high_lookup[bsize] / 2;
   int best_skip2 = 0;
@@ -3754,7 +3845,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
           int qstep = xd->plane[0].dequant[1];
           // TODO(debargha): Enhance this by specializing for each mode_index
           int scale = 4;
-#if CONFIG_HIGH_TRANSFORMS && CONFIG_VP9_HIGH
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
         if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
           qstep >>= (xd->bps - 8);
         }
@@ -3961,8 +4052,9 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t dist_uv;
   int skip_uv;
   PREDICTION_MODE mode_uv = DC_PRED;
-  int intra_cost_penalty = 20 * vp9_dc_quant(cm->base_qindex, cm->y_dc_delta_q,
-                                             VPX_BITS_8);
+  int intra_cost_penalty = vp9_get_intra_cost_penalty(cm->base_qindex,
+                                                      cm->y_dc_delta_q,
+                                                      cm->bit_depth);
   int_mv seg_mvs[4][MAX_REF_FRAMES];
   b_mode_info best_bmodes[4];
   int best_skip2 = 0;
@@ -4418,7 +4510,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
           int qstep = xd->plane[0].dequant[1];
           // TODO(debargha): Enhance this by specializing for each mode_index
           int scale = 4;
-#if CONFIG_HIGH_TRANSFORMS && CONFIG_VP9_HIGH
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
           if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
             qstep >>= (xd->bps - 8);
           }

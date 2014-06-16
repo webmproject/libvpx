@@ -8,6 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include "./vpx_config.h"
+
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
 
@@ -58,6 +60,13 @@ static const vp9_prob cat6_prob[15] = {
   254, 254, 254, 252, 249, 243, 230, 196, 177, 153, 140, 133, 130, 129, 0
 };
 
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
+static const vp9_prob cat6_prob_high[19] = {
+  254, 254, 254, 254, 254, 254, 254, 252, 249,
+  243, 230, 196, 177, 153, 140, 133, 130, 129, 0
+};
+#endif
+
 #define INCREMENT_COUNT(token)                              \
   do {                                                      \
      if (!cm->frame_parallel_decoding_mode)                 \
@@ -98,10 +107,20 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd, PLANE_TYPE type,
       counts->eob_branch[tx_size][type][ref];
   uint8_t token_cache[32 * 32];
   const uint8_t *cat6;
+  const uint8_t *cat6_ptr;
   const uint8_t *band_translate = get_band_translate(tx_size);
   const int dq_shift = (tx_size == TX_32X32);
   int v;
   int16_t dqv = dq[0];
+
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
+  if (cm->use_high)
+    cat6_ptr = cat6_prob_high;
+  else
+    cat6_ptr = cat6_prob;
+#else
+    cat6_ptr = cat6_prob;
+#endif
 
   while (c < max_eob) {
     int val;
@@ -184,7 +203,8 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd, PLANE_TYPE type,
       WRITE_COEF_CONTINUE(val, CATEGORY5_TOKEN);
     }
     val = 0;
-    cat6 = cat6_prob;
+
+    cat6 = cat6_ptr;
     while (*cat6)
       val = (val << 1) | vp9_read(r, *cat6++);
     val += CAT6_MIN_VAL;

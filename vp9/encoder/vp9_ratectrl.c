@@ -15,6 +15,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "./vpx_config.h"
+
 #include "vpx_mem/vpx_mem.h"
 
 #include "vp9/common/vp9_alloccommon.h"
@@ -42,13 +44,52 @@
 
 #define FRAME_OVERHEAD_BITS 200
 
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+#define ASSIGN_MINQ_TABLE(bit_depth, name) \
+  do { \
+    switch (bit_depth) { \
+      case VPX_BITS_8: \
+        name = name##_8; \
+        break; \
+      case VPX_BITS_10: \
+        name = name##_10; \
+        break; \
+      case VPX_BITS_12: \
+        name = name##_12; \
+        break; \
+      default: \
+        assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10" \
+                    " or VPX_BITS_12"); \
+    } \
+  } while (0)
+#else
+#define ASSIGN_MINQ_TABLE(bit_depth, name) \
+  do { \
+    name = name##_8; \
+  } while (0)
+#endif
+
 // Tables relating active max Q to active min Q
-static int kf_low_motion_minq[QINDEX_RANGE];
-static int kf_high_motion_minq[QINDEX_RANGE];
-static int arfgf_low_motion_minq[QINDEX_RANGE];
-static int arfgf_high_motion_minq[QINDEX_RANGE];
-static int inter_minq[QINDEX_RANGE];
-static int rtc_minq[QINDEX_RANGE];
+static int kf_low_motion_minq_8[QINDEX_RANGE];
+static int kf_high_motion_minq_8[QINDEX_RANGE];
+static int arfgf_low_motion_minq_8[QINDEX_RANGE];
+static int arfgf_high_motion_minq_8[QINDEX_RANGE];
+static int inter_minq_8[QINDEX_RANGE];
+static int rtc_minq_8[QINDEX_RANGE];
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+static int kf_low_motion_minq_10[QINDEX_RANGE_10];
+static int kf_high_motion_minq_10[QINDEX_RANGE_10];
+static int arfgf_low_motion_minq_10[QINDEX_RANGE_10];
+static int arfgf_high_motion_minq_10[QINDEX_RANGE_10];
+static int inter_minq_10[QINDEX_RANGE_10];
+static int rtc_minq_10[QINDEX_RANGE_10];
+static int kf_low_motion_minq_12[QINDEX_RANGE_12];
+static int kf_high_motion_minq_12[QINDEX_RANGE_12];
+static int arfgf_low_motion_minq_12[QINDEX_RANGE_12];
+static int arfgf_high_motion_minq_12[QINDEX_RANGE_12];
+static int inter_minq_12[QINDEX_RANGE_12];
+static int rtc_minq_12[QINDEX_RANGE_12];
+#endif
 static int gf_high = 2000;
 static int gf_low = 400;
 static int kf_high = 5000;
@@ -58,8 +99,10 @@ static int kf_low = 400;
 // formulaic approach to facilitate easier adjustment of the Q tables.
 // The formulae were derived from computing a 3rd order polynomial best
 // fit to the original data (after plotting real maxq vs minq (not q index))
-static int get_minq_index(double maxq, double x3, double x2, double x1) {
+static int get_minq_index(double maxq, double x3, double x2, double x1,
+                          vpx_bit_depth_t bit_depth) {
   int i;
+  int range = vp9_get_qindex_range(bit_depth);
   const double minqtarget = MIN(((x3 * maxq + x2) * maxq + x1) * maxq,
                                 maxq);
 
@@ -68,48 +111,79 @@ static int get_minq_index(double maxq, double x3, double x2, double x1) {
   if (minqtarget <= 2.0)
     return 0;
 
-  for (i = 0; i < QINDEX_RANGE; i++)
-    if (minqtarget <= vp9_convert_qindex_to_q(i))
+  for (i = 0; i < range; i++)
+    if (minqtarget <= vp9_convert_qindex_to_q(i, bit_depth))
       return i;
 
-  return QINDEX_RANGE - 1;
+  return range - 1;
+}
+
+static void init_minq_luts(int *kf_low_m, int *kf_high_m,
+                           int *arfgf_low, int *arfgf_high,
+                           int *inter, int *rtc, vpx_bit_depth_t bit_depth) {
+  int i;
+  int range = vp9_get_qindex_range(bit_depth);
+
+  for (i = 0; i < range; i++) {
+    const double maxq = vp9_convert_qindex_to_q(i, bit_depth);
+    kf_low_m[i] = get_minq_index(maxq, 0.000001, -0.0004, 0.125, bit_depth);
+    kf_high_m[i] = get_minq_index(maxq, 0.000002, -0.0012, 0.50, bit_depth);
+    arfgf_low[i] = get_minq_index(maxq, 0.0000015, -0.0009, 0.30, bit_depth);
+    arfgf_high[i] = get_minq_index(maxq, 0.0000021, -0.00125, 0.50, bit_depth);
+    inter[i] = get_minq_index(maxq, 0.00000271, -0.00113, 0.90, bit_depth);
+    rtc[i] = get_minq_index(maxq, 0.00000271, -0.00113, 0.70, bit_depth);
+  }
 }
 
 void vp9_rc_init_minq_luts() {
-  int i;
-
-  for (i = 0; i < QINDEX_RANGE; i++) {
-    const double maxq = vp9_convert_qindex_to_q(i);
-    kf_low_motion_minq[i] = get_minq_index(maxq, 0.000001, -0.0004, 0.125);
-    kf_high_motion_minq[i] = get_minq_index(maxq, 0.000002, -0.0012, 0.50);
-    arfgf_low_motion_minq[i] = get_minq_index(maxq, 0.0000015, -0.0009, 0.30);
-    arfgf_high_motion_minq[i] = get_minq_index(maxq, 0.0000021, -0.00125, 0.50);
-    inter_minq[i] = get_minq_index(maxq, 0.00000271, -0.00113, 0.90);
-    rtc_minq[i] = get_minq_index(maxq, 0.00000271, -0.00113, 0.70);
-  }
+  init_minq_luts(kf_low_motion_minq_8, kf_high_motion_minq_8,
+                 arfgf_low_motion_minq_8, arfgf_high_motion_minq_8,
+                 inter_minq_8, rtc_minq_8, VPX_BITS_8);
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+  init_minq_luts(kf_low_motion_minq_10, kf_high_motion_minq_10,
+                 arfgf_low_motion_minq_10, arfgf_high_motion_minq_10,
+                 inter_minq_10, rtc_minq_10, VPX_BITS_10);
+  init_minq_luts(kf_low_motion_minq_12, kf_high_motion_minq_12,
+                 arfgf_low_motion_minq_12, arfgf_high_motion_minq_12,
+                 inter_minq_12, rtc_minq_12, VPX_BITS_12);
+#endif
 }
 
 // These functions use formulaic calculations to make playing with the
 // quantizer tables easier. If necessary they can be replaced by lookup
 // tables if and when things settle down in the experimental bitstream
-double vp9_convert_qindex_to_q(int qindex) {
+double vp9_convert_qindex_to_q(int qindex, vpx_bit_depth_t bit_depth) {
   // Convert the index to a real Q value (scaled down to match old Q values)
-  return vp9_ac_quant(qindex, 0, VPX_BITS_8) / 4.0;
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+  switch (bit_depth) {
+    case VPX_BITS_8:
+      return vp9_ac_quant(qindex, 0, bit_depth) / 4.0;
+    case VPX_BITS_10:
+      return vp9_ac_quant(qindex, 0, bit_depth) / 16.0;
+    case VPX_BITS_12:
+      return vp9_ac_quant(qindex, 0, bit_depth) / 64.0;
+    default:
+      assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10 or VPX_BITS_12");
+  }
+#else
+  return vp9_ac_quant(qindex, 0, bit_depth) / 4.0;
+#endif
 }
 
 int vp9_rc_bits_per_mb(FRAME_TYPE frame_type, int qindex,
-                       double correction_factor) {
-  const double q = vp9_convert_qindex_to_q(qindex);
+                       double correction_factor, vpx_bit_depth_t bit_depth) {
+  const double q = vp9_convert_qindex_to_q(qindex, bit_depth);
   int enumerator = frame_type == KEY_FRAME ? 3300000 : 2250000;
-
   // q based adjustment to baseline enumerator
   enumerator += (int)(enumerator * q) >> 12;
   return (int)(0.5 + (enumerator * correction_factor / q));
 }
 
 static int estimate_bits_at_q(FRAME_TYPE frame_type, int q, int mbs,
-                              double correction_factor) {
-  const int bpm = (int)(vp9_rc_bits_per_mb(frame_type, q, correction_factor));
+                              double correction_factor,
+                              vpx_bit_depth_t bit_depth) {
+  const int bpm = (int)(vp9_rc_bits_per_mb(frame_type, q, correction_factor,
+                                           bit_depth));
   return ((uint64_t)bpm * mbs) >> BPER_MB_NORMBITS;
 }
 
@@ -230,7 +304,7 @@ void vp9_rc_init(const VP9EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
   rc->ni_frames = 0;
 
   rc->tot_q = 0.0;
-  rc->avg_q = vp9_convert_qindex_to_q(oxcf->worst_allowed_q);
+  rc->avg_q = vp9_convert_qindex_to_q(oxcf->worst_allowed_q, oxcf->bit_depth);
 
   rc->rate_correction_factor = 1.0;
   rc->key_frame_rate_correction_factor = 1.0;
@@ -321,7 +395,8 @@ void vp9_rc_update_rate_correction_factors(VP9_COMP *cpi, int damp_var) {
   // Stay in double to avoid int overflow when values are large
   projected_size_based_on_q = estimate_bits_at_q(cm->frame_type,
                                                  cm->base_qindex, cm->MBs,
-                                                 rate_correction_factor);
+                                                 rate_correction_factor,
+                                                 cm->bit_depth);
   // Work out a size correction factor.
   if (projected_size_based_on_q > 0)
     correction_factor = (100 * cpi->rc.projected_frame_size) /
@@ -383,7 +458,8 @@ int vp9_rc_regulate_q(const VP9_COMP *cpi, int target_bits_per_frame,
 
   do {
     const int bits_per_mb_at_this_q = (int)vp9_rc_bits_per_mb(cm->frame_type, i,
-                                                             correction_factor);
+                                                             correction_factor,
+                                                             cm->bit_depth);
 
     if (bits_per_mb_at_this_q <= target_bits_per_mb) {
       if ((target_bits_per_mb - bits_per_mb_at_this_q) <= last_error)
@@ -499,6 +575,17 @@ static int rc_pick_q_and_bounds_one_pass_cbr(const VP9_COMP *cpi,
   int active_best_quality;
   int active_worst_quality = calc_active_worst_quality_one_pass_cbr(cpi);
   int q;
+  int *kf_low_motion_minq;
+  int *kf_high_motion_minq;
+  int *arfgf_low_motion_minq;
+  int *arfgf_high_motion_minq;
+  int *rtc_minq;
+
+  ASSIGN_MINQ_TABLE(cm->bit_depth, kf_low_motion_minq);
+  ASSIGN_MINQ_TABLE(cm->bit_depth, kf_high_motion_minq);
+  ASSIGN_MINQ_TABLE(cm->bit_depth, arfgf_low_motion_minq);
+  ASSIGN_MINQ_TABLE(cm->bit_depth, arfgf_high_motion_minq);
+  ASSIGN_MINQ_TABLE(cm->bit_depth, rtc_minq);
 
   if (frame_is_intra_only(cm)) {
     active_best_quality = rc->best_quality;
@@ -507,9 +594,10 @@ static int rc_pick_q_and_bounds_one_pass_cbr(const VP9_COMP *cpi,
     // based on the ambient Q to reduce the risk of popping.
     if (rc->this_key_frame_forced) {
       int qindex = rc->last_boosted_qindex;
-      double last_boosted_q = vp9_convert_qindex_to_q(qindex);
+      double last_boosted_q = vp9_convert_qindex_to_q(qindex, cm->bit_depth);
       int delta_qindex = vp9_compute_qdelta(rc, last_boosted_q,
-                                            (last_boosted_q * 0.75));
+                                            (last_boosted_q * 0.75),
+                                            cm->bit_depth);
       active_best_quality = MAX(qindex + delta_qindex, rc->best_quality);
     } else if (cm->current_video_frame > 0) {
       // not first frame of one pass and kf_boost is set
@@ -529,9 +617,10 @@ static int rc_pick_q_and_bounds_one_pass_cbr(const VP9_COMP *cpi,
 
       // Convert the adjustment factor to a qindex delta
       // on active_best_quality.
-      q_val = vp9_convert_qindex_to_q(active_best_quality);
+      q_val = vp9_convert_qindex_to_q(active_best_quality, cm->bit_depth);
       active_best_quality += vp9_compute_qdelta(rc, q_val,
-                                                q_val * q_adj_factor);
+                                                q_val * q_adj_factor,
+                                                cm->bit_depth);
     }
   } else if (!rc->is_src_frame_alt_ref &&
              !cpi->use_svc &&
@@ -580,7 +669,8 @@ static int rc_pick_q_and_bounds_one_pass_cbr(const VP9_COMP *cpi,
     int qdelta = 0;
     vp9_clear_system_state();
     qdelta = vp9_compute_qdelta_by_rate(&cpi->rc, cm->frame_type,
-                                        active_worst_quality, 2.0);
+                                        active_worst_quality, 2.0,
+                                        cm->bit_depth);
     *top_index = active_worst_quality + qdelta;
     *top_index = (*top_index > *bottom_index) ? *top_index : *bottom_index;
   }
@@ -632,6 +722,22 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP9_COMP *cpi,
   int active_best_quality;
   int active_worst_quality = calc_active_worst_quality_one_pass_vbr(cpi);
   int q;
+#if !CONFIG_MULTIPLE_ARF
+  int *kf_low_motion_minq;
+  int *kf_high_motion_minq;
+#endif
+  int *arfgf_low_motion_minq;
+  int *arfgf_high_motion_minq;
+  int *inter_minq;
+
+#if !CONFIG_MULTIPLE_ARF
+  ASSIGN_MINQ_TABLE(cm->bit_depth, kf_low_motion_minq);
+  ASSIGN_MINQ_TABLE(cm->bit_depth, kf_high_motion_minq);
+#endif
+  ASSIGN_MINQ_TABLE(cm->bit_depth, arfgf_low_motion_minq);
+  ASSIGN_MINQ_TABLE(cm->bit_depth, arfgf_high_motion_minq);
+  ASSIGN_MINQ_TABLE(cm->bit_depth, inter_minq);
+
 
   if (frame_is_intra_only(cm)) {
     active_best_quality = rc->best_quality;
@@ -641,9 +747,10 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP9_COMP *cpi,
     // based on the ambient Q to reduce the risk of popping.
     if (rc->this_key_frame_forced) {
       int qindex = rc->last_boosted_qindex;
-      double last_boosted_q = vp9_convert_qindex_to_q(qindex);
+      double last_boosted_q = vp9_convert_qindex_to_q(qindex, cm->bit_depth);
       int delta_qindex = vp9_compute_qdelta(rc, last_boosted_q,
-                                            last_boosted_q * 0.75);
+                                            last_boosted_q * 0.75,
+                                            cm->bit_depth);
       active_best_quality = MAX(qindex + delta_qindex, rc->best_quality);
     } else if (cm->current_video_frame > 0) {
       // not first frame of one pass and kf_boost is set
@@ -663,16 +770,17 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP9_COMP *cpi,
 
       // Convert the adjustment factor to a qindex delta
       // on active_best_quality.
-      q_val = vp9_convert_qindex_to_q(active_best_quality);
+      q_val = vp9_convert_qindex_to_q(active_best_quality, cm->bit_depth);
       active_best_quality += vp9_compute_qdelta(rc, q_val,
-                                                q_val * q_adj_factor);
+                                                q_val * q_adj_factor,
+                                                cm->bit_depth);
     }
 #else
     double current_q;
     // Force the KF quantizer to be 30% of the active_worst_quality.
-    current_q = vp9_convert_qindex_to_q(active_worst_quality);
+    current_q = vp9_convert_qindex_to_q(active_worst_quality, cm->bit_depth);
     active_best_quality = active_worst_quality
-        + vp9_compute_qdelta(rc, current_q, current_q * 0.3);
+        + vp9_compute_qdelta(rc, current_q, current_q * 0.3, cm->bit_depth);
 #endif
   } else if (!rc->is_src_frame_alt_ref &&
              (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)) {
@@ -748,11 +856,13 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP9_COMP *cpi,
         !rc->this_key_frame_forced &&
         !(cm->current_video_frame == 0)) {
       qdelta = vp9_compute_qdelta_by_rate(&cpi->rc, cm->frame_type,
-                                          active_worst_quality, 2.0);
+                                          active_worst_quality, 2.0,
+                                          cm->bit_depth);
     } else if (!rc->is_src_frame_alt_ref &&
                (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)) {
       qdelta = vp9_compute_qdelta_by_rate(&cpi->rc, cm->frame_type,
-                                          active_worst_quality, 1.75);
+                                          active_worst_quality, 1.75,
+                                          cm->bit_depth);
     }
     *top_index = active_worst_quality + qdelta;
     *top_index = (*top_index > *bottom_index) ? *top_index : *bottom_index;
@@ -780,12 +890,13 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP9_COMP *cpi,
   if (cpi->multi_arf_enabled && (cm->frame_type != KEY_FRAME) &&
       cpi->oxcf.rc_mode != RC_MODE_CONSTANT_QUALITY) {
     double new_q;
-    double current_q = vp9_convert_qindex_to_q(active_worst_quality);
+    double current_q = vp9_convert_qindex_to_q(active_worst_quality,
+                                               cm->bit_depth);
     int level = cpi->this_frame_weight;
     assert(level >= 0);
     new_q = current_q * (1.0 - (0.2 * (cpi->max_arf_level - level)));
     q = active_worst_quality +
-        vp9_compute_qdelta(rc, current_q, new_q);
+        vp9_compute_qdelta(rc, current_q, new_q, cm->bit_depth);
 
     *bottom_index = q;
     *top_index    = q;
@@ -810,6 +921,21 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi,
   int active_best_quality;
   int active_worst_quality = cpi->twopass.active_worst_quality;
   int q;
+#if !CONFIG_MULTIPLE_ARF
+  int *kf_low_motion_minq;
+  int *kf_high_motion_minq;
+#endif
+  int *arfgf_low_motion_minq;
+  int *arfgf_high_motion_minq;
+  int *inter_minq;
+
+#if !CONFIG_MULTIPLE_ARF
+  ASSIGN_MINQ_TABLE(cm->bit_depth, kf_low_motion_minq);
+  ASSIGN_MINQ_TABLE(cm->bit_depth, kf_high_motion_minq);
+#endif
+  ASSIGN_MINQ_TABLE(cm->bit_depth, arfgf_low_motion_minq);
+  ASSIGN_MINQ_TABLE(cm->bit_depth, arfgf_high_motion_minq);
+  ASSIGN_MINQ_TABLE(cm->bit_depth, inter_minq);
 
   if (frame_is_intra_only(cm) || vp9_is_upper_layer_key_frame(cpi)) {
 #if !CONFIG_MULTIPLE_ARF
@@ -818,9 +944,10 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi,
     // based on the ambient Q to reduce the risk of popping.
     if (rc->this_key_frame_forced) {
       int qindex = rc->last_boosted_qindex;
-      double last_boosted_q = vp9_convert_qindex_to_q(qindex);
+      double last_boosted_q = vp9_convert_qindex_to_q(qindex, cm->bit_depth);
       int delta_qindex = vp9_compute_qdelta(rc, last_boosted_q,
-                                            last_boosted_q * 0.75);
+                                            last_boosted_q * 0.75,
+                                            cm->bit_depth);
       active_best_quality = MAX(qindex + delta_qindex, rc->best_quality);
     } else {
       // Not forced keyframe.
@@ -843,16 +970,17 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi,
 
       // Convert the adjustment factor to a qindex delta
       // on active_best_quality.
-      q_val = vp9_convert_qindex_to_q(active_best_quality);
+      q_val = vp9_convert_qindex_to_q(active_best_quality, cm->bit_depth);
       active_best_quality += vp9_compute_qdelta(rc, q_val,
-                                                q_val * q_adj_factor);
+                                                q_val * q_adj_factor,
+                                                cm->bit_depth);
     }
 #else
     double current_q;
     // Force the KF quantizer to be 30% of the active_worst_quality.
-    current_q = vp9_convert_qindex_to_q(active_worst_quality);
+    current_q = vp9_convert_qindex_to_q(active_worst_quality, cm->bit_depth);
     active_best_quality = active_worst_quality
-        + vp9_compute_qdelta(rc, current_q, current_q * 0.3);
+        + vp9_compute_qdelta(rc, current_q, current_q * 0.3, cm->bit_depth);
 #endif
   } else if (!rc->is_src_frame_alt_ref &&
              (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)) {
@@ -924,12 +1052,14 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi,
     if ((cm->frame_type == KEY_FRAME || vp9_is_upper_layer_key_frame(cpi)) &&
         !rc->this_key_frame_forced) {
       qdelta = vp9_compute_qdelta_by_rate(&cpi->rc, cm->frame_type,
-                                          active_worst_quality, 2.0);
+                                          active_worst_quality, 2.0,
+                                          cm->bit_depth);
     } else if (!rc->is_src_frame_alt_ref &&
                (oxcf->rc_mode != RC_MODE_CBR) &&
                (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)) {
       qdelta = vp9_compute_qdelta_by_rate(&cpi->rc, cm->frame_type,
-                                          active_worst_quality, 1.75);
+                                          active_worst_quality, 1.75,
+                                          cm->bit_depth);
     }
     *top_index = active_worst_quality + qdelta;
     *top_index = (*top_index > *bottom_index) ? *top_index : *bottom_index;
@@ -957,12 +1087,13 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi,
   if (cpi->multi_arf_enabled && (cm->frame_type != KEY_FRAME) &&
       cpi->oxcf.rc_mode != RC_MODE_CONSTANT_QUALITY) {
     double new_q;
-    double current_q = vp9_convert_qindex_to_q(active_worst_quality);
+    double current_q = vp9_convert_qindex_to_q(active_worst_quality,
+                                               cm->bit_depth);
     int level = cpi->this_frame_weight;
     assert(level >= 0);
     new_q = current_q * (1.0 - (0.2 * (cpi->max_arf_level - level)));
     q = active_worst_quality +
-        vp9_compute_qdelta(rc, current_q, new_q);
+        vp9_compute_qdelta(rc, current_q, new_q, cm->bit_depth);
 
     *bottom_index = q;
     *top_index    = q;
@@ -1098,7 +1229,7 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
     rc->avg_frame_qindex[INTER_FRAME] =
         ROUND_POWER_OF_TWO(3 * rc->avg_frame_qindex[INTER_FRAME] + qindex, 2);
     rc->ni_frames++;
-    rc->tot_q += vp9_convert_qindex_to_q(qindex);
+    rc->tot_q += vp9_convert_qindex_to_q(qindex, cm->bit_depth);
     rc->avg_q = rc->tot_q / rc->ni_frames;
     // Calculate the average Q for normal inter frames (not key or GFU frames).
     rc->ni_tot_qi += qindex;
@@ -1347,7 +1478,8 @@ void vp9_rc_get_one_pass_cbr_params(VP9_COMP *cpi) {
   rc->baseline_gf_interval = INT_MAX;
 }
 
-int vp9_compute_qdelta(const RATE_CONTROL *rc, double qstart, double qtarget) {
+int vp9_compute_qdelta(const RATE_CONTROL *rc, double qstart, double qtarget,
+                       vpx_bit_depth_t bit_depth) {
   int start_index = rc->worst_quality;
   int target_index = rc->worst_quality;
   int i;
@@ -1355,14 +1487,14 @@ int vp9_compute_qdelta(const RATE_CONTROL *rc, double qstart, double qtarget) {
   // Convert the average q value to an index.
   for (i = rc->best_quality; i < rc->worst_quality; ++i) {
     start_index = i;
-    if (vp9_convert_qindex_to_q(i) >= qstart)
+    if (vp9_convert_qindex_to_q(i, bit_depth) >= qstart)
       break;
   }
 
   // Convert the q target to an index
   for (i = rc->best_quality; i < rc->worst_quality; ++i) {
     target_index = i;
-    if (vp9_convert_qindex_to_q(i) >= qtarget)
+    if (vp9_convert_qindex_to_q(i, bit_depth) >= qtarget)
       break;
   }
 
@@ -1370,12 +1502,14 @@ int vp9_compute_qdelta(const RATE_CONTROL *rc, double qstart, double qtarget) {
 }
 
 int vp9_compute_qdelta_by_rate(const RATE_CONTROL *rc, FRAME_TYPE frame_type,
-                               int qindex, double rate_target_ratio) {
+                               int qindex, double rate_target_ratio,
+                               vpx_bit_depth_t bit_depth) {
   int target_index = rc->worst_quality;
   int i;
 
   // Look up the current projected bits per block for the base index
-  const int base_bits_per_mb = vp9_rc_bits_per_mb(frame_type, qindex, 1.0);
+  const int base_bits_per_mb = vp9_rc_bits_per_mb(frame_type, qindex, 1.0,
+                                                  bit_depth);
 
   // Find the target bits per mb based on the base value and given ratio.
   const int target_bits_per_mb = (int)(rate_target_ratio * base_bits_per_mb);
@@ -1383,7 +1517,7 @@ int vp9_compute_qdelta_by_rate(const RATE_CONTROL *rc, FRAME_TYPE frame_type,
   // Convert the q target to an index
   for (i = rc->best_quality; i < rc->worst_quality; ++i) {
     target_index = i;
-    if (vp9_rc_bits_per_mb(frame_type, i, 1.0) <= target_bits_per_mb )
+    if (vp9_rc_bits_per_mb(frame_type, i, 1.0, bit_depth) <= target_bits_per_mb)
       break;
   }
 

@@ -154,10 +154,28 @@ void vp9_pick_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
   if (method == LPF_PICK_FROM_Q) {
     const int min_filter_level = 0;
     const int max_filter_level = get_max_filter_level(cpi);
-    const int q = vp9_ac_quant(cm->base_qindex, 0, VPX_BITS_8);
+    const int q = vp9_ac_quant(cm->base_qindex, 0, cm->bit_depth);
+    int filt_guess;
     // These values were determined by linear fitting the result of the
     // searched level, filt_guess = q * 0.316206 + 3.87252
-    int filt_guess = ROUND_POWER_OF_TWO(q * 20723 + 1015158, 18);
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+    switch (cm->bit_depth) {
+      case VPX_BITS_8:
+        filt_guess = ROUND_POWER_OF_TWO(q * 20723 + 1015158, 18);
+        break;
+      case VPX_BITS_10:
+        filt_guess = ROUND_POWER_OF_TWO(q * 20723 + 4060632, 20);
+        break;
+      case VPX_BITS_12:
+        filt_guess = ROUND_POWER_OF_TWO(q * 20723 + 16242526, 22);
+        break;
+      default:
+        assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10 "
+                    "or VPX_BITS_12");
+    }
+#else
+    filt_guess = ROUND_POWER_OF_TWO(q * 20723 + 1015158, 18);
+#endif
     if (cm->frame_type == KEY_FRAME)
       filt_guess -= 4;
     lf->filter_level = clamp(filt_guess, min_filter_level, max_filter_level);

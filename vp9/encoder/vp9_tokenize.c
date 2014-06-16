@@ -13,6 +13,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "./vpx_config.h"
+
 #include "vpx_mem/vpx_mem.h"
 
 #include "vp9/common/vp9_entropy.h"
@@ -27,6 +29,14 @@ static TOKENVALUE dct_value_tokens[DCT_MAX_VALUE * 2];
 const TOKENVALUE *vp9_dct_value_tokens_ptr;
 static int16_t dct_value_cost[DCT_MAX_VALUE * 2];
 const int16_t *vp9_dct_value_cost_ptr;
+
+
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
+static TOKENVALUE dct_value_tokens_high[DCT_MAX_VALUE_HIGH * 2];
+const TOKENVALUE *vp9_dct_value_tokens_high_ptr;
+static int16_t dct_value_cost_high[DCT_MAX_VALUE_HIGH * 2];
+const int16_t *vp9_dct_value_cost_high_ptr;
+#endif
 
 // Array indices are identical to previously-existing CONTEXT_NODE indices
 const vp9_tree_index vp9_coef_tree[TREE_SIZE(ENTROPY_TOKENS)] = {
@@ -66,6 +76,14 @@ static const vp9_prob Pcat6[] = {
 
 static vp9_tree_index cat1[2], cat2[4], cat3[6], cat4[8], cat5[10], cat6[28];
 
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
+static const vp9_prob Pcat6_high[] = {
+  254, 254, 254, 254, 254, 254, 254, 252, 249,
+  243, 230, 196, 177, 153, 140, 133, 130, 129
+};
+static vp9_tree_index cat6_high[36];
+#endif
+
 static void init_bit_tree(vp9_tree_index *p, int n) {
   int i = 0;
 
@@ -84,6 +102,9 @@ static void init_bit_trees() {
   init_bit_tree(cat4, 4);
   init_bit_tree(cat5, 5);
   init_bit_tree(cat6, 14);
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
+  init_bit_tree(cat6_high, 18);
+#endif
 }
 
 const vp9_extra_bit vp9_extra_bits[ENTROPY_TOKENS] = {
@@ -101,6 +122,23 @@ const vp9_extra_bit vp9_extra_bits[ENTROPY_TOKENS] = {
   {0, 0, 0, 0}            // EOB_TOKEN
 };
 
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
+const vp9_extra_bit vp9_extra_bits_high[ENTROPY_TOKENS] = {
+  {0, 0, 0, 0},           // ZERO_TOKEN
+  {0, 0, 0, 1},           // ONE_TOKEN
+  {0, 0, 0, 2},           // TWO_TOKEN
+  {0, 0, 0, 3},           // THREE_TOKEN
+  {0, 0, 0, 4},           // FOUR_TOKEN
+  {cat1, Pcat1, 1, 5},    // CATEGORY1_TOKEN
+  {cat2, Pcat2, 2, 7},    // CATEGORY2_TOKEN
+  {cat3, Pcat3, 3, 11},   // CATEGORY3_TOKEN
+  {cat4, Pcat4, 4, 19},   // CATEGORY4_TOKEN
+  {cat5, Pcat5, 5, 35},   // CATEGORY5_TOKEN
+  {cat6_high, Pcat6_high, 18, 67},  // CATEGORY6_TOKEN
+  {0, 0, 0, 0}            // EOB_TOKEN
+};
+#endif
+
 struct vp9_token vp9_coef_encodings[ENTROPY_TOKENS];
 
 void vp9_coef_tree_initialize() {
@@ -108,11 +146,9 @@ void vp9_coef_tree_initialize() {
   vp9_tokens_from_tree(vp9_coef_encodings, vp9_coef_tree);
 }
 
-void vp9_tokenize_initialize() {
-  TOKENVALUE *const t = dct_value_tokens + DCT_MAX_VALUE;
-  const vp9_extra_bit *const e = vp9_extra_bits;
-
-  int i = -DCT_MAX_VALUE;
+static void tokenize_init_one(TOKENVALUE *t, const vp9_extra_bit *const e,
+                              int16_t *value_cost, int max_value) {
+  int i = -max_value;
   int sign = 1;
 
   do {
@@ -139,7 +175,7 @@ void vp9_tokenize_initialize() {
     // initialize the cost for extra bits for all possible coefficient value.
     {
       int cost = 0;
-      const vp9_extra_bit *p = &vp9_extra_bits[t[i].token];
+      const vp9_extra_bit *p = &e[t[i].token];
 
       if (p->base_val) {
         const int extra = t[i].extra;
@@ -149,13 +185,27 @@ void vp9_tokenize_initialize() {
           cost += treed_cost(p->tree, p->prob, extra >> 1, length);
 
         cost += vp9_cost_bit(vp9_prob_half, extra & 1); /* sign */
-        dct_value_cost[i + DCT_MAX_VALUE] = cost;
+        value_cost[i] = cost;
       }
     }
-  } while (++i < DCT_MAX_VALUE);
+  } while (++i < max_value);
+}
 
+void vp9_tokenize_initialize() {
   vp9_dct_value_tokens_ptr = dct_value_tokens + DCT_MAX_VALUE;
   vp9_dct_value_cost_ptr = dct_value_cost + DCT_MAX_VALUE;
+
+  tokenize_init_one(dct_value_tokens + DCT_MAX_VALUE, vp9_extra_bits,
+                    dct_value_cost + DCT_MAX_VALUE, DCT_MAX_VALUE);
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
+  vp9_dct_value_tokens_high_ptr = dct_value_tokens_high + DCT_MAX_VALUE_HIGH;
+  vp9_dct_value_cost_high_ptr = dct_value_cost_high + DCT_MAX_VALUE_HIGH;
+
+  tokenize_init_one(dct_value_tokens_high + DCT_MAX_VALUE_HIGH,
+                    vp9_extra_bits_high,
+                    dct_value_cost_high + DCT_MAX_VALUE_HIGH,
+                    DCT_MAX_VALUE_HIGH);
+#endif
 }
 
 struct tokenize_b_args {
@@ -177,7 +227,7 @@ static void set_entropy_context_b(int plane, int block, BLOCK_SIZE plane_bsize,
 }
 
 static INLINE void add_token(TOKENEXTRA **t, const vp9_prob *context_tree,
-                             int16_t extra, uint8_t token,
+                             int32_t extra, uint8_t token,
                              uint8_t skip_eob_node,
                              unsigned int *counts) {
   (*t)->token = token;
@@ -234,6 +284,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
       cpi->common.counts.eob_branch[tx_size][type][ref];
   const uint8_t *const band = get_band_translate(tx_size);
   const int seg_eob = get_tx_eob(&cpi->common.seg, segment_id, tx_size);
+  const TOKENVALUE *dct_value_tokens;
 
   int aoff, loff;
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &aoff, &loff);
@@ -244,6 +295,15 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   scan = so->scan;
   nb = so->neighbors;
   c = 0;
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
+  if (cpi->common.profile > PROFILE_1) {
+    dct_value_tokens = vp9_dct_value_tokens_high_ptr;
+  } else {
+    dct_value_tokens = vp9_dct_value_tokens_ptr;
+  }
+#else
+  dct_value_tokens = vp9_dct_value_tokens_ptr;
+#endif
   while (c < eob) {
     int v = 0;
     int skip_eob = 0;
@@ -260,16 +320,15 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
       pt = get_coef_context(nb, token_cache, c);
       v = qcoeff[scan[c]];
     }
-
     add_token(&t, coef_probs[band[c]][pt],
-              vp9_dct_value_tokens_ptr[v].extra,
-              (uint8_t)vp9_dct_value_tokens_ptr[v].token,
+              dct_value_tokens[v].extra,
+              (uint8_t)dct_value_tokens[v].token,
               (uint8_t)skip_eob,
               counts[band[c]][pt]);
     eob_branch[band[c]][pt] += !skip_eob;
 
     token_cache[scan[c]] =
-        vp9_pt_energy_class[vp9_dct_value_tokens_ptr[v].token];
+        vp9_pt_energy_class[dct_value_tokens[v].token];
     ++c;
     pt = get_coef_context(nb, token_cache, c);
   }

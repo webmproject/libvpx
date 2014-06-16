@@ -24,6 +24,9 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                             int64_t *returndistortion,
                             BLOCK_SIZE bsize);
 
+int vp9_get_intra_cost_penalty(int qindex, int qdelta,
+                               vpx_bit_depth_t bit_depth);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

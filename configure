@@ -271,6 +271,7 @@ EXPERIMENT_LIST="
     multiple_arf
     spatial_svc
     high_transforms
+    high_quant
 "
 CONFIG_LIST="
     external_build

@@ -733,10 +733,10 @@ void vp9_configure_arnr_filter(VP9_COMP *cpi,
   // Adjust the strength based on active max q
   if (cpi->common.current_video_frame > 1)
     q = ((int)vp9_convert_qindex_to_q(
-        cpi->rc.avg_frame_qindex[INTER_FRAME]));
+        cpi->rc.avg_frame_qindex[INTER_FRAME], cpi->common.bit_depth));
   else
     q = ((int)vp9_convert_qindex_to_q(
-        cpi->rc.avg_frame_qindex[KEY_FRAME]));
+        cpi->rc.avg_frame_qindex[KEY_FRAME], cpi->common.bit_depth));
   if (q > 16) {
     cpi->active_arnr_strength = cpi->oxcf.arnr_strength;
   } else {

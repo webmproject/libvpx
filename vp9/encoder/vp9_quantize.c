@@ -10,6 +10,8 @@
 
 #include <math.h>
 
+#include "./vpx_config.h"
+
 #include "vpx_mem/vpx_mem.h"
 
 #include "vp9/common/vp9_quant_common.h"
@@ -280,14 +282,33 @@ static void invert_quant(int16_t *quant, int16_t *shift, int d) {
   *shift = 1 << (16 - l);
 }
 
+static int get_qzbin_factor(int q, vpx_bit_depth_t bit_depth) {
+  int quant = vp9_dc_quant(q, 0, bit_depth);
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+  switch (bit_depth) {
+    case VPX_BITS_8:
+      return q == 0 ? 64 : (quant < 148 ? 84 : 80);
+    case VPX_BITS_10:
+      return q == 0 ? 64 : (quant < 592 ? 84 : 80);
+    case VPX_BITS_12:
+      return q == 0 ? 64 : (quant < 2368 ? 84 : 80);
+    default:
+      assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10 or VPX_BITS_12");
+  }
+#else
+  return q == 0 ? 64 : (quant < 148 ? 84 : 80);
+#endif
+}
+
 void vp9_init_quantizer(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   QUANTS *const quants = &cpi->quants;
   int i, q, quant;
+  int range = vp9_get_qindex_range(cm->bit_depth);
 
-  for (q = 0; q < QINDEX_RANGE; q++) {
-    const int qzbin_factor = q == 0 ? 64 :
-      (vp9_dc_quant(q, 0, VPX_BITS_8) < 148 ? 84 : 80);
+  for (q = 0; q < range; q++) {
+    const int qzbin_factor = get_qzbin_factor(q, cm->bit_depth);
+
     const int qrounding_factor = q == 0 ? 64 : 48;
 
     for (i = 0; i < 2; ++i) {
@@ -348,7 +369,8 @@ void vp9_init_plane_quantizers(VP9_COMP *cpi, MACROBLOCK *x) {
   MACROBLOCKD *const xd = &x->e_mbd;
   QUANTS *const quants = &cpi->quants;
   const int segment_id = xd->mi[0]->mbmi.segment_id;
-  const int qindex = vp9_get_qindex(&cm->seg, segment_id, cm->base_qindex);
+  const int qindex = vp9_get_qindex(&cm->seg, segment_id, cm->base_qindex,
+                                    cm->bit_depth);
   const int rdmult = vp9_compute_rd_mult(cpi, qindex + cm->y_dc_delta_q);
   const int zbin = cpi->zbin_mode_boost;
   int i;
@@ -428,15 +450,70 @@ static const int quantizer_to_qindex[] = {
   224, 228, 232, 236, 240, 244, 249, 255,
 };
 
-int vp9_quantizer_to_qindex(int quantizer) {
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
+static const int quantizer_to_qindex_10[] = {
+  0,   5,   10,  15,  20,  26,  31,  36,
+  41,  46,  52,  57,  62,  67,  72,  78,
+  83,  88,  93,  98,  104, 109, 114, 119,
+  124, 130, 135, 140, 145, 150, 156, 161,
+  166, 171, 176, 182, 187, 192, 197, 202,
+  208, 213, 218, 223, 228, 234, 239, 244,
+  249, 254, 260, 265, 270, 275, 280, 286,
+  291, 296, 301, 306, 312, 317, 322, 327,
+};
+
+static const int quantizer_to_qindex_12[] = {
+  0,   6,   12,  19,  25,  31,  38,  44,
+  50,  57,  63,  69,  76,  82,  88,  95,
+  101, 107, 114, 120, 126, 133, 139, 145,
+  152, 158, 164, 171, 177, 183, 190, 196,
+  202, 209, 215, 221, 228, 234, 240, 247,
+  253, 259, 266, 272, 278, 285, 291, 297,
+  304, 310, 316, 323, 329, 335, 342, 348,
+  354, 361, 367, 373, 380, 386, 392, 398,
+};
+#endif
+
+int vp9_quantizer_to_qindex(int quantizer, vpx_bit_depth_t bit_depth) {
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
+  switch (bit_depth) {
+    case VPX_BITS_8:
+      return quantizer_to_qindex[quantizer];
+    case VPX_BITS_10:
+      return quantizer_to_qindex_10[quantizer];
+    case VPX_BITS_12:
+      return quantizer_to_qindex_12[quantizer];
+    default:
+      assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10 or VPX_BITS_12");
+  }
+#else
+  (void) bit_depth;
   return quantizer_to_qindex[quantizer];
+#endif
 }
 
-int vp9_qindex_to_quantizer(int qindex) {
+int vp9_qindex_to_quantizer(int qindex, vpx_bit_depth_t bit_depth) {
   int quantizer;
+  const int *table = quantizer_to_qindex;
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
+  switch (bit_depth) {
+    case VPX_BITS_8:
+      break;
+    case VPX_BITS_10:
+      table = quantizer_to_qindex_10;
+      break;
+    case VPX_BITS_12:
+      table = quantizer_to_qindex_12;
+      break;
+    default:
+      assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10 or VPX_BITS_12");
+  }
+#else
+  (void) bit_depth;
+#endif
 
   for (quantizer = 0; quantizer < 64; ++quantizer)
-    if (quantizer_to_qindex[quantizer] >= qindex)
+    if (table[quantizer] >= qindex)
       return quantizer;
 
   return 63;

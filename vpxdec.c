@@ -986,6 +986,9 @@ int main_loop(int argc, const char **argv_) {
           // Fallback to 8bit
           bit_depth = VPX_BITS_8;
         }
+        // Default to codec bit depth if output bit depth not set
+        if (!out_bit_depth)
+          out_bit_depth = bit_depth * 2 + 8;
         if (out_bit_depth != 8 &&
             out_bit_depth != bit_depth * 2 + 8) {
           fprintf(stderr, "Does not support bit-depth conversion to: %d.\n",

@@ -60,7 +60,7 @@ void vp9_high_subtract_block_c(int rows, int cols,
   int r, c;
   uint16_t *src = CONVERT_TO_SHORTPTR(src8);
   uint16_t *pred = CONVERT_TO_SHORTPTR(pred8);
-#if CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
   (void) bps;
 #else
   int shift = bps - 8;
@@ -69,7 +69,7 @@ void vp9_high_subtract_block_c(int rows, int cols,
 
   for (r = 0; r < rows; r++) {
     for (c = 0; c < cols; c++) {
-#if CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
       diff[c] = src[c] - pred[c];
 #else
       diff[c] = (src[c] - pred[c] + rnd) >> shift;
@@ -163,6 +163,8 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
   int64_t rd_cost0, rd_cost1;
   int rate0, rate1, error0, error1, t0, t1;
   int best, band, pt, i, final_eob;
+  const TOKENVALUE *dct_value_tokens;
+  const int16_t *dct_value_cost;
 
   assert((!type && !plane) || (type && plane));
   assert(eob <= default_eob);
@@ -179,9 +181,22 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
   tokens[eob][0].qc = 0;
   tokens[eob][1] = tokens[eob][0];
 
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
+  if (xd->bps > 8) {
+    dct_value_tokens = vp9_dct_value_tokens_high_ptr;
+    dct_value_cost = vp9_dct_value_cost_high_ptr;
+  } else {
+    dct_value_tokens = vp9_dct_value_tokens_ptr;
+    dct_value_cost = vp9_dct_value_cost_ptr;
+  }
+#else
+  dct_value_tokens = vp9_dct_value_tokens_ptr;
+  dct_value_cost = vp9_dct_value_cost_ptr;
+#endif
+
   for (i = 0; i < eob; i++)
     token_cache[scan[i]] =
-        vp9_pt_energy_class[vp9_dct_value_tokens_ptr[qcoeff[scan[i]]].token];
+        vp9_pt_energy_class[dct_value_tokens[qcoeff[scan[i]]].token];
 
   for (i = eob; i-- > 0;) {
     int base_bits, d2, dx;
@@ -195,7 +210,7 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
       /* Evaluate the first possibility for this state. */
       rate0 = tokens[next][0].rate;
       rate1 = tokens[next][1].rate;
-      t0 = (vp9_dct_value_tokens_ptr + x)->token;
+      t0 = (dct_value_tokens + x)->token;
       /* Consider both possible successor states. */
       if (next < default_eob) {
         band = band_translate[i + 1];
@@ -208,9 +223,9 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
       UPDATE_RD_COST();
       /* And pick the best. */
       best = rd_cost1 < rd_cost0;
-      base_bits = vp9_dct_value_cost_ptr[x];
+      base_bits = dct_value_cost[x];
       dx = mul * (dqcoeff[rc] - coeff[rc]);
-#if CONFIG_HIGH_TRANSFORMS && CONFIG_VP9_HIGH
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
       if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
         dx >>= xd->bps - 8;
       }
@@ -247,7 +262,7 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
         t0 = tokens[next][0].token == EOB_TOKEN ? EOB_TOKEN : ZERO_TOKEN;
         t1 = tokens[next][1].token == EOB_TOKEN ? EOB_TOKEN : ZERO_TOKEN;
       } else {
-        t0 = t1 = (vp9_dct_value_tokens_ptr + x)->token;
+        t0 = t1 = (dct_value_tokens + x)->token;
       }
       if (next < default_eob) {
         band = band_translate[i + 1];
@@ -266,10 +281,10 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
       UPDATE_RD_COST();
       /* And pick the best. */
       best = rd_cost1 < rd_cost0;
-      base_bits = vp9_dct_value_cost_ptr[x];
+      base_bits = dct_value_cost[x];
 
       if (shortcut) {
-#if CONFIG_HIGH_TRANSFORMS && CONFIG_VP9_HIGH
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
         if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
           dx -= ((dequant_ptr[rc != 0] >> (xd->bps - 8)) + sz) ^ sz;
         } else {
