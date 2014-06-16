@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//ljE\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 283,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-16T18:47:31Z",
+      "side": 1,
+      "message": "Do you need the automatic variable:\nsse_diff \u003d (int)(((int64_t)zero_mv_sse * zero_bias / 100) - best_sse);",
+      "revId": "734fb2f82504379bbd7b444c949b7b19481ce7cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
