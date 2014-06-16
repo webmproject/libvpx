@@ -84,11 +84,12 @@ void vp8_yv12_extend_frame_borders_c(YV12_BUFFER_CONFIG *ybf) {
 static void extend_frame(YV12_BUFFER_CONFIG *const ybf, int ext_size) {
   const int c_w = ybf->uv_crop_width;
   const int c_h = ybf->uv_crop_height;
-  const int c_ext_size = ext_size >> 1;
-  const int c_et = c_ext_size;
-  const int c_el = c_ext_size;
-  const int c_eb = c_ext_size + ybf->uv_height - ybf->uv_crop_height;
-  const int c_er = c_ext_size + ybf->uv_width - ybf->uv_crop_width;
+  const int ss_x = ybf->uv_width < ybf->y_width;
+  const int ss_y = ybf->uv_height < ybf->y_height;
+  const int c_et = ext_size >> ss_y;
+  const int c_el = ext_size >> ss_x;
+  const int c_eb = c_et + ybf->uv_height - ybf->uv_crop_height;
+  const int c_er = c_el + ybf->uv_width - ybf->uv_crop_width;
 
   assert(ybf->y_height - ybf->y_crop_height < 16);
   assert(ybf->y_width - ybf->y_crop_width < 16);
