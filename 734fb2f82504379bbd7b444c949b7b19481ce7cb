@@ -16,6 +16,24 @@
       "revId": "734fb2f82504379bbd7b444c949b7b19481ce7cb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//liY\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 283,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-06-16T20:51:04Z",
+      "side": 1,
+      "message": "Prefer to keep as is. The variable zero_mv_sse may be passed to best_sse below (line 322), and this variable (best_sse) is then used in the decision to denoise or not (i.e, denoise or copy; see line 362). The bias here then also means more likely to denoise the block. Keeping the bias very conservative for now, but may make it more aggressive later.",
+      "parentUuid": "AAAAdn//ljE\u003d",
+      "revId": "734fb2f82504379bbd7b444c949b7b19481ce7cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
