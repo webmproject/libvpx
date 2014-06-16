@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//lmI\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 12
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-06-16T15:25:39Z",
+      "side": 1,
+      "message": "Please leave out these functions from the patches. I will not merge any patch which removes a function or replaces it with an empty function.",
+      "revId": "0284c0842e89ce6115778e160f676cba79e5073c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
