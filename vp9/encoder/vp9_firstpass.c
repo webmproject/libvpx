@@ -497,14 +497,14 @@ void vp9_first_pass(VP9_COMP *cpi) {
                                         &cpi->scaled_source);
   }
 
+  vp9_setup_block_planes(&x->e_mbd, cm->subsampling_x, cm->subsampling_y);
+
   vp9_setup_src_planes(x, cpi->Source, 0, 0);
   vp9_setup_pre_planes(xd, 0, first_ref_buf, 0, 0, NULL);
   vp9_setup_dst_planes(xd->plane, new_yv12, 0, 0);
 
   xd->mi = cm->mi_grid_visible;
   xd->mi[0] = cm->mi;
-
-  vp9_setup_block_planes(&x->e_mbd, cm->subsampling_x, cm->subsampling_y);
 
   vp9_frame_init_quantizer(cpi);
 

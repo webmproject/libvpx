@@ -109,7 +109,9 @@ void vp9_free_frame_buffers(VP9_COMMON *cm) {
   }
 
   vp9_free_frame_buffer(&cm->post_proc_buffer);
+}
 
+void vp9_free_context_buffers(VP9_COMMON *cm) {
   free_mi(cm);
 
   vpx_free(cm->last_frame_seg_map);
@@ -165,36 +167,54 @@ int vp9_resize_frame_buffers(VP9_COMMON *cm, int width, int height) {
 
  fail:
   vp9_free_frame_buffers(cm);
+  vp9_free_context_buffers(cm);
   return 1;
 }
 
+static void init_frame_bufs(VP9_COMMON *cm) {
+  int i;
+
+  cm->new_fb_idx = FRAME_BUFFERS - 1;
+  cm->frame_bufs[cm->new_fb_idx].ref_count = 1;
+
+  for (i = 0; i < REF_FRAMES; ++i) {
+    cm->ref_frame_map[i] = i;
+    cm->frame_bufs[i].ref_count = 1;
+  }
+}
+
 int vp9_alloc_frame_buffers(VP9_COMMON *cm, int width, int height) {
-  const int aligned_width = ALIGN_POWER_OF_TWO(width, MI_SIZE_LOG2);
-  const int aligned_height = ALIGN_POWER_OF_TWO(height, MI_SIZE_LOG2);
+  int i;
   const int ss_x = cm->subsampling_x;
   const int ss_y = cm->subsampling_y;
-  int i;
 
   vp9_free_frame_buffers(cm);
 
-  for (i = 0; i < FRAME_BUFFERS; i++) {
+  for (i = 0; i < FRAME_BUFFERS; ++i) {
     cm->frame_bufs[i].ref_count = 0;
     if (vp9_alloc_frame_buffer(&cm->frame_bufs[i].buf, width, height,
                                ss_x, ss_y, VP9_ENC_BORDER_IN_PIXELS) < 0)
       goto fail;
   }
 
-  cm->new_fb_idx = FRAME_BUFFERS - 1;
-  cm->frame_bufs[cm->new_fb_idx].ref_count = 1;
-
-  for (i = 0; i < REF_FRAMES; i++) {
-    cm->ref_frame_map[i] = i;
-    cm->frame_bufs[i].ref_count = 1;
-  }
+  init_frame_bufs(cm);
 
   if (vp9_alloc_frame_buffer(&cm->post_proc_buffer, width, height, ss_x, ss_y,
                              VP9_ENC_BORDER_IN_PIXELS) < 0)
     goto fail;
+
+  return 0;
+
+ fail:
+  vp9_free_frame_buffers(cm);
+  return 1;
+}
+
+int vp9_alloc_context_buffers(VP9_COMMON *cm, int width, int height) {
+  const int aligned_width = ALIGN_POWER_OF_TWO(width, MI_SIZE_LOG2);
+  const int aligned_height = ALIGN_POWER_OF_TWO(height, MI_SIZE_LOG2);
+
+  vp9_free_context_buffers(cm);
 
   set_mb_mi(cm, aligned_width, aligned_height);
 
@@ -224,12 +244,13 @@ int vp9_alloc_frame_buffers(VP9_COMMON *cm, int width, int height) {
   return 0;
 
  fail:
-  vp9_free_frame_buffers(cm);
+  vp9_free_context_buffers(cm);
   return 1;
 }
 
 void vp9_remove_common(VP9_COMMON *cm) {
   vp9_free_frame_buffers(cm);
+  vp9_free_context_buffers(cm);
   vp9_free_internal_frame_buffers(&cm->int_frame_buffers);
 }
 
