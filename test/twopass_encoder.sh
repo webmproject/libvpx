@@ -29,7 +29,10 @@ twopass_encoder() {
   local codec="$1"
   local output_file="${VPX_TEST_OUTPUT_DIR}/twopass_encoder_${codec}.ivf"
 
-  [ -x "${encoder}" ] || return 1
+  if [ ! -x "${encoder}" ]; then
+    elog "${encoder} does not exist or is not executable."
+    return 1
+  fi
 
   eval "${encoder}" "${codec}" "${YUV_RAW_INPUT_WIDTH}" \
       "${YUV_RAW_INPUT_HEIGHT}" "${YUV_RAW_INPUT}" "${output_file}" \

@@ -17,6 +17,10 @@ VPX_TEST_TOOLS_COMMON_SH=included
 set -e
 devnull='> /dev/null 2>&1'
 
+elog() {
+  echo "$@" 1>&2
+}
+
 vlog() {
   if [ "${VPX_TEST_VERBOSE_OUTPUT}" = "yes" ]; then
     echo "$@"
