@@ -276,7 +276,11 @@ void vp8_denoiser_denoise_mb(VP8_DENOISER *denoiser,
         MB_MODE_INFO saved_mbmi;
         MACROBLOCKD *filter_xd = &x->e_mbd;
         MB_MODE_INFO *mbmi = &filter_xd->mode_info_context->mbmi;
-        int sse_diff = zero_mv_sse - best_sse;
+        int sse_diff = 0;
+        // Bias on zero motion vector sse.
+        int zero_bias = 95;
+        zero_mv_sse = (unsigned int)((int64_t)zero_mv_sse * zero_bias / 100);
+        sse_diff = zero_mv_sse - best_sse;
 
         saved_mbmi = *mbmi;
 
