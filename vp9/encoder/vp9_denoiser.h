@@ -26,6 +26,14 @@ enum vp9_denoiser_decision {
 typedef struct vp9_denoiser {
   YV12_BUFFER_CONFIG running_avg_y[MAX_REF_FRAMES];
   YV12_BUFFER_CONFIG mc_running_avg_y;
+
+  unsigned int zero_mv_sse;
+  unsigned int best_sse;
+  int increase_denoising;
+  PREDICTION_MODE best_sse_inter_mode;
+  int_mv best_sse_mv;
+  MV_REFERENCE_FRAME best_reference_frame;
+  MV_REFERENCE_FRAME best_zeromv_reference_frame;
 } VP9_DENOISER;
 
 void vp9_denoiser_update_frame_info(VP9_DENOISER *denoiser,
@@ -38,7 +46,10 @@ void vp9_denoiser_update_frame_info(VP9_DENOISER *denoiser,
 void vp9_denoiser_denoise(VP9_DENOISER *denoiser, MACROBLOCK *mb,
                           int mi_row, int mi_col, BLOCK_SIZE bs);
 
-void vp9_denoiser_update_frame_stats();
+void vp9_denoiser_reset_frame_stats(VP9_DENOISER *denoiser);
+
+void vp9_denoiser_update_frame_stats(VP9_DENOISER *denoiser, MB_MODE_INFO *mbmi,
+                                     unsigned int sse, PREDICTION_MODE mode);
 
 int vp9_denoiser_alloc(VP9_DENOISER *denoiser, int width, int height,
                        int ssx, int ssy, int border);

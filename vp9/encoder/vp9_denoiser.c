@@ -9,6 +9,7 @@
  */
 
 #include <assert.h>
+#include <limits.h>
 #include "vpx_scale/yv12config.h"
 #include "vpx/vpx_integer.h"
 #include "vp9/encoder/vp9_denoiser.h"
@@ -156,7 +157,25 @@ void vp9_denoiser_update_frame_info(VP9_DENOISER *denoiser,
   }
 }
 
-void vp9_denoiser_update_frame_stats() {
+void vp9_denoiser_reset_frame_stats(VP9_DENOISER *denoiser) {
+  denoiser->zero_mv_sse = UINT_MAX;
+  denoiser->best_sse = UINT_MAX;
+}
+
+void vp9_denoiser_update_frame_stats(VP9_DENOISER *denoiser, MB_MODE_INFO *mbmi,
+                                     unsigned int sse, PREDICTION_MODE mode) {
+  // TODO(tkopp): Use both MVs if possible
+  if (mbmi->mv[0].as_int == 0 && sse < denoiser->zero_mv_sse) {
+    denoiser->zero_mv_sse = sse;
+    denoiser->best_zeromv_reference_frame = mbmi->ref_frame[0];
+  }
+
+  if (mbmi->mv[0].as_int != 0 && sse < denoiser->best_sse) {
+    denoiser->best_sse = sse;
+    denoiser->best_sse_inter_mode = mode;
+    denoiser->best_sse_mv = mbmi->mv[0];
+    denoiser->best_reference_frame = mbmi->ref_frame[0];
+  }
 }
 
 int vp9_denoiser_alloc(VP9_DENOISER *denoiser, int width, int height,
@@ -179,6 +198,8 @@ int vp9_denoiser_alloc(VP9_DENOISER *denoiser, int width, int height,
     vp9_denoiser_free(denoiser);
     return 1;
   }
+
+  denoiser->increase_denoising = 0;
 
   return 0;
 }
