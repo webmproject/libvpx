@@ -594,8 +594,9 @@ void vp9_first_pass(VP9_COMP *cpi) {
 
       // Other than for the first frame do a motion search.
       if (cm->current_video_frame > 0) {
-        int tmp_err, motion_error;
+        int tmp_err, motion_error, raw_motion_error;
         int_mv mv, tmp_mv;
+        struct buf_2d unscaled_last_source_buf_2d;
 
         xd->plane[0].pre[0].buf = first_ref_buf->y_buffer + recon_yoffset;
         motion_error = get_prediction_error(bsize, &x->plane[0].src,
@@ -603,67 +604,82 @@ void vp9_first_pass(VP9_COMP *cpi) {
         // Assume 0,0 motion with no mv overhead.
         mv.as_int = tmp_mv.as_int = 0;
 
-        // Test last reference frame using the previous best mv as the
-        // starting point (best reference) for the search.
-        first_pass_motion_search(cpi, x, &best_ref_mv.as_mv, &mv.as_mv,
-                                 &motion_error);
-        if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
-          vp9_clear_system_state();
-          motion_error = (int)(motion_error * error_weight);
-        }
+        // Compute the motion error of the 0,0 motion using the last source
+        // frame as the reference. Skip the further motion search on
+        // reconstructed frame if this error is small.
+        unscaled_last_source_buf_2d.buf =
+            cpi->unscaled_last_source->y_buffer + recon_yoffset;
+        unscaled_last_source_buf_2d.stride =
+            cpi->unscaled_last_source->y_stride;
+        raw_motion_error = get_prediction_error(bsize, &x->plane[0].src,
+                                                &unscaled_last_source_buf_2d);
 
-        // If the current best reference mv is not centered on 0,0 then do a 0,0
-        // based search as well.
-        if (best_ref_mv.as_int) {
-          tmp_err = INT_MAX;
-          first_pass_motion_search(cpi, x, &zero_mv, &tmp_mv.as_mv,
-                                   &tmp_err);
+        // TODO(pengchong): Replace the hard-coded threshold
+        if (raw_motion_error > 25) {
+          // Test last reference frame using the previous best mv as the
+          // starting point (best reference) for the search.
+          first_pass_motion_search(cpi, x, &best_ref_mv.as_mv, &mv.as_mv,
+                                   &motion_error);
           if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
             vp9_clear_system_state();
-            tmp_err = (int)(tmp_err * error_weight);
+            motion_error = (int)(motion_error * error_weight);
           }
 
-          if (tmp_err < motion_error) {
-            motion_error = tmp_err;
-            mv.as_int = tmp_mv.as_int;
-          }
-        }
+          // If the current best reference mv is not centered on 0,0 then do a
+          // 0,0 based search as well.
+          if (best_ref_mv.as_int) {
+            tmp_err = INT_MAX;
+            first_pass_motion_search(cpi, x, &zero_mv, &tmp_mv.as_mv, &tmp_err);
+            if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
+              vp9_clear_system_state();
+              tmp_err = (int)(tmp_err * error_weight);
+            }
 
-        // Search in an older reference frame.
-        if (cm->current_video_frame > 1 && gld_yv12 != NULL) {
-          // Assume 0,0 motion with no mv overhead.
-          int gf_motion_error;
-
-          xd->plane[0].pre[0].buf = gld_yv12->y_buffer + recon_yoffset;
-          gf_motion_error = get_prediction_error(bsize, &x->plane[0].src,
-                                                 &xd->plane[0].pre[0]);
-
-          first_pass_motion_search(cpi, x, &zero_mv, &tmp_mv.as_mv,
-                                   &gf_motion_error);
-          if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
-            vp9_clear_system_state();
-            gf_motion_error = (int)(gf_motion_error * error_weight);
+            if (tmp_err < motion_error) {
+              motion_error = tmp_err;
+              mv.as_int = tmp_mv.as_int;
+            }
           }
 
-          if (gf_motion_error < motion_error && gf_motion_error < this_error)
-            ++second_ref_count;
+          // Search in an older reference frame.
+          if (cm->current_video_frame > 1 && gld_yv12 != NULL) {
+            // Assume 0,0 motion with no mv overhead.
+            int gf_motion_error;
 
-          // Reset to last frame as reference buffer.
-          xd->plane[0].pre[0].buf = first_ref_buf->y_buffer + recon_yoffset;
-          xd->plane[1].pre[0].buf = first_ref_buf->u_buffer + recon_uvoffset;
-          xd->plane[2].pre[0].buf = first_ref_buf->v_buffer + recon_uvoffset;
+            xd->plane[0].pre[0].buf = gld_yv12->y_buffer + recon_yoffset;
+            gf_motion_error = get_prediction_error(bsize, &x->plane[0].src,
+                                                   &xd->plane[0].pre[0]);
 
-          // In accumulating a score for the older reference frame take the
-          // best of the motion predicted score and the intra coded error
-          // (just as will be done for) accumulation of "coded_error" for
-          // the last frame.
-          if (gf_motion_error < this_error)
-            sr_coded_error += gf_motion_error;
-          else
-            sr_coded_error += this_error;
+            first_pass_motion_search(cpi, x, &zero_mv, &tmp_mv.as_mv,
+                                     &gf_motion_error);
+            if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
+              vp9_clear_system_state();
+              gf_motion_error = (int)(gf_motion_error * error_weight);
+            }
+
+            if (gf_motion_error < motion_error && gf_motion_error < this_error)
+              ++second_ref_count;
+
+            // Reset to last frame as reference buffer.
+            xd->plane[0].pre[0].buf = first_ref_buf->y_buffer + recon_yoffset;
+            xd->plane[1].pre[0].buf = first_ref_buf->u_buffer + recon_uvoffset;
+            xd->plane[2].pre[0].buf = first_ref_buf->v_buffer + recon_uvoffset;
+
+            // In accumulating a score for the older reference frame take the
+            // best of the motion predicted score and the intra coded error
+            // (just as will be done for) accumulation of "coded_error" for
+            // the last frame.
+            if (gf_motion_error < this_error)
+              sr_coded_error += gf_motion_error;
+            else
+              sr_coded_error += this_error;
+          } else {
+            sr_coded_error += motion_error;
+          }
         } else {
           sr_coded_error += motion_error;
         }
+
         // Start by assuming that intra mode is best.
         best_ref_mv.as_int = 0;
 
