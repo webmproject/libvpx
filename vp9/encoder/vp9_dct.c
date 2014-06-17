@@ -50,7 +50,7 @@ void vp9_fdct4x4_1_c(const int16_t *input, int16_t *output, int stride) {
     for (c = 0; c < 4; ++c)
       sum += input[r * stride + c];
 
-  output[0] = sum << 3;
+  output[0] = sum << 1;
   output[1] = 0;
 }
 
@@ -258,7 +258,7 @@ void vp9_fdct8x8_1_c(const int16_t *input, int16_t *output, int stride) {
     for (c = 0; c < 8; ++c)
       sum += input[r * stride + c];
 
-  output[0] = sum * 8;
+  output[0] = sum;
   output[1] = 0;
 }
 
@@ -340,7 +340,7 @@ void vp9_fdct16x16_1_c(const int16_t *input, int16_t *output, int stride) {
     for (c = 0; c < 16; ++c)
       sum += input[r * stride + c];
 
-  output[0] = sum * 8;
+  output[0] = sum >> 1;
   output[1] = 0;
 }
 
@@ -1369,7 +1369,7 @@ void vp9_fdct32x32_1_c(const int16_t *input, int16_t *output, int stride) {
     for (c = 0; c < 32; ++c)
       sum += input[r * stride + c];
 
-  output[0] = sum << 2;
+  output[0] = sum >> 3;
   output[1] = 0;
 }
 
