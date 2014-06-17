@@ -3406,8 +3406,8 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
   set_ref_ptrs(cm, xd, mbmi->ref_frame[0], mbmi->ref_frame[1]);
 
 #if CONFIG_TRANSCODE
-  if (mbmi->interp_filter == BILINEAR)
-    mbmi->interp_filter = EIGHTTAP;
+  if (cm->interp_filter != SWITCHABLE)
+    mbmi->interp_filter = cm->interp_filter;
 #endif
   // Experimental code. Special case for gf and arf zeromv modes.
   // Increase zbin size to suppress noise
