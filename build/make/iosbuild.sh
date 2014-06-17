@@ -31,6 +31,8 @@ TARGETS="armv6-darwin-gcc
          x86-iphonesimulator-gcc
          x86_64-iphonesimulator-gcc"
 
+# Configures for the target specified by $1, and invokes make with the dist
+# target using $DIST_DIR as the distribution output directory.
 build_target() {
   local target="$1"
   local old_pwd="$(pwd)"
@@ -48,6 +50,8 @@ build_target() {
   vlog "***Done building target: ${target}***"
 }
 
+# Configures and builds each target specified by $1, and then builds
+# VPX.framework.
 build_targets() {
   local lib_list=""
   local targets="$1"
@@ -89,6 +93,8 @@ build_targets() {
   # VPX.framework/VPX via lipo -info.
 }
 
+# Trap function. Cleans up the subtree used to build all targets contained in
+# $TARGETS.
 cleanup() {
   cd "${ORIG_PWD}"
 
