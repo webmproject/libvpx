@@ -32,6 +32,7 @@
 #include "vp9/encoder/vp9_mcomp.h"
 #include "vp9/encoder/vp9_quantize.h"
 #include "vp9/encoder/vp9_ratectrl.h"
+#include "vp9/encoder/vp9_rdopt.h"
 #include "vp9/encoder/vp9_speed_features.h"
 #include "vp9/encoder/vp9_svc_layercontext.h"
 #include "vp9/encoder/vp9_tokenize.h"
@@ -45,9 +46,6 @@ extern "C" {
 #endif
 
 #define DEFAULT_GF_INTERVAL         10
-
-#define MAX_MODES 30
-#define MAX_REFS  6
 
 typedef struct {
   int nmvjointcost[MV_JOINTS];
@@ -66,56 +64,6 @@ typedef struct {
   FRAME_CONTEXT fc;
 } CODING_CONTEXT;
 
-// This enumerator type needs to be kept aligned with the mode order in
-// const MODE_DEFINITION vp9_mode_order[MAX_MODES] used in the rd code.
-typedef enum {
-  THR_NEARESTMV,
-  THR_NEARESTA,
-  THR_NEARESTG,
-
-  THR_DC,
-
-  THR_NEWMV,
-  THR_NEWA,
-  THR_NEWG,
-
-  THR_NEARMV,
-  THR_NEARA,
-  THR_COMP_NEARESTLA,
-  THR_COMP_NEARESTGA,
-
-  THR_TM,
-
-  THR_COMP_NEARLA,
-  THR_COMP_NEWLA,
-  THR_NEARG,
-  THR_COMP_NEARGA,
-  THR_COMP_NEWGA,
-
-  THR_ZEROMV,
-  THR_ZEROG,
-  THR_ZEROA,
-  THR_COMP_ZEROLA,
-  THR_COMP_ZEROGA,
-
-  THR_H_PRED,
-  THR_V_PRED,
-  THR_D135_PRED,
-  THR_D207_PRED,
-  THR_D153_PRED,
-  THR_D63_PRED,
-  THR_D117_PRED,
-  THR_D45_PRED,
-} THR_MODES;
-
-typedef enum {
-  THR_LAST,
-  THR_GOLD,
-  THR_ALTR,
-  THR_COMP_LA,
-  THR_COMP_GA,
-  THR_INTRA,
-} THR_MODES_SUB8X8;
 
 typedef enum {
   // encode_breakout is disabled.
@@ -292,32 +240,6 @@ static INLINE int is_lossless_requested(const VP9EncoderConfig *cfg) {
 static INLINE int is_best_mode(MODE mode) {
   return mode == ONE_PASS_BEST || mode == TWO_PASS_SECOND_BEST;
 }
-
-typedef struct RD_OPT {
-  // Thresh_mult is used to set a threshold for the rd score. A higher value
-  // means that we will accept the best mode so far more often. This number
-  // is used in combination with the current block size, and thresh_freq_fact
-  // to pick a threshold.
-  int thresh_mult[MAX_MODES];
-  int thresh_mult_sub8x8[MAX_REFS];
-
-  int threshes[MAX_SEGMENTS][BLOCK_SIZES][MAX_MODES];
-  int thresh_freq_fact[BLOCK_SIZES][MAX_MODES];
-
-  int64_t comp_pred_diff[REFERENCE_MODES];
-  int64_t prediction_type_threshes[MAX_REF_FRAMES][REFERENCE_MODES];
-  int64_t tx_select_diff[TX_MODES];
-  // FIXME(rbultje) can this overflow?
-  int tx_select_threshes[MAX_REF_FRAMES][TX_MODES];
-
-  int64_t filter_diff[SWITCHABLE_FILTER_CONTEXTS];
-  int64_t filter_threshes[MAX_REF_FRAMES][SWITCHABLE_FILTER_CONTEXTS];
-  int64_t filter_cache[SWITCHABLE_FILTER_CONTEXTS];
-  int64_t mask_filter;
-
-  int RDMULT;
-  int RDDIV;
-} RD_OPT;
 
 typedef struct VP9_COMP {
   QUANTS quants;
