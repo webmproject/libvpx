@@ -1340,7 +1340,7 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
     twopass->gf_group.rf_level[frame_index] = GF_ARF_STD;
     twopass->gf_group.bit_allocation[frame_index] = gf_arf_bits;
     twopass->gf_group.arf_src_offset[frame_index] =
-      rc->baseline_gf_interval - 1;
+      (unsigned char)(rc->baseline_gf_interval - 1);
     twopass->gf_group.arf_update_idx[frame_index] = 2;
     twopass->gf_group.arf_ref_idx[frame_index] = 2;
     ++frame_index;
@@ -1350,7 +1350,7 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
       twopass->gf_group.update_type[frame_index] = ARF_UPDATE;
       twopass->gf_group.rf_level[frame_index] = GF_ARF_LOW;
       twopass->gf_group.arf_src_offset[frame_index] =
-        ((rc->baseline_gf_interval - 1) >> 1);
+        (unsigned char)((rc->baseline_gf_interval >> 1) - 1);
       twopass->gf_group.arf_update_idx[frame_index] = 3;
       twopass->gf_group.arf_ref_idx[frame_index] = 2;
       ++frame_index;
@@ -1385,6 +1385,9 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
         twopass->gf_group.arf_update_idx[frame_index] = 2;
         twopass->gf_group.arf_ref_idx[frame_index] = 2;
       }
+    } else {
+      twopass->gf_group.arf_update_idx[frame_index] = 2;
+      twopass->gf_group.arf_ref_idx[frame_index] = 2;
     }
 
     target_frame_size = clamp(target_frame_size, 0,
@@ -1402,6 +1405,16 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
       twopass->gf_group.bit_allocation[middle_frame_idx] + mid_boost_bits;
     twopass->gf_group.update_type[middle_frame_idx] = OVERLAY_UPDATE;
     twopass->gf_group.bit_allocation[middle_frame_idx] = 0;
+
+    // Configure the overlay frame at the end of the sequence that will also
+    // be the start frame of the next group. The reason for doing this here
+    // is that on entry to vp9_get_compressed_data() for the overlay
+    // frame, but before the call to vp9_rc_get_second_pass_params() the
+    // data will otherwise be undefined.
+    twopass->gf_group.update_type[frame_index] = OVERLAY_UPDATE;
+    twopass->gf_group.rf_level[frame_index] = INTER_NORMAL;
+    twopass->gf_group.arf_update_idx[frame_index] = 2;
+    twopass->gf_group.arf_ref_idx[frame_index] = 2;
   }
 }
 

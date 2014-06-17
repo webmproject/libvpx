@@ -2268,8 +2268,15 @@ static void encode_rd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
         rd_use_partition(cpi, tile, mi, tp, mi_row, mi_col, BLOCK_64X64,
                          &dummy_rate, &dummy_dist, 1, cpi->pc_root);
       } else {
+        GF_GROUP * gf_grp = &cpi->twopass.gf_group;
+        int last_was_mid_sequence_overlay = 0;
+        if ((cpi->pass == 2) && (gf_grp->index)) {
+          if (gf_grp->update_type[gf_grp->index - 1] == OVERLAY_UPDATE)
+            last_was_mid_sequence_overlay = 1;
+        }
         if ((cm->current_video_frame
             % sf->last_partitioning_redo_frequency) == 0
+            || last_was_mid_sequence_overlay
             || cm->prev_mi == 0
             || cm->show_frame == 0
             || cm->frame_type == KEY_FRAME

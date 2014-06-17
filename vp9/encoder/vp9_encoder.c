@@ -2462,10 +2462,9 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
       cm->show_frame = 1;
       cm->intra_only = 0;
 
-      // Check to see if the frame to be encoded is an overlay
-      // for a previous arf frame and if so configure it as such.
-      if (cpi->pass == 0)
-        is_src_altref(cpi);
+      // Check to see if the frame to be encoded is an overlay for a previous
+      // arf frame and if so configure it as such.
+      is_src_altref(cpi);
     }
   }
 
