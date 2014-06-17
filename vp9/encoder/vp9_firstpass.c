@@ -607,7 +607,8 @@ void vp9_first_pass(VP9_COMP *cpi) {
                                                 &unscaled_last_source_buf_2d);
 
         // TODO(pengchong): Replace the hard-coded threshold
-        if (raw_motion_error > 25) {
+        if (raw_motion_error > 25 ||
+            (cpi->use_svc && cpi->svc.number_temporal_layers == 1)) {
           // Test last reference frame using the previous best mv as the
           // starting point (best reference) for the search.
           first_pass_motion_search(cpi, x, &best_ref_mv.as_mv, &mv.as_mv,
