@@ -642,8 +642,8 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP9_COMP *cpi,
 
   if (frame_is_intra_only(cm)) {
     active_best_quality = rc->best_quality;
-#if !CONFIG_MULTIPLE_ARF
-    // Handle the special case for key frames forced when we have75 reached
+
+    // Handle the special case for key frames forced when we have reached
     // the maximum key frame interval. Here force the Q to a range
     // based on the ambient Q to reduce the risk of popping.
     if (rc->this_key_frame_forced) {
@@ -674,13 +674,6 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP9_COMP *cpi,
       active_best_quality += vp9_compute_qdelta(rc, q_val,
                                                 q_val * q_adj_factor);
     }
-#else
-    double current_q;
-    // Force the KF quantizer to be 30% of the active_worst_quality.
-    current_q = vp9_convert_qindex_to_q(active_worst_quality);
-    active_best_quality = active_worst_quality
-        + vp9_compute_qdelta(rc, current_q, current_q * 0.3);
-#endif
   } else if (!rc->is_src_frame_alt_ref &&
              (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)) {
     // Use the lower of active_worst_quality and recent
@@ -782,23 +775,7 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP9_COMP *cpi,
         q = *top_index;
     }
   }
-#if CONFIG_MULTIPLE_ARF
-  // Force the quantizer determined by the coding order pattern.
-  if (cpi->multi_arf_enabled && (cm->frame_type != KEY_FRAME) &&
-      cpi->oxcf.rc_mode != VPX_Q) {
-    double new_q;
-    double current_q = vp9_convert_qindex_to_q(active_worst_quality);
-    int level = cpi->this_frame_weight;
-    assert(level >= 0);
-    new_q = current_q * (1.0 - (0.2 * (cpi->max_arf_level - level)));
-    q = active_worst_quality +
-        vp9_compute_qdelta(rc, current_q, new_q);
 
-    *bottom_index = q;
-    *top_index    = q;
-    printf("frame:%d q:%d\n", cm->current_video_frame, q);
-  }
-#endif
   assert(*top_index <= rc->worst_quality &&
          *top_index >= rc->best_quality);
   assert(*bottom_index <= rc->worst_quality &&
@@ -819,7 +796,6 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi,
   int q;
 
   if (frame_is_intra_only(cm) || vp9_is_upper_layer_key_frame(cpi)) {
-#if !CONFIG_MULTIPLE_ARF
     // Handle the special case for key frames forced when we have75 reached
     // the maximum key frame interval. Here force the Q to a range
     // based on the ambient Q to reduce the risk of popping.
@@ -854,13 +830,6 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi,
       active_best_quality += vp9_compute_qdelta(rc, q_val,
                                                 q_val * q_adj_factor);
     }
-#else
-    double current_q;
-    // Force the KF quantizer to be 30% of the active_worst_quality.
-    current_q = vp9_convert_qindex_to_q(active_worst_quality);
-    active_best_quality = active_worst_quality
-        + vp9_compute_qdelta(rc, current_q, current_q * 0.3);
-#endif
   } else if (!rc->is_src_frame_alt_ref &&
              (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)) {
     // Use the lower of active_worst_quality and recent
@@ -959,23 +928,7 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi,
         q = *top_index;
     }
   }
-#if CONFIG_MULTIPLE_ARF
-  // Force the quantizer determined by the coding order pattern.
-  if (cpi->multi_arf_enabled && (cm->frame_type != KEY_FRAME) &&
-      cpi->oxcf.rc_mode != VPX_Q) {
-    double new_q;
-    double current_q = vp9_convert_qindex_to_q(active_worst_quality);
-    int level = cpi->this_frame_weight;
-    assert(level >= 0);
-    new_q = current_q * (1.0 - (0.2 * (cpi->max_arf_level - level)));
-    q = active_worst_quality +
-        vp9_compute_qdelta(rc, current_q, new_q);
 
-    *bottom_index = q;
-    *top_index    = q;
-    printf("frame:%d q:%d\n", cm->current_video_frame, q);
-  }
-#endif
   assert(*top_index <= rc->worst_quality &&
          *top_index >= rc->best_quality);
   assert(*bottom_index <= rc->worst_quality &&

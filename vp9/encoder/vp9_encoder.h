@@ -248,11 +248,7 @@ typedef struct VP9_COMP {
   VP9EncoderConfig oxcf;
   struct lookahead_ctx    *lookahead;
   struct lookahead_entry  *source;
-#if CONFIG_MULTIPLE_ARF
-  struct lookahead_entry  *alt_ref_source[REF_FRAMES];
-#else
   struct lookahead_entry  *alt_ref_source;
-#endif
   struct lookahead_entry  *last_source;
 
   YV12_BUFFER_CONFIG *Source;
@@ -271,9 +267,6 @@ typedef struct VP9_COMP {
   int gld_fb_idx;
   int alt_fb_idx;
 
-#if CONFIG_MULTIPLE_ARF
-  int alt_ref_fb_idx[REF_FRAMES - 3];
-#endif
   int refresh_last_frame;
   int refresh_golden_frame;
   int refresh_alt_ref_frame;
@@ -290,13 +283,6 @@ typedef struct VP9_COMP {
 
   TOKENEXTRA *tok;
   unsigned int tok_count[4][1 << 6];
-
-#if CONFIG_MULTIPLE_ARF
-  // Position within a frame coding order (including any additional ARF frames).
-  unsigned int sequence_number;
-  // Next frame in naturally occurring order that has not yet been coded.
-  int next_frame_in_order;
-#endif
 
   // Ambient reconstruction err target for force key frames
   int ambient_err;
@@ -431,17 +417,6 @@ typedef struct VP9_COMP {
   int partition_cost[PARTITION_CONTEXTS][PARTITION_TYPES];
 
   int multi_arf_enabled;
-#if CONFIG_MULTIPLE_ARF
-  // ARF tracking variables.
-  unsigned int frame_coding_order_period;
-  unsigned int new_frame_coding_order_period;
-  int frame_coding_order[MAX_LAG_BUFFERS * 2];
-  int arf_buffer_idx[MAX_LAG_BUFFERS * 3 / 2];
-  int arf_weight[MAX_LAG_BUFFERS];
-  int arf_buffered;
-  int this_frame_weight;
-  int max_arf_level;
-#endif
 
 #if CONFIG_DENOISING
   VP9_DENOISER denoiser;
