@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//lf0\u003d",
+        "filename": "vp9/common/vp9_seg_common.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-06-17T17:18:29Z",
+      "side": 1,
+      "message": "better to have default: assert(0);",
+      "revId": "ebaee100487dfbd1d00a8927d78935d19fce763c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//lfw\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-06-17T17:18:29Z",
+      "side": 1,
+      "message": "remove this file from the patch.",
+      "revId": "ebaee100487dfbd1d00a8927d78935d19fce763c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//lfo\u003d",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-06-17T17:18:29Z",
+      "side": 1,
+      "message": "can we do this assignment outside the loop, by using a variable cat6_ptr?",
+      "revId": "ebaee100487dfbd1d00a8927d78935d19fce763c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//lfc\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-06-17T17:18:29Z",
+      "side": 1,
+      "message": "use config macros here?",
+      "revId": "ebaee100487dfbd1d00a8927d78935d19fce763c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//lfg\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-06-17T17:18:29Z",
+      "side": 1,
+      "message": "Can we use config macros here?",
+      "revId": "ebaee100487dfbd1d00a8927d78935d19fce763c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//lfs\u003d",
+        "filename": "vp9/encoder/vp9_tokenize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-06-17T17:18:29Z",
+      "side": 1,
+      "message": "Should these be in CONFIG macros?",
+      "revId": "ebaee100487dfbd1d00a8927d78935d19fce763c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//lfk\u003d",
+        "filename": "vpxdec.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 991,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-06-17T17:18:29Z",
+      "side": 1,
+      "message": "perhaps it is better to move the bit_depth_to_bps() utility to the vpx level. But this can wait for now.",
+      "revId": "ebaee100487dfbd1d00a8927d78935d19fce763c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
