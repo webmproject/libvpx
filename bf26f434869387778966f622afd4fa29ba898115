@@ -89,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//lJ8\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1004730
+      },
+      "writtenOn": "2014-06-18T17:44:35Z",
+      "side": 1,
+      "message": "Added in a different CL (Iddb901dbed18940fa60bd8c5cca008c9c07bb1fc) since it changes program behavior.",
+      "parentUuid": "AAAAdn//l2Q\u003d",
+      "revId": "bf26f434869387778966f622afd4fa29ba898115",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//l2Y\u003d",
         "filename": "vp9/encoder/vp9_denoiser.c",
         "patchSetId": 1
@@ -345,6 +363,24 @@
       "writtenOn": "2014-06-13T21:24:28Z",
       "side": 1,
       "message": "this can be localized to the key_frame block",
+      "revId": "bf26f434869387778966f622afd4fa29ba898115",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//lIY\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1004730
+      },
+      "writtenOn": "2014-06-18T17:44:35Z",
+      "side": 1,
+      "message": "Done (Patch set 6 - I missed this one before)",
+      "parentUuid": "AAAAdn//l2k\u003d",
       "revId": "bf26f434869387778966f622afd4fa29ba898115",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
