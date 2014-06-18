@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//lTI\u003d",
+        "filename": "build/make/iosbuild.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-18T01:50:10Z",
+      "side": 1,
+      "message": "aarch64 still requires other code changes I guess",
+      "revId": "f7344a486141f192442ae21ba9449485a9786423",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//lTE\u003d",
+        "filename": "build/make/iosbuild.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-18T01:50:10Z",
+      "side": 1,
+      "message": "current",
+      "revId": "f7344a486141f192442ae21ba9449485a9786423",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//lTA\u003d",
+        "filename": "build/make/iosbuild.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-18T01:50:10Z",
+      "side": 1,
+      "message": "VPX_FRAMEWORK_VPX_CONFIG_H_",
+      "revId": "f7344a486141f192442ae21ba9449485a9786423",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
