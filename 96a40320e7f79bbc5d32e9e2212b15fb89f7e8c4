@@ -16,6 +16,24 @@
       "revId": "96a40320e7f79bbc5d32e9e2212b15fb89f7e8c4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//lFI\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-06-18T20:30:06Z",
+      "side": 0,
+      "message": "No. They will be set here:\n      worker_data-\u003epbi-\u003emax_threads \u003d\n        ctx-\u003eframe_parallel_decode \u003d\u003d 0 ? ctx-\u003ecfg.threads : 0;\n and\n    worker_data-\u003epbi-\u003einv_tile_order \u003d ctx-\u003einvert_tile_order;\n\nIf I fail to set them, I think it will fail in some test cases.",
+      "parentUuid": "AAAAdn//lSE\u003d",
+      "revId": "96a40320e7f79bbc5d32e9e2212b15fb89f7e8c4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
