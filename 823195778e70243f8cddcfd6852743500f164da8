@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//lT4\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 402,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-06-18T00:36:10Z",
+      "side": 1,
+      "message": "Do you need the corrupt frame check here?",
+      "revId": "823195778e70243f8cddcfd6852743500f164da8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//lTo\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 408,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-06-18T00:36:10Z",
+      "side": 1,
+      "message": "This looks weird. What is data_start after decode_one_iter() is called? Is it really data_end inclusive?\n\ne.g.\n\nMy first frame starts at 0 and is 500 bytes long.\nSecond frame starts at 500 and is 200 bytes long.\n\ndata_start\u003d0\nnext_start \u003d  data_start + frame_size;\nnext_start\u003d500\ndecode_one_iter()\ndata_start\u003d499 next_start\u003d500\n\ndata_start \u003d next_start;\ndata_start\u003d500 next_start\u003d500\n\nnext_start \u003d  data_start + frame_size;\nnext_start\u003d700\n\ndecode_one_iter()\ndata_start\u003d699 next_start\u003d700",
+      "revId": "823195778e70243f8cddcfd6852743500f164da8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
