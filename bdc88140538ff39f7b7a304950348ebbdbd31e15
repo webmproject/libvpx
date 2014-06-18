@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//lJU\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-06-18T17:41:52Z",
+      "side": 1,
+      "message": "frame_type is the current frame type?\n\nif it is KEY_FRAME at this point, denoiser-\u003erunning_avg_y[LAST_FRAME] contains the values from initialization. why copy it to everyone else?\n\ndid i miss read something here?",
+      "revId": "bdc88140538ff39f7b7a304950348ebbdbd31e15",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//lKA\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 686,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-06-18T17:41:52Z",
+      "side": 1,
+      "message": "put a comment here saying that the current implementation assumes 420",
+      "revId": "bdc88140538ff39f7b7a304950348ebbdbd31e15",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
