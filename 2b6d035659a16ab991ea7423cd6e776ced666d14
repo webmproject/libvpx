@@ -16,6 +16,24 @@
       "revId": "2b6d035659a16ab991ea7423cd6e776ced666d14",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//lGc\u003d",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-06-18T18:05:46Z",
+      "side": 1,
+      "message": "I thought the large partition will likely chose inter mode over intra mode. I agree that for Block16x16 we may want to check intra mode. I can add a TODO, and will fix the intra checking code later to see if it gives any psnr gain.",
+      "parentUuid": "AAAAdn//lHo\u003d",
+      "revId": "2b6d035659a16ab991ea7423cd6e776ced666d14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
