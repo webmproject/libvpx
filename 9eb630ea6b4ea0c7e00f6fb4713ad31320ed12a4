@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//lZw\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1004730
+      },
+      "writtenOn": "2014-06-18T17:46:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//law\u003d",
+      "revId": "9eb630ea6b4ea0c7e00f6fb4713ad31320ed12a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//las\u003d",
         "filename": "vp9/encoder/vp9_denoiser.c",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2014-06-17T21:09:51Z",
       "side": 1,
       "message": "const",
+      "revId": "9eb630ea6b4ea0c7e00f6fb4713ad31320ed12a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//lZ4\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1004730
+      },
+      "writtenOn": "2014-06-18T17:46:01Z",
+      "side": 1,
+      "message": "In future CLs these constants may change based on the increase_denoising parameter.",
+      "parentUuid": "AAAAdn//las\u003d",
       "revId": "9eb630ea6b4ea0c7e00f6fb4713ad31320ed12a4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//lZo\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1004730
+      },
+      "writtenOn": "2014-06-18T17:46:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//lbE\u003d",
+      "revId": "9eb630ea6b4ea0c7e00f6fb4713ad31320ed12a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//lbA\u003d",
         "filename": "vp9/encoder/vp9_denoiser.c",
         "patchSetId": 4
@@ -64,6 +118,24 @@
       "writtenOn": "2014-06-17T21:09:51Z",
       "side": 1,
       "message": "static",
+      "revId": "9eb630ea6b4ea0c7e00f6fb4713ad31320ed12a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//lZk\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1004730
+      },
+      "writtenOn": "2014-06-18T17:46:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//lbA\u003d",
       "revId": "9eb630ea6b4ea0c7e00f6fb4713ad31320ed12a4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//lZc\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1004730
+      },
+      "writtenOn": "2014-06-18T17:46:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//la8\u003d",
+      "revId": "9eb630ea6b4ea0c7e00f6fb4713ad31320ed12a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//la0\u003d",
         "filename": "vp9/encoder/vp9_denoiser.c",
         "patchSetId": 4
@@ -98,6 +188,24 @@
       "writtenOn": "2014-06-17T21:09:51Z",
       "side": 1,
       "message": "static",
+      "revId": "9eb630ea6b4ea0c7e00f6fb4713ad31320ed12a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//lZM\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1004730
+      },
+      "writtenOn": "2014-06-18T17:46:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//la0\u003d",
       "revId": "9eb630ea6b4ea0c7e00f6fb4713ad31320ed12a4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//lZQ\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1004730
+      },
+      "writtenOn": "2014-06-18T17:46:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//la4\u003d",
+      "revId": "9eb630ea6b4ea0c7e00f6fb4713ad31320ed12a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//lak\u003d",
         "filename": "vp9/encoder/vp9_denoiser.c",
         "patchSetId": 4
@@ -138,6 +264,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//lZY\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1004730
+      },
+      "writtenOn": "2014-06-18T17:46:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//lak\u003d",
+      "revId": "9eb630ea6b4ea0c7e00f6fb4713ad31320ed12a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//lao\u003d",
         "filename": "vp9/encoder/vp9_denoiser.c",
         "patchSetId": 4
@@ -149,6 +293,24 @@
       "writtenOn": "2014-06-17T21:09:51Z",
       "side": 1,
       "message": "drop this line",
+      "revId": "9eb630ea6b4ea0c7e00f6fb4713ad31320ed12a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//lZU\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1004730
+      },
+      "writtenOn": "2014-06-18T17:46:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//lao\u003d",
       "revId": "9eb630ea6b4ea0c7e00f6fb4713ad31320ed12a4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
