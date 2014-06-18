@@ -524,6 +524,7 @@ static void init_config(struct VP9_COMP *cpi, VP9EncoderConfig *oxcf) {
   vp9_change_config(cpi, oxcf);
 
   cpi->static_mb_pct = 0;
+  cpi->ref_frame_flags = 0;
 
   init_buffer_indices(cpi);
 
@@ -564,7 +565,6 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   cpi->pass = get_pass(cpi->oxcf.mode);
 
   rc->baseline_gf_interval = DEFAULT_GF_INTERVAL;
-  cpi->ref_frame_flags = VP9_ALT_FLAG | VP9_GOLD_FLAG | VP9_LAST_FLAG;
 
   cpi->refresh_golden_frame = 0;
   cpi->refresh_last_frame = 1;
@@ -1571,12 +1571,15 @@ static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
 void vp9_scale_references(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
   MV_REFERENCE_FRAME ref_frame;
+  const VP9_REFFRAME ref_mask[3] = {VP9_LAST_FLAG, VP9_GOLD_FLAG, VP9_ALT_FLAG};
 
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
     const int idx = cm->ref_frame_map[get_ref_frame_idx(cpi, ref_frame)];
     const YV12_BUFFER_CONFIG *const ref = &cm->frame_bufs[idx].buf;
 
-    if (ref->y_crop_width != cm->width || ref->y_crop_height != cm->height) {
+    // Need to convert from VP9_REFFRAME to index into ref_mask (subtract 1).
+    if ((cpi->ref_frame_flags & ref_mask[ref_frame - 1]) &&
+        (ref->y_crop_width != cm->width || ref->y_crop_height != cm->height)) {
       const int new_fb = get_free_fb(cm);
       vp9_realloc_frame_buffer(&cm->frame_bufs[new_fb].buf,
                                cm->width, cm->height,
