@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//k/s\u003d",
+        "filename": "build/make/iosbuild.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-06-18T19:51:57Z",
+      "side": 1,
+      "message": "We have an arm64 target? I was waiting on that appearing before adding more to the iOS pile.",
+      "parentUuid": "AAAAdn//lTI\u003d",
+      "revId": "f7344a486141f192442ae21ba9449485a9786423",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//lTE\u003d",
         "filename": "build/make/iosbuild.sh",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//k/o\u003d",
+        "filename": "build/make/iosbuild.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-06-18T19:51:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//lTE\u003d",
+      "revId": "f7344a486141f192442ae21ba9449485a9786423",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//lTA\u003d",
         "filename": "build/make/iosbuild.sh",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2014-06-18T01:50:10Z",
       "side": 1,
       "message": "VPX_FRAMEWORK_VPX_CONFIG_H_",
+      "revId": "f7344a486141f192442ae21ba9449485a9786423",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//k/I\u003d",
+        "filename": "build/make/iosbuild.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-06-18T19:51:57Z",
+      "side": 1,
+      "message": "Done, but updated to be more correct.",
+      "parentUuid": "AAAAdn//lTA\u003d",
       "revId": "f7344a486141f192442ae21ba9449485a9786423",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
