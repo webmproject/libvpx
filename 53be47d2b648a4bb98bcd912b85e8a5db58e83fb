@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//lPA\u003d",
+        "filename": "test/decode_test_driver.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-06-18T15:29:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//lRc\u003d",
+      "revId": "53be47d2b648a4bb98bcd912b85e8a5db58e83fb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//lRQ\u003d",
         "filename": "test/decode_test_driver.h",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2014-06-18T03:26:07Z",
       "side": 1,
       "message": "probably a bool return to indicate whether the loop should keep going",
+      "revId": "53be47d2b648a4bb98bcd912b85e8a5db58e83fb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//lOw\u003d",
+        "filename": "test/decode_test_driver.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-06-18T15:29:35Z",
+      "side": 1,
+      "message": "The assert stops the code from going further - if you don\u0027t want to continue don\u0027t assert.   The code looked weird to me with the return and the assert.   Maybe if you  have an example in which you don\u0027t want to assert and you do want to exit I can add this.",
+      "parentUuid": "AAAAdn//lRQ\u003d",
       "revId": "53be47d2b648a4bb98bcd912b85e8a5db58e83fb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//lOo\u003d",
+        "filename": "test/decode_test_driver.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-06-18T15:29:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//lRU\u003d",
+      "revId": "53be47d2b648a4bb98bcd912b85e8a5db58e83fb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//lRY\u003d",
         "filename": "test/decode_test_driver.h",
         "patchSetId": 3
@@ -64,6 +118,24 @@
       "writtenOn": "2014-06-18T03:26:07Z",
       "side": 1,
       "message": "/* frame_number */ or whatever this param comes to be\n\nhttp://google-styleguide.googlecode.com/svn/trunk/cppguide.xml#Function_Declarations_and_Definitions",
+      "revId": "53be47d2b648a4bb98bcd912b85e8a5db58e83fb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//lOk\u003d",
+        "filename": "test/decode_test_driver.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-06-18T15:29:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//lRY\u003d",
       "revId": "53be47d2b648a4bb98bcd912b85e8a5db58e83fb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//lOg\u003d",
+        "filename": "test/invalid_file_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-06-18T15:29:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//lRI\u003d",
+      "revId": "53be47d2b648a4bb98bcd912b85e8a5db58e83fb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//lQ0\u003d",
         "filename": "test/invalid_file_test.cc",
         "patchSetId": 3
@@ -98,6 +188,24 @@
       "writtenOn": "2014-06-18T03:39:27Z",
       "side": 1,
       "message": "!\u003d NULL",
+      "revId": "53be47d2b648a4bb98bcd912b85e8a5db58e83fb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//lOY\u003d",
+        "filename": "test/invalid_file_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-06-18T15:29:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//lQ0\u003d",
       "revId": "53be47d2b648a4bb98bcd912b85e8a5db58e83fb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//lOc\u003d",
+        "filename": "test/invalid_file_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-06-18T15:29:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//lQ4\u003d",
+      "revId": "53be47d2b648a4bb98bcd912b85e8a5db58e83fb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//lRE\u003d",
         "filename": "test/invalid_file_test.cc",
         "patchSetId": 3
@@ -132,6 +258,24 @@
       "writtenOn": "2014-06-18T03:39:27Z",
       "side": 1,
       "message": "not needed",
+      "revId": "53be47d2b648a4bb98bcd912b85e8a5db58e83fb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//lOU\u003d",
+        "filename": "test/invalid_file_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-06-18T15:29:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//lRE\u003d",
       "revId": "53be47d2b648a4bb98bcd912b85e8a5db58e83fb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//lOQ\u003d",
+        "filename": "test/invalid_file_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-06-18T15:29:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//lRA\u003d",
+      "revId": "53be47d2b648a4bb98bcd912b85e8a5db58e83fb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//lQw\u003d",
         "filename": "test/invalid_file_test.cc",
         "patchSetId": 3
@@ -172,6 +334,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//lOM\u003d",
+        "filename": "test/invalid_file_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-06-18T15:29:35Z",
+      "side": 1,
+      "message": "I agree it might not always fit.   I figured I\u0027d start with this and if I find a case it doesn\u0027t we can tweak.    In the case of a given specific test file -\u003e I think we should know exactly what the failure is..  Its the fuzz tests where we want some failure but don\u0027t care what -\u003e I guess.   but I imagine you could get the failure and move on...",
+      "parentUuid": "AAAAdn//lQw\u003d",
+      "revId": "53be47d2b648a4bb98bcd912b85e8a5db58e83fb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//lQ8\u003d",
         "filename": "test/invalid_file_test.cc",
         "patchSetId": 3
@@ -183,6 +363,24 @@
       "writtenOn": "2014-06-18T03:39:27Z",
       "side": 1,
       "message": "newline",
+      "revId": "53be47d2b648a4bb98bcd912b85e8a5db58e83fb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//lOI\u003d",
+        "filename": "test/invalid_file_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-06-18T15:29:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//lQ8\u003d",
       "revId": "53be47d2b648a4bb98bcd912b85e8a5db58e83fb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
