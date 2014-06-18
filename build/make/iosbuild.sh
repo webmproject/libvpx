@@ -50,9 +50,79 @@ build_target() {
   vlog "***Done building target: ${target}***"
 }
 
+# Returns the preprocessor symbol for the target specified by $1.
+target_to_preproc_symbol() {
+  target="$1"
+  case "${target}" in
+    armv6-*)
+      echo "__ARM_ARCH_6__"
+      ;;
+    armv7-*)
+      echo "__ARM_ARCH_7__"
+      ;;
+    armv7s-*)
+      echo "__ARM_ARCH_7S__"
+      ;;
+    x86-*)
+      echo "__i386__"
+      ;;
+    x86_64-*)
+      echo "__x86_64__"
+      ;;
+    *)
+      echo "#error ${target} unknown/unsupported"
+      return 1
+      ;;
+  esac
+}
+
+# Create a vpx_config.h shim that, based on preprocessor settings for the
+# current target CPU, includes the real vpx_config.h for the current target.
+# $1 is the list of targets.
+create_vpx_framework_config_shim() {
+  local targets="$1"
+  local config_file="${HEADER_DIR}/vpx_config.h"
+  local preproc_symbol=""
+  local target=""
+  local include_guard="VPX_FRAMEWORK_HEADERS_VPX_VPX_CONFIG_H_"
+
+  local file_header="/*
+ *  Copyright (c) $(date +%Y) The WebM project authors. All Rights Reserved.
+ *
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
+ */
+
+/* GENERATED FILE: DO NOT EDIT! */
+
+#ifndef ${include_guard}
+#define ${include_guard}
+
+#if defined"
+
+  printf "%s" "${file_header}" > "${config_file}"
+  for target in ${targets}; do
+    preproc_symbol=$(target_to_preproc_symbol "${target}")
+    printf " ${preproc_symbol}\n" >> "${config_file}"
+    printf "#include \"VPX/vpx/${target}/vpx_config.h\"\n" >> "${config_file}"
+    printf "#elif defined" >> "${config_file}"
+    mkdir "${HEADER_DIR}/${target}"
+    cp -p "${BUILD_ROOT}/${target}/vpx_config.h" "${HEADER_DIR}/${target}"
+  done
+
+  # Consume the last line of output from the loop: We don't want it.
+  sed -i '' -e '$d' "${config_file}"
+
+  printf "#endif\n\n" >> "${config_file}"
+  printf "#endif  // ${include_guard}" >> "${config_file}"
+}
+
 # Configures and builds each target specified by $1, and then builds
 # VPX.framework.
-build_targets() {
+build_framework() {
   local lib_list=""
   local targets="$1"
   local target=""
@@ -75,14 +145,19 @@ build_targets() {
 
   cd "${ORIG_PWD}"
 
-  # Includes are identical for all platforms, and according to dist target
-  # behavior vpx_config.h and vpx_version.h aren't actually necessary for user
-  # apps built with libvpx. So, just copy the includes from the last target
-  # built.
-  # TODO(tomfinegan): The above is a lame excuse. Build common config/version
-  # includes that use the preprocessor to include the correct file.
+  # The basic libvpx API includes are all the same; just grab the most recent
+  # set.
   cp -p "${target_dist_dir}"/include/vpx/* "${HEADER_DIR}"
+
+  # Build the fat library.
   ${LIPO} -create ${lib_list} -output ${FRAMEWORK_DIR}/VPX
+
+  # Create the vpx_config.h shim that allows usage of vpx_config.h from
+  # within VPX.framework.
+  create_vpx_framework_config_shim "${targets}"
+
+  # Copy in vpx_version.h.
+  cp -p "${BUILD_ROOT}/${target}/vpx_version.h" "${HEADER_DIR}"
 
   vlog "Created fat library ${FRAMEWORK_DIR}/VPX containing:"
   for lib in ${lib_list}; do
@@ -166,4 +241,4 @@ cat << EOF
 EOF
 fi
 
-build_targets "${TARGETS}"
+build_framework "${TARGETS}"
