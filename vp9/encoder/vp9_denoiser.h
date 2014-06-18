@@ -18,10 +18,10 @@
 extern "C" {
 #endif
 
-enum vp9_denoiser_decision {
+typedef enum vp9_denoiser_decision {
   COPY_BLOCK,
   FILTER_BLOCK
-};
+} VP9_DENOISER_DECISION;
 
 typedef struct vp9_denoiser {
   YV12_BUFFER_CONFIG running_avg_y[MAX_REF_FRAMES];
