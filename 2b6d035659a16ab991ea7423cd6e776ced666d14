@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//lHo\u003d",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-06-18T17:48:27Z",
+      "side": 1,
+      "message": "this essentially only allows DC prediction for block size 8x8.\n\nit looks ok to me, in this setting.\n\njust wondering what if we fix the intra prediction mode search mismatch, due to the use of TX_8X8 only?",
+      "revId": "2b6d035659a16ab991ea7423cd6e776ced666d14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
