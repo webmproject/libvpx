@@ -16,6 +16,24 @@
       "revId": "b75ba0326278b6bdcd66b194de5e732ca8f1003b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//lIM\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1004730
+      },
+      "writtenOn": "2014-06-18T17:52:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//l0k\u003d",
+      "revId": "b75ba0326278b6bdcd66b194de5e732ca8f1003b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
