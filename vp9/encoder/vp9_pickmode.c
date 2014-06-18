@@ -172,15 +172,15 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
   else
     x->skip_txfm = 0;
 
-  // TODO(jingning) This is a temporary solution to account for frames with
-  // light changes. Need to customize the rate-distortion modeling for non-RD
-  // mode decision.
-  if ((sse >> 3) > var)
-    sse = var;
-  vp9_model_rd_from_var_lapndz(var + sse, 1 << num_pels_log2_lookup[bsize],
-                               ac_quant >> 3, &rate, &dist);
-  *out_rate_sum = rate;
+  vp9_model_rd_from_var_lapndz(sse - var, 1 << num_pels_log2_lookup[bsize],
+                               dc_quant >> 3, &rate, &dist);
+  *out_rate_sum = rate >> 1;
   *out_dist_sum = dist << 3;
+
+  vp9_model_rd_from_var_lapndz(var, 1 << num_pels_log2_lookup[bsize],
+                               ac_quant >> 3, &rate, &dist);
+  *out_rate_sum += rate;
+  *out_dist_sum += dist << 4;
 }
 
 // TODO(jingning) placeholder for inter-frame non-RD mode decision.
