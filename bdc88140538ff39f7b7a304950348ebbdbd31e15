@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//lDY\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1004730
+      },
+      "writtenOn": "2014-06-18T18:27:41Z",
+      "side": 1,
+      "message": "Initialization (vp9_denoiser_alloc()) does not copy a frame into the buffer, it merely allocates it. So that part of the initialization is done here. See vp8/encoder/onyx_if.c, line 3232 to see how it was done in vp8.",
+      "parentUuid": "AAAAdn//lJU\u003d",
+      "revId": "bdc88140538ff39f7b7a304950348ebbdbd31e15",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//lKA\u003d",
         "filename": "vp9/encoder/vp9_encoder.c",
         "patchSetId": 6
@@ -30,6 +48,24 @@
       "writtenOn": "2014-06-18T17:41:52Z",
       "side": 1,
       "message": "put a comment here saying that the current implementation assumes 420",
+      "revId": "bdc88140538ff39f7b7a304950348ebbdbd31e15",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//lDI\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 686,
+      "author": {
+        "id": 1004730
+      },
+      "writtenOn": "2014-06-18T18:27:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//lKA\u003d",
       "revId": "bdc88140538ff39f7b7a304950348ebbdbd31e15",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
