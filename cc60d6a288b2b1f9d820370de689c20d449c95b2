@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//lHg\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-18T17:54:34Z",
+      "side": 1,
+      "message": "mc_avg+sig look const here too\n\nlater this could be reordered, usually it\u0027s best to have (input, output) except in c where a non-const input is being treated as \u0027this\u0027.\n\nhttp://google-styleguide.googlecode.com/svn/trunk/cppguide.xml#Function_Parameter_Ordering",
+      "revId": "cc60d6a288b2b1f9d820370de689c20d449c95b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//lHc\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-18T17:54:34Z",
+      "side": 1,
+      "message": "const uint8_t *srcbuf",
+      "revId": "cc60d6a288b2b1f9d820370de689c20d449c95b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
