@@ -92,9 +92,11 @@ void check_encoder_config(int disable_prompt,
   struct WarningListNode *warning = NULL;
   struct WarningList warning_list = {0};
 
+#if !CONFIG_TRANSCODE
   check_quantizer(stream_config->rc_min_quantizer,
                   stream_config->rc_max_quantizer,
                   &warning_list);
+#endif
   check_lag_in_frames_realtime_deadline(stream_config->g_lag_in_frames,
                                         global_config->deadline,
                                         &warning_list);
