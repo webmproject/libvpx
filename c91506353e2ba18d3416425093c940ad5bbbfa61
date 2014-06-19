@@ -84,6 +84,23 @@
       "revId": "c91506353e2ba18d3416425093c940ad5bbbfa61",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kt0\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 744,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-06-19T15:45:33Z",
+      "side": 1,
+      "message": "Maybe just: FrameWorkerData *const worker_data \u003d (FrameWorkerData *)ctx-\u003eframe_workers[0].data1;  You could also create small helper function for that line of code because it is used several times.",
+      "revId": "c91506353e2ba18d3416425093c940ad5bbbfa61",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
