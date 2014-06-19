@@ -463,9 +463,7 @@ $vp8_short_walsh4x4_neon_asm=vp8_short_walsh4x4_neon;
 # Quantizer
 #
 add_proto qw/void vp8_regular_quantize_b/, "struct block *, struct blockd *";
-specialize qw/vp8_regular_quantize_b sse2/;
-# TODO(johann) Update sse4 implementation and re-enable
-#$vp8_regular_quantize_b_sse4_1=vp8_regular_quantize_b_sse4;
+specialize qw/vp8_regular_quantize_b sse2 sse4_1/;
 
 add_proto qw/void vp8_fast_quantize_b/, "struct block *, struct blockd *";
 specialize qw/vp8_fast_quantize_b sse2 ssse3 media neon_asm/;
