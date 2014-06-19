@@ -40,10 +40,36 @@ void vp9_denoiser_update_frame_stats() {
 
 int vp9_denoiser_alloc(VP9_DENOISER *denoiser, int width, int height,
                        int border) {
+  assert(denoiser);
+
+  denoiser->running_avg_y.stride = width + 2 * border;
+
+  denoiser->running_avg_y.buf = calloc(
+      ((2 * border) + width) * ((2 * border) + height), sizeof(uint8_t));
+  if (denoiser->running_avg_y.buf == NULL) {
+    vp9_denoiser_free(denoiser);
+    return 1;
+  }
+
+  denoiser->mc_running_avg_y.stride = width + 2 * border;
+
+  denoiser->mc_running_avg_y.buf = calloc(
+      ((2 * border) + width) * ((2 * border) + height), sizeof(uint8_t));
+  if (denoiser->mc_running_avg_y.buf == NULL) {
+    vp9_denoiser_free(denoiser);
+    return 1;
+  }
+
   return 0;
 }
 
 void vp9_denoiser_free(VP9_DENOISER *denoiser) {
+  if (denoiser->running_avg_y.buf != NULL) {
+    free(denoiser->running_avg_y.buf);
+  }
+  if (denoiser->mc_running_avg_y.buf != NULL) {
+    free(denoiser->mc_running_avg_y.buf);
+  }
   return;
 }
 
