@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//krE\u003d",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-06-19T16:05:29Z",
+      "side": 1,
+      "message": "Looks like all these manipulations with flags is a copy-paste from encoder_encode() function. Please remove code duplication.",
+      "revId": "00e15330eb5bee220f690a5958e69f111380bf13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
