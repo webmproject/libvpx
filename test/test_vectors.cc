@@ -161,6 +161,7 @@ const char *const kVP9TestVectors[] = {
   "vp90-2-08-tile-4x1.webm", "vp90-2-09-subpixel-00.ivf",
   "vp90-2-02-size-lf-1920x1080.webm", "vp90-2-09-aq2.webm",
   "vp90-2-09-lf_deltas.webm", "vp90-2-10-show-existing-frame.webm",
+  "vp90-2-10-show-existing-frame2.webm",
   "vp90-2-11-size-351x287.webm", "vp90-2-11-size-351x288.webm",
   "vp90-2-11-size-352x287.webm", "vp90-2-12-droppable_1.ivf",
   "vp90-2-12-droppable_2.ivf", "vp90-2-12-droppable_3.ivf",
