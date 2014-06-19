@@ -64,7 +64,7 @@ class InvalidFileTest
   FILE *res_file_;
 };
 
-TEST_P(InvalidFileTest, DISABLED_ReturnCode) {
+TEST_P(InvalidFileTest, ReturnCode) {
   const std::string filename = GET_PARAM(1);
   libvpx_test::CompressedVideoSource *video = NULL;
 
