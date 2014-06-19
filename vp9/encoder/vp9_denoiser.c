@@ -20,9 +20,46 @@ int vp9_denoiser_filter() {
   return 0;
 }
 
+int update_running_avg(uint8_t *mc_avg, int mc_avg_stride, uint8_t *avg,
+                       int avg_stride, uint8_t *sig, int sig_stride,
+                       BLOCK_SIZE bs) {
+  //                           Indices: 0, 1, 2, 3, 4, 5 ,6, 7,
+  static const uint8_t adjustments[] = {0, 0, 0, 0, 3, 3, 3, 3,
+  //                                    8, 9,10,11,12,13,14,15,16
+                                        4, 4, 4, 4, 4, 4, 4, 4, 6};
+  int r, c;
+  int diff;
+  int adjustment;
+  int total_adj = 0;
+
+  for (r = 0; r < heights[bs]; ++r) {
+    for (c = 0; c < widths[bs]; ++c) {
+      diff = mc_avg[c] - sig[c];
+      adjustment = adjustments[MIN(abs(diff), 16)];
+
+      if (diff > 0) {
+        avg[c] = MIN(UINT8_MAX, sig[c] + adjustment);
+        total_adj += adjustment;
+      } else {
+        avg[c] = MAX(0, sig[c] - adjustment);
+        total_adj -= adjustment;
+      }
+    }
+    sig += sig_stride;
+    avg += avg_stride;
+    mc_avg += mc_avg_stride;
+  }
+  return total_adj;
+}
+
 void vp9_denoiser_denoise(VP9_DENOISER *denoiser,
                           MACROBLOCK *mb, MODE_INFO **grid,
                           int mi_row, int mi_col, BLOCK_SIZE bs) {
+  update_running_avg(denoiser->mc_running_avg_y.buf,
+                     denoiser->mc_running_avg_y.stride,
+                     denoiser->running_avg_y.buf,
+                     denoiser->running_avg_y.stride,
+                     mb->plane[0].src.buf, mb->plane[0].src.stride, bs);
   return;
 }
 
