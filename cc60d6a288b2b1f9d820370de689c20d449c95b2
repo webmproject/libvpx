@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//kv4\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1004730
+      },
+      "writtenOn": "2014-06-19T15:36:52Z",
+      "side": 1,
+      "message": "mc_avg and sig are now const.\n\nIn CL I41730c8c92370c76885950a43742347477ca4e7e this function is renamed (and sort of repurposed) to vp9_denoiser_filter(), so I figured this was a good time to reorder the arguments to fit the conventions you referenced.",
+      "parentUuid": "AAAAdn//lHg\u003d",
+      "revId": "cc60d6a288b2b1f9d820370de689c20d449c95b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//lHc\u003d",
         "filename": "vp9/encoder/vp9_denoiser.c",
         "patchSetId": 6
@@ -30,6 +48,24 @@
       "writtenOn": "2014-06-18T17:54:34Z",
       "side": 1,
       "message": "const uint8_t *srcbuf",
+      "revId": "cc60d6a288b2b1f9d820370de689c20d449c95b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kv8\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1004730
+      },
+      "writtenOn": "2014-06-19T15:36:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//lHc\u003d",
       "revId": "cc60d6a288b2b1f9d820370de689c20d449c95b2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
