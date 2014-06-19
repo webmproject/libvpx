@@ -22,27 +22,43 @@ int vp9_denoiser_filter() {
 
 int update_running_avg(uint8_t *mc_avg, int mc_avg_stride, uint8_t *avg,
                        int avg_stride, uint8_t *sig, int sig_stride,
-                       BLOCK_SIZE bs) {
-  //                           Indices: 0, 1, 2, 3, 4, 5 ,6, 7,
-  static const uint8_t adjustments[] = {0, 0, 0, 0, 3, 3, 3, 3,
-  //                                    8, 9,10,11,12,13,14,15,16
-                                        4, 4, 4, 4, 4, 4, 4, 4, 6};
+                       int increase_denoising, BLOCK_SIZE bs) {
   int r, c;
-  int diff;
-  int adjustment;
+  int diff, adj, absdiff;
+  int shift_inc1 = 0, shift_inc2 = 1;
+  int adj_val[] = {3, 4, 6};
   int total_adj = 0;
+
+  if (increase_denoising) {
+    shift_inc1 = 1;
+    shift_inc2 = 2;
+  }
 
   for (r = 0; r < heights[bs]; ++r) {
     for (c = 0; c < widths[bs]; ++c) {
       diff = mc_avg[c] - sig[c];
-      adjustment = adjustments[MIN(abs(diff), 16)];
+      absdiff = abs(diff);
 
-      if (diff > 0) {
-        avg[c] = MIN(UINT8_MAX, sig[c] + adjustment);
-        total_adj += adjustment;
+      if (absdiff <= 3 + shift_inc1) {
+        avg[c] = mc_avg[c];
+        total_adj += diff;
       } else {
-        avg[c] = MAX(0, sig[c] - adjustment);
-        total_adj -= adjustment;
+        switch (absdiff) {
+          case 4: case 5: case 6: case 7:
+            adj = adj_val[0];
+          case 8: case 9: case 10: case 11:
+          case 12: case 13: case 14: case 15:
+            adj = adj_val[1];
+          default:
+            adj = adj_val[2];
+        }
+        if (diff > 0) {
+          avg[c] = MIN(UINT8_MAX, sig[c] + adj);
+          total_adj += adj;
+        } else {
+          avg[c] = MAX(0, sig[c] - adj);
+          total_adj -= adj;
+        }
       }
     }
     sig += sig_stride;
@@ -81,7 +97,7 @@ void vp9_denoiser_denoise(VP9_DENOISER *denoiser,
                      denoiser->mc_running_avg_y.y_stride,
                      denoiser->running_avg_y[INTRA_FRAME].y_buffer,
                      denoiser->running_avg_y[INTRA_FRAME].y_stride,
-                     mb->plane[0].src.buf, mb->plane[0].src.stride, bs);
+                     mb->plane[0].src.buf, mb->plane[0].src.stride, 0, bs);
 
   if (decision == FILTER_BLOCK) {
   }
