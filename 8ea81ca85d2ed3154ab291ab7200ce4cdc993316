@@ -1,0 +1,208 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//kg0\u003d",
+        "filename": "vp9/decoder/vp9_dthread.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-06-19T22:50:58Z",
+      "side": 1,
+      "message": "nit: A comment on what this struct is used for would be good.",
+      "revId": "8ea81ca85d2ed3154ab291ab7200ce4cdc993316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kgo\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-06-19T22:50:58Z",
+      "side": 1,
+      "message": "nit: * placement",
+      "revId": "8ea81ca85d2ed3154ab291ab7200ce4cdc993316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kgg\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-06-19T22:50:58Z",
+      "side": 1,
+      "message": "I would have thought all of the threads would have used one pool of frame buffers.",
+      "revId": "8ea81ca85d2ed3154ab291ab7200ce4cdc993316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kgk\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-06-19T22:50:58Z",
+      "side": 1,
+      "message": "nit: space before *",
+      "revId": "8ea81ca85d2ed3154ab291ab7200ce4cdc993316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kgU\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 283,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-06-19T22:50:58Z",
+      "side": 1,
+      "message": "You could refactor the alloc and the check. e.g.\nvpx_malloc(ctx-\u003enum_frame_workers * sizeof(*ctx-\u003eframe_workers));",
+      "revId": "8ea81ca85d2ed3154ab291ab7200ce4cdc993316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kgQ\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 294,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-06-19T22:50:58Z",
+      "side": 1,
+      "message": "nit: * placement",
+      "revId": "8ea81ca85d2ed3154ab291ab7200ce4cdc993316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kgI\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 374,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-06-19T22:50:58Z",
+      "side": 1,
+      "message": "return error?",
+      "revId": "8ea81ca85d2ed3154ab291ab7200ce4cdc993316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kfs\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 463,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-06-19T22:50:58Z",
+      "side": 1,
+      "message": "I think alignment is off for lines 463-471",
+      "revId": "8ea81ca85d2ed3154ab291ab7200ce4cdc993316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kfo\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 496,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-06-19T22:50:58Z",
+      "side": 1,
+      "message": "again alignment",
+      "revId": "8ea81ca85d2ed3154ab291ab7200ce4cdc993316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kfk\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 546,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-06-19T22:50:58Z",
+      "side": 1,
+      "message": "nit: * alignment",
+      "revId": "8ea81ca85d2ed3154ab291ab7200ce4cdc993316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kfg\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 547,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-06-19T22:50:58Z",
+      "side": 1,
+      "message": "*const",
+      "revId": "8ea81ca85d2ed3154ab291ab7200ce4cdc993316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kfc\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 549,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-06-19T22:50:58Z",
+      "side": 1,
+      "message": "*const",
+      "revId": "8ea81ca85d2ed3154ab291ab7200ce4cdc993316",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
