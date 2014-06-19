@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//kl8\u003d",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-06-19T19:05:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//krE\u003d",
+      "revId": "00e15330eb5bee220f690a5958e69f111380bf13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//kpc\u003d",
         "filename": "vpx/src/svc_encodeframe.c",
         "patchSetId": 8
@@ -30,6 +48,24 @@
       "writtenOn": "2014-06-19T16:12:38Z",
       "side": 1,
       "message": "Could you reuse parse_superframe_index() somehow without duplication of this complicated code?",
+      "revId": "00e15330eb5bee220f690a5958e69f111380bf13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kl4\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 544,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-06-19T19:05:21Z",
+      "side": 1,
+      "message": "parse_superframe_index() is a local function in decoder. But I couldn\u0027t find a place in common folder to put it. And if I put it into common, I need to include some decoder header file. I\u0027m not sure if it\u0027s the right way to do it.",
+      "parentUuid": "AAAAdn//kpc\u003d",
       "revId": "00e15330eb5bee220f690a5958e69f111380bf13",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
