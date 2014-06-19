@@ -1277,9 +1277,6 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
     MODE_INFO *above_mi = xd->mi[-xd->mi_stride];
     MODE_INFO *left_mi = xd->left_available ? xd->mi[-1] : NULL;
 
-    if (!(cpi->sf.intra_y_mode_mask[max_txsize_lookup[bsize]] & (1 << mode)))
-      continue;
-
     if (cpi->common.frame_type == KEY_FRAME) {
       const PREDICTION_MODE A = vp9_above_block_mode(mic, above_mi, 0);
       const PREDICTION_MODE L = vp9_left_block_mode(mic, left_mi, 0);
