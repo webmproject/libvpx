@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//kz8\u003d",
+        "filename": "test/invalid_file_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-19T00:58:43Z",
+      "side": 1,
+      "message": "2014",
+      "revId": "cc08a57dd73f17a99dd995aca2d97ffe317f2714",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kzk\u003d",
+        "filename": "test/invalid_file_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-19T00:58:43Z",
+      "side": 1,
+      "message": "you probably want HasFailure()\n\nhttps://code.google.com/p/googletest/wiki/AdvancedGuide#Checking_for_Failures_in_the_Current_Test",
+      "revId": "cc08a57dd73f17a99dd995aca2d97ffe317f2714",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kz0\u003d",
+        "filename": "test/invalid_file_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-19T00:58:43Z",
+      "side": 1,
+      "message": "newline.\n\nhttp://google-styleguide.googlecode.com/svn/trunk/cppguide.xml#Class_Format",
+      "revId": "cc08a57dd73f17a99dd995aca2d97ffe317f2714",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kzY\u003d",
+        "filename": "test/test.mk",
+        "patchSetId": 6
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-19T00:58:43Z",
+      "side": 1,
+      "message": "you could swap these 2 lines to keep some sort order",
+      "revId": "cc08a57dd73f17a99dd995aca2d97ffe317f2714",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
