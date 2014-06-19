@@ -42,6 +42,11 @@
 
 #define MAX_VP9_HEADER_SIZE 80
 
+#if CONFIG_TRANSCODE
+#define WRITE_MI_ARRAY 0
+#define READ_MI_ARRAY  1
+#endif
+
 static int is_compound_reference_allowed(const VP9_COMMON *cm) {
   int i;
   for (i = 1; i < REFS_PER_FRAME; ++i)
@@ -312,6 +317,13 @@ static MB_MODE_INFO *set_offsets(VP9_COMMON *const cm, MACROBLOCKD *const xd,
     for (x = !y; x < x_mis; ++x)
       xd->mi[y * cm->mi_stride + x] = xd->mi[0];
 
+#if CONFIG_TRANSCODE && WRITE_MI_ARRAY
+  for (y = 0; y < y_mis; ++y)
+    for (x = !y; x < x_mis; ++x)
+      vpx_memcpy(&cm->mi[offset + y * cm->mi_stride + x],
+                 &cm->mi[offset], sizeof(MODE_INFO));
+#endif
+
   set_skip_context(xd, mi_row, mi_col);
 
   // Distance of Mb to the various image edges. These are specified to 8th pel
@@ -412,6 +424,34 @@ static void decode_partition(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   PARTITION_TYPE partition;
   BLOCK_SIZE subsize;
 
+#if CONFIG_TRANSCODE && READ_MI_ARRAY
+  // This is for test purpose only. It verifies the external file
+  // contains the right mode_info array.
+  if (bsize == BLOCK_64X64) {
+    MODE_INFO mi_array[64];
+    FILE *pf = fopen("mi_array.vpx_tmp", "r");
+    if (pf) {
+      int i, j;
+      for (j = 0; j < MI_BLOCK_SIZE; ++j)
+        for (i = 0; i < MI_BLOCK_SIZE; ++i)
+          fread(&mi_array[j * 8 + i], 1, sizeof(MODE_INFO), pf);
+    }
+    fclose(pf);
+
+    {
+      int i, j;
+      for (j = 0; j < MI_BLOCK_SIZE; ++j) {
+        for (i = 0; i < MI_BLOCK_SIZE; ++i) {
+          MB_MODE_INFO *mbmi = &mi_array[j * 8 + i].mbmi;
+          fprintf(stderr, "pos (%d, %d), bsize %d, mode %d\n",
+                  mi_row + j , mi_col + i, mbmi->sb_type, mbmi->mode);
+        }
+      }
+      fprintf(stderr, "\n");
+    }
+  }
+#endif
+
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return;
 
@@ -449,6 +489,22 @@ static void decode_partition(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   if (bsize >= BLOCK_8X8 &&
       (bsize == BLOCK_8X8 || partition != PARTITION_SPLIT))
     update_partition_context(xd, mi_row, mi_col, subsize, bsize);
+
+#if CONFIG_TRANSCODE && WRITE_MI_ARRAY
+  if (bsize == BLOCK_64X64) {
+    FILE *pf = fopen("mi_array.vpx_tmp", "a");
+    if (pf) {
+      int i, j;
+      int offset = mi_row * cm->mi_stride + mi_col;
+      for (j = 0; j < MI_BLOCK_SIZE; ++j)
+        for (i = 0; i < MI_BLOCK_SIZE; ++i)
+          fwrite(&cm->mi[offset + j * cm->mi_stride + i],
+                 1, sizeof(MODE_INFO), pf);
+    }
+
+    fclose(pf);
+  }
+#endif
 }
 
 static void setup_token_decoder(const uint8_t *data,
