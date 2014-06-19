@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//kh0\u003d",
+        "filename": "vp9/decoder/vp9_dthread.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-06-19T22:12:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//kxs\u003d",
+      "revId": "c91506353e2ba18d3416425093c940ad5bbbfa61",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//kxw\u003d",
         "filename": "vp9/decoder/vp9_dthread.h",
         "patchSetId": 7
@@ -30,6 +48,24 @@
       "writtenOn": "2014-06-19T03:35:50Z",
       "side": 1,
       "message": "this is probably wrong, size_t?",
+      "revId": "c91506353e2ba18d3416425093c940ad5bbbfa61",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//khw\u003d",
+        "filename": "vp9/decoder/vp9_dthread.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-06-19T22:12:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//kxw\u003d",
       "revId": "c91506353e2ba18d3416425093c940ad5bbbfa61",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//kho\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 298,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-06-19T22:12:40Z",
+      "side": 1,
+      "message": "The allocation failure will return decode error to the application. Then application could call destroy to do clean up.",
+      "parentUuid": "AAAAdn//kxo\u003d",
+      "revId": "c91506353e2ba18d3416425093c940ad5bbbfa61",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//kxk\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 7
@@ -64,6 +118,24 @@
       "writtenOn": "2014-06-19T03:35:50Z",
       "side": 1,
       "message": "you can localize this to 353 for now",
+      "revId": "c91506353e2ba18d3416425093c940ad5bbbfa61",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//khk\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 333,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-06-19T22:12:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//kxk\u003d",
       "revId": "c91506353e2ba18d3416425093c940ad5bbbfa61",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//khg\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 712,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-06-19T22:12:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//kuQ\u003d",
+      "revId": "c91506353e2ba18d3416425093c940ad5bbbfa61",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//kt0\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 7
@@ -98,6 +188,24 @@
       "writtenOn": "2014-06-19T15:45:33Z",
       "side": 1,
       "message": "Maybe just: FrameWorkerData *const worker_data \u003d (FrameWorkerData *)ctx-\u003eframe_workers[0].data1;  You could also create small helper function for that line of code because it is used several times.",
+      "revId": "c91506353e2ba18d3416425093c940ad5bbbfa61",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//khU\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 744,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-06-19T22:12:40Z",
+      "side": 1,
+      "message": "I wrote in this way to be consistent with other worker data creation style. And I do not think these two lines of code worth a helper function here.",
+      "parentUuid": "AAAAdn//kt0\u003d",
       "revId": "c91506353e2ba18d3416425093c940ad5bbbfa61",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
