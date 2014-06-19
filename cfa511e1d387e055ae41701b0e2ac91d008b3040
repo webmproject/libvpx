@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//kpo\u003d",
+        "filename": "test/decode_test_driver.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-06-19T16:09:03Z",
+      "side": 1,
+      "message": "not sure decoder-\u003eDecodeError is the right thing to output here.",
+      "revId": "cfa511e1d387e055ae41701b0e2ac91d008b3040",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
