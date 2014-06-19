@@ -34,6 +34,24 @@
       "revId": "4aa17f7006532a2a4e02d6d4cb433c4b6ac04776",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kmY\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2013,
+      "author": {
+        "id": 1003234
+      },
+      "writtenOn": "2014-06-19T18:47:44Z",
+      "side": 1,
+      "message": "More general than checking that the same frame is not scaled more than once would be to not scale if the source and target resolution are the same.",
+      "parentUuid": "AAAAdn//kmw\u003d",
+      "revId": "4aa17f7006532a2a4e02d6d4cb433c4b6ac04776",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
