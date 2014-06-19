@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//knU\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2013,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-06-19T18:05:47Z",
+      "side": 1,
+      "message": "I think we should check cpi-\u003eref_frame_flags during the reference frame scaling so we don\u0027t scale frames that we don\u0027t reference. Is there a particular reason not doing this currently?",
+      "revId": "4aa17f7006532a2a4e02d6d4cb433c4b6ac04776",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
