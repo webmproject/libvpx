@@ -16,6 +16,23 @@
       "revId": "00e15330eb5bee220f690a5958e69f111380bf13",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kpc\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 544,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-06-19T16:12:38Z",
+      "side": 1,
+      "message": "Could you reuse parse_superframe_index() somehow without duplication of this complicated code?",
+      "revId": "00e15330eb5bee220f690a5958e69f111380bf13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
