@@ -289,9 +289,10 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
       seg->update_map = 1;
       seg->update_data = 1;
 
-      qi_delta = vp9_compute_qdelta(rc, rc->avg_q, rc->avg_q * 0.875);
-      vp9_set_segdata(seg, 1, SEG_LVL_ALT_Q, qi_delta - 2);
-      vp9_set_segdata(seg, 1, SEG_LVL_ALT_LF, -2);
+      qi_delta = vp9_compute_qdelta(rc, rc->avg_q, rc->avg_q * 0.875,
+                                    cm->bit_depth);
+      vp9_set_segdata(seg, 1, SEG_LVL_ALT_Q, qi_delta - 2, cm->bit_depth);
+      vp9_set_segdata(seg, 1, SEG_LVL_ALT_LF, -2, cm->bit_depth);
 
       vp9_enable_segfeature(seg, 1, SEG_LVL_ALT_Q);
       vp9_enable_segfeature(seg, 1, SEG_LVL_ALT_LF);
@@ -310,16 +311,18 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
         seg->update_data = 1;
         seg->abs_delta = SEGMENT_DELTADATA;
 
-        qi_delta = vp9_compute_qdelta(rc, rc->avg_q, rc->avg_q * 1.125);
-        vp9_set_segdata(seg, 1, SEG_LVL_ALT_Q, qi_delta + 2);
+        qi_delta = vp9_compute_qdelta(rc, rc->avg_q, rc->avg_q * 1.125,
+                                      cm->bit_depth);
+        vp9_set_segdata(seg, 1, SEG_LVL_ALT_Q, qi_delta + 2, cm->bit_depth);
         vp9_enable_segfeature(seg, 1, SEG_LVL_ALT_Q);
 
-        vp9_set_segdata(seg, 1, SEG_LVL_ALT_LF, -2);
+        vp9_set_segdata(seg, 1, SEG_LVL_ALT_LF, -2, cm->bit_depth);
         vp9_enable_segfeature(seg, 1, SEG_LVL_ALT_LF);
 
         // Segment coding disabled for compred testing
         if (high_q || (cpi->static_mb_pct == 100)) {
-          vp9_set_segdata(seg, 1, SEG_LVL_REF_FRAME, ALTREF_FRAME);
+          vp9_set_segdata(seg, 1, SEG_LVL_REF_FRAME, ALTREF_FRAME,
+                          cm->bit_depth);
           vp9_enable_segfeature(seg, 1, SEG_LVL_REF_FRAME);
           vp9_enable_segfeature(seg, 1, SEG_LVL_SKIP);
         }
@@ -347,9 +350,9 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
 
       // All mbs should use ALTREF_FRAME
       vp9_clear_segdata(seg, 0, SEG_LVL_REF_FRAME);
-      vp9_set_segdata(seg, 0, SEG_LVL_REF_FRAME, ALTREF_FRAME);
+      vp9_set_segdata(seg, 0, SEG_LVL_REF_FRAME, ALTREF_FRAME, cm->bit_depth);
       vp9_clear_segdata(seg, 1, SEG_LVL_REF_FRAME);
-      vp9_set_segdata(seg, 1, SEG_LVL_REF_FRAME, ALTREF_FRAME);
+      vp9_set_segdata(seg, 1, SEG_LVL_REF_FRAME, ALTREF_FRAME, cm->bit_depth);
 
       // Skip all MBs if high Q (0,0 mv and skip coeffs)
       if (high_q) {
@@ -1005,7 +1008,7 @@ static void high_set_var_fns(VP9_COMP *const cpi) {
   VP9_COMMON *const cm = &cpi->common;
   if (cm->use_high) {
     switch (cm->bit_depth) {
-      default:
+      case VPX_BITS_8:
         HIGH_BFP(BLOCK_32X16, vp9_high_sad32x16_bits8,
                  vp9_high_sad32x16_avg_bits8,
                  vp9_high_variance32x16,
@@ -1331,6 +1334,9 @@ static void high_set_var_fns(VP9_COMP *const cpi) {
                  vp9_high_sad4x4x8_bits12,
                  vp9_high_sad4x4x4d_bits12)
         break;
+      default:
+        assert(0 && "cm->bit_depth should be VPX_BITS_8, "
+                    "VPX_BITS_10 or VPX_BITS_12");
     }
   }
 }
@@ -2214,16 +2220,17 @@ static void scale_and_extend_frame(const YV12_BUFFER_CONFIG *src,
   vp8_yv12_extend_frame_borders_c(dst);
 }
 
-static int find_fp_qindex() {
+static int find_fp_qindex(vpx_bit_depth_t bit_depth) {
   int i;
+  int range = vp9_get_qindex_range(bit_depth);
 
-  for (i = 0; i < QINDEX_RANGE; i++) {
-    if (vp9_convert_qindex_to_q(i) >= 30.0) {
+  for (i = 0; i < range; i++) {
+    if (vp9_convert_qindex_to_q(i, bit_depth) >= 30.0) {
       break;
     }
   }
 
-  if (i == QINDEX_RANGE)
+  if (i == range)
     i--;
 
   return i;
@@ -3130,7 +3137,7 @@ static void Pass1Encode(VP9_COMP *cpi, size_t *size, uint8_t *dest,
   (void) frame_flags;
 
   vp9_rc_get_first_pass_params(cpi);
-  vp9_set_quantizer(&cpi->common, find_fp_qindex());
+  vp9_set_quantizer(&cpi->common, find_fp_qindex(cpi->common.bit_depth));
   vp9_first_pass(cpi);
 }
 
@@ -3778,7 +3785,6 @@ int vp9_high_get_y_sse(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b,
   assert((a->flags & YV12_FLAG_HIGH) != 0);
   assert((b->flags & YV12_FLAG_HIGH) != 0);
   switch (bit_depth) {
-    default:
     case VPX_BITS_8:
       high_variance(a->y_buffer, a->y_stride, b->y_buffer, b->y_stride,
                     a->y_crop_width, a->y_crop_height, &sse, &sum);
@@ -3791,9 +3797,9 @@ int vp9_high_get_y_sse(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b,
       high_12_variance(a->y_buffer, a->y_stride, b->y_buffer, b->y_stride,
                        a->y_crop_width, a->y_crop_height, &sse, &sum);
       return (int) sse;
+    default:
+      assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10 or VPX_BITS_12");
   }
-  assert(0);
-
 }
 #endif
 

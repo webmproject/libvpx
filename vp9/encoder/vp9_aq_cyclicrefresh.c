@@ -201,7 +201,7 @@ void vp9_cyclic_refresh_setup(VP9_COMP *const cpi) {
 
     // Rate target ratio to set q delta.
     const float rate_ratio_qdelta = 2.0;
-    const double q = vp9_convert_qindex_to_q(cm->base_qindex);
+    const double q = vp9_convert_qindex_to_q(cm->base_qindex, cm->bit_depth);
     vp9_clear_system_state();
     // Some of these parameters may be set via codec-control function later.
     cr->max_sbs_perframe = 10;
@@ -243,17 +243,18 @@ void vp9_cyclic_refresh_setup(VP9_COMP *const cpi) {
     // Set the q delta for segment 1.
     qindex_delta = vp9_compute_qdelta_by_rate(rc, cm->frame_type,
                                               cm->base_qindex,
-                                              rate_ratio_qdelta);
+                                              rate_ratio_qdelta, cm->bit_depth);
     // TODO(marpan): Incorporate the actual-vs-target rate over/undershoot from
     // previous encoded frame.
     if (-qindex_delta > cr->max_qdelta_perc * cm->base_qindex / 100)
       qindex_delta = -cr->max_qdelta_perc * cm->base_qindex / 100;
 
     // Compute rd-mult for segment 1.
-    qindex2 = clamp(cm->base_qindex + cm->y_dc_delta_q + qindex_delta, 0, MAXQ);
+    qindex2 = clamp(cm->base_qindex + cm->y_dc_delta_q + qindex_delta, 0,
+                    vp9_get_maxq(cm->bit_depth));
     cr->rdmult = vp9_compute_rd_mult(cpi, qindex2);
 
-    vp9_set_segdata(seg, 1, SEG_LVL_ALT_Q, qindex_delta);
+    vp9_set_segdata(seg, 1, SEG_LVL_ALT_Q, qindex_delta, cm->bit_depth);
 
     sb_cols = (cm->mi_cols + MI_BLOCK_SIZE - 1) / MI_BLOCK_SIZE;
     sb_rows = (cm->mi_rows + MI_BLOCK_SIZE - 1) / MI_BLOCK_SIZE;

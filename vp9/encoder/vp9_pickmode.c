@@ -23,6 +23,7 @@
 #include "vp9/common/vp9_reconintra.h"
 
 #include "vp9/encoder/vp9_encoder.h"
+#include "vp9/encoder/vp9_pickmode.h"
 #include "vp9/encoder/vp9_ratectrl.h"
 #include "vp9/encoder/vp9_rdopt.h"
 
@@ -172,7 +173,7 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
   if ((sse >> 3) > var)
     sse = var;
 
-#if CONFIG_HIGH_TRANSFORMS && CONFIG_VP9_HIGH
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
   if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
     vp9_model_rd_from_var_lapndz(var + sse,
                                  1 << num_pels_log2_lookup[bsize],
@@ -219,8 +220,9 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   unsigned int sse_y = UINT_MAX;
 
   VP9_COMMON *cm = &cpi->common;
-  int intra_cost_penalty = 20 * vp9_dc_quant(cm->base_qindex, cm->y_dc_delta_q,
-                                             VPX_BITS_8);
+  int intra_cost_penalty = vp9_get_intra_cost_penalty(cm->base_qindex,
+                                                      cm->y_dc_delta_q,
+                                                      cm->bit_depth);
 
   const int64_t inter_mode_thresh = RDCOST(x->rdmult, x->rddiv,
                                            intra_cost_penalty, 0);
@@ -392,13 +394,13 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         // The encode_breakout input
         const unsigned int min_thresh =
             MIN(((unsigned int)x->encode_breakout << 4), max_thresh);
-#if CONFIG_HIGH_TRANSFORMS && CONFIG_VP9_HIGH
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
         const int shift = 2 * xd->bps - 16;
 #endif
 
         // Calculate threshold according to dequant value.
         thresh_ac = (xd->plane[0].dequant[1] * xd->plane[0].dequant[1]) / 9;
-#if CONFIG_HIGH_TRANSFORMS && CONFIG_VP9_HIGH
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
         if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
           if (shift > 0)
             thresh_ac = ROUND_POWER_OF_TWO(thresh_ac, shift);
@@ -410,7 +412,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
             b_height_log2_lookup[bsize]);
 
         thresh_dc = (xd->plane[0].dequant[0] * xd->plane[0].dequant[0] >> 6);
-#if CONFIG_HIGH_TRANSFORMS && CONFIG_VP9_HIGH
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
         if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
           if (shift > 0)
             thresh_dc = ROUND_POWER_OF_TWO(thresh_dc, shift);
@@ -508,4 +510,23 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   return INT64_MAX;
+}
+
+int vp9_get_intra_cost_penalty(int qindex, int qdelta,
+                               vpx_bit_depth_t bit_depth) {
+  const int q = vp9_dc_quant(qindex, qdelta, bit_depth);
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+  switch (bit_depth) {
+    case VPX_BITS_8:
+      return 20 * q;
+    case VPX_BITS_10:
+      return 5 * q;
+    case VPX_BITS_12:
+      return ROUND_POWER_OF_TWO(5 * q, 2);
+    default:
+      assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10 or VPX_BITS_12");
+  }
+#else
+  return 20 * q;
+#endif
 }

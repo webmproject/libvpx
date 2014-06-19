@@ -33,7 +33,7 @@ extern "C" {
 #define pair_set_epi16(a, b) \
   _mm_set_epi16(b, a, b, a, b, a, b, a)
 
-#if CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
 typedef int64_t tran_high_t;
 typedef int32_t tran_low_t;
 #else

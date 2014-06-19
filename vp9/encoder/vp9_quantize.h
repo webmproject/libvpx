@@ -19,21 +19,21 @@ extern "C" {
 #endif
 
 typedef struct {
-  DECLARE_ALIGNED(16, int16_t, y_quant[QINDEX_RANGE][8]);
-  DECLARE_ALIGNED(16, int16_t, y_quant_shift[QINDEX_RANGE][8]);
-  DECLARE_ALIGNED(16, int16_t, y_zbin[QINDEX_RANGE][8]);
-  DECLARE_ALIGNED(16, int16_t, y_round[QINDEX_RANGE][8]);
+  DECLARE_ALIGNED(16, int16_t, y_quant[QINDEX_RANGE_MAX][8]);
+  DECLARE_ALIGNED(16, int16_t, y_quant_shift[QINDEX_RANGE_MAX][8]);
+  DECLARE_ALIGNED(16, int16_t, y_zbin[QINDEX_RANGE_MAX][8]);
+  DECLARE_ALIGNED(16, int16_t, y_round[QINDEX_RANGE_MAX][8]);
 
-  DECLARE_ALIGNED(16, int16_t, uv_quant[QINDEX_RANGE][8]);
-  DECLARE_ALIGNED(16, int16_t, uv_quant_shift[QINDEX_RANGE][8]);
-  DECLARE_ALIGNED(16, int16_t, uv_zbin[QINDEX_RANGE][8]);
-  DECLARE_ALIGNED(16, int16_t, uv_round[QINDEX_RANGE][8]);
+  DECLARE_ALIGNED(16, int16_t, uv_quant[QINDEX_RANGE_MAX][8]);
+  DECLARE_ALIGNED(16, int16_t, uv_quant_shift[QINDEX_RANGE_MAX][8]);
+  DECLARE_ALIGNED(16, int16_t, uv_zbin[QINDEX_RANGE_MAX][8]);
+  DECLARE_ALIGNED(16, int16_t, uv_round[QINDEX_RANGE_MAX][8]);
 
 #if CONFIG_ALPHA
-  DECLARE_ALIGNED(16, int16_t, a_quant[QINDEX_RANGE][8]);
-  DECLARE_ALIGNED(16, int16_t, a_quant_shift[QINDEX_RANGE][8]);
-  DECLARE_ALIGNED(16, int16_t, a_zbin[QINDEX_RANGE][8]);
-  DECLARE_ALIGNED(16, int16_t, a_round[QINDEX_RANGE][8]);
+  DECLARE_ALIGNED(16, int16_t, a_quant[QINDEX_RANGE_MAX][8]);
+  DECLARE_ALIGNED(16, int16_t, a_quant_shift[QINDEX_RANGE_MAX][8]);
+  DECLARE_ALIGNED(16, int16_t, a_zbin[QINDEX_RANGE_MAX][8]);
+  DECLARE_ALIGNED(16, int16_t, a_round[QINDEX_RANGE_MAX][8]);
 #endif
 } QUANTS;
 
@@ -53,9 +53,9 @@ void vp9_init_quantizer(struct VP9_COMP *cpi);
 
 void vp9_set_quantizer(struct VP9Common *cm, int q);
 
-int vp9_quantizer_to_qindex(int quantizer);
+int vp9_quantizer_to_qindex(int quantizer, vpx_bit_depth_t bit_depth);
 
-int vp9_qindex_to_quantizer(int qindex);
+int vp9_qindex_to_quantizer(int qindex, vpx_bit_depth_t bit_depth);
 
 #ifdef __cplusplus
 }  // extern "C"

@@ -25,7 +25,7 @@ static INLINE tran_low_t clamp_high(tran_high_t value, tran_low_t low,
 
 static INLINE tran_low_t clip_pixel_bps_high(tran_high_t dest,
                                              tran_high_t trans, int bps) {
-#if CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
   switch (bps) {
     default:
       return clamp_high(dest + trans, 0, 255);

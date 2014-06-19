@@ -12,6 +12,8 @@
 #include <stdio.h>
 #include <limits.h>
 
+#include "./vpx_config.h"
+
 #include "vpx/vpx_encoder.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem_ops.h"
@@ -121,16 +123,22 @@ static void update_switchable_interp_probs(VP9_COMMON *cm, vp9_writer *w) {
 }
 
 static void pack_mb_tokens(vp9_writer *w,
-                           TOKENEXTRA **tp, const TOKENEXTRA *stop) {
+                           TOKENEXTRA **tp, const TOKENEXTRA *stop,
+                           BITSTREAM_PROFILE profile) {
   TOKENEXTRA *p = *tp;
 
   while (p < stop && p->token != EOSB_TOKEN) {
     const int t = p->token;
     const struct vp9_token *const a = &vp9_coef_encodings[t];
-    const vp9_extra_bit *const b = &vp9_extra_bits[t];
     int i = 0;
     int v = a->value;
     int n = a->len;
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
+    const vp9_extra_bit *const b = profile > PROFILE_1 ?
+        &vp9_extra_bits_high[t] : &vp9_extra_bits[t];
+#else
+    const vp9_extra_bit *const b = &vp9_extra_bits[t];
+#endif
 
     /* skip one or two nodes */
     if (p->skip_eob_node) {
@@ -388,7 +396,7 @@ static void write_modes_b(VP9_COMP *cpi, const TileInfo *const tile,
   }
 
   assert(*tok < tok_end);
-  pack_mb_tokens(w, tok, tok_end);
+  pack_mb_tokens(w, tok, tok_end, cm->profile);
 }
 
 static void write_partition(VP9_COMMON *cm, MACROBLOCKD *xd,
@@ -733,7 +741,7 @@ static void write_delta_q(struct vp9_write_bit_buffer *wb, int delta_q) {
 
 static void encode_quantization(VP9_COMMON *cm,
                                 struct vp9_write_bit_buffer *wb) {
-  vp9_wb_write_literal(wb, cm->base_qindex, QINDEX_BITS);
+  vp9_wb_write_literal(wb, cm->base_qindex, vp9_get_qindex_bits(cm->bit_depth));
   write_delta_q(wb, cm->y_dc_delta_q);
   write_delta_q(wb, cm->uv_dc_delta_q);
   write_delta_q(wb, cm->uv_ac_delta_q);
@@ -788,7 +796,8 @@ static void encode_segmentation(VP9_COMP *cpi,
         vp9_wb_write_bit(wb, active);
         if (active) {
           const int data = vp9_get_segdata(seg, i, j);
-          const int data_max = vp9_seg_feature_data_max(j);
+          const int data_max = vp9_seg_feature_data_max(j,
+                                                        cpi->common.bit_depth);
 
           if (vp9_is_segfeature_signed(j)) {
             encode_unsigned_max(wb, abs(data), data_max);
