@@ -1680,7 +1680,7 @@ static void low_img_upshift(vpx_image_t *dst, vpx_image_t *src,
   if (dst->w != src->w || dst->h != src->h ||
       dst->x_chroma_shift != src->x_chroma_shift ||
       dst->y_chroma_shift != src->y_chroma_shift ||
-      dst->fmt + VPX_IMG_FMT_HIGH != src->fmt ||
+      dst->fmt != src->fmt + VPX_IMG_FMT_HIGH ||
       input_shift < 0) {
     fatal("Unsupported image conversion");
   }
