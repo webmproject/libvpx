@@ -67,6 +67,23 @@
       "revId": "c91506353e2ba18d3416425093c940ad5bbbfa61",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kuQ\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 712,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-06-19T15:40:25Z",
+      "side": 1,
+      "message": "Can you just use if (ctx-\u003eframe_parallel_decode) { ... } without \"\u003d\u003d 1\" like all other similar checks in the codebase.",
+      "revId": "c91506353e2ba18d3416425093c940ad5bbbfa61",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
