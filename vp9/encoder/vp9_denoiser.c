@@ -69,7 +69,7 @@ int update_running_avg(uint8_t *mc_avg, int mc_avg_stride, uint8_t *avg,
 }
 
 uint8_t *block_start(uint8_t *framebuf, int stride, int mi_row, int mi_col) {
-  return framebuf + (stride * mi_row) + mi_col;
+  return framebuf + (stride * mi_row * 8) + (mi_col * 8);
 }
 
 void copy_block(uint8_t *dest, int dest_stride,
@@ -85,8 +85,7 @@ void copy_block(uint8_t *dest, int dest_stride,
   return;
 }
 
-void vp9_denoiser_denoise(VP9_DENOISER *denoiser,
-                          MACROBLOCK *mb, MODE_INFO **grid,
+void vp9_denoiser_denoise(VP9_DENOISER *denoiser, MACROBLOCK *mb,
                           int mi_row, int mi_col, BLOCK_SIZE bs) {
   int decision = COPY_BLOCK;
 
@@ -103,16 +102,26 @@ void vp9_denoiser_denoise(VP9_DENOISER *denoiser,
   }
   if (decision == COPY_BLOCK) {
     copy_block(block_start(avg.y_buffer, avg.y_stride, mi_row, mi_col),
-               avg.y_stride,
-               block_start(src.buf, src.stride, mi_row, mi_col),
-               src.stride,
-               bs);
+               avg.y_stride, src.buf, src.stride, bs);
   }
   return;
 }
 
 void copy_frame(YV12_BUFFER_CONFIG dest, YV12_BUFFER_CONFIG src) {
-  memcpy(dest.buffer_alloc, src.buffer_alloc, src.buffer_alloc_sz);
+  int r, c;
+  uint8_t *srcbuf = src.y_buffer;
+  uint8_t *destbuf = dest.y_buffer;
+  assert(dest.y_width == src.y_width);
+  assert(dest.y_height == src.y_height);
+
+  for (r = 0; r < dest.y_height; ++r) {
+    for (c = 0; c < dest.y_width; ++c) {
+      destbuf[c] = srcbuf[c];
+    }
+    destbuf += dest.y_stride;
+    srcbuf += src.y_stride;
+  }
+  return;
 }
 
 void vp9_denoiser_update_frame_info(VP9_DENOISER *denoiser,
