@@ -16,6 +16,24 @@
       "revId": "4aa17f7006532a2a4e02d6d4cb433c4b6ac04776",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kmw\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2013,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-19T18:36:16Z",
+      "side": 1,
+      "message": "Agreed. Done.\nWe could also check to make sure that we\u0027re not scaling the same frame more than once. If LAST\u003d\u003dGOLDEN, for example.",
+      "parentUuid": "AAAAdn//knU\u003d",
+      "revId": "4aa17f7006532a2a4e02d6d4cb433c4b6ac04776",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
