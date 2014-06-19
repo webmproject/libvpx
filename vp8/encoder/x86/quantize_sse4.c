@@ -17,18 +17,16 @@
 
 #define SELECT_EOB(i, z, x, y, q) \
     do { \
-        __label__ select_eob_end; \
         short boost = *zbin_boost_ptr; \
         short x_z = _mm_extract_epi16(x, z); \
         short y_z = _mm_extract_epi16(y, z); \
         int cmp = (x_z < boost) | (y_z == 0); \
         zbin_boost_ptr++; \
         if (cmp) \
-            goto select_eob_end; \
+            break; \
         q = _mm_insert_epi16(q, y_z, z); \
         eob = i; \
         zbin_boost_ptr = b->zrun_zbin_boost; \
-        select_eob_end:; \
     } while (0)
 
 void vp8_regular_quantize_b_sse4_1(BLOCK *b, BLOCKD *d) {
