@@ -100,10 +100,15 @@ void vp9_setup_pc_tree(VP9_COMMON *cm, VP9_COMP *cpi) {
   vpx_free(cpi->leaf_tree);
   CHECK_MEM_ERROR(cm, cpi->leaf_tree, vpx_calloc(leaf_nodes,
                                                  sizeof(*cpi->leaf_tree)));
+#if CONFIG_TRANSCODE
+  vpx_memset(cpi->leaf_tree, 0, sizeof(*cpi->leaf_tree));
+#endif
   vpx_free(cpi->pc_tree);
   CHECK_MEM_ERROR(cm, cpi->pc_tree, vpx_calloc(tree_nodes,
                                                sizeof(*cpi->pc_tree)));
-
+#if CONFIG_TRANSCODE
+  vpx_memset(cpi->pc_tree, 0, sizeof(*cpi->pc_tree));
+#endif
   this_pc = &cpi->pc_tree[0];
   this_leaf = &cpi->leaf_tree[0];
 
