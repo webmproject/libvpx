@@ -64,6 +64,9 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
   xd->mi[0]->mbmi.mode = NEWMV;
   xd->mi[0]->mbmi.mv[0].as_mv = *dst_mv;
 
+#if CONFIG_INTERINTRA
+  xd->mi[0]->mbmi.ref_frame[1] = NONE;
+#endif
   vp9_build_inter_predictors_sby(xd, mb_row, mb_col, BLOCK_16X16);
 
   /* restore UMV window */
@@ -141,6 +144,9 @@ static int find_best_16x16_intra(VP9_COMP *cpi, PREDICTION_MODE *pbest_mode) {
 
     xd->mi[0]->mbmi.mode = mode;
     vp9_predict_intra_block(xd, 0, 2, TX_16X16, mode,
+#if CONFIG_FILTERINTRA
+                            0,
+#endif
                             x->plane[0].src.buf, x->plane[0].src.stride,
                             xd->plane[0].dst.buf, xd->plane[0].dst.stride,
                             0, 0, 0);

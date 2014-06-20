@@ -64,7 +64,6 @@ typedef struct {
   FRAME_CONTEXT fc;
 } CODING_CONTEXT;
 
-
 typedef enum {
   // encode_breakout is disabled.
   ENCODE_BREAKOUT_DISABLED = 0,
@@ -421,6 +420,16 @@ typedef struct VP9_COMP {
 
 #if CONFIG_DENOISING
   VP9_DENOISER denoiser;
+#endif
+
+#if CONFIG_MASKED_INTERINTER
+  unsigned int masked_interinter_select_counts[2];
+#endif
+#if CONFIG_INTERINTRA
+  unsigned int interintra_select_count[2];
+#if CONFIG_MASKED_INTERINTRA
+  unsigned int masked_interintra_select_count[2];
+#endif
 #endif
 } VP9_COMP;
 
