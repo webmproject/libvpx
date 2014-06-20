@@ -1,0 +1,259 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//kLE\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 799,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-20T22:46:09Z",
+      "side": 1,
+      "message": "Replace with:\n  cpi-\u003emulti_arf_allowed \u003d 0;\n  cpi-\u003emulti_arf_enabled \u003d 0;",
+      "revId": "01c736ae56f1b46683dc4263c64123c301022d31",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kK8\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2533,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-20T22:46:09Z",
+      "side": 1,
+      "message": "How should we treat intra-only frames?",
+      "revId": "01c736ae56f1b46683dc4263c64123c301022d31",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kKo\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1285,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-20T22:46:09Z",
+      "side": 1,
+      "message": "If GF is capitalized so too should ARF.",
+      "revId": "01c736ae56f1b46683dc4263c64123c301022d31",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kKc\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1287,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-20T22:46:09Z",
+      "side": 1,
+      "message": ";-)\nSomebody ran an anagram program over your comment. \"idirestc\".",
+      "revId": "01c736ae56f1b46683dc4263c64123c301022d31",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kKI\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1290,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-20T22:46:09Z",
+      "side": 1,
+      "message": "Remove cpi, it is not used.",
+      "revId": "01c736ae56f1b46683dc4263c64123c301022d31",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kKE\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1291,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-20T22:46:09Z",
+      "side": 1,
+      "message": "Remove space after *",
+      "revId": "01c736ae56f1b46683dc4263c64123c301022d31",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kKM\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1293,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-20T22:46:09Z",
+      "side": 1,
+      "message": "Maybe enum (or #define) these values:\nenum {\n  ARF_SLOT_1 \u003d 2,\n  ARF_SLOT_2 \u003d 3,\n  NUM_ARF_SLOTS \u003d 2\n}",
+      "revId": "01c736ae56f1b46683dc4263c64123c301022d31",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kJ8\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1345,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-20T22:46:09Z",
+      "side": 1,
+      "message": "Remove the commented out code.",
+      "revId": "01c736ae56f1b46683dc4263c64123c301022d31",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kJ4\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1355,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-20T22:46:09Z",
+      "side": 1,
+      "message": "aside",
+      "revId": "01c736ae56f1b46683dc4263c64123c301022d31",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kJw\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1400,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-20T22:46:09Z",
+      "side": 1,
+      "message": "const",
+      "revId": "01c736ae56f1b46683dc4263c64123c301022d31",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kJ0\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1401,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-20T22:46:09Z",
+      "side": 1,
+      "message": "Remove commented out code.",
+      "revId": "01c736ae56f1b46683dc4263c64123c301022d31",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kJQ\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1416,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-20T22:46:09Z",
+      "side": 1,
+      "message": "If you use an index idx, initialized to 0, you can set to 1:\n  if (frame_index \u003c\u003d middle_frame_idx)\nand then have just one set of lines outside of the if-else:\n  twopass-\u003egf_group.arf_update_idx[frame_index] \u003d arf_buffer_indices[idx];\n  twopass-\u003egf_group.arf_ref_idx[frame_index] \u003d arf_buffer_indices[idx];",
+      "revId": "01c736ae56f1b46683dc4263c64123c301022d31",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kJM\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1430,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-20T22:46:09Z",
+      "side": 1,
+      "message": "to to (remove one)",
+      "revId": "01c736ae56f1b46683dc4263c64123c301022d31",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kJI\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1438,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-20T22:46:09Z",
+      "side": 1,
+      "message": "full-stop at end of line.",
+      "revId": "01c736ae56f1b46683dc4263c64123c301022d31",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kJE\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1634,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-20T22:46:09Z",
+      "side": 1,
+      "message": "cpi-\u003emulti_arf_enabled \u003d zero_motion_accumulator \u003c 0.995 ? 1 : 0;",
+      "revId": "01c736ae56f1b46683dc4263c64123c301022d31",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
