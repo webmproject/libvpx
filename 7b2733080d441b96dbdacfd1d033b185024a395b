@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//kNY\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-20T21:31:50Z",
+      "side": 1,
+      "message": "putting ()s around the condition in these cases can help readability: (ctx-\u003eframe_parallel_decode \u003d\u003d 1); that or treat it like a bool",
+      "revId": "7b2733080d441b96dbdacfd1d033b185024a395b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kaY\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 340,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-20T21:31:50Z",
+      "side": 1,
+      "message": "const",
+      "revId": "7b2733080d441b96dbdacfd1d033b185024a395b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
