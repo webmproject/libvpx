@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//kbQ\u003d",
+        "filename": "test/decode_test_driver.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-20T01:36:09Z",
+      "side": 1,
+      "message": "consider making decoder const or reordering the params",
+      "revId": "8b83cd9a283a8f0aabf1db83f99f6d30ba36394f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kbU\u003d",
+        "filename": "test/invalid_file_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-20T01:36:09Z",
+      "side": 1,
+      "message": "just return !HasFailure()",
+      "revId": "8b83cd9a283a8f0aabf1db83f99f6d30ba36394f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
