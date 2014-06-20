@@ -19,6 +19,23 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//kLQ\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 901,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-20T22:08:19Z",
+      "side": 1,
+      "message": "Have you changed the behavior here?\ncpi-\u003erc.is_src_frame_alt_ref is true for the overlay frame.\n!cpi-\u003erefresh_alt_ref_frame is true if the current frame will not become the new ARF.\nMaybe it was intentional?",
+      "revId": "8c9d4ad613b67758f909cfe23183bde5eb1437ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//kM8\u003d",
         "filename": "vp9/encoder/vp9_encoder.c",
         "patchSetId": 14
