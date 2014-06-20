@@ -16,6 +16,24 @@
       "revId": "b18881dc096f50b6bf69fca290563b43707eea2d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kQU\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-06-20T18:56:48Z",
+      "side": 1,
+      "message": "Good catch. Uploaded fix, take a look.",
+      "parentUuid": "AAAAdn//kRs\u003d",
+      "revId": "b18881dc096f50b6bf69fca290563b43707eea2d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
