@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//kTM\u003d",
+        "filename": "test/invalid_file_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-20T17:36:17Z",
+      "side": 1,
+      "message": "const std::string \u0026res_file_name, given the project style",
+      "revId": "f5985fd6bd14b896d1850e418d4454d53a3c9e31",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kSw\u003d",
+        "filename": "test/invalid_file_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-20T17:36:17Z",
+      "side": 1,
+      "message": "these probably aren\u0027t md5\u0027s given you\u0027re reading an int",
+      "revId": "f5985fd6bd14b896d1850e418d4454d53a3c9e31",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kTA\u003d",
+        "filename": "test/invalid_file_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-20T17:36:17Z",
+      "side": 1,
+      "message": "this comment isn\u0027t all that helpful; you might note what the  result file contains or is used for",
+      "revId": "f5985fd6bd14b896d1850e418d4454d53a3c9e31",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
