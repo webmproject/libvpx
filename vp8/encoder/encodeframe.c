@@ -1246,7 +1246,7 @@ int vp8cx_encode_inter_macroblock
             x->zbin_mode_boost_enabled = 0;
         }
         vp8_rd_pick_inter_mode(cpi, x, recon_yoffset, recon_uvoffset, &rate,
-                               &distortion, &intra_error);
+                               &distortion, &intra_error, mb_row, mb_col);
 
         /* switch back to the regular quantizer for the encode */
         if (cpi->sf.improved_quant)

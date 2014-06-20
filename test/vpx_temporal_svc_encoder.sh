@@ -39,7 +39,10 @@ vpx_tsvc_encoder() {
 
   shift 2
 
-  [ -x "${encoder}" ] || return 1
+  if [ ! -x "${encoder}" ]; then
+    elog "${encoder} does not exist or is not executable."
+    return 1
+  fi
 
   eval "${encoder}" "${YUV_RAW_INPUT}" "${output_file}" "${codec}" \
       "${YUV_RAW_INPUT_WIDTH}" "${YUV_RAW_INPUT_HEIGHT}" \

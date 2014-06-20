@@ -125,7 +125,7 @@ vpx_codec_err_t vpx_codec_control_(vpx_codec_ctx_t  *ctx,
         va_list  ap;
 
         va_start(ap, ctrl_id);
-        res = entry->fn(ctx->priv->alg_priv, ctrl_id, ap);
+        res = entry->fn(ctx->priv->alg_priv, ap);
         va_end(ap);
         break;
       }

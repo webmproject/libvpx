@@ -56,9 +56,8 @@ typedef enum {
 
 typedef enum {
   USE_FULL_RD = 0,
-  USE_LARGESTINTRA,
-  USE_LARGESTINTRA_MODELINTER,
-  USE_LARGESTALL
+  USE_LARGESTALL,
+  USE_TX_8X8
 } TX_SIZE_SEARCH_METHOD;
 
 typedef enum {
@@ -134,26 +133,9 @@ typedef enum {
   ONE_LOOP_REDUCED = 2
 } FAST_COEFF_UPDATE;
 
-typedef struct SPEED_FEATURES {
-  // Frame level coding parameter update
-  int frame_parameter_update;
-
+typedef struct MV_SPEED_FEATURES {
   // Motion search method (Diamond, NSTEP, Hex, Big Diamond, Square, etc).
   SEARCH_METHODS search_method;
-
-  RECODE_LOOP_TYPE recode_loop;
-
-  // Subpel_search_method can only be subpel_tree which does a subpixel
-  // logarithmic search that keeps stepping at 1/2 pixel units until
-  // you stop getting a gain, and then goes on to 1/4 and repeats
-  // the same process. Along the way it skips many diagonals.
-  SUBPEL_SEARCH_METHODS subpel_search_method;
-
-  // Maximum number of steps in logarithmic subpel search before giving up.
-  int subpel_iters_per_step;
-
-  // Control when to stop subpel search
-  int subpel_force_stop;
 
   // This parameter controls the number of steps we'll do in a diamond
   // search.
@@ -166,6 +148,27 @@ typedef struct SPEED_FEATURES {
   // If this is set to 1, we limit the motion search range to 2 times the
   // largest motion vector found in the last frame.
   int auto_mv_step_size;
+
+  // Subpel_search_method can only be subpel_tree which does a subpixel
+  // logarithmic search that keeps stepping at 1/2 pixel units until
+  // you stop getting a gain, and then goes on to 1/4 and repeats
+  // the same process. Along the way it skips many diagonals.
+  SUBPEL_SEARCH_METHODS subpel_search_method;
+
+  // Maximum number of steps in logarithmic subpel search before giving up.
+  int subpel_iters_per_step;
+
+  // Control when to stop subpel search
+  int subpel_force_stop;
+} MV_SPEED_FEATURES;
+
+typedef struct SPEED_FEATURES {
+  MV_SPEED_FEATURES mv;
+
+  // Frame level coding parameter update
+  int frame_parameter_update;
+
+  RECODE_LOOP_TYPE recode_loop;
 
   // Trellis (dynamic programming) optimization of quantized values (+1, 0).
   int optimize_coefficients;
@@ -283,9 +286,6 @@ typedef struct SPEED_FEATURES {
   // encoding process for RTC.
   int partition_check;
 
-  // Chessboard pattern index
-  int chessboard_index;
-
   // Use finer quantizer in every other few frames that run variable block
   // partition type search.
   int force_frame_boost;
@@ -331,8 +331,8 @@ typedef struct SPEED_FEATURES {
   int use_nonrd_pick_mode;
 
   // A binary mask indicating if NEARESTMV, NEARMV, ZEROMV, NEWMV
-  // modes are disabled in order from LSB to MSB for each BLOCK_SIZE.
-  int disable_inter_mode_mask[BLOCK_SIZES];
+  // modes are used in order from LSB to MSB for each BLOCK_SIZE.
+  int inter_mode_mask[BLOCK_SIZES];
 
   // This feature controls whether we do the expensive context update and
   // calculation in the rd coefficient costing loop.

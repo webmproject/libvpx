@@ -9,7 +9,6 @@
  */
 
 #include <assert.h>
-#include <limits.h>
 #include <math.h>
 #include <stdio.h>
 
@@ -388,8 +387,8 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
   x->errorperbit = rd->RDMULT / RD_MULT_EPB_RATIO;
   x->errorperbit += (x->errorperbit == 0);
 
-  x->select_txfm_size = (cpi->sf.tx_size_search_method == USE_LARGESTALL &&
-                         cm->frame_type != KEY_FRAME) ? 0 : 1;
+  x->select_tx_size = (cpi->sf.tx_size_search_method == USE_LARGESTALL &&
+                       cm->frame_type != KEY_FRAME) ? 0 : 1;
 
   set_block_thresholds(cm, rd);
 
@@ -962,11 +961,11 @@ static void txfm_rd_in_plane(MACROBLOCK *x,
   }
 }
 
-static void choose_largest_txfm_size(VP9_COMP *cpi, MACROBLOCK *x,
-                                     int *rate, int64_t *distortion,
-                                     int *skip, int64_t *sse,
-                                     int64_t ref_best_rd,
-                                     BLOCK_SIZE bs) {
+static void choose_largest_tx_size(VP9_COMP *cpi, MACROBLOCK *x,
+                                   int *rate, int64_t *distortion,
+                                   int *skip, int64_t *sse,
+                                   int64_t ref_best_rd,
+                                   BLOCK_SIZE bs) {
   const TX_SIZE max_tx_size = max_txsize_lookup[bs];
   VP9_COMMON *const cm = &cpi->common;
   const TX_SIZE largest_tx_size = tx_mode_to_biggest_tx_size[cm->tx_mode];
@@ -981,12 +980,12 @@ static void choose_largest_txfm_size(VP9_COMP *cpi, MACROBLOCK *x,
   cpi->tx_stepdown_count[0]++;
 }
 
-static void choose_txfm_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
-                                     int (*r)[2], int *rate,
-                                     int64_t *d, int64_t *distortion,
-                                     int *s, int *skip,
-                                     int64_t tx_cache[TX_MODES],
-                                     BLOCK_SIZE bs) {
+static void choose_tx_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
+                                   int (*r)[2], int *rate,
+                                   int64_t *d, int64_t *distortion,
+                                   int *s, int *skip,
+                                   int64_t tx_cache[TX_MODES],
+                                   BLOCK_SIZE bs) {
   const TX_SIZE max_tx_size = max_txsize_lookup[bs];
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -1064,12 +1063,12 @@ static int64_t scaled_rd_cost(int rdmult, int rddiv,
   return (int64_t) (RDCOST(rdmult, rddiv, rate, dist) * scale);
 }
 
-static void choose_txfm_size_from_modelrd(VP9_COMP *cpi, MACROBLOCK *x,
-                                          int (*r)[2], int *rate,
-                                          int64_t *d, int64_t *distortion,
-                                          int *s, int *skip, int64_t *sse,
-                                          int64_t ref_best_rd,
-                                          BLOCK_SIZE bs) {
+static void choose_tx_size_from_modelrd(VP9_COMP *cpi, MACROBLOCK *x,
+                                        int (*r)[2], int *rate,
+                                        int64_t *d, int64_t *distortion,
+                                        int *s, int *skip, int64_t *sse,
+                                        int64_t ref_best_rd,
+                                        BLOCK_SIZE bs) {
   const TX_SIZE max_tx_size = max_txsize_lookup[bs];
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -1153,28 +1152,20 @@ static void inter_super_block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
 
   if (cpi->sf.tx_size_search_method == USE_LARGESTALL || xd->lossless) {
     vpx_memset(txfm_cache, 0, TX_MODES * sizeof(int64_t));
-    choose_largest_txfm_size(cpi, x, rate, distortion, skip, sse,
-                             ref_best_rd, bs);
+    choose_largest_tx_size(cpi, x, rate, distortion, skip, sse, ref_best_rd,
+                           bs);
     if (psse)
       *psse = sse[mbmi->tx_size];
     return;
   }
 
-  if (cpi->sf.tx_size_search_method == USE_LARGESTINTRA_MODELINTER) {
-    for (tx_size = TX_4X4; tx_size <= max_tx_size; ++tx_size)
-      model_rd_for_sb_y_tx(cpi, bs, tx_size, x, xd,
-                           &r[tx_size][0], &d[tx_size], &s[tx_size]);
-    choose_txfm_size_from_modelrd(cpi, x, r, rate, d, distortion, s,
-                                  skip, sse, ref_best_rd, bs);
-  } else {
-    for (tx_size = TX_4X4; tx_size <= max_tx_size; ++tx_size)
-      txfm_rd_in_plane(x, &r[tx_size][0], &d[tx_size],
-                       &s[tx_size], &sse[tx_size],
-                       ref_best_rd, 0, bs, tx_size,
-                       cpi->sf.use_fast_coef_costing);
-    choose_txfm_size_from_rd(cpi, x, r, rate, d, distortion, s,
-                             skip, txfm_cache, bs);
-  }
+  for (tx_size = TX_4X4; tx_size <= max_tx_size; ++tx_size)
+    txfm_rd_in_plane(x, &r[tx_size][0], &d[tx_size], &s[tx_size],
+                     &sse[tx_size], ref_best_rd, 0, bs, tx_size,
+                     cpi->sf.use_fast_coef_costing);
+  choose_tx_size_from_rd(cpi, x, r, rate, d, distortion, s,
+                         skip, txfm_cache, bs);
+
   if (psse)
     *psse = sse[mbmi->tx_size];
 }
@@ -1191,8 +1182,8 @@ static void intra_super_block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
   assert(bs == mbmi->sb_type);
   if (cpi->sf.tx_size_search_method != USE_FULL_RD || xd->lossless) {
     vpx_memset(txfm_cache, 0, TX_MODES * sizeof(int64_t));
-    choose_largest_txfm_size(cpi, x, rate, distortion, skip, sse,
-                             ref_best_rd, bs);
+    choose_largest_tx_size(cpi, x, rate, distortion, skip, sse, ref_best_rd,
+                           bs);
   } else {
     int r[TX_SIZES][2], s[TX_SIZES];
     int64_t d[TX_SIZES];
@@ -1202,8 +1193,8 @@ static void intra_super_block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
                        &s[tx_size], &sse[tx_size],
                        ref_best_rd, 0, bs, tx_size,
                        cpi->sf.use_fast_coef_costing);
-    choose_txfm_size_from_rd(cpi, x, r, rate, d, distortion, s,
-                             skip, txfm_cache, bs);
+    choose_tx_size_from_rd(cpi, x, r, rate, d, distortion, s, skip, txfm_cache,
+                           bs);
   }
   if (psse)
     *psse = sse[mbmi->tx_size];
@@ -1610,7 +1601,7 @@ static void super_block_uvrd(const VP9_COMP *cpi, MACROBLOCK *x,
                              int64_t ref_best_rd) {
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
-  TX_SIZE uv_txfm_size = get_uv_tx_size(mbmi);
+  const TX_SIZE uv_tx_size = get_uv_tx_size(mbmi);
   int plane;
   int pnrate = 0, pnskip = 1;
   int64_t pndist = 0, pnsse = 0;
@@ -1631,7 +1622,7 @@ static void super_block_uvrd(const VP9_COMP *cpi, MACROBLOCK *x,
 
   for (plane = 1; plane < MAX_MB_PLANE; ++plane) {
     txfm_rd_in_plane(x, &pnrate, &pndist, &pnskip, &pnsse,
-                     ref_best_rd, plane, bsize, uv_txfm_size,
+                     ref_best_rd, plane, bsize, uv_tx_size,
                      cpi->sf.use_fast_coef_costing);
     if (pnrate == INT_MAX)
       goto term;
@@ -1683,7 +1674,7 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
       *rate_tokenonly = this_rate_tokenonly;
       *distortion     = this_distortion;
       *skippable      = s;
-      if (!x->select_txfm_size)
+      if (!x->select_tx_size)
         swap_block_ptr(x, ctx, 2, 0, 1, MAX_MB_PLANE);
     }
   }
@@ -1990,9 +1981,9 @@ static INLINE int mv_has_subpel(const MV *mv) {
 static int check_best_zero_mv(
     const VP9_COMP *cpi, const uint8_t mode_context[MAX_REF_FRAMES],
     int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES],
-    int disable_inter_mode_mask, int this_mode,
+    int inter_mode_mask, int this_mode,
     const MV_REFERENCE_FRAME ref_frames[2]) {
-  if (!(disable_inter_mode_mask & (1 << INTER_OFFSET(ZEROMV))) &&
+  if ((inter_mode_mask & (1 << ZEROMV)) &&
       (this_mode == NEARMV || this_mode == NEARESTMV || this_mode == ZEROMV) &&
       frame_mv[this_mode][ref_frames[0]].as_int == 0 &&
       (ref_frames[1] == NONE ||
@@ -2058,7 +2049,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
   ENTROPY_CONTEXT t_above[2], t_left[2];
   int subpelmv = 1, have_ref = 0;
   const int has_second_rf = has_second_ref(mbmi);
-  const int disable_inter_mode_mask = cpi->sf.disable_inter_mode_mask[bsize];
+  const int inter_mode_mask = cpi->sf.inter_mode_mask[bsize];
 
   vp9_zero(*bsi);
 
@@ -2107,11 +2098,11 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
         mode_idx = INTER_OFFSET(this_mode);
         bsi->rdstat[i][mode_idx].brdcost = INT64_MAX;
-        if (disable_inter_mode_mask & (1 << mode_idx))
+        if (!(inter_mode_mask & (1 << this_mode)))
           continue;
 
         if (!check_best_zero_mv(cpi, mbmi->mode_context, frame_mv,
-                                disable_inter_mode_mask,
+                                inter_mode_mask,
                                 this_mode, mbmi->ref_frame))
           continue;
 
@@ -2149,7 +2140,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
           else
             max_mv = MAX(abs(bsi->mvp.as_mv.row), abs(bsi->mvp.as_mv.col)) >> 3;
 
-          if (cpi->sf.auto_mv_step_size && cm->show_frame) {
+          if (cpi->sf.mv.auto_mv_step_size && cm->show_frame) {
             // Take wtd average of the step_params based on the last frame's
             // max mv magnitude and the best ref mvs of the current block for
             // the given reference.
@@ -2173,9 +2164,9 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
           vp9_set_mv_search_range(x, &bsi->ref_mv[0]->as_mv);
 
-          bestsme = full_pixel_search(cpi, x, bsize, &mvp_full, step_param,
-                                      sadpb, &bsi->ref_mv[0]->as_mv, new_mv,
-                                      INT_MAX, 1);
+          bestsme = vp9_full_pixel_search(cpi, x, bsize, &mvp_full, step_param,
+                                          sadpb, &bsi->ref_mv[0]->as_mv, new_mv,
+                                          INT_MAX, 1);
 
           // Should we do a full search (best quality only)
           if (is_best_mode(cpi->oxcf.mode)) {
@@ -2204,8 +2195,8 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                          &bsi->ref_mv[0]->as_mv,
                                          cm->allow_high_precision_mv,
                                          x->errorperbit, &cpi->fn_ptr[bsize],
-                                         cpi->sf.subpel_force_stop,
-                                         cpi->sf.subpel_iters_per_step,
+                                         cpi->sf.mv.subpel_force_stop,
+                                         cpi->sf.mv.subpel_iters_per_step,
                                          x->nmvjointcost, x->mvcost,
                                          &distortion,
                                          &x->pred_sse[mbmi->ref_frame[0]]);
@@ -2444,8 +2435,7 @@ static void mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
 
     // Find sad for current vector.
     this_sad = cpi->fn_ptr[block_size].sdf(src_y_ptr, x->plane[0].src.stride,
-                                           ref_y_ptr, ref_y_stride,
-                                           0x7fffffff);
+                                           ref_y_ptr, ref_y_stride);
 
     // Note if it is the best so far.
     if (this_sad < best_sad) {
@@ -2523,8 +2513,6 @@ static void estimate_ref_frame_costs(const VP9_COMMON *cm,
 
 static void store_coding_context(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
                          int mode_index,
-                         int_mv *ref_mv,
-                         int_mv *second_ref_mv,
                          int64_t comp_pred_diff[REFERENCE_MODES],
                          const int64_t tx_size_diff[TX_MODES],
                          int64_t best_filter_diff[SWITCHABLE_FILTER_CONTEXTS]) {
@@ -2664,7 +2652,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
 
   // Work out the size of the first step in the mv step search.
   // 0 here is maximum length first step. 1 is MAX >> 1 etc.
-  if (cpi->sf.auto_mv_step_size && cm->show_frame) {
+  if (cpi->sf.mv.auto_mv_step_size && cm->show_frame) {
     // Take wtd average of the step_params based on the last frame's
     // max mv magnitude and that based on the best ref mvs of the current
     // block for the given reference.
@@ -2711,8 +2699,8 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   mvp_full.col >>= 3;
   mvp_full.row >>= 3;
 
-  bestsme = full_pixel_search(cpi, x, bsize, &mvp_full, step_param, sadpb,
-                              &ref_mv, &tmp_mv->as_mv, INT_MAX, 1);
+  bestsme = vp9_full_pixel_search(cpi, x, bsize, &mvp_full, step_param, sadpb,
+                                  &ref_mv, &tmp_mv->as_mv, INT_MAX, 1);
 
   x->mv_col_min = tmp_col_min;
   x->mv_col_max = tmp_col_max;
@@ -2725,8 +2713,8 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                  cm->allow_high_precision_mv,
                                  x->errorperbit,
                                  &cpi->fn_ptr[bsize],
-                                 cpi->sf.subpel_force_stop,
-                                 cpi->sf.subpel_iters_per_step,
+                                 cpi->sf.mv.subpel_force_stop,
+                                 cpi->sf.mv.subpel_iters_per_step,
                                  x->nmvjointcost, x->mvcost,
                                  &dis, &x->pred_sse[ref]);
   }
@@ -2884,7 +2872,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
           cpi->common.allow_high_precision_mv,
           x->errorperbit,
           &cpi->fn_ptr[bsize],
-          0, cpi->sf.subpel_iters_per_step,
+          0, cpi->sf.mv.subpel_iters_per_step,
           x->nmvjointcost, x->mvcost,
           &dis, &sse, second_pred,
           pw, ph);
@@ -3178,7 +3166,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     *rate2 += vp9_get_switchable_rate(cpi);
 
   if (!is_comp_pred) {
-    if (!x->in_active_map) {
+    if (!x->in_active_map ||
+        vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
       if (psse)
         *psse = 0;
       *distortion = 0;
@@ -3368,11 +3357,6 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   ctx->mic = *xd->mi[0];
 }
 
-static INLINE int rd_less_than_thresh(int64_t best_rd, int thresh,
-                                      int thresh_fact) {
-    return best_rd < ((int64_t)thresh * thresh_fact >> 5) || thresh == INT_MAX;
-}
-
 // Updating rd_thresh_freq_fact[] here means that the different
 // partition/block sizes are handled independently based on the best
 // choice for the current partition. It may well be better to keep a scaled
@@ -3452,7 +3436,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   const int mode_search_skip_flags = cpi->sf.mode_search_skip_flags;
   const int intra_y_mode_mask =
       cpi->sf.intra_y_mode_mask[max_txsize_lookup[bsize]];
-  int disable_inter_mode_mask = cpi->sf.disable_inter_mode_mask[bsize];
+  int inter_mode_mask = cpi->sf.inter_mode_mask[bsize];
   vp9_zero(best_mbmode);
   x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
 
@@ -3516,8 +3500,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   // If the segment skip feature is enabled....
   // then do nothing if the current mode is not allowed..
   if (vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP)) {
-    const int inter_non_zero_mode_mask = 0x1F7F7;
-    mode_skip_mask |= inter_non_zero_mode_mask;
+    mode_skip_mask = ~(1 << THR_ZEROMV);
+    inter_mode_mask = (1 << ZEROMV);
   }
 
   // Disable this drop out case if the ref frame
@@ -3551,7 +3535,11 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   if (bsize > cpi->sf.max_intra_bsize) {
-    mode_skip_mask |= 0xFF30808;
+    const int all_intra_modes = (1 << THR_DC) | (1 << THR_TM) |
+        (1 << THR_H_PRED) | (1 << THR_V_PRED) | (1 << THR_D135_PRED) |
+        (1 << THR_D207_PRED) | (1 << THR_D153_PRED) | (1 << THR_D63_PRED) |
+        (1 << THR_D117_PRED) | (1 << THR_D45_PRED);
+    mode_skip_mask |= all_intra_modes;
   }
 
   if (!x->in_active_map) {
@@ -3565,7 +3553,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       mode_index = THR_ZEROMV;
     mode_skip_mask = ~(1 << mode_index);
     mode_skip_start = MAX_MODES;
-    disable_inter_mode_mask = 0;
+    inter_mode_mask = (1 << NEARESTMV) | (1 << NEARMV) | (1 << ZEROMV) |
+                      (1 << NEWMV);
   }
 
   for (mode_index = 0; mode_index < MAX_MODES; ++mode_index) {
@@ -3607,13 +3596,12 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
     // Test best rd so far against threshold for trying this mode.
     if (rd_less_than_thresh(best_rd, rd_threshes[mode_index],
-        rd_thresh_freq_fact[mode_index]))
+                            rd_thresh_freq_fact[mode_index]))
       continue;
 
     this_mode = vp9_mode_order[mode_index].mode;
     ref_frame = vp9_mode_order[mode_index].ref_frame[0];
-    if (ref_frame != INTRA_FRAME &&
-        disable_inter_mode_mask & (1 << INTER_OFFSET(this_mode)))
+    if (ref_frame != INTRA_FRAME && !(inter_mode_mask & (1 << this_mode)))
       continue;
     second_ref_frame = vp9_mode_order[mode_index].ref_frame[1];
 
@@ -3662,7 +3650,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
           !vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
         const MV_REFERENCE_FRAME ref_frames[2] = {ref_frame, second_ref_frame};
         if (!check_best_zero_mv(cpi, mbmi->mode_context, frame_mv,
-                                disable_inter_mode_mask, this_mode, ref_frames))
+                                inter_mode_mask, this_mode, ref_frames))
           continue;
       }
     }
@@ -3833,7 +3821,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         best_rd = this_rd;
         best_mbmode = *mbmi;
         best_skip2 = this_skip2;
-        if (!x->select_txfm_size)
+        if (!x->select_tx_size)
           swap_block_ptr(x, ctx, 1, 0, 0, max_plane);
         vpx_memcpy(ctx->zcoeff_blk, x->zcoeff_blk[mbmi->tx_size],
                    sizeof(uint8_t) * ctx->num_4x4_blk);
@@ -4005,9 +3993,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
   set_ref_ptrs(cm, xd, mbmi->ref_frame[0], mbmi->ref_frame[1]);
   store_coding_context(x, ctx, best_mode_index,
-                       &mbmi->ref_mvs[mbmi->ref_frame[0]][0],
-                       &mbmi->ref_mvs[mbmi->ref_frame[1] < 0 ? 0 :
-                                      mbmi->ref_frame[1]][0],
                        best_pred_diff, best_tx_diff, best_filter_diff);
 
   return best_rd;
@@ -4058,7 +4043,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   int_mv seg_mvs[4][MAX_REF_FRAMES];
   b_mode_info best_bmodes[4];
   int best_skip2 = 0;
-  int ref_frame_mask = 0;
   int mode_skip_mask = 0;
 
   x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
@@ -4091,17 +4075,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     }
     frame_mv[NEWMV][ref_frame].as_int = INVALID_MV;
     frame_mv[ZEROMV][ref_frame].as_int = 0;
-  }
-
-  for (ref_frame = LAST_FRAME;
-       ref_frame <= ALTREF_FRAME && cpi->sf.reference_masking; ++ref_frame) {
-    int i;
-    for (i = LAST_FRAME; i <= ALTREF_FRAME; ++i) {
-      if ((x->pred_mv_sad[ref_frame] >> 1) > x->pred_mv_sad[i]) {
-        ref_frame_mask |= (1 << ref_frame);
-        break;
-      }
-    }
   }
 
   for (ref_index = 0; ref_index < MAX_REFS; ++ref_index) {
@@ -4197,11 +4170,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     if (vp9_segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME) &&
         vp9_get_segdata(seg, segment_id, SEG_LVL_REF_FRAME) !=
             (int)ref_frame) {
-      continue;
-    // If the segment skip feature is enabled....
-    // then do nothing if the current mode is not allowed..
-    } else if (vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP) &&
-               ref_frame != INTRA_FRAME) {
       continue;
     // Disable this drop out case if the ref frame
     // segment level feature is enabled for this segment. This is to
@@ -4427,15 +4395,10 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     }
 
     if (!disable_skip) {
-      // Test for the condition where skip block will be activated
-      // because there are no non zero coefficients and make any
-      // necessary adjustment for rate. Ignore if skip is coded at
-      // segment level as the cost wont have been added in.
-      // Is Mb level skip allowed (i.e. not coded at segment level).
-      const int mb_skip_allowed = !vp9_segfeature_active(seg, segment_id,
-                                                         SEG_LVL_SKIP);
+      // Skip is never coded at the segment level for sub8x8 blocks and instead
+      // always coded in the bitstream at the mode info level.
 
-      if (mb_skip_allowed && ref_frame != INTRA_FRAME && !xd->lossless) {
+      if (ref_frame != INTRA_FRAME && !xd->lossless) {
         if (RDCOST(x->rdmult, x->rddiv, rate_y + rate_uv, distortion2) <
             RDCOST(x->rdmult, x->rddiv, 0, total_sse)) {
           // Add in the cost of the no skip flag.
@@ -4450,7 +4413,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
           rate_uv = 0;
           this_skip2 = 1;
         }
-      } else if (mb_skip_allowed) {
+      } else {
         // Add in the cost of the no skip flag.
         rate2 += vp9_cost_bit(vp9_get_skip_prob(cm, xd), 0);
       }
@@ -4495,7 +4458,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
                    RDCOST(x->rdmult, x->rddiv, rate_uv, distortion_uv);
         best_mbmode = *mbmi;
         best_skip2 = this_skip2;
-        if (!x->select_txfm_size)
+        if (!x->select_tx_size)
           swap_block_ptr(x, ctx, 1, 0, 0, max_plane);
         vpx_memcpy(ctx->zcoeff_blk, x->zcoeff_blk[TX_4X4],
                    sizeof(uint8_t) * ctx->num_4x4_blk);
@@ -4645,9 +4608,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 
   set_ref_ptrs(cm, xd, mbmi->ref_frame[0], mbmi->ref_frame[1]);
   store_coding_context(x, ctx, best_ref_index,
-                       &mbmi->ref_mvs[mbmi->ref_frame[0]][0],
-                       &mbmi->ref_mvs[mbmi->ref_frame[1] < 0 ? 0 :
-                                      mbmi->ref_frame[1]][0],
                        best_pred_diff, best_tx_diff, best_filter_diff);
 
   return best_rd;

@@ -98,6 +98,9 @@ extern double vp8_calc_ssimg
 #ifdef OUTPUT_YUV_SRC
 FILE *yuv_file;
 #endif
+#ifdef OUTPUT_YUV_DENOISED
+FILE *yuv_denoised_file;
+#endif
 
 #if 0
 FILE *framepsnr;
@@ -1748,7 +1751,8 @@ void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
       {
         int width = (cpi->oxcf.Width + 15) & ~15;
         int height = (cpi->oxcf.Height + 15) & ~15;
-        vp8_denoiser_allocate(&cpi->denoiser, width, height);
+        vp8_denoiser_allocate(&cpi->denoiser, width, height,
+                              cpi->common.mb_rows, cpi->common.mb_cols);
       }
     }
 #endif
@@ -1960,6 +1964,9 @@ struct VP8_COMP* vp8_create_compressor(VP8_CONFIG *oxcf)
 
 #ifdef OUTPUT_YUV_SRC
     yuv_file = fopen("bd.yuv", "ab");
+#endif
+#ifdef OUTPUT_YUV_DENOISED
+    yuv_denoised_file = fopen("denoised.yuv", "ab");
 #endif
 
 #if 0
@@ -2410,6 +2417,9 @@ void vp8_remove_compressor(VP8_COMP **ptr)
 #ifdef OUTPUT_YUV_SRC
     fclose(yuv_file);
 #endif
+#ifdef OUTPUT_YUV_DENOISED
+    fclose(yuv_denoised_file);
+#endif
 
 #if 0
 
@@ -2610,10 +2620,9 @@ int vp8_update_entropy(VP8_COMP *cpi, int update)
 }
 
 
-#if OUTPUT_YUV_SRC
-void vp8_write_yuv_frame(const char *name, YV12_BUFFER_CONFIG *s)
+#if defined(OUTPUT_YUV_SRC) || defined(OUTPUT_YUV_DENOISED)
+void vp8_write_yuv_frame(FILE *yuv_file, YV12_BUFFER_CONFIG *s)
 {
-    FILE *yuv_file = fopen(name, "ab");
     unsigned char *src = s->y_buffer;
     int h = s->y_height;
 
@@ -2643,11 +2652,8 @@ void vp8_write_yuv_frame(const char *name, YV12_BUFFER_CONFIG *s)
         src += s->uv_stride;
     }
     while (--h);
-
-    fclose(yuv_file);
 }
 #endif
-
 
 static void scale_and_extend_source(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
 {
@@ -3895,7 +3901,7 @@ static void encode_frame_to_data_rate
 #endif
 
 #ifdef OUTPUT_YUV_SRC
-    vp8_write_yuv_frame(cpi->Source);
+    vp8_write_yuv_frame(yuv_file, cpi->Source);
 #endif
 
     do
@@ -4433,6 +4439,11 @@ static void encode_frame_to_data_rate
     }
 
     update_reference_frames(cpi);
+
+#ifdef OUTPUT_YUV_DENOISED
+    vp8_write_yuv_frame(yuv_denoised_file,
+                        &cpi->denoiser.yv12_running_avg[INTRA_FRAME]);
+#endif
 
 #if !(CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING)
     if (cpi->oxcf.error_resilient_mode)

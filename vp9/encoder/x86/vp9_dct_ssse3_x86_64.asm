@@ -23,6 +23,7 @@ pw_%1_%2:   dw  %1,  %2,  %1,  %2,  %1,  %2,  %1,  %2
 pw_%2_m%1:  dw  %2, -%1,  %2, -%1,  %2, -%1,  %2, -%1
 %endmacro
 
+TRANSFORM_COEFFS 11585,  11585
 TRANSFORM_COEFFS 15137,   6270
 TRANSFORM_COEFFS 16069,   3196
 TRANSFORM_COEFFS  9102,  13623
@@ -83,7 +84,7 @@ SECTION .text
 %endmacro
 
 ; 1D forward 8x8 DCT transform
-%macro FDCT8_1D 0
+%macro FDCT8_1D 1
   SUM_SUB            0,  7,  9
   SUM_SUB            1,  6,  9
   SUM_SUB            2,  5,  9
@@ -92,14 +93,21 @@ SECTION .text
   SUM_SUB            0,  3,  9
   SUM_SUB            1,  2,  9
   SUM_SUB            6,  5,  9
+%if %1 == 0
   SUM_SUB            0,  1,  9
+%endif
 
   BUTTERFLY_4X       2,  3,  6270,  15137,  m8,  9,  10
 
   pmulhrsw           m6, m12
   pmulhrsw           m5, m12
+%if %1 == 0
   pmulhrsw           m0, m12
   pmulhrsw           m1, m12
+%else
+  BUTTERFLY_4X       1,  0,  11585, 11585,  m8,  9,  10
+  SWAP               0,  1
+%endif
 
   SUM_SUB            4,  5,  9
   SUM_SUB            7,  6,  9
@@ -150,10 +158,10 @@ cglobal fdct8x8, 3, 5, 13, input, output, stride
   psllw              m7, 2
 
   ; column transform
-  FDCT8_1D
+  FDCT8_1D  0
   TRANSPOSE8X8 0, 1, 2, 3, 4, 5, 6, 7, 9
 
-  FDCT8_1D
+  FDCT8_1D  1
   TRANSPOSE8X8 0, 1, 2, 3, 4, 5, 6, 7, 9
 
   DIVIDE_ROUND_2X   0, 1, 9, 10

@@ -34,7 +34,10 @@ vpx_set_ref() {
   local output_file="${VPX_TEST_OUTPUT_DIR}/vp8cx_set_ref_${codec}.ivf"
   local ref_frame_num=90
 
-  [ -x "${encoder}" ] || return 1
+  if [ ! -x "${encoder}" ]; then
+    elog "${encoder} does not exist or is not executable."
+    return 1
+  fi
 
   eval "${encoder}" "${YUV_RAW_INPUT_WIDTH}" "${YUV_RAW_INPUT_HEIGHT}" \
       "${YUV_RAW_INPUT}" "${output_file}" "${ref_frame_num}" \

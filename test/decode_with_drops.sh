@@ -34,7 +34,10 @@ decode_with_drops() {
   local output_file="${VPX_TEST_OUTPUT_DIR}/decode_with_drops_${codec}"
   local drop_mode="$3"
 
-  [ -x "${decoder}" ] || return 1
+  if [ ! -x "${decoder}" ]; then
+    elog "${decoder} does not exist or is not executable."
+    return 1
+  fi
 
   eval "${decoder}" "${input_file}" "${output_file}" "${drop_mode}" ${devnull}
 

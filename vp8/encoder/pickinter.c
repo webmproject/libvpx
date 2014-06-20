@@ -590,9 +590,9 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     int distortion2;
     int bestsme = INT_MAX;
     int best_mode_index = 0;
-    unsigned int sse = INT_MAX, best_rd_sse = INT_MAX;
+    unsigned int sse = UINT_MAX, best_rd_sse = UINT_MAX;
 #if CONFIG_TEMPORAL_DENOISING
-    unsigned int zero_mv_sse = INT_MAX, best_sse = INT_MAX;
+    unsigned int zero_mv_sse = UINT_MAX, best_sse = UINT_MAX;
 #endif
 
     int sf_improved_mv_pred = cpi->sf.improved_mv_pred;
@@ -1168,6 +1168,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 #if CONFIG_TEMPORAL_DENOISING
     if (cpi->oxcf.noise_sensitivity)
     {
+        int block_index = mb_row * cpi->common.mb_cols + mb_col;
         if (x->best_sse_inter_mode == DC_PRED)
         {
             /* No best MV found. */
@@ -1179,7 +1180,9 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         }
         x->increase_denoising = 0;
         vp8_denoiser_denoise_mb(&cpi->denoiser, x, best_sse, zero_mv_sse,
-                                recon_yoffset, recon_uvoffset);
+                                recon_yoffset, recon_uvoffset,
+                                &cpi->common.lf_info, mb_row, mb_col,
+                                block_index);
 
 
         /* Reevaluate ZEROMV after denoising. */

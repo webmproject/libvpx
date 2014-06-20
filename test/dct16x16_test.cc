@@ -274,8 +274,19 @@ void fdct16x16_ref(const int16_t *in, tran_low_t *out, int stride,
   vp9_fdct16x16_c(in, out, stride);
 }
 
-void fht16x16_ref(const int16_t *in, tran_low_t *out, int stride, int tx_type) {
+void idct16x16_ref(const tran_low_t *in, uint8_t *dest, int stride,
+                   int tx_type) {
+  vp9_idct16x16_256_add_c(in, dest, stride);
+}
+
+void fht16x16_ref(const int16_t *in, tran_low_t *out, int stride,
+                  int tx_type) {
   vp9_fht16x16_c(in, out, stride, tx_type);
+}
+
+void iht16x16_ref(const tran_low_t *in, uint8_t *dest, int stride,
+                  int tx_type) {
+  vp9_iht16x16_256_add_c(in, dest, stride, tx_type);
 }
 
 #if CONFIG_VP9_HIGH
@@ -286,6 +297,16 @@ void idct16x16_10(const tran_low_t *in, uint8_t *out, int stride) {
 
 void idct16x16_12(const tran_low_t *in, uint8_t *out, int stride) {
   vp9_high_idct16x16_256_add_c(in, out, stride, 12);
+}
+
+void idct16x16_10_ref(const tran_low_t *in, uint8_t *out, int stride,
+                      int tx_type) {
+  idct16x16_10(in, out, stride);
+}
+
+void idct16x16_12_ref(const tran_low_t *in, uint8_t *out, int stride,
+                      int tx_type) {
+  idct16x16_12(in, out, stride);
 }
 
 void iht16x16_10(const tran_low_t *in, uint8_t *out, int stride, int tx_type) {
@@ -396,12 +417,13 @@ class Trans16x16TestBase {
         input_block[j] = (rnd.Rand16() & mask_) - (rnd.Rand16() & mask_);
         input_extreme_block[j] = rnd.Rand8() % 2 ? mask_ : -mask_;
       }
-      if (i == 0)
+      if (i == 0) {
         for (int j = 0; j < kNumCoeffs; ++j)
           input_extreme_block[j] = mask_;
-      if (i == 1)
+      } else if (i == 1) {
         for (int j = 0; j < kNumCoeffs; ++j)
           input_extreme_block[j] = -mask_;
+      }
 
       fwd_txfm_ref(input_extreme_block, output_ref_block, pitch_, tx_type_);
       REGISTER_STATE_CHECK(RunFwdTxfm(input_extreme_block,
@@ -413,6 +435,68 @@ class Trans16x16TestBase {
         EXPECT_GE(4 * DCT_MAX_VALUE << (bit_depth_ - 8), abs(output_block[j]))
             << "Error: 16x16 FDCT has coefficient larger than 4*DCT_MAX_VALUE";
       }
+    }
+  }
+
+  void RunQuantCheck(int dc_thred, int ac_thred) {
+    ACMRandom rnd(ACMRandom::DeterministicSeed());
+    const int count_test_block = 1000;
+    DECLARE_ALIGNED_ARRAY(16, int16_t, input_block, kNumCoeffs);
+    DECLARE_ALIGNED_ARRAY(16, int16_t, input_extreme_block, kNumCoeffs);
+    DECLARE_ALIGNED_ARRAY(16, tran_low_t, output_ref_block, kNumCoeffs);
+
+    DECLARE_ALIGNED_ARRAY(16, uint8_t, dst, kNumCoeffs);
+    DECLARE_ALIGNED_ARRAY(16, uint16_t, dst16, kNumCoeffs);
+    DECLARE_ALIGNED_ARRAY(16, uint8_t, ref, kNumCoeffs);
+    DECLARE_ALIGNED_ARRAY(16, uint16_t, ref16, kNumCoeffs);
+
+    for (int i = 0; i < count_test_block; ++i) {
+      // Initialize a test block with input range [-255, 255].
+      for (int j = 0; j < kNumCoeffs; ++j) {
+        if (bit_depth_ == 8)
+          input_block[j] = rnd.Rand8() - rnd.Rand8();
+        else
+          input_block[j] = (rnd.Rand16() & mask_) - (rnd.Rand16() & mask_);
+        input_extreme_block[j] = rnd.Rand8() % 2 ? mask_ : -mask_;
+      }
+      if (i == 0)
+        for (int j = 0; j < kNumCoeffs; ++j)
+          input_extreme_block[j] = mask_;
+      if (i == 1)
+        for (int j = 0; j < kNumCoeffs; ++j)
+          input_extreme_block[j] = -mask_;
+
+      fwd_txfm_ref(input_extreme_block, output_ref_block, pitch_, tx_type_);
+
+      // clear reconstructed pixel buffers
+      vpx_memset(dst, 0, kNumCoeffs * sizeof(uint8_t));
+      vpx_memset(dst16, 0, kNumCoeffs * sizeof(uint16_t));
+      vpx_memset(ref, 0, kNumCoeffs * sizeof(uint8_t));
+      vpx_memset(ref16, 0, kNumCoeffs * sizeof(uint16_t));
+
+      // quantization with maximum allowed step sizes
+      output_ref_block[0] = (output_ref_block[0] / dc_thred) * dc_thred;
+      for (int j = 1; j < kNumCoeffs; ++j)
+        output_ref_block[j] = (output_ref_block[j] / ac_thred) * ac_thred;
+      if (bit_depth_ == 8) {
+        inv_txfm_ref(output_ref_block, ref, pitch_, tx_type_);
+        REGISTER_STATE_CHECK(RunInvTxfm(output_ref_block, dst, pitch_));
+#if CONFIG_VP9_HIGH
+      } else {
+        inv_txfm_ref(output_ref_block, CONVERT_TO_BYTEPTR(ref16), pitch_,
+                     tx_type_);
+        REGISTER_STATE_CHECK(RunInvTxfm(output_ref_block,
+                                        CONVERT_TO_BYTEPTR(dst16), pitch_));
+      }
+#else
+      }
+#endif
+      if (bit_depth_ == 8)
+        for (int j = 0; j < kNumCoeffs; ++j)
+          EXPECT_EQ(ref[j], dst[j]);
+      else
+        for (int j = 0; j < kNumCoeffs; ++j)
+          EXPECT_EQ(ref16[j], dst16[j]);
     }
   }
 
@@ -468,6 +552,7 @@ class Trans16x16TestBase {
   fht_t fwd_txfm_ref;
   int bit_depth_;
   int mask_;
+  iht_t inv_txfm_ref;
 };
 
 class Trans16x16DCT
@@ -484,6 +569,21 @@ class Trans16x16DCT
     pitch_     = 16;
     fwd_txfm_ref = fdct16x16_ref;
     mask_ = (1 << bit_depth_) - 1;
+#if CONFIG_VP9_HIGH
+    switch (bit_depth_) {
+      default:
+        inv_txfm_ref = idct16x16_ref;
+        break;
+      case 10:
+        inv_txfm_ref = idct16x16_10_ref;
+        break;
+      case 12:
+        inv_txfm_ref = idct16x16_12_ref;
+        break;
+    }
+#else
+    inv_txfm_ref = idct16x16_ref;
+#endif
   }
   virtual void TearDown() { libvpx_test::ClearSystemState(); }
 
@@ -511,6 +611,12 @@ TEST_P(Trans16x16DCT, MemCheck) {
   RunMemCheck();
 }
 
+TEST_P(Trans16x16DCT, QuantCheck) {
+  // Use maximally allowed quantization step sizes for DC and AC
+  // coefficients respectively.
+  RunQuantCheck(1336, 1828);
+}
+
 TEST_P(Trans16x16DCT, InvAccuracyCheck) {
   RunInvAccuracyCheck();
 }
@@ -529,7 +635,22 @@ class Trans16x16HT
     pitch_     = 16;
     fwd_txfm_ref = fht16x16_ref;
     mask_ = (1 << bit_depth_) - 1;
-  }
+#if CONFIG_VP9_HIGH
+    switch (bit_depth_) {
+      default:
+        inv_txfm_ref = iht16x16_ref;
+        break;
+      case 10:
+        inv_txfm_ref = iht16x16_10;
+        break;
+      case 12:
+        inv_txfm_ref = iht16x16_12;
+        break;
+    }
+#else
+    inv_txfm_ref = iht16x16_ref;
+#endif
+}
   virtual void TearDown() { libvpx_test::ClearSystemState(); }
 
  protected:
@@ -556,22 +677,32 @@ TEST_P(Trans16x16HT, MemCheck) {
   RunMemCheck();
 }
 
+TEST_P(Trans16x16HT, QuantCheck) {
+  // The encoder skips any non-DC intra prediction modes,
+  // when the quantization step size goes beyond 988.
+  RunQuantCheck(549, 988);
+}
+
 using std::tr1::make_tuple;
 
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
 INSTANTIATE_TEST_CASE_P(
     C, Trans16x16DCT,
     ::testing::Values(
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
         make_tuple(&vp9_fdct16x16_c, &vp9_idct16x16_256_add_c, 0, 8),
         make_tuple(&vp9_high_fdct16x16_c, &idct16x16_10, 0, 10),
         make_tuple(&vp9_high_fdct16x16_c, &idct16x16_12, 0, 12)));
 #else
+INSTANTIATE_TEST_CASE_P(
+    C, Trans16x16DCT,
+    ::testing::Values(
         make_tuple(&vp9_fdct16x16_c, &vp9_idct16x16_256_add_c, 0, 8)));
 #endif
+
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
 INSTANTIATE_TEST_CASE_P(
     C, Trans16x16HT,
     ::testing::Values(
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
         make_tuple(&vp9_fht16x16_c, &vp9_iht16x16_256_add_c, 0, 8),
         make_tuple(&vp9_fht16x16_c, &vp9_iht16x16_256_add_c, 1, 8),
         make_tuple(&vp9_fht16x16_c, &vp9_iht16x16_256_add_c, 2, 8),
@@ -585,6 +716,9 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_high_fht16x16_c, &iht16x16_12, 2, 12),
         make_tuple(&vp9_high_fht16x16_c, &iht16x16_12, 3, 12)));
 #else
+INSTANTIATE_TEST_CASE_P(
+    C, Trans16x16HT,
+    ::testing::Values(
         make_tuple(&vp9_fht16x16_c, &vp9_iht16x16_256_add_c, 0, 8),
         make_tuple(&vp9_fht16x16_c, &vp9_iht16x16_256_add_c, 1, 8),
         make_tuple(&vp9_fht16x16_c, &vp9_iht16x16_256_add_c, 2, 8),
@@ -619,5 +753,30 @@ INSTANTIATE_TEST_CASE_P(
     SSSE3, Trans16x16DCT,
     ::testing::Values(
         make_tuple(&vp9_fdct16x16_c, &vp9_idct16x16_256_add_ssse3, 0, 8)));
+#endif
+
+#if HAVE_AVX2 && !CONFIG_HIGH_TRANSFORMS
+// TODO(jzern): these prototypes can be removed after the avx2 versions are
+// reenabled in vp9_rtcd_defs.pl.
+extern "C" {
+void vp9_fdct16x16_avx2(const int16_t *input, int16_t *output, int stride);
+void vp9_fht16x16_avx2(const int16_t *input, int16_t *output, int stride,
+                       int tx_type);
+}
+INSTANTIATE_TEST_CASE_P(
+    DISABLED_AVX2, Trans16x16DCT,
+    ::testing::Values(
+        make_tuple(&vp9_fdct16x16_avx2,
+                   &vp9_idct16x16_256_add_c, 0, 8)));
+INSTANTIATE_TEST_CASE_P(
+    AVX2, Trans16x16HT,
+    ::testing::Values(
+        make_tuple(&vp9_fht16x16_avx2, &vp9_iht16x16_256_add_c, 3, 8)));
+INSTANTIATE_TEST_CASE_P(
+    DISABLED_AVX2, Trans16x16HT,
+    ::testing::Values(
+        make_tuple(&vp9_fht16x16_avx2, &vp9_iht16x16_256_add_c, 0, 8),
+        make_tuple(&vp9_fht16x16_avx2, &vp9_iht16x16_256_add_c, 1, 8),
+        make_tuple(&vp9_fht16x16_avx2, &vp9_iht16x16_256_add_c, 2, 8)));
 #endif
 }  // namespace

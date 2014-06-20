@@ -228,8 +228,6 @@ typedef struct macroblockd {
 #if CONFIG_VP9_HIGH
   /* Bits per sample 8, 10, 12 */
   int bps;
-  void (*high_itxm_add)(const tran_low_t *input, uint8_t *dest, int stride,
-                        int eob, int bps);
   DECLARE_ALIGNED(16, uint16_t, mc_buf_high[80 * 2 * 80 * 2]);
 #endif
 
@@ -237,8 +235,6 @@ typedef struct macroblockd {
   DECLARE_ALIGNED(16, uint8_t, mc_buf[80 * 2 * 80 * 2]);
 
   int lossless;
-  /* Inverse transform function pointers. */
-  void (*itxm_add)(const tran_low_t *input, uint8_t *dest, int stride, int eob);
 
   int corrupted;
 

@@ -32,7 +32,10 @@ postproc() {
   local codec="$2"
   local output_file="${VPX_TEST_OUTPUT_DIR}/postproc_${codec}.raw"
 
-  [ -x "${decoder}" ] || return 1
+  if [ ! -x "${decoder}" ]; then
+    elog "${decoder} does not exist or is not executable."
+    return 1
+  fi
 
   eval "${decoder}" "${input_file}" "${output_file}" ${devnull}
 

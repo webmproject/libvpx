@@ -103,6 +103,7 @@ all_platforms="${all_platforms} armv7-linux-gcc"     #neon Cortex-A8
 all_platforms="${all_platforms} armv7-none-rvct"     #neon Cortex-A8
 all_platforms="${all_platforms} armv7-win32-vs11"
 all_platforms="${all_platforms} armv7-win32-vs12"
+all_platforms="${all_platforms} armv7s-darwin-gcc"
 all_platforms="${all_platforms} mips32-linux-gcc"
 all_platforms="${all_platforms} ppc32-darwin8-gcc"
 all_platforms="${all_platforms} ppc32-darwin9-gcc"
@@ -120,6 +121,7 @@ all_platforms="${all_platforms} x86-darwin10-gcc"
 all_platforms="${all_platforms} x86-darwin11-gcc"
 all_platforms="${all_platforms} x86-darwin12-gcc"
 all_platforms="${all_platforms} x86-darwin13-gcc"
+all_platforms="${all_platforms} x86-iphonesimulator-gcc"
 all_platforms="${all_platforms} x86-linux-gcc"
 all_platforms="${all_platforms} x86-linux-icc"
 all_platforms="${all_platforms} x86-os2-gcc"
@@ -136,6 +138,7 @@ all_platforms="${all_platforms} x86_64-darwin10-gcc"
 all_platforms="${all_platforms} x86_64-darwin11-gcc"
 all_platforms="${all_platforms} x86_64-darwin12-gcc"
 all_platforms="${all_platforms} x86_64-darwin13-gcc"
+all_platforms="${all_platforms} x86_64-iphonesimulator-gcc"
 all_platforms="${all_platforms} x86_64-linux-gcc"
 all_platforms="${all_platforms} x86_64-linux-icc"
 all_platforms="${all_platforms} x86_64-solaris-gcc"
@@ -272,6 +275,7 @@ EXPERIMENT_LIST="
     spatial_svc
     high_transforms
     high_quant
+    denoising
 "
 CONFIG_LIST="
     external_build
@@ -725,6 +729,10 @@ process_toolchain() {
         *-darwin-*)
             # iOS/ARM builds do not work with gtest. This does not match
             # x86 targets.
+        ;;
+        *-iphonesimulator-*)
+            soft_enable webm_io
+            soft_enable libyuv
         ;;
         *-win*)
             # Some mingw toolchains don't have pthread available by default.

@@ -33,7 +33,10 @@ resize_util() {
 
   # resize_util is available only when CONFIG_SHARED is disabled.
   if [ -z "$(vpx_config_option_enabled CONFIG_SHARED)" ]; then
-    [ -x "${resizer}" ] || return 1
+    if [ ! -x "${resizer}" ]; then
+      elog "${resizer} does not exist or is not executable."
+      return 1
+    fi
 
     eval "${resizer}" "${YUV_RAW_INPUT}" \
         "${YUV_RAW_INPUT_WIDTH}x${YUV_RAW_INPUT_HEIGHT}" \

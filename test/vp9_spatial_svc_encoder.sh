@@ -34,7 +34,10 @@ vp9_spatial_svc_encoder() {
 
   shift
 
-  [ -x "${encoder}" ] || return 1
+  if [ ! -x "${encoder}" ]; then
+    elog "${encoder} does not exist or is not executable."
+    return 1
+  fi
 
   eval "${encoder}" -w "${YUV_RAW_INPUT_WIDTH}" -h "${YUV_RAW_INPUT_HEIGHT}" \
       -k "${max_kf}" -f "${frames_to_encode}" "$@" "${YUV_RAW_INPUT}" \

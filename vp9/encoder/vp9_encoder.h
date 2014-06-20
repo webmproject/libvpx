@@ -32,19 +32,20 @@
 #include "vp9/encoder/vp9_mcomp.h"
 #include "vp9/encoder/vp9_quantize.h"
 #include "vp9/encoder/vp9_ratectrl.h"
+#include "vp9/encoder/vp9_rdopt.h"
 #include "vp9/encoder/vp9_speed_features.h"
 #include "vp9/encoder/vp9_svc_layercontext.h"
 #include "vp9/encoder/vp9_tokenize.h"
 #include "vp9/encoder/vp9_variance.h"
+#if CONFIG_DENOISING
+#include "vp9/encoder/vp9_denoiser.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #define DEFAULT_GF_INTERVAL         10
-
-#define MAX_MODES 30
-#define MAX_REFS  6
 
 typedef struct {
   int nmvjointcost[MV_JOINTS];
@@ -63,56 +64,6 @@ typedef struct {
   FRAME_CONTEXT fc;
 } CODING_CONTEXT;
 
-// This enumerator type needs to be kept aligned with the mode order in
-// const MODE_DEFINITION vp9_mode_order[MAX_MODES] used in the rd code.
-typedef enum {
-  THR_NEARESTMV,
-  THR_NEARESTA,
-  THR_NEARESTG,
-
-  THR_DC,
-
-  THR_NEWMV,
-  THR_NEWA,
-  THR_NEWG,
-
-  THR_NEARMV,
-  THR_NEARA,
-  THR_COMP_NEARESTLA,
-  THR_COMP_NEARESTGA,
-
-  THR_TM,
-
-  THR_COMP_NEARLA,
-  THR_COMP_NEWLA,
-  THR_NEARG,
-  THR_COMP_NEARGA,
-  THR_COMP_NEWGA,
-
-  THR_ZEROMV,
-  THR_ZEROG,
-  THR_ZEROA,
-  THR_COMP_ZEROLA,
-  THR_COMP_ZEROGA,
-
-  THR_H_PRED,
-  THR_V_PRED,
-  THR_D135_PRED,
-  THR_D207_PRED,
-  THR_D153_PRED,
-  THR_D63_PRED,
-  THR_D117_PRED,
-  THR_D45_PRED,
-} THR_MODES;
-
-typedef enum {
-  THR_LAST,
-  THR_GOLD,
-  THR_ALTR,
-  THR_COMP_LA,
-  THR_COMP_GA,
-  THR_INTRA,
-} THR_MODES_SUB8X8;
 
 typedef enum {
   // encode_breakout is disabled.
@@ -129,13 +80,6 @@ typedef enum {
   THREEFIVE   = 2,
   ONETWO      = 3
 } VPX_SCALING;
-
-typedef enum {
-  RC_MODE_VBR = 0,
-  RC_MODE_CBR = 1,
-  RC_MODE_CONSTRAINED_QUALITY = 2,
-  RC_MODE_CONSTANT_QUALITY    = 3,
-} RC_MODE;
 
 typedef enum {
   // Good Quality Fast Encoding. The encoder balances quality with the
@@ -210,16 +154,17 @@ typedef struct VP9EncoderConfig {
   // ----------------------------------------------------------------
   // DATARATE CONTROL OPTIONS
 
-  RC_MODE rc_mode;  // vbr, cbr, constrained quality or constant quality
+  // vbr, cbr, constrained quality or constant quality
+  enum vpx_rc_mode rc_mode;
 
   // buffer targeting aggressiveness
   int under_shoot_pct;
   int over_shoot_pct;
 
   // buffering parameters
-  int64_t starting_buffer_level;  // in seconds
-  int64_t optimal_buffer_level;
-  int64_t maximum_buffer_size;
+  int64_t starting_buffer_level_ms;
+  int64_t optimal_buffer_level_ms;
+  int64_t maximum_buffer_size_ms;
 
   // Frame drop threshold.
   int drop_frames_water_mark;
@@ -229,7 +174,6 @@ typedef struct VP9EncoderConfig {
   int worst_allowed_q;
   int best_allowed_q;
   int cq_level;
-  int lossless;
   AQ_MODE aq_mode;  // Adaptive Quantization mode
 
   // Internal frame size scaling.
@@ -258,7 +202,6 @@ typedef struct VP9EncoderConfig {
 
   // these parameters aren't to be used in final build don't use!!!
   int play_alternate;
-  int alt_freq;
 
   int encode_breakout;  // early breakout : for video conf recommend 800
 
@@ -289,35 +232,17 @@ typedef struct VP9EncoderConfig {
   int use_high;
 } VP9EncoderConfig;
 
+static INLINE int is_altref_enabled(const VP9EncoderConfig *cfg) {
+  return cfg->mode != REALTIME && cfg->play_alternate && cfg->lag_in_frames > 0;
+}
+
+static INLINE int is_lossless_requested(const VP9EncoderConfig *cfg) {
+  return cfg->best_allowed_q == 0 && cfg->worst_allowed_q == 0;
+}
+
 static INLINE int is_best_mode(MODE mode) {
   return mode == ONE_PASS_BEST || mode == TWO_PASS_SECOND_BEST;
 }
-
-typedef struct RD_OPT {
-  // Thresh_mult is used to set a threshold for the rd score. A higher value
-  // means that we will accept the best mode so far more often. This number
-  // is used in combination with the current block size, and thresh_freq_fact
-  // to pick a threshold.
-  int thresh_mult[MAX_MODES];
-  int thresh_mult_sub8x8[MAX_REFS];
-
-  int threshes[MAX_SEGMENTS][BLOCK_SIZES][MAX_MODES];
-  int thresh_freq_fact[BLOCK_SIZES][MAX_MODES];
-
-  int64_t comp_pred_diff[REFERENCE_MODES];
-  int64_t prediction_type_threshes[MAX_REF_FRAMES][REFERENCE_MODES];
-  int64_t tx_select_diff[TX_MODES];
-  // FIXME(rbultje) can this overflow?
-  int tx_select_threshes[MAX_REF_FRAMES][TX_MODES];
-
-  int64_t filter_diff[SWITCHABLE_FILTER_CONTEXTS];
-  int64_t filter_threshes[MAX_REF_FRAMES][SWITCHABLE_FILTER_CONTEXTS];
-  int64_t filter_cache[SWITCHABLE_FILTER_CONTEXTS];
-  int64_t mask_filter;
-
-  int RDMULT;
-  int RDDIV;
-} RD_OPT;
 
 typedef struct VP9_COMP {
   QUANTS quants;
@@ -523,6 +448,10 @@ typedef struct VP9_COMP {
   int this_frame_weight;
   int max_arf_level;
 #endif
+
+#if CONFIG_DENOISING
+  VP9_DENOISER denoiser;
+#endif
 } VP9_COMP;
 
 void vp9_initialize_enc();
@@ -634,6 +563,10 @@ static INLINE void set_ref_ptrs(VP9_COMMON *cm, MACROBLOCKD *xd,
                                                          : 0];
   xd->block_refs[1] = &cm->frame_refs[ref1 >= LAST_FRAME ? ref1 - LAST_FRAME
                                                          : 0];
+}
+
+static INLINE int get_chessboard_index(const VP9_COMMON *cm) {
+  return cm->current_video_frame % 2;
 }
 
 #ifdef __cplusplus
