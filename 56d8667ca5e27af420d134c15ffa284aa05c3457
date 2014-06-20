@@ -54,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//kHM\u003d",
+        "filename": "test/decode_test_driver.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-06-20T23:38:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//kHY\u003d",
+      "revId": "56d8667ca5e27af420d134c15ffa284aa05c3457",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//kHU\u003d",
         "filename": "test/decode_test_driver.cc",
         "patchSetId": 6
@@ -65,6 +83,24 @@
       "writtenOn": "2014-06-20T23:35:09Z",
       "side": 1,
       "message": "PeakStream",
+      "revId": "56d8667ca5e27af420d134c15ffa284aa05c3457",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kHI\u003d",
+        "filename": "test/decode_test_driver.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-06-20T23:38:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//kHU\u003d",
       "revId": "56d8667ca5e27af420d134c15ffa284aa05c3457",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
