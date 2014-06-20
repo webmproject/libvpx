@@ -97,14 +97,15 @@ static void free_mi(VP9_COMMON *cm) {
 
 void vp9_free_frame_buffers(VP9_COMMON *cm) {
   int i;
+  BufferPool *const pool = cm->buffer_pool;
 
   for (i = 0; i < FRAME_BUFFERS; ++i) {
-    vp9_free_frame_buffer(&cm->frame_bufs[i].buf);
+    vp9_free_frame_buffer(&pool->frame_bufs[i].buf);
 
-    if (cm->frame_bufs[i].ref_count > 0 &&
-        cm->frame_bufs[i].raw_frame_buffer.data != NULL) {
-      cm->release_fb_cb(cm->cb_priv, &cm->frame_bufs[i].raw_frame_buffer);
-      cm->frame_bufs[i].ref_count = 0;
+    if (pool->frame_bufs[i].ref_count > 0 &&
+        pool->frame_bufs[i].raw_frame_buffer.data != NULL) {
+      pool->release_fb_cb(pool->cb_priv, &pool->frame_bufs[i].raw_frame_buffer);
+      pool->frame_bufs[i].ref_count = 0;
     }
   }
 
@@ -176,13 +177,14 @@ int vp9_resize_frame_buffers(VP9_COMMON *cm, int width, int height) {
 
 static void init_frame_bufs(VP9_COMMON *cm) {
   int i;
+  RefCntBuffer *const frame_bufs = cm->buffer_pool->frame_bufs;
 
   cm->new_fb_idx = FRAME_BUFFERS - 1;
-  cm->frame_bufs[cm->new_fb_idx].ref_count = 1;
+  frame_bufs[cm->new_fb_idx].ref_count = 1;
 
   for (i = 0; i < REF_FRAMES; ++i) {
     cm->ref_frame_map[i] = i;
-    cm->frame_bufs[i].ref_count = 1;
+    frame_bufs[i].ref_count = 1;
   }
 }
 
@@ -190,12 +192,13 @@ int vp9_alloc_frame_buffers(VP9_COMMON *cm, int width, int height) {
   int i;
   const int ss_x = cm->subsampling_x;
   const int ss_y = cm->subsampling_y;
+  RefCntBuffer *const frame_bufs = cm->buffer_pool->frame_bufs;
 
   vp9_free_frame_buffers(cm);
 
   for (i = 0; i < FRAME_BUFFERS; ++i) {
-    cm->frame_bufs[i].ref_count = 0;
-    if (vp9_alloc_frame_buffer(&cm->frame_bufs[i].buf, width, height,
+    frame_bufs[i].ref_count = 0;
+    if (vp9_alloc_frame_buffer(&frame_bufs[i].buf, width, height,
                                ss_x, ss_y, VP9_ENC_BORDER_IN_PIXELS) < 0)
       goto fail;
   }
@@ -256,7 +259,7 @@ int vp9_alloc_context_buffers(VP9_COMMON *cm, int width, int height) {
 void vp9_remove_common(VP9_COMMON *cm) {
   vp9_free_frame_buffers(cm);
   vp9_free_context_buffers(cm);
-  vp9_free_internal_frame_buffers(&cm->int_frame_buffers);
+  vp9_free_internal_frame_buffers(&cm->buffer_pool->int_frame_buffers);
 }
 
 void vp9_update_frame_size(VP9_COMMON *cm) {

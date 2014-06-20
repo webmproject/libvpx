@@ -46,6 +46,9 @@ struct vpx_codec_alg_priv {
   int                     next_submit_thread_id;
   int                     next_output_thread_id;
 
+  // BufferPool that holds all reference frames. Shared by all the FrameWorkers.
+  BufferPool              *buffer_pool;
+
   // External frame buffer info to save for VP9 common.
   void *ext_priv;  // Private data associated with the external frame buffers.
   vpx_get_frame_buffer_cb_fn_t get_ext_fb_cb;
@@ -100,6 +103,7 @@ static vpx_codec_err_t decoder_destroy(vpx_codec_alg_priv_t *ctx) {
   }
 
   vpx_free(ctx->frame_workers);
+  vpx_free(ctx->buffer_pool);
   vpx_free(ctx);
 
   return VPX_CODEC_OK;
@@ -218,21 +222,22 @@ static void init_buffer_callbacks(vpx_codec_alg_priv_t *ctx) {
     VP9Worker *const worker = &ctx->frame_workers[i];
     FrameWorkerData *const worker_data = (FrameWorkerData *)worker->data1;
     VP9_COMMON *const cm = &worker_data->pbi->common;
+    BufferPool *const pool = cm->buffer_pool;
 
     cm->new_fb_idx = -1;
     if (ctx->get_ext_fb_cb != NULL && ctx->release_ext_fb_cb != NULL) {
-      cm->get_fb_cb = ctx->get_ext_fb_cb;
-      cm->release_fb_cb = ctx->release_ext_fb_cb;
-      cm->cb_priv = ctx->ext_priv;
+      pool->get_fb_cb = ctx->get_ext_fb_cb;
+      pool->release_fb_cb = ctx->release_ext_fb_cb;
+      pool->cb_priv = ctx->ext_priv;
     } else {
-      cm->get_fb_cb = vp9_get_frame_buffer;
-      cm->release_fb_cb = vp9_release_frame_buffer;
+      pool->get_fb_cb = vp9_get_frame_buffer;
+      pool->release_fb_cb = vp9_release_frame_buffer;
 
-      if (vp9_alloc_internal_frame_buffers(&cm->int_frame_buffers))
+      if (vp9_alloc_internal_frame_buffers(&pool->int_frame_buffers))
         vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                            "Failed to initialize internal frame buffers");
 
-      cm->cb_priv = &cm->int_frame_buffers;
+      pool->cb_priv = &pool->int_frame_buffers;
     }
   }
 }
@@ -272,6 +277,9 @@ static vpx_codec_err_t init_decoder(vpx_codec_alg_priv_t *ctx) {
   ctx->next_output_thread_id = 0;
   ctx->num_frame_workers =
       (ctx->frame_parallel_decode == 1) ? ctx->cfg.threads: 1;
+  ctx->buffer_pool = (BufferPool *)vpx_calloc(1, sizeof(BufferPool));
+  if (ctx->buffer_pool == NULL)
+    return VPX_CODEC_MEM_ERROR;
 
   ctx->frame_workers = (VP9Worker *)
       vpx_malloc(ctx->num_frame_workers * sizeof(*ctx->frame_workers));
@@ -290,7 +298,7 @@ static vpx_codec_err_t init_decoder(vpx_codec_alg_priv_t *ctx) {
       return VPX_CODEC_MEM_ERROR;
     }
     worker_data = (FrameWorkerData *)worker->data1;
-    worker_data->pbi = vp9_decoder_create();
+    worker_data->pbi = vp9_decoder_create(ctx->buffer_pool);
     if (worker_data->pbi == NULL) {
       set_error_detail(ctx, "Failed to allocate worker_data");
       return VPX_CODEC_MEM_ERROR;
@@ -563,16 +571,18 @@ static vpx_image_t *decoder_get_frame(vpx_codec_alg_priv_t *ctx,
     FrameWorkerData *const worker_data = (FrameWorkerData *)worker->data1;
     if (vp9_get_raw_frame(worker_data->pbi, &sd, &flags) == 0) {
       VP9_COMMON *const cm = &worker_data->pbi->common;
+      BufferPool *const pool = cm->buffer_pool;
+      RefCntBuffer *const frame_bufs = cm->buffer_pool->frame_bufs;
       yuvconfig2image(&ctx->img, &sd, worker_data->user_priv);
-      ctx->img.fb_priv = cm->frame_bufs[cm->new_fb_idx].raw_frame_buffer.priv;
+      ctx->img.fb_priv = frame_bufs[cm->new_fb_idx].raw_frame_buffer.priv;
       img = &ctx->img;
       *iter = img;
       // Decrease reference count of last output frame in frame parallel mode.
       if (ctx->frame_parallel_decode && ctx->last_show_frame >= 0) {
-        --cm->frame_bufs[ctx->last_show_frame].ref_count;
-        if (cm->frame_bufs[ctx->last_show_frame].ref_count == 0) {
-          cm->release_fb_cb(cm->cb_priv,
-              &cm->frame_bufs[ctx->last_show_frame].raw_frame_buffer);
+        --frame_bufs[ctx->last_show_frame].ref_count;
+        if (frame_bufs[ctx->last_show_frame].ref_count == 0) {
+          pool->release_fb_cb(pool->cb_priv,
+              &frame_bufs[ctx->last_show_frame].raw_frame_buffer);
         }
       }
       ctx->last_show_frame = worker_data->pbi->common.new_fb_idx;

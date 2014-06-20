@@ -2271,9 +2271,10 @@ void vp9_setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
 const YV12_BUFFER_CONFIG *vp9_get_scaled_ref_frame(const VP9_COMP *cpi,
                                                    int ref_frame) {
   const VP9_COMMON *const cm = &cpi->common;
+  const RefCntBuffer *const frame_bufs = cm->buffer_pool->frame_bufs;
   const int ref_idx = cm->ref_frame_map[get_ref_frame_idx(cpi, ref_frame)];
   const int scaled_idx = cpi->scaled_ref_idx[ref_frame - 1];
-  return (scaled_idx != ref_idx) ? &cm->frame_bufs[scaled_idx].buf : NULL;
+  return (scaled_idx != ref_idx) ? &frame_bufs[scaled_idx].buf : NULL;
 }
 
 int vp9_get_switchable_rate(const VP9_COMP *cpi) {

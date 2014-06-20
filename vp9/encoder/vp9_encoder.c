@@ -713,7 +713,8 @@ static void cal_nmvsadcosts_hp(int *mvsadcost[2]) {
 }
 
 
-VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
+VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
+                                BufferPool *const pool) {
   unsigned int i, j;
   VP9_COMP *const cpi = vpx_memalign(32, sizeof(VP9_COMP));
   VP9_COMMON *const cm = cpi != NULL ? &cpi->common : NULL;
@@ -734,6 +735,7 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
   vp9_rtcd();
 
   cpi->use_svc = 0;
+  cpi->common.buffer_pool = pool;
 
   init_config(cpi, oxcf);
   vp9_rc_init(&cpi->oxcf, cpi->pass, &cpi->rc);
@@ -1273,7 +1275,7 @@ int vp9_get_reference_enc(VP9_COMP *cpi, int index, YV12_BUFFER_CONFIG **fb) {
   if (index < 0 || index >= REF_FRAMES)
     return -1;
 
-  *fb = &cm->frame_bufs[cm->ref_frame_map[index]].buf;
+  *fb = &cm->buffer_pool->frame_bufs[cm->ref_frame_map[index]].buf;
   return 0;
 }
 
@@ -1542,14 +1544,13 @@ static int recode_loop_test(const VP9_COMP *cpi,
 
 void vp9_update_reference_frames(VP9_COMP *cpi) {
   VP9_COMMON * const cm = &cpi->common;
+  RefCntBuffer *const frame_bufs = cm->buffer_pool->frame_bufs;
 
   // At this point the new frame has been encoded.
   // If any buffer copy / swapping is signaled it should be done here.
   if (cm->frame_type == KEY_FRAME) {
-    ref_cnt_fb(cm->frame_bufs,
-               &cm->ref_frame_map[cpi->gld_fb_idx], cm->new_fb_idx);
-    ref_cnt_fb(cm->frame_bufs,
-               &cm->ref_frame_map[cpi->alt_fb_idx], cm->new_fb_idx);
+    ref_cnt_fb(frame_bufs, &cm->ref_frame_map[cpi->gld_fb_idx], cm->new_fb_idx);
+    ref_cnt_fb(frame_bufs, &cm->ref_frame_map[cpi->alt_fb_idx], cm->new_fb_idx);
   } else if (!cpi->multi_arf_allowed && cpi->refresh_golden_frame &&
              cpi->rc.is_src_frame_alt_ref && !cpi->use_svc) {
     /* Preserve the previously existing golden frame and update the frame in
@@ -1563,8 +1564,7 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
      */
     int tmp;
 
-    ref_cnt_fb(cm->frame_bufs,
-               &cm->ref_frame_map[cpi->alt_fb_idx], cm->new_fb_idx);
+    ref_cnt_fb(frame_bufs, &cm->ref_frame_map[cpi->alt_fb_idx], cm->new_fb_idx);
 
     tmp = cpi->alt_fb_idx;
     cpi->alt_fb_idx = cpi->gld_fb_idx;
@@ -1577,19 +1577,17 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
         arf_idx = gf_group->arf_update_idx[gf_group->index];
       }
 
-      ref_cnt_fb(cm->frame_bufs,
-                 &cm->ref_frame_map[arf_idx], cm->new_fb_idx);
+      ref_cnt_fb(frame_bufs, &cm->ref_frame_map[arf_idx], cm->new_fb_idx);
     }
 
     if (cpi->refresh_golden_frame) {
-      ref_cnt_fb(cm->frame_bufs,
+      ref_cnt_fb(frame_bufs,
                  &cm->ref_frame_map[cpi->gld_fb_idx], cm->new_fb_idx);
     }
   }
 
   if (cpi->refresh_last_frame) {
-    ref_cnt_fb(cm->frame_bufs,
-               &cm->ref_frame_map[cpi->lst_fb_idx], cm->new_fb_idx);
+    ref_cnt_fb(frame_bufs, &cm->ref_frame_map[cpi->lst_fb_idx], cm->new_fb_idx);
   }
 #if CONFIG_DENOISING
   vp9_denoiser_update_frame_info(&cpi->denoiser,
@@ -1630,34 +1628,36 @@ void vp9_scale_references(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
   MV_REFERENCE_FRAME ref_frame;
   const VP9_REFFRAME ref_mask[3] = {VP9_LAST_FLAG, VP9_GOLD_FLAG, VP9_ALT_FLAG};
+  RefCntBuffer *const frame_bufs = cm->buffer_pool->frame_bufs;
 
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
     const int idx = cm->ref_frame_map[get_ref_frame_idx(cpi, ref_frame)];
-    const YV12_BUFFER_CONFIG *const ref = &cm->frame_bufs[idx].buf;
+    const YV12_BUFFER_CONFIG *const ref = &frame_bufs[idx].buf;
 
     // Need to convert from VP9_REFFRAME to index into ref_mask (subtract 1).
     if ((cpi->ref_frame_flags & ref_mask[ref_frame - 1]) &&
         (ref->y_crop_width != cm->width || ref->y_crop_height != cm->height)) {
       const int new_fb = get_free_fb(cm);
-      vp9_realloc_frame_buffer(&cm->frame_bufs[new_fb].buf,
+      vp9_realloc_frame_buffer(&frame_bufs[new_fb].buf,
                                cm->width, cm->height,
                                cm->subsampling_x, cm->subsampling_y,
                                VP9_ENC_BORDER_IN_PIXELS, NULL, NULL, NULL);
-      scale_and_extend_frame(ref, &cm->frame_bufs[new_fb].buf);
+      scale_and_extend_frame(ref, &frame_bufs[new_fb].buf);
       cpi->scaled_ref_idx[ref_frame - 1] = new_fb;
     } else {
       cpi->scaled_ref_idx[ref_frame - 1] = idx;
-      cm->frame_bufs[idx].ref_count++;
+      ++frame_bufs[idx].ref_count;
     }
   }
 }
 
 static void release_scaled_references(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
+  RefCntBuffer *const frame_bufs = cm->buffer_pool->frame_bufs;
   int i;
 
-  for (i = 0; i < 3; i++)
-    cm->frame_bufs[cpi->scaled_ref_idx[i]].ref_count--;
+  for (i = 0; i < 3; ++i)
+    --frame_bufs[cpi->scaled_ref_idx[i]].ref_count;
 }
 
 static void full_to_model_count(unsigned int *model_count,
@@ -2520,6 +2520,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   const int is_spatial_svc = cpi->use_svc &&
                              (cpi->svc.number_temporal_layers == 1) &&
                              (cpi->svc.number_spatial_layers > 1);
+  RefCntBuffer *const frame_bufs = cm->buffer_pool->frame_bufs;
 
   if (!cpi)
     return -1;
@@ -2602,7 +2603,8 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
       cm->show_frame = 1;
       cm->intra_only = 0;
 
-      // Check to see if the frame should be encoded as an arf overlay.
+      // Check to see if the frame to be encoded is an overlay for a previous
+      // arf frame and if so configure it as such.
       check_src_altref(cpi);
     }
   }
@@ -2656,7 +2658,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   /* find a free buffer for the new frame, releasing the reference previously
    * held.
    */
-  cm->frame_bufs[cm->new_fb_idx].ref_count--;
+  --frame_bufs[cm->new_fb_idx].ref_count;
   cm->new_fb_idx = get_free_fb(cm);
 
   if (!cpi->use_svc && cpi->multi_arf_allowed) {
@@ -2690,7 +2692,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
     const int idx = cm->ref_frame_map[get_ref_frame_idx(cpi, ref_frame)];
-    YV12_BUFFER_CONFIG *const buf = &cm->frame_bufs[idx].buf;
+    YV12_BUFFER_CONFIG *const buf = &frame_bufs[idx].buf;
     RefBuffer *const ref_buf = &cm->frame_refs[ref_frame - 1];
     ref_buf->buf = buf;
     ref_buf->idx = idx;

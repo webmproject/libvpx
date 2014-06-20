@@ -11,6 +11,7 @@
 #ifndef VP9_COMMON_VP9_ONYXC_INT_H_
 #define VP9_COMMON_VP9_ONYXC_INT_H_
 
+#include <pthread.h>
 #include "./vpx_config.h"
 #include "vpx/internal/vpx_codec_internal.h"
 #include "./vp9_rtcd.h"
@@ -63,6 +64,26 @@ typedef struct {
   YV12_BUFFER_CONFIG buf;
 } RefCntBuffer;
 
+typedef struct {
+  // Protect BufferPool from being accessed by several FrameWorkers at
+  // the same time during frame parallel decode.
+  // TODO(hkuang): Try to use atomic variable instead of locking the whole pool.
+#if CONFIG_MULTITHREAD
+  pthread_mutex_t pool_mutex;
+#endif
+
+  // Private data associated with the frame buffer callbacks.
+  void *cb_priv;
+
+  vpx_get_frame_buffer_cb_fn_t get_fb_cb;
+  vpx_release_frame_buffer_cb_fn_t release_fb_cb;
+
+  RefCntBuffer frame_bufs[FRAME_BUFFERS];
+
+  // Frame buffers allocated internally by the codec.
+  InternalFrameBufferList int_frame_buffers;
+} BufferPool;
+
 typedef struct VP9Common {
   struct vpx_internal_error_info  error;
 
@@ -88,8 +109,6 @@ typedef struct VP9Common {
   int subsampling_y;
 
   YV12_BUFFER_CONFIG *frame_to_show;
-
-  RefCntBuffer frame_bufs[FRAME_BUFFERS];
 
   int ref_frame_map[REF_FRAMES]; /* maps fb_idx to reference slot */
 
@@ -202,30 +221,26 @@ typedef struct VP9Common {
 
   int log2_tile_cols, log2_tile_rows;
 
-  // Private data associated with the frame buffer callbacks.
-  void *cb_priv;
-  vpx_get_frame_buffer_cb_fn_t get_fb_cb;
-  vpx_release_frame_buffer_cb_fn_t release_fb_cb;
-
-  // Handles memory for the codec.
-  InternalFrameBufferList int_frame_buffers;
+  // External BufferPool passed from outside.
+  BufferPool *buffer_pool;
 
   PARTITION_CONTEXT *above_seg_context;
   ENTROPY_CONTEXT *above_context;
 } VP9_COMMON;
 
 static INLINE YV12_BUFFER_CONFIG *get_frame_new_buffer(VP9_COMMON *cm) {
-  return &cm->frame_bufs[cm->new_fb_idx].buf;
+  return &cm->buffer_pool->frame_bufs[cm->new_fb_idx].buf;
 }
 
 static INLINE int get_free_fb(VP9_COMMON *cm) {
+  RefCntBuffer *const frame_bufs = cm->buffer_pool->frame_bufs;
   int i;
-  for (i = 0; i < FRAME_BUFFERS; i++)
-    if (cm->frame_bufs[i].ref_count == 0)
+  for (i = 0; i < FRAME_BUFFERS; ++i)
+    if (frame_bufs[i].ref_count == 0)
       break;
 
   assert(i < FRAME_BUFFERS);
-  cm->frame_bufs[i].ref_count = 1;
+  frame_bufs[i].ref_count = 1;
   return i;
 }
 
@@ -310,7 +325,6 @@ static INLINE void update_partition_context(MACROBLOCKD *xd,
   PARTITION_CONTEXT *const above_ctx = xd->above_seg_context + mi_col;
   PARTITION_CONTEXT *const left_ctx = xd->left_seg_context + (mi_row & MI_MASK);
 
-  // num_4x4_blocks_wide_lookup[bsize] / 2
   const int bs = num_8x8_blocks_wide_lookup[bsize];
 
   // update the partition context at the end notes. set partition bits

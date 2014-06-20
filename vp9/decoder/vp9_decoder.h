@@ -78,7 +78,7 @@ vpx_codec_err_t vp9_set_reference_dec(VP9_COMMON *cm,
 int vp9_get_reference_dec(struct VP9Decoder *pbi,
                           int index, YV12_BUFFER_CONFIG **fb);
 
-struct VP9Decoder *vp9_decoder_create();
+struct VP9Decoder *vp9_decoder_create(BufferPool *const pool);
 
 void vp9_decoder_remove(struct VP9Decoder *pbi);
 
