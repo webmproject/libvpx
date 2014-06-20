@@ -767,6 +767,7 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
                                    const uint8_t *data,
                                    const uint8_t *data_end) {
   VP9_COMMON *const cm = &pbi->common;
+  const VP9WorkerInterface *const winterface = vp9_get_worker_interface();
   const int aligned_cols = mi_cols_aligned_to_sb(cm->mi_cols);
   const int tile_cols = 1 << cm->log2_tile_cols;
   const int tile_rows = 1 << cm->log2_tile_rows;
@@ -779,7 +780,7 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
     CHECK_MEM_ERROR(cm, pbi->lf_worker.data1,
                     vpx_memalign(32, sizeof(LFWorkerData)));
     pbi->lf_worker.hook = (VP9WorkerHook)vp9_loop_filter_worker;
-    if (pbi->max_threads > 1 && !vp9_worker_reset(&pbi->lf_worker)) {
+    if (pbi->max_threads > 1 && !winterface->reset(&pbi->lf_worker)) {
       vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
                          "Loop filter thread creation failed");
     }
@@ -865,13 +866,13 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
         // decoding has completed: finish up the loop filter in this thread.
         if (mi_row + MI_BLOCK_SIZE >= cm->mi_rows) continue;
 
-        vp9_worker_sync(&pbi->lf_worker);
+        winterface->sync(&pbi->lf_worker);
         lf_data->start = lf_start;
         lf_data->stop = mi_row;
         if (pbi->max_threads > 1) {
-          vp9_worker_launch(&pbi->lf_worker);
+          winterface->launch(&pbi->lf_worker);
         } else {
-          vp9_worker_execute(&pbi->lf_worker);
+          winterface->execute(&pbi->lf_worker);
         }
       }
     }
@@ -880,10 +881,10 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
   // Loopfilter remaining rows in the frame.
   if (cm->lf.filter_level) {
     LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
-    vp9_worker_sync(&pbi->lf_worker);
+    winterface->sync(&pbi->lf_worker);
     lf_data->start = lf_data->stop;
     lf_data->stop = cm->mi_rows;
-    vp9_worker_execute(&pbi->lf_worker);
+    winterface->execute(&pbi->lf_worker);
   }
 
   // Get last tile data.
@@ -927,6 +928,7 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
                                       const uint8_t *data,
                                       const uint8_t *data_end) {
   VP9_COMMON *const cm = &pbi->common;
+  const VP9WorkerInterface *const winterface = vp9_get_worker_interface();
   const uint8_t *bit_reader_end = NULL;
   const int aligned_mi_cols = mi_cols_aligned_to_sb(cm->mi_cols);
   const int tile_cols = 1 << cm->log2_tile_cols;
@@ -953,11 +955,11 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
       VP9Worker *const worker = &pbi->tile_workers[i];
       ++pbi->num_tile_workers;
 
-      vp9_worker_init(worker);
+      winterface->init(worker);
       CHECK_MEM_ERROR(cm, worker->data1,
                       vpx_memalign(32, sizeof(TileWorkerData)));
       CHECK_MEM_ERROR(cm, worker->data2, vpx_malloc(sizeof(TileInfo)));
-      if (i < num_threads - 1 && !vp9_worker_reset(worker)) {
+      if (i < num_threads - 1 && !winterface->reset(worker)) {
         vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
                            "Tile decoder thread creation failed");
       }
@@ -1020,9 +1022,9 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
 
       worker->had_error = 0;
       if (i == num_workers - 1 || n == tile_cols - 1) {
-        vp9_worker_execute(worker);
+        winterface->execute(worker);
       } else {
-        vp9_worker_launch(worker);
+        winterface->launch(worker);
       }
 
       if (buf->col == tile_cols - 1) {
@@ -1034,7 +1036,7 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
 
     for (; i > 0; --i) {
       VP9Worker *const worker = &pbi->tile_workers[i - 1];
-      pbi->mb.corrupted |= !vp9_worker_sync(worker);
+      pbi->mb.corrupted |= !winterface->sync(worker);
     }
     if (final_worker > -1) {
       TileWorkerData *const tile_data =
