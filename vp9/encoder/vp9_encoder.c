@@ -176,9 +176,6 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   vp9_cyclic_refresh_free(cpi->cyclic_refresh);
   cpi->cyclic_refresh = NULL;
 
-  vpx_free(cpi->active_map);
-  cpi->active_map = NULL;
-
   vp9_free_frame_buffers(cm);
 
   vp9_free_frame_buffer(&cpi->last_frame_uf);
@@ -789,10 +786,6 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
   // for use if we want to save and restore it
   CHECK_MEM_ERROR(cm, cpi->coding_context.last_frame_seg_map_copy,
                   vpx_calloc(cm->mi_rows * cm->mi_cols, 1));
-
-  CHECK_MEM_ERROR(cm, cpi->active_map, vpx_calloc(cm->MBs, 1));
-  vpx_memset(cpi->active_map, 1, cm->MBs);
-  cpi->active_map_enabled = 0;
 
   for (i = 0; i < (sizeof(cpi->mbgraph_stats) /
                    sizeof(cpi->mbgraph_stats[0])); i++) {
@@ -2795,16 +2788,23 @@ int vp9_get_preview_raw_frame(VP9_COMP *cpi, YV12_BUFFER_CONFIG *dest,
 
 int vp9_set_active_map(VP9_COMP *cpi, unsigned char *map, int rows, int cols) {
   if (rows == cpi->common.mb_rows && cols == cpi->common.mb_cols) {
+    const int mi_rows = cpi->common.mi_rows;
+    const int mi_cols = cpi->common.mi_cols;
     if (map) {
-      vpx_memcpy(cpi->active_map, map, rows * cols);
-      cpi->active_map_enabled = 1;
+      int r, c;
+      for (r = 0; r < mi_rows; r++) {
+        for (c = 0; c < mi_cols; c++) {
+          cpi->segmentation_map[r * mi_cols + c] =
+              !map[(r >> 1) * cols + (c >> 1)];
+        }
+      }
+      vp9_enable_segfeature(&cpi->common.seg, 1, SEG_LVL_SKIP);
+      vp9_enable_segmentation(&cpi->common.seg);
     } else {
-      cpi->active_map_enabled = 0;
+      vp9_disable_segmentation(&cpi->common.seg);
     }
-
     return 0;
   } else {
-    // cpi->active_map_enabled = 0;
     return -1;
   }
 }
