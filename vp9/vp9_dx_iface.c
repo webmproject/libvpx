@@ -112,9 +112,6 @@ static vpx_codec_err_t decoder_peek_si_internal(const uint8_t *data,
                                                 void *decrypt_state) {
   uint8_t clear_buffer[9];
 
-  if (data_sz <= 8)
-    return VPX_CODEC_UNSUP_BITSTREAM;
-
   if (data + data_sz <= data)
     return VPX_CODEC_INVALID_PARAM;
 
@@ -135,11 +132,15 @@ static vpx_codec_err_t decoder_peek_si_internal(const uint8_t *data,
 
     if (frame_marker != VP9_FRAME_MARKER)
       return VPX_CODEC_UNSUP_BITSTREAM;
+
     if (version > 1) return VPX_CODEC_UNSUP_BITSTREAM;
 
     if (vp9_rb_read_bit(&rb)) {  // show an existing frame
       return VPX_CODEC_OK;
     }
+
+    if (data_sz <= 8)
+      return VPX_CODEC_UNSUP_BITSTREAM;
 
     si->is_kf = !vp9_rb_read_bit(&rb);
     if (si->is_kf) {
