@@ -249,6 +249,8 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
   }
 
   if (speed >= 5) {
+    sf->auto_min_max_partition_size = (cm->frame_type == KEY_FRAME) ?
+        RELAXED_NEIGHBORING_MIN_MAX : STRICT_NEIGHBORING_MIN_MAX;
     sf->max_partition_size = BLOCK_32X32;
     sf->min_partition_size = BLOCK_8X8;
     sf->partition_check =
