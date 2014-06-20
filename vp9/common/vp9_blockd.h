@@ -118,11 +118,75 @@ static INLINE int mi_width_log2(BLOCK_SIZE sb_type) {
   return mi_width_log2_lookup[sb_type];
 }
 
+#if CONFIG_MASKED_INTERINTER
+#define MASK_BITS_SML   3
+#define MASK_BITS_MED   4
+#define MASK_BITS_BIG   5
+#define MASK_NONE      -1
+
+static inline int get_mask_bits(BLOCK_SIZE sb_type) {
+  if (sb_type < BLOCK_8X8)
+    return 0;
+  if (sb_type <= BLOCK_8X8)
+    return MASK_BITS_SML;
+  else if (sb_type <= BLOCK_32X32)
+    return MASK_BITS_MED;
+  else
+    return MASK_BITS_BIG;
+}
+#endif
+
+#if CONFIG_INTERINTRA
+static INLINE TX_SIZE intra_size_log2_for_interintra(int bs) {
+  switch (bs) {
+    case 4:
+      return TX_4X4;
+      break;
+    case 8:
+      return TX_8X8;
+      break;
+    case 16:
+      return TX_16X16;
+      break;
+    case 32:
+      return TX_32X32;
+      break;
+    default:
+      return TX_32X32;
+      break;
+  }
+}
+
+static INLINE int is_interintra_allowed(BLOCK_SIZE sb_type) {
+  return ((sb_type >= BLOCK_8X8) && (sb_type < BLOCK_64X64));
+}
+
+#if CONFIG_MASKED_INTERINTRA
+#define MASK_BITS_SML_INTERINTRA   3
+#define MASK_BITS_MED_INTERINTRA   4
+#define MASK_BITS_BIG_INTERINTRA   5
+#define MASK_NONE_INTERINTRA      -1
+static INLINE int get_mask_bits_interintra(BLOCK_SIZE sb_type) {
+  if (sb_type == BLOCK_4X4)
+     return 0;
+  if (sb_type <= BLOCK_8X8)
+    return MASK_BITS_SML_INTERINTRA;
+  else if (sb_type <= BLOCK_32X32)
+    return MASK_BITS_MED_INTERINTRA;
+  else
+    return MASK_BITS_BIG_INTERINTRA;
+}
+#endif
+#endif
+
 // This structure now relates to 8x8 block regions.
 typedef struct {
   // Common for both INTER and INTRA blocks
   BLOCK_SIZE sb_type;
   PREDICTION_MODE mode;
+#if CONFIG_FILTERINTRA
+  int filterbit, uv_filterbit;
+#endif
   TX_SIZE tx_size;
   uint8_t skip;
   uint8_t segment_id;
@@ -137,10 +201,30 @@ typedef struct {
   int_mv ref_mvs[MAX_REF_FRAMES][MAX_MV_REF_CANDIDATES];
   uint8_t mode_context[MAX_REF_FRAMES];
   INTERP_FILTER interp_filter;
+
+#if CONFIG_EXT_TX
+  EXT_TX_TYPE ext_txfrm;
+#endif
+
+#if CONFIG_MASKED_INTERINTER
+  int use_masked_interinter;
+  int mask_index;
+#endif
+#if CONFIG_INTERINTRA
+  PREDICTION_MODE interintra_mode, interintra_uv_mode;
+#if CONFIG_MASKED_INTERINTRA
+  int interintra_mask_index;
+  int interintra_uv_mask_index;
+  int use_masked_interintra;
+#endif
+#endif
 } MB_MODE_INFO;
 
 typedef struct {
   MB_MODE_INFO mbmi;
+#if CONFIG_FILTERINTRA
+  int b_filter_info[4];
+#endif
   b_mode_info bmi[4];
 } MODE_INFO;
 
@@ -148,6 +232,16 @@ static INLINE PREDICTION_MODE get_y_mode(const MODE_INFO *mi, int block) {
   return mi->mbmi.sb_type < BLOCK_8X8 ? mi->bmi[block].as_mode
                                       : mi->mbmi.mode;
 }
+
+#if CONFIG_FILTERINTRA
+static INLINE int is_filter_allowed(PREDICTION_MODE mode) {
+  return 1;
+}
+
+static INLINE int is_filter_enabled(TX_SIZE txsize) {
+  return (txsize <= TX_32X32);
+}
+#endif
 
 static INLINE int is_inter_block(const MB_MODE_INFO *mbmi) {
   return mbmi->ref_frame[0] > INTRA_FRAME;
@@ -253,8 +347,20 @@ static INLINE TX_TYPE get_tx_type(PLANE_TYPE plane_type,
                                   const MACROBLOCKD *xd) {
   const MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
 
+#if !CONFIG_EXT_TX
   if (plane_type != PLANE_TYPE_Y || is_inter_block(mbmi))
     return DCT_DCT;
+#else
+  if (plane_type != PLANE_TYPE_Y)
+      return DCT_DCT;
+
+  if (is_inter_block(mbmi)) {
+    if (mbmi->ext_txfrm == NORM || mbmi->tx_size >= TX_32X32)
+      return DCT_DCT;
+    else
+      return ADST_ADST;
+  }
+#endif
   return intra_mode_to_tx_type_lookup[mbmi->mode];
 }
 
@@ -262,8 +368,20 @@ static INLINE TX_TYPE get_tx_type_4x4(PLANE_TYPE plane_type,
                                       const MACROBLOCKD *xd, int ib) {
   const MODE_INFO *const mi = xd->mi[0];
 
+#if !CONFIG_EXT_TX
   if (plane_type != PLANE_TYPE_Y || xd->lossless || is_inter_block(&mi->mbmi))
     return DCT_DCT;
+#else
+  if (plane_type != PLANE_TYPE_Y || xd->lossless)
+      return DCT_DCT;
+
+  if (is_inter_block(&mi->mbmi)) {
+    if (mi->mbmi.ext_txfrm == NORM)
+      return DCT_DCT;
+    else
+      return ADST_ADST;
+  }
+#endif
 
   return intra_mode_to_tx_type_lookup[get_y_mode(mi, ib)];
 }

@@ -175,29 +175,85 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
 
   switch (bsize) {
     case BLOCK_4X4:
+#if !CONFIG_FILTERINTRA
       for (i = 0; i < 4; ++i)
+#else
+      for (i = 0; i < 4; ++i) {
+#endif
         mi->bmi[i].as_mode =
             read_intra_mode(r, get_y_mode_probs(mi, above_mi, left_mi, i));
+#if CONFIG_FILTERINTRA
+        if (is_filter_allowed(mi->bmi[i].as_mode))
+          mi->b_filter_info[i] =
+              vp9_read(r, cm->fc.filterintra_prob[0][mi->bmi[i].as_mode]);
+        else
+          mi->b_filter_info[i] = 0;
+      }
+      mbmi->filterbit = mi->b_filter_info[3];
+#endif
       mbmi->mode = mi->bmi[3].as_mode;
       break;
     case BLOCK_4X8:
       mi->bmi[0].as_mode = mi->bmi[2].as_mode =
           read_intra_mode(r, get_y_mode_probs(mi, above_mi, left_mi, 0));
+#if CONFIG_FILTERINTRA
+      if (is_filter_allowed(mi->bmi[0].as_mode))
+        mi->b_filter_info[0] = mi->b_filter_info[2] =
+            vp9_read(r, cm->fc.filterintra_prob[0][mi->bmi[0].as_mode]);
+      else
+        mi->b_filter_info[0] = mi->b_filter_info[2] = 0;
+#endif
       mi->bmi[1].as_mode = mi->bmi[3].as_mode = mbmi->mode =
           read_intra_mode(r, get_y_mode_probs(mi, above_mi, left_mi, 1));
+#if CONFIG_FILTERINTRA
+      if (is_filter_allowed(mi->bmi[1].as_mode))
+        mi->b_filter_info[1] = mi->b_filter_info[3] = mbmi->filterbit =
+            vp9_read(r, cm->fc.filterintra_prob[0][mi->bmi[1].as_mode]);
+      else
+        mi->b_filter_info[1] = mi->b_filter_info[3] = mbmi->filterbit = 0;
+#endif
       break;
     case BLOCK_8X4:
       mi->bmi[0].as_mode = mi->bmi[1].as_mode =
           read_intra_mode(r, get_y_mode_probs(mi, above_mi, left_mi, 0));
+#if CONFIG_FILTERINTRA
+      if (is_filter_allowed(mi->bmi[0].as_mode))
+        mi->b_filter_info[0] = mi->b_filter_info[1] =
+            vp9_read(r, cm->fc.filterintra_prob[0][mi->bmi[0].as_mode]);
+      else
+        mi->b_filter_info[0] = mi->b_filter_info[1] = 0;
+#endif
       mi->bmi[2].as_mode = mi->bmi[3].as_mode = mbmi->mode =
           read_intra_mode(r, get_y_mode_probs(mi, above_mi, left_mi, 2));
+#if CONFIG_FILTERINTRA
+      if (is_filter_allowed(mi->bmi[2].as_mode))
+        mi->b_filter_info[2] = mi->b_filter_info[3] = mbmi->filterbit =
+            vp9_read(r, cm->fc.filterintra_prob[0][mi->bmi[2].as_mode]);
+      else
+        mi->b_filter_info[2] = mi->b_filter_info[3] = mbmi->filterbit = 0;
+#endif
       break;
     default:
       mbmi->mode = read_intra_mode(r,
                                    get_y_mode_probs(mi, above_mi, left_mi, 0));
+#if CONFIG_FILTERINTRA
+      if (is_filter_enabled(mbmi->tx_size) && is_filter_allowed(mbmi->mode))
+        mbmi->filterbit = vp9_read(r,
+                            cm->fc.filterintra_prob[mbmi->tx_size][mbmi->mode]);
+      else
+        mbmi->filterbit = 0;
+#endif
   }
 
   mbmi->uv_mode = read_intra_mode(r, vp9_kf_uv_mode_prob[mbmi->mode]);
+#if CONFIG_FILTERINTRA
+  if (is_filter_enabled(get_uv_tx_size(mbmi)) &&
+      is_filter_allowed(mbmi->uv_mode))
+    mbmi->uv_filterbit = vp9_read(r,
+        cm->fc.filterintra_prob[get_uv_tx_size(mbmi)][mbmi->uv_mode]);
+  else
+    mbmi->uv_filterbit = 0;
+#endif
 }
 
 static int read_mv_component(vp9_reader *r,
@@ -335,25 +391,97 @@ static void read_intra_block_mode_info(VP9_COMMON *const cm, MODE_INFO *mi,
 
   switch (bsize) {
     case BLOCK_4X4:
+#if !CONFIG_FILTERINTRA
       for (i = 0; i < 4; ++i)
+#else
+      for (i = 0; i < 4; ++i) {
+#endif
         mi->bmi[i].as_mode = read_intra_mode_y(cm, r, 0);
+#if CONFIG_FILTERINTRA
+        if (is_filter_allowed(mi->bmi[i].as_mode)) {
+          mi->b_filter_info[i] =
+              vp9_read(r, cm->fc.filterintra_prob[0][mi->bmi[i].as_mode]);
+          cm->counts.filterintra[0][mi->bmi[i].as_mode]
+                                   [mi->b_filter_info[i]]++;
+        } else {
+          mi->b_filter_info[i] = 0;
+        }
+      }
+      mbmi->filterbit = mi->b_filter_info[3];
+#endif
       mbmi->mode = mi->bmi[3].as_mode;
       break;
     case BLOCK_4X8:
       mi->bmi[0].as_mode = mi->bmi[2].as_mode = read_intra_mode_y(cm, r, 0);
+#if CONFIG_FILTERINTRA
+      if (is_filter_allowed(mi->bmi[0].as_mode)) {
+        mi->b_filter_info[0] = mi->b_filter_info[2] =
+            vp9_read(r, cm->fc.filterintra_prob[0][mi->bmi[0].as_mode]);
+        cm->counts.filterintra[0][mi->bmi[0].as_mode][mi->b_filter_info[0]]++;
+      } else {
+        mi->b_filter_info[0] = mi->b_filter_info[2] = 0;
+      }
+#endif
       mi->bmi[1].as_mode = mi->bmi[3].as_mode = mbmi->mode =
           read_intra_mode_y(cm, r, 0);
+#if CONFIG_FILTERINTRA
+      if (is_filter_allowed(mi->bmi[1].as_mode)) {
+        mi->b_filter_info[1] = mi->b_filter_info[3] = mbmi->filterbit =
+            vp9_read(r, cm->fc.filterintra_prob[0][mi->bmi[1].as_mode]);
+        cm->counts.filterintra[0][mi->bmi[1].as_mode][mi->b_filter_info[1]]++;
+      } else {
+        mi->b_filter_info[1] = mi->b_filter_info[3] = mbmi->filterbit = 0;
+      }
+#endif
       break;
     case BLOCK_8X4:
       mi->bmi[0].as_mode = mi->bmi[1].as_mode = read_intra_mode_y(cm, r, 0);
+#if CONFIG_FILTERINTRA
+      if (is_filter_allowed(mi->bmi[0].as_mode)) {
+        mi->b_filter_info[0] = mi->b_filter_info[1] =
+            vp9_read(r, cm->fc.filterintra_prob[0][mi->bmi[0].as_mode]);
+        cm->counts.filterintra[0][mi->bmi[0].as_mode][mi->b_filter_info[0]]++;
+      } else {
+        mi->b_filter_info[0] = mi->b_filter_info[1] = 0;
+      }
+#endif
       mi->bmi[2].as_mode = mi->bmi[3].as_mode = mbmi->mode =
           read_intra_mode_y(cm, r, 0);
+#if CONFIG_FILTERINTRA
+      if (is_filter_allowed(mi->bmi[2].as_mode)) {
+        mi->b_filter_info[2] = mi->b_filter_info[3] = mbmi->filterbit =
+            vp9_read(r, cm->fc.filterintra_prob[0][mi->bmi[2].as_mode]);
+        cm->counts.filterintra[0][mi->bmi[2].as_mode][mi->b_filter_info[2]]++;
+      } else {
+        mi->b_filter_info[2] = mi->b_filter_info[3] = mbmi->filterbit = 0;
+      }
+#endif
       break;
     default:
       mbmi->mode = read_intra_mode_y(cm, r, size_group_lookup[bsize]);
+#if CONFIG_FILTERINTRA
+      if (is_filter_allowed(mbmi->mode) && is_filter_enabled(mbmi->tx_size)) {
+        mbmi->filterbit = vp9_read(r,
+            cm->fc.filterintra_prob[mbmi->tx_size][mbmi->mode]);
+        cm->counts.filterintra[mbmi->tx_size][mbmi->mode][mbmi->filterbit]++;
+      } else {
+        mbmi->filterbit = 0;
+      }
+#endif
   }
 
   mbmi->uv_mode = read_intra_mode_uv(cm, r, mbmi->mode);
+#if CONFIG_FILTERINTRA
+  if (is_filter_allowed(mbmi->uv_mode) &&
+      is_filter_enabled(get_uv_tx_size(mbmi))) {
+    mbmi->uv_filterbit = vp9_read(r,
+        cm->fc.filterintra_prob[get_uv_tx_size(mbmi)][mbmi->uv_mode]);
+    cm->counts.filterintra[get_uv_tx_size(mbmi)]
+                           [mbmi->uv_mode][mbmi->uv_filterbit]++;
+  } else {
+    mbmi->uv_filterbit = 0;
+  }
+#endif
 }
 
 static INLINE int is_mv_valid(const MV *mv) {
@@ -433,6 +561,19 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
   read_ref_frames(cm, xd, r, mbmi->segment_id, mbmi->ref_frame);
   is_compound = has_second_ref(mbmi);
 
+#if CONFIG_EXT_TX
+  if (mbmi->tx_size <= TX_16X16 &&
+      bsize >= BLOCK_8X8 &&
+      !vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP) &&
+      !mbmi->skip) {
+    mbmi->ext_txfrm = vp9_read(r, cm->fc.ext_tx_prob);
+    if (!cm->frame_parallel_decoding_mode)
+      ++cm->counts.ext_tx[mbmi->ext_txfrm];
+  } else {
+    mbmi->ext_txfrm = NORM;
+  }
+#endif
+
   for (ref = 0; ref < 1 + is_compound; ++ref) {
     const MV_REFERENCE_FRAME frame = mbmi->ref_frame[ref];
     vp9_find_mv_refs(cm, xd, tile, mi, frame, mbmi->ref_mvs[frame],
@@ -463,6 +604,37 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
   mbmi->interp_filter = (cm->interp_filter == SWITCHABLE)
                       ? read_switchable_interp_filter(cm, xd, r)
                       : cm->interp_filter;
+
+#if CONFIG_INTERINTRA
+    if ((cm->use_interintra) &&
+        is_interintra_allowed(bsize) &&
+        is_inter_mode(mbmi->mode) &&
+        (mbmi->ref_frame[1] <= INTRA_FRAME)) {
+      mbmi->ref_frame[1] = vp9_read(r, cm->fc.interintra_prob[bsize]) ?
+                           INTRA_FRAME : NONE;
+      cm->counts.interintra[bsize][mbmi->ref_frame[1] == INTRA_FRAME]++;
+#if CONFIG_MASKED_INTERINTRA
+      mbmi->use_masked_interintra = 0;
+#endif
+      if (mbmi->ref_frame[1] == INTRA_FRAME) {
+        mbmi->interintra_mode =
+            read_intra_mode_y(cm, r, size_group_lookup[bsize]);
+        mbmi->interintra_uv_mode = mbmi->interintra_mode;
+#if CONFIG_MASKED_INTERINTRA
+        if (cm->use_masked_interintra && get_mask_bits_interintra(bsize)) {
+          mbmi->use_masked_interintra = vp9_read(r,
+                                          cm->fc.masked_interintra_prob[bsize]);
+          cm->counts.masked_interintra[bsize][mbmi->use_masked_interintra]++;
+          if (mbmi->use_masked_interintra) {
+            mbmi->interintra_mask_index = vp9_read_literal(r,
+                                               get_mask_bits_interintra(bsize));
+            mbmi->interintra_uv_mask_index = mbmi->interintra_mask_index;
+          }
+        }
+#endif
+      }
+    }
+#endif
 
   if (bsize < BLOCK_8X8) {
     const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];  // 1 or 2
@@ -508,6 +680,21 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
     xd->corrupted |= !assign_mv(cm, mbmi->mode, mbmi->mv, nearestmv,
                                 nearestmv, nearmv, is_compound, allow_hp, r);
   }
+#if CONFIG_MASKED_INTERINTER
+  mbmi->use_masked_interinter = 0;
+  if (cm->use_masked_interinter &&
+      cm->reference_mode != SINGLE_REFERENCE &&
+      is_inter_mode(mbmi->mode) &&
+      get_mask_bits(bsize) &&
+      mbmi->ref_frame[1] > INTRA_FRAME) {
+    mbmi->use_masked_interinter =
+        vp9_read(r, cm->fc.masked_interinter_prob[bsize]);
+    cm->counts.masked_interinter[bsize][mbmi->use_masked_interinter]++;
+    if (mbmi->use_masked_interinter) {
+      mbmi->mask_index = vp9_read_literal(r, get_mask_bits(bsize));
+    }
+  }
+#endif
 }
 
 static void read_inter_frame_mode_info(VP9_COMMON *const cm,

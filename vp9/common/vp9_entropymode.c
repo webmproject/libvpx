@@ -13,6 +13,37 @@
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_seg_common.h"
 
+#if CONFIG_MASKED_INTERINTER
+static const vp9_prob default_masked_interinter_prob[BLOCK_SIZES] = {
+    192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192
+};
+#endif
+
+#if CONFIG_INTERINTRA
+static const vp9_prob default_interintra_prob[BLOCK_SIZES] = {
+  192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192
+};
+#if CONFIG_MASKED_INTERINTRA
+static const vp9_prob default_masked_interintra_prob[BLOCK_SIZES] = {
+  192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192
+};
+#endif
+#endif
+
+#if CONFIG_FILTERINTRA
+const vp9_prob default_filterintra_prob[TX_SIZES][INTRA_MODES] = {
+  // DC     V      H    D45   D135   D117   D153   D207    D63     TM
+  {153,   171,   147,   150,   129,   101,   100,   153,   132,   111},
+  {171,   173,   185,   131,    70,    53,    70,   148,   127,   114},
+  {175,   203,   213,    86,    45,    71,    41,   150,   125,   154},
+  {235,   230,   154,   202,   154,   205,    37,   128,     0,   202}
+};
+#endif
+
+#if CONFIG_EXT_TX
+const vp9_prob default_ext_tx_prob = 178;  // 0.6 = 153, 0.7 = 178, 0.8 = 204
+#endif
+
 const vp9_prob vp9_kf_y_mode_prob[INTRA_MODES][INTRA_MODES][INTRA_MODES - 1] = {
   {  // above = dc
     { 137,  30,  42, 148, 151, 207,  70,  52,  91 },  // left = dc
@@ -326,6 +357,21 @@ void vp9_init_mode_probs(FRAME_CONTEXT *fc) {
   fc->tx_probs = default_tx_probs;
   vp9_copy(fc->skip_probs, default_skip_probs);
   vp9_copy(fc->inter_mode_probs, default_inter_mode_probs);
+#if CONFIG_MASKED_INTERINTER
+  vp9_copy(fc->masked_interinter_prob, default_masked_interinter_prob);
+#endif
+#if CONFIG_INTERINTRA
+  vp9_copy(fc->interintra_prob, default_interintra_prob);
+#if CONFIG_MASKED_INTERINTRA
+  vp9_copy(fc->masked_interintra_prob, default_masked_interintra_prob);
+#endif
+#endif
+#if CONFIG_FILTERINTRA
+  vp9_copy(fc->filterintra_prob, default_filterintra_prob);
+#endif
+#if CONFIG_EXT_TX
+  fc->ext_tx_prob = default_ext_tx_prob;
+#endif
 }
 
 const vp9_tree_index vp9_switchable_interp_tree
@@ -416,6 +462,48 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
 
   for (i = 0; i < SKIP_CONTEXTS; ++i)
     fc->skip_probs[i] = adapt_prob(pre_fc->skip_probs[i], counts->skip[i]);
+
+#if CONFIG_MASKED_INTERINTER
+  if (cm->use_masked_interinter) {
+    for (i = 0; i < BLOCK_SIZES; ++i) {
+      if (get_mask_bits(i))
+        fc->masked_interinter_prob[i] = adapt_prob
+                                      (pre_fc->masked_interinter_prob[i],
+                                       counts->masked_interinter[i]);
+    }
+  }
+#endif
+
+#if CONFIG_INTERINTRA
+  if (cm->use_interintra) {
+    for (i = 0; i < BLOCK_SIZES; ++i) {
+      if (is_interintra_allowed(i))
+        fc->interintra_prob[i] = adapt_prob(pre_fc->interintra_prob[i],
+                                            counts->interintra[i]);
+    }
+#if CONFIG_MASKED_INTERINTRA
+    if (cm->use_masked_interintra) {
+      for (i = 0; i < BLOCK_SIZES; ++i) {
+        if (is_interintra_allowed(i) && get_mask_bits_interintra(i))
+          fc->masked_interintra_prob[i] = adapt_prob(
+                                          pre_fc->masked_interintra_prob[i],
+                                          counts->masked_interintra[i]);
+      }
+    }
+#endif
+  }
+#endif
+
+#if CONFIG_FILTERINTRA
+  for (i = 0; i < TX_SIZES; ++i)
+    for (j = 0; j < INTRA_MODES; ++j)
+      fc->filterintra_prob[i][j] = adapt_prob(pre_fc->filterintra_prob[i][j],
+                                   counts->filterintra[i][j]);
+#endif
+
+#if CONFIG_EXT_TX
+  fc->ext_tx_prob = adapt_prob(pre_fc->ext_tx_prob, counts->ext_tx);
+#endif
 }
 
 static void set_default_lf_deltas(struct loopfilter *lf) {

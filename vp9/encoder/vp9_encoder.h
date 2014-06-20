@@ -46,7 +46,11 @@ extern "C" {
 
 #define DEFAULT_GF_INTERVAL         10
 
+#if !CONFIG_INTERINTRA
 #define MAX_MODES 30
+#else
+#define MAX_MODES 42
+#endif
 #define MAX_REFS  6
 
 typedef struct {
@@ -106,6 +110,23 @@ typedef enum {
   THR_D63_PRED,
   THR_D117_PRED,
   THR_D45_PRED,
+
+#if CONFIG_INTERINTRA
+  THR_COMP_INTERINTRA_ZEROL,
+  THR_COMP_INTERINTRA_NEARESTL,
+  THR_COMP_INTERINTRA_NEARL,
+  THR_COMP_INTERINTRA_NEWL,
+
+  THR_COMP_INTERINTRA_ZEROG,
+  THR_COMP_INTERINTRA_NEARESTG,
+  THR_COMP_INTERINTRA_NEARG,
+  THR_COMP_INTERINTRA_NEWG,
+
+  THR_COMP_INTERINTRA_ZEROA,
+  THR_COMP_INTERINTRA_NEARESTA,
+  THR_COMP_INTERINTRA_NEARA,
+  THR_COMP_INTERINTRA_NEWA,
+#endif
 } THR_MODES;
 
 typedef enum {
@@ -526,6 +547,16 @@ typedef struct VP9_COMP {
 
 #if CONFIG_DENOISING
   VP9_DENOISER denoiser;
+#endif
+
+#if CONFIG_MASKED_INTERINTER
+  unsigned int masked_interinter_select_counts[2];
+#endif
+#if CONFIG_INTERINTRA
+  unsigned int interintra_select_count[2];
+#if CONFIG_MASKED_INTERINTRA
+  unsigned int masked_interintra_select_count[2];
+#endif
 #endif
 } VP9_COMP;
 

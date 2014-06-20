@@ -473,6 +473,9 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     for (this_mode = DC_PRED; this_mode <= DC_PRED; ++this_mode) {
       vp9_predict_intra_block(xd, 0, b_width_log2(bsize),
                               mbmi->tx_size, this_mode,
+#if CONFIG_FILTERINTRA
+                              0,
+#endif
                               &p->src.buf[0], p->src.stride,
                               &pd->dst.buf[0], pd->dst.stride, 0, 0, 0);
 

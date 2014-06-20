@@ -52,6 +52,21 @@ typedef struct frame_contexts {
   struct tx_probs tx_probs;
   vp9_prob skip_probs[SKIP_CONTEXTS];
   nmv_context nmvc;
+#if CONFIG_MASKED_INTERINTER
+  vp9_prob masked_interinter_prob[BLOCK_SIZES];
+#endif
+#if CONFIG_INTERINTRA
+  vp9_prob interintra_prob[BLOCK_SIZES];
+#if CONFIG_MASKED_INTERINTRA
+  vp9_prob masked_interintra_prob[BLOCK_SIZES];
+#endif
+#endif
+#if CONFIG_FILTERINTRA
+  vp9_prob filterintra_prob[TX_SIZES][INTRA_MODES];
+#endif
+#if CONFIG_EXT_TX
+  vp9_prob ext_tx_prob;
+#endif
 } FRAME_CONTEXT;
 
 typedef struct {
@@ -71,6 +86,21 @@ typedef struct {
   struct tx_counts tx;
   unsigned int skip[SKIP_CONTEXTS][2];
   nmv_context_counts mv;
+#if CONFIG_MASKED_INTERINTER
+  unsigned int masked_interinter[BLOCK_SIZES][2];
+#endif
+#if CONFIG_INTERINTRA
+  unsigned int interintra[BLOCK_SIZES][2];
+#if CONFIG_MASKED_INTERINTRA
+  unsigned int masked_interintra[BLOCK_SIZES][2];
+#endif
+#endif
+#if CONFIG_FILTERINTRA
+  unsigned int filterintra[TX_SIZES][INTRA_MODES][2];
+#endif
+#if CONFIG_EXT_TX
+  unsigned int ext_tx[2];
+#endif
 } FRAME_COUNTS;
 
 extern const vp9_prob vp9_kf_uv_mode_prob[INTRA_MODES][INTRA_MODES - 1];

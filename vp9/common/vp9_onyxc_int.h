@@ -212,6 +212,16 @@ typedef struct VP9Common {
 
   PARTITION_CONTEXT *above_seg_context;
   ENTROPY_CONTEXT *above_context;
+
+#if CONFIG_MASKED_INTERINTER
+  int use_masked_interinter;
+#endif
+#if CONFIG_INTERINTRA
+  int use_interintra;
+#if CONFIG_MASKED_INTERINTRA
+  int use_masked_interintra;
+#endif
+#endif
 } VP9_COMMON;
 
 static INLINE YV12_BUFFER_CONFIG *get_frame_new_buffer(VP9_COMMON *cm) {

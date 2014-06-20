@@ -67,6 +67,32 @@ typedef unsigned int (*vp9_subp_avg_variance_fn_t)(const uint8_t *src_ptr,
                                                    unsigned int *sse,
                                                    const uint8_t *second_pred);
 
+#if ((CONFIG_MASKED_INTERINTRA && CONFIG_INTERINTRA) || \
+    CONFIG_MASKED_INTERINTER)
+typedef unsigned int(*vp9_masked_sad_fn_t)(const uint8_t *src_ptr,
+                                           int source_stride,
+                                           const uint8_t *ref_ptr,
+                                           int ref_stride,
+                                           const uint8_t *msk_ptr,
+                                           int msk_stride);
+typedef unsigned int (*vp9_masked_variance_fn_t)(const uint8_t *src_ptr,
+                                                 int source_stride,
+                                                 const uint8_t *ref_ptr,
+                                                 int ref_stride,
+                                                 const uint8_t *msk_ptr,
+                                                 int msk_stride,
+                                                 unsigned int *sse);
+typedef unsigned int (*vp9_masked_subpixvariance_fn_t)(const uint8_t *src_ptr,
+                                                       int source_stride,
+                                                       int xoffset,
+                                                       int yoffset,
+                                                       const uint8_t *ref_ptr,
+                                                       int Refstride,
+                                                       const uint8_t *msk_ptr,
+                                                       int msk_stride,
+                                                       unsigned int *sse);
+#endif
+
 typedef struct vp9_variance_vtable {
   vp9_sad_fn_t               sdf;
   vp9_sad_avg_fn_t           sdaf;
@@ -76,6 +102,12 @@ typedef struct vp9_variance_vtable {
   vp9_sad_multi_fn_t         sdx3f;
   vp9_sad_multi_fn_t         sdx8f;
   vp9_sad_multi_d_fn_t       sdx4df;
+#if ((CONFIG_MASKED_INTERINTRA && CONFIG_INTERINTRA) || \
+    CONFIG_MASKED_INTERINTER)
+  vp9_masked_sad_fn_t            msdf;
+  vp9_masked_variance_fn_t       mvf;
+  vp9_masked_subpixvariance_fn_t msvf;
+#endif
 } vp9_variance_fn_ptr_t;
 
 void vp9_comp_avg_pred(uint8_t *comp_pred, const uint8_t *pred, int width,
