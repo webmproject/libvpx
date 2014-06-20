@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//kIY\u003d",
+        "filename": "test/decode_test_driver.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-20T23:18:53Z",
+      "side": 1,
+      "message": "const\nand check that there\u0027s space around the \u0027-\u0027",
+      "revId": "56d8667ca5e27af420d134c15ffa284aa05c3457",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
