@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//kXo\u003d",
+        "filename": "test/decode_test_driver.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-06-20T13:56:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//kbI\u003d",
+      "revId": "72397d04ba79ca4eeba557ae22927a466fcc3586",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//ka8\u003d",
         "filename": "test/decode_test_driver.cc",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2014-06-20T01:43:35Z",
       "side": 1,
       "message": "drop this line",
+      "revId": "72397d04ba79ca4eeba557ae22927a466fcc3586",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kXk\u003d",
+        "filename": "test/decode_test_driver.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-06-20T13:56:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//ka8\u003d",
       "revId": "72397d04ba79ca4eeba557ae22927a466fcc3586",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//kXA\u003d",
+        "filename": "test/decode_test_driver.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-06-20T13:56:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//kbA\u003d",
+      "revId": "72397d04ba79ca4eeba557ae22927a466fcc3586",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//kbE\u003d",
         "filename": "test/decode_test_driver.cc",
         "patchSetId": 5
@@ -64,6 +118,24 @@
       "writtenOn": "2014-06-20T01:43:35Z",
       "side": 1,
       "message": "const + strcmp should be enough unless there\u0027s trailing data.",
+      "revId": "72397d04ba79ca4eeba557ae22927a466fcc3586",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kXg\u003d",
+        "filename": "test/decode_test_driver.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-06-20T13:56:07Z",
+      "side": 1,
+      "message": "There\u0027s trailing data including version number that shouldn\u0027t matter for this test.   Unfortunately the interface doesn\u0027t have a member returning anything like 4cc  this was the best I could come up with.",
+      "parentUuid": "AAAAdn//kbE\u003d",
       "revId": "72397d04ba79ca4eeba557ae22927a466fcc3586",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//kXc\u003d",
+        "filename": "test/decode_test_driver.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-06-20T13:56:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//ka4\u003d",
+      "revId": "72397d04ba79ca4eeba557ae22927a466fcc3586",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//ka0\u003d",
         "filename": "test/decode_test_driver.cc",
         "patchSetId": 5
@@ -98,6 +188,24 @@
       "writtenOn": "2014-06-20T01:43:35Z",
       "side": 1,
       "message": "drop this line",
+      "revId": "72397d04ba79ca4eeba557ae22927a466fcc3586",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kXY\u003d",
+        "filename": "test/decode_test_driver.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-06-20T13:56:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//ka0\u003d",
       "revId": "72397d04ba79ca4eeba557ae22927a466fcc3586",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//kXU\u003d",
+        "filename": "test/decode_test_driver.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-06-20T13:56:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//kas\u003d",
+      "revId": "72397d04ba79ca4eeba557ae22927a466fcc3586",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//kaw\u003d",
         "filename": "test/decode_test_driver.cc",
         "patchSetId": 5
@@ -138,6 +264,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//kXQ\u003d",
+        "filename": "test/decode_test_driver.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-06-20T13:56:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//kaw\u003d",
+      "revId": "72397d04ba79ca4eeba557ae22927a466fcc3586",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//kao\u003d",
         "filename": "test/decode_test_driver.h",
         "patchSetId": 5
@@ -149,6 +293,24 @@
       "writtenOn": "2014-06-20T01:43:35Z",
       "side": 1,
       "message": "const char *GetDecoderName; (void) isn\u0027t necessary in c++, look around at the rest of the class",
+      "revId": "72397d04ba79ca4eeba557ae22927a466fcc3586",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kXM\u003d",
+        "filename": "test/decode_test_driver.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-06-20T13:56:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//kao\u003d",
       "revId": "72397d04ba79ca4eeba557ae22927a466fcc3586",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
