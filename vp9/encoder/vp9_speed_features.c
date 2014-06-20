@@ -274,6 +274,9 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     // is checked for a partition block. Later, we can try to allow large
     // partitions to do intra mode checking.
     sf->max_intra_bsize = BLOCK_8X8;
+
+    // This feature is only enabled when partition search is disabled.
+    sf->reuse_inter_pred_sby = 1;
   }
 
   if (speed >= 7) {
@@ -339,6 +342,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   for (i = 0; i < BLOCK_SIZES; ++i)
     sf->inter_mode_mask[i] = INTER_ALL;
   sf->max_intra_bsize = BLOCK_64X64;
+  sf->reuse_inter_pred_sby = 0;
   // This setting only takes effect when partition_search_type is set
   // to FIXED_PARTITION.
   sf->always_this_block_size = BLOCK_16X16;
