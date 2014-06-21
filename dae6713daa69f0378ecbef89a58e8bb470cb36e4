@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//kEg\u003d",
+        "filename": "vp9/common/vp9_convolve.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-06-21T16:26:22Z",
+      "side": 1,
+      "message": "explain why 135 rows...  Its not clear to me..",
+      "revId": "dae6713daa69f0378ecbef89a58e8bb470cb36e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kEU\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1600,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-06-21T16:26:22Z",
+      "side": 1,
+      "message": "probably should be outside for loop.   Kind of a shame we don\u0027t have something like this already?",
+      "revId": "dae6713daa69f0378ecbef89a58e8bb470cb36e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kEQ\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1604,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-06-21T16:26:22Z",
+      "side": 1,
+      "message": "ref_frame-1 is a bit confusing,  maybe set up ref_mask to have the extra parm at 0 so its obvious that every single mask exactly matches a ref frame.   \n\nDo you need the !\u003d KEY_FRAME won\u0027t keyframes have their ref_mask set to not use any reference frame?   If not isn\u0027t that a bug?",
+      "revId": "dae6713daa69f0378ecbef89a58e8bb470cb36e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
