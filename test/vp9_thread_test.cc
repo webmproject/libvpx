@@ -101,6 +101,11 @@ TEST_P(VP9WorkerThreadTest, HookFailure) {
 // Multi-threaded decode tests
 
 #if CONFIG_WEBM_IO
+struct FileList {
+  const char *name;
+  const char *expected_md5;
+};
+
 // Decodes |filename| with |num_threads|. Returns the md5 of the decoded frames.
 string DecodeFile(const string& filename, int num_threads) {
   libvpx_test::WebMVideoSource video(filename);
@@ -130,6 +135,16 @@ string DecodeFile(const string& filename, int num_threads) {
   return string(md5.Get());
 }
 
+void DecodeFiles(const FileList files[]) {
+  for (const FileList *iter = files; iter->name != NULL; ++iter) {
+    SCOPED_TRACE(iter->name);
+    for (int t = 2; t <= 8; ++t) {
+      EXPECT_STREQ(iter->expected_md5, DecodeFile(iter->name, t).c_str())
+          << "threads = " << t;
+    }
+  }
+}
+
 TEST(VP9DecodeMultiThreadedTest, Decode) {
   // no tiles or frame parallel; this exercises loop filter threading.
   EXPECT_STREQ("b35a1b707b28e82be025d960aba039bc",
@@ -137,32 +152,22 @@ TEST(VP9DecodeMultiThreadedTest, Decode) {
 }
 
 TEST(VP9DecodeMultiThreadedTest, Decode2) {
-  static const struct {
-    const char *name;
-    const char *expected_md5;
-  } files[] = {
+  static const FileList files[] = {
     { "vp90-2-08-tile_1x2_frame_parallel.webm",
       "68ede6abd66bae0a2edf2eb9232241b6" },
     { "vp90-2-08-tile_1x4_frame_parallel.webm",
       "368ebc6ebf3a5e478d85b2c3149b2848" },
     { "vp90-2-08-tile_1x8_frame_parallel.webm",
       "17e439da2388aff3a0f69cb22579c6c1" },
+    { NULL, NULL }
   };
 
-  for (int i = 0; i < static_cast<int>(sizeof(files) / sizeof(files[0])); ++i) {
-    for (int t = 2; t <= 8; ++t) {
-      EXPECT_STREQ(files[i].expected_md5, DecodeFile(files[i].name, t).c_str())
-          << "threads = " << t;
-    }
-  }
+  DecodeFiles(files);
 }
 
 // Test tile quantity changes within one file.
 TEST(VP9DecodeMultiThreadedTest, Decode3) {
-  static const struct {
-    const char *name;
-    const char *expected_md5;
-  } files[] = {
+  static const FileList files[] = {
     { "vp90-2-14-resize-fp-tiles-1-16.webm",
       "0cd5e632c326297e975f38949c31ea94" },
     { "vp90-2-14-resize-fp-tiles-1-2-4-8-16.webm",
@@ -207,14 +212,10 @@ TEST(VP9DecodeMultiThreadedTest, Decode3) {
       "ae96f21f21b6370cc0125621b441fc52" },
     { "vp90-2-14-resize-fp-tiles-8-4.webm",
       "3eb4f24f10640d42218f7fd7b9fd30d4" },
+    { NULL, NULL }
   };
 
-  for (int i = 0; i < static_cast<int>(sizeof(files) / sizeof(files[0])); ++i) {
-    for (int t = 2; t <= 8; ++t) {
-      EXPECT_STREQ(files[i].expected_md5, DecodeFile(files[i].name, t).c_str())
-          << "threads = " << t;
-    }
-  }
+  DecodeFiles(files);
 }
 #endif  // CONFIG_WEBM_IO
 
