@@ -139,7 +139,7 @@ void DecodeFiles(const FileList files[]) {
   for (const FileList *iter = files; iter->name != NULL; ++iter) {
     SCOPED_TRACE(iter->name);
     for (int t = 2; t <= 8; ++t) {
-      EXPECT_STREQ(iter->expected_md5, DecodeFile(iter->name, t).c_str())
+      EXPECT_EQ(iter->expected_md5, DecodeFile(iter->name, t))
           << "threads = " << t;
     }
   }
@@ -147,8 +147,8 @@ void DecodeFiles(const FileList files[]) {
 
 TEST(VP9DecodeMultiThreadedTest, Decode) {
   // no tiles or frame parallel; this exercises loop filter threading.
-  EXPECT_STREQ("b35a1b707b28e82be025d960aba039bc",
-               DecodeFile("vp90-2-03-size-226x226.webm", 2).c_str());
+  EXPECT_EQ("b35a1b707b28e82be025d960aba039bc",
+            DecodeFile("vp90-2-03-size-226x226.webm", 2));
 }
 
 TEST(VP9DecodeMultiThreadedTest, Decode2) {
