@@ -31,7 +31,8 @@ void DecoderTest::RunLoop(CompressedVideoSource *video) {
   ASSERT_TRUE(decoder != NULL);
 
   // Decode frames.
-  for (video->Begin(); video->cxdata(); video->Next()) {
+  for (video->Begin(); !::testing::Test::HasFailure() && video->cxdata();
+       video->Next()) {
     PreDecodeFrameHook(*video, decoder);
     vpx_codec_err_t res_dec = decoder->DecodeFrame(video->cxdata(),
                                                    video->frame_size());
