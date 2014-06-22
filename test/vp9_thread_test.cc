@@ -130,13 +130,13 @@ string DecodeFile(const string& filename, int num_threads) {
   return string(md5.Get());
 }
 
-TEST(VP9DecodeMTTest, MTDecode) {
+TEST(VP9DecodeMultiThreadedTest, Decode) {
   // no tiles or frame parallel; this exercises loop filter threading.
   EXPECT_STREQ("b35a1b707b28e82be025d960aba039bc",
                DecodeFile("vp90-2-03-size-226x226.webm", 2).c_str());
 }
 
-TEST(VP9DecodeMTTest, MTDecode2) {
+TEST(VP9DecodeMultiThreadedTest, Decode2) {
   static const struct {
     const char *name;
     const char *expected_md5;
@@ -158,7 +158,7 @@ TEST(VP9DecodeMTTest, MTDecode2) {
 }
 
 // Test tile quantity changes within one file.
-TEST(VP9DecodeMTTest, MTDecode3) {
+TEST(VP9DecodeMultiThreadedTest, Decode3) {
   static const struct {
     const char *name;
     const char *expected_md5;
