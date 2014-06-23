@@ -37,7 +37,6 @@ static void initialize_dec() {
 
   if (!init_done) {
     vp9_init_neighbors();
-    vp9_init_quant_tables();
     init_done = 1;
   }
 }

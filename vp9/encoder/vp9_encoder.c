@@ -145,8 +145,6 @@ void vp9_initialize_enc() {
 
   if (!init_done) {
     vp9_init_neighbors();
-    vp9_init_quant_tables();
-
     vp9_coef_tree_initialize();
     vp9_tokenize_initialize();
     vp9_init_me_luts();
