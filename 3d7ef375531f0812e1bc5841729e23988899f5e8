@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//jvU\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 1407,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-23T23:39:24Z",
+      "side": 1,
+      "message": "This is more compact:\nint arf_idx \u003d 0;\nif (rc-\u003esource_alt_ref_pending \u0026\u0026 cpi-\u003emulti_arf_enabled) {\n  mid_boost_bits +\u003d (target_frame_size \u003e\u003e 4);\n  target_frame_size -\u003d (target_frame_size \u003e\u003e 4);\n \n  if (frame_index \u003c\u003d middle_frame_idx) \n    arf_idx \u003d 1; \n}\ntwopass-\u003egf_group.arf_update_idx[frame_index] \u003d arf_buffer_indices[arf_idx];\ntwopass-\u003egf_group.arf_ref_idx[frame_index] \u003d arf_buffer_indices[arf_idx];",
+      "revId": "3d7ef375531f0812e1bc5841729e23988899f5e8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
