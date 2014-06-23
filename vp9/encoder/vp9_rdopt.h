@@ -181,6 +181,16 @@ static INLINE int rd_less_than_thresh(int64_t best_rd, int thresh,
     return best_rd < ((int64_t)thresh * thresh_fact >> 5) || thresh == INT_MAX;
 }
 
+void vp9_mv_pred(struct VP9_COMP *cpi, MACROBLOCK *x,
+                 uint8_t *ref_y_buffer, int ref_y_stride,
+                 int ref_frame, BLOCK_SIZE block_size);
+
+void vp9_setup_pred_block(const MACROBLOCKD *xd,
+                          struct buf_2d dst[MAX_MB_PLANE],
+                          const YV12_BUFFER_CONFIG *src,
+                          int mi_row, int mi_col,
+                          const struct scale_factors *scale,
+                          const struct scale_factors *scale_uv);
 #ifdef __cplusplus
 }  // extern "C"
 #endif

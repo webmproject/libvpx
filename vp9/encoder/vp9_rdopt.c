@@ -2074,9 +2074,9 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
   return bsi->segment_rd;
 }
 
-static void mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
-                    uint8_t *ref_y_buffer, int ref_y_stride,
-                    int ref_frame, BLOCK_SIZE block_size ) {
+void vp9_mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
+                 uint8_t *ref_y_buffer, int ref_y_stride,
+                 int ref_frame, BLOCK_SIZE block_size) {
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
   int_mv this_mv;
@@ -2215,12 +2215,12 @@ static void store_coding_context(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
              sizeof(*best_filter_diff) * SWITCHABLE_FILTER_CONTEXTS);
 }
 
-static void setup_pred_block(const MACROBLOCKD *xd,
-                             struct buf_2d dst[MAX_MB_PLANE],
-                             const YV12_BUFFER_CONFIG *src,
-                             int mi_row, int mi_col,
-                             const struct scale_factors *scale,
-                             const struct scale_factors *scale_uv) {
+void vp9_setup_pred_block(const MACROBLOCKD *xd,
+                          struct buf_2d dst[MAX_MB_PLANE],
+                          const YV12_BUFFER_CONFIG *src,
+                          int mi_row, int mi_col,
+                          const struct scale_factors *scale,
+                          const struct scale_factors *scale_uv) {
   int i;
 
   dst[0].buf = src->y_buffer;
@@ -2258,7 +2258,7 @@ void vp9_setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
 
   // TODO(jkoleszar): Is the UV buffer ever used here? If so, need to make this
   // use the UV scaling factors.
-  setup_pred_block(xd, yv12_mb[ref_frame], yv12, mi_row, mi_col, sf, sf);
+  vp9_setup_pred_block(xd, yv12_mb[ref_frame], yv12, mi_row, mi_col, sf, sf);
 
   // Gets an initial list of candidate vectors from neighbours and orders them
   vp9_find_mv_refs(cm, xd, tile, mi, ref_frame, candidates, mi_row, mi_col);
@@ -2272,8 +2272,8 @@ void vp9_setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
   // in full and choose the best as the centre point for subsequent searches.
   // The current implementation doesn't support scaling.
   if (!vp9_is_scaled(sf) && block_size >= BLOCK_8X8)
-    mv_pred(cpi, x, yv12_mb[ref_frame][0].buf, yv12->y_stride,
-            ref_frame, block_size);
+    vp9_mv_pred(cpi, x, yv12_mb[ref_frame][0].buf, yv12->y_stride,
+                ref_frame, block_size);
 }
 
 const YV12_BUFFER_CONFIG *vp9_get_scaled_ref_frame(const VP9_COMP *cpi,
