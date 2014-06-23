@@ -2309,7 +2309,8 @@ static void encode_rd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
                                sf->always_this_block_size);
         rd_use_partition(cpi, tile, mi, tp, mi_row, mi_col, BLOCK_64X64,
                          &dummy_rate, &dummy_dist, 1, cpi->pc_root);
-      } else if (sf->partition_search_type == VAR_BASED_FIXED_PARTITION) {
+      } else if (cpi->skippable_frame ||
+                 sf->partition_search_type == VAR_BASED_FIXED_PARTITION) {
         BLOCK_SIZE bsize;
         set_offsets(cpi, tile, mi_row, mi_col, BLOCK_64X64);
         bsize = get_rd_var_based_fixed_partition(cpi, mi_row, mi_col);
