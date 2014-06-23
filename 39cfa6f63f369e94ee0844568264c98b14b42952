@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//jxs\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 904,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-06-23T22:49:26Z",
+      "side": 1,
+      "message": "This is lots of ifs to get to a delta.   Recommendations : \n\none call to vp9_compute_qdelta_by_rate in this code block.  \n\nNo constants in the code either named constants /   or lookup table:  \n\nEG : \n\nconst double rate_factor_deltas \u003d { \n  1.50, /* INTER_NORMAL */\n  1.50, /* INTER_HIGH */\n  1.50, /* GF_ARF_LOW */\n  1.75, /* GF_ARF_STD */\n  2.00, /* KF_STD */\n};\n\n\nRATE_FACTOR_LEVEL rate_factor \u003d gf_group-\u003erf_level[gf_group-\u003eindex];\n\n\nif ( blah blah \u003d blah blah blah) \n  rate_factor \u003d GF_ARF_STD;\nelse \n  rate_factor \u003d GF_ARF_LOW;\n\ndouble rate_factor_delta \u003d rate_factor_deltas[rate_factor];\n\nqdelta \u003d vp9_compute_qdelta_by_rate(\u0026cpi-\u003erc, cm-\u003eframe_type, active_worst_quality, rate_factor_delta);",
+      "revId": "39cfa6f63f369e94ee0844568264c98b14b42952",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
