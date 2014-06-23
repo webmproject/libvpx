@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//jxw\u003d",
+        "filename": "test/user_priv_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-06-23T22:56:19Z",
+      "side": 1,
+      "message": "Done. Test with NULL first then passed in real frame number.",
+      "parentUuid": "AAAAdn//jx4\u003d",
+      "revId": "21fdf61c12f1b81cd84aa8314518b3849f8ddae8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//jyU\u003d",
         "filename": "test/user_priv_test.cc",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2014-06-23T22:45:32Z",
       "side": 1,
       "message": ". at the end.",
+      "revId": "21fdf61c12f1b81cd84aa8314518b3849f8ddae8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//jw4\u003d",
+        "filename": "test/user_priv_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-06-23T22:56:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//jyU\u003d",
       "revId": "21fdf61c12f1b81cd84aa8314518b3849f8ddae8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//jw0\u003d",
+        "filename": "test/user_priv_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-06-23T22:56:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//jyI\u003d",
+      "revId": "21fdf61c12f1b81cd84aa8314518b3849f8ddae8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//jyQ\u003d",
         "filename": "test/user_priv_test.cc",
         "patchSetId": 3
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//jws\u003d",
+        "filename": "test/user_priv_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-06-23T22:56:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//jyQ\u003d",
+      "revId": "21fdf61c12f1b81cd84aa8314518b3849f8ddae8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//jyM\u003d",
         "filename": "test/user_priv_test.cc",
         "patchSetId": 3
@@ -81,6 +153,24 @@
       "writtenOn": "2014-06-23T22:45:32Z",
       "side": 1,
       "message": "does not",
+      "revId": "21fdf61c12f1b81cd84aa8314518b3849f8ddae8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//jww\u003d",
+        "filename": "test/user_priv_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-06-23T22:56:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//jyM\u003d",
       "revId": "21fdf61c12f1b81cd84aa8314518b3849f8ddae8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
