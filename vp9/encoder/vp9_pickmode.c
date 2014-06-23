@@ -241,9 +241,9 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   mbmi->ref_frame[0] = NONE;
   mbmi->ref_frame[1] = NONE;
   mbmi->tx_size = MIN(max_txsize_lookup[bsize],
-                      tx_mode_to_biggest_tx_size[cpi->common.tx_mode]);
-  mbmi->interp_filter = cpi->common.interp_filter == SWITCHABLE ?
-                        EIGHTTAP : cpi->common.interp_filter;
+                      tx_mode_to_biggest_tx_size[cm->tx_mode]);
+  mbmi->interp_filter = cm->interp_filter == SWITCHABLE ?
+                        EIGHTTAP : cm->interp_filter;
   mbmi->skip = 0;
   mbmi->segment_id = segment_id;
 
