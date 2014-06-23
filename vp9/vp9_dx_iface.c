@@ -317,10 +317,17 @@ static INLINE uint8_t read_marker(vpx_decrypt_cb decrypt_cb,
   return *data;
 }
 
-static void parse_superframe_index(const uint8_t *data, size_t data_sz,
-                                   uint32_t sizes[8], int *count,
-                                   vpx_decrypt_cb decrypt_cb,
-                                   void *decrypt_state) {
+static vpx_codec_err_t parse_superframe_index(const uint8_t *data,
+                                              size_t data_sz,
+                                              uint32_t sizes[8], int *count,
+                                              vpx_decrypt_cb decrypt_cb,
+                                              void *decrypt_state) {
+  // A chunk ending with a byte matching 0xc0 is an invalid chunk unless
+  // it is a super frame index. If the last byte of real video compression
+  // data is 0xc0 the encoder must add a 0 byte. If we have the marker but
+  // not the associated matching marker byte at the front of the index we have
+  // an invalid bitstream and need to return an error.
+
   uint8_t marker;
 
   assert(data_sz);
@@ -332,35 +339,46 @@ static void parse_superframe_index(const uint8_t *data, size_t data_sz,
     const uint32_t mag = ((marker >> 3) & 0x3) + 1;
     const size_t index_sz = 2 + mag * frames;
 
-    if (data_sz >= index_sz) {
-      uint8_t marker2 = read_marker(decrypt_cb, decrypt_state,
-                                    data + data_sz - index_sz);
+    // This chunk is marked as having a superframe index but doesn't have
+    // enough data for it, thus it's an invalid superframe index.
+    if (data_sz < index_sz)
+      return VPX_CODEC_CORRUPT_FRAME;
 
-      if (marker == marker2) {
-        // Found a valid superframe index.
-        uint32_t i, j;
-        const uint8_t *x = &data[data_sz - index_sz + 1];
+    {
+      const uint8_t marker2 = read_marker(decrypt_cb, decrypt_state,
+                                          data + data_sz - index_sz);
 
-        // Frames has a maximum of 8 and mag has a maximum of 4.
-        uint8_t clear_buffer[32];
-        assert(sizeof(clear_buffer) >= frames * mag);
-        if (decrypt_cb) {
-          decrypt_cb(decrypt_state, x, clear_buffer, frames * mag);
-          x = clear_buffer;
-        }
+      // This chunk is marked as having a superframe index but doesn't have
+      // the matching marker byte at the front of the index therefore it's an
+      // invalid chunk.
+      if (marker != marker2)
+        return VPX_CODEC_CORRUPT_FRAME;
+    }
 
-        for (i = 0; i < frames; ++i) {
-          uint32_t this_sz = 0;
+    {
+      // Found a valid superframe index.
+      uint32_t i, j;
+      const uint8_t *x = &data[data_sz - index_sz + 1];
 
-          for (j = 0; j < mag; ++j)
-            this_sz |= (*x++) << (j * 8);
-          sizes[i] = this_sz;
-        }
-
-        *count = frames;
+      // Frames has a maximum of 8 and mag has a maximum of 4.
+      uint8_t clear_buffer[32];
+      assert(sizeof(clear_buffer) >= frames * mag);
+      if (decrypt_cb) {
+        decrypt_cb(decrypt_state, x, clear_buffer, frames * mag);
+        x = clear_buffer;
       }
+
+      for (i = 0; i < frames; ++i) {
+        uint32_t this_sz = 0;
+
+        for (j = 0; j < mag; ++j)
+          this_sz |= (*x++) << (j * 8);
+        sizes[i] = this_sz;
+      }
+      *count = frames;
     }
   }
+  return VPX_CODEC_OK;
 }
 
 static vpx_codec_err_t decoder_decode(vpx_codec_alg_priv_t *ctx,
@@ -375,8 +393,10 @@ static vpx_codec_err_t decoder_decode(vpx_codec_alg_priv_t *ctx,
   if (data == NULL || data_sz == 0)
     return VPX_CODEC_INVALID_PARAM;
 
-  parse_superframe_index(data, data_sz, frame_sizes, &frame_count,
-                         ctx->decrypt_cb, ctx->decrypt_state);
+  res = parse_superframe_index(data, data_sz, frame_sizes, &frame_count,
+                               ctx->decrypt_cb, ctx->decrypt_state);
+  if (res != VPX_CODEC_OK)
+    return res;
 
   if (ctx->frame_parallel_decode) {
     // Decode in frame parallel mode. When decoding in this mode, the frame
