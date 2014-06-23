@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//j5Y\u003d",
+        "filename": "configure",
+        "patchSetId": 8
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-06-23T17:55:26Z",
+      "side": 1,
+      "message": "Can we remove this one for now, because as far as I remember, there wasn\u0027t much gain with this.",
+      "revId": "a8c9b8e7f7ae422e164721326bab9ad87076f6a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
