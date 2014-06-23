@@ -1514,7 +1514,7 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
   } else { /* For non key/golden frames */
     if (cpi->refresh_alt_ref_frame) {
       int arf_idx = cpi->alt_fb_idx;
-      if ((cpi->pass == 2) && cpi->multi_arf_enabled) {
+      if (cpi->pass == 2) {
         const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
         arf_idx = gf_group->arf_update_idx[gf_group->index];
       }
