@@ -416,6 +416,7 @@ typedef struct VP9_COMP {
   PC_TREE *pc_root;
   int partition_cost[PARTITION_CONTEXTS][PARTITION_TYPES];
 
+  int multi_arf_allowed;
   int multi_arf_enabled;
 
 #if CONFIG_DENOISING

@@ -490,6 +490,12 @@ static void set_tile_limits(VP9_COMP *cpi) {
   cm->log2_tile_rows = cpi->oxcf.tile_rows;
 }
 
+static void init_buffer_indices(VP9_COMP *cpi) {
+  cpi->lst_fb_idx = 0;
+  cpi->gld_fb_idx = 1;
+  cpi->alt_fb_idx = 2;
+}
+
 static void init_config(struct VP9_COMP *cpi, VP9EncoderConfig *oxcf) {
   VP9_COMMON *const cm = &cpi->common;
 
@@ -519,9 +525,7 @@ static void init_config(struct VP9_COMP *cpi, VP9EncoderConfig *oxcf) {
 
   cpi->static_mb_pct = 0;
 
-  cpi->lst_fb_idx = 0;
-  cpi->gld_fb_idx = 1;
-  cpi->alt_fb_idx = 2;
+  init_buffer_indices(cpi);
 
   set_tile_limits(cpi);
 }
@@ -762,10 +766,23 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
 
   cpi->refresh_alt_ref_frame = 0;
 
-  if (cpi->pass == 2)
+  // Note that at the moment multi_arf will not work with svc.
+  // For the current check in all the execution paths are defaulted to 0
+  // pending further tuning and testing. The code is left in place here
+  // as a place holder in regard to the required paths.
+  if (cpi->pass == 2) {
+    if (cpi->use_svc) {
+      cpi->multi_arf_allowed = 0;
+      cpi->multi_arf_enabled = 0;
+    } else {
+      // Disable by default for now.
+      cpi->multi_arf_allowed = 0;
+      cpi->multi_arf_enabled = 0;
+    }
+  } else {
+    cpi->multi_arf_allowed = 0;
     cpi->multi_arf_enabled = 0;
-  else
-    cpi->multi_arf_enabled = 0;
+  }
 
   cpi->b_calculate_psnr = CONFIG_INTERNAL_STATS;
 #if CONFIG_INTERNAL_STATS
@@ -1475,9 +1492,8 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
                &cm->ref_frame_map[cpi->gld_fb_idx], cm->new_fb_idx);
     ref_cnt_fb(cm->frame_bufs,
                &cm->ref_frame_map[cpi->alt_fb_idx], cm->new_fb_idx);
-  }
-  else if (!cpi->multi_arf_enabled && cpi->refresh_golden_frame &&
-           cpi->rc.is_src_frame_alt_ref && !cpi->use_svc) {
+  } else if (!cpi->multi_arf_allowed && cpi->refresh_golden_frame &&
+             cpi->rc.is_src_frame_alt_ref && !cpi->use_svc) {
     /* Preserve the previously existing golden frame and update the frame in
      * the alt ref slot instead. This is highly specific to the current use of
      * alt-ref as a forward reference, and this needs to be generalized as
@@ -1495,11 +1511,11 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
     tmp = cpi->alt_fb_idx;
     cpi->alt_fb_idx = cpi->gld_fb_idx;
     cpi->gld_fb_idx = tmp;
-  }  else { /* For non key/golden frames */
+  } else { /* For non key/golden frames */
     if (cpi->refresh_alt_ref_frame) {
       int arf_idx = cpi->alt_fb_idx;
       if ((cpi->pass == 2) && cpi->multi_arf_enabled) {
-        GF_GROUP *gf_group = &cpi->twopass.gf_group;
+        const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
         arf_idx = gf_group->arf_update_idx[gf_group->index];
       }
 
@@ -2372,7 +2388,7 @@ static void is_src_altref(VP9_COMP *cpi) {
   RATE_CONTROL *const rc = &cpi->rc;
 
   if (cpi->pass == 2) {
-    GF_GROUP *gf_group = &cpi->twopass.gf_group;
+    const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
     rc->is_src_frame_alt_ref =
       (gf_group->update_type[gf_group->index] == OVERLAY_UPDATE);
   } else {
@@ -2518,10 +2534,13 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   cm->frame_bufs[cm->new_fb_idx].ref_count--;
   cm->new_fb_idx = get_free_fb(cm);
 
-  if (cpi->multi_arf_enabled && (cm->frame_type != KEY_FRAME) &&
-      (cpi->pass == 2)) {
-    const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
-    cpi->alt_fb_idx = gf_group->arf_ref_idx[gf_group->index];
+  if (!cpi->use_svc && cpi->multi_arf_allowed) {
+    if (cm->frame_type == KEY_FRAME) {
+      init_buffer_indices(cpi);
+    } else if (cpi->pass == 2) {
+      const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
+      cpi->alt_fb_idx = gf_group->arf_ref_idx[gf_group->index];
+    }
   }
 
   cpi->frame_flags = *frame_flags;

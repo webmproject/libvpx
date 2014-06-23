@@ -1400,11 +1400,13 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
     ++frame_index;
   }
 
-  if (rc->source_alt_ref_pending && cpi->multi_arf_enabled) {
-    twopass->gf_group.bit_allocation[2] =
-      twopass->gf_group.bit_allocation[middle_frame_idx] + mid_boost_bits;
-    twopass->gf_group.update_type[middle_frame_idx] = OVERLAY_UPDATE;
-    twopass->gf_group.bit_allocation[middle_frame_idx] = 0;
+  if (rc->source_alt_ref_pending) {
+    if (cpi->multi_arf_enabled) {
+      twopass->gf_group.bit_allocation[2] =
+        twopass->gf_group.bit_allocation[middle_frame_idx] + mid_boost_bits;
+      twopass->gf_group.update_type[middle_frame_idx] = OVERLAY_UPDATE;
+      twopass->gf_group.bit_allocation[middle_frame_idx] = 0;
+    }
 
     // Configure the overlay frame at the end of the sequence that will also
     // be the start frame of the next group. The reason for doing this here
