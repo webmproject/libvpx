@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//kCQ\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 899,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-06-23T10:24:58Z",
+      "side": 1,
+      "message": "Done but cleared out in subsequent patch anyway. This was an initial experiment with comments left in as a reminder of tests done.",
+      "parentUuid": "AAAAdn//kOM\u003d",
+      "revId": "8c9d4ad613b67758f909cfe23183bde5eb1437ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//kLQ\u003d",
         "filename": "vp9/encoder/vp9_bitstream.c",
         "patchSetId": 14
@@ -30,6 +48,24 @@
       "writtenOn": "2014-06-20T22:08:19Z",
       "side": 1,
       "message": "Have you changed the behavior here?\ncpi-\u003erc.is_src_frame_alt_ref is true for the overlay frame.\n!cpi-\u003erefresh_alt_ref_frame is true if the current frame will not become the new ARF.\nMaybe it was intentional?",
+      "revId": "8c9d4ad613b67758f909cfe23183bde5eb1437ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kCM\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 901,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-06-23T10:24:58Z",
+      "side": 1,
+      "message": "It is necessary for now to disable this completely if multiple arfs are in use so this is intended.",
+      "parentUuid": "AAAAdn//kLQ\u003d",
       "revId": "8c9d4ad613b67758f909cfe23183bde5eb1437ad",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//kCI\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 799,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-06-23T10:24:58Z",
+      "side": 1,
+      "message": "This is just a place holder comment for the experiment.",
+      "parentUuid": "AAAAdn//kM8\u003d",
+      "revId": "8c9d4ad613b67758f909cfe23183bde5eb1437ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//kMw\u003d",
         "filename": "vp9/encoder/vp9_encoder.c",
         "patchSetId": 14
@@ -64,6 +118,24 @@
       "writtenOn": "2014-06-20T22:03:43Z",
       "side": 1,
       "message": "Better name would be get_arf_index. Also, cpi can be:\nconst VP9_COMP *const  cpi",
+      "revId": "8c9d4ad613b67758f909cfe23183bde5eb1437ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kCE\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 2413,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-06-23T10:24:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//kMw\u003d",
       "revId": "8c9d4ad613b67758f909cfe23183bde5eb1437ad",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//kB8\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 2416,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-06-23T10:24:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//kMk\u003d",
+      "revId": "8c9d4ad613b67758f909cfe23183bde5eb1437ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//kMg\u003d",
         "filename": "vp9/encoder/vp9_encoder.c",
         "patchSetId": 14
@@ -98,6 +188,24 @@
       "writtenOn": "2014-06-20T22:03:43Z",
       "side": 1,
       "message": "This can be:\nconst GF_GROUP *const gf_group \u003d \u0026cpi-\u003etwopass.gf_group;",
+      "revId": "8c9d4ad613b67758f909cfe23183bde5eb1437ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kCA\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 2418,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-06-23T10:24:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//kMg\u003d",
       "revId": "8c9d4ad613b67758f909cfe23183bde5eb1437ad",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//kB4\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 2431,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-06-23T10:24:58Z",
+      "side": 1,
+      "message": "This code is simplified down in subsequent patches and changing name here would cause conflict in rebasing multiple other patches. Hence I will submit a separate name change to this function after the others are submitted.",
+      "parentUuid": "AAAAdn//kLk\u003d",
+      "revId": "8c9d4ad613b67758f909cfe23183bde5eb1437ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//kLs\u003d",
         "filename": "vp9/encoder/vp9_encoder.c",
         "patchSetId": 14
@@ -132,6 +258,24 @@
       "writtenOn": "2014-06-20T22:03:43Z",
       "side": 1,
       "message": "Remove all the commented out code above.",
+      "revId": "8c9d4ad613b67758f909cfe23183bde5eb1437ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kB0\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 2522,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-06-23T10:24:58Z",
+      "side": 1,
+      "message": "This was cleared out in the next patch anyway as part of removal of #if CONFIG_MULTIPLE_ARF but done here now instead to comply.",
+      "parentUuid": "AAAAdn//kLs\u003d",
       "revId": "8c9d4ad613b67758f909cfe23183bde5eb1437ad",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//kBw\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 2568,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-06-23T10:24:58Z",
+      "side": 1,
+      "message": "This was as intended for this initial experiment (pass \u003d\u003d 0 means first pass) but is changed / fixed in a subsequent patch already pending.",
+      "parentUuid": "AAAAdn//kLo\u003d",
+      "revId": "8c9d4ad613b67758f909cfe23183bde5eb1437ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//kLg\u003d",
         "filename": "vp9/encoder/vp9_encoder.c",
         "patchSetId": 14
@@ -166,6 +328,24 @@
       "writtenOn": "2014-06-20T22:03:43Z",
       "side": 1,
       "message": "const GF_GROUP *const gf_group \u003d \u0026cpi-\u003etwopass.gf_group;",
+      "revId": "8c9d4ad613b67758f909cfe23183bde5eb1437ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kBs\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 2639,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-06-23T10:24:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//kLg\u003d",
       "revId": "8c9d4ad613b67758f909cfe23183bde5eb1437ad",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//kBo\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 1445,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-06-23T10:24:58Z",
+      "side": 1,
+      "message": "Given that there are already multiple dependent patches pending I will change this name as a separate patch.",
+      "parentUuid": "AAAAdn//kNw\u003d",
+      "revId": "8c9d4ad613b67758f909cfe23183bde5eb1437ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//kNs\u003d",
         "filename": "vp9/encoder/vp9_firstpass.c",
         "patchSetId": 14
@@ -200,6 +398,24 @@
       "writtenOn": "2014-06-20T22:03:43Z",
       "side": 1,
       "message": "Swap the two parts of the if so you can remove the !\nI think it makes the code more readable.",
+      "revId": "8c9d4ad613b67758f909cfe23183bde5eb1437ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kBk\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 1453,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-06-23T10:24:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//kNs\u003d",
       "revId": "8c9d4ad613b67758f909cfe23183bde5eb1437ad",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -223,6 +439,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//kBg\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 1494,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-06-23T10:24:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//kNo\u003d",
+      "revId": "8c9d4ad613b67758f909cfe23183bde5eb1437ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//kOE\u003d",
         "filename": "vp9/encoder/vp9_ratectrl.c",
         "patchSetId": 14
@@ -234,6 +468,24 @@
       "writtenOn": "2014-06-20T22:03:43Z",
       "side": 1,
       "message": "What about intra-only frames, do we want to treat them like KFs?\n\nframe_is_intra_only(cm) helps you identify KF/Intra-only frames.",
+      "revId": "8c9d4ad613b67758f909cfe23183bde5eb1437ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kBc\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-06-23T10:24:58Z",
+      "side": 1,
+      "message": "I am not sure at this point. However, this does not directly relate to this multi-arf patch but is a separate issue.",
+      "parentUuid": "AAAAdn//kOE\u003d",
       "revId": "8c9d4ad613b67758f909cfe23183bde5eb1437ad",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -257,6 +509,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//kBY\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 937,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-06-23T10:24:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//kOA\u003d",
+      "revId": "8c9d4ad613b67758f909cfe23183bde5eb1437ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//kN8\u003d",
         "filename": "vp9/encoder/vp9_ratectrl.c",
         "patchSetId": 14
@@ -274,6 +544,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//kBU\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 1044,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-06-23T10:24:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//kN8\u003d",
+      "revId": "8c9d4ad613b67758f909cfe23183bde5eb1437ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//kOI\u003d",
         "filename": "vp9/encoder/vp9_ratectrl.h",
         "patchSetId": 14
@@ -285,6 +573,24 @@
       "writtenOn": "2014-06-20T22:03:43Z",
       "side": 1,
       "message": "Maybe rename the first so it is consistent (LOW, STD, HIGH):\n  INTER_STD \u003d 0,",
+      "revId": "8c9d4ad613b67758f909cfe23183bde5eb1437ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//kBQ\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.h",
+        "patchSetId": 14
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-06-23T10:24:58Z",
+      "side": 1,
+      "message": "Given that this is an initial experimental patch and that there are already multiple dependent patches waiting I will look at this naming issue in a subsequent cosmetic patch.",
+      "parentUuid": "AAAAdn//kOI\u003d",
       "revId": "8c9d4ad613b67758f909cfe23183bde5eb1437ad",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
