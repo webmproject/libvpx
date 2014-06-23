@@ -16,6 +16,24 @@
       "revId": "e8a4edf49e5e4d0ec409154009f1b9a970c8d2b0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//j6k\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 3568,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-06-23T17:23:06Z",
+      "side": 0,
+      "message": "x-\u003ein_active_map and cpi-\u003eactive_map are going away. The segment map which gives better results will be the one supported way to use the active map feature. The map itself then only needs to be stored in the segment map. We don\u0027t need to keep an extra copy of it around. \n\nWhen seg_skip is on the code enters  vp9_rd_pick_inter_mode_sb_seg_skip() instead. \n\nThis patch removes x-\u003ein_active_map (which means the block is active, don\u0027t skip) and treats is as always true.",
+      "parentUuid": "AAAAdn//j64\u003d",
+      "revId": "e8a4edf49e5e4d0ec409154009f1b9a970c8d2b0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
