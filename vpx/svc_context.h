@@ -104,14 +104,16 @@ const char *vpx_svc_dump_statistics(SvcContext *svc_ctx);
 const char *vpx_svc_get_message(const SvcContext *svc_ctx);
 
 /**
- * return size of encoded data to be returned by vpx_svc_get_buffer
+ * return size of encoded data to be returned by vpx_svc_get_buffer.
+ * it needs to be called before vpx_svc_get_buffer.
  */
 size_t vpx_svc_get_frame_size(const SvcContext *svc_ctx);
 
 /**
- * return buffer with encoded data
+ * return buffer with encoded data. encoder will maintain a list of frame
+ * buffers. each call of vpx_svc_get_buffer() will return one frame.
  */
-void *vpx_svc_get_buffer(const SvcContext *svc_ctx);
+void *vpx_svc_get_buffer(SvcContext *svc_ctx);
 
 /**
  * return size of two pass rate control stats data to be returned by

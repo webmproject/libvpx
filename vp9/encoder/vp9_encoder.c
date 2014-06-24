@@ -106,7 +106,7 @@ static INLINE void Scale2Ratio(VPX_SCALING mode, int *hr, int *hs) {
   }
 }
 
-static void set_high_precision_mv(VP9_COMP *cpi, int allow_high_precision_mv) {
+void vp9_set_high_precision_mv(VP9_COMP *cpi, int allow_high_precision_mv) {
   MACROBLOCK *const mb = &cpi->mb;
   cpi->common.allow_high_precision_mv = allow_high_precision_mv;
   if (cpi->common.allow_high_precision_mv) {
@@ -572,7 +572,7 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   cm->reset_frame_context = 0;
 
   vp9_reset_segment_features(&cm->seg);
-  set_high_precision_mv(cpi, 0);
+  vp9_set_high_precision_mv(cpi, 0);
 
   {
     int i;
@@ -2117,7 +2117,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   if (!frame_is_intra_only(cm)) {
     cm->interp_filter = DEFAULT_INTERP_FILTER;
     /* TODO: Decide this more intelligently */
-    set_high_precision_mv(cpi, q < HIGH_PRECISION_MV_QTHRESH);
+    vp9_set_high_precision_mv(cpi, q < HIGH_PRECISION_MV_QTHRESH);
   }
 
   if (cpi->sf.recode_loop == DISALLOW_RECODE) {
@@ -2298,12 +2298,22 @@ int vp9_receive_raw_frame(VP9_COMP *cpi, unsigned int frame_flags,
   int res = 0;
   const int subsampling_x = sd->uv_width  < sd->y_width;
   const int subsampling_y = sd->uv_height < sd->y_height;
+  const int is_spatial_svc = cpi->use_svc &&
+                             (cpi->svc.number_temporal_layers == 1);
 
   check_initial_width(cpi, subsampling_x, subsampling_y);
 
   vpx_usec_timer_start(&timer);
-  if (vp9_lookahead_push(cpi->lookahead,
-                         sd, time_stamp, end_time, frame_flags))
+
+#ifdef CONFIG_SPATIAL_SVC
+  if (is_spatial_svc)
+    res = vp9_svc_lookahead_push(cpi, cpi->lookahead, sd, time_stamp, end_time,
+                                 frame_flags);
+  else
+#endif
+    res = vp9_lookahead_push(cpi->lookahead,
+                             sd, time_stamp, end_time, frame_flags);
+  if (res)
     res = -1;
   vpx_usec_timer_mark(&timer);
   cpi->time_receive_data += vpx_usec_timer_elapsed(&timer);
@@ -2419,11 +2429,14 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   YV12_BUFFER_CONFIG *force_src_buffer = NULL;
   MV_REFERENCE_FRAME ref_frame;
   int arf_src_index;
+  const int is_spatial_svc = cpi->use_svc &&
+                             (cpi->svc.number_temporal_layers == 1);
 
   if (!cpi)
     return -1;
 
-  if (cpi->svc.number_spatial_layers > 1 && cpi->pass == 2) {
+  if (is_spatial_svc && cpi->pass == 2) {
+    vp9_svc_lookahead_peek(cpi, cpi->lookahead, 0, 1);
     vp9_restore_layer_context(cpi);
   }
 
@@ -2432,7 +2445,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   cpi->source = NULL;
   cpi->last_source = NULL;
 
-  set_high_precision_mv(cpi, ALTREF_HIGH_PRECISION_MV);
+  vp9_set_high_precision_mv(cpi, ALTREF_HIGH_PRECISION_MV);
 
   // Normal defaults
   cm->reset_frame_context = 0;
@@ -2446,7 +2459,14 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   if (arf_src_index) {
     assert(arf_src_index <= rc->frames_to_key);
 
-    if ((cpi->source = vp9_lookahead_peek(cpi->lookahead, arf_src_index))) {
+#ifdef CONFIG_SPATIAL_SVC
+    if (is_spatial_svc)
+      cpi->source = vp9_svc_lookahead_peek(cpi, cpi->lookahead,
+                                           arf_src_index, 1);
+    else
+#endif
+      cpi->source = vp9_lookahead_peek(cpi->lookahead, arf_src_index);
+    if (cpi->source != NULL) {
       cpi->alt_ref_source = cpi->source;
 
       if (cpi->oxcf.arnr_max_frames > 0) {
@@ -2472,12 +2492,24 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   if (!cpi->source) {
     // Get last frame source.
     if (cm->current_video_frame > 0) {
-      if ((cpi->last_source = vp9_lookahead_peek(cpi->lookahead, -1)) == NULL)
+#ifdef CONFIG_SPATIAL_SVC
+      if (is_spatial_svc)
+        cpi->last_source = vp9_svc_lookahead_peek(cpi, cpi->lookahead, -1, 0);
+      else
+#endif
+        cpi->last_source = vp9_lookahead_peek(cpi->lookahead, -1);
+      if (cpi->last_source == NULL)
         return -1;
     }
 
     // Read in the source frame.
-    if ((cpi->source = vp9_lookahead_pop(cpi->lookahead, flush))) {
+#ifdef CONFIG_SPATIAL_SVC
+    if (is_spatial_svc)
+      cpi->source = vp9_svc_lookahead_pop(cpi, cpi->lookahead, flush);
+    else
+#endif
+      cpi->source = vp9_lookahead_pop(cpi->lookahead, flush);
+    if (cpi->source != NULL) {
       cm->show_frame = 1;
       cm->intra_only = 0;
 
@@ -2499,7 +2531,9 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
     *time_stamp = cpi->source->ts_start;
     *time_end = cpi->source->ts_end;
-    *frame_flags = cpi->source->flags;
+    *frame_flags =
+        (cpi->source->flags & VPX_EFLAG_FORCE_KF) ? FRAMEFLAGS_KEY : 0;
+
   } else {
     *size = 0;
     if (flush && cpi->pass == 1 && !cpi->twopass.first_pass_done) {
@@ -2829,4 +2863,43 @@ int vp9_get_y_sse(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b) {
 
 int vp9_get_quantizer(VP9_COMP *cpi) {
   return cpi->common.base_qindex;
+}
+
+void vp9_apply_encoding_flags(VP9_COMP *cpi, vpx_enc_frame_flags_t flags) {
+  if (flags & (VP8_EFLAG_NO_REF_LAST | VP8_EFLAG_NO_REF_GF |
+               VP8_EFLAG_NO_REF_ARF)) {
+    int ref = 7;
+
+    if (flags & VP8_EFLAG_NO_REF_LAST)
+      ref ^= VP9_LAST_FLAG;
+
+    if (flags & VP8_EFLAG_NO_REF_GF)
+      ref ^= VP9_GOLD_FLAG;
+
+    if (flags & VP8_EFLAG_NO_REF_ARF)
+      ref ^= VP9_ALT_FLAG;
+
+    vp9_use_as_reference(cpi, ref);
+  }
+
+  if (flags & (VP8_EFLAG_NO_UPD_LAST | VP8_EFLAG_NO_UPD_GF |
+               VP8_EFLAG_NO_UPD_ARF | VP8_EFLAG_FORCE_GF |
+               VP8_EFLAG_FORCE_ARF)) {
+    int upd = 7;
+
+    if (flags & VP8_EFLAG_NO_UPD_LAST)
+      upd ^= VP9_LAST_FLAG;
+
+    if (flags & VP8_EFLAG_NO_UPD_GF)
+      upd ^= VP9_GOLD_FLAG;
+
+    if (flags & VP8_EFLAG_NO_UPD_ARF)
+      upd ^= VP9_ALT_FLAG;
+
+    vp9_update_reference(cpi, upd);
+  }
+
+  if (flags & VP8_EFLAG_NO_UPD_ENTROPY) {
+    vp9_update_entropy(cpi, 0);
+  }
 }
