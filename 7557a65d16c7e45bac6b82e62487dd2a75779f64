@@ -16,6 +16,24 @@
       "revId": "7557a65d16c7e45bac6b82e62487dd2a75779f64",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//jkk\u003d",
+        "filename": "vp9/common/vp9_loopfilter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 942,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-06-24T17:45:48Z",
+      "side": 1,
+      "message": "I\u0027m not quite sure I follow here. \n\nBut for extra context here \"plane\" is a macroblockd_plane* (usually pd), not an integer plane index.",
+      "parentUuid": "AAAAdn//j3I\u003d",
+      "revId": "7557a65d16c7e45bac6b82e62487dd2a75779f64",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
