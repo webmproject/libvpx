@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//jbU\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-24T22:10:35Z",
+      "side": 1,
+      "message": "put the static functions first so you don\u0027t need the forward declarations.",
+      "revId": "2dab38e62e3f83de66d4920ff1b9ab5650c0f340",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//jbQ\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 412,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-24T22:10:35Z",
+      "side": 1,
+      "message": "will future versions depend on these params? if so, (void) them for now, otherwise shift to kConstants",
+      "revId": "2dab38e62e3f83de66d4920ff1b9ab5650c0f340",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
