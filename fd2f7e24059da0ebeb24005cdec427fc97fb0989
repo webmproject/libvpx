@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//jt8\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 1227,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-06-24T00:18:27Z",
+      "side": 1,
+      "message": "I just grab 6 chars from pos 0 instead of the param substitution abuse. \n\nWhy? ${tgt_os#darwin} evaluates to nothing for \"darwin\", and only the trailing version number when it\u0027s \"darwinVERSION\".\n\nThis is only coming up because I\u0027m creating arm64-darwin-gcc, and xcode won\u0027t let me run anything but arm64 code on iphone 5s (?). \n\nNote: Since this hasn\u0027t been working, at least as the comment implied that it should, I\u0027m a little nervous about the impact this change will have on darwin targets.",
+      "revId": "fd2f7e24059da0ebeb24005cdec427fc97fb0989",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
