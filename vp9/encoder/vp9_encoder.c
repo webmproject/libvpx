@@ -2917,7 +2917,25 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   if (!frame_is_intra_only(cm)) {
     cm->interp_filter = DEFAULT_INTERP_FILTER;
     /* TODO: Decide this more intelligently */
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
+    switch (cm->bit_depth) {
+      case VPX_BITS_8:
+        set_high_precision_mv(cpi, q < HIGH_PRECISION_MV_QTHRESH);
+        break;
+      case VPX_BITS_10:
+        set_high_precision_mv(cpi,
+                              q < HIGH_PRECISION_MV_QTHRESH + MAXQ_10 - MAXQ);
+        break;
+      case VPX_BITS_12:
+        set_high_precision_mv(cpi,
+                              q < HIGH_PRECISION_MV_QTHRESH + MAXQ_12 - MAXQ);
+        break;
+      default:
+        assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10, VPX_BITS_12");
+    }
+#else
     set_high_precision_mv(cpi, q < HIGH_PRECISION_MV_QTHRESH);
+#endif
   }
 
   if (cpi->sf.recode_loop == DISALLOW_RECODE) {
