@@ -39,8 +39,9 @@ struct vpx_codec_alg_priv {
   vpx_decrypt_cb          decrypt_cb;
   void                   *decrypt_state;
   vpx_image_t             img;
-  int                     img_avail;
   int                     invert_tile_order;
+  int                     frame_parallel_decode;  // frame-based threading.
+  int                     last_show_frame;  // Index of last output frame.
 
   // External frame buffer info to save for VP9 common.
   void *ext_priv;  // Private data associated with the external frame buffers.
@@ -49,10 +50,12 @@ struct vpx_codec_alg_priv {
 };
 
 static vpx_codec_err_t decoder_init(vpx_codec_ctx_t *ctx,
-                            vpx_codec_priv_enc_mr_cfg_t *data) {
+                                    vpx_codec_priv_enc_mr_cfg_t *data) {
   // This function only allocates space for the vpx_codec_alg_priv_t
   // structure. More memory may be required at the time the stream
   // information becomes known.
+  (void)data;
+
   if (!ctx->priv) {
     vpx_codec_alg_priv_t *alg_priv = vpx_memalign(32, sizeof(*alg_priv));
     if (alg_priv == NULL)
@@ -66,6 +69,11 @@ static vpx_codec_err_t decoder_init(vpx_codec_ctx_t *ctx,
     ctx->priv->alg_priv = alg_priv;
     ctx->priv->alg_priv->si.sz = sizeof(ctx->priv->alg_priv->si);
     ctx->priv->init_flags = ctx->init_flags;
+    ctx->priv->alg_priv->frame_parallel_decode =
+        (ctx->init_flags & VPX_CODEC_USE_FRAME_THREADING);
+
+    // Disable frame parallel decoding for now.
+    ctx->priv->alg_priv->frame_parallel_decode = 0;
 
     if (ctx->config.dec) {
       // Update the reference to the config structure to an internal copy.
@@ -231,6 +239,8 @@ static void init_decoder(vpx_codec_alg_priv_t *ctx) {
 
   ctx->pbi->max_threads = ctx->cfg.threads;
   ctx->pbi->inv_tile_order = ctx->invert_tile_order;
+  ctx->pbi->frame_parallel_decode = ctx->frame_parallel_decode;
+  ctx->last_show_frame = -1;
 
   // If postprocessing was enabled by the application and a
   // configuration has not been provided, default it.
@@ -244,13 +254,10 @@ static void init_decoder(vpx_codec_alg_priv_t *ctx) {
 static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t *ctx,
                                   const uint8_t **data, unsigned int data_sz,
                                   void *user_priv, int64_t deadline) {
-  YV12_BUFFER_CONFIG sd = { 0 };
   vp9_ppflags_t flags = {0};
   VP9_COMMON *cm = NULL;
 
   (void)deadline;
-
-  ctx->img_avail = 0;
 
   // Determine the stream parameters. Note that we rely on peek_si to
   // validate that we have a buffer that does not wrap around the top
@@ -286,13 +293,6 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t *ctx,
   if (ctx->base.init_flags & VPX_CODEC_USE_POSTPROC)
     set_ppflags(ctx, &flags);
 
-  if (vp9_get_raw_frame(ctx->pbi, &sd, &flags))
-    return update_error_state(ctx, &cm->error);
-
-  yuvconfig2image(&ctx->img, &sd, user_priv);
-  ctx->img.fb_priv = cm->frame_bufs[cm->new_fb_idx].raw_frame_buffer.priv;
-  ctx->img_avail = 1;
-
   return VPX_CODEC_OK;
 }
 
@@ -322,55 +322,35 @@ static void parse_superframe_index(const uint8_t *data, size_t data_sz,
     const uint32_t mag = ((marker >> 3) & 0x3) + 1;
     const size_t index_sz = 2 + mag * frames;
 
-    uint8_t marker2 = read_marker(decrypt_cb, decrypt_state,
-                                  data + data_sz - index_sz);
+    if (data_sz >= index_sz) {
+      uint8_t marker2 = read_marker(decrypt_cb, decrypt_state,
+                                    data + data_sz - index_sz);
 
-    if (data_sz >= index_sz && marker2 == marker) {
-      // found a valid superframe index
-      uint32_t i, j;
-      const uint8_t *x = &data[data_sz - index_sz + 1];
+      if (marker == marker2) {
+        // Found a valid superframe index.
+        uint32_t i, j;
+        const uint8_t *x = &data[data_sz - index_sz + 1];
 
-      // frames has a maximum of 8 and mag has a maximum of 4.
-      uint8_t clear_buffer[32];
-      assert(sizeof(clear_buffer) >= frames * mag);
-      if (decrypt_cb) {
-        decrypt_cb(decrypt_state, x, clear_buffer, frames * mag);
-        x = clear_buffer;
+        // Frames has a maximum of 8 and mag has a maximum of 4.
+        uint8_t clear_buffer[32];
+        assert(sizeof(clear_buffer) >= frames * mag);
+        if (decrypt_cb) {
+          decrypt_cb(decrypt_state, x, clear_buffer, frames * mag);
+          x = clear_buffer;
+        }
+
+        for (i = 0; i < frames; ++i) {
+          uint32_t this_sz = 0;
+
+          for (j = 0; j < mag; ++j)
+            this_sz |= (*x++) << (j * 8);
+          sizes[i] = this_sz;
+        }
+
+        *count = frames;
       }
-
-      for (i = 0; i < frames; i++) {
-        uint32_t this_sz = 0;
-
-        for (j = 0; j < mag; j++)
-          this_sz |= (*x++) << (j * 8);
-        sizes[i] = this_sz;
-      }
-
-      *count = frames;
     }
   }
-}
-
-static vpx_codec_err_t decode_one_iter(vpx_codec_alg_priv_t *ctx,
-                                       const uint8_t **data_start_ptr,
-                                       const uint8_t *data_end,
-                                       uint32_t frame_size, void *user_priv,
-                                       long deadline) {
-  const vpx_codec_err_t res = decode_one(ctx, data_start_ptr, frame_size,
-                                         user_priv, deadline);
-  if (res != VPX_CODEC_OK)
-    return res;
-
-  // Account for suboptimal termination by the encoder.
-  while (*data_start_ptr < data_end) {
-    const uint8_t marker = read_marker(ctx->decrypt_cb, ctx->decrypt_state,
-                                       *data_start_ptr);
-    if (marker)
-      break;
-    (*data_start_ptr)++;
-  }
-
-  return VPX_CODEC_OK;
 }
 
 static vpx_codec_err_t decoder_decode(vpx_codec_alg_priv_t *ctx,
@@ -378,7 +358,6 @@ static vpx_codec_err_t decoder_decode(vpx_codec_alg_priv_t *ctx,
                                       void *user_priv, long deadline) {
   const uint8_t *data_start = data;
   const uint8_t *const data_end = data + data_sz;
-  vpx_codec_err_t res;
   uint32_t frame_sizes[8];
   int frame_count;
 
@@ -392,25 +371,37 @@ static vpx_codec_err_t decoder_decode(vpx_codec_alg_priv_t *ctx,
     int i;
 
     for (i = 0; i < frame_count; ++i) {
+      const uint8_t *data_start_copy = data_start;
       const uint32_t frame_size = frame_sizes[i];
+      vpx_codec_err_t res;
       if (data_start < data ||
           frame_size > (uint32_t)(data_end - data_start)) {
         ctx->base.err_detail = "Invalid frame size in index";
         return VPX_CODEC_CORRUPT_FRAME;
       }
 
-      res = decode_one_iter(ctx, &data_start, data_end, frame_size,
-                            user_priv, deadline);
+      res = decode_one(ctx, &data_start_copy, frame_size, user_priv, deadline);
       if (res != VPX_CODEC_OK)
         return res;
+
+      data_start += frame_size;
     }
   } else {
     while (data_start < data_end) {
-      res = decode_one_iter(ctx, &data_start, data_end,
-                            (uint32_t)(data_end - data_start),
-                            user_priv, deadline);
+      const uint32_t frame_size = (uint32_t)(data_end - data_start);
+      const vpx_codec_err_t res = decode_one(ctx, &data_start, frame_size,
+                                             user_priv, deadline);
       if (res != VPX_CODEC_OK)
         return res;
+
+      // Account for suboptimal termination by the encoder.
+      while (data_start < data_end) {
+        const uint8_t marker = read_marker(ctx->decrypt_cb, ctx->decrypt_state,
+                                           data_start);
+        if (marker)
+          break;
+        ++data_start;
+      }
     }
   }
 
@@ -421,15 +412,29 @@ static vpx_image_t *decoder_get_frame(vpx_codec_alg_priv_t *ctx,
                                       vpx_codec_iter_t *iter) {
   vpx_image_t *img = NULL;
 
-  if (ctx->img_avail) {
-    // iter acts as a flip flop, so an image is only returned on the first
-    // call to get_frame.
-    if (!(*iter)) {
+  // iter acts as a flip flop, so an image is only returned on the first
+  // call to get_frame.
+  if (*iter == NULL && ctx->pbi != NULL) {
+    YV12_BUFFER_CONFIG sd;
+    vp9_ppflags_t flags = {0, 0, 0};
+
+    if (vp9_get_raw_frame(ctx->pbi, &sd, &flags) == 0) {
+      VP9_COMMON *cm = &ctx->pbi->common;
+      yuvconfig2image(&ctx->img, &sd, NULL);
+      ctx->img.fb_priv = cm->frame_bufs[cm->new_fb_idx].raw_frame_buffer.priv;
       img = &ctx->img;
       *iter = img;
+      // Decrease reference count of last output frame in frame parallel mode.
+      if (ctx->frame_parallel_decode && ctx->last_show_frame >= 0) {
+        --cm->frame_bufs[ctx->last_show_frame].ref_count;
+        if (cm->frame_bufs[ctx->last_show_frame].ref_count == 0) {
+          cm->release_fb_cb(cm->cb_priv,
+              &cm->frame_bufs[ctx->last_show_frame].raw_frame_buffer);
+        }
+      }
+      ctx->last_show_frame = ctx->pbi->common.new_fb_idx;
     }
   }
-  ctx->img_avail = 0;
 
   return img;
 }
@@ -453,7 +458,7 @@ static vpx_codec_err_t decoder_set_fb_fn(
 }
 
 static vpx_codec_err_t ctrl_set_reference(vpx_codec_alg_priv_t *ctx,
-                                          int ctr_id, va_list args) {
+                                          va_list args) {
   vpx_ref_frame_t *const data = va_arg(args, vpx_ref_frame_t *);
 
   if (data) {
@@ -469,7 +474,7 @@ static vpx_codec_err_t ctrl_set_reference(vpx_codec_alg_priv_t *ctx,
 }
 
 static vpx_codec_err_t ctrl_copy_reference(vpx_codec_alg_priv_t *ctx,
-                                           int ctr_id, va_list args) {
+                                           va_list args) {
   vpx_ref_frame_t *data = va_arg(args, vpx_ref_frame_t *);
 
   if (data) {
@@ -486,7 +491,7 @@ static vpx_codec_err_t ctrl_copy_reference(vpx_codec_alg_priv_t *ctx,
 }
 
 static vpx_codec_err_t ctrl_get_reference(vpx_codec_alg_priv_t *ctx,
-                                          int ctr_id, va_list args) {
+                                          va_list args) {
   vp9_ref_frame_t *data = va_arg(args, vp9_ref_frame_t *);
 
   if (data) {
@@ -501,7 +506,7 @@ static vpx_codec_err_t ctrl_get_reference(vpx_codec_alg_priv_t *ctx,
 }
 
 static vpx_codec_err_t ctrl_set_postproc(vpx_codec_alg_priv_t *ctx,
-                                         int ctr_id, va_list args) {
+                                         va_list args) {
 #if CONFIG_VP9_POSTPROC
   vp8_postproc_cfg_t *data = va_arg(args, vp8_postproc_cfg_t *);
 
@@ -513,17 +518,21 @@ static vpx_codec_err_t ctrl_set_postproc(vpx_codec_alg_priv_t *ctx,
     return VPX_CODEC_INVALID_PARAM;
   }
 #else
+  (void)ctx;
+  (void)args;
   return VPX_CODEC_INCAPABLE;
 #endif
 }
 
 static vpx_codec_err_t ctrl_set_dbg_options(vpx_codec_alg_priv_t *ctx,
-                                            int ctrl_id, va_list args) {
+                                            va_list args) {
+  (void)ctx;
+  (void)args;
   return VPX_CODEC_INCAPABLE;
 }
 
 static vpx_codec_err_t ctrl_get_last_ref_updates(vpx_codec_alg_priv_t *ctx,
-                                                 int ctrl_id, va_list args) {
+                                                 va_list args) {
   int *const update_info = va_arg(args, int *);
 
   if (update_info) {
@@ -539,7 +548,7 @@ static vpx_codec_err_t ctrl_get_last_ref_updates(vpx_codec_alg_priv_t *ctx,
 
 
 static vpx_codec_err_t ctrl_get_frame_corrupted(vpx_codec_alg_priv_t *ctx,
-                                                int ctrl_id, va_list args) {
+                                                va_list args) {
   int *corrupted = va_arg(args, int *);
 
   if (corrupted) {
@@ -554,7 +563,7 @@ static vpx_codec_err_t ctrl_get_frame_corrupted(vpx_codec_alg_priv_t *ctx,
 }
 
 static vpx_codec_err_t ctrl_get_display_size(vpx_codec_alg_priv_t *ctx,
-                                             int ctrl_id, va_list args) {
+                                             va_list args) {
   int *const display_size = va_arg(args, int *);
 
   if (display_size) {
@@ -572,7 +581,7 @@ static vpx_codec_err_t ctrl_get_display_size(vpx_codec_alg_priv_t *ctx,
 }
 
 static vpx_codec_err_t ctrl_get_bit_depth(vpx_codec_alg_priv_t *ctx,
-                                          int ctrl_id, va_list args) {
+                                          va_list args) {
   unsigned int *const bit_depth = va_arg(args, unsigned int *);
 
   if (bit_depth) {
@@ -590,13 +599,12 @@ static vpx_codec_err_t ctrl_get_bit_depth(vpx_codec_alg_priv_t *ctx,
 
 
 static vpx_codec_err_t ctrl_set_invert_tile_order(vpx_codec_alg_priv_t *ctx,
-                                                  int ctr_id, va_list args) {
+                                                  va_list args) {
   ctx->invert_tile_order = va_arg(args, int);
   return VPX_CODEC_OK;
 }
 
 static vpx_codec_err_t ctrl_set_decryptor(vpx_codec_alg_priv_t *ctx,
-                                          int ctrl_id,
                                           va_list args) {
   vpx_decrypt_init *init = va_arg(args, vpx_decrypt_init *);
   ctx->decrypt_cb = init ? init->decrypt_cb : NULL;
@@ -648,11 +656,12 @@ CODEC_INTERFACE(vpx_codec_vp9_dx) = {
     decoder_set_fb_fn,  // vpx_codec_set_fb_fn_t
   },
   { // NOLINT
-    NOT_IMPLEMENTED,
-    NOT_IMPLEMENTED,
-    NOT_IMPLEMENTED,
-    NOT_IMPLEMENTED,
-    NOT_IMPLEMENTED,
-    NOT_IMPLEMENTED
+    NOT_IMPLEMENTED,  // vpx_codec_enc_cfg_map_t
+    NOT_IMPLEMENTED,  // vpx_codec_encode_fn_t
+    NOT_IMPLEMENTED,  // vpx_codec_get_cx_data_fn_t
+    NOT_IMPLEMENTED,  // vpx_codec_enc_config_set_fn_t
+    NOT_IMPLEMENTED,  // vpx_codec_get_global_headers_fn_t
+    NOT_IMPLEMENTED,  // vpx_codec_get_preview_frame_fn_t
+    NOT_IMPLEMENTED   // vpx_codec_enc_mr_get_mem_loc_fn_t
   }
 };

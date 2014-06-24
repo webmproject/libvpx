@@ -9,7 +9,6 @@
 ##
 
 VP8_COMMON_SRCS-yes += vp8_common.mk
-VP8_COMMON_SRCS-yes += common/pragmas.h
 VP8_COMMON_SRCS-yes += common/ppflags.h
 VP8_COMMON_SRCS-yes += common/onyx.h
 VP8_COMMON_SRCS-yes += common/onyxd.h
@@ -108,7 +107,6 @@ VP8_COMMON_SRCS-$(HAVE_SSSE3) += common/x86/variance_impl_ssse3.asm
 VP8_COMMON_SRCS-$(HAVE_SSE4_1) += common/x86/sad_sse4.asm
 
 ifeq ($(CONFIG_POSTPROC),yes)
-VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/postproc_x86.c
 VP8_COMMON_SRCS-$(HAVE_MMX) += common/x86/postproc_mmx.asm
 VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/mfqe_sse2.asm
 VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/postproc_sse2.asm

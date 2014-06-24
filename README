@@ -1,5 +1,4 @@
-vpx Multi-Format Codec SDK
-README - 1 August 2013
+README - 30 May 2014
 
 Welcome to the WebM VP8/VP9 Codec SDK!
 
@@ -63,6 +62,7 @@ COMPILING THE APPLICATIONS/LIBRARIES:
     armv7-none-rvct
     armv7-win32-vs11
     armv7-win32-vs12
+    armv7s-darwin-gcc
     mips32-linux-gcc
     ppc32-darwin8-gcc
     ppc32-darwin9-gcc
@@ -80,6 +80,7 @@ COMPILING THE APPLICATIONS/LIBRARIES:
     x86-darwin11-gcc
     x86-darwin12-gcc
     x86-darwin13-gcc
+    x86-iphonesimulator-gcc
     x86-linux-gcc
     x86-linux-icc
     x86-os2-gcc
@@ -96,6 +97,7 @@ COMPILING THE APPLICATIONS/LIBRARIES:
     x86_64-darwin11-gcc
     x86_64-darwin12-gcc
     x86_64-darwin13-gcc
+    x86_64-iphonesimulator-gcc
     x86_64-linux-gcc
     x86_64-linux-icc
     x86_64-solaris-gcc
@@ -130,6 +132,14 @@ COMPILING THE APPLICATIONS/LIBRARIES:
   If the configuration step fails, the first step is to look in the error log.
   This defaults to config.log. This should give a good indication of what went
   wrong. If not, contact us for support.
+
+VP8/VP9 TEST VECTORS:
+  The test vectors can be downloaded and verified using the build system after
+  running configure. To specify an alternate directory the
+  LIBVPX_TEST_DATA_PATH environment variable can be used.
+
+  $ ./configure --enable-unit-tests
+  $ LIBVPX_TEST_DATA_PATH=../libvpx-test-data make testdata
 
 SUPPORT
   This library is an open source project supported by its community. Please

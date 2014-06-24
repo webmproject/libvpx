@@ -306,6 +306,7 @@ $(1): $($(1:.$(VCPROJ_SFX)=).SRCS) vpx.$(VCPROJ_SFX)
             --name=$$(@:.$(VCPROJ_SFX)=)\
             --ver=$$(CONFIG_VS_VERSION)\
             --proj-guid=$$($$(@:.$(VCPROJ_SFX)=).GUID)\
+            --src-path-bare="$(SRC_PATH_BARE)" \
             $$(if $$(CONFIG_STATIC_MSVCRT),--static-crt) \
             --out=$$@ $$(INTERNAL_CFLAGS) $$(CFLAGS) \
             $$(INTERNAL_LDFLAGS) $$(LDFLAGS) -l$$(CODEC_LIB) $$^

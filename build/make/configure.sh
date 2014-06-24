@@ -774,6 +774,13 @@ process_common_toolchain() {
             add_cflags  "-mmacosx-version-min=10.9"
             add_ldflags "-mmacosx-version-min=10.9"
             ;;
+        *-iphonesimulator-*)
+            add_cflags  "-miphoneos-version-min=5.0"
+            add_ldflags "-miphoneos-version-min=5.0"
+            osx_sdk_dir="$(xcrun --sdk iphonesimulator --show-sdk-path)"
+            add_cflags  "-isysroot ${osx_sdk_dir}"
+            add_ldflags "-isysroot ${osx_sdk_dir}"
+            ;;
     esac
 
     # Handle Solaris variants. Solaris 10 needs -lposix4
@@ -795,7 +802,7 @@ process_common_toolchain() {
         armv8)
             soft_enable neon
             ;;
-        armv7)
+        armv7|armv7s)
             soft_enable neon
             soft_enable neon_asm
             soft_enable media
@@ -824,7 +831,7 @@ process_common_toolchain() {
             arch_int=${arch_int%%te}
             check_add_asflags --defsym ARCHITECTURE=${arch_int}
             tune_cflags="-mtune="
-            if [ ${tgt_isa} = "armv7" ]; then
+            if [ ${tgt_isa} = "armv7" ] || [ ${tgt_isa} = "armv7s" ]; then
                 if [ -z "${float_abi}" ]; then
                     check_cpp <<EOF && float_abi=hard || float_abi=softfp
 #ifndef __ARM_PCS_VFP
@@ -1164,6 +1171,12 @@ EOF
                 # enabled icc && ! enabled pic && add_cflags -fno-pic -mdynamic-no-pic
                 enabled icc && ! enabled pic && add_cflags -fno-pic
             ;;
+            iphonesimulator)
+                add_asflags -f macho${bits}
+                enabled x86 && sim_arch="-arch i386" || sim_arch="-arch x86_64"
+                add_cflags  ${sim_arch}
+                add_ldflags ${sim_arch}
+           ;;
             os2)
                 add_asflags -f aout
                 enabled debug && add_asflags -g

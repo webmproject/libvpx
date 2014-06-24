@@ -8,7 +8,6 @@ text vpx_codec_get_preview_frame
 text vpx_codec_set_cx_data_buf
 text vpx_svc_dump_statistics
 text vpx_svc_encode
-text vpx_svc_free
 text vpx_svc_get_buffer
 text vpx_svc_get_encode_frame_count
 text vpx_svc_get_frame_size

@@ -29,6 +29,7 @@ struct macroblock_plane {
   struct buf_2d src;
 
   // Quantizer setings
+  int16_t *quant_fp;
   int16_t *quant;
   int16_t *quant_shift;
   int16_t *zbin;
@@ -49,7 +50,7 @@ struct macroblock {
 
   MACROBLOCKD e_mbd;
   int skip_block;
-  int select_txfm_size;
+  int select_tx_size;
   int skip_recode;
   int skip_optimize;
   int q_index;
@@ -106,10 +107,19 @@ struct macroblock {
   int use_lp32x32fdct;
   int skip_encode;
 
+  // skip forward transform and quantization
+  int skip_txfm;
+
   // Used to store sub partition's choices.
   MV pred_mv[MAX_REF_FRAMES];
 
   void (*fwd_txm4x4)(const int16_t *input, tran_low_t *output, int stride);
+  void (*itxm_add)(const tran_low_t *input, uint8_t *dest, int stride, int eob);
+
+#if CONFIG_VP9_HIGH
+  void (*high_itxm_add)(const tran_low_t *input, uint8_t *dest, int stride,
+                        int eob, int bps);
+#endif
 };
 
 #ifdef __cplusplus

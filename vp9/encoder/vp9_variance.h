@@ -43,15 +43,13 @@ void high_12_variance(const uint8_t *a8, int a_stride,
 typedef unsigned int(*vp9_sad_fn_t)(const uint8_t *src_ptr,
                                     int source_stride,
                                     const uint8_t *ref_ptr,
-                                    int ref_stride,
-                                    unsigned int max_sad);
+                                    int ref_stride);
 
 typedef unsigned int(*vp9_sad_avg_fn_t)(const uint8_t *src_ptr,
                                         int source_stride,
                                         const uint8_t *ref_ptr,
                                         int ref_stride,
-                                        const uint8_t *second_pred,
-                                        unsigned int max_sad);
+                                        const uint8_t *second_pred);
 
 typedef void (*vp9_sad_multi_fn_t)(const uint8_t *src_ptr,
                                    int source_stride,

@@ -78,7 +78,9 @@ generate_filter() {
             if [ "${f##*.}" == "$pat" ]; then
                 unset file_list[i]
 
-                objf=$(echo ${f%.*}.obj | sed -e 's/^[\./]\+//g' -e 's,[:/],_,g')
+                objf=$(echo ${f%.*}.obj \
+                       | sed -e "s,$src_path_bare,," \
+                             -e 's/^[\./]\+//g' -e 's,[:/ ],_,g')
 
                 if ([ "$pat" == "asm" ] || [ "$pat" == "s" ]) && $asm_use_custom_step; then
                     # Avoid object file name collisions, i.e. vpx_config.c and
@@ -155,7 +157,9 @@ for opt in "$@"; do
         ;;
         --lib) proj_kind="lib"
         ;;
-        --src-path-bare=*) src_path_bare=$(fix_path "$optval")
+        --src-path-bare=*)
+            src_path_bare=$(fix_path "$optval")
+            src_path_bare=${src_path_bare%/}
         ;;
         --static-crt) use_static_runtime=true
         ;;
@@ -171,11 +175,11 @@ for opt in "$@"; do
             esac
         ;;
         -I*)
-            opt="${opt%/}"
             opt=${opt##-I}
             opt=$(fix_path "$opt")
+            opt="${opt%/}"
             incs="${incs}${incs:+;}&quot;${opt}&quot;"
-            yasmincs="${yasmincs} -I${opt}"
+            yasmincs="${yasmincs} -I&quot;${opt}&quot;"
         ;;
         -D*) defines="${defines}${defines:+;}${opt##-D}"
         ;;
@@ -196,7 +200,8 @@ for opt in "$@"; do
         -*) die_unknown $opt
         ;;
         *)
-            file_list[${#file_list[@]}]="$(fix_path $opt)"
+            # The paths in file_list are fixed outside of the loop.
+            file_list[${#file_list[@]}]="$opt"
             case "$opt" in
                  *.asm|*.s) uses_asm=true
                  ;;
@@ -204,6 +209,10 @@ for opt in "$@"; do
         ;;
     esac
 done
+
+# Make one call to fix_path for file_list to improve performance.
+fix_file_list
+
 outfile=${outfile:-/dev/stdout}
 guid=${guid:-`generate_uuid`}
 asm_use_custom_step=false
@@ -392,7 +401,7 @@ generate_vcxproj() {
                     hostplat=Win32
                 fi
                 open_tag PreBuildEvent
-                tag_content Command "call obj_int_extract.bat $src_path_bare $hostplat\\\$(Configuration)"
+                tag_content Command "call obj_int_extract.bat &quot;$src_path_bare&quot; $hostplat\\\$(Configuration)"
                 close_tag PreBuildEvent
             fi
             open_tag ClCompile

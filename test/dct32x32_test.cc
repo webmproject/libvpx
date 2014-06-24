@@ -210,12 +210,13 @@ TEST_P(Trans32x32Test, MemCheck) {
       input_block[j] = (rnd.Rand16() & mask_) - (rnd.Rand16() & mask_);
       input_extreme_block[j] = rnd.Rand8() & 1 ? mask_ : -mask_;
     }
-    if (i == 0)
+    if (i == 0) {
       for (int j = 0; j < kNumCoeffs; ++j)
         input_extreme_block[j] = mask_;
-    if (i == 1)
+    } else if (i == 1) {
       for (int j = 0; j < kNumCoeffs; ++j)
         input_extreme_block[j] = -mask_;
+    }
 
     const int stride = 32;
     vp9_fdct32x32_c(input_extreme_block, output_ref_block, stride);

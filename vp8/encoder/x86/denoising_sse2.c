@@ -112,9 +112,70 @@ int vp8_denoiser_filter_sse2(unsigned char *mc_running_avg_y,
 
         sum_diff_thresh = SUM_DIFF_THRESHOLD;
         if (increase_denoising) sum_diff_thresh = SUM_DIFF_THRESHOLD_HIGH;
-        if (abs(sum_diff) > sum_diff_thresh)
-        {
+        if (abs(sum_diff) > sum_diff_thresh) {
+          // Before returning to copy the block (i.e., apply no denoising),
+          // checK if we can still apply some (weaker) temporal filtering to
+          // this block, that would otherwise not be denoised at all. Simplest
+          // is to apply an additional adjustment to running_avg_y to bring it
+          // closer to sig. The adjustment is capped by a maximum delta, and
+          // chosen such that in most cases the resulting sum_diff will be
+          // within the accceptable range given by sum_diff_thresh.
+
+          // The delta is set by the excess of absolute pixel diff over the
+          // threshold.
+          int delta = ((abs(sum_diff) - sum_diff_thresh) >> 8) + 1;
+          // Only apply the adjustment for max delta up to 3.
+          if (delta < 4) {
+            const __m128i k_delta = _mm_set1_epi8(delta);
+            sig -= sig_stride * 16;
+            mc_running_avg_y -= mc_avg_y_stride * 16;
+            running_avg_y -= avg_y_stride * 16;
+            for (r = 0; r < 16; ++r) {
+              __m128i v_running_avg_y =
+                  _mm_loadu_si128((__m128i *)(&running_avg_y[0]));
+              // Calculate differences.
+              const __m128i v_sig = _mm_loadu_si128((__m128i *)(&sig[0]));
+              const __m128i v_mc_running_avg_y =
+                  _mm_loadu_si128((__m128i *)(&mc_running_avg_y[0]));
+              const __m128i pdiff = _mm_subs_epu8(v_mc_running_avg_y, v_sig);
+              const __m128i ndiff = _mm_subs_epu8(v_sig, v_mc_running_avg_y);
+              // Obtain the sign. FF if diff is negative.
+              const __m128i diff_sign = _mm_cmpeq_epi8(pdiff, k_0);
+              // Clamp absolute difference to delta to get the adjustment.
+              const __m128i adj =
+                  _mm_min_epu8(_mm_or_si128(pdiff, ndiff), k_delta);
+              // Restore the sign and get positive and negative adjustments.
+              __m128i padj, nadj;
+              padj = _mm_andnot_si128(diff_sign, adj);
+              nadj = _mm_and_si128(diff_sign, adj);
+              // Calculate filtered value.
+              v_running_avg_y = _mm_subs_epu8(v_running_avg_y, padj);
+              v_running_avg_y = _mm_adds_epu8(v_running_avg_y, nadj);
+             _mm_storeu_si128((__m128i *)running_avg_y, v_running_avg_y);
+
+             // Accumulate the adjustments.
+             acc_diff = _mm_subs_epi8(acc_diff, padj);
+             acc_diff = _mm_adds_epi8(acc_diff, nadj);
+
+             // Update pointers for next iteration.
+             sig += sig_stride;
+             mc_running_avg_y += mc_avg_y_stride;
+             running_avg_y += avg_y_stride;
+            }
+            {
+              // Update the sum of all pixel differences of this MB.
+              union sum_union s;
+              s.v = acc_diff;
+              sum_diff = s.e[0] + s.e[1] + s.e[2] + s.e[3] + s.e[4] + s.e[5]
+                       + s.e[6] + s.e[7] + s.e[8] + s.e[9] + s.e[10] + s.e[11]
+                       + s.e[12] + s.e[13] + s.e[14] + s.e[15];
+              if (abs(sum_diff) > sum_diff_thresh) {
+                return COPY_BLOCK;
+              }
+            }
+          } else {
             return COPY_BLOCK;
+          }
         }
     }
 

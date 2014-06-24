@@ -177,12 +177,13 @@ class Trans4x4TestBase {
         input_block[j] = (rnd.Rand16() & mask_) - (rnd.Rand16() & mask_);
         input_extreme_block[j] = rnd.Rand8() % 2 ? mask_ : -mask_;
       }
-      if (i == 0)
+      if (i == 0) {
         for (int j = 0; j < kNumCoeffs; ++j)
           input_extreme_block[j] = mask_;
-      if (i == 1)
+      } else if (i == 1) {
         for (int j = 0; j < kNumCoeffs; ++j)
           input_extreme_block[j] = -mask_;
+      }
 
       fwd_txfm_ref(input_extreme_block, output_ref_block, pitch_, tx_type_);
       REGISTER_STATE_CHECK(RunFwdTxfm(input_extreme_block,
@@ -465,6 +466,21 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_fht4x4_sse2, &vp9_iht4x4_16_add_sse2, 1, 8),
         make_tuple(&vp9_fht4x4_sse2, &vp9_iht4x4_16_add_sse2, 2, 8),
         make_tuple(&vp9_fht4x4_sse2, &vp9_iht4x4_16_add_sse2, 3, 8)));
+#endif
+
+#if HAVE_AVX2 && !CONFIG_HIGH_TRANSFORMS
+INSTANTIATE_TEST_CASE_P(
+    AVX2, Trans4x4DCT,
+    ::testing::Values(
+        make_tuple(&vp9_fdct4x4_avx2,
+                   &vp9_idct4x4_16_add_c, 0, 8)));
+INSTANTIATE_TEST_CASE_P(
+    AVX2, Trans4x4HT,
+    ::testing::Values(
+        make_tuple(&vp9_fht4x4_avx2, &vp9_iht4x4_16_add_c, 0, 8),
+        make_tuple(&vp9_fht4x4_avx2, &vp9_iht4x4_16_add_c, 1, 8),
+        make_tuple(&vp9_fht4x4_avx2, &vp9_iht4x4_16_add_c, 2, 8),
+        make_tuple(&vp9_fht4x4_avx2, &vp9_iht4x4_16_add_c, 3, 8)));
 #endif
 
 }  // namespace
