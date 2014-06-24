@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//jkY\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 1218,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-06-24T17:46:22Z",
+      "side": 1,
+      "message": "Can cpi-\u003eskippable_frame be initialized in vp9_create_compressor() instead of doing that in several functions?",
+      "revId": "3aa29fa41bcf4ec4313597de3208a9240042b9ee",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
