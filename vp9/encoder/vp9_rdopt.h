@@ -155,6 +155,16 @@ int64_t vp9_rd_pick_inter_mode_sb(struct VP9_COMP *cpi, struct macroblock *x,
                                   PICK_MODE_CONTEXT *ctx,
                                   int64_t best_rd_so_far);
 
+int64_t vp9_rd_pick_inter_mode_sb_seg_skip(struct VP9_COMP *cpi,
+                                           struct macroblock *x,
+                                           const TileInfo *const tile,
+                                           int mi_row, int mi_col,
+                                           int *returnrate,
+                                           int64_t *returndistortion,
+                                           BLOCK_SIZE bsize,
+                                           PICK_MODE_CONTEXT *ctx,
+                                           int64_t best_rd_so_far);
+
 int64_t vp9_rd_pick_inter_mode_sub8x8(struct VP9_COMP *cpi,
                                       struct macroblock *x,
                                       const struct TileInfo *const tile,

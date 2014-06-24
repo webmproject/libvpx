@@ -821,12 +821,18 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
     vp9_rd_pick_intra_mode_sb(cpi, x, totalrate, totaldist, bsize, ctx,
                               best_rd);
   } else {
-    if (bsize >= BLOCK_8X8)
-      vp9_rd_pick_inter_mode_sb(cpi, x, tile, mi_row, mi_col,
-                                totalrate, totaldist, bsize, ctx, best_rd);
-    else
+    if (bsize >= BLOCK_8X8) {
+      if (vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP))
+        vp9_rd_pick_inter_mode_sb_seg_skip(cpi, x, tile, mi_row, mi_col,
+                                           totalrate, totaldist, bsize, ctx,
+                                           best_rd);
+      else
+        vp9_rd_pick_inter_mode_sb(cpi, x, tile, mi_row, mi_col,
+                                  totalrate, totaldist, bsize, ctx, best_rd);
+    } else {
       vp9_rd_pick_inter_mode_sub8x8(cpi, x, tile, mi_row, mi_col, totalrate,
                                     totaldist, bsize, ctx, best_rd);
+    }
   }
 
   x->rdmult = orig_rdmult;
