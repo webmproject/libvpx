@@ -27,6 +27,85 @@
 #include "vp9/encoder/vp9_ratectrl.h"
 #include "vp9/encoder/vp9_rdopt.h"
 
+static int mv_refs_rt(const VP9_COMMON *cm, const MACROBLOCKD *xd,
+                       const TileInfo *const tile,
+                       MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
+                       int_mv *mv_ref_list,
+                       int mi_row, int mi_col) {
+  const int *ref_sign_bias = cm->ref_frame_sign_bias;
+  int i, refmv_count = 0;
+
+  const POSITION *const mv_ref_search = mv_ref_blocks[mi->mbmi.sb_type];
+
+  int different_ref_found = 0;
+  int context_counter = 0;
+  int const_motion = 0;
+
+  // Blank the reference vector list
+  vpx_memset(mv_ref_list, 0, sizeof(*mv_ref_list) * MAX_MV_REF_CANDIDATES);
+
+  // The nearest 2 blocks are treated differently
+  // if the size < 8x8 we get the mv from the bmi substructure,
+  // and we also need to keep a mode count.
+  for (i = 0; i < 2; ++i) {
+    const POSITION *const mv_ref = &mv_ref_search[i];
+    if (is_inside(tile, mi_col, mi_row, cm->mi_rows, mv_ref)) {
+      const MODE_INFO *const candidate_mi = xd->mi[mv_ref->col + mv_ref->row *
+                                                   xd->mi_stride];
+      const MB_MODE_INFO *const candidate = &candidate_mi->mbmi;
+      // Keep counts for entropy encoding.
+      context_counter += mode_2_counter[candidate->mode];
+      different_ref_found = 1;
+
+      if (candidate->ref_frame[0] == ref_frame)
+        ADD_MV_REF_LIST(get_sub_block_mv(candidate_mi, 0, mv_ref->col, -1));
+    }
+  }
+
+  const_motion = 1;
+
+  // Check the rest of the neighbors in much the same way
+  // as before except we don't need to keep track of sub blocks or
+  // mode counts.
+  for (; i < MVREF_NEIGHBOURS && !refmv_count; ++i) {
+    const POSITION *const mv_ref = &mv_ref_search[i];
+    if (is_inside(tile, mi_col, mi_row, cm->mi_rows, mv_ref)) {
+      const MB_MODE_INFO *const candidate = &xd->mi[mv_ref->col + mv_ref->row *
+                                                    xd->mi_stride]->mbmi;
+      different_ref_found = 1;
+
+      if (candidate->ref_frame[0] == ref_frame)
+        ADD_MV_REF_LIST(candidate->mv[0]);
+    }
+  }
+
+  // Since we couldn't find 2 mvs from the same reference frame
+  // go back through the neighbors and find motion vectors from
+  // different reference frames.
+  if (different_ref_found && !refmv_count) {
+    for (i = 0; i < MVREF_NEIGHBOURS; ++i) {
+      const POSITION *mv_ref = &mv_ref_search[i];
+      if (is_inside(tile, mi_col, mi_row, cm->mi_rows, mv_ref)) {
+        const MB_MODE_INFO *const candidate = &xd->mi[mv_ref->col + mv_ref->row
+                                              * xd->mi_stride]->mbmi;
+
+        // If the candidate is INTRA we don't want to consider its mv.
+        IF_DIFF_REF_FRAME_ADD_MV(candidate);
+      }
+    }
+  }
+
+ Done:
+
+  mi->mbmi.mode_context[ref_frame] = counter_to_context[context_counter];
+
+  // Clamp vectors
+  for (i = 0; i < MAX_MV_REF_CANDIDATES; ++i)
+    clamp_mv_ref(&mv_ref_list[i].as_mv, xd);
+
+  return const_motion;
+}
+
 static void full_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                     BLOCK_SIZE bsize, int mi_row, int mi_col,
                                     int_mv *tmp_mv, int *rate_mv) {
@@ -245,6 +324,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int bsl = mi_width_log2_lookup[bsize];
   const int pred_filter_search = (((mi_row + mi_col) >> bsl) +
                                       get_chessboard_index(cm)) % 2;
+  int const_motion[MAX_REF_FRAMES] = { 0 };
 
   // For speed 6, the result of interp filter is reused later in actual encoding
   // process.
@@ -292,9 +372,27 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   for (ref_frame = LAST_FRAME; ref_frame <= LAST_FRAME ; ++ref_frame) {
     x->pred_mv_sad[ref_frame] = INT_MAX;
     if (cpi->ref_frame_flags & flag_list[ref_frame]) {
-      vp9_setup_buffer_inter(cpi, x, tile,
-                             ref_frame, bsize, mi_row, mi_col,
-                             frame_mv[NEARESTMV], frame_mv[NEARMV], yv12_mb);
+      const YV12_BUFFER_CONFIG *yv12 = get_ref_frame_buffer(cpi, ref_frame);
+      int_mv *const candidates = mbmi->ref_mvs[ref_frame];
+      const struct scale_factors *const sf = &cm->frame_refs[ref_frame - 1].sf;
+      vp9_setup_pred_block(xd, yv12_mb[ref_frame], yv12, mi_row, mi_col,
+                           sf, sf);
+
+      if (cm->coding_use_prev_mi)
+        vp9_find_mv_refs(cm, xd, tile, xd->mi[0], ref_frame,
+                         candidates, mi_row, mi_col);
+      else
+        const_motion[ref_frame] = mv_refs_rt(cm, xd, tile, xd->mi[0],
+                                             ref_frame, candidates,
+                                             mi_row, mi_col);
+
+      vp9_find_best_ref_mvs(xd, cm->allow_high_precision_mv, candidates,
+                            &frame_mv[NEARESTMV][ref_frame],
+                            &frame_mv[NEARMV][ref_frame]);
+
+      if (!vp9_is_scaled(sf) && bsize >= BLOCK_8X8)
+        vp9_mv_pred(cpi, x, yv12_mb[ref_frame][0].buf, yv12->y_stride,
+                    ref_frame, bsize);
     }
     frame_mv[NEWMV][ref_frame].as_int = INVALID_MV;
     frame_mv[ZEROMV][ref_frame].as_int = 0;
@@ -327,6 +425,10 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
     for (this_mode = NEARESTMV; this_mode <= NEWMV; ++this_mode) {
       int rate_mv = 0;
+
+      if (const_motion[ref_frame] &&
+          (this_mode == NEARMV || this_mode == ZEROMV))
+        continue;
 
       if (!(cpi->sf.inter_mode_mask[bsize] & (1 << this_mode)))
         continue;
