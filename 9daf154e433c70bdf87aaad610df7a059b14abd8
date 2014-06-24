@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//jik\u003d",
+        "filename": "test/user_priv_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-06-24T18:21:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//ji8\u003d",
+      "revId": "9daf154e433c70bdf87aaad610df7a059b14abd8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//jjA\u003d",
         "filename": "test/user_priv_test.cc",
         "patchSetId": 8
@@ -30,6 +48,24 @@
       "writtenOn": "2014-06-24T18:15:52Z",
       "side": 1,
       "message": "nit: * placements",
+      "revId": "9daf154e433c70bdf87aaad610df7a059b14abd8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//jio\u003d",
+        "filename": "test/user_priv_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-06-24T18:21:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//jjA\u003d",
       "revId": "9daf154e433c70bdf87aaad610df7a059b14abd8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
