@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//jlU\u003d",
+        "filename": "test/decode_test_driver.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-06-24T17:11:14Z",
+      "side": 1,
+      "message": "Done.\n\nOK. I revert it.",
+      "parentUuid": "AAAAdn//jmM\u003d",
+      "revId": "21fdf61c12f1b81cd84aa8314518b3849f8ddae8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//jx4\u003d",
         "filename": "test/user_priv_test.cc",
         "patchSetId": 3
