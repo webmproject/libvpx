@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//jl8\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 2264,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-06-24T16:33:49Z",
+      "side": 1,
+      "message": "This checking can only be done once for 1 frame. Could it be moved to encode frame function or vp9_rc_get_second_pass_params()?",
+      "revId": "0604af29ccadd936d6d0424776b6e0374866ccde",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//jl4\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 2334,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-06-24T16:33:49Z",
+      "side": 1,
+      "message": "Why add skip checking here? (2-pass speed 2 uses SEARCH_PARTITION.)",
+      "revId": "0604af29ccadd936d6d0424776b6e0374866ccde",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
