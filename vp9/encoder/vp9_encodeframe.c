@@ -139,42 +139,6 @@ static INLINE void set_modeinfo_offsets(VP9_COMMON *const cm,
   xd->mi[0] = cm->mi + idx_str;
 }
 
-static int is_block_in_mb_map(const VP9_COMP *cpi, int mi_row, int mi_col,
-                              BLOCK_SIZE bsize) {
-  const VP9_COMMON *const cm = &cpi->common;
-  const int mb_rows = cm->mb_rows;
-  const int mb_cols = cm->mb_cols;
-  const int mb_row = mi_row >> 1;
-  const int mb_col = mi_col >> 1;
-  const int mb_width = num_8x8_blocks_wide_lookup[bsize] >> 1;
-  const int mb_height = num_8x8_blocks_high_lookup[bsize] >> 1;
-  int r, c;
-  if (bsize <= BLOCK_16X16) {
-    return cpi->active_map[mb_row * mb_cols + mb_col];
-  }
-  for (r = 0; r < mb_height; ++r) {
-    for (c = 0; c < mb_width; ++c) {
-      int row = mb_row + r;
-      int col = mb_col + c;
-      if (row >= mb_rows || col >= mb_cols)
-        continue;
-      if (cpi->active_map[row * mb_cols + col])
-        return 1;
-    }
-  }
-  return 0;
-}
-
-static int check_active_map(const VP9_COMP *cpi, const MACROBLOCK *x,
-                            int mi_row, int mi_col,
-                            BLOCK_SIZE bsize) {
-  if (cpi->active_map_enabled && !x->e_mbd.lossless) {
-    return is_block_in_mb_map(cpi, mi_row, mi_col, bsize);
-  } else {
-    return 1;
-  }
-}
-
 static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
                         int mi_row, int mi_col, BLOCK_SIZE bsize) {
   MACROBLOCK *const x = &cpi->mb;
@@ -186,9 +150,6 @@ static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
   const struct segmentation *const seg = &cm->seg;
 
   set_skip_context(xd, mi_row, mi_col);
-
-  // Activity map pointer
-  x->in_active_map = check_active_map(cpi, x, mi_row, mi_col, bsize);
 
   set_modeinfo_offsets(cm, xd, mi_row, mi_col);
 
@@ -1513,20 +1474,8 @@ static void rd_use_partition(VP9_COMP *cpi,
   if (bsize == BLOCK_16X16) {
     set_offsets(cpi, tile, mi_row, mi_col, bsize);
     x->mb_energy = vp9_block_energy(cpi, x, bsize);
-  } else {
-    x->in_active_map = check_active_map(cpi, x, mi_row, mi_col, bsize);
   }
 
-  if (!x->in_active_map) {
-    do_partition_search = 0;
-    if (mi_row + (mi_step >> 1) < cm->mi_rows &&
-        mi_col + (mi_step >> 1) < cm->mi_cols) {
-      pc_tree->partitioning = PARTITION_NONE;
-      bs_type = mi_8x8[0]->mbmi.sb_type = bsize;
-      subsize = bsize;
-      partition = PARTITION_NONE;
-    }
-  }
   if (do_partition_search &&
       cpi->sf.partition_search_type == SEARCH_PARTITION &&
       cpi->sf.adjust_partitioning_from_last_frame) {
@@ -1989,8 +1938,6 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
   if (bsize == BLOCK_16X16) {
     set_offsets(cpi, tile, mi_row, mi_col, bsize);
     x->mb_energy = vp9_block_energy(cpi, x, bsize);
-  } else {
-    x->in_active_map = check_active_map(cpi, x, mi_row, mi_col, bsize);
   }
   // Determine partition types in search according to the speed features.
   // The threshold set here has to be of square block size.
@@ -2023,8 +1970,6 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     }
   }
 
-  if (!x->in_active_map && (partition_horz_allowed || partition_vert_allowed))
-    do_split = 0;
   // PARTITION_NONE
   if (partition_none_allowed) {
     rd_pick_sb_modes(cpi, tile, mi_row, mi_col, &this_rate, &this_dist, bsize,
@@ -2057,10 +2002,6 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
           do_rect = 0;
         }
       }
-    }
-    if (!x->in_active_map) {
-      do_split = 0;
-      do_rect = 0;
     }
     restore_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
   }
@@ -2591,8 +2532,6 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
   assert(num_8x8_blocks_wide_lookup[bsize] ==
              num_8x8_blocks_high_lookup[bsize]);
 
-  x->in_active_map = check_active_map(cpi, x, mi_row, mi_col, bsize);
-
   // Determine partition types in search according to the speed features.
   // The threshold set here has to be of square block size.
   if (cpi->sf.auto_min_max_partition_size) {
@@ -2610,9 +2549,6 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     partition_horz_allowed &= force_horz_split;
     partition_vert_allowed &= force_vert_split;
   }
-
-  if (!x->in_active_map && (partition_horz_allowed || partition_vert_allowed))
-    do_split = 0;
 
   // PARTITION_NONE
   if (partition_none_allowed) {
@@ -2648,10 +2584,6 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
           do_rect = 0;
         }
       }
-    }
-    if (!x->in_active_map) {
-      do_split = 0;
-      do_rect = 0;
     }
   }
 

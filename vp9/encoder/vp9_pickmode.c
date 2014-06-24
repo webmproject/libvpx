@@ -370,9 +370,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
       // Skipping checking: test to see if this block can be reconstructed by
       // prediction only.
-      if (!x->in_active_map) {
-        x->skip = 1;
-      } else if (cpi->allow_encode_breakout && x->encode_breakout) {
+      if (cpi->allow_encode_breakout && x->encode_breakout) {
         const BLOCK_SIZE uv_size = get_plane_block_size(bsize, &xd->plane[1]);
         unsigned int var = var_y, sse = sse_y;
         // Skipping threshold for ac.

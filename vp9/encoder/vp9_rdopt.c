@@ -2791,12 +2791,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     *rate2 += vp9_get_switchable_rate(cpi);
 
   if (!is_comp_pred) {
-    if (!x->in_active_map) {
-      if (psse)
-        *psse = 0;
-      *distortion = 0;
-      x->skip = 1;
-    } else if (cpi->allow_encode_breakout && x->encode_breakout) {
+    if (cpi->allow_encode_breakout && x->encode_breakout) {
       const BLOCK_SIZE y_size = get_plane_block_size(bsize, &xd->plane[0]);
       const BLOCK_SIZE uv_size = get_plane_block_size(bsize, &xd->plane[1]);
       unsigned int var, sse;
@@ -3143,21 +3138,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     mode_skip_mask |= all_intra_modes;
   }
 
-  if (!x->in_active_map) {
-    int mode_index;
-    assert(cpi->ref_frame_flags & VP9_LAST_FLAG);
-    if (frame_mv[NEARESTMV][LAST_FRAME].as_int == 0)
-      mode_index = THR_NEARESTMV;
-    else if (frame_mv[NEARMV][LAST_FRAME].as_int == 0)
-      mode_index = THR_NEARMV;
-    else
-      mode_index = THR_ZEROMV;
-    mode_skip_mask = ~(1 << mode_index);
-    mode_skip_start = MAX_MODES;
-    inter_mode_mask = (1 << NEARESTMV) | (1 << NEARMV) | (1 << ZEROMV) |
-                      (1 << NEWMV);
-  }
-
   for (mode_index = 0; mode_index < MAX_MODES; ++mode_index) {
     int mode_excluded = 0;
     int64_t this_rd = INT64_MAX;
@@ -3247,16 +3227,14 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         }
       }
     } else {
-      if (x->in_active_map) {
-        const MV_REFERENCE_FRAME ref_frames[2] = {ref_frame, second_ref_frame};
-        if (!check_best_zero_mv(cpi, mbmi->mode_context, frame_mv,
-                                inter_mode_mask, this_mode, ref_frames))
-          continue;
-      }
+      const MV_REFERENCE_FRAME ref_frames[2] = {ref_frame, second_ref_frame};
+      if (!check_best_zero_mv(cpi, mbmi->mode_context, frame_mv,
+                              inter_mode_mask, this_mode, ref_frames))
+        continue;
     }
 
     mbmi->mode = this_mode;
-    mbmi->uv_mode = x->in_active_map ? DC_PRED : this_mode;
+    mbmi->uv_mode = DC_PRED;
     mbmi->ref_frame[0] = ref_frame;
     mbmi->ref_frame[1] = second_ref_frame;
     // Evaluate all sub-pel filters irrespective of whether we can use
@@ -3563,16 +3541,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   } else {
     vp9_zero(best_filter_diff);
     vp9_zero(best_tx_diff);
-  }
-
-  if (!x->in_active_map) {
-    assert(mbmi->ref_frame[0] == LAST_FRAME);
-    assert(mbmi->ref_frame[1] == NONE);
-    assert(mbmi->mode == NEARESTMV ||
-           mbmi->mode == NEARMV ||
-           mbmi->mode == ZEROMV);
-    assert(frame_mv[mbmi->mode][LAST_FRAME].as_int == 0);
-    assert(mbmi->mode == mbmi->uv_mode);
   }
 
   set_ref_ptrs(cm, xd, mbmi->ref_frame[0], mbmi->ref_frame[1]);
