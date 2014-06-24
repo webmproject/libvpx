@@ -16,6 +16,24 @@
       "revId": "fd2f7e24059da0ebeb24005cdec427fc97fb0989",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//jtk\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 1227,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-06-24T00:23:55Z",
+      "side": 1,
+      "message": "Doh. ${var:pos:len} is a bashism. Anyway, that aside, does this make sense or am I off?",
+      "parentUuid": "AAAAdn//jt8\u003d",
+      "revId": "fd2f7e24059da0ebeb24005cdec427fc97fb0989",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
