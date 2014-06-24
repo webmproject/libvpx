@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//jlo\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-06-24T16:47:58Z",
+      "side": 1,
+      "message": "It is possible that NEARESTMV and NEARMV modes are also giving zero motion vector.\n\nOne possibility is to compare the effective motion vector instead of prediction mode. Like mbmi-\u003emv[0].as_int \u003d\u003d 0 for zero motion vector.",
+      "revId": "bd2b1e2e88327a91f1983dc0b1981144669c89a3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
