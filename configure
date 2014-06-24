@@ -276,6 +276,7 @@ EXPERIMENT_LIST="
     high_transforms
     high_quant
     denoising
+    emulate_hw_high
 "
 CONFIG_LIST="
     external_build

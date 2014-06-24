@@ -98,6 +98,14 @@ typedef struct {
   transform_1d cols, rows;  // vertical and horizontal
 } transform_2d;
 
+#if CONFIG_VP9_HIGH
+typedef void (*high_transform_1d)(const tran_low_t*, tran_low_t*, int bps);
+
+typedef struct {
+  high_transform_1d cols, rows;  // vertical and horizontal
+} high_transform_2d;
+#endif
+
 void vp9_iwht4x4_add(const tran_low_t *input, uint8_t *dest, int stride,
                      int eob);
 
