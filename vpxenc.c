@@ -2120,6 +2120,7 @@ int main(int argc, const char **argv_) {
                                       frames_in));
         }
 #else
+        vpx_usec_timer_start(&timer);
         FOREACH_STREAM(encode_frame(stream, &global,
                                     frame_avail ? &raw : NULL,
                                     frames_in));
