@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//jQg\u003d",
+        "filename": "y4minput.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1033,
+      "author": {
+        "id": 1115299
+      },
+      "writtenOn": "2014-06-25T08:53:47Z",
+      "side": 1,
+      "message": "I think this should be:\n pic_sz \u003d _y4m-\u003epic_w * _y4m-\u003epic_h * bytes_per_sample;",
+      "revId": "2313ece1961e95b4b99144c0061922a6cb876c91",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
