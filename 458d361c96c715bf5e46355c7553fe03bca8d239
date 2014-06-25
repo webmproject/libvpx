@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//i6Y\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 472,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-06-25T23:39:33Z",
+      "side": 1,
+      "message": "sf.max_intra_bsize is a speed feature setting. It skips intra prediction check on larger block sizes above the threshold.\n\nThe following module works for any block size. This condition is for speed-up control.",
+      "parentUuid": "AAAAdn//i6s\u003d",
+      "revId": "458d361c96c715bf5e46355c7553fe03bca8d239",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//i6w\u003d",
         "filename": "vp9/encoder/vp9_speed_features.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-06-25T23:24:38Z",
       "side": 1,
       "message": "The above line may not be needed anymore.",
+      "revId": "458d361c96c715bf5e46355c7553fe03bca8d239",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//i6U\u003d",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 275,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-06-25T23:39:33Z",
+      "side": 1,
+      "message": "Seems not to hurt the quality in this setting. Perhaps leave it here as for now. We can decide whether to increase it to BLOCK_16X16 later(?)",
+      "parentUuid": "AAAAdn//i6w\u003d",
       "revId": "458d361c96c715bf5e46355c7553fe03bca8d239",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
