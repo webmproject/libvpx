@@ -47,7 +47,8 @@ void DecoderTest::RunLoop(CompressedVideoSource *video) {
   const bool is_vp8 = strncmp(kVP8Name, codec_name, sizeof(kVP8Name) - 1) == 0;
 
   // Decode frames.
-  for (video->Begin(); video->cxdata(); video->Next()) {
+  for (video->Begin(); !::testing::Test::HasFailure() && video->cxdata();
+       video->Next()) {
     PreDecodeFrameHook(*video, decoder);
 
     vpx_codec_stream_info_t stream_info;
