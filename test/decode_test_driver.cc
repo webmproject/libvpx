@@ -19,7 +19,8 @@ const char kVP8Name[] = "WebM Project VP8";
 
 vpx_codec_err_t Decoder::PeekStream(const uint8_t *cxdata, size_t size,
                                     vpx_codec_stream_info_t *stream_info) {
-  return vpx_codec_peek_stream_info(CodecInterface(), cxdata, size,
+  return vpx_codec_peek_stream_info(CodecInterface(),
+                                    cxdata, static_cast<unsigned int>(size),
                                     stream_info);
 }
 
