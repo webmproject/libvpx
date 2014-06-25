@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//jMw\u003d",
+        "filename": "test/user_priv_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-25T17:47:58Z",
+      "side": 1,
+      "message": "use acm_random.h; rand_r() won\u0027t be available everywhere",
+      "revId": "0ba57df0a90c027caaf0162ffd477c7b09aa965f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
