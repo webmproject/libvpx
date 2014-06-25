@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//jW4\u003d",
+        "filename": "test/user_priv_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-06-25T00:17:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//jYA\u003d",
+      "revId": "54c039dd36521a11b7d6333fa6e6b314e7ceb0d8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//jXc\u003d",
         "filename": "test/user_priv_test.cc",
         "patchSetId": 5
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//jW8\u003d",
+        "filename": "test/user_priv_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-06-25T00:17:17Z",
+      "side": 1,
+      "message": "decoder test driver internal already has this:\nASSERT_EQ(VPX_CODEC_OK, res) \u003c\u003c DecodeError();",
+      "parentUuid": "AAAAdn//jXc\u003d",
+      "revId": "54c039dd36521a11b7d6333fa6e6b314e7ceb0d8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//jXg\u003d",
         "filename": "test/user_priv_test.cc",
         "patchSetId": 5
@@ -47,6 +83,24 @@
       "writtenOn": "2014-06-24T23:13:12Z",
       "side": 1,
       "message": "this could be a bool CheckUserPrivateData() given the code is the same as 64-69",
+      "revId": "54c039dd36521a11b7d6333fa6e6b314e7ceb0d8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//jVQ\u003d",
+        "filename": "test/user_priv_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-06-25T00:17:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//jXg\u003d",
       "revId": "54c039dd36521a11b7d6333fa6e6b314e7ceb0d8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
