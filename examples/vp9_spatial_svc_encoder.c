@@ -296,6 +296,7 @@ int main(int argc, const char **argv) {
   int frame_duration = 1; /* 1 timebase tick per frame */
   FILE *infile = NULL;
   int end_of_stream = 0;
+  int frame_size;
 
   memset(&svc_ctx, 0, sizeof(svc_ctx));
   svc_ctx.log_print = 1;
@@ -351,11 +352,10 @@ int main(int argc, const char **argv) {
       die_codec(&codec, "Failed to encode frame");
     }
     if (!(app_input.passes == 2 && app_input.pass == 1)) {
-      if (vpx_svc_get_frame_size(&svc_ctx) > 0) {
+      while ((frame_size = vpx_svc_get_frame_size(&svc_ctx)) > 0) {
         vpx_video_writer_write_frame(writer,
                                      vpx_svc_get_buffer(&svc_ctx),
-                                     vpx_svc_get_frame_size(&svc_ctx),
-                                     pts);
+                                     frame_size, pts);
       }
     }
     if (vpx_svc_get_rc_stats_buffer_size(&svc_ctx) > 0) {
