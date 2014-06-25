@@ -22,6 +22,11 @@ extern "C" {
 #define SUM_DIFF_THRESHOLD_HIGH (16 * 16 * 3)
 #define MOTION_MAGNITUDE_THRESHOLD (8*3)
 
+#define SUM_DIFF_THRESHOLD_UV (96)   // (8 * 8 * 1.5)
+#define SUM_DIFF_THRESHOLD_HIGH_UV (8 * 8 * 2)
+#define SUM_DIFF_FROM_AVG_THRESH_UV (8 * 8 * 4)
+#define MOTION_MAGNITUDE_THRESHOLD_UV (8*3)
+
 enum vp8_denoiser_decision
 {
   COPY_BLOCK,
