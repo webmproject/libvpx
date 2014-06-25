@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//jIw\u003d",
+        "filename": "test/user_priv_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-06-25T18:25:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//jKo\u003d",
+      "revId": "93581690e8fe843464bdfba4b28d6f42a9dca2bd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//jI8\u003d",
         "filename": "test/user_priv_test.cc",
         "patchSetId": 10
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//jIs\u003d",
+        "filename": "test/user_priv_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-06-25T18:25:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//jI8\u003d",
+      "revId": "93581690e8fe843464bdfba4b28d6f42a9dca2bd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//jKg\u003d",
         "filename": "test/user_priv_test.cc",
         "patchSetId": 10
@@ -47,6 +83,24 @@
       "writtenOn": "2014-06-25T18:15:43Z",
       "side": 1,
       "message": "move this out of the loop otherwise you\u0027ll get the same value using the deterministic seed.",
+      "revId": "93581690e8fe843464bdfba4b28d6f42a9dca2bd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//jIo\u003d",
+        "filename": "test/user_priv_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-06-25T18:25:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//jKg\u003d",
       "revId": "93581690e8fe843464bdfba4b28d6f42a9dca2bd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
