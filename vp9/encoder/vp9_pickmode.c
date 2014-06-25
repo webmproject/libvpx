@@ -439,29 +439,35 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
       // Skipping checking: test to see if this block can be reconstructed by
       // prediction only.
-      if (cpi->allow_encode_breakout && x->encode_breakout) {
+      if (cpi->allow_encode_breakout) {
         const BLOCK_SIZE uv_size = get_plane_block_size(bsize, &xd->plane[1]);
         unsigned int var = var_y, sse = sse_y;
         // Skipping threshold for ac.
         unsigned int thresh_ac;
         // Skipping threshold for dc.
         unsigned int thresh_dc;
-        // Set a maximum for threshold to avoid big PSNR loss in low bit rate
-        // case. Use extreme low threshold for static frames to limit skipping.
-        const unsigned int max_thresh = 36000;
-        // The encode_breakout input
-        const unsigned int min_thresh =
-            MIN(((unsigned int)x->encode_breakout << 4), max_thresh);
+        if (x->encode_breakout > 0) {
+          // Set a maximum for threshold to avoid big PSNR loss in low bit rate
+          // case. Use extreme low threshold for static frames to limit
+          // skipping.
+          const unsigned int max_thresh = 36000;
+          // The encode_breakout input
+          const unsigned int min_thresh =
+              MIN(((unsigned int)x->encode_breakout << 4), max_thresh);
 
-        // Calculate threshold according to dequant value.
-        thresh_ac = (xd->plane[0].dequant[1] * xd->plane[0].dequant[1]) / 9;
-        thresh_ac = clamp(thresh_ac, min_thresh, max_thresh);
+          // Calculate threshold according to dequant value.
+          thresh_ac = (xd->plane[0].dequant[1] * xd->plane[0].dequant[1]) / 9;
+          thresh_ac = clamp(thresh_ac, min_thresh, max_thresh);
 
-        // Adjust ac threshold according to partition size.
-        thresh_ac >>= 8 - (b_width_log2_lookup[bsize] +
-            b_height_log2_lookup[bsize]);
+          // Adjust ac threshold according to partition size.
+          thresh_ac >>=
+              8 - (b_width_log2_lookup[bsize] + b_height_log2_lookup[bsize]);
 
-        thresh_dc = (xd->plane[0].dequant[0] * xd->plane[0].dequant[0] >> 6);
+          thresh_dc = (xd->plane[0].dequant[0] * xd->plane[0].dequant[0] >> 6);
+        } else {
+          thresh_ac = 0;
+          thresh_dc = 0;
+        }
 
         // Y skipping condition checking for ac and dc.
         if (var <= thresh_ac && (sse - var) <= thresh_dc) {
