@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//jTU\u003d",
+        "filename": "test/user_priv_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-25T03:22:37Z",
+      "side": 1,
+      "message": "this should be (expected, actual)",
+      "revId": "f706cd2eb2db1967c15ece053a9e2217f135e0f5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//jTQ\u003d",
+        "filename": "test/user_priv_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-25T03:22:37Z",
+      "side": 1,
+      "message": "here too",
+      "revId": "f706cd2eb2db1967c15ece053a9e2217f135e0f5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//jTY\u003d",
+        "filename": "test/user_priv_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-25T03:22:37Z",
+      "side": 1,
+      "message": "I think this malloc was for testing",
+      "revId": "f706cd2eb2db1967c15ece053a9e2217f135e0f5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
