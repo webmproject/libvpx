@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//jOY\u003d",
+        "filename": "test/user_priv_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-06-25T16:24:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//jTU\u003d",
+      "revId": "f706cd2eb2db1967c15ece053a9e2217f135e0f5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//jTQ\u003d",
         "filename": "test/user_priv_test.cc",
         "patchSetId": 6
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//jOc\u003d",
+        "filename": "test/user_priv_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-06-25T16:24:59Z",
+      "side": 1,
+      "message": "Delete this check as it is not needed. If the previous address checked is passed, this one must be true too.",
+      "parentUuid": "AAAAdn//jTQ\u003d",
+      "revId": "f706cd2eb2db1967c15ece053a9e2217f135e0f5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//jTY\u003d",
         "filename": "test/user_priv_test.cc",
         "patchSetId": 6
@@ -47,6 +83,24 @@
       "writtenOn": "2014-06-25T03:22:37Z",
       "side": 1,
       "message": "I think this malloc was for testing",
+      "revId": "f706cd2eb2db1967c15ece053a9e2217f135e0f5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//jOU\u003d",
+        "filename": "test/user_priv_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-06-25T16:24:59Z",
+      "side": 1,
+      "message": "Done. My bad. Forgot to change it back.",
+      "parentUuid": "AAAAdn//jTY\u003d",
       "revId": "f706cd2eb2db1967c15ece053a9e2217f135e0f5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
