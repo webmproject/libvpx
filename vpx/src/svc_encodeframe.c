@@ -197,23 +197,6 @@ static int svc_log(SvcContext *svc_ctx, SVC_LOG_LEVEL level,
   return retval;
 }
 
-static vpx_codec_err_t set_option_encoding_mode(SvcContext *svc_ctx,
-                                                const char *value_str) {
-  if (strcmp(value_str, "i") == 0) {
-    svc_ctx->encoding_mode = INTER_LAYER_PREDICTION_I;
-  } else if (strcmp(value_str, "alt-ip") == 0) {
-    svc_ctx->encoding_mode = ALT_INTER_LAYER_PREDICTION_IP;
-  } else if (strcmp(value_str, "ip") == 0) {
-    svc_ctx->encoding_mode = INTER_LAYER_PREDICTION_IP;
-  } else if (strcmp(value_str, "gf") == 0) {
-    svc_ctx->encoding_mode = USE_GOLDEN_FRAME;
-  } else {
-    svc_log(svc_ctx, SVC_LOG_ERROR, "invalid encoding mode: %s", value_str);
-    return VPX_CODEC_INVALID_PARAM;
-  }
-  return VPX_CODEC_OK;
-}
-
 static vpx_codec_err_t parse_quantizer_values(SvcContext *svc_ctx,
                                               const char *quantizer_values,
                                               const int is_keyframe) {
@@ -359,10 +342,7 @@ static vpx_codec_err_t parse_options(SvcContext *svc_ctx, const char *options) {
       res = VPX_CODEC_INVALID_PARAM;
       break;
     }
-    if (strcmp("encoding-mode", option_name) == 0) {
-      res = set_option_encoding_mode(svc_ctx, option_value);
-      if (res != VPX_CODEC_OK) break;
-    } else if (strcmp("layers", option_name) == 0) {
+    if (strcmp("layers", option_name) == 0) {
       svc_ctx->spatial_layers = atoi(option_value);
     } else if (strcmp("scale-factors", option_name) == 0) {
       res = parse_scale_factors(svc_ctx, option_value);
@@ -625,62 +605,14 @@ static void calculate_enc_frame_flags(SvcContext *svc_ctx) {
     return;
   }
 
-  switch (svc_ctx->encoding_mode) {
-    case ALT_INTER_LAYER_PREDICTION_IP:
-      if (si->layer == 0) {
-        flags = map_vp8_flags(USE_LAST | UPDATE_LAST);
-      } else if (is_keyframe) {
-        if (si->layer == si->layers - 1) {
-          flags = map_vp8_flags(USE_ARF | UPDATE_LAST);
-        } else {
-          flags = map_vp8_flags(USE_ARF | UPDATE_LAST | UPDATE_GF);
-        }
-      } else {
-        flags = map_vp8_flags(USE_LAST | USE_ARF | UPDATE_LAST);
-      }
-      break;
-    case INTER_LAYER_PREDICTION_I:
-      if (si->layer == 0) {
-        flags = map_vp8_flags(USE_LAST | UPDATE_LAST);
-      } else if (is_keyframe) {
-        flags = map_vp8_flags(USE_ARF | UPDATE_LAST);
-      } else {
-        flags = map_vp8_flags(USE_LAST | UPDATE_LAST);
-      }
-      break;
-    case INTER_LAYER_PREDICTION_IP:
-      if (si->layer == 0) {
-        flags = map_vp8_flags(USE_LAST | UPDATE_LAST);
-      } else if (is_keyframe) {
-        flags = map_vp8_flags(USE_ARF | UPDATE_LAST);
-      } else {
-        flags = map_vp8_flags(USE_LAST | USE_ARF | UPDATE_LAST);
-      }
-      break;
-    case USE_GOLDEN_FRAME:
-      if (2 * si->layers - SVC_REFERENCE_FRAMES <= si->layer) {
-        if (si->layer == 0) {
-          flags = map_vp8_flags(USE_LAST | USE_GF | UPDATE_LAST);
-        } else if (is_keyframe) {
-          flags = map_vp8_flags(USE_ARF | UPDATE_LAST | UPDATE_GF);
-        } else {
-          flags = map_vp8_flags(USE_LAST | USE_ARF | USE_GF | UPDATE_LAST);
-        }
-      } else {
-        if (si->layer == 0) {
-          flags = map_vp8_flags(USE_LAST | UPDATE_LAST);
-        } else if (is_keyframe) {
-          flags = map_vp8_flags(USE_ARF | UPDATE_LAST);
-        } else {
-          flags = map_vp8_flags(USE_LAST | UPDATE_LAST);
-        }
-      }
-      break;
-    default:
-      svc_log(svc_ctx, SVC_LOG_ERROR, "unexpected encoding mode: %d\n",
-              svc_ctx->encoding_mode);
-      break;
+  if (si->layer == 0) {
+    flags = map_vp8_flags(USE_LAST | UPDATE_LAST);
+  } else if (is_keyframe) {
+    flags = map_vp8_flags(USE_ARF | UPDATE_LAST);
+  } else {
+    flags = map_vp8_flags(USE_LAST | USE_ARF | UPDATE_LAST);
   }
+
   si->enc_frame_flags = flags;
 }
 
@@ -726,13 +658,6 @@ static void set_svc_parameters(SvcContext *svc_ctx,
   svc_params.flags = si->enc_frame_flags;
 
   layer = si->layer;
-  if (svc_ctx->encoding_mode == ALT_INTER_LAYER_PREDICTION_IP &&
-      si->frame_within_gop == 0) {
-    // layers 1 & 3 don't exist in this mode, use the higher one
-    if (layer == 0 || layer == 2) {
-      layer += 1;
-    }
-  }
   if (VPX_CODEC_OK != vpx_svc_get_layer_resolution(svc_ctx, layer,
                                                    &svc_params.width,
                                                    &svc_params.height)) {
@@ -759,21 +684,8 @@ static void set_svc_parameters(SvcContext *svc_ctx,
   svc_params.lst_fb_idx = si->layer;
 
   // Use buffer i-1 for layer i Alt (Inter-layer prediction)
-  if (si->layer != 0) {
-    const int use_higher_layer =
-        svc_ctx->encoding_mode == ALT_INTER_LAYER_PREDICTION_IP &&
-        si->frame_within_gop == 0;
-    svc_params.alt_fb_idx = use_higher_layer ? si->layer - 2 : si->layer - 1;
-  }
-
-  if (svc_ctx->encoding_mode == ALT_INTER_LAYER_PREDICTION_IP) {
-    svc_params.gld_fb_idx = si->layer + 1;
-  } else {
-    if (si->layer < 2 * si->layers - SVC_REFERENCE_FRAMES)
-      svc_params.gld_fb_idx = svc_params.lst_fb_idx;
-    else
-      svc_params.gld_fb_idx = 2 * si->layers - 1 - si->layer;
-  }
+  svc_params.alt_fb_idx = (si->layer > 0) ? si->layer - 1 : 0;
+  svc_params.gld_fb_idx = svc_params.lst_fb_idx;
 
   svc_log(svc_ctx, SVC_LOG_DEBUG, "SVC frame: %d, layer: %d, %dx%d, q: %d\n",
           si->encode_frame_count, si->layer, svc_params.width,
@@ -832,11 +744,6 @@ vpx_codec_err_t vpx_svc_encode(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
   if (rawimg != NULL) {
     // encode each layer
     for (si->layer = 0; si->layer < si->layers; ++si->layer) {
-      if (svc_ctx->encoding_mode == ALT_INTER_LAYER_PREDICTION_IP &&
-          si->is_keyframe && (si->layer == 1 || si->layer == 3)) {
-        svc_log(svc_ctx, SVC_LOG_DEBUG, "Skip encoding layer %d\n", si->layer);
-        continue;
-      }
       calculate_enc_frame_flags(svc_ctx);
       set_svc_parameters(svc_ctx, codec_ctx);
     }
@@ -975,7 +882,7 @@ static double calc_psnr(double d) {
 
 // dump accumulated statistics and reset accumulated values
 const char *vpx_svc_dump_statistics(SvcContext *svc_ctx) {
-  int number_of_frames, number_of_keyframes, encode_frame_count;
+  int number_of_frames, encode_frame_count;
   int i, j;
   uint32_t bytes_total = 0;
   double scale[COMPONENTS];
@@ -992,14 +899,9 @@ const char *vpx_svc_dump_statistics(SvcContext *svc_ctx) {
   if (si->encode_frame_count <= 0) return vpx_svc_get_message(svc_ctx);
 
   svc_log(svc_ctx, SVC_LOG_INFO, "\n");
-  number_of_keyframes = encode_frame_count / si->kf_dist + 1;
   for (i = 0; i < si->layers; ++i) {
     number_of_frames = encode_frame_count;
 
-    if (svc_ctx->encoding_mode == ALT_INTER_LAYER_PREDICTION_IP &&
-        (i == 1 || i == 3)) {
-      number_of_frames -= number_of_keyframes;
-    }
     svc_log(svc_ctx, SVC_LOG_INFO,
             "Layer %d Average PSNR=[%2.3f, %2.3f, %2.3f, %2.3f], Bytes=[%u]\n",
             i, (double)si->psnr_sum[i][0] / number_of_frames,
