@@ -272,7 +272,8 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->search_type_check_frequency = 50;
     sf->source_var_thresh = 360;
 
-    sf->tx_size_search_method = USE_TX_8X8;
+    sf->tx_size_search_method = (cm->frame_type == KEY_FRAME) ?
+        USE_LARGESTALL : USE_TX_8X8;
     sf->max_intra_bsize = BLOCK_8X8;
 
     // This feature is only enabled when partition search is disabled.
