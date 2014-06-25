@@ -758,8 +758,6 @@ LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-15-segkey.webm
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-15-segkey.webm.md5
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-15-segkey_adpq.webm
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-15-segkey_adpq.webm.md5
-LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-15-fuzz-flicker.webm
-LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-15-fuzz-flicker.webm.md5
 
 # Invalid files for testing libvpx error checking.
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += invalid-vp90-01.webm
