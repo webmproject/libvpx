@@ -273,9 +273,6 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->source_var_thresh = 360;
 
     sf->tx_size_search_method = USE_TX_8X8;
-    // TODO(yunqingwang): max_intra_bsize is used to decide if DC_PRED mode
-    // is checked for a partition block. Later, we can try to allow large
-    // partitions to do intra mode checking.
     sf->max_intra_bsize = BLOCK_8X8;
 
     // This feature is only enabled when partition search is disabled.
