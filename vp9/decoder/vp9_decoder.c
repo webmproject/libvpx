@@ -210,7 +210,10 @@ static void swap_frame_buffers(VP9Decoder *pbi) {
   }
 
   cm->frame_to_show = get_frame_new_buffer(cm);
-  cm->frame_bufs[cm->new_fb_idx].ref_count--;
+
+  if (!pbi->frame_parallel_decode || !cm->show_frame) {
+    --cm->frame_bufs[cm->new_fb_idx].ref_count;
+  }
 
   // Invalidate these references until the next frame starts.
   for (ref_index = 0; ref_index < 3; ref_index++)
@@ -239,7 +242,9 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
   }
 
   // Check if the previous frame was a frame without any references to it.
-  if (cm->new_fb_idx >= 0 && cm->frame_bufs[cm->new_fb_idx].ref_count == 0)
+  // Release frame buffer if not decoding in frame parallel mode.
+  if (!pbi->frame_parallel_decode && cm->new_fb_idx >= 0
+      && cm->frame_bufs[cm->new_fb_idx].ref_count == 0)
     cm->release_fb_cb(cm->cb_priv,
                       &cm->frame_bufs[cm->new_fb_idx].raw_frame_buffer);
   cm->new_fb_idx = get_free_fb(cm);
