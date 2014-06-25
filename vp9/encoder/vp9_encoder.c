@@ -2387,7 +2387,7 @@ static int get_arf_src_index(VP9_COMP *cpi) {
   return arf_src_index;
 }
 
-static void is_src_altref(VP9_COMP *cpi) {
+static void check_src_altref(VP9_COMP *cpi) {
   RATE_CONTROL *const rc = &cpi->rc;
 
   if (cpi->pass == 2) {
@@ -2481,9 +2481,8 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
       cm->show_frame = 1;
       cm->intra_only = 0;
 
-      // Check to see if the frame to be encoded is an overlay for a previous
-      // arf frame and if so configure it as such.
-      is_src_altref(cpi);
+      // Check to see if the frame should be encoded is an arf overlay.
+      check_src_altref(cpi);
     }
   }
 

@@ -1309,7 +1309,7 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
   double modified_err = 0.0;
   double err_fraction;
   int mid_boost_bits = 0;
-  int middle_frame_idx;
+  int mid_frame_idx;
   unsigned char arf_buffer_indices[MAX_ACTIVE_ARFS];
 
   key_frame = cpi->common.frame_type == KEY_FRAME ||
@@ -1375,7 +1375,7 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
   }
 
   // Define middle frame
-  middle_frame_idx = frame_index + (rc->baseline_gf_interval >> 1) - 1;
+  mid_frame_idx = frame_index + (rc->baseline_gf_interval >> 1) - 1;
 
   // Allocate bits to the other frames in the group.
   for (i = 0; i < rc->baseline_gf_interval - 1; ++i) {
@@ -1396,7 +1396,7 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
       mid_boost_bits += (target_frame_size >> 4);
       target_frame_size -= (target_frame_size >> 4);
 
-      if (frame_index <= middle_frame_idx)
+      if (frame_index <= mid_frame_idx)
         arf_idx = 1;
     }
     twopass->gf_group.arf_update_idx[frame_index] = arf_buffer_indices[arf_idx];
@@ -1426,9 +1426,9 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
     // Final setup for second arf and its overlay.
     if (cpi->multi_arf_enabled) {
       twopass->gf_group.bit_allocation[2] =
-        twopass->gf_group.bit_allocation[middle_frame_idx] + mid_boost_bits;
-      twopass->gf_group.update_type[middle_frame_idx] = OVERLAY_UPDATE;
-      twopass->gf_group.bit_allocation[middle_frame_idx] = 0;
+        twopass->gf_group.bit_allocation[mid_frame_idx] + mid_boost_bits;
+      twopass->gf_group.update_type[mid_frame_idx] = OVERLAY_UPDATE;
+      twopass->gf_group.bit_allocation[mid_frame_idx] = 0;
     }
   } else {
     twopass->gf_group.update_type[frame_index] = GF_UPDATE;
