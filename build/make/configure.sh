@@ -799,7 +799,7 @@ process_common_toolchain() {
     arm*)
         # on arm, isa versions are supersets
         case ${tgt_isa} in
-        armv8)
+        arm64|armv8)
             soft_enable neon
             ;;
         armv7|armv7s)
