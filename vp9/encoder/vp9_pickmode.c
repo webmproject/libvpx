@@ -576,8 +576,14 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           unsigned int sse_u, sse_v;
           unsigned int var_u, var_v;
 
-          // Skip u v prediction for less calculation, that won't affect
-          // result much.
+          // Skip UV prediction unless breakout is zero (lossless) to save
+          // computation with low impact on the result
+          if (x->encode_breakout == 0) {
+            xd->plane[1].pre[0] = yv12_mb[ref_frame][1];
+            xd->plane[2].pre[0] = yv12_mb[ref_frame][2];
+            vp9_build_inter_predictors_sbuv(xd, mi_row, mi_col, bsize);
+          }
+
           var_u = cpi->fn_ptr[uv_size].vf(x->plane[1].src.buf,
                                           x->plane[1].src.stride,
                                           xd->plane[1].dst.buf,
