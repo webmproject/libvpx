@@ -1222,10 +1222,12 @@ EOF
         fi
     fi
 
-    # default use_x86inc to yes if pic is no or 64bit or we are not on darwin
-    if [ ${tgt_isa} = x86_64 -o ! "$pic" = "yes" -o \
-         "${tgt_os#darwin}" = "${tgt_os}"  ]; then
-      soft_enable use_x86inc
+    tgt_os_no_version=$(echo "${tgt_os}" | tr -d "[0-9]")
+    # Default use_x86inc to yes when we are 64 bit, non-pic, or on any
+    # non-Darwin target.
+    if [ "${tgt_isa}" = "x86_64" ] || [ "${pic}" != "yes" ] || \
+            [ "${tgt_os_no_version}" != "darwin" ]; then
+        soft_enable use_x86inc
     fi
 
     # Position Independent Code (PIC) support, for building relocatable
