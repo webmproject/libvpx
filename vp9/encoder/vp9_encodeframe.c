@@ -2315,6 +2315,16 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
   }
 }
 
+#if CONFIG_TRANSCODE
+#define PRINT_MODE_INFO_LOAD 0
+void print_mode_info(MODE_INFO *mi, int mi_row, int mi_col) {
+  MB_MODE_INFO *mbmi = &mi->mbmi;
+  fprintf(stderr, "pos (%d, %d) mode info: bsize %d, mode %d, tx size %d, ref_frame %d\n",
+          mi_row, mi_col, mbmi->sb_type, mbmi->mode, mbmi->tx_size,
+          mbmi->ref_frame[0]);
+}
+#endif
+
 static void encode_rd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
                              int mi_row, TOKENEXTRA **tp) {
   VP9_COMMON *const cm = &cpi->common;
@@ -2337,10 +2347,17 @@ static void encode_rd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
     if (pf) {
       int offset = mi_row * cm->mi_stride + mi_col;
       int i, j;
-      for (j = 0; j < MI_BLOCK_SIZE; ++j)
-        for (i = 0; i < MI_BLOCK_SIZE; ++i)
+      for (j = 0; j < MI_BLOCK_SIZE; ++j) {
+        for (i = 0; i < MI_BLOCK_SIZE; ++i) {
           fread(&cm->mi[offset + j * cm->mi_stride + i],
                 1, sizeof(MODE_INFO), pf);
+#if PRINT_MODE_INFO_LOAD
+          // print out the mode_info loaded in from external file
+          print_mode_info(&cm->mi[offset + j * cm->mi_stride + i],
+                          mi_row + j, mi_col + i);
+#endif
+        }
+      }
     }
 
     encode_sb_mi(cpi, tile, tp, mi_row, mi_col, 1, BLOCK_64X64,
