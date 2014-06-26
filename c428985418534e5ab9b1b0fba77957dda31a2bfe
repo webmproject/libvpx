@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAdn//itw\u003d",
+        "filename": "test/invalid_file_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-06-26T19:52:22Z",
+      "side": 1,
+      "message": "Just our of curiosity: Do we have a listing of what makes these files invalid? I.e. For which invalid condition are we actually testing?",
+      "revId": "c428985418534e5ab9b1b0fba77957dda31a2bfe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//i1Y\u003d",
         "filename": "vp9/decoder/vp9_decodeframe.c",
         "patchSetId": 3
