@@ -567,14 +567,14 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   if (!x->skip && best_rd > inter_mode_thresh &&
       bsize <= cpi->sf.max_intra_bsize) {
     int i, j;
-    int step   = 1 << mbmi->tx_size;
-    int width  = num_4x4_blocks_wide_lookup[bsize];
-    int height = num_4x4_blocks_high_lookup[bsize];
+    const int step   = 1 << mbmi->tx_size;
+    const int width  = num_4x4_blocks_wide_lookup[bsize];
+    const int height = num_4x4_blocks_high_lookup[bsize];
 
     int rate2 = 0;
     int64_t dist2 = 0;
-    int dst_stride = pd->dst.stride;
-    int src_stride = p->src.stride;
+    const int dst_stride = pd->dst.stride;
+    const int src_stride = p->src.stride;
     int block_idx = 0;
 
     for (this_mode = DC_PRED; this_mode <= DC_PRED; ++this_mode) {
