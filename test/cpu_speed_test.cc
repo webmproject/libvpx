@@ -14,6 +14,7 @@
 #include "test/encode_test_driver.h"
 #include "test/i420_video_source.h"
 #include "test/util.h"
+#include "test/y4m_video_source.h"
 
 namespace {
 
@@ -94,6 +95,20 @@ TEST_P(CpuSpeedTest, TestQ0) {
   EXPECT_GE(min_psnr_, kMaxPSNR);
 }
 
+TEST_P(CpuSpeedTest, TestScreencastQ0) {
+  ::libvpx_test::Y4mVideoSource video("screendata.y4m", 0, 25);
+  cfg_.g_timebase = video.timebase();
+  cfg_.rc_2pass_vbr_minsection_pct = 5;
+  cfg_.rc_2pass_vbr_minsection_pct = 2000;
+  cfg_.rc_target_bitrate = 400;
+  cfg_.rc_max_quantizer = 0;
+  cfg_.rc_min_quantizer = 0;
+
+  init_flags_ = VPX_CODEC_USE_PSNR;
+
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  EXPECT_GE(min_psnr_, kMaxPSNR);
+}
 
 TEST_P(CpuSpeedTest, TestEncodeHighBitrate) {
   // Validate that this non multiple of 64 wide clip encodes and decodes
