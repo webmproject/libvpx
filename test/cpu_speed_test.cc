@@ -21,23 +21,34 @@ class CpuSpeedTest : public ::libvpx_test::EncoderTest,
     public ::libvpx_test::CodecTestWith2Params<
         libvpx_test::TestMode, int> {
  protected:
-  CpuSpeedTest() : EncoderTest(GET_PARAM(0)) {}
+  CpuSpeedTest()
+      : EncoderTest(GET_PARAM(0)),
+        encoding_mode_(GET_PARAM(1)),
+        set_cpu_used_(GET_PARAM(2)) {}
   virtual ~CpuSpeedTest() {}
 
   virtual void SetUp() {
     InitializeConfig();
-    SetMode(GET_PARAM(1));
-    set_cpu_used_ = GET_PARAM(2);
+    SetMode(encoding_mode_);
+    if (encoding_mode_ != ::libvpx_test::kRealTime) {
+      cfg_.g_lag_in_frames = 25;
+      cfg_.rc_end_usage = VPX_VBR;
+    } else {
+      cfg_.g_lag_in_frames = 0;
+      cfg_.rc_end_usage = VPX_CBR;
+    }
   }
 
   virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
                                   ::libvpx_test::Encoder *encoder) {
     if (video->frame() == 1) {
       encoder->Control(VP8E_SET_CPUUSED, set_cpu_used_);
-      encoder->Control(VP8E_SET_ENABLEAUTOALTREF, 1);
-      encoder->Control(VP8E_SET_ARNR_MAXFRAMES, 7);
-      encoder->Control(VP8E_SET_ARNR_STRENGTH, 5);
-      encoder->Control(VP8E_SET_ARNR_TYPE, 3);
+      if (encoding_mode_ != ::libvpx_test::kRealTime) {
+        encoder->Control(VP8E_SET_ENABLEAUTOALTREF, 1);
+        encoder->Control(VP8E_SET_ARNR_MAXFRAMES, 7);
+        encoder->Control(VP8E_SET_ARNR_STRENGTH, 5);
+        encoder->Control(VP8E_SET_ARNR_TYPE, 3);
+      }
     }
   }
 
@@ -45,6 +56,8 @@ class CpuSpeedTest : public ::libvpx_test::EncoderTest,
     if (pkt->data.frame.flags & VPX_FRAME_IS_KEY) {
     }
   }
+
+  ::libvpx_test::TestMode encoding_mode_;
   int set_cpu_used_;
 };
 
@@ -53,7 +66,6 @@ TEST_P(CpuSpeedTest, TestQ0) {
   // without a mismatch when passing in a very low max q.  This pushes
   // the encoder to producing lots of big partitions which will likely
   // extend into the border and test the border condition.
-  cfg_.g_lag_in_frames = 25;
   cfg_.rc_2pass_vbr_minsection_pct = 5;
   cfg_.rc_2pass_vbr_minsection_pct = 2000;
   cfg_.rc_target_bitrate = 400;
@@ -72,7 +84,6 @@ TEST_P(CpuSpeedTest, TestEncodeHighBitrate) {
   // without a mismatch when passing in a very low max q.  This pushes
   // the encoder to producing lots of big partitions which will likely
   // extend into the border and test the border condition.
-  cfg_.g_lag_in_frames = 25;
   cfg_.rc_2pass_vbr_minsection_pct = 5;
   cfg_.rc_2pass_vbr_minsection_pct = 2000;
   cfg_.rc_target_bitrate = 12000;
@@ -89,7 +100,6 @@ TEST_P(CpuSpeedTest, TestLowBitrate) {
   // when passing in a very high min q.  This pushes the encoder to producing
   // lots of small partitions which might will test the other condition.
 
-  cfg_.g_lag_in_frames = 25;
   cfg_.rc_2pass_vbr_minsection_pct = 5;
   cfg_.rc_2pass_vbr_minsection_pct = 2000;
   cfg_.rc_target_bitrate = 200;
@@ -108,6 +118,7 @@ using std::tr1::make_tuple;
 
 VP9_INSTANTIATE_TEST_CASE(
     CpuSpeedTest,
-    ::testing::Values(::libvpx_test::kTwoPassGood, ::libvpx_test::kOnePassGood),
+    ::testing::Values(::libvpx_test::kTwoPassGood, ::libvpx_test::kOnePassGood,
+                      ::libvpx_test::kRealTime),
     ::testing::Range(0, 8));
 }  // namespace
