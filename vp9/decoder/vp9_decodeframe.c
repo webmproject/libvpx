@@ -254,11 +254,24 @@ static void predict_and_reconstruct_intra_block(int plane, int block,
                                             : mi->mbmi.uv_mode;
   int x, y;
   uint8_t *dst;
+#if CONFIG_FILTERINTRA
+  int fbit;
+  if (plane == 0)
+    if (mi->mbmi.sb_type < BLOCK_8X8)
+      fbit = mi->b_filter_info[block];
+    else
+      fbit = is_filter_enabled(tx_size) ? mi->mbmi.filterbit : 0;
+  else
+    fbit = is_filter_enabled(tx_size) ? mi->mbmi.uv_filterbit : 0;
+#endif
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &x, &y);
   dst = &pd->dst.buf[4 * y * pd->dst.stride + 4 * x];
 
   vp9_predict_intra_block(xd, block >> (tx_size << 1),
                           b_width_log2(plane_bsize), tx_size, mode,
+#if CONFIG_FILTERINTRA
+                          fbit,
+#endif
                           dst, pd->dst.stride, dst, pd->dst.stride,
                           x, y, plane);
 
@@ -1246,6 +1259,53 @@ static int read_compressed_header(VP9Decoder *pbi, const uint8_t *data,
         vp9_diff_update_prob(&r, &fc->partition_prob[j][i]);
 
     read_mv_probs(nmvc, cm->allow_high_precision_mv, &r);
+
+#if CONFIG_EXT_TX
+    vp9_diff_update_prob(&r, &fc->ext_tx_prob);
+#endif
+
+#if CONFIG_MASKED_INTERINTER
+    if (cm->reference_mode != SINGLE_REFERENCE) {
+      cm->use_masked_interinter = vp9_read_bit(&r);
+      if (cm->use_masked_interinter) {
+        for (i = 0; i < BLOCK_SIZES; i++) {
+          if (get_mask_bits(i))
+            vp9_diff_update_prob(&r, &fc->masked_interinter_prob[i]);
+        }
+      }
+    } else {
+      cm->use_masked_interinter = 0;
+    }
+#endif
+
+#if CONFIG_INTERINTRA
+    if (cm->reference_mode != COMPOUND_REFERENCE) {
+      cm->use_interintra = vp9_read_bit(&r);
+      if (cm->use_interintra) {
+        for (i = 0; i < BLOCK_SIZES; i++) {
+          if (is_interintra_allowed(i)) {
+            vp9_diff_update_prob(&r, &fc->interintra_prob[i]);
+          }
+        }
+#if CONFIG_MASKED_INTERINTRA
+        cm->use_masked_interintra = vp9_read_bit(&r);
+        if (cm->use_masked_interintra) {
+          for (i = 0; i < BLOCK_SIZES; i++) {
+            if (is_interintra_allowed(i) && get_mask_bits_interintra(i))
+              vp9_diff_update_prob(&r, &fc->masked_interintra_prob[i]);
+          }
+        }
+      } else {
+        cm->use_masked_interintra = 0;
+#endif
+      }
+    } else {
+      cm->use_interintra = 0;
+#if CONFIG_MASKED_INTERINTRA
+      cm->use_masked_interintra = 0;
+#endif
+    }
+#endif
   }
 
   return vp9_reader_has_error(&r);
@@ -1297,6 +1357,10 @@ static void debug_check_frame_counts(const VP9_COMMON *const cm) {
   assert(!memcmp(&cm->counts.tx, &zero_counts.tx, sizeof(cm->counts.tx)));
   assert(!memcmp(cm->counts.skip, zero_counts.skip, sizeof(cm->counts.skip)));
   assert(!memcmp(&cm->counts.mv, &zero_counts.mv, sizeof(cm->counts.mv)));
+#if CONFIG_EXT_TX
+  assert(!memcmp(cm->counts.ext_tx, zero_counts.ext_tx,
+                 sizeof(cm->counts.ext_tx)));
+#endif
 }
 #endif  // NDEBUG
 

@@ -689,6 +689,9 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         for (i = 0; i < width; i += step) {
           vp9_predict_intra_block(xd, block_idx, b_width_log2(bsize),
                                   mbmi->tx_size, this_mode,
+#if CONFIG_FILTERINTRA
+                                  0,
+#endif
                                   &p->src.buf[4 * (j * dst_stride + i)],
                                   src_stride,
                                   &pd->dst.buf[4 * (j * dst_stride + i)],
@@ -699,7 +702,6 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           ++block_idx;
         }
       }
-
       rate = rate2;
       dist = dist2;
 

@@ -985,6 +985,41 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
       vp9_sub_pixel_avg_variance4x4,
       vp9_sad4x4x3, vp9_sad4x4x8, vp9_sad4x4x4d)
 
+#if ((CONFIG_MASKED_INTERINTRA && CONFIG_INTERINTRA) || \
+    CONFIG_MASKED_INTERINTER)
+#define MBFP(BT, MSDF, MVF, MSVF) \
+  cpi->fn_ptr[BT].msdf            = MSDF; \
+  cpi->fn_ptr[BT].mvf             = MVF; \
+  cpi->fn_ptr[BT].msvf            = MSVF;
+
+  MBFP(BLOCK_64X64, vp9_masked_sad64x64, vp9_masked_variance64x64,
+       vp9_masked_sub_pixel_variance64x64)
+  MBFP(BLOCK_64X32, vp9_masked_sad64x32, vp9_masked_variance64x32,
+         vp9_masked_sub_pixel_variance64x32)
+  MBFP(BLOCK_32X64, vp9_masked_sad32x64, vp9_masked_variance32x64,
+         vp9_masked_sub_pixel_variance32x64)
+  MBFP(BLOCK_32X32, vp9_masked_sad32x32, vp9_masked_variance32x32,
+       vp9_masked_sub_pixel_variance32x32)
+  MBFP(BLOCK_32X16, vp9_masked_sad32x16, vp9_masked_variance32x16,
+       vp9_masked_sub_pixel_variance32x16)
+  MBFP(BLOCK_16X32, vp9_masked_sad16x32, vp9_masked_variance16x32,
+       vp9_masked_sub_pixel_variance16x32)
+  MBFP(BLOCK_16X16, vp9_masked_sad16x16, vp9_masked_variance16x16,
+         vp9_masked_sub_pixel_variance16x16)
+  MBFP(BLOCK_16X8, vp9_masked_sad16x8, vp9_masked_variance16x8,
+         vp9_masked_sub_pixel_variance16x8)
+  MBFP(BLOCK_8X16, vp9_masked_sad8x16, vp9_masked_variance8x16,
+         vp9_masked_sub_pixel_variance8x16)
+  MBFP(BLOCK_8X8, vp9_masked_sad8x8, vp9_masked_variance8x8,
+       vp9_masked_sub_pixel_variance8x8)
+  MBFP(BLOCK_4X8, vp9_masked_sad4x8, vp9_masked_variance4x8,
+       vp9_masked_sub_pixel_variance4x8)
+  MBFP(BLOCK_8X4, vp9_masked_sad8x4, vp9_masked_variance8x4,
+       vp9_masked_sub_pixel_variance8x4)
+  MBFP(BLOCK_4X4, vp9_masked_sad4x4, vp9_masked_variance4x4,
+       vp9_masked_sub_pixel_variance4x4)
+#endif
+
   cpi->full_search_sad = vp9_full_search_sad;
   cpi->diamond_search_sad = vp9_diamond_search_sad;
   cpi->refining_search_sad = vp9_refining_search_sad;
@@ -1967,6 +2002,45 @@ YV12_BUFFER_CONFIG *vp9_scale_if_required(VP9_COMMON *cm,
   }
 }
 
+#if CONFIG_MASKED_INTERINTER
+static void select_masked_interinter_mode(VP9_COMP *cpi) {
+  static const double threshold = 1/128.0;
+  VP9_COMMON *cm = &cpi->common;
+  int sum = cpi->masked_interinter_select_counts[1] +
+      cpi->masked_interinter_select_counts[0];
+  if (sum) {
+    double fraction = (double) cpi->masked_interinter_select_counts[1] / sum;
+    cm->use_masked_interinter = (fraction > threshold);
+  }
+}
+#endif
+
+#if CONFIG_INTERINTRA
+static void select_interintra_mode(VP9_COMP *cpi) {
+  static const double threshold = 0.007;
+  VP9_COMMON *cm = &cpi->common;
+  int sum = cpi->interintra_select_count[1] + cpi->interintra_select_count[0];
+  if (sum) {
+    double fraction = (double)cpi->interintra_select_count[1] / (double)sum;
+    cm->use_interintra = (fraction > threshold);
+  }
+}
+
+#if CONFIG_MASKED_INTERINTRA
+static void select_masked_interintra_mode(VP9_COMP *cpi) {
+  static const double threshold = 1/100.0;
+  VP9_COMMON *cm = &cpi->common;
+  int sum = cpi->masked_interintra_select_count[1] +
+      cpi->masked_interintra_select_count[0];
+  if (sum) {
+    double fraction = (double)cpi->masked_interintra_select_count[1] /
+                      (double)sum;
+    cm->use_masked_interintra = (fraction > threshold);
+  }
+}
+#endif
+#endif
+
 static void encode_frame_to_data_rate(VP9_COMP *cpi,
                                       size_t *size,
                                       uint8_t *dest,
@@ -2120,6 +2194,20 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     vp9_set_high_precision_mv(cpi, q < HIGH_PRECISION_MV_QTHRESH);
   }
 
+#if CONFIG_MASKED_INTERINTER
+  if (cm->current_video_frame == 0)
+    cm->use_masked_interinter = 0;
+#endif
+
+#if CONFIG_INTERINTRA
+  if (cm->current_video_frame == 0) {
+    cm->use_interintra = 1;
+#if CONFIG_MASKED_INTERINTRA
+    cm->use_masked_interintra = 1;
+#endif
+  }
+#endif
+
   if (cpi->sf.recode_loop == DISALLOW_RECODE) {
     encode_without_recode_loop(cpi, q);
   } else {
@@ -2181,6 +2269,18 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
       vp9_adapt_mode_probs(cm);
       vp9_adapt_mv_probs(cm, cm->allow_high_precision_mv);
     }
+#if CONFIG_MASKED_INTERINTER
+    select_masked_interinter_mode(cpi);
+#endif
+#if CONFIG_INTERINTRA
+    select_interintra_mode(cpi);
+#if CONFIG_MASKED_INTERINTRA
+    if (cpi->common.use_interintra)
+      select_masked_interintra_mode(cpi);
+    else
+      cpi->common.use_masked_interintra = 0;
+#endif
+#endif
   }
 
   if (cpi->refresh_golden_frame == 1)

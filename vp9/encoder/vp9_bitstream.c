@@ -266,6 +266,12 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
   if (!is_inter) {
     if (bsize >= BLOCK_8X8) {
       write_intra_mode(w, mode, cm->fc.y_mode_prob[size_group_lookup[bsize]]);
+#if CONFIG_FILTERINTRA
+      if (is_filter_allowed(mode) && is_filter_enabled(mbmi->tx_size)) {
+        vp9_write(w, mbmi->filterbit,
+                  cm->fc.filterintra_prob[mbmi->tx_size][mode]);
+      }
+#endif
     } else {
       int idx, idy;
       const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];
@@ -274,14 +280,36 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
         for (idx = 0; idx < 2; idx += num_4x4_w) {
           const PREDICTION_MODE b_mode = mi->bmi[idy * 2 + idx].as_mode;
           write_intra_mode(w, b_mode, cm->fc.y_mode_prob[0]);
+#if CONFIG_FILTERINTRA
+          if (is_filter_allowed(b_mode)) {
+            vp9_write(w, mi->b_filter_info[idy * 2 + idx],
+                      cm->fc.filterintra_prob[0][b_mode]);
+          }
+#endif
         }
       }
     }
     write_intra_mode(w, mbmi->uv_mode, cm->fc.uv_mode_prob[mode]);
+#if CONFIG_FILTERINTRA
+    if (is_filter_allowed(mbmi->uv_mode) &&
+        is_filter_enabled(get_uv_tx_size(mbmi))) {
+      vp9_write(w, mbmi->uv_filterbit,
+                cm->fc.filterintra_prob[get_uv_tx_size(mbmi)][mbmi->uv_mode]);
+    }
+#endif
   } else {
     const int mode_ctx = mbmi->mode_context[mbmi->ref_frame[0]];
     const vp9_prob *const inter_probs = cm->fc.inter_mode_probs[mode_ctx];
     write_ref_frames(cpi, w);
+
+#if CONFIG_EXT_TX
+    if (mbmi->tx_size <= TX_16X16 &&
+        bsize >= BLOCK_8X8 &&
+        !mbmi->skip &&
+        !vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
+      vp9_write(w, mbmi->ext_txfrm, cm->fc.ext_tx_prob);
+    }
+#endif
 
     // If segment skip is not enabled code the mode.
     if (!vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP)) {
@@ -299,6 +327,32 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
     } else {
       assert(mbmi->interp_filter == cm->interp_filter);
     }
+
+#if CONFIG_INTERINTRA
+    if ((cm->use_interintra) &&
+        cpi->common.reference_mode != COMPOUND_REFERENCE &&
+        is_interintra_allowed(bsize) &&
+        is_inter_mode(mode) &&
+        (mbmi->ref_frame[1] <= INTRA_FRAME)) {
+        vp9_write(w, mbmi->ref_frame[1] == INTRA_FRAME,
+                  cm->fc.interintra_prob[bsize]);
+        if (mbmi->ref_frame[1] == INTRA_FRAME) {
+          write_intra_mode(w, mbmi->interintra_mode,
+                           cm->fc.y_mode_prob[size_group_lookup[bsize]]);
+#if CONFIG_MASKED_INTERINTRA
+        if (get_mask_bits_interintra(bsize) &&
+            cm->use_masked_interintra) {
+          vp9_write(w, mbmi->use_masked_interintra,
+                    cm->fc.masked_interintra_prob[bsize]);
+          if (mbmi->use_masked_interintra) {
+            vp9_write_literal(w, mbmi->interintra_mask_index,
+                              get_mask_bits_interintra(bsize));
+          }
+        }
+#endif
+      }
+    }
+#endif
 
     if (bsize < BLOCK_8X8) {
       const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];
@@ -326,6 +380,18 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
                         allow_hp);
       }
     }
+#if CONFIG_MASKED_INTERINTER
+  if (cm->use_masked_interinter &&
+      cm->reference_mode != SINGLE_REFERENCE &&
+      is_inter_mode(mode) &&
+      get_mask_bits(mbmi->sb_type) &&
+      mbmi->ref_frame[1] > INTRA_FRAME) {
+    vp9_write(w, mbmi->use_masked_interinter,
+              cm->fc.masked_interinter_prob[bsize]);
+    if (mbmi->use_masked_interinter)
+      vp9_write_literal(w, mbmi->mask_index, get_mask_bits(mbmi->sb_type));
+  }
+#endif
   }
 }
 
@@ -350,6 +416,11 @@ static void write_mb_modes_kf(const VP9_COMP *cpi, MODE_INFO **mi_8x8,
 
   if (bsize >= BLOCK_8X8) {
     write_intra_mode(w, mbmi->mode, get_y_mode_probs(mi, above_mi, left_mi, 0));
+#if CONFIG_FILTERINTRA
+    if (is_filter_allowed(mbmi->mode) && is_filter_enabled(mbmi->tx_size))
+      vp9_write(w, mbmi->filterbit,
+                cm->fc.filterintra_prob[mbmi->tx_size][mbmi->mode]);
+#endif
   } else {
     const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];
     const int num_4x4_h = num_4x4_blocks_high_lookup[bsize];
@@ -360,11 +431,22 @@ static void write_mb_modes_kf(const VP9_COMP *cpi, MODE_INFO **mi_8x8,
         const int block = idy * 2 + idx;
         write_intra_mode(w, mi->bmi[block].as_mode,
                          get_y_mode_probs(mi, above_mi, left_mi, block));
+#if CONFIG_FILTERINTRA
+        if (is_filter_allowed(mi->bmi[block].as_mode))
+          vp9_write(w, mi->b_filter_info[block],
+                    cm->fc.filterintra_prob[0][mi->bmi[block].as_mode]);
+#endif
       }
     }
   }
 
   write_intra_mode(w, mbmi->uv_mode, vp9_kf_uv_mode_prob[mbmi->mode]);
+#if CONFIG_FILTERINTRA
+  if (is_filter_allowed(mbmi->uv_mode) &&
+      is_filter_enabled(get_uv_tx_size(mbmi)))
+    vp9_write(w, mbmi->uv_filterbit,
+              cm->fc.filterintra_prob[get_uv_tx_size(mbmi)][mbmi->uv_mode]);
+#endif
 }
 
 static void write_modes_b(VP9_COMP *cpi, const TileInfo *const tile,
@@ -1176,6 +1258,95 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
                        cm->counts.partition[i], PARTITION_TYPES, &header_bc);
 
     vp9_write_nmv_probs(cm, cm->allow_high_precision_mv, &header_bc);
+
+#if CONFIG_EXT_TX
+    vp9_cond_prob_diff_update(&header_bc, &fc->ext_tx_prob, cm->counts.ext_tx);
+#endif
+
+#if CONFIG_MASKED_INTERINTER
+    if (cm->reference_mode != SINGLE_REFERENCE) {
+      if (!cpi->dummy_packing && cm->use_masked_interinter) {
+        cm->use_masked_interinter = 0;
+        for (i = 0; i < BLOCK_SIZES; i++)
+          if (get_mask_bits(i) && (cm->counts.masked_interinter[i][1] > 0)) {
+            cm->use_masked_interinter = 1;
+            break;
+          }
+      }
+      vp9_write_bit(&header_bc, cm->use_masked_interinter);
+      if (cm->use_masked_interinter) {
+        for (i = 0; i < BLOCK_SIZES; i++)
+          if (get_mask_bits(i))
+            vp9_cond_prob_diff_update(&header_bc,
+                                      &fc->masked_interinter_prob[i],
+                                      cm->counts.masked_interinter[i]);
+      } else {
+        vp9_zero(cm->counts.masked_interinter);
+      }
+    } else {
+      if (!cpi->dummy_packing)
+        cm->use_masked_interinter = 0;
+      vp9_zero(cm->counts.masked_interinter);
+    }
+#endif
+
+#if CONFIG_INTERINTRA
+    if (cm->reference_mode != COMPOUND_REFERENCE) {
+      if (!cpi->dummy_packing && cm->use_interintra) {
+        cm->use_interintra = 0;
+        for (i = 0; i < BLOCK_SIZES; i++) {
+          if (is_interintra_allowed(i) && (cm->counts.interintra[i][1] > 0)) {
+            cm->use_interintra = 1;
+            break;
+          }
+        }
+      }
+      vp9_write_bit(&header_bc, cm->use_interintra);
+      if (cm->use_interintra) {
+        for (i = 0; i < BLOCK_SIZES; i++) {
+          if (is_interintra_allowed(i)) {
+            vp9_cond_prob_diff_update(&header_bc,
+                                      &fc->interintra_prob[i],
+                                      cm->counts.interintra[i]);
+          }
+        }
+#if CONFIG_MASKED_INTERINTRA
+        if (!cpi->dummy_packing && cm->use_masked_interintra) {
+          cm->use_masked_interintra = 0;
+          for (i = 0; i < BLOCK_SIZES; i++) {
+            if (is_interintra_allowed(i) && get_mask_bits_interintra(i) &&
+                (cm->counts.masked_interintra[i][1] > 0)) {
+              cm->use_masked_interintra = 1;
+              break;
+            }
+          }
+        }
+        vp9_write_bit(&header_bc, cm->use_masked_interintra);
+        if (cm->use_masked_interintra) {
+          for (i = 0; i < BLOCK_SIZES; i++) {
+            if (is_interintra_allowed(i) && get_mask_bits_interintra(i))
+              vp9_cond_prob_diff_update(&header_bc,
+                                        &fc->masked_interintra_prob[i],
+                                        cm->counts.masked_interintra[i]);
+          }
+        } else {
+          vp9_zero(cm->counts.masked_interintra);
+        }
+#endif
+      } else {
+        vp9_zero(cm->counts.interintra);
+      }
+    } else {
+      if (!cpi->dummy_packing)
+        cm->use_interintra = 0;
+      vp9_zero(cm->counts.interintra);
+#if CONFIG_MASKED_INTERINTRA
+      if (!cpi->dummy_packing)
+        cm->use_masked_interintra = 0;
+      vp9_zero(cm->counts.masked_interintra);
+#endif
+    }
+#endif
   }
 
   vp9_stop_encode(&header_bc);
