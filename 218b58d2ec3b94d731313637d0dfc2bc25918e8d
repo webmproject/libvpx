@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//i1g\u003d",
+        "filename": "README",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-06-26T15:40:52Z",
+      "side": 1,
+      "message": "if it\u0027s experimental, I\u0027d prefer to leave it out of the target list while you\u0027re working on it and just use --force-target\u003d for testing or for people who are willing to report issues.",
+      "revId": "218b58d2ec3b94d731313637d0dfc2bc25918e8d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//i1c\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 802,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-06-26T15:40:52Z",
+      "side": 1,
+      "message": "seems legit. arm64 is probably more accurate/specific than armv8 also",
+      "revId": "218b58d2ec3b94d731313637d0dfc2bc25918e8d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
