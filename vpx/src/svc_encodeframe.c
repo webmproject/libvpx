@@ -24,6 +24,7 @@
 #include "vpx/svc_context.h"
 #include "vpx/vp8cx.h"
 #include "vpx/vpx_encoder.h"
+#include "vpx_mem/vpx_mem.h"
 
 #ifdef __MINGW32__
 #define strtok_r strtok_s
@@ -46,6 +47,14 @@ _CRTIMP char *__cdecl strtok_s(char *str, const char *delim, char **context);
 
 static const char *DEFAULT_QUANTIZER_VALUES = "60,53,39,33,27";
 static const char *DEFAULT_SCALE_FACTORS = "4/16,5/16,7/16,11/16,16/16";
+
+// One encoded frame
+typedef struct FrameData {
+  void                     *buf;    // compressed data buffer
+  size_t                    size;  // length of compressed data
+  vpx_codec_frame_flags_t   flags;    /**< flags for this frame */
+  struct FrameData         *next;
+} FrameData;
 
 typedef struct SvcInternal {
   char options[OPTION_BUFFER_SIZE];        // set by vpx_svc_set_options
@@ -72,15 +81,15 @@ typedef struct SvcInternal {
 
   // state variables
   int encode_frame_count;
+  int frame_received;
   int frame_within_gop;
   vpx_enc_frame_flags_t enc_frame_flags;
   int layers;
   int layer;
   int is_keyframe;
 
-  size_t frame_size;
-  size_t buffer_size;
-  void *buffer;
+  FrameData *frame_list;
+  FrameData *frame_temp;
 
   char *rc_stats_buf;
   size_t rc_stats_buf_size;
@@ -90,126 +99,52 @@ typedef struct SvcInternal {
   vpx_codec_ctx_t *codec_ctx;
 } SvcInternal;
 
-// Superframe is used to generate an index of individual frames (i.e., layers)
-struct Superframe {
-  int count;
-  uint32_t sizes[SUPERFRAME_SLOTS];
-  uint32_t magnitude;
-  uint8_t buffer[SUPERFRAME_BUFFER_SIZE];
-  size_t index_size;
-};
-
-// One encoded frame layer
-struct LayerData {
-  void *buf;    // compressed data buffer
-  size_t size;  // length of compressed data
-  struct LayerData *next;
-};
-
-// create LayerData from encoder output
-static struct LayerData *ld_create(void *buf, size_t size) {
-  struct LayerData *const layer_data =
-      (struct LayerData *)malloc(sizeof(*layer_data));
-  if (layer_data == NULL) {
+// create FrameData from encoder output
+static struct FrameData *fd_create(void *buf, size_t size,
+                                   vpx_codec_frame_flags_t flags) {
+  struct FrameData *const frame_data =
+      (struct FrameData *)vpx_malloc(sizeof(*frame_data));
+  if (frame_data == NULL) {
     return NULL;
   }
-  layer_data->buf = malloc(size);
-  if (layer_data->buf == NULL) {
-    free(layer_data);
+  frame_data->buf = vpx_malloc(size);
+  if (frame_data->buf == NULL) {
+    vpx_free(frame_data);
     return NULL;
   }
-  memcpy(layer_data->buf, buf, size);
-  layer_data->size = size;
-  return layer_data;
+  vpx_memcpy(frame_data->buf, buf, size);
+  frame_data->size = size;
+  frame_data->flags = flags;
+  return frame_data;
 }
 
-// free LayerData
-static void ld_free(struct LayerData *layer_data) {
-  if (layer_data) {
-    if (layer_data->buf) {
-      free(layer_data->buf);
-      layer_data->buf = NULL;
-    }
-    free(layer_data);
+// free FrameData
+static void fd_free(struct FrameData *p) {
+  if (p) {
+    if (p->buf)
+      vpx_free(p->buf);
+    vpx_free(p);
   }
 }
 
-// add layer data to list
-static void ld_list_add(struct LayerData **list, struct LayerData *layer_data) {
-  struct LayerData **p = list;
+// add FrameData to list
+static void fd_list_add(struct FrameData **list, struct FrameData *layer_data) {
+  struct FrameData **p = list;
 
   while (*p != NULL) p = &(*p)->next;
   *p = layer_data;
   layer_data->next = NULL;
 }
 
-// get accumulated size of layer data
-static size_t ld_list_get_buffer_size(struct LayerData *list) {
-  struct LayerData *p;
-  size_t size = 0;
-
-  for (p = list; p != NULL; p = p->next) {
-    size += p->size;
-  }
-  return size;
-}
-
-// copy layer data to buffer
-static void ld_list_copy_to_buffer(struct LayerData *list, uint8_t *buffer) {
-  struct LayerData *p;
-
-  for (p = list; p != NULL; p = p->next) {
-    buffer[0] = 1;
-    memcpy(buffer, p->buf, p->size);
-    buffer += p->size;
-  }
-}
-
-// free layer data list
-static void ld_list_free(struct LayerData *list) {
-  struct LayerData *p = list;
+// free FrameData list
+static void fd_free_list(struct FrameData *list) {
+  struct FrameData *p = list;
 
   while (p) {
     list = list->next;
-    ld_free(p);
+    fd_free(p);
     p = list;
   }
-}
-
-static void sf_create_index(struct Superframe *sf) {
-  uint8_t marker = 0xc0;
-  int i;
-  uint32_t mag, mask;
-  uint8_t *bufp;
-
-  if (sf->count == 0 || sf->count >= 8) return;
-
-  // Add the number of frames to the marker byte
-  marker |= sf->count - 1;
-
-  // Choose the magnitude
-  for (mag = 0, mask = 0xff; mag < 4; ++mag) {
-    if (sf->magnitude < mask) break;
-    mask <<= 8;
-    mask |= 0xff;
-  }
-  marker |= mag << 3;
-
-  // Write the index
-  sf->index_size = 2 + (mag + 1) * sf->count;
-  bufp = sf->buffer;
-
-  *bufp++ = marker;
-  for (i = 0; i < sf->count; ++i) {
-    int this_sz = sf->sizes[i];
-    uint32_t j;
-
-    for (j = 0; j <= mag; ++j) {
-      *bufp++ = this_sz & 0xff;
-      this_sz >>= 8;
-    }
-  }
-  *bufp++ = marker;
 }
 
 static SvcInternal *get_svc_internal(SvcContext *svc_ctx) {
@@ -574,8 +509,6 @@ vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
   // modify encoder configuration
   enc_cfg->ss_number_layers = si->layers;
   enc_cfg->ts_number_layers = 1;  // Temporal layers not used in this encoder.
-  // Lag in frames not currently supported
-  enc_cfg->g_lag_in_frames = 0;
 
   // TODO(ivanmaltz): determine if these values need to be set explicitly for
   // svc, or if the normal default/override mechanism can be used
@@ -606,6 +539,34 @@ vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
   vpx_codec_control(codec_ctx, VP8E_SET_ENABLEAUTOALTREF, 0);
 
   return VPX_CODEC_OK;
+}
+
+static void accumulate_frame_size_for_each_layer(SvcInternal *const si,
+                                                 const uint8_t *const buf,
+                                                 const size_t size) {
+  uint8_t marker = buf[size - 1];
+  if ((marker & 0xe0) == 0xc0) {
+    const uint32_t frames = (marker & 0x7) + 1;
+    const uint32_t mag = ((marker >> 3) & 0x3) + 1;
+    const size_t index_sz = 2 + mag * frames;
+
+    uint8_t marker2 = buf[size - index_sz];
+
+    if (size >= index_sz && marker2 == marker) {
+      // found a valid superframe index
+      uint32_t i, j;
+      const uint8_t *x = &buf[size - index_sz + 1];
+
+      // frames has a maximum of 8 and mag has a maximum of 4.
+      for (i = 0; i < frames; i++) {
+        uint32_t this_sz = 0;
+
+        for (j = 0; j < mag; j++)
+          this_sz |= (*x++) << (j * 8);
+        si->bytes_sum[i] += this_sz;
+      }
+    }
+  }
 }
 
 // SVC Algorithm flags - these get mapped to VP8_EFLAG_* defined in vp8cx.h
@@ -846,15 +807,12 @@ vpx_codec_err_t vpx_svc_encode(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
   vpx_codec_err_t res;
   vpx_codec_iter_t iter;
   const vpx_codec_cx_pkt_t *cx_pkt;
-  struct LayerData *cx_layer_list = NULL;
-  struct LayerData *layer_data;
-  struct Superframe superframe;
+  int layer_for_psnr = 0;
   SvcInternal *const si = get_svc_internal(svc_ctx);
   if (svc_ctx == NULL || codec_ctx == NULL || si == NULL) {
     return VPX_CODEC_INVALID_PARAM;
   }
 
-  memset(&superframe, 0, sizeof(superframe));
   svc_log_reset(svc_ctx);
   si->rc_stats_buf_used = 0;
 
@@ -863,7 +821,6 @@ vpx_codec_err_t vpx_svc_encode(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
     si->frame_within_gop = 0;
   }
   si->is_keyframe = (si->frame_within_gop == 0);
-  si->frame_size = 0;
 
   if (rawimg != NULL) {
     svc_log(svc_ctx, SVC_LOG_DEBUG,
@@ -872,124 +829,90 @@ vpx_codec_err_t vpx_svc_encode(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
             si->frame_within_gop);
   }
 
-  // encode each layer
-  for (si->layer = 0; si->layer < si->layers; ++si->layer) {
-    if (svc_ctx->encoding_mode == ALT_INTER_LAYER_PREDICTION_IP &&
-        si->is_keyframe && (si->layer == 1 || si->layer == 3)) {
-      svc_log(svc_ctx, SVC_LOG_DEBUG, "Skip encoding layer %d\n", si->layer);
-      continue;
-    }
-
-    if (rawimg != NULL) {
+  if (rawimg != NULL) {
+    // encode each layer
+    for (si->layer = 0; si->layer < si->layers; ++si->layer) {
+      if (svc_ctx->encoding_mode == ALT_INTER_LAYER_PREDICTION_IP &&
+          si->is_keyframe && (si->layer == 1 || si->layer == 3)) {
+        svc_log(svc_ctx, SVC_LOG_DEBUG, "Skip encoding layer %d\n", si->layer);
+        continue;
+      }
       calculate_enc_frame_flags(svc_ctx);
       set_svc_parameters(svc_ctx, codec_ctx);
     }
+  }
 
-    res = vpx_codec_encode(codec_ctx, rawimg, pts, (uint32_t)duration,
-                           si->enc_frame_flags, deadline);
-    if (res != VPX_CODEC_OK) {
-      return res;
-    }
-    // save compressed data
-    iter = NULL;
-    while ((cx_pkt = vpx_codec_get_cx_data(codec_ctx, &iter))) {
-      switch (cx_pkt->kind) {
-        case VPX_CODEC_CX_FRAME_PKT: {
-          const uint32_t frame_pkt_size = (uint32_t)(cx_pkt->data.frame.sz);
-          si->bytes_sum[si->layer] += frame_pkt_size;
-          svc_log(svc_ctx, SVC_LOG_DEBUG,
-                  "SVC frame: %d, layer: %d, size: %u\n",
-                  si->encode_frame_count, si->layer, frame_pkt_size);
-          layer_data =
-              ld_create(cx_pkt->data.frame.buf, (size_t)frame_pkt_size);
-          if (layer_data == NULL) {
-            svc_log(svc_ctx, SVC_LOG_ERROR, "Error allocating LayerData\n");
-            return VPX_CODEC_OK;
+  res = vpx_codec_encode(codec_ctx, rawimg, pts, (uint32_t)duration, 0,
+                         deadline);
+  if (res != VPX_CODEC_OK) {
+    return res;
+  }
+  // save compressed data
+  iter = NULL;
+  while ((cx_pkt = vpx_codec_get_cx_data(codec_ctx, &iter))) {
+    switch (cx_pkt->kind) {
+      case VPX_CODEC_CX_FRAME_PKT: {
+        fd_list_add(&si->frame_list, fd_create(cx_pkt->data.frame.buf,
+                                               cx_pkt->data.frame.sz,
+                                               cx_pkt->data.frame.flags));
+        accumulate_frame_size_for_each_layer(si, cx_pkt->data.frame.buf,
+                                             cx_pkt->data.frame.sz);
+
+        svc_log(svc_ctx, SVC_LOG_DEBUG, "SVC frame: %d, kf: %d, size: %d, "
+                "pts: %d\n", si->frame_received,
+                (cx_pkt->data.frame.flags & VPX_FRAME_IS_KEY) ? 1 : 0,
+                (int)cx_pkt->data.frame.sz, (int)cx_pkt->data.frame.pts);
+
+        ++si->frame_received;
+        layer_for_psnr = 0;
+        break;
+      }
+      case VPX_CODEC_PSNR_PKT: {
+        int i;
+        svc_log(svc_ctx, SVC_LOG_DEBUG,
+                "SVC frame: %d, layer: %d, PSNR(Total/Y/U/V): "
+                "%2.3f  %2.3f  %2.3f  %2.3f \n",
+                si->frame_received, layer_for_psnr,
+                cx_pkt->data.psnr.psnr[0], cx_pkt->data.psnr.psnr[1],
+                cx_pkt->data.psnr.psnr[2], cx_pkt->data.psnr.psnr[3]);
+        svc_log(svc_ctx, SVC_LOG_DEBUG,
+                "SVC frame: %d, layer: %d, SSE(Total/Y/U/V): "
+                "%2.3f  %2.3f  %2.3f  %2.3f \n",
+                si->frame_received, layer_for_psnr,
+                cx_pkt->data.psnr.sse[0], cx_pkt->data.psnr.sse[1],
+                cx_pkt->data.psnr.sse[2], cx_pkt->data.psnr.sse[3]);
+        for (i = 0; i < COMPONENTS; i++) {
+          si->psnr_sum[layer_for_psnr][i] += cx_pkt->data.psnr.psnr[i];
+          si->sse_sum[layer_for_psnr][i] += cx_pkt->data.psnr.sse[i];
+        }
+        ++layer_for_psnr;
+        break;
+      }
+      case VPX_CODEC_STATS_PKT: {
+        size_t new_size = si->rc_stats_buf_used +
+            cx_pkt->data.twopass_stats.sz;
+
+        if (new_size > si->rc_stats_buf_size) {
+          char *p = (char*)realloc(si->rc_stats_buf, new_size);
+          if (p == NULL) {
+            svc_log(svc_ctx, SVC_LOG_ERROR, "Error allocating stats buf\n");
+            return VPX_CODEC_MEM_ERROR;
           }
-          ld_list_add(&cx_layer_list, layer_data);
+          si->rc_stats_buf = p;
+          si->rc_stats_buf_size = new_size;
+        }
 
-          // save layer size in superframe index
-          superframe.sizes[superframe.count++] = frame_pkt_size;
-          superframe.magnitude |= frame_pkt_size;
-          break;
-        }
-        case VPX_CODEC_PSNR_PKT: {
-          int i;
-          svc_log(svc_ctx, SVC_LOG_DEBUG,
-                  "SVC frame: %d, layer: %d, PSNR(Total/Y/U/V): "
-                  "%2.3f  %2.3f  %2.3f  %2.3f \n",
-                  si->encode_frame_count, si->layer,
-                  cx_pkt->data.psnr.psnr[0], cx_pkt->data.psnr.psnr[1],
-                  cx_pkt->data.psnr.psnr[2], cx_pkt->data.psnr.psnr[3]);
-          svc_log(svc_ctx, SVC_LOG_DEBUG,
-                  "SVC frame: %d, layer: %d, SSE(Total/Y/U/V): "
-                  "%2.3f  %2.3f  %2.3f  %2.3f \n",
-                  si->encode_frame_count, si->layer,
-                  cx_pkt->data.psnr.sse[0], cx_pkt->data.psnr.sse[1],
-                  cx_pkt->data.psnr.sse[2], cx_pkt->data.psnr.sse[3]);
-          for (i = 0; i < COMPONENTS; i++) {
-            si->psnr_sum[si->layer][i] += cx_pkt->data.psnr.psnr[i];
-            si->sse_sum[si->layer][i] += cx_pkt->data.psnr.sse[i];
-          }
-          break;
-        }
-        case VPX_CODEC_STATS_PKT: {
-          size_t new_size = si->rc_stats_buf_used +
-              cx_pkt->data.twopass_stats.sz;
-
-          if (new_size > si->rc_stats_buf_size) {
-            char *p = (char*)realloc(si->rc_stats_buf, new_size);
-            if (p == NULL) {
-              svc_log(svc_ctx, SVC_LOG_ERROR, "Error allocating stats buf\n");
-              break;
-            }
-            si->rc_stats_buf = p;
-            si->rc_stats_buf_size = new_size;
-          }
-
-          memcpy(si->rc_stats_buf + si->rc_stats_buf_used,
-                 cx_pkt->data.twopass_stats.buf, cx_pkt->data.twopass_stats.sz);
-          si->rc_stats_buf_used += cx_pkt->data.twopass_stats.sz;
-          break;
-        }
-        default: {
-          break;
-        }
+        memcpy(si->rc_stats_buf + si->rc_stats_buf_used,
+               cx_pkt->data.twopass_stats.buf, cx_pkt->data.twopass_stats.sz);
+        si->rc_stats_buf_used += cx_pkt->data.twopass_stats.sz;
+        break;
+      }
+      default: {
+        break;
       }
     }
-    if (rawimg == NULL) {
-      break;
-    }
   }
-  if (codec_ctx->config.enc->g_pass != VPX_RC_FIRST_PASS) {
-    // add superframe index to layer data list
-    sf_create_index(&superframe);
-    layer_data = ld_create(superframe.buffer, superframe.index_size);
-    ld_list_add(&cx_layer_list, layer_data);
 
-    // get accumulated size of layer data
-    si->frame_size = ld_list_get_buffer_size(cx_layer_list);
-    if (si->frame_size > 0) {
-      // all layers encoded, create single buffer with concatenated layers
-      if (si->frame_size > si->buffer_size) {
-        free(si->buffer);
-        si->buffer = malloc(si->frame_size);
-        if (si->buffer == NULL) {
-          ld_list_free(cx_layer_list);
-          return VPX_CODEC_MEM_ERROR;
-        }
-        si->buffer_size = si->frame_size;
-      }
-      // copy layer data into packet
-      ld_list_copy_to_buffer(cx_layer_list, (uint8_t *)si->buffer);
-
-      ld_list_free(cx_layer_list);
-
-      svc_log(svc_ctx, SVC_LOG_DEBUG, "SVC frame: %d, kf: %d, size: %d, "
-              "pts: %d\n", si->encode_frame_count, si->is_keyframe,
-              (int)si->frame_size, (int)pts);
-    }
-  }
   if (rawimg != NULL) {
     ++si->frame_within_gop;
     ++si->encode_frame_count;
@@ -1004,16 +927,27 @@ const char *vpx_svc_get_message(const SvcContext *svc_ctx) {
   return si->message_buffer;
 }
 
-void *vpx_svc_get_buffer(const SvcContext *svc_ctx) {
-  const SvcInternal *const si = get_const_svc_internal(svc_ctx);
-  if (svc_ctx == NULL || si == NULL) return NULL;
-  return si->buffer;
+// We will maintain a list of output frame buffers since with lag_in_frame
+// we need to output all frame buffers at the end. vpx_svc_get_buffer() will
+// remove a frame buffer from the list the put it to a temporal pointer, which
+// will be removed at the next vpx_svc_get_buffer() or when closing encoder.
+void *vpx_svc_get_buffer(SvcContext *svc_ctx) {
+  SvcInternal *const si = get_svc_internal(svc_ctx);
+  if (svc_ctx == NULL || si == NULL || si->frame_list == NULL) return NULL;
+
+  if (si->frame_temp)
+    fd_free(si->frame_temp);
+
+  si->frame_temp = si->frame_list;
+  si->frame_list = si->frame_list->next;
+
+  return si->frame_temp->buf;
 }
 
 size_t vpx_svc_get_frame_size(const SvcContext *svc_ctx) {
   const SvcInternal *const si = get_const_svc_internal(svc_ctx);
-  if (svc_ctx == NULL || si == NULL) return 0;
-  return si->frame_size;
+  if (svc_ctx == NULL || si == NULL || si->frame_list == NULL) return 0;
+  return si->frame_list->size;
 }
 
 int vpx_svc_get_encode_frame_count(const SvcContext *svc_ctx) {
@@ -1024,8 +958,8 @@ int vpx_svc_get_encode_frame_count(const SvcContext *svc_ctx) {
 
 int vpx_svc_is_keyframe(const SvcContext *svc_ctx) {
   const SvcInternal *const si = get_const_svc_internal(svc_ctx);
-  if (svc_ctx == NULL || si == NULL) return 0;
-  return si->is_keyframe;
+  if (svc_ctx == NULL || si == NULL || si->frame_list == NULL) return 0;
+  return (si->frame_list->flags & VPX_FRAME_IS_KEY) != 0;
 }
 
 void vpx_svc_set_keyframe(SvcContext *svc_ctx) {
@@ -1112,7 +1046,8 @@ void vpx_svc_release(SvcContext *svc_ctx) {
   // SvcInternal if it was not already allocated
   si = (SvcInternal *)svc_ctx->internal;
   if (si != NULL) {
-    free(si->buffer);
+    fd_free(si->frame_temp);
+    fd_free_list(si->frame_list);
     if (si->rc_stats_buf) {
       free(si->rc_stats_buf);
     }

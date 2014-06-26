@@ -30,6 +30,7 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += cq_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += keyframe_test.cc
 
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_DECODER) += external_frame_buffer_test.cc
+LIBVPX_TEST_SRCS-$(CONFIG_VP9_DECODER) += user_priv_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += active_map_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += borders_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += cpu_speed_test.cc
@@ -54,6 +55,7 @@ LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += ../webmdec.h
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += webm_video_source.h
 endif
 
+LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += invalid_file_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += test_vector_test.cc
 
 # Currently we only support decoder perf tests for vp9. Also they read from WebM
@@ -690,6 +692,8 @@ LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-09-subpixel-00.ivf
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-09-subpixel-00.ivf.md5
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-10-show-existing-frame.webm
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-10-show-existing-frame.webm.md5
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-10-show-existing-frame2.webm
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-10-show-existing-frame2.webm.md5
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-11-size-351x287.webm
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-11-size-351x287.webm.md5
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-11-size-351x288.webm
@@ -754,8 +758,14 @@ LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-15-segkey.webm
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-15-segkey.webm.md5
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-15-segkey_adpq.webm
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-15-segkey_adpq.webm.md5
-LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-15-fuzz-flicker.webm
-LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-15-fuzz-flicker.webm.md5
+
+# Invalid files for testing libvpx error checking.
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += invalid-vp90-01.webm
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += invalid-vp90-01.webm.res
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += invalid-vp90-02.webm
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += invalid-vp90-02.webm.res
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += invalid-vp90-2-00-quantizer-00.webm.ivf.s5861_r01-05_b6-.ivf
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += invalid-vp90-2-00-quantizer-00.webm.ivf.s5861_r01-05_b6-.ivf.res
 
 ifeq ($(CONFIG_DECODE_PERF_TESTS),yes)
 # BBB VP9 streams

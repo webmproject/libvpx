@@ -44,8 +44,8 @@ typedef enum {
 } SUBPEL_SEARCH_METHODS;
 
 typedef enum {
-  NO_MOITION_THRESHOLD = 0,
-  LOW_MOITION_THRESHOLD = 7
+  NO_MOTION_THRESHOLD = 0,
+  LOW_MOTION_THRESHOLD = 7
 } MOTION_THRESHOLD;
 
 typedef enum {
@@ -353,6 +353,11 @@ typedef struct SPEED_FEATURES {
 
   // The threshold used in SOURCE_VAR_BASED_PARTITION search type.
   unsigned int source_var_thresh;
+
+  // When partition is pre-set, the inter prediction result from pick_inter_mode
+  // can be reused in final block encoding process. It is enabled only for real-
+  // time mode speed 6.
+  int reuse_inter_pred_sby;
 } SPEED_FEATURES;
 
 struct VP9_COMP;

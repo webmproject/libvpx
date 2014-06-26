@@ -22,8 +22,6 @@ extern "C" {
 #define QINDEX_RANGE (MAXQ - MINQ + 1)
 #define QINDEX_BITS 8
 
-void vp9_init_quant_tables();
-
 int16_t vp9_dc_quant(int qindex, int delta);
 int16_t vp9_ac_quant(int qindex, int delta);
 

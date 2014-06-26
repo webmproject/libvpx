@@ -46,8 +46,8 @@ static INLINE int vp9_is_valid_scale(const struct scale_factors *sf) {
 }
 
 static INLINE int vp9_is_scaled(const struct scale_factors *sf) {
-  return sf->x_scale_fp != REF_NO_SCALE ||
-         sf->y_scale_fp != REF_NO_SCALE;
+  return vp9_is_valid_scale(sf) &&
+         (sf->x_scale_fp != REF_NO_SCALE || sf->y_scale_fp != REF_NO_SCALE);
 }
 
 #ifdef __cplusplus

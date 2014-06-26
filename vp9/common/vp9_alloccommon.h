@@ -23,8 +23,12 @@ void vp9_remove_common(struct VP9Common *cm);
 int vp9_resize_frame_buffers(struct VP9Common *cm, int width, int height);
 
 int vp9_alloc_frame_buffers(struct VP9Common *cm, int width, int height);
+int vp9_alloc_state_buffers(struct VP9Common *cm, int width, int height);
+int vp9_alloc_context_buffers(struct VP9Common *cm, int width, int height);
 
 void vp9_free_frame_buffers(struct VP9Common *cm);
+void vp9_free_state_buffers(struct VP9Common *cm);
+void vp9_free_context_buffers(struct VP9Common *cm);
 
 void vp9_update_frame_size(struct VP9Common *cm);
 

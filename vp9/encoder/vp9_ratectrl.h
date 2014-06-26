@@ -23,6 +23,15 @@ extern "C" {
 // Bits Per MB at different Q (Multiplied by 512)
 #define BPER_MB_NORMBITS    9
 
+typedef enum {
+  INTER_NORMAL = 0,
+  INTER_HIGH = 1,
+  GF_ARF_LOW = 2,
+  GF_ARF_STD = 3,
+  KF_STD = 4,
+  RATE_FACTOR_LEVELS = 5
+} RATE_FACTOR_LEVEL;
+
 typedef struct {
   // Rate targetting variables
   int base_frame_target;           // A baseline frame target before adjustment
@@ -37,9 +46,7 @@ typedef struct {
   int last_boost;
   int kf_boost;
 
-  double rate_correction_factor;
-  double key_frame_rate_correction_factor;
-  double gf_rate_correction_factor;
+  double rate_correction_factors[RATE_FACTOR_LEVELS];
 
   int frames_since_golden;
   int frames_till_gf_update_due;
