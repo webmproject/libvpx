@@ -566,25 +566,47 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   // threshold.
   if (!x->skip && best_rd > inter_mode_thresh &&
       bsize <= cpi->sf.max_intra_bsize) {
+    int i, j;
+    int step   = 1 << mbmi->tx_size;
+    int width  = num_4x4_blocks_wide_lookup[bsize];
+    int height = num_4x4_blocks_high_lookup[bsize];
+
+    int rate2 = 0;
+    int64_t dist2 = 0;
+    int dst_stride = pd->dst.stride;
+    int src_stride = p->src.stride;
+    int block_idx = 0;
+
     for (this_mode = DC_PRED; this_mode <= DC_PRED; ++this_mode) {
       if (cpi->sf.reuse_inter_pred_sby) {
         pd->dst.buf = tmp[0].data;
         pd->dst.stride = bw;
       }
 
-      vp9_predict_intra_block(xd, 0, b_width_log2(bsize),
-                              mbmi->tx_size, this_mode,
-                              &p->src.buf[0], p->src.stride,
-                              &pd->dst.buf[0], pd->dst.stride, 0, 0, 0);
+      for (j = 0; j < height; j += step) {
+        for (i = 0; i < width; i += step) {
+          vp9_predict_intra_block(xd, block_idx, b_width_log2(bsize),
+                                  mbmi->tx_size, this_mode,
+                                  &p->src.buf[4 * (j * dst_stride + i)],
+                                  src_stride,
+                                  &pd->dst.buf[4 * (j * dst_stride + i)],
+                                  dst_stride, i, j, 0);
+          model_rd_for_sb_y(cpi, bsize, x, xd, &rate, &dist, &var_y, &sse_y);
+          rate2 += rate;
+          dist2 += dist;
+          ++block_idx;
+        }
+      }
 
-      model_rd_for_sb_y(cpi, bsize, x, xd, &rate, &dist, &var_y, &sse_y);
-
-      if (cpi->sf.reuse_inter_pred_sby)
-        pd->dst = orig_dst;
+      rate = rate2;
+      dist = dist2;
 
       rate += cpi->mbmode_cost[this_mode];
       rate += intra_cost_penalty;
       this_rd = RDCOST(x->rdmult, x->rddiv, rate, dist);
+
+      if (cpi->sf.reuse_inter_pred_sby)
+        pd->dst = orig_dst;
 
       if (this_rd + intra_mode_cost < best_rd) {
         best_rd = this_rd;
