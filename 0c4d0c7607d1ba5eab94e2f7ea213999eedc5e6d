@@ -1,0 +1,361 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//i0A\u003d",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-26T16:43:25Z",
+      "side": 1,
+      "message": "Set and use:\nRefCntBuffer *const frame_bufs \u003d \u0026cm-\u003ebuffer_pool.frame_bufs[i];\ninside the loop.",
+      "revId": "0c4d0c7607d1ba5eab94e2f7ea213999eedc5e6d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//iz8\u003d",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-26T16:43:25Z",
+      "side": 1,
+      "message": "Why not use:\nBufferPool *const frame_bufs \u003d \u0026cm-\u003ebuffer_pool.frame_bufs;",
+      "revId": "0c4d0c7607d1ba5eab94e2f7ea213999eedc5e6d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//iz4\u003d",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-26T16:43:25Z",
+      "side": 1,
+      "message": "Set and use:\nRefCntBuffer *const frame_bufs \u003d \u0026cm-\u003ebuffer_pool.frame_bufs[i];\ninside the loop.",
+      "revId": "0c4d0c7607d1ba5eab94e2f7ea213999eedc5e6d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//iz0\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 1066,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-26T16:43:25Z",
+      "side": 1,
+      "message": "Use:\nRefCntBuffer *const frame_bufs \u003d \u0026cm-\u003ebuffer_pool.frame_bufs[i];",
+      "revId": "0c4d0c7607d1ba5eab94e2f7ea213999eedc5e6d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//izs\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-26T16:43:25Z",
+      "side": 1,
+      "message": "You only use this once, so either don\u0027t bother to make it local or extend to:\ncm-\u003ebuffer_pool-\u003eframe_bufs[cm-\u003eref_frame_map[0]].buf",
+      "revId": "0c4d0c7607d1ba5eab94e2f7ea213999eedc5e6d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//izo\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-26T16:43:25Z",
+      "side": 1,
+      "message": "Extend to point to frame_bufs",
+      "revId": "0c4d0c7607d1ba5eab94e2f7ea213999eedc5e6d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//izk\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-26T16:43:25Z",
+      "side": 1,
+      "message": "Extend to point to frame_bufs",
+      "revId": "0c4d0c7607d1ba5eab94e2f7ea213999eedc5e6d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//izY\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-26T16:43:25Z",
+      "side": 1,
+      "message": "Maybe extend to frame_bufs and have an explicit reference to cm-\u003ebuffer_pool-\u003ecb_priv below.",
+      "revId": "0c4d0c7607d1ba5eab94e2f7ea213999eedc5e6d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//izc\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-26T16:43:25Z",
+      "side": 1,
+      "message": "Maybe extend to frame_bufs and have an explicit reference to cm-\u003ebuffer_pool-\u003ecb_priv below.",
+      "revId": "0c4d0c7607d1ba5eab94e2f7ea213999eedc5e6d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//izU\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 1248,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-26T16:43:25Z",
+      "side": 1,
+      "message": "Extend to frame_bufs.",
+      "revId": "0c4d0c7607d1ba5eab94e2f7ea213999eedc5e6d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//izQ\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 1490,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-26T16:43:25Z",
+      "side": 1,
+      "message": "Extend to frame_bufs.",
+      "revId": "0c4d0c7607d1ba5eab94e2f7ea213999eedc5e6d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//izM\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 1579,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-26T16:43:25Z",
+      "side": 1,
+      "message": "Extend to frame_bufs.",
+      "revId": "0c4d0c7607d1ba5eab94e2f7ea213999eedc5e6d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//izI\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 1604,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-26T16:43:25Z",
+      "side": 1,
+      "message": "Extend to frame_bufs (or get rid of completely since it is only used once).",
+      "revId": "0c4d0c7607d1ba5eab94e2f7ea213999eedc5e6d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//izA\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 1607,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-26T16:43:25Z",
+      "side": 1,
+      "message": "Pre-increment.",
+      "revId": "0c4d0c7607d1ba5eab94e2f7ea213999eedc5e6d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//izE\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 1608,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-26T16:43:25Z",
+      "side": 1,
+      "message": "Pre-decrement.",
+      "revId": "0c4d0c7607d1ba5eab94e2f7ea213999eedc5e6d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//iy8\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 2440,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-26T16:43:25Z",
+      "side": 1,
+      "message": "Extend to frame_bufs.",
+      "revId": "0c4d0c7607d1ba5eab94e2f7ea213999eedc5e6d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//iy4\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 2578,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-26T16:43:25Z",
+      "side": 1,
+      "message": "Pre-decrement.",
+      "revId": "0c4d0c7607d1ba5eab94e2f7ea213999eedc5e6d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//iy0\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 2274,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-26T16:43:25Z",
+      "side": 1,
+      "message": "Extend to frame_bufs.",
+      "revId": "0c4d0c7607d1ba5eab94e2f7ea213999eedc5e6d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//iyw\u003d",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-26T16:43:25Z",
+      "side": 1,
+      "message": "This is not true, it only holds the reference frames.",
+      "revId": "0c4d0c7607d1ba5eab94e2f7ea213999eedc5e6d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//iys\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-26T16:43:25Z",
+      "side": 1,
+      "message": "It only holds the reference frames.",
+      "revId": "0c4d0c7607d1ba5eab94e2f7ea213999eedc5e6d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//iyk\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 570,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-26T16:43:25Z",
+      "side": 1,
+      "message": "Extend to frame_bufs.",
+      "revId": "0c4d0c7607d1ba5eab94e2f7ea213999eedc5e6d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
