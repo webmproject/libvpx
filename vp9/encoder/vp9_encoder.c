@@ -2462,7 +2462,8 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   MV_REFERENCE_FRAME ref_frame;
   int arf_src_index;
   const int is_spatial_svc = cpi->use_svc &&
-                             (cpi->svc.number_temporal_layers == 1);
+                             (cpi->svc.number_temporal_layers == 1) &&
+                             (cpi->svc.number_spatial_layers > 1);
 
   if (!cpi)
     return -1;
