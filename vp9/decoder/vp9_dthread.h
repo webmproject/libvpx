@@ -40,6 +40,23 @@ typedef struct VP9LfSyncData {
   int sync_range;
 } VP9LfSync;
 
+// WorkerData for the FrameWorker thread. It contains all the information of
+// the worker and decode structures for decoding a frame.
+typedef struct FrameWorkerData {
+  struct VP9Decoder *pbi;
+  const uint8_t *data;
+  const uint8_t *data_end;
+  size_t data_size;
+  void *user_priv;
+  int result;
+  int worker_id;
+
+  // scratch_buffer is used in frame parallel mode only.
+  // It is used to make a copy of the compressed data.
+  uint8_t *scratch_buffer;
+  size_t scratch_buffer_size;
+} FrameWorkerData;
+
 // Allocate memory for loopfilter row synchronization.
 void vp9_loop_filter_alloc(struct VP9Common *cm, VP9LfSync *lf_sync,
                            int rows, int width);

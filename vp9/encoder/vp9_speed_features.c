@@ -84,16 +84,17 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
 
   if (speed >= 2) {
     if (MIN(cm->width, cm->height) >= 720) {
-      sf->lf_motion_threshold = LOW_MOITION_THRESHOLD;
+      sf->lf_motion_threshold = LOW_MOTION_THRESHOLD;
       sf->last_partitioning_redo_frequency = 3;
       sf->disable_split_mask = cm->show_frame ? DISABLE_ALL_SPLIT
                                               : DISABLE_ALL_INTER_SPLIT;
     } else {
       sf->disable_split_mask = LAST_AND_INTRA_SPLIT_ONLY;
       sf->last_partitioning_redo_frequency = 2;
-      sf->lf_motion_threshold = NO_MOITION_THRESHOLD;
+      sf->lf_motion_threshold = NO_MOTION_THRESHOLD;
     }
-    sf->adaptive_pred_interp_filter = 2;
+
+    sf->adaptive_pred_interp_filter = 0;
     sf->reference_masking = 1;
     sf->mode_search_skip_flags = FLAG_SKIP_INTRA_DIRMISMATCH |
                                  FLAG_SKIP_INTRA_BESTINTER |
@@ -114,7 +115,7 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
     else
       sf->disable_split_mask = DISABLE_ALL_INTER_SPLIT;
 
-    sf->lf_motion_threshold = LOW_MOITION_THRESHOLD;
+    sf->lf_motion_threshold = LOW_MOTION_THRESHOLD;
     sf->last_partitioning_redo_frequency = 3;
     sf->recode_loop = ALLOW_RECODE_KFMAXBW;
     sf->adaptive_rd_thresh = 3;
@@ -198,7 +199,7 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
     sf->auto_min_max_partition_size = RELAXED_NEIGHBORING_MIN_MAX;
     sf->use_lastframe_partitioning = LAST_FRAME_PARTITION_LOW_MOTION;
-    sf->lf_motion_threshold = LOW_MOITION_THRESHOLD;
+    sf->lf_motion_threshold = LOW_MOTION_THRESHOLD;
     sf->adjust_partitioning_from_last_frame = 1;
     sf->last_partitioning_redo_frequency = 3;
     sf->use_lp32x32fdct = 1;
@@ -249,6 +250,8 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
   }
 
   if (speed >= 5) {
+    sf->auto_min_max_partition_size = (cm->frame_type == KEY_FRAME) ?
+        RELAXED_NEIGHBORING_MIN_MAX : STRICT_NEIGHBORING_MIN_MAX;
     sf->max_partition_size = BLOCK_32X32;
     sf->min_partition_size = BLOCK_8X8;
     sf->partition_check =
@@ -270,6 +273,10 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->source_var_thresh = 360;
 
     sf->tx_size_search_method = USE_TX_8X8;
+    sf->max_intra_bsize = BLOCK_8X8;
+
+    // This feature is only enabled when partition search is disabled.
+    sf->reuse_inter_pred_sby = 1;
   }
 
   if (speed >= 7) {
@@ -335,6 +342,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   for (i = 0; i < BLOCK_SIZES; ++i)
     sf->inter_mode_mask[i] = INTER_ALL;
   sf->max_intra_bsize = BLOCK_64X64;
+  sf->reuse_inter_pred_sby = 0;
   // This setting only takes effect when partition_search_type is set
   // to FIXED_PARTITION.
   sf->always_this_block_size = BLOCK_16X16;

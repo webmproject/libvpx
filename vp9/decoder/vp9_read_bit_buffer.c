@@ -10,7 +10,7 @@
 #include "vp9/decoder/vp9_read_bit_buffer.h"
 
 size_t vp9_rb_bytes_read(struct vp9_read_bit_buffer *rb) {
-  return rb->bit_offset / CHAR_BIT + (rb->bit_offset % CHAR_BIT > 0);
+  return (rb->bit_offset + CHAR_BIT - 1) / CHAR_BIT;
 }
 
 int vp9_rb_read_bit(struct vp9_read_bit_buffer *rb) {

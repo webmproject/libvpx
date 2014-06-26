@@ -1,5 +1,9 @@
 d5dfb0151c9051f8c85999255645d7a23916d3c0  hantro_collage_w352h288.yuv
 b87815bf86020c592ccc7a846ba2e28ec8043902  hantro_odd.yuv
+fe346136b9b8c1e6f6084cc106485706915795e4  invalid-vp90-01.webm
+25751f5d3b05ff03f0719ad42cd625348eb8961e  invalid-vp90-01.webm.res
+d78e2fceba5ac942246503ec8366f879c4775ca5  invalid-vp90-02.webm
+2dadee5306245fa5eeb0f99652d0e17afbcba96d  invalid-vp90-02.webm.res
 b1f1c3ec79114b9a0651af24ce634afb44a9a419  rush_hour_444.y4m
 5184c46ddca8b1fadd16742e8500115bc8f749da  vp80-00-comprehensive-001.ivf
 65bf1bbbced81b97bd030f376d1b7f61a224793f  vp80-00-comprehensive-002.ivf
@@ -576,6 +580,8 @@ d48c5db1b0f8e60521a7c749696b8067886033a3  vp90-2-09-aq2.webm
 54638c38009198c38c8f3b25c182b709b6c1fd2e  vp90-2-09-lf_deltas.webm.md5
 510d95f3beb3b51c572611fdaeeece12277dac30  vp90-2-10-show-existing-frame.webm
 14d631096f4bfa2d71f7f739aec1448fb3c33bad  vp90-2-10-show-existing-frame.webm.md5
+d2feea7728e8d2c615981d0f47427a4a5a45d881  vp90-2-10-show-existing-frame2.webm
+5f7c7811baa3e4f03be1dd78c33971b727846821  vp90-2-10-show-existing-frame2.webm.md5
 b4318e75f73a6a08992c7326de2fb589c2a794c7  vp90-2-11-size-351x287.webm
 b3c48382cf7d0454e83a02497c229d27720f9e20  vp90-2-11-size-351x287.webm.md5
 8e0096475ea2535bac71d3e2fc09e0c451c444df  vp90-2-11-size-351x288.webm
@@ -638,5 +644,5 @@ e615575ded499ea1d992f3b38e3baa434509cdcd  vp90-2-15-segkey.webm
 e3ab35d4316c5e81325c50f5236ceca4bc0d35df  vp90-2-15-segkey.webm.md5
 9b7ca2cac09d34c4a5d296c1900f93b1e2f69d0d  vp90-2-15-segkey_adpq.webm
 8f46ba5f785d0c2170591a153e0d0d146a7c8090  vp90-2-15-segkey_adpq.webm.md5
-d78e2fceba5ac942246503ec8366f879c4775ca5  vp90-2-15-fuzz-flicker.webm
-bbd7dd15f43a703ff0a332fee4959e7b23bf77dc  vp90-2-15-fuzz-flicker.webm.md5
+76024eb753cdac6a5e5703aaea189d35c3c30ac7  invalid-vp90-2-00-quantizer-00.webm.ivf.s5861_r01-05_b6-.ivf
+d3964f9dad9f60363c81b688324d95b4ec7c8038  invalid-vp90-2-00-quantizer-00.webm.ivf.s5861_r01-05_b6-.ivf.res

@@ -12,6 +12,7 @@
 #define VP9_ENCODER_VP9_FIRSTPASS_H_
 
 #include "vp9/encoder/vp9_lookahead.h"
+#include "vp9/encoder/vp9_ratectrl.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,6 +39,25 @@ typedef struct {
   double count;
   int64_t spatial_layer_id;
 } FIRSTPASS_STATS;
+
+typedef enum {
+  KF_UPDATE = 0,
+  LF_UPDATE = 1,
+  GF_UPDATE = 2,
+  ARF_UPDATE = 3,
+  OVERLAY_UPDATE = 4,
+  FRAME_UPDATE_TYPES = 5
+} FRAME_UPDATE_TYPE;
+
+typedef struct {
+  unsigned char index;
+  RATE_FACTOR_LEVEL rf_level[(MAX_LAG_BUFFERS * 2) + 1];
+  FRAME_UPDATE_TYPE update_type[(MAX_LAG_BUFFERS * 2) + 1];
+  unsigned char arf_src_offset[(MAX_LAG_BUFFERS * 2) + 1];
+  unsigned char arf_update_idx[(MAX_LAG_BUFFERS * 2) + 1];
+  unsigned char arf_ref_idx[(MAX_LAG_BUFFERS * 2) + 1];
+  int bit_allocation[(MAX_LAG_BUFFERS * 2) + 1];
+} GF_GROUP;
 
 typedef struct {
   unsigned int section_intra_rating;
@@ -68,8 +88,7 @@ typedef struct {
 
   int active_worst_quality;
 
-  int gf_group_index;
-  int gf_group_bit_allocation[MAX_LAG_BUFFERS * 2];
+  GF_GROUP gf_group;
 } TWO_PASS;
 
 struct VP9_COMP;

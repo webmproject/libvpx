@@ -93,8 +93,6 @@ struct macroblock {
 
   int encode_breakout;
 
-  int in_active_map;
-
   // note that token_costs is the cost when eob node is skipped
   vp9_coeff_cost token_costs[TX_SIZES];
 

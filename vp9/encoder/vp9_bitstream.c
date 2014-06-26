@@ -890,14 +890,8 @@ static void write_tile_info(VP9_COMMON *cm, struct vp9_write_bit_buffer *wb) {
 }
 
 static int get_refresh_mask(VP9_COMP *cpi) {
-    // Should the GF or ARF be updated using the transmitted frame or buffer
-#if CONFIG_MULTIPLE_ARF
-    if (!cpi->multi_arf_enabled && cpi->refresh_golden_frame &&
-        !cpi->refresh_alt_ref_frame) {
-#else
-    if (cpi->refresh_golden_frame && !cpi->refresh_alt_ref_frame &&
-        !cpi->use_svc) {
-#endif
+    if (!cpi->multi_arf_allowed && cpi->refresh_golden_frame &&
+        cpi->rc.is_src_frame_alt_ref && !cpi->use_svc) {
       // Preserve the previously existing golden frame and update the frame in
       // the alt ref slot instead. This is highly specific to the use of
       // alt-ref as a forward reference, and this needs to be generalized as
@@ -910,15 +904,10 @@ static int get_refresh_mask(VP9_COMP *cpi) {
              (cpi->refresh_golden_frame << cpi->alt_fb_idx);
     } else {
       int arf_idx = cpi->alt_fb_idx;
-#if CONFIG_MULTIPLE_ARF
-      // Determine which ARF buffer to use to encode this ARF frame.
-      if (cpi->multi_arf_enabled) {
-        int sn = cpi->sequence_number;
-        arf_idx = (cpi->frame_coding_order[sn] < 0) ?
-            cpi->arf_buffer_idx[sn + 1] :
-            cpi->arf_buffer_idx[sn];
+      if ((cpi->pass == 2) && cpi->multi_arf_allowed) {
+        const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
+        arf_idx = gf_group->arf_update_idx[gf_group->index];
       }
-#endif
       return (cpi->refresh_last_frame << cpi->lst_fb_idx) |
              (cpi->refresh_golden_frame << cpi->gld_fb_idx) |
              (cpi->refresh_alt_ref_frame << arf_idx);

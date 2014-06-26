@@ -37,7 +37,6 @@ static void initialize_dec() {
 
   if (!init_done) {
     vp9_init_neighbors();
-    vp9_init_quant_tables();
     init_done = 1;
   }
 }
@@ -244,8 +243,8 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
 
   // Check if the previous frame was a frame without any references to it.
   // Release frame buffer if not decoding in frame parallel mode.
-  if (!pbi->frame_parallel_decode && cm->new_fb_idx >= 0 &&
-         cm->frame_bufs[cm->new_fb_idx].ref_count == 0)
+  if (!pbi->frame_parallel_decode && cm->new_fb_idx >= 0
+      && cm->frame_bufs[cm->new_fb_idx].ref_count == 0)
     cm->release_fb_cb(cm->cb_priv,
                       &cm->frame_bufs[cm->new_fb_idx].raw_frame_buffer);
   cm->new_fb_idx = get_free_fb(cm);
@@ -260,10 +259,10 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
     // TODO(jkoleszar): Error concealment is undefined and non-normative
     // at this point, but if it becomes so, [0] may not always be the correct
     // thing to do here.
-    if (cm->frame_refs[0].idx != INT_MAX)
+    if (cm->frame_refs[0].idx != INT_MAX && cm->frame_refs[0].buf != NULL)
       cm->frame_refs[0].buf->corrupted = 1;
 
-    if (cm->frame_bufs[cm->new_fb_idx].ref_count > 0)
+    if (cm->new_fb_idx > 0 && cm->frame_bufs[cm->new_fb_idx].ref_count > 0)
       cm->frame_bufs[cm->new_fb_idx].ref_count--;
 
     return -1;
