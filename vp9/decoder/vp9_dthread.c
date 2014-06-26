@@ -279,3 +279,78 @@ void vp9_loop_filter_dealloc(VP9LfSync *lf_sync, int rows) {
     vp9_zero(*lf_sync);
   }
 }
+
+void vp9_frameworker_wait(VP9Worker* const worker, int row, int col,
+                          RefCntBuffer *ref_buf) {
+  FrameWorkerData *const worker_data = (FrameWorkerData *)worker->data1;
+  const VP9Decoder *const pbi = worker_data->pbi;
+  const RefCntBuffer *const cur_buf = pbi->cur_buf;
+
+  // Check if worker already release the ref_buf.
+  if (!worker || ref_buf->owner_worker_id == -1) return;
+
+  pthread_mutex_lock(&worker_data->stats_mutex);
+  while (!(cur_buf->row >= row && cur_buf->col >= col)
+         && pbi->cur_buf == ref_buf && ref_buf->owner_worker_id != -1) {
+    pthread_cond_wait(&worker_data->stats_cond, &worker_data->stats_mutex);
+  }
+  pthread_mutex_unlock(&worker_data->stats_mutex);
+}
+
+void vp9_frameworker_broadcast(VP9Worker* const worker, int row, int col) {
+  FrameWorkerData *const worker_data = (FrameWorkerData *)worker->data1;
+  const VP9Decoder *const pbi = worker_data->pbi;
+  RefCntBuffer *const cur_buf = pbi->cur_buf;
+
+  pthread_mutex_lock(&worker_data->stats_mutex);
+  cur_buf->row = row;
+  cur_buf->col = col;
+  pthread_cond_signal(&worker_data->stats_cond);
+  pthread_mutex_unlock(&worker_data->stats_mutex);
+}
+
+void vp9_frameworker_copy_context(VP9Worker *const dst_worker,
+                                  const VP9Worker *const src_worker) {
+  FrameWorkerData *const src_worker_data =
+      (FrameWorkerData *)dst_worker->data1;
+  FrameWorkerData *const dst_worker_data =
+      (FrameWorkerData *)src_worker->data1;
+  const VP9_COMMON *const src_cm = &src_worker_data->pbi->common;
+  VP9_COMMON *const dst_cm = &dst_worker_data->pbi->common;
+  int i;
+
+  // Wait until source frame's context is ready.
+  pthread_mutex_lock(&src_worker_data->stats_mutex);
+  while (!src_worker_data->frame_context_ready) {
+    pthread_cond_wait(&src_worker_data->stats_cond,
+                      &src_worker_data->stats_mutex);
+  }
+  pthread_mutex_unlock(&src_worker_data->stats_mutex);
+
+  dst_cm->last_width = src_cm->width;
+  dst_cm->last_height = src_cm->height;
+  dst_cm->subsampling_x = src_cm->subsampling_x;
+  dst_cm->subsampling_y = src_cm->subsampling_y;
+
+  for (i = 0; i < REF_FRAMES; ++i)
+    dst_cm->ref_frame_map[i] = src_cm->next_ref_frame_map[i];
+
+  dst_cm->last_show_frame = src_cm->show_frame;
+
+  dst_cm->prev_mip = src_cm->mip;
+  dst_cm->prev_mi = src_cm->mi;
+  dst_cm->prev_mi_grid_base = src_cm->mi_grid_base;
+  dst_cm->prev_mi_grid_visible = src_cm->mi_grid_visible;
+  dst_cm->lf.last_sharpness_level = src_cm->lf.sharpness_level;
+
+  for (i = 0; i < MAX_REF_LF_DELTAS; ++i) {
+    dst_cm->lf.last_ref_deltas[i] = src_cm->lf.ref_deltas[i];
+    dst_cm->lf.ref_deltas[i] = src_cm->lf.ref_deltas[i];
+  }
+
+  for (i = 0; i < MAX_MODE_LF_DELTAS; ++i)
+    dst_cm-> lf.last_mode_deltas[i] = src_cm->lf.mode_deltas[i];
+
+  for (i = 0; i < FRAME_CONTEXTS; ++i)
+    dst_cm-> frame_contexts[i] = src_cm->frame_contexts[i];
+}

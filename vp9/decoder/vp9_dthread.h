@@ -55,6 +55,11 @@ typedef struct FrameWorkerData {
   // It is used to make a copy of the compressed data.
   uint8_t *scratch_buffer;
   size_t scratch_buffer_size;
+
+  pthread_mutex_t stats_mutex;
+  pthread_cond_t stats_cond;
+
+  int frame_context_ready;  // Current frame's context is ready to read.
 } FrameWorkerData;
 
 // Allocate memory for loopfilter row synchronization.
@@ -70,5 +75,20 @@ void vp9_loop_filter_frame_mt(YV12_BUFFER_CONFIG *frame,
                               struct VP9Common *cm,
                               int frame_filter_level,
                               int y_only);
+
+// Wait for FrameWorker to finish decoding ref_buf to (r,c) position.
+// Note: worker may already finish decoding ref_buf and release it in order to
+// start decoding next frame. So need to check whether worker is still decoding
+// ref_buf.
+void vp9_frameworker_wait(VP9Worker* const worker, int row, int col,
+                          RefCntBuffer *ref_buf);
+
+// FrameWorker broadcasts its decoding progress so other workers that are
+// waiting it could resume decoding.
+void vp9_frameworker_broadcast(VP9Worker* const worker, int row, int col);
+
+// Copy necessary decoding context from src worker to dst worker.
+void vp9_frameworker_copy_context(VP9Worker *const dst_worker,
+                                 const VP9Worker *const src_worker);
 
 #endif  // VP9_DECODER_VP9_DTHREAD_H_

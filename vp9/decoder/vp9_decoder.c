@@ -63,6 +63,7 @@ VP9Decoder *vp9_decoder_create(BufferPool *const pool) {
 
   // Initialize the references to not point to any frame buffers.
   vpx_memset(&cm->ref_frame_map, -1, sizeof(cm->ref_frame_map));
+  vpx_memset(&cm->next_ref_frame_map, -1, sizeof(cm->next_ref_frame_map));
 
   cm->current_video_frame = 0;
   pbi->ready_for_new_data = 1;
@@ -205,12 +206,18 @@ static void swap_frame_buffers(VP9Decoder *pbi) {
   for (mask = pbi->refresh_frame_flags; mask; mask >>= 1) {
     if (mask & 1) {
       const int old_idx = cm->ref_frame_map[ref_index];
+#if CONFIG_MULTITHREAD
+      pthread_mutex_lock(&cm->buffer_pool->pool_mutex);
+#endif
       ref_cnt_fb(frame_bufs, &cm->ref_frame_map[ref_index],
                  cm->new_fb_idx);
       if (old_idx >= 0 && frame_bufs[old_idx].ref_count == 0)
         pool->release_fb_cb(pool->cb_priv,
                             &frame_bufs[old_idx].raw_frame_buffer);
     }
+#if CONFIG_MULTITHREAD
+      pthread_mutex_unlock(&cm->buffer_pool->pool_mutex);
+#endif
     ++ref_index;
   }
 
@@ -255,6 +262,17 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
     pool->release_fb_cb(pool->cb_priv,
                         &frame_bufs[cm->new_fb_idx].raw_frame_buffer);
   cm->new_fb_idx = get_free_fb(cm);
+
+  if (pbi->frame_parallel_decode) {
+    VP9Worker *worker = pbi->owner_frame_worker;
+    FrameWorkerData *const worker_data = worker->data1;
+    pbi->cur_buf = &pool->frame_bufs[cm->new_fb_idx];
+    pool->frame_bufs[cm->new_fb_idx].owner_worker_id = worker_data->worker_id;
+
+    // Reset the decoding progress.
+    pbi->cur_buf->row = -1;
+    pbi->cur_buf->col = -1;
+  }
 
   if (setjmp(cm->error.jmp)) {
     cm->error.setjmp = 0;

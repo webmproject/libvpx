@@ -303,7 +303,9 @@ static vpx_codec_err_t init_decoder(vpx_codec_alg_priv_t *ctx) {
       set_error_detail(ctx, "Failed to allocate worker_data");
       return VPX_CODEC_MEM_ERROR;
     }
-
+    worker_data->pbi->owner_frame_worker = worker;
+    worker_data->worker_id = i;
+    worker_data->frame_context_ready = 0;
     // If decoding in serial mode, FrameWorker thread could create tile worker
     // thread or loopfilter thread.
     worker_data->pbi->max_threads =
@@ -579,11 +581,17 @@ static vpx_image_t *decoder_get_frame(vpx_codec_alg_priv_t *ctx,
       *iter = img;
       // Decrease reference count of last output frame in frame parallel mode.
       if (ctx->frame_parallel_decode && ctx->last_show_frame >= 0) {
+#if CONFIG_MULTITHREAD
+        pthread_mutex_lock(&cm->buffer_pool->pool_mutex);
+#endif
         --frame_bufs[ctx->last_show_frame].ref_count;
         if (frame_bufs[ctx->last_show_frame].ref_count == 0) {
           pool->release_fb_cb(pool->cb_priv,
               &frame_bufs[ctx->last_show_frame].raw_frame_buffer);
         }
+#if CONFIG_MULTITHREAD
+        pthread_mutex_unlock(&cm->buffer_pool->pool_mutex);
+#endif
       }
       ctx->last_show_frame = worker_data->pbi->common.new_fb_idx;
     }
