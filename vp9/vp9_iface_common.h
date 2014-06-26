@@ -31,6 +31,7 @@ static void yuvconfig2image(vpx_image_t *img, const YV12_BUFFER_CONFIG  *yv12,
     img->fmt = VPX_IMG_FMT_I420;
     bps = 12;
   }
+  img->bit_depth = 8;
   img->w = yv12->y_stride;
   img->h = ALIGN_POWER_OF_TWO(yv12->y_height + 2 * VP9_ENC_BORDER_IN_PIXELS, 3);
   img->d_w = yv12->y_crop_width;
@@ -49,6 +50,7 @@ static void yuvconfig2image(vpx_image_t *img, const YV12_BUFFER_CONFIG  *yv12,
   if (yv12->flags & YV12_FLAG_HIGH) {
     // VPX IMG uses byte strides and a pointer to the first byte of the image
     img->fmt |= VPX_IMG_FMT_HIGH;
+    img->bit_depth = 16;
     img->planes[VPX_PLANE_Y]     = (uint8_t*)
         CONVERT_TO_SHORTPTR(yv12->y_buffer);
     img->planes[VPX_PLANE_U]     = (uint8_t*)
