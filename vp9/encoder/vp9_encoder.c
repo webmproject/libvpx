@@ -1514,7 +1514,7 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
   } else { /* For non key/golden frames */
     if (cpi->refresh_alt_ref_frame) {
       int arf_idx = cpi->alt_fb_idx;
-      if (cpi->pass == 2) {
+      if ((cpi->pass == 2) && cpi->multi_arf_allowed) {
         const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
         arf_idx = gf_group->arf_update_idx[gf_group->index];
       }
@@ -2481,7 +2481,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
       cm->show_frame = 1;
       cm->intra_only = 0;
 
-      // Check to see if the frame should be encoded is an arf overlay.
+      // Check to see if the frame should be encoded as an arf overlay.
       check_src_altref(cpi);
     }
   }
