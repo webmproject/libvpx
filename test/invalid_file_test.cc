@@ -97,6 +97,7 @@ const char *const kVP9InvalidFileTests[] = {
   "invalid-vp90-01.webm",
   "invalid-vp90-02.webm",
   "invalid-vp90-2-00-quantizer-00.webm.ivf.s5861_r01-05_b6-.ivf",
+  "invalid-vp90-03.webm",
 };
 
 #define NELEMENTS(x) static_cast<int>(sizeof(x) / sizeof(x[0]))

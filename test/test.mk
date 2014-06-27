@@ -766,6 +766,8 @@ LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += invalid-vp90-01.webm
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += invalid-vp90-01.webm.res
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += invalid-vp90-02.webm
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += invalid-vp90-02.webm.res
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += invalid-vp90-03.webm
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += invalid-vp90-03.webm.res
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += invalid-vp90-2-00-quantizer-00.webm.ivf.s5861_r01-05_b6-.ivf
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += invalid-vp90-2-00-quantizer-00.webm.ivf.s5861_r01-05_b6-.ivf.res
 
