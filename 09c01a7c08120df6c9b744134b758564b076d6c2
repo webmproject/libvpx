@@ -16,6 +16,24 @@
       "revId": "09c01a7c08120df6c9b744134b758564b076d6c2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//iY4\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-06-27T18:33:59Z",
+      "side": 1,
+      "message": "No. It means that only 16x16 is used. This patch is an improvement over current speed 6 partitioning, which is a little better than fixed 16x16 (please refer to: http://git.chromium.org/gitweb/?p\u003dwebm/libvpx.git;a\u003dcommit;h\u003d4e66293fcb5b4779490faf8f40300e7e0096640e)",
+      "parentUuid": "AAAAdn//iZA\u003d",
+      "revId": "09c01a7c08120df6c9b744134b758564b076d6c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
