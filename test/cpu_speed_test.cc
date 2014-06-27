@@ -17,6 +17,8 @@
 
 namespace {
 
+const int kMaxPSNR = 100;
+
 class CpuSpeedTest : public ::libvpx_test::EncoderTest,
     public ::libvpx_test::CodecTestWith2Params<
         libvpx_test::TestMode, int> {
@@ -24,7 +26,8 @@ class CpuSpeedTest : public ::libvpx_test::EncoderTest,
   CpuSpeedTest()
       : EncoderTest(GET_PARAM(0)),
         encoding_mode_(GET_PARAM(1)),
-        set_cpu_used_(GET_PARAM(2)) {}
+        set_cpu_used_(GET_PARAM(2)),
+        min_psnr_(kMaxPSNR) {}
   virtual ~CpuSpeedTest() {}
 
   virtual void SetUp() {
@@ -37,6 +40,10 @@ class CpuSpeedTest : public ::libvpx_test::EncoderTest,
       cfg_.g_lag_in_frames = 0;
       cfg_.rc_end_usage = VPX_CBR;
     }
+  }
+
+  virtual void BeginPassHook(unsigned int /*pass*/) {
+    min_psnr_ = kMaxPSNR;
   }
 
   virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
@@ -57,8 +64,14 @@ class CpuSpeedTest : public ::libvpx_test::EncoderTest,
     }
   }
 
+  virtual void PSNRPktHook(const vpx_codec_cx_pkt_t *pkt) {
+    if (pkt->data.psnr.psnr[0] < min_psnr_)
+      min_psnr_ = pkt->data.psnr.psnr[0];
+  }
+
   ::libvpx_test::TestMode encoding_mode_;
   int set_cpu_used_;
+  double min_psnr_;
 };
 
 TEST_P(CpuSpeedTest, TestQ0) {
@@ -75,7 +88,10 @@ TEST_P(CpuSpeedTest, TestQ0) {
   ::libvpx_test::I420VideoSource video("hantro_odd.yuv", 208, 144, 30, 1, 0,
                                        20);
 
+  init_flags_ = VPX_CODEC_USE_PSNR;
+
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  EXPECT_GE(min_psnr_, kMaxPSNR);
 }
 
 
