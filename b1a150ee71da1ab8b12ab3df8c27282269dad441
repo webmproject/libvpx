@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//idw\u003d",
+        "filename": "vp9/common/vp9_scale.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-27T15:45:42Z",
+      "side": 1,
+      "message": "Change naming:\ncheck_scale_factors --\u003e valid_ref_frame_size\nother_[w|h] --\u003e reference_[w|h]\nthis_[w|h] --\u003e new_[w|h] (or current_[w|h]?)",
+      "revId": "b1a150ee71da1ab8b12ab3df8c27282269dad441",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ids\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 673,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-06-27T15:45:42Z",
+      "side": 1,
+      "message": "RefBuffer *const ref_frame\u003d \u0026cm-\u003eframe_refs[i];",
+      "revId": "b1a150ee71da1ab8b12ab3df8c27282269dad441",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
