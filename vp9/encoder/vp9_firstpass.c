@@ -1360,7 +1360,8 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
     twopass->gf_group.arf_src_offset[frame_index] =
       (unsigned char)(rc->baseline_gf_interval - 1);
     twopass->gf_group.arf_update_idx[frame_index] = arf_buffer_indices[0];
-    twopass->gf_group.arf_ref_idx[frame_index] = arf_buffer_indices[0];
+    twopass->gf_group.arf_ref_idx[frame_index] =
+      arf_buffer_indices[cpi->multi_arf_enabled && rc->source_alt_ref_active];
     ++frame_index;
 
     if (cpi->multi_arf_enabled) {
