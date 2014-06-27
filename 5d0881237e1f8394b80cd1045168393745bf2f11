@@ -16,6 +16,24 @@
       "revId": "5d0881237e1f8394b80cd1045168393745bf2f11",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//iTY\u003d",
+        "filename": "test/cpu_speed_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-06-27T23:14:52Z",
+      "side": 1,
+      "message": "I added a test to LosslessTestLarge. I\u0027d rather the speed features test not turn into a kitchen sink, \nhttps://gerrit.chromium.org/gerrit/#/c/70666/",
+      "parentUuid": "AAAAdn//iYE\u003d",
+      "revId": "5d0881237e1f8394b80cd1045168393745bf2f11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
