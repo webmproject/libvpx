@@ -1048,14 +1048,6 @@ EOF
         esac
     ;;
     x86*)
-        bits=32
-        enabled x86_64 && bits=64
-        check_cpp <<EOF && bits=x32
-#ifndef __ILP32__
-#error "not x32"
-#endif
-EOF
-
         case  ${tgt_os} in
             win*)
                 enabled gcc && add_cflags -fno-common
@@ -1094,8 +1086,6 @@ EOF
                 esac
             ;;
             gcc*)
-                add_cflags -m${bits}
-                add_ldflags -m${bits}
                 link_with_cc=gcc
                 tune_cflags="-march="
                 setup_gnu_toolchain
@@ -1117,6 +1107,20 @@ EOF
                          soft_disable avx2
                     ;;
                 esac
+            ;;
+        esac
+
+        bits=32
+        enabled x86_64 && bits=64
+        check_cpp <<EOF && bits=x32
+#ifndef __ILP32__
+#error "not x32"
+#endif
+EOF
+        case ${tgt_cc} in
+            gcc*)
+                add_cflags -m${bits}
+                add_ldflags -m${bits}
             ;;
         esac
 
