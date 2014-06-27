@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//if4\u003d",
+        "filename": "test/cpu_speed_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-27T01:28:43Z",
+      "side": 1,
+      "message": "not that download speed is a concern, but I wonder if we should be zipping these or storing them as vp9 lossless given we have a decoder...",
+      "revId": "dd38e268fa947ecd008f8a11237a8493d2daa439",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//if8\u003d",
+        "filename": "test/cpu_speed_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-06-27T01:28:43Z",
+      "side": 1,
+      "message": "seems VP9E_SET_LOSSLESS is unnecessary if this is sufficient",
+      "revId": "dd38e268fa947ecd008f8a11237a8493d2daa439",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
