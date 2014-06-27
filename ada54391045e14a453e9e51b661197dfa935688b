@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//iaM\u003d",
+        "filename": "test/cpu_speed_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-06-27T17:26:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//ifs\u003d",
+      "revId": "ada54391045e14a453e9e51b661197dfa935688b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//ifo\u003d",
         "filename": "test/cpu_speed_test.cc",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-06-27T01:35:47Z",
       "side": 1,
       "message": "could be psnr() or min_psnr(), but not strictly necessary in  the test due to protected",
+      "revId": "ada54391045e14a453e9e51b661197dfa935688b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//iaU\u003d",
+        "filename": "test/cpu_speed_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-06-27T17:26:59Z",
+      "side": 1,
+      "message": "Since it is protected as you mentioned the getter seems superfluous.",
+      "parentUuid": "AAAAdn//ifo\u003d",
       "revId": "ada54391045e14a453e9e51b661197dfa935688b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
