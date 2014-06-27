@@ -144,7 +144,9 @@ void vp9_pick_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
   lf->sharpness_level = cm->frame_type == KEY_FRAME ? 0
                                                     : cpi->oxcf.sharpness;
 
-  if (method == LPF_PICK_FROM_Q) {
+  if (method == LPF_PICK_MINIMAL_LPF && lf->filter_level) {
+      lf->filter_level = 0;
+  } else if (method >= LPF_PICK_FROM_Q) {
     const int min_filter_level = 0;
     const int max_filter_level = get_max_filter_level(cpi);
     const int q = vp9_ac_quant(cm->base_qindex, 0);

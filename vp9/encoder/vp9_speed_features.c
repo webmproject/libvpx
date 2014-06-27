@@ -280,7 +280,7 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->reuse_inter_pred_sby = 1;
   }
   if (speed >= 7) {
-    sf->disable_filter_search_var_thresh = 1000;
+    sf->lpf_pick = LPF_PICK_MINIMAL_LPF;
   }
   if (speed >= 8) {
     int i;

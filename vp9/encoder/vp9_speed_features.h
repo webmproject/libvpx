@@ -73,6 +73,8 @@ typedef enum {
   LPF_PICK_FROM_SUBIMAGE,
   // Estimate the level based on quantizer and frame type
   LPF_PICK_FROM_Q,
+  // Pick 0 to disable LPF if LPF was enabled last frame
+  LPF_PICK_MINIMAL_LPF
 } LPF_PICK_METHOD;
 
 typedef enum {
