@@ -34,6 +34,23 @@
       "revId": "09c01a7c08120df6c9b744134b758564b076d6c2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//iUc\u003d",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 579,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-06-27T22:40:49Z",
+      "side": 1,
+      "message": "unintended change here?",
+      "revId": "09c01a7c08120df6c9b744134b758564b076d6c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
