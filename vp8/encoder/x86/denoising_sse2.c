@@ -18,7 +18,7 @@
 #include "vpx_ports/emmintrin_compat.h"
 
 /* Compute the sum of all pixel differences of this MB. */
-static inline unsigned int abs_sum_diff_16x1(__m128i acc_diff) {
+static INLINE unsigned int abs_sum_diff_16x1(__m128i acc_diff) {
   const __m128i k_1 = _mm_set1_epi16(1);
   const __m128i acc_diff_lo = _mm_srai_epi16(
       _mm_unpacklo_epi8(acc_diff, acc_diff), 8);
@@ -44,7 +44,7 @@ int vp8_denoiser_filter_sse2(unsigned char *mc_running_avg_y,
 {
     unsigned char *running_avg_y_start = running_avg_y;
     unsigned char *sig_start = sig;
-    int sum_diff_thresh;
+    unsigned int sum_diff_thresh;
     int r;
     int shift_inc  = (increase_denoising &&
         motion_magnitude <= MOTION_MAGNITUDE_THRESHOLD) ? 1 : 0;
@@ -191,7 +191,7 @@ int vp8_denoiser_filter_uv_sse2(unsigned char *mc_running_avg,
                              int increase_denoising) {
     unsigned char *running_avg_start = running_avg;
     unsigned char *sig_start = sig;
-    int sum_diff_thresh;
+    unsigned int sum_diff_thresh;
     int r;
     int shift_inc  = (increase_denoising &&
         motion_magnitude <= MOTION_MAGNITUDE_THRESHOLD_UV) ? 1 : 0;
