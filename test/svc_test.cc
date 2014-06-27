@@ -41,7 +41,6 @@ class SvcTest : public ::testing::Test {
   virtual ~SvcTest() {}
 
   virtual void SetUp() {
-    svc_.encoding_mode = INTER_LAYER_PREDICTION_IP;
     svc_.log_level = SVC_LOG_DEBUG;
     svc_.log_print = 0;
 
@@ -131,22 +130,13 @@ TEST_F(SvcTest, SetLayersOption) {
   EXPECT_EQ(3, svc_.spatial_layers);
 }
 
-TEST_F(SvcTest, SetEncodingMode) {
-  vpx_codec_err_t res = vpx_svc_set_options(&svc_, "encoding-mode=alt-ip");
-  EXPECT_EQ(VPX_CODEC_OK, res);
-  res = vpx_svc_init(&svc_, &codec_, vpx_codec_vp9_cx(), &codec_enc_);
-  EXPECT_EQ(VPX_CODEC_OK, res);
-  codec_initialized_ = true;
-  EXPECT_EQ(ALT_INTER_LAYER_PREDICTION_IP, svc_.encoding_mode);
-}
-
 TEST_F(SvcTest, SetMultipleOptions) {
-  vpx_codec_err_t res = vpx_svc_set_options(&svc_, "layers=2 encoding-mode=ip");
+  vpx_codec_err_t res =
+      vpx_svc_set_options(&svc_, "layers=2 scale-factors=1/3,2/3");
   res = vpx_svc_init(&svc_, &codec_, vpx_codec_vp9_cx(), &codec_enc_);
   EXPECT_EQ(VPX_CODEC_OK, res);
   codec_initialized_ = true;
   EXPECT_EQ(2, svc_.spatial_layers);
-  EXPECT_EQ(INTER_LAYER_PREDICTION_IP, svc_.encoding_mode);
 }
 
 TEST_F(SvcTest, SetScaleFactorsOption) {

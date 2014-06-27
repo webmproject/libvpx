@@ -23,13 +23,6 @@
 extern "C" {
 #endif
 
-typedef enum SVC_ENCODING_MODE {
-  INTER_LAYER_PREDICTION_I,
-  ALT_INTER_LAYER_PREDICTION_IP,
-  INTER_LAYER_PREDICTION_IP,
-  USE_GOLDEN_FRAME
-} SVC_ENCODING_MODE;
-
 typedef enum SVC_LOG_LEVEL {
   SVC_LOG_ERROR,
   SVC_LOG_INFO,
@@ -39,7 +32,6 @@ typedef enum SVC_LOG_LEVEL {
 typedef struct {
   // public interface to svc_command options
   int spatial_layers;               // number of layers
-  SVC_ENCODING_MODE encoding_mode;  // svc encoding strategy
   SVC_LOG_LEVEL log_level;  // amount of information to display
   int log_print;  // when set, printf log messages instead of returning the
                   // message with svc_get_message
