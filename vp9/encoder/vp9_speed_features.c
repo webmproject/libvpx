@@ -279,8 +279,10 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     // This feature is only enabled when partition search is disabled.
     sf->reuse_inter_pred_sby = 1;
   }
-
   if (speed >= 7) {
+    sf->disable_filter_search_var_thresh = 1000;
+  }
+  if (speed >= 8) {
     int i;
     for (i = 0; i < BLOCK_SIZES; ++i)
       sf->inter_mode_mask[i] = INTER_NEAREST;
