@@ -16,6 +16,24 @@
       "revId": "8240ba23b2655eaf5cf54a6d015dc8818a4610fc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//iZI\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 520,
+      "author": {
+        "id": 1004730
+      },
+      "writtenOn": "2014-06-27T18:24:18Z",
+      "side": 1,
+      "message": "It looks like it\u0027s indented to the correct level... Expand the code a bit to see.",
+      "parentUuid": "AAAAdn//i0c\u003d",
+      "revId": "8240ba23b2655eaf5cf54a6d015dc8818a4610fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
