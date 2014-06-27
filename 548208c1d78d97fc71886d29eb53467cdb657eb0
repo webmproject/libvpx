@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//iZQ\u003d",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 283,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-06-27T18:21:13Z",
+      "side": 1,
+      "message": "source_var_thresh will be calculated from variance histogram. Please see https://gerrit.chromium.org/gerrit/#/c/70621/",
+      "revId": "548208c1d78d97fc71886d29eb53467cdb657eb0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
