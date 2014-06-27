@@ -547,6 +547,27 @@ static void choose_partitioning(VP9_COMP *cpi,
   }
 }
 
+#if CONFIG_TRANSCODE
+// TODO(jingning) This is the place where the encoder reads preliminary
+// coding mode information from external file, and converts them into
+// effective VP9 conformable coding decisions. Certain optimization work
+// may be applied herein.
+static void mode_info_conversion(VP9_COMP *cpi, MACROBLOCK *x,
+                                 int mi_row, int mi_col) {
+  VP9_COMMON     *cm = &cpi->common;
+  MACROBLOCKD    *xd = &x->e_mbd;
+  MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
+
+  if (cm->tx_mode != TX_MODE_SELECT) {
+    mbmi->tx_size = MIN(max_txsize_lookup[mbmi->sb_type],
+                        tx_mode_to_biggest_tx_size[cpi->common.tx_mode]);
+  }
+
+  if (cm->interp_filter != SWITCHABLE)
+    mbmi->interp_filter = cm->interp_filter;
+}
+#endif
+
 static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
                          int mi_row, int mi_col, BLOCK_SIZE bsize,
                          int output_enabled) {
@@ -570,6 +591,10 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   assert(mi->mbmi.sb_type == bsize);
 
   *mi_addr = *mi;
+
+#if CONFIG_TRANSCODE
+  mode_info_conversion(cpi, x, mi_row, mi_col);
+#endif
 
   // If segmentation in use
   if (seg->enabled && output_enabled) {
@@ -3422,10 +3447,6 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
 
   set_ref_ptrs(cm, xd, mbmi->ref_frame[0], mbmi->ref_frame[1]);
 
-#if CONFIG_TRANSCODE
-  if (cm->interp_filter != SWITCHABLE)
-    mbmi->interp_filter = cm->interp_filter;
-#endif
   // Experimental code. Special case for gf and arf zeromv modes.
   // Increase zbin size to suppress noise
   cpi->zbin_mode_boost = get_zbin_mode_boost(mbmi,
