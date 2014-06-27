@@ -25,7 +25,8 @@ MAKE_JOBS=1
 LIBVPX_SOURCE_DIR=$(dirname "$0" | sed -e s,/build/make,,)
 LIPO=$(xcrun -sdk iphoneos${SDK} -find lipo)
 ORIG_PWD="$(pwd)"
-TARGETS="armv6-darwin-gcc
+TARGETS="arm64-darwin-gcc
+         armv6-darwin-gcc
          armv7-darwin-gcc
          armv7s-darwin-gcc
          x86-iphonesimulator-gcc
@@ -54,6 +55,9 @@ build_target() {
 target_to_preproc_symbol() {
   target="$1"
   case "${target}" in
+    arm64-*)
+      echo "__aarch64__"
+      ;;
     armv6-*)
       echo "__ARM_ARCH_6__"
       ;;
