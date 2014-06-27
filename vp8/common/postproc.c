@@ -393,12 +393,12 @@ void vp8_de_noise(VP8_COMMON                 *cm,
                   int                         low_var_thresh,
                   int                         flag)
 {
+    int mbr;
     double level = 6.0e-05 * q * q * q - .0067 * q * q + .306 * q + .0065;
     int ppl = (int)(level + .5);
-    int mb_rows = source->y_width >> 4;
-    int mb_cols = source->y_height >> 4;
+    int mb_rows = cm->mb_rows;
+    int mb_cols = cm->mb_cols;
     unsigned char *limits = cm->pp_limits_buffer;;
-    int mbr, mbc;
     (void) post;
     (void) low_var_thresh;
     (void) flag;
