@@ -76,6 +76,7 @@ int vp9_get_frame_buffer(void *cb_priv, size_t min_size,
 int vp9_release_frame_buffer(void *cb_priv, vpx_codec_frame_buffer_t *fb) {
   InternalFrameBuffer *const int_fb = (InternalFrameBuffer *)fb->priv;
   (void)cb_priv;
-  int_fb->in_use = 0;
+  if (int_fb)
+    int_fb->in_use = 0;
   return 0;
 }

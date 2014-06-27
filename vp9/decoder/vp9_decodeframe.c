@@ -667,9 +667,17 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
   if (!found)
     read_frame_size(rb, &width, &height);
 
-  if (width <= 0 || height <= 0)
-    vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
-                       "Referenced frame with invalid size");
+  // Check that each of the frames that this frame references has valid
+  // dimensions.
+  for (i = 0; i < REFS_PER_FRAME; ++i) {
+    RefBuffer *const ref_frame = &cm->frame_refs[i];
+    const int ref_width = ref_frame->buf->y_width;
+    const int ref_height = ref_frame->buf->y_height;
+
+    if (!valid_ref_frame_size(ref_width, ref_height, width, height))
+      vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+                         "Referenced frame has invalid size");
+  }
 
   apply_frame_size(cm, width, height);
   setup_display_size(cm, rb);
@@ -1142,12 +1150,12 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
       setup_frame_size(cm, rb);
     } else {
       pbi->refresh_frame_flags = vp9_rb_read_literal(rb, REF_FRAMES);
-
       for (i = 0; i < REFS_PER_FRAME; ++i) {
         const int ref = vp9_rb_read_literal(rb, REF_FRAMES_LOG2);
         const int idx = cm->ref_frame_map[ref];
-        cm->frame_refs[i].idx = idx;
-        cm->frame_refs[i].buf = &cm->frame_bufs[idx].buf;
+        RefBuffer *const ref_frame = &cm->frame_refs[i];
+        ref_frame->idx = idx;
+        ref_frame->buf = &cm->frame_bufs[idx].buf;
         cm->ref_frame_sign_bias[LAST_FRAME + i] = vp9_rb_read_bit(rb);
       }
 
