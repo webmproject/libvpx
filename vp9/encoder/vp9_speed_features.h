@@ -357,6 +357,10 @@ typedef struct SPEED_FEATURES {
   // can be reused in final block encoding process. It is enabled only for real-
   // time mode speed 6.
   int reuse_inter_pred_sby;
+
+  // This variable sets the encode_breakout threshold. Currently, it is only
+  // enabled in real time mode.
+  int encode_breakout_thresh;
 } SPEED_FEATURES;
 
 struct VP9_COMP;
