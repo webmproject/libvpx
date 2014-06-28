@@ -36,6 +36,17 @@ class LosslessTestLarge : public ::libvpx_test::EncoderTest,
     SetMode(encoding_mode_);
   }
 
+  virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
+                                  ::libvpx_test::Encoder *encoder) {
+    if (video->frame() == 1) {
+      // Only call Control if quantizer > 0 to verify that using quantizer
+      // alone will activate lossless
+      if (cfg_.rc_max_quantizer > 0 || cfg_.rc_min_quantizer > 0) {
+        encoder->Control(VP9E_SET_LOSSLESS, 1);
+      }
+    }
+  }
+
   virtual void BeginPassHook(unsigned int /*pass*/) {
     psnr_ = kMaxPsnr;
     nframes_ = 0;
@@ -86,6 +97,25 @@ TEST_P(LosslessTestLarge, TestLossLessEncoding444) {
 
   init_flags_ = VPX_CODEC_USE_PSNR;
 
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  const double psnr_lossless = GetMinPsnr();
+  EXPECT_GE(psnr_lossless, kMaxPsnr);
+}
+
+TEST_P(LosslessTestLarge, TestLossLessEncodingCtrl) {
+  const vpx_rational timebase = { 33333333, 1000000000 };
+  cfg_.g_timebase = timebase;
+  cfg_.rc_target_bitrate = 2000;
+  cfg_.g_lag_in_frames = 25;
+  // Intentionally set Q > 0, to make sure control can be used to activate
+  // lossless
+  cfg_.rc_min_quantizer = 10;
+  cfg_.rc_max_quantizer = 20;
+
+  init_flags_ = VPX_CODEC_USE_PSNR;
+
+  libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+                                     timebase.den, timebase.num, 0, 10);
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
   const double psnr_lossless = GetMinPsnr();
   EXPECT_GE(psnr_lossless, kMaxPsnr);
