@@ -78,7 +78,7 @@ string DecodeFile(const string &filename) {
         ref.idx = rnd.Rand8() % 3;
         decoder.Control(VP9_GET_REFERENCE, &ref);
 
-        CheckUserPrivateData(ref.img.user_priv, &frame_num);
+        CheckUserPrivateData(ref.img.user_priv, NULL);
       }
       md5.Add(img);
     }
