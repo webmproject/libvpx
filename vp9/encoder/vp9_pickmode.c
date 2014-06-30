@@ -290,6 +290,93 @@ static void free_pred_buffer(PRED_BUFFER *p) {
   p->in_use = 0;
 }
 
+static void encode_breakout_test(VP9_COMP *cpi, MACROBLOCK *x,
+                                 BLOCK_SIZE bsize, int mi_row, int mi_col,
+                                 MV_REFERENCE_FRAME ref_frame,
+                                 PREDICTION_MODE this_mode,
+                                 unsigned int var_y, unsigned int sse_y,
+                                 struct buf_2d yv12_mb[][MAX_MB_PLANE],
+                                 int *rate, int64_t *dist) {
+  MACROBLOCKD *xd = &x->e_mbd;
+  MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
+
+  const BLOCK_SIZE uv_size = get_plane_block_size(bsize, &xd->plane[1]);
+  unsigned int var = var_y, sse = sse_y;
+  // Skipping threshold for ac.
+  unsigned int thresh_ac;
+  // Skipping threshold for dc.
+  unsigned int thresh_dc;
+  if (x->encode_breakout > 0) {
+    // Set a maximum for threshold to avoid big PSNR loss in low bit rate
+    // case. Use extreme low threshold for static frames to limit
+    // skipping.
+    const unsigned int max_thresh = 36000;
+    // The encode_breakout input
+    const unsigned int min_thresh =
+        MIN(((unsigned int)x->encode_breakout << 4), max_thresh);
+
+    // Calculate threshold according to dequant value.
+    thresh_ac = (xd->plane[0].dequant[1] * xd->plane[0].dequant[1]) / 9;
+    thresh_ac = clamp(thresh_ac, min_thresh, max_thresh);
+
+    // Adjust ac threshold according to partition size.
+    thresh_ac >>=
+        8 - (b_width_log2_lookup[bsize] + b_height_log2_lookup[bsize]);
+
+    thresh_dc = (xd->plane[0].dequant[0] * xd->plane[0].dequant[0] >> 6);
+  } else {
+    thresh_ac = 0;
+    thresh_dc = 0;
+  }
+
+  // Y skipping condition checking for ac and dc.
+  if (var <= thresh_ac && (sse - var) <= thresh_dc) {
+    unsigned int sse_u, sse_v;
+    unsigned int var_u, var_v;
+
+    // Skip UV prediction unless breakout is zero (lossless) to save
+    // computation with low impact on the result
+    if (x->encode_breakout == 0) {
+      xd->plane[1].pre[0] = yv12_mb[ref_frame][1];
+      xd->plane[2].pre[0] = yv12_mb[ref_frame][2];
+      vp9_build_inter_predictors_sbuv(xd, mi_row, mi_col, bsize);
+    }
+
+    var_u = cpi->fn_ptr[uv_size].vf(x->plane[1].src.buf,
+                                    x->plane[1].src.stride,
+                                    xd->plane[1].dst.buf,
+                                    xd->plane[1].dst.stride, &sse_u);
+
+    // U skipping condition checking
+    if ((var_u * 4 <= thresh_ac) && (sse_u - var_u <= thresh_dc)) {
+      var_v = cpi->fn_ptr[uv_size].vf(x->plane[2].src.buf,
+                                      x->plane[2].src.stride,
+                                      xd->plane[2].dst.buf,
+                                      xd->plane[2].dst.stride, &sse_v);
+
+      // V skipping condition checking
+      if ((var_v * 4 <= thresh_ac) && (sse_v - var_v <= thresh_dc)) {
+        x->skip = 1;
+
+        // The cost of skip bit needs to be added.
+        *rate = cpi->inter_mode_cost[mbmi->mode_context[ref_frame]]
+                                     [INTER_OFFSET(this_mode)];
+
+        // More on this part of rate
+        // rate += vp9_cost_bit(vp9_get_skip_prob(cm, xd), 1);
+
+        // Scaling factor for SSE from spatial domain to frequency
+        // domain is 16. Adjust distortion accordingly.
+        // TODO(yunqingwang): In this function, only y-plane dist is
+        // calculated.
+        *dist = (sse << 4);  // + ((sse_u + sse_v) << 4);
+
+        // *disable_skip = 1;
+      }
+    }
+  }
+}
+
 // TODO(jingning) placeholder for inter-frame non-RD mode decision.
 // this needs various further optimizations. to be continued..
 int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
@@ -562,81 +649,11 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       // Skipping checking: test to see if this block can be reconstructed by
       // prediction only.
       if (cpi->allow_encode_breakout) {
-        const BLOCK_SIZE uv_size = get_plane_block_size(bsize, &xd->plane[1]);
-        unsigned int var = var_y, sse = sse_y;
-        // Skipping threshold for ac.
-        unsigned int thresh_ac;
-        // Skipping threshold for dc.
-        unsigned int thresh_dc;
-        if (x->encode_breakout > 0) {
-          // Set a maximum for threshold to avoid big PSNR loss in low bit rate
-          // case. Use extreme low threshold for static frames to limit
-          // skipping.
-          const unsigned int max_thresh = 36000;
-          // The encode_breakout input
-          const unsigned int min_thresh =
-              MIN(((unsigned int)x->encode_breakout << 4), max_thresh);
-
-          // Calculate threshold according to dequant value.
-          thresh_ac = (xd->plane[0].dequant[1] * xd->plane[0].dequant[1]) / 9;
-          thresh_ac = clamp(thresh_ac, min_thresh, max_thresh);
-
-          // Adjust ac threshold according to partition size.
-          thresh_ac >>=
-              8 - (b_width_log2_lookup[bsize] + b_height_log2_lookup[bsize]);
-
-          thresh_dc = (xd->plane[0].dequant[0] * xd->plane[0].dequant[0] >> 6);
-        } else {
-          thresh_ac = 0;
-          thresh_dc = 0;
-        }
-
-        // Y skipping condition checking for ac and dc.
-        if (var <= thresh_ac && (sse - var) <= thresh_dc) {
-          unsigned int sse_u, sse_v;
-          unsigned int var_u, var_v;
-
-          // Skip UV prediction unless breakout is zero (lossless) to save
-          // computation with low impact on the result
-          if (x->encode_breakout == 0) {
-            xd->plane[1].pre[0] = yv12_mb[ref_frame][1];
-            xd->plane[2].pre[0] = yv12_mb[ref_frame][2];
-            vp9_build_inter_predictors_sbuv(xd, mi_row, mi_col, bsize);
-          }
-
-          var_u = cpi->fn_ptr[uv_size].vf(x->plane[1].src.buf,
-                                          x->plane[1].src.stride,
-                                          xd->plane[1].dst.buf,
-                                          xd->plane[1].dst.stride, &sse_u);
-
-          // U skipping condition checking
-          if ((var_u * 4 <= thresh_ac) && (sse_u - var_u <= thresh_dc)) {
-            var_v = cpi->fn_ptr[uv_size].vf(x->plane[2].src.buf,
-                                            x->plane[2].src.stride,
-                                            xd->plane[2].dst.buf,
-                                            xd->plane[2].dst.stride, &sse_v);
-
-            // V skipping condition checking
-            if ((var_v * 4 <= thresh_ac) && (sse_v - var_v <= thresh_dc)) {
-              x->skip = 1;
-
-              // The cost of skip bit needs to be added.
-              rate = rate_mv;
-              rate += cpi->inter_mode_cost[mbmi->mode_context[ref_frame]]
-                                           [INTER_OFFSET(this_mode)];
-
-              // More on this part of rate
-              // rate += vp9_cost_bit(vp9_get_skip_prob(cm, xd), 1);
-
-              // Scaling factor for SSE from spatial domain to frequency
-              // domain is 16. Adjust distortion accordingly.
-              // TODO(yunqingwang): In this function, only y-plane dist is
-              // calculated.
-              dist = (sse << 4);  // + ((sse_u + sse_v) << 4);
-              this_rd = RDCOST(x->rdmult, x->rddiv, rate, dist);
-              // *disable_skip = 1;
-            }
-          }
+        encode_breakout_test(cpi, x, bsize, mi_row, mi_col, ref_frame,
+                             this_mode, var_y, sse_y, yv12_mb, &rate, &dist);
+        if (x->skip) {
+          rate += rate_mv;
+          this_rd = RDCOST(x->rdmult, x->rddiv, rate, dist);
         }
       }
 
