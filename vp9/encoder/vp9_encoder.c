@@ -790,6 +790,7 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
   // For the current check in all the execution paths are defaulted to 0
   // pending further tuning and testing. The code is left in place here
   // as a place holder in regard to the required paths.
+  cpi->multi_arf_last_grp_enabled = 0;
   if (cpi->pass == 2) {
     if (cpi->use_svc) {
       cpi->multi_arf_allowed = 0;

@@ -428,6 +428,7 @@ typedef struct VP9_COMP {
 
   int multi_arf_allowed;
   int multi_arf_enabled;
+  int multi_arf_last_grp_enabled;
 
 #if CONFIG_DENOISING
   VP9_DENOISER denoiser;
