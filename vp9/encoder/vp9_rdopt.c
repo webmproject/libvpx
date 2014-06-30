@@ -3551,8 +3551,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 }
 
 int64_t vp9_rd_pick_inter_mode_sb_seg_skip(VP9_COMP *cpi, MACROBLOCK *x,
-                                           const TileInfo *const tile,
-                                           int mi_row, int mi_col,
                                            int *returnrate,
                                            int64_t *returndistortion,
                                            BLOCK_SIZE bsize,
