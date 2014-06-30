@@ -653,12 +653,7 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
 
 #if CONFIG_DENOISING
   vp9_denoiser_alloc(&(cpi->denoiser), cm->width, cm->height,
-                     // TODO(tkopp) An unrelated bug causes
-                     // cm->subsampling_{x,y} to be uninitialized at this point
-                     // in execution. For now we assume YUV-420, which is x/y
-                     // subsampling of 1.
-                     1, 1,
-                     // cm->subsampling_x, cm->subsampling_y,
+                     cm->subsampling_x, cm->subsampling_y,
                      VP9_ENC_BORDER_IN_PIXELS);
 #endif
 }
@@ -1271,7 +1266,7 @@ int vp9_update_entropy(VP9_COMP * cpi, int update) {
 }
 
 
-#if defined(OUTPUT_YUV_SRC) || defined(OUTPUT_YUV_DENOISED)
+#if defined(OUTPUT_YUV_SRC)
 void vp9_write_yuv_frame(YV12_BUFFER_CONFIG *s, FILE *f) {
   uint8_t *src = s->y_buffer;
   int h = s->y_height;
@@ -1295,6 +1290,38 @@ void vp9_write_yuv_frame(YV12_BUFFER_CONFIG *s, FILE *f) {
   do {
     fwrite(src, s->uv_width, 1, f);
     src += s->uv_stride;
+  } while (--h);
+}
+#endif
+
+#if defined(OUTPUT_YUV_DENOISED)
+// The denoiser buffer is allocated as a YUV 440 buffer. This function writes it
+// as YUV 420. We simply use the top-left pixels of the UV buffers, since we do
+// not denoise the UV channels at this time. If ever we implement UV channel
+// denoising we will have to modify this.
+void vp9_write_yuv_frame_420(YV12_BUFFER_CONFIG *s, FILE *f) {
+  uint8_t *src = s->y_buffer;
+  int h = s->y_height;
+
+  do {
+    fwrite(src, s->y_width, 1, f);
+    src += s->y_stride;
+  } while (--h);
+
+  src = s->u_buffer;
+  h = s->uv_height / 2;
+
+  do {
+    fwrite(src, s->uv_width / 2, 1, f);
+    src += s->uv_stride + s->uv_width / 2;
+  } while (--h);
+
+  src = s->v_buffer;
+  h = s->uv_height / 2;
+
+  do {
+    fwrite(src, s->uv_width / 2, 1, f);
+    src += s->uv_stride + s->uv_width / 2;
   } while (--h);
 }
 #endif
@@ -2134,7 +2161,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 #endif
 
 #ifdef OUTPUT_YUV_DENOISED
-  vp9_write_yuv_frame(&cpi->denoiser.running_avg_y[INTRA_FRAME],
+  vp9_write_yuv_frame_420(&cpi->denoiser.running_avg_y[INTRA_FRAME],
                       yuv_denoised_file);
 #endif
 #ifdef OUTPUT_YUV_SRC

@@ -12,6 +12,7 @@
 #include <limits.h>
 #include "vpx_scale/yv12config.h"
 #include "vpx/vpx_integer.h"
+#include "vp9/common/vp9_reconinter.h"
 #include "vp9/encoder/vp9_denoiser.h"
 
 static const int widths[]  = {4, 4, 8, 8,  8, 16, 16, 16, 32, 32, 32, 64, 64};
@@ -89,6 +90,138 @@ void copy_block(uint8_t *dest, int dest_stride,
   }
 }
 
+static int perform_motion_compensation(VP9_DENOISER *denoiser, MACROBLOCK *mb,
+                                       BLOCK_SIZE bs, int increase_denoising,
+                                       int mi_row, int mi_col) {
+  // constants
+  // TODO(tkopp): empirically determine good constants, or functions of block
+  // size.
+  int NOISE_MOTION_THRESHOLD = 25 * 25;
+  int SSE_DIFF_THRESHOLD = heights[bs] * widths[bs] * 20;
+  unsigned int SSE_THRESH = heights[bs] * widths[bs] * 40;
+  unsigned int SSE_THRESH_HI = heights[bs] * widths[bs] * 60;
+
+  int mv_col, mv_row;
+  int sse_diff = denoiser->zero_mv_sse - denoiser->best_sse;
+  int sse_diff_thresh;
+  int sse_thresh;
+  MV_REFERENCE_FRAME frame;
+  MACROBLOCKD *filter_mbd = &mb->e_mbd;
+  MB_MODE_INFO *mbmi = &filter_mbd->mi[0]->mbmi;
+
+  // We will restore these after motion compensation.
+  MB_MODE_INFO saved_mbmi = *mbmi;
+  struct buf_2d saved_dst = filter_mbd->plane[0].dst;
+  struct buf_2d saved_pre[2];
+  saved_pre[0] = filter_mbd->plane[0].pre[0];
+  saved_pre[1] = filter_mbd->plane[0].pre[1];
+
+  // Decide the threshold for sum squared error.
+  mv_col = denoiser->best_sse_mv.as_mv.col;
+  mv_row = denoiser->best_sse_mv.as_mv.row;
+  if (mv_row * mv_row + mv_col * mv_col > NOISE_MOTION_THRESHOLD) {
+    sse_diff_thresh = 0;
+  } else {
+    sse_diff_thresh = SSE_DIFF_THRESHOLD;
+  }
+
+  frame = denoiser->best_reference_frame;
+
+  // If the best reference frame uses inter-prediction and there is enough of a
+  // difference in sum-squared-error, use it.
+  if (frame != INTRA_FRAME && sse_diff > sse_diff_thresh) {
+    mbmi->ref_frame[0] = denoiser->best_reference_frame;
+    mbmi->mode = denoiser->best_sse_inter_mode;
+    mbmi->mv[0] = denoiser->best_sse_mv;
+  } else {
+    // Otherwise, use the zero reference frame.
+    frame = denoiser->best_zeromv_reference_frame;
+
+    mbmi->ref_frame[0] = denoiser->best_zeromv_reference_frame;
+    mbmi->mode = ZEROMV;
+    mbmi->mv[0].as_int = 0;
+
+    denoiser->best_sse_inter_mode = ZEROMV;
+    denoiser->best_sse_mv.as_int = 0;
+    denoiser->best_sse = denoiser->zero_mv_sse;
+  }
+
+  // Set the pointers in the MACROBLOCKD to point to the buffers in the denoiser
+  // struct.
+  filter_mbd->plane[0].pre[0].buf =
+      block_start(denoiser->running_avg_y[frame].y_buffer,
+                  denoiser->running_avg_y[frame].y_stride,
+                  mi_row, mi_col);
+  filter_mbd->plane[0].pre[0].stride = denoiser->running_avg_y[frame].y_stride;
+
+  filter_mbd->plane[1].pre[0].buf =
+      block_start(denoiser->running_avg_y[frame].u_buffer,
+                  denoiser->running_avg_y[frame].uv_stride,
+                  mi_row, mi_col);
+  filter_mbd->plane[1].pre[0].stride = denoiser->running_avg_y[frame].uv_stride;
+
+  filter_mbd->plane[2].pre[0].buf =
+      block_start(denoiser->running_avg_y[frame].v_buffer,
+                  denoiser->running_avg_y[frame].uv_stride,
+                  mi_row, mi_col);
+  filter_mbd->plane[2].pre[0].stride = denoiser->running_avg_y[frame].uv_stride;
+
+  filter_mbd->plane[0].pre[1].buf =
+      block_start(denoiser->running_avg_y[frame].y_buffer,
+                  denoiser->running_avg_y[frame].y_stride,
+                  mi_row, mi_col);
+  filter_mbd->plane[0].pre[1].stride = denoiser->running_avg_y[frame].y_stride;
+
+  filter_mbd->plane[1].pre[1].buf =
+      block_start(denoiser->running_avg_y[frame].u_buffer,
+                  denoiser->running_avg_y[frame].uv_stride,
+                  mi_row, mi_col);
+  filter_mbd->plane[1].pre[1].stride = denoiser->running_avg_y[frame].uv_stride;
+
+  filter_mbd->plane[2].pre[1].buf =
+      block_start(denoiser->running_avg_y[frame].v_buffer,
+                  denoiser->running_avg_y[frame].uv_stride,
+                  mi_row, mi_col);
+  filter_mbd->plane[2].pre[1].stride = denoiser->running_avg_y[frame].uv_stride;
+
+  filter_mbd->plane[0].dst.buf =
+      block_start(denoiser->mc_running_avg_y.y_buffer,
+                  denoiser->mc_running_avg_y.y_stride,
+                  mi_row, mi_col);
+  filter_mbd->plane[0].dst.stride = denoiser->mc_running_avg_y.y_stride;
+
+  filter_mbd->plane[1].dst.buf =
+      block_start(denoiser->mc_running_avg_y.u_buffer,
+                  denoiser->mc_running_avg_y.uv_stride,
+                  mi_row, mi_col);
+  filter_mbd->plane[1].dst.stride = denoiser->mc_running_avg_y.y_stride;
+
+  filter_mbd->plane[2].dst.buf =
+      block_start(denoiser->mc_running_avg_y.v_buffer,
+                  denoiser->mc_running_avg_y.uv_stride,
+                  mi_row, mi_col);
+  filter_mbd->plane[2].dst.stride = denoiser->mc_running_avg_y.y_stride;
+
+  vp9_build_inter_predictors_sby(filter_mbd, mv_row, mv_col, bs);
+
+  // Restore everything to its original state
+  filter_mbd->plane[0].pre[0] = saved_pre[0];
+  filter_mbd->plane[0].pre[1] = saved_pre[1];
+  filter_mbd->plane[0].dst = saved_dst;
+  *mbmi = saved_mbmi;
+
+  mv_row = denoiser->best_sse_mv.as_mv.row;
+  mv_col = denoiser->best_sse_mv.as_mv.col;
+  sse_thresh = denoiser->increase_denoising ? SSE_THRESH_HI : SSE_THRESH;
+
+  // TODO(tkopp) why 8?
+  if (denoiser->best_sse > sse_thresh ||
+    mv_row * mv_row + mv_col * mv_col > 8 * NOISE_MOTION_THRESHOLD) {
+    return COPY_BLOCK;
+  }
+  return FILTER_BLOCK;
+}
+
 void vp9_denoiser_denoise(VP9_DENOISER *denoiser, MACROBLOCK *mb,
                           int mi_row, int mi_col, BLOCK_SIZE bs) {
   int decision = COPY_BLOCK;
@@ -100,7 +233,9 @@ void vp9_denoiser_denoise(VP9_DENOISER *denoiser, MACROBLOCK *mb,
                                           mi_row, mi_col);
   struct buf_2d src = mb->plane[0].src;
 
-
+  decision = perform_motion_compensation(denoiser, mb, bs,
+                                         denoiser->increase_denoising,
+                                         mi_row, mi_col);
   update_running_avg(mc_avg_start, mc_avg.y_stride, avg_start, avg.y_stride,
                      mb->plane[0].src.buf, mb->plane[0].src.stride, 0, bs);
 
