@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//iFI\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2376,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-06-30T23:19:25Z",
+      "side": 1,
+      "message": "The term \"USE_TX_8X8\" should probably be replaced with a better name. It intends that we use largest transform, if the residual sse is far larger than variance; otherwise, use TX_8X8.",
+      "revId": "307191c3f530a6247f33a927b616bbd3dab760a1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
