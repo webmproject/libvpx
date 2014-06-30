@@ -106,6 +106,34 @@ static int read_frame_stats(const TWO_PASS *p,
   return 1;
 }
 
+#if CONFIG_FP_MB_STATS
+static int input_mb_stats(FIRSTPASS_FRAME_MB_STATS *fp_frame_stats,
+                          const VP9_COMMON *const cm) {
+  FILE *fpfile;
+  int ret;
+
+  fpfile = fopen("firstpass_mb.stt", "r");
+  fseek(fpfile, cm->current_video_frame * cm->MBs * sizeof(FIRSTPASS_MB_STATS),
+        SEEK_SET);
+  ret = fread(fp_frame_stats->mb_stats, sizeof(FIRSTPASS_MB_STATS), cm->MBs,
+              fpfile);
+  fclose(fpfile);
+  if (ret < cm->MBs) {
+    return EOF;
+  }
+  return 1;
+}
+
+static void output_mb_stats(FIRSTPASS_FRAME_MB_STATS *fp_frame_stats,
+                          const VP9_COMMON *const cm) {
+  FILE *fpfile;
+
+  fpfile = fopen("firstpass_mb.stt", "a");
+  fwrite(fp_frame_stats->mb_stats, sizeof(FIRSTPASS_MB_STATS), cm->MBs, fpfile);
+  fclose(fpfile);
+}
+#endif
+
 static int input_stats(TWO_PASS *p, FIRSTPASS_STATS *fps) {
   if (p->stats_in >= p->stats_in_end)
     return EOF;
@@ -452,6 +480,10 @@ void vp9_first_pass(VP9_COMP *cpi) {
   const MV zero_mv = {0, 0};
   const YV12_BUFFER_CONFIG *first_ref_buf = lst_yv12;
 
+#if CONFIG_FP_MB_STATS
+  FIRSTPASS_FRAME_MB_STATS *this_frame_mb_stats = &twopass->this_frame_mb_stats;
+#endif
+
   vp9_clear_system_state();
 
   set_first_pass_params(cpi);
@@ -579,6 +611,17 @@ void vp9_first_pass(VP9_COMP *cpi) {
       // Accumulate the intra error.
       intra_error += (int64_t)this_error;
 
+#if CONFIG_FP_MB_STATS
+      if (cpi->use_fp_mb_stats) {
+        this_frame_mb_stats->mb_stats[mb_row * cm->mb_cols + mb_col].mode =
+            DC_PRED;
+        this_frame_mb_stats->mb_stats[mb_row * cm->mb_cols + mb_col].err =
+            this_error;
+        this_frame_mb_stats->mb_stats[mb_row * cm->mb_cols + mb_col].mv.as_int
+            = 0;
+      }
+#endif
+
       // Set up limit values for motion vectors to prevent them extending
       // outside the UMV borders.
       x->mv_col_min = -((mb_col * 16) + BORDER_MV_PIXELS_B16);
@@ -704,6 +747,17 @@ void vp9_first_pass(VP9_COMP *cpi) {
 
           best_ref_mv.as_int = mv.as_int;
 
+#if CONFIG_FP_MB_STATS
+          if (cpi->use_fp_mb_stats) {
+            this_frame_mb_stats->mb_stats[mb_row * cm->mb_cols + mb_col].mode =
+                NEWMV;
+            this_frame_mb_stats->mb_stats[mb_row * cm->mb_cols + mb_col].err =
+                motion_error;
+            this_frame_mb_stats->mb_stats[mb_row * cm->mb_cols + mb_col].mv.
+                as_int = mv.as_int;
+          }
+#endif
+
           if (mv.as_int) {
             ++mvcount;
 
@@ -808,6 +862,12 @@ void vp9_first_pass(VP9_COMP *cpi) {
     twopass->this_frame_stats = fps;
     output_stats(&twopass->this_frame_stats, cpi->output_pkt_list);
     accumulate_stats(&twopass->total_stats, &fps);
+
+#if CONFIG_FP_MB_STATS
+    if (cpi->use_fp_mb_stats) {
+      output_mb_stats(this_frame_mb_stats, cm);
+    }
+#endif
   }
 
   // Copy the previous Last Frame back into gf and and arf buffers if
@@ -2167,6 +2227,12 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
 
   // Update the total stats remaining structure.
   subtract_stats(&twopass->total_left_stats, &this_frame);
+
+#if CONFIG_FP_MB_STATS
+  if (cpi->use_fp_mb_stats) {
+    input_mb_stats(&twopass->this_frame_mb_stats, cm);
+  }
+#endif
 }
 
 void vp9_twopass_postencode_update(VP9_COMP *cpi) {

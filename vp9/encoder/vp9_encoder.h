@@ -348,6 +348,10 @@ typedef struct VP9_COMP {
   uint64_t time_pick_lpf;
   uint64_t time_encode_sb_row;
 
+#if CONFIG_FP_MB_STATS
+  int use_fp_mb_stats;
+#endif
+
   TWO_PASS twopass;
 
   YV12_BUFFER_CONFIG alt_ref_buffer;

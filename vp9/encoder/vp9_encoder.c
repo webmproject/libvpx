@@ -199,6 +199,13 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
     vpx_free(cpi->source_diff_var);
     cpi->source_diff_var = NULL;
   }
+
+#if CONFIG_FP_MB_STATS
+  if (cpi->use_fp_mb_stats) {
+    vpx_free(cpi->twopass.this_frame_mb_stats.mb_stats);
+    cpi->twopass.this_frame_mb_stats.mb_stats = NULL;
+  }
+#endif
 }
 
 static void save_coding_context(VP9_COMP *cpi) {
@@ -765,6 +772,17 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
                     vpx_calloc(cm->MBs *
                                sizeof(*cpi->mbgraph_stats[i].mb_stats), 1));
   }
+
+#if CONFIG_FP_MB_STATS
+  cpi->use_fp_mb_stats = 0;
+  if (cpi->use_fp_mb_stats) {
+    // a place holder for the mb stats obtained from the first pass
+    CHECK_MEM_ERROR(cm, cpi->twopass.this_frame_mb_stats.mb_stats,
+                    vpx_calloc(cm->MBs * sizeof(FIRSTPASS_MB_STATS), 1));
+  } else {
+    cpi->twopass.this_frame_mb_stats.mb_stats = NULL;
+  }
+#endif
 
   cpi->refresh_alt_ref_frame = 0;
 
