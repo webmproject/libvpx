@@ -421,6 +421,9 @@ static vpx_image_t *decoder_get_frame(vpx_codec_alg_priv_t *ctx,
     if (vp9_get_raw_frame(ctx->pbi, &sd, &flags) == 0) {
       VP9_COMMON *cm = &ctx->pbi->common;
       yuvconfig2image(&ctx->img, &sd, NULL);
+#if CONFIG_VP9_HIGH
+      ctx->img.bit_depth = bit_depth_to_bps(cm->bit_depth);
+#endif
       ctx->img.fb_priv = cm->frame_bufs[cm->new_fb_idx].raw_frame_buffer.priv;
       img = &ctx->img;
       *iter = img;

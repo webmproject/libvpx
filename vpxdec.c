@@ -955,6 +955,7 @@ int main_loop(int argc, const char **argv_) {
           if (img->fmt & VPX_IMG_FMT_HIGH) {
             scaled_img = vpx_img_alloc(NULL, VPX_IMG_FMT_I42016, display_width,
                                        display_height, 16);
+            scaled_img->bit_depth = img->bit_depth;
           } else {
             scaled_img = vpx_img_alloc(NULL, VPX_IMG_FMT_I420, display_width,
                                        display_height, 16);
@@ -981,22 +982,17 @@ int main_loop(int argc, const char **argv_) {
 #if CONFIG_VP9_HIGH
       // Convert to an 8bit image
       if (img->fmt & VPX_IMG_FMT_HIGH) {
-        vpx_bit_depth_t bit_depth;
-        if (vpx_codec_control(&decoder, VP9D_GET_BIT_DEPTH, &bit_depth)) {
-          // Fallback to 8bit
-          bit_depth = VPX_BITS_8;
-        }
         // Default to codec bit depth if output bit depth not set
         if (!out_bit_depth)
-          out_bit_depth = bit_depth * 2 + 8;
+          out_bit_depth = img->bit_depth;
         if (out_bit_depth != 8 &&
-            out_bit_depth != bit_depth * 2 + 8) {
+            out_bit_depth != img->bit_depth) {
           fprintf(stderr, "Does not support bit-depth conversion to: %d.\n",
                   out_bit_depth);
           return EXIT_FAILURE;
         }
         if (out_bit_depth == 8) {
-          unsigned int shift = (int)bit_depth * 2;
+          unsigned int shift = img->bit_depth - 8;
           if (!img_8bit) {
             img_8bit = vpx_img_alloc(NULL, img->fmt - VPX_IMG_FMT_HIGH,
                                      img->d_w, img->d_h, 16);
@@ -1004,6 +1000,7 @@ int main_loop(int argc, const char **argv_) {
           img_convert_16_to_8(img_8bit, img, shift);
           img = img_8bit;
         }
+        img->bit_depth = out_bit_depth;
       }
 #endif
       if (single_file) {
@@ -1012,20 +1009,11 @@ int main_loop(int argc, const char **argv_) {
           size_t len = 0;
           if (frame_out == 1) {
             // Y4M file header
-            vpx_bit_depth_t bit_depth = VPX_BITS_8;
-#if CONFIG_VP9_HIGH
-            if (img->fmt & VPX_IMG_FMT_HIGH) {
-              if (vpx_codec_control(&decoder, VP9D_GET_BIT_DEPTH, &bit_depth)) {
-                // Fallback to 8bit
-                bit_depth = VPX_BITS_8;
-              }
-            }
-#endif
             len = y4m_write_file_header(buf, sizeof(buf),
                                         vpx_input_ctx.width,
                                         vpx_input_ctx.height,
                                         &vpx_input_ctx.framerate, img->fmt,
-                                        bit_depth);
+                                        img->bit_depth);
             if (do_md5) {
               MD5Update(&md5_ctx, (md5byte *)buf, (unsigned int)len);
             } else {
