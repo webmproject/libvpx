@@ -2391,20 +2391,6 @@ static TX_MODE select_tx_mode(const VP9_COMP *cpi) {
   }
 }
 
-static void set_mode_info(MB_MODE_INFO *mbmi, BLOCK_SIZE bsize,
-                          PREDICTION_MODE mode) {
-  mbmi->mode = mode;
-  mbmi->uv_mode = mode;
-  mbmi->mv[0].as_int = 0;
-  mbmi->mv[1].as_int = 0;
-  mbmi->ref_frame[0] = INTRA_FRAME;
-  mbmi->ref_frame[1] = NONE;
-  mbmi->tx_size = max_txsize_lookup[bsize];
-  mbmi->skip = 0;
-  mbmi->sb_type = bsize;
-  mbmi->segment_id = 0;
-}
-
 static void nonrd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
                                 int mi_row, int mi_col,
                                 int *rate, int64_t *dist,
@@ -2417,19 +2403,15 @@ static void nonrd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
   mbmi = &xd->mi[0]->mbmi;
   mbmi->sb_type = bsize;
 
-  if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cm->seg.enabled) {
+  if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cm->seg.enabled)
     if (mbmi->segment_id && x->in_static_area)
       x->rdmult = vp9_cyclic_refresh_get_rdmult(cpi->cyclic_refresh);
-  }
 
-  if (!frame_is_intra_only(cm)) {
-    if (vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP))
-      set_mode_info_seg_skip(x, cm->tx_mode, rate, dist, bsize);
-    else
-      vp9_pick_inter_mode(cpi, x, tile, mi_row, mi_col, rate, dist, bsize);
-  } else {
-    set_mode_info(&xd->mi[0]->mbmi, bsize, DC_PRED);
-  }
+  if (vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP))
+    set_mode_info_seg_skip(x, cm->tx_mode, rate, dist, bsize);
+  else
+    vp9_pick_inter_mode(cpi, x, tile, mi_row, mi_col, rate, dist, bsize);
+
   duplicate_mode_info_in_sb(cm, xd, mi_row, mi_col, bsize);
 }
 
@@ -3040,7 +3022,7 @@ static void encode_tiles(VP9_COMP *cpi) {
       vp9_tile_init(&tile, cm, tile_row, tile_col);
       for (mi_row = tile.mi_row_start; mi_row < tile.mi_row_end;
            mi_row += MI_BLOCK_SIZE) {
-        if (cpi->sf.use_nonrd_pick_mode && cm->frame_type != KEY_FRAME)
+        if (cpi->sf.use_nonrd_pick_mode && !frame_is_intra_only(cm))
           encode_nonrd_sb_row(cpi, &tile, mi_row, &tok);
         else
           encode_rd_sb_row(cpi, &tile, mi_row, &tok);
