@@ -3257,7 +3257,6 @@ void vp9_encode_frame(VP9_COMP *cpi) {
     }
   } else {
     cm->reference_mode = SINGLE_REFERENCE;
-    cm->interp_filter = SWITCHABLE;
     encode_frame_internal(cpi);
   }
 }

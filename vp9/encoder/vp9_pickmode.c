@@ -333,10 +333,10 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   const int *const rd_thresh_freq_fact = cpi->rd.thresh_freq_fact[bsize];
   // Mode index conversion form THR_MODES to PREDICTION_MODE for a ref frame.
   int mode_idx[MB_MODE_COUNT] = {0};
-  INTERP_FILTER filter_ref = SWITCHABLE;
+  INTERP_FILTER filter_ref = cm->interp_filter;
   int bsl = mi_width_log2_lookup[bsize];
-  const int pred_filter_search = (((mi_row + mi_col) >> bsl) +
-                                      get_chessboard_index(cm)) % 2;
+  const int pred_filter_search = cm->interp_filter == SWITCHABLE ?
+      (((mi_row + mi_col) >> bsl) + get_chessboard_index(cm)) % 2 : 0;
   int const_motion[MAX_REF_FRAMES] = { 0 };
 
   // For speed 6, the result of interp filter is reused later in actual encoding
