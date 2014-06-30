@@ -3151,7 +3151,11 @@ static void encode_frame_internal(VP9_COMP *cpi) {
                            cm->uv_dc_delta_q == 0 &&
                            cm->uv_ac_delta_q == 0;
 
+#if CONFIG_TRANSCODE
+  cm->tx_mode = cpi->mb.e_mbd.lossless ? ONLY_4X4 : TX_MODE_SELECT;
+#else
   cm->tx_mode = select_tx_mode(cpi);
+#endif
 
   cpi->mb.fwd_txm4x4 = cpi->mb.e_mbd.lossless ? vp9_fwht4x4 : vp9_fdct4x4;
   cpi->mb.itxm_add = cpi->mb.e_mbd.lossless ? vp9_iwht4x4_add : vp9_idct4x4_add;
