@@ -16,6 +16,24 @@
       "revId": "0f69abd2f92e5747ba703d4fc2f90f475dafe1ec",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//iAo\u003d",
+        "filename": "test/vp9_thread_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-01T07:00:15Z",
+      "side": 1,
+      "message": "that is better. I think we have a mix of that and ARRAYSIZE in tests elsewhere",
+      "parentUuid": "AAAAdn//iCk\u003d",
+      "revId": "0f69abd2f92e5747ba703d4fc2f90f475dafe1ec",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
