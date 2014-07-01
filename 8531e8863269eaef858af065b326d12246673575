@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//iDg\u003d",
+        "filename": "test/y4m_test.cc",
+        "patchSetId": 13
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-07-01T14:55:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//iEk\u003d",
+      "revId": "8531e8863269eaef858af065b326d12246673575",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//iEg\u003d",
         "filename": "test/y4m_test.cc",
         "patchSetId": 13
@@ -30,6 +48,24 @@
       "writtenOn": "2014-07-01T00:16:35Z",
       "side": 1,
       "message": "Can this information be summarized in a static array? Somewhat similar to test_vectors.cc. For example: \n\nstruct TestEntry {\n  const char *filenmae;\n  const int bits;\n  const int format;\n  const char *md5;\n};\n\nstatic TestEntry[] TEST_ENTRIES \u003d {\n  {\"park_joy_90p_8_422.y4m\", 8, VPX_IMG_FMT_I422, \"284a47a47133b12884ec3a14e959a0b6\"},\n  ...\n};",
+      "revId": "8531e8863269eaef858af065b326d12246673575",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//h8g\u003d",
+        "filename": "test/y4m_test.cc",
+        "patchSetId": 13
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-07-01T14:55:02Z",
+      "side": 1,
+      "message": "Done with tuples.",
+      "parentUuid": "AAAAdn//iEg\u003d",
       "revId": "8531e8863269eaef858af065b326d12246673575",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
