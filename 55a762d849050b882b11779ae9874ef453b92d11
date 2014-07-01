@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//h4c\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 604,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-07-01T17:30:01Z",
+      "side": 1,
+      "message": "these consts are actually unnecessary",
+      "revId": "55a762d849050b882b11779ae9874ef453b92d11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//h4Q\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 606,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-07-01T17:30:01Z",
+      "side": 1,
+      "message": "vp9_rb_read_literal() could fail and call error_handler function internally. That\u0027s why locals w and h were assigned first and then copied to *width and *heigh (kind of transaction).",
+      "revId": "55a762d849050b882b11779ae9874ef453b92d11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//h4M\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 1104,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-07-01T17:30:01Z",
+      "side": 1,
+      "message": "!vp9_read_sync_code(rb)",
+      "revId": "55a762d849050b882b11779ae9874ef453b92d11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//h4I\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 1144,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-07-01T17:30:01Z",
+      "side": 1,
+      "message": "!vp9_read_sync_code(rb)",
+      "revId": "55a762d849050b882b11779ae9874ef453b92d11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//h4E\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-07-01T17:30:01Z",
+      "side": 1,
+      "message": "wrong alignment",
+      "revId": "55a762d849050b882b11779ae9874ef453b92d11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//h4A\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-07-01T17:30:01Z",
+      "side": 1,
+      "message": "!vp9_read_sync_code(\u0026rb)",
+      "revId": "55a762d849050b882b11779ae9874ef453b92d11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//h38\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-07-01T17:30:01Z",
+      "side": 1,
+      "message": "!vp9_read_sync_code(\u0026rb)",
+      "revId": "55a762d849050b882b11779ae9874ef453b92d11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
