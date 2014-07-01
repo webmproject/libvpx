@@ -139,10 +139,6 @@ typedef struct MV_SPEED_FEATURES {
   // Motion search method (Diamond, NSTEP, Hex, Big Diamond, Square, etc).
   SEARCH_METHODS search_method;
 
-  // This parameter controls the number of steps we'll do in a diamond
-  // search.
-  int max_step_search_steps;
-
   // This parameter controls which step in the n-step process we start at.
   // It's changed adaptively based on circumstances.
   int reduce_first_step_size;

@@ -36,9 +36,8 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
   MV ref_full;
 
   // Further step/diamond searches as necessary
-  int step_param = mv_sf->reduce_first_step_size +
-                       (cpi->oxcf.speed > 5 ? 1 : 0);
-  step_param = MIN(step_param, mv_sf->max_step_search_steps - 2);
+  int step_param = mv_sf->reduce_first_step_size;
+  step_param = MIN(step_param, MAX_MVSEARCH_STEPS - 2);
 
   vp9_set_mv_search_range(x, ref_mv);
 

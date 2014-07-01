@@ -149,6 +149,9 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
     }
     cpi->allow_encode_breakout = ENCODE_BREAKOUT_ENABLED;
   }
+  if (speed >= 6) {
+    sf->mv.reduce_first_step_size = 1;
+  }
 }
 
 static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
@@ -280,6 +283,8 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
 
     // Increase mode checking threshold for NEWMV.
     sf->elevate_newmv_thresh = 2000;
+
+    sf->mv.reduce_first_step_size = 1;
   }
   if (speed >= 7) {
     sf->use_quant_fp = cm->frame_type == KEY_FRAME ? 0 : 1;
@@ -312,7 +317,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->optimize_coefficients = !is_lossless_requested(&cpi->oxcf);
   sf->mv.reduce_first_step_size = 0;
   sf->mv.auto_mv_step_size = 0;
-  sf->mv.max_step_search_steps = MAX_MVSEARCH_STEPS;
   sf->mv.fullpel_search_step_param = 6;
   sf->comp_inter_joint_search_thresh = BLOCK_4X4;
   sf->adaptive_rd_thresh = 0;
