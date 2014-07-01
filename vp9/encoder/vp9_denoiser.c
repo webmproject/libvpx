@@ -81,13 +81,11 @@ static uint8_t *block_start(uint8_t *framebuf, int stride,
   return framebuf + (stride * mi_row * 8) + (mi_col * 8);
 }
 
-void copy_block(uint8_t *dest, int dest_stride,
-                uint8_t *src, int src_stride, BLOCK_SIZE bs) {
-  int r, c;
+static void copy_block(uint8_t *dest, int dest_stride,
+                       const uint8_t *src, int src_stride, BLOCK_SIZE bs) {
+  int r;
   for (r = 0; r < heights[bs]; ++r) {
-    for (c = 0; c < widths[bs]; ++c) {
-      dest[c] = src[c];
-    }
+    vpx_memcpy(dest, src, widths[bs]);
     dest += dest_stride;
     src += src_stride;
   }
@@ -254,16 +252,14 @@ void vp9_denoiser_denoise(VP9_DENOISER *denoiser, MACROBLOCK *mb,
 }
 
 static void copy_frame(YV12_BUFFER_CONFIG dest, const YV12_BUFFER_CONFIG src) {
-  int r, c;
+  int r;
   const uint8_t *srcbuf = src.y_buffer;
   uint8_t *destbuf = dest.y_buffer;
   assert(dest.y_width == src.y_width);
   assert(dest.y_height == src.y_height);
 
   for (r = 0; r < dest.y_height; ++r) {
-    for (c = 0; c < dest.y_width; ++c) {
-      destbuf[c] = srcbuf[c];
-    }
+    vpx_memcpy(destbuf, srcbuf, dest.y_width);
     destbuf += dest.y_stride;
     srcbuf += src.y_stride;
   }
