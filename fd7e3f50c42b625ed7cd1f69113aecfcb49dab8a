@@ -37,6 +37,42 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//hyU\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 660,
+      "author": {
+        "id": 1004730
+      },
+      "writtenOn": "2014-07-01T21:27:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//h2M\u003d",
+      "revId": "fd7e3f50c42b625ed7cd1f69113aecfcb49dab8a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//hyY\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 660,
+      "author": {
+        "id": 1004730
+      },
+      "writtenOn": "2014-07-01T21:27:47Z",
+      "side": 1,
+      "message": "Done. For now I just tied it to FIXED_PARTITION_SIZE.",
+      "parentUuid": "AAAAdn//h2E\u003d",
+      "revId": "fd7e3f50c42b625ed7cd1f69113aecfcb49dab8a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//h1s\u003d",
         "filename": "vp9/encoder/vp9_pickmode.c",
         "patchSetId": 1
@@ -48,6 +84,24 @@
       "writtenOn": "2014-07-01T18:46:47Z",
       "side": 1,
       "message": "Can we condition enabling denosing on cpi-\u003eoxcf.noise_sensitivity (as in vp8), which would be set by codec control function (see VP8E_SET_NOISE_SENSITIVITY in vpx_temporal_svc_encoder).",
+      "revId": "fd7e3f50c42b625ed7cd1f69113aecfcb49dab8a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//hyQ\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 443,
+      "author": {
+        "id": 1004730
+      },
+      "writtenOn": "2014-07-01T21:27:47Z",
+      "side": 1,
+      "message": "For now I conditioned it on FIXED_PARTITION_SIZE. I could add the control function to a future CL.",
+      "parentUuid": "AAAAdn//h1s\u003d",
       "revId": "fd7e3f50c42b625ed7cd1f69113aecfcb49dab8a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
