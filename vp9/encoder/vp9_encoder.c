@@ -65,7 +65,7 @@ void vp9_coef_tree_initialize();
 // #define OUTPUT_YUV_REC
 
 #ifdef OUTPUT_YUV_DENOISED
-FILE *yuv_denoised_file;
+FILE *yuv_denoised_file = NULL;
 #endif
 #ifdef OUTPUT_YUV_SRC
 FILE *yuv_file;
@@ -657,9 +657,11 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   cpi->ext_refresh_frame_context_pending = 0;
 
 #if CONFIG_DENOISING
-  vp9_denoiser_alloc(&(cpi->denoiser), cm->width, cm->height,
-                     cm->subsampling_x, cm->subsampling_y,
-                     VP9_ENC_BORDER_IN_PIXELS);
+  if (cpi->oxcf.noise_sensitivity > 0) {
+    vp9_denoiser_alloc(&(cpi->denoiser), cm->width, cm->height,
+                       cm->subsampling_x, cm->subsampling_y,
+                       VP9_ENC_BORDER_IN_PIXELS);
+  }
 #endif
 }
 
@@ -839,8 +841,12 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
   cpi->mb.nmvsadcost_hp[1] = &cpi->mb.nmvsadcosts_hp[1][MV_MAX];
   cal_nmvsadcosts_hp(cpi->mb.nmvsadcost_hp);
 
+#if CONFIG_DENOISING
 #ifdef OUTPUT_YUV_DENOISED
-  yuv_denoised_file = fopen("denoised.yuv", "ab");
+  if (cpi->oxcf.noise_sensitivity > 0) {
+    yuv_denoised_file = fopen("denoised.yuv", "ab");
+  }
+#endif
 #endif
 #ifdef OUTPUT_YUV_SRC
   yuv_file = fopen("bd.yuv", "ab");
@@ -1079,7 +1085,9 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
   }
 
 #if CONFIG_DENOISING
-  vp9_denoiser_free(&(cpi->denoiser));
+  if (cpi->oxcf.noise_sensitivity > 0) {
+    vp9_denoiser_free(&(cpi->denoiser));
+  }
 #endif
 
   dealloc_compressor_data(cpi);
@@ -1093,8 +1101,12 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
   vp9_remove_common(&cpi->common);
   vpx_free(cpi);
 
+#if CONFIG_DENOISING
 #ifdef OUTPUT_YUV_DENOISED
-  fclose(yuv_denoised_file);
+  if (cpi->oxcf.noise_sensitivity > 0) {
+    fclose(yuv_denoised_file);
+  }
+#endif
 #endif
 #ifdef OUTPUT_YUV_SRC
   fclose(yuv_file);
@@ -1305,6 +1317,7 @@ void vp9_write_yuv_frame(YV12_BUFFER_CONFIG *s, FILE *f) {
 }
 #endif
 
+#if CONFIG_DENOISING
 #if defined(OUTPUT_YUV_DENOISED)
 // The denoiser buffer is allocated as a YUV 440 buffer. This function writes it
 // as YUV 420. We simply use the top-left pixels of the UV buffers, since we do
@@ -1335,6 +1348,7 @@ void vp9_write_yuv_frame_420(YV12_BUFFER_CONFIG *s, FILE *f) {
     src += s->uv_stride + s->uv_width / 2;
   } while (--h);
 }
+#endif
 #endif
 
 #ifdef OUTPUT_YUV_REC
@@ -1574,12 +1588,14 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
                &cm->ref_frame_map[cpi->lst_fb_idx], cm->new_fb_idx);
   }
 #if CONFIG_DENOISING
-  vp9_denoiser_update_frame_info(&cpi->denoiser,
-                                *cpi->Source,
-                                cpi->common.frame_type,
-                                cpi->refresh_alt_ref_frame,
-                                cpi->refresh_golden_frame,
-                                cpi->refresh_last_frame);
+  if (cpi->oxcf.noise_sensitivity > 0) {
+    vp9_denoiser_update_frame_info(&cpi->denoiser,
+                                   *cpi->Source,
+                                   cpi->common.frame_type,
+                                   cpi->refresh_alt_ref_frame,
+                                   cpi->refresh_golden_frame,
+                                   cpi->refresh_last_frame);
+  }
 #endif
 }
 
@@ -2171,15 +2187,20 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   }
 #endif
 
-#ifdef OUTPUT_YUV_DENOISED
-  vp9_write_yuv_frame_420(&cpi->denoiser.running_avg_y[INTRA_FRAME],
-                      yuv_denoised_file);
-#endif
 #ifdef OUTPUT_YUV_SRC
   vp9_write_yuv_frame(cpi->Source, yuv_file);
 #endif
 
   set_speed_features(cpi);
+
+#if CONFIG_DENOISING
+#ifdef OUTPUT_YUV_DENOISED
+  if (cpi->oxcf.noise_sensitivity > 0) {
+    vp9_write_yuv_frame_420(&cpi->denoiser.running_avg_y[INTRA_FRAME],
+                            yuv_denoised_file);
+  }
+#endif
+#endif
 
   // Decide q and q bounds.
   q = vp9_rc_pick_q_and_bounds(cpi, &bottom_index, &top_index);
