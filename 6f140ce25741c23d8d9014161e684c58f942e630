@@ -16,6 +16,24 @@
       "revId": "6f140ce25741c23d8d9014161e684c58f942e630",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//h0E\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 25
+      },
+      "lineNbr": 372,
+      "author": {
+        "id": 1004730
+      },
+      "writtenOn": "2014-07-01T19:18:19Z",
+      "side": 1,
+      "message": "The bug fix was merged, but the output still looks okay in this patch. I will investigate and submit another CL.",
+      "parentUuid": "AAAAdn//h3c\u003d",
+      "revId": "6f140ce25741c23d8d9014161e684c58f942e630",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
