@@ -858,6 +858,7 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
           decode_partition(tile_data->cm, &tile_data->xd, &tile, mi_row, mi_col,
                            &tile_data->bit_reader, BLOCK_64X64);
         }
+        pbi->mb.corrupted |= tile_data->xd.corrupted;
       }
       // Loopfilter one row.
       if (cm->lf.filter_level) {
@@ -1411,6 +1412,9 @@ void vp9_decode_frame(VP9Decoder *pbi,
     } else {
       debug_check_frame_counts(cm);
     }
+  } else {
+    vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+                       "Decode failed. Frame data is corrupted.");
   }
 
   if (cm->refresh_frame_context)

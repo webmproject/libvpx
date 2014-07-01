@@ -39,8 +39,8 @@ vpx_codec_err_t Decoder::DecodeFrame(const uint8_t *cxdata, size_t size,
   return res_dec;
 }
 
-void DecoderTest::RunLoop(CompressedVideoSource *video) {
-  vpx_codec_dec_cfg_t dec_cfg = {0};
+void DecoderTest::RunLoop(CompressedVideoSource *video,
+                          const vpx_codec_dec_cfg_t &dec_cfg) {
   Decoder* const decoder = codec_->CreateDecoder(dec_cfg, 0);
   ASSERT_TRUE(decoder != NULL);
   const char *codec_name = decoder->GetDecoderName();
@@ -82,7 +82,12 @@ void DecoderTest::RunLoop(CompressedVideoSource *video) {
     while ((img = dec_iter.Next()))
       DecompressedFrameHook(*img, video->frame_number());
   }
-
   delete decoder;
 }
+
+void DecoderTest::RunLoop(CompressedVideoSource *video) {
+  vpx_codec_dec_cfg_t dec_cfg = {0};
+  RunLoop(video, dec_cfg);
+}
+
 }  // namespace libvpx_test
