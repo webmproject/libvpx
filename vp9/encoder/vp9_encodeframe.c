@@ -1172,7 +1172,7 @@ static void set_source_var_based_partition(VP9_COMP *cpi,
     const int offset = (mi_row >> 1) * cm->mb_cols + (mi_col >> 1);
     int is_larger_better = 0;
     int use32x32 = 0;
-    int thr = cpi->source_var_thresh;
+    unsigned int thr = cpi->source_var_thresh;
 
     vpx_memset(d32, 0, 4 * sizeof(diff));
 
