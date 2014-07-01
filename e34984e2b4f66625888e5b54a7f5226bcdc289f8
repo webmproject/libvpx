@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//hsw\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1057,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-01T23:52:28Z",
+      "side": 1,
+      "message": "Remove the else, just return 0.",
+      "revId": "e34984e2b4f66625888e5b54a7f5226bcdc289f8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//hss\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1169,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-01T23:52:28Z",
+      "side": 1,
+      "message": "This loop is exactly the same as the loop above apart from the limits... combine to save code.",
+      "revId": "e34984e2b4f66625888e5b54a7f5226bcdc289f8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
