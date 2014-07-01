@@ -34,6 +34,23 @@
       "revId": "fd7e3f50c42b625ed7cd1f69113aecfcb49dab8a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//h1s\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 443,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-07-01T18:46:47Z",
+      "side": 1,
+      "message": "Can we condition enabling denosing on cpi-\u003eoxcf.noise_sensitivity (as in vp8), which would be set by codec control function (see VP8E_SET_NOISE_SENSITIVITY in vpx_temporal_svc_encoder).",
+      "revId": "fd7e3f50c42b625ed7cd1f69113aecfcb49dab8a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
