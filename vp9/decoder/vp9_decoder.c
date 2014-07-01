@@ -81,7 +81,7 @@ VP9Decoder *vp9_decoder_create() {
 
   vp9_worker_init(&pbi->lf_worker);
 
-#if CONFIG_TRANSCODE
+#if CONFIG_TRANSCODE && WRITE_MI_ARRAY
   cm->mi_array_pf = fopen("mode_info_array_2.bin", "rb");
 #endif
   return pbi;
@@ -91,7 +91,7 @@ void vp9_decoder_remove(VP9Decoder *pbi) {
   VP9_COMMON *const cm = &pbi->common;
   int i;
 
-#if CONFIG_TRANSCODE
+#if CONFIG_TRANSCODE && WRITE_MI_ARRAY
   fclose(cm->mi_array_pf);
 #endif
 

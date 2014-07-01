@@ -42,11 +42,6 @@
 
 #define MAX_VP9_HEADER_SIZE 80
 
-#if CONFIG_TRANSCODE
-#define WRITE_MI_ARRAY 0
-#define READ_MI_ARRAY  0
-#endif
-
 static int is_compound_reference_allowed(const VP9_COMMON *cm) {
   int i;
   for (i = 1; i < REFS_PER_FRAME; ++i)

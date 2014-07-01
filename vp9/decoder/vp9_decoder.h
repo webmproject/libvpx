@@ -27,6 +27,11 @@
 extern "C" {
 #endif
 
+#if CONFIG_TRANSCODE
+#define WRITE_MI_ARRAY 0
+#define READ_MI_ARRAY  0
+#endif
+
 // TODO(hkuang): combine this with TileWorkerData.
 typedef struct TileData {
   VP9_COMMON *cm;
