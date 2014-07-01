@@ -70,6 +70,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//h7M\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 315,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-01T16:22:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//iD0\u003d",
+      "revId": "17bbb57ae8fd29d9776b412aaa2ad054e119c8d3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//iEE\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 5
@@ -81,6 +99,24 @@
       "writtenOn": "2014-07-01T00:35:15Z",
       "side": 1,
       "message": "I think we usually use \"if (intra_only_flag) { ...}\" in the codebase.",
+      "revId": "17bbb57ae8fd29d9776b412aaa2ad054e119c8d3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//h6U\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-01T16:22:00Z",
+      "side": 1,
+      "message": "I would disagree that we use this form consistently, both forms are prevalent in the code. ! makes sense if the variable is boolean in nature, and I agree that the examples you found might be considered to fit that criterion.",
+      "parentUuid": "AAAAdn//iEE\u003d",
       "revId": "17bbb57ae8fd29d9776b412aaa2ad054e119c8d3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -104,6 +140,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//h6E\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-01T16:22:00Z",
+      "side": 1,
+      "message": "Changed this function to vp9_read_sync_code and the return value is not really boolean, so I disagree that this one needs to be changed.",
+      "parentUuid": "AAAAdn//iEA\u003d",
+      "revId": "17bbb57ae8fd29d9776b412aaa2ad054e119c8d3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//iD8\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 5
@@ -115,6 +169,24 @@
       "writtenOn": "2014-07-01T00:35:15Z",
       "side": 1,
       "message": "if (!ctx-\u003esi.is_kf \u0026\u0026 !is_intra_only)",
+      "revId": "17bbb57ae8fd29d9776b412aaa2ad054e119c8d3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//h6Q\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 286,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-01T16:22:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//iD8\u003d",
       "revId": "17bbb57ae8fd29d9776b412aaa2ad054e119c8d3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
