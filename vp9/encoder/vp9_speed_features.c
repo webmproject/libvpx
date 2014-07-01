@@ -279,6 +279,7 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->reuse_inter_pred_sby = 1;
   }
   if (speed >= 7) {
+    sf->use_quant_fp = cm->frame_type == KEY_FRAME ? 0 : 1;
     sf->lpf_pick = LPF_PICK_MINIMAL_LPF;
     sf->encode_breakout_thresh = (MIN(cm->width, cm->height) >= 720) ?
         800 : 300;
@@ -314,6 +315,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->use_lp32x32fdct = 0;
   sf->adaptive_motion_search = 0;
   sf->adaptive_pred_interp_filter = 0;
+  sf->use_quant_fp = 0;
   sf->reference_masking = 0;
   sf->partition_search_type = SEARCH_PARTITION;
   sf->less_rectangular_check = 0;

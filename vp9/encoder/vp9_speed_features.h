@@ -284,6 +284,9 @@ typedef struct SPEED_FEATURES {
   // was selected, and 2 means we use 8 tap if no 8x8 filter mode was selected.
   int adaptive_pred_interp_filter;
 
+  // Fast quantization process path
+  int use_quant_fp;
+
   // Search through variable block partition types in non-RD mode decision
   // encoding process for RTC.
   int partition_check;

@@ -35,6 +35,7 @@ struct macroblock_plane {
 
   // Quantizer setings
   int16_t *quant_fp;
+  int16_t *round_fp;
   int16_t *quant;
   int16_t *quant_shift;
   int16_t *zbin;
@@ -109,6 +110,9 @@ struct macroblock {
   // indicate if it is in the rd search loop or encoding process
   int use_lp32x32fdct;
   int skip_encode;
+
+  // use fast quantization process
+  int quant_fp;
 
   // skip forward transform and quantization
   int skip_txfm;
