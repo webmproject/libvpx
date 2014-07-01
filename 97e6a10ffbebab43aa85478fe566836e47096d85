@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//h+0\u003d",
+        "filename": "test/vp9_thread_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-01T07:40:32Z",
+      "side": 1,
+      "message": "Not in c++, msvc should be OK. this is the normal recommendation:\n\nhttp://google-styleguide.googlecode.com/svn/trunk/cppguide.xml#Function_Declarations_and_Definitions",
+      "parentUuid": "AAAAdn//h/Q\u003d",
+      "revId": "97e6a10ffbebab43aa85478fe566836e47096d85",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//iBs\u003d",
         "filename": "test/vp9_thread_test.cc",
         "patchSetId": 1
@@ -66,6 +84,24 @@
       "side": 1,
       "message": "oh ok. Could be worth mentioning this in the comment then.",
       "parentUuid": "AAAAdn//iAE\u003d",
+      "revId": "97e6a10ffbebab43aa85478fe566836e47096d85",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//h+w\u003d",
+        "filename": "test/vp9_thread_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-01T07:40:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//h/M\u003d",
       "revId": "97e6a10ffbebab43aa85478fe566836e47096d85",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
