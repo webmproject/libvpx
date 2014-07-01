@@ -16,6 +16,24 @@
       "revId": "6ed23a2c3d31f910952d0cf043dc6191024cf77a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//hzU\u003d",
+        "filename": "vp9/encoder/vp9_speed_features.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 366,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-07-01T20:02:19Z",
+      "side": 1,
+      "message": "Moved this to MV_SPEED_FEATURE and changed name to be more specific in patch#3.",
+      "parentUuid": "AAAAdn//h14\u003d",
+      "revId": "6ed23a2c3d31f910952d0cf043dc6191024cf77a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
