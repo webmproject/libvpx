@@ -162,6 +162,9 @@ typedef struct MV_SPEED_FEATURES {
 
   // Control when to stop subpel search
   int subpel_force_stop;
+
+  // This variable sets the step_param used in full pel motion search.
+  int fullpel_search_step_param;
 } MV_SPEED_FEATURES;
 
 typedef struct SPEED_FEATURES {
