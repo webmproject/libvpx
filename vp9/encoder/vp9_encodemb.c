@@ -507,7 +507,7 @@ void vp9_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize) {
 
     if (x->optimize && (!x->skip_recode || !x->skip_optimize)) {
       const struct macroblockd_plane* const pd = &xd->plane[plane];
-      const TX_SIZE tx_size = plane ? get_uv_tx_size(mbmi) : mbmi->tx_size;
+      const TX_SIZE tx_size = plane ? get_uv_tx_size(mbmi, pd) : mbmi->tx_size;
       vp9_get_entropy_contexts(bsize, tx_size, pd,
                                ctx.ta[plane], ctx.tl[plane]);
     }
