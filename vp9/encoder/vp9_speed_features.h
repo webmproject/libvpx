@@ -361,6 +361,9 @@ typedef struct SPEED_FEATURES {
   // This variable sets the encode_breakout threshold. Currently, it is only
   // enabled in real time mode.
   int encode_breakout_thresh;
+
+  // In real time encoding, increase the threshold for NEWMV.
+  int elevate_newmv_thresh;
 } SPEED_FEATURES;
 
 struct VP9_COMP;
