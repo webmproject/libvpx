@@ -277,11 +277,15 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
 
     // This feature is only enabled when partition search is disabled.
     sf->reuse_inter_pred_sby = 1;
+
+    // Increase mode checking threshold for NEWMV.
+    sf->elevate_newmv_thresh = 2000;
   }
   if (speed >= 7) {
     sf->lpf_pick = LPF_PICK_MINIMAL_LPF;
     sf->encode_breakout_thresh = (MIN(cm->width, cm->height) >= 720) ?
         800 : 300;
+    sf->elevate_newmv_thresh = 2500;
   }
   if (speed >= 8) {
     int i;
@@ -352,6 +356,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->always_this_block_size = BLOCK_16X16;
   sf->search_type_check_frequency = 50;
   sf->encode_breakout_thresh = 0;
+  sf->elevate_newmv_thresh = 0;
 
   // Recode loop tolerence %.
   sf->recode_tolerance = 25;

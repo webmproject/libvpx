@@ -4273,6 +4273,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 void vp9_set_rd_speed_thresholds(VP9_COMP *cpi) {
   int i;
   RD_OPT *const rd = &cpi->rd;
+  SPEED_FEATURES *const sf = &cpi->sf;
 
   // Set baseline threshold values
   for (i = 0; i < MAX_MODES; ++i)
@@ -4350,6 +4351,10 @@ void vp9_set_rd_speed_thresholds(VP9_COMP *cpi) {
     rd->thresh_mult[THR_COMP_NEARGA   ] = INT_MAX;
     rd->thresh_mult[THR_COMP_NEWGA    ] = INT_MAX;
   }
+
+  // Adjust threshold only in real time mode, which only use last reference
+  // frame.
+  rd->thresh_mult[THR_NEWMV] += sf->elevate_newmv_thresh;
 }
 
 void vp9_set_rd_speed_thresholds_sub8x8(VP9_COMP *cpi) {
