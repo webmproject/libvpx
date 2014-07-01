@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//h2M\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 660,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-07-01T18:24:39Z",
+      "side": 1,
+      "message": "It\u0027s probably better to make this a named speed feature than to check cpi-\u003eoxcf.mode directly. That way if modes get reshuffled or someone makes a speed-6 derivative, they get this automatically.",
+      "revId": "fd7e3f50c42b625ed7cd1f69113aecfcb49dab8a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
