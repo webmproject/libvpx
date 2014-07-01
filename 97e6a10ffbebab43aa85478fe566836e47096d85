@@ -16,6 +16,24 @@
       "revId": "97e6a10ffbebab43aa85478fe566836e47096d85",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//iAE\u003d",
+        "filename": "test/vp9_thread_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-01T07:07:15Z",
+      "side": 1,
+      "message": "the TODO would lie here I think for a less trivial implementation, there\u0027s no thread pool around or anything but what\u0027s in vp9_thread.c.\nI think the row-based loop filter has this expectation as it\u0027s waiting on progress above and to the left.",
+      "parentUuid": "AAAAdn//iBs\u003d",
+      "revId": "97e6a10ffbebab43aa85478fe566836e47096d85",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
