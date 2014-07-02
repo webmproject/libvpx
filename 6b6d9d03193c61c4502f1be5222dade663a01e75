@@ -16,6 +16,24 @@
       "revId": "6b6d9d03193c61c4502f1be5222dade663a01e75",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//hmU\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 443,
+      "author": {
+        "id": 1004730
+      },
+      "writtenOn": "2014-07-02T16:29:57Z",
+      "side": 1,
+      "message": "I ended up using the control flag cpi-\u003eoxcf.noise_sensitivity, as is done in VP8 at Marco\u0027s suggestion.",
+      "parentUuid": "AAAAdn//hqY\u003d",
+      "revId": "6b6d9d03193c61c4502f1be5222dade663a01e75",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
