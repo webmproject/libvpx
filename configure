@@ -274,6 +274,7 @@ EXPERIMENT_LIST="
     multiple_arf
     spatial_svc
     denoising
+    fp_mb_stats
 "
 CONFIG_LIST="
     external_build
