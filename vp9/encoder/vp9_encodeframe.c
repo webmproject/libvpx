@@ -3074,6 +3074,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   init_encode_frame_mb_context(cpi);
   set_prev_mi(cm);
 
+  x->quant_fp = cpi->sf.use_quant_fp;
   x->skip_txfm = 0;
   if (sf->use_nonrd_pick_mode) {
     // Initialize internal buffer pointers for rtc coding, where non-RD
