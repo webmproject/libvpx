@@ -141,7 +141,7 @@ static void full_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
 
   // TODO(jingning) exploiting adaptive motion search control in non-RD
   // mode decision too.
-  step_param = 6;
+  step_param = cpi->sf.mv.fullpel_search_step_param;
 
   for (i = LAST_FRAME; i <= LAST_FRAME && cpi->common.show_frame; ++i) {
     if ((x->pred_mv_sad[ref] >> 3) > x->pred_mv_sad[i]) {
