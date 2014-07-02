@@ -1067,6 +1067,8 @@ add_proto qw/void vp9_subtract_block/, "int rows, int cols, int16_t *diff_ptr, p
 specialize qw/vp9_subtract_block/, "$sse2_x86inc";
 
 if (vpx_config("CONFIG_VP9_HIGH") eq "yes" && vpx_config("CONFIG_HIGH_TRANSFORMS") eq "yes") {
+# With CONFIG_HIGH_TRANSFORMS, the transform coefficients are held in 32-bit
+# values, so the assembler code for  vp9_block_error can no longer be used.
   add_proto qw/int64_t vp9_block_error/, "const tran_low_t *coeff, const tran_low_t *dqcoeff, intptr_t block_size, int64_t *ssz";
   specialize qw/vp9_block_error/;
 
