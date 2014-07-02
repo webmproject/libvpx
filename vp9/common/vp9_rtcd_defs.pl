@@ -678,22 +678,22 @@ add_proto qw/void vp9_high_convolve_avg/, "const uint8_t *src, ptrdiff_t src_str
 specialize qw/vp9_high_convolve_avg/;
 
 add_proto qw/void vp9_high_convolve8/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h, int bps";
-specialize qw/vp9_high_convolve8/;
+specialize qw/vp9_high_convolve8/, "$sse2_x86_64";
 
 add_proto qw/void vp9_high_convolve8_horiz/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h, int bps";
-specialize qw/vp9_high_convolve8_horiz/;
+specialize qw/vp9_high_convolve8_horiz/, "$sse2_x86_64";
 
 add_proto qw/void vp9_high_convolve8_vert/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h, int bps";
-specialize qw/vp9_high_convolve8_vert/;
+specialize qw/vp9_high_convolve8_vert/, "$sse2_x86_64";
 
 add_proto qw/void vp9_high_convolve8_avg/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h, int bps";
-specialize qw/vp9_high_convolve8_avg/;
+specialize qw/vp9_high_convolve8_avg/, "$sse2_x86_64";
 
 add_proto qw/void vp9_high_convolve8_avg_horiz/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h, int bps";
-specialize qw/vp9_high_convolve8_avg_horiz/;
+specialize qw/vp9_high_convolve8_avg_horiz/, "$sse2_x86_64";
 
 add_proto qw/void vp9_high_convolve8_avg_vert/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h, int bps";
-specialize qw/vp9_high_convolve8_avg_vert/;
+specialize qw/vp9_high_convolve8_avg_vert/, "$sse2_x86_64";
 
 #
 # dct
