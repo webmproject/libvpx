@@ -89,21 +89,13 @@ static int lookup_next_frame_stats(const TWO_PASS *p,
 
 
 // Read frame stats at an offset from the current position.
-static int read_frame_stats(const TWO_PASS *p,
-                            FIRSTPASS_STATS *frame_stats, int offset) {
-  const FIRSTPASS_STATS *fps_ptr = p->stats_in;
-
-  // Check legality of offset.
-  if (offset >= 0) {
-    if (&fps_ptr[offset] >= p->stats_in_end)
-      return EOF;
-  } else if (offset < 0) {
-    if (&fps_ptr[offset] < p->stats_in_start)
-      return EOF;
+static const FIRSTPASS_STATS *read_frame_stats(const TWO_PASS *p, int offset) {
+  if ((offset >= 0 && p->stats_in + offset >= p->stats_in_end) ||
+      (offset < 0 && p->stats_in + offset < p->stats_in_start)) {
+    return NULL;
   }
 
-  *frame_stats = fps_ptr[offset];
-  return 1;
+  return &p->stats_in[offset];
 }
 
 #if CONFIG_FP_MB_STATS
@@ -1113,24 +1105,16 @@ static int detect_transition_to_still(TWO_PASS *twopass,
 // score in the frame following a flash frame. The offset passed in should
 // reflect this.
 static int detect_flash(const TWO_PASS *twopass, int offset) {
-  FIRSTPASS_STATS next_frame;
+  const FIRSTPASS_STATS *const next_frame = read_frame_stats(twopass, offset);
 
-  int flash_detected = 0;
-
-  // Read the frame data.
-  // The return is FALSE (no flash detected) if not a valid frame
-  if (read_frame_stats(twopass, &next_frame, offset) != EOF) {
-    // What we are looking for here is a situation where there is a
-    // brief break in prediction (such as a flash) but subsequent frames
-    // are reasonably well predicted by an earlier (pre flash) frame.
-    // The recovery after a flash is indicated by a high pcnt_second_ref
-    // compared to pcnt_inter.
-    if (next_frame.pcnt_second_ref > next_frame.pcnt_inter &&
-        next_frame.pcnt_second_ref >= 0.5)
-      flash_detected = 1;
-  }
-
-  return flash_detected;
+  // What we are looking for here is a situation where there is a
+  // brief break in prediction (such as a flash) but subsequent frames
+  // are reasonably well predicted by an earlier (pre flash) frame.
+  // The recovery after a flash is indicated by a high pcnt_second_ref
+  // compared to pcnt_inter.
+  return next_frame != NULL &&
+         next_frame->pcnt_second_ref > next_frame->pcnt_inter &&
+         next_frame->pcnt_second_ref >= 0.5;
 }
 
 // Update the motion related elements to the GF arf boost calculation.
@@ -1190,7 +1174,6 @@ static double calc_frame_boost(const TWO_PASS *twopass,
 static int calc_arf_boost(VP9_COMP *cpi, int offset,
                           int f_frames, int b_frames,
                           int *f_boost, int *b_boost) {
-  FIRSTPASS_STATS this_frame;
   TWO_PASS *const twopass = &cpi->twopass;
   int i;
   double boost_score = 0.0;
@@ -1204,11 +1187,12 @@ static int calc_arf_boost(VP9_COMP *cpi, int offset,
 
   // Search forward from the proposed arf/next gf position.
   for (i = 0; i < f_frames; ++i) {
-    if (read_frame_stats(twopass, &this_frame, (i + offset)) == EOF)
+    const FIRSTPASS_STATS *this_frame = read_frame_stats(twopass, i + offset);
+    if (this_frame == NULL)
       break;
 
     // Update the motion related elements to the boost calculation.
-    accumulate_frame_motion_stats(&this_frame,
+    accumulate_frame_motion_stats(this_frame,
                                   &this_frame_mv_in_out, &mv_in_out_accumulator,
                                   &abs_mv_in_out_accumulator,
                                   &mv_ratio_accumulator);
@@ -1220,12 +1204,12 @@ static int calc_arf_boost(VP9_COMP *cpi, int offset,
 
     // Accumulate the effect of prediction quality decay.
     if (!flash_detected) {
-      decay_accumulator *= get_prediction_decay_rate(&cpi->common, &this_frame);
+      decay_accumulator *= get_prediction_decay_rate(&cpi->common, this_frame);
       decay_accumulator = decay_accumulator < MIN_DECAY_FACTOR
                           ? MIN_DECAY_FACTOR : decay_accumulator;
     }
 
-    boost_score += decay_accumulator * calc_frame_boost(twopass, &this_frame,
+    boost_score += decay_accumulator * calc_frame_boost(twopass, this_frame,
                                                         this_frame_mv_in_out);
   }
 
@@ -1241,11 +1225,12 @@ static int calc_arf_boost(VP9_COMP *cpi, int offset,
 
   // Search backward towards last gf position.
   for (i = -1; i >= -b_frames; --i) {
-    if (read_frame_stats(twopass, &this_frame, (i + offset)) == EOF)
+    const FIRSTPASS_STATS *this_frame = read_frame_stats(twopass, i + offset);
+    if (this_frame == NULL)
       break;
 
     // Update the motion related elements to the boost calculation.
-    accumulate_frame_motion_stats(&this_frame,
+    accumulate_frame_motion_stats(this_frame,
                                   &this_frame_mv_in_out, &mv_in_out_accumulator,
                                   &abs_mv_in_out_accumulator,
                                   &mv_ratio_accumulator);
@@ -1257,12 +1242,12 @@ static int calc_arf_boost(VP9_COMP *cpi, int offset,
 
     // Cumulative effect of prediction quality decay.
     if (!flash_detected) {
-      decay_accumulator *= get_prediction_decay_rate(&cpi->common, &this_frame);
+      decay_accumulator *= get_prediction_decay_rate(&cpi->common, this_frame);
       decay_accumulator = decay_accumulator < MIN_DECAY_FACTOR
                               ? MIN_DECAY_FACTOR : decay_accumulator;
     }
 
-    boost_score += decay_accumulator * calc_frame_boost(twopass, &this_frame,
+    boost_score += decay_accumulator * calc_frame_boost(twopass, this_frame,
                                                         this_frame_mv_in_out);
   }
   *b_boost = (int)boost_score;
