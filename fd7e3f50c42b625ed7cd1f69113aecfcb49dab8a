@@ -105,6 +105,24 @@
       "revId": "fd7e3f50c42b625ed7cd1f69113aecfcb49dab8a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//hmQ\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 443,
+      "author": {
+        "id": 1004730
+      },
+      "writtenOn": "2014-07-02T16:30:04Z",
+      "side": 1,
+      "message": "Done. It ended up being simpler than I thought, so I just put it in this CL.",
+      "parentUuid": "AAAAdn//h1s\u003d",
+      "revId": "fd7e3f50c42b625ed7cd1f69113aecfcb49dab8a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
