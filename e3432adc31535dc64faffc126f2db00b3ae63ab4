@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//hl8\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-07-02T18:36:52Z",
+      "side": 1,
+      "message": "you can use oxcf-\u003ebit_depth - no need to change the prototype, and the other two files.",
+      "revId": "e3432adc31535dc64faffc126f2db00b3ae63ab4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
