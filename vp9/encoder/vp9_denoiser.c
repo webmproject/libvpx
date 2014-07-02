@@ -15,6 +15,17 @@
 #include "vp9/common/vp9_reconinter.h"
 #include "vp9/encoder/vp9_denoiser.h"
 
+/* The VP9 denoiser is a work-in-progress. It currently is only designed to work
+ * with speed 6, though it (inexplicably) seems to also work with speed 5 (one
+ * would need to modify the source code in vp9_pickmode.c and vp9_encoder.c to
+ * make the calls to the vp9_denoiser_* functions when in speed 5).
+ *
+ * The implementation is very similar to that of the VP8 denoiser. While
+ * choosing the motion vectors / reference frames, the denoiser is run, and if
+ * it did not modify the signal to much, the denoised block is copied to the
+ * signal.
+ */
+
 #ifdef OUTPUT_YUV_DENOISED
 static void make_grayscale(YV12_BUFFER_CONFIG *yuv);
 #endif

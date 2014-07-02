@@ -440,7 +440,9 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int i;
 
 #if CONFIG_DENOISING
-  vp9_denoiser_reset_frame_stats(&cpi->denoiser);
+  if (cpi->oxcf.noise_sensitivity > 0) {
+    vp9_denoiser_reset_frame_stats(&cpi->denoiser);
+  }
 #endif
 
   if (cpi->sf.reuse_inter_pred_sby) {
@@ -658,7 +660,9 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       }
 
 #if CONFIG_DENOISING
-      vp9_denoiser_update_frame_stats(&cpi->denoiser, mbmi, sse_y, this_mode);
+      if (cpi->oxcf.noise_sensitivity > 0) {
+        vp9_denoiser_update_frame_stats(&cpi->denoiser, mbmi, sse_y, this_mode);
+      }
 #endif
 
       if (this_rd < best_rd || x->skip) {
@@ -774,7 +778,9 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
 #if CONFIG_DENOISING
-  vp9_denoiser_denoise(&cpi->denoiser, x, mi_row, mi_col, bsize);
+  if (cpi->oxcf.noise_sensitivity > 0) {
+    vp9_denoiser_denoise(&cpi->denoiser, x, mi_row, mi_col, bsize);
+  }
 #endif
 
   return INT64_MAX;
