@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//hiA\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 38
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1004730
+      },
+      "writtenOn": "2014-07-02T19:48:23Z",
+      "side": 1,
+      "message": "Correct.",
+      "parentUuid": "AAAAdn//hiU\u003d",
+      "revId": "03a3ba4a0da42588350b1a4a18ff76df44756944",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//hiQ\u003d",
         "filename": "vp9/encoder/vp9_denoiser.c",
         "patchSetId": 38
@@ -30,6 +48,24 @@
       "writtenOn": "2014-07-02T19:37:18Z",
       "side": 1,
       "message": "{ } is not necessary here.",
+      "revId": "03a3ba4a0da42588350b1a4a18ff76df44756944",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//hhk\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 38
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1004730
+      },
+      "writtenOn": "2014-07-02T19:48:23Z",
+      "side": 1,
+      "message": "Okay, I\u0027ll omit them in the future.",
+      "parentUuid": "AAAAdn//hiQ\u003d",
       "revId": "03a3ba4a0da42588350b1a4a18ff76df44756944",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
