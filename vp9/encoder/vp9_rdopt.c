@@ -4289,6 +4289,10 @@ void vp9_set_rd_speed_thresholds(VP9_COMP *cpi) {
   rd->thresh_mult[THR_NEWA] += 1000;
   rd->thresh_mult[THR_NEWG] += 1000;
 
+  // Adjust threshold only in real time mode, which only use last reference
+  // frame.
+  rd->thresh_mult[THR_NEWMV] += sf->elevate_newmv_thresh;
+
   rd->thresh_mult[THR_NEARMV] += 1000;
   rd->thresh_mult[THR_NEARA] += 1000;
   rd->thresh_mult[THR_COMP_NEARESTLA] += 1000;
@@ -4351,10 +4355,6 @@ void vp9_set_rd_speed_thresholds(VP9_COMP *cpi) {
     rd->thresh_mult[THR_COMP_NEARGA   ] = INT_MAX;
     rd->thresh_mult[THR_COMP_NEWGA    ] = INT_MAX;
   }
-
-  // Adjust threshold only in real time mode, which only use last reference
-  // frame.
-  rd->thresh_mult[THR_NEWMV] += sf->elevate_newmv_thresh;
 }
 
 void vp9_set_rd_speed_thresholds_sub8x8(VP9_COMP *cpi) {
