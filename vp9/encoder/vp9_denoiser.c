@@ -15,6 +15,10 @@
 #include "vp9/common/vp9_reconinter.h"
 #include "vp9/encoder/vp9_denoiser.h"
 
+#ifdef OUTPUT_YUV_DENOISED
+static void make_grayscale(YV12_BUFFER_CONFIG *yuv);
+#endif
+
 static const int widths[]  = {4, 4, 8, 8,  8, 16, 16, 16, 32, 32, 32, 64, 64};
 static const int heights[] = {4, 8, 4, 8, 16,  8, 16, 32, 16, 32, 64, 32, 64};
 
@@ -325,6 +329,9 @@ int vp9_denoiser_alloc(VP9_DENOISER *denoiser, int width, int height,
       vp9_denoiser_free(denoiser);
       return 1;
     }
+#ifdef OUTPUT_YUV_DENOISED
+    make_grayscale(&denoiser->running_avg_y[i]);
+#endif
   }
 
   fail = vp9_alloc_frame_buffer(&denoiser->mc_running_avg_y, width, height,
@@ -333,7 +340,9 @@ int vp9_denoiser_alloc(VP9_DENOISER *denoiser, int width, int height,
     vp9_denoiser_free(denoiser);
     return 1;
   }
-
+#ifdef OUTPUT_YUV_DENOISED
+  make_grayscale(&denoiser->running_avg_y[i]);
+#endif
   denoiser->increase_denoising = 0;
 
   return 0;
@@ -353,3 +362,22 @@ void vp9_denoiser_free(VP9_DENOISER *denoiser) {
     vp9_free_frame_buffer(&denoiser->mc_running_avg_y);
   }
 }
+
+#ifdef OUTPUT_YUV_DENOISED
+static void make_grayscale(YV12_BUFFER_CONFIG *yuv) {
+  int r, c;
+  uint8_t *u = yuv->u_buffer;
+  uint8_t *v = yuv->v_buffer;
+
+  // The '/2's are there because we have a 440 buffer, but we want to output
+  // 420.
+  for (r = 0; r < yuv->uv_height / 2; ++r) {
+    for (c = 0; c < yuv->uv_width / 2; ++c) {
+      u[c] = UINT8_MAX / 2;
+      v[c] = UINT8_MAX / 2;
+    }
+    u += yuv->uv_stride + yuv->uv_width / 2;
+    v += yuv->uv_stride + yuv->uv_width / 2;
+  }
+}
+#endif
