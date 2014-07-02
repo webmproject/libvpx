@@ -41,12 +41,12 @@
 #define RD_THRESH_POW      1.25
 #define RD_MULT_EPB_RATIO  64
 
-/* Factor to weigh the rate for switchable interp filters */
+// Factor to weigh the rate for switchable interp filters.
 #define SWITCHABLE_INTERP_RATE_FACTOR 1
 
 // The baseline rd thresholds for breaking out of the rd loop for
 // certain modes are assumed to be based on 8x8 blocks.
-// This table is used to correct for blocks size.
+// This table is used to correct for block size.
 // The factors here are << 2 (2 = x0.5, 32 = x8 etc).
 static const uint8_t rd_thresh_block_size_factor[BLOCK_SIZES] = {
   2, 3, 3, 4, 6, 6, 8, 12, 12, 16, 24, 24, 32
@@ -56,12 +56,11 @@ static void fill_mode_costs(VP9_COMP *cpi) {
   const FRAME_CONTEXT *const fc = &cpi->common.fc;
   int i, j;
 
-  for (i = 0; i < INTRA_MODES; i++)
-    for (j = 0; j < INTRA_MODES; j++)
+  for (i = 0; i < INTRA_MODES; ++i)
+    for (j = 0; j < INTRA_MODES; ++j)
       vp9_cost_tokens(cpi->y_mode_costs[i][j], vp9_kf_y_mode_prob[i][j],
                       vp9_intra_mode_tree);
 
-  // TODO(rbultje) separate tables for superblock costing?
   vp9_cost_tokens(cpi->mbmode_cost, fc->y_mode_prob[1], vp9_intra_mode_tree);
   vp9_cost_tokens(cpi->intra_uv_mode_cost[KEY_FRAME],
                   vp9_kf_uv_mode_prob[TM_PRED], vp9_intra_mode_tree);
@@ -100,19 +99,17 @@ static const uint8_t rd_iifactor[32] = {
   0, 0, 0, 0, 0, 0, 0, 0,
 };
 
-// 3* dc_qlookup[Q]*dc_qlookup[Q];
-
-/* values are now correlated to quantizer */
+// Values are now correlated to quantizer.
 static int sad_per_bit16lut[QINDEX_RANGE];
 static int sad_per_bit4lut[QINDEX_RANGE];
 
 void vp9_init_me_luts() {
   int i;
 
-  // Initialize the sad lut tables using a formulaic calculation for now
+  // Initialize the sad lut tables using a formulaic calculation for now.
   // This is to make it easier to resolve the impact of experimental changes
   // to the quantizer tables.
-  for (i = 0; i < QINDEX_RANGE; i++) {
+  for (i = 0; i < QINDEX_RANGE; ++i) {
     const double q = vp9_convert_qindex_to_q(i);
     sad_per_bit16lut[i] = (int)(0.0418 * q + 2.4107);
     sad_per_bit4lut[i] = (int)(0.063 * q + 2.742);
@@ -121,7 +118,7 @@ void vp9_init_me_luts() {
 
 int vp9_compute_rd_mult(const VP9_COMP *cpi, int qindex) {
   const int q = vp9_dc_quant(qindex, 0);
-  // TODO(debargha): Adjust the function below
+  // TODO(debargha): Adjust the function below.
   int rdmult = 88 * q * q / 25;
   if (cpi->pass == 2 && (cpi->common.frame_type != KEY_FRAME)) {
     if (cpi->twopass.next_iiratio > 31)
@@ -133,7 +130,7 @@ int vp9_compute_rd_mult(const VP9_COMP *cpi, int qindex) {
 }
 
 static int compute_rd_thresh_factor(int qindex) {
-  // TODO(debargha): Adjust the function below
+  // TODO(debargha): Adjust the function below.
   const int q = (int)(pow(vp9_dc_quant(qindex, 0) / 4.0, RD_THRESH_POW) * 5.12);
   return MAX(q, 8);
 }
@@ -147,9 +144,10 @@ static void set_block_thresholds(const VP9_COMMON *cm, RD_OPT *rd) {
   int i, bsize, segment_id;
 
   for (segment_id = 0; segment_id < MAX_SEGMENTS; ++segment_id) {
-    const int qindex = clamp(vp9_get_qindex(&cm->seg, segment_id,
-                                            cm->base_qindex) + cm->y_dc_delta_q,
-                             0, MAXQ);
+    const int qindex =
+        clamp(vp9_get_qindex(&cm->seg, segment_id, cm->base_qindex) +
+                  cm->y_dc_delta_q,
+              0, MAXQ);
     const int q = compute_rd_thresh_factor(qindex);
 
     for (bsize = 0; bsize < BLOCK_SIZES; ++bsize) {
@@ -183,7 +181,7 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
 
   vp9_clear_system_state();
 
-  rd->RDDIV = RDDIV_BITS;  // in bits (to multiply D by 128)
+  rd->RDDIV = RDDIV_BITS;  // In bits (to multiply D by 128).
   rd->RDMULT = vp9_compute_rd_mult(cpi, cm->base_qindex + cm->y_dc_delta_q);
 
   x->errorperbit = rd->RDMULT / RD_MULT_EPB_RATIO;
@@ -197,7 +195,7 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
   if (!cpi->sf.use_nonrd_pick_mode || cm->frame_type == KEY_FRAME) {
     fill_token_costs(x->token_costs, cm->fc.coef_probs);
 
-    for (i = 0; i < PARTITION_CONTEXTS; i++)
+    for (i = 0; i < PARTITION_CONTEXTS; ++i)
       vp9_cost_tokens(cpi->partition_cost[i], get_partition_probs(cm, i),
                       vp9_partition_tree);
   }
@@ -222,15 +220,15 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
 static const int MAX_XSQ_Q10 = 245727;
 
 static void model_rd_norm(int xsq_q10, int *r_q10, int *d_q10) {
-  // NOTE: The tables below must be of the same size
+  // NOTE: The tables below must be of the same size.
 
   // The functions described below are sampled at the four most significant
-  // bits of x^2 + 8 / 256
+  // bits of x^2 + 8 / 256.
 
-  // Normalized rate
-  // This table models the rate for a Laplacian source
-  // source with given variance when quantized with a uniform quantizer
-  // with given stepsize. The closed form expression is:
+  // Normalized rate:
+  // This table models the rate for a Laplacian source with given variance
+  // when quantized with a uniform quantizer with given stepsize. The
+  // closed form expression is:
   // Rn(x) = H(sqrt(r)) + sqrt(r)*[1 + H(r)/(1 - r)],
   // where r = exp(-sqrt(2) * x) and x = qpstep / sqrt(variance),
   // and H(x) is the binary entropy function.
@@ -249,12 +247,12 @@ static void model_rd_norm(int xsq_q10, int *r_q10, int *d_q10) {
        38,    28,    21,    16,    12,    10,     8,     6,
         5,     3,     2,     1,     1,     1,     0,     0,
   };
-  // Normalized distortion
+  // Normalized distortion:
   // This table models the normalized distortion for a Laplacian source
-  // source with given variance when quantized with a uniform quantizer
+  // with given variance when quantized with a uniform quantizer
   // with given stepsize. The closed form expression is:
   // Dn(x) = 1 - 1/sqrt(2) * x / sinh(x/sqrt(2))
-  // where x = qpstep / sqrt(variance)
+  // where x = qpstep / sqrt(variance).
   // Note the actual distortion is Dn * variance.
   static const int dist_tab_q10[] = {
        0,     0,     1,     1,     1,     2,     2,     2,
@@ -286,15 +284,9 @@ static void model_rd_norm(int xsq_q10, int *r_q10, int *d_q10) {
      65504,  73696,  81888,  90080,  98272, 106464, 114656, 122848,
     131040, 147424, 163808, 180192, 196576, 212960, 229344, 245728,
   };
-  /*
-  static const int tab_size = sizeof(rate_tab_q10) / sizeof(rate_tab_q10[0]);
-  assert(sizeof(dist_tab_q10) / sizeof(dist_tab_q10[0]) == tab_size);
-  assert(sizeof(xsq_iq_q10) / sizeof(xsq_iq_q10[0]) == tab_size);
-  assert(MAX_XSQ_Q10 + 1 == xsq_iq_q10[tab_size - 1]);
-  */
-  int tmp = (xsq_q10 >> 2) + 8;
-  int k = get_msb(tmp) - 3;
-  int xq = (k << 3) + ((tmp >> k) & 0x7);
+  const int tmp = (xsq_q10 >> 2) + 8;
+  const int k = get_msb(tmp) - 3;
+  const int xq = (k << 3) + ((tmp >> k) & 0x7);
   const int one_q10 = 1 << 10;
   const int a_q10 = ((xsq_q10 - xsq_iq_q10[xq]) << 10) >> (2 + k);
   const int b_q10 = one_q10 - a_q10;
@@ -391,13 +383,13 @@ void vp9_mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
   pred_mv[1] = mbmi->ref_mvs[ref_frame][1].as_mv;
   pred_mv[2] = x->pred_mv[ref_frame];
 
-  // Get the sad for each candidate reference mv
-  for (i = 0; i < num_mv_refs; i++) {
+  // Get the sad for each candidate reference mv.
+  for (i = 0; i < num_mv_refs; ++i) {
     this_mv.as_mv = pred_mv[i];
 
     max_mv = MAX(max_mv,
                  MAX(abs(this_mv.as_mv.row), abs(this_mv.as_mv.col)) >> 3);
-    // only need to check zero mv once
+    // Only need to check zero mv once.
     if (!this_mv.as_int && zero_seen)
       continue;
 
@@ -442,8 +434,7 @@ void vp9_setup_pred_block(const MACROBLOCKD *xd,
   dst[3].stride = src->alpha_stride;
 #endif
 
-  // TODO(jkoleszar): Make scale factors per-plane data
-  for (i = 0; i < MAX_MB_PLANE; i++) {
+  for (i = 0; i < MAX_MB_PLANE; ++i) {
     setup_pred_plane(dst + i, dst[i].buf, dst[i].stride, mi_row, mi_col,
                      i ? scale_uv : scale,
                      xd->plane[i].subsampling_x, xd->plane[i].subsampling_y);
@@ -471,7 +462,7 @@ void vp9_set_rd_speed_thresholds(VP9_COMP *cpi) {
   RD_OPT *const rd = &cpi->rd;
   SPEED_FEATURES *const sf = &cpi->sf;
 
-  // Set baseline threshold values
+  // Set baseline threshold values.
   for (i = 0; i < MAX_MODES; ++i)
     rd->thresh_mult[i] = is_best_mode(cpi->oxcf.mode) ? -500 : 0;
 
@@ -485,8 +476,8 @@ void vp9_set_rd_speed_thresholds(VP9_COMP *cpi) {
   rd->thresh_mult[THR_NEWA] += 1000;
   rd->thresh_mult[THR_NEWG] += 1000;
 
-  // Adjust threshold only in real time mode, which only use last reference
-  // frame.
+  // Adjust threshold only in real time mode, which only uses last
+  // reference frame.
   rd->thresh_mult[THR_NEWMV] += sf->elevate_newmv_thresh;
 
   rd->thresh_mult[THR_NEARMV] += 1000;
@@ -517,7 +508,7 @@ void vp9_set_rd_speed_thresholds(VP9_COMP *cpi) {
   rd->thresh_mult[THR_D207_PRED] += 2500;
   rd->thresh_mult[THR_D63_PRED] += 2500;
 
-  /* disable frame modes if flags not set */
+  // Disable frame modes if flags not set.
   if (!(cpi->ref_frame_flags & VP9_LAST_FLAG)) {
     rd->thresh_mult[THR_NEWMV    ] = INT_MAX;
     rd->thresh_mult[THR_NEARESTMV] = INT_MAX;
@@ -569,11 +560,11 @@ void vp9_set_rd_speed_thresholds_sub8x8(VP9_COMP *cpi) {
   rd->thresh_mult_sub8x8[THR_COMP_GA] += 4500;
 
   // Check for masked out split cases.
-  for (i = 0; i < MAX_REFS; i++)
+  for (i = 0; i < MAX_REFS; ++i)
     if (sf->disable_split_mask & (1 << i))
       rd->thresh_mult_sub8x8[i] = INT_MAX;
 
-  // disable mode test if frame flag is not set
+  // Disable mode test if frame flag is not set.
   if (!(cpi->ref_frame_flags & VP9_LAST_FLAG))
     rd->thresh_mult_sub8x8[THR_LAST] = INT_MAX;
   if (!(cpi->ref_frame_flags & VP9_GOLD_FLAG))

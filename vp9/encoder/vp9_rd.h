@@ -101,7 +101,7 @@ typedef struct RD_OPT {
   int64_t comp_pred_diff[REFERENCE_MODES];
   int64_t prediction_type_threshes[MAX_REF_FRAMES][REFERENCE_MODES];
   int64_t tx_select_diff[TX_MODES];
-  // FIXME(rbultje) can this overflow?
+  // TODO(agrange): can this overflow?
   int tx_select_threshes[MAX_REF_FRAMES][TX_MODES];
 
   int64_t filter_diff[SWITCHABLE_FILTER_CONTEXTS];
