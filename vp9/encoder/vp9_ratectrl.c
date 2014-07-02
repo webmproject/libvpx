@@ -268,6 +268,26 @@ void vp9_rc_init(const VP9EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
                                            oxcf->best_allowed_q) / 2;
     rc->avg_frame_qindex[INTER_FRAME] = (oxcf->worst_allowed_q +
                                            oxcf->best_allowed_q) / 2;
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
+    switch (oxcf->bit_depth) {
+      case VPX_BITS_8:
+        break;
+      case VPX_BITS_10:
+        rc->avg_frame_qindex[KEY_FRAME] += (MAXQ_10 - MAXQ) / 2;
+        rc->avg_frame_qindex[INTER_FRAME] += (MAXQ_10 - MAXQ) / 2;
+        break;
+      case VPX_BITS_12:
+        rc->avg_frame_qindex[KEY_FRAME] += (MAXQ_12 - MAXQ) / 2;
+        rc->avg_frame_qindex[INTER_FRAME] += (MAXQ_12 - MAXQ) / 2;
+        break;
+      default:
+        assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10, VPX_BITS_12");
+    }
+    if (rc->avg_frame_qindex[KEY_FRAME] > oxcf->worst_allowed_q)
+      rc->avg_frame_qindex[KEY_FRAME] = oxcf->worst_allowed_q;
+    if (rc->avg_frame_qindex[INTER_FRAME] > oxcf->worst_allowed_q)
+      rc->avg_frame_qindex[INTER_FRAME] = oxcf->worst_allowed_q;
+#endif
   }
 
   rc->last_q[KEY_FRAME] = oxcf->best_allowed_q;
