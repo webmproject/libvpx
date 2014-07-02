@@ -1,0 +1,514 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//heY\u003d",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-02T22:01:26Z",
+      "side": 1,
+      "message": "Add period to end of comment (and  others in this file).",
+      "revId": "79779d8e0df990256f34b2ee8c4f782defa7c021",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//heU\u003d",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-02T22:01:26Z",
+      "side": 1,
+      "message": "block (singular)",
+      "revId": "79779d8e0df990256f34b2ee8c4f782defa7c021",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//heg\u003d",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-02T22:01:26Z",
+      "side": 1,
+      "message": "Change all the post-increments to pre-increments.",
+      "revId": "79779d8e0df990256f34b2ee8c4f782defa7c021",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//hec\u003d",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-02T22:01:26Z",
+      "side": 1,
+      "message": "Re-assign or delete.",
+      "revId": "79779d8e0df990256f34b2ee8c4f782defa7c021",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//hek\u003d",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-02T22:01:26Z",
+      "side": 1,
+      "message": "Delete this line, it seems to have become detached.",
+      "revId": "79779d8e0df990256f34b2ee8c4f782defa7c021",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//heQ\u003d",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-02T22:01:26Z",
+      "side": 1,
+      "message": "Capitalize first letter \u0026 add period.",
+      "revId": "79779d8e0df990256f34b2ee8c4f782defa7c021",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//heM\u003d",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-02T22:01:26Z",
+      "side": 1,
+      "message": "Add period.",
+      "revId": "79779d8e0df990256f34b2ee8c4f782defa7c021",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//heI\u003d",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-02T22:01:26Z",
+      "side": 1,
+      "message": "Add period.",
+      "revId": "79779d8e0df990256f34b2ee8c4f782defa7c021",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//heE\u003d",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-02T22:01:26Z",
+      "side": 1,
+      "message": "Add period.",
+      "revId": "79779d8e0df990256f34b2ee8c4f782defa7c021",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//heA\u003d",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-02T22:01:26Z",
+      "side": 1,
+      "message": "Fix alignment.",
+      "revId": "79779d8e0df990256f34b2ee8c4f782defa7c021",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//hd8\u003d",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-02T22:01:26Z",
+      "side": 1,
+      "message": "Capitalize first letter \u0026 add period.",
+      "revId": "79779d8e0df990256f34b2ee8c4f782defa7c021",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//hd4\u003d",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-02T22:01:26Z",
+      "side": 1,
+      "message": "Add period.",
+      "revId": "79779d8e0df990256f34b2ee8c4f782defa7c021",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//hd0\u003d",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-02T22:01:26Z",
+      "side": 1,
+      "message": "Add period.",
+      "revId": "79779d8e0df990256f34b2ee8c4f782defa7c021",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//hds\u003d",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-02T22:01:26Z",
+      "side": 1,
+      "message": "Add period, or colon maybe.",
+      "revId": "79779d8e0df990256f34b2ee8c4f782defa7c021",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//hdw\u003d",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-02T22:01:26Z",
+      "side": 1,
+      "message": "remove 2nd instance of \u0027source\u0027.",
+      "revId": "79779d8e0df990256f34b2ee8c4f782defa7c021",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//hdo\u003d",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-02T22:01:26Z",
+      "side": 1,
+      "message": "Add period, or colon maybe.",
+      "revId": "79779d8e0df990256f34b2ee8c4f782defa7c021",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//hdk\u003d",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-02T22:01:26Z",
+      "side": 1,
+      "message": "remove 2nd instance of \u0027source\u0027.",
+      "revId": "79779d8e0df990256f34b2ee8c4f782defa7c021",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//hdg\u003d",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 257,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-02T22:01:26Z",
+      "side": 1,
+      "message": "Add period.",
+      "revId": "79779d8e0df990256f34b2ee8c4f782defa7c021",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//hdc\u003d",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 294,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-02T22:01:26Z",
+      "side": 1,
+      "message": "Delete commented out code.",
+      "revId": "79779d8e0df990256f34b2ee8c4f782defa7c021",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//hdY\u003d",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-02T22:01:26Z",
+      "side": 1,
+      "message": "Can the aboove 3 vars be const?",
+      "revId": "79779d8e0df990256f34b2ee8c4f782defa7c021",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//hdU\u003d",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 394,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-02T22:01:26Z",
+      "side": 1,
+      "message": "Add period.",
+      "revId": "79779d8e0df990256f34b2ee8c4f782defa7c021",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//hdQ\u003d",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 400,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-02T22:01:26Z",
+      "side": 1,
+      "message": "Capitalize first letter \u0026 add period.",
+      "revId": "79779d8e0df990256f34b2ee8c4f782defa7c021",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//hdM\u003d",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 445,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-02T22:01:26Z",
+      "side": 1,
+      "message": "Reassign or delete.",
+      "revId": "79779d8e0df990256f34b2ee8c4f782defa7c021",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//hdI\u003d",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 474,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-02T22:01:26Z",
+      "side": 1,
+      "message": "Add period.",
+      "revId": "79779d8e0df990256f34b2ee8c4f782defa7c021",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//hdE\u003d",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 516,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-02T22:01:26Z",
+      "side": 1,
+      "message": "Capitalize first \u0026 add period. Use // to match other comments in this file.",
+      "revId": "79779d8e0df990256f34b2ee8c4f782defa7c021",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//hc4\u003d",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 551,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-02T22:01:26Z",
+      "side": 1,
+      "message": "uses",
+      "revId": "79779d8e0df990256f34b2ee8c4f782defa7c021",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//hc0\u003d",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 576,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-02T22:01:26Z",
+      "side": 1,
+      "message": "Capitalize first and add period.",
+      "revId": "79779d8e0df990256f34b2ee8c4f782defa7c021",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//hcw\u003d",
+        "filename": "vp9/encoder/vp9_rd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-02T22:01:26Z",
+      "side": 1,
+      "message": "Remove trailing \u0027,\u0027.",
+      "revId": "79779d8e0df990256f34b2ee8c4f782defa7c021",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//hco\u003d",
+        "filename": "vp9/encoder/vp9_rd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-02T22:01:26Z",
+      "side": 1,
+      "message": "Remove trailing \u0027,\u0027.",
+      "revId": "79779d8e0df990256f34b2ee8c4f782defa7c021",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//hcc\u003d",
+        "filename": "vp9/encoder/vp9_rd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-02T22:01:26Z",
+      "side": 1,
+      "message": "Re-assign.",
+      "revId": "79779d8e0df990256f34b2ee8c4f782defa7c021",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
