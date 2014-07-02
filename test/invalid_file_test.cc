@@ -55,7 +55,8 @@ class InvalidFileTest
 
     // Check results match.
     EXPECT_EQ(expected_res_dec, res_dec)
-        << "Results don't match: frame number = " << video.frame_number();
+        << "Results don't match: frame number = " << video.frame_number()
+        << ". (" << decoder->DecodeError() << ")";
 
     return !HasFailure();
   }
