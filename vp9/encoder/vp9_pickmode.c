@@ -106,24 +106,25 @@ static int mv_refs_rt(const VP9_COMMON *cm, const MACROBLOCKD *xd,
   return const_motion;
 }
 
-static void full_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
-                                    BLOCK_SIZE bsize, int mi_row, int mi_col,
-                                    int_mv *tmp_mv, int *rate_mv) {
+static int combined_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
+                                  BLOCK_SIZE bsize, int mi_row, int mi_col,
+                                  int_mv *tmp_mv, int *rate_mv,
+                                  int64_t best_rd_sofar) {
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
   struct buf_2d backup_yv12[MAX_MB_PLANE] = {{0, 0}};
-  int step_param;
-  int sadpb = x->sadperbit16;
+  const int step_param = cpi->sf.mv.fullpel_search_step_param;
+  const int sadpb = x->sadperbit16;
   MV mvp_full;
-  int ref = mbmi->ref_frame[0];
+  const int ref = mbmi->ref_frame[0];
   const MV ref_mv = mbmi->ref_mvs[ref][0].as_mv;
-  int i;
-
-  int tmp_col_min = x->mv_col_min;
-  int tmp_col_max = x->mv_col_max;
-  int tmp_row_min = x->mv_row_min;
-  int tmp_row_max = x->mv_row_max;
-
+  int dis;
+  int rate_mode;
+  const int tmp_col_min = x->mv_col_min;
+  const int tmp_col_max = x->mv_col_max;
+  const int tmp_row_min = x->mv_row_min;
+  const int tmp_row_max = x->mv_row_max;
+  int rv = 0;
   const YV12_BUFFER_CONFIG *scaled_ref_frame = vp9_get_scaled_ref_frame(cpi,
                                                                         ref);
   if (scaled_ref_frame) {
@@ -133,27 +134,19 @@ static void full_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     // motion search code to be used without additional modifications.
     for (i = 0; i < MAX_MB_PLANE; i++)
       backup_yv12[i] = xd->plane[i].pre[0];
-
     vp9_setup_pre_planes(xd, 0, scaled_ref_frame, mi_row, mi_col, NULL);
   }
-
   vp9_set_mv_search_range(x, &ref_mv);
 
-  // TODO(jingning) exploiting adaptive motion search control in non-RD
-  // mode decision too.
-  step_param = cpi->sf.mv.fullpel_search_step_param;
-
-  for (i = LAST_FRAME; i <= LAST_FRAME && cpi->common.show_frame; ++i) {
-    if ((x->pred_mv_sad[ref] >> 3) > x->pred_mv_sad[i]) {
-      tmp_mv->as_int = INVALID_MV;
-
-      if (scaled_ref_frame) {
-        int i;
-        for (i = 0; i < MAX_MB_PLANE; i++)
-          xd->plane[i].pre[0] = backup_yv12[i];
-      }
-      return;
+  if (cpi->common.show_frame &&
+      (x->pred_mv_sad[ref] >> 3) > x->pred_mv_sad[LAST_FRAME]) {
+    tmp_mv->as_int = INVALID_MV;
+    if (scaled_ref_frame) {
+      int i;
+      for (i = 0; i < MAX_MB_PLANE; i++)
+        xd->plane[i].pre[0] = backup_yv12[i];
     }
+    return rv;
   }
   assert(x->mv_best_ref_index[ref] <= 2);
   if (x->mv_best_ref_index[ref] < 2)
@@ -172,59 +165,38 @@ static void full_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   x->mv_row_min = tmp_row_min;
   x->mv_row_max = tmp_row_max;
 
-  if (scaled_ref_frame) {
-    int i;
-    for (i = 0; i < MAX_MB_PLANE; i++)
-      xd->plane[i].pre[0] = backup_yv12[i];
-  }
-
   // calculate the bit cost on motion vector
   mvp_full.row = tmp_mv->as_mv.row * 8;
   mvp_full.col = tmp_mv->as_mv.col * 8;
+
   *rate_mv = vp9_mv_bit_cost(&mvp_full, &ref_mv,
                              x->nmvjointcost, x->mvcost, MV_COST_WEIGHT);
-}
 
-static void sub_pixel_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
-                                    BLOCK_SIZE bsize, int mi_row, int mi_col,
-                                    MV *tmp_mv) {
-  MACROBLOCKD *xd = &x->e_mbd;
-  MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
-  struct buf_2d backup_yv12[MAX_MB_PLANE] = {{0, 0}};
-  int ref = mbmi->ref_frame[0];
-  MV ref_mv = mbmi->ref_mvs[ref][0].as_mv;
-  int dis;
+  rate_mode = cpi->inter_mode_cost[mbmi->mode_context[ref]]
+                                  [INTER_OFFSET(NEWMV)];
+  rv = !(RDCOST(x->rdmult, x->rddiv, (*rate_mv + rate_mode), 0) >
+         best_rd_sofar);
 
-  const YV12_BUFFER_CONFIG *scaled_ref_frame = vp9_get_scaled_ref_frame(cpi,
-                                                                        ref);
-  if (scaled_ref_frame) {
-    int i;
-    // Swap out the reference frame for a version that's been scaled to
-    // match the resolution of the current frame, allowing the existing
-    // motion search code to be used without additional modifications.
-    for (i = 0; i < MAX_MB_PLANE; i++)
-      backup_yv12[i] = xd->plane[i].pre[0];
-
-    vp9_setup_pre_planes(xd, 0, scaled_ref_frame, mi_row, mi_col, NULL);
+  if (rv) {
+    cpi->find_fractional_mv_step(x, &tmp_mv->as_mv, &ref_mv,
+                                 cpi->common.allow_high_precision_mv,
+                                 x->errorperbit,
+                                 &cpi->fn_ptr[bsize],
+                                 cpi->sf.mv.subpel_force_stop,
+                                 cpi->sf.mv.subpel_iters_per_step,
+                                 x->nmvjointcost, x->mvcost,
+                                 &dis, &x->pred_sse[ref]);
+    x->pred_mv[ref] = tmp_mv->as_mv;
   }
-
-  cpi->find_fractional_mv_step(x, tmp_mv, &ref_mv,
-                               cpi->common.allow_high_precision_mv,
-                               x->errorperbit,
-                               &cpi->fn_ptr[bsize],
-                               cpi->sf.mv.subpel_force_stop,
-                               cpi->sf.mv.subpel_iters_per_step,
-                               x->nmvjointcost, x->mvcost,
-                               &dis, &x->pred_sse[ref]);
 
   if (scaled_ref_frame) {
     int i;
     for (i = 0; i < MAX_MB_PLANE; i++)
       xd->plane[i].pre[0] = backup_yv12[i];
   }
-
-  x->pred_mv[ref] = *tmp_mv;
+  return rv;
 }
+
 
 static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
                               MACROBLOCK *x, MACROBLOCKD *xd,
@@ -544,28 +516,17 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         continue;
 
       if (this_mode == NEWMV) {
-        int rate_mode = 0;
         if (this_rd < (int64_t)(1 << num_pels_log2_lookup[bsize]))
           continue;
-
-        full_pixel_motion_search(cpi, x, bsize, mi_row, mi_col,
-                                 &frame_mv[NEWMV][ref_frame], &rate_mv);
-
-        if (frame_mv[NEWMV][ref_frame].as_int == INVALID_MV)
+        if (!combined_motion_search(cpi, x, bsize, mi_row, mi_col,
+                                    &frame_mv[NEWMV][ref_frame],
+                                    &rate_mv, best_rd))
           continue;
-
-        rate_mode = cpi->inter_mode_cost[mbmi->mode_context[ref_frame]]
-                                        [INTER_OFFSET(this_mode)];
-        if (RDCOST(x->rdmult, x->rddiv, rate_mv + rate_mode, 0) > best_rd)
-          continue;
-
-        sub_pixel_motion_search(cpi, x, bsize, mi_row, mi_col,
-                                &frame_mv[NEWMV][ref_frame].as_mv);
       }
 
-      if (this_mode != NEARESTMV)
-        if (frame_mv[this_mode][ref_frame].as_int ==
-            frame_mv[NEARESTMV][ref_frame].as_int)
+      if (this_mode != NEARESTMV &&
+          frame_mv[this_mode][ref_frame].as_int ==
+              frame_mv[NEARESTMV][ref_frame].as_int)
           continue;
 
       mbmi->mode = this_mode;
