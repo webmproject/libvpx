@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//hiU\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 38
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-07-02T19:37:18Z",
+      "side": 1,
+      "message": "I assume that you will explore adapting the thresholds based on block size next, therefore the currently not-in-use parameters will be useful in this and the functions below.",
+      "revId": "03a3ba4a0da42588350b1a4a18ff76df44756944",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//hiQ\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 38
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-07-02T19:37:18Z",
+      "side": 1,
+      "message": "{ } is not necessary here.",
+      "revId": "03a3ba4a0da42588350b1a4a18ff76df44756944",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//hiM\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 38
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-07-02T19:37:18Z",
+      "side": 1,
+      "message": "same here. \n\nalso noticed in a few places below, when both if and else (or only if) with one line argument, the {}s are not necessary.",
+      "revId": "03a3ba4a0da42588350b1a4a18ff76df44756944",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
