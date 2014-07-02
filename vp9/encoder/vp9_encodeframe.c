@@ -38,6 +38,7 @@
 #include "vp9/encoder/vp9_encodemv.h"
 #include "vp9/encoder/vp9_extend.h"
 #include "vp9/encoder/vp9_pickmode.h"
+#include "vp9/encoder/vp9_rd.h"
 #include "vp9/encoder/vp9_rdopt.h"
 #include "vp9/encoder/vp9_segmentation.h"
 #include "vp9/encoder/vp9_tokenize.h"

@@ -33,7 +33,7 @@
 #include "vp9/encoder/vp9_firstpass.h"
 #include "vp9/encoder/vp9_mcomp.h"
 #include "vp9/encoder/vp9_quantize.h"
-#include "vp9/encoder/vp9_rdopt.h"
+#include "vp9/encoder/vp9_rd.h"
 #include "vp9/encoder/vp9_variance.h"
 
 #define OUTPUT_FPF 0

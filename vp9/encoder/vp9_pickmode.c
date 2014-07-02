@@ -25,7 +25,7 @@
 #include "vp9/encoder/vp9_encoder.h"
 #include "vp9/encoder/vp9_pickmode.h"
 #include "vp9/encoder/vp9_ratectrl.h"
-#include "vp9/encoder/vp9_rdopt.h"
+#include "vp9/encoder/vp9_rd.h"
 
 static int mv_refs_rt(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                        const TileInfo *const tile,

@@ -39,7 +39,7 @@
 #include "vp9/encoder/vp9_encoder.h"
 #include "vp9/encoder/vp9_picklpf.h"
 #include "vp9/encoder/vp9_ratectrl.h"
-#include "vp9/encoder/vp9_rdopt.h"
+#include "vp9/encoder/vp9_rd.h"
 #include "vp9/encoder/vp9_segmentation.h"
 #include "vp9/encoder/vp9_speed_features.h"
 #if CONFIG_INTERNAL_STATS

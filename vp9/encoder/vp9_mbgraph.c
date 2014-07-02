@@ -11,7 +11,6 @@
 #include <limits.h>
 
 #include "vpx_mem/vpx_mem.h"
-#include "vp9/encoder/vp9_rdopt.h"
 #include "vp9/encoder/vp9_segmentation.h"
 #include "vp9/encoder/vp9_mcomp.h"
 #include "vp9/common/vp9_blockd.h"
