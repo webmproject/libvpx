@@ -76,7 +76,7 @@ VP9Decoder *vp9_decoder_create() {
 
   cm->error.setjmp = 0;
 
-  vp9_worker_init(&pbi->lf_worker);
+  vp9_get_worker_interface()->init(&pbi->lf_worker);
 
   return pbi;
 }
@@ -86,12 +86,12 @@ void vp9_decoder_remove(VP9Decoder *pbi) {
   int i;
 
   vp9_remove_common(cm);
-  vp9_worker_end(&pbi->lf_worker);
+  vp9_get_worker_interface()->end(&pbi->lf_worker);
   vpx_free(pbi->lf_worker.data1);
   vpx_free(pbi->tile_data);
   for (i = 0; i < pbi->num_tile_workers; ++i) {
     VP9Worker *const worker = &pbi->tile_workers[i];
-    vp9_worker_end(worker);
+    vp9_get_worker_interface()->end(worker);
     vpx_free(worker->data1);
     vpx_free(worker->data2);
   }

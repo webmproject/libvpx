@@ -138,6 +138,7 @@ void vp9_loop_filter_frame_mt(YV12_BUFFER_CONFIG *frame,
                               int frame_filter_level,
                               int y_only) {
   VP9LfSync *const lf_sync = &pbi->lf_row_sync;
+  const VP9WorkerInterface *const winterface = vp9_get_worker_interface();
   // Number of superblock rows and cols
   const int sb_rows = mi_cols_aligned_to_sb(cm->mi_rows) >> MI_BLOCK_SIZE_LOG2;
   const int tile_cols = 1 << cm->log2_tile_cols;
@@ -197,15 +198,15 @@ void vp9_loop_filter_frame_mt(YV12_BUFFER_CONFIG *frame,
 
     // Start loopfiltering
     if (i == num_workers - 1) {
-      vp9_worker_execute(worker);
+      winterface->execute(worker);
     } else {
-      vp9_worker_launch(worker);
+      winterface->launch(worker);
     }
   }
 
   // Wait till all rows are finished
   for (i = 0; i < num_workers; ++i) {
-    vp9_worker_sync(&pbi->tile_workers[i]);
+    winterface->sync(&pbi->tile_workers[i]);
   }
 }
 
