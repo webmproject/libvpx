@@ -590,12 +590,11 @@ static void setup_segmentation(struct segmentation *seg,
         const int feature_enabled = vp9_rb_read_bit(rb);
         if (feature_enabled) {
           vp9_enable_segfeature(seg, i, j);
-          data = decode_unsigned_max(rb, vp9_seg_feature_data_max(j,
-                                                                  bit_depth));
+          data = decode_unsigned_max(rb, vp9_seg_feature_data_max(j));
           if (vp9_is_segfeature_signed(j))
             data = vp9_rb_read_bit(rb) ? -data : data;
         }
-        vp9_set_segdata(seg, i, j, data, bit_depth);
+        vp9_set_segdata(seg, i, j, data);
       }
     }
   }
@@ -637,7 +636,7 @@ static void setup_quantization(VP9_COMMON *const cm, MACROBLOCKD *const xd,
                                struct vp9_read_bit_buffer *rb) {
   int update = 0;
 
-  cm->base_qindex = vp9_rb_read_literal(rb, vp9_get_qindex_bits(cm->bit_depth));
+  cm->base_qindex = vp9_rb_read_literal(rb, QINDEX_BITS);
   update |= read_delta_q(rb, &cm->y_dc_delta_q);
   update |= read_delta_q(rb, &cm->uv_dc_delta_q);
   update |= read_delta_q(rb, &cm->uv_ac_delta_q);
@@ -1337,9 +1336,8 @@ static int read_compressed_header(VP9Decoder *pbi, const uint8_t *data,
 
 void vp9_init_dequantizer(VP9_COMMON *cm) {
   int q;
-  int range = vp9_get_qindex_range(cm->bit_depth);
 
-  for (q = 0; q < range; q++) {
+  for (q = 0; q < QINDEX_RANGE; q++) {
     cm->y_dequant[q][0] = vp9_dc_quant(q, cm->y_dc_delta_q, cm->bit_depth);
     cm->y_dequant[q][1] = vp9_ac_quant(q, 0, cm->bit_depth);
 

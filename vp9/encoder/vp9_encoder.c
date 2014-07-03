@@ -291,8 +291,8 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
 
       qi_delta = vp9_compute_qdelta(rc, rc->avg_q, rc->avg_q * 0.875,
                                     cm->bit_depth);
-      vp9_set_segdata(seg, 1, SEG_LVL_ALT_Q, qi_delta - 2, cm->bit_depth);
-      vp9_set_segdata(seg, 1, SEG_LVL_ALT_LF, -2, cm->bit_depth);
+      vp9_set_segdata(seg, 1, SEG_LVL_ALT_Q, qi_delta - 2);
+      vp9_set_segdata(seg, 1, SEG_LVL_ALT_LF, -2);
 
       vp9_enable_segfeature(seg, 1, SEG_LVL_ALT_Q);
       vp9_enable_segfeature(seg, 1, SEG_LVL_ALT_LF);
@@ -313,16 +313,15 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
 
         qi_delta = vp9_compute_qdelta(rc, rc->avg_q, rc->avg_q * 1.125,
                                       cm->bit_depth);
-        vp9_set_segdata(seg, 1, SEG_LVL_ALT_Q, qi_delta + 2, cm->bit_depth);
+        vp9_set_segdata(seg, 1, SEG_LVL_ALT_Q, qi_delta + 2);
         vp9_enable_segfeature(seg, 1, SEG_LVL_ALT_Q);
 
-        vp9_set_segdata(seg, 1, SEG_LVL_ALT_LF, -2, cm->bit_depth);
+        vp9_set_segdata(seg, 1, SEG_LVL_ALT_LF, -2);
         vp9_enable_segfeature(seg, 1, SEG_LVL_ALT_LF);
 
         // Segment coding disabled for compred testing
         if (high_q || (cpi->static_mb_pct == 100)) {
-          vp9_set_segdata(seg, 1, SEG_LVL_REF_FRAME, ALTREF_FRAME,
-                          cm->bit_depth);
+          vp9_set_segdata(seg, 1, SEG_LVL_REF_FRAME, ALTREF_FRAME);
           vp9_enable_segfeature(seg, 1, SEG_LVL_REF_FRAME);
           vp9_enable_segfeature(seg, 1, SEG_LVL_SKIP);
         }
@@ -350,9 +349,9 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
 
       // All mbs should use ALTREF_FRAME
       vp9_clear_segdata(seg, 0, SEG_LVL_REF_FRAME);
-      vp9_set_segdata(seg, 0, SEG_LVL_REF_FRAME, ALTREF_FRAME, cm->bit_depth);
+      vp9_set_segdata(seg, 0, SEG_LVL_REF_FRAME, ALTREF_FRAME);
       vp9_clear_segdata(seg, 1, SEG_LVL_REF_FRAME);
-      vp9_set_segdata(seg, 1, SEG_LVL_REF_FRAME, ALTREF_FRAME, cm->bit_depth);
+      vp9_set_segdata(seg, 1, SEG_LVL_REF_FRAME, ALTREF_FRAME);
 
       // Skip all MBs if high Q (0,0 mv and skip coeffs)
       if (high_q) {
@@ -2917,25 +2916,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   if (!frame_is_intra_only(cm)) {
     cm->interp_filter = DEFAULT_INTERP_FILTER;
     /* TODO: Decide this more intelligently */
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
-    switch (cm->bit_depth) {
-      case VPX_BITS_8:
-        set_high_precision_mv(cpi, q < HIGH_PRECISION_MV_QTHRESH);
-        break;
-      case VPX_BITS_10:
-        set_high_precision_mv(cpi,
-                              q < HIGH_PRECISION_MV_QTHRESH + MAXQ_10 - MAXQ);
-        break;
-      case VPX_BITS_12:
-        set_high_precision_mv(cpi,
-                              q < HIGH_PRECISION_MV_QTHRESH + MAXQ_12 - MAXQ);
-        break;
-      default:
-        assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10, VPX_BITS_12");
-    }
-#else
     set_high_precision_mv(cpi, q < HIGH_PRECISION_MV_QTHRESH);
-#endif
   }
 
   if (cpi->sf.recode_loop == DISALLOW_RECODE) {

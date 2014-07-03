@@ -206,11 +206,11 @@ static int sad_per_bit16lut_8[QINDEX_RANGE];
 static int sad_per_bit4lut_8[QINDEX_RANGE];
 
 #if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
-static int sad_per_bit16lut_10[QINDEX_RANGE_10];
-static int sad_per_bit4lut_10[QINDEX_RANGE_10];
+static int sad_per_bit16lut_10[QINDEX_RANGE];
+static int sad_per_bit4lut_10[QINDEX_RANGE];
 
-static int sad_per_bit16lut_12[QINDEX_RANGE_12];
-static int sad_per_bit4lut_12[QINDEX_RANGE_12];
+static int sad_per_bit16lut_12[QINDEX_RANGE];
+static int sad_per_bit4lut_12[QINDEX_RANGE];
 #endif
 
 static void init_me_luts_bd(int *bit16lut, int *bit4lut, int range,
@@ -230,9 +230,9 @@ void vp9_init_me_luts() {
   init_me_luts_bd(sad_per_bit16lut_8, sad_per_bit4lut_8, QINDEX_RANGE,
                   VPX_BITS_8);
 #if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
-  init_me_luts_bd(sad_per_bit16lut_10, sad_per_bit4lut_10, QINDEX_RANGE_10,
+  init_me_luts_bd(sad_per_bit16lut_10, sad_per_bit4lut_10, QINDEX_RANGE,
                   VPX_BITS_10);
-  init_me_luts_bd(sad_per_bit16lut_12, sad_per_bit4lut_12, QINDEX_RANGE_12,
+  init_me_luts_bd(sad_per_bit16lut_12, sad_per_bit4lut_12, QINDEX_RANGE,
                   VPX_BITS_12);
 #endif
 }
@@ -346,7 +346,7 @@ static void set_block_thresholds(const VP9_COMMON *cm, RD_OPT *rd) {
   for (segment_id = 0; segment_id < MAX_SEGMENTS; ++segment_id) {
     const int qindex = clamp(
       vp9_get_qindex(&cm->seg, segment_id, cm->base_qindex, cm->bit_depth) +
-      cm->y_dc_delta_q, 0, vp9_get_maxq(cm->bit_depth));
+      cm->y_dc_delta_q, 0, MAXQ);
 
     const int q = compute_rd_thresh_factor(qindex, cm->bit_depth);
 

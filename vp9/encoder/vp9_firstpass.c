@@ -459,13 +459,12 @@ static BLOCK_SIZE get_bsize(const VP9_COMMON *cm, int mb_row, int mb_col) {
 
 static int find_fp_qindex(vpx_bit_depth_t bit_depth) {
   int i;
-  int range = vp9_get_qindex_range(bit_depth);
 
-  for (i = 0; i < range; ++i)
+  for (i = 0; i < QINDEX_RANGE; ++i)
     if (vp9_convert_qindex_to_q(i, bit_depth) >= 30.0)
       break;
 
-  if (i == range)
+  if (i == QINDEX_RANGE)
     i--;
 
   return i;

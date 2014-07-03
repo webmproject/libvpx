@@ -105,8 +105,7 @@ void vp9_vaq_frame_setup(VP9_COMP *cpi) {
 
       qindex_delta = vp9_compute_qdelta(&cpi->rc, base_q, base_q * Q_RATIO(i),
                                         cm->bit_depth);
-      vp9_set_segdata(seg, SEGMENT_ID(i), SEG_LVL_ALT_Q, qindex_delta,
-                      cm->bit_depth);
+      vp9_set_segdata(seg, SEGMENT_ID(i), SEG_LVL_ALT_Q, qindex_delta);
       vp9_enable_segfeature(seg, SEGMENT_ID(i), SEG_LVL_ALT_Q);
 
       segment_rdmult = vp9_compute_rd_mult(cpi, cm->base_qindex + qindex_delta +

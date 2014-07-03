@@ -250,11 +250,10 @@ void vp9_cyclic_refresh_setup(VP9_COMP *const cpi) {
       qindex_delta = -cr->max_qdelta_perc * cm->base_qindex / 100;
 
     // Compute rd-mult for segment 1.
-    qindex2 = clamp(cm->base_qindex + cm->y_dc_delta_q + qindex_delta, 0,
-                    vp9_get_maxq(cm->bit_depth));
+    qindex2 = clamp(cm->base_qindex + cm->y_dc_delta_q + qindex_delta, 0, MAXQ);
     cr->rdmult = vp9_compute_rd_mult(cpi, qindex2);
 
-    vp9_set_segdata(seg, 1, SEG_LVL_ALT_Q, qindex_delta, cm->bit_depth);
+    vp9_set_segdata(seg, 1, SEG_LVL_ALT_Q, qindex_delta);
 
     sb_cols = (cm->mi_cols + MI_BLOCK_SIZE - 1) / MI_BLOCK_SIZE;
     sb_rows = (cm->mi_rows + MI_BLOCK_SIZE - 1) / MI_BLOCK_SIZE;

@@ -741,7 +741,7 @@ static void write_delta_q(struct vp9_write_bit_buffer *wb, int delta_q) {
 
 static void encode_quantization(VP9_COMMON *cm,
                                 struct vp9_write_bit_buffer *wb) {
-  vp9_wb_write_literal(wb, cm->base_qindex, vp9_get_qindex_bits(cm->bit_depth));
+  vp9_wb_write_literal(wb, cm->base_qindex, QINDEX_BITS);
   write_delta_q(wb, cm->y_dc_delta_q);
   write_delta_q(wb, cm->uv_dc_delta_q);
   write_delta_q(wb, cm->uv_ac_delta_q);
@@ -796,8 +796,7 @@ static void encode_segmentation(VP9_COMP *cpi,
         vp9_wb_write_bit(wb, active);
         if (active) {
           const int data = vp9_get_segdata(seg, i, j);
-          const int data_max = vp9_seg_feature_data_max(j,
-                                                        cpi->common.bit_depth);
+          const int data_max = vp9_seg_feature_data_max(j);
 
           if (vp9_is_segfeature_signed(j)) {
             encode_unsigned_max(wb, abs(data), data_max);

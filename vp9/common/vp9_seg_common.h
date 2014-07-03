@@ -61,16 +61,14 @@ void vp9_enable_segfeature(struct segmentation *seg,
                            int segment_id,
                            SEG_LVL_FEATURES feature_id);
 
-int vp9_seg_feature_data_max(SEG_LVL_FEATURES feature_id,
-                             vpx_bit_depth_t bit_depth);
+int vp9_seg_feature_data_max(SEG_LVL_FEATURES feature_id);
 
 int vp9_is_segfeature_signed(SEG_LVL_FEATURES feature_id);
 
 void vp9_set_segdata(struct segmentation *seg,
                      int segment_id,
                      SEG_LVL_FEATURES feature_id,
-                     int seg_data,
-                     vpx_bit_depth_t bit_depth);
+                     int seg_data);
 
 int vp9_get_segdata(const struct segmentation *seg,
                     int segment_id,

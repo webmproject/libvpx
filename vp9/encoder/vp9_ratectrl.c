@@ -77,18 +77,18 @@ static int arfgf_high_motion_minq_8[QINDEX_RANGE];
 static int inter_minq_8[QINDEX_RANGE];
 static int rtc_minq_8[QINDEX_RANGE];
 #if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
-static int kf_low_motion_minq_10[QINDEX_RANGE_10];
-static int kf_high_motion_minq_10[QINDEX_RANGE_10];
-static int arfgf_low_motion_minq_10[QINDEX_RANGE_10];
-static int arfgf_high_motion_minq_10[QINDEX_RANGE_10];
-static int inter_minq_10[QINDEX_RANGE_10];
-static int rtc_minq_10[QINDEX_RANGE_10];
-static int kf_low_motion_minq_12[QINDEX_RANGE_12];
-static int kf_high_motion_minq_12[QINDEX_RANGE_12];
-static int arfgf_low_motion_minq_12[QINDEX_RANGE_12];
-static int arfgf_high_motion_minq_12[QINDEX_RANGE_12];
-static int inter_minq_12[QINDEX_RANGE_12];
-static int rtc_minq_12[QINDEX_RANGE_12];
+static int kf_low_motion_minq_10[QINDEX_RANGE];
+static int kf_high_motion_minq_10[QINDEX_RANGE];
+static int arfgf_low_motion_minq_10[QINDEX_RANGE];
+static int arfgf_high_motion_minq_10[QINDEX_RANGE];
+static int inter_minq_10[QINDEX_RANGE];
+static int rtc_minq_10[QINDEX_RANGE];
+static int kf_low_motion_minq_12[QINDEX_RANGE];
+static int kf_high_motion_minq_12[QINDEX_RANGE];
+static int arfgf_low_motion_minq_12[QINDEX_RANGE];
+static int arfgf_high_motion_minq_12[QINDEX_RANGE];
+static int inter_minq_12[QINDEX_RANGE];
+static int rtc_minq_12[QINDEX_RANGE];
 #endif
 static int gf_high = 2000;
 static int gf_low = 400;
@@ -102,7 +102,6 @@ static int kf_low = 400;
 static int get_minq_index(double maxq, double x3, double x2, double x1,
                           vpx_bit_depth_t bit_depth) {
   int i;
-  int range = vp9_get_qindex_range(bit_depth);
   const double minqtarget = MIN(((x3 * maxq + x2) * maxq + x1) * maxq,
                                 maxq);
 
@@ -111,20 +110,19 @@ static int get_minq_index(double maxq, double x3, double x2, double x1,
   if (minqtarget <= 2.0)
     return 0;
 
-  for (i = 0; i < range; i++)
+  for (i = 0; i < QINDEX_RANGE; i++)
     if (minqtarget <= vp9_convert_qindex_to_q(i, bit_depth))
       return i;
 
-  return range - 1;
+  return QINDEX_RANGE - 1;
 }
 
 static void init_minq_luts(int *kf_low_m, int *kf_high_m,
                            int *arfgf_low, int *arfgf_high,
                            int *inter, int *rtc, vpx_bit_depth_t bit_depth) {
   int i;
-  int range = vp9_get_qindex_range(bit_depth);
 
-  for (i = 0; i < range; i++) {
+  for (i = 0; i < QINDEX_RANGE; i++) {
     const double maxq = vp9_convert_qindex_to_q(i, bit_depth);
     kf_low_m[i] = get_minq_index(maxq, 0.000001, -0.0004, 0.125, bit_depth);
     kf_high_m[i] = get_minq_index(maxq, 0.000002, -0.0012, 0.50, bit_depth);
@@ -268,26 +266,6 @@ void vp9_rc_init(const VP9EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
                                            oxcf->best_allowed_q) / 2;
     rc->avg_frame_qindex[INTER_FRAME] = (oxcf->worst_allowed_q +
                                            oxcf->best_allowed_q) / 2;
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
-    switch (oxcf->bit_depth) {
-      case VPX_BITS_8:
-        break;
-      case VPX_BITS_10:
-        rc->avg_frame_qindex[KEY_FRAME] += (MAXQ_10 - MAXQ) / 2;
-        rc->avg_frame_qindex[INTER_FRAME] += (MAXQ_10 - MAXQ) / 2;
-        break;
-      case VPX_BITS_12:
-        rc->avg_frame_qindex[KEY_FRAME] += (MAXQ_12 - MAXQ) / 2;
-        rc->avg_frame_qindex[INTER_FRAME] += (MAXQ_12 - MAXQ) / 2;
-        break;
-      default:
-        assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10, VPX_BITS_12");
-    }
-    if (rc->avg_frame_qindex[KEY_FRAME] > oxcf->worst_allowed_q)
-      rc->avg_frame_qindex[KEY_FRAME] = oxcf->worst_allowed_q;
-    if (rc->avg_frame_qindex[INTER_FRAME] > oxcf->worst_allowed_q)
-      rc->avg_frame_qindex[INTER_FRAME] = oxcf->worst_allowed_q;
-#endif
   }
 
   rc->last_q[KEY_FRAME] = oxcf->best_allowed_q;

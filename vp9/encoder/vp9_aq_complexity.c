@@ -60,8 +60,7 @@ void vp9_setup_in_frame_q_adj(VP9_COMP *cpi) {
       }
       if ((cm->base_qindex + qindex_delta) > 0) {
         vp9_enable_segfeature(seg, segment, SEG_LVL_ALT_Q);
-        vp9_set_segdata(seg, segment, SEG_LVL_ALT_Q, qindex_delta,
-                        cm->bit_depth);
+        vp9_set_segdata(seg, segment, SEG_LVL_ALT_Q, qindex_delta);
       }
     }
   }

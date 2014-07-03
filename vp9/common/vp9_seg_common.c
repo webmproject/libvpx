@@ -21,14 +21,6 @@ static const int seg_feature_data_signed[SEG_LVL_MAX] = { 1, 1, 0, 0 };
 static const int seg_feature_data_max[SEG_LVL_MAX] = {
   MAXQ, MAX_LOOP_FILTER, 3, 0 };
 
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
-static const int seg_feature_data_max_10[SEG_LVL_MAX] = {
-  MAXQ_10, MAX_LOOP_FILTER, 3, 0 };
-
-static const int seg_feature_data_max_12[SEG_LVL_MAX] = {
-  MAXQ_12, MAX_LOOP_FILTER, 3, 0 };
-#endif
-
 // These functions provide access to new segment level features.
 // Eventually these function may be "optimized out" but for the moment,
 // the coding mechanism is still subject to change so these provide a
@@ -50,23 +42,8 @@ void vp9_enable_segfeature(struct segmentation *seg, int segment_id,
   seg->feature_mask[segment_id] |= 1 << feature_id;
 }
 
-int vp9_seg_feature_data_max(SEG_LVL_FEATURES feature_id,
-                             vpx_bit_depth_t bit_depth) {
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
-  switch (bit_depth) {
-    case VPX_BITS_8:
-      return seg_feature_data_max[feature_id];
-    case VPX_BITS_10:
-      return seg_feature_data_max_10[feature_id];
-    case VPX_BITS_12:
-      return seg_feature_data_max_12[feature_id];
-    default:
-      assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10 or VPX_BITS_12");
-  }
-#else
-  (void) bit_depth;
+int vp9_seg_feature_data_max(SEG_LVL_FEATURES feature_id) {
   return seg_feature_data_max[feature_id];
-#endif
 }
 
 int vp9_is_segfeature_signed(SEG_LVL_FEATURES feature_id) {
@@ -74,9 +51,8 @@ int vp9_is_segfeature_signed(SEG_LVL_FEATURES feature_id) {
 }
 
 void vp9_set_segdata(struct segmentation *seg, int segment_id,
-                     SEG_LVL_FEATURES feature_id, int seg_data,
-                     vpx_bit_depth_t bit_depth) {
-  const int data_max = vp9_seg_feature_data_max(feature_id, bit_depth);
+                     SEG_LVL_FEATURES feature_id, int seg_data) {
+  const int data_max = vp9_seg_feature_data_max(feature_id);
   assert(seg_data <= data_max);
   if (seg_data < 0) {
     assert(seg_feature_data_signed[feature_id]);

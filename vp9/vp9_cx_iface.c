@@ -341,13 +341,10 @@ static vpx_codec_err_t set_encoder_config(
   oxcf->rc_max_intra_bitrate_pct = extra_cfg->rc_max_intra_bitrate_pct;
 
   oxcf->best_allowed_q =
-      extra_cfg->lossless ? 0 : vp9_quantizer_to_qindex(cfg->rc_min_quantizer,
-                                                        oxcf->bit_depth);
+      extra_cfg->lossless ? 0 : vp9_quantizer_to_qindex(cfg->rc_min_quantizer);
   oxcf->worst_allowed_q =
-      extra_cfg->lossless ? 0 : vp9_quantizer_to_qindex(cfg->rc_max_quantizer,
-                                                        oxcf->bit_depth);
-  oxcf->cq_level        = vp9_quantizer_to_qindex(extra_cfg->cq_level,
-                                                  oxcf->bit_depth);
+      extra_cfg->lossless ? 0 : vp9_quantizer_to_qindex(cfg->rc_max_quantizer);
+  oxcf->cq_level        = vp9_quantizer_to_qindex(extra_cfg->cq_level);
   oxcf->fixed_q = -1;
 
   oxcf->under_shoot_pct         = cfg->rc_undershoot_pct;
@@ -494,8 +491,7 @@ static vpx_codec_err_t ctrl_get_quantizer64(vpx_codec_alg_priv_t *ctx,
   int *const arg = va_arg(args, int *);
   if (arg == NULL)
     return VPX_CODEC_INVALID_PARAM;
-  *arg = vp9_qindex_to_quantizer(vp9_get_quantizer(ctx->cpi),
-                                 ctx->cpi->common.bit_depth);
+  *arg = vp9_qindex_to_quantizer(vp9_get_quantizer(ctx->cpi));
   return VPX_CODEC_OK;
 }
 
