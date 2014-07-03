@@ -58,8 +58,7 @@ struct y4m_input {
   unsigned char    *dst_buf;
   unsigned char    *aux_buf;
   enum vpx_img_fmt  vpx_fmt;
-  int               bps;
-  unsigned int      bit_depth;
+  int               vpx_bps;
 };
 
 int y4m_input_open(y4m_input *_y4m, FILE *_fin, char *_skip, int _nskip,
