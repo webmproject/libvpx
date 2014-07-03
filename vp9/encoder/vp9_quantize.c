@@ -17,7 +17,7 @@
 
 #include "vp9/encoder/vp9_encoder.h"
 #include "vp9/encoder/vp9_quantize.h"
-#include "vp9/encoder/vp9_rdopt.h"
+#include "vp9/encoder/vp9_rd.h"
 
 void vp9_quantize_dc(const int16_t *coeff_ptr, int skip_block,
                      const int16_t *round_ptr, const int16_t quant,
