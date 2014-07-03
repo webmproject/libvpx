@@ -2578,9 +2578,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
       if (cpi->oxcf.arnr_max_frames > 0) {
         // Produce the filtered ARF frame.
-        // TODO(agrange) merge these two functions.
-        vp9_configure_arnr_filter(cpi, arf_src_index, rc->gfu_boost);
-        vp9_temporal_filter_prepare(cpi, arf_src_index);
+        vp9_temporal_filter(cpi, arf_src_index);
         vp9_extend_frame_borders(&cpi->alt_ref_buffer);
         force_src_buffer = &cpi->alt_ref_buffer;
       }
