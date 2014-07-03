@@ -1392,13 +1392,6 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
 
   // Store the bits to spend on the ARF if there is one.
   if (rc->source_alt_ref_pending) {
-    if (cpi->multi_arf_enabled) {
-      // A portion of the gf / arf extra bits are set asside for lower level
-      // boosted frames in the middle of the group.
-      mid_boost_bits += gf_arf_bits >> 5;
-      gf_arf_bits -= (gf_arf_bits >> 5);
-    }
-
     twopass->gf_group.update_type[frame_index] = ARF_UPDATE;
     twopass->gf_group.rf_level[frame_index] = GF_ARF_STD;
     twopass->gf_group.bit_allocation[frame_index] = gf_arf_bits;
@@ -1406,7 +1399,8 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
       (unsigned char)(rc->baseline_gf_interval - 1);
     twopass->gf_group.arf_update_idx[frame_index] = arf_buffer_indices[0];
     twopass->gf_group.arf_ref_idx[frame_index] =
-      arf_buffer_indices[cpi->multi_arf_enabled && rc->source_alt_ref_active];
+      arf_buffer_indices[cpi->multi_arf_last_grp_enabled &&
+                         rc->source_alt_ref_active];
     ++frame_index;
 
     if (cpi->multi_arf_enabled) {
@@ -1481,6 +1475,9 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
     twopass->gf_group.update_type[frame_index] = GF_UPDATE;
     twopass->gf_group.rf_level[frame_index] = GF_ARF_STD;
   }
+
+  // Note whether multi-arf was enabled this group for next time.
+  cpi->multi_arf_last_grp_enabled = cpi->multi_arf_enabled;
 }
 
 // Analyse and define a gf/arf group.
@@ -1545,18 +1542,21 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // Motion breakout threshold for loop below depends on image size.
   mv_ratio_accumulator_thresh = (cpi->common.width + cpi->common.height) / 10.0;
 
-  // Work out a maximum interval for the GF.
-  // If the image appears completely static we can extend beyond this.
-  // The value chosen depends on the active Q range. At low Q we have
-  // bits to spare and are better with a smaller interval and smaller boost.
-  // At high Q when there are few bits to spare we are better with a longer
-  // interval to spread the cost of the GF.
-  //
-  active_max_gf_interval =
-    12 + ((int)vp9_convert_qindex_to_q(rc->last_q[INTER_FRAME]) >> 5);
-
-  if (active_max_gf_interval > rc->max_gf_interval)
+  // Work out a maximum interval for the GF group.
+  // If the image appears almost completely static we can extend beyond this.
+  if (cpi->multi_arf_allowed) {
     active_max_gf_interval = rc->max_gf_interval;
+  } else {
+   // The value chosen depends on the active Q range. At low Q we have
+   // bits to spare and are better with a smaller interval and smaller boost.
+   // At high Q when there are few bits to spare we are better with a longer
+   // interval to spread the cost of the GF.
+   active_max_gf_interval =
+     12 + ((int)vp9_convert_qindex_to_q(rc->last_q[INTER_FRAME]) >> 5);
+
+   if (active_max_gf_interval > rc->max_gf_interval)
+     active_max_gf_interval = rc->max_gf_interval;
+  }
 
   i = 0;
   while (i < rc->static_scene_max_gf_interval && i < rc->frames_to_key) {
@@ -1664,6 +1664,10 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
                                    &b_boost);
     rc->source_alt_ref_pending = 1;
 
+    // Test to see if multi arf is appropriate.
+    cpi->multi_arf_enabled =
+      (cpi->multi_arf_allowed && (rc->baseline_gf_interval >= 6) &&
+      (zero_motion_accumulator < 0.995)) ? 1 : 0;
   } else {
     rc->gfu_boost = (int)boost_score;
     rc->source_alt_ref_pending = 0;
@@ -1823,8 +1827,10 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // Is this a forced key frame by interval.
   rc->this_key_frame_forced = rc->next_key_frame_forced;
 
-  // Clear the alt ref active flag as this can never be active on a key frame.
+  // Clear the alt ref active flag and last group multi arf flags as they
+  // can never be set for a key frame.
   rc->source_alt_ref_active = 0;
+  cpi->multi_arf_last_grp_enabled = 0;
 
   // KF is always a GF so clear frames till next gf counter.
   rc->frames_till_gf_update_due = 0;
