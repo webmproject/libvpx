@@ -38,28 +38,22 @@ class Y4mVideoSource : public VideoSource {
     CloseSource();
   }
 
-  virtual void OpenSource() {
+  virtual void Begin() {
     CloseSource();
     input_file_ = OpenTestDataFile(file_name_);
     ASSERT_TRUE(input_file_ != NULL) << "Input file open failed. Filename: "
-                                     << file_name_;
-  }
+        << file_name_;
 
-  virtual void ReadSourceToStart() {
-    ASSERT_TRUE(input_file_ != NULL);
-    ASSERT_FALSE(y4m_input_open(&y4m_, input_file_, NULL, 0, 0));
+    y4m_input_open(&y4m_, input_file_, NULL, 0, 0);
     framerate_numerator_ = y4m_.fps_n;
     framerate_denominator_ = y4m_.fps_d;
+
     frame_ = 0;
     for (unsigned int i = 0; i < start_; i++) {
-      Next();
+        Next();
     }
-    FillFrame();
-  }
 
-  virtual void Begin() {
-    OpenSource();
-    ReadSourceToStart();
+    FillFrame();
   }
 
   virtual void Next() {
