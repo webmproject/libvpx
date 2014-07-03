@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//hYg\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-03T01:13:01Z",
+      "side": 1,
+      "message": "a better note here or in the code, might be that the relationship of the user private data at runtime is not preserved from decode() to this call which may occur at an unknown point in the future",
+      "revId": "fd0c5ecf608fc94960710866839d5c3c1fe07d84",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
