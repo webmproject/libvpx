@@ -671,7 +671,7 @@ static vpx_codec_err_t ctrl_get_reference(vpx_codec_alg_priv_t *ctx,
     VP9Worker *const worker = ctx->frame_workers;
     FrameWorkerData *const worker_data = (FrameWorkerData *)worker->data1;
     vp9_get_reference_dec(worker_data->pbi, data->idx, &fb);
-    yuvconfig2image(&data->img, fb, worker_data->user_priv);
+    yuvconfig2image(&data->img, fb, NULL);
     return VPX_CODEC_OK;
   } else {
     return VPX_CODEC_INVALID_PARAM;
