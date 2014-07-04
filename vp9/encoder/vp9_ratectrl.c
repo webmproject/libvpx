@@ -424,6 +424,16 @@ static int get_active_quality(int q, int gfu_boost, int low, int high,
   }
 }
 
+static int get_kf_active_quality(const RATE_CONTROL *const rc, int q) {
+  return get_active_quality(q, rc->kf_boost, kf_low, kf_high,
+                            kf_low_motion_minq, kf_high_motion_minq);
+}
+
+static int get_gf_active_quality(const RATE_CONTROL *const rc, int q) {
+  return get_active_quality(q, rc->gfu_boost, gf_low, gf_high,
+                            arfgf_low_motion_minq, arfgf_high_motion_minq);
+}
+
 static int calc_active_worst_quality_one_pass_vbr(const VP9_COMP *cpi) {
   const RATE_CONTROL *const rc = &cpi->rc;
   const unsigned int curr_frame = cpi->common.current_video_frame;
@@ -523,11 +533,8 @@ static int rc_pick_q_and_bounds_one_pass_cbr(const VP9_COMP *cpi,
       double q_adj_factor = 1.0;
       double q_val;
 
-      active_best_quality = get_active_quality(rc->avg_frame_qindex[KEY_FRAME],
-                                               rc->kf_boost,
-                                               kf_low, kf_high,
-                                               kf_low_motion_minq,
-                                               kf_high_motion_minq);
+      active_best_quality =
+          get_kf_active_quality(rc, rc->avg_frame_qindex[KEY_FRAME]);
 
       // Allow somewhat lower kf minq with small image formats.
       if ((cm->width * cm->height) <= (352 * 288)) {
@@ -552,9 +559,7 @@ static int rc_pick_q_and_bounds_one_pass_cbr(const VP9_COMP *cpi,
     } else {
       q = active_worst_quality;
     }
-    active_best_quality = get_active_quality(
-        q, rc->gfu_boost, gf_low, gf_high,
-        arfgf_low_motion_minq, arfgf_high_motion_minq);
+    active_best_quality = get_gf_active_quality(rc, q);
   } else {
     // Use the lower of active_worst_quality and recent/average Q.
     if (cm->current_video_frame > 1) {
@@ -657,11 +662,8 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP9_COMP *cpi,
       double q_adj_factor = 1.0;
       double q_val;
 
-      active_best_quality = get_active_quality(rc->avg_frame_qindex[KEY_FRAME],
-                                               rc->kf_boost,
-                                               kf_low, kf_high,
-                                               kf_low_motion_minq,
-                                               kf_high_motion_minq);
+      active_best_quality =
+          get_kf_active_quality(rc, rc->avg_frame_qindex[KEY_FRAME]);
 
       // Allow somewhat lower kf minq with small image formats.
       if ((cm->width * cm->height) <= (352 * 288)) {
@@ -690,10 +692,7 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP9_COMP *cpi,
       if (q < cq_level)
         q = cq_level;
 
-      active_best_quality = get_active_quality(q, rc->gfu_boost,
-                                               gf_low, gf_high,
-                                               arfgf_low_motion_minq,
-                                               arfgf_high_motion_minq);
+      active_best_quality = get_gf_active_quality(rc, q);
 
       // Constrained quality use slightly lower active best.
       active_best_quality = active_best_quality * 15 / 16;
@@ -702,14 +701,10 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP9_COMP *cpi,
       if (!cpi->refresh_alt_ref_frame) {
         active_best_quality = cq_level;
       } else {
-        active_best_quality = get_active_quality(
-            q, rc->gfu_boost, gf_low, gf_high,
-            arfgf_low_motion_minq, arfgf_high_motion_minq);
+        active_best_quality = get_gf_active_quality(rc, q);
       }
     } else {
-      active_best_quality = get_active_quality(
-          q, rc->gfu_boost, gf_low, gf_high,
-          arfgf_low_motion_minq, arfgf_high_motion_minq);
+      active_best_quality = get_gf_active_quality(rc, q);
     }
   } else {
     if (oxcf->rc_mode == VPX_Q) {
@@ -810,11 +805,7 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi,
       double q_adj_factor = 1.0;
       double q_val;
       // Baseline value derived from cpi->active_worst_quality and kf boost.
-      active_best_quality = get_active_quality(active_worst_quality,
-                                               rc->kf_boost,
-                                               kf_low, kf_high,
-                                               kf_low_motion_minq,
-                                               kf_high_motion_minq);
+      active_best_quality = get_kf_active_quality(rc, active_worst_quality);
 
       // Allow somewhat lower kf minq with small image formats.
       if ((cm->width * cm->height) <= (352 * 288)) {
@@ -846,10 +837,7 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi,
       if (q < cq_level)
         q = cq_level;
 
-      active_best_quality = get_active_quality(q, rc->gfu_boost,
-                                               gf_low, gf_high,
-                                               arfgf_low_motion_minq,
-                                               arfgf_high_motion_minq);
+      active_best_quality = get_gf_active_quality(rc, q);
 
       // Constrained quality use slightly lower active best.
       active_best_quality = active_best_quality * 15 / 16;
@@ -858,14 +846,10 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi,
       if (!cpi->refresh_alt_ref_frame) {
         active_best_quality = cq_level;
       } else {
-        active_best_quality = get_active_quality(
-            q, rc->gfu_boost, gf_low, gf_high,
-            arfgf_low_motion_minq, arfgf_high_motion_minq);
+        active_best_quality = get_gf_active_quality(rc, q);
       }
     } else {
-      active_best_quality = get_active_quality(
-          q, rc->gfu_boost, gf_low, gf_high,
-          arfgf_low_motion_minq, arfgf_high_motion_minq);
+      active_best_quality = get_gf_active_quality(rc, q);
     }
   } else {
     if (oxcf->rc_mode == VPX_Q) {
