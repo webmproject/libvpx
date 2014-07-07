@@ -179,7 +179,8 @@ vp8cx_set_ref.DESCRIPTION           = VP8 set encoder reference frame
 
 ifeq ($(CONFIG_MULTI_RES_ENCODING),yes)
 ifeq ($(CONFIG_LIBYUV),yes)
-EXAMPLES-$(CONFIG_VP8_DECODER)          += vp8_multi_resolution_encoder.c
+EXAMPLES-$(CONFIG_VP8_ENCODER)          += vp8_multi_resolution_encoder.c
+vp8_multi_resolution_encoder.SRCS       += tools_common.h tools_common.c
 vp8_multi_resolution_encoder.SRCS       += $(LIBYUV_SRCS)
 vp8_multi_resolution_encoder.GUID        = 04f8738e-63c8-423b-90fa-7c2703a374de
 vp8_multi_resolution_encoder.DESCRIPTION = VP8 Multiple-resolution Encoding
