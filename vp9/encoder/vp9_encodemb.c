@@ -320,10 +320,10 @@ void vp9_xform_quant_fp(MACROBLOCK *x, int plane, int block,
   switch (tx_size) {
     case TX_32X32:
       fdct32x32(x->use_lp32x32fdct, src_diff, coeff, diff_stride);
-      vp9_quantize_b_32x32(coeff, 1024, x->skip_block, p->zbin, p->round,
-                           p->quant, p->quant_shift, qcoeff, dqcoeff,
-                           pd->dequant, p->zbin_extra, eob, scan_order->scan,
-                           scan_order->iscan);
+      vp9_quantize_fp_32x32(coeff, 1024, x->skip_block, p->zbin, p->round_fp,
+                            p->quant_fp, p->quant_shift, qcoeff, dqcoeff,
+                            pd->dequant, p->zbin_extra, eob, scan_order->scan,
+                            scan_order->iscan);
       break;
     case TX_16X16:
       vp9_fdct16x16(src_diff, coeff, diff_stride);
