@@ -264,7 +264,6 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
   pabsw                           m6, m9                   ; m6 = abs(m9)
   pabsw                          m11, m10                  ; m11 = abs(m10)
   pcmpeqw                         m7, m7
-  pcmpeqw                        m12, m12
 
   paddsw                          m6, m1                   ; m6 += round
   punpckhqdq                      m1, m1
@@ -296,7 +295,7 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
   mova                            m6, [  iscanq+ncoeffq*2+ 0] ; m6 = scan[i]
   mova                           m11, [  iscanq+ncoeffq*2+16] ; m11 = scan[i]
   psubw                           m6, m7                   ; m6 = scan[i] + 1
-  psubw                          m11, m12                  ; m11 = scan[i] + 1
+  psubw                          m11, m7                   ; m11 = scan[i] + 1
   pandn                           m8, m6                   ; m8 = max(eob)
   pandn                          m13, m11                  ; m13 = max(eob)
   pmaxsw                          m8, m13
@@ -309,10 +308,9 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
   pabsw                           m6, m9                   ; m6 = abs(m9)
   pabsw                          m11, m10                  ; m11 = abs(m10)
   pcmpeqw                         m7, m7
-  pcmpeqw                        m12, m12
 %ifidn %1, b_32x32
   pmovmskb                        r6, m7
-  pmovmskb                        r2, m12
+  pmovmskb                        r2, m7
   or                              r6, r2
   jz .skip_iter
 %endif
@@ -343,7 +341,7 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
   mova                            m6, [  iscanq+ncoeffq*2+ 0] ; m6 = scan[i]
   mova                           m11, [  iscanq+ncoeffq*2+16] ; m11 = scan[i]
   psubw                           m6, m7                   ; m6 = scan[i] + 1
-  psubw                          m11, m12                  ; m11 = scan[i] + 1
+  psubw                          m11, m7                   ; m11 = scan[i] + 1
   pandn                          m14, m6                   ; m14 = max(eob)
   pandn                          m13, m11                  ; m13 = max(eob)
   pmaxsw                          m8, m14
