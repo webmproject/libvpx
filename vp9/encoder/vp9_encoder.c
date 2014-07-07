@@ -862,9 +862,7 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
 
 #if CONFIG_DENOISING
 #ifdef OUTPUT_YUV_DENOISED
-  if (cpi->oxcf.noise_sensitivity > 0) {
-    yuv_denoised_file = fopen("denoised.yuv", "ab");
-  }
+  yuv_denoised_file = fopen("denoised.yuv", "ab");
 #endif
 #endif
 #ifdef OUTPUT_YUV_SRC
@@ -1122,9 +1120,7 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
 
 #if CONFIG_DENOISING
 #ifdef OUTPUT_YUV_DENOISED
-  if (cpi->oxcf.noise_sensitivity > 0) {
-    fclose(yuv_denoised_file);
-  }
+  fclose(yuv_denoised_file);
 #endif
 #endif
 #ifdef OUTPUT_YUV_SRC
