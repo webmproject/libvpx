@@ -869,6 +869,7 @@ static void restore_context(VP9_COMP *cpi, int mi_row, int mi_col,
   vpx_memcpy(xd->left_seg_context + (mi_row & MI_MASK), sl,
              sizeof(xd->left_seg_context[0]) * mi_height);
 }
+
 static void save_context(VP9_COMP *cpi, int mi_row, int mi_col,
                          ENTROPY_CONTEXT a[16 * MAX_MB_PLANE],
                          ENTROPY_CONTEXT l[16 * MAX_MB_PLANE],
@@ -906,7 +907,6 @@ static void encode_b(VP9_COMP *cpi, const TileInfo *const tile,
                      TOKENEXTRA **tp, int mi_row, int mi_col,
                      int output_enabled, BLOCK_SIZE bsize,
                      PICK_MODE_CONTEXT *ctx) {
-
   set_offsets(cpi, tile, mi_row, mi_col, bsize);
   update_state(cpi, ctx, mi_row, mi_col, bsize, output_enabled);
   encode_superblock(cpi, tp, output_enabled, mi_row, mi_col, bsize, ctx);
