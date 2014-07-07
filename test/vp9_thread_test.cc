@@ -18,7 +18,7 @@
 #if CONFIG_WEBM_IO
 #include "test/webm_video_source.h"
 #endif
-#include "vp9/decoder/vp9_thread.h"
+#include "vp9/common/vp9_thread.h"
 
 namespace {
 
