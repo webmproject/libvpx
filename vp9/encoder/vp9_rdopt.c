@@ -2238,39 +2238,43 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     *rate2 += vp9_get_switchable_rate(cpi);
 
   if (!is_comp_pred) {
-    if (cpi->allow_encode_breakout && x->encode_breakout) {
+    if (cpi->allow_encode_breakout) {
       const BLOCK_SIZE y_size = get_plane_block_size(bsize, &xd->plane[0]);
       const BLOCK_SIZE uv_size = get_plane_block_size(bsize, &xd->plane[1]);
       unsigned int var, sse;
       // Skipping threshold for ac.
       unsigned int thresh_ac;
-      // Set a maximum for threshold to avoid big PSNR loss in low bitrate case.
-      // Use extreme low threshold for static frames to limit skipping.
-      const unsigned int max_thresh = (cpi->allow_encode_breakout ==
-                                      ENCODE_BREAKOUT_LIMITED) ? 128 : 36000;
-      // The encode_breakout input
-      const unsigned int min_thresh =
-          MIN(((unsigned int)x->encode_breakout << 4), max_thresh);
-
-      // Calculate threshold according to dequant value.
-      thresh_ac = (xd->plane[0].dequant[1] * xd->plane[0].dequant[1]) / 9;
-      thresh_ac = clamp(thresh_ac, min_thresh, max_thresh);
+      // Skipping threshold for dc
+      unsigned int thresh_dc;
 
       var = cpi->fn_ptr[y_size].vf(x->plane[0].src.buf, x->plane[0].src.stride,
                                    xd->plane[0].dst.buf,
                                    xd->plane[0].dst.stride, &sse);
 
-      // Adjust threshold according to partition size.
-      thresh_ac >>= 8 - (b_width_log2_lookup[bsize] +
-          b_height_log2_lookup[bsize]);
+      if (x->encode_breakout > 0) {
+        // Set a maximum for threshold to avoid big PSNR loss in low bitrate
+        // case. Use extreme low threshold for static frames to limit skipping.
+        const unsigned int max_thresh = (cpi->allow_encode_breakout ==
+                                        ENCODE_BREAKOUT_LIMITED) ? 128 : 36000;
+        // The encode_breakout input
+        const unsigned int min_thresh =
+            MIN(((unsigned int)x->encode_breakout << 4), max_thresh);
+
+        // Calculate threshold according to dequant value.
+        thresh_ac = (xd->plane[0].dequant[1] * xd->plane[0].dequant[1]) / 9;
+        thresh_ac = clamp(thresh_ac, min_thresh, max_thresh);
+
+        // Adjust threshold according to partition size.
+        thresh_ac >>= 8 - (b_width_log2_lookup[bsize] +
+            b_height_log2_lookup[bsize]);
+        thresh_dc = (xd->plane[0].dequant[0] * xd->plane[0].dequant[0] >> 6);
+      } else {
+        thresh_ac = 0;
+        thresh_dc = 0;
+      }
 
       // Y skipping condition checking
       if (sse < thresh_ac || sse == 0) {
-        // Skipping threshold for dc
-        unsigned int thresh_dc;
-
-        thresh_dc = (xd->plane[0].dequant[0] * xd->plane[0].dequant[0] >> 6);
-
         // dc skipping checking
         if ((sse - var) < thresh_dc || sse == var) {
           unsigned int sse_u, sse_v;
