@@ -50,6 +50,15 @@ static FILE *OpenTestDataFile(const std::string& file_name) {
   return fopen(path_to_source.c_str(), "rb");
 }
 
+static FILE *OpenTestOutFile(const std::string& file_name) {
+  const std::string path_to_source = GetDataPath() + "/" + file_name;
+  return fopen(path_to_source.c_str(), "wb");
+}
+
+static FILE *OpenTempOutFile() {
+  return tmpfile();
+}
+
 // Abstract base class for test video sources, which provide a stream of
 // vpx_image_t images with associated timestamps and duration.
 class VideoSource {

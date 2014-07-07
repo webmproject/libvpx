@@ -90,6 +90,7 @@ struct VpxInputContext {
   uint32_t width;
   uint32_t height;
   vpx_img_fmt_t fmt;
+  vpx_bit_depth_t bit_depth;
   int only_i420;
   uint32_t fourcc;
   struct VpxRational framerate;

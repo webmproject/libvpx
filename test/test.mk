@@ -15,7 +15,7 @@ LIBVPX_TEST_SRCS-yes += video_source.h
 ##
 ## Black box tests only use the public API.
 ##
-LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += ../md5_utils.h ../md5_utils.c
+LIBVPX_TEST_SRCS-yes                   += ../md5_utils.h ../md5_utils.c
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += ivf_video_source.h
 LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS)    += ../y4minput.h ../y4minput.c
 LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS)    += aq_segment_test.cc
@@ -41,6 +41,9 @@ LIBVPX_TEST_SRCS-yes                   += decode_test_driver.cc
 LIBVPX_TEST_SRCS-yes                   += decode_test_driver.h
 LIBVPX_TEST_SRCS-yes                   += encode_test_driver.cc
 LIBVPX_TEST_SRCS-yes                   += encode_test_driver.h
+
+## Y4m parsing.
+LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS)    += y4m_test.cc ../y4menc.c ../y4menc.h
 
 ## WebM Parsing
 ifeq ($(CONFIG_WEBM_IO), yes)
@@ -134,6 +137,17 @@ endif # CONFIG_SHARED
 ##
 LIBVPX_TEST_DATA-$(CONFIG_ENCODERS) += hantro_collage_w352h288.yuv
 LIBVPX_TEST_DATA-$(CONFIG_ENCODERS) += hantro_odd.yuv
+
+LIBVPX_TEST_DATA-$(CONFIG_ENCODERS) += park_joy_90p_10_420.y4m
+LIBVPX_TEST_DATA-$(CONFIG_ENCODERS) += park_joy_90p_10_422.y4m
+LIBVPX_TEST_DATA-$(CONFIG_ENCODERS) += park_joy_90p_10_444.y4m
+LIBVPX_TEST_DATA-$(CONFIG_ENCODERS) += park_joy_90p_12_420.y4m
+LIBVPX_TEST_DATA-$(CONFIG_ENCODERS) += park_joy_90p_12_422.y4m
+LIBVPX_TEST_DATA-$(CONFIG_ENCODERS) += park_joy_90p_12_444.y4m
+LIBVPX_TEST_DATA-$(CONFIG_ENCODERS) += park_joy_90p_8_420.y4m
+LIBVPX_TEST_DATA-$(CONFIG_ENCODERS) += park_joy_90p_8_422.y4m
+LIBVPX_TEST_DATA-$(CONFIG_ENCODERS) += park_joy_90p_8_444.y4m
+
 LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += rush_hour_444.y4m
 LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += screendata.y4m
 
