@@ -1437,9 +1437,7 @@ static void scale_and_extend_frame_nonnormative(const YV12_BUFFER_CONFIG *src,
     vp9_resize_plane(srcs[i], src_heights[i], src_widths[i], src_strides[i],
                      dsts[i], dst_heights[i], dst_widths[i], dst_strides[i]);
 
-  // TODO(hkuang): Call C version explicitly
-  // as neon version only expand border size 32.
-  vp8_yv12_extend_frame_borders_c(dst);
+  vp9_extend_frame_borders(dst);
 }
 
 static void scale_and_extend_frame(const YV12_BUFFER_CONFIG *src,
@@ -1479,9 +1477,7 @@ static void scale_and_extend_frame(const YV12_BUFFER_CONFIG *src,
     }
   }
 
-  // TODO(hkuang): Call C version explicitly
-  // as neon version only expand border size 32.
-  vp8_yv12_extend_frame_borders_c(dst);
+  vp9_extend_frame_borders(dst);
 }
 
 #define WRITE_RECON_BUFFER 0
