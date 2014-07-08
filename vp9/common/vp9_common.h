@@ -76,9 +76,13 @@ static INLINE int get_unsigned_bits(unsigned int num_values) {
 }
 
 #if CONFIG_VP9_HIGH
+#if ARCH_X86
+  #define CONVERT_TO_SHORTPTR(x) ((uint16_t*)(((uint32_t)x) << 1))
+  #define CONVERT_TO_BYTEPTR(x) ((uint8_t*)(((uint32_t)x) >> 1 ))
+#else
   #define CONVERT_TO_SHORTPTR(x) ((uint16_t*)(((uint64_t)x) << 1))
-  #define CONVERT_TO_BYTEPTR(x) ((uint8_t*)((((uint64_t)x) >> 1 ) + \
-                                            0x8000000000000000))
+  #define CONVERT_TO_BYTEPTR(x) ((uint8_t*)(((uint64_t)x) >> 1 ))
+#endif
 #endif
 
 #if CONFIG_DEBUG
