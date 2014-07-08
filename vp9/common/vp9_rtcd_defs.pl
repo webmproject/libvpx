@@ -610,37 +610,37 @@ specialize qw/vp9_high_dc_128_predictor_32x32/;
 # Loopfilter
 #
 add_proto qw/void vp9_high_lpf_vertical_16/, "uint16_t *s, int pitch, const uint8_t *blimit, const uint8_t *limit, const uint8_t *thresh, int bps";
-specialize qw/vp9_high_lpf_vertical_16/;
+specialize qw/vp9_high_lpf_vertical_16 sse2/;
 
 add_proto qw/void vp9_high_lpf_vertical_16_dual/, "uint16_t *s, int pitch, const uint8_t *blimit, const uint8_t *limit, const uint8_t *thresh, int bps";
-specialize qw/vp9_high_lpf_vertical_16_dual/;
+specialize qw/vp9_high_lpf_vertical_16_dual sse2/;
 
 add_proto qw/void vp9_high_lpf_vertical_8/, "uint16_t *s, int pitch, const uint8_t *blimit, const uint8_t *limit, const uint8_t *thresh, int count, int bps";
-specialize qw/vp9_high_lpf_vertical_8/;
+specialize qw/vp9_high_lpf_vertical_8 sse2/;
 
 add_proto qw/void vp9_high_lpf_vertical_8_dual/, "uint16_t *s, int pitch, const uint8_t *blimit0, const uint8_t *limit0, const uint8_t *thresh0, const uint8_t *blimit1, const uint8_t *limit1, const uint8_t *thresh1, int bps";
-specialize qw/vp9_high_lpf_vertical_8_dual/;
+specialize qw/vp9_high_lpf_vertical_8_dual sse2/;
 
 add_proto qw/void vp9_high_lpf_vertical_4/, "uint16_t *s, int pitch, const uint8_t *blimit, const uint8_t *limit, const uint8_t *thresh, int count, int bps";
-specialize qw/vp9_high_lpf_vertical_4/;
+specialize qw/vp9_high_lpf_vertical_4 sse2/;
 
 add_proto qw/void vp9_high_lpf_vertical_4_dual/, "uint16_t *s, int pitch, const uint8_t *blimit0, const uint8_t *limit0, const uint8_t *thresh0, const uint8_t *blimit1, const uint8_t *limit1, const uint8_t *thresh1, int bps";
-specialize qw/vp9_high_lpf_vertical_4_dual/;
+specialize qw/vp9_high_lpf_vertical_4_dual sse2/;
 
 add_proto qw/void vp9_high_lpf_horizontal_16/, "uint16_t *s, int pitch, const uint8_t *blimit, const uint8_t *limit, const uint8_t *thresh, int count, int bps";
-specialize qw/vp9_high_lpf_horizontal_16/;
+specialize qw/vp9_high_lpf_horizontal_16 sse2/;
 
 add_proto qw/void vp9_high_lpf_horizontal_8/, "uint16_t *s, int pitch, const uint8_t *blimit, const uint8_t *limit, const uint8_t *thresh, int count, int bps";
-specialize qw/vp9_high_lpf_horizontal_8/;
+specialize qw/vp9_high_lpf_horizontal_8 sse2/;
 
 add_proto qw/void vp9_high_lpf_horizontal_8_dual/, "uint16_t *s, int pitch, const uint8_t *blimit0, const uint8_t *limit0, const uint8_t *thresh0, const uint8_t *blimit1, const uint8_t *limit1, const uint8_t *thresh1, int bps";
-specialize qw/vp9_high_lpf_horizontal_8_dual/;
+specialize qw/vp9_high_lpf_horizontal_8_dual sse2/;
 
 add_proto qw/void vp9_high_lpf_horizontal_4/, "uint16_t *s, int pitch, const uint8_t *blimit, const uint8_t *limit, const uint8_t *thresh, int count, int bps";
-specialize qw/vp9_high_lpf_horizontal_4/;
+specialize qw/vp9_high_lpf_horizontal_4 sse2/;
 
 add_proto qw/void vp9_high_lpf_horizontal_4_dual/, "uint16_t *s, int pitch, const uint8_t *blimit0, const uint8_t *limit0, const uint8_t *thresh0, const uint8_t *blimit1, const uint8_t *limit1, const uint8_t *thresh1, int bps";
-specialize qw/vp9_high_lpf_horizontal_4_dual/;
+specialize qw/vp9_high_lpf_horizontal_4_dual sse2/;
 
 #
 # post proc
