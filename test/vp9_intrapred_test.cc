@@ -131,14 +131,20 @@ using std::tr1::make_tuple;
 #if CONFIG_VP9_HIGH
 INSTANTIATE_TEST_CASE_P(SSE2_TO_C_8, IntraPredTest,
                         ::testing::Values(
+#if ARCH_X86_64
+                        make_tuple(&vp9_high_dc_predictor_32x32_sse2,
+                                   &vp9_high_dc_predictor_32x32_c, 32, 8),
+                        make_tuple(&vp9_high_tm_predictor_16x16_sse2,
+                                   &vp9_high_tm_predictor_16x16_c, 16, 8),
+                        make_tuple(&vp9_high_tm_predictor_32x32_sse2,
+                                   &vp9_high_tm_predictor_32x32_c, 32, 8),
+#endif
                         make_tuple(&vp9_high_dc_predictor_4x4_sse,
                                    &vp9_high_dc_predictor_4x4_c, 4, 8),
                         make_tuple(&vp9_high_dc_predictor_8x8_sse2,
                                    &vp9_high_dc_predictor_8x8_c, 8, 8),
                         make_tuple(&vp9_high_dc_predictor_16x16_sse2,
                                    &vp9_high_dc_predictor_16x16_c, 16, 8),
-                        make_tuple(&vp9_high_dc_predictor_32x32_sse2,
-                                   &vp9_high_dc_predictor_32x32_c, 32, 8),
                         make_tuple(&vp9_high_v_predictor_4x4_sse,
                                    &vp9_high_v_predictor_4x4_c, 4, 8),
                         make_tuple(&vp9_high_v_predictor_8x8_sse2,
@@ -150,21 +156,23 @@ INSTANTIATE_TEST_CASE_P(SSE2_TO_C_8, IntraPredTest,
                         make_tuple(&vp9_high_tm_predictor_4x4_sse,
                                    &vp9_high_tm_predictor_4x4_c, 4, 8),
                         make_tuple(&vp9_high_tm_predictor_8x8_sse2,
-                                   &vp9_high_tm_predictor_8x8_c, 8, 8),
-                        make_tuple(&vp9_high_tm_predictor_16x16_sse2,
-                                   &vp9_high_tm_predictor_16x16_c, 16, 8),
-                        make_tuple(&vp9_high_tm_predictor_32x32_sse2,
-                                   &vp9_high_tm_predictor_32x32_c, 32, 8)));
+                                   &vp9_high_tm_predictor_8x8_c, 8, 8)));
 INSTANTIATE_TEST_CASE_P(SSE2_TO_C_10, IntraPredTest,
                         ::testing::Values(
+#if ARCH_X86_64
+                        make_tuple(&vp9_high_dc_predictor_32x32_sse2,
+                                   &vp9_high_dc_predictor_32x32_c, 32, 10),
+                        make_tuple(&vp9_high_tm_predictor_16x16_sse2,
+                                   &vp9_high_tm_predictor_16x16_c, 16, 10),
+                        make_tuple(&vp9_high_tm_predictor_32x32_sse2,
+                                   &vp9_high_tm_predictor_32x32_c, 32, 10),
+#endif
                         make_tuple(&vp9_high_dc_predictor_4x4_sse,
                                    &vp9_high_dc_predictor_4x4_c, 4, 10),
                         make_tuple(&vp9_high_dc_predictor_8x8_sse2,
                                    &vp9_high_dc_predictor_8x8_c, 8, 10),
                         make_tuple(&vp9_high_dc_predictor_16x16_sse2,
                                    &vp9_high_dc_predictor_16x16_c, 16, 10),
-                        make_tuple(&vp9_high_dc_predictor_32x32_sse2,
-                                   &vp9_high_dc_predictor_32x32_c, 32, 10),
                         make_tuple(&vp9_high_v_predictor_4x4_sse,
                                    &vp9_high_v_predictor_4x4_c, 4, 10),
                         make_tuple(&vp9_high_v_predictor_8x8_sse2,
@@ -176,21 +184,23 @@ INSTANTIATE_TEST_CASE_P(SSE2_TO_C_10, IntraPredTest,
                         make_tuple(&vp9_high_tm_predictor_4x4_sse,
                                    &vp9_high_tm_predictor_4x4_c, 4, 10),
                         make_tuple(&vp9_high_tm_predictor_8x8_sse2,
-                                   &vp9_high_tm_predictor_8x8_c, 8, 10),
-                        make_tuple(&vp9_high_tm_predictor_16x16_sse2,
-                                   &vp9_high_tm_predictor_16x16_c, 16, 10),
-                        make_tuple(&vp9_high_tm_predictor_32x32_sse2,
-                                   &vp9_high_tm_predictor_32x32_c, 32, 10)));
+                                   &vp9_high_tm_predictor_8x8_c, 8, 10)));
 INSTANTIATE_TEST_CASE_P(SSE2_TO_C_12, IntraPredTest,
                         ::testing::Values(
+#if ARCH_X86_64
+                        make_tuple(&vp9_high_dc_predictor_32x32_sse2,
+                                   &vp9_high_dc_predictor_32x32_c, 32, 12),
+                        make_tuple(&vp9_high_tm_predictor_16x16_sse2,
+                                   &vp9_high_tm_predictor_16x16_c, 16, 12),
+                        make_tuple(&vp9_high_tm_predictor_32x32_sse2,
+                                   &vp9_high_tm_predictor_32x32_c, 32, 12),
+#endif
                         make_tuple(&vp9_high_dc_predictor_4x4_sse,
                                    &vp9_high_dc_predictor_4x4_c, 4, 12),
                         make_tuple(&vp9_high_dc_predictor_8x8_sse2,
                                    &vp9_high_dc_predictor_8x8_c, 8, 12),
                         make_tuple(&vp9_high_dc_predictor_16x16_sse2,
                                    &vp9_high_dc_predictor_16x16_c, 16, 12),
-                        make_tuple(&vp9_high_dc_predictor_32x32_sse2,
-                                   &vp9_high_dc_predictor_32x32_c, 32, 12),
                         make_tuple(&vp9_high_v_predictor_4x4_sse,
                                    &vp9_high_v_predictor_4x4_c, 4, 12),
                         make_tuple(&vp9_high_v_predictor_8x8_sse2,
@@ -202,11 +212,7 @@ INSTANTIATE_TEST_CASE_P(SSE2_TO_C_12, IntraPredTest,
                         make_tuple(&vp9_high_tm_predictor_4x4_sse,
                                    &vp9_high_tm_predictor_4x4_c, 4, 12),
                         make_tuple(&vp9_high_tm_predictor_8x8_sse2,
-                                   &vp9_high_tm_predictor_8x8_c, 8, 12),
-                        make_tuple(&vp9_high_tm_predictor_16x16_sse2,
-                                   &vp9_high_tm_predictor_16x16_c, 16, 12),
-                        make_tuple(&vp9_high_tm_predictor_32x32_sse2,
-                                   &vp9_high_tm_predictor_32x32_c, 32, 12)));
+                                   &vp9_high_tm_predictor_8x8_c, 8, 12)));
 #endif
 #endif
 }  // namespace

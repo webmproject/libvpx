@@ -553,7 +553,7 @@ add_proto qw/void vp9_high_v_predictor_16x16/, "uint16_t *dst, ptrdiff_t y_strid
 specialize qw/vp9_high_v_predictor_16x16 neon/, "$sse2_x86inc";
 
 add_proto qw/void vp9_high_tm_predictor_16x16/, "uint16_t *dst, ptrdiff_t y_stride, const uint16_t *above, const uint16_t *left, int bps";
-specialize qw/vp9_high_tm_predictor_16x16/, "$sse2_x86inc";
+specialize qw/vp9_high_tm_predictor_16x16/, "$sse2_x86_64";
 
 add_proto qw/void vp9_high_dc_predictor_16x16/, "uint16_t *dst, ptrdiff_t y_stride, const uint16_t *above, const uint16_t *left, int bps";
 specialize qw/vp9_high_dc_predictor_16x16/, "$sse2_x86inc";
@@ -592,10 +592,10 @@ add_proto qw/void vp9_high_v_predictor_32x32/, "uint16_t *dst, ptrdiff_t y_strid
 specialize qw/vp9_high_v_predictor_32x32/, "$sse2_x86inc";
 
 add_proto qw/void vp9_high_tm_predictor_32x32/, "uint16_t *dst, ptrdiff_t y_stride, const uint16_t *above, const uint16_t *left, int bps";
-specialize qw/vp9_high_tm_predictor_32x32/, "$sse2_x86inc";
+specialize qw/vp9_high_tm_predictor_32x32/, "$sse2_x86_64";
 
 add_proto qw/void vp9_high_dc_predictor_32x32/, "uint16_t *dst, ptrdiff_t y_stride, const uint16_t *above, const uint16_t *left, int bps";
-specialize qw/vp9_high_dc_predictor_32x32/, "$sse2_x86inc";
+specialize qw/vp9_high_dc_predictor_32x32/, "$sse2_x86_64";
 
 add_proto qw/void vp9_high_dc_top_predictor_32x32/, "uint16_t *dst, ptrdiff_t y_stride, const uint16_t *above, const uint16_t *left, int bps";
 specialize qw/vp9_high_dc_top_predictor_32x32/;

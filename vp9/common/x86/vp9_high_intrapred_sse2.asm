@@ -24,9 +24,9 @@ cglobal high_dc_predictor_4x4, 4, 5, 4, dst, stride, above, left, goffset
   movq                  m0, [aboveq]
   movq                  m2, [leftq]
   DEFINE_ARGS dst, stride, one
-  mov                 oneq, 0x0001
+  mov                 oned, 0x0001
   pxor                  m1, m1
-  movq                  m3, oneq
+  movd                  m3, oned
   pshufw                m3, m3, 0x0 
   paddw                 m0, m2
   pmaddwd               m0, m3
@@ -121,7 +121,8 @@ cglobal high_dc_predictor_16x16, 4, 5, 5, dst, stride, above, left, goffset
 
   RESTORE_GOT
   REP_RET
-
+  
+%if ARCH_X86_64
 INIT_XMM sse2
 cglobal high_dc_predictor_32x32, 4, 5, 9, dst, stride, above, left, goffset
   GET_GOT     goffsetq
@@ -180,6 +181,7 @@ cglobal high_dc_predictor_32x32, 4, 5, 9, dst, stride, above, left, goffset
 
   RESTORE_GOT
   REP_RET
+%endif
 
 INIT_MMX sse
 cglobal high_v_predictor_4x4, 3, 3, 1, dst, stride, above
@@ -341,6 +343,7 @@ cglobal high_tm_predictor_8x8, 5, 6, 5, dst, stride, above, left, bps, one
   jnz .loop
   REP_RET
 
+%if ARCH_X86_64
 INIT_XMM sse2
 cglobal high_tm_predictor_16x16, 5, 6, 8, dst, stride, above, left, bps, one
   movd                  m2, [aboveq-2]
@@ -395,7 +398,6 @@ cglobal high_tm_predictor_16x16, 5, 6, 8, dst, stride, above, left, bps, one
   jnz .loop
   REP_RET
 
-%if ARCH_X86_64
 INIT_XMM sse2
 cglobal high_tm_predictor_32x32, 5, 6, 12, dst, stride, above, left, bps, one
   movd                  m0, [aboveq-2]

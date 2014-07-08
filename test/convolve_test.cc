@@ -932,7 +932,7 @@ TEST_P(ConvolveTest, CheckScalingFiltering) {
   }
 }
 #if CONFIG_VP9_HIGH
-#if HAVE_SSE2
+#if HAVE_SSE2 && ARCH_X86_64
 void wrap_convolve8_horiz_sse2_8(const uint8_t *src, ptrdiff_t src_stride,
                               uint8_t *dst, ptrdiff_t dst_stride,
                               const int16_t *filter_x, int filter_x_stride,
@@ -1301,7 +1301,7 @@ INSTANTIATE_TEST_CASE_P(C, ConvolveTest, ::testing::Values(
 #endif
 
 
-#if HAVE_SSE2
+#if HAVE_SSE2 && ARCH_X86_64
 #if CONFIG_VP9_HIGH
 const ConvolveFunctions convolve8_sse2(
     wrap_convolve8_horiz_sse2_8, wrap_convolve8_avg_horiz_sse2_8,

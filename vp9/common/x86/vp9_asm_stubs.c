@@ -482,7 +482,7 @@ FUN_CONV_1D(avg_vert, y_step_q4, filter_y, v, src - src_stride * 3, avg_, sse2);
 //                             int w, int h);
 FUN_CONV_2D(, sse2);
 FUN_CONV_2D(avg_ , sse2);
-#if CONFIG_VP9_HIGH
+#if CONFIG_VP9_HIGH && ARCH_X86_64
 high_filter8_1dfunction vp9_high_filter_block1d16_v8_sse2;
 high_filter8_1dfunction vp9_high_filter_block1d16_h8_sse2;
 high_filter8_1dfunction vp9_high_filter_block1d8_v8_sse2;
