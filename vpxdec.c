@@ -934,8 +934,6 @@ int main_loop(int argc, const char **argv_) {
       }
     }
 
-    if (stop_after && frame_in >= stop_after)
-      break;
   }
 
   if (summary || progress) {
