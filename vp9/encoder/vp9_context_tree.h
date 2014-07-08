@@ -41,6 +41,15 @@ typedef struct {
   int64_t tx_rd_diff[TX_MODES];
   int64_t best_filter_diff[SWITCHABLE_FILTER_CONTEXTS];
 
+#if CONFIG_DENOISING
+  unsigned int newmv_sse;
+  unsigned int zeromv_sse;
+  PREDICTION_MODE best_sse_inter_mode;
+  int_mv best_sse_mv;
+  MV_REFERENCE_FRAME best_reference_frame;
+  MV_REFERENCE_FRAME best_zeromv_reference_frame;
+#endif
+
   // motion vector cache for adaptive motion search control in partition
   // search loop
   MV pred_mv[MAX_REF_FRAMES];

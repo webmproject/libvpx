@@ -350,7 +350,8 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                             int mi_row, int mi_col,
                             int *returnrate,
                             int64_t *returndistortion,
-                            BLOCK_SIZE bsize) {
+                            BLOCK_SIZE bsize,
+                            PICK_MODE_CONTEXT *ctx) {
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
   struct macroblock_plane *const p = &x->plane[0];
@@ -404,12 +405,6 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   PRED_BUFFER *best_pred = NULL;
   PRED_BUFFER *this_mode_pred = NULL;
   int i;
-
-#if CONFIG_DENOISING
-  if (cpi->oxcf.noise_sensitivity > 0) {
-    vp9_denoiser_reset_frame_stats(&cpi->denoiser);
-  }
-#endif
 
   if (cpi->sf.reuse_inter_pred_sby) {
     for (i = 0; i < 3; i++) {
@@ -616,7 +611,8 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
 #if CONFIG_DENOISING
       if (cpi->oxcf.noise_sensitivity > 0) {
-        vp9_denoiser_update_frame_stats(&cpi->denoiser, mbmi, sse_y, this_mode);
+        vp9_denoiser_update_frame_stats(&cpi->denoiser, mbmi, sse_y,
+                                        this_mode, ctx);
       }
 #endif
 
@@ -732,12 +728,6 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       }
     }
   }
-
-#if CONFIG_DENOISING
-  if (cpi->oxcf.noise_sensitivity > 0) {
-    vp9_denoiser_denoise(&cpi->denoiser, x, mi_row, mi_col, bsize);
-  }
-#endif
 
   return INT64_MAX;
 }
