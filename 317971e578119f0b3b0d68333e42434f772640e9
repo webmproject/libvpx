@@ -16,6 +16,24 @@
       "revId": "317971e578119f0b3b0d68333e42434f772640e9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//hD4\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 1057,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-08T18:50:19Z",
+      "side": 1,
+      "message": "I\u0027m not sure which alignment? If  its the last 2 lines then it seems to match an example given in the style guide:\nhttps://engdoc.corp.google.com/eng/doc/devguide/cpp/styleguide.shtml?cl\u003dhead#Return_Values\n(Look at the \"Return Values\" section).",
+      "parentUuid": "AAAAdn//hFw\u003d",
+      "revId": "317971e578119f0b3b0d68333e42434f772640e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
