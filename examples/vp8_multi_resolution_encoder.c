@@ -27,8 +27,9 @@
 #define interface (vpx_codec_vp8_cx())
 #define fourcc    0x30385056
 
-#define IVF_FILE_HDR_SZ  (32)
-#define IVF_FRAME_HDR_SZ (12)
+void usage_exit() {
+  exit(EXIT_FAILURE);
+}
 
 /*
  * The input video frame is downsampled several times to generate a multi-level
@@ -44,25 +45,6 @@
 #include "third_party/libyuv/include/libyuv/basic_types.h"
 #include "third_party/libyuv/include/libyuv/scale.h"
 #include "third_party/libyuv/include/libyuv/cpu_id.h"
-
-static void die(const char *fmt, ...) {
-    va_list ap;
-
-    va_start(ap, fmt);
-    vprintf(fmt, ap);
-    if(fmt[strlen(fmt)-1] != '\n')
-        printf("\n");
-    exit(EXIT_FAILURE);
-}
-
-static void die_codec(vpx_codec_ctx_t *ctx, const char *s) {
-    const char *detail = vpx_codec_error_detail(ctx);
-
-    printf("%s: %s\n", s, vpx_codec_error(ctx));
-    if(detail)
-        printf("    %s\n",detail);
-    exit(EXIT_FAILURE);
-}
 
 int (*read_frame_p)(FILE *f, vpx_image_t *img);
 
