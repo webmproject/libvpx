@@ -124,7 +124,7 @@ static void update_switchable_interp_probs(VP9_COMMON *cm, vp9_writer *w) {
 
 static void pack_mb_tokens(vp9_writer *w,
                            TOKENEXTRA **tp, const TOKENEXTRA *stop,
-                           BITSTREAM_PROFILE profile) {
+                           vpx_bit_depth_t bit_depth) {
   TOKENEXTRA *p = *tp;
 
   while (p < stop && p->token != EOSB_TOKEN) {
@@ -134,8 +134,10 @@ static void pack_mb_tokens(vp9_writer *w,
     int v = a->value;
     int n = a->len;
 #if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
-    const vp9_extra_bit *const b = profile > PROFILE_1 ?
-        &vp9_extra_bits_high[t] : &vp9_extra_bits[t];
+    const vp9_extra_bit *const b =
+        bit_depth == VPX_BITS_12 ? &vp9_extra_bits_high12[t] :
+        bit_depth == VPX_BITS_10 ? &vp9_extra_bits_high10[t] :
+        &vp9_extra_bits[t];
 #else
     const vp9_extra_bit *const b = &vp9_extra_bits[t];
 #endif
@@ -396,7 +398,7 @@ static void write_modes_b(VP9_COMP *cpi, const TileInfo *const tile,
   }
 
   assert(*tok < tok_end);
-  pack_mb_tokens(w, tok, tok_end, cm->profile);
+  pack_mb_tokens(w, tok, tok_end, cm->bit_depth);
 }
 
 static void write_partition(VP9_COMMON *cm, MACROBLOCKD *xd,

@@ -32,10 +32,15 @@ const int16_t *vp9_dct_value_cost_ptr;
 
 
 #if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
-static TOKENVALUE dct_value_tokens_high[DCT_MAX_VALUE_HIGH * 2];
-const TOKENVALUE *vp9_dct_value_tokens_high_ptr;
-static int16_t dct_value_cost_high[DCT_MAX_VALUE_HIGH * 2];
-const int16_t *vp9_dct_value_cost_high_ptr;
+static TOKENVALUE dct_value_tokens_high10[DCT_MAX_VALUE_HIGH10 * 2];
+const TOKENVALUE *vp9_dct_value_tokens_high10_ptr;
+static int16_t dct_value_cost_high10[DCT_MAX_VALUE_HIGH10 * 2];
+const int16_t *vp9_dct_value_cost_high10_ptr;
+
+static TOKENVALUE dct_value_tokens_high12[DCT_MAX_VALUE_HIGH12 * 2];
+const TOKENVALUE *vp9_dct_value_tokens_high12_ptr;
+static int16_t dct_value_cost_high12[DCT_MAX_VALUE_HIGH12 * 2];
+const int16_t *vp9_dct_value_cost_high12_ptr;
 #endif
 
 // Array indices are identical to previously-existing CONTEXT_NODE indices
@@ -65,23 +70,14 @@ const vp9_tree_index vp9_coef_con_tree[TREE_SIZE(ENTROPY_TOKENS)] = {
   -CATEGORY5_TOKEN, -CATEGORY6_TOKEN   // 7 = CAT_FIVE
 };
 
-static const vp9_prob Pcat1[] = { 159};
-static const vp9_prob Pcat2[] = { 165, 145};
-static const vp9_prob Pcat3[] = { 173, 148, 140};
-static const vp9_prob Pcat4[] = { 176, 155, 140, 135};
-static const vp9_prob Pcat5[] = { 180, 157, 141, 134, 130};
-static const vp9_prob Pcat6[] = {
-  254, 254, 254, 252, 249, 243, 230, 196, 177, 153, 140, 133, 130, 129
-};
-
 static vp9_tree_index cat1[2], cat2[4], cat3[6], cat4[8], cat5[10], cat6[28];
 
 #if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
-static const vp9_prob Pcat6_high[] = {
-  254, 254, 254, 254, 254, 254, 254, 252, 249,
-  243, 230, 196, 177, 153, 140, 133, 130, 129
-};
-static vp9_tree_index cat6_high[36];
+static vp9_tree_index cat1_high10[2], cat2_high10[4], cat3_high10[6],
+                      cat4_high10[8], cat5_high10[10], cat6_high10[32];
+
+static vp9_tree_index cat1_high12[2], cat2_high12[4], cat3_high12[6],
+                      cat4_high12[8], cat5_high12[10], cat6_high12[36];
 #endif
 
 static void init_bit_tree(vp9_tree_index *p, int n) {
@@ -103,7 +99,19 @@ static void init_bit_trees() {
   init_bit_tree(cat5, 5);
   init_bit_tree(cat6, 14);
 #if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
-  init_bit_tree(cat6_high, 18);
+  init_bit_tree(cat1_high10, 1);
+  init_bit_tree(cat2_high10, 2);
+  init_bit_tree(cat3_high10, 3);
+  init_bit_tree(cat4_high10, 4);
+  init_bit_tree(cat5_high10, 5);
+  init_bit_tree(cat6_high10, 16);
+
+  init_bit_tree(cat1_high12, 1);
+  init_bit_tree(cat2_high12, 2);
+  init_bit_tree(cat3_high12, 3);
+  init_bit_tree(cat4_high12, 4);
+  init_bit_tree(cat5_high12, 5);
+  init_bit_tree(cat6_high12, 18);
 #endif
 }
 
@@ -113,28 +121,42 @@ const vp9_extra_bit vp9_extra_bits[ENTROPY_TOKENS] = {
   {0, 0, 0, 2},           // TWO_TOKEN
   {0, 0, 0, 3},           // THREE_TOKEN
   {0, 0, 0, 4},           // FOUR_TOKEN
-  {cat1, Pcat1, 1, 5},    // CATEGORY1_TOKEN
-  {cat2, Pcat2, 2, 7},    // CATEGORY2_TOKEN
-  {cat3, Pcat3, 3, 11},   // CATEGORY3_TOKEN
-  {cat4, Pcat4, 4, 19},   // CATEGORY4_TOKEN
-  {cat5, Pcat5, 5, 35},   // CATEGORY5_TOKEN
-  {cat6, Pcat6, 14, 67},  // CATEGORY6_TOKEN
+  {cat1, vp9_cat1_prob, 1, 5},    // CATEGORY1_TOKEN
+  {cat2, vp9_cat2_prob, 2, 7},    // CATEGORY2_TOKEN
+  {cat3, vp9_cat3_prob, 3, 11},   // CATEGORY3_TOKEN
+  {cat4, vp9_cat4_prob, 4, 19},   // CATEGORY4_TOKEN
+  {cat5, vp9_cat5_prob, 5, 35},   // CATEGORY5_TOKEN
+  {cat6, vp9_cat6_prob, 14, 67},  // CATEGORY6_TOKEN
   {0, 0, 0, 0}            // EOB_TOKEN
 };
 
 #if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
-const vp9_extra_bit vp9_extra_bits_high[ENTROPY_TOKENS] = {
+const vp9_extra_bit vp9_extra_bits_high10[ENTROPY_TOKENS] = {
   {0, 0, 0, 0},           // ZERO_TOKEN
   {0, 0, 0, 1},           // ONE_TOKEN
   {0, 0, 0, 2},           // TWO_TOKEN
   {0, 0, 0, 3},           // THREE_TOKEN
   {0, 0, 0, 4},           // FOUR_TOKEN
-  {cat1, Pcat1, 1, 5},    // CATEGORY1_TOKEN
-  {cat2, Pcat2, 2, 7},    // CATEGORY2_TOKEN
-  {cat3, Pcat3, 3, 11},   // CATEGORY3_TOKEN
-  {cat4, Pcat4, 4, 19},   // CATEGORY4_TOKEN
-  {cat5, Pcat5, 5, 35},   // CATEGORY5_TOKEN
-  {cat6_high, Pcat6_high, 18, 67},  // CATEGORY6_TOKEN
+  {cat1_high10, vp9_cat1_prob_high10, 1, 5},    // CATEGORY1_TOKEN
+  {cat2_high10, vp9_cat2_prob_high10, 2, 7},    // CATEGORY2_TOKEN
+  {cat3_high10, vp9_cat3_prob_high10, 3, 11},   // CATEGORY3_TOKEN
+  {cat4_high10, vp9_cat4_prob_high10, 4, 19},   // CATEGORY4_TOKEN
+  {cat5_high10, vp9_cat5_prob_high10, 5, 35},   // CATEGORY5_TOKEN
+  {cat6_high10, vp9_cat6_prob_high10, 16, 67},  // CATEGORY6_TOKEN
+  {0, 0, 0, 0}            // EOB_TOKEN
+};
+const vp9_extra_bit vp9_extra_bits_high12[ENTROPY_TOKENS] = {
+  {0, 0, 0, 0},           // ZERO_TOKEN
+  {0, 0, 0, 1},           // ONE_TOKEN
+  {0, 0, 0, 2},           // TWO_TOKEN
+  {0, 0, 0, 3},           // THREE_TOKEN
+  {0, 0, 0, 4},           // FOUR_TOKEN
+  {cat1_high12, vp9_cat1_prob_high12, 1, 5},    // CATEGORY1_TOKEN
+  {cat2_high12, vp9_cat2_prob_high12, 2, 7},    // CATEGORY2_TOKEN
+  {cat3_high12, vp9_cat3_prob_high12, 3, 11},   // CATEGORY3_TOKEN
+  {cat4_high12, vp9_cat4_prob_high12, 4, 19},   // CATEGORY4_TOKEN
+  {cat5_high12, vp9_cat5_prob_high12, 5, 35},   // CATEGORY5_TOKEN
+  {cat6_high12, vp9_cat6_prob_high12, 18, 67},  // CATEGORY6_TOKEN
   {0, 0, 0, 0}            // EOB_TOKEN
 };
 #endif
@@ -198,13 +220,22 @@ void vp9_tokenize_initialize() {
   tokenize_init_one(dct_value_tokens + DCT_MAX_VALUE, vp9_extra_bits,
                     dct_value_cost + DCT_MAX_VALUE, DCT_MAX_VALUE);
 #if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
-  vp9_dct_value_tokens_high_ptr = dct_value_tokens_high + DCT_MAX_VALUE_HIGH;
-  vp9_dct_value_cost_high_ptr = dct_value_cost_high + DCT_MAX_VALUE_HIGH;
+  vp9_dct_value_tokens_high10_ptr = dct_value_tokens_high10 +
+      DCT_MAX_VALUE_HIGH10;
+  vp9_dct_value_cost_high10_ptr = dct_value_cost_high10 + DCT_MAX_VALUE_HIGH10;
 
-  tokenize_init_one(dct_value_tokens_high + DCT_MAX_VALUE_HIGH,
-                    vp9_extra_bits_high,
-                    dct_value_cost_high + DCT_MAX_VALUE_HIGH,
-                    DCT_MAX_VALUE_HIGH);
+  tokenize_init_one(dct_value_tokens_high10 + DCT_MAX_VALUE_HIGH10,
+                    vp9_extra_bits_high10,
+                    dct_value_cost_high10 + DCT_MAX_VALUE_HIGH10,
+                    DCT_MAX_VALUE_HIGH10);
+  vp9_dct_value_tokens_high12_ptr = dct_value_tokens_high12 +
+      DCT_MAX_VALUE_HIGH12;
+  vp9_dct_value_cost_high12_ptr = dct_value_cost_high12 + DCT_MAX_VALUE_HIGH12;
+
+  tokenize_init_one(dct_value_tokens_high12 + DCT_MAX_VALUE_HIGH12,
+                    vp9_extra_bits_high12,
+                    dct_value_cost_high12 + DCT_MAX_VALUE_HIGH12,
+                    DCT_MAX_VALUE_HIGH12);
 #endif
 }
 
@@ -297,7 +328,9 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   c = 0;
 #if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
   if (cpi->common.profile > PROFILE_1) {
-    dct_value_tokens = vp9_dct_value_tokens_high_ptr;
+    dct_value_tokens = (cpi->common.bit_depth == VPX_BITS_10 ?
+                        vp9_dct_value_tokens_high10_ptr :
+                        vp9_dct_value_tokens_high12_ptr);
   } else {
     dct_value_tokens = vp9_dct_value_tokens_ptr;
   }
