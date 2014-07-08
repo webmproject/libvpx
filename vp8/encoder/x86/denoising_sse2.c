@@ -30,9 +30,9 @@ static INLINE unsigned int abs_sum_diff_16x1(__m128i acc_diff) {
                                           _mm_srli_si128(hg_fe_dc_ba, 8));
   const __m128i hgfedcba = _mm_add_epi32(hgfe_dcba,
                                          _mm_srli_si128(hgfe_dcba, 4));
-  unsigned int sum_diff = _mm_cvtsi128_si32(hgfedcba);
+  unsigned int sum_diff = abs(_mm_cvtsi128_si32(hgfedcba));
 
-  return abs(sum_diff);
+  return sum_diff;
 }
 
 int vp8_denoiser_filter_sse2(unsigned char *mc_running_avg_y,
