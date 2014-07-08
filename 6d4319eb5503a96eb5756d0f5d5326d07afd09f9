@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//hAU\u003d",
+        "filename": "vpx_scale/generic/yv12config.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-08T23:26:05Z",
+      "side": 1,
+      "message": "if these have a potential to roll the calculation needs to be promoted to 64-bit, otherwise int/size_t should do",
+      "revId": "6d4319eb5503a96eb5756d0f5d5326d07afd09f9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
