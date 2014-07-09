@@ -85,7 +85,6 @@ void vp9_decoder_remove(VP9Decoder *pbi) {
   VP9_COMMON *const cm = &pbi->common;
   int i;
 
-  vp9_remove_common(cm);
   vp9_get_worker_interface()->end(&pbi->lf_worker);
   vpx_free(pbi->lf_worker.data1);
   vpx_free(pbi->tile_data);
@@ -103,6 +102,7 @@ void vp9_decoder_remove(VP9Decoder *pbi) {
     vp9_loop_filter_dealloc(&pbi->lf_row_sync, sb_rows);
   }
 
+  vp9_remove_common(cm);
   vpx_free(pbi);
 }
 
