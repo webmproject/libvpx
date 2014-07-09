@@ -16,7 +16,7 @@
 
 #include "vp9/common/vp9_seg_common.h"
 
-// 64 bit masks for left transform size.  Each 1 represents a position where
+// 64 bit masks for left transform size. Each 1 represents a position where
 // we should apply a loop filter across the left border of an 8x8 block
 // boundary.
 //
@@ -34,13 +34,13 @@
 //
 // A loopfilter should be applied to every other 8x8 horizontally.
 static const uint64_t left_64x64_txform_mask[TX_SIZES]= {
-    0xffffffffffffffff,  // TX_4X4
-    0xffffffffffffffff,  // TX_8x8
-    0x5555555555555555,  // TX_16x16
-    0x1111111111111111,  // TX_32x32
+  0xffffffffffffffff,  // TX_4X4
+  0xffffffffffffffff,  // TX_8x8
+  0x5555555555555555,  // TX_16x16
+  0x1111111111111111,  // TX_32x32
 };
 
-// 64 bit masks for above transform size.  Each 1 represents a position where
+// 64 bit masks for above transform size. Each 1 represents a position where
 // we should apply a loop filter across the top border of an 8x8 block
 // boundary.
 //
@@ -58,15 +58,15 @@ static const uint64_t left_64x64_txform_mask[TX_SIZES]= {
 //
 // A loopfilter should be applied to every other 4 the row vertically.
 static const uint64_t above_64x64_txform_mask[TX_SIZES]= {
-    0xffffffffffffffff,  // TX_4X4
-    0xffffffffffffffff,  // TX_8x8
-    0x00ff00ff00ff00ff,  // TX_16x16
-    0x000000ff000000ff,  // TX_32x32
+  0xffffffffffffffff,  // TX_4X4
+  0xffffffffffffffff,  // TX_8x8
+  0x00ff00ff00ff00ff,  // TX_16x16
+  0x000000ff000000ff,  // TX_32x32
 };
 
-// 64 bit masks for prediction sizes (left).  Each 1 represents a position
-// where left border of an 8x8 block.  These are aligned to the right most
-// appropriate bit,  and then shifted into place.
+// 64 bit masks for prediction sizes (left). Each 1 represents a position
+// where left border of an 8x8 block. These are aligned to the right most
+// appropriate bit, and then shifted into place.
 //
 // In the case of TX_16x32 ->  ( low order byte first ) we end up with
 // a mask that looks like this :
@@ -80,54 +80,54 @@ static const uint64_t above_64x64_txform_mask[TX_SIZES]= {
 //  00000000
 //  00000000
 static const uint64_t left_prediction_mask[BLOCK_SIZES] = {
-    0x0000000000000001,  // BLOCK_4X4,
-    0x0000000000000001,  // BLOCK_4X8,
-    0x0000000000000001,  // BLOCK_8X4,
-    0x0000000000000001,  // BLOCK_8X8,
-    0x0000000000000101,  // BLOCK_8X16,
-    0x0000000000000001,  // BLOCK_16X8,
-    0x0000000000000101,  // BLOCK_16X16,
-    0x0000000001010101,  // BLOCK_16X32,
-    0x0000000000000101,  // BLOCK_32X16,
-    0x0000000001010101,  // BLOCK_32X32,
-    0x0101010101010101,  // BLOCK_32X64,
-    0x0000000001010101,  // BLOCK_64X32,
-    0x0101010101010101,  // BLOCK_64X64
+  0x0000000000000001,  // BLOCK_4X4,
+  0x0000000000000001,  // BLOCK_4X8,
+  0x0000000000000001,  // BLOCK_8X4,
+  0x0000000000000001,  // BLOCK_8X8,
+  0x0000000000000101,  // BLOCK_8X16,
+  0x0000000000000001,  // BLOCK_16X8,
+  0x0000000000000101,  // BLOCK_16X16,
+  0x0000000001010101,  // BLOCK_16X32,
+  0x0000000000000101,  // BLOCK_32X16,
+  0x0000000001010101,  // BLOCK_32X32,
+  0x0101010101010101,  // BLOCK_32X64,
+  0x0000000001010101,  // BLOCK_64X32,
+  0x0101010101010101,  // BLOCK_64X64
 };
 
 // 64 bit mask to shift and set for each prediction size.
 static const uint64_t above_prediction_mask[BLOCK_SIZES] = {
-    0x0000000000000001,  // BLOCK_4X4
-    0x0000000000000001,  // BLOCK_4X8
-    0x0000000000000001,  // BLOCK_8X4
-    0x0000000000000001,  // BLOCK_8X8
-    0x0000000000000001,  // BLOCK_8X16,
-    0x0000000000000003,  // BLOCK_16X8
-    0x0000000000000003,  // BLOCK_16X16
-    0x0000000000000003,  // BLOCK_16X32,
-    0x000000000000000f,  // BLOCK_32X16,
-    0x000000000000000f,  // BLOCK_32X32,
-    0x000000000000000f,  // BLOCK_32X64,
-    0x00000000000000ff,  // BLOCK_64X32,
-    0x00000000000000ff,  // BLOCK_64X64
+  0x0000000000000001,  // BLOCK_4X4
+  0x0000000000000001,  // BLOCK_4X8
+  0x0000000000000001,  // BLOCK_8X4
+  0x0000000000000001,  // BLOCK_8X8
+  0x0000000000000001,  // BLOCK_8X16,
+  0x0000000000000003,  // BLOCK_16X8
+  0x0000000000000003,  // BLOCK_16X16
+  0x0000000000000003,  // BLOCK_16X32,
+  0x000000000000000f,  // BLOCK_32X16,
+  0x000000000000000f,  // BLOCK_32X32,
+  0x000000000000000f,  // BLOCK_32X64,
+  0x00000000000000ff,  // BLOCK_64X32,
+  0x00000000000000ff,  // BLOCK_64X64
 };
-// 64 bit mask to shift and set for each prediction size.  A bit is set for
+// 64 bit mask to shift and set for each prediction size. A bit is set for
 // each 8x8 block that would be in the left most block of the given block
 // size in the 64x64 block.
 static const uint64_t size_mask[BLOCK_SIZES] = {
-    0x0000000000000001,  // BLOCK_4X4
-    0x0000000000000001,  // BLOCK_4X8
-    0x0000000000000001,  // BLOCK_8X4
-    0x0000000000000001,  // BLOCK_8X8
-    0x0000000000000101,  // BLOCK_8X16,
-    0x0000000000000003,  // BLOCK_16X8
-    0x0000000000000303,  // BLOCK_16X16
-    0x0000000003030303,  // BLOCK_16X32,
-    0x0000000000000f0f,  // BLOCK_32X16,
-    0x000000000f0f0f0f,  // BLOCK_32X32,
-    0x0f0f0f0f0f0f0f0f,  // BLOCK_32X64,
-    0x00000000ffffffff,  // BLOCK_64X32,
-    0xffffffffffffffff,  // BLOCK_64X64
+  0x0000000000000001,  // BLOCK_4X4
+  0x0000000000000001,  // BLOCK_4X8
+  0x0000000000000001,  // BLOCK_8X4
+  0x0000000000000001,  // BLOCK_8X8
+  0x0000000000000101,  // BLOCK_8X16,
+  0x0000000000000003,  // BLOCK_16X8
+  0x0000000000000303,  // BLOCK_16X16
+  0x0000000003030303,  // BLOCK_16X32,
+  0x0000000000000f0f,  // BLOCK_32X16,
+  0x000000000f0f0f0f,  // BLOCK_32X32,
+  0x0f0f0f0f0f0f0f0f,  // BLOCK_32X64,
+  0x00000000ffffffff,  // BLOCK_64X32,
+  0xffffffffffffffff,  // BLOCK_64X64
 };
 
 // These are used for masking the left and above borders.
@@ -136,67 +136,67 @@ static const uint64_t above_border = 0x000000ff000000ff;
 
 // 16 bit masks for uv transform sizes.
 static const uint16_t left_64x64_txform_mask_uv[TX_SIZES]= {
-    0xffff,  // TX_4X4
-    0xffff,  // TX_8x8
-    0x5555,  // TX_16x16
-    0x1111,  // TX_32x32
+  0xffff,  // TX_4X4
+  0xffff,  // TX_8x8
+  0x5555,  // TX_16x16
+  0x1111,  // TX_32x32
 };
 
 static const uint16_t above_64x64_txform_mask_uv[TX_SIZES]= {
-    0xffff,  // TX_4X4
-    0xffff,  // TX_8x8
-    0x0f0f,  // TX_16x16
-    0x000f,  // TX_32x32
+  0xffff,  // TX_4X4
+  0xffff,  // TX_8x8
+  0x0f0f,  // TX_16x16
+  0x000f,  // TX_32x32
 };
 
 // 16 bit left mask to shift and set for each uv prediction size.
 static const uint16_t left_prediction_mask_uv[BLOCK_SIZES] = {
-    0x0001,  // BLOCK_4X4,
-    0x0001,  // BLOCK_4X8,
-    0x0001,  // BLOCK_8X4,
-    0x0001,  // BLOCK_8X8,
-    0x0001,  // BLOCK_8X16,
-    0x0001,  // BLOCK_16X8,
-    0x0001,  // BLOCK_16X16,
-    0x0011,  // BLOCK_16X32,
-    0x0001,  // BLOCK_32X16,
-    0x0011,  // BLOCK_32X32,
-    0x1111,  // BLOCK_32X64
-    0x0011,  // BLOCK_64X32,
-    0x1111,  // BLOCK_64X64
+  0x0001,  // BLOCK_4X4,
+  0x0001,  // BLOCK_4X8,
+  0x0001,  // BLOCK_8X4,
+  0x0001,  // BLOCK_8X8,
+  0x0001,  // BLOCK_8X16,
+  0x0001,  // BLOCK_16X8,
+  0x0001,  // BLOCK_16X16,
+  0x0011,  // BLOCK_16X32,
+  0x0001,  // BLOCK_32X16,
+  0x0011,  // BLOCK_32X32,
+  0x1111,  // BLOCK_32X64
+  0x0011,  // BLOCK_64X32,
+  0x1111,  // BLOCK_64X64
 };
 // 16 bit above mask to shift and set for uv each prediction size.
 static const uint16_t above_prediction_mask_uv[BLOCK_SIZES] = {
-    0x0001,  // BLOCK_4X4
-    0x0001,  // BLOCK_4X8
-    0x0001,  // BLOCK_8X4
-    0x0001,  // BLOCK_8X8
-    0x0001,  // BLOCK_8X16,
-    0x0001,  // BLOCK_16X8
-    0x0001,  // BLOCK_16X16
-    0x0001,  // BLOCK_16X32,
-    0x0003,  // BLOCK_32X16,
-    0x0003,  // BLOCK_32X32,
-    0x0003,  // BLOCK_32X64,
-    0x000f,  // BLOCK_64X32,
-    0x000f,  // BLOCK_64X64
+  0x0001,  // BLOCK_4X4
+  0x0001,  // BLOCK_4X8
+  0x0001,  // BLOCK_8X4
+  0x0001,  // BLOCK_8X8
+  0x0001,  // BLOCK_8X16,
+  0x0001,  // BLOCK_16X8
+  0x0001,  // BLOCK_16X16
+  0x0001,  // BLOCK_16X32,
+  0x0003,  // BLOCK_32X16,
+  0x0003,  // BLOCK_32X32,
+  0x0003,  // BLOCK_32X64,
+  0x000f,  // BLOCK_64X32,
+  0x000f,  // BLOCK_64X64
 };
 
 // 64 bit mask to shift and set for each uv prediction size
 static const uint16_t size_mask_uv[BLOCK_SIZES] = {
-    0x0001,  // BLOCK_4X4
-    0x0001,  // BLOCK_4X8
-    0x0001,  // BLOCK_8X4
-    0x0001,  // BLOCK_8X8
-    0x0001,  // BLOCK_8X16,
-    0x0001,  // BLOCK_16X8
-    0x0001,  // BLOCK_16X16
-    0x0011,  // BLOCK_16X32,
-    0x0003,  // BLOCK_32X16,
-    0x0033,  // BLOCK_32X32,
-    0x3333,  // BLOCK_32X64,
-    0x00ff,  // BLOCK_64X32,
-    0xffff,  // BLOCK_64X64
+  0x0001,  // BLOCK_4X4
+  0x0001,  // BLOCK_4X8
+  0x0001,  // BLOCK_8X4
+  0x0001,  // BLOCK_8X8
+  0x0001,  // BLOCK_8X16,
+  0x0001,  // BLOCK_16X8
+  0x0001,  // BLOCK_16X16
+  0x0011,  // BLOCK_16X32,
+  0x0003,  // BLOCK_32X16,
+  0x0033,  // BLOCK_32X32,
+  0x3333,  // BLOCK_32X64,
+  0x00ff,  // BLOCK_64X32,
+  0xffff,  // BLOCK_64X64
 };
 static const uint16_t left_border_uv =  0x1111;
 static const uint16_t above_border_uv = 0x000f;
@@ -211,7 +211,7 @@ static void update_sharpness(loop_filter_info_n *lfi, int sharpness_lvl) {
 
   // For each possible value for the loop filter fill out limits
   for (lvl = 0; lvl <= MAX_LOOP_FILTER; lvl++) {
-    // Set loop filter paramaeters that control sharpness.
+    // Set loop filter parameters that control sharpness.
     int block_inside_limit = lvl >> ((sharpness_lvl > 0) + (sharpness_lvl > 4));
 
     if (sharpness_lvl > 0) {
@@ -250,7 +250,7 @@ void vp9_loop_filter_init(VP9_COMMON *cm) {
 
 void vp9_loop_filter_frame_init(VP9_COMMON *cm, int default_filt_lvl) {
   int seg_id;
-  // n_shift is the a multiplier for lf_deltas
+  // n_shift is the multiplier for lf_deltas
   // the multiplier is 1 for when filter_lvl is between 0 and 31;
   // 2 when filter_lvl is between 32 and 63
   const int scale = 1 << (default_filt_lvl >> 5);
@@ -316,8 +316,8 @@ static void filter_selectively_vert_row2(PLANE_TYPE plane_type,
   unsigned int mask;
 
   for (mask = mask_16x16_0 | mask_8x8_0 | mask_4x4_0 | mask_4x4_int_0 |
-      mask_16x16_1 | mask_8x8_1 | mask_4x4_1 | mask_4x4_int_1;
-      mask; mask >>= 1) {
+              mask_16x16_1 | mask_8x8_1 | mask_4x4_1 | mask_4x4_int_1;
+       mask; mask >>= 1) {
     const loop_filter_thresh *lfi0 = lfi_n->lfthr + *lfl;
     const loop_filter_thresh *lfi1 = lfi_n->lfthr + *(lfl + lfl_forward);
 
@@ -489,8 +489,8 @@ static void filter_selectively_horiz(uint8_t *s, int pitch,
 }
 
 // This function ors into the current lfm structure, where to do loop
-// filters for the specific mi we are looking at.   It uses information
-// including the block_size_type (32x16, 32x32, etc),  the transform size,
+// filters for the specific mi we are looking at. It uses information
+// including the block_size_type (32x16, 32x32, etc.), the transform size,
 // whether there were any coefficients encoded, and the loop filter strength
 // block we are currently looking at. Shift is used to position the
 // 1's we produce.
@@ -526,7 +526,7 @@ static void build_masks(const loop_filter_info_n *const lfi_n,
   }
 
   // These set 1 in the current block size for the block size edges.
-  // For instance if the block size is 32x16,   we'll set :
+  // For instance if the block size is 32x16, we'll set:
   //    above =   1111
   //              0000
   //    and
@@ -535,7 +535,7 @@ static void build_masks(const loop_filter_info_n *const lfi_n,
   // NOTE : In this example the low bit is left most ( 1000 ) is stored as
   //        1,  not 8...
   //
-  // U and v set things on a 16 bit scale.
+  // U and V set things on a 16 bit scale.
   //
   *above_y |= above_prediction_mask[block_size] << shift_y;
   *above_uv |= above_prediction_mask_uv[block_size] << shift_uv;
@@ -547,7 +547,7 @@ static void build_masks(const loop_filter_info_n *const lfi_n,
   if (mbmi->skip && is_inter_block(mbmi))
     return;
 
-  // Here we are adding a mask for the transform size.  The transform
+  // Here we are adding a mask for the transform size. The transform
   // size mask is set to be correct for a 64x64 prediction block size. We
   // mask to match the size of the block we are working on and then shift it
   // into place..
@@ -573,7 +573,7 @@ static void build_masks(const loop_filter_info_n *const lfi_n,
 }
 
 // This function does the same thing as the one above with the exception that
-// it only affects the y masks.   It exists because for blocks < 16x16 in size,
+// it only affects the y masks. It exists because for blocks < 16x16 in size,
 // we only update u and v masks on the first block.
 static void build_y_mask(const loop_filter_info_n *const lfi_n,
                          const MODE_INFO *mi, const int shift_y,
@@ -627,8 +627,8 @@ void vp9_setup_mask(VP9_COMMON *const cm, const int mi_row, const int mi_col,
   MODE_INFO **mip2 = mi;
 
   // These are offsets to the next mi in the 64x64 block. It is what gets
-  // added to the mi ptr as we go through each loop.  It helps us to avoids
-  // setting up special row and column counters for each index.  The last step
+  // added to the mi ptr as we go through each loop. It helps us to avoid
+  // setting up special row and column counters for each index. The last step
   // brings us out back to the starting position.
   const int offset_32[] = {4, (mode_info_stride << 2) - 4, 4,
                            -(mode_info_stride << 2) - 4};
@@ -637,7 +637,7 @@ void vp9_setup_mask(VP9_COMMON *const cm, const int mi_row, const int mi_col,
   const int offset[] = {1, mode_info_stride - 1, 1, -mode_info_stride - 1};
 
   // Following variables represent shifts to position the current block
-  // mask over the appropriate block.   A shift of 36 to the left will move
+  // mask over the appropriate block. A shift of 36 to the left will move
   // the bits for the final 32 by 32 block in the 64x64 up 4 rows and left
   // 4 rows to the appropriate spot.
   const int shift_32_y[] = {0, 4, 32, 36};
@@ -652,6 +652,7 @@ void vp9_setup_mask(VP9_COMMON *const cm, const int mi_row, const int mi_col,
                         cm->mi_cols - mi_col : MI_BLOCK_SIZE);
 
   vp9_zero(*lfm);
+  assert(mip[0] != NULL);
 
   // TODO(jimbankoski): Try moving most of the following code into decode
   // loop and storing lfm in the mbmi structure so that we don't have to go
@@ -767,7 +768,7 @@ void vp9_setup_mask(VP9_COMMON *const cm, const int mi_row, const int mi_col,
   lfm->above_uv[TX_16X16] |= lfm->above_uv[TX_32X32];
 
   // We do at least 8 tap filter on every 32x32 even if the transform size
-  // is 4x4.  So if the 4x4 is set on a border pixel add it to the 8x8 and
+  // is 4x4. So if the 4x4 is set on a border pixel add it to the 8x8 and
   // remove it from the 4x4.
   lfm->left_y[TX_8X8] |= lfm->left_y[TX_4X4] & left_border;
   lfm->left_y[TX_4X4] &= ~left_border;
@@ -796,7 +797,7 @@ void vp9_setup_mask(VP9_COMMON *const cm, const int mi_row, const int mi_col,
     lfm->int_4x4_y &= mask_y;
     lfm->int_4x4_uv &= mask_uv;
 
-    // We don't apply a wide loop filter on the last uv block row.  If set
+    // We don't apply a wide loop filter on the last uv block row. If set
     // apply the shorter one instead.
     if (rows == 1) {
       lfm->above_uv[TX_8X8] |= lfm->above_uv[TX_16X16];
@@ -830,7 +831,7 @@ void vp9_setup_mask(VP9_COMMON *const cm, const int mi_row, const int mi_col,
     lfm->int_4x4_y &= mask_y;
     lfm->int_4x4_uv &= mask_uv_int;
 
-    // We don't apply a wide loop filter on the last uv column.  If set
+    // We don't apply a wide loop filter on the last uv column. If set
     // apply the shorter one instead.
     if (columns == 1) {
       lfm->left_uv[TX_8X8] |= lfm->left_uv[TX_16X16];
@@ -841,7 +842,8 @@ void vp9_setup_mask(VP9_COMMON *const cm, const int mi_row, const int mi_col,
       lfm->left_uv[TX_16X16] &= ~(lfm->left_uv[TX_16X16] & 0xcccc);
     }
   }
-  // We don't a loop filter on the first column in the image.  Mask that out.
+  // We don't apply a loop filter on the first column in the image, mask that
+  // out.
   if (mi_col == 0) {
     for (i = 0; i < TX_32X32; i++) {
       lfm->left_y[i] &= 0xfefefefefefefefe;
