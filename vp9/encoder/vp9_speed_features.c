@@ -266,7 +266,6 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->max_delta_qindex = (cm->frame_type == KEY_FRAME) ? 20 : 15;
     sf->partition_search_type = REFERENCE_PARTITION;
     sf->use_nonrd_pick_mode = 1;
-    sf->mv.search_method = FAST_DIAMOND;
     sf->allow_skip_recode = 0;
   }
 
@@ -288,6 +287,7 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->mv.reduce_first_step_size = 1;
   }
   if (speed >= 7) {
+    sf->mv.search_method = FAST_DIAMOND;
     sf->mv.fullpel_search_step_param = 10;
     sf->lpf_pick = LPF_PICK_MINIMAL_LPF;
     sf->encode_breakout_thresh = (MIN(cm->width, cm->height) >= 720) ?
