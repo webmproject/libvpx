@@ -52,6 +52,24 @@
       "revId": "317971e578119f0b3b0d68333e42434f772640e9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//g9Y\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 1057,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-07-09T13:06:03Z",
+      "side": 1,
+      "message": "OK I think this is just Gerrit on Windows doing odd things with spaces. As is appears on my screen in Gerrit, the second and third lines of the \u0026\u0026 clause are aligned ONE space back from the first. (I.e. the v of vp9 is one column back in lines 2 and 3)\n\nHowever, if I cut and paste the lines into notepad they seem aligned OK.",
+      "parentUuid": "AAAAdn//hCI\u003d",
+      "revId": "317971e578119f0b3b0d68333e42434f772640e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
