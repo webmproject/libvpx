@@ -28,6 +28,7 @@
 #include "vp9/common/vp9_reconintra.h"
 #include "vp9/common/vp9_reconinter.h"
 #include "vp9/common/vp9_seg_common.h"
+#include "vp9/common/vp9_thread.h"
 #include "vp9/common/vp9_tile_common.h"
 
 #include "vp9/decoder/vp9_decodeframe.h"
@@ -38,7 +39,6 @@
 #include "vp9/decoder/vp9_dthread.h"
 #include "vp9/decoder/vp9_read_bit_buffer.h"
 #include "vp9/decoder/vp9_reader.h"
-#include "vp9/decoder/vp9_thread.h"
 
 #define MAX_VP9_HEADER_SIZE 80
 
