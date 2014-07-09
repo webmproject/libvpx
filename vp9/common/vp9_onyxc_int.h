@@ -257,10 +257,14 @@ static INLINE void init_macroblockd(VP9_COMMON *cm, MACROBLOCKD *xd) {
   xd->mi_stride = cm->mi_stride;
 }
 
+static INLINE int frame_is_intra_only(const VP9_COMMON *const cm) {
+  return cm->frame_type == KEY_FRAME || cm->intra_only;
+}
+
 static INLINE const vp9_prob* get_partition_probs(const VP9_COMMON *cm,
                                                   int ctx) {
-  return cm->frame_type == KEY_FRAME ? vp9_kf_partition_probs[ctx]
-                                     : cm->fc.partition_prob[ctx];
+  return frame_is_intra_only(cm) ? vp9_kf_partition_probs[ctx]
+                                 : cm->fc.partition_prob[ctx];
 }
 
 static INLINE void set_skip_context(MACROBLOCKD *xd, int mi_row, int mi_col) {
@@ -297,10 +301,6 @@ static INLINE void set_prev_mi(VP9_COMMON *cm) {
   // context cannot be used.
   cm->prev_mi = use_prev_in_find_mv_refs ?
                   cm->prev_mip + cm->mi_stride + 1 : NULL;
-}
-
-static INLINE int frame_is_intra_only(const VP9_COMMON *const cm) {
-  return cm->frame_type == KEY_FRAME || cm->intra_only;
 }
 
 static INLINE void update_partition_context(MACROBLOCKD *xd,

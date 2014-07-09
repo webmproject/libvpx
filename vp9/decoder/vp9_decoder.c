@@ -267,7 +267,10 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
 
   vp9_decode_frame(pbi, source, source + size, psource);
 
-  swap_frame_buffers(pbi);
+  if (!cm->show_existing_frame)
+    swap_frame_buffers(pbi);
+  else
+    cm->frame_to_show = get_frame_new_buffer(cm);
 
   vp9_clear_system_state();
 
@@ -291,6 +294,7 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
 
 int vp9_get_raw_frame(VP9Decoder *pbi, YV12_BUFFER_CONFIG *sd,
                       vp9_ppflags_t *flags) {
+  VP9_COMMON *const cm = &pbi->common;
   int ret = -1;
 #if !CONFIG_VP9_POSTPROC
   (void)*flags;
@@ -300,15 +304,20 @@ int vp9_get_raw_frame(VP9Decoder *pbi, YV12_BUFFER_CONFIG *sd,
     return ret;
 
   /* no raw frame to show!!! */
-  if (pbi->common.show_frame == 0)
+  if (!cm->show_frame)
     return ret;
 
   pbi->ready_for_new_data = 1;
 
 #if CONFIG_VP9_POSTPROC
-  ret = vp9_post_proc_frame(&pbi->common, sd, flags);
+  if (!cm->show_existing_frame) {
+    ret = vp9_post_proc_frame(cm, sd, flags);
+  } else {
+    *sd = *cm->frame_to_show;
+    ret = 0;
+  }
 #else
-  *sd = *pbi->common.frame_to_show;
+  *sd = *cm->frame_to_show;
   ret = 0;
 #endif /*!CONFIG_POSTPROC*/
   vp9_clear_system_state();

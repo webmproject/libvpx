@@ -605,8 +605,8 @@ static INTERP_FILTER read_interp_filter(struct vp9_read_bit_buffer *rb) {
                              : literal_to_filter[vp9_rb_read_literal(rb, 2)];
 }
 
-static void read_frame_size(struct vp9_read_bit_buffer *rb,
-                            int *width, int *height) {
+void vp9_read_frame_size(struct vp9_read_bit_buffer *rb,
+                         int *width, int *height) {
   const int w = vp9_rb_read_literal(rb, 16) + 1;
   const int h = vp9_rb_read_literal(rb, 16) + 1;
   *width = w;
@@ -617,7 +617,7 @@ static void setup_display_size(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
   cm->display_width = cm->width;
   cm->display_height = cm->height;
   if (vp9_rb_read_bit(rb))
-    read_frame_size(rb, &cm->display_width, &cm->display_height);
+    vp9_read_frame_size(rb, &cm->display_width, &cm->display_height);
 }
 
 static void apply_frame_size(VP9_COMMON *cm, int width, int height) {
@@ -649,7 +649,7 @@ static void apply_frame_size(VP9_COMMON *cm, int width, int height) {
 
 static void setup_frame_size(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
   int width, height;
-  read_frame_size(rb, &width, &height);
+  vp9_read_frame_size(rb, &width, &height);
   apply_frame_size(cm, width, height);
   setup_display_size(cm, rb);
 }
@@ -669,7 +669,7 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
   }
 
   if (!found)
-    read_frame_size(rb, &width, &height);
+    vp9_read_frame_size(rb, &width, &height);
 
   // Check that each of the frames that this frame references has valid
   // dimensions.
@@ -1053,18 +1053,15 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
   return bit_reader_end;
 }
 
-static void check_sync_code(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
-  if (vp9_rb_read_literal(rb, 8) != VP9_SYNC_CODE_0 ||
-      vp9_rb_read_literal(rb, 8) != VP9_SYNC_CODE_1 ||
-      vp9_rb_read_literal(rb, 8) != VP9_SYNC_CODE_2) {
-    vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
-                       "Invalid frame sync code");
-  }
-}
-
 static void error_handler(void *data) {
   VP9_COMMON *const cm = (VP9_COMMON *)data;
   vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME, "Truncated packet");
+}
+
+int vp9_read_sync_code(struct vp9_read_bit_buffer *const rb) {
+  return vp9_rb_read_literal(rb, 8) == VP9_SYNC_CODE_0 &&
+         vp9_rb_read_literal(rb, 8) == VP9_SYNC_CODE_1 &&
+         vp9_rb_read_literal(rb, 8) == VP9_SYNC_CODE_2;
 }
 
 static BITSTREAM_PROFILE read_profile(struct vp9_read_bit_buffer *rb) {
@@ -1112,7 +1109,9 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
   cm->error_resilient_mode = vp9_rb_read_bit(rb);
 
   if (cm->frame_type == KEY_FRAME) {
-    check_sync_code(cm, rb);
+    if (!vp9_read_sync_code(rb))
+      vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
+                         "Invalid frame sync code");
     if (cm->profile > PROFILE_1)
       cm->bit_depth = vp9_rb_read_bit(rb) ? BITS_12 : BITS_10;
     cm->color_space = (COLOR_SPACE)vp9_rb_read_literal(rb, 3);
@@ -1150,9 +1149,18 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
         0 : vp9_rb_read_literal(rb, 2);
 
     if (cm->intra_only) {
-      check_sync_code(cm, rb);
+      if (!vp9_read_sync_code(rb))
+        vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
+                           "Invalid frame sync code");
 
       pbi->refresh_frame_flags = vp9_rb_read_literal(rb, REF_FRAMES);
+
+      // NOTE: The intra-only frame header does not include the specification of
+      // either the color format or color sub-sampling. VP9 specifies that the
+      // default color space should be YUV 4:2:0 in this case (normative).
+      cm->color_space = BT_601;
+      cm->subsampling_y = cm->subsampling_x = 1;
+
       setup_frame_size(cm, rb);
     } else {
       pbi->refresh_frame_flags = vp9_rb_read_literal(rb, REF_FRAMES);
