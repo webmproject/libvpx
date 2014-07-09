@@ -1686,7 +1686,6 @@ int main(int argc, const char **argv_) {
                   fps >= 1.0 ? fps : fps * 60,
                   fps >= 1.0 ? "fps" : "fpm");
           print_time("ETA", estimated_time_left);
-          fprintf(stderr, "\033[K");
         }
 
       } else
@@ -1737,6 +1736,8 @@ int main(int argc, const char **argv_) {
       }
 
       fflush(stdout);
+      if (!global.quiet)
+        fprintf(stderr, "\033[K");
     }
 
     if (stream_cnt > 1)
