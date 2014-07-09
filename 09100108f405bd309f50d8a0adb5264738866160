@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//g9A\u003d",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 387,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-09T15:30:19Z",
+      "side": 1,
+      "message": "Add full-stop at end of line.",
+      "revId": "09100108f405bd309f50d8a0adb5264738866160",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//g88\u003d",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 390,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-09T15:30:19Z",
+      "side": 1,
+      "message": "Add period at end of line (whilst in this area).",
+      "revId": "09100108f405bd309f50d8a0adb5264738866160",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//g84\u003d",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 414,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-09T15:30:19Z",
+      "side": 1,
+      "message": "Add full-stop.",
+      "revId": "09100108f405bd309f50d8a0adb5264738866160",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//g80\u003d",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 443,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-09T15:30:19Z",
+      "side": 1,
+      "message": "Full-stop. Also, the code from here to \"start_frame \u003d ...\" seems to repeat or interact with a lot of the operations implemented in adjust_arnr_filter. Would it be better to move this code into there?",
+      "revId": "09100108f405bd309f50d8a0adb5264738866160",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//g8w\u003d",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 449,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-09T15:30:19Z",
+      "side": 1,
+      "message": "Full-stop.",
+      "revId": "09100108f405bd309f50d8a0adb5264738866160",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//g8Y\u003d",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 459,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-09T15:30:19Z",
+      "side": 1,
+      "message": "Full-stop.",
+      "revId": "09100108f405bd309f50d8a0adb5264738866160",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//g8U\u003d",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 465,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-09T15:30:19Z",
+      "side": 1,
+      "message": "Full-stop.",
+      "revId": "09100108f405bd309f50d8a0adb5264738866160",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//g8Q\u003d",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 467,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-09T15:30:19Z",
+      "side": 1,
+      "message": "Pre-increment.",
+      "revId": "09100108f405bd309f50d8a0adb5264738866160",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
