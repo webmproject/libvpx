@@ -353,7 +353,7 @@ static vpx_codec_err_t set_encoder_config(
 
   oxcf->key_freq               = cfg->kf_max_dist;
 
-  oxcf->speed                  =  clamp(abs(extra_cfg->cpu_used), 0, 7);
+  oxcf->speed                  =  abs(extra_cfg->cpu_used);
   oxcf->encode_breakout        =  extra_cfg->static_thresh;
   oxcf->play_alternate         =  extra_cfg->enable_auto_alt_ref;
   oxcf->noise_sensitivity      =  extra_cfg->noise_sensitivity;
