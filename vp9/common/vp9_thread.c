@@ -11,7 +11,7 @@
 //
 // Original source:
 //  http://git.chromium.org/webm/libwebp.git
-//  100644 blob 08ad4e1fecba302bf1247645e84a7d2779956bc3  src/utils/thread.c
+//  100644 blob 264210ba2807e4da47eb5d18c04cf869d89b9784  src/utils/thread.c
 
 #include <assert.h>
 #include <string.h>   // for memset()
@@ -144,18 +144,19 @@ static void launch(VP9Worker *const worker) {
 }
 
 static void end(VP9Worker *const worker) {
-  if (worker->status_ >= OK) {
 #if CONFIG_MULTITHREAD
+  if (worker->impl_ != NULL) {
     change_state(worker, NOT_OK);
     pthread_join(worker->impl_->thread_, NULL);
     pthread_mutex_destroy(&worker->impl_->mutex_);
     pthread_cond_destroy(&worker->impl_->condition_);
-#else
-    worker->status_ = NOT_OK;
-#endif
+    vpx_free(worker->impl_);
+    worker->impl_ = NULL;
   }
-  vpx_free(worker->impl_);
-  worker->impl_ = NULL;
+#else
+  worker->status_ = NOT_OK;
+  assert(worker->impl_ == NULL);
+#endif
   assert(worker->status_ == NOT_OK);
 }
 
