@@ -234,21 +234,18 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
   movifnidn                   quantq, quantmp
   mova                            m1, [roundq]             ; m1 = round
   mova                            m2, [quantq]             ; m2 = quant
-%ifidn %1, b_32x32
-; TODO(jingning) to be continued with 32x32 quantization process
+%ifidn %1, fp_32x32
   pcmpeqw                         m5, m5
   psrlw                           m5, 15
-  paddw                           m0, m5
   paddw                           m1, m5
-  psrlw                           m0, 1                    ; m0 = (m0 + 1) / 2
   psrlw                           m1, 1                    ; m1 = (m1 + 1) / 2
 %endif
   mova                            m3, [r2q]                ; m3 = dequant
   mov                             r3, qcoeffmp
   mov                             r4, dqcoeffmp
   mov                             r5, iscanmp
-%ifidn %1, b_32x32
-  psllw                           m4, 1
+%ifidn %1, fp_32x32
+  psllw                           m2, 1
 %endif
   pxor                            m5, m5                   ; m5 = dedicated zero
   DEFINE_ARGS coeff, ncoeff, d1, qcoeff, dqcoeff, iscan, d2, d3, d4, d5, d6, eob
@@ -275,18 +272,19 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
   psignw                         m13, m10                  ; m13 = reinsert sign
   mova        [qcoeffq+ncoeffq*2+ 0], m8
   mova        [qcoeffq+ncoeffq*2+16], m13
-%ifidn %1, b_32x32
+%ifidn %1, fp_32x32
   pabsw                           m8, m8
   pabsw                          m13, m13
 %endif
   pmullw                          m8, m3                   ; dqc[i] = qc[i] * q
   punpckhqdq                      m3, m3
   pmullw                         m13, m3                   ; dqc[i] = qc[i] * q
-%ifidn %1, b_32x32
+%ifidn %1, fp_32x32
   psrlw                           m8, 1
   psrlw                          m13, 1
   psignw                          m8, m9
   psignw                         m13, m10
+  psrlw                           m0, m3, 2
 %endif
   mova       [dqcoeffq+ncoeffq*2+ 0], m8
   mova       [dqcoeffq+ncoeffq*2+16], m13
@@ -307,13 +305,17 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
   mova                           m10, [  coeffq+ncoeffq*2+16] ; m10 = c[i]
   pabsw                           m6, m9                   ; m6 = abs(m9)
   pabsw                          m11, m10                  ; m11 = abs(m10)
-  pcmpeqw                         m7, m7
-%ifidn %1, b_32x32
+%ifidn %1, fp_32x32
+  pcmpgtw                         m7, m6,  m0
+  pcmpgtw                        m12, m11, m0
   pmovmskb                        r6, m7
-  pmovmskb                        r2, m7
+  pmovmskb                        r2, m12
+
   or                              r6, r2
   jz .skip_iter
 %endif
+  pcmpeqw                         m7, m7
+
   paddsw                          m6, m1                   ; m6 += round
   paddsw                         m11, m1                   ; m11 += round
   pmulhw                         m14, m6, m2               ; m14 = m6*q>>16
@@ -322,13 +324,13 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
   psignw                         m13, m10                  ; m13 = reinsert sign
   mova        [qcoeffq+ncoeffq*2+ 0], m14
   mova        [qcoeffq+ncoeffq*2+16], m13
-%ifidn %1, b_32x32
+%ifidn %1, fp_32x32
   pabsw                          m14, m14
   pabsw                          m13, m13
 %endif
   pmullw                         m14, m3                   ; dqc[i] = qc[i] * q
   pmullw                         m13, m3                   ; dqc[i] = qc[i] * q
-%ifidn %1, b_32x32
+%ifidn %1, fp_32x32
   psrlw                          m14, 1
   psrlw                          m13, 1
   psignw                         m14, m9
@@ -349,7 +351,7 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
   add                        ncoeffq, mmsize
   jl .ac_only_loop
 
-%ifidn %1, b_32x32
+%ifidn %1, fp_32x32
   jmp .accumulate_eob
 .skip_iter:
   mova        [qcoeffq+ncoeffq*2+ 0], m5
@@ -397,3 +399,4 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
 
 INIT_XMM ssse3
 QUANTIZE_FP fp, 7
+QUANTIZE_FP fp_32x32, 7
