@@ -178,7 +178,7 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
                                          &cpi->fn_ptr[BLOCK_16X16],
                                          0, mv_sf->subpel_iters_per_step,
                                          NULL, NULL,
-                                         &distortion, &sse);
+                                         &distortion, &sse, NULL, 0, 0);
 
   // Restore input state
   x->plane[0].src = src;

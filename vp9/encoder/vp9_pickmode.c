@@ -185,7 +185,7 @@ static int combined_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                  cpi->sf.mv.subpel_force_stop,
                                  cpi->sf.mv.subpel_iters_per_step,
                                  x->nmvjointcost, x->mvcost,
-                                 &dis, &x->pred_sse[ref]);
+                                 &dis, &x->pred_sse[ref], NULL, 0, 0);
     x->pred_mv[ref] = tmp_mv->as_mv;
   }
 

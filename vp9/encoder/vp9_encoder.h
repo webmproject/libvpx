@@ -338,7 +338,6 @@ typedef struct VP9_COMP {
   CYCLIC_REFRESH *cyclic_refresh;
 
   fractional_mv_step_fp *find_fractional_mv_step;
-  fractional_mv_step_comp_fp *find_fractional_mv_step_comp;
   vp9_full_search_fn_t full_search_sad;
   vp9_refining_search_fn_t refining_search_sad;
   vp9_diamond_search_fn_t diamond_search_sad;

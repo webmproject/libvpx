@@ -396,7 +396,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
 
   if (sf->mv.subpel_search_method == SUBPEL_TREE) {
     cpi->find_fractional_mv_step = vp9_find_best_sub_pixel_tree;
-    cpi->find_fractional_mv_step_comp = vp9_find_best_sub_pixel_comp_tree;
   }
 
   cpi->mb.optimize = sf->optimize_coefficients == 1 && cpi->pass != 1;
