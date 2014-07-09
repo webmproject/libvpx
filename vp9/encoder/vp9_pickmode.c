@@ -127,6 +127,10 @@ static int combined_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   int rv = 0;
   const YV12_BUFFER_CONFIG *scaled_ref_frame = vp9_get_scaled_ref_frame(cpi,
                                                                         ref);
+  if (cpi->common.show_frame &&
+      (x->pred_mv_sad[ref] >> 3) > x->pred_mv_sad[LAST_FRAME])
+    return rv;
+
   if (scaled_ref_frame) {
     int i;
     // Swap out the reference frame for a version that's been scaled to
@@ -138,16 +142,6 @@ static int combined_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   }
   vp9_set_mv_search_range(x, &ref_mv);
 
-  if (cpi->common.show_frame &&
-      (x->pred_mv_sad[ref] >> 3) > x->pred_mv_sad[LAST_FRAME]) {
-    tmp_mv->as_int = INVALID_MV;
-    if (scaled_ref_frame) {
-      int i;
-      for (i = 0; i < MAX_MB_PLANE; i++)
-        xd->plane[i].pre[0] = backup_yv12[i];
-    }
-    return rv;
-  }
   assert(x->mv_best_ref_index[ref] <= 2);
   if (x->mv_best_ref_index[ref] < 2)
     mvp_full = mbmi->ref_mvs[ref][x->mv_best_ref_index[ref]].as_mv;
