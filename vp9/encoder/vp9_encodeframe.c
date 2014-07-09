@@ -562,11 +562,21 @@ static void mode_info_conversion(VP9_COMP *cpi, const TileInfo *const tile,
   int_mv nearest_mv, near_mv;
   int_mv *candidates = mbmi->ref_mvs[ref_frame];
 
+  // TODO(jingning) handle single reference frame only
+  mbmi->ref_frame[1] = NONE;
+
   vp9_find_mv_refs(cm, xd, tile, xd->mi[0], ref_frame, candidates,
                    mi_row, mi_col);
 
   vp9_find_best_ref_mvs(xd, cm->allow_high_precision_mv, candidates,
                         &nearest_mv, &near_mv);
+
+  if (!cm->allow_high_precision_mv || !vp9_use_mv_hp(&mbmi->mv[0].as_mv)) {
+    if (mbmi->mv[0].as_mv.row & 1)
+      mbmi->mv[0].as_mv.row += (mbmi->mv[0].as_mv.row > 0 ? -1 : 1);
+    if (mbmi->mv[0].as_mv.col & 1)
+      mbmi->mv[0].as_mv.col += (mbmi->mv[1].as_mv.col > 0 ? -1 : 1);
+  }
 
   if (cm->tx_mode != TX_MODE_SELECT) {
     mbmi->tx_size = MIN(max_txsize_lookup[mbmi->sb_type],
@@ -577,6 +587,11 @@ static void mode_info_conversion(VP9_COMP *cpi, const TileInfo *const tile,
 
   if (cm->interp_filter != SWITCHABLE)
     mbmi->interp_filter = cm->interp_filter;
+
+  if (!is_inter_block(mbmi)) {
+    mbmi->mv[0].as_int = 0;
+    mbmi->mv[1].as_int = 0;
+  }
 }
 #endif
 
