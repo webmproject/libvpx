@@ -571,6 +571,8 @@ static void mode_info_conversion(VP9_COMP *cpi, const TileInfo *const tile,
   if (cm->tx_mode != TX_MODE_SELECT) {
     mbmi->tx_size = MIN(max_txsize_lookup[mbmi->sb_type],
                         tx_mode_to_biggest_tx_size[cpi->common.tx_mode]);
+  } else if (mbmi->tx_size > max_txsize_lookup[mbmi->sb_type]) {
+    mbmi->tx_size = max_txsize_lookup[mbmi->sb_type];
   }
 
   if (cm->interp_filter != SWITCHABLE)
