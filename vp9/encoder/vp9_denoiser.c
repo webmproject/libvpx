@@ -190,12 +190,19 @@ static VP9_DENOISER_DECISION perform_motion_compensation(VP9_DENOISER *denoiser,
   MACROBLOCKD *filter_mbd = &mb->e_mbd;
   MB_MODE_INFO *mbmi = &filter_mbd->mi[0]->mbmi;
 
+  MB_MODE_INFO saved_mbmi;
+  int i, j;
+  struct buf_2d saved_dst[MAX_MB_PLANE];
+  struct buf_2d saved_pre[MAX_MB_PLANE][2];  // 2 pre buffers
+
   // We will restore these after motion compensation.
-  MB_MODE_INFO saved_mbmi = *mbmi;
-  struct buf_2d saved_dst = filter_mbd->plane[0].dst;
-  struct buf_2d saved_pre[2];
-  saved_pre[0] = filter_mbd->plane[0].pre[0];
-  saved_pre[1] = filter_mbd->plane[0].pre[1];
+  saved_mbmi = *mbmi;
+  for (i = 0; i < MAX_MB_PLANE; ++i) {
+    for (j = 0; j < 2; ++j) {
+      saved_pre[i][j] = filter_mbd->plane[i].pre[j];
+    }
+    saved_dst[i] = filter_mbd->plane[i].dst;
+  }
 
   mv_col = denoiser->best_sse_mv.as_mv.col;
   mv_row = denoiser->best_sse_mv.as_mv.row;
@@ -224,67 +231,52 @@ static VP9_DENOISER_DECISION perform_motion_compensation(VP9_DENOISER *denoiser,
 
   // Set the pointers in the MACROBLOCKD to point to the buffers in the denoiser
   // struct.
-  filter_mbd->plane[0].pre[0].buf =
-      block_start(denoiser->running_avg_y[frame].y_buffer,
-                  denoiser->running_avg_y[frame].y_stride,
-                  mi_row, mi_col);
-  filter_mbd->plane[0].pre[0].stride = denoiser->running_avg_y[frame].y_stride;
-
-  filter_mbd->plane[1].pre[0].buf =
-      block_start(denoiser->running_avg_y[frame].u_buffer,
-                  denoiser->running_avg_y[frame].uv_stride,
-                  mi_row, mi_col);
-  filter_mbd->plane[1].pre[0].stride = denoiser->running_avg_y[frame].uv_stride;
-
-  filter_mbd->plane[2].pre[0].buf =
-      block_start(denoiser->running_avg_y[frame].v_buffer,
-                  denoiser->running_avg_y[frame].uv_stride,
-                  mi_row, mi_col);
-  filter_mbd->plane[2].pre[0].stride = denoiser->running_avg_y[frame].uv_stride;
-
-  filter_mbd->plane[0].pre[1].buf =
-      block_start(denoiser->running_avg_y[frame].y_buffer,
-                  denoiser->running_avg_y[frame].y_stride,
-                  mi_row, mi_col);
-  filter_mbd->plane[0].pre[1].stride = denoiser->running_avg_y[frame].y_stride;
-
-  filter_mbd->plane[1].pre[1].buf =
-      block_start(denoiser->running_avg_y[frame].u_buffer,
-                  denoiser->running_avg_y[frame].uv_stride,
-                  mi_row, mi_col);
-  filter_mbd->plane[1].pre[1].stride = denoiser->running_avg_y[frame].uv_stride;
-
-  filter_mbd->plane[2].pre[1].buf =
-      block_start(denoiser->running_avg_y[frame].v_buffer,
-                  denoiser->running_avg_y[frame].uv_stride,
-                  mi_row, mi_col);
-  filter_mbd->plane[2].pre[1].stride = denoiser->running_avg_y[frame].uv_stride;
-
+  for (j = 0; j < 2; ++j) {
+    filter_mbd->plane[0].pre[j].buf =
+        block_start(denoiser->running_avg_y[frame].y_buffer,
+                    denoiser->running_avg_y[frame].y_stride,
+                    mi_row, mi_col);
+    filter_mbd->plane[0].pre[j].stride =
+        denoiser->running_avg_y[frame].y_stride;
+    filter_mbd->plane[1].pre[j].buf =
+        block_start(denoiser->running_avg_y[frame].u_buffer,
+                    denoiser->running_avg_y[frame].uv_stride,
+                    mi_row, mi_col);
+    filter_mbd->plane[1].pre[j].stride =
+        denoiser->running_avg_y[frame].uv_stride;
+    filter_mbd->plane[2].pre[j].buf =
+        block_start(denoiser->running_avg_y[frame].v_buffer,
+                    denoiser->running_avg_y[frame].uv_stride,
+                    mi_row, mi_col);
+    filter_mbd->plane[2].pre[j].stride =
+        denoiser->running_avg_y[frame].uv_stride;
+  }
   filter_mbd->plane[0].dst.buf =
       block_start(denoiser->mc_running_avg_y.y_buffer,
                   denoiser->mc_running_avg_y.y_stride,
                   mi_row, mi_col);
   filter_mbd->plane[0].dst.stride = denoiser->mc_running_avg_y.y_stride;
-
   filter_mbd->plane[1].dst.buf =
       block_start(denoiser->mc_running_avg_y.u_buffer,
                   denoiser->mc_running_avg_y.uv_stride,
                   mi_row, mi_col);
-  filter_mbd->plane[1].dst.stride = denoiser->mc_running_avg_y.y_stride;
-
+  filter_mbd->plane[1].dst.stride = denoiser->mc_running_avg_y.uv_stride;
   filter_mbd->plane[2].dst.buf =
       block_start(denoiser->mc_running_avg_y.v_buffer,
                   denoiser->mc_running_avg_y.uv_stride,
                   mi_row, mi_col);
-  filter_mbd->plane[2].dst.stride = denoiser->mc_running_avg_y.y_stride;
+  filter_mbd->plane[2].dst.stride = denoiser->mc_running_avg_y.uv_stride;
 
   vp9_build_inter_predictors_sby(filter_mbd, mv_row, mv_col, bs);
 
   // Restore everything to its original state
-  filter_mbd->plane[0].pre[0] = saved_pre[0];
-  filter_mbd->plane[0].pre[1] = saved_pre[1];
-  filter_mbd->plane[0].dst = saved_dst;
   *mbmi = saved_mbmi;
+  for (i = 0; i < MAX_MB_PLANE; ++i) {
+    for (j = 0; j < 2; ++j) {
+      filter_mbd->plane[i].pre[j] = saved_pre[i][j];
+    }
+    filter_mbd->plane[i].dst = saved_dst[i];
+  }
 
   mv_row = denoiser->best_sse_mv.as_mv.row;
   mv_col = denoiser->best_sse_mv.as_mv.col;
