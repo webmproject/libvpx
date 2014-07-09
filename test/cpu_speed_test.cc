@@ -7,8 +7,6 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
-#include <climits>
-#include <vector>
 #include "third_party/googletest/src/include/gtest/gtest.h"
 #include "test/codec_factory.h"
 #include "test/encode_test_driver.h"
@@ -20,9 +18,9 @@ namespace {
 
 const int kMaxPSNR = 100;
 
-class CpuSpeedTest : public ::libvpx_test::EncoderTest,
-    public ::libvpx_test::CodecTestWith2Params<
-        libvpx_test::TestMode, int> {
+class CpuSpeedTest
+    : public ::libvpx_test::EncoderTest,
+      public ::libvpx_test::CodecTestWith2Params<libvpx_test::TestMode, int> {
  protected:
   CpuSpeedTest()
       : EncoderTest(GET_PARAM(0)),
@@ -57,11 +55,6 @@ class CpuSpeedTest : public ::libvpx_test::EncoderTest,
         encoder->Control(VP8E_SET_ARNR_STRENGTH, 5);
         encoder->Control(VP8E_SET_ARNR_TYPE, 3);
       }
-    }
-  }
-
-  virtual void FramePktHook(const vpx_codec_cx_pkt_t *pkt) {
-    if (pkt->data.frame.flags & VPX_FRAME_IS_KEY) {
     }
   }
 
@@ -126,11 +119,11 @@ TEST_P(CpuSpeedTest, TestEncodeHighBitrate) {
 
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 }
+
 TEST_P(CpuSpeedTest, TestLowBitrate) {
   // Validate that this clip encodes and decodes without a mismatch
   // when passing in a very high min q.  This pushes the encoder to producing
   // lots of small partitions which might will test the other condition.
-
   cfg_.rc_2pass_vbr_minsection_pct = 5;
   cfg_.rc_2pass_vbr_minsection_pct = 2000;
   cfg_.rc_target_bitrate = 200;
@@ -141,11 +134,6 @@ TEST_P(CpuSpeedTest, TestLowBitrate) {
 
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 }
-
-using std::tr1::make_tuple;
-
-#define VP9_FACTORY \
-  static_cast<const libvpx_test::CodecFactory*> (&libvpx_test::kVP9)
 
 VP9_INSTANTIATE_TEST_CASE(
     CpuSpeedTest,
