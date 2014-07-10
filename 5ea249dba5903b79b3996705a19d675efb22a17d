@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//gr0\u003d",
+        "filename": "test/tools_common.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 356,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-10T21:21:56Z",
+      "side": 1,
+      "message": "this is a nice convenience, but a more generic loader/exec param would serve e.g., qemu, wine; see for example:\n\nhttp://build.webmproject.org/jenkins/job/libwebp__test/",
+      "revId": "5ea249dba5903b79b3996705a19d675efb22a17d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//grw\u003d",
+        "filename": "test/tools_common.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 413,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-10T21:21:56Z",
+      "side": 1,
+      "message": "as defaults this is OK, leak check, etc. can be added as needed",
+      "revId": "5ea249dba5903b79b3996705a19d675efb22a17d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
