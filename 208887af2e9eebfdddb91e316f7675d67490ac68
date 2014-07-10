@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//grY\u003d",
+        "filename": "test/vpx_temporal_svc_encoder.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-10T21:51:17Z",
+      "side": 1,
+      "message": "no way to outright skip the test if we\u0027ve gotten this far I guess",
+      "revId": "208887af2e9eebfdddb91e316f7675d67490ac68",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//grc\u003d",
+        "filename": "test/vpx_temporal_svc_encoder.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-10T21:51:17Z",
+      "side": 1,
+      "message": "indent on continuation is usually 2, but I think we\u0027ve ignored that so far:\n\nhttp://google-styleguide.googlecode.com/svn/trunk/shell.xml#Indentation",
+      "revId": "208887af2e9eebfdddb91e316f7675d67490ac68",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
