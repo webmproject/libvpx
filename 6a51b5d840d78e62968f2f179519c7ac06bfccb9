@@ -16,6 +16,24 @@
       "revId": "6a51b5d840d78e62968f2f179519c7ac06bfccb9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//gvw\u003d",
+        "filename": "test/register_state_check.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-10T19:06:10Z",
+      "side": 1,
+      "message": "better than what I had definitely and more inline with the description. I wasn\u0027t think too hard about it at the time, thanks.",
+      "parentUuid": "AAAAdn//gwo\u003d",
+      "revId": "6a51b5d840d78e62968f2f179519c7ac06bfccb9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
