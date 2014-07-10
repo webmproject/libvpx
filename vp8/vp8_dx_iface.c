@@ -409,6 +409,7 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t  *ctx,
                 if (setjmp(pbi->common.error.jmp))
                 {
                     pbi->common.error.setjmp = 0;
+                    vp8_clear_system_state();
                     /* same return value as used in vp8dx_receive_compressed_data */
                     return -1;
                 }

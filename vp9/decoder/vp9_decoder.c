@@ -246,6 +246,7 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
 
   if (setjmp(cm->error.jmp)) {
     cm->error.setjmp = 0;
+    vp9_clear_system_state();
 
     // We do not know if the missing frame(s) was supposed to update
     // any of the reference buffers, but we act conservative and
