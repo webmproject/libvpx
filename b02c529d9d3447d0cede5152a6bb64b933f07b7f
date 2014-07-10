@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//gzA\u003d",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 360,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-10T18:37:34Z",
+      "side": 1,
+      "message": "You don\u0027t need const on built-in type params, same for param below.",
+      "revId": "b02c529d9d3447d0cede5152a6bb64b933f07b7f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//gzE\u003d",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 445,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-10T18:37:34Z",
+      "side": 1,
+      "message": "const",
+      "revId": "b02c529d9d3447d0cede5152a6bb64b933f07b7f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
