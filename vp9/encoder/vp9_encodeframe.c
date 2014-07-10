@@ -2393,27 +2393,34 @@ static void encode_rd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
   for (mi_col = tile->mi_col_start; mi_col < tile->mi_col_end;
        mi_col += MI_BLOCK_SIZE) {
 #if CONFIG_TRANSCODE
-    FILE *pf = cm->mi_array_pf;
-    assert(pf != 0);
-    if (pf) {
-      int offset = mi_row * cm->mi_stride + mi_col;
-      int i, j;
-      for (j = 0; j < MI_BLOCK_SIZE; ++j) {
-        for (i = 0; i < MI_BLOCK_SIZE; ++i) {
-          MODE_INFO *mi = &cm->mi[offset + j * cm->mi_stride + i];
-          fread(mi, 1, sizeof(MODE_INFO), pf);
+    if (cm->frame_type == KEY_FRAME) {
+      int dummy_rate;
+      int64_t dummy_dist;
+      rd_pick_partition(cpi, tile, tp, mi_row, mi_col, BLOCK_64X64,
+                        &dummy_rate, &dummy_dist, 1, INT64_MAX, cpi->pc_root);
+    } else {
+      FILE *pf = cm->mi_array_pf;
+      assert(pf != 0);
+      if (pf) {
+        int offset = mi_row * cm->mi_stride + mi_col;
+        int i, j;
+        for (j = 0; j < MI_BLOCK_SIZE; ++j) {
+          for (i = 0; i < MI_BLOCK_SIZE; ++i) {
+            MODE_INFO *mi = &cm->mi[offset + j * cm->mi_stride + i];
+            fread(mi, 1, sizeof(MODE_INFO), pf);
 
 #if PRINT_MODE_INFO_LOAD
-          // print out the mode_info loaded in from external file
-          print_mode_info(&cm->mi[offset + j * cm->mi_stride + i],
-                          mi_row + j, mi_col + i);
+            // print out the mode_info loaded in from external file
+            print_mode_info(&cm->mi[offset + j * cm->mi_stride + i],
+                            mi_row + j, mi_col + i);
 #endif
+          }
         }
       }
-    }
 
-    encode_sb_mi(cpi, tile, tp, mi_row, mi_col, 1, BLOCK_64X64,
-                 cpi->pc_root);
+      encode_sb_mi(cpi, tile, tp, mi_row, mi_col, 1, BLOCK_64X64,
+                   cpi->pc_root);
+    }
 #else
     int dummy_rate;
     int64_t dummy_dist;
