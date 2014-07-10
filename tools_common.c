@@ -241,9 +241,18 @@ int vpx_img_read(vpx_image_t *img, FILE *file) {
   for (plane = 0; plane < 3; ++plane) {
     unsigned char *buf = img->planes[plane];
     const int stride = img->stride[plane];
+#if CONFIG_VP9_HIGH
+    int w = vpx_img_plane_width(img, plane);
+#else
     const int w = vpx_img_plane_width(img, plane);
+#endif
     const int h = vpx_img_plane_height(img, plane);
     int y;
+#if CONFIG_VP9_HIGH
+    if (img->fmt & VPX_IMG_FMT_HIGH) {
+      w *= sizeof(uint16_t);
+    }
+#endif
 
     for (y = 0; y < h; ++y) {
       if (fread(buf, 1, w, file) != w)

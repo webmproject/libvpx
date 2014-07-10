@@ -461,14 +461,26 @@ int main(int argc, char **argv) {
   FILE *infile = NULL;
   struct RateControlMetrics rc;
   int64_t cx_time = 0;
+#if CONFIG_VP9_HIGH
+  vpx_bit_depth_t bit_depth;
+  int in_bit_depth;
+#endif
 
   exec_name = argv[0];
   // Check usage and arguments.
+#if CONFIG_VP9_HIGH
+  if (argc < 12) {
+    die("Usage: %s <infile> <outfile> <codec_type(vp8/vp9)> <width> <height> "
+        "<rate_num> <rate_den> <speed> <frame_drop_threshold> <mode> "
+        "<Rate_0> ... <Rate_nlayers-1> <bit_depth>\n", argv[0]);
+  }
+#else
   if (argc < 11) {
     die("Usage: %s <infile> <outfile> <codec_type(vp8/vp9)> <width> <height> "
         "<rate_num> <rate_den> <speed> <frame_drop_threshold> <mode> "
         "<Rate_0> ... <Rate_nlayers-1> \n", argv[0]);
   }
+#endif
 
   encoder = get_vpx_encoder_by_name(argv[3]);
   if (!encoder)
@@ -487,13 +499,44 @@ int main(int argc, char **argv) {
     die("Invalid layering mode (0..12) %s", argv[10]);
   }
 
+#if CONFIG_VP9_HIGH
+  if (argc != 12 + mode_to_num_layers[layering_mode]) {
+    die("Invalid number of arguments");
+  }
+  switch (strtol(argv[argc-1], NULL, 0)) {
+    case 8:
+      bit_depth = VPX_BITS_8;
+      in_bit_depth = 8;
+      break;
+    case 10:
+      bit_depth = VPX_BITS_10;
+      in_bit_depth = 10;
+      break;
+    case 12:
+      bit_depth = VPX_BITS_12;
+      in_bit_depth = 12;
+      break;
+    default:
+      die("Invalid bit depth (8,10,12) %s", argv[argc-1]);
+  }
+#else
   if (argc != 11 + mode_to_num_layers[layering_mode]) {
     die("Invalid number of arguments");
   }
+#endif
 
+#if CONFIG_VP9_HIGH
+  if (!vpx_img_alloc(&raw,
+                     bit_depth == VPX_BITS_8 ? VPX_IMG_FMT_I420 :
+                                               VPX_IMG_FMT_I42016,
+                     width, height, 32)) {
+    die("Failed to allocate image", width, height);
+  }
+#else
   if (!vpx_img_alloc(&raw, VPX_IMG_FMT_I420, width, height, 32)) {
     die("Failed to allocate image", width, height);
   }
+#endif
 
   // Populate encoder configuration.
   res = vpx_codec_enc_config_default(encoder->codec_interface(), &cfg, 0);
@@ -505,6 +548,14 @@ int main(int argc, char **argv) {
   // Update the default configuration with our settings.
   cfg.g_w = width;
   cfg.g_h = height;
+
+#if CONFIG_VP9_HIGH
+  if (bit_depth != VPX_BITS_8) {
+    cfg.g_bit_depth = bit_depth;
+    cfg.g_in_bit_depth = in_bit_depth;
+    cfg.g_profile = 2;
+  }
+#endif
 
   // Timebase format e.g. 30fps: numerator=1, demoninator = 30.
   cfg.g_timebase.num = strtol(argv[6], NULL, 0);
@@ -574,8 +625,14 @@ int main(int argc, char **argv) {
   cfg.ss_number_layers = 1;
 
   // Initialize codec.
+#if CONFIG_VP9_HIGH
+  if (vpx_codec_enc_init(&codec, encoder->codec_interface(), &cfg,
+                         bit_depth == VPX_BITS_8 ? 0 : VPX_CODEC_USE_HIGH))
+    die_codec(&codec, "Failed to initialize encoder");
+#else
   if (vpx_codec_enc_init(&codec, encoder->codec_interface(), &cfg, 0))
     die_codec(&codec, "Failed to initialize encoder");
+#endif
 
   if (strncmp(encoder->name, "vp8", 3) == 0) {
     vpx_codec_control(&codec, VP8E_SET_CPUUSED, -speed);
