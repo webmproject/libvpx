@@ -389,7 +389,7 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
       }
 
       // Skip border extension if block is inside the frame.
-      if (x0 < 0 || x0 > frame_width - 1 || x1 < 0 || x1 > frame_width ||
+      if (x0 < 0 || x0 > frame_width - 1 || x1 < 0 || x1 > frame_width - 1 ||
           y0 < 0 || y0 > frame_height - 1 || y1 < 0 || y1 > frame_height - 1) {
         uint8_t *buf_ptr1 = ref_frame + y0 * pre_buf->stride + x0;
         // Extend the border.
