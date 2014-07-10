@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//gwo\u003d",
+        "filename": "test/register_state_check.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-07-10T18:07:57Z",
+      "side": 1,
+      "message": "I\u0027m not super happy with these names. \n\nMaybe ASM_REGISTER_STATE_CHECK and API_REGISTER_STATE_CHECK would be better?",
+      "revId": "6a51b5d840d78e62968f2f179519c7ac06bfccb9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
