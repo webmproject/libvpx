@@ -38,7 +38,7 @@ resize_util() {
       return 1
     fi
 
-    eval "${resizer}" "${YUV_RAW_INPUT}" \
+    eval "${VPX_TEST_PREFIX}" "${resizer}" "${YUV_RAW_INPUT}" \
         "${YUV_RAW_INPUT_WIDTH}x${YUV_RAW_INPUT_HEIGHT}" \
         "${target_dimensions}" "${output_file}" ${frames_to_resize} \
         ${devnull}
