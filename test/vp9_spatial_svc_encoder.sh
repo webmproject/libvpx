@@ -39,10 +39,9 @@ vp9_spatial_svc_encoder() {
     return 1
   fi
 
-  eval "${encoder}" -w "${YUV_RAW_INPUT_WIDTH}" -h "${YUV_RAW_INPUT_HEIGHT}" \
-      -k "${max_kf}" -f "${frames_to_encode}" "$@" "${YUV_RAW_INPUT}" \
-      "${output_file}" \
-      ${devnull}
+  eval "${VPX_TEST_PREFIX}" "${encoder}" -w "${YUV_RAW_INPUT_WIDTH}" \
+      -h "${YUV_RAW_INPUT_HEIGHT}" -k "${max_kf}" -f "${frames_to_encode}" \
+      "$@" "${YUV_RAW_INPUT}" "${output_file}" ${devnull}
 
   [ -e "${output_file}" ] || return 1
 }

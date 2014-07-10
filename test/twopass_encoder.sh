@@ -34,7 +34,7 @@ twopass_encoder() {
     return 1
   fi
 
-  eval "${encoder}" "${codec}" "${YUV_RAW_INPUT_WIDTH}" \
+  eval "${VPX_TEST_PREFIX}" "${encoder}" "${codec}" "${YUV_RAW_INPUT_WIDTH}" \
       "${YUV_RAW_INPUT_HEIGHT}" "${YUV_RAW_INPUT}" "${output_file}" \
       ${devnull}
 

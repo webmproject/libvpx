@@ -48,8 +48,8 @@ vpx_tsvc_encoder() {
     return 1
   fi
 
-  eval "${encoder}" "${YUV_RAW_INPUT}" "${output_file}" "${codec}" \
-      "${YUV_RAW_INPUT_WIDTH}" "${YUV_RAW_INPUT_HEIGHT}" \
+  eval "${VPX_TEST_PREFIX}" "${encoder}" "${YUV_RAW_INPUT}" "${output_file}" \
+      "${codec}" "${YUV_RAW_INPUT_WIDTH}" "${YUV_RAW_INPUT_HEIGHT}" \
       "${timebase_num}" "${timebase_den}" "${speed}" "${frame_drop_thresh}" \
       "$@" \
       ${devnull}
