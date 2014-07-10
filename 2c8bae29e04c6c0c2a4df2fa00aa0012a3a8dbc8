@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//gvE\u003d",
+        "filename": "test/decode_test_driver.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-07-10T20:54:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//g+Q\u003d",
+      "revId": "2c8bae29e04c6c0c2a4df2fa00aa0012a3a8dbc8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//g+M\u003d",
         "filename": "test/decode_test_driver.cc",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2014-07-09T03:50:35Z",
       "side": 1,
       "message": "add a newline here",
+      "revId": "2c8bae29e04c6c0c2a4df2fa00aa0012a3a8dbc8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//gtU\u003d",
+        "filename": "test/decode_test_driver.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-07-10T20:54:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//g+M\u003d",
       "revId": "2c8bae29e04c6c0c2a4df2fa00aa0012a3a8dbc8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//gtQ\u003d",
+        "filename": "test/invalid_file_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-07-10T20:54:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//g+I\u003d",
+      "revId": "2c8bae29e04c6c0c2a4df2fa00aa0012a3a8dbc8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//g+E\u003d",
         "filename": "test/invalid_file_test.cc",
         "patchSetId": 4
@@ -64,6 +118,24 @@
       "writtenOn": "2014-07-09T03:50:35Z",
       "side": 1,
       "message": "const",
+      "revId": "2c8bae29e04c6c0c2a4df2fa00aa0012a3a8dbc8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//gtM\u003d",
+        "filename": "test/invalid_file_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-07-10T20:54:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//g+E\u003d",
       "revId": "2c8bae29e04c6c0c2a4df2fa00aa0012a3a8dbc8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//gtI\u003d",
+        "filename": "test/invalid_file_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-07-10T20:54:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//g+A\u003d",
+      "revId": "2c8bae29e04c6c0c2a4df2fa00aa0012a3a8dbc8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//g98\u003d",
         "filename": "test/test.mk",
         "patchSetId": 4
@@ -98,6 +188,24 @@
       "writtenOn": "2014-07-09T03:50:35Z",
       "side": 1,
       "message": "drop this line",
+      "revId": "2c8bae29e04c6c0c2a4df2fa00aa0012a3a8dbc8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//gso\u003d",
+        "filename": "test/test.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 792,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-07-10T20:54:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//g98\u003d",
       "revId": "2c8bae29e04c6c0c2a4df2fa00aa0012a3a8dbc8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
