@@ -34,6 +34,24 @@
       "revId": "68f4ae0d1de85196a58c84f3f2b91889f906a2d8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//guQ\u003d",
+        "filename": "test/register_state_check.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-10T19:40:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//gug\u003d",
+      "revId": "68f4ae0d1de85196a58c84f3f2b91889f906a2d8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
