@@ -681,6 +681,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     int i, j;
     const int width  = num_4x4_blocks_wide_lookup[bsize];
     const int height = num_4x4_blocks_high_lookup[bsize];
+    const BLOCK_SIZE bsize_tx = txsize_to_bsize[mbmi->tx_size];
 
     int rate2 = 0;
     int64_t dist2 = 0;
@@ -706,7 +707,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                   src_stride,
                                   &pd->dst.buf[4 * (j * dst_stride + i)],
                                   dst_stride, i, j, 0);
-          model_rd_for_sb_y(cpi, bsize, x, xd, &rate, &dist, &var_y, &sse_y);
+          model_rd_for_sb_y(cpi, bsize_tx, x, xd, &rate, &dist, &var_y, &sse_y);
           rate2 += rate;
           dist2 += dist;
           ++block_idx;
