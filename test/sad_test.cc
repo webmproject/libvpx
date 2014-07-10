@@ -149,9 +149,9 @@ class SADx4Test
     const uint8_t* refs[] = {GetReference(0), GetReference(1),
                              GetReference(2), GetReference(3)};
 
-    REGISTER_STATE_CHECK(GET_PARAM(2)(source_data_, source_stride_,
-                                      refs, reference_stride_,
-                                      results));
+    ASM_REGISTER_STATE_CHECK(GET_PARAM(2)(source_data_, source_stride_,
+                                          refs, reference_stride_,
+                                          results));
   }
 
   void CheckSADs() {
@@ -178,9 +178,9 @@ class SADTest
     unsigned int ret;
     const uint8_t* const reference = GetReference(block_idx);
 
-    REGISTER_STATE_CHECK(ret = GET_PARAM(2)(source_data_, source_stride_,
-                                            reference, reference_stride_,
-                                            max_sad));
+    ASM_REGISTER_STATE_CHECK(ret = GET_PARAM(2)(source_data_, source_stride_,
+                                                reference, reference_stride_,
+                                                max_sad));
     return ret;
   }
 
@@ -210,8 +210,8 @@ class SADVP9Test
     unsigned int ret;
     const uint8_t* const reference = GetReference(block_idx);
 
-    REGISTER_STATE_CHECK(ret = GET_PARAM(2)(source_data_, source_stride_,
-                                            reference, reference_stride_));
+    ASM_REGISTER_STATE_CHECK(ret = GET_PARAM(2)(source_data_, source_stride_,
+                                                reference, reference_stride_));
     return ret;
   }
 

@@ -52,7 +52,7 @@ TEST_P(IDCTTest, TestGuardBlocks) {
 TEST_P(IDCTTest, TestAllZeros) {
   int i;
 
-  REGISTER_STATE_CHECK(UUT(input, output, 16, output, 16));
+  ASM_REGISTER_STATE_CHECK(UUT(input, output, 16, output, 16));
 
   for (i = 0; i < 256; i++)
     if ((i & 0xF) < 4 && i < 64)
@@ -65,7 +65,7 @@ TEST_P(IDCTTest, TestAllOnes) {
   int i;
 
   input[0] = 4;
-  REGISTER_STATE_CHECK(UUT(input, output, 16, output, 16));
+  ASM_REGISTER_STATE_CHECK(UUT(input, output, 16, output, 16));
 
   for (i = 0; i < 256; i++)
     if ((i & 0xF) < 4 && i < 64)
@@ -79,7 +79,7 @@ TEST_P(IDCTTest, TestAddOne) {
 
   for (i = 0; i < 256; i++) predict[i] = i;
   input[0] = 4;
-  REGISTER_STATE_CHECK(UUT(input, predict, 16, output, 16));
+  ASM_REGISTER_STATE_CHECK(UUT(input, predict, 16, output, 16));
 
   for (i = 0; i < 256; i++)
     if ((i & 0xF) < 4 && i < 64)
@@ -93,7 +93,7 @@ TEST_P(IDCTTest, TestWithData) {
 
   for (i = 0; i < 16; i++) input[i] = i;
 
-  REGISTER_STATE_CHECK(UUT(input, output, 16, output, 16));
+  ASM_REGISTER_STATE_CHECK(UUT(input, output, 16, output, 16));
 
   for (i = 0; i < 256; i++)
     if ((i & 0xF) > 3 || i > 63)

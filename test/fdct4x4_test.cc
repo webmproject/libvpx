@@ -79,9 +79,9 @@ class Trans4x4TestBase {
         test_input_block[j] = src[j] - dst[j];
       }
 
-      REGISTER_STATE_CHECK(RunFwdTxfm(test_input_block,
-                                      test_temp_block, pitch_));
-      REGISTER_STATE_CHECK(RunInvTxfm(test_temp_block, dst, pitch_));
+      ASM_REGISTER_STATE_CHECK(RunFwdTxfm(test_input_block,
+                                          test_temp_block, pitch_));
+      ASM_REGISTER_STATE_CHECK(RunInvTxfm(test_temp_block, dst, pitch_));
 
       for (int j = 0; j < kNumCoeffs; ++j) {
         const uint32_t diff = dst[j] - src[j];
@@ -114,7 +114,7 @@ class Trans4x4TestBase {
         input_block[j] = rnd.Rand8() - rnd.Rand8();
 
       fwd_txfm_ref(input_block, output_ref_block, pitch_, tx_type_);
-      REGISTER_STATE_CHECK(RunFwdTxfm(input_block, output_block, pitch_));
+      ASM_REGISTER_STATE_CHECK(RunFwdTxfm(input_block, output_block, pitch_));
 
       // The minimum quant value is 4.
       for (int j = 0; j < kNumCoeffs; ++j)
@@ -145,8 +145,8 @@ class Trans4x4TestBase {
       }
 
       fwd_txfm_ref(input_extreme_block, output_ref_block, pitch_, tx_type_);
-      REGISTER_STATE_CHECK(RunFwdTxfm(input_extreme_block,
-                                      output_block, pitch_));
+      ASM_REGISTER_STATE_CHECK(RunFwdTxfm(input_extreme_block,
+                                          output_block, pitch_));
 
       // The minimum quant value is 4.
       for (int j = 0; j < kNumCoeffs; ++j) {
@@ -175,7 +175,7 @@ class Trans4x4TestBase {
 
       fwd_txfm_ref(in, coeff, pitch_, tx_type_);
 
-      REGISTER_STATE_CHECK(RunInvTxfm(coeff, dst, pitch_));
+      ASM_REGISTER_STATE_CHECK(RunInvTxfm(coeff, dst, pitch_));
 
       for (int j = 0; j < kNumCoeffs; ++j) {
         const uint32_t diff = dst[j] - src[j];

@@ -68,7 +68,7 @@ class FwdTrans8x8TestBase {
       // Initialize a test block with input range [-255, 255].
       for (int j = 0; j < 64; ++j)
         test_input_block[j] = rnd.Rand8() - rnd.Rand8();
-      REGISTER_STATE_CHECK(
+      ASM_REGISTER_STATE_CHECK(
           RunFwdTxfm(test_input_block, test_output_block, pitch_));
 
       for (int j = 0; j < 64; ++j) {
@@ -97,7 +97,7 @@ class FwdTrans8x8TestBase {
       // Initialize a test block with input range [-15, 15].
       for (int j = 0; j < 64; ++j)
         test_input_block[j] = (rnd.Rand8() >> 4) - (rnd.Rand8() >> 4);
-      REGISTER_STATE_CHECK(
+      ASM_REGISTER_STATE_CHECK(
           RunFwdTxfm(test_input_block, test_output_block, pitch_));
 
       for (int j = 0; j < 64; ++j) {
@@ -139,7 +139,7 @@ class FwdTrans8x8TestBase {
         test_input_block[j] = src[j] - dst[j];
       }
 
-      REGISTER_STATE_CHECK(
+      ASM_REGISTER_STATE_CHECK(
           RunFwdTxfm(test_input_block, test_temp_block, pitch_));
       for (int j = 0; j < 64; ++j) {
           if (test_temp_block[j] > 0) {
@@ -152,7 +152,7 @@ class FwdTrans8x8TestBase {
             test_temp_block[j] *= 4;
           }
       }
-      REGISTER_STATE_CHECK(
+      ASM_REGISTER_STATE_CHECK(
           RunInvTxfm(test_temp_block, dst, pitch_));
 
       for (int j = 0; j < 64; ++j) {
@@ -202,11 +202,11 @@ class FwdTrans8x8TestBase {
         test_input_block[j] = src[j] - dst[j];
       }
 
-      REGISTER_STATE_CHECK(
+      ASM_REGISTER_STATE_CHECK(
           RunFwdTxfm(test_input_block, test_temp_block, pitch_));
-      REGISTER_STATE_CHECK(
+      ASM_REGISTER_STATE_CHECK(
           fwd_txfm_ref(test_input_block, ref_temp_block, pitch_, tx_type_));
-      REGISTER_STATE_CHECK(
+      ASM_REGISTER_STATE_CHECK(
           RunInvTxfm(test_temp_block, dst, pitch_));
 
       for (int j = 0; j < 64; ++j) {
