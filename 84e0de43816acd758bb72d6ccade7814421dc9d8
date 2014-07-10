@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//gxY\u003d",
+        "filename": "vpx_scale/generic/yv12config.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-10T17:46:13Z",
+      "side": 1,
+      "message": "how is this defined? size_t? you\u0027ll want to cast as they\u0027re different in 32-bit",
+      "revId": "84e0de43816acd758bb72d6ccade7814421dc9d8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//gxU\u003d",
+        "filename": "vpx_scale/generic/yv12config.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-10T17:46:13Z",
+      "side": 1,
+      "message": "ditto, for now; this one could eventually be bumped to 64-bit",
+      "revId": "84e0de43816acd758bb72d6ccade7814421dc9d8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
