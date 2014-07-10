@@ -851,94 +851,6 @@ int vp9_full_range_search_c(const MACROBLOCK *x,
 
 int vp9_diamond_search_sad_c(const MACROBLOCK *x,
                              const search_site_config *cfg,
-                             MV *ref_mv, MV *best_mv,
-                             int search_param, int sad_per_bit, int *num00,
-                             const vp9_variance_fn_ptr_t *fn_ptr,
-                             const MV *center_mv) {
-  const MACROBLOCKD *const xd = &x->e_mbd;
-  const struct buf_2d *const what = &x->plane[0].src;
-  const struct buf_2d *const in_what = &xd->plane[0].pre[0];
-  // search_param determines the length of the initial step and hence the number
-  // of iterations
-  // 0 = initial step (MAX_FIRST_STEP) pel : 1 = (MAX_FIRST_STEP/2) pel, 2 =
-  // (MAX_FIRST_STEP/4) pel... etc.
-  const search_site *const ss = &cfg->ss[search_param * cfg->searches_per_step];
-  const int tot_steps = (cfg->ss_count / cfg->searches_per_step) - search_param;
-  const MV fcenter_mv = {center_mv->row >> 3, center_mv->col >> 3};
-  const uint8_t *best_address, *in_what_ref;
-  int best_sad = INT_MAX;
-  int best_site = 0;
-  int last_site = 0;
-  int i, j, step;
-
-  clamp_mv(ref_mv, x->mv_col_min, x->mv_col_max, x->mv_row_min, x->mv_row_max);
-  in_what_ref = get_buf_from_mv(in_what, ref_mv);
-  best_address = in_what_ref;
-  *num00 = 0;
-  *best_mv = *ref_mv;
-
-  // Check the starting position
-  best_sad = fn_ptr->sdf(what->buf, what->stride,
-                         best_address, in_what->stride) +
-      mvsad_err_cost(x, best_mv, &fcenter_mv, sad_per_bit);
-
-  i = 1;
-
-  for (step = 0; step < tot_steps; step++) {
-    for (j = 0; j < cfg->searches_per_step; j++) {
-      const MV mv = {best_mv->row + ss[i].mv.row,
-                     best_mv->col + ss[i].mv.col};
-      if (is_mv_in(x, &mv)) {
-       int sad = fn_ptr->sdf(what->buf, what->stride,
-                             best_address + ss[i].offset, in_what->stride);
-        if (sad < best_sad) {
-          sad += mvsad_err_cost(x, &mv, &fcenter_mv, sad_per_bit);
-          if (sad < best_sad) {
-            best_sad = sad;
-            best_site = i;
-          }
-        }
-      }
-
-      i++;
-    }
-
-    if (best_site != last_site) {
-      best_mv->row += ss[best_site].mv.row;
-      best_mv->col += ss[best_site].mv.col;
-      best_address += ss[best_site].offset;
-      last_site = best_site;
-#if defined(NEW_DIAMOND_SEARCH)
-      while (1) {
-        const MV this_mv = {best_mv->row + ss[best_site].mv.row,
-                            best_mv->col + ss[best_site].mv.col};
-        if (is_mv_in(x, &this_mv)) {
-          int sad = fn_ptr->sdf(what->buf, what->stride,
-                                best_address + ss[best_site].offset,
-                                in_what->stride);
-          if (sad < best_sad) {
-            sad += mvsad_err_cost(x, &this_mv, &fcenter_mv, sad_per_bit);
-            if (sad < best_sad) {
-              best_sad = sad;
-              best_mv->row += ss[best_site].mv.row;
-              best_mv->col += ss[best_site].mv.col;
-              best_address += ss[best_site].offset;
-              continue;
-            }
-          }
-        }
-        break;
-      };
-#endif
-    } else if (best_address == in_what_ref) {
-      (*num00)++;
-    }
-  }
-  return best_sad;
-}
-
-int vp9_diamond_search_sadx4(const MACROBLOCK *x,
-                             const search_site_config *cfg,
                              MV *ref_mv, MV *best_mv, int search_param,
                              int sad_per_bit, int *num00,
                              const vp9_variance_fn_ptr_t *fn_ptr,
@@ -1059,8 +971,7 @@ int vp9_diamond_search_sadx4(const MACROBLOCK *x,
           unsigned int thissad = fn_ptr->sdf(what, what_stride, check_here,
                                              in_what_stride);
           if (thissad < bestsad) {
-            thissad += mvsad_err_cost(&this_mv, &fcenter_mv,
-                                      mvjsadcost, mvsadcost, sad_per_bit);
+            thissad += mvsad_err_cost(x, &this_mv, &fcenter_mv, sad_per_bit);
             if (thissad < bestsad) {
               bestsad = thissad;
               best_mv->row += ss[best_site].mv.row;
