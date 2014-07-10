@@ -177,6 +177,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//gzk\u003d",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 443,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-07-10T11:43:54Z",
+      "side": 1,
+      "message": "On closer examination the adjust function does seem to adequately clamp to all required limits so I will simplify this down.",
+      "parentUuid": "AAAAdn//g0E\u003d",
+      "revId": "09100108f405bd309f50d8a0adb5264738866160",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//g8w\u003d",
         "filename": "vp9/encoder/vp9_temporal_filter.c",
         "patchSetId": 2
