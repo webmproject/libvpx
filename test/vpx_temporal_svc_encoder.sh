@@ -21,6 +21,10 @@ vpx_tsvc_encoder_verify_environment() {
     echo "Libvpx test data must exist in LIBVPX_TEST_DATA_PATH."
     return 1
   fi
+  if [ "$(vpx_config_option_enabled CONFIG_TEMPORAL_DENOISING)" != "yes" ]; then
+    elog "Warning: Temporal denoising is disabled! Spatial denoising will be " \
+      "used instead, which is probably not what you want for this test."
+  fi
 }
 
 # Runs vpx_temporal_svc_encoder using the codec specified by $1 and output file
