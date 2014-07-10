@@ -172,7 +172,7 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   vp9_cyclic_refresh_free(cpi->cyclic_refresh);
   cpi->cyclic_refresh = NULL;
 
-  vp9_free_frame_buffers(cm);
+  vp9_free_ref_frame_buffers(cm);
   vp9_free_context_buffers(cm);
 
   vp9_free_frame_buffer(&cpi->last_frame_uf);
@@ -424,7 +424,7 @@ static void alloc_raw_frame_buffers(VP9_COMP *cpi) {
 
 static void alloc_ref_frame_buffers(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
-  if (vp9_alloc_frame_buffers(cm, cm->width, cm->height))
+  if (vp9_alloc_ref_frame_buffers(cm, cm->width, cm->height))
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate frame buffers");
 }
@@ -471,7 +471,9 @@ void vp9_alloc_compressor_data(VP9_COMP *cpi) {
 static void update_frame_size(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
-  vp9_update_frame_size(cm);
+
+  vp9_set_mb_mi(cm, cm->width, cm->height);
+  vp9_init_context_buffers(cm);
   init_macroblockd(cm, xd);
 
   if (cpi->use_svc && cpi->svc.number_temporal_layers == 1) {
@@ -2842,6 +2844,8 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
           PSNR_STATS psnr2;
           double frame_ssim2 = 0, weight = 0;
 #if CONFIG_VP9_POSTPROC
+          // TODO(agrange) Add resizing of post-proc buffer in here when the
+          // encoder is changed to use on-demand buffer allocation.
           vp9_deblock(cm->frame_to_show, &cm->post_proc_buffer,
                       cm->lf.filter_level * 10 / 6);
 #endif
@@ -2959,10 +2963,11 @@ int vp9_set_internal_size(VP9_COMP *cpi,
   // always go to the next whole number
   cm->width = (hs - 1 + cpi->oxcf.width * hr) / hs;
   cm->height = (vs - 1 + cpi->oxcf.height * vr) / vs;
-
   assert(cm->width <= cpi->initial_width);
   assert(cm->height <= cpi->initial_height);
+
   update_frame_size(cpi);
+
   return 0;
 }
 
@@ -2995,10 +3000,11 @@ int vp9_set_size_literal(VP9_COMP *cpi, unsigned int width,
       printf("Warning: Desired height too large, changed to %d\n", cm->height);
     }
   }
-
   assert(cm->width <= cpi->initial_width);
   assert(cm->height <= cpi->initial_height);
+
   update_frame_size(cpi);
+
   return 0;
 }
 

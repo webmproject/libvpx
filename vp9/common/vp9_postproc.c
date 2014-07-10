@@ -411,6 +411,14 @@ int vp9_post_proc_frame(struct VP9Common *cm,
 
   vp9_clear_system_state();
 
+#if CONFIG_VP9_POSTPROC || CONFIG_INTERNAL_STATS
+  if (vp9_realloc_frame_buffer(&cm->post_proc_buffer, cm->width, cm->height,
+                               cm->subsampling_x, cm->subsampling_y,
+                               VP9_DEC_BORDER_IN_PIXELS, NULL, NULL, NULL) < 0)
+    vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+                       "Failed to allocate post-processing buffer");
+#endif
+
   if (flags & VP9D_DEMACROBLOCK) {
     deblock_and_de_macro_block(cm->frame_to_show, ppbuf,
                                q + (ppflags->deblocking_level - 5) * 10, 1, 0);
