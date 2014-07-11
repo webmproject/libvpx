@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//ge4\u003d",
+        "filename": "vpx_scale/generic/yv12config.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-11T18:40:26Z",
+      "side": 1,
+      "message": "this alignment is wrong. why not cast the stride in all cases, might balance better",
+      "revId": "94330f203a503d078eac750b2568aae24cd100b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ges\u003d",
+        "filename": "vpx_scale/generic/yv12config.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-11T18:40:26Z",
+      "side": 1,
+      "message": "if buffer_alloc_sz a uint64? thought it was size_t; in any case frame_size is uint64",
+      "revId": "94330f203a503d078eac750b2568aae24cd100b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
