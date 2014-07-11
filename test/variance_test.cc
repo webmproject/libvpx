@@ -124,7 +124,8 @@ void VarianceTest<VarianceFunctionType>::ZeroTest() {
       memset(ref_, j, block_size_);
       unsigned int sse;
       unsigned int var;
-      REGISTER_STATE_CHECK(var = variance_(src_, width_, ref_, width_, &sse));
+      ASM_REGISTER_STATE_CHECK(
+          var = variance_(src_, width_, ref_, width_, &sse));
       EXPECT_EQ(0u, var) << "src values: " << i << "ref values: " << j;
     }
   }
@@ -139,7 +140,8 @@ void VarianceTest<VarianceFunctionType>::RefTest() {
     }
     unsigned int sse1, sse2;
     unsigned int var1;
-    REGISTER_STATE_CHECK(var1 = variance_(src_, width_, ref_, width_, &sse1));
+    ASM_REGISTER_STATE_CHECK(
+        var1 = variance_(src_, width_, ref_, width_, &sse1));
     const unsigned int var2 = variance_ref(src_, ref_, log2width_,
                                            log2height_, &sse2);
     EXPECT_EQ(sse1, sse2);
@@ -155,7 +157,7 @@ void VarianceTest<VarianceFunctionType>::OneQuarterTest() {
   memset(ref_ + half, 0, half);
   unsigned int sse;
   unsigned int var;
-  REGISTER_STATE_CHECK(var = variance_(src_, width_, ref_, width_, &sse));
+  ASM_REGISTER_STATE_CHECK(var = variance_(src_, width_, ref_, width_, &sse));
   const unsigned int expected = block_size_ * 255 * 255 / 4;
   EXPECT_EQ(expected, var);
 }
@@ -246,8 +248,8 @@ void SubpelVarianceTest<SubpelVarianceFunctionType>::RefTest() {
       }
       unsigned int sse1, sse2;
       unsigned int var1;
-      REGISTER_STATE_CHECK(var1 = subpel_variance_(ref_, width_ + 1, x, y,
-                                                   src_, width_, &sse1));
+      ASM_REGISTER_STATE_CHECK(var1 = subpel_variance_(ref_, width_ + 1, x, y,
+                                                       src_, width_, &sse1));
       const unsigned int var2 = subpel_variance_ref(ref_, src_, log2width_,
                                                     log2height_, x, y, &sse2);
       EXPECT_EQ(sse1, sse2) << "at position " << x << ", " << y;
@@ -269,8 +271,9 @@ void SubpelVarianceTest<vp9_subp_avg_variance_fn_t>::RefTest() {
       }
       unsigned int sse1, sse2;
       unsigned int var1;
-      REGISTER_STATE_CHECK(var1 = subpel_variance_(ref_, width_ + 1, x, y,
-                                                   src_, width_, &sse1, sec_));
+      ASM_REGISTER_STATE_CHECK(
+          var1 = subpel_variance_(ref_, width_ + 1, x, y,
+                                  src_, width_, &sse1, sec_));
       const unsigned int var2 = subpel_avg_variance_ref(ref_, src_, sec_,
                                                         log2width_, log2height_,
                                                         x, y, &sse2);

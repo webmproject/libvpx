@@ -264,7 +264,7 @@ TEST_P(ConvolveTest, CopyHoriz) {
   uint8_t* const out = output();
   DECLARE_ALIGNED(256, const int16_t, filter8[8]) = {0, 0, 0, 128, 0, 0, 0, 0};
 
-  REGISTER_STATE_CHECK(
+  ASM_REGISTER_STATE_CHECK(
       UUT_->h8_(in, kInputStride, out, kOutputStride, filter8, 16, filter8, 16,
                 Width(), Height()));
 
@@ -281,7 +281,7 @@ TEST_P(ConvolveTest, CopyVert) {
   uint8_t* const out = output();
   DECLARE_ALIGNED(256, const int16_t, filter8[8]) = {0, 0, 0, 128, 0, 0, 0, 0};
 
-  REGISTER_STATE_CHECK(
+  ASM_REGISTER_STATE_CHECK(
       UUT_->v8_(in, kInputStride, out, kOutputStride, filter8, 16, filter8, 16,
                 Width(), Height()));
 
@@ -298,7 +298,7 @@ TEST_P(ConvolveTest, Copy2D) {
   uint8_t* const out = output();
   DECLARE_ALIGNED(256, const int16_t, filter8[8]) = {0, 0, 0, 128, 0, 0, 0, 0};
 
-  REGISTER_STATE_CHECK(
+  ASM_REGISTER_STATE_CHECK(
       UUT_->hv8_(in, kInputStride, out, kOutputStride, filter8, 16, filter8, 16,
                  Width(), Height()));
 
@@ -356,17 +356,17 @@ TEST_P(ConvolveTest, MatchesReferenceSubpixelFilter) {
                            Width(), Height());
 
         if (filters == eighttap_smooth || (filter_x && filter_y))
-          REGISTER_STATE_CHECK(
+          ASM_REGISTER_STATE_CHECK(
               UUT_->hv8_(in, kInputStride, out, kOutputStride,
                          filters[filter_x], 16, filters[filter_y], 16,
                          Width(), Height()));
         else if (filter_y)
-          REGISTER_STATE_CHECK(
+          ASM_REGISTER_STATE_CHECK(
               UUT_->v8_(in, kInputStride, out, kOutputStride,
                         kInvalidFilter, 16, filters[filter_y], 16,
                         Width(), Height()));
         else
-          REGISTER_STATE_CHECK(
+          ASM_REGISTER_STATE_CHECK(
               UUT_->h8_(in, kInputStride, out, kOutputStride,
                         filters[filter_x], 16, kInvalidFilter, 16,
                         Width(), Height()));
@@ -414,17 +414,17 @@ TEST_P(ConvolveTest, MatchesReferenceAveragingSubpixelFilter) {
                                    Width(), Height());
 
         if (filters == eighttap_smooth || (filter_x && filter_y))
-          REGISTER_STATE_CHECK(
+          ASM_REGISTER_STATE_CHECK(
               UUT_->hv8_avg_(in, kInputStride, out, kOutputStride,
                              filters[filter_x], 16, filters[filter_y], 16,
                              Width(), Height()));
         else if (filter_y)
-          REGISTER_STATE_CHECK(
+          ASM_REGISTER_STATE_CHECK(
               UUT_->v8_avg_(in, kInputStride, out, kOutputStride,
                             filters[filter_x], 16, filters[filter_y], 16,
                             Width(), Height()));
         else
-          REGISTER_STATE_CHECK(
+          ASM_REGISTER_STATE_CHECK(
               UUT_->h8_avg_(in, kInputStride, out, kOutputStride,
                             filters[filter_x], 16, filters[filter_y], 16,
                             Width(), Height()));
@@ -494,9 +494,10 @@ TEST_P(ConvolveTest, ChangeFilterWorks) {
    */
 
   /* Test the horizontal filter. */
-  REGISTER_STATE_CHECK(UUT_->h8_(in, kInputStride, out, kOutputStride,
-                                 kChangeFilters[kInitialSubPelOffset],
-                                 kInputPixelStep, NULL, 0, Width(), Height()));
+  ASM_REGISTER_STATE_CHECK(
+      UUT_->h8_(in, kInputStride, out, kOutputStride,
+                kChangeFilters[kInitialSubPelOffset],
+                kInputPixelStep, NULL, 0, Width(), Height()));
 
   for (int x = 0; x < Width(); ++x) {
     const int kFilterPeriodAdjust = (x >> 3) << 3;
@@ -508,9 +509,10 @@ TEST_P(ConvolveTest, ChangeFilterWorks) {
   }
 
   /* Test the vertical filter. */
-  REGISTER_STATE_CHECK(UUT_->v8_(in, kInputStride, out, kOutputStride,
-                                 NULL, 0, kChangeFilters[kInitialSubPelOffset],
-                                 kInputPixelStep, Width(), Height()));
+  ASM_REGISTER_STATE_CHECK(
+      UUT_->v8_(in, kInputStride, out, kOutputStride,
+                NULL, 0, kChangeFilters[kInitialSubPelOffset],
+                kInputPixelStep, Width(), Height()));
 
   for (int y = 0; y < Height(); ++y) {
     const int kFilterPeriodAdjust = (y >> 3) << 3;
@@ -522,12 +524,11 @@ TEST_P(ConvolveTest, ChangeFilterWorks) {
   }
 
   /* Test the horizontal and vertical filters in combination. */
-  REGISTER_STATE_CHECK(UUT_->hv8_(in, kInputStride, out, kOutputStride,
-                                  kChangeFilters[kInitialSubPelOffset],
-                                  kInputPixelStep,
-                                  kChangeFilters[kInitialSubPelOffset],
-                                  kInputPixelStep,
-                                  Width(), Height()));
+  ASM_REGISTER_STATE_CHECK(
+      UUT_->hv8_(in, kInputStride, out, kOutputStride,
+                 kChangeFilters[kInitialSubPelOffset], kInputPixelStep,
+                 kChangeFilters[kInitialSubPelOffset], kInputPixelStep,
+                 Width(), Height()));
 
   for (int y = 0; y < Height(); ++y) {
     const int kFilterPeriodAdjustY = (y >> 3) << 3;
@@ -560,10 +561,10 @@ TEST_P(ConvolveTest, CheckScalingFiltering) {
   for (int frac = 0; frac < 16; ++frac) {
     for (int step = 1; step <= 32; ++step) {
       /* Test the horizontal and vertical filters in combination. */
-      REGISTER_STATE_CHECK(UUT_->hv8_(in, kInputStride, out, kOutputStride,
-                                      eighttap[frac], step,
-                                      eighttap[frac], step,
-                                      Width(), Height()));
+      ASM_REGISTER_STATE_CHECK(UUT_->hv8_(in, kInputStride, out, kOutputStride,
+                                          eighttap[frac], step,
+                                          eighttap[frac], step,
+                                          Width(), Height()));
 
       CheckGuardBlocks();
 
