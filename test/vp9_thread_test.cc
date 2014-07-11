@@ -35,6 +35,15 @@ class VP9WorkerThreadTest : public ::testing::TestWithParam<bool> {
     vp9_get_worker_interface()->end(&worker_);
   }
 
+  void Run(VP9Worker* worker) {
+    const bool synchronous = GetParam();
+    if (synchronous) {
+      vp9_get_worker_interface()->execute(worker);
+    } else {
+      vp9_get_worker_interface()->launch(worker);
+    }
+  }
+
   VP9Worker worker_;
 };
 
@@ -57,12 +66,7 @@ TEST_P(VP9WorkerThreadTest, HookSuccess) {
     worker_.data1 = &hook_data;
     worker_.data2 = &return_value;
 
-    const bool synchronous = GetParam();
-    if (synchronous) {
-      vp9_get_worker_interface()->execute(&worker_);
-    } else {
-      vp9_get_worker_interface()->launch(&worker_);
-    }
+    Run(&worker_);
     EXPECT_NE(vp9_get_worker_interface()->sync(&worker_), 0);
     EXPECT_FALSE(worker_.had_error);
     EXPECT_EQ(5, hook_data);
@@ -81,12 +85,7 @@ TEST_P(VP9WorkerThreadTest, HookFailure) {
   worker_.data1 = &hook_data;
   worker_.data2 = &return_value;
 
-  const bool synchronous = GetParam();
-  if (synchronous) {
-    vp9_get_worker_interface()->execute(&worker_);
-  } else {
-    vp9_get_worker_interface()->launch(&worker_);
-  }
+  Run(&worker_);
   EXPECT_FALSE(vp9_get_worker_interface()->sync(&worker_));
   EXPECT_EQ(1, worker_.had_error);
 
@@ -97,6 +96,39 @@ TEST_P(VP9WorkerThreadTest, HookFailure) {
   vp9_get_worker_interface()->launch(&worker_);
   EXPECT_NE(vp9_get_worker_interface()->sync(&worker_), 0);
   EXPECT_FALSE(worker_.had_error);
+}
+
+TEST_P(VP9WorkerThreadTest, EndWithoutSync) {
+  // Create a large number of threads to increase the chances of detecting a
+  // race. Doing more work in the hook is no guarantee as any race would occur
+  // post hook execution in the main thread loop driver.
+  static const int kNumWorkers = 64;
+  VP9Worker workers[kNumWorkers];
+  int hook_data[kNumWorkers];
+  int return_value[kNumWorkers];
+
+  for (int n = 0; n < kNumWorkers; ++n) {
+    vp9_get_worker_interface()->init(&workers[n]);
+    return_value[n] = 1;  // return successfully from the hook
+    workers[n].hook = ThreadHook;
+    workers[n].data1 = &hook_data[n];
+    workers[n].data2 = &return_value[n];
+  }
+
+  for (int i = 0; i < 2; ++i) {
+    for (int n = 0; n < kNumWorkers; ++n) {
+      EXPECT_NE(vp9_get_worker_interface()->reset(&workers[n]), 0);
+      hook_data[n] = 0;
+    }
+
+    for (int n = 0; n < kNumWorkers; ++n) {
+      Run(&workers[n]);
+    }
+
+    for (int n = kNumWorkers - 1; n >= 0; --n) {
+      vp9_get_worker_interface()->end(&workers[n]);
+    }
+  }
 }
 
 TEST(VP9WorkerThreadTest, TestInterfaceAPI) {
