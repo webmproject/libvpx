@@ -287,7 +287,7 @@ static void encode_breakout_test(VP9_COMP *cpi, MACROBLOCK *x,
 
     // Adjust ac threshold according to partition size.
     thresh_ac >>=
-        8 - (b_width_log2_lookup[bsize] + b_height_log2_lookup[bsize]);
+        8 - (b_width_log2(bsize) + b_height_log2(bsize));
 
     thresh_dc = (xd->plane[0].dequant[0] * xd->plane[0].dequant[0] >> 6);
   } else {
@@ -387,7 +387,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   // Mode index conversion form THR_MODES to PREDICTION_MODE for a ref frame.
   int mode_idx[MB_MODE_COUNT] = {0};
   INTERP_FILTER filter_ref = cm->interp_filter;
-  int bsl = mi_width_log2_lookup[bsize];
+  int bsl = mi_width_log2(bsize);
   const int pred_filter_search = cm->interp_filter == SWITCHABLE ?
       (((mi_row + mi_col) >> bsl) + get_chessboard_index(cm)) % 2 : 0;
   int const_motion[MAX_REF_FRAMES] = { 0 };

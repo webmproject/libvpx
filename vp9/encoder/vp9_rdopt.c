@@ -1793,8 +1793,8 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   if (cpi->sf.adaptive_motion_search) {
-    int bwl = b_width_log2_lookup[bsize];
-    int bhl = b_height_log2_lookup[bsize];
+    int bwl = b_width_log2(bsize);
+    int bhl = b_height_log2(bsize);
     int i;
     int tlevel = x->pred_mv_sad[ref] >> (bwl + bhl + 4);
 
@@ -2266,8 +2266,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         thresh_ac = clamp(thresh_ac, min_thresh, max_thresh);
 
         // Adjust threshold according to partition size.
-        thresh_ac >>= 8 - (b_width_log2_lookup[bsize] +
-            b_height_log2_lookup[bsize]);
+        thresh_ac >>= 8 - (b_width_log2(bsize) +
+            b_height_log2(bsize));
         thresh_dc = (xd->plane[0].dequant[0] * xd->plane[0].dequant[0] >> 6);
       } else {
         thresh_ac = 0;
