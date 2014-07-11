@@ -875,6 +875,7 @@ int main_loop(int argc, const char **argv_) {
           }
           scaled_img = vpx_img_alloc(NULL, VPX_IMG_FMT_I420, display_width,
                                      display_height, 16);
+          scaled_img->bit_depth = img->bit_depth;
         }
 
         if (img->d_w != scaled_img->d_w || img->d_h != scaled_img->d_h) {
@@ -901,7 +902,7 @@ int main_loop(int argc, const char **argv_) {
                                         vpx_input_ctx.width,
                                         vpx_input_ctx.height,
                                         &vpx_input_ctx.framerate,
-                                        img->fmt, 8);
+                                        img->fmt, img->bit_depth);
             if (do_md5) {
               MD5Update(&md5_ctx, (md5byte *)buf, (unsigned int)len);
             } else {
