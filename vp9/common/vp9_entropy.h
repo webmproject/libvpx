@@ -43,6 +43,21 @@ extern "C" {
 
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_pt_energy_class[ENTROPY_TOKENS]);
 
+#define CAT1_MIN_VAL    5
+#define CAT2_MIN_VAL    7
+#define CAT3_MIN_VAL   11
+#define CAT4_MIN_VAL   19
+#define CAT5_MIN_VAL   35
+#define CAT6_MIN_VAL   67
+
+// Extra bit probabilities.
+DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat1_prob[1]);
+DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat2_prob[2]);
+DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat3_prob[3]);
+DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat4_prob[4]);
+DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat5_prob[5]);
+DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat6_prob[14]);
+
 #define EOB_MODEL_TOKEN 3
 extern const vp9_tree_index vp9_coefmodel_tree[];
 

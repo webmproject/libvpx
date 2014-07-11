@@ -28,35 +28,6 @@
 #define CAT_THREE_CONTEXT_NODE      6
 #define CAT_FIVE_CONTEXT_NODE       7
 
-#define CAT1_MIN_VAL    5
-#define CAT2_MIN_VAL    7
-#define CAT3_MIN_VAL   11
-#define CAT4_MIN_VAL   19
-#define CAT5_MIN_VAL   35
-#define CAT6_MIN_VAL   67
-#define CAT1_PROB0    159
-#define CAT2_PROB0    145
-#define CAT2_PROB1    165
-
-#define CAT3_PROB0 140
-#define CAT3_PROB1 148
-#define CAT3_PROB2 173
-
-#define CAT4_PROB0 135
-#define CAT4_PROB1 140
-#define CAT4_PROB2 155
-#define CAT4_PROB3 176
-
-#define CAT5_PROB0 130
-#define CAT5_PROB1 134
-#define CAT5_PROB2 141
-#define CAT5_PROB3 157
-#define CAT5_PROB4 180
-
-static const vp9_prob cat6_prob[15] = {
-  254, 254, 254, 252, 249, 243, 230, 196, 177, 153, 140, 133, 130, 129, 0
-};
-
 #define INCREMENT_COUNT(token)                              \
   do {                                                      \
      if (!cm->frame_parallel_decoding_mode)                 \
@@ -96,7 +67,6 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd, PLANE_TYPE type,
   unsigned int (*eob_branch_count)[COEFF_CONTEXTS] =
       counts->eob_branch[tx_size][type][ref];
   uint8_t token_cache[32 * 32];
-  const uint8_t *cat6;
   const uint8_t *band_translate = get_band_translate(tx_size);
   const int dq_shift = (tx_size == TX_32X32);
   int v;
@@ -148,44 +118,55 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd, PLANE_TYPE type,
     if (!vp9_read(r, prob[HIGH_LOW_CONTEXT_NODE])) {
       if (!vp9_read(r, prob[CAT_ONE_CONTEXT_NODE])) {
         val = CAT1_MIN_VAL;
-        ADJUST_COEF(CAT1_PROB0, 0);
+        ADJUST_COEF(vp9_cat1_prob[0], 0);
         WRITE_COEF_CONTINUE(val, CATEGORY1_TOKEN);
       }
       val = CAT2_MIN_VAL;
-      ADJUST_COEF(CAT2_PROB1, 1);
-      ADJUST_COEF(CAT2_PROB0, 0);
+      ADJUST_COEF(vp9_cat2_prob[0], 1);
+      ADJUST_COEF(vp9_cat2_prob[1], 0);
       WRITE_COEF_CONTINUE(val, CATEGORY2_TOKEN);
     }
 
     if (!vp9_read(r, prob[CAT_THREEFOUR_CONTEXT_NODE])) {
       if (!vp9_read(r, prob[CAT_THREE_CONTEXT_NODE])) {
         val = CAT3_MIN_VAL;
-        ADJUST_COEF(CAT3_PROB2, 2);
-        ADJUST_COEF(CAT3_PROB1, 1);
-        ADJUST_COEF(CAT3_PROB0, 0);
+        ADJUST_COEF(vp9_cat3_prob[0], 2);
+        ADJUST_COEF(vp9_cat3_prob[1], 1);
+        ADJUST_COEF(vp9_cat3_prob[2], 0);
         WRITE_COEF_CONTINUE(val, CATEGORY3_TOKEN);
       }
       val = CAT4_MIN_VAL;
-      ADJUST_COEF(CAT4_PROB3, 3);
-      ADJUST_COEF(CAT4_PROB2, 2);
-      ADJUST_COEF(CAT4_PROB1, 1);
-      ADJUST_COEF(CAT4_PROB0, 0);
+      ADJUST_COEF(vp9_cat4_prob[0], 3);
+      ADJUST_COEF(vp9_cat4_prob[1], 2);
+      ADJUST_COEF(vp9_cat4_prob[2], 1);
+      ADJUST_COEF(vp9_cat4_prob[3], 0);
       WRITE_COEF_CONTINUE(val, CATEGORY4_TOKEN);
     }
 
     if (!vp9_read(r, prob[CAT_FIVE_CONTEXT_NODE])) {
       val = CAT5_MIN_VAL;
-      ADJUST_COEF(CAT5_PROB4, 4);
-      ADJUST_COEF(CAT5_PROB3, 3);
-      ADJUST_COEF(CAT5_PROB2, 2);
-      ADJUST_COEF(CAT5_PROB1, 1);
-      ADJUST_COEF(CAT5_PROB0, 0);
+      ADJUST_COEF(vp9_cat5_prob[0], 4);
+      ADJUST_COEF(vp9_cat5_prob[1], 3);
+      ADJUST_COEF(vp9_cat5_prob[2], 2);
+      ADJUST_COEF(vp9_cat5_prob[3], 1);
+      ADJUST_COEF(vp9_cat5_prob[4], 0);
       WRITE_COEF_CONTINUE(val, CATEGORY5_TOKEN);
     }
     val = 0;
-    cat6 = cat6_prob;
-    while (*cat6)
-      val = (val << 1) | vp9_read(r, *cat6++);
+    val = (val << 1) | vp9_read(r, vp9_cat6_prob[0]);
+    val = (val << 1) | vp9_read(r, vp9_cat6_prob[1]);
+    val = (val << 1) | vp9_read(r, vp9_cat6_prob[2]);
+    val = (val << 1) | vp9_read(r, vp9_cat6_prob[3]);
+    val = (val << 1) | vp9_read(r, vp9_cat6_prob[4]);
+    val = (val << 1) | vp9_read(r, vp9_cat6_prob[5]);
+    val = (val << 1) | vp9_read(r, vp9_cat6_prob[6]);
+    val = (val << 1) | vp9_read(r, vp9_cat6_prob[7]);
+    val = (val << 1) | vp9_read(r, vp9_cat6_prob[8]);
+    val = (val << 1) | vp9_read(r, vp9_cat6_prob[9]);
+    val = (val << 1) | vp9_read(r, vp9_cat6_prob[10]);
+    val = (val << 1) | vp9_read(r, vp9_cat6_prob[11]);
+    val = (val << 1) | vp9_read(r, vp9_cat6_prob[12]);
+    val = (val << 1) | vp9_read(r, vp9_cat6_prob[13]);
     val += CAT6_MIN_VAL;
 
     WRITE_COEF_CONTINUE(val, CATEGORY6_TOKEN);
