@@ -30,7 +30,6 @@ void vp8_bilinear_predict4x4_neon(
         int dst_pitch) {
     uint8x8_t d0u8, d1u8, d2u8, d3u8, d4u8, d5u8, d6u8;
     uint8x8_t d26u8, d27u8, d28u8, d29u8, d30u8;
-    uint32x2_t d28u32, d29u32, d30u32;
     uint8x16_t q1u8, q2u8;
     uint16x8_t q1u16, q2u16;
     uint16x8_t q7u16, q8u16, q9u16;
@@ -39,6 +38,10 @@ void vp8_bilinear_predict4x4_neon(
     uint32x2x2_t d0u32x2, d1u32x2, d2u32x2, d3u32x2;
 
     if (xoffset == 0) {  // skip_1stpass_filter
+        uint32x2_t d28u32 = vdup_n_u32(0);
+        uint32x2_t d29u32 = vdup_n_u32(0);
+        uint32x2_t d30u32 = vdup_n_u32(0);
+
         d28u32 = vld1_lane_u32((const uint32_t *)src_ptr, d28u32, 0);
         src_ptr += src_pixels_per_line;
         d28u32 = vld1_lane_u32((const uint32_t *)src_ptr, d28u32, 1);
