@@ -37,35 +37,6 @@
 #define CAT4_MIN_VAL   19
 #define CAT5_MIN_VAL   35
 #define CAT6_MIN_VAL   67
-#define CAT1_PROB0    159
-#define CAT2_PROB0    145
-#define CAT2_PROB1    165
-
-#define CAT3_PROB0 140
-#define CAT3_PROB1 148
-#define CAT3_PROB2 173
-
-#define CAT4_PROB0 135
-#define CAT4_PROB1 140
-#define CAT4_PROB2 155
-#define CAT4_PROB3 176
-
-#define CAT5_PROB0 130
-#define CAT5_PROB1 134
-#define CAT5_PROB2 141
-#define CAT5_PROB3 157
-#define CAT5_PROB4 180
-
-static const vp9_prob cat6_prob[15] = {
-  254, 254, 254, 252, 249, 243, 230, 196, 177, 153, 140, 133, 130, 129, 0
-};
-
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
-static const vp9_prob cat6_prob_high[19] = {
-  254, 254, 254, 254, 254, 254, 254, 252, 249,
-  243, 230, 196, 177, 153, 140, 133, 130, 129, 0
-};
-#endif
 
 #define INCREMENT_COUNT(token)                              \
   do {                                                      \
@@ -106,20 +77,46 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd, PLANE_TYPE type,
   unsigned int (*eob_branch_count)[COEFF_CONTEXTS] =
       counts->eob_branch[tx_size][type][ref];
   uint8_t token_cache[32 * 32];
-  const uint8_t *cat6;
+  const uint8_t *cat1_ptr, *cat2_ptr, *cat3_ptr, *cat4_ptr, *cat5_ptr;
   const uint8_t *cat6_ptr;
+  const uint8_t *cat6;
   const uint8_t *band_translate = get_band_translate(tx_size);
   const int dq_shift = (tx_size == TX_32X32);
   int v;
   int16_t dqv = dq[0];
 
 #if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
-  if (cm->use_high)
-    cat6_ptr = cat6_prob_high;
-  else
-    cat6_ptr = cat6_prob;
+  if (cm->use_high) {
+    if (cm->bit_depth == VPX_BITS_10) {
+      cat1_ptr = vp9_cat1_prob_high10;
+      cat2_ptr = vp9_cat2_prob_high10;
+      cat3_ptr = vp9_cat3_prob_high10;
+      cat4_ptr = vp9_cat4_prob_high10;
+      cat5_ptr = vp9_cat5_prob_high10;
+      cat6_ptr = vp9_cat6_prob_high10;
+    } else {
+      cat1_ptr = vp9_cat1_prob_high12;
+      cat2_ptr = vp9_cat2_prob_high12;
+      cat3_ptr = vp9_cat3_prob_high12;
+      cat4_ptr = vp9_cat4_prob_high12;
+      cat5_ptr = vp9_cat5_prob_high12;
+      cat6_ptr = vp9_cat6_prob_high12;
+    }
+  } else {
+    cat1_ptr = vp9_cat1_prob;
+    cat2_ptr = vp9_cat2_prob;
+    cat3_ptr = vp9_cat3_prob;
+    cat4_ptr = vp9_cat4_prob;
+    cat5_ptr = vp9_cat5_prob;
+    cat6_ptr = vp9_cat6_prob;
+  }
 #else
-    cat6_ptr = cat6_prob;
+  cat1_ptr = vp9_cat1_prob;
+  cat2_ptr = vp9_cat2_prob;
+  cat3_ptr = vp9_cat3_prob;
+  cat4_ptr = vp9_cat4_prob;
+  cat5_ptr = vp9_cat5_prob;
+  cat6_ptr = vp9_cat6_prob;
 #endif
 
   while (c < max_eob) {
@@ -168,38 +165,38 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd, PLANE_TYPE type,
     if (!vp9_read(r, prob[HIGH_LOW_CONTEXT_NODE])) {
       if (!vp9_read(r, prob[CAT_ONE_CONTEXT_NODE])) {
         val = CAT1_MIN_VAL;
-        ADJUST_COEF(CAT1_PROB0, 0);
+        ADJUST_COEF(cat1_ptr[0], 0);
         WRITE_COEF_CONTINUE(val, CATEGORY1_TOKEN);
       }
       val = CAT2_MIN_VAL;
-      ADJUST_COEF(CAT2_PROB1, 1);
-      ADJUST_COEF(CAT2_PROB0, 0);
+      ADJUST_COEF(cat2_ptr[0], 1);
+      ADJUST_COEF(cat2_ptr[1], 0);
       WRITE_COEF_CONTINUE(val, CATEGORY2_TOKEN);
     }
 
     if (!vp9_read(r, prob[CAT_THREEFOUR_CONTEXT_NODE])) {
       if (!vp9_read(r, prob[CAT_THREE_CONTEXT_NODE])) {
         val = CAT3_MIN_VAL;
-        ADJUST_COEF(CAT3_PROB2, 2);
-        ADJUST_COEF(CAT3_PROB1, 1);
-        ADJUST_COEF(CAT3_PROB0, 0);
+        ADJUST_COEF(cat3_ptr[0], 2);
+        ADJUST_COEF(cat3_ptr[1], 1);
+        ADJUST_COEF(cat3_ptr[2], 0);
         WRITE_COEF_CONTINUE(val, CATEGORY3_TOKEN);
       }
       val = CAT4_MIN_VAL;
-      ADJUST_COEF(CAT4_PROB3, 3);
-      ADJUST_COEF(CAT4_PROB2, 2);
-      ADJUST_COEF(CAT4_PROB1, 1);
-      ADJUST_COEF(CAT4_PROB0, 0);
+      ADJUST_COEF(cat4_ptr[0], 3);
+      ADJUST_COEF(cat4_ptr[1], 2);
+      ADJUST_COEF(cat4_ptr[2], 1);
+      ADJUST_COEF(cat4_ptr[3], 0);
       WRITE_COEF_CONTINUE(val, CATEGORY4_TOKEN);
     }
 
     if (!vp9_read(r, prob[CAT_FIVE_CONTEXT_NODE])) {
       val = CAT5_MIN_VAL;
-      ADJUST_COEF(CAT5_PROB4, 4);
-      ADJUST_COEF(CAT5_PROB3, 3);
-      ADJUST_COEF(CAT5_PROB2, 2);
-      ADJUST_COEF(CAT5_PROB1, 1);
-      ADJUST_COEF(CAT5_PROB0, 0);
+      ADJUST_COEF(cat5_ptr[0], 4);
+      ADJUST_COEF(cat5_ptr[1], 3);
+      ADJUST_COEF(cat5_ptr[2], 2);
+      ADJUST_COEF(cat5_ptr[3], 1);
+      ADJUST_COEF(cat5_ptr[4], 0);
       WRITE_COEF_CONTINUE(val, CATEGORY5_TOKEN);
     }
     val = 0;

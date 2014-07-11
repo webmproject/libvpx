@@ -727,9 +727,12 @@ static INLINE int cost_coeffs(MACROBLOCK *x,
                               : get_uv_tx_size(mbmi) == tx_size);
 
 #if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
-  if (xd->bps > 8) {
-    dct_value_tokens = vp9_dct_value_tokens_high_ptr;
-    dct_value_cost = vp9_dct_value_cost_high_ptr;
+  if (xd->bps == 12) {
+    dct_value_tokens = vp9_dct_value_tokens_high12_ptr;
+    dct_value_cost = vp9_dct_value_cost_high12_ptr;
+  } else if (xd->bps == 10) {
+    dct_value_tokens = vp9_dct_value_tokens_high10_ptr;
+    dct_value_cost = vp9_dct_value_cost_high10_ptr;
   } else {
     dct_value_tokens = vp9_dct_value_tokens_ptr;
     dct_value_cost = vp9_dct_value_cost_ptr;
