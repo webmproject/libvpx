@@ -965,8 +965,8 @@ static int parse_stream_params(struct VpxEncoderConfig *global,
               break;
 
           /* Update/insert */
-          assert(j < ARG_CTRL_CNT_MAX);
-          if (j < ARG_CTRL_CNT_MAX) {
+          assert(j < (int)ARG_CTRL_CNT_MAX);
+          if (j < (int)ARG_CTRL_CNT_MAX) {
             config->arg_ctrls[j][0] = ctrl_args_map[i];
             config->arg_ctrls[j][1] = arg_parse_enum_or_int(&arg);
             if (j == config->arg_ctrl_cnt)
@@ -1517,7 +1517,7 @@ int main(int argc, const char **argv_) {
   vpx_image_t raw;
   int frame_avail, got_data;
 
-  struct VpxInputContext input = {0};
+  struct VpxInputContext input;
   struct VpxEncoderConfig global;
   struct stream_state *streams = NULL;
   char **argv, **argi;
@@ -1525,6 +1525,7 @@ int main(int argc, const char **argv_) {
   int stream_cnt = 0;
   int res = 0;
 
+  memset(&input, 0, sizeof(input));
   exec_name = argv_[0];
 
   if (argc < 3)

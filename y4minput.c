@@ -683,6 +683,7 @@ static void y4m_convert_444_420jpeg(y4m_input *_y4m, unsigned char *_dst,
 static void y4m_convert_mono_420jpeg(y4m_input *_y4m, unsigned char *_dst,
                                      unsigned char *_aux) {
   int c_sz;
+  (void)_aux;
   _dst += _y4m->pic_w * _y4m->pic_h;
   c_sz = ((_y4m->pic_w + _y4m->dst_c_dec_h - 1) / _y4m->dst_c_dec_h) *
          ((_y4m->pic_h + _y4m->dst_c_dec_v - 1) / _y4m->dst_c_dec_v);
@@ -692,6 +693,9 @@ static void y4m_convert_mono_420jpeg(y4m_input *_y4m, unsigned char *_dst,
 /*No conversion function needed.*/
 static void y4m_convert_null(y4m_input *_y4m, unsigned char *_dst,
                              unsigned char *_aux) {
+  (void)_y4m;
+  (void)_dst;
+  (void)_aux;
 }
 
 int y4m_input_open(y4m_input *_y4m, FILE *_fin, char *_skip, int _nskip,
