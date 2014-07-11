@@ -151,7 +151,7 @@ MV clamp_mv_to_umv_border_sb(const MACROBLOCKD *xd, const MV *src_mv,
   return clamped_mv;
 }
 
-static MV average_split_mvs(const struct macroblockd_plane *pd, int plane,
+static MV average_split_mvs(const struct macroblockd_plane *pd,
                             const MODE_INFO *mi, int ref, int block) {
   const int ss_idx = ((pd->subsampling_x > 0) << 1) | (pd->subsampling_y > 0);
   MV res = {0, 0};
@@ -190,7 +190,7 @@ static void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
     struct buf_2d *const dst_buf = &pd->dst;
     uint8_t *const dst = dst_buf->buf + dst_buf->stride * y + x;
     const MV mv = mi->mbmi.sb_type < BLOCK_8X8
-               ? average_split_mvs(pd, plane, mi, ref, block)
+               ? average_split_mvs(pd, mi, ref, block)
                : mi->mbmi.mv[ref].as_mv;
 
     // TODO(jkoleszar): This clamping is done in the incorrect place for the
@@ -288,7 +288,7 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
     struct buf_2d *const dst_buf = &pd->dst;
     uint8_t *const dst = dst_buf->buf + dst_buf->stride * y + x;
     const MV mv = mi->mbmi.sb_type < BLOCK_8X8
-               ? average_split_mvs(pd, plane, mi, ref, block)
+               ? average_split_mvs(pd, mi, ref, block)
                : mi->mbmi.mv[ref].as_mv;
 
 
