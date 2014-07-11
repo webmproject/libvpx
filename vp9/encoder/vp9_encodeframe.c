@@ -1827,7 +1827,7 @@ static void auto_partition_range(VP9_COMP *cpi, const TileInfo *const tile,
   int bh, bw;
   BLOCK_SIZE min_size = BLOCK_32X32;
   BLOCK_SIZE max_size = BLOCK_8X8;
-  int bsl = mi_width_log2_lookup[BLOCK_64X64];
+  int bsl = mi_width_log2(BLOCK_64X64);
   const int search_range_ctrl = (((mi_row + mi_col) >> bsl) +
                                      get_chessboard_index(cm)) % 2;
   // Trap case where we do not have a prediction.
@@ -1976,8 +1976,8 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
           pc_tree->partitioning = PARTITION_NONE;
 
         // Adjust threshold according to partition size.
-        stop_thresh >>= 8 - (b_width_log2_lookup[bsize] +
-            b_height_log2_lookup[bsize]);
+        stop_thresh >>= 8 - (b_width_log2(bsize) +
+            b_height_log2(bsize));
 
         stop_thresh_rd = RDCOST(x->rdmult, x->rddiv, 0, stop_thresh);
         // If obtained distortion is very small, choose current partition
@@ -2548,8 +2548,8 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
           pc_tree->partitioning = PARTITION_NONE;
 
         // Adjust threshold according to partition size.
-        stop_thresh >>= 8 - (b_width_log2_lookup[bsize] +
-            b_height_log2_lookup[bsize]);
+        stop_thresh >>= 8 - (b_width_log2(bsize) +
+            b_height_log2(bsize));
 
         stop_thresh_rd = RDCOST(x->rdmult, x->rddiv, 0, stop_thresh);
         // If obtained distortion is very small, choose current partition
