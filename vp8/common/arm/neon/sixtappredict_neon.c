@@ -36,7 +36,6 @@ void vp8_sixtap_predict4x4_neon(
     uint8x8_t d0u8, d1u8, d2u8, d3u8, d4u8, d5u8, d18u8, d19u8, d20u8, d21u8;
     uint8x8_t d23u8, d24u8, d25u8, d26u8, d27u8, d28u8, d29u8, d30u8, d31u8;
     int8x8_t dtmps8, d0s8, d1s8, d2s8, d3s8, d4s8, d5s8;
-    uint32x2_t d27u32, d28u32, d29u32, d30u32, d31u32;
     uint16x8_t q3u16, q4u16, q5u16, q6u16, q7u16;
     uint16x8_t q8u16, q9u16, q10u16, q11u16, q12u16;
     int16x8_t q3s16, q4s16, q5s16, q6s16, q7s16;
@@ -46,6 +45,12 @@ void vp8_sixtap_predict4x4_neon(
     uint32x2x2_t d0u32x2, d1u32x2;
 
     if (xoffset == 0) {  // secondpass_filter4x4_only
+        uint32x2_t d27u32 = vdup_n_u32(0);
+        uint32x2_t d28u32 = vdup_n_u32(0);
+        uint32x2_t d29u32 = vdup_n_u32(0);
+        uint32x2_t d30u32 = vdup_n_u32(0);
+        uint32x2_t d31u32 = vdup_n_u32(0);
+
         // load second_pass filter
         dtmps8 = vld1_s8(vp8_sub_pel_filters[yoffset]);
         d0s8 = vdup_lane_s8(dtmps8, 0);
