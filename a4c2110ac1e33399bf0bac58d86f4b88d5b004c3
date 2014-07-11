@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//gms\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 1336,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-11T01:40:24Z",
+      "side": 1,
+      "message": "shift",
+      "revId": "a4c2110ac1e33399bf0bac58d86f4b88d5b004c3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//gmw\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 1337,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-11T01:40:24Z",
+      "side": 1,
+      "message": "[ $# -ne/-gt 0 ] will suffice",
+      "revId": "a4c2110ac1e33399bf0bac58d86f4b88d5b004c3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//gmg\u003d",
+        "filename": "configure",
+        "patchSetId": 3
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-11T01:40:24Z",
+      "side": 1,
+      "message": "--size-limit would be more consistent",
+      "revId": "a4c2110ac1e33399bf0bac58d86f4b88d5b004c3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
