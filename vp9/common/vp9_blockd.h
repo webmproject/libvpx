@@ -242,9 +242,7 @@ typedef struct macroblockd {
 
 static INLINE BLOCK_SIZE get_subsize(BLOCK_SIZE bsize,
                                      PARTITION_TYPE partition) {
-  const BLOCK_SIZE subsize = subsize_lookup[partition][bsize];
-  assert(subsize < BLOCK_SIZES);
-  return subsize;
+  return subsize_lookup[partition][bsize];
 }
 
 extern const TX_TYPE intra_mode_to_tx_type_lookup[INTRA_MODES];
@@ -288,9 +286,7 @@ static INLINE TX_SIZE get_uv_tx_size(const MB_MODE_INFO *mbmi,
 
 static INLINE BLOCK_SIZE get_plane_block_size(BLOCK_SIZE bsize,
     const struct macroblockd_plane *pd) {
-  BLOCK_SIZE bs = ss_size_lookup[bsize][pd->subsampling_x][pd->subsampling_y];
-  assert(bs < BLOCK_SIZES);
-  return bs;
+  return ss_size_lookup[bsize][pd->subsampling_x][pd->subsampling_y];
 }
 
 typedef void (*foreach_transformed_block_visitor)(int plane, int block,
