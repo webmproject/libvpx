@@ -1970,6 +1970,7 @@ int main(int argc, const char **argv_) {
         else if (stream->config.cfg.g_bit_depth == VPX_BITS_12)
           input.bit_depth = stream->config.cfg.g_in_bit_depth = 12;
       });
+      if (input.bit_depth > 8) input.fmt |= VPX_IMG_FMT_HIGH;
     } else {
       FOREACH_STREAM({
         stream->config.cfg.g_in_bit_depth = input.bit_depth;
