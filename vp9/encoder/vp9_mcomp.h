@@ -64,7 +64,7 @@ int vp9_get_mvpred_av_var(const MACROBLOCK *x,
 struct VP9_COMP;
 struct SPEED_FEATURES;
 
-int vp9_init_search_range(const struct SPEED_FEATURES *sf, int size);
+int vp9_init_search_range(int size);
 
 // Runs sequence of diamond searches in smaller steps for RD
 int vp9_full_pixel_diamond(const struct VP9_COMP *cpi, MACROBLOCK *x,
