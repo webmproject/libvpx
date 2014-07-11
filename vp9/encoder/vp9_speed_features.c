@@ -296,6 +296,7 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
   }
   if (speed >= 8) {
     int i;
+    sf->max_intra_bsize = BLOCK_32X32;
     for (i = 0; i < BLOCK_SIZES; ++i)
       sf->inter_mode_mask[i] = INTER_NEAREST;
   }

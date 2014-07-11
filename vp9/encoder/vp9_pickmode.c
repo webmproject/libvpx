@@ -685,7 +685,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
     int rate2 = 0;
     int64_t dist2 = 0;
-    const int dst_stride = pd->dst.stride;
+    const int dst_stride = cpi->sf.reuse_inter_pred_sby ? bw : pd->dst.stride;
     const int src_stride = p->src.stride;
     int block_idx = 0;
 
