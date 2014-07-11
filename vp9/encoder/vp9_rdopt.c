@@ -1367,7 +1367,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
             // Take wtd average of the step_params based on the last frame's
             // max mv magnitude and the best ref mvs of the current block for
             // the given reference.
-            step_param = (vp9_init_search_range(&cpi->sf, max_mv) +
+            step_param = (vp9_init_search_range(max_mv) +
                               cpi->mv_step_param) / 2;
           } else {
             step_param = cpi->mv_step_param;
@@ -1779,7 +1779,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     // Take wtd average of the step_params based on the last frame's
     // max mv magnitude and that based on the best ref mvs of the current
     // block for the given reference.
-    step_param = (vp9_init_search_range(&cpi->sf, x->max_mv_context[ref]) +
+    step_param = (vp9_init_search_range(x->max_mv_context[ref]) +
                     cpi->mv_step_param) / 2;
   } else {
     step_param = cpi->mv_step_param;
