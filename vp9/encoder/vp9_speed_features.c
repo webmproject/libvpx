@@ -228,12 +228,13 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->last_partitioning_redo_frequency = 4;
     sf->adaptive_rd_thresh = 5;
     sf->use_fast_coef_costing = 0;
-    sf->auto_min_max_partition_size = STRICT_NEIGHBORING_MIN_MAX;
+    if (cm->frame_type != KEY_FRAME)
+      sf->auto_min_max_partition_size = STRICT_NEIGHBORING_MIN_MAX;
     sf->adjust_partitioning_from_last_frame =
         cm->last_frame_type != cm->frame_type || (0 ==
         (frames_since_key + 1) % sf->last_partitioning_redo_frequency);
     sf->subpel_force_stop = 1;
-    for (i = 0; i < TX_SIZES; i++) {
+    for (i = 0; i < TX_SIZES && cm->frame_type != KEY_FRAME; i++) {
       sf->intra_y_mode_mask[i] = INTRA_DC_H_V;
       sf->intra_uv_mode_mask[i] = INTRA_DC;
     }
