@@ -87,8 +87,8 @@ int read_yuv_frame(struct VpxInputContext *input_ctx, vpx_image_t *yuv_frame) {
 
   for (plane = 0; plane < 3; ++plane) {
     uint8_t *ptr;
-    const int w = (plane ? (1 + yuv_frame->d_w) / 2 : yuv_frame->d_w);
-    const int h = (plane ? (1 + yuv_frame->d_h) / 2 : yuv_frame->d_h);
+    const int w = vpx_img_plane_width(yuv_frame, plane);
+    const int h = vpx_img_plane_height(yuv_frame, plane);
     int r;
 
     /* Determine the correct plane based on the image format. The for-loop
