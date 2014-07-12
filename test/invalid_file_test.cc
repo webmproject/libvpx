@@ -25,9 +25,10 @@
 
 namespace {
 
-using std::tr1::make_tuple;
-
-typedef std::tr1::tuple<int, const char *> DecodeParam;
+struct DecodeParam {
+  int threads;
+  const char *filename;
+};
 
 class InvalidFileTest
     : public ::libvpx_test::DecoderTest,
@@ -73,8 +74,8 @@ TEST_P(InvalidFileTest, ReturnCode) {
   libvpx_test::CompressedVideoSource *video = NULL;
   const DecodeParam input = GET_PARAM(1);
   vpx_codec_dec_cfg_t cfg = {0};
-  cfg.threads = std::tr1::get<0>(input);
-  const std::string filename = std::tr1::get<1>(input);
+  cfg.threads = input.threads;
+  const std::string filename = input.filename;
 
   // Open compressed video file.
   if (filename.substr(filename.length() - 3, 3) == "ivf") {
@@ -101,25 +102,20 @@ TEST_P(InvalidFileTest, ReturnCode) {
   delete video;
 }
 
-const char *const kVP9InvalidFileTests[] = {
-  "invalid-vp90-01-v2.webm",
-  "invalid-vp90-02-v2.webm",
-  "invalid-vp90-2-00-quantizer-00.webm.ivf.s5861_r01-05_b6-.ivf",
-  "invalid-vp90-03-v2.webm",
-  "invalid-vp90-2-00-quantizer-11.webm.ivf.s52984_r01-05_b6-.ivf",
-  "invalid-vp90-2-00-quantizer-11.webm.ivf.s52984_r01-05_b6-z.ivf",
+const DecodeParam kVP9InvalidFileTests[] = {
+  {1, "invalid-vp90-01-v2.webm"},
+  {1, "invalid-vp90-02-v2.webm"},
+  {1, "invalid-vp90-2-00-quantizer-00.webm.ivf.s5861_r01-05_b6-.ivf"},
+  {1, "invalid-vp90-03-v2.webm"},
+  {1, "invalid-vp90-2-00-quantizer-11.webm.ivf.s52984_r01-05_b6-.ivf"},
+  {1, "invalid-vp90-2-00-quantizer-11.webm.ivf.s52984_r01-05_b6-z.ivf"},
 };
 
-INSTANTIATE_TEST_CASE_P(
-    VP9, InvalidFileTest,
-    ::testing::Combine(
-        ::testing::Values(
-            static_cast<const libvpx_test::CodecFactory*>(&libvpx_test::kVP9)),
-        ::testing::Combine(::testing::Values(1),
-                           ::testing::ValuesIn(kVP9InvalidFileTests))));
+VP9_INSTANTIATE_TEST_CASE(InvalidFileTest,
+                          ::testing::ValuesIn(kVP9InvalidFileTests));
 
 const DecodeParam kMultiThreadedVP9InvalidFileTests[] = {
-  make_tuple(4, "invalid-vp90-2-08-tile_1x4_frame_parallel_all_key.webm"),
+  {4, "invalid-vp90-2-08-tile_1x4_frame_parallel_all_key.webm"},
 };
 
 INSTANTIATE_TEST_CASE_P(
