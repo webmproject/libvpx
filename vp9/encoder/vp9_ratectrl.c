@@ -1097,7 +1097,7 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
 
   rc->total_target_vs_actual = rc->total_actual_bits - rc->total_target_bits;
 
-  if (is_altref_enabled(oxcf) && cpi->refresh_alt_ref_frame &&
+  if (is_altref_enabled(cpi) && cpi->refresh_alt_ref_frame &&
       (cm->frame_type != KEY_FRAME))
     // Update the alternate reference frame stats as appropriate.
     update_alt_ref_frame_stats(cpi);
@@ -1349,8 +1349,9 @@ int vp9_compute_qdelta_by_rate(const RATE_CONTROL *rc, FRAME_TYPE frame_type,
   return target_index - qindex;
 }
 
-void vp9_rc_set_gf_max_interval(const VP9EncoderConfig *const oxcf,
+void vp9_rc_set_gf_max_interval(const VP9_COMP *const cpi,
                                 RATE_CONTROL *const rc) {
+  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   // Set Maximum gf/arf interval
   rc->max_gf_interval = 16;
 
@@ -1359,7 +1360,7 @@ void vp9_rc_set_gf_max_interval(const VP9EncoderConfig *const oxcf,
   if (rc->static_scene_max_gf_interval > (MAX_LAG_BUFFERS * 2))
     rc->static_scene_max_gf_interval = MAX_LAG_BUFFERS * 2;
 
-  if (is_altref_enabled(oxcf)) {
+  if (is_altref_enabled(cpi)) {
     if (rc->static_scene_max_gf_interval > oxcf->lag_in_frames - 1)
       rc->static_scene_max_gf_interval = oxcf->lag_in_frames - 1;
   }
@@ -1392,5 +1393,5 @@ void vp9_rc_update_framerate(VP9_COMP *cpi) {
   rc->max_frame_bandwidth = MAX(MAX((cm->MBs * MAX_MB_RATE), MAXRATE_1080P),
                                     vbr_max_bits);
 
-  vp9_rc_set_gf_max_interval(oxcf, rc);
+  vp9_rc_set_gf_max_interval(cpi, rc);
 }

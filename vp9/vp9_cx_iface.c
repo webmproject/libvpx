@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "./vpx_config.h"
 #include "vpx/vpx_codec.h"
 #include "vpx/internal/vpx_codec_internal.h"
 #include "./vpx_version.h"
@@ -88,7 +89,7 @@ struct vpx_codec_alg_priv {
   size_t                  pending_frame_magnitude;
   vpx_image_t             preview_img;
   vp8_postproc_cfg_t      preview_ppcfg;
-  vpx_codec_pkt_list_decl(128) pkt_list;
+  vpx_codec_pkt_list_decl(256) pkt_list;
   unsigned int                 fixed_kf_cntr;
 };
 
@@ -174,6 +175,19 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
   }
 
   RANGE_CHECK(cfg, ss_number_layers, 1, VPX_SS_MAX_LAYERS);
+
+#ifdef CONFIG_SPATIAL_SVC
+  if (cfg->ss_number_layers > 1) {
+    int i, alt_ref_sum = 0;
+    for (i = 0; i < cfg->ss_number_layers; ++i) {
+      if (cfg->ss_enable_auto_alt_ref[i])
+        ++alt_ref_sum;
+    }
+    if (alt_ref_sum > REF_FRAMES - cfg->ss_number_layers)
+      ERROR("Not enough ref buffers for svc alt ref frames");
+  }
+#endif
+
   RANGE_CHECK(cfg, ts_number_layers, 1, VPX_TS_MAX_LAYERS);
   if (cfg->ts_number_layers > 1) {
     unsigned int i;
@@ -382,8 +396,12 @@ static vpx_codec_err_t set_encoder_config(
 
   if (oxcf->ss_number_layers > 1) {
     int i;
-    for (i = 0; i < VPX_SS_MAX_LAYERS; ++i)
+    for (i = 0; i < VPX_SS_MAX_LAYERS; ++i) {
       oxcf->ss_target_bitrate[i] =  1000 * cfg->ss_target_bitrate[i];
+#ifdef CONFIG_SPATIAL_SVC
+      oxcf->ss_play_alternate[i] =  cfg->ss_enable_auto_alt_ref[i];
+#endif
+    }
   } else if (oxcf->ss_number_layers == 1) {
     oxcf->ss_target_bitrate[0] = (int)oxcf->target_bandwidth;
   }
@@ -864,6 +882,11 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
         vpx_codec_cx_pkt_t pkt;
         VP9_COMP *const cpi = (VP9_COMP *)ctx->cpi;
 
+#ifdef CONFIG_SPATIAL_SVC
+        if (cpi->use_svc && cpi->svc.number_temporal_layers == 1)
+          cpi->svc.layer_context[cpi->svc.spatial_layer_id].layer_size += size;
+#endif
+
         // Pack invisible frames with the next visible frame
         if (cpi->common.show_frame == 0
 #ifdef CONFIG_SPATIAL_SVC
@@ -936,6 +959,18 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
         vpx_codec_pkt_list_add(&ctx->pkt_list.head, &pkt);
         cx_data += size;
         cx_data_sz -= size;
+#ifdef CONFIG_SPATIAL_SVC
+        if (cpi->use_svc && cpi->svc.number_temporal_layers == 1) {
+          vpx_codec_cx_pkt_t pkt = {0};
+          int i;
+          pkt.kind = VPX_CODEC_SPATIAL_SVC_LAYER_SIZES;
+          for (i = 0; i < cpi->svc.number_spatial_layers; ++i) {
+            pkt.data.layer_sizes[i] = cpi->svc.layer_context[i].layer_size;
+            cpi->svc.layer_context[i].layer_size = 0;
+          }
+          vpx_codec_pkt_list_add(&ctx->pkt_list.head, &pkt);
+        }
+#endif
       }
     }
   }
@@ -1245,6 +1280,9 @@ static vpx_codec_enc_cfg_map_t encoder_usage_cfg_map[] = {
       9999,               // kf_max_dist
 
       VPX_SS_DEFAULT_LAYERS,  // ss_number_layers
+#ifdef CONFIG_SPATIAL_SVC
+      {0},
+#endif
       {0},                    // ss_target_bitrate
       1,                      // ts_number_layers
       {0},                    // ts_target_bitrate

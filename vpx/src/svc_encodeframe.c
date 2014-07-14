@@ -21,10 +21,12 @@
 #include <string.h>
 #define VPX_DISABLE_CTRL_TYPECHECKS 1
 #define VPX_CODEC_DISABLE_COMPAT 1
+#include "./vpx_config.h"
 #include "vpx/svc_context.h"
 #include "vpx/vp8cx.h"
 #include "vpx/vpx_encoder.h"
 #include "vpx_mem/vpx_mem.h"
+#include "vp9/common/vp9_onyxc_int.h"
 
 #ifdef __MINGW32__
 #define strtok_r strtok_s
@@ -65,6 +67,7 @@ typedef struct SvcInternal {
   int scaling_factor_num[VPX_SS_MAX_LAYERS];
   int scaling_factor_den[VPX_SS_MAX_LAYERS];
   int quantizer[VPX_SS_MAX_LAYERS];
+  int enable_auto_alt_ref[VPX_SS_MAX_LAYERS];
 
   // accumulated statistics
   double psnr_sum[VPX_SS_MAX_LAYERS][COMPONENTS];   // total/Y/U/V
@@ -80,7 +83,6 @@ typedef struct SvcInternal {
   int encode_frame_count;
   int frame_received;
   int frame_within_gop;
-  vpx_enc_frame_flags_t enc_frame_flags;
   int layers;
   int layer;
   int is_keyframe;
@@ -238,6 +240,59 @@ static vpx_codec_err_t parse_quantizer_values(SvcContext *svc_ctx,
   return res;
 }
 
+static vpx_codec_err_t parse_auto_alt_ref(SvcContext *svc_ctx,
+                                          const char *alt_ref_options) {
+  char *input_string;
+  char *token;
+  const char *delim = ",";
+  char *save_ptr;
+  int found = 0, enabled = 0;
+  int i, value;
+  vpx_codec_err_t res = VPX_CODEC_OK;
+  SvcInternal *const si = get_svc_internal(svc_ctx);
+
+  if (alt_ref_options == NULL || strlen(alt_ref_options) == 0) {
+    return VPX_CODEC_INVALID_PARAM;
+  } else {
+    input_string = strdup(alt_ref_options);
+  }
+
+  token = strtok_r(input_string, delim, &save_ptr);
+  for (i = 0; i < svc_ctx->spatial_layers; ++i) {
+    if (token != NULL) {
+      value = atoi(token);
+      if (value < 0 || value > 1) {
+        svc_log(svc_ctx, SVC_LOG_ERROR,
+                "enable auto alt ref values: invalid value %s\n", token);
+        res = VPX_CODEC_INVALID_PARAM;
+        break;
+      }
+      token = strtok_r(NULL, delim, &save_ptr);
+      found = i + 1;
+    } else {
+      value = 0;
+    }
+    si->enable_auto_alt_ref[i] = value;
+    if (value > 0)
+      ++enabled;
+  }
+  if (res == VPX_CODEC_OK && found != svc_ctx->spatial_layers) {
+    svc_log(svc_ctx, SVC_LOG_ERROR,
+            "svc: quantizers: %d values required, but only %d specified\n",
+            svc_ctx->spatial_layers, found);
+    res = VPX_CODEC_INVALID_PARAM;
+  }
+  if (enabled > REF_FRAMES - svc_ctx->spatial_layers) {
+    svc_log(svc_ctx, SVC_LOG_ERROR,
+            "svc: auto alt ref: Maxinum %d(REF_FRAMES - layers) layers could"
+            "enabled auto alt reference frame, but % layers are enabled\n",
+            REF_FRAMES - svc_ctx->spatial_layers, enabled);
+    res = VPX_CODEC_INVALID_PARAM;
+  }
+  free(input_string);
+  return res;
+}
+
 static void log_invalid_scale_factor(SvcContext *svc_ctx, const char *value) {
   svc_log(svc_ctx, SVC_LOG_ERROR, "svc scale-factors: invalid value %s\n",
           value);
@@ -335,6 +390,9 @@ static vpx_codec_err_t parse_options(SvcContext *svc_ctx, const char *options) {
     } else if (strcmp("quantizers", option_name) == 0) {
       res = parse_quantizer_values(svc_ctx, option_value);
       if (res != VPX_CODEC_OK) break;
+    } else if (strcmp("auto-alt-refs", option_name) == 0) {
+      res = parse_auto_alt_ref(svc_ctx, option_value);
+      if (res != VPX_CODEC_OK) break;
     } else {
       svc_log(svc_ctx, SVC_LOG_ERROR, "invalid option: %s\n", option_name);
       res = VPX_CODEC_INVALID_PARAM;
@@ -382,6 +440,7 @@ vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
                              vpx_codec_iface_t *iface,
                              vpx_codec_enc_cfg_t *enc_cfg) {
   vpx_codec_err_t res;
+  int i;
   SvcInternal *const si = get_svc_internal(svc_ctx);
   if (svc_ctx == NULL || codec_ctx == NULL || iface == NULL ||
       enc_cfg == NULL) {
@@ -428,7 +487,6 @@ vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
   // TODO(Minghai): Optimize the mechanism of allocating bits after
   // implementing svc two pass rate control.
   if (si->layers > 1) {
-    int i;
     float total = 0;
     float alloc_ratio[VPX_SS_MAX_LAYERS] = {0};
 
@@ -451,6 +509,9 @@ vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
       }
     }
   }
+
+  for (i = 0; i < si->layers; ++i)
+    enc_cfg->ss_enable_auto_alt_ref[i] = si->enable_auto_alt_ref[i];
 
   // modify encoder configuration
   enc_cfg->ss_number_layers = si->layers;
@@ -482,104 +543,8 @@ vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
 
   vpx_codec_control(codec_ctx, VP9E_SET_SVC, 1);
   vpx_codec_control(codec_ctx, VP8E_SET_TOKEN_PARTITIONS, 1);
-  vpx_codec_control(codec_ctx, VP8E_SET_ENABLEAUTOALTREF, 0);
 
   return VPX_CODEC_OK;
-}
-
-static void accumulate_frame_size_for_each_layer(SvcInternal *const si,
-                                                 const uint8_t *const buf,
-                                                 const size_t size) {
-  uint8_t marker = buf[size - 1];
-  if ((marker & 0xe0) == 0xc0) {
-    const uint32_t frames = (marker & 0x7) + 1;
-    const uint32_t mag = ((marker >> 3) & 0x3) + 1;
-    const size_t index_sz = 2 + mag * frames;
-
-    uint8_t marker2 = buf[size - index_sz];
-
-    if (size >= index_sz && marker2 == marker) {
-      // found a valid superframe index
-      uint32_t i, j;
-      const uint8_t *x = &buf[size - index_sz + 1];
-
-      // frames has a maximum of 8 and mag has a maximum of 4.
-      for (i = 0; i < frames; i++) {
-        uint32_t this_sz = 0;
-
-        for (j = 0; j < mag; j++)
-          this_sz |= (*x++) << (j * 8);
-        si->bytes_sum[i] += this_sz;
-      }
-    }
-  }
-}
-
-// SVC Algorithm flags - these get mapped to VP8_EFLAG_* defined in vp8cx.h
-
-// encoder should reference the last frame
-#define USE_LAST (1 << 0)
-
-// encoder should reference the alt ref frame
-#define USE_ARF (1 << 1)
-
-// encoder should reference the golden frame
-#define USE_GF (1 << 2)
-
-// encoder should copy current frame to the last frame buffer
-#define UPDATE_LAST (1 << 3)
-
-// encoder should copy current frame to the alt ref frame buffer
-#define UPDATE_ARF (1 << 4)
-
-// encoder should copy current frame to the golden frame
-#define UPDATE_GF (1 << 5)
-
-static int map_vp8_flags(int svc_flags) {
-  int flags = 0;
-
-  if (!(svc_flags & USE_LAST)) flags |= VP8_EFLAG_NO_REF_LAST;
-  if (!(svc_flags & USE_ARF)) flags |= VP8_EFLAG_NO_REF_ARF;
-  if (!(svc_flags & USE_GF)) flags |= VP8_EFLAG_NO_REF_GF;
-
-  if (svc_flags & UPDATE_LAST) {
-    // last is updated automatically
-  } else {
-    flags |= VP8_EFLAG_NO_UPD_LAST;
-  }
-  if (svc_flags & UPDATE_ARF) {
-    flags |= VP8_EFLAG_FORCE_ARF;
-  } else {
-    flags |= VP8_EFLAG_NO_UPD_ARF;
-  }
-  if (svc_flags & UPDATE_GF) {
-    flags |= VP8_EFLAG_FORCE_GF;
-  } else {
-    flags |= VP8_EFLAG_NO_UPD_GF;
-  }
-  return flags;
-}
-
-static void calculate_enc_frame_flags(SvcContext *svc_ctx) {
-  vpx_enc_frame_flags_t flags = VPX_EFLAG_FORCE_KF;
-  SvcInternal *const si = get_svc_internal(svc_ctx);
-  const int is_keyframe = (si->frame_within_gop == 0);
-
-  // keyframe layer zero is identical for all modes
-  if (is_keyframe && si->layer == 0) {
-    si->enc_frame_flags = VPX_EFLAG_FORCE_KF;
-    return;
-  }
-
-  if (si->layer == 0) {
-    flags = map_vp8_flags(USE_LAST | UPDATE_LAST);
-  } else if (is_keyframe) {
-    flags = map_vp8_flags(USE_ARF | UPDATE_LAST);
-  } else {
-    flags = map_vp8_flags(USE_LAST | USE_ARF | UPDATE_LAST);
-  }
-
-  si->enc_frame_flags = flags;
 }
 
 vpx_codec_err_t vpx_svc_get_layer_resolution(const SvcContext *svc_ctx,
@@ -621,7 +586,6 @@ static void set_svc_parameters(SvcContext *svc_ctx,
   memset(&svc_params, 0, sizeof(svc_params));
   svc_params.temporal_layer = 0;
   svc_params.spatial_layer = si->layer;
-  svc_params.flags = si->enc_frame_flags;
 
   layer = si->layer;
   if (VPX_CODEC_OK != vpx_svc_get_layer_resolution(svc_ctx, layer,
@@ -640,33 +604,6 @@ static void set_svc_parameters(SvcContext *svc_ctx,
   }
 
   svc_params.distance_from_i_frame = si->frame_within_gop;
-
-  // Use buffer i for layer i LST
-  svc_params.lst_fb_idx = si->layer;
-
-  // Use buffer i-1 for layer i Alt (Inter-layer prediction)
-  svc_params.alt_fb_idx = (si->layer > 0) ? si->layer - 1 : 0;
-  svc_params.gld_fb_idx = svc_params.lst_fb_idx;
-
-  svc_log(svc_ctx, SVC_LOG_DEBUG, "SVC frame: %d, layer: %d, %dx%d, q: %d\n",
-          si->encode_frame_count, si->layer, svc_params.width,
-          svc_params.height, svc_params.min_quantizer);
-
-  if (svc_params.flags == VPX_EFLAG_FORCE_KF) {
-    svc_log(svc_ctx, SVC_LOG_DEBUG, "flags == VPX_EFLAG_FORCE_KF\n");
-  } else {
-    svc_log(
-        svc_ctx, SVC_LOG_DEBUG, "Using:    LST/GLD/ALT [%2d|%2d|%2d]\n",
-        svc_params.flags & VP8_EFLAG_NO_REF_LAST ? -1 : svc_params.lst_fb_idx,
-        svc_params.flags & VP8_EFLAG_NO_REF_GF ? -1 : svc_params.gld_fb_idx,
-        svc_params.flags & VP8_EFLAG_NO_REF_ARF ? -1 : svc_params.alt_fb_idx);
-    svc_log(
-        svc_ctx, SVC_LOG_DEBUG, "Updating: LST/GLD/ALT [%2d|%2d|%2d]\n",
-        svc_params.flags & VP8_EFLAG_NO_UPD_LAST ? -1 : svc_params.lst_fb_idx,
-        svc_params.flags & VP8_EFLAG_NO_UPD_GF ? -1 : svc_params.gld_fb_idx,
-        svc_params.flags & VP8_EFLAG_NO_UPD_ARF ? -1 : svc_params.alt_fb_idx);
-  }
-
   vpx_codec_control(codec_ctx, VP9E_SET_SVC_PARAMETERS, &svc_params);
 }
 
@@ -705,7 +642,6 @@ vpx_codec_err_t vpx_svc_encode(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
   if (rawimg != NULL) {
     // encode each layer
     for (si->layer = 0; si->layer < si->layers; ++si->layer) {
-      calculate_enc_frame_flags(svc_ctx);
       set_svc_parameters(svc_ctx, codec_ctx);
     }
   }
@@ -723,8 +659,6 @@ vpx_codec_err_t vpx_svc_encode(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
         fd_list_add(&si->frame_list, fd_create(cx_pkt->data.frame.buf,
                                                cx_pkt->data.frame.sz,
                                                cx_pkt->data.frame.flags));
-        accumulate_frame_size_for_each_layer(si, cx_pkt->data.frame.buf,
-                                             cx_pkt->data.frame.sz);
 
         svc_log(svc_ctx, SVC_LOG_DEBUG, "SVC frame: %d, kf: %d, size: %d, "
                 "pts: %d\n", si->frame_received,
@@ -773,6 +707,12 @@ vpx_codec_err_t vpx_svc_encode(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
         memcpy(si->rc_stats_buf + si->rc_stats_buf_used,
                cx_pkt->data.twopass_stats.buf, cx_pkt->data.twopass_stats.sz);
         si->rc_stats_buf_used += cx_pkt->data.twopass_stats.sz;
+        break;
+      }
+      case VPX_CODEC_SPATIAL_SVC_LAYER_SIZES: {
+        int i;
+        for (i = 0; i < si->layers; ++i)
+          si->bytes_sum[i] += cx_pkt->data.layer_sizes[i];
         break;
       }
       default: {

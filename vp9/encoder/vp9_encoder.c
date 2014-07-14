@@ -206,6 +206,12 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
     cpi->twopass.this_frame_mb_stats.mb_stats = NULL;
   }
 #endif
+
+  for (i = 0; i < MAX_LAG_BUFFERS; ++i) {
+    vp9_free_frame_buffer(&cpi->svc.scaled_frames[i]);
+  }
+  vpx_memset(&cpi->svc.scaled_frames[0], 0,
+             MAX_LAG_BUFFERS * sizeof(cpi->svc.scaled_frames[0]));
 }
 
 static void save_coding_context(VP9_COMP *cpi) {
@@ -476,6 +482,15 @@ static void update_frame_size(VP9_COMP *cpi) {
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   vp9_update_frame_size(cm);
   init_macroblockd(cm, xd);
+
+  if (cpi->use_svc && cpi->svc.number_temporal_layers == 1) {
+    if (vp9_realloc_frame_buffer(&cpi->alt_ref_buffer,
+                                 cm->width, cm->height,
+                                 cm->subsampling_x, cm->subsampling_y,
+                                 VP9_ENC_BORDER_IN_PIXELS, NULL, NULL, NULL))
+      vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+                         "Failed to reallocate alt_ref_buffer");
+  }
 }
 
 void vp9_new_framerate(VP9_COMP *cpi, double framerate) {
@@ -2486,7 +2501,7 @@ void adjust_frame_rate(VP9_COMP *cpi) {
 static int get_arf_src_index(VP9_COMP *cpi) {
   RATE_CONTROL *const rc = &cpi->rc;
   int arf_src_index = 0;
-  if (is_altref_enabled(&cpi->oxcf)) {
+  if (is_altref_enabled(cpi)) {
     if (cpi->pass == 2) {
       const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
       if (gf_group->update_type[gf_group->index] == ARF_UPDATE) {
@@ -2565,12 +2580,26 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 #ifdef CONFIG_SPATIAL_SVC
     if (is_spatial_svc)
       cpi->source = vp9_svc_lookahead_peek(cpi, cpi->lookahead,
-                                           arf_src_index, 1);
+                                           arf_src_index, 0);
     else
 #endif
       cpi->source = vp9_lookahead_peek(cpi->lookahead, arf_src_index);
     if (cpi->source != NULL) {
       cpi->alt_ref_source = cpi->source;
+
+#ifdef CONFIG_SPATIAL_SVC
+      if (is_spatial_svc && cpi->svc.spatial_layer_id > 0) {
+        int i;
+        // Reference a hidden frame from a lower layer
+        for (i = cpi->svc.spatial_layer_id - 1; i >= 0; --i) {
+          if (cpi->oxcf.ss_play_alternate[i]) {
+            cpi->gld_fb_idx = cpi->svc.layer_context[i].alt_ref_idx;
+            break;
+          }
+        }
+      }
+      cpi->svc.layer_context[cpi->svc.spatial_layer_id].has_alt_frame = 1;
+#endif
 
       if (cpi->oxcf.arnr_max_frames > 0) {
         // Produce the filtered ARF frame.

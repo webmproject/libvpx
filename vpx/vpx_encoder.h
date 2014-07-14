@@ -156,6 +156,9 @@ extern "C" {
     VPX_CODEC_CX_FRAME_PKT,    /**< Compressed video frame */
     VPX_CODEC_STATS_PKT,       /**< Two-pass statistics for this frame */
     VPX_CODEC_PSNR_PKT,        /**< PSNR statistics for this frame */
+#ifdef CONFIG_SPATIAL_SVC
+    VPX_CODEC_SPATIAL_SVC_LAYER_SIZES, /**< Sizes for each layer in this frame*/
+#endif
     VPX_CODEC_CUSTOM_PKT = 256 /**< Algorithm extensions  */
   };
 
@@ -191,6 +194,9 @@ extern "C" {
         double       psnr[4];     /**< PSNR, total/y/u/v */
       } psnr;                       /**< data for PSNR packet */
       struct vpx_fixed_buf raw;     /**< data for arbitrary packets */
+#ifdef CONFIG_SPATIAL_SVC
+      size_t layer_sizes[VPX_SS_MAX_LAYERS];
+#endif
 
       /* This packet size is fixed to allow codecs to extend this
        * interface without having to manage storage for raw packets,
@@ -622,6 +628,15 @@ extern "C" {
      * This value specifies the number of spatial coding layers to be used.
      */
     unsigned int           ss_number_layers;
+
+#ifdef CONFIG_SPATIAL_SVC
+    /*!\brief Enable auto alt reference flags for each spatial layer.
+     *
+     * These values specify if auto alt reference frame is enabled for each
+     * spatial layer.
+     */
+    int                    ss_enable_auto_alt_ref[VPX_SS_MAX_LAYERS];
+#endif
 
     /*!\brief Target bitrate for each spatial layer.
      *

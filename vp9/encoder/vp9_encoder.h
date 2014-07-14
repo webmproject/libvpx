@@ -195,6 +195,7 @@ typedef struct VP9EncoderConfig {
   int ts_number_layers;  // Number of temporal layers.
   // Bitrate allocation for spatial layers.
   int ss_target_bitrate[VPX_SS_MAX_LAYERS];
+  int ss_play_alternate[VPX_SS_MAX_LAYERS];
   // Bitrate allocation (CBR mode) and framerate factor, for temporal layers.
   int ts_target_bitrate[VPX_TS_MAX_LAYERS];
   int ts_rate_decimator[VPX_TS_MAX_LAYERS];
@@ -228,10 +229,6 @@ typedef struct VP9EncoderConfig {
 
   vp8e_tuning tuning;
 } VP9EncoderConfig;
-
-static INLINE int is_altref_enabled(const VP9EncoderConfig *cfg) {
-  return cfg->mode != REALTIME && cfg->play_alternate && cfg->lag_in_frames > 0;
-}
 
 static INLINE int is_lossless_requested(const VP9EncoderConfig *cfg) {
   return cfg->best_allowed_q == 0 && cfg->worst_allowed_q == 0;
@@ -534,6 +531,13 @@ YV12_BUFFER_CONFIG *vp9_scale_if_required(VP9_COMMON *cm,
                                           YV12_BUFFER_CONFIG *scaled);
 
 void vp9_apply_encoding_flags(VP9_COMP *cpi, vpx_enc_frame_flags_t flags);
+
+static INLINE int is_altref_enabled(const VP9_COMP *const cpi) {
+  return cpi->oxcf.mode != REALTIME && cpi->oxcf.lag_in_frames > 0 &&
+         (cpi->oxcf.play_alternate &&
+          (!(cpi->use_svc && cpi->svc.number_temporal_layers == 1) ||
+           cpi->oxcf.ss_play_alternate[cpi->svc.spatial_layer_id]));
+}
 
 static INLINE void set_ref_ptrs(VP9_COMMON *cm, MACROBLOCKD *xd,
                                 MV_REFERENCE_FRAME ref0,

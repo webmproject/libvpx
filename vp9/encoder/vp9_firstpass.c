@@ -486,24 +486,33 @@ void vp9_first_pass(VP9_COMP *cpi) {
     const YV12_BUFFER_CONFIG *scaled_ref_buf = NULL;
     twopass = &cpi->svc.layer_context[cpi->svc.spatial_layer_id].twopass;
 
+    if (cpi->common.current_video_frame == 0) {
+      cpi->ref_frame_flags = 0;
+    } else {
+      LAYER_CONTEXT *lc = &cpi->svc.layer_context[cpi->svc.spatial_layer_id];
+      if (lc->current_video_frame_in_layer == 0)
+        cpi->ref_frame_flags = VP9_GOLD_FLAG;
+      else
+        cpi->ref_frame_flags = VP9_LAST_FLAG | VP9_GOLD_FLAG;
+    }
+
     vp9_scale_references(cpi);
 
     // Use either last frame or alt frame for motion search.
     if (cpi->ref_frame_flags & VP9_LAST_FLAG) {
       scaled_ref_buf = vp9_get_scaled_ref_frame(cpi, LAST_FRAME);
       ref_frame = LAST_FRAME;
-    } else if (cpi->ref_frame_flags & VP9_ALT_FLAG) {
-      scaled_ref_buf = vp9_get_scaled_ref_frame(cpi, ALTREF_FRAME);
-      ref_frame = ALTREF_FRAME;
+    } else if (cpi->ref_frame_flags & VP9_GOLD_FLAG) {
+      scaled_ref_buf = vp9_get_scaled_ref_frame(cpi, GOLDEN_FRAME);
+      ref_frame = GOLDEN_FRAME;
     }
 
-    if (scaled_ref_buf != NULL) {
-      // Update the stride since we are using scaled reference buffer
+    if (scaled_ref_buf != NULL)
       first_ref_buf = scaled_ref_buf;
-      recon_y_stride = first_ref_buf->y_stride;
-      recon_uv_stride = first_ref_buf->uv_stride;
-      uv_mb_height = 16 >> (first_ref_buf->y_height > first_ref_buf->uv_height);
-    }
+
+    recon_y_stride = new_yv12->y_stride;
+    recon_uv_stride = new_yv12->uv_stride;
+    uv_mb_height = 16 >> (new_yv12->y_height > new_yv12->uv_height);
 
     // Disable golden frame for svc first pass for now.
     gld_yv12 = NULL;
@@ -909,6 +918,8 @@ void vp9_first_pass(VP9_COMP *cpi) {
   }
 
   ++cm->current_video_frame;
+  if (cpi->use_svc)
+    vp9_inc_frame_in_layer(&cpi->svc);
 }
 
 static double calc_correction_factor(double err_per_mb,
@@ -1506,7 +1517,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   double mv_in_out_accumulator = 0.0;
   double abs_mv_in_out_accumulator = 0.0;
   double mv_ratio_accumulator_thresh;
-  unsigned int allow_alt_ref = is_altref_enabled(oxcf);
+  unsigned int allow_alt_ref = is_altref_enabled(cpi);
 
   int f_boost = 0;
   int b_boost = 0;
@@ -2080,6 +2091,11 @@ void configure_buffer_updates(VP9_COMP *cpi) {
     default:
       assert(0);
   }
+  if (cpi->use_svc && cpi->svc.number_temporal_layers == 1) {
+    cpi->refresh_golden_frame = 0;
+    if (cpi->alt_ref_source == NULL)
+      cpi->refresh_alt_ref_frame = 0;
+  }
 }
 
 
@@ -2122,6 +2138,18 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
 #endif
     vp9_rc_set_frame_target(cpi, target_rate);
     cm->frame_type = INTER_FRAME;
+
+    if (is_spatial_svc) {
+      if (cpi->svc.spatial_layer_id == 0) {
+        lc->is_key_frame = 0;
+      } else {
+        lc->is_key_frame = cpi->svc.layer_context[0].is_key_frame;
+
+        if (lc->is_key_frame)
+          cpi->ref_frame_flags &= (~VP9_LAST_FLAG);
+      }
+    }
+
     return;
   }
 
@@ -2189,7 +2217,8 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
     }
 
     rc->frames_till_gf_update_due = rc->baseline_gf_interval;
-    cpi->refresh_golden_frame = 1;
+    if (!is_spatial_svc)
+      cpi->refresh_golden_frame = 1;
   }
 
   {
