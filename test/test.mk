@@ -773,6 +773,8 @@ LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-15-segkey_adpq.webm
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-15-segkey_adpq.webm.md5
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-16-intra-only.webm
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-16-intra-only.webm.md5
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-17-show-existing-frame.webm
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-17-show-existing-frame.webm.md5
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp91-2-04-yuv444.webm
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp91-2-04-yuv444.webm.md5
 
