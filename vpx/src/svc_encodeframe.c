@@ -87,6 +87,10 @@ typedef struct SvcInternal {
   int layer;
   int is_keyframe;
 
+#if CONFIG_VP9_HIGH
+  vpx_bit_depth_t bit_depth;
+#endif
+
   FrameData *frame_list;
   FrameData *frame_temp;
 
@@ -452,6 +456,9 @@ vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
 
   si->width = enc_cfg->g_w;
   si->height = enc_cfg->g_h;
+#if CONFIG_VP9_HIGH
+  si->bit_depth = enc_cfg->g_bit_depth;
+#endif
 
   if (enc_cfg->kf_max_dist < 2) {
     svc_log(svc_ctx, SVC_LOG_ERROR, "key frame distance too small: %d\n",
@@ -535,7 +542,15 @@ vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
   enc_cfg->g_error_resilient = 1;
 
   // Initialize codec
+#if CONFIG_VP9_HIGH
+  if (enc_cfg->g_bit_depth == VPX_BITS_8)
+    res = vpx_codec_enc_init(codec_ctx, iface, enc_cfg, VPX_CODEC_USE_PSNR);
+  else
+    res = vpx_codec_enc_init(codec_ctx, iface, enc_cfg,
+                             VPX_CODEC_USE_PSNR | VPX_CODEC_USE_HIGH);
+#else
   res = vpx_codec_enc_init(codec_ctx, iface, enc_cfg, VPX_CODEC_USE_PSNR);
+#endif
   if (res != VPX_CODEC_OK) {
     svc_log(svc_ctx, SVC_LOG_ERROR, "svc_enc_init error\n");
     return res;
@@ -810,7 +825,23 @@ const char *vpx_svc_dump_statistics(SvcContext *svc_ctx) {
             (double)si->psnr_sum[i][2] / number_of_frames,
             (double)si->psnr_sum[i][3] / number_of_frames, si->bytes_sum[i]);
     // the following psnr calculation is deduced from ffmpeg.c#print_report
+#if CONFIG_VP9_HIGH
+    switch (si->bit_depth) {
+      case VPX_BITS_8:
+        y_scale = si->width * si->height * 255.0 * 255.0 * number_of_frames;
+        break;
+      case VPX_BITS_10:
+        y_scale = si->width * si->height * 1023.0 * 1023.0 * number_of_frames;
+        break;
+      case VPX_BITS_12:
+        y_scale = si->width * si->height * 4095.0 * 4095.0 * number_of_frames;
+        break;
+      default:
+        assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10, VPX_BITS_12");
+    }
+#else
     y_scale = si->width * si->height * 255.0 * 255.0 * number_of_frames;
+#endif
     scale[1] = y_scale;
     scale[2] = scale[3] = y_scale / 4;  // U or V
     scale[0] = y_scale * 1.5;           // total

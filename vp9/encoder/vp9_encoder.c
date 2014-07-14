@@ -3841,8 +3841,7 @@ int vp9_set_size_literal(VP9_COMP *cpi, unsigned int width,
   VP9_COMMON *cm = &cpi->common;
 
 #if CONFIG_VP9_HIGH
-  // The internal bitdepth should be overwritten when the first frame arrives
-  check_initial_width(cpi, 1, 1, 0);
+  check_initial_width(cpi, 1, 1, cm->use_high);
 #else
   check_initial_width(cpi, 1, 1);
 #endif
