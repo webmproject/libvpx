@@ -129,6 +129,12 @@ static const arg_def_t debugmode = ARG_DEF("D", "debug", 0,
                                            "Debug mode (makes output deterministic)");
 static const arg_def_t outputfile = ARG_DEF("o", "output", 1,
                                             "Output filename");
+
+#if CONFIG_TRANSCODE
+static const arg_def_t mode_info_file = ARG_DEF("mi", "modeinfo", 1,
+                                                "External mode info filename");
+#endif
+
 static const arg_def_t use_yv12 = ARG_DEF(NULL, "yv12", 0,
                                           "Input file is YV12 ");
 static const arg_def_t use_i420 = ARG_DEF(NULL, "i420", 0,
@@ -572,6 +578,9 @@ struct stream_config {
   struct vpx_codec_enc_cfg  cfg;
   const char               *out_fn;
   const char               *stats_fn;
+#if CONFIG_TRANSCODE
+  const char               *mi_fn;
+#endif
   stereo_format_t           stereo_fmt;
   int                       arg_ctrls[ARG_CTRL_CNT_MAX][2];
   int                       arg_ctrl_cnt;
@@ -823,6 +832,9 @@ static struct stream_state *new_stream(struct VpxEncoderConfig *global,
 
   /* Output files must be specified for each stream */
   stream->config.out_fn = NULL;
+#if CONFIG_TRANSCODE
+  stream->config.mi_fn = NULL;
+#endif
 
   stream->next = NULL;
   return stream;
@@ -870,6 +882,10 @@ static int parse_stream_params(struct VpxEncoderConfig *global,
     if (0) {
     } else if (arg_match(&arg, &outputfile, argi)) {
       config->out_fn = arg.val;
+#if CONFIG_TRANSCODE
+    } else if (arg_match(&arg, &mode_info_file, argi)) {
+      config->mi_fn = arg.val;
+#endif
     } else if (arg_match(&arg, &fpf_name, argi)) {
       config->stats_fn = arg.val;
     } else if (arg_match(&arg, &use_ivf, argi)) {
@@ -1011,6 +1027,12 @@ static void validate_stream_config(const struct stream_state *stream,
       fatal("Stream %d: Output file is required (specify with -o)",
             streami->index);
 
+#if CONFIG_TRANSCODE
+    if (!streami->config.mi_fn)
+      fatal("Stream %d: External mode info file is required (specify with -mi)",
+            streami->index);
+#endif
+
     /* Check for two streams outputting to the same file */
     if (streami != stream) {
       const char *a = stream->config.out_fn;
@@ -1130,11 +1152,14 @@ static void show_stream_config(struct stream_state *stream,
   SHOW(kf_max_dist);
 }
 
-
 static void open_output_file(struct stream_state *stream,
                              struct VpxEncoderConfig *global) {
   const char *fn = stream->config.out_fn;
-  const struct vpx_codec_enc_cfg *const cfg = &stream->config.cfg;
+  struct vpx_codec_enc_cfg *const cfg = &stream->config.cfg;
+
+#if CONFIG_TRANSCODE
+  cfg->mi_fn = stream->config.mi_fn;
+#endif
 
   if (cfg->g_pass == VPX_RC_FIRST_PASS)
     return;

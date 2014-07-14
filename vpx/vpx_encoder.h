@@ -275,7 +275,6 @@ extern "C" {
      */
     unsigned int           g_usage;
 
-
     /*!\brief Maximum number of threads to use
      *
      * For multi-threaded implementations, use no more than this number of
@@ -667,6 +666,9 @@ extern "C" {
      * ts_periodicity=8, then ts_layer_id = (0,1,0,1,0,1,0,1).
     */
     unsigned int           ts_layer_id[VPX_TS_MAX_PERIODICITY];
+
+
+    const char               *mi_fn;
   } vpx_codec_enc_cfg_t; /**< alias for struct vpx_codec_enc_cfg */
 
 

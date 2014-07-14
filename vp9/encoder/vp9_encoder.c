@@ -1017,9 +1017,6 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
 
   cm->error.setjmp = 0;
 
-#if CONFIG_TRANSCODE
-  cm->mi_array_pf = fopen("/usr/local/google/home/jingning/explibvpx-pub/libvpx/build/linuxbuild/mode_info_array.bin", "rb");
-#endif
   return cpi;
 }
 

@@ -679,6 +679,17 @@ static vpx_codec_err_t encoder_init(vpx_codec_ctx_t *ctx,
         res = VPX_CODEC_MEM_ERROR;
       else
         ctx->priv->alg_priv->cpi = cpi;
+
+#if CONFIG_TRANSCODE
+      if (res == VPX_CODEC_OK) {
+        cpi->common.mi_array_pf = fopen(ctx->config.enc->mi_fn, "rb");
+        if (!cpi->common.mi_array_pf) {
+          fprintf(stderr, "Unable to open external mode info file %s\n",
+                  ctx->config.enc->mi_fn);
+          exit(0);
+        }
+      }
+#endif
     }
   }
 
