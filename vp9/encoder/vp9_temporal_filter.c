@@ -432,12 +432,6 @@ void vp9_temporal_filter(VP9_COMP *cpi, int distance) {
   frames_to_blur_forward = ((frames_to_blur - 1) / 2);
   start_frame = distance + frames_to_blur_forward;
 
-  // Setup scaling factors. Scaling on each of the arnr frames not supported.
-  vp9_setup_scale_factors_for_frame(&sf,
-      get_frame_new_buffer(cm)->y_crop_width,
-      get_frame_new_buffer(cm)->y_crop_height,
-      cm->width, cm->height);
-
   // Setup frame pointers, NULL indicates frame not included in filter.
   vp9_zero(cpi->frames);
   for (frame = 0; frame < frames_to_blur; ++frame) {
@@ -445,6 +439,41 @@ void vp9_temporal_filter(VP9_COMP *cpi, int distance) {
     struct lookahead_entry *buf = vp9_lookahead_peek(cpi->lookahead,
                                                      which_buffer);
     cpi->frames[frames_to_blur - 1 - frame] = &buf->img;
+  }
+
+  // Setup scaling factors. Scaling on each of the arnr frames is not supported
+  if (cpi->use_svc && cpi->svc.number_temporal_layers == 1) {
+    // In spatial svc the scaling factors might be less then 1/2. So we will use
+    // non-normative scaling.
+    int frame_used = 0;
+    vp9_setup_scale_factors_for_frame(&sf,
+                                      get_frame_new_buffer(cm)->y_crop_width,
+                                      get_frame_new_buffer(cm)->y_crop_height,
+                                      get_frame_new_buffer(cm)->y_crop_width,
+                                      get_frame_new_buffer(cm)->y_crop_height);
+
+    for (frame = 0; frame < frames_to_blur; ++frame) {
+      if (cm->mi_cols * MI_SIZE != cpi->frames[frame]->y_width ||
+          cm->mi_rows * MI_SIZE != cpi->frames[frame]->y_height) {
+        if (vp9_realloc_frame_buffer(&cpi->svc.scaled_frames[frame_used],
+                                     cm->width, cm->height,
+                                     cm->subsampling_x, cm->subsampling_y,
+                                     VP9_ENC_BORDER_IN_PIXELS, NULL, NULL,
+                                     NULL))
+          vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+                             "Failed to reallocate alt_ref_buffer");
+
+        cpi->frames[frame] =
+            vp9_scale_if_required(cm, cpi->frames[frame],
+                                  &cpi->svc.scaled_frames[frame_used]);
+        ++frame_used;
+      }
+    }
+  } else {
+    vp9_setup_scale_factors_for_frame(&sf,
+                                      get_frame_new_buffer(cm)->y_crop_width,
+                                      get_frame_new_buffer(cm)->y_crop_height,
+                                      cm->width, cm->height);
   }
 
   temporal_filter_iterate_c(cpi, frames_to_blur, frames_to_blur_backward,

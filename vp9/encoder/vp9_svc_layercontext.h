@@ -29,6 +29,10 @@ typedef struct {
   unsigned int current_video_frame_in_layer;
   int is_key_frame;
   vpx_svc_parameters_t svc_params_received;
+  struct lookahead_entry  *alt_ref_source;
+  int alt_ref_idx;
+  int has_alt_frame;
+  size_t layer_size;
 } LAYER_CONTEXT;
 
 typedef struct {
@@ -36,6 +40,11 @@ typedef struct {
   int temporal_layer_id;
   int number_spatial_layers;
   int number_temporal_layers;
+
+  // Store scaled source frames to be used for temporal filter to generate
+  // a alt ref frame.
+  YV12_BUFFER_CONFIG scaled_frames[MAX_LAG_BUFFERS];
+
   // Layer context used for rate control in one pass temporal CBR mode or
   // two pass spatial mode. Defined for temporal or spatial layers for now.
   // Does not support temporal combined with spatial RC.
