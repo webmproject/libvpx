@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//gM0\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-14T21:56:30Z",
+      "side": 1,
+      "message": "this won\u0027t be available under visual studio _tempnam is there as is tmpnam, but they\u0027ll both probably earn you security related warnings",
+      "revId": "18a9b28fa2487ff385e0958d1af3fcff09503025",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
