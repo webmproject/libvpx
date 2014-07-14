@@ -227,6 +227,10 @@ typedef struct VP9EncoderConfig {
   struct vpx_fixed_buf         two_pass_stats_in;
   struct vpx_codec_pkt_list  *output_pkt_list;
 
+#if CONFIG_FP_MB_STATS
+  struct vpx_fixed_buf         firstpass_mb_stats_in;
+#endif
+
   vp8e_tuning tuning;
 } VP9EncoderConfig;
 

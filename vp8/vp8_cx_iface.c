@@ -1291,6 +1291,7 @@ static vpx_codec_enc_cfg_map_t vp8e_usage_cfg_map[] =
         VPX_VBR,            /* rc_end_usage */
 #if VPX_ENCODER_ABI_VERSION > (1 + VPX_CODEC_ABI_VERSION)
         {0},                /* rc_twopass_stats_in */
+        {0},                /* rc_firstpass_mb_stats_in */
 #endif
         256,                /* rc_target_bandwidth */
         4,                  /* rc_min_quantizer */
