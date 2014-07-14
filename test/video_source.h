@@ -10,6 +10,9 @@
 #ifndef TEST_VIDEO_SOURCE_H_
 #define TEST_VIDEO_SOURCE_H_
 
+#if defined(_WIN32)
+#include <windows.h>
+#endif
 #include <cstdio>
 #include <cstdlib>
 #include <string>
@@ -55,9 +58,69 @@ static FILE *OpenTestOutFile(const std::string& file_name) {
   return fopen(path_to_source.c_str(), "wb");
 }
 
-static FILE *OpenTempOutFile() {
-  return tmpfile();
+static std::string GetTempOutFilename() {
+  std::string basename;
+#if defined(_WIN32)
+  char fname[MAX_PATH];
+  // Assume for now that the filename generated is unique per process
+  const UINT ret = GetTempFileNameA(
+      GetDataPath().c_str(), "lvx", 0, fname);
+  if (ret != 0) {
+    const char *slash = strrchr(fname, '\\');
+    if (slash == NULL) slash = strrchr(fname, '/');
+    if (slash == NULL)
+      basename.assign(fname);
+    else
+      basename.assign(slash + 1);
+  } else {
+    basename.clear();
+  }
+#else
+  char fname[256];
+  const std::string templ = GetDataPath() + "/libvpx_test_XXXXXX";
+  strncpy(fname, templ.c_str(), templ.size());
+  fname[templ.size()] = '\0';
+  const int fd = mkstemp(fname);
+  if (fd != -1) {
+    close(fd);
+    basename.assign(strrchr(fname, '/') + 1);
+  } else {
+    basename.clear();
+  }
+#endif
+  return basename;
 }
+
+class TempOutFile {
+ public:
+  TempOutFile() {
+    file_name_ = GetTempOutFilename();
+    file_ = OpenTestOutFile(file_name_);
+  }
+  ~TempOutFile() {
+    CloseFile();
+    if (!file_name_.empty()) {
+      const std::string path_to_source = GetDataPath() + "/" + file_name_;
+      EXPECT_EQ(0, remove(path_to_source.c_str()));
+    }
+  }
+  FILE *file() {
+    return file_;
+  }
+  const std::string& file_name() {
+    return file_name_;
+  }
+  void CloseFile() {
+    if (file_) {
+      fclose(file_);
+      file_ = NULL;
+    }
+  }
+
+ protected:
+  FILE *file_;
+  std::string file_name_;
+};
 
 // Abstract base class for test video sources, which provide a stream of
 // vpx_image_t images with associated timestamps and duration.

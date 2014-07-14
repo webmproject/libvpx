@@ -48,6 +48,7 @@ int y4m_write_file_header(char *buf, size_t len, int width, int height,
               "C420p16 XYSCSS=420P16\n";
       break;
     default:
+      color = NULL;
       assert(0);
   }
   return snprintf(buf, len, "YUV4MPEG2 W%u H%u F%u:%u I%c %s", width, height,
