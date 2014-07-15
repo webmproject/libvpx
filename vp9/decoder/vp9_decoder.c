@@ -268,10 +268,7 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
 
   vp9_decode_frame(pbi, source, source + size, psource);
 
-  if (!cm->show_existing_frame)
-    swap_frame_buffers(pbi);
-  else
-    cm->frame_to_show = get_frame_new_buffer(cm);
+  swap_frame_buffers(pbi);
 
   vp9_clear_system_state();
 
