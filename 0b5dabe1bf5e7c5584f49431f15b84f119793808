@@ -16,6 +16,24 @@
       "revId": "0b5dabe1bf5e7c5584f49431f15b84f119793808",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//f9A\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_sad_neon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2014-07-15T21:23:58Z",
+      "side": 1,
+      "message": "Yeah, it should work.  Not sure why I thought I had to use 32 bits.  Will fix.",
+      "parentUuid": "AAAAdn//gEo\u003d",
+      "revId": "0b5dabe1bf5e7c5584f49431f15b84f119793808",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
