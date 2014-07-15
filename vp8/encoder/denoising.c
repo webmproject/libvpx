@@ -396,15 +396,14 @@ void vp8_denoiser_denoise_mb(VP8_DENOISER *denoiser,
                              loop_filter_info_n *lfi_n,
                              int mb_row,
                              int mb_col,
-                             int block_index)
+                             int block_index,
+                             int uv_denoise)
 {
     int mv_row;
     int mv_col;
     unsigned int motion_magnitude2;
     unsigned int sse_thresh;
     int sse_diff_thresh = 0;
-    // Denoise the UV channel.
-    int apply_color_denoise = 0;
     // Spatial loop filter: only applied selectively based on
     // temporal filter state of block relative to top/left neighbors.
     int apply_spatial_loop_filter = 1;
@@ -529,7 +528,7 @@ void vp8_denoiser_denoise_mb(VP8_DENOISER *denoiser,
         denoiser->denoise_state[block_index] = motion_magnitude2 > 0 ?
             kFilterNonZeroMV : kFilterZeroMV;
         // Only denoise UV for zero motion, and if y channel was denoised.
-        if (apply_color_denoise &&
+        if (uv_denoise &&
             motion_magnitude2 == 0 &&
             decision == FILTER_BLOCK) {
           unsigned char *mc_running_avg_u =
@@ -566,7 +565,7 @@ void vp8_denoiser_denoise_mb(VP8_DENOISER *denoiser,
                 denoiser->yv12_running_avg[INTRA_FRAME].y_stride);
         denoiser->denoise_state[block_index] = kNoFilter;
     }
-    if (apply_color_denoise) {
+    if (uv_denoise) {
       if (decision_u == COPY_BLOCK) {
         vp8_copy_mem8x8(
             x->block[16].src + *x->block[16].base_src, x->block[16].src_stride,
