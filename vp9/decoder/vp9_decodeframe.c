@@ -194,7 +194,7 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
                                     int eob) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
   if (eob > 0) {
-    TX_TYPE tx_type;
+    TX_TYPE tx_type = DCT_DCT;
     int16_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
     if (xd->lossless) {
       tx_type = DCT_DCT;

@@ -1222,7 +1222,12 @@ EOF
         fi
     fi
 
-    enabled debug && check_add_cflags -g && check_add_ldflags -g
+    if enabled debug; then
+        check_add_cflags -g && check_add_ldflags -g
+    else
+        check_add_cflags -DNDEBUG
+    fi
+
     enabled gprof && check_add_cflags -pg && check_add_ldflags -pg
     enabled gcov &&
         check_add_cflags -fprofile-arcs -ftest-coverage &&

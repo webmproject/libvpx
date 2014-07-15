@@ -260,6 +260,8 @@ typedef enum {
 
 static void tree_to_node(void *data, BLOCK_SIZE bsize, variance_node *node) {
   int i;
+  node->part_variances = NULL;
+  vpx_memset(node->split, 0, sizeof(node->split));
   switch (bsize) {
     case BLOCK_64X64: {
       v64x64 *vt = (v64x64 *) data;

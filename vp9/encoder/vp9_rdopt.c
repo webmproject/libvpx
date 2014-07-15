@@ -3019,7 +3019,6 @@ int64_t vp9_rd_pick_inter_mode_sb_seg_skip(VP9_COMP *cpi, MACROBLOCK *x,
   RD_OPT *const rd_opt = &cpi->rd;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
-  const struct segmentation *const seg = &cm->seg;
   unsigned char segment_id = mbmi->segment_id;
   const int comp_pred = 0;
   int i;
@@ -3045,7 +3044,7 @@ int64_t vp9_rd_pick_inter_mode_sb_seg_skip(VP9_COMP *cpi, MACROBLOCK *x,
 
   *returnrate = INT_MAX;
 
-  assert(vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP));
+  assert(vp9_segfeature_active(&cm->seg, segment_id, SEG_LVL_SKIP));
 
   mbmi->mode = ZEROMV;
   mbmi->uv_mode = DC_PRED;
