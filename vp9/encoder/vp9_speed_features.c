@@ -294,7 +294,11 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
         800 : 300;
     sf->elevate_newmv_thresh = 2500;
   }
-  if (speed >= 8) {
+  if (speed >= 12) {
+    sf->elevate_newmv_thresh = 4000;
+    sf->mv.subpel_force_stop = 2;
+  }
+  if (speed >= 13) {
     int i;
     sf->max_intra_bsize = BLOCK_32X32;
     for (i = 0; i < BLOCK_SIZES; ++i)
