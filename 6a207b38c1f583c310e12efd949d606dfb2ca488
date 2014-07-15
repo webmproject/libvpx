@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//gGw\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2621,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-07-15T04:01:10Z",
+      "side": 1,
+      "message": "ctx was defined as pc_tree-\u003enone, i.e., it stores the coding information associated with partition none.\n\nIn the horizontal case, the argument should perhaps be pc_tree-\u003ehorizontal[0] ([1] for the next one). Similarly in the vertical case, use pc_tree-\u003evertical[0] (and [1] for the second block).",
+      "revId": "6a207b38c1f583c310e12efd949d606dfb2ca488",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
