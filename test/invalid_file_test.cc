@@ -66,46 +66,49 @@ class InvalidFileTest
     return !HasFailure();
   }
 
+  void RunTest() {
+    const DecodeParam input = GET_PARAM(1);
+    libvpx_test::CompressedVideoSource *video = NULL;
+    vpx_codec_dec_cfg_t cfg = {0};
+    cfg.threads = input.threads;
+    const std::string filename = input.filename;
+
+    // Open compressed video file.
+    if (filename.substr(filename.length() - 3, 3) == "ivf") {
+      video = new libvpx_test::IVFVideoSource(filename);
+    } else if (filename.substr(filename.length() - 4, 4) == "webm") {
+#if CONFIG_WEBM_IO
+      video = new libvpx_test::WebMVideoSource(filename);
+#else
+      fprintf(stderr, "WebM IO is disabled, skipping test vector %s\n",
+              filename.c_str());
+      return;
+#endif
+    }
+    video->Init();
+
+    // Construct result file name. The file holds a list of expected integer
+    // results, one for each decoded frame.  Any result that doesn't match
+    // the files list will cause a test failure.
+    const std::string res_filename = filename + ".res";
+    OpenResFile(res_filename);
+
+    // Decode frame, and check the md5 matching.
+    ASSERT_NO_FATAL_FAILURE(RunLoop(video, cfg));
+    delete video;
+  }
+
  private:
   FILE *res_file_;
 };
 
 TEST_P(InvalidFileTest, ReturnCode) {
-  libvpx_test::CompressedVideoSource *video = NULL;
-  const DecodeParam input = GET_PARAM(1);
-  vpx_codec_dec_cfg_t cfg = {0};
-  cfg.threads = input.threads;
-  const std::string filename = input.filename;
-
-  // Open compressed video file.
-  if (filename.substr(filename.length() - 3, 3) == "ivf") {
-    video = new libvpx_test::IVFVideoSource(filename);
-  } else if (filename.substr(filename.length() - 4, 4) == "webm") {
-#if CONFIG_WEBM_IO
-    video = new libvpx_test::WebMVideoSource(filename);
-#else
-    fprintf(stderr, "WebM IO is disabled, skipping test vector %s\n",
-            filename.c_str());
-    return;
-#endif
-  }
-  video->Init();
-
-  // Construct result file name. The file holds a list of expected integer
-  // results, one for each decoded frame.  Any result that doesn't match
-  // the files list will cause a test failure.
-  const std::string res_filename = filename + ".res";
-  OpenResFile(res_filename);
-
-  // Decode frame, and check the md5 matching.
-  ASSERT_NO_FATAL_FAILURE(RunLoop(video, cfg));
-  delete video;
+  RunTest();
 }
 
 const DecodeParam kVP9InvalidFileTests[] = {
-  {1, "invalid-vp90-01-v2.webm"},
   {1, "invalid-vp90-02-v2.webm"},
-  {1, "invalid-vp90-2-00-quantizer-00.webm.ivf.s5861_r01-05_b6-.ivf"},
+  {1, "invalid-vp90-2-00-quantizer-00.webm.ivf.s5861_r01-05_b6-.v2.ivf"},
   {1, "invalid-vp90-03-v2.webm"},
   {1, "invalid-vp90-2-00-quantizer-11.webm.ivf.s52984_r01-05_b6-.ivf"},
   {1, "invalid-vp90-2-00-quantizer-11.webm.ivf.s52984_r01-05_b6-z.ivf"},
@@ -113,6 +116,27 @@ const DecodeParam kVP9InvalidFileTests[] = {
 
 VP9_INSTANTIATE_TEST_CASE(InvalidFileTest,
                           ::testing::ValuesIn(kVP9InvalidFileTests));
+
+// This class will include test vectors that are expected to fail
+// peek. However they are still expected to have no fatal failures.
+class InvalidFileInvalidPeekTest : public InvalidFileTest {
+ protected:
+  InvalidFileInvalidPeekTest() : InvalidFileTest() {}
+  virtual void HandlePeekResult(libvpx_test::Decoder *const decoder,
+                                libvpx_test::CompressedVideoSource *video,
+                                const vpx_codec_err_t res_peek) {}
+};
+
+TEST_P(InvalidFileInvalidPeekTest, ReturnCode) {
+  RunTest();
+}
+
+const DecodeParam kVP9InvalidFileInvalidPeekTests[] = {
+  {1, "invalid-vp90-01-v2.webm"},
+};
+
+VP9_INSTANTIATE_TEST_CASE(InvalidFileInvalidPeekTest,
+                          ::testing::ValuesIn(kVP9InvalidFileInvalidPeekTests));
 
 const DecodeParam kMultiThreadedVP9InvalidFileTests[] = {
   {4, "invalid-vp90-2-08-tile_1x4_frame_parallel_all_key.webm"},

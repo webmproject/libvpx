@@ -1065,9 +1065,11 @@ int vp9_read_sync_code(struct vp9_read_bit_buffer *const rb) {
          vp9_rb_read_literal(rb, 8) == VP9_SYNC_CODE_2;
 }
 
-static BITSTREAM_PROFILE read_profile(struct vp9_read_bit_buffer *rb) {
+BITSTREAM_PROFILE vp9_read_profile(struct vp9_read_bit_buffer *rb) {
   int profile = vp9_rb_read_bit(rb);
   profile |= vp9_rb_read_bit(rb) << 1;
+  if (profile > 2)
+    profile += vp9_rb_read_bit(rb);
   return (BITSTREAM_PROFILE) profile;
 }
 
@@ -1083,7 +1085,7 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
       vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
                          "Invalid frame marker");
 
-  cm->profile = read_profile(rb);
+  cm->profile = vp9_read_profile(rb);
   if (cm->profile >= MAX_PROFILES)
     vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
                        "Unsupported bitstream profile");
@@ -1118,7 +1120,7 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
     cm->color_space = (COLOR_SPACE)vp9_rb_read_literal(rb, 3);
     if (cm->color_space != SRGB) {
       vp9_rb_read_bit(rb);  // [16,235] (including xvycc) vs [0,255] range
-      if (cm->profile >= PROFILE_1) {
+      if (cm->profile == PROFILE_1 || cm->profile == PROFILE_3) {
         cm->subsampling_x = vp9_rb_read_bit(rb);
         cm->subsampling_y = vp9_rb_read_bit(rb);
         vp9_rb_read_bit(rb);  // has extra plane
@@ -1126,12 +1128,12 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
         cm->subsampling_y = cm->subsampling_x = 1;
       }
     } else {
-      if (cm->profile >= PROFILE_1) {
+      if (cm->profile == PROFILE_1 || cm->profile == PROFILE_3) {
         cm->subsampling_y = cm->subsampling_x = 0;
         vp9_rb_read_bit(rb);  // has extra plane
       } else {
         vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
-                           "RGB not supported in profile 0");
+                           "4:4:4 color not supported in profile 0");
       }
     }
 

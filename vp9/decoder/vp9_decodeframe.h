@@ -29,6 +29,7 @@ void vp9_decode_frame(struct VP9Decoder *pbi,
 int vp9_read_sync_code(struct vp9_read_bit_buffer *const rb);
 void vp9_read_frame_size(struct vp9_read_bit_buffer *rb,
                          int *width, int *height);
+BITSTREAM_PROFILE vp9_read_profile(struct vp9_read_bit_buffer *rb);
 
 #ifdef __cplusplus
 }  // extern "C"

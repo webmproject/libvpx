@@ -1024,9 +1024,22 @@ static void write_sync_code(struct vp9_write_bit_buffer *wb) {
 
 static void write_profile(BITSTREAM_PROFILE profile,
                           struct vp9_write_bit_buffer *wb) {
-  assert(profile < MAX_PROFILES);
-  vp9_wb_write_bit(wb, profile & 1);
-  vp9_wb_write_bit(wb, profile >> 1);
+  switch (profile) {
+    case PROFILE_0:
+      vp9_wb_write_literal(wb, 0, 2);
+      break;
+    case PROFILE_1:
+      vp9_wb_write_literal(wb, 2, 2);
+      break;
+    case PROFILE_2:
+      vp9_wb_write_literal(wb, 1, 2);
+      break;
+    case PROFILE_3:
+      vp9_wb_write_literal(wb, 6, 3);
+      break;
+    default:
+      assert(0);
+  }
 }
 
 static void write_uncompressed_header(VP9_COMP *cpi,
@@ -1052,13 +1065,13 @@ static void write_uncompressed_header(VP9_COMP *cpi,
     vp9_wb_write_literal(wb, cs, 3);
     if (cs != SRGB) {
       vp9_wb_write_bit(wb, 0);  // 0: [16, 235] (i.e. xvYCC), 1: [0, 255]
-      if (cm->profile >= PROFILE_1) {
+      if (cm->profile == PROFILE_1 || cm->profile == PROFILE_3) {
         vp9_wb_write_bit(wb, cm->subsampling_x);
         vp9_wb_write_bit(wb, cm->subsampling_y);
         vp9_wb_write_bit(wb, 0);  // has extra plane
       }
     } else {
-      assert(cm->profile == PROFILE_1);
+      assert(cm->profile == PROFILE_1 || cm->profile == PROFILE_3);
       vp9_wb_write_bit(wb, 0);  // has extra plane
     }
 
