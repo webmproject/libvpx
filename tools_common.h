@@ -120,7 +120,7 @@ int read_yuv_frame(struct VpxInputContext *input_ctx, vpx_image_t *yuv_frame);
 typedef struct VpxInterface {
   const char *const name;
   const uint32_t fourcc;
-  vpx_codec_iface_t *(*const interface)();
+  vpx_codec_iface_t *(*const codec_interface)();
 } VpxInterface;
 
 int get_vpx_encoder_count();

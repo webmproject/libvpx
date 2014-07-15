@@ -426,7 +426,7 @@ void usage_exit() {
   for (i = 0; i < get_vpx_encoder_count(); ++i) {
     const VpxInterface *const encoder = get_vpx_encoder_by_index(i);
     fprintf(stderr, "    %-6s - %s\n",
-            encoder->name, vpx_codec_iface_name(encoder->interface()));
+            encoder->name, vpx_codec_iface_name(encoder->codec_interface()));
   }
 
   exit(EXIT_FAILURE);
@@ -798,7 +798,7 @@ static struct stream_state *new_stream(struct VpxEncoderConfig *global,
     vpx_codec_err_t  res;
 
     /* Populate encoder configuration */
-    res = vpx_codec_enc_config_default(global->codec->interface(),
+    res = vpx_codec_enc_config_default(global->codec->codec_interface(),
                                        &stream->config.cfg,
                                        global->usage);
     if (res)
@@ -1112,7 +1112,7 @@ static void show_stream_config(struct stream_state *stream,
 
   if (stream->index == 0) {
     fprintf(stderr, "Codec: %s\n",
-            vpx_codec_iface_name(global->codec->interface()));
+            vpx_codec_iface_name(global->codec->codec_interface()));
     fprintf(stderr, "Source file: %s File Type: %s Format: %s\n",
             input->filename,
             file_type_to_string(input->file_type),
@@ -1262,7 +1262,7 @@ static void initialize_encoder(struct stream_state *stream,
   flags |= global->out_part ? VPX_CODEC_USE_OUTPUT_PARTITION : 0;
 
   /* Construct Encoder Context */
-  vpx_codec_enc_init(&stream->encoder, global->codec->interface(),
+  vpx_codec_enc_init(&stream->encoder, global->codec->codec_interface(),
                      &stream->config.cfg, flags);
   ctx_exit_on_error(&stream->encoder, "Failed to initialize encoder");
 
@@ -1283,7 +1283,7 @@ static void initialize_encoder(struct stream_state *stream,
 #if CONFIG_DECODERS
   if (global->test_decode != TEST_DECODE_OFF) {
     const VpxInterface *decoder = get_vpx_decoder_by_name(global->codec->name);
-    vpx_codec_dec_init(&stream->decoder, decoder->interface(), NULL, 0);
+    vpx_codec_dec_init(&stream->decoder, decoder->codec_interface(), NULL, 0);
   }
 #endif
 }

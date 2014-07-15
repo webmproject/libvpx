@@ -466,7 +466,7 @@ int main(int argc, char **argv) {
   if (!encoder)
     die("Unsupported codec.");
 
-  printf("Using %s\n", vpx_codec_iface_name(encoder->interface()));
+  printf("Using %s\n", vpx_codec_iface_name(encoder->codec_interface()));
 
   width = strtol(argv[4], NULL, 0);
   height = strtol(argv[5], NULL, 0);
@@ -488,7 +488,7 @@ int main(int argc, char **argv) {
   }
 
   // Populate encoder configuration.
-  res = vpx_codec_enc_config_default(encoder->interface(), &cfg, 0);
+  res = vpx_codec_enc_config_default(encoder->codec_interface(), &cfg, 0);
   if (res) {
     printf("Failed to get config: %s\n", vpx_codec_err_to_string(res));
     return EXIT_FAILURE;
@@ -566,7 +566,7 @@ int main(int argc, char **argv) {
   cfg.ss_number_layers = 1;
 
   // Initialize codec.
-  if (vpx_codec_enc_init(&codec, encoder->interface(), &cfg, 0))
+  if (vpx_codec_enc_init(&codec, encoder->codec_interface(), &cfg, 0))
     die_codec(&codec, "Failed to initialize encoder");
 
   if (strncmp(encoder->name, "vp8", 3) == 0) {

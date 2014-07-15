@@ -138,9 +138,9 @@ int main(int argc, char **argv) {
     die("Failed to allocate image.");
   }
 
-  printf("Using %s\n", vpx_codec_iface_name(encoder->interface()));
+  printf("Using %s\n", vpx_codec_iface_name(encoder->codec_interface()));
 
-  res = vpx_codec_enc_config_default(encoder->interface(), &cfg, 0);
+  res = vpx_codec_enc_config_default(encoder->codec_interface(), &cfg, 0);
   if (res)
     die_codec(&codec, "Failed to get default codec config.");
 
@@ -157,7 +157,7 @@ int main(int argc, char **argv) {
   if (!(infile = fopen(argv[3], "rb")))
     die("Failed to open %s for reading.", argv[3]);
 
-  if (vpx_codec_enc_init(&codec, encoder->interface(), &cfg, 0))
+  if (vpx_codec_enc_init(&codec, encoder->codec_interface(), &cfg, 0))
     die_codec(&codec, "Failed to initialize encoder");
 
   while (vpx_img_read(&raw, infile)) {
