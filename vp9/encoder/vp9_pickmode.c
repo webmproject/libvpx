@@ -343,6 +343,12 @@ static void encode_breakout_test(VP9_COMP *cpi, MACROBLOCK *x,
   }
 }
 
+static const THR_MODES mode_idx[MAX_REF_FRAMES - 1][4] = {
+  {THR_NEARESTMV, THR_NEARMV, THR_ZEROMV, THR_NEWMV},
+  {THR_NEARESTG, THR_NEARG, THR_ZEROG, THR_NEWG},
+  {THR_NEARESTA, THR_NEARA, THR_ZEROA, THR_NEWA},
+};
+
 // TODO(jingning) placeholder for inter-frame non-RD mode decision.
 // this needs various further optimizations. to be continued..
 int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
@@ -367,7 +373,6 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t best_rd = INT64_MAX;
   int64_t this_rd = INT64_MAX;
   int skip_txfm = 0;
-
   int rate = INT_MAX;
   int64_t dist = INT64_MAX;
   // var_y and sse_y are saved to be used in skipping checking
@@ -385,18 +390,16 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   const int *const rd_threshes = cpi->rd.threshes[segment_id][bsize];
   const int *const rd_thresh_freq_fact = cpi->rd.thresh_freq_fact[bsize];
   // Mode index conversion form THR_MODES to PREDICTION_MODE for a ref frame.
-  int mode_idx[MB_MODE_COUNT] = {0};
   INTERP_FILTER filter_ref = cm->interp_filter;
   int bsl = mi_width_log2(bsize);
   const int pred_filter_search = cm->interp_filter == SWITCHABLE ?
       (((mi_row + mi_col) >> bsl) + get_chessboard_index(cm)) % 2 : 0;
   int const_motion[MAX_REF_FRAMES] = { 0 };
-
-  // For speed 6, the result of interp filter is reused later in actual encoding
-  // process.
   int bh = num_4x4_blocks_high_lookup[bsize] << 2;
   int bw = num_4x4_blocks_wide_lookup[bsize] << 2;
   int pixels_in_block = bh * bw;
+  // For speed 6, the result of interp filter is reused later in actual encoding
+  // process.
   // tmp[3] points to dst buffer, and the other 3 point to allocated buffers.
   PRED_BUFFER tmp[4];
   DECLARE_ALIGNED_ARRAY(16, uint8_t, pred_buf, 3 * 64 * 64);
@@ -417,14 +420,12 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       tmp[i].stride = bw;
       tmp[i].in_use = 0;
     }
-
     tmp[3].data = pd->dst.buf;
     tmp[3].stride = pd->dst.stride;
     tmp[3].in_use = 0;
   }
 
   x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
-
   x->skip = 0;
 
   // initialize mode decisions
@@ -438,11 +439,18 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                       tx_mode_to_biggest_tx_size[cm->tx_mode]);
   mbmi->interp_filter = cm->interp_filter == SWITCHABLE ?
                         EIGHTTAP : cm->interp_filter;
-  mbmi->skip = 0;
   mbmi->segment_id = segment_id;
 
-  for (ref_frame = LAST_FRAME; ref_frame <= LAST_FRAME ; ++ref_frame) {
+  for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
     x->pred_mv_sad[ref_frame] = INT_MAX;
+    frame_mv[NEWMV][ref_frame].as_int = INVALID_MV;
+    frame_mv[ZEROMV][ref_frame].as_int = 0;
+
+    if (xd->up_available)
+      filter_ref = xd->mi[-xd->mi_stride]->mbmi.interp_filter;
+    else if (xd->left_available)
+      filter_ref = xd->mi[-1]->mbmi.interp_filter;
+
     if (cpi->ref_frame_flags & flag_list[ref_frame]) {
       const YV12_BUFFER_CONFIG *yv12 = get_ref_frame_buffer(cpi, ref_frame);
       int_mv *const candidates = mbmi->ref_mvs[ref_frame];
@@ -465,19 +473,9 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       if (!vp9_is_scaled(sf) && bsize >= BLOCK_8X8)
         vp9_mv_pred(cpi, x, yv12_mb[ref_frame][0].buf, yv12->y_stride,
                     ref_frame, bsize);
-    }
-    frame_mv[NEWMV][ref_frame].as_int = INVALID_MV;
-    frame_mv[ZEROMV][ref_frame].as_int = 0;
-  }
-
-  if (xd->up_available)
-    filter_ref = xd->mi[-xd->mi_stride]->mbmi.interp_filter;
-  else if (xd->left_available)
-    filter_ref = xd->mi[-1]->mbmi.interp_filter;
-
-  for (ref_frame = LAST_FRAME; ref_frame <= LAST_FRAME ; ++ref_frame) {
-    if (!(cpi->ref_frame_flags & flag_list[ref_frame]))
+    } else {
       continue;
+    }
 
     // Select prediction reference frames.
     xd->plane[0].pre[0] = yv12_mb[ref_frame][0];
@@ -487,16 +485,9 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
     mbmi->ref_frame[0] = ref_frame;
 
-    // Set conversion index for LAST_FRAME.
-    if (ref_frame == LAST_FRAME) {
-      mode_idx[NEARESTMV] = THR_NEARESTMV;   // LAST_FRAME, NEARESTMV
-      mode_idx[NEARMV] = THR_NEARMV;         // LAST_FRAME, NEARMV
-      mode_idx[ZEROMV] = THR_ZEROMV;         // LAST_FRAME, ZEROMV
-      mode_idx[NEWMV] = THR_NEWMV;           // LAST_FRAME, NEWMV
-    }
-
     for (this_mode = NEARESTMV; this_mode <= NEWMV; ++this_mode) {
       int rate_mv = 0;
+      int mode_rd_thresh;
 
       if (const_motion[ref_frame] &&
           (this_mode == NEARMV || this_mode == ZEROMV))
@@ -505,7 +496,9 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       if (!(cpi->sf.inter_mode_mask[bsize] & (1 << this_mode)))
         continue;
 
-      if (rd_less_than_thresh(best_rd, rd_threshes[mode_idx[this_mode]],
+      mode_rd_thresh =  rd_threshes[mode_idx[ref_frame - LAST_FRAME]
+                                            [this_mode - NEARESTMV]];
+      if (rd_less_than_thresh(best_rd, mode_rd_thresh,
                               rd_thresh_freq_fact[this_mode]))
         continue;
 
@@ -644,6 +637,10 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       if (x->skip)
         break;
     }
+    // If the current reference frame is valid and we found a usable mode,
+    // we are done.
+    if (best_rd < INT64_MAX)
+      break;
   }
 
   // If best prediction is not in dst buf, then copy the prediction block from
