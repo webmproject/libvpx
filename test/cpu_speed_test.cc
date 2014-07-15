@@ -139,5 +139,5 @@ VP9_INSTANTIATE_TEST_CASE(
     CpuSpeedTest,
     ::testing::Values(::libvpx_test::kTwoPassGood, ::libvpx_test::kOnePassGood,
                       ::libvpx_test::kRealTime),
-    ::testing::Range(0, 8));
+    ::testing::Range(0, 9));
 }  // namespace
