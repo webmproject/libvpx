@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//gAg\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1027,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-07-15T18:18:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//gBw\u003d",
+      "revId": "2b41ff8bc462ce9741d043e3fb80f93a63d6019f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//gB0\u003d",
         "filename": "vp9/encoder/vp9_bitstream.c",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2014-07-15T17:20:08Z",
       "side": 1,
       "message": "vp9_wb_write_literal() might be a little more compact here.",
+      "revId": "2b41ff8bc462ce9741d043e3fb80f93a63d6019f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//gAc\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1044,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-07-15T18:18:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//gB0\u003d",
       "revId": "2b41ff8bc462ce9741d043e3fb80f93a63d6019f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
