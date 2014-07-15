@@ -178,7 +178,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
 
 #ifdef CONFIG_SPATIAL_SVC
   if (cfg->ss_number_layers > 1) {
-    int i, alt_ref_sum = 0;
+    unsigned int i, alt_ref_sum = 0;
     for (i = 0; i < cfg->ss_number_layers; ++i) {
       if (cfg->ss_enable_auto_alt_ref[i])
         ++alt_ref_sum;
