@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//gKE\u003d",
+        "filename": "vpx_scale/generic/yv12config.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-07-15T00:02:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//ge4\u003d",
+      "revId": "94330f203a503d078eac750b2568aae24cd100b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//ges\u003d",
         "filename": "vpx_scale/generic/yv12config.c",
         "patchSetId": 10
@@ -30,6 +48,24 @@
       "writtenOn": "2014-07-11T18:40:26Z",
       "side": 1,
       "message": "if buffer_alloc_sz a uint64? thought it was size_t; in any case frame_size is uint64",
+      "revId": "94330f203a503d078eac750b2568aae24cd100b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//gKA\u003d",
+        "filename": "vpx_scale/generic/yv12config.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-07-15T00:02:29Z",
+      "side": 1,
+      "message": "no ybf-\u003ebuffer_alloc_sz is an int.   This is a bigger problem I can start addressing tomorrow.   probably in a separate patch.",
+      "parentUuid": "AAAAdn//ges\u003d",
       "revId": "94330f203a503d078eac750b2568aae24cd100b8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
