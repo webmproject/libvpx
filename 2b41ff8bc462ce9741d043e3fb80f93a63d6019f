@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//gBw\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1027,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-07-15T17:20:08Z",
+      "side": 1,
+      "message": "I think with the assert(0) in default this one is now superfluous.",
+      "revId": "2b41ff8bc462ce9741d043e3fb80f93a63d6019f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//gB0\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1044,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-07-15T17:20:08Z",
+      "side": 1,
+      "message": "vp9_wb_write_literal() might be a little more compact here.",
+      "revId": "2b41ff8bc462ce9741d043e3fb80f93a63d6019f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
