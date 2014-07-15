@@ -30,6 +30,10 @@ struct DecodeParam {
   const char *filename;
 };
 
+std::ostream &operator<<(std::ostream &os, const DecodeParam &dp) {
+  return os << "threads: " << dp.threads << " file: " << dp.filename;
+}
+
 class InvalidFileTest
     : public ::libvpx_test::DecoderTest,
       public ::libvpx_test::CodecTestWithParam<DecodeParam> {
