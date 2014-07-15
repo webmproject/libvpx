@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//gBU\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-15T18:01:05Z",
+      "side": 1,
+      "message": "this is deprecated. since you\u0027re writing for windows, just use the windows api",
+      "revId": "f8df037b5d3bbc288c268f8b4ea66cb243507323",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//gBI\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-15T18:01:05Z",
+      "side": 1,
+      "message": "why not just have a class which has a file() accessor and if necessary deletes the file when it falls out of scope?",
+      "revId": "f8df037b5d3bbc288c268f8b4ea66cb243507323",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
