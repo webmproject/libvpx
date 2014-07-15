@@ -592,6 +592,40 @@ static void mode_info_conversion(VP9_COMP *cpi, const TileInfo *const tile,
     mbmi->mv[0].as_int = 0;
     mbmi->mv[1].as_int = 0;
   }
+
+  if (mbmi->sb_type < BLOCK_8X8) {
+    MODE_INFO *mi = xd->mi[0];
+    const int num_4x4_w = num_4x4_blocks_wide_lookup[mbmi->sb_type];  // 1 or 2
+    const int num_4x4_h = num_4x4_blocks_high_lookup[mbmi->sb_type];  // 1 or 2
+    int idx, idy;
+    for (idy = 0; idy < 2; idy += num_4x4_h) {
+      for (idx = 0; idx < 2; idx += num_4x4_w) {
+        const int j = idy * 2 + idx;
+        int ref;
+        const PREDICTION_MODE b_mode = mi->bmi[j].as_mode;
+
+        if (b_mode == NEARESTMV || b_mode == NEARMV) {
+          for (ref = 0; ref < 1 + has_second_ref(mbmi); ++ref) {
+            vp9_append_sub8x8_mvs_for_idx(cm, xd, tile, j, ref, mi_row, mi_col,
+                                          &nearest_mv, &near_mv);
+            mi->bmi[j].as_mv[ref].as_int = (b_mode == NEARESTMV) ?
+                nearest_mv.as_int : near_mv.as_int;
+          }
+        }
+
+        if (b_mode == ZEROMV)
+          for (ref = 0; ref < 1 + has_second_ref(mbmi); ++ref)
+            mi->bmi[j].as_mv[ref].as_int = 0;
+
+        if (num_4x4_h == 2)
+          mi->bmi[j + 2] = mi->bmi[j];
+        if (num_4x4_w == 2)
+          mi->bmi[j + 1] = mi->bmi[j];
+      }
+    }
+
+    mbmi->mode = mi->bmi[3].as_mode;
+  }
 }
 #endif
 
