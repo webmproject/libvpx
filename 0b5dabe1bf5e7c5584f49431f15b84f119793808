@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//gEo\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_sad_neon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-07-15T15:26:14Z",
+      "side": 1,
+      "message": "Would this work?\n\n vec_lo_1, vec_lo_2, vec_hi_1, vec_hi_2 \u003d 0;\n\n for (i\u003d0; i\u003c64: ++i) {\n   vec_lo_1 \u003d vabal(00);\n   vec_hi_1 \u003d vabal(00);\n   vec_lo_2 \u003d vabal(16);\n   vec_hi_2 \u003d vabal(16);\n   vec_lo_1 \u003d vabal(32);\n   vec_hi_1 \u003d vabal(32);\n   vec_lo_2 \u003d vabal(48);\n   vec_hi_2 \u003d vabal(48);\n }\n\n vec_w_lo \u003d vaddw_u16(vget_low_u16(vec_lo_1));\n vec_w_hi \u003d vaddw_u16(vget_low_u16(vec_hi_1));\n vec_w_lo \u003d vaddw_u16(vget_high_u16(vec_lo_1));\n vec_w_hi \u003d vaddw_u16(vget_high_u16(vec_hi_1));\n vec_w_lo \u003d vaddw_u16(vget_low_u16(vec_lo_2));\n vec_w_hi \u003d vaddw_u16(vget_low_u16(vec_hi_2));\n vec_w_lo \u003d vaddw_u16(vget_high_u16(vec_lo_2));\n vec_w_hi \u003d vaddw_u16(vget_high_u16(vec_hi_2));\n\n return horizontal_add_32x4(vec_w_lo, vec_w_hi);\n\nI don\u0027t know about register pressure and whether or not it would be faster.",
+      "revId": "0b5dabe1bf5e7c5584f49431f15b84f119793808",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
