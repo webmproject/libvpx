@@ -61,7 +61,8 @@ void vp8_denoiser_denoise_mb(VP8_DENOISER *denoiser,
                              loop_filter_info_n *lfi_n,
                              int mb_row,
                              int mb_col,
-                             int block_index);
+                             int block_index,
+                             int uv_denoise);
 
 #ifdef __cplusplus
 }  // extern "C"
