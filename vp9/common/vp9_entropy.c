@@ -15,6 +15,14 @@
 #include "vpx_mem/vpx_mem.h"
 #include "vpx/vpx_integer.h"
 
+const vp9_prob vp9_cat1_prob[] = { 159 };
+const vp9_prob vp9_cat2_prob[] = { 165, 145 };
+const vp9_prob vp9_cat3_prob[] = { 173, 148, 140 };
+const vp9_prob vp9_cat4_prob[] = { 176, 155, 140, 135 };
+const vp9_prob vp9_cat5_prob[] = { 180, 157, 141, 134, 130 };
+const vp9_prob vp9_cat6_prob[] = {
+    254, 254, 254, 252, 249, 243, 230, 196, 177, 153, 140, 133, 130, 129
+};
 
 const uint8_t vp9_coefband_trans_8x8plus[1024] = {
   0, 1, 1, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4,
