@@ -166,7 +166,7 @@ void usage_exit() {
   for (i = 0; i < get_vpx_decoder_count(); ++i) {
     const VpxInterface *const decoder = get_vpx_decoder_by_index(i);
     fprintf(stderr, "    %-6s - %s\n",
-            decoder->name, vpx_codec_iface_name(decoder->interface()));
+            decoder->name, vpx_codec_iface_name(decoder->codec_interface()));
   }
 
   exit(EXIT_FAILURE);
@@ -286,7 +286,7 @@ int file_is_raw(struct VpxInputContext *input) {
     if (mem_get_le32(buf) < 256 * 1024 * 1024) {
       for (i = 0; i < get_vpx_decoder_count(); ++i) {
         const VpxInterface *const decoder = get_vpx_decoder_by_index(i);
-        if (!vpx_codec_peek_stream_info(decoder->interface(),
+        if (!vpx_codec_peek_stream_info(decoder->codec_interface(),
                                         buf + 4, 32 - 4, &si)) {
           is_raw = 1;
           input->fourcc = decoder->fourcc;
@@ -728,7 +728,8 @@ int main_loop(int argc, const char **argv_) {
 
   dec_flags = (postproc ? VPX_CODEC_USE_POSTPROC : 0) |
               (ec_enabled ? VPX_CODEC_USE_ERROR_CONCEALMENT : 0);
-  if (vpx_codec_dec_init(&decoder, interface->interface(), &cfg, dec_flags)) {
+  if (vpx_codec_dec_init(&decoder, interface->codec_interface(),
+                         &cfg, dec_flags)) {
     fprintf(stderr, "Failed to initialize decoder: %s\n",
             vpx_codec_error(&decoder));
     return EXIT_FAILURE;
