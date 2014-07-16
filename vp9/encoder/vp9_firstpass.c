@@ -2192,14 +2192,6 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
     cpi->refresh_golden_frame = 1;
   }
 
-  {
-    FIRSTPASS_STATS next_frame;
-    if (lookup_next_frame_stats(twopass, &next_frame) != EOF) {
-      twopass->next_iiratio = (int)(next_frame.intra_error /
-                                 DOUBLE_DIVIDE_CHECK(next_frame.coded_error));
-    }
-  }
-
   configure_buffer_updates(cpi);
 
   target_rate = twopass->gf_group.bit_allocation[twopass->gf_group.index];
