@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//fyU\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_sad_neon.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-07-16T19:00:52Z",
+      "side": 1,
+      "message": "nit: double semicolon",
+      "revId": "7bb0c6f026b1ab27b477d1de2bf0bea10149be22",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
