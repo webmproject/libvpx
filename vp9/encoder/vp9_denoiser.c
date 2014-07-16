@@ -13,6 +13,7 @@
 #include "vpx_scale/yv12config.h"
 #include "vpx/vpx_integer.h"
 #include "vp9/common/vp9_reconinter.h"
+#include "vp9/encoder/vp9_context_tree.h"
 #include "vp9/encoder/vp9_denoiser.h"
 
 /* The VP9 denoiser is a work-in-progress. It currently is only designed to work
@@ -183,9 +184,11 @@ static VP9_DENOISER_DECISION perform_motion_compensation(VP9_DENOISER *denoiser,
                                                          BLOCK_SIZE bs,
                                                          int increase_denoising,
                                                          int mi_row,
-                                                         int mi_col) {
+                                                         int mi_col,
+                                                         PICK_MODE_CONTEXT *ctx
+                                                         ) {
   int mv_col, mv_row;
-  int sse_diff = denoiser->zero_mv_sse - denoiser->best_sse;
+  int sse_diff = ctx->zeromv_sse - ctx->newmv_sse;
   MV_REFERENCE_FRAME frame;
   MACROBLOCKD *filter_mbd = &mb->e_mbd;
   MB_MODE_INFO *mbmi = &filter_mbd->mi[0]->mbmi;
@@ -204,29 +207,29 @@ static VP9_DENOISER_DECISION perform_motion_compensation(VP9_DENOISER *denoiser,
     saved_dst[i] = filter_mbd->plane[i].dst;
   }
 
-  mv_col = denoiser->best_sse_mv.as_mv.col;
-  mv_row = denoiser->best_sse_mv.as_mv.row;
+  mv_col = ctx->best_sse_mv.as_mv.col;
+  mv_row = ctx->best_sse_mv.as_mv.row;
 
-  frame = denoiser->best_reference_frame;
+  frame = ctx->best_reference_frame;
 
   // If the best reference frame uses inter-prediction and there is enough of a
   // difference in sum-squared-error, use it.
   if (frame != INTRA_FRAME &&
       sse_diff > sse_diff_thresh(bs, increase_denoising, mv_row, mv_col)) {
-    mbmi->ref_frame[0] = denoiser->best_reference_frame;
-    mbmi->mode = denoiser->best_sse_inter_mode;
-    mbmi->mv[0] = denoiser->best_sse_mv;
+    mbmi->ref_frame[0] = ctx->best_reference_frame;
+    mbmi->mode = ctx->best_sse_inter_mode;
+    mbmi->mv[0] = ctx->best_sse_mv;
   } else {
     // Otherwise, use the zero reference frame.
-    frame = denoiser->best_zeromv_reference_frame;
+    frame = ctx->best_zeromv_reference_frame;
 
-    mbmi->ref_frame[0] = denoiser->best_zeromv_reference_frame;
+    mbmi->ref_frame[0] = ctx->best_zeromv_reference_frame;
     mbmi->mode = ZEROMV;
     mbmi->mv[0].as_int = 0;
 
-    denoiser->best_sse_inter_mode = ZEROMV;
-    denoiser->best_sse_mv.as_int = 0;
-    denoiser->best_sse = denoiser->zero_mv_sse;
+    ctx->best_sse_inter_mode = ZEROMV;
+    ctx->best_sse_mv.as_int = 0;
+    ctx->newmv_sse = ctx->zeromv_sse;
   }
 
   // Set the pointers in the MACROBLOCKD to point to the buffers in the denoiser
@@ -278,10 +281,10 @@ static VP9_DENOISER_DECISION perform_motion_compensation(VP9_DENOISER *denoiser,
     filter_mbd->plane[i].dst = saved_dst[i];
   }
 
-  mv_row = denoiser->best_sse_mv.as_mv.row;
-  mv_col = denoiser->best_sse_mv.as_mv.col;
+  mv_row = ctx->best_sse_mv.as_mv.row;
+  mv_col = ctx->best_sse_mv.as_mv.col;
 
-  if (denoiser->best_sse > sse_thresh(bs, increase_denoising)) {
+  if (ctx->newmv_sse > sse_thresh(bs, increase_denoising)) {
     return COPY_BLOCK;
   }
   if (mv_row * mv_row + mv_col * mv_col >
@@ -292,7 +295,8 @@ static VP9_DENOISER_DECISION perform_motion_compensation(VP9_DENOISER *denoiser,
 }
 
 void vp9_denoiser_denoise(VP9_DENOISER *denoiser, MACROBLOCK *mb,
-                          int mi_row, int mi_col, BLOCK_SIZE bs) {
+                          int mi_row, int mi_col, BLOCK_SIZE bs,
+                          PICK_MODE_CONTEXT *ctx) {
   VP9_DENOISER_DECISION decision = FILTER_BLOCK;
   YV12_BUFFER_CONFIG avg = denoiser->running_avg_y[INTRA_FRAME];
   YV12_BUFFER_CONFIG mc_avg = denoiser->mc_running_avg_y;
@@ -303,7 +307,7 @@ void vp9_denoiser_denoise(VP9_DENOISER *denoiser, MACROBLOCK *mb,
 
   decision = perform_motion_compensation(denoiser, mb, bs,
                                          denoiser->increase_denoising,
-                                         mi_row, mi_col);
+                                         mi_row, mi_col, ctx);
 
   if (decision == FILTER_BLOCK) {
     decision = denoiser_filter(src.buf, src.stride,
@@ -362,24 +366,25 @@ void vp9_denoiser_update_frame_info(VP9_DENOISER *denoiser,
   }
 }
 
-void vp9_denoiser_reset_frame_stats(VP9_DENOISER *denoiser) {
-  denoiser->zero_mv_sse = UINT_MAX;
-  denoiser->best_sse = UINT_MAX;
+void vp9_denoiser_reset_frame_stats(PICK_MODE_CONTEXT *ctx) {
+  ctx->zeromv_sse = UINT_MAX;
+  ctx->newmv_sse = UINT_MAX;
 }
 
 void vp9_denoiser_update_frame_stats(VP9_DENOISER *denoiser, MB_MODE_INFO *mbmi,
-                                     unsigned int sse, PREDICTION_MODE mode) {
+                                     unsigned int sse, PREDICTION_MODE mode,
+                                     PICK_MODE_CONTEXT *ctx) {
   // TODO(tkopp): Use both MVs if possible
-  if (mbmi->mv[0].as_int == 0 && sse < denoiser->zero_mv_sse) {
-    denoiser->zero_mv_sse = sse;
-    denoiser->best_zeromv_reference_frame = mbmi->ref_frame[0];
+  if (mbmi->mv[0].as_int == 0 && sse < ctx->zeromv_sse) {
+    ctx->zeromv_sse = sse;
+    ctx->best_zeromv_reference_frame = mbmi->ref_frame[0];
   }
 
-  if (mbmi->mv[0].as_int != 0 && sse < denoiser->best_sse) {
-    denoiser->best_sse = sse;
-    denoiser->best_sse_inter_mode = mode;
-    denoiser->best_sse_mv = mbmi->mv[0];
-    denoiser->best_reference_frame = mbmi->ref_frame[0];
+  if (mode == NEWMV) {
+    ctx->newmv_sse = sse;
+    ctx->best_sse_inter_mode = mode;
+    ctx->best_sse_mv = mbmi->mv[0];
+    ctx->best_reference_frame = mbmi->ref_frame[0];
   }
 }
 
