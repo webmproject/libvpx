@@ -372,6 +372,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->elevate_newmv_thresh = 0;
   // Recode loop tolerence %.
   sf->recode_tolerance = 25;
+  sf->default_interp_filter = SWITCHABLE;
 
   switch (oxcf->mode) {
     case ONE_PASS_BEST:

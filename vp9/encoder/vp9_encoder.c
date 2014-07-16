@@ -51,8 +51,6 @@
 
 void vp9_coef_tree_initialize();
 
-#define DEFAULT_INTERP_FILTER SWITCHABLE
-
 #define SHARP_FILTER_QTHRESH 0          /* Q threshold for 8-tap sharp filter */
 
 #define ALTREF_HIGH_PRECISION_MV 1      // Whether to use high precision mv
@@ -636,7 +634,7 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   rc->worst_quality = cpi->oxcf.worst_allowed_q;
   rc->best_quality = cpi->oxcf.best_allowed_q;
 
-  cm->interp_filter = DEFAULT_INTERP_FILTER;
+  cm->interp_filter = cpi->sf.default_interp_filter;
 
   cm->display_width = cpi->oxcf.width;
   cm->display_height = cpi->oxcf.height;
@@ -2247,7 +2245,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   q = vp9_rc_pick_q_and_bounds(cpi, &bottom_index, &top_index);
 
   if (!frame_is_intra_only(cm)) {
-    cm->interp_filter = DEFAULT_INTERP_FILTER;
+    cm->interp_filter = cpi->sf.default_interp_filter;
     /* TODO: Decide this more intelligently */
     vp9_set_high_precision_mv(cpi, q < HIGH_PRECISION_MV_QTHRESH);
   }
