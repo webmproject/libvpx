@@ -133,6 +133,10 @@ static const arg_def_t use_yv12 = ARG_DEF(NULL, "yv12", 0,
                                           "Input file is YV12 ");
 static const arg_def_t use_i420 = ARG_DEF(NULL, "i420", 0,
                                           "Input file is I420 (default)");
+static const arg_def_t use_i422 = ARG_DEF(NULL, "i422", 0,
+                                          "Input file is I422");
+static const arg_def_t use_i444 = ARG_DEF(NULL, "i444", 0,
+                                          "Input file is I444");
 static const arg_def_t codecarg = ARG_DEF(NULL, "codec", 1,
                                           "Codec to use");
 static const arg_def_t passes           = ARG_DEF("p", "passes", 1,
@@ -234,8 +238,8 @@ static const arg_def_t lag_in_frames    = ARG_DEF(NULL, "lag-in-frames", 1,
                                                   "Max number of frames to lag");
 
 static const arg_def_t *global_args[] = {
-  &use_yv12, &use_i420, &usage, &threads, &profile,
-  &width, &height,
+  &use_yv12, &use_i420, &use_i422, &use_i444, &usage, &threads,
+  &profile, &width, &height,
 #if CONFIG_WEBM_IO
   &stereo_mode,
 #endif
@@ -765,7 +769,7 @@ static void parse_global_config(struct VpxEncoderConfig *global, char **argv) {
   memset(global, 0, sizeof(*global));
   global->codec = get_vpx_encoder_by_index(0);
   global->passes = 0;
-  global->use_i420 = 1;
+  global->color_type = I420;
   /* Assign default deadline to good quality */
   global->deadline = VPX_DL_GOOD_QUALITY;
 
@@ -798,9 +802,13 @@ static void parse_global_config(struct VpxEncoderConfig *global, char **argv) {
     else if (arg_match(&arg, &rt_dl, argi))
       global->deadline = VPX_DL_REALTIME;
     else if (arg_match(&arg, &use_yv12, argi))
-      global->use_i420 = 0;
+      global->color_type = YV12;
     else if (arg_match(&arg, &use_i420, argi))
-      global->use_i420 = 1;
+      global->color_type = I420;
+    else if (arg_match(&arg, &use_i422, argi))
+      global->color_type = I422;
+    else if (arg_match(&arg, &use_i444, argi))
+      global->color_type = I444;
     else if (arg_match(&arg, &quietarg, argi))
       global->quiet = 1;
     else if (arg_match(&arg, &verbosearg, argi))
@@ -1440,6 +1448,11 @@ static void encode_frame(struct stream_state *stream,
   if (img) {
     if ((img->fmt & VPX_IMG_FMT_HIGH) &&
         (img->d_w != cfg->g_w || img->d_h != cfg->g_h)) {
+      if (img->fmt != VPX_IMG_FMT_I42016) {
+        fprintf(stderr, "%s can only scale 4:2:0 inputs\n", exec_name);
+        exit(EXIT_FAILURE);
+      }
+#if CONFIG_LIBYUV
       if (!stream->img)
         stream->img = vpx_img_alloc(NULL, VPX_IMG_FMT_I42016,
                                     cfg->g_w, cfg->g_h, 16);
@@ -1459,6 +1472,14 @@ static void encode_frame(struct stream_state *stream,
                    stream->img->d_w, stream->img->d_h,
                    kFilterBox);
       img = stream->img;
+#else
+    stream->encoder.err = 1;
+    ctx_exit_on_error(&stream->encoder,
+                      "Stream %d: Failed to encode frame.\n"
+                      "Scaling disabled in this configuration. \n"
+                      "To enable, configure with --enable-libyuv\n",
+                      stream->index);
+#endif
     }
   }
 #endif
@@ -1894,7 +1915,14 @@ int main(int argc, const char **argv_) {
   argv = argv_dup(argc - 1, argv_ + 1);
   parse_global_config(&global, argv);
 
-  input.fmt = global.use_i420 ? VPX_IMG_FMT_I420 : VPX_IMG_FMT_YV12;
+  if (global.color_type == I420)
+    input.fmt = VPX_IMG_FMT_I420;
+  else if (global.color_type == I422)
+    input.fmt = VPX_IMG_FMT_I422;
+  else if (global.color_type == I444)
+    input.fmt = VPX_IMG_FMT_I444;
+  else if (global.color_type == YV12)
+    input.fmt = VPX_IMG_FMT_YV12;
 
   {
     /* Now parse each stream's parameters. Using a local scope here
