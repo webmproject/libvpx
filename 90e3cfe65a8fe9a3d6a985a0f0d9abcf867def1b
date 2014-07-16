@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//fss\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-07-16T19:44:39Z",
+      "side": 1,
+      "message": "nit:order of includes",
+      "revId": "90e3cfe65a8fe9a3d6a985a0f0d9abcf867def1b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//fsk\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-07-16T19:44:39Z",
+      "side": 1,
+      "message": "nit: you could refactor this two chunks of code.",
+      "revId": "90e3cfe65a8fe9a3d6a985a0f0d9abcf867def1b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//fsg\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-07-16T19:44:39Z",
+      "side": 1,
+      "message": "nit: stride better than s",
+      "revId": "90e3cfe65a8fe9a3d6a985a0f0d9abcf867def1b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//fsI\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-07-16T19:44:39Z",
+      "side": 1,
+      "message": "function comment. Also not a big fan of the one letter params.",
+      "revId": "90e3cfe65a8fe9a3d6a985a0f0d9abcf867def1b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//fsY\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-07-16T19:44:39Z",
+      "side": 1,
+      "message": "const",
+      "revId": "90e3cfe65a8fe9a3d6a985a0f0d9abcf867def1b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//fsA\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-07-16T19:44:39Z",
+      "side": 1,
+      "message": "nit:variable iterator is not good. Should be row something.",
+      "revId": "90e3cfe65a8fe9a3d6a985a0f0d9abcf867def1b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//fsU\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-07-16T19:44:39Z",
+      "side": 1,
+      "message": "const",
+      "revId": "90e3cfe65a8fe9a3d6a985a0f0d9abcf867def1b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//fr8\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-07-16T19:44:39Z",
+      "side": 1,
+      "message": "nit:variable iterator is not good. Should be row something.",
+      "revId": "90e3cfe65a8fe9a3d6a985a0f0d9abcf867def1b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
