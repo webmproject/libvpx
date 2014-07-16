@@ -613,7 +613,7 @@ static void mode_info_conversion(VP9_COMP *cpi, const TileInfo *const tile,
           }
         }
 
-        if (b_mode == ZEROMV)
+        if (b_mode == ZEROMV || b_mode <= TM_PRED)
           for (ref = 0; ref < 1 + has_second_ref(mbmi); ++ref)
             mi->bmi[j].as_mv[ref].as_int = 0;
 
@@ -625,6 +625,8 @@ static void mode_info_conversion(VP9_COMP *cpi, const TileInfo *const tile,
     }
 
     mbmi->mode = mi->bmi[3].as_mode;
+    mbmi->mv[0].as_int = mi->bmi[3].as_mv[0].as_int;
+    mbmi->mv[1].as_int = mi->bmi[3].as_mv[1].as_int;
   } else {
     switch (mbmi->mode) {
       case NEARESTMV:
