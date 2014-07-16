@@ -133,6 +133,10 @@ static const arg_def_t use_yv12 = ARG_DEF(NULL, "yv12", 0,
                                           "Input file is YV12 ");
 static const arg_def_t use_i420 = ARG_DEF(NULL, "i420", 0,
                                           "Input file is I420 (default)");
+static const arg_def_t use_i422 = ARG_DEF(NULL, "i422", 0,
+                                          "Input file is I422");
+static const arg_def_t use_i444 = ARG_DEF(NULL, "i444", 0,
+                                          "Input file is I444");
 static const arg_def_t codecarg = ARG_DEF(NULL, "codec", 1,
                                           "Codec to use");
 static const arg_def_t passes           = ARG_DEF("p", "passes", 1,
@@ -233,7 +237,8 @@ static const arg_def_t lag_in_frames    = ARG_DEF(NULL, "lag-in-frames", 1,
                                                   "Max number of frames to lag");
 
 static const arg_def_t *global_args[] = {
-  &use_yv12, &use_i420, &usage, &threads, &profile,
+  &use_yv12, &use_i420, &use_i422, &use_i444,
+  &usage, &threads, &profile,
   &width, &height,
 #if CONFIG_WEBM_IO
   &stereo_mode,
@@ -636,7 +641,7 @@ static void parse_global_config(struct VpxEncoderConfig *global, char **argv) {
   memset(global, 0, sizeof(*global));
   global->codec = get_vpx_encoder_by_index(0);
   global->passes = 0;
-  global->use_i420 = 1;
+  global->color_type = I420;
   /* Assign default deadline to good quality */
   global->deadline = VPX_DL_GOOD_QUALITY;
 
@@ -669,9 +674,13 @@ static void parse_global_config(struct VpxEncoderConfig *global, char **argv) {
     else if (arg_match(&arg, &rt_dl, argi))
       global->deadline = VPX_DL_REALTIME;
     else if (arg_match(&arg, &use_yv12, argi))
-      global->use_i420 = 0;
+      global->color_type = YV12;
     else if (arg_match(&arg, &use_i420, argi))
-      global->use_i420 = 1;
+      global->color_type = I420;
+    else if (arg_match(&arg, &use_i422, argi))
+      global->color_type = I422;
+    else if (arg_match(&arg, &use_i444, argi))
+      global->color_type = I444;
     else if (arg_match(&arg, &quietarg, argi))
       global->quiet = 1;
     else if (arg_match(&arg, &verbosearg, argi))
@@ -1593,7 +1602,20 @@ int main(int argc, const char **argv_) {
   argv = argv_dup(argc - 1, argv_ + 1);
   parse_global_config(&global, argv);
 
-  input.fmt = global.use_i420 ? VPX_IMG_FMT_I420 : VPX_IMG_FMT_YV12;
+  switch (global.color_type) {
+    case I420:
+      input.fmt = VPX_IMG_FMT_I420;
+      break;
+    case I422:
+      input.fmt = VPX_IMG_FMT_I422;
+      break;
+    case I444:
+      input.fmt = VPX_IMG_FMT_I444;
+      break;
+    case YV12:
+      input.fmt = VPX_IMG_FMT_YV12;
+      break;
+  }
 
   {
     /* Now parse each stream's parameters. Using a local scope here
