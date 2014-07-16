@@ -473,6 +473,17 @@ INSTANTIATE_TEST_CASE_P(NEON, SADTest, ::testing::Values(
                         make_tuple(8, 8, sad_8x8_neon),
                         make_tuple(4, 4, sad_4x4_neon)));
 #endif  // CONFIG_VP8_ENCODER
+#if CONFIG_VP9_ENCODER
+const sad_m_by_n_fn_vp9_t sad_64x64_neon_vp9 = vp9_sad64x64_neon;
+const sad_m_by_n_fn_vp9_t sad_32x32_neon_vp9 = vp9_sad32x32_neon;
+const sad_m_by_n_fn_vp9_t sad_16x16_neon_vp9 = vp9_sad16x16_neon;
+const sad_m_by_n_test_param_vp9_t neon_vp9_tests[] = {
+  make_tuple(64, 64, sad_64x64_neon_vp9),
+  make_tuple(32, 32, sad_32x32_neon_vp9),
+  make_tuple(16, 16, sad_16x16_neon_vp9),
+};
+INSTANTIATE_TEST_CASE_P(NEON, SADVP9Test, ::testing::ValuesIn(neon_vp9_tests));
+#endif  // CONFIG_VP9_ENCODER
 #endif  // HAVE_NEON
 
 //------------------------------------------------------------------------------
