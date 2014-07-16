@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//foY\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-07-16T21:52:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//fqE\u003d",
+      "revId": "54ea3d9a976069c87edc1953e45999964b03b23f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//fqI\u003d",
         "filename": "test/video_source.h",
         "patchSetId": 13
@@ -30,6 +48,24 @@
       "writtenOn": "2014-07-16T21:21:40Z",
       "side": 1,
       "message": "until we find other misbehaving platforms, I\u0027d think tmpfile() would be sufficient here.",
+      "revId": "54ea3d9a976069c87edc1953e45999964b03b23f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//foQ\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-07-16T21:52:06Z",
+      "side": 1,
+      "message": "That would unnecessarily make the implementation of the test class complicated, since it has to do two different mechanisms for read back for linux and windows. So prefer not to use tmpfile(). This is cleaner IMO where the difference is only in the implementation of the TempOutFile class, and the test class remains unpolluted.",
+      "parentUuid": "AAAAdn//fqI\u003d",
       "revId": "54ea3d9a976069c87edc1953e45999964b03b23f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//foU\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-07-16T21:52:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//fqA\u003d",
+      "revId": "54ea3d9a976069c87edc1953e45999964b03b23f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//fp8\u003d",
         "filename": "test/video_source.h",
         "patchSetId": 13
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//foI\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-07-16T21:52:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//fp8\u003d",
+      "revId": "54ea3d9a976069c87edc1953e45999964b03b23f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//fp4\u003d",
         "filename": "test/video_source.h",
         "patchSetId": 13
@@ -81,6 +153,24 @@
       "writtenOn": "2014-07-16T21:21:40Z",
       "side": 1,
       "message": "not sure if this and the other are necessary as public",
+      "revId": "54ea3d9a976069c87edc1953e45999964b03b23f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//fnk\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-07-16T21:52:06Z",
+      "side": 1,
+      "message": "Both are needed in the test class. Doesn\u0027t compile with these being protected.",
+      "parentUuid": "AAAAdn//fp4\u003d",
       "revId": "54ea3d9a976069c87edc1953e45999964b03b23f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
