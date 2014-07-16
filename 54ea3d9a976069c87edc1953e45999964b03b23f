@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//fqE\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-16T21:21:40Z",
+      "side": 1,
+      "message": "use GetTempFileNameA to avoid any problems moving between unicode/ansi builds",
+      "revId": "54ea3d9a976069c87edc1953e45999964b03b23f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//fqI\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-16T21:21:40Z",
+      "side": 1,
+      "message": "until we find other misbehaving platforms, I\u0027d think tmpfile() would be sufficient here.",
+      "revId": "54ea3d9a976069c87edc1953e45999964b03b23f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//fqA\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-16T21:21:40Z",
+      "side": 1,
+      "message": "this could be an EXPECT",
+      "revId": "54ea3d9a976069c87edc1953e45999964b03b23f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//fp8\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-16T21:21:40Z",
+      "side": 1,
+      "message": "file()",
+      "revId": "54ea3d9a976069c87edc1953e45999964b03b23f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//fp4\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-16T21:21:40Z",
+      "side": 1,
+      "message": "not sure if this and the other are necessary as public",
+      "revId": "54ea3d9a976069c87edc1953e45999964b03b23f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
