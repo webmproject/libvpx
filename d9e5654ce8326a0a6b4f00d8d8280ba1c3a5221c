@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//ftg\u003d",
+        "filename": "test/vpx_scale_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-07-16T19:20:18Z",
+      "side": 1,
+      "message": "nit: alignment... maybe?",
+      "revId": "d9e5654ce8326a0a6b4f00d8d8280ba1c3a5221c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ftU\u003d",
+        "filename": "test/vpx_scale_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-07-16T19:20:18Z",
+      "side": 1,
+      "message": "nit: params fit on same line",
+      "revId": "d9e5654ce8326a0a6b4f00d8d8280ba1c3a5221c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//fs8\u003d",
+        "filename": "test/vpx_scale_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-07-16T19:20:18Z",
+      "side": 1,
+      "message": "nit:123 would benefit as const variable with descriptive name.",
+      "revId": "d9e5654ce8326a0a6b4f00d8d8280ba1c3a5221c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//fs0\u003d",
+        "filename": "test/vpx_scale_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-07-16T19:20:18Z",
+      "side": 1,
+      "message": "nit: these would be nice as descriptive variables as well.",
+      "revId": "d9e5654ce8326a0a6b4f00d8d8280ba1c3a5221c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
