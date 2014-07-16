@@ -1,0 +1,191 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//fnU\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-16T22:04:04Z",
+      "side": 1,
+      "message": "don\u0027t propagate this _t naming, use camelcase for types\n\nhttp://google-styleguide.googlecode.com/svn/trunk/cppguide.xml#Type_Names",
+      "revId": "a150a31af490b4b8f188b5e17e9ddcdb7334ed1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//fm4\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-16T22:04:04Z",
+      "side": 1,
+      "message": "I\u0027d call this ResetImage",
+      "revId": "a150a31af490b4b8f188b5e17e9ddcdb7334ed1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//fnA\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-16T22:04:04Z",
+      "side": 1,
+      "message": "prefer sizeof(var)\n\nhttp://google-styleguide.googlecode.com/svn/trunk/cppguide.xml#sizeof",
+      "revId": "a150a31af490b4b8f188b5e17e9ddcdb7334ed1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//fnI\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-16T22:04:04Z",
+      "side": 1,
+      "message": "bring this up one line and align the params there",
+      "revId": "a150a31af490b4b8f188b5e17e9ddcdb7334ed1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//fm0\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-16T22:04:04Z",
+      "side": 1,
+      "message": "ditto on sizeof",
+      "revId": "a150a31af490b4b8f188b5e17e9ddcdb7334ed1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//fmw\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-16T22:04:04Z",
+      "side": 1,
+      "message": "ditto on alignment",
+      "revId": "a150a31af490b4b8f188b5e17e9ddcdb7334ed1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//fmg\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-16T22:04:04Z",
+      "side": 1,
+      "message": "spell these out",
+      "revId": "a150a31af490b4b8f188b5e17e9ddcdb7334ed1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//fmk\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-16T22:04:04Z",
+      "side": 1,
+      "message": "y / x are OK for the loop vars",
+      "revId": "a150a31af490b4b8f188b5e17e9ddcdb7334ed1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//fms\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-16T22:04:04Z",
+      "side": 1,
+      "message": "spell these out",
+      "revId": "a150a31af490b4b8f188b5e17e9ddcdb7334ed1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//fmo\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-16T22:04:04Z",
+      "side": 1,
+      "message": "here too",
+      "revId": "a150a31af490b4b8f188b5e17e9ddcdb7334ed1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//fmc\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-16T22:04:04Z",
+      "side": 1,
+      "message": "it\u0027s spelled ASSERT_EQ here",
+      "revId": "a150a31af490b4b8f188b5e17e9ddcdb7334ed1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
