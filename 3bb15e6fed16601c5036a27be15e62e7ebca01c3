@@ -34,6 +34,24 @@
       "revId": "3bb15e6fed16601c5036a27be15e62e7ebca01c3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//f6o\u003d",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 298,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-07-16T00:16:25Z",
+      "side": 1,
+      "message": "At 4000, compression is about 10% worse than speed 7.",
+      "parentUuid": "AAAAdn//f7Q\u003d",
+      "revId": "3bb15e6fed16601c5036a27be15e62e7ebca01c3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
