@@ -47,7 +47,9 @@ const decode_perf_param_t kVP9DecodePerfVectors[] = {
   make_tuple("vp90-2-tos_426x178_tile_1x1_181kbps.webm", 1),
   make_tuple("vp90-2-tos_640x266_tile_1x2_336kbps.webm", 2),
   make_tuple("vp90-2-tos_854x356_tile_1x2_656kbps.webm", 2),
+  make_tuple("vp90-2-tos_854x356_tile_1x2_fpm_546kbps.webm", 2),
   make_tuple("vp90-2-tos_1280x534_tile_1x4_1306kbps.webm", 4),
+  make_tuple("vp90-2-tos_1280x534_tile_1x4_fpm_952kbps.webm", 4),
   make_tuple("vp90-2-tos_1920x800_tile_1x4_fpm_2335kbps.webm", 4),
 };
 
