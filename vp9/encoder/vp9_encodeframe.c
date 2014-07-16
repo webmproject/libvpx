@@ -625,6 +625,20 @@ static void mode_info_conversion(VP9_COMP *cpi, const TileInfo *const tile,
     }
 
     mbmi->mode = mi->bmi[3].as_mode;
+  } else {
+    switch (mbmi->mode) {
+      case NEARESTMV:
+        mbmi->mv[0].as_int = nearest_mv.as_int;
+        break;
+      case NEARMV:
+        mbmi->mv[0].as_int = near_mv.as_int;
+        break;
+      case ZEROMV:
+        mbmi->mv[0].as_int = 0;
+        break;
+      default:
+        break;
+    }
   }
 }
 #endif
