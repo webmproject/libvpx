@@ -52,6 +52,24 @@
       "revId": "77063ebb25413c09f60de26b394748263418eaa4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//fU8\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-17T22:41:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//fX0\u003d",
+      "revId": "77063ebb25413c09f60de26b394748263418eaa4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
