@@ -70,6 +70,24 @@
       "revId": "89aaa03932c875e1f1bc041eb5f80199980591cd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//fSs\u003d",
+        "filename": "test/invalid_file_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-07-17T23:40:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//fgA\u003d",
+      "revId": "89aaa03932c875e1f1bc041eb5f80199980591cd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
