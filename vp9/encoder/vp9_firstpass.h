@@ -20,7 +20,6 @@ extern "C" {
 
 #if CONFIG_FP_MB_STATS
 typedef struct {
-  uint8_t *mb_stats_in;
   uint8_t *mb_stats_start;
   uint8_t *mb_stats_end;
 } FIRSTPASS_MB_STATS;
