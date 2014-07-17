@@ -34,6 +34,24 @@
       "revId": "89aaa03932c875e1f1bc041eb5f80199980591cd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//fZg\u003d",
+        "filename": "test/invalid_file_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-07-17T16:25:04Z",
+      "side": 1,
+      "message": "Yes - this is not doing anything platform dependent. I just made the res file name separate from the actual filename + .res, since in certain cases only the res file may change, but the actual file may remain the same; and in that case we can change the version in the name only for the res.",
+      "parentUuid": "AAAAdn//fio\u003d",
+      "revId": "89aaa03932c875e1f1bc041eb5f80199980591cd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
