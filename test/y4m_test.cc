@@ -24,14 +24,14 @@ static const unsigned int kWidth  = 160;
 static const unsigned int kHeight = 90;
 static const unsigned int kFrames = 10;
 
-typedef struct {
+struct Y4mTestParam {
   const char *filename;
   unsigned int bit_depth;
   vpx_img_fmt format;
   const char *md5raw;
-} test_entry_type;
+};
 
-const test_entry_type kY4mTestVectors[] = {
+const Y4mTestParam kY4mTestVectors[] = {
   {"park_joy_90p_8_420.y4m", 8, VPX_IMG_FMT_I420,
     "e5406275b9fc6bb3436c31d4a05c1cab"},
   {"park_joy_90p_8_422.y4m", 8, VPX_IMG_FMT_I422,
@@ -70,7 +70,7 @@ static void write_image_file(const vpx_image_t *img, FILE *file) {
 }
 
 class Y4mVideoSourceTest
-    : public ::testing::TestWithParam<test_entry_type>,
+    : public ::testing::TestWithParam<Y4mTestParam>,
       public ::libvpx_test::Y4mVideoSource {
  protected:
   Y4mVideoSourceTest() : Y4mVideoSource("", 0, 0) {}
@@ -126,7 +126,7 @@ class Y4mVideoSourceTest
 };
 
 TEST_P(Y4mVideoSourceTest, SourceTest) {
-  const test_entry_type t = GetParam();
+  const Y4mTestParam t = GetParam();
   Init(t.filename, kFrames);
   HeaderChecks(t.bit_depth, t.format);
   Md5Check(t.md5raw);
@@ -175,7 +175,7 @@ class Y4mVideoWriteTest
 };
 
 TEST_P(Y4mVideoWriteTest, WriteTest) {
-  const test_entry_type t = GetParam();
+  const Y4mTestParam t = GetParam();
   Init(t.filename, kFrames);
   HeaderChecks(t.bit_depth, t.format);
   Md5Check(t.md5raw);
