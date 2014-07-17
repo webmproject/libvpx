@@ -748,9 +748,6 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
 
   cm->current_video_frame = 0;
 
-  // Set reference frame sign bias for ALTREF frame to 1 (for now)
-  cm->ref_frame_sign_bias[ALTREF_FRAME] = 1;
-
   cpi->gold_is_last = 0;
   cpi->alt_is_last = 0;
   cpi->gold_is_alt = 0;
@@ -2085,6 +2082,22 @@ static void configure_skippable_frame(VP9_COMP *cpi) {
     twopass->stats_in->pcnt_inter - twopass->stats_in->pcnt_motion == 1);
 }
 
+static void set_arf_sign_bias(VP9_COMP *cpi) {
+  VP9_COMMON *const cm = &cpi->common;
+  int arf_sign_bias;
+
+  if ((cpi->pass == 2) && cpi->multi_arf_allowed) {
+    const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
+    arf_sign_bias = cpi->rc.source_alt_ref_active &&
+                    (!cpi->refresh_alt_ref_frame ||
+                     (gf_group->rf_level[gf_group->index] == GF_ARF_LOW));
+  } else {
+    arf_sign_bias =
+      (cpi->rc.source_alt_ref_active && !cpi->refresh_alt_ref_frame);
+  }
+  cm->ref_frame_sign_bias[ALTREF_FRAME] = arf_sign_bias;
+}
+
 static void encode_frame_to_data_rate(VP9_COMP *cpi,
                                       size_t *size,
                                       uint8_t *dest,
@@ -2117,8 +2130,8 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   cpi->zbin_mode_boost = 0;
   cpi->zbin_mode_boost_enabled = 0;
 
-  // Current default encoder behavior for the altref sign bias.
-  cm->ref_frame_sign_bias[ALTREF_FRAME] = cpi->rc.source_alt_ref_active;
+  // Set the arf sign bias for this frame.
+  set_arf_sign_bias(cpi);
 
   // Set default state for segment based loop filter update flags.
   cm->lf.mode_ref_delta_update = 0;

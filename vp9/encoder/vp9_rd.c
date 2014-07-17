@@ -92,13 +92,6 @@ static void fill_token_costs(vp9_coeff_cost *c,
           }
 }
 
-static const uint8_t rd_iifactor[32] = {
-  4, 4, 3, 2, 1, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0,
-};
-
 // Values are now correlated to quantizer.
 static int sad_per_bit16lut[QINDEX_RANGE];
 static int sad_per_bit4lut[QINDEX_RANGE];
@@ -116,15 +109,25 @@ void vp9_init_me_luts() {
   }
 }
 
+static const int rd_boost_factor[16] = {
+  64, 32, 32, 32, 24, 16, 12, 12,
+  8, 8, 4, 4, 2, 2, 1, 0
+};
+static const int rd_frame_type_factor[FRAME_UPDATE_TYPES] = {
+128, 144, 128, 128, 144
+};
+
 int vp9_compute_rd_mult(const VP9_COMP *cpi, int qindex) {
   const int q = vp9_dc_quant(qindex, 0);
-  // TODO(debargha): Adjust the function below.
-  int rdmult = 88 * q * q / 25;
+  int rdmult = 88 * q * q / 24;
+
   if (cpi->pass == 2 && (cpi->common.frame_type != KEY_FRAME)) {
-    if (cpi->twopass.next_iiratio > 31)
-      rdmult += (rdmult * rd_iifactor[31]) >> 4;
-    else
-      rdmult += (rdmult * rd_iifactor[cpi->twopass.next_iiratio]) >> 4;
+    const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
+    const FRAME_UPDATE_TYPE frame_type = gf_group->update_type[gf_group->index];
+    const int boost_index = MIN(15, (cpi->rc.gfu_boost / 100));
+
+    rdmult = (rdmult * rd_frame_type_factor[frame_type]) >> 7;
+    rdmult += ((rdmult * rd_boost_factor[boost_index]) >> 7);
   }
   return rdmult;
 }
