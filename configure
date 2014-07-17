@@ -271,7 +271,6 @@ HAVE_LIST="
     unistd_h
 "
 EXPERIMENT_LIST="
-    alpha
     multiple_arf
     spatial_svc
     denoising

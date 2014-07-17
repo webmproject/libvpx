@@ -640,10 +640,8 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
 
 void vp9_setup_src_planes(MACROBLOCK *x, const YV12_BUFFER_CONFIG *src,
                           int mi_row, int mi_col) {
-  uint8_t *const buffers[4] = {src->y_buffer, src->u_buffer, src->v_buffer,
-                               src->alpha_buffer};
-  const int strides[4] = {src->y_stride, src->uv_stride, src->uv_stride,
-                          src->alpha_stride};
+  uint8_t *const buffers[3] = {src->y_buffer, src->u_buffer, src->v_buffer };
+  const int strides[3] = {src->y_stride, src->uv_stride, src->uv_stride };
   int i;
 
   // Set current frame pointer.

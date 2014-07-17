@@ -168,11 +168,7 @@ enum mv_precision {
   MV_PRECISION_Q4
 };
 
-#if CONFIG_ALPHA
-enum { MAX_MB_PLANE = 4 };
-#else
 enum { MAX_MB_PLANE = 3 };
-#endif
 
 struct buf_2d {
   uint8_t *buf;

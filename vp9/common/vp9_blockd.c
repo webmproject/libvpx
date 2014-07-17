@@ -146,10 +146,4 @@ void vp9_setup_block_planes(MACROBLOCKD *xd, int ss_x, int ss_y) {
     xd->plane[i].subsampling_x = i ? ss_x : 0;
     xd->plane[i].subsampling_y = i ? ss_y : 0;
   }
-#if CONFIG_ALPHA
-  // TODO(jkoleszar): Using the Y w/h for now
-  xd->plane[3].plane_type = PLANE_TYPE_Y;
-  xd->plane[3].subsampling_x = 0;
-  xd->plane[3].subsampling_y = 0;
-#endif
 }

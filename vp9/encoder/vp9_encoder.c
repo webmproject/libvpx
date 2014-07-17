@@ -1418,17 +1418,6 @@ void vp9_write_yuv_rec_frame(VP9_COMMON *cm) {
     src += s->uv_stride;
   } while (--h);
 
-#if CONFIG_ALPHA
-  if (s->alpha_buffer) {
-    src = s->alpha_buffer;
-    h = s->alpha_height;
-    do {
-      fwrite(src, s->alpha_width, 1,  yuv_rec_file);
-      src += s->alpha_stride;
-    } while (--h);
-  }
-#endif
-
   fflush(yuv_rec_file);
 }
 #endif
@@ -1437,22 +1426,18 @@ static void scale_and_extend_frame_nonnormative(const YV12_BUFFER_CONFIG *src,
                                                 YV12_BUFFER_CONFIG *dst) {
   // TODO(dkovalev): replace YV12_BUFFER_CONFIG with vpx_image_t
   int i;
-  const uint8_t *const srcs[4] = {src->y_buffer, src->u_buffer, src->v_buffer,
-                                  src->alpha_buffer};
-  const int src_strides[4] = {src->y_stride, src->uv_stride, src->uv_stride,
-                              src->alpha_stride};
-  const int src_widths[4] = {src->y_crop_width, src->uv_crop_width,
-                             src->uv_crop_width, src->y_crop_width};
-  const int src_heights[4] = {src->y_crop_height, src->uv_crop_height,
-                              src->uv_crop_height, src->y_crop_height};
-  uint8_t *const dsts[4] = {dst->y_buffer, dst->u_buffer, dst->v_buffer,
-                            dst->alpha_buffer};
-  const int dst_strides[4] = {dst->y_stride, dst->uv_stride, dst->uv_stride,
-                              dst->alpha_stride};
-  const int dst_widths[4] = {dst->y_crop_width, dst->uv_crop_width,
-                             dst->uv_crop_width, dst->y_crop_width};
-  const int dst_heights[4] = {dst->y_crop_height, dst->uv_crop_height,
-                              dst->uv_crop_height, dst->y_crop_height};
+  const uint8_t *const srcs[3] = {src->y_buffer, src->u_buffer, src->v_buffer};
+  const int src_strides[3] = {src->y_stride, src->uv_stride, src->uv_stride};
+  const int src_widths[3] = {src->y_crop_width, src->uv_crop_width,
+                             src->uv_crop_width };
+  const int src_heights[3] = {src->y_crop_height, src->uv_crop_height,
+                              src->uv_crop_height};
+  uint8_t *const dsts[3] = {dst->y_buffer, dst->u_buffer, dst->v_buffer};
+  const int dst_strides[3] = {dst->y_stride, dst->uv_stride, dst->uv_stride};
+  const int dst_widths[3] = {dst->y_crop_width, dst->uv_crop_width,
+                             dst->uv_crop_width};
+  const int dst_heights[3] = {dst->y_crop_height, dst->uv_crop_height,
+                              dst->uv_crop_height};
 
   for (i = 0; i < MAX_MB_PLANE; ++i)
     vp9_resize_plane(srcs[i], src_heights[i], src_widths[i], src_strides[i],
@@ -1467,14 +1452,10 @@ static void scale_and_extend_frame(const YV12_BUFFER_CONFIG *src,
   const int src_h = src->y_crop_height;
   const int dst_w = dst->y_crop_width;
   const int dst_h = dst->y_crop_height;
-  const uint8_t *const srcs[4] = {src->y_buffer, src->u_buffer, src->v_buffer,
-                                  src->alpha_buffer};
-  const int src_strides[4] = {src->y_stride, src->uv_stride, src->uv_stride,
-                              src->alpha_stride};
-  uint8_t *const dsts[4] = {dst->y_buffer, dst->u_buffer, dst->v_buffer,
-                            dst->alpha_buffer};
-  const int dst_strides[4] = {dst->y_stride, dst->uv_stride, dst->uv_stride,
-                              dst->alpha_stride};
+  const uint8_t *const srcs[3] = {src->y_buffer, src->u_buffer, src->v_buffer};
+  const int src_strides[3] = {src->y_stride, src->uv_stride, src->uv_stride};
+  uint8_t *const dsts[3] = {dst->y_buffer, dst->u_buffer, dst->v_buffer};
+  const int dst_strides[3] = {dst->y_stride, dst->uv_stride, dst->uv_stride};
   const InterpKernel *const kernel = vp9_get_interp_kernel(EIGHTTAP);
   int x, y, i;
 

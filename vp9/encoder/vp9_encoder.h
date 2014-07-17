@@ -509,9 +509,8 @@ static INLINE int frame_is_boosted(const VP9_COMP *cpi) {
 }
 
 static INLINE int get_token_alloc(int mb_rows, int mb_cols) {
-  // TODO(JBB): make this work for alpha channel and double check we can't
-  // exceed this token count if we have a 32x32 transform crossing a boundary
-  // at a multiple of 16.
+  // TODO(JBB): double check we can't exceed this token count if we have a
+  // 32x32 transform crossing a boundary at a multiple of 16.
   // mb_rows, cols are in units of 16 pixels. We assume 3 planes all at full
   // resolution. We assume up to 1 token per pixel, and then allow
   // a head room of 4.

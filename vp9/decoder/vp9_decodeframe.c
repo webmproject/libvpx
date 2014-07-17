@@ -1134,14 +1134,18 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
       if (cm->profile == PROFILE_1 || cm->profile == PROFILE_3) {
         cm->subsampling_x = vp9_rb_read_bit(rb);
         cm->subsampling_y = vp9_rb_read_bit(rb);
-        vp9_rb_read_bit(rb);  // has extra plane
+        if (vp9_rb_read_bit(rb))
+          vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
+                             "Reserved bit set");
       } else {
         cm->subsampling_y = cm->subsampling_x = 1;
       }
     } else {
       if (cm->profile == PROFILE_1 || cm->profile == PROFILE_3) {
         cm->subsampling_y = cm->subsampling_x = 0;
-        vp9_rb_read_bit(rb);  // has extra plane
+        if (vp9_rb_read_bit(rb))
+          vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
+                             "Reserved bit set");
       } else {
         vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
                            "4:4:4 color not supported in profile 0");

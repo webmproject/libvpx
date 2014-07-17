@@ -432,10 +432,6 @@ void vp9_setup_pred_block(const MACROBLOCKD *xd,
   dst[1].buf = src->u_buffer;
   dst[2].buf = src->v_buffer;
   dst[1].stride = dst[2].stride = src->uv_stride;
-#if CONFIG_ALPHA
-  dst[3].buf = src->alpha_buffer;
-  dst[3].stride = src->alpha_stride;
-#endif
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
     setup_pred_plane(dst + i, dst[i].buf, dst[i].stride, mi_row, mi_col,

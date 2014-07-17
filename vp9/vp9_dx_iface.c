@@ -155,11 +155,11 @@ static vpx_codec_err_t decoder_peek_si_internal(const uint8_t *data,
         rb.bit_offset += 1;  // [16,235] (including xvycc) vs [0,255] range
         if (profile == PROFILE_1 || profile == PROFILE_3) {
           rb.bit_offset += 2;  // subsampling x/y
-          rb.bit_offset += 1;  // has extra plane
+          rb.bit_offset += 1;  // unused
         }
       } else {
         if (profile == PROFILE_1 || profile == PROFILE_3) {
-          rb.bit_offset += 1;  // has extra plane
+          rb.bit_offset += 1;  // unused
         } else {
           // RGB is only available in version 1
           return VPX_CODEC_UNSUP_BITSTREAM;

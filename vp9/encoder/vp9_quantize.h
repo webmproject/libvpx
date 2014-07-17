@@ -35,13 +35,6 @@ typedef struct {
   DECLARE_ALIGNED(16, int16_t, uv_quant_shift[QINDEX_RANGE][8]);
   DECLARE_ALIGNED(16, int16_t, uv_zbin[QINDEX_RANGE][8]);
   DECLARE_ALIGNED(16, int16_t, uv_round[QINDEX_RANGE][8]);
-
-#if CONFIG_ALPHA
-  DECLARE_ALIGNED(16, int16_t, a_quant[QINDEX_RANGE][8]);
-  DECLARE_ALIGNED(16, int16_t, a_quant_shift[QINDEX_RANGE][8]);
-  DECLARE_ALIGNED(16, int16_t, a_zbin[QINDEX_RANGE][8]);
-  DECLARE_ALIGNED(16, int16_t, a_round[QINDEX_RANGE][8]);
-#endif
 } QUANTS;
 
 void vp9_quantize_dc(const int16_t *coeff_ptr, int skip_block,

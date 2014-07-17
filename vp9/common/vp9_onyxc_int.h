@@ -68,9 +68,6 @@ typedef struct VP9Common {
 
   DECLARE_ALIGNED(16, int16_t, y_dequant[QINDEX_RANGE][8]);
   DECLARE_ALIGNED(16, int16_t, uv_dequant[QINDEX_RANGE][8]);
-#if CONFIG_ALPHA
-  DECLARE_ALIGNED(16, int16_t, a_dequant[QINDEX_RANGE][8]);
-#endif
 
   COLOR_SPACE color_space;
 
@@ -134,10 +131,6 @@ typedef struct VP9Common {
   int y_dc_delta_q;
   int uv_dc_delta_q;
   int uv_ac_delta_q;
-#if CONFIG_ALPHA
-  int a_dc_delta_q;
-  int a_ac_delta_q;
-#endif
 
   /* We allocate a MODE_INFO struct for each macroblock, together with
      an extra row on top and column on the left to simplify prediction. */

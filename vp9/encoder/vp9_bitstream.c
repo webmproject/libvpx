@@ -1068,11 +1068,11 @@ static void write_uncompressed_header(VP9_COMP *cpi,
       if (cm->profile == PROFILE_1 || cm->profile == PROFILE_3) {
         vp9_wb_write_bit(wb, cm->subsampling_x);
         vp9_wb_write_bit(wb, cm->subsampling_y);
-        vp9_wb_write_bit(wb, 0);  // has extra plane
+        vp9_wb_write_bit(wb, 0);  // unused
       }
     } else {
       assert(cm->profile == PROFILE_1 || cm->profile == PROFILE_3);
-      vp9_wb_write_bit(wb, 0);  // has extra plane
+      vp9_wb_write_bit(wb, 0);  // unused
     }
 
     write_frame_size(cm, wb);

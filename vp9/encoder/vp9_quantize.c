@@ -315,16 +315,6 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
       quants->uv_zbin[q][i] = ROUND_POWER_OF_TWO(qzbin_factor * quant, 7);
       quants->uv_round[q][i] = (qrounding_factor * quant) >> 7;
       cm->uv_dequant[q][i] = quant;
-
-#if CONFIG_ALPHA
-      // alpha
-      quant = i == 0 ? vp9_dc_quant(q, cm->a_dc_delta_q)
-                     : vp9_ac_quant(q, cm->a_ac_delta_q);
-      invert_quant(&quants->a_quant[q][i], &quants->a_quant_shift[q][i], quant);
-      quants->a_zbin[q][i] = ROUND_POWER_OF_TWO(qzbin_factor * quant, 7);
-      quants->a_round[q][i] = (qrounding_factor * quant) >> 7;
-      cm->a_dequant[q][i] = quant;
-#endif
     }
 
     for (i = 2; i < 8; i++) {
@@ -343,14 +333,6 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
       quants->uv_zbin[q][i] = quants->uv_zbin[q][1];
       quants->uv_round[q][i] = quants->uv_round[q][1];
       cm->uv_dequant[q][i] = cm->uv_dequant[q][1];
-
-#if CONFIG_ALPHA
-      quants->a_quant[q][i] = quants->a_quant[q][1];
-      quants->a_quant_shift[q][i] = quants->a_quant_shift[q][1];
-      quants->a_zbin[q][i] = quants->a_zbin[q][1];
-      quants->a_round[q][i] = quants->a_round[q][1];
-      cm->a_dequant[q][i] = cm->a_dequant[q][1];
-#endif
     }
   }
 }
@@ -386,15 +368,6 @@ void vp9_init_plane_quantizers(VP9_COMP *cpi, MACROBLOCK *x) {
     x->plane[i].zbin_extra = (int16_t)((cm->uv_dequant[qindex][1] * zbin) >> 7);
     xd->plane[i].dequant = cm->uv_dequant[qindex];
   }
-
-#if CONFIG_ALPHA
-  x->plane[3].quant = quants->a_quant[qindex];
-  x->plane[3].quant_shift = quants->a_quant_shift[qindex];
-  x->plane[3].zbin = quants->a_zbin[qindex];
-  x->plane[3].round = quants->a_round[qindex];
-  x->plane[3].zbin_extra = (int16_t)((cm->a_dequant[qindex][1] * zbin) >> 7);
-  xd->plane[3].dequant = cm->a_dequant[qindex];
-#endif
 
   x->skip_block = vp9_segfeature_active(&cm->seg, segment_id, SEG_LVL_SKIP);
   x->q_index = qindex;
