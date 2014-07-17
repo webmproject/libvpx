@@ -16,6 +16,24 @@
       "revId": "89aaa03932c875e1f1bc041eb5f80199980591cd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//fio\u003d",
+        "filename": "test/invalid_file_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-07-17T00:28:56Z",
+      "side": 1,
+      "message": "I don\u0027t see anything that\u0027s per platform?   What\u0027s the issue?  He\u0027s now specifying a res file but that\u0027s just so that we don\u0027t have staging issues for checking in the code?",
+      "parentUuid": "AAAAdn//fjM\u003d",
+      "revId": "89aaa03932c875e1f1bc041eb5f80199980591cd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
