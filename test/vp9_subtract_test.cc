@@ -17,14 +17,14 @@
 #include "vp9/common/vp9_blockd.h"
 #include "vpx_mem/vpx_mem.h"
 
-typedef void (*subtract_fn_t)(int rows, int cols,
-                              int16_t *diff_ptr, ptrdiff_t diff_stride,
-                              const uint8_t *src_ptr, ptrdiff_t src_stride,
-                              const uint8_t *pred_ptr, ptrdiff_t pred_stride);
+typedef void (*SubtractFunc)(int rows, int cols,
+                             int16_t *diff_ptr, ptrdiff_t diff_stride,
+                             const uint8_t *src_ptr, ptrdiff_t src_stride,
+                             const uint8_t *pred_ptr, ptrdiff_t pred_stride);
 
 namespace vp9 {
 
-class VP9SubtractBlockTest : public ::testing::TestWithParam<subtract_fn_t> {
+class VP9SubtractBlockTest : public ::testing::TestWithParam<SubtractFunc> {
  public:
   virtual void TearDown() {
     libvpx_test::ClearSystemState();
