@@ -366,6 +366,9 @@ typedef struct SPEED_FEATURES {
 
   // In real time encoding, increase the threshold for NEWMV.
   int elevate_newmv_thresh;
+
+  // default interp filter choice
+  INTERP_FILTER default_interp_filter;
 } SPEED_FEATURES;
 
 struct VP9_COMP;
