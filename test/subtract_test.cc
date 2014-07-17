@@ -18,11 +18,11 @@
 #include "vp8/encoder/block.h"
 #include "vpx_mem/vpx_mem.h"
 
-typedef void (*subtract_b_fn_t)(BLOCK *be, BLOCKD *bd, int pitch);
+typedef void (*SubtractBlockFunc)(BLOCK *be, BLOCKD *bd, int pitch);
 
 namespace {
 
-class SubtractBlockTest : public ::testing::TestWithParam<subtract_b_fn_t> {
+class SubtractBlockTest : public ::testing::TestWithParam<SubtractBlockFunc> {
  public:
   virtual void TearDown() {
     libvpx_test::ClearSystemState();
