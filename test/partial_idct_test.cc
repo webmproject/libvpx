@@ -26,14 +26,14 @@
 using libvpx_test::ACMRandom;
 
 namespace {
-typedef void (*fwd_txfm_t)(const int16_t *in, int16_t *out, int stride);
-typedef void (*inv_txfm_t)(const int16_t *in, uint8_t *out, int stride);
-typedef std::tr1::tuple<fwd_txfm_t,
-                        inv_txfm_t,
-                        inv_txfm_t,
-                        TX_SIZE, int> partial_itxfm_param_t;
+typedef void (*FwdTxfmFunc)(const int16_t *in, int16_t *out, int stride);
+typedef void (*InvTxfmFunc)(const int16_t *in, uint8_t *out, int stride);
+typedef std::tr1::tuple<FwdTxfmFunc,
+                        InvTxfmFunc,
+                        InvTxfmFunc,
+                        TX_SIZE, int> PartialInvTxfmParam;
 const int kMaxNumCoeffs = 1024;
-class PartialIDctTest : public ::testing::TestWithParam<partial_itxfm_param_t> {
+class PartialIDctTest : public ::testing::TestWithParam<PartialInvTxfmParam> {
  public:
   virtual ~PartialIDctTest() {}
   virtual void SetUp() {
@@ -49,9 +49,9 @@ class PartialIDctTest : public ::testing::TestWithParam<partial_itxfm_param_t> {
  protected:
   int last_nonzero_;
   TX_SIZE tx_size_;
-  fwd_txfm_t ftxfm_;
-  inv_txfm_t full_itxfm_;
-  inv_txfm_t partial_itxfm_;
+  FwdTxfmFunc ftxfm_;
+  InvTxfmFunc full_itxfm_;
+  InvTxfmFunc partial_itxfm_;
 };
 
 TEST_P(PartialIDctTest, RunQuantCheck) {
