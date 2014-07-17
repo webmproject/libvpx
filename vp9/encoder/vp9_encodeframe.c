@@ -602,20 +602,27 @@ static void mode_info_conversion(VP9_COMP *cpi, const TileInfo *const tile,
       for (idx = 0; idx < 2; idx += num_4x4_w) {
         const int j = idy * 2 + idx;
         int ref;
-        const PREDICTION_MODE b_mode = mi->bmi[j].as_mode;
+        PREDICTION_MODE b_mode = mi->bmi[j].as_mode;
 
-        if (b_mode == NEARESTMV || b_mode == NEARMV) {
-          for (ref = 0; ref < 1 + has_second_ref(mbmi); ++ref) {
-            vp9_append_sub8x8_mvs_for_idx(cm, xd, tile, j, ref, mi_row, mi_col,
-                                          &nearest_mv, &near_mv);
-            mi->bmi[j].as_mv[ref].as_int = (b_mode == NEARESTMV) ?
-                nearest_mv.as_int : near_mv.as_int;
-          }
-        }
+        for (ref = 0; ref < 1 + has_second_ref(mbmi); ++ref) {
+          vp9_append_sub8x8_mvs_for_idx(cm, xd, tile, j, ref, mi_row, mi_col,
+                                        &nearest_mv, &near_mv);
 
-        if (b_mode == ZEROMV || b_mode <= TM_PRED)
-          for (ref = 0; ref < 1 + has_second_ref(mbmi); ++ref)
+          if (b_mode > TM_PRED) {
+            // inter mode
+            if (mi->bmi[j].as_mv[ref].as_int == nearest_mv.as_int)
+              b_mode = NEARESTMV;
+            else if (mi->bmi[j].as_mv[ref].as_int == near_mv.as_int)
+              b_mode = NEARMV;
+            else if (mi->bmi[j].as_mv[ref].as_int == 0)
+              b_mode = ZEROMV;
+          } else {
+            // intra mode
             mi->bmi[j].as_mv[ref].as_int = 0;
+          }
+
+          mi->bmi[j].as_mode = b_mode;
+        }
 
         if (num_4x4_h == 2)
           mi->bmi[j + 2] = mi->bmi[j];
@@ -628,18 +635,13 @@ static void mode_info_conversion(VP9_COMP *cpi, const TileInfo *const tile,
     mbmi->mv[0].as_int = mi->bmi[3].as_mv[0].as_int;
     mbmi->mv[1].as_int = mi->bmi[3].as_mv[1].as_int;
   } else {
-    switch (mbmi->mode) {
-      case NEARESTMV:
-        mbmi->mv[0].as_int = nearest_mv.as_int;
-        break;
-      case NEARMV:
-        mbmi->mv[0].as_int = near_mv.as_int;
-        break;
-      case ZEROMV:
-        mbmi->mv[0].as_int = 0;
-        break;
-      default:
-        break;
+    if (mbmi->mode > TM_PRED) {
+      if (mbmi->mv[0].as_int == nearest_mv.as_int)
+        mbmi->mode = NEARESTMV;
+      else if (mbmi->mv[0].as_int == near_mv.as_int)
+        mbmi->mode = NEARMV;
+      else if (mbmi->mv[0].as_int == 0)
+        mbmi->mode = ZEROMV;
     }
   }
 }
