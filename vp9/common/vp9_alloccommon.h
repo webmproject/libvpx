@@ -34,6 +34,8 @@ void vp9_update_frame_size(struct VP9Common *cm);
 
 void vp9_swap_mi_and_prev_mi(struct VP9Common *cm);
 
+void vp9_swap_current_and_last_seg_map(struct VP9Common *cm);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

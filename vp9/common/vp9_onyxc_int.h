@@ -44,6 +44,8 @@ extern "C" {
 #define FRAME_CONTEXTS_LOG2 2
 #define FRAME_CONTEXTS (1 << FRAME_CONTEXTS_LOG2)
 
+#define NUM_PING_PONG_BUFFERS 2
+
 extern const struct {
   PARTITION_CONTEXT above;
   PARTITION_CONTEXT left;
@@ -163,8 +165,8 @@ typedef struct VP9Common {
 
   int mi_idx;
   int prev_mi_idx;
-  MODE_INFO *mip_array[2];
-  MODE_INFO **mi_grid_base_array[2];
+  MODE_INFO *mip_array[NUM_PING_PONG_BUFFERS];
+  MODE_INFO **mi_grid_base_array[NUM_PING_PONG_BUFFERS];
 
   MODE_INFO *mip; /* Base of allocated array */
   MODE_INFO *mi;  /* Corresponds to upper left visible macroblock */
@@ -177,7 +179,12 @@ typedef struct VP9Common {
   MODE_INFO **prev_mi_grid_visible;
 
   // Persistent mb segment id map used in prediction.
-  unsigned char *last_frame_seg_map;
+  int seg_map_idx;
+  int prev_seg_map_idx;
+
+  uint8_t *seg_map_array[NUM_PING_PONG_BUFFERS];
+  uint8_t *last_frame_seg_map;
+  uint8_t *current_frame_seg_map;
 
   INTERP_FILTER interp_filter;
 

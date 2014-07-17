@@ -295,6 +295,8 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
     cm->current_video_frame++;
   }
 
+  vp9_swap_current_and_last_seg_map(cm);
+
   pbi->ready_for_new_data = 0;
 
   cm->error.setjmp = 0;

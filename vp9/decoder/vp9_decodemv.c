@@ -96,7 +96,7 @@ static void set_segment_id(VP9_COMMON *cm, BLOCK_SIZE bsize,
 
   for (y = 0; y < ymis; y++)
     for (x = 0; x < xmis; x++)
-      cm->last_frame_seg_map[mi_offset + y * cm->mi_cols + x] = segment_id;
+      cm->current_frame_seg_map[mi_offset + y * cm->mi_cols + x] = segment_id;
 }
 
 static int read_intra_segment_id(VP9_COMMON *const cm, MACROBLOCKD *const xd,
@@ -129,8 +129,10 @@ static int read_inter_segment_id(VP9_COMMON *const cm, MACROBLOCKD *const xd,
 
   predicted_segment_id = vp9_get_segment_id(cm, cm->last_frame_seg_map,
                                             bsize, mi_row, mi_col);
-  if (!seg->update_map)
+  if (!seg->update_map) {
+    set_segment_id(cm, bsize, mi_row, mi_col, predicted_segment_id);
     return predicted_segment_id;
+  }
 
   if (seg->temporal_update) {
     const vp9_prob pred_prob = vp9_get_pred_prob_seg_id(seg, xd);

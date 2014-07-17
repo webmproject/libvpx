@@ -55,7 +55,7 @@ static void setup_mi(VP9_COMMON *cm) {
 static int alloc_mi(VP9_COMMON *cm, int mi_size) {
   int i;
 
-  for (i = 0; i < 2; ++i) {
+  for (i = 0; i < NUM_PING_PONG_BUFFERS; ++i) {
     cm->mip_array[i] =
         (MODE_INFO *)vpx_calloc(mi_size, sizeof(*cm->mip));
     if (cm->mip_array[i] == NULL)
@@ -82,7 +82,7 @@ static int alloc_mi(VP9_COMMON *cm, int mi_size) {
 static void free_mi(VP9_COMMON *cm) {
   int i;
 
-  for (i = 0; i < 2; ++i) {
+  for (i = 0; i < NUM_PING_PONG_BUFFERS; ++i) {
     vpx_free(cm->mip_array[i]);
     cm->mip_array[i] = NULL;
     vpx_free(cm->mi_grid_base_array[i]);
@@ -93,6 +93,37 @@ static void free_mi(VP9_COMMON *cm) {
   cm->prev_mip = NULL;
   cm->mi_grid_base = NULL;
   cm->prev_mi_grid_base = NULL;
+}
+
+static int alloc_seg_map(VP9_COMMON *cm, int seg_map_size) {
+  int i;
+
+  for (i = 0; i < NUM_PING_PONG_BUFFERS; ++i) {
+    cm->seg_map_array[i] = (uint8_t *)vpx_calloc(seg_map_size, 1);
+    if (cm->seg_map_array[i] == NULL)
+      return 1;
+  }
+
+  // Init the index.
+  cm->seg_map_idx = 0;
+  cm->prev_seg_map_idx = 1;
+
+  cm->current_frame_seg_map = cm->seg_map_array[cm->seg_map_idx];
+  cm->last_frame_seg_map = cm->seg_map_array[cm->prev_seg_map_idx];
+
+  return 0;
+}
+
+static void free_seg_map(VP9_COMMON *cm) {
+  int i;
+
+  for (i = 0; i < NUM_PING_PONG_BUFFERS; ++i) {
+    vpx_free(cm->seg_map_array[i]);
+    cm->seg_map_array[i] = NULL;
+  }
+
+  cm->current_frame_seg_map = NULL;
+  cm->last_frame_seg_map = NULL;
 }
 
 void vp9_free_frame_buffers(VP9_COMMON *cm) {
@@ -115,8 +146,7 @@ void vp9_free_frame_buffers(VP9_COMMON *cm) {
 void vp9_free_context_buffers(VP9_COMMON *cm) {
   free_mi(cm);
 
-  vpx_free(cm->last_frame_seg_map);
-  cm->last_frame_seg_map = NULL;
+  free_seg_map(cm);
 
   vpx_free(cm->above_context);
   cm->above_context = NULL;
@@ -147,9 +177,8 @@ int vp9_resize_frame_buffers(VP9_COMMON *cm, int width, int height) {
   setup_mi(cm);
 
   // Create the segmentation map structure and set to 0.
-  vpx_free(cm->last_frame_seg_map);
-  cm->last_frame_seg_map = (uint8_t *)vpx_calloc(cm->mi_rows * cm->mi_cols, 1);
-  if (!cm->last_frame_seg_map)
+  free_seg_map(cm);
+  if (alloc_seg_map(cm, cm->mi_rows * cm->mi_cols))
     goto fail;
 
   vpx_free(cm->above_context);
@@ -270,8 +299,8 @@ void vp9_update_frame_size(VP9_COMMON *cm) {
   setup_mi(cm);
 
   // Initialize the previous frame segment map to 0.
-  if (cm->last_frame_seg_map)
-    vpx_memset(cm->last_frame_seg_map, 0, cm->mi_rows * cm->mi_cols);
+  if (cm->current_frame_seg_map)
+    vpx_memset(cm->current_frame_seg_map, 0, cm->mi_rows * cm->mi_cols);
 }
 
 void vp9_swap_mi_and_prev_mi(VP9_COMMON *cm) {
@@ -291,4 +320,14 @@ void vp9_swap_mi_and_prev_mi(VP9_COMMON *cm) {
   cm->prev_mi = cm->prev_mip + cm->mi_stride + 1;
   cm->mi_grid_visible = cm->mi_grid_base + cm->mi_stride + 1;
   cm->prev_mi_grid_visible = cm->prev_mi_grid_base + cm->mi_stride + 1;
+}
+
+void vp9_swap_current_and_last_seg_map(VP9_COMMON *cm) {
+  // Swap indices.
+  const int tmp = cm->seg_map_idx;
+  cm->seg_map_idx = cm->prev_seg_map_idx;
+  cm->prev_seg_map_idx = tmp;
+
+  cm->current_frame_seg_map = cm->seg_map_array[cm->seg_map_idx];
+  cm->last_frame_seg_map = cm->seg_map_array[cm->prev_seg_map_idx];
 }
