@@ -34,6 +34,7 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP9_DECODER) += user_priv_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += active_map_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += borders_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += cpu_speed_test.cc
+LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += frame_size_tests.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += resize_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_lossless_test.cc
 

@@ -485,6 +485,7 @@ EOF
     print_config_h ARCH   "${TMP_H}" ${ARCH_LIST}
     print_config_h HAVE   "${TMP_H}" ${HAVE_LIST}
     print_config_h CONFIG "${TMP_H}" ${CONFIG_LIST}
+    print_config_vars_h   "${TMP_H}" ${VAR_LIST}
     echo "#endif /* VPX_CONFIG_H */" >> ${TMP_H}
     mkdir -p `dirname "$1"`
     cmp "$1" ${TMP_H} >/dev/null 2>&1 || mv ${TMP_H} "$1"
@@ -549,6 +550,15 @@ process_common_cmdline() {
         [ "${optval}" = yasm -o "${optval}" = nasm -o "${optval}" = auto ] \
             || die "Must be yasm, nasm or auto: ${optval}"
         alt_as="${optval}"
+        ;;
+        --size-limit=*)
+        w="${optval%%x*}"
+        h="${optval##*x}"
+        VAR_LIST="DECODE_WIDTH_LIMIT ${w} DECODE_HEIGHT_LIMIT ${h}"
+        [ ${w} -gt 0 -a ${h} -gt 0 ] || die "Invalid size-limit: too small."
+        [ ${w} -lt 65536 -a ${h} -lt 65536 ] \
+            || die "Invalid size-limit: too big."
+        enable_feature size_limit
         ;;
         --prefix=*)
         prefix="${optval}"
@@ -1321,6 +1331,16 @@ print_config_h() {
         else
             echo "#define ${prefix}_${upname} 0" >> $header
         fi
+    done
+}
+
+print_config_vars_h() {
+    local header=$1
+    shift
+    while [ $# -gt 0 ]; do
+        upname="`toupper $1`"
+        echo "#define ${upname} $2" >> $header
+        shift 2
     done
 }
 

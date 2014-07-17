@@ -26,6 +26,7 @@ Advanced options:
   ${toggle_unit_tests}            unit tests
   ${toggle_decode_perf_tests}     build decoder perf tests with unit tests
   --libc=PATH                     path to alternate libc
+  --size-limit=WxH                max size to allow in the decoder
   --as={yasm|nasm|auto}           use specified assembler [auto, yasm preferred]
   --sdk-path=PATH                 path to root of sdk (android builds only)
   ${toggle_fast_unaligned}        don't use unaligned accesses, even when
@@ -327,6 +328,7 @@ CONFIG_LIST="
     multi_res_encoding
     temporal_denoising
     experimental
+    size_limit
     ${EXPERIMENT_LIST}
 "
 CMDLINE_SELECT="
@@ -352,6 +354,7 @@ CMDLINE_SELECT="
     docs
     libc
     as
+    size_limit
     fast_unaligned
     codec_srcs
     debug_libs

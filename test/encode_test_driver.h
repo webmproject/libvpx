@@ -221,6 +221,14 @@ class EncoderTest {
   virtual void DecompressedFrameHook(const vpx_image_t& img,
                                      vpx_codec_pts_t pts) {}
 
+  // Hook to be called to handle decode result. Return true to continue.
+  virtual bool HandleDecodeResult(const vpx_codec_err_t res_dec,
+                                  const VideoSource& /* video */,
+                                  Decoder *decoder) {
+    EXPECT_EQ(VPX_CODEC_OK, res_dec) << decoder->DecodeError();
+    return VPX_CODEC_OK == res_dec;
+  }
+
   // Hook that can modify the encoder's output data
   virtual const vpx_codec_cx_pkt_t * MutateEncoderOutputHook(
       const vpx_codec_cx_pkt_t *pkt) {

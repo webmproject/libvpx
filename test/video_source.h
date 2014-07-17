@@ -127,6 +127,10 @@ class DummyVideoSource : public VideoSource {
 
   virtual unsigned int limit() const { return limit_; }
 
+  void set_limit(unsigned int limit) {
+    limit_ = limit;
+  }
+
   void SetSize(unsigned int width, unsigned int height) {
     if (width != width_ || height != height_) {
       vpx_img_free(img_);
