@@ -620,28 +620,28 @@ static void setup_display_size(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
     vp9_read_frame_size(rb, &cm->display_width, &cm->display_height);
 }
 
-static void apply_frame_size(VP9_COMMON *cm, int width, int height) {
-#if CONFIG_SIZE_LIMIT
-  if (width > DECODE_WIDTH_LIMIT || height > DECODE_HEIGHT_LIMIT)
-    vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
-                       "Width and height beyond allowed size.");
-#endif
-
+static void resize_context_buffers(VP9_COMMON *cm, int width, int height) {
   if (cm->width != width || cm->height != height) {
-    // Change in frame size.
-    // TODO(agrange) Don't test width/height, check overall size.
-    if (width > cm->width || height > cm->height) {
-      // Rescale frame buffers only if they're not big enough already.
-      if (vp9_resize_frame_buffers(cm, width, height))
+    // Change in frame size (assumption: color format does not change).
+    if (cm->width == 0 || cm->height == 0 ||
+        width * height > cm->width * cm->height) {
+      if (vp9_alloc_context_buffers(cm, width, height))
         vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                            "Failed to allocate frame buffers");
+    } else {
+      vp9_set_mb_mi(cm, width, height);
     }
-
+    vp9_init_context_buffers(cm);
     cm->width = width;
     cm->height = height;
-
-    vp9_update_frame_size(cm);
   }
+}
+
+static void setup_frame_size(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
+  int width, height;
+  vp9_read_frame_size(rb, &width, &height);
+  resize_context_buffers(cm, width, height);
+  setup_display_size(cm, rb);
 
   if (vp9_realloc_frame_buffer(
           get_frame_new_buffer(cm), cm->width, cm->height,
@@ -651,13 +651,6 @@ static void apply_frame_size(VP9_COMMON *cm, int width, int height) {
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate frame buffer");
   }
-}
-
-static void setup_frame_size(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
-  int width, height;
-  vp9_read_frame_size(rb, &width, &height);
-  apply_frame_size(cm, width, height);
-  setup_display_size(cm, rb);
 }
 
 static void setup_frame_size_with_refs(VP9_COMMON *cm,
@@ -681,16 +674,23 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
   // dimensions.
   for (i = 0; i < REFS_PER_FRAME; ++i) {
     RefBuffer *const ref_frame = &cm->frame_refs[i];
-    const int ref_width = ref_frame->buf->y_width;
-    const int ref_height = ref_frame->buf->y_height;
-
-    if (!valid_ref_frame_size(ref_width, ref_height, width, height))
+    if (!valid_ref_frame_size(ref_frame->buf->y_width, ref_frame->buf->y_height,
+                              width, height))
       vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
                          "Referenced frame has invalid size");
   }
 
-  apply_frame_size(cm, width, height);
+  resize_context_buffers(cm, width, height);
   setup_display_size(cm, rb);
+
+  if (vp9_realloc_frame_buffer(
+          get_frame_new_buffer(cm), cm->width, cm->height,
+          cm->subsampling_x, cm->subsampling_y, VP9_DEC_BORDER_IN_PIXELS,
+          &cm->frame_bufs[cm->new_fb_idx].raw_frame_buffer, cm->get_fb_cb,
+          cm->cb_priv)) {
+    vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+                       "Failed to allocate frame buffer");
+  }
 }
 
 static void setup_tile_info(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
@@ -1144,8 +1144,8 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
     pbi->refresh_frame_flags = (1 << REF_FRAMES) - 1;
 
     for (i = 0; i < REFS_PER_FRAME; ++i) {
-      cm->frame_refs[i].idx = cm->new_fb_idx;
-      cm->frame_refs[i].buf = get_frame_new_buffer(cm);
+      cm->frame_refs[i].idx = -1;
+      cm->frame_refs[i].buf = NULL;
     }
 
     setup_frame_size(cm, rb);
