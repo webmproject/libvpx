@@ -71,12 +71,12 @@ void reference_32x32_dct_2d(const int16_t input[kNumCoeffs],
   }
 }
 
-typedef void (*fwd_txfm_t)(const int16_t *in, int16_t *out, int stride);
-typedef void (*inv_txfm_t)(const int16_t *in, uint8_t *out, int stride);
+typedef void (*FwdTxfmFunc)(const int16_t *in, int16_t *out, int stride);
+typedef void (*InvTxfmFunc)(const int16_t *in, uint8_t *out, int stride);
 
-typedef std::tr1::tuple<fwd_txfm_t, inv_txfm_t, int> trans_32x32_param_t;
+typedef std::tr1::tuple<FwdTxfmFunc, InvTxfmFunc, int> Trans32x32Param;
 
-class Trans32x32Test : public ::testing::TestWithParam<trans_32x32_param_t> {
+class Trans32x32Test : public ::testing::TestWithParam<Trans32x32Param> {
  public:
   virtual ~Trans32x32Test() {}
   virtual void SetUp() {
@@ -90,8 +90,8 @@ class Trans32x32Test : public ::testing::TestWithParam<trans_32x32_param_t> {
 
  protected:
   int version_;
-  fwd_txfm_t fwd_txfm_;
-  inv_txfm_t inv_txfm_;
+  FwdTxfmFunc fwd_txfm_;
+  InvTxfmFunc inv_txfm_;
 };
 
 TEST_P(Trans32x32Test, AccuracyCheck) {
