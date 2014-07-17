@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//fbc\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-07-17T14:31:42Z",
+      "side": 1,
+      "message": "these type names are a bit hard to read.. too many capitals crunched together.   Camel case seems to fall apart for acronyms.   Since the style guide doesn\u0027t provide guidance I suggest we follow advice here: \n\nhttp://www.approxion.com/?p\u003d303\n\nAnd for abbreviations / etc longer than 2 chars use camel case.  So SAD becomes Sad and VP9 becomes Vp9 .. \n\n- SadMxNFunc\n- Vp9SadMxNFunc\n\nrather than having to deal with functions that are multiple acronyms in arow....",
+      "revId": "77063ebb25413c09f60de26b394748263418eaa4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
