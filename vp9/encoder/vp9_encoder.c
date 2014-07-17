@@ -940,8 +940,6 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
 
         cpi->twopass.firstpass_mb_stats.mb_stats_start =
             oxcf->firstpass_mb_stats_in.buf;
-        cpi->twopass.firstpass_mb_stats.mb_stats_in =
-            cpi->twopass.firstpass_mb_stats.mb_stats_start;
         cpi->twopass.firstpass_mb_stats.mb_stats_end =
             cpi->twopass.firstpass_mb_stats.mb_stats_start +
             (ps - 1) * cpi->common.MBs * sizeof(uint8_t);

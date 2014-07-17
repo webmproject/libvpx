@@ -148,16 +148,6 @@ static void output_stats(FIRSTPASS_STATS *stats,
 }
 
 #if CONFIG_FP_MB_STATS
-static int input_fpmb_stats(FIRSTPASS_MB_STATS *firstpass_mb_stats,
-                            VP9_COMMON *cm, uint8_t **this_frame_mb_stats) {
-  if (firstpass_mb_stats->mb_stats_in > firstpass_mb_stats->mb_stats_end)
-    return EOF;
-
-  *this_frame_mb_stats = firstpass_mb_stats->mb_stats_in;
-  firstpass_mb_stats->mb_stats_in += cm->MBs * sizeof(uint8_t);
-  return 1;
-}
-
 static void output_fpmb_stats(uint8_t *this_frame_mb_stats, VP9_COMMON *cm,
                          struct vpx_codec_pkt_list *pktlist) {
   struct vpx_codec_cx_pkt pkt;
@@ -2232,13 +2222,6 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
 
   // Update the total stats remaining structure.
   subtract_stats(&twopass->total_left_stats, &this_frame);
-
-#if CONFIG_FP_MB_STATS
-  if (cpi->use_fp_mb_stats) {
-    input_fpmb_stats(&twopass->firstpass_mb_stats, cm,
-                     &twopass->this_frame_mb_stats);
-  }
-#endif
 }
 
 void vp9_twopass_postencode_update(VP9_COMP *cpi) {

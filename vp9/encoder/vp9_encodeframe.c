@@ -3034,6 +3034,21 @@ static void encode_tiles(VP9_COMP *cpi) {
   }
 }
 
+#if CONFIG_FP_MB_STATS
+static int input_fpmb_stats(FIRSTPASS_MB_STATS *firstpass_mb_stats,
+                            VP9_COMMON *cm, uint8_t **this_frame_mb_stats) {
+  uint8_t *mb_stats_in = firstpass_mb_stats->mb_stats_start +
+      cm->current_video_frame * cm->MBs * sizeof(uint8_t);
+
+  if (mb_stats_in > firstpass_mb_stats->mb_stats_end)
+    return EOF;
+
+  *this_frame_mb_stats = mb_stats_in;
+
+  return 1;
+}
+#endif
+
 static void encode_frame_internal(VP9_COMP *cpi) {
   SPEED_FEATURES *const sf = &cpi->sf;
   RD_OPT *const rd_opt = &cpi->rd;
@@ -3100,6 +3115,13 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   {
     struct vpx_usec_timer emr_timer;
     vpx_usec_timer_start(&emr_timer);
+
+#if CONFIG_FP_MB_STATS
+  if (cpi->use_fp_mb_stats) {
+    input_fpmb_stats(&cpi->twopass.firstpass_mb_stats, cm,
+                     &cpi->twopass.this_frame_mb_stats);
+  }
+#endif
 
     encode_tiles(cpi);
 
