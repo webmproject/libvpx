@@ -16,6 +16,24 @@
       "revId": "77063ebb25413c09f60de26b394748263418eaa4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//fYc\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-17T17:42:36Z",
+      "side": 1,
+      "message": "I knew this one would be the most difficult. I\u0027d say make this pass then a rework could be in order for this file. If we go your way which in general I only mildly dislike, we\u0027d want to adopt this everywhere so one large rename would be good for the test classes, etc.\nIf the file was split or the names namespaced it would be a non-issue. Alternate names could be used too.",
+      "parentUuid": "AAAAdn//fbc\u003d",
+      "revId": "77063ebb25413c09f60de26b394748263418eaa4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
