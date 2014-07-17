@@ -52,6 +52,24 @@
       "revId": "89aaa03932c875e1f1bc041eb5f80199980591cd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//fgA\u003d",
+        "filename": "test/invalid_file_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-07-17T22:34:44Z",
+      "side": 1,
+      "message": "ahh yes I don\u0027t think you need the .res file here at all..  just change the name of the webm file and change a lot less code.  \n\nmaybe when you need to do something different for 10 bit vs non 10 bit we\u0027ll need something like this,  but even then it seems you could have the video filename derived from the resource filename minus the extension or something like that. \n\nJim",
+      "parentUuid": "AAAAdn//fio\u003d",
+      "revId": "89aaa03932c875e1f1bc041eb5f80199980591cd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
