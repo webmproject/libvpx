@@ -15,18 +15,18 @@
 #include "vpx/vpx_integer.h"
 #include "vpx_mem/vpx_mem.h"
 
-typedef void (*post_proc_func_t)(unsigned char *src_ptr,
-                                 unsigned char *dst_ptr,
-                                 int src_pixels_per_line,
-                                 int dst_pixels_per_line,
-                                 int cols,
-                                 unsigned char *flimit,
-                                 int size);
+typedef void (*PostProcFunc)(unsigned char *src_ptr,
+                             unsigned char *dst_ptr,
+                             int src_pixels_per_line,
+                             int dst_pixels_per_line,
+                             int cols,
+                             unsigned char *flimit,
+                             int size);
 
 namespace {
 
 class VP8PostProcessingFilterTest
-    : public ::testing::TestWithParam<post_proc_func_t> {
+    : public ::testing::TestWithParam<PostProcFunc> {
  public:
   virtual void TearDown() {
     libvpx_test::ClearSystemState();
