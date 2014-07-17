@@ -238,6 +238,8 @@ typedef struct VP9EncoderConfig {
   // Enable feature to reduce the frame quantization every x frames.
   int frame_periodic_boost;
 
+  int kf_extern_coding;
+
   // two pass datarate control
   int two_pass_vbrbias;        // two pass datarate control tweaks
   int two_pass_vbrmin_section;

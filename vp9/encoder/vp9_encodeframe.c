@@ -2443,7 +2443,8 @@ static void encode_rd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
   for (mi_col = tile->mi_col_start; mi_col < tile->mi_col_end;
        mi_col += MI_BLOCK_SIZE) {
 #if CONFIG_TRANSCODE
-    if (cm->frame_type == KEY_FRAME) {
+    if (cm->frame_type == KEY_FRAME &&
+        !cpi->oxcf.kf_extern_coding) {
       int dummy_rate;
       int64_t dummy_dist;
       rd_pick_partition(cpi, tile, tp, mi_row, mi_col, BLOCK_64X64,

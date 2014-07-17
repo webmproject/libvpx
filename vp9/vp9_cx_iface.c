@@ -38,6 +38,7 @@ struct vp9_extracfg {
   unsigned int                frame_parallel_decoding_mode;
   AQ_MODE                     aq_mode;
   unsigned int                frame_periodic_boost;
+  unsigned int                kf_extern_coding;
   BIT_DEPTH                   bit_depth;
 };
 
@@ -68,6 +69,7 @@ static const struct extraconfig_map extracfg_map[] = {
       0,                          // frame_parallel_decoding_mode
       NO_AQ,                      // aq_mode
       0,                          // frame_periodic_delta_q
+      0,                          // key frame coding from external mode
       BITS_8,                     // Bit depth
     }
   }
@@ -155,6 +157,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
   RANGE_CHECK_BOOL(extra_cfg, lossless);
   RANGE_CHECK(extra_cfg, aq_mode,           0, AQ_MODE_COUNT - 1);
   RANGE_CHECK(extra_cfg, frame_periodic_boost, 0, 1);
+  RANGE_CHECK(extra_cfg, kf_extern_coding, 0, 1);
   RANGE_CHECK_HI(cfg, g_threads,          64);
   RANGE_CHECK_HI(cfg, g_lag_in_frames,    MAX_LAG_BUFFERS);
   RANGE_CHECK(cfg, rc_end_usage,          VPX_VBR, VPX_Q);
@@ -384,6 +387,8 @@ static vpx_codec_err_t set_encoder_config(
   oxcf->aq_mode = extra_cfg->aq_mode;
 
   oxcf->frame_periodic_boost =  extra_cfg->frame_periodic_boost;
+
+  oxcf->kf_extern_coding = extra_cfg->kf_extern_coding;
 
   oxcf->ss_number_layers = cfg->ss_number_layers;
 
@@ -615,6 +620,13 @@ static vpx_codec_err_t ctrl_set_frame_periodic_boost(vpx_codec_alg_priv_t *ctx,
                                                      va_list args) {
   struct vp9_extracfg extra_cfg = ctx->extra_cfg;
   extra_cfg.frame_periodic_boost = CAST(VP9E_SET_FRAME_PERIODIC_BOOST, args);
+  return update_extra_cfg(ctx, &extra_cfg);
+}
+
+static vpx_codec_err_t ctrl_set_kf_extern_coding(vpx_codec_alg_priv_t *ctx,
+                                                 va_list args) {
+  struct vp9_extracfg extra_cfg = ctx->extra_cfg;
+  extra_cfg.kf_extern_coding = CAST(VP9E_SET_KF_EXTERN_CODING, args);
   return update_extra_cfg(ctx, &extra_cfg);
 }
 
@@ -1234,6 +1246,7 @@ static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   {VP9E_SET_FRAME_PARALLEL_DECODING,  ctrl_set_frame_parallel_decoding_mode},
   {VP9E_SET_AQ_MODE,                  ctrl_set_aq_mode},
   {VP9E_SET_FRAME_PERIODIC_BOOST,     ctrl_set_frame_periodic_boost},
+  {VP9E_SET_KF_EXTERN_CODING,         ctrl_set_kf_extern_coding},
   {VP9E_SET_SVC,                      ctrl_set_svc},
   {VP9E_SET_SVC_PARAMETERS,           ctrl_set_svc_parameters},
   {VP9E_SET_SVC_LAYER_ID,             ctrl_set_svc_layer_id},
