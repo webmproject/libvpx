@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//fjM\u003d",
+        "filename": "test/invalid_file_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-17T00:13:45Z",
+      "side": 1,
+      "message": "Jim can sign off on this mixed res files / expectations per-platform is fragile in my opinion. in any case the alignment is wrong here; I\u0027d still prefer to keep this simple until there was an actual need",
+      "revId": "89aaa03932c875e1f1bc041eb5f80199980591cd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
