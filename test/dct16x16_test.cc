@@ -258,15 +258,15 @@ void reference_16x16_dct_2d(int16_t input[256], double output[256]) {
   }
 }
 
-typedef void (*fdct_t)(const int16_t *in, int16_t *out, int stride);
-typedef void (*idct_t)(const int16_t *in, uint8_t *out, int stride);
-typedef void (*fht_t) (const int16_t *in, int16_t *out, int stride,
-                       int tx_type);
-typedef void (*iht_t) (const int16_t *in, uint8_t *out, int stride,
-                       int tx_type);
+typedef void (*FdctFunc)(const int16_t *in, int16_t *out, int stride);
+typedef void (*IdctFunc)(const int16_t *in, uint8_t *out, int stride);
+typedef void (*FhtFunc)(const int16_t *in, int16_t *out, int stride,
+                        int tx_type);
+typedef void (*IhtFunc)(const int16_t *in, uint8_t *out, int stride,
+                        int tx_type);
 
-typedef std::tr1::tuple<fdct_t, idct_t, int> dct_16x16_param_t;
-typedef std::tr1::tuple<fht_t, iht_t, int> ht_16x16_param_t;
+typedef std::tr1::tuple<FdctFunc, IdctFunc, int> Dct16x16Param;
+typedef std::tr1::tuple<FhtFunc, IhtFunc, int> Ht16x16Param;
 
 void fdct16x16_ref(const int16_t *in, int16_t *out, int stride, int tx_type) {
   vp9_fdct16x16_c(in, out, stride);
@@ -463,13 +463,13 @@ class Trans16x16TestBase {
   }
   int pitch_;
   int tx_type_;
-  fht_t fwd_txfm_ref;
-  iht_t inv_txfm_ref;
+  FhtFunc fwd_txfm_ref;
+  IhtFunc inv_txfm_ref;
 };
 
 class Trans16x16DCT
     : public Trans16x16TestBase,
-      public ::testing::TestWithParam<dct_16x16_param_t> {
+      public ::testing::TestWithParam<Dct16x16Param> {
  public:
   virtual ~Trans16x16DCT() {}
 
@@ -491,8 +491,8 @@ class Trans16x16DCT
     inv_txfm_(out, dst, stride);
   }
 
-  fdct_t fwd_txfm_;
-  idct_t inv_txfm_;
+  FdctFunc fwd_txfm_;
+  IdctFunc inv_txfm_;
 };
 
 TEST_P(Trans16x16DCT, AccuracyCheck) {
@@ -519,7 +519,7 @@ TEST_P(Trans16x16DCT, InvAccuracyCheck) {
 
 class Trans16x16HT
     : public Trans16x16TestBase,
-      public ::testing::TestWithParam<ht_16x16_param_t> {
+      public ::testing::TestWithParam<Ht16x16Param> {
  public:
   virtual ~Trans16x16HT() {}
 
@@ -541,8 +541,8 @@ class Trans16x16HT
     inv_txfm_(out, dst, stride, tx_type_);
   }
 
-  fht_t fwd_txfm_;
-  iht_t inv_txfm_;
+  FhtFunc fwd_txfm_;
+  IhtFunc inv_txfm_;
 };
 
 TEST_P(Trans16x16HT, AccuracyCheck) {
