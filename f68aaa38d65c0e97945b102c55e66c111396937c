@@ -16,6 +16,24 @@
       "revId": "f68aaa38d65c0e97945b102c55e66c111396937c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//e+k\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 623,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-18T23:17:12Z",
+      "side": 1,
+      "message": "Done. Fixed in a new patch:\nhttps://gerrit.chromium.org/gerrit/#/c/70922/",
+      "parentUuid": "AAAAdn//fAI\u003d",
+      "revId": "f68aaa38d65c0e97945b102c55e66c111396937c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
