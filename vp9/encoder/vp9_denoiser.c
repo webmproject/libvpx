@@ -345,10 +345,9 @@ void vp9_denoiser_update_frame_info(VP9_DENOISER *denoiser,
                                     int refresh_last_frame) {
   if (frame_type == KEY_FRAME) {
     int i;
-    copy_frame(denoiser->running_avg_y[LAST_FRAME], src);
-    for (i = 2; i < MAX_REF_FRAMES - 1; i++) {
-      copy_frame(denoiser->running_avg_y[i],
-                 denoiser->running_avg_y[LAST_FRAME]);
+    // Start at 1 so as not to overwrite the INTRA_FRAME
+    for (i = 1; i < MAX_REF_FRAMES; ++i) {
+      copy_frame(denoiser->running_avg_y[i], src);
     }
   } else {  /* For non key frames */
     if (refresh_alt_ref_frame) {
