@@ -143,6 +143,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//e+8\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-18T23:03:33Z",
+      "side": 1,
+      "message": "...as an external function",
+      "parentUuid": "AAAAdn//e/I\u003d",
+      "revId": "2dea8aa061757a5ec6970ea1a627b9ab90d4841f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//fE0\u003d",
         "filename": "test/scale_border_test.cc",
         "patchSetId": 8
