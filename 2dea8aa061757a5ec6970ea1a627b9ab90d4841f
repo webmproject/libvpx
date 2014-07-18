@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//e/E\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-18T23:03:08Z",
+      "side": 1,
+      "message": "note, \u0027private\u0027 is different than \u0027protected\u0027",
+      "parentUuid": "AAAAdn//fDE\u003d",
+      "revId": "2dea8aa061757a5ec6970ea1a627b9ab90d4841f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//fE8\u003d",
         "filename": "test/scale_border_test.cc",
         "patchSetId": 8
@@ -101,6 +119,24 @@
       "side": 1,
       "message": "This function? so FillPlane as well? Or is that different because FillPlane is called from a public function?",
       "parentUuid": "AAAAdn//fE8\u003d",
+      "revId": "2dea8aa061757a5ec6970ea1a627b9ab90d4841f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//e/I\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-18T23:03:08Z",
+      "side": 1,
+      "message": "it\u0027s not that important here, but given it\u0027s independent of the class instantiation, you only need one copy. think of it as an external variable",
+      "parentUuid": "AAAAdn//fDM\u003d",
       "revId": "2dea8aa061757a5ec6970ea1a627b9ab90d4841f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
