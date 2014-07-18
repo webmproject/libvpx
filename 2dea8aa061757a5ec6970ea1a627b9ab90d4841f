@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//fDA\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-07-18T20:50:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//fFE\u003d",
+      "revId": "2dea8aa061757a5ec6970ea1a627b9ab90d4841f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//fFA\u003d",
         "filename": "test/scale_border_test.cc",
         "patchSetId": 8
@@ -30,6 +48,24 @@
       "writtenOn": "2014-07-18T19:09:21Z",
       "side": 1,
       "message": "most of the below could actually be private",
+      "revId": "2dea8aa061757a5ec6970ea1a627b9ab90d4841f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//fDE\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-07-18T20:50:20Z",
+      "side": 1,
+      "message": "Done. With some tweaking in the later test.",
+      "parentUuid": "AAAAdn//fFA\u003d",
       "revId": "2dea8aa061757a5ec6970ea1a627b9ab90d4841f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//fDM\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-07-18T20:50:20Z",
+      "side": 1,
+      "message": "This function? so FillPlane as well? Or is that different because FillPlane is called from a public function?",
+      "parentUuid": "AAAAdn//fE8\u003d",
+      "revId": "2dea8aa061757a5ec6970ea1a627b9ab90d4841f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//fE0\u003d",
         "filename": "test/scale_border_test.cc",
         "patchSetId": 8
@@ -64,6 +118,24 @@
       "writtenOn": "2014-07-18T19:10:18Z",
       "side": 1,
       "message": "fwiw this could be named DISABLED_* since it\u0027s known broken at this stage",
+      "revId": "2dea8aa061757a5ec6970ea1a627b9ab90d4841f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//fDI\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-07-18T20:50:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//fE0\u003d",
       "revId": "2dea8aa061757a5ec6970ea1a627b9ab90d4841f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
