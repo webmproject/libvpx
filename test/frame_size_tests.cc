@@ -62,16 +62,6 @@ TEST_F(VP9FrameSizeTestsLarge, TestInvalidSizes) {
   video.set_limit(2);
   expected_res_ = VPX_CODEC_CORRUPT_FRAME;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-#else
-  // If we are on a 32 bit platform we can't possibly allocate enough memory
-  // for the largest video frame size (64kx64k). This test checks that we
-  // properly return a memory error.
-  if (sizeof(size_t) == 4) {
-    video.SetSize(65535, 65535);
-    video.set_limit(2);
-    expected_res_ = VPX_CODEC_MEM_ERROR;
-    ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
-  }
 #endif
 }
 
