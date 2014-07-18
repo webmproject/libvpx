@@ -136,13 +136,13 @@ TEST_P(Trans32x32Test, AccuracyCheck) {
       }
     }
 
-    REGISTER_STATE_CHECK(fwd_txfm_(test_input_block, test_temp_block, 32));
+    ASM_REGISTER_STATE_CHECK(fwd_txfm_(test_input_block, test_temp_block, 32));
     if (bit_depth_ == 8)
-      REGISTER_STATE_CHECK(inv_txfm_(test_temp_block, dst, 32));
+      ASM_REGISTER_STATE_CHECK(inv_txfm_(test_temp_block, dst, 32));
 #if CONFIG_VP9_HIGH
     else
-      REGISTER_STATE_CHECK(inv_txfm_(test_temp_block,
-                                     CONVERT_TO_BYTEPTR(dst16), 32));
+      ASM_REGISTER_STATE_CHECK(inv_txfm_(test_temp_block,
+                                         CONVERT_TO_BYTEPTR(dst16), 32));
 #endif
 
     for (int j = 0; j < kNumCoeffs; ++j) {
@@ -181,7 +181,7 @@ TEST_P(Trans32x32Test, CoeffCheck) {
 
     const int stride = 32;
     vp9_fdct32x32_c(input_block, output_ref_block, stride);
-    REGISTER_STATE_CHECK(fwd_txfm_(input_block, output_block, stride));
+    ASM_REGISTER_STATE_CHECK(fwd_txfm_(input_block, output_block, stride));
 
     if (version_ == 0) {
       for (int j = 0; j < kNumCoeffs; ++j)
@@ -220,7 +220,8 @@ TEST_P(Trans32x32Test, MemCheck) {
 
     const int stride = 32;
     vp9_fdct32x32_c(input_extreme_block, output_ref_block, stride);
-    REGISTER_STATE_CHECK(fwd_txfm_(input_extreme_block, output_block, stride));
+    ASM_REGISTER_STATE_CHECK(
+        fwd_txfm_(input_extreme_block, output_block, stride));
 
     // The minimum quant value is 4.
     for (int j = 0; j < kNumCoeffs; ++j) {
@@ -271,10 +272,10 @@ TEST_P(Trans32x32Test, InverseAccuracy) {
       coeff[j] = round(out_r[j]);
 
     if (bit_depth_ == 8)
-      REGISTER_STATE_CHECK(inv_txfm_(coeff, dst, 32));
+      ASM_REGISTER_STATE_CHECK(inv_txfm_(coeff, dst, 32));
 #if CONFIG_VP9_HIGH
     else
-      REGISTER_STATE_CHECK(inv_txfm_(coeff, CONVERT_TO_BYTEPTR(dst16), 32));
+      ASM_REGISTER_STATE_CHECK(inv_txfm_(coeff, CONVERT_TO_BYTEPTR(dst16), 32));
 #endif
     for (int j = 0; j < kNumCoeffs; ++j) {
       const int diff = bit_depth_ == 8 ? dst[j] - src[j] : dst16[j] - src16[j];

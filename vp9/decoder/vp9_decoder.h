@@ -18,10 +18,9 @@
 
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_ppflags.h"
+#include "vp9/common/vp9_thread.h"
 
-#include "vp9/decoder/vp9_decoder.h"
 #include "vp9/decoder/vp9_dthread.h"
-#include "vp9/decoder/vp9_thread.h"
 
 #ifdef __cplusplus
 extern "C" {

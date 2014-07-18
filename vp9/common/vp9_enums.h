@@ -25,10 +25,10 @@ extern "C" {
 
 #define MI_MASK (MI_BLOCK_SIZE - 1)
 
-// Bitstream profiles indicated by 2 bits in the uncompressed header.
-// 00:  Profile 0. 8-bit 4:2:0 only.
-// 10:  Profile 1. Adds 4:4:4, 4:2:2, alpha to Profile 0.
-// 01:  Profile 2. Supports 10-bit and 12-bit color only, with 4:2:0 sampling.
+// Bitstream profiles indicated by 2-3 bits in the uncompressed header.
+// 00: Profile 0.  8-bit 4:2:0 only.
+// 10: Profile 1.  Adds 4:4:4, 4:2:2, alpha to Profile 0.
+// 01: Profile 2.  Supports 10-bit and 12-bit color only, with 4:2:0 sampling.
 // 110: Profile 3. Supports 10-bit and 12-bit color only, with 4:2:2/4:4:4
 //                 sampling and alpha.
 // 111: Undefined profile.

@@ -28,6 +28,11 @@ typedef struct {
   struct vpx_fixed_buf rc_twopass_stats_in;
   unsigned int current_video_frame_in_layer;
   int is_key_frame;
+  vpx_svc_parameters_t svc_params_received;
+  struct lookahead_entry  *alt_ref_source;
+  int alt_ref_idx;
+  int has_alt_frame;
+  size_t layer_size;
 } LAYER_CONTEXT;
 
 typedef struct {
@@ -35,6 +40,11 @@ typedef struct {
   int temporal_layer_id;
   int number_spatial_layers;
   int number_temporal_layers;
+
+  // Store scaled source frames to be used for temporal filter to generate
+  // a alt ref frame.
+  YV12_BUFFER_CONFIG scaled_frames[MAX_LAG_BUFFERS];
+
   // Layer context used for rate control in one pass temporal CBR mode or
   // two pass spatial mode. Defined for temporal or spatial layers for now.
   // Does not support temporal combined with spatial RC.
@@ -73,6 +83,23 @@ void vp9_inc_frame_in_layer(SVC *svc);
 
 // Check if current layer is key frame in spatial upper layer
 int vp9_is_upper_layer_key_frame(const struct VP9_COMP *const cpi);
+
+// Copy the source image, flags and svc parameters into a new framebuffer
+// with the expected stride/border
+int vp9_svc_lookahead_push(const struct VP9_COMP *const cpi,
+                           struct lookahead_ctx *ctx, YV12_BUFFER_CONFIG *src,
+                           int64_t ts_start, int64_t ts_end,
+                           unsigned int flags);
+
+// Get the next source buffer to encode
+struct lookahead_entry *vp9_svc_lookahead_pop(struct VP9_COMP *const cpi,
+                                              struct lookahead_ctx *ctx,
+                                              int drain);
+
+// Get a future source buffer to encode
+struct lookahead_entry *vp9_svc_lookahead_peek(struct VP9_COMP *const cpi,
+                                               struct lookahead_ctx *ctx,
+                                               int index, int copy_params);
 
 #ifdef __cplusplus
 }  // extern "C"

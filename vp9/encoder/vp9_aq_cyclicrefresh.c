@@ -16,7 +16,6 @@
 #include "vp9/common/vp9_seg_common.h"
 
 #include "vp9/encoder/vp9_ratectrl.h"
-#include "vp9/encoder/vp9_rdopt.h"
 #include "vp9/encoder/vp9_segmentation.h"
 
 struct CYCLIC_REFRESH {

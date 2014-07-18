@@ -102,9 +102,9 @@ extern "C" {
     vpx_img_fmt_t fmt; /**< Image Format */
 
     /* Image storage dimensions */
-    unsigned int    w;           /**< Stored image width */
-    unsigned int    h;           /**< Stored image height */
-    unsigned int    bit_depth;   /**< Stored image bit-depth */
+    unsigned int  w;           /**< Stored image width */
+    unsigned int  h;           /**< Stored image height */
+    unsigned int  bit_depth;   /**< Stored image bit-depth */
 
     /* Image display dimensions */
     unsigned int    d_w;   /**< Displayed image width */

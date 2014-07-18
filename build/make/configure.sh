@@ -485,6 +485,7 @@ EOF
     print_config_h ARCH   "${TMP_H}" ${ARCH_LIST}
     print_config_h HAVE   "${TMP_H}" ${HAVE_LIST}
     print_config_h CONFIG "${TMP_H}" ${CONFIG_LIST}
+    print_config_vars_h   "${TMP_H}" ${VAR_LIST}
     echo "#endif /* VPX_CONFIG_H */" >> ${TMP_H}
     mkdir -p `dirname "$1"`
     cmp "$1" ${TMP_H} >/dev/null 2>&1 || mv ${TMP_H} "$1"
@@ -549,6 +550,15 @@ process_common_cmdline() {
         [ "${optval}" = yasm -o "${optval}" = nasm -o "${optval}" = auto ] \
             || die "Must be yasm, nasm or auto: ${optval}"
         alt_as="${optval}"
+        ;;
+        --size-limit=*)
+        w="${optval%%x*}"
+        h="${optval##*x}"
+        VAR_LIST="DECODE_WIDTH_LIMIT ${w} DECODE_HEIGHT_LIMIT ${h}"
+        [ ${w} -gt 0 -a ${h} -gt 0 ] || die "Invalid size-limit: too small."
+        [ ${w} -lt 65536 -a ${h} -lt 65536 ] \
+            || die "Invalid size-limit: too big."
+        enable_feature size_limit
         ;;
         --prefix=*)
         prefix="${optval}"
@@ -799,7 +809,7 @@ process_common_toolchain() {
     arm*)
         # on arm, isa versions are supersets
         case ${tgt_isa} in
-        armv8)
+        arm64|armv8)
             soft_enable neon
             ;;
         armv7|armv7s)
@@ -1048,14 +1058,6 @@ EOF
         esac
     ;;
     x86*)
-        bits=32
-        enabled x86_64 && bits=64
-        check_cpp <<EOF && bits=x32
-#ifndef __ILP32__
-#error "not x32"
-#endif
-EOF
-
         case  ${tgt_os} in
             win*)
                 enabled gcc && add_cflags -fno-common
@@ -1094,8 +1096,6 @@ EOF
                 esac
             ;;
             gcc*)
-                add_cflags -m${bits}
-                add_ldflags -m${bits}
                 link_with_cc=gcc
                 tune_cflags="-march="
                 setup_gnu_toolchain
@@ -1117,6 +1117,20 @@ EOF
                          soft_disable avx2
                     ;;
                 esac
+            ;;
+        esac
+
+        bits=32
+        enabled x86_64 && bits=64
+        check_cpp <<EOF && bits=x32
+#ifndef __ILP32__
+#error "not x32"
+#endif
+EOF
+        case ${tgt_cc} in
+            gcc*)
+                add_cflags -m${bits}
+                add_ldflags -m${bits}
             ;;
         esac
 
@@ -1222,10 +1236,12 @@ EOF
         fi
     fi
 
-    # default use_x86inc to yes if pic is no or 64bit or we are not on darwin
-    if [ ${tgt_isa} = x86_64 -o ! "$pic" = "yes" -o \
-         "${tgt_os#darwin}" = "${tgt_os}"  ]; then
-      soft_enable use_x86inc
+    tgt_os_no_version=$(echo "${tgt_os}" | tr -d "[0-9]")
+    # Default use_x86inc to yes when we are 64 bit, non-pic, or on any
+    # non-Darwin target.
+    if [ "${tgt_isa}" = "x86_64" ] || [ "${pic}" != "yes" ] || \
+            [ "${tgt_os_no_version}" != "darwin" ]; then
+        soft_enable use_x86inc
     fi
 
     # Position Independent Code (PIC) support, for building relocatable
@@ -1315,6 +1331,16 @@ print_config_h() {
         else
             echo "#define ${prefix}_${upname} 0" >> $header
         fi
+    done
+}
+
+print_config_vars_h() {
+    local header=$1
+    shift
+    while [ $# -gt 0 ]; do
+        upname="`toupper $1`"
+        echo "#define ${upname} $2" >> $header
+        shift 2
     done
 }
 

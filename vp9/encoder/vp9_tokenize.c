@@ -116,48 +116,48 @@ static void init_bit_trees() {
 }
 
 const vp9_extra_bit vp9_extra_bits[ENTROPY_TOKENS] = {
-  {0, 0, 0, 0},           // ZERO_TOKEN
-  {0, 0, 0, 1},           // ONE_TOKEN
-  {0, 0, 0, 2},           // TWO_TOKEN
-  {0, 0, 0, 3},           // THREE_TOKEN
-  {0, 0, 0, 4},           // FOUR_TOKEN
-  {cat1, vp9_cat1_prob, 1, 5},    // CATEGORY1_TOKEN
-  {cat2, vp9_cat2_prob, 2, 7},    // CATEGORY2_TOKEN
-  {cat3, vp9_cat3_prob, 3, 11},   // CATEGORY3_TOKEN
-  {cat4, vp9_cat4_prob, 4, 19},   // CATEGORY4_TOKEN
-  {cat5, vp9_cat5_prob, 5, 35},   // CATEGORY5_TOKEN
-  {cat6, vp9_cat6_prob, 14, 67},  // CATEGORY6_TOKEN
-  {0, 0, 0, 0}            // EOB_TOKEN
+  {0, 0, 0, 0},                              // ZERO_TOKEN
+  {0, 0, 0, 1},                              // ONE_TOKEN
+  {0, 0, 0, 2},                              // TWO_TOKEN
+  {0, 0, 0, 3},                              // THREE_TOKEN
+  {0, 0, 0, 4},                              // FOUR_TOKEN
+  {cat1, vp9_cat1_prob, 1,  CAT1_MIN_VAL},   // CATEGORY1_TOKEN
+  {cat2, vp9_cat2_prob, 2,  CAT2_MIN_VAL},   // CATEGORY2_TOKEN
+  {cat3, vp9_cat3_prob, 3,  CAT3_MIN_VAL},   // CATEGORY3_TOKEN
+  {cat4, vp9_cat4_prob, 4,  CAT4_MIN_VAL},   // CATEGORY4_TOKEN
+  {cat5, vp9_cat5_prob, 5,  CAT5_MIN_VAL},   // CATEGORY5_TOKEN
+  {cat6, vp9_cat6_prob, 14, CAT6_MIN_VAL},   // CATEGORY6_TOKEN
+  {0, 0, 0, 0}                               // EOB_TOKEN
 };
 
 #if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
 const vp9_extra_bit vp9_extra_bits_high10[ENTROPY_TOKENS] = {
-  {0, 0, 0, 0},           // ZERO_TOKEN
-  {0, 0, 0, 1},           // ONE_TOKEN
-  {0, 0, 0, 2},           // TWO_TOKEN
-  {0, 0, 0, 3},           // THREE_TOKEN
-  {0, 0, 0, 4},           // FOUR_TOKEN
-  {cat1_high10, vp9_cat1_prob_high10, 1, 5},    // CATEGORY1_TOKEN
-  {cat2_high10, vp9_cat2_prob_high10, 2, 7},    // CATEGORY2_TOKEN
-  {cat3_high10, vp9_cat3_prob_high10, 3, 11},   // CATEGORY3_TOKEN
-  {cat4_high10, vp9_cat4_prob_high10, 4, 19},   // CATEGORY4_TOKEN
-  {cat5_high10, vp9_cat5_prob_high10, 5, 35},   // CATEGORY5_TOKEN
-  {cat6_high10, vp9_cat6_prob_high10, 16, 67},  // CATEGORY6_TOKEN
-  {0, 0, 0, 0}            // EOB_TOKEN
+  {0, 0, 0, 0},                                            // ZERO_TOKEN
+  {0, 0, 0, 1},                                            // ONE_TOKEN
+  {0, 0, 0, 2},                                            // TWO_TOKEN
+  {0, 0, 0, 3},                                            // THREE_TOKEN
+  {0, 0, 0, 4},                                            // FOUR_TOKEN
+  {cat1_high10, vp9_cat1_prob_high10, 1,  CAT1_MIN_VAL},   // CATEGORY1_TOKEN
+  {cat2_high10, vp9_cat2_prob_high10, 2,  CAT2_MIN_VAL},   // CATEGORY2_TOKEN
+  {cat3_high10, vp9_cat3_prob_high10, 3,  CAT3_MIN_VAL},   // CATEGORY3_TOKEN
+  {cat4_high10, vp9_cat4_prob_high10, 4,  CAT4_MIN_VAL},   // CATEGORY4_TOKEN
+  {cat5_high10, vp9_cat5_prob_high10, 5,  CAT5_MIN_VAL},   // CATEGORY5_TOKEN
+  {cat6_high10, vp9_cat6_prob_high10, 16, CAT6_MIN_VAL},   // CATEGORY6_TOKEN
+  {0, 0, 0, 0}                                             // EOB_TOKEN
 };
 const vp9_extra_bit vp9_extra_bits_high12[ENTROPY_TOKENS] = {
-  {0, 0, 0, 0},           // ZERO_TOKEN
-  {0, 0, 0, 1},           // ONE_TOKEN
-  {0, 0, 0, 2},           // TWO_TOKEN
-  {0, 0, 0, 3},           // THREE_TOKEN
-  {0, 0, 0, 4},           // FOUR_TOKEN
-  {cat1_high12, vp9_cat1_prob_high12, 1, 5},    // CATEGORY1_TOKEN
-  {cat2_high12, vp9_cat2_prob_high12, 2, 7},    // CATEGORY2_TOKEN
-  {cat3_high12, vp9_cat3_prob_high12, 3, 11},   // CATEGORY3_TOKEN
-  {cat4_high12, vp9_cat4_prob_high12, 4, 19},   // CATEGORY4_TOKEN
-  {cat5_high12, vp9_cat5_prob_high12, 5, 35},   // CATEGORY5_TOKEN
-  {cat6_high12, vp9_cat6_prob_high12, 18, 67},  // CATEGORY6_TOKEN
-  {0, 0, 0, 0}            // EOB_TOKEN
+  {0, 0, 0, 0},                                            // ZERO_TOKEN
+  {0, 0, 0, 1},                                            // ONE_TOKEN
+  {0, 0, 0, 2},                                            // TWO_TOKEN
+  {0, 0, 0, 3},                                            // THREE_TOKEN
+  {0, 0, 0, 4},                                            // FOUR_TOKEN
+  {cat1_high12, vp9_cat1_prob_high12, 1,  CAT1_MIN_VAL},   // CATEGORY1_TOKEN
+  {cat2_high12, vp9_cat2_prob_high12, 2,  CAT2_MIN_VAL},   // CATEGORY2_TOKEN
+  {cat3_high12, vp9_cat3_prob_high12, 3,  CAT3_MIN_VAL},   // CATEGORY3_TOKEN
+  {cat4_high12, vp9_cat4_prob_high12, 4,  CAT4_MIN_VAL},   // CATEGORY4_TOKEN
+  {cat5_high12, vp9_cat5_prob_high12, 5,  CAT5_MIN_VAL},   // CATEGORY5_TOKEN
+  {cat6_high12, vp9_cat6_prob_high12, 18, CAT6_MIN_VAL},   // CATEGORY6_TOKEN
+  {0, 0, 0, 0}                                             // EOB_TOKEN
 };
 #endif
 

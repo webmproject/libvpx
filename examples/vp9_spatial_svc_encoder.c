@@ -28,16 +28,6 @@
 #include "vpx/vpx_encoder.h"
 #include "./vpxstats.h"
 
-static const struct arg_enum_list encoding_mode_enum[] = {
-  {"i", INTER_LAYER_PREDICTION_I},
-  {"alt-ip", ALT_INTER_LAYER_PREDICTION_IP},
-  {"ip", INTER_LAYER_PREDICTION_IP},
-  {"gf", USE_GOLDEN_FRAME},
-  {NULL, 0}
-};
-
-static const arg_def_t encoding_mode_arg = ARG_DEF_ENUM(
-    "m", "encoding-mode", 1, "Encoding mode algorithm", encoding_mode_enum);
 static const arg_def_t skip_frames_arg =
     ARG_DEF("s", "skip-frames", 1, "input frames to skip");
 static const arg_def_t frames_arg =
@@ -58,9 +48,6 @@ static const arg_def_t quantizers_arg =
     ARG_DEF("q", "quantizers", 1, "quantizers for non key frames, also will "
             "be applied to key frames if -qn is not specified (lowest to "
             "highest layer)");
-static const arg_def_t quantizers_keyframe_arg =
-    ARG_DEF("qn", "quantizers-keyframe", 1, "quantizers for key frames (lowest "
-        "to highest layer)");
 static const arg_def_t passes_arg =
     ARG_DEF("p", "passes", 1, "Number of passes (1/2)");
 static const arg_def_t pass_arg =
@@ -77,16 +64,13 @@ static const arg_def_t max_bitrate_arg =
     ARG_DEF(NULL, "max-bitrate", 1, "Maximum bitrate");
 
 static const arg_def_t *svc_args[] = {
-  &encoding_mode_arg, &frames_arg,        &width_arg,       &height_arg,
+  &frames_arg,        &width_arg,         &height_arg,
   &timebase_arg,      &bitrate_arg,       &skip_frames_arg, &layers_arg,
-  &kf_dist_arg,       &scale_factors_arg, &quantizers_arg,
-  &quantizers_keyframe_arg,               &passes_arg,      &pass_arg,
-  &fpf_name_arg,      &min_q_arg,         &max_q_arg,       &min_bitrate_arg,
-  &max_bitrate_arg,   NULL
+  &kf_dist_arg,       &scale_factors_arg, &quantizers_arg,  &passes_arg,
+  &pass_arg,          &fpf_name_arg,      &min_q_arg,       &max_q_arg,
+  &min_bitrate_arg,   &max_bitrate_arg,   NULL
 };
 
-static const SVC_ENCODING_MODE default_encoding_mode =
-    INTER_LAYER_PREDICTION_IP;
 static const uint32_t default_frames_to_skip = 0;
 static const uint32_t default_frames_to_code = 60 * 60;
 static const uint32_t default_width = 1920;
@@ -135,7 +119,6 @@ static void parse_command_line(int argc, const char **argv_,
   // initialize SvcContext with parameters that will be passed to vpx_svc_init
   svc_ctx->log_level = SVC_LOG_DEBUG;
   svc_ctx->spatial_layers = default_spatial_layers;
-  svc_ctx->encoding_mode = default_encoding_mode;
 
   // start with default encoder configuration
   res = vpx_codec_enc_config_default(vpx_codec_vp9_cx(), enc_cfg, 0);
@@ -161,9 +144,7 @@ static void parse_command_line(int argc, const char **argv_,
   for (argi = argj = argv; (*argj = *argi); argi += arg.argv_step) {
     arg.argv_step = 1;
 
-    if (arg_match(&arg, &encoding_mode_arg, argi)) {
-      svc_ctx->encoding_mode = arg_parse_enum_or_int(&arg);
-    } else if (arg_match(&arg, &frames_arg, argi)) {
+    if (arg_match(&arg, &frames_arg, argi)) {
       app_input->frames_to_code = arg_parse_uint(&arg);
     } else if (arg_match(&arg, &width_arg, argi)) {
       enc_cfg->g_w = arg_parse_uint(&arg);
@@ -183,9 +164,7 @@ static void parse_command_line(int argc, const char **argv_,
     } else if (arg_match(&arg, &scale_factors_arg, argi)) {
       vpx_svc_set_scale_factors(svc_ctx, arg.val);
     } else if (arg_match(&arg, &quantizers_arg, argi)) {
-      vpx_svc_set_quantizers(svc_ctx, arg.val, 0);
-    } else if (arg_match(&arg, &quantizers_keyframe_arg, argi)) {
-      vpx_svc_set_quantizers(svc_ctx, arg.val, 1);
+      vpx_svc_set_quantizers(svc_ctx, arg.val);
     } else if (arg_match(&arg, &passes_arg, argi)) {
       passes = arg_parse_uint(&arg);
       if (passes < 1 || passes > 2) {
@@ -270,12 +249,12 @@ static void parse_command_line(int argc, const char **argv_,
 
   printf(
       "Codec %s\nframes: %d, skip: %d\n"
-      "mode: %d, layers: %d\n"
+      "layers: %d\n"
       "width %d, height: %d,\n"
       "num: %d, den: %d, bitrate: %d,\n"
       "gop size: %d\n",
       vpx_codec_iface_name(vpx_codec_vp9_cx()), app_input->frames_to_code,
-      app_input->frames_to_skip, svc_ctx->encoding_mode,
+      app_input->frames_to_skip,
       svc_ctx->spatial_layers, enc_cfg->g_w, enc_cfg->g_h,
       enc_cfg->g_timebase.num, enc_cfg->g_timebase.den,
       enc_cfg->rc_target_bitrate, enc_cfg->kf_max_dist);
@@ -296,6 +275,7 @@ int main(int argc, const char **argv) {
   int frame_duration = 1; /* 1 timebase tick per frame */
   FILE *infile = NULL;
   int end_of_stream = 0;
+  int frame_size;
 
   memset(&svc_ctx, 0, sizeof(svc_ctx));
   svc_ctx.log_print = 1;
@@ -351,11 +331,10 @@ int main(int argc, const char **argv) {
       die_codec(&codec, "Failed to encode frame");
     }
     if (!(app_input.passes == 2 && app_input.pass == 1)) {
-      if (vpx_svc_get_frame_size(&svc_ctx) > 0) {
+      while ((frame_size = vpx_svc_get_frame_size(&svc_ctx)) > 0) {
         vpx_video_writer_write_frame(writer,
                                      vpx_svc_get_buffer(&svc_ctx),
-                                     vpx_svc_get_frame_size(&svc_ctx),
-                                     pts);
+                                     frame_size, pts);
       }
     }
     if (vpx_svc_get_rc_stats_buffer_size(&svc_ctx) > 0) {

@@ -186,12 +186,12 @@ TEST_P(Loop8Test6Param, OperationCheck) {
     }
 #if CONFIG_VP9_HIGH
     ref_loopfilter_op_(ref_s+8+p*8, p, blimit, limit, thresh, count, bps);
-    REGISTER_STATE_CHECK(loopfilter_op_(s+8+p*8, p, blimit, limit, thresh,
-                                        count, bps));
+    ASM_REGISTER_STATE_CHECK(loopfilter_op_(s+8+p*8, p, blimit, limit, thresh,
+                                            count, bps));
 #else
     ref_loopfilter_op_(ref_s+8+p*8, p, blimit, limit, thresh, count);
-    REGISTER_STATE_CHECK(loopfilter_op_(s+8+p*8, p, blimit, limit, thresh,
-                                        count));
+    ASM_REGISTER_STATE_CHECK(loopfilter_op_(s+8+p*8, p, blimit, limit, thresh,
+                                            count));
 #endif
 
     for (int j = 0; j < kNumCoeffs; ++j) {
@@ -239,12 +239,12 @@ TEST_P(Loop8Test6Param, ValueCheck) {
     }
 #if CONFIG_VP9_HIGH
     ref_loopfilter_op_(ref_s+8+p*8, p, blimit, limit, thresh, count, bps);
-    REGISTER_STATE_CHECK(loopfilter_op_(s+8+p*8, p, blimit, limit, thresh,
-                                        count, bps));
+    ASM_REGISTER_STATE_CHECK(loopfilter_op_(s+8+p*8, p, blimit, limit, thresh,
+                                            count, bps));
 #else
     ref_loopfilter_op_(ref_s+8+p*8, p, blimit, limit, thresh, count);
-    REGISTER_STATE_CHECK(loopfilter_op_(s+8+p*8, p, blimit, limit, thresh,
-                                        count));
+    ASM_REGISTER_STATE_CHECK(loopfilter_op_(s+8+p*8, p, blimit, limit, thresh,
+                                            count));
 #endif
     for (int j = 0; j < kNumCoeffs; ++j) {
       err_count += ref_s[j] != s[j];
@@ -326,13 +326,14 @@ TEST_P(Loop8Test9Param, OperationCheck) {
 #if CONFIG_VP9_HIGH
     ref_loopfilter_op_(ref_s+8+p*8, p, blimit0, limit0, thresh0,
                        blimit1, limit1, thresh1, bps);
-    REGISTER_STATE_CHECK(loopfilter_op_(s+8+p*8, p, blimit0, limit0, thresh0,
-                         blimit1, limit1, thresh1, bps));
+    ASM_REGISTER_STATE_CHECK(loopfilter_op_(s+8+p*8, p, blimit0, limit0,
+                                            thresh0, blimit1, limit1, thresh1,
+                                            bps));
 #else
     ref_loopfilter_op_(ref_s+8+p*8, p, blimit0, limit0, thresh0,
                        blimit1, limit1, thresh1);
-    REGISTER_STATE_CHECK(loopfilter_op_(s+8+p*8, p, blimit0, limit0, thresh0,
-                       blimit1, limit1, thresh1));
+    ASM_REGISTER_STATE_CHECK(loopfilter_op_(s+8+p*8, p, blimit0, limit0,
+                                            thresh0, blimit1, limit1, thresh1));
 #endif
     for (int j = 0; j < kNumCoeffs; ++j) {
       err_count += ref_s[j] != s[j];
@@ -388,13 +389,14 @@ TEST_P(Loop8Test9Param, ValueCheck) {
     int32_t  bps   = bit_depth_;
     ref_loopfilter_op_(ref_s+8+p*8, p, blimit0, limit0, thresh0,
                        blimit1, limit1, thresh1, bps);
-    REGISTER_STATE_CHECK(loopfilter_op_(s+8+p*8, p, blimit0, limit0, thresh0,
-                         blimit1, limit1, thresh1, bps));
+    ASM_REGISTER_STATE_CHECK(loopfilter_op_(s+8+p*8, p, blimit0, limit0,
+                                            thresh0, blimit1, limit1, thresh1,
+                                            bps));
 #else
     ref_loopfilter_op_(ref_s+8+p*8, p, blimit0, limit0, thresh0,
                        blimit1, limit1, thresh1);
-    REGISTER_STATE_CHECK(loopfilter_op_(s+8+p*8, p, blimit0, limit0, thresh0,
-                       blimit1, limit1, thresh1));
+    ASM_REGISTER_STATE_CHECK(loopfilter_op_(s+8+p*8, p, blimit0, limit0,
+                                            thresh0, blimit1, limit1, thresh1));
 #endif
     for (int j = 0; j < kNumCoeffs; ++j) {
       err_count += ref_s[j] != s[j];

@@ -195,6 +195,18 @@ static MV mi_mv_pred_q4(const MODE_INFO *mi, int idx) {
   return res;
 }
 
+static INLINE int round_mv_comp_q2(int value) {
+  return (value < 0 ? value - 1 : value + 1) / 2;
+}
+
+static MV mi_mv_pred_q2(const MODE_INFO *mi, int idx, int block0, int block1) {
+  MV res = { round_mv_comp_q2(mi->bmi[block0].as_mv[idx].as_mv.row +
+                              mi->bmi[block1].as_mv[idx].as_mv.row),
+             round_mv_comp_q2(mi->bmi[block0].as_mv[idx].as_mv.col +
+                              mi->bmi[block1].as_mv[idx].as_mv.col) };
+  return res;
+}
+
 // TODO(jkoleszar): yet another mv clamping function :-(
 MV clamp_mv_to_umv_border_sb(const MACROBLOCKD *xd, const MV *src_mv,
                              int bw, int bh, int ss_x, int ss_y) {
@@ -221,6 +233,29 @@ MV clamp_mv_to_umv_border_sb(const MACROBLOCKD *xd, const MV *src_mv,
   return clamped_mv;
 }
 
+static MV average_split_mvs(const struct macroblockd_plane *pd,
+                            const MODE_INFO *mi, int ref, int block) {
+  const int ss_idx = ((pd->subsampling_x > 0) << 1) | (pd->subsampling_y > 0);
+  MV res = {0, 0};
+  switch (ss_idx) {
+    case 0:
+      res = mi->bmi[block].as_mv[ref].as_mv;
+      break;
+    case 1:
+      res = mi_mv_pred_q2(mi, ref, block, block + 2);
+      break;
+    case 2:
+      res = mi_mv_pred_q2(mi, ref, block, block + 1);
+      break;
+    case 3:
+      res = mi_mv_pred_q4(mi, ref);
+      break;
+    default:
+      assert(ss_idx <= 3 || ss_idx >= 0);
+  }
+  return res;
+}
+
 static void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
                                    int bw, int bh,
                                    int x, int y, int w, int h,
@@ -236,14 +271,8 @@ static void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
     struct buf_2d *const pre_buf = &pd->pre[ref];
     struct buf_2d *const dst_buf = &pd->dst;
     uint8_t *const dst = dst_buf->buf + dst_buf->stride * y + x;
-
-    // TODO(jkoleszar): All chroma MVs in SPLITMV mode are taken as the
-    // same MV (the average of the 4 luma MVs) but we could do something
-    // smarter for non-4:2:0. Just punt for now, pending the changes to get
-    // rid of SPLITMV mode entirely.
     const MV mv = mi->mbmi.sb_type < BLOCK_8X8
-               ? (plane == 0 ? mi->bmi[block].as_mv[ref].as_mv
-                             : mi_mv_pred_q4(mi, ref))
+               ? average_split_mvs(pd, mi, ref, block)
                : mi->mbmi.mv[ref].as_mv;
 
     // TODO(jkoleszar): This clamping is done in the incorrect place for the
@@ -349,15 +378,10 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
     struct buf_2d *const pre_buf = &pd->pre[ref];
     struct buf_2d *const dst_buf = &pd->dst;
     uint8_t *const dst = dst_buf->buf + dst_buf->stride * y + x;
-
-    // TODO(jkoleszar): All chroma MVs in SPLITMV mode are taken as the
-    // same MV (the average of the 4 luma MVs) but we could do something
-    // smarter for non-4:2:0. Just punt for now, pending the changes to get
-    // rid of SPLITMV mode entirely.
     const MV mv = mi->mbmi.sb_type < BLOCK_8X8
-               ? (plane == 0 ? mi->bmi[block].as_mv[ref].as_mv
-                             : mi_mv_pred_q4(mi, ref))
+               ? average_split_mvs(pd, mi, ref, block)
                : mi->mbmi.mv[ref].as_mv;
+
 
     // TODO(jkoleszar): This clamping is done in the incorrect place for the
     // scaling case. It needs to be done on the scaled MV, not the pre-scaling
@@ -456,7 +480,7 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
       }
 
       // Skip border extension if block is inside the frame.
-      if (x0 < 0 || x0 > frame_width - 1 || x1 < 0 || x1 > frame_width ||
+      if (x0 < 0 || x0 > frame_width - 1 || x1 < 0 || x1 > frame_width - 1 ||
           y0 < 0 || y0 > frame_height - 1 || y1 < 0 || y1 > frame_height - 1) {
         uint8_t *buf_ptr1 = ref_frame + y0 * pre_buf->stride + x0;
         // Extend the border.

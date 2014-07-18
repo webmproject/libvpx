@@ -110,8 +110,8 @@ class IntraPredTest
     const uint16_t *const_above_row = above_row_;
     const uint16_t *const_left_col = left_col_;
     ref_fn_(ref_dst_, stride_, const_above_row, const_left_col, bit_depth_);
-    REGISTER_STATE_CHECK(pred_fn_(dst_, stride_, const_above_row,
-                                  const_left_col, bit_depth_));
+    ASM_REGISTER_STATE_CHECK(pred_fn_(dst_, stride_, const_above_row,
+                                      const_left_col, bit_depth_));
   }
   intra_pred_fn_t pred_fn_;
   intra_pred_fn_t ref_fn_;

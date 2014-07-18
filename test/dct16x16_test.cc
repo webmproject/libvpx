@@ -354,14 +354,14 @@ class Trans16x16TestBase {
         }
       }
 
-      REGISTER_STATE_CHECK(RunFwdTxfm(test_input_block,
-                                      test_temp_block, pitch_));
+      ASM_REGISTER_STATE_CHECK(RunFwdTxfm(test_input_block,
+                                          test_temp_block, pitch_));
       if (bit_depth_ == 8)
-        REGISTER_STATE_CHECK(
+        ASM_REGISTER_STATE_CHECK(
             RunInvTxfm(test_temp_block, dst, pitch_));
 #if CONFIG_VP9_HIGH
       else
-        REGISTER_STATE_CHECK(
+        ASM_REGISTER_STATE_CHECK(
             RunInvTxfm(test_temp_block, CONVERT_TO_BYTEPTR(dst16), pitch_));
 #endif
 
@@ -395,7 +395,7 @@ class Trans16x16TestBase {
         input_block[j] = (rnd.Rand16() & mask_) - (rnd.Rand16() & mask_);
 
       fwd_txfm_ref(input_block, output_ref_block, pitch_, tx_type_);
-      REGISTER_STATE_CHECK(RunFwdTxfm(input_block, output_block, pitch_));
+      ASM_REGISTER_STATE_CHECK(RunFwdTxfm(input_block, output_block, pitch_));
 
       // The minimum quant value is 4.
       for (int j = 0; j < kNumCoeffs; ++j)
@@ -426,8 +426,8 @@ class Trans16x16TestBase {
       }
 
       fwd_txfm_ref(input_extreme_block, output_ref_block, pitch_, tx_type_);
-      REGISTER_STATE_CHECK(RunFwdTxfm(input_extreme_block,
-                                      output_block, pitch_));
+      ASM_REGISTER_STATE_CHECK(RunFwdTxfm(input_extreme_block,
+                                          output_block, pitch_));
 
       // The minimum quant value is 4.
       for (int j = 0; j < kNumCoeffs; ++j) {
@@ -480,13 +480,13 @@ class Trans16x16TestBase {
         output_ref_block[j] = (output_ref_block[j] / ac_thred) * ac_thred;
       if (bit_depth_ == 8) {
         inv_txfm_ref(output_ref_block, ref, pitch_, tx_type_);
-        REGISTER_STATE_CHECK(RunInvTxfm(output_ref_block, dst, pitch_));
+        ASM_REGISTER_STATE_CHECK(RunInvTxfm(output_ref_block, dst, pitch_));
 #if CONFIG_VP9_HIGH
       } else {
         inv_txfm_ref(output_ref_block, CONVERT_TO_BYTEPTR(ref16), pitch_,
                      tx_type_);
-        REGISTER_STATE_CHECK(RunInvTxfm(output_ref_block,
-                                        CONVERT_TO_BYTEPTR(dst16), pitch_));
+        ASM_REGISTER_STATE_CHECK(RunInvTxfm(output_ref_block,
+                                            CONVERT_TO_BYTEPTR(dst16), pitch_));
       }
 #else
       }
@@ -531,10 +531,11 @@ class Trans16x16TestBase {
         coeff[j] = round(out_r[j]);
 
       if (bit_depth_ == 8)
-        REGISTER_STATE_CHECK(RunInvTxfm(coeff, dst, 16));
+        ASM_REGISTER_STATE_CHECK(RunInvTxfm(coeff, dst, 16));
 #if CONFIG_VP9_HIGH
       else
-        REGISTER_STATE_CHECK(RunInvTxfm(coeff, CONVERT_TO_BYTEPTR(dst16), 16));
+        ASM_REGISTER_STATE_CHECK(RunInvTxfm(coeff, CONVERT_TO_BYTEPTR(dst16),
+                                            16));
 #endif
 
       for (int j = 0; j < kNumCoeffs; ++j) {

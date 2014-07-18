@@ -32,6 +32,14 @@ void usage_exit() {
   exit(EXIT_FAILURE);
 }
 
+// Denoiser states, for temporal denoising.
+enum denoiserState {
+  kDenoiserOff,
+  kDenoiserOnYOnly,
+  kDenoiserOnYUV,
+  kDenoiserOnYUVAggressive  // Aggressive mode not implemented currently.
+};
+
 static int mode_to_num_layers[12] = {1, 2, 2, 3, 3, 3, 3, 5, 2, 3, 3, 3};
 
 // For rate control encoding stats.
@@ -466,7 +474,7 @@ int main(int argc, char **argv) {
   if (!encoder)
     die("Unsupported codec.");
 
-  printf("Using %s\n", vpx_codec_iface_name(encoder->interface()));
+  printf("Using %s\n", vpx_codec_iface_name(encoder->codec_interface()));
 
   width = strtol(argv[4], NULL, 0);
   height = strtol(argv[5], NULL, 0);
@@ -488,7 +496,7 @@ int main(int argc, char **argv) {
   }
 
   // Populate encoder configuration.
-  res = vpx_codec_enc_config_default(encoder->interface(), &cfg, 0);
+  res = vpx_codec_enc_config_default(encoder->codec_interface(), &cfg, 0);
   if (res) {
     printf("Failed to get config: %s\n", vpx_codec_err_to_string(res));
     return EXIT_FAILURE;
@@ -566,12 +574,12 @@ int main(int argc, char **argv) {
   cfg.ss_number_layers = 1;
 
   // Initialize codec.
-  if (vpx_codec_enc_init(&codec, encoder->interface(), &cfg, 0))
+  if (vpx_codec_enc_init(&codec, encoder->codec_interface(), &cfg, 0))
     die_codec(&codec, "Failed to initialize encoder");
 
   if (strncmp(encoder->name, "vp8", 3) == 0) {
     vpx_codec_control(&codec, VP8E_SET_CPUUSED, -speed);
-    vpx_codec_control(&codec, VP8E_SET_NOISE_SENSITIVITY, 1);
+    vpx_codec_control(&codec, VP8E_SET_NOISE_SENSITIVITY, kDenoiserOnYUV);
   } else if (strncmp(encoder->name, "vp9", 3) == 0) {
       vpx_codec_control(&codec, VP8E_SET_CPUUSED, speed);
       vpx_codec_control(&codec, VP9E_SET_AQ_MODE, 3);

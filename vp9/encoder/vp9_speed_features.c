@@ -84,16 +84,17 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
 
   if (speed >= 2) {
     if (MIN(cm->width, cm->height) >= 720) {
-      sf->lf_motion_threshold = LOW_MOITION_THRESHOLD;
+      sf->lf_motion_threshold = LOW_MOTION_THRESHOLD;
       sf->last_partitioning_redo_frequency = 3;
       sf->disable_split_mask = cm->show_frame ? DISABLE_ALL_SPLIT
                                               : DISABLE_ALL_INTER_SPLIT;
     } else {
       sf->disable_split_mask = LAST_AND_INTRA_SPLIT_ONLY;
       sf->last_partitioning_redo_frequency = 2;
-      sf->lf_motion_threshold = NO_MOITION_THRESHOLD;
+      sf->lf_motion_threshold = NO_MOTION_THRESHOLD;
     }
-    sf->adaptive_pred_interp_filter = 2;
+
+    sf->adaptive_pred_interp_filter = 0;
     sf->reference_masking = 1;
     sf->mode_search_skip_flags = FLAG_SKIP_INTRA_DIRMISMATCH |
                                  FLAG_SKIP_INTRA_BESTINTER |
@@ -114,7 +115,7 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
     else
       sf->disable_split_mask = DISABLE_ALL_INTER_SPLIT;
 
-    sf->lf_motion_threshold = LOW_MOITION_THRESHOLD;
+    sf->lf_motion_threshold = LOW_MOTION_THRESHOLD;
     sf->last_partitioning_redo_frequency = 3;
     sf->recode_loop = ALLOW_RECODE_KFMAXBW;
     sf->adaptive_rd_thresh = 3;
@@ -147,6 +148,9 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
       sf->intra_uv_mode_mask[i] = INTRA_DC;
     }
     cpi->allow_encode_breakout = ENCODE_BREAKOUT_ENABLED;
+  }
+  if (speed >= 6) {
+    sf->mv.reduce_first_step_size = 1;
   }
 }
 
@@ -198,7 +202,7 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
     sf->auto_min_max_partition_size = RELAXED_NEIGHBORING_MIN_MAX;
     sf->use_lastframe_partitioning = LAST_FRAME_PARTITION_LOW_MOTION;
-    sf->lf_motion_threshold = LOW_MOITION_THRESHOLD;
+    sf->lf_motion_threshold = LOW_MOTION_THRESHOLD;
     sf->adjust_partitioning_from_last_frame = 1;
     sf->last_partitioning_redo_frequency = 3;
     sf->use_lp32x32fdct = 1;
@@ -249,6 +253,9 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
   }
 
   if (speed >= 5) {
+    sf->use_quant_fp = cm->frame_type == KEY_FRAME ? 0 : 1;
+    sf->auto_min_max_partition_size = (cm->frame_type == KEY_FRAME) ?
+        RELAXED_NEIGHBORING_MIN_MAX : STRICT_NEIGHBORING_MIN_MAX;
     sf->max_partition_size = BLOCK_32X32;
     sf->min_partition_size = BLOCK_8X8;
     sf->partition_check =
@@ -259,7 +266,6 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->max_delta_qindex = (cm->frame_type == KEY_FRAME) ? 20 : 15;
     sf->partition_search_type = REFERENCE_PARTITION;
     sf->use_nonrd_pick_mode = 1;
-    sf->mv.search_method = FAST_DIAMOND;
     sf->allow_skip_recode = 0;
   }
 
@@ -267,13 +273,34 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     // Adaptively switch between SOURCE_VAR_BASED_PARTITION and FIXED_PARTITION.
     sf->partition_search_type = SOURCE_VAR_BASED_PARTITION;
     sf->search_type_check_frequency = 50;
-    sf->source_var_thresh = 360;
 
-    sf->tx_size_search_method = USE_TX_8X8;
+    sf->tx_size_search_method = (cm->frame_type == KEY_FRAME) ?
+        USE_LARGESTALL : USE_TX_8X8;
+    sf->max_intra_bsize = BLOCK_8X8;
+
+    // This feature is only enabled when partition search is disabled.
+    sf->reuse_inter_pred_sby = 1;
+
+    // Increase mode checking threshold for NEWMV.
+    sf->elevate_newmv_thresh = 2000;
+
+    sf->mv.reduce_first_step_size = 1;
   }
-
   if (speed >= 7) {
+    sf->mv.search_method = FAST_DIAMOND;
+    sf->mv.fullpel_search_step_param = 10;
+    sf->lpf_pick = LPF_PICK_MINIMAL_LPF;
+    sf->encode_breakout_thresh = (MIN(cm->width, cm->height) >= 720) ?
+        800 : 300;
+    sf->elevate_newmv_thresh = 2500;
+  }
+  if (speed >= 12) {
+    sf->elevate_newmv_thresh = 4000;
+    sf->mv.subpel_force_stop = 2;
+  }
+  if (speed >= 13) {
     int i;
+    sf->max_intra_bsize = BLOCK_32X32;
     for (i = 0; i < BLOCK_SIZES; ++i)
       sf->inter_mode_mask[i] = INTER_NEAREST;
   }
@@ -295,7 +322,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->optimize_coefficients = !is_lossless_requested(&cpi->oxcf);
   sf->mv.reduce_first_step_size = 0;
   sf->mv.auto_mv_step_size = 0;
-  sf->mv.max_step_search_steps = MAX_MVSEARCH_STEPS;
+  sf->mv.fullpel_search_step_param = 6;
   sf->comp_inter_joint_search_thresh = BLOCK_4X4;
   sf->adaptive_rd_thresh = 0;
   sf->use_lastframe_partitioning = LAST_FRAME_PARTITION_OFF;
@@ -303,6 +330,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->use_lp32x32fdct = 0;
   sf->adaptive_motion_search = 0;
   sf->adaptive_pred_interp_filter = 0;
+  sf->use_quant_fp = 0;
   sf->reference_masking = 0;
   sf->partition_search_type = SEARCH_PARTITION;
   sf->less_rectangular_check = 0;
@@ -335,14 +363,16 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   for (i = 0; i < BLOCK_SIZES; ++i)
     sf->inter_mode_mask[i] = INTER_ALL;
   sf->max_intra_bsize = BLOCK_64X64;
+  sf->reuse_inter_pred_sby = 0;
   // This setting only takes effect when partition_search_type is set
   // to FIXED_PARTITION.
   sf->always_this_block_size = BLOCK_16X16;
   sf->search_type_check_frequency = 50;
-  sf->source_var_thresh = 100;
-
+  sf->encode_breakout_thresh = 0;
+  sf->elevate_newmv_thresh = 0;
   // Recode loop tolerence %.
   sf->recode_tolerance = 25;
+  sf->default_interp_filter = SWITCHABLE;
 
   switch (oxcf->mode) {
     case ONE_PASS_BEST:
@@ -372,7 +402,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
 
   if (sf->mv.subpel_search_method == SUBPEL_TREE) {
     cpi->find_fractional_mv_step = vp9_find_best_sub_pixel_tree;
-    cpi->find_fractional_mv_step_comp = vp9_find_best_sub_pixel_comp_tree;
   }
 
   cpi->mb.optimize = sf->optimize_coefficients == 1 && cpi->pass != 1;
@@ -383,4 +412,8 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   if (!cpi->oxcf.frame_periodic_boost) {
     sf->max_delta_qindex = 0;
   }
+
+  if (cpi->encode_breakout && oxcf->mode == REALTIME &&
+      sf->encode_breakout_thresh > cpi->encode_breakout)
+    cpi->encode_breakout = sf->encode_breakout_thresh;
 }

@@ -463,9 +463,7 @@ $vp8_short_walsh4x4_neon_asm=vp8_short_walsh4x4_neon;
 # Quantizer
 #
 add_proto qw/void vp8_regular_quantize_b/, "struct block *, struct blockd *";
-specialize qw/vp8_regular_quantize_b sse2/;
-# TODO(johann) Update sse4 implementation and re-enable
-#$vp8_regular_quantize_b_sse4_1=vp8_regular_quantize_b_sse4;
+specialize qw/vp8_regular_quantize_b sse2 sse4_1/;
 
 add_proto qw/void vp8_fast_quantize_b/, "struct block *, struct blockd *";
 specialize qw/vp8_fast_quantize_b sse2 ssse3 media neon_asm/;
@@ -554,6 +552,9 @@ $vp8_yv12_copy_partial_frame_neon_asm=vp8_yv12_copy_partial_frame_neon;
 if (vpx_config("CONFIG_TEMPORAL_DENOISING") eq "yes") {
     add_proto qw/int vp8_denoiser_filter/, "unsigned char *mc_running_avg_y, int mc_avg_y_stride, unsigned char *running_avg_y, int avg_y_stride, unsigned char *sig, int sig_stride, unsigned int motion_magnitude, int increase_denoising";
     specialize qw/vp8_denoiser_filter sse2 neon/;
+    add_proto qw/int vp8_denoiser_filter_uv/, "unsigned char *mc_running_avg, int mc_avg_stride, unsigned char *running_avg, int avg_stride, unsigned char *sig, int sig_stride, unsigned int motion_magnitude, int increase_denoising";
+    specialize qw/vp8_denoiser_filter_uv sse2 neon/;
+
 }
 
 # End of encoder only functions

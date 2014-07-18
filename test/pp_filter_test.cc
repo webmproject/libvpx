@@ -80,8 +80,9 @@ TEST_P(VP8PostProcessingFilterTest, FilterOutputCheck) {
   // Initialize pixels in the output to 99.
   (void)vpx_memset(dst_image, 99, output_size);
 
-  REGISTER_STATE_CHECK(GetParam()(src_image_ptr, dst_image_ptr, input_stride,
-                                  output_stride, block_width, flimits, 16));
+  ASM_REGISTER_STATE_CHECK(
+      GetParam()(src_image_ptr, dst_image_ptr, input_stride,
+                 output_stride, block_width, flimits, 16));
 
   static const uint8_t expected_data[block_height] = {
     4, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 4

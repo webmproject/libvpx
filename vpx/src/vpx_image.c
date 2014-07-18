@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "vpx/vpx_image.h"
+#include "vpx/vpx_integer.h"
 
 #define ADDRESS_STORAGE_SIZE      sizeof(size_t)
 /*returns an addr aligned to the byte boundary specified by align*/
@@ -40,13 +41,13 @@ static void img_buf_free(void *memblk) {
   }
 }
 
-static vpx_image_t *img_alloc_helper(vpx_image_t  *img,
-                                     vpx_img_fmt_t fmt,
-                                     unsigned int  d_w,
-                                     unsigned int  d_h,
-                                     unsigned int  buf_align,
-                                     unsigned int  stride_align,
-                                     unsigned char      *img_data) {
+static vpx_image_t *img_alloc_helper(vpx_image_t   *img,
+                                     vpx_img_fmt_t  fmt,
+                                     unsigned int   d_w,
+                                     unsigned int   d_h,
+                                     unsigned int   buf_align,
+                                     unsigned int   stride_align,
+                                     unsigned char *img_data) {
 
   unsigned int  h, w, s, xcs, ycs, bps;
   int           align;
@@ -167,8 +168,13 @@ static vpx_image_t *img_alloc_helper(vpx_image_t  *img,
   img->img_data = img_data;
 
   if (!img_data) {
-    img->img_data = img_buf_memalign(buf_align, ((fmt & VPX_IMG_FMT_PLANAR) ?
-                                                 h * s * bps / 8 : h * s));
+    const uint64_t alloc_size = (fmt & VPX_IMG_FMT_PLANAR) ?
+                                (uint64_t)h * s * bps / 8 : (uint64_t)h * s;
+
+    if (alloc_size != (size_t)alloc_size)
+      goto fail;
+
+    img->img_data = img_buf_memalign(buf_align, (size_t)alloc_size);
     img->img_data_owner = 1;
   }
 

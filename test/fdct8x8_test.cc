@@ -125,7 +125,7 @@ class FwdTrans8x8TestBase {
       for (int j = 0; j < 64; ++j)
         test_input_block[j] = ((rnd.Rand16() >> (16 - bit_depth_)) & mask_) -
                               ((rnd.Rand16() >> (16 - bit_depth_)) & mask_);
-      REGISTER_STATE_CHECK(
+      ASM_REGISTER_STATE_CHECK(
           RunFwdTxfm(test_input_block, test_output_block, pitch_));
 
       for (int j = 0; j < 64; ++j) {
@@ -155,7 +155,7 @@ class FwdTrans8x8TestBase {
       for (int j = 0; j < 64; ++j)
         test_input_block[j] = ((rnd.Rand16() & mask_) >> 4) -
                               ((rnd.Rand16() & mask_) >> 4);
-      REGISTER_STATE_CHECK(
+      ASM_REGISTER_STATE_CHECK(
           RunFwdTxfm(test_input_block, test_output_block, pitch_));
 
       for (int j = 0; j < 64; ++j) {
@@ -205,7 +205,7 @@ class FwdTrans8x8TestBase {
         }
       }
 
-      REGISTER_STATE_CHECK(
+      ASM_REGISTER_STATE_CHECK(
           RunFwdTxfm(test_input_block, test_temp_block, pitch_));
       for (int j = 0; j < 64; ++j) {
           if (test_temp_block[j] > 0) {
@@ -219,11 +219,11 @@ class FwdTrans8x8TestBase {
           }
       }
       if (bit_depth_ == 8)
-        REGISTER_STATE_CHECK(
+        ASM_REGISTER_STATE_CHECK(
             RunInvTxfm(test_temp_block, dst, pitch_));
 #if CONFIG_VP9_HIGH
       else
-        REGISTER_STATE_CHECK(
+        ASM_REGISTER_STATE_CHECK(
             RunInvTxfm(test_temp_block, CONVERT_TO_BYTEPTR(dst16), pitch_));
 #endif
 
@@ -292,16 +292,16 @@ class FwdTrans8x8TestBase {
         }
       }
 
-      REGISTER_STATE_CHECK(
+      ASM_REGISTER_STATE_CHECK(
           RunFwdTxfm(test_input_block, test_temp_block, pitch_));
-      REGISTER_STATE_CHECK(
+      ASM_REGISTER_STATE_CHECK(
           fwd_txfm_ref(test_input_block, ref_temp_block, pitch_, tx_type_));
       if (bit_depth_ == 8)
-        REGISTER_STATE_CHECK(
+        ASM_REGISTER_STATE_CHECK(
             RunInvTxfm(test_temp_block, dst, pitch_));
 #if CONFIG_VP9_HIGH
       else
-        REGISTER_STATE_CHECK(
+        ASM_REGISTER_STATE_CHECK(
             RunInvTxfm(test_temp_block, CONVERT_TO_BYTEPTR(dst16), pitch_));
 #endif
 
@@ -362,11 +362,11 @@ class FwdTrans8x8TestBase {
         coeff[j] = round(out_r[j]);
 
       if (bit_depth_ == 8)
-        REGISTER_STATE_CHECK(RunInvTxfm(coeff, dst, pitch_));
+        ASM_REGISTER_STATE_CHECK(RunInvTxfm(coeff, dst, pitch_));
 #if CONFIG_VP9_HIGH
       else
-        REGISTER_STATE_CHECK(RunInvTxfm(coeff, CONVERT_TO_BYTEPTR(dst16),
-                                        pitch_));
+        ASM_REGISTER_STATE_CHECK(RunInvTxfm(coeff, CONVERT_TO_BYTEPTR(dst16),
+                                            pitch_));
 #endif
 
       for (int j = 0; j < kNumCoeffs; ++j) {

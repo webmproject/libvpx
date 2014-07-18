@@ -298,7 +298,6 @@ typedef struct vpx_svc_parameters {
   unsigned int height;        /**< height of current spatial layer */
   int spatial_layer;          /**< current spatial layer number - 0 = base */
   int temporal_layer;         /**< current temporal layer number - 0 = base */
-  int flags;                  /**< encode frame flags */
   int max_quantizer;          /**< max quantizer for current layer */
   int min_quantizer;          /**< min quantizer for current layer */
   int distance_from_i_frame;  /**< frame number within current gop */

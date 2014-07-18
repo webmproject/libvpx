@@ -118,8 +118,8 @@ TEST_P(PartialIDctTest, RunQuantCheck) {
                          = (output_ref_block[j] / 1828) * 1828;
     }
 
-    REGISTER_STATE_CHECK(full_itxfm_(test_coef_block1, dst1, size));
-    REGISTER_STATE_CHECK(partial_itxfm_(test_coef_block1, dst2, size));
+    ASM_REGISTER_STATE_CHECK(full_itxfm_(test_coef_block1, dst1, size));
+    ASM_REGISTER_STATE_CHECK(partial_itxfm_(test_coef_block1, dst2, size));
 
     for (int j = 0; j < block_size; ++j) {
       const int diff = dst1[j] - dst2[j];
@@ -182,8 +182,8 @@ TEST_P(PartialIDctTest, ResultsMatch) {
     memcpy(test_coef_block2, test_coef_block1,
            sizeof(*test_coef_block2) * block_size);
 
-    REGISTER_STATE_CHECK(full_itxfm_(test_coef_block1, dst1, size));
-    REGISTER_STATE_CHECK(partial_itxfm_(test_coef_block2, dst2, size));
+    ASM_REGISTER_STATE_CHECK(full_itxfm_(test_coef_block1, dst1, size));
+    ASM_REGISTER_STATE_CHECK(partial_itxfm_(test_coef_block2, dst2, size));
 
     for (int j = 0; j < block_size; ++j) {
       const int diff = dst1[j] - dst2[j];

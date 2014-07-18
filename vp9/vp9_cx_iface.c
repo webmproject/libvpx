@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "./vpx_config.h"
 #include "vpx/vpx_codec.h"
 #include "vpx/internal/vpx_codec_internal.h"
 #include "./vpx_version.h"
@@ -86,8 +87,8 @@ struct vpx_codec_alg_priv {
   size_t                  pending_frame_magnitude;
   vpx_image_t             preview_img;
   vp8_postproc_cfg_t      preview_ppcfg;
-  vpx_codec_pkt_list_decl(64) pkt_list;
-  unsigned int                fixed_kf_cntr;
+  vpx_codec_pkt_list_decl(256) pkt_list;
+  unsigned int                 fixed_kf_cntr;
 };
 
 static VP9_REFFRAME ref_frame_to_vp9_reframe(vpx_ref_frame_type_t frame) {
@@ -172,6 +173,19 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
   }
 
   RANGE_CHECK(cfg, ss_number_layers, 1, VPX_SS_MAX_LAYERS);
+
+#ifdef CONFIG_SPATIAL_SVC
+  if (cfg->ss_number_layers > 1) {
+    unsigned int i, alt_ref_sum = 0;
+    for (i = 0; i < cfg->ss_number_layers; ++i) {
+      if (cfg->ss_enable_auto_alt_ref[i])
+        ++alt_ref_sum;
+    }
+    if (alt_ref_sum > REF_FRAMES - cfg->ss_number_layers)
+      ERROR("Not enough ref buffers for svc alt ref frames");
+  }
+#endif
+
   RANGE_CHECK(cfg, ts_number_layers, 1, VPX_TS_MAX_LAYERS);
   if (cfg->ts_number_layers > 1) {
     unsigned int i;
@@ -369,7 +383,7 @@ static vpx_codec_err_t set_encoder_config(
 
   oxcf->key_freq               = cfg->kf_max_dist;
 
-  oxcf->speed                  =  clamp(abs(extra_cfg->cpu_used), 0, 7);
+  oxcf->speed                  =  abs(extra_cfg->cpu_used);
   oxcf->encode_breakout        =  extra_cfg->static_thresh;
   oxcf->play_alternate         =  extra_cfg->enable_auto_alt_ref;
   oxcf->noise_sensitivity      =  extra_cfg->noise_sensitivity;
@@ -377,6 +391,10 @@ static vpx_codec_err_t set_encoder_config(
 
   oxcf->two_pass_stats_in      =  cfg->rc_twopass_stats_in;
   oxcf->output_pkt_list        =  extra_cfg->pkt_list;
+
+#if CONFIG_FP_MB_STATS
+  oxcf->firstpass_mb_stats_in  = cfg->rc_firstpass_mb_stats_in;
+#endif
 
   oxcf->arnr_max_frames = extra_cfg->arnr_max_frames;
   oxcf->arnr_strength   = extra_cfg->arnr_strength;
@@ -398,8 +416,12 @@ static vpx_codec_err_t set_encoder_config(
 
   if (oxcf->ss_number_layers > 1) {
     int i;
-    for (i = 0; i < VPX_SS_MAX_LAYERS; ++i)
+    for (i = 0; i < VPX_SS_MAX_LAYERS; ++i) {
       oxcf->ss_target_bitrate[i] =  1000 * cfg->ss_target_bitrate[i];
+#ifdef CONFIG_SPATIAL_SVC
+      oxcf->ss_play_alternate[i] =  cfg->ss_enable_auto_alt_ref[i];
+#endif
+    }
   } else if (oxcf->ss_number_layers == 1) {
     oxcf->ss_target_bitrate[0] = (int)oxcf->target_bandwidth;
   }
@@ -664,6 +686,7 @@ static vpx_codec_err_t encoder_init(vpx_codec_ctx_t *ctx,
 
     priv->extra_cfg = extracfg_map[i].cfg;
     priv->extra_cfg.pkt_list = &priv->pkt_list.head;
+
      // Maximum buffer size approximated based on having multiple ARF.
     priv->cx_data_sz = priv->cfg.g_w * priv->cfg.g_h * 3 / 2 * 8;
 
@@ -821,42 +844,7 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
     return VPX_CODEC_INVALID_PARAM;
   }
 
-  if (flags & (VP8_EFLAG_NO_REF_LAST | VP8_EFLAG_NO_REF_GF |
-               VP8_EFLAG_NO_REF_ARF)) {
-    int ref = 7;
-
-    if (flags & VP8_EFLAG_NO_REF_LAST)
-      ref ^= VP9_LAST_FLAG;
-
-    if (flags & VP8_EFLAG_NO_REF_GF)
-      ref ^= VP9_GOLD_FLAG;
-
-    if (flags & VP8_EFLAG_NO_REF_ARF)
-      ref ^= VP9_ALT_FLAG;
-
-    vp9_use_as_reference(ctx->cpi, ref);
-  }
-
-  if (flags & (VP8_EFLAG_NO_UPD_LAST | VP8_EFLAG_NO_UPD_GF |
-               VP8_EFLAG_NO_UPD_ARF | VP8_EFLAG_FORCE_GF |
-               VP8_EFLAG_FORCE_ARF)) {
-    int upd = 7;
-
-    if (flags & VP8_EFLAG_NO_UPD_LAST)
-      upd ^= VP9_LAST_FLAG;
-
-    if (flags & VP8_EFLAG_NO_UPD_GF)
-      upd ^= VP9_GOLD_FLAG;
-
-    if (flags & VP8_EFLAG_NO_UPD_ARF)
-      upd ^= VP9_ALT_FLAG;
-
-    vp9_update_reference(ctx->cpi, upd);
-  }
-
-  if (flags & VP8_EFLAG_NO_UPD_ENTROPY) {
-    vp9_update_entropy(ctx->cpi, 0);
-  }
+  vp9_apply_encoding_flags(ctx->cpi, flags);
 
   // Handle fixed keyframe intervals
   if (ctx->cfg.kf_mode == VPX_KF_AUTO &&
@@ -869,7 +857,7 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
 
   // Initialize the encoder instance on the first frame.
   if (res == VPX_CODEC_OK && ctx->cpi != NULL) {
-    unsigned int lib_flags;
+    unsigned int lib_flags = 0;
     YV12_BUFFER_CONFIG sd;
     int64_t dst_time_stamp, dst_end_time_stamp;
     size_t size, cx_data_sz;
@@ -878,9 +866,6 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
     // Set up internal flags
     if (ctx->base.init_flags & VPX_CODEC_USE_PSNR)
       ((VP9_COMP *)ctx->cpi)->b_calculate_psnr = 1;
-
-    // Convert API flags to internal codec lib flags
-    lib_flags = (flags & VPX_EFLAG_FORCE_KF) ? FRAMEFLAGS_KEY : 0;
 
     /* vp9 use 10,000,000 ticks/second as time stamp */
     dst_time_stamp = (pts * 10000000 * ctx->cfg.g_timebase.num)
@@ -891,7 +876,9 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
     if (img != NULL) {
       res = image2yuvconfig(img, &sd);
 
-      if (vp9_receive_raw_frame(ctx->cpi, lib_flags,
+      // Store the original flags in to the frame buffer. Will extract the
+      // key frame flag when we actually encode this frame.
+      if (vp9_receive_raw_frame(ctx->cpi, flags,
                                 &sd, dst_time_stamp, dst_end_time_stamp)) {
         VP9_COMP *cpi = (VP9_COMP *)ctx->cpi;
         res = update_error_state(ctx, &cpi->common.error);
@@ -900,7 +887,6 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
 
     cx_data = ctx->cx_data;
     cx_data_sz = ctx->cx_data_sz;
-    lib_flags = 0;
 
     /* Any pending invisible frames? */
     if (ctx->pending_cx_data) {
@@ -927,8 +913,18 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
         vpx_codec_cx_pkt_t pkt;
         VP9_COMP *const cpi = (VP9_COMP *)ctx->cpi;
 
+#ifdef CONFIG_SPATIAL_SVC
+        if (cpi->use_svc && cpi->svc.number_temporal_layers == 1)
+          cpi->svc.layer_context[cpi->svc.spatial_layer_id].layer_size += size;
+#endif
+
         // Pack invisible frames with the next visible frame
-        if (cpi->common.show_frame == 0) {
+        if (cpi->common.show_frame == 0
+#ifdef CONFIG_SPATIAL_SVC
+            || (cpi->use_svc && cpi->svc.number_temporal_layers == 1 &&
+                cpi->svc.spatial_layer_id < cpi->svc.number_spatial_layers - 1)
+#endif
+            ) {
           if (ctx->pending_cx_data == 0)
             ctx->pending_cx_data = cx_data;
           ctx->pending_cx_data_sz += size;
@@ -951,7 +947,12 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
           / ctx->cfg.g_timebase.num / 10000000);
         pkt.data.frame.flags = lib_flags << 16;
 
-        if (lib_flags & FRAMEFLAGS_KEY)
+        if (lib_flags & FRAMEFLAGS_KEY
+#ifdef CONFIG_SPATIAL_SVC
+            || (cpi->use_svc && cpi->svc.number_temporal_layers == 1 &&
+                cpi->svc.layer_context[0].is_key_frame)
+#endif
+            )
           pkt.data.frame.flags |= VPX_FRAME_IS_KEY;
 
         if (cpi->common.show_frame == 0) {
@@ -989,6 +990,18 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
         vpx_codec_pkt_list_add(&ctx->pkt_list.head, &pkt);
         cx_data += size;
         cx_data_sz -= size;
+#ifdef CONFIG_SPATIAL_SVC
+        if (cpi->use_svc && cpi->svc.number_temporal_layers == 1) {
+          vpx_codec_cx_pkt_t pkt = {0};
+          int i;
+          pkt.kind = VPX_CODEC_SPATIAL_SVC_LAYER_SIZES;
+          for (i = 0; i < cpi->svc.number_spatial_layers; ++i) {
+            pkt.data.layer_sizes[i] = cpi->svc.layer_context[i].layer_size;
+            cpi->svc.layer_context[i].layer_size = 0;
+          }
+          vpx_codec_pkt_list_add(&ctx->pkt_list.head, &pkt);
+        }
+#endif
       }
     }
   }
@@ -1191,24 +1204,19 @@ static vpx_codec_err_t ctrl_set_svc_parameters(vpx_codec_alg_priv_t *ctx,
   VP9_COMP *const cpi = ctx->cpi;
   vpx_svc_parameters_t *const params = va_arg(args, vpx_svc_parameters_t *);
 
-  if (params == NULL)
+  if (params == NULL || params->spatial_layer < 0 ||
+      params->spatial_layer >= cpi->svc.number_spatial_layers)
     return VPX_CODEC_INVALID_PARAM;
 
-  cpi->svc.spatial_layer_id = params->spatial_layer;
-  cpi->svc.temporal_layer_id = params->temporal_layer;
+  if (params->spatial_layer == 0) {
+    int i;
+    for (i = 0; i < cpi->svc.number_spatial_layers; ++i) {
+      cpi->svc.layer_context[i].svc_params_received.spatial_layer = -1;
+    }
+  }
 
-  cpi->lst_fb_idx = params->lst_fb_idx;
-  cpi->gld_fb_idx = params->gld_fb_idx;
-  cpi->alt_fb_idx = params->alt_fb_idx;
-
-  if (vp9_set_size_literal(ctx->cpi, params->width, params->height) != 0)
-    return VPX_CODEC_INVALID_PARAM;
-
-  ctx->cfg.rc_max_quantizer = params->max_quantizer;
-  ctx->cfg.rc_min_quantizer = params->min_quantizer;
-
-  set_encoder_config(&ctx->oxcf, &ctx->cfg, &ctx->extra_cfg);
-  vp9_change_config(ctx->cpi, &ctx->oxcf);
+  cpi->svc.layer_context[params->spatial_layer].svc_params_received =
+      *params;
 
   return VPX_CODEC_OK;
 }
@@ -1284,6 +1292,7 @@ static vpx_codec_enc_cfg_map_t encoder_usage_cfg_map[] = {
       VPX_VBR,            // rc_end_usage
 #if VPX_ENCODER_ABI_VERSION > (1 + VPX_CODEC_ABI_VERSION)
       {NULL, 0},          // rc_twopass_stats_in
+      {NULL, 0},          // rc_firstpass_mb_stats_in
 #endif
       256,                // rc_target_bandwidth
       0,                  // rc_min_quantizer
@@ -1305,6 +1314,9 @@ static vpx_codec_enc_cfg_map_t encoder_usage_cfg_map[] = {
       9999,               // kf_max_dist
 
       VPX_SS_DEFAULT_LAYERS,  // ss_number_layers
+#ifdef CONFIG_SPATIAL_SVC
+      {0},
+#endif
       {0},                    // ss_target_bitrate
       1,                      // ts_number_layers
       {0},                    // ts_target_bitrate

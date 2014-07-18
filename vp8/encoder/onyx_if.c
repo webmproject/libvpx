@@ -4886,6 +4886,7 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
     if (setjmp(cpi->common.error.jmp))
     {
         cpi->common.error.setjmp = 0;
+        vp8_clear_system_state();
         return VPX_CODEC_CORRUPT_FRAME;
     }
 

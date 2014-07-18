@@ -44,8 +44,8 @@ typedef enum {
 } SUBPEL_SEARCH_METHODS;
 
 typedef enum {
-  NO_MOITION_THRESHOLD = 0,
-  LOW_MOITION_THRESHOLD = 7
+  NO_MOTION_THRESHOLD = 0,
+  LOW_MOTION_THRESHOLD = 7
 } MOTION_THRESHOLD;
 
 typedef enum {
@@ -73,6 +73,8 @@ typedef enum {
   LPF_PICK_FROM_SUBIMAGE,
   // Estimate the level based on quantizer and frame type
   LPF_PICK_FROM_Q,
+  // Pick 0 to disable LPF if LPF was enabled last frame
+  LPF_PICK_MINIMAL_LPF
 } LPF_PICK_METHOD;
 
 typedef enum {
@@ -137,10 +139,6 @@ typedef struct MV_SPEED_FEATURES {
   // Motion search method (Diamond, NSTEP, Hex, Big Diamond, Square, etc).
   SEARCH_METHODS search_method;
 
-  // This parameter controls the number of steps we'll do in a diamond
-  // search.
-  int max_step_search_steps;
-
   // This parameter controls which step in the n-step process we start at.
   // It's changed adaptively based on circumstances.
   int reduce_first_step_size;
@@ -160,6 +158,9 @@ typedef struct MV_SPEED_FEATURES {
 
   // Control when to stop subpel search
   int subpel_force_stop;
+
+  // This variable sets the step_param used in full pel motion search.
+  int fullpel_search_step_param;
 } MV_SPEED_FEATURES;
 
 typedef struct SPEED_FEATURES {
@@ -282,6 +283,9 @@ typedef struct SPEED_FEATURES {
   // was selected, and 2 means we use 8 tap if no 8x8 filter mode was selected.
   int adaptive_pred_interp_filter;
 
+  // Fast quantization process path
+  int use_quant_fp;
+
   // Search through variable block partition types in non-RD mode decision
   // encoding process for RTC.
   int partition_check;
@@ -351,8 +355,20 @@ typedef struct SPEED_FEATURES {
   // FIXED_PARTITION search type should be used.
   int search_type_check_frequency;
 
-  // The threshold used in SOURCE_VAR_BASED_PARTITION search type.
-  unsigned int source_var_thresh;
+  // When partition is pre-set, the inter prediction result from pick_inter_mode
+  // can be reused in final block encoding process. It is enabled only for real-
+  // time mode speed 6.
+  int reuse_inter_pred_sby;
+
+  // This variable sets the encode_breakout threshold. Currently, it is only
+  // enabled in real time mode.
+  int encode_breakout_thresh;
+
+  // In real time encoding, increase the threshold for NEWMV.
+  int elevate_newmv_thresh;
+
+  // default interp filter choice
+  INTERP_FILTER default_interp_filter;
 } SPEED_FEATURES;
 
 struct VP9_COMP;

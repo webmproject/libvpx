@@ -82,7 +82,7 @@ TEST_P(SubtractBlockTest, SimpleSubtract) {
       predictor += kDiffPredStride;
     }
 
-    REGISTER_STATE_CHECK(GetParam()(&be, &bd, kDiffPredStride));
+    ASM_REGISTER_STATE_CHECK(GetParam()(&be, &bd, kDiffPredStride));
 
     base_src = *be.base_src;
     src_diff = be.src_diff;

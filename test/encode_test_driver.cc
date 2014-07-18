@@ -59,7 +59,7 @@ void Encoder::EncodeFrameInternal(const VideoSource &video,
   }
 
   // Encode the frame
-  REGISTER_STATE_CHECK(
+  API_REGISTER_STATE_CHECK(
       res = vpx_codec_encode(&encoder_,
                              video.img(), video.pts(), video.duration(),
                              frame_flags, deadline_));
@@ -69,7 +69,10 @@ void Encoder::EncodeFrameInternal(const VideoSource &video,
 void Encoder::Flush() {
   const vpx_codec_err_t res = vpx_codec_encode(&encoder_, NULL, 0, 0, 0,
                                                deadline_);
-  ASSERT_EQ(VPX_CODEC_OK, res) << EncoderError();
+  if (!encoder_.priv)
+    ASSERT_EQ(VPX_CODEC_ERROR, res) << EncoderError();
+  else
+    ASSERT_EQ(VPX_CODEC_OK, res) << EncoderError();
 }
 
 void EncoderTest::InitializeConfig() {
@@ -177,7 +180,10 @@ void EncoderTest::RunLoop(VideoSource *video) {
             if (decoder && DoDecode()) {
               vpx_codec_err_t res_dec = decoder->DecodeFrame(
                   (const uint8_t*)pkt->data.frame.buf, pkt->data.frame.sz);
-              ASSERT_EQ(VPX_CODEC_OK, res_dec) << decoder->DecodeError();
+
+              if (!HandleDecodeResult(res_dec, *video, decoder))
+                break;
+
               has_dxdata = true;
             }
             ASSERT_GE(pkt->data.frame.pts, last_pts_);

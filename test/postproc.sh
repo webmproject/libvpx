@@ -37,7 +37,8 @@ postproc() {
     return 1
   fi
 
-  eval "${decoder}" "${input_file}" "${output_file}" ${devnull}
+  eval "${VPX_TEST_PREFIX}" "${decoder}" "${input_file}" "${output_file}" \
+      ${devnull}
 
   [ -e "${output_file}" ] || return 1
 }

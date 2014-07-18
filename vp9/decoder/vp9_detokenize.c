@@ -31,13 +31,6 @@
 #define CAT_THREE_CONTEXT_NODE      6
 #define CAT_FIVE_CONTEXT_NODE       7
 
-#define CAT1_MIN_VAL    5
-#define CAT2_MIN_VAL    7
-#define CAT3_MIN_VAL   11
-#define CAT4_MIN_VAL   19
-#define CAT5_MIN_VAL   35
-#define CAT6_MIN_VAL   67
-
 #define INCREMENT_COUNT(token)                              \
   do {                                                      \
      if (!cm->frame_parallel_decoding_mode)                 \
@@ -79,7 +72,6 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd, PLANE_TYPE type,
   uint8_t token_cache[32 * 32];
   const uint8_t *cat1_ptr, *cat2_ptr, *cat3_ptr, *cat4_ptr, *cat5_ptr;
   const uint8_t *cat6_ptr;
-  const uint8_t *cat6;
   const uint8_t *band_translate = get_band_translate(tx_size);
   const int dq_shift = (tx_size == TX_32X32);
   int v;
@@ -200,10 +192,32 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd, PLANE_TYPE type,
       WRITE_COEF_CONTINUE(val, CATEGORY5_TOKEN);
     }
     val = 0;
-
-    cat6 = cat6_ptr;
-    while (*cat6)
-      val = (val << 1) | vp9_read(r, *cat6++);
+    val = (val << 1) | vp9_read(r, cat6_ptr[0]);
+    val = (val << 1) | vp9_read(r, cat6_ptr[1]);
+    val = (val << 1) | vp9_read(r, cat6_ptr[2]);
+    val = (val << 1) | vp9_read(r, cat6_ptr[3]);
+    val = (val << 1) | vp9_read(r, cat6_ptr[4]);
+    val = (val << 1) | vp9_read(r, cat6_ptr[5]);
+    val = (val << 1) | vp9_read(r, cat6_ptr[6]);
+    val = (val << 1) | vp9_read(r, cat6_ptr[7]);
+    val = (val << 1) | vp9_read(r, cat6_ptr[8]);
+    val = (val << 1) | vp9_read(r, cat6_ptr[9]);
+    val = (val << 1) | vp9_read(r, cat6_ptr[10]);
+    val = (val << 1) | vp9_read(r, cat6_ptr[11]);
+    val = (val << 1) | vp9_read(r, cat6_ptr[12]);
+    val = (val << 1) | vp9_read(r, cat6_ptr[13]);
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
+    if (cm->use_high) {
+      // 10 bit
+      val = (val << 1) | vp9_read(r, cat6_ptr[14]);
+      val = (val << 1) | vp9_read(r, cat6_ptr[15]);
+      if (cm->bit_depth == VPX_BITS_12) {
+        // 12 bit
+        val = (val << 1) | vp9_read(r, cat6_ptr[16]);
+        val = (val << 1) | vp9_read(r, cat6_ptr[17]);
+      }
+    }
+#endif
     val += CAT6_MIN_VAL;
 
     WRITE_COEF_CONTINUE(val, CATEGORY6_TOKEN);

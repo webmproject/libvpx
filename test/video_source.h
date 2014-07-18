@@ -50,6 +50,15 @@ static FILE *OpenTestDataFile(const std::string& file_name) {
   return fopen(path_to_source.c_str(), "rb");
 }
 
+static FILE *OpenTestOutFile(const std::string& file_name) {
+  const std::string path_to_source = GetDataPath() + "/" + file_name;
+  return fopen(path_to_source.c_str(), "wb");
+}
+
+static FILE *OpenTempOutFile() {
+  return tmpfile();
+}
+
 // Abstract base class for test video sources, which provide a stream of
 // vpx_image_t images with associated timestamps and duration.
 class VideoSource {
@@ -118,6 +127,10 @@ class DummyVideoSource : public VideoSource {
 
   virtual unsigned int limit() const { return limit_; }
 
+  void set_limit(unsigned int limit) {
+    limit_ = limit;
+  }
+
   void SetSize(unsigned int width, unsigned int height) {
     if (width != width_ || height != height_) {
       vpx_img_free(img_);
@@ -129,7 +142,7 @@ class DummyVideoSource : public VideoSource {
   }
 
  protected:
-  virtual void FillFrame() { memset(img_->img_data, 0, raw_sz_); }
+  virtual void FillFrame() { if (img_) memset(img_->img_data, 0, raw_sz_); }
 
   vpx_image_t *img_;
   size_t       raw_sz_;
@@ -157,11 +170,13 @@ class RandomVideoSource : public DummyVideoSource {
   // 15 frames of noise, followed by 15 static frames. Reset to 0 rather
   // than holding previous frames to encourage keyframes to be thrown.
   virtual void FillFrame() {
-    if (frame_ % 30 < 15)
-      for (size_t i = 0; i < raw_sz_; ++i)
-        img_->img_data[i] = rnd_.Rand8();
-    else
-      memset(img_->img_data, 0, raw_sz_);
+    if (img_) {
+      if (frame_ % 30 < 15)
+        for (size_t i = 0; i < raw_sz_; ++i)
+          img_->img_data[i] = rnd_.Rand8();
+      else
+        memset(img_->img_data, 0, raw_sz_);
+    }
   }
 
   ACMRandom rnd_;

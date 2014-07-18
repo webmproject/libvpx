@@ -37,7 +37,6 @@ static void initialize_dec() {
 
   if (!init_done) {
     vp9_init_neighbors();
-    vp9_init_quant_tables();
     init_done = 1;
   }
 }
@@ -77,7 +76,7 @@ VP9Decoder *vp9_decoder_create() {
 
   cm->error.setjmp = 0;
 
-  vp9_worker_init(&pbi->lf_worker);
+  vp9_get_worker_interface()->init(&pbi->lf_worker);
 
   return pbi;
 }
@@ -86,13 +85,12 @@ void vp9_decoder_remove(VP9Decoder *pbi) {
   VP9_COMMON *const cm = &pbi->common;
   int i;
 
-  vp9_remove_common(cm);
-  vp9_worker_end(&pbi->lf_worker);
+  vp9_get_worker_interface()->end(&pbi->lf_worker);
   vpx_free(pbi->lf_worker.data1);
   vpx_free(pbi->tile_data);
   for (i = 0; i < pbi->num_tile_workers; ++i) {
     VP9Worker *const worker = &pbi->tile_workers[i];
-    vp9_worker_end(worker);
+    vp9_get_worker_interface()->end(worker);
     vpx_free(worker->data1);
     vpx_free(worker->data2);
   }
@@ -104,6 +102,7 @@ void vp9_decoder_remove(VP9Decoder *pbi) {
     vp9_loop_filter_dealloc(&pbi->lf_row_sync, sb_rows);
   }
 
+  vp9_remove_common(cm);
   vpx_free(pbi);
 }
 
@@ -211,10 +210,7 @@ static void swap_frame_buffers(VP9Decoder *pbi) {
   }
 
   cm->frame_to_show = get_frame_new_buffer(cm);
-
-  if (!pbi->frame_parallel_decode || !cm->show_frame) {
-    --cm->frame_bufs[cm->new_fb_idx].ref_count;
-  }
+  cm->frame_bufs[cm->new_fb_idx].ref_count--;
 
   // Invalidate these references until the next frame starts.
   for (ref_index = 0; ref_index < 3; ref_index++)
@@ -243,15 +239,14 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
   }
 
   // Check if the previous frame was a frame without any references to it.
-  // Release frame buffer if not decoding in frame parallel mode.
-  if (!pbi->frame_parallel_decode && cm->new_fb_idx >= 0 &&
-         cm->frame_bufs[cm->new_fb_idx].ref_count == 0)
+  if (cm->new_fb_idx >= 0 && cm->frame_bufs[cm->new_fb_idx].ref_count == 0)
     cm->release_fb_cb(cm->cb_priv,
                       &cm->frame_bufs[cm->new_fb_idx].raw_frame_buffer);
   cm->new_fb_idx = get_free_fb(cm);
 
   if (setjmp(cm->error.jmp)) {
     cm->error.setjmp = 0;
+    vp9_clear_system_state();
 
     // We do not know if the missing frame(s) was supposed to update
     // any of the reference buffers, but we act conservative and
@@ -260,10 +255,10 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
     // TODO(jkoleszar): Error concealment is undefined and non-normative
     // at this point, but if it becomes so, [0] may not always be the correct
     // thing to do here.
-    if (cm->frame_refs[0].idx != INT_MAX)
+    if (cm->frame_refs[0].idx != INT_MAX && cm->frame_refs[0].buf != NULL)
       cm->frame_refs[0].buf->corrupted = 1;
 
-    if (cm->frame_bufs[cm->new_fb_idx].ref_count > 0)
+    if (cm->new_fb_idx > 0 && cm->frame_bufs[cm->new_fb_idx].ref_count > 0)
       cm->frame_bufs[cm->new_fb_idx].ref_count--;
 
     return -1;
@@ -297,6 +292,7 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
 
 int vp9_get_raw_frame(VP9Decoder *pbi, YV12_BUFFER_CONFIG *sd,
                       vp9_ppflags_t *flags) {
+  VP9_COMMON *const cm = &pbi->common;
   int ret = -1;
 #if !CONFIG_VP9_POSTPROC
   (void)*flags;
@@ -306,15 +302,20 @@ int vp9_get_raw_frame(VP9Decoder *pbi, YV12_BUFFER_CONFIG *sd,
     return ret;
 
   /* no raw frame to show!!! */
-  if (pbi->common.show_frame == 0)
+  if (!cm->show_frame)
     return ret;
 
   pbi->ready_for_new_data = 1;
 
 #if CONFIG_VP9_POSTPROC
-  ret = vp9_post_proc_frame(&pbi->common, sd, flags);
+  if (!cm->show_existing_frame) {
+    ret = vp9_post_proc_frame(cm, sd, flags);
+  } else {
+    *sd = *cm->frame_to_show;
+    ret = 0;
+  }
 #else
-  *sd = *pbi->common.frame_to_show;
+  *sd = *cm->frame_to_show;
   ret = 0;
 #endif /*!CONFIG_POSTPROC*/
   vp9_clear_system_state();

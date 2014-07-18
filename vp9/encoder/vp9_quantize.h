@@ -28,6 +28,8 @@ typedef struct {
   // if we want to deprecate the current use of y_quant.
   DECLARE_ALIGNED(16, int16_t, y_quant_fp[QINDEX_RANGE][8]);
   DECLARE_ALIGNED(16, int16_t, uv_quant_fp[QINDEX_RANGE][8]);
+  DECLARE_ALIGNED(16, int16_t, y_round_fp[QINDEX_RANGE][8]);
+  DECLARE_ALIGNED(16, int16_t, uv_round_fp[QINDEX_RANGE][8]);
 
   DECLARE_ALIGNED(16, int16_t, uv_quant[QINDEX_RANGE][8]);
   DECLARE_ALIGNED(16, int16_t, uv_quant_shift[QINDEX_RANGE][8]);

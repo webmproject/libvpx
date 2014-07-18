@@ -12,8 +12,8 @@
 #define VP9_DECODER_VP9_DTHREAD_H_
 
 #include "./vpx_config.h"
+#include "vp9/common/vp9_thread.h"
 #include "vp9/decoder/vp9_reader.h"
-#include "vp9/decoder/vp9_thread.h"
 
 struct VP9Common;
 struct VP9Decoder;

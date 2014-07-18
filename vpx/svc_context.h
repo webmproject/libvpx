@@ -23,13 +23,6 @@
 extern "C" {
 #endif
 
-typedef enum SVC_ENCODING_MODE {
-  INTER_LAYER_PREDICTION_I,
-  ALT_INTER_LAYER_PREDICTION_IP,
-  INTER_LAYER_PREDICTION_IP,
-  USE_GOLDEN_FRAME
-} SVC_ENCODING_MODE;
-
 typedef enum SVC_LOG_LEVEL {
   SVC_LOG_ERROR,
   SVC_LOG_INFO,
@@ -39,7 +32,6 @@ typedef enum SVC_LOG_LEVEL {
 typedef struct {
   // public interface to svc_command options
   int spatial_layers;               // number of layers
-  SVC_ENCODING_MODE encoding_mode;  // svc encoding strategy
   SVC_LOG_LEVEL log_level;  // amount of information to display
   int log_print;  // when set, printf log messages instead of returning the
                   // message with svc_get_message
@@ -64,8 +56,7 @@ vpx_codec_err_t vpx_svc_set_options(SvcContext *svc_ctx, const char *options);
  * e.g., "60,53,39,33,27"
  */
 vpx_codec_err_t vpx_svc_set_quantizers(SvcContext *svc_ctx,
-                                       const char *quantizer_values,
-                                       const int is_for_keyframe);
+                                       const char *quantizer_values);
 
 /**
  * Set SVC scale factors
@@ -104,14 +95,16 @@ const char *vpx_svc_dump_statistics(SvcContext *svc_ctx);
 const char *vpx_svc_get_message(const SvcContext *svc_ctx);
 
 /**
- * return size of encoded data to be returned by vpx_svc_get_buffer
+ * return size of encoded data to be returned by vpx_svc_get_buffer.
+ * it needs to be called before vpx_svc_get_buffer.
  */
 size_t vpx_svc_get_frame_size(const SvcContext *svc_ctx);
 
 /**
- * return buffer with encoded data
+ * return buffer with encoded data. encoder will maintain a list of frame
+ * buffers. each call of vpx_svc_get_buffer() will return one frame.
  */
-void *vpx_svc_get_buffer(const SvcContext *svc_ctx);
+void *vpx_svc_get_buffer(SvcContext *svc_ctx);
 
 /**
  * return size of two pass rate control stats data to be returned by

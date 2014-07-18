@@ -28,10 +28,11 @@ class MD5 {
       // plane, we never want to round down and thus skip a pixel so if
       // we are shifting by 1 (chroma_shift) we add 1 before doing the shift.
       // This works only for chroma_shift of 0 and 1.
+      const int bytes_per_sample = (img->fmt & VPX_IMG_FMT_HIGH) ? 2 : 1;
       const int h = plane ? (img->d_h + img->y_chroma_shift) >>
                     img->y_chroma_shift : img->d_h;
-      const int w = plane ? (img->d_w + img->x_chroma_shift) >>
-                    img->x_chroma_shift : img->d_w;
+      const int w = (plane ? (img->d_w + img->x_chroma_shift) >>
+                     img->x_chroma_shift : img->d_w) * bytes_per_sample;
 
       for (int y = 0; y < h; ++y) {
         MD5Update(&md5_, buf, w);

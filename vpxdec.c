@@ -79,6 +79,8 @@ static const arg_def_t error_concealment = ARG_DEF(NULL, "error-concealment", 0,
                                                    "Enable decoder error-concealment");
 static const arg_def_t scalearg = ARG_DEF("S", "scale", 0,
                                             "Scale output frames uniformly");
+static const arg_def_t continuearg =
+    ARG_DEF("k", "keep-going", 0, "(debug) Continue decoding after error");
 
 static const arg_def_t fb_arg =
     ARG_DEF(NULL, "frame-buffers", 1, "Number of frame buffers to use");
@@ -95,8 +97,7 @@ static const arg_def_t *all_args[] = {
   &codecarg, &use_yv12, &use_i420, &flipuvarg, &rawvideo, &noblitarg,
   &progressarg, &limitarg, &skiparg, &postprocarg, &summaryarg, &outputfile,
   &threadsarg, &verbosearg, &scalearg, &fb_arg,
-  &md5arg,
-  &error_concealment,
+  &md5arg, &error_concealment, &continuearg,
 #if CONFIG_VP9_HIGH
   &outbitdeptharg,
 #endif
@@ -195,7 +196,7 @@ void usage_exit() {
   for (i = 0; i < get_vpx_decoder_count(); ++i) {
     const VpxInterface *const decoder = get_vpx_decoder_by_index(i);
     fprintf(stderr, "    %-6s - %s\n",
-            decoder->name, vpx_codec_iface_name(decoder->interface()));
+            decoder->name, vpx_codec_iface_name(decoder->codec_interface()));
   }
 
   exit(EXIT_FAILURE);
@@ -320,7 +321,7 @@ int file_is_raw(struct VpxInputContext *input) {
     if (mem_get_le32(buf) < 256 * 1024 * 1024) {
       for (i = 0; i < get_vpx_decoder_count(); ++i) {
         const VpxInterface *const decoder = get_vpx_decoder_by_index(i);
-        if (!vpx_codec_peek_stream_info(decoder->interface(),
+        if (!vpx_codec_peek_stream_info(decoder->codec_interface(),
                                         buf + 4, 32 - 4, &si)) {
           is_raw = 1;
           input->fourcc = decoder->fourcc;
@@ -704,6 +705,7 @@ int main_loop(int argc, const char **argv_) {
   int                    stop_after = 0, postproc = 0, summary = 0, quiet = 1;
   int                    arg_skip = 0;
   int                    ec_enabled = 0;
+  int                    keep_going = 0;
   const VpxInterface *interface = NULL;
   const VpxInterface *fourcc_interface = NULL;
   uint64_t dx_time = 0;
@@ -861,6 +863,8 @@ int main_loop(int argc, const char **argv_) {
       }
     } else if (arg_match(&arg, &error_concealment, argi)) {
       ec_enabled = 1;
+    } else if (arg_match(&arg, &continuearg, argi)) {
+      keep_going = 1;
     }
 
 #endif
@@ -953,7 +957,8 @@ int main_loop(int argc, const char **argv_) {
 
   dec_flags = (postproc ? VPX_CODEC_USE_POSTPROC : 0) |
               (ec_enabled ? VPX_CODEC_USE_ERROR_CONCEALMENT : 0);
-  if (vpx_codec_dec_init(&decoder, interface->interface(), &cfg, dec_flags)) {
+  if (vpx_codec_dec_init(&decoder, interface->codec_interface(),
+                         &cfg, dec_flags)) {
     fprintf(stderr, "Failed to initialize decoder: %s\n",
             vpx_codec_error(&decoder));
     return EXIT_FAILURE;
@@ -1042,7 +1047,8 @@ int main_loop(int argc, const char **argv_) {
 
           if (detail)
             warn("Additional information: %s", detail);
-          goto fail;
+          if (!keep_going)
+            goto fail;
         }
 
         vpx_usec_timer_mark(&timer);
@@ -1100,7 +1106,6 @@ int main_loop(int argc, const char **argv_) {
           if (img->fmt & VPX_IMG_FMT_HIGH) {
             scaled_img = vpx_img_alloc(NULL, VPX_IMG_FMT_I42016, display_width,
                                        display_height, 16);
-            scaled_img->bit_depth = img->bit_depth;
           } else {
             scaled_img = vpx_img_alloc(NULL, VPX_IMG_FMT_I420, display_width,
                                        display_height, 16);
@@ -1109,6 +1114,7 @@ int main_loop(int argc, const char **argv_) {
           scaled_img = vpx_img_alloc(NULL, VPX_IMG_FMT_I420, display_width,
                                      display_height, 16);
 #endif
+          scaled_img->bit_depth = img->bit_depth;
         }
 
         if (img->d_w != scaled_img->d_w || img->d_h != scaled_img->d_h) {
@@ -1157,8 +1163,8 @@ int main_loop(int argc, const char **argv_) {
             len = y4m_write_file_header(buf, sizeof(buf),
                                         vpx_input_ctx.width,
                                         vpx_input_ctx.height,
-                                        &vpx_input_ctx.framerate, img->fmt,
-                                        img->bit_depth);
+                                        &vpx_input_ctx.framerate,
+                                        img->fmt, img->bit_depth);
             if (do_md5) {
               MD5Update(&md5_ctx, (md5byte *)buf, (unsigned int)len);
             } else {
@@ -1176,20 +1182,18 @@ int main_loop(int argc, const char **argv_) {
         } else {
           if (frame_out == 1) {
             // Check if --yv12 or --i420 options are consistent with the
-            // bit-stream.
+            // bit-stream decoded
             if (opt_i420) {
               if (img->fmt != VPX_IMG_FMT_I420 &&
                   img->fmt != VPX_IMG_FMT_I42016) {
-                fprintf(stderr,
-                        "Cannot produce i420 output for bit-stream.\n");
+                fprintf(stderr, "Cannot produce i420 output for bit-stream.\n");
                 goto fail;
               }
             }
             if (opt_yv12) {
               if ((img->fmt != VPX_IMG_FMT_I420 &&
                    img->fmt != VPX_IMG_FMT_YV12) || img->bit_depth != 8) {
-                fprintf(stderr,
-                        "Cannot produce yv12 output for bit-stream.\n");
+                fprintf(stderr, "Cannot produce yv12 output for bit-stream.\n");
                 goto fail;
               }
             }

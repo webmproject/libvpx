@@ -41,28 +41,38 @@ extern "C" {
 
 #define ENTROPY_NODES 11
 
+
+
+DECLARE_ALIGNED(16, extern const uint8_t, vp9_pt_energy_class[ENTROPY_TOKENS]);
+
+#define CAT1_MIN_VAL    5
+#define CAT2_MIN_VAL    7
+#define CAT3_MIN_VAL   11
+#define CAT4_MIN_VAL   19
+#define CAT5_MIN_VAL   35
+#define CAT6_MIN_VAL   67
+
+// Extra bit probabilities.
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat1_prob[1]);
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat2_prob[2]);
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat3_prob[3]);
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat4_prob[4]);
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat5_prob[5]);
-DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat6_prob[15]);
+DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat6_prob[14]);
 #if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat1_prob_high10[1]);
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat2_prob_high10[2]);
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat3_prob_high10[3]);
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat4_prob_high10[4]);
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat5_prob_high10[5]);
-DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat6_prob_high10[17]);
+DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat6_prob_high10[16]);
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat1_prob_high12[1]);
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat2_prob_high12[2]);
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat3_prob_high12[3]);
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat4_prob_high12[4]);
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat5_prob_high12[5]);
-DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat6_prob_high12[19]);
+DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat6_prob_high12[18]);
 #endif
-
-DECLARE_ALIGNED(16, extern const uint8_t, vp9_pt_energy_class[ENTROPY_TOKENS]);
 
 #define EOB_MODEL_TOKEN 3
 extern const vp9_tree_index vp9_coefmodel_tree[];

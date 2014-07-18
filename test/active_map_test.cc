@@ -83,9 +83,6 @@ TEST_P(ActiveMapTest, Test) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 }
 
-#define VP9_FACTORY \
-  static_cast<const libvpx_test::CodecFactory *>(&libvpx_test::kVP9)
-
 VP9_INSTANTIATE_TEST_CASE(ActiveMapTest,
                           ::testing::Values(::libvpx_test::kRealTime),
                           ::testing::Range(0, 6));

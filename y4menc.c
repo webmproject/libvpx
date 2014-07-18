@@ -8,12 +8,13 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <assert.h>
 #include "./y4menc.h"
 
 int y4m_write_file_header(char *buf, size_t len, int width, int height,
                           const struct VpxRational *framerate,
                           vpx_img_fmt_t fmt, unsigned int bit_depth) {
-  char *color;
+  const char *color;
   switch (bit_depth) {
     case 8:
       color = fmt == VPX_IMG_FMT_444A ? "C444alpha\n" :
@@ -49,7 +50,6 @@ int y4m_write_file_header(char *buf, size_t len, int width, int height,
     default:
       assert(0);
   }
-
   return snprintf(buf, len, "YUV4MPEG2 W%u H%u F%u:%u I%c %s", width, height,
                   framerate->numerator, framerate->denominator, 'p', color);
 }

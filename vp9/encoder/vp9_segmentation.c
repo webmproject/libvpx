@@ -27,6 +27,8 @@ void vp9_enable_segmentation(struct segmentation *seg) {
 
 void vp9_disable_segmentation(struct segmentation *seg) {
   seg->enabled = 0;
+  seg->update_map = 0;
+  seg->update_data = 0;
 }
 
 void vp9_set_segment_data(struct segmentation *seg,

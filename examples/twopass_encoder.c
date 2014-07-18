@@ -168,9 +168,9 @@ int main(int argc, char **argv) {
   if (!writer)
     die("Failed to open %s for writing", outfile_arg);
 
-  printf("Using %s\n", vpx_codec_iface_name(encoder->interface()));
+  printf("Using %s\n", vpx_codec_iface_name(encoder->codec_interface()));
 
-  res = vpx_codec_enc_config_default(encoder->interface(), &cfg, 0);
+  res = vpx_codec_enc_config_default(encoder->codec_interface(), &cfg, 0);
   if (res)
     die_codec(&codec, "Failed to get default codec config.");
 
@@ -193,7 +193,7 @@ int main(int argc, char **argv) {
     if (!(infile = fopen(infile_arg, "rb")))
       die("Failed to open %s for reading", infile_arg);
 
-    if (vpx_codec_enc_init(&codec, encoder->interface(), &cfg, 0))
+    if (vpx_codec_enc_init(&codec, encoder->codec_interface(), &cfg, 0))
       die_codec(&codec, "Failed to initialize encoder");
 
     while (vpx_img_read(&raw, infile)) {

@@ -240,8 +240,8 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
   xd->plane[0].pre[0].buf = frame_ptr_buf;
   xd->plane[0].pre[0].stride = stride;
 
-  step_param = mv_sf->reduce_first_step_size + (cpi->oxcf.speed > 5 ? 1 : 0);
-  step_param = MIN(step_param, mv_sf->max_step_search_steps - 2);
+  step_param = mv_sf->reduce_first_step_size;
+  step_param = MIN(step_param, MAX_MVSEARCH_STEPS - 2);
 
   // Ignore mv costing by sending NULL pointer instead of cost arrays
   vp9_hex_search(x, &best_ref_mv1_full, step_param, sadpb, 1,
@@ -255,7 +255,7 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
                                          &cpi->fn_ptr[BLOCK_16X16],
                                          0, mv_sf->subpel_iters_per_step,
                                          NULL, NULL,
-                                         &distortion, &sse);
+                                         &distortion, &sse, NULL, 0, 0);
 
   // Restore input state
   x->plane[0].src = src;
@@ -584,154 +584,32 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
     mbd->plane[i].pre[0].buf = input_buffer[i];
 }
 
-void vp9_temporal_filter_prepare(VP9_COMP *cpi, int distance) {
-  VP9_COMMON *const cm = &cpi->common;
-  int frame = 0;
-  int frames_to_blur_backward = 0;
-  int frames_to_blur_forward = 0;
-  int frames_to_blur = 0;
-  int start_frame = 0;
-  int strength = cpi->active_arnr_strength;
-  int blur_type = cpi->oxcf.arnr_type;
-  int max_frames = cpi->active_arnr_frames;
-  const int num_frames_backward = distance;
-  const int num_frames_forward = vp9_lookahead_depth(cpi->lookahead)
-                               - (num_frames_backward + 1);
-  struct scale_factors sf;
-
-  switch (blur_type) {
-    case 1:
-      // Backward Blur
-      frames_to_blur_backward = num_frames_backward;
-
-      if (frames_to_blur_backward >= max_frames)
-        frames_to_blur_backward = max_frames - 1;
-
-      frames_to_blur = frames_to_blur_backward + 1;
-      break;
-
-    case 2:
-      // Forward Blur
-      frames_to_blur_forward = num_frames_forward;
-
-      if (frames_to_blur_forward >= max_frames)
-        frames_to_blur_forward = max_frames - 1;
-
-      frames_to_blur = frames_to_blur_forward + 1;
-      break;
-
-    case 3:
-    default:
-      // Center Blur
-      frames_to_blur_forward = num_frames_forward;
-      frames_to_blur_backward = num_frames_backward;
-
-      if (frames_to_blur_forward > frames_to_blur_backward)
-        frames_to_blur_forward = frames_to_blur_backward;
-
-      if (frames_to_blur_backward > frames_to_blur_forward)
-        frames_to_blur_backward = frames_to_blur_forward;
-
-      // When max_frames is even we have 1 more frame backward than forward
-      if (frames_to_blur_forward > (max_frames - 1) / 2)
-        frames_to_blur_forward = ((max_frames - 1) / 2);
-
-      if (frames_to_blur_backward > (max_frames / 2))
-        frames_to_blur_backward = (max_frames / 2);
-
-      frames_to_blur = frames_to_blur_backward + frames_to_blur_forward + 1;
-      break;
-  }
-
-  start_frame = distance + frames_to_blur_forward;
-
-#ifdef DEBUGFWG
-  // DEBUG FWG
-  printf(
-      "max:%d FBCK:%d FFWD:%d ftb:%d ftbbck:%d ftbfwd:%d sei:%d lasei:%d "
-      "start:%d",
-      max_frames, num_frames_backward, num_frames_forward, frames_to_blur,
-      frames_to_blur_backward, frames_to_blur_forward, cpi->source_encode_index,
-      cpi->last_alt_ref_sei, start_frame);
-#endif
-
-  // Setup scaling factors. Scaling on each of the arnr frames is not supported
-  vp9_setup_scale_factors_for_frame(&sf,
-      get_frame_new_buffer(cm)->y_crop_width,
-      get_frame_new_buffer(cm)->y_crop_height,
-#if CONFIG_VP9_HIGH
-      cm->width, cm->height, cm->use_high);
-#else
-      cm->width, cm->height);
-#endif
-
-  // Setup frame pointers, NULL indicates frame not included in filter
-  vp9_zero(cpi->frames);
-  for (frame = 0; frame < frames_to_blur; frame++) {
-    int which_buffer = start_frame - frame;
-    struct lookahead_entry *buf = vp9_lookahead_peek(cpi->lookahead,
-                                                     which_buffer);
-    cpi->frames[frames_to_blur - 1 - frame] = &buf->img;
-  }
-
-  temporal_filter_iterate_c(cpi, frames_to_blur, frames_to_blur_backward,
-                            strength, &sf);
-}
-
-void vp9_configure_arnr_filter(VP9_COMP *cpi,
-                               const unsigned int frames_to_arnr,
-                               const int group_boost) {
-  int half_gf_int;
-  int frames_after_arf;
-  int frames_bwd = cpi->oxcf.arnr_max_frames - 1;
-  int frames_fwd = cpi->oxcf.arnr_max_frames - 1;
+// Apply buffer limits and context specific adjustments to arnr filter.
+static void adjust_arnr_filter(VP9_COMP *cpi,
+                               int distance, int group_boost) {
+  const int frames_after_arf =
+            vp9_lookahead_depth(cpi->lookahead) - distance - 1;
+  int frames_fwd = (cpi->oxcf.arnr_max_frames - 1) >> 1;
+  int frames_bwd;
   int q;
 
-  // Define the arnr filter width for this group of frames. We only
-  // filter frames that lie within a distance of half the GF interval
-  // from the ARF frame. We also have to trap cases where the filter
-  // extends beyond the end of the lookahead buffer.
-  // Note: frames_to_arnr parameter is the offset of the arnr
-  // frame from the current frame.
-  half_gf_int = cpi->rc.baseline_gf_interval >> 1;
-  frames_after_arf = vp9_lookahead_depth(cpi->lookahead)
-      - frames_to_arnr - 1;
+  // Define the forward and backwards filter limits for this arnr group.
+  if (frames_fwd > frames_after_arf)
+    frames_fwd = frames_after_arf;
+  if (frames_fwd > distance)
+    frames_fwd = distance;
 
-  switch (cpi->oxcf.arnr_type) {
-    case 1:  // Backward filter
-      frames_fwd = 0;
-      if (frames_bwd > half_gf_int)
-        frames_bwd = half_gf_int;
-      break;
+  frames_bwd = frames_fwd;
 
-    case 2:  // Forward filter
-      if (frames_fwd > half_gf_int)
-        frames_fwd = half_gf_int;
-      if (frames_fwd > frames_after_arf)
-        frames_fwd = frames_after_arf;
-      frames_bwd = 0;
-      break;
+  // For even length filter there is one more frame backward
+  // than forward: e.g. len=6 ==> bbbAff, len=7 ==> bbbAfff.
+  if (frames_bwd < distance)
+    frames_bwd += (cpi->oxcf.arnr_max_frames + 1) & 0x1;
 
-    case 3:  // Centered filter
-    default:
-      frames_fwd >>= 1;
-      if (frames_fwd > frames_after_arf)
-        frames_fwd = frames_after_arf;
-      if (frames_fwd > half_gf_int)
-        frames_fwd = half_gf_int;
-
-      frames_bwd = frames_fwd;
-
-      // For even length filter there is one more frame backward
-      // than forward: e.g. len=6 ==> bbbAff, len=7 ==> bbbAfff.
-      if (frames_bwd < half_gf_int)
-        frames_bwd += (cpi->oxcf.arnr_max_frames + 1) & 0x1;
-      break;
-  }
-
+  // Set the baseline active filter size.
   cpi->active_arnr_frames = frames_bwd + 1 + frames_fwd;
 
-  // Adjust the strength based on active max q
+  // Adjust the strength based on active max q.
   if (cpi->common.current_video_frame > 1)
     q = ((int)vp9_convert_qindex_to_q(
         cpi->rc.avg_frame_qindex[INTER_FRAME], cpi->common.bit_depth));
@@ -754,4 +632,98 @@ void vp9_configure_arnr_filter(VP9_COMP *cpi,
   if (cpi->active_arnr_strength > (group_boost / 300)) {
     cpi->active_arnr_strength = (group_boost / 300);
   }
+
+  // Adjustments for second level arf in multi arf case.
+  if (cpi->pass == 2 && cpi->multi_arf_allowed) {
+    const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
+    if (gf_group->rf_level[gf_group->index] != GF_ARF_STD) {
+      cpi->active_arnr_strength >>= 1;
+    }
+  }
+}
+
+void vp9_temporal_filter(VP9_COMP *cpi, int distance) {
+  VP9_COMMON *const cm = &cpi->common;
+  RATE_CONTROL *const rc = &cpi->rc;
+  int frame;
+  int frames_to_blur;
+  int start_frame;
+  int strength;
+  int frames_to_blur_backward;
+  int frames_to_blur_forward;
+  struct scale_factors sf;
+
+  // Apply context specific adjustments to the arnr filter parameters.
+  adjust_arnr_filter(cpi, distance, rc->gfu_boost);
+  strength = cpi->active_arnr_strength;
+  frames_to_blur = cpi->active_arnr_frames;
+  frames_to_blur_backward = (frames_to_blur / 2);
+  frames_to_blur_forward = ((frames_to_blur - 1) / 2);
+  start_frame = distance + frames_to_blur_forward;
+
+  // Setup frame pointers, NULL indicates frame not included in filter.
+  vp9_zero(cpi->frames);
+  for (frame = 0; frame < frames_to_blur; ++frame) {
+    const int which_buffer = start_frame - frame;
+    struct lookahead_entry *buf = vp9_lookahead_peek(cpi->lookahead,
+                                                     which_buffer);
+    cpi->frames[frames_to_blur - 1 - frame] = &buf->img;
+  }
+
+  // Setup scaling factors. Scaling on each of the arnr frames is not supported
+  if (cpi->use_svc && cpi->svc.number_temporal_layers == 1) {
+    // In spatial svc the scaling factors might be less then 1/2. So we will use
+    // non-normative scaling.
+    int frame_used = 0;
+#if CONFIG_VP9_HIGH
+    vp9_setup_scale_factors_for_frame(&sf,
+                                      get_frame_new_buffer(cm)->y_crop_width,
+                                      get_frame_new_buffer(cm)->y_crop_height,
+                                      get_frame_new_buffer(cm)->y_crop_width,
+                                      get_frame_new_buffer(cm)->y_crop_height,
+                                      cm->use_high);
+#else
+    vp9_setup_scale_factors_for_frame(&sf,
+                                      get_frame_new_buffer(cm)->y_crop_width,
+                                      get_frame_new_buffer(cm)->y_crop_height,
+                                      get_frame_new_buffer(cm)->y_crop_width,
+                                      get_frame_new_buffer(cm)->y_crop_height);
+#endif
+
+    for (frame = 0; frame < frames_to_blur; ++frame) {
+      if (cm->mi_cols * MI_SIZE != cpi->frames[frame]->y_width ||
+          cm->mi_rows * MI_SIZE != cpi->frames[frame]->y_height) {
+        if (vp9_realloc_frame_buffer(&cpi->svc.scaled_frames[frame_used],
+                                     cm->width, cm->height,
+                                     cm->subsampling_x, cm->subsampling_y,
+#if CONFIG_VP9_HIGH
+                                     cm->use_high,
+#endif
+                                     VP9_ENC_BORDER_IN_PIXELS, NULL, NULL,
+                                     NULL))
+          vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+                             "Failed to reallocate alt_ref_buffer");
+
+        cpi->frames[frame] =
+            vp9_scale_if_required(cm, cpi->frames[frame],
+                                  &cpi->svc.scaled_frames[frame_used]);
+        ++frame_used;
+      }
+    }
+  } else {
+#if CONFIG_VP9_HIGH
+    vp9_setup_scale_factors_for_frame(&sf,
+                                      get_frame_new_buffer(cm)->y_crop_width,
+                                      get_frame_new_buffer(cm)->y_crop_height,
+                                      cm->width, cm->height, cm->use_high);
+#else
+    vp9_setup_scale_factors_for_frame(&sf,
+                                      get_frame_new_buffer(cm)->y_crop_width,
+                                      get_frame_new_buffer(cm)->y_crop_height,
+                                      cm->width, cm->height);
+#endif
+  }
+
+  temporal_filter_iterate_c(cpi, frames_to_blur, frames_to_blur_backward,
+                            strength, &sf);
 }

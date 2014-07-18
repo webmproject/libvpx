@@ -32,7 +32,7 @@
 #include "vp9/encoder/vp9_mcomp.h"
 #include "vp9/encoder/vp9_quantize.h"
 #include "vp9/encoder/vp9_ratectrl.h"
-#include "vp9/encoder/vp9_rdopt.h"
+#include "vp9/encoder/vp9_rd.h"
 #include "vp9/encoder/vp9_speed_features.h"
 #include "vp9/encoder/vp9_svc_layercontext.h"
 #include "vp9/encoder/vp9_tokenize.h"
@@ -196,6 +196,7 @@ typedef struct VP9EncoderConfig {
   int ts_number_layers;  // Number of temporal layers.
   // Bitrate allocation for spatial layers.
   int ss_target_bitrate[VPX_SS_MAX_LAYERS];
+  int ss_play_alternate[VPX_SS_MAX_LAYERS];
   // Bitrate allocation (CBR mode) and framerate factor, for temporal layers.
   int ts_target_bitrate[VPX_TS_MAX_LAYERS];
   int ts_rate_decimator[VPX_TS_MAX_LAYERS];
@@ -227,14 +228,14 @@ typedef struct VP9EncoderConfig {
   struct vpx_fixed_buf         two_pass_stats_in;
   struct vpx_codec_pkt_list  *output_pkt_list;
 
+#if CONFIG_FP_MB_STATS
+  struct vpx_fixed_buf         firstpass_mb_stats_in;
+#endif
+
   vp8e_tuning tuning;
   /* Flag to say whether we are using 16bit frame buffers */
   int use_high;
 } VP9EncoderConfig;
-
-static INLINE int is_altref_enabled(const VP9EncoderConfig *cfg) {
-  return cfg->mode != REALTIME && cfg->play_alternate && cfg->lag_in_frames > 0;
-}
 
 static INLINE int is_lossless_requested(const VP9EncoderConfig *cfg) {
   return cfg->best_allowed_q == 0 && cfg->worst_allowed_q == 0;
@@ -251,11 +252,7 @@ typedef struct VP9_COMP {
   VP9EncoderConfig oxcf;
   struct lookahead_ctx    *lookahead;
   struct lookahead_entry  *source;
-#if CONFIG_MULTIPLE_ARF
-  struct lookahead_entry  *alt_ref_source[REF_FRAMES];
-#else
   struct lookahead_entry  *alt_ref_source;
-#endif
   struct lookahead_entry  *last_source;
 
   YV12_BUFFER_CONFIG *Source;
@@ -269,14 +266,13 @@ typedef struct VP9_COMP {
   int alt_is_last;  // Alt same as last ( short circuit altref search)
   int gold_is_alt;  // don't do both alt and gold search ( just do gold).
 
+  int skippable_frame;
+
   int scaled_ref_idx[3];
   int lst_fb_idx;
   int gld_fb_idx;
   int alt_fb_idx;
 
-#if CONFIG_MULTIPLE_ARF
-  int alt_ref_fb_idx[REF_FRAMES - 3];
-#endif
   int refresh_last_frame;
   int refresh_golden_frame;
   int refresh_alt_ref_frame;
@@ -293,13 +289,6 @@ typedef struct VP9_COMP {
 
   TOKENEXTRA *tok;
   unsigned int tok_count[4][1 << 6];
-
-#if CONFIG_MULTIPLE_ARF
-  // Position within a frame coding order (including any additional ARF frames).
-  unsigned int sequence_number;
-  // Next frame in naturally occurring order that has not yet been coded.
-  int next_frame_in_order;
-#endif
 
   // Ambient reconstruction err target for force key frames
   int ambient_err;
@@ -350,13 +339,9 @@ typedef struct VP9_COMP {
 
   unsigned char *complexity_map;
 
-  unsigned char *active_map;
-  unsigned int active_map_enabled;
-
   CYCLIC_REFRESH *cyclic_refresh;
 
   fractional_mv_step_fp *find_fractional_mv_step;
-  fractional_mv_step_comp_fp *find_fractional_mv_step_comp;
   vp9_full_search_fn_t full_search_sad;
   vp9_refining_search_fn_t refining_search_sad;
   vp9_diamond_search_fn_t diamond_search_sad;
@@ -365,6 +350,10 @@ typedef struct VP9_COMP {
   uint64_t time_compress_data;
   uint64_t time_pick_lpf;
   uint64_t time_encode_sb_row;
+
+#if CONFIG_FP_MB_STATS
+  int use_fp_mb_stats;
+#endif
 
   TWO_PASS twopass;
 
@@ -419,7 +408,11 @@ typedef struct VP9_COMP {
 
   SVC svc;
 
-  int use_large_partition_rate;
+  // Store frame variance info in SOURCE_VAR_BASED_PARTITION search type.
+  diff *source_diff_var;
+  // The threshold used in SOURCE_VAR_BASED_PARTITION search type.
+  unsigned int source_var_thresh;
+  int frames_till_next_var_check;
 
   int frame_flags;
 
@@ -436,18 +429,9 @@ typedef struct VP9_COMP {
   PC_TREE *pc_root;
   int partition_cost[PARTITION_CONTEXTS][PARTITION_TYPES];
 
-#if CONFIG_MULTIPLE_ARF
-  // ARF tracking variables.
+  int multi_arf_allowed;
   int multi_arf_enabled;
-  unsigned int frame_coding_order_period;
-  unsigned int new_frame_coding_order_period;
-  int frame_coding_order[MAX_LAG_BUFFERS * 2];
-  int arf_buffer_idx[MAX_LAG_BUFFERS * 3 / 2];
-  int arf_weight[MAX_LAG_BUFFERS];
-  int arf_buffered;
-  int this_frame_weight;
-  int max_arf_level;
-#endif
+  int multi_arf_last_grp_enabled;
 
 #if CONFIG_DENOISING
   VP9_DENOISER denoiser;
@@ -552,9 +536,20 @@ void vp9_update_reference_frames(VP9_COMP *cpi);
 
 int64_t vp9_rescale(int64_t val, int64_t num, int denom);
 
+void vp9_set_high_precision_mv(VP9_COMP *cpi, int allow_high_precision_mv);
+
 YV12_BUFFER_CONFIG *vp9_scale_if_required(VP9_COMMON *cm,
                                           YV12_BUFFER_CONFIG *unscaled,
                                           YV12_BUFFER_CONFIG *scaled);
+
+void vp9_apply_encoding_flags(VP9_COMP *cpi, vpx_enc_frame_flags_t flags);
+
+static INLINE int is_altref_enabled(const VP9_COMP *const cpi) {
+  return cpi->oxcf.mode != REALTIME && cpi->oxcf.lag_in_frames > 0 &&
+         (cpi->oxcf.play_alternate &&
+          (!(cpi->use_svc && cpi->svc.number_temporal_layers == 1) ||
+           cpi->oxcf.ss_play_alternate[cpi->svc.spatial_layer_id]));
+}
 
 static INLINE void set_ref_ptrs(VP9_COMMON *cm, MACROBLOCKD *xd,
                                 MV_REFERENCE_FRAME ref0,
