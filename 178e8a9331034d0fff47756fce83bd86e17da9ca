@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAdn//e/k\u003d",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-07-18T22:48:18Z",
+      "side": 1,
+      "message": "nit: maybe MAX_NUM_SEG_MAPS instead of 2?",
+      "revId": "178e8a9331034d0fff47756fce83bd86e17da9ca",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//fCg\u003d",
         "filename": "vp9/common/vp9_alloccommon.c",
         "patchSetId": 6
@@ -30,6 +47,23 @@
       "writtenOn": "2014-07-18T21:44:15Z",
       "side": 1,
       "message": "We\u0027ve just changed width \u0026 height, has the buffer current_frame_seg_map being realloc\u0027ed at this point.",
+      "revId": "178e8a9331034d0fff47756fce83bd86e17da9ca",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//e/c\u003d",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-07-18T22:48:18Z",
+      "side": 1,
+      "message": "I think MAX_NUM_SEG_MAPS instead of 2 is better.",
       "revId": "178e8a9331034d0fff47756fce83bd86e17da9ca",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
