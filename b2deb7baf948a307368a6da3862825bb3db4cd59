@@ -16,6 +16,24 @@
       "revId": "b2deb7baf948a307368a6da3862825bb3db4cd59",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//fHc\u003d",
+        "filename": "vpx_scale/generic/yv12extend.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-07-18T17:35:59Z",
+      "side": 1,
+      "message": "For VP8 border is always 32 / VP8BORDERINPIXELS\n\nBorders are added to maintain alignment. It would be very very dumb to have an odd border. Should I assert border %2?",
+      "parentUuid": "AAAAdn//fH0\u003d",
+      "revId": "b2deb7baf948a307368a6da3862825bb3db4cd59",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
