@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//fCg\u003d",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-18T21:44:15Z",
+      "side": 1,
+      "message": "We usually put the free function in the alloc function before new buffers are allocated.",
+      "revId": "178e8a9331034d0fff47756fce83bd86e17da9ca",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//fCQ\u003d",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 303,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-18T21:44:15Z",
+      "side": 1,
+      "message": "We\u0027ve just changed width \u0026 height, has the buffer current_frame_seg_map being realloc\u0027ed at this point.",
+      "revId": "178e8a9331034d0fff47756fce83bd86e17da9ca",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
