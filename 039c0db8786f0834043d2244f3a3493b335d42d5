@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//fJY\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-07-18T17:19:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//fLw\u003d",
+      "revId": "039c0db8786f0834043d2244f3a3493b335d42d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//fLo\u003d",
         "filename": "test/scale_border_test.cc",
         "patchSetId": 7
@@ -30,6 +48,24 @@
       "writtenOn": "2014-07-18T03:55:09Z",
       "side": 1,
       "message": "sort these",
+      "revId": "039c0db8786f0834043d2244f3a3493b335d42d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//fJc\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-07-18T17:19:52Z",
+      "side": 1,
+      "message": "wasn\u0027t sure how to order the ./ and _ so i just deferred to vi :sort",
+      "parentUuid": "AAAAdn//fLo\u003d",
       "revId": "039c0db8786f0834043d2244f3a3493b335d42d5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//fJU\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-07-18T17:19:52Z",
+      "side": 1,
+      "message": "woops. had longer var names before",
+      "parentUuid": "AAAAdn//fLg\u003d",
+      "revId": "039c0db8786f0834043d2244f3a3493b335d42d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//fLY\u003d",
         "filename": "test/scale_border_test.cc",
         "patchSetId": 7
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//fJI\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-07-18T17:19:52Z",
+      "side": 1,
+      "message": "tried to clear it up. this justification might make more sense in the previous commit message",
+      "parentUuid": "AAAAdn//fLY\u003d",
+      "revId": "039c0db8786f0834043d2244f3a3493b335d42d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//fLM\u003d",
         "filename": "test/scale_border_test.cc",
         "patchSetId": 7
@@ -81,6 +153,24 @@
       "writtenOn": "2014-07-18T03:55:09Z",
       "side": 1,
       "message": "use array access for these",
+      "revId": "039c0db8786f0834043d2244f3a3493b335d42d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//fJE\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-07-18T17:19:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//fLM\u003d",
       "revId": "039c0db8786f0834043d2244f3a3493b335d42d5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
