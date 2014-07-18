@@ -122,13 +122,12 @@ static vpx_codec_err_t decoder_peek_si_internal(const uint8_t *data,
     int error_resilient;
     struct vp9_read_bit_buffer rb = { data, data + data_sz, 0, NULL, NULL };
     const int frame_marker = vp9_rb_read_literal(&rb, 2);
-    const int version = vp9_rb_read_bit(&rb);
-    (void) vp9_rb_read_bit(&rb);  // unused version bit
+    const BITSTREAM_PROFILE profile = vp9_read_profile(&rb);
 
     if (frame_marker != VP9_FRAME_MARKER)
       return VPX_CODEC_UNSUP_BITSTREAM;
 
-    if (version > 1) return VPX_CODEC_UNSUP_BITSTREAM;
+    if (profile >= MAX_PROFILES) return VPX_CODEC_UNSUP_BITSTREAM;
 
     if (vp9_rb_read_bit(&rb)) {  // show an existing frame
       vp9_rb_read_literal(&rb, 3);  // Frame buffer to show.
@@ -149,15 +148,17 @@ static vpx_codec_err_t decoder_peek_si_internal(const uint8_t *data,
       if (!vp9_read_sync_code(&rb))
         return VPX_CODEC_UNSUP_BITSTREAM;
 
+      if (profile > PROFILE_1)
+        rb.bit_offset += 1;  // Bit-depth 10 or 12
       colorspace = vp9_rb_read_literal(&rb, 3);
       if (colorspace != sRGB) {
         rb.bit_offset += 1;  // [16,235] (including xvycc) vs [0,255] range
-        if (version == 1) {
+        if (profile == PROFILE_1 || profile == PROFILE_3) {
           rb.bit_offset += 2;  // subsampling x/y
           rb.bit_offset += 1;  // has extra plane
         }
       } else {
-        if (version == 1) {
+        if (profile == PROFILE_1 || profile == PROFILE_3) {
           rb.bit_offset += 1;  // has extra plane
         } else {
           // RGB is only available in version 1

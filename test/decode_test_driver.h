@@ -91,9 +91,11 @@ class Decoder {
         &decoder_, cb_get, cb_release, user_priv);
   }
 
-  const char* GetDecoderName() {
+  const char* GetDecoderName() const {
     return vpx_codec_iface_name(CodecInterface());
   }
+
+  bool IsVP8() const;
 
  protected:
   virtual vpx_codec_iface_t* CodecInterface() const = 0;
@@ -137,6 +139,11 @@ class DecoderTest {
   // Hook to be called on every decompressed frame.
   virtual void DecompressedFrameHook(const vpx_image_t& img,
                                      const unsigned int frame_number) {}
+
+  // Hook to be called on peek result
+  virtual void HandlePeekResult(Decoder* const decoder,
+                                CompressedVideoSource *video,
+                                const vpx_codec_err_t res_peek);
 
  protected:
   explicit DecoderTest(const CodecFactory *codec) : codec_(codec) {}

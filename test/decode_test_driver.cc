@@ -39,12 +39,34 @@ vpx_codec_err_t Decoder::DecodeFrame(const uint8_t *cxdata, size_t size,
   return res_dec;
 }
 
+bool Decoder::IsVP8() const {
+  const char *codec_name = GetDecoderName();
+  return strncmp(kVP8Name, codec_name, sizeof(kVP8Name) - 1) == 0;
+}
+
+void DecoderTest::HandlePeekResult(Decoder *const decoder,
+                                   CompressedVideoSource *video,
+                                   const vpx_codec_err_t res_peek) {
+  const bool is_vp8 = decoder->IsVP8();
+  if (is_vp8) {
+    /* Vp8's implementation of PeekStream returns an error if the frame you
+     * pass it is not a keyframe, so we only expect VPX_CODEC_OK on the first
+     * frame, which must be a keyframe. */
+    if (video->frame_number() == 0)
+      ASSERT_EQ(VPX_CODEC_OK, res_peek) << "Peek return failed: "
+                                        << vpx_codec_err_to_string(res_peek);
+  } else {
+    /* The Vp9 implementation of PeekStream returns an error only if the
+     * data passed to it isn't a valid Vp9 chunk. */
+    ASSERT_EQ(VPX_CODEC_OK, res_peek) << "Peek return failed: "
+                                      << vpx_codec_err_to_string(res_peek);
+  }
+}
+
 void DecoderTest::RunLoop(CompressedVideoSource *video,
                           const vpx_codec_dec_cfg_t &dec_cfg) {
   Decoder* const decoder = codec_->CreateDecoder(dec_cfg, 0);
   ASSERT_TRUE(decoder != NULL);
-  const char *codec_name = decoder->GetDecoderName();
-  const bool is_vp8 = strncmp(kVP8Name, codec_name, sizeof(kVP8Name) - 1) == 0;
 
   // Decode frames.
   for (video->Begin(); !::testing::Test::HasFailure() && video->cxdata();
@@ -56,19 +78,8 @@ void DecoderTest::RunLoop(CompressedVideoSource *video,
     const vpx_codec_err_t res_peek = decoder->PeekStream(video->cxdata(),
                                                          video->frame_size(),
                                                          &stream_info);
-    if (is_vp8) {
-      /* Vp8's implementation of PeekStream returns an error if the frame you
-       * pass it is not a keyframe, so we only expect VPX_CODEC_OK on the first
-       * frame, which must be a keyframe. */
-      if (video->frame_number() == 0)
-        ASSERT_EQ(VPX_CODEC_OK, res_peek) << "Peek return failed: "
-            << vpx_codec_err_to_string(res_peek);
-    } else {
-      /* The Vp9 implementation of PeekStream returns an error only if the
-       * data passed to it isn't a valid Vp9 chunk. */
-      ASSERT_EQ(VPX_CODEC_OK, res_peek) << "Peek return failed: "
-          << vpx_codec_err_to_string(res_peek);
-    }
+    HandlePeekResult(decoder, video, res_peek);
+    ASSERT_FALSE(::testing::Test::HasFailure());
 
     vpx_codec_err_t res_dec = decoder->DecodeFrame(video->cxdata(),
                                                    video->frame_size());
