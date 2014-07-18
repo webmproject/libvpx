@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//fFE\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-18T19:09:21Z",
+      "side": 1,
+      "message": "drop this line",
+      "revId": "2dea8aa061757a5ec6970ea1a627b9ab90d4841f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//fFA\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-18T19:09:21Z",
+      "side": 1,
+      "message": "most of the below could actually be private",
+      "revId": "2dea8aa061757a5ec6970ea1a627b9ab90d4841f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//fE8\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-18T19:09:21Z",
+      "side": 1,
+      "message": "this could be static I think",
+      "revId": "2dea8aa061757a5ec6970ea1a627b9ab90d4841f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
