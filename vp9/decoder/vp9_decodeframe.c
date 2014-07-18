@@ -621,6 +621,11 @@ static void setup_display_size(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
 }
 
 static void resize_context_buffers(VP9_COMMON *cm, int width, int height) {
+#if CONFIG_SIZE_LIMIT
+  if (width > DECODE_WIDTH_LIMIT || height > DECODE_HEIGHT_LIMIT)
+    vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+                       "Width and height beyond allowed size.");
+#endif
   if (cm->width != width || cm->height != height) {
     // Change in frame size (assumption: color format does not change).
     if (cm->width == 0 || cm->height == 0 ||
