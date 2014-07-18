@@ -111,6 +111,7 @@ create_vpx_framework_config_shim() {
   for target in ${targets}; do
     preproc_symbol=$(target_to_preproc_symbol "${target}")
     printf " ${preproc_symbol}\n" >> "${config_file}"
+    printf "#define VPX_FRAMEWORK_TARGET \"${target}\"\n" >> "${config_file}"
     printf "#include \"VPX/vpx/${target}/vpx_config.h\"\n" >> "${config_file}"
     printf "#elif defined" >> "${config_file}"
     mkdir "${HEADER_DIR}/${target}"
