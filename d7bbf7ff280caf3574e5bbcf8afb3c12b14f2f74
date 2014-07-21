@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//eyY\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3239,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-21T21:53:46Z",
+      "side": 1,
+      "message": "vp8_yv12_copy_frame includes a call to vp8_yv12_extend_frame_borders so I think you can replace the code block with one for loop:\nfor (i \u003d LAST_FRAME; i \u003c MAX_REF_FRAMES; ++i)\n  vp8_yv12_copy_frame(cpi-\u003eSource,\n                                    \u0026cpi-\u003edenoiser.yv12_running_avg[i]);",
+      "revId": "d7bbf7ff280caf3574e5bbcf8afb3c12b14f2f74",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
