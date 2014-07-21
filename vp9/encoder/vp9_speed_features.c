@@ -88,13 +88,13 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
       sf->last_partitioning_redo_frequency = 3;
       sf->disable_split_mask = cm->show_frame ? DISABLE_ALL_SPLIT
                                               : DISABLE_ALL_INTER_SPLIT;
+      sf->adaptive_pred_interp_filter = 0;
     } else {
       sf->disable_split_mask = LAST_AND_INTRA_SPLIT_ONLY;
       sf->last_partitioning_redo_frequency = 2;
       sf->lf_motion_threshold = NO_MOTION_THRESHOLD;
     }
 
-    sf->adaptive_pred_interp_filter = 0;
     sf->reference_masking = 1;
     sf->mode_search_skip_flags = FLAG_SKIP_INTRA_DIRMISMATCH |
                                  FLAG_SKIP_INTRA_BESTINTER |
@@ -114,6 +114,8 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
       sf->disable_split_mask = DISABLE_ALL_SPLIT;
     else
       sf->disable_split_mask = DISABLE_ALL_INTER_SPLIT;
+
+    sf->adaptive_pred_interp_filter = 0;
 
     sf->lf_motion_threshold = LOW_MOTION_THRESHOLD;
     sf->last_partitioning_redo_frequency = 3;
