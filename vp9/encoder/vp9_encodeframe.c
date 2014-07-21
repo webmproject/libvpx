@@ -644,6 +644,15 @@ static void mode_info_conversion(VP9_COMP *cpi, const TileInfo *const tile,
         mbmi->mode = ZEROMV;
     }
   }
+
+  if (is_inter_block(mbmi)) {
+    vp9_update_mv_count(cm, xd);
+
+    if (cm->interp_filter == SWITCHABLE) {
+      const int ctx = vp9_get_pred_context_switchable_interp(xd);
+      ++cm->counts.switchable_interp[ctx][mbmi->interp_filter];
+    }
+  }
 }
 #endif
 
@@ -762,6 +771,7 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   }
 #endif
   if (!frame_is_intra_only(cm)) {
+#if !CONFIG_TRANSCODE
     if (is_inter_block(mbmi)) {
       vp9_update_mv_count(cm, xd);
 
@@ -770,6 +780,7 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
         ++cm->counts.switchable_interp[ctx][mbmi->interp_filter];
       }
     }
+#endif
 
     rd_opt->comp_pred_diff[SINGLE_REFERENCE] += ctx->single_pred_diff;
     rd_opt->comp_pred_diff[COMPOUND_REFERENCE] += ctx->comp_pred_diff;
