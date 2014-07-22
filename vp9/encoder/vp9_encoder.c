@@ -2226,15 +2226,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
   set_speed_features(cpi);
 
-#if CONFIG_DENOISING
-#ifdef OUTPUT_YUV_DENOISED
-  if (cpi->oxcf.noise_sensitivity > 0) {
-    vp9_write_yuv_frame_420(&cpi->denoiser.running_avg_y[INTRA_FRAME],
-                            yuv_denoised_file);
-  }
-#endif
-#endif
-
   // Decide q and q bounds.
   q = vp9_rc_pick_q_and_bounds(cpi, &bottom_index, &top_index);
 
@@ -2249,6 +2240,16 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   } else {
     encode_with_recode_loop(cpi, size, dest, q, bottom_index, top_index);
   }
+
+#if CONFIG_DENOISING
+#ifdef OUTPUT_YUV_DENOISED
+  if (cpi->oxcf.noise_sensitivity > 0) {
+    vp9_write_yuv_frame_420(&cpi->denoiser.running_avg_y[INTRA_FRAME],
+                            yuv_denoised_file);
+  }
+#endif
+#endif
+
 
   // Special case code to reduce pulsing when key frames are forced at a
   // fixed interval. Note the reconstruction error if it is the frame before
