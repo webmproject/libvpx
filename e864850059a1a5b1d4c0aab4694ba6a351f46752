@@ -1,0 +1,225 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//erw\u003d",
+        "filename": "test/encode_perf_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-22T21:31:46Z",
+      "side": 1,
+      "message": "2014",
+      "revId": "e864850059a1a5b1d4c0aab4694ba6a351f46752",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ers\u003d",
+        "filename": "test/encode_perf_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-22T21:31:46Z",
+      "side": 1,
+      "message": "let\u0027s treat this as an external lib, it should be after system libs but before vpx\u0027s; the make sure the rest are sorted",
+      "revId": "e864850059a1a5b1d4c0aab4694ba6a351f46752",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eq4\u003d",
+        "filename": "test/encode_perf_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-22T21:31:46Z",
+      "side": 1,
+      "message": "I know the decode perf test has this setup, but make this a non-tuple type. it will have issues with some toolchains:\n\nhttps://gerrit.chromium.org/gerrit/#/c/70859/\n\nunless it only occurs when passed as a parameter via INSTANTIATE_TEST_CASE_P()",
+      "revId": "e864850059a1a5b1d4c0aab4694ba6a351f46752",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//erg\u003d",
+        "filename": "test/encode_perf_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-22T21:31:46Z",
+      "side": 1,
+      "message": "I think NELEMENTS is more common in the tests currently",
+      "revId": "e864850059a1a5b1d4c0aab4694ba6a351f46752",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//erY\u003d",
+        "filename": "test/encode_perf_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-22T21:31:46Z",
+      "side": 1,
+      "message": "make this a kConstant otherwise lower with \u0027_\u0027 for variable names\n\nhttp://google-styleguide.googlecode.com/svn/trunk/cppguide.xml#Constant_Names",
+      "revId": "e864850059a1a5b1d4c0aab4694ba6a351f46752",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//erQ\u003d",
+        "filename": "test/encode_perf_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-22T21:31:46Z",
+      "side": 1,
+      "message": "treat this like an initializer list, break before the colon, indent 4 then align the rest.",
+      "revId": "e864850059a1a5b1d4c0aab4694ba6a351f46752",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//erM\u003d",
+        "filename": "test/encode_perf_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-22T21:31:46Z",
+      "side": 1,
+      "message": "indent 2",
+      "revId": "e864850059a1a5b1d4c0aab4694ba6a351f46752",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//erE\u003d",
+        "filename": "test/encode_perf_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-22T21:31:46Z",
+      "side": 1,
+      "message": "if this is min psnr; call the member min_psnr_ and name this min_psnr()",
+      "revId": "e864850059a1a5b1d4c0aab4694ba6a351f46752",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//erI\u003d",
+        "filename": "test/encode_perf_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-22T21:31:46Z",
+      "side": 1,
+      "message": "fix indent",
+      "revId": "e864850059a1a5b1d4c0aab4694ba6a351f46752",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//erA\u003d",
+        "filename": "test/encode_perf_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-22T21:31:46Z",
+      "side": 1,
+      "message": "call this speed(unsigned...)\n\nhttp://google-styleguide.googlecode.com/svn/trunk/cppguide.xml#Function_Names",
+      "revId": "e864850059a1a5b1d4c0aab4694ba6a351f46752",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eq0\u003d",
+        "filename": "test/encode_perf_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-22T21:31:46Z",
+      "side": 1,
+      "message": "this cast shouldn\u0027t be necessary, but in any case you should prefer c++ casts -\u003e static_cast",
+      "revId": "e864850059a1a5b1d4c0aab4694ba6a351f46752",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eqw\u003d",
+        "filename": "test/encode_perf_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-22T21:31:46Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "e864850059a1a5b1d4c0aab4694ba6a351f46752",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eqs\u003d",
+        "filename": "test/encode_perf_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-22T21:31:46Z",
+      "side": 1,
+      "message": "this alignment is wrong, you should align the params or break after the \u0027(\u0027 and indent 4",
+      "revId": "e864850059a1a5b1d4c0aab4694ba6a351f46752",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
