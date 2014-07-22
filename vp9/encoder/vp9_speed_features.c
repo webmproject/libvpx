@@ -116,6 +116,7 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
       sf->disable_split_mask = DISABLE_ALL_INTER_SPLIT;
 
     sf->adaptive_pred_interp_filter = 0;
+    sf->cb_pred_filter_search = 1;
 
     sf->lf_motion_threshold = LOW_MOTION_THRESHOLD;
     sf->last_partitioning_redo_frequency = 3;
@@ -332,6 +333,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->use_lp32x32fdct = 0;
   sf->adaptive_motion_search = 0;
   sf->adaptive_pred_interp_filter = 0;
+  sf->cb_pred_filter_search = 0;
   sf->use_quant_fp = 0;
   sf->reference_masking = 0;
   sf->partition_search_type = SEARCH_PARTITION;
