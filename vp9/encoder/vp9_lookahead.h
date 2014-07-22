@@ -14,7 +14,7 @@
 #include "vpx_scale/yv12config.h"
 #include "vpx/vpx_integer.h"
 
-#ifdef CONFIG_SPATIAL_SVC
+#if CONFIG_SPATIAL_SVC
 #include "vpx/vp8cx.h"
 #include "vpx/vpx_encoder.h"
 #endif
@@ -31,7 +31,7 @@ struct lookahead_entry {
   int64_t             ts_end;
   unsigned int        flags;
 
-#ifdef CONFIG_SPATIAL_SVC
+#if CONFIG_SPATIAL_SVC
   vpx_svc_parameters_t svc_params[VPX_SS_MAX_LAYERS];
 #endif
 };
