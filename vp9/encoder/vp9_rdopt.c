@@ -2014,7 +2014,6 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                  int *rate_y, int64_t *distortion_y,
                                  int *rate_uv, int64_t *distortion_uv,
                                  int *mode_excluded, int *disable_skip,
-                                 INTERP_FILTER *best_filter,
                                  int_mv (*mode_mv)[MAX_REF_FRAMES],
                                  int mi_row, int mi_col,
                                  int_mv single_newmv[MAX_REF_FRAMES],
@@ -2041,6 +2040,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   uint8_t *orig_dst[MAX_MB_PLANE];
   int orig_dst_stride[MAX_MB_PLANE];
   int rs = 0;
+  INTERP_FILTER best_filter = cm->interp_filter;
 
   if (is_comp_pred) {
     if (frame_mv[refs[0]].as_int == INVALID_MV ||
@@ -2124,9 +2124,9 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     rd_opt->filter_cache[i] = INT64_MAX;
 
   if (cm->interp_filter != BILINEAR) {
-    *best_filter = EIGHTTAP;
+    best_filter = EIGHTTAP;
     if (x->source_variance < cpi->sf.disable_filter_search_var_thresh) {
-      *best_filter = EIGHTTAP;
+      best_filter = EIGHTTAP;
     } else {
       int newbest;
       int tmp_rate_sum = 0;
@@ -2189,7 +2189,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
         if (newbest) {
           best_rd = rd;
-          *best_filter = mbmi->interp_filter;
+          best_filter = mbmi->interp_filter;
           if (cm->interp_filter == SWITCHABLE && i && !intpel_mv)
             best_needs_copy = !best_needs_copy;
         }
@@ -2205,7 +2205,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   }
   // Set the appropriate filter
   mbmi->interp_filter = cm->interp_filter != SWITCHABLE ?
-      cm->interp_filter : *best_filter;
+      cm->interp_filter : best_filter;
   rs = cm->interp_filter == SWITCHABLE ? vp9_get_switchable_rate(cpi) : 0;
 
   if (pred_exists) {
@@ -2480,7 +2480,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t best_inter_rd = INT64_MAX;
   PREDICTION_MODE best_intra_mode = DC_PRED;
   MV_REFERENCE_FRAME best_inter_ref_frame = LAST_FRAME;
-  INTERP_FILTER tmp_best_filter = SWITCHABLE;
   int rate_uv_intra[TX_SIZES], rate_uv_tokenonly[TX_SIZES];
   int64_t dist_uv[TX_SIZES];
   int skip_uv[TX_SIZES];
@@ -2743,8 +2742,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                   &rate2, &distortion2, &skippable,
                                   &rate_y, &distortion_y,
                                   &rate_uv, &distortion_uv,
-                                  &mode_excluded, &disable_skip,
-                                  &tmp_best_filter, frame_mv,
+                                  &mode_excluded, &disable_skip, frame_mv,
                                   mi_row, mi_col,
                                   single_newmv, &total_sse, best_rd);
       if (this_rd == INT64_MAX)
