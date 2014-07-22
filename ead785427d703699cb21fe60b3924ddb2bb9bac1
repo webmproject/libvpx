@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//eqI\u003d",
+        "filename": "build/make/Makefile",
+        "patchSetId": 1
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-22T22:53:51Z",
+      "side": 1,
+      "message": "given the comment above at 198 it seems nm + awk were a workaround attempt for this. out of curiosity what does the symbol look like in this case?\ncan you drop line 205 and test too? I think that will help too large command lines on some platforms too",
+      "revId": "ead785427d703699cb21fe60b3924ddb2bb9bac1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
