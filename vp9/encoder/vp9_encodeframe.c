@@ -2362,9 +2362,9 @@ static MV_REFERENCE_FRAME get_frame_type(const VP9_COMP *cpi) {
   else if (cpi->rc.is_src_frame_alt_ref && cpi->refresh_golden_frame)
     return ALTREF_FRAME;
   else if (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)
-    return LAST_FRAME;
-  else
     return GOLDEN_FRAME;
+  else
+    return LAST_FRAME;
 }
 
 static TX_MODE select_tx_mode(const VP9_COMP *cpi) {
