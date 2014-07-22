@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//euY\u003d",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-07-22T18:10:12Z",
+      "side": 1,
+      "message": "You can drop this extra line of whitespace.",
+      "revId": "b2b05416535003f9e7bb4aeb8490159b87da2ef8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//euU\u003d",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 357,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-07-22T18:10:12Z",
+      "side": 1,
+      "message": "Same here.",
+      "revId": "b2b05416535003f9e7bb4aeb8490159b87da2ef8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
