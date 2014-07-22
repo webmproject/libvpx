@@ -411,8 +411,8 @@ void vp8_denoiser_denoise_mb(VP8_DENOISER *denoiser,
     MV_REFERENCE_FRAME zero_frame = x->best_zeromv_reference_frame;
 
     enum vp8_denoiser_decision decision = FILTER_BLOCK;
-    enum vp8_denoiser_decision decision_u = FILTER_BLOCK;
-    enum vp8_denoiser_decision decision_v = FILTER_BLOCK;
+    enum vp8_denoiser_decision decision_u = COPY_BLOCK;
+    enum vp8_denoiser_decision decision_v = COPY_BLOCK;
 
     if (zero_frame)
     {
