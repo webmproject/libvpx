@@ -176,7 +176,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
 
   RANGE_CHECK(cfg, ss_number_layers, 1, VPX_SS_MAX_LAYERS);
 
-#ifdef CONFIG_SPATIAL_SVC
+#if CONFIG_SPATIAL_SVC
   if (cfg->ss_number_layers > 1) {
     unsigned int i, alt_ref_sum = 0;
     for (i = 0; i < cfg->ss_number_layers; ++i) {
@@ -403,7 +403,7 @@ static vpx_codec_err_t set_encoder_config(
     int i;
     for (i = 0; i < VPX_SS_MAX_LAYERS; ++i) {
       oxcf->ss_target_bitrate[i] =  1000 * cfg->ss_target_bitrate[i];
-#ifdef CONFIG_SPATIAL_SVC
+#if CONFIG_SPATIAL_SVC
       oxcf->ss_play_alternate[i] =  cfg->ss_enable_auto_alt_ref[i];
 #endif
     }
@@ -888,14 +888,14 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
         vpx_codec_cx_pkt_t pkt;
         VP9_COMP *const cpi = (VP9_COMP *)ctx->cpi;
 
-#ifdef CONFIG_SPATIAL_SVC
+#if CONFIG_SPATIAL_SVC
         if (cpi->use_svc && cpi->svc.number_temporal_layers == 1)
           cpi->svc.layer_context[cpi->svc.spatial_layer_id].layer_size += size;
 #endif
 
         // Pack invisible frames with the next visible frame
         if (cpi->common.show_frame == 0
-#ifdef CONFIG_SPATIAL_SVC
+#if CONFIG_SPATIAL_SVC
             || (cpi->use_svc && cpi->svc.number_temporal_layers == 1 &&
                 cpi->svc.spatial_layer_id < cpi->svc.number_spatial_layers - 1)
 #endif
@@ -923,7 +923,7 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
         pkt.data.frame.flags = lib_flags << 16;
 
         if (lib_flags & FRAMEFLAGS_KEY
-#ifdef CONFIG_SPATIAL_SVC
+#if CONFIG_SPATIAL_SVC
             || (cpi->use_svc && cpi->svc.number_temporal_layers == 1 &&
                 cpi->svc.layer_context[0].is_key_frame)
 #endif
@@ -965,7 +965,7 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
         vpx_codec_pkt_list_add(&ctx->pkt_list.head, &pkt);
         cx_data += size;
         cx_data_sz -= size;
-#ifdef CONFIG_SPATIAL_SVC
+#if CONFIG_SPATIAL_SVC
         if (cpi->use_svc && cpi->svc.number_temporal_layers == 1) {
           vpx_codec_cx_pkt_t pkt = {0};
           int i;
@@ -1287,7 +1287,7 @@ static vpx_codec_enc_cfg_map_t encoder_usage_cfg_map[] = {
       9999,               // kf_max_dist
 
       VPX_SS_DEFAULT_LAYERS,  // ss_number_layers
-#ifdef CONFIG_SPATIAL_SVC
+#if CONFIG_SPATIAL_SVC
       {0},
 #endif
       {0},                    // ss_target_bitrate

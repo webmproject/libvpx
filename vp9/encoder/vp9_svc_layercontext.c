@@ -223,6 +223,7 @@ int vp9_is_upper_layer_key_frame(const VP9_COMP *const cpi) {
          cpi->svc.layer_context[cpi->svc.spatial_layer_id].is_key_frame;
 }
 
+#if CONFIG_SPATIAL_SVC
 int vp9_svc_lookahead_push(const VP9_COMP *const cpi, struct lookahead_ctx *ctx,
                            YV12_BUFFER_CONFIG *src, int64_t ts_start,
                            int64_t ts_end, unsigned int flags) {
@@ -352,3 +353,4 @@ struct lookahead_entry *vp9_svc_lookahead_pop(VP9_COMP *const cpi,
 
   return buf;
 }
+#endif

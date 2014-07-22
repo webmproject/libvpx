@@ -2422,15 +2422,13 @@ int vp9_receive_raw_frame(VP9_COMP *cpi, unsigned int frame_flags,
   int res = 0;
   const int subsampling_x = sd->uv_width  < sd->y_width;
   const int subsampling_y = sd->uv_height < sd->y_height;
-  const int is_spatial_svc = cpi->use_svc &&
-                             (cpi->svc.number_temporal_layers == 1);
 
   check_initial_width(cpi, subsampling_x, subsampling_y);
 
   vpx_usec_timer_start(&timer);
 
-#ifdef CONFIG_SPATIAL_SVC
-  if (is_spatial_svc)
+#if CONFIG_SPATIAL_SVC
+  if (cpi->use_svc && cpi->svc.number_temporal_layers == 1)
     res = vp9_svc_lookahead_push(cpi, cpi->lookahead, sd, time_stamp, end_time,
                                  frame_flags);
   else
@@ -2561,7 +2559,9 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     return -1;
 
   if (is_spatial_svc && cpi->pass == 2) {
+#if CONFIG_SPATIAL_SVC
     vp9_svc_lookahead_peek(cpi, cpi->lookahead, 0, 1);
+#endif
     vp9_restore_layer_context(cpi);
   }
 
@@ -2584,7 +2584,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   if (arf_src_index) {
     assert(arf_src_index <= rc->frames_to_key);
 
-#ifdef CONFIG_SPATIAL_SVC
+#if CONFIG_SPATIAL_SVC
     if (is_spatial_svc)
       cpi->source = vp9_svc_lookahead_peek(cpi, cpi->lookahead,
                                            arf_src_index, 0);
@@ -2594,7 +2594,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     if (cpi->source != NULL) {
       cpi->alt_ref_source = cpi->source;
 
-#ifdef CONFIG_SPATIAL_SVC
+#if CONFIG_SPATIAL_SVC
       if (is_spatial_svc && cpi->svc.spatial_layer_id > 0) {
         int i;
         // Reference a hidden frame from a lower layer
@@ -2629,7 +2629,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   if (!cpi->source) {
     // Get last frame source.
     if (cm->current_video_frame > 0) {
-#ifdef CONFIG_SPATIAL_SVC
+#if CONFIG_SPATIAL_SVC
       if (is_spatial_svc)
         cpi->last_source = vp9_svc_lookahead_peek(cpi, cpi->lookahead, -1, 0);
       else
@@ -2640,7 +2640,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     }
 
     // Read in the source frame.
-#ifdef CONFIG_SPATIAL_SVC
+#if CONFIG_SPATIAL_SVC
     if (is_spatial_svc)
       cpi->source = vp9_svc_lookahead_pop(cpi, cpi->lookahead, flush);
     else
