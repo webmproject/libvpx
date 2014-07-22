@@ -3232,17 +3232,9 @@ static void update_reference_frames(VP8_COMP *cpi)
         if (cm->frame_type == KEY_FRAME)
         {
             int i;
-            vp8_yv12_copy_frame(
-                    cpi->Source,
-                    &cpi->denoiser.yv12_running_avg[LAST_FRAME]);
-
-            vp8_yv12_extend_frame_borders(
-                    &cpi->denoiser.yv12_running_avg[LAST_FRAME]);
-
-            for (i = 2; i < MAX_REF_FRAMES - 1; i++)
-                vp8_yv12_copy_frame(
-                        &cpi->denoiser.yv12_running_avg[LAST_FRAME],
-                        &cpi->denoiser.yv12_running_avg[i]);
+            for (i = LAST_FRAME; i < MAX_REF_FRAMES; ++i)
+              vp8_yv12_copy_frame(cpi->Source,
+                                  &cpi->denoiser.yv12_running_avg[i]);
         }
         else /* For non key frames */
         {
