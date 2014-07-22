@@ -196,13 +196,13 @@ $(BUILD_PFX)%.asm.s: %.asm
 # the copy implementation
 HAVE_GNU_STRIP := $(if $(CONFIG_DEBUG),,$(HAVE_GNU_STRIP))
 ifeq ($(HAVE_GNU_STRIP),yes)
-# Older binutils strip global sybols not needed for relocation processing
-# when given --strip-unneeded. Use nm and awk to identify globals and
-# keep them.
+# Older binutils strip global symbols not needed for relocation processing
+# when given --strip-unneeded. Using nm and awk to identify globals and
+# keep them caused command line length issues under mingw and segfaults in
+# test_libvpx were observed under OS/2: simply use --strip-debug.
 %.a: %_g.a
 	$(if $(quiet),@echo "    [STRIP] $@ < $<")
-	$(qexec)$(STRIP) --strip-unneeded \
-         `$(NM) $< | grep ' [A-TV-Z] ' | awk '{print "-K"$$3'}`\
+	$(qexec)$(STRIP) --strip-debug \
           -o $@ $<
 else
 %.a: %_g.a
