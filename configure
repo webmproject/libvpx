@@ -271,7 +271,6 @@ HAVE_LIST="
     unistd_h
 "
 EXPERIMENT_LIST="
-    multiple_arf
     spatial_svc
     denoising
     fp_mb_stats
