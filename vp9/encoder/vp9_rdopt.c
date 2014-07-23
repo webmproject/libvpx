@@ -434,22 +434,26 @@ static void choose_largest_tx_size(VP9_COMP *cpi, MACROBLOCK *x,
   mbmi->tx_size = MIN(max_tx_size, largest_tx_size);
 
   txfm_rd_in_plane(x, rate, distortion, skip,
-                   &sse[mbmi->tx_size], ref_best_rd, 0, bs,
+                   sse, ref_best_rd, 0, bs,
                    mbmi->tx_size, cpi->sf.use_fast_coef_costing);
   cpi->tx_stepdown_count[0]++;
 }
 
 static void choose_tx_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
-                                   int (*r)[2], int *rate,
-                                   int64_t *d, int64_t *distortion,
-                                   int *s, int *skip,
+                                   int *rate,
+                                   int64_t *distortion,
+                                   int *skip,
+                                   int64_t *psse,
                                    int64_t tx_cache[TX_MODES],
+                                   int64_t ref_best_rd,
                                    BLOCK_SIZE bs) {
   const TX_SIZE max_tx_size = max_txsize_lookup[bs];
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
   vp9_prob skip_prob = vp9_get_skip_prob(cm, xd);
+  int r[TX_SIZES][2], s[TX_SIZES];
+  int64_t d[TX_SIZES], sse[TX_SIZES];
   int64_t rd[TX_SIZES][2] = {{INT64_MAX, INT64_MAX},
                              {INT64_MAX, INT64_MAX},
                              {INT64_MAX, INT64_MAX},
@@ -466,6 +470,9 @@ static void choose_tx_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
   s1 = vp9_cost_bit(skip_prob, 1);
 
   for (n = TX_4X4; n <= max_tx_size; n++) {
+    txfm_rd_in_plane(x, &r[n][0], &d[n], &s[n],
+                     &sse[n], ref_best_rd, 0, bs, n,
+                     cpi->sf.use_fast_coef_costing);
     r[n][1] = r[n][0];
     if (r[n][0] < INT_MAX) {
       for (m = 0; m <= n - (n == max_tx_size); m++) {
@@ -496,6 +503,7 @@ static void choose_tx_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
   *distortion = d[mbmi->tx_size];
   *rate       = r[mbmi->tx_size][cm->tx_mode == TX_MODE_SELECT];
   *skip       = s[mbmi->tx_size];
+  *psse       = sse[mbmi->tx_size];
 
   tx_cache[ONLY_4X4] = rd[TX_4X4][0];
   tx_cache[ALLOW_8X8] = rd[TX_8X8][0];
@@ -522,65 +530,39 @@ static void inter_super_block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
                                   int64_t *psse, BLOCK_SIZE bs,
                                   int64_t txfm_cache[TX_MODES],
                                   int64_t ref_best_rd) {
-  int r[TX_SIZES][2], s[TX_SIZES];
-  int64_t d[TX_SIZES], sse[TX_SIZES];
   MACROBLOCKD *xd = &x->e_mbd;
-  MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
-  const TX_SIZE max_tx_size = max_txsize_lookup[bs];
-  TX_SIZE tx_size;
 
-  assert(bs == mbmi->sb_type);
+  assert(bs == xd->mi[0]->mbmi.sb_type);
 
   vp9_subtract_plane(x, bs, 0);
 
   if (cpi->sf.tx_size_search_method == USE_LARGESTALL || xd->lossless) {
     vpx_memset(txfm_cache, 0, TX_MODES * sizeof(int64_t));
-    choose_largest_tx_size(cpi, x, rate, distortion, skip, sse, ref_best_rd,
+    choose_largest_tx_size(cpi, x, rate, distortion, skip, psse, ref_best_rd,
                            bs);
-    if (psse)
-      *psse = sse[mbmi->tx_size];
-    return;
+  } else {
+    choose_tx_size_from_rd(cpi, x, rate, distortion, skip, psse,
+                           txfm_cache, ref_best_rd, bs);
   }
-
-  for (tx_size = TX_4X4; tx_size <= max_tx_size; ++tx_size)
-    txfm_rd_in_plane(x, &r[tx_size][0], &d[tx_size], &s[tx_size],
-                     &sse[tx_size], ref_best_rd, 0, bs, tx_size,
-                     cpi->sf.use_fast_coef_costing);
-  choose_tx_size_from_rd(cpi, x, r, rate, d, distortion, s,
-                         skip, txfm_cache, bs);
-
-  if (psse)
-    *psse = sse[mbmi->tx_size];
 }
 
 static void intra_super_block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
                                   int64_t *distortion, int *skip,
-                                  int64_t *psse, BLOCK_SIZE bs,
+                                  BLOCK_SIZE bs,
                                   int64_t txfm_cache[TX_MODES],
                                   int64_t ref_best_rd) {
-  int64_t sse[TX_SIZES];
   MACROBLOCKD *xd = &x->e_mbd;
-  MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
+  int64_t sse;
 
-  assert(bs == mbmi->sb_type);
+  assert(bs == xd->mi[0]->mbmi.sb_type);
   if (cpi->sf.tx_size_search_method != USE_FULL_RD || xd->lossless) {
     vpx_memset(txfm_cache, 0, TX_MODES * sizeof(int64_t));
-    choose_largest_tx_size(cpi, x, rate, distortion, skip, sse, ref_best_rd,
+    choose_largest_tx_size(cpi, x, rate, distortion, skip, &sse, ref_best_rd,
                            bs);
   } else {
-    int r[TX_SIZES][2], s[TX_SIZES];
-    int64_t d[TX_SIZES];
-    TX_SIZE tx_size;
-    for (tx_size = TX_4X4; tx_size <= max_txsize_lookup[bs]; ++tx_size)
-      txfm_rd_in_plane(x, &r[tx_size][0], &d[tx_size],
-                       &s[tx_size], &sse[tx_size],
-                       ref_best_rd, 0, bs, tx_size,
-                       cpi->sf.use_fast_coef_costing);
-    choose_tx_size_from_rd(cpi, x, r, rate, d, distortion, s, skip, txfm_cache,
-                           bs);
+    choose_tx_size_from_rd(cpi, x, rate, distortion, skip, &sse,
+                           txfm_cache, ref_best_rd, bs);
   }
-  if (psse)
-    *psse = sse[mbmi->tx_size];
 }
 
 
@@ -834,7 +816,7 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
     mic->mbmi.mode = mode;
 
     intra_super_block_yrd(cpi, x, &this_rate_tokenonly, &this_distortion,
-        &s, NULL, bsize, local_tx_cache, best_rd);
+        &s, bsize, local_tx_cache, best_rd);
 
     if (this_rate_tokenonly == INT_MAX)
       continue;
@@ -2722,7 +2704,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
     if (ref_frame == INTRA_FRAME) {
       TX_SIZE uv_tx;
-      intra_super_block_yrd(cpi, x, &rate_y, &distortion_y, &skippable, NULL,
+      intra_super_block_yrd(cpi, x, &rate_y, &distortion_y, &skippable,
                             bsize, tx_cache, best_rd);
 
       if (rate_y == INT_MAX)
