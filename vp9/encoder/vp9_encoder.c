@@ -2685,6 +2685,9 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     cpi->last_end_time_stamp_seen = cpi->source->ts_start;
   }
 
+  // Clear down mmx registers
+  vp9_clear_system_state();
+
   // adjust frame rates based on timestamps given
   if (cm->show_frame) {
     adjust_frame_rate(cpi);
@@ -2698,9 +2701,6 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
   // start with a 0 size frame
   *size = 0;
-
-  // Clear down mmx registers
-  vp9_clear_system_state();
 
   /* find a free buffer for the new frame, releasing the reference previously
    * held.
