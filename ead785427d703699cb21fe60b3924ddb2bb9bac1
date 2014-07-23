@@ -34,6 +34,24 @@
       "revId": "ead785427d703699cb21fe60b3924ddb2bb9bac1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//elQ\u003d",
+        "filename": "build/make/Makefile",
+        "patchSetId": 1
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-23T19:49:06Z",
+      "side": 1,
+      "message": "I was wondering if how the g_executable_path symbol was marked in this case and if it was incorrectly being removed. It sounds like it isn\u0027t and there may be something else to blame.\nFor now switching to --strip-debug is fine, you drop line 205 since it shouldn\u0027t be needed.",
+      "parentUuid": "AAAAdn//enY\u003d",
+      "revId": "ead785427d703699cb21fe60b3924ddb2bb9bac1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
