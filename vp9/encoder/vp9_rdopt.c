@@ -2045,11 +2045,15 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int pred_filter_search = cpi->sf.cb_pred_filter_search ?
       (((mi_row + mi_col) >> bsl)) & 0x01 : 0;
 
-  if (pred_filter_search && this_mode != NEWMV) {
+  if (pred_filter_search) {
+    INTERP_FILTER af = SWITCHABLE, lf = SWITCHABLE;
     if (xd->up_available)
-      best_filter = xd->mi[-xd->mi_stride]->mbmi.interp_filter;
-    else if (xd->left_available)
-      best_filter = xd->mi[-1]->mbmi.interp_filter;
+      af = xd->mi[-xd->mi_stride]->mbmi.interp_filter;
+    if (xd->left_available)
+      lf = xd->mi[-1]->mbmi.interp_filter;
+
+    if ((this_mode != NEWMV) || (af == lf))
+      best_filter = af;
   }
 
   if (is_comp_pred) {
