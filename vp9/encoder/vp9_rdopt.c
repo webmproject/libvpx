@@ -2013,7 +2013,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                  int *skippable,
                                  int *rate_y, int64_t *distortion_y,
                                  int *rate_uv, int64_t *distortion_uv,
-                                 int *mode_excluded, int *disable_skip,
+                                 int *disable_skip,
                                  int_mv (*mode_mv)[MAX_REF_FRAMES],
                                  int mi_row, int mi_col,
                                  int_mv single_newmv[MAX_REF_FRAMES],
@@ -2120,10 +2120,6 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
    * words if you present them in that order, the second one is always known
    * if the first is known */
   *rate2 += cost_mv_ref(cpi, this_mode, mbmi->mode_context[refs[0]]);
-
-  if (!(*mode_excluded))
-    *mode_excluded = is_comp_pred ? cm->reference_mode == SINGLE_REFERENCE
-                                  : cm->reference_mode == COMPOUND_REFERENCE;
 
   pred_exists = 0;
   // Are all MVs integer pel for Y and UV
@@ -2755,7 +2751,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                   &rate2, &distortion2, &skippable,
                                   &rate_y, &distortion_y,
                                   &rate_uv, &distortion_uv,
-                                  &mode_excluded, &disable_skip, frame_mv,
+                                  &disable_skip, frame_mv,
                                   mi_row, mi_col,
                                   single_newmv, &total_sse, best_rd);
       if (this_rd == INT64_MAX)
