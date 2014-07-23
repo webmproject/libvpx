@@ -89,7 +89,8 @@ TEST_F(VP9FrameSizeTestsLarge, ValidSizes) {
   // one for each lag in frames (for 2 pass), and then one for each possible
   // reference buffer (8) - we can end up with up to 30 buffers of roughly this
   // size or almost 1 gig of memory.
-  video.SetSize(4096, 4096);
+  // TODO(jzern): restore this to at least 4096x4096 after issue #828 is fixed.
+  video.SetSize(4096, 2160);
   video.set_limit(2);
   expected_res_ = VPX_CODEC_OK;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
