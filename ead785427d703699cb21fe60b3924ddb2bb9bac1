@@ -16,6 +16,24 @@
       "revId": "ead785427d703699cb21fe60b3924ddb2bb9bac1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//enY\u003d",
+        "filename": "build/make/Makefile",
+        "patchSetId": 1
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1001311
+      },
+      "writtenOn": "2014-07-23T10:29:21Z",
+      "side": 1,
+      "message": "I don\u0027t understand exactly what you want. Anyway nm + awk prints the symbol like \n\n    -K__ZNKSt5ctypeIcE8do_widenEc\n\nBTW, the strange is that g_executable_path reamins at stripped lib. However, when accessing g_executable_path, test_libvpx crashes.\n\nAnd although I remove 205 line, crashes at the same point.",
+      "parentUuid": "AAAAdn//eqI\u003d",
+      "revId": "ead785427d703699cb21fe60b3924ddb2bb9bac1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
