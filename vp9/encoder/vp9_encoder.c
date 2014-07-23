@@ -131,7 +131,8 @@ static void setup_frame(VP9_COMP *cpi) {
   }
 
   if (cm->frame_type == KEY_FRAME) {
-    cpi->refresh_golden_frame = 1;
+    if (!(cpi->use_svc && cpi->svc.number_temporal_layers == 1))
+      cpi->refresh_golden_frame = 1;
     cpi->refresh_alt_ref_frame = 1;
   } else {
     cm->fc = cm->frame_contexts[cm->frame_context_idx];
@@ -2001,7 +2002,8 @@ static void get_ref_frame_flags(VP9_COMP *cpi) {
   if (cpi->gold_is_last)
     cpi->ref_frame_flags &= ~VP9_GOLD_FLAG;
 
-  if (cpi->rc.frames_till_gf_update_due == INT_MAX)
+  if (cpi->rc.frames_till_gf_update_due == INT_MAX &&
+      !(cpi->use_svc && cpi->svc.number_temporal_layers == 1))
     cpi->ref_frame_flags &= ~VP9_GOLD_FLAG;
 
   if (cpi->alt_is_last)
