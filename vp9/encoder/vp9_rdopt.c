@@ -2040,7 +2040,18 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   uint8_t *orig_dst[MAX_MB_PLANE];
   int orig_dst_stride[MAX_MB_PLANE];
   int rs = 0;
-  INTERP_FILTER best_filter = cm->interp_filter;
+  INTERP_FILTER best_filter = SWITCHABLE;
+
+  int bsl = mi_width_log2_lookup[bsize];
+  int pred_filter_search = cpi->sf.cb_pred_filter_search ?
+      (((mi_row + mi_col) >> bsl)) & 0x01 : 0;
+
+  if (pred_filter_search && this_mode != NEWMV) {
+    if (xd->up_available)
+      best_filter = xd->mi[-xd->mi_stride]->mbmi.interp_filter;
+    else if (xd->left_available)
+      best_filter = xd->mi[-1]->mbmi.interp_filter;
+  }
 
   if (is_comp_pred) {
     if (frame_mv[refs[0]].as_int == INVALID_MV ||
@@ -2124,10 +2135,9 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     rd_opt->filter_cache[i] = INT64_MAX;
 
   if (cm->interp_filter != BILINEAR) {
-    best_filter = EIGHTTAP;
     if (x->source_variance < cpi->sf.disable_filter_search_var_thresh) {
       best_filter = EIGHTTAP;
-    } else {
+    } else if (best_filter == SWITCHABLE) {
       int newbest;
       int tmp_rate_sum = 0;
       int64_t tmp_dist_sum = 0;
