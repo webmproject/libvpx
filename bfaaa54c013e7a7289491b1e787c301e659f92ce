@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//epA\u003d",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 692,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-23T00:25:02Z",
+      "side": 1,
+      "message": "Good point, yes.",
+      "parentUuid": "AAAAdn//epo\u003d",
+      "revId": "bfaaa54c013e7a7289491b1e787c301e659f92ce",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//es8\u003d",
         "filename": "vp9/vp9_cx_iface.c",
         "patchSetId": 1
@@ -66,6 +84,24 @@
       "side": 1,
       "message": "is that stored somewhere post-creation?",
       "parentUuid": "AAAAdn//es8\u003d",
+      "revId": "bfaaa54c013e7a7289491b1e787c301e659f92ce",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eo0\u003d",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 693,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-23T00:25:02Z",
+      "side": 1,
+      "message": "Don\u0027t think it is right now, but I know Paul is only using up to 2 ARFs in his experiments right now. If we added the variable we\u0027d be making a useful saving of memory even when multi-ARF is used. Arguably not part of this patch, I would agree.",
+      "parentUuid": "AAAAdn//eps\u003d",
       "revId": "bfaaa54c013e7a7289491b1e787c301e659f92ce",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
