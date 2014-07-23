@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//ehA\u003d",
+        "filename": "test/encode_perf_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-23T23:34:17Z",
+      "side": 1,
+      "message": "sort these",
+      "revId": "88c23b014a1a8101db6b759f78342f49ab1f05fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ehE\u003d",
+        "filename": "test/encode_perf_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-23T23:34:17Z",
+      "side": 1,
+      "message": "alignment is off\nhttp://google-styleguide.googlecode.com/svn/trunk/cppguide.xml#Function_Declarations_and_Definitions",
+      "revId": "88c23b014a1a8101db6b759f78342f49ab1f05fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ehI\u003d",
+        "filename": "test/encode_perf_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-23T23:34:17Z",
+      "side": 1,
+      "message": "align this with the other parameters",
+      "revId": "88c23b014a1a8101db6b759f78342f49ab1f05fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eg8\u003d",
+        "filename": "test/encode_perf_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-23T23:34:17Z",
+      "side": 1,
+      "message": "add parentheses around the whole expression for safety",
+      "revId": "88c23b014a1a8101db6b759f78342f49ab1f05fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//egw\u003d",
+        "filename": "test/encode_perf_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-23T23:34:17Z",
+      "side": 1,
+      "message": "drop this line",
+      "revId": "88c23b014a1a8101db6b759f78342f49ab1f05fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eg4\u003d",
+        "filename": "test/encode_perf_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-23T23:34:17Z",
+      "side": 1,
+      "message": "prefer pre-increment",
+      "revId": "88c23b014a1a8101db6b759f78342f49ab1f05fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ego\u003d",
+        "filename": "test/test.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 848,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-23T23:34:17Z",
+      "side": 1,
+      "message": "are the source of these noted in the test-vector doc? I assume these are public access and ok to redistribute",
+      "revId": "88c23b014a1a8101db6b759f78342f49ab1f05fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
