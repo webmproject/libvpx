@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//eaQ\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 11
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-07-24T21:46:03Z",
+      "side": 1,
+      "message": "Moved to the commit that fixed it. This was always kind of a weird place for this comment.",
+      "parentUuid": "AAAAdn//ebU\u003d",
+      "revId": "7c8583481d2926bed32485da540f3c7fc6ee7dc9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//ebQ\u003d",
         "filename": "test/scale_border_test.cc",
         "patchSetId": 11
@@ -30,6 +48,24 @@
       "writtenOn": "2014-07-24T20:08:23Z",
       "side": 1,
       "message": "you should ASSERT_NO_FATAL_FAILURE here\n\nhttps://code.google.com/p/googletest/wiki/AdvancedGuide#Asserting_on_Subroutines",
+      "revId": "7c8583481d2926bed32485da540f3c7fc6ee7dc9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eaI\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 11
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-07-24T21:46:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//ebQ\u003d",
       "revId": "7c8583481d2926bed32485da540f3c7fc6ee7dc9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
