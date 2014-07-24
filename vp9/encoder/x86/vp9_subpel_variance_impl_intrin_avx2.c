@@ -67,7 +67,7 @@ DECLARE_ALIGNED(32, static const uint8_t, bilinear_filters_avx2[512]) = {
 #define LOAD_SRC_DST \
   /* load source and destination */ \
   src_reg = _mm256_loadu_si256((__m256i const *) (src)); \
-  dst_reg = _mm256_load_si256((__m256i const *) (dst));
+  dst_reg = _mm256_loadu_si256((__m256i const *) (dst));
 
 #define AVG_NEXT_SRC(src_reg, size_stride) \
   src_next_reg = _mm256_loadu_si256((__m256i const *) \
