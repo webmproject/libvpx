@@ -39,16 +39,40 @@ enum vp8_denoiser_filter_state {
   kFilterNonZeroMV
 };
 
+typedef struct {
+  // Scale factor on sse threshold above which no denoising is done.
+  unsigned int scale_sse_thresh;
+  // Scale factor on motion magnitude threshold above which no
+  // denoising is done.
+  unsigned int scale_motion_thresh;
+  // Scale factor on motion magnitude below which we increase the strength of
+  // the temporal filter (in function vp8_denoiser_filter).
+  unsigned int scale_increase_filter;
+  // Scale factor to bias to ZEROMV for denoising.
+  unsigned int denoise_mv_bias;
+  // Scale factor to bias to ZEROMV for coding mode selection.
+  unsigned int pickmode_mv_bias;
+  // Quantizer threshold below which we use the segmentation map to switch off
+  // loop filter for blocks that have been coded as ZEROMV-LAST a certain number
+  // (consec_zerolast) of consecutive frames. Note that the delta-QP is set to
+  // 0 when segmentation map is used for shutting off loop filter.
+  unsigned int qp_thresh;
+  // Threshold for number of consecutive frames for blocks coded as ZEROMV-LAST.
+  unsigned int consec_zerolast;
+} denoise_params;
+
 typedef struct vp8_denoiser
 {
     YV12_BUFFER_CONFIG yv12_running_avg[MAX_REF_FRAMES];
     YV12_BUFFER_CONFIG yv12_mc_running_avg;
     unsigned char* denoise_state;
     int num_mb_cols;
+    int aggressive_mode;
+    denoise_params denoise_pars;
 } VP8_DENOISER;
 
 int vp8_denoiser_allocate(VP8_DENOISER *denoiser, int width, int height,
-                          int num_mb_rows, int num_mb_cols);
+                          int num_mb_rows, int num_mb_cols, int mode);
 
 void vp8_denoiser_free(VP8_DENOISER *denoiser);
 
