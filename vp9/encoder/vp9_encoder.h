@@ -37,7 +37,7 @@
 #include "vp9/encoder/vp9_svc_layercontext.h"
 #include "vp9/encoder/vp9_tokenize.h"
 #include "vp9/encoder/vp9_variance.h"
-#if CONFIG_DENOISING
+#if CONFIG_VP9_TEMPORAL_DENOISING
 #include "vp9/encoder/vp9_denoiser.h"
 #endif
 
@@ -430,7 +430,7 @@ typedef struct VP9_COMP {
   int multi_arf_enabled;
   int multi_arf_last_grp_enabled;
 
-#if CONFIG_DENOISING
+#if CONFIG_VP9_TEMPORAL_DENOISING
   VP9_DENOISER denoiser;
 #endif
 } VP9_COMP;

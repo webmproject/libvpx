@@ -273,7 +273,7 @@ HAVE_LIST="
 EXPERIMENT_LIST="
     multiple_arf
     spatial_svc
-    denoising
+    vp9_temporal_denoising
     fp_mb_stats
 "
 CONFIG_LIST="

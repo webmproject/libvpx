@@ -41,7 +41,7 @@ typedef struct {
   int64_t tx_rd_diff[TX_MODES];
   int64_t best_filter_diff[SWITCHABLE_FILTER_CONTEXTS];
 
-#if CONFIG_DENOISING
+#if CONFIG_VP9_TEMPORAL_DENOISING
   unsigned int newmv_sse;
   unsigned int zeromv_sse;
   PREDICTION_MODE best_sse_inter_mode;
