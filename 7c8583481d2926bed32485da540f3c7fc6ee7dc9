@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//ecA\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 11
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-07-24T16:34:35Z",
+      "side": 1,
+      "message": "We use DISABLED_ on the arch instead of the test name (like chromium)",
+      "revId": "7c8583481d2926bed32485da540f3c7fc6ee7dc9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
