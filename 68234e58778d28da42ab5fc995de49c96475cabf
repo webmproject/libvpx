@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//ebA\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 684,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-24T20:48:28Z",
+      "side": 1,
+      "message": "This doesn\u0027t prevent the encoder from referring to a buffer that must be scaled outside of the permitted range, so long as it also specifies a reference frame that has valid size.\n\nThis means that we have to add a check at the per-block level to check that the frame referred to is of a valid size.\n\nWithout this additional check I think fuzz testing might still result in a crash.",
+      "revId": "68234e58778d28da42ab5fc995de49c96475cabf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
