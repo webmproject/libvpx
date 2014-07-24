@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAdn//ebU\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 11
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-24T20:08:23Z",
+      "side": 1,
+      "message": "you could say that previously it was incorrectly rounded here. you could have the round happen here, but it\u0027s simpler to do it at creation time",
+      "revId": "7c8583481d2926bed32485da540f3c7fc6ee7dc9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ebQ\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 11
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-24T20:08:23Z",
+      "side": 1,
+      "message": "you should ASSERT_NO_FATAL_FAILURE here\n\nhttps://code.google.com/p/googletest/wiki/AdvancedGuide#Asserting_on_Subroutines",
+      "revId": "7c8583481d2926bed32485da540f3c7fc6ee7dc9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//ecA\u003d",
         "filename": "test/scale_border_test.cc",
         "patchSetId": 11
@@ -13,6 +47,24 @@
       "writtenOn": "2014-07-24T16:34:35Z",
       "side": 1,
       "message": "We use DISABLED_ on the arch instead of the test name (like chromium)",
+      "revId": "7c8583481d2926bed32485da540f3c7fc6ee7dc9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ebY\u003d",
+        "filename": "test/scale_border_test.cc",
+        "patchSetId": 11
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-24T20:08:23Z",
+      "side": 1,
+      "message": "you\u0027re forced in this case as otherwise you\u0027d need another class named DISABLED_...\n\nhttps://code.google.com/p/googletest/wiki/AdvancedGuide#Temporarily_Disabling_Tests",
+      "parentUuid": "AAAAdn//ecA\u003d",
       "revId": "7c8583481d2926bed32485da540f3c7fc6ee7dc9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
