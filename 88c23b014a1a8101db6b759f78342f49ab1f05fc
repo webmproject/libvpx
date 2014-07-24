@@ -104,6 +104,40 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//eck\u003d",
+        "filename": "test/encode_perf_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-07-24T15:17:20Z",
+      "side": 1,
+      "message": "You could add most of these initializations to Setup().",
+      "revId": "88c23b014a1a8101db6b759f78342f49ab1f05fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eco\u003d",
+        "filename": "test/encode_perf_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-07-24T15:17:20Z",
+      "side": 1,
+      "message": "Would be good to know how long psnr calculation takes.",
+      "revId": "88c23b014a1a8101db6b759f78342f49ab1f05fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//ego\u003d",
         "filename": "test/test.mk",
         "patchSetId": 3
