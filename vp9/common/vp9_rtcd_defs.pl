@@ -739,10 +739,10 @@ if (vpx_config("CONFIG_INTERNAL_STATS") eq "yes") {
 
 # fdct functions
 add_proto qw/void vp9_fht4x4/, "const int16_t *input, int16_t *output, int stride, int tx_type";
-specialize qw/vp9_fht4x4 sse2 avx2/;
+specialize qw/vp9_fht4x4 sse2/;
 
 add_proto qw/void vp9_fht8x8/, "const int16_t *input, int16_t *output, int stride, int tx_type";
-specialize qw/vp9_fht8x8 sse2 avx2/;
+specialize qw/vp9_fht8x8 sse2/;
 
 add_proto qw/void vp9_fht16x16/, "const int16_t *input, int16_t *output, int stride, int tx_type";
 specialize qw/vp9_fht16x16 sse2/;
@@ -754,13 +754,13 @@ add_proto qw/void vp9_fdct4x4_1/, "const int16_t *input, int16_t *output, int st
 specialize qw/vp9_fdct4x4_1 sse2/;
 
 add_proto qw/void vp9_fdct4x4/, "const int16_t *input, int16_t *output, int stride";
-specialize qw/vp9_fdct4x4 sse2 avx2/;
+specialize qw/vp9_fdct4x4 sse2/;
 
 add_proto qw/void vp9_fdct8x8_1/, "const int16_t *input, int16_t *output, int stride";
 specialize qw/vp9_fdct8x8_1 sse2/;
 
 add_proto qw/void vp9_fdct8x8/, "const int16_t *input, int16_t *output, int stride";
-specialize qw/vp9_fdct8x8 sse2 avx2/, "$ssse3_x86_64";
+specialize qw/vp9_fdct8x8 sse2/, "$ssse3_x86_64";
 
 add_proto qw/void vp9_fdct16x16_1/, "const int16_t *input, int16_t *output, int stride";
 specialize qw/vp9_fdct16x16_1 sse2/;

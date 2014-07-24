@@ -376,19 +376,4 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_fht4x4_sse2, &vp9_iht4x4_16_add_sse2, 3)));
 #endif
 
-#if HAVE_AVX2
-INSTANTIATE_TEST_CASE_P(
-    AVX2, Trans4x4DCT,
-    ::testing::Values(
-        make_tuple(&vp9_fdct4x4_avx2,
-                   &vp9_idct4x4_16_add_c, 0)));
-INSTANTIATE_TEST_CASE_P(
-    AVX2, Trans4x4HT,
-    ::testing::Values(
-        make_tuple(&vp9_fht4x4_avx2, &vp9_iht4x4_16_add_c, 0),
-        make_tuple(&vp9_fht4x4_avx2, &vp9_iht4x4_16_add_c, 1),
-        make_tuple(&vp9_fht4x4_avx2, &vp9_iht4x4_16_add_c, 2),
-        make_tuple(&vp9_fht4x4_avx2, &vp9_iht4x4_16_add_c, 3)));
-#endif
-
 }  // namespace

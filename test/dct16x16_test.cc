@@ -606,29 +606,4 @@ INSTANTIATE_TEST_CASE_P(
     ::testing::Values(
         make_tuple(&vp9_fdct16x16_c, &vp9_idct16x16_256_add_ssse3, 0)));
 #endif
-
-#if HAVE_AVX2
-// TODO(jzern): these prototypes can be removed after the avx2 versions are
-// reenabled in vp9_rtcd_defs.pl.
-extern "C" {
-void vp9_fdct16x16_avx2(const int16_t *input, int16_t *output, int stride);
-void vp9_fht16x16_avx2(const int16_t *input, int16_t *output, int stride,
-                       int tx_type);
-}
-INSTANTIATE_TEST_CASE_P(
-    DISABLED_AVX2, Trans16x16DCT,
-    ::testing::Values(
-        make_tuple(&vp9_fdct16x16_avx2,
-                   &vp9_idct16x16_256_add_c, 0)));
-INSTANTIATE_TEST_CASE_P(
-    AVX2, Trans16x16HT,
-    ::testing::Values(
-        make_tuple(&vp9_fht16x16_avx2, &vp9_iht16x16_256_add_c, 3)));
-INSTANTIATE_TEST_CASE_P(
-    DISABLED_AVX2, Trans16x16HT,
-    ::testing::Values(
-        make_tuple(&vp9_fht16x16_avx2, &vp9_iht16x16_256_add_c, 0),
-        make_tuple(&vp9_fht16x16_avx2, &vp9_iht16x16_256_add_c, 1),
-        make_tuple(&vp9_fht16x16_avx2, &vp9_iht16x16_256_add_c, 2)));
-#endif
 }  // namespace
