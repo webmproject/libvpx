@@ -179,10 +179,4 @@ TEST_P(ExtendBorderTest, ExtendBorder) {
 
 INSTANTIATE_TEST_CASE_P(C, ExtendBorderTest,
                         ::testing::Values(vp8_yv12_extend_frame_borders_c));
-
-#if HAVE_NEON
-INSTANTIATE_TEST_CASE_P(DISABLED_NEON, ExtendBorderTest,
-                        ::testing::Values(vp8_yv12_extend_frame_borders_neon));
-#endif
-
 }  // namespace
