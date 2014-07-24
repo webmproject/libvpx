@@ -16,6 +16,24 @@
       "revId": "d68319cf688559fcc22b66106527217b131cfb48",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//edY\u003d",
+        "filename": "build/make/Makefile",
+        "patchSetId": 1
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1001311
+      },
+      "writtenOn": "2014-07-24T08:41:48Z",
+      "side": 1,
+      "message": "I can reproduce with test_libvpx.  The following is a part of log.\n\n[----------] 2 tests from VP9WorkerThreadTest\n[ RUN      ] VP9WorkerThreadTest.TestInterfaceAPI\n[       OK ] VP9WorkerThreadTest.TestInterfaceAPI (0 ms)\n[ RUN      ] VP9WorkerThreadTest.TestSerialInterface\n\nKilled by SIGSEGV\npid\u003d0x85fc ppid\u003d0x6526 tid\u003d0x0002 slot\u003d0x00b1 pri\u003d0x0200 mc\u003d0x0001\nF:\\LANG\\WORK\\LIBVPX\\LIBVPX.GIT\\TEST_LIBVPX.EXE\nTEST_LIB 0:0023cd84\ncs:eip\u003d005b:0024cd84      ss:esp\u003d0053:0860fa6c      ebp\u003d0860fbe4\n ds\u003d0053      es\u003d0053      fs\u003d150b      gs\u003d0000     efl\u003d00012202\neax\u003d0273436c ebx\u003d0860fb40 ecx\u003d027340ec edx\u003d0273422c edi\u003d027349ac esi\u003d00000140\n\nAnd my debugger says that the caused instruction is\n\n     PUNPCKLBW   MM6,MM2\n\nI hope this help you.",
+      "parentUuid": "AAAAdn//eeM\u003d",
+      "revId": "d68319cf688559fcc22b66106527217b131cfb48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
