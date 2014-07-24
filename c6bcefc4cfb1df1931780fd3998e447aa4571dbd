@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//efc\u003d",
+        "filename": "third_party/x86inc/x86inc.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-24T02:12:47Z",
+      "side": 1,
+      "message": "s/+m/m/",
+      "revId": "c6bcefc4cfb1df1931780fd3998e447aa4571dbd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
