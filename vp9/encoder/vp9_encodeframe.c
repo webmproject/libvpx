@@ -2015,17 +2015,10 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
             ctx->mic.mbmi.interp_filter;
       rd_pick_sb_modes(cpi, tile, mi_row, mi_col, &sum_rate, &sum_dist, subsize,
                        pc_tree->leaf_split[0], best_rd, 0);
-      if (sum_rate == INT_MAX) {
+      if (sum_rate == INT_MAX)
         sum_rd = INT64_MAX;
-      } else {
+      else
         sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
-        if (sum_rd < best_rd) {
-          update_state(cpi, pc_tree->leaf_split[0], mi_row, mi_col, subsize, 0);
-          encode_superblock(cpi, tp, 0, mi_row, mi_col, subsize,
-                            pc_tree->leaf_split[0]);
-          update_partition_context(xd, mi_row, mi_col, subsize, bsize);
-        }
-      }
     } else {
       for (i = 0; i < 4 && sum_rd < best_rd; ++i) {
       const int x_idx = (i & 1) * mi_step;
