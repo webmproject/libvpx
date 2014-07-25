@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//ePY\u003d",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 711,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-07-25T17:52:45Z",
+      "side": 1,
+      "message": "May remove these prototypes as stated above.",
+      "revId": "72034565034bd9323a5cf31f440b6ff57d2ff4f7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
