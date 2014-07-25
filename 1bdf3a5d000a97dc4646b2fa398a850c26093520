@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//eNY\u003d",
+        "filename": "test/vpx_scale_test.cc",
+        "patchSetId": 15
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-25T22:46:37Z",
+      "side": 1,
+      "message": "const YV12_BUFFER_CONFIG \u0026actual\n\nthis could also be a const member function",
+      "revId": "1bdf3a5d000a97dc4646b2fa398a850c26093520",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
