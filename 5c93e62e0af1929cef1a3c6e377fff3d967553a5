@@ -16,6 +16,24 @@
       "revId": "5c93e62e0af1929cef1a3c6e377fff3d967553a5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eTk\u003d",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 746,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-07-25T03:52:01Z",
+      "side": 1,
+      "message": "Yes. The aligned read in avx2 requires 32-byte alignment. Vp9 source buffer alignment is 32-byte for Y, and 16-byte for U and V.",
+      "parentUuid": "AAAAdn//eV4\u003d",
+      "revId": "5c93e62e0af1929cef1a3c6e377fff3d967553a5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
