@@ -671,7 +671,7 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   cpi->ext_refresh_frame_flags_pending = 0;
   cpi->ext_refresh_frame_context_pending = 0;
 
-#if CONFIG_DENOISING
+#if CONFIG_VP9_TEMPORAL_DENOISING
   if (cpi->oxcf.noise_sensitivity > 0) {
     vp9_denoiser_alloc(&(cpi->denoiser), cm->width, cm->height,
                        cm->subsampling_x, cm->subsampling_y,
@@ -865,7 +865,7 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
   cpi->mb.nmvsadcost_hp[1] = &cpi->mb.nmvsadcosts_hp[1][MV_MAX];
   cal_nmvsadcosts_hp(cpi->mb.nmvsadcost_hp);
 
-#if CONFIG_DENOISING
+#if CONFIG_VP9_TEMPORAL_DENOISING
 #ifdef OUTPUT_YUV_DENOISED
   yuv_denoised_file = fopen("denoised.yuv", "ab");
 #endif
@@ -1119,7 +1119,7 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
 #endif
   }
 
-#if CONFIG_DENOISING
+#if CONFIG_VP9_TEMPORAL_DENOISING
   if (cpi->oxcf.noise_sensitivity > 0) {
     vp9_denoiser_free(&(cpi->denoiser));
   }
@@ -1143,7 +1143,7 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
   vp9_remove_common(&cpi->common);
   vpx_free(cpi);
 
-#if CONFIG_DENOISING
+#if CONFIG_VP9_TEMPORAL_DENOISING
 #ifdef OUTPUT_YUV_DENOISED
   fclose(yuv_denoised_file);
 #endif
@@ -1357,7 +1357,7 @@ void vp9_write_yuv_frame(YV12_BUFFER_CONFIG *s, FILE *f) {
 }
 #endif
 
-#if CONFIG_DENOISING
+#if CONFIG_VP9_TEMPORAL_DENOISING
 #if defined(OUTPUT_YUV_DENOISED)
 // The denoiser buffer is allocated as a YUV 440 buffer. This function writes it
 // as YUV 420. We simply use the top-left pixels of the UV buffers, since we do
@@ -1604,7 +1604,7 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
     ref_cnt_fb(cm->frame_bufs,
                &cm->ref_frame_map[cpi->lst_fb_idx], cm->new_fb_idx);
   }
-#if CONFIG_DENOISING
+#if CONFIG_VP9_TEMPORAL_DENOISING
   if (cpi->oxcf.noise_sensitivity > 0) {
     vp9_denoiser_update_frame_info(&cpi->denoiser,
                                    *cpi->Source,
@@ -2241,7 +2241,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     encode_with_recode_loop(cpi, size, dest, q, bottom_index, top_index);
   }
 
-#if CONFIG_DENOISING
+#if CONFIG_VP9_TEMPORAL_DENOISING
 #ifdef OUTPUT_YUV_DENOISED
   if (cpi->oxcf.noise_sensitivity > 0) {
     vp9_write_yuv_frame_420(&cpi->denoiser.running_avg_y[INTRA_FRAME],
