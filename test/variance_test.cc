@@ -90,14 +90,14 @@ class VarianceTest
 
     rnd(ACMRandom::DeterministicSeed());
     block_size_ = width_ * height_;
-    src_ = new uint8_t[block_size_];
+    src_ = reinterpret_cast<uint8_t *>(vpx_memalign(16, block_size_));
     ref_ = new uint8_t[block_size_];
     ASSERT_TRUE(src_ != NULL);
     ASSERT_TRUE(ref_ != NULL);
   }
 
   virtual void TearDown() {
-    delete[] src_;
+    vpx_free(src_);
     delete[] ref_;
     libvpx_test::ClearSystemState();
   }
