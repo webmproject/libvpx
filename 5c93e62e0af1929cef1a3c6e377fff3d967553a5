@@ -34,6 +34,24 @@
       "revId": "5c93e62e0af1929cef1a3c6e377fff3d967553a5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eRg\u003d",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 746,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-25T07:09:06Z",
+      "side": 1,
+      "message": "I thought so, is there any reason not to widen it in the lib? if it improves performance that is.\nI\u0027m surprised this test didn\u0027t cause issues in 32-bit builds if any of the underlying code has this requirement",
+      "parentUuid": "AAAAdn//eTk\u003d",
+      "revId": "5c93e62e0af1929cef1a3c6e377fff3d967553a5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
