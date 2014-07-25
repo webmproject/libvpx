@@ -22,7 +22,6 @@
 #include "vp9/common/vp9_quant_common.h"
 #include "vp9/common/vp9_reconinter.h"  // vp9_setup_dst_planes()
 #include "vp9/common/vp9_systemdependent.h"
-
 #include "vp9/encoder/vp9_aq_variance.h"
 #include "vp9/encoder/vp9_block.h"
 #include "vp9/encoder/vp9_encodeframe.h"
@@ -56,7 +55,6 @@
 
 #define MIN_KF_BOOST        300
 #define MIN_GF_INTERVAL     4
-#define LONG_TERM_VBR_CORRECTION
 
 static void swap_yv12(YV12_BUFFER_CONFIG *a, YV12_BUFFER_CONFIG *b) {
   YV12_BUFFER_CONFIG temp = *a;
@@ -963,7 +961,7 @@ static int get_twopass_worst_quality(const VP9_COMP *cpi,
     const double err_per_mb = section_err / num_mbs;
     const double speed_term = 1.0 + 0.04 * oxcf->speed;
     const int target_norm_bits_per_mb = ((uint64_t)section_target_bandwidth <<
-                                            BPER_MB_NORMBITS) / num_mbs;
+                                         BPER_MB_NORMBITS) / num_mbs;
     int q;
     int is_svc_upper_layer = 0;
     if (is_spatial_svc(cpi) && cpi->svc.spatial_layer_id > 0)
@@ -1080,6 +1078,19 @@ static double get_prediction_decay_rate(const VP9_COMMON *cm,
 
   return MIN(second_ref_decay, next_frame->pcnt_inter);
 }
+
+// This function gives an estimate of how badly we believe the prediction
+// quality is decaying from frame to frame.
+static double get_zero_motion_factor(const VP9_COMMON *cm,
+                                     const FIRSTPASS_STATS *frame) {
+  const double sr_ratio = frame->coded_error /
+                          DOUBLE_DIVIDE_CHECK(frame->sr_coded_error);
+  const double zero_motion_pct = frame->pcnt_inter -
+                                 frame->pcnt_motion;
+
+  return MIN(sr_ratio, zero_motion_pct);
+}
+
 
 // Function to test for a condition where a complex transition is followed
 // by a static section. For example in slide shows where there is a fade
@@ -1604,11 +1615,9 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       decay_accumulator = decay_accumulator * loop_decay_rate;
 
       // Monitor for static sections.
-      if ((next_frame.pcnt_inter - next_frame.pcnt_motion) <
-          zero_motion_accumulator) {
-        zero_motion_accumulator = next_frame.pcnt_inter -
-                                      next_frame.pcnt_motion;
-      }
+      zero_motion_accumulator =
+        MIN(zero_motion_accumulator,
+            get_zero_motion_factor(&cpi->common, &next_frame));
 
       // Break clause to detect very still sections after motion. For example,
       // a static image after a fade or other transition.
@@ -1978,11 +1987,9 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       break;
 
     // Monitor for static sections.
-    if ((next_frame.pcnt_inter - next_frame.pcnt_motion) <
-            zero_motion_accumulator) {
-      zero_motion_accumulator = (next_frame.pcnt_inter -
-                                     next_frame.pcnt_motion);
-    }
+    zero_motion_accumulator =
+      MIN(zero_motion_accumulator,
+          get_zero_motion_factor(&cpi->common, &next_frame));
 
     // For the first few frames collect data to decide kf boost.
     if (i <= (rc->max_gf_interval * 2)) {
@@ -2139,11 +2146,11 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
     target_rate = twopass->gf_group.bit_allocation[twopass->gf_group.index];
     target_rate = vp9_rc_clamp_pframe_target_size(cpi, target_rate);
     rc->base_frame_target = target_rate;
-#ifdef LONG_TERM_VBR_CORRECTION
+
     // Correction to rate target based on prior over or under shoot.
     if (cpi->oxcf.rc_mode == VPX_VBR)
       vbr_rate_correction(&target_rate, rc->vbr_bits_off_target);
-#endif
+
     vp9_rc_set_frame_target(cpi, target_rate);
     cm->frame_type = INTER_FRAME;
 
@@ -2242,11 +2249,11 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
     target_rate = vp9_rc_clamp_pframe_target_size(cpi, target_rate);
 
   rc->base_frame_target = target_rate;
-#ifdef LONG_TERM_VBR_CORRECTION
+
   // Correction to rate target based on prior over or under shoot.
   if (cpi->oxcf.rc_mode == VPX_VBR)
     vbr_rate_correction(&target_rate, rc->vbr_bits_off_target);
-#endif
+
   vp9_rc_set_frame_target(cpi, target_rate);
 
   // Update the total stats remaining structure.
@@ -2256,45 +2263,19 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
 void vp9_twopass_postencode_update(VP9_COMP *cpi) {
   TWO_PASS *const twopass = &cpi->twopass;
   RATE_CONTROL *const rc = &cpi->rc;
-#ifdef LONG_TERM_VBR_CORRECTION
-  // In this experimental mode, the VBR correction is done exclusively through
-  // rc->vbr_bits_off_target. Based on the sign of this value, a limited %
-  // adjustment is made to the target rate of subsequent frames, to try and
-  // push it back towards 0. This mode is less likely to suffer from
-  // extreme behaviour at the end of a clip or group of frames.
+
+  // VBR correction is done through rc->vbr_bits_off_target. Based on the
+  // sign of this value, a limited % adjustment is made to the target rate
+  // of subsequent frames, to try and push it back towards 0. This method
+  // is designed to prevent extreme behaviour at the end of a clip
+  // or group of frames.
   const int bits_used = rc->base_frame_target;
   rc->vbr_bits_off_target += rc->base_frame_target - rc->projected_frame_size;
-#else
-  // In this mode, VBR correction is acheived by altering bits_left,
-  // kf_group_bits & gf_group_bits to reflect any deviation from the target
-  // rate in this frame. This alters the allocation of bits to the
-  // remaning frames in the group / clip.
-  //
-  // This method can give rise to unstable behaviour near the end of a clip
-  // or kf/gf group of frames where any accumulated error is corrected over an
-  // ever decreasing number of frames. Hence we change the balance of target
-  // vs. actual bitrate gradually as we progress towards the end of the
-  // sequence in order to mitigate this effect.
-  const double progress =
-      (double)(twopass->stats_in - twopass->stats_in_start) /
-              (twopass->stats_in_end - twopass->stats_in_start);
-  const int bits_used = (int)(progress * rc->this_frame_target +
-                             (1.0 - progress) * rc->projected_frame_size);
-#endif
 
   twopass->bits_left = MAX(twopass->bits_left - bits_used, 0);
 
-#ifdef LONG_TERM_VBR_CORRECTION
   if (cpi->common.frame_type != KEY_FRAME &&
       !vp9_is_upper_layer_key_frame(cpi)) {
-#else
-  if (cpi->common.frame_type == KEY_FRAME ||
-      vp9_is_upper_layer_key_frame(cpi)) {
-    // For key frames kf_group_bits already had the target bits subtracted out.
-    // So now update to the correct value based on the actual bits used.
-    twopass->kf_group_bits += rc->this_frame_target - bits_used;
-  } else {
-#endif
     twopass->kf_group_bits -= bits_used;
   }
   twopass->kf_group_bits = MAX(twopass->kf_group_bits, 0);
