@@ -662,6 +662,7 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
                                        struct vp9_read_bit_buffer *rb) {
   int width, height;
   int found = 0, i;
+  int has_valid_ref_frame = 0;
   for (i = 0; i < REFS_PER_FRAME; ++i) {
     if (vp9_rb_read_bit(rb)) {
       YV12_BUFFER_CONFIG *const buf = cm->frame_refs[i].buf;
@@ -675,15 +676,21 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
   if (!found)
     vp9_read_frame_size(rb, &width, &height);
 
-  // Check that each of the frames that this frame references has valid
-  // dimensions.
+  if (width <=0 || height <= 0)
+    vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+                       "Invalid frame size");
+
+  // Check to make sure at least one of frames that this frame references
+  // has valid dimensions.
   for (i = 0; i < REFS_PER_FRAME; ++i) {
     RefBuffer *const ref_frame = &cm->frame_refs[i];
-    if (!valid_ref_frame_size(ref_frame->buf->y_width, ref_frame->buf->y_height,
-                              width, height))
-      vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
-                         "Referenced frame has invalid size");
+    has_valid_ref_frame |= valid_ref_frame_size(ref_frame->buf->y_width,
+                                                ref_frame->buf->y_height,
+                                                width, height);
   }
+  if (!has_valid_ref_frame)
+    vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+                       "Referenced frame has invalid size");
 
   resize_context_buffers(cm, width, height);
   setup_display_size(cm, rb);
