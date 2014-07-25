@@ -69,6 +69,11 @@ ifeq ($(CONFIG_DECODE_PERF_TESTS)$(CONFIG_VP9_DECODER)$(CONFIG_WEBM_IO), \
 LIBVPX_TEST_SRCS-yes                   += decode_perf_test.cc
 endif
 
+# encode perf tests are vp9 only
+ifeq ($(CONFIG_ENCODE_PERF_TESTS)$(CONFIG_VP9_ENCODER), yesyes)
+LIBVPX_TEST_SRCS-yes += encode_perf_test.cc
+endif
+
 ##
 ## WHITE BOX TESTS
 ##
@@ -839,3 +844,15 @@ LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += \
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += \
   vp90-2-tos_1920x800_tile_1x4_fpm_2335kbps.webm
 endif  # CONFIG_DECODE_PERF_TESTS
+
+ifeq ($(CONFIG_ENCODE_PERF_TESTS),yes)
+LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += desktop_640_360_30.yuv
+LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += kirland_640_480_30.yuv
+LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += macmarcomoving_640_480_30.yuv
+LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += macmarcostationary_640_480_30.yuv
+LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += niklas_640_480_30.yuv
+LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += tacomanarrows_640_480_30.yuv
+LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += tacomasmallcameramovement_640_480_30.yuv
+LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += thaloundeskmtg_640_480_30.yuv
+LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += niklas_1280_720_30.yuv
+endif  # CONFIG_ENCODE_PERF_TESTS

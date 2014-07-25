@@ -25,6 +25,7 @@ Advanced options:
   ${toggle_docs}                  documentation
   ${toggle_unit_tests}            unit tests
   ${toggle_decode_perf_tests}     build decoder perf tests with unit tests
+  ${toggle_encode_perf_tests}     build encoder perf tests with unit tests
   --libc=PATH                     path to alternate libc
   --size-limit=WxH                max size to allow in the decoder
   --as={yasm|nasm|auto}           use specified assembler [auto, yasm preferred]
@@ -324,6 +325,7 @@ CONFIG_LIST="
     webm_io
     libyuv
     decode_perf_tests
+    encode_perf_tests
     multi_res_encoding
     temporal_denoising
     experimental
@@ -380,6 +382,7 @@ CMDLINE_SELECT="
     webm_io
     libyuv
     decode_perf_tests
+    encode_perf_tests
     multi_res_encoding
     temporal_denoising
     experimental

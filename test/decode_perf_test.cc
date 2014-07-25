@@ -92,6 +92,7 @@ TEST_P(DecodePerfTest, PerfTest) {
   const double fps = double(frames) / elapsed_secs;
 
   printf("{\n");
+  printf("\t\"type\" : \"decode_perf_test\",\n");
   printf("\t\"version\" : \"%s\",\n", VERSION_STRING_NOSP);
   printf("\t\"videoName\" : \"%s\",\n", video_name);
   printf("\t\"threadCount\" : %u,\n", threads);
