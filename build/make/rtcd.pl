@@ -3,7 +3,7 @@
 no strict 'refs';
 use warnings;
 use Getopt::Long;
-Getopt::Long::Configure("auto_help");
+Getopt::Long::Configure("auto_help") if $Getopt::Long::VERSION > 2.32;
 
 my %ALL_FUNCS = ();
 my @ALL_ARCHS;
