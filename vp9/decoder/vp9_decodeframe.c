@@ -627,9 +627,13 @@ static void resize_context_buffers(VP9_COMMON *cm, int width, int height) {
                        "Width and height beyond allowed size.");
 #endif
   if (cm->width != width || cm->height != height) {
+    const int aligned_width = ALIGN_POWER_OF_TWO(width, MI_SIZE_LOG2);
+    const int aligned_height = ALIGN_POWER_OF_TWO(height, MI_SIZE_LOG2);
+
     // Change in frame size (assumption: color format does not change).
     if (cm->width == 0 || cm->height == 0 ||
-        width * height > cm->width * cm->height) {
+        aligned_width > cm->width ||
+        aligned_width * aligned_height > cm->width * cm->height) {
       if (vp9_alloc_context_buffers(cm, width, height))
         vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                            "Failed to allocate frame buffers");
