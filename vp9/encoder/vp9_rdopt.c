@@ -3259,13 +3259,10 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
         vp9_is_scaled(&cm->frame_refs[second_ref_frame - 1].sf))
       continue;
 
-    if (comp_pred) {
-      mode_excluded = mode_excluded ? mode_excluded
-                                    : cm->reference_mode == SINGLE_REFERENCE;
-    } else if (ref_frame != INTRA_FRAME) {
-      mode_excluded = mode_excluded ? mode_excluded
-                                    : cm->reference_mode == COMPOUND_REFERENCE;
-    }
+    if (comp_pred)
+      mode_excluded = cm->reference_mode == SINGLE_REFERENCE;
+    else if (ref_frame != INTRA_FRAME)
+      mode_excluded = cm->reference_mode == COMPOUND_REFERENCE;
 
     // If the segment reference frame feature is enabled....
     // then do nothing if the current ref frame is not allowed..
