@@ -52,6 +52,24 @@
       "revId": "5c93e62e0af1929cef1a3c6e377fff3d967553a5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eQE\u003d",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 746,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-07-25T16:58:23Z",
+      "side": 1,
+      "message": "To ensure 32-byte alignment for U and V, Y alignment has to be 64-byte, which means the stride has to be 64-byte aligned, causing more overhead. Anyway, most of these motion search related functions are only used in Y plane, which is already 32-byte aligned. So it shouldn\u0027t cause much performance issue. I checked the variance assembly code we have and they didn\u0027t require any alignment, which is why the test didn\u0027t fail before.",
+      "parentUuid": "AAAAdn//eRg\u003d",
+      "revId": "5c93e62e0af1929cef1a3c6e377fff3d967553a5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
