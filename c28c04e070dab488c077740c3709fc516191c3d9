@@ -16,6 +16,24 @@
       "revId": "c28c04e070dab488c077740c3709fc516191c3d9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eLQ\u003d",
+        "filename": "test/vpx_scale_test.cc",
+        "patchSetId": 16
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-07-26T03:07:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//eLk\u003d",
+      "revId": "c28c04e070dab488c077740c3709fc516191c3d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
