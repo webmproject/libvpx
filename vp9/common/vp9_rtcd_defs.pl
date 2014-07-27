@@ -305,15 +305,15 @@ specialize qw/vp9_convolve_avg neon_asm dspr2/, "$sse2_x86inc";
 $vp9_convolve_avg_neon_asm=vp9_convolve_avg_neon;
 
 add_proto qw/void vp9_convolve8/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h";
-specialize qw/vp9_convolve8 sse2 ssse3 neon_asm dspr2/;
+specialize qw/vp9_convolve8 sse2 ssse3 neon_asm dspr2 avx2/;
 $vp9_convolve8_neon_asm=vp9_convolve8_neon;
 
 add_proto qw/void vp9_convolve8_horiz/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h";
-specialize qw/vp9_convolve8_horiz sse2 ssse3 neon_asm dspr2/;
+specialize qw/vp9_convolve8_horiz sse2 ssse3 neon_asm dspr2 avx2/;
 $vp9_convolve8_horiz_neon_asm=vp9_convolve8_horiz_neon;
 
 add_proto qw/void vp9_convolve8_vert/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h";
-specialize qw/vp9_convolve8_vert sse2 ssse3 neon_asm dspr2/;
+specialize qw/vp9_convolve8_vert sse2 ssse3 neon_asm dspr2 avx2/;
 $vp9_convolve8_vert_neon_asm=vp9_convolve8_vert_neon;
 
 add_proto qw/void vp9_convolve8_avg/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h";
