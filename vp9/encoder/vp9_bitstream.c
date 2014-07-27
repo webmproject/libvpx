@@ -1208,8 +1208,6 @@ void vp9_pack_bitstream(VP9_COMP *cpi, uint8_t *dest, size_t *size) {
   uncompressed_hdr_size = vp9_rb_bytes_written(&wb);
   data += uncompressed_hdr_size;
 
-  vp9_compute_update_table();
-
   vp9_clear_system_state();
 
   first_part_size = write_compressed_header(cpi, data);

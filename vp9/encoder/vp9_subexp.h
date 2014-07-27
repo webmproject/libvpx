@@ -16,9 +16,6 @@
 extern "C" {
 #endif
 
-void vp9_compute_update_table();
-
-
 void vp9_write_prob_diff_update(vp9_writer *w,
                                 vp9_prob newp, vp9_prob oldp);
 
