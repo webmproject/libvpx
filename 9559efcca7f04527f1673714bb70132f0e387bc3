@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//eJw\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_dct_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-07-27T21:01:49Z",
+      "side": 1,
+      "message": "Why are you combing the results this way and transposing them later?\n\nIt looks like you can just combine them ab, cd, ... Same with stage 4. Then just remove the transpose code.",
+      "revId": "9559efcca7f04527f1673714bb70132f0e387bc3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
