@@ -1,0 +1,276 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//eD4\u003d",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 583,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-28T22:11:44Z",
+      "side": 1,
+      "message": "Remove commented out lines.",
+      "revId": "13b2335f54ea3e5da2bd692242c4d252b68f157d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eDw\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-28T22:11:44Z",
+      "side": 1,
+      "message": "Style guide states that \"related\" header file should go at the top, i.e. \"denoising.h\" then \u003climits.h\u003e then the rest (which should be in alphabetical order but clearly aren\u0027t!)..",
+      "revId": "13b2335f54ea3e5da2bd692242c4d252b68f157d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eDs\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 377,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-28T22:11:44Z",
+      "side": 1,
+      "message": "Move this function implementation to above the function above it from where it is called to remove the need for a forward declaration.",
+      "revId": "13b2335f54ea3e5da2bd692242c4d252b68f157d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eDk\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 387,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-28T22:11:44Z",
+      "side": 1,
+      "message": "Implement this as an if...else. As it stands the vars will be set twice if aggressive_mode is set.",
+      "revId": "13b2335f54ea3e5da2bd692242c4d252b68f157d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eDc\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 450,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-28T22:11:44Z",
+      "side": 1,
+      "message": "const",
+      "revId": "13b2335f54ea3e5da2bd692242c4d252b68f157d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eEA\u003d",
+        "filename": "vp8/encoder/denoising.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-28T22:11:44Z",
+      "side": 1,
+      "message": "\"Note that...\" ?",
+      "revId": "13b2335f54ea3e5da2bd692242c4d252b68f157d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eD8\u003d",
+        "filename": "vp8/encoder/denoising.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-28T22:11:44Z",
+      "side": 1,
+      "message": "denoise_params would be more descriptive maybe?",
+      "revId": "13b2335f54ea3e5da2bd692242c4d252b68f157d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eDQ\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 525,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-28T22:11:44Z",
+      "side": 1,
+      "message": "remove multiple spaces",
+      "revId": "13b2335f54ea3e5da2bd692242c4d252b68f157d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eDI\u003d",
+        "filename": "vp8/encoder/ethreading.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-28T22:11:44Z",
+      "side": 1,
+      "message": "remove multiple spaces. Also, this code is exactly the same as that in encodeframe.c, could we pull it out as a common function?",
+      "revId": "13b2335f54ea3e5da2bd692242c4d252b68f157d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eDE\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 618,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-28T22:11:44Z",
+      "side": 1,
+      "message": "cpi-\u003edenoiser.aggressive_mode !\u003d 0 \u0026\u0026\nis clearer.",
+      "revId": "13b2335f54ea3e5da2bd692242c4d252b68f157d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eC8\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 624,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-28T22:11:44Z",
+      "side": 1,
+      "message": "\"This is to avoid \"dot\" artifacts that can occur from repeated\"",
+      "revId": "13b2335f54ea3e5da2bd692242c4d252b68f157d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eC0\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 631,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-28T22:11:44Z",
+      "side": 1,
+      "message": "alignment",
+      "revId": "13b2335f54ea3e5da2bd692242c4d252b68f157d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eCs\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 3509,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-28T22:11:44Z",
+      "side": 1,
+      "message": "you don\u0027t need the brackets",
+      "revId": "13b2335f54ea3e5da2bd692242c4d252b68f157d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eCo\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 4027,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-28T22:11:44Z",
+      "side": 1,
+      "message": "consec_zero_last counter.",
+      "revId": "13b2335f54ea3e5da2bd692242c4d252b68f157d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eCk\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 4029,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-28T22:11:44Z",
+      "side": 1,
+      "message": "you don\u0027t need the brackets.",
+      "revId": "13b2335f54ea3e5da2bd692242c4d252b68f157d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eCg\u003d",
+        "filename": "vp8/encoder/onyx_int.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 514,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-28T22:11:44Z",
+      "side": 1,
+      "message": "Count of....uses ZEROMV_LAST.\"",
+      "revId": "13b2335f54ea3e5da2bd692242c4d252b68f157d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
