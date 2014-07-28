@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//eCY\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_dct_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2014-07-28T22:21:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//eDo\u003d",
+      "revId": "9559efcca7f04527f1673714bb70132f0e387bc3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//eDg\u003d",
         "filename": "vp9/encoder/arm/neon/vp9_dct_neon.c",
         "patchSetId": 2
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//eCU\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_dct_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2014-07-28T22:21:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//eDg\u003d",
+      "revId": "9559efcca7f04527f1673714bb70132f0e387bc3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//eDM\u003d",
         "filename": "vp9/encoder/arm/neon/vp9_dct_neon.c",
         "patchSetId": 2
@@ -47,6 +83,24 @@
       "writtenOn": "2014-07-28T22:07:41Z",
       "side": 1,
       "message": "const on v_s* variables.",
+      "revId": "9559efcca7f04527f1673714bb70132f0e387bc3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eCQ\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_dct_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2014-07-28T22:21:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//eDM\u003d",
       "revId": "9559efcca7f04527f1673714bb70132f0e387bc3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -123,6 +177,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//eCM\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_dct_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2014-07-28T22:21:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//eDA\u003d",
+      "revId": "9559efcca7f04527f1673714bb70132f0e387bc3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//eC4\u003d",
         "filename": "vp9/encoder/arm/neon/vp9_dct_neon.c",
         "patchSetId": 2
@@ -134,6 +206,24 @@
       "writtenOn": "2014-07-28T22:07:41Z",
       "side": 1,
       "message": "nit: clean up whitespace before division",
+      "revId": "9559efcca7f04527f1673714bb70132f0e387bc3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eCI\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_dct_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2014-07-28T22:21:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//eC4\u003d",
       "revId": "9559efcca7f04527f1673714bb70132f0e387bc3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
