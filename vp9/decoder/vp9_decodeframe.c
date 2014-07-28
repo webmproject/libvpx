@@ -688,8 +688,8 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
   // has valid dimensions.
   for (i = 0; i < REFS_PER_FRAME; ++i) {
     RefBuffer *const ref_frame = &cm->frame_refs[i];
-    has_valid_ref_frame |= valid_ref_frame_size(ref_frame->buf->y_width,
-                                                ref_frame->buf->y_height,
+    has_valid_ref_frame |= valid_ref_frame_size(ref_frame->buf->y_crop_width,
+                                                ref_frame->buf->y_crop_height,
                                                 width, height);
   }
   if (!has_valid_ref_frame)
