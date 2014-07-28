@@ -757,10 +757,10 @@ add_proto qw/void vp9_fdct4x4/, "const int16_t *input, int16_t *output, int stri
 specialize qw/vp9_fdct4x4 sse2/;
 
 add_proto qw/void vp9_fdct8x8_1/, "const int16_t *input, int16_t *output, int stride";
-specialize qw/vp9_fdct8x8_1 sse2/;
+specialize qw/vp9_fdct8x8_1 sse2 neon/;
 
 add_proto qw/void vp9_fdct8x8/, "const int16_t *input, int16_t *output, int stride";
-specialize qw/vp9_fdct8x8 sse2/, "$ssse3_x86_64";
+specialize qw/vp9_fdct8x8 sse2 neon/, "$ssse3_x86_64";
 
 add_proto qw/void vp9_fdct16x16_1/, "const int16_t *input, int16_t *output, int stride";
 specialize qw/vp9_fdct16x16_1 sse2/;
