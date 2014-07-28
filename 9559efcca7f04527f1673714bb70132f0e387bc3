@@ -2,6 +2,57 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAdn//eDo\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_dct_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-07-28T22:07:41Z",
+      "side": 1,
+      "message": "nit:align",
+      "revId": "9559efcca7f04527f1673714bb70132f0e387bc3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eDg\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_dct_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-07-28T22:07:41Z",
+      "side": 1,
+      "message": "nit: prefer preincrement",
+      "revId": "9559efcca7f04527f1673714bb70132f0e387bc3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eDM\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_dct_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-07-28T22:07:41Z",
+      "side": 1,
+      "message": "const on v_s* variables.",
+      "revId": "9559efcca7f04527f1673714bb70132f0e387bc3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//eJw\u003d",
         "filename": "vp9/encoder/arm/neon/vp9_dct_neon.c",
         "patchSetId": 2
@@ -49,6 +100,40 @@
       "side": 1,
       "message": "Got it. I thought it was 00, 01, 02, going across, but I see you need it going down.",
       "parentUuid": "AAAAdn//eIo\u003d",
+      "revId": "9559efcca7f04527f1673714bb70132f0e387bc3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eDA\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_dct_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-07-28T22:07:41Z",
+      "side": 1,
+      "message": "nit: 2 spaces before comment",
+      "revId": "9559efcca7f04527f1673714bb70132f0e387bc3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eC4\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_dct_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-07-28T22:07:41Z",
+      "side": 1,
+      "message": "nit: clean up whitespace before division",
       "revId": "9559efcca7f04527f1673714bb70132f0e387bc3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
