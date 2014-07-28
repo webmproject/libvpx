@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//eFs\u003d",
+        "filename": "build/make/Makefile",
+        "patchSetId": 2
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-28T18:57:52Z",
+      "side": 1,
+      "message": "seems like this should be applied to all modules that might call an sse function. for now how about setting checking/setting cflags in configure only when target\u003dx86-os2-gcc?\n\ndoes this only occur with gcc-4.9 or earlier versions as well?",
+      "revId": "9b01cd8e8485a1d7c3bff90eb6a6394a55a859ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
