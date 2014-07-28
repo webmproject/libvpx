@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//eBg\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_variance_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-07-28T22:43:22Z",
+      "side": 1,
+      "message": "nit: extra space between int and a_stride.",
+      "revId": "dee4e24c7196a00978379ac918d40406d4f213ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eBc\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_variance_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-07-28T22:43:22Z",
+      "side": 1,
+      "message": "same for w and h",
+      "revId": "dee4e24c7196a00978379ac918d40406d4f213ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eBU\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_variance_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-07-28T22:43:22Z",
+      "side": 1,
+      "message": "preincrement",
+      "revId": "dee4e24c7196a00978379ac918d40406d4f213ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eBM\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_variance_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-07-28T22:43:22Z",
+      "side": 1,
+      "message": "nit: extra ws",
+      "revId": "dee4e24c7196a00978379ac918d40406d4f213ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eBA\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_variance_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-07-28T22:43:22Z",
+      "side": 1,
+      "message": "nit: extra ws",
+      "revId": "dee4e24c7196a00978379ac918d40406d4f213ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eA8\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_variance_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-07-28T22:43:22Z",
+      "side": 1,
+      "message": "nit: extra ws",
+      "revId": "dee4e24c7196a00978379ac918d40406d4f213ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eA4\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_variance_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-07-28T22:43:22Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "dee4e24c7196a00978379ac918d40406d4f213ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eA0\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_variance_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-07-28T22:43:22Z",
+      "side": 1,
+      "message": "nit: alignment",
+      "revId": "dee4e24c7196a00978379ac918d40406d4f213ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//eAw\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_variance_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-07-28T22:43:22Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "dee4e24c7196a00978379ac918d40406d4f213ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
