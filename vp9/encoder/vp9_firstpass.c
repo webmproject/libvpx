@@ -599,7 +599,8 @@ void vp9_first_pass(VP9_COMP *cpi) {
 
 #if CONFIG_FP_MB_STATS
       if (cpi->use_fp_mb_stats) {
-        // TODO(pengchong): store some related block statistics here
+        // initialization
+        cpi->twopass.frame_mb_stats_buf[mb_row * cm->mb_cols + mb_col] = 0;
       }
 #endif
 
@@ -700,6 +701,33 @@ void vp9_first_pass(VP9_COMP *cpi) {
         // Start by assuming that intra mode is best.
         best_ref_mv.as_int = 0;
 
+#if CONFIG_FP_MB_STATS
+        if (cpi->use_fp_mb_stats) {
+          // intra predication statistics
+          cpi->twopass.frame_mb_stats_buf[mb_row * cm->mb_cols + mb_col] = 0;
+          cpi->twopass.frame_mb_stats_buf[mb_row * cm->mb_cols + mb_col] |=
+              FPMB_DCINTRA_MASK;
+          cpi->twopass.frame_mb_stats_buf[mb_row * cm->mb_cols + mb_col] &=
+              (~FPMB_NONZERO_MOTION_MASK);
+          if (this_error > FPMB_ERROR_LEVEL4_TH) {
+            cpi->twopass.frame_mb_stats_buf[mb_row * cm->mb_cols + mb_col] |=
+                FPMB_ERROR_LEVEL4_MASK;
+          } else if (this_error > FPMB_ERROR_LEVEL3_TH) {
+            cpi->twopass.frame_mb_stats_buf[mb_row * cm->mb_cols + mb_col] |=
+                FPMB_ERROR_LEVEL3_MASK;
+          } else if (this_error > FPMB_ERROR_LEVEL2_TH) {
+            cpi->twopass.frame_mb_stats_buf[mb_row * cm->mb_cols + mb_col] |=
+                FPMB_ERROR_LEVEL2_MASK;
+          } else if (this_error > FPMB_ERROR_LEVEL1_TH) {
+            cpi->twopass.frame_mb_stats_buf[mb_row * cm->mb_cols + mb_col] |=
+                FPMB_ERROR_LEVEL1_MASK;
+          } else {
+            cpi->twopass.frame_mb_stats_buf[mb_row * cm->mb_cols + mb_col] |=
+                FPMB_ERROR_LEVEL0_MASK;
+          }
+        }
+#endif
+
         if (motion_error <= this_error) {
           // Keep a count of cases where the inter and intra were very close
           // and very low. This helps with scene cut detection for example in
@@ -730,12 +758,40 @@ void vp9_first_pass(VP9_COMP *cpi) {
 
 #if CONFIG_FP_MB_STATS
           if (cpi->use_fp_mb_stats) {
-            // TODO(pengchong): save some related block statistics here
+            // inter predication statistics
+            cpi->twopass.frame_mb_stats_buf[mb_row * cm->mb_cols + mb_col] = 0;
+            cpi->twopass.frame_mb_stats_buf[mb_row * cm->mb_cols + mb_col] &=
+                (~FPMB_DCINTRA_MASK);
+            cpi->twopass.frame_mb_stats_buf[mb_row * cm->mb_cols + mb_col] &=
+                (~FPMB_NONZERO_MOTION_MASK);
+            if (this_error > FPMB_ERROR_LEVEL4_TH) {
+              cpi->twopass.frame_mb_stats_buf[mb_row * cm->mb_cols + mb_col] |=
+                  FPMB_ERROR_LEVEL4_MASK;
+            } else if (this_error > FPMB_ERROR_LEVEL3_TH) {
+              cpi->twopass.frame_mb_stats_buf[mb_row * cm->mb_cols + mb_col] |=
+                  FPMB_ERROR_LEVEL3_MASK;
+            } else if (this_error > FPMB_ERROR_LEVEL2_TH) {
+              cpi->twopass.frame_mb_stats_buf[mb_row * cm->mb_cols + mb_col] |=
+                  FPMB_ERROR_LEVEL2_MASK;
+            } else if (this_error > FPMB_ERROR_LEVEL1_TH) {
+              cpi->twopass.frame_mb_stats_buf[mb_row * cm->mb_cols + mb_col] |=
+                  FPMB_ERROR_LEVEL1_MASK;
+            } else {
+              cpi->twopass.frame_mb_stats_buf[mb_row * cm->mb_cols + mb_col] |=
+                  FPMB_ERROR_LEVEL0_MASK;
+            }
           }
 #endif
 
           if (mv.as_int) {
             ++mvcount;
+
+#if CONFIG_FP_MB_STATS
+            if (cpi->use_fp_mb_stats) {
+              cpi->twopass.frame_mb_stats_buf[mb_row * cm->mb_cols + mb_col] |=
+                  FPMB_NONZERO_MOTION_MASK;
+            }
+#endif
 
             // Non-zero vector, was it different from the last non zero vector?
             if (mv.as_int != lastmv_as_int)
