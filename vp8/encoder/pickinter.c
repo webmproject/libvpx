@@ -40,7 +40,6 @@ extern const MB_PREDICTION_MODE vp8_mode_order[MAX_MODES];
 
 extern int vp8_cost_mv_ref(MB_PREDICTION_MODE m, const int near_mv_ref_ct[4]);
 
-
 int vp8_skip_fractional_mv_step(MACROBLOCK *mb, BLOCK *b, BLOCKD *d,
                                 int_mv *bestmv, int_mv *ref_mv,
                                 int error_per_bit,
@@ -694,6 +693,13 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
      */
     calculate_zeromv_rd_adjustment(cpi, x, &rd_adjustment);
 
+#if CONFIG_TEMPORAL_DENOISING
+    if (cpi->oxcf.noise_sensitivity) {
+      rd_adjustment = (int)(rd_adjustment *
+          cpi->denoiser.denoise_pars.pickmode_mv_bias / 100);
+    }
+#endif
+
     /* if we encode a new mv this is important
      * find the best new motion vector
      */
@@ -1168,7 +1174,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 #if CONFIG_TEMPORAL_DENOISING
     if (cpi->oxcf.noise_sensitivity)
     {
-        int uv_denoise = (cpi->oxcf.noise_sensitivity == 2) ? 1 : 0;
+        int uv_denoise = (cpi->oxcf.noise_sensitivity >= 2) ? 1 : 0;
         int block_index = mb_row * cpi->common.mb_cols + mb_col;
         if (x->best_sse_inter_mode == DC_PRED)
         {

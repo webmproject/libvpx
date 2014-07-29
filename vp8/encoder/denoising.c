@@ -8,6 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <limits.h>
+
 #include "denoising.h"
 
 #include "vp8/common/reconinter.h"
@@ -333,12 +335,33 @@ int vp8_denoiser_filter_uv_c(unsigned char *mc_running_avg_uv,
     return FILTER_BLOCK;
 }
 
+void vp8_denoiser_set_parameters(VP8_DENOISER *denoiser) {
+  if (!denoiser->aggressive_mode) {
+    denoiser->denoise_pars.scale_sse_thresh = 1;
+    denoiser->denoise_pars.scale_motion_thresh = 8;
+    denoiser->denoise_pars.scale_increase_filter = 0;
+    denoiser->denoise_pars.denoise_mv_bias = 95;
+    denoiser->denoise_pars.pickmode_mv_bias = 100;
+    denoiser->denoise_pars.qp_thresh = 0;
+    denoiser->denoise_pars.consec_zerolast = UINT_MAX;
+  } else {
+    denoiser->denoise_pars.scale_sse_thresh = 2;
+    denoiser->denoise_pars.scale_motion_thresh = 16;
+    denoiser->denoise_pars.scale_increase_filter = 1;
+    denoiser->denoise_pars.denoise_mv_bias = 60;
+    denoiser->denoise_pars.pickmode_mv_bias = 60;
+    denoiser->denoise_pars.qp_thresh = 100;
+    denoiser->denoise_pars.consec_zerolast = 10;
+  }
+}
+
 int vp8_denoiser_allocate(VP8_DENOISER *denoiser, int width, int height,
-                          int num_mb_rows, int num_mb_cols)
+                          int num_mb_rows, int num_mb_cols, int mode)
 {
     int i;
     assert(denoiser);
     denoiser->num_mb_cols = num_mb_cols;
+    denoiser->aggressive_mode = mode;
 
     for (i = 0; i < MAX_REF_FRAMES; i++)
     {
@@ -369,9 +392,10 @@ int vp8_denoiser_allocate(VP8_DENOISER *denoiser, int width, int height,
 
     denoiser->denoise_state = vpx_calloc((num_mb_rows * num_mb_cols), 1);
     vpx_memset(denoiser->denoise_state, 0, (num_mb_rows * num_mb_cols));
-
+    vp8_denoiser_set_parameters(denoiser);
     return 0;
 }
+
 
 void vp8_denoiser_free(VP8_DENOISER *denoiser)
 {
@@ -401,6 +425,7 @@ void vp8_denoiser_denoise_mb(VP8_DENOISER *denoiser,
 {
     int mv_row;
     int mv_col;
+    unsigned int motion_threshold;
     unsigned int motion_magnitude2;
     unsigned int sse_thresh;
     int sse_diff_thresh = 0;
@@ -424,7 +449,7 @@ void vp8_denoiser_denoise_mb(VP8_DENOISER *denoiser,
         MB_MODE_INFO *mbmi = &filter_xd->mode_info_context->mbmi;
         int sse_diff = 0;
         // Bias on zero motion vector sse.
-        int zero_bias = 95;
+        const int zero_bias = denoiser->denoise_pars.denoise_mv_bias;
         zero_mv_sse = (unsigned int)((int64_t)zero_mv_sse * zero_bias / 100);
         sse_diff = zero_mv_sse - best_sse;
 
@@ -502,14 +527,19 @@ void vp8_denoiser_denoise_mb(VP8_DENOISER *denoiser,
     mv_row = x->best_sse_mv.as_mv.row;
     mv_col = x->best_sse_mv.as_mv.col;
     motion_magnitude2 = mv_row * mv_row + mv_col * mv_col;
-    sse_thresh = SSE_THRESHOLD;
-    if (x->increase_denoising) sse_thresh = SSE_THRESHOLD_HIGH;
+    motion_threshold = denoiser->denoise_pars.scale_motion_thresh *
+        NOISE_MOTION_THRESHOLD;
 
-    if (best_sse > sse_thresh || motion_magnitude2
-           > 8 * NOISE_MOTION_THRESHOLD)
-    {
-        decision = COPY_BLOCK;
-    }
+    if (motion_magnitude2 <
+        denoiser->denoise_pars.scale_increase_filter * NOISE_MOTION_THRESHOLD)
+      x->increase_denoising = 1;
+
+    sse_thresh = denoiser->denoise_pars.scale_sse_thresh * SSE_THRESHOLD;
+    if (x->increase_denoising)
+      sse_thresh = denoiser->denoise_pars.scale_sse_thresh * SSE_THRESHOLD_HIGH;
+
+    if (best_sse > sse_thresh || motion_magnitude2 > motion_threshold)
+      decision = COPY_BLOCK;
 
     if (decision == FILTER_BLOCK)
     {
