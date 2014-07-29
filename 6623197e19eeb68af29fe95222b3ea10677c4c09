@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//d7E\u003d",
+        "filename": "test/frame_size_tests.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-29T16:41:09Z",
+      "side": 1,
+      "message": "remove multiple spaces.",
+      "revId": "6623197e19eeb68af29fe95222b3ea10677c4c09",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//d7A\u003d",
+        "filename": "test/frame_size_tests.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-29T16:41:09Z",
+      "side": 1,
+      "message": "You could mention (a) that the ref buffers are ~29Mbit since they have padding, and (b) this assumes 4:2:0 format, 4:4:4 would be worse.",
+      "revId": "6623197e19eeb68af29fe95222b3ea10677c4c09",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
