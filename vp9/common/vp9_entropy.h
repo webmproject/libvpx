@@ -59,7 +59,7 @@ DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat3_prob[3]);
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat4_prob[4]);
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat5_prob[5]);
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat6_prob[14]);
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_QUANT
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat1_prob_high10[1]);
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat2_prob_high10[2]);
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat3_prob_high10[3]);
@@ -86,7 +86,7 @@ typedef struct {
 
 // indexed by token value
 extern const vp9_extra_bit vp9_extra_bits[ENTROPY_TOKENS];
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_QUANT
 extern const vp9_extra_bit vp9_extra_bits_high10[ENTROPY_TOKENS];
 extern const vp9_extra_bit vp9_extra_bits_high12[ENTROPY_TOKENS];
 #endif

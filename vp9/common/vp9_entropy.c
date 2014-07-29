@@ -23,7 +23,7 @@ const vp9_prob vp9_cat5_prob[] = { 180, 157, 141, 134, 130 };
 const vp9_prob vp9_cat6_prob[] = {
   254, 254, 254, 252, 249, 243, 230, 196, 177, 153, 140, 133, 130, 129
 };
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_QUANT
 const vp9_prob vp9_cat1_prob_high10[] = { 159 };
 const vp9_prob vp9_cat2_prob_high10[] = { 165, 145 };
 const vp9_prob vp9_cat3_prob_high10[] = { 173, 148, 140 };

@@ -514,7 +514,7 @@ using std::tr1::make_tuple;
 INSTANTIATE_TEST_CASE_P(
     C, FwdTrans8x8DCT,
     ::testing::Values(
-#if CONFIG_HIGH_TRANSFORMS && CONFIG_VP9_HIGH
+#if CONFIG_VP9_HIGH
         make_tuple(&vp9_fdct8x8_c, &vp9_idct8x8_64_add_c, 0, 8),
         make_tuple(&vp9_high_fdct8x8_c, &idct8x8_10, 0, 10),
         make_tuple(&vp9_high_fdct8x8_c, &idct8x8_12, 0, 12)));
@@ -524,7 +524,7 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     C, FwdTrans8x8HT,
     ::testing::Values(
-#if CONFIG_HIGH_TRANSFORMS && CONFIG_VP9_HIGH
+#if CONFIG_VP9_HIGH
         make_tuple(&vp9_fht8x8_c, &vp9_iht8x8_64_add_c, 0, 8),
         make_tuple(&vp9_fht8x8_c, &vp9_iht8x8_64_add_c, 1, 8),
         make_tuple(&vp9_fht8x8_c, &vp9_iht8x8_64_add_c, 2, 8),
@@ -544,7 +544,7 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_fht8x8_c, &vp9_iht8x8_64_add_c, 3, 8)));
 #endif
 
-#if HAVE_NEON_ASM && !CONFIG_HIGH_TRANSFORMS
+#if HAVE_NEON_ASM && !CONFIG_VP9_HIGH
 INSTANTIATE_TEST_CASE_P(
     NEON, FwdTrans8x8DCT,
     ::testing::Values(
@@ -558,7 +558,7 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_fht8x8_c, &vp9_iht8x8_64_add_neon, 3, 8)));
 #endif
 
-#if HAVE_SSE2 && !CONFIG_HIGH_TRANSFORMS
+#if HAVE_SSE2 && !CONFIG_VP9_HIGH
 INSTANTIATE_TEST_CASE_P(
     SSE2, FwdTrans8x8DCT,
     ::testing::Values(
@@ -572,14 +572,14 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_fht8x8_sse2, &vp9_iht8x8_64_add_sse2, 3, 8)));
 #endif
 
-#if HAVE_SSSE3 && ARCH_X86_64 && !CONFIG_HIGH_TRANSFORMS
+#if HAVE_SSSE3 && ARCH_X86_64 && !CONFIG_VP9_HIGH
 INSTANTIATE_TEST_CASE_P(
     SSSE3, FwdTrans8x8DCT,
     ::testing::Values(
         make_tuple(&vp9_fdct8x8_ssse3, &vp9_idct8x8_64_add_ssse3, 0, 8)));
 #endif
 
-#if HAVE_AVX2 && !CONFIG_HIGH_TRANSFORMS
+#if HAVE_AVX2 && !CONFIG_VP9_HIGH
 INSTANTIATE_TEST_CASE_P(
     AVX2, FwdTrans8x8DCT,
     ::testing::Values(

@@ -548,7 +548,7 @@ static void invert_quant(int16_t *quant, int16_t *shift, int d) {
 
 static int get_qzbin_factor(int q, vpx_bit_depth_t bit_depth) {
   int quant = vp9_dc_quant(q, 0, bit_depth);
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH
   switch (bit_depth) {
     case VPX_BITS_8:
       return q == 0 ? 64 : (quant < 148 ? 84 : 80);

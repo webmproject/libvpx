@@ -292,7 +292,7 @@ using std::tr1::make_tuple;
 INSTANTIATE_TEST_CASE_P(
     C, Trans32x32Test,
     ::testing::Values(
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH
         make_tuple(&vp9_fdct32x32_c, &vp9_idct32x32_1024_add_c, 0, 8),
         make_tuple(&vp9_fdct32x32_rd_c, &vp9_idct32x32_1024_add_c, 1, 8),
         make_tuple(&vp9_high_fdct32x32_c, &idct32x32_10, 0, 10),
@@ -304,7 +304,7 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_fdct32x32_rd_c, &vp9_idct32x32_1024_add_c, 1, 8)));
 #endif
 
-#if HAVE_NEON_ASM && !CONFIG_HIGH_TRANSFORMS
+#if HAVE_NEON_ASM && !CONFIG_VP9_HIGH
 INSTANTIATE_TEST_CASE_P(
     NEON, Trans32x32Test,
     ::testing::Values(
@@ -314,7 +314,7 @@ INSTANTIATE_TEST_CASE_P(
                    &vp9_idct32x32_1024_add_neon, 1, 8)));
 #endif
 
-#if HAVE_SSE2 && !CONFIG_HIGH_TRANSFORMS
+#if HAVE_SSE2 && !CONFIG_VP9_HIGH
 INSTANTIATE_TEST_CASE_P(
     SSE2, Trans32x32Test,
     ::testing::Values(
@@ -324,7 +324,7 @@ INSTANTIATE_TEST_CASE_P(
                    &vp9_idct32x32_1024_add_sse2, 1, 8)));
 #endif
 
-#if HAVE_AVX2 && !CONFIG_HIGH_TRANSFORMS
+#if HAVE_AVX2 && !CONFIG_VP9_HIGH
 INSTANTIATE_TEST_CASE_P(
     AVX2, Trans32x32Test,
     ::testing::Values(

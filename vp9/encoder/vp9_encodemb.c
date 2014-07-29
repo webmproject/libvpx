@@ -60,7 +60,7 @@ void vp9_high_subtract_block_c(int rows, int cols,
   int r, c;
   uint16_t *src = CONVERT_TO_SHORTPTR(src8);
   uint16_t *pred = CONVERT_TO_SHORTPTR(pred8);
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH
   (void) bps;
 #else
   int shift = bps - 8;
@@ -69,7 +69,7 @@ void vp9_high_subtract_block_c(int rows, int cols,
 
   for (r = 0; r < rows; r++) {
     for (c = 0; c < cols; c++) {
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH
       diff[c] = src[c] - pred[c];
 #else
       diff[c] = (src[c] - pred[c] + rnd) >> shift;
@@ -181,7 +181,7 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
   tokens[eob][0].qc = 0;
   tokens[eob][1] = tokens[eob][0];
 
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_QUANT
   if (xd->bps == 12) {
     dct_value_tokens = vp9_dct_value_tokens_high12_ptr;
     dct_value_cost = vp9_dct_value_cost_high12_ptr;
@@ -228,7 +228,7 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
       best = rd_cost1 < rd_cost0;
       base_bits = dct_value_cost[x];
       dx = mul * (dqcoeff[rc] - coeff[rc]);
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH
       if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
         dx >>= xd->bps - 8;
       }
@@ -287,7 +287,7 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
       base_bits = dct_value_cost[x];
 
       if (shortcut) {
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH
         if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
           dx -= ((dequant_ptr[rc != 0] >> (xd->bps - 8)) + sz) ^ sz;
         } else {

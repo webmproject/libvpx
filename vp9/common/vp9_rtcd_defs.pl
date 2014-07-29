@@ -332,7 +332,7 @@ $vp9_convolve8_avg_vert_neon_asm=vp9_convolve8_avg_vert_neon;
 #
 # dct
 #
-if (vpx_config("CONFIG_VP9_HIGH") eq "yes" && vpx_config("CONFIG_HIGH_TRANSFORMS") eq "yes") {
+if (vpx_config("CONFIG_VP9_HIGH") eq "yes") {
   add_proto qw/void vp9_idct4x4_1_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
   specialize qw/vp9_idct4x4_1_add/;
 
@@ -1066,8 +1066,8 @@ specialize qw/vp9_get_mb_ss mmx sse2/;
 add_proto qw/void vp9_subtract_block/, "int rows, int cols, int16_t *diff_ptr, ptrdiff_t diff_stride, const uint8_t *src_ptr, ptrdiff_t src_stride, const uint8_t *pred_ptr, ptrdiff_t pred_stride";
 specialize qw/vp9_subtract_block/, "$sse2_x86inc";
 
-if (vpx_config("CONFIG_VP9_HIGH") eq "yes" && vpx_config("CONFIG_HIGH_TRANSFORMS") eq "yes") {
-# With CONFIG_HIGH_TRANSFORMS, the transform coefficients are held in 32-bit
+if (vpx_config("CONFIG_VP9_HIGH") eq "yes") {
+# the transform coefficients are held in 32-bit
 # values, so the assembler code for  vp9_block_error can no longer be used.
   add_proto qw/int64_t vp9_block_error/, "const tran_low_t *coeff, const tran_low_t *dqcoeff, intptr_t block_size, int64_t *ssz";
   specialize qw/vp9_block_error/;
@@ -1112,7 +1112,7 @@ if (vpx_config("CONFIG_INTERNAL_STATS") eq "yes") {
 }
 
 # fdct functions
-if (vpx_config("CONFIG_VP9_HIGH") eq "yes" && vpx_config("CONFIG_HIGH_TRANSFORMS") eq "yes") {
+if (vpx_config("CONFIG_VP9_HIGH") eq "yes") {
   add_proto qw/void vp9_fht4x4/, "const int16_t *input, tran_low_t *output, int stride, int tx_type";
   specialize qw/vp9_fht4x4/;
 

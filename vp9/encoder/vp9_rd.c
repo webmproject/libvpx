@@ -96,7 +96,7 @@ static void fill_token_costs(vp9_coeff_cost *c,
 static int sad_per_bit16lut_8[QINDEX_RANGE];
 static int sad_per_bit4lut_8[QINDEX_RANGE];
 
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH
 static int sad_per_bit16lut_10[QINDEX_RANGE];
 static int sad_per_bit4lut_10[QINDEX_RANGE];
 
@@ -120,7 +120,7 @@ static void init_me_luts_bd(int *bit16lut, int *bit4lut, int range,
 void vp9_init_me_luts() {
   init_me_luts_bd(sad_per_bit16lut_8, sad_per_bit4lut_8, QINDEX_RANGE,
                   VPX_BITS_8);
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH
   init_me_luts_bd(sad_per_bit16lut_10, sad_per_bit4lut_10, QINDEX_RANGE,
                   VPX_BITS_10);
   init_me_luts_bd(sad_per_bit16lut_12, sad_per_bit4lut_12, QINDEX_RANGE,
@@ -139,7 +139,7 @@ static const int rd_frame_type_factor[FRAME_UPDATE_TYPES] = {
 int vp9_compute_rd_mult(const VP9_COMP *cpi, int qindex) {
   const int64_t q = vp9_dc_quant(qindex, 0, cpi->common.bit_depth);
   int rdmult = 88 * q * q / 24;
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH
   switch (cpi->common.bit_depth) {
     case VPX_BITS_8:
       rdmult = 88 * q * q / 24;
@@ -167,7 +167,7 @@ int vp9_compute_rd_mult(const VP9_COMP *cpi, int qindex) {
 
 static int compute_rd_thresh_factor(int qindex, vpx_bit_depth_t bit_depth) {
   double q;
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH
   switch (bit_depth) {
     case VPX_BITS_8:
       q = vp9_dc_quant(qindex, 0, VPX_BITS_8) / 4.0;
@@ -190,7 +190,7 @@ static int compute_rd_thresh_factor(int qindex, vpx_bit_depth_t bit_depth) {
 }
 
 void vp9_initialize_me_consts(VP9_COMP *cpi, int qindex) {
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH
   switch (cpi->common.bit_depth) {
     case VPX_BITS_8:
       cpi->mb.sadperbit16 = sad_per_bit16lut_8[qindex];

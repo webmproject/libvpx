@@ -639,7 +639,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
          (bsize >= BLOCK_16X16 ? TX_16X16 : TX_8X8) : TX_4X4;
       vp9_encode_intra_block_plane(x, bsize, 0);
       this_error = vp9_get_mb_ss(x->plane[0].src_diff);
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH
       if (cm->use_high) {
         switch (cm->bit_depth) {
           case VPX_BITS_8:

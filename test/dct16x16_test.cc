@@ -686,7 +686,7 @@ TEST_P(Trans16x16HT, QuantCheck) {
 
 using std::tr1::make_tuple;
 
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH
 INSTANTIATE_TEST_CASE_P(
     C, Trans16x16DCT,
     ::testing::Values(
@@ -700,7 +700,7 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_fdct16x16_c, &vp9_idct16x16_256_add_c, 0, 8)));
 #endif
 
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH
 INSTANTIATE_TEST_CASE_P(
     C, Trans16x16HT,
     ::testing::Values(
@@ -726,7 +726,7 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_fht16x16_c, &vp9_iht16x16_256_add_c, 3, 8)));
 #endif
 
-#if HAVE_NEON_ASM && !CONFIG_HIGH_TRANSFORMS
+#if HAVE_NEON_ASM && !CONFIG_VP9_HIGH
 INSTANTIATE_TEST_CASE_P(
     NEON, Trans16x16DCT,
     ::testing::Values(
@@ -734,7 +734,7 @@ INSTANTIATE_TEST_CASE_P(
                    &vp9_idct16x16_256_add_neon, 0, 8)));
 #endif
 
-#if HAVE_SSE2 && !CONFIG_HIGH_TRANSFORMS
+#if HAVE_SSE2 && !CONFIG_VP9_HIGH
 INSTANTIATE_TEST_CASE_P(
     SSE2, Trans16x16DCT,
     ::testing::Values(
@@ -749,14 +749,14 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_fht16x16_sse2, &vp9_iht16x16_256_add_sse2, 3, 8)));
 #endif
 
-#if HAVE_SSSE3 && !CONFIG_HIGH_TRANSFORMS
+#if HAVE_SSSE3 && !CONFIG_VP9_HIGH
 INSTANTIATE_TEST_CASE_P(
     SSSE3, Trans16x16DCT,
     ::testing::Values(
         make_tuple(&vp9_fdct16x16_c, &vp9_idct16x16_256_add_ssse3, 0, 8)));
 #endif
 
-#if HAVE_AVX2 && !CONFIG_HIGH_TRANSFORMS
+#if HAVE_AVX2 && !CONFIG_VP9_HIGH
 // TODO(jzern): these prototypes can be removed after the avx2 versions are
 // reenabled in vp9_rtcd_defs.pl.
 extern "C" {

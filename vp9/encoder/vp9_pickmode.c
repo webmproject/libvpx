@@ -229,7 +229,7 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
                          tx_mode_to_biggest_tx_size[cpi->common.tx_mode]);
   }
 
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH
   if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
     vp9_model_rd_from_var_lapndz(sse - var, 1 << num_pels_log2_lookup[bsize],
                                  dc_quant >> (xd->bps - 5), &rate, &dist);
@@ -244,7 +244,7 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
   *out_rate_sum = rate >> 1;
   *out_dist_sum = dist << 3;
 
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH
   if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
     vp9_model_rd_from_var_lapndz(var, 1 << num_pels_log2_lookup[bsize],
                                  ac_quant >> (xd->bps - 5), &rate, &dist);
@@ -300,13 +300,13 @@ static void encode_breakout_test(VP9_COMP *cpi, MACROBLOCK *x,
     // The encode_breakout input
     const unsigned int min_thresh =
         MIN(((unsigned int)x->encode_breakout << 4), max_thresh);
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH
     const int shift = 2 * xd->bps - 16;
 #endif
 
     // Calculate threshold according to dequant value.
     thresh_ac = (xd->plane[0].dequant[1] * xd->plane[0].dequant[1]) / 9;
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH
     if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
       if (shift > 0)
         thresh_ac = ROUND_POWER_OF_TWO(thresh_ac, shift);
@@ -319,7 +319,7 @@ static void encode_breakout_test(VP9_COMP *cpi, MACROBLOCK *x,
         8 - (b_width_log2(bsize) + b_height_log2(bsize));
 
     thresh_dc = (xd->plane[0].dequant[0] * xd->plane[0].dequant[0] >> 6);
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH
     if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
       if (shift > 0)
         thresh_dc = ROUND_POWER_OF_TWO(thresh_dc, shift);
@@ -788,7 +788,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 int vp9_get_intra_cost_penalty(int qindex, int qdelta,
                                vpx_bit_depth_t bit_depth) {
   const int q = vp9_dc_quant(qindex, qdelta, bit_depth);
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH
   switch (bit_depth) {
     case VPX_BITS_8:
       return 20 * q;
