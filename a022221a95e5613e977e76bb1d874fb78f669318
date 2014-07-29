@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//dy8\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-07-29T22:46:52Z",
+      "side": 1,
+      "message": "KO, can you set your git config to use unix-style newlines please?\n\nhttps://help.github.com/articles/dealing-with-line-endings",
+      "revId": "a022221a95e5613e977e76bb1d874fb78f669318",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dzA\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 1319,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-07-29T22:46:52Z",
+      "side": 1,
+      "message": "Does this make sense as a pattern or should the local functions have a differently named variable and modify that, instead of modifying the global var and resetting it?",
+      "revId": "a022221a95e5613e977e76bb1d874fb78f669318",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
