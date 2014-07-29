@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//d9M\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_variance_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2014-07-29T11:38:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//eBg\u003d",
+      "revId": "dee4e24c7196a00978379ac918d40406d4f213ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//eBc\u003d",
         "filename": "vp9/encoder/arm/neon/vp9_variance_neon.c",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2014-07-28T22:43:22Z",
       "side": 1,
       "message": "same for w and h",
+      "revId": "dee4e24c7196a00978379ac918d40406d4f213ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//d9I\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_variance_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2014-07-29T11:38:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//eBc\u003d",
       "revId": "dee4e24c7196a00978379ac918d40406d4f213ad",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//d9E\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_variance_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2014-07-29T11:38:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//eBU\u003d",
+      "revId": "dee4e24c7196a00978379ac918d40406d4f213ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//eBM\u003d",
         "filename": "vp9/encoder/arm/neon/vp9_variance_neon.c",
         "patchSetId": 3
@@ -64,6 +118,24 @@
       "writtenOn": "2014-07-28T22:43:22Z",
       "side": 1,
       "message": "nit: extra ws",
+      "revId": "dee4e24c7196a00978379ac918d40406d4f213ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//d9A\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_variance_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2014-07-29T11:38:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//eBM\u003d",
       "revId": "dee4e24c7196a00978379ac918d40406d4f213ad",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//d88\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_variance_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2014-07-29T11:38:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//eBA\u003d",
+      "revId": "dee4e24c7196a00978379ac918d40406d4f213ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//eA8\u003d",
         "filename": "vp9/encoder/arm/neon/vp9_variance_neon.c",
         "patchSetId": 3
@@ -98,6 +188,24 @@
       "writtenOn": "2014-07-28T22:43:22Z",
       "side": 1,
       "message": "nit: extra ws",
+      "revId": "dee4e24c7196a00978379ac918d40406d4f213ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//d84\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_variance_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2014-07-29T11:38:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//eA8\u003d",
       "revId": "dee4e24c7196a00978379ac918d40406d4f213ad",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//d80\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_variance_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2014-07-29T11:38:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//eA4\u003d",
+      "revId": "dee4e24c7196a00978379ac918d40406d4f213ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//eA0\u003d",
         "filename": "vp9/encoder/arm/neon/vp9_variance_neon.c",
         "patchSetId": 3
@@ -138,6 +264,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//d8w\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_variance_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2014-07-29T11:38:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//eA0\u003d",
+      "revId": "dee4e24c7196a00978379ac918d40406d4f213ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//eAw\u003d",
         "filename": "vp9/encoder/arm/neon/vp9_variance_neon.c",
         "patchSetId": 3
@@ -149,6 +293,24 @@
       "writtenOn": "2014-07-28T22:43:22Z",
       "side": 1,
       "message": "ditto",
+      "revId": "dee4e24c7196a00978379ac918d40406d4f213ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//d8s\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_variance_neon.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2014-07-29T11:38:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//eAw\u003d",
       "revId": "dee4e24c7196a00978379ac918d40406d4f213ad",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
