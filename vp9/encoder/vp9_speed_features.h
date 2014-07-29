@@ -286,6 +286,8 @@ typedef struct SPEED_FEATURES {
   // Chessboard pattern prediction filter type search
   int cb_pred_filter_search;
 
+  int cb_partition_search;
+
   // Fast quantization process path
   int use_quant_fp;
 
