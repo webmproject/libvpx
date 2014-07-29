@@ -34,6 +34,24 @@
       "revId": "9b01cd8e8485a1d7c3bff90eb6a6394a55a859ae",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//d9c\u003d",
+        "filename": "build/make/Makefile",
+        "patchSetId": 2
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-29T06:50:05Z",
+      "side": 1,
+      "message": "\u003e do you mean add -mstackrealign to cflags unconditionally on OS/2 ? I think,\n\n\u003e this is excessive, and if a problem occurs later, it\u0027s enough to fix it then.\n\n\u003e But if you want, I\u0027ll do that.\n\nI think only targeting these files could miss some call sites though, but since you\u0027ve got the test setup this is ok for now. A configure check for the flag and testing for it only on os/2 would be best for now, we can expand it if needed.",
+      "parentUuid": "AAAAdn//d9o\u003d",
+      "revId": "9b01cd8e8485a1d7c3bff90eb6a6394a55a859ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
