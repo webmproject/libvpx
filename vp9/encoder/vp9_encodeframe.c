@@ -1917,6 +1917,9 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
   const int xss = x->e_mbd.plane[1].subsampling_x;
   const int yss = x->e_mbd.plane[1].subsampling_y;
 
+  BLOCK_SIZE min_size = cpi->sf.min_partition_size;
+  BLOCK_SIZE max_size = cpi->sf.max_partition_size;
+
   int partition_none_allowed = !force_horz_split && !force_vert_split;
   int partition_horz_allowed = !force_vert_split && yss <= xss &&
                                bsize >= BLOCK_8X8;
@@ -1934,15 +1937,12 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
   // Determine partition types in search according to the speed features.
   // The threshold set here has to be of square block size.
   if (cpi->sf.auto_min_max_partition_size) {
-    partition_none_allowed &= (bsize <= cpi->sf.max_partition_size &&
-                               bsize >= cpi->sf.min_partition_size);
-    partition_horz_allowed &= ((bsize <= cpi->sf.max_partition_size &&
-                                bsize >  cpi->sf.min_partition_size) ||
+    partition_none_allowed &= (bsize <= max_size && bsize >= min_size);
+    partition_horz_allowed &= ((bsize <= max_size && bsize > min_size) ||
                                 force_horz_split);
-    partition_vert_allowed &= ((bsize <= cpi->sf.max_partition_size &&
-                                bsize >  cpi->sf.min_partition_size) ||
+    partition_vert_allowed &= ((bsize <= max_size && bsize > min_size) ||
                                 force_vert_split);
-    do_split &= bsize > cpi->sf.min_partition_size;
+    do_split &= bsize > min_size;
   }
   if (cpi->sf.use_square_partition_only) {
     partition_horz_allowed &= force_horz_split;
