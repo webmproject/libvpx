@@ -462,8 +462,8 @@ int main(int argc, char **argv) {
   struct RateControlMetrics rc;
   int64_t cx_time = 0;
 #if CONFIG_VP9_HIGH
-  vpx_bit_depth_t bit_depth;
-  int in_bit_depth;
+  vpx_bit_depth_t bit_depth = VPX_BITS_8;
+  int in_bit_depth = 8;
 #endif
 
   exec_name = argv[0];
