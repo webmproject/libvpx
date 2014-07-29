@@ -16,6 +16,24 @@
       "revId": "9b01cd8e8485a1d7c3bff90eb6a6394a55a859ae",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//d9o\u003d",
+        "filename": "build/make/Makefile",
+        "patchSetId": 2
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1001311
+      },
+      "writtenOn": "2014-07-29T03:03:36Z",
+      "side": 1,
+      "message": "do you mean add -mstackrealign to cflags unconditionally on OS/2 ? I think, this is excessive, and if a problem occurs later, it\u0027s enough to fix it then. But if you want, I\u0027ll do that.\n\nAnd I tested only with gcc490.",
+      "parentUuid": "AAAAdn//eFs\u003d",
+      "revId": "9b01cd8e8485a1d7c3bff90eb6a6394a55a859ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
