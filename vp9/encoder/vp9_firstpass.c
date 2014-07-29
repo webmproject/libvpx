@@ -553,6 +553,9 @@ void vp9_first_pass(VP9_COMP *cpi) {
       const int use_dc_pred = (mb_col || mb_row) && (!mb_col || !mb_row);
       double error_weight = 1.0;
       const BLOCK_SIZE bsize = get_bsize(cm, mb_row, mb_col);
+#if CONFIG_FP_MB_STATS
+      const int mb_index = mb_row * cm->mb_cols + mb_col;
+#endif
 
       vp9_clear_system_state();
 
@@ -600,7 +603,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
 #if CONFIG_FP_MB_STATS
       if (cpi->use_fp_mb_stats) {
         // initialization
-        cpi->twopass.frame_mb_stats_buf[mb_row * cm->mb_cols + mb_col] = 0;
+        cpi->twopass.frame_mb_stats_buf[mb_index] = 0;
       }
 #endif
 
@@ -704,26 +707,20 @@ void vp9_first_pass(VP9_COMP *cpi) {
 #if CONFIG_FP_MB_STATS
         if (cpi->use_fp_mb_stats) {
           // intra predication statistics
-          cpi->twopass.frame_mb_stats_buf[mb_row * cm->mb_cols + mb_col] = 0;
-          cpi->twopass.frame_mb_stats_buf[mb_row * cm->mb_cols + mb_col] |=
-              FPMB_DCINTRA_MASK;
-          cpi->twopass.frame_mb_stats_buf[mb_row * cm->mb_cols + mb_col] &=
-              (~FPMB_NONZERO_MOTION_MASK);
+          cpi->twopass.frame_mb_stats_buf[mb_index] = 0;
+          cpi->twopass.frame_mb_stats_buf[mb_index] |= FPMB_DCINTRA_MASK;
+          cpi->twopass.frame_mb_stats_buf[mb_index] &=
+              ~FPMB_NONZERO_MOTION_MASK;
           if (this_error > FPMB_ERROR_LEVEL4_TH) {
-            cpi->twopass.frame_mb_stats_buf[mb_row * cm->mb_cols + mb_col] |=
-                FPMB_ERROR_LEVEL4_MASK;
+            cpi->twopass.frame_mb_stats_buf[mb_index] |= FPMB_ERROR_LEVEL4_MASK;
           } else if (this_error > FPMB_ERROR_LEVEL3_TH) {
-            cpi->twopass.frame_mb_stats_buf[mb_row * cm->mb_cols + mb_col] |=
-                FPMB_ERROR_LEVEL3_MASK;
+            cpi->twopass.frame_mb_stats_buf[mb_index] |= FPMB_ERROR_LEVEL3_MASK;
           } else if (this_error > FPMB_ERROR_LEVEL2_TH) {
-            cpi->twopass.frame_mb_stats_buf[mb_row * cm->mb_cols + mb_col] |=
-                FPMB_ERROR_LEVEL2_MASK;
+            cpi->twopass.frame_mb_stats_buf[mb_index] |= FPMB_ERROR_LEVEL2_MASK;
           } else if (this_error > FPMB_ERROR_LEVEL1_TH) {
-            cpi->twopass.frame_mb_stats_buf[mb_row * cm->mb_cols + mb_col] |=
-                FPMB_ERROR_LEVEL1_MASK;
+            cpi->twopass.frame_mb_stats_buf[mb_index] |= FPMB_ERROR_LEVEL1_MASK;
           } else {
-            cpi->twopass.frame_mb_stats_buf[mb_row * cm->mb_cols + mb_col] |=
-                FPMB_ERROR_LEVEL0_MASK;
+            cpi->twopass.frame_mb_stats_buf[mb_index] |= FPMB_ERROR_LEVEL0_MASK;
           }
         }
 #endif
@@ -759,25 +756,24 @@ void vp9_first_pass(VP9_COMP *cpi) {
 #if CONFIG_FP_MB_STATS
           if (cpi->use_fp_mb_stats) {
             // inter predication statistics
-            cpi->twopass.frame_mb_stats_buf[mb_row * cm->mb_cols + mb_col] = 0;
-            cpi->twopass.frame_mb_stats_buf[mb_row * cm->mb_cols + mb_col] &=
-                (~FPMB_DCINTRA_MASK);
-            cpi->twopass.frame_mb_stats_buf[mb_row * cm->mb_cols + mb_col] &=
-                (~FPMB_NONZERO_MOTION_MASK);
+            cpi->twopass.frame_mb_stats_buf[mb_index] = 0;
+            cpi->twopass.frame_mb_stats_buf[mb_index] &= ~FPMB_DCINTRA_MASK;
+            cpi->twopass.frame_mb_stats_buf[mb_index] &=
+                ~FPMB_NONZERO_MOTION_MASK;
             if (this_error > FPMB_ERROR_LEVEL4_TH) {
-              cpi->twopass.frame_mb_stats_buf[mb_row * cm->mb_cols + mb_col] |=
+              cpi->twopass.frame_mb_stats_buf[mb_index] |=
                   FPMB_ERROR_LEVEL4_MASK;
             } else if (this_error > FPMB_ERROR_LEVEL3_TH) {
-              cpi->twopass.frame_mb_stats_buf[mb_row * cm->mb_cols + mb_col] |=
+              cpi->twopass.frame_mb_stats_buf[mb_index] |=
                   FPMB_ERROR_LEVEL3_MASK;
             } else if (this_error > FPMB_ERROR_LEVEL2_TH) {
-              cpi->twopass.frame_mb_stats_buf[mb_row * cm->mb_cols + mb_col] |=
+              cpi->twopass.frame_mb_stats_buf[mb_index] |=
                   FPMB_ERROR_LEVEL2_MASK;
             } else if (this_error > FPMB_ERROR_LEVEL1_TH) {
-              cpi->twopass.frame_mb_stats_buf[mb_row * cm->mb_cols + mb_col] |=
+              cpi->twopass.frame_mb_stats_buf[mb_index] |=
                   FPMB_ERROR_LEVEL1_MASK;
             } else {
-              cpi->twopass.frame_mb_stats_buf[mb_row * cm->mb_cols + mb_col] |=
+              cpi->twopass.frame_mb_stats_buf[mb_index] |=
                   FPMB_ERROR_LEVEL0_MASK;
             }
           }
@@ -788,7 +784,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
 
 #if CONFIG_FP_MB_STATS
             if (cpi->use_fp_mb_stats) {
-              cpi->twopass.frame_mb_stats_buf[mb_row * cm->mb_cols + mb_col] |=
+              cpi->twopass.frame_mb_stats_buf[mb_index] |=
                   FPMB_NONZERO_MOTION_MASK;
             }
 #endif
