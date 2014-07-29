@@ -335,8 +335,16 @@ int vp8_denoiser_filter_uv_c(unsigned char *mc_running_avg_uv,
     return FILTER_BLOCK;
 }
 
-void vp8_denoiser_set_parameters(VP8_DENOISER *denoiser) {
-  if (!denoiser->aggressive_mode) {
+void vp8_denoiser_set_parameters(VP8_DENOISER *denoiser, int mode) {
+  assert(mode > 0);  // Denoiser is allocated only if mode > 0.
+  if (mode == 1) {
+    denoiser->denoiser_mode = kDenoiserOnYOnly;
+  } else if (mode == 2) {
+    denoiser->denoiser_mode = kDenoiserOnYUV;
+  } else {
+    denoiser->denoiser_mode = kDenoiserOnYUVAggressive;
+  }
+  if (denoiser->denoiser_mode != kDenoiserOnYUVAggressive) {
     denoiser->denoise_pars.scale_sse_thresh = 1;
     denoiser->denoise_pars.scale_motion_thresh = 8;
     denoiser->denoise_pars.scale_increase_filter = 0;
@@ -361,7 +369,6 @@ int vp8_denoiser_allocate(VP8_DENOISER *denoiser, int width, int height,
     int i;
     assert(denoiser);
     denoiser->num_mb_cols = num_mb_cols;
-    denoiser->aggressive_mode = mode;
 
     for (i = 0; i < MAX_REF_FRAMES; i++)
     {
@@ -392,7 +399,7 @@ int vp8_denoiser_allocate(VP8_DENOISER *denoiser, int width, int height,
 
     denoiser->denoise_state = vpx_calloc((num_mb_rows * num_mb_cols), 1);
     vpx_memset(denoiser->denoise_state, 0, (num_mb_rows * num_mb_cols));
-    vp8_denoiser_set_parameters(denoiser);
+    vp8_denoiser_set_parameters(denoiser, mode);
     return 0;
 }
 
@@ -420,8 +427,8 @@ void vp8_denoiser_denoise_mb(VP8_DENOISER *denoiser,
                              loop_filter_info_n *lfi_n,
                              int mb_row,
                              int mb_col,
-                             int block_index,
-                             int uv_denoise)
+                             int block_index)
+
 {
     int mv_row;
     int mv_col;
@@ -558,7 +565,7 @@ void vp8_denoiser_denoise_mb(VP8_DENOISER *denoiser,
         denoiser->denoise_state[block_index] = motion_magnitude2 > 0 ?
             kFilterNonZeroMV : kFilterZeroMV;
         // Only denoise UV for zero motion, and if y channel was denoised.
-        if (uv_denoise &&
+        if (denoiser->denoiser_mode != kDenoiserOnYOnly &&
             motion_magnitude2 == 0 &&
             decision == FILTER_BLOCK) {
           unsigned char *mc_running_avg_u =
@@ -595,7 +602,7 @@ void vp8_denoiser_denoise_mb(VP8_DENOISER *denoiser,
                 denoiser->yv12_running_avg[INTRA_FRAME].y_stride);
         denoiser->denoise_state[block_index] = kNoFilter;
     }
-    if (uv_denoise) {
+    if (denoiser->denoiser_mode != kDenoiserOnYOnly) {
       if (decision_u == COPY_BLOCK) {
         vp8_copy_mem8x8(
             x->block[16].src + *x->block[16].base_src, x->block[16].src_stride,

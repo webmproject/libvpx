@@ -615,7 +615,7 @@ static void cyclic_background_refresh(VP8_COMP *cpi, int Q, int lf_adjustment)
         cpi->cyclic_refresh_mode_index = i;
 
 #if CONFIG_TEMPORAL_DENOISING
-        if (cpi->denoiser.aggressive_mode != 0 &&
+        if (cpi->denoiser.denoiser_mode == kDenoiserOnYUVAggressive &&
             Q < (int)cpi->denoiser.denoise_pars.qp_thresh) {
           // Under aggressive denoising mode, use segmentation to turn off loop
           // filter below some qp thresh. The loop filter is turned off for all
@@ -1283,8 +1283,7 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
       vp8_denoiser_free(&cpi->denoiser);
       vp8_denoiser_allocate(&cpi->denoiser, width, height,
                             cm->mb_rows, cm->mb_cols,
-                            ((cpi->oxcf.noise_sensitivity == 3) ?
-                            1 : 0));
+                            cpi->oxcf.noise_sensitivity);
     }
 #endif
 }
@@ -1781,7 +1780,7 @@ void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
         int height = (cpi->oxcf.Height + 15) & ~15;
         vp8_denoiser_allocate(&cpi->denoiser, width, height,
                               cm->mb_rows, cm->mb_cols,
-                              ((cpi->oxcf.noise_sensitivity == 3) ? 1 : 0));
+                              cpi->oxcf.noise_sensitivity);
       }
     }
 #endif
