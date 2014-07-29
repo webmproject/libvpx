@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//d2U\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_variance_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2014-07-29T19:24:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//d3A\u003d",
+      "revId": "5f698998a1992ae502790f858a5fd093e8dec1f7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//d28\u003d",
         "filename": "vp9/encoder/arm/neon/vp9_variance_neon.c",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2014-07-29T19:03:22Z",
       "side": 1,
       "message": "align",
+      "revId": "5f698998a1992ae502790f858a5fd093e8dec1f7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//d2Q\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_variance_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2014-07-29T19:24:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//d28\u003d",
       "revId": "5f698998a1992ae502790f858a5fd093e8dec1f7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//d2M\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_variance_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2014-07-29T19:24:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//d24\u003d",
+      "revId": "5f698998a1992ae502790f858a5fd093e8dec1f7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//d2c\u003d",
         "filename": "vp9/encoder/arm/neon/vp9_variance_neon.c",
         "patchSetId": 4
@@ -64,6 +118,24 @@
       "writtenOn": "2014-07-29T19:03:22Z",
       "side": 1,
       "message": "Would probably be good for readability to set some const vars. I.e.\nconst int kWidth \u003d 16;\nconst int kHeight \u003d 16;\nconst int kHeightPlusOne \u003d kHeight + 1;",
+      "revId": "5f698998a1992ae502790f858a5fd093e8dec1f7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//d18\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_variance_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2014-07-29T19:24:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//d2c\u003d",
       "revId": "5f698998a1992ae502790f858a5fd093e8dec1f7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
