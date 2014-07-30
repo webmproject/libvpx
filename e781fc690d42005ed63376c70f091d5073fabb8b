@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//djw\u003d",
+        "filename": "test/vpxdec.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-30T23:11:26Z",
+      "side": 1,
+      "message": "this should probably be quoted for safety; -n (nostring) would cause an error",
+      "revId": "e781fc690d42005ed63376c70f091d5073fabb8b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//djs\u003d",
+        "filename": "test/vpxdec.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-30T23:11:26Z",
+      "side": 1,
+      "message": "drop this line",
+      "revId": "e781fc690d42005ed63376c70f091d5073fabb8b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
