@@ -16,6 +16,24 @@
       "revId": "fff4e263f6d1fa42126ed23f40bbd7f57b3bb43f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dtw\u003d",
+        "filename": "test/test-data.sha1",
+        "patchSetId": 1
+      },
+      "lineNbr": 681,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-07-30T14:10:23Z",
+      "side": 1,
+      "message": "this is actually renamed from vp90-2-06-bilinear.webm as per adrians code review....  Fixing comment in doc..",
+      "parentUuid": "AAAAdn//du8\u003d",
+      "revId": "fff4e263f6d1fa42126ed23f40bbd7f57b3bb43f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
