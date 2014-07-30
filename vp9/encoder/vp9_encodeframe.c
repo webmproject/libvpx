@@ -1948,7 +1948,7 @@ static INLINE void load_pred_mv(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx) {
 static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
                               TOKENEXTRA **tp, int mi_row,
                               int mi_col, BLOCK_SIZE bsize, int *rate,
-                              int64_t *dist, int do_recon, int64_t best_rd,
+                              int64_t *dist, int64_t best_rd,
                               PC_TREE *pc_tree) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
@@ -2095,7 +2095,7 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
 
         pc_tree->split[i]->index = i;
         rd_pick_partition(cpi, tile, tp, mi_row + y_idx, mi_col + x_idx,
-                          subsize, &this_rate, &this_dist, i != 3,
+                          subsize, &this_rate, &this_dist,
                           best_rd - sum_rd, pc_tree->split[i]);
 
         if (this_rate == INT_MAX) {
@@ -2232,7 +2232,7 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
   *rate = best_rate;
   *dist = best_dist;
 
-  if (best_rate < INT_MAX && best_dist < INT64_MAX && do_recon) {
+  if (best_rate < INT_MAX && best_dist < INT64_MAX && pc_tree->index != 3) {
     int output_enabled = (bsize == BLOCK_64X64);
 
     // Check the projected output rate for this SB against it's target
@@ -2343,7 +2343,7 @@ static void encode_rd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
                                     &sf->max_partition_size);
           }
           rd_pick_partition(cpi, tile, tp, mi_row, mi_col, BLOCK_64X64,
-                            &dummy_rate, &dummy_dist, 1, INT64_MAX,
+                            &dummy_rate, &dummy_dist, INT64_MAX,
                             cpi->pc_root);
         } else {
           if (sf->constrain_copy_partition &&
@@ -2365,7 +2365,7 @@ static void encode_rd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
                                 &sf->max_partition_size);
       }
       rd_pick_partition(cpi, tile, tp, mi_row, mi_col, BLOCK_64X64,
-                        &dummy_rate, &dummy_dist, 1, INT64_MAX, cpi->pc_root);
+                        &dummy_rate, &dummy_dist, INT64_MAX, cpi->pc_root);
     }
   }
 }
