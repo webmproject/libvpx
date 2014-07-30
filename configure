@@ -67,10 +67,10 @@ Codecs:
 EOF
 #restore editor state '
 
-    local family;
-    local last_family;
-    local c;
-    local str;
+    family="";
+    last_family="";
+    c="";
+    str="";
     for c in ${CODECS}; do
         family=${c%_*}
         if [ "${family}" != "${last_family}" ]; then
@@ -412,7 +412,7 @@ process_cmdline() {
 }
 
 post_process_cmdline() {
-    local c
+    c=""
 
     # If the codec family is disabled, disable all components of that family.
     # If the codec family is enabled, enable all components of that family.
@@ -459,8 +459,8 @@ process_targets() {
     enabled universal && echo "FAT_ARCHS=${fat_bin_archs}" >> config.mk
 
     # Calculate the default distribution name, based on the enabled features
-    local cf
-    local DIST_DIR=vpx
+    cf=""
+    DIST_DIR=vpx
     for cf in $CODEC_FAMILIES; do
         if enabled ${cf}_encoder && enabled ${cf}_decoder; then
             DIST_DIR="${DIST_DIR}-${cf}"
@@ -482,7 +482,7 @@ process_targets() {
           ;;
     esac
     if [ -f "${source_path}/build/make/version.sh" ]; then
-        local ver=`"$source_path/build/make/version.sh" --bare "$source_path"`
+        ver=`"$source_path/build/make/version.sh" --bare "$source_path"`
         DIST_DIR="${DIST_DIR}-${ver}"
         VERSION_STRING=${ver}
         ver=${ver%%-*}
@@ -516,7 +516,7 @@ EOF
     # Write makefiles for all enabled targets
     #
     for tgt in libs examples docs solution; do
-        local tgt_fn="$tgt-$toolchain.mk"
+        tgt_fn="$tgt-$toolchain.mk"
 
         if enabled $tgt; then
             echo "Creating makefiles for ${toolchain} ${tgt}"
@@ -555,7 +555,7 @@ process_detect() {
                     true;
                 ;;
                 *)
-                    local result=false
+                    result=false
                     for d in "$@"; do
                         [ -f "${d##-I}/$header" ] && result=true && break
                     done
@@ -604,7 +604,7 @@ process_toolchain() {
     # Handle universal binaries for this architecture
     case $toolchain in
         universal-darwin*)
-            local darwin_ver=${tgt_os##darwin}
+            darwin_ver=${tgt_os##darwin}
 
             # Snow Leopard (10.6/darwin10) dropped support for PPC
             # Include PPC support for all prior versions

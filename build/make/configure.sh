@@ -381,8 +381,8 @@ EOF
 
 # tests for -m$1 toggling the feature given in $2. If $2 is empty $1 is used.
 check_gcc_machine_option() {
-    local opt="$1"
-    local feature="$2"
+    opt="$1"
+    feature="$2"
     [ -n "$feature" ] || feature="$opt"
 
     if enabled gcc && ! disabled "$feature" && ! check_cflags "-m$opt"; then
@@ -419,8 +419,8 @@ true
 }
 
 write_common_target_config_mk() {
-    local CC="${CC}"
-    local CXX="${CXX}"
+    saved_CC="${CC}"
+    saved_CXX="${CXX}"
     enabled ccache && CC="ccache ${CC}"
     enabled ccache && CXX="ccache ${CXX}"
     print_webm_license $1 "##" ""
@@ -470,6 +470,8 @@ EOF
 
     enabled msvs && echo "CONFIG_VS_VERSION=${vs_version}" >> "${1}"
 
+    CC="${saved_CC}"
+    CXX="${saved_CXX}"
 }
 
 
@@ -1314,8 +1316,9 @@ process_toolchain() {
 }
 
 print_config_mk() {
-    local prefix=$1
-    local makefile=$2
+    saved_prefix="${prefix}"
+    prefix=$1
+    makefile=$2
     shift 2
     for cfg; do
         if enabled $cfg; then
@@ -1323,11 +1326,13 @@ print_config_mk() {
             echo "${prefix}_${upname}=yes" >> $makefile
         fi
     done
+    prefix="${saved_prefix}"
 }
 
 print_config_h() {
-    local prefix=$1
-    local header=$2
+    saved_prefix="${prefix}"
+    prefix=$1
+    header=$2
     shift 2
     for cfg; do
         upname="`toupper $cfg`"
@@ -1337,10 +1342,11 @@ print_config_h() {
             echo "#define ${prefix}_${upname} 0" >> $header
         fi
     done
+    prefix="${saved_prefix}"
 }
 
 print_config_vars_h() {
-    local header=$1
+    header=$1
     shift
     while [ $# -gt 0 ]; do
         upname="`toupper $1`"
@@ -1350,9 +1356,10 @@ print_config_vars_h() {
 }
 
 print_webm_license() {
-    local destination=$1
-    local prefix="$2"
-    local suffix="$3"
+    saved_prefix="${prefix}"
+    destination=$1
+    prefix="$2"
+    suffix="$3"
     shift 3
     cat <<EOF > ${destination}
 ${prefix} Copyright (c) 2011 The WebM project authors. All Rights Reserved.${suffix}
@@ -1363,6 +1370,7 @@ ${prefix} tree. An additional intellectual property rights grant can be found${s
 ${prefix} in the file PATENTS.  All contributing project authors may${suffix}
 ${prefix} be found in the AUTHORS file in the root of the source tree.${suffix}
 EOF
+    prefix="${saved_prefix}"
 }
 
 process_targets() {
