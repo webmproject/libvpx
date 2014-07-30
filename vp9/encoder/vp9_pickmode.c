@@ -394,7 +394,8 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   INTERP_FILTER filter_ref = cm->interp_filter;
   int bsl = mi_width_log2(bsize);
   const int pred_filter_search = cm->interp_filter == SWITCHABLE ?
-      (((mi_row + mi_col) >> bsl) + get_chessboard_index(cm)) % 2 : 0;
+      (((mi_row + mi_col) >> bsl) +
+       get_chessboard_index(cm->current_video_frame)) & 0x1 : 0;
   int const_motion[MAX_REF_FRAMES] = { 0 };
   int bh = num_4x4_blocks_high_lookup[bsize] << 2;
   int bw = num_4x4_blocks_wide_lookup[bsize] << 2;

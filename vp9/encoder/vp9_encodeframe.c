@@ -1836,7 +1836,7 @@ static void auto_partition_range(VP9_COMP *cpi, const TileInfo *const tile,
   BLOCK_SIZE max_size = BLOCK_8X8;
   int bsl = mi_width_log2(BLOCK_64X64);
   const int search_range_ctrl = (((mi_row + mi_col) >> bsl) +
-                                     get_chessboard_index(cm)) % 2;
+                       get_chessboard_index(cm->current_video_frame)) & 0x1;
   // Trap case where we do not have a prediction.
   if (search_range_ctrl &&
       (left_in_image || above_in_image || cm->frame_type != KEY_FRAME)) {

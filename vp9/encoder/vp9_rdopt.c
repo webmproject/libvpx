@@ -2025,7 +2025,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
   int bsl = mi_width_log2_lookup[bsize];
   int pred_filter_search = cpi->sf.cb_pred_filter_search ?
-      (((mi_row + mi_col) >> bsl)) & 0x01 : 0;
+      (((mi_row + mi_col) >> bsl) +
+       get_chessboard_index(cm->current_video_frame)) & 0x1 : 0;
 
   if (pred_filter_search) {
     INTERP_FILTER af = SWITCHABLE, lf = SWITCHABLE;

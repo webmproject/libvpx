@@ -551,8 +551,8 @@ static INLINE void set_ref_ptrs(VP9_COMMON *cm, MACROBLOCKD *xd,
                                                          : 0];
 }
 
-static INLINE int get_chessboard_index(const VP9_COMMON *cm) {
-  return cm->current_video_frame % 2;
+static INLINE int get_chessboard_index(const int frame_index) {
+  return frame_index & 0x1;
 }
 
 #ifdef __cplusplus
