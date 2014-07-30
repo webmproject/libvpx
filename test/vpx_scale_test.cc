@@ -253,9 +253,4 @@ TEST_P(CopyFrameTest, CopyFrame) {
 
 INSTANTIATE_TEST_CASE_P(C, CopyFrameTest,
                         ::testing::Values(vp8_yv12_copy_frame_c));
-
-#if HAVE_NEON
-INSTANTIATE_TEST_CASE_P(NEON, CopyFrameTest,
-                        ::testing::Values(vp8_yv12_copy_frame_neon));
-#endif
 }  // namespace
