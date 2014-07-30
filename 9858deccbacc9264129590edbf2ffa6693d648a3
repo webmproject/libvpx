@@ -1,0 +1,174 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//duI\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 994,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-07-30T14:05:22Z",
+      "side": 1,
+      "message": "if this cfg really can be 0 we have a whole host of unchecked get_ref_frame_buffers in the code...",
+      "revId": "9858deccbacc9264129590edbf2ffa6693d648a3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//duE\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 1649,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-07-30T14:05:22Z",
+      "side": 1,
+      "message": "don\u0027t use magic number -1 \u003d\u003e invalid_buffer or something like that.",
+      "revId": "9858deccbacc9264129590edbf2ffa6693d648a3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//duA\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 2407,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-07-30T14:05:22Z",
+      "side": 1,
+      "message": "-1 \u003d\u003e invalid_buffer",
+      "revId": "9858deccbacc9264129590edbf2ffa6693d648a3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dt8\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 2721,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-07-30T14:05:22Z",
+      "side": 1,
+      "message": "why \u003e 0?  isn\u0027t 0 a valid ref buffer idx?",
+      "revId": "9858deccbacc9264129590edbf2ffa6693d648a3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dt4\u003d",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 500,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-07-30T14:05:22Z",
+      "side": 1,
+      "message": "Now that this can return null,  seems to me we have to check everywhere we call get_ref_frame_buffer to make sure its non NULL..",
+      "revId": "9858deccbacc9264129590edbf2ffa6693d648a3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//duY\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 435,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-07-30T14:05:22Z",
+      "side": 1,
+      "message": "this can apparently return 0.   Should we check for non 0 before trying to use it?",
+      "revId": "9858deccbacc9264129590edbf2ffa6693d648a3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//duU\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 505,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-07-30T14:05:22Z",
+      "side": 1,
+      "message": "-1 -\u003e INVALID_REF_BUFFER_IDX or something like that.",
+      "revId": "9858deccbacc9264129590edbf2ffa6693d648a3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//duQ\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 666,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-07-30T14:05:22Z",
+      "side": 1,
+      "message": "-1 -\u003e to INVALID_IDX or something like that.",
+      "revId": "9858deccbacc9264129590edbf2ffa6693d648a3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//duM\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 668,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-07-30T14:05:22Z",
+      "side": 1,
+      "message": "This can apparently return 0 but we don\u0027t check it...",
+      "revId": "9858deccbacc9264129590edbf2ffa6693d648a3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//duc\u003d",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 449,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-07-30T14:05:22Z",
+      "side": 1,
+      "message": "maybe rather than magic -1 we should use INVALID_REF_IDX or call a static function that checks this.",
+      "revId": "9858deccbacc9264129590edbf2ffa6693d648a3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
