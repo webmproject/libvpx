@@ -410,6 +410,7 @@ $(LIBVPX_TEST_DATA): $(SRC_PATH_BARE)/test/test-data.sha1
 
 testdata:: $(LIBVPX_TEST_DATA)
 	$(qexec)if [ -x "$$(which sha1sum)" ]; then\
+            set -e;\
             echo "Checking test data:";\
             if [ -n "$(LIBVPX_TEST_DATA)" ]; then\
                 for f in $(call enabled,LIBVPX_TEST_DATA); do\
