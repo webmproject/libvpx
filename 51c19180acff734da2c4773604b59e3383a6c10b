@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//drA\u003d",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 710,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-30T17:27:16Z",
+      "side": 1,
+      "message": "this block can go if you\u0027ve restored all the functions in the rtcd",
+      "revId": "51c19180acff734da2c4773604b59e3383a6c10b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
