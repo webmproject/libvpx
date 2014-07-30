@@ -1888,6 +1888,15 @@ static INLINE void load_pred_mv(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx) {
   vpx_memcpy(x->pred_mv, ctx->pred_mv, sizeof(x->pred_mv));
 }
 
+#if CONFIG_FP_MB_STATS
+const int num_16x16_blocks_wide_lookup[BLOCK_SIZES] =
+  {1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 4, 4};
+const int num_16x16_blocks_high_lookup[BLOCK_SIZES] =
+  {1, 1, 1, 1, 1, 1, 1, 2, 1, 2, 4, 2, 4};
+const int qindex_skip_threshold_lookup[BLOCK_SIZES] =
+  {0, 10, 10, 30, 40, 40, 60, 80, 80, 90, 100, 100, 120};
+#endif
+
 // TODO(jingning,jimbankoski,rbultje): properly skip partition types that are
 // unlikely to be selected depending on previous rate-distortion optimization
 // results, for encoding speed-up.
@@ -1993,6 +2002,52 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
           do_split = 0;
           do_rect = 0;
         }
+
+#if CONFIG_FP_MB_STATS
+        // Check if every 16x16 first pass block statistics has zero
+        // motion and the corresponding first pass residue is small enough.
+        // If that is the case, check the difference variance between the
+        // current frame and the last frame. If the variance is small enough,
+        // stop further splitting in RD optimization
+        if (cpi->use_fp_mb_stats && do_split != 0 &&
+            cm->base_qindex > qindex_skip_threshold_lookup[bsize]) {
+          VP9_COMMON *cm = &cpi->common;
+          int mb_row = mi_row >> 1;
+          int mb_col = mi_col >> 1;
+          int mb_row_end =
+              MIN(mb_row + num_16x16_blocks_high_lookup[bsize], cm->mb_rows);
+          int mb_col_end =
+              MIN(mb_col + num_16x16_blocks_wide_lookup[bsize], cm->mb_cols);
+          int r, c;
+
+          int skip = 1;
+          for (r = mb_row; r < mb_row_end; r++) {
+            for (c = mb_col; c < mb_col_end; c++) {
+              const int mb_index = r * cm->mb_cols + c;
+              if ((cpi->twopass.this_frame_mb_stats[mb_index] &
+                   FPMB_NONZERO_MOTION_MASK) ||
+                  !(cpi->twopass.this_frame_mb_stats[mb_index] &
+                    FPMB_ERROR_LEVEL0_MASK)) {
+                skip = 0;
+                break;
+              }
+            }
+            if (skip == 0) {
+              break;
+            }
+          }
+          if (skip) {
+            unsigned int var;
+            set_offsets(cpi, tile, mi_row, mi_col, bsize);
+            var = get_sby_perpixel_diff_variance(cpi, &cpi->mb.plane[0].src,
+                                                 mi_row, mi_col, bsize);
+            if (var < 8) {
+              do_split = 0;
+              do_rect = 0;
+            }
+          }
+        }
+#endif
       }
     }
     restore_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
