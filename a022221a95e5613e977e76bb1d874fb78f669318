@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//dww\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1001311
+      },
+      "writtenOn": "2014-07-30T01:17:57Z",
+      "side": 1,
+      "message": "Strange, I have already set autocrlf to true. Anyway I\u0027ll try to remove cr.",
+      "parentUuid": "AAAAdn//dy8\u003d",
+      "revId": "a022221a95e5613e977e76bb1d874fb78f669318",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//dzA\u003d",
         "filename": "build/make/configure.sh",
         "patchSetId": 4
