@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//dwg\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1001311
+      },
+      "writtenOn": "2014-07-30T01:29:30Z",
+      "side": 1,
+      "message": "I\u0027ve confirmed my local repo and patch. BTW it does not have cr at all. hmm... do you know how to fix this ?",
+      "parentUuid": "AAAAdn//dww\u003d",
+      "revId": "a022221a95e5613e977e76bb1d874fb78f669318",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//dzA\u003d",
         "filename": "build/make/configure.sh",
         "patchSetId": 4
