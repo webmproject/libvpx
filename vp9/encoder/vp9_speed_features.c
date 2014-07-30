@@ -110,10 +110,12 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
   if (speed >= 3) {
     sf->tx_size_search_method = frame_is_intra_only(cm) ? USE_FULL_RD
                                                         : USE_LARGESTALL;
-    if (MIN(cm->width, cm->height) >= 720)
+    if (MIN(cm->width, cm->height) >= 720) {
       sf->disable_split_mask = DISABLE_ALL_SPLIT;
-    else
+      sf->cb_partition_search = frame_is_boosted(cpi) ? 0 : 1;
+    } else {
       sf->disable_split_mask = DISABLE_ALL_INTER_SPLIT;
+    }
 
     sf->adaptive_pred_interp_filter = 0;
     sf->cb_pred_filter_search = 1;
@@ -334,6 +336,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->adaptive_motion_search = 0;
   sf->adaptive_pred_interp_filter = 0;
   sf->cb_pred_filter_search = 0;
+  sf->cb_partition_search = 0;
   sf->use_quant_fp = 0;
   sf->reference_masking = 0;
   sf->partition_search_type = SEARCH_PARTITION;

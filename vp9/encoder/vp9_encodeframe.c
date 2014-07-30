@@ -1880,6 +1880,60 @@ static void auto_partition_range(VP9_COMP *cpi, const TileInfo *const tile,
   *max_block_size = max_size;
 }
 
+// TODO(jingning) refactor functions setting partition search range
+static void set_partition_range(VP9_COMMON *cm, MACROBLOCKD *xd,
+                                int mi_row, int mi_col, BLOCK_SIZE bsize,
+                                BLOCK_SIZE *min_bs, BLOCK_SIZE *max_bs) {
+  int mi_width  = num_8x8_blocks_wide_lookup[bsize];
+  int mi_height = num_8x8_blocks_high_lookup[bsize];
+  int idx, idy;
+
+  MODE_INFO *mi;
+  MODE_INFO **prev_mi =
+      &cm->prev_mi_grid_visible[mi_row * cm->mi_stride + mi_col];
+  BLOCK_SIZE bs, min_size, max_size;
+
+  min_size = BLOCK_64X64;
+  max_size = BLOCK_4X4;
+
+  if (prev_mi) {
+    for (idy = 0; idy < mi_height; ++idy) {
+      for (idx = 0; idx < mi_width; ++idx) {
+        mi = prev_mi[idy * cm->mi_stride + idx];
+        bs = mi ? mi->mbmi.sb_type : bsize;
+        min_size = MIN(min_size, bs);
+        max_size = MAX(max_size, bs);
+      }
+    }
+  }
+
+  if (xd->left_available) {
+    for (idy = 0; idy < mi_height; ++idy) {
+      mi = xd->mi[idy * cm->mi_stride - 1];
+      bs = mi ? mi->mbmi.sb_type : bsize;
+      min_size = MIN(min_size, bs);
+      max_size = MAX(max_size, bs);
+    }
+  }
+
+  if (xd->up_available) {
+    for (idx = 0; idx < mi_width; ++idx) {
+      mi = xd->mi[idx - cm->mi_stride];
+      bs = mi ? mi->mbmi.sb_type : bsize;
+      min_size = MIN(min_size, bs);
+      max_size = MAX(max_size, bs);
+    }
+  }
+
+  if (min_size == max_size) {
+    min_size = min_partition_size[min_size];
+    max_size = max_partition_size[max_size];
+  }
+
+  *min_bs = min_size;
+  *max_bs = max_size;
+}
+
 static INLINE void store_pred_mv(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx) {
   vpx_memcpy(ctx->pred_mv, x->pred_mv, sizeof(x->pred_mv));
 }
@@ -1943,6 +1997,15 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     set_offsets(cpi, tile, mi_row, mi_col, bsize);
     x->mb_energy = vp9_block_energy(cpi, x, bsize);
   }
+
+  if (cpi->sf.cb_partition_search && bsize == BLOCK_16X16) {
+    int cb_partition_search_ctrl = ((pc_tree->index == 0 || pc_tree->index == 3)
+        + get_chessboard_index(cm->current_video_frame)) & 0x1;
+
+    if (cb_partition_search_ctrl && bsize > min_size && bsize < max_size)
+      set_partition_range(cm, xd, mi_row, mi_col, bsize, &min_size, &max_size);
+  }
+
   // Determine partition types in search according to the speed features.
   // The threshold set here has to be of square block size.
   if (cpi->sf.auto_min_max_partition_size) {
@@ -2085,6 +2148,7 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
         if (cpi->sf.adaptive_motion_search)
           load_pred_mv(x, ctx);
 
+        pc_tree->split[i]->index = i;
         rd_pick_partition(cpi, tile, tp, mi_row + y_idx, mi_col + x_idx,
                           subsize, &this_rate, &this_dist, i != 3,
                           best_rd - sum_rd, pc_tree->split[i]);
@@ -2280,6 +2344,7 @@ static void encode_rd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
     }
 
     vp9_zero(cpi->mb.pred_mv);
+    cpi->pc_root->index = 0;
 
     if ((sf->partition_search_type == SEARCH_PARTITION &&
          sf->use_lastframe_partitioning) ||
