@@ -409,6 +409,10 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   PRED_BUFFER *this_mode_pred = NULL;
   int i;
 
+  // CTX is used by the temporal denoiser which is currently being developed.
+  // TODO(jbb): when temporal denoiser is finished and in the default build
+  // remove the following line;
+  (void) ctx;
   if (cpi->sf.reuse_inter_pred_sby) {
     for (i = 0; i < 3; i++) {
       tmp[i].data = &pred_buf[pixels_in_block * i];
