@@ -16,6 +16,24 @@
       "revId": "fbaa4b84afeecc6b443f47d329348685e0017d27",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dqk\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 619,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-07-30T17:33:12Z",
+      "side": 1,
+      "message": "ok, will do in future changes.",
+      "parentUuid": "AAAAdn//dqs\u003d",
+      "revId": "fbaa4b84afeecc6b443f47d329348685e0017d27",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
