@@ -34,6 +34,24 @@
       "revId": "fff4e263f6d1fa42126ed23f40bbd7f57b3bb43f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//drY\u003d",
+        "filename": "test/test-data.sha1",
+        "patchSetId": 1
+      },
+      "lineNbr": 681,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-30T17:23:42Z",
+      "side": 1,
+      "message": "I wondered about that, the frame md5\u0027s are named that way",
+      "parentUuid": "AAAAdn//dtw\u003d",
+      "revId": "fff4e263f6d1fa42126ed23f40bbd7f57b3bb43f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
