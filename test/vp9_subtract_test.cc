@@ -95,4 +95,9 @@ INSTANTIATE_TEST_CASE_P(C, VP9SubtractBlockTest,
 INSTANTIATE_TEST_CASE_P(SSE2, VP9SubtractBlockTest,
                         ::testing::Values(vp9_subtract_block_sse2));
 #endif
+#if HAVE_NEON
+INSTANTIATE_TEST_CASE_P(NEON, VP9SubtractBlockTest,
+                        ::testing::Values(vp9_subtract_block_neon));
+#endif
+
 }  // namespace vp9
