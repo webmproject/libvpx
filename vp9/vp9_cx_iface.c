@@ -305,6 +305,16 @@ static vpx_codec_err_t validate_img(vpx_codec_alg_priv_t *ctx,
   return VPX_CODEC_OK;
 }
 
+static int get_image_bps(const vpx_image_t *img) {
+  switch (img->fmt) {
+    case VPX_IMG_FMT_YV12:
+    case VPX_IMG_FMT_I420: return 12;
+    case VPX_IMG_FMT_I422: return 16;
+    case VPX_IMG_FMT_I444: return 24;
+    default: assert(0 && "Invalid image format");
+  }
+  return 0;
+}
 
 static vpx_codec_err_t set_encoder_config(
     VP9EncoderConfig *oxcf,
@@ -672,16 +682,6 @@ static vpx_codec_err_t encoder_init(vpx_codec_ctx_t *ctx,
     priv->extra_cfg = extracfg_map[i].cfg;
     priv->extra_cfg.pkt_list = &priv->pkt_list.head;
 
-     // Maximum buffer size approximated based on having multiple ARF.
-    priv->cx_data_sz = priv->cfg.g_w * priv->cfg.g_h * 3 / 2 * 8;
-
-    if (priv->cx_data_sz < 4096)
-      priv->cx_data_sz = 4096;
-
-    priv->cx_data = (unsigned char *)malloc(priv->cx_data_sz);
-    if (priv->cx_data == NULL)
-      return VPX_CODEC_MEM_ERROR;
-
     vp9_initialize_enc();
 
     res = validate_config(priv, &priv->cfg, &priv->extra_cfg);
@@ -806,8 +806,24 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
                                       unsigned long deadline) {
   vpx_codec_err_t res = VPX_CODEC_OK;
 
-  if (img)
+  if (img != NULL) {
     res = validate_img(ctx, img);
+    // TODO(jzern) the checks related to cpi's validity should be treated as a
+    // failure condition, encoder setup is done fully in init() currently.
+    if (res == VPX_CODEC_OK && ctx->cpi != NULL && ctx->cx_data == NULL) {
+      // There's no codec control for multiple alt-refs so check the encoder
+      // instance for its status to determine the compressed data size.
+      ctx->cx_data_sz = ctx->cfg.g_w * ctx->cfg.g_h *
+                        get_image_bps(img) / 8 *
+                        (ctx->cpi->multi_arf_allowed ? 8 : 2);
+      if (ctx->cx_data_sz < 4096) ctx->cx_data_sz = 4096;
+
+      ctx->cx_data = (unsigned char *)malloc(ctx->cx_data_sz);
+      if (ctx->cx_data == NULL) {
+        return VPX_CODEC_MEM_ERROR;
+      }
+    }
+  }
 
   pick_quickcompress_mode(ctx, duration, deadline);
   vpx_codec_pkt_list_init(&ctx->pkt_list);
