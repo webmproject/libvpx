@@ -616,7 +616,7 @@ static void cyclic_background_refresh(VP8_COMP *cpi, int Q, int lf_adjustment)
 
 #if CONFIG_TEMPORAL_DENOISING
         if (cpi->denoiser.aggressive_mode != 0 &&
-            Q < cpi->denoiser.denoise_pars.qp_thresh) {
+            Q < (int)cpi->denoiser.denoise_pars.qp_thresh) {
           // Under aggressive denoising mode, use segmentation to turn off loop
           // filter below some qp thresh. The loop filter is turned off for all
           // blocks that have been encoded as ZEROMV LAST x frames in a row,
