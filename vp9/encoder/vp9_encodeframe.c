@@ -2087,10 +2087,10 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
           for (r = mb_row; r < mb_row_end; r++) {
             for (c = mb_col; c < mb_col_end; c++) {
               const int mb_index = r * cm->mb_cols + c;
-              if ((cpi->twopass.this_frame_mb_stats[mb_index] &
-                   FPMB_NONZERO_MOTION_MASK) ||
+              if (!(cpi->twopass.this_frame_mb_stats[mb_index] &
+                    FPMB_MOTION_ZERO_MASK) ||
                   !(cpi->twopass.this_frame_mb_stats[mb_index] &
-                    FPMB_ERROR_LEVEL0_MASK)) {
+                    FPMB_ERROR_SMALL_MASK)) {
                 skip = 0;
                 break;
               }
