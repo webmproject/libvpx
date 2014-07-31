@@ -22,6 +22,38 @@ vpxdec_verify_environment() {
   fi
 }
 
+# Echoes yes to stdout when vpxdec exists according to vpx_tool_available().
+vpxdec_available() {
+  [ -n "$(vpx_tool_available vpxdec)" ] && echo yes
+}
+
+# Wrapper function for running vpxdec in noblit mode. Requires that
+# LIBVPX_BIN_PATH points to the directory containing vpxdec. Positional
+# parameter one is used as the input file path. Positional parameter two, when
+# present, is interpreted as a boolean flag that means the input should be sent
+# to vpxdec via pipe from cat instead of directly.
+vpxdec() {
+  local input="${1}"
+  local pipe_input=${2}
+
+  if [ $# -gt 2 ]; then
+    # shift away $1 and $2 so the remaining arguments can be passed to vpxdec
+    # via $@.
+    shift 2
+  fi
+
+  local decoder="${LIBVPX_BIN_PATH}/vpxdec${VPX_TEST_EXE_SUFFIX}"
+
+  if [ -z "${pipe_input}" ]; then
+    eval "${VPX_TEST_PREFIX}" "${decoder}" "$input" --summary --noblit "$@" \
+        ${devnull}
+  else
+    cat "${input}" \
+        | eval "${VPX_TEST_PREFIX}" "${decoder}" - --summary --noblit "$@" \
+            ${devnull}
+  fi
+}
+
 vpxdec_can_decode_vp8() {
   if [ "$(vpxdec_available)" = "yes" ] && \
      [ "$(vp8_decode_available)" = "yes" ]; then
