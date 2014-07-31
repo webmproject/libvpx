@@ -458,7 +458,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       vp9_setup_pred_block(xd, yv12_mb[ref_frame], yv12, mi_row, mi_col,
                            sf, sf);
 
-      if (cm->coding_use_prev_mi)
+      if (!cm->error_resilient_mode)
         vp9_find_mv_refs(cm, xd, tile, xd->mi[0], ref_frame,
                          candidates, mi_row, mi_col);
       else

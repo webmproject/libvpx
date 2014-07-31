@@ -1233,11 +1233,9 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
   }
 
   if (!cm->error_resilient_mode) {
-    cm->coding_use_prev_mi = 1;
     cm->refresh_frame_context = vp9_rb_read_bit(rb);
     cm->frame_parallel_decoding_mode = vp9_rb_read_bit(rb);
   } else {
-    cm->coding_use_prev_mi = 0;
     cm->refresh_frame_context = 0;
     cm->frame_parallel_decoding_mode = 1;
   }
@@ -1413,7 +1411,7 @@ void vp9_decode_frame(VP9Decoder *pbi,
 
   init_macroblockd(cm, &pbi->mb);
 
-  if (cm->coding_use_prev_mi)
+  if (!cm->error_resilient_mode)
     set_prev_mi(cm);
   else
     cm->prev_mi = NULL;

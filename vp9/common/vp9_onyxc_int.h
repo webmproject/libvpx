@@ -188,11 +188,6 @@ typedef struct VP9Common {
   int error_resilient_mode;
   int frame_parallel_decoding_mode;
 
-  // Flag indicates if prev_mi can be used in coding:
-  //   0: encoder assumes decoder does not have prev_mi
-  //   1: encoder assumes decoder has and uses prev_mi
-  unsigned int coding_use_prev_mi;
-
   int log2_tile_cols, log2_tile_rows;
 
   // Private data associated with the frame buffer callbacks.
