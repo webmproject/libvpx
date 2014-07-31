@@ -340,6 +340,7 @@ struct vpx_codec_iface {
     vpx_codec_set_fb_fn_t     set_fb_fn;   /**< \copydoc ::vpx_codec_set_fb_fn_t */
   } dec;
   struct vpx_codec_enc_iface {
+    int                                cfg_map_count;
     vpx_codec_enc_cfg_map_t           *cfg_maps;      /**< \copydoc ::vpx_codec_enc_cfg_map_t */
     vpx_codec_encode_fn_t              encode;        /**< \copydoc ::vpx_codec_encode_fn_t */
     vpx_codec_get_cx_data_fn_t         get_cx_data;   /**< \copydoc ::vpx_codec_get_cx_data_fn_t */

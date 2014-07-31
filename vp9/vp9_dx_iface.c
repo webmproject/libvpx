@@ -707,6 +707,7 @@ CODEC_INTERFACE(vpx_codec_vp9_dx) = {
     decoder_set_fb_fn,  // vpx_codec_set_fb_fn_t
   },
   { // NOLINT
+    0,
     NOT_IMPLEMENTED,  // vpx_codec_enc_cfg_map_t
     NOT_IMPLEMENTED,  // vpx_codec_encode_fn_t
     NOT_IMPLEMENTED,  // vpx_codec_get_cx_data_fn_t
