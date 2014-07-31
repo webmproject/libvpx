@@ -1463,7 +1463,7 @@ static void rd_use_partition(VP9_COMP *cpi,
   pc_tree->partitioning = partition;
   save_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
 
-  if (bsize == BLOCK_16X16) {
+  if (bsize == BLOCK_16X16 && cpi->oxcf.aq_mode) {
     set_offsets(cpi, tile, mi_row, mi_col, bsize);
     x->mb_energy = vp9_block_energy(cpi, x, bsize);
   }
@@ -1993,10 +1993,10 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
   assert(num_8x8_blocks_wide_lookup[bsize] ==
              num_8x8_blocks_high_lookup[bsize]);
 
-  if (bsize == BLOCK_16X16) {
-    set_offsets(cpi, tile, mi_row, mi_col, bsize);
+  set_offsets(cpi, tile, mi_row, mi_col, bsize);
+
+  if (bsize == BLOCK_16X16 && cpi->oxcf.aq_mode)
     x->mb_energy = vp9_block_energy(cpi, x, bsize);
-  }
 
   if (cpi->sf.cb_partition_search && bsize == BLOCK_16X16) {
     int cb_partition_search_ctrl = ((pc_tree->index == 0 || pc_tree->index == 3)
