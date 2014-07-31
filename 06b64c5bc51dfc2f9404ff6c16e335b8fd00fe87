@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//dhw\u003d",
+        "filename": "test/vpxdec.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-07-31T03:59:20Z",
+      "side": 1,
+      "message": "@jzern: Here is where you get to say, \"I told you so\". I should\u0027ve have done things this way to begin with.",
+      "revId": "06b64c5bc51dfc2f9404ff6c16e335b8fd00fe87",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
