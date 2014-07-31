@@ -439,7 +439,8 @@ void vp9_setup_past_independence(VP9_COMMON *cm) {
   int i;
   vp9_clearall_segfeatures(&cm->seg);
   cm->seg.abs_delta = SEGMENT_DELTADATA;
-  if (cm->last_frame_seg_map)
+
+  if (cm->last_frame_seg_map && !cm->frame_parallel_decode)
     vpx_memset(cm->last_frame_seg_map, 0, (cm->mi_rows * cm->mi_cols));
 
   if (cm->current_frame_seg_map)
@@ -467,7 +468,7 @@ void vp9_setup_past_independence(VP9_COMMON *cm) {
     cm->frame_contexts[cm->frame_context_idx] = cm->fc;
   }
 
-  if (frame_is_intra_only(cm))
+  if (frame_is_intra_only(cm) && !cm->frame_parallel_decode)
     vpx_memset(cm->prev_mip, 0, cm->mi_stride * (cm->mi_rows + 1) *
                                     sizeof(*cm->prev_mip));
 

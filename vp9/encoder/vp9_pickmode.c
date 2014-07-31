@@ -484,7 +484,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
       if (cm->coding_use_prev_mi)
         vp9_find_mv_refs(cm, xd, tile, xd->mi[0], ref_frame,
-                         candidates, mi_row, mi_col);
+                         candidates, mi_row, mi_col, NULL, NULL);
       else
         const_motion[ref_frame] = mv_refs_rt(cm, xd, tile, xd->mi[0],
                                              ref_frame, candidates,

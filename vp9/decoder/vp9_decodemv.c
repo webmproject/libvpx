@@ -420,11 +420,18 @@ static int read_is_inter_block(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   }
 }
 
-static void read_inter_block_mode_info(VP9_COMMON *const cm,
+static void fpm_sync(void *const data, int mi_row) {
+  VP9Decoder *const pbi = (VP9Decoder *)data;
+  vp9_frameworker_wait(pbi->frame_worker_owner, pbi->prev_buf,
+                       mi_row << MI_BLOCK_SIZE_LOG2);
+}
+
+static void read_inter_block_mode_info(VP9Decoder *const pbi,
                                        MACROBLOCKD *const xd,
                                        const TileInfo *const tile,
                                        MODE_INFO *const mi,
                                        int mi_row, int mi_col, vp9_reader *r) {
+  VP9_COMMON *const cm = &pbi->common;
   MB_MODE_INFO *const mbmi = &mi->mbmi;
   const BLOCK_SIZE bsize = mbmi->sb_type;
   const int allow_hp = cm->allow_high_precision_mv;
@@ -438,7 +445,7 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
   for (ref = 0; ref < 1 + is_compound; ++ref) {
     const MV_REFERENCE_FRAME frame = mbmi->ref_frame[ref];
     vp9_find_mv_refs(cm, xd, tile, mi, frame, mbmi->ref_mvs[frame],
-                     mi_row, mi_col);
+                     mi_row, mi_col, fpm_sync, (void *)pbi);
   }
 
   inter_mode_ctx = mbmi->mode_context[mbmi->ref_frame[0]];
@@ -512,10 +519,13 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
   }
 }
 
-static void read_inter_frame_mode_info(VP9_COMMON *const cm,
+// TODO(hkuang): Pass cm instead of pbi. This requires change in
+// vp9_frameworker_wait.
+static void read_inter_frame_mode_info(VP9Decoder *const pbi,
                                        MACROBLOCKD *const xd,
                                        const TileInfo *const tile,
                                        int mi_row, int mi_col, vp9_reader *r) {
+  VP9_COMMON *const cm = &pbi->common;
   MODE_INFO *const mi = xd->mi[0];
   MB_MODE_INFO *const mbmi = &mi->mbmi;
   int inter_block;
@@ -529,16 +539,17 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
                                !mbmi->skip || !inter_block, r);
 
   if (inter_block)
-    read_inter_block_mode_info(cm, xd, tile, mi, mi_row, mi_col, r);
+    read_inter_block_mode_info(pbi, xd, tile, mi, mi_row, mi_col, r);
   else
     read_intra_block_mode_info(cm, mi, r);
 }
 
-void vp9_read_mode_info(VP9_COMMON *cm, MACROBLOCKD *xd,
+void vp9_read_mode_info(VP9Decoder *const pbi, MACROBLOCKD *xd,
                         const TileInfo *const tile,
                         int mi_row, int mi_col, vp9_reader *r) {
+  VP9_COMMON *const cm = &pbi->common;
   if (frame_is_intra_only(cm))
     read_intra_frame_mode_info(cm, xd, mi_row, mi_col, r);
   else
-    read_inter_frame_mode_info(cm, xd, tile, mi_row, mi_col, r);
+    read_inter_frame_mode_info(pbi, xd, tile, mi_row, mi_col, r);
 }

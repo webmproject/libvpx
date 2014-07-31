@@ -26,6 +26,7 @@
 #endif
 #include "vp9/common/vp9_quant_common.h"
 #include "vp9/common/vp9_systemdependent.h"
+#include "vp9/common/vp9_thread.h"
 
 #include "vp9/decoder/vp9_decodeframe.h"
 #include "vp9/decoder/vp9_decoder.h"
@@ -63,6 +64,7 @@ VP9Decoder *vp9_decoder_create(BufferPool *const pool) {
 
   // Initialize the references to not point to any frame buffers.
   vpx_memset(&cm->ref_frame_map, -1, sizeof(cm->ref_frame_map));
+  vpx_memset(&cm->next_ref_frame_map, -1, sizeof(cm->next_ref_frame_map));
 
   cm->current_video_frame = 0;
   pbi->ready_for_new_data = 1;
@@ -195,29 +197,51 @@ int vp9_get_reference_dec(VP9Decoder *pbi, int index, YV12_BUFFER_CONFIG **fb) {
   return 0;
 }
 
+static INLINE void decrease_ref_count(int idx, RefCntBuffer *const frame_bufs,
+                                      BufferPool *const pool) {
+  if (idx >= 0) {
+    --frame_bufs[idx].ref_count;
+    if (frame_bufs[idx].ref_count == 0) {
+      pool->release_fb_cb(pool->cb_priv, &frame_bufs[idx].raw_frame_buffer);
+    }
+  }
+}
+
 /* If any buffer updating is signaled it should be done here. */
 static void swap_frame_buffers(VP9Decoder *pbi) {
   int ref_index = 0, mask;
-  VP9_COMMON * const cm = &pbi->common;
-  BufferPool * const pool = cm->buffer_pool;
+  VP9_COMMON *const cm = &pbi->common;
+  BufferPool *const pool = cm->buffer_pool;
   RefCntBuffer *const frame_bufs = cm->buffer_pool->frame_bufs;
 
+  lock_buffer_pool(pool);
   for (mask = pbi->refresh_frame_flags; mask; mask >>= 1) {
-    if (mask & 1) {
-      const int old_idx = cm->ref_frame_map[ref_index];
-      ref_cnt_fb(frame_bufs, &cm->ref_frame_map[ref_index],
-                 cm->new_fb_idx);
-      if (old_idx >= 0 && frame_bufs[old_idx].ref_count == 0)
-        pool->release_fb_cb(pool->cb_priv,
-                            &frame_bufs[old_idx].raw_frame_buffer);
+    const int old_idx = cm->ref_frame_map[ref_index];
+    // Current thread releases the holding of reference frame.
+    decrease_ref_count(old_idx, frame_bufs, pool);
+
+    // Release the reference frame in reference map.
+    if ((mask & 1) && old_idx >= 0) {
+      decrease_ref_count(old_idx, frame_bufs, pool);
     }
+    cm->ref_frame_map[ref_index] = cm->next_ref_frame_map[ref_index];
     ++ref_index;
   }
+
+  // Current thread releases the holding of reference frame.
+  for (; ref_index < REF_FRAMES && !cm->show_existing_frame; ++ref_index) {
+    const int old_idx = cm->ref_frame_map[ref_index];
+    decrease_ref_count(old_idx, frame_bufs, pool);
+    cm->ref_frame_map[ref_index] = cm->next_ref_frame_map[ref_index];
+  }
+  unlock_buffer_pool(pool);
 
   cm->frame_to_show = get_frame_new_buffer(cm);
 
   if (!pbi->frame_parallel_decode || !cm->show_frame) {
+    lock_buffer_pool(pool);
     --frame_bufs[cm->new_fb_idx].ref_count;
+    unlock_buffer_pool(pool);
   }
 
   // Invalidate these references until the next frame starts.
@@ -256,6 +280,20 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
                         &frame_bufs[cm->new_fb_idx].raw_frame_buffer);
   cm->new_fb_idx = get_free_fb(cm);
 
+
+  if (pbi->frame_parallel_decode) {
+    VP9Worker *const worker = pbi->frame_worker_owner;
+    vp9_frameworker_lock_stats(worker);
+    frame_bufs[cm->new_fb_idx].frame_worker_owner = worker;
+    // Reset decoding progress.
+    pbi->cur_buf = &frame_bufs[cm->new_fb_idx];
+    pbi->cur_buf->row = -1;
+    pbi->cur_buf->col = -1;
+    vp9_frameworker_unlock_stats(worker);
+  } else {
+    pbi->cur_buf = &frame_bufs[cm->new_fb_idx];
+  }
+
   if (setjmp(cm->error.jmp)) {
     cm->error.setjmp = 0;
 
@@ -283,19 +321,38 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
 
   vp9_clear_system_state();
 
-  cm->last_width = cm->width;
-  cm->last_height = cm->height;
-
   if (!cm->show_existing_frame)
     cm->last_show_frame = cm->show_frame;
-  if (cm->show_frame) {
-    if (!cm->show_existing_frame)
-      vp9_swap_mi_and_prev_mi(cm);
 
-    cm->current_video_frame++;
+  // Update progress in frame parallel decode.
+  if (pbi->frame_parallel_decode) {
+    // Need to lock the mutex here as another thread may
+    // be accessing this buffer.
+    VP9Worker *const worker = pbi->frame_worker_owner;
+    FrameWorkerData *const frame_worker_data = worker->data1;
+    vp9_frameworker_lock_stats(worker);
+
+    if (cm->show_frame) {
+      if (!cm->show_existing_frame)
+        vp9_swap_mi_and_prev_mi(cm);
+      cm->current_video_frame++;
+    }
+    vp9_swap_current_and_last_seg_map(cm);
+    frame_worker_data->frame_decoded = 1;
+    frame_worker_data->frame_context_ready = 1;
+    vp9_frameworker_signal_stats(worker);
+    vp9_frameworker_unlock_stats(worker);
+  } else {
+    cm->last_width = cm->width;
+    cm->last_height = cm->height;
+    if (cm->show_frame) {
+      if (!cm->show_existing_frame)
+        vp9_swap_mi_and_prev_mi(cm);
+      cm->current_video_frame++;
+    }
+
+    vp9_swap_current_and_last_seg_map(cm);
   }
-
-  vp9_swap_current_and_last_seg_map(cm);
 
   pbi->ready_for_new_data = 0;
 

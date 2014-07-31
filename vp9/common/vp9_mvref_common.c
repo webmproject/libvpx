@@ -17,14 +17,12 @@ static void find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                              const TileInfo *const tile,
                              MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
                              int_mv *mv_ref_list,
-                             int block, int mi_row, int mi_col) {
+                             int block, int mi_row, int mi_col,
+                             find_mv_refs_sync sync, void *const data) {
   const int *ref_sign_bias = cm->ref_frame_sign_bias;
   int i, refmv_count = 0;
-  const MODE_INFO *prev_mi = cm->coding_use_prev_mi && cm->prev_mi
-        ? cm->prev_mi_grid_visible[mi_row * xd->mi_stride + mi_col]
-        : NULL;
-  const MB_MODE_INFO *const prev_mbmi = prev_mi ? &prev_mi->mbmi : NULL;
-
+  MODE_INFO *prev_mi = NULL;
+  MB_MODE_INFO *prev_mbmi = NULL;
 
   const POSITION *const mv_ref_search = mv_ref_blocks[mi->mbmi.sb_type];
 
@@ -71,6 +69,14 @@ static void find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
     }
   }
 
+  // Synchronize here for frame parallel decode if sync function is provided.
+  if (sync != NULL) {
+    sync(data, mi_row);
+  }
+  prev_mi = cm->coding_use_prev_mi && cm->prev_mi ?
+            cm->prev_mi_grid_visible[mi_row * xd->mi_stride + mi_col] : NULL;
+  prev_mbmi = prev_mi ? &prev_mi->mbmi : NULL;
+
   // Check the last frame's mode and mv info.
   if (prev_mbmi) {
     if (prev_mbmi->ref_frame[0] == ref_frame)
@@ -109,12 +115,13 @@ static void find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
 }
 
 void vp9_find_mv_refs(const VP9_COMMON *cm, const MACROBLOCKD *xd,
-                                    const TileInfo *const tile,
-                                    MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
-                                    int_mv *mv_ref_list,
-                                    int mi_row, int mi_col) {
+                      const TileInfo *const tile,
+                      MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
+                      int_mv *mv_ref_list,
+                      int mi_row, int mi_col,
+                      find_mv_refs_sync sync, void *const data) {
   find_mv_refs_idx(cm, xd, tile, mi, ref_frame, mv_ref_list, -1,
-                   mi_row, mi_col);
+                   mi_row, mi_col, sync, data);
 }
 
 static void lower_mv_precision(MV *mv, int allow_hp) {
@@ -152,7 +159,7 @@ void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
   assert(MAX_MV_REF_CANDIDATES == 2);
 
   find_mv_refs_idx(cm, xd, tile, mi, mi->mbmi.ref_frame[ref], mv_list, block,
-                   mi_row, mi_col);
+                   mi_row, mi_col, NULL, NULL);
 
   near->as_int = 0;
   switch (block) {
