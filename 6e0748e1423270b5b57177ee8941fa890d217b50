@@ -16,6 +16,24 @@
       "revId": "6e0748e1423270b5b57177ee8941fa890d217b50",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dgs\u003d",
+        "filename": "test/vpxdec.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-07-31T04:46:47Z",
+      "side": 1,
+      "message": "Sloppiness fixed in dependent commit.",
+      "parentUuid": "AAAAdn//dg8\u003d",
+      "revId": "6e0748e1423270b5b57177ee8941fa890d217b50",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
