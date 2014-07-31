@@ -252,7 +252,7 @@ tolower(){
 #
 source_path=${0%/*}
 enable_feature source_path_used
-if test -z "$source_path" -o "$source_path" = "." ; then
+if [ -z "$source_path" ] || [ "$source_path" = "." ]; then
     source_path="`pwd`"
     disable_feature source_path_used
 fi
@@ -549,7 +549,8 @@ process_common_cmdline() {
         alt_libc="${optval}"
         ;;
         --as=*)
-        [ "${optval}" = yasm -o "${optval}" = nasm -o "${optval}" = auto ] \
+        [ "${optval}" = yasm ] || [ "${optval}" = nasm ] \
+            || [ "${optval}" = auto ] \
             || die "Must be yasm, nasm or auto: ${optval}"
         alt_as="${optval}"
         ;;
@@ -557,8 +558,8 @@ process_common_cmdline() {
         w="${optval%%x*}"
         h="${optval##*x}"
         VAR_LIST="DECODE_WIDTH_LIMIT ${w} DECODE_HEIGHT_LIMIT ${h}"
-        [ ${w} -gt 0 -a ${h} -gt 0 ] || die "Invalid size-limit: too small."
-        [ ${w} -lt 65536 -a ${h} -lt 65536 ] \
+        [ ${w} -gt 0 ] && [ ${h} -gt 0 ] || die "Invalid size-limit: too small."
+        [ ${w} -lt 65536 ] && [ ${h} -lt 65536 ] \
             || die "Invalid size-limit: too big."
         enable_feature size_limit
         ;;
@@ -1152,7 +1153,7 @@ EOF
             auto|"")
                 which nasm >/dev/null 2>&1 && AS=nasm
                 which yasm >/dev/null 2>&1 && AS=yasm
-                [ "${AS}" = auto -o -z "${AS}" ] \
+                [ "${AS}" = auto ] || [ -z "${AS}" ] \
                     && die "Neither yasm nor nasm have been found"
             ;;
         esac
