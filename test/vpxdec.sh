@@ -27,31 +27,25 @@ vpxdec_available() {
   [ -n "$(vpx_tool_available vpxdec)" ] && echo yes
 }
 
-# Wrapper function for running vpxdec in noblit mode. Requires that
-# LIBVPX_BIN_PATH points to the directory containing vpxdec. Positional
-# parameter one is used as the input file path. Positional parameter two, when
-# present, is interpreted as a boolean flag that means the input should be sent
-# to vpxdec via pipe from cat instead of directly.
-vpxdec() {
-  local input="${1}"
-  local pipe_input=${2}
-
-  if [ $# -gt 2 ]; then
-    # shift away $1 and $2 so the remaining arguments can be passed to vpxdec
-    # via $@.
-    shift 2
-  fi
-
+# Wrapper function for running vpxdec with pipe input. Requires that
+# LIBVPX_BIN_PATH points to the directory containing vpxdec. $1 is used as the
+# input file path and shifted away. All remaining parameters are passed through
+# to vpxdec.
+vpxdec_pipe() {
   local decoder="${LIBVPX_BIN_PATH}/vpxdec${VPX_TEST_EXE_SUFFIX}"
+  local input="$1"
+  shift
+  cat "${input}" | eval "${VPX_TEST_PREFIX}" "${decoder}" - "$@" ${devnull}
+}
 
-  if [ -z "${pipe_input}" ]; then
-    eval "${VPX_TEST_PREFIX}" "${decoder}" "$input" --summary --noblit "$@" \
-        ${devnull}
-  else
-    cat "${input}" \
-        | eval "${VPX_TEST_PREFIX}" "${decoder}" - --summary --noblit "$@" \
-            ${devnull}
-  fi
+# Wrapper function for running vpxdec. Requires that LIBVPX_BIN_PATH points to
+# the directory containing vpxdec. $1 one is used as the input file path and
+# shifted away. All remaining parameters are passed through to vpxdec.
+vpxdec() {
+  local decoder="${LIBVPX_BIN_PATH}/vpxdec${VPX_TEST_EXE_SUFFIX}"
+  local input="${1}"
+  shift
+  eval "${VPX_TEST_PREFIX}" "${decoder}" "$input" "$@" ${devnull}
 }
 
 vpxdec_can_decode_vp8() {
@@ -70,20 +64,20 @@ vpxdec_can_decode_vp9() {
 
 vpxdec_vp8_ivf() {
   if [ "$(vpxdec_can_decode_vp8)" = "yes" ]; then
-    vpxdec "${VP8_IVF_FILE}"
+    vpxdec "${VP8_IVF_FILE}" --summary --noblit
   fi
 }
 
 vpxdec_vp8_ivf_pipe_input() {
   if [ "$(vpxdec_can_decode_vp8)" = "yes" ]; then
-    vpxdec "${VP8_IVF_FILE}" -
+    vpxdec_pipe "${VP8_IVF_FILE}" --summary --noblit
   fi
 }
 
 vpxdec_vp9_webm() {
   if [ "$(vpxdec_can_decode_vp9)" = "yes" ] && \
      [ "$(webm_io_available)" = "yes" ]; then
-    vpxdec "${VP9_WEBM_FILE}"
+    vpxdec "${VP9_WEBM_FILE}" --summary --noblit
   fi
 }
 
