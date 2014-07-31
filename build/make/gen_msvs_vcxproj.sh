@@ -262,15 +262,9 @@ case "$target" in
         asm_Release_cmdline="yasm -Xvc -f win32 ${yasmincs} &quot;%(FullPath)&quot;"
     ;;
     arm*)
+        platforms[0]="ARM"
         asm_Debug_cmdline="armasm -nologo &quot;%(FullPath)&quot;"
         asm_Release_cmdline="armasm -nologo &quot;%(FullPath)&quot;"
-        if [ "$name" = "obj_int_extract" ]; then
-            # We don't want to build this tool for the target architecture,
-            # but for an architecture we can run locally during the build.
-            platforms[0]="Win32"
-        else
-            platforms[0]="ARM"
-        fi
     ;;
     *) die "Unsupported target $target!"
     ;;
@@ -400,23 +394,13 @@ generate_vcxproj() {
                 if [ "$hostplat" == "ARM" ]; then
                     hostplat=Win32
                 fi
-                open_tag PreBuildEvent
-                tag_content Command "call obj_int_extract.bat &quot;$src_path_bare&quot; $hostplat\\\$(Configuration)"
-                close_tag PreBuildEvent
             fi
             open_tag ClCompile
             if [ "$config" = "Debug" ]; then
                 opt=Disabled
                 runtime=$debug_runtime
                 curlibs=$debug_libs
-                case "$name" in
-                obj_int_extract)
-                    debug=DEBUG
-                    ;;
-                *)
-                    debug=_DEBUG
-                    ;;
-                esac
+                debug=_DEBUG
             else
                 opt=MaxSpeed
                 runtime=$release_runtime
@@ -424,14 +408,7 @@ generate_vcxproj() {
                 tag_content FavorSizeOrSpeed Speed
                 debug=NDEBUG
             fi
-            case "$name" in
-            obj_int_extract)
-                extradefines=";_CONSOLE"
-                ;;
-            *)
-                extradefines=";$defines"
-                ;;
-            esac
+            extradefines=";$defines"
             tag_content Optimization $opt
             tag_content AdditionalIncludeDirectories "$incs;%(AdditionalIncludeDirectories)"
             tag_content PreprocessorDefinitions "WIN32;$debug;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE$extradefines;%(PreprocessorDefinitions)"
@@ -451,10 +428,6 @@ generate_vcxproj() {
             case "$proj_kind" in
             exe)
                 open_tag Link
-                if [ "$name" != "obj_int_extract" ]; then
-                    tag_content AdditionalDependencies "$curlibs;%(AdditionalDependencies)"
-                    tag_content AdditionalLibraryDirectories "$libdirs;%(AdditionalLibraryDirectories)"
-                fi
                 tag_content GenerateDebugInformation true
                 # Console is the default normally, but if
                 # AppContainerApplication is set, we need to override it.

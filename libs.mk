@@ -18,32 +18,6 @@ else
 endif
 
 #
-# Calculate platform- and compiler-specific offsets for hand coded assembly
-#
-ifeq ($(filter icc gcc,$(TGT_CC)), $(TGT_CC))
-OFFSET_PATTERN:='^[a-zA-Z0-9_]* EQU'
-define asm_offsets_template
-$$(BUILD_PFX)$(1): $$(BUILD_PFX)$(2).S
-	@echo "    [CREATE] $$@"
-	$$(qexec)LC_ALL=C grep $$(OFFSET_PATTERN) $$< | tr -d '$$$$\#' $$(ADS2GAS) > $$@
-$$(BUILD_PFX)$(2).S: $(2)
-CLEAN-OBJS += $$(BUILD_PFX)$(1) $(2).S
-endef
-else
-  ifeq ($(filter rvct,$(TGT_CC)), $(TGT_CC))
-define asm_offsets_template
-$$(BUILD_PFX)$(1): obj_int_extract
-$$(BUILD_PFX)$(1): $$(BUILD_PFX)$(2).o
-	@echo "    [CREATE] $$@"
-	$$(qexec)./obj_int_extract rvds $$< $$(ADS2GAS) > $$@
-OBJS-yes += $$(BUILD_PFX)$(2).o
-CLEAN-OBJS += $$(BUILD_PFX)$(1)
-$$(filter %$$(ASM).o,$$(OBJS-yes)): $$(BUILD_PFX)$(1)
-endef
-endif # rvct
-endif # !gcc
-
-#
 # Rule to generate runtime cpu detection files
 #
 define rtcd_h_template
@@ -212,26 +186,6 @@ CLEAN-OBJS += libvpx_srcs.txt
 ifeq ($(CONFIG_EXTERNAL_BUILD),yes)
 ifeq ($(CONFIG_MSVS),yes)
 
-obj_int_extract.bat: $(SRC_PATH_BARE)/build/$(MSVS_ARCH_DIR)/obj_int_extract.bat
-	@cp $^ $@
-
-obj_int_extract.$(VCPROJ_SFX): obj_int_extract.bat
-obj_int_extract.$(VCPROJ_SFX): $(SRC_PATH_BARE)/build/make/obj_int_extract.c
-	@echo "    [CREATE] $@"
-	$(qexec)$(GEN_VCPROJ) \
-    --exe \
-    --target=$(TOOLCHAIN) \
-    --name=obj_int_extract \
-    --ver=$(CONFIG_VS_VERSION) \
-    --proj-guid=E1360C65-D375-4335-8057-7ED99CC3F9B2 \
-    --src-path-bare="$(SRC_PATH_BARE)" \
-    $(if $(CONFIG_STATIC_MSVCRT),--static-crt) \
-    --out=$@ $^ \
-    -I. \
-    -I"$(SRC_PATH_BARE)" \
-
-PROJECTS-$(BUILD_LIBVPX) += obj_int_extract.$(VCPROJ_SFX)
-
 vpx.def: $(call enabled,CODEC_EXPORTS)
 	@echo "    [CREATE] $@"
 	$(qexec)$(SRC_PATH_BARE)/build/make/gen_msvs_def.sh\
@@ -246,7 +200,7 @@ ASM_INCLUDES := \
     vpx_config.asm \
     vpx_ports/x86_abi_support.asm \
 
-vpx.$(VCPROJ_SFX): $(CODEC_SRCS) vpx.def obj_int_extract.$(VCPROJ_SFX)
+vpx.$(VCPROJ_SFX): $(CODEC_SRCS) vpx.def
 	@echo "    [CREATE] $@"
 	$(qexec)$(GEN_VCPROJ) \
             $(if $(CONFIG_SHARED),--dll,--lib) \
@@ -377,7 +331,7 @@ CLEAN-OBJS += $(BUILD_PFX)vpx_config.asm
 endif
 
 #
-# Add assembler dependencies for configuration and offsets
+# Add assembler dependencies for configuration.
 #
 $(filter %.s.o,$(OBJS-yes)):     $(BUILD_PFX)vpx_config.asm
 $(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)vpx_config.asm
