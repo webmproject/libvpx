@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//dg8\u003d",
+        "filename": "test/vpxdec.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-31T04:44:46Z",
+      "side": 1,
+      "message": "seems like you\u0027d always want to shift 1 to remove input, but it\u0027s a harmless dup",
+      "revId": "6e0748e1423270b5b57177ee8941fa890d217b50",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
