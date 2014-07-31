@@ -16,6 +16,24 @@
       "revId": "e4eb0330fa7cc36951dc894e4ed2fc3b88390c56",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dfc\u003d",
+        "filename": "test/vp9_spatial_svc_encoder.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-07-31T05:42:07Z",
+      "side": 1,
+      "message": "it\u0027s getting run (no -p) on these files, the problem here is checkbashisms only looks for some BASH_* variables and only then with -x. this is safe but the behavior won\u0027t be what was intended",
+      "parentUuid": "AAAAdn//dfw\u003d",
+      "revId": "e4eb0330fa7cc36951dc894e4ed2fc3b88390c56",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
