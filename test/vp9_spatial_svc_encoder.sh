@@ -88,4 +88,8 @@ vp9_spatial_svc_tests="vp9_spatial_svc_mode_i
                        vp9_spatial_svc_mode_ip
                        vp9_spatial_svc_mode_gf"
 
-run_tests vp9_spatial_svc_encoder_verify_environment "${vp9_spatial_svc_tests}"
+if [ "$(vpx_config_option_enabled CONFIG_SPATIAL_SVC)" = "yes" ]; then
+  run_tests \
+    vp9_spatial_svc_encoder_verify_environment \
+    "${vp9_spatial_svc_tests}"
+fi
