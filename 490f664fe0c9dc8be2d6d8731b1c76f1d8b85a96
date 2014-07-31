@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//dlQ\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-07-31T14:50:15Z",
+      "side": 1,
+      "message": "assert(mode \u003e 0);\nis more explicit.",
+      "revId": "490f664fe0c9dc8be2d6d8731b1c76f1d8b85a96",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
