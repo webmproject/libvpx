@@ -1317,7 +1317,6 @@ static vpx_codec_enc_cfg_map_t encoder_usage_cfg_map[] = {
 #endif
     }
   },
-  { -1, {NOT_IMPLEMENTED}}
 };
 
 #ifndef VERSION_STRING
@@ -1340,6 +1339,7 @@ CODEC_INTERFACE(vpx_codec_vp9_cx) = {
     NOT_IMPLEMENTED   // vpx_codec_set_fb_fn_t
   },
   {  // NOLINT
+    1,                      // 1 cfg map
     encoder_usage_cfg_map,  // vpx_codec_enc_cfg_map_t
     encoder_encode,         // vpx_codec_encode_fn_t
     encoder_get_cxdata,     // vpx_codec_get_cx_data_fn_t

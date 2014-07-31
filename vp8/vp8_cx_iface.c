@@ -1326,7 +1326,6 @@ static vpx_codec_enc_cfg_map_t vp8e_usage_cfg_map[] =
         0,                  /* ts_periodicity */
         {0},                /* ts_layer_id */
     }},
-    { -1, {NOT_IMPLEMENTED}}
 };
 
 
@@ -1352,6 +1351,7 @@ CODEC_INTERFACE(vpx_codec_vp8_cx) =
         NOT_IMPLEMENTED,    /* vpx_codec_frame_get_fn_t  frame_get; */
     },
     {
+        1,                  /* 1 cfg map */
         vp8e_usage_cfg_map, /* vpx_codec_enc_cfg_map_t    peek_si; */
         vp8e_encode,        /* vpx_codec_encode_fn_t      encode; */
         vp8e_get_cxdata,    /* vpx_codec_get_cx_data_fn_t   frame_get; */

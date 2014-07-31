@@ -162,6 +162,7 @@ vpx_codec_err_t  vpx_codec_enc_config_default(vpx_codec_iface_t    *iface,
                                               unsigned int          usage) {
   vpx_codec_err_t res;
   vpx_codec_enc_cfg_map_t *map;
+  int i;
 
   if (!iface || !cfg || usage > INT_MAX)
     res = VPX_CODEC_INVALID_PARAM;
@@ -170,7 +171,8 @@ vpx_codec_err_t  vpx_codec_enc_config_default(vpx_codec_iface_t    *iface,
   else {
     res = VPX_CODEC_INVALID_PARAM;
 
-    for (map = iface->enc.cfg_maps; map->usage >= 0; map++) {
+    for (i = 0; i < iface->enc.cfg_map_count; ++i) {
+      map = iface->enc.cfg_maps + i;
       if (map->usage == (int)usage) {
         *cfg = map->cfg;
         cfg->g_usage = usage;

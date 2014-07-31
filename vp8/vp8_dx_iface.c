@@ -804,6 +804,7 @@ CODEC_INTERFACE(vpx_codec_vp8_dx) =
         NOT_IMPLEMENTED,
     },
     { /* encoder functions */
+        0,
         NOT_IMPLEMENTED,
         NOT_IMPLEMENTED,
         NOT_IMPLEMENTED,
