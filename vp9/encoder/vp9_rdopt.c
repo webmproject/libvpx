@@ -1991,7 +1991,7 @@ static INLINE void restore_dst_buf(MACROBLOCKD *xd,
 static void rd_encode_breakout_test(VP9_COMP *cpi, MACROBLOCK *x,
                                     BLOCK_SIZE bsize, int *rate2,
                                     int64_t *distortion, int64_t *distortion_uv,
-                                    int *disable_skip, int64_t this_rd) {
+                                    int *disable_skip) {
   VP9_COMMON *cm = &cpi->common;
   MACROBLOCKD *xd = &x->e_mbd;
   const BLOCK_SIZE y_size = get_plane_block_size(bsize, &xd->plane[0]);
@@ -2062,7 +2062,6 @@ static void rd_encode_breakout_test(VP9_COMP *cpi, MACROBLOCK *x,
           *distortion = (sse << 4) + *distortion_uv;
 
           *disable_skip = 1;
-          this_rd = RDCOST(x->rdmult, x->rddiv, *rate2, *distortion);
         }
       }
     }
@@ -2314,7 +2313,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   if (!is_comp_pred) {
     if (cpi->allow_encode_breakout)
       rd_encode_breakout_test(cpi, x, bsize, rate2, distortion, distortion_uv,
-                              disable_skip, this_rd);
+                              disable_skip);
   }
 
   if (!x->skip) {
