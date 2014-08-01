@@ -313,8 +313,8 @@ void vp9_model_rd_from_var_lapndz(unsigned int var, unsigned int n,
     int d_q10, r_q10;
     const uint64_t xsq_q10_64 =
         ((((uint64_t)qstep * qstep * n) << 10) + (var >> 1)) / var;
-    const int xsq_q10 = xsq_q10_64 > MAX_XSQ_Q10 ?
-                        MAX_XSQ_Q10 : (int)xsq_q10_64;
+    const int xsq_q10 = xsq_q10_64 > (uint64_t)MAX_XSQ_Q10 ?
+                        (int)MAX_XSQ_Q10 : (int)xsq_q10_64;
     model_rd_norm(xsq_q10, &r_q10, &d_q10);
     *rate = (n * r_q10 + 2) >> 2;
     *dist = (var * (int64_t)d_q10 + 512) >> 10;
