@@ -66,7 +66,7 @@ struct macroblock {
   int sadperbit4;
   int rddiv;
   int rdmult;
-  unsigned int mb_energy;
+  int mb_energy;
 
   int mv_best_ref_index[MAX_REF_FRAMES];
   unsigned int max_mv_context[MAX_REF_FRAMES];
