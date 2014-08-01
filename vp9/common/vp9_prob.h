@@ -44,7 +44,7 @@ typedef int8_t vp9_tree_index;
 typedef const vp9_tree_index vp9_tree[];
 
 static INLINE vp9_prob clip_prob(int p) {
-  return (p > 255) ? 255u : (p < 1) ? 1u : p;
+  return (p > 255) ? 255 : (p < 1) ? 1 : p;
 }
 
 static INLINE vp9_prob get_prob(int num, int den) {
