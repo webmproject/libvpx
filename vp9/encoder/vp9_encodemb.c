@@ -32,7 +32,7 @@ struct optimize_ctx {
 struct encode_b_args {
   MACROBLOCK *x;
   struct optimize_ctx *ctx;
-  unsigned char *skip;
+  int8_t *skip;
 };
 
 void vp9_subtract_block_c(int rows, int cols,
@@ -699,7 +699,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
 
 void vp9_encode_block_intra(MACROBLOCK *x, int plane, int block,
                             BLOCK_SIZE plane_bsize, TX_SIZE tx_size,
-                            unsigned char *skip) {
+                            int8_t *skip) {
   struct encode_b_args arg = {x, NULL, skip};
   encode_block_intra(plane, block, plane_bsize, tx_size, &arg);
 }

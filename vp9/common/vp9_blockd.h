@@ -124,9 +124,9 @@ typedef struct {
   BLOCK_SIZE sb_type;
   PREDICTION_MODE mode;
   TX_SIZE tx_size;
-  uint8_t skip;
-  uint8_t segment_id;
-  uint8_t seg_id_predicted;  // valid only when temporal_update is enabled
+  int8_t skip;
+  int8_t segment_id;
+  int8_t seg_id_predicted;  // valid only when temporal_update is enabled
 
   // Only for INTRA blocks
   PREDICTION_MODE uv_mode;
