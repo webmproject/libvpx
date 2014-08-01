@@ -1565,7 +1565,12 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
     ref_cnt_fb(cm->frame_bufs,
                &cm->ref_frame_map[cpi->alt_fb_idx], cm->new_fb_idx);
   } else if (!cpi->multi_arf_allowed && cpi->refresh_golden_frame &&
-             cpi->rc.is_src_frame_alt_ref && !cpi->use_svc) {
+             cpi->rc.is_src_frame_alt_ref &&
+             (!cpi->use_svc ||      // Add spatial svc base layer case here
+              (cpi->svc.number_temporal_layers == 1 &&
+               cpi->svc.spatial_layer_id == 0 &&
+               cpi->svc.layer_context[0].gold_ref_idx >=0 &&
+               cpi->oxcf.ss_play_alternate[0]))) {
     /* Preserve the previously existing golden frame and update the frame in
      * the alt ref slot instead. This is highly specific to the current use of
      * alt-ref as a forward reference, and this needs to be generalized as
@@ -1583,6 +1588,11 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
     tmp = cpi->alt_fb_idx;
     cpi->alt_fb_idx = cpi->gld_fb_idx;
     cpi->gld_fb_idx = tmp;
+
+    if (cpi->use_svc && cpi->svc.number_temporal_layers == 1) {
+      cpi->svc.layer_context[0].gold_ref_idx = cpi->gld_fb_idx;
+      cpi->svc.layer_context[0].alt_ref_idx = cpi->alt_fb_idx;
+    }
   } else { /* For non key/golden frames */
     if (cpi->refresh_alt_ref_frame) {
       int arf_idx = cpi->alt_fb_idx;

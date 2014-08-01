@@ -2119,7 +2119,8 @@ void configure_buffer_updates(VP9_COMP *cpi) {
       assert(0);
   }
   if (cpi->use_svc && cpi->svc.number_temporal_layers == 1) {
-    cpi->refresh_golden_frame = 0;
+    if (cpi->svc.layer_context[cpi->svc.spatial_layer_id].gold_ref_idx < 0)
+      cpi->refresh_golden_frame = 0;
     if (cpi->alt_ref_source == NULL)
       cpi->refresh_alt_ref_frame = 0;
   }
@@ -2219,6 +2220,9 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
   if (is_spatial_svc) {
     if (cpi->svc.spatial_layer_id == 0) {
       lc->is_key_frame = (cm->frame_type == KEY_FRAME);
+      if (lc->is_key_frame)
+        cpi->ref_frame_flags &=
+            (~VP9_LAST_FLAG & ~VP9_GOLD_FLAG & ~VP9_ALT_FLAG);
     } else {
       cm->frame_type = INTER_FRAME;
       lc->is_key_frame = cpi->svc.layer_context[0].is_key_frame;
