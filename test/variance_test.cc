@@ -757,20 +757,25 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(6, 6, subpel_avg_variance64x64_avx2)));
 #endif  // HAVE_AVX2
 #if HAVE_NEON
+const vp9_variance_fn_t variance8x8_neon = vp9_variance8x8_neon;
 const vp9_variance_fn_t variance16x16_neon = vp9_variance16x16_neon;
 const vp9_variance_fn_t variance32x32_neon = vp9_variance32x32_neon;
 INSTANTIATE_TEST_CASE_P(
     NEON, VP9VarianceTest,
-    ::testing::Values(make_tuple(4, 4, variance16x16_neon),
+    ::testing::Values(make_tuple(3, 3, variance8x8_neon),
+                      make_tuple(4, 4, variance16x16_neon),
                       make_tuple(5, 5, variance32x32_neon)));
 
+const vp9_subpixvariance_fn_t subpel_variance8x8_neon =
+    vp9_sub_pixel_variance8x8_neon;
 const vp9_subpixvariance_fn_t subpel_variance16x16_neon =
     vp9_sub_pixel_variance16x16_neon;
 const vp9_subpixvariance_fn_t subpel_variance32x32_neon =
     vp9_sub_pixel_variance32x32_neon;
 INSTANTIATE_TEST_CASE_P(
     NEON, VP9SubpelVarianceTest,
-    ::testing::Values(make_tuple(4, 4, subpel_variance16x16_neon),
+    ::testing::Values(make_tuple(3, 3, subpel_variance8x8_neon),
+                      make_tuple(4, 4, subpel_variance16x16_neon),
                       make_tuple(5, 5, subpel_variance32x32_neon)));
 #endif  // HAVE_NEON
 #endif  // CONFIG_VP9_ENCODER
