@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//dSI\u003d",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 316,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-02T02:22:03Z",
+      "side": 1,
+      "message": "this is a bit gross, you could localize the const to the function and instead of casting each branch just cast the full expression",
+      "revId": "4345d18e1d11d5850aac17e5df2a6bc621ec991e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
