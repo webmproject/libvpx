@@ -34,6 +34,24 @@
       "revId": "80f8ead4f951ea106d0840e0e58dea0ae840118d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dQw\u003d",
+        "filename": "vp9/common/vp9_entropy.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-02T04:26:05Z",
+      "side": 1,
+      "message": "Jim\u0027s motivation for these patches was -Wextra under gcc, btw",
+      "parentUuid": "AAAAdn//dQ4\u003d",
+      "revId": "80f8ead4f951ea106d0840e0e58dea0ae840118d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
