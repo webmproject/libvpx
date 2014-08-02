@@ -7,13 +7,9 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
-#include <climits>
-#include <vector>
 #include "third_party/googletest/src/include/gtest/gtest.h"
 #include "test/codec_factory.h"
-#include "test/encode_test_driver.h"
-#include "test/i420_video_source.h"
-#include "test/util.h"
+#include "test/video_source.h"
 
 namespace {
 
@@ -33,10 +29,7 @@ class VP9FrameSizeTestsLarge
   virtual bool HandleDecodeResult(const vpx_codec_err_t res_dec,
                                   const libvpx_test::VideoSource &video,
                                   libvpx_test::Decoder *decoder) {
-    EXPECT_EQ(expected_res_, res_dec)
-        << "Expected " << expected_res_
-        << "but got " << res_dec;
-
+    EXPECT_EQ(expected_res_, res_dec) << decoder->DecodeError();
     return !::testing::Test::HasFailure();
   }
 
