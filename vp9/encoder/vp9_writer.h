@@ -22,14 +22,9 @@ extern "C" {
 typedef struct {
   unsigned int lowvalue;
   unsigned int range;
-  unsigned int value;
   int count;
   unsigned int pos;
   uint8_t *buffer;
-
-  // Variables used to track bit costs without outputing to the bitstream
-  unsigned int  measure_cost;
-  uint64_t bit_counter;
 } vp9_writer;
 
 void vp9_start_encode(vp9_writer *bc, uint8_t *buffer);
