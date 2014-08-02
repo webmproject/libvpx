@@ -16,6 +16,24 @@
       "revId": "68b88136d1fc8dc6be6e014b8776d4bd01750ca5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dRU\u003d",
+        "filename": "test/decode_test_driver.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-08-02T04:09:24Z",
+      "side": 1,
+      "message": "I prefer this way because cxdata() is only called once and it is just a getter function without any computation inside.",
+      "parentUuid": "AAAAdn//dRs\u003d",
+      "revId": "68b88136d1fc8dc6be6e014b8776d4bd01750ca5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
