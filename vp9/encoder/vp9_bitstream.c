@@ -121,7 +121,7 @@ static void update_switchable_interp_probs(VP9_COMMON *cm, vp9_writer *w) {
 }
 
 static void pack_mb_tokens(vp9_writer *w,
-                           TOKENEXTRA **tp, const TOKENEXTRA *stop) {
+                           TOKENEXTRA **tp, const TOKENEXTRA *const stop) {
   TOKENEXTRA *p = *tp;
 
   while (p < stop && p->token != EOSB_TOKEN) {
@@ -368,9 +368,10 @@ static void write_mb_modes_kf(const VP9_COMP *cpi, MODE_INFO **mi_8x8,
 }
 
 static void write_modes_b(VP9_COMP *cpi, const TileInfo *const tile,
-                          vp9_writer *w, TOKENEXTRA **tok, TOKENEXTRA *tok_end,
+                          vp9_writer *w, TOKENEXTRA **tok,
+                          const TOKENEXTRA *const tok_end,
                           int mi_row, int mi_col) {
-  VP9_COMMON *const cm = &cpi->common;
+  const VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   MODE_INFO *m;
 
@@ -391,7 +392,8 @@ static void write_modes_b(VP9_COMP *cpi, const TileInfo *const tile,
   pack_mb_tokens(w, tok, tok_end);
 }
 
-static void write_partition(VP9_COMMON *cm, MACROBLOCKD *xd,
+static void write_partition(const VP9_COMMON *const cm,
+                            const MACROBLOCKD *const xd,
                             int hbs, int mi_row, int mi_col,
                             PARTITION_TYPE p, BLOCK_SIZE bsize, vp9_writer *w) {
   const int ctx = partition_plane_context(xd, mi_row, mi_col, bsize);
@@ -413,17 +415,17 @@ static void write_partition(VP9_COMMON *cm, MACROBLOCKD *xd,
 }
 
 static void write_modes_sb(VP9_COMP *cpi,
-                           const TileInfo *const tile,
-                           vp9_writer *w, TOKENEXTRA **tok, TOKENEXTRA *tok_end,
+                           const TileInfo *const tile, vp9_writer *w,
+                           TOKENEXTRA **tok, const TOKENEXTRA *const tok_end,
                            int mi_row, int mi_col, BLOCK_SIZE bsize) {
-  VP9_COMMON *const cm = &cpi->common;
+  const VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
 
   const int bsl = b_width_log2(bsize);
   const int bs = (1 << bsl) / 4;
   PARTITION_TYPE partition;
   BLOCK_SIZE subsize;
-  MODE_INFO *m = cm->mi_grid_visible[mi_row * cm->mi_stride + mi_col];
+  const MODE_INFO *m = cm->mi_grid_visible[mi_row * cm->mi_stride + mi_col];
 
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return;
@@ -469,8 +471,8 @@ static void write_modes_sb(VP9_COMP *cpi,
 }
 
 static void write_modes(VP9_COMP *cpi,
-                        const TileInfo *const tile,
-                        vp9_writer *w, TOKENEXTRA **tok, TOKENEXTRA *tok_end) {
+                        const TileInfo *const tile, vp9_writer *w,
+                        TOKENEXTRA **tok, const TOKENEXTRA *const tok_end) {
   int mi_row, mi_col;
 
   for (mi_row = tile->mi_row_start; mi_row < tile->mi_row_end;
@@ -731,7 +733,7 @@ static void write_delta_q(struct vp9_write_bit_buffer *wb, int delta_q) {
   }
 }
 
-static void encode_quantization(VP9_COMMON *cm,
+static void encode_quantization(const VP9_COMMON *const cm,
                                 struct vp9_write_bit_buffer *wb) {
   vp9_wb_write_literal(wb, cm->base_qindex, QINDEX_BITS);
   write_delta_q(wb, cm->y_dc_delta_q);
@@ -869,7 +871,8 @@ static void fix_interp_filter(VP9_COMMON *cm) {
   }
 }
 
-static void write_tile_info(VP9_COMMON *cm, struct vp9_write_bit_buffer *wb) {
+static void write_tile_info(const VP9_COMMON *const cm,
+                            struct vp9_write_bit_buffer *wb) {
   int min_log2_tile_cols, max_log2_tile_cols, ones;
   vp9_get_tile_n_bits(cm->mi_cols, &min_log2_tile_cols, &max_log2_tile_cols);
 
