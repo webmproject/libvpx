@@ -2117,6 +2117,7 @@ void configure_buffer_updates(VP9_COMP *cpi) {
       break;
     default:
       assert(0);
+      break;
   }
   if (cpi->use_svc && cpi->svc.number_temporal_layers == 1) {
     cpi->refresh_golden_frame = 0;

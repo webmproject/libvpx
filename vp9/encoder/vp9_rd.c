@@ -357,6 +357,7 @@ void vp9_get_entropy_contexts(BLOCK_SIZE bsize, TX_SIZE tx_size,
       break;
     default:
       assert(0 && "Invalid transform size.");
+      break;
   }
 }
 

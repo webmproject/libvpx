@@ -2628,6 +2628,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         case NONE:
         case MAX_REF_FRAMES:
           assert(0 && "Invalid Reference frame");
+          break;
       }
     }
     if (mode_skip_mask & (1 << mode_index))
@@ -3225,6 +3226,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
           case NONE:
           case MAX_REF_FRAMES:
             assert(0 && "Invalid Reference frame");
+            break;
         }
       }
       if (mode_skip_mask & (1 << ref_index))

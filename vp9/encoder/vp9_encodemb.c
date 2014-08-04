@@ -348,6 +348,7 @@ void vp9_xform_quant_fp(MACROBLOCK *x, int plane, int block,
       break;
     default:
       assert(0);
+      break;
   }
 }
 
@@ -394,6 +395,7 @@ void vp9_xform_quant_dc(MACROBLOCK *x, int plane, int block,
       break;
     default:
       assert(0);
+      break;
   }
 }
 
@@ -444,6 +446,7 @@ void vp9_xform_quant(MACROBLOCK *x, int plane, int block,
       break;
     default:
       assert(0);
+      break;
   }
 }
 
@@ -521,6 +524,7 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
       break;
     default:
       assert(0 && "Invalid transform size");
+      break;
   }
 }
 
@@ -692,6 +696,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
       break;
     default:
       assert(0);
+      break;
   }
   if (*eob)
     *(args->skip) = 0;

@@ -297,6 +297,7 @@ static vpx_codec_err_t validate_img(vpx_codec_alg_priv_t *ctx,
     default:
       ERROR("Invalid image format. Only YV12, I420, I422, I444 images are "
             "supported.");
+      break;
   }
 
   if (img->d_w != ctx->cfg.g_w || img->d_h != ctx->cfg.g_h)
@@ -311,7 +312,7 @@ static int get_image_bps(const vpx_image_t *img) {
     case VPX_IMG_FMT_I420: return 12;
     case VPX_IMG_FMT_I422: return 16;
     case VPX_IMG_FMT_I444: return 24;
-    default: assert(0 && "Invalid image format");
+    default: assert(0 && "Invalid image format"); break;
   }
   return 0;
 }

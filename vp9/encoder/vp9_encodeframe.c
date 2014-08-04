@@ -293,6 +293,7 @@ static void tree_to_node(void *data, BLOCK_SIZE bsize, variance_node *node) {
     }
     default: {
       assert(0);
+      break;
     }
   }
 }
@@ -985,6 +986,7 @@ static void encode_sb(VP9_COMP *cpi, const TileInfo *const tile,
       break;
     default:
       assert("Invalid partition type.");
+      break;
   }
 
   if (partition != PARTITION_SPLIT || bsize == BLOCK_8X8)
@@ -1412,6 +1414,7 @@ static void encode_sb_rt(VP9_COMP *cpi, const TileInfo *const tile,
       break;
     default:
       assert("Invalid partition type.");
+      break;
   }
 
   if (partition != PARTITION_SPLIT || bsize == BLOCK_8X8)
@@ -1590,6 +1593,7 @@ static void rd_use_partition(VP9_COMP *cpi,
       break;
     default:
       assert(0);
+      break;
   }
 
   pl = partition_plane_context(xd, mi_row, mi_col, bsize);
@@ -2952,6 +2956,7 @@ static void nonrd_use_partition(VP9_COMP *cpi,
       break;
     default:
       assert("Invalid partition type.");
+      break;
   }
 
   if (bsize == BLOCK_64X64 && output_enabled) {
@@ -3028,6 +3033,7 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
         break;
       default:
         assert(0);
+        break;
     }
   }
 }
