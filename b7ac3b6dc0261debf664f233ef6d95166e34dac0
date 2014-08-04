@@ -16,6 +16,24 @@
       "revId": "b7ac3b6dc0261debf664f233ef6d95166e34dac0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dPk\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-08-04T15:58:49Z",
+      "side": 1,
+      "message": "yes this is a big structure.   This was part of the optimizations made by scott to cut down on the size of this structure. They used to be ints.    this is still a big structure though...",
+      "parentUuid": "AAAAdn//dSY\u003d",
+      "revId": "b7ac3b6dc0261debf664f233ef6d95166e34dac0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
