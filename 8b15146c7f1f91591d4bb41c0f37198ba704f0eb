@@ -1,0 +1,616 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//dMI\u003d",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-04T21:10:04Z",
+      "side": 1,
+      "message": "border",
+      "revId": "8b15146c7f1f91591d4bb41c0f37198ba704f0eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dKs\u003d",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-04T21:10:04Z",
+      "side": 1,
+      "message": "\"...prev_mip comes from another thread, so current...\"",
+      "revId": "8b15146c7f1f91591d4bb41c0f37198ba704f0eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dN4\u003d",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-04T21:10:04Z",
+      "side": 1,
+      "message": "Update the comment explaining what the additional 5 buffers are needed for.",
+      "revId": "8b15146c7f1f91591d4bb41c0f37198ba704f0eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dN0\u003d",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-04T21:10:04Z",
+      "side": 1,
+      "message": "owner_frame_worker presumably.",
+      "revId": "8b15146c7f1f91591d4bb41c0f37198ba704f0eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dNs\u003d",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-04T21:10:04Z",
+      "side": 1,
+      "message": "what units are row and col?\n\"...They are reset to -1 when decoding begins and set to INT_MAX when the frame is fully decoded.\"",
+      "revId": "8b15146c7f1f91591d4bb41c0f37198ba704f0eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dNo\u003d",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-04T21:10:04Z",
+      "side": 1,
+      "message": "\"...for the next frame...\"",
+      "revId": "8b15146c7f1f91591d4bb41c0f37198ba704f0eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dNk\u003d",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-04T21:10:04Z",
+      "side": 1,
+      "message": "// Frame-base threading.\nAs your comment infers, why do we need this in VP9_COMMON?",
+      "revId": "8b15146c7f1f91591d4bb41c0f37198ba704f0eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dJ0\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 862,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-04T21:10:04Z",
+      "side": 1,
+      "message": "// Wait until the mi in the previous frame is ready.\"",
+      "revId": "8b15146c7f1f91591d4bb41c0f37198ba704f0eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dJw\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 1543,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-04T21:10:04Z",
+      "side": 1,
+      "message": "Remove commented out code.",
+      "revId": "8b15146c7f1f91591d4bb41c0f37198ba704f0eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dNA\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-04T21:10:04Z",
+      "side": 1,
+      "message": "This seems to be replicated; delete it.",
+      "revId": "8b15146c7f1f91591d4bb41c0f37198ba704f0eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dKY\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-04T21:10:04Z",
+      "side": 1,
+      "message": "Combine with the \u0027if\u0027 above:\nif (old_idx \u003e\u003d 0) {\n  --pool-\u003eframe_bufs[old_idx].ref_count;\n  if (frame_bufs[old_idx].ref_count \u003d\u003d 0)\n    pool-\u003erelease_fb_cb(pool-\u003ecb_priv,\t219\n                              \u0026frame_bufs[old_idx].raw_frame_buffer);\n}",
+      "revId": "8b15146c7f1f91591d4bb41c0f37198ba704f0eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dKU\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-04T21:10:04Z",
+      "side": 1,
+      "message": "Both clauses here contain almost exactly the same code... rationalize into one.",
+      "revId": "8b15146c7f1f91591d4bb41c0f37198ba704f0eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dJ8\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-04T21:10:04Z",
+      "side": 1,
+      "message": "macro or const int instead of -1.",
+      "revId": "8b15146c7f1f91591d4bb41c0f37198ba704f0eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dJ4\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 337,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-04T21:10:04Z",
+      "side": 1,
+      "message": "delete line",
+      "revId": "8b15146c7f1f91591d4bb41c0f37198ba704f0eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dNI\u003d",
+        "filename": "vp9/decoder/vp9_decoder.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-04T21:10:04Z",
+      "side": 1,
+      "message": "Capital letter at start of comment (same for next 3 comments below).",
+      "revId": "8b15146c7f1f91591d4bb41c0f37198ba704f0eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dNE\u003d",
+        "filename": "vp9/decoder/vp9_decoder.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-04T21:10:04Z",
+      "side": 1,
+      "message": "Maybe move these 2 lines above the loop filter related vars above so that the frame-related and loop-filter related vars are grouped.",
+      "revId": "8b15146c7f1f91591d4bb41c0f37198ba704f0eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dM0\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 290,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-04T21:10:04Z",
+      "side": 1,
+      "message": "// Check if worker has already releases ref_buf.",
+      "revId": "8b15146c7f1f91591d4bb41c0f37198ba704f0eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dMw\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 291,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-04T21:10:04Z",
+      "side": 1,
+      "message": "If worker is NULL you\u0027ve already crashed due to its use above. You should either assume it can\u0027t be NULL or test before use.",
+      "revId": "8b15146c7f1f91591d4bb41c0f37198ba704f0eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dMs\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 293,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-04T21:10:04Z",
+      "side": 1,
+      "message": "Is the lock ok here since you\u0027ve already accessed worker_data members above?",
+      "revId": "8b15146c7f1f91591d4bb41c0f37198ba704f0eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dMo\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 313,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-04T21:10:04Z",
+      "side": 1,
+      "message": "Is the lock ok here, you\u0027ve already accessed worker_data members above?",
+      "revId": "8b15146c7f1f91591d4bb41c0f37198ba704f0eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dMk\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 329,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-04T21:10:04Z",
+      "side": 1,
+      "message": "indent",
+      "revId": "8b15146c7f1f91591d4bb41c0f37198ba704f0eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dMg\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 331,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-04T21:10:04Z",
+      "side": 1,
+      "message": "indent",
+      "revId": "8b15146c7f1f91591d4bb41c0f37198ba704f0eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dMc\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 352,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-04T21:10:04Z",
+      "side": 1,
+      "message": "remove space -- did this compile?",
+      "revId": "8b15146c7f1f91591d4bb41c0f37198ba704f0eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dMY\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-04T21:10:04Z",
+      "side": 1,
+      "message": "Would all these be better implemented as memcpy?",
+      "revId": "8b15146c7f1f91591d4bb41c0f37198ba704f0eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dMU\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 379,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-04T21:10:04Z",
+      "side": 1,
+      "message": "remove space.",
+      "revId": "8b15146c7f1f91591d4bb41c0f37198ba704f0eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dMQ\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 382,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-04T21:10:04Z",
+      "side": 1,
+      "message": "remove space.",
+      "revId": "8b15146c7f1f91591d4bb41c0f37198ba704f0eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dMM\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 386,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-04T21:10:04Z",
+      "side": 1,
+      "message": "Better to conditionally compile in all the multi-threading functions and calls to them using the CONFIG_MULTITHREAD macro rather than using the macro to define null behavior if multi-threading is disabled.",
+      "revId": "8b15146c7f1f91591d4bb41c0f37198ba704f0eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dNg\u003d",
+        "filename": "vp9/decoder/vp9_dthread.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-04T21:10:04Z",
+      "side": 1,
+      "message": "Space before *",
+      "revId": "8b15146c7f1f91591d4bb41c0f37198ba704f0eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dNc\u003d",
+        "filename": "vp9/decoder/vp9_dthread.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-04T21:10:04Z",
+      "side": 1,
+      "message": "\"Worker data for...\"",
+      "revId": "8b15146c7f1f91591d4bb41c0f37198ba704f0eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dNY\u003d",
+        "filename": "vp9/decoder/vp9_dthread.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-04T21:10:04Z",
+      "side": 1,
+      "message": "Move to be immediately before the 2 vars it refers to.\n\"The following two variables could be obtained in other ways, but are shadowed here to considerably reduce access time.\"",
+      "revId": "8b15146c7f1f91591d4bb41c0f37198ba704f0eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dNU\u003d",
+        "filename": "vp9/decoder/vp9_dthread.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-04T21:10:04Z",
+      "side": 1,
+      "message": "Finished",
+      "revId": "8b15146c7f1f91591d4bb41c0f37198ba704f0eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dNQ\u003d",
+        "filename": "vp9/decoder/vp9_dthread.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-04T21:10:04Z",
+      "side": 1,
+      "message": "\"...waiting on it can resume decoding.\"",
+      "revId": "8b15146c7f1f91591d4bb41c0f37198ba704f0eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dJs\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-04T21:10:04Z",
+      "side": 1,
+      "message": "remove white space",
+      "revId": "8b15146c7f1f91591d4bb41c0f37198ba704f0eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dJo\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-04T21:10:04Z",
+      "side": 1,
+      "message": "//-style comments to match other comments in nearby code.",
+      "revId": "8b15146c7f1f91591d4bb41c0f37198ba704f0eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dJg\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 912,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-04T21:10:04Z",
+      "side": 1,
+      "message": "I think you need to remove this clause altogether don\u0027t you. Its aim was to trap the case where parallel decode was requested, but not implemented.",
+      "revId": "8b15146c7f1f91591d4bb41c0f37198ba704f0eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dNM\u003d",
+        "filename": "vpx/vpx_frame_buffer.h",
+        "patchSetId": 28
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-04T21:10:04Z",
+      "side": 1,
+      "message": "Extend the comment to explain why you need the additional 9 buffers.\"",
+      "revId": "8b15146c7f1f91591d4bb41c0f37198ba704f0eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
