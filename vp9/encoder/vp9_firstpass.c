@@ -225,26 +225,6 @@ static void subtract_stats(FIRSTPASS_STATS *section,
   section->duration   -= frame->duration;
 }
 
-static void avg_stats(FIRSTPASS_STATS *section) {
-  if (section->count < 1.0)
-    return;
-
-  section->intra_error /= section->count;
-  section->coded_error /= section->count;
-  section->sr_coded_error /= section->count;
-  section->pcnt_inter  /= section->count;
-  section->pcnt_second_ref /= section->count;
-  section->pcnt_neutral /= section->count;
-  section->pcnt_motion /= section->count;
-  section->MVr        /= section->count;
-  section->mvr_abs     /= section->count;
-  section->MVc        /= section->count;
-  section->mvc_abs     /= section->count;
-  section->MVrv       /= section->count;
-  section->MVcv       /= section->count;
-  section->mv_in_out_count   /= section->count;
-  section->duration   /= section->count;
-}
 
 // Calculate a modified Error used in distributing bits between easier and
 // harder frames.
