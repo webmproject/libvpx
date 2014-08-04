@@ -52,6 +52,24 @@
       "revId": "80f8ead4f951ea106d0840e0e58dea0ae840118d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dP4\u003d",
+        "filename": "vp9/common/vp9_entropy.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-08-04T15:55:51Z",
+      "side": 1,
+      "message": "not sure where this ended up.   I rebased...\n\ngcc warns here because asserts turn into noop and gcc sees it as a case without warning ( even though its the last one).   \n\nI grouped all of these into one cl because I wasn\u0027t super fond of any of them....     Just was the easiest way to get past the warning...    \n\nI tried removing the case altogether for a couple but that turned out to be a bigger cl...",
+      "parentUuid": "AAAAdn//dQw\u003d",
+      "revId": "80f8ead4f951ea106d0840e0e58dea0ae840118d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
