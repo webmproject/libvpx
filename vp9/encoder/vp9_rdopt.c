@@ -191,7 +191,7 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
       int64_t dist;
       int64_t square_error = sse;
       int quantizer = (pd->dequant[1] >> 3);
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH
       if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
         quantizer >>= (xd->bps - 8);
       }
@@ -207,7 +207,7 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
     } else {
       int rate;
       int64_t dist;
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH
       if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
         vp9_model_rd_from_var_lapndz(sse, 1 << num_pels_log2_lookup[bs],
                                      pd->dequant[1] >> (xd->bps - 5),
@@ -244,7 +244,7 @@ int64_t vp9_block_error_c(const tran_low_t *coeff, const tran_low_t *dqcoeff,
   return error;
 }
 
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH
 int64_t vp9_high_block_error_c(const tran_low_t *coeff,
                                const tran_low_t *dqcoeff, intptr_t block_size,
                                int64_t *ssz, int bps) {
@@ -304,7 +304,7 @@ static INLINE int cost_coeffs(MACROBLOCK *x,
   assert(type == PLANE_TYPE_Y ? mbmi->tx_size == tx_size
                               : get_uv_tx_size(mbmi, pd) == tx_size);
 
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_QUANT
   if (xd->bps == 12) {
     dct_value_tokens = vp9_dct_value_tokens_high12_ptr;
     dct_value_cost = vp9_dct_value_cost_high12_ptr;
@@ -371,7 +371,7 @@ static INLINE int cost_coeffs(MACROBLOCK *x,
 
   return cost;
 }
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH
 static void dist_block(int plane, int block, TX_SIZE tx_size,
                        struct rdcost_block_args* args, int bps) {
 #else
@@ -387,7 +387,7 @@ static void dist_block(int plane, int block, TX_SIZE tx_size,
   int shift = tx_size == TX_32X32 ? 0 : 2;
   tran_low_t *const coeff = BLOCK_OFFSET(p->coeff, block);
   tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH
   args->dist = vp9_high_block_error(coeff, dqcoeff, 16 << ss_txfrm_size,
                                     &this_sse, bps) >> shift;
 #else
@@ -400,7 +400,7 @@ static void dist_block(int plane, int block, TX_SIZE tx_size,
     // TODO(jingning): tune the model to better capture the distortion.
     int64_t p = (pd->dequant[1] * pd->dequant[1] *
                     (1 << ss_txfrm_size)) >> (shift + 2);
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH
     if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
       p >>= ((xd->bps - 8) * 2);
     }
@@ -437,7 +437,7 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
     vp9_encode_block_intra(x, plane, block, plane_bsize, tx_size, &mbmi->skip);
   else
     vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH
   if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
     dist_block(plane, block, tx_size, args, xd->bps);
   } else {
@@ -782,7 +782,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
             ratey += cost_coeffs(x, 0, block, tempa + idx, templ + idy, TX_4X4,
                                so->scan, so->neighbors,
                                cpi->sf.use_fast_coef_costing);
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH
             distortion += vp9_high_block_error(coeff,
                             BLOCK_OFFSET(pd->dqcoeff, block), 16, &unused,
                             xd->bps) >> 2;
@@ -1339,7 +1339,7 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
       x->fwd_txm4x4(raster_block_offset_int16(BLOCK_8X8, k, p->src_diff),
                     coeff, 8);
       vp9_regular_quantize_b_4x4(x, 0, k, so->scan, so->iscan);
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH
       if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
         thisdistortion += vp9_high_block_error(coeff,
                                                BLOCK_OFFSET(pd->dqcoeff, k),
@@ -2545,7 +2545,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
         // Calculate threshold according to dequant value.
         thresh_ac = (xd->plane[0].dequant[1] * xd->plane[0].dequant[1]) / 9;
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH
         if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
           const int shift = 2 * xd->bps - 16;
           if (shift > 0)
@@ -2558,7 +2558,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         thresh_ac >>= 8 - (b_width_log2(bsize) +
             b_height_log2(bsize));
         thresh_dc = (xd->plane[0].dequant[0] * xd->plane[0].dequant[0] >> 6);
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH
         if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
           const int shift = 2 * xd->bps - 16;
           if (shift > 0)
@@ -3157,7 +3157,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
           int qstep = xd->plane[0].dequant[1];
           // TODO(debargha): Enhance this by specializing for each mode_index
           int scale = 4;
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH
         if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
           qstep >>= (xd->bps - 8);
         }
@@ -3892,7 +3892,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
           int qstep = xd->plane[0].dequant[1];
           // TODO(debargha): Enhance this by specializing for each mode_index
           int scale = 4;
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH
           if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
             qstep >>= (xd->bps - 8);
           }

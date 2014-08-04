@@ -275,7 +275,6 @@ EXPERIMENT_LIST="
     vp9_high
     multiple_arf
     spatial_svc
-    high_transforms
     high_quant
     denoising
     emulate_hw_high

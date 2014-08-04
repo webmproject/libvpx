@@ -26,7 +26,7 @@ void vp9_tokenize_initialize();
 
 typedef struct {
   int16_t token;
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_QUANT
   int32_t extra;
 #else
   int16_t extra;
@@ -35,7 +35,7 @@ typedef struct {
 
 typedef struct {
   const vp9_prob *context_tree;
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_QUANT
   int32_t extra;
 #else
   int16_t extra;
@@ -62,7 +62,7 @@ extern const int16_t *vp9_dct_value_cost_ptr;
  */
 extern const TOKENVALUE *vp9_dct_value_tokens_ptr;
 
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_QUANT
 extern const int16_t *vp9_dct_value_cost_high10_ptr;
 extern const TOKENVALUE *vp9_dct_value_tokens_high10_ptr;
 extern const int16_t *vp9_dct_value_cost_high12_ptr;

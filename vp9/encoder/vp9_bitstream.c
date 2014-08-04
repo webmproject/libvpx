@@ -133,7 +133,7 @@ static void pack_mb_tokens(vp9_writer *w,
     int i = 0;
     int v = a->value;
     int n = a->len;
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_QUANT
     const vp9_extra_bit *const b =
         bit_depth == VPX_BITS_12 ? &vp9_extra_bits_high12[t] :
         bit_depth == VPX_BITS_10 ? &vp9_extra_bits_high10[t] :

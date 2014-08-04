@@ -391,7 +391,7 @@ using std::tr1::make_tuple;
 INSTANTIATE_TEST_CASE_P(
     C, Trans4x4DCT,
     ::testing::Values(
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH
         make_tuple(&vp9_fdct4x4_c, &vp9_idct4x4_16_add_c, 0, 8),
         make_tuple(&vp9_high_fdct4x4_c, &idct4x4_10, 0, 10),
         make_tuple(&vp9_high_fdct4x4_c, &idct4x4_12, 0, 12)));
@@ -401,7 +401,7 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     C, Trans4x4HT,
     ::testing::Values(
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH
         make_tuple(&vp9_fht4x4_c, &vp9_iht4x4_16_add_c, 0, 8),
         make_tuple(&vp9_fht4x4_c, &vp9_iht4x4_16_add_c, 1, 8),
         make_tuple(&vp9_fht4x4_c, &vp9_iht4x4_16_add_c, 2, 8),
@@ -423,7 +423,7 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     C, Trans4x4WHT,
     ::testing::Values(
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS
+#if CONFIG_VP9_HIGH
         make_tuple(&vp9_fwht4x4_c, &vp9_iwht4x4_16_add_c, 0, 8),
         make_tuple(&vp9_high_fwht4x4_c, &iwht4x4_10, 0, 10),
         make_tuple(&vp9_high_fwht4x4_c, &iwht4x4_12, 0, 12)));
@@ -431,7 +431,7 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_fwht4x4_c, &vp9_iwht4x4_16_add_c, 0, 8)));
 #endif
 
-#if HAVE_NEON_ASM && !CONFIG_HIGH_TRANSFORMS
+#if HAVE_NEON_ASM && !CONFIG_VP9_HIGH
 INSTANTIATE_TEST_CASE_P(
     NEON, Trans4x4DCT,
     ::testing::Values(
@@ -446,14 +446,14 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_fht4x4_c, &vp9_iht4x4_16_add_neon, 3, 8)));
 #endif
 
-#if CONFIG_USE_X86INC && HAVE_MMX && !CONFIG_HIGH_TRANSFORMS
+#if CONFIG_USE_X86INC && HAVE_MMX && !CONFIG_VP9_HIGH
 INSTANTIATE_TEST_CASE_P(
     MMX, Trans4x4WHT,
     ::testing::Values(
         make_tuple(&vp9_fwht4x4_mmx, &vp9_iwht4x4_16_add_c, 0, 8)));
 #endif
 
-#if HAVE_SSE2 && !CONFIG_HIGH_TRANSFORMS
+#if HAVE_SSE2 && !CONFIG_VP9_HIGH
 INSTANTIATE_TEST_CASE_P(
     SSE2, Trans4x4DCT,
     ::testing::Values(
@@ -468,7 +468,7 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_fht4x4_sse2, &vp9_iht4x4_16_add_sse2, 3, 8)));
 #endif
 
-#if HAVE_AVX2 && !CONFIG_HIGH_TRANSFORMS
+#if HAVE_AVX2 && !CONFIG_VP9_HIGH
 INSTANTIATE_TEST_CASE_P(
     AVX2, Trans4x4DCT,
     ::testing::Values(

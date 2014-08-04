@@ -77,7 +77,7 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd, PLANE_TYPE type,
   int v;
   int16_t dqv = dq[0];
 
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_QUANT
   if (cm->use_high) {
     if (cm->bit_depth == VPX_BITS_10) {
       cat1_ptr = vp9_cat1_prob_high10;
@@ -206,7 +206,7 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd, PLANE_TYPE type,
     val = (val << 1) | vp9_read(r, cat6_ptr[11]);
     val = (val << 1) | vp9_read(r, cat6_ptr[12]);
     val = (val << 1) | vp9_read(r, cat6_ptr[13]);
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_TRANSFORMS && CONFIG_HIGH_QUANT
+#if CONFIG_VP9_HIGH && CONFIG_HIGH_QUANT
     if (cm->use_high) {
       // 10 bit
       val = (val << 1) | vp9_read(r, cat6_ptr[14]);

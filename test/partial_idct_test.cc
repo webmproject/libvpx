@@ -259,7 +259,7 @@ INSTANTIATE_TEST_CASE_P(
                    TX_4X4, 1)));
 #endif
 
-#if HAVE_SSE2 && !CONFIG_HIGH_TRANSFORMS
+#if HAVE_SSE2 && !CONFIG_VP9_HIGH
 INSTANTIATE_TEST_CASE_P(
     SSE2, PartialIDctTest,
     ::testing::Values(
@@ -293,7 +293,7 @@ INSTANTIATE_TEST_CASE_P(
                    TX_4X4, 1)));
 #endif
 
-#if HAVE_SSSE3 && ARCH_X86_64 && !CONFIG_HIGH_TRANSFORMS
+#if HAVE_SSSE3 && ARCH_X86_64 && !CONFIG_VP9_HIGH
 INSTANTIATE_TEST_CASE_P(
     SSSE3_64, PartialIDctTest,
     ::testing::Values(
@@ -303,7 +303,7 @@ INSTANTIATE_TEST_CASE_P(
                    TX_8X8, 12)));
 #endif
 
-#if HAVE_SSSE3  && !CONFIG_HIGH_TRANSFORMS
+#if HAVE_SSSE3  && !CONFIG_VP9_HIGH
 INSTANTIATE_TEST_CASE_P(
     SSSE3, PartialIDctTest,
     ::testing::Values(
