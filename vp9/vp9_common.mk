@@ -67,7 +67,6 @@ VP9_COMMON_SRCS-yes += common/vp9_common_data.h
 VP9_COMMON_SRCS-yes += common/vp9_scan.c
 VP9_COMMON_SRCS-yes += common/vp9_scan.h
 
-VP9_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/vp9_postproc_x86.h
 VP9_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/vp9_asm_stubs.c
 VP9_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/vp9_loopfilter_intrin_sse2.c
 VP9_COMMON_SRCS-$(HAVE_AVX2) += common/x86/vp9_loopfilter_intrin_avx2.c
