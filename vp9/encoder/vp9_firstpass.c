@@ -689,18 +689,11 @@ void vp9_first_pass(VP9_COMP *cpi) {
           // intra predication statistics
           cpi->twopass.frame_mb_stats_buf[mb_index] = 0;
           cpi->twopass.frame_mb_stats_buf[mb_index] |= FPMB_DCINTRA_MASK;
-          cpi->twopass.frame_mb_stats_buf[mb_index] &=
-              ~FPMB_NONZERO_MOTION_MASK;
-          if (this_error > FPMB_ERROR_LEVEL4_TH) {
-            cpi->twopass.frame_mb_stats_buf[mb_index] |= FPMB_ERROR_LEVEL4_MASK;
-          } else if (this_error > FPMB_ERROR_LEVEL3_TH) {
-            cpi->twopass.frame_mb_stats_buf[mb_index] |= FPMB_ERROR_LEVEL3_MASK;
-          } else if (this_error > FPMB_ERROR_LEVEL2_TH) {
-            cpi->twopass.frame_mb_stats_buf[mb_index] |= FPMB_ERROR_LEVEL2_MASK;
-          } else if (this_error > FPMB_ERROR_LEVEL1_TH) {
-            cpi->twopass.frame_mb_stats_buf[mb_index] |= FPMB_ERROR_LEVEL1_MASK;
-          } else {
-            cpi->twopass.frame_mb_stats_buf[mb_index] |= FPMB_ERROR_LEVEL0_MASK;
+          cpi->twopass.frame_mb_stats_buf[mb_index] |= FPMB_MOTION_ZERO_MASK;
+          if (this_error > FPMB_ERROR_LARGE_TH) {
+            cpi->twopass.frame_mb_stats_buf[mb_index] |= FPMB_ERROR_LARGE_MASK;
+          } else if (this_error < FPMB_ERROR_SMALL_TH) {
+            cpi->twopass.frame_mb_stats_buf[mb_index] |= FPMB_ERROR_SMALL_MASK;
           }
         }
 #endif
@@ -738,23 +731,13 @@ void vp9_first_pass(VP9_COMP *cpi) {
             // inter predication statistics
             cpi->twopass.frame_mb_stats_buf[mb_index] = 0;
             cpi->twopass.frame_mb_stats_buf[mb_index] &= ~FPMB_DCINTRA_MASK;
-            cpi->twopass.frame_mb_stats_buf[mb_index] &=
-                ~FPMB_NONZERO_MOTION_MASK;
-            if (this_error > FPMB_ERROR_LEVEL4_TH) {
+            cpi->twopass.frame_mb_stats_buf[mb_index] |= FPMB_MOTION_ZERO_MASK;
+            if (this_error > FPMB_ERROR_LARGE_TH) {
               cpi->twopass.frame_mb_stats_buf[mb_index] |=
-                  FPMB_ERROR_LEVEL4_MASK;
-            } else if (this_error > FPMB_ERROR_LEVEL3_TH) {
+                  FPMB_ERROR_LARGE_MASK;
+            } else if (this_error < FPMB_ERROR_SMALL_TH) {
               cpi->twopass.frame_mb_stats_buf[mb_index] |=
-                  FPMB_ERROR_LEVEL3_MASK;
-            } else if (this_error > FPMB_ERROR_LEVEL2_TH) {
-              cpi->twopass.frame_mb_stats_buf[mb_index] |=
-                  FPMB_ERROR_LEVEL2_MASK;
-            } else if (this_error > FPMB_ERROR_LEVEL1_TH) {
-              cpi->twopass.frame_mb_stats_buf[mb_index] |=
-                  FPMB_ERROR_LEVEL1_MASK;
-            } else {
-              cpi->twopass.frame_mb_stats_buf[mb_index] |=
-                  FPMB_ERROR_LEVEL0_MASK;
+                  FPMB_ERROR_SMALL_MASK;
             }
           }
 #endif
@@ -764,8 +747,28 @@ void vp9_first_pass(VP9_COMP *cpi) {
 
 #if CONFIG_FP_MB_STATS
             if (cpi->use_fp_mb_stats) {
-              cpi->twopass.frame_mb_stats_buf[mb_index] |=
-                  FPMB_NONZERO_MOTION_MASK;
+              cpi->twopass.frame_mb_stats_buf[mb_index] &=
+                  ~FPMB_MOTION_ZERO_MASK;
+              // check estimated motion direction
+              if (mv.as_mv.col > 0 && mv.as_mv.col >= abs(mv.as_mv.row)) {
+                // right direction
+                cpi->twopass.frame_mb_stats_buf[mb_index] |=
+                    FPMB_MOTION_RIGHT_MASK;
+              } else if (mv.as_mv.row < 0 &&
+                         abs(mv.as_mv.row) >= abs(mv.as_mv.col)) {
+                // up direction
+                cpi->twopass.frame_mb_stats_buf[mb_index] |=
+                    FPMB_MOTION_UP_MASK;
+              } else if (mv.as_mv.col < 0 &&
+                         abs(mv.as_mv.col) >= abs(mv.as_mv.row)) {
+                // left direction
+                cpi->twopass.frame_mb_stats_buf[mb_index] |=
+                    FPMB_MOTION_LEFT_MASK;
+              } else {
+                // down direction
+                cpi->twopass.frame_mb_stats_buf[mb_index] |=
+                    FPMB_MOTION_DOWN_MASK;
+              }
             }
 #endif
 
