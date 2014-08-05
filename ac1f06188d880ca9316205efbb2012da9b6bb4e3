@@ -16,6 +16,24 @@
       "revId": "ac1f06188d880ca9316205efbb2012da9b6bb4e3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dE8\u003d",
+        "filename": "vp9/encoder/vp9_subexp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-05T21:35:02Z",
+      "side": 0,
+      "message": "done. -Wno-unused-function is set by configure for some reason, so I\u0027m sure there\u0027s more creep than this...",
+      "parentUuid": "AAAAdn//dME\u003d",
+      "revId": "ac1f06188d880ca9316205efbb2012da9b6bb4e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
