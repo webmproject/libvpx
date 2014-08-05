@@ -425,6 +425,7 @@ void generate_filename(const char *pattern, char *out, size_t q_len,
           break;
         default:
           die("Unrecognized pattern %%%c\n", p[1]);
+          break;
       }
 
       pat_len = strlen(q);
@@ -511,7 +512,7 @@ int main_loop(int argc, const char **argv_) {
   int                     use_y4m = 1;
   int                     opt_yv12 = 0;
   int                     opt_i420 = 0;
-  vpx_codec_dec_cfg_t     cfg = {0};
+  vpx_codec_dec_cfg_t     cfg = {0, 0, 0};
 #if CONFIG_VP8_DECODER
   vp8_postproc_cfg_t      vp8_pp_cfg = {0};
   int                     vp8_dbg_color_ref_frame = 0;
@@ -525,7 +526,7 @@ int main_loop(int argc, const char **argv_) {
   vpx_image_t             *scaled_img = NULL;
   int                     frame_avail, got_data;
   int                     num_external_frame_buffers = 0;
-  struct ExternalFrameBufferList ext_fb_list = {0};
+  struct ExternalFrameBufferList ext_fb_list = {0, NULL};
 
   const char *outfile_pattern = NULL;
   char outfile_name[PATH_MAX] = {0};
@@ -534,10 +535,10 @@ int main_loop(int argc, const char **argv_) {
   MD5Context md5_ctx;
   unsigned char md5_digest[16];
 
-  struct VpxDecInputContext input = {0};
-  struct VpxInputContext vpx_input_ctx = {0};
+  struct VpxDecInputContext input = {NULL, NULL};
+  struct VpxInputContext vpx_input_ctx;
 #if CONFIG_WEBM_IO
-  struct WebmInputContext webm_ctx = {0};
+  struct WebmInputContext webm_ctx;
   input.webm_ctx = &webm_ctx;
 #endif
   input.vpx_input_ctx = &vpx_input_ctx;
