@@ -35,6 +35,7 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
     RATE_CONTROL *const lrc = &lc->rc;
     int i;
     lc->current_video_frame_in_layer = 0;
+    lc->layer_size = 0;
     lrc->ni_av_qi = oxcf->worst_allowed_q;
     lrc->total_actual_bits = 0;
     lrc->total_target_vs_actual = 0;
@@ -48,7 +49,6 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
     for (i = 0; i < RATE_FACTOR_LEVELS; ++i) {
       lrc->rate_correction_factors[i] = 1.0;
     }
-    lc->layer_size = 0;
 
     if (svc->number_temporal_layers > 1) {
       lc->target_bandwidth = oxcf->ts_target_bitrate[layer];
@@ -66,12 +66,17 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
         lc->alt_ref_idx = alt_ref_idx++;
       else
         lc->alt_ref_idx = -1;
+      lc->gold_ref_idx = -1;
     }
 
     lrc->buffer_level = vp9_rescale((int)(oxcf->starting_buffer_level_ms),
                                     lc->target_bandwidth, 1000);
     lrc->bits_off_target = lrc->buffer_level;
   }
+
+  // Still have extra buffer for base layer golden frame
+  if (svc->number_spatial_layers > 1 && alt_ref_idx < REF_FRAMES)
+    svc->layer_context[0].gold_ref_idx = alt_ref_idx;
 }
 
 // Update the layer context from a change_config() call.
@@ -266,21 +271,25 @@ static int copy_svc_params(VP9_COMP *const cpi, struct lookahead_entry *buf) {
   layer_param = &buf->svc_params[layer_id];
   cpi->svc.spatial_layer_id = layer_param->spatial_layer;
   cpi->svc.temporal_layer_id = layer_param->temporal_layer;
+  cpi->ref_frame_flags = VP9_ALT_FLAG | VP9_GOLD_FLAG | VP9_LAST_FLAG;
+
+  lc = &cpi->svc.layer_context[cpi->svc.spatial_layer_id];
 
   cpi->lst_fb_idx = cpi->svc.spatial_layer_id;
 
   if (cpi->svc.spatial_layer_id < 1)
-    cpi->gld_fb_idx = cpi->lst_fb_idx;
+      cpi->gld_fb_idx = lc->gold_ref_idx >= 0 ?
+                        lc->gold_ref_idx : cpi->lst_fb_idx;
   else
     cpi->gld_fb_idx = cpi->svc.spatial_layer_id - 1;
 
-  lc = &cpi->svc.layer_context[cpi->svc.spatial_layer_id];
-
   if (lc->current_video_frame_in_layer == 0) {
-    if (cpi->svc.spatial_layer_id >= 2)
+    if (cpi->svc.spatial_layer_id >= 2) {
       cpi->alt_fb_idx = cpi->svc.spatial_layer_id - 2;
-    else
+    } else {
       cpi->alt_fb_idx = cpi->lst_fb_idx;
+      cpi->ref_frame_flags &= (~VP9_LAST_FLAG & ~VP9_ALT_FLAG);
+    }
   } else {
     if (cpi->oxcf.ss_play_alternate[cpi->svc.spatial_layer_id]) {
       cpi->alt_fb_idx = lc->alt_ref_idx;
