@@ -70,6 +70,24 @@
       "revId": "80f8ead4f951ea106d0840e0e58dea0ae840118d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dEA\u003d",
+        "filename": "vp9/common/vp9_entropy.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-05T22:07:56Z",
+      "side": 1,
+      "message": "I\u0027d expect you\u0027d end up with a void cast of the statement so you wouldn\u0027t get a label at the end of a compound statement warning.\nI don\u0027t mind them at the end of the block, but I\u0027m just curious what the warning was. you should include the warning in future commits",
+      "parentUuid": "AAAAdn//dP4\u003d",
+      "revId": "80f8ead4f951ea106d0840e0e58dea0ae840118d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
