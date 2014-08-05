@@ -212,11 +212,11 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
   *sse_y = sse;
 
   if (sse < dc_quant * dc_quant >> 6)
-    x->skip_txfm = 1;
+    x->skip_txfm[0] = 1;
   else if (var < ac_quant * ac_quant >> 6)
-    x->skip_txfm = 2;
+    x->skip_txfm[0] = 2;
   else
-    x->skip_txfm = 0;
+    x->skip_txfm[0] = 0;
 
   if (cpi->common.tx_mode == TX_MODE_SELECT) {
     if (sse > (var << 2))
@@ -558,7 +558,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           if (cost < best_cost) {
             best_filter = filter;
             best_cost = cost;
-            skip_txfm = x->skip_txfm;
+            skip_txfm = x->skip_txfm[0];
 
             if (cpi->sf.reuse_inter_pred_sby) {
               if (this_mode_pred != current_pred) {
@@ -584,7 +584,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         dist = pf_dist[mbmi->interp_filter];
         var_y = pf_var[mbmi->interp_filter];
         sse_y = pf_sse[mbmi->interp_filter];
-        x->skip_txfm = skip_txfm;
+        x->skip_txfm[0] = skip_txfm;
       } else {
         mbmi->interp_filter = (filter_ref == SWITCHABLE) ? EIGHTTAP: filter_ref;
         vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
@@ -622,7 +622,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         best_pred_filter = mbmi->interp_filter;
         best_tx_size = mbmi->tx_size;
         best_ref_frame = ref_frame;
-        skip_txfm = x->skip_txfm;
+        skip_txfm = x->skip_txfm[0];
 
         if (cpi->sf.reuse_inter_pred_sby) {
           if (best_pred != NULL)
@@ -664,7 +664,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   mbmi->ref_frame[0]  = best_ref_frame;
   mbmi->mv[0].as_int  = frame_mv[best_mode][best_ref_frame].as_int;
   xd->mi[0]->bmi[0].as_mv[0].as_int = mbmi->mv[0].as_int;
-  x->skip_txfm = skip_txfm;
+  x->skip_txfm[0] = skip_txfm;
 
   // Perform intra prediction search, if the best SAD is above a certain
   // threshold.
@@ -726,7 +726,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         mbmi->uv_mode = this_mode;
         mbmi->mv[0].as_int = INVALID_MV;
       } else {
-        x->skip_txfm = skip_txfm;
+        x->skip_txfm[0] = skip_txfm;
       }
     }
   }
