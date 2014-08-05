@@ -1095,6 +1095,40 @@ BITSTREAM_PROFILE vp9_read_profile(struct vp9_read_bit_buffer *rb) {
   return (BITSTREAM_PROFILE) profile;
 }
 
+static void read_bitdepth_colorspace_sampling(
+    VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
+  if (cm->profile >= PROFILE_2)
+    cm->bit_depth = vp9_rb_read_bit(rb) ? BITS_12 : BITS_10;
+  cm->color_space = (COLOR_SPACE)vp9_rb_read_literal(rb, 3);
+  if (cm->color_space != SRGB) {
+    vp9_rb_read_bit(rb);  // [16,235] (including xvycc) vs [0,255] range
+    if (cm->profile == PROFILE_1 || cm->profile == PROFILE_3) {
+      cm->subsampling_x = vp9_rb_read_bit(rb);
+      cm->subsampling_y = vp9_rb_read_bit(rb);
+      if (cm->subsampling_x == 1 && cm->subsampling_y == 1)
+        vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
+                           "4:2:0 color not supported in profile 1 or 3");
+      if (vp9_rb_read_bit(rb))
+        vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
+                           "Reserved bit set");
+    } else {
+      cm->subsampling_y = cm->subsampling_x = 1;
+    }
+  } else {
+    if (cm->profile == PROFILE_1 || cm->profile == PROFILE_3) {
+      // Note if colorspace is SRGB then 4:4:4 chroma sampling is assumed.
+      // 4:2:2 or 4:4:0 chroma sampling is not allowed.
+      cm->subsampling_y = cm->subsampling_x = 0;
+      if (vp9_rb_read_bit(rb))
+        vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
+                           "Reserved bit set");
+    } else {
+      vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
+                         "4:4:4 color not supported in profile 0 or 2");
+    }
+  }
+}
+
 static size_t read_uncompressed_header(VP9Decoder *pbi,
                                        struct vp9_read_bit_buffer *rb) {
   VP9_COMMON *const cm = &pbi->common;
@@ -1137,32 +1171,8 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
     if (!vp9_read_sync_code(rb))
       vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
                          "Invalid frame sync code");
-    if (cm->profile > PROFILE_1)
-      cm->bit_depth = vp9_rb_read_bit(rb) ? BITS_12 : BITS_10;
-    cm->color_space = (COLOR_SPACE)vp9_rb_read_literal(rb, 3);
-    if (cm->color_space != SRGB) {
-      vp9_rb_read_bit(rb);  // [16,235] (including xvycc) vs [0,255] range
-      if (cm->profile == PROFILE_1 || cm->profile == PROFILE_3) {
-        cm->subsampling_x = vp9_rb_read_bit(rb);
-        cm->subsampling_y = vp9_rb_read_bit(rb);
-        if (vp9_rb_read_bit(rb))
-          vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
-                             "Reserved bit set");
-      } else {
-        cm->subsampling_y = cm->subsampling_x = 1;
-      }
-    } else {
-      if (cm->profile == PROFILE_1 || cm->profile == PROFILE_3) {
-        cm->subsampling_y = cm->subsampling_x = 0;
-        if (vp9_rb_read_bit(rb))
-          vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
-                             "Reserved bit set");
-      } else {
-        vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
-                           "4:4:4 color not supported in profile 0");
-      }
-    }
 
+    read_bitdepth_colorspace_sampling(cm, rb);
     pbi->refresh_frame_flags = (1 << REF_FRAMES) - 1;
 
     for (i = 0; i < REFS_PER_FRAME; ++i) {
@@ -1181,15 +1191,18 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
       if (!vp9_read_sync_code(rb))
         vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
                            "Invalid frame sync code");
+      if (cm->profile > PROFILE_0) {
+        read_bitdepth_colorspace_sampling(cm, rb);
+      } else {
+        // NOTE: The intra-only frame header does not include the specification
+        // of either the color format or color sub-sampling in profile 0. VP9
+        // specifies that the default color space should be YUV 4:2:0 in this
+        // case (normative).
+        cm->color_space = BT_601;
+        cm->subsampling_y = cm->subsampling_x = 1;
+      }
 
       pbi->refresh_frame_flags = vp9_rb_read_literal(rb, REF_FRAMES);
-
-      // NOTE: The intra-only frame header does not include the specification of
-      // either the color format or color sub-sampling. VP9 specifies that the
-      // default color space should be YUV 4:2:0 in this case (normative).
-      cm->color_space = BT_601;
-      cm->subsampling_y = cm->subsampling_x = 1;
-
       setup_frame_size(cm, rb);
     } else {
       pbi->refresh_frame_flags = vp9_rb_read_literal(rb, REF_FRAMES);

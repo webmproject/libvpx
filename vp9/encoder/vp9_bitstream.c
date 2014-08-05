@@ -1045,6 +1045,29 @@ static void write_profile(BITSTREAM_PROFILE profile,
   }
 }
 
+static void write_bitdepth_colorspace_sampling(
+    VP9_COMMON *const cm, struct vp9_write_bit_buffer *wb) {
+  if (cm->profile >= PROFILE_2) {
+    assert(cm->bit_depth > BITS_8);
+    vp9_wb_write_bit(wb, cm->bit_depth - BITS_10);
+  }
+  vp9_wb_write_literal(wb, cm->color_space, 3);
+  if (cm->color_space != SRGB) {
+    vp9_wb_write_bit(wb, 0);  // 0: [16, 235] (i.e. xvYCC), 1: [0, 255]
+    if (cm->profile == PROFILE_1 || cm->profile == PROFILE_3) {
+      assert(cm->subsampling_x != 1 || cm->subsampling_y != 1);
+      vp9_wb_write_bit(wb, cm->subsampling_x);
+      vp9_wb_write_bit(wb, cm->subsampling_y);
+      vp9_wb_write_bit(wb, 0);  // unused
+    } else {
+      assert(cm->subsampling_x == 1 && cm->subsampling_y == 1);
+    }
+  } else {
+    assert(cm->profile == PROFILE_1 || cm->profile == PROFILE_3);
+    vp9_wb_write_bit(wb, 0);  // unused
+  }
+}
+
 static void write_uncompressed_header(VP9_COMP *cpi,
                                       struct vp9_write_bit_buffer *wb) {
   VP9_COMMON *const cm = &cpi->common;
@@ -1059,25 +1082,8 @@ static void write_uncompressed_header(VP9_COMP *cpi,
   vp9_wb_write_bit(wb, cm->error_resilient_mode);
 
   if (cm->frame_type == KEY_FRAME) {
-    const COLOR_SPACE cs = UNKNOWN;
     write_sync_code(wb);
-    if (cm->profile > PROFILE_1) {
-      assert(cm->bit_depth > BITS_8);
-      vp9_wb_write_bit(wb, cm->bit_depth - BITS_10);
-    }
-    vp9_wb_write_literal(wb, cs, 3);
-    if (cs != SRGB) {
-      vp9_wb_write_bit(wb, 0);  // 0: [16, 235] (i.e. xvYCC), 1: [0, 255]
-      if (cm->profile == PROFILE_1 || cm->profile == PROFILE_3) {
-        vp9_wb_write_bit(wb, cm->subsampling_x);
-        vp9_wb_write_bit(wb, cm->subsampling_y);
-        vp9_wb_write_bit(wb, 0);  // unused
-      }
-    } else {
-      assert(cm->profile == PROFILE_1 || cm->profile == PROFILE_3);
-      vp9_wb_write_bit(wb, 0);  // unused
-    }
-
+    write_bitdepth_colorspace_sampling(cm, wb);
     write_frame_size(cm, wb);
   } else {
     if (!cm->show_frame)
@@ -1088,6 +1094,11 @@ static void write_uncompressed_header(VP9_COMP *cpi,
 
     if (cm->intra_only) {
       write_sync_code(wb);
+
+      // Note for profile 0, 420 8bpp is assumed.
+      if (cm->profile > PROFILE_0) {
+        write_bitdepth_colorspace_sampling(cm, wb);
+      }
 
       vp9_wb_write_literal(wb, get_refresh_mask(cpi), REF_FRAMES);
       write_frame_size(cm, wb);
