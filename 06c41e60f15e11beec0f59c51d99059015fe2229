@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//dEc\u003d",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-05T21:51:34Z",
+      "side": 1,
+      "message": "drop the trailing comma on the last member here and in the other update; this will break c90 builds",
+      "revId": "06c41e60f15e11beec0f59c51d99059015fe2229",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
