@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAdn//dGI\u003d",
+        "filename": "test/decode_test_driver.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-05T20:05:25Z",
+      "side": 1,
+      "message": "it\u0027s a bool, you can use !end_of_file for readability",
+      "revId": "68b88136d1fc8dc6be6e014b8776d4bd01750ca5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//dRs\u003d",
         "filename": "test/decode_test_driver.cc",
         "patchSetId": 6
@@ -49,6 +66,23 @@
       "side": 1,
       "message": "I agree, it\u0027s a simpler accessor that\u0027s what they\u0027re for",
       "parentUuid": "AAAAdn//dRU\u003d",
+      "revId": "68b88136d1fc8dc6be6e014b8776d4bd01750ca5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//dGE\u003d",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 334,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-05T20:05:25Z",
+      "side": 1,
+      "message": "this could be called \u0027flushed\u0027 and I still don\u0027t like the difference in return values here. multiple flushes should be ok",
       "revId": "68b88136d1fc8dc6be6e014b8776d4bd01750ca5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
