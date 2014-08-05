@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//dCs\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-05T22:54:11Z",
+      "side": 1,
+      "message": "For the additional 2 characters I would rename this so it is absolutely clear what it reads:\nparse_bitdepth_colorspace_sampling\n(sorry, missed that in my first look).",
+      "revId": "38ffe4378c527ec88538ec7bc5e849396b36e774",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
