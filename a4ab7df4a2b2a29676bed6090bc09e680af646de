@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//c6o\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 2770,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-06T21:47:28Z",
+      "side": 1,
+      "message": "Make the test explicit:\nif (cpi-\u003eoxcf.noise_sensitivity \u003e 0) {",
+      "revId": "a4ab7df4a2b2a29676bed6090bc09e680af646de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
