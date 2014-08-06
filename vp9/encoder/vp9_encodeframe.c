@@ -1953,6 +1953,42 @@ const int num_16x16_blocks_high_lookup[BLOCK_SIZES] =
   {1, 1, 1, 1, 1, 1, 1, 2, 1, 2, 4, 2, 4};
 const int qindex_skip_threshold_lookup[BLOCK_SIZES] =
   {0, 10, 10, 30, 40, 40, 60, 80, 80, 90, 100, 100, 120};
+const int qindex_split_threshold_lookup[BLOCK_SIZES] =
+  {0, 3, 3, 7, 15, 15, 30, 40, 40, 60, 80, 80, 120};
+const int complexity_16x16_blocks_threshold[BLOCK_SIZES] =
+  {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 4, 6};
+
+typedef enum {
+  MV_ZERO = 0,
+  MV_LEFT = 1,
+  MV_UP = 2,
+  MV_RIGHT = 3,
+  MV_DOWN = 4,
+  MV_INVALID
+} MOTION_DIRECTION;
+
+static INLINE MOTION_DIRECTION get_motion_direction_fp(uint8_t fp_byte) {
+  if (fp_byte & FPMB_MOTION_ZERO_MASK) {
+    return MV_ZERO;
+  } else if (fp_byte & FPMB_MOTION_LEFT_MASK) {
+    return MV_LEFT;
+  } else if (fp_byte & FPMB_MOTION_RIGHT_MASK) {
+    return MV_RIGHT;
+  } else if (fp_byte & FPMB_MOTION_UP_MASK) {
+    return MV_UP;
+  } else {
+    return MV_DOWN;
+  }
+}
+
+static INLINE int get_motion_inconsistency(MOTION_DIRECTION this_mv,
+                                           MOTION_DIRECTION that_mv) {
+  if (this_mv == that_mv) {
+    return 0;
+  } else {
+    return abs(this_mv - that_mv) == 2 ? 2 : 1;
+  }
+}
 #endif
 
 // TODO(jingning,jimbankoski,rbultje): properly skip partition types that are
@@ -1978,6 +2014,7 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
   int64_t sum_rd = 0;
   int do_split = bsize >= BLOCK_8X8;
   int do_rect = 1;
+
   // Override skipping rectangular partition operations for edge blocks
   const int force_horz_split = (mi_row + mi_step >= cm->mi_rows);
   const int force_vert_split = (mi_col + mi_step >= cm->mi_cols);
@@ -1986,6 +2023,11 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
 
   BLOCK_SIZE min_size = cpi->sf.min_partition_size;
   BLOCK_SIZE max_size = cpi->sf.max_partition_size;
+
+#if CONFIG_FP_MB_STATS
+  unsigned int src_diff_var = UINT_MAX;
+  int none_complexity = 0;
+#endif
 
   int partition_none_allowed = !force_horz_split && !force_vert_split;
   int partition_horz_allowed = !force_vert_split && yss <= xss &&
@@ -2038,6 +2080,65 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     }
   }
 
+#if CONFIG_FP_MB_STATS
+  if (cpi->use_fp_mb_stats) {
+    set_offsets(cpi, tile, mi_row, mi_col, bsize);
+    src_diff_var = get_sby_perpixel_diff_variance(cpi, &cpi->mb.plane[0].src,
+                                                  mi_row, mi_col, bsize);
+  }
+#endif
+
+#if CONFIG_FP_MB_STATS
+  // Decide whether we shall split directly and skip searching NONE by using
+  // the first pass block statistics
+  if (cpi->use_fp_mb_stats && bsize >= BLOCK_32X32 && do_split &&
+      partition_none_allowed && src_diff_var > 4 &&
+      cm->base_qindex < qindex_split_threshold_lookup[bsize]) {
+    int mb_row = mi_row >> 1;
+    int mb_col = mi_col >> 1;
+    int mb_row_end =
+        MIN(mb_row + num_16x16_blocks_high_lookup[bsize], cm->mb_rows);
+    int mb_col_end =
+        MIN(mb_col + num_16x16_blocks_wide_lookup[bsize], cm->mb_cols);
+    int r, c;
+
+    // compute a complexity measure, basically measure inconsistency of motion
+    // vectors obtained from the first pass in the current block
+    for (r = mb_row; r < mb_row_end ; r++) {
+      for (c = mb_col; c < mb_col_end; c++) {
+        const int mb_index = r * cm->mb_cols + c;
+
+        MOTION_DIRECTION this_mv;
+        MOTION_DIRECTION right_mv;
+        MOTION_DIRECTION bottom_mv;
+
+        this_mv =
+            get_motion_direction_fp(cpi->twopass.this_frame_mb_stats[mb_index]);
+
+        // to its right
+        if (c != mb_col_end - 1) {
+          right_mv = get_motion_direction_fp(
+              cpi->twopass.this_frame_mb_stats[mb_index + 1]);
+          none_complexity += get_motion_inconsistency(this_mv, right_mv);
+        }
+
+        // to its bottom
+        if (r != mb_row_end - 1) {
+          bottom_mv = get_motion_direction_fp(
+              cpi->twopass.this_frame_mb_stats[mb_index + cm->mb_cols]);
+          none_complexity += get_motion_inconsistency(this_mv, bottom_mv);
+        }
+
+        // do not count its left and top neighbors to avoid double counting
+      }
+    }
+
+    if (none_complexity > complexity_16x16_blocks_threshold[bsize]) {
+      partition_none_allowed = 0;
+    }
+  }
+#endif
+
   // PARTITION_NONE
   if (partition_none_allowed) {
     rd_pick_sb_modes(cpi, tile, mi_row, mi_col, &this_rate, &this_dist, bsize,
@@ -2048,6 +2149,7 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
         this_rate += cpi->partition_cost[pl][PARTITION_NONE];
       }
       sum_rd = RDCOST(x->rdmult, x->rddiv, this_rate, this_dist);
+
       if (sum_rd < best_rd) {
         int64_t stop_thresh = 4096;
         int64_t stop_thresh_rd;
@@ -2078,7 +2180,6 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
         // stop further splitting in RD optimization
         if (cpi->use_fp_mb_stats && do_split != 0 &&
             cm->base_qindex > qindex_skip_threshold_lookup[bsize]) {
-          VP9_COMMON *cm = &cpi->common;
           int mb_row = mi_row >> 1;
           int mb_col = mi_col >> 1;
           int mb_row_end =
@@ -2104,11 +2205,12 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
             }
           }
           if (skip) {
-            unsigned int var;
-            set_offsets(cpi, tile, mi_row, mi_col, bsize);
-            var = get_sby_perpixel_diff_variance(cpi, &cpi->mb.plane[0].src,
-                                                 mi_row, mi_col, bsize);
-            if (var < 8) {
+            if (src_diff_var == UINT_MAX) {
+              set_offsets(cpi, tile, mi_row, mi_col, bsize);
+              src_diff_var = get_sby_perpixel_diff_variance(
+                  cpi, &cpi->mb.plane[0].src, mi_row, mi_col, bsize);
+            }
+            if (src_diff_var < 8) {
               do_split = 0;
               do_rect = 0;
             }
@@ -2171,6 +2273,7 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
       pl = partition_plane_context(xd, mi_row, mi_col, bsize);
       sum_rate += cpi->partition_cost[pl][PARTITION_SPLIT];
       sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
+
       if (sum_rd < best_rd) {
         best_rate = sum_rate;
         best_dist = sum_dist;
@@ -2283,6 +2386,7 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     }
     restore_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
   }
+
   // TODO(jbb): This code added so that we avoid static analysis
   // warning related to the fact that best_rd isn't used after this
   // point.  This code should be refactored so that the duplicate
