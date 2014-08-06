@@ -3468,6 +3468,9 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
                    cpi->oxcf.aq_mode != CYCLIC_REFRESH_AQ &&
                    cpi->sf.allow_skip_recode;
 
+  if (!x->skip_recode && !cpi->sf.use_nonrd_pick_mode)
+    vpx_memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
+
   x->skip_optimize = ctx->is_coded;
   ctx->is_coded = 1;
   x->use_lp32x32fdct = cpi->sf.use_lp32x32fdct;
