@@ -511,20 +511,23 @@ TEST_P(FwdTrans8x8HT, ExtremalCheck) {
 
 using std::tr1::make_tuple;
 
+#if CONFIG_VP9_HIGH
 INSTANTIATE_TEST_CASE_P(
     C, FwdTrans8x8DCT,
     ::testing::Values(
-#if CONFIG_VP9_HIGH
         make_tuple(&vp9_fdct8x8_c, &vp9_idct8x8_64_add_c, 0, 8),
         make_tuple(&vp9_high_fdct8x8_c, &idct8x8_10, 0, 10),
         make_tuple(&vp9_high_fdct8x8_c, &idct8x8_12, 0, 12)));
 #else
+INSTANTIATE_TEST_CASE_P(
+    C, FwdTrans8x8DCT,
+    ::testing::Values(
         make_tuple(&vp9_fdct8x8_c, &vp9_idct8x8_64_add_c, 0, 8)));
 #endif
+#if CONFIG_VP9_HIGH
 INSTANTIATE_TEST_CASE_P(
     C, FwdTrans8x8HT,
     ::testing::Values(
-#if CONFIG_VP9_HIGH
         make_tuple(&vp9_fht8x8_c, &vp9_iht8x8_64_add_c, 0, 8),
         make_tuple(&vp9_fht8x8_c, &vp9_iht8x8_64_add_c, 1, 8),
         make_tuple(&vp9_fht8x8_c, &vp9_iht8x8_64_add_c, 2, 8),
@@ -538,6 +541,9 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_high_fht8x8_c, &iht8x8_12, 2, 12),
         make_tuple(&vp9_high_fht8x8_c, &iht8x8_12, 3, 12)));
 #else
+INSTANTIATE_TEST_CASE_P(
+    C, FwdTrans8x8HT,
+    ::testing::Values(
         make_tuple(&vp9_fht8x8_c, &vp9_iht8x8_64_add_c, 0, 8),
         make_tuple(&vp9_fht8x8_c, &vp9_iht8x8_64_add_c, 1, 8),
         make_tuple(&vp9_fht8x8_c, &vp9_iht8x8_64_add_c, 2, 8),

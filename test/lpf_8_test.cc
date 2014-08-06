@@ -412,10 +412,10 @@ TEST_P(Loop8Test9Param, ValueCheck) {
 }
 using std::tr1::make_tuple;
 #if HAVE_SSE2
+#if CONFIG_VP9_HIGH
 INSTANTIATE_TEST_CASE_P(
   SSE2_C_COMPARE_SINGLE, Loop8Test6Param,
   ::testing::Values(
-#if CONFIG_VP9_HIGH
     make_tuple(&vp9_high_lpf_horizontal_4_sse2,
                &vp9_high_lpf_horizontal_4_c,     8),
     make_tuple(&vp9_high_lpf_vertical_4_sse2,
@@ -453,16 +453,19 @@ INSTANTIATE_TEST_CASE_P(
     make_tuple(&wrapper_vertical_16_sse2,
                &wrapper_vertical_16_c,          12)));
 #else
+INSTANTIATE_TEST_CASE_P(
+  SSE2_C_COMPARE_SINGLE, Loop8Test6Param,
+  ::testing::Values(
     make_tuple(&vp9_lpf_horizontal_8_sse2,  &vp9_lpf_horizontal_8_c,  8),
     make_tuple(&vp9_lpf_horizontal_16_sse2, &vp9_lpf_horizontal_16_c, 8),
     make_tuple(&vp9_lpf_vertical_8_sse2,    &vp9_lpf_vertical_8_c,    8)));
 #endif
 #endif
 #if HAVE_SSE2
+#if CONFIG_VP9_HIGH
 INSTANTIATE_TEST_CASE_P(
   SSE2_C_COMPARE_DUAL, Loop8Test6Param,
   ::testing::Values(
-#if CONFIG_VP9_HIGH
     make_tuple(&wrapper_vertical_16_dual_sse2,
                &wrapper_vertical_16_dual_c,      8),
     make_tuple(&wrapper_vertical_16_dual_sse2,
@@ -470,15 +473,18 @@ INSTANTIATE_TEST_CASE_P(
     make_tuple(&wrapper_vertical_16_dual_sse2,
                &wrapper_vertical_16_dual_c,     12)));
 #else
+INSTANTIATE_TEST_CASE_P(
+  SSE2_C_COMPARE_DUAL, Loop8Test6Param,
+  ::testing::Values(
     make_tuple(&wrapper_vertical_16_sse2,   &wrapper_vertical_16_c,   8)));
 #endif
 #endif
 
 #if HAVE_SSE2
+#if CONFIG_VP9_HIGH
 INSTANTIATE_TEST_CASE_P(
   SSE_C_COMPARE_DUAL, Loop8Test9Param,
   ::testing::Values(
-#if CONFIG_VP9_HIGH
     make_tuple(&vp9_high_lpf_horizontal_4_dual_sse2,
                &vp9_high_lpf_horizontal_4_dual_c,     8),
     make_tuple(&vp9_high_lpf_horizontal_8_dual_sse2,
@@ -504,6 +510,9 @@ INSTANTIATE_TEST_CASE_P(
     make_tuple(&vp9_high_lpf_vertical_8_dual_sse2,
                &vp9_high_lpf_vertical_8_dual_c,      12)));
 #else
+INSTANTIATE_TEST_CASE_P(
+  SSE_C_COMPARE_DUAL, Loop8Test9Param,
+  ::testing::Values(
     make_tuple(&vp9_lpf_horizontal_4_dual_sse2,
                &vp9_lpf_horizontal_4_dual_c,          8),
     make_tuple(&vp9_lpf_horizontal_8_dual_sse2,

@@ -289,10 +289,10 @@ TEST_P(Trans32x32Test, InverseAccuracy) {
 
 using std::tr1::make_tuple;
 
+#if CONFIG_VP9_HIGH
 INSTANTIATE_TEST_CASE_P(
     C, Trans32x32Test,
     ::testing::Values(
-#if CONFIG_VP9_HIGH
         make_tuple(&vp9_fdct32x32_c, &vp9_idct32x32_1024_add_c, 0, 8),
         make_tuple(&vp9_fdct32x32_rd_c, &vp9_idct32x32_1024_add_c, 1, 8),
         make_tuple(&vp9_high_fdct32x32_c, &idct32x32_10, 0, 10),
@@ -300,6 +300,9 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_high_fdct32x32_c, &idct32x32_12, 0, 12),
         make_tuple(&vp9_high_fdct32x32_rd_c, &idct32x32_12, 1, 12)));
 #else
+INSTANTIATE_TEST_CASE_P(
+    C, Trans32x32Test,
+    ::testing::Values(
         make_tuple(&vp9_fdct32x32_c, &vp9_idct32x32_1024_add_c, 0, 8),
         make_tuple(&vp9_fdct32x32_rd_c, &vp9_idct32x32_1024_add_c, 1, 8)));
 #endif

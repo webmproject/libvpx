@@ -388,20 +388,23 @@ TEST_P(Trans4x4WHT, InvAccuracyCheck) {
 using std::tr1::make_tuple;
 
 
+#if CONFIG_VP9_HIGH
 INSTANTIATE_TEST_CASE_P(
     C, Trans4x4DCT,
     ::testing::Values(
-#if CONFIG_VP9_HIGH
         make_tuple(&vp9_fdct4x4_c, &vp9_idct4x4_16_add_c, 0, 8),
         make_tuple(&vp9_high_fdct4x4_c, &idct4x4_10, 0, 10),
         make_tuple(&vp9_high_fdct4x4_c, &idct4x4_12, 0, 12)));
 #else
+INSTANTIATE_TEST_CASE_P(
+    C, Trans4x4DCT,
+    ::testing::Values(
         make_tuple(&vp9_fdct4x4_c, &vp9_idct4x4_16_add_c, 0, 8)));
 #endif
+#if CONFIG_VP9_HIGH
 INSTANTIATE_TEST_CASE_P(
     C, Trans4x4HT,
     ::testing::Values(
-#if CONFIG_VP9_HIGH
         make_tuple(&vp9_fht4x4_c, &vp9_iht4x4_16_add_c, 0, 8),
         make_tuple(&vp9_fht4x4_c, &vp9_iht4x4_16_add_c, 1, 8),
         make_tuple(&vp9_fht4x4_c, &vp9_iht4x4_16_add_c, 2, 8),
@@ -415,19 +418,25 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_high_fht4x4_c, &iht4x4_12, 2, 12),
         make_tuple(&vp9_high_fht4x4_c, &iht4x4_12, 3, 12)));
 #else
+INSTANTIATE_TEST_CASE_P(
+    C, Trans4x4HT,
+    ::testing::Values(
         make_tuple(&vp9_fht4x4_c, &vp9_iht4x4_16_add_c, 0, 8),
         make_tuple(&vp9_fht4x4_c, &vp9_iht4x4_16_add_c, 1, 8),
         make_tuple(&vp9_fht4x4_c, &vp9_iht4x4_16_add_c, 2, 8),
         make_tuple(&vp9_fht4x4_c, &vp9_iht4x4_16_add_c, 3, 8)));
 #endif
+#if CONFIG_VP9_HIGH
 INSTANTIATE_TEST_CASE_P(
     C, Trans4x4WHT,
     ::testing::Values(
-#if CONFIG_VP9_HIGH
         make_tuple(&vp9_fwht4x4_c, &vp9_iwht4x4_16_add_c, 0, 8),
         make_tuple(&vp9_high_fwht4x4_c, &iwht4x4_10, 0, 10),
         make_tuple(&vp9_high_fwht4x4_c, &iwht4x4_12, 0, 12)));
 #else
+INSTANTIATE_TEST_CASE_P(
+    C, Trans4x4WHT,
+    ::testing::Values(
         make_tuple(&vp9_fwht4x4_c, &vp9_iwht4x4_16_add_c, 0, 8)));
 #endif
 
