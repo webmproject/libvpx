@@ -2762,6 +2762,19 @@ static int resize_key_frame(VP8_COMP *cpi)
             cm->Height = new_height;
             vp8_alloc_compressor_data(cpi);
             scale_and_extend_source(cpi->un_scaled_source, cpi);
+#if CONFIG_TEMPORAL_DENOISING
+            // TODO(marpan): denoiser_allocate() is not called in
+            // vp8_alloc_compressor_data() (currently denoiser_allocate is
+            // only called in change_config()). Check if we can move this call
+            // of denoiser_free/allocate into vp8_alloc_compressor_data().
+            if (cpi->oxcf.noise_sensitivity > 0) {
+              vp8_denoiser_free(&cpi->denoiser);
+              vp8_denoiser_allocate(&cpi->denoiser, new_width, new_height,
+                                    cm->mb_rows, cm->mb_cols,
+                                    ((cpi->oxcf.noise_sensitivity == 3) ?
+                                    1 : 0));
+            }
+#endif
             return 1;
         }
     }
