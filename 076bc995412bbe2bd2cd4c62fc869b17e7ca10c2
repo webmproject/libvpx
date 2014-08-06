@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAdn//c7s\u003d",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 312,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-06T19:22:07Z",
+      "side": 1,
+      "message": "can be a static; uint32_t should be enough; it will be promoted properly. you just want to avoid the sign conversion",
+      "revId": "076bc995412bbe2bd2cd4c62fc869b17e7ca10c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//c/Q\u003d",
         "filename": "vp9/encoder/vp9_rd.c",
         "patchSetId": 1
