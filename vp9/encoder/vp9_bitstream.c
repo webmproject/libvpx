@@ -888,21 +888,17 @@ static void write_tile_info(VP9_COMMON *cm, struct vp9_write_bit_buffer *wb) {
 }
 
 static int get_refresh_mask(VP9_COMP *cpi) {
-  if (!cpi->multi_arf_allowed && cpi->refresh_golden_frame &&
-      cpi->rc.is_src_frame_alt_ref &&
-      (!cpi->use_svc ||      // Add spatial svc base layer case here
-       (cpi->svc.number_temporal_layers == 1 &&
-        cpi->svc.spatial_layer_id == 0 &&
-        cpi->svc.layer_context[0].gold_ref_idx >=0 &&
-        cpi->oxcf.ss_play_alternate[0]))) {
-    // Preserve the previously existing golden frame and update the frame in
-    // the alt ref slot instead. This is highly specific to the use of
-    // alt-ref as a forward reference, and this needs to be generalized as
-    // other uses are implemented (like RTC/temporal scaling)
-    //
-    // gld_fb_idx and alt_fb_idx need to be swapped for future frames, but
-    // that happens in vp9_encoder.c:update_reference_frames() so that it can
-    // be done outside of the recode loop.
+  if (vp9_preserve_existing_gf(cpi)) {
+    // We have decided to preserve the previously existing golden frame as our
+    // new ARF frame. However, in the short term we leave it in the GF slot and,
+    // if we're updating the GF with the current decoded frame, we save it
+    // instead to the ARF slot.
+    // Later, in the function vp9_encoder.c:vp9_update_reference_frames() we
+    // will swap gld_fb_idx and alt_fb_idx to achieve our objective. We do it
+    // there so that it can be done outside of the recode loop.
+    // Note: This is highly specific to the use of ARF as a forward reference,
+    // and this needs to be generalized as other uses are implemented
+    // (like RTC/temporal scalability).
     return (cpi->refresh_last_frame << cpi->lst_fb_idx) |
            (cpi->refresh_golden_frame << cpi->alt_fb_idx);
   } else {

@@ -1564,22 +1564,15 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
                &cm->ref_frame_map[cpi->gld_fb_idx], cm->new_fb_idx);
     ref_cnt_fb(cm->frame_bufs,
                &cm->ref_frame_map[cpi->alt_fb_idx], cm->new_fb_idx);
-  } else if (!cpi->multi_arf_allowed && cpi->refresh_golden_frame &&
-             cpi->rc.is_src_frame_alt_ref &&
-             (!cpi->use_svc ||      // Add spatial svc base layer case here
-              (cpi->svc.number_temporal_layers == 1 &&
-               cpi->svc.spatial_layer_id == 0 &&
-               cpi->svc.layer_context[0].gold_ref_idx >=0 &&
-               cpi->oxcf.ss_play_alternate[0]))) {
-    /* Preserve the previously existing golden frame and update the frame in
-     * the alt ref slot instead. This is highly specific to the current use of
-     * alt-ref as a forward reference, and this needs to be generalized as
-     * other uses are implemented (like RTC/temporal scaling)
-     *
-     * The update to the buffer in the alt ref slot was signaled in
-     * vp9_pack_bitstream(), now swap the buffer pointers so that it's treated
-     * as the golden frame next time.
-     */
+  } else if (vp9_preserve_existing_gf(cpi)) {
+    // We have decided to preserve the previously existing golden frame as our
+    // new ARF frame. However, in the short term in function
+    // vp9_bitstream.c::get_refresh_mask() we left it in the GF slot and, if
+    // we're updating the GF with the current decoded frame, we save it to the
+    // ARF slot instead.
+    // We now have to update the ARF with the current frame and swap gld_fb_idx
+    // and alt_fb_idx so that, overall, we've stored the old GF in the new ARF
+    // slot and, if we're updating the GF, the current frame becomes the new GF.
     int tmp;
 
     ref_cnt_fb(cm->frame_bufs,
