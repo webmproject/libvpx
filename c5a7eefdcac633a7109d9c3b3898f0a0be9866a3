@@ -34,6 +34,24 @@
       "revId": "c5a7eefdcac633a7109d9c3b3898f0a0be9866a3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//c70\u003d",
+        "filename": "vp9/encoder/vp9_write_bit_buffer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-06T19:18:01Z",
+      "side": 1,
+      "message": "well one could join the vp9_writer and this one, but here it is simply  a bitwriter with write_bit/write_literal. the split is ok, the name just struck me as a bit tedious",
+      "parentUuid": "AAAAdn//c/E\u003d",
+      "revId": "c5a7eefdcac633a7109d9c3b3898f0a0be9866a3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
