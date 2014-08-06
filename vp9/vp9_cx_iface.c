@@ -803,6 +803,20 @@ static int write_superframe_index(vpx_codec_alg_priv_t *ctx) {
   return index_sz;
 }
 
+// vp9 uses 10,000,000 ticks/second as time stamp
+#define TICKS_PER_SEC 10000000
+
+static int64_t timebase_units_to_ticks(const vpx_rational_t *timebase,
+                                       int64_t n) {
+  return n * TICKS_PER_SEC * timebase->num / timebase->den;
+}
+
+static int64_t ticks_to_timebase_units(const vpx_rational_t *timebase,
+                                       int64_t n) {
+  const int64_t round = TICKS_PER_SEC * timebase->num / 2 - 1;
+  return (n * timebase->den + round) / timebase->num / TICKS_PER_SEC;
+}
+
 static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
                                       const vpx_image_t *img,
                                       vpx_codec_pts_t pts,
@@ -810,6 +824,7 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
                                       vpx_enc_frame_flags_t flags,
                                       unsigned long deadline) {
   vpx_codec_err_t res = VPX_CODEC_OK;
+  const vpx_rational_t *const timebase = &ctx->cfg.g_timebase;
 
   if (img != NULL) {
     res = validate_img(ctx, img);
@@ -855,19 +870,15 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
   if (res == VPX_CODEC_OK && ctx->cpi != NULL) {
     unsigned int lib_flags = 0;
     YV12_BUFFER_CONFIG sd;
-    int64_t dst_time_stamp, dst_end_time_stamp;
+    int64_t dst_time_stamp = timebase_units_to_ticks(timebase, pts);
+    int64_t dst_end_time_stamp =
+        timebase_units_to_ticks(timebase, pts + duration);
     size_t size, cx_data_sz;
     unsigned char *cx_data;
 
     // Set up internal flags
     if (ctx->base.init_flags & VPX_CODEC_USE_PSNR)
       ((VP9_COMP *)ctx->cpi)->b_calculate_psnr = 1;
-
-    /* vp9 use 10,000,000 ticks/second as time stamp */
-    dst_time_stamp = (pts * 10000000 * ctx->cfg.g_timebase.num)
-                     / ctx->cfg.g_timebase.den;
-    dst_end_time_stamp = (pts + duration) * 10000000 * ctx->cfg.g_timebase.num /
-                         ctx->cfg.g_timebase.den;
 
     if (img != NULL) {
       res = image2yuvconfig(img, &sd);
@@ -905,9 +916,8 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
                                          cx_data, &dst_time_stamp,
                                          &dst_end_time_stamp, !img)) {
       if (size) {
-        vpx_codec_pts_t round, delta;
-        vpx_codec_cx_pkt_t pkt;
         VP9_COMP *const cpi = (VP9_COMP *)ctx->cpi;
+        vpx_codec_cx_pkt_t pkt;
 
 #if CONFIG_SPATIAL_SVC
         if (cpi->use_svc && cpi->svc.number_temporal_layers == 1)
@@ -932,15 +942,11 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
         }
 
         // Add the frame packet to the list of returned packets.
-        round = (vpx_codec_pts_t)10000000 * ctx->cfg.g_timebase.num / 2 - 1;
-        delta = (dst_end_time_stamp - dst_time_stamp);
         pkt.kind = VPX_CODEC_CX_FRAME_PKT;
-        pkt.data.frame.pts =
-          (dst_time_stamp * ctx->cfg.g_timebase.den + round)
-          / ctx->cfg.g_timebase.num / 10000000;
-        pkt.data.frame.duration = (unsigned long)
-          ((delta * ctx->cfg.g_timebase.den + round)
-          / ctx->cfg.g_timebase.num / 10000000);
+        pkt.data.frame.pts = ticks_to_timebase_units(timebase, dst_time_stamp);
+        pkt.data.frame.duration =
+           (unsigned long)ticks_to_timebase_units(timebase,
+               dst_end_time_stamp - dst_time_stamp);
         pkt.data.frame.flags = lib_flags << 16;
 
         if (lib_flags & FRAMEFLAGS_KEY
@@ -958,9 +964,8 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
           // prior PTS so that if a decoder uses pts to schedule when
           // to do this, we start right after last frame was decoded.
           // Invisible frames have no duration.
-          pkt.data.frame.pts = ((cpi->last_time_stamp_seen
-                                 * ctx->cfg.g_timebase.den + round)
-                                / ctx->cfg.g_timebase.num / 10000000) + 1;
+          pkt.data.frame.pts =
+              ticks_to_timebase_units(timebase, cpi->last_time_stamp_seen) + 1;
           pkt.data.frame.duration = 0;
         }
 
