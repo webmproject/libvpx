@@ -910,14 +910,14 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
         VP9_COMP *const cpi = (VP9_COMP *)ctx->cpi;
 
 #if CONFIG_SPATIAL_SVC
-        if (cpi->use_svc && cpi->svc.number_temporal_layers == 1)
+        if (is_spatial_svc(cpi))
           cpi->svc.layer_context[cpi->svc.spatial_layer_id].layer_size += size;
 #endif
 
         // Pack invisible frames with the next visible frame
         if (cpi->common.show_frame == 0
 #if CONFIG_SPATIAL_SVC
-            || (cpi->use_svc && cpi->svc.number_temporal_layers == 1 &&
+            || (is_spatial_svc(cpi) &&
                 cpi->svc.spatial_layer_id < cpi->svc.number_spatial_layers - 1)
 #endif
             ) {
@@ -945,7 +945,7 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
 
         if (lib_flags & FRAMEFLAGS_KEY
 #if CONFIG_SPATIAL_SVC
-            || (cpi->use_svc && cpi->svc.number_temporal_layers == 1 &&
+            || (is_spatial_svc(cpi) &&
                 cpi->svc.layer_context[0].is_key_frame)
 #endif
             )
@@ -987,7 +987,7 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
         cx_data += size;
         cx_data_sz -= size;
 #if CONFIG_SPATIAL_SVC
-        if (cpi->use_svc && cpi->svc.number_temporal_layers == 1) {
+        if (is_spatial_svc(cpi)) {
           vpx_codec_cx_pkt_t pkt = {0};
           int i;
           pkt.kind = VPX_CODEC_SPATIAL_SVC_LAYER_SIZES;

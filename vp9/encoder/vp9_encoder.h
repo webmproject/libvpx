@@ -536,10 +536,16 @@ YV12_BUFFER_CONFIG *vp9_scale_if_required(VP9_COMMON *cm,
 
 void vp9_apply_encoding_flags(VP9_COMP *cpi, vpx_enc_frame_flags_t flags);
 
+static INLINE int is_spatial_svc(const struct VP9_COMP *const cpi) {
+  return cpi->use_svc &&
+         cpi->svc.number_temporal_layers == 1 &&
+         cpi->svc.number_spatial_layers > 1;
+}
+
 static INLINE int is_altref_enabled(const VP9_COMP *const cpi) {
   return cpi->oxcf.mode != REALTIME && cpi->oxcf.lag_in_frames > 0 &&
          (cpi->oxcf.play_alternate &&
-          (!(cpi->use_svc && cpi->svc.number_temporal_layers == 1) ||
+          (!is_spatial_svc(cpi) ||
            cpi->oxcf.ss_play_alternate[cpi->svc.spatial_layer_id]));
 }
 
