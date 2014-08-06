@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//c4M\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 641,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-06T23:56:07Z",
+      "side": 1,
+      "message": "remove these if they\u0027re all restored",
+      "revId": "bc1810aa7a2060f0825d8a9add6ee2d5e6712afe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
