@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//c88\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-08-06T18:41:18Z",
+      "side": 1,
+      "message": "Can you add something to the message about why it needs to be reallocated?",
+      "revId": "8ff2d296d53bde6a37ed3cac19f62d0a32926386",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
