@@ -366,7 +366,7 @@ int vp9_get_tx_size_context(const MACROBLOCKD *xd) {
   return (above_ctx + left_ctx) > max_tx_size;
 }
 
-int vp9_get_segment_id(VP9_COMMON *cm, const uint8_t *segment_ids,
+int vp9_get_segment_id(const VP9_COMMON *cm, const uint8_t *segment_ids,
                        BLOCK_SIZE bsize, int mi_row, int mi_col) {
   const int mi_offset = mi_row * cm->mi_cols + mi_col;
   const int bw = num_8x8_blocks_wide_lookup[bsize];
