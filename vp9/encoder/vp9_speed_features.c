@@ -160,7 +160,7 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
 }
 
 static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
-                                 int speed) {
+                                 int speed, vp9e_tune_content content) {
   VP9_COMMON *const cm = &cpi->common;
   const int frames_since_key =
       cm->frame_type == KEY_FRAME ? 0 : cpi->rc.frames_since_key;
@@ -275,6 +275,13 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
   }
 
   if (speed >= 6) {
+    if (content == VP9E_CONTENT_SCREEN) {
+      int i;
+      // Allow fancy modes at all sizes since SOURCE_VAR_BASED_PARTITION is used
+      for (i = 0; i < BLOCK_SIZES; ++i)
+        sf->inter_mode_mask[i] = INTER_ALL;
+    }
+
     // Adaptively switch between SOURCE_VAR_BASED_PARTITION and FIXED_PARTITION.
     sf->partition_search_type = SOURCE_VAR_BASED_PARTITION;
     sf->search_type_check_frequency = 50;
@@ -392,7 +399,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
       set_good_speed_feature(cpi, cm, sf, oxcf->speed);
       break;
     case REALTIME:
-      set_rt_speed_feature(cpi, sf, oxcf->speed);
+      set_rt_speed_feature(cpi, sf, oxcf->speed, oxcf->content);
       break;
   }
 
