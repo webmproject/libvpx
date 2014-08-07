@@ -3613,7 +3613,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
       vp9_setup_pre_planes(xd, ref, cfg, mi_row, mi_col,
                            &xd->block_refs[ref]->sf);
     }
-    if (!cpi->sf.reuse_inter_pred_sby)
+    if (!cpi->sf.reuse_inter_pred_sby || seg_skip)
       vp9_build_inter_predictors_sby(xd, mi_row, mi_col, MAX(bsize, BLOCK_8X8));
 
     vp9_build_inter_predictors_sbuv(xd, mi_row, mi_col, MAX(bsize, BLOCK_8X8));
