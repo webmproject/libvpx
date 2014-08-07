@@ -188,11 +188,9 @@ static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
   }
 }
 
-static void duplicate_mode_info_in_sb(VP9_COMMON * const cm,
-                                     MACROBLOCKD *const xd,
-                                     int mi_row,
-                                     int mi_col,
-                                     BLOCK_SIZE bsize) {
+static void duplicate_mode_info_in_sb(VP9_COMMON *cm, MACROBLOCKD *xd,
+                                      int mi_row, int mi_col,
+                                      BLOCK_SIZE bsize) {
   const int block_width = num_8x8_blocks_wide_lookup[bsize];
   const int block_height = num_8x8_blocks_high_lookup[bsize];
   int i, j;
@@ -799,9 +797,7 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
   }
 }
 
-static void update_stats(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
-  const MACROBLOCK *const x = &cpi->mb;
+static void update_stats(VP9_COMMON *cm, const MACROBLOCK *x) {
   const MACROBLOCKD *const xd = &x->e_mbd;
   const MODE_INFO *const mi = xd->mi[0];
   const MB_MODE_INFO *const mbmi = &mi->mbmi;
@@ -913,7 +909,7 @@ static void encode_b(VP9_COMP *cpi, const TileInfo *const tile,
   encode_superblock(cpi, tp, output_enabled, mi_row, mi_col, bsize, ctx);
 
   if (output_enabled) {
-    update_stats(cpi);
+    update_stats(&cpi->common, &cpi->mb);
 
     (*tp)->token = EOSB_TOKEN;
     (*tp)++;
@@ -1330,8 +1326,6 @@ static void encode_b_rt(VP9_COMP *cpi, const TileInfo *const tile,
                         TOKENEXTRA **tp, int mi_row, int mi_col,
                      int output_enabled, BLOCK_SIZE bsize,
                      PICK_MODE_CONTEXT *ctx) {
-
-
   set_offsets(cpi, tile, mi_row, mi_col, bsize);
   update_state_rt(cpi, ctx, mi_row, mi_col, bsize);
 
@@ -1343,7 +1337,7 @@ static void encode_b_rt(VP9_COMP *cpi, const TileInfo *const tile,
 #endif
 
   encode_superblock(cpi, tp, output_enabled, mi_row, mi_col, bsize, ctx);
-  update_stats(cpi);
+  update_stats(&cpi->common, &cpi->mb);
 
   (*tp)->token = EOSB_TOKEN;
   (*tp)++;
@@ -1366,7 +1360,6 @@ static void encode_sb_rt(VP9_COMP *cpi, const TileInfo *const tile,
     return;
 
   if (bsize >= BLOCK_8X8) {
-    MACROBLOCKD *const xd = &cpi->mb.e_mbd;
     const int idx_str = xd->mi_stride * mi_row + mi_col;
     MODE_INFO ** mi_8x8 = cm->mi_grid_visible + idx_str;
     ctx = partition_plane_context(xd, mi_row, mi_col, bsize);
@@ -1729,10 +1722,9 @@ static const BLOCK_SIZE max_partition_size[BLOCK_SIZES] = {
 //
 // The min and max are assumed to have been initialized prior to calling this
 // function so repeat calls can accumulate a min and max of more than one sb64.
-static void get_sb_partition_size_range(VP9_COMP *cpi, MODE_INFO ** mi_8x8,
-                                        BLOCK_SIZE * min_block_size,
-                                        BLOCK_SIZE * max_block_size ) {
-  MACROBLOCKD *const xd = &cpi->mb.e_mbd;
+static void get_sb_partition_size_range(MACROBLOCKD *xd, MODE_INFO **mi_8x8,
+                                        BLOCK_SIZE *min_block_size,
+                                        BLOCK_SIZE *max_block_size ) {
   int sb_width_in_blocks = MI_BLOCK_SIZE;
   int sb_height_in_blocks  = MI_BLOCK_SIZE;
   int i, j;
@@ -1787,17 +1779,17 @@ static void rd_auto_partition_range(VP9_COMP *cpi, const TileInfo *const tile,
     if (cm->frame_type != KEY_FRAME) {
       MODE_INFO **const prev_mi =
           &cm->prev_mi_grid_visible[mi_row * xd->mi_stride + mi_col];
-      get_sb_partition_size_range(cpi, prev_mi, &min_size, &max_size);
+      get_sb_partition_size_range(xd, prev_mi, &min_size, &max_size);
     }
     // Find the min and max partition sizes used in the left SB64
     if (left_in_image) {
       MODE_INFO **left_sb64_mi = &mi[-MI_BLOCK_SIZE];
-      get_sb_partition_size_range(cpi, left_sb64_mi, &min_size, &max_size);
+      get_sb_partition_size_range(xd, left_sb64_mi, &min_size, &max_size);
     }
     // Find the min and max partition sizes used in the above SB64.
     if (above_in_image) {
       MODE_INFO **above_sb64_mi = &mi[-xd->mi_stride * MI_BLOCK_SIZE];
-      get_sb_partition_size_range(cpi, above_sb64_mi, &min_size, &max_size);
+      get_sb_partition_size_range(xd, above_sb64_mi, &min_size, &max_size);
     }
     // adjust observed min and max
     if (cpi->sf.auto_min_max_partition_size == RELAXED_NEIGHBORING_MIN_MAX) {
@@ -2706,6 +2698,8 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
                                  int mi_col, BLOCK_SIZE bsize, int *rate,
                                  int64_t *dist, int do_recon, int64_t best_rd,
                                  PC_TREE *pc_tree) {
+  const SPEED_FEATURES *const sf = &cpi->sf;
+  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -2737,18 +2731,18 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
 
   // Determine partition types in search according to the speed features.
   // The threshold set here has to be of square block size.
-  if (cpi->sf.auto_min_max_partition_size) {
-    partition_none_allowed &= (bsize <= cpi->sf.max_partition_size &&
-                               bsize >= cpi->sf.min_partition_size);
-    partition_horz_allowed &= ((bsize <= cpi->sf.max_partition_size &&
-                                bsize >  cpi->sf.min_partition_size) ||
+  if (sf->auto_min_max_partition_size) {
+    partition_none_allowed &= (bsize <= sf->max_partition_size &&
+                               bsize >= sf->min_partition_size);
+    partition_horz_allowed &= ((bsize <= sf->max_partition_size &&
+                                bsize > sf->min_partition_size) ||
                                 force_horz_split);
-    partition_vert_allowed &= ((bsize <= cpi->sf.max_partition_size &&
-                                bsize >  cpi->sf.min_partition_size) ||
+    partition_vert_allowed &= ((bsize <= sf->max_partition_size &&
+                                bsize > sf->min_partition_size) ||
                                 force_vert_split);
-    do_split &= bsize > cpi->sf.min_partition_size;
+    do_split &= bsize > sf->min_partition_size;
   }
-  if (cpi->sf.use_square_partition_only) {
+  if (sf->use_square_partition_only) {
     partition_horz_allowed &= force_horz_split;
     partition_vert_allowed &= force_vert_split;
   }
@@ -2827,7 +2821,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     } else {
       // skip rectangular partition test when larger block size
       // gives better rd cost
-      if (cpi->sf.less_rectangular_check)
+      if (sf->less_rectangular_check)
         do_rect &= !partition_none_allowed;
     }
   }
@@ -2835,7 +2829,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
   // PARTITION_HORZ
   if (partition_horz_allowed && do_rect) {
     subsize = get_subsize(bsize, PARTITION_HORZ);
-    if (cpi->sf.adaptive_motion_search)
+    if (sf->adaptive_motion_search)
       load_pred_mv(x, ctx);
 
     nonrd_pick_sb_modes(cpi, tile, mi_row, mi_col,
@@ -2880,7 +2874,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
   if (partition_vert_allowed && do_rect) {
     subsize = get_subsize(bsize, PARTITION_VERT);
 
-    if (cpi->sf.adaptive_motion_search)
+    if (sf->adaptive_motion_search)
       load_pred_mv(x, ctx);
 
     nonrd_pick_sb_modes(cpi, tile, mi_row, mi_col,
@@ -2937,12 +2931,12 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     // Check the projected output rate for this SB against it's target
     // and and if necessary apply a Q delta using segmentation to get
     // closer to the target.
-    if ((cpi->oxcf.aq_mode == COMPLEXITY_AQ) && cm->seg.update_map) {
+    if ((oxcf->aq_mode == COMPLEXITY_AQ) && cm->seg.update_map) {
       vp9_select_in_frame_q_segment(cpi, mi_row, mi_col, output_enabled,
                                     best_rate);
     }
 
-    if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ)
+    if (oxcf->aq_mode == CYCLIC_REFRESH_AQ)
       vp9_cyclic_refresh_set_rate_and_dist_sb(cpi->cyclic_refresh,
                                               best_rate, best_dist);
 
@@ -3073,9 +3067,10 @@ static void nonrd_use_partition(VP9_COMP *cpi,
 
 static void encode_nonrd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
                                 int mi_row, TOKENEXTRA **tp) {
-  VP9_COMMON *cm = &cpi->common;
-  MACROBLOCK *x = &cpi->mb;
-  MACROBLOCKD *xd = &x->e_mbd;
+  SPEED_FEATURES *const sf = &cpi->sf;
+  VP9_COMMON *const cm = &cpi->common;
+  MACROBLOCK *const x = &cpi->mb;
+  MACROBLOCKD *const xd = &x->e_mbd;
   int mi_col;
 
   // Initialize the left context for the new SB row
@@ -3085,7 +3080,6 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
   // Code each SB in the row
   for (mi_col = tile->mi_col_start; mi_col < tile->mi_col_end;
        mi_col += MI_BLOCK_SIZE) {
-    MACROBLOCK *x = &cpi->mb;
     int dummy_rate = 0;
     int64_t dummy_dist = 0;
     const int idx_str = cm->mi_stride * mi_row + mi_col;
@@ -3098,7 +3092,7 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
     vp9_zero(x->pred_mv);
 
     // Set the partition type of the 64X64 block
-    switch (cpi->sf.partition_search_type) {
+    switch (sf->partition_search_type) {
       case VAR_BASED_PARTITION:
         choose_partitioning(cpi, tile, mi_row, mi_col);
         nonrd_use_partition(cpi, tile, mi, tp, mi_row, mi_col, BLOCK_64X64,
@@ -3111,20 +3105,20 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
         break;
       case VAR_BASED_FIXED_PARTITION:
       case FIXED_PARTITION:
-        bsize = cpi->sf.partition_search_type == FIXED_PARTITION ?
-                cpi->sf.always_this_block_size :
+        bsize = sf->partition_search_type == FIXED_PARTITION ?
+                sf->always_this_block_size :
                 get_nonrd_var_based_fixed_partition(cpi, mi_row, mi_col);
         set_fixed_partitioning(cpi, tile, mi, mi_row, mi_col, bsize);
         nonrd_use_partition(cpi, tile, mi, tp, mi_row, mi_col, BLOCK_64X64,
                             1, &dummy_rate, &dummy_dist, cpi->pc_root);
         break;
       case REFERENCE_PARTITION:
-        if (cpi->sf.partition_check ||
+        if (sf->partition_check ||
             !is_background(cpi, tile, mi_row, mi_col)) {
           set_modeinfo_offsets(cm, xd, mi_row, mi_col);
           auto_partition_range(cpi, tile, mi_row, mi_col,
-                               &cpi->sf.min_partition_size,
-                               &cpi->sf.max_partition_size);
+                               &sf->min_partition_size,
+                               &sf->max_partition_size);
           nonrd_pick_partition(cpi, tile, tp, mi_row, mi_col, BLOCK_64X64,
                                &dummy_rate, &dummy_dist, 1, INT64_MAX,
                                cpi->pc_root);
@@ -3144,8 +3138,8 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
 // end RTC play code
 
 static int set_var_thresh_from_histogram(VP9_COMP *cpi) {
-  SPEED_FEATURES *const sf = &cpi->sf;
-  VP9_COMMON *const cm = &cpi->common;
+  const SPEED_FEATURES *const sf = &cpi->sf;
+  const VP9_COMMON *const cm = &cpi->common;
 
   const uint8_t *src = cpi->Source->y_buffer;
   const uint8_t *last_src = cpi->Last_Source->y_buffer;
@@ -3304,19 +3298,19 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   vp9_zero(rd_opt->tx_select_diff);
   vp9_zero(rd_opt->tx_select_threshes);
 
-  cpi->mb.e_mbd.lossless = cm->base_qindex == 0 &&
-                           cm->y_dc_delta_q == 0 &&
-                           cm->uv_dc_delta_q == 0 &&
-                           cm->uv_ac_delta_q == 0;
+  xd->lossless = cm->base_qindex == 0 &&
+                 cm->y_dc_delta_q == 0 &&
+                 cm->uv_dc_delta_q == 0 &&
+                 cm->uv_ac_delta_q == 0;
 
   cm->tx_mode = select_tx_mode(cpi);
 
-  cpi->mb.fwd_txm4x4 = cpi->mb.e_mbd.lossless ? vp9_fwht4x4 : vp9_fdct4x4;
-  cpi->mb.itxm_add = cpi->mb.e_mbd.lossless ? vp9_iwht4x4_add : vp9_idct4x4_add;
+  x->fwd_txm4x4 = xd->lossless ? vp9_fwht4x4 : vp9_fdct4x4;
+  x->itxm_add = xd->lossless ? vp9_iwht4x4_add : vp9_idct4x4_add;
 
-  if (cpi->mb.e_mbd.lossless) {
-    cpi->mb.optimize = 0;
-    cpi->common.lf.filter_level = 0;
+  if (xd->lossless) {
+    x->optimize = 0;
+    cm->lf.filter_level = 0;
     cpi->zbin_mode_boost_enabled = 0;
   }
 
