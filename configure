@@ -46,6 +46,9 @@ Advanced options:
   ${toggle_realtime_only}         enable this option while building for real-time encoding
   ${toggle_onthefly_bitpacking}   enable on-the-fly bitpacking in real-time encoding
   ${toggle_error_concealment}     enable this option to get a decoder which is able to conceal losses
+  ${toggle_coefficient_range_checking}
+                                  enable decoder to check if intermediate
+                                  transform coefficients are in valid range
   ${toggle_runtime_cpu_detect}    runtime cpu detection
   ${toggle_shared}                shared library support
   ${toggle_static}                static library support
@@ -327,6 +330,7 @@ CONFIG_LIST="
     encode_perf_tests
     multi_res_encoding
     temporal_denoising
+    coefficient_range_checking
     experimental
     size_limit
     ${EXPERIMENT_LIST}
@@ -384,6 +388,7 @@ CMDLINE_SELECT="
     encode_perf_tests
     multi_res_encoding
     temporal_denoising
+    coefficient_range_checking
     experimental
 "
 
