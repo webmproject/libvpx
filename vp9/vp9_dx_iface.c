@@ -97,6 +97,30 @@ static vpx_codec_err_t decoder_destroy(vpx_codec_alg_priv_t *ctx) {
   return VPX_CODEC_OK;
 }
 
+static int parse_bitdepth_colorspace_sampling(
+    BITSTREAM_PROFILE profile, struct vp9_read_bit_buffer *rb) {
+  const int sRGB = 7;
+  int colorspace;
+  if (profile >= PROFILE_2)
+    rb->bit_offset += 1;  // Bit-depth 10 or 12.
+  colorspace = vp9_rb_read_literal(rb, 3);
+  if (colorspace != sRGB) {
+    rb->bit_offset += 1;  // [16,235] (including xvycc) vs [0,255] range.
+    if (profile == PROFILE_1 || profile == PROFILE_3) {
+      rb->bit_offset += 2;  // subsampling x/y.
+      rb->bit_offset += 1;  // unused.
+    }
+  } else {
+    if (profile == PROFILE_1 || profile == PROFILE_3) {
+      rb->bit_offset += 1;  // unused
+    } else {
+      // RGB is only available in version 1.
+      return 0;
+    }
+  }
+  return 1;
+}
+
 static vpx_codec_err_t decoder_peek_si_internal(const uint8_t *data,
                                                 unsigned int data_sz,
                                                 vpx_codec_stream_info_t *si,
@@ -142,29 +166,11 @@ static vpx_codec_err_t decoder_peek_si_internal(const uint8_t *data,
     error_resilient = vp9_rb_read_bit(&rb);
 
     if (si->is_kf) {
-      const int sRGB = 7;
-      int colorspace;
-
       if (!vp9_read_sync_code(&rb))
         return VPX_CODEC_UNSUP_BITSTREAM;
+      if (!parse_bitdepth_colorspace_sampling(profile, &rb))
+        return VPX_CODEC_UNSUP_BITSTREAM;
 
-      if (profile > PROFILE_1)
-        rb.bit_offset += 1;  // Bit-depth 10 or 12
-      colorspace = vp9_rb_read_literal(&rb, 3);
-      if (colorspace != sRGB) {
-        rb.bit_offset += 1;  // [16,235] (including xvycc) vs [0,255] range
-        if (profile == PROFILE_1 || profile == PROFILE_3) {
-          rb.bit_offset += 2;  // subsampling x/y
-          rb.bit_offset += 1;  // has extra plane
-        }
-      } else {
-        if (profile == PROFILE_1 || profile == PROFILE_3) {
-          rb.bit_offset += 1;  // has extra plane
-        } else {
-          // RGB is only available in version 1
-          return VPX_CODEC_UNSUP_BITSTREAM;
-        }
-      }
       vp9_read_frame_size(&rb, (int *)&si->w, (int *)&si->h);
     } else {
       intra_only_flag = show_frame ? 0 : vp9_rb_read_bit(&rb);
@@ -173,6 +179,10 @@ static vpx_codec_err_t decoder_peek_si_internal(const uint8_t *data,
       if (intra_only_flag) {
         if (!vp9_read_sync_code(&rb))
           return VPX_CODEC_UNSUP_BITSTREAM;
+        if (profile > PROFILE_0) {
+          if (!parse_bitdepth_colorspace_sampling(profile, &rb))
+            return VPX_CODEC_UNSUP_BITSTREAM;
+        }
         rb.bit_offset += REF_FRAMES;  // refresh_frame_flags
         vp9_read_frame_size(&rb, (int *)&si->w, (int *)&si->h);
       }

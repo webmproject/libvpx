@@ -639,12 +639,14 @@ static int read_delta_q(struct vp9_read_bit_buffer *rb, int *delta_q) {
 static void setup_quantization(VP9_COMMON *const cm, MACROBLOCKD *const xd,
                                struct vp9_read_bit_buffer *rb) {
   int update = 0;
-
   cm->base_qindex = vp9_rb_read_literal(rb, QINDEX_BITS);
   update |= read_delta_q(rb, &cm->y_dc_delta_q);
   update |= read_delta_q(rb, &cm->uv_dc_delta_q);
   update |= read_delta_q(rb, &cm->uv_ac_delta_q);
-  if (update)
+
+  // TODO(peter.derivaz): Don't really want to call this for every frame
+  // for high-bit-depth, but need the bit depth to init dequantizers
+  if (update || cm->profile >= PROFILE_2)
     vp9_init_dequantizer(cm);
 
   xd->lossless = cm->base_qindex == 0 &&
@@ -1148,6 +1150,49 @@ BITSTREAM_PROFILE vp9_read_profile(struct vp9_read_bit_buffer *rb) {
   return (BITSTREAM_PROFILE) profile;
 }
 
+static void read_bitdepth_colorspace_sampling(
+    VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
+  if (cm->profile >= PROFILE_2) {
+    cm->bit_depth = vp9_rb_read_bit(rb) ? VPX_BITS_12 : VPX_BITS_10;
+#if CONFIG_VP9_HIGH
+    cm->use_high = 1;
+#endif
+  } else {
+#if CONFIG_VP9_HIGH
+    cm->use_high = 0;
+#endif
+    cm->bit_depth = VPX_BITS_8;
+  }
+  cm->color_space = (COLOR_SPACE)vp9_rb_read_literal(rb, 3);
+  if (cm->color_space != SRGB) {
+    vp9_rb_read_bit(rb);  // [16,235] (including xvycc) vs [0,255] range
+    if (cm->profile == PROFILE_1 || cm->profile == PROFILE_3) {
+      cm->subsampling_x = vp9_rb_read_bit(rb);
+      cm->subsampling_y = vp9_rb_read_bit(rb);
+      if (cm->subsampling_x == 1 && cm->subsampling_y == 1)
+        vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
+                           "4:2:0 color not supported in profile 1 or 3");
+      if (vp9_rb_read_bit(rb))
+        vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
+                           "Reserved bit set");
+    } else {
+      cm->subsampling_y = cm->subsampling_x = 1;
+    }
+  } else {
+    if (cm->profile == PROFILE_1 || cm->profile == PROFILE_3) {
+      // Note: If colorspace is SRGB then only 4:4:4 chroma sampling
+      // is supported.
+      cm->subsampling_y = cm->subsampling_x = 0;
+      if (vp9_rb_read_bit(rb))
+        vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
+                           "Reserved bit set");
+    } else {
+      vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
+                         "4:4:4 color not supported in profile 0 or 2");
+    }
+  }
+}
+
 static size_t read_uncompressed_header(VP9Decoder *pbi,
                                        struct vp9_read_bit_buffer *rb) {
   VP9_COMMON *const cm = &pbi->common;
@@ -1190,41 +1235,7 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
     if (!vp9_read_sync_code(rb))
       vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
                          "Invalid frame sync code");
-    if (cm->profile > PROFILE_1) {
-      cm->bit_depth = vp9_rb_read_bit(rb) ? VPX_BITS_12 : VPX_BITS_10;
-#if CONFIG_VP9_HIGH
-      cm->use_high = 1;
-#endif
-    } else {
-#if CONFIG_VP9_HIGH
-      cm->use_high = 0;
-#endif
-      cm->bit_depth = VPX_BITS_8;
-    }
-    // TODO(peter.derivaz): Don't really want to call this for every frame, but
-    // need the bit depth to init dequantizers
-    vp9_init_dequantizer(cm);
-
-    cm->color_space = (COLOR_SPACE)vp9_rb_read_literal(rb, 3);
-    if (cm->color_space != SRGB) {
-      vp9_rb_read_bit(rb);  // [16,235] (including xvycc) vs [0,255] range
-      if (cm->profile == PROFILE_1 || cm->profile == PROFILE_3) {
-        cm->subsampling_x = vp9_rb_read_bit(rb);
-        cm->subsampling_y = vp9_rb_read_bit(rb);
-        vp9_rb_read_bit(rb);  // has extra plane
-      } else {
-        cm->subsampling_y = cm->subsampling_x = 1;
-      }
-    } else {
-      if (cm->profile == PROFILE_1 || cm->profile == PROFILE_3) {
-        cm->subsampling_y = cm->subsampling_x = 0;
-        vp9_rb_read_bit(rb);  // has extra plane
-      } else {
-        vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
-                           "4:4:4 color not supported in profile 0");
-      }
-    }
-
+    read_bitdepth_colorspace_sampling(cm, rb);
     pbi->refresh_frame_flags = (1 << REF_FRAMES) - 1;
 
     for (i = 0; i < REFS_PER_FRAME; ++i) {
@@ -1243,15 +1254,17 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
       if (!vp9_read_sync_code(rb))
         vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
                            "Invalid frame sync code");
-
+      if (cm->profile > PROFILE_0) {
+        read_bitdepth_colorspace_sampling(cm, rb);
+      } else {
+        // NOTE: The intra-only frame header does not include the specification
+        // of either the color format or color sub-sampling in profile 0. VP9
+        // specifies that the default color space should be YUV 4:2:0 in this
+        // case (normative).
+        cm->color_space = BT_601;
+        cm->subsampling_y = cm->subsampling_x = 1;
+      }
       pbi->refresh_frame_flags = vp9_rb_read_literal(rb, REF_FRAMES);
-
-      // NOTE: The intra-only frame header does not include the specification of
-      // either the color format or color sub-sampling. VP9 specifies that the
-      // default color space should be YUV 4:2:0 in this case (normative).
-      cm->color_space = BT_601;
-      cm->subsampling_y = cm->subsampling_x = 1;
-
       setup_frame_size(cm, rb);
     } else {
       pbi->refresh_frame_flags = vp9_rb_read_literal(rb, REF_FRAMES);
@@ -1287,7 +1300,6 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
       }
     }
   }
-
   if (!cm->error_resilient_mode) {
     cm->coding_use_prev_mi = 1;
     cm->refresh_frame_context = vp9_rb_read_bit(rb);

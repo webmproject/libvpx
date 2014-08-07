@@ -550,6 +550,7 @@ static void init_config(struct VP9_COMP *cpi, VP9EncoderConfig *oxcf) {
 #if CONFIG_VP9_HIGH
   cm->use_high = oxcf->use_high;
 #endif
+  cm->color_space = UNKNOWN;
 
   cm->width = oxcf->width;
   cm->height = oxcf->height;
@@ -3269,9 +3270,16 @@ int vp9_receive_raw_frame(VP9_COMP *cpi, unsigned int frame_flags,
   vpx_usec_timer_mark(&timer);
   cpi->time_receive_data += vpx_usec_timer_elapsed(&timer);
 
-  if (cm->profile == PROFILE_0 && (subsampling_x != 1 || subsampling_y != 1)) {
+  if ((cm->profile == PROFILE_0 || cm->profile == PROFILE_2) &&
+      (subsampling_x != 1 || subsampling_y != 1)) {
     vpx_internal_error(&cm->error, VPX_CODEC_INVALID_PARAM,
-                       "Non-4:2:0 color space requires profile >= 1");
+                       "Non-4:2:0 color space requires profile 1 or 3");
+    res = -1;
+  }
+  if ((cm->profile == PROFILE_1 || cm->profile == PROFILE_3) &&
+      (subsampling_x == 1 && subsampling_y == 1)) {
+    vpx_internal_error(&cm->error, VPX_CODEC_INVALID_PARAM,
+                       "4:2:0 color space requires profile 0 or 2");
     res = -1;
   }
 
