@@ -327,7 +327,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   nb = so->neighbors;
   c = 0;
 #if CONFIG_VP9_HIGH && CONFIG_HIGH_QUANT
-  if (cpi->common.profile > PROFILE_1) {
+  if (cpi->common.profile >= PROFILE_2) {
     dct_value_tokens = (cpi->common.bit_depth == VPX_BITS_10 ?
                         vp9_dct_value_tokens_high10_ptr :
                         vp9_dct_value_tokens_high12_ptr);
