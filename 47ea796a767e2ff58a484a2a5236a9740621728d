@@ -16,6 +16,24 @@
       "revId": "47ea796a767e2ff58a484a2a5236a9740621728d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//czU\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1107,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-07T16:18:25Z",
+      "side": 1,
+      "message": "If we do then we need to modify the comment by the side of the definition of PROFILE_1 in vp9_enums.h.\n  // 00: Profile 0.  8-bit 4:2:0 only.\n  // 10: Profile 1.  Adds 4:4:4, 4:2:2, and 4:4:0 to Profile 0.\nThis suggests to me that Profile_1 includes the possibility of \n4:2:0.",
+      "parentUuid": "AAAAdn//czg\u003d",
+      "revId": "47ea796a767e2ff58a484a2a5236a9740621728d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
