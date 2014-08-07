@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//cqE\u003d",
+        "filename": "vp9/common/x86/vp9_subpixel_8t_intrin_avx2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 427,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-07T23:40:08Z",
+      "side": 1,
+      "message": "this variable naming is inconsistent; usually we try to use lowercase with underscores. the cleanup shouldn\u0027t be done here, but a follow-up would be nice.",
+      "revId": "839911fb6dde5a2d560708b1cd4653616b07c9ba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
