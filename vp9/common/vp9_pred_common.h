@@ -26,7 +26,7 @@ static INLINE const MODE_INFO *get_left_mi(const MACROBLOCKD *const xd) {
   return xd->left_available ? xd->mi[-1] : NULL;
 }
 
-int vp9_get_segment_id(VP9_COMMON *cm, const uint8_t *segment_ids,
+int vp9_get_segment_id(const VP9_COMMON *cm, const uint8_t *segment_ids,
                        BLOCK_SIZE bsize, int mi_row, int mi_col);
 
 static INLINE int vp9_get_pred_context_seg_id(const MACROBLOCKD *xd) {
