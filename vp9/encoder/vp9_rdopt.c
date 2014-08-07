@@ -171,15 +171,27 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
   int64_t dist_sum = 0;
   const int ref = xd->mi[0]->mbmi.ref_frame[0];
   unsigned int sse;
+  const int shift = 8;
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
     struct macroblock_plane *const p = &x->plane[i];
     struct macroblockd_plane *const pd = &xd->plane[i];
     const BLOCK_SIZE bs = get_plane_block_size(bsize, pd);
 
-    (void) cpi->fn_ptr[bs].vf(p->src.buf, p->src.stride,
-                              pd->dst.buf, pd->dst.stride, &sse);
+    const unsigned int var = cpi->fn_ptr[bs].vf(p->src.buf, p->src.stride,
+                                                pd->dst.buf, pd->dst.stride,
+                                                &sse);
 
+    if (!x->select_tx_size) {
+      if (sse < p->quant_thred[0] >> shift)
+        x->skip_txfm[i] = 1;
+      else if (var < p->quant_thred[1] >> shift)
+        x->skip_txfm[i] = 2;
+      else
+        x->skip_txfm[i] = 0;
+    }
+
+    x->bsse[i] = sse;
     if (i == 0)
       x->pred_sse[ref] = sse;
 
@@ -357,12 +369,32 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
   if (args->skip)
     return;
 
-  if (!is_inter_block(mbmi))
+  if (!is_inter_block(mbmi)) {
     vp9_encode_block_intra(x, plane, block, plane_bsize, tx_size, &mbmi->skip);
-  else
-    vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
+    dist_block(plane, block, tx_size, args);
+  } else {
+    if (x->skip_txfm[plane] == 0) {
+      // full forward transform and quantization
+      vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
+      dist_block(plane, block, tx_size, args);
+    } else if (x->skip_txfm[plane] == 2) {
+      // compute DC coefficient
+      int16_t *const coeff   = BLOCK_OFFSET(x->plane[plane].coeff, block);
+      int16_t *const dqcoeff = BLOCK_OFFSET(xd->plane[plane].dqcoeff, block);
+      vp9_xform_quant_dc(x, plane, block, plane_bsize, tx_size);
+      args->sse  = x->bsse[plane] << 4;
+      args->dist = args->sse;
+      if (!x->plane[plane].eobs[block])
+        args->dist = args->sse - ((coeff[0] * coeff[0] -
+            (coeff[0] - dqcoeff[0]) * (coeff[0] - dqcoeff[0])) >> 2);
+    } else {
+      // skip forward transform
+      x->plane[plane].eobs[block] = 0;
+      args->sse  = x->bsse[plane] << 4;
+      args->dist = args->sse;
+    }
+  }
 
-  dist_block(plane, block, tx_size, args);
   rate_block(plane, block, plane_bsize, tx_size, args);
   rd1 = RDCOST(x->rdmult, x->rddiv, args->rate, args->dist);
   rd2 = RDCOST(x->rdmult, x->rddiv, 0, args->sse);
@@ -2103,6 +2135,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int orig_dst_stride[MAX_MB_PLANE];
   int rs = 0;
   INTERP_FILTER best_filter = SWITCHABLE;
+  int skip_txfm[MAX_MB_PLANE] = {0};
+  int64_t bsse[MAX_MB_PLANE] = {0};
 
   int bsl = mi_width_log2_lookup[bsize];
   int pred_filter_search = cpi->sf.cb_pred_filter_search ?
@@ -2265,6 +2299,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           best_filter = mbmi->interp_filter;
           if (cm->interp_filter == SWITCHABLE && i && !intpel_mv)
             best_needs_copy = !best_needs_copy;
+          vpx_memcpy(skip_txfm, x->skip_txfm, sizeof(skip_txfm));
+          vpx_memcpy(bsse, x->bsse, sizeof(bsse));
         }
 
         if ((cm->interp_filter == SWITCHABLE && newbest) ||
@@ -2316,6 +2352,9 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       rd_encode_breakout_test(cpi, x, bsize, rate2, distortion, distortion_uv,
                               disable_skip, this_rd);
   }
+
+  vpx_memcpy(x->skip_txfm, skip_txfm, sizeof(skip_txfm));
+  vpx_memcpy(x->bsse, bsse, sizeof(bsse));
 
   if (!x->skip) {
     int skippable_y, skippable_uv;
