@@ -47,42 +47,8 @@ vp9_spatial_svc_encoder() {
   [ -e "${output_file}" ] || return 1
 }
 
-# Each mode is run with layer count 1-$vp9_ssvc_test_layers.
+# Each test is run with layer count 1-$vp9_ssvc_test_layers.
 vp9_ssvc_test_layers=5
-
-DISABLED_vp9_spatial_svc_mode_i() {
-  if [ "$(vp9_encode_available)" = "yes" ]; then
-    local readonly test_name="DISABLED_vp9_spatial_svc_mode_i"
-    for layers in $(seq 1 ${vp9_ssvc_test_layers}); do
-      vp9_spatial_svc_encoder "${test_name}" -m i -l ${layers}
-    done
-  fi
-}
-
-DISABLED_vp9_spatial_svc_mode_altip() {
-  if [ "$(vp9_encode_available)" = "yes" ]; then
-    local readonly test_name="DISABLED_vp9_spatial_svc_mode_altip"
-    for layers in $(seq 1 ${vp9_ssvc_test_layers}); do
-      vp9_spatial_svc_encoder "${test_name}" -m "alt-ip" -l ${layers}
-    done
-  fi
-}
-
-DISABLED_vp9_spatial_svc_mode_ip() {
-  if [ "$(vp9_encode_available)" = "yes" ]; then
-    local readonly test_name="DISABLED_vp9_spatial_svc_mode_ip"
-    vp9_spatial_svc_encoder "${test_name}" -m ip -l 1
-  fi
-}
-
-DISABLED_vp9_spatial_svc_mode_gf() {
-  if [ "$(vp9_encode_available)" = "yes" ]; then
-    local readonly test_name="DISABLED_vp9_spatial_svc_mode_gf"
-    for layers in $(seq 1 ${vp9_ssvc_test_layers}); do
-      vp9_spatial_svc_encoder "${test_name}" -m gf -l ${layers}
-    done
-  fi
-}
 
 vp9_spatial_svc() {
   if [ "$(vp9_encode_available)" = "yes" ]; then
