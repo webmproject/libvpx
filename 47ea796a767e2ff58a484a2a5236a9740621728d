@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//czg\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1107,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-08-07T15:53:43Z",
+      "side": 1,
+      "message": "Shall we add here also: \n\nif (cm-\u003esubsampling_x \u003d\u003d 1 \u0026\u0026 cm-\u003esubsampling_y \u003d\u003d 1)\n  vpx_internal_error(\u0026cm-\u003eerror, VPX_CODEC_UNSUP_BITSTREAM,\n                         \"4:2:0 color not supported in profile 1 or 3\");",
+      "revId": "47ea796a767e2ff58a484a2a5236a9740621728d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
