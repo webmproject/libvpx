@@ -16,6 +16,24 @@
       "revId": "51c19180acff734da2c4773604b59e3383a6c10b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//czI\u003d",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 710,
+      "author": {
+        "id": 1108495
+      },
+      "writtenOn": "2014-08-07T17:02:39Z",
+      "side": 1,
+      "message": "Do you mean to delete the whole extern C{}?",
+      "parentUuid": "AAAAdn//drA\u003d",
+      "revId": "51c19180acff734da2c4773604b59e3383a6c10b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
