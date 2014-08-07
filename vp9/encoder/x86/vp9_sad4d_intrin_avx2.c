@@ -31,7 +31,7 @@ void vp9_sad32x32x4d_avx2(uint8_t *src,
   sum_ref3 = _mm256_set1_epi16(0);
   for (i = 0; i < 32 ; i++) {
     // load src and all refs
-    src_reg = _mm256_load_si256((__m256i *)(src));
+    src_reg = _mm256_loadu_si256((__m256i *)(src));
     ref0_reg = _mm256_loadu_si256((__m256i *) (ref0));
     ref1_reg = _mm256_loadu_si256((__m256i *) (ref1));
     ref2_reg = _mm256_loadu_si256((__m256i *) (ref2));
@@ -103,8 +103,8 @@ void vp9_sad64x64x4d_avx2(uint8_t *src,
   sum_ref3 = _mm256_set1_epi16(0);
   for (i = 0; i < 64 ; i++) {
     // load 64 bytes from src and all refs
-    src_reg = _mm256_load_si256((__m256i *)(src));
-    srcnext_reg = _mm256_load_si256((__m256i *)(src + 32));
+    src_reg = _mm256_loadu_si256((__m256i *)(src));
+    srcnext_reg = _mm256_loadu_si256((__m256i *)(src + 32));
     ref0_reg = _mm256_loadu_si256((__m256i *) (ref0));
     ref0next_reg = _mm256_loadu_si256((__m256i *) (ref0 + 32));
     ref1_reg = _mm256_loadu_si256((__m256i *) (ref1));
