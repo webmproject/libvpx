@@ -71,6 +71,7 @@ static const struct extraconfig_map extracfg_map[] = {
       NO_AQ,                      // aq_mode
       0,                          // frame_periodic_delta_q
       BITS_8,                     // Bit depth
+      VP9E_CONTENT_DEFAULT        // content
     }
   }
 };
