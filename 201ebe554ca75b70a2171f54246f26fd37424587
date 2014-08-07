@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//cxQ\u003d",
+        "filename": "tools_common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-07T17:44:16Z",
+      "side": 1,
+      "message": "as an alternative you could swap the size/number params and test for 1. it\u0027s ok either way...",
+      "revId": "201ebe554ca75b70a2171f54246f26fd37424587",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
