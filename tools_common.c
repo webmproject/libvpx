@@ -246,7 +246,7 @@ int vpx_img_read(vpx_image_t *img, FILE *file) {
     int y;
 
     for (y = 0; y < h; ++y) {
-      if (fread(buf, 1, w, file) != w)
+      if (fread(buf, 1, w, file) != (size_t)w)
         return 0;
       buf += stride;
     }
