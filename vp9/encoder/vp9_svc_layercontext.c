@@ -116,9 +116,9 @@ void vp9_update_layer_context_change_config(VP9_COMP *const cpi,
     lrc->buffer_level = MIN(lrc->buffer_level, lrc->maximum_buffer_size);
     // Update framerate-related quantities.
     if (svc->number_temporal_layers > 1) {
-      lc->framerate = oxcf->framerate / oxcf->ts_rate_decimator[layer];
+      lc->framerate = cpi->framerate / oxcf->ts_rate_decimator[layer];
     } else {
-      lc->framerate = oxcf->framerate;
+      lc->framerate = cpi->framerate;
     }
     lrc->avg_frame_bandwidth = (int)(lc->target_bandwidth / lc->framerate);
     lrc->max_frame_bandwidth = rc->max_frame_bandwidth;
@@ -141,7 +141,7 @@ void vp9_update_temporal_layer_framerate(VP9_COMP *const cpi) {
   RATE_CONTROL *const lrc = &lc->rc;
   const int layer = svc->temporal_layer_id;
 
-  lc->framerate = oxcf->framerate / oxcf->ts_rate_decimator[layer];
+  lc->framerate = cpi->framerate / oxcf->ts_rate_decimator[layer];
   lrc->avg_frame_bandwidth = (int)(lc->target_bandwidth / lc->framerate);
   lrc->max_frame_bandwidth = cpi->rc.max_frame_bandwidth;
   // Update the average layer frame size (non-cumulative per-frame-bw).
@@ -149,7 +149,7 @@ void vp9_update_temporal_layer_framerate(VP9_COMP *const cpi) {
     lc->avg_frame_size = lrc->avg_frame_bandwidth;
   } else {
     const double prev_layer_framerate =
-        oxcf->framerate / oxcf->ts_rate_decimator[layer - 1];
+        cpi->framerate / oxcf->ts_rate_decimator[layer - 1];
     const int prev_layer_target_bandwidth = oxcf->ts_target_bitrate[layer - 1];
     lc->avg_frame_size =
         (int)((lc->target_bandwidth - prev_layer_target_bandwidth) /

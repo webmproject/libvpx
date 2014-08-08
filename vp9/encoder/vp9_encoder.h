@@ -134,7 +134,7 @@ typedef struct VP9EncoderConfig {
   BIT_DEPTH bit_depth;
   int width;  // width of data passed to the compressor
   int height;  // height of data passed to the compressor
-  double framerate;  // set to passed in framerate
+  double init_framerate;  // set to passed in framerate
   int64_t target_bandwidth;  // bandwidth to be used in kilobits per second
 
   int noise_sensitivity;  // pre processing blur: recommendation 0
@@ -305,6 +305,7 @@ typedef struct VP9_COMP {
   int64_t first_time_stamp_ever;
 
   RATE_CONTROL rc;
+  double framerate;
 
   vp9_coeff_count coef_counts[TX_SIZES][PLANE_TYPES];
 

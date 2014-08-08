@@ -1208,7 +1208,7 @@ static int calc_iframe_target_size_one_pass_cbr(const VP9_COMP *cpi) {
       ? INT_MAX : (int)(rc->starting_buffer_level / 2);
   } else {
     int kf_boost = 32;
-    double framerate = oxcf->framerate;
+    double framerate = cpi->framerate;
     if (svc->number_temporal_layers > 1 &&
         oxcf->rc_mode == VPX_CBR) {
       // Use the layer framerate for temporal layers CBR mode.
@@ -1364,7 +1364,7 @@ void vp9_rc_update_framerate(VP9_COMP *cpi) {
   RATE_CONTROL *const rc = &cpi->rc;
   int vbr_max_bits;
 
-  rc->avg_frame_bandwidth = (int)(oxcf->target_bandwidth / oxcf->framerate);
+  rc->avg_frame_bandwidth = (int)(oxcf->target_bandwidth / cpi->framerate);
   rc->min_frame_bandwidth = (int)(rc->avg_frame_bandwidth *
                                 oxcf->two_pass_vbrmin_section / 100);
 

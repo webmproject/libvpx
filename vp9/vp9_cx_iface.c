@@ -330,9 +330,9 @@ static vpx_codec_err_t set_encoder_config(
   oxcf->height  = cfg->g_h;
   oxcf->bit_depth = extra_cfg->bit_depth;
   // guess a frame rate if out of whack, use 30
-  oxcf->framerate = (double)cfg->g_timebase.den / cfg->g_timebase.num;
-  if (oxcf->framerate > 180)
-    oxcf->framerate = 30;
+  oxcf->init_framerate = (double)cfg->g_timebase.den / cfg->g_timebase.num;
+  if (oxcf->init_framerate > 180)
+    oxcf->init_framerate = 30;
 
   switch (cfg->g_pass) {
     case VPX_RC_ONE_PASS:
