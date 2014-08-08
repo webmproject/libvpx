@@ -3568,7 +3568,8 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
   MODE_INFO **mi_8x8 = xd->mi;
   MODE_INFO *mi = mi_8x8[0];
   MB_MODE_INFO *mbmi = &mi->mbmi;
-  unsigned int segment_id = mbmi->segment_id;
+  const int seg_skip = vp9_segfeature_active(&cm->seg, mbmi->segment_id,
+                                             SEG_LVL_SKIP);
   const int mis = cm->mi_stride;
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
@@ -3623,8 +3624,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
       vp9_tokenize_sb(cpi, t, !output_enabled, MAX(bsize, BLOCK_8X8));
     } else {
       mbmi->skip = 1;
-      if (output_enabled &&
-          !vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP))
+      if (output_enabled && !seg_skip)
         cm->counts.skip[vp9_get_skip_context(xd)][1]++;
       reset_skip_context(xd, MAX(bsize, BLOCK_8X8));
     }
@@ -3633,9 +3633,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
   if (output_enabled) {
     if (cm->tx_mode == TX_MODE_SELECT &&
         mbmi->sb_type >= BLOCK_8X8  &&
-        !(is_inter_block(mbmi) &&
-            (mbmi->skip ||
-             vp9_segfeature_active(&cm->seg, segment_id, SEG_LVL_SKIP)))) {
+        !(is_inter_block(mbmi) && (mbmi->skip || seg_skip))) {
       ++get_tx_counts(max_txsize_lookup[bsize], vp9_get_tx_size_context(xd),
                       &cm->counts.tx)[mbmi->tx_size];
     } else {
