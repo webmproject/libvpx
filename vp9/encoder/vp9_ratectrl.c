@@ -277,7 +277,7 @@ static double get_rate_correction_factor(const VP9_COMP *cpi) {
 
   if (cpi->common.frame_type == KEY_FRAME) {
     return rc->rate_correction_factors[KF_STD];
-  } else if (cpi->pass == 2) {
+  } else if (cpi->oxcf.pass == 2) {
     RATE_FACTOR_LEVEL rf_lvl =
       cpi->twopass.gf_group.rf_level[cpi->twopass.gf_group.index];
     return rc->rate_correction_factors[rf_lvl];
@@ -296,7 +296,7 @@ static void set_rate_correction_factor(VP9_COMP *cpi, double factor) {
 
   if (cpi->common.frame_type == KEY_FRAME) {
     rc->rate_correction_factors[KF_STD] = factor;
-  } else if (cpi->pass == 2) {
+  } else if (cpi->oxcf.pass == 2) {
     RATE_FACTOR_LEVEL rf_lvl =
       cpi->twopass.gf_group.rf_level[cpi->twopass.gf_group.index];
     rc->rate_correction_factors[rf_lvl] = factor;
@@ -923,7 +923,7 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi,
 int vp9_rc_pick_q_and_bounds(const VP9_COMP *cpi,
                              int *bottom_index, int *top_index) {
   int q;
-  if (cpi->pass == 0) {
+  if (cpi->oxcf.pass == 0) {
     if (cpi->oxcf.rc_mode == VPX_CBR)
       q = rc_pick_q_and_bounds_one_pass_cbr(cpi, bottom_index, top_index);
     else
@@ -991,7 +991,7 @@ static void update_golden_frame_stats(VP9_COMP *cpi) {
     // this frame refreshes means next frames don't unless specified by user
     rc->frames_since_golden = 0;
 
-    if (cpi->pass == 2) {
+    if (cpi->oxcf.pass == 2) {
       if (!rc->source_alt_ref_pending &&
           cpi->twopass.gf_group.rf_level[0] == GF_ARF_STD)
       rc->source_alt_ref_active = 0;
@@ -1242,7 +1242,7 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
           (~VP9_LAST_FLAG & ~VP9_GOLD_FLAG & ~VP9_ALT_FLAG);
     }
 
-    if (cpi->pass == 0 && cpi->oxcf.rc_mode == VPX_CBR) {
+    if (cpi->oxcf.pass == 0 && cpi->oxcf.rc_mode == VPX_CBR) {
       target = calc_iframe_target_size_one_pass_cbr(cpi);
     }
   } else {
@@ -1260,7 +1260,7 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
       cpi->ref_frame_flags &= (~VP9_ALT_FLAG);
     }
 
-    if (cpi->pass == 0 && cpi->oxcf.rc_mode == VPX_CBR) {
+    if (cpi->oxcf.pass == 0 && cpi->oxcf.rc_mode == VPX_CBR) {
       target = calc_pframe_target_size_one_pass_cbr(cpi);
     }
   }

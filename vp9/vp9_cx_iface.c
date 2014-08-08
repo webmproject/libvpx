@@ -337,12 +337,15 @@ static vpx_codec_err_t set_encoder_config(
   switch (cfg->g_pass) {
     case VPX_RC_ONE_PASS:
       oxcf->mode = ONE_PASS_GOOD;
+      oxcf->pass = 0;
       break;
     case VPX_RC_FIRST_PASS:
       oxcf->mode = TWO_PASS_FIRST;
+      oxcf->pass = 1;
       break;
     case VPX_RC_LAST_PASS:
       oxcf->mode = TWO_PASS_SECOND_BEST;
+      oxcf->pass = 2;
       break;
   }
 

@@ -405,11 +405,11 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
 
   // Slow quant, dct and trellis not worthwhile for first pass
   // so make sure they are always turned off.
-  if (cpi->pass == 1)
+  if (oxcf->pass == 1)
     sf->optimize_coefficients = 0;
 
   // No recode for 1 pass.
-  if (cpi->pass == 0) {
+  if (oxcf->pass == 0) {
     sf->recode_loop = DISALLOW_RECODE;
     sf->optimize_coefficients = 0;
   }
@@ -418,7 +418,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
     cpi->find_fractional_mv_step = vp9_find_best_sub_pixel_tree;
   }
 
-  cpi->mb.optimize = sf->optimize_coefficients == 1 && cpi->pass != 1;
+  cpi->mb.optimize = sf->optimize_coefficients == 1 && oxcf->pass != 1;
 
   if (sf->disable_split_mask == DISABLE_ALL_SPLIT)
     sf->adaptive_pred_interp_filter = 0;
