@@ -1018,10 +1018,6 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
       vp9_sub_pixel_avg_variance4x4,
       vp9_sad4x4x3, vp9_sad4x4x8, vp9_sad4x4x4d)
 
-  cpi->full_search_sad = vp9_full_search_sad;
-  cpi->diamond_search_sad = vp9_diamond_search_sad;
-  cpi->refining_search_sad = vp9_refining_search_sad;
-
   /* vp9_init_quantizer() is first called here. Add check in
    * vp9_frame_init_quantizer() so that vp9_init_quantizer is only
    * called later when needed. This will avoid unnecessary calls of
