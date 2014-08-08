@@ -41,7 +41,13 @@ class DxDataIterator {
 class Decoder {
  public:
   Decoder(vpx_codec_dec_cfg_t cfg, unsigned long deadline)
-      : cfg_(cfg), deadline_(deadline), init_done_(false) {
+      : cfg_(cfg), flags_(0), deadline_(deadline), init_done_(false) {
+    memset(&decoder_, 0, sizeof(decoder_));
+  }
+
+  Decoder(vpx_codec_dec_cfg_t cfg, const vpx_codec_flags_t flag,
+          unsigned long deadline)  // NOLINT
+      : cfg_(cfg), flags_(flag), deadline_(deadline), init_done_(false) {
     memset(&decoder_, 0, sizeof(decoder_));
   }
 
@@ -102,7 +108,7 @@ class Decoder {
     if (!init_done_) {
       const vpx_codec_err_t res = vpx_codec_dec_init(&decoder_,
                                                      CodecInterface(),
-                                                     &cfg_, 0);
+                                                     &cfg_, flags_);
       ASSERT_EQ(VPX_CODEC_OK, res) << DecodeError();
       init_done_ = true;
     }
@@ -110,6 +116,7 @@ class Decoder {
 
   vpx_codec_ctx_t     decoder_;
   vpx_codec_dec_cfg_t cfg_;
+  vpx_codec_flags_t   flags_;
   unsigned int        deadline_;
   bool                init_done_;
 };
@@ -119,6 +126,9 @@ class DecoderTest {
  public:
   // Main decoding loop
   virtual void RunLoop(CompressedVideoSource *video);
+
+  virtual void set_cfg(const vpx_codec_dec_cfg_t &dec_cfg);
+  virtual void set_flags(const vpx_codec_flags_t flags);
 
   // Hook to be called before decompressing every frame.
   virtual void PreDecodeFrameHook(const CompressedVideoSource& video,
@@ -137,11 +147,15 @@ class DecoderTest {
                                      const unsigned int frame_number) {}
 
  protected:
-  explicit DecoderTest(const CodecFactory *codec) : codec_(codec) {}
+  explicit DecoderTest(const CodecFactory *codec) : codec_(codec), flags_(0) {
+    memset(&cfg_, 0, sizeof(cfg_));
+  }
 
   virtual ~DecoderTest() {}
 
   const CodecFactory *codec_;
+  vpx_codec_dec_cfg_t cfg_;
+  vpx_codec_flags_t   flags_;
 };
 
 }  // namespace libvpx_test
