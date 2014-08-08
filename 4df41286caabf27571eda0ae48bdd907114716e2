@@ -16,6 +16,24 @@
       "revId": "4df41286caabf27571eda0ae48bdd907114716e2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//cio\u003d",
+        "filename": "test/vpxenc.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-08T22:07:07Z",
+      "side": 1,
+      "message": "Weird. minq\u003dmaxq\u003d0 is an extra way to get at lossless-- the warnings code only allows 0 when they\u0027re equal. So, I\u0027ve dropped --lossless\u003d1 from this test so that both methods of accessing lossless encoding are tested.",
+      "parentUuid": "AAAAdn//cmw\u003d",
+      "revId": "4df41286caabf27571eda0ae48bdd907114716e2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
