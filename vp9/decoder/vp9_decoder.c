@@ -181,17 +181,6 @@ vpx_codec_err_t vp9_set_reference_dec(VP9_COMMON *cm,
   return cm->error.error_code;
 }
 
-
-int vp9_get_reference_dec(VP9Decoder *pbi, int index, YV12_BUFFER_CONFIG **fb) {
-  VP9_COMMON *cm = &pbi->common;
-
-  if (index < 0 || index >= REF_FRAMES)
-    return -1;
-
-  *fb = &cm->frame_bufs[cm->ref_frame_map[index]].buf;
-  return 0;
-}
-
 /* If any buffer updating is signaled it should be done here. */
 static void swap_frame_buffers(VP9Decoder *pbi) {
   int ref_index = 0, mask;

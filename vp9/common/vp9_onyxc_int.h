@@ -202,6 +202,12 @@ typedef struct VP9Common {
   ENTROPY_CONTEXT *above_context;
 } VP9_COMMON;
 
+static INLINE YV12_BUFFER_CONFIG *get_ref_frame(VP9_COMMON *cm, int index) {
+  if (index < 0 || index >= REF_FRAMES)
+    return NULL;
+  return &cm->frame_bufs[cm->ref_frame_map[index]].buf;
+}
+
 static INLINE YV12_BUFFER_CONFIG *get_frame_new_buffer(VP9_COMMON *cm) {
   return &cm->frame_bufs[cm->new_fb_idx].buf;
 }
