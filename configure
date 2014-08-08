@@ -494,11 +494,11 @@ process_detect() {
         # Can only build shared libs on a subset of platforms. Doing this check
         # here rather than at option parse time because the target auto-detect
         # magic happens after the command line has been parsed.
-        if ! enabled linux; then
+        if ! enabled linux && ! enabled os2; then
             if enabled gnu; then
                 echo "--enable-shared is only supported on ELF; assuming this is OK"
             else
-                die "--enable-shared only supported on ELF for now"
+                die "--enable-shared only supported on ELF and OS/2 for now"
             fi
         fi
     fi
