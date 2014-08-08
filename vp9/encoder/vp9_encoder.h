@@ -143,6 +143,7 @@ typedef struct VP9EncoderConfig {
   unsigned int rc_max_intra_bitrate_pct;
 
   MODE mode;
+  int pass;
 
   // Key Framing Operations
   int auto_key;  // autodetect cut scenes and set the keyframes
@@ -313,9 +314,6 @@ typedef struct VP9_COMP {
   MBGRAPH_FRAME_STATS mbgraph_stats[MAX_LAG_BUFFERS];
   int mbgraph_n_frames;             // number of frames filled in the above
   int static_mb_pct;                // % forced skip mbs by segmentation
-
-  int pass;
-
   int ref_frame_flags;
 
   SPEED_FEATURES sf;

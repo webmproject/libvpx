@@ -553,23 +553,6 @@ static void init_config(struct VP9_COMP *cpi, VP9EncoderConfig *oxcf) {
   set_tile_limits(cpi);
 }
 
-static int get_pass(MODE mode) {
-  switch (mode) {
-    case REALTIME:
-    case ONE_PASS_GOOD:
-    case ONE_PASS_BEST:
-      return 0;
-
-    case TWO_PASS_FIRST:
-      return 1;
-
-    case TWO_PASS_SECOND_GOOD:
-    case TWO_PASS_SECOND_BEST:
-      return 2;
-  }
-  return -1;
-}
-
 void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
@@ -584,7 +567,6 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
     assert(cm->bit_depth > BITS_8);
 
   cpi->oxcf = *oxcf;
-  cpi->pass = get_pass(cpi->oxcf.mode);
 
   rc->baseline_gf_interval = DEFAULT_GF_INTERVAL;
 
@@ -654,7 +636,7 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
 
   if ((cpi->svc.number_temporal_layers > 1 &&
       cpi->oxcf.rc_mode == VPX_CBR) ||
-      (cpi->svc.number_spatial_layers > 1 && cpi->pass == 2)) {
+      (cpi->svc.number_spatial_layers > 1 && cpi->oxcf.pass == 2)) {
     vp9_update_layer_context_change_config(cpi,
                                            (int)cpi->oxcf.target_bandwidth);
   }
@@ -748,7 +730,7 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
   cpi->use_svc = 0;
 
   init_config(cpi, oxcf);
-  vp9_rc_init(&cpi->oxcf, cpi->pass, &cpi->rc);
+  vp9_rc_init(&cpi->oxcf, oxcf->pass, &cpi->rc);
 
   cm->current_video_frame = 0;
 
@@ -800,7 +782,7 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
   // pending further tuning and testing. The code is left in place here
   // as a place holder in regard to the required paths.
   cpi->multi_arf_last_grp_enabled = 0;
-  if (cpi->pass == 2) {
+  if (oxcf->pass == 2) {
     if (cpi->use_svc) {
       cpi->multi_arf_allowed = 0;
       cpi->multi_arf_enabled = 0;
@@ -888,9 +870,9 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
 
   cpi->allow_encode_breakout = ENCODE_BREAKOUT_ENABLED;
 
-  if (cpi->pass == 1) {
+  if (oxcf->pass == 1) {
     vp9_init_first_pass(cpi);
-  } else if (cpi->pass == 2) {
+  } else if (oxcf->pass == 2) {
     const size_t packet_sz = sizeof(FIRSTPASS_STATS);
     const int packets = (int)(oxcf->two_pass_stats_in.sz / packet_sz);
 
@@ -1066,7 +1048,7 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
     vp9_clear_system_state();
 
     // printf("\n8x8-4x4:%d-%d\n", cpi->t8x8_count, cpi->t4x4_count);
-    if (cpi->pass != 1) {
+    if (cpi->oxcf.pass != 1) {
       FILE *f = fopen("opsnr.stt", "a");
       double time_encoded = (cpi->last_end_time_stamp_seen
                              - cpi->first_time_stamp_ever) / 10000000.000;
@@ -1590,7 +1572,7 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
   } else { /* For non key/golden frames */
     if (cpi->refresh_alt_ref_frame) {
       int arf_idx = cpi->alt_fb_idx;
-      if ((cpi->pass == 2) && cpi->multi_arf_allowed) {
+      if ((cpi->oxcf.pass == 2) && cpi->multi_arf_allowed) {
         const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
         arf_idx = gf_group->arf_update_idx[gf_group->index];
       }
@@ -2071,7 +2053,7 @@ static void set_arf_sign_bias(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   int arf_sign_bias;
 
-  if ((cpi->pass == 2) && cpi->multi_arf_allowed) {
+  if ((cpi->oxcf.pass == 2) && cpi->multi_arf_allowed) {
     const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
     arf_sign_bias = cpi->rc.source_alt_ref_active &&
                     (!cpi->refresh_alt_ref_frame ||
@@ -2173,19 +2155,19 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   // static regions if indicated.
   // Only allowed in second pass of two pass (as requires lagged coding)
   // and if the relevant speed feature flag is set.
-  if (cpi->pass == 2 && cpi->sf.static_segmentation)
+  if (cpi->oxcf.pass == 2 && cpi->sf.static_segmentation)
     configure_static_seg_features(cpi);
 
   // Check if the current frame is skippable for the partition search in the
   // second pass according to the first pass stats
-  if (cpi->pass == 2 &&
+  if (cpi->oxcf.pass == 2 &&
       (!cpi->use_svc || is_spatial_svc(cpi))) {
     configure_skippable_frame(cpi);
   }
 
   // For 1 pass CBR, check if we are dropping this frame.
   // Never drop on key frame.
-  if (cpi->pass == 0 &&
+  if (cpi->oxcf.pass == 0 &&
       cpi->oxcf.rc_mode == VPX_CBR &&
       cm->frame_type != KEY_FRAME) {
     if (vp9_rc_drop_frame(cpi)) {
@@ -2517,7 +2499,7 @@ static int get_arf_src_index(VP9_COMP *cpi) {
   RATE_CONTROL *const rc = &cpi->rc;
   int arf_src_index = 0;
   if (is_altref_enabled(cpi)) {
-    if (cpi->pass == 2) {
+    if (cpi->oxcf.pass == 2) {
       const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
       if (gf_group->update_type[gf_group->index] == ARF_UPDATE) {
         arf_src_index = gf_group->arf_src_offset[gf_group->index];
@@ -2532,7 +2514,7 @@ static int get_arf_src_index(VP9_COMP *cpi) {
 static void check_src_altref(VP9_COMP *cpi) {
   RATE_CONTROL *const rc = &cpi->rc;
 
-  if (cpi->pass == 2) {
+  if (cpi->oxcf.pass == 2) {
     const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
     rc->is_src_frame_alt_ref =
       (gf_group->update_type[gf_group->index] == OVERLAY_UPDATE);
@@ -2565,7 +2547,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   if (!cpi)
     return -1;
 
-  if (is_spatial_svc(cpi) && cpi->pass == 2) {
+  if (is_spatial_svc(cpi) && cpi->oxcf.pass == 2) {
 #if CONFIG_SPATIAL_SVC
     vp9_svc_lookahead_peek(cpi, cpi->lookahead, 0, 1);
 #endif
@@ -2679,7 +2661,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
   } else {
     *size = 0;
-    if (flush && cpi->pass == 1 && !cpi->twopass.first_pass_done) {
+    if (flush && cpi->oxcf.pass == 1 && !cpi->twopass.first_pass_done) {
       vp9_end_first_pass(cpi);    /* get last stats packet */
       cpi->twopass.first_pass_done = 1;
     }
@@ -2717,7 +2699,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   if (!cpi->use_svc && cpi->multi_arf_allowed) {
     if (cm->frame_type == KEY_FRAME) {
       init_buffer_indices(cpi);
-    } else if (cpi->pass == 2) {
+    } else if (cpi->oxcf.pass == 2) {
       const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
       cpi->alt_fb_idx = gf_group->arf_ref_idx[gf_group->index];
     }
@@ -2725,7 +2707,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
   cpi->frame_flags = *frame_flags;
 
-  if (cpi->pass == 2 &&
+  if (cpi->oxcf.pass == 2 &&
       cm->current_video_frame == 0 &&
       cpi->oxcf.allow_spatial_resampling &&
       cpi->oxcf.rc_mode == VPX_VBR) {
@@ -2763,13 +2745,13 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     vp9_vaq_init();
   }
 
-  if (cpi->pass == 1 &&
+  if (cpi->oxcf.pass == 1 &&
       (!cpi->use_svc || is_spatial_svc(cpi))) {
     const int lossless = is_lossless_requested(&cpi->oxcf);
     cpi->mb.fwd_txm4x4 = lossless ? vp9_fwht4x4 : vp9_fdct4x4;
     cpi->mb.itxm_add = lossless ? vp9_iwht4x4_add : vp9_idct4x4_add;
     vp9_first_pass(cpi);
-  } else if (cpi->pass == 2 &&
+  } else if (cpi->oxcf.pass == 2 &&
       (!cpi->use_svc || is_spatial_svc(cpi))) {
     Pass2Encode(cpi, size, dest, frame_flags);
   } else if (cpi->use_svc) {
@@ -2794,19 +2776,19 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   // Save layer specific state.
   if ((cpi->svc.number_temporal_layers > 1 &&
       cpi->oxcf.rc_mode == VPX_CBR) ||
-      (cpi->svc.number_spatial_layers > 1 && cpi->pass == 2)) {
+      (cpi->svc.number_spatial_layers > 1 && cpi->oxcf.pass == 2)) {
     vp9_save_layer_context(cpi);
   }
 
   vpx_usec_timer_mark(&cmptimer);
   cpi->time_compress_data += vpx_usec_timer_elapsed(&cmptimer);
 
-  if (cpi->b_calculate_psnr && cpi->pass != 1 && cm->show_frame)
+  if (cpi->b_calculate_psnr && cpi->oxcf.pass != 1 && cm->show_frame)
     generate_psnr_packet(cpi);
 
 #if CONFIG_INTERNAL_STATS
 
-  if (cpi->pass != 1) {
+  if (cpi->oxcf.pass != 1) {
     cpi->bytes += (int)(*size);
 
     if (cm->show_frame) {

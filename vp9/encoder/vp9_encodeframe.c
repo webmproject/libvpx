@@ -2476,7 +2476,7 @@ static void encode_rd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
       } else {
         GF_GROUP * gf_grp = &cpi->twopass.gf_group;
         int last_was_mid_sequence_overlay = 0;
-        if ((cpi->pass == 2) && (gf_grp->index)) {
+        if ((cpi->oxcf.pass == 2) && (gf_grp->index)) {
           if (gf_grp->update_type[gf_grp->index - 1] == OVERLAY_UPDATE)
             last_was_mid_sequence_overlay = 1;
         }
