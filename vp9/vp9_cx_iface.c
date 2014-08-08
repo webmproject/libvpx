@@ -1053,9 +1053,9 @@ static vpx_codec_err_t ctrl_get_reference(vpx_codec_alg_priv_t *ctx,
   vp9_ref_frame_t *const frame = va_arg(args, vp9_ref_frame_t *);
 
   if (frame != NULL) {
-    YV12_BUFFER_CONFIG *fb;
+    YV12_BUFFER_CONFIG *fb = get_ref_frame(&ctx->cpi->common, frame->idx);
+    if (fb == NULL) return VPX_CODEC_ERROR;
 
-    vp9_get_reference_enc(ctx->cpi, frame->idx, &fb);
     yuvconfig2image(&frame->img, fb, NULL);
     return VPX_CODEC_OK;
   } else {

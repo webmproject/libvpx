@@ -463,9 +463,6 @@ void vp9_update_reference(VP9_COMP *cpi, int ref_frame_flags);
 int vp9_copy_reference_enc(VP9_COMP *cpi, VP9_REFFRAME ref_frame_flag,
                            YV12_BUFFER_CONFIG *sd);
 
-int vp9_get_reference_enc(VP9_COMP *cpi, int index,
-                          YV12_BUFFER_CONFIG **fb);
-
 int vp9_set_reference_enc(VP9_COMP *cpi, VP9_REFFRAME ref_frame_flag,
                           YV12_BUFFER_CONFIG *sd);
 

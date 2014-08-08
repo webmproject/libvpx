@@ -1303,16 +1303,6 @@ int vp9_copy_reference_enc(VP9_COMP *cpi, VP9_REFFRAME ref_frame_flag,
   }
 }
 
-int vp9_get_reference_enc(VP9_COMP *cpi, int index, YV12_BUFFER_CONFIG **fb) {
-  VP9_COMMON *cm = &cpi->common;
-
-  if (index < 0 || index >= REF_FRAMES)
-    return -1;
-
-  *fb = &cm->frame_bufs[cm->ref_frame_map[index]].buf;
-  return 0;
-}
-
 int vp9_set_reference_enc(VP9_COMP *cpi, VP9_REFFRAME ref_frame_flag,
                           YV12_BUFFER_CONFIG *sd) {
   YV12_BUFFER_CONFIG *cfg = get_vp9_ref_frame_buffer(cpi, ref_frame_flag);
