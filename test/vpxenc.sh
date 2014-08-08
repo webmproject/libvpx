@@ -135,10 +135,10 @@ vpxenc_vp9_webm() {
   fi
 }
 
-DISABLED_vpxenc_vp9_ivf_lossless() {
+vpxenc_vp9_ivf_lossless() {
   if [ "$(vpxenc_can_encode_vp9)" = "yes" ]; then
     vpxenc vp9 ${YUV_RAW_INPUT_WIDTH} ${YUV_RAW_INPUT_HEIGHT} ${TEST_FRAMES} \
-        "${YUV_RAW_INPUT}" vp9_lossless.ivf --lossless
+        "${YUV_RAW_INPUT}" vp9_lossless.ivf --lossless=1
   fi
 }
 
@@ -147,6 +147,6 @@ vpxenc_tests="vpxenc_vp8_ivf
               vpxenc_vp8_ivf_pipe_input
               vpxenc_vp9_ivf
               vpxenc_vp9_webm
-              DISABLED_vpxenc_vp9_ivf_lossless"
+              vpxenc_vp9_ivf_lossless"
 
 run_tests vpxenc_verify_environment "${vpxenc_tests}"
