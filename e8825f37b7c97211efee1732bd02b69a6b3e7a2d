@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//cnU\u003d",
+        "filename": "test/vpxenc.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-08T03:09:01Z",
+      "side": 1,
+      "message": "LIBVPX_BIN_PATH is the directory where all scripts expect to find the program being tested. Two invocations are still needed because of the different locations for vpxenc/dec and the examples. \n\nTo get everything working with one invocation probably requires another command line arg and variable (i.e. --examples-path and LIBVPX_EXAMPLES_PATH).\n\nThe fun part, aka why this is the way it is, is that on Windows, everything ends up in the same directory... I would have just relied on a base path and had the examples add examples/ before the program being tested unconditionally, but since that doesn\u0027t really work... \n\nI suppose it\u0027s not that bad to check for windows in each test script, but my lame secondary reason is that I didn\u0027t want to have a call to is_windows_target() every place I built an executable path.",
+      "parentUuid": "AAAAdn//cn0\u003d",
+      "revId": "e8825f37b7c97211efee1732bd02b69a6b3e7a2d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//cnw\u003d",
         "filename": "test/vpxenc.sh",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//cnQ\u003d",
+        "filename": "test/vpxenc.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-08T03:09:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//cnw\u003d",
+      "revId": "e8825f37b7c97211efee1732bd02b69a6b3e7a2d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//cns\u003d",
         "filename": "test/vpxenc.sh",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2014-08-08T02:12:18Z",
       "side": 1,
       "message": "be nice if we could validate that this worked; also I think minq\u003dmaxq\u003d0 is some magic",
+      "revId": "e8825f37b7c97211efee1732bd02b69a6b3e7a2d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//cnM\u003d",
+        "filename": "test/vpxenc.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-08T03:09:01Z",
+      "side": 1,
+      "message": "Added a new test w/minq and maxq.\n\nAgreed on more validation... I have a TODO laying around that applies to everything in the examples set. Haven\u0027t really had a chance to think much about the problem.",
+      "parentUuid": "AAAAdn//cns\u003d",
       "revId": "e8825f37b7c97211efee1732bd02b69a6b3e7a2d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
