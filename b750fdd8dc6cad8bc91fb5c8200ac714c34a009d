@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//ciU\u003d",
+        "filename": "vp9/encoder/vp9_quantize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-08-08T22:27:42Z",
+      "side": 1,
+      "message": "let it allocate the space for tmp variables altogether, so as to avoid do it in the if branch, which might take extra push/pop instructions.",
+      "parentUuid": "AAAAdn//ckU\u003d",
+      "revId": "b750fdd8dc6cad8bc91fb5c8200ac714c34a009d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//ckQ\u003d",
         "filename": "vp9/encoder/vp9_quantize.c",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2014-08-08T17:26:02Z",
       "side": 1,
       "message": "Same questions as above",
+      "revId": "b750fdd8dc6cad8bc91fb5c8200ac714c34a009d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ciQ\u003d",
+        "filename": "vp9/encoder/vp9_quantize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-08-08T22:27:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//ckQ\u003d",
       "revId": "b750fdd8dc6cad8bc91fb5c8200ac714c34a009d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//ciM\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-08-08T22:27:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//ckI\u003d",
+      "revId": "b750fdd8dc6cad8bc91fb5c8200ac714c34a009d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//ckE\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 3
@@ -64,6 +118,24 @@
       "writtenOn": "2014-08-08T17:26:02Z",
       "side": 1,
       "message": "const?",
+      "revId": "b750fdd8dc6cad8bc91fb5c8200ac714c34a009d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ciI\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-08-08T22:27:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//ckE\u003d",
       "revId": "b750fdd8dc6cad8bc91fb5c8200ac714c34a009d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
