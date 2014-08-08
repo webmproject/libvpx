@@ -510,8 +510,10 @@ vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
     }
   }
 
+#if CONFIG_SPATIAL_SVC
   for (i = 0; i < si->layers; ++i)
     enc_cfg->ss_enable_auto_alt_ref[i] = si->enable_auto_alt_ref[i];
+#endif
 
   // modify encoder configuration
   enc_cfg->ss_number_layers = si->layers;
@@ -709,12 +711,14 @@ vpx_codec_err_t vpx_svc_encode(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
         si->rc_stats_buf_used += cx_pkt->data.twopass_stats.sz;
         break;
       }
+#if CONFIG_SPATIAL_SVC
       case VPX_CODEC_SPATIAL_SVC_LAYER_SIZES: {
         int i;
         for (i = 0; i < si->layers; ++i)
           si->bytes_sum[i] += cx_pkt->data.layer_sizes[i];
         break;
       }
+#endif
       default: {
         break;
       }
