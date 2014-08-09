@@ -108,7 +108,7 @@ extern "C"
          * For temporal denoiser: noise_sensitivity = 0 means off,
          * noise_sensitivity = 1 means temporal denoiser on for Y channel only,
          * noise_sensitivity = 2 means temporal denoiser on for all channels.
-         * noise_sensitivity = 3 means aggressive denoising mode.
+         * noise_sensitivity >= 3 means aggressive denoising mode.
          * Temporal denoiser is enabled via the configuration option:
          * CONFIG_TEMPORAL_DENOISING.
          * For spatial denoiser: noise_sensitivity controls the amount of

@@ -39,6 +39,13 @@ enum vp8_denoiser_filter_state {
   kFilterNonZeroMV
 };
 
+enum vp8_denoiser_mode {
+  kDenoiserOff,
+  kDenoiserOnYOnly,
+  kDenoiserOnYUV,
+  kDenoiserOnYUVAggressive
+};
+
 typedef struct {
   // Scale factor on sse threshold above which no denoising is done.
   unsigned int scale_sse_thresh;
@@ -67,7 +74,7 @@ typedef struct vp8_denoiser
     YV12_BUFFER_CONFIG yv12_mc_running_avg;
     unsigned char* denoise_state;
     int num_mb_cols;
-    int aggressive_mode;
+    int denoiser_mode;
     denoise_params denoise_pars;
 } VP8_DENOISER;
 
@@ -85,8 +92,7 @@ void vp8_denoiser_denoise_mb(VP8_DENOISER *denoiser,
                              loop_filter_info_n *lfi_n,
                              int mb_row,
                              int mb_col,
-                             int block_index,
-                             int uv_denoise);
+                             int block_index);
 
 #ifdef __cplusplus
 }  // extern "C"

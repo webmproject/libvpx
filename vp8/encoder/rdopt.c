@@ -2511,7 +2511,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 #if CONFIG_TEMPORAL_DENOISING
     if (cpi->oxcf.noise_sensitivity)
     {
-        int uv_denoise = (cpi->oxcf.noise_sensitivity == 2) ? 1 : 0;
         int block_index = mb_row * cpi->common.mb_cols + mb_col;
         if (x->best_sse_inter_mode == DC_PRED)
         {
@@ -2525,8 +2524,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         vp8_denoiser_denoise_mb(&cpi->denoiser, x, best_sse, zero_mv_sse,
                                 recon_yoffset, recon_uvoffset,
                                 &cpi->common.lf_info, mb_row, mb_col,
-                                block_index, uv_denoise);
-
+                                block_index);
 
         /* Reevaluate ZEROMV after denoising. */
         if (best_mode.mbmode.ref_frame == INTRA_FRAME &&
