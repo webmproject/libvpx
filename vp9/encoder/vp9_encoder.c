@@ -65,9 +65,6 @@ void vp9_coef_tree_initialize();
 #ifdef OUTPUT_YUV_DENOISED
 FILE *yuv_denoised_file = NULL;
 #endif
-#ifdef OUTPUT_YUV_SRC
-FILE *yuv_file;
-#endif
 #ifdef OUTPUT_YUV_REC
 FILE *yuv_rec_file;
 #endif
@@ -854,9 +851,6 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
   yuv_denoised_file = fopen("denoised.yuv", "ab");
 #endif
 #endif
-#ifdef OUTPUT_YUV_SRC
-  yuv_file = fopen("bd.yuv", "ab");
-#endif
 #ifdef OUTPUT_YUV_REC
   yuv_rec_file = fopen("rec.yuv", "wb");
 #endif
@@ -1132,9 +1126,6 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
   fclose(yuv_denoised_file);
 #endif
 #endif
-#ifdef OUTPUT_YUV_SRC
-  fclose(yuv_file);
-#endif
 #ifdef OUTPUT_YUV_REC
   fclose(yuv_rec_file);
 #endif
@@ -1301,35 +1292,6 @@ int vp9_update_entropy(VP9_COMP * cpi, int update) {
   cpi->ext_refresh_frame_context_pending = 1;
   return 0;
 }
-
-
-#if defined(OUTPUT_YUV_SRC)
-void vp9_write_yuv_frame(YV12_BUFFER_CONFIG *s, FILE *f) {
-  uint8_t *src = s->y_buffer;
-  int h = s->y_height;
-
-  do {
-    fwrite(src, s->y_width, 1, f);
-    src += s->y_stride;
-  } while (--h);
-
-  src = s->u_buffer;
-  h = s->uv_height;
-
-  do {
-    fwrite(src, s->uv_width, 1, f);
-    src += s->uv_stride;
-  } while (--h);
-
-  src = s->v_buffer;
-  h = s->uv_height;
-
-  do {
-    fwrite(src, s->uv_width, 1, f);
-    src += s->uv_stride;
-  } while (--h);
-}
-#endif
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
 #if defined(OUTPUT_YUV_DENOISED)
@@ -2192,10 +2154,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     }
     vp9_denoise(cpi->Source, cpi->Source, l);
   }
-#endif
-
-#ifdef OUTPUT_YUV_SRC
-  vp9_write_yuv_frame(cpi->Source, yuv_file);
 #endif
 
   set_speed_features(cpi);
