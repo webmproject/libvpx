@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//cfM\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-09T02:18:46Z",
+      "side": 1,
+      "message": "simple_encoder: Flush encoder.",
+      "revId": "6f64ca938e8f30423a240189b5708fb42db53694",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//cfI\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-09T02:18:46Z",
+      "side": 1,
+      "message": "s/retunrs/returns/\n\nDo any other examples need updates?",
+      "revId": "6f64ca938e8f30423a240189b5708fb42db53694",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//cfU\u003d",
+        "filename": "examples/simple_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-09T02:18:46Z",
+      "side": 1,
+      "message": "s/Push/Encode/\n\nPeriod at the end.",
+      "revId": "6f64ca938e8f30423a240189b5708fb42db53694",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//cfQ\u003d",
+        "filename": "examples/simple_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-09T02:18:46Z",
+      "side": 1,
+      "message": "s/Flush/Flush encoder./",
+      "revId": "6f64ca938e8f30423a240189b5708fb42db53694",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
