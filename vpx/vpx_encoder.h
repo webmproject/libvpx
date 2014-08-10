@@ -704,10 +704,6 @@ extern "C" {
    * is not thread safe and should be guarded with a lock if being used
    * in a multithreaded context.
    *
-   * In XMA mode (activated by setting VPX_CODEC_USE_XMA in the flags
-   * parameter), the storage pointed to by the cfg parameter must be
-   * kept readable and stable until all memory maps have been set.
-   *
    * \param[in]    ctx     Pointer to this instance's context.
    * \param[in]    iface   Pointer to the algorithm interface to use.
    * \param[in]    cfg     Configuration to use, if known. May be NULL.
@@ -740,10 +736,6 @@ extern "C" {
    * Applications should call the vpx_codec_enc_init_multi convenience macro
    * instead of this function directly, to ensure that the ABI version number
    * parameter is properly initialized.
-   *
-   * In XMA mode (activated by setting VPX_CODEC_USE_XMA in the flags
-   * parameter), the storage pointed to by the cfg parameter must be
-   * kept readable and stable until all memory maps have been set.
    *
    * \param[in]    ctx     Pointer to this instance's context.
    * \param[in]    iface   Pointer to the algorithm interface to use.
