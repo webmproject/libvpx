@@ -8,15 +8,15 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "third_party/libyuv/include/libyuv/planar_functions.h"
+#include "libyuv/planar_functions.h"
 
 #include <string.h>  // for memset()
 
-#include "third_party/libyuv/include/libyuv/cpu_id.h"
+#include "libyuv/cpu_id.h"
 #ifdef HAVE_JPEG
-#include "third_party/libyuv/include/libyuv/mjpeg_decoder.h"
+#include "libyuv/mjpeg_decoder.h"
 #endif
-#include "third_party/libyuv/include/libyuv/row.h"
+#include "libyuv/row.h"
 
 #ifdef __cplusplus
 namespace libyuv {
@@ -36,6 +36,10 @@ void CopyPlane(const uint8* src_y, int src_stride_y,
     width *= height;
     height = 1;
     src_stride_y = dst_stride_y = 0;
+  }
+  // Nothing to do.
+  if (src_y == dst_y && src_stride_y == dst_stride_y) {
+    return;
   }
 #if defined(HAS_COPYROW_X86)
   if (TestCpuFlag(kCpuHasX86) && IS_ALIGNED(width, 4)) {

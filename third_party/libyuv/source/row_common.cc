@@ -8,11 +8,11 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "third_party/libyuv/include/libyuv/row.h"
+#include "libyuv/row.h"
 
 #include <string.h>  // For memcpy and memset.
 
-#include "third_party/libyuv/include/libyuv/basic_types.h"
+#include "libyuv/basic_types.h"
 
 #ifdef __cplusplus
 namespace libyuv {
