@@ -81,6 +81,24 @@ void TestVp9Controls(vpx_codec_ctx_t *dec) {
     EXPECT_EQ(VPX_CODEC_INVALID_PARAM,
               vpx_codec_control_(dec, kControls[i], NULL));
   }
+
+  vp9_ref_frame_t ref;
+  ref.idx = 0;
+  EXPECT_EQ(VPX_CODEC_ERROR, vpx_codec_control(dec, VP9_GET_REFERENCE, &ref));
+  EXPECT_EQ(VPX_CODEC_INVALID_PARAM,
+            vpx_codec_control(dec, VP9_GET_REFERENCE, NULL));
+
+  vpx_ref_frame_t ref_copy;
+  const int width = 352;
+  const int height = 288;
+  ASSERT_TRUE(
+      vpx_img_alloc(&ref_copy.img, VPX_IMG_FMT_I420, width, height, 1) != NULL);
+  ref_copy.frame_type = VP8_LAST_FRAME;
+  EXPECT_EQ(VPX_CODEC_ERROR,
+            vpx_codec_control(dec, VP8_COPY_REFERENCE, &ref_copy));
+  EXPECT_EQ(VPX_CODEC_INVALID_PARAM,
+            vpx_codec_control(dec, VP8_COPY_REFERENCE, NULL));
+  vpx_img_free(&ref_copy.img);
 }
 
 TEST(DecodeAPI, Vp9InvalidDecode) {
