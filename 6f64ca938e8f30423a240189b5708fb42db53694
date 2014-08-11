@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//cYc\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-08-11T21:11:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//cfM\u003d",
+      "revId": "6f64ca938e8f30423a240189b5708fb42db53694",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//cfI\u003d",
         "filename": "/COMMIT_MSG",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2014-08-09T02:18:46Z",
       "side": 1,
       "message": "s/retunrs/returns/\n\nDo any other examples need updates?",
+      "revId": "6f64ca938e8f30423a240189b5708fb42db53694",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//cYY\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-08-11T21:11:30Z",
+      "side": 1,
+      "message": "Done. Yes, I\u0027m going to create different patches for every example.",
+      "parentUuid": "AAAAdn//cfI\u003d",
       "revId": "6f64ca938e8f30423a240189b5708fb42db53694",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
