@@ -171,6 +171,9 @@ int64_t vp9_rd_pick_inter_mode_sb(struct VP9_COMP *cpi, struct macroblock *x,
                                   const struct TileInfo *const tile,
                                   int mi_row, int mi_col,
                                   int *returnrate,
+#if CONFIG_SUPERTX
+                                  int *returnrate_nocoef,
+#endif
                                   int64_t *returndistortion,
                                   BLOCK_SIZE bsize,
                                   PICK_MODE_CONTEXT *ctx,
@@ -191,6 +194,9 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(struct VP9_COMP *cpi,
                                       const struct TileInfo *const tile,
                                       int mi_row, int mi_col,
                                       int *returnrate,
+#if CONFIG_SUPERTX
+                                      int *returnrate_nocoef,
+#endif
                                       int64_t *returndistortion,
                                       BLOCK_SIZE bsize,
                                       PICK_MODE_CONTEXT *ctx,
@@ -222,6 +228,21 @@ void vp9_setup_pred_block(const MACROBLOCKD *xd,
                           int mi_row, int mi_col,
                           const struct scale_factors *scale,
                           const struct scale_factors *scale_uv);
+
+#if CONFIG_SUPERTX
+void txfm_rd_in_plane_supertx(MACROBLOCK *x,
+                              int *rate, int64_t *distortion,
+                              int *skippable, int64_t *sse,
+                              int64_t ref_best_rd, int plane,
+                              BLOCK_SIZE bsize, TX_SIZE tx_size,
+                              int use_fast_coef_casting);
+void txfm_rd_in_plane(MACROBLOCK *x,
+                      int *rate, int64_t *distortion,
+                      int *skippable, int64_t *sse,
+                      int64_t ref_best_rd, int plane,
+                      BLOCK_SIZE bsize, TX_SIZE tx_size,
+                      int use_fast_coef_casting);
+#endif
 #ifdef __cplusplus
 }  // extern "C"
 #endif

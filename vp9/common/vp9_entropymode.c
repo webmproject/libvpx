@@ -31,7 +31,7 @@ static const vp9_prob default_masked_interintra_prob[BLOCK_SIZES] = {
 #endif
 
 #if CONFIG_FILTERINTRA
-const vp9_prob default_filterintra_prob[TX_SIZES][INTRA_MODES] = {
+static const vp9_prob default_filterintra_prob[TX_SIZES][INTRA_MODES] = {
   // DC     V      H    D45   D135   D117   D153   D207    D63     TM
   {153,   171,   147,   150,   129,   101,   100,   153,   132,   111},
   {171,   173,   185,   131,    70,    53,    70,   148,   127,   114},
@@ -41,7 +41,17 @@ const vp9_prob default_filterintra_prob[TX_SIZES][INTRA_MODES] = {
 #endif
 
 #if CONFIG_EXT_TX
-const vp9_prob default_ext_tx_prob = 178;  // 0.6 = 153, 0.7 = 178, 0.8 = 204
+static const vp9_prob default_ext_tx_prob = 178;
+#endif
+
+#if CONFIG_SUPERTX
+static const vp9_prob default_supertx_prob[TX_SIZES] = {
+  255, 160, 160, 160
+};
+
+static const vp9_prob default_supertxsplit_prob[TX_SIZES] = {
+  255, 200, 200, 200
+};
 #endif
 
 const vp9_prob vp9_kf_y_mode_prob[INTRA_MODES][INTRA_MODES][INTRA_MODES - 1] = {
@@ -372,6 +382,10 @@ void vp9_init_mode_probs(FRAME_CONTEXT *fc) {
 #if CONFIG_EXT_TX
   fc->ext_tx_prob = default_ext_tx_prob;
 #endif
+#if CONFIG_SUPERTX
+  vp9_copy(fc->supertx_prob, default_supertx_prob);
+  vp9_copy(fc->supertxsplit_prob, default_supertxsplit_prob);
+#endif
 }
 
 const vp9_tree_index vp9_switchable_interp_tree
@@ -503,6 +517,23 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
 
 #if CONFIG_EXT_TX
   fc->ext_tx_prob = adapt_prob(pre_fc->ext_tx_prob, counts->ext_tx);
+#endif
+
+#if CONFIG_SUPERTX
+  for (i = 1; i < TX_SIZES; ++i) {
+    fc->supertx_prob[i] = adapt_prob(pre_fc->supertx_prob[i],
+                                     counts->supertx[i]);
+/*    fprintf(stderr, "%d(%d %d) ", fc->supertx_prob[i],
+            counts->supertx[i][0], counts->supertx[i][1]);*/
+  }
+
+  for (i = 1; i < TX_SIZES; ++i) {
+    fc->supertxsplit_prob[i] = adapt_prob(pre_fc->supertxsplit_prob[i],
+                                          counts->supertxsplit[i]);
+/*    fprintf(stderr, "%d(%d %d) ", fc->supertxsplit_prob[i],
+                    counts->supertxsplit[i][0], counts->supertxsplit[i][1]);*/
+  }
+/*  fprintf(stderr, "\n");*/
 #endif
 }
 

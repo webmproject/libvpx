@@ -133,6 +133,15 @@ const BLOCK_SIZE ss_size_lookup[BLOCK_SIZES][2][2] = {
   {{BLOCK_64X64, BLOCK_64X32},   {BLOCK_32X64,   BLOCK_32X32}},
 };
 
+#if CONFIG_SUPERTX
+const TX_SIZE uvsupertx_size_lookup[TX_SIZES] = {
+    TX_4X4,
+    TX_4X4,
+    TX_8X8,
+    TX_16X16
+};
+#endif
+
 // Generates 4 bit field in which each bit set to 1 represents
 // a blocksize partition  1111 means we split 64x64, 32x32, 16x16
 // and 8x8.  1000 means we just split the 64x64 to 32x32

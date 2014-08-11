@@ -278,6 +278,7 @@ EXPERIMENT_LIST="
     masked_interintra
     filterintra
     ext_tx
+    supertx
 "
 CONFIG_LIST="
     external_build

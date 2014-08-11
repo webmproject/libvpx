@@ -334,6 +334,13 @@ typedef struct macroblockd {
   PARTITION_CONTEXT left_seg_context[8];
 } MACROBLOCKD;
 
+#if CONFIG_SUPERTX
+static INLINE int supertx_enabled(const MB_MODE_INFO *mbmi) {
+  return mbmi->tx_size >
+         MIN(b_width_log2(mbmi->sb_type), b_height_log2(mbmi->sb_type));
+}
+#endif
+
 static INLINE BLOCK_SIZE get_subsize(BLOCK_SIZE bsize,
                                      PARTITION_TYPE partition) {
   const BLOCK_SIZE subsize = subsize_lookup[partition][bsize];
@@ -399,7 +406,15 @@ static INLINE TX_SIZE get_uv_tx_size_impl(TX_SIZE y_tx_size, BLOCK_SIZE bsize) {
 }
 
 static INLINE TX_SIZE get_uv_tx_size(const MB_MODE_INFO *mbmi) {
+#if CONFIG_SUPERTX
+  if (!supertx_enabled(mbmi)) {
+#endif
   return get_uv_tx_size_impl(mbmi->tx_size, mbmi->sb_type);
+#if CONFIG_SUPERTX
+  } else {
+    return uvsupertx_size_lookup[mbmi->tx_size];
+  }
+#endif
 }
 
 static INLINE BLOCK_SIZE get_plane_block_size(BLOCK_SIZE bsize,

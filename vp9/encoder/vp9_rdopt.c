@@ -611,8 +611,10 @@ static INLINE int cost_coeffs(MACROBLOCK *x,
   int pt = combine_entropy_contexts(*A, *L);
   int c, cost;
   // Check for consistency of tx_size with mode info
+#if !CONFIG_SUPERTX
   assert(type == PLANE_TYPE_Y ? mbmi->tx_size == tx_size
                               : get_uv_tx_size(mbmi) == tx_size);
+#endif
 
   if (eob == 0) {
     // single eob token
@@ -777,7 +779,11 @@ void vp9_get_entropy_contexts(BLOCK_SIZE bsize, TX_SIZE tx_size,
   }
 }
 
+#if !CONFIG_SUPERTX
 static void txfm_rd_in_plane(MACROBLOCK *x,
+#else
+void txfm_rd_in_plane(MACROBLOCK *x,
+#endif
                              int *rate, int64_t *distortion,
                              int *skippable, int64_t *sse,
                              int64_t ref_best_rd, int plane,
@@ -812,6 +818,41 @@ static void txfm_rd_in_plane(MACROBLOCK *x,
     *skippable  = vp9_is_skippable_in_plane(x, bsize, plane);
   }
 }
+
+#if CONFIG_SUPERTX
+void txfm_rd_in_plane_supertx(MACROBLOCK *x,
+                              int *rate, int64_t *distortion,
+                              int *skippable, int64_t *sse,
+                              int64_t ref_best_rd, int plane,
+                              BLOCK_SIZE bsize, TX_SIZE tx_size,
+                              int use_fast_coef_casting) {
+  MACROBLOCKD *const xd = &x->e_mbd;
+  const struct macroblockd_plane *const pd = &xd->plane[plane];
+  struct rdcost_block_args args;
+  vp9_zero(args);
+  args.x = x;
+  args.best_rd = ref_best_rd;
+  args.use_fast_coef_costing = use_fast_coef_casting;
+
+  vp9_get_entropy_contexts(bsize, tx_size, pd, args.t_above, args.t_left);
+
+  args.so = get_scan(xd, tx_size, pd->plane_type, 0);
+
+  block_rd_txfm(plane, 0, get_plane_block_size(bsize, pd), tx_size, &args);
+
+  if (args.skip) {
+    *rate       = INT_MAX;
+    *distortion = INT64_MAX;
+    *sse        = INT64_MAX;
+    *skippable  = 0;
+  } else {
+    *distortion = args.this_dist;
+    *rate       = args.this_rate;
+    *sse        = args.this_sse;
+    *skippable  = !x->plane[plane].eobs[0];
+  }
+}
+#endif
 
 static void choose_largest_tx_size(VP9_COMP *cpi, MACROBLOCK *x,
                                    int *rate, int64_t *distortion,
@@ -3687,6 +3728,9 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                   const TileInfo *const tile,
                                   int mi_row, int mi_col,
                                   int *returnrate,
+#if CONFIG_SUPERTX
+                                  int *returnrate_nocoef,
+#endif
                                   int64_t *returndistortion,
                                   BLOCK_SIZE bsize,
                                   PICK_MODE_CONTEXT *ctx,
@@ -3768,6 +3812,9 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     x->pred_sse[i] = INT_MAX;
 
   *returnrate = INT_MAX;
+#if CONFIG_SUPERTX
+  *returnrate_nocoef = INT_MAX;
+#endif
 
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
     x->pred_mv_sad[ref_frame] = INT_MAX;
@@ -4043,6 +4090,9 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_FILTERINTRA
       mbmi->filterbit = 0;
 #endif
+#if CONFIG_EXT_TX
+      mbmi->ext_txfrm = 0;
+#endif
       intra_super_block_yrd(cpi, x, &rate_y, &distortion_y, &skippable, NULL,
                             bsize, tx_cache, best_rd);
 
@@ -4174,6 +4224,9 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         // Back out the coefficient coding costs
         rate2 -= (rate_y + rate_uv);
         // for best yrd calculation
+#if CONFIG_SUPERTX
+        rate_y = 0;
+#endif
         rate_uv = 0;
 
         // Cost the skip mb case
@@ -4253,6 +4306,15 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         }
 
         *returnrate = rate2;
+#if CONFIG_SUPERTX
+        *returnrate_nocoef = rate2 - rate_y - rate_uv;
+        if (!disable_skip) {
+          *returnrate_nocoef -= vp9_cost_bit(vp9_get_skip_prob(cm, xd),
+                                             skippable || this_skip2);
+        }
+        *returnrate_nocoef -= vp9_cost_bit(vp9_get_intra_inter_prob(cm, xd),
+                                           mbmi->ref_frame[0] != INTRA_FRAME);
+#endif
         *returndistortion = distortion2;
         best_rd = this_rd;
         best_mbmode = *mbmi;
@@ -4536,6 +4598,9 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
                                       const TileInfo *const tile,
                                       int mi_row, int mi_col,
                                       int *returnrate,
+#if CONFIG_SUPERTX
+                                      int *returnrate_nocoef,
+#endif
                                       int64_t *returndistortion,
                                       BLOCK_SIZE bsize,
                                       PICK_MODE_CONTEXT *ctx,
@@ -4611,6 +4676,9 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   rate_uv_intra = INT_MAX;
 
   *returnrate = INT_MAX;
+#if CONFIG_SUPERTX
+  *returnrate_nocoef = INT_MAX;
+#endif
 
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ref_frame++) {
     if (cpi->ref_frame_flags & flag_list[ref_frame]) {
@@ -4750,6 +4818,9 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 
     if (ref_frame == INTRA_FRAME) {
       int rate;
+#if CONFIG_EXT_TX
+      mbmi->ext_txfrm = 0;
+#endif
       if (rd_pick_intra_sub_8x8_y_mode(cpi, x, &rate, &rate_y,
                                        &distortion_y, best_rd) >= best_rd)
         continue;
@@ -5004,6 +5075,15 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
         }
 
         *returnrate = rate2;
+#if CONFIG_SUPERTX
+        *returnrate_nocoef = rate2 - rate_y - rate_uv;
+        if (!disable_skip)
+          *returnrate_nocoef -= vp9_cost_bit(vp9_get_skip_prob(cm, xd),
+                                             this_skip2);
+        *returnrate_nocoef -= vp9_cost_bit(vp9_get_intra_inter_prob(cm, xd),
+                                           mbmi->ref_frame[0] != INTRA_FRAME);
+        assert(*returnrate_nocoef > 0);
+#endif
         *returndistortion = distortion2;
         best_rd = this_rd;
         best_yrd = best_rd -
@@ -5109,6 +5189,9 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 
   if (best_rd == INT64_MAX) {
     *returnrate = INT_MAX;
+#if CONFIG_SUPERTX
+    *returnrate_nocoef = INT_MAX;
+#endif
     *returndistortion = INT64_MAX;
     return best_rd;
   }

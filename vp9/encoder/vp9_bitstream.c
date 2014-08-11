@@ -39,6 +39,18 @@ static struct vp9_token switchable_interp_encodings[SWITCHABLE_FILTERS];
 static struct vp9_token partition_encodings[PARTITION_TYPES];
 static struct vp9_token inter_mode_encodings[INTER_MODES];
 
+#if CONFIG_SUPERTX
+static int vp9_check_supertx(VP9_COMMON *cm, int mi_row, int mi_col,
+                             BLOCK_SIZE bsize) {
+  MODE_INFO **mi;
+
+  mi = cm->mi_grid_visible + (mi_row * cm->mi_stride + mi_col);
+
+  return mi[0]->mbmi.tx_size == b_width_log2(bsize) &&
+         mi[0]->mbmi.sb_type < bsize;
+}
+#endif
+
 void vp9_entropy_mode_init() {
   vp9_tokens_from_tree(intra_mode_encodings, vp9_intra_mode_tree);
   vp9_tokens_from_tree(switchable_interp_encodings, vp9_switchable_interp_tree);
@@ -225,6 +237,9 @@ static void write_ref_frames(const VP9_COMP *cpi, vp9_writer *w) {
 }
 
 static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
+#if CONFIG_SUPERTX
+                                int supertx_enabled,
+#endif
                                 vp9_writer *w) {
   VP9_COMMON *const cm = &cpi->common;
   const nmv_context *nmvc = &cm->fc.nmvc;
@@ -252,12 +267,28 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
     }
   }
 
+#if CONFIG_SUPERTX
+  if (!supertx_enabled)
+#endif
   skip = write_skip(cpi, segment_id, mi, w);
+#if CONFIG_SUPERTX
+  else
+    skip = mbmi->skip;
+#endif
 
+#if CONFIG_SUPERTX
+  if (!supertx_enabled) {
+#endif
   if (!vp9_segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME))
     vp9_write(w, is_inter, vp9_get_intra_inter_prob(cm, xd));
+#if CONFIG_SUPERTX
+  }
+#endif
 
   if (bsize >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT &&
+#if CONFIG_SUPERTX
+      !supertx_enabled &&
+#endif
       !(is_inter &&
         (skip || vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP)))) {
     write_selected_tx_size(cpi, mbmi->tx_size, bsize, w);
@@ -305,6 +336,9 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
 #if CONFIG_EXT_TX
     if (mbmi->tx_size <= TX_16X16 &&
         bsize >= BLOCK_8X8 &&
+#if CONFIG_SUPERTX
+        !supertx_enabled &&
+#endif
         !mbmi->skip &&
         !vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
       vp9_write(w, mbmi->ext_txfrm, cm->fc.ext_tx_prob);
@@ -451,6 +485,9 @@ static void write_mb_modes_kf(const VP9_COMP *cpi, MODE_INFO **mi_8x8,
 
 static void write_modes_b(VP9_COMP *cpi, const TileInfo *const tile,
                           vp9_writer *w, TOKENEXTRA **tok, TOKENEXTRA *tok_end,
+#if CONFIG_SUPERTX
+                          int supertx_enabled,
+#endif
                           int mi_row, int mi_col) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
@@ -466,11 +503,21 @@ static void write_modes_b(VP9_COMP *cpi, const TileInfo *const tile,
   if (frame_is_intra_only(cm)) {
     write_mb_modes_kf(cpi, xd->mi, w);
   } else {
+#if CONFIG_SUPERTX
+    pack_inter_mode_mvs(cpi, m, supertx_enabled, w);
+#else
     pack_inter_mode_mvs(cpi, m, w);
+#endif
   }
 
+#if CONFIG_SUPERTX
+  if (!supertx_enabled) {
+#endif
   assert(*tok < tok_end);
   pack_mb_tokens(w, tok, tok_end);
+#if CONFIG_SUPERTX
+  }
+#endif
 }
 
 static void write_partition(VP9_COMMON *cm, MACROBLOCKD *xd,
@@ -497,6 +544,9 @@ static void write_partition(VP9_COMMON *cm, MACROBLOCKD *xd,
 static void write_modes_sb(VP9_COMP *cpi,
                            const TileInfo *const tile,
                            vp9_writer *w, TOKENEXTRA **tok, TOKENEXTRA *tok_end,
+#if CONFIG_SUPERTX
+                           int pack_token, int supertx_enabled,
+#endif
                            int mi_row, int mi_col, BLOCK_SIZE bsize) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
@@ -513,36 +563,105 @@ static void write_modes_sb(VP9_COMP *cpi,
   partition = partition_lookup[bsl][m->mbmi.sb_type];
   write_partition(cm, xd, bs, mi_row, mi_col, partition, bsize, w);
   subsize = get_subsize(bsize, partition);
+#if CONFIG_SUPERTX
+  xd->mi = cm->mi_grid_visible + (mi_row * cm->mi_stride + mi_col);
+  set_mi_row_col(xd, tile,
+                 mi_row, num_8x8_blocks_high_lookup[bsize],
+                 mi_col, num_8x8_blocks_wide_lookup[bsize],
+                 cm->mi_rows, cm->mi_cols);
+  if (!supertx_enabled && cm->frame_type != KEY_FRAME &&
+      partition != PARTITION_NONE && bsize <= BLOCK_32X32) {
+    TX_SIZE supertx_size = b_width_log2(bsize);
+    vp9_prob prob = partition == PARTITION_SPLIT ?
+                    cm->fc.supertxsplit_prob[supertx_size] :
+                    cm->fc.supertx_prob[supertx_size];
+    supertx_enabled = (xd->mi[0]->mbmi.tx_size == supertx_size);
+    vp9_write(w, supertx_enabled, prob);
+    if (supertx_enabled) {
+      vp9_write(w, xd->mi[0]->mbmi.skip, vp9_get_skip_prob(cm, xd));
+#if CONFIG_EXT_TX
+      if (supertx_size <= TX_16X16 && !xd->mi[0]->mbmi.skip)
+        vp9_write(w, xd->mi[0]->mbmi.ext_txfrm, cm->fc.ext_tx_prob);
+#endif
+    }
+  }
+#endif
   if (subsize < BLOCK_8X8) {
-    write_modes_b(cpi, tile, w, tok, tok_end, mi_row, mi_col);
+    write_modes_b(cpi, tile, w, tok, tok_end,
+#if CONFIG_SUPERTX
+                  supertx_enabled,
+#endif
+                  mi_row, mi_col);
   } else {
     switch (partition) {
       case PARTITION_NONE:
-        write_modes_b(cpi, tile, w, tok, tok_end, mi_row, mi_col);
+        write_modes_b(cpi, tile, w, tok, tok_end,
+#if CONFIG_SUPERTX
+                      supertx_enabled,
+#endif
+                      mi_row, mi_col);
         break;
       case PARTITION_HORZ:
-        write_modes_b(cpi, tile, w, tok, tok_end, mi_row, mi_col);
+        write_modes_b(cpi, tile, w, tok, tok_end,
+#if CONFIG_SUPERTX
+                      supertx_enabled,
+#endif
+                      mi_row, mi_col);
         if (mi_row + bs < cm->mi_rows)
-          write_modes_b(cpi, tile, w, tok, tok_end, mi_row + bs, mi_col);
+          write_modes_b(cpi, tile, w, tok, tok_end,
+#if CONFIG_SUPERTX
+                        supertx_enabled,
+#endif
+                        mi_row + bs, mi_col);
         break;
       case PARTITION_VERT:
-        write_modes_b(cpi, tile, w, tok, tok_end, mi_row, mi_col);
+        write_modes_b(cpi, tile, w, tok, tok_end,
+#if CONFIG_SUPERTX
+                      supertx_enabled,
+#endif
+                      mi_row, mi_col);
         if (mi_col + bs < cm->mi_cols)
-          write_modes_b(cpi, tile, w, tok, tok_end, mi_row, mi_col + bs);
+          write_modes_b(cpi, tile, w, tok, tok_end,
+#if CONFIG_SUPERTX
+                        supertx_enabled,
+#endif
+                        mi_row, mi_col + bs);
         break;
       case PARTITION_SPLIT:
-        write_modes_sb(cpi, tile, w, tok, tok_end, mi_row, mi_col, subsize);
-        write_modes_sb(cpi, tile, w, tok, tok_end, mi_row, mi_col + bs,
+        write_modes_sb(cpi, tile, w, tok, tok_end,
+#if CONFIG_SUPERTX
+                       !supertx_enabled, supertx_enabled,
+#endif
+                       mi_row, mi_col, subsize);
+        write_modes_sb(cpi, tile, w, tok, tok_end,
+#if CONFIG_SUPERTX
+                       !supertx_enabled, supertx_enabled,
+#endif
+                       mi_row, mi_col + bs,
                        subsize);
-        write_modes_sb(cpi, tile, w, tok, tok_end, mi_row + bs, mi_col,
+        write_modes_sb(cpi, tile, w, tok, tok_end,
+#if CONFIG_SUPERTX
+                       !supertx_enabled, supertx_enabled,
+#endif
+                       mi_row + bs, mi_col,
                        subsize);
-        write_modes_sb(cpi, tile, w, tok, tok_end, mi_row + bs, mi_col + bs,
+        write_modes_sb(cpi, tile, w, tok, tok_end,
+#if CONFIG_SUPERTX
+                       !supertx_enabled, supertx_enabled,
+#endif
+                       mi_row + bs, mi_col + bs,
                        subsize);
         break;
       default:
         assert(0);
     }
   }
+#if CONFIG_SUPERTX
+  if (partition != PARTITION_NONE && supertx_enabled && pack_token) {
+    assert(*tok < tok_end);
+    pack_mb_tokens(w, tok, tok_end);
+  }
+#endif
 
   // update partition context
   if (bsize >= BLOCK_8X8 &&
@@ -560,7 +679,11 @@ static void write_modes(VP9_COMP *cpi,
     vp9_zero(cpi->mb.e_mbd.left_seg_context);
     for (mi_col = tile->mi_col_start; mi_col < tile->mi_col_end;
          mi_col += MI_BLOCK_SIZE)
-      write_modes_sb(cpi, tile, w, tok, tok_end, mi_row, mi_col,
+      write_modes_sb(cpi, tile, w, tok, tok_end,
+#if CONFIG_SUPERTX
+                     1, 0,
+#endif
+                     mi_row, mi_col,
                      BLOCK_64X64);
   }
 }

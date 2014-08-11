@@ -206,6 +206,13 @@ static const int mode_lf_lut[MB_MODE_COUNT] = {
   1, 1, 0, 1                     // INTER_MODES (ZEROMV == 0)
 };
 
+#if CONFIG_SUPERTX
+static int supertx_enabled_lpf(const MB_MODE_INFO *mbmi) {
+  return mbmi->tx_size >
+         MIN(b_width_log2(mbmi->sb_type), b_height_log2(mbmi->sb_type));
+}
+#endif
+
 static void update_sharpness(loop_filter_info_n *lfi, int sharpness_lvl) {
   int lvl;
 
@@ -572,6 +579,85 @@ static void build_masks(const loop_filter_info_n *const lfi_n,
     *int_4x4_uv |= (size_mask_uv[block_size] & 0xffff) << shift_uv;
 }
 
+#if CONFIG_SUPERTX
+static void build_masks_supertx(const loop_filter_info_n *const lfi_n,
+                                const MODE_INFO *mi, const int shift_y,
+                                const int shift_uv,
+                                LOOP_FILTER_MASK *lfm) {
+  const MB_MODE_INFO *mbmi = &mi->mbmi;
+  const TX_SIZE tx_size_y = mbmi->tx_size;
+  const TX_SIZE tx_size_uv = get_uv_tx_size(mbmi);
+  const BLOCK_SIZE block_size = 3 * (int)tx_size_y;
+  const int filter_level = get_filter_level(lfi_n, mbmi);
+  uint64_t *const left_y = &lfm->left_y[tx_size_y];
+  uint64_t *const above_y = &lfm->above_y[tx_size_y];
+  uint64_t *const int_4x4_y = &lfm->int_4x4_y;
+  uint16_t *const left_uv = &lfm->left_uv[tx_size_uv];
+  uint16_t *const above_uv = &lfm->above_uv[tx_size_uv];
+  uint16_t *const int_4x4_uv = &lfm->int_4x4_uv;
+  int i;
+
+  // If filter level is 0 we don't loop filter.
+  if (!filter_level) {
+    return;
+  } else {
+    const int w = num_8x8_blocks_wide_lookup[block_size];
+    const int h = num_8x8_blocks_high_lookup[block_size];
+    int index = shift_y;
+    for (i = 0; i < h; i++) {
+      vpx_memset(&lfm->lfl_y[index], filter_level, w);
+      index += 8;
+    }
+  }
+
+  // These set 1 in the current block size for the block size edges.
+  // For instance if the block size is 32x16,   we'll set :
+  //    above =   1111
+  //              0000
+  //    and
+  //    left  =   1000
+  //          =   1000
+  // NOTE : In this example the low bit is left most ( 1000 ) is stored as
+  //        1,  not 8...
+  //
+  // U and v set things on a 16 bit scale.
+  //
+  *above_y |= above_prediction_mask[block_size] << shift_y;
+  *above_uv |= above_prediction_mask_uv[block_size] << shift_uv;
+  *left_y |= left_prediction_mask[block_size] << shift_y;
+  *left_uv |= left_prediction_mask_uv[block_size] << shift_uv;
+
+  // If the block has no coefficients and is not intra we skip applying
+  // the loop filter on block edges.
+  if (mbmi->skip && is_inter_block(mbmi))
+    return;
+
+  // Here we are adding a mask for the transform size.  The transform
+  // size mask is set to be correct for a 64x64 prediction block size. We
+  // mask to match the size of the block we are working on and then shift it
+  // into place..
+  *above_y |= (size_mask[block_size] &
+               above_64x64_txform_mask[tx_size_y]) << shift_y;
+  *above_uv |= (size_mask_uv[block_size] &
+                above_64x64_txform_mask_uv[tx_size_uv]) << shift_uv;
+
+  *left_y |= (size_mask[block_size] &
+              left_64x64_txform_mask[tx_size_y]) << shift_y;
+  *left_uv |= (size_mask_uv[block_size] &
+               left_64x64_txform_mask_uv[tx_size_uv]) << shift_uv;
+
+  // Here we are trying to determine what to do with the internal 4x4 block
+  // boundaries.  These differ from the 4x4 boundaries on the outside edge of
+  // an 8x8 in that the internal ones can be skipped and don't depend on
+  // the prediction block size.
+  if (tx_size_y == TX_4X4)
+    *int_4x4_y |= (size_mask[block_size] & 0xffffffffffffffff) << shift_y;
+
+  if (tx_size_uv == TX_4X4)
+    *int_4x4_uv |= (size_mask_uv[block_size] & 0xffff) << shift_uv;
+}
+#endif
+
 // This function does the same thing as the one above with the exception that
 // it only affects the y masks.   It exists because for blocks < 16x16 in size,
 // we only update u and v masks on the first block.
@@ -615,6 +701,48 @@ static void build_y_mask(const loop_filter_info_n *const lfi_n,
     *int_4x4_y |= (size_mask[block_size] & 0xffffffffffffffff) << shift_y;
 }
 
+#if CONFIG_SUPERTX
+static void build_y_mask_supertx(const loop_filter_info_n *const lfi_n,
+                                 const MODE_INFO *mi, const int shift_y,
+                                 LOOP_FILTER_MASK *lfm) {
+  const MB_MODE_INFO *mbmi = &mi->mbmi;
+  const TX_SIZE tx_size_y = mbmi->tx_size;
+  const BLOCK_SIZE block_size = 3 * (int)tx_size_y;
+  const int filter_level = get_filter_level(lfi_n, mbmi);
+  uint64_t *const left_y = &lfm->left_y[tx_size_y];
+  uint64_t *const above_y = &lfm->above_y[tx_size_y];
+  uint64_t *const int_4x4_y = &lfm->int_4x4_y;
+  int i;
+
+  if (!filter_level) {
+    return;
+  } else {
+    const int w = num_8x8_blocks_wide_lookup[block_size];
+    const int h = num_8x8_blocks_high_lookup[block_size];
+    int index = shift_y;
+    for (i = 0; i < h; i++) {
+      vpx_memset(&lfm->lfl_y[index], filter_level, w);
+      index += 8;
+    }
+  }
+
+  *above_y |= above_prediction_mask[block_size] << shift_y;
+  *left_y |= left_prediction_mask[block_size] << shift_y;
+
+  if (mbmi->skip && is_inter_block(mbmi))
+    return;
+
+  *above_y |= (size_mask[block_size] &
+               above_64x64_txform_mask[tx_size_y]) << shift_y;
+
+  *left_y |= (size_mask[block_size] &
+              left_64x64_txform_mask[tx_size_y]) << shift_y;
+
+  if (tx_size_y == TX_4X4)
+    *int_4x4_y |= (size_mask[block_size] & 0xffffffffffffffff) << shift_y;
+}
+#endif
+
 // This function sets up the bit masks for the entire 64x64 region represented
 // by mi_row, mi_col.
 // TODO(JBB): This function only works for yv12.
@@ -650,6 +778,9 @@ void vp9_setup_mask(VP9_COMMON *const cm, const int mi_row, const int mi_col,
                         cm->mi_rows - mi_row : MI_BLOCK_SIZE);
   const int max_cols = (mi_col + MI_BLOCK_SIZE > cm->mi_cols ?
                         cm->mi_cols - mi_col : MI_BLOCK_SIZE);
+#if CONFIG_SUPERTX
+  int supertx;
+#endif
 
   vp9_zero(*lfm);
 
@@ -687,20 +818,43 @@ void vp9_setup_mask(VP9_COMMON *const cm, const int mi_row, const int mi_col,
             build_masks(lfi_n, mip[0], shift_y, shift_uv, lfm);
             break;
           case BLOCK_32X16:
+#if CONFIG_SUPERTX
+            supertx = supertx_enabled_lpf(&mip[0]->mbmi);
+            if (!supertx) {
+#endif
             build_masks(lfi_n, mip[0], shift_y, shift_uv, lfm);
             if (mi_32_row_offset + 2 >= max_rows)
               continue;
             mip2 = mip + mode_info_stride * 2;
             build_masks(lfi_n, mip2[0], shift_y + 16, shift_uv + 4, lfm);
+#if CONFIG_SUPERTX
+            } else {
+              build_masks_supertx(lfi_n, mip[0], shift_y, shift_uv, lfm);
+            }
+#endif
             break;
           case BLOCK_16X32:
+#if CONFIG_SUPERTX
+            supertx = supertx_enabled_lpf(&mip[0]->mbmi);
+            if (!supertx) {
+#endif
             build_masks(lfi_n, mip[0], shift_y, shift_uv, lfm);
             if (mi_32_col_offset + 2 >= max_cols)
               continue;
             mip2 = mip + 2;
             build_masks(lfi_n, mip2[0], shift_y + 2, shift_uv + 1, lfm);
+#if CONFIG_SUPERTX
+            } else {
+              build_masks_supertx(lfi_n, mip[0], shift_y, shift_uv, lfm);
+            }
+#endif
             break;
           default:
+#if CONFIG_SUPERTX
+            if (mip[0]->mbmi.tx_size == TX_32X32) {
+              build_masks_supertx(lfi_n, mip[0], shift_y, shift_uv, lfm);
+            } else {
+#endif
             for (idx_16 = 0; idx_16 < 4; mip += offset_16[idx_16], ++idx_16) {
               const int shift_y = shift_32_y[idx_32] + shift_16_y[idx_16];
               const int shift_uv = shift_32_uv[idx_32] + shift_16_uv[idx_16];
@@ -717,24 +871,56 @@ void vp9_setup_mask(VP9_COMMON *const cm, const int mi_row, const int mi_col,
                   build_masks(lfi_n, mip[0], shift_y, shift_uv, lfm);
                   break;
                 case BLOCK_16X8:
+#if CONFIG_SUPERTX
+                  supertx = supertx_enabled_lpf(&mip[0]->mbmi);
+                  if (!supertx) {
+#endif
                   build_masks(lfi_n, mip[0], shift_y, shift_uv, lfm);
                   if (mi_16_row_offset + 1 >= max_rows)
                     continue;
                   mip2 = mip + mode_info_stride;
                   build_y_mask(lfi_n, mip2[0], shift_y+8, lfm);
+#if CONFIG_SUPERTX
+                  } else {
+                    build_masks_supertx(lfi_n, mip[0], shift_y, shift_uv, lfm);
+                  }
+#endif
                   break;
                 case BLOCK_8X16:
+#if CONFIG_SUPERTX
+                  supertx = supertx_enabled_lpf(&mip[0]->mbmi);
+                  if (!supertx) {
+#endif
                   build_masks(lfi_n, mip[0], shift_y, shift_uv, lfm);
                   if (mi_16_col_offset +1 >= max_cols)
                     continue;
                   mip2 = mip + 1;
                   build_y_mask(lfi_n, mip2[0], shift_y+1, lfm);
+#if CONFIG_SUPERTX
+                  } else {
+                    build_masks_supertx(lfi_n, mip[0], shift_y, shift_uv, lfm);
+                  }
+#endif
                   break;
                 default: {
+#if CONFIG_SUPERTX
+                  if (mip[0]->mbmi.tx_size == TX_16X16) {
+                    build_masks_supertx(lfi_n, mip[0], shift_y, shift_uv, lfm);
+                  } else {
+#endif
                   const int shift_y = shift_32_y[idx_32] +
                                       shift_16_y[idx_16] +
                                       shift_8_y[0];
+#if CONFIG_SUPERTX
+                  supertx = supertx_enabled_lpf(&mip[0]->mbmi);
+                  if (!supertx) {
+#endif
                   build_masks(lfi_n, mip[0], shift_y, shift_uv, lfm);
+#if CONFIG_SUPERTX
+                  } else {
+                    build_masks_supertx(lfi_n, mip[0], shift_y, shift_uv, lfm);
+                  }
+#endif
                   mip += offset[0];
                   for (idx_8 = 1; idx_8 < 4; mip += offset[idx_8], ++idx_8) {
                     const int shift_y = shift_32_y[idx_32] +
@@ -748,12 +934,26 @@ void vp9_setup_mask(VP9_COMMON *const cm, const int mi_row, const int mi_col,
                     if (mi_8_col_offset >= max_cols ||
                         mi_8_row_offset >= max_rows)
                       continue;
+#if CONFIG_SUPERTX
+                    supertx = supertx_enabled_lpf(&mip[0]->mbmi);
+                    if (!supertx)
+#endif
                     build_y_mask(lfi_n, mip[0], shift_y, lfm);
+#if CONFIG_SUPERTX
+                    else
+                      build_y_mask_supertx(lfi_n, mip[0], shift_y, lfm);
+#endif
                   }
+#if CONFIG_SUPERTX
+                  }
+#endif
                   break;
                 }
               }
             }
+#if CONFIG_SUPERTX
+            }
+#endif
             break;
         }
       }

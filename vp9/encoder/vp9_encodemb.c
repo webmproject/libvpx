@@ -578,6 +578,26 @@ void vp9_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize) {
   }
 }
 
+#if CONFIG_SUPERTX
+void vp9_encode_sb_supertx(MACROBLOCK *x, BLOCK_SIZE bsize) {
+  MACROBLOCKD *const xd = &x->e_mbd;
+  struct optimize_ctx ctx;
+  MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
+  struct encode_b_args arg = {x, &ctx, &mbmi->skip};
+  int plane;
+
+  for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
+    BLOCK_SIZE plane_size = bsize - 3 * (plane > 0);
+    const struct macroblockd_plane* const pd = &xd->plane[plane];
+    const TX_SIZE tx_size = plane ? get_uv_tx_size(mbmi) : mbmi->tx_size;
+    vp9_subtract_plane(x, bsize, plane);
+    vp9_get_entropy_contexts(bsize, tx_size, pd,
+                             ctx.ta[plane], ctx.tl[plane]);
+    encode_block(plane, 0, plane_size, b_width_log2(plane_size), &arg);
+  }
+}
+#endif
+
 static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                TX_SIZE tx_size, void *arg) {
   struct encode_b_args* const args = arg;

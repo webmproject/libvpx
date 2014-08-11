@@ -72,6 +72,53 @@ void vp9_generate_hard_mask(int mask_index, BLOCK_SIZE sb_type,
                           int h, int w, uint8_t *mask, int stride);
 #endif
 
+#if CONFIG_SUPERTX
+void vp9_build_inter_predictors_sby_sub8x8_extend(MACROBLOCKD *xd,
+                                                  int mi_row, int mi_col,
+                                                  int mi_row_ori,
+                                                  int mi_col_ori,
+                                                  BLOCK_SIZE top_bsize,
+                                                  PARTITION_TYPE partition);
+void vp9_build_inter_predictors_sbuv_sub8x8_extend(MACROBLOCKD *xd,
+#if CONFIG_MASKED_INTERINTER
+                                                   int mi_row, int mi_col,
+#endif
+                                                   int mi_row_ori,
+                                                   int mi_col_ori,
+                                                   BLOCK_SIZE top_bsize);
+void vp9_build_masked_inter_predictor_complex(uint8_t *dst, int dst_stride,
+                                              uint8_t *dst2, int dst2_stride,
+                                              int plane,
+                                              int mi_row, int mi_col,
+                                              int mi_row_ori, int mi_col_ori,
+                                              BLOCK_SIZE bsize,
+                                              BLOCK_SIZE top_bsize,
+                                              PARTITION_TYPE partition);
+void vp9_dec_build_inter_predictors_sby_sub8x8_extend(MACROBLOCKD *xd,
+                                                      int mi_row, int mi_col,
+                                                      int mi_row_ori,
+                                                      int mi_col_ori,
+                                                      BLOCK_SIZE top_bsize,
+                                                      PARTITION_TYPE p);
+void vp9_dec_build_inter_predictors_sbuv_sub8x8_extend(MACROBLOCKD *xd,
+#if CONFIG_MASKED_INTERINTER
+                                                       int mi_row, int mi_col,
+#endif
+                                                       int mi_row_ori,
+                                                       int mi_col_ori,
+                                                       BLOCK_SIZE top_bsize);
+#if CONFIG_MASKED_INTERINTER
+void vp9_build_inter_predictors_sb_extend(MACROBLOCKD *xd,
+                                          int mi_row, int mi_col,
+                                          int mi_row_ori, int mi_col_ori,
+                                          BLOCK_SIZE bsize);
+void vp9_dec_build_inter_predictors_sb_extend(MACROBLOCKD *xd,
+                                              int mi_row, int mi_col,
+                                              int mi_row_ori, int mi_col_ori,
+                                              BLOCK_SIZE bsize);
+#endif
+#endif
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
