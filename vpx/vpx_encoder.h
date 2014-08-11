@@ -637,14 +637,12 @@ extern "C" {
      */
     unsigned int           ss_number_layers;
 
-#if CONFIG_SPATIAL_SVC
     /*!\brief Enable auto alt reference flags for each spatial layer.
      *
      * These values specify if auto alt reference frame is enabled for each
      * spatial layer.
      */
     int                    ss_enable_auto_alt_ref[VPX_SS_MAX_LAYERS];
-#endif
 
     /*!\brief Target bitrate for each spatial layer.
      *
