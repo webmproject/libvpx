@@ -145,6 +145,14 @@ class Y4mVideoWriteTest
     delete tmpfile_;
   }
 
+  virtual void ReplaceInputFile(FILE *input_file) {
+    CloseSource();
+    frame_ = 0;
+    input_file_ = input_file;
+    rewind(input_file_);
+    ReadSourceToStart();
+  }
+
   // Writes out a y4m file and then reads it back
   void WriteY4mAndReadBack() {
     ASSERT_TRUE(input_file_ != NULL);
@@ -163,8 +171,7 @@ class Y4mVideoWriteTest
       write_image_file(img(), tmpfile_->file());
       Next();
     }
-    tmpfile_->CloseFile();
-    Y4mVideoSourceTest::Init(tmpfile_->file_name(), limit_);
+    ReplaceInputFile(tmpfile_->file());
   }
 
   virtual void Init(const std::string &file_name, int limit) {
