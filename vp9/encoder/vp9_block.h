@@ -115,7 +115,7 @@ struct macroblock {
   int quant_fp;
 
   // skip forward transform and quantization
-  int skip_txfm;
+  int skip_txfm[MAX_MB_PLANE];
 
   // Used to store sub partition's choices.
   MV pred_mv[MAX_REF_FRAMES];
