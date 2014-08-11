@@ -118,11 +118,12 @@ void usage_exit() {
   exit(EXIT_FAILURE);
 }
 
-static void encode_frame(vpx_codec_ctx_t *codec,
-                         vpx_image_t *img,
-                         int frame_index,
-                         int flags,
-                         VpxVideoWriter *writer) {
+static int encode_frame(vpx_codec_ctx_t *codec,
+                        vpx_image_t *img,
+                        int frame_index,
+                        int flags,
+                        VpxVideoWriter *writer) {
+  int got_pkts = 0;
   vpx_codec_iter_t iter = NULL;
   const vpx_codec_cx_pkt_t *pkt = NULL;
   const vpx_codec_err_t res = vpx_codec_encode(codec, img, frame_index, 1,
@@ -131,6 +132,8 @@ static void encode_frame(vpx_codec_ctx_t *codec,
     die_codec(codec, "Failed to encode frame");
 
   while ((pkt = vpx_codec_get_cx_data(codec, &iter)) != NULL) {
+    got_pkts = 1;
+
     if (pkt->kind == VPX_CODEC_CX_FRAME_PKT) {
       const int keyframe = (pkt->data.frame.flags & VPX_FRAME_IS_KEY) != 0;
       if (!vpx_video_writer_write_frame(writer,
@@ -139,11 +142,12 @@ static void encode_frame(vpx_codec_ctx_t *codec,
                                         pkt->data.frame.pts)) {
         die_codec(codec, "Failed to write compressed frame");
       }
-
       printf(keyframe ? "K" : ".");
       fflush(stdout);
     }
   }
+
+  return got_pkts;
 }
 
 int main(int argc, char **argv) {
@@ -230,13 +234,16 @@ int main(int argc, char **argv) {
   if (vpx_codec_enc_init(&codec, encoder->codec_interface(), &cfg, 0))
     die_codec(&codec, "Failed to initialize encoder");
 
+  // Encode frames.
   while (vpx_img_read(&raw, infile)) {
     int flags = 0;
     if (keyframe_interval > 0 && frame_count % keyframe_interval == 0)
       flags |= VPX_EFLAG_FORCE_KF;
     encode_frame(&codec, &raw, frame_count++, flags, writer);
   }
-  encode_frame(&codec, NULL, -1, 0, writer);  // flush the encoder
+
+  // Flush encoder.
+  while (encode_frame(&codec, NULL, -1, 0, writer)) {};
 
   printf("\n");
   fclose(infile);
