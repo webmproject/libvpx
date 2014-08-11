@@ -475,22 +475,22 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
     return;
   }
 
-  if (x->skip_txfm[plane] == 0) {
-    // full forward transform and quantization
-    if (!x->skip_recode) {
+  if (!x->skip_recode) {
+    if (x->skip_txfm[plane] == 0) {
+      // full forward transform and quantization
       if (x->quant_fp)
         vp9_xform_quant_fp(x, plane, block, plane_bsize, tx_size);
       else
         vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
+    } else if (x->skip_txfm[plane] == 2) {
+      // fast path forward transform and quantization
+      vp9_xform_quant_dc(x, plane, block, plane_bsize, tx_size);
+    } else {
+      // skip forward transform
+      p->eobs[block] = 0;
+      *a = *l = 0;
+      return;
     }
-  } else if (x->skip_txfm[plane] == 2) {
-    // fast path forward transform and quantization
-    vp9_xform_quant_dc(x, plane, block, plane_bsize, tx_size);
-  } else {
-    // skip forward transform
-    p->eobs[block] = 0;
-    *a = *l = 0;
-    return;
   }
 
   if (x->optimize && (!x->skip_recode || !x->skip_optimize)) {
