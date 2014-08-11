@@ -53,6 +53,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//cZU\u003d",
+        "filename": "examples/simple_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-08-11T21:00:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//cfU\u003d",
+      "revId": "6f64ca938e8f30423a240189b5708fb42db53694",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//cfQ\u003d",
         "filename": "examples/simple_encoder.c",
         "patchSetId": 2
@@ -64,6 +82,24 @@
       "writtenOn": "2014-08-09T02:18:46Z",
       "side": 1,
       "message": "s/Flush/Flush encoder./",
+      "revId": "6f64ca938e8f30423a240189b5708fb42db53694",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//cZQ\u003d",
+        "filename": "examples/simple_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-08-11T21:00:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//cfQ\u003d",
       "revId": "6f64ca938e8f30423a240189b5708fb42db53694",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
