@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//cTk\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-08-12T05:47:56Z",
+      "side": 1,
+      "message": "This is to check if the file pointer is an open file, since the file may already be closed externally though the file pointer.\nUsing ftell() instead, which should return -1 for a not open file.",
+      "parentUuid": "AAAAdn//cUI\u003d",
+      "revId": "c1d6f8af69d07cab5ec2cdd17274d98ecf56bcd0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//cUE\u003d",
         "filename": "test/y4m_test.cc",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2014-08-12T03:13:43Z",
       "side": 1,
       "message": "ReplaceInputFile() would be OK",
+      "revId": "c1d6f8af69d07cab5ec2cdd17274d98ecf56bcd0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//cTo\u003d",
+        "filename": "test/y4m_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-08-12T05:47:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//cUE\u003d",
       "revId": "c1d6f8af69d07cab5ec2cdd17274d98ecf56bcd0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
