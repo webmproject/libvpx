@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//cPU\u003d",
+        "filename": "vpx/vpx_integer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-12T22:44:12Z",
+      "side": 1,
+      "message": "outer ()s can go",
+      "revId": "0a7ac016b256487f93e0e31dbd936ddc1e920d30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//cPQ\u003d",
+        "filename": "vpx/vpx_integer.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-12T22:44:12Z",
+      "side": 1,
+      "message": "not this doesn\u0027t allow for a way to force inline off for older compilers",
+      "revId": "0a7ac016b256487f93e0e31dbd936ddc1e920d30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
