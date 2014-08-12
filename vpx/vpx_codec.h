@@ -153,7 +153,6 @@ extern "C" {
   typedef long vpx_codec_caps_t;
 #define VPX_CODEC_CAP_DECODER 0x1 /**< Is a decoder */
 #define VPX_CODEC_CAP_ENCODER 0x2 /**< Is an encoder */
-#define VPX_CODEC_CAP_XMA     0x4 /**< Supports eXternal Memory Allocation */
 
 
   /*! \brief Initialization-time Feature Enabling
@@ -164,7 +163,6 @@ extern "C" {
    *  The available flags are specified by VPX_CODEC_USE_* defines.
    */
   typedef long vpx_codec_flags_t;
-#define VPX_CODEC_USE_XMA 0x00000001    /**< Use eXternal Memory Allocation mode */
 
 
   /*!\brief Codec interface structure.
