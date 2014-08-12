@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//cOQ\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-08-12T23:16:04Z",
+      "side": 1,
+      "message": "Done.\n\nBTW, _set_invalid_parameter_handler does not work on mingw.",
+      "parentUuid": "AAAAdn//cOk\u003d",
+      "revId": "5feae8ba768aaff6ec9dade181b97404d62f5b24",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//cOg\u003d",
         "filename": "test/video_source.h",
         "patchSetId": 6
@@ -30,6 +48,24 @@
       "writtenOn": "2014-08-12T23:04:16Z",
       "side": 1,
       "message": "where else is this getting closed, can\u0027t we just route that through this call and avoid all the ifdef\u0027ry?",
+      "revId": "5feae8ba768aaff6ec9dade181b97404d62f5b24",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//cOI\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-08-12T23:16:04Z",
+      "side": 1,
+      "message": "It is being closed in CloseSource(). If we try to get that to work that will be even more work, since we use the same mechanism for both regular files and tmp files. \nI think the current solution is fine if not perfect - since it works on linux, mingw, Visual Studio. We can revisit this if it does not work on any platform later.",
+      "parentUuid": "AAAAdn//cOg\u003d",
       "revId": "5feae8ba768aaff6ec9dade181b97404d62f5b24",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
