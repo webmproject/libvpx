@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//caQ\u003d",
+        "filename": "test/codec_factory.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-08-12T21:00:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//cbU\u003d",
+      "revId": "ca511f208b53a1006e89aceb3dc12602f71d7ad8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//cbQ\u003d",
         "filename": "test/decode_test_driver.cc",
         "patchSetId": 3
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//cQM\u003d",
+        "filename": "test/decode_test_driver.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-08-12T21:00:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//cbQ\u003d",
+      "revId": "ca511f208b53a1006e89aceb3dc12602f71d7ad8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//cbY\u003d",
         "filename": "test/test_vector_test.cc",
         "patchSetId": 3
@@ -47,6 +83,24 @@
       "writtenOn": "2014-08-11T19:08:27Z",
       "side": 1,
       "message": "these should be merged and if the failure case is hard to detect a SCOPED_TRACE in the test body or overloading operator\u003c\u003c might help.",
+      "revId": "ca511f208b53a1006e89aceb3dc12602f71d7ad8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//cVU\u003d",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-08-12T21:00:42Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "AAAAdn//cbY\u003d",
       "revId": "ca511f208b53a1006e89aceb3dc12602f71d7ad8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
