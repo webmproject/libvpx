@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//cOs\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-08-12T23:00:43Z",
+      "side": 1,
+      "message": "If... fails,",
+      "revId": "56d4b6605e7f1b4660b7d5be2683e82d4108d3bd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
