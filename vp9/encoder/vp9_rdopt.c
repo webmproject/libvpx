@@ -458,18 +458,18 @@ static void choose_tx_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
                              {INT64_MAX, INT64_MAX},
                              {INT64_MAX, INT64_MAX},
                              {INT64_MAX, INT64_MAX}};
-  TX_SIZE n, m;
+  int n, m;
   int s0, s1;
   const TX_SIZE max_mode_tx_size = tx_mode_to_biggest_tx_size[cm->tx_mode];
   int64_t best_rd = INT64_MAX;
-  TX_SIZE best_tx = TX_4X4;
+  TX_SIZE best_tx = max_tx_size;
 
   const vp9_prob *tx_probs = get_tx_probs2(max_tx_size, xd, &cm->fc.tx_probs);
   assert(skip_prob > 0);
   s0 = vp9_cost_bit(skip_prob, 0);
   s1 = vp9_cost_bit(skip_prob, 1);
 
-  for (n = TX_4X4; n <= max_tx_size; n++) {
+  for (n = max_tx_size; n >= 0;  n--) {
     txfm_rd_in_plane(x, &r[n][0], &d[n], &s[n],
                      &sse[n], ref_best_rd, 0, bs, n,
                      cpi->sf.use_fast_coef_costing);
@@ -490,6 +490,13 @@ static void choose_tx_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
       rd[n][0] = RDCOST(x->rdmult, x->rddiv, r[n][0] + s0, d[n]);
       rd[n][1] = RDCOST(x->rdmult, x->rddiv, r[n][1] + s0, d[n]);
     }
+
+    // Early termination in transform size search.
+    if (cpi->sf.tx_size_search_breakout &&
+        (rd[n][1] == INT64_MAX ||
+        (n < max_tx_size && rd[n][1] > rd[n + 1][1]) ||
+        s[n] == 1))
+      break;
 
     if (rd[n][1] < best_rd) {
       best_tx = n;
