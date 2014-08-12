@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//cOA\u003d",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-12T23:22:07Z",
+      "side": 1,
+      "message": "just make these const int kDecodeMode...",
+      "revId": "76ddb6827c35a2ca80cafff53ae35f4403e2cfd2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//cNw\u003d",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-12T23:22:07Z",
+      "side": 1,
+      "message": "you\u0027ll get warnings with this, use snprintf but take a look at tools_common.h for a msvc _snprintf change",
+      "revId": "76ddb6827c35a2ca80cafff53ae35f4403e2cfd2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//cN8\u003d",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-12T23:22:07Z",
+      "side": 1,
+      "message": "fix the alignment",
+      "revId": "76ddb6827c35a2ca80cafff53ae35f4403e2cfd2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//cNs\u003d",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-12T23:22:07Z",
+      "side": 1,
+      "message": "fix alignment",
+      "revId": "76ddb6827c35a2ca80cafff53ae35f4403e2cfd2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//cNQ\u003d",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-12T23:22:07Z",
+      "side": 1,
+      "message": "align these 2",
+      "revId": "76ddb6827c35a2ca80cafff53ae35f4403e2cfd2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//cNU\u003d",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-12T23:22:07Z",
+      "side": 1,
+      "message": "align these 2",
+      "revId": "76ddb6827c35a2ca80cafff53ae35f4403e2cfd2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//cNY\u003d",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-12T23:22:07Z",
+      "side": 1,
+      "message": "align these 2",
+      "revId": "76ddb6827c35a2ca80cafff53ae35f4403e2cfd2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
