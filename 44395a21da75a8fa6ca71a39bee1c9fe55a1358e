@@ -16,6 +16,24 @@
       "revId": "44395a21da75a8fa6ca71a39bee1c9fe55a1358e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//cX8\u003d",
+        "filename": "vpxdec.c",
+        "patchSetId": 28
+      },
+      "lineNbr": 937,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-08-12T01:00:40Z",
+      "side": 0,
+      "message": "This line change should not be in this commit. But it is needed to make the vpxdec work with frame parallel.",
+      "parentUuid": "AAAAdn//dM4\u003d",
+      "revId": "44395a21da75a8fa6ca71a39bee1c9fe55a1358e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
