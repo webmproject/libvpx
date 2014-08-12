@@ -2687,29 +2687,44 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                 tile->mi_col_end - mi_col);
       const int mi_height = MIN(num_8x8_blocks_high_lookup[bsize],
                                 tile->mi_row_end - mi_row);
+      const int bsl = mi_width_log2(bsize);
+      int cb_partition_search_ctrl = (((mi_row + mi_col) >> bsl)
+          + get_chessboard_index(cm->current_video_frame)) & 0x1;
       MB_MODE_INFO *ref_mbmi;
       int const_motion = 1;
+      int skip_ref_frame = !cb_partition_search_ctrl;
+      MV_REFERENCE_FRAME rf = NONE;
       int_mv ref_mv;
       ref_mv.as_int = INVALID_MV;
 
       if ((mi_row - 1) >= tile->mi_row_start) {
         ref_mv = xd->mi[-xd->mi_stride]->mbmi.mv[0];
+        rf = xd->mi[-xd->mi_stride]->mbmi.ref_frame[0];
         for (i = 0; i < mi_width; ++i) {
           ref_mbmi = &xd->mi[-xd->mi_stride + i]->mbmi;
           const_motion &= (ref_mv.as_int == ref_mbmi->mv[0].as_int) &&
                           (ref_frame == ref_mbmi->ref_frame[0]);
+          skip_ref_frame &= (rf == ref_mbmi->ref_frame[0]);
         }
       }
 
       if ((mi_col - 1) >= tile->mi_col_start) {
         if (ref_mv.as_int == INVALID_MV)
           ref_mv = xd->mi[-1]->mbmi.mv[0];
+        if (rf == NONE)
+          rf = xd->mi[-1]->mbmi.ref_frame[0];
         for (i = 0; i < mi_height; ++i) {
           ref_mbmi = &xd->mi[i * xd->mi_stride - 1]->mbmi;
           const_motion &= (ref_mv.as_int == ref_mbmi->mv[0].as_int) &&
                           (ref_frame == ref_mbmi->ref_frame[0]);
+          skip_ref_frame &= (rf == ref_mbmi->ref_frame[0]);
         }
       }
+
+      if (skip_ref_frame && this_mode != NEARESTMV && this_mode != NEWMV)
+        if (rf > INTRA_FRAME)
+          if (ref_frame != rf)
+            continue;
 
       if (const_motion)
         if (this_mode == NEARMV || this_mode == ZEROMV)
