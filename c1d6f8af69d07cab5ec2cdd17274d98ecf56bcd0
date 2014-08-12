@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//cUI\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-12T03:13:43Z",
+      "side": 1,
+      "message": "this would be called \u0027_fileno\u0027 in some cases in msvc. while not just check file_ !\u003d NULL ?",
+      "revId": "c1d6f8af69d07cab5ec2cdd17274d98ecf56bcd0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//cUE\u003d",
+        "filename": "test/y4m_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-12T03:13:43Z",
+      "side": 1,
+      "message": "ReplaceInputFile() would be OK",
+      "revId": "c1d6f8af69d07cab5ec2cdd17274d98ecf56bcd0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
