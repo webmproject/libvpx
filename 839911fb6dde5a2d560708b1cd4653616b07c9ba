@@ -34,6 +34,24 @@
       "revId": "839911fb6dde5a2d560708b1cd4653616b07c9ba",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//cPA\u003d",
+        "filename": "vp9/common/x86/vp9_subpixel_8t_intrin_avx2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 427,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-08-12T22:52:45Z",
+      "side": 1,
+      "message": "I think James meant the change of names would be in another separate commit.",
+      "parentUuid": "AAAAdn//cPw\u003d",
+      "revId": "839911fb6dde5a2d560708b1cd4653616b07c9ba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
