@@ -35,7 +35,7 @@ typedef struct {
 void vp9_start_encode(vp9_writer *bc, uint8_t *buffer);
 void vp9_stop_encode(vp9_writer *bc);
 
-static void vp9_write(vp9_writer *br, int bit, int probability) {
+static INLINE void vp9_write(vp9_writer *br, int bit, int probability) {
   unsigned int split;
   int count = br->count;
   unsigned int range = br->range;
@@ -83,11 +83,11 @@ static void vp9_write(vp9_writer *br, int bit, int probability) {
   br->range = range;
 }
 
-static void vp9_write_bit(vp9_writer *w, int bit) {
+static INLINE void vp9_write_bit(vp9_writer *w, int bit) {
   vp9_write(w, bit, 128);  // vp9_prob_half
 }
 
-static void vp9_write_literal(vp9_writer *w, int data, int bits) {
+static INLINE void vp9_write_literal(vp9_writer *w, int data, int bits) {
   int bit;
 
   for (bit = bits - 1; bit >= 0; bit--)
