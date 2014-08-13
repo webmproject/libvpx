@@ -2581,35 +2581,17 @@ static MV_REFERENCE_FRAME get_frame_type(const VP9_COMP *cpi) {
 }
 
 static TX_MODE select_tx_mode(const VP9_COMP *cpi) {
-  if (cpi->mb.e_mbd.lossless) {
+  if (cpi->mb.e_mbd.lossless)
     return ONLY_4X4;
-  } else if (cpi->common.current_video_frame == 0) {
+  if (cpi->common.current_video_frame == 0)
     return TX_MODE_SELECT;
-  } else {
-    if (cpi->sf.tx_size_search_method == USE_LARGESTALL) {
-      return ALLOW_32X32;
-    } else if (cpi->sf.tx_size_search_method == USE_FULL_RD) {
-      const RD_OPT *const rd_opt = &cpi->rd;
-      const MV_REFERENCE_FRAME frame_type = get_frame_type(cpi);
-      return rd_opt->tx_select_threshes[frame_type][ALLOW_32X32] >
-                 rd_opt->tx_select_threshes[frame_type][TX_MODE_SELECT] ?
-                     ALLOW_32X32 : TX_MODE_SELECT;
-    } else if (cpi->sf.tx_size_search_method == USE_TX_8X8) {
-      return TX_MODE_SELECT;
-    } else {
-      unsigned int total = 0;
-      int i;
-      for (i = 0; i < TX_SIZES; ++i)
-        total += cpi->tx_stepdown_count[i];
-
-      if (total) {
-        const double fraction = (double)cpi->tx_stepdown_count[0] / total;
-        return fraction > 0.90 ? ALLOW_32X32 : TX_MODE_SELECT;
-      } else {
-        return cpi->common.tx_mode;
-      }
-    }
-  }
+  if (cpi->sf.tx_size_search_method == USE_LARGESTALL)
+    return ALLOW_32X32;
+  else if (cpi->sf.tx_size_search_method == USE_FULL_RD||
+           cpi->sf.tx_size_search_method == USE_TX_8X8)
+    return TX_MODE_SELECT;
+  else
+    return cpi->common.tx_mode;
 }
 
 static void nonrd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
