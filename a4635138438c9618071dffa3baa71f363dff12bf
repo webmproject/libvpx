@@ -34,6 +34,24 @@
       "revId": "a4635138438c9618071dffa3baa71f363dff12bf",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//cIQ\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-13T02:20:15Z",
+      "side": 1,
+      "message": "right, I forgot how all this got started...",
+      "parentUuid": "AAAAdn//cIo\u003d",
+      "revId": "a4635138438c9618071dffa3baa71f363dff12bf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
