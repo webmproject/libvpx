@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//cCQ\u003d",
+        "filename": "test/cq_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-08-13T15:33:46Z",
+      "side": 1,
+      "message": "If there\u0027s a failure reported shouldn\u0027t we just return it most likely means we failed to compress the whole file and the results are suspect.",
+      "revId": "6d018e93aaf7b480e8f7f61e35c612e14c3ca6ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//cCI\u003d",
+        "filename": "test/cq_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-08-13T15:33:46Z",
+      "side": 1,
+      "message": "maybe add words \" bitrate should decrease with increased cq level here\"",
+      "revId": "6d018e93aaf7b480e8f7f61e35c612e14c3ca6ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//cCM\u003d",
+        "filename": "test/cq_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-08-13T15:33:46Z",
+      "side": 1,
+      "message": "what if there was a failure before and the expect fails,  wouldn\u0027t we want to add this?   Not sure that this adds much over what you say above. + bitrate should decrease with higner CQ level not increase.... text is a bit misleading",
+      "revId": "6d018e93aaf7b480e8f7f61e35c612e14c3ca6ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
