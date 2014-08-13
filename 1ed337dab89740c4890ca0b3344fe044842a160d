@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//b9s\u003d",
+        "filename": "build/make/rtcd.pl",
+        "patchSetId": 2
+      },
+      "lineNbr": 380,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-13T18:45:45Z",
+      "side": 1,
+      "message": "this could be merged with 368, passing $opts{arch} as a parameter unless you\u0027re planning on adding something more complex here later",
+      "revId": "1ed337dab89740c4890ca0b3344fe044842a160d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
