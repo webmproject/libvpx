@@ -9,6 +9,7 @@
  */
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
+#include "test/ivf_video_source.h"
 #include "./vpx_config.h"
 #include "vpx/vp8dx.h"
 #include "vpx/vpx_decoder.h"
@@ -55,5 +56,53 @@ TEST(DecodeAPI, InvalidParams) {
     EXPECT_EQ(VPX_CODEC_OK, vpx_codec_destroy(&dec));
   }
 }
+
+#if CONFIG_VP9_DECODER
+// Test VP9 codec controls after a decode error to ensure the code doesn't
+// misbehave.
+void TestVp9Controls(vpx_codec_ctx_t *dec) {
+  static const int kControls[] = {
+    VP8D_GET_LAST_REF_UPDATES,
+    VP8D_GET_FRAME_CORRUPTED,
+    VP9D_GET_DISPLAY_SIZE,
+  };
+  int val[2];
+
+  for (int i = 0; i < NELEMENTS(kControls); ++i) {
+    const vpx_codec_err_t res = vpx_codec_control_(dec, kControls[i], val);
+    switch (kControls[i]) {
+      case VP8D_GET_FRAME_CORRUPTED:
+        EXPECT_EQ(VPX_CODEC_ERROR, res) << kControls[i];
+        break;
+      default:
+        EXPECT_EQ(VPX_CODEC_OK, res) << kControls[i];
+        break;
+    }
+    EXPECT_EQ(VPX_CODEC_INVALID_PARAM,
+              vpx_codec_control_(dec, kControls[i], NULL));
+  }
+}
+
+TEST(DecodeAPI, Vp9InvalidDecode) {
+  const vpx_codec_iface_t *const codec = &vpx_codec_vp9_dx_algo;
+  const char filename[] =
+      "invalid-vp90-2-00-quantizer-00.webm.ivf.s5861_r01-05_b6-.v2.ivf";
+  libvpx_test::IVFVideoSource video(filename);
+  video.Init();
+  video.Begin();
+  ASSERT_TRUE(!HasFailure());
+
+  vpx_codec_ctx_t dec;
+  EXPECT_EQ(VPX_CODEC_OK, vpx_codec_dec_init(&dec, codec, NULL, 0));
+  EXPECT_EQ(VPX_CODEC_MEM_ERROR,
+            vpx_codec_decode(&dec, video.cxdata(), video.frame_size(), NULL,
+                             0));
+  vpx_codec_iter_t iter = NULL;
+  EXPECT_EQ(NULL, vpx_codec_get_frame(&dec, &iter));
+
+  TestVp9Controls(&dec);
+  EXPECT_EQ(VPX_CODEC_OK, vpx_codec_destroy(&dec));
+}
+#endif  // CONFIG_VP9_DECODER
 
 }  // namespace

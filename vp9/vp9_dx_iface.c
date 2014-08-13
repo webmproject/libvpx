@@ -639,11 +639,10 @@ static vpx_codec_err_t ctrl_get_frame_corrupted(vpx_codec_alg_priv_t *ctx,
                                                 va_list args) {
   int *corrupted = va_arg(args, int *);
 
-  if (corrupted) {
-    if (ctx->pbi)
-      *corrupted = ctx->pbi->common.frame_to_show->corrupted;
-    else
-      return VPX_CODEC_ERROR;
+  if (corrupted != NULL && ctx->pbi != NULL) {
+    const YV12_BUFFER_CONFIG *const frame = ctx->pbi->common.frame_to_show;
+    if (frame == NULL) return VPX_CODEC_ERROR;
+    *corrupted = frame->corrupted;
     return VPX_CODEC_OK;
   } else {
     return VPX_CODEC_INVALID_PARAM;
