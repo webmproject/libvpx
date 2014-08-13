@@ -2682,6 +2682,40 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       continue;
     second_ref_frame = vp9_mode_order[mode_index].ref_frame[1];
 
+    if (cpi->sf.motion_field_mode_search) {
+      const int mi_width  = MIN(num_8x8_blocks_wide_lookup[bsize],
+                                tile->mi_col_end - mi_col);
+      const int mi_height = MIN(num_8x8_blocks_high_lookup[bsize],
+                                tile->mi_row_end - mi_row);
+      MB_MODE_INFO *ref_mbmi;
+      int const_motion = 1;
+      int_mv ref_mv;
+      ref_mv.as_int = INVALID_MV;
+
+      if ((mi_row - 1) >= tile->mi_row_start) {
+        ref_mv = xd->mi[-xd->mi_stride]->mbmi.mv[0];
+        for (i = 0; i < mi_width; ++i) {
+          ref_mbmi = &xd->mi[-xd->mi_stride + i]->mbmi;
+          const_motion &= (ref_mv.as_int == ref_mbmi->mv[0].as_int) &&
+                          (ref_frame == ref_mbmi->ref_frame[0]);
+        }
+      }
+
+      if ((mi_col - 1) >= tile->mi_col_start) {
+        if (ref_mv.as_int == INVALID_MV)
+          ref_mv = xd->mi[-1]->mbmi.mv[0];
+        for (i = 0; i < mi_height; ++i) {
+          ref_mbmi = &xd->mi[i * xd->mi_stride - 1]->mbmi;
+          const_motion &= (ref_mv.as_int == ref_mbmi->mv[0].as_int) &&
+                          (ref_frame == ref_mbmi->ref_frame[0]);
+        }
+      }
+
+      if (const_motion)
+        if (this_mode == NEARMV || this_mode == ZEROMV)
+          continue;
+    }
+
     comp_pred = second_ref_frame > INTRA_FRAME;
     if (comp_pred) {
       if ((mode_search_skip_flags & FLAG_SKIP_COMP_BESTINTRA) &&
