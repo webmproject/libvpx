@@ -50,6 +50,24 @@
       "revId": "6d018e93aaf7b480e8f7f61e35c612e14c3ca6ad",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//cAg\u003d",
+        "filename": "test/cq_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-13T17:33:08Z",
+      "side": 1,
+      "message": "it would be additional noise and we\u0027d need another flag. I was just trying to add another line as with this setup a failing test won\u0027t be reported in the summary. right on the text being backward though, I\u0027ll drop this...",
+      "parentUuid": "AAAAdn//cCM\u003d",
+      "revId": "6d018e93aaf7b480e8f7f61e35c612e14c3ca6ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
