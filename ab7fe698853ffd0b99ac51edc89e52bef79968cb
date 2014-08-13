@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//cFg\u003d",
+        "filename": "examples.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-13T05:53:52Z",
+      "side": 1,
+      "message": "this line is redundant with 230",
+      "revId": "ab7fe698853ffd0b99ac51edc89e52bef79968cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
