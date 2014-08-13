@@ -53,55 +53,33 @@ static FILE *OpenTestDataFile(const std::string& file_name) {
   return fopen(path_to_source.c_str(), "rb");
 }
 
-static FILE *OpenTestOutFile(const std::string& file_name) {
-  const std::string path_to_source = GetDataPath() + "/" + file_name;
-  return fopen(path_to_source.c_str(), "wb");
-}
-
-static std::string GetTempOutFilename() {
-  std::string basename;
+static FILE *GetTempOutFile(std::string *file_name) {
+  file_name->clear();
 #if defined(_WIN32)
   char fname[MAX_PATH];
-  // Assume for now that the filename generated is unique per process
-  const UINT ret = GetTempFileNameA(
-      GetDataPath().c_str(), "lvx", 0, fname);
-  if (ret != 0) {
-    const char *slash = strrchr(fname, '\\');
-    if (slash == NULL) slash = strrchr(fname, '/');
-    if (slash == NULL)
-      basename.assign(fname);
-    else
-      basename.assign(slash + 1);
-  } else {
-    basename.clear();
+  char tmppath[MAX_PATH];
+  if (GetTempPathA(MAX_PATH, tmppath)) {
+    // Assume for now that the filename generated is unique per process
+    if (GetTempFileNameA(tmppath, "lvx", 0, fname)) {
+      file_name->assign(fname);
+      return fopen(fname, "wb+");
+    }
   }
+  return NULL;
 #else
-  char fname[256];
-  const std::string templ = GetDataPath() + "/libvpx_test_XXXXXX";
-  strncpy(fname, templ.c_str(), templ.size());
-  fname[templ.size()] = '\0';
-  const int fd = mkstemp(fname);
-  if (fd != -1) {
-    close(fd);
-    basename.assign(strrchr(fname, '/') + 1);
-  } else {
-    basename.clear();
-  }
+  return tmpfile();
 #endif
-  return basename;
 }
 
 class TempOutFile {
  public:
   TempOutFile() {
-    file_name_ = GetTempOutFilename();
-    file_ = OpenTestOutFile(file_name_);
+    file_ = GetTempOutFile(&file_name_);
   }
   ~TempOutFile() {
     CloseFile();
     if (!file_name_.empty()) {
-      const std::string path_to_source = GetDataPath() + "/" + file_name_;
-      EXPECT_EQ(0, remove(path_to_source.c_str()));
+      EXPECT_EQ(0, remove(file_name_.c_str()));
     }
   }
   FILE *file() {
@@ -110,14 +88,19 @@ class TempOutFile {
   const std::string& file_name() {
     return file_name_;
   }
+
+ protected:
   void CloseFile() {
     if (file_) {
-      fclose(file_);
+      // Close if file pointer is associated with an open file
+#if defined(_WIN32)
+      if (file_->_ptr != NULL) fclose(file_);
+#else
+      if (fileno(file_) != -1) fclose(file_);
+#endif
       file_ = NULL;
     }
   }
-
- protected:
   FILE *file_;
   std::string file_name_;
 };
