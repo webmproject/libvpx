@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//b54\u003d",
+        "filename": "test/decode_test_driver.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-13T23:09:01Z",
+      "side": 1,
+      "message": "not sure if these need to be overridden, they should be named set_*() in any case:\n\nhttp://google-styleguide.googlecode.com/svn/trunk/cppguide.xml#Function_Names",
+      "revId": "65158ba4e1e8d9978bd7b09634d980bac99be80e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//b50\u003d",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-13T23:09:01Z",
+      "side": 1,
+      "message": "as I said in an earlier patchset this won\u0027t build everywhere:\n\nhttp://msdn.microsoft.com/en-us/library/2ts7cx93.aspx\n\nthe size should be -1 too to make sure a \u0027\\0\u0027 gets added",
+      "revId": "65158ba4e1e8d9978bd7b09634d980bac99be80e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//b5s\u003d",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-13T23:09:01Z",
+      "side": 1,
+      "message": "flags",
+      "revId": "65158ba4e1e8d9978bd7b09634d980bac99be80e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//b5w\u003d",
+        "filename": "test/test_vector_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-13T23:09:01Z",
+      "side": 1,
+      "message": "elsewhere there\u0027s a space between the type and the \u0027*\u0027 -\u003e CodecFactory *",
+      "revId": "65158ba4e1e8d9978bd7b09634d980bac99be80e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
