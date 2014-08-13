@@ -110,14 +110,13 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
   if (speed >= 3) {
     sf->tx_size_search_method = frame_is_intra_only(cm) ? USE_FULL_RD
                                                         : USE_LARGESTALL;
-    if (MIN(cm->width, cm->height) >= 720) {
+    if (MIN(cm->width, cm->height) >= 720)
       sf->disable_split_mask = DISABLE_ALL_SPLIT;
-      sf->cb_partition_search = frame_is_boosted(cpi) ? 0 : 1;
-    } else {
+    else
       sf->disable_split_mask = DISABLE_ALL_INTER_SPLIT;
-    }
 
     sf->adaptive_pred_interp_filter = 0;
+    sf->cb_partition_search = frame_is_boosted(cpi) ? 0 : 1;
     sf->cb_pred_filter_search = 1;
     sf->motion_field_mode_search = frame_is_boosted(cpi) ? 0 : 1;
 
@@ -126,8 +125,6 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
     sf->recode_loop = ALLOW_RECODE_KFMAXBW;
     sf->adaptive_rd_thresh = 3;
     sf->mode_skip_start = 6;
-    sf->use_fast_coef_updates = ONE_LOOP_REDUCED;
-    sf->use_fast_coef_costing = 1;
   }
 
   if (speed >= 4) {
@@ -140,6 +137,8 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
     sf->disable_filter_search_var_thresh = 200;
     sf->use_lastframe_partitioning = LAST_FRAME_PARTITION_ALL;
     sf->use_lp32x32fdct = 1;
+    sf->use_fast_coef_updates = ONE_LOOP_REDUCED;
+    sf->use_fast_coef_costing = 1;
   }
 
   if (speed >= 5) {
