@@ -104,7 +104,7 @@ int vp9_rc_bits_per_mb(FRAME_TYPE frame_type, int qindex,
 
   // q based adjustment to baseline enumerator
   enumerator += (int)(enumerator * q) >> 12;
-  return (int)(0.5 + (enumerator * correction_factor / q));
+  return (int)(enumerator * correction_factor / q);
 }
 
 static int estimate_bits_at_q(FRAME_TYPE frame_type, int q, int mbs,
