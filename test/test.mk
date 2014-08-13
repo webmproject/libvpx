@@ -59,6 +59,7 @@ LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += ../webmdec.h
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += webm_video_source.h
 endif
 
+LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += decode_api_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += invalid_file_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += test_vector_test.cc
 

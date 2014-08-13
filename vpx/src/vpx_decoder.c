@@ -113,7 +113,7 @@ vpx_codec_err_t vpx_codec_decode(vpx_codec_ctx_t    *ctx,
 
   /* Sanity checks */
   /* NULL data ptr allowed if data_sz is 0 too */
-  if (!ctx || (!data && data_sz))
+  if (!ctx || (!data && data_sz) || (data && !data_sz))
     res = VPX_CODEC_INVALID_PARAM;
   else if (!ctx->iface || !ctx->priv)
     res = VPX_CODEC_ERROR;
