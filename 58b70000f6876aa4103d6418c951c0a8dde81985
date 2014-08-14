@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//b0M\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 602,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-08-14T16:24:38Z",
+      "side": 1,
+      "message": "Yes, here we use var from above calculation. Adding this condition makes it clear that if the encode breakout is disabled by the user (i.e. x-\u003eencode_breakout\u003d0), we don\u0027t do encode breakout test.",
+      "parentUuid": "AAAAdn//b8Q\u003d",
+      "revId": "58b70000f6876aa4103d6418c951c0a8dde81985",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//b8I\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 2
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//b0g\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2299,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-08-14T16:24:38Z",
+      "side": 1,
+      "message": "There is some overlap between this part and encode_breakout, which needs to be looked into.",
+      "parentUuid": "AAAAdn//b8I\u003d",
+      "revId": "58b70000f6876aa4103d6418c951c0a8dde81985",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//b8M\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 2
@@ -47,6 +83,24 @@
       "writtenOn": "2014-08-13T20:41:55Z",
       "side": 1,
       "message": "Here we actually do call y-variance",
+      "revId": "58b70000f6876aa4103d6418c951c0a8dde81985",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//b0c\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2316,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-08-14T16:24:38Z",
+      "side": 1,
+      "message": "Add this condition for now to stop calling the function and doing variance.",
+      "parentUuid": "AAAAdn//b8M\u003d",
       "revId": "58b70000f6876aa4103d6418c951c0a8dde81985",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
