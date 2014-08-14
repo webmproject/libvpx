@@ -207,7 +207,7 @@ static INLINE YV12_BUFFER_CONFIG *get_ref_frame(VP9_COMMON *cm, int index) {
     return NULL;
   if (cm->ref_frame_map[index] < 0)
     return NULL;
-  assert(cm->ref_frame_map[index] < REF_FRAMES);
+  assert(cm->ref_frame_map[index] < FRAME_BUFFERS);
   return &cm->frame_bufs[cm->ref_frame_map[index]].buf;
 }
 
