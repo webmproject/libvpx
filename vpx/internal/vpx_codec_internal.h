@@ -369,11 +369,11 @@ struct vpx_codec_priv_enc_mr_cfg
 
 #undef VPX_CTRL_USE_TYPE
 #define VPX_CTRL_USE_TYPE(id, typ) \
-  static typ id##__value(va_list args) {return va_arg(args, typ);} \
+  static VPX_INLINE typ id##__value(va_list args) {return va_arg(args, typ);}
 
 #undef VPX_CTRL_USE_TYPE_DEPRECATED
 #define VPX_CTRL_USE_TYPE_DEPRECATED(id, typ) \
-  static typ id##__value(va_list args) {return va_arg(args, typ);} \
+  static VPX_INLINE typ id##__value(va_list args) {return va_arg(args, typ);}
 
 #define CAST(id, arg) id##__value(arg)
 
