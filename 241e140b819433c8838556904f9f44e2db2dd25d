@@ -1,0 +1,174 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//bv8\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 393,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-14T21:41:13Z",
+      "side": 1,
+      "message": "don\u0027t need the braces",
+      "revId": "241e140b819433c8838556904f9f44e2db2dd25d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//b6A\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 3314,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-14T21:41:13Z",
+      "side": 1,
+      "message": "lower case \u0027total\u0027",
+      "revId": "241e140b819433c8838556904f9f44e2db2dd25d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//bwc\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 3320,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-14T21:41:13Z",
+      "side": 1,
+      "message": "Remove the \u0027|\u0027",
+      "revId": "241e140b819433c8838556904f9f44e2db2dd25d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//b58\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 3329,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-14T21:41:13Z",
+      "side": 1,
+      "message": "int fac_framerate \u003d cpi-\u003eoutput_framerate \u003c 25.0f ? 80 : 100;",
+      "revId": "241e140b819433c8838556904f9f44e2db2dd25d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//bwU\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 3337,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-14T21:41:13Z",
+      "side": 1,
+      "message": "Remove \"|\" from the  comments.",
+      "revId": "241e140b819433c8838556904f9f44e2db2dd25d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//bwQ\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 3348,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-14T21:41:13Z",
+      "side": 1,
+      "message": "const",
+      "revId": "241e140b819433c8838556904f9f44e2db2dd25d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//bwM\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 3353,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-14T21:41:13Z",
+      "side": 1,
+      "message": "const",
+      "revId": "241e140b819433c8838556904f9f44e2db2dd25d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//bwI\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 3379,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-14T21:41:13Z",
+      "side": 1,
+      "message": "\"... if the application...\"",
+      "revId": "241e140b819433c8838556904f9f44e2db2dd25d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//bwE\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 4584,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-14T21:41:13Z",
+      "side": 1,
+      "message": "\"This process is called every ~8 frames...\"",
+      "revId": "241e140b819433c8838556904f9f44e2db2dd25d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//bwA\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 4587,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-14T21:41:13Z",
+      "side": 1,
+      "message": "space around %",
+      "revId": "241e140b819433c8838556904f9f44e2db2dd25d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
