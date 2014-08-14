@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//byQ\u003d",
+        "filename": "test/codec_factory.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-14T19:18:53Z",
+      "side": 1,
+      "message": "2 spaces before comments:\n\nhttp://google-styleguide.googlecode.com/svn/trunk/cppguide.xml#Implementation_Comments",
+      "revId": "8ac3a33dfc7b39ee75a00f604c65209cb44b2a12",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
