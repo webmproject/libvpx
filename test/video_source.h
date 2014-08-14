@@ -92,12 +92,7 @@ class TempOutFile {
  protected:
   void CloseFile() {
     if (file_) {
-      // Close if file pointer is associated with an open file
-#if defined(_WIN32)
-      if (file_->_ptr != NULL) fclose(file_);
-#else
-      if (fileno(file_) != -1) fclose(file_);
-#endif
+      fclose(file_);
       file_ = NULL;
     }
   }
