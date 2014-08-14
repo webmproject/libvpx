@@ -3150,10 +3150,8 @@ static void update_reference_frames(VP8_COMP *cpi)
 
         cm->alt_fb_idx = cm->gld_fb_idx = cm->new_fb_idx;
 
-#if CONFIG_MULTI_RES_ENCODING
         cpi->current_ref_frames[GOLDEN_FRAME] = cm->current_video_frame;
         cpi->current_ref_frames[ALTREF_FRAME] = cm->current_video_frame;
-#endif
     }
     else    /* For non key frames */
     {
@@ -3165,9 +3163,7 @@ static void update_reference_frames(VP8_COMP *cpi)
             cm->yv12_fb[cm->alt_fb_idx].flags &= ~VP8_ALTR_FRAME;
             cm->alt_fb_idx = cm->new_fb_idx;
 
-#if CONFIG_MULTI_RES_ENCODING
             cpi->current_ref_frames[ALTREF_FRAME] = cm->current_video_frame;
-#endif
         }
         else if (cm->copy_buffer_to_arf)
         {
@@ -3181,10 +3177,8 @@ static void update_reference_frames(VP8_COMP *cpi)
                     yv12_fb[cm->alt_fb_idx].flags &= ~VP8_ALTR_FRAME;
                     cm->alt_fb_idx = cm->lst_fb_idx;
 
-#if CONFIG_MULTI_RES_ENCODING
                     cpi->current_ref_frames[ALTREF_FRAME] =
                         cpi->current_ref_frames[LAST_FRAME];
-#endif
                 }
             }
             else /* if (cm->copy_buffer_to_arf == 2) */
@@ -3195,10 +3189,8 @@ static void update_reference_frames(VP8_COMP *cpi)
                     yv12_fb[cm->alt_fb_idx].flags &= ~VP8_ALTR_FRAME;
                     cm->alt_fb_idx = cm->gld_fb_idx;
 
-#if CONFIG_MULTI_RES_ENCODING
                     cpi->current_ref_frames[ALTREF_FRAME] =
                         cpi->current_ref_frames[GOLDEN_FRAME];
-#endif
                 }
             }
         }
@@ -3211,9 +3203,7 @@ static void update_reference_frames(VP8_COMP *cpi)
             cm->yv12_fb[cm->gld_fb_idx].flags &= ~VP8_GOLD_FRAME;
             cm->gld_fb_idx = cm->new_fb_idx;
 
-#if CONFIG_MULTI_RES_ENCODING
             cpi->current_ref_frames[GOLDEN_FRAME] = cm->current_video_frame;
-#endif
         }
         else if (cm->copy_buffer_to_gf)
         {
@@ -3227,10 +3217,8 @@ static void update_reference_frames(VP8_COMP *cpi)
                     yv12_fb[cm->gld_fb_idx].flags &= ~VP8_GOLD_FRAME;
                     cm->gld_fb_idx = cm->lst_fb_idx;
 
-#if CONFIG_MULTI_RES_ENCODING
                     cpi->current_ref_frames[GOLDEN_FRAME] =
                         cpi->current_ref_frames[LAST_FRAME];
-#endif
                 }
             }
             else /* if (cm->copy_buffer_to_gf == 2) */
@@ -3241,10 +3229,8 @@ static void update_reference_frames(VP8_COMP *cpi)
                     yv12_fb[cm->gld_fb_idx].flags &= ~VP8_GOLD_FRAME;
                     cm->gld_fb_idx = cm->alt_fb_idx;
 
-#if CONFIG_MULTI_RES_ENCODING
                     cpi->current_ref_frames[GOLDEN_FRAME] =
                         cpi->current_ref_frames[ALTREF_FRAME];
-#endif
                 }
             }
         }
@@ -3256,9 +3242,7 @@ static void update_reference_frames(VP8_COMP *cpi)
         cm->yv12_fb[cm->lst_fb_idx].flags &= ~VP8_LAST_FRAME;
         cm->lst_fb_idx = cm->new_fb_idx;
 
-#if CONFIG_MULTI_RES_ENCODING
         cpi->current_ref_frames[LAST_FRAME] = cm->current_video_frame;
-#endif
     }
 
 #if CONFIG_TEMPORAL_DENOISING
@@ -3493,6 +3477,31 @@ static void encode_frame_to_data_rate
         }
     }
 #endif
+
+    // Find the reference frame closest to the current frame.
+    cpi->closest_reference_frame = LAST_FRAME;
+    if (cm->frame_type != KEY_FRAME) {
+      int i;
+      MV_REFERENCE_FRAME closest_ref = INTRA_FRAME;
+      if (cpi->ref_frame_flags & VP8_LAST_FRAME) {
+        closest_ref = LAST_FRAME;
+      } else if (cpi->ref_frame_flags & VP8_GOLD_FRAME) {
+        closest_ref = GOLDEN_FRAME;
+      } else if (cpi->ref_frame_flags & VP8_ALTR_FRAME) {
+        closest_ref = ALTREF_FRAME;
+      }
+      for (i = 1; i <= 3; i++) {
+        vpx_ref_frame_type_t ref_frame_type = (vpx_ref_frame_type_t)
+            ((i == 3) ? 4 : i);
+        if (cpi->ref_frame_flags & ref_frame_type) {
+          if ((cm->current_video_frame - cpi->current_ref_frames[i]) <
+            (cm->current_video_frame - cpi->current_ref_frames[closest_ref])) {
+            closest_ref = i;
+          }
+        }
+      }
+      cpi->closest_reference_frame = closest_ref;
+    }
 
     /* Set various flags etc to special state if it is a key frame */
     if (cm->frame_type == KEY_FRAME)
@@ -4420,7 +4429,8 @@ static void encode_frame_to_data_rate
             {
                 for (mb_col = 0; mb_col < cm->mb_cols; mb_col ++)
                 {
-                    if(tmp->mbmi.mode == ZEROMV)
+                    if (tmp->mbmi.mode == ZEROMV &&
+                       tmp->mbmi.ref_frame == LAST_FRAME)
                         cpi->zeromv_count++;
                     tmp++;
                 }

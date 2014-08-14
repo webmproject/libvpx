@@ -505,16 +505,11 @@ static int evaluate_inter_mode(unsigned int* sse, int rate2, int* distortion2,
 
     this_rd = RDCOST(x->rdmult, x->rddiv, rate2, *distortion2);
 
-    /* Adjust rd to bias to ZEROMV */
-    if(this_mode == ZEROMV)
+    // Adjust rd for ZEROMV and LAST, if LAST is the closest reference frame.
+    if (this_mode == ZEROMV &&
+        x->e_mbd.mode_info_context->mbmi.ref_frame == LAST_FRAME &&
+        cpi->closest_reference_frame == LAST_FRAME)
     {
-        /* Bias to ZEROMV on LAST_FRAME reference when it is available. */
-        if ((cpi->ref_frame_flags & VP8_LAST_FRAME &
-            cpi->common.refresh_last_frame)
-            && x->e_mbd.mode_info_context->mbmi.ref_frame != LAST_FRAME)
-            rd_adj = 100;
-
-        // rd_adj <= 100
         this_rd = ((int64_t)this_rd) * rd_adj / 100;
     }
 
