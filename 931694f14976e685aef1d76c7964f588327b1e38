@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAdn//bxQ\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-14T21:04:12Z",
+      "side": 1,
+      "message": "put something informative in the body, which set of static analysis warnings are you clearing?",
+      "revId": "931694f14976e685aef1d76c7964f588327b1e38",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//b0A\u003d",
         "filename": "vp9/encoder/vp9_firstpass.c",
         "patchSetId": 1
