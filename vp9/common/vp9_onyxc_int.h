@@ -137,6 +137,7 @@ typedef struct VP9Common {
 
   int mi_idx;
   int prev_mi_idx;
+  int mi_alloc_size;
   MODE_INFO *mip_array[2];
   MODE_INFO **mi_grid_base_array[2];
 
@@ -273,6 +274,11 @@ static INLINE void set_skip_context(MACROBLOCKD *xd, int mi_row, int mi_col) {
     pd->above_context = &xd->above_context[i][above_idx >> pd->subsampling_x];
     pd->left_context = &xd->left_context[i][left_idx >> pd->subsampling_y];
   }
+}
+
+static INLINE int calc_mi_size(int len) {
+  // len is in mi units.
+  return len + MI_BLOCK_SIZE;
 }
 
 static INLINE void set_mi_row_col(MACROBLOCKD *xd, const TileInfo *const tile,

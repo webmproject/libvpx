@@ -421,10 +421,12 @@ static void write_modes_sb(VP9_COMP *cpi,
   const int bs = (1 << bsl) / 4;
   PARTITION_TYPE partition;
   BLOCK_SIZE subsize;
-  const MODE_INFO *m = cm->mi_grid_visible[mi_row * cm->mi_stride + mi_col];
+  const MODE_INFO *m = NULL;
 
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return;
+
+  m = cm->mi_grid_visible[mi_row * cm->mi_stride + mi_col];
 
   partition = partition_lookup[bsl][m->mbmi.sb_type];
   write_partition(cm, xd, bs, mi_row, mi_col, partition, bsize, w);
