@@ -125,6 +125,8 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
     sf->recode_loop = ALLOW_RECODE_KFMAXBW;
     sf->adaptive_rd_thresh = 3;
     sf->mode_skip_start = 6;
+    sf->intra_y_mode_mask[TX_32X32] = INTRA_DC;
+    sf->intra_uv_mode_mask[TX_32X32] = INTRA_DC;
   }
 
   if (speed >= 4) {
