@@ -2480,7 +2480,7 @@ static void encode_rd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
           if (gf_grp->update_type[gf_grp->index - 1] == OVERLAY_UPDATE)
             last_was_mid_sequence_overlay = 1;
         }
-        if ((cm->current_video_frame
+        if ((cpi->rc.frames_since_key
             % sf->last_partitioning_redo_frequency) == 0
             || last_was_mid_sequence_overlay
             || cm->prev_mi == 0
@@ -2583,7 +2583,7 @@ static MV_REFERENCE_FRAME get_frame_type(const VP9_COMP *cpi) {
 static TX_MODE select_tx_mode(const VP9_COMP *cpi) {
   if (cpi->mb.e_mbd.lossless)
     return ONLY_4X4;
-  if (cpi->common.current_video_frame == 0)
+  if (cpi->common.frame_type == KEY_FRAME)
     return TX_MODE_SELECT;
   if (cpi->sf.tx_size_search_method == USE_LARGESTALL)
     return ALLOW_32X32;
