@@ -42,6 +42,7 @@ typedef struct {
   int sb64_target_rate;
   int last_q[FRAME_TYPES];         // Separate values for Intra/Inter
   int last_boosted_qindex;         // Last boosted GF/KF/ARF q
+  int last_kf_qindex;              // Q index of the last key frame coded.
 
   int gfu_boost;
   int last_boost;
