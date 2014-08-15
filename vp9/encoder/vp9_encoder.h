@@ -298,8 +298,6 @@ typedef struct VP9_COMP {
 
   int zbin_mode_boost;
   int zbin_mode_boost_enabled;
-  int active_arnr_frames;           // <= cpi->oxcf.arnr_max_frames
-  int active_arnr_strength;         // <= cpi->oxcf.arnr_max_strength
 
   int64_t last_time_stamp_seen;
   int64_t last_end_time_stamp_seen;

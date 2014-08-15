@@ -357,12 +357,14 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
 
 // Apply buffer limits and context specific adjustments to arnr filter.
 static void adjust_arnr_filter(VP9_COMP *cpi,
-                               int distance, int group_boost) {
+                               int distance, int group_boost,
+                               int *arnr_frames, int *arnr_strength) {
+  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   const int frames_after_arf =
-            vp9_lookahead_depth(cpi->lookahead) - distance - 1;
+      vp9_lookahead_depth(cpi->lookahead) - distance - 1;
   int frames_fwd = (cpi->oxcf.arnr_max_frames - 1) >> 1;
   int frames_bwd;
-  int q;
+  int q, frames, strength;
 
   // Define the forward and backwards filter limits for this arnr group.
   if (frames_fwd > frames_after_arf)
@@ -375,10 +377,10 @@ static void adjust_arnr_filter(VP9_COMP *cpi,
   // For even length filter there is one more frame backward
   // than forward: e.g. len=6 ==> bbbAff, len=7 ==> bbbAfff.
   if (frames_bwd < distance)
-    frames_bwd += (cpi->oxcf.arnr_max_frames + 1) & 0x1;
+    frames_bwd += (oxcf->arnr_max_frames + 1) & 0x1;
 
   // Set the baseline active filter size.
-  cpi->active_arnr_frames = frames_bwd + 1 + frames_fwd;
+  frames = frames_bwd + 1 + frames_fwd;
 
   // Adjust the strength based on active max q.
   if (cpi->common.current_video_frame > 1)
@@ -388,29 +390,33 @@ static void adjust_arnr_filter(VP9_COMP *cpi,
     q = ((int)vp9_convert_qindex_to_q(
         cpi->rc.avg_frame_qindex[KEY_FRAME]));
   if (q > 16) {
-    cpi->active_arnr_strength = cpi->oxcf.arnr_strength;
+    strength = oxcf->arnr_strength;
   } else {
-    cpi->active_arnr_strength = cpi->oxcf.arnr_strength - ((16 - q) / 2);
-    if (cpi->active_arnr_strength < 0)
-      cpi->active_arnr_strength = 0;
+    strength = oxcf->arnr_strength - ((16 - q) / 2);
+    if (strength < 0)
+      strength = 0;
   }
 
   // Adjust number of frames in filter and strength based on gf boost level.
-  if (cpi->active_arnr_frames > (group_boost / 150)) {
-    cpi->active_arnr_frames = (group_boost / 150);
-    cpi->active_arnr_frames += !(cpi->active_arnr_frames & 1);
+  if (frames > group_boost / 150) {
+    frames = group_boost / 150;
+    frames += !(frames & 1);
   }
-  if (cpi->active_arnr_strength > (group_boost / 300)) {
-    cpi->active_arnr_strength = (group_boost / 300);
+
+  if (strength > group_boost / 300) {
+    strength = group_boost / 300;
   }
 
   // Adjustments for second level arf in multi arf case.
   if (cpi->oxcf.pass == 2 && cpi->multi_arf_allowed) {
     const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
     if (gf_group->rf_level[gf_group->index] != GF_ARF_STD) {
-      cpi->active_arnr_strength >>= 1;
+      strength >>= 1;
     }
   }
+
+  *arnr_frames = frames;
+  *arnr_strength = strength;
 }
 
 void vp9_temporal_filter(VP9_COMP *cpi, int distance) {
@@ -425,9 +431,7 @@ void vp9_temporal_filter(VP9_COMP *cpi, int distance) {
   struct scale_factors sf;
 
   // Apply context specific adjustments to the arnr filter parameters.
-  adjust_arnr_filter(cpi, distance, rc->gfu_boost);
-  strength = cpi->active_arnr_strength;
-  frames_to_blur = cpi->active_arnr_frames;
+  adjust_arnr_filter(cpi, distance, rc->gfu_boost, &frames_to_blur, &strength);
   frames_to_blur_backward = (frames_to_blur / 2);
   frames_to_blur_forward = ((frames_to_blur - 1) / 2);
   start_frame = distance + frames_to_blur_forward;
