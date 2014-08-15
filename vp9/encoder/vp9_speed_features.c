@@ -390,20 +390,18 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->recode_tolerance = 25;
   sf->default_interp_filter = SWITCHABLE;
 
-  switch (oxcf->mode) {
-    case ONE_PASS_BEST:
-    case TWO_PASS_SECOND_BEST:  // This is the best quality mode.
-      cpi->diamond_search_sad = vp9_full_range_search;
-      break;
-    case TWO_PASS_FIRST:
-    case ONE_PASS_GOOD:
-    case TWO_PASS_SECOND_GOOD:
+  if (oxcf->mode == REALTIME) {
+    set_rt_speed_feature(cpi, sf, oxcf->speed, oxcf->content);
+  } else {
+    if (!is_best_mode(oxcf->mode))
       set_good_speed_feature(cpi, cm, sf, oxcf->speed);
-      break;
-    case REALTIME:
-      set_rt_speed_feature(cpi, sf, oxcf->speed, oxcf->content);
-      break;
   }
+
+  cpi->full_search_sad = vp9_full_search_sad;
+  cpi->diamond_search_sad = is_best_mode(oxcf->mode) ? vp9_full_range_search
+                                                     : vp9_diamond_search_sad;
+  cpi->refining_search_sad = vp9_refining_search_sad;
+
 
   // Slow quant, dct and trellis not worthwhile for first pass
   // so make sure they are always turned off.
