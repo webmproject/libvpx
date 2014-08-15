@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//bbE\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-08-15T23:45:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//bcw\u003d",
+      "revId": "26cd950f34287e4d786901d13f899b5347f628ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//bc8\u003d",
         "filename": "test/svc_test.cc",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2014-08-15T23:14:44Z",
       "side": 1,
       "message": "seems like these uint8_t are a bit excessive, wouldn\u0027t \u0027int\u0027 be enough?",
+      "revId": "26cd950f34287e4d786901d13f899b5347f628ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//bbA\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-08-15T23:45:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//bc8\u003d",
       "revId": "26cd950f34287e4d786901d13f899b5347f628ae",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//ba8\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-08-15T23:45:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//bck\u003d",
+      "revId": "26cd950f34287e4d786901d13f899b5347f628ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//bco\u003d",
         "filename": "test/svc_test.cc",
         "patchSetId": 3
@@ -64,6 +118,24 @@
       "writtenOn": "2014-08-15T23:14:44Z",
       "side": 1,
       "message": "seems like these 3 could be a common function",
+      "revId": "26cd950f34287e4d786901d13f899b5347f628ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ba4\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-08-15T23:45:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//bco\u003d",
       "revId": "26cd950f34287e4d786901d13f899b5347f628ae",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//ba0\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-08-15T23:45:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//bcc\u003d",
+      "revId": "26cd950f34287e4d786901d13f899b5347f628ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//bcg\u003d",
         "filename": "test/svc_test.cc",
         "patchSetId": 3
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//baw\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-08-15T23:45:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//bcg\u003d",
+      "revId": "26cd950f34287e4d786901d13f899b5347f628ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//bcY\u003d",
         "filename": "test/svc_test.cc",
         "patchSetId": 3
@@ -115,6 +223,24 @@
       "writtenOn": "2014-08-15T23:14:44Z",
       "side": 1,
       "message": "this can be const I think",
+      "revId": "26cd950f34287e4d786901d13f899b5347f628ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//bas\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-08-15T23:45:32Z",
+      "side": 1,
+      "message": "inputs cannot be const* since I need to modify the bitstream in the buffer.",
+      "parentUuid": "AAAAdn//bcY\u003d",
       "revId": "26cd950f34287e4d786901d13f899b5347f628ae",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
