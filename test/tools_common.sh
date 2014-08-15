@@ -144,6 +144,24 @@ is_windows_target() {
   fi
 }
 
+# Echoes path to $1 when it's executable and exists in ${LIBVPX_BIN_PATH}, or an
+# empty string. Caller is responsible for testing the string once the function
+# returns.
+vpx_tool_path() {
+  local readonly tool_name="$1"
+  local tool_path="${LIBVPX_BIN_PATH}/${tool_name}${VPX_TEST_EXE_SUFFIX}"
+  if [ ! -x "${tool_path}" ]; then
+    # Try one directory up: when running via examples.sh the tool could be in
+    # the parent directory of $LIBVPX_BIN_PATH.
+    tool_path="${LIBVPX_BIN_PATH}/../${tool_name}${VPX_TEST_EXE_SUFFIX}"
+  fi
+
+  if [ ! -x "${tool_path}" ]; then
+    tool_path=""
+  fi
+  echo "${tool_path}"
+}
+
 # Echoes yes to stdout when the file named by positional parameter one exists
 # in LIBVPX_BIN_PATH, and is executable.
 vpx_tool_available() {
