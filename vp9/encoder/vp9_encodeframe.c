@@ -2060,17 +2060,6 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
 
   save_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
 
-  if (cpi->sf.disable_split_var_thresh && partition_none_allowed) {
-    unsigned int source_variancey;
-    vp9_setup_src_planes(x, cpi->Source, mi_row, mi_col);
-    source_variancey = get_sby_perpixel_variance(cpi, &x->plane[0].src, bsize);
-    if (source_variancey < cpi->sf.disable_split_var_thresh) {
-      do_split = 0;
-      if (source_variancey < cpi->sf.disable_split_var_thresh / 2)
-        do_rect = 0;
-    }
-  }
-
 #if CONFIG_FP_MB_STATS
   if (cpi->use_fp_mb_stats) {
     set_offsets(cpi, tile, mi_row, mi_col, bsize);
