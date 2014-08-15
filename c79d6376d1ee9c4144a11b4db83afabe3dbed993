@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//bfQ\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1807,
+      "author": {
+        "id": 1004744
+      },
+      "writtenOn": "2014-08-15T23:18:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//bh0\u003d",
+      "revId": "c79d6376d1ee9c4144a11b4db83afabe3dbed993",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//bho\u003d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 6
@@ -30,6 +48,24 @@
       "writtenOn": "2014-08-15T21:07:26Z",
       "side": 1,
       "message": "Is it possible to only use integer calculations? For example, you don\u0027t have to do \"/sum\" in variance calculation. Anyway, here the calculations probably don\u0027t have to be very precise.",
+      "revId": "c79d6376d1ee9c4144a11b4db83afabe3dbed993",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//bb4\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1823,
+      "author": {
+        "id": 1004744
+      },
+      "writtenOn": "2014-08-15T23:18:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//bho\u003d",
       "revId": "c79d6376d1ee9c4144a11b4db83afabe3dbed993",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
