@@ -31,8 +31,8 @@ vpxdec_verify_environment() {
 # input file path and shifted away. All remaining parameters are passed through
 # to vpxdec.
 vpxdec_pipe() {
-  local decoder="$(vpx_tool_path vpxdec)"
-  local input="$1"
+  local readonly decoder="$(vpx_tool_path vpxdec)"
+  local readonly input="$1"
   shift
   cat "${input}" | eval "${VPX_TEST_PREFIX}" "${decoder}" - "$@" ${devnull}
 }
@@ -41,8 +41,8 @@ vpxdec_pipe() {
 # the directory containing vpxdec. $1 one is used as the input file path and
 # shifted away. All remaining parameters are passed through to vpxdec.
 vpxdec() {
-  local decoder="$(vpx_tool_path vpxdec)"
-  local input="${1}"
+  local readonly decoder="$(vpx_tool_path vpxdec)"
+  local readonly input="$1"
   shift
   eval "${VPX_TEST_PREFIX}" "${decoder}" "$input" "$@" ${devnull}
 }
