@@ -37,7 +37,8 @@ enum denoiserState {
   kDenoiserOff,
   kDenoiserOnYOnly,
   kDenoiserOnYUV,
-  kDenoiserOnYUVAggressive  // Aggressive mode not implemented currently.
+  kDenoiserOnYUVAggressive,
+  kDenoiserOnAdaptive
 };
 
 static int mode_to_num_layers[12] = {1, 2, 2, 3, 3, 3, 3, 5, 2, 3, 3, 3};

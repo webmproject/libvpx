@@ -24,7 +24,7 @@ extern "C" {
 
 #define SUM_DIFF_THRESHOLD_UV (96)   // (8 * 8 * 1.5)
 #define SUM_DIFF_THRESHOLD_HIGH_UV (8 * 8 * 2)
-#define SUM_DIFF_FROM_AVG_THRESH_UV (8 * 8 * 4)
+#define SUM_DIFF_FROM_AVG_THRESH_UV (8 * 8 * 8)
 #define MOTION_MAGNITUDE_THRESHOLD_UV (8*3)
 
 enum vp8_denoiser_decision
@@ -43,7 +43,8 @@ enum vp8_denoiser_mode {
   kDenoiserOff,
   kDenoiserOnYOnly,
   kDenoiserOnYUV,
-  kDenoiserOnYUVAggressive
+  kDenoiserOnYUVAggressive,
+  kDenoiserOnAdaptive
 };
 
 typedef struct {
@@ -72,9 +73,14 @@ typedef struct vp8_denoiser
 {
     YV12_BUFFER_CONFIG yv12_running_avg[MAX_REF_FRAMES];
     YV12_BUFFER_CONFIG yv12_mc_running_avg;
+    // TODO(marpan): Should remove yv12_last_source and use vp8_lookahead_peak.
+    YV12_BUFFER_CONFIG yv12_last_source;
     unsigned char* denoise_state;
     int num_mb_cols;
     int denoiser_mode;
+    int threshold_aggressive_mode;
+    int nmse_source_diff;
+    int nmse_source_diff_count;
     denoise_params denoise_pars;
 } VP8_DENOISER;
 
@@ -82,6 +88,8 @@ int vp8_denoiser_allocate(VP8_DENOISER *denoiser, int width, int height,
                           int num_mb_rows, int num_mb_cols, int mode);
 
 void vp8_denoiser_free(VP8_DENOISER *denoiser);
+
+void vp8_denoiser_set_parameters(VP8_DENOISER *denoiser, int mode);
 
 void vp8_denoiser_denoise_mb(VP8_DENOISER *denoiser,
                              MACROBLOCK *x,
