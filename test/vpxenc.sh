@@ -128,6 +128,7 @@ vpxenc_vp9_ivf() {
       --height="${YUV_RAW_INPUT_HEIGHT}" \
       --limit="${TEST_FRAMES}" \
       --ivf \
+      --test-decode=fatal \
       --output="${output}" \
       "${YUV_RAW_INPUT}"
 
@@ -146,6 +147,7 @@ vpxenc_vp9_webm() {
       --width="${YUV_RAW_INPUT_WIDTH}" \
       --height="${YUV_RAW_INPUT_HEIGHT}" \
       --limit="${TEST_FRAMES}" \
+      --test-decode=fatal \
       --output="${output}" \
       "${YUV_RAW_INPUT}"
 
