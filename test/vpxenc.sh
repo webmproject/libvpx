@@ -23,25 +23,22 @@ vpxenc_verify_environment() {
     echo "The file ${YUV_RAW_INPUT##*/} must exist in LIBVPX_TEST_DATA_PATH."
     return 1
   fi
+  if [ -z "$(vpx_tool_path vpxenc)" ]; then
+    elog "vpxenc not found. It must exist in LIBVPX_BIN_PATH or its parent."
+    return 1
+  fi
 }
 
 vpxenc_can_encode_vp8() {
-  if [ "$(vpxenc_available)" = "yes" ] && \
-     [ "$(vp8_encode_available)" = "yes" ]; then
+  if [ "$(vp8_encode_available)" = "yes" ]; then
     echo yes
   fi
 }
 
 vpxenc_can_encode_vp9() {
-  if [ "$(vpxenc_available)" = "yes" ] && \
-     [ "$(vp9_encode_available)" = "yes" ]; then
+  if [ "$(vp9_encode_available)" = "yes" ]; then
     echo yes
   fi
-}
-
-# Echoes yes to stdout when vpxenc exists according to vpx_tool_available().
-vpxenc_available() {
-  [ -n "$(vpx_tool_available vpxenc)" ] && echo yes
 }
 
 # Wrapper function for running vpxenc with pipe input. Requires that
@@ -49,7 +46,7 @@ vpxenc_available() {
 # input file path and shifted away. All remaining parameters are passed through
 # to vpxenc.
 vpxenc_pipe() {
-  local readonly encoder="${LIBVPX_BIN_PATH}/vpxenc${VPX_TEST_EXE_SUFFIX}"
+  local readonly encoder="$(vpx_tool_path vpxenc)"
   local readonly input="$1"
   shift
   cat "${input}" | eval "${VPX_TEST_PREFIX}" "${encoder}" - "$@" ${devnull}
@@ -59,7 +56,7 @@ vpxenc_pipe() {
 # the directory containing vpxenc. $1 one is used as the input file path and
 # shifted away. All remaining parameters are passed through to vpxenc.
 vpxenc() {
-  local readonly encoder="${LIBVPX_BIN_PATH}/vpxenc${VPX_TEST_EXE_SUFFIX}"
+  local readonly encoder="$(vpx_tool_path vpxenc)"
   local readonly input="${1}"
   shift
   eval "${VPX_TEST_PREFIX}" "${encoder}" "$input" "$@" ${devnull}
