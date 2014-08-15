@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//bcU\u003d",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 17
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-08-15T23:14:58Z",
+      "side": 1,
+      "message": "The tests look good. But it will be better if the tests can be combined together and all the duplicate code can be removed.",
+      "revId": "351a9ebc9481fb52f47eb8a6a0a7fa4ac583ef55",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
