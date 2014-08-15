@@ -1041,12 +1041,12 @@ int y4m_input_fetch_frame(y4m_input *_y4m, FILE *_fin, vpx_image_t *_img) {
   c_w *= bytes_per_sample;
   c_h = (_y4m->pic_h + _y4m->dst_c_dec_v - 1) / _y4m->dst_c_dec_v;
   c_sz = c_w * c_h;
-  _img->stride[PLANE_Y] = _img->stride[PLANE_ALPHA] =
+  _img->stride[VPX_PLANE_Y] = _img->stride[VPX_PLANE_ALPHA] =
       _y4m->pic_w * bytes_per_sample;
-  _img->stride[PLANE_U] = _img->stride[PLANE_V] = c_w;
-  _img->planes[PLANE_Y] = _y4m->dst_buf;
-  _img->planes[PLANE_U] = _y4m->dst_buf + pic_sz;
-  _img->planes[PLANE_V] = _y4m->dst_buf + pic_sz + c_sz;
-  _img->planes[PLANE_ALPHA] = _y4m->dst_buf + pic_sz + 2 * c_sz;
+  _img->stride[VPX_PLANE_U] = _img->stride[VPX_PLANE_V] = c_w;
+  _img->planes[VPX_PLANE_Y] = _y4m->dst_buf;
+  _img->planes[VPX_PLANE_U] = _y4m->dst_buf + pic_sz;
+  _img->planes[VPX_PLANE_V] = _y4m->dst_buf + pic_sz + c_sz;
+  _img->planes[VPX_PLANE_ALPHA] = _y4m->dst_buf + pic_sz + 2 * c_sz;
   return 1;
 }
