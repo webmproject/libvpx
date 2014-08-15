@@ -2525,8 +2525,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   PREDICTION_MODE mode_uv[TX_SIZES];
   int64_t mode_distortions[MB_MODE_COUNT] = {-1};
   int intra_cost_penalty = 20 * vp9_dc_quant(cm->base_qindex, cm->y_dc_delta_q);
-  const int bws = num_8x8_blocks_wide_lookup[bsize] / 2;
-  const int bhs = num_8x8_blocks_high_lookup[bsize] / 2;
   int best_skip2 = 0;
   int mode_skip_mask = 0;
   int mode_skip_start = cpi->sf.mode_skip_start + 1;
@@ -2611,18 +2609,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       if (frame_mv[NEARESTMV][ALTREF_FRAME].as_int != 0)
         mode_skip_mask |= (1 << THR_NEARESTA);
     }
-  }
-
-  // TODO(JBB): This is to make up for the fact that we don't have sad
-  // functions that work when the block size reads outside the umv.  We
-  // should fix this either by making the motion search just work on
-  // a representative block in the boundary ( first ) and then implement a
-  // function that does sads when inside the border..
-  if ((mi_row + bhs) > cm->mi_rows || (mi_col + bws) > cm->mi_cols) {
-    const int new_modes_mask =
-        (1 << THR_NEWMV) | (1 << THR_NEWG) | (1 << THR_NEWA) |
-        (1 << THR_COMP_NEWLA) | (1 << THR_COMP_NEWGA);
-    mode_skip_mask |= new_modes_mask;
   }
 
   if (bsize > cpi->sf.max_intra_bsize) {
