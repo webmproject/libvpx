@@ -485,7 +485,7 @@ static void update_frame_size(VP9_COMP *cpi) {
 }
 
 void vp9_new_framerate(VP9_COMP *cpi, double framerate) {
-  cpi->oxcf.framerate = framerate < 0.1 ? 30 : framerate;
+  cpi->framerate = framerate < 0.1 ? 30 : framerate;
   vp9_rc_update_framerate(cpi);
 }
 
@@ -518,6 +518,7 @@ static void init_config(struct VP9_COMP *cpi, VP9EncoderConfig *oxcf) {
   VP9_COMMON *const cm = &cpi->common;
 
   cpi->oxcf = *oxcf;
+  cpi->framerate = oxcf->init_framerate;
 
   cm->profile = oxcf->profile;
   cm->bit_depth = oxcf->bit_depth;
@@ -611,7 +612,7 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   rc->buffer_level = MIN(rc->buffer_level, rc->maximum_buffer_size);
 
   // Set up frame rate and related parameters rate control values.
-  vp9_new_framerate(cpi, cpi->oxcf.framerate);
+  vp9_new_framerate(cpi, cpi->framerate);
 
   // Set absolute upper and lower quality limits
   rc->worst_quality = cpi->oxcf.worst_allowed_q;
@@ -2430,7 +2431,7 @@ void adjust_frame_rate(VP9_COMP *cpi) {
       // over the whole interval seen.
       const double interval = MIN((double)(cpi->source->ts_end
                                    - cpi->first_time_stamp_ever), 10000000.0);
-      double avg_duration = 10000000.0 / cpi->oxcf.framerate;
+      double avg_duration = 10000000.0 / cpi->framerate;
       avg_duration *= (interval - avg_duration + this_duration);
       avg_duration /= interval;
 
