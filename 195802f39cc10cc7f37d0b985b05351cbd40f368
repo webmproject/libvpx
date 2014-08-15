@@ -212,6 +212,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//bc4\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-15T23:08:12Z",
+      "side": 1,
+      "message": "the check (which should be !\u003d NULL in any case) isn\u0027t necessary with well behaved free() implementations",
+      "parentUuid": "AAAAdn//bfE\u003d",
+      "revId": "195802f39cc10cc7f37d0b985b05351cbd40f368",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//bio\u003d",
         "filename": "test/svc_test.cc",
         "patchSetId": 2
