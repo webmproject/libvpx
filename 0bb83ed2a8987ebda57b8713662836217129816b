@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//bkI\u003d",
+        "filename": "build/make/rtcd.pl",
+        "patchSetId": 3
+      },
+      "lineNbr": 368,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-15T19:22:11Z",
+      "side": 1,
+      "message": "the inner ()s are unnecessary",
+      "revId": "0bb83ed2a8987ebda57b8713662836217129816b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//bkE\u003d",
+        "filename": "build/make/rtcd.pl",
+        "patchSetId": 3
+      },
+      "lineNbr": 369,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-15T19:22:11Z",
+      "side": 1,
+      "message": "qw// doesn\u0027t interpolate, you\u0027ll want \"$opts{arch}\"",
+      "revId": "0bb83ed2a8987ebda57b8713662836217129816b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//bkA\u003d",
+        "filename": "build/make/rtcd.pl",
+        "patchSetId": 3
+      },
+      "lineNbr": 374,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-15T19:22:11Z",
+      "side": 1,
+      "message": "ditto. see vp9/common/vp9_rtcd_defs.pl for examples",
+      "revId": "0bb83ed2a8987ebda57b8713662836217129816b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
