@@ -118,6 +118,23 @@
       "revId": "195802f39cc10cc7f37d0b985b05351cbd40f368",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//bic\u003d",
+        "filename": "vp9/decoder/vp9_decoder.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-15T20:17:49Z",
+      "side": 1,
+      "message": "add a note here that these are exposed for use in tests",
+      "revId": "195802f39cc10cc7f37d0b985b05351cbd40f368",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
