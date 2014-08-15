@@ -362,7 +362,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->mode_search_skip_flags = 0;
   sf->force_frame_boost = 0;
   sf->max_delta_qindex = 0;
-  sf->disable_split_var_thresh = 0;
   sf->disable_filter_search_var_thresh = 0;
   for (i = 0; i < TX_SIZES; i++) {
     sf->intra_y_mode_mask[i] = INTRA_ALL;

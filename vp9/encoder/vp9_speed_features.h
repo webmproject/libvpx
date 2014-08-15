@@ -309,9 +309,6 @@ typedef struct SPEED_FEATURES {
   // defined in the MODE_SEARCH_SKIP_HEURISTICS enum
   unsigned int mode_search_skip_flags;
 
-  // A source variance threshold below which the split mode is disabled
-  unsigned int disable_split_var_thresh;
-
   // A source variance threshold below which filter search is disabled
   // Choose a very large value (UINT_MAX) to use 8-tap always
   unsigned int disable_filter_search_var_thresh;
