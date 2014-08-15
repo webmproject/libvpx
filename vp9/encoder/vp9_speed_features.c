@@ -92,6 +92,12 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
     sf->intra_uv_mode_mask[TX_16X16] = INTRA_DC_H_V;
 
     sf->tx_size_search_breakout = 1;
+
+    if (MIN(cm->width, cm->height) >= 720)
+      sf->partition_search_breakout_dist_thr = (1 << 23);
+    else
+      sf->partition_search_breakout_dist_thr = (1 << 21);
+    sf->partition_search_breakout_rate_thr = 500;
   }
 
   if (speed >= 2) {
@@ -120,6 +126,12 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
     sf->auto_min_max_partition_size = CONSTRAIN_NEIGHBORING_MIN_MAX;
     sf->use_lastframe_partitioning = LAST_FRAME_PARTITION_LOW_MOTION;
     sf->adjust_partitioning_from_last_frame = 1;
+
+    if (MIN(cm->width, cm->height) >= 720)
+      sf->partition_search_breakout_dist_thr = (1 << 24);
+    else
+      sf->partition_search_breakout_dist_thr = (1 << 22);
+    sf->partition_search_breakout_rate_thr = 700;
   }
 
   if (speed >= 3) {
@@ -144,6 +156,12 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
     sf->intra_y_mode_mask[TX_32X32] = INTRA_DC;
     sf->intra_uv_mode_mask[TX_32X32] = INTRA_DC;
     sf->adaptive_interp_filter_search = 1;
+
+    if (MIN(cm->width, cm->height) >= 720)
+      sf->partition_search_breakout_dist_thr = (1 << 25);
+    else
+      sf->partition_search_breakout_dist_thr = (1 << 23);
+    sf->partition_search_breakout_rate_thr = 1000;
   }
 
   if (speed >= 4) {
@@ -158,6 +176,12 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
     sf->use_lp32x32fdct = 1;
     sf->use_fast_coef_updates = ONE_LOOP_REDUCED;
     sf->use_fast_coef_costing = 1;
+
+    if (MIN(cm->width, cm->height) >= 720)
+      sf->partition_search_breakout_dist_thr = (1 << 26);
+    else
+      sf->partition_search_breakout_dist_thr = (1 << 24);
+    sf->partition_search_breakout_rate_thr = 1500;
   }
 
   if (speed >= 5) {
@@ -411,6 +435,8 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->recode_tolerance = 25;
   sf->default_interp_filter = SWITCHABLE;
   sf->tx_size_search_breakout = 0;
+  sf->partition_search_breakout_dist_thr = 0;
+  sf->partition_search_breakout_rate_thr = 0;
 
   if (oxcf->mode == REALTIME)
     set_rt_speed_feature(cpi, sf, oxcf->speed, oxcf->content);

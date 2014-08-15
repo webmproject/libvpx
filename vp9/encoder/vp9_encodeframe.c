@@ -727,6 +727,7 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
     p[i].eobs = ctx->eobs_pbuf[i][0];
   }
   ctx->is_coded = 0;
+  ctx->skippable = 0;
   x->skip_recode = 0;
 
   // Set to zero to make sure we do not use the previous encoded frame stats
@@ -2158,8 +2159,8 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
       sum_rd = RDCOST(x->rdmult, x->rddiv, this_rate, this_dist);
 
       if (sum_rd < best_rd) {
-        int64_t stop_thresh = 4096;
-        int64_t stop_thresh_rd;
+        int64_t dist_breakout_thr = cpi->sf.partition_search_breakout_dist_thr;
+        int rate_breakout_thr = cpi->sf.partition_search_breakout_rate_thr;
 
         best_rate = this_rate;
         best_dist = this_dist;
@@ -2167,14 +2168,18 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
         if (bsize >= BLOCK_8X8)
           pc_tree->partitioning = PARTITION_NONE;
 
-        // Adjust threshold according to partition size.
-        stop_thresh >>= 8 - (b_width_log2(bsize) +
+        // Adjust dist breakout threshold according to the partition size.
+        dist_breakout_thr >>= 8 - (b_width_log2(bsize) +
             b_height_log2(bsize));
 
-        stop_thresh_rd = RDCOST(x->rdmult, x->rddiv, 0, stop_thresh);
-        // If obtained distortion is very small, choose current partition
-        // and stop splitting.
-        if (!x->e_mbd.lossless && best_rd < stop_thresh_rd) {
+        // If all y, u, v transform blocks in this partition are skippable, and
+        // the dist & rate are within the thresholds, the partition search is
+        // terminated for current branch of the partition search tree.
+        // The dist & rate thresholds are set to 0 at speed 0 to disable the
+        // early termination at that speed.
+        if (!x->e_mbd.lossless &&
+            (ctx->skippable && best_dist < dist_breakout_thr &&
+            best_rate < rate_breakout_thr)) {
           do_split = 0;
           do_rect = 0;
         }
