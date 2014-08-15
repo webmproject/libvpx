@@ -49,7 +49,9 @@ vpxenc_pipe() {
   local readonly encoder="$(vpx_tool_path vpxenc)"
   local readonly input="$1"
   shift
-  cat "${input}" | eval "${VPX_TEST_PREFIX}" "${encoder}" - "$@" ${devnull}
+  cat "${input}" | eval "${VPX_TEST_PREFIX}" "${encoder}" - \
+    --test-decode=fatal \
+    "$@" ${devnull}
 }
 
 # Wrapper function for running vpxenc. Requires that LIBVPX_BIN_PATH points to
@@ -59,7 +61,9 @@ vpxenc() {
   local readonly encoder="$(vpx_tool_path vpxenc)"
   local readonly input="${1}"
   shift
-  eval "${VPX_TEST_PREFIX}" "${encoder}" "$input" "$@" ${devnull}
+  eval "${VPX_TEST_PREFIX}" "${encoder}" "$input" \
+    --test-decode=fatal \
+    "$@" ${devnull}
 }
 
 vpxenc_vp8_ivf() {
@@ -125,7 +129,6 @@ vpxenc_vp9_ivf() {
       --height="${YUV_RAW_INPUT_HEIGHT}" \
       --limit="${TEST_FRAMES}" \
       --ivf \
-      --test-decode=fatal \
       --output="${output}" \
       "${YUV_RAW_INPUT}"
 
@@ -144,7 +147,6 @@ vpxenc_vp9_webm() {
       --width="${YUV_RAW_INPUT_WIDTH}" \
       --height="${YUV_RAW_INPUT_HEIGHT}" \
       --limit="${TEST_FRAMES}" \
-      --test-decode=fatal \
       --output="${output}" \
       "${YUV_RAW_INPUT}"
 
@@ -165,7 +167,6 @@ vpxenc_vp9_ivf_lossless() {
       --ivf \
       --output="${output}" \
       --lossless=1 \
-      --test-decode=fatal \
       "${YUV_RAW_INPUT}"
 
     if [ ! -e "${output}" ]; then
@@ -186,7 +187,6 @@ vpxenc_vp9_ivf_minq0_maxq0() {
       --output="${output}" \
       --min-q=0 \
       --max-q=0 \
-      --test-decode=fatal \
       "${YUV_RAW_INPUT}"
 
     if [ ! -e "${output}" ]; then
