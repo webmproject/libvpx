@@ -69,8 +69,8 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
       lc->gold_ref_idx = -1;
     }
 
-    lrc->buffer_level = vp9_rescale((int)(oxcf->starting_buffer_level_ms),
-                                    lc->target_bandwidth, 1000);
+    lrc->buffer_level = oxcf->starting_buffer_level_ms *
+                            lc->target_bandwidth / 1000;
     lrc->bits_off_target = lrc->buffer_level;
   }
 

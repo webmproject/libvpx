@@ -489,14 +489,6 @@ void vp9_new_framerate(VP9_COMP *cpi, double framerate) {
   vp9_rc_update_framerate(cpi);
 }
 
-int64_t vp9_rescale(int64_t val, int64_t num, int denom) {
-  int64_t llnum = num;
-  int64_t llden = denom;
-  int64_t llval = val;
-
-  return (llval * llnum / llden);
-}
-
 static void set_tile_limits(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
 
@@ -591,21 +583,21 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
     cpi->oxcf.maximum_buffer_size_ms = 240000;
   }
 
-  rc->starting_buffer_level = vp9_rescale(cpi->oxcf.starting_buffer_level_ms,
-                                          cpi->oxcf.target_bandwidth, 1000);
+  rc->starting_buffer_level = cpi->oxcf.starting_buffer_level_ms *
+                                  cpi->oxcf.target_bandwidth / 1000;
 
   // Set or reset optimal and maximum buffer levels.
   if (cpi->oxcf.optimal_buffer_level_ms == 0)
     rc->optimal_buffer_level = cpi->oxcf.target_bandwidth / 8;
   else
-    rc->optimal_buffer_level = vp9_rescale(cpi->oxcf.optimal_buffer_level_ms,
-                                           cpi->oxcf.target_bandwidth, 1000);
+    rc->optimal_buffer_level = cpi->oxcf.optimal_buffer_level_ms *
+                                   cpi->oxcf.target_bandwidth / 1000;
 
   if (cpi->oxcf.maximum_buffer_size_ms == 0)
     rc->maximum_buffer_size = cpi->oxcf.target_bandwidth / 8;
   else
-    rc->maximum_buffer_size = vp9_rescale(cpi->oxcf.maximum_buffer_size_ms,
-                                          cpi->oxcf.target_bandwidth, 1000);
+    rc->maximum_buffer_size = cpi->oxcf.maximum_buffer_size_ms *
+                                  cpi->oxcf.target_bandwidth / 1000;
   // Under a configuration change, where maximum_buffer_size may change,
   // keep buffer level clipped to the maximum allowed buffer size.
   rc->bits_off_target = MIN(rc->bits_off_target, rc->maximum_buffer_size);
