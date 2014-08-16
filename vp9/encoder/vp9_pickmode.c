@@ -402,13 +402,13 @@ static const THR_MODES mode_idx[MAX_REF_FRAMES - 1][INTER_MODES] = {
 
 // TODO(jingning) placeholder for inter-frame non-RD mode decision.
 // this needs various further optimizations. to be continued..
-int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
-                            const TileInfo *const tile,
-                            int mi_row, int mi_col,
-                            int *returnrate,
-                            int64_t *returndistortion,
-                            BLOCK_SIZE bsize,
-                            PICK_MODE_CONTEXT *ctx) {
+void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
+                         const TileInfo *const tile,
+                         int mi_row, int mi_col,
+                         int *returnrate,
+                         int64_t *returndistortion,
+                         BLOCK_SIZE bsize,
+                         PICK_MODE_CONTEXT *ctx) {
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
   struct macroblockd_plane *const pd = &xd->plane[0];
@@ -761,6 +761,4 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     if (cpi->sf.reuse_inter_pred_sby)
       pd->dst = orig_dst;
   }
-
-  return INT64_MAX;
 }
