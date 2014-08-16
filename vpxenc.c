@@ -19,12 +19,15 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if CONFIG_LIBYUV
+#include "third_party/libyuv/include/libyuv/scale.h"
+#endif
+
 #include "vpx/vpx_encoder.h"
 #if CONFIG_DECODERS
 #include "vpx/vpx_decoder.h"
 #endif
 
-#include "third_party/libyuv/include/libyuv/scale.h"
 #include "./args.h"
 #include "./ivfenc.h"
 #include "./tools_common.h"
