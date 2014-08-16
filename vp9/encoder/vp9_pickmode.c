@@ -417,13 +417,14 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                          int64_t *returndistortion,
                          BLOCK_SIZE bsize,
                          PICK_MODE_CONTEXT *ctx) {
-  MACROBLOCKD *xd = &x->e_mbd;
-  MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
+  VP9_COMMON *const cm = &cpi->common;
+  MACROBLOCKD *const xd = &x->e_mbd;
+  MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
   struct macroblockd_plane *const pd = &xd->plane[0];
   PREDICTION_MODE this_mode, best_mode = ZEROMV;
   MV_REFERENCE_FRAME ref_frame, best_ref_frame = LAST_FRAME;
   TX_SIZE best_tx_size = MIN(max_txsize_lookup[bsize],
-                             tx_mode_to_biggest_tx_size[cpi->common.tx_mode]);
+                             tx_mode_to_biggest_tx_size[cm->tx_mode]);
   INTERP_FILTER best_pred_filter = EIGHTTAP;
   int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES];
   struct buf_2d yv12_mb[4][MAX_MB_PLANE];
@@ -438,9 +439,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   unsigned int var_y = UINT_MAX;
   unsigned int sse_y = UINT_MAX;
 
-  VP9_COMMON *cm = &cpi->common;
-  int intra_cost_penalty = 20 * vp9_dc_quant(cm->base_qindex, cm->y_dc_delta_q);
-
+  const int intra_cost_penalty =
+      20 * vp9_dc_quant(cm->base_qindex, cm->y_dc_delta_q);
   const int64_t inter_mode_thresh = RDCOST(x->rdmult, x->rddiv,
                                            intra_cost_penalty, 0);
   const int64_t intra_mode_cost = 50;
@@ -449,14 +449,13 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   const int *const rd_threshes = cpi->rd.threshes[segment_id][bsize];
   const int *const rd_thresh_freq_fact = cpi->rd.thresh_freq_fact[bsize];
   INTERP_FILTER filter_ref = cm->interp_filter;
-  int bsl = mi_width_log2(bsize);
+  const int bsl = mi_width_log2(bsize);
   const int pred_filter_search = cm->interp_filter == SWITCHABLE ?
       (((mi_row + mi_col) >> bsl) +
        get_chessboard_index(cm->current_video_frame)) & 0x1 : 0;
   int const_motion[MAX_REF_FRAMES] = { 0 };
   const int bh = num_4x4_blocks_high_lookup[bsize] << 2;
   const int bw = num_4x4_blocks_wide_lookup[bsize] << 2;
-  const int pixels_in_block = bh * bw;
   // For speed 6, the result of interp filter is reused later in actual encoding
   // process.
   // tmp[3] points to dst buffer, and the other 3 point to allocated buffers.
@@ -473,7 +472,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   (void) ctx;
   if (cpi->sf.reuse_inter_pred_sby) {
     for (i = 0; i < 3; i++) {
-      tmp[i].data = &pred_buf[pixels_in_block * i];
+      tmp[i].data = &pred_buf[bw * bh * i];
       tmp[i].stride = bw;
       tmp[i].in_use = 0;
     }
