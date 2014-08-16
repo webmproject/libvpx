@@ -421,7 +421,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
   struct macroblockd_plane *const pd = &xd->plane[0];
-  PREDICTION_MODE this_mode, best_mode = ZEROMV;
+  PREDICTION_MODE best_mode = ZEROMV;
   MV_REFERENCE_FRAME ref_frame, best_ref_frame = LAST_FRAME;
   TX_SIZE best_tx_size = MIN(max_txsize_lookup[bsize],
                              tx_mode_to_biggest_tx_size[cm->tx_mode]);
@@ -464,13 +464,9 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   struct buf_2d orig_dst = pd->dst;
   PRED_BUFFER *best_pred = NULL;
   PRED_BUFFER *this_mode_pred = NULL;
-  int i;
 
-  // CTX is used by the temporal denoiser which is currently being developed.
-  // TODO(jbb): when temporal denoiser is finished and in the default build
-  // remove the following line;
-  (void) ctx;
   if (cpi->sf.reuse_inter_pred_sby) {
+    int i;
     for (i = 0; i < 3; i++) {
       tmp[i].data = &pred_buf[bw * bh * i];
       tmp[i].stride = bw;
@@ -498,6 +494,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   mbmi->segment_id = segment_id;
 
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
+    PREDICTION_MODE this_mode;
     x->pred_mv_sad[ref_frame] = INT_MAX;
     frame_mv[NEWMV][ref_frame].as_int = INVALID_MV;
     frame_mv[ZEROMV][ref_frame].as_int = 0;
@@ -668,6 +665,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       if (cpi->oxcf.noise_sensitivity > 0) {
         vp9_denoiser_update_frame_stats(mbmi, sse_y, this_mode, ctx);
       }
+#else
+      (void)ctx;
 #endif
 
       if (this_rd < best_rd || x->skip) {
@@ -703,15 +702,9 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   // temp buf to dst buf.
   if (best_pred != NULL && cpi->sf.reuse_inter_pred_sby &&
       best_pred->data != orig_dst.buf) {
-    uint8_t *copy_from, *copy_to;
-
     pd->dst = orig_dst;
-    copy_to = pd->dst.buf;
-
-    copy_from = best_pred->data;
-
-    vp9_convolve_copy(copy_from, bw, copy_to, pd->dst.stride, NULL, 0, NULL, 0,
-                      bw, bh);
+    vp9_convolve_copy(best_pred->data, bw, pd->dst.buf, pd->dst.stride, NULL, 0,
+                      NULL, 0, bw, bh);
   }
 
   mbmi->mode          = best_mode;
@@ -726,8 +719,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   // threshold.
   if (!x->skip && best_rd > inter_mode_thresh &&
       bsize <= cpi->sf.max_intra_bsize) {
+    PREDICTION_MODE this_mode;
     struct estimate_block_intra_args args = { cpi, x, DC_PRED, 0, 0 };
-
     const TX_SIZE intra_tx_size =
         MIN(max_txsize_lookup[bsize],
             tx_mode_to_biggest_tx_size[cpi->common.tx_mode]);
