@@ -615,19 +615,21 @@ static void cyclic_background_refresh(VP8_COMP *cpi, int Q, int lf_adjustment)
         cpi->cyclic_refresh_mode_index = i;
 
 #if CONFIG_TEMPORAL_DENOISING
-        if (cpi->denoiser.denoiser_mode == kDenoiserOnYUVAggressive &&
-            Q < (int)cpi->denoiser.denoise_pars.qp_thresh) {
-          // Under aggressive denoising mode, use segmentation to turn off loop
-          // filter below some qp thresh. The loop filter is turned off for all
-          // blocks that have been encoded as ZEROMV LAST x frames in a row,
-          // where x is set by cpi->denoiser.denoise_pars.consec_zerolast.
-          // This is to avoid "dot" artifacts that can occur from repeated
-          // loop filtering on noisy input source.
-          cpi->cyclic_refresh_q = Q;
-          lf_adjustment = -MAX_LOOP_FILTER;
-          for (i = 0; i < mbs_in_frame; ++i) {
-            seg_map[i] = (cpi->consec_zero_last[i] >
-                          cpi->denoiser.denoise_pars.consec_zerolast) ? 1 : 0;
+        if (cpi->oxcf.noise_sensitivity > 0) {
+          if (cpi->denoiser.denoiser_mode == kDenoiserOnYUVAggressive &&
+              Q < (int)cpi->denoiser.denoise_pars.qp_thresh) {
+            // Under aggressive denoising, use segmentation to turn off loop
+            // filter below some qp thresh. The filter is turned off for all
+            // blocks that have been encoded as ZEROMV LAST x frames in a row,
+            // where x is set by cpi->denoiser.denoise_pars.consec_zerolast.
+            // This is to avoid "dot" artifacts that can occur from repeated
+            // loop filtering on noisy input source.
+            cpi->cyclic_refresh_q = Q;
+            lf_adjustment = -MAX_LOOP_FILTER;
+            for (i = 0; i < mbs_in_frame; ++i) {
+              seg_map[i] = (cpi->consec_zero_last[i] >
+                            cpi->denoiser.denoise_pars.consec_zerolast) ? 1 : 0;
+            }
           }
         }
 #endif
