@@ -65,6 +65,7 @@ COMPILING THE APPLICATIONS/LIBRARIES:
     armv7-win32-vs12
     armv7s-darwin-gcc
     mips32-linux-gcc
+    mips64-linux-gcc
     ppc32-darwin8-gcc
     ppc32-darwin9-gcc
     ppc32-linux-gcc

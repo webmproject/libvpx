@@ -111,6 +111,7 @@ all_platforms="${all_platforms} armv7-win32-vs11"
 all_platforms="${all_platforms} armv7-win32-vs12"
 all_platforms="${all_platforms} armv7s-darwin-gcc"
 all_platforms="${all_platforms} mips32-linux-gcc"
+all_platforms="${all_platforms} mips64-linux-gcc"
 all_platforms="${all_platforms} ppc32-darwin8-gcc"
 all_platforms="${all_platforms} ppc32-darwin9-gcc"
 all_platforms="${all_platforms} ppc32-linux-gcc"
@@ -253,6 +254,8 @@ ARCH_EXT_LIST="
 
     mips32
     dspr2
+
+    mips64
 
     mmx
     sse
