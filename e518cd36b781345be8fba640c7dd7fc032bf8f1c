@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//bXA\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-16T03:56:37Z",
+      "side": 1,
+      "message": "Initialize would sounds a bit better",
+      "revId": "e518cd36b781345be8fba640c7dd7fc032bf8f1c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//bXE\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-16T03:56:37Z",
+      "side": 1,
+      "message": "you can add const to this cast for definiteness",
+      "revId": "e518cd36b781345be8fba640c7dd7fc032bf8f1c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
