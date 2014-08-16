@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//bZs\u003d",
+        "filename": "examples/set_maps.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 241,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-16T00:03:55Z",
+      "side": 1,
+      "message": "Get rid of the \u0027;\u0027",
+      "revId": "00efe8d27ff1f8ce60574afaa2f048de62362473",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
