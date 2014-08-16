@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//bXk\u003d",
+        "filename": "build/make/rtcd.pl",
+        "patchSetId": 5
+      },
+      "lineNbr": 369,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-16T03:15:33Z",
+      "side": 1,
+      "message": "typo here -\u003e {arch}",
+      "revId": "e13817cdf5fc44b14eac8ab7ef1c264b856aee8d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
