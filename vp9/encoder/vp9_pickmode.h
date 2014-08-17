@@ -17,12 +17,6 @@
 extern "C" {
 #endif
 
-typedef struct {
-  uint8_t *data;
-  int stride;
-  int in_use;
-} PRED_BUFFER;
-
 void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                          const struct TileInfo *const tile,
                          int mi_row, int mi_col,

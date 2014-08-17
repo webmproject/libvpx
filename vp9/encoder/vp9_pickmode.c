@@ -28,6 +28,12 @@
 #include "vp9/encoder/vp9_ratectrl.h"
 #include "vp9/encoder/vp9_rd.h"
 
+typedef struct {
+  uint8_t *data;
+  int stride;
+  int in_use;
+} PRED_BUFFER;
+
 static int mv_refs_rt(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                        const TileInfo *const tile,
                        MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
