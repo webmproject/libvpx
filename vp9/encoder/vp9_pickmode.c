@@ -35,10 +35,10 @@ typedef struct {
 } PRED_BUFFER;
 
 static int mv_refs_rt(const VP9_COMMON *cm, const MACROBLOCKD *xd,
-                       const TileInfo *const tile,
-                       MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
-                       int_mv *mv_ref_list,
-                       int mi_row, int mi_col) {
+                      const TileInfo *const tile,
+                      MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
+                      int_mv *mv_ref_list,
+                      int mi_row, int mi_col) {
   const int *ref_sign_bias = cm->ref_frame_sign_bias;
   int i, refmv_count = 0;
 
@@ -230,13 +230,15 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
 
   if (cpi->common.tx_mode == TX_MODE_SELECT) {
     if (sse > (var << 2))
-      xd->mi[0]->mbmi.tx_size = MIN(max_txsize_lookup[bsize],
-                          tx_mode_to_biggest_tx_size[cpi->common.tx_mode]);
+      xd->mi[0]->mbmi.tx_size =
+          MIN(max_txsize_lookup[bsize],
+              tx_mode_to_biggest_tx_size[cpi->common.tx_mode]);
     else
       xd->mi[0]->mbmi.tx_size = TX_8X8;
   } else {
-    xd->mi[0]->mbmi.tx_size = MIN(max_txsize_lookup[bsize],
-                         tx_mode_to_biggest_tx_size[cpi->common.tx_mode]);
+    xd->mi[0]->mbmi.tx_size =
+        MIN(max_txsize_lookup[bsize],
+            tx_mode_to_biggest_tx_size[cpi->common.tx_mode]);
   }
 
   vp9_model_rd_from_var_lapndz(sse - var, 1 << num_pels_log2_lookup[bsize],
@@ -337,7 +339,7 @@ static void encode_breakout_test(VP9_COMP *cpi, MACROBLOCK *x,
 
         // The cost of skip bit needs to be added.
         *rate = cpi->inter_mode_cost[mbmi->mode_context[ref_frame]]
-                                     [INTER_OFFSET(this_mode)];
+                                    [INTER_OFFSET(this_mode)];
 
         // More on this part of rate
         // rate += vp9_cost_bit(vp9_get_skip_prob(cm, xd), 1);
@@ -446,7 +448,6 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   unsigned char segment_id = mbmi->segment_id;
   const int *const rd_threshes = cpi->rd.threshes[segment_id][bsize];
   const int *const rd_thresh_freq_fact = cpi->rd.thresh_freq_fact[bsize];
-  // Mode index conversion form THR_MODES to PREDICTION_MODE for a ref frame.
   INTERP_FILTER filter_ref = cm->interp_filter;
   int bsl = mi_width_log2(bsize);
   const int pred_filter_search = cm->interp_filter == SWITCHABLE ?
@@ -552,8 +553,9 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       if (!(cpi->sf.inter_mode_mask[bsize] & (1 << this_mode)))
         continue;
 
-      mode_rd_thresh =  rd_threshes[mode_idx[ref_frame - LAST_FRAME]
-                                    [INTER_OFFSET(this_mode)]];
+      mode_rd_thresh =
+          rd_threshes[mode_idx[ref_frame -
+                               LAST_FRAME][INTER_OFFSET(this_mode)]];
       if (rd_less_than_thresh(best_rd, mode_rd_thresh,
                               rd_thresh_freq_fact[this_mode]))
         continue;
@@ -570,7 +572,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       if (this_mode != NEARESTMV &&
           frame_mv[this_mode][ref_frame].as_int ==
               frame_mv[NEARESTMV][ref_frame].as_int)
-          continue;
+        continue;
 
       mbmi->mode = this_mode;
       mbmi->mv[0].as_int = frame_mv[this_mode][ref_frame].as_int;
@@ -649,7 +651,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
       rate += rate_mv;
       rate += cpi->inter_mode_cost[mbmi->mode_context[ref_frame]]
-                                [INTER_OFFSET(this_mode)];
+                                  [INTER_OFFSET(this_mode)];
       this_rd = RDCOST(x->rdmult, x->rddiv, rate, dist);
 
       // Skipping checking: test to see if this block can be reconstructed by
