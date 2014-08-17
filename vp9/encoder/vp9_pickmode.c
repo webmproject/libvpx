@@ -443,9 +443,9 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       20 * vp9_dc_quant(cm->base_qindex, cm->y_dc_delta_q);
   const int64_t inter_mode_thresh = RDCOST(x->rdmult, x->rddiv,
                                            intra_cost_penalty, 0);
-  const int64_t intra_mode_cost = 50;
+  const int intra_mode_cost = 50;
 
-  unsigned char segment_id = mbmi->segment_id;
+  const int8_t segment_id = mbmi->segment_id;
   const int *const rd_threshes = cpi->rd.threshes[segment_id][bsize];
   const int *const rd_thresh_freq_fact = cpi->rd.thresh_freq_fact[bsize];
   INTERP_FILTER filter_ref = cm->interp_filter;
