@@ -646,7 +646,6 @@ static int rc_pick_q_and_bounds_one_pass_vbr(const VP9_COMP *cpi,
   int q;
 
   if (frame_is_intra_only(cm)) {
-    active_best_quality = rc->best_quality;
 
     // Handle the special case for key frames forced when we have reached
     // the maximum key frame interval. Here force the Q to a range
