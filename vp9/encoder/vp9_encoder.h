@@ -495,14 +495,6 @@ static INLINE YV12_BUFFER_CONFIG *get_ref_frame_buffer(
       .buf;
 }
 
-// Intra only frames, golden frames (except alt ref overlays) and
-// alt ref frames tend to be coded at a higher than ambient quality
-static INLINE int frame_is_boosted(const VP9_COMP *cpi) {
-  return frame_is_intra_only(&cpi->common) || cpi->refresh_alt_ref_frame ||
-         (cpi->refresh_golden_frame && !cpi->rc.is_src_frame_alt_ref) ||
-         vp9_is_upper_layer_key_frame(cpi);
-}
-
 static INLINE int get_token_alloc(int mb_rows, int mb_cols) {
   // TODO(JBB): double check we can't exceed this token count if we have a
   // 32x32 transform crossing a boundary at a multiple of 16.
