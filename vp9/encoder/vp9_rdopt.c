@@ -2523,7 +2523,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t dist_uv[TX_SIZES];
   int skip_uv[TX_SIZES];
   PREDICTION_MODE mode_uv[TX_SIZES];
-  int64_t mode_distortions[MB_MODE_COUNT] = {-1};
   int intra_cost_penalty = 20 * vp9_dc_quant(cm->base_qindex, cm->y_dc_delta_q);
   int best_skip2 = 0;
   int mode_skip_mask = 0;
@@ -2893,12 +2892,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         best_pred_rd[i] = MIN(best_pred_rd[i], this_rd);
       for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; i++)
         best_filter_rd[i] = MIN(best_filter_rd[i], this_rd);
-    }
-
-    // Store the respective mode distortions for later use.
-    if (mode_distortions[this_mode] == -1
-        || distortion2 < mode_distortions[this_mode]) {
-      mode_distortions[this_mode] = distortion2;
     }
 
     // Did this mode help.. i.e. is it the new best mode
