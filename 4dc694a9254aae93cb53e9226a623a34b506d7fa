@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//bRs\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2658,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-18T21:13:03Z",
+      "side": 1,
+      "message": "Combine the two ifs maybe.",
+      "revId": "4dc694a9254aae93cb53e9226a623a34b506d7fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//bRo\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2660,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-18T21:13:03Z",
+      "side": 1,
+      "message": "You could move the two lines:\n  ref_frame \u003d vp9_mode_order[mode_index].ref_frame[0];\n  second_ref_frame \u003d vp9_mode_order[mode_index].ref_frame[1];\nfrom below \u0026 use these in this test.",
+      "revId": "4dc694a9254aae93cb53e9226a623a34b506d7fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
