@@ -520,8 +520,6 @@ void vp9_scale_references(VP9_COMP *cpi);
 
 void vp9_update_reference_frames(VP9_COMP *cpi);
 
-int64_t vp9_rescale(int64_t val, int64_t num, int denom);
-
 void vp9_set_high_precision_mv(VP9_COMP *cpi, int allow_high_precision_mv);
 
 YV12_BUFFER_CONFIG *vp9_scale_if_required(VP9_COMMON *cm,
