@@ -194,8 +194,7 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
                                     int eob) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
   if (eob > 0) {
-    TX_TYPE tx_type;
-    const PLANE_TYPE plane_type = pd->plane_type;
+    TX_TYPE tx_type = DCT_DCT;
     tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
 #if CONFIG_VP9_HIGH
     if (xd->cur_buf->flags&YV12_FLAG_HIGH) {
@@ -203,6 +202,7 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
         tx_type = DCT_DCT;
         vp9_high_iwht4x4_add(dqcoeff, dst, stride, eob, xd->bps);
       } else {
+        const PLANE_TYPE plane_type = pd->plane_type;
         switch (tx_size) {
           case TX_4X4:
             tx_type = get_tx_type_4x4(plane_type, xd, block);
@@ -229,6 +229,7 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
         tx_type = DCT_DCT;
         vp9_iwht4x4_add(dqcoeff, dst, stride, eob);
       } else {
+        const PLANE_TYPE plane_type = pd->plane_type;
         switch (tx_size) {
           case TX_4X4:
             tx_type = get_tx_type_4x4(plane_type, xd, block);
@@ -256,6 +257,7 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
       tx_type = DCT_DCT;
       vp9_iwht4x4_add(dqcoeff, dst, stride, eob);
     } else {
+      const PLANE_TYPE plane_type = pd->plane_type;
       switch (tx_size) {
         case TX_4X4:
           tx_type = get_tx_type_4x4(plane_type, xd, block);
@@ -684,13 +686,20 @@ static void setup_display_size(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
 }
 
 static void resize_context_buffers(VP9_COMMON *cm, int width, int height) {
+#if CONFIG_SIZE_LIMIT
+  if (width > DECODE_WIDTH_LIMIT || height > DECODE_HEIGHT_LIMIT)
+    vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+                       "Width and height beyond allowed size.");
+#endif
   if (cm->width != width || cm->height != height) {
-    // Change in frame size (assumption: color format does not change).
-    if (cm->width == 0 || cm->height == 0 ||
-        width * height > cm->width * cm->height) {
+    const int new_rows = ALIGN_POWER_OF_TWO(height,
+                                            MI_SIZE_LOG2) >> MI_SIZE_LOG2;
+    const int new_cols = ALIGN_POWER_OF_TWO(width,
+                                            MI_SIZE_LOG2) >> MI_SIZE_LOG2;
+    if (calc_mi_size(new_rows) * calc_mi_size(new_cols) > cm->mi_alloc_size) {
       if (vp9_alloc_context_buffers(cm, width, height))
         vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
-                           "Failed to allocate frame buffers");
+                           "Failed to allocate context buffers");
     } else {
       vp9_set_mb_mi(cm, width, height);
     }
@@ -724,6 +733,7 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
                                        struct vp9_read_bit_buffer *rb) {
   int width, height;
   int found = 0, i;
+  int has_valid_ref_frame = 0;
   for (i = 0; i < REFS_PER_FRAME; ++i) {
     if (vp9_rb_read_bit(rb)) {
       YV12_BUFFER_CONFIG *const buf = cm->frame_refs[i].buf;
@@ -737,15 +747,21 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
   if (!found)
     vp9_read_frame_size(rb, &width, &height);
 
-  // Check that each of the frames that this frame references has valid
-  // dimensions.
+  if (width <=0 || height <= 0)
+    vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+                       "Invalid frame size");
+
+  // Check to make sure at least one of frames that this frame references
+  // has valid dimensions.
   for (i = 0; i < REFS_PER_FRAME; ++i) {
     RefBuffer *const ref_frame = &cm->frame_refs[i];
-    if (!valid_ref_frame_size(ref_frame->buf->y_width, ref_frame->buf->y_height,
-                              width, height))
-      vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
-                         "Referenced frame has invalid size");
+    has_valid_ref_frame |= valid_ref_frame_size(ref_frame->buf->y_crop_width,
+                                                ref_frame->buf->y_crop_height,
+                                                width, height);
   }
+  if (!has_valid_ref_frame)
+    vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+                       "Referenced frame has invalid size");
 
   resize_context_buffers(cm, width, height);
   setup_display_size(cm, rb);
@@ -1180,8 +1196,8 @@ static void read_bitdepth_colorspace_sampling(
     }
   } else {
     if (cm->profile == PROFILE_1 || cm->profile == PROFILE_3) {
-      // Note: If colorspace is SRGB then only 4:4:4 chroma sampling
-      // is supported.
+      // Note if colorspace is SRGB then 4:4:4 chroma sampling is assumed.
+      // 4:2:2 or 4:4:0 chroma sampling is not allowed.
       cm->subsampling_y = cm->subsampling_x = 0;
       if (vp9_rb_read_bit(rb))
         vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
@@ -1235,6 +1251,7 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
     if (!vp9_read_sync_code(rb))
       vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
                          "Invalid frame sync code");
+
     read_bitdepth_colorspace_sampling(cm, rb);
     pbi->refresh_frame_flags = (1 << REF_FRAMES) - 1;
 
@@ -1264,6 +1281,7 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
         cm->color_space = BT_601;
         cm->subsampling_y = cm->subsampling_x = 1;
       }
+
       pbi->refresh_frame_flags = vp9_rb_read_literal(rb, REF_FRAMES);
       setup_frame_size(cm, rb);
     } else {
@@ -1301,11 +1319,9 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
     }
   }
   if (!cm->error_resilient_mode) {
-    cm->coding_use_prev_mi = 1;
     cm->refresh_frame_context = vp9_rb_read_bit(rb);
     cm->frame_parallel_decoding_mode = vp9_rb_read_bit(rb);
   } else {
-    cm->coding_use_prev_mi = 0;
     cm->refresh_frame_context = 0;
     cm->frame_parallel_decoding_mode = 1;
   }
@@ -1481,7 +1497,7 @@ void vp9_decode_frame(VP9Decoder *pbi,
 
   init_macroblockd(cm, &pbi->mb);
 
-  if (cm->coding_use_prev_mi)
+  if (!cm->error_resilient_mode)
     set_prev_mi(cm);
   else
     cm->prev_mi = NULL;

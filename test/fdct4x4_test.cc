@@ -30,15 +30,15 @@ using libvpx_test::ACMRandom;
 
 namespace {
 const int kNumCoeffs = 16;
-typedef void (*fdct_t)(const int16_t *in, tran_low_t *out, int stride);
-typedef void (*idct_t)(const tran_low_t *in, uint8_t *out, int stride);
-typedef void (*fht_t) (const int16_t *in, tran_low_t *out, int stride,
-                       int tx_type);
-typedef void (*iht_t) (const tran_low_t *in, uint8_t *out, int stride,
-                       int tx_type);
+typedef void (*FdctFunc)(const int16_t *in, tran_low_t *out, int stride);
+typedef void (*IdctFunc)(const tran_low_t *in, uint8_t *out, int stride);
+typedef void (*FhtFunc)(const int16_t *in, tran_low_t *out, int stride,
+                        int tx_type);
+typedef void (*IhtFunc)(const tran_low_t *in, uint8_t *out, int stride,
+                        int tx_type);
 
-typedef std::tr1::tuple<fdct_t, idct_t, int, int> dct_4x4_param_t;
-typedef std::tr1::tuple<fht_t, iht_t, int, int> ht_4x4_param_t;
+typedef std::tr1::tuple<FdctFunc, IdctFunc, int, int> Dct4x4Param;
+typedef std::tr1::tuple<FhtFunc, IhtFunc, int, int> Ht4x4Param;
 
 void fdct4x4_ref(const int16_t *in, tran_low_t *out, int stride, int tx_type) {
   vp9_fdct4x4_c(in, out, stride);
@@ -245,14 +245,14 @@ class Trans4x4TestBase {
 
   int pitch_;
   int tx_type_;
-  fht_t fwd_txfm_ref;
   int bit_depth_;
   int mask_;
+  FhtFunc fwd_txfm_ref;
 };
 
 class Trans4x4DCT
     : public Trans4x4TestBase,
-      public ::testing::TestWithParam<dct_4x4_param_t> {
+      public ::testing::TestWithParam<Dct4x4Param> {
  public:
   virtual ~Trans4x4DCT() {}
 
@@ -275,8 +275,8 @@ class Trans4x4DCT
     inv_txfm_(out, dst, stride);
   }
 
-  fdct_t fwd_txfm_;
-  idct_t inv_txfm_;
+  FdctFunc fwd_txfm_;
+  IdctFunc inv_txfm_;
 };
 
 TEST_P(Trans4x4DCT, AccuracyCheck) {
@@ -297,7 +297,7 @@ TEST_P(Trans4x4DCT, InvAccuracyCheck) {
 
 class Trans4x4HT
     : public Trans4x4TestBase,
-      public ::testing::TestWithParam<ht_4x4_param_t> {
+      public ::testing::TestWithParam<Ht4x4Param> {
  public:
   virtual ~Trans4x4HT() {}
 
@@ -321,8 +321,8 @@ class Trans4x4HT
     inv_txfm_(out, dst, stride, tx_type_);
   }
 
-  fht_t fwd_txfm_;
-  iht_t inv_txfm_;
+  FhtFunc fwd_txfm_;
+  IhtFunc inv_txfm_;
 };
 
 TEST_P(Trans4x4HT, AccuracyCheck) {
@@ -343,7 +343,7 @@ TEST_P(Trans4x4HT, InvAccuracyCheck) {
 
 class Trans4x4WHT
     : public Trans4x4TestBase,
-      public ::testing::TestWithParam<dct_4x4_param_t> {
+      public ::testing::TestWithParam<Dct4x4Param> {
  public:
   virtual ~Trans4x4WHT() {}
 
@@ -366,8 +366,8 @@ class Trans4x4WHT
     inv_txfm_(out, dst, stride);
   }
 
-  fdct_t fwd_txfm_;
-  idct_t inv_txfm_;
+  FdctFunc fwd_txfm_;
+  IdctFunc inv_txfm_;
 };
 
 TEST_P(Trans4x4WHT, AccuracyCheck) {
@@ -475,21 +475,6 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_fht4x4_sse2, &vp9_iht4x4_16_add_sse2, 1, 8),
         make_tuple(&vp9_fht4x4_sse2, &vp9_iht4x4_16_add_sse2, 2, 8),
         make_tuple(&vp9_fht4x4_sse2, &vp9_iht4x4_16_add_sse2, 3, 8)));
-#endif
-
-#if HAVE_AVX2 && !CONFIG_VP9_HIGH
-INSTANTIATE_TEST_CASE_P(
-    AVX2, Trans4x4DCT,
-    ::testing::Values(
-        make_tuple(&vp9_fdct4x4_avx2,
-                   &vp9_idct4x4_16_add_c, 0, 8)));
-INSTANTIATE_TEST_CASE_P(
-    AVX2, Trans4x4HT,
-    ::testing::Values(
-        make_tuple(&vp9_fht4x4_avx2, &vp9_iht4x4_16_add_c, 0, 8),
-        make_tuple(&vp9_fht4x4_avx2, &vp9_iht4x4_16_add_c, 1, 8),
-        make_tuple(&vp9_fht4x4_avx2, &vp9_iht4x4_16_add_c, 2, 8),
-        make_tuple(&vp9_fht4x4_avx2, &vp9_iht4x4_16_add_c, 3, 8)));
 #endif
 
 }  // namespace

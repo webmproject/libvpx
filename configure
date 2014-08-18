@@ -25,6 +25,7 @@ Advanced options:
   ${toggle_docs}                  documentation
   ${toggle_unit_tests}            unit tests
   ${toggle_decode_perf_tests}     build decoder perf tests with unit tests
+  ${toggle_encode_perf_tests}     build encoder perf tests with unit tests
   --libc=PATH                     path to alternate libc
   --size-limit=WxH                max size to allow in the decoder
   --as={yasm|nasm|auto}           use specified assembler [auto, yasm preferred]
@@ -45,6 +46,9 @@ Advanced options:
   ${toggle_realtime_only}         enable this option while building for real-time encoding
   ${toggle_onthefly_bitpacking}   enable on-the-fly bitpacking in real-time encoding
   ${toggle_error_concealment}     enable this option to get a decoder which is able to conceal losses
+  ${toggle_coefficient_range_checking}
+                                  enable decoder to check if intermediate
+                                  transform coefficients are in valid range
   ${toggle_runtime_cpu_detect}    runtime cpu detection
   ${toggle_shared}                shared library support
   ${toggle_static}                static library support
@@ -66,10 +70,10 @@ Codecs:
 EOF
 #restore editor state '
 
-    local family;
-    local last_family;
-    local c;
-    local str;
+    family="";
+    last_family="";
+    c="";
+    str="";
     for c in ${CODECS}; do
         family=${c%_*}
         if [ "${family}" != "${last_family}" ]; then
@@ -271,12 +275,10 @@ HAVE_LIST="
     unistd_h
 "
 EXPERIMENT_LIST="
-    alpha
     vp9_high
-    multiple_arf
     spatial_svc
     high_quant
-    denoising
+    vp9_temporal_denoising
     emulate_hw_high
     fp_mb_stats
 "
@@ -328,8 +330,10 @@ CONFIG_LIST="
     webm_io
     libyuv
     decode_perf_tests
+    encode_perf_tests
     multi_res_encoding
     temporal_denoising
+    coefficient_range_checking
     experimental
     size_limit
     ${EXPERIMENT_LIST}
@@ -384,8 +388,10 @@ CMDLINE_SELECT="
     webm_io
     libyuv
     decode_perf_tests
+    encode_perf_tests
     multi_res_encoding
     temporal_denoising
+    coefficient_range_checking
     experimental
 "
 
@@ -413,7 +419,7 @@ process_cmdline() {
 }
 
 post_process_cmdline() {
-    local c
+    c=""
 
     # If the codec family is disabled, disable all components of that family.
     # If the codec family is enabled, enable all components of that family.
@@ -460,8 +466,8 @@ process_targets() {
     enabled universal && echo "FAT_ARCHS=${fat_bin_archs}" >> config.mk
 
     # Calculate the default distribution name, based on the enabled features
-    local cf
-    local DIST_DIR=vpx
+    cf=""
+    DIST_DIR=vpx
     for cf in $CODEC_FAMILIES; do
         if enabled ${cf}_encoder && enabled ${cf}_decoder; then
             DIST_DIR="${DIST_DIR}-${cf}"
@@ -483,7 +489,7 @@ process_targets() {
           ;;
     esac
     if [ -f "${source_path}/build/make/version.sh" ]; then
-        local ver=`"$source_path/build/make/version.sh" --bare "$source_path"`
+        ver=`"$source_path/build/make/version.sh" --bare "$source_path"`
         DIST_DIR="${DIST_DIR}-${ver}"
         VERSION_STRING=${ver}
         ver=${ver%%-*}
@@ -517,7 +523,7 @@ EOF
     # Write makefiles for all enabled targets
     #
     for tgt in libs examples docs solution; do
-        local tgt_fn="$tgt-$toolchain.mk"
+        tgt_fn="$tgt-$toolchain.mk"
 
         if enabled $tgt; then
             echo "Creating makefiles for ${toolchain} ${tgt}"
@@ -556,7 +562,7 @@ process_detect() {
                     true;
                 ;;
                 *)
-                    local result=false
+                    result=false
                     for d in "$@"; do
                         [ -f "${d##-I}/$header" ] && result=true && break
                     done
@@ -605,7 +611,7 @@ process_toolchain() {
     # Handle universal binaries for this architecture
     case $toolchain in
         universal-darwin*)
-            local darwin_ver=${tgt_os##darwin}
+            darwin_ver=${tgt_os##darwin}
 
             # Snow Leopard (10.6/darwin10) dropped support for PPC
             # Include PPC support for all prior versions

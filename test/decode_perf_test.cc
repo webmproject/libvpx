@@ -29,9 +29,9 @@ const double kUsecsInSec = 1000000.0;
 /*
  DecodePerfTest takes a tuple of filename + number of threads to decode with
  */
-typedef std::tr1::tuple<const char *, unsigned> decode_perf_param_t;
+typedef std::tr1::tuple<const char *, unsigned> DecodePerfParam;
 
-const decode_perf_param_t kVP9DecodePerfVectors[] = {
+const DecodePerfParam kVP9DecodePerfVectors[] = {
   make_tuple("vp90-2-bbb_426x240_tile_1x1_180kbps.webm", 1),
   make_tuple("vp90-2-bbb_640x360_tile_1x2_337kbps.webm", 2),
   make_tuple("vp90-2-bbb_854x480_tile_1x2_651kbps.webm", 2),
@@ -64,7 +64,7 @@ const decode_perf_param_t kVP9DecodePerfVectors[] = {
    power/temp/min max frame decode times/etc
  */
 
-class DecodePerfTest : public ::testing::TestWithParam<decode_perf_param_t> {
+class DecodePerfTest : public ::testing::TestWithParam<DecodePerfParam> {
 };
 
 TEST_P(DecodePerfTest, PerfTest) {
@@ -92,6 +92,7 @@ TEST_P(DecodePerfTest, PerfTest) {
   const double fps = double(frames) / elapsed_secs;
 
   printf("{\n");
+  printf("\t\"type\" : \"decode_perf_test\",\n");
   printf("\t\"version\" : \"%s\",\n", VERSION_STRING_NOSP);
   printf("\t\"videoName\" : \"%s\",\n", video_name);
   printf("\t\"threadCount\" : %u,\n", threads);

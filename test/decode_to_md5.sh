@@ -44,8 +44,8 @@ decode_to_md5() {
 
   [ -e "${output_file}" ] || return 1
 
-  local md5_last_frame=$(tail -n1 "${output_file}")
-  local actual_md5=$(echo "${md5_last_frame% *}" | tr -d [:space:])
+  local md5_last_frame="$(tail -n1 "${output_file}" | awk '{print $1}')"
+  local actual_md5="$(echo "${md5_last_frame}" | awk '{print $1}')"
   [ "${actual_md5}" = "${expected_md5}" ] || return 1
 }
 

@@ -84,6 +84,8 @@ int vp8_yv12_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
     ybf->y_height = aligned_height;
     ybf->y_stride = y_stride;
 
+    ybf->uv_crop_width = (width + 1) / 2;
+    ybf->uv_crop_height = (height + 1) / 2;
     ybf->uv_width = uv_width;
     ybf->uv_height = uv_height;
     ybf->uv_stride = uv_stride;
@@ -216,7 +218,7 @@ int vp9_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
       if (!ybf->buffer_alloc)
         return -1;
 
-      ybf->buffer_alloc_sz = frame_size;
+      ybf->buffer_alloc_sz = (int)frame_size;
 
       // This memset is needed for fixing valgrind error from C loop filter
       // due to access uninitialized memory in frame border. It could be
@@ -245,7 +247,7 @@ int vp9_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
     ybf->uv_stride = uv_stride;
 
     ybf->border = border;
-    ybf->frame_size = frame_size;
+    ybf->frame_size = (int)frame_size;
 #if CONFIG_VP9_HIGH
     if (use_high) {
       // Store uint16 addresses when using 16bit framebuffers

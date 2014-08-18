@@ -252,7 +252,7 @@ tolower(){
 #
 source_path=${0%/*}
 enable_feature source_path_used
-if test -z "$source_path" -o "$source_path" = "." ; then
+if [ -z "$source_path" ] || [ "$source_path" = "." ]; then
     source_path="`pwd`"
     disable_feature source_path_used
 fi
@@ -381,8 +381,8 @@ EOF
 
 # tests for -m$1 toggling the feature given in $2. If $2 is empty $1 is used.
 check_gcc_machine_option() {
-    local opt="$1"
-    local feature="$2"
+    opt="$1"
+    feature="$2"
     [ -n "$feature" ] || feature="$opt"
 
     if enabled gcc && ! disabled "$feature" && ! check_cflags "-m$opt"; then
@@ -419,8 +419,8 @@ true
 }
 
 write_common_target_config_mk() {
-    local CC="${CC}"
-    local CXX="${CXX}"
+    saved_CC="${CC}"
+    saved_CXX="${CXX}"
     enabled ccache && CC="ccache ${CC}"
     enabled ccache && CXX="ccache ${CXX}"
     print_webm_license $1 "##" ""
@@ -470,6 +470,8 @@ EOF
 
     enabled msvs && echo "CONFIG_VS_VERSION=${vs_version}" >> "${1}"
 
+    CC="${saved_CC}"
+    CXX="${saved_CXX}"
 }
 
 
@@ -547,7 +549,8 @@ process_common_cmdline() {
         alt_libc="${optval}"
         ;;
         --as=*)
-        [ "${optval}" = yasm -o "${optval}" = nasm -o "${optval}" = auto ] \
+        [ "${optval}" = yasm ] || [ "${optval}" = nasm ] \
+            || [ "${optval}" = auto ] \
             || die "Must be yasm, nasm or auto: ${optval}"
         alt_as="${optval}"
         ;;
@@ -555,8 +558,8 @@ process_common_cmdline() {
         w="${optval%%x*}"
         h="${optval##*x}"
         VAR_LIST="DECODE_WIDTH_LIMIT ${w} DECODE_HEIGHT_LIMIT ${h}"
-        [ ${w} -gt 0 -a ${h} -gt 0 ] || die "Invalid size-limit: too small."
-        [ ${w} -lt 65536 -a ${h} -lt 65536 ] \
+        [ ${w} -gt 0 ] && [ ${h} -gt 0 ] || die "Invalid size-limit: too small."
+        [ ${w} -lt 65536 ] && [ ${h} -lt 65536 ] \
             || die "Invalid size-limit: too big."
         enable_feature size_limit
         ;;
@@ -1150,7 +1153,7 @@ EOF
             auto|"")
                 which nasm >/dev/null 2>&1 && AS=nasm
                 which yasm >/dev/null 2>&1 && AS=yasm
-                [ "${AS}" = auto -o -z "${AS}" ] \
+                [ "${AS}" = auto ] || [ -z "${AS}" ] \
                     && die "Neither yasm nor nasm have been found"
             ;;
         esac
@@ -1222,7 +1225,12 @@ EOF
         fi
     fi
 
-    enabled debug && check_add_cflags -g && check_add_ldflags -g
+    if enabled debug; then
+        check_add_cflags -g && check_add_ldflags -g
+    else
+        check_add_cflags -DNDEBUG
+    fi
+
     enabled gprof && check_add_cflags -pg && check_add_ldflags -pg
     enabled gcov &&
         check_add_cflags -fprofile-arcs -ftest-coverage &&
@@ -1309,8 +1317,9 @@ process_toolchain() {
 }
 
 print_config_mk() {
-    local prefix=$1
-    local makefile=$2
+    saved_prefix="${prefix}"
+    prefix=$1
+    makefile=$2
     shift 2
     for cfg; do
         if enabled $cfg; then
@@ -1318,11 +1327,13 @@ print_config_mk() {
             echo "${prefix}_${upname}=yes" >> $makefile
         fi
     done
+    prefix="${saved_prefix}"
 }
 
 print_config_h() {
-    local prefix=$1
-    local header=$2
+    saved_prefix="${prefix}"
+    prefix=$1
+    header=$2
     shift 2
     for cfg; do
         upname="`toupper $cfg`"
@@ -1332,10 +1343,11 @@ print_config_h() {
             echo "#define ${prefix}_${upname} 0" >> $header
         fi
     done
+    prefix="${saved_prefix}"
 }
 
 print_config_vars_h() {
-    local header=$1
+    header=$1
     shift
     while [ $# -gt 0 ]; do
         upname="`toupper $1`"
@@ -1345,9 +1357,10 @@ print_config_vars_h() {
 }
 
 print_webm_license() {
-    local destination=$1
-    local prefix="$2"
-    local suffix="$3"
+    saved_prefix="${prefix}"
+    destination=$1
+    prefix="$2"
+    suffix="$3"
     shift 3
     cat <<EOF > ${destination}
 ${prefix} Copyright (c) 2011 The WebM project authors. All Rights Reserved.${suffix}
@@ -1358,6 +1371,7 @@ ${prefix} tree. An additional intellectual property rights grant can be found${s
 ${prefix} in the file PATENTS.  All contributing project authors may${suffix}
 ${prefix} be found in the AUTHORS file in the root of the source tree.${suffix}
 EOF
+    prefix="${saved_prefix}"
 }
 
 process_targets() {

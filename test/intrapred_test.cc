@@ -216,16 +216,16 @@ class IntraPredBase {
   int num_planes_;
 };
 
-typedef void (*intra_pred_y_fn_t)(MACROBLOCKD *x,
-                                  uint8_t *yabove_row,
-                                  uint8_t *yleft,
-                                  int left_stride,
-                                  uint8_t *ypred_ptr,
-                                  int y_stride);
+typedef void (*IntraPredYFunc)(MACROBLOCKD *x,
+                               uint8_t *yabove_row,
+                               uint8_t *yleft,
+                               int left_stride,
+                               uint8_t *ypred_ptr,
+                               int y_stride);
 
 class IntraPredYTest
     : public IntraPredBase,
-      public ::testing::TestWithParam<intra_pred_y_fn_t> {
+      public ::testing::TestWithParam<IntraPredYFunc> {
  public:
   static void SetUpTestCase() {
     mb_ = reinterpret_cast<MACROBLOCKD*>(
@@ -267,7 +267,7 @@ class IntraPredYTest
                                       data_ptr_[0], kStride));
   }
 
-  intra_pred_y_fn_t pred_fn_;
+  IntraPredYFunc pred_fn_;
   static uint8_t* data_array_;
   static MACROBLOCKD * mb_;
   static MODE_INFO *mi_;
@@ -295,19 +295,19 @@ INSTANTIATE_TEST_CASE_P(SSSE3, IntraPredYTest,
                             vp8_build_intra_predictors_mby_s_ssse3));
 #endif
 
-typedef void (*intra_pred_uv_fn_t)(MACROBLOCKD *x,
-                                   uint8_t *uabove_row,
-                                   uint8_t *vabove_row,
-                                   uint8_t *uleft,
-                                   uint8_t *vleft,
-                                   int left_stride,
-                                   uint8_t *upred_ptr,
-                                   uint8_t *vpred_ptr,
-                                   int pred_stride);
+typedef void (*IntraPredUvFunc)(MACROBLOCKD *x,
+                                uint8_t *uabove_row,
+                                uint8_t *vabove_row,
+                                uint8_t *uleft,
+                                uint8_t *vleft,
+                                int left_stride,
+                                uint8_t *upred_ptr,
+                                uint8_t *vpred_ptr,
+                                int pred_stride);
 
 class IntraPredUVTest
     : public IntraPredBase,
-      public ::testing::TestWithParam<intra_pred_uv_fn_t> {
+      public ::testing::TestWithParam<IntraPredUvFunc> {
  public:
   static void SetUpTestCase() {
     mb_ = reinterpret_cast<MACROBLOCKD*>(
@@ -349,7 +349,7 @@ class IntraPredUVTest
              data_ptr_[0], data_ptr_[1], kStride);
   }
 
-  intra_pred_uv_fn_t pred_fn_;
+  IntraPredUvFunc pred_fn_;
   // We use 24 so that the data pointer of the first pixel in each row of
   // each macroblock is 8-byte aligned, and this gives us access to the
   // top-left and top-right corner pixels belonging to the top-left/right

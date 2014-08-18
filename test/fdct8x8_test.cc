@@ -65,15 +65,15 @@ void reference_8x8_dct_2d(const int16_t input[kNumCoeffs],
 using libvpx_test::ACMRandom;
 
 namespace {
-typedef void (*fdct_t)(const int16_t *in, tran_low_t *out, int stride);
-typedef void (*idct_t)(const tran_low_t *in, uint8_t *out, int stride);
-typedef void (*fht_t) (const int16_t *in, tran_low_t *out, int stride,
-                       int tx_type);
-typedef void (*iht_t) (const tran_low_t *in, uint8_t *out, int stride,
-                       int tx_type);
+typedef void (*FdctFunc)(const int16_t *in, tran_low_t *out, int stride);
+typedef void (*IdctFunc)(const tran_low_t *in, uint8_t *out, int stride);
+typedef void (*FhtFunc)(const int16_t *in, tran_low_t *out, int stride,
+                        int tx_type);
+typedef void (*IhtFunc)(const tran_low_t *in, uint8_t *out, int stride,
+                        int tx_type);
 
-typedef std::tr1::tuple<fdct_t, idct_t, int, int> dct_8x8_param_t;
-typedef std::tr1::tuple<fht_t, iht_t, int, int> ht_8x8_param_t;
+typedef std::tr1::tuple<FdctFunc, IdctFunc, int, int> Dct8x8Param;
+typedef std::tr1::tuple<FhtFunc, IhtFunc, int, int> Ht8x8Param;
 
 void fdct8x8_ref(const int16_t *in, tran_low_t *out, int stride, int tx_type) {
   vp9_fdct8x8_c(in, out, stride);
@@ -412,14 +412,14 @@ class FwdTrans8x8TestBase {
 
   int pitch_;
   int tx_type_;
-  fht_t fwd_txfm_ref;
+  FhtFunc fwd_txfm_ref;
   int bit_depth_;
   int mask_;
 };
 
 class FwdTrans8x8DCT
     : public FwdTrans8x8TestBase,
-      public ::testing::TestWithParam<dct_8x8_param_t> {
+      public ::testing::TestWithParam<Dct8x8Param> {
  public:
   virtual ~FwdTrans8x8DCT() {}
 
@@ -443,8 +443,8 @@ class FwdTrans8x8DCT
     inv_txfm_(out, dst, stride);
   }
 
-  fdct_t fwd_txfm_;
-  idct_t inv_txfm_;
+  FdctFunc fwd_txfm_;
+  IdctFunc inv_txfm_;
 };
 
 TEST_P(FwdTrans8x8DCT, SignBiasCheck) {
@@ -469,7 +469,7 @@ TEST_P(FwdTrans8x8DCT, InvAccuracyCheck) {
 
 class FwdTrans8x8HT
     : public FwdTrans8x8TestBase,
-      public ::testing::TestWithParam<ht_8x8_param_t> {
+      public ::testing::TestWithParam<Ht8x8Param> {
  public:
   virtual ~FwdTrans8x8HT() {}
 
@@ -493,8 +493,8 @@ class FwdTrans8x8HT
     inv_txfm_(out, dst, stride, tx_type_);
   }
 
-  fht_t fwd_txfm_;
-  iht_t inv_txfm_;
+  FhtFunc fwd_txfm_;
+  IhtFunc inv_txfm_;
 };
 
 TEST_P(FwdTrans8x8HT, SignBiasCheck) {
@@ -554,7 +554,7 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     NEON, FwdTrans8x8DCT,
     ::testing::Values(
-        make_tuple(&vp9_fdct8x8_c, &vp9_idct8x8_64_add_neon, 0, 8)));
+        make_tuple(&vp9_fdct8x8_neon, &vp9_idct8x8_64_add_neon, 0, 8)));
 INSTANTIATE_TEST_CASE_P(
     DISABLED_NEON, FwdTrans8x8HT,
     ::testing::Values(
@@ -583,19 +583,5 @@ INSTANTIATE_TEST_CASE_P(
     SSSE3, FwdTrans8x8DCT,
     ::testing::Values(
         make_tuple(&vp9_fdct8x8_ssse3, &vp9_idct8x8_64_add_ssse3, 0, 8)));
-#endif
-
-#if HAVE_AVX2 && !CONFIG_VP9_HIGH
-INSTANTIATE_TEST_CASE_P(
-    AVX2, FwdTrans8x8DCT,
-    ::testing::Values(
-        make_tuple(&vp9_fdct8x8_avx2, &vp9_idct8x8_64_add_c, 0, 8)));
-INSTANTIATE_TEST_CASE_P(
-    AVX2, FwdTrans8x8HT,
-    ::testing::Values(
-        make_tuple(&vp9_fht8x8_avx2, &vp9_iht8x8_64_add_c, 0, 8),
-        make_tuple(&vp9_fht8x8_avx2, &vp9_iht8x8_64_add_c, 1, 8),
-        make_tuple(&vp9_fht8x8_avx2, &vp9_iht8x8_64_add_c, 2, 8),
-        make_tuple(&vp9_fht8x8_avx2, &vp9_iht8x8_64_add_c, 3, 8)));
 #endif
 }  // namespace

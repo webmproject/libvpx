@@ -123,8 +123,12 @@ vpx_codec_err_t vp9_copy_reference_dec(VP9Decoder *pbi,
    * later commit that adds VP9-specific controls for this functionality.
    */
   if (ref_frame_flag == VP9_LAST_FLAG) {
-    const YV12_BUFFER_CONFIG *const cfg =
-        &cm->frame_bufs[cm->ref_frame_map[0]].buf;
+    const YV12_BUFFER_CONFIG *const cfg = get_ref_frame(cm, 0);
+    if (cfg == NULL) {
+      vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
+                         "No 'last' reference frame");
+      return VPX_CODEC_ERROR;
+    }
     if (!equal_dimensions(cfg, sd))
       vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
                          "Incorrect buffer dimensions");
@@ -179,17 +183,6 @@ vpx_codec_err_t vp9_set_reference_dec(VP9_COMMON *cm,
   }
 
   return cm->error.error_code;
-}
-
-
-int vp9_get_reference_dec(VP9Decoder *pbi, int index, YV12_BUFFER_CONFIG **fb) {
-  VP9_COMMON *cm = &pbi->common;
-
-  if (index < 0 || index >= REF_FRAMES)
-    return -1;
-
-  *fb = &cm->frame_bufs[cm->ref_frame_map[index]].buf;
-  return 0;
 }
 
 /* If any buffer updating is signaled it should be done here. */

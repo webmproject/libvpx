@@ -22,7 +22,6 @@
 #include "vp9/common/vp9_quant_common.h"
 #include "vp9/common/vp9_reconinter.h"  // vp9_setup_dst_planes()
 #include "vp9/common/vp9_systemdependent.h"
-
 #include "vp9/encoder/vp9_aq_variance.h"
 #include "vp9/encoder/vp9_block.h"
 #include "vp9/encoder/vp9_encodeframe.h"
@@ -56,7 +55,6 @@
 
 #define MIN_KF_BOOST        300
 #define MIN_GF_INTERVAL     4
-#define LONG_TERM_VBR_CORRECTION
 
 static void swap_yv12(YV12_BUFFER_CONFIG *a, YV12_BUFFER_CONFIG *b) {
   YV12_BUFFER_CONFIG temp = *a;
@@ -225,26 +223,6 @@ static void subtract_stats(FIRSTPASS_STATS *section,
   section->duration   -= frame->duration;
 }
 
-static void avg_stats(FIRSTPASS_STATS *section) {
-  if (section->count < 1.0)
-    return;
-
-  section->intra_error /= section->count;
-  section->coded_error /= section->count;
-  section->sr_coded_error /= section->count;
-  section->pcnt_inter  /= section->count;
-  section->pcnt_second_ref /= section->count;
-  section->pcnt_neutral /= section->count;
-  section->pcnt_motion /= section->count;
-  section->MVr        /= section->count;
-  section->mvr_abs     /= section->count;
-  section->MVc        /= section->count;
-  section->mvc_abs     /= section->count;
-  section->MVrv       /= section->count;
-  section->MVcv       /= section->count;
-  section->mv_in_out_count   /= section->count;
-  section->duration   /= section->count;
-}
 
 // Calculate a modified Error used in distributing bits between easier and
 // harder frames.
@@ -278,7 +256,7 @@ void vp9_init_first_pass(VP9_COMP *cpi) {
 }
 
 void vp9_end_first_pass(VP9_COMP *cpi) {
-  if (cpi->use_svc && cpi->svc.number_temporal_layers == 1) {
+  if (is_spatial_svc(cpi)) {
     int i;
     for (i = 0; i < cpi->svc.number_spatial_layers; ++i) {
       output_stats(&cpi->svc.layer_context[i].twopass.total_stats,
@@ -526,7 +504,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
   set_first_pass_params(cpi);
   vp9_set_quantizer(cm, find_fp_qindex(cm->bit_depth));
 
-  if (cpi->use_svc && cpi->svc.number_temporal_layers == 1) {
+  if (is_spatial_svc(cpi)) {
     MV_REFERENCE_FRAME ref_frame = LAST_FRAME;
     const YV12_BUFFER_CONFIG *scaled_ref_buf = NULL;
     twopass = &cpi->svc.layer_context[cpi->svc.spatial_layer_id].twopass;
@@ -613,6 +591,9 @@ void vp9_first_pass(VP9_COMP *cpi) {
       const int use_dc_pred = (mb_col || mb_row) && (!mb_col || !mb_row);
       double error_weight = 1.0;
       const BLOCK_SIZE bsize = get_bsize(cm, mb_row, mb_col);
+#if CONFIG_FP_MB_STATS
+      const int mb_index = mb_row * cm->mb_cols + mb_col;
+#endif
 
       vp9_clear_system_state();
 
@@ -676,7 +657,8 @@ void vp9_first_pass(VP9_COMP *cpi) {
 
 #if CONFIG_FP_MB_STATS
       if (cpi->use_fp_mb_stats) {
-        // TODO(pengchong): store some related block statistics here
+        // initialization
+        cpi->twopass.frame_mb_stats_buf[mb_index] = 0;
       }
 #endif
 
@@ -727,8 +709,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
                                                 &unscaled_last_source_buf_2d);
 #endif
         // TODO(pengchong): Replace the hard-coded threshold
-        if (raw_motion_error > 25 ||
-            (cpi->use_svc && cpi->svc.number_temporal_layers == 1)) {
+        if (raw_motion_error > 25 || is_spatial_svc(cpi)) {
           // Test last reference frame using the previous best mv as the
           // starting point (best reference) for the search.
           first_pass_motion_search(cpi, x, &best_ref_mv.as_mv, &mv.as_mv,
@@ -805,6 +786,20 @@ void vp9_first_pass(VP9_COMP *cpi) {
         // Start by assuming that intra mode is best.
         best_ref_mv.as_int = 0;
 
+#if CONFIG_FP_MB_STATS
+        if (cpi->use_fp_mb_stats) {
+          // intra predication statistics
+          cpi->twopass.frame_mb_stats_buf[mb_index] = 0;
+          cpi->twopass.frame_mb_stats_buf[mb_index] |= FPMB_DCINTRA_MASK;
+          cpi->twopass.frame_mb_stats_buf[mb_index] |= FPMB_MOTION_ZERO_MASK;
+          if (this_error > FPMB_ERROR_LARGE_TH) {
+            cpi->twopass.frame_mb_stats_buf[mb_index] |= FPMB_ERROR_LARGE_MASK;
+          } else if (this_error < FPMB_ERROR_SMALL_TH) {
+            cpi->twopass.frame_mb_stats_buf[mb_index] |= FPMB_ERROR_SMALL_MASK;
+          }
+        }
+#endif
+
         if (motion_error <= this_error) {
           // Keep a count of cases where the inter and intra were very close
           // and very low. This helps with scene cut detection for example in
@@ -835,12 +830,49 @@ void vp9_first_pass(VP9_COMP *cpi) {
 
 #if CONFIG_FP_MB_STATS
           if (cpi->use_fp_mb_stats) {
-            // TODO(pengchong): save some related block statistics here
+            // inter predication statistics
+            cpi->twopass.frame_mb_stats_buf[mb_index] = 0;
+            cpi->twopass.frame_mb_stats_buf[mb_index] &= ~FPMB_DCINTRA_MASK;
+            cpi->twopass.frame_mb_stats_buf[mb_index] |= FPMB_MOTION_ZERO_MASK;
+            if (this_error > FPMB_ERROR_LARGE_TH) {
+              cpi->twopass.frame_mb_stats_buf[mb_index] |=
+                  FPMB_ERROR_LARGE_MASK;
+            } else if (this_error < FPMB_ERROR_SMALL_TH) {
+              cpi->twopass.frame_mb_stats_buf[mb_index] |=
+                  FPMB_ERROR_SMALL_MASK;
+            }
           }
 #endif
 
           if (mv.as_int) {
             ++mvcount;
+
+#if CONFIG_FP_MB_STATS
+            if (cpi->use_fp_mb_stats) {
+              cpi->twopass.frame_mb_stats_buf[mb_index] &=
+                  ~FPMB_MOTION_ZERO_MASK;
+              // check estimated motion direction
+              if (mv.as_mv.col > 0 && mv.as_mv.col >= abs(mv.as_mv.row)) {
+                // right direction
+                cpi->twopass.frame_mb_stats_buf[mb_index] |=
+                    FPMB_MOTION_RIGHT_MASK;
+              } else if (mv.as_mv.row < 0 &&
+                         abs(mv.as_mv.row) >= abs(mv.as_mv.col)) {
+                // up direction
+                cpi->twopass.frame_mb_stats_buf[mb_index] |=
+                    FPMB_MOTION_UP_MASK;
+              } else if (mv.as_mv.col < 0 &&
+                         abs(mv.as_mv.col) >= abs(mv.as_mv.row)) {
+                // left direction
+                cpi->twopass.frame_mb_stats_buf[mb_index] |=
+                    FPMB_MOTION_LEFT_MASK;
+              } else {
+                // down direction
+                cpi->twopass.frame_mb_stats_buf[mb_index] |=
+                    FPMB_MOTION_DOWN_MASK;
+              }
+            }
+#endif
 
             // Non-zero vector, was it different from the last non zero vector?
             if (mv.as_int != lastmv_as_int)
@@ -968,7 +1000,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
 
   vp9_extend_frame_borders(new_yv12);
 
-  if (cpi->use_svc && cpi->svc.number_temporal_layers == 1) {
+  if (is_spatial_svc(cpi)) {
     vp9_update_reference_frames(cpi);
   } else {
     // Swap frame pointers so last frame refers to the frame we just compressed.
@@ -1035,13 +1067,11 @@ static int get_twopass_worst_quality(const VP9_COMP *cpi,
     const double err_per_mb = section_err / num_mbs;
     const double speed_term = 1.0 + 0.04 * oxcf->speed;
     const int target_norm_bits_per_mb = ((uint64_t)section_target_bandwidth <<
-                                            BPER_MB_NORMBITS) / num_mbs;
+                                         BPER_MB_NORMBITS) / num_mbs;
     int q;
     int is_svc_upper_layer = 0;
-    if (cpi->use_svc && cpi->svc.number_temporal_layers == 1 &&
-        cpi->svc.spatial_layer_id > 0) {
+    if (is_spatial_svc(cpi) && cpi->svc.spatial_layer_id > 0)
       is_svc_upper_layer = 1;
-    }
 
     // Try and pick a max Q that will be high enough to encode the
     // content at the given rate.
@@ -1156,6 +1186,19 @@ static double get_prediction_decay_rate(const VP9_COMMON *cm,
 
   return MIN(second_ref_decay, next_frame->pcnt_inter);
 }
+
+// This function gives an estimate of how badly we believe the prediction
+// quality is decaying from frame to frame.
+static double get_zero_motion_factor(const VP9_COMMON *cm,
+                                     const FIRSTPASS_STATS *frame) {
+  const double sr_ratio = frame->coded_error /
+                          DOUBLE_DIVIDE_CHECK(frame->sr_coded_error);
+  const double zero_motion_pct = frame->pcnt_inter -
+                                 frame->pcnt_motion;
+
+  return MIN(sr_ratio, zero_motion_pct);
+}
+
 
 // Function to test for a condition where a complex transition is followed
 // by a static section. For example in slide shows where there is a fade
@@ -1681,11 +1724,9 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       decay_accumulator = decay_accumulator * loop_decay_rate;
 
       // Monitor for static sections.
-      if ((next_frame.pcnt_inter - next_frame.pcnt_motion) <
-          zero_motion_accumulator) {
-        zero_motion_accumulator = next_frame.pcnt_inter -
-                                      next_frame.pcnt_motion;
-      }
+      zero_motion_accumulator =
+        MIN(zero_motion_accumulator,
+            get_zero_motion_factor(&cpi->common, &next_frame));
 
       // Break clause to detect very still sections after motion. For example,
       // a static image after a fade or other transition.
@@ -2056,11 +2097,9 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       break;
 
     // Monitor for static sections.
-    if ((next_frame.pcnt_inter - next_frame.pcnt_motion) <
-            zero_motion_accumulator) {
-      zero_motion_accumulator = (next_frame.pcnt_inter -
-                                     next_frame.pcnt_motion);
-    }
+    zero_motion_accumulator =
+      MIN(zero_motion_accumulator,
+          get_zero_motion_factor(&cpi->common, &next_frame));
 
     // For the first few frames collect data to decide kf boost.
     if (i <= (rc->max_gf_interval * 2)) {
@@ -2175,9 +2214,11 @@ void configure_buffer_updates(VP9_COMP *cpi) {
       break;
     default:
       assert(0);
+      break;
   }
-  if (cpi->use_svc && cpi->svc.number_temporal_layers == 1) {
-    cpi->refresh_golden_frame = 0;
+  if (is_spatial_svc(cpi)) {
+    if (cpi->svc.layer_context[cpi->svc.spatial_layer_id].gold_ref_idx < 0)
+      cpi->refresh_golden_frame = 0;
     if (cpi->alt_ref_source == NULL)
       cpi->refresh_alt_ref_frame = 0;
   }
@@ -2194,9 +2235,8 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
 
   int target_rate;
   LAYER_CONTEXT *lc = NULL;
-  const int is_spatial_svc = (cpi->use_svc &&
-                              cpi->svc.number_temporal_layers == 1);
-  if (is_spatial_svc) {
+
+  if (is_spatial_svc(cpi)) {
     lc = &cpi->svc.layer_context[cpi->svc.spatial_layer_id];
     frames_left = (int)(twopass->total_stats.count -
                   lc->current_video_frame_in_layer);
@@ -2216,15 +2256,15 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
     target_rate = twopass->gf_group.bit_allocation[twopass->gf_group.index];
     target_rate = vp9_rc_clamp_pframe_target_size(cpi, target_rate);
     rc->base_frame_target = target_rate;
-#ifdef LONG_TERM_VBR_CORRECTION
+
     // Correction to rate target based on prior over or under shoot.
     if (cpi->oxcf.rc_mode == VPX_VBR)
       vbr_rate_correction(&target_rate, rc->vbr_bits_off_target);
-#endif
+
     vp9_rc_set_frame_target(cpi, target_rate);
     cm->frame_type = INTER_FRAME;
 
-    if (is_spatial_svc) {
+    if (is_spatial_svc(cpi)) {
       if (cpi->svc.spatial_layer_id == 0) {
         lc->is_key_frame = 0;
       } else {
@@ -2240,7 +2280,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
 
   vp9_clear_system_state();
 
-  if (is_spatial_svc && twopass->kf_intra_err_min == 0) {
+  if (is_spatial_svc(cpi) && twopass->kf_intra_err_min == 0) {
     twopass->kf_intra_err_min = KF_MB_INTRA_MIN * cpi->common.MBs;
     twopass->gf_intra_err_min = GF_MB_INTRA_MIN * cpi->common.MBs;
   }
@@ -2248,7 +2288,8 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
   if (cpi->oxcf.rc_mode == VPX_Q) {
     twopass->active_worst_quality = cpi->oxcf.cq_level;
   } else if (cm->current_video_frame == 0 ||
-             (is_spatial_svc && lc->current_video_frame_in_layer == 0)) {
+             (is_spatial_svc(cpi) &&
+              lc->current_video_frame_in_layer == 0)) {
     // Special case code for first frame.
     const int section_target_bandwidth = (int)(twopass->bits_left /
                                                frames_left);
@@ -2274,9 +2315,12 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
     cm->frame_type = INTER_FRAME;
   }
 
-  if (is_spatial_svc) {
+  if (is_spatial_svc(cpi)) {
     if (cpi->svc.spatial_layer_id == 0) {
       lc->is_key_frame = (cm->frame_type == KEY_FRAME);
+      if (lc->is_key_frame)
+        cpi->ref_frame_flags &=
+            (~VP9_LAST_FLAG & ~VP9_GOLD_FLAG & ~VP9_ALT_FLAG);
     } else {
       cm->frame_type = INTER_FRAME;
       lc->is_key_frame = cpi->svc.layer_context[0].is_key_frame;
@@ -2302,7 +2346,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
     }
 
     rc->frames_till_gf_update_due = rc->baseline_gf_interval;
-    if (!is_spatial_svc)
+    if (!is_spatial_svc(cpi))
       cpi->refresh_golden_frame = 1;
   }
 
@@ -2315,11 +2359,11 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
     target_rate = vp9_rc_clamp_pframe_target_size(cpi, target_rate);
 
   rc->base_frame_target = target_rate;
-#ifdef LONG_TERM_VBR_CORRECTION
+
   // Correction to rate target based on prior over or under shoot.
   if (cpi->oxcf.rc_mode == VPX_VBR)
     vbr_rate_correction(&target_rate, rc->vbr_bits_off_target);
-#endif
+
   vp9_rc_set_frame_target(cpi, target_rate);
 
   // Update the total stats remaining structure.
@@ -2329,45 +2373,19 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
 void vp9_twopass_postencode_update(VP9_COMP *cpi) {
   TWO_PASS *const twopass = &cpi->twopass;
   RATE_CONTROL *const rc = &cpi->rc;
-#ifdef LONG_TERM_VBR_CORRECTION
-  // In this experimental mode, the VBR correction is done exclusively through
-  // rc->vbr_bits_off_target. Based on the sign of this value, a limited %
-  // adjustment is made to the target rate of subsequent frames, to try and
-  // push it back towards 0. This mode is less likely to suffer from
-  // extreme behaviour at the end of a clip or group of frames.
+
+  // VBR correction is done through rc->vbr_bits_off_target. Based on the
+  // sign of this value, a limited % adjustment is made to the target rate
+  // of subsequent frames, to try and push it back towards 0. This method
+  // is designed to prevent extreme behaviour at the end of a clip
+  // or group of frames.
   const int bits_used = rc->base_frame_target;
   rc->vbr_bits_off_target += rc->base_frame_target - rc->projected_frame_size;
-#else
-  // In this mode, VBR correction is acheived by altering bits_left,
-  // kf_group_bits & gf_group_bits to reflect any deviation from the target
-  // rate in this frame. This alters the allocation of bits to the
-  // remaning frames in the group / clip.
-  //
-  // This method can give rise to unstable behaviour near the end of a clip
-  // or kf/gf group of frames where any accumulated error is corrected over an
-  // ever decreasing number of frames. Hence we change the balance of target
-  // vs. actual bitrate gradually as we progress towards the end of the
-  // sequence in order to mitigate this effect.
-  const double progress =
-      (double)(twopass->stats_in - twopass->stats_in_start) /
-              (twopass->stats_in_end - twopass->stats_in_start);
-  const int bits_used = (int)(progress * rc->this_frame_target +
-                             (1.0 - progress) * rc->projected_frame_size);
-#endif
 
   twopass->bits_left = MAX(twopass->bits_left - bits_used, 0);
 
-#ifdef LONG_TERM_VBR_CORRECTION
   if (cpi->common.frame_type != KEY_FRAME &&
       !vp9_is_upper_layer_key_frame(cpi)) {
-#else
-  if (cpi->common.frame_type == KEY_FRAME ||
-      vp9_is_upper_layer_key_frame(cpi)) {
-    // For key frames kf_group_bits already had the target bits subtracted out.
-    // So now update to the correct value based on the actual bits used.
-    twopass->kf_group_bits += rc->this_frame_target - bits_used;
-  } else {
-#endif
     twopass->kf_group_bits -= bits_used;
   }
   twopass->kf_group_bits = MAX(twopass->kf_group_bits, 0);

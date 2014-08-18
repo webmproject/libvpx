@@ -34,7 +34,7 @@ typedef struct {
   int is_coded;
   int num_4x4_blk;
   int skip;
-  int skip_txfm;
+  int skip_txfm[MAX_MB_PLANE];
   int best_mode_index;
   int hybrid_pred_diff;
   int comp_pred_diff;
@@ -42,7 +42,7 @@ typedef struct {
   int64_t tx_rd_diff[TX_MODES];
   int64_t best_filter_diff[SWITCHABLE_FILTER_CONTEXTS];
 
-#if CONFIG_DENOISING
+#if CONFIG_VP9_TEMPORAL_DENOISING
   unsigned int newmv_sse;
   unsigned int zeromv_sse;
   PREDICTION_MODE best_sse_inter_mode;

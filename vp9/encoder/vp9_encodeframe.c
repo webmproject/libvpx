@@ -247,11 +247,9 @@ static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
   }
 }
 
-static void duplicate_mode_info_in_sb(VP9_COMMON * const cm,
-                                     MACROBLOCKD *const xd,
-                                     int mi_row,
-                                     int mi_col,
-                                     BLOCK_SIZE bsize) {
+static void duplicate_mode_info_in_sb(VP9_COMMON *cm, MACROBLOCKD *xd,
+                                      int mi_row, int mi_col,
+                                      BLOCK_SIZE bsize) {
   const int block_width = num_8x8_blocks_wide_lookup[bsize];
   const int block_height = num_8x8_blocks_high_lookup[bsize];
   int i, j;
@@ -319,6 +317,8 @@ typedef enum {
 
 static void tree_to_node(void *data, BLOCK_SIZE bsize, variance_node *node) {
   int i;
+  node->part_variances = NULL;
+  vpx_memset(node->split, 0, sizeof(node->split));
   switch (bsize) {
     case BLOCK_64X64: {
       v64x64 *vt = (v64x64 *) data;
@@ -350,6 +350,7 @@ static void tree_to_node(void *data, BLOCK_SIZE bsize, variance_node *node) {
     }
     default: {
       assert(0);
+      break;
     }
   }
 }
@@ -612,10 +613,9 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
     }
     // Else for cyclic refresh mode update the segment map, set the segment id
     // and then update the quantizer.
-    else if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) {
+    if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) {
       vp9_cyclic_refresh_update_segment(cpi, &xd->mi[0]->mbmi,
                                         mi_row, mi_col, bsize, 1);
-      vp9_init_plane_quantizers(cpi, x);
     }
   }
 
@@ -712,10 +712,8 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
 
 void vp9_setup_src_planes(MACROBLOCK *x, const YV12_BUFFER_CONFIG *src,
                           int mi_row, int mi_col) {
-  uint8_t *const buffers[4] = {src->y_buffer, src->u_buffer, src->v_buffer,
-                               src->alpha_buffer};
-  const int strides[4] = {src->y_stride, src->uv_stride, src->uv_stride,
-                          src->alpha_stride};
+  uint8_t *const buffers[3] = {src->y_buffer, src->u_buffer, src->v_buffer };
+  const int strides[3] = {src->y_stride, src->uv_stride, src->uv_stride };
   int i;
 
   // Set current frame pointer.
@@ -882,9 +880,7 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
   }
 }
 
-static void update_stats(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
-  const MACROBLOCK *const x = &cpi->mb;
+static void update_stats(VP9_COMMON *cm, const MACROBLOCK *x) {
   const MACROBLOCKD *const xd = &x->e_mbd;
   const MODE_INFO *const mi = xd->mi[0];
   const MB_MODE_INFO *const mbmi = &mi->mbmi;
@@ -996,7 +992,7 @@ static void encode_b(VP9_COMP *cpi, const TileInfo *const tile,
   encode_superblock(cpi, tp, output_enabled, mi_row, mi_col, bsize, ctx);
 
   if (output_enabled) {
-    update_stats(cpi);
+    update_stats(&cpi->common, &cpi->mb);
 
     (*tp)->token = EOSB_TOKEN;
     (*tp)++;
@@ -1069,6 +1065,7 @@ static void encode_sb(VP9_COMP *cpi, const TileInfo *const tile,
       break;
     default:
       assert("Invalid partition type.");
+      break;
   }
 
   if (partition != PARTITION_SPLIT || bsize == BLOCK_8X8)
@@ -1405,19 +1402,17 @@ static void update_state_rt(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   }
 
   x->skip = ctx->skip;
-  x->skip_txfm = mbmi->segment_id ? 0 : ctx->skip_txfm;
+  x->skip_txfm[0] = mbmi->segment_id ? 0 : ctx->skip_txfm[0];
 }
 
 static void encode_b_rt(VP9_COMP *cpi, const TileInfo *const tile,
                         TOKENEXTRA **tp, int mi_row, int mi_col,
                      int output_enabled, BLOCK_SIZE bsize,
                      PICK_MODE_CONTEXT *ctx) {
-
-
   set_offsets(cpi, tile, mi_row, mi_col, bsize);
   update_state_rt(cpi, ctx, mi_row, mi_col, bsize);
 
-#if CONFIG_DENOISING
+#if CONFIG_VP9_TEMPORAL_DENOISING
   if (cpi->oxcf.noise_sensitivity > 0 && output_enabled) {
     vp9_denoiser_denoise(&cpi->denoiser, &cpi->mb, mi_row, mi_col,
                          MAX(BLOCK_8X8, bsize), ctx);
@@ -1425,7 +1420,7 @@ static void encode_b_rt(VP9_COMP *cpi, const TileInfo *const tile,
 #endif
 
   encode_superblock(cpi, tp, output_enabled, mi_row, mi_col, bsize, ctx);
-  update_stats(cpi);
+  update_stats(&cpi->common, &cpi->mb);
 
   (*tp)->token = EOSB_TOKEN;
   (*tp)++;
@@ -1448,7 +1443,6 @@ static void encode_sb_rt(VP9_COMP *cpi, const TileInfo *const tile,
     return;
 
   if (bsize >= BLOCK_8X8) {
-    MACROBLOCKD *const xd = &cpi->mb.e_mbd;
     const int idx_str = xd->mi_stride * mi_row + mi_col;
     MODE_INFO ** mi_8x8 = cm->mi_grid_visible + idx_str;
     ctx = partition_plane_context(xd, mi_row, mi_col, bsize);
@@ -1496,6 +1490,7 @@ static void encode_sb_rt(VP9_COMP *cpi, const TileInfo *const tile,
       break;
     default:
       assert("Invalid partition type.");
+      break;
   }
 
   if (partition != PARTITION_SPLIT || bsize == BLOCK_8X8)
@@ -1547,7 +1542,7 @@ static void rd_use_partition(VP9_COMP *cpi,
   pc_tree->partitioning = partition;
   save_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
 
-  if (bsize == BLOCK_16X16) {
+  if (bsize == BLOCK_16X16 && cpi->oxcf.aq_mode) {
     set_offsets(cpi, tile, mi_row, mi_col, bsize);
     x->mb_energy = vp9_block_energy(cpi, x, bsize);
   }
@@ -1674,6 +1669,7 @@ static void rd_use_partition(VP9_COMP *cpi,
       break;
     default:
       assert(0);
+      break;
   }
 
   pl = partition_plane_context(xd, mi_row, mi_col, bsize);
@@ -1809,10 +1805,9 @@ static const BLOCK_SIZE max_partition_size[BLOCK_SIZES] = {
 //
 // The min and max are assumed to have been initialized prior to calling this
 // function so repeat calls can accumulate a min and max of more than one sb64.
-static void get_sb_partition_size_range(VP9_COMP *cpi, MODE_INFO ** mi_8x8,
-                                        BLOCK_SIZE * min_block_size,
-                                        BLOCK_SIZE * max_block_size ) {
-  MACROBLOCKD *const xd = &cpi->mb.e_mbd;
+static void get_sb_partition_size_range(MACROBLOCKD *xd, MODE_INFO **mi_8x8,
+                                        BLOCK_SIZE *min_block_size,
+                                        BLOCK_SIZE *max_block_size ) {
   int sb_width_in_blocks = MI_BLOCK_SIZE;
   int sb_height_in_blocks  = MI_BLOCK_SIZE;
   int i, j;
@@ -1867,17 +1862,17 @@ static void rd_auto_partition_range(VP9_COMP *cpi, const TileInfo *const tile,
     if (cm->frame_type != KEY_FRAME) {
       MODE_INFO **const prev_mi =
           &cm->prev_mi_grid_visible[mi_row * xd->mi_stride + mi_col];
-      get_sb_partition_size_range(cpi, prev_mi, &min_size, &max_size);
+      get_sb_partition_size_range(xd, prev_mi, &min_size, &max_size);
     }
     // Find the min and max partition sizes used in the left SB64
     if (left_in_image) {
       MODE_INFO **left_sb64_mi = &mi[-MI_BLOCK_SIZE];
-      get_sb_partition_size_range(cpi, left_sb64_mi, &min_size, &max_size);
+      get_sb_partition_size_range(xd, left_sb64_mi, &min_size, &max_size);
     }
     // Find the min and max partition sizes used in the above SB64.
     if (above_in_image) {
       MODE_INFO **above_sb64_mi = &mi[-xd->mi_stride * MI_BLOCK_SIZE];
-      get_sb_partition_size_range(cpi, above_sb64_mi, &min_size, &max_size);
+      get_sb_partition_size_range(xd, above_sb64_mi, &min_size, &max_size);
     }
     // adjust observed min and max
     if (cpi->sf.auto_min_max_partition_size == RELAXED_NEIGHBORING_MIN_MAX) {
@@ -1920,7 +1915,7 @@ static void auto_partition_range(VP9_COMP *cpi, const TileInfo *const tile,
   BLOCK_SIZE max_size = BLOCK_8X8;
   int bsl = mi_width_log2(BLOCK_64X64);
   const int search_range_ctrl = (((mi_row + mi_col) >> bsl) +
-                                     get_chessboard_index(cm)) % 2;
+                       get_chessboard_index(cm->current_video_frame)) & 0x1;
   // Trap case where we do not have a prediction.
   if (search_range_ctrl &&
       (left_in_image || above_in_image || cm->frame_type != KEY_FRAME)) {
@@ -1964,6 +1959,60 @@ static void auto_partition_range(VP9_COMP *cpi, const TileInfo *const tile,
   *max_block_size = max_size;
 }
 
+// TODO(jingning) refactor functions setting partition search range
+static void set_partition_range(VP9_COMMON *cm, MACROBLOCKD *xd,
+                                int mi_row, int mi_col, BLOCK_SIZE bsize,
+                                BLOCK_SIZE *min_bs, BLOCK_SIZE *max_bs) {
+  int mi_width  = num_8x8_blocks_wide_lookup[bsize];
+  int mi_height = num_8x8_blocks_high_lookup[bsize];
+  int idx, idy;
+
+  MODE_INFO *mi;
+  MODE_INFO **prev_mi =
+      &cm->prev_mi_grid_visible[mi_row * cm->mi_stride + mi_col];
+  BLOCK_SIZE bs, min_size, max_size;
+
+  min_size = BLOCK_64X64;
+  max_size = BLOCK_4X4;
+
+  if (prev_mi) {
+    for (idy = 0; idy < mi_height; ++idy) {
+      for (idx = 0; idx < mi_width; ++idx) {
+        mi = prev_mi[idy * cm->mi_stride + idx];
+        bs = mi ? mi->mbmi.sb_type : bsize;
+        min_size = MIN(min_size, bs);
+        max_size = MAX(max_size, bs);
+      }
+    }
+  }
+
+  if (xd->left_available) {
+    for (idy = 0; idy < mi_height; ++idy) {
+      mi = xd->mi[idy * cm->mi_stride - 1];
+      bs = mi ? mi->mbmi.sb_type : bsize;
+      min_size = MIN(min_size, bs);
+      max_size = MAX(max_size, bs);
+    }
+  }
+
+  if (xd->up_available) {
+    for (idx = 0; idx < mi_width; ++idx) {
+      mi = xd->mi[idx - cm->mi_stride];
+      bs = mi ? mi->mbmi.sb_type : bsize;
+      min_size = MIN(min_size, bs);
+      max_size = MAX(max_size, bs);
+    }
+  }
+
+  if (min_size == max_size) {
+    min_size = min_partition_size[min_size];
+    max_size = max_partition_size[max_size];
+  }
+
+  *min_bs = min_size;
+  *max_bs = max_size;
+}
+
 static INLINE void store_pred_mv(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx) {
   vpx_memcpy(ctx->pred_mv, x->pred_mv, sizeof(x->pred_mv));
 }
@@ -1972,13 +2021,58 @@ static INLINE void load_pred_mv(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx) {
   vpx_memcpy(x->pred_mv, ctx->pred_mv, sizeof(x->pred_mv));
 }
 
+#if CONFIG_FP_MB_STATS
+const int num_16x16_blocks_wide_lookup[BLOCK_SIZES] =
+  {1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 4, 4};
+const int num_16x16_blocks_high_lookup[BLOCK_SIZES] =
+  {1, 1, 1, 1, 1, 1, 1, 2, 1, 2, 4, 2, 4};
+const int qindex_skip_threshold_lookup[BLOCK_SIZES] =
+  {0, 10, 10, 30, 40, 40, 60, 80, 80, 90, 100, 100, 120};
+const int qindex_split_threshold_lookup[BLOCK_SIZES] =
+  {0, 3, 3, 7, 15, 15, 30, 40, 40, 60, 80, 80, 120};
+const int complexity_16x16_blocks_threshold[BLOCK_SIZES] =
+  {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 4, 6};
+
+typedef enum {
+  MV_ZERO = 0,
+  MV_LEFT = 1,
+  MV_UP = 2,
+  MV_RIGHT = 3,
+  MV_DOWN = 4,
+  MV_INVALID
+} MOTION_DIRECTION;
+
+static INLINE MOTION_DIRECTION get_motion_direction_fp(uint8_t fp_byte) {
+  if (fp_byte & FPMB_MOTION_ZERO_MASK) {
+    return MV_ZERO;
+  } else if (fp_byte & FPMB_MOTION_LEFT_MASK) {
+    return MV_LEFT;
+  } else if (fp_byte & FPMB_MOTION_RIGHT_MASK) {
+    return MV_RIGHT;
+  } else if (fp_byte & FPMB_MOTION_UP_MASK) {
+    return MV_UP;
+  } else {
+    return MV_DOWN;
+  }
+}
+
+static INLINE int get_motion_inconsistency(MOTION_DIRECTION this_mv,
+                                           MOTION_DIRECTION that_mv) {
+  if (this_mv == that_mv) {
+    return 0;
+  } else {
+    return abs(this_mv - that_mv) == 2 ? 2 : 1;
+  }
+}
+#endif
+
 // TODO(jingning,jimbankoski,rbultje): properly skip partition types that are
 // unlikely to be selected depending on previous rate-distortion optimization
 // results, for encoding speed-up.
 static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
                               TOKENEXTRA **tp, int mi_row,
                               int mi_col, BLOCK_SIZE bsize, int *rate,
-                              int64_t *dist, int do_recon, int64_t best_rd,
+                              int64_t *dist, int64_t best_rd,
                               PC_TREE *pc_tree) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
@@ -1995,11 +2089,20 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
   int64_t sum_rd = 0;
   int do_split = bsize >= BLOCK_8X8;
   int do_rect = 1;
+
   // Override skipping rectangular partition operations for edge blocks
   const int force_horz_split = (mi_row + mi_step >= cm->mi_rows);
   const int force_vert_split = (mi_col + mi_step >= cm->mi_cols);
   const int xss = x->e_mbd.plane[1].subsampling_x;
   const int yss = x->e_mbd.plane[1].subsampling_y;
+
+  BLOCK_SIZE min_size = cpi->sf.min_partition_size;
+  BLOCK_SIZE max_size = cpi->sf.max_partition_size;
+
+#if CONFIG_FP_MB_STATS
+  unsigned int src_diff_var = UINT_MAX;
+  int none_complexity = 0;
+#endif
 
   int partition_none_allowed = !force_horz_split && !force_vert_split;
   int partition_horz_allowed = !force_vert_split && yss <= xss &&
@@ -2011,22 +2114,28 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
   assert(num_8x8_blocks_wide_lookup[bsize] ==
              num_8x8_blocks_high_lookup[bsize]);
 
-  if (bsize == BLOCK_16X16) {
-    set_offsets(cpi, tile, mi_row, mi_col, bsize);
+  set_offsets(cpi, tile, mi_row, mi_col, bsize);
+
+  if (bsize == BLOCK_16X16 && cpi->oxcf.aq_mode)
     x->mb_energy = vp9_block_energy(cpi, x, bsize);
+
+  if (cpi->sf.cb_partition_search && bsize == BLOCK_16X16) {
+    int cb_partition_search_ctrl = ((pc_tree->index == 0 || pc_tree->index == 3)
+        + get_chessboard_index(cm->current_video_frame)) & 0x1;
+
+    if (cb_partition_search_ctrl && bsize > min_size && bsize < max_size)
+      set_partition_range(cm, xd, mi_row, mi_col, bsize, &min_size, &max_size);
   }
+
   // Determine partition types in search according to the speed features.
   // The threshold set here has to be of square block size.
   if (cpi->sf.auto_min_max_partition_size) {
-    partition_none_allowed &= (bsize <= cpi->sf.max_partition_size &&
-                               bsize >= cpi->sf.min_partition_size);
-    partition_horz_allowed &= ((bsize <= cpi->sf.max_partition_size &&
-                                bsize >  cpi->sf.min_partition_size) ||
+    partition_none_allowed &= (bsize <= max_size && bsize >= min_size);
+    partition_horz_allowed &= ((bsize <= max_size && bsize > min_size) ||
                                 force_horz_split);
-    partition_vert_allowed &= ((bsize <= cpi->sf.max_partition_size &&
-                                bsize >  cpi->sf.min_partition_size) ||
+    partition_vert_allowed &= ((bsize <= max_size && bsize > min_size) ||
                                 force_vert_split);
-    do_split &= bsize > cpi->sf.min_partition_size;
+    do_split &= bsize > min_size;
   }
   if (cpi->sf.use_square_partition_only) {
     partition_horz_allowed &= force_horz_split;
@@ -2056,6 +2165,65 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     }
   }
 
+#if CONFIG_FP_MB_STATS
+  if (cpi->use_fp_mb_stats) {
+    set_offsets(cpi, tile, mi_row, mi_col, bsize);
+    src_diff_var = get_sby_perpixel_diff_variance(cpi, &cpi->mb.plane[0].src,
+                                                  mi_row, mi_col, bsize);
+  }
+#endif
+
+#if CONFIG_FP_MB_STATS
+  // Decide whether we shall split directly and skip searching NONE by using
+  // the first pass block statistics
+  if (cpi->use_fp_mb_stats && bsize >= BLOCK_32X32 && do_split &&
+      partition_none_allowed && src_diff_var > 4 &&
+      cm->base_qindex < qindex_split_threshold_lookup[bsize]) {
+    int mb_row = mi_row >> 1;
+    int mb_col = mi_col >> 1;
+    int mb_row_end =
+        MIN(mb_row + num_16x16_blocks_high_lookup[bsize], cm->mb_rows);
+    int mb_col_end =
+        MIN(mb_col + num_16x16_blocks_wide_lookup[bsize], cm->mb_cols);
+    int r, c;
+
+    // compute a complexity measure, basically measure inconsistency of motion
+    // vectors obtained from the first pass in the current block
+    for (r = mb_row; r < mb_row_end ; r++) {
+      for (c = mb_col; c < mb_col_end; c++) {
+        const int mb_index = r * cm->mb_cols + c;
+
+        MOTION_DIRECTION this_mv;
+        MOTION_DIRECTION right_mv;
+        MOTION_DIRECTION bottom_mv;
+
+        this_mv =
+            get_motion_direction_fp(cpi->twopass.this_frame_mb_stats[mb_index]);
+
+        // to its right
+        if (c != mb_col_end - 1) {
+          right_mv = get_motion_direction_fp(
+              cpi->twopass.this_frame_mb_stats[mb_index + 1]);
+          none_complexity += get_motion_inconsistency(this_mv, right_mv);
+        }
+
+        // to its bottom
+        if (r != mb_row_end - 1) {
+          bottom_mv = get_motion_direction_fp(
+              cpi->twopass.this_frame_mb_stats[mb_index + cm->mb_cols]);
+          none_complexity += get_motion_inconsistency(this_mv, bottom_mv);
+        }
+
+        // do not count its left and top neighbors to avoid double counting
+      }
+    }
+
+    if (none_complexity > complexity_16x16_blocks_threshold[bsize]) {
+      partition_none_allowed = 0;
+    }
+  }
+#endif
+
   // PARTITION_NONE
   if (partition_none_allowed) {
     rd_pick_sb_modes(cpi, tile, mi_row, mi_col, &this_rate, &this_dist, bsize,
@@ -2066,6 +2234,7 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
         this_rate += cpi->partition_cost[pl][PARTITION_NONE];
       }
       sum_rd = RDCOST(x->rdmult, x->rddiv, this_rate, this_dist);
+
       if (sum_rd < best_rd) {
         int64_t stop_thresh = 4096;
         int64_t stop_thresh_rd;
@@ -2087,6 +2256,52 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
           do_split = 0;
           do_rect = 0;
         }
+
+#if CONFIG_FP_MB_STATS
+        // Check if every 16x16 first pass block statistics has zero
+        // motion and the corresponding first pass residue is small enough.
+        // If that is the case, check the difference variance between the
+        // current frame and the last frame. If the variance is small enough,
+        // stop further splitting in RD optimization
+        if (cpi->use_fp_mb_stats && do_split != 0 &&
+            cm->base_qindex > qindex_skip_threshold_lookup[bsize]) {
+          int mb_row = mi_row >> 1;
+          int mb_col = mi_col >> 1;
+          int mb_row_end =
+              MIN(mb_row + num_16x16_blocks_high_lookup[bsize], cm->mb_rows);
+          int mb_col_end =
+              MIN(mb_col + num_16x16_blocks_wide_lookup[bsize], cm->mb_cols);
+          int r, c;
+
+          int skip = 1;
+          for (r = mb_row; r < mb_row_end; r++) {
+            for (c = mb_col; c < mb_col_end; c++) {
+              const int mb_index = r * cm->mb_cols + c;
+              if (!(cpi->twopass.this_frame_mb_stats[mb_index] &
+                    FPMB_MOTION_ZERO_MASK) ||
+                  !(cpi->twopass.this_frame_mb_stats[mb_index] &
+                    FPMB_ERROR_SMALL_MASK)) {
+                skip = 0;
+                break;
+              }
+            }
+            if (skip == 0) {
+              break;
+            }
+          }
+          if (skip) {
+            if (src_diff_var == UINT_MAX) {
+              set_offsets(cpi, tile, mi_row, mi_col, bsize);
+              src_diff_var = get_sby_perpixel_diff_variance(
+                  cpi, &cpi->mb.plane[0].src, mi_row, mi_col, bsize);
+            }
+            if (src_diff_var < 8) {
+              do_split = 0;
+              do_rect = 0;
+            }
+          }
+        }
+#endif
       }
     }
     restore_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
@@ -2109,17 +2324,10 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
             ctx->mic.mbmi.interp_filter;
       rd_pick_sb_modes(cpi, tile, mi_row, mi_col, &sum_rate, &sum_dist, subsize,
                        pc_tree->leaf_split[0], best_rd, 0);
-      if (sum_rate == INT_MAX) {
+      if (sum_rate == INT_MAX)
         sum_rd = INT64_MAX;
-      } else {
+      else
         sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
-        if (sum_rd < best_rd) {
-          update_state(cpi, pc_tree->leaf_split[0], mi_row, mi_col, subsize, 0);
-          encode_superblock(cpi, tp, 0, mi_row, mi_col, subsize,
-                            pc_tree->leaf_split[0]);
-          update_partition_context(xd, mi_row, mi_col, subsize, bsize);
-        }
-      }
     } else {
       for (i = 0; i < 4 && sum_rd < best_rd; ++i) {
       const int x_idx = (i & 1) * mi_step;
@@ -2131,8 +2339,9 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
         if (cpi->sf.adaptive_motion_search)
           load_pred_mv(x, ctx);
 
+        pc_tree->split[i]->index = i;
         rd_pick_partition(cpi, tile, tp, mi_row + y_idx, mi_col + x_idx,
-                          subsize, &this_rate, &this_dist, i != 3,
+                          subsize, &this_rate, &this_dist,
                           best_rd - sum_rd, pc_tree->split[i]);
 
         if (this_rate == INT_MAX) {
@@ -2149,6 +2358,7 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
       pl = partition_plane_context(xd, mi_row, mi_col, bsize);
       sum_rate += cpi->partition_cost[pl][PARTITION_SPLIT];
       sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
+
       if (sum_rd < best_rd) {
         best_rate = sum_rate;
         best_dist = sum_dist;
@@ -2261,6 +2471,7 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     }
     restore_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
   }
+
   // TODO(jbb): This code added so that we avoid static analysis
   // warning related to the fact that best_rd isn't used after this
   // point.  This code should be refactored so that the duplicate
@@ -2269,7 +2480,7 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
   *rate = best_rate;
   *dist = best_dist;
 
-  if (best_rate < INT_MAX && best_dist < INT64_MAX && do_recon) {
+  if (best_rate < INT_MAX && best_dist < INT64_MAX && pc_tree->index != 3) {
     int output_enabled = (bsize == BLOCK_64X64);
 
     // Check the projected output rate for this SB against it's target
@@ -2326,6 +2537,7 @@ static void encode_rd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
     }
 
     vp9_zero(cpi->mb.pred_mv);
+    cpi->pc_root->index = 0;
 
     if ((sf->partition_search_type == SEARCH_PARTITION &&
          sf->use_lastframe_partitioning) ||
@@ -2357,11 +2569,11 @@ static void encode_rd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
       } else {
         GF_GROUP * gf_grp = &cpi->twopass.gf_group;
         int last_was_mid_sequence_overlay = 0;
-        if ((cpi->pass == 2) && (gf_grp->index)) {
+        if ((cpi->oxcf.pass == 2) && (gf_grp->index)) {
           if (gf_grp->update_type[gf_grp->index - 1] == OVERLAY_UPDATE)
             last_was_mid_sequence_overlay = 1;
         }
-        if ((cm->current_video_frame
+        if ((cpi->rc.frames_since_key
             % sf->last_partitioning_redo_frequency) == 0
             || last_was_mid_sequence_overlay
             || cm->prev_mi == 0
@@ -2379,7 +2591,7 @@ static void encode_rd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
                                     &sf->max_partition_size);
           }
           rd_pick_partition(cpi, tile, tp, mi_row, mi_col, BLOCK_64X64,
-                            &dummy_rate, &dummy_dist, 1, INT64_MAX,
+                            &dummy_rate, &dummy_dist, INT64_MAX,
                             cpi->pc_root);
         } else {
           if (sf->constrain_copy_partition &&
@@ -2401,7 +2613,7 @@ static void encode_rd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
                                 &sf->max_partition_size);
       }
       rd_pick_partition(cpi, tile, tp, mi_row, mi_col, BLOCK_64X64,
-                        &dummy_rate, &dummy_dist, 1, INT64_MAX, cpi->pc_root);
+                        &dummy_rate, &dummy_dist, INT64_MAX, cpi->pc_root);
     }
   }
 }
@@ -2456,41 +2668,23 @@ static MV_REFERENCE_FRAME get_frame_type(const VP9_COMP *cpi) {
   else if (cpi->rc.is_src_frame_alt_ref && cpi->refresh_golden_frame)
     return ALTREF_FRAME;
   else if (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame)
-    return LAST_FRAME;
-  else
     return GOLDEN_FRAME;
+  else
+    return LAST_FRAME;
 }
 
 static TX_MODE select_tx_mode(const VP9_COMP *cpi) {
-  if (cpi->mb.e_mbd.lossless) {
+  if (cpi->mb.e_mbd.lossless)
     return ONLY_4X4;
-  } else if (cpi->common.current_video_frame == 0) {
+  if (cpi->common.frame_type == KEY_FRAME)
     return TX_MODE_SELECT;
-  } else {
-    if (cpi->sf.tx_size_search_method == USE_LARGESTALL) {
-      return ALLOW_32X32;
-    } else if (cpi->sf.tx_size_search_method == USE_FULL_RD) {
-      const RD_OPT *const rd_opt = &cpi->rd;
-      const MV_REFERENCE_FRAME frame_type = get_frame_type(cpi);
-      return rd_opt->tx_select_threshes[frame_type][ALLOW_32X32] >
-                 rd_opt->tx_select_threshes[frame_type][TX_MODE_SELECT] ?
-                     ALLOW_32X32 : TX_MODE_SELECT;
-    } else if (cpi->sf.tx_size_search_method == USE_TX_8X8) {
-      return TX_MODE_SELECT;
-    } else {
-      unsigned int total = 0;
-      int i;
-      for (i = 0; i < TX_SIZES; ++i)
-        total += cpi->tx_stepdown_count[i];
-
-      if (total) {
-        const double fraction = (double)cpi->tx_stepdown_count[0] / total;
-        return fraction > 0.90 ? ALLOW_32X32 : TX_MODE_SELECT;
-      } else {
-        return cpi->common.tx_mode;
-      }
-    }
-  }
+  if (cpi->sf.tx_size_search_method == USE_LARGESTALL)
+    return ALLOW_32X32;
+  else if (cpi->sf.tx_size_search_method == USE_FULL_RD||
+           cpi->sf.tx_size_search_method == USE_TX_8X8)
+    return TX_MODE_SELECT;
+  else
+    return cpi->common.tx_mode;
 }
 
 static void nonrd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
@@ -2579,6 +2773,8 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
                                  int mi_col, BLOCK_SIZE bsize, int *rate,
                                  int64_t *dist, int do_recon, int64_t best_rd,
                                  PC_TREE *pc_tree) {
+  const SPEED_FEATURES *const sf = &cpi->sf;
+  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -2610,18 +2806,18 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
 
   // Determine partition types in search according to the speed features.
   // The threshold set here has to be of square block size.
-  if (cpi->sf.auto_min_max_partition_size) {
-    partition_none_allowed &= (bsize <= cpi->sf.max_partition_size &&
-                               bsize >= cpi->sf.min_partition_size);
-    partition_horz_allowed &= ((bsize <= cpi->sf.max_partition_size &&
-                                bsize >  cpi->sf.min_partition_size) ||
+  if (sf->auto_min_max_partition_size) {
+    partition_none_allowed &= (bsize <= sf->max_partition_size &&
+                               bsize >= sf->min_partition_size);
+    partition_horz_allowed &= ((bsize <= sf->max_partition_size &&
+                                bsize > sf->min_partition_size) ||
                                 force_horz_split);
-    partition_vert_allowed &= ((bsize <= cpi->sf.max_partition_size &&
-                                bsize >  cpi->sf.min_partition_size) ||
+    partition_vert_allowed &= ((bsize <= sf->max_partition_size &&
+                                bsize > sf->min_partition_size) ||
                                 force_vert_split);
-    do_split &= bsize > cpi->sf.min_partition_size;
+    do_split &= bsize > sf->min_partition_size;
   }
-  if (cpi->sf.use_square_partition_only) {
+  if (sf->use_square_partition_only) {
     partition_horz_allowed &= force_horz_split;
     partition_vert_allowed &= force_vert_split;
   }
@@ -2631,7 +2827,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     nonrd_pick_sb_modes(cpi, tile, mi_row, mi_col,
                         &this_rate, &this_dist, bsize, ctx);
     ctx->mic.mbmi = xd->mi[0]->mbmi;
-    ctx->skip_txfm = x->skip_txfm;
+    ctx->skip_txfm[0] = x->skip_txfm[0];
     ctx->skip = x->skip;
 
     if (this_rate != INT_MAX) {
@@ -2700,7 +2896,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     } else {
       // skip rectangular partition test when larger block size
       // gives better rd cost
-      if (cpi->sf.less_rectangular_check)
+      if (sf->less_rectangular_check)
         do_rect &= !partition_none_allowed;
     }
   }
@@ -2708,7 +2904,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
   // PARTITION_HORZ
   if (partition_horz_allowed && do_rect) {
     subsize = get_subsize(bsize, PARTITION_HORZ);
-    if (cpi->sf.adaptive_motion_search)
+    if (sf->adaptive_motion_search)
       load_pred_mv(x, ctx);
 
     nonrd_pick_sb_modes(cpi, tile, mi_row, mi_col,
@@ -2716,7 +2912,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
                         &pc_tree->horizontal[0]);
 
     pc_tree->horizontal[0].mic.mbmi = xd->mi[0]->mbmi;
-    pc_tree->horizontal[0].skip_txfm = x->skip_txfm;
+    pc_tree->horizontal[0].skip_txfm[0] = x->skip_txfm[0];
     pc_tree->horizontal[0].skip = x->skip;
 
     sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
@@ -2728,7 +2924,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
                           &pc_tree->horizontal[1]);
 
       pc_tree->horizontal[1].mic.mbmi = xd->mi[0]->mbmi;
-      pc_tree->horizontal[1].skip_txfm = x->skip_txfm;
+      pc_tree->horizontal[1].skip_txfm[0] = x->skip_txfm[0];
       pc_tree->horizontal[1].skip = x->skip;
 
       if (this_rate == INT_MAX) {
@@ -2753,14 +2949,14 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
   if (partition_vert_allowed && do_rect) {
     subsize = get_subsize(bsize, PARTITION_VERT);
 
-    if (cpi->sf.adaptive_motion_search)
+    if (sf->adaptive_motion_search)
       load_pred_mv(x, ctx);
 
     nonrd_pick_sb_modes(cpi, tile, mi_row, mi_col,
                         &this_rate, &this_dist, subsize,
                         &pc_tree->vertical[0]);
     pc_tree->vertical[0].mic.mbmi = xd->mi[0]->mbmi;
-    pc_tree->vertical[0].skip_txfm = x->skip_txfm;
+    pc_tree->vertical[0].skip_txfm[0] = x->skip_txfm[0];
     pc_tree->vertical[0].skip = x->skip;
     sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
     if (sum_rd < best_rd && mi_col + ms < cm->mi_cols) {
@@ -2769,7 +2965,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
                           &this_rate, &this_dist, subsize,
                           &pc_tree->vertical[1]);
       pc_tree->vertical[1].mic.mbmi = xd->mi[0]->mbmi;
-      pc_tree->vertical[1].skip_txfm = x->skip_txfm;
+      pc_tree->vertical[1].skip_txfm[0] = x->skip_txfm[0];
       pc_tree->vertical[1].skip = x->skip;
       if (this_rate == INT_MAX) {
         sum_rd = INT64_MAX;
@@ -2810,12 +3006,12 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     // Check the projected output rate for this SB against it's target
     // and and if necessary apply a Q delta using segmentation to get
     // closer to the target.
-    if ((cpi->oxcf.aq_mode == COMPLEXITY_AQ) && cm->seg.update_map) {
+    if ((oxcf->aq_mode == COMPLEXITY_AQ) && cm->seg.update_map) {
       vp9_select_in_frame_q_segment(cpi, mi_row, mi_col, output_enabled,
                                     best_rate);
     }
 
-    if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ)
+    if (oxcf->aq_mode == CYCLIC_REFRESH_AQ)
       vp9_cyclic_refresh_set_rate_and_dist_sb(cpi->cyclic_refresh,
                                               best_rate, best_dist);
 
@@ -2860,20 +3056,20 @@ static void nonrd_use_partition(VP9_COMP *cpi,
       nonrd_pick_sb_modes(cpi, tile, mi_row, mi_col, totrate, totdist,
                           subsize, &pc_tree->none);
       pc_tree->none.mic.mbmi = xd->mi[0]->mbmi;
-      pc_tree->none.skip_txfm = x->skip_txfm;
+      pc_tree->none.skip_txfm[0] = x->skip_txfm[0];
       pc_tree->none.skip = x->skip;
       break;
     case PARTITION_VERT:
       nonrd_pick_sb_modes(cpi, tile, mi_row, mi_col, totrate, totdist,
                           subsize, &pc_tree->vertical[0]);
       pc_tree->vertical[0].mic.mbmi = xd->mi[0]->mbmi;
-      pc_tree->vertical[0].skip_txfm = x->skip_txfm;
+      pc_tree->vertical[0].skip_txfm[0] = x->skip_txfm[0];
       pc_tree->vertical[0].skip = x->skip;
       if (mi_col + hbs < cm->mi_cols) {
         nonrd_pick_sb_modes(cpi, tile, mi_row, mi_col + hbs,
                             &rate, &dist, subsize, &pc_tree->vertical[1]);
         pc_tree->vertical[1].mic.mbmi = xd->mi[0]->mbmi;
-        pc_tree->vertical[1].skip_txfm = x->skip_txfm;
+        pc_tree->vertical[1].skip_txfm[0] = x->skip_txfm[0];
         pc_tree->vertical[1].skip = x->skip;
         if (rate != INT_MAX && dist != INT64_MAX &&
             *totrate != INT_MAX && *totdist != INT64_MAX) {
@@ -2886,13 +3082,13 @@ static void nonrd_use_partition(VP9_COMP *cpi,
       nonrd_pick_sb_modes(cpi, tile, mi_row, mi_col, totrate, totdist,
                           subsize, &pc_tree->horizontal[0]);
       pc_tree->horizontal[0].mic.mbmi = xd->mi[0]->mbmi;
-      pc_tree->horizontal[0].skip_txfm = x->skip_txfm;
+      pc_tree->horizontal[0].skip_txfm[0] = x->skip_txfm[0];
       pc_tree->horizontal[0].skip = x->skip;
       if (mi_row + hbs < cm->mi_rows) {
         nonrd_pick_sb_modes(cpi, tile, mi_row + hbs, mi_col,
                             &rate, &dist, subsize, &pc_tree->horizontal[0]);
         pc_tree->horizontal[1].mic.mbmi = xd->mi[0]->mbmi;
-        pc_tree->horizontal[1].skip_txfm = x->skip_txfm;
+        pc_tree->horizontal[1].skip_txfm[0] = x->skip_txfm[0];
         pc_tree->horizontal[1].skip = x->skip;
         if (rate != INT_MAX && dist != INT64_MAX &&
             *totrate != INT_MAX && *totdist != INT64_MAX) {
@@ -2933,6 +3129,7 @@ static void nonrd_use_partition(VP9_COMP *cpi,
       break;
     default:
       assert("Invalid partition type.");
+      break;
   }
 
   if (bsize == BLOCK_64X64 && output_enabled) {
@@ -2945,9 +3142,10 @@ static void nonrd_use_partition(VP9_COMP *cpi,
 
 static void encode_nonrd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
                                 int mi_row, TOKENEXTRA **tp) {
-  VP9_COMMON *cm = &cpi->common;
-  MACROBLOCK *x = &cpi->mb;
-  MACROBLOCKD *xd = &x->e_mbd;
+  SPEED_FEATURES *const sf = &cpi->sf;
+  VP9_COMMON *const cm = &cpi->common;
+  MACROBLOCK *const x = &cpi->mb;
+  MACROBLOCKD *const xd = &x->e_mbd;
   int mi_col;
 
   // Initialize the left context for the new SB row
@@ -2957,7 +3155,6 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
   // Code each SB in the row
   for (mi_col = tile->mi_col_start; mi_col < tile->mi_col_end;
        mi_col += MI_BLOCK_SIZE) {
-    MACROBLOCK *x = &cpi->mb;
     int dummy_rate = 0;
     int64_t dummy_dist = 0;
     const int idx_str = cm->mi_stride * mi_row + mi_col;
@@ -2970,7 +3167,7 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
     vp9_zero(x->pred_mv);
 
     // Set the partition type of the 64X64 block
-    switch (cpi->sf.partition_search_type) {
+    switch (sf->partition_search_type) {
       case VAR_BASED_PARTITION:
         choose_partitioning(cpi, tile, mi_row, mi_col);
         nonrd_use_partition(cpi, tile, mi, tp, mi_row, mi_col, BLOCK_64X64,
@@ -2983,20 +3180,20 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
         break;
       case VAR_BASED_FIXED_PARTITION:
       case FIXED_PARTITION:
-        bsize = cpi->sf.partition_search_type == FIXED_PARTITION ?
-                cpi->sf.always_this_block_size :
+        bsize = sf->partition_search_type == FIXED_PARTITION ?
+                sf->always_this_block_size :
                 get_nonrd_var_based_fixed_partition(cpi, mi_row, mi_col);
         set_fixed_partitioning(cpi, tile, mi, mi_row, mi_col, bsize);
         nonrd_use_partition(cpi, tile, mi, tp, mi_row, mi_col, BLOCK_64X64,
                             1, &dummy_rate, &dummy_dist, cpi->pc_root);
         break;
       case REFERENCE_PARTITION:
-        if (cpi->sf.partition_check ||
+        if (sf->partition_check ||
             !is_background(cpi, tile, mi_row, mi_col)) {
           set_modeinfo_offsets(cm, xd, mi_row, mi_col);
           auto_partition_range(cpi, tile, mi_row, mi_col,
-                               &cpi->sf.min_partition_size,
-                               &cpi->sf.max_partition_size);
+                               &sf->min_partition_size,
+                               &sf->max_partition_size);
           nonrd_pick_partition(cpi, tile, tp, mi_row, mi_col, BLOCK_64X64,
                                &dummy_rate, &dummy_dist, 1, INT64_MAX,
                                cpi->pc_root);
@@ -3009,14 +3206,15 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
         break;
       default:
         assert(0);
+        break;
     }
   }
 }
 // end RTC play code
 
 static int set_var_thresh_from_histogram(VP9_COMP *cpi) {
-  SPEED_FEATURES *const sf = &cpi->sf;
-  VP9_COMMON *const cm = &cpi->common;
+  const SPEED_FEATURES *const sf = &cpi->sf;
+  const VP9_COMMON *const cm = &cpi->common;
 
   const uint8_t *src = cpi->Source->y_buffer;
   const uint8_t *last_src = cpi->Last_Source->y_buffer;
@@ -3199,30 +3397,28 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   vp9_zero(rd_opt->tx_select_diff);
   vp9_zero(rd_opt->tx_select_threshes);
 
-  cpi->mb.e_mbd.lossless = cm->base_qindex == 0 &&
-                           cm->y_dc_delta_q == 0 &&
-                           cm->uv_dc_delta_q == 0 &&
-                           cm->uv_ac_delta_q == 0;
+  xd->lossless = cm->base_qindex == 0 &&
+                 cm->y_dc_delta_q == 0 &&
+                 cm->uv_dc_delta_q == 0 &&
+                 cm->uv_ac_delta_q == 0;
 
   cm->tx_mode = select_tx_mode(cpi);
 
 #if CONFIG_VP9_HIGH
   if (cm->use_high)
-    cpi->mb.fwd_txm4x4 = cpi->mb.e_mbd.lossless ? vp9_fwht4x4 : vp9_fdct4x4;
+    x->fwd_txm4x4 = xd->lossless ? vp9_fwht4x4 : vp9_fdct4x4;
   else
-    cpi->mb.fwd_txm4x4 = cpi->mb.e_mbd.lossless ? vp9_high_fwht4x4 :
-                                                  vp9_high_fdct4x4;
-  cpi->mb.itxm_add = cpi->mb.e_mbd.lossless ? vp9_iwht4x4_add : vp9_idct4x4_add;
-  cpi->mb.high_itxm_add = cpi->mb.e_mbd.lossless ? vp9_high_iwht4x4_add :
-                                                   vp9_high_idct4x4_add;
+    x->fwd_txm4x4 = xd->lossless ? vp9_high_fwht4x4 : vp9_high_fdct4x4;
+  x->itxm_add = xd->lossless ? vp9_iwht4x4_add : vp9_idct4x4_add;
+  x->high_itxm_add = xd->lossless ? vp9_high_iwht4x4_add : vp9_high_idct4x4_add;
 #else
-  cpi->mb.fwd_txm4x4 = cpi->mb.e_mbd.lossless ? vp9_fwht4x4 : vp9_fdct4x4;
+  x->fwd_txm4x4 = xd->lossless ? vp9_fwht4x4 : vp9_fdct4x4;
 #endif
-  cpi->mb.itxm_add = cpi->mb.e_mbd.lossless ? vp9_iwht4x4_add : vp9_idct4x4_add;
+  x->itxm_add = xd->lossless ? vp9_iwht4x4_add : vp9_idct4x4_add;
 
-  if (cpi->mb.e_mbd.lossless) {
-    cpi->mb.optimize = 0;
-    cpi->common.lf.filter_level = 0;
+  if (xd->lossless) {
+    x->optimize = 0;
+    cm->lf.filter_level = 0;
     cpi->zbin_mode_boost_enabled = 0;
   }
 
@@ -3234,7 +3430,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   set_prev_mi(cm);
 
   x->quant_fp = cpi->sf.use_quant_fp;
-  x->skip_txfm = 0;
+  vp9_zero(x->skip_txfm);
   if (sf->use_nonrd_pick_mode) {
     // Initialize internal buffer pointers for rtc coding, where non-RD
     // mode decision is used and hence no buffer pointer swap needed.
@@ -3474,7 +3670,8 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
   MODE_INFO **mi_8x8 = xd->mi;
   MODE_INFO *mi = mi_8x8[0];
   MB_MODE_INFO *mbmi = &mi->mbmi;
-  unsigned int segment_id = mbmi->segment_id;
+  const int seg_skip = vp9_segfeature_active(&cm->seg, mbmi->segment_id,
+                                             SEG_LVL_SKIP);
   const int mis = cm->mi_stride;
   const int mi_width = num_8x8_blocks_wide_lookup[bsize];
   const int mi_height = num_8x8_blocks_high_lookup[bsize];
@@ -3483,6 +3680,9 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
                    cpi->oxcf.aq_mode != COMPLEXITY_AQ &&
                    cpi->oxcf.aq_mode != CYCLIC_REFRESH_AQ &&
                    cpi->sf.allow_skip_recode;
+
+  if (!x->skip_recode && !cpi->sf.use_nonrd_pick_mode)
+    vpx_memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
 
   x->skip_optimize = ctx->is_coded;
   ctx->is_coded = 1;
@@ -3518,7 +3718,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
       vp9_setup_pre_planes(xd, ref, cfg, mi_row, mi_col,
                            &xd->block_refs[ref]->sf);
     }
-    if (!cpi->sf.reuse_inter_pred_sby)
+    if (!cpi->sf.reuse_inter_pred_sby || seg_skip)
       vp9_build_inter_predictors_sby(xd, mi_row, mi_col, MAX(bsize, BLOCK_8X8));
 
     vp9_build_inter_predictors_sbuv(xd, mi_row, mi_col, MAX(bsize, BLOCK_8X8));
@@ -3529,8 +3729,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
       vp9_tokenize_sb(cpi, t, !output_enabled, MAX(bsize, BLOCK_8X8));
     } else {
       mbmi->skip = 1;
-      if (output_enabled &&
-          !vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP))
+      if (output_enabled && !seg_skip)
         cm->counts.skip[vp9_get_skip_context(xd)][1]++;
       reset_skip_context(xd, MAX(bsize, BLOCK_8X8));
     }
@@ -3539,9 +3738,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
   if (output_enabled) {
     if (cm->tx_mode == TX_MODE_SELECT &&
         mbmi->sb_type >= BLOCK_8X8  &&
-        !(is_inter_block(mbmi) &&
-            (mbmi->skip ||
-             vp9_segfeature_active(&cm->seg, segment_id, SEG_LVL_SKIP)))) {
+        !(is_inter_block(mbmi) && (mbmi->skip || seg_skip))) {
       ++get_tx_counts(max_txsize_lookup[bsize], vp9_get_tx_size_context(xd),
                       &cm->counts.tx)[mbmi->tx_size];
     } else {

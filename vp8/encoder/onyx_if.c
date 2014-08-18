@@ -613,6 +613,24 @@ static void cyclic_background_refresh(VP8_COMP *cpi, int Q, int lf_adjustment)
         while(block_count && i != cpi->cyclic_refresh_mode_index);
 
         cpi->cyclic_refresh_mode_index = i;
+
+#if CONFIG_TEMPORAL_DENOISING
+        if (cpi->denoiser.denoiser_mode == kDenoiserOnYUVAggressive &&
+            Q < (int)cpi->denoiser.denoise_pars.qp_thresh) {
+          // Under aggressive denoising mode, use segmentation to turn off loop
+          // filter below some qp thresh. The loop filter is turned off for all
+          // blocks that have been encoded as ZEROMV LAST x frames in a row,
+          // where x is set by cpi->denoiser.denoise_pars.consec_zerolast.
+          // This is to avoid "dot" artifacts that can occur from repeated
+          // loop filtering on noisy input source.
+          cpi->cyclic_refresh_q = Q;
+          lf_adjustment = -MAX_LOOP_FILTER;
+          for (i = 0; i < mbs_in_frame; ++i) {
+            seg_map[i] = (cpi->consec_zero_last[i] >
+                          cpi->denoiser.denoise_pars.consec_zerolast) ? 1 : 0;
+          }
+        }
+#endif
     }
 
     /* Activate segmentation. */
@@ -1259,6 +1277,15 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
 
     vpx_free(cpi->tplist);
     CHECK_MEM_ERROR(cpi->tplist, vpx_malloc(sizeof(TOKENLIST) * cm->mb_rows));
+
+#if CONFIG_TEMPORAL_DENOISING
+    if (cpi->oxcf.noise_sensitivity > 0) {
+      vp8_denoiser_free(&cpi->denoiser);
+      vp8_denoiser_allocate(&cpi->denoiser, width, height,
+                            cm->mb_rows, cm->mb_cols,
+                            cpi->oxcf.noise_sensitivity);
+    }
+#endif
 }
 
 
@@ -1405,7 +1432,7 @@ static void update_layer_contexts (VP8_COMP *cpi)
         double prev_layer_framerate=0;
 
         assert(oxcf->number_of_layers <= VPX_TS_MAX_LAYERS);
-        for (i=0; i<oxcf->number_of_layers; i++)
+        for (i = 0; i < oxcf->number_of_layers && i < VPX_TS_MAX_LAYERS; ++i)
         {
             LAYER_CONTEXT *lc = &cpi->layer_context[i];
 
@@ -1752,7 +1779,8 @@ void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
         int width = (cpi->oxcf.Width + 15) & ~15;
         int height = (cpi->oxcf.Height + 15) & ~15;
         vp8_denoiser_allocate(&cpi->denoiser, width, height,
-                              cpi->common.mb_rows, cpi->common.mb_cols);
+                              cm->mb_rows, cm->mb_cols,
+                              cpi->oxcf.noise_sensitivity);
       }
     }
 #endif
@@ -1879,6 +1907,13 @@ struct VP8_COMP* vp8_create_compressor(VP8_CONFIG *oxcf)
      */
     cpi->cyclic_refresh_mode_enabled = cpi->oxcf.error_resilient_mode;
     cpi->cyclic_refresh_mode_max_mbs_perframe = (cpi->common.mb_rows * cpi->common.mb_cols) / 5;
+    if (cpi->oxcf.number_of_layers == 1) {
+        cpi->cyclic_refresh_mode_max_mbs_perframe =
+            (cpi->common.mb_rows * cpi->common.mb_cols) / 20;
+    } else if (cpi->oxcf.number_of_layers == 2) {
+        cpi->cyclic_refresh_mode_max_mbs_perframe =
+            (cpi->common.mb_rows * cpi->common.mb_cols) / 10;
+    }
     cpi->cyclic_refresh_mode_index = 0;
     cpi->cyclic_refresh_q = 32;
 
@@ -1888,6 +1923,9 @@ struct VP8_COMP* vp8_create_compressor(VP8_CONFIG *oxcf)
     }
     else
         cpi->cyclic_refresh_map = (signed char *) NULL;
+
+    CHECK_MEM_ERROR(cpi->consec_zero_last,
+                    vpx_calloc(cpi->common.mb_rows * cpi->common.mb_cols, 1));
 
 #ifdef VP8_ENTROPY_STATS
     init_context_counters();
@@ -2409,6 +2447,7 @@ void vp8_remove_compressor(VP8_COMP **ptr)
     vpx_free(cpi->mb.ss);
     vpx_free(cpi->tok);
     vpx_free(cpi->cyclic_refresh_map);
+    vpx_free(cpi->consec_zero_last);
 
     vp8_remove_common(&cpi->common);
     vpx_free(cpi);
@@ -3232,17 +3271,9 @@ static void update_reference_frames(VP8_COMP *cpi)
         if (cm->frame_type == KEY_FRAME)
         {
             int i;
-            vp8_yv12_copy_frame(
-                    cpi->Source,
-                    &cpi->denoiser.yv12_running_avg[LAST_FRAME]);
-
-            vp8_yv12_extend_frame_borders(
-                    &cpi->denoiser.yv12_running_avg[LAST_FRAME]);
-
-            for (i = 2; i < MAX_REF_FRAMES - 1; i++)
-                vp8_yv12_copy_frame(
-                        &cpi->denoiser.yv12_running_avg[LAST_FRAME],
-                        &cpi->denoiser.yv12_running_avg[i]);
+            for (i = LAST_FRAME; i < MAX_REF_FRAMES; ++i)
+              vp8_yv12_copy_frame(cpi->Source,
+                                  &cpi->denoiser.yv12_running_avg[i]);
         }
         else /* For non key frames */
         {
@@ -3479,6 +3510,9 @@ static void encode_frame_to_data_rate
         {
             cpi->mb.rd_thresh_mult[i] = 128;
         }
+
+        // Reset the zero_last counter to 0 on key frame.
+        vpx_memset(cpi->consec_zero_last, 0, cm->mb_rows * cm->mb_cols);
     }
 
 #if 0
@@ -3900,6 +3934,7 @@ static void encode_frame_to_data_rate
 
 #endif
 
+
 #ifdef OUTPUT_YUV_SRC
     vp8_write_yuv_frame(yuv_file, cpi->Source);
 #endif
@@ -3995,6 +4030,8 @@ static void encode_frame_to_data_rate
                 else
                   disable_segmentation(cpi);
               }
+              // Reset the consec_zero_last counter on key frame.
+              vpx_memset(cpi->consec_zero_last, 0, cm->mb_rows * cm->mb_cols);
               vp8_set_quantizer(cpi, Q);
             }
 
@@ -5037,7 +5074,8 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
 
                 /* Update frame rates for each layer */
                 assert(cpi->oxcf.number_of_layers <= VPX_TS_MAX_LAYERS);
-                for (i=0; i<cpi->oxcf.number_of_layers; i++)
+                for (i = 0; i < cpi->oxcf.number_of_layers &&
+                     i < VPX_TS_MAX_LAYERS; ++i)
                 {
                     LAYER_CONTEXT *lc = &cpi->layer_context[i];
                     lc->framerate = cpi->ref_framerate /

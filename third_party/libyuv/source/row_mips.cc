@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "third_party/libyuv/include/libyuv/row.h"
+#include "libyuv/row.h"
 
 #ifdef __cplusplus
 namespace libyuv {
@@ -16,7 +16,8 @@ extern "C" {
 #endif
 
 // The following are available on Mips platforms:
-#if !defined(LIBYUV_DISABLE_MIPS) && defined(__mips__)
+#if !defined(LIBYUV_DISABLE_MIPS) && defined(__mips__) && \
+    (_MIPS_SIM == _MIPS_SIM_ABI32)
 
 #ifdef HAS_COPYROW_MIPS
 void CopyRow_MIPS(const uint8* src, uint8* dst, int count) {
@@ -376,7 +377,9 @@ void CopyRow_MIPS(const uint8* src, uint8* dst, int count) {
 
 // MIPS DSPR2 functions
 #if !defined(LIBYUV_DISABLE_MIPS) && defined(__mips_dsp) && \
-    (__mips_dsp_rev >= 2)
+    (__mips_dsp_rev >= 2) && \
+    (_MIPS_SIM == _MIPS_SIM_ABI32)
+
 void SplitUVRow_MIPS_DSPR2(const uint8* src_uv, uint8* dst_u, uint8* dst_v,
                            int width) {
   __asm__ __volatile__ (

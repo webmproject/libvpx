@@ -34,7 +34,7 @@ void vp9_set_mb_mi(VP9_COMMON *cm, int width, int height) {
 
   cm->mi_cols = aligned_width >> MI_SIZE_LOG2;
   cm->mi_rows = aligned_height >> MI_SIZE_LOG2;
-  cm->mi_stride = cm->mi_cols + MI_BLOCK_SIZE;
+  cm->mi_stride = calc_mi_size(cm->mi_cols);
 
   cm->mb_cols = (cm->mi_cols + 1) >> 1;
   cm->mb_rows = (cm->mi_rows + 1) >> 1;
@@ -60,15 +60,17 @@ static int alloc_mi(VP9_COMMON *cm, int mi_size) {
 
   for (i = 0; i < 2; ++i) {
     cm->mip_array[i] =
-        (MODE_INFO *)vpx_calloc(mi_size, sizeof(*cm->mip));
+        (MODE_INFO *)vpx_calloc(mi_size, sizeof(MODE_INFO));
     if (cm->mip_array[i] == NULL)
       return 1;
 
     cm->mi_grid_base_array[i] =
-        (MODE_INFO **)vpx_calloc(mi_size, sizeof(*cm->mi_grid_base));
+        (MODE_INFO **)vpx_calloc(mi_size, sizeof(MODE_INFO*));
     if (cm->mi_grid_base_array[i] == NULL)
       return 1;
   }
+
+  cm->mi_alloc_size = mi_size;
 
   // Init the index.
   cm->mi_idx = 0;
@@ -131,7 +133,8 @@ int vp9_alloc_context_buffers(VP9_COMMON *cm, int width, int height) {
   vp9_free_context_buffers(cm);
 
   vp9_set_mb_mi(cm, width, height);
-  if (alloc_mi(cm, cm->mi_stride * (cm->mi_rows + MI_BLOCK_SIZE))) goto fail;
+  if (alloc_mi(cm, cm->mi_stride * calc_mi_size(cm->mi_rows)))
+    goto fail;
 
   cm->last_frame_seg_map = (uint8_t *)vpx_calloc(cm->mi_rows * cm->mi_cols, 1);
   if (!cm->last_frame_seg_map) goto fail;

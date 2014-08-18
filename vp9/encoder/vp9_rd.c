@@ -154,7 +154,7 @@ int vp9_compute_rd_mult(const VP9_COMP *cpi, int qindex) {
       assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10 or VPX_BITS_12");
   }
 #endif
-  if (cpi->pass == 2 && (cpi->common.frame_type != KEY_FRAME)) {
+  if (cpi->oxcf.pass == 2 && (cpi->common.frame_type != KEY_FRAME)) {
     const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
     const FRAME_UPDATE_TYPE frame_type = gf_group->update_type[gf_group->index];
     const int boost_index = MIN(15, (cpi->rc.gfu_boost / 100));
@@ -180,6 +180,7 @@ static int compute_rd_thresh_factor(int qindex, vpx_bit_depth_t bit_depth) {
       break;
     default:
       assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10 or VPX_BITS_12");
+      return -1;
   }
 #else
   (void) bit_depth;
@@ -289,8 +290,6 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
   }
 }
 
-static const int MAX_XSQ_Q10 = 245727;
-
 static void model_rd_norm(int xsq_q10, int *r_q10, int *d_q10) {
   // NOTE: The tables below must be of the same size.
 
@@ -380,10 +379,10 @@ void vp9_model_rd_from_var_lapndz(unsigned int var, unsigned int n,
     *dist = 0;
   } else {
     int d_q10, r_q10;
+    static const uint32_t MAX_XSQ_Q10 = 245727;
     const uint64_t xsq_q10_64 =
         ((((uint64_t)qstep * qstep * n) << 10) + (var >> 1)) / var;
-    const int xsq_q10 = xsq_q10_64 > MAX_XSQ_Q10 ?
-                        MAX_XSQ_Q10 : (int)xsq_q10_64;
+    const int xsq_q10 = (int)MIN(xsq_q10_64, MAX_XSQ_Q10);
     model_rd_norm(xsq_q10, &r_q10, &d_q10);
     *rate = (n * r_q10 + 2) >> 2;
     *dist = (var * (int64_t)d_q10 + 512) >> 10;
@@ -426,6 +425,7 @@ void vp9_get_entropy_contexts(BLOCK_SIZE bsize, TX_SIZE tx_size,
       break;
     default:
       assert(0 && "Invalid transform size.");
+      break;
   }
 }
 
@@ -501,10 +501,6 @@ void vp9_setup_pred_block(const MACROBLOCKD *xd,
   dst[1].buf = src->u_buffer;
   dst[2].buf = src->v_buffer;
   dst[1].stride = dst[2].stride = src->uv_stride;
-#if CONFIG_ALPHA
-  dst[3].buf = src->alpha_buffer;
-  dst[3].stride = src->alpha_stride;
-#endif
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
     setup_pred_plane(dst + i, dst[i].buf, dst[i].stride, mi_row, mi_col,

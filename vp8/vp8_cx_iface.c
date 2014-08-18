@@ -1318,9 +1318,7 @@ static vpx_codec_enc_cfg_map_t vp8e_usage_cfg_map[] =
         "vp8.fpf"           /* first pass filename */
 #endif
         VPX_SS_DEFAULT_LAYERS, /* ss_number_layers */
-#ifdef CONFIG_SPATIAL_SVC
         {0},
-#endif
         {0},                /* ss_target_bitrate */
         1,                  /* ts_number_layers */
         {0},                /* ts_target_bitrate */
@@ -1328,7 +1326,6 @@ static vpx_codec_enc_cfg_map_t vp8e_usage_cfg_map[] =
         0,                  /* ts_periodicity */
         {0},                /* ts_layer_id */
     }},
-    { -1, {NOT_IMPLEMENTED}}
 };
 
 
@@ -1345,8 +1342,6 @@ CODEC_INTERFACE(vpx_codec_vp8_cx) =
     vp8e_init,          /* vpx_codec_init_fn_t       init; */
     vp8e_destroy,       /* vpx_codec_destroy_fn_t    destroy; */
     vp8e_ctf_maps,      /* vpx_codec_ctrl_fn_map_t  *ctrl_maps; */
-    NOT_IMPLEMENTED,    /* vpx_codec_get_mmap_fn_t   get_mmap; */
-    NOT_IMPLEMENTED,    /* vpx_codec_set_mmap_fn_t   set_mmap; */
     {
         NOT_IMPLEMENTED,    /* vpx_codec_peek_si_fn_t    peek_si; */
         NOT_IMPLEMENTED,    /* vpx_codec_get_si_fn_t     get_si; */
@@ -1354,6 +1349,7 @@ CODEC_INTERFACE(vpx_codec_vp8_cx) =
         NOT_IMPLEMENTED,    /* vpx_codec_frame_get_fn_t  frame_get; */
     },
     {
+        1,                  /* 1 cfg map */
         vp8e_usage_cfg_map, /* vpx_codec_enc_cfg_map_t    peek_si; */
         vp8e_encode,        /* vpx_codec_encode_fn_t      encode; */
         vp8e_get_cxdata,    /* vpx_codec_get_cx_data_fn_t   frame_get; */

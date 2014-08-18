@@ -41,11 +41,11 @@ static void yuvconfig2image(vpx_image_t *img, const YV12_BUFFER_CONFIG  *yv12,
   img->planes[VPX_PLANE_Y] = yv12->y_buffer;
   img->planes[VPX_PLANE_U] = yv12->u_buffer;
   img->planes[VPX_PLANE_V] = yv12->v_buffer;
-  img->planes[VPX_PLANE_ALPHA] = yv12->alpha_buffer;
+  img->planes[VPX_PLANE_ALPHA] = NULL;
   img->stride[VPX_PLANE_Y] = yv12->y_stride;
   img->stride[VPX_PLANE_U] = yv12->uv_stride;
   img->stride[VPX_PLANE_V] = yv12->uv_stride;
-  img->stride[VPX_PLANE_ALPHA] = yv12->alpha_stride;
+  img->stride[VPX_PLANE_ALPHA] = yv12->y_stride;
 #if CONFIG_VP9_HIGH
   if (yv12->flags & YV12_FLAG_HIGH) {
     // VPX IMG uses byte strides and a pointer to the first byte of the image
@@ -57,12 +57,11 @@ static void yuvconfig2image(vpx_image_t *img, const YV12_BUFFER_CONFIG  *yv12,
         CONVERT_TO_SHORTPTR(yv12->u_buffer);
     img->planes[VPX_PLANE_V]     = (uint8_t*)
         CONVERT_TO_SHORTPTR(yv12->v_buffer);
-    img->planes[VPX_PLANE_ALPHA] = (uint8_t*)
-        CONVERT_TO_SHORTPTR(yv12->alpha_buffer);
+    img->planes[VPX_PLANE_ALPHA] = NULL;
     img->stride[VPX_PLANE_Y]     = 2 * yv12->y_stride;
     img->stride[VPX_PLANE_U]     = 2 * yv12->uv_stride;
     img->stride[VPX_PLANE_V]     = 2 * yv12->uv_stride;
-    img->stride[VPX_PLANE_ALPHA] = 2 * yv12->alpha_stride;
+    img->stride[VPX_PLANE_ALPHA] = 2 * yv12->y_stride;;
   }
 #endif
   img->bps = bps;
@@ -77,7 +76,6 @@ static vpx_codec_err_t image2yuvconfig(const vpx_image_t *img,
   yv12->y_buffer = img->planes[VPX_PLANE_Y];
   yv12->u_buffer = img->planes[VPX_PLANE_U];
   yv12->v_buffer = img->planes[VPX_PLANE_V];
-  yv12->alpha_buffer = img->planes[VPX_PLANE_ALPHA];
 
   yv12->y_crop_width  = img->d_w;
   yv12->y_crop_height = img->d_h;
@@ -89,12 +87,8 @@ static vpx_codec_err_t image2yuvconfig(const vpx_image_t *img,
   yv12->uv_height = img->y_chroma_shift == 1 ? (1 + yv12->y_height) / 2
                                              : yv12->y_height;
 
-  yv12->alpha_width = yv12->alpha_buffer ? img->d_w : 0;
-  yv12->alpha_height = yv12->alpha_buffer ? img->d_h : 0;
-
   yv12->y_stride = img->stride[VPX_PLANE_Y];
   yv12->uv_stride = img->stride[VPX_PLANE_U];
-  yv12->alpha_stride = yv12->alpha_buffer ? img->stride[VPX_PLANE_ALPHA] : 0;
 #if CONFIG_VP9_HIGH
   if (img->fmt & VPX_IMG_FMT_HIGH) {
     // In vpx_image_t
@@ -114,7 +108,6 @@ static vpx_codec_err_t image2yuvconfig(const vpx_image_t *img,
     yv12->v_buffer = CONVERT_TO_BYTEPTR(yv12->v_buffer);
     yv12->y_stride >>= 1;
     yv12->uv_stride >>= 1;
-    yv12->alpha_stride >>= 1;
     yv12->flags = YV12_FLAG_HIGH;
   } else {
     yv12->flags = 0;
@@ -122,13 +115,6 @@ static vpx_codec_err_t image2yuvconfig(const vpx_image_t *img,
   yv12->border  = (yv12->y_stride - img->w) / 2;
 #else
   yv12->border  = (img->stride[VPX_PLANE_Y] - img->w) / 2;
-#endif
-#if CONFIG_ALPHA
-  // For development purposes, force alpha to hold the same data as Y for now.
-  yv12->alpha_buffer = yv12->y_buffer;
-  yv12->alpha_width = yv12->y_width;
-  yv12->alpha_height = yv12->y_height;
-  yv12->alpha_stride = yv12->y_stride;
 #endif
   return VPX_CODEC_OK;
 }

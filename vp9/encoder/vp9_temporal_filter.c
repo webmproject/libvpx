@@ -634,7 +634,7 @@ static void adjust_arnr_filter(VP9_COMP *cpi,
   }
 
   // Adjustments for second level arf in multi arf case.
-  if (cpi->pass == 2 && cpi->multi_arf_allowed) {
+  if (cpi->oxcf.pass == 2 && cpi->multi_arf_allowed) {
     const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
     if (gf_group->rf_level[gf_group->index] != GF_ARF_STD) {
       cpi->active_arnr_strength >>= 1;
@@ -671,7 +671,7 @@ void vp9_temporal_filter(VP9_COMP *cpi, int distance) {
   }
 
   // Setup scaling factors. Scaling on each of the arnr frames is not supported
-  if (cpi->use_svc && cpi->svc.number_temporal_layers == 1) {
+  if (is_spatial_svc(cpi)) {
     // In spatial svc the scaling factors might be less then 1/2. So we will use
     // non-normative scaling.
     int frame_used = 0;

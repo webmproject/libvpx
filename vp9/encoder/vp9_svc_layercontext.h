@@ -31,6 +31,7 @@ typedef struct {
   vpx_svc_parameters_t svc_params_received;
   struct lookahead_entry  *alt_ref_source;
   int alt_ref_idx;
+  int gold_ref_idx;
   int has_alt_frame;
   size_t layer_size;
 } LAYER_CONTEXT;

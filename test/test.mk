@@ -59,6 +59,7 @@ LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += ../webmdec.h
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += webm_video_source.h
 endif
 
+LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += decode_api_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += invalid_file_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += test_vector_test.cc
 
@@ -67,6 +68,11 @@ LIBVPX_TEST_SRCS-$(CONFIG_DECODERS)    += test_vector_test.cc
 ifeq ($(CONFIG_DECODE_PERF_TESTS)$(CONFIG_VP9_DECODER)$(CONFIG_WEBM_IO), \
       yesyesyes)
 LIBVPX_TEST_SRCS-yes                   += decode_perf_test.cc
+endif
+
+# encode perf tests are vp9 only
+ifeq ($(CONFIG_ENCODE_PERF_TESTS)$(CONFIG_VP9_ENCODER), yesyes)
+LIBVPX_TEST_SRCS-yes += encode_perf_test.cc
 endif
 
 ##
@@ -95,6 +101,7 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += vp8_fdct4x4_test.cc
 LIBVPX_TEST_SRCS-yes                   += idct_test.cc
 LIBVPX_TEST_SRCS-yes                   += intrapred_test.cc
 LIBVPX_TEST_SRCS-yes                   += sixtap_predict_test.cc
+LIBVPX_TEST_SRCS-yes                   += vpx_scale_test.cc
 
 endif # VP8
 
@@ -778,6 +785,8 @@ LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-16-intra-only.webm
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-16-intra-only.webm.md5
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-17-show-existing-frame.webm
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-17-show-existing-frame.webm.md5
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-18-resize.ivf
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-18-resize.ivf.md5
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp91-2-04-yuv444.webm
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp91-2-04-yuv444.webm.md5
 
@@ -840,3 +849,15 @@ LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += \
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += \
   vp90-2-tos_1920x800_tile_1x4_fpm_2335kbps.webm
 endif  # CONFIG_DECODE_PERF_TESTS
+
+ifeq ($(CONFIG_ENCODE_PERF_TESTS),yes)
+LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += desktop_640_360_30.yuv
+LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += kirland_640_480_30.yuv
+LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += macmarcomoving_640_480_30.yuv
+LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += macmarcostationary_640_480_30.yuv
+LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += niklas_640_480_30.yuv
+LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += tacomanarrows_640_480_30.yuv
+LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += tacomasmallcameramovement_640_480_30.yuv
+LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += thaloundeskmtg_640_480_30.yuv
+LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += niklas_1280_720_30.yuv
+endif  # CONFIG_ENCODE_PERF_TESTS

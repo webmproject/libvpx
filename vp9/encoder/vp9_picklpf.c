@@ -24,7 +24,7 @@
 #include "vp9/encoder/vp9_quantize.h"
 
 static int get_max_filter_level(const VP9_COMP *cpi) {
-  if (cpi->pass == 2) {
+  if (cpi->oxcf.pass == 2) {
     return cpi->twopass.section_intra_rating > 8 ? MAX_LOOP_FILTER * 3 / 4
                                                  : MAX_LOOP_FILTER;
   } else {
@@ -89,7 +89,7 @@ static int search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
     // Bias against raising loop filter in favor of lowering it.
     int bias = (best_err >> (15 - (filt_mid / 8))) * filter_step;
 
-    if ((cpi->pass == 2) && (cpi->twopass.section_intra_rating < 20))
+    if ((cpi->oxcf.pass == 2) && (cpi->twopass.section_intra_rating < 20))
       bias = (bias * cpi->twopass.section_intra_rating) / 20;
 
     // yx, bias less for large block size
@@ -174,6 +174,7 @@ void vp9_pick_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
       default:
         assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10 "
                     "or VPX_BITS_12");
+        return;
     }
 #else
     filt_guess = ROUND_POWER_OF_TWO(q * 20723 + 1015158, 18);

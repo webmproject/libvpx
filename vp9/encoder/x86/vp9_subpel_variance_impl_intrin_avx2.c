@@ -67,7 +67,7 @@ DECLARE_ALIGNED(32, static const uint8_t, bilinear_filters_avx2[512]) = {
 #define LOAD_SRC_DST \
   /* load source and destination */ \
   src_reg = _mm256_loadu_si256((__m256i const *) (src)); \
-  dst_reg = _mm256_load_si256((__m256i const *) (dst));
+  dst_reg = _mm256_loadu_si256((__m256i const *) (dst));
 
 #define AVG_NEXT_SRC(src_reg, size_stride) \
   src_next_reg = _mm256_loadu_si256((__m256i const *) \
@@ -333,7 +333,7 @@ unsigned int vp9_sub_pixel_avg_variance32xh_avx2(const uint8_t *src,
     if (y_offset == 0) {
       for (i = 0; i < height ; i++) {
         LOAD_SRC_DST
-        sec_reg = _mm256_load_si256((__m256i const *) (sec));
+        sec_reg = _mm256_loadu_si256((__m256i const *) (sec));
         src_reg = _mm256_avg_epu8(src_reg, sec_reg);
         sec+= sec_stride;
         // expend each byte to 2 bytes
@@ -347,7 +347,7 @@ unsigned int vp9_sub_pixel_avg_variance32xh_avx2(const uint8_t *src,
       for (i = 0; i < height ; i++) {
         LOAD_SRC_DST
         AVG_NEXT_SRC(src_reg, src_stride)
-        sec_reg = _mm256_load_si256((__m256i const *) (sec));
+        sec_reg = _mm256_loadu_si256((__m256i const *) (sec));
         src_reg = _mm256_avg_epu8(src_reg, sec_reg);
         sec+= sec_stride;
         // expend each byte to 2 bytes
@@ -369,7 +369,7 @@ unsigned int vp9_sub_pixel_avg_variance32xh_avx2(const uint8_t *src,
         MERGE_NEXT_SRC(src_reg, src_stride)
         FILTER_SRC(filter)
         src_reg = _mm256_packus_epi16(exp_src_lo, exp_src_hi);
-        sec_reg = _mm256_load_si256((__m256i const *) (sec));
+        sec_reg = _mm256_loadu_si256((__m256i const *) (sec));
         src_reg = _mm256_avg_epu8(src_reg, sec_reg);
         sec+= sec_stride;
         MERGE_WITH_SRC(src_reg, zero_reg)
@@ -385,7 +385,7 @@ unsigned int vp9_sub_pixel_avg_variance32xh_avx2(const uint8_t *src,
       for (i = 0; i < height ; i++) {
         LOAD_SRC_DST
         AVG_NEXT_SRC(src_reg, 1)
-        sec_reg = _mm256_load_si256((__m256i const *) (sec));
+        sec_reg = _mm256_loadu_si256((__m256i const *) (sec));
         src_reg = _mm256_avg_epu8(src_reg, sec_reg);
         sec+= sec_stride;
         // expand each byte to 2 bytes
@@ -409,7 +409,7 @@ unsigned int vp9_sub_pixel_avg_variance32xh_avx2(const uint8_t *src,
         AVG_NEXT_SRC(src_reg, 1)
         // average between previous average to current average
         src_avg = _mm256_avg_epu8(src_avg, src_reg);
-        sec_reg = _mm256_load_si256((__m256i const *) (sec));
+        sec_reg = _mm256_loadu_si256((__m256i const *) (sec));
         src_avg = _mm256_avg_epu8(src_avg, sec_reg);
         sec+= sec_stride;
         // expand each byte to 2 bytes
@@ -437,7 +437,7 @@ unsigned int vp9_sub_pixel_avg_variance32xh_avx2(const uint8_t *src,
         MERGE_WITH_SRC(src_avg, src_reg)
         FILTER_SRC(filter)
         src_avg = _mm256_packus_epi16(exp_src_lo, exp_src_hi);
-        sec_reg = _mm256_load_si256((__m256i const *) (sec));
+        sec_reg = _mm256_loadu_si256((__m256i const *) (sec));
         src_avg = _mm256_avg_epu8(src_avg, sec_reg);
         // expand each byte to 2 bytes
         MERGE_WITH_SRC(src_avg, zero_reg)
@@ -459,7 +459,7 @@ unsigned int vp9_sub_pixel_avg_variance32xh_avx2(const uint8_t *src,
         MERGE_NEXT_SRC(src_reg, 1)
         FILTER_SRC(filter)
         src_reg = _mm256_packus_epi16(exp_src_lo, exp_src_hi);
-        sec_reg = _mm256_load_si256((__m256i const *) (sec));
+        sec_reg = _mm256_loadu_si256((__m256i const *) (sec));
         src_reg = _mm256_avg_epu8(src_reg, sec_reg);
         MERGE_WITH_SRC(src_reg, zero_reg)
         sec+= sec_stride;
@@ -487,7 +487,7 @@ unsigned int vp9_sub_pixel_avg_variance32xh_avx2(const uint8_t *src,
         src_reg =  _mm256_packus_epi16(exp_src_lo, exp_src_hi);
         // average between previous pack to the current
         src_pack = _mm256_avg_epu8(src_pack, src_reg);
-        sec_reg = _mm256_load_si256((__m256i const *) (sec));
+        sec_reg = _mm256_loadu_si256((__m256i const *) (sec));
         src_pack = _mm256_avg_epu8(src_pack, sec_reg);
         sec+= sec_stride;
         MERGE_WITH_SRC(src_pack, zero_reg)
@@ -524,7 +524,7 @@ unsigned int vp9_sub_pixel_avg_variance32xh_avx2(const uint8_t *src,
         // filter the source
         FILTER_SRC(yfilter)
         src_pack = _mm256_packus_epi16(exp_src_lo, exp_src_hi);
-        sec_reg = _mm256_load_si256((__m256i const *) (sec));
+        sec_reg = _mm256_loadu_si256((__m256i const *) (sec));
         src_pack = _mm256_avg_epu8(src_pack, sec_reg);
         MERGE_WITH_SRC(src_pack, zero_reg)
         src_pack = src_reg;

@@ -769,13 +769,13 @@ add_proto qw/unsigned int vp9_variance32x64/, "const uint8_t *src_ptr, int sourc
 specialize qw/vp9_variance32x64/, "$sse2_x86inc";
 
 add_proto qw/unsigned int vp9_variance32x32/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-specialize qw/vp9_variance32x32 avx2/, "$sse2_x86inc";
+specialize qw/vp9_variance32x32 avx2 neon/, "$sse2_x86inc";
 
 add_proto qw/unsigned int vp9_variance64x64/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
 specialize qw/vp9_variance64x64 avx2/, "$sse2_x86inc";
 
 add_proto qw/unsigned int vp9_variance16x16/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-specialize qw/vp9_variance16x16 mmx avx2/, "$sse2_x86inc";
+specialize qw/vp9_variance16x16 mmx avx2 neon/, "$sse2_x86inc";
 
 add_proto qw/unsigned int vp9_variance16x8/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
 specialize qw/vp9_variance16x8 mmx/, "$sse2_x86inc";
@@ -784,13 +784,13 @@ add_proto qw/unsigned int vp9_variance8x16/, "const uint8_t *src_ptr, int source
 specialize qw/vp9_variance8x16 mmx/, "$sse2_x86inc";
 
 add_proto qw/unsigned int vp9_variance8x8/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-specialize qw/vp9_variance8x8 mmx/, "$sse2_x86inc";
+specialize qw/vp9_variance8x8 mmx neon/, "$sse2_x86inc";
 
 add_proto qw/void vp9_get8x8var/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, int *sum";
-specialize qw/vp9_get8x8var mmx/, "$sse2_x86inc";
+specialize qw/vp9_get8x8var mmx neon/, "$sse2_x86inc";
 
 add_proto qw/void vp9_get16x16var/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, int *sum";
-specialize qw/vp9_get16x16var avx2/, "$sse2_x86inc";
+specialize qw/vp9_get16x16var avx2 neon/, "$sse2_x86inc";
 
 add_proto qw/unsigned int vp9_variance8x4/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
 specialize qw/vp9_variance8x4/, "$sse2_x86inc";
@@ -802,10 +802,10 @@ add_proto qw/unsigned int vp9_variance4x4/, "const uint8_t *src_ptr, int source_
 specialize qw/vp9_variance4x4 mmx/, "$sse2_x86inc";
 
 add_proto qw/unsigned int vp9_sub_pixel_variance64x64/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-specialize qw/vp9_sub_pixel_variance64x64/, "$sse2_x86inc", "$ssse3_x86inc";
+specialize qw/vp9_sub_pixel_variance64x64 avx2/, "$sse2_x86inc", "$ssse3_x86inc";
 
 add_proto qw/unsigned int vp9_sub_pixel_avg_variance64x64/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
-specialize qw/vp9_sub_pixel_avg_variance64x64/, "$sse2_x86inc", "$ssse3_x86inc";
+specialize qw/vp9_sub_pixel_avg_variance64x64 avx2/, "$sse2_x86inc", "$ssse3_x86inc";
 
 add_proto qw/unsigned int vp9_sub_pixel_variance32x64/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
 specialize qw/vp9_sub_pixel_variance32x64/, "$sse2_x86inc", "$ssse3_x86inc";
@@ -832,13 +832,13 @@ add_proto qw/unsigned int vp9_sub_pixel_avg_variance16x32/, "const uint8_t *src_
 specialize qw/vp9_sub_pixel_avg_variance16x32/, "$sse2_x86inc", "$ssse3_x86inc";
 
 add_proto qw/unsigned int vp9_sub_pixel_variance32x32/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-specialize qw/vp9_sub_pixel_variance32x32/, "$sse2_x86inc", "$ssse3_x86inc";
+specialize qw/vp9_sub_pixel_variance32x32 avx2 neon/, "$sse2_x86inc", "$ssse3_x86inc";
 
 add_proto qw/unsigned int vp9_sub_pixel_avg_variance32x32/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
-specialize qw/vp9_sub_pixel_avg_variance32x32/, "$sse2_x86inc", "$ssse3_x86inc";
+specialize qw/vp9_sub_pixel_avg_variance32x32 avx2/, "$sse2_x86inc", "$ssse3_x86inc";
 
 add_proto qw/unsigned int vp9_sub_pixel_variance16x16/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-specialize qw/vp9_sub_pixel_variance16x16/, "$sse2_x86inc", "$ssse3_x86inc";
+specialize qw/vp9_sub_pixel_variance16x16 neon/, "$sse2_x86inc", "$ssse3_x86inc";
 
 add_proto qw/unsigned int vp9_sub_pixel_avg_variance16x16/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
 specialize qw/vp9_sub_pixel_avg_variance16x16/, "$sse2_x86inc", "$ssse3_x86inc";
@@ -856,7 +856,7 @@ add_proto qw/unsigned int vp9_sub_pixel_avg_variance16x8/, "const uint8_t *src_p
 specialize qw/vp9_sub_pixel_avg_variance16x8/, "$sse2_x86inc", "$ssse3_x86inc";
 
 add_proto qw/unsigned int vp9_sub_pixel_variance8x8/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
-specialize qw/vp9_sub_pixel_variance8x8/, "$sse2_x86inc", "$ssse3_x86inc";
+specialize qw/vp9_sub_pixel_variance8x8 neon/, "$sse2_x86inc", "$ssse3_x86inc";
 
 add_proto qw/unsigned int vp9_sub_pixel_avg_variance8x8/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
 specialize qw/vp9_sub_pixel_avg_variance8x8/, "$sse2_x86inc", "$ssse3_x86inc";
@@ -909,7 +909,7 @@ add_proto qw/unsigned int vp9_sad8x16/, "const uint8_t *src_ptr, int source_stri
 specialize qw/vp9_sad8x16 mmx/, "$sse2_x86inc";
 
 add_proto qw/unsigned int vp9_sad8x8/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride";
-specialize qw/vp9_sad8x8 mmx/, "$sse2_x86inc";
+specialize qw/vp9_sad8x8 mmx neon/, "$sse2_x86inc";
 
 add_proto qw/unsigned int vp9_sad8x4/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride";
 specialize qw/vp9_sad8x4/, "$sse2_x86inc";
@@ -1008,7 +1008,7 @@ add_proto qw/void vp9_sad4x4x8/, "const uint8_t *src_ptr, int  src_stride, const
 specialize qw/vp9_sad4x4x8 sse4/;
 
 add_proto qw/void vp9_sad64x64x4d/, "const uint8_t *src_ptr, int  src_stride, const uint8_t* const ref_ptr[], int  ref_stride, unsigned int *sad_array";
-specialize qw/vp9_sad64x64x4d sse2/;
+specialize qw/vp9_sad64x64x4d sse2 avx2/;
 
 add_proto qw/void vp9_sad32x64x4d/, "const uint8_t *src_ptr, int  src_stride, const uint8_t* const ref_ptr[], int  ref_stride, unsigned int *sad_array";
 specialize qw/vp9_sad32x64x4d sse2/;
@@ -1023,7 +1023,7 @@ add_proto qw/void vp9_sad16x32x4d/, "const uint8_t *src_ptr, int  src_stride, co
 specialize qw/vp9_sad16x32x4d sse2/;
 
 add_proto qw/void vp9_sad32x32x4d/, "const uint8_t *src_ptr, int  src_stride, const uint8_t* const ref_ptr[], int  ref_stride, unsigned int *sad_array";
-specialize qw/vp9_sad32x32x4d sse2/;
+specialize qw/vp9_sad32x32x4d sse2 avx2/;
 
 add_proto qw/void vp9_sad16x16x4d/, "const uint8_t *src_ptr, int  src_stride, const uint8_t* const ref_ptr[], int  ref_stride, unsigned int *sad_array";
 specialize qw/vp9_sad16x16x4d sse2/;
@@ -1064,7 +1064,7 @@ specialize qw/vp9_get_mb_ss mmx sse2/;
 # ENCODEMB INVOKE
 
 add_proto qw/void vp9_subtract_block/, "int rows, int cols, int16_t *diff_ptr, ptrdiff_t diff_stride, const uint8_t *src_ptr, ptrdiff_t src_stride, const uint8_t *pred_ptr, ptrdiff_t pred_stride";
-specialize qw/vp9_subtract_block/, "$sse2_x86inc";
+specialize qw/vp9_subtract_block neon/, "$sse2_x86inc";
 
 if (vpx_config("CONFIG_VP9_HIGH") eq "yes") {
 # the transform coefficients are held in 32-bit
@@ -1088,7 +1088,7 @@ if (vpx_config("CONFIG_VP9_HIGH") eq "yes") {
   specialize qw/vp9_block_error avx2/;
 
   add_proto qw/void vp9_quantize_fp/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, int zbin_oq_value, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan";
-  specialize qw/vp9_quantize_fp/, "$ssse3_x86_64";
+  specialize qw/vp9_quantize_fp neon/, "$ssse3_x86_64";
 
   add_proto qw/void vp9_quantize_fp_32x32/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, int zbin_oq_value, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan";
   specialize qw/vp9_quantize_fp_32x32/, "$ssse3_x86_64";
@@ -1112,6 +1112,7 @@ if (vpx_config("CONFIG_INTERNAL_STATS") eq "yes") {
 }
 
 # fdct functions
+
 if (vpx_config("CONFIG_VP9_HIGH") eq "yes") {
   add_proto qw/void vp9_fht4x4/, "const int16_t *input, tran_low_t *output, int stride, int tx_type";
   specialize qw/vp9_fht4x4/;
@@ -1153,10 +1154,10 @@ if (vpx_config("CONFIG_VP9_HIGH") eq "yes") {
   specialize qw/vp9_fdct32x32_rd/;
 } else {
   add_proto qw/void vp9_fht4x4/, "const int16_t *input, tran_low_t *output, int stride, int tx_type";
-  specialize qw/vp9_fht4x4 sse2 avx2/;
+  specialize qw/vp9_fht4x4 sse2/;
 
   add_proto qw/void vp9_fht8x8/, "const int16_t *input, tran_low_t *output, int stride, int tx_type";
-  specialize qw/vp9_fht8x8 sse2 avx2/;
+  specialize qw/vp9_fht8x8 sse2/;
 
   add_proto qw/void vp9_fht16x16/, "const int16_t *input, tran_low_t *output, int stride, int tx_type";
   specialize qw/vp9_fht16x16 sse2/;
@@ -1168,13 +1169,13 @@ if (vpx_config("CONFIG_VP9_HIGH") eq "yes") {
   specialize qw/vp9_fdct4x4_1 sse2/;
 
   add_proto qw/void vp9_fdct4x4/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vp9_fdct4x4 sse2 avx2/;
+  specialize qw/vp9_fdct4x4 sse2/;
 
   add_proto qw/void vp9_fdct8x8_1/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vp9_fdct8x8_1 sse2/;
+  specialize qw/vp9_fdct8x8_1 sse2 neon/;
 
   add_proto qw/void vp9_fdct8x8/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vp9_fdct8x8 sse2 avx2/, "$ssse3_x86_64";
+  specialize qw/vp9_fdct8x8 sse2 neon/, "$ssse3_x86_64";
 
   add_proto qw/void vp9_fdct16x16_1/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/vp9_fdct16x16_1 sse2/;

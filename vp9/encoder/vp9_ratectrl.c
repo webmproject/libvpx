@@ -60,6 +60,7 @@
       default: \
         assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10" \
                     " or VPX_BITS_12"); \
+        name = NULL; \
     } \
   } while (0)
 #else
@@ -162,6 +163,7 @@ double vp9_convert_qindex_to_q(int qindex, vpx_bit_depth_t bit_depth) {
       return vp9_ac_quant(qindex, 0, bit_depth) / 64.0;
     default:
       assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10 or VPX_BITS_12");
+      return -1.0;
   }
 #else
   return vp9_ac_quant(qindex, 0, bit_depth) / 4.0;
@@ -174,7 +176,7 @@ int vp9_rc_bits_per_mb(FRAME_TYPE frame_type, int qindex,
   int enumerator = frame_type == KEY_FRAME ? 3300000 : 2250000;
   // q based adjustment to baseline enumerator
   enumerator += (int)(enumerator * q) >> 12;
-  return (int)(0.5 + (enumerator * correction_factor / q));
+  return (int)(enumerator * correction_factor / q);
 }
 
 static int estimate_bits_at_q(FRAME_TYPE frame_type, int q, int mbs,
@@ -349,7 +351,7 @@ static double get_rate_correction_factor(const VP9_COMP *cpi) {
 
   if (cpi->common.frame_type == KEY_FRAME) {
     return rc->rate_correction_factors[KF_STD];
-  } else if (cpi->pass == 2) {
+  } else if (cpi->oxcf.pass == 2) {
     RATE_FACTOR_LEVEL rf_lvl =
       cpi->twopass.gf_group.rf_level[cpi->twopass.gf_group.index];
     return rc->rate_correction_factors[rf_lvl];
@@ -368,7 +370,7 @@ static void set_rate_correction_factor(VP9_COMP *cpi, double factor) {
 
   if (cpi->common.frame_type == KEY_FRAME) {
     rc->rate_correction_factors[KF_STD] = factor;
-  } else if (cpi->pass == 2) {
+  } else if (cpi->oxcf.pass == 2) {
     RATE_FACTOR_LEVEL rf_lvl =
       cpi->twopass.gf_group.rf_level[cpi->twopass.gf_group.index];
     rc->rate_correction_factors[rf_lvl] = factor;
@@ -1027,7 +1029,7 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi,
 int vp9_rc_pick_q_and_bounds(const VP9_COMP *cpi,
                              int *bottom_index, int *top_index) {
   int q;
-  if (cpi->pass == 0) {
+  if (cpi->oxcf.pass == 0) {
     if (cpi->oxcf.rc_mode == VPX_CBR)
       q = rc_pick_q_and_bounds_one_pass_cbr(cpi, bottom_index, top_index);
     else
@@ -1095,7 +1097,7 @@ static void update_golden_frame_stats(VP9_COMP *cpi) {
     // this frame refreshes means next frames don't unless specified by user
     rc->frames_since_golden = 0;
 
-    if (cpi->pass == 2) {
+    if (cpi->oxcf.pass == 2) {
       if (!rc->source_alt_ref_pending &&
           cpi->twopass.gf_group.rf_level[0] == GF_ARF_STD)
       rc->source_alt_ref_active = 0;
@@ -1312,7 +1314,7 @@ static int calc_iframe_target_size_one_pass_cbr(const VP9_COMP *cpi) {
       ? INT_MAX : (int)(rc->starting_buffer_level / 2);
   } else {
     int kf_boost = 32;
-    double framerate = oxcf->framerate;
+    double framerate = cpi->framerate;
     if (svc->number_temporal_layers > 1 &&
         oxcf->rc_mode == VPX_CBR) {
       // Use the layer framerate for temporal layers CBR mode.
@@ -1340,26 +1342,31 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
     cm->frame_type = KEY_FRAME;
     rc->source_alt_ref_active = 0;
 
-    if (cpi->use_svc && cpi->svc.number_temporal_layers == 1) {
+    if (is_spatial_svc(cpi)) {
       cpi->svc.layer_context[cpi->svc.spatial_layer_id].is_key_frame = 1;
+      cpi->ref_frame_flags &=
+          (~VP9_LAST_FLAG & ~VP9_GOLD_FLAG & ~VP9_ALT_FLAG);
     }
 
-    if (cpi->pass == 0 && cpi->oxcf.rc_mode == VPX_CBR) {
+    if (cpi->oxcf.pass == 0 && cpi->oxcf.rc_mode == VPX_CBR) {
       target = calc_iframe_target_size_one_pass_cbr(cpi);
     }
   } else {
     cm->frame_type = INTER_FRAME;
 
-    if (cpi->use_svc && cpi->svc.number_temporal_layers == 1) {
+    if (is_spatial_svc(cpi)) {
       LAYER_CONTEXT *lc = &cpi->svc.layer_context[cpi->svc.spatial_layer_id];
       if (cpi->svc.spatial_layer_id == 0) {
         lc->is_key_frame = 0;
       } else {
         lc->is_key_frame = cpi->svc.layer_context[0].is_key_frame;
+        if (lc->is_key_frame)
+          cpi->ref_frame_flags &= (~VP9_LAST_FLAG);
       }
+      cpi->ref_frame_flags &= (~VP9_ALT_FLAG);
     }
 
-    if (cpi->pass == 0 && cpi->oxcf.rc_mode == VPX_CBR) {
+    if (cpi->oxcf.pass == 0 && cpi->oxcf.rc_mode == VPX_CBR) {
       target = calc_pframe_target_size_one_pass_cbr(cpi);
     }
   }
@@ -1466,7 +1473,7 @@ void vp9_rc_update_framerate(VP9_COMP *cpi) {
   RATE_CONTROL *const rc = &cpi->rc;
   int vbr_max_bits;
 
-  rc->avg_frame_bandwidth = (int)(oxcf->target_bandwidth / oxcf->framerate);
+  rc->avg_frame_bandwidth = (int)(oxcf->target_bandwidth / cpi->framerate);
   rc->min_frame_bandwidth = (int)(rc->avg_frame_bandwidth *
                                 oxcf->two_pass_vbrmin_section / 100);
 

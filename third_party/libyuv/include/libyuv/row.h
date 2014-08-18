@@ -13,7 +13,11 @@
 
 #include <stdlib.h>  // For malloc.
 
-#include "basic_types.h"
+#include "libyuv/basic_types.h"
+
+#if defined(__native_client__)
+#include "ppapi/c/pp_macros.h"  // For PPAPI_RELEASE
+#endif
 
 #ifdef __cplusplus
 namespace libyuv {
@@ -38,7 +42,8 @@ extern "C" {
   var = 0
 
 #if defined(__pnacl__) || defined(__CLR_VER) || defined(COVERAGE_ENABLED) || \
-    defined(TARGET_IPHONE_SIMULATOR)
+    defined(TARGET_IPHONE_SIMULATOR) || \
+    (defined(_MSC_VER) && defined(__clang__))
 #define LIBYUV_DISABLE_X86
 #endif
 // True if compiling for SSSE3 as a requirement.
@@ -47,7 +52,12 @@ extern "C" {
 #endif
 
 // Enable for NaCL pepper 33 for bundle and AVX2 support.
-//  #define NEW_BINUTILS
+#if defined(__native_client__) && PPAPI_RELEASE >= 33
+#define NEW_BINUTILS
+#endif
+#if defined(__native_client__) && defined(__arm__) && PPAPI_RELEASE < 37
+#define LIBYUV_DISABLE_NEON
+#endif
 
 // The following are available on all x86 platforms:
 #if !defined(LIBYUV_DISABLE_X86) && \
@@ -152,6 +162,11 @@ extern "C" {
 #define HAS_YUY2TOYROW_SSE2
 #endif
 
+// The following are available on x64 Visual C:
+#if !defined(LIBYUV_DISABLE_X86) && defined (_M_X64)
+#define HAS_I422TOARGBROW_SSSE3
+#endif
+
 // GCC >= 4.7.0 required for AVX2.
 #if defined(__GNUC__) && (defined(__x86_64__) || defined(__i386__))
 #if (__GNUC__ > 4) || (__GNUC__ == 4 && (__GNUC_MINOR__ >= 7))
@@ -233,6 +248,10 @@ extern "C" {
 #define HAS_ARGBBLENDROW_SSE2
 #define HAS_ARGBATTENUATEROW_SSE2
 #define HAS_MIRRORROW_SSE2
+#endif
+
+// The following are available on arm64 platforms:
+#if !defined(LIBYUV_DISABLE_NEON) && defined(__aarch64__)
 #endif
 
 // The following are available on Neon platforms:
@@ -330,7 +349,8 @@ extern "C" {
 #endif
 
 // The following are available on Mips platforms:
-#if !defined(LIBYUV_DISABLE_MIPS) && defined(__mips__)
+#if !defined(LIBYUV_DISABLE_MIPS) && defined(__mips__) && \
+    (_MIPS_SIM == _MIPS_SIM_ABI32)
 #define HAS_COPYROW_MIPS
 #if defined(__mips_dsp) && (__mips_dsp_rev >= 2)
 #define HAS_I422TOABGRROW_MIPS_DSPR2
@@ -426,7 +446,7 @@ typedef uint8 uvec8[16];
     "lea " #offset "(%q" #base ",%q" #index "," #scale "),%%r14d\n" \
     #opcode " (%%r15,%%r14),%" #arg "\n" \
     BUNDLEUNLOCK
-#else
+#else  // defined(__native_client__) && defined(__x86_64__)
 #define BUNDLEALIGN "\n"
 #define MEMACCESS(base) "(%" #base ")"
 #define MEMACCESS2(offset, base) #offset "(%" #base ")"
@@ -443,6 +463,15 @@ typedef uint8 uvec8[16];
     #opcode " %%" #reg ","#offset "(%" #base ",%" #index "," #scale ")\n"
 #define MEMOPARG(opcode, offset, base, index, scale, arg) \
     #opcode " " #offset "(%" #base ",%" #index "," #scale "),%" #arg "\n"
+#endif  // defined(__native_client__) && defined(__x86_64__)
+
+#if defined(__arm__)
+#undef MEMACCESS
+#if defined(__native_client__)
+#define MEMACCESS(base) ".p2align   3\nbic %" #base ", #0xc0000000\n"
+#else
+#define MEMACCESS(base) "\n"
+#endif
 #endif
 
 void I444ToARGBRow_NEON(const uint8* src_y,

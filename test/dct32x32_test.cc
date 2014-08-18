@@ -71,10 +71,10 @@ void reference_32x32_dct_2d(const int16_t input[kNumCoeffs],
   }
 }
 
-typedef void (*fwd_txfm_t)(const int16_t *in, tran_low_t *out, int stride);
-typedef void (*inv_txfm_t)(const tran_low_t *in, uint8_t *out, int stride);
+typedef void (*FwdTxfmFunc)(const int16_t *in, tran_low_t *out, int stride);
+typedef void (*InvTxfmFunc)(const tran_low_t *in, uint8_t *out, int stride);
 
-typedef std::tr1::tuple<fwd_txfm_t, inv_txfm_t, int, int> trans_32x32_param_t;
+typedef std::tr1::tuple<FwdTxfmFunc, InvTxfmFunc, int, int> Trans32x32Param;
 
 #if CONFIG_VP9_HIGH
 
@@ -88,7 +88,7 @@ void idct32x32_12(const tran_low_t *in, uint8_t *out, int stride) {
 
 #endif
 
-class Trans32x32Test : public ::testing::TestWithParam<trans_32x32_param_t> {
+class Trans32x32Test : public ::testing::TestWithParam<Trans32x32Param> {
  public:
   virtual ~Trans32x32Test() {}
   virtual void SetUp() {
@@ -106,8 +106,8 @@ class Trans32x32Test : public ::testing::TestWithParam<trans_32x32_param_t> {
   int version_;
   int bit_depth_;
   int mask_;
-  fwd_txfm_t fwd_txfm_;
-  inv_txfm_t inv_txfm_;
+  FwdTxfmFunc fwd_txfm_;
+  InvTxfmFunc inv_txfm_;
 };
 
 TEST_P(Trans32x32Test, AccuracyCheck) {

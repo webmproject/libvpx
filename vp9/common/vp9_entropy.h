@@ -205,12 +205,13 @@ static INLINE int get_entropy_context(TX_SIZE tx_size, const ENTROPY_CONTEXT *a,
       break;
     default:
       assert(0 && "Invalid transform size.");
+      break;
   }
 
   return combine_entropy_contexts(above_ec, left_ec);
 }
 
-static const INLINE scan_order *get_scan(const MACROBLOCKD *xd, TX_SIZE tx_size,
+static INLINE const scan_order *get_scan(const MACROBLOCKD *xd, TX_SIZE tx_size,
                                          PLANE_TYPE type, int block_idx) {
   const MODE_INFO *const mi = xd->mi[0];
 

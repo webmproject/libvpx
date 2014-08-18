@@ -8,9 +8,9 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "third_party/libyuv/include/libyuv/cpu_id.h"
+#include "libyuv/cpu_id.h"
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && !defined(__clang__)
 #include <intrin.h>  // For __cpuidex()
 #endif
 #if !defined(__pnacl__) && !defined(__CLR_VER) && \
@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "third_party/libyuv/include/libyuv/basic_types.h"  // For CPU_X86
+#include "libyuv/basic_types.h"  // For CPU_X86
 
 #ifdef __cplusplus
 namespace libyuv {
@@ -48,7 +48,7 @@ extern "C" {
     defined(__i386__) || defined(__x86_64__))
 LIBYUV_API
 void CpuId(uint32 info_eax, uint32 info_ecx, uint32* cpu_info) {
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && !defined(__clang__)
 #if (_MSC_FULL_VER >= 160040219)
   __cpuidex((int*)(cpu_info), info_eax, info_ecx);
 #elif defined(_M_IX86)
@@ -188,10 +188,14 @@ LIBYUV_API SAFEBUFFERS
 int InitCpuFlags(void) {
 #if !defined(__pnacl__) && !defined(__CLR_VER) && defined(CPU_X86)
 
+  uint32 cpu_info0[4] = { 0, 0, 0, 0 };
   uint32 cpu_info1[4] = { 0, 0, 0, 0 };
   uint32 cpu_info7[4] = { 0, 0, 0, 0 };
+  CpuId(0, 0, cpu_info0);
   CpuId(1, 0, cpu_info1);
-  CpuId(7, 0, cpu_info7);
+  if (cpu_info0[0] >= 7) {
+    CpuId(7, 0, cpu_info7);
+  }
   cpu_info_ = ((cpu_info1[3] & 0x04000000) ? kCpuHasSSE2 : 0) |
               ((cpu_info1[2] & 0x00000200) ? kCpuHasSSSE3 : 0) |
               ((cpu_info1[2] & 0x00080000) ? kCpuHasSSE41 : 0) |
@@ -199,6 +203,7 @@ int InitCpuFlags(void) {
               ((cpu_info7[1] & 0x00000200) ? kCpuHasERMS : 0) |
               ((cpu_info1[2] & 0x00001000) ? kCpuHasFMA3 : 0) |
               kCpuHasX86;
+
 #ifdef HAS_XGETBV
   if ((cpu_info1[2] & 0x18000000) == 0x18000000 &&  // AVX and OSSave
       TestOsSaveYmm()) {  // Saves YMM.

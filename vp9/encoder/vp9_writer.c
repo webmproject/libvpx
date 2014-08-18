@@ -15,7 +15,6 @@
 void vp9_start_encode(vp9_writer *br, uint8_t *source) {
   br->lowvalue = 0;
   br->range    = 255;
-  br->value    = 0;
   br->count    = -24;
   br->buffer   = source;
   br->pos      = 0;

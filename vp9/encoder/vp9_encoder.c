@@ -65,9 +65,6 @@ void vp9_coef_tree_initialize();
 #ifdef OUTPUT_YUV_DENOISED
 FILE *yuv_denoised_file = NULL;
 #endif
-#ifdef OUTPUT_YUV_SRC
-FILE *yuv_file;
-#endif
 #ifdef OUTPUT_YUV_REC
 FILE *yuv_rec_file;
 #endif
@@ -135,7 +132,8 @@ static void setup_frame(VP9_COMP *cpi) {
   }
 
   if (cm->frame_type == KEY_FRAME) {
-    cpi->refresh_golden_frame = 1;
+    if (!is_spatial_svc(cpi))
+      cpi->refresh_golden_frame = 1;
     cpi->refresh_alt_ref_frame = 1;
   } else {
     cm->fc = cm->frame_contexts[cm->frame_context_idx];
@@ -497,7 +495,7 @@ static void update_frame_size(VP9_COMP *cpi) {
   vp9_init_context_buffers(cm);
   init_macroblockd(cm, xd);
 
-  if (cpi->use_svc && cpi->svc.number_temporal_layers == 1) {
+  if (is_spatial_svc(cpi)) {
     if (vp9_realloc_frame_buffer(&cpi->alt_ref_buffer,
                                  cm->width, cm->height,
                                  cm->subsampling_x, cm->subsampling_y,
@@ -511,7 +509,7 @@ static void update_frame_size(VP9_COMP *cpi) {
 }
 
 void vp9_new_framerate(VP9_COMP *cpi, double framerate) {
-  cpi->oxcf.framerate = framerate < 0.1 ? 30 : framerate;
+  cpi->framerate = framerate < 0.1 ? 30 : framerate;
   vp9_rc_update_framerate(cpi);
 }
 
@@ -544,6 +542,7 @@ static void init_config(struct VP9_COMP *cpi, VP9EncoderConfig *oxcf) {
   VP9_COMMON *const cm = &cpi->common;
 
   cpi->oxcf = *oxcf;
+  cpi->framerate = oxcf->init_framerate;
 
   cm->profile = oxcf->profile;
   cm->bit_depth = oxcf->bit_depth;
@@ -579,23 +578,6 @@ static void init_config(struct VP9_COMP *cpi, VP9EncoderConfig *oxcf) {
   set_tile_limits(cpi);
 }
 
-static int get_pass(MODE mode) {
-  switch (mode) {
-    case REALTIME:
-    case ONE_PASS_GOOD:
-    case ONE_PASS_BEST:
-      return 0;
-
-    case TWO_PASS_FIRST:
-      return 1;
-
-    case TWO_PASS_SECOND_GOOD:
-    case TWO_PASS_SECOND_BEST:
-      return 2;
-  }
-  return -1;
-}
-
 void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
@@ -607,7 +589,6 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   assert(cm->bit_depth <= VPX_BITS_12);
 
   cpi->oxcf = *oxcf;
-  cpi->pass = get_pass(cpi->oxcf.mode);
 #if CONFIG_VP9_HIGH
   if (cpi->oxcf.use_high) {
     cpi->mb.e_mbd.bps = bit_depth_to_bps(cm->bit_depth);
@@ -660,7 +641,7 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   rc->buffer_level = MIN(rc->buffer_level, rc->maximum_buffer_size);
 
   // Set up frame rate and related parameters rate control values.
-  vp9_new_framerate(cpi, cpi->oxcf.framerate);
+  vp9_new_framerate(cpi, cpi->framerate);
 
   // Set absolute upper and lower quality limits
   rc->worst_quality = cpi->oxcf.worst_allowed_q;
@@ -682,7 +663,7 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
 
   if ((cpi->svc.number_temporal_layers > 1 &&
       cpi->oxcf.rc_mode == VPX_CBR) ||
-      (cpi->svc.number_spatial_layers > 1 && cpi->pass == 2)) {
+      (cpi->svc.number_spatial_layers > 1 && cpi->oxcf.pass == 2)) {
     vp9_update_layer_context_change_config(cpi,
                                            (int)cpi->oxcf.target_bandwidth);
   }
@@ -705,7 +686,7 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   high_set_var_fns(cpi);
 #endif
 
-#if CONFIG_DENOISING
+#if CONFIG_VP9_TEMPORAL_DENOISING
   if (cpi->oxcf.noise_sensitivity > 0) {
     vp9_denoiser_alloc(&(cpi->denoiser), cm->width, cm->height,
                        cm->subsampling_x, cm->subsampling_y,
@@ -1316,7 +1297,7 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
   cpi->use_svc = 0;
 
   init_config(cpi, oxcf);
-  vp9_rc_init(&cpi->oxcf, cpi->pass, &cpi->rc);
+  vp9_rc_init(&cpi->oxcf, oxcf->pass, &cpi->rc);
 
   cm->current_video_frame = 0;
 
@@ -1368,7 +1349,7 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
   // pending further tuning and testing. The code is left in place here
   // as a place holder in regard to the required paths.
   cpi->multi_arf_last_grp_enabled = 0;
-  if (cpi->pass == 2) {
+  if (oxcf->pass == 2) {
     if (cpi->use_svc) {
       cpi->multi_arf_allowed = 0;
       cpi->multi_arf_enabled = 0;
@@ -1435,13 +1416,10 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
   cpi->mb.nmvsadcost_hp[1] = &cpi->mb.nmvsadcosts_hp[1][MV_MAX];
   cal_nmvsadcosts_hp(cpi->mb.nmvsadcost_hp);
 
-#if CONFIG_DENOISING
+#if CONFIG_VP9_TEMPORAL_DENOISING
 #ifdef OUTPUT_YUV_DENOISED
   yuv_denoised_file = fopen("denoised.yuv", "ab");
 #endif
-#endif
-#ifdef OUTPUT_YUV_SRC
-  yuv_file = fopen("bd.yuv", "ab");
 #endif
 #ifdef OUTPUT_YUV_REC
   yuv_rec_file = fopen("rec.yuv", "wb");
@@ -1456,9 +1434,9 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
 
   cpi->allow_encode_breakout = ENCODE_BREAKOUT_ENABLED;
 
-  if (cpi->pass == 1) {
+  if (oxcf->pass == 1) {
     vp9_init_first_pass(cpi);
-  } else if (cpi->pass == 2) {
+  } else if (oxcf->pass == 2) {
     const size_t packet_sz = sizeof(FIRSTPASS_STATS);
     const int packets = (int)(oxcf->two_pass_stats_in.sz / packet_sz);
 
@@ -1638,7 +1616,7 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
     vp9_clear_system_state();
 
     // printf("\n8x8-4x4:%d-%d\n", cpi->t8x8_count, cpi->t4x4_count);
-    if (cpi->pass != 1) {
+    if (cpi->oxcf.pass != 1) {
       FILE *f = fopen("opsnr.stt", "a");
       double time_encoded = (cpi->last_end_time_stamp_seen
                              - cpi->first_time_stamp_ever) / 10000000.000;
@@ -1694,7 +1672,7 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
 #endif
   }
 
-#if CONFIG_DENOISING
+#if CONFIG_VP9_TEMPORAL_DENOISING
   if (cpi->oxcf.noise_sensitivity > 0) {
     vp9_denoiser_free(&(cpi->denoiser));
   }
@@ -1718,13 +1696,10 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
   vp9_remove_common(&cpi->common);
   vpx_free(cpi);
 
-#if CONFIG_DENOISING
+#if CONFIG_VP9_TEMPORAL_DENOISING
 #ifdef OUTPUT_YUV_DENOISED
   fclose(yuv_denoised_file);
 #endif
-#endif
-#ifdef OUTPUT_YUV_SRC
-  fclose(yuv_file);
 #endif
 #ifdef OUTPUT_YUV_REC
   fclose(yuv_rec_file);
@@ -1990,16 +1965,6 @@ int vp9_copy_reference_enc(VP9_COMP *cpi, VP9_REFFRAME ref_frame_flag,
   }
 }
 
-int vp9_get_reference_enc(VP9_COMP *cpi, int index, YV12_BUFFER_CONFIG **fb) {
-  VP9_COMMON *cm = &cpi->common;
-
-  if (index < 0 || index >= REF_FRAMES)
-    return -1;
-
-  *fb = &cm->frame_bufs[cm->ref_frame_map[index]].buf;
-  return 0;
-}
-
 int vp9_set_reference_enc(VP9_COMP *cpi, VP9_REFFRAME ref_frame_flag,
                           YV12_BUFFER_CONFIG *sd) {
   YV12_BUFFER_CONFIG *cfg = get_vp9_ref_frame_buffer(cpi, ref_frame_flag);
@@ -2017,36 +1982,7 @@ int vp9_update_entropy(VP9_COMP * cpi, int update) {
   return 0;
 }
 
-
-#if defined(OUTPUT_YUV_SRC)
-void vp9_write_yuv_frame(YV12_BUFFER_CONFIG *s, FILE *f) {
-  uint8_t *src = s->y_buffer;
-  int h = s->y_height;
-
-  do {
-    fwrite(src, s->y_width, 1, f);
-    src += s->y_stride;
-  } while (--h);
-
-  src = s->u_buffer;
-  h = s->uv_height;
-
-  do {
-    fwrite(src, s->uv_width, 1, f);
-    src += s->uv_stride;
-  } while (--h);
-
-  src = s->v_buffer;
-  h = s->uv_height;
-
-  do {
-    fwrite(src, s->uv_width, 1, f);
-    src += s->uv_stride;
-  } while (--h);
-}
-#endif
-
-#if CONFIG_DENOISING
+#if CONFIG_VP9_TEMPORAL_DENOISING
 #if defined(OUTPUT_YUV_DENOISED)
 // The denoiser buffer is allocated as a YUV 440 buffer. This function writes it
 // as YUV 420. We simply use the top-left pixels of the UV buffers, since we do
@@ -2136,17 +2072,6 @@ void vp9_write_yuv_rec_frame(VP9_COMMON *cm) {
     src += s->uv_stride;
   } while (--h);
 
-#if CONFIG_ALPHA
-  if (s->alpha_buffer) {
-    src = s->alpha_buffer;
-    h = s->alpha_crop_height;
-    do {
-      fwrite(src, s->alpha_crop_width, 1,  yuv_rec_file);
-      src += s->alpha_stride;
-    } while (--h);
-  }
-#endif
-
   fflush(yuv_rec_file);
 }
 #endif
@@ -2162,22 +2087,18 @@ static void scale_and_extend_frame_nonnormative(const YV12_BUFFER_CONFIG *src,
 #endif
   // TODO(dkovalev): replace YV12_BUFFER_CONFIG with vpx_image_t
   int i;
-  const uint8_t *const srcs[4] = {src->y_buffer, src->u_buffer, src->v_buffer,
-                                  src->alpha_buffer};
-  const int src_strides[4] = {src->y_stride, src->uv_stride, src->uv_stride,
-                              src->alpha_stride};
-  const int src_widths[4] = {src->y_crop_width, src->uv_crop_width,
-                             src->uv_crop_width, src->y_crop_width};
-  const int src_heights[4] = {src->y_crop_height, src->uv_crop_height,
-                              src->uv_crop_height, src->y_crop_height};
-  uint8_t *const dsts[4] = {dst->y_buffer, dst->u_buffer, dst->v_buffer,
-                            dst->alpha_buffer};
-  const int dst_strides[4] = {dst->y_stride, dst->uv_stride, dst->uv_stride,
-                              dst->alpha_stride};
-  const int dst_widths[4] = {dst->y_crop_width, dst->uv_crop_width,
-                             dst->uv_crop_width, dst->y_crop_width};
-  const int dst_heights[4] = {dst->y_crop_height, dst->uv_crop_height,
-                              dst->uv_crop_height, dst->y_crop_height};
+  const uint8_t *const srcs[3] = {src->y_buffer, src->u_buffer, src->v_buffer};
+  const int src_strides[3] = {src->y_stride, src->uv_stride, src->uv_stride};
+  const int src_widths[3] = {src->y_crop_width, src->uv_crop_width,
+                             src->uv_crop_width };
+  const int src_heights[3] = {src->y_crop_height, src->uv_crop_height,
+                              src->uv_crop_height};
+  uint8_t *const dsts[3] = {dst->y_buffer, dst->u_buffer, dst->v_buffer};
+  const int dst_strides[3] = {dst->y_stride, dst->uv_stride, dst->uv_stride};
+  const int dst_widths[3] = {dst->y_crop_width, dst->uv_crop_width,
+                             dst->uv_crop_width};
+  const int dst_heights[3] = {dst->y_crop_height, dst->uv_crop_height,
+                              dst->uv_crop_height};
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
 #if CONFIG_VP9_HIGH
@@ -2210,14 +2131,10 @@ static void scale_and_extend_frame(const YV12_BUFFER_CONFIG *src,
   const int src_h = src->y_crop_height;
   const int dst_w = dst->y_crop_width;
   const int dst_h = dst->y_crop_height;
-  const uint8_t *const srcs[4] = {src->y_buffer, src->u_buffer, src->v_buffer,
-                                  src->alpha_buffer};
-  const int src_strides[4] = {src->y_stride, src->uv_stride, src->uv_stride,
-                              src->alpha_stride};
-  uint8_t *const dsts[4] = {dst->y_buffer, dst->u_buffer, dst->v_buffer,
-                            dst->alpha_buffer};
-  const int dst_strides[4] = {dst->y_stride, dst->uv_stride, dst->uv_stride,
-                              dst->alpha_stride};
+  const uint8_t *const srcs[3] = {src->y_buffer, src->u_buffer, src->v_buffer};
+  const int src_strides[3] = {src->y_stride, src->uv_stride, src->uv_stride};
+  uint8_t *const dsts[3] = {dst->y_buffer, dst->u_buffer, dst->v_buffer};
+  const int dst_strides[3] = {dst->y_stride, dst->uv_stride, dst->uv_stride};
   const InterpKernel *const kernel = vp9_get_interp_kernel(EIGHTTAP);
   int x, y, i;
 
@@ -2338,17 +2255,15 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
                &cm->ref_frame_map[cpi->gld_fb_idx], cm->new_fb_idx);
     ref_cnt_fb(cm->frame_bufs,
                &cm->ref_frame_map[cpi->alt_fb_idx], cm->new_fb_idx);
-  } else if (!cpi->multi_arf_allowed && cpi->refresh_golden_frame &&
-             cpi->rc.is_src_frame_alt_ref && !cpi->use_svc) {
-    /* Preserve the previously existing golden frame and update the frame in
-     * the alt ref slot instead. This is highly specific to the current use of
-     * alt-ref as a forward reference, and this needs to be generalized as
-     * other uses are implemented (like RTC/temporal scaling)
-     *
-     * The update to the buffer in the alt ref slot was signaled in
-     * vp9_pack_bitstream(), now swap the buffer pointers so that it's treated
-     * as the golden frame next time.
-     */
+  } else if (vp9_preserve_existing_gf(cpi)) {
+    // We have decided to preserve the previously existing golden frame as our
+    // new ARF frame. However, in the short term in function
+    // vp9_bitstream.c::get_refresh_mask() we left it in the GF slot and, if
+    // we're updating the GF with the current decoded frame, we save it to the
+    // ARF slot instead.
+    // We now have to update the ARF with the current frame and swap gld_fb_idx
+    // and alt_fb_idx so that, overall, we've stored the old GF in the new ARF
+    // slot and, if we're updating the GF, the current frame becomes the new GF.
     int tmp;
 
     ref_cnt_fb(cm->frame_bufs,
@@ -2357,10 +2272,15 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
     tmp = cpi->alt_fb_idx;
     cpi->alt_fb_idx = cpi->gld_fb_idx;
     cpi->gld_fb_idx = tmp;
+
+    if (is_spatial_svc(cpi)) {
+      cpi->svc.layer_context[0].gold_ref_idx = cpi->gld_fb_idx;
+      cpi->svc.layer_context[0].alt_ref_idx = cpi->alt_fb_idx;
+    }
   } else { /* For non key/golden frames */
     if (cpi->refresh_alt_ref_frame) {
       int arf_idx = cpi->alt_fb_idx;
-      if ((cpi->pass == 2) && cpi->multi_arf_allowed) {
+      if ((cpi->oxcf.pass == 2) && cpi->multi_arf_allowed) {
         const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
         arf_idx = gf_group->arf_update_idx[gf_group->index];
       }
@@ -2379,7 +2299,7 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
     ref_cnt_fb(cm->frame_bufs,
                &cm->ref_frame_map[cpi->lst_fb_idx], cm->new_fb_idx);
   }
-#if CONFIG_DENOISING
+#if CONFIG_VP9_TEMPORAL_DENOISING
   if (cpi->oxcf.noise_sensitivity > 0) {
     vp9_denoiser_update_frame_info(&cpi->denoiser,
                                    *cpi->Source,
@@ -2510,8 +2430,8 @@ static void output_frame_level_debug_stats(VP9_COMP *cpi) {
         cpi->rc.total_actual_bits, cm->base_qindex,
         vp9_convert_qindex_to_q(cm->base_qindex),
         (double)vp9_dc_quant(cm->base_qindex, 0) / 4.0,
+        vp9_convert_qindex_to_q(cpi->twopass.active_worst_quality),
         cpi->rc.avg_q,
-        vp9_convert_qindex_to_q(cpi->rc.ni_av_qi),
         vp9_convert_qindex_to_q(cpi->oxcf.cq_level),
         cpi->refresh_last_frame, cpi->refresh_golden_frame,
         cpi->refresh_alt_ref_frame, cm->frame_type, cpi->rc.gfu_boost,
@@ -2796,7 +2716,8 @@ static void get_ref_frame_flags(VP9_COMP *cpi) {
   if (cpi->gold_is_last)
     cpi->ref_frame_flags &= ~VP9_GOLD_FLAG;
 
-  if (cpi->rc.frames_till_gf_update_due == INT_MAX)
+  if (cpi->rc.frames_till_gf_update_due == INT_MAX &&
+      !is_spatial_svc(cpi))
     cpi->ref_frame_flags &= ~VP9_GOLD_FLAG;
 
   if (cpi->alt_is_last)
@@ -2847,9 +2768,7 @@ static void configure_skippable_frame(VP9_COMP *cpi) {
   // according to the variance
 
   SVC *const svc = &cpi->svc;
-  const int is_spatial_svc = (svc->number_spatial_layers > 1) &&
-                             (svc->number_temporal_layers == 1);
-  TWO_PASS *const twopass = is_spatial_svc ?
+  TWO_PASS *const twopass = is_spatial_svc(cpi) ?
                             &svc->layer_context[svc->spatial_layer_id].twopass
                             : &cpi->twopass;
 
@@ -2867,7 +2786,7 @@ static void set_arf_sign_bias(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   int arf_sign_bias;
 
-  if ((cpi->pass == 2) && cpi->multi_arf_allowed) {
+  if ((cpi->oxcf.pass == 2) && cpi->multi_arf_allowed) {
     const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
     arf_sign_bias = cpi->rc.source_alt_ref_active &&
                     (!cpi->refresh_alt_ref_frame ||
@@ -2955,9 +2874,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
       (cpi->oxcf.frame_parallel_decoding_mode != 0);
 
     // By default, encoder assumes decoder can use prev_mi.
-    cm->coding_use_prev_mi = 1;
     if (cm->error_resilient_mode) {
-      cm->coding_use_prev_mi = 0;
       cm->frame_parallel_decoding_mode = 1;
       cm->reset_frame_context = 0;
       cm->refresh_frame_context = 0;
@@ -2971,19 +2888,19 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   // static regions if indicated.
   // Only allowed in second pass of two pass (as requires lagged coding)
   // and if the relevant speed feature flag is set.
-  if (cpi->pass == 2 && cpi->sf.static_segmentation)
+  if (cpi->oxcf.pass == 2 && cpi->sf.static_segmentation)
     configure_static_seg_features(cpi);
 
   // Check if the current frame is skippable for the partition search in the
   // second pass according to the first pass stats
-  if (cpi->pass == 2 &&
-      (!cpi->use_svc || cpi->svc.number_temporal_layers == 1)) {
+  if (cpi->oxcf.pass == 2 &&
+      (!cpi->use_svc || is_spatial_svc(cpi))) {
     configure_skippable_frame(cpi);
   }
 
   // For 1 pass CBR, check if we are dropping this frame.
   // Never drop on key frame.
-  if (cpi->pass == 0 &&
+  if (cpi->oxcf.pass == 0 &&
       cpi->oxcf.rc_mode == VPX_CBR &&
       cm->frame_type != KEY_FRAME) {
     if (vp9_rc_drop_frame(cpi)) {
@@ -3020,20 +2937,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   }
 #endif
 
-#ifdef OUTPUT_YUV_SRC
-  vp9_write_yuv_frame(cpi->Source, yuv_file);
-#endif
-
   set_speed_features(cpi);
-
-#if CONFIG_DENOISING
-#ifdef OUTPUT_YUV_DENOISED
-  if (cpi->oxcf.noise_sensitivity > 0) {
-    vp9_write_yuv_frame_420(&cpi->denoiser.running_avg_y[INTRA_FRAME],
-                            yuv_denoised_file);
-  }
-#endif
-#endif
 
   // Decide q and q bounds.
   q = vp9_rc_pick_q_and_bounds(cpi, &bottom_index, &top_index);
@@ -3049,6 +2953,16 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   } else {
     encode_with_recode_loop(cpi, size, dest, q, bottom_index, top_index);
   }
+
+#if CONFIG_VP9_TEMPORAL_DENOISING
+#ifdef OUTPUT_YUV_DENOISED
+  if (cpi->oxcf.noise_sensitivity > 0) {
+    vp9_write_yuv_frame_420(&cpi->denoiser.running_avg_y[INTRA_FRAME],
+                            yuv_denoised_file);
+  }
+#endif
+#endif
+
 
   // Special case code to reduce pulsing when key frames are forced at a
   // fixed interval. Note the reconstruction error if it is the frame before
@@ -3246,8 +3160,6 @@ int vp9_receive_raw_frame(VP9_COMP *cpi, unsigned int frame_flags,
 #if CONFIG_VP9_HIGH
   const int use_high = sd->flags & YV12_FLAG_HIGH;
 #endif
-  const int is_spatial_svc = cpi->use_svc &&
-                             (cpi->svc.number_temporal_layers == 1);
 
 #if CONFIG_VP9_HIGH
   check_initial_width(cpi, subsampling_x, subsampling_y, use_high);
@@ -3257,8 +3169,8 @@ int vp9_receive_raw_frame(VP9_COMP *cpi, unsigned int frame_flags,
 
   vpx_usec_timer_start(&timer);
 
-#ifdef CONFIG_SPATIAL_SVC
-  if (is_spatial_svc)
+#if CONFIG_SPATIAL_SVC
+  if (is_spatial_svc(cpi))
     res = vp9_svc_lookahead_push(cpi, cpi->lookahead, sd, time_stamp, end_time,
                                  frame_flags);
   else
@@ -3327,7 +3239,7 @@ void adjust_frame_rate(VP9_COMP *cpi) {
       // over the whole interval seen.
       const double interval = MIN((double)(cpi->source->ts_end
                                    - cpi->first_time_stamp_ever), 10000000.0);
-      double avg_duration = 10000000.0 / cpi->oxcf.framerate;
+      double avg_duration = 10000000.0 / cpi->framerate;
       avg_duration *= (interval - avg_duration + this_duration);
       avg_duration /= interval;
 
@@ -3344,7 +3256,7 @@ static int get_arf_src_index(VP9_COMP *cpi) {
   RATE_CONTROL *const rc = &cpi->rc;
   int arf_src_index = 0;
   if (is_altref_enabled(cpi)) {
-    if (cpi->pass == 2) {
+    if (cpi->oxcf.pass == 2) {
       const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
       if (gf_group->update_type[gf_group->index] == ARF_UPDATE) {
         arf_src_index = gf_group->arf_src_offset[gf_group->index];
@@ -3359,7 +3271,7 @@ static int get_arf_src_index(VP9_COMP *cpi) {
 static void check_src_altref(VP9_COMP *cpi) {
   RATE_CONTROL *const rc = &cpi->rc;
 
-  if (cpi->pass == 2) {
+  if (cpi->oxcf.pass == 2) {
     const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
     rc->is_src_frame_alt_ref =
       (gf_group->update_type[gf_group->index] == OVERLAY_UPDATE);
@@ -3388,15 +3300,14 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   YV12_BUFFER_CONFIG *force_src_buffer = NULL;
   MV_REFERENCE_FRAME ref_frame;
   int arf_src_index;
-  const int is_spatial_svc = cpi->use_svc &&
-                             (cpi->svc.number_temporal_layers == 1) &&
-                             (cpi->svc.number_spatial_layers > 1);
 
   if (!cpi)
     return -1;
 
-  if (is_spatial_svc && cpi->pass == 2) {
+  if (is_spatial_svc(cpi) && cpi->oxcf.pass == 2) {
+#if CONFIG_SPATIAL_SVC
     vp9_svc_lookahead_peek(cpi, cpi->lookahead, 0, 1);
+#endif
     vp9_restore_layer_context(cpi);
   }
 
@@ -3419,8 +3330,8 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   if (arf_src_index) {
     assert(arf_src_index <= rc->frames_to_key);
 
-#ifdef CONFIG_SPATIAL_SVC
-    if (is_spatial_svc)
+#if CONFIG_SPATIAL_SVC
+    if (is_spatial_svc(cpi))
       cpi->source = vp9_svc_lookahead_peek(cpi, cpi->lookahead,
                                            arf_src_index, 0);
     else
@@ -3429,8 +3340,8 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     if (cpi->source != NULL) {
       cpi->alt_ref_source = cpi->source;
 
-#ifdef CONFIG_SPATIAL_SVC
-      if (is_spatial_svc && cpi->svc.spatial_layer_id > 0) {
+#if CONFIG_SPATIAL_SVC
+      if (is_spatial_svc(cpi) && cpi->svc.spatial_layer_id > 0) {
         int i;
         // Reference a hidden frame from a lower layer
         for (i = cpi->svc.spatial_layer_id - 1; i >= 0; --i) {
@@ -3464,8 +3375,8 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   if (!cpi->source) {
     // Get last frame source.
     if (cm->current_video_frame > 0) {
-#ifdef CONFIG_SPATIAL_SVC
-      if (is_spatial_svc)
+#if CONFIG_SPATIAL_SVC
+      if (is_spatial_svc(cpi))
         cpi->last_source = vp9_svc_lookahead_peek(cpi, cpi->lookahead, -1, 0);
       else
 #endif
@@ -3475,8 +3386,8 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     }
 
     // Read in the source frame.
-#ifdef CONFIG_SPATIAL_SVC
-    if (is_spatial_svc)
+#if CONFIG_SPATIAL_SVC
+    if (is_spatial_svc(cpi))
       cpi->source = vp9_svc_lookahead_pop(cpi, cpi->lookahead, flush);
     else
 #endif
@@ -3507,7 +3418,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
   } else {
     *size = 0;
-    if (flush && cpi->pass == 1 && !cpi->twopass.first_pass_done) {
+    if (flush && cpi->oxcf.pass == 1 && !cpi->twopass.first_pass_done) {
       vp9_end_first_pass(cpi);    /* get last stats packet */
       cpi->twopass.first_pass_done = 1;
     }
@@ -3518,6 +3429,9 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     cpi->first_time_stamp_ever = cpi->source->ts_start;
     cpi->last_end_time_stamp_seen = cpi->source->ts_start;
   }
+
+  // Clear down mmx registers
+  vp9_clear_system_state();
 
   // adjust frame rates based on timestamps given
   if (cm->show_frame) {
@@ -3533,9 +3447,6 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   // start with a 0 size frame
   *size = 0;
 
-  // Clear down mmx registers
-  vp9_clear_system_state();
-
   /* find a free buffer for the new frame, releasing the reference previously
    * held.
    */
@@ -3545,7 +3456,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   if (!cpi->use_svc && cpi->multi_arf_allowed) {
     if (cm->frame_type == KEY_FRAME) {
       init_buffer_indices(cpi);
-    } else if (cpi->pass == 2) {
+    } else if (cpi->oxcf.pass == 2) {
       const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
       cpi->alt_fb_idx = gf_group->arf_ref_idx[gf_group->index];
     }
@@ -3553,7 +3464,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
   cpi->frame_flags = *frame_flags;
 
-  if (cpi->pass == 2 &&
+  if (cpi->oxcf.pass == 2 &&
       cm->current_video_frame == 0 &&
       cpi->oxcf.allow_spatial_resampling &&
       cpi->oxcf.rc_mode == VPX_VBR) {
@@ -3601,8 +3512,8 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     vp9_vaq_init();
   }
 
-  if (cpi->pass == 1 &&
-      (!cpi->use_svc || cpi->svc.number_temporal_layers == 1)) {
+  if (cpi->oxcf.pass == 1 &&
+      (!cpi->use_svc || is_spatial_svc(cpi))) {
     const int lossless = is_lossless_requested(&cpi->oxcf);
 #if CONFIG_VP9_HIGH
     if (cpi->oxcf.use_high)
@@ -3616,8 +3527,8 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 #endif
     cpi->mb.itxm_add = lossless ? vp9_iwht4x4_add : vp9_idct4x4_add;
     vp9_first_pass(cpi);
-  } else if (cpi->pass == 2 &&
-      (!cpi->use_svc || cpi->svc.number_temporal_layers == 1)) {
+  } else if (cpi->oxcf.pass == 2 &&
+      (!cpi->use_svc || is_spatial_svc(cpi))) {
     Pass2Encode(cpi, size, dest, frame_flags);
   } else if (cpi->use_svc) {
     SvcEncode(cpi, size, dest, frame_flags);
@@ -3641,19 +3552,19 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   // Save layer specific state.
   if ((cpi->svc.number_temporal_layers > 1 &&
       cpi->oxcf.rc_mode == VPX_CBR) ||
-      (cpi->svc.number_spatial_layers > 1 && cpi->pass == 2)) {
+      (cpi->svc.number_spatial_layers > 1 && cpi->oxcf.pass == 2)) {
     vp9_save_layer_context(cpi);
   }
 
   vpx_usec_timer_mark(&cmptimer);
   cpi->time_compress_data += vpx_usec_timer_elapsed(&cmptimer);
 
-  if (cpi->b_calculate_psnr && cpi->pass != 1 && cm->show_frame)
+  if (cpi->b_calculate_psnr && cpi->oxcf.pass != 1 && cm->show_frame)
     generate_psnr_packet(cpi);
 
 #if CONFIG_INTERNAL_STATS
 
-  if (cpi->pass != 1) {
+  if (cpi->oxcf.pass != 1) {
     cpi->bytes += (int)(*size);
 
     if (cm->show_frame) {
@@ -3920,6 +3831,7 @@ int vp9_high_get_y_sse(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b,
       return (int) sse;
     default:
       assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10 or VPX_BITS_12");
+      return -1;
   }
 }
 #endif

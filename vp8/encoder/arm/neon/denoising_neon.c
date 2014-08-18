@@ -279,8 +279,8 @@ int vp8_denoiser_filter_uv_neon(unsigned char *mc_running_avg,
       {
         const uint32x2_t _7654_3210 = vpaddl_u16(v_sum_block);
         const uint64x1_t _76543210 = vpaddl_u32(_7654_3210);
-        const unsigned int sum_block =
-            vget_lane_u32(vreinterpret_u32_u64(_76543210), 0);
+        const int sum_block =
+            vget_lane_s32(vreinterpret_s32_u64(_76543210), 0);
         if (abs(sum_block - (128 * 8 * 8)) < SUM_DIFF_FROM_AVG_THRESH_UV) {
           return COPY_BLOCK;
         }

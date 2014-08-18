@@ -118,20 +118,26 @@ testdata::
 utiltest:
 
 # Add compiler flags for intrinsic files
+ifeq ($(TOOLCHAIN), x86-os2-gcc)
+STACKREALIGN=-mstackrealign
+else
+STACKREALIGN=
+endif
+
 $(BUILD_PFX)%_mmx.c.d: CFLAGS += -mmmx
 $(BUILD_PFX)%_mmx.c.o: CFLAGS += -mmmx
-$(BUILD_PFX)%_sse2.c.d: CFLAGS += -msse2
-$(BUILD_PFX)%_sse2.c.o: CFLAGS += -msse2
-$(BUILD_PFX)%_sse3.c.d: CFLAGS += -msse3
-$(BUILD_PFX)%_sse3.c.o: CFLAGS += -msse3
-$(BUILD_PFX)%_ssse3.c.d: CFLAGS += -mssse3
-$(BUILD_PFX)%_ssse3.c.o: CFLAGS += -mssse3
-$(BUILD_PFX)%_sse4.c.d: CFLAGS += -msse4.1
-$(BUILD_PFX)%_sse4.c.o: CFLAGS += -msse4.1
-$(BUILD_PFX)%_avx.c.d: CFLAGS += -mavx
-$(BUILD_PFX)%_avx.c.o: CFLAGS += -mavx
-$(BUILD_PFX)%_avx2.c.d: CFLAGS += -mavx2
-$(BUILD_PFX)%_avx2.c.o: CFLAGS += -mavx2
+$(BUILD_PFX)%_sse2.c.d: CFLAGS += -msse2 $(STACKREALIGN)
+$(BUILD_PFX)%_sse2.c.o: CFLAGS += -msse2 $(STACKREALIGN)
+$(BUILD_PFX)%_sse3.c.d: CFLAGS += -msse3 $(STACKREALIGN)
+$(BUILD_PFX)%_sse3.c.o: CFLAGS += -msse3 $(STACKREALIGN)
+$(BUILD_PFX)%_ssse3.c.d: CFLAGS += -mssse3 $(STACKREALIGN)
+$(BUILD_PFX)%_ssse3.c.o: CFLAGS += -mssse3 $(STACKREALIGN)
+$(BUILD_PFX)%_sse4.c.d: CFLAGS += -msse4.1 $(STACKREALIGN)
+$(BUILD_PFX)%_sse4.c.o: CFLAGS += -msse4.1 $(STACKREALIGN)
+$(BUILD_PFX)%_avx.c.d: CFLAGS += -mavx $(STACKREALIGN)
+$(BUILD_PFX)%_avx.c.o: CFLAGS += -mavx $(STACKREALIGN)
+$(BUILD_PFX)%_avx2.c.d: CFLAGS += -mavx2 $(STACKREALIGN)
+$(BUILD_PFX)%_avx2.c.o: CFLAGS += -mavx2 $(STACKREALIGN)
 
 $(BUILD_PFX)%.c.d: %.c
 	$(if $(quiet),@echo "    [DEP] $@")
@@ -196,13 +202,13 @@ $(BUILD_PFX)%.asm.s: %.asm
 # the copy implementation
 HAVE_GNU_STRIP := $(if $(CONFIG_DEBUG),,$(HAVE_GNU_STRIP))
 ifeq ($(HAVE_GNU_STRIP),yes)
-# Older binutils strip global sybols not needed for relocation processing
-# when given --strip-unneeded. Use nm and awk to identify globals and
-# keep them.
+# Older binutils strip global symbols not needed for relocation processing
+# when given --strip-unneeded. Using nm and awk to identify globals and
+# keep them caused command line length issues under mingw and segfaults in
+# test_libvpx were observed under OS/2: simply use --strip-debug.
 %.a: %_g.a
 	$(if $(quiet),@echo "    [STRIP] $@ < $<")
-	$(qexec)$(STRIP) --strip-unneeded \
-         `$(NM) $< | grep ' [A-TV-Z] ' | awk '{print "-K"$$3'}`\
+	$(qexec)$(STRIP) --strip-debug \
           -o $@ $<
 else
 %.a: %_g.a

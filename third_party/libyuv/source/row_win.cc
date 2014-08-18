@@ -8,15 +8,179 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "third_party/libyuv/include/libyuv/row.h"
+#include "libyuv/row.h"
+
+#if defined (_M_X64)
+#include <emmintrin.h>
+#include <tmmintrin.h>  // For _mm_maddubs_epi16
+#endif
 
 #ifdef __cplusplus
 namespace libyuv {
 extern "C" {
 #endif
 
-// This module is for Visual C x86.
-#if !defined(LIBYUV_DISABLE_X86) && defined(_M_IX86) && defined(_MSC_VER)
+// This module is for Visual C.
+#if !defined(LIBYUV_DISABLE_X86) && defined(_MSC_VER)
+
+#define YG 74  /* (int8)(1.164 * 64 + 0.5) */
+
+#define UB 127  /* min(127,(int8)(2.018 * 64)) */
+#define UG -25  /* (int8)(-0.391 * 64 - 0.5) */
+#define UR 0
+
+#define VB 0
+#define VG -52  /* (int8)(-0.813 * 64 - 0.5) */
+#define VR 102  /* (int8)(1.596 * 64 + 0.5) */
+
+// Bias
+#define BB UB * 128 + VB * 128
+#define BG UG * 128 + VG * 128
+#define BR UR * 128 + VR * 128
+
+static const vec8 kUVToB = {
+  UB, VB, UB, VB, UB, VB, UB, VB, UB, VB, UB, VB, UB, VB, UB, VB
+};
+
+static const vec8 kUVToR = {
+  UR, VR, UR, VR, UR, VR, UR, VR, UR, VR, UR, VR, UR, VR, UR, VR
+};
+
+static const vec8 kUVToG = {
+  UG, VG, UG, VG, UG, VG, UG, VG, UG, VG, UG, VG, UG, VG, UG, VG
+};
+
+static const vec8 kVUToB = {
+  VB, UB, VB, UB, VB, UB, VB, UB, VB, UB, VB, UB, VB, UB, VB, UB,
+};
+
+static const vec8 kVUToR = {
+  VR, UR, VR, UR, VR, UR, VR, UR, VR, UR, VR, UR, VR, UR, VR, UR,
+};
+
+static const vec8 kVUToG = {
+  VG, UG, VG, UG, VG, UG, VG, UG, VG, UG, VG, UG, VG, UG, VG, UG,
+};
+
+static const vec16 kYToRgb = { YG, YG, YG, YG, YG, YG, YG, YG };
+static const vec16 kYSub16 = { 16, 16, 16, 16, 16, 16, 16, 16 };
+static const vec16 kUVBiasB = { BB, BB, BB, BB, BB, BB, BB, BB };
+static const vec16 kUVBiasG = { BG, BG, BG, BG, BG, BG, BG, BG };
+static const vec16 kUVBiasR = { BR, BR, BR, BR, BR, BR, BR, BR };
+
+// 64 bit
+#if defined(_M_X64)
+
+// Aligned destination version.
+__declspec(align(16))
+void I422ToARGBRow_SSSE3(const uint8* y_buf,
+                         const uint8* u_buf,
+                         const uint8* v_buf,
+                         uint8* dst_argb,
+                         int width) {
+
+  __m128i xmm0, xmm1, xmm2, xmm3;
+  const __m128i xmm5 = _mm_set1_epi8(-1);
+  const __m128i xmm4 = _mm_setzero_si128();
+  const ptrdiff_t offset = (uint8*)v_buf - (uint8*)u_buf;
+
+  while (width > 0) {
+    xmm0 = _mm_cvtsi32_si128(*(uint32*)u_buf);
+    xmm1 = _mm_cvtsi32_si128(*(uint32*)(u_buf + offset));
+    xmm0 = _mm_unpacklo_epi8(xmm0, xmm1);
+    xmm0 = _mm_unpacklo_epi16(xmm0, xmm0);
+    xmm1 = _mm_load_si128(&xmm0);
+    xmm2 = _mm_load_si128(&xmm0);
+    xmm0 = _mm_maddubs_epi16(xmm0, *(__m128i*)kUVToB);
+    xmm1 = _mm_maddubs_epi16(xmm1, *(__m128i*)kUVToG);
+    xmm2 = _mm_maddubs_epi16(xmm2, *(__m128i*)kUVToR);
+    xmm0 = _mm_sub_epi16(xmm0, *(__m128i*)kUVBiasB);
+    xmm1 = _mm_sub_epi16(xmm1, *(__m128i*)kUVBiasG);
+    xmm2 = _mm_sub_epi16(xmm2, *(__m128i*)kUVBiasR);
+    xmm3 = _mm_loadl_epi64((__m128i*)y_buf);
+    xmm3 = _mm_unpacklo_epi8(xmm3, xmm4);
+    xmm3 = _mm_subs_epi16(xmm3, *(__m128i*)kYSub16);
+    xmm3 = _mm_mullo_epi16(xmm3, *(__m128i*)kYToRgb);
+    xmm0 = _mm_adds_epi16(xmm0, xmm3);
+    xmm1 = _mm_adds_epi16(xmm1, xmm3);
+    xmm2 = _mm_adds_epi16(xmm2, xmm3);
+    xmm0 = _mm_srai_epi16(xmm0, 6);
+    xmm1 = _mm_srai_epi16(xmm1, 6);
+    xmm2 = _mm_srai_epi16(xmm2, 6);
+    xmm0 = _mm_packus_epi16(xmm0, xmm0);
+    xmm1 = _mm_packus_epi16(xmm1, xmm1);
+    xmm2 = _mm_packus_epi16(xmm2, xmm2);
+    xmm0 = _mm_unpacklo_epi8(xmm0, xmm1);
+    xmm2 = _mm_unpacklo_epi8(xmm2, xmm5);
+    xmm1 = _mm_load_si128(&xmm0);
+    xmm0 = _mm_unpacklo_epi16(xmm0, xmm2);
+    xmm1 = _mm_unpackhi_epi16(xmm1, xmm2);
+
+    _mm_store_si128((__m128i *)dst_argb, xmm0);
+    _mm_store_si128((__m128i *)(dst_argb + 16), xmm1);
+
+    y_buf += 8;
+    u_buf += 4;
+    dst_argb += 32;
+    width -= 8;
+  }
+}
+
+// Unaligned destination version.
+void I422ToARGBRow_Unaligned_SSSE3(const uint8* y_buf,
+                                   const uint8* u_buf,
+                                   const uint8* v_buf,
+                                   uint8* dst_argb,
+                                   int width) {
+
+  __m128i xmm0, xmm1, xmm2, xmm3;
+  const __m128i xmm5 = _mm_set1_epi8(-1);
+  const __m128i xmm4 = _mm_setzero_si128();
+  const ptrdiff_t offset = (uint8*)v_buf - (uint8*)u_buf;
+
+  while (width > 0) {
+    xmm0 = _mm_cvtsi32_si128(*(uint32*)u_buf);
+    xmm1 = _mm_cvtsi32_si128(*(uint32*)(u_buf + offset));
+    xmm0 = _mm_unpacklo_epi8(xmm0, xmm1);
+    xmm0 = _mm_unpacklo_epi16(xmm0, xmm0);
+    xmm1 = _mm_load_si128(&xmm0);
+    xmm2 = _mm_load_si128(&xmm0);
+    xmm0 = _mm_maddubs_epi16(xmm0, *(__m128i*)kUVToB);
+    xmm1 = _mm_maddubs_epi16(xmm1, *(__m128i*)kUVToG);
+    xmm2 = _mm_maddubs_epi16(xmm2, *(__m128i*)kUVToR);
+    xmm0 = _mm_sub_epi16(xmm0, *(__m128i*)kUVBiasB);
+    xmm1 = _mm_sub_epi16(xmm1, *(__m128i*)kUVBiasG);
+    xmm2 = _mm_sub_epi16(xmm2, *(__m128i*)kUVBiasR);
+    xmm3 = _mm_loadl_epi64((__m128i*)y_buf);
+    xmm3 = _mm_unpacklo_epi8(xmm3, xmm4);
+    xmm3 = _mm_subs_epi16(xmm3, *(__m128i*)kYSub16);
+    xmm3 = _mm_mullo_epi16(xmm3, *(__m128i*)kYToRgb);
+    xmm0 = _mm_adds_epi16(xmm0, xmm3);
+    xmm1 = _mm_adds_epi16(xmm1, xmm3);
+    xmm2 = _mm_adds_epi16(xmm2, xmm3);
+    xmm0 = _mm_srai_epi16(xmm0, 6);
+    xmm1 = _mm_srai_epi16(xmm1, 6);
+    xmm2 = _mm_srai_epi16(xmm2, 6);
+    xmm0 = _mm_packus_epi16(xmm0, xmm0);
+    xmm1 = _mm_packus_epi16(xmm1, xmm1);
+    xmm2 = _mm_packus_epi16(xmm2, xmm2);
+    xmm0 = _mm_unpacklo_epi8(xmm0, xmm1);
+    xmm2 = _mm_unpacklo_epi8(xmm2, xmm5);
+    xmm1 = _mm_load_si128(&xmm0);
+    xmm0 = _mm_unpacklo_epi16(xmm0, xmm2);
+    xmm1 = _mm_unpackhi_epi16(xmm1, xmm2);
+
+    _mm_storeu_si128((__m128i *)dst_argb, xmm0);
+    _mm_storeu_si128((__m128i *)(dst_argb + 16), xmm1);
+
+    y_buf += 8;
+    u_buf += 4;
+    dst_argb += 32;
+    width -= 8;
+  }
+}
+// 32 bit
+#else  // defined(_M_X64)
 
 #ifdef HAS_ARGBTOYROW_SSSE3
 
@@ -2030,21 +2194,6 @@ void RGBAToUVRow_Unaligned_SSSE3(const uint8* src_argb0, int src_stride_argb,
 }
 #endif  // HAS_ARGBTOYROW_SSSE3
 
-#define YG 74 /* (int8)(1.164 * 64 + 0.5) */
-
-#define UB 127 /* min(63,(int8)(2.018 * 64)) */
-#define UG -25 /* (int8)(-0.391 * 64 - 0.5) */
-#define UR 0
-
-#define VB 0
-#define VG -52 /* (int8)(-0.813 * 64 - 0.5) */
-#define VR 102 /* (int8)(1.596 * 64 + 0.5) */
-
-// Bias
-#define BB UB * 128 + VB * 128
-#define BG UG * 128 + VG * 128
-#define BR UR * 128 + VR * 128
-
 #ifdef HAS_I422TOARGBROW_AVX2
 
 static const lvec8 kUVToB_AVX = {
@@ -2079,10 +2228,10 @@ static const lvec16 kUVBiasR_AVX = {
 // 8 UV values upsampled to 16 UV, mixed with 16 Y producing 16 ARGB (64 bytes).
 __declspec(naked) __declspec(align(16))
 void I422ToARGBRow_AVX2(const uint8* y_buf,
-                         const uint8* u_buf,
-                         const uint8* v_buf,
-                         uint8* dst_argb,
-                         int width) {
+                        const uint8* u_buf,
+                        const uint8* v_buf,
+                        uint8* dst_argb,
+                        int width) {
   __asm {
     push       esi
     push       edi
@@ -2149,36 +2298,6 @@ void I422ToARGBRow_AVX2(const uint8* y_buf,
 #endif  // HAS_I422TOARGBROW_AVX2
 
 #ifdef HAS_I422TOARGBROW_SSSE3
-
-static const vec8 kUVToB = {
-  UB, VB, UB, VB, UB, VB, UB, VB, UB, VB, UB, VB, UB, VB, UB, VB
-};
-
-static const vec8 kUVToR = {
-  UR, VR, UR, VR, UR, VR, UR, VR, UR, VR, UR, VR, UR, VR, UR, VR
-};
-
-static const vec8 kUVToG = {
-  UG, VG, UG, VG, UG, VG, UG, VG, UG, VG, UG, VG, UG, VG, UG, VG
-};
-
-static const vec8 kVUToB = {
-  VB, UB, VB, UB, VB, UB, VB, UB, VB, UB, VB, UB, VB, UB, VB, UB,
-};
-
-static const vec8 kVUToR = {
-  VR, UR, VR, UR, VR, UR, VR, UR, VR, UR, VR, UR, VR, UR, VR, UR,
-};
-
-static const vec8 kVUToG = {
-  VG, UG, VG, UG, VG, UG, VG, UG, VG, UG, VG, UG, VG, UG, VG, UG,
-};
-
-static const vec16 kYToRgb = { YG, YG, YG, YG, YG, YG, YG, YG };
-static const vec16 kYSub16 = { 16, 16, 16, 16, 16, 16, 16, 16 };
-static const vec16 kUVBiasB = { BB, BB, BB, BB, BB, BB, BB, BB };
-static const vec16 kUVBiasG = { BG, BG, BG, BG, BG, BG, BG, BG };
-static const vec16 kUVBiasR = { BR, BR, BR, BR, BR, BR, BR, BR };
 
 // TODO(fbarchard): Read that does half size on Y and treats 420 as 444.
 
@@ -7276,7 +7395,8 @@ void ARGBLumaColorTableRow_SSSE3(const uint8* src_argb, uint8* dst_argb,
 }
 #endif  // HAS_ARGBLUMACOLORTABLEROW_SSSE3
 
-#endif  // !defined(LIBYUV_DISABLE_X86) && defined(_M_IX86) && defined(_MSC_VER)
+#endif  // defined(_M_X64)
+#endif  // !defined(LIBYUV_DISABLE_X86) && defined(_MSC_VER)
 
 #ifdef __cplusplus
 }  // extern "C"

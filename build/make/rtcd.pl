@@ -3,7 +3,7 @@
 no strict 'refs';
 use warnings;
 use Getopt::Long;
-Getopt::Long::Configure("auto_help");
+Getopt::Long::Configure("auto_help") if $Getopt::Long::VERSION > 2.32;
 
 my %ALL_FUNCS = ();
 my @ALL_ARCHS;
@@ -385,6 +385,8 @@ if ($opts{arch} eq 'x86') {
   arm;
 } elsif ($opts{arch} eq 'armv7') {
   @ALL_ARCHS = filter(qw/edsp media neon_asm neon/);
+  @REQUIRES = filter(keys %required ? keys %required : qw/media/);
+  &require(@REQUIRES);
   arm;
 } elsif ($opts{arch} eq 'armv8') {
   @ALL_ARCHS = filter(qw/neon/);

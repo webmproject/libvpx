@@ -52,11 +52,10 @@ int vp9_is_segfeature_signed(SEG_LVL_FEATURES feature_id) {
 
 void vp9_set_segdata(struct segmentation *seg, int segment_id,
                      SEG_LVL_FEATURES feature_id, int seg_data) {
-  const int data_max = vp9_seg_feature_data_max(feature_id);
-  assert(seg_data <= data_max);
+  assert(seg_data <= vp9_seg_feature_data_max(feature_id));
   if (seg_data < 0) {
     assert(seg_feature_data_signed[feature_id]);
-    assert(-seg_data <= data_max);
+    assert(-seg_data <= vp9_seg_feature_data_max(feature_id));
   }
 
   seg->feature_data[segment_id][feature_id] = seg_data;

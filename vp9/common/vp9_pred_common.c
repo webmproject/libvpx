@@ -353,9 +353,9 @@ int vp9_get_tx_size_context(const MACROBLOCKD *xd) {
   const MB_MODE_INFO *const left_mbmi = get_mbmi(get_left_mi(xd));
   const int has_above = above_mbmi != NULL;
   const int has_left = left_mbmi != NULL;
-  int above_ctx = (has_above && !above_mbmi->skip) ? above_mbmi->tx_size
+  int above_ctx = (has_above && !above_mbmi->skip) ? (int)above_mbmi->tx_size
                                                    : max_tx_size;
-  int left_ctx = (has_left && !left_mbmi->skip) ? left_mbmi->tx_size
+  int left_ctx = (has_left && !left_mbmi->skip) ? (int)left_mbmi->tx_size
                                                 : max_tx_size;
   if (!has_left)
     left_ctx = above_ctx;
@@ -366,7 +366,7 @@ int vp9_get_tx_size_context(const MACROBLOCKD *xd) {
   return (above_ctx + left_ctx) > max_tx_size;
 }
 
-int vp9_get_segment_id(VP9_COMMON *cm, const uint8_t *segment_ids,
+int vp9_get_segment_id(const VP9_COMMON *cm, const uint8_t *segment_ids,
                        BLOCK_SIZE bsize, int mi_row, int mi_col) {
   const int mi_offset = mi_row * cm->mi_cols + mi_col;
   const int bw = num_8x8_blocks_wide_lookup[bsize];

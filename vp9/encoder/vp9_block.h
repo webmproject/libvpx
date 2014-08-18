@@ -42,6 +42,7 @@ struct macroblock_plane {
   int16_t *zbin;
   int16_t *round;
 
+  int64_t quant_thred[2];
   // Zbin Over Quant value
   int16_t zbin_extra;
 };
@@ -67,7 +68,7 @@ struct macroblock {
   int sadperbit4;
   int rddiv;
   int rdmult;
-  unsigned int mb_energy;
+  int mb_energy;
 
   int mv_best_ref_index[MAX_REF_FRAMES];
   unsigned int max_mv_context[MAX_REF_FRAMES];
@@ -116,7 +117,9 @@ struct macroblock {
   int quant_fp;
 
   // skip forward transform and quantization
-  int skip_txfm;
+  int skip_txfm[MAX_MB_PLANE];
+
+  int64_t bsse[MAX_MB_PLANE];
 
   // Used to store sub partition's choices.
   MV pred_mv[MAX_REF_FRAMES];

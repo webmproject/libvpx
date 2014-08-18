@@ -31,8 +31,6 @@ vpx_codec_err_t vpx_codec_dec_init_ver(vpx_codec_ctx_t      *ctx,
     res = VPX_CODEC_INVALID_PARAM;
   else if (iface->abi_version != VPX_CODEC_INTERNAL_ABI_VERSION)
     res = VPX_CODEC_ABI_MISMATCH;
-  else if ((flags & VPX_CODEC_USE_XMA) && !(iface->caps & VPX_CODEC_CAP_XMA))
-    res = VPX_CODEC_INCAPABLE;
   else if ((flags & VPX_CODEC_USE_POSTPROC) && !(iface->caps & VPX_CODEC_CAP_POSTPROC))
     res = VPX_CODEC_INCAPABLE;
   else if ((flags & VPX_CODEC_USE_ERROR_CONCEALMENT) &&
@@ -50,19 +48,15 @@ vpx_codec_err_t vpx_codec_dec_init_ver(vpx_codec_ctx_t      *ctx,
     ctx->priv = NULL;
     ctx->init_flags = flags;
     ctx->config.dec = cfg;
-    res = VPX_CODEC_OK;
 
-    if (!(flags & VPX_CODEC_USE_XMA)) {
-      res = ctx->iface->init(ctx, NULL);
-
-      if (res) {
-        ctx->err_detail = ctx->priv ? ctx->priv->err_detail : NULL;
-        vpx_codec_destroy(ctx);
-      }
-
-      if (ctx->priv)
-        ctx->priv->iface = ctx->iface;
+    res = ctx->iface->init(ctx, NULL);
+    if (res) {
+      ctx->err_detail = ctx->priv ? ctx->priv->err_detail : NULL;
+      vpx_codec_destroy(ctx);
     }
+
+    if (ctx->priv)
+      ctx->priv->iface = ctx->iface;
   }
 
   return SAVE_STATUS(ctx, res);
@@ -119,7 +113,7 @@ vpx_codec_err_t vpx_codec_decode(vpx_codec_ctx_t    *ctx,
 
   /* Sanity checks */
   /* NULL data ptr allowed if data_sz is 0 too */
-  if (!ctx || (!data && data_sz))
+  if (!ctx || (!data && data_sz) || (data && !data_sz))
     res = VPX_CODEC_INVALID_PARAM;
   else if (!ctx->iface || !ctx->priv)
     res = VPX_CODEC_ERROR;
@@ -178,50 +172,6 @@ vpx_codec_err_t vpx_codec_register_put_slice_cb(vpx_codec_ctx_t             *ctx
     ctx->priv->dec.put_slice_cb.u.put_slice = cb;
     ctx->priv->dec.put_slice_cb.user_priv = user_priv;
     res = VPX_CODEC_OK;
-  }
-
-  return SAVE_STATUS(ctx, res);
-}
-
-
-vpx_codec_err_t vpx_codec_get_mem_map(vpx_codec_ctx_t                *ctx,
-                                      vpx_codec_mmap_t               *mmap,
-                                      vpx_codec_iter_t               *iter) {
-  vpx_codec_err_t res = VPX_CODEC_OK;
-
-  if (!ctx || !mmap || !iter || !ctx->iface)
-    res = VPX_CODEC_INVALID_PARAM;
-  else if (!(ctx->iface->caps & VPX_CODEC_CAP_XMA))
-    res = VPX_CODEC_ERROR;
-  else
-    res = ctx->iface->get_mmap(ctx, mmap, iter);
-
-  return SAVE_STATUS(ctx, res);
-}
-
-
-vpx_codec_err_t vpx_codec_set_mem_map(vpx_codec_ctx_t   *ctx,
-                                      vpx_codec_mmap_t  *mmap,
-                                      unsigned int     num_maps) {
-  vpx_codec_err_t res = VPX_CODEC_MEM_ERROR;
-
-  if (!ctx || !mmap || !ctx->iface)
-    res = VPX_CODEC_INVALID_PARAM;
-  else if (!(ctx->iface->caps & VPX_CODEC_CAP_XMA))
-    res = VPX_CODEC_ERROR;
-  else {
-    unsigned int i;
-
-    for (i = 0; i < num_maps; i++, mmap++) {
-      if (!mmap->base)
-        break;
-
-      /* Everything look ok, set the mmap in the decoder */
-      res = ctx->iface->set_mmap(ctx, mmap);
-
-      if (res)
-        break;
-    }
   }
 
   return SAVE_STATUS(ctx, res);

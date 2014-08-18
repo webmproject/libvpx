@@ -41,6 +41,7 @@ struct vpx_codec_alg_priv {
   void                   *decrypt_state;
   vpx_image_t             img;
   int                     img_avail;
+  int                     flushed;
   int                     invert_tile_order;
   int                     frame_parallel_decode;  // frame-based threading.
 
@@ -70,6 +71,7 @@ static vpx_codec_err_t decoder_init(vpx_codec_ctx_t *ctx,
     ctx->priv->alg_priv = alg_priv;
     ctx->priv->alg_priv->si.sz = sizeof(ctx->priv->alg_priv->si);
     ctx->priv->init_flags = ctx->init_flags;
+    ctx->priv->alg_priv->flushed = 0;
     ctx->priv->alg_priv->frame_parallel_decode =
         (ctx->init_flags & VPX_CODEC_USE_FRAME_THREADING);
 
@@ -174,6 +176,7 @@ static vpx_codec_err_t decoder_peek_si_internal(const uint8_t *data,
       vp9_read_frame_size(&rb, (int *)&si->w, (int *)&si->h);
     } else {
       intra_only_flag = show_frame ? 0 : vp9_rb_read_bit(&rb);
+
       rb.bit_offset += error_resilient ? 0 : 2;  // reset_frame_context
 
       if (intra_only_flag) {
@@ -413,8 +416,13 @@ static vpx_codec_err_t decoder_decode(vpx_codec_alg_priv_t *ctx,
   uint32_t frame_sizes[8];
   int frame_count;
 
-  if (data == NULL || data_sz == 0)
-    return VPX_CODEC_INVALID_PARAM;
+  if (data == NULL && data_sz == 0) {
+    ctx->flushed = 1;
+    return VPX_CODEC_OK;
+  }
+
+  // Reset flushed when receiving a valid frame.
+  ctx->flushed = 0;
 
   res = parse_superframe_index(data, data_sz, frame_sizes, &frame_count,
                                ctx->decrypt_cb, ctx->decrypt_state);
@@ -578,9 +586,9 @@ static vpx_codec_err_t ctrl_get_reference(vpx_codec_alg_priv_t *ctx,
   vp9_ref_frame_t *data = va_arg(args, vp9_ref_frame_t *);
 
   if (data) {
-    YV12_BUFFER_CONFIG* fb;
+    YV12_BUFFER_CONFIG* fb = get_ref_frame(&ctx->pbi->common, data->idx);
+    if (fb == NULL) return VPX_CODEC_ERROR;
 
-    vp9_get_reference_dec(ctx->pbi, data->idx, &fb);
     yuvconfig2image(&data->img, fb, NULL);
     return VPX_CODEC_OK;
   } else {
@@ -634,11 +642,10 @@ static vpx_codec_err_t ctrl_get_frame_corrupted(vpx_codec_alg_priv_t *ctx,
                                                 va_list args) {
   int *corrupted = va_arg(args, int *);
 
-  if (corrupted) {
-    if (ctx->pbi)
-      *corrupted = ctx->pbi->common.frame_to_show->corrupted;
-    else
-      return VPX_CODEC_ERROR;
+  if (corrupted != NULL && ctx->pbi != NULL) {
+    const YV12_BUFFER_CONFIG *const frame = ctx->pbi->common.frame_to_show;
+    if (frame == NULL) return VPX_CODEC_ERROR;
+    *corrupted = frame->corrupted;
     return VPX_CODEC_OK;
   } else {
     return VPX_CODEC_INVALID_PARAM;
@@ -729,8 +736,6 @@ CODEC_INTERFACE(vpx_codec_vp9_dx) = {
   decoder_init,       // vpx_codec_init_fn_t
   decoder_destroy,    // vpx_codec_destroy_fn_t
   decoder_ctrl_maps,  // vpx_codec_ctrl_fn_map_t
-  NOT_IMPLEMENTED,    // vpx_codec_get_mmap_fn_t
-  NOT_IMPLEMENTED,    // vpx_codec_set_mmap_fn_t
   { // NOLINT
     decoder_peek_si,    // vpx_codec_peek_si_fn_t
     decoder_get_si,     // vpx_codec_get_si_fn_t
@@ -739,6 +744,7 @@ CODEC_INTERFACE(vpx_codec_vp9_dx) = {
     decoder_set_fb_fn,  // vpx_codec_set_fb_fn_t
   },
   { // NOLINT
+    0,
     NOT_IMPLEMENTED,  // vpx_codec_enc_cfg_map_t
     NOT_IMPLEMENTED,  // vpx_codec_encode_fn_t
     NOT_IMPLEMENTED,  // vpx_codec_get_cx_data_fn_t

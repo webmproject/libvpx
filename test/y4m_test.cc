@@ -24,14 +24,14 @@ static const unsigned int kWidth  = 160;
 static const unsigned int kHeight = 90;
 static const unsigned int kFrames = 10;
 
-typedef struct {
+struct Y4mTestParam {
   const char *filename;
   unsigned int bit_depth;
   vpx_img_fmt format;
   const char *md5raw;
-} test_entry_type;
+};
 
-const test_entry_type kY4mTestVectors[] = {
+const Y4mTestParam kY4mTestVectors[] = {
   {"park_joy_90p_8_420.y4m", 8, VPX_IMG_FMT_I420,
     "e5406275b9fc6bb3436c31d4a05c1cab"},
   {"park_joy_90p_8_422.y4m", 8, VPX_IMG_FMT_I422,
@@ -70,7 +70,7 @@ static void write_image_file(const vpx_image_t *img, FILE *file) {
 }
 
 class Y4mVideoSourceTest
-    : public ::testing::TestWithParam<test_entry_type>,
+    : public ::testing::TestWithParam<Y4mTestParam>,
       public ::libvpx_test::Y4mVideoSource {
  protected:
   Y4mVideoSourceTest() : Y4mVideoSource("", 0, 0) {}
@@ -126,7 +126,7 @@ class Y4mVideoSourceTest
 };
 
 TEST_P(Y4mVideoSourceTest, SourceTest) {
-  const test_entry_type t = GetParam();
+  const Y4mTestParam t = GetParam();
   Init(t.filename, kFrames);
   HeaderChecks(t.bit_depth, t.format);
   Md5Check(t.md5raw);
@@ -138,9 +138,14 @@ INSTANTIATE_TEST_CASE_P(C, Y4mVideoSourceTest,
 class Y4mVideoWriteTest
     : public Y4mVideoSourceTest {
  protected:
-  Y4mVideoWriteTest() : Y4mVideoSourceTest() {}
+  Y4mVideoWriteTest() {}
 
-  virtual void ReplaceInputFp(FILE *input_file) {
+  virtual ~Y4mVideoWriteTest() {
+    CloseSource();
+    delete tmpfile_;
+  }
+
+  virtual void ReplaceInputFile(FILE *input_file) {
     CloseSource();
     frame_ = 0;
     input_file_ = input_file;
@@ -153,30 +158,31 @@ class Y4mVideoWriteTest
     ASSERT_TRUE(input_file_ != NULL);
     char buf[Y4M_BUFFER_SIZE] = {0};
     const struct VpxRational framerate = {y4m_.fps_n, y4m_.fps_d};
-    FILE *out_file = libvpx_test::OpenTempOutFile();
-    ASSERT_TRUE(out_file != NULL);
+    tmpfile_ = new libvpx_test::TempOutFile;
+    ASSERT_TRUE(tmpfile_->file() != NULL);
     y4m_write_file_header(buf, sizeof(buf),
                           kWidth, kHeight,
                           &framerate, y4m_.vpx_fmt,
                           y4m_.bit_depth);
-    fputs(buf, out_file);
+    fputs(buf, tmpfile_->file());
     for (unsigned int i = start_; i < limit_; i++) {
       y4m_write_frame_header(buf, sizeof(buf));
-      fputs(buf, out_file);
-      write_image_file(img(), out_file);
+      fputs(buf, tmpfile_->file());
+      write_image_file(img(), tmpfile_->file());
       Next();
     }
-    ReplaceInputFp(out_file);
+    ReplaceInputFile(tmpfile_->file());
   }
 
   virtual void Init(const std::string &file_name, int limit) {
     Y4mVideoSourceTest::Init(file_name, limit);
     WriteY4mAndReadBack();
   }
+  libvpx_test::TempOutFile *tmpfile_;
 };
 
 TEST_P(Y4mVideoWriteTest, WriteTest) {
-  const test_entry_type t = GetParam();
+  const Y4mTestParam t = GetParam();
   Init(t.filename, kFrames);
   HeaderChecks(t.bit_depth, t.format);
   Md5Check(t.md5raw);

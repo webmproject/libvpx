@@ -60,6 +60,7 @@ struct vpx_codec_alg_priv
     vpx_decrypt_cb          decrypt_cb;
     void                    *decrypt_state;
     vpx_image_t             img;
+    int                     flushed;
     int                     img_setup;
     struct frame_buffers    yv12_frame_buffers;
     void                    *user_priv;
@@ -88,6 +89,7 @@ static void vp8_init_ctx(vpx_codec_ctx_t *ctx)
     ctx->priv->alg_priv->si.sz = sizeof(ctx->priv->alg_priv->si);
     ctx->priv->alg_priv->decrypt_cb = NULL;
     ctx->priv->alg_priv->decrypt_state = NULL;
+    ctx->priv->alg_priv->flushed = 0;
     ctx->priv->init_flags = ctx->init_flags;
 
     if (ctx->config.dec)
@@ -328,6 +330,13 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t  *ctx,
     unsigned int resolution_change = 0;
     unsigned int w, h;
 
+    if (data == NULL && data_sz == 0) {
+      ctx->flushed = 1;
+      return VPX_CODEC_OK;
+    }
+
+    /* Reset flushed when receiving a valid frame */
+    ctx->flushed = 0;
 
     /* Update the input fragment data */
     if(update_fragments(ctx, data, data_sz, &res) <= 0)
@@ -737,8 +746,9 @@ static vpx_codec_err_t vp8_get_frame_corrupted(vpx_codec_alg_priv_t *ctx,
 
     if (corrupted && pbi)
     {
-        *corrupted = pbi->common.frame_to_show->corrupted;
-
+        const YV12_BUFFER_CONFIG *const frame = pbi->common.frame_to_show;
+        if (frame == NULL) return VPX_CODEC_ERROR;
+        *corrupted = frame->corrupted;
         return VPX_CODEC_OK;
     }
     else
@@ -794,8 +804,6 @@ CODEC_INTERFACE(vpx_codec_vp8_dx) =
     vp8_init,         /* vpx_codec_init_fn_t       init; */
     vp8_destroy,      /* vpx_codec_destroy_fn_t    destroy; */
     vp8_ctf_maps,     /* vpx_codec_ctrl_fn_map_t  *ctrl_maps; */
-    NOT_IMPLEMENTED,  /* vpx_codec_get_mmap_fn_t   get_mmap; */
-    NOT_IMPLEMENTED,  /* vpx_codec_set_mmap_fn_t   set_mmap; */
     {
         vp8_peek_si,      /* vpx_codec_peek_si_fn_t    peek_si; */
         vp8_get_si,       /* vpx_codec_get_si_fn_t     get_si; */
@@ -804,6 +812,7 @@ CODEC_INTERFACE(vpx_codec_vp8_dx) =
         NOT_IMPLEMENTED,
     },
     { /* encoder functions */
+        0,
         NOT_IMPLEMENTED,
         NOT_IMPLEMENTED,
         NOT_IMPLEMENTED,

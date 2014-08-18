@@ -21,29 +21,28 @@
 #include "vpx_ports/mem.h"
 
 namespace {
-typedef void (*convolve_fn_t)(const uint8_t *src, ptrdiff_t src_stride,
-                              uint8_t *dst, ptrdiff_t dst_stride,
-                              const int16_t *filter_x, int filter_x_stride,
-                              const int16_t *filter_y, int filter_y_stride,
-                              int w, int h);
+typedef void (*ConvolveFunc)(const uint8_t *src, ptrdiff_t src_stride,
+                             uint8_t *dst, ptrdiff_t dst_stride,
+                             const int16_t *filter_x, int filter_x_stride,
+                             const int16_t *filter_y, int filter_y_stride,
+                             int w, int h);
 
 struct ConvolveFunctions {
-  ConvolveFunctions(convolve_fn_t h8, convolve_fn_t h8_avg,
-                    convolve_fn_t v8, convolve_fn_t v8_avg,
-                    convolve_fn_t hv8, convolve_fn_t hv8_avg, int bps)
+  ConvolveFunctions(ConvolveFunc h8, ConvolveFunc h8_avg,
+                    ConvolveFunc v8, ConvolveFunc v8_avg,
+                    ConvolveFunc hv8, ConvolveFunc hv8_avg, int bps)
       : h8_(h8), v8_(v8), hv8_(hv8), h8_avg_(h8_avg), v8_avg_(v8_avg),
         hv8_avg_(hv8_avg), use_high_bps_(bps) {}
-
-  convolve_fn_t h8_;
-  convolve_fn_t v8_;
-  convolve_fn_t hv8_;
-  convolve_fn_t h8_avg_;
-  convolve_fn_t v8_avg_;
-  convolve_fn_t hv8_avg_;
+  ConvolveFunc h8_;
+  ConvolveFunc v8_;
+  ConvolveFunc hv8_;
+  ConvolveFunc h8_avg_;
+  ConvolveFunc v8_avg_;
+  ConvolveFunc hv8_avg_;
   int use_high_bps_;
 };
 
-typedef std::tr1::tuple<int, int, const ConvolveFunctions*> convolve_param_t;
+typedef std::tr1::tuple<int, int, const ConvolveFunctions *> ConvolveParam;
 
 // Reference 8-tap subpixel filter, slightly modified to fit into this test.
 #define VP9_FILTER_WEIGHT 128
@@ -171,14 +170,14 @@ void filter_average_block2d_8_c(const uint8_t *src_ptr,
 }
 
 void high_filter_block2d_8_c(const uint16_t *src_ptr,
-                        const unsigned int src_stride,
-                        const int16_t *HFilter,
-                        const int16_t *VFilter,
-                        uint16_t *dst_ptr,
-                        unsigned int dst_stride,
-                        unsigned int output_width,
-                        unsigned int output_height,
-                        int bps) {
+                             const unsigned int src_stride,
+                             const int16_t *HFilter,
+                             const int16_t *VFilter,
+                             uint16_t *dst_ptr,
+                             unsigned int dst_stride,
+                             unsigned int output_width,
+                             unsigned int output_height,
+                             int bps) {
   // Between passes, we use an intermediate buffer whose height is extended to
   // have enough horizontally filtered values as input for the vertical pass.
   // This buffer is allocated to be big enough for the largest block type we
@@ -255,12 +254,12 @@ void high_filter_block2d_8_c(const uint16_t *src_ptr,
 }
 
 void high_block2d_average_c(uint16_t *src,
-                       unsigned int src_stride,
-                       uint16_t *output_ptr,
-                       unsigned int output_stride,
-                       unsigned int output_width,
-                       unsigned int output_height,
-                       int bps) {
+                            unsigned int src_stride,
+                            uint16_t *output_ptr,
+                            unsigned int output_stride,
+                            unsigned int output_width,
+                            unsigned int output_height,
+                            int bps) {
   unsigned int i, j;
   for (i = 0; i < output_height; ++i) {
     for (j = 0; j < output_width; ++j) {
@@ -271,14 +270,14 @@ void high_block2d_average_c(uint16_t *src,
 }
 
 void high_filter_average_block2d_8_c(const uint16_t *src_ptr,
-                                const unsigned int src_stride,
-                                const int16_t *HFilter,
-                                const int16_t *VFilter,
-                                uint16_t *dst_ptr,
-                                unsigned int dst_stride,
-                                unsigned int output_width,
-                                unsigned int output_height,
-                                int bps) {
+                                     const unsigned int src_stride,
+                                     const int16_t *HFilter,
+                                     const int16_t *VFilter,
+                                     uint16_t *dst_ptr,
+                                     unsigned int dst_stride,
+                                     unsigned int output_width,
+                                     unsigned int output_height,
+                                     int bps) {
   uint16_t tmp[64 * 64];
 
   assert(output_width <= 64);
@@ -289,7 +288,7 @@ void high_filter_average_block2d_8_c(const uint16_t *src_ptr,
                     output_width, output_height, bps);
 }
 
-class ConvolveTest : public ::testing::TestWithParam<convolve_param_t> {
+class ConvolveTest : public ::testing::TestWithParam<ConvolveParam> {
  public:
   static void SetUpTestCase() {
     // Force input_ to be unaligned, output to be 16 byte aligned.
