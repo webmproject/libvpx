@@ -188,6 +188,8 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
     if (alt_ref_sum > REF_FRAMES - cfg->ss_number_layers)
       ERROR("Not enough ref buffers for svc alt ref frames");
   }
+  if (cfg->ss_number_layers > 3 && cfg->g_error_resilient == 0)
+    ERROR("Multiple frame contexts are not supported for more than 3 layers");
 #endif
 
   RANGE_CHECK(cfg, ts_number_layers, 1, VPX_TS_MAX_LAYERS);

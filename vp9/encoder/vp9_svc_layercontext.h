@@ -28,6 +28,7 @@ typedef struct {
   struct vpx_fixed_buf rc_twopass_stats_in;
   unsigned int current_video_frame_in_layer;
   int is_key_frame;
+  FRAME_TYPE last_frame_type;
   vpx_svc_parameters_t svc_params_received;
   struct lookahead_entry  *alt_ref_source;
   int alt_ref_idx;

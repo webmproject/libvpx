@@ -2102,6 +2102,19 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
       cm->reset_frame_context = 2;
     }
   }
+  if (is_spatial_svc(cpi) && cm->error_resilient_mode == 0) {
+    cm->frame_context_idx = cpi->svc.spatial_layer_id;
+
+    // The probs will be updated based on the frame type of its previous
+    // frame if frame_parallel_decoding_mode is 0. The type may vary for
+    // the frame after a key frame in base layer since we may drop enhancement
+    // layers. So set frame_parallel_decoding_mode to 1 in this case.
+    if (cpi->svc.spatial_layer_id == 0 &&
+        cpi->svc.layer_context[0].last_frame_type == KEY_FRAME)
+      cm->frame_parallel_decoding_mode = 1;
+    else
+      cm->frame_parallel_decoding_mode = 0;
+  }
 
   // Configure experimental use of segmentation for enhanced coding of
   // static regions if indicated.
@@ -2277,8 +2290,12 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   cm->last_height = cm->height;
 
   // reset to normal state now that we are done.
-  if (!cm->show_existing_frame)
-    cm->last_show_frame = cm->show_frame;
+  if (!cm->show_existing_frame) {
+    if (is_spatial_svc(cpi) && cm->error_resilient_mode == 0)
+      cm->last_show_frame = 0;
+    else
+      cm->last_show_frame = cm->show_frame;
+  }
 
   if (cm->show_frame) {
     vp9_swap_mi_and_prev_mi(cm);
@@ -2289,6 +2306,10 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     if (cpi->use_svc)
       vp9_inc_frame_in_layer(&cpi->svc);
   }
+
+  if (is_spatial_svc(cpi))
+    cpi->svc.layer_context[cpi->svc.spatial_layer_id].last_frame_type =
+        cm->frame_type;
 }
 
 static void SvcEncode(VP9_COMP *cpi, size_t *size, uint8_t *dest,

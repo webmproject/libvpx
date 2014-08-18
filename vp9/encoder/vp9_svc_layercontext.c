@@ -36,6 +36,7 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
     int i;
     lc->current_video_frame_in_layer = 0;
     lc->layer_size = 0;
+    lc->last_frame_type = FRAME_TYPES;
     lrc->ni_av_qi = oxcf->worst_allowed_q;
     lrc->total_actual_bits = 0;
     lrc->total_target_vs_actual = 0;
