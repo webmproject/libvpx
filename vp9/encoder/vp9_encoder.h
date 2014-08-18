@@ -82,36 +82,19 @@ typedef enum {
 } VPX_SCALING;
 
 typedef enum {
-  // Good Quality Fast Encoding. The encoder balances quality with the
-  // amount of time it takes to encode the output. (speed setting
-  // controls how fast)
-  ONE_PASS_GOOD = 1,
+  // Good Quality Fast Encoding. The encoder balances quality with the amount of
+  // time it takes to encode the output. Speed setting controls how fast.
+  GOOD,
 
-  // One Pass - Best Quality. The encoder places priority on the
-  // quality of the output over encoding speed. The output is compressed
-  // at the highest possible quality. This option takes the longest
-  // amount of time to encode. (speed setting ignored)
-  ONE_PASS_BEST = 2,
+  // The encoder places priority on the quality of the output over encoding
+  // speed. The output is compressed at the highest possible quality. This
+  // option takes the longest amount of time to encode. Speed setting ignored.
+  BEST,
 
-  // Two Pass - First Pass. The encoder generates a file of statistics
-  // for use in the second encoding pass. (speed setting controls how fast)
-  TWO_PASS_FIRST = 3,
-
-  // Two Pass - Second Pass. The encoder uses the statistics that were
-  // generated in the first encoding pass to create the compressed
-  // output. (speed setting controls how fast)
-  TWO_PASS_SECOND_GOOD = 4,
-
-  // Two Pass - Second Pass Best.  The encoder uses the statistics that
-  // were generated in the first encoding pass to create the compressed
-  // output using the highest possible quality, and taking a
-  // longer amount of time to encode. (speed setting ignored)
-  TWO_PASS_SECOND_BEST = 5,
-
-  // Realtime/Live Encoding. This mode is optimized for realtime
-  // encoding (for example, capturing a television signal or feed from
-  // a live camera). (speed setting controls how fast)
-  REALTIME = 6,
+  // Realtime/Live Encoding. This mode is optimized for realtime encoding (for
+  // example, capturing a television signal or feed from a live camera). Speed
+  // setting controls how fast.
+  REALTIME
 } MODE;
 
 typedef enum {
@@ -241,7 +224,7 @@ static INLINE int is_lossless_requested(const VP9EncoderConfig *cfg) {
 }
 
 static INLINE int is_best_mode(MODE mode) {
-  return mode == ONE_PASS_BEST || mode == TWO_PASS_SECOND_BEST;
+  return mode == BEST;
 }
 
 typedef struct VP9_COMP {
