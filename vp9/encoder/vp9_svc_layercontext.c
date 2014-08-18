@@ -106,12 +106,9 @@ void vp9_update_layer_context_change_config(VP9_COMP *const cpi,
     }
     bitrate_alloc = (float)lc->target_bandwidth / target_bandwidth;
     // Update buffer-related quantities.
-    lrc->starting_buffer_level =
-        (int64_t)(rc->starting_buffer_level * bitrate_alloc);
-    lrc->optimal_buffer_level =
-        (int64_t)(rc->optimal_buffer_level * bitrate_alloc);
-    lrc->maximum_buffer_size =
-        (int64_t)(rc->maximum_buffer_size * bitrate_alloc);
+    lrc->starting_buffer_level = rc->starting_buffer_level * bitrate_alloc;
+    lrc->optimal_buffer_level = rc->optimal_buffer_level * bitrate_alloc;
+    lrc->maximum_buffer_size = rc->maximum_buffer_size * bitrate_alloc;
     lrc->bits_off_target = MIN(lrc->bits_off_target, lrc->maximum_buffer_size);
     lrc->buffer_level = MIN(lrc->buffer_level, lrc->maximum_buffer_size);
     // Update framerate-related quantities.
