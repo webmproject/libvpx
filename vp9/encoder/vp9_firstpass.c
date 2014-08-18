@@ -432,6 +432,8 @@ void vp9_first_pass(VP9_COMP *cpi) {
   TWO_PASS *twopass = &cpi->twopass;
   const MV zero_mv = {0, 0};
   const YV12_BUFFER_CONFIG *first_ref_buf = lst_yv12;
+  LAYER_CONTEXT *const lc = is_spatial_svc(cpi) ?
+        &cpi->svc.layer_context[cpi->svc.spatial_layer_id] : 0;
 
 #if CONFIG_FP_MB_STATS
   if (cpi->use_fp_mb_stats) {
@@ -444,15 +446,14 @@ void vp9_first_pass(VP9_COMP *cpi) {
   set_first_pass_params(cpi);
   vp9_set_quantizer(cm, find_fp_qindex());
 
-  if (is_spatial_svc(cpi)) {
+  if (lc != NULL) {
     MV_REFERENCE_FRAME ref_frame = LAST_FRAME;
     const YV12_BUFFER_CONFIG *scaled_ref_buf = NULL;
-    twopass = &cpi->svc.layer_context[cpi->svc.spatial_layer_id].twopass;
+    twopass = &lc->twopass;
 
     if (cpi->common.current_video_frame == 0) {
       cpi->ref_frame_flags = 0;
     } else {
-      LAYER_CONTEXT *lc = &cpi->svc.layer_context[cpi->svc.spatial_layer_id];
       if (lc->current_video_frame_in_layer == 0)
         cpi->ref_frame_flags = VP9_GOLD_FLAG;
       else
@@ -613,7 +614,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
                                                 &unscaled_last_source_buf_2d);
 
         // TODO(pengchong): Replace the hard-coded threshold
-        if (raw_motion_error > 25 || is_spatial_svc(cpi)) {
+        if (raw_motion_error > 25 || lc != NULL) {
           // Test last reference frame using the previous best mv as the
           // starting point (best reference) for the search.
           first_pass_motion_search(cpi, x, &best_ref_mv.as_mv, &mv.as_mv,
@@ -895,7 +896,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
 
   vp9_extend_frame_borders(new_yv12);
 
-  if (is_spatial_svc(cpi)) {
+  if (lc != NULL) {
     vp9_update_reference_frames(cpi);
   } else {
     // Swap frame pointers so last frame refers to the frame we just compressed.
@@ -1554,8 +1555,6 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   vp9_clear_system_state();
   vp9_zero(next_frame);
 
-  gf_group_bits = 0;
-
   // Load stats for the current frame.
   mod_frame_err = calculate_modified_err(twopass, oxcf, this_frame);
 
@@ -2124,10 +2123,10 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
   FIRSTPASS_STATS this_frame_copy;
 
   int target_rate;
-  LAYER_CONTEXT *lc = NULL;
+  LAYER_CONTEXT *const lc = is_spatial_svc(cpi) ?
+        &cpi->svc.layer_context[cpi->svc.spatial_layer_id] : 0;
 
-  if (is_spatial_svc(cpi)) {
-    lc = &cpi->svc.layer_context[cpi->svc.spatial_layer_id];
+  if (lc != NULL) {
     frames_left = (int)(twopass->total_stats.count -
                   lc->current_video_frame_in_layer);
   } else {
@@ -2154,7 +2153,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
     vp9_rc_set_frame_target(cpi, target_rate);
     cm->frame_type = INTER_FRAME;
 
-    if (is_spatial_svc(cpi)) {
+    if (lc != NULL) {
       if (cpi->svc.spatial_layer_id == 0) {
         lc->is_key_frame = 0;
       } else {
@@ -2170,7 +2169,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
 
   vp9_clear_system_state();
 
-  if (is_spatial_svc(cpi) && twopass->kf_intra_err_min == 0) {
+  if (lc != NULL && twopass->kf_intra_err_min == 0) {
     twopass->kf_intra_err_min = KF_MB_INTRA_MIN * cpi->common.MBs;
     twopass->gf_intra_err_min = GF_MB_INTRA_MIN * cpi->common.MBs;
   }
@@ -2178,8 +2177,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
   if (cpi->oxcf.rc_mode == VPX_Q) {
     twopass->active_worst_quality = cpi->oxcf.cq_level;
   } else if (cm->current_video_frame == 0 ||
-             (is_spatial_svc(cpi) &&
-              lc->current_video_frame_in_layer == 0)) {
+             (lc != NULL && lc->current_video_frame_in_layer == 0)) {
     // Special case code for first frame.
     const int section_target_bandwidth = (int)(twopass->bits_left /
                                                frames_left);
@@ -2205,7 +2203,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
     cm->frame_type = INTER_FRAME;
   }
 
-  if (is_spatial_svc(cpi)) {
+  if (lc != NULL) {
     if (cpi->svc.spatial_layer_id == 0) {
       lc->is_key_frame = (cm->frame_type == KEY_FRAME);
       if (lc->is_key_frame)
@@ -2236,7 +2234,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
     }
 
     rc->frames_till_gf_update_due = rc->baseline_gf_interval;
-    if (!is_spatial_svc(cpi))
+    if (lc != NULL)
       cpi->refresh_golden_frame = 1;
   }
 
