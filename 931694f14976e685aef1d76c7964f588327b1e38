@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//bQA\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-08-18T22:38:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//bxQ\u003d",
+      "revId": "931694f14976e685aef1d76c7964f588327b1e38",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//b0A\u003d",
         "filename": "vp9/encoder/vp9_firstpass.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-08-14T16:56:07Z",
       "side": 1,
       "message": "Better:\n  LAYER_CONTEXT *const lc \u003d is_spatial_svc(cpi) ?\n      \u0026cpi-\u003esvc.layer_context[cpi-\u003esvc.spatial_layer_id] : 0;\nThen change all instances of:\n  if (is_spatial_svc(cpi))\nto:\n  if (lc !\u003d NULL)",
+      "revId": "931694f14976e685aef1d76c7964f588327b1e38",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//bQM\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2125,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-08-18T22:38:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//b0A\u003d",
       "revId": "931694f14976e685aef1d76c7964f588327b1e38",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
