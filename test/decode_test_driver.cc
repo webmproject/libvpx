@@ -40,7 +40,7 @@ vpx_codec_err_t Decoder::DecodeFrame(const uint8_t *cxdata, size_t size,
 }
 
 void DecoderTest::RunLoop(CompressedVideoSource *video) {
-  Decoder* const decoder = codec_->CreateDecoder(cfg_, flags_);
+  Decoder* const decoder = codec_->CreateDecoder(cfg_, flags_, 0);
   ASSERT_TRUE(decoder != NULL);
   const char *codec_name = decoder->GetDecoderName();
   const bool is_vp8 = strncmp(kVP8Name, codec_name, sizeof(kVP8Name) - 1) == 0;
