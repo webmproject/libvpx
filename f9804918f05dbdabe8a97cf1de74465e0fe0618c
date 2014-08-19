@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//bHk\u003d",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 599,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-19T16:49:17Z",
+      "side": 1,
+      "message": "Remove the commented out code \u0026 the variable max_intra_size_pct all together (or static const):\n#define MAX_INTRA_SIZE_PCT 200",
+      "revId": "f9804918f05dbdabe8a97cf1de74465e0fe0618c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
