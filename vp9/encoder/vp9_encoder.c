@@ -721,11 +721,6 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
   vp9_rc_init(&cpi->oxcf, oxcf->pass, &cpi->rc);
 
   cm->current_video_frame = 0;
-
-  cpi->gold_is_last = 0;
-  cpi->alt_is_last = 0;
-  cpi->gold_is_alt = 0;
-
   cpi->skippable_frame = 0;
 
   // Create the encoder segmentation map and set all entries to 0
@@ -1906,36 +1901,27 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
   } while (loop);
 }
 
-static void get_ref_frame_flags(VP9_COMP *cpi) {
-  if (cpi->refresh_last_frame & cpi->refresh_golden_frame)
-    cpi->gold_is_last = 1;
-  else if (cpi->refresh_last_frame ^ cpi->refresh_golden_frame)
-    cpi->gold_is_last = 0;
+static int get_ref_frame_flags(const VP9_COMP *cpi) {
+  const int *const map = cpi->common.ref_frame_map;
+  const int gold_is_last = map[cpi->gld_fb_idx] == map[cpi->lst_fb_idx];
+  const int alt_is_last = map[cpi->alt_fb_idx] == map[cpi->lst_fb_idx];
+  const int gold_is_alt = map[cpi->gld_fb_idx] == map[cpi->alt_fb_idx];
+  int flags = VP9_ALT_FLAG | VP9_GOLD_FLAG | VP9_LAST_FLAG;
 
-  if (cpi->refresh_last_frame & cpi->refresh_alt_ref_frame)
-    cpi->alt_is_last = 1;
-  else if (cpi->refresh_last_frame ^ cpi->refresh_alt_ref_frame)
-    cpi->alt_is_last = 0;
-
-  if (cpi->refresh_alt_ref_frame & cpi->refresh_golden_frame)
-    cpi->gold_is_alt = 1;
-  else if (cpi->refresh_alt_ref_frame ^ cpi->refresh_golden_frame)
-    cpi->gold_is_alt = 0;
-
-  cpi->ref_frame_flags = VP9_ALT_FLAG | VP9_GOLD_FLAG | VP9_LAST_FLAG;
-
-  if (cpi->gold_is_last)
-    cpi->ref_frame_flags &= ~VP9_GOLD_FLAG;
+  if (gold_is_last)
+    flags &= ~VP9_GOLD_FLAG;
 
   if (cpi->rc.frames_till_gf_update_due == INT_MAX &&
       !is_spatial_svc(cpi))
-    cpi->ref_frame_flags &= ~VP9_GOLD_FLAG;
+    flags &= ~VP9_GOLD_FLAG;
 
-  if (cpi->alt_is_last)
-    cpi->ref_frame_flags &= ~VP9_ALT_FLAG;
+  if (alt_is_last)
+    flags &= ~VP9_ALT_FLAG;
 
-  if (cpi->gold_is_alt)
-    cpi->ref_frame_flags &= ~VP9_ALT_FLAG;
+  if (gold_is_alt)
+    flags &= ~VP9_ALT_FLAG;
+
+  return flags;
 }
 
 static void set_ext_overrides(VP9_COMP *cpi) {
@@ -2237,7 +2223,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   else
     cpi->frame_flags &= ~FRAMEFLAGS_ALTREF;
 
-  get_ref_frame_flags(cpi);
+  cpi->ref_frame_flags = get_ref_frame_flags(cpi);
 
   cm->last_frame_type = cm->frame_type;
   vp9_rc_postencode_update(cpi, *size);
