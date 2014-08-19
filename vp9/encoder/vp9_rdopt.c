@@ -2632,6 +2632,12 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     int64_t total_sse = INT64_MAX;
     int early_term = 0;
 
+    this_mode = vp9_mode_order[mode_index].mode;
+    ref_frame = vp9_mode_order[mode_index].ref_frame[0];
+    if (ref_frame != INTRA_FRAME && !(inter_mode_mask & (1 << this_mode)))
+      continue;
+    second_ref_frame = vp9_mode_order[mode_index].ref_frame[1];
+
     // Look at the reference frame of the best mode so far and set the
     // skip mask to look at a subset of the remaining modes.
     if (mode_index == mode_skip_start && best_mode_index >= 0) {
@@ -2653,6 +2659,13 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
           break;
       }
     }
+
+    if (cpi->sf.alt_ref_search_fp && cpi->rc.is_src_frame_alt_ref) {
+      mode_skip_mask = 0;
+      if (!(ref_frame == ALTREF_FRAME && second_ref_frame == NONE))
+        continue;
+    }
+
     if (mode_skip_mask & (1 << mode_index))
       continue;
 
@@ -2660,12 +2673,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     if (rd_less_than_thresh(best_rd, rd_threshes[mode_index],
                             rd_thresh_freq_fact[mode_index]))
       continue;
-
-    this_mode = vp9_mode_order[mode_index].mode;
-    ref_frame = vp9_mode_order[mode_index].ref_frame[0];
-    if (ref_frame != INTRA_FRAME && !(inter_mode_mask & (1 << this_mode)))
-      continue;
-    second_ref_frame = vp9_mode_order[mode_index].ref_frame[1];
 
     if (cpi->sf.motion_field_mode_search) {
       const int mi_width  = MIN(num_8x8_blocks_wide_lookup[bsize],
