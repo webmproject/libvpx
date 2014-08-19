@@ -541,6 +541,20 @@ static void init_config(struct VP9_COMP *cpi, VP9EncoderConfig *oxcf) {
   set_tile_limits(cpi);
 }
 
+static void set_rc_buffer_sizes(RATE_CONTROL *rc,
+                                const VP9EncoderConfig *oxcf) {
+  const int64_t bandwidth = oxcf->target_bandwidth;
+  const int64_t starting = oxcf->starting_buffer_level_ms;
+  const int64_t optimal = oxcf->optimal_buffer_level_ms;
+  const int64_t maximum = oxcf->maximum_buffer_size_ms;
+
+  rc->starting_buffer_level = starting * bandwidth / 1000;
+  rc->optimal_buffer_level = (optimal == 0) ? bandwidth / 8
+                                            : optimal * bandwidth / 1000;
+  rc->maximum_buffer_size = (maximum == 0) ? bandwidth / 8
+                                           : maximum * bandwidth / 1000;
+}
+
 void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
@@ -574,28 +588,8 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   }
   cpi->encode_breakout = cpi->oxcf.encode_breakout;
 
-  // local file playback mode == really big buffer
-  if (cpi->oxcf.rc_mode == VPX_VBR) {
-    cpi->oxcf.starting_buffer_level_ms = 60000;
-    cpi->oxcf.optimal_buffer_level_ms = 60000;
-    cpi->oxcf.maximum_buffer_size_ms = 240000;
-  }
+  set_rc_buffer_sizes(rc, &cpi->oxcf);
 
-  rc->starting_buffer_level = cpi->oxcf.starting_buffer_level_ms *
-                                  cpi->oxcf.target_bandwidth / 1000;
-
-  // Set or reset optimal and maximum buffer levels.
-  if (cpi->oxcf.optimal_buffer_level_ms == 0)
-    rc->optimal_buffer_level = cpi->oxcf.target_bandwidth / 8;
-  else
-    rc->optimal_buffer_level = cpi->oxcf.optimal_buffer_level_ms *
-                                   cpi->oxcf.target_bandwidth / 1000;
-
-  if (cpi->oxcf.maximum_buffer_size_ms == 0)
-    rc->maximum_buffer_size = cpi->oxcf.target_bandwidth / 8;
-  else
-    rc->maximum_buffer_size = cpi->oxcf.maximum_buffer_size_ms *
-                                  cpi->oxcf.target_bandwidth / 1000;
   // Under a configuration change, where maximum_buffer_size may change,
   // keep buffer level clipped to the maximum allowed buffer size.
   rc->bits_off_target = MIN(rc->bits_off_target, rc->maximum_buffer_size);

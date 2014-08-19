@@ -325,6 +325,7 @@ static vpx_codec_err_t set_encoder_config(
     VP9EncoderConfig *oxcf,
     const vpx_codec_enc_cfg_t *cfg,
     const struct vp9_extracfg *extra_cfg) {
+  const int is_vbr = cfg->rc_end_usage == VPX_VBR;
   oxcf->profile = cfg->g_profile;
   oxcf->width   = cfg->g_w;
   oxcf->height  = cfg->g_h;
@@ -371,9 +372,9 @@ static vpx_codec_err_t set_encoder_config(
   oxcf->scaled_frame_width       = cfg->rc_scaled_width;
   oxcf->scaled_frame_height      = cfg->rc_scaled_height;
 
-  oxcf->maximum_buffer_size_ms   = cfg->rc_buf_sz;
-  oxcf->starting_buffer_level_ms = cfg->rc_buf_initial_sz;
-  oxcf->optimal_buffer_level_ms  = cfg->rc_buf_optimal_sz;
+  oxcf->maximum_buffer_size_ms   = is_vbr ? 240000 : cfg->rc_buf_sz;
+  oxcf->starting_buffer_level_ms = is_vbr ? 60000 : cfg->rc_buf_initial_sz;
+  oxcf->optimal_buffer_level_ms  = is_vbr ? 60000 : cfg->rc_buf_optimal_sz;
 
   oxcf->drop_frames_water_mark   = cfg->rc_dropframe_thresh;
 
