@@ -1082,8 +1082,7 @@ static double get_prediction_decay_rate(const VP9_COMMON *cm,
 
 // This function gives an estimate of how badly we believe the prediction
 // quality is decaying from frame to frame.
-static double get_zero_motion_factor(const VP9_COMMON *cm,
-                                     const FIRSTPASS_STATS *frame) {
+static double get_zero_motion_factor(const FIRSTPASS_STATS *frame) {
   const double sr_ratio = frame->coded_error /
                           DOUBLE_DIVIDE_CHECK(frame->sr_coded_error);
   const double zero_motion_pct = frame->pcnt_inter -
@@ -1614,9 +1613,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       decay_accumulator = decay_accumulator * loop_decay_rate;
 
       // Monitor for static sections.
-      zero_motion_accumulator =
-        MIN(zero_motion_accumulator,
-            get_zero_motion_factor(&cpi->common, &next_frame));
+      zero_motion_accumulator = MIN(zero_motion_accumulator,
+                                    get_zero_motion_factor(&next_frame));
 
       // Break clause to detect very still sections after motion. For example,
       // a static image after a fade or other transition.
@@ -1986,9 +1984,8 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       break;
 
     // Monitor for static sections.
-    zero_motion_accumulator =
-      MIN(zero_motion_accumulator,
-          get_zero_motion_factor(&cpi->common, &next_frame));
+    zero_motion_accumulator =MIN(zero_motion_accumulator,
+                                 get_zero_motion_factor(&next_frame));
 
     // For the first few frames collect data to decide kf boost.
     if (i <= (rc->max_gf_interval * 2)) {
