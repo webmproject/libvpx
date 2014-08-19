@@ -3303,15 +3303,17 @@ static void process_denoiser_mode_change(VP8_COMP *cpi) {
   int skip = 2;
   // Only select blocks for computing nmse that have been encoded
   // as ZERO LAST min_consec_zero_last frames in a row.
-  int min_consec_zero_last = 10;
+  // Scale with number of temporal layers.
+  int min_consec_zero_last = 8 / cpi->oxcf.number_of_layers;
   // Decision is tested for changing the denoising mode every
   // num_mode_change times this function is called. Note that this
   // function called every 8 frames, so (8 * num_mode_change) is number
   // of frames where denoising mode change is tested for switch.
   int num_mode_change = 15;
   // Framerate factor, to compensate for larger mse at lower framerates.
-  // TODO(marpan): Adjust this factor,
-  int fac_framerate = cpi->output_framerate < 25.0f ? 80 : 100;
+  // Use ref_framerate, which is full source framerate for temporal layers.
+  // TODO(marpan): Adjust this factor.
+  int fac_framerate = cpi->ref_framerate < 25.0f ? 80 : 100;
   int tot_num_blocks = cm->mb_rows * cm->mb_cols;
   int ystride = cpi->Source->y_stride;
   unsigned char *src = cpi->Source->y_buffer;
