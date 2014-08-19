@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//a8s\u003d",
+        "filename": "examples/set_maps.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-08-19T21:56:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//bH8\u003d",
+      "revId": "44bd9addd1ba23e27e0fd09610a5d31e51509772",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//bH4\u003d",
         "filename": "examples/set_maps.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-08-19T16:43:14Z",
       "side": 1,
       "message": "We don\u0027t need the exit, die calls usage_exit():\n\nif (encoder \u003d\u003d NULL) die(\"Unsupported codec.\");\n\nwould work I think.",
+      "revId": "44bd9addd1ba23e27e0fd09610a5d31e51509772",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//a8o\u003d",
+        "filename": "examples/set_maps.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-08-19T21:56:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//bH4\u003d",
       "revId": "44bd9addd1ba23e27e0fd09610a5d31e51509772",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
