@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//a+0\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1121,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-19T21:36:57Z",
+      "side": 1,
+      "message": "Remove brackets.",
+      "revId": "6d14e9ed09d5022724cf26498ca1258608f71482",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
