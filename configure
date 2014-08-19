@@ -210,6 +210,7 @@ enable_feature spatial_resampling
 enable_feature multithread
 enable_feature os_support
 enable_feature temporal_denoising
+enable_feature high_quant
 
 [ -d "${source_path}/../include" ] && enable_feature alt_tree_layout
 for d in vp8 vp9; do
