@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//bF8\u003d",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-08-19T17:36:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//bNg\u003d",
+      "revId": "25b4e4911ef31981bdf8d6419ca1972cc06ba568",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//bNc\u003d",
         "filename": "vp9/encoder/vp9_encoder.h",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2014-08-19T16:37:28Z",
       "side": 1,
       "message": "Move period to end of line.",
+      "revId": "25b4e4911ef31981bdf8d6419ca1972cc06ba568",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//bF4\u003d",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-08-19T17:36:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//bNc\u003d",
       "revId": "25b4e4911ef31981bdf8d6419ca1972cc06ba568",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//bF0\u003d",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-08-19T17:36:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//bNE\u003d",
+      "revId": "25b4e4911ef31981bdf8d6419ca1972cc06ba568",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//bM4\u003d",
         "filename": "vp9/vp9_cx_iface.c",
         "patchSetId": 2
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//bFo\u003d",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 730,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-08-19T17:36:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//bM4\u003d",
+      "revId": "25b4e4911ef31981bdf8d6419ca1972cc06ba568",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//bIQ\u003d",
         "filename": "vp9/vp9_cx_iface.c",
         "patchSetId": 2
@@ -81,6 +153,24 @@
       "writtenOn": "2014-08-19T16:37:28Z",
       "side": 1,
       "message": "You don\u0027t need this... initialization has set to BEST.",
+      "revId": "25b4e4911ef31981bdf8d6419ca1972cc06ba568",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//bFk\u003d",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 738,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-08-19T17:36:52Z",
+      "side": 1,
+      "message": "I still think it\u0027s better to have the assignment here to cover all possible cases in a \u0027symmetric\u0027 way (i.e. new_mode is assigned in every possible case).",
+      "parentUuid": "AAAAdn//bIQ\u003d",
       "revId": "25b4e4911ef31981bdf8d6419ca1972cc06ba568",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
