@@ -538,7 +538,8 @@ int main_loop(int argc, const char **argv_) {
   struct VpxDecInputContext input = {NULL, NULL};
   struct VpxInputContext vpx_input_ctx;
 #if CONFIG_WEBM_IO
-  struct WebmInputContext webm_ctx = {0};
+  struct WebmInputContext webm_ctx;
+  memset(&(webm_ctx), 0, sizeof(webm_ctx));
   input.webm_ctx = &webm_ctx;
 #endif
   input.vpx_input_ctx = &vpx_input_ctx;
