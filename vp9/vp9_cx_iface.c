@@ -43,37 +43,27 @@ struct vp9_extracfg {
   vp9e_tune_content           content;
 };
 
-struct extraconfig_map {
-  unsigned int usage;
-  struct vp9_extracfg cfg;
-};
-
-static const struct extraconfig_map extracfg_map[] = {
-  {
-    0,
-    { // NOLINT
-      NULL,
-      0,                          // cpu_used
-      1,                          // enable_auto_alt_ref
-      0,                          // noise_sensitivity
-      0,                          // sharpness
-      0,                          // static_thresh
-      0,                          // tile_columns
-      0,                          // tile_rows
-      7,                          // arnr_max_frames
-      5,                          // arnr_strength
-      3,                          // arnr_type
-      VP8_TUNE_PSNR,              // tuning
-      10,                         // cq_level
-      0,                          // rc_max_intra_bitrate_pct
-      0,                          // lossless
-      0,                          // frame_parallel_decoding_mode
-      NO_AQ,                      // aq_mode
-      0,                          // frame_periodic_delta_q
-      BITS_8,                     // Bit depth
-      VP9E_CONTENT_DEFAULT        // content
-    }
-  }
+static struct vp9_extracfg default_extra_cfg = {
+  NULL,
+  0,                          // cpu_used
+  1,                          // enable_auto_alt_ref
+  0,                          // noise_sensitivity
+  0,                          // sharpness
+  0,                          // static_thresh
+  0,                          // tile_columns
+  0,                          // tile_rows
+  7,                          // arnr_max_frames
+  5,                          // arnr_strength
+  3,                          // arnr_type
+  VP8_TUNE_PSNR,              // tuning
+  10,                         // cq_level
+  0,                          // rc_max_intra_bitrate_pct
+  0,                          // lossless
+  0,                          // frame_parallel_decoding_mode
+  NO_AQ,                      // aq_mode
+  0,                          // frame_periodic_delta_q
+  BITS_8,                     // Bit depth
+  VP9E_CONTENT_DEFAULT        // content
 };
 
 struct vpx_codec_alg_priv {
@@ -659,8 +649,6 @@ static vpx_codec_err_t encoder_init(vpx_codec_ctx_t *ctx,
   (void)data;
 
   if (ctx->priv == NULL) {
-    int i;
-    vpx_codec_enc_cfg_t *cfg;
     struct vpx_codec_alg_priv *priv = calloc(1, sizeof(*priv));
 
     if (priv == NULL)
@@ -679,16 +667,7 @@ static vpx_codec_err_t encoder_init(vpx_codec_ctx_t *ctx,
       ctx->config.enc = &ctx->priv->alg_priv->cfg;
     }
 
-    cfg = &ctx->priv->alg_priv->cfg;
-
-    // Select the extra vp6 configuration table based on the current
-    // usage value. If the current usage value isn't found, use the
-    // values for usage case 0.
-    for (i = 0;
-         extracfg_map[i].usage && extracfg_map[i].usage != cfg->g_usage;
-         ++i) {}
-
-    priv->extra_cfg = extracfg_map[i].cfg;
+    priv->extra_cfg = default_extra_cfg;
     priv->extra_cfg.pkt_list = &priv->pkt_list.head;
 
     vp9_initialize_enc();
