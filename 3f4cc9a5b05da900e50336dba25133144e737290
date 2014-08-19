@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//a9U\u003d",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 466,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-08-19T21:53:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//bFE\u003d",
+      "revId": "3f4cc9a5b05da900e50336dba25133144e737290",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//bFI\u003d",
         "filename": "examples/vpx_temporal_svc_encoder.c",
         "patchSetId": 1
@@ -48,6 +66,24 @@
       "writtenOn": "2014-08-19T17:46:51Z",
       "side": 1,
       "message": "Exit is already called from die().",
+      "revId": "3f4cc9a5b05da900e50336dba25133144e737290",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//a9M\u003d",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 574,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-08-19T21:53:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//bFI\u003d",
       "revId": "3f4cc9a5b05da900e50336dba25133144e737290",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
