@@ -507,7 +507,7 @@ static void choose_tx_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
                      cpi->sf.use_fast_coef_costing);
     r[n][1] = r[n][0];
     if (r[n][0] < INT_MAX) {
-      for (m = 0; m <= n - (n == max_tx_size); m++) {
+      for (m = 0; m <= n - (n == (int) max_tx_size); m++) {
         if (m == n)
           r[n][1] += vp9_cost_zero(tx_probs[m]);
         else
@@ -526,7 +526,7 @@ static void choose_tx_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
     // Early termination in transform size search.
     if (cpi->sf.tx_size_search_breakout &&
         (rd[n][1] == INT64_MAX ||
-        (n < max_tx_size && rd[n][1] > rd[n + 1][1]) ||
+        (n < (int) max_tx_size && rd[n][1] > rd[n + 1][1]) ||
         s[n] == 1))
       break;
 
