@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//a6Y\u003d",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 442,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-19T23:10:56Z",
+      "side": 1,
+      "message": "Remove whitespace.",
+      "revId": "c08399cd7e18966361d512adb025f71be4a7cab7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
