@@ -700,7 +700,7 @@ static void y4m_convert_null(y4m_input *_y4m, unsigned char *_dst,
 
 int y4m_input_open(y4m_input *_y4m, FILE *_fin, char *_skip, int _nskip,
                    int only_420) {
-  char buffer[80];
+  char buffer[80] = {0};
   int  ret;
   int  i;
   /*Read until newline, or 80 cols, whichever happens first.*/
