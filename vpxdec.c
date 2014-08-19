@@ -15,13 +15,16 @@
 #include <string.h>
 #include <limits.h>
 
+#include "./vpx_config.h"
+
+#if CONFIG_LIBYUV
 #include "third_party/libyuv/include/libyuv/scale.h"
+#endif
 
 #include "./args.h"
 #include "./ivfdec.h"
 
 #define VPX_CODEC_DISABLE_COMPAT 1
-#include "./vpx_config.h"
 #include "vpx/vpx_decoder.h"
 #include "vpx_ports/mem_ops.h"
 #include "vpx_ports/vpx_timer.h"
@@ -123,6 +126,7 @@ static const arg_def_t *vp8_pp_args[] = {
 };
 #endif
 
+#if CONFIG_LIBYUV
 static INLINE int vpx_image_scale(vpx_image_t *src, vpx_image_t *dst,
                                   FilterModeEnum mode) {
   assert(src->fmt == VPX_IMG_FMT_I420);
@@ -137,6 +141,7 @@ static INLINE int vpx_image_scale(vpx_image_t *src, vpx_image_t *dst,
                    dst->d_w, dst->d_h,
                    mode);
 }
+#endif
 
 void usage_exit() {
   int i;
