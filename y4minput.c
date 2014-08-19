@@ -978,7 +978,9 @@ int y4m_input_open(y4m_input *_y4m, FILE *_fin, char *_skip, int _nskip,
     _y4m->dst_buf = (unsigned char *)malloc(_y4m->dst_buf_sz);
   else
     _y4m->dst_buf = (unsigned char *)malloc(2 * _y4m->dst_buf_sz);
-  _y4m->aux_buf = (unsigned char *)malloc(_y4m->aux_buf_sz);
+
+  if (_y4m->aux_buf_sz > 0)
+    _y4m->aux_buf = (unsigned char *)malloc(_y4m->aux_buf_sz);
   return 0;
 }
 
