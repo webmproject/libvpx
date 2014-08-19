@@ -2004,19 +2004,41 @@ static void set_arf_sign_bias(VP9_COMP *cpi) {
   cm->ref_frame_sign_bias[ALTREF_FRAME] = arf_sign_bias;
 }
 
+static void set_mv_search_params(VP9_COMP *cpi) {
+  const VP9_COMMON *const cm = &cpi->common;
+  const unsigned int max_mv_def = MIN(cm->width, cm->height);
+
+  // Default based on max resolution.
+  cpi->mv_step_param = vp9_init_search_range(max_mv_def);
+
+  if (cpi->sf.mv.auto_mv_step_size) {
+    if (frame_is_intra_only(cm)) {
+      // Initialize max_mv_magnitude for use in the first INTER frame
+      // after a key/intra-only frame.
+      cpi->max_mv_magnitude = max_mv_def;
+    } else {
+      if (cm->show_frame)
+        // Allow mv_steps to correspond to twice the max mv magnitude found
+        // in the previous frame, capped by the default max_mv_magnitude based
+        // on resolution.
+        cpi->mv_step_param =
+            vp9_init_search_range(MIN(max_mv_def, 2 * cpi->max_mv_magnitude));
+      cpi->max_mv_magnitude = 0;
+    }
+  }
+}
+
 static void encode_frame_to_data_rate(VP9_COMP *cpi,
                                       size_t *size,
                                       uint8_t *dest,
                                       unsigned int *frame_flags) {
   VP9_COMMON *const cm = &cpi->common;
+  struct segmentation *const seg = &cm->seg;
   TX_SIZE t;
   int q;
   int top_index;
   int bottom_index;
 
-  const SPEED_FEATURES *const sf = &cpi->sf;
-  const unsigned int max_mv_def = MIN(cm->width, cm->height);
-  struct segmentation *const seg = &cm->seg;
   set_ext_overrides(cpi);
 
   cpi->Source = vp9_scale_if_required(cm, cpi->un_scaled_source,
@@ -2042,24 +2064,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   // Set default state for segment based loop filter update flags.
   cm->lf.mode_ref_delta_update = 0;
 
-  // Initialize cpi->mv_step_param to default based on max resolution.
-  cpi->mv_step_param = vp9_init_search_range(max_mv_def);
-  // Initialize cpi->max_mv_magnitude and cpi->mv_step_param if appropriate.
-  if (sf->mv.auto_mv_step_size) {
-    if (frame_is_intra_only(cm)) {
-      // Initialize max_mv_magnitude for use in the first INTER frame
-      // after a key/intra-only frame.
-      cpi->max_mv_magnitude = max_mv_def;
-    } else {
-      if (cm->show_frame)
-        // Allow mv_steps to correspond to twice the max mv magnitude found
-        // in the previous frame, capped by the default max_mv_magnitude based
-        // on resolution.
-        cpi->mv_step_param = vp9_init_search_range(MIN(max_mv_def, 2 *
-                                 cpi->max_mv_magnitude));
-      cpi->max_mv_magnitude = 0;
-    }
-  }
+  set_mv_search_params(cpi);
 
   // Set various flags etc to special state if it is a key frame.
   if (frame_is_intra_only(cm)) {
