@@ -8,38 +8,12 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #include <stdlib.h>
 #include <string.h>
+
 #include "vpx/vpx_image.h"
 #include "vpx/vpx_integer.h"
-
-#define ADDRESS_STORAGE_SIZE      sizeof(size_t)
-/*returns an addr aligned to the byte boundary specified by align*/
-#define align_addr(addr,align) (void*)(((size_t)(addr) + ((align) - 1)) & (size_t)-(align))
-
-/* Memalign code is copied from vpx_mem.c */
-static void *img_buf_memalign(size_t align, size_t size) {
-  void *addr,
-       * x = NULL;
-
-  addr = malloc(size + align - 1 + ADDRESS_STORAGE_SIZE);
-
-  if (addr) {
-    x = align_addr((unsigned char *)addr + ADDRESS_STORAGE_SIZE, (int)align);
-    /* save the actual malloc address */
-    ((size_t *)x)[-1] = (size_t)addr;
-  }
-
-  return x;
-}
-
-static void img_buf_free(void *memblk) {
-  if (memblk) {
-    void *addr = (void *)(((size_t *)memblk)[-1]);
-    free(addr);
-  }
-}
+#include "vpx_mem/vpx_mem.h"
 
 static vpx_image_t *img_alloc_helper(vpx_image_t   *img,
                                      vpx_img_fmt_t  fmt,
@@ -172,7 +146,7 @@ static vpx_image_t *img_alloc_helper(vpx_image_t   *img,
     if (alloc_size != (size_t)alloc_size)
       goto fail;
 
-    img->img_data = img_buf_memalign(buf_align, (size_t)alloc_size);
+    img->img_data = (uint8_t *)vpx_memalign(buf_align, (size_t)alloc_size);
     img->img_data_owner = 1;
   }
 
@@ -296,7 +270,7 @@ void vpx_img_flip(vpx_image_t *img) {
 void vpx_img_free(vpx_image_t *img) {
   if (img) {
     if (img->img_data && img->img_data_owner)
-      img_buf_free(img->img_data);
+      vpx_free(img->img_data);
 
     if (img->self_allocd)
       free(img);
