@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//a5k\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-20T00:07:03Z",
+      "side": 1,
+      "message": "prefer static_cast",
+      "revId": "e1b5d24837ab0a786eab7897c663f22a30813b42",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//a5g\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-20T00:07:03Z",
+      "side": 1,
+      "message": "!\u003d NULL",
+      "revId": "e1b5d24837ab0a786eab7897c663f22a30813b42",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
