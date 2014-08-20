@@ -214,6 +214,99 @@ void VarianceTest<VarianceFunctionType>::OneQuarterTest() {
   EXPECT_EQ(expected, var);
 }
 
+#if CONFIG_VP8_ENCODER
+template<typename MseFunctionType>
+class MseTest
+    : public ::testing::TestWithParam<tuple<int, int, MseFunctionType> > {
+ public:
+  virtual void SetUp() {
+    const tuple<int, int, MseFunctionType>& params = this->GetParam();
+    log2width_  = get<0>(params);
+    width_ = 1 << log2width_;
+    log2height_ = get<1>(params);
+    height_ = 1 << log2height_;
+    mse_ = get<2>(params);
+
+    rnd(ACMRandom::DeterministicSeed());
+    block_size_ = width_ * height_;
+    src_ = reinterpret_cast<uint8_t *>(vpx_memalign(16, block_size_));
+    ref_ = new uint8_t[block_size_];
+    ASSERT_TRUE(src_ != NULL);
+    ASSERT_TRUE(ref_ != NULL);
+  }
+
+  virtual void TearDown() {
+    vpx_free(src_);
+    delete[] ref_;
+    libvpx_test::ClearSystemState();
+  }
+
+ protected:
+  void RefTest_mse();
+  void RefTest_sse();
+  void MaxTest_mse();
+  void MaxTest_sse();
+
+  ACMRandom rnd;
+  uint8_t* src_;
+  uint8_t* ref_;
+  int width_, log2width_;
+  int height_, log2height_;
+  int block_size_;
+  MseFunctionType mse_;
+};
+
+template<typename MseFunctionType>
+void MseTest<MseFunctionType>::RefTest_mse() {
+  for (int i = 0; i < 10; ++i) {
+    for (int j = 0; j < block_size_; j++) {
+      src_[j] = rnd.Rand8();
+      ref_[j] = rnd.Rand8();
+    }
+    unsigned int sse1, sse2;
+    ASM_REGISTER_STATE_CHECK(mse_(src_, width_, ref_, width_, &sse1));
+    variance_ref(src_, ref_, log2width_, log2height_, &sse2);
+    EXPECT_EQ(sse1, sse2);
+  }
+}
+
+template<typename MseFunctionType>
+void MseTest<MseFunctionType>::RefTest_sse() {
+  for (int i = 0; i < 10; ++i) {
+    for (int j = 0; j < block_size_; j++) {
+      src_[j] = rnd.Rand8();
+      ref_[j] = rnd.Rand8();
+    }
+    unsigned int sse2;
+    unsigned int var1;
+    ASM_REGISTER_STATE_CHECK(
+        var1 = mse_(src_, width_, ref_, width_));
+    variance_ref(src_, ref_, log2width_, log2height_, &sse2);
+    EXPECT_EQ(var1, sse2);
+  }
+}
+
+template<typename MseFunctionType>
+void MseTest<MseFunctionType>::MaxTest_mse() {
+  memset(src_, 255, block_size_);
+  memset(ref_, 0, block_size_);
+  unsigned int sse;
+  ASM_REGISTER_STATE_CHECK(mse_(src_, width_, ref_, width_, &sse));
+  const unsigned int expected = block_size_ * 255 * 255;
+  EXPECT_EQ(expected, sse);
+}
+
+template<typename MseFunctionType>
+void MseTest<MseFunctionType>::MaxTest_sse() {
+  memset(src_, 255, block_size_);
+  memset(ref_, 0, block_size_);
+  unsigned int var;
+  ASM_REGISTER_STATE_CHECK(var = mse_(src_, width_, ref_, width_));
+  const unsigned int expected = block_size_ * 255 * 255;
+  EXPECT_EQ(expected, var);
+}
+#endif
+
 #if CONFIG_VP9_ENCODER
 
 unsigned int subpel_avg_variance_ref(const uint8_t *ref,
@@ -343,11 +436,30 @@ void SubpelVarianceTest<vp9_subp_avg_variance_fn_t>::RefTest() {
 namespace vp8 {
 
 #if CONFIG_VP8_ENCODER
+typedef unsigned int (*vp8_sse_fn_t)(const unsigned char *src_ptr,
+    int source_stride, const unsigned char *ref_ptr, int  ref_stride);
+
+typedef MseTest<vp8_sse_fn_t> VP8SseTest;
+typedef MseTest<vp8_variance_fn_t> VP8MseTest;
 typedef VarianceTest<vp8_variance_fn_t> VP8VarianceTest;
 
+TEST_P(VP8SseTest, Ref_sse) { RefTest_sse(); }
+TEST_P(VP8SseTest, Max_sse) { MaxTest_sse(); }
+TEST_P(VP8MseTest, Ref_mse) { RefTest_mse(); }
+TEST_P(VP8MseTest, Max_mse) { MaxTest_mse(); }
 TEST_P(VP8VarianceTest, Zero) { ZeroTest(); }
 TEST_P(VP8VarianceTest, Ref) { RefTest(); }
 TEST_P(VP8VarianceTest, OneQuarter) { OneQuarterTest(); }
+
+const vp8_sse_fn_t get4x4sse_cs_c = vp8_get4x4sse_cs_c;
+INSTANTIATE_TEST_CASE_P(
+    C, VP8SseTest,
+    ::testing::Values(make_tuple(2, 2, get4x4sse_cs_c)));
+
+const vp8_variance_fn_t mse16x16_c = vp8_mse16x16_c;
+INSTANTIATE_TEST_CASE_P(
+    C, VP8MseTest,
+    ::testing::Values(make_tuple(4, 4, mse16x16_c)));
 
 const vp8_variance_fn_t variance4x4_c = vp8_variance4x4_c;
 const vp8_variance_fn_t variance8x8_c = vp8_variance8x8_c;
@@ -363,6 +475,16 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(4, 4, variance16x16_c)));
 
 #if HAVE_NEON
+const vp8_sse_fn_t get4x4sse_cs_neon = vp8_get4x4sse_cs_neon;
+INSTANTIATE_TEST_CASE_P(
+    NEON, VP8SseTest,
+    ::testing::Values(make_tuple(2, 2, get4x4sse_cs_neon)));
+
+const vp8_variance_fn_t mse16x16_neon = vp8_mse16x16_neon;
+INSTANTIATE_TEST_CASE_P(
+    NEON, VP8MseTest,
+    ::testing::Values(make_tuple(4, 4, mse16x16_neon)));
+
 const vp8_variance_fn_t variance8x8_neon = vp8_variance8x8_neon;
 const vp8_variance_fn_t variance8x16_neon = vp8_variance8x16_neon;
 const vp8_variance_fn_t variance16x8_neon = vp8_variance16x8_neon;
@@ -374,6 +496,7 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(4, 3, variance16x8_neon),
                       make_tuple(4, 4, variance16x16_neon)));
 #endif
+
 
 #if HAVE_MMX
 const vp8_variance_fn_t variance4x4_mmx = vp8_variance4x4_mmx;
