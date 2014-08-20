@@ -3380,13 +3380,13 @@ static void process_denoiser_mode_change(VP8_COMP *cpi) {
   // num_mode_change.
   if (cpi->denoiser.nmse_source_diff_count == num_mode_change) {
     // Check for going up: from normal to aggressive mode.
-    if ((cpi->denoiser.denoiser_mode = kDenoiserOnYUV) &&
+    if ((cpi->denoiser.denoiser_mode == kDenoiserOnYUV) &&
         (cpi->denoiser.nmse_source_diff >
         cpi->denoiser.threshold_aggressive_mode)) {
       vp8_denoiser_set_parameters(&cpi->denoiser, kDenoiserOnYUVAggressive);
     } else {
       // Check for going down: from aggressive to normal mode.
-      if ((cpi->denoiser.denoiser_mode = kDenoiserOnYUVAggressive) &&
+      if ((cpi->denoiser.denoiser_mode == kDenoiserOnYUVAggressive) &&
           (cpi->denoiser.nmse_source_diff <
           cpi->denoiser.threshold_aggressive_mode)) {
         vp8_denoiser_set_parameters(&cpi->denoiser, kDenoiserOnYUV);
