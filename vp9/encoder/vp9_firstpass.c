@@ -1095,12 +1095,10 @@ static double get_zero_motion_factor(const FIRSTPASS_STATS *frame) {
 // Function to test for a condition where a complex transition is followed
 // by a static section. For example in slide shows where there is a fade
 // between slides. This is to help with more optimal kf and gf positioning.
-static int detect_transition_to_still(TWO_PASS *twopass,
+static int detect_transition_to_still(const TWO_PASS *twopass,
                                       int frame_interval, int still_interval,
                                       double loop_decay_rate,
                                       double last_decay_rate) {
-  int trans_to_still = 0;
-
   // Break clause to detect very still sections after motion
   // For example a static image after a fade or other transition
   // instead of a clean scene cut.
@@ -1108,26 +1106,22 @@ static int detect_transition_to_still(TWO_PASS *twopass,
       loop_decay_rate >= 0.999 &&
       last_decay_rate < 0.9) {
     int j;
-    const FIRSTPASS_STATS *position = twopass->stats_in;
-    FIRSTPASS_STATS tmp_next_frame;
 
     // Look ahead a few frames to see if static condition persists...
     for (j = 0; j < still_interval; ++j) {
-      if (EOF == input_stats(twopass, &tmp_next_frame))
+      const FIRSTPASS_STATS *stats = &twopass->stats_in[j];
+      if (stats >= twopass->stats_in_end)
         break;
 
-      if (tmp_next_frame.pcnt_inter - tmp_next_frame.pcnt_motion < 0.999)
+      if (stats->pcnt_inter - stats->pcnt_motion < 0.999)
         break;
     }
 
-    reset_fpf_position(twopass, position);
-
     // Only if it does do we signal a transition to still.
-    if (j == still_interval)
-      trans_to_still = 1;
+    return j == still_interval;
   }
 
-  return trans_to_still;
+  return 0;
 }
 
 // This function detects a flash through the high relative pcnt_second_ref
