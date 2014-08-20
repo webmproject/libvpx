@@ -2891,11 +2891,11 @@ void vp9_fdct32x32_1_sse2(const int16_t *input, int16_t *output, int stride) {
 #define FDCT32x32_2D vp9_fdct32x32_rd_sse2
 #define FDCT32x32_HIGH_PRECISION 0
 #include "vp9/encoder/x86/vp9_dct32x32_sse2.c"
-#undef  FDCT32x32_2D
 #undef  FDCT32x32_HIGH_PRECISION
+#undef  FDCT32x32_2D
 
 #define FDCT32x32_2D vp9_fdct32x32_sse2
 #define FDCT32x32_HIGH_PRECISION 1
 #include "vp9/encoder/x86/vp9_dct32x32_sse2.c" // NOLINT
-#undef  FDCT32x32_2D
 #undef  FDCT32x32_HIGH_PRECISION
+#undef  FDCT32x32_2D
