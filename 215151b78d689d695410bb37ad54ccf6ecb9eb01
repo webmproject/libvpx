@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//a2E\u003d",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-08-20T10:18:13Z",
+      "side": 1,
+      "message": "I guess this function becomes questionable after the separation.",
+      "revId": "215151b78d689d695410bb37ad54ccf6ecb9eb01",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
