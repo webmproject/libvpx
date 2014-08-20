@@ -1367,7 +1367,8 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
                                    double group_error, int gf_arf_bits) {
   RATE_CONTROL *const rc = &cpi->rc;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
-  TWO_PASS *twopass = &cpi->twopass;
+  TWO_PASS *const twopass = &cpi->twopass;
+  GF_GROUP *const gf_group = &twopass->gf_group;
   FIRSTPASS_STATS frame_stats;
   int i;
   int frame_index = 1;
@@ -1390,17 +1391,17 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
   // is also the golden frame.
   if (!key_frame) {
     if (rc->source_alt_ref_active) {
-      twopass->gf_group.update_type[0] = OVERLAY_UPDATE;
-      twopass->gf_group.rf_level[0] = INTER_NORMAL;
-      twopass->gf_group.bit_allocation[0] = 0;
-      twopass->gf_group.arf_update_idx[0] = arf_buffer_indices[0];
-      twopass->gf_group.arf_ref_idx[0] = arf_buffer_indices[0];
+      gf_group->update_type[0] = OVERLAY_UPDATE;
+      gf_group->rf_level[0] = INTER_NORMAL;
+      gf_group->bit_allocation[0] = 0;
+      gf_group->arf_update_idx[0] = arf_buffer_indices[0];
+      gf_group->arf_ref_idx[0] = arf_buffer_indices[0];
     } else {
-      twopass->gf_group.update_type[0] = GF_UPDATE;
-      twopass->gf_group.rf_level[0] = GF_ARF_STD;
-      twopass->gf_group.bit_allocation[0] = gf_arf_bits;
-      twopass->gf_group.arf_update_idx[0] = arf_buffer_indices[0];
-      twopass->gf_group.arf_ref_idx[0] = arf_buffer_indices[0];
+      gf_group->update_type[0] = GF_UPDATE;
+      gf_group->rf_level[0] = GF_ARF_STD;
+      gf_group->bit_allocation[0] = gf_arf_bits;
+      gf_group->arf_update_idx[0] = arf_buffer_indices[0];
+      gf_group->arf_ref_idx[0] = arf_buffer_indices[0];
     }
 
     // Step over the golden frame / overlay frame
@@ -1415,25 +1416,25 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
 
   // Store the bits to spend on the ARF if there is one.
   if (rc->source_alt_ref_pending) {
-    twopass->gf_group.update_type[frame_index] = ARF_UPDATE;
-    twopass->gf_group.rf_level[frame_index] = GF_ARF_STD;
-    twopass->gf_group.bit_allocation[frame_index] = gf_arf_bits;
-    twopass->gf_group.arf_src_offset[frame_index] =
+    gf_group->update_type[frame_index] = ARF_UPDATE;
+    gf_group->rf_level[frame_index] = GF_ARF_STD;
+    gf_group->bit_allocation[frame_index] = gf_arf_bits;
+    gf_group->arf_src_offset[frame_index] =
       (unsigned char)(rc->baseline_gf_interval - 1);
-    twopass->gf_group.arf_update_idx[frame_index] = arf_buffer_indices[0];
-    twopass->gf_group.arf_ref_idx[frame_index] =
+    gf_group->arf_update_idx[frame_index] = arf_buffer_indices[0];
+    gf_group->arf_ref_idx[frame_index] =
       arf_buffer_indices[cpi->multi_arf_last_grp_enabled &&
                          rc->source_alt_ref_active];
     ++frame_index;
 
     if (cpi->multi_arf_enabled) {
       // Set aside a slot for a level 1 arf.
-      twopass->gf_group.update_type[frame_index] = ARF_UPDATE;
-      twopass->gf_group.rf_level[frame_index] = GF_ARF_LOW;
-      twopass->gf_group.arf_src_offset[frame_index] =
+      gf_group->update_type[frame_index] = ARF_UPDATE;
+      gf_group->rf_level[frame_index] = GF_ARF_LOW;
+      gf_group->arf_src_offset[frame_index] =
         (unsigned char)((rc->baseline_gf_interval >> 1) - 1);
-      twopass->gf_group.arf_update_idx[frame_index] = arf_buffer_indices[1];
-      twopass->gf_group.arf_ref_idx[frame_index] = arf_buffer_indices[0];
+      gf_group->arf_update_idx[frame_index] = arf_buffer_indices[1];
+      gf_group->arf_ref_idx[frame_index] = arf_buffer_indices[0];
       ++frame_index;
     }
   }
@@ -1463,16 +1464,16 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
       if (frame_index <= mid_frame_idx)
         arf_idx = 1;
     }
-    twopass->gf_group.arf_update_idx[frame_index] = arf_buffer_indices[arf_idx];
-    twopass->gf_group.arf_ref_idx[frame_index] = arf_buffer_indices[arf_idx];
+    gf_group->arf_update_idx[frame_index] = arf_buffer_indices[arf_idx];
+    gf_group->arf_ref_idx[frame_index] = arf_buffer_indices[arf_idx];
 
     target_frame_size = clamp(target_frame_size, 0,
                               MIN(max_bits, (int)total_group_bits));
 
-    twopass->gf_group.update_type[frame_index] = LF_UPDATE;
-    twopass->gf_group.rf_level[frame_index] = INTER_NORMAL;
+    gf_group->update_type[frame_index] = LF_UPDATE;
+    gf_group->rf_level[frame_index] = INTER_NORMAL;
 
-    twopass->gf_group.bit_allocation[frame_index] = target_frame_size;
+    gf_group->bit_allocation[frame_index] = target_frame_size;
     ++frame_index;
   }
 
@@ -1480,23 +1481,23 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
   // We need to configure the frame at the end of the sequence + 1 that will be
   // the start frame for the next group. Otherwise prior to the call to
   // vp9_rc_get_second_pass_params() the data will be undefined.
-  twopass->gf_group.arf_update_idx[frame_index] = arf_buffer_indices[0];
-  twopass->gf_group.arf_ref_idx[frame_index] = arf_buffer_indices[0];
+  gf_group->arf_update_idx[frame_index] = arf_buffer_indices[0];
+  gf_group->arf_ref_idx[frame_index] = arf_buffer_indices[0];
 
   if (rc->source_alt_ref_pending) {
-    twopass->gf_group.update_type[frame_index] = OVERLAY_UPDATE;
-    twopass->gf_group.rf_level[frame_index] = INTER_NORMAL;
+    gf_group->update_type[frame_index] = OVERLAY_UPDATE;
+    gf_group->rf_level[frame_index] = INTER_NORMAL;
 
     // Final setup for second arf and its overlay.
     if (cpi->multi_arf_enabled) {
-      twopass->gf_group.bit_allocation[2] =
-        twopass->gf_group.bit_allocation[mid_frame_idx] + mid_boost_bits;
-      twopass->gf_group.update_type[mid_frame_idx] = OVERLAY_UPDATE;
-      twopass->gf_group.bit_allocation[mid_frame_idx] = 0;
+      gf_group->bit_allocation[2] =
+          gf_group->bit_allocation[mid_frame_idx] + mid_boost_bits;
+      gf_group->update_type[mid_frame_idx] = OVERLAY_UPDATE;
+      gf_group->bit_allocation[mid_frame_idx] = 0;
     }
   } else {
-    twopass->gf_group.update_type[frame_index] = GF_UPDATE;
-    twopass->gf_group.rf_level[frame_index] = GF_ARF_STD;
+    gf_group->update_type[frame_index] = GF_UPDATE;
+    gf_group->rf_level[frame_index] = GF_ARF_STD;
   }
 
   // Note whether multi-arf was enabled this group for next time.
@@ -1822,6 +1823,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   int i, j;
   RATE_CONTROL *const rc = &cpi->rc;
   TWO_PASS *const twopass = &cpi->twopass;
+  GF_GROUP *const gf_group = &twopass->gf_group;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   const FIRSTPASS_STATS first_frame = *this_frame;
   const FIRSTPASS_STATS *const start_position = twopass->stats_in;
@@ -1840,7 +1842,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   cpi->common.frame_type = KEY_FRAME;
 
   // Reset the GF group data structures.
-  vp9_zero(twopass->gf_group);
+  vp9_zero(*gf_group);
 
   // Is this a forced key frame by interval.
   rc->this_key_frame_forced = rc->next_key_frame_forced;
@@ -2030,9 +2032,9 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   twopass->kf_group_bits -= kf_bits;
 
   // Save the bits to spend on the key frame.
-  twopass->gf_group.bit_allocation[0] = kf_bits;
-  twopass->gf_group.update_type[0] = KF_UPDATE;
-  twopass->gf_group.rf_level[0] = KF_STD;
+  gf_group->bit_allocation[0] = kf_bits;
+  gf_group->update_type[0] = KF_UPDATE;
+  gf_group->rf_level[0] = KF_STD;
 
   // Note the total error score of the kf group minus the key frame itself.
   twopass->kf_group_error_left = (int)(kf_group_err - kf_mod_err);
@@ -2109,6 +2111,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
   TWO_PASS *const twopass = &cpi->twopass;
+  GF_GROUP *const gf_group = &twopass->gf_group;
   int frames_left;
   FIRSTPASS_STATS this_frame;
   FIRSTPASS_STATS this_frame_copy;
@@ -2130,10 +2133,10 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
 
   // If this is an arf frame then we dont want to read the stats file or
   // advance the input pointer as we already have what we need.
-  if (twopass->gf_group.update_type[twopass->gf_group.index] == ARF_UPDATE) {
+  if (gf_group->update_type[gf_group->index] == ARF_UPDATE) {
     int target_rate;
     configure_buffer_updates(cpi);
-    target_rate = twopass->gf_group.bit_allocation[twopass->gf_group.index];
+    target_rate = gf_group->bit_allocation[gf_group->index];
     target_rate = vp9_rc_clamp_pframe_target_size(cpi, target_rate);
     rc->base_frame_target = target_rate;
 
@@ -2231,7 +2234,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
 
   configure_buffer_updates(cpi);
 
-  target_rate = twopass->gf_group.bit_allocation[twopass->gf_group.index];
+  target_rate = gf_group->bit_allocation[gf_group->index];
   if (cpi->common.frame_type == KEY_FRAME)
     target_rate = vp9_rc_clamp_iframe_target_size(cpi, target_rate);
   else
