@@ -456,9 +456,8 @@ $vp8_short_fdct8x4_media=vp8_short_fdct8x4_armv6;
 $vp8_short_fdct8x4_neon_asm=vp8_short_fdct8x4_neon;
 
 add_proto qw/void vp8_short_walsh4x4/, "short *input, short *output, int pitch";
-specialize qw/vp8_short_walsh4x4 sse2 media neon_asm/;
+specialize qw/vp8_short_walsh4x4 sse2 media neon/;
 $vp8_short_walsh4x4_media=vp8_short_walsh4x4_armv6;
-$vp8_short_walsh4x4_neon_asm=vp8_short_walsh4x4_neon;
 
 #
 # Quantizer
