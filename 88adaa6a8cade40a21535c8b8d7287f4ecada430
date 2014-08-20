@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAdn//ay4\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-20T18:27:17Z",
+      "side": 1,
+      "message": "Add period at end of comment. And to the end of all the other comment lines.",
+      "revId": "88adaa6a8cade40a21535c8b8d7287f4ecada430",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ayk\u003d",
+        "filename": "test/svc_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 293,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-20T18:27:17Z",
+      "side": 1,
+      "message": "Don\u0027t need the brackets.",
+      "revId": "88adaa6a8cade40a21535c8b8d7287f4ecada430",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//azQ\u003d",
         "filename": "vp9/encoder/vp9_bitstream.c",
         "patchSetId": 6
@@ -13,6 +47,57 @@
       "writtenOn": "2014-08-20T18:10:21Z",
       "side": 1,
       "message": "Can you add a comment here saying why this is needed?",
+      "revId": "88adaa6a8cade40a21535c8b8d7287f4ecada430",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//azM\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1085,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-20T18:27:17Z",
+      "side": 1,
+      "message": "This is a bitstream change.",
+      "revId": "88adaa6a8cade40a21535c8b8d7287f4ecada430",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//azA\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 2109,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-20T18:27:17Z",
+      "side": 1,
+      "message": "\"The type may vary for...\" ?",
+      "revId": "88adaa6a8cade40a21535c8b8d7287f4ecada430",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//azE\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-08-20T18:27:17Z",
+      "side": 1,
+      "message": "use_multiple_frame_contexts (plural)",
       "revId": "88adaa6a8cade40a21535c8b8d7287f4ecada430",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
