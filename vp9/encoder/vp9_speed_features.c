@@ -143,6 +143,7 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
     sf->mode_skip_start = 6;
     sf->intra_y_mode_mask[TX_32X32] = INTRA_DC;
     sf->intra_uv_mode_mask[TX_32X32] = INTRA_DC;
+    sf->adaptive_interp_filter_search = 1;
   }
 
   if (speed >= 4) {
@@ -380,6 +381,8 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->force_frame_boost = 0;
   sf->max_delta_qindex = 0;
   sf->disable_filter_search_var_thresh = 0;
+  sf->adaptive_interp_filter_search = 0;
+
   for (i = 0; i < TX_SIZES; i++) {
     sf->intra_y_mode_mask[i] = INTRA_ALL;
     sf->intra_uv_mode_mask[i] = INTRA_ALL;

@@ -290,6 +290,7 @@ typedef struct VP9_COMP {
   double framerate;
 
   vp9_coeff_count coef_counts[TX_SIZES][PLANE_TYPES];
+  int interp_filter_selected[MAX_REF_FRAMES][SWITCHABLE];
 
   struct vpx_codec_pkt_list  *output_pkt_list;
 

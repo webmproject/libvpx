@@ -103,6 +103,12 @@ typedef enum {
 } MODE_SEARCH_SKIP_LOGIC;
 
 typedef enum {
+  FLAG_SKIP_EIGHTTAP = 1 << EIGHTTAP,
+  FLAG_SKIP_EIGHTTAP_SMOOTH = 1 << EIGHTTAP_SMOOTH,
+  FLAG_SKIP_EIGHTTAP_SHARP = 1 << EIGHTTAP_SHARP,
+} INTERP_FILTER_MASK;
+
+typedef enum {
   // Search partitions using RD/NONRD criterion
   SEARCH_PARTITION = 0,
 
@@ -380,6 +386,12 @@ typedef struct SPEED_FEATURES {
   // Early termination in transform size search, which only applies while
   // tx_size_search_method is USE_FULL_RD.
   int tx_size_search_breakout;
+
+  // adaptive interp_filter search to allow skip of certain filter types.
+  int adaptive_interp_filter_search;
+
+  // mask for skip evaluation of certain interp_filter type.
+  INTERP_FILTER_MASK interp_filter_search_mask;
 } SPEED_FEATURES;
 
 struct VP9_COMP;

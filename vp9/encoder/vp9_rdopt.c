@@ -2263,6 +2263,13 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         } else {
           int rate_sum = 0;
           int64_t dist_sum = 0;
+          if (i > 0 && cpi->sf.adaptive_interp_filter_search &&
+              (cpi->sf.interp_filter_search_mask & (1 << i))) {
+            rate_sum = INT_MAX;
+            dist_sum = INT64_MAX;
+            continue;
+          }
+
           if ((cm->interp_filter == SWITCHABLE &&
                (!i || best_needs_copy)) ||
               (cm->interp_filter != SWITCHABLE &&
