@@ -21,7 +21,6 @@
 #include "vp9/vp9_iface_common.h"
 
 struct vp9_extracfg {
-  struct vpx_codec_pkt_list *pkt_list;
   int                         cpu_used;  // available cpu percentage in 1/16
   unsigned int                enable_auto_alt_ref;
   unsigned int                noise_sensitivity;
@@ -44,7 +43,6 @@ struct vp9_extracfg {
 };
 
 static struct vp9_extracfg default_extra_cfg = {
-  NULL,
   0,                          // cpu_used
   1,                          // enable_auto_alt_ref
   0,                          // noise_sensitivity
@@ -383,7 +381,6 @@ static vpx_codec_err_t set_encoder_config(
   oxcf->sharpness              =  extra_cfg->sharpness;
 
   oxcf->two_pass_stats_in      =  cfg->rc_twopass_stats_in;
-  oxcf->output_pkt_list        =  extra_cfg->pkt_list;
 
 #if CONFIG_FP_MB_STATS
   oxcf->firstpass_mb_stats_in  = cfg->rc_firstpass_mb_stats_in;
@@ -667,7 +664,6 @@ static vpx_codec_err_t encoder_init(vpx_codec_ctx_t *ctx,
     }
 
     priv->extra_cfg = default_extra_cfg;
-    priv->extra_cfg.pkt_list = &priv->pkt_list.head;
 
     vp9_initialize_enc();
 
@@ -679,10 +675,12 @@ static vpx_codec_err_t encoder_init(vpx_codec_ctx_t *ctx,
                          &ctx->priv->alg_priv->cfg,
                          &ctx->priv->alg_priv->extra_cfg);
       cpi = vp9_create_compressor(&ctx->priv->alg_priv->oxcf);
-      if (cpi == NULL)
+      if (cpi == NULL) {
         res = VPX_CODEC_MEM_ERROR;
-      else
+      } else {
+        cpi->output_pkt_list = &priv->pkt_list.head;
         ctx->priv->alg_priv->cpi = cpi;
+      }
     }
   }
 

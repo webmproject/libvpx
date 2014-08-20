@@ -840,8 +840,6 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
   kf_list = fopen("kf_list.stt", "w");
 #endif
 
-  cpi->output_pkt_list = oxcf->output_pkt_list;
-
   cpi->allow_encode_breakout = ENCODE_BREAKOUT_ENABLED;
 
   if (oxcf->pass == 1) {
