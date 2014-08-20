@@ -668,7 +668,6 @@ static vpx_codec_err_t encoder_init(vpx_codec_ctx_t *ctx,
 
     ctx->priv = &priv->base;
     ctx->priv->sz = sizeof(*ctx->priv);
-    ctx->priv->iface = ctx->iface;
     ctx->priv->alg_priv = priv;
     ctx->priv->init_flags = ctx->init_flags;
     ctx->priv->enc.total_encoders = 1;
