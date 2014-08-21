@@ -646,26 +646,6 @@ INSTANTIATE_TEST_CASE_P(SSSE3, ConvolveTest, ::testing::Values(
 #endif
 
 #if HAVE_AVX2
-// TODO(jzern): these prototypes can be removed after the avx2 versions are
-// reenabled in vp9_rtcd_defs.pl.
-extern "C" {
-void vp9_convolve8_vert_avx2(const uint8_t *src, ptrdiff_t src_stride,
-                             uint8_t *dst, ptrdiff_t dst_stride,
-                             const int16_t *filter_x, int x_step_q4,
-                             const int16_t *filter_y, int y_step_q4,
-                             int w, int h);
-void vp9_convolve8_horiz_avx2(const uint8_t *src, ptrdiff_t src_stride,
-                              uint8_t *dst, ptrdiff_t dst_stride,
-                              const int16_t *filter_x, int x_step_q4,
-                              const int16_t *filter_y, int y_step_q4,
-                              int w, int h);
-void vp9_convolve8_avx2(const uint8_t *src, ptrdiff_t src_stride,
-                        uint8_t *dst, ptrdiff_t dst_stride,
-                        const int16_t *filter_x, int x_step_q4,
-                        const int16_t *filter_y, int y_step_q4,
-                        int w, int h);
-}
-
 const ConvolveFunctions convolve8_avx2(
     vp9_convolve8_horiz_avx2, vp9_convolve8_avg_horiz_ssse3,
     vp9_convolve8_vert_avx2, vp9_convolve8_avg_vert_ssse3,
@@ -676,9 +656,7 @@ INSTANTIATE_TEST_CASE_P(AVX2, ConvolveTest, ::testing::Values(
     make_tuple(8, 4, &convolve8_avx2),
     make_tuple(4, 8, &convolve8_avx2),
     make_tuple(8, 8, &convolve8_avx2),
-    make_tuple(8, 16, &convolve8_avx2)));
-
-INSTANTIATE_TEST_CASE_P(DISABLED_AVX2, ConvolveTest, ::testing::Values(
+    make_tuple(8, 16, &convolve8_avx2),
     make_tuple(16, 8, &convolve8_avx2),
     make_tuple(16, 16, &convolve8_avx2),
     make_tuple(32, 16, &convolve8_avx2),
