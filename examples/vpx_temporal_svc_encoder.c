@@ -12,6 +12,7 @@
 //  encoding scheme based on temporal scalability for video applications
 //  that benefit from a scalable bitstream.
 
+#include <assert.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -438,7 +439,7 @@ static void set_temporal_layer_pattern(int layering_mode,
 }
 
 int main(int argc, char **argv) {
-  VpxVideoWriter *outfile[VPX_TS_MAX_LAYERS];
+  VpxVideoWriter *outfile[VPX_TS_MAX_LAYERS] = {NULL};
   vpx_codec_ctx_t codec;
   vpx_codec_enc_cfg_t cfg;
   int frame_cnt = 0;
@@ -569,6 +570,8 @@ int main(int argc, char **argv) {
     outfile[i] = vpx_video_writer_open(file_name, kContainerIVF, &info);
     if (!outfile[i])
       die("Failed to open %s for writing", file_name);
+
+    assert(outfile[i] != NULL);
   }
   // No spatial layers in this encoder.
   cfg.ss_number_layers = 1;
