@@ -53,9 +53,6 @@ vpx_codec_err_t vpx_codec_enc_init_ver(vpx_codec_ctx_t      *ctx,
       ctx->err_detail = ctx->priv ? ctx->priv->err_detail : NULL;
       vpx_codec_destroy(ctx);
     }
-
-    if (ctx->priv)
-      ctx->priv->iface = ctx->iface;
   }
 
   return SAVE_STATUS(ctx, res);
@@ -134,9 +131,6 @@ vpx_codec_err_t vpx_codec_enc_init_multi_ver(vpx_codec_ctx_t      *ctx,
             i--;
           }
         }
-
-        if (ctx->priv)
-          ctx->priv->iface = ctx->iface;
 
         if (res)
           break;

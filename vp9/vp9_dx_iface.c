@@ -66,7 +66,6 @@ static vpx_codec_err_t decoder_init(vpx_codec_ctx_t *ctx,
 
     ctx->priv = (vpx_codec_priv_t *)alg_priv;
     ctx->priv->sz = sizeof(*ctx->priv);
-    ctx->priv->iface = ctx->iface;
     ctx->priv->alg_priv = alg_priv;
     ctx->priv->alg_priv->si.sz = sizeof(ctx->priv->alg_priv->si);
     ctx->priv->init_flags = ctx->init_flags;

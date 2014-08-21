@@ -84,7 +84,6 @@ static void vp8_init_ctx(vpx_codec_ctx_t *ctx)
         (vpx_codec_priv_t *)vpx_memalign(8, sizeof(vpx_codec_alg_priv_t));
     vpx_memset(ctx->priv, 0, sizeof(vpx_codec_alg_priv_t));
     ctx->priv->sz = sizeof(*ctx->priv);
-    ctx->priv->iface = ctx->iface;
     ctx->priv->alg_priv = (vpx_codec_alg_priv_t *)ctx->priv;
     ctx->priv->alg_priv->si.sz = sizeof(ctx->priv->alg_priv->si);
     ctx->priv->alg_priv->decrypt_cb = NULL;
