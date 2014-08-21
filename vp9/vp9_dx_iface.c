@@ -58,28 +58,25 @@ static vpx_codec_err_t decoder_init(vpx_codec_ctx_t *ctx,
   (void)data;
 
   if (!ctx->priv) {
-    vpx_codec_alg_priv_t *alg_priv = vpx_memalign(32, sizeof(*alg_priv));
+    vpx_codec_alg_priv_t *const alg_priv = vpx_memalign(32, sizeof(*alg_priv));
     if (alg_priv == NULL)
       return VPX_CODEC_MEM_ERROR;
 
     vp9_zero(*alg_priv);
 
     ctx->priv = (vpx_codec_priv_t *)alg_priv;
-    ctx->priv->sz = sizeof(*ctx->priv);
-    ctx->priv->alg_priv = alg_priv;
-    ctx->priv->alg_priv->si.sz = sizeof(ctx->priv->alg_priv->si);
+    ctx->priv->sz = sizeof(*alg_priv);
     ctx->priv->init_flags = ctx->init_flags;
-    ctx->priv->alg_priv->flushed = 0;
-    ctx->priv->alg_priv->frame_parallel_decode =
-        (ctx->init_flags & VPX_CODEC_USE_FRAME_THREADING);
 
-    // Disable frame parallel decoding for now.
-    ctx->priv->alg_priv->frame_parallel_decode = 0;
+    alg_priv->si.sz = sizeof(alg_priv->si);
+    alg_priv->flushed = 0;
+    alg_priv->frame_parallel_decode =
+        (ctx->init_flags & VPX_CODEC_USE_FRAME_THREADING);
+    alg_priv->frame_parallel_decode = 0;  // Disable for now
 
     if (ctx->config.dec) {
-      // Update the reference to the config structure to an internal copy.
-      ctx->priv->alg_priv->cfg = *ctx->config.dec;
-      ctx->config.dec = &ctx->priv->alg_priv->cfg;
+      alg_priv->cfg = *ctx->config.dec;
+      ctx->config.dec = &alg_priv->cfg;
     }
   }
 

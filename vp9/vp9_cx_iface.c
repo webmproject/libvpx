@@ -644,41 +644,34 @@ static vpx_codec_err_t encoder_init(vpx_codec_ctx_t *ctx,
   (void)data;
 
   if (ctx->priv == NULL) {
-    struct vpx_codec_alg_priv *priv = calloc(1, sizeof(*priv));
+    vpx_codec_alg_priv_t *const alg_priv = calloc(1, sizeof(*alg_priv));
 
-    if (priv == NULL)
+    if (alg_priv == NULL)
       return VPX_CODEC_MEM_ERROR;
 
-    ctx->priv = &priv->base;
-    ctx->priv->sz = sizeof(*ctx->priv);
-    ctx->priv->alg_priv = priv;
+    ctx->priv = (vpx_codec_priv_t *)alg_priv;
+    ctx->priv->sz = sizeof(vpx_codec_alg_priv_t);
     ctx->priv->init_flags = ctx->init_flags;
     ctx->priv->enc.total_encoders = 1;
 
     if (ctx->config.enc) {
       // Update the reference to the config structure to an internal copy.
-      ctx->priv->alg_priv->cfg = *ctx->config.enc;
-      ctx->config.enc = &ctx->priv->alg_priv->cfg;
+      alg_priv->cfg = *ctx->config.enc;
+      ctx->config.enc = &alg_priv->cfg;
     }
 
-    priv->extra_cfg = default_extra_cfg;
-
+    alg_priv->extra_cfg = default_extra_cfg;
     vp9_initialize_enc();
 
-    res = validate_config(priv, &priv->cfg, &priv->extra_cfg);
+    res = validate_config(alg_priv, &alg_priv->cfg, &alg_priv->extra_cfg);
 
     if (res == VPX_CODEC_OK) {
-      VP9_COMP *cpi;
-      set_encoder_config(&ctx->priv->alg_priv->oxcf,
-                         &ctx->priv->alg_priv->cfg,
-                         &ctx->priv->alg_priv->extra_cfg);
-      cpi = vp9_create_compressor(&ctx->priv->alg_priv->oxcf);
-      if (cpi == NULL) {
+      set_encoder_config(&alg_priv->oxcf, &alg_priv->cfg, &alg_priv->extra_cfg);
+      alg_priv->cpi = vp9_create_compressor(&alg_priv->oxcf);
+      if (alg_priv->cpi == NULL)
         res = VPX_CODEC_MEM_ERROR;
-      } else {
-        cpi->output_pkt_list = &priv->pkt_list.head;
-        ctx->priv->alg_priv->cpi = cpi;
-      }
+      else
+        alg_priv->cpi->output_pkt_list = &alg_priv->pkt_list.head;
     }
   }
 

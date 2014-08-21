@@ -336,7 +336,6 @@ typedef struct vpx_codec_priv_cb_pair {
  */
 struct vpx_codec_priv {
   unsigned int                    sz;
-  struct vpx_codec_alg_priv      *alg_priv;
   const char                     *err_detail;
   vpx_codec_flags_t               init_flags;
   struct {

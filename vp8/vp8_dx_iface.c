@@ -80,29 +80,32 @@ static unsigned long vp8_priv_sz(const vpx_codec_dec_cfg_t *si, vpx_codec_flags_
 
 static void vp8_init_ctx(vpx_codec_ctx_t *ctx)
 {
-    ctx->priv =
-        (vpx_codec_priv_t *)vpx_memalign(8, sizeof(vpx_codec_alg_priv_t));
-    vpx_memset(ctx->priv, 0, sizeof(vpx_codec_alg_priv_t));
+    vpx_codec_alg_priv_t *priv =
+        (vpx_codec_alg_priv_t *)vpx_memalign(8, sizeof(*priv));
+    vpx_memset(priv, 0, sizeof(*priv));
+
+    ctx->priv = (vpx_codec_priv_t *)priv;
     ctx->priv->sz = sizeof(*ctx->priv);
-    ctx->priv->alg_priv = (vpx_codec_alg_priv_t *)ctx->priv;
-    ctx->priv->alg_priv->si.sz = sizeof(ctx->priv->alg_priv->si);
-    ctx->priv->alg_priv->decrypt_cb = NULL;
-    ctx->priv->alg_priv->decrypt_state = NULL;
-    ctx->priv->alg_priv->flushed = 0;
     ctx->priv->init_flags = ctx->init_flags;
+
+    priv->si.sz = sizeof(priv->si);
+    priv->decrypt_cb = NULL;
+    priv->decrypt_state = NULL;
+    priv->flushed = 0;
 
     if (ctx->config.dec)
     {
         /* Update the reference to the config structure to an internal copy. */
-        ctx->priv->alg_priv->cfg = *ctx->config.dec;
-        ctx->config.dec = &ctx->priv->alg_priv->cfg;
+        priv->cfg = *ctx->config.dec;
+        ctx->config.dec = &priv->cfg;
     }
 }
 
 static vpx_codec_err_t vp8_init(vpx_codec_ctx_t *ctx,
                                 vpx_codec_priv_enc_mr_cfg_t *data)
 {
-    vpx_codec_err_t        res = VPX_CODEC_OK;
+    vpx_codec_err_t res = VPX_CODEC_OK;
+    vpx_codec_alg_priv_t *priv = NULL;
     (void) data;
 
     vp8_rtcd();
@@ -114,29 +117,30 @@ static vpx_codec_err_t vp8_init(vpx_codec_ctx_t *ctx,
     if (!ctx->priv)
     {
         vp8_init_ctx(ctx);
+        priv = (vpx_codec_alg_priv_t *)ctx->priv;
 
         /* initialize number of fragments to zero */
-        ctx->priv->alg_priv->fragments.count = 0;
+        priv->fragments.count = 0;
         /* is input fragments enabled? */
-        ctx->priv->alg_priv->fragments.enabled =
-                (ctx->priv->alg_priv->base.init_flags &
-                    VPX_CODEC_USE_INPUT_FRAGMENTS);
+        priv->fragments.enabled =
+            (priv->base.init_flags & VPX_CODEC_USE_INPUT_FRAGMENTS);
 
         /*post processing level initialized to do nothing */
     }
+    else
+    {
+        priv = (vpx_codec_alg_priv_t *)ctx->priv;
+    }
 
-    ctx->priv->alg_priv->yv12_frame_buffers.use_frame_threads =
-            (ctx->priv->alg_priv->base.init_flags &
-                    VPX_CODEC_USE_FRAME_THREADING);
+    priv->yv12_frame_buffers.use_frame_threads =
+        (ctx->priv->init_flags & VPX_CODEC_USE_FRAME_THREADING);
 
     /* for now, disable frame threading */
-    ctx->priv->alg_priv->yv12_frame_buffers.use_frame_threads = 0;
+    priv->yv12_frame_buffers.use_frame_threads = 0;
 
-    if(ctx->priv->alg_priv->yv12_frame_buffers.use_frame_threads &&
-            (( ctx->priv->alg_priv->base.init_flags &
-                            VPX_CODEC_USE_ERROR_CONCEALMENT)
-                    || ( ctx->priv->alg_priv->base.init_flags &
-                            VPX_CODEC_USE_INPUT_FRAGMENTS) ) )
+    if (priv->yv12_frame_buffers.use_frame_threads &&
+        ((ctx->priv->init_flags & VPX_CODEC_USE_ERROR_CONCEALMENT) ||
+         (ctx->priv->init_flags & VPX_CODEC_USE_INPUT_FRAGMENTS)))
     {
         /* row-based threading, error concealment, and input fragments will
          * not be supported when using frame-based threading */

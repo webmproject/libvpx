@@ -620,7 +620,6 @@ static vpx_codec_err_t vp8e_init(vpx_codec_ctx_t *ctx,
 {
     vpx_codec_err_t        res = VPX_CODEC_OK;
     struct vpx_codec_alg_priv *priv;
-    struct VP8_COMP *optr;
 
     vp8_rtcd();
 
@@ -633,9 +632,8 @@ static vpx_codec_err_t vp8e_init(vpx_codec_ctx_t *ctx,
             return VPX_CODEC_MEM_ERROR;
         }
 
-        ctx->priv = &priv->base;
-        ctx->priv->sz = sizeof(*ctx->priv);
-        ctx->priv->alg_priv = priv;
+        ctx->priv = (vpx_codec_priv_t *)priv;
+        ctx->priv->sz = sizeof(struct vpx_codec_alg_priv);
         ctx->priv->init_flags = ctx->init_flags;
 
         if (ctx->config.enc)
@@ -643,10 +641,9 @@ static vpx_codec_err_t vp8e_init(vpx_codec_ctx_t *ctx,
             /* Update the reference to the config structure to an
              * internal copy.
              */
-            ctx->priv->alg_priv->cfg = *ctx->config.enc;
-            ctx->config.enc = &ctx->priv->alg_priv->cfg;
+            priv->cfg = *ctx->config.enc;
+            ctx->config.enc = &priv->cfg;
         }
-
 
         priv->vp8_cfg = default_extracfg;
         priv->vp8_cfg.pkt_list = &priv->pkt_list.head;
@@ -671,17 +668,10 @@ static vpx_codec_err_t vp8e_init(vpx_codec_ctx_t *ctx,
 
         if (!res)
         {
-            set_vp8e_config(&ctx->priv->alg_priv->oxcf,
-                             ctx->priv->alg_priv->cfg,
-                             ctx->priv->alg_priv->vp8_cfg,
-                             mr_cfg);
-
-            optr = vp8_create_compressor(&ctx->priv->alg_priv->oxcf);
-
-            if (!optr)
+            set_vp8e_config(&priv->oxcf, priv->cfg, priv->vp8_cfg, mr_cfg);
+            priv->cpi = vp8_create_compressor(&priv->oxcf);
+            if (!priv->cpi)
                 res = VPX_CODEC_MEM_ERROR;
-            else
-                ctx->priv->alg_priv->cpi = optr;
         }
     }
 
