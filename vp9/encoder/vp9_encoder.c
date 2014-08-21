@@ -1394,40 +1394,6 @@ static void scale_and_extend_frame(const YV12_BUFFER_CONFIG *src,
   vp9_extend_frame_borders(dst);
 }
 
-#define WRITE_RECON_BUFFER 0
-#if WRITE_RECON_BUFFER
-void write_cx_frame_to_file(YV12_BUFFER_CONFIG *frame, int this_frame) {
-  FILE *yframe;
-  int i;
-  char filename[255];
-
-  snprintf(filename, sizeof(filename), "cx\\y%04d.raw", this_frame);
-  yframe = fopen(filename, "wb");
-
-  for (i = 0; i < frame->y_height; i++)
-    fwrite(frame->y_buffer + i * frame->y_stride,
-           frame->y_width, 1, yframe);
-
-  fclose(yframe);
-  snprintf(filename, sizeof(filename), "cx\\u%04d.raw", this_frame);
-  yframe = fopen(filename, "wb");
-
-  for (i = 0; i < frame->uv_height; i++)
-    fwrite(frame->u_buffer + i * frame->uv_stride,
-           frame->uv_width, 1, yframe);
-
-  fclose(yframe);
-  snprintf(filename, sizeof(filename), "cx\\v%04d.raw", this_frame);
-  yframe = fopen(filename, "wb");
-
-  for (i = 0; i < frame->uv_height; i++)
-    fwrite(frame->v_buffer + i * frame->uv_stride,
-           frame->uv_width, 1, yframe);
-
-  fclose(yframe);
-}
-#endif
-
 // Function to test for conditions that indicate we should loop
 // back and recode a frame.
 static int recode_loop_test(const VP9_COMP *cpi,
@@ -2168,26 +2134,8 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
   cm->frame_to_show = get_frame_new_buffer(cm);
 
-#if WRITE_RECON_BUFFER
-  if (cm->show_frame)
-    write_cx_frame_to_file(cm->frame_to_show,
-                           cm->current_video_frame);
-  else
-    write_cx_frame_to_file(cm->frame_to_show,
-                           cm->current_video_frame + 1000);
-#endif
-
   // Pick the loop filter level for the frame.
   loopfilter_frame(cpi, cm);
-
-#if WRITE_RECON_BUFFER
-  if (cm->show_frame)
-    write_cx_frame_to_file(cm->frame_to_show,
-                           cm->current_video_frame + 2000);
-  else
-    write_cx_frame_to_file(cm->frame_to_show,
-                           cm->current_video_frame + 3000);
-#endif
 
   // build the bitstream
   cpi->dummy_packing = 0;
