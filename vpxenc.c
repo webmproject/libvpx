@@ -740,8 +740,9 @@ static void parse_global_config(struct VpxEncoderConfig *global, char **argv) {
 #if CONFIG_VP9_ENCODER
     // Make default VP9 passes = 2 until there is a better quality 1-pass
     // encoder
-    global->passes = (strcmp(global->codec->name, "vp9") == 0 &&
-                      global->deadline != VPX_DL_REALTIME) ? 2 : 1;
+    if (global->codec != NULL && global->codec->name != NULL)
+      global->passes = (strcmp(global->codec->name, "vp9") == 0 &&
+                        global->deadline != VPX_DL_REALTIME) ? 2 : 1;
 #else
     global->passes = 1;
 #endif
@@ -809,8 +810,10 @@ static struct stream_state *new_stream(struct VpxEncoderConfig *global,
   struct stream_state *stream;
 
   stream = calloc(1, sizeof(*stream));
-  if (!stream)
+  if (stream == NULL) {
     fatal("Failed to allocate new stream.");
+  }
+
   if (prev) {
     memcpy(stream, prev, sizeof(*stream));
     stream->index++;
@@ -996,12 +999,13 @@ static int parse_stream_params(struct VpxEncoderConfig *global,
           * instance of this control.
           */
           for (j = 0; j < config->arg_ctrl_cnt; j++)
-            if (config->arg_ctrls[j][0] == ctrl_args_map[i])
+            if (ctrl_args_map != NULL &&
+                config->arg_ctrls[j][0] == ctrl_args_map[i])
               break;
 
           /* Update/insert */
           assert(j < (int)ARG_CTRL_CNT_MAX);
-          if (j < (int)ARG_CTRL_CNT_MAX) {
+          if (ctrl_args_map != NULL && j < (int)ARG_CTRL_CNT_MAX) {
             config->arg_ctrls[j][0] = ctrl_args_map[i];
             config->arg_ctrls[j][1] = arg_parse_enum_or_int(&arg);
             if (j == config->arg_ctrl_cnt)
@@ -1788,7 +1792,8 @@ int main(int argc, const char **argv_) {
         got_data = 0;
         FOREACH_STREAM(get_cx_data(stream, &global, &got_data));
 
-        if (!got_data && input.length && !streams->frames_out) {
+        if (!got_data && input.length && streams != NULL &&
+            !streams->frames_out) {
           lagged_count = global.limit ? seen_frames : ftello(input.file);
         } else if (input.length) {
           int64_t remaining;
