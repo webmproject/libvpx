@@ -39,40 +39,28 @@ struct vp8_extracfg
 
 };
 
-struct extraconfig_map
-{
-    int                 usage;
-    struct vp8_extracfg cfg;
-};
-
-static const struct extraconfig_map extracfg_map[] =
-{
-    {
-        0,
-        {
-            NULL,
+static struct vp8_extracfg default_extracfg = {
+  NULL,
 #if !(CONFIG_REALTIME_ONLY)
-            0,                          /* cpu_used      */
+  0,                          /* cpu_used      */
 #else
-            4,                          /* cpu_used      */
+  4,                          /* cpu_used      */
 #endif
-            0,                          /* enable_auto_alt_ref */
-            0,                          /* noise_sensitivity */
-            0,                          /* Sharpness */
-            0,                          /* static_thresh */
+  0,                          /* enable_auto_alt_ref */
+  0,                          /* noise_sensitivity */
+  0,                          /* Sharpness */
+  0,                          /* static_thresh */
 #if (CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING)
-            VP8_EIGHT_TOKENPARTITION,
+  VP8_EIGHT_TOKENPARTITION,
 #else
-            VP8_ONE_TOKENPARTITION,     /* token_partitions */
+  VP8_ONE_TOKENPARTITION,     /* token_partitions */
 #endif
-            0,                          /* arnr_max_frames */
-            3,                          /* arnr_strength */
-            3,                          /* arnr_type*/
-            0,                          /* tuning*/
-            10,                         /* cq_level */
-            0,                          /* rc_max_intra_bitrate_pct */
-        }
-    }
+  0,                          /* arnr_max_frames */
+  3,                          /* arnr_strength */
+  3,                          /* arnr_type*/
+  0,                          /* tuning*/
+  10,                         /* cq_level */
+  0,                          /* rc_max_intra_bitrate_pct */
 };
 
 struct vpx_codec_alg_priv
@@ -632,9 +620,6 @@ static vpx_codec_err_t vp8e_init(vpx_codec_ctx_t *ctx,
 {
     vpx_codec_err_t        res = VPX_CODEC_OK;
     struct vpx_codec_alg_priv *priv;
-    vpx_codec_enc_cfg_t       *cfg;
-    unsigned int               i;
-
     struct VP8_COMP *optr;
 
     vp8_rtcd();
@@ -662,17 +647,8 @@ static vpx_codec_err_t vp8e_init(vpx_codec_ctx_t *ctx,
             ctx->config.enc = &ctx->priv->alg_priv->cfg;
         }
 
-        cfg =  &ctx->priv->alg_priv->cfg;
 
-        /* Select the extra vp8 configuration table based on the current
-         * usage value. If the current usage value isn't found, use the
-         * values for usage case 0.
-         */
-        for (i = 0;
-             extracfg_map[i].usage && extracfg_map[i].usage != cfg->g_usage;
-             i++);
-
-        priv->vp8_cfg = extracfg_map[i].cfg;
+        priv->vp8_cfg = default_extracfg;
         priv->vp8_cfg.pkt_list = &priv->pkt_list.head;
 
         priv->cx_data_sz = priv->cfg.g_w * priv->cfg.g_h * 3 / 2 * 2;
