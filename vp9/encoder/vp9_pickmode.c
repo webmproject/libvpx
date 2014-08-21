@@ -254,7 +254,8 @@ static int get_pred_buffer(PRED_BUFFER *p, int len) {
 }
 
 static void free_pred_buffer(PRED_BUFFER *p) {
-  p->in_use = 0;
+  if (p != NULL)
+    p->in_use = 0;
 }
 
 static void encode_breakout_test(VP9_COMP *cpi, MACROBLOCK *x,
@@ -671,8 +672,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         skip_txfm = x->skip_txfm[0];
 
         if (cpi->sf.reuse_inter_pred_sby) {
-          if (best_pred != NULL)
-            free_pred_buffer(best_pred);
+          free_pred_buffer(best_pred);
 
           best_pred = this_mode_pred;
         }
@@ -692,7 +692,8 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
   // If best prediction is not in dst buf, then copy the prediction block from
   // temp buf to dst buf.
-  if (cpi->sf.reuse_inter_pred_sby && best_pred->data != orig_dst.buf) {
+  if (best_pred != NULL && cpi->sf.reuse_inter_pred_sby &&
+      best_pred->data != orig_dst.buf) {
     uint8_t *copy_from, *copy_to;
 
     pd->dst = orig_dst;
