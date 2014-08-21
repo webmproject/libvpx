@@ -1945,18 +1945,16 @@ YV12_BUFFER_CONFIG *vp9_scale_if_required(VP9_COMMON *cm,
   }
 }
 
-static void configure_skippable_frame(VP9_COMP *cpi) {
+static int is_skippable_frame(const VP9_COMP *cpi) {
   // If the current frame does not have non-zero motion vector detected in the
   // first  pass, and so do its previous and forward frames, then this frame
   // can be skipped for partition check, and the partition size is assigned
   // according to the variance
+  const SVC *const svc = &cpi->svc;
+  const TWO_PASS *const twopass = is_spatial_svc(cpi) ?
+      &svc->layer_context[svc->spatial_layer_id].twopass : &cpi->twopass;
 
-  SVC *const svc = &cpi->svc;
-  TWO_PASS *const twopass = is_spatial_svc(cpi) ?
-                            &svc->layer_context[svc->spatial_layer_id].twopass
-                            : &cpi->twopass;
-
-  cpi->skippable_frame = (!frame_is_intra_only(&cpi->common) &&
+  return (!frame_is_intra_only(&cpi->common) &&
     twopass->stats_in - 2 > twopass->stats_in_start &&
     twopass->stats_in < twopass->stats_in_end &&
     (twopass->stats_in - 1)->pcnt_inter - (twopass->stats_in - 1)->pcnt_motion
@@ -2084,7 +2082,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   // second pass according to the first pass stats
   if (cpi->oxcf.pass == 2 &&
       (!cpi->use_svc || is_spatial_svc(cpi))) {
-    configure_skippable_frame(cpi);
+    cpi->skippable_frame = is_skippable_frame(cpi);
   }
 
   // For 1 pass CBR, check if we are dropping this frame.
