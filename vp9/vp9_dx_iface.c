@@ -647,12 +647,12 @@ CODEC_INTERFACE(vpx_codec_vp9_dx) = {
   },
   { // NOLINT
     0,
-    NOT_IMPLEMENTED,  // vpx_codec_enc_cfg_map_t
-    NOT_IMPLEMENTED,  // vpx_codec_encode_fn_t
-    NOT_IMPLEMENTED,  // vpx_codec_get_cx_data_fn_t
-    NOT_IMPLEMENTED,  // vpx_codec_enc_config_set_fn_t
-    NOT_IMPLEMENTED,  // vpx_codec_get_global_headers_fn_t
-    NOT_IMPLEMENTED,  // vpx_codec_get_preview_frame_fn_t
-    NOT_IMPLEMENTED   // vpx_codec_enc_mr_get_mem_loc_fn_t
+    NULL,  // vpx_codec_enc_cfg_map_t
+    NULL,  // vpx_codec_encode_fn_t
+    NULL,  // vpx_codec_get_cx_data_fn_t
+    NULL,  // vpx_codec_enc_config_set_fn_t
+    NULL,  // vpx_codec_get_global_headers_fn_t
+    NULL,  // vpx_codec_get_preview_frame_fn_t
+    NULL   // vpx_codec_enc_mr_get_mem_loc_fn_t
   }
 };

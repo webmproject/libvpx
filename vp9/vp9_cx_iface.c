@@ -1354,11 +1354,11 @@ CODEC_INTERFACE(vpx_codec_vp9_cx) = {
   encoder_destroy,    // vpx_codec_destroy_fn_t
   encoder_ctrl_maps,  // vpx_codec_ctrl_fn_map_t
   {  // NOLINT
-    NOT_IMPLEMENTED,  // vpx_codec_peek_si_fn_t
-    NOT_IMPLEMENTED,  // vpx_codec_get_si_fn_t
-    NOT_IMPLEMENTED,  // vpx_codec_decode_fn_t
-    NOT_IMPLEMENTED,  // vpx_codec_frame_get_fn_t
-    NOT_IMPLEMENTED   // vpx_codec_set_fb_fn_t
+    NULL,  // vpx_codec_peek_si_fn_t
+    NULL,  // vpx_codec_get_si_fn_t
+    NULL,  // vpx_codec_decode_fn_t
+    NULL,  // vpx_codec_frame_get_fn_t
+    NULL   // vpx_codec_set_fb_fn_t
   },
   {  // NOLINT
     1,                      // 1 cfg map
@@ -1366,8 +1366,8 @@ CODEC_INTERFACE(vpx_codec_vp9_cx) = {
     encoder_encode,         // vpx_codec_encode_fn_t
     encoder_get_cxdata,     // vpx_codec_get_cx_data_fn_t
     encoder_set_config,     // vpx_codec_enc_config_set_fn_t
-    NOT_IMPLEMENTED,        // vpx_codec_get_global_headers_fn_t
+    NULL,        // vpx_codec_get_global_headers_fn_t
     encoder_get_preview,    // vpx_codec_get_preview_frame_fn_t
-    NOT_IMPLEMENTED         // vpx_codec_enc_mr_get_mem_loc_fn_t
+    NULL         // vpx_codec_enc_mr_get_mem_loc_fn_t
   }
 };

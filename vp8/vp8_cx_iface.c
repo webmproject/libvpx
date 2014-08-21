@@ -1346,10 +1346,10 @@ CODEC_INTERFACE(vpx_codec_vp8_cx) =
     vp8e_destroy,       /* vpx_codec_destroy_fn_t    destroy; */
     vp8e_ctf_maps,      /* vpx_codec_ctrl_fn_map_t  *ctrl_maps; */
     {
-        NOT_IMPLEMENTED,    /* vpx_codec_peek_si_fn_t    peek_si; */
-        NOT_IMPLEMENTED,    /* vpx_codec_get_si_fn_t     get_si; */
-        NOT_IMPLEMENTED,    /* vpx_codec_decode_fn_t     decode; */
-        NOT_IMPLEMENTED,    /* vpx_codec_frame_get_fn_t  frame_get; */
+        NULL,    /* vpx_codec_peek_si_fn_t    peek_si; */
+        NULL,    /* vpx_codec_get_si_fn_t     get_si; */
+        NULL,    /* vpx_codec_decode_fn_t     decode; */
+        NULL,    /* vpx_codec_frame_get_fn_t  frame_get; */
     },
     {
         1,                  /* 1 cfg map */
@@ -1357,7 +1357,7 @@ CODEC_INTERFACE(vpx_codec_vp8_cx) =
         vp8e_encode,        /* vpx_codec_encode_fn_t      encode; */
         vp8e_get_cxdata,    /* vpx_codec_get_cx_data_fn_t   frame_get; */
         vp8e_set_config,
-        NOT_IMPLEMENTED,
+        NULL,
         vp8e_get_preview,
         vp8e_mr_alloc_mem,
     } /* encoder functions */
