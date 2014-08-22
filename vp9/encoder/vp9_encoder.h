@@ -235,7 +235,6 @@ typedef struct VP9_COMP {
   struct lookahead_ctx    *lookahead;
   struct lookahead_entry  *source;
   struct lookahead_entry  *alt_ref_source;
-  struct lookahead_entry  *last_source;
 
   YV12_BUFFER_CONFIG *Source;
   YV12_BUFFER_CONFIG *Last_Source;  // NULL for first frame and alt_ref frames
