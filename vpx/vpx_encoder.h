@@ -188,14 +188,14 @@ extern "C" {
                                               has id 0.*/
 
       } frame;  /**< data for compressed frame packet */
-      struct vpx_fixed_buf twopass_stats;  /**< data for two-pass packet */
-      struct vpx_fixed_buf firstpass_mb_stats; /**< first pass mb packet */
+      vpx_fixed_buf_t twopass_stats;  /**< data for two-pass packet */
+      vpx_fixed_buf_t firstpass_mb_stats; /**< first pass mb packet */
       struct vpx_psnr_pkt {
         unsigned int samples[4];  /**< Number of samples, total/y/u/v */
         uint64_t     sse[4];      /**< sum squared error, total/y/u/v */
         double       psnr[4];     /**< PSNR, total/y/u/v */
       } psnr;                       /**< data for PSNR packet */
-      struct vpx_fixed_buf raw;     /**< data for arbitrary packets */
+      vpx_fixed_buf_t raw;     /**< data for arbitrary packets */
 #if CONFIG_SPATIAL_SVC
       size_t layer_sizes[VPX_SS_MAX_LAYERS];
 #endif
@@ -452,14 +452,14 @@ extern "C" {
      * A buffer containing all of the stats packets produced in the first
      * pass, concatenated.
      */
-    struct vpx_fixed_buf   rc_twopass_stats_in;
+    vpx_fixed_buf_t   rc_twopass_stats_in;
 
     /*!\brief first pass mb stats buffer.
      *
      * A buffer containing all of the first pass mb stats packets produced
      * in the first pass, concatenated.
      */
-    struct vpx_fixed_buf   rc_firstpass_mb_stats_in;
+    vpx_fixed_buf_t   rc_firstpass_mb_stats_in;
 
     /*!\brief Target data rate
      *
