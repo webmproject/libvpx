@@ -1778,7 +1778,6 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
     // to recode.
     if (cpi->sf.recode_loop >= ALLOW_RECODE_KFARFGF) {
       save_coding_context(cpi);
-      cpi->dummy_packing = 1;
       if (!cpi->sf.use_nonrd_pick_mode)
         vp9_pack_bitstream(cpi, dest, size);
 
@@ -2248,7 +2247,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   loopfilter_frame(cpi, cm);
 
   // build the bitstream
-  cpi->dummy_packing = 0;
   vp9_pack_bitstream(cpi, dest, size);
 
   if (cm->seg.update_map)

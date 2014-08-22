@@ -370,8 +370,6 @@ typedef struct VP9_COMP {
 
   int droppable;
 
-  int dummy_packing;    /* flag to indicate if packing is dummy */
-
   int initial_width;
   int initial_height;
 

@@ -216,7 +216,7 @@ void vp9_encode_mv(VP9_COMP* cpi, vp9_writer* w,
 
   // If auto_mv_step_size is enabled then keep track of the largest
   // motion vector component used.
-  if (!cpi->dummy_packing && cpi->sf.mv.auto_mv_step_size) {
+  if (cpi->sf.mv.auto_mv_step_size) {
     unsigned int maxv = MAX(abs(mv->row), abs(mv->col)) >> 3;
     cpi->max_mv_magnitude = MAX(maxv, cpi->max_mv_magnitude);
   }
