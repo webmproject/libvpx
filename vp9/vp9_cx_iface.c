@@ -323,7 +323,7 @@ static vpx_codec_err_t set_encoder_config(
   if (oxcf->init_framerate > 180)
     oxcf->init_framerate = 30;
 
-  oxcf->mode = BEST;
+  oxcf->mode = GOOD;
 
   switch (cfg->g_pass) {
     case VPX_RC_ONE_PASS:
