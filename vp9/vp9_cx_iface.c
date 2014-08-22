@@ -978,8 +978,9 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
         cx_data_sz -= size;
 #if CONFIG_SPATIAL_SVC
         if (is_spatial_svc(cpi)) {
-          vpx_codec_cx_pkt_t pkt = {0};
+          vpx_codec_cx_pkt_t pkt;
           int i;
+          vp9_zero(pkt);
           pkt.kind = VPX_CODEC_SPATIAL_SVC_LAYER_SIZES;
           for (i = 0; i < cpi->svc.number_spatial_layers; ++i) {
             pkt.data.layer_sizes[i] = cpi->svc.layer_context[i].layer_size;
