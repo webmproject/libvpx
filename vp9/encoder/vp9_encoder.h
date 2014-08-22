@@ -208,11 +208,11 @@ typedef struct VP9EncoderConfig {
   int tile_columns;
   int tile_rows;
 
-  struct vpx_fixed_buf         two_pass_stats_in;
-  struct vpx_codec_pkt_list  *output_pkt_list;
+  vpx_fixed_buf_t two_pass_stats_in;
+  struct vpx_codec_pkt_list *output_pkt_list;
 
 #if CONFIG_FP_MB_STATS
-  struct vpx_fixed_buf         firstpass_mb_stats_in;
+  vpx_fixed_buf_t firstpass_mb_stats_in;
 #endif
 
   vp8e_tuning tuning;

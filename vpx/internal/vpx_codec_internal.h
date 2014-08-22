@@ -344,7 +344,7 @@ struct vpx_codec_priv {
     vpx_codec_priv_cb_pair_t    put_slice_cb;
   } dec;
   struct {
-    struct vpx_fixed_buf        cx_data_dst_buf;
+    vpx_fixed_buf_t             cx_data_dst_buf;
     unsigned int                cx_data_pad_before;
     unsigned int                cx_data_pad_after;
     vpx_codec_cx_pkt_t          cx_data_pkt;
