@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//aZo\u003d",
+        "filename": "test/decode_test_driver.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-08-22T21:11:50Z",
+      "side": 1,
+      "message": "thats kind of a shame...   \n\nInitializing this way looks kind of ugly to me..   Personally I prefer :\nvpx_codec_dec_cfg_t cfg \u003d {};\n\nwhich I think would give all 0\u0027s,   but the formatter doesn\u0027t like it.",
+      "revId": "b4b191aba0ca89eb56e1fcbbf68ee98136fca815",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
