@@ -16,6 +16,24 @@
       "revId": "0f264a6d45ca04df12e34d5196c6d838efadfeaa",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ado\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-08-22T18:56:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//ag4\u003d",
+      "revId": "0f264a6d45ca04df12e34d5196c6d838efadfeaa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
