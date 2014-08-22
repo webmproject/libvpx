@@ -670,8 +670,6 @@ static void update_coef_probs(VP9_COMP *cpi, vp9_writer* w) {
   vp9_coeff_stats frame_branch_ct[TX_SIZES][PLANE_TYPES];
   vp9_coeff_probs_model frame_coef_probs[TX_SIZES][PLANE_TYPES];
 
-  vp9_clear_system_state();
-
   for (tx_size = TX_4X4; tx_size <= TX_32X32; ++tx_size)
     build_tree_distribution(cpi, tx_size, frame_branch_ct[tx_size],
                             frame_coef_probs[tx_size]);
