@@ -16,6 +16,24 @@
       "revId": "b4b191aba0ca89eb56e1fcbbf68ee98136fca815",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//aYg\u003d",
+        "filename": "test/decode_test_driver.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-22T21:46:44Z",
+      "side": 1,
+      "message": "formatter? brace initialization is since c++11, we aren\u0027t targeting that for our baseline here",
+      "parentUuid": "AAAAdn//aZo\u003d",
+      "revId": "b4b191aba0ca89eb56e1fcbbf68ee98136fca815",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
