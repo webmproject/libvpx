@@ -211,8 +211,8 @@ class ResizeInternalTest : public ResizeTest {
     EXPECT_NEAR(pkt->data.psnr.psnr[0], frame0_psnr_, 2.0);
   }
 
-  virtual void FramePktHook(const vpx_codec_cx_pkt_t *pkt) {
 #if WRITE_COMPRESSED_STREAM
+  virtual void FramePktHook(const vpx_codec_cx_pkt_t *pkt) {
     ++out_frames_;
 
     // Write initial file header if first frame.
@@ -222,8 +222,8 @@ class ResizeInternalTest : public ResizeTest {
     // Write frame header and data.
     write_ivf_frame_header(pkt, outfile_);
     (void)fwrite(pkt->data.frame.buf, 1, pkt->data.frame.sz, outfile_);
-#endif
   }
+#endif
 
   double frame0_psnr_;
 #if WRITE_COMPRESSED_STREAM
