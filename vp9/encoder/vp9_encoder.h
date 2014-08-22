@@ -296,6 +296,11 @@ typedef struct VP9_COMP {
 
   CODING_CONTEXT coding_context;
 
+  int *nmvcosts[2];
+  int *nmvcosts_hp[2];
+  int *nmvsadcosts[2];
+  int *nmvsadcosts_hp[2];
+
   int zbin_mode_boost;
   int zbin_mode_boost_enabled;
 
