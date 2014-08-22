@@ -366,6 +366,9 @@ void vp9_plane_add_noise_c(uint8_t *start, char *noise,
                            unsigned int width, unsigned int height, int pitch) {
   unsigned int i, j;
 
+  // TODO(jbb): why does simd code use both but c doesn't,  normalize and
+  // fix..
+  (void) bothclamp;
   for (i = 0; i < height; i++) {
     uint8_t *pos = start + i * pitch;
     char  *ref = (char *)(noise + (rand() & 0xff));  // NOLINT
