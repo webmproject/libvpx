@@ -126,9 +126,9 @@ VP9_INSTANTIATE_TEST_CASE(InvalidFileTest,
 class InvalidFileInvalidPeekTest : public InvalidFileTest {
  protected:
   InvalidFileInvalidPeekTest() : InvalidFileTest() {}
-  virtual void HandlePeekResult(libvpx_test::Decoder *const decoder,
-                                libvpx_test::CompressedVideoSource *video,
-                                const vpx_codec_err_t res_peek) {}
+  virtual void HandlePeekResult(libvpx_test::Decoder* /*decoder*/,
+                                libvpx_test::CompressedVideoSource* /*video*/,
+                                const vpx_codec_err_t /*res_peek*/) {}
 };
 
 TEST_P(InvalidFileInvalidPeekTest, ReturnCode) {
