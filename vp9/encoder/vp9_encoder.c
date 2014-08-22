@@ -2461,6 +2461,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   RATE_CONTROL *const rc = &cpi->rc;
   struct vpx_usec_timer  cmptimer;
   YV12_BUFFER_CONFIG *force_src_buffer = NULL;
+  struct lookahead_entry *last_source = NULL;
   MV_REFERENCE_FRAME ref_frame;
   int arf_src_index;
 
@@ -2474,7 +2475,6 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   vpx_usec_timer_start(&cmptimer);
 
   cpi->source = NULL;
-  cpi->last_source = NULL;
 
   vp9_set_high_precision_mv(cpi, ALTREF_HIGH_PRECISION_MV);
 
@@ -2537,11 +2537,11 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     if (cm->current_video_frame > 0) {
 #if CONFIG_SPATIAL_SVC
       if (is_spatial_svc(cpi))
-        cpi->last_source = vp9_svc_lookahead_peek(cpi, cpi->lookahead, -1, 0);
+        last_source = vp9_svc_lookahead_peek(cpi, cpi->lookahead, -1, 0);
       else
 #endif
-        cpi->last_source = vp9_lookahead_peek(cpi->lookahead, -1);
-      if (cpi->last_source == NULL)
+        last_source = vp9_lookahead_peek(cpi->lookahead, -1);
+      if (last_source == NULL)
         return -1;
     }
 
@@ -2565,8 +2565,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     cpi->un_scaled_source = cpi->Source = force_src_buffer ? force_src_buffer
                                                            : &cpi->source->img;
 
-    cpi->unscaled_last_source = cpi->last_source != NULL ?
-                                    &cpi->last_source->img : NULL;
+    cpi->unscaled_last_source = last_source != NULL ? &last_source->img : NULL;
 
     *time_stamp = cpi->source->ts_start;
     *time_end = cpi->source->ts_end;
