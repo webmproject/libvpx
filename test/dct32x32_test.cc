@@ -37,7 +37,7 @@ static int round(double x) {
 
 const int kNumCoeffs = 1024;
 const double kPi = 3.141592653589793238462643383279502884;
-void reference_32x32_dct_1d(const double in[32], double out[32], int stride) {
+void reference_32x32_dct_1d(const double in[32], double out[32]) {
   const double kInvSqrt2 = 0.707106781186547524400844362104;
   for (int k = 0; k < 32; k++) {
     out[k] = 0.0;
@@ -55,7 +55,7 @@ void reference_32x32_dct_2d(const int16_t input[kNumCoeffs],
     double temp_in[32], temp_out[32];
     for (int j = 0; j < 32; ++j)
       temp_in[j] = input[j*32 + i];
-    reference_32x32_dct_1d(temp_in, temp_out, 1);
+    reference_32x32_dct_1d(temp_in, temp_out);
     for (int j = 0; j < 32; ++j)
       output[j * 32 + i] = temp_out[j];
   }
@@ -64,7 +64,7 @@ void reference_32x32_dct_2d(const int16_t input[kNumCoeffs],
     double temp_in[32], temp_out[32];
     for (int j = 0; j < 32; ++j)
       temp_in[j] = output[j + i*32];
-    reference_32x32_dct_1d(temp_in, temp_out, 1);
+    reference_32x32_dct_1d(temp_in, temp_out);
     // Scale by some magic number
     for (int j = 0; j < 32; ++j)
       output[j + i * 32] = temp_out[j] / 4;
