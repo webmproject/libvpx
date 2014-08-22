@@ -370,8 +370,8 @@ void vp9_denoiser_reset_frame_stats(PICK_MODE_CONTEXT *ctx) {
   ctx->newmv_sse = UINT_MAX;
 }
 
-void vp9_denoiser_update_frame_stats(VP9_DENOISER *denoiser, MB_MODE_INFO *mbmi,
-                                     unsigned int sse, PREDICTION_MODE mode,
+void vp9_denoiser_update_frame_stats(MB_MODE_INFO *mbmi, unsigned int sse,
+                                     PREDICTION_MODE mode,
                                      PICK_MODE_CONTEXT *ctx) {
   // TODO(tkopp): Use both MVs if possible
   if (mbmi->mv[0].as_int == 0 && sse < ctx->zeromv_sse) {
