@@ -233,7 +233,6 @@ typedef struct VP9_COMP {
   VP9_COMMON common;
   VP9EncoderConfig oxcf;
   struct lookahead_ctx    *lookahead;
-  struct lookahead_entry  *source;
   struct lookahead_entry  *alt_ref_source;
 
   YV12_BUFFER_CONFIG *Source;

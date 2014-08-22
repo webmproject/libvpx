@@ -396,7 +396,7 @@ static void set_first_pass_params(VP9_COMP *cpi) {
   cpi->rc.frames_to_key = INT_MAX;
 }
 
-void vp9_first_pass(VP9_COMP *cpi) {
+void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
   int mb_row, mb_col;
   MACROBLOCK *const x = &cpi->mb;
   VP9_COMMON *const cm = &cpi->common;
@@ -865,7 +865,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
     // TODO(paulwilkins):  Handle the case when duration is set to 0, or
     // something less than the full time between subsequent values of
     // cpi->source_time_stamp.
-    fps.duration = (double)(cpi->source->ts_end - cpi->source->ts_start);
+    fps.duration = (double)(source->ts_end - source->ts_start);
 
     // Don't want to do output stats with a stack variable!
     twopass->this_frame_stats = fps;
