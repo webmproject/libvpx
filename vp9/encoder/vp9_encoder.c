@@ -167,6 +167,26 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   vpx_free(cpi->complexity_map);
   cpi->complexity_map = NULL;
 
+  vpx_free(cpi->nmvcosts[0]);
+  vpx_free(cpi->nmvcosts[1]);
+  cpi->nmvcosts[0] = NULL;
+  cpi->nmvcosts[1] = NULL;
+
+  vpx_free(cpi->nmvcosts_hp[0]);
+  vpx_free(cpi->nmvcosts_hp[1]);
+  cpi->nmvcosts_hp[0] = NULL;
+  cpi->nmvcosts_hp[1] = NULL;
+
+  vpx_free(cpi->nmvsadcosts[0]);
+  vpx_free(cpi->nmvsadcosts[1]);
+  cpi->nmvsadcosts[0] = NULL;
+  cpi->nmvsadcosts[1] = NULL;
+
+  vpx_free(cpi->nmvsadcosts_hp[0]);
+  vpx_free(cpi->nmvsadcosts_hp[1]);
+  cpi->nmvsadcosts_hp[0] = NULL;
+  cpi->nmvsadcosts_hp[1] = NULL;
+
   vp9_cyclic_refresh_free(cpi->cyclic_refresh);
   cpi->cyclic_refresh = NULL;
 
@@ -212,8 +232,15 @@ static void save_coding_context(VP9_COMP *cpi) {
   // intended for use in a re-code loop in vp9_compress_frame where the
   // quantizer value is adjusted between loop iterations.
   vp9_copy(cc->nmvjointcost,  cpi->mb.nmvjointcost);
-  vp9_copy(cc->nmvcosts,  cpi->mb.nmvcosts);
-  vp9_copy(cc->nmvcosts_hp,  cpi->mb.nmvcosts_hp);
+
+  vpx_memcpy(cc->nmvcosts[0], cpi->nmvcosts[0],
+             MV_VALS * sizeof(*cpi->nmvcosts[0]));
+  vpx_memcpy(cc->nmvcosts[1], cpi->nmvcosts[1],
+             MV_VALS * sizeof(*cpi->nmvcosts[1]));
+  vpx_memcpy(cc->nmvcosts_hp[0], cpi->nmvcosts_hp[0],
+             MV_VALS * sizeof(*cpi->nmvcosts_hp[0]));
+  vpx_memcpy(cc->nmvcosts_hp[1], cpi->nmvcosts_hp[1],
+             MV_VALS * sizeof(*cpi->nmvcosts_hp[1]));
 
   vp9_copy(cc->segment_pred_probs, cm->seg.pred_probs);
 
@@ -233,8 +260,15 @@ static void restore_coding_context(VP9_COMP *cpi) {
   // Restore key state variables to the snapshot state stored in the
   // previous call to vp9_save_coding_context.
   vp9_copy(cpi->mb.nmvjointcost, cc->nmvjointcost);
-  vp9_copy(cpi->mb.nmvcosts, cc->nmvcosts);
-  vp9_copy(cpi->mb.nmvcosts_hp, cc->nmvcosts_hp);
+
+  vpx_memcpy(cpi->nmvcosts[0], cc->nmvcosts[0],
+             MV_VALS * sizeof(*cc->nmvcosts[0]));
+  vpx_memcpy(cpi->nmvcosts[1], cc->nmvcosts[1],
+             MV_VALS * sizeof(*cc->nmvcosts[1]));
+  vpx_memcpy(cpi->nmvcosts_hp[0], cc->nmvcosts_hp[0],
+             MV_VALS * sizeof(*cc->nmvcosts_hp[0]));
+  vpx_memcpy(cpi->nmvcosts_hp[1], cc->nmvcosts_hp[1],
+             MV_VALS * sizeof(*cc->nmvcosts_hp[1]));
 
   vp9_copy(cm->seg.pred_probs, cc->segment_pred_probs);
 
@@ -734,6 +768,23 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
   CHECK_MEM_ERROR(cm, cpi->coding_context.last_frame_seg_map_copy,
                   vpx_calloc(cm->mi_rows * cm->mi_cols, 1));
 
+  CHECK_MEM_ERROR(cm, cpi->nmvcosts[0],
+                  vpx_calloc(MV_VALS, sizeof(*cpi->nmvcosts[0])));
+  CHECK_MEM_ERROR(cm, cpi->nmvcosts[1],
+                  vpx_calloc(MV_VALS, sizeof(*cpi->nmvcosts[1])));
+  CHECK_MEM_ERROR(cm, cpi->nmvcosts_hp[0],
+                  vpx_calloc(MV_VALS, sizeof(*cpi->nmvcosts_hp[0])));
+  CHECK_MEM_ERROR(cm, cpi->nmvcosts_hp[1],
+                  vpx_calloc(MV_VALS, sizeof(*cpi->nmvcosts_hp[1])));
+  CHECK_MEM_ERROR(cm, cpi->nmvsadcosts[0],
+                  vpx_calloc(MV_VALS, sizeof(*cpi->nmvsadcosts[0])));
+  CHECK_MEM_ERROR(cm, cpi->nmvsadcosts[1],
+                  vpx_calloc(MV_VALS, sizeof(*cpi->nmvsadcosts[1])));
+  CHECK_MEM_ERROR(cm, cpi->nmvsadcosts_hp[0],
+                  vpx_calloc(MV_VALS, sizeof(*cpi->nmvsadcosts_hp[0])));
+  CHECK_MEM_ERROR(cm, cpi->nmvsadcosts_hp[1],
+                  vpx_calloc(MV_VALS, sizeof(*cpi->nmvsadcosts_hp[1])));
+
   for (i = 0; i < (sizeof(cpi->mbgraph_stats) /
                    sizeof(cpi->mbgraph_stats[0])); i++) {
     CHECK_MEM_ERROR(cm, cpi->mbgraph_stats[i].mb_stats,
@@ -814,16 +865,16 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
   cpi->first_time_stamp_ever = INT64_MAX;
 
   cal_nmvjointsadcost(cpi->mb.nmvjointsadcost);
-  cpi->mb.nmvcost[0] = &cpi->mb.nmvcosts[0][MV_MAX];
-  cpi->mb.nmvcost[1] = &cpi->mb.nmvcosts[1][MV_MAX];
-  cpi->mb.nmvsadcost[0] = &cpi->mb.nmvsadcosts[0][MV_MAX];
-  cpi->mb.nmvsadcost[1] = &cpi->mb.nmvsadcosts[1][MV_MAX];
+  cpi->mb.nmvcost[0] = &cpi->nmvcosts[0][MV_MAX];
+  cpi->mb.nmvcost[1] = &cpi->nmvcosts[1][MV_MAX];
+  cpi->mb.nmvsadcost[0] = &cpi->nmvsadcosts[0][MV_MAX];
+  cpi->mb.nmvsadcost[1] = &cpi->nmvsadcosts[1][MV_MAX];
   cal_nmvsadcosts(cpi->mb.nmvsadcost);
 
-  cpi->mb.nmvcost_hp[0] = &cpi->mb.nmvcosts_hp[0][MV_MAX];
-  cpi->mb.nmvcost_hp[1] = &cpi->mb.nmvcosts_hp[1][MV_MAX];
-  cpi->mb.nmvsadcost_hp[0] = &cpi->mb.nmvsadcosts_hp[0][MV_MAX];
-  cpi->mb.nmvsadcost_hp[1] = &cpi->mb.nmvsadcosts_hp[1][MV_MAX];
+  cpi->mb.nmvcost_hp[0] = &cpi->nmvcosts_hp[0][MV_MAX];
+  cpi->mb.nmvcost_hp[1] = &cpi->nmvcosts_hp[1][MV_MAX];
+  cpi->mb.nmvsadcost_hp[0] = &cpi->nmvsadcosts_hp[0][MV_MAX];
+  cpi->mb.nmvsadcost_hp[1] = &cpi->nmvsadcosts_hp[1][MV_MAX];
   cal_nmvsadcosts_hp(cpi->mb.nmvsadcost_hp);
 
 #if CONFIG_VP9_TEMPORAL_DENOISING

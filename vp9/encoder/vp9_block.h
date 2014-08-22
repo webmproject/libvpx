@@ -76,16 +76,12 @@ struct macroblock {
   int pred_mv_sad[MAX_REF_FRAMES];
 
   int nmvjointcost[MV_JOINTS];
-  int nmvcosts[2][MV_VALS];
   int *nmvcost[2];
-  int nmvcosts_hp[2][MV_VALS];
   int *nmvcost_hp[2];
   int **mvcost;
 
   int nmvjointsadcost[MV_JOINTS];
-  int nmvsadcosts[2][MV_VALS];
   int *nmvsadcost[2];
-  int nmvsadcosts_hp[2][MV_VALS];
   int *nmvsadcost_hp[2];
   int **mvsadcost;
 
