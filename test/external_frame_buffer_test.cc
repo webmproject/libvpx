@@ -285,7 +285,7 @@ class ExternalFrameBufferTest : public ::testing::Test {
     video_->Init();
     video_->Begin();
 
-    vpx_codec_dec_cfg_t cfg = {0};
+    vpx_codec_dec_cfg_t cfg = vpx_codec_dec_cfg_t();
     decoder_ = new libvpx_test::VP9Decoder(cfg, 0);
     ASSERT_TRUE(decoder_ != NULL);
   }

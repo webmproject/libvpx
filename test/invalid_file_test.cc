@@ -73,7 +73,7 @@ class InvalidFileTest
   void RunTest() {
     const DecodeParam input = GET_PARAM(1);
     libvpx_test::CompressedVideoSource *video = NULL;
-    vpx_codec_dec_cfg_t cfg = {0};
+    vpx_codec_dec_cfg_t cfg = vpx_codec_dec_cfg_t();
     cfg.threads = input.threads;
     const std::string filename = input.filename;
 
