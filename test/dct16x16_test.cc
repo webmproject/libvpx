@@ -268,11 +268,13 @@ typedef void (*IhtFunc)(const int16_t *in, uint8_t *out, int stride,
 typedef std::tr1::tuple<FdctFunc, IdctFunc, int> Dct16x16Param;
 typedef std::tr1::tuple<FhtFunc, IhtFunc, int> Ht16x16Param;
 
-void fdct16x16_ref(const int16_t *in, int16_t *out, int stride, int tx_type) {
+void fdct16x16_ref(const int16_t *in, int16_t *out, int stride,
+                   int /*tx_type*/) {
   vp9_fdct16x16_c(in, out, stride);
 }
 
-void idct16x16_ref(const int16_t *in, uint8_t *dest, int stride, int tx_type) {
+void idct16x16_ref(const int16_t *in, uint8_t *dest, int stride,
+                   int /*tx_type*/) {
   vp9_idct16x16_256_add_c(in, dest, stride);
 }
 
