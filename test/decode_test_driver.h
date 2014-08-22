@@ -125,20 +125,20 @@ class DecoderTest {
                        const vpx_codec_dec_cfg_t &dec_cfg);
 
   // Hook to be called before decompressing every frame.
-  virtual void PreDecodeFrameHook(const CompressedVideoSource& video,
-                                  Decoder *decoder) {}
+  virtual void PreDecodeFrameHook(const CompressedVideoSource& /*video*/,
+                                  Decoder* /*decoder*/) {}
 
   // Hook to be called to handle decode result. Return true to continue.
   virtual bool HandleDecodeResult(const vpx_codec_err_t res_dec,
-                                  const CompressedVideoSource& /* video */,
+                                  const CompressedVideoSource& /*video*/,
                                   Decoder *decoder) {
     EXPECT_EQ(VPX_CODEC_OK, res_dec) << decoder->DecodeError();
     return VPX_CODEC_OK == res_dec;
   }
 
   // Hook to be called on every decompressed frame.
-  virtual void DecompressedFrameHook(const vpx_image_t& img,
-                                     const unsigned int frame_number) {}
+  virtual void DecompressedFrameHook(const vpx_image_t& /*img*/,
+                                     const unsigned int /*frame_number*/) {}
 
   // Hook to be called on peek result
   virtual void HandlePeekResult(Decoder* const decoder,
