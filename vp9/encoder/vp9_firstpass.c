@@ -428,7 +428,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
   int neutral_count = 0;
   int new_mv_count = 0;
   int sum_in_vectors = 0;
-  uint32_t lastmv_as_int = 0;
+  MV lastmv = {0, 0};
   TWO_PASS *twopass = &cpi->twopass;
   const MV zero_mv = {0, 0};
   const YV12_BUFFER_CONFIG *first_ref_buf = lst_yv12;
@@ -512,9 +512,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
   vp9_tile_init(&tile, cm, 0, 0);
 
   for (mb_row = 0; mb_row < cm->mb_rows; ++mb_row) {
-    int_mv best_ref_mv;
-
-    best_ref_mv.as_int = 0;
+    MV best_ref_mv = {0, 0};
 
     // Reset above block coeffs.
     xd->up_available = (mb_row != 0);
@@ -594,14 +592,13 @@ void vp9_first_pass(VP9_COMP *cpi) {
       // Other than for the first frame do a motion search.
       if (cm->current_video_frame > 0) {
         int tmp_err, motion_error, raw_motion_error;
-        int_mv mv, tmp_mv;
+        // Assume 0,0 motion with no mv overhead.
+        MV mv = {0, 0} , tmp_mv = {0, 0};
         struct buf_2d unscaled_last_source_buf_2d;
 
         xd->plane[0].pre[0].buf = first_ref_buf->y_buffer + recon_yoffset;
         motion_error = get_prediction_error(bsize, &x->plane[0].src,
                                             &xd->plane[0].pre[0]);
-        // Assume 0,0 motion with no mv overhead.
-        mv.as_int = tmp_mv.as_int = 0;
 
         // Compute the motion error of the 0,0 motion using the last source
         // frame as the reference. Skip the further motion search on
@@ -617,8 +614,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
         if (raw_motion_error > 25 || lc != NULL) {
           // Test last reference frame using the previous best mv as the
           // starting point (best reference) for the search.
-          first_pass_motion_search(cpi, x, &best_ref_mv.as_mv, &mv.as_mv,
-                                   &motion_error);
+          first_pass_motion_search(cpi, x, &best_ref_mv, &mv, &motion_error);
           if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
             vp9_clear_system_state();
             motion_error = (int)(motion_error * error_weight);
@@ -626,9 +622,9 @@ void vp9_first_pass(VP9_COMP *cpi) {
 
           // If the current best reference mv is not centered on 0,0 then do a
           // 0,0 based search as well.
-          if (best_ref_mv.as_int) {
+          if (!is_zero_mv(&best_ref_mv)) {
             tmp_err = INT_MAX;
-            first_pass_motion_search(cpi, x, &zero_mv, &tmp_mv.as_mv, &tmp_err);
+            first_pass_motion_search(cpi, x, &zero_mv, &tmp_mv, &tmp_err);
             if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
               vp9_clear_system_state();
               tmp_err = (int)(tmp_err * error_weight);
@@ -636,7 +632,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
 
             if (tmp_err < motion_error) {
               motion_error = tmp_err;
-              mv.as_int = tmp_mv.as_int;
+              mv = tmp_mv;
             }
           }
 
@@ -649,7 +645,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
             gf_motion_error = get_prediction_error(bsize, &x->plane[0].src,
                                                    &xd->plane[0].pre[0]);
 
-            first_pass_motion_search(cpi, x, &zero_mv, &tmp_mv.as_mv,
+            first_pass_motion_search(cpi, x, &zero_mv, &tmp_mv,
                                      &gf_motion_error);
             if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
               vp9_clear_system_state();
@@ -680,7 +676,8 @@ void vp9_first_pass(VP9_COMP *cpi) {
         }
 
         // Start by assuming that intra mode is best.
-        best_ref_mv.as_int = 0;
+        best_ref_mv.row = 0;
+        best_ref_mv.col = 0;
 
 #if CONFIG_FP_MB_STATS
         if (cpi->use_fp_mb_stats) {
@@ -704,25 +701,25 @@ void vp9_first_pass(VP9_COMP *cpi) {
               this_error < 2 * intrapenalty)
             ++neutral_count;
 
-          mv.as_mv.row *= 8;
-          mv.as_mv.col *= 8;
+          mv.row *= 8;
+          mv.col *= 8;
           this_error = motion_error;
           xd->mi[0]->mbmi.mode = NEWMV;
-          xd->mi[0]->mbmi.mv[0] = mv;
+          xd->mi[0]->mbmi.mv[0].as_mv = mv;
           xd->mi[0]->mbmi.tx_size = TX_4X4;
           xd->mi[0]->mbmi.ref_frame[0] = LAST_FRAME;
           xd->mi[0]->mbmi.ref_frame[1] = NONE;
           vp9_build_inter_predictors_sby(xd, mb_row << 1, mb_col << 1, bsize);
           vp9_encode_sby_pass1(x, bsize);
-          sum_mvr += mv.as_mv.row;
-          sum_mvr_abs += abs(mv.as_mv.row);
-          sum_mvc += mv.as_mv.col;
-          sum_mvc_abs += abs(mv.as_mv.col);
-          sum_mvrs += mv.as_mv.row * mv.as_mv.row;
-          sum_mvcs += mv.as_mv.col * mv.as_mv.col;
+          sum_mvr += mv.row;
+          sum_mvr_abs += abs(mv.row);
+          sum_mvc += mv.col;
+          sum_mvc_abs += abs(mv.col);
+          sum_mvrs += mv.row * mv.row;
+          sum_mvcs += mv.col * mv.col;
           ++intercount;
 
-          best_ref_mv.as_int = mv.as_int;
+          best_ref_mv = mv;
 
 #if CONFIG_FP_MB_STATS
           if (cpi->use_fp_mb_stats) {
@@ -740,7 +737,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
           }
 #endif
 
-          if (mv.as_int) {
+          if (!is_zero_mv(&mv)) {
             ++mvcount;
 
 #if CONFIG_FP_MB_STATS
@@ -771,33 +768,33 @@ void vp9_first_pass(VP9_COMP *cpi) {
 #endif
 
             // Non-zero vector, was it different from the last non zero vector?
-            if (mv.as_int != lastmv_as_int)
+            if (!is_equal_mv(&mv, &lastmv))
               ++new_mv_count;
-            lastmv_as_int = mv.as_int;
+            lastmv = mv;
 
             // Does the row vector point inwards or outwards?
             if (mb_row < cm->mb_rows / 2) {
-              if (mv.as_mv.row > 0)
+              if (mv.row > 0)
                 --sum_in_vectors;
-              else if (mv.as_mv.row < 0)
+              else if (mv.row < 0)
                 ++sum_in_vectors;
             } else if (mb_row > cm->mb_rows / 2) {
-              if (mv.as_mv.row > 0)
+              if (mv.row > 0)
                 ++sum_in_vectors;
-              else if (mv.as_mv.row < 0)
+              else if (mv.row < 0)
                 --sum_in_vectors;
             }
 
             // Does the col vector point inwards or outwards?
             if (mb_col < cm->mb_cols / 2) {
-              if (mv.as_mv.col > 0)
+              if (mv.col > 0)
                 --sum_in_vectors;
-              else if (mv.as_mv.col < 0)
+              else if (mv.col < 0)
                 ++sum_in_vectors;
             } else if (mb_col > cm->mb_cols / 2) {
-              if (mv.as_mv.col > 0)
+              if (mv.col > 0)
                 ++sum_in_vectors;
-              else if (mv.as_mv.col < 0)
+              else if (mv.col < 0)
                 --sum_in_vectors;
             }
           }
