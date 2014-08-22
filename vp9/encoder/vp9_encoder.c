@@ -2742,12 +2742,12 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
           cpi->totalp_sq_error += psnr2.sse[0];
           cpi->totalp_samples += psnr2.samples[0];
 
-          frame_ssim2 = vp9_calc_ssim(orig, recon, 1, &weight);
+          frame_ssim2 = vp9_calc_ssim(orig, recon, &weight);
 
           cpi->summed_quality += frame_ssim2 * weight;
           cpi->summed_weights += weight;
 
-          frame_ssim2 = vp9_calc_ssim(orig, &cm->post_proc_buffer, 1, &weight);
+          frame_ssim2 = vp9_calc_ssim(orig, &cm->post_proc_buffer, &weight);
 
           cpi->summedp_quality += frame_ssim2 * weight;
           cpi->summedp_weights += weight;
