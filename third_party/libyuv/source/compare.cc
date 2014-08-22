@@ -80,7 +80,7 @@ uint32 HashDjb2(const uint8* src, uint64 count, uint32 seed) {
 
 uint32 SumSquareError_C(const uint8* src_a, const uint8* src_b, int count);
 #if !defined(LIBYUV_DISABLE_NEON) && \
-    (defined(__ARM_NEON__) || defined(LIBYUV_NEON))
+    (defined(__ARM_NEON__) || defined(LIBYUV_NEON) || defined(__aarch64__))
 #define HAS_SUMSQUAREERROR_NEON
 uint32 SumSquareError_NEON(const uint8* src_a, const uint8* src_b, int count);
 #endif
