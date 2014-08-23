@@ -31,6 +31,7 @@ LIBYUV_SRCS +=  third_party/libyuv/include/libyuv/basic_types.h  \
                 third_party/libyuv/source/scale_common.cc \
                 third_party/libyuv/source/scale_mips.cc \
                 third_party/libyuv/source/scale_neon.cc \
+                third_party/libyuv/source/scale_neon64.cc \
                 third_party/libyuv/source/scale_posix.cc \
                 third_party/libyuv/source/scale_win.cc \
 
