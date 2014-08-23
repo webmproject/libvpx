@@ -1103,18 +1103,8 @@ int main_loop(int argc, const char **argv_) {
               display_height = display_size[1];
             }
           }
-#if CONFIG_VP9_HIGH
-          if (img->fmt & VPX_IMG_FMT_HIGH) {
-            scaled_img = vpx_img_alloc(NULL, VPX_IMG_FMT_I42016, display_width,
-                                       display_height, 16);
-          } else {
-            scaled_img = vpx_img_alloc(NULL, VPX_IMG_FMT_I420, display_width,
-                                       display_height, 16);
-          }
-#else
-          scaled_img = vpx_img_alloc(NULL, VPX_IMG_FMT_I420, display_width,
+          scaled_img = vpx_img_alloc(NULL, img->fmt, display_width,
                                      display_height, 16);
-#endif
           scaled_img->bit_depth = img->bit_depth;
         }
 
