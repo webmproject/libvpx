@@ -599,7 +599,8 @@ int main_loop(int argc, const char **argv_) {
       do_scale = 1;
     else if (arg_match(&arg, &fb_arg, argi))
       num_external_frame_buffers = arg_parse_uint(&arg);
-
+    else if (arg_match(&arg, &continuearg, argi))
+      keep_going = 1;
 #if CONFIG_VP8_DECODER
     else if (arg_match(&arg, &addnoise_level, argi)) {
       postproc = 1;
@@ -649,11 +650,8 @@ int main_loop(int argc, const char **argv_) {
       }
     } else if (arg_match(&arg, &error_concealment, argi)) {
       ec_enabled = 1;
-    } else if (arg_match(&arg, &continuearg, argi)) {
-      keep_going = 1;
     }
-
-#endif
+#endif  // CONFIG_VP8_DECODER
     else
       argj++;
   }
