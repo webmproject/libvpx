@@ -139,7 +139,7 @@ void EncoderTest::MismatchHook(const vpx_image_t* /*img1*/,
 }
 
 void EncoderTest::RunLoop(VideoSource *video) {
-  vpx_codec_dec_cfg_t dec_cfg = {0};
+  vpx_codec_dec_cfg_t dec_cfg = vpx_codec_dec_cfg_t();
 
   stats_.Reset();
 

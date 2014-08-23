@@ -29,7 +29,7 @@ class TileIndependenceTest : public ::libvpx_test::EncoderTest,
         md5_inv_order_(),
         n_tiles_(GET_PARAM(1)) {
     init_flags_ = VPX_CODEC_USE_PSNR;
-    vpx_codec_dec_cfg_t cfg;
+    vpx_codec_dec_cfg_t cfg = vpx_codec_dec_cfg_t();
     cfg.w = 704;
     cfg.h = 144;
     cfg.threads = 1;

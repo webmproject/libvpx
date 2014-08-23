@@ -47,7 +47,7 @@ TEST(TestDecrypt, DecryptWorksVp9) {
   libvpx_test::IVFVideoSource video("vp90-2-05-resize.ivf");
   video.Init();
 
-  vpx_codec_dec_cfg_t dec_cfg = {0};
+  vpx_codec_dec_cfg_t dec_cfg = vpx_codec_dec_cfg_t();
   VP9Decoder decoder(dec_cfg, 0);
 
   video.Begin();

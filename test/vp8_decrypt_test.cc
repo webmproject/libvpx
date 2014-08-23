@@ -47,7 +47,7 @@ TEST(TestDecrypt, DecryptWorksVp8) {
   libvpx_test::IVFVideoSource video("vp80-00-comprehensive-001.ivf");
   video.Init();
 
-  vpx_codec_dec_cfg_t dec_cfg = {0};
+  vpx_codec_dec_cfg_t dec_cfg = vpx_codec_dec_cfg_t();
   VP8Decoder decoder(dec_cfg, 0);
 
   video.Begin();

@@ -163,7 +163,7 @@ string DecodeFile(const string& filename, int num_threads) {
   libvpx_test::WebMVideoSource video(filename);
   video.Init();
 
-  vpx_codec_dec_cfg_t cfg = {0};
+  vpx_codec_dec_cfg_t cfg = vpx_codec_dec_cfg_t();
   cfg.threads = num_threads;
   libvpx_test::VP9Decoder decoder(cfg, 0);
 

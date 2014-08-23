@@ -60,7 +60,7 @@ class SvcTest : public ::testing::Test {
     codec_enc_.kf_min_dist = 100;
     codec_enc_.kf_max_dist = 100;
 
-    vpx_codec_dec_cfg_t dec_cfg = {0};
+    vpx_codec_dec_cfg_t dec_cfg = vpx_codec_dec_cfg_t();
     VP9CodecFactory codec_factory;
     decoder_ = codec_factory.CreateDecoder(dec_cfg, 0);
   }
