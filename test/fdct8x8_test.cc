@@ -39,7 +39,7 @@ typedef void (*IhtFunc)(const int16_t *in, uint8_t *out, int stride,
 typedef std::tr1::tuple<FdctFunc, IdctFunc, int> Dct8x8Param;
 typedef std::tr1::tuple<FhtFunc, IhtFunc, int> Ht8x8Param;
 
-void fdct8x8_ref(const int16_t *in, int16_t *out, int stride, int tx_type) {
+void fdct8x8_ref(const int16_t *in, int16_t *out, int stride, int /*tx_type*/) {
   vp9_fdct8x8_c(in, out, stride);
 }
 
