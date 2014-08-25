@@ -1232,30 +1232,23 @@ static void set_source_var_based_partition(VP9_COMP *cpi,
   }
 }
 
-static int is_background(VP9_COMP *cpi, const TileInfo *const tile,
+static int is_background(const VP9_COMP *cpi, const TileInfo *const tile,
                          int mi_row, int mi_col) {
-  MACROBLOCK *x = &cpi->mb;
-  uint8_t *src, *pre;
-  int src_stride, pre_stride;
-
+  // This assumes the input source frames are of the same dimension.
   const int row8x8_remaining = tile->mi_row_end - mi_row;
   const int col8x8_remaining = tile->mi_col_end - mi_col;
-
+  const int x = mi_col * MI_SIZE;
+  const int y = mi_row * MI_SIZE;
+  const int src_stride = cpi->Source->y_stride;
+  const uint8_t *const src = &cpi->Source->y_buffer[y * src_stride + x];
+  const int pre_stride = cpi->Last_Source->y_stride;
+  const uint8_t *const pre = &cpi->Last_Source->y_buffer[y * pre_stride + x];
   int this_sad = 0;
   int threshold = 0;
 
-  // This assumes the input source frames are of the same dimension.
-  src_stride = cpi->Source->y_stride;
-  src = cpi->Source->y_buffer + (mi_row * MI_SIZE) * src_stride +
-            (mi_col * MI_SIZE);
-  pre_stride = cpi->Last_Source->y_stride;
-  pre = cpi->Last_Source->y_buffer + (mi_row * MI_SIZE) * pre_stride +
-          (mi_col * MI_SIZE);
-
   if (row8x8_remaining >= MI_BLOCK_SIZE &&
       col8x8_remaining >= MI_BLOCK_SIZE) {
-    this_sad = cpi->fn_ptr[BLOCK_64X64].sdf(src, src_stride,
-                                            pre, pre_stride);
+    this_sad = cpi->fn_ptr[BLOCK_64X64].sdf(src, src_stride, pre, pre_stride);
     threshold = (1 << 12);
   } else {
     int r, c;
@@ -1266,8 +1259,7 @@ static int is_background(VP9_COMP *cpi, const TileInfo *const tile,
     threshold = (row8x8_remaining * col8x8_remaining) << 6;
   }
 
-  x->in_static_area = (this_sad < 2 * threshold);
-  return x->in_static_area;
+  return this_sad < 2 * threshold;
 }
 
 static int sb_has_motion(const VP9_COMMON *cm, MODE_INFO **prev_mi_8x8,
@@ -3119,7 +3111,7 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
         break;
       case REFERENCE_PARTITION:
         if (sf->partition_check ||
-            !is_background(cpi, tile, mi_row, mi_col)) {
+            !(x->in_static_area = is_background(cpi, tile, mi_row, mi_col))) {
           set_modeinfo_offsets(cm, xd, mi_row, mi_col);
           auto_partition_range(cpi, tile, mi_row, mi_col,
                                &sf->min_partition_size,
