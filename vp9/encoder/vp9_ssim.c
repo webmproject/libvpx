@@ -95,7 +95,7 @@ double vp9_ssim2(uint8_t *img1, uint8_t *img2, int stride_img1,
   return ssim_total;
 }
 double vp9_calc_ssim(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest,
-                     int lumamask, double *weight) {
+                     double *weight) {
   double a, b, c;
   double ssimv;
 
