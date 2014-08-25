@@ -203,9 +203,11 @@ extern "C" {
     const char              *err_detail;  /**< Detailed info, if available */
     vpx_codec_flags_t        init_flags;  /**< Flags passed at init time */
     union {
-      struct vpx_codec_dec_cfg  *dec;   /**< Decoder Configuration Pointer */
-      struct vpx_codec_enc_cfg  *enc;   /**< Encoder Configuration Pointer */
-      void                      *raw;
+      /**< Decoder Configuration Pointer */
+      const struct vpx_codec_dec_cfg *dec;
+      /**< Encoder Configuration Pointer */
+      const struct vpx_codec_enc_cfg *enc;
+      const void                     *raw;
     }                        config;      /**< Configuration pointer aliasing union */
     vpx_codec_priv_t        *priv;        /**< Algorithm private storage */
   } vpx_codec_ctx_t;
