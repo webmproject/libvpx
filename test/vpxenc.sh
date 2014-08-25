@@ -69,13 +69,13 @@ vpxenc() {
 vpxenc_vp8_ivf() {
   if [ "$(vpxenc_can_encode_vp8)" = "yes" ]; then
     local readonly output="${VPX_TEST_OUTPUT_DIR}/vp8.ivf"
-    vpxenc --codec=vp8 \
+    vpxenc "${YUV_RAW_INPUT}" \
+      --codec=vp8 \
       --width="${YUV_RAW_INPUT_WIDTH}" \
       --height="${YUV_RAW_INPUT_HEIGHT}" \
       --limit="${TEST_FRAMES}" \
       --ivf \
-      --output="${output}" \
-      "${YUV_RAW_INPUT}"
+      --output="${output}"
 
     if [ ! -e "${output}" ]; then
       elog "Output file does not exist."
@@ -88,12 +88,12 @@ vpxenc_vp8_webm() {
   if [ "$(vpxenc_can_encode_vp8)" = "yes" ] && \
      [ "$(webm_io_available)" = "yes" ]; then
     local readonly output="${VPX_TEST_OUTPUT_DIR}/vp8.webm"
-    vpxenc --codec=vp8 \
+    vpxenc "${YUV_RAW_INPUT}" \
+      --codec=vp8 \
       --width="${YUV_RAW_INPUT_WIDTH}" \
       --height="${YUV_RAW_INPUT_HEIGHT}" \
       --limit="${TEST_FRAMES}" \
-      --output="${output}" \
-      "${YUV_RAW_INPUT}"
+      --output="${output}"
 
     if [ ! -e "${output}" ]; then
       elog "Output file does not exist."
@@ -142,13 +142,13 @@ vpxenc_vp8_webm_2pass() {
   if [ "$(vpxenc_can_encode_vp8)" = "yes" ] && \
      [ "$(webm_io_available)" = "yes" ]; then
     local readonly output="${VPX_TEST_OUTPUT_DIR}/vp8.webm"
-    vpxenc --codec=vp8 \
+    vpxenc "${YUV_RAW_INPUT}" \
+      --codec=vp8 \
       --width="${YUV_RAW_INPUT_WIDTH}" \
       --height="${YUV_RAW_INPUT_HEIGHT}" \
       --limit="${TEST_FRAMES}" \
       --output="${output}" \
-      --passes=2 \
-      "${YUV_RAW_INPUT}"
+      --passes=2
 
     if [ ! -e "${output}" ]; then
       elog "Output file does not exist."
@@ -163,15 +163,15 @@ vpxenc_vp8_webm_lag10_frames20() {
     local readonly lag_total_frames=20
     local readonly lag_frames=10
     local readonly output="${VPX_TEST_OUTPUT_DIR}/vp8_lag10_frames20.webm"
-    vpxenc --codec=vp8 \
+    vpxenc "${YUV_RAW_INPUT}" \
+      --codec=vp8 \
       --width="${YUV_RAW_INPUT_WIDTH}" \
       --height="${YUV_RAW_INPUT_HEIGHT}" \
       --limit="${lag_total_frames}" \
       --lag-in-frames="${lag_frames}" \
       --output="${output}" \
       --auto-alt-ref=1 \
-      --passes=2 \
-      "${YUV_RAW_INPUT}"
+      --passes=2
 
     if [ ! -e "${output}" ]; then
       elog "Output file does not exist."
@@ -183,14 +183,13 @@ vpxenc_vp8_webm_lag10_frames20() {
 vpxenc_vp8_ivf_piped_input() {
   if [ "$(vpxenc_can_encode_vp8)" = "yes" ]; then
     local readonly output="${VPX_TEST_OUTPUT_DIR}/vp8_piped_input.ivf"
-    cat "${YUV_RAW_INPUT}" \
-      | vpxenc --codec=vp8 \
+      vpxenc_pipe "${YUV_RAW_INPUT}" \
+        --codec=vp8 \
         --width="${YUV_RAW_INPUT_WIDTH}" \
         --height="${YUV_RAW_INPUT_HEIGHT}" \
         --limit="${TEST_FRAMES}" \
         --ivf \
-        --output="${output}" \
-        -
+        --output="${output}"
 
     if [ ! -e "${output}" ]; then
       elog "Output file does not exist."
@@ -202,13 +201,13 @@ vpxenc_vp8_ivf_piped_input() {
 vpxenc_vp9_ivf() {
   if [ "$(vpxenc_can_encode_vp9)" = "yes" ]; then
     local readonly output="${VPX_TEST_OUTPUT_DIR}/vp9.ivf"
-    vpxenc --codec=vp9 \
+    vpxenc "${YUV_RAW_INPUT}" \
+      --codec=vp9 \
       --width="${YUV_RAW_INPUT_WIDTH}" \
       --height="${YUV_RAW_INPUT_HEIGHT}" \
       --limit="${TEST_FRAMES}" \
       --ivf \
-      --output="${output}" \
-      "${YUV_RAW_INPUT}"
+      --output="${output}"
 
     if [ ! -e "${output}" ]; then
       elog "Output file does not exist."
@@ -221,12 +220,12 @@ vpxenc_vp9_webm() {
   if [ "$(vpxenc_can_encode_vp9)" = "yes" ] && \
      [ "$(webm_io_available)" = "yes" ]; then
     local readonly output="${VPX_TEST_OUTPUT_DIR}/vp9.webm"
-    vpxenc --codec=vp9 \
+    vpxenc "${YUV_RAW_INPUT}" \
+      --codec=vp9 \
       --width="${YUV_RAW_INPUT_WIDTH}" \
       --height="${YUV_RAW_INPUT_HEIGHT}" \
       --limit="${TEST_FRAMES}" \
-      --output="${output}" \
-      "${YUV_RAW_INPUT}"
+      --output="${output}"
 
     if [ ! -e "${output}" ]; then
       elog "Output file does not exist."
@@ -275,13 +274,13 @@ vpxenc_vp9_webm_2pass() {
   if [ "$(vpxenc_can_encode_vp9)" = "yes" ] && \
      [ "$(webm_io_available)" = "yes" ]; then
     local readonly output="${VPX_TEST_OUTPUT_DIR}/vp9.webm"
-    vpxenc --codec=vp9 \
+    vpxenc "${YUV_RAW_INPUT}" \
+      --codec=vp9 \
       --width="${YUV_RAW_INPUT_WIDTH}" \
       --height="${YUV_RAW_INPUT_HEIGHT}" \
       --limit="${TEST_FRAMES}" \
       --output="${output}" \
-      --passes=2 \
-      "${YUV_RAW_INPUT}"
+      --passes=2
 
     if [ ! -e "${output}" ]; then
       elog "Output file does not exist."
@@ -293,14 +292,14 @@ vpxenc_vp9_webm_2pass() {
 vpxenc_vp9_ivf_lossless() {
   if [ "$(vpxenc_can_encode_vp9)" = "yes" ]; then
     local readonly output="${VPX_TEST_OUTPUT_DIR}/vp9_lossless.ivf"
-    vpxenc --codec=vp9 \
+    vpxenc "${YUV_RAW_INPUT}" \
+      --codec=vp9 \
       --width="${YUV_RAW_INPUT_WIDTH}" \
       --height="${YUV_RAW_INPUT_HEIGHT}" \
       --limit="${TEST_FRAMES}" \
       --ivf \
       --output="${output}" \
-      --lossless=1 \
-      "${YUV_RAW_INPUT}"
+      --lossless=1
 
     if [ ! -e "${output}" ]; then
       elog "Output file does not exist."
@@ -312,15 +311,15 @@ vpxenc_vp9_ivf_lossless() {
 vpxenc_vp9_ivf_minq0_maxq0() {
   if [ "$(vpxenc_can_encode_vp9)" = "yes" ]; then
     local readonly output="${VPX_TEST_OUTPUT_DIR}/vp9_lossless_minq0_maxq0.ivf"
-    vpxenc --codec=vp9 \
+    vpxenc "${YUV_RAW_INPUT}" \
+      --codec=vp9 \
       --width="${YUV_RAW_INPUT_WIDTH}" \
       --height="${YUV_RAW_INPUT_HEIGHT}" \
       --limit="${TEST_FRAMES}" \
       --ivf \
       --output="${output}" \
       --min-q=0 \
-      --max-q=0 \
-      "${YUV_RAW_INPUT}"
+      --max-q=0
 
     if [ ! -e "${output}" ]; then
       elog "Output file does not exist."
@@ -335,15 +334,15 @@ vpxenc_vp9_webm_lag10_frames20() {
     local readonly lag_total_frames=20
     local readonly lag_frames=10
     local readonly output="${VPX_TEST_OUTPUT_DIR}/vp9_lag10_frames20.webm"
-    vpxenc --codec=vp9 \
+    vpxenc "${YUV_RAW_INPUT}" \
+      --codec=vp9 \
       --width="${YUV_RAW_INPUT_WIDTH}" \
       --height="${YUV_RAW_INPUT_HEIGHT}" \
       --limit="${lag_total_frames}" \
       --lag-in-frames="${lag_frames}" \
       --output="${output}" \
       --passes=2 \
-      --auto-alt-ref=1 \
-      "${YUV_RAW_INPUT}"
+      --auto-alt-ref=1
 
     if [ ! -e "${output}" ]; then
       elog "Output file does not exist."
