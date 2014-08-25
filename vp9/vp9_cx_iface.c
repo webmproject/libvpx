@@ -912,7 +912,7 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
 #endif
 
         // Pack invisible frames with the next visible frame
-        if (cpi->common.show_frame == 0
+        if (!cpi->common.show_frame
 #if CONFIG_SPATIAL_SVC
             || (is_spatial_svc(cpi) &&
                 cpi->svc.spatial_layer_id < cpi->svc.number_spatial_layers - 1)
@@ -943,18 +943,6 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
 #endif
             )
           pkt.data.frame.flags |= VPX_FRAME_IS_KEY;
-
-        if (cpi->common.show_frame == 0) {
-          pkt.data.frame.flags |= VPX_FRAME_IS_INVISIBLE;
-
-          // This timestamp should be as close as possible to the
-          // prior PTS so that if a decoder uses pts to schedule when
-          // to do this, we start right after last frame was decoded.
-          // Invisible frames have no duration.
-          pkt.data.frame.pts =
-              ticks_to_timebase_units(timebase, cpi->last_time_stamp_seen) + 1;
-          pkt.data.frame.duration = 0;
-        }
 
         if (cpi->droppable)
           pkt.data.frame.flags |= VPX_FRAME_IS_DROPPABLE;
