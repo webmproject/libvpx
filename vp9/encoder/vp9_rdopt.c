@@ -468,7 +468,6 @@ static void choose_largest_tx_size(VP9_COMP *cpi, MACROBLOCK *x,
   txfm_rd_in_plane(x, rate, distortion, skip,
                    sse, ref_best_rd, 0, bs,
                    mbmi->tx_size, cpi->sf.use_fast_coef_costing);
-  cpi->tx_stepdown_count[0]++;
 }
 
 static void choose_tx_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
@@ -551,16 +550,12 @@ static void choose_tx_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
 
   if (max_tx_size == TX_32X32 && best_tx == TX_32X32) {
     tx_cache[TX_MODE_SELECT] = rd[TX_32X32][1];
-    cpi->tx_stepdown_count[0]++;
   } else if (max_tx_size >= TX_16X16 && best_tx == TX_16X16) {
     tx_cache[TX_MODE_SELECT] = rd[TX_16X16][1];
-    cpi->tx_stepdown_count[max_tx_size - TX_16X16]++;
   } else if (rd[TX_8X8][1] < rd[TX_4X4][1]) {
     tx_cache[TX_MODE_SELECT] = rd[TX_8X8][1];
-    cpi->tx_stepdown_count[max_tx_size - TX_8X8]++;
   } else {
     tx_cache[TX_MODE_SELECT] = rd[TX_4X4][1];
-    cpi->tx_stepdown_count[max_tx_size - TX_4X4]++;
   }
 }
 

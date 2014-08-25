@@ -3289,7 +3289,6 @@ static void encode_frame_internal(VP9_COMP *cpi) {
 
   vp9_zero(cm->counts);
   vp9_zero(cpi->coef_counts);
-  vp9_zero(cpi->tx_stepdown_count);
   vp9_zero(rd_opt->comp_pred_diff);
   vp9_zero(rd_opt->filter_diff);
   vp9_zero(rd_opt->tx_select_diff);
