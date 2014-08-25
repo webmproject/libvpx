@@ -656,8 +656,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
       if (cpi->oxcf.noise_sensitivity > 0) {
-        vp9_denoiser_update_frame_stats(&cpi->denoiser, mbmi, sse_y,
-                                        this_mode, ctx);
+        vp9_denoiser_update_frame_stats(mbmi, sse_y, this_mode, ctx);
       }
 #endif
 
