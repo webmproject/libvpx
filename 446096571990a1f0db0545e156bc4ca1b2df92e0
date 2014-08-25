@@ -34,6 +34,24 @@
       "revId": "446096571990a1f0db0545e156bc4ca1b2df92e0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//aOM\u003d",
+        "filename": "vpx/src/vpx_encoder.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-25T22:09:11Z",
+      "side": 1,
+      "message": "OK. might be nice to normalize the two, though this signature is somewhat hidden from the user via a convenience macro",
+      "parentUuid": "AAAAdn//aOs\u003d",
+      "revId": "446096571990a1f0db0545e156bc4ca1b2df92e0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
