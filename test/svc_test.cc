@@ -112,7 +112,7 @@ class SvcTest : public ::testing::Test {
       video.Next();
     }
 
-    // Flush encoder and test EOS packet
+    // Flush encoder and test EOS packet.
     res = vpx_svc_encode(&svc_, &codec_, NULL, video.pts(),
                          video.duration(), VPX_DL_GOOD_QUALITY);
     stats_size = vpx_svc_get_rc_stats_buffer_size(&svc_);
@@ -135,7 +135,7 @@ class SvcTest : public ::testing::Test {
         EXPECT_EQ(1, vpx_svc_is_keyframe(&svc_));
       }
 
-      outputs[*frame_received].buf = malloc(frame_size);
+      outputs[*frame_received].buf = malloc(frame_size + 16);
       ASSERT_TRUE(outputs[*frame_received].buf != NULL);
       memcpy(outputs[*frame_received].buf, vpx_svc_get_buffer(&svc_),
              frame_size);
@@ -176,13 +176,13 @@ class SvcTest : public ::testing::Test {
       video.Next();
     }
 
-    // Flush Encoder
+    // Flush encoder.
     res = vpx_svc_encode(&svc_, &codec_, NULL, 0,
                          video.duration(), VPX_DL_GOOD_QUALITY);
     EXPECT_EQ(VPX_CODEC_OK, res);
     StoreFrames(n, outputs, &frame_received);
 
-    EXPECT_EQ(frame_received, (size_t)n);
+    EXPECT_EQ(frame_received, static_cast<size_t>(n));
 
     ReleaseEncoder();
   }
@@ -204,7 +204,7 @@ class SvcTest : public ::testing::Test {
       ++decoded_frames;
 
       DxDataIterator dec_iter = decoder_->GetDxData();
-      while (dec_iter.Next()) {
+      while (dec_iter.Next() != NULL) {
         ++received_frames;
       }
     }
@@ -214,7 +214,8 @@ class SvcTest : public ::testing::Test {
 
   void DropEnhancementLayers(struct vpx_fixed_buf *const inputs,
                              const int num_super_frames,
-                             const int remained_layers) {
+                             const int remained_layers,
+                             const bool is_multiple_frame_context) {
     ASSERT_TRUE(inputs != NULL);
     ASSERT_GT(num_super_frames, 0);
     ASSERT_GT(remained_layers, 0);
@@ -236,7 +237,7 @@ class SvcTest : public ::testing::Test {
       uint8_t *frame_data = static_cast<uint8_t *>(inputs[i].buf);
       uint8_t *frame_start = frame_data;
       for (frame = 0; frame < frame_count; ++frame) {
-        // Looking for a visible frame
+        // Looking for a visible frame.
         if (frame_data[0] & 0x02) {
           ++frames_found;
           if (frames_found == remained_layers)
@@ -244,11 +245,17 @@ class SvcTest : public ::testing::Test {
         }
         frame_data += frame_sizes[frame];
       }
-      ASSERT_LT(frame, frame_count);
-      if (frame == frame_count - 1)
+      ASSERT_LT(frame, frame_count) << "Couldn't find a visible frame. "
+          << "remaining_layers: " << remained_layers
+          << "    super_frame: " << i
+          << "    is_multiple_frame_context: " << is_multiple_frame_context;
+      if (frame == frame_count - 1 && !is_multiple_frame_context)
         continue;
 
       frame_data += frame_sizes[frame];
+      // We need to add one more frame for multiple frame context.
+      if (is_multiple_frame_context)
+        ++frame;
       uint8_t marker =
           static_cast<const uint8_t *>(inputs[i].buf)[inputs[i].sz - 1];
       const uint32_t mag = ((marker >> 3) & 0x3) + 1;
@@ -256,11 +263,37 @@ class SvcTest : public ::testing::Test {
       const size_t new_index_sz = 2 + mag * (frame + 1);
       marker &= 0x0f8;
       marker |= frame;
+
+      // Copy existing frame sizes.
+      memmove(frame_data + (is_multiple_frame_context ? 2 : 1),
+              frame_start + inputs[i].sz - index_sz + 1, new_index_sz - 2);
+      if (is_multiple_frame_context) {
+        // Add a one byte frame with flag show_existing frame.
+        *frame_data++ = 0x88 | (remained_layers - 1);
+      }
+      // New marker.
       frame_data[0] = marker;
-      memcpy(frame_data + 1, frame_start + inputs[i].sz - index_sz + 1,
-             new_index_sz - 2);
-      frame_data[new_index_sz - 1] = marker;
-      inputs[i].sz = frame_data - frame_start + new_index_sz;
+      frame_data += (mag * (frame + 1) + 1);
+
+      if (is_multiple_frame_context) {
+        // Write the frame size for the one byte frame.
+        frame_data -= mag;
+        *frame_data++ = 1;
+        for (uint32_t j = 1; j < mag; ++j) {
+          *frame_data++ = 0;
+        }
+      }
+
+      *frame_data++ = marker;
+      inputs[i].sz = frame_data - frame_start;
+
+      if (is_multiple_frame_context) {
+        // Change the show frame flag to 0 for all frames.
+        for (int j = 0; j < frame; ++j) {
+          frame_start[0] &= ~2;
+          frame_start += frame_sizes[j];
+        }
+      }
     }
   }
 
@@ -507,7 +540,7 @@ TEST_F(SvcTest, TwoPassEncode2LayersDecodeBaseLayerOnly) {
   vpx_fixed_buf outputs[10];
   memset(&outputs[0], 0, sizeof(outputs));
   Pass2EncodeNFrames(&stats_buf, 10, 2, &outputs[0]);
-  DropEnhancementLayers(&outputs[0], 10, 1);
+  DropEnhancementLayers(&outputs[0], 10, 1, false);
   DecodeNFrames(&outputs[0], 10);
   FreeBitstreamBuffers(&outputs[0], 10);
 }
@@ -525,13 +558,13 @@ TEST_F(SvcTest, TwoPassEncode5LayersDecode54321Layers) {
   Pass2EncodeNFrames(&stats_buf, 10, 5, &outputs[0]);
 
   DecodeNFrames(&outputs[0], 10);
-  DropEnhancementLayers(&outputs[0], 10, 4);
+  DropEnhancementLayers(&outputs[0], 10, 4, false);
   DecodeNFrames(&outputs[0], 10);
-  DropEnhancementLayers(&outputs[0], 10, 3);
+  DropEnhancementLayers(&outputs[0], 10, 3, false);
   DecodeNFrames(&outputs[0], 10);
-  DropEnhancementLayers(&outputs[0], 10, 2);
+  DropEnhancementLayers(&outputs[0], 10, 2, false);
   DecodeNFrames(&outputs[0], 10);
-  DropEnhancementLayers(&outputs[0], 10, 1);
+  DropEnhancementLayers(&outputs[0], 10, 1, false);
   DecodeNFrames(&outputs[0], 10);
 
   FreeBitstreamBuffers(&outputs[0], 10);
@@ -568,12 +601,121 @@ TEST_F(SvcTest, TwoPassEncode3SNRLayersDecode321Layers) {
   memset(&outputs[0], 0, sizeof(outputs));
   Pass2EncodeNFrames(&stats_buf, 20, 3, &outputs[0]);
   DecodeNFrames(&outputs[0], 20);
-  DropEnhancementLayers(&outputs[0], 20, 2);
+  DropEnhancementLayers(&outputs[0], 20, 2, false);
   DecodeNFrames(&outputs[0], 20);
-  DropEnhancementLayers(&outputs[0], 20, 1);
+  DropEnhancementLayers(&outputs[0], 20, 1, false);
   DecodeNFrames(&outputs[0], 20);
 
   FreeBitstreamBuffers(&outputs[0], 20);
+}
+
+TEST_F(SvcTest, SetMultipleFrameContextOption) {
+  svc_.spatial_layers = 5;
+  vpx_codec_err_t res =
+      vpx_svc_set_options(&svc_, "multi-frame-contexts=1");
+  EXPECT_EQ(VPX_CODEC_OK, res);
+  res = vpx_svc_init(&svc_, &codec_, vpx_codec_vp9_cx(), &codec_enc_);
+  EXPECT_EQ(VPX_CODEC_INVALID_PARAM, res);
+
+  svc_.spatial_layers = 2;
+  res = vpx_svc_set_options(&svc_, "multi-frame-contexts=1");
+  InitializeEncoder();
+}
+
+TEST_F(SvcTest, TwoPassEncode2LayersWithMultipleFrameContext) {
+  // First pass encode
+  std::string stats_buf;
+  Pass1EncodeNFrames(10, 2, &stats_buf);
+
+  // Second pass encode
+  codec_enc_.g_pass = VPX_RC_LAST_PASS;
+  codec_enc_.g_error_resilient = 0;
+  vpx_svc_set_options(&svc_, "auto-alt-refs=1,1 multi-frame-contexts=1");
+  vpx_fixed_buf outputs[10];
+  memset(&outputs[0], 0, sizeof(outputs));
+  Pass2EncodeNFrames(&stats_buf, 10, 2, &outputs[0]);
+  DropEnhancementLayers(&outputs[0], 10, 2, true);
+  DecodeNFrames(&outputs[0], 10);
+  FreeBitstreamBuffers(&outputs[0], 10);
+}
+
+TEST_F(SvcTest, TwoPassEncode2LayersWithMultipleFrameContextDecodeBaselayer) {
+  // First pass encode
+  std::string stats_buf;
+  Pass1EncodeNFrames(10, 2, &stats_buf);
+
+  // Second pass encode
+  codec_enc_.g_pass = VPX_RC_LAST_PASS;
+  codec_enc_.g_error_resilient = 0;
+  vpx_svc_set_options(&svc_, "auto-alt-refs=1,1 multi-frame-contexts=1");
+  vpx_fixed_buf outputs[10];
+  memset(&outputs[0], 0, sizeof(outputs));
+  Pass2EncodeNFrames(&stats_buf, 10, 2, &outputs[0]);
+  DropEnhancementLayers(&outputs[0], 10, 1, true);
+  DecodeNFrames(&outputs[0], 10);
+  FreeBitstreamBuffers(&outputs[0], 10);
+}
+
+TEST_F(SvcTest, TwoPassEncode2SNRLayersWithMultipleFrameContext) {
+  // First pass encode
+  std::string stats_buf;
+  vpx_svc_set_options(&svc_, "scale-factors=1/1,1/1");
+  Pass1EncodeNFrames(10, 2, &stats_buf);
+
+  // Second pass encode
+  codec_enc_.g_pass = VPX_RC_LAST_PASS;
+  codec_enc_.g_error_resilient = 0;
+  vpx_svc_set_options(&svc_, "auto-alt-refs=1,1 scale-factors=1/1,1/1 "
+                      "multi-frame-contexts=1");
+  vpx_fixed_buf outputs[10];
+  memset(&outputs[0], 0, sizeof(outputs));
+  Pass2EncodeNFrames(&stats_buf, 10, 2, &outputs[0]);
+  DropEnhancementLayers(&outputs[0], 10, 2, true);
+  DecodeNFrames(&outputs[0], 10);
+  FreeBitstreamBuffers(&outputs[0], 10);
+}
+
+TEST_F(SvcTest, TwoPassEncode3SNRLayersWithMultipleFrameContextDecode321Layer) {
+  // First pass encode
+  std::string stats_buf;
+  vpx_svc_set_options(&svc_, "scale-factors=1/1,1/1,1/1");
+  Pass1EncodeNFrames(10, 3, &stats_buf);
+
+  // Second pass encode
+  codec_enc_.g_pass = VPX_RC_LAST_PASS;
+  codec_enc_.g_error_resilient = 0;
+  vpx_svc_set_options(&svc_, "auto-alt-refs=1,1,1 scale-factors=1/1,1/1,1/1 "
+                      "multi-frame-contexts=1");
+  vpx_fixed_buf outputs[10];
+  memset(&outputs[0], 0, sizeof(outputs));
+  Pass2EncodeNFrames(&stats_buf, 10, 3, &outputs[0]);
+
+  vpx_fixed_buf outputs_new[10];
+  for (int i = 0; i < 10; ++i) {
+    outputs_new[i].buf = malloc(outputs[i].sz + 16);
+    ASSERT_TRUE(outputs_new[i].buf != NULL);
+    memcpy(outputs_new[i].buf, outputs[i].buf, outputs[i].sz);
+    outputs_new[i].sz = outputs[i].sz;
+  }
+  DropEnhancementLayers(&outputs_new[0], 10, 3, true);
+  DecodeNFrames(&outputs_new[0], 10);
+
+  for (int i = 0; i < 10; ++i) {
+    memcpy(outputs_new[i].buf, outputs[i].buf, outputs[i].sz);
+    outputs_new[i].sz = outputs[i].sz;
+  }
+  DropEnhancementLayers(&outputs_new[0], 10, 2, true);
+  DecodeNFrames(&outputs_new[0], 10);
+
+  for (int i = 0; i < 10; ++i) {
+    memcpy(outputs_new[i].buf, outputs[i].buf, outputs[i].sz);
+    outputs_new[i].sz = outputs[i].sz;
+  }
+  DropEnhancementLayers(&outputs_new[0], 10, 1, true);
+  DecodeNFrames(&outputs_new[0], 10);
+
+  FreeBitstreamBuffers(&outputs[0], 10);
+  FreeBitstreamBuffers(&outputs_new[0], 10);
 }
 
 }  // namespace

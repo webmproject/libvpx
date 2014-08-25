@@ -86,6 +86,7 @@ typedef struct SvcInternal {
   int layers;
   int layer;
   int is_keyframe;
+  int use_multiple_frame_contexts;
 
   FrameData *frame_list;
   FrameData *frame_temp;
@@ -366,6 +367,7 @@ static vpx_codec_err_t parse_options(SvcContext *svc_ctx, const char *options) {
   char *option_name;
   char *option_value;
   char *input_ptr;
+  SvcInternal *const si = get_svc_internal(svc_ctx);
   vpx_codec_err_t res = VPX_CODEC_OK;
 
   if (options == NULL) return VPX_CODEC_OK;
@@ -393,6 +395,8 @@ static vpx_codec_err_t parse_options(SvcContext *svc_ctx, const char *options) {
     } else if (strcmp("auto-alt-refs", option_name) == 0) {
       res = parse_auto_alt_ref(svc_ctx, option_value);
       if (res != VPX_CODEC_OK) break;
+    } else if (strcmp("multi-frame-contexts", option_name) == 0) {
+      si->use_multiple_frame_contexts = atoi(option_value);
     } else {
       svc_log(svc_ctx, SVC_LOG_ERROR, "invalid option: %s\n", option_name);
       res = VPX_CODEC_INVALID_PARAM;
@@ -401,6 +405,10 @@ static vpx_codec_err_t parse_options(SvcContext *svc_ctx, const char *options) {
     option_name = strtok_r(NULL, "=", &input_ptr);
   }
   free(input_string);
+
+  if (si->use_multiple_frame_contexts && svc_ctx->spatial_layers > 3)
+    res = VPX_CODEC_INVALID_PARAM;
+
   return res;
 }
 
@@ -534,7 +542,8 @@ vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
   enc_cfg->rc_buf_initial_sz = 500;
   enc_cfg->rc_buf_optimal_sz = 600;
   enc_cfg->rc_buf_sz = 1000;
-  enc_cfg->g_error_resilient = 1;
+  if (enc_cfg->g_error_resilient == 0 && si->use_multiple_frame_contexts == 0)
+    enc_cfg->g_error_resilient = 1;
 
   // Initialize codec
   res = vpx_codec_enc_init(codec_ctx, iface, enc_cfg, VPX_CODEC_USE_PSNR);
