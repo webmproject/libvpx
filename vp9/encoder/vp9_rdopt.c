@@ -1371,7 +1371,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
           if (best_rd < label_mv_thresh)
             break;
 
-          if (!is_best_mode(cpi->oxcf.mode)) {
+          if (cpi->oxcf.mode != BEST) {
             // use previous block's result as next block's MV predictor.
             if (i > 0) {
               bsi->mvp.as_int = mi->bmi[i - 1].as_mv[0].as_int;
@@ -1413,7 +1413,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                           INT_MAX, 1);
 
           // Should we do a full search (best quality only)
-          if (is_best_mode(cpi->oxcf.mode)) {
+          if (cpi->oxcf.mode == BEST) {
             int_mv *const best_mv = &mi->bmi[i].as_mv[0];
             /* Check if mvp_full is within the range. */
             clamp_mv(&mvp_full, x->mv_col_min, x->mv_col_max,

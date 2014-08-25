@@ -462,7 +462,7 @@ void vp9_set_rd_speed_thresholds(VP9_COMP *cpi) {
 
   // Set baseline threshold values.
   for (i = 0; i < MAX_MODES; ++i)
-    rd->thresh_mult[i] = is_best_mode(cpi->oxcf.mode) ? -500 : 0;
+    rd->thresh_mult[i] = cpi->oxcf.mode == BEST ? -500 : 0;
 
   rd->thresh_mult[THR_NEARESTMV] = 0;
   rd->thresh_mult[THR_NEARESTG] = 0;
@@ -548,7 +548,7 @@ void vp9_set_rd_speed_thresholds_sub8x8(VP9_COMP *cpi) {
   int i;
 
   for (i = 0; i < MAX_REFS; ++i)
-    rd->thresh_mult_sub8x8[i] = is_best_mode(cpi->oxcf.mode)  ? -500 : 0;
+    rd->thresh_mult_sub8x8[i] = cpi->oxcf.mode == BEST ? -500 : 0;
 
   rd->thresh_mult_sub8x8[THR_LAST] += 2500;
   rd->thresh_mult_sub8x8[THR_GOLD] += 2500;

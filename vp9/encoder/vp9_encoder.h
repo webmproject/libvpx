@@ -223,10 +223,6 @@ static INLINE int is_lossless_requested(const VP9EncoderConfig *cfg) {
   return cfg->best_allowed_q == 0 && cfg->worst_allowed_q == 0;
 }
 
-static INLINE int is_best_mode(MODE mode) {
-  return mode == BEST;
-}
-
 typedef struct VP9_COMP {
   QUANTS quants;
   MACROBLOCK mb;
