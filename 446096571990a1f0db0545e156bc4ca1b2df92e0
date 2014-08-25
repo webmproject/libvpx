@@ -16,6 +16,24 @@
       "revId": "446096571990a1f0db0545e156bc4ca1b2df92e0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//aOs\u003d",
+        "filename": "vpx/src/vpx_encoder.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-08-25T21:51:14Z",
+      "side": 1,
+      "message": "I looked at this function, unfortunately cfg is modified, so I decided to skip it for now. I didn\u0027t look at iface, that\u0027s probably a good idea to make it const as well (in a separate patch).",
+      "parentUuid": "AAAAdn//aPI\u003d",
+      "revId": "446096571990a1f0db0545e156bc4ca1b2df92e0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
