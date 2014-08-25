@@ -2424,8 +2424,8 @@ static int frame_is_reference(const VP9_COMP *cpi) {
          cm->seg.update_data;
 }
 
-void adjust_frame_rate(VP9_COMP *cpi) {
-  const struct lookahead_entry *const source = cpi->source;
+void adjust_frame_rate(VP9_COMP *cpi,
+                       const struct lookahead_entry *source) {
   int64_t this_duration;
   int step = 0;
 
@@ -2481,7 +2481,8 @@ static int get_arf_src_index(VP9_COMP *cpi) {
   return arf_src_index;
 }
 
-static void check_src_altref(VP9_COMP *cpi) {
+static void check_src_altref(VP9_COMP *cpi,
+                             const struct lookahead_entry *source) {
   RATE_CONTROL *const rc = &cpi->rc;
 
   if (cpi->oxcf.pass == 2) {
@@ -2490,7 +2491,7 @@ static void check_src_altref(VP9_COMP *cpi) {
       (gf_group->update_type[gf_group->index] == OVERLAY_UPDATE);
   } else {
     rc->is_src_frame_alt_ref = cpi->alt_ref_source &&
-                               (cpi->source == cpi->alt_ref_source);
+                               (source == cpi->alt_ref_source);
   }
 
   if (rc->is_src_frame_alt_ref) {
@@ -2513,6 +2514,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   struct vpx_usec_timer  cmptimer;
   YV12_BUFFER_CONFIG *force_src_buffer = NULL;
   struct lookahead_entry *last_source = NULL;
+  struct lookahead_entry *source = NULL;
   MV_REFERENCE_FRAME ref_frame;
   int arf_src_index;
 
@@ -2524,8 +2526,6 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   }
 
   vpx_usec_timer_start(&cmptimer);
-
-  cpi->source = NULL;
 
   vp9_set_high_precision_mv(cpi, ALTREF_HIGH_PRECISION_MV);
 
@@ -2543,13 +2543,12 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
 #if CONFIG_SPATIAL_SVC
     if (is_spatial_svc(cpi))
-      cpi->source = vp9_svc_lookahead_peek(cpi, cpi->lookahead,
-                                           arf_src_index, 0);
+      source = vp9_svc_lookahead_peek(cpi, cpi->lookahead, arf_src_index, 0);
     else
 #endif
-      cpi->source = vp9_lookahead_peek(cpi->lookahead, arf_src_index);
-    if (cpi->source != NULL) {
-      cpi->alt_ref_source = cpi->source;
+      source = vp9_lookahead_peek(cpi->lookahead, arf_src_index);
+    if (source != NULL) {
+      cpi->alt_ref_source = source;
 
 #if CONFIG_SPATIAL_SVC
       if (is_spatial_svc(cpi) && cpi->svc.spatial_layer_id > 0) {
@@ -2583,7 +2582,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     }
   }
 
-  if (!cpi->source) {
+  if (!source) {
     // Get last frame source.
     if (cm->current_video_frame > 0) {
 #if CONFIG_SPATIAL_SVC
@@ -2599,29 +2598,28 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     // Read in the source frame.
 #if CONFIG_SPATIAL_SVC
     if (is_spatial_svc(cpi))
-      cpi->source = vp9_svc_lookahead_pop(cpi, cpi->lookahead, flush);
+      source = vp9_svc_lookahead_pop(cpi, cpi->lookahead, flush);
     else
 #endif
-      cpi->source = vp9_lookahead_pop(cpi->lookahead, flush);
-    if (cpi->source != NULL) {
+      source = vp9_lookahead_pop(cpi->lookahead, flush);
+    if (source != NULL) {
       cm->show_frame = 1;
       cm->intra_only = 0;
 
       // Check to see if the frame should be encoded as an arf overlay.
-      check_src_altref(cpi);
+      check_src_altref(cpi, source);
     }
   }
 
-  if (cpi->source) {
+  if (source) {
     cpi->un_scaled_source = cpi->Source = force_src_buffer ? force_src_buffer
-                                                           : &cpi->source->img;
+                                                           : &source->img;
 
     cpi->unscaled_last_source = last_source != NULL ? &last_source->img : NULL;
 
-    *time_stamp = cpi->source->ts_start;
-    *time_end = cpi->source->ts_end;
-    *frame_flags =
-        (cpi->source->flags & VPX_EFLAG_FORCE_KF) ? FRAMEFLAGS_KEY : 0;
+    *time_stamp = source->ts_start;
+    *time_end = source->ts_end;
+    *frame_flags = (source->flags & VPX_EFLAG_FORCE_KF) ? FRAMEFLAGS_KEY : 0;
 
   } else {
     *size = 0;
@@ -2632,9 +2630,9 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     return -1;
   }
 
-  if (cpi->source->ts_start < cpi->first_time_stamp_ever) {
-    cpi->first_time_stamp_ever = cpi->source->ts_start;
-    cpi->last_end_time_stamp_seen = cpi->source->ts_start;
+  if (source->ts_start < cpi->first_time_stamp_ever) {
+    cpi->first_time_stamp_ever = source->ts_start;
+    cpi->last_end_time_stamp_seen = source->ts_start;
   }
 
   // Clear down mmx registers
@@ -2642,7 +2640,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
   // adjust frame rates based on timestamps given
   if (cm->show_frame) {
-    adjust_frame_rate(cpi);
+    adjust_frame_rate(cpi, source);
   }
 
   if (cpi->svc.number_temporal_layers > 1 &&
@@ -2714,7 +2712,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     const int lossless = is_lossless_requested(oxcf);
     cpi->mb.fwd_txm4x4 = lossless ? vp9_fwht4x4 : vp9_fdct4x4;
     cpi->mb.itxm_add = lossless ? vp9_iwht4x4_add : vp9_idct4x4_add;
-    vp9_first_pass(cpi);
+    vp9_first_pass(cpi, source);
   } else if (oxcf->pass == 2 &&
       (!cpi->use_svc || is_spatial_svc(cpi))) {
     Pass2Encode(cpi, size, dest, frame_flags);

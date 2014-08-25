@@ -121,7 +121,7 @@ struct VP9_COMP;
 
 void vp9_init_first_pass(struct VP9_COMP *cpi);
 void vp9_rc_get_first_pass_params(struct VP9_COMP *cpi);
-void vp9_first_pass(struct VP9_COMP *cpi);
+void vp9_first_pass(struct VP9_COMP *cpi, const struct lookahead_entry *source);
 void vp9_end_first_pass(struct VP9_COMP *cpi);
 
 void vp9_init_second_pass(struct VP9_COMP *cpi);
