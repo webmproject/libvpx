@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//aO8\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-08-25T21:48:44Z",
+      "side": 1,
+      "message": "vp9_zero?",
+      "revId": "ca25b6828ca474ef7b6d44597ebb8b60fb26a60f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//aO4\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-08-25T21:48:44Z",
+      "side": 1,
+      "message": "vp9_zero?",
+      "revId": "ca25b6828ca474ef7b6d44597ebb8b60fb26a60f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//aO0\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2080,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-08-25T21:48:44Z",
+      "side": 1,
+      "message": "I think it is better to return mask value from this function and make assignment to cpi-\u003esf.interp_filter_search_mask  outside (in this case you could use const for cpi pointer).",
+      "revId": "ca25b6828ca474ef7b6d44597ebb8b60fb26a60f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//aPA\u003d",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 293,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-08-25T21:48:44Z",
+      "side": 1,
+      "message": "MAX_REF_FRAMES instead of 4 ?",
+      "revId": "ca25b6828ca474ef7b6d44597ebb8b60fb26a60f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
