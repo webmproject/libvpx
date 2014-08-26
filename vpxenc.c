@@ -321,7 +321,7 @@ static const arg_def_t *kf_args[] = {
 static const arg_def_t noise_sens = ARG_DEF(NULL, "noise-sensitivity", 1,
                                             "Noise sensitivity (frames to blur)");
 static const arg_def_t sharpness = ARG_DEF(NULL, "sharpness", 1,
-                                           "Filter sharpness (0-7)");
+                                           "Loop filter sharpness (0..7)");
 static const arg_def_t static_thresh = ARG_DEF(NULL, "static-thresh", 1,
                                                "Motion detection threshold");
 static const arg_def_t cpu_used = ARG_DEF(NULL, "cpu-used", 1,
@@ -329,11 +329,11 @@ static const arg_def_t cpu_used = ARG_DEF(NULL, "cpu-used", 1,
 static const arg_def_t auto_altref = ARG_DEF(NULL, "auto-alt-ref", 1,
                                              "Enable automatic alt reference frames");
 static const arg_def_t arnr_maxframes = ARG_DEF(NULL, "arnr-maxframes", 1,
-                                                "AltRef Max Frames");
+                                                "AltRef max frames (0..15)");
 static const arg_def_t arnr_strength = ARG_DEF(NULL, "arnr-strength", 1,
-                                               "AltRef Strength");
+                                               "AltRef filter strength (0..6)");
 static const arg_def_t arnr_type = ARG_DEF(NULL, "arnr-type", 1,
-                                           "AltRef Type");
+                                           "AltRef type");
 static const struct arg_enum_list tuning_enum[] = {
   {"psnr", VP8_TUNE_PSNR},
   {"ssim", VP8_TUNE_SSIM},
