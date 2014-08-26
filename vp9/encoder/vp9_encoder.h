@@ -372,8 +372,6 @@ typedef struct VP9_COMP {
 
   int dummy_packing;    /* flag to indicate if packing is dummy */
 
-  unsigned int tx_stepdown_count[TX_SIZES];
-
   int initial_width;
   int initial_height;
 
