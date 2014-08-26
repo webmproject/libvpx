@@ -378,7 +378,7 @@ static const arg_def_t aq_mode = ARG_DEF(
     "Adaptive quantization mode (0: off (default), 1: variance 2: complexity, "
     "3: cyclic refresh)");
 static const arg_def_t frame_periodic_boost = ARG_DEF(
-    NULL, "frame_boost", 1,
+    NULL, "frame-boost", 1,
     "Enable frame periodic boost (0: off (default), 1: on)");
 
 static const struct arg_enum_list tune_content_enum[] = {
