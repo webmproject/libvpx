@@ -41,6 +41,40 @@ vpxenc_can_encode_vp9() {
   fi
 }
 
+# Echo vpxenc command line parameters allowing use of
+# hantro_collage_w352h288.yuv as input.
+yuv_input_hantro_collage() {
+  echo ""${YUV_RAW_INPUT}"
+       --width="${YUV_RAW_INPUT_WIDTH}"
+       --height="${YUV_RAW_INPUT_HEIGHT}""
+}
+
+# Echo default vpxenc real time encoding params. $1 is the codec, which defaults
+# to vp8 if unspecified.
+vpxenc_rt_params() {
+  local readonly codec="${1:-vp8}"
+  echo "--codec=${codec}
+    --buf-initial-sz=500
+    --buf-optimal-sz=600
+    --buf-sz=1000
+    --cpu-used=-5
+    --end-usage=cbr
+    --error-resilient=1
+    --kf-max-dist=90000
+    --lag-in-frames=0
+    --max-intra-rate=300
+    --max-q=56
+    --min-q=2
+    --noise-sensitivity=0
+    --overshoot-pct=50
+    --passes=1
+    --profile=0
+    --resize-allowed=0
+    --rt
+    --static-thresh=0
+    --undershoot-pct=50"
+}
+
 # Wrapper function for running vpxenc with pipe input. Requires that
 # LIBVPX_BIN_PATH points to the directory containing vpxenc. $1 is used as the
 # input file path and shifted away. All remaining parameters are passed through
@@ -69,10 +103,8 @@ vpxenc() {
 vpxenc_vp8_ivf() {
   if [ "$(vpxenc_can_encode_vp8)" = "yes" ]; then
     local readonly output="${VPX_TEST_OUTPUT_DIR}/vp8.ivf"
-    vpxenc "${YUV_RAW_INPUT}" \
+    vpxenc $(yuv_input_hantro_collage) \
       --codec=vp8 \
-      --width="${YUV_RAW_INPUT_WIDTH}" \
-      --height="${YUV_RAW_INPUT_HEIGHT}" \
       --limit="${TEST_FRAMES}" \
       --ivf \
       --output="${output}"
@@ -88,10 +120,8 @@ vpxenc_vp8_webm() {
   if [ "$(vpxenc_can_encode_vp8)" = "yes" ] && \
      [ "$(webm_io_available)" = "yes" ]; then
     local readonly output="${VPX_TEST_OUTPUT_DIR}/vp8.webm"
-    vpxenc "${YUV_RAW_INPUT}" \
+    vpxenc $(yuv_input_hantro_collage) \
       --codec=vp8 \
-      --width="${YUV_RAW_INPUT_WIDTH}" \
-      --height="${YUV_RAW_INPUT_HEIGHT}" \
       --limit="${TEST_FRAMES}" \
       --output="${output}"
 
@@ -106,31 +136,9 @@ vpxenc_vp8_webm_rt() {
   if [ "$(vpxenc_can_encode_vp8)" = "yes" ] && \
      [ "$(webm_io_available)" = "yes" ]; then
     local readonly output="${VPX_TEST_OUTPUT_DIR}/vp8_rt.webm"
-    vpxenc "${YUV_RAW_INPUT}" \
-      --codec=vp8 \
-      --width="${YUV_RAW_INPUT_WIDTH}" \
-      --height="${YUV_RAW_INPUT_HEIGHT}" \
-      --output="${output}" \
-      --buf-initial-sz=500 \
-      --buf-optimal-sz=600 \
-      --buf-sz=1000 \
-      --cpu-used=-5 \
-      --end-usage=cbr \
-      --error-resilient=1 \
-      --kf-max-dist=90000 \
-      --lag-in-frames=0 \
-      --max-intra-rate=300 \
-      --max-q=56 \
-      --min-q=2 \
-      --noise-sensitivity=0 \
-      --overshoot-pct=50 \
-      --passes=1 \
-      --profile=0 \
-      --resize-allowed=0 \
-      --rt \
-      --static-thresh=0 \
-      --undershoot-pct=50
-
+    vpxenc $(yuv_input_hantro_collage) \
+      $(vpxenc_rt_params vp8) \
+      --output="${output}"
     if [ ! -e "${output}" ]; then
       elog "Output file does not exist."
       return 1
@@ -142,10 +150,8 @@ vpxenc_vp8_webm_2pass() {
   if [ "$(vpxenc_can_encode_vp8)" = "yes" ] && \
      [ "$(webm_io_available)" = "yes" ]; then
     local readonly output="${VPX_TEST_OUTPUT_DIR}/vp8.webm"
-    vpxenc "${YUV_RAW_INPUT}" \
+    vpxenc $(yuv_input_hantro_collage) \
       --codec=vp8 \
-      --width="${YUV_RAW_INPUT_WIDTH}" \
-      --height="${YUV_RAW_INPUT_HEIGHT}" \
       --limit="${TEST_FRAMES}" \
       --output="${output}" \
       --passes=2
@@ -163,10 +169,8 @@ vpxenc_vp8_webm_lag10_frames20() {
     local readonly lag_total_frames=20
     local readonly lag_frames=10
     local readonly output="${VPX_TEST_OUTPUT_DIR}/vp8_lag10_frames20.webm"
-    vpxenc "${YUV_RAW_INPUT}" \
+    vpxenc $(yuv_input_hantro_collage) \
       --codec=vp8 \
-      --width="${YUV_RAW_INPUT_WIDTH}" \
-      --height="${YUV_RAW_INPUT_HEIGHT}" \
       --limit="${lag_total_frames}" \
       --lag-in-frames="${lag_frames}" \
       --output="${output}" \
@@ -183,13 +187,11 @@ vpxenc_vp8_webm_lag10_frames20() {
 vpxenc_vp8_ivf_piped_input() {
   if [ "$(vpxenc_can_encode_vp8)" = "yes" ]; then
     local readonly output="${VPX_TEST_OUTPUT_DIR}/vp8_piped_input.ivf"
-      vpxenc_pipe "${YUV_RAW_INPUT}" \
-        --codec=vp8 \
-        --width="${YUV_RAW_INPUT_WIDTH}" \
-        --height="${YUV_RAW_INPUT_HEIGHT}" \
-        --limit="${TEST_FRAMES}" \
-        --ivf \
-        --output="${output}"
+    vpxenc_pipe $(yuv_input_hantro_collage) \
+      --codec=vp8 \
+      --limit="${TEST_FRAMES}" \
+      --ivf \
+      --output="${output}"
 
     if [ ! -e "${output}" ]; then
       elog "Output file does not exist."
@@ -201,10 +203,8 @@ vpxenc_vp8_ivf_piped_input() {
 vpxenc_vp9_ivf() {
   if [ "$(vpxenc_can_encode_vp9)" = "yes" ]; then
     local readonly output="${VPX_TEST_OUTPUT_DIR}/vp9.ivf"
-    vpxenc "${YUV_RAW_INPUT}" \
+    vpxenc $(yuv_input_hantro_collage) \
       --codec=vp9 \
-      --width="${YUV_RAW_INPUT_WIDTH}" \
-      --height="${YUV_RAW_INPUT_HEIGHT}" \
       --limit="${TEST_FRAMES}" \
       --ivf \
       --output="${output}"
@@ -220,10 +220,8 @@ vpxenc_vp9_webm() {
   if [ "$(vpxenc_can_encode_vp9)" = "yes" ] && \
      [ "$(webm_io_available)" = "yes" ]; then
     local readonly output="${VPX_TEST_OUTPUT_DIR}/vp9.webm"
-    vpxenc "${YUV_RAW_INPUT}" \
+    vpxenc $(yuv_input_hantro_collage) \
       --codec=vp9 \
-      --width="${YUV_RAW_INPUT_WIDTH}" \
-      --height="${YUV_RAW_INPUT_HEIGHT}" \
       --limit="${TEST_FRAMES}" \
       --output="${output}"
 
@@ -238,30 +236,9 @@ vpxenc_vp9_webm_rt() {
   if [ "$(vpxenc_can_encode_vp9)" = "yes" ] && \
      [ "$(webm_io_available)" = "yes" ]; then
     local readonly output="${VPX_TEST_OUTPUT_DIR}/vp9_rt.webm"
-    vpxenc "${YUV_RAW_INPUT}" \
-      --codec=vp9 \
-      --width="${YUV_RAW_INPUT_WIDTH}" \
-      --height="${YUV_RAW_INPUT_HEIGHT}" \
-      --output="${output}" \
-      --buf-initial-sz=500 \
-      --buf-optimal-sz=600 \
-      --buf-sz=1000 \
-      --cpu-used=-5 \
-      --end-usage=cbr \
-      --error-resilient=1 \
-      --kf-max-dist=90000 \
-      --lag-in-frames=0 \
-      --max-intra-rate=300 \
-      --max-q=56 \
-      --min-q=2 \
-      --noise-sensitivity=0 \
-      --overshoot-pct=50 \
-      --passes=1 \
-      --profile=0 \
-      --resize-allowed=0 \
-      --rt \
-      --static-thresh=0 \
-      --undershoot-pct=50
+    vpxenc $(yuv_input_hantro_collage) \
+      $(vpxenc_rt_params vp9) \
+      --output="${output}"
 
     if [ ! -e "${output}" ]; then
       elog "Output file does not exist."
@@ -274,10 +251,8 @@ vpxenc_vp9_webm_2pass() {
   if [ "$(vpxenc_can_encode_vp9)" = "yes" ] && \
      [ "$(webm_io_available)" = "yes" ]; then
     local readonly output="${VPX_TEST_OUTPUT_DIR}/vp9.webm"
-    vpxenc "${YUV_RAW_INPUT}" \
+    vpxenc $(yuv_input_hantro_collage) \
       --codec=vp9 \
-      --width="${YUV_RAW_INPUT_WIDTH}" \
-      --height="${YUV_RAW_INPUT_HEIGHT}" \
       --limit="${TEST_FRAMES}" \
       --output="${output}" \
       --passes=2
@@ -292,10 +267,8 @@ vpxenc_vp9_webm_2pass() {
 vpxenc_vp9_ivf_lossless() {
   if [ "$(vpxenc_can_encode_vp9)" = "yes" ]; then
     local readonly output="${VPX_TEST_OUTPUT_DIR}/vp9_lossless.ivf"
-    vpxenc "${YUV_RAW_INPUT}" \
+    vpxenc $(yuv_input_hantro_collage) \
       --codec=vp9 \
-      --width="${YUV_RAW_INPUT_WIDTH}" \
-      --height="${YUV_RAW_INPUT_HEIGHT}" \
       --limit="${TEST_FRAMES}" \
       --ivf \
       --output="${output}" \
@@ -311,10 +284,8 @@ vpxenc_vp9_ivf_lossless() {
 vpxenc_vp9_ivf_minq0_maxq0() {
   if [ "$(vpxenc_can_encode_vp9)" = "yes" ]; then
     local readonly output="${VPX_TEST_OUTPUT_DIR}/vp9_lossless_minq0_maxq0.ivf"
-    vpxenc "${YUV_RAW_INPUT}" \
+    vpxenc $(yuv_input_hantro_collage) \
       --codec=vp9 \
-      --width="${YUV_RAW_INPUT_WIDTH}" \
-      --height="${YUV_RAW_INPUT_HEIGHT}" \
       --limit="${TEST_FRAMES}" \
       --ivf \
       --output="${output}" \
@@ -334,10 +305,8 @@ vpxenc_vp9_webm_lag10_frames20() {
     local readonly lag_total_frames=20
     local readonly lag_frames=10
     local readonly output="${VPX_TEST_OUTPUT_DIR}/vp9_lag10_frames20.webm"
-    vpxenc "${YUV_RAW_INPUT}" \
+    vpxenc $(yuv_input_hantro_collage) \
       --codec=vp9 \
-      --width="${YUV_RAW_INPUT_WIDTH}" \
-      --height="${YUV_RAW_INPUT_HEIGHT}" \
       --limit="${lag_total_frames}" \
       --lag-in-frames="${lag_frames}" \
       --output="${output}" \
