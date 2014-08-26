@@ -41,7 +41,10 @@ class DatarateTestLarge : public ::libvpx_test::EncoderTest,
   }
 
   virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
-                                  ::libvpx_test::Encoder* /*encoder*/) {
+                                  ::libvpx_test::Encoder *encoder) {
+    if (video->frame() == 1) {
+      encoder->Control(VP8E_SET_NOISE_SENSITIVITY, denoiser_on_);
+    }
     const vpx_rational_t tb = video->timebase();
     timebase_ = static_cast<double>(tb.num) / tb.den;
     duration_ = 0;
@@ -120,9 +123,43 @@ class DatarateTestLarge : public ::libvpx_test::EncoderTest,
   double file_datarate_;
   double effective_datarate_;
   size_t bits_in_last_frame_;
+  int denoiser_on_;
 };
 
+TEST_P(DatarateTestLarge, BasicBufferModelDenoiserOff) {
+  denoiser_on_ = 0;
+  cfg_.rc_buf_initial_sz = 500;
+  cfg_.rc_dropframe_thresh = 1;
+  cfg_.rc_max_quantizer = 56;
+  cfg_.rc_end_usage = VPX_CBR;
+  // 2 pass cbr datarate control has a bug hidden by the small # of
+  // frames selected in this encode. The problem is that even if the buffer is
+  // negative we produce a keyframe on a cutscene. Ignoring datarate
+  // constraints
+  // TODO(jimbankoski): ( Fix when issue
+  // http://code.google.com/p/webm/issues/detail?id=495 is addressed. )
+  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+                                       30, 1, 0, 140);
+
+  // There is an issue for low bitrates in real-time mode, where the
+  // effective_datarate slightly overshoots the target bitrate.
+  // This is same the issue as noted about (#495).
+  // TODO(jimbankoski/marpan): Update test to run for lower bitrates (< 100),
+  // when the issue is resolved.
+  for (int i = 100; i < 800; i += 200) {
+    cfg_.rc_target_bitrate = i;
+    ResetModel();
+    ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+    ASSERT_GE(cfg_.rc_target_bitrate, effective_datarate_ * 0.95)
+        << " The datarate for the file exceeds the target!";
+
+    ASSERT_LE(cfg_.rc_target_bitrate, file_datarate_ * 1.3)
+        << " The datarate for the file missed the target!";
+  }
+}
+
 TEST_P(DatarateTestLarge, BasicBufferModel) {
+  denoiser_on_ = 1;
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_dropframe_thresh = 1;
   cfg_.rc_max_quantizer = 56;
@@ -154,6 +191,7 @@ TEST_P(DatarateTestLarge, BasicBufferModel) {
 }
 
 TEST_P(DatarateTestLarge, ChangingDropFrameThresh) {
+  denoiser_on_ = 1;
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_max_quantizer = 36;
   cfg_.rc_end_usage = VPX_CBR;
