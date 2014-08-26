@@ -804,6 +804,23 @@ static int64_t ticks_to_timebase_units(const vpx_rational_t *timebase,
   return (n * timebase->den + round) / timebase->num / TICKS_PER_SEC;
 }
 
+static vpx_codec_frame_flags_t get_frame_pkt_flags(const VP9_COMP *cpi,
+                                                   unsigned int lib_flags) {
+  vpx_codec_frame_flags_t flags = lib_flags << 16;
+
+  if (lib_flags & FRAMEFLAGS_KEY
+#if CONFIG_SPATIAL_SVC
+      || (is_spatial_svc(cpi) && cpi->svc.layer_context[0].is_key_frame)
+#endif
+        )
+    flags |= VPX_FRAME_IS_KEY;
+
+  if (cpi->droppable)
+    flags |= VPX_FRAME_IS_DROPPABLE;
+
+  return flags;
+}
+
 static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
                                       const vpx_image_t *img,
                                       vpx_codec_pts_t pts,
@@ -934,18 +951,7 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
         pkt.data.frame.duration =
            (unsigned long)ticks_to_timebase_units(timebase,
                dst_end_time_stamp - dst_time_stamp);
-        pkt.data.frame.flags = lib_flags << 16;
-
-        if (lib_flags & FRAMEFLAGS_KEY
-#if CONFIG_SPATIAL_SVC
-            || (is_spatial_svc(cpi) &&
-                cpi->svc.layer_context[0].is_key_frame)
-#endif
-            )
-          pkt.data.frame.flags |= VPX_FRAME_IS_KEY;
-
-        if (cpi->droppable)
-          pkt.data.frame.flags |= VPX_FRAME_IS_DROPPABLE;
+        pkt.data.frame.flags = get_frame_pkt_flags(cpi, lib_flags);
 
         if (ctx->pending_cx_data) {
           ctx->pending_frame_sizes[ctx->pending_frame_count++] = size;
