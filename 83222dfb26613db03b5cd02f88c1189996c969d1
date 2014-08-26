@@ -88,6 +88,24 @@
       "revId": "83222dfb26613db03b5cd02f88c1189996c969d1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//aF8\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 328,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-26T17:46:51Z",
+      "side": 1,
+      "message": "So... then, yes, remove the abs when codec\u003d\u003dvp9...?\n\nDoes speed have no impact on vp9?\n\nMaybe add TODOs to clarify per codec differences in meaning/ranges to vpxenc usage.",
+      "parentUuid": "AAAAdn//aGE\u003d",
+      "revId": "83222dfb26613db03b5cd02f88c1189996c969d1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
