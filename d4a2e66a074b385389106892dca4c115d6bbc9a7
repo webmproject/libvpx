@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//aEc\u003d",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-26T19:55:13Z",
+      "side": 1,
+      "message": "it would be nice to make this additive via a param, instead of wiping out our existing coverage",
+      "revId": "d4a2e66a074b385389106892dca4c115d6bbc9a7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
