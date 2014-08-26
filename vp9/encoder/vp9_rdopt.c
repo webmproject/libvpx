@@ -2366,7 +2366,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   if (cm->interp_filter == SWITCHABLE)
-    *rate2 += vp9_get_switchable_rate(cpi);
+    *rate2 += rs;
 
   if (!is_comp_pred) {
     if (cpi->allow_encode_breakout)
