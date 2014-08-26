@@ -154,7 +154,7 @@ static vpx_image_t *img_alloc_helper(vpx_image_t   *img,
     goto fail;
 
   img->fmt = fmt;
-  img->bit_depth = (fmt & VPX_IMG_FMT_HIGH) ? 16 : 8;
+  img->bit_depth = (fmt & VPX_IMG_FMT_HIGHBITDEPTH) ? 16 : 8;
   img->w = w;
   img->h = h;
   img->x_chroma_shift = xcs;

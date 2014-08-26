@@ -47,7 +47,11 @@ void vp9_denoiser_update_frame_stats(MB_MODE_INFO *mbmi,
                                      PICK_MODE_CONTEXT *ctx);
 
 int vp9_denoiser_alloc(VP9_DENOISER *denoiser, int width, int height,
-                       int ssx, int ssy, int border);
+                       int ssx, int ssy,
+#if CONFIG_VP9_HIGHBITDEPTH
+                       int use_highbitdepth,
+#endif
+                       int border);
 
 void vp9_denoiser_free(VP9_DENOISER *denoiser);
 

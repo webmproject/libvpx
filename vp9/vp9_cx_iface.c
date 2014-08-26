@@ -37,7 +37,7 @@ struct vp9_extracfg {
   unsigned int                frame_parallel_decoding_mode;
   AQ_MODE                     aq_mode;
   unsigned int                frame_periodic_boost;
-  BIT_DEPTH                   bit_depth;
+  vpx_bit_depth_t             bit_depth;
   vp9e_tune_content           content;
 };
 
@@ -58,7 +58,7 @@ static struct vp9_extracfg default_extra_cfg = {
   0,                          // frame_parallel_decoding_mode
   NO_AQ,                      // aq_mode
   0,                          // frame_periodic_delta_q
-  BITS_8,                     // Bit depth
+  VPX_BITS_8,                 // Bit depth
   VP9E_CONTENT_DEFAULT        // content
 };
 
@@ -208,6 +208,8 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
   RANGE_CHECK(extra_cfg, arnr_max_frames, 0, 15);
   RANGE_CHECK_HI(extra_cfg, arnr_strength, 6);
   RANGE_CHECK(extra_cfg, cq_level, 0, 63);
+  RANGE_CHECK(cfg, g_bit_depth, VPX_BITS_8, VPX_BITS_12);
+  RANGE_CHECK(cfg, g_input_bit_depth, 8, 12);
   RANGE_CHECK(extra_cfg, content,
               VP9E_CONTENT_DEFAULT, VP9E_CONTENT_INVALID - 1);
 
@@ -266,12 +268,16 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
     }
   }
 
+#if !CONFIG_VP9_HIGHBITDEPTH
+  if (cfg->g_profile > (unsigned int)PROFILE_1)
+    ERROR("Profile > 1 not supported in this build configuration");
+#endif
   if (cfg->g_profile <= (unsigned int)PROFILE_1 &&
-      extra_cfg->bit_depth > BITS_8)
-    ERROR("High bit-depth not supported in profile < 2");
+      extra_cfg->bit_depth > VPX_BITS_8)
+    ERROR("Codec high bit-depth not supported in profile < 2");
   if (cfg->g_profile > (unsigned int)PROFILE_1 &&
-      extra_cfg->bit_depth == BITS_8)
-    ERROR("Bit-depth 8 not supported in profile > 1");
+      extra_cfg->bit_depth == VPX_BITS_8)
+    ERROR("Codec bit-depth 8 not supported in profile > 1");
 
   return VPX_CODEC_OK;
 }
@@ -303,6 +309,9 @@ static int get_image_bps(const vpx_image_t *img) {
     case VPX_IMG_FMT_I420: return 12;
     case VPX_IMG_FMT_I422: return 16;
     case VPX_IMG_FMT_I444: return 24;
+    case VPX_IMG_FMT_I42016: return 24;
+    case VPX_IMG_FMT_I42216: return 32;
+    case VPX_IMG_FMT_I44416: return 48;
     default: assert(0 && "Invalid image format"); break;
   }
   return 0;
@@ -317,6 +326,7 @@ static vpx_codec_err_t set_encoder_config(
   oxcf->width   = cfg->g_w;
   oxcf->height  = cfg->g_h;
   oxcf->bit_depth = extra_cfg->bit_depth;
+  oxcf->input_bit_depth = cfg->g_input_bit_depth;
   // guess a frame rate if out of whack, use 30
   oxcf->init_framerate = (double)cfg->g_timebase.den / cfg->g_timebase.num;
   if (oxcf->init_framerate > 180)
@@ -1246,6 +1256,9 @@ static vpx_codec_enc_cfg_map_t encoder_usage_cfg_map[] = {
 
       320,                // g_width
       240,                // g_height
+      VPX_BITS_8,         // g_bit_depth
+      8,                  // g_input_bit_depth
+
       {1, 30},            // g_timebase
 
       0,                  // g_error_resilient

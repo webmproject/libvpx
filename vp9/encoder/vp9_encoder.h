@@ -114,9 +114,10 @@ typedef enum {
 
 typedef struct VP9EncoderConfig {
   BITSTREAM_PROFILE profile;
-  BIT_DEPTH bit_depth;
+  vpx_bit_depth_t bit_depth;     // Codec bit-depth.
   int width;  // width of data passed to the compressor
   int height;  // height of data passed to the compressor
+  unsigned int input_bit_depth;  // Input bit depth.
   double init_framerate;  // set to passed in framerate
   int64_t target_bandwidth;  // bandwidth to be used in kilobits per second
 

@@ -465,6 +465,9 @@ void vp9_temporal_filter(VP9_COMP *cpi, int distance) {
         if (vp9_realloc_frame_buffer(&cpi->svc.scaled_frames[frame_used],
                                      cm->width, cm->height,
                                      cm->subsampling_x, cm->subsampling_y,
+#if CONFIG_VP9_HIGHBITDEPTH
+                                     cm->use_highbitdepth,
+#endif
                                      VP9_ENC_BORDER_IN_PIXELS, NULL, NULL,
                                      NULL))
           vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,

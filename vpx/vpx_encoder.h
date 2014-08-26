@@ -80,6 +80,9 @@ extern "C" {
    */
 #define VPX_CODEC_CAP_OUTPUT_PARTITION  0x20000
 
+/*! Can support input images at greater than 8 bitdepth.
+ */
+#define VPX_CODEC_CAP_HIGHBITDEPTH  0x40000
 
   /*! \brief Initialization-time Feature Enabling
    *
@@ -91,6 +94,7 @@ extern "C" {
 #define VPX_CODEC_USE_PSNR  0x10000 /**< Calculate PSNR on each frame */
 #define VPX_CODEC_USE_OUTPUT_PARTITION  0x20000 /**< Make the encoder output one
   partition at a time. */
+#define VPX_CODEC_USE_HIGHBITDEPTH 0x40000 /**< Use high bitdepth */
 
 
   /*!\brief Generic fixed size buffer structure
@@ -324,6 +328,21 @@ extern "C" {
      */
     unsigned int           g_h;
 
+    /*!\brief Bit-depth of the codec
+     *
+     * This value identifies the bit_depth of the codec,
+     * Only certain bit-depths are supported as identified in the
+     * vpx_bit_depth_t enum.
+     */
+    vpx_bit_depth_t        g_bit_depth;
+
+    /*!\brief Bit-depth of the input frames
+     *
+     * This value identifies the bit_depth of the input frames in bits.
+     * Note that the frames passed as input to the encoder must have
+     * this bit-depth.
+     */
+    unsigned int           g_input_bit_depth;
 
     /*!\brief Stream timebase units
      *
