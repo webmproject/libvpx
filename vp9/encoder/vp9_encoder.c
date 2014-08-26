@@ -2062,6 +2062,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
                                       uint8_t *dest,
                                       unsigned int *frame_flags) {
   VP9_COMMON *const cm = &cpi->common;
+  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   struct segmentation *const seg = &cm->seg;
   TX_SIZE t;
   int q;
@@ -2109,9 +2110,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     // The alternate reference frame cannot be active for a key frame.
     cpi->rc.source_alt_ref_active = 0;
 
-    cm->error_resilient_mode = (cpi->oxcf.error_resilient_mode != 0);
-    cm->frame_parallel_decoding_mode =
-      (cpi->oxcf.frame_parallel_decoding_mode != 0);
+    cm->error_resilient_mode = oxcf->error_resilient_mode;
 
     // By default, encoder assumes decoder can use prev_mi.
     if (cm->error_resilient_mode) {
@@ -2119,6 +2118,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
       cm->reset_frame_context = 0;
       cm->refresh_frame_context = 0;
     } else if (cm->intra_only) {
+      cm->frame_parallel_decoding_mode = oxcf->frame_parallel_decoding_mode;
       // Only reset the current context.
       cm->reset_frame_context = 2;
     }
@@ -2141,20 +2141,20 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   // static regions if indicated.
   // Only allowed in second pass of two pass (as requires lagged coding)
   // and if the relevant speed feature flag is set.
-  if (cpi->oxcf.pass == 2 && cpi->sf.static_segmentation)
+  if (oxcf->pass == 2 && cpi->sf.static_segmentation)
     configure_static_seg_features(cpi);
 
   // Check if the current frame is skippable for the partition search in the
   // second pass according to the first pass stats
-  if (cpi->oxcf.pass == 2 &&
+  if (oxcf->pass == 2 &&
       (!cpi->use_svc || is_spatial_svc(cpi))) {
     configure_skippable_frame(cpi);
   }
 
   // For 1 pass CBR, check if we are dropping this frame.
   // Never drop on key frame.
-  if (cpi->oxcf.pass == 0 &&
-      cpi->oxcf.rc_mode == VPX_CBR &&
+  if (oxcf->pass == 0 &&
+      oxcf->rc_mode == VPX_CBR &&
       cm->frame_type != KEY_FRAME) {
     if (vp9_rc_drop_frame(cpi)) {
       vp9_rc_postencode_update_drop_frame(cpi);
@@ -2166,9 +2166,9 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   vp9_clear_system_state();
 
 #if CONFIG_VP9_POSTPROC
-  if (cpi->oxcf.noise_sensitivity > 0) {
+  if (oxcf->noise_sensitivity > 0) {
     int l = 0;
-    switch (cpi->oxcf.noise_sensitivity) {
+    switch (oxcf->noise_sensitivity) {
       case 1:
         l = 20;
         break;
@@ -2209,7 +2209,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
 #ifdef OUTPUT_YUV_DENOISED
-  if (cpi->oxcf.noise_sensitivity > 0) {
+  if (oxcf->noise_sensitivity > 0) {
     vp9_write_yuv_frame_420(&cpi->denoiser.running_avg_y[INTRA_FRAME],
                             yuv_denoised_file);
   }
