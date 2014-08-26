@@ -2146,7 +2146,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   DECLARE_ALIGNED_ARRAY(16, uint8_t, tmp_buf, MAX_MB_PLANE * 64 * 64);
   int pred_exists = 0;
   int intpel_mv;
-  int64_t rd, best_rd = INT64_MAX;
+  int64_t rd, tmp_rd, best_rd = INT64_MAX;
   int best_needs_copy = 0;
   uint8_t *orig_dst[MAX_MB_PLANE];
   int orig_dst_stride[MAX_MB_PLANE];
@@ -2328,6 +2328,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
             (cm->interp_filter != SWITCHABLE &&
              cm->interp_filter == mbmi->interp_filter)) {
           pred_exists = 1;
+          tmp_rd = best_rd;
         }
       }
       restore_dst_buf(xd, orig_dst, orig_dst_stride);
@@ -2346,17 +2347,19 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         xd->plane[i].dst.stride = 64;
       }
     }
+    rd = tmp_rd + RDCOST(x->rdmult, x->rddiv, rs, 0);
   } else {
+    int tmp_rate;
+    int64_t tmp_dist;
     // Handles the special case when a filter that is not in the
-    // switchable list (ex. bilinear, 6-tap) is indicated at the frame level
+    // switchable list (ex. bilinear) is indicated at the frame level, or
+    // skip condition holds.
     vp9_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
+    model_rd_for_sb(cpi, bsize, x, xd, &tmp_rate, &tmp_dist);
+    rd = RDCOST(x->rdmult, x->rddiv, rs + tmp_rate, tmp_dist);
   }
 
   if (cpi->sf.use_rd_breakout && ref_best_rd < INT64_MAX) {
-    int tmp_rate;
-    int64_t tmp_dist;
-    model_rd_for_sb(cpi, bsize, x, xd, &tmp_rate, &tmp_dist);
-    rd = RDCOST(x->rdmult, x->rddiv, rs + tmp_rate, tmp_dist);
     // if current pred_error modeled rd is substantially more than the best
     // so far, do not bother doing full rd
     if (rd / 2 > ref_best_rd) {
