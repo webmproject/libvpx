@@ -887,7 +887,7 @@ int main_loop(int argc, const char **argv_) {
               display_height = display_size[1];
             }
           }
-          scaled_img = vpx_img_alloc(NULL, VPX_IMG_FMT_I420, display_width,
+          scaled_img = vpx_img_alloc(NULL, img->fmt, display_width,
                                      display_height, 16);
           scaled_img->bit_depth = img->bit_depth;
         }
