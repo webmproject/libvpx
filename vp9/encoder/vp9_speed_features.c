@@ -180,8 +180,8 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
 static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
                                  int speed, vp9e_tune_content content) {
   VP9_COMMON *const cm = &cpi->common;
-  const int frames_since_key =
-      cm->frame_type == KEY_FRAME ? 0 : cpi->rc.frames_since_key;
+  const int is_keyframe = cm->frame_type == KEY_FRAME;
+  const int frames_since_key = is_keyframe ? 0 : cpi->rc.frames_since_key;
   sf->static_segmentation = 0;
   sf->adaptive_rd_thresh = 1;
   sf->use_fast_coef_costing = 1;
@@ -277,17 +277,16 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
   }
 
   if (speed >= 5) {
-    sf->use_quant_fp = cm->frame_type == KEY_FRAME ? 0 : 1;
-    sf->auto_min_max_partition_size = (cm->frame_type == KEY_FRAME) ?
-        RELAXED_NEIGHBORING_MIN_MAX : STRICT_NEIGHBORING_MIN_MAX;
+    sf->use_quant_fp = !is_keyframe;
+    sf->auto_min_max_partition_size = is_keyframe ? RELAXED_NEIGHBORING_MIN_MAX
+                                                  : STRICT_NEIGHBORING_MIN_MAX;
     sf->max_partition_size = BLOCK_32X32;
     sf->min_partition_size = BLOCK_8X8;
     sf->partition_check =
         (frames_since_key % sf->last_partitioning_redo_frequency == 1);
-    sf->force_frame_boost = cm->frame_type == KEY_FRAME ||
-        (frames_since_key %
-            (sf->last_partitioning_redo_frequency << 1) == 1);
-    sf->max_delta_qindex = (cm->frame_type == KEY_FRAME) ? 20 : 15;
+    sf->force_frame_boost = is_keyframe ||
+        (frames_since_key % (sf->last_partitioning_redo_frequency << 1) == 1);
+    sf->max_delta_qindex = is_keyframe ? 20 : 15;
     sf->partition_search_type = REFERENCE_PARTITION;
     sf->use_nonrd_pick_mode = 1;
     sf->allow_skip_recode = 0;
@@ -305,8 +304,7 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->partition_search_type = SOURCE_VAR_BASED_PARTITION;
     sf->search_type_check_frequency = 50;
 
-    sf->tx_size_search_method = (cm->frame_type == KEY_FRAME) ?
-        USE_LARGESTALL : USE_TX_8X8;
+    sf->tx_size_search_method = is_keyframe ? USE_LARGESTALL : USE_TX_8X8;
 
     // This feature is only enabled when partition search is disabled.
     sf->reuse_inter_pred_sby = 1;
@@ -316,6 +314,7 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
 
     sf->mv.reduce_first_step_size = 1;
   }
+
   if (speed >= 7) {
     sf->mv.search_method = FAST_DIAMOND;
     sf->mv.fullpel_search_step_param = 10;
@@ -324,10 +323,12 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
         800 : 300;
     sf->elevate_newmv_thresh = 2500;
   }
+
   if (speed >= 12) {
     sf->elevate_newmv_thresh = 4000;
     sf->mv.subpel_force_stop = 2;
   }
+
   if (speed >= 13) {
     int i;
     sf->max_intra_bsize = BLOCK_32X32;
