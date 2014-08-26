@@ -34,6 +34,24 @@
       "revId": "83222dfb26613db03b5cd02f88c1189996c969d1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//aGU\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 328,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-26T17:39:34Z",
+      "side": 1,
+      "message": "Hah. Ok, then: Why do the real-time params suggest use of -5 for cpu-used? Does that actually do something within libvpx? Should that abs() call be removed?",
+      "parentUuid": "AAAAdn//aGc\u003d",
+      "revId": "83222dfb26613db03b5cd02f88c1189996c969d1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
