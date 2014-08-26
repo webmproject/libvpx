@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//aMo\u003d",
+        "filename": "examples/twopass_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-26T00:08:31Z",
+      "side": 1,
+      "message": "Either get rid of this line of white space, or...",
+      "revId": "6cde1285566b7fa4b9167c8e20c33e291643d173",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//aMk\u003d",
+        "filename": "examples/twopass_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-26T00:08:31Z",
+      "side": 1,
+      "message": "Add one here.",
+      "revId": "6cde1285566b7fa4b9167c8e20c33e291643d173",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
