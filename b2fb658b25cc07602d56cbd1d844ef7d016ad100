@@ -1,0 +1,191 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Z+w\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 40
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-08-27T18:36:45Z",
+      "side": 1,
+      "message": "Probably best to not include these code cleanups in a CL like this. IT just adds noise. You can do these very quickly in another CL.",
+      "revId": "b2fb658b25cc07602d56cbd1d844ef7d016ad100",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Z90\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 40
+      },
+      "lineNbr": 864,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-08-27T18:36:45Z",
+      "side": 1,
+      "message": "why col2?",
+      "revId": "b2fb658b25cc07602d56cbd1d844ef7d016ad100",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Z94\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 40
+      },
+      "lineNbr": 897,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-08-27T18:36:45Z",
+      "side": 1,
+      "message": "nit:80 chars",
+      "revId": "b2fb658b25cc07602d56cbd1d844ef7d016ad100",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Z9A\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.h",
+        "patchSetId": 40
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-08-27T18:36:45Z",
+      "side": 1,
+      "message": "In general, I\u0027m a little worried about adding bigger structures as a parameter to a bunch of functions. We want to break the bigger structures and only pass in what we need.",
+      "revId": "b2fb658b25cc07602d56cbd1d844ef7d016ad100",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Z9g\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 40
+      },
+      "lineNbr": 517,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-08-27T18:36:45Z",
+      "side": 1,
+      "message": "why Done?",
+      "revId": "b2fb658b25cc07602d56cbd1d844ef7d016ad100",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Z+U\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 40
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-08-27T18:36:45Z",
+      "side": 1,
+      "message": "The order of the lock seems wired here. Either old_idx needs to be checked under a locked mutex or put the lock right before \"pool-\u003eframe_bufs[old_idx].ref_count--;\"",
+      "revId": "b2fb658b25cc07602d56cbd1d844ef7d016ad100",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Z+Q\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 40
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-08-27T18:36:45Z",
+      "side": 1,
+      "message": "You could refactor the code after you initialize old_index. Not sure if it would be more readable though.",
+      "revId": "b2fb658b25cc07602d56cbd1d844ef7d016ad100",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Z+A\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 40
+      },
+      "lineNbr": 340,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-08-27T18:36:45Z",
+      "side": 1,
+      "message": "instead of having a bunch of pbi-\u003eframe_parallel_decode checks here and right below, it might be more readable to have one if check.",
+      "revId": "b2fb658b25cc07602d56cbd1d844ef7d016ad100",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Z9U\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 40
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-08-27T18:36:45Z",
+      "side": 1,
+      "message": "80 chars",
+      "revId": "b2fb658b25cc07602d56cbd1d844ef7d016ad100",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Z9c\u003d",
+        "filename": "vp9/decoder/vp9_dthread.h",
+        "patchSetId": 40
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-08-27T18:36:45Z",
+      "side": 1,
+      "message": "nit: 80chars",
+      "revId": "b2fb658b25cc07602d56cbd1d844ef7d016ad100",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Z/M\u003d",
+        "filename": "vpx/vpx_frame_buffer.h",
+        "patchSetId": 40
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-08-27T18:36:45Z",
+      "side": 1,
+      "message": "TODO: Add support to set number of worker threads dynamically. Or up the max number. I think we may want to go higher than 4.",
+      "revId": "b2fb658b25cc07602d56cbd1d844ef7d016ad100",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
