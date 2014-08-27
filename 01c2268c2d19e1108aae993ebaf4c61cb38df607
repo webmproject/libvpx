@@ -104,6 +104,23 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Z4o\u003d",
+        "filename": "examples/vp8_multi_resolution_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-27T23:21:41Z",
+      "side": 1,
+      "message": "Move this output usage_exit, then just call usage_exit here\n\nOR\n\nbraces",
+      "revId": "01c2268c2d19e1108aae993ebaf4c61cb38df607",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Z6o\u003d",
         "filename": "examples/vp8_multi_resolution_encoder.c",
         "patchSetId": 2
