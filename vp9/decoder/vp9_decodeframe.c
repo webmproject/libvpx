@@ -813,6 +813,8 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
 
   if (cm->lf.filter_level) {
     LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
+    // Be sure to sync as we might be resuming after a failed frame decode.
+    winterface->sync(&pbi->lf_worker);
     lf_data->frame_buffer = get_frame_new_buffer(cm);
     lf_data->cm = cm;
     vp9_copy(lf_data->planes, pbi->mb.plane);
