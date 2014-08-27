@@ -52,6 +52,24 @@
       "revId": "cbced6a80fe3ec44a9cae4445db2bdc9c6cecc49",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Z/I\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2242,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-08-27T16:42:24Z",
+      "side": 1,
+      "message": "rate2 has both motion vector cost and the mode cost, which could be fairly significant at lower bit-rate(?) It seems to be related to the bit-rate (i.e., Lagrangian multiplier applied to the rate cost) and the prediction quality of the NEARESTMV mode (i.e., the clip content).\n\nI saw many triggered cases in the first P frame coding for bus CIF, but mostly for 8x8 block sizes. Didn\u0027t run extensive speed test over easy clips though. \n\nRan the borg test to verify there is no compression performance change.",
+      "parentUuid": "AAAAdn//Z/Y\u003d",
+      "revId": "cbced6a80fe3ec44a9cae4445db2bdc9c6cecc49",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
