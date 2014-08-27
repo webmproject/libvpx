@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Z64\u003d",
+        "filename": "examples/vp8_multi_resolution_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-27T21:47:12Z",
+      "side": 1,
+      "message": "Adding a note here about --enable-multi-res-encoding being required at configure time to actually use this example would be very nice.",
+      "revId": "01c2268c2d19e1108aae993ebaf4c61cb38df607",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Z6s\u003d",
+        "filename": "examples/vp8_multi_resolution_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-27T21:47:12Z",
+      "side": 1,
+      "message": "Usage?",
+      "revId": "01c2268c2d19e1108aae993ebaf4c61cb38df607",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Z7Y\u003d",
+        "filename": "examples/vp8_multi_resolution_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-27T21:47:12Z",
+      "side": 1,
+      "message": "Make this const int, fix the naming style, (NUM_ENCODERS -\u003e kNumEncoders) and move it to main(). I don\u0027t think it ever needed to be a define (nor did it need to be global). You\u0027ll also need to relocate the above comment...\n\nIt would be nice if this file had the nice informative comment block the other examples currently have.",
+      "revId": "01c2268c2d19e1108aae993ebaf4c61cb38df607",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Z7k\u003d",
+        "filename": "examples/vp8_multi_resolution_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-27T21:47:12Z",
+      "side": 1,
+      "message": "Move these up with other includes-- no need to preserve what was there when it was wrong in the first place. (Keeping the libyuv comment probably isn\u0027t necessary either, given that the include path repeats it twice).",
+      "revId": "01c2268c2d19e1108aae993ebaf4c61cb38df607",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Z60\u003d",
+        "filename": "examples/vp8_multi_resolution_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-27T21:47:12Z",
+      "side": 1,
+      "message": ". at the end",
+      "revId": "01c2268c2d19e1108aae993ebaf4c61cb38df607",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Z6w\u003d",
+        "filename": "examples/vp8_multi_resolution_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-27T21:47:12Z",
+      "side": 1,
+      "message": "const",
+      "revId": "01c2268c2d19e1108aae993ebaf4c61cb38df607",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Z6o\u003d",
+        "filename": "examples/vp8_multi_resolution_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-27T21:47:12Z",
+      "side": 1,
+      "message": "Encode frame.\n\nTthe rest of the comment is misleading-- we\u0027re only encoding one frame per loop iteration, and the existing comment implies otherwise.",
+      "revId": "01c2268c2d19e1108aae993ebaf4c61cb38df607",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
