@@ -1360,6 +1360,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
           int sadpb = x->sadperbit4;
           MV mvp_full;
           int max_mv;
+          int sad_list[5];
 
           /* Is the best so far sufficiently good that we cant justify doing
            * and new motion search. */
@@ -1403,9 +1404,11 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
           vp9_set_mv_search_range(x, &bsi->ref_mv[0]->as_mv);
 
-          bestsme = vp9_full_pixel_search(cpi, x, bsize, &mvp_full, step_param,
-                                          sadpb, &bsi->ref_mv[0]->as_mv, new_mv,
-                                          INT_MAX, 1);
+          bestsme = vp9_full_pixel_search(
+              cpi, x, bsize, &mvp_full, step_param, sadpb,
+              cpi->sf.mv.subpel_search_method != SUBPEL_TREE ? sad_list : NULL,
+              &bsi->ref_mv[0]->as_mv, new_mv,
+              INT_MAX, 1);
 
           // Should we do a full search (best quality only)
           if (cpi->oxcf.mode == BEST) {
@@ -1417,6 +1420,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                            sadpb, 16, &cpi->fn_ptr[bsize],
                                            &bsi->ref_mv[0]->as_mv,
                                            &best_mv->as_mv);
+            sad_list[1] = sad_list[2] = sad_list[3] = sad_list[4] = INT_MAX;
             if (thissme < bestsme) {
               bestsme = thissme;
               *new_mv = best_mv->as_mv;
@@ -1429,17 +1433,19 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
           if (bestsme < INT_MAX) {
             int distortion;
-            cpi->find_fractional_mv_step(x,
-                                         new_mv,
-                                         &bsi->ref_mv[0]->as_mv,
-                                         cm->allow_high_precision_mv,
-                                         x->errorperbit, &cpi->fn_ptr[bsize],
-                                         cpi->sf.mv.subpel_force_stop,
-                                         cpi->sf.mv.subpel_iters_per_step,
-                                         x->nmvjointcost, x->mvcost,
-                                         &distortion,
-                                         &x->pred_sse[mbmi->ref_frame[0]],
-                                         NULL, 0, 0);
+            cpi->find_fractional_mv_step(
+                x,
+                new_mv,
+                &bsi->ref_mv[0]->as_mv,
+                cm->allow_high_precision_mv,
+                x->errorperbit, &cpi->fn_ptr[bsize],
+                cpi->sf.mv.subpel_force_stop,
+                cpi->sf.mv.subpel_iters_per_step,
+                cond_sad_list(cpi, sad_list),
+                x->nmvjointcost, x->mvcost,
+                &distortion,
+                &x->pred_sse[mbmi->ref_frame[0]],
+                NULL, 0, 0);
 
             // save motion search result for use in compound prediction
             seg_mvs[i][mbmi->ref_frame[0]].as_mv = *new_mv;
@@ -1767,6 +1773,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   int tmp_col_max = x->mv_col_max;
   int tmp_row_min = x->mv_row_min;
   int tmp_row_max = x->mv_row_max;
+  int sad_list[5];
 
   const YV12_BUFFER_CONFIG *scaled_ref_frame = vp9_get_scaled_ref_frame(cpi,
                                                                         ref);
@@ -1839,6 +1846,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   mvp_full.row >>= 3;
 
   bestsme = vp9_full_pixel_search(cpi, x, bsize, &mvp_full, step_param, sadpb,
+                                  cond_sad_list(cpi, sad_list),
                                   &ref_mv, &tmp_mv->as_mv, INT_MAX, 1);
 
   x->mv_col_min = tmp_col_min;
@@ -1854,6 +1862,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                  &cpi->fn_ptr[bsize],
                                  cpi->sf.mv.subpel_force_stop,
                                  cpi->sf.mv.subpel_iters_per_step,
+                                 cond_sad_list(cpi, sad_list),
                                  x->nmvjointcost, x->mvcost,
                                  &dis, &x->pred_sse[ref], NULL, 0, 0);
   }
@@ -1978,6 +1987,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
           x->errorperbit,
           &cpi->fn_ptr[bsize],
           0, cpi->sf.mv.subpel_iters_per_step,
+          NULL,
           x->nmvjointcost, x->mvcost,
           &dis, &sse, second_pred,
           pw, ph);
