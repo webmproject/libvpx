@@ -350,27 +350,6 @@ static INLINE int partition_plane_context(const MACROBLOCKD *xd,
   return (left * 2 + above) + bsl * PARTITION_PLOFFSET;
 }
 
-#if CONFIG_VP9_HIGH
-static INLINE unsigned int bit_depth_to_bps(vpx_bit_depth_t bit_depth) {
-  int bps = 8;
-  switch (bit_depth) {
-    case VPX_BITS_8:
-      bps = 8;
-      break;
-    case VPX_BITS_10:
-      bps = 10;
-      break;
-    case VPX_BITS_12:
-      bps = 12;
-      break;
-    default:
-      assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10 or VPX_BITS_12");
-      break;
-  }
-  return bps;
-}
-#endif  // CONFIG_VP9_HIGH
-
 #ifdef __cplusplus
 }  // extern "C"
 #endif

@@ -215,9 +215,9 @@ extern "C" {
    * This enumeration determines the bit depth of the codec.
    */
   typedef enum vpx_bit_depth {
-    VPX_BITS_8,   /**< 8 bits  */
-    VPX_BITS_10,  /**< 10 bits */
-    VPX_BITS_12   /**< 12 bits */
+    VPX_BITS_8  = 8,   /**< 8 bits  */
+    VPX_BITS_10 = 10,  /**< 10 bits */
+    VPX_BITS_12 = 12   /**< 12 bits */
   } vpx_bit_depth_t;
 
   /*
@@ -466,8 +466,23 @@ extern "C" {
     return vpx_codec_control_(ctx, ctrl_id);\
   } /**<\hideinitializer*/
 
-
 #endif
+
+static inline unsigned int vpx_bit_depth_to_bps(vpx_bit_depth_t bit_depth) {
+  int bps = 8;
+  switch (bit_depth) {
+    case VPX_BITS_8:
+      bps = 8;
+      break;
+    case VPX_BITS_10:
+      bps = 10;
+      break;
+    case VPX_BITS_12:
+      bps = 12;
+      break;
+  }
+  return bps;
+}
 
   /*!@} - end defgroup codec*/
 #ifdef __cplusplus

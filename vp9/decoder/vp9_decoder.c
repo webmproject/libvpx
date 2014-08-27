@@ -58,6 +58,7 @@ VP9Decoder *vp9_decoder_create() {
 
   cm->error.setjmp = 1;
   initialize_dec();
+  cm->bit_depth = VPX_BITS_8;
 
   vp9_rtcd();
 

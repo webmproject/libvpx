@@ -520,7 +520,7 @@ static vpx_image_t *decoder_get_frame(vpx_codec_alg_priv_t *ctx,
     if (!(*iter)) {
       img = &ctx->img;
 #if CONFIG_VP9_HIGH
-      img->bit_depth = bit_depth_to_bps(ctx->pbi->common.bit_depth);
+      img->bit_depth = vpx_bit_depth_to_bps(ctx->pbi->common.bit_depth);
 #endif
       *iter = img;
     }

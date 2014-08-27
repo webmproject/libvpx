@@ -1200,9 +1200,9 @@ static void validate_stream_config(const struct stream_state *stream,
 
   // Check that the codec bit depth is greater than the input bit depth
   if (stream->config.cfg.g_in_bit_depth >
-      stream->config.cfg.g_bit_depth * 2 + 8) {
+      vpx_bit_depth_to_bps(stream->config.cfg.g_bit_depth)) {
     fatal("Stream %d: codec bit depth (%d) less than input bit depth (%d)",
-          stream->index, stream->config.cfg.g_bit_depth * 2 + 8,
+          stream->index, vpx_bit_depth_to_bps(stream->config.cfg.g_bit_depth),
           stream->config.cfg.g_in_bit_depth);
   }
 
@@ -1313,7 +1313,7 @@ static void show_stream_config(struct stream_state *stream,
   SHOW(g_profile);
   SHOW(g_w);
   SHOW(g_h);
-  SHOW(g_bit_depth * 2 + 8);  // tricks the macro to display in bits
+  SHOW(g_bit_depth);
   SHOW(g_in_bit_depth);
   SHOW(g_timebase.num);
   SHOW(g_timebase.den);
@@ -2057,12 +2057,9 @@ int main(int argc, const char **argv_) {
       FOREACH_STREAM({
         if (stream->config.cfg.g_in_bit_depth)
           input.bit_depth = stream->config.cfg.g_in_bit_depth;
-        else if (stream->config.cfg.g_bit_depth == VPX_BITS_8)
-          input.bit_depth = stream->config.cfg.g_in_bit_depth = 8;
-        else if (stream->config.cfg.g_bit_depth == VPX_BITS_10)
-          input.bit_depth = stream->config.cfg.g_in_bit_depth = 10;
-        else if (stream->config.cfg.g_bit_depth == VPX_BITS_12)
-          input.bit_depth = stream->config.cfg.g_in_bit_depth = 12;
+        else
+          input.bit_depth = stream->config.cfg.g_in_bit_depth =
+              vpx_bit_depth_to_bps(stream->config.cfg.g_bit_depth);
       });
       if (input.bit_depth > 8) input.fmt |= VPX_IMG_FMT_HIGH;
     } else {
@@ -2136,8 +2133,8 @@ int main(int argc, const char **argv_) {
         if (stream->config.cfg.g_profile == 0) {
           input_shift = 0;
         } else {
-          input_shift = (stream->config.cfg.g_bit_depth * 2 + 8) -
-                        stream->config.cfg.g_in_bit_depth;
+          input_shift = vpx_bit_depth_to_bps(stream->config.cfg.g_bit_depth) -
+              stream->config.cfg.g_in_bit_depth;
         }
       });
     }

@@ -657,7 +657,7 @@ static void setup_quantization(VP9_COMMON *const cm, MACROBLOCKD *const xd,
                  cm->uv_ac_delta_q == 0;
 
 #if CONFIG_VP9_HIGH
-  xd->bps = bit_depth_to_bps(cm->bit_depth);
+  xd->bps = vpx_bit_depth_to_bps(cm->bit_depth);
 #endif
 }
 
