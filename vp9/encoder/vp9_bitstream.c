@@ -294,6 +294,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
       vp9_write_token(w, vp9_switchable_interp_tree,
                       cm->fc.switchable_interp_prob[ctx],
                       &switchable_interp_encodings[mbmi->interp_filter]);
+      ++cpi->interp_filter_selected[0][mbmi->interp_filter];
     } else {
       assert(mbmi->interp_filter == cm->interp_filter);
     }
