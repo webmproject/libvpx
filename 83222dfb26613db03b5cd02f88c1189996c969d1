@@ -159,6 +159,24 @@
       "revId": "83222dfb26613db03b5cd02f88c1189996c969d1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//aA8\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 332,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-08-27T00:37:03Z",
+      "side": 1,
+      "message": "In the code:\n\nRANGE_CHECK(extra_cfg, arnr_max_frames, 0, 15);\n\nRANGE_CHECK_HI(extra_cfg, arnr_strength, 6);",
+      "parentUuid": "AAAAdn//aBI\u003d",
+      "revId": "83222dfb26613db03b5cd02f88c1189996c969d1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
