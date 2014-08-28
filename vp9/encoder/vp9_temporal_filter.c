@@ -145,6 +145,7 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
   int bestsme = INT_MAX;
   int distortion;
   unsigned int sse;
+  int sad_list[5];
 
   MV best_ref_mv1 = {0, 0};
   MV best_ref_mv1_full; /* full-pixel value of best_ref_mv1 */
@@ -168,6 +169,7 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
 
   // Ignore mv costing by sending NULL pointer instead of cost arrays
   vp9_hex_search(x, &best_ref_mv1_full, step_param, sadpb, 1,
+                 cond_sad_list(cpi, sad_list),
                  &cpi->fn_ptr[BLOCK_16X16], 0, &best_ref_mv1, ref_mv);
 
   // Ignore mv costing by sending NULL pointer instead of cost array
@@ -177,6 +179,7 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
                                          x->errorperbit,
                                          &cpi->fn_ptr[BLOCK_16X16],
                                          0, mv_sf->subpel_iters_per_step,
+                                         cond_sad_list(cpi, sad_list),
                                          NULL, NULL,
                                          &distortion, &sse, NULL, 0, 0);
 

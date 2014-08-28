@@ -126,6 +126,7 @@ static int combined_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   const int tmp_row_min = x->mv_row_min;
   const int tmp_row_max = x->mv_row_max;
   int rv = 0;
+  int sad_list[5];
   const YV12_BUFFER_CONFIG *scaled_ref_frame = vp9_get_scaled_ref_frame(cpi,
                                                                         ref);
   if (cpi->common.show_frame &&
@@ -152,8 +153,9 @@ static int combined_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   mvp_full.col >>= 3;
   mvp_full.row >>= 3;
 
-  vp9_full_pixel_search(cpi, x, bsize, &mvp_full, step_param, sadpb, &ref_mv,
-                        &tmp_mv->as_mv, INT_MAX, 0);
+  vp9_full_pixel_search(cpi, x, bsize, &mvp_full, step_param, sadpb,
+                        cond_sad_list(cpi, sad_list),
+                        &ref_mv, &tmp_mv->as_mv, INT_MAX, 0);
 
   x->mv_col_min = tmp_col_min;
   x->mv_col_max = tmp_col_max;
@@ -179,6 +181,7 @@ static int combined_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                  &cpi->fn_ptr[bsize],
                                  cpi->sf.mv.subpel_force_stop,
                                  cpi->sf.mv.subpel_iters_per_step,
+                                 cond_sad_list(cpi, sad_list),
                                  x->nmvjointcost, x->mvcost,
                                  &dis, &x->pred_sse[ref], NULL, 0, 0);
     x->pred_mv[ref] = tmp_mv->as_mv;
