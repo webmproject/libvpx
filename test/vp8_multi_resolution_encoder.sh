@@ -39,7 +39,7 @@ vp8_mre() {
     return 1
   fi
 
-  eval "${VPX_TEST_PREFIX}" "${encoder}" "$@"
+  eval "${VPX_TEST_PREFIX}" "${encoder}" "$@" ${devnull}
 }
 
 vp8_multi_resolution_encoder_three_formats() {
