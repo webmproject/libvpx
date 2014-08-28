@@ -2238,6 +2238,10 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
    * if the first is known */
   *rate2 += cost_mv_ref(cpi, this_mode, mbmi->mode_context[refs[0]]);
 
+  if (RDCOST(x->rdmult, x->rddiv, *rate2, 0) > ref_best_rd &&
+      mbmi->mode != NEARESTMV)
+    return INT64_MAX;
+
   pred_exists = 0;
   // Are all MVs integer pel for Y and UV
   intpel_mv = !mv_has_subpel(&mbmi->mv[0].as_mv);
