@@ -30,7 +30,6 @@ struct vp9_extracfg {
   unsigned int                tile_rows;
   unsigned int                arnr_max_frames;
   unsigned int                arnr_strength;
-  unsigned int                arnr_type;
   vp8e_tuning                 tuning;
   unsigned int                cq_level;  // constrained quality level
   unsigned int                rc_max_intra_bitrate_pct;
@@ -52,7 +51,6 @@ static struct vp9_extracfg default_extra_cfg = {
   0,                          // tile_rows
   7,                          // arnr_max_frames
   5,                          // arnr_strength
-  3,                          // arnr_type
   VP8_TUNE_PSNR,              // tuning
   10,                         // cq_level
   0,                          // rc_max_intra_bitrate_pct
@@ -209,7 +207,6 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
   RANGE_CHECK_HI(extra_cfg, sharpness, 7);
   RANGE_CHECK(extra_cfg, arnr_max_frames, 0, 15);
   RANGE_CHECK_HI(extra_cfg, arnr_strength, 6);
-  RANGE_CHECK(extra_cfg, arnr_type, 1, 3);
   RANGE_CHECK(extra_cfg, cq_level, 0, 63);
   RANGE_CHECK(extra_cfg, content,
               VP9E_CONTENT_DEFAULT, VP9E_CONTENT_INVALID - 1);
@@ -390,7 +387,6 @@ static vpx_codec_err_t set_encoder_config(
 
   oxcf->arnr_max_frames = extra_cfg->arnr_max_frames;
   oxcf->arnr_strength   = extra_cfg->arnr_strength;
-  oxcf->arnr_type       = extra_cfg->arnr_type;
 
   oxcf->tuning = extra_cfg->tuning;
   oxcf->content = extra_cfg->content;
@@ -586,9 +582,9 @@ static vpx_codec_err_t ctrl_set_arnr_strength(vpx_codec_alg_priv_t *ctx,
 
 static vpx_codec_err_t ctrl_set_arnr_type(vpx_codec_alg_priv_t *ctx,
                                           va_list args) {
-  struct vp9_extracfg extra_cfg = ctx->extra_cfg;
-  extra_cfg.arnr_type = CAST(VP8E_SET_ARNR_TYPE, args);
-  return update_extra_cfg(ctx, &extra_cfg);
+  (void)ctx;
+  (void)args;
+  return VPX_CODEC_OK;
 }
 
 static vpx_codec_err_t ctrl_set_tuning(vpx_codec_alg_priv_t *ctx,
