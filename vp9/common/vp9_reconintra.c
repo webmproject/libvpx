@@ -9,11 +9,9 @@
  */
 
 #include "./vpx_config.h"
+#include "./vp9_rtcd.h"
 
 #include "vpx_mem/vpx_mem.h"
-#include "vpx_ports/vpx_once.h"
-
-#include "./vp9_rtcd.h"
 
 #include "vp9/common/vp9_reconintra.h"
 #include "vp9/common/vp9_onyxc_int.h"
@@ -292,32 +290,32 @@ intra_pred_allsizes(dc)
 typedef void (*intra_pred_fn)(uint8_t *dst, ptrdiff_t stride,
                               const uint8_t *above, const uint8_t *left);
 
-static intra_pred_fn pred[INTRA_MODES][4];
-static intra_pred_fn dc_pred[2][2][4];
+static intra_pred_fn pred[INTRA_MODES][TX_SIZES];
+static intra_pred_fn dc_pred[2][2][TX_SIZES];
 
-static void init_intra_pred_fn_ptrs(void) {
-#define intra_pred_allsizes(l, type) \
-  l[0] = vp9_##type##_predictor_4x4; \
-  l[1] = vp9_##type##_predictor_8x8; \
-  l[2] = vp9_##type##_predictor_16x16; \
-  l[3] = vp9_##type##_predictor_32x32
+void vp9_init_intra_predictors() {
+#define INIT_ALL_SIZES(p, type) \
+  p[TX_4X4] = vp9_##type##_predictor_4x4; \
+  p[TX_8X8] = vp9_##type##_predictor_8x8; \
+  p[TX_16X16] = vp9_##type##_predictor_16x16; \
+  p[TX_32X32] = vp9_##type##_predictor_32x32
 
-  intra_pred_allsizes(pred[V_PRED], v);
-  intra_pred_allsizes(pred[H_PRED], h);
-  intra_pred_allsizes(pred[D207_PRED], d207);
-  intra_pred_allsizes(pred[D45_PRED], d45);
-  intra_pred_allsizes(pred[D63_PRED], d63);
-  intra_pred_allsizes(pred[D117_PRED], d117);
-  intra_pred_allsizes(pred[D135_PRED], d135);
-  intra_pred_allsizes(pred[D153_PRED], d153);
-  intra_pred_allsizes(pred[TM_PRED], tm);
+  INIT_ALL_SIZES(pred[V_PRED], v);
+  INIT_ALL_SIZES(pred[H_PRED], h);
+  INIT_ALL_SIZES(pred[D207_PRED], d207);
+  INIT_ALL_SIZES(pred[D45_PRED], d45);
+  INIT_ALL_SIZES(pred[D63_PRED], d63);
+  INIT_ALL_SIZES(pred[D117_PRED], d117);
+  INIT_ALL_SIZES(pred[D135_PRED], d135);
+  INIT_ALL_SIZES(pred[D153_PRED], d153);
+  INIT_ALL_SIZES(pred[TM_PRED], tm);
 
-  intra_pred_allsizes(dc_pred[0][0], dc_128);
-  intra_pred_allsizes(dc_pred[0][1], dc_top);
-  intra_pred_allsizes(dc_pred[1][0], dc_left);
-  intra_pred_allsizes(dc_pred[1][1], dc);
+  INIT_ALL_SIZES(dc_pred[0][0], dc_128);
+  INIT_ALL_SIZES(dc_pred[0][1], dc_top);
+  INIT_ALL_SIZES(dc_pred[1][0], dc_left);
+  INIT_ALL_SIZES(dc_pred[1][1], dc);
 
-#undef intra_pred_allsizes
+#undef INIT_ALL_SIZES
 }
 
 static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
@@ -342,8 +340,6 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
   // 129  E   F  ..  U   V
   // 129  G   H  ..  S   T   T   T   T   T
   // ..
-
-  once(init_intra_pred_fn_ptrs);
 
   // Get current frame pointer, width and height.
   if (plane == 0) {

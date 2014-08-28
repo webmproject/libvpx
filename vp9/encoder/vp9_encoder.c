@@ -24,6 +24,7 @@
 #include "vp9/common/vp9_postproc.h"
 #endif
 #include "vp9/common/vp9_reconinter.h"
+#include "vp9/common/vp9_reconintra.h"
 #include "vp9/common/vp9_systemdependent.h"
 #include "vp9/common/vp9_tile_common.h"
 
@@ -142,7 +143,9 @@ void vp9_initialize_enc() {
   static int init_done = 0;
 
   if (!init_done) {
+    vp9_rtcd();
     vp9_init_neighbors();
+    vp9_init_intra_predictors();
     vp9_coef_tree_initialize();
     vp9_tokenize_initialize();
     vp9_init_me_luts();
@@ -763,8 +766,6 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
   }
 
   cm->error.setjmp = 1;
-
-  vp9_rtcd();
 
   cpi->use_svc = 0;
 
