@@ -393,6 +393,10 @@ typedef struct SPEED_FEATURES {
 
   // mask for skip evaluation of certain interp_filter type.
   INTERP_FILTER_MASK interp_filter_search_mask;
+
+  // Partition search early breakout thresholds.
+  int64_t partition_search_breakout_dist_thr;
+  int partition_search_breakout_rate_thr;
 } SPEED_FEATURES;
 
 struct VP9_COMP;
