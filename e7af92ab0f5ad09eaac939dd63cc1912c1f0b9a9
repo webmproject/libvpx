@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Zvo\u003d",
+        "filename": "vp9/encoder/x86/vp9_variance_sse2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-08-28T18:15:16Z",
+      "side": 1,
+      "message": "Can we use _mm_madd_epi16() ? Packed Multiply and Add should be faster?",
+      "revId": "e7af92ab0f5ad09eaac939dd63cc1912c1f0b9a9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
