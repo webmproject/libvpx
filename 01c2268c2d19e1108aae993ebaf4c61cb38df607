@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Z20\u003d",
+        "filename": "examples/vp8_multi_resolution_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-08-28T01:11:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Z64\u003d",
+      "revId": "01c2268c2d19e1108aae993ebaf4c61cb38df607",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Z6s\u003d",
         "filename": "examples/vp8_multi_resolution_encoder.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2014-08-27T21:47:12Z",
       "side": 1,
       "message": "Usage?",
+      "revId": "01c2268c2d19e1108aae993ebaf4c61cb38df607",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Z24\u003d",
+        "filename": "examples/vp8_multi_resolution_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-08-28T01:11:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Z6s\u003d",
       "revId": "01c2268c2d19e1108aae993ebaf4c61cb38df607",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Z3I\u003d",
+        "filename": "examples/vp8_multi_resolution_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-08-28T01:11:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Z7Y\u003d",
+      "revId": "01c2268c2d19e1108aae993ebaf4c61cb38df607",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Z7k\u003d",
         "filename": "examples/vp8_multi_resolution_encoder.c",
         "patchSetId": 2
@@ -64,6 +118,24 @@
       "writtenOn": "2014-08-27T21:47:12Z",
       "side": 1,
       "message": "Move these up with other includes-- no need to preserve what was there when it was wrong in the first place. (Keeping the libyuv comment probably isn\u0027t necessary either, given that the include path repeats it twice).",
+      "revId": "01c2268c2d19e1108aae993ebaf4c61cb38df607",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Z3M\u003d",
+        "filename": "examples/vp8_multi_resolution_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-08-28T01:11:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Z7k\u003d",
       "revId": "01c2268c2d19e1108aae993ebaf4c61cb38df607",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Z3E\u003d",
+        "filename": "examples/vp8_multi_resolution_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-08-28T01:11:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Z60\u003d",
+      "revId": "01c2268c2d19e1108aae993ebaf4c61cb38df607",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Z6w\u003d",
         "filename": "examples/vp8_multi_resolution_encoder.c",
         "patchSetId": 2
@@ -98,6 +188,24 @@
       "writtenOn": "2014-08-27T21:47:12Z",
       "side": 1,
       "message": "const",
+      "revId": "01c2268c2d19e1108aae993ebaf4c61cb38df607",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Z3A\u003d",
+        "filename": "examples/vp8_multi_resolution_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-08-28T01:11:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Z6w\u003d",
       "revId": "01c2268c2d19e1108aae993ebaf4c61cb38df607",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Z28\u003d",
+        "filename": "examples/vp8_multi_resolution_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-08-28T01:11:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Z4o\u003d",
+      "revId": "01c2268c2d19e1108aae993ebaf4c61cb38df607",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Z6o\u003d",
         "filename": "examples/vp8_multi_resolution_encoder.c",
         "patchSetId": 2
@@ -132,6 +258,24 @@
       "writtenOn": "2014-08-27T21:47:12Z",
       "side": 1,
       "message": "Encode frame.\n\nTthe rest of the comment is misleading-- we\u0027re only encoding one frame per loop iteration, and the existing comment implies otherwise.",
+      "revId": "01c2268c2d19e1108aae993ebaf4c61cb38df607",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Z2w\u003d",
+        "filename": "examples/vp8_multi_resolution_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-08-28T01:11:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Z6o\u003d",
       "revId": "01c2268c2d19e1108aae993ebaf4c61cb38df607",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
