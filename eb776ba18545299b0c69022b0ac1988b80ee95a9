@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//ZpM\u003d",
+        "filename": "configure",
+        "patchSetId": 5
+      },
+      "lineNbr": 337,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-28T22:11:18Z",
+      "side": 1,
+      "message": "Please call this vp9_high_bit_depth or vp9_highbitdepth. \"vp9_high\" is a bit ambiguous.",
+      "revId": "eb776ba18545299b0c69022b0ac1988b80ee95a9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZpI\u003d",
+        "filename": "tools_common.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 244,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-28T22:11:18Z",
+      "side": 1,
+      "message": "Ditto here: Please use CONFIG_VP9_HIGH_BIT_DEPTH instead.",
+      "revId": "eb776ba18545299b0c69022b0ac1988b80ee95a9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZpE\u003d",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-28T22:11:18Z",
+      "side": 1,
+      "message": "s/use_high/use_high_bit_depth/g\n\nNot sure if the \"use\" part is even necessary.\n\nHere and throughout.",
+      "revId": "eb776ba18545299b0c69022b0ac1988b80ee95a9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Zo8\u003d",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-28T22:11:18Z",
+      "side": 1,
+      "message": "CONFIG_VP9_HIGH_BIT_DEPTH",
+      "revId": "eb776ba18545299b0c69022b0ac1988b80ee95a9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Zoo\u003d",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1261,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-28T22:11:18Z",
+      "side": 1,
+      "message": "presumably the \"in\" means input. s/_in_/_input_/\n\nWhy: What\u0027s \"in\" the bit depth?",
+      "revId": "eb776ba18545299b0c69022b0ac1988b80ee95a9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Zok\u003d",
+        "filename": "vpx/vpx_encoder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-28T22:11:18Z",
+      "side": 1,
+      "message": "_HIGH_BIT_DEPTH",
+      "revId": "eb776ba18545299b0c69022b0ac1988b80ee95a9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Zog\u003d",
+        "filename": "vpx/vpx_encoder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-28T22:11:18Z",
+      "side": 1,
+      "message": "Ditto.",
+      "revId": "eb776ba18545299b0c69022b0ac1988b80ee95a9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Zoc\u003d",
+        "filename": "vpx/vpx_encoder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 333,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-28T22:11:18Z",
+      "side": 1,
+      "message": "s/bit_depth/output bit depth/",
+      "revId": "eb776ba18545299b0c69022b0ac1988b80ee95a9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZoU\u003d",
+        "filename": "vpx_scale/yv12config.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-28T22:11:18Z",
+      "side": 1,
+      "message": "_HIGH_BIT_DEPTH",
+      "revId": "eb776ba18545299b0c69022b0ac1988b80ee95a9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
