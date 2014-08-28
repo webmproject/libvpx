@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Zn8\u003d",
+        "filename": "build/make/iosbuild.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-28T22:26:28Z",
+      "side": 1,
+      "message": "Per arch output from $ clang -dM -E -x c /dev/null -arch \u003carch\u003e. Identical entries omitted.\n\nclang -dM -E -x c /dev/null -arch armv7:\n\n    #define __ARM_ARCH_7A__ 1\n    #define __ARM_ARCH_PROFILE A\n    #define __ARM_VFPV3__ 1\n\nclang -dM -E -x c /dev/null -arch armv7s\n\n    #define __ARM_ARCH_7S__ 1\n    #define __ARM_ARCH_EXT_IDIV__ 1\n    #define __ARM_VFPV4__ 1\n\nI just went with 7A. One char change CLs are the best CLs.",
+      "revId": "a3b594eeb16d4d7bfe9e81e0d5e1bdffd596cf98",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
