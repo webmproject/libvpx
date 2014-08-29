@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Ziw\u003d",
+        "filename": "configure",
+        "patchSetId": 5
+      },
+      "lineNbr": 337,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-08-29T16:45:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//ZpM\u003d",
+      "revId": "eb776ba18545299b0c69022b0ac1988b80ee95a9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//ZpI\u003d",
         "filename": "tools_common.c",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2014-08-28T22:11:18Z",
       "side": 1,
       "message": "Ditto here: Please use CONFIG_VP9_HIGH_BIT_DEPTH instead.",
+      "revId": "eb776ba18545299b0c69022b0ac1988b80ee95a9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Zio\u003d",
+        "filename": "tools_common.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 244,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-08-29T16:45:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//ZpI\u003d",
       "revId": "eb776ba18545299b0c69022b0ac1988b80ee95a9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//ZiU\u003d",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-08-29T16:45:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//ZpE\u003d",
+      "revId": "eb776ba18545299b0c69022b0ac1988b80ee95a9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Zo8\u003d",
         "filename": "vp9/common/vp9_alloccommon.c",
         "patchSetId": 5
@@ -64,6 +118,24 @@
       "writtenOn": "2014-08-28T22:11:18Z",
       "side": 1,
       "message": "CONFIG_VP9_HIGH_BIT_DEPTH",
+      "revId": "eb776ba18545299b0c69022b0ac1988b80ee95a9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Zik\u003d",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-08-29T16:45:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Zo8\u003d",
       "revId": "eb776ba18545299b0c69022b0ac1988b80ee95a9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -104,6 +176,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Zi8\u003d",
+        "filename": "vpx/vpx_encoder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-08-29T16:45:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Zok\u003d",
+      "revId": "eb776ba18545299b0c69022b0ac1988b80ee95a9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Zog\u003d",
         "filename": "vpx/vpx_encoder.h",
         "patchSetId": 5
@@ -115,6 +205,24 @@
       "writtenOn": "2014-08-28T22:11:18Z",
       "side": 1,
       "message": "Ditto.",
+      "revId": "eb776ba18545299b0c69022b0ac1988b80ee95a9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Zi4\u003d",
+        "filename": "vpx/vpx_encoder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-08-29T16:45:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Zog\u003d",
       "revId": "eb776ba18545299b0c69022b0ac1988b80ee95a9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -138,6 +246,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Zi0\u003d",
+        "filename": "vpx/vpx_encoder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 333,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-08-29T16:45:06Z",
+      "side": 1,
+      "message": "I used output bit-depth in a slightly different way. Even though the bit-stream is say 8-bit, we may request an output bit-depth of 10.",
+      "parentUuid": "AAAAdn//Zoc\u003d",
+      "revId": "eb776ba18545299b0c69022b0ac1988b80ee95a9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//ZoU\u003d",
         "filename": "vpx_scale/yv12config.h",
         "patchSetId": 5
@@ -149,6 +275,24 @@
       "writtenOn": "2014-08-28T22:11:18Z",
       "side": 1,
       "message": "_HIGH_BIT_DEPTH",
+      "revId": "eb776ba18545299b0c69022b0ac1988b80ee95a9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZiI\u003d",
+        "filename": "vpx_scale/yv12config.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-08-29T16:45:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//ZoU\u003d",
       "revId": "eb776ba18545299b0c69022b0ac1988b80ee95a9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
