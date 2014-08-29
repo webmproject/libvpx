@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Z14\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 40
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-08-29T00:05:31Z",
+      "side": 1,
+      "message": "Done. Eclipse somehow do this for me automatically. Was going to delete it.",
+      "parentUuid": "AAAAdn//Z+w\u003d",
+      "revId": "b2fb658b25cc07602d56cbd1d844ef7d016ad100",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Z90\u003d",
         "filename": "vp9/decoder/vp9_decodeframe.c",
         "patchSetId": 40
@@ -30,6 +48,24 @@
       "writtenOn": "2014-08-27T18:36:45Z",
       "side": 1,
       "message": "why col2?",
+      "revId": "b2fb658b25cc07602d56cbd1d844ef7d016ad100",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Z10\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 40
+      },
+      "lineNbr": 864,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-08-29T00:05:31Z",
+      "side": 1,
+      "message": "Yes.  col2 is bad name as col is taken. I have change the code a little bit and vp9_frameworker_broadcast does not need to send the col anymore.",
+      "parentUuid": "AAAAdn//Z90\u003d",
       "revId": "b2fb658b25cc07602d56cbd1d844ef7d016ad100",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Z1w\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 40
+      },
+      "lineNbr": 897,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-08-29T00:05:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Z94\u003d",
+      "revId": "b2fb658b25cc07602d56cbd1d844ef7d016ad100",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Z9A\u003d",
         "filename": "vp9/decoder/vp9_decodeframe.h",
         "patchSetId": 40
@@ -64,6 +118,24 @@
       "writtenOn": "2014-08-27T18:36:45Z",
       "side": 1,
       "message": "In general, I\u0027m a little worried about adding bigger structures as a parameter to a bunch of functions. We want to break the bigger structures and only pass in what we need.",
+      "revId": "b2fb658b25cc07602d56cbd1d844ef7d016ad100",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZuM\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.h",
+        "patchSetId": 40
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-08-29T00:05:31Z",
+      "side": 1,
+      "message": "Yes. I will test the performance with and without this change. I already test some clips. Seems no noticeable difference.  My thinking is instead of make parameter smaller, maybe combine several functions into a function. It does not  hurt any readability.",
+      "parentUuid": "AAAAdn//Z9A\u003d",
       "revId": "b2fb658b25cc07602d56cbd1d844ef7d016ad100",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//ZtU\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 40
+      },
+      "lineNbr": 517,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-08-29T00:05:31Z",
+      "side": 1,
+      "message": "Macro from finding motion vector.",
+      "parentUuid": "AAAAdn//Z9g\u003d",
+      "revId": "b2fb658b25cc07602d56cbd1d844ef7d016ad100",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Z+U\u003d",
         "filename": "vp9/decoder/vp9_decoder.c",
         "patchSetId": 40
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//ZtE\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 40
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-08-29T00:05:31Z",
+      "side": 1,
+      "message": "Done. Right. This actually makes the code faster.",
+      "parentUuid": "AAAAdn//Z+U\u003d",
+      "revId": "b2fb658b25cc07602d56cbd1d844ef7d016ad100",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Z+Q\u003d",
         "filename": "vp9/decoder/vp9_decoder.c",
         "patchSetId": 40
@@ -115,6 +223,24 @@
       "writtenOn": "2014-08-27T18:36:45Z",
       "side": 1,
       "message": "You could refactor the code after you initialize old_index. Not sure if it would be more readable though.",
+      "revId": "b2fb658b25cc07602d56cbd1d844ef7d016ad100",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Zss\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 40
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-08-29T00:05:31Z",
+      "side": 1,
+      "message": "Yes. Maybe. I will wait for James\u0027s comment here.",
+      "parentUuid": "AAAAdn//Z+Q\u003d",
       "revId": "b2fb658b25cc07602d56cbd1d844ef7d016ad100",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +281,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//ZrU\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 40
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-08-29T00:05:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Z9U\u003d",
+      "revId": "b2fb658b25cc07602d56cbd1d844ef7d016ad100",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Z9c\u003d",
         "filename": "vp9/decoder/vp9_dthread.h",
         "patchSetId": 40
@@ -172,6 +316,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//ZrQ\u003d",
+        "filename": "vp9/decoder/vp9_dthread.h",
+        "patchSetId": 40
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-08-29T00:05:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Z9c\u003d",
+      "revId": "b2fb658b25cc07602d56cbd1d844ef7d016ad100",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Z/M\u003d",
         "filename": "vpx/vpx_frame_buffer.h",
         "patchSetId": 40
@@ -183,6 +345,24 @@
       "writtenOn": "2014-08-27T18:36:45Z",
       "side": 1,
       "message": "TODO: Add support to set number of worker threads dynamically. Or up the max number. I think we may want to go higher than 4.",
+      "revId": "b2fb658b25cc07602d56cbd1d844ef7d016ad100",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZqE\u003d",
+        "filename": "vpx/vpx_frame_buffer.h",
+        "patchSetId": 40
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-08-29T00:05:31Z",
+      "side": 1,
+      "message": "Done. Totally agree. I will implement this later.",
+      "parentUuid": "AAAAdn//Z/M\u003d",
       "revId": "b2fb658b25cc07602d56cbd1d844ef7d016ad100",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
