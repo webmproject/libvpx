@@ -148,16 +148,7 @@ void vp9_loop_filter_frame_mt(YV12_BUFFER_CONFIG *frame,
   // Allocate memory used in thread synchronization.
   // This always needs to be done even if frame_filter_level is 0.
   if (!lf_sync->sync_range || cm->last_height != cm->height) {
-    if (cm->last_height != cm->height) {
-      const int aligned_last_height =
-          ALIGN_POWER_OF_TWO(cm->last_height, MI_SIZE_LOG2);
-      const int last_sb_rows =
-          mi_cols_aligned_to_sb(aligned_last_height >> MI_SIZE_LOG2) >>
-          MI_BLOCK_SIZE_LOG2;
-
-      vp9_loop_filter_dealloc(lf_sync, last_sb_rows);
-    }
-
+    vp9_loop_filter_dealloc(lf_sync);
     vp9_loop_filter_alloc(cm, lf_sync, sb_rows, cm->width);
   }
 
@@ -227,19 +218,22 @@ static int get_sync_range(int width) {
 // Allocate memory for lf row synchronization
 void vp9_loop_filter_alloc(VP9_COMMON *cm, VP9LfSync *lf_sync, int rows,
                            int width) {
+  lf_sync->rows = rows;
 #if CONFIG_MULTITHREAD
-  int i;
+  {
+    int i;
 
-  CHECK_MEM_ERROR(cm, lf_sync->mutex_,
-                  vpx_malloc(sizeof(*lf_sync->mutex_) * rows));
-  for (i = 0; i < rows; ++i) {
-    pthread_mutex_init(&lf_sync->mutex_[i], NULL);
-  }
+    CHECK_MEM_ERROR(cm, lf_sync->mutex_,
+                    vpx_malloc(sizeof(*lf_sync->mutex_) * rows));
+    for (i = 0; i < rows; ++i) {
+      pthread_mutex_init(&lf_sync->mutex_[i], NULL);
+    }
 
-  CHECK_MEM_ERROR(cm, lf_sync->cond_,
-                  vpx_malloc(sizeof(*lf_sync->cond_) * rows));
-  for (i = 0; i < rows; ++i) {
-    pthread_cond_init(&lf_sync->cond_[i], NULL);
+    CHECK_MEM_ERROR(cm, lf_sync->cond_,
+                    vpx_malloc(sizeof(*lf_sync->cond_) * rows));
+    for (i = 0; i < rows; ++i) {
+      pthread_cond_init(&lf_sync->cond_[i], NULL);
+    }
   }
 #endif  // CONFIG_MULTITHREAD
 
@@ -251,23 +245,19 @@ void vp9_loop_filter_alloc(VP9_COMMON *cm, VP9LfSync *lf_sync, int rows,
 }
 
 // Deallocate lf synchronization related mutex and data
-void vp9_loop_filter_dealloc(VP9LfSync *lf_sync, int rows) {
-#if !CONFIG_MULTITHREAD
-  (void)rows;
-#endif  // !CONFIG_MULTITHREAD
-
+void vp9_loop_filter_dealloc(VP9LfSync *lf_sync) {
   if (lf_sync != NULL) {
 #if CONFIG_MULTITHREAD
     int i;
 
     if (lf_sync->mutex_ != NULL) {
-      for (i = 0; i < rows; ++i) {
+      for (i = 0; i < lf_sync->rows; ++i) {
         pthread_mutex_destroy(&lf_sync->mutex_[i]);
       }
       vpx_free(lf_sync->mutex_);
     }
     if (lf_sync->cond_ != NULL) {
-      for (i = 0; i < rows; ++i) {
+      for (i = 0; i < lf_sync->rows; ++i) {
         pthread_cond_destroy(&lf_sync->cond_[i]);
       }
       vpx_free(lf_sync->cond_);
