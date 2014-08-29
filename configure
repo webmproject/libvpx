@@ -279,6 +279,7 @@ EXPERIMENT_LIST="
     filterintra
     ext_tx
     supertx
+    copy_coding
 "
 CONFIG_LIST="
     external_build

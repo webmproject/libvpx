@@ -1742,6 +1742,15 @@ static int read_compressed_header(VP9Decoder *pbi, const uint8_t *data,
 #endif
     }
 #endif
+
+#if CONFIG_COPY_CODING
+    for (j = 0; j < COPY_MODE_CONTEXTS; j++) {
+      for (i = 0; i < 1; i++)
+        vp9_diff_update_prob(&r, &fc->copy_mode_probs_l2[j][i]);
+      for (i = 0; i < 2; i++)
+        vp9_diff_update_prob(&r, &fc->copy_mode_probs[j][i]);
+    }
+#endif
   }
 
   return vp9_reader_has_error(&r);

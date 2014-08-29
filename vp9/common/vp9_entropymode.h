@@ -71,6 +71,11 @@ typedef struct frame_contexts {
   vp9_prob supertx_prob[TX_SIZES];
   vp9_prob supertxsplit_prob[TX_SIZES];
 #endif
+#if CONFIG_COPY_CODING
+  vp9_prob copy_noref_prob[COPY_MODE_CONTEXTS][BLOCK_SIZES];
+  vp9_prob copy_mode_probs_l2[COPY_MODE_CONTEXTS][1];
+  vp9_prob copy_mode_probs[COPY_MODE_CONTEXTS][COPY_MODE_COUNT - 2];
+#endif
 } FRAME_CONTEXT;
 
 typedef struct {
@@ -110,6 +115,11 @@ typedef struct {
   unsigned int supertxsplit[TX_SIZES][2];
   unsigned int supertx_size[BLOCK_SIZES];
 #endif
+#if CONFIG_COPY_CODING
+  unsigned int copy_noref[COPY_MODE_CONTEXTS][BLOCK_SIZES][2];
+  unsigned int copy_mode_l2[COPY_MODE_CONTEXTS][2];
+  unsigned int copy_mode[COPY_MODE_CONTEXTS][COPY_MODE_COUNT - 1];
+#endif
 } FRAME_COUNTS;
 
 extern const vp9_prob vp9_kf_uv_mode_prob[INTRA_MODES][INTRA_MODES - 1];
@@ -122,6 +132,10 @@ extern const vp9_tree_index vp9_inter_mode_tree[TREE_SIZE(INTER_MODES)];
 extern const vp9_tree_index vp9_partition_tree[TREE_SIZE(PARTITION_TYPES)];
 extern const vp9_tree_index vp9_switchable_interp_tree
                                 [TREE_SIZE(SWITCHABLE_FILTERS)];
+#if CONFIG_COPY_CODING
+extern const vp9_tree_index vp9_copy_mode_tree_l2[TREE_SIZE(2)];
+extern const vp9_tree_index vp9_copy_mode_tree[TREE_SIZE(COPY_MODE_COUNT - 1)];
+#endif
 
 void vp9_setup_past_independence(struct VP9Common *cm);
 

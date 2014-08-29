@@ -409,6 +409,10 @@ typedef struct VP9_COMP {
   int intra_uv_mode_cost[FRAME_TYPES][INTRA_MODES];
   int y_mode_costs[INTRA_MODES][INTRA_MODES][INTRA_MODES];
   int switchable_interp_costs[SWITCHABLE_FILTER_CONTEXTS][SWITCHABLE_FILTERS];
+#if CONFIG_COPY_CODING
+  int copy_mode_cost_l2[COPY_MODE_CONTEXTS][2];
+  int copy_mode_cost[COPY_MODE_CONTEXTS][COPY_MODE_COUNT - 1];
+#endif
 
   PICK_MODE_CONTEXT *leaf_tree;
   PC_TREE *pc_tree;

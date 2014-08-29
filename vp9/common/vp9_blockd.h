@@ -32,6 +32,9 @@ extern "C" {
 #define BLOCK_SIZE_GROUPS 4
 #define SKIP_CONTEXTS 3
 #define INTER_MODE_CONTEXTS 7
+#if CONFIG_COPY_CODING
+#define COPY_MODE_CONTEXTS 5
+#endif
 
 /* Segment Feature Masks */
 #define MAX_MV_REF_CANDIDATES 2
@@ -78,6 +81,16 @@ typedef enum {
   NEWMV,
   MB_MODE_COUNT
 } PREDICTION_MODE;
+
+#if CONFIG_COPY_CODING
+typedef enum {
+  NOREF,
+  REF0,
+  REF1,
+  REF2,
+  COPY_MODE_COUNT
+} COPY_MODE;
+#endif
 
 static INLINE int is_inter_mode(PREDICTION_MODE mode) {
   return mode >= NEARESTMV && mode <= NEWMV;
@@ -217,6 +230,10 @@ typedef struct {
   int interintra_uv_mask_index;
   int use_masked_interintra;
 #endif
+#endif
+#if CONFIG_COPY_CODING
+  COPY_MODE copy_mode;
+  int inter_ref_count;
 #endif
 } MB_MODE_INFO;
 

@@ -736,7 +736,25 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   }
 #endif
   if (!frame_is_intra_only(cm)) {
+#if CONFIG_COPY_CODING
+    COPY_MODE copy_mode = mbmi->copy_mode;
+    if (mbmi->sb_type >= BLOCK_8X8) {
+      int copy_mode_context = vp9_get_copy_mode_context(xd);
+      if (mbmi->inter_ref_count > 0) {
+        ++cm->counts.copy_noref[copy_mode_context][mbmi->sb_type]
+                               [copy_mode != NOREF];
+        if (copy_mode != NOREF) {
+          if (mbmi->inter_ref_count == 2)
+            ++cm->counts.copy_mode_l2[copy_mode_context][copy_mode - REF0];
+          else if (mbmi->inter_ref_count > 2)
+            ++cm->counts.copy_mode[copy_mode_context][copy_mode - REF0];
+        }
+      }
+    }
+    if (is_inter_block(mbmi) && copy_mode == NOREF) {
+#else
     if (is_inter_block(mbmi)) {
+#endif
       vp9_update_mv_count(cm, xd);
 
       if (cm->interp_filter == SWITCHABLE) {
@@ -842,7 +860,25 @@ static void update_state_supertx(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
     return;
 
   if (!frame_is_intra_only(cm)) {
+#if CONFIG_COPY_CODING
+    COPY_MODE copy_mode = mbmi->copy_mode;
+    if (mbmi->sb_type >= BLOCK_8X8) {
+      int copy_mode_context = vp9_get_copy_mode_context(xd);
+      if (mbmi->inter_ref_count > 0) {
+        ++cm->counts.copy_noref[copy_mode_context][mbmi->sb_type]
+                               [copy_mode != NOREF];
+        if (copy_mode != NOREF) {
+          if (mbmi->inter_ref_count == 2)
+            ++cm->counts.copy_mode_l2[copy_mode_context][copy_mode - REF0];
+          else if (mbmi->inter_ref_count > 2)
+            ++cm->counts.copy_mode[copy_mode_context][copy_mode - REF0];
+        }
+      }
+    }
+    if (is_inter_block(mbmi) && copy_mode == NOREF) {
+#else
     if (is_inter_block(mbmi)) {
+#endif
       vp9_update_mv_count(cm, xd);
 
       if (cm->interp_filter == SWITCHABLE) {
@@ -1259,7 +1295,11 @@ static void update_stats(VP9_COMP *cpi) {
   const MODE_INFO *const mi = xd->mi[0];
   const MB_MODE_INFO *const mbmi = &mi->mbmi;
 
+#if !CONFIG_COPY_CODING
   if (!frame_is_intra_only(cm)) {
+#else
+  if (!frame_is_intra_only(cm) && mbmi->copy_mode == NOREF) {
+#endif
     const int seg_ref_active = vp9_segfeature_active(&cm->seg, mbmi->segment_id,
                                                      SEG_LVL_REF_FRAME);
     if (!seg_ref_active) {

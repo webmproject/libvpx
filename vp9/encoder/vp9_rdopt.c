@@ -356,6 +356,15 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
                         cm->fc.inter_mode_probs[i], vp9_inter_mode_tree);
     }
   }
+
+#if CONFIG_COPY_CODING
+  for (i = 0; i < COPY_MODE_CONTEXTS; ++i) {
+    vp9_cost_tokens((int *)cpi->copy_mode_cost_l2[i],
+                    cm->fc.copy_mode_probs_l2[i], vp9_copy_mode_tree_l2);
+    vp9_cost_tokens((int *)cpi->copy_mode_cost[i],
+                    cm->fc.copy_mode_probs[i], vp9_copy_mode_tree);
+  }
+#endif
 }
 
 static const int MAX_XSQ_Q10 = 245727;
@@ -3794,11 +3803,22 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int start_skip = 0;
   int mode_skip_mask_interintra = 0;
 #endif
+#if CONFIG_COPY_CODING
+  COPY_MODE copy_mode;
+  int inter_ref_count;
+  MB_MODE_INFO *inter_ref_list[18];
+  int copy_mode_context = vp9_get_copy_mode_context(xd);
+#endif
   vp9_zero(best_mbmode);
   x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
 
   estimate_ref_frame_costs(cm, xd, segment_id, ref_costs_single, ref_costs_comp,
                            &comp_mode_p);
+#if CONFIG_COPY_CODING
+  inter_ref_count =
+    vp9_construct_ref_inter_list(cm, xd, bsize, mi_row, mi_col, inter_ref_list);
+  mbmi->inter_ref_count = inter_ref_count;
+#endif
 
   for (i = 0; i < REFERENCE_MODES; ++i)
     best_pred_rd[i] = INT64_MAX;
@@ -4064,6 +4084,9 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     // them for this frame.
     mbmi->interp_filter = cm->interp_filter == SWITCHABLE ? EIGHTTAP
                                                           : cm->interp_filter;
+#if CONFIG_COPY_CODING
+    mbmi->copy_mode = NOREF;
+#endif
     x->skip = 0;
     set_ref_ptrs(cm, xd, ref_frame, second_ref_frame);
 
@@ -4216,6 +4239,12 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     } else {
       rate2 += ref_costs_single[ref_frame];
     }
+
+#if CONFIG_COPY_CODING
+    if (inter_ref_count > 0)
+      rate2 += vp9_cost_bit(cm->fc.copy_noref_prob[copy_mode_context][bsize],
+                            0);
+#endif
 
     if (!disable_skip) {
       if (skippable) {
@@ -4423,10 +4452,15 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     ++cpi->interintra_select_count[is_best_interintra];
 #endif
 
+#if !CONFIG_COPY_CODING
   if (best_mode_index < 0 || best_rd >= best_rd_so_far)
     return INT64_MAX;
+#endif
 
   // If we used an estimate for the uv intra rd in the loop above...
+#if CONFIG_COPY_CODING
+  if (!(best_mode_index < 0 || best_rd >= best_rd_so_far)) {
+#endif
   if (cpi->sf.use_uv_intra_rd_estimate) {
     // Do Intra UV best rd mode selection if best mode choice above was intra.
     if (vp9_mode_order[best_mode_index].ref_frame[0] == INTRA_FRAME) {
@@ -4482,6 +4516,188 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   set_ref_ptrs(cm, xd, mbmi->ref_frame[0], mbmi->ref_frame[1]);
   store_coding_context(x, ctx, best_mode_index,
                        best_pred_diff, best_tx_diff, best_filter_diff);
+#if CONFIG_COPY_CODING
+  }
+
+  for (copy_mode = REF0;
+       copy_mode < MIN(REF0 + inter_ref_count, COPY_MODE_COUNT); copy_mode++) {
+    int64_t this_rd = INT64_MAX;
+    int rate2 = 0, rate_y = 0, rate_uv = 0;
+    int64_t distortion2 = 0, distortion_y = 0, distortion_uv = 0;
+    int this_skip2 = 0, skippable = 0, skippable_y = 0, skippable_uv = 0;
+    int64_t ssey, sseuv, total_sse = INT64_MAX;
+    int64_t tx_cache[TX_MODES];
+    int i;
+#if CONFIG_EXT_TX
+    int tx_type, rate2_tx, this_skip2_tx, best_tx_size, best_tx_type;
+    int64_t distortion2_tx, bestrd_tx = INT64_MAX;
+#endif
+
+    *mbmi = *inter_ref_list[copy_mode - REF0];
+#if CONFIG_MASKED_INTERINTER
+    mbmi->use_masked_interinter = 0;
+#endif
+#if CONFIG_INTERINTRA
+    if (mbmi->ref_frame[1] == INTRA_FRAME)
+      mbmi->ref_frame[1] = NONE;
+#endif
+    mbmi->sb_type = bsize;
+    mbmi->inter_ref_count = inter_ref_count;
+    mbmi->copy_mode = copy_mode;
+    mbmi->mode = NEARESTMV;
+    x->skip = 0;
+    set_ref_ptrs(cm, xd, mbmi->ref_frame[0], mbmi->ref_frame[1]);
+    for (i = 0; i < MAX_MB_PLANE; i++) {
+      xd->plane[i].pre[0] = yv12_mb[mbmi->ref_frame[0]][i];
+      if (mbmi->ref_frame[1] > INTRA_FRAME)
+        xd->plane[i].pre[1] = yv12_mb[mbmi->ref_frame[1]][i];
+    }
+    vp9_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
+
+    for (i = 0; i < TX_MODES; ++i)
+      tx_cache[i] = INT64_MAX;
+#if CONFIG_EXT_TX
+    for (tx_type = 0; tx_type < 2; tx_type++) {
+      mbmi->ext_txfrm = tx_type;
+#endif
+    inter_super_block_yrd(cpi, x, &rate_y, &distortion_y, &skippable_y, &ssey,
+                          bsize, tx_cache, INT64_MAX);
+    super_block_uvrd(cpi, x, &rate_uv, &distortion_uv, &skippable_uv, &sseuv,
+                     bsize, INT64_MAX);
+
+    rate2 = rate_y + rate_uv;
+    distortion2 = distortion_y + distortion_uv;
+    skippable = skippable_y && skippable_uv;
+    total_sse = ssey + sseuv;
+
+    if (skippable) {
+      vp9_prob skip_prob = vp9_get_skip_prob(cm, xd);
+
+      rate2 -= (rate_y + rate_uv);
+      rate_y = 0;
+      rate_uv = 0;
+      if (skip_prob) {
+        int prob_skip_cost = vp9_cost_bit(skip_prob, 1);
+        rate2 += prob_skip_cost;
+      }
+    } else if (!xd->lossless) {
+      if (RDCOST(x->rdmult, x->rddiv, rate_y + rate_uv, distortion2) <
+          RDCOST(x->rdmult, x->rddiv, 0, total_sse)) {
+        rate2 += vp9_cost_bit(vp9_get_skip_prob(cm, xd), 0);
+      } else {
+        rate2 += vp9_cost_bit(vp9_get_skip_prob(cm, xd), 1);
+        distortion2 = total_sse;
+        assert(total_sse >= 0);
+        rate2 -= (rate_y + rate_uv);
+        rate_y = 0;
+        rate_uv = 0;
+        this_skip2 = 1;
+      }
+    } else {
+      rate2 += vp9_cost_bit(vp9_get_skip_prob(cm, xd), 0);
+    }
+#if CONFIG_EXT_TX
+      if (mbmi->tx_size <= TX_16X16 && !this_skip2)
+        rate2 += vp9_cost_bit(cm->fc.ext_tx_prob, tx_type);
+      this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
+      if (tx_type == 0 || this_rd < (bestrd_tx * 0.97)) {
+        bestrd_tx = this_rd;
+        best_tx_type = tx_type;
+        best_tx_size = mbmi->tx_size;
+        rate2_tx = rate2;
+        distortion2_tx = distortion2;
+        this_skip2_tx = this_skip2;
+      }
+    }
+    if (best_tx_size <= TX_16X16)
+      mbmi->ext_txfrm = best_tx_type;
+    else
+      mbmi->ext_txfrm = 0;
+
+    inter_super_block_yrd(cpi, x, &rate_y, &distortion_y, &skippable_y, &ssey,
+                          bsize, tx_cache, INT64_MAX);
+    super_block_uvrd(cpi, x, &rate_uv, &distortion_uv, &skippable_uv, &sseuv,
+                     bsize, INT64_MAX);
+
+    rate2 = rate2_tx;
+    distortion2 = distortion2_tx;
+    this_skip2 = this_skip2_tx;
+#endif
+
+    rate2 += vp9_cost_bit(cm->fc.copy_noref_prob[copy_mode_context][bsize], 1);
+    switch (inter_ref_count) {
+      case 1:
+        break;
+      case 2:
+        rate2 += cpi->copy_mode_cost_l2[copy_mode_context][copy_mode - REF0];
+        break;
+      default:
+        rate2 += cpi->copy_mode_cost[copy_mode_context][copy_mode - REF0];
+        break;
+    }
+    this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
+
+    if (this_rd < best_rd) {
+      int max_plane = MAX_MB_PLANE;
+
+      *returnrate = rate2;
+      *returndistortion = distortion2;
+#if CONFIG_SUPERTX
+      *returnrate_nocoef =
+          vp9_cost_bit(cm->fc.copy_noref_prob[copy_mode_context][bsize], 1);
+      if (inter_ref_count == 2)
+        *returnrate_nocoef +=
+            cpi->copy_mode_cost_l2[copy_mode_context][copy_mode - REF0];
+      else if (inter_ref_count > 2)
+        *returnrate_nocoef +=
+            cpi->copy_mode_cost[copy_mode_context][copy_mode - REF0];
+#endif
+      best_rd = this_rd;
+      best_mbmode = *mbmi;
+      best_skip2 = this_skip2;
+      if (!x->select_tx_size)
+        swap_block_ptr(x, ctx, 1, 0, 0, max_plane);
+      vpx_memcpy(ctx->zcoeff_blk, x->zcoeff_blk[mbmi->tx_size],
+                 sizeof(uint8_t) * ctx->num_4x4_blk);
+    }
+
+    if (bsize < BLOCK_32X32) {
+      if (bsize < BLOCK_16X16)
+        tx_cache[ALLOW_16X16] = tx_cache[ALLOW_8X8];
+      tx_cache[ALLOW_32X32] = tx_cache[ALLOW_16X16];
+    }
+    if (this_rd != INT64_MAX) {
+      for (i = 0; i < TX_MODES && tx_cache[i] < INT64_MAX; i++) {
+        int64_t adj_rd = INT64_MAX;
+        adj_rd = this_rd + tx_cache[i] - tx_cache[cm->tx_mode];
+
+        if (adj_rd < best_tx_rd[i])
+          best_tx_rd[i] = adj_rd;
+      }
+    }
+  }
+  if ((best_mode_index < 0 && best_mbmode.copy_mode == NOREF)
+      || best_rd >= best_rd_so_far)
+    return INT64_MAX;
+
+  *mbmi = best_mbmode;
+  x->skip |= best_skip2;
+  ctx->skip = x->skip;
+  ctx->mic = *xd->mi[0];
+
+  if (!x->skip) {
+    for (i = 0; i < TX_MODES; i++) {
+      if (best_tx_rd[i] == INT64_MAX)
+        best_tx_diff[i] = 0;
+      else
+        best_tx_diff[i] = best_rd - best_tx_rd[i];
+    }
+    vpx_memcpy(ctx->tx_rd_diff, best_tx_diff, sizeof(ctx->tx_rd_diff));
+  } else {
+    vp9_zero(best_filter_diff);
+    vp9_zero(best_tx_diff);
+  }
+#endif
 
   return best_rd;
 }
@@ -4654,6 +4870,9 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 #endif
 #if CONFIG_EXT_TX
   mbmi->ext_txfrm = NORM;
+#endif
+#if CONFIG_COPY_CODING
+  mbmi->copy_mode = NOREF;
 #endif
 
   x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
