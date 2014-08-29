@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//ZjE\u003d",
+        "filename": "vpx/vpx_codec.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 471,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-08-29T16:26:48Z",
+      "side": 1,
+      "message": "It looks like we could just use the enum value instead of calling this function.",
+      "revId": "059a721d92464556c582095965b4ca10b3abbe9a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
