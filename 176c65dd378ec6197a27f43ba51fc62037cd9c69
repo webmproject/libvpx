@@ -1,0 +1,208 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Zg4\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 10
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-29T18:19:19Z",
+      "side": 1,
+      "message": "So this is actually the first in a series of commits required to get this working in the master branch? (just curious)",
+      "revId": "176c65dd378ec6197a27f43ba51fc62037cd9c69",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Zg0\u003d",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-29T18:19:19Z",
+      "side": 1,
+      "message": "nit: period.",
+      "revId": "176c65dd378ec6197a27f43ba51fc62037cd9c69",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Zgw\u003d",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-29T18:19:19Z",
+      "side": 1,
+      "message": "period again; might as well since you\u0027re in here...",
+      "revId": "176c65dd378ec6197a27f43ba51fc62037cd9c69",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Zgs\u003d",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-29T18:19:19Z",
+      "side": 1,
+      "message": "Period.",
+      "revId": "176c65dd378ec6197a27f43ba51fc62037cd9c69",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Zgo\u003d",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-29T18:19:19Z",
+      "side": 1,
+      "message": "Period.",
+      "revId": "176c65dd378ec6197a27f43ba51fc62037cd9c69",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Zgk\u003d",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 274,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-29T18:19:19Z",
+      "side": 1,
+      "message": "I think it\u0027s \"#if CONFIG_VP9_HBD\" everywhere else-- why negate here?",
+      "revId": "176c65dd378ec6197a27f43ba51fc62037cd9c69",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZgQ\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 606,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-29T18:19:19Z",
+      "side": 1,
+      "message": "nit: Drop this line to the bottom of the function and fall through? Looks a little odd is all.",
+      "revId": "176c65dd378ec6197a27f43ba51fc62037cd9c69",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZgM\u003d",
+        "filename": "vpx/vpx_codec.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-29T18:19:19Z",
+      "side": 1,
+      "message": "Shouldn\u0027t the comment be \u0027\u003c\u003d\u0027 and not \u0027\u003c\u0027?",
+      "revId": "176c65dd378ec6197a27f43ba51fc62037cd9c69",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZgE\u003d",
+        "filename": "vpx/vpx_image.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-29T18:19:19Z",
+      "side": 1,
+      "message": "Period? :)",
+      "revId": "176c65dd378ec6197a27f43ba51fc62037cd9c69",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZgA\u003d",
+        "filename": "vpx/vpx_image.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-29T18:19:19Z",
+      "side": 1,
+      "message": "Ditto.",
+      "revId": "176c65dd378ec6197a27f43ba51fc62037cd9c69",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Zf8\u003d",
+        "filename": "vpx_scale/generic/yv12config.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-29T18:19:19Z",
+      "side": 1,
+      "message": "The alignment is pretty weird here-- is Chrome displaying things incorrectly, or does this need to be fixed?\n\nI would just drop it all down to the next line\n\n    const uint64_t frame_size \u003d\n        (1 + use_highbitdepth) * (yplane_size +  2 * uvplane_size);\n\nI think that fits...",
+      "revId": "176c65dd378ec6197a27f43ba51fc62037cd9c69",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Zfw\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 1203,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-08-29T18:19:19Z",
+      "side": 1,
+      "message": "Period.",
+      "revId": "176c65dd378ec6197a27f43ba51fc62037cd9c69",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
