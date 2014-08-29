@@ -994,6 +994,7 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
 
   // Reset tile decoding hook
   for (n = 0; n < num_workers; ++n) {
+    winterface->sync(&pbi->tile_workers[n]);
     pbi->tile_workers[n].hook = (VP9WorkerHook)tile_worker_hook;
   }
 
