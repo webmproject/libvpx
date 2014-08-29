@@ -485,21 +485,6 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(6, 5, subpel_avg_variance64x32_c),
                       make_tuple(6, 6, subpel_avg_variance64x64_c)));
 
-#if HAVE_MMX
-const vp9_variance_fn_t variance4x4_mmx = vp9_variance4x4_mmx;
-const vp9_variance_fn_t variance8x8_mmx = vp9_variance8x8_mmx;
-const vp9_variance_fn_t variance8x16_mmx = vp9_variance8x16_mmx;
-const vp9_variance_fn_t variance16x8_mmx = vp9_variance16x8_mmx;
-const vp9_variance_fn_t variance16x16_mmx = vp9_variance16x16_mmx;
-INSTANTIATE_TEST_CASE_P(
-    MMX, VP9VarianceTest,
-    ::testing::Values(make_tuple(2, 2, variance4x4_mmx),
-                      make_tuple(3, 3, variance8x8_mmx),
-                      make_tuple(3, 4, variance8x16_mmx),
-                      make_tuple(4, 3, variance16x8_mmx),
-                      make_tuple(4, 4, variance16x16_mmx)));
-#endif
-
 #if HAVE_SSE2
 #if CONFIG_USE_X86INC
 const vp9_variance_fn_t variance4x4_sse2 = vp9_variance4x4_sse2;
