@@ -147,7 +147,7 @@ void vp9_loop_filter_frame_mt(YV12_BUFFER_CONFIG *frame,
 
   // Allocate memory used in thread synchronization.
   // This always needs to be done even if frame_filter_level is 0.
-  if (!cm->current_video_frame || cm->last_height != cm->height) {
+  if (!lf_sync->sync_range || cm->last_height != cm->height) {
     if (cm->last_height != cm->height) {
       const int aligned_last_height =
           ALIGN_POWER_OF_TWO(cm->last_height, MI_SIZE_LOG2);
