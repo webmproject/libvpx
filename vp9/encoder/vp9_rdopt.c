@@ -2794,6 +2794,10 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     }
 
     if (ref_frame == INTRA_FRAME) {
+      if (cpi->sf.adaptive_mode_search)
+        if ((x->source_variance << num_pels_log2_lookup[bsize]) > best_intra_rd)
+          continue;
+
       if (!(intra_y_mode_mask & (1 << this_mode)))
         continue;
       if (this_mode != DC_PRED) {
@@ -2966,6 +2970,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
           /* required for left and above block mv */
           mbmi->mv[0].as_int = 0;
           max_plane = 1;
+        } else {
+          best_intra_rd = x->pred_sse[ref_frame];
         }
 
         *returnrate = rate2;

@@ -291,6 +291,9 @@ typedef struct SPEED_FEATURES {
   // was selected, and 2 means we use 8 tap if no 8x8 filter mode was selected.
   int adaptive_pred_interp_filter;
 
+  // Adaptive prediction mode search
+  int adaptive_mode_search;
+
   // Chessboard pattern prediction filter type search
   int cb_pred_filter_search;
 
