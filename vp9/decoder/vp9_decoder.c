@@ -96,10 +96,8 @@ void vp9_decoder_remove(VP9Decoder *pbi) {
   }
   vpx_free(pbi->tile_workers);
 
-  if (pbi->num_tile_workers) {
-    const int sb_rows =
-        mi_cols_aligned_to_sb(cm->mi_rows) >> MI_BLOCK_SIZE_LOG2;
-    vp9_loop_filter_dealloc(&pbi->lf_row_sync, sb_rows);
+  if (pbi->num_tile_workers > 0) {
+    vp9_loop_filter_dealloc(&pbi->lf_row_sync);
   }
 
   vp9_remove_common(cm);
