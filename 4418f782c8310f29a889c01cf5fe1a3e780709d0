@@ -19,6 +19,40 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//ZbQ\u003d",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 45
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-08-30T06:44:49Z",
+      "side": 1,
+      "message": "Replace with lock_buffer_pool.",
+      "revId": "4418f782c8310f29a889c01cf5fe1a3e780709d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZbM\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 45
+      },
+      "lineNbr": 648,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-08-30T06:44:49Z",
+      "side": 1,
+      "message": "replace with lock_buffer_pool",
+      "revId": "4418f782c8310f29a889c01cf5fe1a3e780709d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Zcg\u003d",
         "filename": "vp9/decoder/vp9_decodeframe.c",
         "patchSetId": 45
@@ -30,6 +64,58 @@
       "writtenOn": "2014-08-29T21:30:53Z",
       "side": 1,
       "message": "this should be abstracted to something like lock(buffer_pool); then the ifdef check is only needed in one place",
+      "revId": "4418f782c8310f29a889c01cf5fe1a3e780709d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZbI\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 45
+      },
+      "lineNbr": 659,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-08-30T06:44:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Zcg\u003d",
+      "revId": "4418f782c8310f29a889c01cf5fe1a3e780709d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZbE\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 45
+      },
+      "lineNbr": 1121,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-08-30T06:44:49Z",
+      "side": 1,
+      "message": "replace with lock_buffer_pool",
+      "revId": "4418f782c8310f29a889c01cf5fe1a3e780709d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZbA\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 45
+      },
+      "lineNbr": 1237,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-08-30T06:44:49Z",
+      "side": 1,
+      "message": "replace with lock_buffer_pool",
       "revId": "4418f782c8310f29a889c01cf5fe1a3e780709d0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
