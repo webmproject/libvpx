@@ -172,7 +172,7 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
   const int ref = xd->mi[0]->mbmi.ref_frame[0];
   unsigned int sse;
   unsigned int var = 0;
-  int64_t sum_sse = 0;
+  unsigned int sum_sse = 0;
   const int shift = 8;
   int rate;
   int64_t dist;
