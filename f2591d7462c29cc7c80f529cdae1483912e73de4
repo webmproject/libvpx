@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//ZZs\u003d",
+        "filename": "vp9/encoder/x86/vp9_variance_avx2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-30T01:19:36Z",
+      "side": 1,
+      "message": "no space after \u0027(*get_var_avx2)\u0027 -- I think there are other instances in _XXX.c asm related files",
+      "revId": "f2591d7462c29cc7c80f529cdae1483912e73de4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZZo\u003d",
+        "filename": "vp9/encoder/x86/vp9_variance_avx2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-30T01:19:36Z",
+      "side": 1,
+      "message": "could reorder these so they increase 16x16/32x16/32x32...",
+      "revId": "f2591d7462c29cc7c80f529cdae1483912e73de4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZZc\u003d",
+        "filename": "vp9/encoder/x86/vp9_variance_avx2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-30T01:19:36Z",
+      "side": 1,
+      "message": "const throughout",
+      "revId": "f2591d7462c29cc7c80f529cdae1483912e73de4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZZk\u003d",
+        "filename": "vp9/encoder/x86/vp9_variance_avx2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-30T01:19:36Z",
+      "side": 1,
+      "message": "same here for order, maybe in another patch",
+      "revId": "f2591d7462c29cc7c80f529cdae1483912e73de4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZZg\u003d",
+        "filename": "vp9/encoder/x86/vp9_variance_avx2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-30T01:19:36Z",
+      "side": 1,
+      "message": "const",
+      "revId": "f2591d7462c29cc7c80f529cdae1483912e73de4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZZY\u003d",
+        "filename": "vp9/encoder/x86/vp9_variance_avx2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-30T01:19:36Z",
+      "side": 1,
+      "message": "const",
+      "revId": "f2591d7462c29cc7c80f529cdae1483912e73de4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZZU\u003d",
+        "filename": "vp9/encoder/x86/vp9_variance_avx2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-08-30T01:19:36Z",
+      "side": 1,
+      "message": "drop these 2 lines",
+      "revId": "f2591d7462c29cc7c80f529cdae1483912e73de4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
