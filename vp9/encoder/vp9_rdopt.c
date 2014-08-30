@@ -172,6 +172,7 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
   const int ref = xd->mi[0]->mbmi.ref_frame[0];
   unsigned int sse;
   unsigned int var = 0;
+  int64_t sum_sse = 0;
   const int shift = 8;
   int rate;
   int64_t dist;
@@ -190,29 +191,31 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
     int lw = b_width_log2_lookup[unit_size] + 2;
     int lh = b_height_log2_lookup[unit_size] + 2;
 
-    x->bsse[i] = 0;
+    sum_sse = 0;
 
     for (idy = 0; idy < bh; ++idy) {
       for (idx = 0; idx < bw; ++idx) {
         uint8_t *src = p->src.buf + (idy * p->src.stride << lh) + (idx << lw);
         uint8_t *dst = pd->dst.buf + (idy * pd->dst.stride << lh) + (idx << lh);
+        int block_idx = (idy << 1) + idx;
 
-        var += cpi->fn_ptr[unit_size].vf(src , p->src.stride,
-                                         dst, pd->dst.stride, &sse);
+        var = cpi->fn_ptr[unit_size].vf(src, p->src.stride,
+                                        dst, pd->dst.stride, &sse);
+        x->bsse[(i << 2) + block_idx] = sse;
+        sum_sse += sse;
 
-        x->bsse[i] += sse;
+        if (!x->select_tx_size) {
+          if (x->bsse[(i << 2) + block_idx] < p->quant_thred[0] >> shift)
+            x->skip_txfm[(i << 2) + block_idx] = 1;
+          else if (var < p->quant_thred[1] >> shift)
+            x->skip_txfm[(i << 2) + block_idx] = 2;
+          else
+            x->skip_txfm[(i << 2) + block_idx] = 0;
+        }
+
         if (i == 0)
           x->pred_sse[ref] += sse;
       }
-    }
-
-    if (!x->select_tx_size) {
-      if (x->bsse[i] < p->quant_thred[0] >> shift)
-        x->skip_txfm[i] = 1;
-      else if (var < p->quant_thred[1] >> shift)
-        x->skip_txfm[i] = 2;
-      else
-        x->skip_txfm[i] = 0;
     }
 
     // Fast approximate the modelling function.
@@ -230,7 +233,7 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
       rate_sum += rate;
       dist_sum += dist;
     } else {
-      vp9_model_rd_from_var_lapndz(x->bsse[i], 1 << num_pels_log2_lookup[bs],
+      vp9_model_rd_from_var_lapndz(sum_sse, 1 << num_pels_log2_lookup[bs],
                                    pd->dequant[1] >> 3, &rate, &dist);
       rate_sum += rate;
       dist_sum += dist;
@@ -390,17 +393,17 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
   if (!is_inter_block(mbmi)) {
     vp9_encode_block_intra(x, plane, block, plane_bsize, tx_size, &mbmi->skip);
     dist_block(plane, block, tx_size, args);
-  } else {
-    if (x->skip_txfm[plane] == 0) {
+  } else if (max_txsize_lookup[plane_bsize] == tx_size) {
+    if (x->skip_txfm[(plane << 2) + (block >> (tx_size << 1))] == 0) {
       // full forward transform and quantization
       vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
       dist_block(plane, block, tx_size, args);
-    } else if (x->skip_txfm[plane] == 2) {
+    } else if (x->skip_txfm[(plane << 2) + (block >> (tx_size << 1))] == 2) {
       // compute DC coefficient
       int16_t *const coeff   = BLOCK_OFFSET(x->plane[plane].coeff, block);
       int16_t *const dqcoeff = BLOCK_OFFSET(xd->plane[plane].dqcoeff, block);
       vp9_xform_quant_dc(x, plane, block, plane_bsize, tx_size);
-      args->sse  = x->bsse[plane] << 4;
+      args->sse  = x->bsse[(plane << 2) + (block >> (tx_size << 1))] << 4;
       args->dist = args->sse;
       if (!x->plane[plane].eobs[block])
         args->dist = args->sse - ((coeff[0] * coeff[0] -
@@ -408,9 +411,13 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
     } else {
       // skip forward transform
       x->plane[plane].eobs[block] = 0;
-      args->sse  = x->bsse[plane] << 4;
+      args->sse  = x->bsse[(plane << 2) + (block >> (tx_size << 1))] << 4;
       args->dist = args->sse;
     }
+  } else {
+    // full forward transform and quantization
+    vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
+    dist_block(plane, block, tx_size, args);
   }
 
   rate_block(plane, block, plane_bsize, tx_size, args);
@@ -2166,8 +2173,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int orig_dst_stride[MAX_MB_PLANE];
   int rs = 0;
   INTERP_FILTER best_filter = SWITCHABLE;
-  int skip_txfm[MAX_MB_PLANE] = {0};
-  int64_t bsse[MAX_MB_PLANE] = {0};
+  int skip_txfm[MAX_MB_PLANE << 2] = {0};
+  int64_t bsse[MAX_MB_PLANE << 2] = {0};
 
   int bsl = mi_width_log2_lookup[bsize];
   int pred_filter_search = cpi->sf.cb_pred_filter_search ?
