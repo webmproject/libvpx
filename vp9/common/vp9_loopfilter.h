@@ -129,8 +129,8 @@ typedef struct LoopFilterWorkerData {
   int num_lf_workers;
 } LFWorkerData;
 
-// Operates on the rows described by LFWorkerData passed as 'arg1'.
-int vp9_loop_filter_worker(void *arg1, void *arg2);
+// Operates on the rows described by 'lf_data'.
+int vp9_loop_filter_worker(LFWorkerData *const lf_data, void *unused);
 #ifdef __cplusplus
 }  // extern "C"
 #endif
