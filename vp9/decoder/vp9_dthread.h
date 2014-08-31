@@ -52,8 +52,8 @@ void vp9_loop_filter_dealloc(VP9LfSync *lf_sync);
 void vp9_loop_filter_frame_mt(VP9LfSync *lf_sync,
                               YV12_BUFFER_CONFIG *frame,
                               struct macroblockd_plane planes[MAX_MB_PLANE],
-                              struct VP9Decoder *pbi,
                               struct VP9Common *cm,
+                              VP9Worker *workers, int num_workers,
                               int frame_filter_level,
                               int y_only);
 
