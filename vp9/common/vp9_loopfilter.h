@@ -124,9 +124,6 @@ typedef struct LoopFilterWorkerData {
   int start;
   int stop;
   int y_only;
-
-  struct VP9LfSyncData *lf_sync;
-  int num_lf_workers;
 } LFWorkerData;
 
 // Operates on the rows described by 'lf_data'.

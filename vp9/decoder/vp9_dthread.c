@@ -92,12 +92,12 @@ static void loop_filter_rows_mt(const YV12_BUFFER_CONFIG *const frame_buffer,
                                 VP9_COMMON *const cm,
                                 struct macroblockd_plane planes[MAX_MB_PLANE],
                                 int start, int stop, int y_only,
-                                VP9LfSync *const lf_sync, int num_lf_workers) {
+                                VP9LfSync *const lf_sync) {
   const int num_planes = y_only ? 1 : MAX_MB_PLANE;
   int r, c;  // SB row and col
   const int sb_cols = mi_cols_aligned_to_sb(cm->mi_cols) >> MI_BLOCK_SIZE_LOG2;
 
-  for (r = start; r < stop; r += num_lf_workers) {
+  for (r = start; r < stop; r += lf_sync->num_workers) {
     const int mi_row = r << MI_BLOCK_SIZE_LOG2;
     MODE_INFO *const mi = cm->mi + mi_row * cm->mi_stride;
 
@@ -121,13 +121,10 @@ static void loop_filter_rows_mt(const YV12_BUFFER_CONFIG *const frame_buffer,
 }
 
 // Row-based multi-threaded loopfilter hook
-static int loop_filter_row_worker(TileWorkerData *const tile_data,
-                                  void *unused) {
-  LFWorkerData *const lf_data = &tile_data->lfdata;
-  (void)unused;
+static int loop_filter_row_worker(VP9LfSync *const lf_sync,
+                                  LFWorkerData *const lf_data) {
   loop_filter_rows_mt(lf_data->frame_buffer, lf_data->cm, lf_data->planes,
-                      lf_data->start, lf_data->stop, lf_data->y_only,
-                      lf_data->lf_sync, lf_data->num_lf_workers);
+                      lf_data->start, lf_data->stop, lf_data->y_only, lf_sync);
   return 1;
 }
 
@@ -149,9 +146,10 @@ void vp9_loop_filter_frame_mt(VP9LfSync *lf_sync,
 
   if (!frame_filter_level) return;
 
-  if (!lf_sync->sync_range || cm->last_height != cm->height) {
+  if (!lf_sync->sync_range || cm->last_height != cm->height ||
+      num_workers > lf_sync->num_workers) {
     vp9_loop_filter_dealloc(lf_sync);
-    vp9_loop_filter_alloc(lf_sync, cm, sb_rows, cm->width);
+    vp9_loop_filter_alloc(lf_sync, cm, sb_rows, cm->width, num_workers);
   }
 
   vp9_loop_filter_frame_init(cm, frame_filter_level);
@@ -169,10 +167,11 @@ void vp9_loop_filter_frame_mt(VP9LfSync *lf_sync,
   // then the number of workers used by the loopfilter should be revisited.
   for (i = 0; i < num_workers; ++i) {
     VP9Worker *const worker = &workers[i];
-    TileWorkerData *const tile_data = (TileWorkerData*)worker->data1;
-    LFWorkerData *const lf_data = &tile_data->lfdata;
+    LFWorkerData *const lf_data = &lf_sync->lfdata[i];
 
     worker->hook = (VP9WorkerHook)loop_filter_row_worker;
+    worker->data1 = lf_sync;
+    worker->data2 = lf_data;
 
     // Loopfilter data
     lf_data->frame_buffer = frame;
@@ -181,9 +180,6 @@ void vp9_loop_filter_frame_mt(VP9LfSync *lf_sync,
     lf_data->start = i;
     lf_data->stop = sb_rows;
     lf_data->y_only = y_only;
-
-    lf_data->lf_sync = lf_sync;
-    lf_data->num_lf_workers = num_workers;
 
     // Start loopfiltering
     if (i == num_workers - 1) {
@@ -215,7 +211,7 @@ static int get_sync_range(int width) {
 
 // Allocate memory for lf row synchronization
 void vp9_loop_filter_alloc(VP9LfSync *lf_sync, VP9_COMMON *cm, int rows,
-                           int width) {
+                           int width, int num_workers) {
   lf_sync->rows = rows;
 #if CONFIG_MULTITHREAD
   {
@@ -238,6 +234,10 @@ void vp9_loop_filter_alloc(VP9LfSync *lf_sync, VP9_COMMON *cm, int rows,
     }
   }
 #endif  // CONFIG_MULTITHREAD
+
+  CHECK_MEM_ERROR(cm, lf_sync->lfdata,
+                  vpx_malloc(num_workers * sizeof(*lf_sync->lfdata)));
+  lf_sync->num_workers = num_workers;
 
   CHECK_MEM_ERROR(cm, lf_sync->cur_sb_col,
                   vpx_malloc(sizeof(*lf_sync->cur_sb_col) * rows));
@@ -265,6 +265,7 @@ void vp9_loop_filter_dealloc(VP9LfSync *lf_sync) {
       vpx_free(lf_sync->cond_);
     }
 #endif  // CONFIG_MULTITHREAD
+    vpx_free(lf_sync->lfdata);
     vpx_free(lf_sync->cur_sb_col);
     // clear the structure as the source of this call may be a resize in which
     // case this call will be followed by an _alloc() which may fail.
