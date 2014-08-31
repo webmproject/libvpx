@@ -149,7 +149,7 @@ void vp9_loop_filter_frame_mt(YV12_BUFFER_CONFIG *frame,
   // This always needs to be done even if frame_filter_level is 0.
   if (!lf_sync->sync_range || cm->last_height != cm->height) {
     vp9_loop_filter_dealloc(lf_sync);
-    vp9_loop_filter_alloc(cm, lf_sync, sb_rows, cm->width);
+    vp9_loop_filter_alloc(lf_sync, cm, sb_rows, cm->width);
   }
 
   if (!frame_filter_level) return;
@@ -216,7 +216,7 @@ static int get_sync_range(int width) {
 }
 
 // Allocate memory for lf row synchronization
-void vp9_loop_filter_alloc(VP9_COMMON *cm, VP9LfSync *lf_sync, int rows,
+void vp9_loop_filter_alloc(VP9LfSync *lf_sync, VP9_COMMON *cm, int rows,
                            int width) {
   lf_sync->rows = rows;
 #if CONFIG_MULTITHREAD
