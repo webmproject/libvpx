@@ -49,7 +49,8 @@ void vp9_loop_filter_alloc(VP9LfSync *lf_sync, VP9_COMMON *cm, int rows,
 void vp9_loop_filter_dealloc(VP9LfSync *lf_sync);
 
 // Multi-threaded loopfilter that uses the tile threads.
-void vp9_loop_filter_frame_mt(YV12_BUFFER_CONFIG *frame,
+void vp9_loop_filter_frame_mt(VP9LfSync *lf_sync,
+                              YV12_BUFFER_CONFIG *frame,
                               struct VP9Decoder *pbi,
                               struct VP9Common *cm,
                               int frame_filter_level,

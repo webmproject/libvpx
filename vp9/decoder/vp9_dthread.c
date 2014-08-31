@@ -133,11 +133,11 @@ static int loop_filter_row_worker(TileWorkerData *const tile_data,
 
 // VP9 decoder: Implement multi-threaded loopfilter that uses the tile
 // threads.
-void vp9_loop_filter_frame_mt(YV12_BUFFER_CONFIG *frame,
+void vp9_loop_filter_frame_mt(VP9LfSync *lf_sync,
+                              YV12_BUFFER_CONFIG *frame,
                               VP9Decoder *pbi, VP9_COMMON *cm,
                               int frame_filter_level,
                               int y_only) {
-  VP9LfSync *const lf_sync = &pbi->lf_row_sync;
   const VP9WorkerInterface *const winterface = vp9_get_worker_interface();
   // Number of superblock rows and cols
   const int sb_rows = mi_cols_aligned_to_sb(cm->mi_rows) >> MI_BLOCK_SIZE_LOG2;
