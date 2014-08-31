@@ -51,6 +51,7 @@ void vp9_loop_filter_dealloc(VP9LfSync *lf_sync);
 // Multi-threaded loopfilter that uses the tile threads.
 void vp9_loop_filter_frame_mt(VP9LfSync *lf_sync,
                               YV12_BUFFER_CONFIG *frame,
+                              struct macroblockd_plane planes[MAX_MB_PLANE],
                               struct VP9Decoder *pbi,
                               struct VP9Common *cm,
                               int frame_filter_level,

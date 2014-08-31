@@ -135,6 +135,7 @@ static int loop_filter_row_worker(TileWorkerData *const tile_data,
 // threads.
 void vp9_loop_filter_frame_mt(VP9LfSync *lf_sync,
                               YV12_BUFFER_CONFIG *frame,
+                              struct macroblockd_plane planes[MAX_MB_PLANE],
                               VP9Decoder *pbi, VP9_COMMON *cm,
                               int frame_filter_level,
                               int y_only) {
@@ -177,7 +178,7 @@ void vp9_loop_filter_frame_mt(VP9LfSync *lf_sync,
     // Loopfilter data
     lf_data->frame_buffer = frame;
     lf_data->cm = cm;
-    vp9_copy(lf_data->planes, pbi->mb.plane);
+    vpx_memcpy(lf_data->planes, planes, sizeof(lf_data->planes));
     lf_data->start = i;
     lf_data->stop = sb_rows;
     lf_data->y_only = y_only;   // always do all planes in decoder
