@@ -145,14 +145,12 @@ void vp9_loop_filter_frame_mt(YV12_BUFFER_CONFIG *frame,
   const int num_workers = MIN(pbi->max_threads & ~1, tile_cols);
   int i;
 
-  // Allocate memory used in thread synchronization.
-  // This always needs to be done even if frame_filter_level is 0.
+  if (!frame_filter_level) return;
+
   if (!lf_sync->sync_range || cm->last_height != cm->height) {
     vp9_loop_filter_dealloc(lf_sync);
     vp9_loop_filter_alloc(lf_sync, cm, sb_rows, cm->width);
   }
-
-  if (!frame_filter_level) return;
 
   vp9_loop_filter_frame_init(cm, frame_filter_level);
 
