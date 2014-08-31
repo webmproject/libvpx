@@ -1065,14 +1065,19 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
     // use num_threads - 1 workers.
     CHECK_MEM_ERROR(cm, pbi->tile_workers,
                     vpx_malloc(num_threads * sizeof(*pbi->tile_workers)));
+    // Ensure tile data offsets will be properly aligned. This may fail on
+    // platforms without DECLARE_ALIGNED().
+    assert((sizeof(*pbi->tile_worker_data) % 16) == 0);
+    CHECK_MEM_ERROR(cm, pbi->tile_worker_data,
+                    vpx_memalign(32, num_threads *
+                                 sizeof(*pbi->tile_worker_data)));
+    CHECK_MEM_ERROR(cm, pbi->tile_worker_info,
+                    vpx_malloc(num_threads * sizeof(*pbi->tile_worker_info)));
     for (i = 0; i < num_threads; ++i) {
       VP9Worker *const worker = &pbi->tile_workers[i];
       ++pbi->num_tile_workers;
 
       winterface->init(worker);
-      CHECK_MEM_ERROR(cm, worker->data1,
-                      vpx_memalign(32, sizeof(TileWorkerData)));
-      CHECK_MEM_ERROR(cm, worker->data2, vpx_malloc(sizeof(TileInfo)));
       if (i < num_threads - 1 && !winterface->reset(worker)) {
         vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
                            "Tile decoder thread creation failed");
@@ -1082,8 +1087,11 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
 
   // Reset tile decoding hook
   for (n = 0; n < num_workers; ++n) {
-    winterface->sync(&pbi->tile_workers[n]);
-    pbi->tile_workers[n].hook = (VP9WorkerHook)tile_worker_hook;
+    VP9Worker *const worker = &pbi->tile_workers[n];
+    winterface->sync(worker);
+    worker->hook = (VP9WorkerHook)tile_worker_hook;
+    worker->data1 = &pbi->tile_worker_data[n];
+    worker->data2 = &pbi->tile_worker_info[n];
   }
 
   // Note: this memset assumes above_context[0], [1] and [2]
