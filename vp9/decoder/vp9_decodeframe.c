@@ -1486,7 +1486,7 @@ void vp9_decode_frame(VP9Decoder *pbi,
 
   if (!first_partition_size) {
     // showing a frame directly
-    *p_data_end = data + 1;
+    *p_data_end = data + (cm->profile <= PROFILE_2 ? 1 : 2);
     return;
   }
 
