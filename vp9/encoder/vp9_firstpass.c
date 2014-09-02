@@ -62,8 +62,8 @@ static void swap_yv12(YV12_BUFFER_CONFIG *a, YV12_BUFFER_CONFIG *b) {
   *b = temp;
 }
 
-static int gfboost_qadjust(int qindex) {
-  const double q = vp9_convert_qindex_to_q(qindex);
+static int gfboost_qadjust(int qindex, vpx_bit_depth_t bit_depth) {
+  const double q = vp9_convert_qindex_to_q(qindex, bit_depth);
   return (int)((0.00000828 * q * q * q) +
                (-0.0055 * q * q) +
                (1.32 * q) + 79.3);
@@ -360,11 +360,11 @@ static BLOCK_SIZE get_bsize(const VP9_COMMON *cm, int mb_row, int mb_col) {
   }
 }
 
-static int find_fp_qindex() {
+static int find_fp_qindex(vpx_bit_depth_t bit_depth) {
   int i;
 
   for (i = 0; i < QINDEX_RANGE; ++i)
-    if (vp9_convert_qindex_to_q(i) >= 30.0)
+    if (vp9_convert_qindex_to_q(i, bit_depth) >= 30.0)
       break;
 
   if (i == QINDEX_RANGE)
@@ -434,7 +434,7 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
   vp9_clear_system_state();
 
   set_first_pass_params(cpi);
-  vp9_set_quantizer(cm, find_fp_qindex());
+  vp9_set_quantizer(cm, find_fp_qindex(cm->bit_depth));
 
   if (lc != NULL) {
     twopass = &lc->twopass;
@@ -935,12 +935,13 @@ static double calc_correction_factor(double err_per_mb,
                                      double err_divisor,
                                      double pt_low,
                                      double pt_high,
-                                     int q) {
+                                     int q,
+                                     vpx_bit_depth_t bit_depth) {
   const double error_term = err_per_mb / err_divisor;
 
   // Adjustment based on actual quantizer to power term.
-  const double power_term = MIN(vp9_convert_qindex_to_q(q) * 0.0125 + pt_low,
-                                pt_high);
+  const double power_term =
+      MIN(vp9_convert_qindex_to_q(q, bit_depth) * 0.0125 + pt_low, pt_high);
 
   // Calculate correction factor.
   if (power_term < 1.0)
@@ -975,9 +976,11 @@ static int get_twopass_worst_quality(const VP9_COMP *cpi,
       const double factor =
           calc_correction_factor(err_per_mb, ERR_DIVISOR,
                                  is_svc_upper_layer ? SVC_FACTOR_PT_LOW :
-                                 FACTOR_PT_LOW, FACTOR_PT_HIGH, q);
+                                 FACTOR_PT_LOW, FACTOR_PT_HIGH, q,
+                                 cpi->common.bit_depth);
       const int bits_per_mb = vp9_rc_bits_per_mb(INTER_FRAME, q,
-                                                 factor * speed_term);
+                                                 factor * speed_term,
+                                                 cpi->common.bit_depth);
       if (bits_per_mb <= target_norm_bits_per_mb)
         break;
     }
@@ -1594,7 +1597,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
    // At high Q when there are few bits to spare we are better with a longer
    // interval to spread the cost of the GF.
    active_max_gf_interval =
-     12 + ((int)vp9_convert_qindex_to_q(rc->last_q[INTER_FRAME]) >> 5);
+     12 + ((int)vp9_convert_qindex_to_q(rc->last_q[INTER_FRAME],
+                                        cpi->common.bit_depth) >> 5);
 
    if (active_max_gf_interval > rc->max_gf_interval)
      active_max_gf_interval = rc->max_gf_interval;
@@ -1736,7 +1740,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // Calculate the extra bits to be used for boosted frame(s)
   {
     int q = rc->last_q[INTER_FRAME];
-    int boost = (rc->gfu_boost * gfboost_qadjust(q)) / 100;
+    int boost =
+        (rc->gfu_boost * gfboost_qadjust(q, cpi->common.bit_depth)) / 100;
 
     // Set max and minimum boost and hence minimum allocation.
     boost = clamp(boost, 125, (rc->baseline_gf_interval + 1) * 200);
@@ -2227,7 +2232,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
                                                 section_target_bandwidth);
     twopass->active_worst_quality = tmp_q;
     rc->ni_av_qi = tmp_q;
-    rc->avg_q = vp9_convert_qindex_to_q(tmp_q);
+    rc->avg_q = vp9_convert_qindex_to_q(tmp_q, cm->bit_depth);
   }
   vp9_zero(this_frame);
   if (EOF == input_stats(twopass, &this_frame))

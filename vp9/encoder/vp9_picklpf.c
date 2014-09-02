@@ -142,7 +142,7 @@ void vp9_pick_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
   } else if (method >= LPF_PICK_FROM_Q) {
     const int min_filter_level = 0;
     const int max_filter_level = get_max_filter_level(cpi);
-    const int q = vp9_ac_quant(cm->base_qindex, 0);
+    const int q = vp9_ac_quant(cm->base_qindex, 0, cm->bit_depth);
     // These values were determined by linear fitting the result of the
     // searched level, filt_guess = q * 0.316206 + 3.87252
     int filt_guess = ROUND_POWER_OF_TWO(q * 20723 + 1015158, 18);

@@ -440,7 +440,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   unsigned int sse_y = UINT_MAX;
 
   const int intra_cost_penalty =
-      20 * vp9_dc_quant(cm->base_qindex, cm->y_dc_delta_q);
+      20 * vp9_dc_quant(cm->base_qindex, cm->y_dc_delta_q, cm->bit_depth);
   const int64_t inter_mode_thresh = RDCOST(x->rdmult, x->rddiv,
                                            intra_cost_penalty, 0);
   const int intra_mode_cost = 50;
