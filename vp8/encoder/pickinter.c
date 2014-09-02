@@ -487,6 +487,7 @@ static int evaluate_inter_mode(unsigned int* sse, int rate2, int* distortion2,
     MB_PREDICTION_MODE this_mode = x->e_mbd.mode_info_context->mbmi.mode;
     int_mv mv = x->e_mbd.mode_info_context->mbmi.mv;
     int this_rd;
+    int denoise_aggressive = 0;
     /* Exit early and don't compute the distortion if this macroblock
      * is marked inactive. */
     if (cpi->active_map_enabled && x->active_ptr[0] == 0)
@@ -505,10 +506,17 @@ static int evaluate_inter_mode(unsigned int* sse, int rate2, int* distortion2,
 
     this_rd = RDCOST(x->rdmult, x->rddiv, rate2, *distortion2);
 
+#if CONFIG_TEMPORAL_DENOISING
+    if (cpi->oxcf.noise_sensitivity > 0) {
+      denoise_aggressive =
+        (cpi->denoiser.denoiser_mode == kDenoiserOnYUVAggressive) ? 1 : 0;
+    }
+#endif
+
     // Adjust rd for ZEROMV and LAST, if LAST is the closest reference frame.
     if (this_mode == ZEROMV &&
         x->e_mbd.mode_info_context->mbmi.ref_frame == LAST_FRAME &&
-        cpi->closest_reference_frame == LAST_FRAME)
+        (denoise_aggressive || cpi->closest_reference_frame == LAST_FRAME))
     {
         this_rd = ((int64_t)this_rd) * rd_adj / 100;
     }
