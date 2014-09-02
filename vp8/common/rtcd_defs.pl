@@ -72,12 +72,12 @@ $vp8_loop_filter_bh_dspr2=vp8_loop_filter_bh_dspr2;
 
 
 add_proto qw/void vp8_loop_filter_simple_mbv/, "unsigned char *y, int ystride, const unsigned char *blimit";
-specialize qw/vp8_loop_filter_simple_mbv mmx sse2 media neon_asm/;
+specialize qw/vp8_loop_filter_simple_mbv mmx sse2 media neon/;
 $vp8_loop_filter_simple_mbv_c=vp8_loop_filter_simple_vertical_edge_c;
 $vp8_loop_filter_simple_mbv_mmx=vp8_loop_filter_simple_vertical_edge_mmx;
 $vp8_loop_filter_simple_mbv_sse2=vp8_loop_filter_simple_vertical_edge_sse2;
 $vp8_loop_filter_simple_mbv_media=vp8_loop_filter_simple_vertical_edge_armv6;
-$vp8_loop_filter_simple_mbv_neon_asm=vp8_loop_filter_mbvs_neon;
+$vp8_loop_filter_simple_mbv_neon=vp8_loop_filter_mbvs_neon;
 
 add_proto qw/void vp8_loop_filter_simple_mbh/, "unsigned char *y, int ystride, const unsigned char *blimit";
 specialize qw/vp8_loop_filter_simple_mbh mmx sse2 media neon/;
@@ -88,12 +88,12 @@ $vp8_loop_filter_simple_mbh_media=vp8_loop_filter_simple_horizontal_edge_armv6;
 $vp8_loop_filter_simple_mbh_neon=vp8_loop_filter_mbhs_neon;
 
 add_proto qw/void vp8_loop_filter_simple_bv/, "unsigned char *y, int ystride, const unsigned char *blimit";
-specialize qw/vp8_loop_filter_simple_bv mmx sse2 media neon_asm/;
+specialize qw/vp8_loop_filter_simple_bv mmx sse2 media neon/;
 $vp8_loop_filter_simple_bv_c=vp8_loop_filter_bvs_c;
 $vp8_loop_filter_simple_bv_mmx=vp8_loop_filter_bvs_mmx;
 $vp8_loop_filter_simple_bv_sse2=vp8_loop_filter_bvs_sse2;
 $vp8_loop_filter_simple_bv_media=vp8_loop_filter_bvs_armv6;
-$vp8_loop_filter_simple_bv_neon_asm=vp8_loop_filter_bvs_neon;
+$vp8_loop_filter_simple_bv_neon=vp8_loop_filter_bvs_neon;
 
 add_proto qw/void vp8_loop_filter_simple_bh/, "unsigned char *y, int ystride, const unsigned char *blimit";
 specialize qw/vp8_loop_filter_simple_bh mmx sse2 media neon/;
