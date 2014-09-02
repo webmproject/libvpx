@@ -76,16 +76,6 @@ static void reset_fpf_position(TWO_PASS *p,
   p->stats_in = position;
 }
 
-static int lookup_next_frame_stats(const TWO_PASS *p,
-                                   FIRSTPASS_STATS *next_frame) {
-  if (p->stats_in >= p->stats_in_end)
-    return EOF;
-
-  *next_frame = *p->stats_in;
-  return 1;
-}
-
-
 // Read frame stats at an offset from the current position.
 static const FIRSTPASS_STATS *read_frame_stats(const TWO_PASS *p, int offset) {
   if ((offset >= 0 && p->stats_in + offset >= p->stats_in_end) ||
@@ -1871,16 +1861,17 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     input_stats(twopass, this_frame);
 
     // Provided that we are not at the end of the file...
-    if (cpi->oxcf.auto_key &&
-        lookup_next_frame_stats(twopass, &next_frame) != EOF) {
+    if (cpi->oxcf.auto_key && twopass->stats_in < twopass->stats_in_end) {
       double loop_decay_rate;
 
       // Check for a scene cut.
-      if (test_candidate_kf(twopass, &last_frame, this_frame, &next_frame))
+      if (test_candidate_kf(twopass, &last_frame, this_frame,
+                            twopass->stats_in))
         break;
 
       // How fast is the prediction quality decaying?
-      loop_decay_rate = get_prediction_decay_rate(&cpi->common, &next_frame);
+      loop_decay_rate = get_prediction_decay_rate(&cpi->common,
+                                                  twopass->stats_in);
 
       // We want to know something about the recent past... rather than
       // as used elsewhere where we are concerned with decay in prediction
