@@ -2779,6 +2779,10 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
     comp_pred = second_ref_frame > INTRA_FRAME;
     if (comp_pred) {
+      if (cpi->sf.alt_ref_search_fp)
+        if (!cm->show_frame)
+          continue;
+
       if ((mode_search_skip_flags & FLAG_SKIP_COMP_BESTINTRA) &&
           best_mode_index >=0 &&
           vp9_mode_order[best_mode_index].ref_frame[0] == INTRA_FRAME)
