@@ -331,7 +331,7 @@ typedef struct VP9_COMP {
   TWO_PASS twopass;
 
   YV12_BUFFER_CONFIG alt_ref_buffer;
-  YV12_BUFFER_CONFIG *frames[MAX_LAG_BUFFERS];
+
 
 #if CONFIG_INTERNAL_STATS
   unsigned int mode_chosen_counts[MAX_MODES];
