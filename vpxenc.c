@@ -200,6 +200,10 @@ static const arg_def_t experimental_bitstream =
     ARG_DEF(NULL, "experimental-bitstream", 0,
             "Allow experimental bitstream features.");
 
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+static const arg_def_t test16bitinternalarg = ARG_DEF(
+    NULL, "test-16bit-internal", 0, "Force use of 16 bit internal buffer");
+#endif
 
 static const arg_def_t *main_args[] = {
   &debugmode,
@@ -248,6 +252,9 @@ static const arg_def_t *global_args[] = {
 #endif
   &timebase, &framerate,
   &error_resilient,
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+  &test16bitinternalarg,
+#endif
   &lag_in_frames, NULL
 };
 
@@ -381,6 +388,23 @@ static const arg_def_t frame_periodic_boost = ARG_DEF(
     NULL, "frame-boost", 1,
     "Enable frame periodic boost (0: off (default), 1: on)");
 
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+static const struct arg_enum_list bitdepth_enum[] = {
+  {"8",  VPX_BITS_8},
+  {"10", VPX_BITS_10},
+  {"12", VPX_BITS_12},
+  {NULL, 0}
+};
+
+static const arg_def_t bitdeptharg   = ARG_DEF_ENUM("b", "bit-depth", 1,
+                                                    "Bit depth for codec "
+                                                    "(8 for version <=1, "
+                                                    "10 or 12 for version 2)",
+                                                    bitdepth_enum);
+static const arg_def_t inbitdeptharg = ARG_DEF(NULL, "input-bit-depth", 1,
+                                               "Bit depth of input");
+#endif
+
 static const struct arg_enum_list tune_content_enum[] = {
   {"default", VP9E_CONTENT_DEFAULT},
   {"screen", VP9E_CONTENT_SCREEN},
@@ -395,6 +419,9 @@ static const arg_def_t *vp9_args[] = {
   &tile_cols, &tile_rows, &arnr_maxframes, &arnr_strength, &arnr_type,
   &tune_ssim, &cq_level, &max_intra_rate_pct, &lossless,
   &frame_parallel_decoding, &aq_mode, &frame_periodic_boost, &tune_content,
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+  &bitdeptharg, &inbitdeptharg,
+#endif
   NULL
 };
 static const int vp9_arg_ctrl_map[] = {
@@ -450,6 +477,102 @@ void usage_exit() {
 }
 
 #define mmin(a, b)  ((a) < (b) ? (a) : (b))
+
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+static void find_mismatch_high(const vpx_image_t *const img1,
+                               const vpx_image_t *const img2,
+                               int yloc[4], int uloc[4], int vloc[4]) {
+  uint16_t *plane1, *plane2;
+  uint32_t stride1, stride2;
+  const uint32_t bsize = 64;
+  const uint32_t bsizey = bsize >> img1->y_chroma_shift;
+  const uint32_t bsizex = bsize >> img1->x_chroma_shift;
+  const uint32_t c_w =
+      (img1->d_w + img1->x_chroma_shift) >> img1->x_chroma_shift;
+  const uint32_t c_h =
+      (img1->d_h + img1->y_chroma_shift) >> img1->y_chroma_shift;
+  int match = 1;
+  uint32_t i, j;
+  yloc[0] = yloc[1] = yloc[2] = yloc[3] = -1;
+  plane1 = (uint16_t*)img1->planes[VPX_PLANE_Y];
+  plane2 = (uint16_t*)img2->planes[VPX_PLANE_Y];
+  stride1 = img1->stride[VPX_PLANE_Y]/2;
+  stride2 = img2->stride[VPX_PLANE_Y]/2;
+  for (i = 0, match = 1; match && i < img1->d_h; i += bsize) {
+    for (j = 0; match && j < img1->d_w; j += bsize) {
+      int k, l;
+      const int si = mmin(i + bsize, img1->d_h) - i;
+      const int sj = mmin(j + bsize, img1->d_w) - j;
+      for (k = 0; match && k < si; ++k) {
+        for (l = 0; match && l < sj; ++l) {
+          if (*(plane1 + (i + k) * stride1 + j + l) !=
+              *(plane2 + (i + k) * stride2 + j + l)) {
+            yloc[0] = i + k;
+            yloc[1] = j + l;
+            yloc[2] = *(plane1 + (i + k) * stride1 + j + l);
+            yloc[3] = *(plane2 + (i + k) * stride2 + j + l);
+            match = 0;
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  uloc[0] = uloc[1] = uloc[2] = uloc[3] = -1;
+  plane1 = (uint16_t*)img1->planes[VPX_PLANE_U];
+  plane2 = (uint16_t*)img2->planes[VPX_PLANE_U];
+  stride1 = img1->stride[VPX_PLANE_U]/2;
+  stride2 = img2->stride[VPX_PLANE_U]/2;
+  for (i = 0, match = 1; match && i < c_h; i += bsizey) {
+    for (j = 0; match && j < c_w; j += bsizex) {
+      int k, l;
+      const int si = mmin(i + bsizey, c_h - i);
+      const int sj = mmin(j + bsizex, c_w - j);
+      for (k = 0; match && k < si; ++k) {
+        for (l = 0; match && l < sj; ++l) {
+          if (*(plane1 + (i + k) * stride1 + j + l) !=
+              *(plane2 + (i + k) * stride2 + j + l)) {
+            uloc[0] = i + k;
+            uloc[1] = j + l;
+            uloc[2] = *(plane1 + (i + k) * stride1 + j + l);
+            uloc[3] = *(plane2 + (i + k) * stride2 + j + l);
+            match = 0;
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  vloc[0] = vloc[1] = vloc[2] = vloc[3] = -1;
+  plane1 = (uint16_t*)img1->planes[VPX_PLANE_V];
+  plane2 = (uint16_t*)img2->planes[VPX_PLANE_V];
+  stride1 = img1->stride[VPX_PLANE_V]/2;
+  stride2 = img2->stride[VPX_PLANE_V]/2;
+  for (i = 0, match = 1; match && i < c_h; i += bsizey) {
+    for (j = 0; match && j < c_w; j += bsizex) {
+      int k, l;
+      const int si = mmin(i + bsizey, c_h - i);
+      const int sj = mmin(j + bsizex, c_w - j);
+      for (k = 0; match && k < si; ++k) {
+        for (l = 0; match && l < sj; ++l) {
+          if (*(plane1 + (i + k) * stride1 + j + l) !=
+              *(plane2 + (i + k) * stride2 + j + l)) {
+            vloc[0] = i + k;
+            vloc[1] = j + l;
+            vloc[2] = *(plane1 + (i + k) * stride1 + j + l);
+            vloc[3] = *(plane2 + (i + k) * stride2 + j + l);
+            match = 0;
+            break;
+          }
+        }
+      }
+    }
+  }
+}
+#endif
+
 static void find_mismatch(const vpx_image_t *const img1,
                           const vpx_image_t *const img2,
                           int yloc[4], int uloc[4], int vloc[4]) {
@@ -542,7 +665,8 @@ static void find_mismatch(const vpx_image_t *const img1,
 
 static int compare_img(const vpx_image_t *const img1,
                        const vpx_image_t *const img2) {
-  const uint32_t c_w =
+  uint32_t l_w = img1->d_w;
+  uint32_t c_w =
       (img1->d_w + img1->x_chroma_shift) >> img1->x_chroma_shift;
   const uint32_t c_h =
       (img1->d_h + img1->y_chroma_shift) >> img1->y_chroma_shift;
@@ -552,11 +676,17 @@ static int compare_img(const vpx_image_t *const img1,
   match &= (img1->fmt == img2->fmt);
   match &= (img1->d_w == img2->d_w);
   match &= (img1->d_h == img2->d_h);
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+  if (img1->fmt & VPX_IMG_FMT_HIGHBITDEPTH) {
+    l_w *= 2;
+    c_w *= 2;
+  }
+#endif
 
   for (i = 0; i < img1->d_h; ++i)
     match &= (memcmp(img1->planes[VPX_PLANE_Y] + i * img1->stride[VPX_PLANE_Y],
                      img2->planes[VPX_PLANE_Y] + i * img2->stride[VPX_PLANE_Y],
-                     img1->d_w) == 0);
+                     l_w) == 0);
 
   for (i = 0; i < c_h; ++i)
     match &= (memcmp(img1->planes[VPX_PLANE_U] + i * img1->stride[VPX_PLANE_U],
@@ -601,6 +731,10 @@ struct stream_config {
   int                       arg_ctrl_cnt;
   int                       write_webm;
   int                       have_kf_max_dist;
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+  // whether to use 16bit internal buffers
+  int                       use_16bit_internal;
+#endif
 };
 
 
@@ -873,6 +1007,9 @@ static int parse_stream_params(struct VpxEncoderConfig *global,
   static const int        *ctrl_args_map = NULL;
   struct stream_config    *config = &stream->config;
   int                      eos_mark_found = 0;
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+  int                      test_16bit_internal = 0;
+#endif
 
   // Handle codec specific options
   if (0) {
@@ -921,6 +1058,12 @@ static int parse_stream_params(struct VpxEncoderConfig *global,
       config->cfg.g_w = arg_parse_uint(&arg);
     } else if (arg_match(&arg, &height, argi)) {
       config->cfg.g_h = arg_parse_uint(&arg);
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+    } else if (arg_match(&arg, &bitdeptharg, argi)) {
+      config->cfg.g_bit_depth = arg_parse_enum_or_int(&arg);
+    } else if (arg_match(&arg, &inbitdeptharg, argi)) {
+      config->cfg.g_input_bit_depth = arg_parse_uint(&arg);
+#endif
 #if CONFIG_WEBM_IO
     } else if (arg_match(&arg, &stereo_mode, argi)) {
       config->stereo_fmt = arg_parse_enum_or_int(&arg);
@@ -988,6 +1131,12 @@ static int parse_stream_params(struct VpxEncoderConfig *global,
       config->have_kf_max_dist = 1;
     } else if (arg_match(&arg, &kf_disabled, argi)) {
       config->cfg.kf_mode = VPX_KF_DISABLED;
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+    } else if (arg_match(&arg, &test16bitinternalarg, argi)) {
+      if (strcmp(global->codec->name, "vp9") == 0) {
+        test_16bit_internal = 1;
+      }
+#endif
     } else {
       int i, match = 0;
       for (i = 0; ctrl_args[i]; i++) {
@@ -1018,6 +1167,12 @@ static int parse_stream_params(struct VpxEncoderConfig *global,
         argj++;
     }
   }
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+  if (strcmp(global->codec->name, "vp9") == 0) {
+    config->use_16bit_internal = test_16bit_internal |
+                                 (config->cfg.g_profile > 1);
+  }
+#endif
   return eos_mark_found;
 }
 
@@ -1043,6 +1198,14 @@ static void validate_stream_config(const struct stream_state *stream,
     fatal("Stream %d: profile %d is experimental and requires the --%s flag",
           stream->index, stream->config.cfg.g_profile,
           experimental_bitstream.long_name);
+  }
+
+  // Check that the codec bit depth is greater than the input bit depth.
+  if (stream->config.cfg.g_input_bit_depth >
+      (int)stream->config.cfg.g_bit_depth) {
+    fatal("Stream %d: codec bit depth (%d) less than input bit depth (%d)",
+          stream->index, (int)stream->config.cfg.g_bit_depth,
+          stream->config.cfg.g_input_bit_depth);
   }
 
   for (streami = stream; streami; streami = streami->next) {
@@ -1153,6 +1316,8 @@ static void show_stream_config(struct stream_state *stream,
   SHOW(g_profile);
   SHOW(g_w);
   SHOW(g_h);
+  SHOW(g_bit_depth);
+  SHOW(g_input_bit_depth);
   SHOW(g_timebase.num);
   SHOW(g_timebase.den);
   SHOW(g_error_resilient);
@@ -1285,6 +1450,9 @@ static void initialize_encoder(struct stream_state *stream,
 
   flags |= global->show_psnr ? VPX_CODEC_USE_PSNR : 0;
   flags |= global->out_part ? VPX_CODEC_USE_OUTPUT_PARTITION : 0;
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+  flags |= stream->config.use_16bit_internal ? VPX_CODEC_USE_HIGHBITDEPTH : 0;
+#endif
 
   /* Construct Encoder Context */
   vpx_codec_enc_init(&stream->encoder, global->codec->codec_interface(),
@@ -1330,6 +1498,46 @@ static void encode_frame(struct stream_state *stream,
                      / cfg->g_timebase.num / global->framerate.num;
 
   /* Scale if necessary */
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+  if (img) {
+    if ((img->fmt & VPX_IMG_FMT_HIGHBITDEPTH) &&
+        (img->d_w != cfg->g_w || img->d_h != cfg->g_h)) {
+      if (img->fmt != VPX_IMG_FMT_I42016) {
+        fprintf(stderr, "%s can only scale 4:2:0 inputs\n", exec_name);
+        exit(EXIT_FAILURE);
+      }
+#if CONFIG_LIBYUV
+      if (!stream->img) {
+        stream->img = vpx_img_alloc(NULL, VPX_IMG_FMT_I42016,
+                                    cfg->g_w, cfg->g_h, 16);
+      }
+      I420Scale_16((uint16*)img->planes[VPX_PLANE_Y],
+                   img->stride[VPX_PLANE_Y]/2,
+                   (uint16*)img->planes[VPX_PLANE_U],
+                   img->stride[VPX_PLANE_U]/2,
+                   (uint16*)img->planes[VPX_PLANE_V],
+                   img->stride[VPX_PLANE_V]/2,
+                   img->d_w, img->d_h,
+                   (uint16*)stream->img->planes[VPX_PLANE_Y],
+                   stream->img->stride[VPX_PLANE_Y]/2,
+                   (uint16*)stream->img->planes[VPX_PLANE_U],
+                   stream->img->stride[VPX_PLANE_U]/2,
+                   (uint16*)stream->img->planes[VPX_PLANE_V],
+                   stream->img->stride[VPX_PLANE_V]/2,
+                   stream->img->d_w, stream->img->d_h,
+                   kFilterBox);
+      img = stream->img;
+#else
+    stream->encoder.err = 1;
+    ctx_exit_on_error(&stream->encoder,
+                      "Stream %d: Failed to encode frame.\n"
+                      "Scaling disabled in this configuration. \n"
+                      "To enable, configure with --enable-libyuv\n",
+                      stream->index);
+#endif
+    }
+  }
+#endif
   if (img && (img->d_w != cfg->g_w || img->d_h != cfg->g_h)) {
     if (img->fmt != VPX_IMG_FMT_I420 && img->fmt != VPX_IMG_FMT_YV12) {
       fprintf(stderr, "%s can only scale 4:2:0 8bpp inputs\n", exec_name);
@@ -1508,6 +1716,131 @@ static float usec_to_fps(uint64_t usec, unsigned int frames) {
   return (float)(usec > 0 ? frames * 1000000.0 / (float)usec : 0);
 }
 
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+static void high_img_upshift(vpx_image_t *dst, vpx_image_t *src,
+                             int input_shift) {
+  // Note the offset is 1 less than half
+  const int offset = input_shift > 0 ? (1 << (input_shift - 1)) - 1 : 0;
+  int plane;
+  if (dst->w != src->w || dst->h != src->h ||
+      dst->x_chroma_shift != src->x_chroma_shift ||
+      dst->y_chroma_shift != src->y_chroma_shift ||
+      dst->fmt != src->fmt || input_shift < 0) {
+    fatal("Unsupported image conversion");
+  }
+  switch (src->fmt) {
+    case VPX_IMG_FMT_I42016:
+    case VPX_IMG_FMT_I42216:
+    case VPX_IMG_FMT_I44416:
+      break;
+    default:
+      fatal("Unsupported image conversion");
+      break;
+  }
+  for (plane = 0; plane < 3; plane++) {
+    int w = src->w;
+    int h = src->h;
+    int x, y;
+    if (plane) {
+      w >>= src->x_chroma_shift;
+      h >>= src->y_chroma_shift;
+    }
+    for (y = 0; y < h; y++) {
+      uint16_t *p_src = (uint16_t *)(src->planes[plane] +
+                                     y * src->stride[plane]);
+      uint16_t *p_dst = (uint16_t *)(dst->planes[plane] +
+                                     y * dst->stride[plane]);
+      for (x = 0; x < w; x++)
+        *p_dst++ = (*p_src++ << input_shift) + offset;
+    }
+  }
+}
+
+static void low_img_upshift(vpx_image_t *dst, vpx_image_t *src,
+                            int input_shift) {
+  // Note the offset is 1 less than half
+  const int offset = input_shift > 0 ? (1 << (input_shift - 1)) - 1 : 0;
+  int plane;
+  if (dst->w != src->w || dst->h != src->h ||
+      dst->x_chroma_shift != src->x_chroma_shift ||
+      dst->y_chroma_shift != src->y_chroma_shift ||
+      dst->fmt != src->fmt + VPX_IMG_FMT_HIGHBITDEPTH ||
+      input_shift < 0) {
+    fatal("Unsupported image conversion");
+  }
+  switch (src->fmt) {
+    case VPX_IMG_FMT_I420:
+    case VPX_IMG_FMT_I422:
+    case VPX_IMG_FMT_I444:
+      break;
+    default:
+      fatal("Unsupported image conversion");
+      break;
+  }
+  for (plane = 0; plane < 3; plane++) {
+    int w = src->w;
+    int h = src->h;
+    int x, y;
+    if (plane) {
+      w >>= src->x_chroma_shift;
+      h >>= src->y_chroma_shift;
+    }
+    for (y = 0; y < h; y++) {
+      uint8_t *p_src = src->planes[plane] + y * src->stride[plane];
+      uint16_t *p_dst = (uint16_t *)(dst->planes[plane] +
+                                     y * dst->stride[plane]);
+      for (x = 0; x < w; x++) {
+        *p_dst++ = (*p_src++ << input_shift) + offset;
+      }
+    }
+  }
+}
+
+static void img_upshift(vpx_image_t *dst, vpx_image_t *src,
+                        int input_shift) {
+  if (src->fmt & VPX_IMG_FMT_HIGHBITDEPTH) {
+    high_img_upshift(dst, src, input_shift);
+  } else {
+    low_img_upshift(dst, src, input_shift);
+  }
+}
+
+static void img_cast_16_to_8(vpx_image_t *dst, vpx_image_t *src) {
+  int plane;
+  if (dst->fmt + VPX_IMG_FMT_HIGHBITDEPTH != src->fmt ||
+      dst->d_w != src->d_w || dst->d_h != src->d_h ||
+      dst->x_chroma_shift != src->x_chroma_shift ||
+      dst->y_chroma_shift != src->y_chroma_shift) {
+    fatal("Unsupported image conversion");
+  }
+  switch (dst->fmt) {
+    case VPX_IMG_FMT_I420:
+    case VPX_IMG_FMT_I422:
+    case VPX_IMG_FMT_I444:
+      break;
+    default:
+      fatal("Unsupported image conversion");
+      break;
+  }
+  for (plane = 0; plane < 3; plane++) {
+    int w = src->d_w;
+    int h = src->d_h;
+    int x, y;
+    if (plane) {
+      w >>= src->x_chroma_shift;
+      h >>= src->y_chroma_shift;
+    }
+    for (y = 0; y < h; y++) {
+      uint16_t *p_src = (uint16_t *)(src->planes[plane] +
+                                     y * src->stride[plane]);
+      uint8_t *p_dst = dst->planes[plane] + y * dst->stride[plane];
+      for (x = 0; x < w; x++) {
+        *p_dst++ = *p_src++;
+      }
+    }
+  }
+}
+#endif
 
 static void test_decode(struct stream_state  *stream,
                         enum TestDecodeFatality fatal,
@@ -1534,20 +1867,44 @@ static void test_decode(struct stream_state  *stream,
     vpx_codec_control(&stream->encoder, VP8_COPY_REFERENCE, &ref_enc);
     vpx_codec_control(&stream->decoder, VP8_COPY_REFERENCE, &ref_dec);
   } else {
-    struct vp9_ref_frame ref;
+    struct vp9_ref_frame ref_enc, ref_dec;
 
-    ref.idx = 0;
-    vpx_codec_control(&stream->encoder, VP9_GET_REFERENCE, &ref);
-    enc_img = ref.img;
-    vpx_codec_control(&stream->decoder, VP9_GET_REFERENCE, &ref);
-    dec_img = ref.img;
+    ref_enc.idx = 0;
+    ref_dec.idx = 0;
+    vpx_codec_control(&stream->encoder, VP9_GET_REFERENCE, &ref_enc);
+    enc_img = ref_enc.img;
+    vpx_codec_control(&stream->decoder, VP9_GET_REFERENCE, &ref_dec);
+    dec_img = ref_dec.img;
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+    if ((enc_img.fmt & VPX_IMG_FMT_HIGHBITDEPTH) !=
+        (dec_img.fmt & VPX_IMG_FMT_HIGHBITDEPTH)) {
+      if (enc_img.fmt & VPX_IMG_FMT_HIGHBITDEPTH) {
+        vpx_img_alloc(&enc_img, enc_img.fmt - VPX_IMG_FMT_HIGHBITDEPTH,
+                      enc_img.d_w, enc_img.d_h, 16);
+        img_cast_16_to_8(&enc_img, &ref_enc.img);
+      }
+      if (dec_img.fmt & VPX_IMG_FMT_HIGHBITDEPTH) {
+        vpx_img_alloc(&dec_img, dec_img.fmt - VPX_IMG_FMT_HIGHBITDEPTH,
+                      dec_img.d_w, dec_img.d_h, 16);
+        img_cast_16_to_8(&dec_img, &ref_dec.img);
+      }
+    }
+#endif
   }
   ctx_exit_on_error(&stream->encoder, "Failed to get encoder reference frame");
   ctx_exit_on_error(&stream->decoder, "Failed to get decoder reference frame");
 
   if (!compare_img(&enc_img, &dec_img)) {
     int y[4], u[4], v[4];
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+    if (enc_img.fmt & VPX_IMG_FMT_HIGHBITDEPTH) {
+      find_mismatch_high(&enc_img, &dec_img, y, u, v);
+    } else {
+      find_mismatch(&enc_img, &dec_img, y, u, v);
+    }
+#else
     find_mismatch(&enc_img, &dec_img, y, u, v);
+#endif
     stream->decoder.err = 1;
     warn_or_exit_on_error(&stream->decoder, fatal == TEST_DECODE_FATAL,
                           "Stream %d: Encode/decode mismatch on frame %d at"
@@ -1589,6 +1946,12 @@ static void print_time(const char *label, int64_t etl) {
 int main(int argc, const char **argv_) {
   int pass;
   vpx_image_t raw;
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+  vpx_image_t raw_shift;
+  int allocated_raw_shift = 0;
+  int use_16bit_internal = 0;
+  int input_shift = 0;
+#endif
   int frame_avail, got_data;
 
   struct VpxInputContext input;
@@ -1690,6 +2053,27 @@ int main(int argc, const char **argv_) {
     if (!input.width || !input.height)
       fatal("Specify stream dimensions with --width (-w) "
             " and --height (-h)");
+
+    /* If input file does not specify bit-depth but input-bit-depth parameter
+     * exists, assume that to be the input bit-depth. However, if the
+     * input-bit-depth paramter does not exist, assume the input bit-depth
+     * to be the same as the codec bit-depth.
+     */
+    if (!input.bit_depth) {
+      FOREACH_STREAM({
+        if (stream->config.cfg.g_input_bit_depth)
+          input.bit_depth = stream->config.cfg.g_input_bit_depth;
+        else
+          input.bit_depth = stream->config.cfg.g_input_bit_depth =
+              (int)stream->config.cfg.g_bit_depth;
+      });
+      if (input.bit_depth > 8) input.fmt |= VPX_IMG_FMT_HIGHBITDEPTH;
+    } else {
+      FOREACH_STREAM({
+        stream->config.cfg.g_input_bit_depth = input.bit_depth;
+      });
+    }
+
     FOREACH_STREAM(set_stream_dimensions(stream, input.width, input.height));
     FOREACH_STREAM(validate_stream_config(stream, &global));
 
@@ -1743,6 +2127,25 @@ int main(int argc, const char **argv_) {
     FOREACH_STREAM(open_output_file(stream, &global));
     FOREACH_STREAM(initialize_encoder(stream, &global));
 
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+    if (strcmp(global.codec->name, "vp9") == 0) {
+      // Check to see if at least one stream uses 16 bit internal.
+      // Currently assume that the bit_depths for all streams using
+      // highbitdepth are the same.
+      FOREACH_STREAM({
+        if (stream->config.use_16bit_internal) {
+          use_16bit_internal = 1;
+        }
+        if (stream->config.cfg.g_profile == 0) {
+          input_shift = 0;
+        } else {
+          input_shift = (int)stream->config.cfg.g_bit_depth -
+              stream->config.cfg.g_input_bit_depth;
+        }
+      });
+    }
+#endif
+
     frame_avail = 1;
     got_data = 0;
 
@@ -1780,10 +2183,45 @@ int main(int argc, const char **argv_) {
         frame_avail = 0;
 
       if (frames_in > global.skip_frames) {
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+        vpx_image_t *frame_to_encode;
+        if (input_shift || (use_16bit_internal && input.bit_depth == 8)) {
+          assert(use_16bit_internal);
+          // Input bit depth and stream bit depth do not match, so up
+          // shift frame to stream bit depth
+          if (!allocated_raw_shift) {
+            vpx_img_alloc(&raw_shift, raw.fmt | VPX_IMG_FMT_HIGHBITDEPTH,
+                          input.width, input.height, 32);
+            allocated_raw_shift = 1;
+          }
+          img_upshift(&raw_shift, &raw, input_shift);
+          frame_to_encode = &raw_shift;
+        } else {
+          frame_to_encode = &raw;
+        }
+        vpx_usec_timer_start(&timer);
+        if (use_16bit_internal) {
+          assert(frame_to_encode->fmt & VPX_IMG_FMT_HIGHBITDEPTH);
+          FOREACH_STREAM({
+            if (stream->config.use_16bit_internal)
+              encode_frame(stream, &global,
+                           frame_avail ? frame_to_encode : NULL,
+                           frames_in);
+            else
+              assert(0);
+          });
+        } else {
+          assert((frame_to_encode->fmt & VPX_IMG_FMT_HIGHBITDEPTH) == 0);
+          FOREACH_STREAM(encode_frame(stream, &global,
+                                      frame_avail ? frame_to_encode : NULL,
+                                      frames_in));
+        }
+#else
         vpx_usec_timer_start(&timer);
         FOREACH_STREAM(encode_frame(stream, &global,
                                     frame_avail ? &raw : NULL,
                                     frames_in));
+#endif
         vpx_usec_timer_mark(&timer);
         cx_time += vpx_usec_timer_elapsed(&timer);
 
@@ -1901,6 +2339,10 @@ int main(int argc, const char **argv_) {
     });
 #endif
 
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+  if (allocated_raw_shift)
+    vpx_img_free(&raw_shift);
+#endif
   vpx_img_free(&raw);
   free(argv);
   free(streams);

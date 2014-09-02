@@ -90,12 +90,20 @@ static const arg_def_t fb_arg =
 
 static const arg_def_t md5arg = ARG_DEF(NULL, "md5", 0,
                                         "Compute the MD5 sum of the decoded frame");
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+static const arg_def_t outbitdeptharg = ARG_DEF(
+    NULL, "output-bit-depth", 1,
+    "Output bit-depth for decoded frames");
+#endif
 
 static const arg_def_t *all_args[] = {
   &codecarg, &use_yv12, &use_i420, &flipuvarg, &rawvideo, &noblitarg,
   &progressarg, &limitarg, &skiparg, &postprocarg, &summaryarg, &outputfile,
   &threadsarg, &verbosearg, &scalearg, &fb_arg,
   &md5arg, &error_concealment, &continuearg,
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+  &outbitdeptharg,
+#endif
   NULL
 };
 
@@ -129,6 +137,26 @@ static const arg_def_t *vp8_pp_args[] = {
 #if CONFIG_LIBYUV
 static INLINE int vpx_image_scale(vpx_image_t *src, vpx_image_t *dst,
                                   FilterModeEnum mode) {
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+  if (src->fmt == VPX_IMG_FMT_I42016) {
+    assert(dst->fmt == VPX_IMG_FMT_I42016);
+    return I420Scale_16((uint16_t*)src->planes[VPX_PLANE_Y],
+                        src->stride[VPX_PLANE_Y]/2,
+                        (uint16_t*)src->planes[VPX_PLANE_U],
+                        src->stride[VPX_PLANE_U]/2,
+                        (uint16_t*)src->planes[VPX_PLANE_V],
+                        src->stride[VPX_PLANE_V]/2,
+                        src->d_w, src->d_h,
+                        (uint16_t*)dst->planes[VPX_PLANE_Y],
+                        dst->stride[VPX_PLANE_Y]/2,
+                        (uint16_t*)dst->planes[VPX_PLANE_U],
+                        dst->stride[VPX_PLANE_U]/2,
+                        (uint16_t*)dst->planes[VPX_PLANE_V],
+                        dst->stride[VPX_PLANE_V]/2,
+                        dst->d_w, dst->d_h,
+                        mode);
+  }
+#endif
   assert(src->fmt == VPX_IMG_FMT_I420);
   assert(dst->fmt == VPX_IMG_FMT_I420);
   return I420Scale(src->planes[VPX_PLANE_Y], src->stride[VPX_PLANE_Y],
@@ -265,6 +293,11 @@ static void update_image_md5(const vpx_image_t *img, const int planes[3],
 static void write_image_file(const vpx_image_t *img, const int planes[3],
                              FILE *file) {
   int i, y;
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+  const int bytes_per_sample = ((img->fmt & VPX_IMG_FMT_HIGHBITDEPTH) ? 2 : 1);
+#else
+  const int bytes_per_sample = 1;
+#endif
 
   for (i = 0; i < 3; ++i) {
     const int plane = planes[i];
@@ -274,7 +307,7 @@ static void write_image_file(const vpx_image_t *img, const int planes[3],
     const int h = vpx_img_plane_height(img, plane);
 
     for (y = 0; y < h; ++y) {
-      fwrite(buf, 1, w, file);
+      fwrite(buf, bytes_per_sample, w, file);
       buf += stride;
     }
   }
@@ -494,6 +527,178 @@ static FILE *open_outfile(const char *name) {
   }
 }
 
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+static void high_img_upshift(vpx_image_t *dst, vpx_image_t *src,
+                             int input_shift) {
+  const int offset = input_shift > 0 ? (1 << (input_shift - 1)) : 0;
+  int plane;
+  if (dst->d_w != src->d_w || dst->d_h != src->d_h ||
+      dst->x_chroma_shift != src->x_chroma_shift ||
+      dst->y_chroma_shift != src->y_chroma_shift ||
+      dst->fmt != src->fmt || input_shift < 0) {
+    fatal("Unsupported image conversion");
+  }
+  switch (src->fmt) {
+    case VPX_IMG_FMT_I42016:
+    case VPX_IMG_FMT_I42216:
+    case VPX_IMG_FMT_I44416:
+      break;
+    default:
+      fatal("Unsupported image conversion");
+      break;
+  }
+  for (plane = 0; plane < 3; plane++) {
+    int w = src->d_w;
+    int h = src->d_h;
+    int x, y;
+    if (plane) {
+      w >>= src->x_chroma_shift;
+      h >>= src->y_chroma_shift;
+    }
+    for (y = 0; y < h; y++) {
+      uint16_t *p_src = (uint16_t *)(src->planes[plane] +
+                                     y * src->stride[plane]);
+      uint16_t *p_dst = (uint16_t *)(dst->planes[plane] +
+                                     y * dst->stride[plane]);
+      for (x = 0; x < w; x++)
+        *p_dst++ = (*p_src++ << input_shift) + offset;
+    }
+  }
+}
+
+static void low_img_upshift(vpx_image_t *dst, vpx_image_t *src,
+                            int input_shift) {
+  const int offset = input_shift > 0 ? (1 << (input_shift - 1)) : 0;
+  int plane;
+  if (dst->d_w != src->d_w || dst->d_h != src->d_h ||
+      dst->x_chroma_shift != src->x_chroma_shift ||
+      dst->y_chroma_shift != src->y_chroma_shift ||
+      dst->fmt != src->fmt + VPX_IMG_FMT_HIGHBITDEPTH ||
+      input_shift < 0) {
+    fatal("Unsupported image conversion");
+  }
+  switch (src->fmt) {
+    case VPX_IMG_FMT_I420:
+    case VPX_IMG_FMT_I422:
+    case VPX_IMG_FMT_I444:
+      break;
+    default:
+      fatal("Unsupported image conversion");
+      break;
+  }
+  for (plane = 0; plane < 3; plane++) {
+    int w = src->d_w;
+    int h = src->d_h;
+    int x, y;
+    if (plane) {
+      w >>= src->x_chroma_shift;
+      h >>= src->y_chroma_shift;
+    }
+    for (y = 0; y < h; y++) {
+      uint8_t *p_src = src->planes[plane] + y * src->stride[plane];
+      uint16_t *p_dst = (uint16_t *)(dst->planes[plane] +
+                                     y * dst->stride[plane]);
+      for (x = 0; x < w; x++) {
+        *p_dst++ = (*p_src++ << input_shift) + offset;
+      }
+    }
+  }
+}
+
+static void img_upshift(vpx_image_t *dst, vpx_image_t *src,
+                        int input_shift) {
+  if (src->fmt & VPX_IMG_FMT_HIGHBITDEPTH) {
+    high_img_upshift(dst, src, input_shift);
+  } else {
+    low_img_upshift(dst, src, input_shift);
+  }
+}
+
+static void high_img_downshift(vpx_image_t *dst, vpx_image_t *src,
+                               int down_shift) {
+  int plane;
+  if (dst->d_w != src->d_w || dst->d_h != src->d_h ||
+      dst->x_chroma_shift != src->x_chroma_shift ||
+      dst->y_chroma_shift != src->y_chroma_shift ||
+      dst->fmt != src->fmt || down_shift < 0) {
+    fatal("Unsupported image conversion");
+  }
+  switch (src->fmt) {
+    case VPX_IMG_FMT_I42016:
+    case VPX_IMG_FMT_I42216:
+    case VPX_IMG_FMT_I44416:
+      break;
+    default:
+      fatal("Unsupported image conversion");
+      break;
+  }
+  for (plane = 0; plane < 3; plane++) {
+    int w = src->d_w;
+    int h = src->d_h;
+    int x, y;
+    if (plane) {
+      w >>= src->x_chroma_shift;
+      h >>= src->y_chroma_shift;
+    }
+    for (y = 0; y < h; y++) {
+      uint16_t *p_src = (uint16_t *)(src->planes[plane] +
+                                     y * src->stride[plane]);
+      uint16_t *p_dst = (uint16_t *)(dst->planes[plane] +
+                                     y * dst->stride[plane]);
+      for (x = 0; x < w; x++)
+        *p_dst++ = *p_src++ >> down_shift;
+    }
+  }
+}
+
+static void low_img_downshift(vpx_image_t *dst, vpx_image_t *src,
+                            int down_shift) {
+  int plane;
+  if (dst->d_w != src->d_w || dst->d_h != src->d_h ||
+      dst->x_chroma_shift != src->x_chroma_shift ||
+      dst->y_chroma_shift != src->y_chroma_shift ||
+      src->fmt != dst->fmt + VPX_IMG_FMT_HIGHBITDEPTH ||
+      down_shift < 0) {
+    fatal("Unsupported image conversion");
+  }
+  switch (dst->fmt) {
+    case VPX_IMG_FMT_I420:
+    case VPX_IMG_FMT_I422:
+    case VPX_IMG_FMT_I444:
+      break;
+    default:
+      fatal("Unsupported image conversion");
+      break;
+  }
+  for (plane = 0; plane < 3; plane++) {
+    int w = src->d_w;
+    int h = src->d_h;
+    int x, y;
+    if (plane) {
+      w >>= src->x_chroma_shift;
+      h >>= src->y_chroma_shift;
+    }
+    for (y = 0; y < h; y++) {
+      uint16_t *p_src = (uint16_t *)(src->planes[plane] +
+                                     y * src->stride[plane]);
+      uint8_t *p_dst = dst->planes[plane] + y * dst->stride[plane];
+      for (x = 0; x < w; x++) {
+        *p_dst++ = *p_src++ >> down_shift;
+      }
+    }
+  }
+}
+
+static void img_downshift(vpx_image_t *dst, vpx_image_t *src,
+                          int down_shift) {
+  if (dst->fmt & VPX_IMG_FMT_HIGHBITDEPTH) {
+    high_img_downshift(dst, src, down_shift);
+  } else {
+    low_img_downshift(dst, src, down_shift);
+  }
+}
+#endif
+
 int main_loop(int argc, const char **argv_) {
   vpx_codec_ctx_t       decoder;
   char                  *fn = NULL;
@@ -518,6 +723,9 @@ int main_loop(int argc, const char **argv_) {
   int                     opt_yv12 = 0;
   int                     opt_i420 = 0;
   vpx_codec_dec_cfg_t     cfg = {0, 0, 0};
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+  int                     output_bit_depth = 0;
+#endif
 #if CONFIG_VP8_DECODER
   vp8_postproc_cfg_t      vp8_pp_cfg = {0};
   int                     vp8_dbg_color_ref_frame = 0;
@@ -529,6 +737,9 @@ int main_loop(int argc, const char **argv_) {
   int                     dec_flags = 0;
   int                     do_scale = 0;
   vpx_image_t             *scaled_img = NULL;
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+  vpx_image_t             *img_shifted = NULL;
+#endif
   int                     frame_avail, got_data;
   int                     num_external_frame_buffers = 0;
   struct ExternalFrameBufferList ext_fb_list = {0, NULL};
@@ -569,6 +780,9 @@ int main_loop(int argc, const char **argv_) {
       use_y4m = 0;
       flipuv = 1;
       opt_yv12 = 1;
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+      output_bit_depth = 8;  // For yv12 8-bit depth output is assumed
+#endif
     } else if (arg_match(&arg, &use_i420, argi)) {
       use_y4m = 0;
       flipuv = 0;
@@ -601,6 +815,11 @@ int main_loop(int argc, const char **argv_) {
       num_external_frame_buffers = arg_parse_uint(&arg);
     else if (arg_match(&arg, &continuearg, argi))
       keep_going = 1;
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+    else if (arg_match(&arg, &outbitdeptharg, argi)) {
+      output_bit_depth = arg_parse_uint(&arg);
+    }
+#endif
 #if CONFIG_VP8_DECODER
     else if (arg_match(&arg, &addnoise_level, argi)) {
       postproc = 1;
@@ -905,6 +1124,33 @@ int main_loop(int argc, const char **argv_) {
 #endif
         }
       }
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+      // Default to codec bit depth if output bit depth not set
+      if (!output_bit_depth) {
+        output_bit_depth = img->bit_depth;
+      }
+      // Shift up or down if necessary
+      if (output_bit_depth != img->bit_depth) {
+        if (!img_shifted) {
+          if (output_bit_depth == 8) {
+            img_shifted = vpx_img_alloc(
+                NULL, img->fmt - VPX_IMG_FMT_HIGHBITDEPTH,
+                img->d_w, img->d_h, 16);
+          } else {
+            img_shifted = vpx_img_alloc(
+                NULL, img->fmt | VPX_IMG_FMT_HIGHBITDEPTH,
+                img->d_w, img->d_h, 16);
+          }
+          img_shifted->bit_depth = output_bit_depth;
+        }
+        if (output_bit_depth > img->bit_depth) {
+          img_upshift(img_shifted, img, output_bit_depth - img->bit_depth);
+        } else {
+          img_downshift(img_shifted, img, img->bit_depth - output_bit_depth);
+        }
+        img = img_shifted;
+      }
+#endif
 
       if (single_file) {
         if (use_y4m) {
@@ -1011,6 +1257,9 @@ fail:
     free(buf);
 
   if (scaled_img) vpx_img_free(scaled_img);
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+  if (img_shifted) vpx_img_free(img_shifted);
+#endif
 
   for (i = 0; i < ext_fb_list.num_external_frame_buffers; ++i) {
     free(ext_fb_list.ext_fb[i].data);

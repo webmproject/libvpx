@@ -40,12 +40,6 @@ typedef enum BITSTREAM_PROFILE {
   MAX_PROFILES
 } BITSTREAM_PROFILE;
 
-typedef enum BIT_DEPTH {
-  BITS_8,
-  BITS_10,
-  BITS_12
-} BIT_DEPTH;
-
 typedef enum BLOCK_SIZE {
   BLOCK_4X4,
   BLOCK_4X8,

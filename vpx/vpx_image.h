@@ -31,10 +31,10 @@ extern "C" {
 #define VPX_IMAGE_ABI_VERSION (2) /**<\hideinitializer*/
 
 
-#define VPX_IMG_FMT_PLANAR     0x100  /**< Image is a planar format */
-#define VPX_IMG_FMT_UV_FLIP    0x200  /**< V plane precedes U plane in memory */
-#define VPX_IMG_FMT_HAS_ALPHA  0x400  /**< Image has an alpha channel component */
-#define VPX_IMG_FMT_HIGH       0x800  /**< Image uses 16bit framebuffer */
+#define VPX_IMG_FMT_PLANAR     0x100  /**< Image is a planar format. */
+#define VPX_IMG_FMT_UV_FLIP    0x200  /**< V plane precedes U in memory. */
+#define VPX_IMG_FMT_HAS_ALPHA  0x400  /**< Image has an alpha channel. */
+#define VPX_IMG_FMT_HIGHBITDEPTH 0x800  /**< Image uses 16bit framebuffer. */
 
   /*!\brief List of supported image formats */
   typedef enum vpx_img_fmt {
@@ -59,9 +59,9 @@ extern "C" {
     VPX_IMG_FMT_I422    = VPX_IMG_FMT_PLANAR | 5,
     VPX_IMG_FMT_I444    = VPX_IMG_FMT_PLANAR | 6,
     VPX_IMG_FMT_444A    = VPX_IMG_FMT_PLANAR | VPX_IMG_FMT_HAS_ALPHA | 7,
-    VPX_IMG_FMT_I42016    = VPX_IMG_FMT_I420 | VPX_IMG_FMT_HIGH,
-    VPX_IMG_FMT_I42216    = VPX_IMG_FMT_I422 | VPX_IMG_FMT_HIGH,
-    VPX_IMG_FMT_I44416    = VPX_IMG_FMT_I444 | VPX_IMG_FMT_HIGH
+    VPX_IMG_FMT_I42016    = VPX_IMG_FMT_I420 | VPX_IMG_FMT_HIGHBITDEPTH,
+    VPX_IMG_FMT_I42216    = VPX_IMG_FMT_I422 | VPX_IMG_FMT_HIGHBITDEPTH,
+    VPX_IMG_FMT_I44416    = VPX_IMG_FMT_I444 | VPX_IMG_FMT_HIGHBITDEPTH
   } vpx_img_fmt_t; /**< alias for enum vpx_img_fmt */
 
 #if !defined(VPX_CODEC_DISABLE_COMPAT) || !VPX_CODEC_DISABLE_COMPAT

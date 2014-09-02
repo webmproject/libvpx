@@ -1046,8 +1046,8 @@ static void write_profile(BITSTREAM_PROFILE profile,
 static void write_bitdepth_colorspace_sampling(
     VP9_COMMON *const cm, struct vp9_write_bit_buffer *wb) {
   if (cm->profile >= PROFILE_2) {
-    assert(cm->bit_depth > BITS_8);
-    vp9_wb_write_bit(wb, cm->bit_depth - BITS_10);
+    assert(cm->bit_depth > VPX_BITS_8);
+    vp9_wb_write_bit(wb, cm->bit_depth == VPX_BITS_10 ? 0 : 1);
   }
   vp9_wb_write_literal(wb, cm->color_space, 3);
   if (cm->color_space != SRGB) {

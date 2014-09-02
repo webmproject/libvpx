@@ -334,6 +334,7 @@ CONFIG_LIST="
     multi_res_encoding
     temporal_denoising
     coefficient_range_checking
+    vp9_highbitdepth
     experimental
     size_limit
     ${EXPERIMENT_LIST}
@@ -392,6 +393,7 @@ CMDLINE_SELECT="
     multi_res_encoding
     temporal_denoising
     coefficient_range_checking
+    vp9_highbitdepth
     experimental
 "
 

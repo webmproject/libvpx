@@ -57,7 +57,7 @@ static void write_image_file(const vpx_image_t *img, FILE *file) {
   for (plane = 0; plane < 3; ++plane) {
     const unsigned char *buf = img->planes[plane];
     const int stride = img->stride[plane];
-    const int bytes_per_sample = (img->fmt & VPX_IMG_FMT_HIGH) ? 2 : 1;
+    const int bytes_per_sample = (img->fmt & VPX_IMG_FMT_HIGHBITDEPTH) ? 2 : 1;
     const int h = (plane ? (img->d_h + img->y_chroma_shift) >>
                    img->y_chroma_shift : img->d_h);
     const int w = (plane ? (img->d_w + img->x_chroma_shift) >>

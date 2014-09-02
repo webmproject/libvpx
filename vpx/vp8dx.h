@@ -75,6 +75,9 @@ enum vp8_dec_control_id {
   /** control function to get the display dimensions for the current frame. */
   VP9D_GET_DISPLAY_SIZE,
 
+  /** control function to get the bit depth of the stream. */
+  VP9D_GET_BIT_DEPTH,
+
   /** For testing. */
   VP9_INVERT_TILE_DECODE_ORDER,
 
@@ -118,6 +121,7 @@ VPX_CTRL_USE_TYPE(VP8D_GET_LAST_REF_USED,       int *)
 VPX_CTRL_USE_TYPE(VPXD_SET_DECRYPTOR,           vpx_decrypt_init *)
 VPX_CTRL_USE_TYPE(VP8D_SET_DECRYPTOR,           vpx_decrypt_init *)
 VPX_CTRL_USE_TYPE(VP9D_GET_DISPLAY_SIZE,        int *)
+VPX_CTRL_USE_TYPE(VP9D_GET_BIT_DEPTH,           unsigned int *)
 VPX_CTRL_USE_TYPE(VP9_INVERT_TILE_DECODE_ORDER, int)
 
 /*! @} - end defgroup vp8_decoder */

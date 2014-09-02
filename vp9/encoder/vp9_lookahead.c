@@ -50,6 +50,9 @@ struct lookahead_ctx *vp9_lookahead_init(unsigned int width,
                                          unsigned int height,
                                          unsigned int subsampling_x,
                                          unsigned int subsampling_y,
+#if CONFIG_VP9_HIGHBITDEPTH
+                                         int use_highbitdepth,
+#endif
                                          unsigned int depth) {
   struct lookahead_ctx *ctx = NULL;
 
@@ -70,6 +73,9 @@ struct lookahead_ctx *vp9_lookahead_init(unsigned int width,
     for (i = 0; i < depth; i++)
       if (vp9_alloc_frame_buffer(&ctx->buf[i].img,
                                  width, height, subsampling_x, subsampling_y,
+#if CONFIG_VP9_HIGHBITDEPTH
+                                 use_highbitdepth,
+#endif
                                  VP9_ENC_BORDER_IN_PIXELS))
         goto bail;
   }
