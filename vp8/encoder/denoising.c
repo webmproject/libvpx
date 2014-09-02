@@ -413,9 +413,11 @@ int vp8_denoiser_allocate(VP8_DENOISER *denoiser, int width, int height,
     denoiser->nmse_source_diff = 0;
     denoiser->nmse_source_diff_count = 0;
     // TODO(marpan): Adjust thresholds, including effect on resolution.
-    denoiser->threshold_aggressive_mode = 40;
+    denoiser->threshold_aggressive_mode = 35;
     if (width * height > 640 * 480)
-      denoiser->threshold_aggressive_mode = 180;
+      denoiser->threshold_aggressive_mode = 150;
+    else if (width * height > 1280 * 720)
+      denoiser->threshold_aggressive_mode = 1400;
     return 0;
 }
 
