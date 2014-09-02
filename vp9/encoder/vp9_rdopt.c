@@ -584,46 +584,26 @@ static void choose_tx_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
   }
 }
 
-static void inter_super_block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
-                                  int64_t *distortion, int *skip,
-                                  int64_t *psse, BLOCK_SIZE bs,
-                                  int64_t txfm_cache[TX_MODES],
-                                  int64_t ref_best_rd) {
+static void super_block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
+                            int64_t *distortion, int *skip,
+                            int64_t *psse, BLOCK_SIZE bs,
+                            int64_t txfm_cache[TX_MODES],
+                            int64_t ref_best_rd) {
   MACROBLOCKD *xd = &x->e_mbd;
+  int64_t sse;
+  int64_t *ret_sse = psse ? psse : &sse;
 
   assert(bs == xd->mi[0]->mbmi.sb_type);
-
-  vp9_subtract_plane(x, bs, 0);
 
   if (cpi->sf.tx_size_search_method == USE_LARGESTALL || xd->lossless) {
     vpx_memset(txfm_cache, 0, TX_MODES * sizeof(int64_t));
-    choose_largest_tx_size(cpi, x, rate, distortion, skip, psse, ref_best_rd,
+    choose_largest_tx_size(cpi, x, rate, distortion, skip, ret_sse, ref_best_rd,
                            bs);
   } else {
-    choose_tx_size_from_rd(cpi, x, rate, distortion, skip, psse,
+    choose_tx_size_from_rd(cpi, x, rate, distortion, skip, ret_sse,
                            txfm_cache, ref_best_rd, bs);
   }
 }
-
-static void intra_super_block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
-                                  int64_t *distortion, int *skip,
-                                  BLOCK_SIZE bs,
-                                  int64_t txfm_cache[TX_MODES],
-                                  int64_t ref_best_rd) {
-  MACROBLOCKD *xd = &x->e_mbd;
-  int64_t sse;
-
-  assert(bs == xd->mi[0]->mbmi.sb_type);
-  if (cpi->sf.tx_size_search_method != USE_FULL_RD || xd->lossless) {
-    vpx_memset(txfm_cache, 0, TX_MODES * sizeof(int64_t));
-    choose_largest_tx_size(cpi, x, rate, distortion, skip, &sse, ref_best_rd,
-                           bs);
-  } else {
-    choose_tx_size_from_rd(cpi, x, rate, distortion, skip, &sse,
-                           txfm_cache, ref_best_rd, bs);
-  }
-}
-
 
 static int conditional_skipintra(PREDICTION_MODE mode,
                                  PREDICTION_MODE best_intra_mode) {
@@ -874,8 +854,8 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
     }
     mic->mbmi.mode = mode;
 
-    intra_super_block_yrd(cpi, x, &this_rate_tokenonly, &this_distortion,
-        &s, bsize, local_tx_cache, best_rd);
+    super_block_yrd(cpi, x, &this_rate_tokenonly, &this_distortion,
+        &s, NULL, bsize, local_tx_cache, best_rd);
 
     if (this_rate_tokenonly == INT_MAX)
       continue;
@@ -2414,8 +2394,9 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     int64_t rdcosty = INT64_MAX;
 
     // Y cost and distortion
-    inter_super_block_yrd(cpi, x, rate_y, distortion_y, &skippable_y, psse,
-                          bsize, txfm_cache, ref_best_rd);
+    vp9_subtract_plane(x, bsize, 0);
+    super_block_yrd(cpi, x, rate_y, distortion_y, &skippable_y, psse,
+                    bsize, txfm_cache, ref_best_rd);
 
     if (*rate_y == INT_MAX) {
       *rate2 = INT_MAX;
@@ -2854,8 +2835,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
     if (ref_frame == INTRA_FRAME) {
       TX_SIZE uv_tx;
-      intra_super_block_yrd(cpi, x, &rate_y, &distortion_y, &skippable,
-                            bsize, tx_cache, best_rd);
+      super_block_yrd(cpi, x, &rate_y, &distortion_y, &skippable,
+                      NULL, bsize, tx_cache, best_rd);
 
       if (rate_y == INT_MAX)
         continue;
