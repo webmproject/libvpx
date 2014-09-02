@@ -505,21 +505,6 @@ const SadMxNParam mmx_tests[] = {
 INSTANTIATE_TEST_CASE_P(MMX, SADTest, ::testing::ValuesIn(mmx_tests));
 #endif  // CONFIG_VP8_ENCODER
 
-#if CONFIG_VP9_ENCODER
-const SadMxNVp9Func sad_16x16_mmx_vp9 = vp9_sad16x16_mmx;
-const SadMxNVp9Func sad_8x16_mmx_vp9 = vp9_sad8x16_mmx;
-const SadMxNVp9Func sad_16x8_mmx_vp9 = vp9_sad16x8_mmx;
-const SadMxNVp9Func sad_8x8_mmx_vp9 = vp9_sad8x8_mmx;
-const SadMxNVp9Func sad_4x4_mmx_vp9 = vp9_sad4x4_mmx;
-const SadMxNVp9Param mmx_vp9_tests[] = {
-  make_tuple(16, 16, sad_16x16_mmx_vp9),
-  make_tuple(8, 16, sad_8x16_mmx_vp9),
-  make_tuple(16, 8, sad_16x8_mmx_vp9),
-  make_tuple(8, 8, sad_8x8_mmx_vp9),
-  make_tuple(4, 4, sad_4x4_mmx_vp9),
-};
-INSTANTIATE_TEST_CASE_P(MMX, SADVP9Test, ::testing::ValuesIn(mmx_vp9_tests));
-#endif  // CONFIG_VP9_ENCODER
 #endif  // HAVE_MMX
 
 #if HAVE_SSE
