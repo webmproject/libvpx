@@ -2603,8 +2603,6 @@ static MV_REFERENCE_FRAME get_frame_type(const VP9_COMP *cpi) {
 static TX_MODE select_tx_mode(const VP9_COMP *cpi) {
   if (cpi->mb.e_mbd.lossless)
     return ONLY_4X4;
-  if (cpi->common.frame_type == KEY_FRAME)
-    return TX_MODE_SELECT;
   if (cpi->sf.tx_size_search_method == USE_LARGESTALL)
     return ALLOW_32X32;
   else if (cpi->sf.tx_size_search_method == USE_FULL_RD||
