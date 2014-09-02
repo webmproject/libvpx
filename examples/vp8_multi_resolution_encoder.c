@@ -31,6 +31,14 @@
 #include "./tools_common.h"
 #include "./video_writer.h"
 
+// The input video frame is downsampled several times to generate a
+// multi-level  hierarchical structure. kNumEncoders is defined as the number
+// of encoding  levels required. For example, if the size of input video is
+// 1280x720, kNumEncoders is 3, and down-sampling factor is 2, the encoder
+// outputs 3 bitstreams with resolution of 1280x720(level 0),
+// 640x360(level 1), and 320x180(level 2) respectively.
+#define kNumEncoders 3
+
 static const char *exec_name;
 
 void usage_exit() {
@@ -41,14 +49,6 @@ void usage_exit() {
 }
 
 int main(int argc, char *argv[]) {
-  // The input video frame is downsampled several times to generate a
-  // multi-level  hierarchical structure. kNumEncoders is defined as the number
-  // of encoding  levels required. For example, if the size of input video is
-  // 1280x720, kNumEncoders is 3, and down-sampling factor is 2, the encoder
-  // outputs 3 bitstreams with resolution of 1280x720(level 0),
-  // 640x360(level 1), and 320x180(level 2) respectively.
-  static const int kNumEncoders = 3;
-
   int frame_cnt = 0;
   FILE *infile = NULL;
   VpxVideoWriter *writers[kNumEncoders];
