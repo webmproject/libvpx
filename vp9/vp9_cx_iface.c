@@ -163,22 +163,8 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
   }
 
   RANGE_CHECK(cfg, ss_number_layers, 1, VPX_SS_MAX_LAYERS);
-
-#if CONFIG_SPATIAL_SVC
-  if (cfg->ss_number_layers > 1) {
-    unsigned int i, alt_ref_sum = 0;
-    for (i = 0; i < cfg->ss_number_layers; ++i) {
-      if (cfg->ss_enable_auto_alt_ref[i])
-        ++alt_ref_sum;
-    }
-    if (alt_ref_sum > REF_FRAMES - cfg->ss_number_layers)
-      ERROR("Not enough ref buffers for svc alt ref frames");
-  }
-  if (cfg->ss_number_layers > 3 && cfg->g_error_resilient == 0)
-    ERROR("Multiple frame contexts are not supported for more than 3 layers");
-#endif
-
   RANGE_CHECK(cfg, ts_number_layers, 1, VPX_TS_MAX_LAYERS);
+
   if (cfg->ts_number_layers > 1) {
     unsigned int i;
     for (i = 1; i < cfg->ts_number_layers; ++i)
@@ -190,6 +176,28 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
       if (cfg->ts_rate_decimator[i - 1] != 2 * cfg->ts_rate_decimator[i])
         ERROR("ts_rate_decimator factors are not powers of 2");
   }
+
+#if CONFIG_SPATIAL_SVC
+  if (cfg->ss_number_layers * cfg->ts_number_layers > REF_FRAMES)
+    ERROR("Too many layers. Maximum 8 layers could be set");
+
+  if ((cfg->ss_number_layers > 1 || cfg->ts_number_layers > 1) &&
+      cfg->g_pass == VPX_RC_LAST_PASS) {
+    unsigned int i, alt_ref_sum = 0;
+    for (i = 0; i < cfg->ss_number_layers; ++i) {
+      if (cfg->ss_enable_auto_alt_ref[i])
+        ++alt_ref_sum;
+    }
+    if (alt_ref_sum >
+        REF_FRAMES - cfg->ss_number_layers * cfg->ts_number_layers)
+      ERROR("Not enough ref buffers for svc alt ref frames");
+    if ((cfg->ss_number_layers > 3 ||
+         cfg->ss_number_layers * cfg->ts_number_layers > 4) &&
+        cfg->g_error_resilient == 0)
+    ERROR("Multiple frame context are not supported for more than 3 spatial "
+          "layers or more than 4 spatial x temporal layers");
+  }
+#endif
 
   // VP9 does not support a lower bound on the keyframe interval in
   // automatic keyframe placement mode.
@@ -226,7 +234,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
     if (cfg->rc_twopass_stats_in.sz % packet_sz)
       ERROR("rc_twopass_stats_in.sz indicates truncated packet.");
 
-    if (cfg->ss_number_layers > 1) {
+    if (cfg->ss_number_layers > 1 || cfg->ts_number_layers > 1) {
       int i;
       unsigned int n_packets_per_layer[VPX_SS_MAX_LAYERS] = {0};
 
@@ -413,6 +421,9 @@ static vpx_codec_err_t set_encoder_config(
     }
   } else if (oxcf->ss_number_layers == 1) {
     oxcf->ss_target_bitrate[0] = (int)oxcf->target_bandwidth;
+#if CONFIG_SPATIAL_SVC
+    oxcf->ss_play_alternate[0] = extra_cfg->enable_auto_alt_ref;
+#endif
   }
 
   oxcf->ts_number_layers = cfg->ts_number_layers;
@@ -799,7 +810,7 @@ static vpx_codec_frame_flags_t get_frame_pkt_flags(const VP9_COMP *cpi,
 
   if (lib_flags & FRAMEFLAGS_KEY
 #if CONFIG_SPATIAL_SVC
-      || (is_spatial_svc(cpi) && cpi->svc.layer_context[0].is_key_frame)
+      || (is_two_pass_svc(cpi) && cpi->svc.layer_context[0].is_key_frame)
 #endif
         )
     flags |= VPX_FRAME_IS_KEY;
@@ -913,14 +924,14 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
         vpx_codec_cx_pkt_t pkt;
 
 #if CONFIG_SPATIAL_SVC
-        if (is_spatial_svc(cpi))
+        if (is_two_pass_svc(cpi))
           cpi->svc.layer_context[cpi->svc.spatial_layer_id].layer_size += size;
 #endif
 
         // Pack invisible frames with the next visible frame
         if (!cpi->common.show_frame
 #if CONFIG_SPATIAL_SVC
-            || (is_spatial_svc(cpi) &&
+            || (is_two_pass_svc(cpi) &&
                 cpi->svc.spatial_layer_id < cpi->svc.number_spatial_layers - 1)
 #endif
             ) {
@@ -962,7 +973,7 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
         cx_data += size;
         cx_data_sz -= size;
 #if CONFIG_SPATIAL_SVC
-        if (is_spatial_svc(cpi)) {
+        if (is_two_pass_svc(cpi)) {
           vpx_codec_cx_pkt_t pkt;
           int i;
           vp9_zero(pkt);

@@ -26,7 +26,7 @@ static INLINE int vp9_preserve_existing_gf(VP9_COMP *cpi) {
   return !cpi->multi_arf_allowed && cpi->refresh_golden_frame &&
          cpi->rc.is_src_frame_alt_ref &&
          (!cpi->use_svc ||      // Add spatial svc base layer case here
-          (is_spatial_svc(cpi) &&
+          (is_two_pass_svc(cpi) &&
            cpi->svc.spatial_layer_id == 0 &&
            cpi->svc.layer_context[0].gold_ref_idx >=0 &&
            cpi->oxcf.ss_play_alternate[0]));

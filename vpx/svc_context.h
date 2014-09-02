@@ -31,7 +31,8 @@ typedef enum SVC_LOG_LEVEL {
 
 typedef struct {
   // public interface to svc_command options
-  int spatial_layers;               // number of layers
+  int spatial_layers;               // number of spatial layers
+  int temporal_layers;               // number of temporal layers
   SVC_LOG_LEVEL log_level;  // amount of information to display
   int log_print;  // when set, printf log messages instead of returning the
                   // message with svc_get_message

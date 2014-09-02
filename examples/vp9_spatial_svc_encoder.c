@@ -38,8 +38,10 @@ static const arg_def_t timebase_arg =
     ARG_DEF("t", "timebase", 1, "timebase (num/den)");
 static const arg_def_t bitrate_arg = ARG_DEF(
     "b", "target-bitrate", 1, "encoding bitrate, in kilobits per second");
-static const arg_def_t layers_arg =
-    ARG_DEF("l", "layers", 1, "number of SVC layers");
+static const arg_def_t spatial_layers_arg =
+    ARG_DEF("sl", "spatial-layers", 1, "number of spatial SVC layers");
+static const arg_def_t temporal_layers_arg =
+    ARG_DEF("tl", "temporal-layers", 1, "number of temporal SVC layers");
 static const arg_def_t kf_dist_arg =
     ARG_DEF("k", "kf-dist", 1, "number of frames between keyframes");
 static const arg_def_t scale_factors_arg =
@@ -65,10 +67,11 @@ static const arg_def_t max_bitrate_arg =
 
 static const arg_def_t *svc_args[] = {
   &frames_arg,        &width_arg,         &height_arg,
-  &timebase_arg,      &bitrate_arg,       &skip_frames_arg, &layers_arg,
+  &timebase_arg,      &bitrate_arg,       &skip_frames_arg, &spatial_layers_arg,
   &kf_dist_arg,       &scale_factors_arg, &quantizers_arg,  &passes_arg,
   &pass_arg,          &fpf_name_arg,      &min_q_arg,       &max_q_arg,
-  &min_bitrate_arg,   &max_bitrate_arg,   NULL
+  &min_bitrate_arg,   &max_bitrate_arg,   &temporal_layers_arg,
+  NULL
 };
 
 static const uint32_t default_frames_to_skip = 0;
@@ -79,6 +82,7 @@ static const uint32_t default_timebase_num = 1;
 static const uint32_t default_timebase_den = 60;
 static const uint32_t default_bitrate = 1000;
 static const uint32_t default_spatial_layers = 5;
+static const uint32_t default_temporal_layers = 1;
 static const uint32_t default_kf_dist = 100;
 
 typedef struct {
@@ -119,6 +123,7 @@ static void parse_command_line(int argc, const char **argv_,
   // initialize SvcContext with parameters that will be passed to vpx_svc_init
   svc_ctx->log_level = SVC_LOG_DEBUG;
   svc_ctx->spatial_layers = default_spatial_layers;
+  svc_ctx->temporal_layers = default_temporal_layers;
 
   // start with default encoder configuration
   res = vpx_codec_enc_config_default(vpx_codec_vp9_cx(), enc_cfg, 0);
@@ -156,8 +161,10 @@ static void parse_command_line(int argc, const char **argv_,
       enc_cfg->rc_target_bitrate = arg_parse_uint(&arg);
     } else if (arg_match(&arg, &skip_frames_arg, argi)) {
       app_input->frames_to_skip = arg_parse_uint(&arg);
-    } else if (arg_match(&arg, &layers_arg, argi)) {
+    } else if (arg_match(&arg, &spatial_layers_arg, argi)) {
       svc_ctx->spatial_layers = arg_parse_uint(&arg);
+    } else if (arg_match(&arg, &temporal_layers_arg, argi)) {
+      svc_ctx->temporal_layers = arg_parse_uint(&arg);
     } else if (arg_match(&arg, &kf_dist_arg, argi)) {
       enc_cfg->kf_min_dist = arg_parse_uint(&arg);
       enc_cfg->kf_max_dist = enc_cfg->kf_min_dist;
