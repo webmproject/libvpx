@@ -26,8 +26,8 @@
 using libvpx_test::ACMRandom;
 
 namespace {
-typedef void (*FwdTxfmFunc)(const int16_t *in, int16_t *out, int stride);
-typedef void (*InvTxfmFunc)(const int16_t *in, uint8_t *out, int stride);
+typedef void (*FwdTxfmFunc)(const int16_t *in, tran_low_t *out, int stride);
+typedef void (*InvTxfmFunc)(const tran_low_t *in, uint8_t *out, int stride);
 typedef std::tr1::tuple<FwdTxfmFunc,
                         InvTxfmFunc,
                         InvTxfmFunc,
@@ -74,8 +74,8 @@ TEST_P(PartialIDctTest, RunQuantCheck) {
       FAIL() << "Wrong Size!";
       break;
   }
-  DECLARE_ALIGNED_ARRAY(16, int16_t, test_coef_block1, kMaxNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(16, int16_t, test_coef_block2, kMaxNumCoeffs);
+  DECLARE_ALIGNED_ARRAY(16, tran_low_t, test_coef_block1, kMaxNumCoeffs);
+  DECLARE_ALIGNED_ARRAY(16, tran_low_t, test_coef_block2, kMaxNumCoeffs);
   DECLARE_ALIGNED_ARRAY(16, uint8_t, dst1, kMaxNumCoeffs);
   DECLARE_ALIGNED_ARRAY(16, uint8_t, dst2, kMaxNumCoeffs);
 
@@ -83,7 +83,7 @@ TEST_P(PartialIDctTest, RunQuantCheck) {
   const int block_size = size * size;
 
   DECLARE_ALIGNED_ARRAY(16, int16_t, input_extreme_block, kMaxNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(16, int16_t, output_ref_block, kMaxNumCoeffs);
+  DECLARE_ALIGNED_ARRAY(16, tran_low_t, output_ref_block, kMaxNumCoeffs);
 
   int max_error = 0;
   for (int i = 0; i < count_test_block; ++i) {
@@ -153,8 +153,8 @@ TEST_P(PartialIDctTest, ResultsMatch) {
       FAIL() << "Wrong Size!";
       break;
   }
-  DECLARE_ALIGNED_ARRAY(16, int16_t, test_coef_block1, kMaxNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(16, int16_t, test_coef_block2, kMaxNumCoeffs);
+  DECLARE_ALIGNED_ARRAY(16, tran_low_t, test_coef_block1, kMaxNumCoeffs);
+  DECLARE_ALIGNED_ARRAY(16, tran_low_t, test_coef_block2, kMaxNumCoeffs);
   DECLARE_ALIGNED_ARRAY(16, uint8_t, dst1, kMaxNumCoeffs);
   DECLARE_ALIGNED_ARRAY(16, uint8_t, dst2, kMaxNumCoeffs);
   const int count_test_block = 1000;
@@ -229,6 +229,7 @@ INSTANTIATE_TEST_CASE_P(
                    &vp9_idct4x4_16_add_c,
                    &vp9_idct4x4_1_add_c,
                    TX_4X4, 1)));
+
 #if HAVE_NEON_ASM
 INSTANTIATE_TEST_CASE_P(
     NEON, PartialIDctTest,
@@ -259,7 +260,7 @@ INSTANTIATE_TEST_CASE_P(
                    TX_4X4, 1)));
 #endif
 
-#if HAVE_SSE2
+#if HAVE_SSE2 && !CONFIG_VP9_HIGHBITDEPTH
 INSTANTIATE_TEST_CASE_P(
     SSE2, PartialIDctTest,
     ::testing::Values(
@@ -293,7 +294,7 @@ INSTANTIATE_TEST_CASE_P(
                    TX_4X4, 1)));
 #endif
 
-#if HAVE_SSSE3 && ARCH_X86_64
+#if HAVE_SSSE3 && ARCH_X86_64 && !CONFIG_VP9_HIGHBITDEPTH
 INSTANTIATE_TEST_CASE_P(
     SSSE3_64, PartialIDctTest,
     ::testing::Values(
@@ -303,7 +304,7 @@ INSTANTIATE_TEST_CASE_P(
                    TX_8X8, 12)));
 #endif
 
-#if HAVE_SSSE3
+#if HAVE_SSSE3 && !CONFIG_VP9_HIGHBITDEPTH
 INSTANTIATE_TEST_CASE_P(
     SSSE3, PartialIDctTest,
     ::testing::Values(

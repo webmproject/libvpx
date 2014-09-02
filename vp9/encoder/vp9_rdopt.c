@@ -249,7 +249,7 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
   *out_dist_sum = dist_sum << 4;
 }
 
-int64_t vp9_block_error_c(const int16_t *coeff, const int16_t *dqcoeff,
+int64_t vp9_block_error_c(const tran_low_t *coeff, const tran_low_t *dqcoeff,
                           intptr_t block_size, int64_t *ssz) {
   int i;
   int64_t error = 0, sqcoeff = 0;
@@ -288,7 +288,7 @@ static INLINE int cost_coeffs(MACROBLOCK *x,
   const PLANE_TYPE type = pd->plane_type;
   const int16_t *band_count = &band_counts[tx_size][1];
   const int eob = p->eobs[block];
-  const int16_t *const qcoeff = BLOCK_OFFSET(p->qcoeff, block);
+  const tran_low_t *const qcoeff = BLOCK_OFFSET(p->qcoeff, block);
   unsigned int (*token_costs)[2][COEFF_CONTEXTS][ENTROPY_TOKENS] =
                    x->token_costs[tx_size][type][is_inter_block(mbmi)];
   uint8_t token_cache[32 * 32];
@@ -358,8 +358,8 @@ static void dist_block(int plane, int block, TX_SIZE tx_size,
   const struct macroblockd_plane *const pd = &xd->plane[plane];
   int64_t this_sse;
   int shift = tx_size == TX_32X32 ? 0 : 2;
-  int16_t *const coeff = BLOCK_OFFSET(p->coeff, block);
-  int16_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
+  tran_low_t *const coeff = BLOCK_OFFSET(p->coeff, block);
+  tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
   args->dist = vp9_block_error(coeff, dqcoeff, 16 << ss_txfrm_size,
                                &this_sse) >> shift;
   args->sse  = this_sse >> shift;
@@ -405,8 +405,8 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
       dist_block(plane, block, tx_size, args);
     } else if (x->skip_txfm[(plane << 2) + (block >> (tx_size << 1))] == 2) {
       // compute DC coefficient
-      int16_t *const coeff   = BLOCK_OFFSET(x->plane[plane].coeff, block);
-      int16_t *const dqcoeff = BLOCK_OFFSET(xd->plane[plane].dqcoeff, block);
+      tran_low_t *const coeff   = BLOCK_OFFSET(x->plane[plane].coeff, block);
+      tran_low_t *const dqcoeff = BLOCK_OFFSET(xd->plane[plane].dqcoeff, block);
       vp9_xform_quant_dc(x, plane, block, plane_bsize, tx_size);
       args->sse  = x->bsse[(plane << 2) + (block >> (tx_size << 1))] << 4;
       args->dist = args->sse;
@@ -690,7 +690,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
         uint8_t *const dst = &dst_init[idx * 4 + idy * 4 * dst_stride];
         int16_t *const src_diff = raster_block_offset_int16(BLOCK_8X8, block,
                                                             p->src_diff);
-        int16_t *const coeff = BLOCK_OFFSET(x->plane[0].coeff, block);
+        tran_low_t *const coeff = BLOCK_OFFSET(x->plane[0].coeff, block);
         xd->mi[0]->bmi[block].as_mode = mode;
         vp9_predict_intra_block(xd, block, 1,
                                 TX_4X4, mode,
@@ -1137,7 +1137,7 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
   for (idy = 0; idy < height / 4; ++idy) {
     for (idx = 0; idx < width / 4; ++idx) {
       int64_t ssz, rd, rd1, rd2;
-      int16_t* coeff;
+      tran_low_t* coeff;
 
       k += (idy * 2 + idx);
       coeff = BLOCK_OFFSET(p->coeff, k);

@@ -556,6 +556,9 @@ static void init_config(struct VP9_COMP *cpi, VP9EncoderConfig *oxcf) {
 
   cm->profile = oxcf->profile;
   cm->bit_depth = oxcf->bit_depth;
+#if CONFIG_VP9_HIGHBITDEPTH
+  cm->use_highbitdepth = oxcf->use_highbitdepth;
+#endif
   cm->color_space = UNKNOWN;
 
   cm->width = oxcf->width;
@@ -613,6 +616,11 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
     assert(cm->bit_depth > VPX_BITS_8);
 
   cpi->oxcf = *oxcf;
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (cpi->oxcf.use_highbitdepth) {
+    cpi->mb.e_mbd.bd = (int)cm->bit_depth;
+  }
+#endif
 
   rc->baseline_gf_interval = DEFAULT_GF_INTERVAL;
 
@@ -2768,7 +2776,16 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   if (oxcf->pass == 1 &&
       (!cpi->use_svc || is_two_pass_svc(cpi))) {
     const int lossless = is_lossless_requested(oxcf);
+#if CONFIG_VP9_HIGHBITDEPTH
+    if (cpi->oxcf.use_highbitdepth)
+      cpi->mb.fwd_txm4x4 = lossless ? vp9_high_fwht4x4 : vp9_high_fdct4x4;
+    else
+      cpi->mb.fwd_txm4x4 = lossless ? vp9_fwht4x4 : vp9_fdct4x4;
+    cpi->mb.high_itxm_add = lossless ? vp9_high_iwht4x4_add :
+                                       vp9_high_idct4x4_add;
+#else
     cpi->mb.fwd_txm4x4 = lossless ? vp9_fwht4x4 : vp9_fdct4x4;
+#endif
     cpi->mb.itxm_add = lossless ? vp9_iwht4x4_add : vp9_idct4x4_add;
     vp9_first_pass(cpi, source);
   } else if (oxcf->pass == 2 &&

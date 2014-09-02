@@ -686,6 +686,10 @@ static vpx_codec_err_t encoder_init(vpx_codec_ctx_t *ctx,
 
     if (res == VPX_CODEC_OK) {
       set_encoder_config(&priv->oxcf, &priv->cfg, &priv->extra_cfg);
+#if CONFIG_VP9_HIGHBITDEPTH
+      priv->oxcf.use_highbitdepth =
+          (ctx->init_flags & VPX_CODEC_USE_HIGHBITDEPTH) ? 1 : 0;
+#endif
       priv->cpi = vp9_create_compressor(&priv->oxcf);
       if (priv->cpi == NULL)
         res = VPX_CODEC_MEM_ERROR;
@@ -1333,6 +1337,9 @@ static vpx_codec_enc_cfg_map_t encoder_usage_cfg_map[] = {
 CODEC_INTERFACE(vpx_codec_vp9_cx) = {
   "WebM Project VP9 Encoder" VERSION_STRING,
   VPX_CODEC_INTERNAL_ABI_VERSION,
+#if CONFIG_VP9_HIGHBITDEPTH
+  VPX_CODEC_CAP_HIGHBITDEPTH |
+#endif
   VPX_CODEC_CAP_ENCODER | VPX_CODEC_CAP_PSNR,  // vpx_codec_caps_t
   encoder_init,       // vpx_codec_init_fn_t
   encoder_destroy,    // vpx_codec_destroy_fn_t

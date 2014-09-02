@@ -212,7 +212,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   TOKENEXTRA *t = *tp;        /* store tokens starting here */
   int eob = p->eobs[block];
   const PLANE_TYPE type = pd->plane_type;
-  const int16_t *qcoeff = BLOCK_OFFSET(p->qcoeff, block);
+  const tran_low_t *qcoeff = BLOCK_OFFSET(p->qcoeff, block);
   const int segment_id = mbmi->segment_id;
   const int16_t *scan, *nb;
   const scan_order *so;

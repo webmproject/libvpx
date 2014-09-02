@@ -281,6 +281,7 @@ EXPERIMENT_LIST="
     spatial_svc
     vp9_temporal_denoising
     fp_mb_stats
+    emulate_hardware_highbitdepth
 "
 CONFIG_LIST="
     external_build

@@ -217,6 +217,9 @@ typedef struct VP9EncoderConfig {
 
   vp8e_tuning tuning;
   vp9e_tune_content content;
+#if CONFIG_VP9_HIGHBITDEPTH
+  int use_highbitdepth;
+#endif
 } VP9EncoderConfig;
 
 static INLINE int is_lossless_requested(const VP9EncoderConfig *cfg) {

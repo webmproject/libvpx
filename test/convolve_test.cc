@@ -581,6 +581,8 @@ TEST_P(ConvolveTest, CheckScalingFiltering) {
 
 using std::tr1::make_tuple;
 
+#if CONFIG_VP9_HIGHBITDEPTH
+#else
 const ConvolveFunctions convolve8_c(
     vp9_convolve8_horiz_c, vp9_convolve8_avg_horiz_c,
     vp9_convolve8_vert_c, vp9_convolve8_avg_vert_c,
@@ -600,8 +602,11 @@ INSTANTIATE_TEST_CASE_P(C, ConvolveTest, ::testing::Values(
     make_tuple(64, 32, &convolve8_c),
     make_tuple(32, 64, &convolve8_c),
     make_tuple(64, 64, &convolve8_c)));
+#endif
 
-#if HAVE_SSE2
+#if HAVE_SSE2 && ARCH_X86_64
+#if CONFIG_VP9_HIGHBITDEPTH
+#else
 const ConvolveFunctions convolve8_sse2(
     vp9_convolve8_horiz_sse2, vp9_convolve8_avg_horiz_sse2,
     vp9_convolve8_vert_sse2, vp9_convolve8_avg_vert_sse2,
@@ -621,6 +626,7 @@ INSTANTIATE_TEST_CASE_P(SSE2, ConvolveTest, ::testing::Values(
     make_tuple(64, 32, &convolve8_sse2),
     make_tuple(32, 64, &convolve8_sse2),
     make_tuple(64, 64, &convolve8_sse2)));
+#endif
 #endif
 
 #if HAVE_SSSE3
