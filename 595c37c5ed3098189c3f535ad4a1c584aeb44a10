@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//ZQk\u003d",
+        "filename": "vpxdec.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 1130,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-02T21:27:20Z",
+      "side": 1,
+      "message": "nit: Either brace this or add a blank line: Your choice.",
+      "revId": "595c37c5ed3098189c3f535ad4a1c584aeb44a10",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZQg\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 1510,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-02T21:27:20Z",
+      "side": 1,
+      "message": "nit: braces around multiline",
+      "revId": "595c37c5ed3098189c3f535ad4a1c584aeb44a10",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
