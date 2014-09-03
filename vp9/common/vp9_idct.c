@@ -925,7 +925,7 @@ void vp9_idct16x16_1_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
 }
 
 static void idct32(const tran_low_t *input, tran_low_t *output) {
-  tran_high_t step1[32], step2[32];
+  tran_low_t step1[32], step2[32];
   tran_high_t temp1, temp2;
 
   // stage 1
