@@ -654,34 +654,33 @@ static vpx_codec_err_t encoder_init(vpx_codec_ctx_t *ctx,
   (void)data;
 
   if (ctx->priv == NULL) {
-    vpx_codec_alg_priv_t *const alg_priv = calloc(1, sizeof(*alg_priv));
-
-    if (alg_priv == NULL)
+    vpx_codec_alg_priv_t *const priv = vpx_calloc(1, sizeof(*priv));
+    if (priv == NULL)
       return VPX_CODEC_MEM_ERROR;
 
-    ctx->priv = (vpx_codec_priv_t *)alg_priv;
-    ctx->priv->sz = sizeof(vpx_codec_alg_priv_t);
+    ctx->priv = (vpx_codec_priv_t *)priv;
+    ctx->priv->sz = sizeof(*priv);
     ctx->priv->init_flags = ctx->init_flags;
     ctx->priv->enc.total_encoders = 1;
 
     if (ctx->config.enc) {
       // Update the reference to the config structure to an internal copy.
-      alg_priv->cfg = *ctx->config.enc;
-      ctx->config.enc = &alg_priv->cfg;
+      priv->cfg = *ctx->config.enc;
+      ctx->config.enc = &priv->cfg;
     }
 
-    alg_priv->extra_cfg = default_extra_cfg;
+    priv->extra_cfg = default_extra_cfg;
     vp9_initialize_enc();
 
-    res = validate_config(alg_priv, &alg_priv->cfg, &alg_priv->extra_cfg);
+    res = validate_config(priv, &priv->cfg, &priv->extra_cfg);
 
     if (res == VPX_CODEC_OK) {
-      set_encoder_config(&alg_priv->oxcf, &alg_priv->cfg, &alg_priv->extra_cfg);
-      alg_priv->cpi = vp9_create_compressor(&alg_priv->oxcf);
-      if (alg_priv->cpi == NULL)
+      set_encoder_config(&priv->oxcf, &priv->cfg, &priv->extra_cfg);
+      priv->cpi = vp9_create_compressor(&priv->oxcf);
+      if (priv->cpi == NULL)
         res = VPX_CODEC_MEM_ERROR;
       else
-        alg_priv->cpi->output_pkt_list = &alg_priv->pkt_list.head;
+        priv->cpi->output_pkt_list = &priv->pkt_list.head;
     }
   }
 
@@ -691,7 +690,7 @@ static vpx_codec_err_t encoder_init(vpx_codec_ctx_t *ctx,
 static vpx_codec_err_t encoder_destroy(vpx_codec_alg_priv_t *ctx) {
   free(ctx->cx_data);
   vp9_remove_compressor(ctx->cpi);
-  free(ctx);
+  vpx_free(ctx);
   return VPX_CODEC_OK;
 }
 
