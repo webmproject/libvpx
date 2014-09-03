@@ -65,7 +65,6 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
   const int boosted = frame_is_boosted(cpi);
 
   sf->adaptive_rd_thresh = 1;
-  sf->recode_loop = (speed < 1) ? ALLOW_RECODE : ALLOW_RECODE_KFMAXBW;
   sf->allow_skip_recode = 1;
 
   if (speed >= 1) {
