@@ -294,6 +294,11 @@ INSTANTIATE_TEST_CASE_P(SSSE3, IntraPredYTest,
                         ::testing::Values(
                             vp8_build_intra_predictors_mby_s_ssse3));
 #endif
+#if HAVE_NEON
+INSTANTIATE_TEST_CASE_P(NEON, IntraPredYTest,
+                        ::testing::Values(
+                            vp8_build_intra_predictors_mby_s_neon));
+#endif
 
 typedef void (*IntraPredUvFunc)(MACROBLOCKD *x,
                                 uint8_t *uabove_row,
@@ -381,6 +386,11 @@ INSTANTIATE_TEST_CASE_P(SSE2, IntraPredUVTest,
 INSTANTIATE_TEST_CASE_P(SSSE3, IntraPredUVTest,
                         ::testing::Values(
                             vp8_build_intra_predictors_mbuv_s_ssse3));
+#endif
+#if HAVE_NEON
+INSTANTIATE_TEST_CASE_P(NEON, IntraPredUVTest,
+                        ::testing::Values(
+                            vp8_build_intra_predictors_mbuv_s_neon));
 #endif
 
 }  // namespace
