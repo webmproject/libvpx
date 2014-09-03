@@ -16,6 +16,24 @@
       "revId": "026837e965b8839f51a861806abb571332411884",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZH8\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 598,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-09-03T18:56:38Z",
+      "side": 1,
+      "message": "Good catch, fixed in patch#3.",
+      "parentUuid": "AAAAdn//ZLc\u003d",
+      "revId": "026837e965b8839f51a861806abb571332411884",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
