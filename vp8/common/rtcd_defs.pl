@@ -38,15 +38,13 @@ $vp8_dequant_idct_add_media=vp8_dequant_idct_add_v6;
 $vp8_dequant_idct_add_dspr2=vp8_dequant_idct_add_dspr2;
 
 add_proto qw/void vp8_dequant_idct_add_y_block/, "short *q, short *dq, unsigned char *dst, int stride, char *eobs";
-specialize qw/vp8_dequant_idct_add_y_block mmx sse2 media neon_asm dspr2/;
+specialize qw/vp8_dequant_idct_add_y_block mmx sse2 media neon dspr2/;
 $vp8_dequant_idct_add_y_block_media=vp8_dequant_idct_add_y_block_v6;
-$vp8_dequant_idct_add_y_block_neon_asm=vp8_dequant_idct_add_y_block_neon;
 $vp8_dequant_idct_add_y_block_dspr2=vp8_dequant_idct_add_y_block_dspr2;
 
 add_proto qw/void vp8_dequant_idct_add_uv_block/, "short *q, short *dq, unsigned char *dst_u, unsigned char *dst_v, int stride, char *eobs";
-specialize qw/vp8_dequant_idct_add_uv_block mmx sse2 media neon_asm dspr2/;
+specialize qw/vp8_dequant_idct_add_uv_block mmx sse2 media neon dspr2/;
 $vp8_dequant_idct_add_uv_block_media=vp8_dequant_idct_add_uv_block_v6;
-$vp8_dequant_idct_add_uv_block_neon_asm=vp8_dequant_idct_add_uv_block_neon;
 $vp8_dequant_idct_add_y_block_dspr2=vp8_dequant_idct_add_y_block_dspr2;
 
 #
