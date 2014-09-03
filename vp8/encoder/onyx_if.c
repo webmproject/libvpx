@@ -3293,6 +3293,7 @@ static void update_reference_frames(VP8_COMP *cpi)
 
 }
 
+#if CONFIG_TEMPORAL_DENOISING
 static void process_denoiser_mode_change(VP8_COMP *cpi) {
   const VP8_COMMON *const cm = &cpi->common;
   int i, j;
@@ -3399,6 +3400,7 @@ static void process_denoiser_mode_change(VP8_COMP *cpi) {
     cpi->denoiser.nmse_source_diff_count = 0;
   }
 }
+#endif
 
 void vp8_loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm)
 {
