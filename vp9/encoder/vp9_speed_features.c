@@ -149,7 +149,7 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
     sf->alt_ref_search_fp = 1;
     sf->motion_field_mode_search = !boosted;
     sf->lf_motion_threshold = LOW_MOTION_THRESHOLD;
-    sf->last_partitioning_redo_frequency = 3;
+    sf->last_partitioning_redo_frequency = 2;
     sf->recode_loop = ALLOW_RECODE_KFMAXBW;
     sf->adaptive_rd_thresh = 3;
     sf->mode_skip_start = 6;
