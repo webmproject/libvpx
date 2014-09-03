@@ -2779,9 +2779,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
     comp_pred = second_ref_frame > INTRA_FRAME;
     if (comp_pred) {
-      if (cpi->sf.alt_ref_search_fp)
-        if (!cm->show_frame)
-          continue;
+      if (!cm->allow_comp_inter_inter)
+        continue;
 
       if ((mode_search_skip_flags & FLAG_SKIP_COMP_BESTINTRA) &&
           best_mode_index >=0 &&
@@ -3384,6 +3383,9 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 
     comp_pred = second_ref_frame > INTRA_FRAME;
     if (comp_pred) {
+      if (!cm->allow_comp_inter_inter)
+        continue;
+
       if (!(cpi->ref_frame_flags & flag_list[second_ref_frame]))
         continue;
       // Do not allow compound prediction if the segment level reference frame
