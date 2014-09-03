@@ -112,7 +112,7 @@ struct macroblock {
   int quant_fp;
 
   // skip forward transform and quantization
-  int skip_txfm[MAX_MB_PLANE << 2];
+  uint8_t skip_txfm[MAX_MB_PLANE << 2];
 
   int64_t bsse[MAX_MB_PLANE << 2];
 

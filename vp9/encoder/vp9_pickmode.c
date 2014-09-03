@@ -423,7 +423,7 @@ int64_t vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                     VP9_ALT_FLAG };
   int64_t best_rd = INT64_MAX;
   int64_t this_rd = INT64_MAX;
-  int skip_txfm = 0;
+  uint8_t skip_txfm = 0;
   int rate = INT_MAX;
   int64_t dist = INT64_MAX;
   // var_y and sse_y are saved to be used in skipping checking

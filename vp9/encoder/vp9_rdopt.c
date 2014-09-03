@@ -2150,6 +2150,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                  int_mv (*mode_mv)[MAX_REF_FRAMES],
                                  int mi_row, int mi_col,
                                  int_mv single_newmv[MAX_REF_FRAMES],
+                                 INTERP_FILTER (*single_filter)[MAX_REF_FRAMES],
+                                 int (*single_skippable)[MAX_REF_FRAMES],
                                  int64_t *psse,
                                  const int64_t ref_best_rd) {
   VP9_COMMON *cm = &cpi->common;
@@ -2173,7 +2175,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int orig_dst_stride[MAX_MB_PLANE];
   int rs = 0;
   INTERP_FILTER best_filter = SWITCHABLE;
-  int skip_txfm[MAX_MB_PLANE << 2] = {0};
+  uint8_t skip_txfm[MAX_MB_PLANE << 2] = {0};
   int64_t bsse[MAX_MB_PLANE << 2] = {0};
 
   int bsl = mi_width_log2_lookup[bsize];
@@ -2196,6 +2198,12 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     if (frame_mv[refs[0]].as_int == INVALID_MV ||
         frame_mv[refs[1]].as_int == INVALID_MV)
       return INT64_MAX;
+
+    if (cpi->sf.adaptive_mode_search) {
+      if (single_filter[this_mode][refs[0]] ==
+          single_filter[this_mode][refs[1]])
+        best_filter = single_filter[this_mode][refs[0]];
+    }
   }
 
   if (this_mode == NEWMV) {
@@ -2385,7 +2393,18 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     vp9_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
     model_rd_for_sb(cpi, bsize, x, xd, &tmp_rate, &tmp_dist);
     rd = RDCOST(x->rdmult, x->rddiv, rs + tmp_rate, tmp_dist);
+    vpx_memcpy(skip_txfm, x->skip_txfm, sizeof(skip_txfm));
+    vpx_memcpy(bsse, x->bsse, sizeof(bsse));
   }
+
+  if (!is_comp_pred)
+    single_filter[this_mode][refs[0]] = mbmi->interp_filter;
+
+  if (cpi->sf.adaptive_mode_search)
+    if (is_comp_pred)
+      if (single_skippable[this_mode][refs[0]] &&
+          single_skippable[this_mode][refs[1]])
+        vpx_memset(skip_txfm, 1, sizeof(skip_txfm));
 
   if (cpi->sf.use_rd_breakout && ref_best_rd < INT64_MAX) {
     // if current pred_error modeled rd is substantially more than the best
@@ -2444,6 +2463,9 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     *distortion += *distortion_uv;
     *skippable = skippable_y && skippable_uv;
   }
+
+  if (!is_comp_pred)
+    single_skippable[this_mode][refs[0]] = *skippable;
 
   restore_dst_buf(xd, orig_dst, orig_dst_stride);
   return this_rd;  // if 0, this will be re-calculated by caller
@@ -2551,10 +2573,12 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   PREDICTION_MODE this_mode;
   MV_REFERENCE_FRAME ref_frame, second_ref_frame;
   unsigned char segment_id = mbmi->segment_id;
-  int comp_pred, i;
+  int comp_pred, i, k;
   int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES];
   struct buf_2d yv12_mb[4][MAX_MB_PLANE];
   int_mv single_newmv[MAX_REF_FRAMES] = { { 0 } };
+  INTERP_FILTER single_inter_filter[MB_MODE_COUNT][MAX_REF_FRAMES];
+  int single_skippable[MB_MODE_COUNT][MAX_REF_FRAMES];
   static const int flag_list[4] = { 0, VP9_LAST_FLAG, VP9_GOLD_FLAG,
                                     VP9_ALT_FLAG };
   int64_t best_rd = best_rd_so_far;
@@ -2603,6 +2627,12 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     rate_uv_intra[i] = INT_MAX;
   for (i = 0; i < MAX_REF_FRAMES; ++i)
     x->pred_sse[i] = INT_MAX;
+  for (i = 0; i < MB_MODE_COUNT; ++i) {
+    for (k = 0; k < MAX_REF_FRAMES; ++k) {
+      single_inter_filter[i][k] = SWITCHABLE;
+      single_skippable[i][k] = 0;
+    }
+  }
 
   *returnrate = INT_MAX;
 
@@ -2886,7 +2916,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                   &rate_uv, &distortion_uv,
                                   &disable_skip, frame_mv,
                                   mi_row, mi_col,
-                                  single_newmv, &total_sse, best_rd);
+                                  single_newmv, single_inter_filter,
+                                  single_skippable, &total_sse, best_rd);
       if (this_rd == INT64_MAX)
         continue;
 
