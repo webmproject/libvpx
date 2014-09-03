@@ -1,0 +1,378 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//ZFk\u003d",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 47
+      },
+      "lineNbr": 356,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-03T22:27:23Z",
+      "side": 1,
+      "message": "...that was accessing it...",
+      "revId": "f30c6e331013b7141629bcf2f10d034908eeaa08",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZFg\u003d",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 47
+      },
+      "lineNbr": 357,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-03T22:27:23Z",
+      "side": 1,
+      "message": ". So it can be resized safely now.",
+      "revId": "f30c6e331013b7141629bcf2f10d034908eeaa08",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZFc\u003d",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 47
+      },
+      "lineNbr": 359,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-03T22:27:23Z",
+      "side": 1,
+      "message": "const",
+      "revId": "f30c6e331013b7141629bcf2f10d034908eeaa08",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZFU\u003d",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 47
+      },
+      "lineNbr": 361,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-03T22:27:23Z",
+      "side": 1,
+      "message": "shouldn\u0027t be necessary, but you could group the vpx_free()s so it\u0027s a bit more readable",
+      "revId": "f30c6e331013b7141629bcf2f10d034908eeaa08",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZFQ\u003d",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 47
+      },
+      "lineNbr": 366,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-03T22:27:23Z",
+      "side": 1,
+      "message": "this should be CHECK_MEM_ERROR, then some of the \u0027\u003d NULL\u0027 statements would be required",
+      "revId": "f30c6e331013b7141629bcf2f10d034908eeaa08",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZFM\u003d",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 47
+      },
+      "lineNbr": 374,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-03T22:27:23Z",
+      "side": 1,
+      "message": "delete this line",
+      "revId": "f30c6e331013b7141629bcf2f10d034908eeaa08",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZFI\u003d",
+        "filename": "vp9/common/vp9_entropymode.c",
+        "patchSetId": 47
+      },
+      "lineNbr": 442,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-03T22:27:23Z",
+      "side": 1,
+      "message": "delete this line",
+      "revId": "f30c6e331013b7141629bcf2f10d034908eeaa08",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZFE\u003d",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 47
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-03T22:27:23Z",
+      "side": 1,
+      "message": "...a maximum of...",
+      "revId": "f30c6e331013b7141629bcf2f10d034908eeaa08",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZE8\u003d",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 47
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-03T22:27:23Z",
+      "side": 1,
+      "message": "should note what this is for in the frame_parallel_decode case.",
+      "revId": "f30c6e331013b7141629bcf2f10d034908eeaa08",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZF8\u003d",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 47
+      },
+      "lineNbr": 298,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-03T22:27:23Z",
+      "side": 1,
+      "message": "delete this line",
+      "revId": "f30c6e331013b7141629bcf2f10d034908eeaa08",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZE0\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 47
+      },
+      "lineNbr": 410,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-03T22:27:23Z",
+      "side": 1,
+      "message": "what\u0027s the pbi carrying that it\u0027s needed to pass it through everywhere?",
+      "revId": "f30c6e331013b7141629bcf2f10d034908eeaa08",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZE4\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 47
+      },
+      "lineNbr": 418,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-03T22:27:23Z",
+      "side": 1,
+      "message": "delete this line",
+      "revId": "f30c6e331013b7141629bcf2f10d034908eeaa08",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZEw\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 47
+      },
+      "lineNbr": 890,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-03T22:27:23Z",
+      "side": 1,
+      "message": "...of the current superblock row.",
+      "revId": "f30c6e331013b7141629bcf2f10d034908eeaa08",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZFw\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 47
+      },
+      "lineNbr": 892,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-03T22:27:23Z",
+      "side": 1,
+      "message": "this needs to be updated if you meant to change the constant from 18 to 11",
+      "revId": "f30c6e331013b7141629bcf2f10d034908eeaa08",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZEs\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 47
+      },
+      "lineNbr": 1221,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-03T22:27:23Z",
+      "side": 1,
+      "message": "you could localize int ref_index to this block I think",
+      "revId": "f30c6e331013b7141629bcf2f10d034908eeaa08",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZEo\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 47
+      },
+      "lineNbr": 1522,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-03T22:27:23Z",
+      "side": 1,
+      "message": "no space after \u0027*\u0027",
+      "revId": "f30c6e331013b7141629bcf2f10d034908eeaa08",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZDs\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 47
+      },
+      "lineNbr": 423,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-03T22:27:23Z",
+      "side": 1,
+      "message": "this duplication is a bit unfortunate. couldn\u0027t you just rework the prev_mi assignment in the existing code, maybe with the addition of 1 more parameter to the call?",
+      "revId": "f30c6e331013b7141629bcf2f10d034908eeaa08",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZDw\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 47
+      },
+      "lineNbr": 528,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-03T22:27:23Z",
+      "side": 1,
+      "message": "this is used in one place, just replace the function; otherwise this should have \u0027vp9_\u0027 removed as it\u0027s private",
+      "revId": "f30c6e331013b7141629bcf2f10d034908eeaa08",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZDo\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 47
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-03T22:27:23Z",
+      "side": 1,
+      "message": "can these two branches be merged back together given this should be a no-op for non-frame-parallel decodes",
+      "revId": "f30c6e331013b7141629bcf2f10d034908eeaa08",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZDk\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 47
+      },
+      "lineNbr": 285,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-03T22:27:23Z",
+      "side": 1,
+      "message": "put this in a lock/unlock function too",
+      "revId": "f30c6e331013b7141629bcf2f10d034908eeaa08",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZDg\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 47
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-03T22:27:23Z",
+      "side": 1,
+      "message": "fix indent",
+      "revId": "f30c6e331013b7141629bcf2f10d034908eeaa08",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZDc\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 47
+      },
+      "lineNbr": 358,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-03T22:27:23Z",
+      "side": 1,
+      "message": "indent is wrong",
+      "revId": "f30c6e331013b7141629bcf2f10d034908eeaa08",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
