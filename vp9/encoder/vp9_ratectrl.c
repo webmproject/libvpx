@@ -1235,7 +1235,7 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
     cm->frame_type = KEY_FRAME;
     rc->source_alt_ref_active = 0;
 
-    if (is_spatial_svc(cpi)) {
+    if (is_two_pass_svc(cpi)) {
       cpi->svc.layer_context[cpi->svc.spatial_layer_id].is_key_frame = 1;
       cpi->ref_frame_flags &=
           (~VP9_LAST_FLAG & ~VP9_GOLD_FLAG & ~VP9_ALT_FLAG);
@@ -1247,7 +1247,7 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
   } else {
     cm->frame_type = INTER_FRAME;
 
-    if (is_spatial_svc(cpi)) {
+    if (is_two_pass_svc(cpi)) {
       LAYER_CONTEXT *lc = &cpi->svc.layer_context[cpi->svc.spatial_layer_id];
       if (cpi->svc.spatial_layer_id == 0) {
         lc->is_key_frame = 0;
