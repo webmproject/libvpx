@@ -16,6 +16,24 @@
       "revId": "27db51c6025af11521475f0ad0716d798107c9d8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Y3w\u003d",
+        "filename": "vpx/internal/vpx_codec_internal.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 338,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-09-04T22:10:51Z",
+      "side": 0,
+      "message": "Yes,  this is exactly the reason why I want to remove it.",
+      "parentUuid": "AAAAdn//Y38\u003d",
+      "revId": "27db51c6025af11521475f0ad0716d798107c9d8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
