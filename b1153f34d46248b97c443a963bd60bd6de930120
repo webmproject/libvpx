@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Y18\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-09-04T23:53:20Z",
+      "side": 1,
+      "message": "prefer to use // for each line",
+      "revId": "b1153f34d46248b97c443a963bd60bd6de930120",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Y2A\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-09-04T23:53:20Z",
+      "side": 1,
+      "message": "space before/after * (i.e., 8 * 3)",
+      "revId": "b1153f34d46248b97c443a963bd60bd6de930120",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
