@@ -670,7 +670,6 @@ static vpx_codec_err_t encoder_init(vpx_codec_ctx_t *ctx,
       return VPX_CODEC_MEM_ERROR;
 
     ctx->priv = (vpx_codec_priv_t *)priv;
-    ctx->priv->sz = sizeof(*priv);
     ctx->priv->init_flags = ctx->init_flags;
     ctx->priv->enc.total_encoders = 1;
 
