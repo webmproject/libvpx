@@ -422,21 +422,6 @@ static void update_reference_segmentation_map(VP9_COMP *cpi) {
   }
 }
 
-
-static void set_speed_features(VP9_COMP *cpi) {
-#if CONFIG_INTERNAL_STATS
-  int i;
-  for (i = 0; i < MAX_MODES; ++i)
-    cpi->mode_chosen_counts[i] = 0;
-#endif
-
-  vp9_set_speed_features(cpi);
-
-  // Set rd thresholds based on mode and speed setting
-  vp9_set_rd_speed_thresholds(cpi);
-  vp9_set_rd_speed_thresholds_sub8x8(cpi);
-}
-
 static void alloc_raw_frame_buffers(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
   const VP9EncoderConfig *oxcf = &cpi->oxcf;
@@ -985,7 +970,7 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
     }
   }
 
-  set_speed_features(cpi);
+  vp9_set_speed_features(cpi);
 
   // Allocate memory to store variances for a frame.
   CHECK_MEM_ERROR(cm, cpi->source_diff_var,
@@ -2246,7 +2231,16 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   }
 #endif
 
-  set_speed_features(cpi);
+#if CONFIG_INTERNAL_STATS
+  int i;
+  for (i = 0; i < MAX_MODES; ++i)
+    cpi->mode_chosen_counts[i] = 0;
+#endif
+
+  vp9_set_speed_features(cpi);
+
+  vp9_set_rd_speed_thresholds(cpi);
+  vp9_set_rd_speed_thresholds_sub8x8(cpi);
 
   // Decide q and q bounds.
   q = vp9_rc_pick_q_and_bounds(cpi, &bottom_index, &top_index);
