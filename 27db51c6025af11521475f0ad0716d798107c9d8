@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Y38\u003d",
+        "filename": "vpx/internal/vpx_codec_internal.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 338,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-04T21:54:42Z",
+      "side": 0,
+      "message": "I believe this was modeled after ffmpeg where the codec gave it\u0027s size requirements but the allocation was done in a common area, followed by an init(). we\u0027re not using it now, so it should be all right to remove I suppose",
+      "revId": "27db51c6025af11521475f0ad0716d798107c9d8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
