@@ -88,7 +88,7 @@ class VarianceTest
     height_ = 1 << log2height_;
     variance_ = get<2>(params);
 
-    rnd(ACMRandom::DeterministicSeed());
+    rnd_.Reset(ACMRandom::DeterministicSeed());
     block_size_ = width_ * height_;
     src_ = reinterpret_cast<uint8_t *>(vpx_memalign(16, block_size_));
     ref_ = new uint8_t[block_size_];
@@ -107,7 +107,7 @@ class VarianceTest
   void RefTest();
   void OneQuarterTest();
 
-  ACMRandom rnd;
+  ACMRandom rnd_;
   uint8_t* src_;
   uint8_t* ref_;
   int width_, log2width_;
@@ -135,8 +135,8 @@ template<typename VarianceFunctionType>
 void VarianceTest<VarianceFunctionType>::RefTest() {
   for (int i = 0; i < 10; ++i) {
     for (int j = 0; j < block_size_; j++) {
-      src_[j] = rnd.Rand8();
-      ref_[j] = rnd.Rand8();
+      src_[j] = rnd_.Rand8();
+      ref_[j] = rnd_.Rand8();
     }
     unsigned int sse1, sse2;
     unsigned int var1;
@@ -206,7 +206,7 @@ class SubpelVarianceTest
     height_ = 1 << log2height_;
     subpel_variance_ = get<2>(params);
 
-    rnd(ACMRandom::DeterministicSeed());
+    rnd_.Reset(ACMRandom::DeterministicSeed());
     block_size_ = width_ * height_;
     src_ = reinterpret_cast<uint8_t *>(vpx_memalign(16, block_size_));
     sec_ = reinterpret_cast<uint8_t *>(vpx_memalign(16, block_size_));
@@ -226,7 +226,7 @@ class SubpelVarianceTest
  protected:
   void RefTest();
 
-  ACMRandom rnd;
+  ACMRandom rnd_;
   uint8_t *src_;
   uint8_t *ref_;
   uint8_t *sec_;
@@ -241,10 +241,10 @@ void SubpelVarianceTest<SubpelVarianceFunctionType>::RefTest() {
   for (int x = 0; x < 16; ++x) {
     for (int y = 0; y < 16; ++y) {
       for (int j = 0; j < block_size_; j++) {
-        src_[j] = rnd.Rand8();
+        src_[j] = rnd_.Rand8();
       }
       for (int j = 0; j < block_size_ + width_ + height_ + 1; j++) {
-        ref_[j] = rnd.Rand8();
+        ref_[j] = rnd_.Rand8();
       }
       unsigned int sse1, sse2;
       unsigned int var1;
@@ -263,11 +263,11 @@ void SubpelVarianceTest<vp9_subp_avg_variance_fn_t>::RefTest() {
   for (int x = 0; x < 16; ++x) {
     for (int y = 0; y < 16; ++y) {
       for (int j = 0; j < block_size_; j++) {
-        src_[j] = rnd.Rand8();
-        sec_[j] = rnd.Rand8();
+        src_[j] = rnd_.Rand8();
+        sec_[j] = rnd_.Rand8();
       }
       for (int j = 0; j < block_size_ + width_ + height_ + 1; j++) {
-        ref_[j] = rnd.Rand8();
+        ref_[j] = rnd_.Rand8();
       }
       unsigned int sse1, sse2;
       unsigned int var1;
