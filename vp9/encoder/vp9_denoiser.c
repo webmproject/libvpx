@@ -78,7 +78,8 @@ static VP9_DENOISER_DECISION denoiser_filter(const uint8_t *sig, int sig_stride,
                                              int mc_avg_stride,
                                              uint8_t *avg, int avg_stride,
                                              int increase_denoising,
-                                             BLOCK_SIZE bs) {
+                                             BLOCK_SIZE bs,
+                                             int motion_magnitude) {
   int r, c;
   const uint8_t *sig_start = sig;
   const uint8_t *mc_avg_start = mc_avg;
@@ -86,6 +87,19 @@ static VP9_DENOISER_DECISION denoiser_filter(const uint8_t *sig, int sig_stride,
   int diff, adj, absdiff, delta;
   int adj_val[] = {3, 4, 6};
   int total_adj = 0;
+  int shift_inc = 1;
+
+  /* If motion_magnitude is small, making the denoiser more aggressive by
+   * increasing the adjustment for each level. Add another increment for
+   * blocks that are labeled for increase denoising. */
+  if (motion_magnitude <= MOTION_MAGNITUDE_THRESHOLD) {
+    if (increase_denoising) {
+      shift_inc = 2;
+    }
+    adj_val[0] += shift_inc;
+    adj_val[1] += shift_inc;
+    adj_val[2] += shift_inc;
+  }
 
   // First attempt to apply a strong temporal denoising filter.
   for (r = 0; r < heights[bs]; ++r) {
@@ -192,7 +206,8 @@ static VP9_DENOISER_DECISION perform_motion_compensation(VP9_DENOISER *denoiser,
                                                          int increase_denoising,
                                                          int mi_row,
                                                          int mi_col,
-                                                         PICK_MODE_CONTEXT *ctx
+                                                         PICK_MODE_CONTEXT *ctx,
+                                                         int *motion_magnitude
                                                          ) {
   int mv_col, mv_row;
   int sse_diff = ctx->zeromv_sse - ctx->newmv_sse;
@@ -216,6 +231,8 @@ static VP9_DENOISER_DECISION perform_motion_compensation(VP9_DENOISER *denoiser,
 
   mv_col = ctx->best_sse_mv.as_mv.col;
   mv_row = ctx->best_sse_mv.as_mv.row;
+
+  *motion_magnitude = mv_row * mv_row + mv_col * mv_col;
 
   frame = ctx->best_reference_frame;
 
@@ -304,6 +321,7 @@ static VP9_DENOISER_DECISION perform_motion_compensation(VP9_DENOISER *denoiser,
 void vp9_denoiser_denoise(VP9_DENOISER *denoiser, MACROBLOCK *mb,
                           int mi_row, int mi_col, BLOCK_SIZE bs,
                           PICK_MODE_CONTEXT *ctx) {
+  int motion_magnitude = 0;
   VP9_DENOISER_DECISION decision = FILTER_BLOCK;
   YV12_BUFFER_CONFIG avg = denoiser->running_avg_y[INTRA_FRAME];
   YV12_BUFFER_CONFIG mc_avg = denoiser->mc_running_avg_y;
@@ -314,13 +332,14 @@ void vp9_denoiser_denoise(VP9_DENOISER *denoiser, MACROBLOCK *mb,
 
   decision = perform_motion_compensation(denoiser, mb, bs,
                                          denoiser->increase_denoising,
-                                         mi_row, mi_col, ctx);
+                                         mi_row, mi_col, ctx,
+                                         &motion_magnitude);
 
   if (decision == FILTER_BLOCK) {
     decision = denoiser_filter(src.buf, src.stride,
                                mc_avg_start, mc_avg.y_stride,
                                avg_start, avg.y_stride,
-                               0, bs);
+                               0, bs, motion_magnitude);
   }
 
   if (decision == FILTER_BLOCK) {
