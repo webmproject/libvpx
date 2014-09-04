@@ -16,6 +16,24 @@
       "revId": "ae69069eb2c5d235f57ea2a565ba7f780ea9f1d5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ZAU\u003d",
+        "filename": "vp9/common/vp9_rtcd_defs.pl",
+        "patchSetId": 2
+      },
+      "lineNbr": 699,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-09-04T02:03:20Z",
+      "side": 1,
+      "message": "Done\n\nI\u0027ll fix the same issue for variance functions in the separate patch.",
+      "parentUuid": "AAAAdn//ZA0\u003d",
+      "revId": "ae69069eb2c5d235f57ea2a565ba7f780ea9f1d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
