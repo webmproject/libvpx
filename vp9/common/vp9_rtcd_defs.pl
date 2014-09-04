@@ -284,15 +284,6 @@ specialize qw/vp9_plane_add_noise mmx sse2/;
 $vp9_plane_add_noise_sse2=vp9_plane_add_noise_wmt;
 }
 
-add_proto qw/void vp9_blend_mb_inner/, "uint8_t *y, uint8_t *u, uint8_t *v, int y1, int u1, int v1, int alpha, int stride";
-specialize qw/vp9_blend_mb_inner/;
-
-add_proto qw/void vp9_blend_mb_outer/, "uint8_t *y, uint8_t *u, uint8_t *v, int y1, int u1, int v1, int alpha, int stride";
-specialize qw/vp9_blend_mb_outer/;
-
-add_proto qw/void vp9_blend_b/, "uint8_t *y, uint8_t *u, uint8_t *v, int y1, int u1, int v1, int alpha, int stride";
-specialize qw/vp9_blend_b/;
-
 #
 # Sub Pixel Filters
 #
