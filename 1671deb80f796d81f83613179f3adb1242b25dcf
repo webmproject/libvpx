@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//ZBE\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1205,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-04T00:25:04Z",
+      "side": 1,
+      "message": "why are these 2 different types in the first place?",
+      "revId": "1671deb80f796d81f83613179f3adb1242b25dcf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
