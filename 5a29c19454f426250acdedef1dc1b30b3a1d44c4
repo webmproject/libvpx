@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Y/4\u003d",
+        "filename": "vpx/vpx_encoder.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 345,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-09-04T02:35:45Z",
+      "side": 1,
+      "message": "This is not correct. g_input_bit_depth should be unsigned int, since we allow the input source to have a bit-depth lower than that of the codec bit-depth.",
+      "revId": "5a29c19454f426250acdedef1dc1b30b3a1d44c4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Y/w\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1205,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-09-04T02:35:45Z",
+      "side": 1,
+      "message": "I think type-casting to (unsigned int) should fix the warning, here and below.",
+      "revId": "5a29c19454f426250acdedef1dc1b30b3a1d44c4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
