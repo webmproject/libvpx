@@ -81,11 +81,10 @@ static unsigned long vp8_priv_sz(const vpx_codec_dec_cfg_t *si, vpx_codec_flags_
 static void vp8_init_ctx(vpx_codec_ctx_t *ctx)
 {
     vpx_codec_alg_priv_t *priv =
-        (vpx_codec_alg_priv_t *)vpx_memalign(8, sizeof(*priv));
-    vpx_memset(priv, 0, sizeof(*priv));
+        (vpx_codec_alg_priv_t *)vpx_calloc(1, sizeof(*priv));
 
     ctx->priv = (vpx_codec_priv_t *)priv;
-    ctx->priv->sz = sizeof(*ctx->priv);
+    ctx->priv->sz = sizeof(*priv);
     ctx->priv->init_flags = ctx->init_flags;
 
     priv->si.sz = sizeof(priv->si);

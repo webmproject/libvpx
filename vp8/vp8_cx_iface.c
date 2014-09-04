@@ -14,6 +14,7 @@
 #include "vpx/vpx_codec.h"
 #include "vpx/internal/vpx_codec_internal.h"
 #include "vpx_version.h"
+#include "vpx_mem/vpx_mem.h"
 #include "vp8/encoder/onyx_int.h"
 #include "vpx/vp8cx.h"
 #include "vp8/encoder/firstpass.h"
@@ -619,13 +620,14 @@ static vpx_codec_err_t vp8e_init(vpx_codec_ctx_t *ctx,
                                  vpx_codec_priv_enc_mr_cfg_t *mr_cfg)
 {
     vpx_codec_err_t        res = VPX_CODEC_OK;
-    struct vpx_codec_alg_priv *priv;
+
 
     vp8_rtcd();
 
     if (!ctx->priv)
     {
-        priv = calloc(1, sizeof(struct vpx_codec_alg_priv));
+        struct vpx_codec_alg_priv *priv =
+            (struct vpx_codec_alg_priv *)vpx_calloc(1, sizeof(*priv));
 
         if (!priv)
         {
@@ -633,7 +635,7 @@ static vpx_codec_err_t vp8e_init(vpx_codec_ctx_t *ctx,
         }
 
         ctx->priv = (vpx_codec_priv_t *)priv;
-        ctx->priv->sz = sizeof(struct vpx_codec_alg_priv);
+        ctx->priv->sz = sizeof(*priv);
         ctx->priv->init_flags = ctx->init_flags;
 
         if (ctx->config.enc)
@@ -692,7 +694,7 @@ static vpx_codec_err_t vp8e_destroy(vpx_codec_alg_priv_t *ctx)
 
     free(ctx->cx_data);
     vp8_remove_compressor(&ctx->cpi);
-    free(ctx);
+    vpx_free(ctx);
     return VPX_CODEC_OK;
 }
 

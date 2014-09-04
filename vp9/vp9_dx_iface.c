@@ -58,25 +58,23 @@ static vpx_codec_err_t decoder_init(vpx_codec_ctx_t *ctx,
   (void)data;
 
   if (!ctx->priv) {
-    vpx_codec_alg_priv_t *const alg_priv = vpx_memalign(32, sizeof(*alg_priv));
-    if (alg_priv == NULL)
+    vpx_codec_alg_priv_t *const priv = vpx_calloc(1, sizeof(*priv));
+    if (priv == NULL)
       return VPX_CODEC_MEM_ERROR;
 
-    vp9_zero(*alg_priv);
-
-    ctx->priv = (vpx_codec_priv_t *)alg_priv;
-    ctx->priv->sz = sizeof(*alg_priv);
+    ctx->priv = (vpx_codec_priv_t *)priv;
+    ctx->priv->sz = sizeof(*priv);
     ctx->priv->init_flags = ctx->init_flags;
 
-    alg_priv->si.sz = sizeof(alg_priv->si);
-    alg_priv->flushed = 0;
-    alg_priv->frame_parallel_decode =
+    priv->si.sz = sizeof(priv->si);
+    priv->flushed = 0;
+    priv->frame_parallel_decode =
         (ctx->init_flags & VPX_CODEC_USE_FRAME_THREADING);
-    alg_priv->frame_parallel_decode = 0;  // Disable for now
+    priv->frame_parallel_decode = 0;  // Disable for now
 
     if (ctx->config.dec) {
-      alg_priv->cfg = *ctx->config.dec;
-      ctx->config.dec = &alg_priv->cfg;
+      priv->cfg = *ctx->config.dec;
+      ctx->config.dec = &priv->cfg;
     }
   }
 
