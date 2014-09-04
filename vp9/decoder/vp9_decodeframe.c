@@ -330,6 +330,9 @@ static void set_ref(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   if (!vp9_is_valid_scale(&ref_buffer->sf))
     vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
                        "Invalid scale factors");
+  if (ref_buffer->buf->corrupted)
+    vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+                       "Block reference is corrupt");
   vp9_setup_pre_planes(xd, idx, ref_buffer->buf, mi_row, mi_col,
                        &ref_buffer->sf);
   xd->corrupted |= ref_buffer->buf->corrupted;
@@ -675,6 +678,10 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
       YV12_BUFFER_CONFIG *const buf = cm->frame_refs[i].buf;
       width = buf->y_crop_width;
       height = buf->y_crop_height;
+      if (buf->corrupted) {
+        vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+                           "Frame reference is corrupt");
+      }
       found = 1;
       break;
     }
