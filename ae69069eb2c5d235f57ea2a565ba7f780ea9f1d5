@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//ZA0\u003d",
+        "filename": "vp9/common/vp9_rtcd_defs.pl",
+        "patchSetId": 2
+      },
+      "lineNbr": 699,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-04T00:30:05Z",
+      "side": 1,
+      "message": "are these wrappers around asm files that use x86inc.asm? if everything is intrinsics based this should be simply \u0027sse2\u0027",
+      "revId": "ae69069eb2c5d235f57ea2a565ba7f780ea9f1d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
