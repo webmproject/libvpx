@@ -12,6 +12,10 @@
 #include "vpx_ports/mem.h"
 #include "vpx/vpx_integer.h"
 
+#ifdef _MSC_VER
+#define __builtin_prefetch(x)
+#endif
+
 static const uint16_t bilinear_taps_coeff[8][2] = {
     {128,   0},
     {112,  16},
@@ -40,7 +44,7 @@ unsigned int vp8_sub_pixel_variance16x16_neon_func(
     uint8x8_t d19u8, d20u8, d21u8;
     int16x4_t d22s16, d23s16, d24s16, d25s16, d26s16, d27s16, d28s16, d29s16;
     uint32x2_t d0u32, d10u32;
-    int64_t d0s64, d1s64, d2s64, d3s64;
+    int64x1_t d0s64, d1s64, d2s64, d3s64;
     uint8x16_t q0u8, q1u8, q2u8, q3u8, q4u8, q5u8, q6u8, q7u8, q8u8, q9u8;
     uint8x16_t q10u8, q11u8, q12u8, q13u8, q14u8, q15u8;
     uint16x8_t q1u16, q2u16, q3u16, q4u16, q5u16, q6u16, q7u16, q8u16;
@@ -503,7 +507,7 @@ unsigned int vp8_variance_halfpixvar16x16_h_neon(
     int16x4_t d0s16, d1s16, d2s16, d3s16, d4s16, d5s16, d6s16, d7s16;
     int16x4_t d8s16, d9s16, d10s16, d11s16, d12s16, d13s16, d14s16, d15s16;
     uint32x2_t d0u32, d10u32;
-    int64_t d0s64, d1s64, d2s64, d3s64;
+    int64x1_t d0s64, d1s64, d2s64, d3s64;
     uint8x16_t q0u8, q1u8, q2u8, q3u8, q4u8, q5u8, q6u8;
     uint8x16_t q7u8, q11u8, q12u8, q13u8, q14u8;
     uint16x8_t q0u16, q1u16, q2u16, q3u16, q4u16, q5u16, q6u16, q7u16;
@@ -639,7 +643,7 @@ unsigned int vp8_variance_halfpixvar16x16_v_neon(
     int16x4_t d22s16, d23s16, d24s16, d25s16, d26s16, d27s16, d28s16, d29s16;
     int16x4_t d0s16, d1s16, d2s16, d3s16, d4s16, d5s16, d6s16, d7s16;
     uint32x2_t d0u32, d10u32;
-    int64_t d0s64, d1s64, d2s64, d3s64;
+    int64x1_t d0s64, d1s64, d2s64, d3s64;
     uint8x16_t q0u8, q1u8, q2u8, q3u8, q4u8, q5u8, q6u8, q7u8, q15u8;
     uint16x8_t q0u16, q1u16, q2u16, q3u16, q11u16, q12u16, q13u16, q14u16;
     int32x4_t q8s32, q9s32, q10s32;
@@ -769,7 +773,7 @@ unsigned int vp8_variance_halfpixvar16x16_hv_neon(
     int16x4_t d0s16, d1s16, d2s16, d3s16, d10s16, d11s16, d12s16, d13s16;
     int16x4_t d18s16, d19s16, d20s16, d21s16, d22s16, d23s16, d24s16, d25s16;
     uint32x2_t d0u32, d10u32;
-    int64_t d0s64, d1s64, d2s64, d3s64;
+    int64x1_t d0s64, d1s64, d2s64, d3s64;
     uint8x16_t q0u8, q1u8, q2u8, q3u8, q4u8, q5u8, q6u8, q7u8, q8u8, q9u8;
     uint16x8_t q0u16, q1u16, q5u16, q6u16, q9u16, q10u16, q11u16, q12u16;
     int32x4_t q13s32, q14s32, q15s32;
