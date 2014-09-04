@@ -145,11 +145,17 @@ static VP9_DENOISER_DECISION denoiser_filter(const uint8_t *sig, int sig_stride,
         adj = delta;
       }
       if (diff > 0) {
+        // Diff positive means we made positive adjustment above
+        // (in first try/attempt), so now make negative adjustment to bring
+        // denoised signal down.
         avg[c] = MAX(0, avg[c] - adj);
-        total_adj += adj;
-      } else {
-        avg[c] = MIN(UINT8_MAX, avg[c] + adj);
         total_adj -= adj;
+      } else {
+        // Diff negative means we made negative adjustment above
+        // (in first try/attempt), so now make positive adjustment to bring
+        // denoised signal up.
+        avg[c] = MIN(UINT8_MAX, avg[c] + adj);
+        total_adj += adj;
       }
     }
     sig += sig_stride;
