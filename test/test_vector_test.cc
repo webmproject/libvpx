@@ -169,7 +169,7 @@ INSTANTIATE_TEST_CASE_P(
             static_cast<const libvpx_test::CodecFactory *>(&libvpx_test::kVP9)),
         ::testing::Combine(
             ::testing::Values(1),        // Frame Parallel mode.
-            ::testing::Values(2, 3, 4),  // With 2, 3, 4 threads.
+            ::testing::Range(2, 9),      // With 2 ~ 8 threads.
             ::testing::ValuesIn(libvpx_test::kVP9TestVectors,
                                 libvpx_test::kVP9TestVectors +
                                     libvpx_test::kNumVP9TestVectors))));
