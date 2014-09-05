@@ -107,6 +107,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Yzg\u003d",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-05T01:02:34Z",
+      "side": 1,
+      "message": "http://google-styleguide.googlecode.com/svn/trunk/cppguide.xml?showone\u003dInterfaces#Interfaces\n\nread the referenced section, it\u0027s exactly for this reason you want one",
+      "parentUuid": "AAAAdn//Y0A\u003d",
+      "revId": "ad7a764ff2bb2b53c44fd51d1b13392db4cfa9f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Y1A\u003d",
         "filename": "test/variance_test.cc",
         "patchSetId": 4
