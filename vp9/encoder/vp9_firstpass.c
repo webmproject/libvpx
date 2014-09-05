@@ -437,41 +437,51 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
   vp9_set_quantizer(cm, find_fp_qindex());
 
   if (lc != NULL) {
-    MV_REFERENCE_FRAME ref_frame = LAST_FRAME;
     twopass = &lc->twopass;
 
-    if (cpi->common.current_video_frame == 0) {
-      cpi->ref_frame_flags = 0;
+    cpi->lst_fb_idx = cpi->svc.spatial_layer_id;
+    cpi->ref_frame_flags = VP9_LAST_FLAG;
+
+    if (cpi->svc.number_spatial_layers + cpi->svc.spatial_layer_id <
+        REF_FRAMES) {
+      cpi->gld_fb_idx =
+          cpi->svc.number_spatial_layers + cpi->svc.spatial_layer_id;
+      cpi->ref_frame_flags |= VP9_GOLD_FLAG;
+      cpi->refresh_golden_frame = (lc->current_video_frame_in_layer == 0);
     } else {
-    if (lc->current_video_frame_in_layer <
-        (unsigned int)cpi->svc.number_temporal_layers)
-        cpi->ref_frame_flags = VP9_GOLD_FLAG;
-      else
-        cpi->ref_frame_flags = VP9_LAST_FLAG | VP9_GOLD_FLAG;
+      cpi->refresh_golden_frame = 0;
     }
+
+    if (lc->current_video_frame_in_layer == 0)
+      cpi->ref_frame_flags = 0;
 
     vp9_scale_references(cpi);
 
     // Use either last frame or alt frame for motion search.
     if (cpi->ref_frame_flags & VP9_LAST_FLAG) {
       first_ref_buf = vp9_get_scaled_ref_frame(cpi, LAST_FRAME);
-      ref_frame = LAST_FRAME;
       if (first_ref_buf == NULL)
         first_ref_buf = get_ref_frame_buffer(cpi, LAST_FRAME);
-    } else if (cpi->ref_frame_flags & VP9_GOLD_FLAG) {
-      first_ref_buf = vp9_get_scaled_ref_frame(cpi, GOLDEN_FRAME);
-      ref_frame = GOLDEN_FRAME;
-      if (first_ref_buf == NULL)
-        first_ref_buf = get_ref_frame_buffer(cpi, GOLDEN_FRAME);
+    }
+
+    if (cpi->ref_frame_flags & VP9_GOLD_FLAG) {
+      const int ref_idx =
+          cm->ref_frame_map[get_ref_frame_idx(cpi, GOLDEN_FRAME)];
+      const int scaled_idx = cpi->scaled_ref_idx[GOLDEN_FRAME - 1];
+
+      gld_yv12 = (scaled_idx != ref_idx) ? &cm->frame_bufs[scaled_idx].buf :
+                 get_ref_frame_buffer(cpi, GOLDEN_FRAME);
+    } else {
+      gld_yv12 = NULL;
     }
 
     recon_y_stride = new_yv12->y_stride;
     recon_uv_stride = new_yv12->uv_stride;
     uv_mb_height = 16 >> (new_yv12->y_height > new_yv12->uv_height);
 
-    // Disable golden frame for svc first pass for now.
-    gld_yv12 = NULL;
-    set_ref_ptrs(cm, xd, ref_frame, NONE);
+    set_ref_ptrs(cm, xd,
+                 (cpi->ref_frame_flags & VP9_LAST_FLAG) ? LAST_FRAME: NONE,
+                 (cpi->ref_frame_flags & VP9_GOLD_FLAG) ? GOLDEN_FRAME : NONE);
 
     cpi->Source = vp9_scale_if_required(cm, cpi->un_scaled_source,
                                         &cpi->scaled_source);
@@ -581,7 +591,8 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
       x->mv_col_max = ((cm->mb_cols - 1 - mb_col) * 16) + BORDER_MV_PIXELS_B16;
 
       // Other than for the first frame do a motion search.
-      if (cm->current_video_frame > 0) {
+      if ((lc == NULL && cm->current_video_frame > 0) ||
+          (lc != NULL && lc->current_video_frame_in_layer > 0)) {
         int tmp_err, motion_error, raw_motion_error;
         // Assume 0,0 motion with no mv overhead.
         MV mv = {0, 0} , tmp_mv = {0, 0};
@@ -628,7 +639,9 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
           }
 
           // Search in an older reference frame.
-          if (cm->current_video_frame > 1 && gld_yv12 != NULL) {
+          if (((lc == NULL && cm->current_video_frame > 1) ||
+               (lc != NULL && lc->current_video_frame_in_layer > 1))
+              && gld_yv12 != NULL) {
             // Assume 0,0 motion with no mv overhead.
             int gf_motion_error;
 
@@ -893,7 +906,7 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
 
   // Special case for the first frame. Copy into the GF buffer as a second
   // reference.
-  if (cm->current_video_frame == 0 && gld_yv12 != NULL) {
+  if (cm->current_video_frame == 0 && gld_yv12 != NULL && lc == NULL) {
     vp8_yv12_copy_frame(lst_yv12, gld_yv12);
   }
 
