@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Yyo\u003d",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-05T02:55:22Z",
+      "side": 1,
+      "message": "this can be protected to match the Test class definition, in general note that the order is public/protected/private meaning all sections should be named.\n\nhttp://google-styleguide.googlecode.com/svn/trunk/cppguide.xml#Class_Format",
+      "revId": "ff995c30c95f94b1fbccdab9674083e4432f533c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Yyw\u003d",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-05T02:55:22Z",
+      "side": 1,
+      "message": "SsFunc or better would be to expand the name, there\u0027s plenty of room to make this more readable",
+      "revId": "ff995c30c95f94b1fbccdab9674083e4432f533c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Yyk\u003d",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-05T02:55:22Z",
+      "side": 1,
+      "message": "the name of the function is misleading with this, you can add another",
+      "revId": "ff995c30c95f94b1fbccdab9674083e4432f533c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
