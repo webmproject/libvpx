@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Yrg\u003d",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-09-05T19:02:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Yyo\u003d",
+      "revId": "ff995c30c95f94b1fbccdab9674083e4432f533c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Yyw\u003d",
         "filename": "test/variance_test.cc",
         "patchSetId": 5
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//YrE\u003d",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-09-05T19:02:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Yyw\u003d",
+      "revId": "ff995c30c95f94b1fbccdab9674083e4432f533c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Yyk\u003d",
         "filename": "test/variance_test.cc",
         "patchSetId": 5
@@ -47,6 +83,24 @@
       "writtenOn": "2014-09-05T02:55:22Z",
       "side": 1,
       "message": "the name of the function is misleading with this, you can add another",
+      "revId": "ff995c30c95f94b1fbccdab9674083e4432f533c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Yrc\u003d",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-09-05T19:02:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Yyk\u003d",
       "revId": "ff995c30c95f94b1fbccdab9674083e4432f533c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
