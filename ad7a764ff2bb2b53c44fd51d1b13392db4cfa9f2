@@ -125,6 +125,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Yy0\u003d",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-05T02:45:40Z",
+      "side": 1,
+      "message": "in general it\u0027s best to define one to be explicit, but yes in this case the fact that the base class has one means this class\u0027 is virtual too.\n\nthe reasoning behind the style guide recommendation is that it\u0027s simpler to apply the practice in all cases to avoid forgetting since code tends to move around, derivations change etc.",
+      "parentUuid": "AAAAdn//Yzg\u003d",
+      "revId": "ad7a764ff2bb2b53c44fd51d1b13392db4cfa9f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Y1A\u003d",
         "filename": "test/variance_test.cc",
         "patchSetId": 4
