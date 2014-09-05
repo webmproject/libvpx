@@ -795,6 +795,582 @@ specialize qw/vp9_full_range_search/;
 add_proto qw/void vp9_temporal_filter_apply/, "uint8_t *frame1, unsigned int stride, uint8_t *frame2, unsigned int block_width, unsigned int block_height, int strength, int filter_weight, unsigned int *accumulator, uint16_t *count";
 specialize qw/vp9_temporal_filter_apply sse2/;
 
+if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
+
+  # variance
+  add_proto qw/unsigned int vp9_high_variance32x16/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_variance32x16/;
+
+  add_proto qw/unsigned int vp9_high_variance16x32/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_variance16x32/;
+
+  add_proto qw/unsigned int vp9_high_variance64x32/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_variance64x32/;
+
+  add_proto qw/unsigned int vp9_high_variance32x64/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_variance32x64/;
+
+  add_proto qw/unsigned int vp9_high_variance32x32/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_variance32x32/;
+
+  add_proto qw/unsigned int vp9_high_variance64x64/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_variance64x64/;
+
+  add_proto qw/unsigned int vp9_high_variance16x16/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_variance16x16/;
+
+  add_proto qw/unsigned int vp9_high_variance16x8/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_variance16x8/;
+
+  add_proto qw/unsigned int vp9_high_variance8x16/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_variance8x16/;
+
+  add_proto qw/unsigned int vp9_high_variance8x8/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_variance8x8/;
+
+  add_proto qw/unsigned int vp9_high_variance8x4/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_variance8x4/;
+
+  add_proto qw/unsigned int vp9_high_variance4x8/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_variance4x8/;
+
+  add_proto qw/unsigned int vp9_high_variance4x4/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_variance4x4/;
+
+  add_proto qw/void vp9_high_get8x8var/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, int *sum";
+  specialize qw/vp9_high_get8x8var/;
+
+  add_proto qw/void vp9_high_get16x16var/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, int *sum";
+  specialize qw/vp9_high_get16x16var/;
+
+  add_proto qw/unsigned int vp9_high_10_variance32x16/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_10_variance32x16/;
+
+  add_proto qw/unsigned int vp9_high_10_variance16x32/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_10_variance16x32/;
+
+  add_proto qw/unsigned int vp9_high_10_variance64x32/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_10_variance64x32/;
+
+  add_proto qw/unsigned int vp9_high_10_variance32x64/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_10_variance32x64/;
+
+  add_proto qw/unsigned int vp9_high_10_variance32x32/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_10_variance32x32/;
+
+  add_proto qw/unsigned int vp9_high_10_variance64x64/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_10_variance64x64/;
+
+  add_proto qw/unsigned int vp9_high_10_variance16x16/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_10_variance16x16/;
+
+  add_proto qw/unsigned int vp9_high_10_variance16x8/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_10_variance16x8/;
+
+  add_proto qw/unsigned int vp9_high_10_variance8x16/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_10_variance8x16/;
+
+  add_proto qw/unsigned int vp9_high_10_variance8x8/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_10_variance8x8/;
+
+  add_proto qw/unsigned int vp9_high_10_variance8x4/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_10_variance8x4/;
+
+  add_proto qw/unsigned int vp9_high_10_variance4x8/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_10_variance4x8/;
+
+  add_proto qw/unsigned int vp9_high_10_variance4x4/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_10_variance4x4/;
+
+  add_proto qw/void vp9_high_10_get8x8var/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, int *sum";
+  specialize qw/vp9_high_10_get8x8var/;
+
+  add_proto qw/void vp9_high_10_get16x16var/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, int *sum";
+  specialize qw/vp9_high_10_get16x16var/;
+
+  add_proto qw/unsigned int vp9_high_12_variance32x16/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_12_variance32x16/;
+
+  add_proto qw/unsigned int vp9_high_12_variance16x32/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_12_variance16x32/;
+
+  add_proto qw/unsigned int vp9_high_12_variance64x32/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_12_variance64x32/;
+
+  add_proto qw/unsigned int vp9_high_12_variance32x64/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_12_variance32x64/;
+
+  add_proto qw/unsigned int vp9_high_12_variance32x32/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_12_variance32x32/;
+
+  add_proto qw/unsigned int vp9_high_12_variance64x64/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_12_variance64x64/;
+
+  add_proto qw/unsigned int vp9_high_12_variance16x16/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_12_variance16x16/;
+
+  add_proto qw/unsigned int vp9_high_12_variance16x8/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_12_variance16x8/;
+
+  add_proto qw/unsigned int vp9_high_12_variance8x16/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_12_variance8x16/;
+
+  add_proto qw/unsigned int vp9_high_12_variance8x8/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_12_variance8x8/;
+
+  add_proto qw/unsigned int vp9_high_12_variance8x4/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_12_variance8x4/;
+
+  add_proto qw/unsigned int vp9_high_12_variance4x8/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_12_variance4x8/;
+
+  add_proto qw/unsigned int vp9_high_12_variance4x4/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_12_variance4x4/;
+
+  add_proto qw/void vp9_high_12_get8x8var/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, int *sum";
+  specialize qw/vp9_high_12_get8x8var/;
+
+  add_proto qw/void vp9_high_12_get16x16var/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, int *sum";
+  specialize qw/vp9_high_12_get16x16var/;
+
+  add_proto qw/unsigned int vp9_high_sub_pixel_variance64x64/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_sub_pixel_variance64x64/;
+
+  add_proto qw/unsigned int vp9_high_sub_pixel_avg_variance64x64/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_sub_pixel_avg_variance64x64/;
+
+  add_proto qw/unsigned int vp9_high_sub_pixel_variance32x64/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_sub_pixel_variance32x64/;
+
+  add_proto qw/unsigned int vp9_high_sub_pixel_avg_variance32x64/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_sub_pixel_avg_variance32x64/;
+
+  add_proto qw/unsigned int vp9_high_sub_pixel_variance64x32/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_sub_pixel_variance64x32/;
+
+  add_proto qw/unsigned int vp9_high_sub_pixel_avg_variance64x32/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_sub_pixel_avg_variance64x32/;
+
+  add_proto qw/unsigned int vp9_high_sub_pixel_variance32x16/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_sub_pixel_variance32x16/;
+
+  add_proto qw/unsigned int vp9_high_sub_pixel_avg_variance32x16/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_sub_pixel_avg_variance32x16/;
+
+  add_proto qw/unsigned int vp9_high_sub_pixel_variance16x32/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_sub_pixel_variance16x32/;
+
+  add_proto qw/unsigned int vp9_high_sub_pixel_avg_variance16x32/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_sub_pixel_avg_variance16x32/;
+
+  add_proto qw/unsigned int vp9_high_sub_pixel_variance32x32/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_sub_pixel_variance32x32/;
+
+  add_proto qw/unsigned int vp9_high_sub_pixel_avg_variance32x32/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_sub_pixel_avg_variance32x32/;
+
+  add_proto qw/unsigned int vp9_high_sub_pixel_variance16x16/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_sub_pixel_variance16x16/;
+
+  add_proto qw/unsigned int vp9_high_sub_pixel_avg_variance16x16/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_sub_pixel_avg_variance16x16/;
+
+  add_proto qw/unsigned int vp9_high_sub_pixel_variance8x16/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_sub_pixel_variance8x16/;
+
+  add_proto qw/unsigned int vp9_high_sub_pixel_avg_variance8x16/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_sub_pixel_avg_variance8x16/;
+
+  add_proto qw/unsigned int vp9_high_sub_pixel_variance16x8/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_sub_pixel_variance16x8/;
+
+  add_proto qw/unsigned int vp9_high_sub_pixel_avg_variance16x8/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_sub_pixel_avg_variance16x8/;
+
+  add_proto qw/unsigned int vp9_high_sub_pixel_variance8x8/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_sub_pixel_variance8x8/;
+
+  add_proto qw/unsigned int vp9_high_sub_pixel_avg_variance8x8/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_sub_pixel_avg_variance8x8/;
+
+  add_proto qw/unsigned int vp9_high_sub_pixel_variance8x4/, "const uint8_t *src_ptr, int source_stride, int xoffset, int yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_sub_pixel_variance8x4/;
+
+  add_proto qw/unsigned int vp9_high_sub_pixel_avg_variance8x4/, "const uint8_t *src_ptr, int source_stride, int xoffset, int yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_sub_pixel_avg_variance8x4/;
+
+  add_proto qw/unsigned int vp9_high_sub_pixel_variance4x8/, "const uint8_t *src_ptr, int source_stride, int xoffset, int yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_sub_pixel_variance4x8/;
+
+  add_proto qw/unsigned int vp9_high_sub_pixel_avg_variance4x8/, "const uint8_t *src_ptr, int source_stride, int xoffset, int yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_sub_pixel_avg_variance4x8/;
+
+  add_proto qw/unsigned int vp9_high_sub_pixel_variance4x4/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_sub_pixel_variance4x4/;
+
+  add_proto qw/unsigned int vp9_high_sub_pixel_avg_variance4x4/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_sub_pixel_avg_variance4x4/;
+
+  add_proto qw/unsigned int vp9_high_10_sub_pixel_variance64x64/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_10_sub_pixel_variance64x64/;
+
+  add_proto qw/unsigned int vp9_high_10_sub_pixel_avg_variance64x64/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_10_sub_pixel_avg_variance64x64/;
+
+  add_proto qw/unsigned int vp9_high_10_sub_pixel_variance32x64/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_10_sub_pixel_variance32x64/;
+
+  add_proto qw/unsigned int vp9_high_10_sub_pixel_avg_variance32x64/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_10_sub_pixel_avg_variance32x64/;
+
+  add_proto qw/unsigned int vp9_high_10_sub_pixel_variance64x32/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_10_sub_pixel_variance64x32/;
+
+  add_proto qw/unsigned int vp9_high_10_sub_pixel_avg_variance64x32/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_10_sub_pixel_avg_variance64x32/;
+
+  add_proto qw/unsigned int vp9_high_10_sub_pixel_variance32x16/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_10_sub_pixel_variance32x16/;
+
+  add_proto qw/unsigned int vp9_high_10_sub_pixel_avg_variance32x16/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_10_sub_pixel_avg_variance32x16/;
+
+  add_proto qw/unsigned int vp9_high_10_sub_pixel_variance16x32/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_10_sub_pixel_variance16x32/;
+
+  add_proto qw/unsigned int vp9_high_10_sub_pixel_avg_variance16x32/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_10_sub_pixel_avg_variance16x32/;
+
+  add_proto qw/unsigned int vp9_high_10_sub_pixel_variance32x32/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_10_sub_pixel_variance32x32/;
+
+  add_proto qw/unsigned int vp9_high_10_sub_pixel_avg_variance32x32/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_10_sub_pixel_avg_variance32x32/;
+
+  add_proto qw/unsigned int vp9_high_10_sub_pixel_variance16x16/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_10_sub_pixel_variance16x16/;
+
+  add_proto qw/unsigned int vp9_high_10_sub_pixel_avg_variance16x16/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_10_sub_pixel_avg_variance16x16/;
+
+  add_proto qw/unsigned int vp9_high_10_sub_pixel_variance8x16/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_10_sub_pixel_variance8x16/;
+
+  add_proto qw/unsigned int vp9_high_10_sub_pixel_avg_variance8x16/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_10_sub_pixel_avg_variance8x16/;
+
+  add_proto qw/unsigned int vp9_high_10_sub_pixel_variance16x8/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_10_sub_pixel_variance16x8/;
+
+  add_proto qw/unsigned int vp9_high_10_sub_pixel_avg_variance16x8/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_10_sub_pixel_avg_variance16x8/;
+
+  add_proto qw/unsigned int vp9_high_10_sub_pixel_variance8x8/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_10_sub_pixel_variance8x8/;
+
+  add_proto qw/unsigned int vp9_high_10_sub_pixel_avg_variance8x8/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_10_sub_pixel_avg_variance8x8/;
+
+  add_proto qw/unsigned int vp9_high_10_sub_pixel_variance8x4/, "const uint8_t *src_ptr, int source_stride, int xoffset, int yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_10_sub_pixel_variance8x4/;
+
+  add_proto qw/unsigned int vp9_high_10_sub_pixel_avg_variance8x4/, "const uint8_t *src_ptr, int source_stride, int xoffset, int yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_10_sub_pixel_avg_variance8x4/;
+
+  add_proto qw/unsigned int vp9_high_10_sub_pixel_variance4x8/, "const uint8_t *src_ptr, int source_stride, int xoffset, int yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_10_sub_pixel_variance4x8/;
+
+  add_proto qw/unsigned int vp9_high_10_sub_pixel_avg_variance4x8/, "const uint8_t *src_ptr, int source_stride, int xoffset, int yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_10_sub_pixel_avg_variance4x8/;
+
+  add_proto qw/unsigned int vp9_high_10_sub_pixel_variance4x4/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_10_sub_pixel_variance4x4/;
+
+  add_proto qw/unsigned int vp9_high_10_sub_pixel_avg_variance4x4/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_10_sub_pixel_avg_variance4x4/;
+
+  add_proto qw/unsigned int vp9_high_12_sub_pixel_variance64x64/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_12_sub_pixel_variance64x64/;
+
+  add_proto qw/unsigned int vp9_high_12_sub_pixel_avg_variance64x64/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_12_sub_pixel_avg_variance64x64/;
+
+  add_proto qw/unsigned int vp9_high_12_sub_pixel_variance32x64/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_12_sub_pixel_variance32x64/;
+
+  add_proto qw/unsigned int vp9_high_12_sub_pixel_avg_variance32x64/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_12_sub_pixel_avg_variance32x64/;
+
+  add_proto qw/unsigned int vp9_high_12_sub_pixel_variance64x32/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_12_sub_pixel_variance64x32/;
+
+  add_proto qw/unsigned int vp9_high_12_sub_pixel_avg_variance64x32/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_12_sub_pixel_avg_variance64x32/;
+
+  add_proto qw/unsigned int vp9_high_12_sub_pixel_variance32x16/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_12_sub_pixel_variance32x16/;
+
+  add_proto qw/unsigned int vp9_high_12_sub_pixel_avg_variance32x16/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_12_sub_pixel_avg_variance32x16/;
+
+  add_proto qw/unsigned int vp9_high_12_sub_pixel_variance16x32/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_12_sub_pixel_variance16x32/;
+
+  add_proto qw/unsigned int vp9_high_12_sub_pixel_avg_variance16x32/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_12_sub_pixel_avg_variance16x32/;
+
+  add_proto qw/unsigned int vp9_high_12_sub_pixel_variance32x32/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_12_sub_pixel_variance32x32/;
+
+  add_proto qw/unsigned int vp9_high_12_sub_pixel_avg_variance32x32/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_12_sub_pixel_avg_variance32x32/;
+
+  add_proto qw/unsigned int vp9_high_12_sub_pixel_variance16x16/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_12_sub_pixel_variance16x16/;
+
+  add_proto qw/unsigned int vp9_high_12_sub_pixel_avg_variance16x16/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_12_sub_pixel_avg_variance16x16/;
+
+  add_proto qw/unsigned int vp9_high_12_sub_pixel_variance8x16/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_12_sub_pixel_variance8x16/;
+
+  add_proto qw/unsigned int vp9_high_12_sub_pixel_avg_variance8x16/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_12_sub_pixel_avg_variance8x16/;
+
+  add_proto qw/unsigned int vp9_high_12_sub_pixel_variance16x8/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_12_sub_pixel_variance16x8/;
+
+  add_proto qw/unsigned int vp9_high_12_sub_pixel_avg_variance16x8/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_12_sub_pixel_avg_variance16x8/;
+
+  add_proto qw/unsigned int vp9_high_12_sub_pixel_variance8x8/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_12_sub_pixel_variance8x8/;
+
+  add_proto qw/unsigned int vp9_high_12_sub_pixel_avg_variance8x8/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_12_sub_pixel_avg_variance8x8/;
+
+  add_proto qw/unsigned int vp9_high_12_sub_pixel_variance8x4/, "const uint8_t *src_ptr, int source_stride, int xoffset, int yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_12_sub_pixel_variance8x4/;
+
+  add_proto qw/unsigned int vp9_high_12_sub_pixel_avg_variance8x4/, "const uint8_t *src_ptr, int source_stride, int xoffset, int yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_12_sub_pixel_avg_variance8x4/;
+
+  add_proto qw/unsigned int vp9_high_12_sub_pixel_variance4x8/, "const uint8_t *src_ptr, int source_stride, int xoffset, int yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_12_sub_pixel_variance4x8/;
+
+  add_proto qw/unsigned int vp9_high_12_sub_pixel_avg_variance4x8/, "const uint8_t *src_ptr, int source_stride, int xoffset, int yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_12_sub_pixel_avg_variance4x8/;
+
+  add_proto qw/unsigned int vp9_high_12_sub_pixel_variance4x4/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse";
+  specialize qw/vp9_high_12_sub_pixel_variance4x4/;
+
+  add_proto qw/unsigned int vp9_high_12_sub_pixel_avg_variance4x4/, "const uint8_t *src_ptr, int source_stride, int xoffset, int  yoffset, const uint8_t *ref_ptr, int ref_stride, unsigned int *sse, const uint8_t *second_pred";
+  specialize qw/vp9_high_12_sub_pixel_avg_variance4x4/;
+
+  add_proto qw/unsigned int vp9_high_sad64x64/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride";
+  specialize qw/vp9_high_sad64x64/;
+
+  add_proto qw/unsigned int vp9_high_sad32x64/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride";
+  specialize qw/vp9_high_sad32x64/;
+
+  add_proto qw/unsigned int vp9_high_sad64x32/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride";
+  specialize qw/vp9_high_sad64x32/;
+
+  add_proto qw/unsigned int vp9_high_sad32x16/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride";
+  specialize qw/vp9_high_sad32x16/;
+
+  add_proto qw/unsigned int vp9_high_sad16x32/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride";
+  specialize qw/vp9_high_sad16x32/;
+
+  add_proto qw/unsigned int vp9_high_sad32x32/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride";
+  specialize qw/vp9_high_sad32x32/;
+
+  add_proto qw/unsigned int vp9_high_sad16x16/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride";
+  specialize qw/vp9_high_sad16x16/;
+
+  add_proto qw/unsigned int vp9_high_sad16x8/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride";
+  specialize qw/vp9_high_sad16x8/;
+
+  add_proto qw/unsigned int vp9_high_sad8x16/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride";
+  specialize qw/vp9_high_sad8x16/;
+
+  add_proto qw/unsigned int vp9_high_sad8x8/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride";
+  specialize qw/vp9_high_sad8x8/;
+
+  add_proto qw/unsigned int vp9_high_sad8x4/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride";
+  specialize qw/vp9_high_sad8x4/;
+
+  add_proto qw/unsigned int vp9_high_sad4x8/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride";
+  specialize qw/vp9_high_sad4x8/;
+
+  add_proto qw/unsigned int vp9_high_sad4x4/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride";
+  specialize qw/vp9_high_sad4x4/;
+
+  add_proto qw/unsigned int vp9_high_sad64x64_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *second_pred";
+  specialize qw/vp9_high_sad64x64_avg/;
+
+  add_proto qw/unsigned int vp9_high_sad32x64_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred";
+  specialize qw/vp9_high_sad32x64_avg/;
+
+  add_proto qw/unsigned int vp9_high_sad64x32_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred";
+  specialize qw/vp9_high_sad64x32_avg/;
+
+  add_proto qw/unsigned int vp9_high_sad32x16_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred";
+  specialize qw/vp9_high_sad32x16_avg/;
+
+  add_proto qw/unsigned int vp9_high_sad16x32_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred";
+  specialize qw/vp9_high_sad16x32_avg/;
+
+  add_proto qw/unsigned int vp9_high_sad32x32_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *second_pred";
+  specialize qw/vp9_high_sad32x32_avg/;
+
+  add_proto qw/unsigned int vp9_high_sad16x16_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *second_pred";
+  specialize qw/vp9_high_sad16x16_avg/;
+
+  add_proto qw/unsigned int vp9_high_sad16x8_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *second_pred";
+  specialize qw/vp9_high_sad16x8_avg/;
+
+  add_proto qw/unsigned int vp9_high_sad8x16_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *second_pred";
+  specialize qw/vp9_high_sad8x16_avg/;
+
+  add_proto qw/unsigned int vp9_high_sad8x8_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *second_pred";
+  specialize qw/vp9_high_sad8x8_avg/;
+
+  add_proto qw/unsigned int vp9_high_sad8x4_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred";
+  specialize qw/vp9_high_sad8x4_avg/;
+
+  add_proto qw/unsigned int vp9_high_sad4x8_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int ref_stride, const uint8_t *second_pred";
+  specialize qw/vp9_high_sad4x8_avg/;
+
+  add_proto qw/unsigned int vp9_high_sad4x4_avg/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, const uint8_t *second_pred";
+  specialize qw/vp9_high_sad4x4_avg/;
+
+  add_proto qw/void vp9_high_sad64x64x3/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, unsigned int *sad_array";
+  specialize qw/vp9_high_sad64x64x3/;
+
+  add_proto qw/void vp9_high_sad32x32x3/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, unsigned int *sad_array";
+  specialize qw/vp9_high_sad32x32x3/;
+
+  add_proto qw/void vp9_high_sad16x16x3/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, unsigned int *sad_array";
+  specialize qw/vp9_high_sad16x16x3/;
+
+  add_proto qw/void vp9_high_sad16x8x3/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, unsigned int *sad_array";
+  specialize qw/vp9_high_sad16x8x3/;
+
+  add_proto qw/void vp9_high_sad8x16x3/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, unsigned int *sad_array";
+  specialize qw/vp9_high_sad8x16x3/;
+
+  add_proto qw/void vp9_high_sad8x8x3/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, unsigned int *sad_array";
+  specialize qw/vp9_high_sad8x8x3/;
+
+  add_proto qw/void vp9_high_sad4x4x3/, "const uint8_t *src_ptr, int source_stride, const uint8_t *ref_ptr, int  ref_stride, unsigned int *sad_array";
+  specialize qw/vp9_high_sad4x4x3/;
+
+  add_proto qw/void vp9_high_sad64x64x8/, "const uint8_t *src_ptr, int  src_stride, const uint8_t *ref_ptr, int  ref_stride, uint32_t *sad_array";
+  specialize qw/vp9_high_sad64x64x8/;
+
+  add_proto qw/void vp9_high_sad32x32x8/, "const uint8_t *src_ptr, int  src_stride, const uint8_t *ref_ptr, int  ref_stride, uint32_t *sad_array";
+  specialize qw/vp9_high_sad32x32x8/;
+
+  add_proto qw/void vp9_high_sad16x16x8/, "const uint8_t *src_ptr, int  src_stride, const uint8_t *ref_ptr, int  ref_stride, uint32_t *sad_array";
+  specialize qw/vp9_high_sad16x16x8/;
+
+  add_proto qw/void vp9_high_sad16x8x8/, "const uint8_t *src_ptr, int  src_stride, const uint8_t *ref_ptr, int  ref_stride, uint32_t *sad_array";
+  specialize qw/vp9_high_sad16x8x8/;
+
+  add_proto qw/void vp9_high_sad8x16x8/, "const uint8_t *src_ptr, int  src_stride, const uint8_t *ref_ptr, int  ref_stride, uint32_t *sad_array";
+  specialize qw/vp9_high_sad8x16x8/;
+
+  add_proto qw/void vp9_high_sad8x8x8/, "const uint8_t *src_ptr, int  src_stride, const uint8_t *ref_ptr, int  ref_stride, uint32_t *sad_array";
+  specialize qw/vp9_high_sad8x8x8/;
+
+  add_proto qw/void vp9_high_sad8x4x8/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, uint32_t *sad_array";
+  specialize qw/vp9_high_sad8x4x8/;
+
+  add_proto qw/void vp9_high_sad4x8x8/, "const uint8_t *src_ptr, int src_stride, const uint8_t *ref_ptr, int ref_stride, uint32_t *sad_array";
+  specialize qw/vp9_high_sad4x8x8/;
+
+  add_proto qw/void vp9_high_sad4x4x8/, "const uint8_t *src_ptr, int  src_stride, const uint8_t *ref_ptr, int  ref_stride, uint32_t *sad_array";
+  specialize qw/vp9_high_sad4x4x8/;
+
+  add_proto qw/void vp9_high_sad64x64x4d/, "const uint8_t *src_ptr, int  src_stride, const uint8_t* const ref_ptr[], int  ref_stride, unsigned int *sad_array";
+  specialize qw/vp9_high_sad64x64x4d/;
+
+  add_proto qw/void vp9_high_sad32x64x4d/, "const uint8_t *src_ptr, int  src_stride, const uint8_t* const ref_ptr[], int  ref_stride, unsigned int *sad_array";
+  specialize qw/vp9_high_sad32x64x4d/;
+
+  add_proto qw/void vp9_high_sad64x32x4d/, "const uint8_t *src_ptr, int  src_stride, const uint8_t* const ref_ptr[], int  ref_stride, unsigned int *sad_array";
+  specialize qw/vp9_high_sad64x32x4d/;
+
+  add_proto qw/void vp9_high_sad32x16x4d/, "const uint8_t *src_ptr, int  src_stride, const uint8_t* const ref_ptr[], int  ref_stride, unsigned int *sad_array";
+  specialize qw/vp9_high_sad32x16x4d/;
+
+  add_proto qw/void vp9_high_sad16x32x4d/, "const uint8_t *src_ptr, int  src_stride, const uint8_t* const ref_ptr[], int  ref_stride, unsigned int *sad_array";
+  specialize qw/vp9_high_sad16x32x4d/;
+
+  add_proto qw/void vp9_high_sad32x32x4d/, "const uint8_t *src_ptr, int  src_stride, const uint8_t* const ref_ptr[], int  ref_stride, unsigned int *sad_array";
+  specialize qw/vp9_high_sad32x32x4d/;
+
+  add_proto qw/void vp9_high_sad16x16x4d/, "const uint8_t *src_ptr, int  src_stride, const uint8_t* const ref_ptr[], int  ref_stride, unsigned int *sad_array";
+  specialize qw/vp9_high_sad16x16x4d/;
+
+  add_proto qw/void vp9_high_sad16x8x4d/, "const uint8_t *src_ptr, int  src_stride, const uint8_t* const ref_ptr[], int  ref_stride, unsigned int *sad_array";
+  specialize qw/vp9_high_sad16x8x4d/;
+
+  add_proto qw/void vp9_high_sad8x16x4d/, "const uint8_t *src_ptr, int  src_stride, const uint8_t* const ref_ptr[], int  ref_stride, unsigned int *sad_array";
+  specialize qw/vp9_high_sad8x16x4d/;
+
+  add_proto qw/void vp9_high_sad8x8x4d/, "const uint8_t *src_ptr, int  src_stride, const uint8_t* const ref_ptr[], int  ref_stride, unsigned int *sad_array";
+  specialize qw/vp9_high_sad8x8x4d/;
+
+  # TODO(jingning): need to convert these 4x8/8x4 functions into sse2 form
+  add_proto qw/void vp9_high_sad8x4x4d/, "const uint8_t *src_ptr, int src_stride, const uint8_t* const ref_ptr[], int ref_stride, unsigned int *sad_array";
+  specialize qw/vp9_high_sad8x4x4d/;
+
+  add_proto qw/void vp9_high_sad4x8x4d/, "const uint8_t *src_ptr, int src_stride, const uint8_t* const ref_ptr[], int ref_stride, unsigned int *sad_array";
+  specialize qw/vp9_high_sad4x8x4d/;
+
+  add_proto qw/void vp9_high_sad4x4x4d/, "const uint8_t *src_ptr, int  src_stride, const uint8_t* const ref_ptr[], int  ref_stride, unsigned int *sad_array";
+  specialize qw/vp9_high_sad4x4x4d/;
+
+  add_proto qw/unsigned int vp9_high_mse16x16/, "const uint8_t *src_ptr, int  source_stride, const uint8_t *ref_ptr, int  recon_stride, unsigned int *sse";
+  specialize qw/vp9_high_mse16x16/;
+
+  add_proto qw/unsigned int vp9_high_mse8x16/, "const uint8_t *src_ptr, int  source_stride, const uint8_t *ref_ptr, int  recon_stride, unsigned int *sse";
+  specialize qw/vp9_high_mse8x16/;
+
+  add_proto qw/unsigned int vp9_high_mse16x8/, "const uint8_t *src_ptr, int  source_stride, const uint8_t *ref_ptr, int  recon_stride, unsigned int *sse";
+  specialize qw/vp9_high_mse16x8/;
+
+  add_proto qw/unsigned int vp9_high_mse8x8/, "const uint8_t *src_ptr, int  source_stride, const uint8_t *ref_ptr, int  recon_stride, unsigned int *sse";
+  specialize qw/vp9_high_mse8x8/;
+
+  add_proto qw/unsigned int vp9_high_10_mse16x16/, "const uint8_t *src_ptr, int  source_stride, const uint8_t *ref_ptr, int  recon_stride, unsigned int *sse";
+  specialize qw/vp9_high_10_mse16x16/;
+
+  add_proto qw/unsigned int vp9_high_10_mse8x16/, "const uint8_t *src_ptr, int  source_stride, const uint8_t *ref_ptr, int  recon_stride, unsigned int *sse";
+  specialize qw/vp9_high_10_mse8x16/;
+
+  add_proto qw/unsigned int vp9_high_10_mse16x8/, "const uint8_t *src_ptr, int  source_stride, const uint8_t *ref_ptr, int  recon_stride, unsigned int *sse";
+  specialize qw/vp9_high_10_mse16x8/;
+
+  add_proto qw/unsigned int vp9_high_10_mse8x8/, "const uint8_t *src_ptr, int  source_stride, const uint8_t *ref_ptr, int  recon_stride, unsigned int *sse";
+  specialize qw/vp9_high_10_mse8x8/;
+
+  add_proto qw/unsigned int vp9_high_12_mse16x16/, "const uint8_t *src_ptr, int  source_stride, const uint8_t *ref_ptr, int  recon_stride, unsigned int *sse";
+  specialize qw/vp9_high_12_mse16x16/;
+
+  add_proto qw/unsigned int vp9_high_12_mse8x16/, "const uint8_t *src_ptr, int  source_stride, const uint8_t *ref_ptr, int  recon_stride, unsigned int *sse";
+  specialize qw/vp9_high_12_mse8x16/;
+
+  add_proto qw/unsigned int vp9_high_12_mse16x8/, "const uint8_t *src_ptr, int  source_stride, const uint8_t *ref_ptr, int  recon_stride, unsigned int *sse";
+  specialize qw/vp9_high_12_mse16x8/;
+
+  add_proto qw/unsigned int vp9_high_12_mse8x8/, "const uint8_t *src_ptr, int  source_stride, const uint8_t *ref_ptr, int  recon_stride, unsigned int *sse";
+  specialize qw/vp9_high_12_mse8x8/;
+
+}
+
 }
 # end encoder functions
 1;
