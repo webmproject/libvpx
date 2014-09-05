@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Y0I\u003d",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-09-05T00:38:57Z",
+      "side": 1,
+      "message": "I see, will fix next time.",
+      "parentUuid": "AAAAdn//Y1M\u003d",
+      "revId": "ad7a764ff2bb2b53c44fd51d1b13392db4cfa9f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Y1I\u003d",
         "filename": "test/variance_test.cc",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2014-09-05T00:15:36Z",
       "side": 1,
       "message": "can be one line",
+      "revId": "ad7a764ff2bb2b53c44fd51d1b13392db4cfa9f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Y0E\u003d",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-09-05T00:38:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Y1I\u003d",
       "revId": "ad7a764ff2bb2b53c44fd51d1b13392db4cfa9f2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Y0A\u003d",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-09-05T00:38:57Z",
+      "side": 1,
+      "message": "Why? Base class already defines virtual destructor.",
+      "parentUuid": "AAAAdn//Y1E\u003d",
+      "revId": "ad7a764ff2bb2b53c44fd51d1b13392db4cfa9f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Y1A\u003d",
         "filename": "test/variance_test.cc",
         "patchSetId": 4
@@ -64,6 +118,24 @@
       "writtenOn": "2014-09-05T00:15:36Z",
       "side": 1,
       "message": "newline\n\nhttp://google-styleguide.googlecode.com/svn/trunk/cppguide.xml#Class_Format",
+      "revId": "ad7a764ff2bb2b53c44fd51d1b13392db4cfa9f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Yz8\u003d",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-09-05T00:38:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Y1A\u003d",
       "revId": "ad7a764ff2bb2b53c44fd51d1b13392db4cfa9f2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Yz4\u003d",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-09-05T00:38:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Y08\u003d",
+      "revId": "ad7a764ff2bb2b53c44fd51d1b13392db4cfa9f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Y04\u003d",
         "filename": "test/variance_test.cc",
         "patchSetId": 4
@@ -98,6 +188,24 @@
       "writtenOn": "2014-09-05T00:15:36Z",
       "side": 1,
       "message": "should test the all 255 case too",
+      "revId": "ad7a764ff2bb2b53c44fd51d1b13392db4cfa9f2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Yz0\u003d",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-09-05T00:38:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Y04\u003d",
       "revId": "ad7a764ff2bb2b53c44fd51d1b13392db4cfa9f2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
