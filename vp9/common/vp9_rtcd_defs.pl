@@ -684,16 +684,16 @@ add_proto qw/void vp9_sad4x4x4d/, "const uint8_t *src_ptr, int  src_stride, cons
 specialize qw/vp9_sad4x4x4d sse/;
 
 add_proto qw/unsigned int vp9_mse16x16/, "const uint8_t *src_ptr, int  source_stride, const uint8_t *ref_ptr, int  recon_stride, unsigned int *sse";
-specialize qw/vp9_mse16x16 sse2 avx2/;
+specialize qw/vp9_mse16x16 avx2/, "$sse2_x86inc";
 
 add_proto qw/unsigned int vp9_mse8x16/, "const uint8_t *src_ptr, int  source_stride, const uint8_t *ref_ptr, int  recon_stride, unsigned int *sse";
-specialize qw/vp9_mse8x16 sse2/;
+specialize qw/vp9_mse8x16/, "$sse2_x86inc";
 
 add_proto qw/unsigned int vp9_mse16x8/, "const uint8_t *src_ptr, int  source_stride, const uint8_t *ref_ptr, int  recon_stride, unsigned int *sse";
-specialize qw/vp9_mse16x8 sse2/;
+specialize qw/vp9_mse16x8/, "$sse2_x86inc";
 
 add_proto qw/unsigned int vp9_mse8x8/, "const uint8_t *src_ptr, int  source_stride, const uint8_t *ref_ptr, int  recon_stride, unsigned int *sse";
-specialize qw/vp9_mse8x8 sse2/;
+specialize qw/vp9_mse8x8/, "$sse2_x86inc";
 
 add_proto qw/unsigned int vp9_get_mb_ss/, "const int16_t *";
 specialize qw/vp9_get_mb_ss sse2/;
