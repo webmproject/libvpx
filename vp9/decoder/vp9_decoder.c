@@ -25,6 +25,7 @@
 #include "vp9/common/vp9_postproc.h"
 #endif
 #include "vp9/common/vp9_quant_common.h"
+#include "vp9/common/vp9_reconintra.h"
 #include "vp9/common/vp9_systemdependent.h"
 
 #include "vp9/decoder/vp9_decodeframe.h"
@@ -36,7 +37,9 @@ static void initialize_dec() {
   static int init_done = 0;
 
   if (!init_done) {
+    vp9_rtcd();
     vp9_init_neighbors();
+    vp9_init_intra_predictors();
     init_done = 1;
   }
 }
@@ -58,8 +61,6 @@ VP9Decoder *vp9_decoder_create() {
 
   cm->error.setjmp = 1;
   initialize_dec();
-
-  vp9_rtcd();
 
   // Initialize the references to not point to any frame buffers.
   vpx_memset(&cm->ref_frame_map, -1, sizeof(cm->ref_frame_map));
