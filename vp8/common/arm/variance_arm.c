@@ -95,7 +95,7 @@ unsigned int vp8_sub_pixel_variance16x16_armv6
 #endif /* HAVE_MEDIA */
 
 
-#if HAVE_NEON_ASM
+#if HAVE_NEON
 
 extern unsigned int vp8_sub_pixel_variance16x16_neon_func
 (
