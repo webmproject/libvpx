@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//YqQ\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-09-05T19:16:32Z",
+      "side": 1,
+      "message": "static const\nyou can also put [VPX_SS_MAX_LAYERS]",
+      "revId": "e34dc9fce1b0740f2f0d876fdc8437489e4d4443",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YqU\u003d",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-09-05T19:16:32Z",
+      "side": 1,
+      "message": "static const",
+      "revId": "e34dc9fce1b0740f2f0d876fdc8437489e4d4443",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
