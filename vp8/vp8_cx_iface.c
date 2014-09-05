@@ -635,7 +635,6 @@ static vpx_codec_err_t vp8e_init(vpx_codec_ctx_t *ctx,
         }
 
         ctx->priv = (vpx_codec_priv_t *)priv;
-        ctx->priv->sz = sizeof(*priv);
         ctx->priv->init_flags = ctx->init_flags;
 
         if (ctx->config.enc)

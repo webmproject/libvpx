@@ -335,7 +335,6 @@ typedef struct vpx_codec_priv_cb_pair {
  * and the pointer cast to the proper type.
  */
 struct vpx_codec_priv {
-  unsigned int                    sz;
   const char                     *err_detail;
   vpx_codec_flags_t               init_flags;
   struct {
