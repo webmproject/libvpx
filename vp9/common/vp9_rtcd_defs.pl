@@ -268,7 +268,7 @@ $vp9_lpf_horizontal_4_dual_neon_asm=vp9_lpf_horizontal_4_dual_neon;
 #
 if (vpx_config("CONFIG_VP9_POSTPROC") eq "yes") {
 add_proto qw/void vp9_mbpost_proc_down/, "uint8_t *dst, int pitch, int rows, int cols, int flimit";
-specialize qw/vp9_mbpost_proc_down mmx sse2/;
+specialize qw/vp9_mbpost_proc_down sse2/;
 $vp9_mbpost_proc_down_sse2=vp9_mbpost_proc_down_xmm;
 
 add_proto qw/void vp9_mbpost_proc_across_ip/, "uint8_t *src, int pitch, int rows, int cols, int flimit";
@@ -276,11 +276,11 @@ specialize qw/vp9_mbpost_proc_across_ip sse2/;
 $vp9_mbpost_proc_across_ip_sse2=vp9_mbpost_proc_across_ip_xmm;
 
 add_proto qw/void vp9_post_proc_down_and_across/, "const uint8_t *src_ptr, uint8_t *dst_ptr, int src_pixels_per_line, int dst_pixels_per_line, int rows, int cols, int flimit";
-specialize qw/vp9_post_proc_down_and_across mmx sse2/;
+specialize qw/vp9_post_proc_down_and_across sse2/;
 $vp9_post_proc_down_and_across_sse2=vp9_post_proc_down_and_across_xmm;
 
 add_proto qw/void vp9_plane_add_noise/, "uint8_t *Start, char *noise, char blackclamp[16], char whiteclamp[16], char bothclamp[16], unsigned int Width, unsigned int Height, int Pitch";
-specialize qw/vp9_plane_add_noise mmx sse2/;
+specialize qw/vp9_plane_add_noise sse2/;
 $vp9_plane_add_noise_sse2=vp9_plane_add_noise_wmt;
 }
 
