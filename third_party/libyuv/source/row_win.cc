@@ -21,7 +21,8 @@ extern "C" {
 #endif
 
 // This module is for Visual C.
-#if !defined(LIBYUV_DISABLE_X86) && defined(_MSC_VER)
+#if !defined(LIBYUV_DISABLE_X86) && defined(_MSC_VER) && \
+    (defined(_M_IX86) || defined(_M_X64))
 
 #define YG 74  /* (int8)(1.164 * 64 + 0.5) */
 

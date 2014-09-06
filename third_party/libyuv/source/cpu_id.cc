@@ -15,7 +15,8 @@
 #endif
 #if !defined(__pnacl__) && !defined(__CLR_VER) && \
     !defined(__native_client__)  && \
-    defined(_MSC_VER) && (_MSC_FULL_VER >= 160040219)
+    defined(_MSC_VER) && (_MSC_FULL_VER >= 160040219) && \
+    (defined(_M_IX86) || defined(_M_X64))
 #include <immintrin.h>  // For _xgetbv()
 #endif
 
