@@ -103,8 +103,9 @@ static void var_filter_block2d_bil_second_pass(const uint16_t *src_ptr,
 unsigned int vp9_get_mb_ss_c(const int16_t *src_ptr) {
   unsigned int i, sum = 0;
 
-  for (i = 0; i < 256; i++)
+  for (i = 0; i < 256; ++i) {
     sum += src_ptr[i] * src_ptr[i];
+  }
 
   return sum;
 }
