@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Ym4\u003d",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-09-06T01:10:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YoI\u003d",
+      "revId": "ba767fa488f70f98cdca4efbfb336c381eac1963",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Yn4\u003d",
         "filename": "test/variance_test.cc",
         "patchSetId": 8
@@ -30,6 +48,24 @@
       "writtenOn": "2014-09-06T00:09:57Z",
       "side": 1,
       "message": "I\u0027d think \u0027GetParam()\u0027 would be sufficient",
+      "revId": "ba767fa488f70f98cdca4efbfb336c381eac1963",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Ym0\u003d",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-09-06T01:10:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Yn4\u003d",
       "revId": "ba767fa488f70f98cdca4efbfb336c381eac1963",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Ymw\u003d",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-09-06T01:10:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YoA\u003d",
+      "revId": "ba767fa488f70f98cdca4efbfb336c381eac1963",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//YoE\u003d",
         "filename": "test/variance_test.cc",
         "patchSetId": 8
@@ -64,6 +118,24 @@
       "writtenOn": "2014-09-06T00:09:57Z",
       "side": 1,
       "message": "only one is necessary",
+      "revId": "ba767fa488f70f98cdca4efbfb336c381eac1963",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Yms\u003d",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-09-06T01:10:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YoE\u003d",
       "revId": "ba767fa488f70f98cdca4efbfb336c381eac1963",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
