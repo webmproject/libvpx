@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//YoI\u003d",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-06T00:09:57Z",
+      "side": 1,
+      "message": "can be one line I think",
+      "revId": "ba767fa488f70f98cdca4efbfb336c381eac1963",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Yn4\u003d",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-06T00:09:57Z",
+      "side": 1,
+      "message": "I\u0027d think \u0027GetParam()\u0027 would be sufficient",
+      "revId": "ba767fa488f70f98cdca4efbfb336c381eac1963",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YoA\u003d",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-06T00:09:57Z",
+      "side": 1,
+      "message": "do you want Reset() here for consistency? in the other cases and this one though the object should be getting destroyed between cases, so they\u0027ll be equivalent",
+      "revId": "ba767fa488f70f98cdca4efbfb336c381eac1963",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YoE\u003d",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-06T00:09:57Z",
+      "side": 1,
+      "message": "only one is necessary",
+      "revId": "ba767fa488f70f98cdca4efbfb336c381eac1963",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
