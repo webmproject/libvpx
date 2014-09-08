@@ -15,6 +15,7 @@
 
 #include <assert.h>
 #include <math.h>
+#include <limits.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -47,8 +48,33 @@ _CRTIMP char *__cdecl strtok_s(char *str, const char *delim, char **context);
 #define OPTION_BUFFER_SIZE 256
 #define COMPONENTS 4  // psnr & sse statistics maintained for total, y, u, v
 
-static const char *DEFAULT_QUANTIZER_VALUES = "60,53,39,33,27";
-static const char *DEFAULT_SCALE_FACTORS = "4/16,5/16,7/16,11/16,16/16";
+static const int DEFAULT_QUANTIZER_VALUES[VPX_SS_MAX_LAYERS] = {
+  60, 53, 39, 33, 27
+};
+
+static const int DEFAULT_SCALE_FACTORS_NUM[VPX_SS_MAX_LAYERS] = {
+  4, 5, 7, 11, 16
+};
+
+static const int DEFAULT_SCALE_FACTORS_DEN[VPX_SS_MAX_LAYERS] = {
+  16, 16, 16, 16, 16
+};
+
+typedef enum {
+  QUANTIZER = 0,
+  BITRATE,
+  SCALE_FACTOR,
+  AUTO_ALT_REF,
+  ALL_OPTION_TYPES
+} LAYER_OPTION_TYPE;
+
+static const int option_max_values[ALL_OPTION_TYPES] = {
+  63, INT_MAX, INT_MAX, 1
+};
+
+static const int option_min_values[ALL_OPTION_TYPES] = {
+  0, 0, 1, 0
+};
 
 // One encoded frame
 typedef struct FrameData {
@@ -68,6 +94,7 @@ typedef struct SvcInternal {
   int scaling_factor_den[VPX_SS_MAX_LAYERS];
   int quantizer[VPX_SS_MAX_LAYERS];
   int enable_auto_alt_ref[VPX_SS_MAX_LAYERS];
+  int bitrates[VPX_SS_MAX_LAYERS];
 
   // accumulated statistics
   double psnr_sum[VPX_SS_MAX_LAYERS][COMPONENTS];   // total/Y/U/V
@@ -197,158 +224,62 @@ static int svc_log(SvcContext *svc_ctx, SVC_LOG_LEVEL level,
   return retval;
 }
 
-static vpx_codec_err_t parse_quantizer_values(SvcContext *svc_ctx,
-                                              const char *quantizer_values) {
-  char *input_string;
-  char *token;
-  const char *delim = ",";
-  char *save_ptr;
-  int found = 0;
-  int i, q;
-  vpx_codec_err_t res = VPX_CODEC_OK;
-  SvcInternal *const si = get_svc_internal(svc_ctx);
+static vpx_codec_err_t extract_option(LAYER_OPTION_TYPE type,
+                                      char *input,
+                                      int *value0,
+                                      int *value1) {
+  if (type == SCALE_FACTOR) {
+    *value0 = strtol(input, &input, 10);
+    if (*input++ != '/')
+      return VPX_CODEC_INVALID_PARAM;
+    *value1 = strtol(input, &input, 10);
 
-  if (quantizer_values == NULL || strlen(quantizer_values) == 0) {
-    input_string = strdup(DEFAULT_QUANTIZER_VALUES);
+    if (*value0 < option_min_values[SCALE_FACTOR] ||
+        *value1 < option_min_values[SCALE_FACTOR] ||
+        *value0 > option_max_values[SCALE_FACTOR] ||
+        *value1 > option_max_values[SCALE_FACTOR])
+      return VPX_CODEC_INVALID_PARAM;
   } else {
-    input_string = strdup(quantizer_values);
+    *value0 = atoi(input);
+    if (*value0 < option_min_values[type] ||
+        *value0 > option_max_values[type])
+      return VPX_CODEC_INVALID_PARAM;
   }
-
-  token = strtok_r(input_string, delim, &save_ptr);
-  for (i = 0; i < svc_ctx->spatial_layers; ++i) {
-    if (token != NULL) {
-      q = atoi(token);
-      if (q <= 0 || q > 100) {
-        svc_log(svc_ctx, SVC_LOG_ERROR,
-                "svc-quantizer-values: invalid value %s\n", token);
-        res = VPX_CODEC_INVALID_PARAM;
-        break;
-      }
-      token = strtok_r(NULL, delim, &save_ptr);
-      found = i + 1;
-    } else {
-      q = 0;
-    }
-    si->quantizer[i + VPX_SS_MAX_LAYERS - svc_ctx->spatial_layers] = q;
-  }
-  if (res == VPX_CODEC_OK && found != svc_ctx->spatial_layers) {
-    svc_log(svc_ctx, SVC_LOG_ERROR,
-            "svc: quantizers: %d values required, but only %d specified\n",
-            svc_ctx->spatial_layers, found);
-    res = VPX_CODEC_INVALID_PARAM;
-  }
-  free(input_string);
-  return res;
+  return VPX_CODEC_OK;
 }
 
-static vpx_codec_err_t parse_auto_alt_ref(SvcContext *svc_ctx,
-                                          const char *alt_ref_options) {
-  char *input_string;
-  char *token;
-  const char *delim = ",";
-  char *save_ptr;
-  int found = 0, enabled = 0;
-  int i, value;
-  vpx_codec_err_t res = VPX_CODEC_OK;
-  SvcInternal *const si = get_svc_internal(svc_ctx);
-
-  if (alt_ref_options == NULL || strlen(alt_ref_options) == 0) {
-    return VPX_CODEC_INVALID_PARAM;
-  } else {
-    input_string = strdup(alt_ref_options);
-  }
-
-  token = strtok_r(input_string, delim, &save_ptr);
-  for (i = 0; i < svc_ctx->spatial_layers; ++i) {
-    if (token != NULL) {
-      value = atoi(token);
-      if (value < 0 || value > 1) {
-        svc_log(svc_ctx, SVC_LOG_ERROR,
-                "enable auto alt ref values: invalid value %s\n", token);
-        res = VPX_CODEC_INVALID_PARAM;
-        break;
-      }
-      token = strtok_r(NULL, delim, &save_ptr);
-      found = i + 1;
-    } else {
-      value = 0;
-    }
-    si->enable_auto_alt_ref[i] = value;
-    if (value > 0)
-      ++enabled;
-  }
-  if (res == VPX_CODEC_OK && found != svc_ctx->spatial_layers) {
-    svc_log(svc_ctx, SVC_LOG_ERROR,
-            "svc: quantizers: %d values required, but only %d specified\n",
-            svc_ctx->spatial_layers, found);
-    res = VPX_CODEC_INVALID_PARAM;
-  }
-  if (enabled > REF_FRAMES - svc_ctx->spatial_layers) {
-    svc_log(svc_ctx, SVC_LOG_ERROR,
-            "svc: auto alt ref: Maxinum %d(REF_FRAMES - layers) layers could"
-            "enabled auto alt reference frame, but % layers are enabled\n",
-            REF_FRAMES - svc_ctx->spatial_layers, enabled);
-    res = VPX_CODEC_INVALID_PARAM;
-  }
-  free(input_string);
-  return res;
-}
-
-static void log_invalid_scale_factor(SvcContext *svc_ctx, const char *value) {
-  svc_log(svc_ctx, SVC_LOG_ERROR, "svc scale-factors: invalid value %s\n",
-          value);
-}
-
-static vpx_codec_err_t parse_scale_factors(SvcContext *svc_ctx,
-                                           const char *scale_factors) {
-  char *input_string;
-  char *token;
-  const char *delim = ",";
-  char *save_ptr;
-  int found = 0;
+static vpx_codec_err_t parse_layer_options_from_string(SvcContext *svc_ctx,
+                                                       LAYER_OPTION_TYPE type,
+                                                       const char *input,
+                                                       int *option0,
+                                                       int *option1) {
   int i;
-  int64_t num, den;
   vpx_codec_err_t res = VPX_CODEC_OK;
-  SvcInternal *const si = get_svc_internal(svc_ctx);
+  char *input_string;
+  char *token;
+  const char *delim = ",";
+  char *save_ptr;
 
-  if (scale_factors == NULL || strlen(scale_factors) == 0) {
-    input_string = strdup(DEFAULT_SCALE_FACTORS);
-  } else {
-    input_string = strdup(scale_factors);
-  }
+  if (input == NULL || option0 == NULL ||
+      (option1 == NULL && type == SCALE_FACTOR))
+    return VPX_CODEC_INVALID_PARAM;
+
+  input_string = strdup(input);
   token = strtok_r(input_string, delim, &save_ptr);
   for (i = 0; i < svc_ctx->spatial_layers; ++i) {
-    num = den = 0;
     if (token != NULL) {
-      num = strtol(token, &token, 10);
-      if (num <= 0) {
-        log_invalid_scale_factor(svc_ctx, token);
-        res = VPX_CODEC_INVALID_PARAM;
+      res = extract_option(type, token, option0 + i, option1 + i);
+      if (res != VPX_CODEC_OK)
         break;
-      }
-      if (*token++ != '/') {
-        log_invalid_scale_factor(svc_ctx, token);
-        res = VPX_CODEC_INVALID_PARAM;
-        break;
-      }
-      den = strtol(token, &token, 10);
-      if (den <= 0) {
-        log_invalid_scale_factor(svc_ctx, token);
-        res = VPX_CODEC_INVALID_PARAM;
-        break;
-      }
       token = strtok_r(NULL, delim, &save_ptr);
-      found = i + 1;
+    } else {
+      break;
     }
-    si->scaling_factor_num[i + VPX_SS_MAX_LAYERS - svc_ctx->spatial_layers] =
-        (int)num;
-    si->scaling_factor_den[i + VPX_SS_MAX_LAYERS - svc_ctx->spatial_layers] =
-        (int)den;
   }
-  if (res == VPX_CODEC_OK && found != svc_ctx->spatial_layers) {
+  if (res == VPX_CODEC_OK && i != svc_ctx->spatial_layers) {
     svc_log(svc_ctx, SVC_LOG_ERROR,
-            "svc: scale-factors: %d values required, but only %d specified\n",
-            svc_ctx->spatial_layers, found);
+            "svc: layer params type: %d    %d values required, "
+            "but only %d specified\n", type, svc_ctx->spatial_layers, i);
     res = VPX_CODEC_INVALID_PARAM;
   }
   free(input_string);
@@ -369,6 +300,7 @@ static vpx_codec_err_t parse_options(SvcContext *svc_ctx, const char *options) {
   char *input_ptr;
   SvcInternal *const si = get_svc_internal(svc_ctx);
   vpx_codec_err_t res = VPX_CODEC_OK;
+  int i, alt_ref_enabled = 0;
 
   if (options == NULL) return VPX_CODEC_OK;
   input_string = strdup(options);
@@ -389,13 +321,21 @@ static vpx_codec_err_t parse_options(SvcContext *svc_ctx, const char *options) {
     } else if (strcmp("temporal-layers", option_name) == 0) {
       svc_ctx->temporal_layers = atoi(option_value);
     } else if (strcmp("scale-factors", option_name) == 0) {
-      res = parse_scale_factors(svc_ctx, option_value);
+      res = parse_layer_options_from_string(svc_ctx, SCALE_FACTOR, option_value,
+                                            si->scaling_factor_num,
+                                            si->scaling_factor_den);
       if (res != VPX_CODEC_OK) break;
     } else if (strcmp("quantizers", option_name) == 0) {
-      res = parse_quantizer_values(svc_ctx, option_value);
+      res = parse_layer_options_from_string(svc_ctx, QUANTIZER, option_value,
+                                            si->quantizer, NULL);
       if (res != VPX_CODEC_OK) break;
     } else if (strcmp("auto-alt-refs", option_name) == 0) {
-      res = parse_auto_alt_ref(svc_ctx, option_value);
+      res = parse_layer_options_from_string(svc_ctx, AUTO_ALT_REF, option_value,
+                                            si->enable_auto_alt_ref, NULL);
+      if (res != VPX_CODEC_OK) break;
+    } else if (strcmp("bitrates", option_name) == 0) {
+      res = parse_layer_options_from_string(svc_ctx, BITRATE, option_value,
+                                            si->bitrates, NULL);
       if (res != VPX_CODEC_OK) break;
     } else if (strcmp("multi-frame-contexts", option_name) == 0) {
       si->use_multiple_frame_contexts = atoi(option_value);
@@ -412,6 +352,16 @@ static vpx_codec_err_t parse_options(SvcContext *svc_ctx, const char *options) {
       (svc_ctx->spatial_layers > 3 ||
        svc_ctx->spatial_layers * svc_ctx->temporal_layers > 4))
     res = VPX_CODEC_INVALID_PARAM;
+
+  for (i = 0; i < svc_ctx->spatial_layers; ++i)
+    alt_ref_enabled += si->enable_auto_alt_ref[i];
+  if (alt_ref_enabled > REF_FRAMES - svc_ctx->spatial_layers) {
+    svc_log(svc_ctx, SVC_LOG_ERROR,
+            "svc: auto alt ref: Maxinum %d(REF_FRAMES - layers) layers could"
+            "enabled auto alt reference frame, but % layers are enabled\n",
+            REF_FRAMES - svc_ctx->spatial_layers, alt_ref_enabled);
+    res = VPX_CODEC_INVALID_PARAM;
+  }
 
   return res;
 }
@@ -448,6 +398,39 @@ vpx_codec_err_t vpx_svc_set_scale_factors(SvcContext *svc_ctx,
   return VPX_CODEC_OK;
 }
 
+void assign_layer_bitrates(const SvcInternal *const si,
+                           vpx_codec_enc_cfg_t *const enc_cfg) {
+  int i;
+
+  if (si->bitrates[0] != 0) {
+    enc_cfg->rc_target_bitrate = 0;
+    for (i = 0; i < si->layers; ++i) {
+      enc_cfg->ss_target_bitrate[i] = (unsigned int)si->bitrates[i];
+      enc_cfg->rc_target_bitrate += si->bitrates[i];
+    }
+  } else {
+    float total = 0;
+    float alloc_ratio[VPX_SS_MAX_LAYERS] = {0};
+
+    for (i = 0; i < si->layers; ++i) {
+      if (si->scaling_factor_den[i] > 0) {
+        alloc_ratio[i] = (float)(si->scaling_factor_num[i] * 1.0 /
+            si->scaling_factor_den[i]);
+
+        alloc_ratio[i] *= alloc_ratio[i];
+        total += alloc_ratio[i];
+      }
+    }
+
+    for (i = 0; i < si->layers; ++i) {
+      if (total > 0) {
+        enc_cfg->ss_target_bitrate[i] = (unsigned int)
+            (enc_cfg->rc_target_bitrate * alloc_ratio[i] / total);
+      }
+    }
+  }
+}
+
 vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
                              vpx_codec_iface_t *iface,
                              vpx_codec_enc_cfg_t *enc_cfg) {
@@ -481,11 +464,27 @@ vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
     return VPX_CODEC_INVALID_PARAM;
   }
 
-  res = parse_quantizer_values(svc_ctx, si->quantizers);
-  if (res != VPX_CODEC_OK) return res;
+  for (i = 0; i < VPX_SS_MAX_LAYERS; ++i) {
+    si->quantizer[i] = DEFAULT_QUANTIZER_VALUES[i];
+    si->scaling_factor_num[i] = DEFAULT_SCALE_FACTORS_NUM[i];
+    si->scaling_factor_den[i] = DEFAULT_SCALE_FACTORS_DEN[i];
+  }
 
-  res = parse_scale_factors(svc_ctx, si->scale_factors);
-  if (res != VPX_CODEC_OK) return res;
+  if (strlen(si->quantizers) > 0) {
+    res = parse_layer_options_from_string(svc_ctx, QUANTIZER, si->quantizers,
+                                          si->quantizer, NULL);
+    if (res != VPX_CODEC_OK)
+      return res;
+  }
+
+  if (strlen(si->scale_factors) > 0) {
+    res = parse_layer_options_from_string(svc_ctx, SCALE_FACTOR,
+                                          si->scale_factors,
+                                          si->scaling_factor_num,
+                                          si->scaling_factor_den);
+    if (res != VPX_CODEC_OK)
+      return res;
+  }
 
   // Parse aggregate command line options. Options must start with
   // "layers=xx" then followed by other options
@@ -504,33 +503,7 @@ vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
 
   si->layers = svc_ctx->spatial_layers;
 
-  // Assign target bitrate for each layer. We calculate the ratio
-  // from the resolution for now.
-  // TODO(Minghai): Optimize the mechanism of allocating bits after
-  // implementing svc two pass rate control.
-  if (si->layers > 1) {
-    float total = 0;
-    float alloc_ratio[VPX_SS_MAX_LAYERS] = {0};
-
-    assert(si->layers <= VPX_SS_MAX_LAYERS);
-    for (i = 0; i < si->layers; ++i) {
-      int pos = i + VPX_SS_MAX_LAYERS - svc_ctx->spatial_layers;
-      if (pos < VPX_SS_MAX_LAYERS && si->scaling_factor_den[pos] > 0) {
-        alloc_ratio[i] = (float)(si->scaling_factor_num[pos] * 1.0 /
-            si->scaling_factor_den[pos]);
-
-        alloc_ratio[i] *= alloc_ratio[i];
-        total += alloc_ratio[i];
-      }
-    }
-
-    for (i = 0; i < si->layers; ++i) {
-      if (total > 0) {
-        enc_cfg->ss_target_bitrate[i] = (unsigned int)
-            (enc_cfg->rc_target_bitrate * alloc_ratio[i] / total);
-      }
-    }
-  }
+  assign_layer_bitrates(si, enc_cfg);
 
 #if CONFIG_SPATIAL_SVC
   for (i = 0; i < si->layers; ++i)
@@ -585,7 +558,7 @@ vpx_codec_err_t vpx_svc_get_layer_resolution(const SvcContext *svc_ctx,
                                              int layer,
                                              unsigned int *width,
                                              unsigned int *height) {
-  int w, h, index, num, den;
+  int w, h, num, den;
   const SvcInternal *const si = get_const_svc_internal(svc_ctx);
 
   if (svc_ctx == NULL || si == NULL || width == NULL || height == NULL) {
@@ -593,9 +566,8 @@ vpx_codec_err_t vpx_svc_get_layer_resolution(const SvcContext *svc_ctx,
   }
   if (layer < 0 || layer >= si->layers) return VPX_CODEC_INVALID_PARAM;
 
-  index = layer + VPX_SS_MAX_LAYERS - si->layers;
-  num = si->scaling_factor_num[index];
-  den = si->scaling_factor_den[index];
+  num = si->scaling_factor_num[layer];
+  den = si->scaling_factor_den[layer];
   if (num == 0 || den == 0) return VPX_CODEC_INVALID_PARAM;
 
   w = si->width * num / den;
@@ -613,7 +585,7 @@ vpx_codec_err_t vpx_svc_get_layer_resolution(const SvcContext *svc_ctx,
 
 static void set_svc_parameters(SvcContext *svc_ctx,
                                vpx_codec_ctx_t *codec_ctx) {
-  int layer, layer_index;
+  int layer;
   vpx_svc_parameters_t svc_params;
   SvcInternal *const si = get_svc_internal(svc_ctx);
 
@@ -627,11 +599,10 @@ static void set_svc_parameters(SvcContext *svc_ctx,
                                                    &svc_params.height)) {
     svc_log(svc_ctx, SVC_LOG_ERROR, "vpx_svc_get_layer_resolution failed\n");
   }
-  layer_index = layer + VPX_SS_MAX_LAYERS - si->layers;
 
   if (codec_ctx->config.enc->g_pass == VPX_RC_ONE_PASS) {
-    svc_params.min_quantizer = si->quantizer[layer_index];
-    svc_params.max_quantizer = si->quantizer[layer_index];
+    svc_params.min_quantizer = si->quantizer[layer];
+    svc_params.max_quantizer = si->quantizer[layer];
   } else {
     svc_params.min_quantizer = codec_ctx->config.enc->rc_min_quantizer;
     svc_params.max_quantizer = codec_ctx->config.enc->rc_max_quantizer;
