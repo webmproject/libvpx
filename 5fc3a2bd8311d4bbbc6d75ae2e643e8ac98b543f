@@ -1,0 +1,208 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Ydk\u003d",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 53
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-08T21:38:05Z",
+      "side": 1,
+      "message": "merge this with the block at line 104",
+      "revId": "5fc3a2bd8311d4bbbc6d75ae2e643e8ac98b543f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Ydg\u003d",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 53
+      },
+      "lineNbr": 359,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-08T21:38:05Z",
+      "side": 1,
+      "message": "you might be able to adopt this \u0027update_prev_mi\u0027 scheme in all cases to keep the differences down between frame-parallel and non",
+      "revId": "5fc3a2bd8311d4bbbc6d75ae2e643e8ac98b543f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Ydc\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 53
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-08T21:38:05Z",
+      "side": 1,
+      "message": "fix indent",
+      "revId": "5fc3a2bd8311d4bbbc6d75ae2e643e8ac98b543f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YdY\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 53
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-08T21:38:05Z",
+      "side": 1,
+      "message": "!\u003d NULL",
+      "revId": "5fc3a2bd8311d4bbbc6d75ae2e643e8ac98b543f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YdU\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 53
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-08T21:38:05Z",
+      "side": 1,
+      "message": "if you lead with \u0027?\u0027 you should indent this 3 more spaces, though I\u0027m OK with placing it under the \u0027\u003d\u0027. if you break after the operator then aligning the conditions makes sense",
+      "revId": "5fc3a2bd8311d4bbbc6d75ae2e643e8ac98b543f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YdQ\u003d",
+        "filename": "vp9/common/vp9_mvref_common.h",
+        "patchSetId": 53
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-08T21:38:05Z",
+      "side": 1,
+      "message": "name the parameters",
+      "revId": "5fc3a2bd8311d4bbbc6d75ae2e643e8ac98b543f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YdI\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 53
+      },
+      "lineNbr": 1436,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-08T21:38:05Z",
+      "side": 1,
+      "message": "you have a helper function for this now, no?",
+      "revId": "5fc3a2bd8311d4bbbc6d75ae2e643e8ac98b543f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YdM\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 53
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-08T21:38:05Z",
+      "side": 1,
+      "message": "can these two branches be merged now with the lock_buffer_pool implementation?",
+      "revId": "5fc3a2bd8311d4bbbc6d75ae2e643e8ac98b543f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YdE\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 53
+      },
+      "lineNbr": 2257,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-08T21:38:05Z",
+      "side": 1,
+      "message": "I didn\u0027t look at the non-NULL case, but if these are isolated you could keep this as is and define a second version which takes a sync function; then the NULL, NULL would be hidden closer to the implemenation",
+      "revId": "5fc3a2bd8311d4bbbc6d75ae2e643e8ac98b543f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YdA\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 53
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-08T21:38:05Z",
+      "side": 1,
+      "message": "implementing",
+      "revId": "5fc3a2bd8311d4bbbc6d75ae2e643e8ac98b543f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Yc8\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 53
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-08T21:38:05Z",
+      "side": 1,
+      "message": "drop this line",
+      "revId": "5fc3a2bd8311d4bbbc6d75ae2e643e8ac98b543f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Yc4\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 53
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-08T21:38:05Z",
+      "side": 1,
+      "message": "you should stop the thread before deleting anything related to it",
+      "revId": "5fc3a2bd8311d4bbbc6d75ae2e643e8ac98b543f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
