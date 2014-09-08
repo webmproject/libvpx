@@ -2233,9 +2233,11 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 #endif
 
 #if CONFIG_INTERNAL_STATS
-  int i;
-  for (i = 0; i < MAX_MODES; ++i)
-    cpi->mode_chosen_counts[i] = 0;
+  {
+    int i;
+    for (i = 0; i < MAX_MODES; ++i)
+      cpi->mode_chosen_counts[i] = 0;
+  }
 #endif
 
   vp9_set_speed_features(cpi);
