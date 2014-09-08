@@ -696,7 +696,7 @@ add_proto qw/unsigned int vp9_mse8x8/, "const uint8_t *src_ptr, int  source_stri
 specialize qw/vp9_mse8x8/, "$sse2_x86inc";
 
 add_proto qw/unsigned int vp9_get_mb_ss/, "const int16_t *";
-specialize qw/vp9_get_mb_ss sse2/;
+specialize qw/vp9_get_mb_ss/, "$sse2_x86inc";
 # ENCODEMB INVOKE
 
 add_proto qw/int64_t vp9_block_error/, "const int16_t *coeff, const int16_t *dqcoeff, intptr_t block_size, int64_t *ssz";
