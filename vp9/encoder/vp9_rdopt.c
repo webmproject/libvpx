@@ -1398,7 +1398,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
           mvp_full.row = bsi->mvp.as_mv.row >> 3;
           mvp_full.col = bsi->mvp.as_mv.col >> 3;
 
-          if (cpi->sf.adaptive_motion_search && cm->show_frame) {
+          if (cpi->sf.adaptive_motion_search) {
             mvp_full.row = x->pred_mv[mbmi->ref_frame[0]].row >> 3;
             mvp_full.col = x->pred_mv[mbmi->ref_frame[0]].col >> 3;
             step_param = MAX(step_param, 8);
@@ -1815,8 +1815,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     step_param = cpi->mv_step_param;
   }
 
-  if (cpi->sf.adaptive_motion_search && bsize < BLOCK_64X64 &&
-      cm->show_frame) {
+  if (cpi->sf.adaptive_motion_search && bsize < BLOCK_64X64) {
     int boffset = 2 * (b_width_log2(BLOCK_64X64) - MIN(b_height_log2(bsize),
                                                        b_width_log2(bsize)));
     step_param = MAX(step_param, boffset);
@@ -1876,7 +1875,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   *rate_mv = vp9_mv_bit_cost(&tmp_mv->as_mv, &ref_mv,
                              x->nmvjointcost, x->mvcost, MV_COST_WEIGHT);
 
-  if (cpi->sf.adaptive_motion_search && cm->show_frame)
+  if (cpi->sf.adaptive_motion_search)
     x->pred_mv[ref] = tmp_mv->as_mv;
 
   if (scaled_ref_frame) {

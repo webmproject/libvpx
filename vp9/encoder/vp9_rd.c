@@ -374,7 +374,6 @@ void vp9_mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
   uint8_t *ref_y_ptr;
   const int num_mv_refs = MAX_MV_REF_CANDIDATES +
                     (cpi->sf.adaptive_motion_search &&
-                     cpi->common.show_frame &&
                      block_size < cpi->sf.max_partition_size);
 
   MV pred_mv[3];
