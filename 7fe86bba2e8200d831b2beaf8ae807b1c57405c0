@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Yfg\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 669,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-09-08T16:48:40Z",
+      "side": 1,
+      "message": "move this up to the place outside for-loop over prediction mode(?)",
+      "revId": "7fe86bba2e8200d831b2beaf8ae807b1c57405c0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
