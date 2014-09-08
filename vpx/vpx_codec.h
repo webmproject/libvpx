@@ -43,6 +43,7 @@
 extern "C" {
 #endif
 
+#include "./vpx_config.h"
 #include "./vpx_integer.h"
 #include "./vpx_image.h"
 
@@ -468,7 +469,7 @@ extern "C" {
 
 #endif
 
-static inline unsigned int vpx_bit_depth_to_bps(vpx_bit_depth_t bit_depth) {
+static INLINE unsigned int vpx_bit_depth_to_bps(vpx_bit_depth_t bit_depth) {
   int bps = 8;
   switch (bit_depth) {
     case VPX_BITS_8:
