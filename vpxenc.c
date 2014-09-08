@@ -1202,7 +1202,7 @@ static void validate_stream_config(const struct stream_state *stream,
 
   // Check that the codec bit depth is greater than the input bit depth.
   if (stream->config.cfg.g_input_bit_depth >
-      (int)stream->config.cfg.g_bit_depth) {
+      (unsigned int)stream->config.cfg.g_bit_depth) {
     fatal("Stream %d: codec bit depth (%d) less than input bit depth (%d)",
           stream->index, (int)stream->config.cfg.g_bit_depth,
           stream->config.cfg.g_input_bit_depth);
