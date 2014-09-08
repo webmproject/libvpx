@@ -16,6 +16,24 @@
       "revId": "7fe86bba2e8200d831b2beaf8ae807b1c57405c0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Yd0\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 669,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-08T21:05:06Z",
+      "side": 1,
+      "message": "it\u0027s here as it is closely related to this section of code. Having them separate like it was makes it easy to forget if the code is moved/modified.",
+      "parentUuid": "AAAAdn//Yfg\u003d",
+      "revId": "7fe86bba2e8200d831b2beaf8ae807b1c57405c0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
