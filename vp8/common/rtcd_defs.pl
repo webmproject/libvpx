@@ -530,13 +530,6 @@ if (vpx_config("CONFIG_REALTIME_ONLY") ne "yes") {
 }
 
 #
-# Pick Loopfilter
-#
-add_proto qw/void vp8_yv12_copy_partial_frame/, "struct yv12_buffer_config *src_ybc, struct yv12_buffer_config *dst_ybc";
-specialize qw/vp8_yv12_copy_partial_frame neon_asm/;
-$vp8_yv12_copy_partial_frame_neon_asm=vp8_yv12_copy_partial_frame_neon;
-
-#
 # Denoiser filter
 #
 if (vpx_config("CONFIG_TEMPORAL_DENOISING") eq "yes") {
@@ -544,7 +537,6 @@ if (vpx_config("CONFIG_TEMPORAL_DENOISING") eq "yes") {
     specialize qw/vp8_denoiser_filter sse2 neon/;
     add_proto qw/int vp8_denoiser_filter_uv/, "unsigned char *mc_running_avg, int mc_avg_stride, unsigned char *running_avg, int avg_stride, unsigned char *sig, int sig_stride, unsigned int motion_magnitude, int increase_denoising";
     specialize qw/vp8_denoiser_filter_uv sse2 neon/;
-
 }
 
 # End of encoder only functions
