@@ -2705,7 +2705,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     // Look at the reference frame of the best mode so far and set the
     // skip mask to look at a subset of the remaining modes.
     if (mode_index == mode_skip_start && best_mode_index >= 0) {
-      switch (vp9_mode_order[best_mode_index].ref_frame[0]) {
+      switch (best_mbmode.ref_frame[0]) {
         case INTRA_FRAME:
           break;
         case LAST_FRAME:
@@ -2794,7 +2794,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
       if ((mode_search_skip_flags & FLAG_SKIP_COMP_BESTINTRA) &&
           best_mode_index >=0 &&
-          vp9_mode_order[best_mode_index].ref_frame[0] == INTRA_FRAME)
+          best_mbmode.ref_frame[0] == INTRA_FRAME)
         continue;
       if ((mode_search_skip_flags & FLAG_SKIP_COMP_REFMISMATCH) &&
           ref_frame != best_inter_ref_frame &&
@@ -2826,7 +2826,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         if ((mode_search_skip_flags & FLAG_SKIP_INTRA_BESTINTER) &&
             (this_mode >= D45_PRED && this_mode <= TM_PRED)) {
           if (best_mode_index >= 0 &&
-              vp9_mode_order[best_mode_index].ref_frame[0] > INTRA_FRAME)
+              best_mbmode.ref_frame[0] > INTRA_FRAME)
             continue;
         }
         if (mode_search_skip_flags & FLAG_SKIP_INTRA_DIRMISMATCH) {
@@ -3124,7 +3124,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   // If we used an estimate for the uv intra rd in the loop above...
   if (cpi->sf.use_uv_intra_rd_estimate) {
     // Do Intra UV best rd mode selection if best mode choice above was intra.
-    if (vp9_mode_order[best_mode_index].ref_frame[0] == INTRA_FRAME) {
+    if (best_mbmode.ref_frame[0] == INTRA_FRAME) {
       TX_SIZE uv_tx_size;
       *mbmi = best_mbmode;
       uv_tx_size = get_uv_tx_size(mbmi, &xd->plane[1]);
