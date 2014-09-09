@@ -3370,33 +3370,43 @@ static void process_denoiser_mode_change(VP8_COMP *cpi) {
   if (total > 0 &&
       (num_blocks > (tot_num_blocks >> 4))) {
     // Update the recursive mean square source_diff.
-    if (cpi->denoiser.nmse_source_diff_count == 0)
+    if (cpi->denoiser.nmse_source_diff_count == 0) {
       // First sample in new interval.
       cpi->denoiser.nmse_source_diff = total;
-    else
+      cpi->denoiser.qp_avg = cm->base_qindex;
+    } else {
       // For subsequent samples, use average with weight ~1/4 for new sample.
       cpi->denoiser.nmse_source_diff = (int)((total >> 2) +
           3 * (cpi->denoiser.nmse_source_diff >> 2));
+      cpi->denoiser.qp_avg = (int)((cm->base_qindex >> 2) +
+          3 * (cpi->denoiser.qp_avg >> 2));
+    }
     cpi->denoiser.nmse_source_diff_count++;
   }
   // Check for changing the denoiser mode, when we have obtained #samples =
-  // num_mode_change.
+  // num_mode_change. Condition the change also on the bitrate and QP.
   if (cpi->denoiser.nmse_source_diff_count == num_mode_change) {
     // Check for going up: from normal to aggressive mode.
     if ((cpi->denoiser.denoiser_mode == kDenoiserOnYUV) &&
         (cpi->denoiser.nmse_source_diff >
-        cpi->denoiser.threshold_aggressive_mode)) {
+        cpi->denoiser.threshold_aggressive_mode) &&
+        (cpi->denoiser.qp_avg < cpi->denoiser.qp_threshold_up &&
+         cpi->target_bandwidth > cpi->denoiser.bitrate_threshold)) {
       vp8_denoiser_set_parameters(&cpi->denoiser, kDenoiserOnYUVAggressive);
     } else {
       // Check for going down: from aggressive to normal mode.
-      if ((cpi->denoiser.denoiser_mode == kDenoiserOnYUVAggressive) &&
+      if (((cpi->denoiser.denoiser_mode == kDenoiserOnYUVAggressive) &&
           (cpi->denoiser.nmse_source_diff <
-          cpi->denoiser.threshold_aggressive_mode)) {
+          cpi->denoiser.threshold_aggressive_mode)) ||
+          ((cpi->denoiser.denoiser_mode == kDenoiserOnYUVAggressive) &&
+          (cpi->denoiser.qp_avg > cpi->denoiser.qp_threshold_down ||
+           cpi->target_bandwidth < cpi->denoiser.bitrate_threshold))) {
         vp8_denoiser_set_parameters(&cpi->denoiser, kDenoiserOnYUV);
       }
     }
     // Reset metric and counter for next interval.
     cpi->denoiser.nmse_source_diff = 0;
+    cpi->denoiser.qp_avg = 0;
     cpi->denoiser.nmse_source_diff_count = 0;
   }
 }
