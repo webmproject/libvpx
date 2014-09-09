@@ -1,0 +1,888 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//YS0\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "Should probably mention the configure flag and its impact on tran_low/high_t (i.e. changes from 16/32 -\u003e 32/64).",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YTM\u003d",
+        "filename": "configure",
+        "patchSetId": 7
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "What\u0027s hw mean? Hardware? Let\u0027s just expand it.\n\nIs this meant to be in this commit?",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YSs\u003d",
+        "filename": "test/dct16x16_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "Why do we need to extern this? (sorry, but you touched the line, so I\u0027m asking :))\n\nIt\u0027s defined in vp9_rtcd.h as:\n\nvoid vp9_idct16x16_256_add_c(const int16_t *input, uint8_t *dest, int dest_stride);\n\nAnd there\u0027s the include right up above there, and vp9_rtcd.h has the __cplusplus extern \"C\" boiler plate... maybe it was missing at some point?\n\nAlso, if it ends up that we really need it:\n\nCopy/paste the actual declaration.",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YSc\u003d",
+        "filename": "test/dct16x16_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 368,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "nit x2: Braces on if/else",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YSU\u003d",
+        "filename": "test/dct16x16_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 554,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "nit: One multi line, brace both if and else.",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YSQ\u003d",
+        "filename": "test/dct16x16_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 664,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "nit: Mind moving the default to the bottom? Looks odd (to me, anyway).",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YSI\u003d",
+        "filename": "test/dct16x16_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 714,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "VPX_BITS_8? And so on, for 8/10/12 through the rest of the file...\n\nUnless I\u0027m confused about what\u0027s going on here, and in that case: oops! :)",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YR8\u003d",
+        "filename": "test/dct32x32_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "nit: Braces",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YRo\u003d",
+        "filename": "test/dct32x32_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "VPX_BITS_8?",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YRk\u003d",
+        "filename": "test/dct32x32_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 283,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YRg\u003d",
+        "filename": "test/dct32x32_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 309,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "VPX_BITS_8/10/12?",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YRc\u003d",
+        "filename": "test/fdct4x4_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "Same question as with vp9_idct16x16_256_add_c-- why do we need the extern?",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YRY\u003d",
+        "filename": "test/fdct4x4_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "nit: Braces",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YRM\u003d",
+        "filename": "test/fdct4x4_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "nit: Braces.",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YRI\u003d",
+        "filename": "test/fdct4x4_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 412,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "VPX_BITS_8/10/12?",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YRE\u003d",
+        "filename": "test/fdct8x8_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "extern actually necessary?",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YRA\u003d",
+        "filename": "test/fdct8x8_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "align",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YQ8\u003d",
+        "filename": "test/fdct8x8_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "nit: Braces",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YQ4\u003d",
+        "filename": "test/fdct8x8_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 314,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "nit: Braces",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YQ0\u003d",
+        "filename": "test/fdct8x8_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 386,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "nit: Braces",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YQw\u003d",
+        "filename": "test/fdct8x8_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 416,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "nit: probably should not have braces here given the rest of the code...",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YQs\u003d",
+        "filename": "test/fdct8x8_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 537,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "VPX_BIT_8/10/12?",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YQk\u003d",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "Bring this back up to the previous line (so it matches other usage sites).",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YQg\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 229,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "Two things:\n\n    1. Should we use the bits enum here?\n    2. s/bps/bpc/ (or bits_per_component)-- sample implies all pixel components, no?\n\nI also dislike the ambiguity of bps; I more typically see it used in a bandwidth scenario with the meaning bits per second.",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YQc\u003d",
+        "filename": "vp9/common/vp9_idct.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "Re earlier comment about HW: I definitely prefer HARDWARE to HW.",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YQY\u003d",
+        "filename": "vp9/common/vp9_idct.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "s/bps/bpc/",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YQU\u003d",
+        "filename": "vp9/common/vp9_idct.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "I guess the location of these definitions sort of explains the (apparently) unnecessary extern\u0027ing I\u0027ve pointed out elsewhere, but I\u0027m still unsure that it\u0027s truly needed.",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YQQ\u003d",
+        "filename": "vp9/common/vp9_idct.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1578,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "nit: alignment is kind of odd here.",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YQM\u003d",
+        "filename": "vp9/common/vp9_idct.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1627,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "nit: s/-odd/- odd/",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YQI\u003d",
+        "filename": "vp9/common/vp9_idct.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1654,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "nit: period",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YQE\u003d",
+        "filename": "vp9/common/vp9_idct.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1661,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YQA\u003d",
+        "filename": "vp9/common/vp9_idct.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1730,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "drop the extra line",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YP8\u003d",
+        "filename": "vp9/common/vp9_idct.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1747,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "period",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YP4\u003d",
+        "filename": "vp9/common/vp9_idct.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1754,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "period",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YP0\u003d",
+        "filename": "vp9/common/vp9_idct.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1761,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "weird alignment again\n\nnote: not marking these three again, please fix throughout.\n\n(seems like every call site for clip_pixel_bps_high() has the same odd alignment)",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YPw\u003d",
+        "filename": "vp9/common/vp9_idct.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1781,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "please don\u0027t do this",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YPo\u003d",
+        "filename": "vp9/common/vp9_idct.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 2126,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "ditto on the please don\u0027t do this",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YPk\u003d",
+        "filename": "vp9/common/vp9_idct.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 2174,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "remove the extra horizontal whitespace",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YPg\u003d",
+        "filename": "vp9/common/vp9_idct.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 2208,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YPc\u003d",
+        "filename": "vp9/common/vp9_idct.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 2323,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "period",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YPY\u003d",
+        "filename": "vp9/common/vp9_idct.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 2350,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "extra vertical whitespace",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YPU\u003d",
+        "filename": "vp9/common/vp9_idct.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 2837,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "nit: Comment in first if makes it 2 lines, braces on all please",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YPQ\u003d",
+        "filename": "vp9/common/vp9_idct.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 2850,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YPM\u003d",
+        "filename": "vp9/common/vp9_idct.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 2861,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "ditto, but in the else if :)",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YS4\u003d",
+        "filename": "vp9/common/vp9_idct.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "Some (brief) explanation about what these are for (i.e. why they\u0027re necessary) would be nice.",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YSw\u003d",
+        "filename": "vp9/common/vp9_idct.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "Are high/low the right terms here? If the types are named in terms of precision: names lgtm. If the actual thinking is big/small or wide/narrow the naming should probably be adjusted now...\n\nAnyway, I\u0027m not really certain about this, so I just wanted to mention it.",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YPI\u003d",
+        "filename": "vp9/common/vp9_rtcd_defs.pl",
+        "patchSetId": 7
+      },
+      "lineNbr": 335,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "sorry: punting here. I haven\u0027t really looked at this stuff before, so I don\u0027t know if it\u0027s correct or not. I\u0027ll take your word that it is. :)",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YPE\u003d",
+        "filename": "vp9/encoder/vp9_block.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "s/bps/bpc/ if you go with my earlier suggestion",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YPA\u003d",
+        "filename": "vp9/encoder/vp9_dct.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "This notation before the declaration is something I haven\u0027t really seen before-- does it need to be this way, or is it safe to move them to the usual place?",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YO8\u003d",
+        "filename": "vp9/encoder/vp9_dct.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YO4\u003d",
+        "filename": "vp9/encoder/vp9_dct.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 365,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "ditto/throughout",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YOs\u003d",
+        "filename": "vp9/encoder/vp9_dct.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1040,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-09T22:24:17Z",
+      "side": 1,
+      "message": "And make the magic numbers constants? :)",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
