@@ -412,12 +412,27 @@ int vp8_denoiser_allocate(VP8_DENOISER *denoiser, int width, int height,
     vp8_denoiser_set_parameters(denoiser, mode);
     denoiser->nmse_source_diff = 0;
     denoiser->nmse_source_diff_count = 0;
+    denoiser->qp_avg = 0;
+    // QP threshold below which we can go up to aggressive mode.
+    denoiser->qp_threshold_up = 80;
+    // QP threshold above which we can go back down to normal mode.
+    // For now keep this second threshold high, so not used currently.
+    denoiser->qp_threshold_down = 128;
+    // Bitrate thresholds and noise metric (nmse) thresholds for switching to
+    // aggressive mode.
     // TODO(marpan): Adjust thresholds, including effect on resolution.
+    denoiser->bitrate_threshold = 200000;  // (bits/sec).
     denoiser->threshold_aggressive_mode = 35;
-    if (width * height > 640 * 480)
+    if (width * height > 640 * 480) {
+      denoiser->bitrate_threshold = 500000;
+      denoiser->threshold_aggressive_mode = 100;
+    } else if (width * height > 960 * 540) {
+      denoiser->bitrate_threshold = 800000;
       denoiser->threshold_aggressive_mode = 150;
-    else if (width * height > 1280 * 720)
+    } else if (width * height > 1280 * 720) {
+      denoiser->bitrate_threshold = 2000000;
       denoiser->threshold_aggressive_mode = 1400;
+    }
     return 0;
 }
 
