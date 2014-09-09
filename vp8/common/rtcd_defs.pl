@@ -289,22 +289,19 @@ $vp8_sub_pixel_variance16x16_media=vp8_sub_pixel_variance16x16_armv6;
 $vp8_sub_pixel_variance16x16_neon_asm=vp8_sub_pixel_variance16x16_neon;
 
 add_proto qw/unsigned int vp8_variance_halfpixvar16x16_h/, "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int *sse";
-specialize qw/vp8_variance_halfpixvar16x16_h mmx sse2 media neon_asm/;
+specialize qw/vp8_variance_halfpixvar16x16_h mmx sse2 media neon/;
 $vp8_variance_halfpixvar16x16_h_sse2=vp8_variance_halfpixvar16x16_h_wmt;
 $vp8_variance_halfpixvar16x16_h_media=vp8_variance_halfpixvar16x16_h_armv6;
-$vp8_variance_halfpixvar16x16_h_neon_asm=vp8_variance_halfpixvar16x16_h_neon;
 
 add_proto qw/unsigned int vp8_variance_halfpixvar16x16_v/, "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int *sse";
-specialize qw/vp8_variance_halfpixvar16x16_v mmx sse2 media neon_asm/;
+specialize qw/vp8_variance_halfpixvar16x16_v mmx sse2 media neon/;
 $vp8_variance_halfpixvar16x16_v_sse2=vp8_variance_halfpixvar16x16_v_wmt;
 $vp8_variance_halfpixvar16x16_v_media=vp8_variance_halfpixvar16x16_v_armv6;
-$vp8_variance_halfpixvar16x16_v_neon_asm=vp8_variance_halfpixvar16x16_v_neon;
 
 add_proto qw/unsigned int vp8_variance_halfpixvar16x16_hv/, "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int *sse";
-specialize qw/vp8_variance_halfpixvar16x16_hv mmx sse2 media neon_asm/;
+specialize qw/vp8_variance_halfpixvar16x16_hv mmx sse2 media neon/;
 $vp8_variance_halfpixvar16x16_hv_sse2=vp8_variance_halfpixvar16x16_hv_wmt;
 $vp8_variance_halfpixvar16x16_hv_media=vp8_variance_halfpixvar16x16_hv_armv6;
-$vp8_variance_halfpixvar16x16_hv_neon_asm=vp8_variance_halfpixvar16x16_hv_neon;
 
 #
 # Single block SAD
