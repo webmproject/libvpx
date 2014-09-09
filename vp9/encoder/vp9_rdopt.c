@@ -2575,6 +2575,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   vp9_prob comp_mode_p;
   int64_t best_intra_rd = INT64_MAX;
   int64_t best_inter_rd = INT64_MAX;
+  unsigned int best_pred_sse = UINT_MAX;
   PREDICTION_MODE best_intra_mode = DC_PRED;
   MV_REFERENCE_FRAME best_inter_ref_frame = LAST_FRAME;
   int rate_uv_intra[TX_SIZES], rate_uv_tokenonly[TX_SIZES];
@@ -2804,7 +2805,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
     if (ref_frame == INTRA_FRAME) {
       if (cpi->sf.adaptive_mode_search)
-        if ((x->source_variance << num_pels_log2_lookup[bsize]) > best_intra_rd)
+        if ((x->source_variance << num_pels_log2_lookup[bsize]) > best_pred_sse)
           continue;
 
       if (!(intra_y_mode_mask & (1 << this_mode)))
@@ -2983,7 +2984,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
           mbmi->mv[0].as_int = 0;
           max_plane = 1;
         } else {
-          best_intra_rd = x->pred_sse[ref_frame];
+          best_pred_sse = x->pred_sse[ref_frame];
         }
 
         *returnrate = rate2;
