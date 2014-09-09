@@ -668,6 +668,15 @@ static void setup_frame_size(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate frame buffer");
   }
+  cm->frame_bufs[cm->new_fb_idx].buf.bit_depth = (unsigned int)cm->bit_depth;
+}
+
+static INLINE int valid_ref_frame_img_fmt(vpx_bit_depth_t ref_bit_depth,
+                                          int ref_xss, int ref_yss,
+                                          vpx_bit_depth_t this_bit_depth,
+                                          int this_xss, int this_yss) {
+  return ref_bit_depth == this_bit_depth && ref_xss == this_xss &&
+         ref_yss == this_yss;
 }
 
 static void setup_frame_size_with_refs(VP9_COMMON *cm,
@@ -707,6 +716,18 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
   if (!has_valid_ref_frame)
     vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
                        "Referenced frame has invalid size");
+  for (i = 0; i < REFS_PER_FRAME; ++i) {
+    RefBuffer *const ref_frame = &cm->frame_refs[i];
+    if (!valid_ref_frame_img_fmt(
+            ref_frame->buf->bit_depth,
+            ref_frame->buf->uv_crop_width < ref_frame->buf->y_crop_width,
+            ref_frame->buf->uv_crop_height < ref_frame->buf->y_crop_height,
+            cm->bit_depth,
+            cm->subsampling_x,
+            cm->subsampling_y))
+      vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+                         "Referenced frame has incompatible color space");
+  }
 
   resize_context_buffers(cm, width, height);
   setup_display_size(cm, rb);
@@ -723,6 +744,7 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate frame buffer");
   }
+  cm->frame_bufs[cm->new_fb_idx].buf.bit_depth = (unsigned int)cm->bit_depth;
 }
 
 static void setup_tile_info(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
