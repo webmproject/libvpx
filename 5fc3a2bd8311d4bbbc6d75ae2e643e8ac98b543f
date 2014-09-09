@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//YcM\u003d",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 53
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-09T14:53:09Z",
+      "side": 1,
+      "message": "Done. The upper check is added later to fix a unite test failure. It should be merged with this block.",
+      "parentUuid": "AAAAdn//Ydk\u003d",
+      "revId": "5fc3a2bd8311d4bbbc6d75ae2e643e8ac98b543f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Ydg\u003d",
         "filename": "vp9/common/vp9_alloccommon.c",
         "patchSetId": 53
@@ -53,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//YcI\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 53
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-09T14:53:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Ydc\u003d",
+      "revId": "5fc3a2bd8311d4bbbc6d75ae2e643e8ac98b543f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//YdY\u003d",
         "filename": "vp9/common/vp9_mvref_common.c",
         "patchSetId": 53
@@ -64,6 +100,24 @@
       "writtenOn": "2014-09-08T21:38:05Z",
       "side": 1,
       "message": "!\u003d NULL",
+      "revId": "5fc3a2bd8311d4bbbc6d75ae2e643e8ac98b543f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YcE\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 53
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-09T14:53:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YdY\u003d",
       "revId": "5fc3a2bd8311d4bbbc6d75ae2e643e8ac98b543f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +141,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//YcA\u003d",
+        "filename": "vp9/common/vp9_mvref_common.c",
+        "patchSetId": 53
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-09T14:53:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YdU\u003d",
+      "revId": "5fc3a2bd8311d4bbbc6d75ae2e643e8ac98b543f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//YdQ\u003d",
         "filename": "vp9/common/vp9_mvref_common.h",
         "patchSetId": 53
@@ -98,6 +170,24 @@
       "writtenOn": "2014-09-08T21:38:05Z",
       "side": 1,
       "message": "name the parameters",
+      "revId": "5fc3a2bd8311d4bbbc6d75ae2e643e8ac98b543f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Yb0\u003d",
+        "filename": "vp9/common/vp9_mvref_common.h",
+        "patchSetId": 53
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-09T14:53:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YdQ\u003d",
       "revId": "5fc3a2bd8311d4bbbc6d75ae2e643e8ac98b543f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +211,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Ybw\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 53
+      },
+      "lineNbr": 1436,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-09T14:53:09Z",
+      "side": 1,
+      "message": "Done. Yes. I was hesitated because this lead to 2~3 more instructions of \"FrameWorkerData *const worker_data \u003d worker-\u003edata1;\" in each function call. But it should not be a big deal.",
+      "parentUuid": "AAAAdn//YdI\u003d",
+      "revId": "5fc3a2bd8311d4bbbc6d75ae2e643e8ac98b543f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//YdM\u003d",
         "filename": "vp9/decoder/vp9_decoder.c",
         "patchSetId": 53
@@ -132,6 +240,24 @@
       "writtenOn": "2014-09-08T21:38:05Z",
       "side": 1,
       "message": "can these two branches be merged now with the lock_buffer_pool implementation?",
+      "revId": "5fc3a2bd8311d4bbbc6d75ae2e643e8ac98b543f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Ybo\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 53
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-09T14:53:09Z",
+      "side": 1,
+      "message": "Done. I am going to delete ref_cnt_fb as it is useless now. Also, I move the lock_buffer_pool to outside of the loop as I think too often lock and unlock inside the loop will actually hurt performance.",
+      "parentUuid": "AAAAdn//YdM\u003d",
       "revId": "5fc3a2bd8311d4bbbc6d75ae2e643e8ac98b543f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +281,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Ybk\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 53
+      },
+      "lineNbr": 2257,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-09T14:53:09Z",
+      "side": 1,
+      "message": "Per our discussion,  I will just keep this function as it is not used often and it does not worth to create a separate new function for it.",
+      "parentUuid": "AAAAdn//YdE\u003d",
+      "revId": "5fc3a2bd8311d4bbbc6d75ae2e643e8ac98b543f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//YdA\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 53
@@ -166,6 +310,24 @@
       "writtenOn": "2014-09-08T21:38:05Z",
       "side": 1,
       "message": "implementing",
+      "revId": "5fc3a2bd8311d4bbbc6d75ae2e643e8ac98b543f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Ybg\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 53
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-09T14:53:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YdA\u003d",
       "revId": "5fc3a2bd8311d4bbbc6d75ae2e643e8ac98b543f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -189,6 +351,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Ybc\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 53
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-09T14:53:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Yc8\u003d",
+      "revId": "5fc3a2bd8311d4bbbc6d75ae2e643e8ac98b543f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Yc4\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 53
@@ -200,6 +380,24 @@
       "writtenOn": "2014-09-08T21:38:05Z",
       "side": 1,
       "message": "you should stop the thread before deleting anything related to it",
+      "revId": "5fc3a2bd8311d4bbbc6d75ae2e643e8ac98b543f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YbY\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 53
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-09T14:53:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Yc4\u003d",
       "revId": "5fc3a2bd8311d4bbbc6d75ae2e643e8ac98b543f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
