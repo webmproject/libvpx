@@ -3170,7 +3170,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     vp9_zero(best_tx_diff);
   }
 
-  set_ref_ptrs(cm, xd, mbmi->ref_frame[0], mbmi->ref_frame[1]);
   store_coding_context(x, ctx, best_mode_index, best_pred_diff,
                        best_tx_diff, best_filter_diff, best_mode_skippable);
 
@@ -3883,7 +3882,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     vp9_zero(best_filter_diff);
   }
 
-  set_ref_ptrs(cm, xd, mbmi->ref_frame[0], mbmi->ref_frame[1]);
   store_coding_context(x, ctx, best_ref_index,
                        best_pred_diff, best_tx_diff, best_filter_diff, 0);
 
