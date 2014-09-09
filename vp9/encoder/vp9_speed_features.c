@@ -104,15 +104,11 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
                                                       : USE_LARGESTALL;
 
     if (MIN(cm->width, cm->height) >= 720) {
-      sf->lf_motion_threshold = LOW_MOTION_THRESHOLD;
-      sf->last_partitioning_redo_frequency = 3;
       sf->disable_split_mask = cm->show_frame ? DISABLE_ALL_SPLIT
                                               : DISABLE_ALL_INTER_SPLIT;
       sf->adaptive_pred_interp_filter = 0;
     } else {
       sf->disable_split_mask = LAST_AND_INTRA_SPLIT_ONLY;
-      sf->last_partitioning_redo_frequency = 2;
-      sf->lf_motion_threshold = NO_MOTION_THRESHOLD;
     }
 
     sf->reference_masking = 1;
@@ -123,7 +119,6 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
     sf->disable_filter_search_var_thresh = 100;
     sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
     sf->auto_min_max_partition_size = CONSTRAIN_NEIGHBORING_MIN_MAX;
-    sf->adjust_partitioning_from_last_frame = 1;
 
     if (MIN(cm->width, cm->height) >= 720)
       sf->partition_search_breakout_dist_thr = (1 << 24);
@@ -147,8 +142,6 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
     sf->cb_pred_filter_search = 1;
     sf->alt_ref_search_fp = 1;
     sf->motion_field_mode_search = !boosted;
-    sf->lf_motion_threshold = LOW_MOTION_THRESHOLD;
-    sf->last_partitioning_redo_frequency = 2;
     sf->recode_loop = ALLOW_RECODE_KFMAXBW;
     sf->adaptive_rd_thresh = 3;
     sf->mode_skip_start = 6;
@@ -171,7 +164,6 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
     sf->mode_search_skip_flags |= FLAG_SKIP_COMP_REFMISMATCH |
                                   FLAG_EARLY_TERMINATE;
     sf->disable_filter_search_var_thresh = 200;
-    sf->use_lastframe_partitioning = LAST_FRAME_PARTITION_ALL;
     sf->use_lp32x32fdct = 1;
     sf->use_fast_coef_updates = ONE_LOOP_REDUCED;
     sf->use_fast_coef_costing = 1;

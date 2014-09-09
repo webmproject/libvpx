@@ -2466,6 +2466,9 @@ static void encode_rd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
     vp9_zero(cpi->mb.pred_mv);
     cpi->pc_root->index = 0;
 
+    // TODO(yunqingwang): use_lastframe_partitioning is no longer used in good-
+    // quality encoding. Need to evaluate it in real-time encoding later to
+    // decide if it can be removed too. And then, do the code cleanup.
     if ((sf->partition_search_type == SEARCH_PARTITION &&
          sf->use_lastframe_partitioning) ||
          sf->partition_search_type == FIXED_PARTITION ||
