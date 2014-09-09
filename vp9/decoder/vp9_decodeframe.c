@@ -960,9 +960,8 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
   return vp9_reader_find_end(&tile_data->bit_reader);
 }
 
-static int tile_worker_hook(void *arg1, void *arg2) {
-  TileWorkerData *const tile_data = (TileWorkerData*)arg1;
-  const TileInfo *const tile = (TileInfo*)arg2;
+static int tile_worker_hook(TileWorkerData *const tile_data,
+                            const TileInfo *const tile) {
   int mi_row, mi_col;
 
   for (mi_row = tile->mi_row_start; mi_row < tile->mi_row_end;
