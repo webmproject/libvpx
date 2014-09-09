@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//YNg\u003d",
+        "filename": "vp9/common/arm/neon/vp9_convolve8_avg_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-09-09T23:42:13Z",
+      "side": 1,
+      "message": "Please align the arguments  (see above functions, which are correct)",
+      "revId": "6e0b7cc8ac57b2c21679273b42453fe23aadc6a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YNc\u003d",
+        "filename": "vp9/common/arm/neon/vp9_convolve8_avg_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-09-09T23:42:13Z",
+      "side": 1,
+      "message": "__builtin_prefetch does not exist for MSVC:\nhttps://chromium.googlesource.com/webm/libvpx/+/0002da32e68de361ff1139c0d81b2062aeef803d\n\nthe ifdef _MSC_VER bit should probably be moved to vpx_ports/mem.h because it\u0027s used in quite a few files now",
+      "revId": "6e0b7cc8ac57b2c21679273b42453fe23aadc6a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YNY\u003d",
+        "filename": "vp9/common/arm/neon/vp9_convolve8_avg_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-09-09T23:42:13Z",
+      "side": 1,
+      "message": "align",
+      "revId": "6e0b7cc8ac57b2c21679273b42453fe23aadc6a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
