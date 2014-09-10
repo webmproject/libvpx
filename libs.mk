@@ -531,7 +531,6 @@ libs.doxy: $(CODEC_DOC_SRCS)
 	@echo "    [CREATE] $@"
 	@rm -f $@
 	@echo "INPUT += $^" >> $@
-	@echo "PREDEFINED = VPX_CODEC_DISABLE_COMPAT" >> $@
 	@echo "INCLUDE_PATH += ." >> $@;
 	@echo "ENABLED_SECTIONS += $(sort $(CODEC_DOC_SECTIONS))" >> $@
 

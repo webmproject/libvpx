@@ -29,9 +29,7 @@
 // -----------------
 // For decoders, you only have to include `vpx_decoder.h` and then any
 // header files for the specific codecs you use. In this case, we're using
-// vp8. The `VPX_CODEC_DISABLE_COMPAT` macro can be defined to ensure
-// strict compliance with the latest SDK by disabling some backwards
-// compatibility features. Defining this macro is encouraged.
+// vp8.
 //
 // Initializing The Codec
 // ----------------------
@@ -80,8 +78,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#define VPX_CODEC_DISABLE_COMPAT 1
 
 #include "vpx/vp8dx.h"
 #include "vpx/vpx_decoder.h"

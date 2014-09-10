@@ -24,7 +24,6 @@
 #include "./args.h"
 #include "./ivfdec.h"
 
-#define VPX_CODEC_DISABLE_COMPAT 1
 #include "vpx/vpx_decoder.h"
 #include "vpx_ports/mem_ops.h"
 #include "vpx_ports/vpx_timer.h"

@@ -50,7 +50,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define VPX_CODEC_DISABLE_COMPAT 1
 #include "vpx/vp8cx.h"
 #include "vpx/vpx_encoder.h"
 
