@@ -67,6 +67,8 @@ typedef struct {
   unsigned int qp_thresh;
   // Threshold for number of consecutive frames for blocks coded as ZEROMV-LAST.
   unsigned int consec_zerolast;
+  // Threshold for amount of spatial blur on Y channel. 0 means no spatial blur.
+  unsigned int spatial_blur;
 } denoise_params;
 
 typedef struct vp8_denoiser

@@ -4023,6 +4023,17 @@ static void encode_frame_to_data_rate
 
     scale_and_extend_source(cpi->un_scaled_source, cpi);
 
+#if CONFIG_TEMPORAL_DENOISING && CONFIG_POSTPROC
+    // Option to apply spatial blur under the aggressive or adaptive
+    // (temporal denoising) mode.
+    if (cpi->oxcf.noise_sensitivity >= 3) {
+      if (cpi->denoiser.denoise_pars.spatial_blur != 0) {
+        vp8_de_noise(cm, cpi->Source, cpi->Source,
+            cpi->denoiser.denoise_pars.spatial_blur, 1, 0, 0);
+      }
+    }
+#endif
+
 #if !(CONFIG_REALTIME_ONLY) && CONFIG_POSTPROC && !(CONFIG_TEMPORAL_DENOISING)
 
     if (cpi->oxcf.noise_sensitivity > 0)
@@ -4055,11 +4066,11 @@ static void encode_frame_to_data_rate
 
         if (cm->frame_type == KEY_FRAME)
         {
-            vp8_de_noise(cm, cpi->Source, cpi->Source, l , 1,  0);
+            vp8_de_noise(cm, cpi->Source, cpi->Source, l , 1,  0, 1);
         }
         else
         {
-            vp8_de_noise(cm, cpi->Source, cpi->Source, l , 1,  0);
+            vp8_de_noise(cm, cpi->Source, cpi->Source, l , 1,  0, 1);
 
             src = cpi->Source->y_buffer;
 
