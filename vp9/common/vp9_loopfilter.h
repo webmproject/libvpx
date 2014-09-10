@@ -111,13 +111,13 @@ void vp9_loop_filter_frame(YV12_BUFFER_CONFIG *frame,
                            int y_only, int partial_frame);
 
 // Apply the loop filter to [start, stop) macro block rows in frame_buffer.
-void vp9_loop_filter_rows(const YV12_BUFFER_CONFIG *frame_buffer,
+void vp9_loop_filter_rows(YV12_BUFFER_CONFIG *frame_buffer,
                           struct VP9Common *cm,
                           struct macroblockd_plane planes[MAX_MB_PLANE],
                           int start, int stop, int y_only);
 
 typedef struct LoopFilterWorkerData {
-  const YV12_BUFFER_CONFIG *frame_buffer;
+  YV12_BUFFER_CONFIG *frame_buffer;
   struct VP9Common *cm;
   struct macroblockd_plane planes[MAX_MB_PLANE];
 

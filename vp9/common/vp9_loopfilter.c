@@ -1193,7 +1193,7 @@ void vp9_filter_block_plane(VP9_COMMON *const cm,
   }
 }
 
-void vp9_loop_filter_rows(const YV12_BUFFER_CONFIG *frame_buffer,
+void vp9_loop_filter_rows(YV12_BUFFER_CONFIG *frame_buffer,
                           VP9_COMMON *cm,
                           struct macroblockd_plane planes[MAX_MB_PLANE],
                           int start, int stop, int y_only) {
