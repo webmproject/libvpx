@@ -41,9 +41,14 @@
 #define RD_THRESH_MAX_FACT 64
 #define RD_THRESH_INC      1
 
-#define LAST_FRAME_MODE_MASK    0xFFEDCD60
-#define GOLDEN_FRAME_MODE_MASK  0xFFDA3BB0
-#define ALT_REF_MODE_MASK       0xFFC648D0
+#define LAST_FRAME_MODE_MASK    ((1 << GOLDEN_FRAME) | (1 << ALTREF_FRAME) | \
+                                 (1 << INTRA_FRAME))
+#define GOLDEN_FRAME_MODE_MASK  ((1 << LAST_FRAME) | (1 << ALTREF_FRAME) | \
+                                 (1 << INTRA_FRAME))
+#define ALT_REF_MODE_MASK       ((1 << LAST_FRAME) | (1 << GOLDEN_FRAME) | \
+                                 (1 << INTRA_FRAME))
+
+#define SECOND_REF_FRAME_MASK   ((1 << ALTREF_FRAME) | 0x01)
 
 #define MIN_EARLY_TERM_INDEX    3
 
@@ -2584,7 +2589,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   PREDICTION_MODE mode_uv[TX_SIZES];
   int intra_cost_penalty = 20 * vp9_dc_quant(cm->base_qindex, cm->y_dc_delta_q);
   int best_skip2 = 0;
-  int mode_skip_mask = 0;
+  uint8_t ref_frame_skip_mask[2] = { 0 };
+  uint16_t mode_skip_mask[MAX_REF_FRAMES] = { 0 };
   int mode_skip_start = cpi->sf.mode_skip_start + 1;
   const int *const rd_threshes = rd_opt->threshes[segment_id][bsize];
   const int *const rd_thresh_freq_fact = rd_opt->thresh_freq_fact[bsize];
@@ -2628,23 +2634,17 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
-    // All modes from vp9_mode_order that use this frame as any ref
-    static const int ref_frame_mask_all[] = {
-        0x0, 0x123291, 0x25c444, 0x39b722
-    };
-    // Fixed mv modes (NEARESTMV, NEARMV, ZEROMV) from vp9_mode_order that use
-    // this frame as their primary ref
-    static const int ref_frame_mask_fixedmv[] = {
-        0x0, 0x121281, 0x24c404, 0x080102
-    };
     if (!(cpi->ref_frame_flags & flag_list[ref_frame])) {
-      // Skip modes for missing references
-      mode_skip_mask |= ref_frame_mask_all[ref_frame];
+      // Skip checking missing references in both single and compound reference
+      // modes. Note that a mode will be skipped iff both reference frames
+      // are masked out.
+      ref_frame_skip_mask[0] |= (1 << ref_frame);
+      ref_frame_skip_mask[1] |= SECOND_REF_FRAME_MASK;
     } else if (cpi->sf.reference_masking) {
       for (i = LAST_FRAME; i <= ALTREF_FRAME; ++i) {
         // Skip fixed mv modes for poor references
         if ((x->pred_mv_sad[ref_frame] >> 2) > x->pred_mv_sad[i]) {
-          mode_skip_mask |= ref_frame_mask_fixedmv[ref_frame];
+          mode_skip_mask[ref_frame] |= INTER_NEAREST_NEAR_ZERO;
           break;
         }
       }
@@ -2653,7 +2653,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     // then do nothing if the current ref frame is not allowed..
     if (vp9_segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME) &&
         vp9_get_segdata(seg, segment_id, SEG_LVL_REF_FRAME) != (int)ref_frame) {
-      mode_skip_mask |= ref_frame_mask_all[ref_frame];
+      ref_frame_skip_mask[0] |= (1 << ref_frame);
+      ref_frame_skip_mask[1] |= SECOND_REF_FRAME_MASK;
     }
   }
 
@@ -2666,12 +2667,13 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     // an unfiltered alternative. We allow near/nearest as well
     // because they may result in zero-zero MVs but be cheaper.
     if (cpi->rc.is_src_frame_alt_ref && (cpi->oxcf.arnr_max_frames == 0)) {
-      mode_skip_mask =
-          ~((1 << THR_NEARESTA) | (1 << THR_NEARA) | (1 << THR_ZEROA));
+      ref_frame_skip_mask[0] = (1 << LAST_FRAME) | (1 << GOLDEN_FRAME);
+      ref_frame_skip_mask[1] = SECOND_REF_FRAME_MASK;
+      mode_skip_mask[ALTREF_FRAME] = ~INTER_NEAREST_NEAR_ZERO;
       if (frame_mv[NEARMV][ALTREF_FRAME].as_int != 0)
-        mode_skip_mask |= (1 << THR_NEARA);
+        mode_skip_mask[ALTREF_FRAME] |= (1 << NEARMV);
       if (frame_mv[NEARESTMV][ALTREF_FRAME].as_int != 0)
-        mode_skip_mask |= (1 << THR_NEARESTA);
+        mode_skip_mask[ALTREF_FRAME] |= (1 << NEARESTMV);
     }
   }
 
@@ -2702,13 +2704,15 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         case INTRA_FRAME:
           break;
         case LAST_FRAME:
-          mode_skip_mask |= LAST_FRAME_MODE_MASK;
+          ref_frame_skip_mask[0] |= LAST_FRAME_MODE_MASK;
+          ref_frame_skip_mask[1] |= SECOND_REF_FRAME_MASK;
           break;
         case GOLDEN_FRAME:
-          mode_skip_mask |= GOLDEN_FRAME_MODE_MASK;
+          ref_frame_skip_mask[0] |= GOLDEN_FRAME_MODE_MASK;
+          ref_frame_skip_mask[1] |= SECOND_REF_FRAME_MASK;
           break;
         case ALTREF_FRAME:
-          mode_skip_mask |= ALT_REF_MODE_MASK;
+          ref_frame_skip_mask[0] |= ALT_REF_MODE_MASK;
           break;
         case NONE:
         case MAX_REF_FRAMES:
@@ -2717,17 +2721,24 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       }
     }
 
-    if (cpi->sf.alt_ref_search_fp && cpi->rc.is_src_frame_alt_ref) {
-      mode_skip_mask = 0;
-      if (!(ref_frame == ALTREF_FRAME && second_ref_frame == NONE))
-        continue;
+    if (cpi->rc.is_src_frame_alt_ref) {
+      if (cpi->sf.alt_ref_search_fp) {
+        mode_skip_mask[ALTREF_FRAME] = 0;
+
+        if (!(ref_frame == ALTREF_FRAME && second_ref_frame == NONE))
+          continue;
+      }
     }
 
     if (bsize > cpi->sf.max_intra_bsize)
       if (ref_frame == INTRA_FRAME)
         continue;
 
-    if (mode_skip_mask & (1 << mode_index))
+    if (ref_frame_skip_mask[0] & (1 << ref_frame) &&
+        ref_frame_skip_mask[1] & (1 << MAX(0, second_ref_frame)))
+      continue;
+
+    if (mode_skip_mask[ref_frame] & (1 << this_mode))
       continue;
 
     // Test best rd so far against threshold for trying this mode.
