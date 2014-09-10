@@ -121,6 +121,23 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//YKQ\u003d",
+        "filename": "test/dct32x32_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-09-10T01:04:59Z",
+      "side": 1,
+      "message": "maybe max_ instead of mask_?",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//YR8\u003d",
         "filename": "test/dct32x32_test.cc",
         "patchSetId": 7
@@ -183,6 +200,74 @@
       "writtenOn": "2014-09-09T22:24:17Z",
       "side": 1,
       "message": "VPX_BITS_8/10/12?",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YKM\u003d",
+        "filename": "test/dct32x32_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 311,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-09-10T01:04:59Z",
+      "side": 1,
+      "message": "It seems you can use \"#if CONFIG_VP9_HIGHBITDEPTH\" just for 10 and 12 bit tuples here.",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YKI\u003d",
+        "filename": "test/dct32x32_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 323,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-09-10T01:04:59Z",
+      "side": 1,
+      "message": "Do you really need \"\u0026\u0026 !CONFIG_VP9_HIGHBITDEPTH\" here?",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YKE\u003d",
+        "filename": "test/dct32x32_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 333,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-09-10T01:04:59Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YKA\u003d",
+        "filename": "test/dct32x32_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 343,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-09-10T01:04:59Z",
+      "side": 1,
+      "message": "ditto",
       "revId": "1fdf6924e724fbf46a88a123e6581e4087ce48de",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
