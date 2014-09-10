@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//YAo\u003d",
+        "filename": "vp9/common/vp9_rtcd_defs.pl",
+        "patchSetId": 1
+      },
+      "lineNbr": 790,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-09-10T21:21:01Z",
+      "side": 1,
+      "message": "The syntax is fine. It passes all the tests in the highbitdepth branch.",
+      "parentUuid": "AAAAdn//YOk\u003d",
+      "revId": "5b854175e5d4aaa092246b84879d99d9148183d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//YOg\u003d",
         "filename": "vp9/encoder/vp9_sad.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-09-09T22:38:09Z",
       "side": 1,
       "message": "nit: align",
+      "revId": "5b854175e5d4aaa092246b84879d99d9148183d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YIU\u003d",
+        "filename": "vp9/encoder/vp9_sad.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-09-10T21:21:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YOg\u003d",
       "revId": "5b854175e5d4aaa092246b84879d99d9148183d0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//YIQ\u003d",
+        "filename": "vp9/encoder/vp9_sad.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-09-10T21:21:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YLI\u003d",
+      "revId": "5b854175e5d4aaa092246b84879d99d9148183d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//YLE\u003d",
         "filename": "vp9/encoder/vp9_sad.c",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2014-09-10T00:32:57Z",
       "side": 1,
       "message": "const uint16_t *b \u003d ...",
+      "revId": "5b854175e5d4aaa092246b84879d99d9148183d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YIM\u003d",
+        "filename": "vp9/encoder/vp9_sad.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-09-10T21:21:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YLE\u003d",
       "revId": "5b854175e5d4aaa092246b84879d99d9148183d0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//YII\u003d",
+        "filename": "vp9/encoder/vp9_sad.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-09-10T21:21:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YK4\u003d",
+      "revId": "5b854175e5d4aaa092246b84879d99d9148183d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//YKw\u003d",
         "filename": "vp9/encoder/vp9_sad.c",
         "patchSetId": 1
@@ -98,6 +188,24 @@
       "writtenOn": "2014-09-10T00:32:57Z",
       "side": 1,
       "message": "Can you just cast comp_pred to (const uint8_t *) and call high_sad? It this case you can remove high_sadb completely.",
+      "revId": "5b854175e5d4aaa092246b84879d99d9148183d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YIE\u003d",
+        "filename": "vp9/encoder/vp9_sad.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-09-10T21:21:01Z",
+      "side": 1,
+      "message": "I think no.",
+      "parentUuid": "AAAAdn//YKw\u003d",
       "revId": "5b854175e5d4aaa092246b84879d99d9148183d0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//YA8\u003d",
+        "filename": "vp9/encoder/vp9_variance.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 271,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-09-10T21:21:01Z",
+      "side": 1,
+      "message": "Will be used later from other files - so not static.",
+      "parentUuid": "AAAAdn//YKk\u003d",
+      "revId": "5b854175e5d4aaa092246b84879d99d9148183d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//YKg\u003d",
         "filename": "vp9/encoder/vp9_variance.c",
         "patchSetId": 1
@@ -132,6 +258,24 @@
       "writtenOn": "2014-09-10T00:39:48Z",
       "side": 1,
       "message": "static",
+      "revId": "5b854175e5d4aaa092246b84879d99d9148183d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YA4\u003d",
+        "filename": "vp9/encoder/vp9_variance.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 293,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-09-10T21:21:01Z",
+      "side": 1,
+      "message": "ditto.",
+      "parentUuid": "AAAAdn//YKg\u003d",
       "revId": "5b854175e5d4aaa092246b84879d99d9148183d0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//YH4\u003d",
+        "filename": "vp9/encoder/vp9_variance.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 317,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-09-10T21:21:01Z",
+      "side": 1,
+      "message": "ditto.",
+      "parentUuid": "AAAAdn//YKc\u003d",
+      "revId": "5b854175e5d4aaa092246b84879d99d9148183d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//YKY\u003d",
         "filename": "vp9/encoder/vp9_variance.c",
         "patchSetId": 1
@@ -166,6 +328,24 @@
       "writtenOn": "2014-09-10T00:39:48Z",
       "side": 1,
       "message": "Could you define just one function based on uint64_t and reuse it everywhere?",
+      "revId": "5b854175e5d4aaa092246b84879d99d9148183d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YA0\u003d",
+        "filename": "vp9/encoder/vp9_variance.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 322,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-09-10T21:21:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YKY\u003d",
       "revId": "5b854175e5d4aaa092246b84879d99d9148183d0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//YH0\u003d",
+        "filename": "vp9/encoder/vp9_variance.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 353,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-09-10T21:21:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YOc\u003d",
+      "revId": "5b854175e5d4aaa092246b84879d99d9148183d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//YOY\u003d",
         "filename": "vp9/encoder/vp9_variance.c",
         "patchSetId": 1
@@ -200,6 +398,24 @@
       "writtenOn": "2014-09-09T22:38:09Z",
       "side": 1,
       "message": "remove horiz whitespace",
+      "revId": "5b854175e5d4aaa092246b84879d99d9148183d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YHw\u003d",
+        "filename": "vp9/encoder/vp9_variance.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 361,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-09-10T21:21:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YOY\u003d",
       "revId": "5b854175e5d4aaa092246b84879d99d9148183d0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -223,6 +439,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//X8c\u003d",
+        "filename": "vp9/encoder/vp9_variance.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 389,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-09-10T21:21:01Z",
+      "side": 1,
+      "message": "Removed",
+      "parentUuid": "AAAAdn//YKo\u003d",
+      "revId": "5b854175e5d4aaa092246b84879d99d9148183d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//YOU\u003d",
         "filename": "vp9/encoder/vp9_variance.c",
         "patchSetId": 1
@@ -240,6 +474,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//YAs\u003d",
+        "filename": "vp9/encoder/vp9_variance.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 437,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-09-10T21:21:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YOU\u003d",
+      "revId": "5b854175e5d4aaa092246b84879d99d9148183d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//YOQ\u003d",
         "filename": "vp9/encoder/vp9_variance.c",
         "patchSetId": 1
@@ -251,6 +503,24 @@
       "writtenOn": "2014-09-09T22:38:09Z",
       "side": 1,
       "message": "nit: extra line",
+      "revId": "5b854175e5d4aaa092246b84879d99d9148183d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YHs\u003d",
+        "filename": "vp9/encoder/vp9_variance.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 471,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-09-10T21:21:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YOQ\u003d",
       "revId": "5b854175e5d4aaa092246b84879d99d9148183d0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
