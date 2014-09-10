@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//X+c\u003d",
+        "filename": "examples/vp9_lossless_encoder.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-10T20:52:54Z",
+      "side": 1,
+      "message": "This is a pretty simple example, so it probably doesn\u0027t need the full comment block treatment that exists in the other examples.\n\nYou should add an extra line of text to the usage that details the purpose of the application. Nothing huge; the final result should be something like:\n\n    vp9_lossless_encoder: Example application for demonstration of VP9 lossless encoding. Supports raw input only.\n    Usage: ...",
+      "revId": "066b88194114e7fbce653dcbe327c1a4160a1e13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//X9g\u003d",
+        "filename": "examples/vp9_lossless_encoder.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-10T20:52:54Z",
+      "side": 1,
+      "message": "I thought the encoder was fine with odd width/height? Doesn\u0027t it just extend?\n\nThe validity of odd YV12/I420 isn\u0027t really the point, and yes it\u0027s a good practice to show people that this is a bad thing. If you want to keep the odd check (assuming I\u0027m correct and the encoder is OK with it) I think you need an explanation about why it\u0027s rejected given that this is example code.",
+      "revId": "066b88194114e7fbce653dcbe327c1a4160a1e13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
