@@ -547,8 +547,8 @@ static void high_img_upshift(vpx_image_t *dst, vpx_image_t *src,
     int h = src->d_h;
     int x, y;
     if (plane) {
-      w >>= src->x_chroma_shift;
-      h >>= src->y_chroma_shift;
+      w = (w + src->x_chroma_shift) >> src->x_chroma_shift;
+      h = (h + src->y_chroma_shift) >> src->y_chroma_shift;
     }
     for (y = 0; y < h; y++) {
       uint16_t *p_src = (uint16_t *)(src->planes[plane] +
@@ -586,8 +586,8 @@ static void low_img_upshift(vpx_image_t *dst, vpx_image_t *src,
     int h = src->d_h;
     int x, y;
     if (plane) {
-      w >>= src->x_chroma_shift;
-      h >>= src->y_chroma_shift;
+      w = (w + src->x_chroma_shift) >> src->x_chroma_shift;
+      h = (h + src->y_chroma_shift) >> src->y_chroma_shift;
     }
     for (y = 0; y < h; y++) {
       uint8_t *p_src = src->planes[plane] + y * src->stride[plane];
@@ -632,8 +632,8 @@ static void high_img_downshift(vpx_image_t *dst, vpx_image_t *src,
     int h = src->d_h;
     int x, y;
     if (plane) {
-      w >>= src->x_chroma_shift;
-      h >>= src->y_chroma_shift;
+      w = (w + src->x_chroma_shift) >> src->x_chroma_shift;
+      h = (h + src->y_chroma_shift) >> src->y_chroma_shift;
     }
     for (y = 0; y < h; y++) {
       uint16_t *p_src = (uint16_t *)(src->planes[plane] +
@@ -670,8 +670,8 @@ static void low_img_downshift(vpx_image_t *dst, vpx_image_t *src,
     int h = src->d_h;
     int x, y;
     if (plane) {
-      w >>= src->x_chroma_shift;
-      h >>= src->y_chroma_shift;
+      w = (w + src->x_chroma_shift) >> src->x_chroma_shift;
+      h = (h + src->y_chroma_shift) >> src->y_chroma_shift;
     }
     for (y = 0; y < h; y++) {
       uint16_t *p_src = (uint16_t *)(src->planes[plane] +
