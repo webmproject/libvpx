@@ -28,9 +28,8 @@
 // Encoding A Frame
 // ----------------
 // Encoding a frame in two pass mode is identical to the simple encoder
-// example, except the deadline is set to VPX_DL_BEST_QUALITY to get the
-// best quality possible. VPX_DL_GOOD_QUALITY could also be used.
-//
+// example. To increase the quality while sacrificing encoding speed,
+// VPX_DL_BEST_QUALITY can be used in place of VPX_DL_GOOD_QUALITY.
 //
 // Processing Statistics Packets
 // -----------------------------
@@ -141,13 +140,13 @@ static vpx_fixed_buf_t pass0(vpx_image_t *raw,
   // Calculate frame statistics.
   while (vpx_img_read(raw, infile)) {
     ++frame_count;
-    get_frame_stats(&codec, raw, frame_count, 1, 0, VPX_DL_BEST_QUALITY,
+    get_frame_stats(&codec, raw, frame_count, 1, 0, VPX_DL_GOOD_QUALITY,
                     &stats);
   }
 
   // Flush encoder.
   while (get_frame_stats(&codec, NULL, frame_count, 1, 0,
-                         VPX_DL_BEST_QUALITY, &stats)) {}
+                         VPX_DL_GOOD_QUALITY, &stats)) {}
 
   printf("Pass 0 complete. Processed %d frames.\n", frame_count);
   if (vpx_codec_destroy(&codec))
@@ -181,11 +180,11 @@ static void pass1(vpx_image_t *raw,
   // Encode frames.
   while (vpx_img_read(raw, infile)) {
     ++frame_count;
-    encode_frame(&codec, raw, frame_count, 1, 0, VPX_DL_BEST_QUALITY, writer);
+    encode_frame(&codec, raw, frame_count, 1, 0, VPX_DL_GOOD_QUALITY, writer);
   }
 
   // Flush encoder.
-  while (encode_frame(&codec, NULL, -1, 1, 0, VPX_DL_BEST_QUALITY, writer)) {}
+  while (encode_frame(&codec, NULL, -1, 1, 0, VPX_DL_GOOD_QUALITY, writer)) {}
 
   printf("\n");
 
