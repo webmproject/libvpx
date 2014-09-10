@@ -269,10 +269,10 @@ void vp9_comp_avg_pred(uint8_t *comp_pred, const uint8_t *pred, int width,
 
 #if CONFIG_VP9_HIGH
 
-void high_variance(const uint8_t *a8, int  a_stride,
-                   const uint8_t *b8, int  b_stride,
-                   int w, int h, unsigned int *sse,
-                   int *sum) {
+void high_variance64(const uint8_t *a8, int  a_stride,
+                     const uint8_t *b8, int  b_stride,
+                     int w, int h, uint64_t *sse,
+                     uint64_t *sum) {
   int i, j;
 
   uint16_t *a = CONVERT_TO_SHORTPTR(a8);
@@ -291,26 +291,24 @@ void high_variance(const uint8_t *a8, int  a_stride,
   }
 }
 
+void high_variance(const uint8_t *a8, int  a_stride,
+                   const uint8_t *b8, int  b_stride,
+                   int w, int h, unsigned int *sse,
+                   int *sum) {
+  uint64_t sse_long = 0;
+  uint64_t sum_long = 0;
+  high_variance64(a8, a_stride, b8, b_stride, w, h, &sse_long, &sum_long);
+  *sse = sse_long;
+  *sum = sum_long;
+}
+
 void high_10_variance(const uint8_t *a8, int  a_stride,
                       const uint8_t *b8, int  b_stride,
                       int w, int h, unsigned int *sse,
                       int *sum) {
-  int i, j;
   uint64_t sse_long = 0;
   uint64_t sum_long = 0;
-
-  uint16_t *a = CONVERT_TO_SHORTPTR(a8);
-  uint16_t *b = CONVERT_TO_SHORTPTR(b8);
-
-  for (i = 0; i < h; i++) {
-    for (j = 0; j < w; j++) {
-      const int diff = a[j] - b[j];
-      sum_long += diff;
-      sse_long += diff * diff;
-    }
-    a += a_stride;
-    b += b_stride;
-  }
+  high_variance64(a8, a_stride, b8, b_stride, w, h, &sse_long, &sum_long);
   *sum = ROUND_POWER_OF_TWO(sum_long, 2);
   *sse = ROUND_POWER_OF_TWO(sse_long, 4);
 }
@@ -319,22 +317,9 @@ void high_12_variance(const uint8_t *a8, int  a_stride,
                       const uint8_t *b8, int  b_stride,
                       int w, int h, unsigned int *sse,
                       int *sum) {
-  int i, j;
   uint64_t sse_long = 0;
   uint64_t sum_long = 0;
-
-  uint16_t *a = CONVERT_TO_SHORTPTR(a8);
-  uint16_t *b = CONVERT_TO_SHORTPTR(b8);
-
-  for (i = 0; i < h; i++) {
-    for (j = 0; j < w; j++) {
-      const int diff = a[j] - b[j];
-      sum_long += diff;
-      sse_long += diff * diff;
-    }
-    a += a_stride;
-    b += b_stride;
-  }
+  high_variance64(a8, a_stride, b8, b_stride, w, h, &sse_long, &sum_long);
   *sum = ROUND_POWER_OF_TWO(sum_long, 4);
   *sse = ROUND_POWER_OF_TWO(sse_long, 8);
 }
@@ -385,15 +370,6 @@ static void high_var_filter_block2d_bil_second_pass(
     src_ptr += src_pixels_per_line - output_width;
     output_ptr += output_width;
   }
-}
-
-unsigned int vp9_high_get_mb_ss_c(const int16_t *src_ptr) {
-  unsigned int i, sum = 0;
-
-  for (i = 0; i < 256; i++) {
-    sum += (src_ptr[i] * src_ptr[i]);
-  }
-  return sum;
 }
 
 #define HIGH_VAR(W, H) \

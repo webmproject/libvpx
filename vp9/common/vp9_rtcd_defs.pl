@@ -1787,8 +1787,6 @@ specialize qw/vp9_high_12_mse16x8/;
 add_proto qw/unsigned int vp9_high_12_mse8x8/, "const uint8_t *src_ptr, int  source_stride, const uint8_t *ref_ptr, int  recon_stride, unsigned int *sse";
 specialize qw/vp9_high_12_mse8x8/;
 
-add_proto qw/unsigned int vp9_high_get_mb_ss/, "const int16_t *";
-specialize qw/vp9_high_get_mb_ss/;
 # ENCODEMB INVOKE
 
 add_proto qw/int64_t vp9_high_block_error/, "const tran_low_t *coeff, const tran_low_t *dqcoeff, intptr_t block_size, int64_t *ssz, int bps";
