@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//X5c\u003d",
+        "filename": "build/make/rtcd.pl",
+        "patchSetId": 4
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-10T22:38:03Z",
+      "side": 1,
+      "message": "this is not what I asked for at all the next if was fine; I was talking about the capture -\u003e next if /^(?:CONFIG_|HAVE_)/;",
+      "revId": "bdae59cb62bfe22cb3c22a8c955f902fa73d0c9e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
