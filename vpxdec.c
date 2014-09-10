@@ -692,6 +692,14 @@ static void img_downshift(vpx_image_t *dst, vpx_image_t *src,
     low_img_downshift(dst, src, down_shift);
   }
 }
+
+static int img_shifted_realloc_required(const vpx_image_t *img,
+                                        const vpx_image_t *shifted,
+                                        vpx_img_fmt_t required_fmt) {
+  return img->d_w != shifted->d_w ||
+         img->d_h != shifted->d_h ||
+         required_fmt != shifted->fmt;
+}
 #endif
 
 int main_loop(int argc, const char **argv_) {
@@ -1127,14 +1135,17 @@ int main_loop(int argc, const char **argv_) {
         out_bit_depth = img->bit_depth;
       // Shift up or down if necessary
       if (out_bit_depth != img->bit_depth) {
+        vpx_img_fmt_t shifted_fmt = out_bit_depth == 8
+            ? img->fmt ^ (img->fmt & VPX_IMG_FMT_HIGH)
+            : img->fmt | VPX_IMG_FMT_HIGH;
+        if (img_shifted &&
+            img_shifted_realloc_required(img, img_shifted, shifted_fmt)) {
+          vpx_img_free(img_shifted);
+          img_shifted = NULL;
+        }
         if (!img_shifted) {
-          if (out_bit_depth == 8) {
-            img_shifted = vpx_img_alloc(NULL, img->fmt - VPX_IMG_FMT_HIGH,
-                                     img->d_w, img->d_h, 16);
-          } else {
-            img_shifted = vpx_img_alloc(NULL, img->fmt | VPX_IMG_FMT_HIGH,
-                                     img->d_w, img->d_h, 16);
-          }
+          img_shifted = vpx_img_alloc(NULL, shifted_fmt,
+                                      img->d_w, img->d_h, 16);
           img_shifted->bit_depth = out_bit_depth;
         }
         if (out_bit_depth > img->bit_depth) {
