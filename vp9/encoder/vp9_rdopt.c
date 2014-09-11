@@ -2576,7 +2576,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   unsigned int ref_costs_single[MAX_REF_FRAMES], ref_costs_comp[MAX_REF_FRAMES];
   vp9_prob comp_mode_p;
   int64_t best_intra_rd = INT64_MAX;
-  int64_t best_inter_rd = INT64_MAX;
   unsigned int best_pred_sse = UINT_MAX;
   PREDICTION_MODE best_intra_mode = DC_PRED;
   int rate_uv_intra[TX_SIZES], rate_uv_tokenonly[TX_SIZES];
@@ -2956,11 +2955,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         best_intra_rd = this_rd;
         best_intra_mode = mbmi->mode;
       }
-    } else {
-      // Keep record of best inter rd with single reference
-      if (!comp_pred && !mode_excluded && this_rd < best_inter_rd) {
-        best_inter_rd = this_rd;
-      }
     }
 
     if (!disable_skip && ref_frame == INTRA_FRAME) {
@@ -3311,7 +3305,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   int ref_index, best_ref_index = 0;
   unsigned int ref_costs_single[MAX_REF_FRAMES], ref_costs_comp[MAX_REF_FRAMES];
   vp9_prob comp_mode_p;
-  int64_t best_inter_rd = INT64_MAX;
   INTERP_FILTER tmp_best_filter = SWITCHABLE;
   int rate_uv_intra, rate_uv_tokenonly;
   int64_t dist_uv;
@@ -3693,14 +3686,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 
       // Calculate the final RD estimate for this mode.
       this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
-    }
-
-    // Keep record of best inter rd with single reference
-    if (is_inter_block(mbmi) &&
-        !has_second_ref(mbmi) &&
-        !mode_excluded &&
-        this_rd < best_inter_rd) {
-      best_inter_rd = this_rd;
     }
 
     if (!disable_skip && ref_frame == INTRA_FRAME) {
