@@ -307,7 +307,6 @@ typedef struct vpx_svc_parameters {
   int temporal_layer;         /**< current temporal layer number - 0 = base */
   int max_quantizer;          /**< max quantizer for current layer */
   int min_quantizer;          /**< min quantizer for current layer */
-  int distance_from_i_frame;  /**< frame number within current gop */
   int lst_fb_idx;             /**< last frame frame buffer index */
   int gld_fb_idx;             /**< golden frame frame buffer index */
   int alt_fb_idx;             /**< alt reference frame frame buffer index */
