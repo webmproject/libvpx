@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//XsI\u003d",
+        "filename": "examples/vp9_lossless_encoder.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-09-11T18:27:23Z",
+      "side": 1,
+      "message": "Done. I slightly changed your text.",
+      "parentUuid": "AAAAdn//X+c\u003d",
+      "revId": "066b88194114e7fbce653dcbe327c1a4160a1e13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//X9g\u003d",
         "filename": "examples/vp9_lossless_encoder.c",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2014-09-10T20:52:54Z",
       "side": 1,
       "message": "I thought the encoder was fine with odd width/height? Doesn\u0027t it just extend?\n\nThe validity of odd YV12/I420 isn\u0027t really the point, and yes it\u0027s a good practice to show people that this is a bad thing. If you want to keep the odd check (assuming I\u0027m correct and the encoder is OK with it) I think you need an explanation about why it\u0027s rejected given that this is example code.",
+      "revId": "066b88194114e7fbce653dcbe327c1a4160a1e13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Xr0\u003d",
+        "filename": "examples/vp9_lossless_encoder.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1002442
+      },
+      "writtenOn": "2014-09-11T18:27:23Z",
+      "side": 1,
+      "message": "I just did the same thing as in all our examples. I will double check and remove all checks from all examples at once. Just to be consistent. Does it sound good?",
+      "parentUuid": "AAAAdn//X9g\u003d",
       "revId": "066b88194114e7fbce653dcbe327c1a4160a1e13",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
