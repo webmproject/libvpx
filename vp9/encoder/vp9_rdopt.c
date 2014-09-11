@@ -1229,11 +1229,9 @@ static INLINE int mv_has_subpel(const MV *mv) {
 // TODO(aconverse): Find out if this is still productive then clean up or remove
 static int check_best_zero_mv(
     const VP9_COMP *cpi, const uint8_t mode_context[MAX_REF_FRAMES],
-    int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES],
-    int inter_mode_mask, int this_mode,
+    int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES], int this_mode,
     const MV_REFERENCE_FRAME ref_frames[2]) {
-  if ((inter_mode_mask & (1 << ZEROMV)) &&
-      (this_mode == NEARMV || this_mode == NEARESTMV || this_mode == ZEROMV) &&
+  if ((this_mode == NEARMV || this_mode == NEARESTMV || this_mode == ZEROMV) &&
       frame_mv[this_mode][ref_frames[0]].as_int == 0 &&
       (ref_frames[1] == NONE ||
        frame_mv[this_mode][ref_frames[1]].as_int == 0)) {
@@ -1351,7 +1349,6 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
           continue;
 
         if (!check_best_zero_mv(cpi, mbmi->mode_context, frame_mv,
-                                inter_mode_mask,
                                 this_mode, mbmi->ref_frame))
           continue;
 
@@ -2597,7 +2594,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   const int mode_search_skip_flags = cpi->sf.mode_search_skip_flags;
   const int intra_y_mode_mask =
       cpi->sf.intra_y_mode_mask[max_txsize_lookup[bsize]];
-  int inter_mode_mask = cpi->sf.inter_mode_mask[bsize];
   vp9_zero(best_mbmode);
   x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
 
@@ -2706,8 +2702,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
     this_mode = vp9_mode_order[mode_index].mode;
     ref_frame = vp9_mode_order[mode_index].ref_frame[0];
-    if (ref_frame != INTRA_FRAME && !(inter_mode_mask & (1 << this_mode)))
-      continue;
     second_ref_frame = vp9_mode_order[mode_index].ref_frame[1];
 
     // Look at the reference frame of the best mode so far and set the
@@ -2845,7 +2839,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     } else {
       const MV_REFERENCE_FRAME ref_frames[2] = {ref_frame, second_ref_frame};
       if (!check_best_zero_mv(cpi, mbmi->mode_context, frame_mv,
-                              inter_mode_mask, this_mode, ref_frames))
+                              this_mode, ref_frames))
         continue;
     }
 
