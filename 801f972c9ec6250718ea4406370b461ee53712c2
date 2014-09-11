@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//YCI\u003d",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-11T05:04:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YM0\u003d",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//YMw\u003d",
         "filename": "vp9/common/vp9_alloccommon.c",
         "patchSetId": 54
@@ -30,6 +48,24 @@
       "writtenOn": "2014-09-10T00:06:09Z",
       "side": 1,
       "message": "should be sizeof(cm-\u003emip_array[0])",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YCE\u003d",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-11T05:04:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YMw\u003d",
       "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//YB8\u003d",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-11T05:04:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YMs\u003d",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//YMk\u003d",
         "filename": "vp9/decoder/vp9_decoder.c",
         "patchSetId": 54
@@ -64,6 +118,24 @@
       "writtenOn": "2014-09-10T00:06:09Z",
       "side": 1,
       "message": "just make this if (!frame_parallel) ++pool-\u003e...",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YB4\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 213,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-11T05:04:42Z",
+      "side": 1,
+      "message": "Done. Thanks. Looks better.",
+      "parentUuid": "AAAAdn//YMk\u003d",
       "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//YBo\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-11T05:04:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YMo\u003d",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//YMg\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 54
@@ -98,6 +188,24 @@
       "writtenOn": "2014-09-10T00:06:09Z",
       "side": 1,
       "message": "available",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//X/s\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-11T05:04:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YMg\u003d",
       "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//X/o\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-11T05:04:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YMc\u003d",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//YMY\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 54
@@ -132,6 +258,24 @@
       "writtenOn": "2014-09-10T00:06:09Z",
       "side": 1,
       "message": "with n\u003d1, do you want to spawn a thread? execute() could be used in that case",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//X/k\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 365,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-11T05:04:42Z",
+      "side": 1,
+      "message": "Current plan is use serial decode instead of parallel decode if thread is only 1 as there is no way to work around the annoying prev_mi and mi. It will be more tricky. Also, parallel decode with 1 thread will be slower due to memcpy of the buffer into internal memory. I change the following code to reflect this:\n    ctx-\u003epriv-\u003ealg_priv-\u003eframe_parallel_decode \u003d\n        (ctx-\u003einit_flags \u0026 VPX_CODEC_USE_FRAME_THREADING) ? 1 : 0;",
+      "parentUuid": "AAAAdn//YMY\u003d",
       "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//X/U\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 440,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-11T05:04:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YMU\u003d",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//YMQ\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 54
@@ -166,6 +328,24 @@
       "writtenOn": "2014-09-10T00:06:09Z",
       "side": 1,
       "message": "--ctx-\u003e...",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//X/Q\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 458,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-11T05:04:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YMQ\u003d",
       "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//X/Y\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 548,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-11T05:04:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YMM\u003d",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//YMI\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 54
@@ -200,6 +398,24 @@
       "writtenOn": "2014-09-10T00:06:09Z",
       "side": 1,
       "message": "++ctx-\u003e...",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//X/M\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 552,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-11T05:04:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YMI\u003d",
       "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -223,6 +439,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//X/I\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 563,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-11T05:04:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YME\u003d",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//YMA\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 54
@@ -234,6 +468,24 @@
       "writtenOn": "2014-09-10T00:06:09Z",
       "side": 1,
       "message": "...finishes decoding",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//X/E\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 620,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-11T05:04:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YMA\u003d",
       "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -257,6 +509,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//X/A\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 625,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-11T05:04:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YL8\u003d",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//YL4\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 54
@@ -268,6 +538,24 @@
       "writtenOn": "2014-09-10T00:06:09Z",
       "side": 1,
       "message": "these 2 branches look similar, is all this necessary when frame_parallel_decode is false?",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//X+s\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 637,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-11T05:04:42Z",
+      "side": 1,
+      "message": "Both branches are for frame_parallel_decode case. The upper one is for superframe with multiple frames, while this one is for superframe with only one frame. To avoid code duplication, I already put all the code inside wait_worker_and_cache_frame. \nI could put error handling inside wait_work_and_cache_frame too, but it seems that will break readability.",
+      "parentUuid": "AAAAdn//YL4\u003d",
       "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -291,6 +579,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//X+g\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 708,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-11T05:04:42Z",
+      "side": 1,
+      "message": "Done. My lock_buffer_pool originally accept VP9_COMMON as input which is not good here. I change the lock_buffer_pool to use BufferPool as input now.",
+      "parentUuid": "AAAAdn//YL0\u003d",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//YLs\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 54
@@ -302,6 +608,24 @@
       "writtenOn": "2014-09-10T00:06:09Z",
       "side": 1,
       "message": "breaking after \u0027\u0026\u0026\u0027 is more common in this module I think",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//X+Y\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 729,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-11T05:04:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YLs\u003d",
       "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -325,6 +649,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//X+U\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 739,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-11T05:04:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YLo\u003d",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//YLk\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 54
@@ -336,6 +678,24 @@
       "writtenOn": "2014-09-10T00:06:09Z",
       "side": 1,
       "message": "prefer predecrement",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//X+Q\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 740,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-11T05:04:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YLk\u003d",
       "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -359,6 +719,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//X+M\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 753,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-11T05:04:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YLg\u003d",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//YLc\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 54
@@ -370,6 +748,24 @@
       "writtenOn": "2014-09-10T00:06:09Z",
       "side": 1,
       "message": "preincrement",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//X+I\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 757,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-11T05:04:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YLc\u003d",
       "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
