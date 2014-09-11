@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Xvw\u003d",
+        "filename": "test/dct32x32_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 313,
+      "author": {
+        "id": 1115299
+      },
+      "writtenOn": "2014-09-11T12:46:25Z",
+      "side": 1,
+      "message": "You need to take care with macros here because VS2012 has some problems with macro expansion.\n\nSee the changes made here:\nhttps://gerrit.chromium.org/gerrit/#/c/71101/\n\nI think this means that the #if CONFIG_VP9_HIGHBITDEPTH needs to be outside the INSTANTIATE_TEST_CASE_P macro.",
+      "revId": "0cfdb229ace4b49f370dceb6796e137fd32f6867",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
