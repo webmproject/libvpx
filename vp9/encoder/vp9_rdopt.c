@@ -2592,8 +2592,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   const int *const rd_threshes = rd_opt->threshes[segment_id][bsize];
   const int *const rd_thresh_freq_fact = rd_opt->thresh_freq_fact[bsize];
   const int mode_search_skip_flags = cpi->sf.mode_search_skip_flags;
-  const int intra_y_mode_mask =
-      cpi->sf.intra_y_mode_mask[max_txsize_lookup[bsize]];
   vp9_zero(best_mbmode);
   x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
 
@@ -2685,6 +2683,9 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     ref_frame_skip_mask[0] |= (1 << INTRA_FRAME);
     ref_frame_skip_mask[1] |= (1 << INTRA_FRAME);
   }
+
+  mode_skip_mask[INTRA_FRAME] |=
+      ~(cpi->sf.intra_y_mode_mask[max_txsize_lookup[bsize]]);
 
   for (mode_index = 0; mode_index < MAX_MODES; ++mode_index) {
     int mode_excluded = 0;
@@ -2813,8 +2814,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         if ((x->source_variance << num_pels_log2_lookup[bsize]) > best_pred_sse)
           continue;
 
-      if (!(intra_y_mode_mask & (1 << this_mode)))
-        continue;
       if (this_mode != DC_PRED) {
         // Disable intra modes other than DC_PRED for blocks with low variance
         // Threshold for intra skipping based on source variance
