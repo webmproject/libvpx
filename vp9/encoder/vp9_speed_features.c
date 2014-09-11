@@ -131,8 +131,7 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
     sf->tx_size_search_method = USE_LARGESTALL;
     sf->disable_split_mask = DISABLE_ALL_SPLIT;
     sf->adaptive_rd_thresh = 4;
-    sf->mode_search_skip_flags |= FLAG_SKIP_COMP_REFMISMATCH |
-                                  FLAG_EARLY_TERMINATE;
+    sf->mode_search_skip_flags |= FLAG_EARLY_TERMINATE;
     sf->disable_filter_search_var_thresh = 200;
     sf->use_lastframe_partitioning = LAST_FRAME_PARTITION_ALL;
     sf->use_lp32x32fdct = 1;
