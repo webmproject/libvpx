@@ -282,7 +282,7 @@ int main(int argc, const char **argv) {
   int frame_duration = 1; /* 1 timebase tick per frame */
   FILE *infile = NULL;
   int end_of_stream = 0;
-  int frame_size;
+  int frames_received = 0;
 
   memset(&svc_ctx, 0, sizeof(svc_ctx));
   svc_ctx.log_print = 1;
@@ -325,6 +325,8 @@ int main(int argc, const char **argv) {
 
   // Encode frames
   while (!end_of_stream) {
+    vpx_codec_iter_t iter = NULL;
+    const vpx_codec_cx_pkt_t *cx_pkt;
     if (frame_cnt >= app_input.frames_to_code || !vpx_img_read(&raw, infile)) {
       // We need one extra vpx_svc_encode call at end of stream to flush
       // encoder and get remaining data
@@ -337,18 +339,34 @@ int main(int argc, const char **argv) {
     if (res != VPX_CODEC_OK) {
       die_codec(&codec, "Failed to encode frame");
     }
-    if (!(app_input.passes == 2 && app_input.pass == 1)) {
-      while ((frame_size = vpx_svc_get_frame_size(&svc_ctx)) > 0) {
-        vpx_video_writer_write_frame(writer,
-                                     vpx_svc_get_buffer(&svc_ctx),
-                                     frame_size, pts);
+
+    while ((cx_pkt = vpx_codec_get_cx_data(&codec, &iter)) != NULL) {
+      switch (cx_pkt->kind) {
+        case VPX_CODEC_CX_FRAME_PKT: {
+          if (cx_pkt->data.frame.sz > 0)
+            vpx_video_writer_write_frame(writer,
+                                         cx_pkt->data.frame.buf,
+                                         cx_pkt->data.frame.sz,
+                                         cx_pkt->data.frame.pts);
+
+          printf("SVC frame: %d, kf: %d, size: %d, pts: %d\n", frames_received,
+                 !!(cx_pkt->data.frame.flags & VPX_FRAME_IS_KEY),
+                 (int)cx_pkt->data.frame.sz, (int)cx_pkt->data.frame.pts);
+          ++frames_received;
+          break;
+        }
+        case VPX_CODEC_STATS_PKT: {
+          stats_write(&app_input.rc_stats,
+                      cx_pkt->data.twopass_stats.buf,
+                      cx_pkt->data.twopass_stats.sz);
+          break;
+        }
+        default: {
+          break;
+        }
       }
     }
-    if (vpx_svc_get_rc_stats_buffer_size(&svc_ctx) > 0) {
-      stats_write(&app_input.rc_stats,
-                  vpx_svc_get_rc_stats_buffer(&svc_ctx),
-                  vpx_svc_get_rc_stats_buffer_size(&svc_ctx));
-    }
+
     if (!end_of_stream) {
       ++frame_cnt;
       pts += frame_duration;
