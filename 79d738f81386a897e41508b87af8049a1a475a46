@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//X2E\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-09-11T00:50:39Z",
+      "side": 1,
+      "message": "Do you mean split the first item? Done if I understand it properly.",
+      "parentUuid": "AAAAdn//X3c\u003d",
+      "revId": "79d738f81386a897e41508b87af8049a1a475a46",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//X3g\u003d",
         "filename": "vpx/vpx_encoder.h",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-09-10T23:58:25Z",
       "side": 1,
       "message": "I think we want to protect these still, as this is still an experiment",
+      "revId": "79d738f81386a897e41508b87af8049a1a475a46",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//X2M\u003d",
+        "filename": "vpx/vpx_encoder.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2014-09-11T00:50:39Z",
+      "side": 1,
+      "message": "Done. But I have to put #include \"vpx_config.h\" ahead of #include \"vpx/internal/vpx_codec_internal.h\" in vpx_encoder.c",
+      "parentUuid": "AAAAdn//X3g\u003d",
       "revId": "79d738f81386a897e41508b87af8049a1a475a46",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
