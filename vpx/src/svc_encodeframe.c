@@ -114,64 +114,9 @@ typedef struct SvcInternal {
   int is_keyframe;
   int use_multiple_frame_contexts;
 
-  FrameData *frame_list;
-  FrameData *frame_temp;
-
-  char *rc_stats_buf;
-  size_t rc_stats_buf_size;
-  size_t rc_stats_buf_used;
-
   char message_buffer[2048];
   vpx_codec_ctx_t *codec_ctx;
 } SvcInternal;
-
-// create FrameData from encoder output
-static struct FrameData *fd_create(void *buf, size_t size,
-                                   vpx_codec_frame_flags_t flags) {
-  struct FrameData *const frame_data =
-      (struct FrameData *)vpx_malloc(sizeof(*frame_data));
-  if (frame_data == NULL) {
-    return NULL;
-  }
-  frame_data->buf = vpx_malloc(size);
-  if (frame_data->buf == NULL) {
-    vpx_free(frame_data);
-    return NULL;
-  }
-  vpx_memcpy(frame_data->buf, buf, size);
-  frame_data->size = size;
-  frame_data->flags = flags;
-  return frame_data;
-}
-
-// free FrameData
-static void fd_free(struct FrameData *p) {
-  if (p) {
-    if (p->buf)
-      vpx_free(p->buf);
-    vpx_free(p);
-  }
-}
-
-// add FrameData to list
-static void fd_list_add(struct FrameData **list, struct FrameData *layer_data) {
-  struct FrameData **p = list;
-
-  while (*p != NULL) p = &(*p)->next;
-  *p = layer_data;
-  layer_data->next = NULL;
-}
-
-// free FrameData list
-static void fd_free_list(struct FrameData *list) {
-  struct FrameData *p = list;
-
-  while (p) {
-    list = list->next;
-    fd_free(p);
-    p = list;
-  }
-}
 
 static SvcInternal *get_svc_internal(SvcContext *svc_ctx) {
   if (svc_ctx == NULL) return NULL;
@@ -628,7 +573,6 @@ vpx_codec_err_t vpx_svc_encode(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
   }
 
   svc_log_reset(svc_ctx);
-  si->rc_stats_buf_used = 0;
 
   si->layers = svc_ctx->spatial_layers;
   if (si->encode_frame_count == 0) {
@@ -659,20 +603,6 @@ vpx_codec_err_t vpx_svc_encode(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
   iter = NULL;
   while ((cx_pkt = vpx_codec_get_cx_data(codec_ctx, &iter))) {
     switch (cx_pkt->kind) {
-      case VPX_CODEC_CX_FRAME_PKT: {
-        fd_list_add(&si->frame_list, fd_create(cx_pkt->data.frame.buf,
-                                               cx_pkt->data.frame.sz,
-                                               cx_pkt->data.frame.flags));
-
-        svc_log(svc_ctx, SVC_LOG_DEBUG, "SVC frame: %d, kf: %d, size: %d, "
-                "pts: %d\n", si->frame_received,
-                (cx_pkt->data.frame.flags & VPX_FRAME_IS_KEY) ? 1 : 0,
-                (int)cx_pkt->data.frame.sz, (int)cx_pkt->data.frame.pts);
-
-        ++si->frame_received;
-        layer_for_psnr = 0;
-        break;
-      }
       case VPX_CODEC_PSNR_PKT: {
         int i;
         svc_log(svc_ctx, SVC_LOG_DEBUG,
@@ -692,25 +622,8 @@ vpx_codec_err_t vpx_svc_encode(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
           si->sse_sum[layer_for_psnr][i] += cx_pkt->data.psnr.sse[i];
         }
         ++layer_for_psnr;
-        break;
-      }
-      case VPX_CODEC_STATS_PKT: {
-        size_t new_size = si->rc_stats_buf_used +
-            cx_pkt->data.twopass_stats.sz;
-
-        if (new_size > si->rc_stats_buf_size) {
-          char *p = (char*)realloc(si->rc_stats_buf, new_size);
-          if (p == NULL) {
-            svc_log(svc_ctx, SVC_LOG_ERROR, "Error allocating stats buf\n");
-            return VPX_CODEC_MEM_ERROR;
-          }
-          si->rc_stats_buf = p;
-          si->rc_stats_buf_size = new_size;
-        }
-
-        memcpy(si->rc_stats_buf + si->rc_stats_buf_used,
-               cx_pkt->data.twopass_stats.buf, cx_pkt->data.twopass_stats.sz);
-        si->rc_stats_buf_used += cx_pkt->data.twopass_stats.sz;
+        if (layer_for_psnr == svc_ctx->spatial_layers)
+          layer_for_psnr = 0;
         break;
       }
 #if CONFIG_SPATIAL_SVC
@@ -741,39 +654,10 @@ const char *vpx_svc_get_message(const SvcContext *svc_ctx) {
   return si->message_buffer;
 }
 
-// We will maintain a list of output frame buffers since with lag_in_frame
-// we need to output all frame buffers at the end. vpx_svc_get_buffer() will
-// remove a frame buffer from the list the put it to a temporal pointer, which
-// will be removed at the next vpx_svc_get_buffer() or when closing encoder.
-void *vpx_svc_get_buffer(SvcContext *svc_ctx) {
-  SvcInternal *const si = get_svc_internal(svc_ctx);
-  if (svc_ctx == NULL || si == NULL || si->frame_list == NULL) return NULL;
-
-  if (si->frame_temp)
-    fd_free(si->frame_temp);
-
-  si->frame_temp = si->frame_list;
-  si->frame_list = si->frame_list->next;
-
-  return si->frame_temp->buf;
-}
-
-size_t vpx_svc_get_frame_size(const SvcContext *svc_ctx) {
-  const SvcInternal *const si = get_const_svc_internal(svc_ctx);
-  if (svc_ctx == NULL || si == NULL || si->frame_list == NULL) return 0;
-  return si->frame_list->size;
-}
-
 int vpx_svc_get_encode_frame_count(const SvcContext *svc_ctx) {
   const SvcInternal *const si = get_const_svc_internal(svc_ctx);
   if (svc_ctx == NULL || si == NULL) return 0;
   return si->encode_frame_count;
-}
-
-int vpx_svc_is_keyframe(const SvcContext *svc_ctx) {
-  const SvcInternal *const si = get_const_svc_internal(svc_ctx);
-  if (svc_ctx == NULL || si == NULL || si->frame_list == NULL) return 0;
-  return (si->frame_list->flags & VPX_FRAME_IS_KEY) != 0;
 }
 
 void vpx_svc_set_keyframe(SvcContext *svc_ctx) {
@@ -855,26 +739,8 @@ void vpx_svc_release(SvcContext *svc_ctx) {
   // SvcInternal if it was not already allocated
   si = (SvcInternal *)svc_ctx->internal;
   if (si != NULL) {
-    fd_free(si->frame_temp);
-    fd_free_list(si->frame_list);
-    if (si->rc_stats_buf) {
-      free(si->rc_stats_buf);
-    }
     free(si);
     svc_ctx->internal = NULL;
   }
 }
-
-size_t vpx_svc_get_rc_stats_buffer_size(const SvcContext *svc_ctx) {
-  const SvcInternal *const si = get_const_svc_internal(svc_ctx);
-  if (svc_ctx == NULL || si == NULL) return 0;
-  return si->rc_stats_buf_used;
-}
-
-char *vpx_svc_get_rc_stats_buffer(const SvcContext *svc_ctx) {
-  const SvcInternal *const si = get_const_svc_internal(svc_ctx);
-  if (svc_ctx == NULL || si == NULL) return NULL;
-  return si->rc_stats_buf;
-}
-
 

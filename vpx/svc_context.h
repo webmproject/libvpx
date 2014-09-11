@@ -96,29 +96,6 @@ const char *vpx_svc_dump_statistics(SvcContext *svc_ctx);
 const char *vpx_svc_get_message(const SvcContext *svc_ctx);
 
 /**
- * return size of encoded data to be returned by vpx_svc_get_buffer.
- * it needs to be called before vpx_svc_get_buffer.
- */
-size_t vpx_svc_get_frame_size(const SvcContext *svc_ctx);
-
-/**
- * return buffer with encoded data. encoder will maintain a list of frame
- * buffers. each call of vpx_svc_get_buffer() will return one frame.
- */
-void *vpx_svc_get_buffer(SvcContext *svc_ctx);
-
-/**
- * return size of two pass rate control stats data to be returned by
- * vpx_svc_get_rc_stats_buffer
- */
-size_t vpx_svc_get_rc_stats_buffer_size(const SvcContext *svc_ctx);
-
-/**
- * return buffer two pass of rate control stats data
- */
-char *vpx_svc_get_rc_stats_buffer(const SvcContext *svc_ctx);
-
-/**
  * return spatial resolution of the specified layer
  */
 vpx_codec_err_t vpx_svc_get_layer_resolution(const SvcContext *svc_ctx,
@@ -129,11 +106,6 @@ vpx_codec_err_t vpx_svc_get_layer_resolution(const SvcContext *svc_ctx,
  * return number of frames that have been encoded
  */
 int vpx_svc_get_encode_frame_count(const SvcContext *svc_ctx);
-
-/**
- * return 1 if last encoded frame was a keyframe
- */
-int vpx_svc_is_keyframe(const SvcContext *svc_ctx);
 
 /**
  * force the next frame to be a keyframe

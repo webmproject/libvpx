@@ -74,6 +74,7 @@ class SvcTest : public ::testing::Test {
     const vpx_codec_err_t res =
         vpx_svc_init(&svc_, &codec_, vpx_codec_vp9_cx(), &codec_enc_);
     EXPECT_EQ(VPX_CODEC_OK, res);
+    vpx_codec_control(&codec_, VP8E_SET_CPUUSED, 4);  // Make the test faster
     codec_initialized_ = true;
   }
 
@@ -83,11 +84,23 @@ class SvcTest : public ::testing::Test {
     codec_initialized_ = false;
   }
 
+  void GetStatsData(std::string *const stats_buf) {
+    vpx_codec_iter_t iter = NULL;
+    const vpx_codec_cx_pkt_t *cx_pkt;
+
+    while ((cx_pkt = vpx_codec_get_cx_data(&codec_, &iter)) != NULL) {
+      if (cx_pkt->kind == VPX_CODEC_STATS_PKT) {
+        EXPECT_GT(cx_pkt->data.twopass_stats.sz, 0U);
+        ASSERT_TRUE(cx_pkt->data.twopass_stats.buf != NULL);
+        stats_buf->append(static_cast<char*>(cx_pkt->data.twopass_stats.buf),
+                          cx_pkt->data.twopass_stats.sz);
+      }
+    }
+  }
+
   void Pass1EncodeNFrames(const int n, const int layers,
                           std::string *const stats_buf) {
     vpx_codec_err_t res;
-    size_t stats_size = 0;
-    const char *stats_data = NULL;
 
     ASSERT_GT(n, 0);
     ASSERT_GT(layers, 0);
@@ -104,22 +117,15 @@ class SvcTest : public ::testing::Test {
       res = vpx_svc_encode(&svc_, &codec_, video.img(), video.pts(),
                            video.duration(), VPX_DL_GOOD_QUALITY);
       ASSERT_EQ(VPX_CODEC_OK, res);
-      stats_size = vpx_svc_get_rc_stats_buffer_size(&svc_);
-      EXPECT_GT(stats_size, 0U);
-      stats_data = vpx_svc_get_rc_stats_buffer(&svc_);
-      ASSERT_TRUE(stats_data != NULL);
-      stats_buf->append(stats_data, stats_size);
+      GetStatsData(stats_buf);
       video.Next();
     }
 
     // Flush encoder and test EOS packet.
     res = vpx_svc_encode(&svc_, &codec_, NULL, video.pts(),
                          video.duration(), VPX_DL_GOOD_QUALITY);
-    stats_size = vpx_svc_get_rc_stats_buffer_size(&svc_);
-    EXPECT_GT(stats_size, 0U);
-    stats_data = vpx_svc_get_rc_stats_buffer(&svc_);
-    ASSERT_TRUE(stats_data != NULL);
-    stats_buf->append(stats_data, stats_size);
+    ASSERT_EQ(VPX_CODEC_OK, res);
+    GetStatsData(stats_buf);
 
     ReleaseEncoder();
   }
@@ -127,20 +133,27 @@ class SvcTest : public ::testing::Test {
   void StoreFrames(const size_t max_frame_received,
                    struct vpx_fixed_buf *const outputs,
                    size_t *const frame_received) {
-    size_t frame_size;
-    while ((frame_size = vpx_svc_get_frame_size(&svc_)) > 0) {
-      ASSERT_LT(*frame_received, max_frame_received);
+    vpx_codec_iter_t iter = NULL;
+    const vpx_codec_cx_pkt_t *cx_pkt;
 
-      if (*frame_received == 0) {
-        EXPECT_EQ(1, vpx_svc_is_keyframe(&svc_));
+    while ((cx_pkt = vpx_codec_get_cx_data(&codec_, &iter)) != NULL) {
+      if (cx_pkt->kind == VPX_CODEC_CX_FRAME_PKT) {
+        const size_t frame_size = cx_pkt->data.frame.sz;
+
+        EXPECT_GT(frame_size, 0U);
+        ASSERT_TRUE(cx_pkt->data.frame.buf != NULL);
+        ASSERT_LT(*frame_received, max_frame_received);
+
+        if (*frame_received == 0)
+          EXPECT_EQ(1, !!(cx_pkt->data.frame.flags & VPX_FRAME_IS_KEY));
+
+        outputs[*frame_received].buf = malloc(frame_size + 16);
+        ASSERT_TRUE(outputs[*frame_received].buf != NULL);
+        memcpy(outputs[*frame_received].buf, cx_pkt->data.frame.buf,
+               frame_size);
+        outputs[*frame_received].sz = frame_size;
+        ++(*frame_received);
       }
-
-      outputs[*frame_received].buf = malloc(frame_size + 16);
-      ASSERT_TRUE(outputs[*frame_received].buf != NULL);
-      memcpy(outputs[*frame_received].buf, vpx_svc_get_buffer(&svc_),
-             frame_size);
-      outputs[*frame_received].sz = frame_size;
-      ++(*frame_received);
     }
   }
 
