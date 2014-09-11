@@ -43,6 +43,8 @@
 extern "C" {
 #endif
 
+#include <assert.h>
+
 #include "./vpx_config.h"
 #include "./vpx_integer.h"
 #include "./vpx_image.h"
@@ -216,9 +218,10 @@ extern "C" {
    * This enumeration determines the bit depth of the codec.
    */
   typedef enum vpx_bit_depth {
-    VPX_BITS_8  = 8,   /**< 8 bits  */
-    VPX_BITS_10 = 10,  /**< 10 bits */
-    VPX_BITS_12 = 12   /**< 12 bits */
+    VPX_BITS_8       = 8,    /**< 8 bits  */
+    VPX_BITS_10      = 10,   /**< 10 bits */
+    VPX_BITS_12      = 12,   /**< 12 bits */
+    VPX_BITS_NOT_SET = 0xFF  /**< Invalid value */
   } vpx_bit_depth_t;
 
   /*
@@ -480,6 +483,9 @@ static INLINE unsigned int vpx_bit_depth_to_bps(vpx_bit_depth_t bit_depth) {
       break;
     case VPX_BITS_12:
       bps = 12;
+      break;
+    case VPX_BITS_NOT_SET:
+      assert(0 && "Bit depth is not initialized.");
       break;
   }
   return bps;
