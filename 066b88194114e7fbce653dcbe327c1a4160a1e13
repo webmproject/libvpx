@@ -69,6 +69,24 @@
       "revId": "066b88194114e7fbce653dcbe327c1a4160a1e13",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Xpw\u003d",
+        "filename": "examples/vp9_lossless_encoder.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-11T20:20:10Z",
+      "side": 1,
+      "message": "Yeah, that sgtm!",
+      "parentUuid": "AAAAdn//Xr0\u003d",
+      "revId": "066b88194114e7fbce653dcbe327c1a4160a1e13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
