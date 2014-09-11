@@ -1222,6 +1222,7 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
     }
 
     setup_frame_size(cm, rb);
+    pbi->need_resync = 0;
   } else {
     cm->intra_only = cm->show_frame ? 0 : vp9_rb_read_bit(rb);
 
@@ -1245,6 +1246,7 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
 
       pbi->refresh_frame_flags = vp9_rb_read_literal(rb, REF_FRAMES);
       setup_frame_size(cm, rb);
+      pbi->need_resync = 0;
     } else {
       pbi->refresh_frame_flags = vp9_rb_read_literal(rb, REF_FRAMES);
       for (i = 0; i < REFS_PER_FRAME; ++i) {
@@ -1271,6 +1273,12 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
           vp9_extend_frame_borders(ref_buf->buf);
       }
     }
+  }
+
+  if (pbi->need_resync) {
+    vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+                       "Keyframe / intra-only frame required to reset decoder"
+                       " state");
   }
 
   if (!cm->error_resilient_mode) {
