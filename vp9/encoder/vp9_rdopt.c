@@ -2677,6 +2677,14 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     }
   }
 
+  if (cpi->rc.is_src_frame_alt_ref) {
+    if (cpi->sf.alt_ref_search_fp) {
+      mode_skip_mask[ALTREF_FRAME] = 0;
+      ref_frame_skip_mask[0] = ~(1 << ALTREF_FRAME);
+      ref_frame_skip_mask[1] = SECOND_REF_FRAME_MASK;
+    }
+  }
+
   for (mode_index = 0; mode_index < MAX_MODES; ++mode_index) {
     int mode_excluded = 0;
     int64_t this_rd = INT64_MAX;
@@ -2718,15 +2726,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         case MAX_REF_FRAMES:
           assert(0 && "Invalid Reference frame");
           break;
-      }
-    }
-
-    if (cpi->rc.is_src_frame_alt_ref) {
-      if (cpi->sf.alt_ref_search_fp) {
-        mode_skip_mask[ALTREF_FRAME] = 0;
-
-        if (!(ref_frame == ALTREF_FRAME && second_ref_frame == NONE))
-          continue;
       }
     }
 
