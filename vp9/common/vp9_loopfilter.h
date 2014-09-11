@@ -89,7 +89,7 @@ struct VP9LfSyncData;
 // by mi_row, mi_col.
 void vp9_setup_mask(struct VP9Common *const cm,
                     const int mi_row, const int mi_col,
-                    MODE_INFO **mi_8x8, const int mode_info_stride,
+                    MODE_INFO *mi_8x8, const int mode_info_stride,
                     LOOP_FILTER_MASK *lfm);
 
 void vp9_filter_block_plane(struct VP9Common *const cm,

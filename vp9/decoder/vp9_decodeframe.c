@@ -249,7 +249,7 @@ static void predict_and_reconstruct_intra_block(int plane, int block,
   VP9_COMMON *const cm = args->cm;
   MACROBLOCKD *const xd = args->xd;
   struct macroblockd_plane *const pd = &xd->plane[plane];
-  MODE_INFO *const mi = xd->mi[0];
+  MODE_INFO *const mi = xd->mi[0].src_mi;
   const PREDICTION_MODE mode = (plane == 0) ? get_y_mode(mi, block)
                                             : mi->mbmi.uv_mode;
   int x, y;
@@ -305,12 +305,14 @@ static MB_MODE_INFO *set_offsets(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   const int offset = mi_row * cm->mi_stride + mi_col;
   int x, y;
 
-  xd->mi = cm->mi_grid_visible + offset;
-  xd->mi[0] = &cm->mi[offset];
-  xd->mi[0]->mbmi.sb_type = bsize;
+  xd->mi = cm->mi + offset;
+  xd->mi[0].src_mi = &xd->mi[0];  // Point to self.
+  xd->mi[0].mbmi.sb_type = bsize;
+
   for (y = 0; y < y_mis; ++y)
-    for (x = !y; x < x_mis; ++x)
-      xd->mi[y * cm->mi_stride + x] = xd->mi[0];
+    for (x = !y; x < x_mis; ++x) {
+      xd->mi[y * cm->mi_stride + x].src_mi = &xd->mi[0];
+    }
 
   set_skip_context(xd, mi_row, mi_col);
 
@@ -319,12 +321,12 @@ static MB_MODE_INFO *set_offsets(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   set_mi_row_col(xd, tile, mi_row, bh, mi_col, bw, cm->mi_rows, cm->mi_cols);
 
   vp9_setup_dst_planes(xd->plane, get_frame_new_buffer(cm), mi_row, mi_col);
-  return &xd->mi[0]->mbmi;
+  return &xd->mi[0].mbmi;
 }
 
 static void set_ref(VP9_COMMON *const cm, MACROBLOCKD *const xd,
                     int idx, int mi_row, int mi_col) {
-  MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
+  MB_MODE_INFO *const mbmi = &xd->mi[0].src_mi->mbmi;
   RefBuffer *ref_buffer = &cm->frame_refs[mbmi->ref_frame[idx] - LAST_FRAME];
   xd->block_refs[idx] = ref_buffer;
   if (!vp9_is_valid_scale(&ref_buffer->sf))

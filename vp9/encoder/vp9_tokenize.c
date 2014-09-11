@@ -299,7 +299,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   uint8_t token_cache[32 * 32];
   struct macroblock_plane *p = &cpi->mb.plane[plane];
   struct macroblockd_plane *pd = &xd->plane[plane];
-  MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
+  MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
   int pt; /* near block/prev token context index */
   int c;
   TOKENEXTRA *t = *tp;        /* store tokens starting here */
@@ -407,7 +407,7 @@ void vp9_tokenize_sb(VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,
                      BLOCK_SIZE bsize) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
-  MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
+  MB_MODE_INFO *const mbmi = &xd->mi[0].src_mi->mbmi;
   TOKENEXTRA *t_backup = *t;
   const int ctx = vp9_get_skip_context(xd);
   const int skip_inc = !vp9_segfeature_active(&cm->seg, mbmi->segment_id,

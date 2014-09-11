@@ -143,7 +143,8 @@ typedef struct {
   INTERP_FILTER interp_filter;
 } MB_MODE_INFO;
 
-typedef struct {
+typedef struct MODE_INFO {
+  struct MODE_INFO *src_mi;
   MB_MODE_INFO mbmi;
   b_mode_info bmi[4];
 } MODE_INFO;
@@ -206,8 +207,7 @@ typedef struct macroblockd {
 
   int mi_stride;
 
-  // A NULL indicates that the 8x8 is not part of the image
-  MODE_INFO **mi;
+  MODE_INFO *mi;
 
   int up_available;
   int left_available;
@@ -255,7 +255,7 @@ extern const TX_TYPE intra_mode_to_tx_type_lookup[INTRA_MODES];
 
 static INLINE TX_TYPE get_tx_type(PLANE_TYPE plane_type,
                                   const MACROBLOCKD *xd) {
-  const MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
+  const MB_MODE_INFO *const mbmi = &xd->mi[0].src_mi->mbmi;
 
   if (plane_type != PLANE_TYPE_Y || is_inter_block(mbmi))
     return DCT_DCT;
@@ -264,7 +264,7 @@ static INLINE TX_TYPE get_tx_type(PLANE_TYPE plane_type,
 
 static INLINE TX_TYPE get_tx_type_4x4(PLANE_TYPE plane_type,
                                       const MACROBLOCKD *xd, int ib) {
-  const MODE_INFO *const mi = xd->mi[0];
+  const MODE_INFO *const mi = xd->mi[0].src_mi;
 
   if (plane_type != PLANE_TYPE_Y || xd->lossless || is_inter_block(&mi->mbmi))
     return DCT_DCT;
