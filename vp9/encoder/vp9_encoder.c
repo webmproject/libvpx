@@ -1272,7 +1272,10 @@ static void generate_psnr_packet(VP9_COMP *cpi) {
     pkt.data.psnr.psnr[i] = psnr.psnr[i];
   }
   pkt.kind = VPX_CODEC_PSNR_PKT;
-  vpx_codec_pkt_list_add(cpi->output_pkt_list, &pkt);
+  if (is_two_pass_svc(cpi))
+    cpi->svc.layer_context[cpi->svc.spatial_layer_id].psnr_pkt = pkt.data.psnr;
+  else
+    vpx_codec_pkt_list_add(cpi->output_pkt_list, &pkt);
 }
 
 int vp9_use_as_reference(VP9_COMP *cpi, int ref_frame_flags) {

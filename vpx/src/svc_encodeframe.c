@@ -107,7 +107,7 @@ typedef struct SvcInternal {
 
   // state variables
   int encode_frame_count;
-  int frame_received;
+  int psnr_pkt_received;
   int frame_within_gop;
   int layers;
   int layer;
@@ -566,7 +566,6 @@ vpx_codec_err_t vpx_svc_encode(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
   vpx_codec_err_t res;
   vpx_codec_iter_t iter;
   const vpx_codec_cx_pkt_t *cx_pkt;
-  int layer_for_psnr = 0;
   SvcInternal *const si = get_svc_internal(svc_ctx);
   if (svc_ctx == NULL || codec_ctx == NULL || si == NULL) {
     return VPX_CODEC_INVALID_PARAM;
@@ -603,30 +602,37 @@ vpx_codec_err_t vpx_svc_encode(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
   iter = NULL;
   while ((cx_pkt = vpx_codec_get_cx_data(codec_ctx, &iter))) {
     switch (cx_pkt->kind) {
-      case VPX_CODEC_PSNR_PKT: {
+#if CONFIG_SPATIAL_SVC
+      case VPX_CODEC_SPATIAL_SVC_LAYER_PSNR: {
         int i;
-        svc_log(svc_ctx, SVC_LOG_DEBUG,
-                "SVC frame: %d, layer: %d, PSNR(Total/Y/U/V): "
-                "%2.3f  %2.3f  %2.3f  %2.3f \n",
-                si->frame_received, layer_for_psnr,
-                cx_pkt->data.psnr.psnr[0], cx_pkt->data.psnr.psnr[1],
-                cx_pkt->data.psnr.psnr[2], cx_pkt->data.psnr.psnr[3]);
-        svc_log(svc_ctx, SVC_LOG_DEBUG,
-                "SVC frame: %d, layer: %d, SSE(Total/Y/U/V): "
-                "%2.3f  %2.3f  %2.3f  %2.3f \n",
-                si->frame_received, layer_for_psnr,
-                cx_pkt->data.psnr.sse[0], cx_pkt->data.psnr.sse[1],
-                cx_pkt->data.psnr.sse[2], cx_pkt->data.psnr.sse[3]);
-        for (i = 0; i < COMPONENTS; i++) {
-          si->psnr_sum[layer_for_psnr][i] += cx_pkt->data.psnr.psnr[i];
-          si->sse_sum[layer_for_psnr][i] += cx_pkt->data.psnr.sse[i];
+        for (i = 0; i < svc_ctx->spatial_layers; ++i) {
+          int j;
+          svc_log(svc_ctx, SVC_LOG_DEBUG,
+                  "SVC frame: %d, layer: %d, PSNR(Total/Y/U/V): "
+                  "%2.3f  %2.3f  %2.3f  %2.3f \n",
+                  si->psnr_pkt_received, i,
+                  cx_pkt->data.layer_psnr[i].psnr[0],
+                  cx_pkt->data.layer_psnr[i].psnr[1],
+                  cx_pkt->data.layer_psnr[i].psnr[2],
+                  cx_pkt->data.layer_psnr[i].psnr[3]);
+          svc_log(svc_ctx, SVC_LOG_DEBUG,
+                  "SVC frame: %d, layer: %d, SSE(Total/Y/U/V): "
+                  "%2.3f  %2.3f  %2.3f  %2.3f \n",
+                  si->psnr_pkt_received, i,
+                  cx_pkt->data.layer_psnr[i].sse[0],
+                  cx_pkt->data.layer_psnr[i].sse[1],
+                  cx_pkt->data.layer_psnr[i].sse[2],
+                  cx_pkt->data.layer_psnr[i].sse[3]);
+
+          for (j = 0; j < COMPONENTS; ++j) {
+            si->psnr_sum[i][j] +=
+                cx_pkt->data.layer_psnr[i].psnr[j];
+            si->sse_sum[i][j] += cx_pkt->data.layer_psnr[i].sse[j];
+          }
         }
-        ++layer_for_psnr;
-        if (layer_for_psnr == svc_ctx->spatial_layers)
-          layer_for_psnr = 0;
+        ++si->psnr_pkt_received;
         break;
       }
-#if CONFIG_SPATIAL_SVC
       case VPX_CODEC_SPATIAL_SVC_LAYER_SIZES: {
         int i;
         for (i = 0; i < si->layers; ++i)
@@ -673,7 +679,7 @@ static double calc_psnr(double d) {
 
 // dump accumulated statistics and reset accumulated values
 const char *vpx_svc_dump_statistics(SvcContext *svc_ctx) {
-  int number_of_frames, encode_frame_count;
+  int number_of_frames;
   int i, j;
   uint32_t bytes_total = 0;
   double scale[COMPONENTS];
@@ -686,12 +692,11 @@ const char *vpx_svc_dump_statistics(SvcContext *svc_ctx) {
 
   svc_log_reset(svc_ctx);
 
-  encode_frame_count = si->encode_frame_count;
-  if (si->encode_frame_count <= 0) return vpx_svc_get_message(svc_ctx);
+  number_of_frames = si->psnr_pkt_received;
+  if (number_of_frames <= 0) return vpx_svc_get_message(svc_ctx);
 
   svc_log(svc_ctx, SVC_LOG_INFO, "\n");
   for (i = 0; i < si->layers; ++i) {
-    number_of_frames = encode_frame_count;
 
     svc_log(svc_ctx, SVC_LOG_INFO,
             "Layer %d Average PSNR=[%2.3f, %2.3f, %2.3f, %2.3f], Bytes=[%u]\n",

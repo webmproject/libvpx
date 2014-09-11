@@ -981,15 +981,20 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
         cx_data_sz -= size;
 #if CONFIG_SPATIAL_SVC
         if (is_two_pass_svc(cpi)) {
-          vpx_codec_cx_pkt_t pkt;
+          vpx_codec_cx_pkt_t pkt_sizes, pkt_psnr;
           int i;
-          vp9_zero(pkt);
-          pkt.kind = VPX_CODEC_SPATIAL_SVC_LAYER_SIZES;
+          vp9_zero(pkt_sizes);
+          vp9_zero(pkt_psnr);
+          pkt_sizes.kind = VPX_CODEC_SPATIAL_SVC_LAYER_SIZES;
+          pkt_psnr.kind = VPX_CODEC_SPATIAL_SVC_LAYER_PSNR;
           for (i = 0; i < cpi->svc.number_spatial_layers; ++i) {
-            pkt.data.layer_sizes[i] = cpi->svc.layer_context[i].layer_size;
-            cpi->svc.layer_context[i].layer_size = 0;
+            LAYER_CONTEXT *lc = &cpi->svc.layer_context[i];
+            pkt_sizes.data.layer_sizes[i] = lc->layer_size;
+            pkt_psnr.data.layer_psnr[i] = lc->psnr_pkt;
+            lc->layer_size = 0;
           }
-          vpx_codec_pkt_list_add(&ctx->pkt_list.head, &pkt);
+          vpx_codec_pkt_list_add(&ctx->pkt_list.head, &pkt_sizes);
+          vpx_codec_pkt_list_add(&ctx->pkt_list.head, &pkt_psnr);
         }
 #endif
       }
