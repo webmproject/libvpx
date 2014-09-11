@@ -139,25 +139,25 @@ void vp9_convolve8_##avg##opt(const uint8_t *src, ptrdiff_t src_stride, \
                            filter_x, x_step_q4, filter_y, y_step_q4, w, h); \
   } \
 }
-#if HAVE_AVX2
+#if HAVE_AVX2 && HAVE_SSSE3
 filter8_1dfunction vp9_filter_block1d16_v8_avx2;
 filter8_1dfunction vp9_filter_block1d16_h8_avx2;
 filter8_1dfunction vp9_filter_block1d4_v8_ssse3;
-#if (ARCH_X86_64)
+#if ARCH_X86_64
 filter8_1dfunction vp9_filter_block1d8_v8_intrin_ssse3;
 filter8_1dfunction vp9_filter_block1d8_h8_intrin_ssse3;
 filter8_1dfunction vp9_filter_block1d4_h8_intrin_ssse3;
 #define vp9_filter_block1d8_v8_avx2 vp9_filter_block1d8_v8_intrin_ssse3
 #define vp9_filter_block1d8_h8_avx2 vp9_filter_block1d8_h8_intrin_ssse3
 #define vp9_filter_block1d4_h8_avx2 vp9_filter_block1d4_h8_intrin_ssse3
-#else
+#else  // ARCH_X86
 filter8_1dfunction vp9_filter_block1d8_v8_ssse3;
 filter8_1dfunction vp9_filter_block1d8_h8_ssse3;
 filter8_1dfunction vp9_filter_block1d4_h8_ssse3;
 #define vp9_filter_block1d8_v8_avx2 vp9_filter_block1d8_v8_ssse3
 #define vp9_filter_block1d8_h8_avx2 vp9_filter_block1d8_h8_ssse3
 #define vp9_filter_block1d4_h8_avx2 vp9_filter_block1d4_h8_ssse3
-#endif
+#endif  // ARCH_X86_64 / ARCH_X86
 filter8_1dfunction vp9_filter_block1d16_v2_ssse3;
 filter8_1dfunction vp9_filter_block1d16_h2_ssse3;
 filter8_1dfunction vp9_filter_block1d8_v2_ssse3;
@@ -190,9 +190,9 @@ FUN_CONV_1D(vert, y_step_q4, filter_y, v, src - src_stride * 3, , avx2);
 //                          const int16_t *filter_y, int y_step_q4,
 //                          int w, int h);
 FUN_CONV_2D(, avx2);
-#endif
+#endif  // HAVE_AX2 && HAVE_SSSE3
 #if HAVE_SSSE3
-#if (ARCH_X86_64)
+#if ARCH_X86_64
 filter8_1dfunction vp9_filter_block1d16_v8_intrin_ssse3;
 filter8_1dfunction vp9_filter_block1d16_h8_intrin_ssse3;
 filter8_1dfunction vp9_filter_block1d8_v8_intrin_ssse3;
@@ -204,14 +204,14 @@ filter8_1dfunction vp9_filter_block1d4_h8_intrin_ssse3;
 #define vp9_filter_block1d8_v8_ssse3 vp9_filter_block1d8_v8_intrin_ssse3
 #define vp9_filter_block1d8_h8_ssse3 vp9_filter_block1d8_h8_intrin_ssse3
 #define vp9_filter_block1d4_h8_ssse3 vp9_filter_block1d4_h8_intrin_ssse3
-#else
+#else  // ARCH_X86
 filter8_1dfunction vp9_filter_block1d16_v8_ssse3;
 filter8_1dfunction vp9_filter_block1d16_h8_ssse3;
 filter8_1dfunction vp9_filter_block1d8_v8_ssse3;
 filter8_1dfunction vp9_filter_block1d8_h8_ssse3;
 filter8_1dfunction vp9_filter_block1d4_v8_ssse3;
 filter8_1dfunction vp9_filter_block1d4_h8_ssse3;
-#endif
+#endif  // ARCH_X86_64 / ARCH_X86
 filter8_1dfunction vp9_filter_block1d16_v8_avg_ssse3;
 filter8_1dfunction vp9_filter_block1d16_h8_avg_ssse3;
 filter8_1dfunction vp9_filter_block1d8_v8_avg_ssse3;
@@ -270,7 +270,7 @@ FUN_CONV_1D(avg_vert, y_step_q4, filter_y, v, src - src_stride * 3, avg_,
 //                              int w, int h);
 FUN_CONV_2D(, ssse3);
 FUN_CONV_2D(avg_ , ssse3);
-#endif
+#endif  // HAVE_SSSE3
 
 #if HAVE_SSE2
 filter8_1dfunction vp9_filter_block1d16_v8_sse2;
@@ -336,4 +336,4 @@ FUN_CONV_1D(avg_vert, y_step_q4, filter_y, v, src - src_stride * 3, avg_, sse2);
 //                             int w, int h);
 FUN_CONV_2D(, sse2);
 FUN_CONV_2D(avg_ , sse2);
-#endif
+#endif  // HAVE_SSE2
