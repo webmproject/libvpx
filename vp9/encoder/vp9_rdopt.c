@@ -2685,6 +2685,11 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     }
   }
 
+  if (bsize > cpi->sf.max_intra_bsize) {
+    ref_frame_skip_mask[0] |= (1 << INTRA_FRAME);
+    ref_frame_skip_mask[1] |= (1 << INTRA_FRAME);
+  }
+
   for (mode_index = 0; mode_index < MAX_MODES; ++mode_index) {
     int mode_excluded = 0;
     int64_t this_rd = INT64_MAX;
@@ -2728,10 +2733,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
           break;
       }
     }
-
-    if (bsize > cpi->sf.max_intra_bsize)
-      if (ref_frame == INTRA_FRAME)
-        continue;
 
     if (ref_frame_skip_mask[0] & (1 << ref_frame) &&
         ref_frame_skip_mask[1] & (1 << MAX(0, second_ref_frame)))
