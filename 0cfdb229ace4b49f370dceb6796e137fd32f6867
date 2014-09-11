@@ -16,6 +16,24 @@
       "revId": "0cfdb229ace4b49f370dceb6796e137fd32f6867",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Xns\u003d",
+        "filename": "test/dct32x32_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 313,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-09-11T22:41:05Z",
+      "side": 1,
+      "message": "oops I forgot. reverting those.",
+      "parentUuid": "AAAAdn//Xvw\u003d",
+      "revId": "0cfdb229ace4b49f370dceb6796e137fd32f6867",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
