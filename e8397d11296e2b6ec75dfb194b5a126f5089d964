@@ -1,0 +1,191 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//XZY\u003d",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 58
+      },
+      "lineNbr": 352,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-12T23:40:07Z",
+      "side": 1,
+      "message": "you should be able to check update_prev_mi only; you could add an assert for frame_parallel_decode to find any logic errors",
+      "revId": "e8397d11296e2b6ec75dfb194b5a126f5089d964",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//XYo\u003d",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 58
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-12T23:40:07Z",
+      "side": 1,
+      "message": "do you need pixel level granularity or would mi_row/mi_col work?",
+      "revId": "e8397d11296e2b6ec75dfb194b5a126f5089d964",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//XY8\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 58
+      },
+      "lineNbr": 894,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-12T23:40:07Z",
+      "side": 1,
+      "message": "3 -\u003e MI_BLOCK_SIZE_LOG2 I believe",
+      "revId": "e8397d11296e2b6ec75dfb194b5a126f5089d964",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//XY4\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 58
+      },
+      "lineNbr": 426,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-12T23:40:07Z",
+      "side": 1,
+      "message": "same here, MI_BLOCK_SIZE_LOG2",
+      "revId": "e8397d11296e2b6ec75dfb194b5a126f5089d964",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//XYw\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 58
+      },
+      "lineNbr": 320,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-12T23:40:07Z",
+      "side": 1,
+      "message": "*const",
+      "revId": "e8397d11296e2b6ec75dfb194b5a126f5089d964",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//XYM\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 58
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-12T23:40:07Z",
+      "side": 1,
+      "message": "you should use the helpers everywhere for consistency, though they\u0027re equivalent here",
+      "revId": "e8397d11296e2b6ec75dfb194b5a126f5089d964",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//XYA\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 58
+      },
+      "lineNbr": 432,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-12T23:40:07Z",
+      "side": 1,
+      "message": "space around operators, prefer sizeof(var)",
+      "revId": "e8397d11296e2b6ec75dfb194b5a126f5089d964",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//XYI\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 58
+      },
+      "lineNbr": 438,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-12T23:40:07Z",
+      "side": 1,
+      "message": "no space after \u0027-\u003e\u0027",
+      "revId": "e8397d11296e2b6ec75dfb194b5a126f5089d964",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//XYE\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 58
+      },
+      "lineNbr": 439,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-12T23:40:07Z",
+      "side": 1,
+      "message": "prefer sizeof(var)",
+      "revId": "e8397d11296e2b6ec75dfb194b5a126f5089d964",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//XX8\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 58
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-12T23:40:07Z",
+      "side": 1,
+      "message": "indent once more as this is part of the outer () group",
+      "revId": "e8397d11296e2b6ec75dfb194b5a126f5089d964",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//XX4\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 58
+      },
+      "lineNbr": 443,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-12T23:40:07Z",
+      "side": 1,
+      "message": "scratch",
+      "revId": "e8397d11296e2b6ec75dfb194b5a126f5089d964",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
