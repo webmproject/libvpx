@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Xag\u003d",
+        "filename": "vpx_ports/mem.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-09-12T23:02:17Z",
+      "side": 0,
+      "message": "huh, so only this top part was included in the header guard",
+      "revId": "3e7b04af54e9133c94527aa970b398c009adcbef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Xac\u003d",
+        "filename": "vpx_ports/mem.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-09-12T23:02:17Z",
+      "side": 0,
+      "message": "interesting that we never saw a redefine warning on this",
+      "revId": "3e7b04af54e9133c94527aa970b398c009adcbef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
