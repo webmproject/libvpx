@@ -479,7 +479,7 @@ static void choose_partitioning(VP9_COMP *cpi,
     d = VP9_VAR_OFFS;
     dp = 0;
 #if CONFIG_VP9_HIGH
-    if (xd->cur_buf->flags&YV12_FLAG_HIGH) {
+    if (xd->cur_buf->flags&YV12_FLAG_HIGHBITDEPTH) {
       switch (xd->bps) {
       default:
         d = CONVERT_TO_BYTEPTR(VP9_HIGH_VAR_OFFS_8);
@@ -806,7 +806,7 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
   // Set to zero to make sure we do not use the previous encoded frame stats
   mbmi->skip = 0;
 #if CONFIG_VP9_HIGH
-  if (xd->cur_buf->flags&YV12_FLAG_HIGH) {
+  if (xd->cur_buf->flags&YV12_FLAG_HIGHBITDEPTH) {
     x->source_variance = high_get_sby_perpixel_variance(
         cpi, &x->plane[0].src, bsize, xd->bps);
   } else {
@@ -2148,7 +2148,7 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     unsigned int source_variancey;
     vp9_setup_src_planes(x, cpi->Source, mi_row, mi_col);
 #if CONFIG_VP9_HIGH
-    if (xd->cur_buf->flags&YV12_FLAG_HIGH) {
+    if (xd->cur_buf->flags&YV12_FLAG_HIGHBITDEPTH) {
       source_variancey = high_get_sby_perpixel_variance(cpi, &x->plane[0].src,
                                                         bsize, xd->bps);
     } else {

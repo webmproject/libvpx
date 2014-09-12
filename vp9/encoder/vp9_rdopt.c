@@ -204,7 +204,7 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
       int64_t square_error = sse;
       int quantizer = (pd->dequant[1] >> 3);
 #if CONFIG_VP9_HIGH
-      if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
         quantizer >>= (xd->bps - 8);
       }
 #endif
@@ -220,7 +220,7 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
       int rate;
       int64_t dist;
 #if CONFIG_VP9_HIGH
-      if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
         vp9_model_rd_from_var_lapndz(sse, 1 << num_pels_log2_lookup[bs],
                                      pd->dequant[1] >> (xd->bps - 5),
                                      &rate, &dist);
@@ -413,7 +413,7 @@ static void dist_block(int plane, int block, TX_SIZE tx_size,
     int64_t p = (pd->dequant[1] * pd->dequant[1] *
                     (1 << ss_txfrm_size)) >> (shift + 2);
 #if CONFIG_VP9_HIGH
-    if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       p >>= ((xd->bps - 8) * 2);
     }
 #endif
@@ -448,7 +448,7 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
   if (!is_inter_block(mbmi)) {
     vp9_encode_block_intra(x, plane, block, plane_bsize, tx_size, &mbmi->skip);
 #if CONFIG_VP9_HIGH
-    if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       dist_block(plane, block, tx_size, args, xd->bps);
     } else {
       dist_block(plane, block, tx_size, args, 8);
@@ -461,7 +461,7 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
       // full forward transform and quantization
       vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
 #if CONFIG_VP9_HIGH
-      if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
         dist_block(plane, block, tx_size, args, xd->bps);
       } else {
         dist_block(plane, block, tx_size, args, 8);
@@ -751,7 +751,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
   xd->mi[0]->mbmi.tx_size = TX_4X4;
 
 #if CONFIG_VP9_HIGH
-  if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     for (mode = DC_PRED; mode <= TM_PRED; ++mode) {
       int64_t this_rd;
       int ratey = 0;
@@ -1309,7 +1309,7 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
     const uint8_t *pre = &pd->pre[ref].buf[raster_block_offset(BLOCK_8X8, i,
                                                pd->pre[ref].stride)];
 #if CONFIG_VP9_HIGH
-  if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     vp9_high_build_inter_predictor(pre, pd->pre[ref].stride,
                               dst, pd->dst.stride,
                               &mi->bmi[i].as_mv[ref].as_mv,
@@ -1337,7 +1337,7 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
 #endif
   }
 #if CONFIG_VP9_HIGH
-  if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     vp9_high_subtract_block(height, width,
                raster_block_offset_int16(BLOCK_8X8, i, p->src_diff), 8,
                src, p->src.stride,
@@ -1366,7 +1366,7 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
                     coeff, 8);
       vp9_regular_quantize_b_4x4(x, 0, k, so->scan, so->iscan);
 #if CONFIG_VP9_HIGH
-      if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
         thisdistortion += vp9_high_block_error(coeff,
                                                BLOCK_OFFSET(pd->dqcoeff, k),
                                                16, &ssz, xd->bps);
@@ -2143,7 +2143,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     vp9_get_scaled_ref_frame(cpi, mbmi->ref_frame[1])
   };
 #if CONFIG_VP9_HIGH
-  if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     second_pred_alloc = vpx_memalign(16, pw * ph * sizeof(uint16_t));
     second_pred = CONVERT_TO_BYTEPTR(second_pred_alloc);
   } else {
@@ -2188,7 +2188,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     ref_yv12[0] = xd->plane[0].pre[0];
     ref_yv12[1] = xd->plane[0].pre[1];
 #if CONFIG_VP9_HIGH
-    if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       vp9_high_build_inter_predictor(ref_yv12[!id].buf,
                               ref_yv12[!id].stride,
                               second_pred, pw,
@@ -2331,7 +2331,7 @@ static void rd_encode_breakout_test(VP9_COMP *cpi, MACROBLOCK *x,
     // Calculate threshold according to dequant value.
     thresh_ac = (xd->plane[0].dequant[1] * xd->plane[0].dequant[1]) / 9;
 #if CONFIG_VP9_HIGH
-    if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       const int shift = 2 * xd->bps - 16;
       if (shift > 0)
         thresh_ac = ROUND_POWER_OF_TWO(thresh_ac, shift);
@@ -2344,7 +2344,7 @@ static void rd_encode_breakout_test(VP9_COMP *cpi, MACROBLOCK *x,
         b_height_log2(bsize));
     thresh_dc = (xd->plane[0].dequant[0] * xd->plane[0].dequant[0] >> 6);
 #if CONFIG_VP9_HIGH
-        if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+        if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
           const int shift = 2 * xd->bps - 16;
           if (shift > 0)
             thresh_dc = ROUND_POWER_OF_TWO(thresh_dc, shift);
@@ -2444,7 +2444,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
        get_chessboard_index(cm->current_video_frame)) & 0x1 : 0;
 
 #if CONFIG_VP9_HIGH
-  if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     tmp_buf = CONVERT_TO_BYTEPTR(tmp_buf16);
   } else {
     tmp_buf = tmp_buf8;
@@ -3257,7 +3257,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
           // TODO(debargha): Enhance this by specializing for each mode_index
           int scale = 4;
 #if CONFIG_VP9_HIGH
-        if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+        if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
           qstep >>= (xd->bps - 8);
         }
 #endif
@@ -3989,7 +3989,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
           // TODO(debargha): Enhance this by specializing for each mode_index
           int scale = 4;
 #if CONFIG_VP9_HIGH
-          if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+          if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
             qstep >>= (xd->bps - 8);
           }
 #endif

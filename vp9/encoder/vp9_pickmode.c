@@ -230,7 +230,7 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
   }
 
 #if CONFIG_VP9_HIGH
-  if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     vp9_model_rd_from_var_lapndz(sse - var, 1 << num_pels_log2_lookup[bsize],
                                  dc_quant >> (xd->bps - 5), &rate, &dist);
   } else {
@@ -245,7 +245,7 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
   *out_dist_sum = dist << 3;
 
 #if CONFIG_VP9_HIGH
-  if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     vp9_model_rd_from_var_lapndz(var, 1 << num_pels_log2_lookup[bsize],
                                  ac_quant >> (xd->bps - 5), &rate, &dist);
   } else {
@@ -307,7 +307,7 @@ static void encode_breakout_test(VP9_COMP *cpi, MACROBLOCK *x,
     // Calculate threshold according to dequant value.
     thresh_ac = (xd->plane[0].dequant[1] * xd->plane[0].dequant[1]) / 9;
 #if CONFIG_VP9_HIGH
-    if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       if (shift > 0)
         thresh_ac = ROUND_POWER_OF_TWO(thresh_ac, shift);
     }
@@ -320,7 +320,7 @@ static void encode_breakout_test(VP9_COMP *cpi, MACROBLOCK *x,
 
     thresh_dc = (xd->plane[0].dequant[0] * xd->plane[0].dequant[0] >> 6);
 #if CONFIG_VP9_HIGH
-    if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       if (shift > 0)
         thresh_dc = ROUND_POWER_OF_TWO(thresh_dc, shift);
     }

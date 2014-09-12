@@ -1879,7 +1879,7 @@ static void calc_high_psnr(const YV12_BUFFER_CONFIG *a,
     const int h = heights[i];
     const uint32_t samples = w * h;
     uint64_t sse;
-    if (a->flags & YV12_FLAG_HIGH) {
+    if (a->flags & YV12_FLAG_HIGHBITDEPTH) {
       if (input_shift)
         sse = high_get_sse_shift(a_planes[i], a_strides[i],
                                  b_planes[i], b_strides[i], w, h,
@@ -2022,7 +2022,7 @@ void vp9_write_yuv_rec_frame(VP9_COMMON *cm) {
   uint8_t *src = s->y_buffer;
   int h = s->y_crop_height;
 #if CONFIG_VP9_HIGH
-  if (s->flags & YV12_FLAG_HIGH) {
+  if (s->flags & YV12_FLAG_HIGHBITDEPTH) {
     uint16_t *src16 = CONVERT_TO_SHORTPTR(s->y_buffer);
 
     do {
@@ -2102,7 +2102,7 @@ static void scale_and_extend_frame_nonnormative(const YV12_BUFFER_CONFIG *src,
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
 #if CONFIG_VP9_HIGH
-    if (src->flags & YV12_FLAG_HIGH) {
+    if (src->flags & YV12_FLAG_HIGHBITDEPTH) {
       vp9_high_resize_plane(srcs[i], src_heights[i], src_widths[i],
                             src_strides[i], dsts[i], dst_heights[i],
                             dst_widths[i], dst_strides[i], bps);
@@ -2150,7 +2150,7 @@ static void scale_and_extend_frame(const YV12_BUFFER_CONFIG *src,
                                      src_stride + (x / factor) * src_w / dst_w;
         uint8_t *dst_ptr = dsts[i] + (y / factor) * dst_stride + (x / factor);
 #if CONFIG_VP9_HIGH
-        if (src->flags & YV12_FLAG_HIGH) {
+        if (src->flags & YV12_FLAG_HIGHBITDEPTH) {
           vp9_high_convolve8(src_ptr, src_stride, dst_ptr, dst_stride,
                              kernel[x_q4 & 0xf], 16 * src_w / dst_w,
                              kernel[y_q4 & 0xf], 16 * src_h / dst_h,
@@ -3158,7 +3158,7 @@ int vp9_receive_raw_frame(VP9_COMP *cpi, unsigned int frame_flags,
   const int subsampling_x = sd->uv_width  < sd->y_width;
   const int subsampling_y = sd->uv_height < sd->y_height;
 #if CONFIG_VP9_HIGH
-  const int use_high = sd->flags & YV12_FLAG_HIGH;
+  const int use_high = sd->flags & YV12_FLAG_HIGHBITDEPTH;
 #endif
 
 #if CONFIG_VP9_HIGH
@@ -3495,7 +3495,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     vp9_setup_scale_factors_for_frame(&ref_buf->sf,
                                       buf->y_crop_width, buf->y_crop_height,
                                       cm->width, cm->height,
-                                      (buf->flags & YV12_FLAG_HIGH) ? 1 : 0);
+                                      (buf->flags & YV12_FLAG_HIGHBITDEPTH) ? 1 : 0);
 #else
     vp9_setup_scale_factors_for_frame(&ref_buf->sf,
                                       buf->y_crop_width, buf->y_crop_height,
@@ -3814,8 +3814,8 @@ int vp9_high_get_y_sse(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b,
   int sum;
   assert(a->y_crop_width == b->y_crop_width);
   assert(a->y_crop_height == b->y_crop_height);
-  assert((a->flags & YV12_FLAG_HIGH) != 0);
-  assert((b->flags & YV12_FLAG_HIGH) != 0);
+  assert((a->flags & YV12_FLAG_HIGHBITDEPTH) != 0);
+  assert((b->flags & YV12_FLAG_HIGHBITDEPTH) != 0);
   switch (bit_depth) {
     case VPX_BITS_8:
       high_variance(a->y_buffer, a->y_stride, b->y_buffer, b->y_stride,

@@ -883,7 +883,7 @@ void vp9_predict_intra_block(const MACROBLOCKD *xd, int block_idx, int bwl_in,
 
   assert(bwl >= 0);
 #if CONFIG_VP9_HIGH
-  if (xd->cur_buf->flags&YV12_FLAG_HIGH) {
+  if (xd->cur_buf->flags&YV12_FLAG_HIGHBITDEPTH) {
     build_intra_predictors_high(xd, ref, ref_stride, dst, dst_stride, mode,
                                 tx_size, have_top, have_left, have_right,
                                 x, y, plane, xd->bps);

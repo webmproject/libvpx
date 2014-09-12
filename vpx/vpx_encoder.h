@@ -82,7 +82,7 @@ extern "C" {
 
   /*! Can support input images at greater than 8 bitdepth.
    */
-#define VPX_CODEC_CAP_HIGH  0x40000
+#define VPX_CODEC_CAP_HIGHBITDEPTH  0x40000
 
   /*! \brief Initialization-time Feature Enabling
    *

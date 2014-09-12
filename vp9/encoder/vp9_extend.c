@@ -122,7 +122,7 @@ void vp9_copy_and_extend_frame(const YV12_BUFFER_CONFIG *src,
   const int er_uv = er_y >> uv_width_subsampling;
 
 #if CONFIG_VP9_HIGH
-  if (src->flags & YV12_FLAG_HIGH) {
+  if (src->flags & YV12_FLAG_HIGHBITDEPTH) {
     copy_and_extend_plane_high(src->y_buffer, src->y_stride,
                         dst->y_buffer, dst->y_stride,
                         src->y_width, src->y_height,

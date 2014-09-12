@@ -305,7 +305,7 @@ int vp9_find_best_sub_pixel_tree(const MACROBLOCK *x,
   // pixel search, and can be passed in this function.
   if (second_pred != NULL) {
 #if CONFIG_VP9_HIGH
-    if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       DECLARE_ALIGNED_ARRAY(16, uint16_t, comp_pred16, 64 * 64);
       vp9_high_comp_avg_pred(comp_pred16, second_pred, w, h, y + offset,
                              y_stride);

@@ -399,7 +399,7 @@ static void deblock_and_de_macro_block(YV12_BUFFER_CONFIG   *source,
   (void) low_var_thresh;
   (void) flag;
 #if CONFIG_VP9_HIGH
-  if (source->flags & YV12_FLAG_HIGH) {
+  if (source->flags & YV12_FLAG_HIGHBITDEPTH) {
     vp9_high_post_proc_down_and_across(CONVERT_TO_SHORTPTR(source->y_buffer),
                                        CONVERT_TO_SHORTPTR(post->y_buffer),
                                        source->y_stride, post->y_stride,
@@ -477,8 +477,9 @@ void vp9_deblock(const YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst,
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
 #if CONFIG_VP9_HIGH
-    assert((src->flags & YV12_FLAG_HIGH) == (dst->flags & YV12_FLAG_HIGH));
-    if (src->flags & YV12_FLAG_HIGH) {
+    assert((src->flags & YV12_FLAG_HIGHBITDEPTH) ==
+           (dst->flags & YV12_FLAG_HIGHBITDEPTH));
+    if (src->flags & YV12_FLAG_HIGHBITDEPTH) {
       vp9_high_post_proc_down_and_across(CONVERT_TO_SHORTPTR(srcs[i]),
                                          CONVERT_TO_SHORTPTR(dsts[i]),
                                          src_strides[i], dst_strides[i],
@@ -518,8 +519,9 @@ void vp9_denoise(const YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst,
     const int dst_stride = dst_strides[i];
 
 #if CONFIG_VP9_HIGH
-    assert((src->flags & YV12_FLAG_HIGH) == (dst->flags & YV12_FLAG_HIGH));
-    if (src->flags & YV12_FLAG_HIGH) {
+    assert((src->flags & YV12_FLAG_HIGHBITDEPTH) ==
+           (dst->flags & YV12_FLAG_HIGHBITDEPTH));
+    if (src->flags & YV12_FLAG_HIGHBITDEPTH) {
       const uint16_t *const src = CONVERT_TO_SHORTPTR(srcs[i] + 2 * src_stride
                                                       + 2);
       uint16_t *const dst = CONVERT_TO_SHORTPTR(dsts[i] + 2 * dst_stride + 2);

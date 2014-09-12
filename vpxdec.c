@@ -290,7 +290,7 @@ static void write_image_file(const vpx_image_t *img, const int planes[3],
   int i, y;
   int bytes_per_sample = 1;
 #if CONFIG_VP9_HIGH
-  if (img->fmt & VPX_IMG_FMT_HIGH)
+  if (img->fmt & VPX_IMG_FMT_HIGHBITDEPTH)
     bytes_per_sample = 2;
 #endif
 
@@ -568,7 +568,7 @@ static void low_img_upshift(vpx_image_t *dst, vpx_image_t *src,
   if (dst->d_w != src->d_w || dst->d_h != src->d_h ||
       dst->x_chroma_shift != src->x_chroma_shift ||
       dst->y_chroma_shift != src->y_chroma_shift ||
-      dst->fmt != src->fmt + VPX_IMG_FMT_HIGH ||
+      dst->fmt != src->fmt + VPX_IMG_FMT_HIGHBITDEPTH ||
       input_shift < 0) {
     fatal("Unsupported image conversion");
   }
@@ -602,7 +602,7 @@ static void low_img_upshift(vpx_image_t *dst, vpx_image_t *src,
 
 static void img_upshift(vpx_image_t *dst, vpx_image_t *src,
                         int input_shift) {
-  if (src->fmt & VPX_IMG_FMT_HIGH) {
+  if (src->fmt & VPX_IMG_FMT_HIGHBITDEPTH) {
     high_img_upshift(dst, src, input_shift);
   } else {
     low_img_upshift(dst, src, input_shift);
@@ -652,7 +652,7 @@ static void low_img_downshift(vpx_image_t *dst, vpx_image_t *src,
   if (dst->d_w != src->d_w || dst->d_h != src->d_h ||
       dst->x_chroma_shift != src->x_chroma_shift ||
       dst->y_chroma_shift != src->y_chroma_shift ||
-      src->fmt != dst->fmt + VPX_IMG_FMT_HIGH ||
+      src->fmt != dst->fmt + VPX_IMG_FMT_HIGHBITDEPTH ||
       down_shift < 0) {
     fatal("Unsupported image conversion");
   }
@@ -686,7 +686,7 @@ static void low_img_downshift(vpx_image_t *dst, vpx_image_t *src,
 
 static void img_downshift(vpx_image_t *dst, vpx_image_t *src,
                           int down_shift) {
-  if (dst->fmt & VPX_IMG_FMT_HIGH) {
+  if (dst->fmt & VPX_IMG_FMT_HIGHBITDEPTH) {
     high_img_downshift(dst, src, down_shift);
   } else {
     low_img_downshift(dst, src, down_shift);
@@ -1136,8 +1136,8 @@ int main_loop(int argc, const char **argv_) {
       // Shift up or down if necessary
       if (out_bit_depth != img->bit_depth) {
         vpx_img_fmt_t shifted_fmt = out_bit_depth == 8
-            ? img->fmt ^ (img->fmt & VPX_IMG_FMT_HIGH)
-            : img->fmt | VPX_IMG_FMT_HIGH;
+            ? img->fmt ^ (img->fmt & VPX_IMG_FMT_HIGHBITDEPTH)
+            : img->fmt | VPX_IMG_FMT_HIGHBITDEPTH;
         if (img_shifted &&
             img_shifted_realloc_required(img, img_shifted, shifted_fmt)) {
           vpx_img_free(img_shifted);

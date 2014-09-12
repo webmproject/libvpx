@@ -304,7 +304,7 @@ static void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
     pre += (scaled_mv.row >> SUBPEL_BITS) * pre_buf->stride
            + (scaled_mv.col >> SUBPEL_BITS);
 #if CONFIG_VP9_HIGH
-    if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       high_inter_predictor(pre, pre_buf->stride, dst, dst_buf->stride,
                     subpel_x, subpel_y, sf, w, h, ref, kernel, xs, ys, xd->bps);
     } else {
@@ -485,7 +485,7 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
         uint8_t *buf_ptr1 = ref_frame + y0 * pre_buf->stride + x0;
         // Extend the border.
 #if CONFIG_VP9_HIGH
-        if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+        if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
           high_build_mc_border(buf_ptr1, pre_buf->stride, xd->mc_buf_high,
                                x1 - x0 + 1, x0, y0, x1 - x0 + 1, y1 - y0 + 1,
                                frame_width, frame_height);
@@ -509,7 +509,7 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
       }
     }
 #if CONFIG_VP9_HIGH
-    if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       high_inter_predictor(buf_ptr, buf_stride, dst, dst_buf->stride, subpel_x,
                     subpel_y, sf, w, h, ref, kernel, xs, ys, xd->bps);
     } else {

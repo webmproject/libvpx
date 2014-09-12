@@ -91,7 +91,7 @@ void vp9_subtract_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
   const int bh = 4 * num_4x4_blocks_high_lookup[plane_bsize];
 
 #if CONFIG_VP9_HIGH
-  if (x->e_mbd.cur_buf->flags&YV12_FLAG_HIGH) {
+  if (x->e_mbd.cur_buf->flags&YV12_FLAG_HIGHBITDEPTH) {
     vp9_high_subtract_block(bh, bw, p->src_diff, bw, p->src.buf, p->src.stride,
                             pd->dst.buf, pd->dst.stride, x->e_mbd.bps);
     return;
@@ -229,7 +229,7 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
       base_bits = dct_value_cost[x];
       dx = mul * (dqcoeff[rc] - coeff[rc]);
 #if CONFIG_VP9_HIGH
-      if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
         dx >>= xd->bps - 8;
       }
 #endif
@@ -288,7 +288,7 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
 
       if (shortcut) {
 #if CONFIG_VP9_HIGH
-        if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+        if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
           dx -= ((dequant_ptr[rc != 0] >> (xd->bps - 8)) + sz) ^ sz;
         } else {
           dx -= (dequant_ptr[rc != 0] + sz) ^ sz;
@@ -398,7 +398,7 @@ void vp9_xform_quant_fp(MACROBLOCK *x, int plane, int block,
   src_diff = &p->src_diff[4 * (j * diff_stride + i)];
 
 #if CONFIG_VP9_HIGH
-  if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     switch (tx_size) {
       case TX_32X32:
         high_fdct32x32(x->use_lp32x32fdct, src_diff, coeff, diff_stride);
@@ -485,7 +485,7 @@ void vp9_xform_quant_dc(MACROBLOCK *x, int plane, int block,
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &i, &j);
   src_diff = &p->src_diff[4 * (j * diff_stride + i)];
 #if CONFIG_VP9_HIGH
-  if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     switch (tx_size) {
       case TX_32X32:
         vp9_high_fdct32x32_1(src_diff, coeff, diff_stride);
@@ -565,7 +565,7 @@ void vp9_xform_quant(MACROBLOCK *x, int plane, int block,
   src_diff = &p->src_diff[4 * (j * diff_stride + i)];
 
 #if CONFIG_VP9_HIGH
-  if (xd->cur_buf->flags&YV12_FLAG_HIGH) {
+  if (xd->cur_buf->flags&YV12_FLAG_HIGHBITDEPTH) {
      switch (tx_size) {
       case TX_32X32:
         high_fdct32x32(x->use_lp32x32fdct, src_diff, coeff, diff_stride);
@@ -693,7 +693,7 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
     return;
 
 #if CONFIG_VP9_HIGH
-  if (xd->cur_buf->flags&YV12_FLAG_HIGH) {
+  if (xd->cur_buf->flags&YV12_FLAG_HIGHBITDEPTH) {
     switch (tx_size) {
       case TX_32X32:
         vp9_high_idct32x32_add(dqcoeff, dst, pd->dst.stride,
@@ -758,7 +758,7 @@ static void encode_block_pass1(int plane, int block, BLOCK_SIZE plane_bsize,
 
   if (p->eobs[block] > 0) {
 #if CONFIG_VP9_HIGH
-    if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
        x->high_itxm_add(dqcoeff, dst, pd->dst.stride, p->eobs[block], xd->bps);
        return;
     }
@@ -823,7 +823,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
   src = &p->src.buf[4 * (j * src_stride + i)];
   src_diff = &p->src_diff[4 * (j * diff_stride + i)];
 #if CONFIG_VP9_HIGH
-  if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     switch (tx_size) {
       case TX_32X32:
         scan_order = &vp9_default_scan_orders[TX_32X32];

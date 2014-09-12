@@ -57,7 +57,7 @@ static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
   }
 
 #if CONFIG_VP9_HIGH
-  if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
      vp9_high_build_inter_predictor(y_mb_ptr, stride,
                             &pred[0], 16,
                             &mv,
@@ -297,7 +297,7 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
   int i;
 
 #if CONFIG_VP9_HIGH
-  if (mbd->cur_buf->flags & YV12_FLAG_HIGH) {
+  if (mbd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     predictor = CONVERT_TO_BYTEPTR(predictor16);
   } else {
     predictor = predictor8;
@@ -374,7 +374,7 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
               mb_col * 16, mb_row * 16);
 
 #if CONFIG_VP9_HIGH
-          if (mbd->cur_buf->flags & YV12_FLAG_HIGH) {
+          if (mbd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
             int adj_strength = strength + 2 * (mbd->bps - 8);
             // Apply the filter (YUV)
             vp9_high_temporal_filter_apply(f->y_buffer + mb_y_offset,
@@ -431,7 +431,7 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
       }
 
 #if CONFIG_VP9_HIGH
-      if (mbd->cur_buf->flags & YV12_FLAG_HIGH) {
+      if (mbd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
         uint16_t *dst1_16;
         uint16_t *dst2_16;
         // Normalize filter output to produce AltRef frame

@@ -150,7 +150,7 @@ static vpx_image_t *img_alloc_helper(vpx_image_t   *img,
   align = (1 << ycs) - 1;
   h = (d_h + align) & ~align;
   s = (fmt & VPX_IMG_FMT_PLANAR) ?
-      ((fmt & VPX_IMG_FMT_HIGH) ? 2 * w : w) : bps * w / 8;
+      ((fmt & VPX_IMG_FMT_HIGHBITDEPTH) ? 2 * w : w) : bps * w / 8;
   s = (s + stride_align - 1) & ~(stride_align - 1);
 
   /* Allocate the new image */
@@ -182,7 +182,7 @@ static vpx_image_t *img_alloc_helper(vpx_image_t   *img,
     goto fail;
 
   img->fmt = fmt;
-  img->bit_depth = (fmt & VPX_IMG_FMT_HIGH) ? 16 : 8;
+  img->bit_depth = (fmt & VPX_IMG_FMT_HIGHBITDEPTH) ? 16 : 8;
   img->w = w;
   img->h = h;
   img->x_chroma_shift = xcs;
@@ -236,7 +236,7 @@ int vpx_img_set_rect(vpx_image_t  *img,
       img->planes[VPX_PLANE_PACKED] =
         img->img_data + x * img->bps / 8 + y * img->stride[VPX_PLANE_PACKED];
     } else {
-      int bytes_per_sample = (img->fmt & VPX_IMG_FMT_HIGH) ? 2 : 1;
+      int bytes_per_sample = (img->fmt & VPX_IMG_FMT_HIGHBITDEPTH) ? 2 : 1;
       data = img->img_data;
 
       if (img->fmt & VPX_IMG_FMT_HAS_ALPHA) {

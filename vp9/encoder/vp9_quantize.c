@@ -516,7 +516,7 @@ void vp9_regular_quantize_b_4x4(MACROBLOCK *x, int plane, int block,
   struct macroblockd_plane *pd = &xd->plane[plane];
 
 #if CONFIG_VP9_HIGH
-  if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     vp9_high_quantize_b(BLOCK_OFFSET(p->coeff, block),
            16, x->skip_block,
            p->zbin, p->round, p->quant, p->quant_shift,

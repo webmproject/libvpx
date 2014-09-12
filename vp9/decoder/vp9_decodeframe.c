@@ -197,7 +197,7 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
     TX_TYPE tx_type = DCT_DCT;
     tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
 #if CONFIG_VP9_HIGH
-    if (xd->cur_buf->flags&YV12_FLAG_HIGH) {
+    if (xd->cur_buf->flags&YV12_FLAG_HIGHBITDEPTH) {
       if (xd->lossless) {
         tx_type = DCT_DCT;
         vp9_high_iwht4x4_add(dqcoeff, dst, stride, eob, xd->bps);

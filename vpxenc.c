@@ -681,7 +681,7 @@ static int compare_img(const vpx_image_t *const img1,
   match &= (img1->d_w == img2->d_w);
   match &= (img1->d_h == img2->d_h);
 #if CONFIG_VP9_HIGH
-  if (img1->fmt & VPX_IMG_FMT_HIGH) {
+  if (img1->fmt & VPX_IMG_FMT_HIGHBITDEPTH) {
     l_w *= 2;
     c_w *= 2;
   }
@@ -1497,7 +1497,7 @@ static void encode_frame(struct stream_state *stream,
   /* Scale if necessary */
 #if CONFIG_VP9_HIGH
   if (img) {
-    if ((img->fmt & VPX_IMG_FMT_HIGH) &&
+    if ((img->fmt & VPX_IMG_FMT_HIGHBITDEPTH) &&
         (img->d_w != cfg->g_w || img->d_h != cfg->g_h)) {
       if (img->fmt != VPX_IMG_FMT_I42016) {
         fprintf(stderr, "%s can only scale 4:2:0 inputs\n", exec_name);
@@ -1760,7 +1760,7 @@ static void low_img_upshift(vpx_image_t *dst, vpx_image_t *src,
   if (dst->w != src->w || dst->h != src->h ||
       dst->x_chroma_shift != src->x_chroma_shift ||
       dst->y_chroma_shift != src->y_chroma_shift ||
-      dst->fmt != src->fmt + VPX_IMG_FMT_HIGH ||
+      dst->fmt != src->fmt + VPX_IMG_FMT_HIGHBITDEPTH ||
       input_shift < 0) {
     fatal("Unsupported image conversion");
   }
@@ -1794,7 +1794,7 @@ static void low_img_upshift(vpx_image_t *dst, vpx_image_t *src,
 
 static void img_upshift(vpx_image_t *dst, vpx_image_t *src,
                         int input_shift) {
-  if (src->fmt & VPX_IMG_FMT_HIGH) {
+  if (src->fmt & VPX_IMG_FMT_HIGHBITDEPTH) {
     high_img_upshift(dst, src, input_shift);
   } else {
     low_img_upshift(dst, src, input_shift);
@@ -1803,7 +1803,7 @@ static void img_upshift(vpx_image_t *dst, vpx_image_t *src,
 
 static void img_cast_16_to_8(vpx_image_t *dst, vpx_image_t *src) {
   int plane;
-  if (dst->fmt + VPX_IMG_FMT_HIGH != src->fmt ||
+  if (dst->fmt + VPX_IMG_FMT_HIGHBITDEPTH != src->fmt ||
       dst->d_w != src->d_w || dst->d_h != src->d_h ||
       dst->x_chroma_shift != src->x_chroma_shift ||
       dst->y_chroma_shift != src->y_chroma_shift) {
@@ -1872,14 +1872,14 @@ static void test_decode(struct stream_state  *stream,
     vpx_codec_control(&stream->decoder, VP9_GET_REFERENCE, &ref_dec);
     dec_img = ref_dec.img;
 #if CONFIG_VP9_HIGH
-    if ((enc_img.fmt & VPX_IMG_FMT_HIGH) != (dec_img.fmt & VPX_IMG_FMT_HIGH)) {
-      if (enc_img.fmt & VPX_IMG_FMT_HIGH) {
-        vpx_img_alloc(&enc_img, enc_img.fmt - VPX_IMG_FMT_HIGH, enc_img.d_w,
+    if ((enc_img.fmt & VPX_IMG_FMT_HIGHBITDEPTH) != (dec_img.fmt & VPX_IMG_FMT_HIGHBITDEPTH)) {
+      if (enc_img.fmt & VPX_IMG_FMT_HIGHBITDEPTH) {
+        vpx_img_alloc(&enc_img, enc_img.fmt - VPX_IMG_FMT_HIGHBITDEPTH, enc_img.d_w,
                       enc_img.d_h, 16);
         img_cast_16_to_8(&enc_img, &ref_enc.img);
       }
-      if (dec_img.fmt & VPX_IMG_FMT_HIGH) {
-        vpx_img_alloc(&dec_img, dec_img.fmt - VPX_IMG_FMT_HIGH, dec_img.d_w,
+      if (dec_img.fmt & VPX_IMG_FMT_HIGHBITDEPTH) {
+        vpx_img_alloc(&dec_img, dec_img.fmt - VPX_IMG_FMT_HIGHBITDEPTH, dec_img.d_w,
                       dec_img.d_h, 16);
         img_cast_16_to_8(&dec_img, &ref_dec.img);
       }
@@ -1892,7 +1892,7 @@ static void test_decode(struct stream_state  *stream,
   if (!compare_img(&enc_img, &dec_img)) {
     int y[4], u[4], v[4];
 #if CONFIG_VP9_HIGH
-    if (enc_img.fmt & VPX_IMG_FMT_HIGH) {
+    if (enc_img.fmt & VPX_IMG_FMT_HIGHBITDEPTH) {
       find_mismatch_high(&enc_img, &dec_img, y, u, v);
     } else {
       find_mismatch(&enc_img, &dec_img, y, u, v);
@@ -2061,7 +2061,7 @@ int main(int argc, const char **argv_) {
           input.bit_depth = stream->config.cfg.g_in_bit_depth =
               vpx_bit_depth_to_bps(stream->config.cfg.g_bit_depth);
       });
-      if (input.bit_depth > 8) input.fmt |= VPX_IMG_FMT_HIGH;
+      if (input.bit_depth > 8) input.fmt |= VPX_IMG_FMT_HIGHBITDEPTH;
     } else {
       FOREACH_STREAM({
         stream->config.cfg.g_in_bit_depth = input.bit_depth;
@@ -2184,7 +2184,7 @@ int main(int argc, const char **argv_) {
           // Input bit depth and stream bit depth do not match, so up
           // shift frame to stream bit depth
           if (!allocated_raw_shift) {
-            vpx_img_alloc(&raw_shift, raw.fmt | VPX_IMG_FMT_HIGH,
+            vpx_img_alloc(&raw_shift, raw.fmt | VPX_IMG_FMT_HIGHBITDEPTH,
                           input.width, input.height, 32);
             allocated_raw_shift = 1;
           }
@@ -2195,7 +2195,7 @@ int main(int argc, const char **argv_) {
         }
         vpx_usec_timer_start(&timer);
         if (use_16bit_internal) {
-          assert(frame_to_encode->fmt & VPX_IMG_FMT_HIGH);
+          assert(frame_to_encode->fmt & VPX_IMG_FMT_HIGHBITDEPTH);
           FOREACH_STREAM({
             if (stream->config.use_16bit_internal)
               encode_frame(stream, &global,
@@ -2205,7 +2205,7 @@ int main(int argc, const char **argv_) {
               assert(0);
           });
         } else {
-          assert((frame_to_encode->fmt & VPX_IMG_FMT_HIGH) == 0);
+          assert((frame_to_encode->fmt & VPX_IMG_FMT_HIGHBITDEPTH) == 0);
           FOREACH_STREAM(encode_frame(stream, &global,
                                       frame_avail ? frame_to_encode : NULL,
                                       frames_in));

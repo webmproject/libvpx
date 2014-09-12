@@ -257,7 +257,7 @@ int vp9_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
                     (uv_border_h * uv_stride) + uv_border_w;
       ybf->v_buffer = p + yplane_size + uvplane_size +
                     (uv_border_h * uv_stride) + uv_border_w;
-      ybf->flags = YV12_FLAG_HIGH;
+      ybf->flags = YV12_FLAG_HIGHBITDEPTH;
     } else {
       ybf->y_buffer = ybf->buffer_alloc + (border * y_stride) + border;
       ybf->u_buffer = ybf->buffer_alloc + yplane_size +

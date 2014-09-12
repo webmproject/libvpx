@@ -375,7 +375,7 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   // Override the default variance function to use MSE.
   v_fn_ptr.vf = get_block_variance_fn(bsize);
 #if CONFIG_VP9_HIGH
-  if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     v_fn_ptr.vf = high_get_block_variance_fn(xd->mi[0]->mbmi.sb_type, xd->bps);
   }
 #endif
@@ -675,7 +675,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
 
         xd->plane[0].pre[0].buf = first_ref_buf->y_buffer + recon_yoffset;
 #if CONFIG_VP9_HIGH
-        if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+        if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
           motion_error = high_get_prediction_error(bsize, &x->plane[0].src,
                                             &xd->plane[0].pre[0], xd->bps);
         } else {
@@ -697,7 +697,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
         unscaled_last_source_buf_2d.stride =
             cpi->unscaled_last_source->y_stride;
 #if CONFIG_VP9_HIGH
-        if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+        if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
           raw_motion_error = high_get_prediction_error(bsize, &x->plane[0].src,
                               &unscaled_last_source_buf_2d, xd->bps);
         } else {
@@ -742,7 +742,7 @@ void vp9_first_pass(VP9_COMP *cpi) {
 
             xd->plane[0].pre[0].buf = gld_yv12->y_buffer + recon_yoffset;
 #if CONFIG_VP9_HIGH
-            if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+            if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
               gf_motion_error = high_get_prediction_error(
                   bsize, &x->plane[0].src, &xd->plane[0].pre[0], xd->bps);
             } else {

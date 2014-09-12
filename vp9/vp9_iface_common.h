@@ -47,9 +47,9 @@ static void yuvconfig2image(vpx_image_t *img, const YV12_BUFFER_CONFIG  *yv12,
   img->stride[VPX_PLANE_V] = yv12->uv_stride;
   img->stride[VPX_PLANE_ALPHA] = yv12->y_stride;
 #if CONFIG_VP9_HIGH
-  if (yv12->flags & YV12_FLAG_HIGH) {
+  if (yv12->flags & YV12_FLAG_HIGHBITDEPTH) {
     // VPX IMG uses byte strides and a pointer to the first byte of the image
-    img->fmt |= VPX_IMG_FMT_HIGH;
+    img->fmt |= VPX_IMG_FMT_HIGHBITDEPTH;
     img->bit_depth = 16;
     img->planes[VPX_PLANE_Y]     = (uint8_t*)
         CONVERT_TO_SHORTPTR(yv12->y_buffer);
@@ -90,7 +90,7 @@ static vpx_codec_err_t image2yuvconfig(const vpx_image_t *img,
   yv12->y_stride = img->stride[VPX_PLANE_Y];
   yv12->uv_stride = img->stride[VPX_PLANE_U];
 #if CONFIG_VP9_HIGH
-  if (img->fmt & VPX_IMG_FMT_HIGH) {
+  if (img->fmt & VPX_IMG_FMT_HIGHBITDEPTH) {
     // In vpx_image_t
     //     planes point to uint8 address of start of data
     //     stride counts uint8s to reach next row
@@ -108,7 +108,7 @@ static vpx_codec_err_t image2yuvconfig(const vpx_image_t *img,
     yv12->v_buffer = CONVERT_TO_BYTEPTR(yv12->v_buffer);
     yv12->y_stride >>= 1;
     yv12->uv_stride >>= 1;
-    yv12->flags = YV12_FLAG_HIGH;
+    yv12->flags = YV12_FLAG_HIGHBITDEPTH;
   } else {
     yv12->flags = 0;
   }

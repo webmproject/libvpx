@@ -131,7 +131,7 @@ static unsigned int block_variance(VP9_COMP *cpi, MACROBLOCK *x,
     const int bh = 8 * num_8x8_blocks_high_lookup[bs] - bottom_overflow;
     int avg;
 #if CONFIG_VP9_HIGH
-    if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       high_variance(x->plane[0].src.buf, x->plane[0].src.stride,
                     CONVERT_TO_BYTEPTR(vp9_high_64_zeros), 0, bw, bh, &sse,
                     &avg);
@@ -149,7 +149,7 @@ static unsigned int block_variance(VP9_COMP *cpi, MACROBLOCK *x,
     return (256 * var) / (bw * bh);
   } else {
 #if CONFIG_VP9_HIGH
-    if (xd->cur_buf->flags & YV12_FLAG_HIGH) {
+    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       var = cpi->fn_ptr[bs].vf(x->plane[0].src.buf,
                                x->plane[0].src.stride,
                                CONVERT_TO_BYTEPTR(vp9_high_64_zeros), 0, &sse);
