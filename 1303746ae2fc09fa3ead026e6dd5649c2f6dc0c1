@@ -16,6 +16,24 @@
       "revId": "1303746ae2fc09fa3ead026e6dd5649c2f6dc0c1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Xd8\u003d",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 957,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-09-12T16:34:48Z",
+      "side": 1,
+      "message": "This function became complicated since I wanted to remove any redundant computations. \nThe interface of the subpel search function has the optional sad costs passed for the 4 neighboring integer pel positions. The integer search must compute it in a manner that is most efficient. If I moved this to sub-pel search, then there will be redundant computations, since these positions would likely already have been covered in the full-pel search.",
+      "parentUuid": "AAAAdn//XeE\u003d",
+      "revId": "1303746ae2fc09fa3ead026e6dd5649c2f6dc0c1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
