@@ -2152,6 +2152,10 @@ void configure_buffer_updates(VP9_COMP *cpi) {
       break;
   }
   if (is_two_pass_svc(cpi)) {
+    if (cpi->svc.temporal_layer_id > 0) {
+      cpi->refresh_last_frame = 0;
+      cpi->refresh_golden_frame = 0;
+    }
     if (cpi->svc.layer_context[cpi->svc.spatial_layer_id].gold_ref_idx < 0)
       cpi->refresh_golden_frame = 0;
     if (cpi->alt_ref_source == NULL)

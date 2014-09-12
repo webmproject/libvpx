@@ -178,8 +178,6 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
   }
 
 #if CONFIG_SPATIAL_SVC
-  if (cfg->ss_number_layers * cfg->ts_number_layers > REF_FRAMES)
-    ERROR("Too many layers. Maximum 8 layers could be set");
 
   if ((cfg->ss_number_layers > 1 || cfg->ts_number_layers > 1) &&
       cfg->g_pass == VPX_RC_LAST_PASS) {
@@ -188,8 +186,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
       if (cfg->ss_enable_auto_alt_ref[i])
         ++alt_ref_sum;
     }
-    if (alt_ref_sum >
-        REF_FRAMES - cfg->ss_number_layers * cfg->ts_number_layers)
+    if (alt_ref_sum > REF_FRAMES - cfg->ss_number_layers)
       ERROR("Not enough ref buffers for svc alt ref frames");
     if ((cfg->ss_number_layers > 3 ||
          cfg->ss_number_layers * cfg->ts_number_layers > 4) &&
