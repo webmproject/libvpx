@@ -34,6 +34,24 @@
       "revId": "1303746ae2fc09fa3ead026e6dd5649c2f6dc0c1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Xd0\u003d",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 957,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-09-12T17:00:41Z",
+      "side": 1,
+      "message": "Sounds good.",
+      "parentUuid": "AAAAdn//Xd8\u003d",
+      "revId": "1303746ae2fc09fa3ead026e6dd5649c2f6dc0c1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
