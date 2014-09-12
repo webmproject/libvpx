@@ -148,7 +148,12 @@ enum vp8e_enc_control_id {
    */
   VP8E_SET_CPUUSED           = 13,
   VP8E_SET_ENABLEAUTOALTREF,       /**< control function to enable vp8 to automatic set and use altref frame */
-  VP8E_SET_NOISE_SENSITIVITY,      /**< control function to set noise sensitivity */
+  /*!\brief control function to set noise sensitivity
+   *
+   * 0: off, 1: OnYOnly, 2: OnYUV,
+   * 3: OnYUVAggressive, 4: Adaptive
+   */
+  VP8E_SET_NOISE_SENSITIVITY,
   VP8E_SET_SHARPNESS,              /**< control function to set sharpness */
   VP8E_SET_STATIC_THRESHOLD,       /**< control function to set the threshold for macroblocks treated static */
   VP8E_SET_TOKEN_PARTITIONS,       /**< control function to set the number of token partitions  */
@@ -197,6 +202,11 @@ enum vp8e_enc_control_id {
   VP9E_SET_FRAME_PARALLEL_DECODING,
   VP9E_SET_AQ_MODE,
   VP9E_SET_FRAME_PERIODIC_BOOST,
+  /*!\brief control function to set noise sensitivity
+   *
+   *  0: off, 1: OnYOnly
+   */
+  VP9E_SET_NOISE_SENSITIVITY,
 
   VP9E_SET_SVC,
   VP9E_SET_SVC_PARAMETERS,
@@ -376,6 +386,8 @@ VPX_CTRL_USE_TYPE(VP9E_SET_FRAME_PARALLEL_DECODING, unsigned int)
 VPX_CTRL_USE_TYPE(VP9E_SET_AQ_MODE, unsigned int)
 
 VPX_CTRL_USE_TYPE(VP9E_SET_FRAME_PERIODIC_BOOST, unsigned int)
+
+VPX_CTRL_USE_TYPE(VP9E_SET_NOISE_SENSITIVITY,  unsigned int)
 
 VPX_CTRL_USE_TYPE(VP9E_SET_TUNE_CONTENT, int) /* vp9e_tune_content */
 /*! @} - end defgroup vp8_encoder */
