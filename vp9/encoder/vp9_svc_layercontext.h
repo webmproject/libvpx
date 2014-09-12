@@ -36,6 +36,7 @@ typedef struct {
   int gold_ref_idx;
   int has_alt_frame;
   size_t layer_size;
+  struct vpx_psnr_pkt psnr_pkt;
 } LAYER_CONTEXT;
 
 typedef struct {
