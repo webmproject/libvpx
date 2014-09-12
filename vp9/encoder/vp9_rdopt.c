@@ -2794,9 +2794,9 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         continue;
 
       if ((mode_search_skip_flags & FLAG_SKIP_COMP_BESTINTRA) &&
-          best_mode_index >=0 &&
-          best_mbmode.ref_frame[0] == INTRA_FRAME)
+          best_mode_index >= 0 && best_mbmode.ref_frame[0] == INTRA_FRAME)
         continue;
+
       mode_excluded = cm->reference_mode == SINGLE_REFERENCE;
     } else {
       if (ref_frame != INTRA_FRAME)
@@ -3026,13 +3026,11 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       hybrid_rd = RDCOST(x->rdmult, x->rddiv, hybrid_rate, distortion2);
 
       if (!comp_pred) {
-        if (single_rd < best_pred_rd[SINGLE_REFERENCE]) {
+        if (single_rd < best_pred_rd[SINGLE_REFERENCE])
           best_pred_rd[SINGLE_REFERENCE] = single_rd;
-        }
       } else {
-        if (single_rd < best_pred_rd[COMPOUND_REFERENCE]) {
+        if (single_rd < best_pred_rd[COMPOUND_REFERENCE])
           best_pred_rd[COMPOUND_REFERENCE] = single_rd;
-        }
       }
       if (hybrid_rd < best_pred_rd[REFERENCE_MODE_SELECT])
         best_pred_rd[REFERENCE_MODE_SELECT] = hybrid_rd;
