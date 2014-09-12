@@ -185,6 +185,7 @@ typedef struct VP9Common {
 
   // VPX_BITS_8 in versions 0 and 1, VPX_BITS_10/VPX_BITS_12 in version 2
   vpx_bit_depth_t bit_depth;
+  vpx_bit_depth_t dequant_bit_depth;
 
 #if CONFIG_VP9_POSTPROC
   struct postproc_state  postproc_state;

@@ -646,10 +646,10 @@ static void setup_quantization(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   update |= read_delta_q(rb, &cm->uv_dc_delta_q);
   update |= read_delta_q(rb, &cm->uv_ac_delta_q);
 
-  // TODO(peter.derivaz): Don't really want to call this for every frame
-  // for high-bit-depth, but need the bit depth to init dequantizers
-  if (update || cm->profile >= PROFILE_2)
+  if (update || cm->bit_depth != cm->dequant_bit_depth) {
     vp9_init_dequantizer(cm);
+    cm->dequant_bit_depth = cm->bit_depth;
+  }
 
   xd->lossless = cm->base_qindex == 0 &&
                  cm->y_dc_delta_q == 0 &&
