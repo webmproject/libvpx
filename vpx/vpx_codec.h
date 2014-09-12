@@ -45,7 +45,6 @@ extern "C" {
 
 #include <assert.h>
 
-#include "./vpx_config.h"
 #include "./vpx_integer.h"
 #include "./vpx_image.h"
 
@@ -471,25 +470,6 @@ extern "C" {
   } /**<\hideinitializer*/
 
 #endif
-
-static INLINE unsigned int vpx_bit_depth_to_bps(vpx_bit_depth_t bit_depth) {
-  int bps = 8;
-  switch (bit_depth) {
-    case VPX_BITS_8:
-      bps = 8;
-      break;
-    case VPX_BITS_10:
-      bps = 10;
-      break;
-    case VPX_BITS_12:
-      bps = 12;
-      break;
-    case VPX_BITS_NOT_SET:
-      assert(0 && "Bit depth is not initialized.");
-      break;
-  }
-  return bps;
-}
 
   /*!@} - end defgroup codec*/
 #ifdef __cplusplus

@@ -1251,7 +1251,7 @@ static void filter_block_plane_non420(VP9_COMMON *cm,
                                    mask_4x4_c & border_mask,
                                    mask_4x4_int[r],
                                    &cm->lf_info, &lfl[r << 3],
-                                   vpx_bit_depth_to_bps(cm->bit_depth));
+                                   (int)cm->bit_depth);
     } else {
       filter_selectively_vert(dst->buf, dst->stride,
                               mask_16x16_c & border_mask,
@@ -1299,7 +1299,7 @@ static void filter_block_plane_non420(VP9_COMMON *cm,
                                     mask_4x4_r,
                                     mask_4x4_int_r,
                                     &cm->lf_info, &lfl[r << 3],
-                                    vpx_bit_depth_to_bps(cm->bit_depth));
+                                    (int)cm->bit_depth);
     } else {
       filter_selectively_horiz(dst->buf, dst->stride,
                                mask_16x16_r,
@@ -1352,7 +1352,7 @@ void vp9_filter_block_plane(VP9_COMMON *const cm,
                                           mask_4x4_l,
                                           mask_4x4_int_l,
                                           &cm->lf_info, &lfm->lfl_y[r << 3],
-                                          vpx_bit_depth_to_bps(cm->bit_depth));
+                                          (int)cm->bit_depth);
       } else {
         filter_selectively_vert_row2(plane->plane_type,
                                      dst->buf, dst->stride,
@@ -1412,7 +1412,7 @@ void vp9_filter_block_plane(VP9_COMMON *const cm,
                                       mask_4x4_int & 0xff,
                                       &cm->lf_info,
                                       &lfm->lfl_y[r << 3],
-                                      vpx_bit_depth_to_bps(cm->bit_depth));
+                                      (int)cm->bit_depth);
       } else {
         filter_selectively_horiz(dst->buf, dst->stride,
                                  mask_16x16_r,
@@ -1472,8 +1472,7 @@ void vp9_filter_block_plane(VP9_COMMON *const cm,
                                             mask_4x4_int_l,
                                             &cm->lf_info,
                                             &lfm->lfl_uv[r << 1],
-                                            vpx_bit_depth_to_bps(
-                                                cm->bit_depth));
+                                            (int)cm->bit_depth);
         } else {
           filter_selectively_vert_row2(plane->plane_type,
                                        dst->buf, dst->stride,
@@ -1538,7 +1537,7 @@ void vp9_filter_block_plane(VP9_COMMON *const cm,
                                       mask_4x4_int_r,
                                       &cm->lf_info,
                                       &lfm->lfl_uv[r << 1],
-                                      vpx_bit_depth_to_bps(cm->bit_depth));
+                                      (int)cm->bit_depth);
       } else {
         filter_selectively_horiz(dst->buf, dst->stride,
                                  mask_16x16_r,

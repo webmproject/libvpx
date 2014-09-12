@@ -591,7 +591,7 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   cpi->oxcf = *oxcf;
 #if CONFIG_VP9_HIGH
   if (cpi->oxcf.use_high) {
-    cpi->mb.e_mbd.bps = vpx_bit_depth_to_bps(cm->bit_depth);
+    cpi->mb.e_mbd.bps = (int)cm->bit_depth;
   }
 #endif
 
@@ -2340,7 +2340,7 @@ void vp9_scale_references(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
   MV_REFERENCE_FRAME ref_frame;
 #if CONFIG_VP9_HIGH
-  int bps = vpx_bit_depth_to_bps(cm->bit_depth);
+  int bps = (int)cm->bit_depth;
 #endif
   const VP9_REFFRAME ref_mask[3] = {VP9_LAST_FLAG, VP9_GOLD_FLAG, VP9_ALT_FLAG};
 
@@ -2750,7 +2750,7 @@ YV12_BUFFER_CONFIG *vp9_scale_if_required(VP9_COMMON *cm,
   if (cm->mi_cols * MI_SIZE != unscaled->y_width ||
       cm->mi_rows * MI_SIZE != unscaled->y_height) {
 #if CONFIG_VP9_HIGH
-    int bps = vpx_bit_depth_to_bps(cm->bit_depth);
+    int bps = (int)cm->bit_depth;
     scale_and_extend_frame_nonnormative(unscaled, scaled, bps);
 #else
     scale_and_extend_frame_nonnormative(unscaled, scaled);
