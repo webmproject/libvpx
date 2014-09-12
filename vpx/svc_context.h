@@ -102,15 +102,6 @@ vpx_codec_err_t vpx_svc_get_layer_resolution(const SvcContext *svc_ctx,
                                              int layer,
                                              unsigned int *width,
                                              unsigned int *height);
-/**
- * return number of frames that have been encoded
- */
-int vpx_svc_get_encode_frame_count(const SvcContext *svc_ctx);
-
-/**
- * force the next frame to be a keyframe
- */
-void vpx_svc_set_keyframe(SvcContext *svc_ctx);
 
 #ifdef __cplusplus
 }  // extern "C"
