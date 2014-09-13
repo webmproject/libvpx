@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//XXA\u003d",
+        "filename": "vp9/common/arm/neon/vp9_convolve8_neon.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-09-13T00:41:31Z",
+      "side": 1,
+      "message": "Please take a look at the x86 intrinsics:\n https://gerrit.chromium.org/gerrit/gitweb?p\u003dwebm/libvpx.git;a\u003dtree;f\u003dvp9/common/x86;h\u003df8456267ba00ecee25006e050c39f4b33fe5cb13;hb\u003drefs/heads/master\n\nspecifically:\n vp9_idct_intrin_sse2.c\n vp9_idct_intrin_ssse3.c\n vp9_loopfilter_intrin_sse2.c\n vp9_subpixel_8t_intrin_avx2.c\n\nand libwebp:\n http://git.chromium.org/gitweb/?p\u003dwebm/libwebp.git;a\u003dblob;f\u003dsrc/dsp/enc_neon.c;h\u003d3ef9fe366d19d87bb6d95875f47430824709a7d5;hb\u003dHEAD\n\nThe code in the examples uses much more descriptive variable names and generally tries to stick closely to the C code to make reading, understanding, and debugging either.\n\nThe variable names used here make the code incredibly difficult to read and requires a significant effort to read and understand. I was lenient with the vp8 code but we\u0027re trying to maintain a much higher level of code in the vp9 branch.",
+      "revId": "09c8672a4039b5f3b5c71034a6e56964fcde9730",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
