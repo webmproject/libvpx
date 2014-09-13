@@ -2579,7 +2579,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t best_inter_rd = INT64_MAX;
   unsigned int best_pred_sse = UINT_MAX;
   PREDICTION_MODE best_intra_mode = DC_PRED;
-  MV_REFERENCE_FRAME best_inter_ref_frame = LAST_FRAME;
   int rate_uv_intra[TX_SIZES], rate_uv_tokenonly[TX_SIZES];
   int64_t dist_uv[TX_SIZES];
   int skip_uv[TX_SIZES];
@@ -2799,10 +2798,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
           best_mode_index >=0 &&
           best_mbmode.ref_frame[0] == INTRA_FRAME)
         continue;
-      if ((mode_search_skip_flags & FLAG_SKIP_COMP_REFMISMATCH) &&
-          ref_frame != best_inter_ref_frame &&
-          second_ref_frame != best_inter_ref_frame)
-        continue;
       mode_excluded = cm->reference_mode == SINGLE_REFERENCE;
     } else {
       if (ref_frame != INTRA_FRAME)
@@ -2965,7 +2960,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       // Keep record of best inter rd with single reference
       if (!comp_pred && !mode_excluded && this_rd < best_inter_rd) {
         best_inter_rd = this_rd;
-        best_inter_ref_frame = ref_frame;
       }
     }
 
@@ -3318,7 +3312,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   unsigned int ref_costs_single[MAX_REF_FRAMES], ref_costs_comp[MAX_REF_FRAMES];
   vp9_prob comp_mode_p;
   int64_t best_inter_rd = INT64_MAX;
-  MV_REFERENCE_FRAME best_inter_ref_frame = LAST_FRAME;
   INTERP_FILTER tmp_best_filter = SWITCHABLE;
   int rate_uv_intra, rate_uv_tokenonly;
   int64_t dist_uv;
@@ -3429,10 +3422,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
         continue;
       if ((cpi->sf.mode_search_skip_flags & FLAG_SKIP_COMP_BESTINTRA) &&
           vp9_ref_order[best_ref_index].ref_frame[0] == INTRA_FRAME)
-        continue;
-      if ((cpi->sf.mode_search_skip_flags & FLAG_SKIP_COMP_REFMISMATCH) &&
-          ref_frame != best_inter_ref_frame &&
-          second_ref_frame != best_inter_ref_frame)
         continue;
     }
 
@@ -3712,7 +3701,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
         !mode_excluded &&
         this_rd < best_inter_rd) {
       best_inter_rd = this_rd;
-      best_inter_ref_frame = ref_frame;
     }
 
     if (!disable_skip && ref_frame == INTRA_FRAME) {

@@ -125,11 +125,6 @@ typedef enum {
   // Skips comp inter modes if the best so far is an intra mode.
   FLAG_SKIP_COMP_BESTINTRA = 1 << 1,
 
-  // Skips comp inter modes if the best single intermode so far does
-  // not have the same reference as one of the two references being
-  // tested.
-  FLAG_SKIP_COMP_REFMISMATCH = 1 << 2,
-
   // Skips oblique intra modes if the best so far is an inter mode.
   FLAG_SKIP_INTRA_BESTINTER = 1 << 3,
 

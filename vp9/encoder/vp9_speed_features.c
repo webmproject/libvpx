@@ -126,8 +126,7 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
     sf->mv.search_method = BIGDIA;
     sf->mv.subpel_search_method = SUBPEL_TREE_PRUNED;
     sf->adaptive_rd_thresh = 4;
-    sf->mode_search_skip_flags |= FLAG_SKIP_COMP_REFMISMATCH |
-                                  FLAG_EARLY_TERMINATE;
+    sf->mode_search_skip_flags |= FLAG_EARLY_TERMINATE;
     sf->disable_filter_search_var_thresh = 200;
     sf->use_lp32x32fdct = 1;
     sf->use_fast_coef_updates = ONE_LOOP_REDUCED;
