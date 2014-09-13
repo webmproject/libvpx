@@ -99,6 +99,9 @@ typedef struct {
   int_mv as_mv[2];  // first, second inter predictor motion vectors
 } b_mode_info;
 
+// Note that the rate-distortion optimization loop, bit-stream writer, and
+// decoder implementation modules critically rely on the enum entry values
+// specified herein. They should be refactored concurrently.
 typedef enum {
   NONE = -1,
   INTRA_FRAME = 0,
