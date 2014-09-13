@@ -3312,7 +3312,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   int_mv seg_mvs[4][MAX_REF_FRAMES];
   b_mode_info best_bmodes[4];
   int best_skip2 = 0;
-  int mode_skip_mask = 0;
+  int ref_frame_skip_mask[2] = { 0 };
 
   x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
   vpx_memset(x->zcoeff_blk[TX_4X4], 0, 4);
@@ -3341,6 +3341,9 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
                              ref_frame, bsize, mi_row, mi_col,
                              frame_mv[NEARESTMV], frame_mv[NEARMV],
                              yv12_mb);
+    } else {
+      ref_frame_skip_mask[0] |= (1 << ref_frame);
+      ref_frame_skip_mask[1] |= SECOND_REF_FRAME_MASK;
     }
     frame_mv[NEWMV][ref_frame].as_int = INVALID_MV;
     frame_mv[ZEROMV][ref_frame].as_int = 0;
@@ -3368,16 +3371,17 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       if (ref_index == 3) {
         switch (vp9_ref_order[best_ref_index].ref_frame[0]) {
           case INTRA_FRAME:
-            mode_skip_mask = 0;
             break;
           case LAST_FRAME:
-            mode_skip_mask = 0x0010;
+            ref_frame_skip_mask[0] |= (1 << GOLDEN_FRAME) | (1 << ALTREF_FRAME);
+            ref_frame_skip_mask[1] |= SECOND_REF_FRAME_MASK;
             break;
           case GOLDEN_FRAME:
-            mode_skip_mask = 0x0008;
+            ref_frame_skip_mask[0] |= (1 << LAST_FRAME) | (1 << ALTREF_FRAME);
+            ref_frame_skip_mask[1] |= SECOND_REF_FRAME_MASK;
             break;
           case ALTREF_FRAME:
-            mode_skip_mask = 0x0000;
+            ref_frame_skip_mask[0] |= (1 << GOLDEN_FRAME) | (1 << LAST_FRAME);
             break;
           case NONE:
           case MAX_REF_FRAMES:
@@ -3385,9 +3389,11 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
             break;
         }
       }
-      if (mode_skip_mask & (1 << ref_index))
-        continue;
     }
+
+    if (ref_frame_skip_mask[0] & (1 << ref_index) &&
+        ref_frame_skip_mask[1] & (1 << ref_index))
+      continue;
 
     // Test best rd so far against threshold for trying this mode.
     if (rd_less_than_thresh(best_rd,
