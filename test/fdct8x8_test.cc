@@ -373,7 +373,7 @@ class FwdTrans8x8TestBase {
 
       reference_8x8_dct_2d(in, out_r);
       for (int j = 0; j < kNumCoeffs; ++j)
-        coeff[j] = round(out_r[j]);
+        coeff[j] = static_cast<tran_low_t>(round(out_r[j]));
 
       if (bit_depth_ == VPX_BITS_8) {
         ASM_REGISTER_STATE_CHECK(RunInvTxfm(coeff, dst, pitch_));
@@ -416,7 +416,7 @@ class FwdTrans8x8TestBase {
       RunFwdTxfm(in, coeff, pitch_);
       reference_8x8_dct_2d(in, out_r);
       for (int j = 0; j < kNumCoeffs; ++j)
-        coeff_r[j] = round(out_r[j]);
+        coeff_r[j] = static_cast<tran_low_t>(round(out_r[j]));
 
       for (int j = 0; j < kNumCoeffs; ++j) {
         const uint32_t diff = coeff[j] - coeff_r[j];
