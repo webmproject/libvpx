@@ -498,41 +498,6 @@ void vp9_set_rd_speed_thresholds(VP9_COMP *cpi) {
   rd->thresh_mult[THR_D153_PRED] += 2500;
   rd->thresh_mult[THR_D207_PRED] += 2500;
   rd->thresh_mult[THR_D63_PRED] += 2500;
-
-  // Disable frame modes if flags not set.
-  if (!(cpi->ref_frame_flags & VP9_LAST_FLAG)) {
-    rd->thresh_mult[THR_NEWMV    ] = INT_MAX;
-    rd->thresh_mult[THR_NEARESTMV] = INT_MAX;
-    rd->thresh_mult[THR_ZEROMV   ] = INT_MAX;
-    rd->thresh_mult[THR_NEARMV   ] = INT_MAX;
-  }
-  if (!(cpi->ref_frame_flags & VP9_GOLD_FLAG)) {
-    rd->thresh_mult[THR_NEARESTG ] = INT_MAX;
-    rd->thresh_mult[THR_ZEROG    ] = INT_MAX;
-    rd->thresh_mult[THR_NEARG    ] = INT_MAX;
-    rd->thresh_mult[THR_NEWG     ] = INT_MAX;
-  }
-  if (!(cpi->ref_frame_flags & VP9_ALT_FLAG)) {
-    rd->thresh_mult[THR_NEARESTA ] = INT_MAX;
-    rd->thresh_mult[THR_ZEROA    ] = INT_MAX;
-    rd->thresh_mult[THR_NEARA    ] = INT_MAX;
-    rd->thresh_mult[THR_NEWA     ] = INT_MAX;
-  }
-
-  if ((cpi->ref_frame_flags & (VP9_LAST_FLAG | VP9_ALT_FLAG)) !=
-      (VP9_LAST_FLAG | VP9_ALT_FLAG)) {
-    rd->thresh_mult[THR_COMP_ZEROLA   ] = INT_MAX;
-    rd->thresh_mult[THR_COMP_NEARESTLA] = INT_MAX;
-    rd->thresh_mult[THR_COMP_NEARLA   ] = INT_MAX;
-    rd->thresh_mult[THR_COMP_NEWLA    ] = INT_MAX;
-  }
-  if ((cpi->ref_frame_flags & (VP9_GOLD_FLAG | VP9_ALT_FLAG)) !=
-      (VP9_GOLD_FLAG | VP9_ALT_FLAG)) {
-    rd->thresh_mult[THR_COMP_ZEROGA   ] = INT_MAX;
-    rd->thresh_mult[THR_COMP_NEARESTGA] = INT_MAX;
-    rd->thresh_mult[THR_COMP_NEARGA   ] = INT_MAX;
-    rd->thresh_mult[THR_COMP_NEWGA    ] = INT_MAX;
-  }
 }
 
 void vp9_set_rd_speed_thresholds_sub8x8(VP9_COMP *cpi) {
@@ -554,18 +519,4 @@ void vp9_set_rd_speed_thresholds_sub8x8(VP9_COMP *cpi) {
   for (i = 0; i < MAX_REFS; ++i)
     if (sf->disable_split_mask & (1 << i))
       rd->thresh_mult_sub8x8[i] = INT_MAX;
-
-  // Disable mode test if frame flag is not set.
-  if (!(cpi->ref_frame_flags & VP9_LAST_FLAG))
-    rd->thresh_mult_sub8x8[THR_LAST] = INT_MAX;
-  if (!(cpi->ref_frame_flags & VP9_GOLD_FLAG))
-    rd->thresh_mult_sub8x8[THR_GOLD] = INT_MAX;
-  if (!(cpi->ref_frame_flags & VP9_ALT_FLAG))
-    rd->thresh_mult_sub8x8[THR_ALTR] = INT_MAX;
-  if ((cpi->ref_frame_flags & (VP9_LAST_FLAG | VP9_ALT_FLAG)) !=
-      (VP9_LAST_FLAG | VP9_ALT_FLAG))
-    rd->thresh_mult_sub8x8[THR_COMP_LA] = INT_MAX;
-  if ((cpi->ref_frame_flags & (VP9_GOLD_FLAG | VP9_ALT_FLAG)) !=
-      (VP9_GOLD_FLAG | VP9_ALT_FLAG))
-    rd->thresh_mult_sub8x8[THR_COMP_GA] = INT_MAX;
 }
