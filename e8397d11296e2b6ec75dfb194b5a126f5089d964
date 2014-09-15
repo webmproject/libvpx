@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//XRs\u003d",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 58
+      },
+      "lineNbr": 352,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-15T15:05:11Z",
+      "side": 1,
+      "message": "Done. Yes. You are right. I wrote in this way so people will know the code inside the block is only used in frame_parallel_decode. I remove it now. But add comments that this block will only be used in frame parallel decode.",
+      "parentUuid": "AAAAdn//XZY\u003d",
+      "revId": "e8397d11296e2b6ec75dfb194b5a126f5089d964",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//XYo\u003d",
         "filename": "vp9/common/vp9_onyxc_int.h",
         "patchSetId": 58
@@ -30,6 +48,24 @@
       "writtenOn": "2014-09-12T23:40:07Z",
       "side": 1,
       "message": "do you need pixel level granularity or would mi_row/mi_col work?",
+      "revId": "e8397d11296e2b6ec75dfb194b5a126f5089d964",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//XRo\u003d",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 58
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-15T15:05:11Z",
+      "side": 1,
+      "message": "pixel level will be better as that will give better flexibility for later optimization. Also, the last 7 rows of pixels are not available until next sb rows get filtered.",
+      "parentUuid": "AAAAdn//XYo\u003d",
       "revId": "e8397d11296e2b6ec75dfb194b5a126f5089d964",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//XRk\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 58
+      },
+      "lineNbr": 894,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-15T15:05:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//XY8\u003d",
+      "revId": "e8397d11296e2b6ec75dfb194b5a126f5089d964",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//XY4\u003d",
         "filename": "vp9/decoder/vp9_decodemv.c",
         "patchSetId": 58
@@ -64,6 +118,24 @@
       "writtenOn": "2014-09-12T23:40:07Z",
       "side": 1,
       "message": "same here, MI_BLOCK_SIZE_LOG2",
+      "revId": "e8397d11296e2b6ec75dfb194b5a126f5089d964",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//XRg\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 58
+      },
+      "lineNbr": 426,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-15T15:05:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//XY4\u003d",
       "revId": "e8397d11296e2b6ec75dfb194b5a126f5089d964",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//XRc\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 58
+      },
+      "lineNbr": 320,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-15T15:05:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//XYw\u003d",
+      "revId": "e8397d11296e2b6ec75dfb194b5a126f5089d964",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//XYM\u003d",
         "filename": "vp9/decoder/vp9_dthread.c",
         "patchSetId": 58
@@ -98,6 +188,24 @@
       "writtenOn": "2014-09-12T23:40:07Z",
       "side": 1,
       "message": "you should use the helpers everywhere for consistency, though they\u0027re equivalent here",
+      "revId": "e8397d11296e2b6ec75dfb194b5a126f5089d964",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//XRU\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 58
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-15T15:05:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//XYM\u003d",
       "revId": "e8397d11296e2b6ec75dfb194b5a126f5089d964",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//XRI\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 58
+      },
+      "lineNbr": 432,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-15T15:05:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//XYA\u003d",
+      "revId": "e8397d11296e2b6ec75dfb194b5a126f5089d964",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//XYI\u003d",
         "filename": "vp9/decoder/vp9_dthread.c",
         "patchSetId": 58
@@ -132,6 +258,24 @@
       "writtenOn": "2014-09-12T23:40:07Z",
       "side": 1,
       "message": "no space after \u0027-\u003e\u0027",
+      "revId": "e8397d11296e2b6ec75dfb194b5a126f5089d964",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//XRM\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 58
+      },
+      "lineNbr": 438,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-15T15:05:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//XYI\u003d",
       "revId": "e8397d11296e2b6ec75dfb194b5a126f5089d964",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//XRQ\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 58
+      },
+      "lineNbr": 439,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-15T15:05:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//XYE\u003d",
+      "revId": "e8397d11296e2b6ec75dfb194b5a126f5089d964",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//XX8\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 58
@@ -172,6 +334,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//XRE\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 58
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-15T15:05:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//XX8\u003d",
+      "revId": "e8397d11296e2b6ec75dfb194b5a126f5089d964",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//XX4\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 58
@@ -183,6 +363,24 @@
       "writtenOn": "2014-09-12T23:40:07Z",
       "side": 1,
       "message": "scratch",
+      "revId": "e8397d11296e2b6ec75dfb194b5a126f5089d964",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//XRA\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 58
+      },
+      "lineNbr": 443,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-15T15:05:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//XX4\u003d",
       "revId": "e8397d11296e2b6ec75dfb194b5a126f5089d964",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
