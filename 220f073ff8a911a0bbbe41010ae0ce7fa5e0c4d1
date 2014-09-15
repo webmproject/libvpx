@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//XOk\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 470,
+      "author": {
+        "id": 1003244
+      },
+      "writtenOn": "2014-09-15T14:07:44Z",
+      "side": 1,
+      "message": "1. I made a horrible type in original subset, there must be \"!\u003d 16\" instead of \"\u003d\u003d 16\". \n2. (1 \u003c\u003c (SUBPEL_BITS - 1)): looks like this expression is equal to 8, not 16. There is define for this value (SUBPEL_SHIFTS).\n3. Plain value (16) was more clear than expression for me, may be because asserts like \"assert(y_step_q4 \u003c\u003d 32)\" use plain values. As a possible alternative a can propose a name like \"SUBPEL_NO_CONVOLVE\" or something like this.",
+      "revId": "220f073ff8a911a0bbbe41010ae0ce7fa5e0c4d1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
