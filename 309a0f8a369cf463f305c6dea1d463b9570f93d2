@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//XHc\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 341,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-09-15T22:41:14Z",
+      "side": 1,
+      "message": "(bs \u003d\u003d 6) -\u003e (bs \u003d\u003d BLOCK_16X16)",
+      "revId": "309a0f8a369cf463f305c6dea1d463b9570f93d2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//XHI\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 342,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-09-15T22:41:14Z",
+      "side": 1,
+      "message": "define vp9_denoiser_16x16 in vp9/common/vp9_rtcd_defs.pl, where there is a nice handle to identify if the system supports sse2 or not, then selecting sse2/c functions accrodingly.\n\nusing _sse2 directly here, in case the system doesn\u0027t support sse2, will cause a compile error.",
+      "revId": "309a0f8a369cf463f305c6dea1d463b9570f93d2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//XHY\u003d",
+        "filename": "vp9/encoder/x86/vp9_denoiser_sse2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-09-15T22:41:14Z",
+      "side": 1,
+      "message": "fix the format warning",
+      "revId": "309a0f8a369cf463f305c6dea1d463b9570f93d2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
