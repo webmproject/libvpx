@@ -3761,11 +3761,11 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       single_rd = RDCOST(x->rdmult, x->rddiv, single_rate, distortion2);
       hybrid_rd = RDCOST(x->rdmult, x->rddiv, hybrid_rate, distortion2);
 
-      if (!comp_pred && single_rd < best_pred_rd[SINGLE_REFERENCE]) {
+      if (!comp_pred && single_rd < best_pred_rd[SINGLE_REFERENCE])
         best_pred_rd[SINGLE_REFERENCE] = single_rd;
-      } else if (comp_pred && single_rd < best_pred_rd[COMPOUND_REFERENCE]) {
+      else if (comp_pred && single_rd < best_pred_rd[COMPOUND_REFERENCE])
         best_pred_rd[COMPOUND_REFERENCE] = single_rd;
-      }
+
       if (hybrid_rd < best_pred_rd[REFERENCE_MODE_SELECT])
         best_pred_rd[REFERENCE_MODE_SELECT] = hybrid_rd;
     }
