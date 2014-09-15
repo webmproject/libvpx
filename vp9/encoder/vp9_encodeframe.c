@@ -3617,16 +3617,8 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
 
     vp9_build_inter_predictors_sbuv(xd, mi_row, mi_col, MAX(bsize, BLOCK_8X8));
 
-    if (!x->skip) {
-      mbmi->skip = 1;
-      vp9_encode_sb(x, MAX(bsize, BLOCK_8X8));
-      vp9_tokenize_sb(cpi, t, !output_enabled, MAX(bsize, BLOCK_8X8));
-    } else {
-      mbmi->skip = 1;
-      if (output_enabled && !seg_skip)
-        cm->counts.skip[vp9_get_skip_context(xd)][1]++;
-      reset_skip_context(xd, MAX(bsize, BLOCK_8X8));
-    }
+    vp9_encode_sb(x, MAX(bsize, BLOCK_8X8));
+    vp9_tokenize_sb(cpi, t, !output_enabled, MAX(bsize, BLOCK_8X8));
   }
 
   if (output_enabled) {

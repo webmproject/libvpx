@@ -574,6 +574,11 @@ void vp9_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize) {
   struct encode_b_args arg = {x, &ctx, &mbmi->skip};
   int plane;
 
+  mbmi->skip = 1;
+
+  if (x->skip)
+    return;
+
   for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
     if (!x->skip_recode)
       vp9_subtract_plane(x, bsize, plane);
