@@ -405,8 +405,8 @@ static void high_convolve(const uint8_t *src, ptrdiff_t src_stride,
 
   assert(w <= 64);
   assert(h <= 64);
-  assert(y_step_q4 <= 80);
-  assert(x_step_q4 <= 80);
+  assert(y_step_q4 <= 32);
+  assert(x_step_q4 <= 32);
 
   if (intermediate_height < h)
     intermediate_height = h;
