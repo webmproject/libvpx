@@ -2397,10 +2397,7 @@ static void Pass0Encode(VP9_COMP *cpi, size_t *size, uint8_t *dest,
 static void Pass2Encode(VP9_COMP *cpi, size_t *size,
                         uint8_t *dest, unsigned int *frame_flags) {
   cpi->allow_encode_breakout = ENCODE_BREAKOUT_ENABLED;
-
-  vp9_rc_get_second_pass_params(cpi);
   encode_frame_to_data_rate(cpi, size, dest, frame_flags);
-
   vp9_twopass_postencode_update(cpi);
 }
 
@@ -2723,6 +2720,12 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
    */
   cm->frame_bufs[cm->new_fb_idx].ref_count--;
   cm->new_fb_idx = get_free_fb(cm);
+
+  // For two pass encodes analyse the first pass stats and determine
+  // the bit allocation and other parameters for this frame / group of frames.
+  if ((oxcf->pass == 2) && (!cpi->use_svc || is_two_pass_svc(cpi))) {
+    vp9_rc_get_second_pass_params(cpi);
+  }
 
   if (!cpi->use_svc && cpi->multi_arf_allowed) {
     if (cm->frame_type == KEY_FRAME) {
