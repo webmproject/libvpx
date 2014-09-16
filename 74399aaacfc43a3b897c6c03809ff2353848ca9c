@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//W+E\u003d",
+        "filename": "vp9/common/x86/vp9_high_intrapred_sse2.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-16T18:08:09Z",
+      "side": 1,
+      "message": "Can you change the EoLs to unix? Everything else in this dir is LF only, not CRLF like this file.",
+      "revId": "74399aaacfc43a3b897c6c03809ff2353848ca9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
