@@ -2913,18 +2913,11 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
     if (!disable_skip) {
       if (skippable) {
-        vp9_prob skip_prob = vp9_get_skip_prob(cm, xd);
-
         // Back out the coefficient coding costs
         rate2 -= (rate_y + rate_uv);
-        // for best yrd calculation
-        rate_uv = 0;
 
         // Cost the skip mb case
-        if (skip_prob) {
-          int prob_skip_cost = vp9_cost_bit(skip_prob, 1);
-          rate2 += prob_skip_cost;
-        }
+        rate2 += vp9_cost_bit(vp9_get_skip_prob(cm, xd), 1);
       } else if (ref_frame != INTRA_FRAME && !xd->lossless) {
         if (RDCOST(x->rdmult, x->rddiv, rate_y + rate_uv, distortion2) <
             RDCOST(x->rdmult, x->rddiv, 0, total_sse)) {
@@ -2936,8 +2929,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
           distortion2 = total_sse;
           assert(total_sse >= 0);
           rate2 -= (rate_y + rate_uv);
-          rate_y = 0;
-          rate_uv = 0;
           this_skip2 = 1;
         }
       } else {
