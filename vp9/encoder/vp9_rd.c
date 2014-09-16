@@ -457,9 +457,15 @@ void vp9_set_rd_speed_thresholds(VP9_COMP *cpi) {
   for (i = 0; i < MAX_MODES; ++i)
     rd->thresh_mult[i] = cpi->oxcf.mode == BEST ? -500 : 0;
 
-  rd->thresh_mult[THR_NEARESTMV] = 0;
-  rd->thresh_mult[THR_NEARESTG] = 0;
-  rd->thresh_mult[THR_NEARESTA] = 0;
+  if (sf->adaptive_rd_thresh) {
+    rd->thresh_mult[THR_NEARESTMV] = 300;
+    rd->thresh_mult[THR_NEARESTG] = 300;
+    rd->thresh_mult[THR_NEARESTA] = 300;
+  } else {
+    rd->thresh_mult[THR_NEARESTMV] = 0;
+    rd->thresh_mult[THR_NEARESTG] = 0;
+    rd->thresh_mult[THR_NEARESTA] = 0;
+  }
 
   rd->thresh_mult[THR_DC] += 1000;
 
