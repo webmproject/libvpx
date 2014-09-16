@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//W9I\u003d",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-16T18:26:47Z",
+      "side": 1,
+      "message": "I\u0027m not disputing that the assert() should always fail here; I\u0027m just pointing out that the assert compiles away to nothing when NDEBUG is defined, and an early return should be added to the default to avoid executing any further code in this function in that situation.\n\nThat is, unless it\u0027s safe to continue on falling through the the return at the end of the function, even after hitting the default case.",
+      "revId": "08188e76e994f0f53f5388e1483bba51c030f5c6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
