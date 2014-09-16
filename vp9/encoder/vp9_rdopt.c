@@ -2793,6 +2793,15 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       if (!cm->allow_comp_inter_inter)
         continue;
 
+      // Skip compound inter modes if ARF is not available.
+      if (!(cpi->ref_frame_flags & flag_list[second_ref_frame]))
+        continue;
+
+      // Do not allow compound prediction if the segment level reference frame
+      // feature is in use as in this case there can only be one reference.
+      if (vp9_segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME))
+        continue;
+
       if ((mode_search_skip_flags & FLAG_SKIP_COMP_BESTINTRA) &&
           best_mode_index >= 0 && best_mbmode.ref_frame[0] == INTRA_FRAME)
         continue;
