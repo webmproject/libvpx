@@ -3161,6 +3161,10 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     vp9_zero(best_tx_diff);
   }
 
+  // TODO(yunqingwang): Moving this line in front of the above best_filter_diff
+  // updating code causes PSNR loss. Need to figure out the confliction.
+  x->skip |= best_mode_skippable;
+
   store_coding_context(x, ctx, best_mode_index, best_pred_diff,
                        best_tx_diff, best_filter_diff, best_mode_skippable);
 
