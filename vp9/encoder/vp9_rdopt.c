@@ -3364,7 +3364,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     // skip mask to look at a subset of the remaining modes.
     if (ref_index > 2 && cpi->sf.mode_skip_start < MAX_MODES) {
       if (ref_index == 3) {
-        switch (vp9_ref_order[best_ref_index].ref_frame[0]) {
+        switch (best_mbmode.ref_frame[0]) {
           case INTRA_FRAME:
             break;
           case LAST_FRAME:
@@ -3413,7 +3413,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       if (vp9_segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME))
         continue;
       if ((cpi->sf.mode_search_skip_flags & FLAG_SKIP_COMP_BESTINTRA) &&
-          vp9_ref_order[best_ref_index].ref_frame[0] == INTRA_FRAME)
+          best_mbmode.ref_frame[0] == INTRA_FRAME)
         continue;
     }
 
@@ -3801,7 +3801,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   // If we used an estimate for the uv intra rd in the loop above...
   if (cpi->sf.use_uv_intra_rd_estimate) {
     // Do Intra UV best rd mode selection if best mode choice above was intra.
-    if (vp9_ref_order[best_ref_index].ref_frame[0] == INTRA_FRAME) {
+    if (best_mbmode.ref_frame[0] == INTRA_FRAME) {
       *mbmi = best_mbmode;
       rd_pick_intra_sbuv_mode(cpi, x, ctx, &rate_uv_intra,
                               &rate_uv_tokenonly,
