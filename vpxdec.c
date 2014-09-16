@@ -384,7 +384,7 @@ int get_vp9_frame_buffer(void *cb_priv, size_t min_size,
 
   if (ext_fb_list->ext_fb[i].size < min_size) {
     free(ext_fb_list->ext_fb[i].data);
-    ext_fb_list->ext_fb[i].data = (uint8_t *)malloc(min_size);
+    ext_fb_list->ext_fb[i].data = (uint8_t *)calloc(min_size, sizeof(uint8_t));
     if (!ext_fb_list->ext_fb[i].data)
       return -1;
 

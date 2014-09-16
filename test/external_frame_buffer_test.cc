@@ -71,6 +71,7 @@ class ExternalFrameBufferList {
     if (ext_fb_list_[idx].size < min_size) {
       delete [] ext_fb_list_[idx].data;
       ext_fb_list_[idx].data = new uint8_t[min_size];
+      memset(ext_fb_list_[idx].data, 0, min_size);
       ext_fb_list_[idx].size = min_size;
     }
 
