@@ -62,7 +62,7 @@ target_to_preproc_symbol() {
       echo "__ARM_ARCH_6__"
       ;;
     armv7-*)
-      echo "__ARM_ARCH_7__"
+      echo "__ARM_ARCH_7A__"
       ;;
     armv7s-*)
       echo "__ARM_ARCH_7S__"
