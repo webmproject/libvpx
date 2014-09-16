@@ -1265,10 +1265,18 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
 
       for (i = 0; i < REFS_PER_FRAME; ++i) {
         RefBuffer *const ref_buf = &cm->frame_refs[i];
+#if CONFIG_VP9_HIGHBITDEPTH
+        vp9_setup_scale_factors_for_frame(&ref_buf->sf,
+                                          ref_buf->buf->y_crop_width,
+                                          ref_buf->buf->y_crop_height,
+                                          cm->width, cm->height,
+                                          cm->use_highbitdepth);
+#else
         vp9_setup_scale_factors_for_frame(&ref_buf->sf,
                                           ref_buf->buf->y_crop_width,
                                           ref_buf->buf->y_crop_height,
                                           cm->width, cm->height);
+#endif
         if (vp9_is_scaled(&ref_buf->sf))
           vp9_extend_frame_borders(ref_buf->buf);
       }

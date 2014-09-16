@@ -2767,10 +2767,17 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     RefBuffer *const ref_buf = &cm->frame_refs[ref_frame - 1];
     ref_buf->buf = buf;
     ref_buf->idx = idx;
+#if CONFIG_VP9_HIGHBITDEPTH
+    vp9_setup_scale_factors_for_frame(&ref_buf->sf,
+                                      buf->y_crop_width, buf->y_crop_height,
+                                      cm->width, cm->height,
+                                      (buf->flags & YV12_FLAG_HIGHBITDEPTH) ?
+                                          1 : 0);
+#else
     vp9_setup_scale_factors_for_frame(&ref_buf->sf,
                                       buf->y_crop_width, buf->y_crop_height,
                                       cm->width, cm->height);
-
+#endif
     if (vp9_is_scaled(&ref_buf->sf))
       vp9_extend_frame_borders(buf);
   }

@@ -454,12 +454,20 @@ void vp9_temporal_filter(VP9_COMP *cpi, int distance) {
     // In spatial svc the scaling factors might be less then 1/2. So we will use
     // non-normative scaling.
     int frame_used = 0;
+#if CONFIG_VP9_HIGHBITDEPTH
+    vp9_setup_scale_factors_for_frame(&sf,
+                                      get_frame_new_buffer(cm)->y_crop_width,
+                                      get_frame_new_buffer(cm)->y_crop_height,
+                                      get_frame_new_buffer(cm)->y_crop_width,
+                                      get_frame_new_buffer(cm)->y_crop_height,
+                                      cm->use_highbitdepth);
+#else
     vp9_setup_scale_factors_for_frame(&sf,
                                       get_frame_new_buffer(cm)->y_crop_width,
                                       get_frame_new_buffer(cm)->y_crop_height,
                                       get_frame_new_buffer(cm)->y_crop_width,
                                       get_frame_new_buffer(cm)->y_crop_height);
-
+#endif
     for (frame = 0; frame < frames_to_blur; ++frame) {
       if (cm->mi_cols * MI_SIZE != frames[frame]->y_width ||
           cm->mi_rows * MI_SIZE != frames[frame]->y_height) {
@@ -481,11 +489,20 @@ void vp9_temporal_filter(VP9_COMP *cpi, int distance) {
     }
   } else {
     // ARF is produced at the native frame size and resized when coded.
+#if CONFIG_VP9_HIGHBITDEPTH
+    vp9_setup_scale_factors_for_frame(&sf,
+                                      frames[0]->y_crop_width,
+                                      frames[0]->y_crop_height,
+                                      frames[0]->y_crop_width,
+                                      frames[0]->y_crop_height,
+                                      cm->use_highbitdepth);
+#else
     vp9_setup_scale_factors_for_frame(&sf,
                                       frames[0]->y_crop_width,
                                       frames[0]->y_crop_height,
                                       frames[0]->y_crop_width,
                                       frames[0]->y_crop_height);
+#endif
   }
 
   temporal_filter_iterate_c(cpi, frames, frames_to_blur,

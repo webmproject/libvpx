@@ -607,6 +607,33 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vp9_high_dc_128_predictor_32x32/;
 
   #
+  # Sub Pixel Filters
+  #
+  add_proto qw/void vp9_high_convolve_copy/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h, int bps";
+  specialize qw/vp9_high_convolve_copy/;
+
+  add_proto qw/void vp9_high_convolve_avg/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h, int bps";
+  specialize qw/vp9_high_convolve_avg/;
+
+  add_proto qw/void vp9_high_convolve8/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h, int bps";
+  specialize qw/vp9_high_convolve8/, "$sse2_x86_64";
+
+  add_proto qw/void vp9_high_convolve8_horiz/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h, int bps";
+  specialize qw/vp9_high_convolve8_horiz/, "$sse2_x86_64";
+
+  add_proto qw/void vp9_high_convolve8_vert/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h, int bps";
+  specialize qw/vp9_high_convolve8_vert/, "$sse2_x86_64";
+
+  add_proto qw/void vp9_high_convolve8_avg/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h, int bps";
+  specialize qw/vp9_high_convolve8_avg/, "$sse2_x86_64";
+
+  add_proto qw/void vp9_high_convolve8_avg_horiz/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h, int bps";
+  specialize qw/vp9_high_convolve8_avg_horiz/, "$sse2_x86_64";
+
+  add_proto qw/void vp9_high_convolve8_avg_vert/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h, int bps";
+  specialize qw/vp9_high_convolve8_avg_vert/, "$sse2_x86_64";
+
+  #
   # dct
   #
   add_proto qw/void vp9_high_idct4x4_1_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int bd";

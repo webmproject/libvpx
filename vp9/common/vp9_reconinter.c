@@ -63,6 +63,53 @@ static void build_mc_border(const uint8_t *src, int src_stride,
   } while (--b_h);
 }
 
+#if CONFIG_VP9_HIGHBITDEPTH
+static void high_build_mc_border(const uint8_t *src8, int src_stride,
+                                 uint16_t *dst, int dst_stride,
+                                 int x, int y, int b_w, int b_h,
+                                 int w, int h) {
+  // Get a pointer to the start of the real data for this row.
+  const uint16_t *src = CONVERT_TO_SHORTPTR(src8);
+  const uint16_t *ref_row = src - x - y * src_stride;
+
+  if (y >= h)
+    ref_row += (h - 1) * src_stride;
+  else if (y > 0)
+    ref_row += y * src_stride;
+
+  do {
+    int right = 0, copy;
+    int left = x < 0 ? -x : 0;
+
+    if (left > b_w)
+      left = b_w;
+
+    if (x + b_w > w)
+      right = x + b_w - w;
+
+    if (right > b_w)
+      right = b_w;
+
+    copy = b_w - left - right;
+
+    if (left)
+      vpx_memset16(dst, ref_row[0], left);
+
+    if (copy)
+      memcpy(dst + left, ref_row + x + left, copy * sizeof(uint16_t));
+
+    if (right)
+      vpx_memset16(dst + left + copy, ref_row[w - 1], right);
+
+    dst += dst_stride;
+    ++y;
+
+    if (y > 0 && y < h)
+      ref_row += src_stride;
+  } while (--b_h);
+}
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
 static void inter_predictor(const uint8_t *src, int src_stride,
                             uint8_t *dst, int dst_stride,
                             const int subpel_x,
@@ -96,6 +143,42 @@ void vp9_build_inter_predictor(const uint8_t *src, int src_stride,
   inter_predictor(src, src_stride, dst, dst_stride, subpel_x, subpel_y,
                   sf, w, h, ref, kernel, sf->x_step_q4, sf->y_step_q4);
 }
+
+#if CONFIG_VP9_HIGHBITDEPTH
+static void high_inter_predictor(const uint8_t *src, int src_stride,
+                                 uint8_t *dst, int dst_stride,
+                                 const int subpel_x,
+                                 const int subpel_y,
+                                 const struct scale_factors *sf,
+                                 int w, int h, int ref,
+                                 const InterpKernel *kernel,
+                                 int xs, int ys, int bd) {
+  sf->high_predict[subpel_x != 0][subpel_y != 0][ref](
+      src, src_stride, dst, dst_stride,
+      kernel[subpel_x], xs, kernel[subpel_y], ys, w, h, bd);
+}
+
+void vp9_high_build_inter_predictor(const uint8_t *src, int src_stride,
+                                    uint8_t *dst, int dst_stride,
+                                    const MV *src_mv,
+                                    const struct scale_factors *sf,
+                                    int w, int h, int ref,
+                                    const InterpKernel *kernel,
+                                    enum mv_precision precision,
+                                    int x, int y, int bd) {
+  const int is_q4 = precision == MV_PRECISION_Q4;
+  const MV mv_q4 = { is_q4 ? src_mv->row : src_mv->row * 2,
+                     is_q4 ? src_mv->col : src_mv->col * 2 };
+  MV32 mv = vp9_scale_mv(&mv_q4, x, y, sf);
+  const int subpel_x = mv.col & SUBPEL_MASK;
+  const int subpel_y = mv.row & SUBPEL_MASK;
+
+  src += (mv.row >> SUBPEL_BITS) * src_stride + (mv.col >> SUBPEL_BITS);
+
+  high_inter_predictor(src, src_stride, dst, dst_stride, subpel_x, subpel_y,
+                       sf, w, h, ref, kernel, sf->x_step_q4, sf->y_step_q4, bd);
+}
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 static INLINE int round_mv_comp_q4(int value) {
   return (value < 0 ? value - 2 : value + 2) / 4;
@@ -222,8 +305,19 @@ static void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
     pre += (scaled_mv.row >> SUBPEL_BITS) * pre_buf->stride
            + (scaled_mv.col >> SUBPEL_BITS);
 
+#if CONFIG_VP9_HIGHBITDEPTH
+    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+      high_inter_predictor(pre, pre_buf->stride, dst, dst_buf->stride,
+                           subpel_x, subpel_y, sf, w, h, ref, kernel, xs, ys,
+                           xd->bd);
+    } else {
+      inter_predictor(pre, pre_buf->stride, dst, dst_buf->stride,
+                      subpel_x, subpel_y, sf, w, h, ref, kernel, xs, ys);
+    }
+#else
     inter_predictor(pre, pre_buf->stride, dst, dst_buf->stride,
                     subpel_x, subpel_y, sf, w, h, ref, kernel, xs, ys);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
   }
 }
 
@@ -393,16 +487,64 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
           y0 < 0 || y0 > frame_height - 1 || y1 < 0 || y1 > frame_height - 1) {
         uint8_t *buf_ptr1 = ref_frame + y0 * pre_buf->stride + x0;
         // Extend the border.
-        build_mc_border(buf_ptr1, pre_buf->stride, xd->mc_buf, x1 - x0 + 1,
-                        x0, y0, x1 - x0 + 1, y1 - y0 + 1, frame_width,
+#if CONFIG_VP9_HIGHBITDEPTH
+        if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+          high_build_mc_border(buf_ptr1,
+                               pre_buf->stride,
+                               xd->mc_buf_high,
+                               x1 - x0 + 1,
+                               x0,
+                               y0,
+                               x1 - x0 + 1,
+                               y1 - y0 + 1,
+                               frame_width,
+                               frame_height);
+          buf_stride = x1 - x0 + 1;
+          buf_ptr = CONVERT_TO_BYTEPTR(xd->mc_buf_high) +
+              y_pad * 3 * buf_stride + x_pad * 3;
+        } else {
+          build_mc_border(buf_ptr1,
+                          pre_buf->stride,
+                          xd->mc_buf,
+                          x1 - x0 + 1,
+                          x0,
+                          y0,
+                          x1 - x0 + 1,
+                          y1 - y0 + 1,
+                          frame_width,
+                          frame_height);
+          buf_stride = x1 - x0 + 1;
+          buf_ptr = xd->mc_buf + y_pad * 3 * buf_stride + x_pad * 3;
+        }
+#else
+        build_mc_border(buf_ptr1,
+                        pre_buf->stride,
+                        xd->mc_buf,
+                        x1 - x0 + 1,
+                        x0,
+                        y0,
+                        x1 - x0 + 1,
+                        y1 - y0 + 1,
+                        frame_width,
                         frame_height);
         buf_stride = x1 - x0 + 1;
         buf_ptr = xd->mc_buf + y_pad * 3 * buf_stride + x_pad * 3;
+#endif  // CONFIG_VP9_HIGHBITDEPTH
       }
     }
 
+#if CONFIG_VP9_HIGHBITDEPTH
+    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+      high_inter_predictor(buf_ptr, buf_stride, dst, dst_buf->stride, subpel_x,
+                           subpel_y, sf, w, h, ref, kernel, xs, ys, xd->bd);
+    } else {
+      inter_predictor(buf_ptr, buf_stride, dst, dst_buf->stride, subpel_x,
+                    subpel_y, sf, w, h, ref, kernel, xs, ys);
+    }
+#else
     inter_predictor(buf_ptr, buf_stride, dst, dst_buf->stride, subpel_x,
                     subpel_y, sf, w, h, ref, kernel, xs, ys);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
   }
 }
 
