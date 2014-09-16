@@ -3386,8 +3386,8 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       }
     }
 
-    if (ref_frame_skip_mask[0] & (1 << ref_index) &&
-        ref_frame_skip_mask[1] & (1 << ref_index))
+    if (ref_frame_skip_mask[0] & (1 << ref_frame) &&
+        ref_frame_skip_mask[1] & (1 << MAX(0, second_ref_frame)))
       continue;
 
     // Test best rd so far against threshold for trying this mode.
@@ -3396,22 +3396,17 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
                             rd_opt->thresh_freq_fact[bsize][ref_index]))
       continue;
 
-    if (ref_frame > INTRA_FRAME &&
-        !(cpi->ref_frame_flags & flag_list[ref_frame])) {
-      continue;
-    }
-
     comp_pred = second_ref_frame > INTRA_FRAME;
     if (comp_pred) {
       if (!cm->allow_comp_inter_inter)
         continue;
-
       if (!(cpi->ref_frame_flags & flag_list[second_ref_frame]))
         continue;
       // Do not allow compound prediction if the segment level reference frame
       // feature is in use as in this case there can only be one reference.
       if (vp9_segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME))
         continue;
+
       if ((cpi->sf.mode_search_skip_flags & FLAG_SKIP_COMP_BESTINTRA) &&
           best_mbmode.ref_frame[0] == INTRA_FRAME)
         continue;
