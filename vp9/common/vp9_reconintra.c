@@ -71,9 +71,9 @@ const TX_TYPE intra_mode_to_tx_type_lookup[INTRA_MODES] = {
 static INLINE void high_d207_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
                                        const uint16_t *above,
                                        const uint16_t *left, int bd) {
+  int r, c;
   (void) above;
   (void) bd;
-  int r, c;
 
   // First column.
   for (r = 0; r < bs - 1; ++r) {
@@ -105,9 +105,9 @@ static INLINE void high_d207_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
 static INLINE void high_d63_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
                                       const uint16_t *above,
                                       const uint16_t *left, int bd) {
+  int r, c;
   (void) left;
   (void) bd;
-  int r, c;
   for (r = 0; r < bs; ++r) {
     for (c = 0; c < bs; ++c) {
       dst[c] = r & 1 ? ROUND_POWER_OF_TWO(above[r/2 + c] +
@@ -123,9 +123,9 @@ static INLINE void high_d63_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
 static INLINE void high_d45_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
                                       const uint16_t *above,
                                       const uint16_t *left, int bd) {
+  int r, c;
   (void) left;
   (void) bd;
-  int r, c;
   for (r = 0; r < bs; ++r) {
     for (c = 0; c < bs; ++c) {
       dst[c] = r + c + 2 < bs * 2 ?  ROUND_POWER_OF_TWO(above[r + c] +
@@ -140,8 +140,8 @@ static INLINE void high_d45_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
 static INLINE void high_d117_predictor(uint16_t *dst, ptrdiff_t stride,
                                        int bs, const uint16_t *above,
                                        const uint16_t *left, int bd) {
-  (void) bd;
   int r, c;
+  (void) bd;
 
   // first row
   for (c = 0; c < bs; c++)
@@ -171,8 +171,8 @@ static INLINE void high_d117_predictor(uint16_t *dst, ptrdiff_t stride,
 static INLINE void high_d135_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
                                        const uint16_t *above,
                                        const uint16_t *left, int bd) {
-  (void) bd;
   int r, c;
+  (void) bd;
   dst[0] = ROUND_POWER_OF_TWO(left[0] + above[-1] * 2 + above[0], 2);
   for (c = 1; c < bs; c++)
     dst[c] = ROUND_POWER_OF_TWO(above[c - 2] + above[c - 1] * 2 + above[c], 2);
@@ -193,8 +193,8 @@ static INLINE void high_d135_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
 static INLINE void high_d153_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
                                        const uint16_t *above,
                                        const uint16_t *left, int bd) {
-  (void) bd;
   int r, c;
+  (void) bd;
   dst[0] = ROUND_POWER_OF_TWO(above[-1] + left[0], 1);
   for (r = 1; r < bs; r++)
     dst[r * stride] = ROUND_POWER_OF_TWO(left[r - 1] + left[r], 1);
@@ -221,10 +221,9 @@ static INLINE void high_d153_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
 static INLINE void high_v_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
                                     const uint16_t *above,
                                     const uint16_t *left, int bd) {
+  int r;
   (void) left;
   (void) bd;
-  int r;
-
   for (r = 0; r < bs; r++) {
     vpx_memcpy(dst, above, bs * sizeof(uint16_t));
     dst += stride;
@@ -234,10 +233,9 @@ static INLINE void high_v_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
 static INLINE void high_h_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
                                     const uint16_t *above, const uint16_t *left,
                                     int bd) {
+  int r;
   (void) above;
   (void) bd;
-  int r;
-
   for (r = 0; r < bs; r++) {
     vpx_memset16(dst, left[r], bs);
     dst += stride;
@@ -247,9 +245,9 @@ static INLINE void high_h_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
 static INLINE void high_tm_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
                                      const uint16_t *above,
                                      const uint16_t *left, int bd) {
-  (void) bd;
   int r, c;
   int ytop_left = above[-1];
+  (void) bd;
 
   for (r = 0; r < bs; r++) {
     for (c = 0; c < bs; c++)
@@ -261,9 +259,9 @@ static INLINE void high_tm_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
 static INLINE void high_dc_128_predictor(uint16_t *dst, ptrdiff_t stride,
                                          int bs, const uint16_t *above,
                                          const uint16_t *left, int bd) {
+  int r;
   (void) above;
   (void) left;
-  int r;
 
   for (r = 0; r < bs; r++) {
     vpx_memset16(dst, 128 << (bd - 8), bs);
@@ -274,9 +272,9 @@ static INLINE void high_dc_128_predictor(uint16_t *dst, ptrdiff_t stride,
 static INLINE void high_dc_left_predictor(uint16_t *dst, ptrdiff_t stride,
                                           int bs, const uint16_t *above,
                                           const uint16_t *left, int bd) {
+  int i, r, expected_dc, sum = 0;
   (void) above;
   (void) bd;
-  int i, r, expected_dc, sum = 0;
 
   for (i = 0; i < bs; i++)
     sum += left[i];
@@ -291,9 +289,9 @@ static INLINE void high_dc_left_predictor(uint16_t *dst, ptrdiff_t stride,
 static INLINE void high_dc_top_predictor(uint16_t *dst, ptrdiff_t stride,
                                          int bs, const uint16_t *above,
                                          const uint16_t *left, int bd) {
+  int i, r, expected_dc, sum = 0;
   (void) left;
   (void) bd;
-  int i, r, expected_dc, sum = 0;
 
   for (i = 0; i < bs; i++)
     sum += above[i];
@@ -308,9 +306,9 @@ static INLINE void high_dc_top_predictor(uint16_t *dst, ptrdiff_t stride,
 static INLINE void high_dc_predictor(uint16_t *dst, ptrdiff_t stride,
                                      int bs, const uint16_t *above,
                                      const uint16_t *left, int bd) {
-  (void) bd;
   int i, r, expected_dc, sum = 0;
   const int count = 2 * bs;
+  (void) bd;
 
   for (i = 0; i < bs; i++) {
     sum += above[i];
