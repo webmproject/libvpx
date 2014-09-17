@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//WyY\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 414,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-09-17T18:43:06Z",
+      "side": 1,
+      "message": "const?",
+      "revId": "13949425a644db26ece3e1ac16406134cbfd1c77",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WyU\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 833,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-09-17T18:43:06Z",
+      "side": 1,
+      "message": "why not use sqrt() instead of pow(x, 0.5)?",
+      "revId": "13949425a644db26ece3e1ac16406134cbfd1c77",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WyQ\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-09-17T18:43:06Z",
+      "side": 1,
+      "message": "remove?",
+      "revId": "13949425a644db26ece3e1ac16406134cbfd1c77",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WyM\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 1195,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-09-17T18:43:06Z",
+      "side": 1,
+      "message": "{} can be removed ?",
+      "revId": "13949425a644db26ece3e1ac16406134cbfd1c77",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
