@@ -18,7 +18,7 @@ unsigned int vp8_mse16x16_neon(
         unsigned int *sse) {
     int i;
     int16x4_t d22s16, d23s16, d24s16, d25s16, d26s16, d27s16, d28s16, d29s16;
-    int64_t d0s64;
+    int64x1_t d0s64;
     uint8x16_t q0u8, q1u8, q2u8, q3u8;
     int32x4_t q7s32, q8s32, q9s32, q10s32;
     uint16x8_t q11u16, q12u16, q13u16, q14u16;
@@ -82,7 +82,7 @@ unsigned int vp8_get4x4sse_cs_neon(
         const unsigned char *ref_ptr,
         int recon_stride) {
     int16x4_t d22s16, d24s16, d26s16, d28s16;
-    int64_t d0s64;
+    int64x1_t d0s64;
     uint8x8_t d0u8, d1u8, d2u8, d3u8, d4u8, d5u8, d6u8, d7u8;
     int32x4_t q7s32, q8s32, q9s32, q10s32;
     uint16x8_t q11u16, q12u16, q13u16, q14u16;
