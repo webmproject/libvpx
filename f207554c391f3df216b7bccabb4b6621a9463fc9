@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//WeU\u003d",
+        "filename": "vp8/common/postproc.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 390,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-09-18T22:13:33Z",
+      "side": 1,
+      "message": "Can\u0027t we rationalize these two functions since a lot of the code is common to both. Also give the explicit name of the compilation flag (I didn\u0027t understand what the comment in braces meant.",
+      "revId": "f207554c391f3df216b7bccabb4b6621a9463fc9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WeQ\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4030,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-09-18T22:13:33Z",
+      "side": 1,
+      "message": "!\u003d 0",
+      "revId": "f207554c391f3df216b7bccabb4b6621a9463fc9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
