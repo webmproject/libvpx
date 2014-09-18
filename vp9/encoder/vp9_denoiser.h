@@ -55,6 +55,10 @@ int vp9_denoiser_alloc(VP9_DENOISER *denoiser, int width, int height,
 #endif
                        int border);
 
+#if CONFIG_VP9_TEMPORAL_DENOISING
+int total_adj_strong_thresh(BLOCK_SIZE bs, int increase_denoising);
+#endif
+
 void vp9_denoiser_free(VP9_DENOISER *denoiser);
 
 #ifdef __cplusplus

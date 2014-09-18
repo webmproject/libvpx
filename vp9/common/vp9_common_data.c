@@ -36,7 +36,6 @@ const int size_group_lookup[BLOCK_SIZES] =
 const int num_pels_log2_lookup[BLOCK_SIZES] =
   {4, 5, 5, 6, 7, 7, 8, 9, 9, 10, 11, 11, 12};
 
-
 const PARTITION_TYPE partition_lookup[][BLOCK_SIZES] = {
   {  // 4X4
     // 4X4, 4X8,8X4,8X8,8X16,16X8,16X16,16X32,32X16,32X32,32X64,64X32,64X64
