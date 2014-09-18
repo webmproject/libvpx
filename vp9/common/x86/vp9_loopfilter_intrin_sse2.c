@@ -351,27 +351,34 @@ static void mb_lpf_horizontal_edge_w_sse2_8(unsigned char *s,
   }
 }
 
-static INLINE __m128i filter_add2_sub2(__m128i total, __m128i a1, __m128i a2,
-                                       __m128i s1, __m128i s2) {
-  total = _mm_add_epi16(a1, total);
-  total = _mm_add_epi16(_mm_sub_epi16(total, _mm_add_epi16(s1, s2)), a2);
-  return total;
+static INLINE __m128i filter_add2_sub2(const __m128i *const total,
+                                       const __m128i *const a1,
+                                       const __m128i *const a2,
+                                       const __m128i *const s1,
+                                       const __m128i *const s2) {
+  __m128i x = _mm_add_epi16(*a1, *total);
+  x = _mm_add_epi16(_mm_sub_epi16(x, _mm_add_epi16(*s1, *s2)), *a2);
+  return x;
 }
 
-static INLINE __m128i filter8_mask(__m128i flat, __m128i other_filt,
-                                   __m128i f8_lo, __m128i f8_hi) {
-  const __m128i f8 = _mm_packus_epi16(_mm_srli_epi16(f8_lo, 3),
-                                      _mm_srli_epi16(f8_hi, 3));
-  const __m128i result = _mm_and_si128(flat, f8);
-  return _mm_or_si128(_mm_andnot_si128(flat, other_filt), result);
+static INLINE __m128i filter8_mask(const __m128i *const flat,
+                                   const __m128i *const other_filt,
+                                   const __m128i *const f8_lo,
+                                   const __m128i *const f8_hi) {
+  const __m128i f8 = _mm_packus_epi16(_mm_srli_epi16(*f8_lo, 3),
+                                      _mm_srli_epi16(*f8_hi, 3));
+  const __m128i result = _mm_and_si128(*flat, f8);
+  return _mm_or_si128(_mm_andnot_si128(*flat, *other_filt), result);
 }
 
-static INLINE __m128i filter16_mask(__m128i flat, __m128i other_filt,
-                                    __m128i f_lo, __m128i f_hi) {
-  const __m128i f = _mm_packus_epi16(_mm_srli_epi16(f_lo, 4),
-                                     _mm_srli_epi16(f_hi, 4));
-  const __m128i result = _mm_and_si128(flat, f);
-  return _mm_or_si128(_mm_andnot_si128(flat, other_filt), result);
+static INLINE __m128i filter16_mask(const __m128i *const flat,
+                                    const __m128i *const other_filt,
+                                    const __m128i *const f_lo,
+                                    const __m128i *const f_hi) {
+  const __m128i f = _mm_packus_epi16(_mm_srli_epi16(*f_lo, 4),
+                                     _mm_srli_epi16(*f_hi, 4));
+  const __m128i result = _mm_and_si128(*flat, f);
+  return _mm_or_si128(_mm_andnot_si128(*flat, *other_filt), result);
 }
 
 static void mb_lpf_horizontal_edge_w_sse2_16(unsigned char *s,
@@ -554,27 +561,27 @@ static void mb_lpf_horizontal_edge_w_sse2_16(unsigned char *s,
                             _mm_add_epi16(p2_hi, p1_hi));
       f8_hi = _mm_add_epi16(_mm_add_epi16(p0_hi, q0_hi), f8_hi);
 
-      op2 = filter8_mask(flat, p2, f8_lo, f8_hi);
+      op2 = filter8_mask(&flat, &p2, &f8_lo, &f8_hi);
 
-      f8_lo = filter_add2_sub2(f8_lo, q1_lo, p1_lo, p2_lo, p3_lo);
-      f8_hi = filter_add2_sub2(f8_hi, q1_hi, p1_hi, p2_hi, p3_hi);
-      op1 = filter8_mask(flat, op1, f8_lo, f8_hi);
+      f8_lo = filter_add2_sub2(&f8_lo, &q1_lo, &p1_lo, &p2_lo, &p3_lo);
+      f8_hi = filter_add2_sub2(&f8_hi, &q1_hi, &p1_hi, &p2_hi, &p3_hi);
+      op1 = filter8_mask(&flat, &op1, &f8_lo, &f8_hi);
 
-      f8_lo = filter_add2_sub2(f8_lo, q2_lo, p0_lo, p1_lo, p3_lo);
-      f8_hi = filter_add2_sub2(f8_hi, q2_hi, p0_hi, p1_hi, p3_hi);
-      op0 = filter8_mask(flat, op0, f8_lo, f8_hi);
+      f8_lo = filter_add2_sub2(&f8_lo, &q2_lo, &p0_lo, &p1_lo, &p3_lo);
+      f8_hi = filter_add2_sub2(&f8_hi, &q2_hi, &p0_hi, &p1_hi, &p3_hi);
+      op0 = filter8_mask(&flat, &op0, &f8_lo, &f8_hi);
 
-      f8_lo = filter_add2_sub2(f8_lo, q3_lo, q0_lo, p0_lo, p3_lo);
-      f8_hi = filter_add2_sub2(f8_hi, q3_hi, q0_hi, p0_hi, p3_hi);
-      oq0 = filter8_mask(flat, oq0, f8_lo, f8_hi);
+      f8_lo = filter_add2_sub2(&f8_lo, &q3_lo, &q0_lo, &p0_lo, &p3_lo);
+      f8_hi = filter_add2_sub2(&f8_hi, &q3_hi, &q0_hi, &p0_hi, &p3_hi);
+      oq0 = filter8_mask(&flat, &oq0, &f8_lo, &f8_hi);
 
-      f8_lo = filter_add2_sub2(f8_lo, q3_lo, q1_lo, q0_lo, p2_lo);
-      f8_hi = filter_add2_sub2(f8_hi, q3_hi, q1_hi, q0_hi, p2_hi);
-      oq1 = filter8_mask(flat, oq1, f8_lo, f8_hi);
+      f8_lo = filter_add2_sub2(&f8_lo, &q3_lo, &q1_lo, &q0_lo, &p2_lo);
+      f8_hi = filter_add2_sub2(&f8_hi, &q3_hi, &q1_hi, &q0_hi, &p2_hi);
+      oq1 = filter8_mask(&flat, &oq1, &f8_lo, &f8_hi);
 
-      f8_lo = filter_add2_sub2(f8_lo, q3_lo, q2_lo, q1_lo, p1_lo);
-      f8_hi = filter_add2_sub2(f8_hi, q3_hi, q2_hi, q1_hi, p1_hi);
-      oq2 = filter8_mask(flat, q2, f8_lo, f8_hi);
+      f8_lo = filter_add2_sub2(&f8_lo, &q3_lo, &q2_lo, &q1_lo, &p1_lo);
+      f8_hi = filter_add2_sub2(&f8_hi, &q3_hi, &q2_hi, &q1_hi, &p1_hi);
+      oq2 = filter8_mask(&flat, &q2, &f8_lo, &f8_hi);
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -634,72 +641,72 @@ static void mb_lpf_horizontal_edge_w_sse2_16(unsigned char *s,
       f_hi = _mm_add_epi16(_mm_add_epi16(p0_hi, q0_hi), f_hi);
       f_hi = _mm_add_epi16(_mm_add_epi16(p5_hi, eight), f_hi);
 
-      p6 = filter16_mask(flat2, p6, f_lo, f_hi);
+      p6 = filter16_mask(&flat2, &p6, &f_lo, &f_hi);
       _mm_storeu_si128((__m128i *)(s - 7 * p), p6);
 
-      f_lo = filter_add2_sub2(f_lo, q1_lo, p5_lo, p6_lo, p7_lo);
-      f_hi = filter_add2_sub2(f_hi, q1_hi, p5_hi, p6_hi, p7_hi);
-      p5 = filter16_mask(flat2, p5, f_lo, f_hi);
+      f_lo = filter_add2_sub2(&f_lo, &q1_lo, &p5_lo, &p6_lo, &p7_lo);
+      f_hi = filter_add2_sub2(&f_hi, &q1_hi, &p5_hi, &p6_hi, &p7_hi);
+      p5 = filter16_mask(&flat2, &p5, &f_lo, &f_hi);
       _mm_storeu_si128((__m128i *)(s - 6 * p), p5);
 
-      f_lo = filter_add2_sub2(f_lo, q2_lo, p4_lo, p5_lo, p7_lo);
-      f_hi = filter_add2_sub2(f_hi, q2_hi, p4_hi, p5_hi, p7_hi);
-      p4 = filter16_mask(flat2, p4, f_lo, f_hi);
+      f_lo = filter_add2_sub2(&f_lo, &q2_lo, &p4_lo, &p5_lo, &p7_lo);
+      f_hi = filter_add2_sub2(&f_hi, &q2_hi, &p4_hi, &p5_hi, &p7_hi);
+      p4 = filter16_mask(&flat2, &p4, &f_lo, &f_hi);
       _mm_storeu_si128((__m128i *)(s - 5 * p), p4);
 
-      f_lo = filter_add2_sub2(f_lo, q3_lo, p3_lo, p4_lo, p7_lo);
-      f_hi = filter_add2_sub2(f_hi, q3_hi, p3_hi, p4_hi, p7_hi);
-      p3 = filter16_mask(flat2, p3, f_lo, f_hi);
+      f_lo = filter_add2_sub2(&f_lo, &q3_lo, &p3_lo, &p4_lo, &p7_lo);
+      f_hi = filter_add2_sub2(&f_hi, &q3_hi, &p3_hi, &p4_hi, &p7_hi);
+      p3 = filter16_mask(&flat2, &p3, &f_lo, &f_hi);
       _mm_storeu_si128((__m128i *)(s - 4 * p), p3);
 
-      f_lo = filter_add2_sub2(f_lo, q4_lo, p2_lo, p3_lo, p7_lo);
-      f_hi = filter_add2_sub2(f_hi, q4_hi, p2_hi, p3_hi, p7_hi);
-      op2 = filter16_mask(flat2, op2, f_lo, f_hi);
+      f_lo = filter_add2_sub2(&f_lo, &q4_lo, &p2_lo, &p3_lo, &p7_lo);
+      f_hi = filter_add2_sub2(&f_hi, &q4_hi, &p2_hi, &p3_hi, &p7_hi);
+      op2 = filter16_mask(&flat2, &op2, &f_lo, &f_hi);
       _mm_storeu_si128((__m128i *)(s - 3 * p), op2);
 
-      f_lo = filter_add2_sub2(f_lo, q5_lo, p1_lo, p2_lo, p7_lo);
-      f_hi = filter_add2_sub2(f_hi, q5_hi, p1_hi, p2_hi, p7_hi);
-      op1 = filter16_mask(flat2, op1, f_lo, f_hi);
+      f_lo = filter_add2_sub2(&f_lo, &q5_lo, &p1_lo, &p2_lo, &p7_lo);
+      f_hi = filter_add2_sub2(&f_hi, &q5_hi, &p1_hi, &p2_hi, &p7_hi);
+      op1 = filter16_mask(&flat2, &op1, &f_lo, &f_hi);
       _mm_storeu_si128((__m128i *)(s - 2 * p), op1);
 
-      f_lo = filter_add2_sub2(f_lo, q6_lo, p0_lo, p1_lo, p7_lo);
-      f_hi = filter_add2_sub2(f_hi, q6_hi, p0_hi, p1_hi, p7_hi);
-      op0 = filter16_mask(flat2, op0, f_lo, f_hi);
+      f_lo = filter_add2_sub2(&f_lo, &q6_lo, &p0_lo, &p1_lo, &p7_lo);
+      f_hi = filter_add2_sub2(&f_hi, &q6_hi, &p0_hi, &p1_hi, &p7_hi);
+      op0 = filter16_mask(&flat2, &op0, &f_lo, &f_hi);
       _mm_storeu_si128((__m128i *)(s - 1 * p), op0);
 
-      f_lo = filter_add2_sub2(f_lo, q7_lo, q0_lo, p0_lo, p7_lo);
-      f_hi = filter_add2_sub2(f_hi, q7_hi, q0_hi, p0_hi, p7_hi);
-      oq0 = filter16_mask(flat2, oq0, f_lo, f_hi);
+      f_lo = filter_add2_sub2(&f_lo, &q7_lo, &q0_lo, &p0_lo, &p7_lo);
+      f_hi = filter_add2_sub2(&f_hi, &q7_hi, &q0_hi, &p0_hi, &p7_hi);
+      oq0 = filter16_mask(&flat2, &oq0, &f_lo, &f_hi);
       _mm_storeu_si128((__m128i *)(s - 0 * p), oq0);
 
-      f_lo = filter_add2_sub2(f_lo, q7_lo, q1_lo, p6_lo, q0_lo);
-      f_hi = filter_add2_sub2(f_hi, q7_hi, q1_hi, p6_hi, q0_hi);
-      oq1 = filter16_mask(flat2, oq1, f_lo, f_hi);
+      f_lo = filter_add2_sub2(&f_lo, &q7_lo, &q1_lo, &p6_lo, &q0_lo);
+      f_hi = filter_add2_sub2(&f_hi, &q7_hi, &q1_hi, &p6_hi, &q0_hi);
+      oq1 = filter16_mask(&flat2, &oq1, &f_lo, &f_hi);
       _mm_storeu_si128((__m128i *)(s + 1 * p), oq1);
 
-      f_lo = filter_add2_sub2(f_lo, q7_lo, q2_lo, p5_lo, q1_lo);
-      f_hi = filter_add2_sub2(f_hi, q7_hi, q2_hi, p5_hi, q1_hi);
-      oq2 = filter16_mask(flat2, oq2, f_lo, f_hi);
+      f_lo = filter_add2_sub2(&f_lo, &q7_lo, &q2_lo, &p5_lo, &q1_lo);
+      f_hi = filter_add2_sub2(&f_hi, &q7_hi, &q2_hi, &p5_hi, &q1_hi);
+      oq2 = filter16_mask(&flat2, &oq2, &f_lo, &f_hi);
       _mm_storeu_si128((__m128i *)(s + 2 * p), oq2);
 
-      f_lo = filter_add2_sub2(f_lo, q7_lo, q3_lo, p4_lo, q2_lo);
-      f_hi = filter_add2_sub2(f_hi, q7_hi, q3_hi, p4_hi, q2_hi);
-      q3 = filter16_mask(flat2, q3, f_lo, f_hi);
+      f_lo = filter_add2_sub2(&f_lo, &q7_lo, &q3_lo, &p4_lo, &q2_lo);
+      f_hi = filter_add2_sub2(&f_hi, &q7_hi, &q3_hi, &p4_hi, &q2_hi);
+      q3 = filter16_mask(&flat2, &q3, &f_lo, &f_hi);
       _mm_storeu_si128((__m128i *)(s + 3 * p), q3);
 
-      f_lo = filter_add2_sub2(f_lo, q7_lo, q4_lo, p3_lo, q3_lo);
-      f_hi = filter_add2_sub2(f_hi, q7_hi, q4_hi, p3_hi, q3_hi);
-      q4 = filter16_mask(flat2, q4, f_lo, f_hi);
+      f_lo = filter_add2_sub2(&f_lo, &q7_lo, &q4_lo, &p3_lo, &q3_lo);
+      f_hi = filter_add2_sub2(&f_hi, &q7_hi, &q4_hi, &p3_hi, &q3_hi);
+      q4 = filter16_mask(&flat2, &q4, &f_lo, &f_hi);
       _mm_storeu_si128((__m128i *)(s + 4 * p), q4);
 
-      f_lo = filter_add2_sub2(f_lo, q7_lo, q5_lo, p2_lo, q4_lo);
-      f_hi = filter_add2_sub2(f_hi, q7_hi, q5_hi, p2_hi, q4_hi);
-      q5 = filter16_mask(flat2, q5, f_lo, f_hi);
+      f_lo = filter_add2_sub2(&f_lo, &q7_lo, &q5_lo, &p2_lo, &q4_lo);
+      f_hi = filter_add2_sub2(&f_hi, &q7_hi, &q5_hi, &p2_hi, &q4_hi);
+      q5 = filter16_mask(&flat2, &q5, &f_lo, &f_hi);
       _mm_storeu_si128((__m128i *)(s + 5 * p), q5);
 
-      f_lo = filter_add2_sub2(f_lo, q7_lo, q6_lo, p1_lo, q5_lo);
-      f_hi = filter_add2_sub2(f_hi, q7_hi, q6_hi, p1_hi, q5_hi);
-      q6 = filter16_mask(flat2, q6, f_lo, f_hi);
+      f_lo = filter_add2_sub2(&f_lo, &q7_lo, &q6_lo, &p1_lo, &q5_lo);
+      f_hi = filter_add2_sub2(&f_hi, &q7_hi, &q6_hi, &p1_hi, &q5_hi);
+      q6 = filter16_mask(&flat2, &q6, &f_lo, &f_hi);
       _mm_storeu_si128((__m128i *)(s + 6 * p), q6);
     }
     // wide flat
