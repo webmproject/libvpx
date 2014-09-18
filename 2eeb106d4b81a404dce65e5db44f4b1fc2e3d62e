@@ -16,6 +16,24 @@
       "revId": "2eeb106d4b81a404dce65e5db44f4b1fc2e3d62e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Wds\u003d",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2014-09-18T22:27:38Z",
+      "side": 1,
+      "message": "I have updated it. Both of them are added.",
+      "parentUuid": "AAAAdn//Wek\u003d",
+      "revId": "2eeb106d4b81a404dce65e5db44f4b1fc2e3d62e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
