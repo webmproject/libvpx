@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Wqo\u003d",
+        "filename": "test/convolve_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 279,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T00:02:08Z",
+      "side": 1,
+      "message": "Bah, nm: That won\u0027t work because of ambiguity... The ConvolveTest member can probably go entirely, though.\n\nAmbiguity/internal linkage error:\n\n        [DEP] test/convolve_test.cc.d\n        [CXX] test/convolve_test.cc.o\n    ../test/convolve_test.cc:328:20: warning: variable \u0027\u003canonymous namespace\u003e::ConvolveTest::kMaxDimension\u0027 has\n          internal linkage but is not defined [-Wundefined-internal]\n      static const int kMaxDimension \u003d kMaxDimension;\n                      ^\n    ../test/convolve_test.cc:328:36: note: used here\n      static const int kMaxDimension \u003d kMaxDimension;\n                                      ^\n    1 warning generated.\n        [LD] test_libvpx\n    make[1]: Nothing to be done for `all\u0027.\n    make[1]: Nothing to be done for `all\u0027.",
+      "parentUuid": "AAAAdn//Wq0\u003d",
+      "revId": "d589565f1285a9d6372ca55241afeec1fdaf06eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Wqw\u003d",
         "filename": "test/convolve_test.cc",
         "patchSetId": 3
