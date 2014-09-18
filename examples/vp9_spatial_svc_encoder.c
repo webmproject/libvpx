@@ -46,10 +46,6 @@ static const arg_def_t kf_dist_arg =
     ARG_DEF("k", "kf-dist", 1, "number of frames between keyframes");
 static const arg_def_t scale_factors_arg =
     ARG_DEF("r", "scale-factors", 1, "scale factors (lowest to highest layer)");
-static const arg_def_t quantizers_arg =
-    ARG_DEF("q", "quantizers", 1, "quantizers for non key frames, also will "
-            "be applied to key frames if -qn is not specified (lowest to "
-            "highest layer)");
 static const arg_def_t passes_arg =
     ARG_DEF("p", "passes", 1, "Number of passes (1/2)");
 static const arg_def_t pass_arg =
@@ -68,10 +64,9 @@ static const arg_def_t max_bitrate_arg =
 static const arg_def_t *svc_args[] = {
   &frames_arg,        &width_arg,         &height_arg,
   &timebase_arg,      &bitrate_arg,       &skip_frames_arg, &spatial_layers_arg,
-  &kf_dist_arg,       &scale_factors_arg, &quantizers_arg,  &passes_arg,
-  &pass_arg,          &fpf_name_arg,      &min_q_arg,       &max_q_arg,
-  &min_bitrate_arg,   &max_bitrate_arg,   &temporal_layers_arg,
-  NULL
+  &kf_dist_arg,       &scale_factors_arg, &passes_arg,      &pass_arg,
+  &fpf_name_arg,      &min_q_arg,         &max_q_arg,       &min_bitrate_arg,
+  &max_bitrate_arg,   &temporal_layers_arg,                 NULL
 };
 
 static const uint32_t default_frames_to_skip = 0;
@@ -172,9 +167,6 @@ static void parse_command_line(int argc, const char **argv_,
     } else if (arg_match(&arg, &scale_factors_arg, argi)) {
       snprintf(string_options, 1024, "%s scale-factors=%s",
                string_options, arg.val);
-    } else if (arg_match(&arg, &quantizers_arg, argi)) {
-      snprintf(string_options, 1024, "%s quantizers=%s",
-                     string_options, arg.val);
     } else if (arg_match(&arg, &passes_arg, argi)) {
       passes = arg_parse_uint(&arg);
       if (passes < 1 || passes > 2) {
@@ -188,9 +180,11 @@ static void parse_command_line(int argc, const char **argv_,
     } else if (arg_match(&arg, &fpf_name_arg, argi)) {
       fpf_file_name = arg.val;
     } else if (arg_match(&arg, &min_q_arg, argi)) {
-      enc_cfg->rc_min_quantizer = arg_parse_uint(&arg);
+      snprintf(string_options, 1024, "%s min-quantizers=%s",
+               string_options, arg.val);
     } else if (arg_match(&arg, &max_q_arg, argi)) {
-      enc_cfg->rc_max_quantizer = arg_parse_uint(&arg);
+      snprintf(string_options, 1024, "%s max-quantizers=%s",
+               string_options, arg.val);
     } else if (arg_match(&arg, &min_bitrate_arg, argi)) {
       min_bitrate = arg_parse_uint(&arg);
     } else if (arg_match(&arg, &max_bitrate_arg, argi)) {
