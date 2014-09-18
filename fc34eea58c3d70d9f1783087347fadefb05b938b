@@ -16,6 +16,24 @@
       "revId": "fc34eea58c3d70d9f1783087347fadefb05b938b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//W2Q\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2014-09-18T18:31:00Z",
+      "side": 1,
+      "message": "Yes, it is used in my SSE2 version of this function. Currently, I just keep it the same with VP8 denoiser SSE2 code. It is used in that code, so I just let it be. I noticed there are substitutes in VP9 for them, can I change them in another patch. This patch is too long.",
+      "parentUuid": "AAAAdn//W2Y\u003d",
+      "revId": "fc34eea58c3d70d9f1783087347fadefb05b938b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
