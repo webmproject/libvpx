@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//WpU\u003d",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 636,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2014-09-18T18:22:26Z",
+      "side": 1,
+      "message": "Yes, you are right. When this is off, it will still pass. It is a waste of time to do this for every test. I will enclose it in #if#endif. And for VP8, I will do the same thing for the unit test of denoiser in another patch.",
+      "parentUuid": "AAAAdn//Wpo\u003d",
+      "revId": "86312ff096d2bca15d54a5e0f5a93cde12d96dc6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Wps\u003d",
         "filename": "test/datarate_test.cc",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2014-09-18T03:16:55Z",
       "side": 1,
       "message": "drop this line",
+      "revId": "86312ff096d2bca15d54a5e0f5a93cde12d96dc6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WpQ\u003d",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 650,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2014-09-18T18:22:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Wps\u003d",
       "revId": "86312ff096d2bca15d54a5e0f5a93cde12d96dc6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
