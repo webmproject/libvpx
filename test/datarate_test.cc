@@ -126,6 +126,7 @@ class DatarateTestLarge : public ::libvpx_test::EncoderTest,
   int denoiser_on_;
 };
 
+#if CONFIG_TEMPORAL_DENOISING
 // Check basic datarate targeting, for a single bitrate, but loop over the
 // various denoiser settings.
 TEST_P(DatarateTestLarge, DenoiserLevels) {
@@ -154,6 +155,7 @@ TEST_P(DatarateTestLarge, DenoiserLevels) {
         << " The datarate for the file missed the target!";
   }
 }
+#endif  // CONFIG_TEMPORAL_DENOISING
 
 TEST_P(DatarateTestLarge, BasicBufferModel) {
   denoiser_on_ = 0;
@@ -647,7 +649,7 @@ TEST_P(DatarateTestVP9Large, DenoiserLevels) {
   ASSERT_LE(effective_datarate_[0], cfg_.rc_target_bitrate * 1.15)
       << " The datarate for the file is greater than target by too much!";
 }
-#endif
+#endif  // CONFIG_VP9_TEMPORAL_DENOISING
 
 VP8_INSTANTIATE_TEST_CASE(DatarateTestLarge, ALL_TEST_MODES);
 VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9Large,
