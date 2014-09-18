@@ -19,7 +19,7 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   int layer;
   int layer_end;
-  int alt_ref_idx = svc->number_spatial_layers * svc->number_temporal_layers;
+  int alt_ref_idx = svc->number_spatial_layers;
 
   svc->spatial_layer_id = 0;
   svc->temporal_layer_id = 0;
@@ -286,30 +286,17 @@ static int copy_svc_params(VP9_COMP *const cpi, struct lookahead_entry *buf) {
     count >>= 1;
   }
 
-  cpi->lst_fb_idx =
-      cpi->svc.spatial_layer_id * cpi->svc.number_temporal_layers +
-      cpi->svc.temporal_layer_id;
-  if (lc->frames_from_key_frame < cpi->svc.number_temporal_layers)
-    cpi->ref_frame_flags &= ~VP9_LAST_FLAG;
+  cpi->lst_fb_idx = cpi->svc.spatial_layer_id;
 
-  if (cpi->svc.spatial_layer_id == 0) {
-    if (cpi->svc.temporal_layer_id == 0)
-      cpi->gld_fb_idx = lc->gold_ref_idx >= 0 ?
-                        lc->gold_ref_idx : cpi->lst_fb_idx;
-    else
-      cpi->gld_fb_idx = cpi->lst_fb_idx - 1;
-  } else {
-    if (cpi->svc.temporal_layer_id == 0)
-      cpi->gld_fb_idx = cpi->svc.spatial_layer_id -
-                        cpi->svc.number_temporal_layers;
-    else
-      cpi->gld_fb_idx = cpi->lst_fb_idx - 1;
-  }
+  if (cpi->svc.spatial_layer_id == 0)
+    cpi->gld_fb_idx = (lc->gold_ref_idx >= 0) ?
+                      lc->gold_ref_idx : cpi->lst_fb_idx;
+  else
+    cpi->gld_fb_idx = cpi->svc.spatial_layer_id - 1;
 
   if (lc->current_video_frame_in_layer == 0) {
     if (cpi->svc.spatial_layer_id >= 2) {
-      cpi->alt_fb_idx =
-          cpi->svc.spatial_layer_id - 2 * cpi->svc.number_temporal_layers;
+      cpi->alt_fb_idx = cpi->svc.spatial_layer_id - 2;
     } else {
       cpi->alt_fb_idx = cpi->lst_fb_idx;
       cpi->ref_frame_flags &= (~VP9_LAST_FLAG & ~VP9_ALT_FLAG);
@@ -331,8 +318,7 @@ static int copy_svc_params(VP9_COMP *const cpi, struct lookahead_entry *buf) {
             lc_lower->alt_ref_source != NULL)
           cpi->alt_fb_idx = lc_lower->alt_ref_idx;
         else if (cpi->svc.spatial_layer_id >= 2)
-          cpi->alt_fb_idx =
-              cpi->svc.spatial_layer_id - 2 * cpi->svc.number_temporal_layers;
+          cpi->alt_fb_idx = cpi->svc.spatial_layer_id - 2;
         else
           cpi->alt_fb_idx = cpi->lst_fb_idx;
       }
