@@ -91,6 +91,12 @@ static const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
 
   {NEARMV,    {LAST_FRAME,   NONE}},
   {NEARMV,    {ALTREF_FRAME, NONE}},
+  {NEARMV,    {GOLDEN_FRAME, NONE}},
+
+  {ZEROMV,    {LAST_FRAME,   NONE}},
+  {ZEROMV,    {GOLDEN_FRAME, NONE}},
+  {ZEROMV,    {ALTREF_FRAME, NONE}},
+
   {NEARESTMV, {LAST_FRAME,   ALTREF_FRAME}},
   {NEARESTMV, {GOLDEN_FRAME, ALTREF_FRAME}},
 
@@ -98,13 +104,9 @@ static const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
 
   {NEARMV,    {LAST_FRAME,   ALTREF_FRAME}},
   {NEWMV,     {LAST_FRAME,   ALTREF_FRAME}},
-  {NEARMV,    {GOLDEN_FRAME, NONE}},
   {NEARMV,    {GOLDEN_FRAME, ALTREF_FRAME}},
   {NEWMV,     {GOLDEN_FRAME, ALTREF_FRAME}},
 
-  {ZEROMV,    {LAST_FRAME,   NONE}},
-  {ZEROMV,    {GOLDEN_FRAME, NONE}},
-  {ZEROMV,    {ALTREF_FRAME, NONE}},
   {ZEROMV,    {LAST_FRAME,   ALTREF_FRAME}},
   {ZEROMV,    {GOLDEN_FRAME, ALTREF_FRAME}},
 
@@ -2572,7 +2574,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t best_filter_diff[SWITCHABLE_FILTER_CONTEXTS];
   MB_MODE_INFO best_mbmode;
   int best_mode_skippable = 0;
-  int mode_index, best_mode_index = -1;
+  int midx, best_mode_index = -1;
   unsigned int ref_costs_single[MAX_REF_FRAMES], ref_costs_comp[MAX_REF_FRAMES];
   vp9_prob comp_mode_p;
   int64_t best_intra_rd = INT64_MAX;
@@ -2590,8 +2592,11 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int mode_skip_start = cpi->sf.mode_skip_start + 1;
   const int *const rd_threshes = rd_opt->threshes[segment_id][bsize];
   const int *const rd_thresh_freq_fact = rd_opt->thresh_freq_fact[bsize];
+  int mode_threshold[MAX_MODES];
+  int *mode_map = rd_opt->mode_map[bsize];
   const int mode_search_skip_flags = cpi->sf.mode_search_skip_flags;
   vp9_zero(best_mbmode);
+
   x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
 
   estimate_ref_frame_costs(cm, xd, segment_id, ref_costs_single, ref_costs_comp,
@@ -2686,7 +2691,25 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   mode_skip_mask[INTRA_FRAME] |=
       ~(cpi->sf.intra_y_mode_mask[max_txsize_lookup[bsize]]);
 
-  for (mode_index = 0; mode_index < MAX_MODES; ++mode_index) {
+  for (i = 0; i < MAX_MODES; ++i)
+    mode_threshold[i] = ((int64_t)rd_threshes[i] * rd_thresh_freq_fact[i]) >> 5;
+
+  midx =  cpi->sf.schedule_mode_search ? mode_skip_start : 0;
+  while (midx > 4) {
+    uint8_t end_pos = 0;
+    for (i = 5; i < midx; ++i) {
+      if (mode_threshold[mode_map[i - 1]] > mode_threshold[mode_map[i]]) {
+        uint8_t tmp = mode_map[i];
+        mode_map[i] = mode_map[i - 1];
+        mode_map[i - 1] = tmp;
+        end_pos = i;
+      }
+    }
+    midx = end_pos;
+  }
+
+  for (midx = 0; midx < MAX_MODES; ++midx) {
+    int mode_index = mode_map[midx];
     int mode_excluded = 0;
     int64_t this_rd = INT64_MAX;
     int disable_skip = 0;
@@ -2706,7 +2729,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
     // Look at the reference frame of the best mode so far and set the
     // skip mask to look at a subset of the remaining modes.
-    if (mode_index == mode_skip_start && best_mode_index >= 0) {
+    if (midx == mode_skip_start && best_mode_index >= 0) {
       switch (best_mbmode.ref_frame[0]) {
         case INTRA_FRAME:
           break;
@@ -2736,8 +2759,10 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       continue;
 
     // Test best rd so far against threshold for trying this mode.
-    if (rd_less_than_thresh(best_rd, rd_threshes[mode_index],
-                            rd_thresh_freq_fact[mode_index]))
+    if (best_mode_skippable && cpi->sf.schedule_mode_search)
+      mode_threshold[mode_index] <<= 1;
+
+    if (best_rd < mode_threshold[mode_index])
       continue;
 
     if (cpi->sf.motion_field_mode_search) {
@@ -3129,7 +3154,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
          (cm->interp_filter == best_mbmode.interp_filter) ||
          !is_inter_block(&best_mbmode));
 
-  update_rd_thresh_fact(cpi, bsize, best_mode_index);
+  if (!cpi->rc.is_src_frame_alt_ref)
+    update_rd_thresh_fact(cpi, bsize, best_mode_index);
 
   // macroblock modes
   *mbmi = best_mbmode;

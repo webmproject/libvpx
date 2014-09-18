@@ -95,9 +95,11 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
                                                         : USE_LARGESTALL;
     if (MIN(cm->width, cm->height) >= 720) {
       sf->disable_split_mask = DISABLE_ALL_SPLIT;
+      sf->schedule_mode_search = cm->base_qindex < 220 ? 1 : 0;
     } else {
       sf->max_intra_bsize = BLOCK_32X32;
       sf->disable_split_mask = DISABLE_ALL_INTER_SPLIT;
+      sf->schedule_mode_search = cm->base_qindex < 175 ? 1 : 0;
     }
     sf->adaptive_pred_interp_filter = 0;
     sf->adaptive_mode_search = 1;
@@ -376,6 +378,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->use_fast_coef_updates = TWO_LOOP;
   sf->use_fast_coef_costing = 0;
   sf->mode_skip_start = MAX_MODES;  // Mode index at which mode skip mask set
+  sf->schedule_mode_search = 0;
   sf->use_nonrd_pick_mode = 0;
   for (i = 0; i < BLOCK_SIZES; ++i)
     sf->inter_mode_mask[i] = INTER_ALL;

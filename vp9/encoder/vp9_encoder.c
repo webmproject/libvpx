@@ -991,8 +991,10 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
 
   // Default rd threshold factors for mode selection
   for (i = 0; i < BLOCK_SIZES; ++i) {
-    for (j = 0; j < MAX_MODES; ++j)
+    for (j = 0; j < MAX_MODES; ++j) {
       cpi->rd.thresh_freq_fact[i][j] = 32;
+      cpi->rd.mode_map[i][j] = j;
+    }
   }
 
 #define BFP(BT, SDF, SDAF, VF, SVF, SVAF, SDX3F, SDX8F, SDX4DF)\
