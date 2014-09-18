@@ -52,22 +52,6 @@ typedef struct {
 vpx_codec_err_t vpx_svc_set_options(SvcContext *svc_ctx, const char *options);
 
 /**
- * Set SVC quantizer values
- * values comma separated, ordered from lowest resolution to highest
- * e.g., "60,53,39,33,27"
- */
-vpx_codec_err_t vpx_svc_set_quantizers(SvcContext *svc_ctx,
-                                       const char *quantizer_values);
-
-/**
- * Set SVC scale factors
- * values comma separated, ordered from lowest resolution to highest
- * e.g.,  "4/16,5/16,7/16,11/16,16/16"
- */
-vpx_codec_err_t vpx_svc_set_scale_factors(SvcContext *svc_ctx,
-                                          const char *scale_factors);
-
-/**
  * initialize SVC encoding
  */
 vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
