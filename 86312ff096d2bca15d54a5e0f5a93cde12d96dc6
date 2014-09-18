@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Wpo\u003d",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 636,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-18T03:16:55Z",
+      "side": 1,
+      "message": "given this relies on the temporal denoiser this function should be enclosed in an #if/#endif, though given the checks I imagine it will still pass when this is off, correct?",
+      "revId": "86312ff096d2bca15d54a5e0f5a93cde12d96dc6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Wps\u003d",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 650,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-18T03:16:55Z",
+      "side": 1,
+      "message": "drop this line",
+      "revId": "86312ff096d2bca15d54a5e0f5a93cde12d96dc6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
