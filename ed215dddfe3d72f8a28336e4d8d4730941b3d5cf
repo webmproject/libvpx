@@ -1,0 +1,1262 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//WnQ\u003d",
+        "filename": "test/lpf_8_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "2014",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WnM\u003d",
+        "filename": "test/lpf_8_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "cmath\ncstdlib\nstring",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WnI\u003d",
+        "filename": "test/lpf_8_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "extra space",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WnE\u003d",
+        "filename": "test/lpf_8_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "align under open paren of arglist (ditto for the next 3)",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WnA\u003d",
+        "filename": "test/lpf_8_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "align (ditto for next 3)",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WlY\u003d",
+        "filename": "test/lpf_8_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "remove extra spaces on above lines",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Wm0\u003d",
+        "filename": "test/lpf_8_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "indent function body",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Wmw\u003d",
+        "filename": "test/lpf_8_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Wms\u003d",
+        "filename": "test/lpf_8_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "remove extra spaces (next 3 too)",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Wmo\u003d",
+        "filename": "test/lpf_8_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "break after open brace, align, break before close brace (ditto for the next 3)",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WlQ\u003d",
+        "filename": "test/lpf_8_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "Here and throughout (might have missed some above; tried to find the earliest occurrence once I noticed this...): Space around arithmetic operators.",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Wlk\u003d",
+        "filename": "test/lpf_8_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "-2 indent this block",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Wmk\u003d",
+        "filename": "test/lpf_8_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "break after open paren of ASM_REGISTER_STATE_CHECK (ditto next)",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Wmg\u003d",
+        "filename": "test/lpf_8_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "+2 indent",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WmM\u003d",
+        "filename": "test/lpf_8_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "same comments as Loop8Test6Param OperationCheck",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Wlw\u003d",
+        "filename": "test/lpf_8_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 275,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "same comments as Loop8Test6Param ValueCheck",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Wlo\u003d",
+        "filename": "test/lpf_8_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 319,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "-2 indent in this block",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WlM\u003d",
+        "filename": "test/lpf_8_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 364,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "same comments as Loop8Test9Param OperationCheck",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WlE\u003d",
+        "filename": "test/lpf_8_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 402,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "extra space",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WlI\u003d",
+        "filename": "test/lpf_8_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 423,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "\u003e80 col",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WlA\u003d",
+        "filename": "test/lpf_8_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 467,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "remove extra horizontal whitespace (throughout)",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WkI\u003d",
+        "filename": "vp9/common/vp9_loopfilter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 419,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "align with open paren of for (matches other stuff in this file)",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Wj8\u003d",
+        "filename": "vp9/common/vp9_loopfilter_filters.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 355,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "pedantic nit: Capitalization/punctuation in comments in this section.",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Wjo\u003d",
+        "filename": "vp9/common/vp9_loopfilter_filters.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 360,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "s/bps/bd/",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Wj4\u003d",
+        "filename": "vp9/common/vp9_loopfilter_filters.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 410,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "extra space above two lines",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Wj0\u003d",
+        "filename": "vp9/common/vp9_loopfilter_filters.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 421,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "attach to variable being casted",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Wjw\u003d",
+        "filename": "vp9/common/vp9_loopfilter_filters.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 457,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "One per line",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Wjk\u003d",
+        "filename": "vp9/common/vp9_loopfilter_filters.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 574,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "align/extra space\n\nalso, I think one calculation per line would be easier to read here; even at the cost of making this section very long vertically.",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Wjg\u003d",
+        "filename": "vp9/common/vp9_loopfilter_filters.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 607,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "One per line",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Wjc\u003d",
+        "filename": "vp9/common/vp9_loopfilter_filters.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 653,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WjY\u003d",
+        "filename": "vp9/common/vp9_loopfilter_filters.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 665,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "remove extra spaces\nditto on the one calc per line vs length comment",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WjU\u003d",
+        "filename": "vp9/common/vp9_loopfilter_filters.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 674,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "align",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WjM\u003d",
+        "filename": "vp9/common/vp9_loopfilter_filters.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 681,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "align",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WjQ\u003d",
+        "filename": "vp9/common/vp9_loopfilter_filters.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 684,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "align",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WjI\u003d",
+        "filename": "vp9/common/vp9_loopfilter_filters.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 688,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "align, remove extra space etc",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WjE\u003d",
+        "filename": "vp9/common/vp9_postproc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "Post proc down/period",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WjA\u003d",
+        "filename": "vp9/common/vp9_postproc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "newline (to make the label stand out even more)",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Wi8\u003d",
+        "filename": "vp9/common/vp9_postproc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "newline before, none after",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Wi4\u003d",
+        "filename": "vp9/common/vp9_postproc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "drop the extra new lines",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Wi0\u003d",
+        "filename": "vp9/common/vp9_postproc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 291,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "extra space",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Wiw\u003d",
+        "filename": "vp9/common/vp9_postproc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 295,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Wio\u003d",
+        "filename": "vp9/common/vp9_postproc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 303,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Wik\u003d",
+        "filename": "vp9/common/vp9_postproc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 356,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "what\u0027s the NOLINT suppressing?",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Wig\u003d",
+        "filename": "vp9/common/vp9_postproc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 361,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "extra space",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Wic\u003d",
+        "filename": "vp9/common/vp9_postproc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 367,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WiY\u003d",
+        "filename": "vp9/common/vp9_postproc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 372,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WiU\u003d",
+        "filename": "vp9/common/vp9_postproc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 516,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "worth handling the NDEBUG case here? Should probably return out... too bad we\u0027re in a void function and we can\u0027t pass out an error.",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WiQ\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "s/CRLF/LF/ please",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WiM\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "2014",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WiE\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "newline between include groups",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WhQ\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "s/bps/bd/",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WiA\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "one per line",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Wh0\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "break at first open paren and get the entire _mm_subs_epi16 call on one line?",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Whs\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "align",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Who\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "fix alignment above 3 calls",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Whk\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "ok; no need for one per line here; that would just be ridiculous",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Whc\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "move this line up and get rid of scoping?",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Whg\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "get rid of this scoping",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WhY\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "this comment, and the next several: Are they necessary to keep around? Is it helpful to keep the C equivalent near the intrinsic usage? (curious)",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WhU\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "remove scoping, relocate declarations?\n\n(holy crap this is a long function)\n\nWould it be too much to ask to break this up?",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Wg8\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "indent -2 if we really need this extra scope",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Wg4\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "remove extra scope/relocate declaration?",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Wg0\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "If we keep the extra scoping the contents of the block need indenting here",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Wgw\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "extra spaces in this section around assignments",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Wgs\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "align; next several calls as well.",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Wgg\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 528,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "This function seems excessively long... is it seriously detrimental to performance to have multiple functions? (or is there some other reason?)",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Wgc\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 566,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "+2 indent (next two as well)",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WgY\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 574,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "Can the declaration be attached to the assignments? (i.e. drop this line, move (void)count down, do the declaration and assignments in one go)",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WgU\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 588,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "Repeat of the comments above: Is this scoping necessary, can we have multiple functions instead of doing this with the scoping, or can the declarations move up?",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WgA\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 631,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "drop this newline",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WgQ\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 807,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "Fix indentation of the above three statements.",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WgM\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 811,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "drop the extra newline",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WgI\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 822,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "ditto comment re necessity of scoping and sub functions",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WgE\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1054,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-18T19:59:09Z",
+      "side": 1,
+      "message": "What\u0027s the purpose of declaring this as single entry arrays? (just pointing out possible ignorance on my part)\n\nAny reason why this can\u0027t just be \n\n    uint16_t *dest1 \u003d out + 8;\n\n?",
+      "revId": "ed215dddfe3d72f8a28336e4d8d4730941b3d5cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
