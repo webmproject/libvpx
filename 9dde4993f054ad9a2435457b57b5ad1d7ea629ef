@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//WTU\u003d",
+        "filename": "test/tools_common.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 258,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-19T18:37:54Z",
+      "side": 1,
+      "message": "tests_to_run is empty here",
+      "revId": "9dde4993f054ad9a2435457b57b5ad1d7ea629ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
