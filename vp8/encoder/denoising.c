@@ -384,6 +384,7 @@ void vp8_denoiser_set_parameters(VP8_DENOISER *denoiser, int mode) {
     denoiser->denoise_pars.pickmode_mv_bias = 100;
     denoiser->denoise_pars.qp_thresh = 0;
     denoiser->denoise_pars.consec_zerolast = UINT_MAX;
+    denoiser->denoise_pars.spatial_blur = 0;
   } else {
     denoiser->denoise_pars.scale_sse_thresh = 2;
     denoiser->denoise_pars.scale_motion_thresh = 16;
@@ -392,6 +393,7 @@ void vp8_denoiser_set_parameters(VP8_DENOISER *denoiser, int mode) {
     denoiser->denoise_pars.pickmode_mv_bias = 60;
     denoiser->denoise_pars.qp_thresh = 100;
     denoiser->denoise_pars.consec_zerolast = 10;
+    denoiser->denoise_pars.spatial_blur = 20;
   }
 }
 
