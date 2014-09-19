@@ -483,6 +483,11 @@ static INLINE int get_token_alloc(int mb_rows, int mb_cols) {
 }
 
 int vp9_get_y_sse(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b);
+#if CONFIG_VP9_HIGHBITDEPTH
+int vp9_highbd_get_y_sse(const YV12_BUFFER_CONFIG *a,
+                         const YV12_BUFFER_CONFIG *b,
+                         vpx_bit_depth_t bit_depth);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 void vp9_alloc_compressor_data(VP9_COMP *cpi);
 
