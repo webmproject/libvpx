@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//WUA\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 59
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-19T19:01:26Z",
+      "side": 1,
+      "message": "nit: vertical space",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WT0\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 59
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-19T19:01:26Z",
+      "side": 1,
+      "message": "nit: cached_frame or just decoded_frame\n\ncache_element I think is too vague",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WTs\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 59
+      },
+      "lineNbr": 428,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-19T19:01:26Z",
+      "side": 1,
+      "message": "nit: space between type and *",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WS8\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 59
+      },
+      "lineNbr": 618,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-19T19:01:26Z",
+      "side": 1,
+      "message": "you can refactor this:\n\nif (ctx-\u003eavailable_threads \u003d\u003d 0) {\n  if (ctx-\u003enum_cache_frames \u003c FRAME_CACHE_SIZE) {\n    wait_worker_and_cache_frame(ctx);\n   } else {\n            // TODO(hkuang): Add unit test to test this path.\n            set_error_detail(ctx, \"Frame output cache is full.\");\n            return VPX_CODEC_ERROR;\n  }\n}\n\ndecode_one()",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WS4\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 59
+      },
+      "lineNbr": 642,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-19T19:01:26Z",
+      "side": 1,
+      "message": "You could probably refactor this big if if (frame_count \u003e 0) too. Maybe a do while loop.\n\nOtherwise refactor this else branch like the one above.",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WSs\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 59
+      },
+      "lineNbr": 708,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-19T19:01:26Z",
+      "side": 1,
+      "message": "Move these declarations to a lower scope.",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WSk\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 59
+      },
+      "lineNbr": 728,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-19T19:01:26Z",
+      "side": 1,
+      "message": "flushed",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WSg\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 59
+      },
+      "lineNbr": 731,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-19T19:01:26Z",
+      "side": 1,
+      "message": "What happens if app calls\n\ndecode(frame 0);\n\nget_frame(); -\u003e NULL\n\n...\n\ndecode(frame 1);\n\nget_frame(); -\u003e NULL\n\n...\n\n[decoder finishes frame 0]\n\n...\n\ndecode(frame 2);\n\nget_frame(); Will decoder return NULL? Or frame 0?",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
