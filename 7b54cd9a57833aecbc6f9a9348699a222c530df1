@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//WS0\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-09-19T18:52:25Z",
+      "side": 1,
+      "message": "Still WIP or ready to be reviewed?",
+      "revId": "7b54cd9a57833aecbc6f9a9348699a222c530df1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
