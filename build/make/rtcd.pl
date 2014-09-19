@@ -209,14 +209,16 @@ sub common_top() {
 #define RTCD_EXTERN extern
 #endif
 
+EOF
+
+process_forward_decls();
+print <<EOF;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 EOF
-
-process_forward_decls();
-print "\n";
 declare_function_pointers("c", @ALL_ARCHS);
 
 print <<EOF;
