@@ -247,6 +247,108 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//YC0\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-19T18:05:11Z",
+      "side": 1,
+      "message": "Is this worker different than the end worker call in vp9_decoder_remove()?\n\nI.e. vp9_get_worker_interface()-\u003eend(\u0026pbi-\u003elf_worker)",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YCY\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 324,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-19T18:05:11Z",
+      "side": 1,
+      "message": "I think changing worker_data to frame_worker_data or something to distinguish it from other wroker_data would be good.",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YCk\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 337,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-19T18:05:11Z",
+      "side": 1,
+      "message": "nit: frame_worker_owner or frame_worker_parent",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YCw\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 340,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-19T18:05:11Z",
+      "side": 1,
+      "message": "redundant",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YCg\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 342,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-19T18:05:11Z",
+      "side": 1,
+      "message": "worker_data-\u003escratch_buffer \u003d NULL;",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YCc\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 346,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-19T18:05:11Z",
+      "side": 1,
+      "message": "stats_mutex?\n\nIs that status?",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//YMY\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 54
@@ -282,6 +384,40 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//YCU\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 426,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-19T18:05:11Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YCQ\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 429,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-19T18:05:11Z",
+      "side": 1,
+      "message": "What happens if these two variables are equal? Can that happen?\n\nIs that checked in the unittests?",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//YMU\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 54
@@ -311,6 +447,40 @@
       "side": 1,
       "message": "Done",
       "parentUuid": "AAAAdn//YMU\u003d",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YCM\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 440,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-19T18:05:11Z",
+      "side": 1,
+      "message": "you can do a realloc here.",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YBs\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 448,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-19T18:05:11Z",
+      "side": 1,
+      "message": "Is data always the compressed image in FrameWorkerData? If so change the name to compressed_frame or something.",
       "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -457,6 +627,23 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//YBE\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 613,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-19T18:05:11Z",
+      "side": 1,
+      "message": "I think this code is not going to work if developers call decode() many times in a row without calling get_frame. This should be tested in a unit test.",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//YMA\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 54
@@ -555,6 +742,24 @@
       "writtenOn": "2014-09-11T05:04:42Z",
       "side": 1,
       "message": "Both branches are for frame_parallel_decode case. The upper one is for superframe with multiple frames, while this one is for superframe with only one frame. To avoid code duplication, I already put all the code inside wait_worker_and_cache_frame. \nI could put error handling inside wait_work_and_cache_frame too, but it seems that will break readability.",
+      "parentUuid": "AAAAdn//YL4\u003d",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//YBI\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 637,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-19T18:05:11Z",
+      "side": 1,
+      "message": "+1",
       "parentUuid": "AAAAdn//YL4\u003d",
       "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
