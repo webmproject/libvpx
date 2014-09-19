@@ -515,37 +515,6 @@ TEST_F(SvcTest, OnePassEncodeThreeFrames) {
   FreeBitstreamBuffers(&outputs[0], 3);
 }
 
-TEST_F(SvcTest, GetLayerResolution) {
-  svc_.spatial_layers = 2;
-  vpx_svc_set_options(&svc_, "scale-factors=4/16,8/16");
-  InitializeEncoder();
-
-  // ensure that requested layer is a valid layer
-  uint32_t layer_width, layer_height;
-  vpx_codec_err_t res = vpx_svc_get_layer_resolution(&svc_, svc_.spatial_layers,
-                                     &layer_width, &layer_height);
-  EXPECT_EQ(VPX_CODEC_INVALID_PARAM, res);
-
-  res = vpx_svc_get_layer_resolution(NULL, 0, &layer_width, &layer_height);
-  EXPECT_EQ(VPX_CODEC_INVALID_PARAM, res);
-
-  res = vpx_svc_get_layer_resolution(&svc_, 0, NULL, &layer_height);
-  EXPECT_EQ(VPX_CODEC_INVALID_PARAM, res);
-
-  res = vpx_svc_get_layer_resolution(&svc_, 0, &layer_width, NULL);
-  EXPECT_EQ(VPX_CODEC_INVALID_PARAM, res);
-
-  res = vpx_svc_get_layer_resolution(&svc_, 0, &layer_width, &layer_height);
-  EXPECT_EQ(VPX_CODEC_OK, res);
-  EXPECT_EQ(kWidth * 4 / 16, layer_width);
-  EXPECT_EQ(kHeight * 4 / 16, layer_height);
-
-  res = vpx_svc_get_layer_resolution(&svc_, 1, &layer_width, &layer_height);
-  EXPECT_EQ(VPX_CODEC_OK, res);
-  EXPECT_EQ(kWidth * 8 / 16, layer_width);
-  EXPECT_EQ(kHeight * 8 / 16, layer_height);
-}
-
 TEST_F(SvcTest, TwoPassEncode10Frames) {
   // First pass encode
   std::string stats_buf;

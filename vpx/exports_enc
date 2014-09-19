@@ -12,4 +12,3 @@ text vpx_svc_get_message
 text vpx_svc_init
 text vpx_svc_release
 text vpx_svc_set_options
-text vpx_svc_get_layer_resolution

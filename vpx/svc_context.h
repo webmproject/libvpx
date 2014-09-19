@@ -79,14 +79,6 @@ const char *vpx_svc_dump_statistics(SvcContext *svc_ctx);
  */
 const char *vpx_svc_get_message(const SvcContext *svc_ctx);
 
-/**
- * return spatial resolution of the specified layer
- */
-vpx_codec_err_t vpx_svc_get_layer_resolution(const SvcContext *svc_ctx,
-                                             int layer,
-                                             unsigned int *width,
-                                             unsigned int *height);
-
 #ifdef __cplusplus
 }  // extern "C"
 #endif

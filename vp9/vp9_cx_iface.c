@@ -1201,21 +1201,17 @@ static vpx_codec_err_t ctrl_set_svc_layer_id(vpx_codec_alg_priv_t *ctx,
 static vpx_codec_err_t ctrl_set_svc_parameters(vpx_codec_alg_priv_t *ctx,
                                                va_list args) {
   VP9_COMP *const cpi = ctx->cpi;
-  vpx_svc_parameters_t *const params = va_arg(args, vpx_svc_parameters_t *);
+  vpx_svc_extra_cfg_t *const params = va_arg(args, vpx_svc_extra_cfg_t *);
+  int i;
 
-  if (params == NULL || params->spatial_layer < 0 ||
-      params->spatial_layer >= cpi->svc.number_spatial_layers)
-    return VPX_CODEC_INVALID_PARAM;
+  for (i = 0; i < cpi->svc.number_spatial_layers; ++i) {
+    LAYER_CONTEXT *lc = &cpi->svc.layer_context[i];
 
-  if (params->spatial_layer == 0) {
-    int i;
-    for (i = 0; i < cpi->svc.number_spatial_layers; ++i) {
-      cpi->svc.layer_context[i].svc_params_received.spatial_layer = -1;
-    }
+    lc->max_q = params->max_quantizers[i];
+    lc->min_q = params->min_quantizers[i];
+    lc->scaling_factor_num = params->scaling_factor_num[i];
+    lc->scaling_factor_den = params->scaling_factor_den[i];
   }
-
-  cpi->svc.layer_context[params->spatial_layer].svc_params_received =
-      *params;
 
   return VPX_CODEC_OK;
 }

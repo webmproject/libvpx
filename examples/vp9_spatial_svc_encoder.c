@@ -305,12 +305,6 @@ int main(int argc, const char **argv) {
   info.codec_fourcc = VP9_FOURCC;
   info.time_base.numerator = enc_cfg.g_timebase.num;
   info.time_base.denominator = enc_cfg.g_timebase.den;
-  if (vpx_svc_get_layer_resolution(&svc_ctx, svc_ctx.spatial_layers - 1,
-                                   (unsigned int *)&info.frame_width,
-                                   (unsigned int *)&info.frame_height) !=
-      VPX_CODEC_OK) {
-    die("Failed to get output resolution");
-  }
 
   if (!(app_input.passes == 2 && app_input.pass == 1)) {
     // We don't save the bitstream for the 1st pass on two pass rate control

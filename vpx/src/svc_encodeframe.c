@@ -85,10 +85,7 @@ typedef struct SvcInternal {
   char options[OPTION_BUFFER_SIZE];        // set by vpx_svc_set_options
 
   // values extracted from option, quantizers
-  int scaling_factor_num[VPX_SS_MAX_LAYERS];
-  int scaling_factor_den[VPX_SS_MAX_LAYERS];
-  int max_quantizers[VPX_SS_MAX_LAYERS];
-  int min_quantizers[VPX_SS_MAX_LAYERS];
+  vpx_svc_extra_cfg_t svc_params;
   int enable_auto_alt_ref[VPX_SS_MAX_LAYERS];
   int bitrates[VPX_SS_MAX_LAYERS];
 
@@ -174,7 +171,8 @@ static vpx_codec_err_t extract_option(LAYER_OPTION_TYPE type,
     if (*value0 < option_min_values[SCALE_FACTOR] ||
         *value1 < option_min_values[SCALE_FACTOR] ||
         *value0 > option_max_values[SCALE_FACTOR] ||
-        *value1 > option_max_values[SCALE_FACTOR])
+        *value1 > option_max_values[SCALE_FACTOR] ||
+        *value0 > *value1)  // num shouldn't be greater than den
       return VPX_CODEC_INVALID_PARAM;
   } else {
     *value0 = atoi(input);
@@ -259,16 +257,18 @@ static vpx_codec_err_t parse_options(SvcContext *svc_ctx, const char *options) {
       svc_ctx->temporal_layers = atoi(option_value);
     } else if (strcmp("scale-factors", option_name) == 0) {
       res = parse_layer_options_from_string(svc_ctx, SCALE_FACTOR, option_value,
-                                            si->scaling_factor_num,
-                                            si->scaling_factor_den);
+                                            si->svc_params.scaling_factor_num,
+                                            si->svc_params.scaling_factor_den);
       if (res != VPX_CODEC_OK) break;
     } else if (strcmp("max-quantizers", option_name) == 0) {
       res = parse_layer_options_from_string(svc_ctx, QUANTIZER, option_value,
-                                            si->max_quantizers, NULL);
+                                            si->svc_params.max_quantizers,
+                                            NULL);
       if (res != VPX_CODEC_OK) break;
     } else if (strcmp("min-quantizers", option_name) == 0) {
       res = parse_layer_options_from_string(svc_ctx, QUANTIZER, option_value,
-                                            si->min_quantizers, NULL);
+                                            si->svc_params.min_quantizers,
+                                            NULL);
       if (res != VPX_CODEC_OK) break;
     } else if (strcmp("auto-alt-refs", option_name) == 0) {
       res = parse_layer_options_from_string(svc_ctx, AUTO_ALT_REF, option_value,
@@ -290,9 +290,10 @@ static vpx_codec_err_t parse_options(SvcContext *svc_ctx, const char *options) {
   free(input_string);
 
   for (i = 0; i < svc_ctx->spatial_layers; ++i) {
-    if (si->max_quantizers[i] > MAX_QUANTIZER || si->max_quantizers[i] < 0 ||
-        si->min_quantizers[i] > si->max_quantizers[i] ||
-        si->min_quantizers[i] < 0)
+    if (si->svc_params.max_quantizers[i] > MAX_QUANTIZER ||
+        si->svc_params.max_quantizers[i] < 0 ||
+        si->svc_params.min_quantizers[i] > si->svc_params.max_quantizers[i] ||
+        si->svc_params.min_quantizers[i] < 0)
       res = VPX_CODEC_INVALID_PARAM;
   }
 
@@ -340,9 +341,9 @@ void assign_layer_bitrates(const SvcContext *svc_ctx,
     float alloc_ratio[VPX_SS_MAX_LAYERS] = {0};
 
     for (i = 0; i < svc_ctx->spatial_layers; ++i) {
-      if (si->scaling_factor_den[i] > 0) {
-        alloc_ratio[i] = (float)(si->scaling_factor_num[i] * 1.0 /
-            si->scaling_factor_den[i]);
+      if (si->svc_params.scaling_factor_den[i] > 0) {
+        alloc_ratio[i] = (float)(si->svc_params.scaling_factor_num[i] * 1.0 /
+                                 si->svc_params.scaling_factor_den[i]);
 
         alloc_ratio[i] *= alloc_ratio[i];
         total += alloc_ratio[i];
@@ -392,10 +393,10 @@ vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
   }
 
   for (i = 0; i < VPX_SS_MAX_LAYERS; ++i) {
-    si->max_quantizers[i] = MAX_QUANTIZER;
-    si->min_quantizers[i] = 0;
-    si->scaling_factor_num[i] = DEFAULT_SCALE_FACTORS_NUM[i];
-    si->scaling_factor_den[i] = DEFAULT_SCALE_FACTORS_DEN[i];
+    si->svc_params.max_quantizers[i] = MAX_QUANTIZER;
+    si->svc_params.min_quantizers[i] = 0;
+    si->svc_params.scaling_factor_num[i] = DEFAULT_SCALE_FACTORS_NUM[i];
+    si->svc_params.scaling_factor_den[i] = DEFAULT_SCALE_FACTORS_DEN[i];
   }
 
   // Parse aggregate command line options. Options must start with
@@ -444,60 +445,9 @@ vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
   }
 
   vpx_codec_control(codec_ctx, VP9E_SET_SVC, 1);
+  vpx_codec_control(codec_ctx, VP9E_SET_SVC_PARAMETERS, &si->svc_params);
 
   return VPX_CODEC_OK;
-}
-
-vpx_codec_err_t vpx_svc_get_layer_resolution(const SvcContext *svc_ctx,
-                                             int layer,
-                                             unsigned int *width,
-                                             unsigned int *height) {
-  int w, h, num, den;
-  const SvcInternal *const si = get_const_svc_internal(svc_ctx);
-
-  if (svc_ctx == NULL || si == NULL || width == NULL || height == NULL)
-    return VPX_CODEC_INVALID_PARAM;
-  if (layer < 0 || layer >= svc_ctx->spatial_layers)
-    return VPX_CODEC_INVALID_PARAM;
-
-  num = si->scaling_factor_num[layer];
-  den = si->scaling_factor_den[layer];
-  if (num == 0 || den == 0) return VPX_CODEC_INVALID_PARAM;
-
-  w = si->width * num / den;
-  h = si->height * num / den;
-
-  // make height and width even to make chrome player happy
-  w += w % 2;
-  h += h % 2;
-
-  *width = w;
-  *height = h;
-
-  return VPX_CODEC_OK;
-}
-
-static void set_svc_parameters(SvcContext *svc_ctx,
-                               vpx_codec_ctx_t *codec_ctx) {
-  int layer;
-  vpx_svc_parameters_t svc_params;
-  SvcInternal *const si = get_svc_internal(svc_ctx);
-
-  memset(&svc_params, 0, sizeof(svc_params));
-  svc_params.temporal_layer = 0;
-  svc_params.spatial_layer = si->layer;
-
-  layer = si->layer;
-  if (VPX_CODEC_OK != vpx_svc_get_layer_resolution(svc_ctx, layer,
-                                                   &svc_params.width,
-                                                   &svc_params.height)) {
-    svc_log(svc_ctx, SVC_LOG_ERROR, "vpx_svc_get_layer_resolution failed\n");
-  }
-
-  svc_params.min_quantizer = si->min_quantizers[layer];
-  svc_params.max_quantizer = si->max_quantizers[layer];
-
-  vpx_codec_control(codec_ctx, VP9E_SET_SVC_PARAMETERS, &svc_params);
 }
 
 /**
@@ -516,13 +466,6 @@ vpx_codec_err_t vpx_svc_encode(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
   }
 
   svc_log_reset(svc_ctx);
-
-  if (rawimg != NULL) {
-    // encode each layer
-    for (si->layer = 0; si->layer < svc_ctx->spatial_layers; ++si->layer) {
-      set_svc_parameters(svc_ctx, codec_ctx);
-    }
-  }
 
   res = vpx_codec_encode(codec_ctx, rawimg, pts, (uint32_t)duration, 0,
                          deadline);

@@ -305,23 +305,6 @@ typedef enum {
   VP8_TUNE_SSIM
 } vp8e_tuning;
 
-/*!\brief  vp9 svc parameters
- *
- * This defines parameters for svc encoding.
- *
- */
-typedef struct vpx_svc_parameters {
-  unsigned int width;         /**< width of current spatial layer */
-  unsigned int height;        /**< height of current spatial layer */
-  int spatial_layer;          /**< current spatial layer number - 0 = base */
-  int temporal_layer;         /**< current temporal layer number - 0 = base */
-  int max_quantizer;          /**< max quantizer for current layer */
-  int min_quantizer;          /**< min quantizer for current layer */
-  int lst_fb_idx;             /**< last frame frame buffer index */
-  int gld_fb_idx;             /**< golden frame frame buffer index */
-  int alt_fb_idx;             /**< alt reference frame frame buffer index */
-} vpx_svc_parameters_t;
-
 /*!\brief  vp9 svc layer parameters
  *
  * This defines the spatial and temporal layer id numbers for svc encoding.
@@ -354,7 +337,7 @@ VPX_CTRL_USE_TYPE(VP8E_SET_ACTIVEMAP,          vpx_active_map_t *)
 VPX_CTRL_USE_TYPE(VP8E_SET_SCALEMODE,          vpx_scaling_mode_t *)
 
 VPX_CTRL_USE_TYPE(VP9E_SET_SVC,                int)
-VPX_CTRL_USE_TYPE(VP9E_SET_SVC_PARAMETERS,     vpx_svc_parameters_t *)
+VPX_CTRL_USE_TYPE(VP9E_SET_SVC_PARAMETERS,     void *)
 VPX_CTRL_USE_TYPE(VP9E_SET_SVC_LAYER_ID,       vpx_svc_layer_id_t *)
 
 VPX_CTRL_USE_TYPE(VP8E_SET_CPUUSED,            int)
