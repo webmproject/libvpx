@@ -2167,8 +2167,14 @@ void vp9_write_yuv_rec_frame(VP9_COMMON *cm) {
 }
 #endif
 
+#if CONFIG_VP9_HIGHBITDEPTH
+static void scale_and_extend_frame_nonnormative(const YV12_BUFFER_CONFIG *src,
+                                                YV12_BUFFER_CONFIG *dst,
+                                                int bd) {
+#else
 static void scale_and_extend_frame_nonnormative(const YV12_BUFFER_CONFIG *src,
                                                 YV12_BUFFER_CONFIG *dst) {
+#endif  // CONFIG_VP9_HIGHBITDEPTH
   // TODO(dkovalev): replace YV12_BUFFER_CONFIG with vpx_image_t
   int i;
   const uint8_t *const srcs[3] = {src->y_buffer, src->u_buffer, src->v_buffer};
@@ -2184,15 +2190,31 @@ static void scale_and_extend_frame_nonnormative(const YV12_BUFFER_CONFIG *src,
   const int dst_heights[3] = {dst->y_crop_height, dst->uv_crop_height,
                               dst->uv_crop_height};
 
-  for (i = 0; i < MAX_MB_PLANE; ++i)
+  for (i = 0; i < MAX_MB_PLANE; ++i) {
+#if CONFIG_VP9_HIGHBITDEPTH
+    if (src->flags & YV12_FLAG_HIGHBITDEPTH) {
+      vp9_highbd_resize_plane(srcs[i], src_heights[i], src_widths[i],
+                              src_strides[i], dsts[i], dst_heights[i],
+                              dst_widths[i], dst_strides[i], bd);
+    } else {
+      vp9_resize_plane(srcs[i], src_heights[i], src_widths[i], src_strides[i],
+                       dsts[i], dst_heights[i], dst_widths[i], dst_strides[i]);
+    }
+#else
     vp9_resize_plane(srcs[i], src_heights[i], src_widths[i], src_strides[i],
                      dsts[i], dst_heights[i], dst_widths[i], dst_strides[i]);
-
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+  }
   vp9_extend_frame_borders(dst);
 }
 
+#if CONFIG_VP9_HIGHBITDEPTH
+static void scale_and_extend_frame(const YV12_BUFFER_CONFIG *src,
+                                   YV12_BUFFER_CONFIG *dst, int bd) {
+#else
 static void scale_and_extend_frame(const YV12_BUFFER_CONFIG *src,
                                    YV12_BUFFER_CONFIG *dst) {
+#endif  // CONFIG_VP9_HIGHBITDEPTH
   const int src_w = src->y_crop_width;
   const int src_h = src->y_crop_height;
   const int dst_w = dst->y_crop_width;
@@ -2216,10 +2238,24 @@ static void scale_and_extend_frame(const YV12_BUFFER_CONFIG *src,
                                      src_stride + (x / factor) * src_w / dst_w;
         uint8_t *dst_ptr = dsts[i] + (y / factor) * dst_stride + (x / factor);
 
+#if CONFIG_VP9_HIGHBITDEPTH
+        if (src->flags & YV12_FLAG_HIGHBITDEPTH) {
+          vp9_high_convolve8(src_ptr, src_stride, dst_ptr, dst_stride,
+                             kernel[x_q4 & 0xf], 16 * src_w / dst_w,
+                             kernel[y_q4 & 0xf], 16 * src_h / dst_h,
+                             16 / factor, 16 / factor, bd);
+        } else {
+          vp9_convolve8(src_ptr, src_stride, dst_ptr, dst_stride,
+                        kernel[x_q4 & 0xf], 16 * src_w / dst_w,
+                        kernel[y_q4 & 0xf], 16 * src_h / dst_h,
+                        16 / factor, 16 / factor);
+        }
+#else
         vp9_convolve8(src_ptr, src_stride, dst_ptr, dst_stride,
                       kernel[x_q4 & 0xf], 16 * src_w / dst_w,
                       kernel[y_q4 & 0xf], 16 * src_h / dst_h,
                       16 / factor, 16 / factor);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
       }
     }
   }
@@ -2388,9 +2424,14 @@ void vp9_scale_references(VP9_COMP *cpi) {
                                cm->subsampling_x, cm->subsampling_y,
 #if CONFIG_VP9_HIGHBITDEPTH
                                cm->use_highbitdepth,
-#endif
+#endif  // CONFIG_VP9_HIGHBITDEPTH
                                VP9_ENC_BORDER_IN_PIXELS, NULL, NULL, NULL);
+#if CONFIG_VP9_HIGHBITDEPTH
+      scale_and_extend_frame(ref, &cm->frame_bufs[new_fb].buf,
+                             (int)cm->bit_depth);
+#else
       scale_and_extend_frame(ref, &cm->frame_bufs[new_fb].buf);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
       cpi->scaled_ref_idx[ref_frame - 1] = new_fb;
     } else {
       cpi->scaled_ref_idx[ref_frame - 1] = idx;
@@ -2766,7 +2807,11 @@ YV12_BUFFER_CONFIG *vp9_scale_if_required(VP9_COMMON *cm,
                                           YV12_BUFFER_CONFIG *scaled) {
   if (cm->mi_cols * MI_SIZE != unscaled->y_width ||
       cm->mi_rows * MI_SIZE != unscaled->y_height) {
+#if CONFIG_VP9_HIGHBITDEPTH
+    scale_and_extend_frame_nonnormative(unscaled, scaled, (int)cm->bit_depth);
+#else
     scale_and_extend_frame_nonnormative(unscaled, scaled);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
     return scaled;
   } else {
     return unscaled;
