@@ -519,9 +519,6 @@ static vpx_image_t *decoder_get_frame(vpx_codec_alg_priv_t *ctx,
     // call to get_frame.
     if (!(*iter)) {
       img = &ctx->img;
-#if CONFIG_VP9_HIGH
-      img->bit_depth = (unsigned int)ctx->pbi->common.bit_depth;
-#endif
       *iter = img;
     }
   }
