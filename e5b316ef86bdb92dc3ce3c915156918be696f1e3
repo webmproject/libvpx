@@ -2,6 +2,465 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAdn//WCs\u003d",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 59
+      },
+      "lineNbr": 350,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-22T21:45:49Z",
+      "side": 1,
+      "message": "now is needed?",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WEk\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 59
+      },
+      "lineNbr": 892,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-22T21:45:49Z",
+      "side": 1,
+      "message": "Do you have any idea why?",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WEQ\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 59
+      },
+      "lineNbr": 1095,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-22T21:45:49Z",
+      "side": 1,
+      "message": "Other place sin the code you have BufferPool *const pool \u003d pbi-\u003ecommon.buffer_pool;\n\nwhy not here?",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WEU\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 59
+      },
+      "lineNbr": 1096,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-22T21:45:49Z",
+      "side": 1,
+      "message": "move mask declaration closer to where it is used.",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WEM\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 59
+      },
+      "lineNbr": 1228,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-22T21:45:49Z",
+      "side": 1,
+      "message": "cm-\u003ebuffer_pool-\u003eframe_bufs -\u003e frame_bufs",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WEs\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 59
+      },
+      "lineNbr": 1429,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-22T21:45:49Z",
+      "side": 1,
+      "message": "pbi-\u003ecommon -\u003e cm",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WEE\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 59
+      },
+      "lineNbr": 1554,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-22T21:45:49Z",
+      "side": 1,
+      "message": "Every where else you make this assignment, the variable name is frame_buf. I would change this to keep it consistent.\n\nHow about?\n\nRefCntBuffer *const frame_buf \u003d \u0026pool-\u003eframe_bufs[idx];\n\nRefCntBuffer *const ref_buf \u003d \u0026frame_buf-\u003ebuf;",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WDY\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 59
+      },
+      "lineNbr": 1618,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-22T21:45:49Z",
+      "side": 1,
+      "message": "x1 does not need to be in this scope.",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WDI\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 59
+      },
+      "lineNbr": 425,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-22T21:45:49Z",
+      "side": 1,
+      "message": "mi_row",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WCw\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 59
+      },
+      "lineNbr": 523,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-22T21:45:49Z",
+      "side": 1,
+      "message": "If you change vp9_frameworker_wait(), you would not need to pass in pbi here. You could pass in pbi-\u003eprev_buf as data",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WFc\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 59
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-22T21:45:49Z",
+      "side": 1,
+      "message": "nit: no space after *",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WFg\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 59
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-22T21:45:49Z",
+      "side": 1,
+      "message": "nit: no space after *",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WFY\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 59
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-22T21:45:49Z",
+      "side": 1,
+      "message": "pool?",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WFU\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 59
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-22T21:45:49Z",
+      "side": 1,
+      "message": "pool-\u003eframe_bufs -\u003e frame_bufs",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WFQ\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 59
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-22T21:45:49Z",
+      "side": 1,
+      "message": "pool-\u003eframe_bufs -\u003e frame_bufs",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WFM\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 59
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-22T21:45:49Z",
+      "side": 1,
+      "message": "pool?",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WFI\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 59
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-22T21:45:49Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WFE\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 59
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-22T21:45:49Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WFA\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 59
+      },
+      "lineNbr": 276,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-22T21:45:49Z",
+      "side": 1,
+      "message": "pool-\u003eframe_bufs -\u003e frame_bufs",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WE8\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 59
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-22T21:45:49Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WE4\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 59
+      },
+      "lineNbr": 283,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-22T21:45:49Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WFo\u003d",
+        "filename": "vp9/decoder/vp9_decoder.h",
+        "patchSetId": 59
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-22T21:45:49Z",
+      "side": 1,
+      "message": "why newline?",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WDM\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 59
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-22T21:45:49Z",
+      "side": 1,
+      "message": "Should probably remove the debug code.",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WDQ\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 59
+      },
+      "lineNbr": 286,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-22T21:45:49Z",
+      "side": 1,
+      "message": "I think having one #if CONFIG_MULTITHREAD might be better for readability.\n\ne.g.\n\n#if CONFIG_MULTITHREAD\n\nvoid vp9_frameworker_lock_stats()\n\nvoid vp9_frameworker_unlock_stats()\n\n...\n\n#else\n\nvoid vp9_frameworker_lock_stats()\n\nvoid vp9_frameworker_unlock_stats()\n\n...\n\n#endif",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WC4\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 59
+      },
+      "lineNbr": 312,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-22T21:45:49Z",
+      "side": 1,
+      "message": "You are not using worker parameter in this function.",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WC0\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 59
+      },
+      "lineNbr": 325,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-22T21:45:49Z",
+      "side": 1,
+      "message": "*const",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WDU\u003d",
+        "filename": "vp9/decoder/vp9_dthread.h",
+        "patchSetId": 59
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-09-22T21:45:49Z",
+      "side": 1,
+      "message": "very nit: Instead of decoding_done. Maybe frame_decoded; Or frame_is_decoded;",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//WUA\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 59
