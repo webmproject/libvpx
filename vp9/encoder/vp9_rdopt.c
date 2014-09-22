@@ -2718,7 +2718,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     int64_t distortion2 = 0, distortion_y = 0, distortion_uv = 0;
     int skippable = 0;
     int64_t tx_cache[TX_MODES];
-    int i;
     int this_skip2 = 0;
     int64_t total_sse = INT64_MAX;
     int early_term = 0;
