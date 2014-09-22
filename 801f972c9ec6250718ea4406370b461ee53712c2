@@ -264,6 +264,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//WR8\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-22T23:48:33Z",
+      "side": 1,
+      "message": "No. They are different. FrameWorker owns the pbi. And each pbi owns the tile worker or lf worker.  vp9_decoder_remove removes the tile worker and lf worker inside the pbi.",
+      "parentUuid": "AAAAdn//YC0\u003d",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//YCY\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 54
@@ -275,6 +293,24 @@
       "writtenOn": "2014-09-19T18:05:11Z",
       "side": 1,
       "message": "I think changing worker_data to frame_worker_data or something to distinguish it from other wroker_data would be good.",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WR4\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 324,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-22T23:48:33Z",
+      "side": 1,
+      "message": "Done. Change to frame_worker_data",
+      "parentUuid": "AAAAdn//YCY\u003d",
       "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -298,6 +334,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//WRQ\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 337,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-22T23:48:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YCk\u003d",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//YCw\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 54
@@ -309,6 +363,24 @@
       "writtenOn": "2014-09-19T18:05:11Z",
       "side": 1,
       "message": "redundant",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WQ0\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 340,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-22T23:48:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YCw\u003d",
       "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -332,6 +404,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//WQw\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 342,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-22T23:48:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YCg\u003d",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//YCc\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 54
@@ -343,6 +433,24 @@
       "writtenOn": "2014-09-19T18:05:11Z",
       "side": 1,
       "message": "stats_mutex?\n\nIs that status?",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WQk\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 346,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-22T23:48:33Z",
+      "side": 1,
+      "message": "Per offline conversation, I will keep this as I am an NBA fan.",
+      "parentUuid": "AAAAdn//YCc\u003d",
       "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -401,6 +509,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//WQg\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 426,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-22T23:48:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YCU\u003d",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//YCQ\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 54
@@ -412,6 +538,24 @@
       "writtenOn": "2014-09-19T18:05:11Z",
       "side": 1,
       "message": "What happens if these two variables are equal? Can that happen?\n\nIs that checked in the unittests?",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WP4\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 429,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-22T23:48:33Z",
+      "side": 1,
+      "message": "This will only happen for the first frame. If last_submit_worker_id is the same as next_submit_worker_id, then there will be only thread. And libvpx will not run in frame parallel decode mode in this case.",
+      "parentUuid": "AAAAdn//YCQ\u003d",
       "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -470,6 +614,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//WGQ\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 440,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-22T23:48:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//YCM\u003d",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//YBs\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 54
@@ -481,6 +643,24 @@
       "writtenOn": "2014-09-19T18:05:11Z",
       "side": 1,
       "message": "Is data always the compressed image in FrameWorkerData? If so change the name to compressed_frame or something.",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WPs\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 448,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-22T23:48:33Z",
+      "side": 1,
+      "message": "Agree it is a better name. But all the functions in vp9_dx_iface.c define like this. i.e, decoder_decode. So I use this for consistency.",
+      "parentUuid": "AAAAdn//YBs\u003d",
       "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -638,6 +818,24 @@
       "writtenOn": "2014-09-19T18:05:11Z",
       "side": 1,
       "message": "I think this code is not going to work if developers call decode() many times in a row without calling get_frame. This should be tested in a unit test.",
+      "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//WOw\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 54
+      },
+      "lineNbr": 613,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-09-22T23:48:33Z",
+      "side": 1,
+      "message": "Will add a test for that.  But for the normal serial decode, the previous decoded frame will be lost if application did not call get_frame. For frame parallel decode, frames will be cached inside. Error will be returned when the cache is full.",
+      "parentUuid": "AAAAdn//YBE\u003d",
       "revId": "801f972c9ec6250718ea4406370b461ee53712c2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
