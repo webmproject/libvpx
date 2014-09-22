@@ -318,6 +318,8 @@ typedef struct SPEED_FEATURES {
   // point for this motion search and limits the search range around it.
   int adaptive_motion_search;
 
+  int schedule_mode_search;
+
   // Allows sub 8x8 modes to use the prediction filter that was determined
   // best for 8x8 mode. If set to 0 we always re check all the filters for
   // sizes less than 8x8, 1 means we check all filter modes if no 8x8 filter
