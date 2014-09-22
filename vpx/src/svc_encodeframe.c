@@ -44,7 +44,7 @@ _CRTIMP char *__cdecl strtok_s(char *str, const char *delim, char **context);
 #define SVC_REFERENCE_FRAMES 8
 #define SUPERFRAME_SLOTS (8)
 #define SUPERFRAME_BUFFER_SIZE (SUPERFRAME_SLOTS * sizeof(uint32_t) + 2)
-#define OPTION_BUFFER_SIZE 256
+#define OPTION_BUFFER_SIZE 1024
 #define COMPONENTS 4  // psnr & sse statistics maintained for total, y, u, v
 
 static const int DEFAULT_QUANTIZER_VALUES[VPX_SS_MAX_LAYERS] = {
@@ -85,8 +85,6 @@ typedef struct FrameData {
 
 typedef struct SvcInternal {
   char options[OPTION_BUFFER_SIZE];        // set by vpx_svc_set_options
-  char quantizers[OPTION_BUFFER_SIZE];     // set by vpx_svc_set_quantizers
-  char scale_factors[OPTION_BUFFER_SIZE];  // set by vpx_svc_set_scale_factors
 
   // values extracted from option, quantizers
   int scaling_factor_num[VPX_SS_MAX_LAYERS];
@@ -316,28 +314,6 @@ vpx_codec_err_t vpx_svc_set_options(SvcContext *svc_ctx, const char *options) {
   return VPX_CODEC_OK;
 }
 
-vpx_codec_err_t vpx_svc_set_quantizers(SvcContext *svc_ctx,
-                                       const char *quantizers) {
-  SvcInternal *const si = get_svc_internal(svc_ctx);
-  if (svc_ctx == NULL || quantizers == NULL || si == NULL) {
-    return VPX_CODEC_INVALID_PARAM;
-  }
-  strncpy(si->quantizers, quantizers, sizeof(si->quantizers));
-  si->quantizers[sizeof(si->quantizers) - 1] = '\0';
-  return VPX_CODEC_OK;
-}
-
-vpx_codec_err_t vpx_svc_set_scale_factors(SvcContext *svc_ctx,
-                                          const char *scale_factors) {
-  SvcInternal *const si = get_svc_internal(svc_ctx);
-  if (svc_ctx == NULL || scale_factors == NULL || si == NULL) {
-    return VPX_CODEC_INVALID_PARAM;
-  }
-  strncpy(si->scale_factors, scale_factors, sizeof(si->scale_factors));
-  si->scale_factors[sizeof(si->scale_factors) - 1] = '\0';
-  return VPX_CODEC_OK;
-}
-
 void assign_layer_bitrates(const SvcContext *svc_ctx,
                            vpx_codec_enc_cfg_t *const enc_cfg) {
   int i;
@@ -409,22 +385,6 @@ vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
     si->quantizer[i] = DEFAULT_QUANTIZER_VALUES[i];
     si->scaling_factor_num[i] = DEFAULT_SCALE_FACTORS_NUM[i];
     si->scaling_factor_den[i] = DEFAULT_SCALE_FACTORS_DEN[i];
-  }
-
-  if (strlen(si->quantizers) > 0) {
-    res = parse_layer_options_from_string(svc_ctx, QUANTIZER, si->quantizers,
-                                          si->quantizer, NULL);
-    if (res != VPX_CODEC_OK)
-      return res;
-  }
-
-  if (strlen(si->scale_factors) > 0) {
-    res = parse_layer_options_from_string(svc_ctx, SCALE_FACTOR,
-                                          si->scale_factors,
-                                          si->scaling_factor_num,
-                                          si->scaling_factor_den);
-    if (res != VPX_CODEC_OK)
-      return res;
   }
 
   // Parse aggregate command line options. Options must start with

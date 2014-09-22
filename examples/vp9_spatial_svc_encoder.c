@@ -119,6 +119,7 @@ static void parse_command_line(int argc, const char **argv_,
   const char *fpf_file_name = NULL;
   unsigned int min_bitrate = 0;
   unsigned int max_bitrate = 0;
+  char string_options[1024] = {0};
 
   // initialize SvcContext with parameters that will be passed to vpx_svc_init
   svc_ctx->log_level = SVC_LOG_DEBUG;
@@ -169,9 +170,11 @@ static void parse_command_line(int argc, const char **argv_,
       enc_cfg->kf_min_dist = arg_parse_uint(&arg);
       enc_cfg->kf_max_dist = enc_cfg->kf_min_dist;
     } else if (arg_match(&arg, &scale_factors_arg, argi)) {
-      vpx_svc_set_scale_factors(svc_ctx, arg.val);
+      snprintf(string_options, 1024, "%s scale-factors=%s",
+               string_options, arg.val);
     } else if (arg_match(&arg, &quantizers_arg, argi)) {
-      vpx_svc_set_quantizers(svc_ctx, arg.val);
+      snprintf(string_options, 1024, "%s quantizers=%s",
+                     string_options, arg.val);
     } else if (arg_match(&arg, &passes_arg, argi)) {
       passes = arg_parse_uint(&arg);
       if (passes < 1 || passes > 2) {
@@ -196,6 +199,10 @@ static void parse_command_line(int argc, const char **argv_,
       ++argj;
     }
   }
+
+  // There will be a space in front of the string options
+  if (strlen(string_options) > 0)
+    vpx_svc_set_options(svc_ctx, string_options + 1);
 
   if (passes == 0 || passes == 1) {
     if (pass) {

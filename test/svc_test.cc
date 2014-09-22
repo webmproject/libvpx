@@ -399,11 +399,6 @@ TEST_F(SvcTest, SvcInit) {
 
 TEST_F(SvcTest, InitTwoLayers) {
   svc_.spatial_layers = 2;
-  vpx_svc_set_scale_factors(&svc_, "4/16,16*16");  // invalid scale values
-  vpx_codec_err_t res = vpx_svc_init(&svc_, &codec_, codec_iface_, &codec_enc_);
-  EXPECT_EQ(VPX_CODEC_INVALID_PARAM, res);
-
-  vpx_svc_set_scale_factors(&svc_, "4/16,16/16");  // valid scale values
   InitializeEncoder();
 }
 
@@ -440,6 +435,16 @@ TEST_F(SvcTest, SetScaleFactorsOption) {
   res = vpx_svc_init(&svc_, &codec_, vpx_codec_vp9_cx(), &codec_enc_);
   EXPECT_EQ(VPX_CODEC_INVALID_PARAM, res);
 
+  res = vpx_svc_set_options(&svc_, "scale-factors=1/3, 3*3");
+  EXPECT_EQ(VPX_CODEC_OK, res);
+  res = vpx_svc_init(&svc_, &codec_, vpx_codec_vp9_cx(), &codec_enc_);
+  EXPECT_EQ(VPX_CODEC_INVALID_PARAM, res);
+
+  res = vpx_svc_set_options(&svc_, "scale-factors=1/3");
+  EXPECT_EQ(VPX_CODEC_OK, res);
+  res = vpx_svc_init(&svc_, &codec_, vpx_codec_vp9_cx(), &codec_enc_);
+  EXPECT_EQ(VPX_CODEC_INVALID_PARAM, res);
+
   res = vpx_svc_set_options(&svc_, "scale-factors=1/3,2/3");
   EXPECT_EQ(VPX_CODEC_OK, res);
   InitializeEncoder();
@@ -448,6 +453,11 @@ TEST_F(SvcTest, SetScaleFactorsOption) {
 TEST_F(SvcTest, SetQuantizersOption) {
   svc_.spatial_layers = 2;
   vpx_codec_err_t res = vpx_svc_set_options(&svc_, "quantizers=not-quantizers");
+  EXPECT_EQ(VPX_CODEC_OK, res);
+  res = vpx_svc_init(&svc_, &codec_, vpx_codec_vp9_cx(), &codec_enc_);
+  EXPECT_EQ(VPX_CODEC_INVALID_PARAM, res);
+
+  res = vpx_svc_set_options(&svc_, "40");
   EXPECT_EQ(VPX_CODEC_OK, res);
   res = vpx_svc_init(&svc_, &codec_, vpx_codec_vp9_cx(), &codec_enc_);
   EXPECT_EQ(VPX_CODEC_INVALID_PARAM, res);
@@ -472,42 +482,6 @@ TEST_F(SvcTest, SetAutoAltRefOption) {
   InitializeEncoder();
 }
 
-TEST_F(SvcTest, SetQuantizers) {
-  vpx_codec_err_t res = vpx_svc_set_quantizers(NULL, "40,30");
-  EXPECT_EQ(VPX_CODEC_INVALID_PARAM, res);
-
-  res = vpx_svc_set_quantizers(&svc_, NULL);
-  EXPECT_EQ(VPX_CODEC_INVALID_PARAM, res);
-
-  svc_.spatial_layers = 2;
-  res = vpx_svc_set_quantizers(&svc_, "40");
-  EXPECT_EQ(VPX_CODEC_OK, res);
-  res = vpx_svc_init(&svc_, &codec_, vpx_codec_vp9_cx(), &codec_enc_);
-  EXPECT_EQ(VPX_CODEC_INVALID_PARAM, res);
-
-  res = vpx_svc_set_quantizers(&svc_, "40,30");
-  EXPECT_EQ(VPX_CODEC_OK, res);
-  InitializeEncoder();
-}
-
-TEST_F(SvcTest, SetScaleFactors) {
-  vpx_codec_err_t res = vpx_svc_set_scale_factors(NULL, "4/16,16/16");
-  EXPECT_EQ(VPX_CODEC_INVALID_PARAM, res);
-
-  res = vpx_svc_set_scale_factors(&svc_, NULL);
-  EXPECT_EQ(VPX_CODEC_INVALID_PARAM, res);
-
-  svc_.spatial_layers = 2;
-  res = vpx_svc_set_scale_factors(&svc_, "4/16");
-  EXPECT_EQ(VPX_CODEC_OK, res);
-  res = vpx_svc_init(&svc_, &codec_, vpx_codec_vp9_cx(), &codec_enc_);
-  EXPECT_EQ(VPX_CODEC_INVALID_PARAM, res);
-
-  res = vpx_svc_set_scale_factors(&svc_, "4/16,16/16");
-  EXPECT_EQ(VPX_CODEC_OK, res);
-  InitializeEncoder();
-}
-
 // Test that decoder can handle an SVC frame as the first frame in a sequence.
 TEST_F(SvcTest, OnePassEncodeOneFrame) {
   codec_enc_.g_pass = VPX_RC_ONE_PASS;
@@ -528,9 +502,7 @@ TEST_F(SvcTest, OnePassEncodeThreeFrames) {
 
 TEST_F(SvcTest, GetLayerResolution) {
   svc_.spatial_layers = 2;
-  vpx_svc_set_scale_factors(&svc_, "4/16,8/16");
-  vpx_svc_set_quantizers(&svc_, "40,30");
-
+  vpx_svc_set_options(&svc_, "scale-factors=4/16,8/16");
   InitializeEncoder();
 
   // ensure that requested layer is a valid layer
