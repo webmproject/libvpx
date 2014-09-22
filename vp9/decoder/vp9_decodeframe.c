@@ -1318,6 +1318,9 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
       }
     }
   }
+#if CONFIG_VP9_HIGH
+  get_frame_new_buffer(cm)->bit_depth = cm->bit_depth;
+#endif
   if (!cm->error_resilient_mode) {
     cm->refresh_frame_context = vp9_rb_read_bit(rb);
     cm->frame_parallel_decoding_mode = vp9_rb_read_bit(rb);

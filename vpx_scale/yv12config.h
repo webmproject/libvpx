@@ -53,6 +53,9 @@ typedef struct yv12_buffer_config {
 
   int corrupted;
   int flags;
+#if CONFIG_VP9_HIGH
+  int bit_depth;
+#endif
 } YV12_BUFFER_CONFIG;
 
 #define YV12_FLAG_HIGHBITDEPTH 1
