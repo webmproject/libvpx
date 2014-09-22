@@ -2472,11 +2472,6 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       *returnrate = INT_MAX;
       return;
     }
-    max_uv_tx_size = get_uv_tx_size_impl(xd->mi[0].src_mi->mbmi.tx_size, bsize,
-                                         pd[1].subsampling_x,
-                                         pd[1].subsampling_y);
-    rd_pick_intra_sbuv_mode(cpi, x, ctx, &rate_uv, &rate_uv_tokenonly,
-                            &dist_uv, &uv_skip, bsize, max_uv_tx_size);
   } else {
     y_skip = 0;
     if (rd_pick_intra_sub_8x8_y_mode(cpi, x, &rate_y, &rate_y_tokenonly,
@@ -2484,12 +2479,13 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       *returnrate = INT_MAX;
       return;
     }
-    max_uv_tx_size = get_uv_tx_size_impl(xd->mi[0].src_mi->mbmi.tx_size, bsize,
-                                         pd[1].subsampling_x,
-                                         pd[1].subsampling_y);
-    rd_pick_intra_sbuv_mode(cpi, x, ctx, &rate_uv, &rate_uv_tokenonly,
-                            &dist_uv, &uv_skip, BLOCK_8X8, max_uv_tx_size);
   }
+  max_uv_tx_size = get_uv_tx_size_impl(xd->mi[0].src_mi->mbmi.tx_size, bsize,
+                                       pd[1].subsampling_x,
+                                       pd[1].subsampling_y);
+  rd_pick_intra_sbuv_mode(cpi, x, ctx, &rate_uv, &rate_uv_tokenonly,
+                          &dist_uv, &uv_skip, MAX(BLOCK_8X8, bsize),
+                          max_uv_tx_size);
 
   if (y_skip && uv_skip) {
     *returnrate = rate_y + rate_uv - rate_y_tokenonly - rate_uv_tokenonly +
