@@ -22,7 +22,7 @@
 
 namespace {
 
-static const int kMaxDimension = 64;
+static const unsigned int kMaxDimension = 64;
 
 typedef void (*ConvolveFunc)(const uint8_t *src, ptrdiff_t src_stride,
                              uint8_t *dst, ptrdiff_t dst_stride,
