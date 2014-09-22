@@ -1280,6 +1280,10 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
         // case (normative).
         cm->color_space = BT_601;
         cm->subsampling_y = cm->subsampling_x = 1;
+        cm->bit_depth = VPX_BITS_8;
+#if CONFIG_VP9_HIGH
+        cm->use_high = 0;
+#endif
       }
 
       pbi->refresh_frame_flags = vp9_rb_read_literal(rb, REF_FRAMES);
