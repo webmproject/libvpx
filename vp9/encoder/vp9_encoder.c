@@ -2448,15 +2448,7 @@ int vp9_receive_raw_frame(VP9_COMP *cpi, unsigned int frame_flags,
 
   vpx_usec_timer_start(&timer);
 
-#if CONFIG_SPATIAL_SVC
-  if (is_two_pass_svc(cpi))
-    res = vp9_svc_lookahead_push(cpi, cpi->lookahead, sd, time_stamp, end_time,
-                                 frame_flags);
-  else
-#endif
-    res = vp9_lookahead_push(cpi->lookahead,
-                             sd, time_stamp, end_time, frame_flags);
-  if (res)
+  if (vp9_lookahead_push(cpi->lookahead, sd, time_stamp, end_time, frame_flags))
     res = -1;
   vpx_usec_timer_mark(&timer);
   cpi->time_receive_data += vpx_usec_timer_elapsed(&timer);
@@ -2585,11 +2577,12 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   MV_REFERENCE_FRAME ref_frame;
   int arf_src_index;
 
-  if (is_two_pass_svc(cpi) && oxcf->pass == 2) {
+  if (is_two_pass_svc(cpi)) {
 #if CONFIG_SPATIAL_SVC
-    vp9_svc_lookahead_peek(cpi, cpi->lookahead, 0, 1);
+    vp9_svc_start_frame(cpi);
 #endif
-    vp9_restore_layer_context(cpi);
+    if (oxcf->pass == 2)
+      vp9_restore_layer_context(cpi);
   }
 
   vpx_usec_timer_start(&cmptimer);
@@ -2608,13 +2601,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   if (arf_src_index) {
     assert(arf_src_index <= rc->frames_to_key);
 
-#if CONFIG_SPATIAL_SVC
-    if (is_two_pass_svc(cpi))
-      source = vp9_svc_lookahead_peek(cpi, cpi->lookahead, arf_src_index, 0);
-    else
-#endif
-      source = vp9_lookahead_peek(cpi->lookahead, arf_src_index);
-    if (source != NULL) {
+    if ((source = vp9_lookahead_peek(cpi->lookahead, arf_src_index)) != NULL) {
       cpi->alt_ref_source = source;
 
 #if CONFIG_SPATIAL_SVC
@@ -2652,13 +2639,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   if (!source) {
     // Get last frame source.
     if (cm->current_video_frame > 0) {
-#if CONFIG_SPATIAL_SVC
-      if (is_two_pass_svc(cpi))
-        last_source = vp9_svc_lookahead_peek(cpi, cpi->lookahead, -1, 0);
-      else
-#endif
-        last_source = vp9_lookahead_peek(cpi->lookahead, -1);
-      if (last_source == NULL)
+      if ((last_source = vp9_lookahead_peek(cpi->lookahead, -1)) == NULL)
         return -1;
     }
 
@@ -2918,6 +2899,12 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   }
 
 #endif
+
+  if (is_two_pass_svc(cpi) && cm->show_frame) {
+    ++cpi->svc.spatial_layer_to_encode;
+    if (cpi->svc.spatial_layer_to_encode >= cpi->svc.number_spatial_layers)
+      cpi->svc.spatial_layer_to_encode = 0;
+  }
   return 0;
 }
 

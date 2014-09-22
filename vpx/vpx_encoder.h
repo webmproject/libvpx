@@ -711,6 +711,18 @@ extern "C" {
     unsigned int           ts_layer_id[VPX_TS_MAX_PERIODICITY];
   } vpx_codec_enc_cfg_t; /**< alias for struct vpx_codec_enc_cfg */
 
+  /*!\brief  vp9 svc extra configure parameters
+   *
+   * This defines max/min quantizers and scale factors for each layer
+   *
+   */
+  typedef struct vpx_svc_parameters {
+    int max_quantizers[VPX_SS_MAX_LAYERS];
+    int min_quantizers[VPX_SS_MAX_LAYERS];
+    int scaling_factor_num[VPX_SS_MAX_LAYERS];
+    int scaling_factor_den[VPX_SS_MAX_LAYERS];
+  } vpx_svc_extra_cfg_t;
+
 
   /*!\brief Initialize an encoder instance
    *
