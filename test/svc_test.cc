@@ -452,17 +452,32 @@ TEST_F(SvcTest, SetScaleFactorsOption) {
 
 TEST_F(SvcTest, SetQuantizersOption) {
   svc_.spatial_layers = 2;
-  vpx_codec_err_t res = vpx_svc_set_options(&svc_, "quantizers=not-quantizers");
+  vpx_codec_err_t res = vpx_svc_set_options(&svc_, "max-quantizers=nothing");
   EXPECT_EQ(VPX_CODEC_OK, res);
   res = vpx_svc_init(&svc_, &codec_, vpx_codec_vp9_cx(), &codec_enc_);
   EXPECT_EQ(VPX_CODEC_INVALID_PARAM, res);
 
-  res = vpx_svc_set_options(&svc_, "40");
+  res = vpx_svc_set_options(&svc_, "min-quantizers=nothing");
   EXPECT_EQ(VPX_CODEC_OK, res);
   res = vpx_svc_init(&svc_, &codec_, vpx_codec_vp9_cx(), &codec_enc_);
   EXPECT_EQ(VPX_CODEC_INVALID_PARAM, res);
 
-  vpx_svc_set_options(&svc_, "quantizers=40,45");
+  res = vpx_svc_set_options(&svc_, "max-quantizers=40");
+  EXPECT_EQ(VPX_CODEC_OK, res);
+  res = vpx_svc_init(&svc_, &codec_, vpx_codec_vp9_cx(), &codec_enc_);
+  EXPECT_EQ(VPX_CODEC_INVALID_PARAM, res);
+
+  res = vpx_svc_set_options(&svc_, "min-quantizers=40");
+  EXPECT_EQ(VPX_CODEC_OK, res);
+  res = vpx_svc_init(&svc_, &codec_, vpx_codec_vp9_cx(), &codec_enc_);
+  EXPECT_EQ(VPX_CODEC_INVALID_PARAM, res);
+
+  res = vpx_svc_set_options(&svc_, "max-quantizers=30,30 min-quantizers=40,40");
+  EXPECT_EQ(VPX_CODEC_OK, res);
+  res = vpx_svc_init(&svc_, &codec_, vpx_codec_vp9_cx(), &codec_enc_);
+  EXPECT_EQ(VPX_CODEC_INVALID_PARAM, res);
+
+  res = vpx_svc_set_options(&svc_, "max-quantizers=40,40 min-quantizers=30,30");
   InitializeEncoder();
 }
 
