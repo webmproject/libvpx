@@ -1,0 +1,208 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//V3g\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1421,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-23T23:51:13Z",
+      "side": 1,
+      "message": "// CONFIG_VP9_HIGHBITDEPTH",
+      "revId": "0f03095ff84eb5f145b4db2fcf19ad5b11c8df51",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//V3c\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1461,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-23T23:51:13Z",
+      "side": 1,
+      "message": "// CONFIG_VP9_HIGHBITDEPTH",
+      "revId": "0f03095ff84eb5f145b4db2fcf19ad5b11c8df51",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//V3Y\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1502,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-23T23:51:13Z",
+      "side": 1,
+      "message": "// CONFIG_VP9_HIGHBITDEPTH",
+      "revId": "0f03095ff84eb5f145b4db2fcf19ad5b11c8df51",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//V3Q\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1678,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-23T23:51:13Z",
+      "side": 1,
+      "message": "// CONFIG_VP9_HIGHBITDEPTH",
+      "revId": "0f03095ff84eb5f145b4db2fcf19ad5b11c8df51",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//V3M\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2047,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-23T23:51:13Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "0f03095ff84eb5f145b4db2fcf19ad5b11c8df51",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//V3I\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 536,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-23T23:51:13Z",
+      "side": 1,
+      "message": "bring everything after \u0027\u003d\u0027 down a line",
+      "revId": "0f03095ff84eb5f145b4db2fcf19ad5b11c8df51",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//V3E\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 539,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-23T23:51:13Z",
+      "side": 1,
+      "message": "I think the ternary operator use here is harder to read than a simple if/else after the block of declarations.",
+      "revId": "0f03095ff84eb5f145b4db2fcf19ad5b11c8df51",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//V3A\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 572,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-23T23:51:13Z",
+      "side": 1,
+      "message": "easier to read if we have \u0027filter[k] *\u0027 end the previous line, and just go with a 4 space indent (thus keeping input[...] on one line... I think it fits, anyway)",
+      "revId": "0f03095ff84eb5f145b4db2fcf19ad5b11c8df51",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//V28\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 587,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-23T23:51:13Z",
+      "side": 1,
+      "message": "wrap at \u0027filter[k] *\u0027... I think that cuts this to two lines, and helps make it a bit more readable.",
+      "revId": "0f03095ff84eb5f145b4db2fcf19ad5b11c8df51",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//V24\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 620,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-23T23:51:13Z",
+      "side": 1,
+      "message": "Does this need to be static?",
+      "revId": "0f03095ff84eb5f145b4db2fcf19ad5b11c8df51",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//V20\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 676,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-23T23:51:13Z",
+      "side": 1,
+      "message": "ditto re static",
+      "revId": "0f03095ff84eb5f145b4db2fcf19ad5b11c8df51",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//V2w\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 813,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-23T23:51:13Z",
+      "side": 1,
+      "message": "braces",
+      "revId": "0f03095ff84eb5f145b4db2fcf19ad5b11c8df51",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
