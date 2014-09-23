@@ -96,28 +96,24 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
     if (MIN(cm->width, cm->height) >= 720) {
       sf->disable_split_mask = DISABLE_ALL_SPLIT;
       sf->schedule_mode_search = cm->base_qindex < 220 ? 1 : 0;
+      sf->partition_search_breakout_dist_thr = (1 << 25);
     } else {
       sf->max_intra_bsize = BLOCK_32X32;
       sf->disable_split_mask = DISABLE_ALL_INTER_SPLIT;
       sf->schedule_mode_search = cm->base_qindex < 175 ? 1 : 0;
+      sf->partition_search_breakout_dist_thr = (1 << 23);
     }
     sf->adaptive_pred_interp_filter = 0;
     sf->adaptive_mode_search = 1;
     sf->cb_partition_search = !boosted;
     sf->cb_pred_filter_search = 1;
     sf->alt_ref_search_fp = 1;
-    sf->motion_field_mode_search = !boosted;
     sf->recode_loop = ALLOW_RECODE_KFMAXBW;
     sf->adaptive_rd_thresh = 3;
     sf->mode_skip_start = 6;
     sf->intra_y_mode_mask[TX_32X32] = INTRA_DC;
     sf->intra_uv_mode_mask[TX_32X32] = INTRA_DC;
     sf->adaptive_interp_filter_search = 1;
-
-    if (MIN(cm->width, cm->height) >= 720)
-      sf->partition_search_breakout_dist_thr = (1 << 25);
-    else
-      sf->partition_search_breakout_dist_thr = (1 << 23);
     sf->partition_search_breakout_rate_thr = 1000;
   }
 
@@ -133,6 +129,7 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
     sf->use_lp32x32fdct = 1;
     sf->use_fast_coef_updates = ONE_LOOP_REDUCED;
     sf->use_fast_coef_costing = 1;
+    sf->motion_field_mode_search = !boosted;
 
     if (MIN(cm->width, cm->height) >= 720)
       sf->partition_search_breakout_dist_thr = (1 << 26);

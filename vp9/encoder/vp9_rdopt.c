@@ -2510,24 +2510,23 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   ctx->mic = *xd->mi[0].src_mi;
 }
 
-// Updating rd_thresh_freq_fact[] here means that the different
-// partition/block sizes are handled independently based on the best
-// choice for the current partition. It may well be better to keep a scaled
-// best rd so far value and update rd_thresh_freq_fact based on the mode/size
-// combination that wins out.
 static void update_rd_thresh_fact(VP9_COMP *cpi, int bsize,
                                   int best_mode_index) {
   if (cpi->sf.adaptive_rd_thresh > 0) {
     const int top_mode = bsize < BLOCK_8X8 ? MAX_REFS : MAX_MODES;
     int mode;
     for (mode = 0; mode < top_mode; ++mode) {
-      int *const fact = &cpi->rd.thresh_freq_fact[bsize][mode];
-
-      if (mode == best_mode_index) {
-        *fact -= (*fact >> 3);
-      } else {
-        *fact = MIN(*fact + RD_THRESH_INC,
-                    cpi->sf.adaptive_rd_thresh * RD_THRESH_MAX_FACT);
+      const BLOCK_SIZE min_size = MAX(bsize - 1, BLOCK_4X4);
+      const BLOCK_SIZE max_size = MIN(bsize + 2, BLOCK_64X64);
+      BLOCK_SIZE bs;
+      for (bs = min_size; bs <= max_size; ++bs) {
+        int *const fact = &cpi->rd.thresh_freq_fact[bs][mode];
+        if (mode == best_mode_index) {
+          *fact -= (*fact >> 4);
+        } else {
+          *fact = MIN(*fact + RD_THRESH_INC,
+                      cpi->sf.adaptive_rd_thresh * RD_THRESH_MAX_FACT);
+        }
       }
     }
   }
