@@ -1,0 +1,276 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//V9w\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-23T18:12:06Z",
+      "side": 1,
+      "message": "Sigh-- This is my fault, because I should have noticed it much sooner: We should be doing vp9_highbitdepth instead of simply \"high\". Since fixing this is now a refactoring problem that I\u0027ve caused by missing it in earlier reviews I\u0027m happy to help deal with it.\n\nAnyway, throughout this patch:\n\n- s/high/vp9_highbitdepth/ in names when VP9 specific\n- s/high/highbitdepth/ when generic (i.e. could be moved out and shared with new codec versions)\n\nPassing nit: Any reason why we\u0027re not spelling out entire words in this function name?",
+      "revId": "9e3ea4c657fa3f661fe2e4917adbfea83814fb42",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//V9g\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 612,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-23T18:12:06Z",
+      "side": 1,
+      "message": "HIGHBITDEPTH",
+      "revId": "9e3ea4c657fa3f661fe2e4917adbfea83814fb42",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//V9s\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 620,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-23T18:12:06Z",
+      "side": 1,
+      "message": "Get rid of the extra horizontal space",
+      "revId": "9e3ea4c657fa3f661fe2e4917adbfea83814fb42",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//V9o\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 683,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-23T18:12:06Z",
+      "side": 1,
+      "message": "+2 indent",
+      "revId": "9e3ea4c657fa3f661fe2e4917adbfea83814fb42",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//V9k\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 693,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-23T18:12:06Z",
+      "side": 1,
+      "message": "ditto, for all of the fnname##\u0027s",
+      "revId": "9e3ea4c657fa3f661fe2e4917adbfea83814fb42",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//V9c\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 814,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-23T18:12:06Z",
+      "side": 1,
+      "message": "pedantry: I would break after the BLOCK_, and keep the NULL args on their own line.",
+      "revId": "9e3ea4c657fa3f661fe2e4917adbfea83814fb42",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//V9Y\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1138,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-23T18:12:06Z",
+      "side": 1,
+      "message": "Add a newline here, or get rid of the one before the preceding breaks.",
+      "revId": "9e3ea4c657fa3f661fe2e4917adbfea83814fb42",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//V9U\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1887,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-23T18:12:06Z",
+      "side": 1,
+      "message": "remove extra spaces",
+      "revId": "9e3ea4c657fa3f661fe2e4917adbfea83814fb42",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//V9Q\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1892,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-23T18:12:06Z",
+      "side": 1,
+      "message": "const",
+      "revId": "9e3ea4c657fa3f661fe2e4917adbfea83814fb42",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//V9M\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2074,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-23T18:12:06Z",
+      "side": 1,
+      "message": "What\u0027s CONFIG_VP9_HIGH? Has this been compiled since the change to HIGHBITDEPTH? :)\n\nAlso, // CONFIG_VP9_HIGHBITDEPTH",
+      "revId": "9e3ea4c657fa3f661fe2e4917adbfea83814fb42",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//V9I\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2524,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-23T18:12:06Z",
+      "side": 1,
+      "message": "braces",
+      "revId": "9e3ea4c657fa3f661fe2e4917adbfea83814fb42",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//V9A\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3618,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-23T18:12:06Z",
+      "side": 1,
+      "message": "more pedantry: can probably make this 2 lines instead of 3",
+      "revId": "9e3ea4c657fa3f661fe2e4917adbfea83814fb42",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//V88\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3634,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-23T18:12:06Z",
+      "side": 1,
+      "message": "ditto, above pedantry, but 2 vs 4",
+      "revId": "9e3ea4c657fa3f661fe2e4917adbfea83814fb42",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//V84\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3812,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-23T18:12:06Z",
+      "side": 1,
+      "message": "highbitdepth",
+      "revId": "9e3ea4c657fa3f661fe2e4917adbfea83814fb42",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//V8o\u003d",
+        "filename": "vp9/encoder/vp9_ssim.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-23T18:12:06Z",
+      "side": 1,
+      "message": "one shift per line would be more readable",
+      "revId": "9e3ea4c657fa3f661fe2e4917adbfea83814fb42",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//V8k\u003d",
+        "filename": "vp9/encoder/vp9_ssim.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-23T18:12:06Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "9e3ea4c657fa3f661fe2e4917adbfea83814fb42",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
