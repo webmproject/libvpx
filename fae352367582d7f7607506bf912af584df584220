@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//V60\u003d",
+        "filename": "test/lpf_8_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-23T21:37:13Z",
+      "side": 1,
+      "message": "Drop this new line",
+      "revId": "fae352367582d7f7607506bf912af584df584220",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
