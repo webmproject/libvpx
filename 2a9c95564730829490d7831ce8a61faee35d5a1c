@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAdn//Vps\u003d",
+        "filename": "vp8/common/arm/neon/loopfiltersimpleverticaledge_neon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-09-24T22:58:25Z",
+      "side": 1,
+      "message": "Also an ice. The error message reports on a later line, but switching the VPX_INCOMPATIBLE_GCC on and off triggers it:\nerror: insn does not satisfy its constraints:\n(insn 691 663 11 2 (set (reg:OI 75 s12 [orig:176 D.12978 ] [176])\n        (mem/s/c:OI (pre_dec:SI (reg/f:SI 3 r3 [728])) [0 MEM[(struct uint8x8x4_t *)\u0026d1u8x4].__o+0 S32 A64])) /usr/local/google/home/johannkoenig/android-ndk-r9d/toolchains/arm-linux-androideabi-4.6/prebuilt/linux-x86_64/bin/../lib/gcc/arm-linux-androideabi/4.6/include/arm_neon.h:9944 751 {*neon_movoi}\n     (expr_list:REG_INC (reg/f:SI 3 r3 [728])\n        (nil)))\n/home/johannkoenig/on2/REFwebm/vp8/common/arm/neon/loopfiltersimpleverticaledge_neon.c:275:1: internal compiler error: in reload_cse_simplify_operands, at postreload.c:403",
+      "revId": "2a9c95564730829490d7831ce8a61faee35d5a1c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//VrE\u003d",
         "filename": "vpx_ports/arm.h",
         "patchSetId": 5

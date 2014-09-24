@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//VqU\u003d",
+        "filename": "vp8/common/arm/neon/loopfilter_neon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-09-24T22:58:25Z",
+      "side": 0,
+      "message": "This was the code that crashed and it has been removed entirely. It crashed with later versions of the compiler as well, but it appears it only affected some devices (which may have unaligned access disabled for some reason?)",
+      "revId": "7feede986917eca0ab18ba72be1502a88abc54ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
