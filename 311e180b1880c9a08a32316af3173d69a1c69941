@@ -1,0 +1,378 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Vv0\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-24T19:22:23Z",
+      "side": 1,
+      "message": "Both defaults could use a return to handle the NDEBUG case.",
+      "revId": "311e180b1880c9a08a32316af3173d69a1c69941",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Vvw\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-24T19:22:23Z",
+      "side": 1,
+      "message": "if/else... nested ternary is evil.",
+      "revId": "311e180b1880c9a08a32316af3173d69a1c69941",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Vvs\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-24T19:22:23Z",
+      "side": 1,
+      "message": "+2 indent in these blocks",
+      "revId": "311e180b1880c9a08a32316af3173d69a1c69941",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Vvo\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-24T19:22:23Z",
+      "side": 1,
+      "message": "default to bottom, please",
+      "revId": "311e180b1880c9a08a32316af3173d69a1c69941",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Vvk\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 494,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-24T19:22:23Z",
+      "side": 1,
+      "message": "ditto/default",
+      "revId": "311e180b1880c9a08a32316af3173d69a1c69941",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//VvY\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 818,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-24T19:22:23Z",
+      "side": 1,
+      "message": "break both above at \u0027\u003d\u0027",
+      "revId": "311e180b1880c9a08a32316af3173d69a1c69941",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Vvc\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 822,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-24T19:22:23Z",
+      "side": 1,
+      "message": "this fits on one line",
+      "revId": "311e180b1880c9a08a32316af3173d69a1c69941",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//VvA\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 931,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-24T19:22:23Z",
+      "side": 1,
+      "message": "return/NDEBUG\n\nNot sure if it\u0027s safe to fall through and deref eob...",
+      "revId": "311e180b1880c9a08a32316af3173d69a1c69941",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Vu8\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 271,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-24T19:22:23Z",
+      "side": 1,
+      "message": "One arithmetic/pointer op per line, please",
+      "revId": "311e180b1880c9a08a32316af3173d69a1c69941",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Vu4\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 325,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-24T19:22:23Z",
+      "side": 1,
+      "message": "might as well add \u0026\u0026 shift \u003e 0 and get rid of the extra if",
+      "revId": "311e180b1880c9a08a32316af3173d69a1c69941",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Vu0\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 338,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-24T19:22:23Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "311e180b1880c9a08a32316af3173d69a1c69941",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Vuk\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 796,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-24T19:22:23Z",
+      "side": 1,
+      "message": "Does this really need to be a goto? Seems like it could be \n\n    if (... \u003c best_rd) {\n        vp9_high_iwht4x4_add(...);\n    }",
+      "revId": "311e180b1880c9a08a32316af3173d69a1c69941",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//VuM\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 809,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-24T19:22:23Z",
+      "side": 1,
+      "message": "align",
+      "revId": "311e180b1880c9a08a32316af3173d69a1c69941",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//VuE\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 811,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-24T19:22:23Z",
+      "side": 1,
+      "message": "Might be more readable this way:\n\n                vp9_high_block_error(coeff,\n                                     BLOCK_OFFSET(pd-\u003edqcoeff, block), \n                                     16, \u0026unused, xd-\u003ebd) \u003e\u003e 2;",
+      "revId": "311e180b1880c9a08a32316af3173d69a1c69941",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Vug\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 814,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-24T19:22:23Z",
+      "side": 1,
+      "message": "ditto, re goto",
+      "revId": "311e180b1880c9a08a32316af3173d69a1c69941",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Vuc\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 821,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-24T19:22:23Z",
+      "side": 1,
+      "message": "still going on about the goto: This section would then need to be protected...",
+      "revId": "311e180b1880c9a08a32316af3173d69a1c69941",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//VuQ\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 832,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-24T19:22:23Z",
+      "side": 1,
+      "message": "braces",
+      "revId": "311e180b1880c9a08a32316af3173d69a1c69941",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//VuY\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 836,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-24T19:22:23Z",
+      "side": 1,
+      "message": "last bit about the goto: But we wouldn\u0027t have this odd looking bit.",
+      "revId": "311e180b1880c9a08a32316af3173d69a1c69941",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//VuU\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 843,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-24T19:22:23Z",
+      "side": 1,
+      "message": "braces",
+      "revId": "311e180b1880c9a08a32316af3173d69a1c69941",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//VuA\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1312,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-24T19:22:23Z",
+      "side": 1,
+      "message": "align",
+      "revId": "311e180b1880c9a08a32316af3173d69a1c69941",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Vt8\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1344,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-24T19:22:23Z",
+      "side": 1,
+      "message": "Ditto, but this one fits aligned with the \u0027(\u0027 as-is.",
+      "revId": "311e180b1880c9a08a32316af3173d69a1c69941",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Vt4\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2213,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-24T19:22:23Z",
+      "side": 1,
+      "message": "align these",
+      "revId": "311e180b1880c9a08a32316af3173d69a1c69941",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
