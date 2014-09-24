@@ -247,6 +247,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//V0I\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 539,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-24T01:12:34Z",
+      "side": 1,
+      "message": "ok, but it sucks for readability there too.",
+      "parentUuid": "AAAAdn//V1s\u003d",
+      "revId": "0f03095ff84eb5f145b4db2fcf19ad5b11c8df51",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//V3A\u003d",
         "filename": "vp9/encoder/vp9_resize.c",
         "patchSetId": 2
@@ -311,6 +329,24 @@
       "side": 1,
       "message": "you cannot really cut to 2 lines here.",
       "parentUuid": "AAAAdn//V28\u003d",
+      "revId": "0f03095ff84eb5f145b4db2fcf19ad5b11c8df51",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//V0E\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 587,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-24T01:12:34Z",
+      "side": 1,
+      "message": "Eyeballing line length on a gbus is hard. ;)",
+      "parentUuid": "AAAAdn//V1g\u003d",
       "revId": "0f03095ff84eb5f145b4db2fcf19ad5b11c8df51",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
