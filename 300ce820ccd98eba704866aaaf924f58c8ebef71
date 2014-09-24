@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//VtA\u003d",
+        "filename": "vp8/common/arm/neon/loopfilter_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-24T20:04:47Z",
+      "side": 1,
+      "message": "the ()s are unnecessary here. put the negative condition first",
+      "revId": "300ce820ccd98eba704866aaaf924f58c8ebef71",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//VtE\u003d",
+        "filename": "vp8/common/arm/neon/loopfilter_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-24T20:04:47Z",
+      "side": 1,
+      "message": "inner ()s are unnecessary and you should probably do \u003c\u003d 6 to be safe",
+      "revId": "300ce820ccd98eba704866aaaf924f58c8ebef71",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Vs8\u003d",
+        "filename": "vp8/common/arm/neon/loopfiltersimpleverticaledge_neon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-24T20:04:47Z",
+      "side": 1,
+      "message": "can you gather this somewhere to a WORKAROUND_GCC_BUG or similar define?",
+      "revId": "300ce820ccd98eba704866aaaf924f58c8ebef71",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
