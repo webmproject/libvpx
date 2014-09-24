@@ -484,6 +484,52 @@ static INLINE int is_mv_in(const MACROBLOCK *x, const MV *mv) {
 #define MAX_PATTERN_CANDIDATES      8  // max number of canddiates per scale
 #define PATTERN_CANDIDATES_REF      3  // number of refinement candidates
 
+// Calculate and return a sad+mvcost list around an integer best pel.
+static INLINE void calc_int_sad_cost_list(MACROBLOCK *x,
+                                          const MV *ref_mv,
+                                          int sadpb,
+                                          const vp9_variance_fn_ptr_t *fn_ptr,
+                                          const MV *best_mv,
+                                          int *cost_list) {
+  static const MV neighbors[4] = {{0, -1}, {1, 0}, {0, 1}, {-1, 0}};
+  const struct buf_2d *const what = &x->plane[0].src;
+  const struct buf_2d *const in_what = &x->e_mbd.plane[0].pre[0];
+  const MV fcenter_mv = {ref_mv->row >> 3, ref_mv->col >> 3};
+  int br = best_mv->row;
+  int bc = best_mv->col;
+  MV this_mv;
+  int i;
+
+  this_mv.row = br;
+  this_mv.col = bc;
+  cost_list[0] = fn_ptr->sdf(what->buf, what->stride,
+                             get_buf_from_mv(in_what, &this_mv),
+                             in_what->stride) +
+      mvsad_err_cost(x, &this_mv, &fcenter_mv, sadpb);
+  if (check_bounds(x, br, bc, 1)) {
+    for (i = 0; i < 4; i++) {
+      const MV this_mv = {br + neighbors[i].row,
+        bc + neighbors[i].col};
+      cost_list[i + 1] = fn_ptr->sdf(what->buf, what->stride,
+                                     get_buf_from_mv(in_what, &this_mv),
+                                     in_what->stride) +
+          mvsad_err_cost(x, &this_mv, &fcenter_mv, sadpb);
+    }
+  } else {
+    for (i = 0; i < 4; i++) {
+      const MV this_mv = {br + neighbors[i].row,
+        bc + neighbors[i].col};
+      if (!is_mv_in(x, &this_mv))
+        cost_list[i + 1] = INT_MAX;
+      else
+        cost_list[i + 1] = fn_ptr->sdf(what->buf, what->stride,
+                                       get_buf_from_mv(in_what, &this_mv),
+                                       in_what->stride) +
+            mvsad_err_cost(x, &this_mv, &fcenter_mv, sadpb);
+    }
+  }
+}
+
 // Generic pattern search function that searches over multiple scales.
 // Each scale can have a different number of candidates and shape of
 // candidates as indicated in the num_candidates and candidates arrays
@@ -1378,10 +1424,10 @@ int vp9_diamond_search_sad_c(const MACROBLOCK *x,
 /* do_refine: If last step (1-away) of n-step search doesn't pick the center
               point as the best match, we will do a final 1-away diamond
               refining search  */
-
 int vp9_full_pixel_diamond(const VP9_COMP *cpi, MACROBLOCK *x,
                            MV *mvp_full, int step_param,
                            int sadpb, int further_steps, int do_refine,
+                           int *cost_list,
                            const vp9_variance_fn_ptr_t *fn_ptr,
                            const MV *ref_mv, MV *dst_mv) {
   MV temp_mv;
@@ -1433,6 +1479,11 @@ int vp9_full_pixel_diamond(const VP9_COMP *cpi, MACROBLOCK *x,
       bestsme = thissme;
       *dst_mv = best_mv;
     }
+  }
+
+  // Return cost list.
+  if (cost_list) {
+    calc_int_sad_cost_list(x, ref_mv, sadpb, fn_ptr, dst_mv, cost_list);
   }
   return bestsme;
 }
@@ -1792,7 +1843,7 @@ int vp9_full_pixel_search(VP9_COMP *cpi, MACROBLOCK *x,
     case NSTEP:
       var = vp9_full_pixel_diamond(cpi, x, mvp_full, step_param, error_per_bit,
                                    MAX_MVSEARCH_STEPS - 1 - step_param,
-                                   1, fn_ptr, ref_mv, tmp_mv);
+                                   1, sad_list, fn_ptr, ref_mv, tmp_mv);
       break;
     default:
       assert(!"Invalid search method.");
