@@ -93,6 +93,7 @@ ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_high_intrapred_sse2.asm
 VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_high_subpixel_8t_sse2.asm
 VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_high_subpixel_bilinear_sse2.asm
+VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_high_loopfilter_intrin_sse2.c
 endif
 
 # common (c)
