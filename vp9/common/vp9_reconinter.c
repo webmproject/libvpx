@@ -385,12 +385,6 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
                ? average_split_mvs(pd, mi, ref, block)
                : mi->mbmi.mv[ref].as_mv;
 
-
-    // TODO(jkoleszar): This clamping is done in the incorrect place for the
-    // scaling case. It needs to be done on the scaled MV, not the pre-scaling
-    // MV. Note however that it performs the subsampling aware scaling so
-    // that the result is always q4.
-    // mv_precision precision is MV_PRECISION_Q4.
     const MV mv_q4 = clamp_mv_to_umv_border_sb(xd, &mv, bw, bh,
                                                pd->subsampling_x,
                                                pd->subsampling_y);
@@ -451,7 +445,8 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
     subpel_x = scaled_mv.col & SUBPEL_MASK;
     subpel_y = scaled_mv.row & SUBPEL_MASK;
 
-    // Calculate the top left corner of the best matching block in the reference frame.
+    // Calculate the top left corner of the best matching block in the
+    // reference frame.
     x0 += scaled_mv.col >> SUBPEL_BITS;
     y0 += scaled_mv.row >> SUBPEL_BITS;
     x0_16 += scaled_mv.col;
