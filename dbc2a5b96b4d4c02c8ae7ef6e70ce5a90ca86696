@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Vv8\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-24T18:15:55Z",
+      "side": 1,
+      "message": "you should state what it fixes in the subject and then in the body note it \u0027fixes issue...\u0027",
+      "revId": "dbc2a5b96b4d4c02c8ae7ef6e70ce5a90ca86696",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
