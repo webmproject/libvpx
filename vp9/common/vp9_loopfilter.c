@@ -1155,8 +1155,8 @@ static void filter_block_plane_non420(VP9_COMMON *cm,
                                       int mi_row, int mi_col) {
   const int ss_x = plane->subsampling_x;
   const int ss_y = plane->subsampling_y;
-  const int row_step = 1 << ss_x;
-  const int col_step = 1 << ss_y;
+  const int row_step = 1 << ss_y;
+  const int col_step = 1 << ss_x;
   const int row_step_stride = cm->mi_stride * row_step;
   struct buf_2d *const dst = &plane->dst;
   uint8_t* const dst0 = dst->buf;
