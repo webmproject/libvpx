@@ -155,7 +155,7 @@ int vp9_compute_rd_mult(const VP9_COMP *cpi, int qindex) {
   }
 #else
   int rdmult = 88 * q * q / 24;
-#endif
+#endif  // CONFIG_VP9_HIGHBITDEPTH
   if (cpi->oxcf.pass == 2 && (cpi->common.frame_type != KEY_FRAME)) {
     const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
     const FRAME_UPDATE_TYPE frame_type = gf_group->update_type[gf_group->index];
@@ -187,7 +187,7 @@ static int compute_rd_thresh_factor(int qindex, vpx_bit_depth_t bit_depth) {
 #else
   (void) bit_depth;
   q = vp9_dc_quant(qindex, 0, VPX_BITS_8) / 4.0;
-#endif
+#endif  // CONFIG_VP9_HIGHBITDEPTH
   // TODO(debargha): Adjust the function below.
   return MAX((int)(pow(q, RD_THRESH_POW) * 5.12), 8);
 }
@@ -213,7 +213,7 @@ void vp9_initialize_me_consts(VP9_COMP *cpi, int qindex) {
 #else
   cpi->mb.sadperbit16 = sad_per_bit16lut_8[qindex];
   cpi->mb.sadperbit4 = sad_per_bit4lut_8[qindex];
-#endif
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 }
 
 static void set_block_thresholds(const VP9_COMMON *cm, RD_OPT *rd) {
@@ -598,3 +598,24 @@ void vp9_set_rd_speed_thresholds_sub8x8(VP9_COMP *cpi) {
     if (sf->disable_split_mask & (1 << i))
       rd->thresh_mult_sub8x8[i] = INT_MAX;
 }
+
+int vp9_get_intra_cost_penalty(int qindex, int qdelta,
+                               vpx_bit_depth_t bit_depth) {
+  const int q = vp9_dc_quant(qindex, qdelta, bit_depth);
+#if CONFIG_VP9_HIGHBITDEPTH
+  switch (bit_depth) {
+    case VPX_BITS_8:
+      return 20 * q;
+    case VPX_BITS_10:
+      return 5 * q;
+    case VPX_BITS_12:
+      return ROUND_POWER_OF_TWO(5 * q, 2);
+    default:
+      assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10 or VPX_BITS_12");
+      return -1;
+  }
+#else
+  return 20 * q;
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+}
+

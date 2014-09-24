@@ -228,9 +228,13 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
     // Fast approximate the modelling function.
     if (cpi->oxcf.speed > 4) {
       int64_t rate;
-      int64_t dist;
       int64_t square_error = sse;
       int quantizer = (pd->dequant[1] >> 3);
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+        quantizer >>= (xd->bd - 8);
+      }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
       if (quantizer < 120)
         rate = (square_error * (280 - quantizer)) >> 8;
@@ -240,8 +244,19 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
       rate_sum += rate;
       dist_sum += dist;
     } else {
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+        vp9_model_rd_from_var_lapndz(sse, 1 << num_pels_log2_lookup[bs],
+                                     pd->dequant[1] >> (xd->bd - 5),
+                                     &rate, &dist);
+      } else {
+        vp9_model_rd_from_var_lapndz(sse, 1 << num_pels_log2_lookup[bs],
+                                     pd->dequant[1] >> 3, &rate, &dist);
+      }
+#else
       vp9_model_rd_from_var_lapndz(sum_sse, 1 << num_pels_log2_lookup[bs],
                                    pd->dequant[1] >> 3, &rate, &dist);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
       rate_sum += rate;
       dist_sum += dist;
     }
@@ -265,6 +280,31 @@ int64_t vp9_block_error_c(const tran_low_t *coeff, const tran_low_t *dqcoeff,
   *ssz = sqcoeff;
   return error;
 }
+
+
+#if CONFIG_VP9_HIGHBITDEPTH
+int64_t vp9_high_block_error_c(const tran_low_t *coeff,
+                               const tran_low_t *dqcoeff,
+                               intptr_t block_size,
+                               int64_t *ssz, int bd) {
+  int i;
+  int64_t error = 0, sqcoeff = 0;
+  int shift = 2 * (bd - 8);
+  int rounding = shift > 0 ? 1 << (shift - 1) : 0;
+
+  for (i = 0; i < block_size; i++) {
+    const int64_t diff = coeff[i] - dqcoeff[i];
+    error +=  diff * diff;
+    sqcoeff += (int64_t)coeff[i] * (int64_t)coeff[i];
+  }
+  assert(error >= 0 && sqcoeff >= 0);
+  error = (error + rounding) >> shift;
+  sqcoeff = (sqcoeff + rounding) >> shift;
+
+  *ssz = sqcoeff;
+  return error;
+}
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 /* The trailing '0' is a terminator which is used inside cost_coeffs() to
  * decide whether to include cost of a trailing EOB node or not (i.e. we
@@ -351,8 +391,14 @@ static INLINE int cost_coeffs(MACROBLOCK *x,
 
   return cost;
 }
+
+#if CONFIG_VP9_HIGHBITDEPTH
+static void dist_block(int plane, int block, TX_SIZE tx_size,
+                       struct rdcost_block_args* args, int bd) {
+#else
 static void dist_block(int plane, int block, TX_SIZE tx_size,
                        struct rdcost_block_args* args) {
+#endif  // CONFIG_VP9_HIGHBITDEPTH
   const int ss_txfrm_size = tx_size << 1;
   MACROBLOCK* const x = args->x;
   MACROBLOCKD* const xd = &x->e_mbd;
@@ -362,14 +408,24 @@ static void dist_block(int plane, int block, TX_SIZE tx_size,
   int shift = tx_size == TX_32X32 ? 0 : 2;
   tran_low_t *const coeff = BLOCK_OFFSET(p->coeff, block);
   tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
+#if CONFIG_VP9_HIGHBITDEPTH
+  args->dist = vp9_high_block_error(coeff, dqcoeff, 16 << ss_txfrm_size,
+                                    &this_sse, bd) >> shift;
+#else
   args->dist = vp9_block_error(coeff, dqcoeff, 16 << ss_txfrm_size,
                                &this_sse) >> shift;
+#endif  // CONFIG_VP9_HIGHBITDEPTH
   args->sse  = this_sse >> shift;
 
   if (x->skip_encode && !is_inter_block(&xd->mi[0].src_mi->mbmi)) {
     // TODO(jingning): tune the model to better capture the distortion.
     int64_t p = (pd->dequant[1] * pd->dequant[1] *
                     (1 << ss_txfrm_size)) >> (shift + 2);
+#if CONFIG_VP9_HIGHBITDEPTH
+    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+      p >>= ((xd->bd - 8) * 2);
+    }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
     args->dist += (p >> 4);
     args->sse  += p;
   }
@@ -399,12 +455,28 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
 
   if (!is_inter_block(mbmi)) {
     vp9_encode_block_intra(x, plane, block, plane_bsize, tx_size, &mbmi->skip);
+#if CONFIG_VP9_HIGHBITDEPTH
+    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+      dist_block(plane, block, tx_size, args, xd->bd);
+    } else {
+      dist_block(plane, block, tx_size, args, 8);
+    }
+#else
     dist_block(plane, block, tx_size, args);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
   } else if (max_txsize_lookup[plane_bsize] == tx_size) {
     if (x->skip_txfm[(plane << 2) + (block >> (tx_size << 1))] == 0) {
       // full forward transform and quantization
       vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+        dist_block(plane, block, tx_size, args, xd->bd);
+      } else {
+        dist_block(plane, block, tx_size, args, 8);
+      }
+#else
       dist_block(plane, block, tx_size, args);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
     } else if (x->skip_txfm[(plane << 2) + (block >> (tx_size << 1))] == 2) {
       // compute DC coefficient
       tran_low_t *const coeff   = BLOCK_OFFSET(x->plane[plane].coeff, block);
@@ -424,7 +496,15 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
   } else {
     // full forward transform and quantization
     vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
+#if CONFIG_VP9_HIGHBITDEPTH
+    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+      dist_block(plane, block, tx_size, args, xd->bd);
+    } else {
+      dist_block(plane, block, tx_size, args, 8);
+    }
+#else
     dist_block(plane, block, tx_size, args);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
   }
 
   rate_block(plane, block, plane_bsize, tx_size, args);
@@ -659,12 +739,117 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
   const int num_4x4_blocks_high = num_4x4_blocks_high_lookup[bsize];
   int idx, idy;
   uint8_t best_dst[8 * 8];
+#if CONFIG_VP9_HIGHBITDEPTH
+  uint16_t best_dst16[8 * 8];
+#endif
 
   assert(ib < 4);
 
   vpx_memcpy(ta, a, sizeof(ta));
   vpx_memcpy(tl, l, sizeof(tl));
   xd->mi[0].src_mi->mbmi.tx_size = TX_4X4;
+
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+    for (mode = DC_PRED; mode <= TM_PRED; ++mode) {
+      int64_t this_rd;
+      int ratey = 0;
+      int64_t distortion = 0;
+      int rate = bmode_costs[mode];
+
+      if (!(cpi->sf.intra_y_mode_mask[TX_4X4] & (1 << mode)))
+        continue;
+
+      // Only do the oblique modes if the best so far is
+      // one of the neighboring directional modes
+      if (cpi->sf.mode_search_skip_flags & FLAG_SKIP_INTRA_DIRMISMATCH) {
+        if (conditional_skipintra(mode, *best_mode))
+            continue;
+      }
+
+      vpx_memcpy(tempa, ta, sizeof(ta));
+      vpx_memcpy(templ, tl, sizeof(tl));
+
+      for (idy = 0; idy < num_4x4_blocks_high; ++idy) {
+        for (idx = 0; idx < num_4x4_blocks_wide; ++idx) {
+          const int block = ib + idy * 2 + idx;
+          const uint8_t *const src = &src_init[idx * 4 + idy * 4 * src_stride];
+          uint8_t *const dst = &dst_init[idx * 4 + idy * 4 * dst_stride];
+          int16_t *const src_diff = raster_block_offset_int16(BLOCK_8X8, block,
+                                                              p->src_diff);
+          tran_low_t *const coeff = BLOCK_OFFSET(x->plane[0].coeff, block);
+          xd->mi[0].src_mi->bmi[block].as_mode = mode;
+          vp9_predict_intra_block(xd, block, 1,
+                                  TX_4X4, mode,
+                                  x->skip_encode ? src : dst,
+                                  x->skip_encode ? src_stride : dst_stride,
+                                  dst, dst_stride, idx, idy, 0);
+          vp9_high_subtract_block(4, 4, src_diff, 8, src, src_stride,
+                                  dst, dst_stride, xd->bd);
+          if (xd->lossless) {
+            const scan_order *so = &vp9_default_scan_orders[TX_4X4];
+            vp9_high_fwht4x4(src_diff, coeff, 8);
+            vp9_regular_quantize_b_4x4(x, 0, block, so->scan, so->iscan);
+            ratey += cost_coeffs(x, 0, block, tempa + idx, templ + idy, TX_4X4,
+                                 so->scan, so->neighbors,
+                                 cpi->sf.use_fast_coef_costing);
+            if (RDCOST(x->rdmult, x->rddiv, ratey, distortion) >= best_rd)
+              goto next_highbd;
+            vp9_high_iwht4x4_add(BLOCK_OFFSET(pd->dqcoeff, block),
+                                 dst, dst_stride,
+                                 p->eobs[block], xd->bd);
+          } else {
+            int64_t unused;
+            const TX_TYPE tx_type = get_tx_type_4x4(PLANE_TYPE_Y, xd, block);
+            const scan_order *so = &vp9_scan_orders[TX_4X4][tx_type];
+            vp9_high_fht4x4(src_diff, coeff, 8, tx_type);
+            vp9_regular_quantize_b_4x4(x, 0, block, so->scan, so->iscan);
+            ratey += cost_coeffs(x, 0, block, tempa + idx, templ + idy, TX_4X4,
+                                 so->scan, so->neighbors,
+                                 cpi->sf.use_fast_coef_costing);
+            distortion += vp9_high_block_error(coeff,
+                                               BLOCK_OFFSET(pd->dqcoeff, block),
+                                               16, &unused, xd->bd) >> 2;
+            if (RDCOST(x->rdmult, x->rddiv, ratey, distortion) >= best_rd)
+              goto next_highbd;
+            vp9_high_iht4x4_add(tx_type, BLOCK_OFFSET(pd->dqcoeff, block),
+                                dst, dst_stride, p->eobs[block], xd->bd);
+          }
+        }
+      }
+
+      rate += ratey;
+      this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
+
+      if (this_rd < best_rd) {
+        *bestrate = rate;
+        *bestratey = ratey;
+        *bestdistortion = distortion;
+        best_rd = this_rd;
+        *best_mode = mode;
+        vpx_memcpy(a, tempa, sizeof(tempa));
+        vpx_memcpy(l, templ, sizeof(templ));
+        for (idy = 0; idy < num_4x4_blocks_high * 4; ++idy) {
+          vpx_memcpy(best_dst16 + idy * 8,
+                     CONVERT_TO_SHORTPTR(dst_init + idy * dst_stride),
+                     num_4x4_blocks_wide * 4 * sizeof(uint16_t));
+        }
+      }
+    next_highbd:
+      {}
+    }
+    if (best_rd >= rd_thresh || x->skip_encode)
+      return best_rd;
+
+    for (idy = 0; idy < num_4x4_blocks_high * 4; ++idy) {
+      vpx_memcpy(CONVERT_TO_SHORTPTR(dst_init + idy * dst_stride),
+                 best_dst16 + idy * 8,
+                 num_4x4_blocks_wide * 4 * sizeof(uint16_t));
+    }
+
+    return best_rd;
+  }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
   for (mode = DC_PRED; mode <= TM_PRED; ++mode) {
     int64_t this_rd;
@@ -1118,6 +1303,16 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
   for (ref = 0; ref < 1 + is_compound; ++ref) {
     const uint8_t *pre = &pd->pre[ref].buf[raster_block_offset(BLOCK_8X8, i,
                                                pd->pre[ref].stride)];
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+    vp9_high_build_inter_predictor(pre, pd->pre[ref].stride,
+                                   dst, pd->dst.stride,
+                                   &mi->bmi[i].as_mv[ref].as_mv,
+                                   &xd->block_refs[ref]->sf, width, height, ref,
+                                   kernel, MV_PRECISION_Q3,
+                                   mi_col * MI_SIZE + 4 * (i % 2),
+                                   mi_row * MI_SIZE + 4 * (i / 2), xd->bd);
+  } else {
     vp9_build_inter_predictor(pre, pd->pre[ref].stride,
                               dst, pd->dst.stride,
                               &mi->bmi[i].as_mv[ref].as_mv,
@@ -1126,11 +1321,32 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
                               mi_col * MI_SIZE + 4 * (i % 2),
                               mi_row * MI_SIZE + 4 * (i / 2));
   }
+#else
+    vp9_build_inter_predictor(pre, pd->pre[ref].stride,
+                              dst, pd->dst.stride,
+                              &mi->bmi[i].as_mv[ref].as_mv,
+                              &xd->block_refs[ref]->sf, width, height, ref,
+                              kernel, MV_PRECISION_Q3,
+                              mi_col * MI_SIZE + 4 * (i % 2),
+                              mi_row * MI_SIZE + 4 * (i / 2));
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+  }
 
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+    vp9_high_subtract_block(
+        height, width, raster_block_offset_int16(BLOCK_8X8, i, p->src_diff), 8,
+        src, p->src.stride, dst, pd->dst.stride, xd->bd);
+  } else {
+    vp9_subtract_block(
+        height, width, raster_block_offset_int16(BLOCK_8X8, i, p->src_diff), 8,
+        src, p->src.stride, dst, pd->dst.stride);
+  }
+#else
   vp9_subtract_block(height, width,
                      raster_block_offset_int16(BLOCK_8X8, i, p->src_diff), 8,
-                     src, p->src.stride,
-                     dst, pd->dst.stride);
+                     src, p->src.stride, dst, pd->dst.stride);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
   k = i;
   for (idy = 0; idy < height / 4; ++idy) {
@@ -1143,8 +1359,19 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
       x->fwd_txm4x4(raster_block_offset_int16(BLOCK_8X8, k, p->src_diff),
                     coeff, 8);
       vp9_regular_quantize_b_4x4(x, 0, k, so->scan, so->iscan);
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+        thisdistortion += vp9_high_block_error(coeff,
+                                               BLOCK_OFFSET(pd->dqcoeff, k),
+                                               16, &ssz, xd->bd);
+      } else {
+        thisdistortion += vp9_block_error(coeff, BLOCK_OFFSET(pd->dqcoeff, k),
+                                          16, &ssz);
+      }
+#else
       thisdistortion += vp9_block_error(coeff, BLOCK_OFFSET(pd->dqcoeff, k),
                                         16, &ssz);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
       thissse += ssz;
       thisrate += cost_coeffs(x, 0, k, ta + (k & 1), tl + (k >> 1), TX_4X4,
                               so->scan, so->neighbors,
@@ -1901,7 +2128,12 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   int_mv ref_mv[2];
   int ite, ref;
   // Prediction buffer from second frame.
+#if CONFIG_VP9_HIGHBITDEPTH
+  uint8_t *second_pred;
+  uint8_t *second_pred_alloc;
+#else
   uint8_t *second_pred = vpx_memalign(16, pw * ph * sizeof(uint8_t));
+#endif  // CONFIG_VP9_HIGHBITDEPTH
   const InterpKernel *kernel = vp9_get_interp_kernel(mbmi->interp_filter);
 
   // Do joint motion search in compound mode to get more accurate mv.
@@ -1912,6 +2144,15 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     vp9_get_scaled_ref_frame(cpi, mbmi->ref_frame[0]),
     vp9_get_scaled_ref_frame(cpi, mbmi->ref_frame[1])
   };
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+    second_pred_alloc = vpx_memalign(16, pw * ph * sizeof(uint16_t));
+    second_pred = CONVERT_TO_BYTEPTR(second_pred_alloc);
+  } else {
+    second_pred_alloc = vpx_memalign(16, pw * ph * sizeof(uint8_t));
+    second_pred = second_pred_alloc;
+  }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
   for (ref = 0; ref < 2; ++ref) {
     ref_mv[ref] = mbmi->ref_mvs[refs[ref]][0];
@@ -1950,6 +2191,28 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     ref_yv12[1] = xd->plane[0].pre[1];
 
     // Get pred block from second frame.
+#if CONFIG_VP9_HIGHBITDEPTH
+    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+      vp9_high_build_inter_predictor(ref_yv12[!id].buf,
+                                     ref_yv12[!id].stride,
+                                     second_pred, pw,
+                                     &frame_mv[refs[!id]].as_mv,
+                                     &xd->block_refs[!id]->sf,
+                                     pw, ph, 0,
+                                     kernel, MV_PRECISION_Q3,
+                                     mi_col * MI_SIZE, mi_row * MI_SIZE,
+                                     xd->bd);
+    } else {
+      vp9_build_inter_predictor(ref_yv12[!id].buf,
+                                ref_yv12[!id].stride,
+                                second_pred, pw,
+                                &frame_mv[refs[!id]].as_mv,
+                                &xd->block_refs[!id]->sf,
+                                pw, ph, 0,
+                                kernel, MV_PRECISION_Q3,
+                                mi_col * MI_SIZE, mi_row * MI_SIZE);
+    }
+#else
     vp9_build_inter_predictor(ref_yv12[!id].buf,
                               ref_yv12[!id].stride,
                               second_pred, pw,
@@ -1958,6 +2221,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                               pw, ph, 0,
                               kernel, MV_PRECISION_Q3,
                               mi_col * MI_SIZE, mi_row * MI_SIZE);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
     // Compound motion search on first ref frame.
     if (id)
@@ -2026,7 +2290,11 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                 x->nmvjointcost, x->mvcost, MV_COST_WEIGHT);
   }
 
+#if CONFIG_VP9_HIGHBITDEPTH
+  vpx_free(second_pred_alloc);
+#else
   vpx_free(second_pred);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 }
 
 static INLINE void restore_dst_buf(MACROBLOCKD *xd,
@@ -2068,12 +2336,26 @@ static void rd_encode_breakout_test(VP9_COMP *cpi, MACROBLOCK *x,
 
     // Calculate threshold according to dequant value.
     thresh_ac = (xd->plane[0].dequant[1] * xd->plane[0].dequant[1]) / 9;
+#if CONFIG_VP9_HIGHBITDEPTH
+    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+      const int shift = 2 * xd->bd - 16;
+      if (shift > 0)
+        thresh_ac = ROUND_POWER_OF_TWO(thresh_ac, shift);
+    }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
     thresh_ac = clamp(thresh_ac, min_thresh, max_thresh);
 
     // Adjust threshold according to partition size.
     thresh_ac >>= 8 - (b_width_log2(bsize) +
         b_height_log2(bsize));
     thresh_dc = (xd->plane[0].dequant[0] * xd->plane[0].dequant[0] >> 6);
+#if CONFIG_VP9_HIGHBITDEPTH
+    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+      const int shift = 2 * xd->bd - 16;
+      if (shift > 0)
+        thresh_dc = ROUND_POWER_OF_TWO(thresh_dc, shift);
+    }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
   } else {
     thresh_ac = 0;
     thresh_dc = 0;
@@ -2145,7 +2427,13 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int refs[2] = { mbmi->ref_frame[0],
     (mbmi->ref_frame[1] < 0 ? 0 : mbmi->ref_frame[1]) };
   int_mv cur_mv[2];
+#if CONFIG_VP9_HIGHBITDEPTH
+  DECLARE_ALIGNED_ARRAY(16, uint16_t, tmp_buf16, MAX_MB_PLANE * 64 * 64);
+  DECLARE_ALIGNED_ARRAY(16, uint8_t, tmp_buf8, MAX_MB_PLANE * 64 * 64);
+  uint8_t *tmp_buf = tmp_buf8;
+#else
   DECLARE_ALIGNED_ARRAY(16, uint8_t, tmp_buf, MAX_MB_PLANE * 64 * 64);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
   int pred_exists = 0;
   int intpel_mv;
   int64_t rd, tmp_rd, best_rd = INT64_MAX;
@@ -2161,6 +2449,14 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int pred_filter_search = cpi->sf.cb_pred_filter_search ?
       (((mi_row + mi_col) >> bsl) +
        get_chessboard_index(cm->current_video_frame)) & 0x1 : 0;
+
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+    tmp_buf = CONVERT_TO_BYTEPTR(tmp_buf16);
+  } else {
+    tmp_buf = tmp_buf8;
+  }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
   if (pred_filter_search) {
     INTERP_FILTER af = SWITCHABLE, lf = SWITCHABLE;
@@ -2575,8 +2871,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t dist_uv[TX_SIZES];
   int skip_uv[TX_SIZES];
   PREDICTION_MODE mode_uv[TX_SIZES];
-  const int intra_cost_penalty =
-      20 * vp9_dc_quant(cm->base_qindex, cm->y_dc_delta_q, cm->bit_depth);
+  const int intra_cost_penalty = vp9_get_intra_cost_penalty(
+      cm->base_qindex, cm->y_dc_delta_q, cm->bit_depth);
   int best_skip2 = 0;
   uint8_t ref_frame_skip_mask[2] = { 0 };
   uint16_t mode_skip_mask[MAX_REF_FRAMES] = { 0 };
@@ -3011,9 +3307,14 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         // based on qp, activity mask and history
         if ((mode_search_skip_flags & FLAG_EARLY_TERMINATE) &&
             (mode_index > MIN_EARLY_TERM_INDEX)) {
-          const int qstep = xd->plane[0].dequant[1];
+          int qstep = xd->plane[0].dequant[1];
           // TODO(debargha): Enhance this by specializing for each mode_index
           int scale = 4;
+#if CONFIG_VP9_HIGHBITDEPTH
+          if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+            qstep >>= (xd->bd - 8);
+          }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
           if (x->source_variance < UINT_MAX) {
             const int var_adjust = (x->source_variance < 16);
             scale -= var_adjust;
@@ -3329,8 +3630,8 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t dist_uv;
   int skip_uv;
   PREDICTION_MODE mode_uv = DC_PRED;
-  const int intra_cost_penalty =
-      20 * vp9_dc_quant(cm->base_qindex, cm->y_dc_delta_q, cm->bit_depth);
+  const int intra_cost_penalty = vp9_get_intra_cost_penalty(
+      cm->base_qindex, cm->y_dc_delta_q, cm->bit_depth);
   int_mv seg_mvs[4][MAX_REF_FRAMES];
   b_mode_info best_bmodes[4];
   int best_skip2 = 0;
@@ -3748,9 +4049,14 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
         // based on qp, activity mask and history
         if ((cpi->sf.mode_search_skip_flags & FLAG_EARLY_TERMINATE) &&
             (ref_index > MIN_EARLY_TERM_INDEX)) {
-          const int qstep = xd->plane[0].dequant[1];
+          int qstep = xd->plane[0].dequant[1];
           // TODO(debargha): Enhance this by specializing for each mode_index
           int scale = 4;
+#if CONFIG_VP9_HIGHBITDEPTH
+          if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+            qstep >>= (xd->bd - 8);
+          }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
           if (x->source_variance < UINT_MAX) {
             const int var_adjust = (x->source_variance < 16);
             scale -= var_adjust;

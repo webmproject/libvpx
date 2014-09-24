@@ -241,13 +241,44 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
             tx_mode_to_biggest_tx_size[cpi->common.tx_mode]);
   }
 
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+    vp9_model_rd_from_var_lapndz(sse - var, 1 << num_pels_log2_lookup[bsize],
+                                 dc_quant >> (xd->bd - 5), &rate, &dist);
+  } else {
+    vp9_model_rd_from_var_lapndz(sse - var, 1 << num_pels_log2_lookup[bsize],
+                                 dc_quant >> 3, &rate, &dist);
+  }
+#else
   vp9_model_rd_from_var_lapndz(sse - var, 1 << num_pels_log2_lookup[bsize],
                                dc_quant >> 3, &rate, &dist);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
   *out_rate_sum = rate >> 1;
   *out_dist_sum = dist << 3;
 
-  vp9_model_rd_from_var_lapndz(var, 1 << num_pels_log2_lookup[bsize],
-                               ac_quant >> 3, &rate, &dist);
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+    vp9_model_rd_from_var_lapndz(var,
+                                 1 << num_pels_log2_lookup[bsize],
+                                 ac_quant >> (xd->bd - 5),
+                                 &rate,
+                                 &dist);
+  } else {
+    vp9_model_rd_from_var_lapndz(var,
+                                 1 << num_pels_log2_lookup[bsize],
+                                 ac_quant >> 3,
+                                 &rate,
+                                 &dist);
+  }
+#else
+  vp9_model_rd_from_var_lapndz(var,
+                               1 << num_pels_log2_lookup[bsize],
+                               ac_quant >> 3,
+                               &rate,
+                               &dist);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
   *out_rate_sum += rate;
   *out_dist_sum += dist << 4;
 }
@@ -293,9 +324,17 @@ static void encode_breakout_test(VP9_COMP *cpi, MACROBLOCK *x,
     // The encode_breakout input
     const unsigned int min_thresh =
         MIN(((unsigned int)x->encode_breakout << 4), max_thresh);
+#if CONFIG_VP9_HIGHBITDEPTH
+    const int shift = 2 * xd->bd - 16;
+#endif
 
     // Calculate threshold according to dequant value.
     thresh_ac = (xd->plane[0].dequant[1] * xd->plane[0].dequant[1]) / 9;
+#if CONFIG_VP9_HIGHBITDEPTH
+    if ((xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) && shift > 0) {
+      thresh_ac = ROUND_POWER_OF_TWO(thresh_ac, shift);
+    }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
     thresh_ac = clamp(thresh_ac, min_thresh, max_thresh);
 
     // Adjust ac threshold according to partition size.
@@ -303,6 +342,11 @@ static void encode_breakout_test(VP9_COMP *cpi, MACROBLOCK *x,
         8 - (b_width_log2(bsize) + b_height_log2(bsize));
 
     thresh_dc = (xd->plane[0].dequant[0] * xd->plane[0].dequant[0] >> 6);
+#if CONFIG_VP9_HIGHBITDEPTH
+    if ((xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) && shift > 0) {
+      thresh_dc = ROUND_POWER_OF_TWO(thresh_dc, shift);
+    }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
   } else {
     thresh_ac = 0;
     thresh_dc = 0;
@@ -438,9 +482,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   // var_y and sse_y are saved to be used in skipping checking
   unsigned int var_y = UINT_MAX;
   unsigned int sse_y = UINT_MAX;
-
-  const int intra_cost_penalty =
-      20 * vp9_dc_quant(cm->base_qindex, cm->y_dc_delta_q, cm->bit_depth);
+  const int intra_cost_penalty = vp9_get_intra_cost_penalty(
+      cm->base_qindex, cm->y_dc_delta_q, cm->bit_depth);
   const int64_t inter_mode_thresh = RDCOST(x->rdmult, x->rddiv,
                                            intra_cost_penalty, 0);
   const int intra_mode_cost = 50;
@@ -461,14 +504,25 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   // tmp[3] points to dst buffer, and the other 3 point to allocated buffers.
   PRED_BUFFER tmp[4];
   DECLARE_ALIGNED_ARRAY(16, uint8_t, pred_buf, 3 * 64 * 64);
+#if CONFIG_VP9_HIGHBITDEPTH
+  DECLARE_ALIGNED_ARRAY(16, uint16_t, pred_buf_16, 3 * 64 * 64);
+#endif
   struct buf_2d orig_dst = pd->dst;
   PRED_BUFFER *best_pred = NULL;
   PRED_BUFFER *this_mode_pred = NULL;
+  const int pixels_in_block = bh * bw;
 
   if (cpi->sf.reuse_inter_pred_sby) {
     int i;
     for (i = 0; i < 3; i++) {
-      tmp[i].data = &pred_buf[bw * bh * i];
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (cm->use_highbitdepth)
+        tmp[i].data = CONVERT_TO_BYTEPTR(&pred_buf_16[pixels_in_block * i]);
+      else
+        tmp[i].data = &pred_buf[pixels_in_block * i];
+#else
+      tmp[i].data = &pred_buf[pixels_in_block * i];
+#endif  // CONFIG_VP9_HIGHBITDEPTH
       tmp[i].stride = bw;
       tmp[i].in_use = 0;
     }
@@ -703,8 +757,18 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   if (best_pred != NULL && cpi->sf.reuse_inter_pred_sby &&
       best_pred->data != orig_dst.buf) {
     pd->dst = orig_dst;
+#if CONFIG_VP9_HIGHBITDEPTH
+    if (cm->use_highbitdepth) {
+      vp9_high_convolve_copy(best_pred->data, bw, pd->dst.buf, pd->dst.stride,
+                             NULL, 0, NULL, 0, bw, bh, xd->bd);
+    } else {
+      vp9_convolve_copy(best_pred->data, bw, pd->dst.buf, pd->dst.stride,
+                        NULL, 0, NULL, 0, bw, bh);
+    }
+#else
     vp9_convolve_copy(best_pred->data, bw, pd->dst.buf, pd->dst.stride, NULL, 0,
                       NULL, 0, bw, bh);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
   }
 
   mbmi->mode          = best_mode;

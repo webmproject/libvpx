@@ -196,6 +196,64 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
   if (eob > 0) {
     TX_TYPE tx_type = DCT_DCT;
     tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
+#if CONFIG_VP9_HIGHBITDEPTH
+    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+      if (xd->lossless) {
+        tx_type = DCT_DCT;
+        vp9_high_iwht4x4_add(dqcoeff, dst, stride, eob, xd->bd);
+      } else {
+        const PLANE_TYPE plane_type = pd->plane_type;
+        switch (tx_size) {
+          case TX_4X4:
+            tx_type = get_tx_type_4x4(plane_type, xd, block);
+            vp9_high_iht4x4_add(tx_type, dqcoeff, dst, stride, eob, xd->bd);
+            break;
+          case TX_8X8:
+            tx_type = get_tx_type(plane_type, xd);
+            vp9_high_iht8x8_add(tx_type, dqcoeff, dst, stride, eob, xd->bd);
+            break;
+          case TX_16X16:
+            tx_type = get_tx_type(plane_type, xd);
+            vp9_high_iht16x16_add(tx_type, dqcoeff, dst, stride, eob, xd->bd);
+            break;
+          case TX_32X32:
+            tx_type = DCT_DCT;
+            vp9_high_idct32x32_add(dqcoeff, dst, stride, eob, xd->bd);
+            break;
+          default:
+            assert(0 && "Invalid transform size");
+        }
+      }
+    } else {
+      if (xd->lossless) {
+        tx_type = DCT_DCT;
+        vp9_iwht4x4_add(dqcoeff, dst, stride, eob);
+      } else {
+        const PLANE_TYPE plane_type = pd->plane_type;
+        switch (tx_size) {
+          case TX_4X4:
+            tx_type = get_tx_type_4x4(plane_type, xd, block);
+            vp9_iht4x4_add(tx_type, dqcoeff, dst, stride, eob);
+            break;
+          case TX_8X8:
+            tx_type = get_tx_type(plane_type, xd);
+            vp9_iht8x8_add(tx_type, dqcoeff, dst, stride, eob);
+            break;
+          case TX_16X16:
+            tx_type = get_tx_type(plane_type, xd);
+            vp9_iht16x16_add(tx_type, dqcoeff, dst, stride, eob);
+            break;
+          case TX_32X32:
+            tx_type = DCT_DCT;
+            vp9_idct32x32_add(dqcoeff, dst, stride, eob);
+            break;
+          default:
+            assert(0 && "Invalid transform size");
+            return;
+        }
+      }
+    }
+#else
     if (xd->lossless) {
       tx_type = DCT_DCT;
       vp9_iwht4x4_add(dqcoeff, dst, stride, eob);
@@ -220,8 +278,10 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
           break;
         default:
           assert(0 && "Invalid transform size");
+          return;
       }
     }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
     if (eob == 1) {
       vpx_memset(dqcoeff, 0, 2 * sizeof(dqcoeff[0]));
@@ -599,6 +659,9 @@ static void setup_quantization(VP9_COMMON *const cm, MACROBLOCKD *const xd,
                  cm->y_dc_delta_q == 0 &&
                  cm->uv_dc_delta_q == 0 &&
                  cm->uv_ac_delta_q == 0;
+#if CONFIG_VP9_HIGHBITDEPTH
+  xd->bd = (int)cm->bit_depth;
+#endif
 }
 
 static INTERP_FILTER read_interp_filter(struct vp9_read_bit_buffer *rb) {
@@ -1139,8 +1202,17 @@ BITSTREAM_PROFILE vp9_read_profile(struct vp9_read_bit_buffer *rb) {
 
 static void read_bitdepth_colorspace_sampling(
     VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
-  if (cm->profile >= PROFILE_2)
+  if (cm->profile >= PROFILE_2) {
     cm->bit_depth = vp9_rb_read_bit(rb) ? VPX_BITS_12 : VPX_BITS_10;
+#if CONFIG_VP9_HIGHBITDEPTH
+    cm->use_highbitdepth = 1;
+#endif
+  } else {
+    cm->bit_depth = VPX_BITS_8;
+#if CONFIG_VP9_HIGHBITDEPTH
+    cm->use_highbitdepth = 0;
+#endif
+  }
   cm->color_space = (COLOR_SPACE)vp9_rb_read_literal(rb, 3);
   if (cm->color_space != SRGB) {
     vp9_rb_read_bit(rb);  // [16,235] (including xvycc) vs [0,255] range
@@ -1244,6 +1316,10 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
         // case (normative).
         cm->color_space = BT_601;
         cm->subsampling_y = cm->subsampling_x = 1;
+        cm->bit_depth = VPX_BITS_8;
+#if CONFIG_VP9_HIGHBITDEPTH
+        cm->use_highbitdepth = 0;
+#endif
       }
 
       pbi->refresh_frame_flags = vp9_rb_read_literal(rb, REF_FRAMES);
@@ -1284,6 +1360,9 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
       }
     }
   }
+#if CONFIG_VP9_HIGHBITDEPTH
+  get_frame_new_buffer(cm)->bit_depth = cm->bit_depth;
+#endif
 
   if (pbi->need_resync) {
     vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,

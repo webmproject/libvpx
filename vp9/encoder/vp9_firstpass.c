@@ -281,6 +281,60 @@ static unsigned int get_prediction_error(BLOCK_SIZE bsize,
   return sse;
 }
 
+#if CONFIG_VP9_HIGHBITDEPTH
+static vp9_variance_fn_t highbd_get_block_variance_fn(BLOCK_SIZE bsize,
+                                                      int bd) {
+  switch (bd) {
+    default:
+      switch (bsize) {
+        case BLOCK_8X8:
+          return vp9_high_mse8x8;
+        case BLOCK_16X8:
+          return vp9_high_mse16x8;
+        case BLOCK_8X16:
+          return vp9_high_mse8x16;
+        default:
+          return vp9_high_mse16x16;
+      }
+      break;
+    case 10:
+      switch (bsize) {
+        case BLOCK_8X8:
+          return vp9_high_10_mse8x8;
+        case BLOCK_16X8:
+          return vp9_high_10_mse16x8;
+        case BLOCK_8X16:
+          return vp9_high_10_mse8x16;
+        default:
+          return vp9_high_10_mse16x16;
+      }
+      break;
+    case 12:
+      switch (bsize) {
+        case BLOCK_8X8:
+          return vp9_high_12_mse8x8;
+        case BLOCK_16X8:
+          return vp9_high_12_mse16x8;
+        case BLOCK_8X16:
+          return vp9_high_12_mse8x16;
+        default:
+          return vp9_high_12_mse16x16;
+      }
+      break;
+  }
+}
+
+static unsigned int highbd_get_prediction_error(BLOCK_SIZE bsize,
+                                                const struct buf_2d *src,
+                                                const struct buf_2d *ref,
+                                                int bd) {
+  unsigned int sse;
+  const vp9_variance_fn_t fn = highbd_get_block_variance_fn(bsize, bd);
+  fn(src->buf, src->stride, ref->buf, ref->stride, &sse);
+  return sse;
+}
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
 // Refine the motion search range according to the frame dimension
 // for first pass test.
 static int get_search_range(const VP9_COMMON *cm) {
@@ -311,6 +365,11 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
 
   // Override the default variance function to use MSE.
   v_fn_ptr.vf = get_block_variance_fn(bsize);
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+    v_fn_ptr.vf = highbd_get_block_variance_fn(bsize, xd->bd);
+  }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
   // Center the initial step/diamond search on best mv.
   tmp_err = cpi->diamond_search_sad(x, &cpi->ss_cfg, &ref_mv_full, &tmp_mv,
@@ -562,6 +621,24 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
          (bsize >= BLOCK_16X16 ? TX_16X16 : TX_8X8) : TX_4X4;
       vp9_encode_intra_block_plane(x, bsize, 0);
       this_error = vp9_get_mb_ss(x->plane[0].src_diff);
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (cm->use_highbitdepth) {
+        switch (cm->bit_depth) {
+          case VPX_BITS_8:
+            break;
+          case VPX_BITS_10:
+            this_error >>= 4;
+            break;
+          case VPX_BITS_12:
+            this_error >>= 8;
+            break;
+          default:
+            assert(0 && "cm->bit_depth should be VPX_BITS_8, "
+                        "VPX_BITS_10 or VPX_BITS_12");
+            return;
+        }
+      }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
       if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
         vp9_clear_system_state();
@@ -601,8 +678,18 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
         struct buf_2d unscaled_last_source_buf_2d;
 
         xd->plane[0].pre[0].buf = first_ref_buf->y_buffer + recon_yoffset;
-        motion_error = get_prediction_error(bsize, &x->plane[0].src,
-                                            &xd->plane[0].pre[0]);
+#if CONFIG_VP9_HIGHBITDEPTH
+        if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+          motion_error = highbd_get_prediction_error(
+              bsize, &x->plane[0].src, &xd->plane[0].pre[0], xd->bd);
+        } else {
+          motion_error = get_prediction_error(
+              bsize, &x->plane[0].src, &xd->plane[0].pre[0]);
+        }
+#else
+        motion_error = get_prediction_error(
+            bsize, &x->plane[0].src, &xd->plane[0].pre[0]);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
         // Compute the motion error of the 0,0 motion using the last source
         // frame as the reference. Skip the further motion search on
@@ -611,8 +698,18 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
             cpi->unscaled_last_source->y_buffer + recon_yoffset;
         unscaled_last_source_buf_2d.stride =
             cpi->unscaled_last_source->y_stride;
-        raw_motion_error = get_prediction_error(bsize, &x->plane[0].src,
-                                                &unscaled_last_source_buf_2d);
+#if CONFIG_VP9_HIGHBITDEPTH
+        if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+          raw_motion_error = highbd_get_prediction_error(
+              bsize, &x->plane[0].src, &unscaled_last_source_buf_2d, xd->bd);
+        } else {
+          raw_motion_error = get_prediction_error(
+              bsize, &x->plane[0].src, &unscaled_last_source_buf_2d);
+        }
+#else
+        raw_motion_error = get_prediction_error(
+            bsize, &x->plane[0].src, &unscaled_last_source_buf_2d);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
         // TODO(pengchong): Replace the hard-coded threshold
         if (raw_motion_error > 25 || lc != NULL) {
@@ -648,8 +745,18 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
             int gf_motion_error;
 
             xd->plane[0].pre[0].buf = gld_yv12->y_buffer + recon_yoffset;
-            gf_motion_error = get_prediction_error(bsize, &x->plane[0].src,
-                                                   &xd->plane[0].pre[0]);
+#if CONFIG_VP9_HIGHBITDEPTH
+            if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+              gf_motion_error = highbd_get_prediction_error(
+                  bsize, &x->plane[0].src, &xd->plane[0].pre[0], xd->bd);
+            } else {
+              gf_motion_error = get_prediction_error(
+                  bsize, &x->plane[0].src, &xd->plane[0].pre[0]);
+            }
+#else
+            gf_motion_error = get_prediction_error(
+                bsize, &x->plane[0].src, &xd->plane[0].pre[0]);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
             first_pass_motion_search(cpi, x, &zero_mv, &tmp_mv,
                                      &gf_motion_error);
