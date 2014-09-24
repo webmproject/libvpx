@@ -16,6 +16,24 @@
       "revId": "7feede986917eca0ab18ba72be1502a88abc54ac",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Vpk\u003d",
+        "filename": "vp8/common/arm/neon/loopfilter_neon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-09-24T23:14:41Z",
+      "side": 0,
+      "message": "that\u0027s why I wanted it separate, with a clear description in case someone wanted to have a look at the root cause",
+      "parentUuid": "AAAAdn//VqU\u003d",
+      "revId": "7feede986917eca0ab18ba72be1502a88abc54ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
