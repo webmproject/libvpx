@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//VrE\u003d",
+        "filename": "vpx_ports/arm.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-09-24T22:37:34Z",
+      "side": 1,
+      "message": "Verified with gcc 4.6 and 4.8 that the correct code is compiled",
+      "revId": "2a9c95564730829490d7831ce8a61faee35d5a1c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
