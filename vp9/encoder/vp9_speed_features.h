@@ -435,6 +435,9 @@ typedef struct SPEED_FEATURES {
   // Partition search early breakout thresholds.
   int64_t partition_search_breakout_dist_thr;
   int partition_search_breakout_rate_thr;
+
+  // Allow skipping partition search for still image frame
+  int allow_partition_search_skip;
 } SPEED_FEATURES;
 
 struct VP9_COMP;

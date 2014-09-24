@@ -772,7 +772,7 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
   vp9_rc_init(&cpi->oxcf, oxcf->pass, &cpi->rc);
 
   cm->current_video_frame = 0;
-  cpi->skippable_frame = 0;
+  cpi->partition_search_skippable_frame = 0;
 
   // Create the encoder segmentation map and set all entries to 0
   CHECK_MEM_ERROR(cm, cpi->segmentation_map,
@@ -2203,9 +2203,9 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
   // Check if the current frame is skippable for the partition search in the
   // second pass according to the first pass stats
-  if (oxcf->pass == 2 &&
+  if (cpi->sf.allow_partition_search_skip && oxcf->pass == 2 &&
       (!cpi->use_svc || is_two_pass_svc(cpi))) {
-    cpi->skippable_frame = is_skippable_frame(cpi);
+    cpi->partition_search_skippable_frame = is_skippable_frame(cpi);
   }
 
   // For 1 pass CBR, check if we are dropping this frame.
