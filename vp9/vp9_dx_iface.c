@@ -437,7 +437,6 @@ static vpx_image_t *decoder_get_frame(vpx_codec_alg_priv_t *ctx,
     // call to get_frame.
     if (!(*iter)) {
       img = &ctx->img;
-      img->bit_depth = (int)ctx->pbi->common.bit_depth;
       *iter = img;
     }
   }

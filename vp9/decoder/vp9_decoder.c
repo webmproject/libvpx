@@ -69,6 +69,7 @@ VP9Decoder *vp9_decoder_create() {
   cm->current_video_frame = 0;
   pbi->ready_for_new_data = 1;
   cm->bit_depth = VPX_BITS_8;
+  cm->dequant_bit_depth = VPX_BITS_8;
 
   // vp9_init_dequantizer() is first called here. Add check in
   // frame_init_dequantizer() to avoid unnecessary calling of

@@ -46,6 +46,22 @@ static void yuvconfig2image(vpx_image_t *img, const YV12_BUFFER_CONFIG  *yv12,
   img->stride[VPX_PLANE_U] = yv12->uv_stride;
   img->stride[VPX_PLANE_V] = yv12->uv_stride;
   img->stride[VPX_PLANE_ALPHA] = yv12->y_stride;
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (yv12->flags & YV12_FLAG_HIGHBITDEPTH) {
+    // vpx_image_t uses byte strides and a pointer to the first byte
+    // of the image.
+    img->fmt |= VPX_IMG_FMT_HIGHBITDEPTH;
+    img->bit_depth = yv12->bit_depth;
+    img->planes[VPX_PLANE_Y] = (uint8_t*)CONVERT_TO_SHORTPTR(yv12->y_buffer);
+    img->planes[VPX_PLANE_U] = (uint8_t*)CONVERT_TO_SHORTPTR(yv12->u_buffer);
+    img->planes[VPX_PLANE_V] = (uint8_t*)CONVERT_TO_SHORTPTR(yv12->v_buffer);
+    img->planes[VPX_PLANE_ALPHA] = NULL;
+    img->stride[VPX_PLANE_Y] = 2 * yv12->y_stride;
+    img->stride[VPX_PLANE_U] = 2 * yv12->uv_stride;
+    img->stride[VPX_PLANE_V] = 2 * yv12->uv_stride;
+    img->stride[VPX_PLANE_ALPHA] = 2 * yv12->y_stride;
+  }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
   img->bps = bps;
   img->user_priv = user_priv;
   img->img_data = yv12->buffer_alloc;
@@ -71,6 +87,32 @@ static vpx_codec_err_t image2yuvconfig(const vpx_image_t *img,
 
   yv12->y_stride = img->stride[VPX_PLANE_Y];
   yv12->uv_stride = img->stride[VPX_PLANE_U];
+
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (img->fmt & VPX_IMG_FMT_HIGHBITDEPTH) {
+    // In vpx_image_t
+    //     planes point to uint8 address of start of data
+    //     stride counts uint8s to reach next row
+    // In YV12_BUFFER_CONFIG
+    //     y_buffer, u_buffer, v_buffer point to uint16 address of data
+    //     stride and border counts in uint16s
+    // This means that all the address calculations in the main body of code
+    // should work correctly.
+    // However, before we do any pixel operations we need to cast the address
+    // to a uint16 ponter and double its value.
+    yv12->y_buffer = CONVERT_TO_BYTEPTR(yv12->y_buffer);
+    yv12->u_buffer = CONVERT_TO_BYTEPTR(yv12->u_buffer);
+    yv12->v_buffer = CONVERT_TO_BYTEPTR(yv12->v_buffer);
+    yv12->y_stride >>= 1;
+    yv12->uv_stride >>= 1;
+    yv12->flags = YV12_FLAG_HIGHBITDEPTH;
+  } else {
+    yv12->flags = 0;
+  }
+  yv12->border  = (yv12->y_stride - img->w) / 2;
+#else
+  yv12->border  = (img->stride[VPX_PLANE_Y] - img->w) / 2;
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
   yv12->border  = (img->stride[VPX_PLANE_Y] - img->w) / 2;
   return VPX_CODEC_OK;

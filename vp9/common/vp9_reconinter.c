@@ -467,13 +467,13 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
       int y1 = ((y0_16 + (h - 1) * ys) >> SUBPEL_BITS) + 1;
       int x_pad = 0, y_pad = 0;
 
-      if (subpel_x || (sf->x_step_q4 != 16)) {
+      if (subpel_x || (sf->x_step_q4 != SUBPEL_SHIFTS)) {
         x0 -= VP9_INTERP_EXTEND - 1;
         x1 += VP9_INTERP_EXTEND;
         x_pad = 1;
       }
 
-      if (subpel_y || (sf->y_step_q4 != 16)) {
+      if (subpel_y || (sf->y_step_q4 != SUBPEL_SHIFTS)) {
         y0 -= VP9_INTERP_EXTEND - 1;
         y1 += VP9_INTERP_EXTEND;
         y_pad = 1;

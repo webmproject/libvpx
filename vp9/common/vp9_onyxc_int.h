@@ -180,6 +180,7 @@ typedef struct VP9Common {
 
   // VPX_BITS_8 in profile 0 or 1, VPX_BITS_10 or VPX_BITS_12 in profile 2 or 3.
   vpx_bit_depth_t bit_depth;
+  vpx_bit_depth_t dequant_bit_depth;  // bit_depth of current dequantizer
 
 #if CONFIG_VP9_POSTPROC
   struct postproc_state  postproc_state;

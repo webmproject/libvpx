@@ -551,8 +551,8 @@ static void high_img_upshift(vpx_image_t *dst, vpx_image_t *src,
     int h = src->d_h;
     int x, y;
     if (plane) {
-      w >>= src->x_chroma_shift;
-      h >>= src->y_chroma_shift;
+      w = (w + src->x_chroma_shift) >> src->x_chroma_shift;
+      h = (h + src->y_chroma_shift) >> src->y_chroma_shift;
     }
     for (y = 0; y < h; y++) {
       uint16_t *p_src = (uint16_t *)(src->planes[plane] +
@@ -590,8 +590,8 @@ static void low_img_upshift(vpx_image_t *dst, vpx_image_t *src,
     int h = src->d_h;
     int x, y;
     if (plane) {
-      w >>= src->x_chroma_shift;
-      h >>= src->y_chroma_shift;
+      w = (w + src->x_chroma_shift) >> src->x_chroma_shift;
+      h = (h + src->y_chroma_shift) >> src->y_chroma_shift;
     }
     for (y = 0; y < h; y++) {
       uint8_t *p_src = src->planes[plane] + y * src->stride[plane];
@@ -636,8 +636,8 @@ static void high_img_downshift(vpx_image_t *dst, vpx_image_t *src,
     int h = src->d_h;
     int x, y;
     if (plane) {
-      w >>= src->x_chroma_shift;
-      h >>= src->y_chroma_shift;
+      w = (w + src->x_chroma_shift) >> src->x_chroma_shift;
+      h = (h + src->y_chroma_shift) >> src->y_chroma_shift;
     }
     for (y = 0; y < h; y++) {
       uint16_t *p_src = (uint16_t *)(src->planes[plane] +
@@ -674,8 +674,8 @@ static void low_img_downshift(vpx_image_t *dst, vpx_image_t *src,
     int h = src->d_h;
     int x, y;
     if (plane) {
-      w >>= src->x_chroma_shift;
-      h >>= src->y_chroma_shift;
+      w = (w + src->x_chroma_shift) >> src->x_chroma_shift;
+      h = (h + src->y_chroma_shift) >> src->y_chroma_shift;
     }
     for (y = 0; y < h; y++) {
       uint16_t *p_src = (uint16_t *)(src->planes[plane] +
@@ -695,6 +695,14 @@ static void img_downshift(vpx_image_t *dst, vpx_image_t *src,
   } else {
     low_img_downshift(dst, src, down_shift);
   }
+}
+
+static int img_shifted_realloc_required(const vpx_image_t *img,
+                                        const vpx_image_t *shifted,
+                                        vpx_img_fmt_t required_fmt) {
+  return img->d_w != shifted->d_w ||
+         img->d_h != shifted->d_h ||
+         required_fmt != shifted->fmt;
 }
 #endif
 
@@ -1130,16 +1138,17 @@ int main_loop(int argc, const char **argv_) {
       }
       // Shift up or down if necessary
       if (output_bit_depth != img->bit_depth) {
+        const vpx_img_fmt_t shifted_fmt = output_bit_depth == 8 ?
+            img->fmt ^ (img->fmt & VPX_IMG_FMT_HIGHBITDEPTH) :
+            img->fmt | VPX_IMG_FMT_HIGHBITDEPTH;
+        if (img_shifted &&
+            img_shifted_realloc_required(img, img_shifted, shifted_fmt)) {
+          vpx_img_free(img_shifted);
+          img_shifted = NULL;
+        }
         if (!img_shifted) {
-          if (output_bit_depth == 8) {
-            img_shifted = vpx_img_alloc(
-                NULL, img->fmt - VPX_IMG_FMT_HIGHBITDEPTH,
-                img->d_w, img->d_h, 16);
-          } else {
-            img_shifted = vpx_img_alloc(
-                NULL, img->fmt | VPX_IMG_FMT_HIGHBITDEPTH,
-                img->d_w, img->d_h, 16);
-          }
+          img_shifted = vpx_img_alloc(NULL, shifted_fmt,
+                                      img->d_w, img->d_h, 16);
           img_shifted->bit_depth = output_bit_depth;
         }
         if (output_bit_depth > img->bit_depth) {
