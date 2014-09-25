@@ -16,6 +16,24 @@
       "revId": "dcf70e330a1688eb298ae9e06e327a082216b50b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Vo8\u003d",
+        "filename": "vp9/common/vp9_rtcd_defs.pl",
+        "patchSetId": 2
+      },
+      "lineNbr": 1012,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2014-09-25T00:33:21Z",
+      "side": 1,
+      "message": "You mean I should change it from \"sse2_x86inc\" to \"sse2\", because it does not depend on x86 asm, right? I will change it later, since I\u0027m going to submit a bigger patch which is the final version of SSE2 code for VP9 denoiser.",
+      "parentUuid": "AAAAdn//VqA\u003d",
+      "revId": "dcf70e330a1688eb298ae9e06e327a082216b50b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
