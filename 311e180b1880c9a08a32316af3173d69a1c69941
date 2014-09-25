@@ -422,6 +422,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//VoQ\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 796,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-09-25T03:50:29Z",
+      "side": 1,
+      "message": "To me this sounds like two wrongs make a right, but the \"when in Rome\" rule pretty effectively overrules my dislike of this setup... *grumble grumble... etc*. OK.",
+      "parentUuid": "AAAAdn//VqQ\u003d",
+      "revId": "311e180b1880c9a08a32316af3173d69a1c69941",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//VuM\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 2
