@@ -53,6 +53,12 @@ extern const int16_t *vp9_dct_value_cost_ptr;
  *  fields are not.
  */
 extern const TOKENVALUE *vp9_dct_value_tokens_ptr;
+#if CONFIG_VP9_HIGHBITDEPTH
+extern const int16_t *vp9_dct_value_cost_high10_ptr;
+extern const TOKENVALUE *vp9_dct_value_tokens_high10_ptr;
+extern const int16_t *vp9_dct_value_cost_high12_ptr;
+extern const TOKENVALUE *vp9_dct_value_tokens_high12_ptr;
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 #ifdef __cplusplus
 }  // extern "C"

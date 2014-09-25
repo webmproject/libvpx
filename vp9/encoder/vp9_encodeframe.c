@@ -61,15 +61,50 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
 // Eventually this should be replaced by custom no-reference routines,
 //  which will be faster.
 static const uint8_t VP9_VAR_OFFS[64] = {
-  128, 128, 128, 128, 128, 128, 128, 128,
-  128, 128, 128, 128, 128, 128, 128, 128,
-  128, 128, 128, 128, 128, 128, 128, 128,
-  128, 128, 128, 128, 128, 128, 128, 128,
-  128, 128, 128, 128, 128, 128, 128, 128,
-  128, 128, 128, 128, 128, 128, 128, 128,
-  128, 128, 128, 128, 128, 128, 128, 128,
-  128, 128, 128, 128, 128, 128, 128, 128
+    128, 128, 128, 128, 128, 128, 128, 128,
+    128, 128, 128, 128, 128, 128, 128, 128,
+    128, 128, 128, 128, 128, 128, 128, 128,
+    128, 128, 128, 128, 128, 128, 128, 128,
+    128, 128, 128, 128, 128, 128, 128, 128,
+    128, 128, 128, 128, 128, 128, 128, 128,
+    128, 128, 128, 128, 128, 128, 128, 128,
+    128, 128, 128, 128, 128, 128, 128, 128
 };
+
+#if CONFIG_VP9_HIGHBITDEPTH
+static const uint16_t VP9_HIGH_VAR_OFFS_8[64] = {
+    128, 128, 128, 128, 128, 128, 128, 128,
+    128, 128, 128, 128, 128, 128, 128, 128,
+    128, 128, 128, 128, 128, 128, 128, 128,
+    128, 128, 128, 128, 128, 128, 128, 128,
+    128, 128, 128, 128, 128, 128, 128, 128,
+    128, 128, 128, 128, 128, 128, 128, 128,
+    128, 128, 128, 128, 128, 128, 128, 128,
+    128, 128, 128, 128, 128, 128, 128, 128
+};
+
+static const uint16_t VP9_HIGH_VAR_OFFS_10[64] = {
+    128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4,
+    128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4,
+    128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4,
+    128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4,
+    128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4,
+    128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4,
+    128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4,
+    128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4, 128*4
+};
+
+static const uint16_t VP9_HIGH_VAR_OFFS_12[64] = {
+    128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16,
+    128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16,
+    128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16,
+    128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16,
+    128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16,
+    128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16,
+    128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16,
+    128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16, 128*16
+};
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 static unsigned int get_sby_perpixel_variance(VP9_COMP *cpi,
                                               const struct buf_2d *ref,
@@ -79,6 +114,32 @@ static unsigned int get_sby_perpixel_variance(VP9_COMP *cpi,
                                               VP9_VAR_OFFS, 0, &sse);
   return ROUND_POWER_OF_TWO(var, num_pels_log2_lookup[bs]);
 }
+
+#if CONFIG_VP9_HIGHBITDEPTH
+static unsigned int high_get_sby_perpixel_variance(
+    VP9_COMP *cpi, const struct buf_2d *ref, BLOCK_SIZE bs, int bd) {
+  unsigned int var, sse;
+  switch (bd) {
+    case 10:
+      var = cpi->fn_ptr[bs].vf(ref->buf, ref->stride,
+                               CONVERT_TO_BYTEPTR(VP9_HIGH_VAR_OFFS_10),
+                               0, &sse);
+      break;
+    case 12:
+      var = cpi->fn_ptr[bs].vf(ref->buf, ref->stride,
+                               CONVERT_TO_BYTEPTR(VP9_HIGH_VAR_OFFS_12),
+                               0, &sse);
+      break;
+    case 8:
+    default:
+      var = cpi->fn_ptr[bs].vf(ref->buf, ref->stride,
+                               CONVERT_TO_BYTEPTR(VP9_HIGH_VAR_OFFS_8),
+                               0, &sse);
+      break;
+  }
+  return ROUND_POWER_OF_TWO(var, num_pels_log2_lookup[bs]);
+}
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 static unsigned int get_sby_perpixel_diff_variance(VP9_COMP *cpi,
                                                    const struct buf_2d *ref,
@@ -419,6 +480,22 @@ static void choose_partitioning(VP9_COMP *cpi,
   } else {
     d = VP9_VAR_OFFS;
     dp = 0;
+#if CONFIG_VP9_HIGHBITDEPTH
+    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+      switch (xd->bd) {
+        case 10:
+          d = CONVERT_TO_BYTEPTR(VP9_HIGH_VAR_OFFS_10);
+          break;
+        case 12:
+          d = CONVERT_TO_BYTEPTR(VP9_HIGH_VAR_OFFS_12);
+          break;
+        case 8:
+        default:
+          d = CONVERT_TO_BYTEPTR(VP9_HIGH_VAR_OFFS_8);
+          break;
+      }
+    }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
   }
 
   // Fill in the entire tree of 8x8 variances for splits.
@@ -734,7 +811,17 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
   // Set to zero to make sure we do not use the previous encoded frame stats
   mbmi->skip = 0;
 
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+    x->source_variance =
+        high_get_sby_perpixel_variance(cpi, &x->plane[0].src, bsize, xd->bd);
+  } else {
+    x->source_variance =
+        get_sby_perpixel_variance(cpi, &x->plane[0].src, bsize);
+  }
+#else
   x->source_variance = get_sby_perpixel_variance(cpi, &x->plane[0].src, bsize);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
   // Save rdmult before it might be changed, so it can be restored later.
   orig_rdmult = x->rdmult;
@@ -3170,9 +3257,34 @@ static int set_var_thresh_from_histogram(VP9_COMP *cpi) {
 
   for (i = 0; i < cm->mb_rows; i++) {
     for (j = 0; j < cm->mb_cols; j++) {
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (cm->use_highbitdepth) {
+        switch (cm->bit_depth) {
+          case VPX_BITS_8:
+            vp9_high_get16x16var(src, src_stride, last_src, last_stride,
+                                 &var16->sse, &var16->sum);
+            break;
+          case VPX_BITS_10:
+            vp9_high_10_get16x16var(src, src_stride, last_src, last_stride,
+                                    &var16->sse, &var16->sum);
+            break;
+          case VPX_BITS_12:
+            vp9_high_12_get16x16var(src, src_stride, last_src, last_stride,
+                                    &var16->sse, &var16->sum);
+            break;
+          default:
+            assert(0 && "cm->bit_depth should be VPX_BITS_8, VPX_BITS_10"
+                   " or VPX_BITS_12");
+            return -1;
+        }
+      } else {
+        vp9_get16x16var(src, src_stride, last_src, last_stride,
+                        &var16->sse, &var16->sum);
+      }
+#else
       vp9_get16x16var(src, src_stride, last_src, last_stride,
                       &var16->sse, &var16->sum);
-
+#endif  // CONFIG_VP9_HIGHBITDEPTH
       var16->var = var16->sse -
           (((uint32_t)var16->sum * var16->sum) >> 8);
 
@@ -3314,7 +3426,15 @@ static void encode_frame_internal(VP9_COMP *cpi) {
 
   cm->tx_mode = select_tx_mode(cpi);
 
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (cm->use_highbitdepth)
+    x->fwd_txm4x4 = xd->lossless ? vp9_fwht4x4 : vp9_fdct4x4;
+  else
+    x->fwd_txm4x4 = xd->lossless ? vp9_high_fwht4x4 : vp9_high_fdct4x4;
+  x->high_itxm_add = xd->lossless ? vp9_high_iwht4x4_add : vp9_high_idct4x4_add;
+#else
   x->fwd_txm4x4 = xd->lossless ? vp9_fwht4x4 : vp9_fdct4x4;
+#endif  // CONFIG_VP9_HIGHBITDEPTH
   x->itxm_add = xd->lossless ? vp9_iwht4x4_add : vp9_idct4x4_add;
 
   if (xd->lossless) {

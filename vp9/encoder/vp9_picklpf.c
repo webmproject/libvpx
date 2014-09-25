@@ -40,7 +40,15 @@ static int try_filter_frame(const YV12_BUFFER_CONFIG *sd, VP9_COMP *const cpi,
 
   vp9_loop_filter_frame(cm->frame_to_show, cm, &cpi->mb.e_mbd, filt_level, 1,
                         partial_frame);
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (cm->use_highbitdepth) {
+    filt_err = vp9_highbd_get_y_sse(sd, cm->frame_to_show, cm->bit_depth);
+  } else {
+    filt_err = vp9_get_y_sse(sd, cm->frame_to_show);
+  }
+#else
   filt_err = vp9_get_y_sse(sd, cm->frame_to_show);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
   // Re-instate the unfiltered frame
   vpx_yv12_copy_y(&cpi->last_frame_uf, cm->frame_to_show);
@@ -145,7 +153,26 @@ void vp9_pick_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
     const int q = vp9_ac_quant(cm->base_qindex, 0, cm->bit_depth);
     // These values were determined by linear fitting the result of the
     // searched level, filt_guess = q * 0.316206 + 3.87252
+#if CONFIG_VP9_HIGHDEPTH
+    int filt_guess;
+    switch (cm->bit_depth) {
+      case VPX_BITS_8:
+        filt_guess = ROUND_POWER_OF_TWO(q * 20723 + 1015158, 18);
+        break;
+      case VPX_BITS_10:
+        filt_guess = ROUND_POWER_OF_TWO(q * 20723 + 4060632, 20);
+        break;
+      case VPX_BITS_12:
+        filt_guess = ROUND_POWER_OF_TWO(q * 20723 + 16242526, 22);
+        break;
+      default:
+        assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10 "
+                    "or VPX_BITS_12");
+        return;
+    }
+#else
     int filt_guess = ROUND_POWER_OF_TWO(q * 20723 + 1015158, 18);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
     if (cm->frame_type == KEY_FRAME)
       filt_guess -= 4;
     lf->filter_level = clamp(filt_guess, min_filter_level, max_filter_level);

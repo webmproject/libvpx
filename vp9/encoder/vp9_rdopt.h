@@ -54,7 +54,6 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(struct VP9_COMP *cpi,
                                       BLOCK_SIZE bsize,
                                       PICK_MODE_CONTEXT *ctx,
                                       int64_t best_rd_so_far);
-
 #ifdef __cplusplus
 }  // extern "C"
 #endif

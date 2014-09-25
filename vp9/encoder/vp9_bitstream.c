@@ -120,16 +120,28 @@ static void update_switchable_interp_probs(VP9_COMMON *cm, vp9_writer *w) {
 }
 
 static void pack_mb_tokens(vp9_writer *w,
-                           TOKENEXTRA **tp, const TOKENEXTRA *const stop) {
+                           TOKENEXTRA **tp, const TOKENEXTRA *const stop,
+                           vpx_bit_depth_t bit_depth) {
   TOKENEXTRA *p = *tp;
 
   while (p < stop && p->token != EOSB_TOKEN) {
     const int t = p->token;
     const struct vp9_token *const a = &vp9_coef_encodings[t];
-    const vp9_extra_bit *const b = &vp9_extra_bits[t];
     int i = 0;
     int v = a->value;
     int n = a->len;
+#if CONFIG_VP9_HIGHBITDEPTH
+    const vp9_extra_bit *b;
+    if (bit_depth == VPX_BITS_12)
+      b = &vp9_extra_bits_high12[t];
+    else if (bit_depth == VPX_BITS_10)
+      b = &vp9_extra_bits_high10[t];
+    else
+      b = &vp9_extra_bits[t];
+#else
+    const vp9_extra_bit *const b = &vp9_extra_bits[t];
+    (void) bit_depth;
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
     /* skip one or two nodes */
     if (p->skip_eob_node) {
@@ -387,7 +399,7 @@ static void write_modes_b(VP9_COMP *cpi, const TileInfo *const tile,
   }
 
   assert(*tok < tok_end);
-  pack_mb_tokens(w, tok, tok_end);
+  pack_mb_tokens(w, tok, tok_end, cm->bit_depth);
 }
 
 static void write_partition(const VP9_COMMON *const cm,
