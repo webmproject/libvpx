@@ -177,6 +177,9 @@ int vp9_rc_bits_per_mb(FRAME_TYPE frame_type, int qindex,
   const double q = vp9_convert_qindex_to_q(qindex, bit_depth);
   int enumerator = frame_type == KEY_FRAME ? 2700000 : 1800000;
 
+  assert(correction_factor <= MAX_BPB_FACTOR &&
+         correction_factor >= MIN_BPB_FACTOR);
+
   // q based adjustment to baseline enumerator
   enumerator += (int)(enumerator * q) >> 12;
   return (int)(enumerator * correction_factor / q);
@@ -187,7 +190,8 @@ static int estimate_bits_at_q(FRAME_TYPE frame_type, int q, int mbs,
                               vpx_bit_depth_t bit_depth) {
   const int bpm = (int)(vp9_rc_bits_per_mb(frame_type, q, correction_factor,
                                            bit_depth));
-  return ((uint64_t)bpm * mbs) >> BPER_MB_NORMBITS;
+  return MAX(FRAME_OVERHEAD_BITS,
+             (int)((uint64_t)bpm * mbs) >> BPER_MB_NORMBITS);
 }
 
 int vp9_rc_clamp_pframe_target_size(const VP9_COMP *const cpi, int target) {
@@ -410,7 +414,7 @@ void vp9_rc_update_rate_correction_factors(VP9_COMP *cpi, int damp_var) {
                                                  rate_correction_factor,
                                                  cm->bit_depth);
   // Work out a size correction factor.
-  if (projected_size_based_on_q > 0)
+  if (projected_size_based_on_q > FRAME_OVERHEAD_BITS)
     correction_factor = (100 * cpi->rc.projected_frame_size) /
                             projected_size_based_on_q;
 

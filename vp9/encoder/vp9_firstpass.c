@@ -39,9 +39,9 @@
 #define ARF_STATS_OUTPUT    0
 
 #define BOOST_FACTOR        12.5
-#define ERR_DIVISOR         100.0
-#define FACTOR_PT_LOW       0.5
-#define FACTOR_PT_HIGH      0.9
+#define ERR_DIVISOR         125.0
+#define FACTOR_PT_LOW       0.70
+#define FACTOR_PT_HIGH      0.90
 #define FIRST_PASS_Q        10.0
 #define GF_MAX_BOOST        96.0
 #define INTRA_MODE_PENALTY  1024
@@ -1057,7 +1057,7 @@ static double calc_correction_factor(double err_per_mb,
 
   // Adjustment based on actual quantizer to power term.
   const double power_term =
-      MIN(vp9_convert_qindex_to_q(q, bit_depth) * 0.0125 + pt_low, pt_high);
+      MIN(vp9_convert_qindex_to_q(q, bit_depth) * 0.01 + pt_low, pt_high);
 
   // Calculate correction factor.
   if (power_term < 1.0)
@@ -1065,6 +1065,11 @@ static double calc_correction_factor(double err_per_mb,
 
   return fclamp(pow(error_term, power_term), 0.05, 5.0);
 }
+
+// Larger image formats are expected to be a little harder to code relatively
+// given the same prediction error score. This in part at least relates to the
+// increased size and hence coding cost of motion vectors.
+#define EDIV_SIZE_FACTOR 800
 
 static int get_twopass_worst_quality(const VP9_COMP *cpi,
                                      const FIRSTPASS_STATS *stats,
@@ -1079,8 +1084,10 @@ static int get_twopass_worst_quality(const VP9_COMP *cpi,
     const double section_err = stats->coded_error / stats->count;
     const double err_per_mb = section_err / num_mbs;
     const double speed_term = 1.0 + 0.04 * oxcf->speed;
+    const double ediv_size_correction = num_mbs / EDIV_SIZE_FACTOR;
     const int target_norm_bits_per_mb = ((uint64_t)section_target_bandwidth <<
                                          BPER_MB_NORMBITS) / num_mbs;
+
     int q;
     int is_svc_upper_layer = 0;
     if (is_two_pass_svc(cpi) && cpi->svc.spatial_layer_id > 0)
@@ -1090,7 +1097,7 @@ static int get_twopass_worst_quality(const VP9_COMP *cpi,
     // content at the given rate.
     for (q = rc->best_quality; q < rc->worst_quality; ++q) {
       const double factor =
-          calc_correction_factor(err_per_mb, ERR_DIVISOR,
+          calc_correction_factor(err_per_mb, ERR_DIVISOR - ediv_size_correction,
                                  is_svc_upper_layer ? SVC_FACTOR_PT_LOW :
                                  FACTOR_PT_LOW, FACTOR_PT_HIGH, q,
                                  cpi->common.bit_depth);
@@ -1735,7 +1742,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       // bits to spare and are better with a smaller interval and smaller boost.
       // At high Q when there are few bits to spare we are better with a longer
       // interval to spread the cost of the GF.
-      active_max_gf_interval = 12 + MIN(4, (int_max_q / 32));
+      active_max_gf_interval = 12 + MIN(4, (int_max_q / 24));
       if (active_max_gf_interval > rc->max_gf_interval)
         active_max_gf_interval = rc->max_gf_interval;
     }

@@ -1758,7 +1758,7 @@ static void rd_use_partition(VP9_COMP *cpi,
 
   // We must have chosen a partitioning and encoding or we'll fail later on.
   // No other opportunities for success.
-  if ( bsize == BLOCK_64X64)
+  if (bsize == BLOCK_64X64)
     assert(chosen_rate < INT_MAX && chosen_dist < INT64_MAX);
 
   if (do_recon) {
