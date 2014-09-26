@@ -277,7 +277,6 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
       base_bits = dct_value_cost[x];
 
       if (shortcut) {
-        dx -= (dequant_ptr[rc != 0] + sz) ^ sz;
 #if CONFIG_VP9_HIGHBITDEPTH
         if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
           dx -= ((dequant_ptr[rc != 0] >> (xd->bd - 8)) + sz) ^ sz;
