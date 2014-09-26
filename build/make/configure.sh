@@ -788,8 +788,8 @@ process_common_toolchain() {
             add_ldflags "-mmacosx-version-min=10.9"
             ;;
         *-iphonesimulator-*)
-            add_cflags  "-miphoneos-version-min=5.0"
-            add_ldflags "-miphoneos-version-min=5.0"
+            add_cflags  "-miphoneos-version-min=6.0"
+            add_ldflags "-miphoneos-version-min=6.0"
             osx_sdk_dir="$(xcrun --sdk iphonesimulator --show-sdk-path)"
             add_cflags  "-isysroot ${osx_sdk_dir}"
             add_ldflags "-isysroot ${osx_sdk_dir}"
