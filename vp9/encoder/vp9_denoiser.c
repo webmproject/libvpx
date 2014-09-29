@@ -143,7 +143,7 @@ static VP9_DENOISER_DECISION denoiser_filter(const uint8_t *sig, int sig_stride,
 
   // Otherwise, we try to dampen the filter if the delta is not too high.
   delta = ((abs(total_adj) - total_adj_strong_thresh(bs, increase_denoising))
-           >> 8) + 1;
+           >> num_pels_log2_lookup[bs]) + 1;
 
   if (delta >= delta_thresh(bs, increase_denoising)) {
     return COPY_BLOCK;
