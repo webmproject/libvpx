@@ -16,6 +16,24 @@
       "revId": "ccd5b66d880476bfdd526c85f00f4fb430182906",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//VaU\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2014-09-29T20:12:10Z",
+      "side": 1,
+      "message": "Yell, I didn\u0027t notice that we have the similar array in vp9_common_data.c.\nI reused that for my patch, but for widths and heights, I didn\u0027t see the same array there and just leave it as it be.",
+      "parentUuid": "AAAAdn//VbA\u003d",
+      "revId": "ccd5b66d880476bfdd526c85f00f4fb430182906",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
