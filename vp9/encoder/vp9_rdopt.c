@@ -2970,6 +2970,11 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     }
   }
 
+  if (cpi->sf.alt_ref_search_fp)
+    if (!cm->show_frame)
+      if (x->pred_mv_sad[ALTREF_FRAME] > (x->pred_mv_sad[GOLDEN_FRAME] << 1))
+        mode_skip_mask[ALTREF_FRAME] |= INTER_ALL;
+
   if (bsize > cpi->sf.max_intra_bsize) {
     ref_frame_skip_mask[0] |= (1 << INTRA_FRAME);
     ref_frame_skip_mask[1] |= (1 << INTRA_FRAME);
