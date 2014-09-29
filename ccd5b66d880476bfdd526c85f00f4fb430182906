@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//VbA\u003d",
+        "filename": "vp9/encoder/vp9_denoiser.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-09-29T18:50:16Z",
+      "side": 1,
+      "message": "These three constant arrays have similarity to many of those in vp9_common_data.{h,c}, would it be better that we reuse those, or, have all these defined in the same location?",
+      "revId": "ccd5b66d880476bfdd526c85f00f4fb430182906",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
