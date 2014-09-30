@@ -6,6 +6,7 @@ print <<EOF
 
 #include "vpx/vpx_integer.h"
 #include "vp9/common/vp9_enums.h"
+#include "vp9/common/vp9_idct.h"
 
 struct macroblockd;
 

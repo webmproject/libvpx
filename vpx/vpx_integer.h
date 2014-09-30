@@ -63,15 +63,4 @@ typedef size_t uintptr_t;
 #include <inttypes.h>
 #endif
 
-// Note:
-// tran_low_t  is the datatype used for final transform coefficients.
-// tran_high_t is the datatype used for intermediate transform stages.
-#if CONFIG_VP9_HIGHBITDEPTH && CONFIG_VP9
-typedef int64_t tran_high_t;
-typedef int32_t tran_low_t;
-#else
-typedef int32_t tran_high_t;
-typedef int16_t tran_low_t;
-#endif
-
 #endif  // VPX_VPX_INTEGER_H_
