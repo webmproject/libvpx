@@ -79,6 +79,8 @@ typedef enum {
 typedef enum {
   SUBPEL_TREE = 0,
   SUBPEL_TREE_PRUNED = 1,
+  SUBPEL_TREE_PRUNED_MORE = 2,
+  SUBPEL_SURFACE_FIT = 3,
   // Other methods to come
 } SUBPEL_SEARCH_METHODS;
 
