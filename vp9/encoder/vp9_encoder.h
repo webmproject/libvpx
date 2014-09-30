@@ -241,7 +241,8 @@ typedef struct VP9_COMP {
   YV12_BUFFER_CONFIG *unscaled_last_source;
   YV12_BUFFER_CONFIG scaled_last_source;
 
-  int skippable_frame;
+  // For a still frame, this flag is set to 1 to skip partition search.
+  int partition_search_skippable_frame;
 
   int scaled_ref_idx[3];
   int lst_fb_idx;
