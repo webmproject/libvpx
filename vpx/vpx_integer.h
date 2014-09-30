@@ -49,9 +49,15 @@ typedef size_t uintptr_t;
 
 /* Most platforms have the C99 standard integer types. */
 
-#if defined(__cplusplus) && !defined(__STDC_FORMAT_MACROS)
-#define __STDC_FORMAT_MACROS
-#endif
+#if defined(__cplusplus)
+# if !defined(__STDC_FORMAT_MACROS)
+#  define __STDC_FORMAT_MACROS
+# endif
+# if !defined(__STDC_LIMIT_MACROS)
+#  define __STDC_LIMIT_MACROS
+# endif
+#endif  // __cplusplus
+
 #include <stdint.h>
 
 #endif
