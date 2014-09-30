@@ -1676,6 +1676,10 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
       vp9_sub_pixel_avg_variance4x4,
       vp9_sad4x4x3, vp9_sad4x4x8, vp9_sad4x4x4d)
 
+#if CONFIG_VP9_HIGHBITDEPTH
+  highbd_set_var_fns(cpi);
+#endif
+
   /* vp9_init_quantizer() is first called here. Add check in
    * vp9_frame_init_quantizer() so that vp9_init_quantizer is only
    * called later when needed. This will avoid unnecessary calls of

@@ -274,27 +274,47 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
   }
 
 #if !CONFIG_VP9_HIGHBITDEPTH
-  if (cfg->g_profile > (unsigned int)PROFILE_1)
+  if (cfg->g_profile > (unsigned int)PROFILE_1) {
     ERROR("Profile > 1 not supported in this build configuration");
+  }
 #endif
   if (cfg->g_profile <= (unsigned int)PROFILE_1 &&
-      extra_cfg->bit_depth > VPX_BITS_8)
+      cfg->g_bit_depth > VPX_BITS_8) {
     ERROR("Codec high bit-depth not supported in profile < 2");
+  }
+  if (cfg->g_profile <= (unsigned int)PROFILE_1 &&
+      cfg->g_input_bit_depth > 8) {
+    ERROR("Source high bit-depth not supported in profile < 2");
+  }
   if (cfg->g_profile > (unsigned int)PROFILE_1 &&
-      extra_cfg->bit_depth == VPX_BITS_8)
+      cfg->g_bit_depth == VPX_BITS_8) {
     ERROR("Codec bit-depth 8 not supported in profile > 1");
+  }
 
   return VPX_CODEC_OK;
 }
-
 
 static vpx_codec_err_t validate_img(vpx_codec_alg_priv_t *ctx,
                                     const vpx_image_t *img) {
   switch (img->fmt) {
     case VPX_IMG_FMT_YV12:
     case VPX_IMG_FMT_I420:
+    case VPX_IMG_FMT_I42016:
+      break;
     case VPX_IMG_FMT_I422:
     case VPX_IMG_FMT_I444:
+      if (ctx->cfg.g_profile != (unsigned int)PROFILE_1) {
+        ERROR("Invalid image format. I422, I444 images are "
+              "not supported in profile.");
+      }
+      break;
+    case VPX_IMG_FMT_I42216:
+    case VPX_IMG_FMT_I44416:
+      if (ctx->cfg.g_profile != (unsigned int)PROFILE_1 &&
+          ctx->cfg.g_profile != (unsigned int)PROFILE_3) {
+        ERROR("Invalid image format. 16-bit I422, I444 images are "
+              "not supported in profile.");
+      }
       break;
     default:
       ERROR("Invalid image format. Only YV12, I420, I422, I444 images are "
@@ -330,7 +350,7 @@ static vpx_codec_err_t set_encoder_config(
   oxcf->profile = cfg->g_profile;
   oxcf->width   = cfg->g_w;
   oxcf->height  = cfg->g_h;
-  oxcf->bit_depth = extra_cfg->bit_depth;
+  oxcf->bit_depth = cfg->g_bit_depth;
   oxcf->input_bit_depth = cfg->g_input_bit_depth;
   // guess a frame rate if out of whack, use 30
   oxcf->init_framerate = (double)cfg->g_timebase.den / cfg->g_timebase.num;
