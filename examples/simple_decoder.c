@@ -33,24 +33,25 @@
 //
 // Initializing The Codec
 // ----------------------
-// The decoder is initialized by the following code. This is an example for
-// the VP8 decoder, but the code is analogous for all algorithms. Replace
-// `vpx_codec_vp8_dx()` with a pointer to the interface exposed by the
-// algorithm you want to use. The `cfg` argument is left as NULL in this
-// example, because we want the algorithm to determine the stream
-// configuration (width/height) and allocate memory automatically. This
-// parameter is generally only used if you need to preallocate memory,
-// particularly in External Memory Allocation mode.
+// The libvpx decoder is initialized by the call to vpx_codec_dec_init().
+// Determining the codec interface to use is handled by VpxVideoReader and the
+// functions prefixed with vpx_video_reader_. Discussion of those functions is
+// beyond the scope of this example, but the main gist is to open the input file
+// and parse just enough of it to determine if it's a VPx file and which VPx
+// codec is contained within the file.
+// Note the NULL pointer passed to vpx_codec_dec_init(). We do that in this
+// example because we want the algorithm to determine the stream configuration
+// (width/height) and allocate memory automatically.
 //
 // Decoding A Frame
 // ----------------
 // Once the frame has been read into memory, it is decoded using the
 // `vpx_codec_decode` function. The call takes a pointer to the data
-// (`frame`) and the length of the data (`frame_sz`). No application data
+// (`frame`) and the length of the data (`frame_size`). No application data
 // is associated with the frame in this example, so the `user_priv`
 // parameter is NULL. The `deadline` parameter is left at zero for this
-// example. This parameter is generally only used when doing adaptive
-// postprocessing.
+// example. This parameter is generally only used when doing adaptive post
+// processing.
 //
 // Codecs may produce a variable number of output frames for every call to
 // `vpx_codec_decode`. These frames are retrieved by the
@@ -72,14 +73,13 @@
 // --------------
 // This example does not special case any error return codes. If there was
 // an error, a descriptive message is printed and the program exits. With
-// few exeptions, vpx_codec functions return an enumerated error status,
+// few exceptions, vpx_codec functions return an enumerated error status,
 // with the value `0` indicating success.
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "vpx/vp8dx.h"
 #include "vpx/vpx_decoder.h"
 
 #include "./tools_common.h"
