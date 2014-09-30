@@ -36,17 +36,6 @@ extern "C" {
 #define dual_set_epi16(a, b) \
   _mm_set_epi16(b, b, b, b, a, a, a, a)
 
-// Note:
-// tran_low_t  is the datatype used for final transform coefficients.
-// tran_high_t is the datatype used for intermediate transform stages.
-#if CONFIG_VP9_HIGHBITDEPTH
-typedef int64_t tran_high_t;
-typedef int32_t tran_low_t;
-#else
-typedef int32_t tran_high_t;
-typedef int16_t tran_low_t;
-#endif
-
 // Constants:
 //  for (int i = 1; i< 32; ++i)
 //    printf("static const int cospi_%d_64 = %.0f;\n", i,
