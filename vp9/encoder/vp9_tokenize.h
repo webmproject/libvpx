@@ -26,12 +26,20 @@ void vp9_tokenize_initialize();
 
 typedef struct {
   int16_t token;
+#if CONFIG_VP9_HIGHBITDEPTH
+  int32_t extra;
+#else
   int16_t extra;
+#endif
 } TOKENVALUE;
 
 typedef struct {
   const vp9_prob *context_tree;
+#if CONFIG_VP9_HIGHBITDEPTH
+  int32_t extra;
+#else
   int16_t         extra;
+#endif
   uint8_t         token;
   uint8_t         skip_eob_node;
 } TOKENEXTRA;

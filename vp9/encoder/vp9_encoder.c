@@ -1712,15 +1712,16 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
                              - cpi->first_time_stamp_ever) / 10000000.000;
       double total_encode_time = (cpi->time_receive_data +
                                   cpi->time_compress_data)   / 1000.000;
-      double dr = (double)cpi->bytes * (double) 8 / (double)1000
-                  / time_encoded;
+      const double dr =
+          (double)cpi->bytes * (double) 8 / (double)1000 / time_encoded;
+      const double peak = (double)((1 << cpi->oxcf.input_bit_depth) - 1);
 
       if (cpi->b_calculate_psnr) {
         const double total_psnr =
-            vpx_sse_to_psnr((double)cpi->total_samples, 255.0,
+            vpx_sse_to_psnr((double)cpi->total_samples, peak,
                             (double)cpi->total_sq_error);
         const double totalp_psnr =
-            vpx_sse_to_psnr((double)cpi->totalp_samples, 255.0,
+            vpx_sse_to_psnr((double)cpi->totalp_samples, peak,
                             (double)cpi->totalp_sq_error);
         const double total_ssim = 100 * pow(cpi->summed_quality /
                                                 cpi->summed_weights, 8.0);
@@ -1914,6 +1915,7 @@ typedef struct {
 
 static void calc_psnr(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b,
                       PSNR_STATS *psnr) {
+  static const double peak = 255.0;
   const int widths[3]        = {a->y_width,  a->uv_width,  a->uv_width };
   const int heights[3]       = {a->y_height, a->uv_height, a->uv_height};
   const uint8_t *a_planes[3] = {a->y_buffer, a->u_buffer,  a->v_buffer };
@@ -1933,7 +1935,7 @@ static void calc_psnr(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b,
                                  w, h);
     psnr->sse[1 + i] = sse;
     psnr->samples[1 + i] = samples;
-    psnr->psnr[1 + i] = vpx_sse_to_psnr(samples, 255.0, (double)sse);
+    psnr->psnr[1 + i] = vpx_sse_to_psnr(samples, peak, (double)sse);
 
     total_sse += sse;
     total_samples += samples;
@@ -1941,7 +1943,7 @@ static void calc_psnr(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b,
 
   psnr->sse[0] = total_sse;
   psnr->samples[0] = total_samples;
-  psnr->psnr[0] = vpx_sse_to_psnr((double)total_samples, 255.0,
+  psnr->psnr[0] = vpx_sse_to_psnr((double)total_samples, peak,
                                   (double)total_sse);
 }
 
@@ -3699,7 +3701,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
           vp9_clear_system_state();
 
 #if CONFIG_VP9_HIGHBITDEPTH
-          calc_highbd_psnr(orig, recon, &psnr, cpi->mb.e_mbd.bd,
+          calc_highbd_psnr(orig, pp, &psnr, cpi->mb.e_mbd.bd,
                            cpi->oxcf.input_bit_depth);
 #else
           calc_psnr(orig, pp, &psnr2);
@@ -3714,11 +3716,9 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
 #if CONFIG_VP9_HIGHBITDEPTH
           if (cm->use_highbitdepth) {
-            frame_ssim2 = vp9_highbd_calc_ssim(
-                orig, recon, &weight, xd->bd,
-                xd->bd - cpi->oxcf.input_bit_depth);
+            frame_ssim2 = vp9_highbd_calc_ssim(orig, recon, &weight, xd->bd);
           } else {
-            frame_ssim2 = vp9_calc_ssim(orig, recon, 1, &weight);
+            frame_ssim2 = vp9_calc_ssim(orig, recon, &weight);
           }
 #else
           frame_ssim2 = vp9_calc_ssim(orig, recon, &weight);
@@ -3730,8 +3730,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 #if CONFIG_VP9_HIGHBITDEPTH
           if (cm->use_highbitdepth) {
             frame_ssim2 = vp9_highbd_calc_ssim(
-                orig, &cm->post_proc_buffer, &weight,
-                xd->bd, xd->bd - cpi->oxcf.input_bit_depth);
+                orig, &cm->post_proc_buffer, &weight, xd->bd);
           } else {
             frame_ssim2 = vp9_calc_ssim(orig, &cm->post_proc_buffer, &weight);
           }
@@ -3757,10 +3756,9 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
       if (cpi->b_calculate_ssimg) {
         double y, u, v, frame_all;
 #if CONFIG_VP9_HIGHBITDEPTH
-        if (cm->use_high) {
+        if (cm->use_highbitdepth) {
           frame_all = vp9_highbd_calc_ssimg(cpi->Source, cm->frame_to_show, &y,
-                                            &u, &v, xd->bd,
-                                            xd->bd - cpi->oxcf.input_bit_depth);
+                                            &u, &v, xd->bd);
         } else {
           frame_all = vp9_calc_ssimg(cpi->Source, cm->frame_to_show, &y, &u,
                                      &v);

@@ -246,11 +246,11 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
     } else {
 #if CONFIG_VP9_HIGHBITDEPTH
       if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-        vp9_model_rd_from_var_lapndz(sse, 1 << num_pels_log2_lookup[bs],
+        vp9_model_rd_from_var_lapndz(sum_sse, 1 << num_pels_log2_lookup[bs],
                                      pd->dequant[1] >> (xd->bd - 5),
                                      &rate, &dist);
       } else {
-        vp9_model_rd_from_var_lapndz(sse, 1 << num_pels_log2_lookup[bs],
+        vp9_model_rd_from_var_lapndz(sum_sse, 1 << num_pels_log2_lookup[bs],
                                      pd->dequant[1] >> 3, &rate, &dist);
       }
 #else
