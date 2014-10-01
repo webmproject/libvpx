@@ -180,7 +180,7 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
   unsigned int sse;
   unsigned int var = 0;
   unsigned int sum_sse = 0;
-  const int shift = 8;
+  const int shift = 6;
   int rate;
   int64_t dist;
 
@@ -212,12 +212,16 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
         sum_sse += sse;
 
         if (!x->select_tx_size) {
-          if (x->bsse[(i << 2) + block_idx] < p->quant_thred[0] >> shift)
-            x->skip_txfm[(i << 2) + block_idx] = 1;
-          else if (var < p->quant_thred[1] >> shift)
+          // Check if all ac coefficients can be quantized to zero.
+          if (var < p->quant_thred[1] >> shift) {
             x->skip_txfm[(i << 2) + block_idx] = 2;
-          else
+
+            // Check if dc coefficient can be quantized to zero.
+            if (sse - var < p->quant_thred[0] >> shift)
+              x->skip_txfm[(i << 2) + block_idx] = 1;
+          } else {
             x->skip_txfm[(i << 2) + block_idx] = 0;
+          }
         }
 
         if (i == 0)
@@ -484,9 +488,15 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
       vp9_xform_quant_dc(x, plane, block, plane_bsize, tx_size);
       args->sse  = x->bsse[(plane << 2) + (block >> (tx_size << 1))] << 4;
       args->dist = args->sse;
-      if (!x->plane[plane].eobs[block])
-        args->dist = args->sse - ((coeff[0] * coeff[0] -
-            (coeff[0] - dqcoeff[0]) * (coeff[0] - dqcoeff[0])) >> 2);
+      if (x->plane[plane].eobs[block]) {
+        int64_t dc_correct = coeff[0] * coeff[0] -
+            (coeff[0] - dqcoeff[0]) * (coeff[0] - dqcoeff[0]);
+
+        if (tx_size != TX_32X32)
+          dc_correct >>= 2;
+
+        args->dist = args->sse - dc_correct;
+      }
     } else {
       // skip forward transform
       x->plane[plane].eobs[block] = 0;

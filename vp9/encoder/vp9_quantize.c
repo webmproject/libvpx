@@ -641,12 +641,13 @@ void vp9_init_plane_quantizers(VP9_COMP *cpi, MACROBLOCK *x) {
   x->plane[0].quant_shift = quants->y_quant_shift[qindex];
   x->plane[0].zbin = quants->y_zbin[qindex];
   x->plane[0].round = quants->y_round[qindex];
-  x->plane[0].quant_thred[0] = cm->y_dequant[qindex][0] *
-                                  cm->y_dequant[qindex][0];
-  x->plane[0].quant_thred[1] = cm->y_dequant[qindex][1] *
-                                  cm->y_dequant[qindex][1];
   x->plane[0].zbin_extra = (int16_t)((cm->y_dequant[qindex][1] * zbin) >> 7);
   xd->plane[0].dequant = cm->y_dequant[qindex];
+
+  x->plane[0].quant_thred[0] = (x->plane[0].zbin[0] + x->plane[0].zbin_extra) *
+      (x->plane[0].zbin[0] + x->plane[0].zbin_extra);
+  x->plane[0].quant_thred[1] = (x->plane[0].zbin[1] + x->plane[0].zbin_extra) *
+      (x->plane[0].zbin[1] + x->plane[0].zbin_extra);
 
   // UV
   for (i = 1; i < 3; i++) {
@@ -656,12 +657,15 @@ void vp9_init_plane_quantizers(VP9_COMP *cpi, MACROBLOCK *x) {
     x->plane[i].quant_shift = quants->uv_quant_shift[qindex];
     x->plane[i].zbin = quants->uv_zbin[qindex];
     x->plane[i].round = quants->uv_round[qindex];
-    x->plane[i].quant_thred[0] = cm->y_dequant[qindex][0] *
-                                    cm->y_dequant[qindex][0];
-    x->plane[i].quant_thred[1] = cm->y_dequant[qindex][1] *
-                                    cm->y_dequant[qindex][1];
     x->plane[i].zbin_extra = (int16_t)((cm->uv_dequant[qindex][1] * zbin) >> 7);
     xd->plane[i].dequant = cm->uv_dequant[qindex];
+
+    x->plane[i].quant_thred[0] =
+        (x->plane[i].zbin[0] + x->plane[i].zbin_extra) *
+        (x->plane[i].zbin[0] + x->plane[i].zbin_extra);
+    x->plane[i].quant_thred[1] =
+        (x->plane[i].zbin[1] + x->plane[i].zbin_extra) *
+        (x->plane[i].zbin[1] + x->plane[i].zbin_extra);
   }
 
   x->skip_block = vp9_segfeature_active(&cm->seg, segment_id, SEG_LVL_SKIP);
