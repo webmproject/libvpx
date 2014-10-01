@@ -38,7 +38,6 @@ static void initialize_dec() {
 
   if (!init_done) {
     vp9_rtcd();
-    vp9_init_neighbors();
     vp9_init_intra_predictors();
     init_done = 1;
   }
