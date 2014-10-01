@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//VGE\u003d",
+        "filename": "vpx/src/vpx_image.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-10-01T20:07:40Z",
+      "side": 1,
+      "message": "3 nits here since you\u0027re now touching this section:\n\n- the alignment spacing in the arg list needs to go\n- ditto in the declarations\n- drop the extra new line at the beginning of the function",
+      "revId": "e855d8eb16d510ca7b44738048c0a9438f6a62a1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
