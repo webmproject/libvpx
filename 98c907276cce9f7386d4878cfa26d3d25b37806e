@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//VMA\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 391,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-10-01T17:19:12Z",
+      "side": 1,
+      "message": "move this line into the if cm-\u003eframe_type !\u003d KEY_FRAME",
+      "revId": "98c907276cce9f7386d4878cfa26d3d25b37806e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//VME\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 3620,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-10-01T17:19:12Z",
+      "side": 1,
+      "message": "assert seems like the wrong thing to do here,  maybe throw an error?",
+      "revId": "98c907276cce9f7386d4878cfa26d3d25b37806e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//VL8\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 1620,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-10-01T17:19:12Z",
+      "side": 1,
+      "message": "get_ref_frame_idx can return -1 ?   shouldn\u0027t it be tested too",
+      "revId": "98c907276cce9f7386d4878cfa26d3d25b37806e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//VL4\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 2763,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-10-01T17:19:12Z",
+      "side": 1,
+      "message": "get_ref_frame_idx can return -1 need to check it in array.\n\nif ( idx !\u003d INVALID-BLAH)",
+      "revId": "98c907276cce9f7386d4878cfa26d3d25b37806e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//VL0\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 431,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-10-01T17:19:12Z",
+      "side": 1,
+      "message": "new_yv12 can be 0 as can lst_yv12 no?  \n\ncan gld_idx also be -1   ??",
+      "revId": "98c907276cce9f7386d4878cfa26d3d25b37806e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//VLw\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 511,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-10-01T17:19:12Z",
+      "side": 1,
+      "message": "not sure assert is the right thing to do here.   Are we sure that this should never happen ( eg frames are dropped / bad encode)",
+      "revId": "98c907276cce9f7386d4878cfa26d3d25b37806e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//VLo\u003d",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 510,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-10-01T17:19:12Z",
+      "side": 1,
+      "message": "can this be -1?",
+      "revId": "98c907276cce9f7386d4878cfa26d3d25b37806e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//VLs\u003d",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 511,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-10-01T17:19:12Z",
+      "side": 1,
+      "message": "can this be -1?",
+      "revId": "98c907276cce9f7386d4878cfa26d3d25b37806e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//VLk\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 1745,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-10-01T17:19:12Z",
+      "side": 1,
+      "message": "are we sure we want an assert here - ie its never possible to get this far and still be valid?",
+      "revId": "98c907276cce9f7386d4878cfa26d3d25b37806e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
