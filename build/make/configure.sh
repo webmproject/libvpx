@@ -736,6 +736,9 @@ process_common_toolchain() {
     # PIC is probably what we want when building shared libs
     enabled shared && soft_enable pic
 
+    # Minimum iOS version for all target platforms (darwin and iphonesimulator).
+    IOS_VERSION_MIN="6.0"
+
     # Handle darwin variants. Newer SDKs allow targeting older
     # platforms, so find the newest SDK available.
     case ${toolchain} in
@@ -754,7 +757,6 @@ process_common_toolchain() {
                     fi
                 done
             fi
-            IOS_VERSION_MIN="6.0"
             ;;
     esac
 
@@ -975,12 +977,23 @@ EOF
             CXX="$(${XCRUN_FIND} clang++)"
             CC="$(${XCRUN_FIND} clang)"
             AR="$(${XCRUN_FIND} ar)"
-            LD="${CXX:-$(${XCRUN_FIND} ld)}"
             AS="$(${XCRUN_FIND} as)"
             STRIP="$(${XCRUN_FIND} strip)"
             NM="$(${XCRUN_FIND} nm)"
             RANLIB="$(${XCRUN_FIND} ranlib)"
             AS_SFX=.s
+
+            # Special handling of ld for armv6 because libclang_rt.ios.a does
+            # not contain armv6 support in Apple's clang package:
+            #   Apple LLVM version 5.1 (clang-503.0.40) (based on LLVM 3.4svn).
+            # TODO(tomfinegan): Remove this. Our minimum iOS version (6.0)
+            # renders support for armv6 unnecessary because the 3GS and up
+            # support neon.
+            if [ "${tgt_isa}" = "armv6" ]; then
+                LD="$(${XCRUN_FIND} ld)"
+            else
+                LD="${CXX:-$(${XCRUN_FIND} ld)}"
+            fi
 
             # ASFLAGS is written here instead of using check_add_asflags
             # because we need to overwrite all of ASFLAGS and purge the
