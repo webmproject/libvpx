@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//VNc\u003d",
+        "filename": "vpx/src/vpx_image.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1003244
+      },
+      "writtenOn": "2014-10-01T11:08:54Z",
+      "side": 1,
+      "message": "As I understood, doubling the stride here will cause unnecessary memory allocation. When estimating alloc_size, both bps and stride will be taken into account. My proposal is here: https://gerrit.chromium.org/gerrit/#/c/71702/",
+      "revId": "695594c76d42a1a87145130b2774663daa6d6290",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
