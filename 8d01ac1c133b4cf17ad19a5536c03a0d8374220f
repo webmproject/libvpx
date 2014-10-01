@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//VRQ\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 994,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-01T00:04:58Z",
+      "side": 1,
+      "message": "would -miphoneos-version-min\u003d6.0 or -Wl,-ios_version_min make more sense?",
+      "revId": "8d01ac1c133b4cf17ad19a5536c03a0d8374220f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
