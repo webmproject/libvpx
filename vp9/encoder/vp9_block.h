@@ -13,8 +13,6 @@
 
 #include "vp9/common/vp9_entropymv.h"
 #include "vp9/common/vp9_entropy.h"
-#include "vpx_ports/mem.h"
-#include "vp9/common/vp9_onyxc_int.h"
 
 #ifdef __cplusplus
 extern "C" {
