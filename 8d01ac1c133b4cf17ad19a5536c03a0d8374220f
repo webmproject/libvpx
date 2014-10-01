@@ -16,6 +16,24 @@
       "revId": "8d01ac1c133b4cf17ad19a5536c03a0d8374220f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//VP8\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 994,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-10-01T03:13:28Z",
+      "side": 1,
+      "message": "Former makes perfect sense, and it works. Hooray.\n\nToo bad it won\u0027t work in the else case... I dislike the ld on macosx.",
+      "parentUuid": "AAAAdn//VRQ\u003d",
+      "revId": "8d01ac1c133b4cf17ad19a5536c03a0d8374220f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
