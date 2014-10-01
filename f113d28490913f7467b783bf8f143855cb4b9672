@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//VMs\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-10-01T15:27:16Z",
+      "side": 1,
+      "message": "Can one \"regular\" here be sufficient?",
+      "revId": "f113d28490913f7467b783bf8f143855cb4b9672",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
