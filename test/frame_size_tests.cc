@@ -84,4 +84,13 @@ TEST_F(VP9FrameSizeTestsLarge, ValidSizes) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 #endif
 }
+
+TEST_F(VP9FrameSizeTestsLarge, OneByOneVideo) {
+  ::libvpx_test::RandomVideoSource video;
+
+  video.SetSize(1, 1);
+  video.set_limit(2);
+  expected_res_ = VPX_CODEC_OK;
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+}
 }  // namespace
