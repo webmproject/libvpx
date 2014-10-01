@@ -3276,8 +3276,8 @@ int vp9_receive_raw_frame(VP9_COMP *cpi, unsigned int frame_flags,
   VP9_COMMON *cm = &cpi->common;
   struct vpx_usec_timer timer;
   int res = 0;
-  const int subsampling_x = sd->uv_width  < sd->y_width;
-  const int subsampling_y = sd->uv_height < sd->y_height;
+  const int subsampling_x = sd->subsampling_x;
+  const int subsampling_y = sd->subsampling_y;
 #if CONFIG_VP9_HIGHBITDEPTH
   const int use_highbitdepth = sd->flags & YV12_FLAG_HIGHBITDEPTH;
   check_initial_width(cpi, use_highbitdepth, subsampling_x, subsampling_y);

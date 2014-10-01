@@ -735,6 +735,8 @@ static void setup_frame_size(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate frame buffer");
   }
+  cm->frame_bufs[cm->new_fb_idx].buf.subsampling_x = cm->subsampling_x;
+  cm->frame_bufs[cm->new_fb_idx].buf.subsampling_y = cm->subsampling_y;
   cm->frame_bufs[cm->new_fb_idx].buf.bit_depth = (unsigned int)cm->bit_depth;
 }
 
@@ -787,8 +789,8 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
     RefBuffer *const ref_frame = &cm->frame_refs[i];
     if (!valid_ref_frame_img_fmt(
             ref_frame->buf->bit_depth,
-            ref_frame->buf->uv_crop_width < ref_frame->buf->y_crop_width,
-            ref_frame->buf->uv_crop_height < ref_frame->buf->y_crop_height,
+            ref_frame->buf->subsampling_x,
+            ref_frame->buf->subsampling_y,
             cm->bit_depth,
             cm->subsampling_x,
             cm->subsampling_y))
@@ -811,6 +813,8 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate frame buffer");
   }
+  cm->frame_bufs[cm->new_fb_idx].buf.subsampling_x = cm->subsampling_x;
+  cm->frame_bufs[cm->new_fb_idx].buf.subsampling_y = cm->subsampling_y;
   cm->frame_bufs[cm->new_fb_idx].buf.bit_depth = (unsigned int)cm->bit_depth;
 }
 

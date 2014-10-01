@@ -242,6 +242,8 @@ int vp9_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
 
     ybf->border = border;
     ybf->frame_size = (int)frame_size;
+    ybf->subsampling_x = ss_x;
+    ybf->subsampling_y = ss_y;
 
 #if CONFIG_VP9_HIGHBITDEPTH
     if (use_highbitdepth) {
