@@ -1802,11 +1802,8 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   # Structured Similarity (SSIM)
   #
   if (vpx_config("CONFIG_INTERNAL_STATS") eq "yes") {
-    add_proto qw/void vp9_high_ssim_parms_8x8/, "uint16_t *s, int sp, uint16_t *r, int rp, uint32_t *sum_s, uint32_t *sum_r, uint32_t *sum_sq_s, uint32_t *sum_sq_r, uint32_t *sum_sxr";
-    specialize qw/vp9_high_ssim_parms_8x8/;
-
-    add_proto qw/void vp9_high_ssim_parms_8x8_shift/, "uint16_t *s, int sp, uint16_t *r, int rp, uint32_t *sum_s, uint32_t *sum_r, uint32_t *sum_sq_s, uint32_t *sum_sq_r, uint32_t *sum_sxr, unsigned int bd, unsigned int shift";
-    specialize qw/vp9_high_ssim_parms_8x8_shift/;
+    add_proto qw/void vp9_highbd_ssim_parms_8x8/, "uint16_t *s, int sp, uint16_t *r, int rp, uint32_t *sum_s, uint32_t *sum_r, uint32_t *sum_sq_s, uint32_t *sum_sq_r, uint32_t *sum_sxr";
+    specialize qw/vp9_highbd_ssim_parms_8x8/;
   }
 
   # fdct functions

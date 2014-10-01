@@ -261,7 +261,7 @@ static void set_entropy_context_b(int plane, int block, BLOCK_SIZE plane_bsize,
 }
 
 static INLINE void add_token(TOKENEXTRA **t, const vp9_prob *context_tree,
-                             int16_t extra, uint8_t token,
+                             int32_t extra, uint8_t token,
                              uint8_t skip_eob_node,
                              unsigned int *counts) {
   (*t)->token = token;
@@ -329,7 +329,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   scan = so->scan;
   nb = so->neighbors;
   c = 0;
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_QUANT
+#if CONFIG_VP9_HIGHBITDEPTH
   if (cpi->common.profile >= PROFILE_2) {
     dct_value_tokens = (cpi->common.bit_depth == VPX_BITS_10 ?
                         vp9_dct_value_tokens_high10_ptr :

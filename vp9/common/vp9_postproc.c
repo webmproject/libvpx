@@ -469,7 +469,7 @@ void vp9_deblock(const YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst,
   uint8_t *const dsts[3] = {dst->y_buffer, dst->u_buffer, dst->v_buffer};
   const int dst_strides[3] = {dst->y_stride, dst->uv_stride, dst->uv_stride};
 
-  for (i = 0; i < MAX_MB_PLANE; ++i)
+  for (i = 0; i < MAX_MB_PLANE; ++i) {
 #if CONFIG_VP9_HIGHBITDEPTH
     assert((src->flags & YV12_FLAG_HIGHBITDEPTH) ==
            (dst->flags & YV12_FLAG_HIGHBITDEPTH));
@@ -488,6 +488,7 @@ void vp9_deblock(const YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst,
                                   src_strides[i], dst_strides[i],
                                   src_heights[i], src_widths[i], ppl);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+  }
 }
 
 void vp9_denoise(const YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst,

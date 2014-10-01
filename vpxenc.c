@@ -1695,7 +1695,7 @@ static void get_cx_data(struct stream_state *stream,
 }
 
 
-static void show_psnr(struct stream_state  *stream) {
+static void show_psnr(struct stream_state  *stream, double peak) {
   int i;
   double ovpsnr;
 
@@ -1703,7 +1703,7 @@ static void show_psnr(struct stream_state  *stream) {
     return;
 
   fprintf(stderr, "Stream %d PSNR (Overall/Avg/Y/U/V)", stream->index);
-  ovpsnr = sse_to_psnr((double)stream->psnr_samples_total, 255.0,
+  ovpsnr = sse_to_psnr((double)stream->psnr_samples_total, peak,
                        (double)stream->psnr_sse_total);
   fprintf(stderr, " %.3f", ovpsnr);
 
@@ -1784,8 +1784,8 @@ static void low_img_upshift(vpx_image_t *dst, vpx_image_t *src,
     int h = src->h;
     int x, y;
     if (plane) {
-      w >>= src->x_chroma_shift;
-      h >>= src->y_chroma_shift;
+      w = (w + src->x_chroma_shift) >> src->x_chroma_shift;
+      h = (h + src->y_chroma_shift) >> src->y_chroma_shift;
     }
     for (y = 0; y < h; y++) {
       uint8_t *p_src = src->planes[plane] + y * src->stride[plane];
@@ -2272,24 +2272,29 @@ int main(int argc, const char **argv_) {
     if (stream_cnt > 1)
       fprintf(stderr, "\n");
 
-    if (!global.quiet)
-      FOREACH_STREAM(fprintf(
-                       stderr,
-                       "\rPass %d/%d frame %4d/%-4d %7"PRId64"B %7lub/f %7"PRId64"b/s"
-                       " %7"PRId64" %s (%.2f fps)\033[K\n", pass + 1,
-                       global.passes, frames_in, stream->frames_out, (int64_t)stream->nbytes,
-                       seen_frames ? (unsigned long)(stream->nbytes * 8 / seen_frames) : 0,
-                       seen_frames ? (int64_t)stream->nbytes * 8
-                       * (int64_t)global.framerate.num / global.framerate.den
-                       / seen_frames
-                       : 0,
-                       stream->cx_time > 9999999 ? stream->cx_time / 1000 : stream->cx_time,
-                       stream->cx_time > 9999999 ? "ms" : "us",
-                       usec_to_fps(stream->cx_time, seen_frames));
-                    );
+    if (!global.quiet) {
+      FOREACH_STREAM(fprintf(stderr,
+          "\rPass %d/%d frame %4d/%-4d %7"PRId64"B %7"PRId64"b/f %7"PRId64"b/s"
+          " %7"PRId64" %s (%.2f fps)\033[K\n",
+          pass + 1,
+          global.passes, frames_in, stream->frames_out, (int64_t)stream->nbytes,
+          seen_frames ? (int64_t)(stream->nbytes * 8 / seen_frames) : 0,
+          seen_frames ? (int64_t)stream->nbytes * 8 *
+              (int64_t)global.framerate.num / global.framerate.den /
+              seen_frames : 0,
+          stream->cx_time > 9999999 ? stream->cx_time / 1000 : stream->cx_time,
+          stream->cx_time > 9999999 ? "ms" : "us",
+          usec_to_fps(stream->cx_time, seen_frames)));
+    }
 
-    if (global.show_psnr)
-      FOREACH_STREAM(show_psnr(stream));
+    if (global.show_psnr) {
+      if (global.codec->fourcc == VP9_FOURCC) {
+        FOREACH_STREAM(
+            show_psnr(stream, (1 << stream->config.cfg.g_input_bit_depth) - 1));
+      } else {
+        FOREACH_STREAM(show_psnr(stream, 255.0));
+      }
+    }
 
     FOREACH_STREAM(vpx_codec_destroy(&stream->encoder));
 

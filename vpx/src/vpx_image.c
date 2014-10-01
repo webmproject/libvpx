@@ -15,16 +15,16 @@
 #include "vpx/vpx_integer.h"
 #include "vpx_mem/vpx_mem.h"
 
-static vpx_image_t *img_alloc_helper(vpx_image_t   *img,
-                                     vpx_img_fmt_t  fmt,
-                                     unsigned int   d_w,
-                                     unsigned int   d_h,
-                                     unsigned int   buf_align,
-                                     unsigned int   stride_align,
+static vpx_image_t *img_alloc_helper(vpx_image_t *img,
+                                     vpx_img_fmt_t fmt,
+                                     unsigned int d_w,
+                                     unsigned int d_h,
+                                     unsigned int buf_align,
+                                     unsigned int stride_align,
                                      unsigned char *img_data) {
-
-  unsigned int  h, w, s, xcs, ycs, bps;
-  int           align;
+  unsigned int h, w, s, xcs, ycs, bps;
+  unsigned int stride_in_bytes;
+  int align;
 
   /* Treat align==0 like align==1 */
   if (!buf_align)
@@ -125,6 +125,7 @@ static vpx_image_t *img_alloc_helper(vpx_image_t   *img,
   h = (d_h + align) & ~align;
   s = (fmt & VPX_IMG_FMT_PLANAR) ? w : bps * w / 8;
   s = (s + stride_align - 1) & ~(stride_align - 1);
+  stride_in_bytes = (fmt & VPX_IMG_FMT_HIGHBITDEPTH) ? s * 2 : s;
 
   /* Allocate the new image */
   if (!img) {
@@ -163,8 +164,8 @@ static vpx_image_t *img_alloc_helper(vpx_image_t   *img,
   img->bps = bps;
 
   /* Calculate strides */
-  img->stride[VPX_PLANE_Y] = img->stride[VPX_PLANE_ALPHA] = s;
-  img->stride[VPX_PLANE_U] = img->stride[VPX_PLANE_V] = s >> xcs;
+  img->stride[VPX_PLANE_Y] = img->stride[VPX_PLANE_ALPHA] = stride_in_bytes;
+  img->stride[VPX_PLANE_U] = img->stride[VPX_PLANE_V] = stride_in_bytes >> xcs;
 
   /* Default viewport to entire image */
   if (!vpx_img_set_rect(img, 0, 0, d_w, d_h))
