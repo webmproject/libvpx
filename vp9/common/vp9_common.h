@@ -77,8 +77,22 @@ static INLINE uint16_t clip_pixel_high(int val, int bd) {
   }
 }
 
+// Note:
+// tran_low_t  is the datatype used for final transform coefficients.
+// tran_high_t is the datatype used for intermediate transform stages.
+typedef int64_t tran_high_t;
+typedef int32_t tran_low_t;
+
 #define CONVERT_TO_SHORTPTR(x) ((uint16_t*)(((uintptr_t)x) << 1))
 #define CONVERT_TO_BYTEPTR(x) ((uint8_t*)(((uintptr_t)x) >> 1 ))
+
+#else
+
+// Note:
+// tran_low_t  is the datatype used for final transform coefficients.
+// tran_high_t is the datatype used for intermediate transform stages.
+typedef int32_t tran_high_t;
+typedef int16_t tran_low_t;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 #if CONFIG_DEBUG
