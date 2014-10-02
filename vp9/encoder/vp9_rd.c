@@ -136,7 +136,7 @@ static const int rd_frame_type_factor[FRAME_UPDATE_TYPES] = {
 };
 
 int vp9_compute_rd_mult(const VP9_COMP *cpi, int qindex) {
-  const int q = vp9_dc_quant(qindex, 0, cpi->common.bit_depth);
+  const int64_t q = vp9_dc_quant(qindex, 0, cpi->common.bit_depth);
 #if CONFIG_VP9_HIGHBITDEPTH
   int rdmult = 0;
   switch (cpi->common.bit_depth) {
