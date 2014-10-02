@@ -1815,8 +1815,6 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     old_boost_score = boost_score;
   }
 
-  twopass->gf_zeromotion_pct = (int)(zero_motion_accumulator * 1000.0);
-
   // Set the interval until the next gf.
   if (cpi->common.frame_type == KEY_FRAME || rc->source_alt_ref_active)
     rc->baseline_gf_interval = i - 1;
@@ -2397,16 +2395,6 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
   // Define a new GF/ARF group. (Should always enter here for key frames).
   if (rc->frames_till_gf_update_due == 0) {
     define_gf_group(cpi, &this_frame_copy);
-
-    if (twopass->gf_zeromotion_pct > 995) {
-      // As long as max_thresh for encode breakout is small enough, it is ok
-      // to enable it for show frame, i.e. set allow_encode_breakout to
-      // ENCODE_BREAKOUT_LIMITED.
-      if (!cm->show_frame)
-        cpi->allow_encode_breakout = ENCODE_BREAKOUT_DISABLED;
-      else
-        cpi->allow_encode_breakout = ENCODE_BREAKOUT_LIMITED;
-    }
 
     rc->frames_till_gf_update_due = rc->baseline_gf_interval;
     if (lc != NULL)
