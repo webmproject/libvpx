@@ -70,6 +70,7 @@ static vpx_image_t *img_alloc_helper(vpx_image_t *img,
       bps = 12;
       break;
     case VPX_IMG_FMT_I422:
+    case VPX_IMG_FMT_I440:
       bps = 16;
       break;
     case VPX_IMG_FMT_I444:
@@ -79,6 +80,7 @@ static vpx_image_t *img_alloc_helper(vpx_image_t *img,
       bps = 24;
       break;
     case VPX_IMG_FMT_I42216:
+    case VPX_IMG_FMT_I44016:
       bps = 32;
       break;
     case VPX_IMG_FMT_I44416:
@@ -107,10 +109,12 @@ static vpx_image_t *img_alloc_helper(vpx_image_t *img,
 
   switch (fmt) {
     case VPX_IMG_FMT_I420:
+    case VPX_IMG_FMT_I440:
     case VPX_IMG_FMT_YV12:
     case VPX_IMG_FMT_VPXI420:
     case VPX_IMG_FMT_VPXYV12:
     case VPX_IMG_FMT_I42016:
+    case VPX_IMG_FMT_I44016:
       ycs = 1;
       break;
     default:

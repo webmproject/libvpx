@@ -28,8 +28,13 @@ static void yuvconfig2image(vpx_image_t *img, const YV12_BUFFER_CONFIG  *yv12,
       bps = 16;
     }
   } else {
-    img->fmt = VPX_IMG_FMT_I420;
-    bps = 12;
+    if (!ss_x) {
+      img->fmt = VPX_IMG_FMT_I440;
+      bps = 16;
+    } else {
+      img->fmt = VPX_IMG_FMT_I420;
+      bps = 12;
+    }
   }
   img->bit_depth = 8;
   img->w = yv12->y_stride;
