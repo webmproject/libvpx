@@ -130,15 +130,13 @@ static void convolve(const uint8_t *src, ptrdiff_t src_stride,
   // --Require an additional SUBPEL_TAPS rows for the 8-tap filter tails.
   // --((64 - 1) * 32 + 15) >> 4 + 8 = 135.
   uint8_t temp[135 * 64];
-  int intermediate_height = (((h - 1) * y_step_q4 + 15) >> 4) + SUBPEL_TAPS;
+  int intermediate_height =
+          (((h - 1) * y_step_q4 + y0_q4) >> SUBPEL_BITS) + SUBPEL_TAPS;
 
   assert(w <= 64);
   assert(h <= 64);
   assert(y_step_q4 <= 32);
   assert(x_step_q4 <= 32);
-
-  if (intermediate_height < h)
-    intermediate_height = h;
 
   convolve_horiz(src - src_stride * (SUBPEL_TAPS / 2 - 1), src_stride, temp, 64,
                  x_filters, x0_q4, x_step_q4, w, intermediate_height);
@@ -407,15 +405,13 @@ static void high_convolve(const uint8_t *src, ptrdiff_t src_stride,
   // --Require an additional SUBPEL_TAPS rows for the 8-tap filter tails.
   // --((64 - 1) * 32 + 15) >> 4 + 8 = 135.
   uint16_t temp[64 * 135];
-  int intermediate_height = (((h - 1) * y_step_q4 + 15) >> 4) + SUBPEL_TAPS;
+  int intermediate_height =
+          (((h - 1) * y_step_q4 + y0_q4) >> SUBPEL_BITS) + SUBPEL_TAPS;
 
   assert(w <= 64);
   assert(h <= 64);
   assert(y_step_q4 <= 32);
   assert(x_step_q4 <= 32);
-
-  if (intermediate_height < h)
-    intermediate_height = h;
 
   high_convolve_horiz(src - src_stride * (SUBPEL_TAPS / 2 - 1),
                       src_stride, CONVERT_TO_BYTEPTR(temp), 64,
