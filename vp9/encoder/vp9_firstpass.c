@@ -145,7 +145,7 @@ static void output_fpmb_stats(uint8_t *this_frame_mb_stats, VP9_COMMON *cm,
   struct vpx_codec_cx_pkt pkt;
   pkt.kind = VPX_CODEC_FPMB_STATS_PKT;
   pkt.data.firstpass_mb_stats.buf = this_frame_mb_stats;
-  pkt.data.firstpass_mb_stats.sz = cm->MBs * sizeof(uint8_t);
+  pkt.data.firstpass_mb_stats.sz = cpi->initial_mbs * sizeof(uint8_t);
   vpx_codec_pkt_list_add(pktlist, &pkt);
 }
 #endif
@@ -339,9 +339,9 @@ static unsigned int highbd_get_prediction_error(BLOCK_SIZE bsize,
 
 // Refine the motion search range according to the frame dimension
 // for first pass test.
-static int get_search_range(const VP9_COMMON *cm) {
+static int get_search_range(const VP9_COMP *cpi) {
   int sr = 0;
-  const int dim = MIN(cm->width, cm->height);
+  const int dim = MIN(cpi->initial_width, cpi->initial_height);
 
   while ((dim << sr) < MAX_FULL_PEL_VAL)
     ++sr;
@@ -361,7 +361,7 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
 
   int step_param = 3;
   int further_steps = (MAX_MVSEARCH_STEPS - 1) - step_param;
-  const int sr = get_search_range(&cpi->common);
+  const int sr = get_search_range(cpi);
   step_param += sr;
   further_steps -= sr;
 
@@ -490,7 +490,7 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
 
 #if CONFIG_FP_MB_STATS
   if (cpi->use_fp_mb_stats) {
-    vp9_zero_array(cpi->twopass.frame_mb_stats_buf, cm->MBs);
+    vp9_zero_array(cpi->twopass.frame_mb_stats_buf, cpi->initial_mbs);
   }
 #endif
 
@@ -946,7 +946,7 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
     // where the typical "real" energy per MB also falls.
     // Initial estimate here uses sqrt(mbs) to define the min_err, where the
     // number of mbs is propotional to image area.
-    const double min_err = 200 * sqrt(cm->MBs);
+    const double min_err = 200 * sqrt(cpi->initial_mbs);
 
     fps.frame = cm->current_video_frame;
     fps.spatial_layer_id = cpi->svc.spatial_layer_id;
@@ -954,9 +954,9 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
     fps.sr_coded_error = (double)(sr_coded_error >> 8) + min_err;
     fps.intra_error = (double)(intra_error >> 8) + min_err;
     fps.count = 1.0;
-    fps.pcnt_inter = (double)intercount / cm->MBs;
-    fps.pcnt_second_ref = (double)second_ref_count / cm->MBs;
-    fps.pcnt_neutral = (double)neutral_count / cm->MBs;
+    fps.pcnt_inter = (double)intercount / cpi->initial_mbs;
+    fps.pcnt_second_ref = (double)second_ref_count / cpi->initial_mbs;
+    fps.pcnt_neutral = (double)neutral_count / cpi->initial_mbs;
 
     if (mvcount > 0) {
       fps.MVr = (double)sum_mvr / mvcount;
@@ -967,7 +967,7 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
       fps.MVcv = ((double)sum_mvcs - (fps.MVc * fps.MVc / mvcount)) / mvcount;
       fps.mv_in_out_count = (double)sum_in_vectors / (mvcount * 2);
       fps.new_mv_count = new_mv_count;
-      fps.pcnt_motion = (double)mvcount / cm->MBs;
+      fps.pcnt_motion = (double)mvcount / cpi->initial_mbs;
     } else {
       fps.MVr = 0.0;
       fps.mvr_abs = 0.0;
@@ -1081,7 +1081,7 @@ static int get_twopass_worst_quality(const VP9_COMP *cpi,
   if (section_target_bandwidth <= 0) {
     return rc->worst_quality;  // Highest value allowed
   } else {
-    const int num_mbs = cpi->common.MBs;
+    const int num_mbs = cpi->initial_mbs;
     const double section_err = stats->coded_error / stats->count;
     const double err_per_mb = section_err / num_mbs;
     const double speed_term = 1.0 + 0.04 * oxcf->speed;
@@ -1195,9 +1195,10 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
 #define LOW_SR_DIFF_TRHESH 0.1
 #define SR_DIFF_MAX 128.0
 
-static double get_sr_decay_rate(const VP9_COMMON *cm,
+static double get_sr_decay_rate(const VP9_COMP *cpi,
                                 const FIRSTPASS_STATS *frame) {
-  double sr_diff = (frame->sr_coded_error - frame->coded_error) / cm->MBs;
+  double sr_diff =
+      (frame->sr_coded_error - frame->coded_error) / cpi->initial_mbs;
   double sr_decay = 1.0;
   const double motion_amplitude_factor =
     frame->pcnt_motion * ((frame->mvc_abs + frame->mvr_abs) / 2);
@@ -1214,19 +1215,19 @@ static double get_sr_decay_rate(const VP9_COMMON *cm,
 
 // This function gives an estimate of how badly we believe the prediction
 // quality is decaying from frame to frame.
-static double get_zero_motion_factor(const VP9_COMMON *cm,
+static double get_zero_motion_factor(const VP9_COMP *cpi,
                                      const FIRSTPASS_STATS *frame) {
   const double zero_motion_pct = frame->pcnt_inter -
                                  frame->pcnt_motion;
-  double sr_decay = get_sr_decay_rate(cm, frame);
+  double sr_decay = get_sr_decay_rate(cpi, frame);
   return MIN(sr_decay, zero_motion_pct);
 }
 
 #define ZM_POWER_FACTOR 0.75
 
-static double get_prediction_decay_rate(const VP9_COMMON *cm,
+static double get_prediction_decay_rate(const VP9_COMP *cpi,
                                         const FIRSTPASS_STATS *next_frame) {
-  const double sr_decay_rate = get_sr_decay_rate(cm, next_frame);
+  const double sr_decay_rate = get_sr_decay_rate(cpi, next_frame);
   const double zero_motion_factor =
     (0.95 * pow((next_frame->pcnt_inter - next_frame->pcnt_motion),
                 ZM_POWER_FACTOR));
@@ -1322,7 +1323,7 @@ static double calc_frame_boost(VP9_COMP *cpi,
   const double q_correction = MIN((0.8 + (lq * 0.001)), 1.0);
 
   // Underlying boost factor is based on inter error ratio.
-  frame_boost = (BASELINE_ERR_PER_MB * cpi->common.MBs) /
+  frame_boost = (BASELINE_ERR_PER_MB * cpi->initial_mbs) /
                 DOUBLE_DIVIDE_CHECK(this_frame->coded_error);
   frame_boost = frame_boost * BOOST_FACTOR * q_correction;
 
@@ -1371,7 +1372,7 @@ static int calc_arf_boost(VP9_COMP *cpi, int offset,
 
     // Accumulate the effect of prediction quality decay.
     if (!flash_detected) {
-      decay_accumulator *= get_prediction_decay_rate(&cpi->common, this_frame);
+      decay_accumulator *= get_prediction_decay_rate(cpi, this_frame);
       decay_accumulator = decay_accumulator < MIN_DECAY_FACTOR
                           ? MIN_DECAY_FACTOR : decay_accumulator;
     }
@@ -1410,7 +1411,7 @@ static int calc_arf_boost(VP9_COMP *cpi, int offset,
 
     // Cumulative effect of prediction quality decay.
     if (!flash_detected) {
-      decay_accumulator *= get_prediction_decay_rate(&cpi->common, this_frame);
+      decay_accumulator *= get_prediction_decay_rate(cpi, this_frame);
       decay_accumulator = decay_accumulator < MIN_DECAY_FACTOR
                               ? MIN_DECAY_FACTOR : decay_accumulator;
     }
@@ -1729,7 +1730,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     gf_group_err -= gf_first_frame_err;
 
   // Motion breakout threshold for loop below depends on image size.
-  mv_ratio_accumulator_thresh = (cpi->common.width + cpi->common.height) / 4.0;
+  mv_ratio_accumulator_thresh =
+      (cpi->initial_height + cpi->initial_width) / 4.0;
 
   // Set a maximum and minimum interval for the GF group.
   // If the image appears almost completely static we can extend beyond this.
@@ -1781,14 +1783,14 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     // Accumulate the effect of prediction quality decay.
     if (!flash_detected) {
       last_loop_decay_rate = loop_decay_rate;
-      loop_decay_rate = get_prediction_decay_rate(&cpi->common, &next_frame);
+      loop_decay_rate = get_prediction_decay_rate(cpi, &next_frame);
 
       decay_accumulator = decay_accumulator * loop_decay_rate;
 
       // Monitor for static sections.
       zero_motion_accumulator =
         MIN(zero_motion_accumulator,
-            get_zero_motion_factor(&cpi->common, &next_frame));
+            get_zero_motion_factor(cpi, &next_frame));
 
       // Break clause to detect very still sections after motion. For example,
       // a static image after a fade or other transition.
@@ -2065,8 +2067,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
         break;
 
       // How fast is the prediction quality decaying?
-      loop_decay_rate = get_prediction_decay_rate(&cpi->common,
-                                                  twopass->stats_in);
+      loop_decay_rate = get_prediction_decay_rate(cpi, twopass->stats_in);
 
       // We want to know something about the recent past... rather than
       // as used elsewhere where we are concerned with decay in prediction
@@ -2177,7 +2178,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     // Monitor for static sections.
     zero_motion_accumulator =
       MIN(zero_motion_accumulator,
-          get_zero_motion_factor(&cpi->common, &next_frame));
+          get_zero_motion_factor(cpi, &next_frame));
 
     // Not all frames in the group are necessarily used in calculating boost.
     if ((i <= rc->max_gf_interval) ||
@@ -2188,7 +2189,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       // How fast is prediction quality decaying.
       if (!detect_flash(twopass, 0)) {
         const double loop_decay_rate =
-          get_prediction_decay_rate(&cpi->common, &next_frame);
+          get_prediction_decay_rate(cpi, &next_frame);
         decay_accumulator *= loop_decay_rate;
         decay_accumulator = MAX(decay_accumulator, MIN_DECAY_FACTOR);
         av_decay_accumulator += decay_accumulator;
