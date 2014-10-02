@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//U78\u003d",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 469,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-10-02T20:32:12Z",
+      "side": 1,
+      "message": "const int",
+      "revId": "7f7467c42a7c2c73485ef291c1882a89df9071e5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//U7w\u003d",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 477,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-10-02T20:32:12Z",
+      "side": 1,
+      "message": "may want to add highbitdepth to die message",
+      "revId": "7f7467c42a7c2c73485ef291c1882a89df9071e5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
