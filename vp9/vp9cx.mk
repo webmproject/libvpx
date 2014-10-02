@@ -115,6 +115,7 @@ VP9_CX_SRCS-$(HAVE_SSSE3) += encoder/x86/vp9_dct_ssse3_x86_64.asm
 endif
 VP9_CX_SRCS-$(HAVE_SSSE3) += encoder/x86/vp9_sad_ssse3.asm
 VP9_CX_SRCS-$(HAVE_SSE4_1) += encoder/x86/vp9_sad_sse4.asm
+VP9_CX_SRCS-$(HAVE_AVX2) += encoder/x86/vp9_sad_intrin_avx2.c
 VP9_CX_SRCS-$(ARCH_X86_64) += encoder/x86/vp9_ssim_opt_x86_64.asm
 
 VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_dct_sse2.c
