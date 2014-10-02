@@ -13,8 +13,6 @@
 
 #include "./vpx_config.h"
 #include "vp9/encoder/vp9_block.h"
-#include "vp9/encoder/vp9_encoder.h"
-#include "vp9/common/vp9_onyxc_int.h"
 
 #ifdef __cplusplus
 extern "C" {
