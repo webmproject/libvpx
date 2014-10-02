@@ -303,16 +303,18 @@ static vpx_codec_err_t validate_img(vpx_codec_alg_priv_t *ctx,
       break;
     case VPX_IMG_FMT_I422:
     case VPX_IMG_FMT_I444:
+    case VPX_IMG_FMT_I440:
       if (ctx->cfg.g_profile != (unsigned int)PROFILE_1) {
-        ERROR("Invalid image format. I422, I444 images are "
+        ERROR("Invalid image format. I422, I444, I440 images are "
               "not supported in profile.");
       }
       break;
     case VPX_IMG_FMT_I42216:
     case VPX_IMG_FMT_I44416:
+    case VPX_IMG_FMT_I44016:
       if (ctx->cfg.g_profile != (unsigned int)PROFILE_1 &&
           ctx->cfg.g_profile != (unsigned int)PROFILE_3) {
-        ERROR("Invalid image format. 16-bit I422, I444 images are "
+        ERROR("Invalid image format. 16-bit I422, I444, I440 images are "
               "not supported in profile.");
       }
       break;
@@ -334,9 +336,11 @@ static int get_image_bps(const vpx_image_t *img) {
     case VPX_IMG_FMT_I420: return 12;
     case VPX_IMG_FMT_I422: return 16;
     case VPX_IMG_FMT_I444: return 24;
+    case VPX_IMG_FMT_I440: return 16;
     case VPX_IMG_FMT_I42016: return 24;
     case VPX_IMG_FMT_I42216: return 32;
     case VPX_IMG_FMT_I44416: return 48;
+    case VPX_IMG_FMT_I44016: return 32;
     default: assert(0 && "Invalid image format"); break;
   }
   return 0;
