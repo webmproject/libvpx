@@ -14,14 +14,12 @@
 #include <assert.h>
 
 #include "./vpx_config.h"
-#include "vpx/vpx_integer.h"
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_enums.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 
 // Constants and Macros used by all idct/dct functions
 #define DCT_CONST_BITS 14
