@@ -2,6 +2,74 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAdn//U7M\u003d",
+        "filename": "examples/vp9_spatial_svc_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-10-02T20:54:29Z",
+      "side": 1,
+      "message": "multi nit:\n- extra spaces\n- wrap at equals",
+      "revId": "7f7467c42a7c2c73485ef291c1882a89df9071e5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//U7I\u003d",
+        "filename": "examples/vp9_spatial_svc_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-10-02T20:54:29Z",
+      "side": 1,
+      "message": "pedantry: 8, 10, or 12",
+      "revId": "7f7467c42a7c2c73485ef291c1882a89df9071e5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//U7E\u003d",
+        "filename": "examples/vp9_spatial_svc_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-10-02T20:54:29Z",
+      "side": 1,
+      "message": "seems like this should be _arg based on the others",
+      "revId": "7f7467c42a7c2c73485ef291c1882a89df9071e5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//U7A\u003d",
+        "filename": "examples/vp9_spatial_svc_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 337,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-10-02T20:54:29Z",
+      "side": 1,
+      "message": "this side of the #if/#else needs braces on the if... add to both.",
+      "revId": "7f7467c42a7c2c73485ef291c1882a89df9071e5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//U78\u003d",
         "filename": "examples/vpx_temporal_svc_encoder.c",
         "patchSetId": 1
@@ -30,6 +98,41 @@
       "writtenOn": "2014-10-02T20:32:12Z",
       "side": 1,
       "message": "may want to add highbitdepth to die message",
+      "revId": "7f7467c42a7c2c73485ef291c1882a89df9071e5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//U68\u003d",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 477,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-10-02T20:54:29Z",
+      "side": 1,
+      "message": "Or a proper usage() with a CONFIG_VP9_HIGHBITDEPTH #if/#else",
+      "parentUuid": "AAAAdn//U7w\u003d",
+      "revId": "7f7467c42a7c2c73485ef291c1882a89df9071e5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//U6w\u003d",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 622,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-10-02T20:54:29Z",
+      "side": 1,
+      "message": "+4 indent above 2 lines",
       "revId": "7f7467c42a7c2c73485ef291c1882a89df9071e5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
