@@ -217,7 +217,7 @@ void high_filter_block2d_8_c(const uint16_t *src_ptr,
                          (VP9_FILTER_WEIGHT >> 1);  // Rounding
 
         // Normalize back to 0-255...
-        *output_ptr = clip_pixel_high(temp >> VP9_FILTER_SHIFT, bd);
+        *output_ptr = clip_pixel_highbd(temp >> VP9_FILTER_SHIFT, bd);
         ++src_ptr;
         output_ptr += intermediate_height;
       }
@@ -245,7 +245,7 @@ void high_filter_block2d_8_c(const uint16_t *src_ptr,
                          (VP9_FILTER_WEIGHT >> 1);  // Rounding
 
         // Normalize back to 0-255...
-        *dst_ptr++ = clip_pixel_high(temp >> VP9_FILTER_SHIFT, bd);
+        *dst_ptr++ = clip_pixel_highbd(temp >> VP9_FILTER_SHIFT, bd);
         src_ptr += intermediate_height;
       }
       src_ptr += intermediate_next_stride;

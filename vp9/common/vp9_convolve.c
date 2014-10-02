@@ -301,7 +301,7 @@ static void high_convolve_horiz(const uint8_t *src8, ptrdiff_t src_stride,
       int k, sum = 0;
       for (k = 0; k < SUBPEL_TAPS; ++k)
         sum += src_x[k] * x_filter[k];
-      dst[x] = clip_pixel_high(ROUND_POWER_OF_TWO(sum, FILTER_BITS), bd);
+      dst[x] = clip_pixel_highbd(ROUND_POWER_OF_TWO(sum, FILTER_BITS), bd);
       x_q4 += x_step_q4;
     }
     src += src_stride;
@@ -327,7 +327,7 @@ static void high_convolve_avg_horiz(const uint8_t *src8, ptrdiff_t src_stride,
       for (k = 0; k < SUBPEL_TAPS; ++k)
         sum += src_x[k] * x_filter[k];
       dst[x] = ROUND_POWER_OF_TWO(dst[x] +
-          clip_pixel_high(ROUND_POWER_OF_TWO(sum, FILTER_BITS), bd), 1);
+          clip_pixel_highbd(ROUND_POWER_OF_TWO(sum, FILTER_BITS), bd), 1);
       x_q4 += x_step_q4;
     }
     src += src_stride;
@@ -352,7 +352,7 @@ static void high_convolve_vert(const uint8_t *src8, ptrdiff_t src_stride,
       int k, sum = 0;
       for (k = 0; k < SUBPEL_TAPS; ++k)
         sum += src_y[k * src_stride] * y_filter[k];
-      dst[y * dst_stride] = clip_pixel_high(
+      dst[y * dst_stride] = clip_pixel_highbd(
           ROUND_POWER_OF_TWO(sum, FILTER_BITS), bd);
       y_q4 += y_step_q4;
     }
@@ -379,7 +379,7 @@ static void high_convolve_avg_vert(const uint8_t *src8, ptrdiff_t src_stride,
       for (k = 0; k < SUBPEL_TAPS; ++k)
         sum += src_y[k * src_stride] * y_filter[k];
       dst[y * dst_stride] = ROUND_POWER_OF_TWO(dst[y * dst_stride] +
-          clip_pixel_high(ROUND_POWER_OF_TWO(sum, FILTER_BITS), bd), 1);
+          clip_pixel_highbd(ROUND_POWER_OF_TWO(sum, FILTER_BITS), bd), 1);
       y_q4 += y_step_q4;
     }
     ++src;

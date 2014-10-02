@@ -251,7 +251,7 @@ static INLINE void high_tm_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
 
   for (r = 0; r < bs; r++) {
     for (c = 0; c < bs; c++)
-      dst[c] = clip_pixel_high(left[r] + above[c] - ytop_left, bd);
+      dst[c] = clip_pixel_highbd(left[r] + above[c] - ytop_left, bd);
     dst += stride;
   }
 }
