@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//U8o\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 67
+      },
+      "lineNbr": 1233,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-10-02T23:41:49Z",
+      "side": 1,
+      "message": "Increase the reference count of all the reference frames to avoid another thread free the frame d due to reference count decrease to 0.",
+      "revId": "827bf83ce5ac6531548a79b93944ebe286899ec2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//U8s\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 67
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-10-02T23:41:49Z",
+      "side": 1,
+      "message": "Fix the problem that a thread\u0027s reference frame has been released by another thread due to reference count decrease to 0.",
+      "revId": "827bf83ce5ac6531548a79b93944ebe286899ec2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//U80\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 67
+      },
+      "lineNbr": 324,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-10-02T23:41:49Z",
+      "side": 1,
+      "message": "Add the mutex init which leads to crash on windows. Strange it works fine on linux.",
+      "revId": "827bf83ce5ac6531548a79b93944ebe286899ec2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
