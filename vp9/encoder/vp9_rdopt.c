@@ -491,7 +491,9 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
       if (x->plane[plane].eobs[block]) {
         int64_t dc_correct = coeff[0] * coeff[0] -
             (coeff[0] - dqcoeff[0]) * (coeff[0] - dqcoeff[0]);
-
+#if CONFIG_VP9_HIGHBITDEPTH
+        dc_correct >>= ((xd->bd - 8) * 2);
+#endif
         if (tx_size != TX_32X32)
           dc_correct >>= 2;
 
