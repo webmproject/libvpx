@@ -1384,12 +1384,18 @@ static void update_state_rt(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   *(xd->mi[0].src_mi) = ctx->mic;
   xd->mi[0].src_mi = &xd->mi[0];
 
-
-  // For in frame adaptive Q, check for reseting the segment_id and updating
-  // the cyclic refresh map.
-  if ((cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) && seg->enabled) {
-    vp9_cyclic_refresh_update_segment(cpi, &xd->mi[0].src_mi->mbmi,
-                                      mi_row, mi_col, bsize, 1);
+  if (seg->enabled && cpi->oxcf.aq_mode) {
+    // For in frame complexity AQ or variance AQ, copy segment_id from
+    // segmentation_map.
+    if (cpi->oxcf.aq_mode == COMPLEXITY_AQ ||
+        cpi->oxcf.aq_mode == VARIANCE_AQ ) {
+      const uint8_t *const map = seg->update_map ? cpi->segmentation_map
+                                                 : cm->last_frame_seg_map;
+      mbmi->segment_id = vp9_get_segment_id(cm, map, bsize, mi_row, mi_col);
+    } else {
+    // Setting segmentation map for cyclic_refresh
+      vp9_cyclic_refresh_update_segment(cpi, mbmi, mi_row, mi_col, bsize, 1);
+    }
     vp9_init_plane_quantizers(cpi, x);
   }
 
@@ -1758,7 +1764,7 @@ static void rd_use_partition(VP9_COMP *cpi,
 
   // We must have chosen a partitioning and encoding or we'll fail later on.
   // No other opportunities for success.
-  if ( bsize == BLOCK_64X64)
+  if (bsize == BLOCK_64X64)
     assert(chosen_rate < INT_MAX && chosen_dist < INT64_MAX);
 
   if (do_recon) {
