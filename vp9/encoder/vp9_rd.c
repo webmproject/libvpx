@@ -138,7 +138,7 @@ static const int rd_frame_type_factor[FRAME_UPDATE_TYPES] = {
 int vp9_compute_rd_mult(const VP9_COMP *cpi, int qindex) {
   const int64_t q = vp9_dc_quant(qindex, 0, cpi->common.bit_depth);
 #if CONFIG_VP9_HIGHBITDEPTH
-  int rdmult = 0;
+  int64_t rdmult = 0;
   switch (cpi->common.bit_depth) {
     case VPX_BITS_8:
       rdmult = 88 * q * q / 24;
@@ -154,7 +154,7 @@ int vp9_compute_rd_mult(const VP9_COMP *cpi, int qindex) {
       return -1;
   }
 #else
-  int rdmult = 88 * q * q / 24;
+  int64_t rdmult = 88 * q * q / 24;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   if (cpi->oxcf.pass == 2 && (cpi->common.frame_type != KEY_FRAME)) {
     const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
@@ -164,7 +164,7 @@ int vp9_compute_rd_mult(const VP9_COMP *cpi, int qindex) {
     rdmult = (rdmult * rd_frame_type_factor[frame_type]) >> 7;
     rdmult += ((rdmult * rd_boost_factor[boost_index]) >> 7);
   }
-  return rdmult;
+  return (int)rdmult;
 }
 
 static int compute_rd_thresh_factor(int qindex, vpx_bit_depth_t bit_depth) {
