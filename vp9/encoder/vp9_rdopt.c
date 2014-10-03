@@ -1948,11 +1948,17 @@ static void store_coding_context(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
                          int64_t best_filter_diff[SWITCHABLE_FILTER_CONTEXTS],
                          int skippable) {
   MACROBLOCKD *const xd = &x->e_mbd;
+  int plane, has_high_freq_coeff = 0;
+  BLOCK_SIZE bsize = xd->mi[0].src_mi->mbmi.sb_type;
+
+  if (bsize >= BLOCK_8X8)
+    for (plane = 0; plane < MAX_MB_PLANE; ++plane)
+      has_high_freq_coeff |= vp9_has_high_freq_in_plane(x, bsize, plane);
 
   // Take a snapshot of the coding context so it can be
   // restored if we decide to encode this way
   ctx->skip = x->skip;
-  ctx->skippable = skippable;
+  ctx->skippable = skippable || !has_high_freq_coeff;
   ctx->best_mode_index = mode_index;
   ctx->mic = *xd->mi[0].src_mi;
   ctx->single_pred_diff = (int)comp_pred_diff[SINGLE_REFERENCE];
