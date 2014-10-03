@@ -65,7 +65,7 @@ static INLINE int get_unsigned_bits(unsigned int num_values) {
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
-static INLINE uint16_t clip_pixel_high(int val, int bd) {
+static INLINE uint16_t clip_pixel_highbd(int val, int bd) {
   switch (bd) {
     case 8:
     default:

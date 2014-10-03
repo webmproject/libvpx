@@ -458,7 +458,7 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_fwht4x4_c, &vp9_iwht4x4_16_add_c, 0, VPX_BITS_8)));
 #endif
 
-#if HAVE_NEON_ASM && !CONFIG_VP9_HIGHBITDEPTH
+#if HAVE_NEON_ASM && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(
     NEON, Trans4x4DCT,
     ::testing::Values(
@@ -473,14 +473,15 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_fht4x4_c, &vp9_iht4x4_16_add_neon, 3, VPX_BITS_8)));
 #endif
 
-#if CONFIG_USE_X86INC && HAVE_MMX && !CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_USE_X86INC && HAVE_MMX && !CONFIG_VP9_HIGHBITDEPTH && \
+    !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(
     MMX, Trans4x4WHT,
     ::testing::Values(
         make_tuple(&vp9_fwht4x4_mmx, &vp9_iwht4x4_16_add_c, 0, VPX_BITS_8)));
 #endif
 
-#if HAVE_SSE2 && !CONFIG_VP9_HIGHBITDEPTH
+#if HAVE_SSE2 && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(
     SSE2, Trans4x4DCT,
     ::testing::Values(
