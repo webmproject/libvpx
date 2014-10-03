@@ -2608,8 +2608,8 @@ static void encode_rd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
                                     mi_row, mi_col, BLOCK_16X16);
       else
         copy_partitioning(cm, mi, prev_mi);
-        rd_use_partition(cpi, tile, mi, tp, mi_row, mi_col, BLOCK_64X64,
-                         &dummy_rate, &dummy_dist, 1, cpi->pc_root);
+      rd_use_partition(cpi, tile, mi, tp, mi_row, mi_col, BLOCK_64X64,
+                       &dummy_rate, &dummy_dist, 1, cpi->pc_root);
     } else {
       // If required set upper and lower partition size limits
       if (sf->auto_min_max_partition_size) {
