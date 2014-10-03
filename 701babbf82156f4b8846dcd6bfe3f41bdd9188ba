@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Uxo\u003d",
+        "filename": "vp9/common/vp9_common_data.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-10-03T18:27:09Z",
+      "side": 1,
+      "message": "Remove these two lines, since they are not needed anymore.",
+      "revId": "701babbf82156f4b8846dcd6bfe3f41bdd9188ba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
