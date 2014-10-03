@@ -49,6 +49,7 @@ extern const vp9_tree_index vp9_coef_con_tree[];
 extern struct vp9_token vp9_coef_encodings[];
 
 int vp9_is_skippable_in_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane);
+int vp9_has_high_freq_in_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane);
 
 struct VP9_COMP;
 

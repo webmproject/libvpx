@@ -2267,6 +2267,8 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
         dist_breakout_thr >>= 8 - (b_width_log2(bsize) +
             b_height_log2(bsize));
 
+        rate_breakout_thr *= num_pels_log2_lookup[bsize];
+
         // If all y, u, v transform blocks in this partition are skippable, and
         // the dist & rate are within the thresholds, the partition search is
         // terminated for current branch of the partition search tree.

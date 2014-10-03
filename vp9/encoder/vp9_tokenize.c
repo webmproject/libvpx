@@ -403,6 +403,24 @@ int vp9_is_skippable_in_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
   return result;
 }
 
+static void has_high_freq_coeff(int plane, int block,
+                                BLOCK_SIZE plane_bsize, TX_SIZE tx_size,
+                                void *argv) {
+  struct is_skippable_args *args = argv;
+  int eobs = (tx_size == TX_4X4) ? 3 : 10;
+  (void) plane_bsize;
+
+  *(args->skippable) |= (args->x->plane[plane].eobs[block] > eobs);
+}
+
+int vp9_has_high_freq_in_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
+  int result = 0;
+  struct is_skippable_args args = {x, &result};
+  vp9_foreach_transformed_block_in_plane(&x->e_mbd, bsize, plane,
+                                         has_high_freq_coeff, &args);
+  return result;
+}
+
 void vp9_tokenize_sb(VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,
                      BLOCK_SIZE bsize) {
   VP9_COMMON *const cm = &cpi->common;
