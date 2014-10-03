@@ -198,9 +198,6 @@ static const arg_def_t disable_warnings =
 static const arg_def_t disable_warning_prompt =
     ARG_DEF("y", "disable-warning-prompt", 0,
             "Display warnings, but do not prompt user to continue.");
-static const arg_def_t experimental_bitstream =
-    ARG_DEF(NULL, "experimental-bitstream", 0,
-            "Allow experimental bitstream features.");
 
 #if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
 static const arg_def_t test16bitinternalarg = ARG_DEF(
@@ -861,8 +858,6 @@ static void parse_global_config(struct VpxEncoderConfig *global, char **argv) {
       global->disable_warnings = 1;
     else if (arg_match(&arg, &disable_warning_prompt, argi))
       global->disable_warning_prompt = 1;
-    else if (arg_match(&arg, &experimental_bitstream, argi))
-      global->experimental_bitstream = 1;
     else
       argj++;
   }
@@ -1199,12 +1194,6 @@ static void validate_stream_config(const struct stream_state *stream,
   if (!stream->config.cfg.g_w || !stream->config.cfg.g_h)
     fatal("Stream %d: Specify stream dimensions with --width (-w) "
           " and --height (-h)", stream->index);
-
-  if (stream->config.cfg.g_profile != 0 && !global->experimental_bitstream) {
-    fatal("Stream %d: profile %d is experimental and requires the --%s flag",
-          stream->index, stream->config.cfg.g_profile,
-          experimental_bitstream.long_name);
-  }
 
   // Check that the codec bit depth is greater than the input bit depth.
   if (stream->config.cfg.g_input_bit_depth >
