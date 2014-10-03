@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Uww\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2270,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-10-03T18:47:29Z",
+      "side": 1,
+      "message": "so we are scaling the threshold by log(Npixel) here? The commit message reads like scaling linearly on size.",
+      "revId": "1059f9208dce6b4c418273f1be23e497cc595253",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
