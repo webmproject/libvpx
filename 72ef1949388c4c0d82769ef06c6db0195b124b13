@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//UsA\u003d",
+        "filename": "y4minput.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 980,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-10-04T02:06:12Z",
+      "side": 1,
+      "message": "Not really that familiar with this code...\n\nIs dst_buf_read_sz really insufficient? It seems like it should be. Or are you just being conservative?",
+      "revId": "72ef1949388c4c0d82769ef06c6db0195b124b13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
