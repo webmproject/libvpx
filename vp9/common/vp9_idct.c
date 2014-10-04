@@ -38,24 +38,16 @@
 #endif  // CONFIG_EMULATE_HARDWARE
 
 #if CONFIG_VP9_HIGHBITDEPTH
-static INLINE tran_low_t highbd_clip_pixel_add(tran_high_t dest,
-                                               tran_high_t trans, int bd) {
+static INLINE uint16_t highbd_clip_pixel_add(uint16_t dest, tran_high_t trans,
+                                             int bd) {
   trans = WRAPLOW(trans, bd);
-  switch (bd) {
-    case 8:
-    default:
-      return clamp(WRAPLOW(dest + trans, bd), 0, 255);
-    case 10:
-      return clamp(WRAPLOW(dest + trans, bd), 0, 1023);
-    case 12:
-      return clamp(WRAPLOW(dest + trans, bd), 0, 4095);
-  }
+  return clip_pixel_highbd(WRAPLOW(dest + trans, bd), bd);
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-static INLINE tran_low_t clip_pixel_add(tran_high_t dest, tran_high_t trans) {
+static INLINE uint8_t clip_pixel_add(uint8_t dest, tran_high_t trans) {
   trans = WRAPLOW(trans, 8);
-  return clamp(WRAPLOW(dest + trans, 8), 0, 255);
+  return clip_pixel(WRAPLOW(dest + trans, 8));
 }
 
 void vp9_iwht4x4_16_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
@@ -175,8 +167,8 @@ void vp9_idct4x4_16_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
       temp_in[j] = out[j * 4 + i];
     idct4(temp_in, temp_out);
     for (j = 0; j < 4; ++j) {
-      dest[j * stride + i] = clip_pixel_add(ROUND_POWER_OF_TWO(temp_out[j], 4),
-                                            dest[j * stride + i]);
+      dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
+                                            ROUND_POWER_OF_TWO(temp_out[j], 4));
     }
   }
 }
@@ -262,8 +254,8 @@ void vp9_idct8x8_64_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
       temp_in[j] = out[j * 8 + i];
     idct8(temp_in, temp_out);
     for (j = 0; j < 8; ++j) {
-      dest[j * stride + i] = clip_pixel_add(ROUND_POWER_OF_TWO(temp_out[j], 5),
-                                            dest[j * stride + i]);
+      dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
+                                            ROUND_POWER_OF_TWO(temp_out[j], 5));
     }
   }
 }
@@ -350,8 +342,8 @@ void vp9_iht4x4_16_add_c(const tran_low_t *input, uint8_t *dest, int stride,
       temp_in[j] = out[j * 4 + i];
     IHT_4[tx_type].cols(temp_in, temp_out);
     for (j = 0; j < 4; ++j) {
-      dest[j * stride + i] = clip_pixel_add(ROUND_POWER_OF_TWO(temp_out[j], 4),
-                                            dest[j * stride + i]);
+      dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
+                                            ROUND_POWER_OF_TWO(temp_out[j], 4));
     }
   }
 }
@@ -461,8 +453,8 @@ void vp9_iht8x8_64_add_c(const tran_low_t *input, uint8_t *dest, int stride,
       temp_in[j] = out[j * 8 + i];
     ht.cols(temp_in, temp_out);
     for (j = 0; j < 8; ++j) {
-      dest[j * stride + i] = clip_pixel_add(ROUND_POWER_OF_TWO(temp_out[j], 5),
-                                            dest[j * stride + i]);
+      dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
+                                            ROUND_POWER_OF_TWO(temp_out[j], 5));
     }
   }
 }
@@ -487,8 +479,8 @@ void vp9_idct8x8_12_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
       temp_in[j] = out[j * 8 + i];
     idct8(temp_in, temp_out);
     for (j = 0; j < 8; ++j) {
-      dest[j * stride + i] = clip_pixel_add(ROUND_POWER_OF_TWO(temp_out[j], 5),
-                                            dest[j * stride + i]);
+      dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
+                                            ROUND_POWER_OF_TWO(temp_out[j], 5));
     }
   }
 }
@@ -678,8 +670,8 @@ void vp9_idct16x16_256_add_c(const tran_low_t *input, uint8_t *dest,
       temp_in[j] = out[j * 16 + i];
     idct16(temp_in, temp_out);
     for (j = 0; j < 16; ++j) {
-      dest[j * stride + i] = clip_pixel_add(ROUND_POWER_OF_TWO(temp_out[j], 6),
-                                            dest[j * stride + i]);
+      dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
+                                            ROUND_POWER_OF_TWO(temp_out[j], 6));
     }
   }
 }
@@ -884,8 +876,8 @@ void vp9_iht16x16_256_add_c(const tran_low_t *input, uint8_t *dest, int stride,
       temp_in[j] = out[j * 16 + i];
     ht.cols(temp_in, temp_out);
     for (j = 0; j < 16; ++j) {
-      dest[j * stride + i] = clip_pixel_add(ROUND_POWER_OF_TWO(temp_out[j], 6),
-                                            dest[j * stride + i]);
+      dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
+                                            ROUND_POWER_OF_TWO(temp_out[j], 6));
     }
   }
 }
@@ -911,8 +903,8 @@ void vp9_idct16x16_10_add_c(const tran_low_t *input, uint8_t *dest,
       temp_in[j] = out[j*16 + i];
     idct16(temp_in, temp_out);
     for (j = 0; j < 16; ++j) {
-      dest[j * stride + i] = clip_pixel_add(ROUND_POWER_OF_TWO(temp_out[j], 6),
-                                            dest[j * stride + i]);
+      dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
+                                            ROUND_POWER_OF_TWO(temp_out[j], 6));
     }
   }
 }
@@ -1330,8 +1322,8 @@ void vp9_idct32x32_1024_add_c(const tran_low_t *input, uint8_t *dest,
       temp_in[j] = out[j * 32 + i];
     idct32(temp_in, temp_out);
     for (j = 0; j < 32; ++j) {
-      dest[j * stride + i] = clip_pixel_add(ROUND_POWER_OF_TWO(temp_out[j], 6),
-                                            dest[j * stride + i]);
+      dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
+                                            ROUND_POWER_OF_TWO(temp_out[j], 6));
     }
   }
 }
@@ -1357,8 +1349,8 @@ void vp9_idct32x32_34_add_c(const tran_low_t *input, uint8_t *dest,
       temp_in[j] = out[j * 32 + i];
     idct32(temp_in, temp_out);
     for (j = 0; j < 32; ++j) {
-      dest[j * stride + i] = clip_pixel_add(ROUND_POWER_OF_TWO(temp_out[j], 6),
-                                            dest[j * stride + i]);
+      dest[j * stride + i] = clip_pixel_add(dest[j * stride + i],
+                                            ROUND_POWER_OF_TWO(temp_out[j], 6));
     }
   }
 }
