@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Uog\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 473,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-10-06T17:31:55Z",
+      "side": 1,
+      "message": "Are we confident to apply this factor on all key frames in all CBR coding modes?",
+      "revId": "967bcab8ffaea226a5c17fa5dca68d7efd2e594b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
