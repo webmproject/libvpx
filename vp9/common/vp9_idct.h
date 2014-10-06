@@ -77,8 +77,7 @@ static const tran_high_t sinpi_2_9 = 9929;
 static const tran_high_t sinpi_3_9 = 13377;
 static const tran_high_t sinpi_4_9 = 15212;
 
-static INLINE tran_low_t dct_const_round_shift(tran_high_t input) {
-  tran_high_t rv = ROUND_POWER_OF_TWO(input, DCT_CONST_BITS);
+static INLINE tran_low_t check_range(tran_high_t input) {
 #if CONFIG_VP9_HIGHBITDEPTH
   // For valid highbitdepth VP9 streams, intermediate stage coefficients will
   // stay within the ranges:
@@ -92,10 +91,15 @@ static INLINE tran_low_t dct_const_round_shift(tran_high_t input) {
   // this range for every intermediate coefficient can burdensome for a decoder,
   // therefore the following assertion is only enabled when configured with
   // --enable-coefficient-range-checking.
-  assert(INT16_MIN <= rv);
-  assert(rv <= INT16_MAX);
+  assert(INT16_MIN <= input);
+  assert(input <= INT16_MAX);
 #endif
-  return (tran_low_t)rv;
+  return (tran_low_t)input;
+}
+
+static INLINE tran_low_t dct_const_round_shift(tran_high_t input) {
+  tran_high_t rv = ROUND_POWER_OF_TWO(input, DCT_CONST_BITS);
+  return check_range(rv);
 }
 
 typedef void (*transform_1d)(const tran_low_t*, tran_low_t*);

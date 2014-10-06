@@ -794,18 +794,18 @@ static void iadst16(const tran_low_t *input, tran_low_t *output) {
   s14 = - x14 * cospi_24_64 + x15 * cospi_8_64;
   s15 =   x14 * cospi_8_64  + x15 * cospi_24_64;
 
-  x0 = WRAPLOW(s0 + s2, 8);
-  x1 = WRAPLOW(s1 + s3, 8);
-  x2 = WRAPLOW(s0 - s2, 8);
-  x3 = WRAPLOW(s1 - s3, 8);
+  x0 = WRAPLOW(check_range(s0 + s2), 8);
+  x1 = WRAPLOW(check_range(s1 + s3), 8);
+  x2 = WRAPLOW(check_range(s0 - s2), 8);
+  x3 = WRAPLOW(check_range(s1 - s3), 8);
   x4 = WRAPLOW(dct_const_round_shift(s4 + s6), 8);
   x5 = WRAPLOW(dct_const_round_shift(s5 + s7), 8);
   x6 = WRAPLOW(dct_const_round_shift(s4 - s6), 8);
   x7 = WRAPLOW(dct_const_round_shift(s5 - s7), 8);
-  x8 = WRAPLOW(s8 + s10, 8);
-  x9 = WRAPLOW(s9 + s11, 8);
-  x10 = WRAPLOW(s8 - s10, 8);
-  x11 = WRAPLOW(s9 - s11, 8);
+  x8 = WRAPLOW(check_range(s8 + s10), 8);
+  x9 = WRAPLOW(check_range(s9 + s11), 8);
+  x10 = WRAPLOW(check_range(s8 - s10), 8);
+  x11 = WRAPLOW(check_range(s9 - s11), 8);
   x12 = WRAPLOW(dct_const_round_shift(s12 + s14), 8);
   x13 = WRAPLOW(dct_const_round_shift(s13 + s15), 8);
   x14 = WRAPLOW(dct_const_round_shift(s12 - s14), 8);

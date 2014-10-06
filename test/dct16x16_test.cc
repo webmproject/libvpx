@@ -443,7 +443,7 @@ class Trans16x16TestBase {
 
   void RunQuantCheck(int dc_thred, int ac_thred) {
     ACMRandom rnd(ACMRandom::DeterministicSeed());
-    const int count_test_block = 1000;
+    const int count_test_block = 100000;
     DECLARE_ALIGNED_ARRAY(16, int16_t, input_block, kNumCoeffs);
     DECLARE_ALIGNED_ARRAY(16, int16_t, input_extreme_block, kNumCoeffs);
     DECLARE_ALIGNED_ARRAY(16, tran_low_t, output_ref_block, kNumCoeffs);
@@ -700,7 +700,7 @@ TEST_P(Trans16x16HT, MemCheck) {
 TEST_P(Trans16x16HT, QuantCheck) {
   // The encoder skips any non-DC intra prediction modes,
   // when the quantization step size goes beyond 988.
-  RunQuantCheck(549, 988);
+  RunQuantCheck(429, 729);
 }
 
 using std::tr1::make_tuple;
