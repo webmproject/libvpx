@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//UoE\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-10-06T17:59:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//UoM\u003d",
+      "revId": "44ff140e7ecc569add1717c1598fd1818400280f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//UoU\u003d",
         "filename": "vp9/common/vp9_idct.h",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-10-06T17:47:49Z",
       "side": 1,
       "message": "This function share common code with the one above? Can we make dct_const_round_shift() to call this one instead to reduce code duplication?",
+      "revId": "44ff140e7ecc569add1717c1598fd1818400280f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//UoA\u003d",
+        "filename": "vp9/common/vp9_idct.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-10-06T17:59:45Z",
+      "side": 1,
+      "message": "dct_const_round_shift has ROUND_POWER_OF_TWO(input, DCT_CONST_BITS) hard coded in it. To make it include this case, we might need one more input argument and if statements in dct_const_round_shift.",
+      "parentUuid": "AAAAdn//UoU\u003d",
       "revId": "44ff140e7ecc569add1717c1598fd1818400280f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
