@@ -1224,9 +1224,7 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
 
   cpi->oxcf = *oxcf;
 #if CONFIG_VP9_HIGHBITDEPTH
-  if (cpi->oxcf.use_highbitdepth) {
-    cpi->mb.e_mbd.bd = (int)cm->bit_depth;
-  }
+  cpi->mb.e_mbd.bd = (int)cm->bit_depth;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
   rc->baseline_gf_interval = DEFAULT_GF_INTERVAL;
