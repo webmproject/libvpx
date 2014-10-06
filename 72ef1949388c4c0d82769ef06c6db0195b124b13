@@ -16,6 +16,24 @@
       "revId": "72ef1949388c4c0d82769ef06c6db0195b124b13",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Uo8\u003d",
+        "filename": "y4minput.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 980,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-10-06T16:40:13Z",
+      "side": 1,
+      "message": "The change was to deal with the read size for 444 with Alptha, if the depth is larger than 8, for example, 10 and 12, it potentially needs the size of 2 * dst_buf_read_sz.",
+      "parentUuid": "AAAAdn//UsA\u003d",
+      "revId": "72ef1949388c4c0d82769ef06c6db0195b124b13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
