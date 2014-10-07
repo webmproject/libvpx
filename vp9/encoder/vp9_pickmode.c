@@ -235,6 +235,10 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
               tx_mode_to_biggest_tx_size[cpi->common.tx_mode]);
     else
       xd->mi[0].src_mi->mbmi.tx_size = TX_8X8;
+
+    if (cpi->sf.partition_search_type == VAR_BASED_PARTITION &&
+        xd->mi[0].src_mi->mbmi.tx_size > TX_16X16)
+      xd->mi[0].src_mi->mbmi.tx_size = TX_16X16;
   } else {
     xd->mi[0].src_mi->mbmi.tx_size =
         MIN(max_txsize_lookup[bsize],
@@ -611,7 +615,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         continue;
 
       if (this_mode == NEWMV) {
-        if (this_rd < (int64_t)(1 << num_pels_log2_lookup[bsize]))
+        if (cpi->sf.partition_search_type != VAR_BASED_PARTITION &&
+            this_rd < (int64_t)(1 << num_pels_log2_lookup[bsize]))
           continue;
         if (!combined_motion_search(cpi, x, bsize, mi_row, mi_col,
                                     &frame_mv[NEWMV][ref_frame],
