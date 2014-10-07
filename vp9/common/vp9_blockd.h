@@ -111,13 +111,6 @@ typedef enum {
   MAX_REF_FRAMES = 4
 } MV_REFERENCE_FRAME;
 
-static INLINE int b_width_log2(BLOCK_SIZE sb_type) {
-  return b_width_log2_lookup[sb_type];
-}
-static INLINE int b_height_log2(BLOCK_SIZE sb_type) {
-  return b_height_log2_lookup[sb_type];
-}
-
 static INLINE int mi_width_log2(BLOCK_SIZE sb_type) {
   return mi_width_log2_lookup[sb_type];
 }
@@ -312,7 +305,7 @@ void vp9_foreach_transformed_block(
 static INLINE void txfrm_block_to_raster_xy(BLOCK_SIZE plane_bsize,
                                             TX_SIZE tx_size, int block,
                                             int *x, int *y) {
-  const int bwl = b_width_log2(plane_bsize);
+  const int bwl = b_width_log2_lookup[plane_bsize];
   const int tx_cols_log2 = bwl - tx_size;
   const int tx_cols = 1 << tx_cols_log2;
   const int raster_mb = block >> (tx_size << 1);
