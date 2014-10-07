@@ -19,6 +19,23 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Ui8\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 445,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-10-07T06:33:04Z",
+      "side": 1,
+      "message": "maybe add comment like: \"Set count to 1 in fill_variance() for this 1-sample down-sampled 8x8 (which sets variance to 0 for 8x8 block)\"",
+      "revId": "64b31c1a28bba902fe2ba42426fa0f8a1d781506",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Uj4\u003d",
         "filename": "vp9/encoder/vp9_pickmode.c",
         "patchSetId": 15
