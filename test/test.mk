@@ -103,6 +103,10 @@ LIBVPX_TEST_SRCS-yes                   += intrapred_test.cc
 LIBVPX_TEST_SRCS-yes                   += sixtap_predict_test.cc
 LIBVPX_TEST_SRCS-yes                   += vpx_scale_test.cc
 
+ifeq ($(CONFIG_VP8_ENCODER)$(CONFIG_TEMPORAL_DENOISING),yesyes)
+LIBVPX_TEST_SRCS-$(HAVE_SSE2) += vp8_denoiser_sse2_test.cc
+endif
+
 endif # VP8
 
 ## VP9
@@ -135,8 +139,8 @@ ifeq ($(CONFIG_VP9_ENCODER),yes)
 LIBVPX_TEST_SRCS-$(CONFIG_SPATIAL_SVC) += svc_test.cc
 endif
 
-ifeq ($(CONFIG_VP9_TEMPORAL_DENOISING),yes)
-LIBVPX_TEST_SRCS-$(CONFIG_VP9_TEMPORAL_DENOISING) += vp9_denoiser_sse2_test.cc
+ifeq ($(CONFIG_VP9_ENCODER)$(CONFIG_VP9_TEMPORAL_DENOISING),yesyes)
+LIBVPX_TEST_SRCS-$(HAVE_SSE2) += vp9_denoiser_sse2_test.cc
 endif
 
 endif # VP9
