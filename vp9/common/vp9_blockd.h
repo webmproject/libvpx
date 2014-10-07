@@ -49,8 +49,6 @@ typedef enum {
 
 typedef char ENTROPY_CONTEXT;
 
-typedef char PARTITION_CONTEXT;
-
 static INLINE int combine_entropy_contexts(ENTROPY_CONTEXT a,
                                            ENTROPY_CONTEXT b) {
   return (a != 0) + (b != 0);

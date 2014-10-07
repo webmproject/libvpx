@@ -67,6 +67,7 @@ typedef enum PARTITION_TYPE {
   PARTITION_INVALID = PARTITION_TYPES
 } PARTITION_TYPE;
 
+typedef char PARTITION_CONTEXT;
 #define PARTITION_PLOFFSET   4  // number of probability models per block size
 #define PARTITION_CONTEXTS (4 * PARTITION_PLOFFSET)
 
