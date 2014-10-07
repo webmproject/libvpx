@@ -34,7 +34,7 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
   const int tmp_row_min = x->mv_row_min;
   const int tmp_row_max = x->mv_row_max;
   MV ref_full;
-  int sad_list[5];
+  int cost_list[5];
 
   // Further step/diamond searches as necessary
   int step_param = mv_sf->reduce_first_step_size;
@@ -47,7 +47,7 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
 
   /*cpi->sf.search_method == HEX*/
   vp9_hex_search(x, &ref_full, step_param, x->errorperbit, 0,
-                 cond_sad_list(cpi, sad_list),
+                 cond_cost_list(cpi, cost_list),
                  &v_fn_ptr, 0, ref_mv, dst_mv);
 
   // Try sub-pixel MC
@@ -58,7 +58,7 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
     cpi->find_fractional_mv_step(
         x, dst_mv, ref_mv, cpi->common.allow_high_precision_mv, x->errorperbit,
         &v_fn_ptr, 0, mv_sf->subpel_iters_per_step,
-        cond_sad_list(cpi, sad_list),
+        cond_cost_list(cpi, cost_list),
         NULL, NULL,
         &distortion, &sse, NULL, 0, 0);
   }

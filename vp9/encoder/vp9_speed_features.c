@@ -124,7 +124,7 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
     sf->tx_size_search_method = USE_LARGESTALL;
     sf->disable_split_mask = DISABLE_ALL_SPLIT;
     sf->mv.search_method = BIGDIA;
-    sf->mv.subpel_search_method = SUBPEL_TREE_PRUNED;
+    sf->mv.subpel_search_method = SUBPEL_TREE_PRUNED_MORE;
     sf->adaptive_rd_thresh = 4;
     sf->mode_search_skip_flags |= FLAG_EARLY_TERMINATE;
     sf->disable_filter_search_var_thresh = 200;
@@ -425,8 +425,8 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
     cpi->find_fractional_mv_step = vp9_find_best_sub_pixel_tree_pruned;
   } else if (sf->mv.subpel_search_method == SUBPEL_TREE_PRUNED_MORE) {
     cpi->find_fractional_mv_step = vp9_find_best_sub_pixel_tree_pruned_more;
-  } else if (sf->mv.subpel_search_method == SUBPEL_SURFACE_FIT) {
-    cpi->find_fractional_mv_step = vp9_find_best_sub_pixel_surface_fit;
+  } else if (sf->mv.subpel_search_method == SUBPEL_TREE_PRUNED_EVENMORE) {
+    cpi->find_fractional_mv_step = vp9_find_best_sub_pixel_tree_pruned_evenmore;
   }
 
   cpi->mb.optimize = sf->optimize_coefficients == 1 && oxcf->pass != 1;

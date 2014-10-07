@@ -531,8 +531,8 @@ static INLINE int get_chessboard_index(const int frame_index) {
   return frame_index & 0x1;
 }
 
-static INLINE int *cond_sad_list(const struct VP9_COMP *cpi, int *sad_list) {
-  return cpi->sf.mv.subpel_search_method != SUBPEL_TREE ? sad_list : NULL;
+static INLINE int *cond_cost_list(const struct VP9_COMP *cpi, int *cost_list) {
+  return cpi->sf.mv.subpel_search_method != SUBPEL_TREE ? cost_list : NULL;
 }
 
 #ifdef __cplusplus
