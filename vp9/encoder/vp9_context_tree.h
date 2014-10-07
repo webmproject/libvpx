@@ -11,7 +11,7 @@
 #ifndef VP9_ENCODER_VP9_CONTEXT_TREE_H_
 #define VP9_ENCODER_VP9_CONTEXT_TREE_H_
 
-#include "vp9/common/vp9_onyxc_int.h"
+#include "vp9/common/vp9_entropymode.h"
 
 struct VP9_COMP;
 
