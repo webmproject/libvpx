@@ -676,61 +676,66 @@ void vp9_temporal_filter(VP9_COMP *cpi, int distance) {
     frames[frames_to_blur - 1 - frame] = &buf->img;
   }
 
-  // Setup scaling factors. Scaling on each of the arnr frames is not supported
-  if (is_two_pass_svc(cpi)) {
-    // In spatial svc the scaling factors might be less then 1/2. So we will use
-    // non-normative scaling.
-    int frame_used = 0;
+  if (frames_to_blur > 0) {
+    // Setup scaling factors. Scaling on each of the arnr frames is not
+    // supported.
+    if (is_two_pass_svc(cpi)) {
+      // In spatial svc the scaling factors might be less then 1/2.
+      // So we will use non-normative scaling.
+      int frame_used = 0;
 #if CONFIG_VP9_HIGHBITDEPTH
-    vp9_setup_scale_factors_for_frame(&sf,
-                                      get_frame_new_buffer(cm)->y_crop_width,
-                                      get_frame_new_buffer(cm)->y_crop_height,
-                                      get_frame_new_buffer(cm)->y_crop_width,
-                                      get_frame_new_buffer(cm)->y_crop_height,
-                                      cm->use_highbitdepth);
+      vp9_setup_scale_factors_for_frame(
+          &sf,
+          get_frame_new_buffer(cm)->y_crop_width,
+          get_frame_new_buffer(cm)->y_crop_height,
+          get_frame_new_buffer(cm)->y_crop_width,
+          get_frame_new_buffer(cm)->y_crop_height,
+          cm->use_highbitdepth);
 #else
-    vp9_setup_scale_factors_for_frame(&sf,
-                                      get_frame_new_buffer(cm)->y_crop_width,
-                                      get_frame_new_buffer(cm)->y_crop_height,
-                                      get_frame_new_buffer(cm)->y_crop_width,
-                                      get_frame_new_buffer(cm)->y_crop_height);
+      vp9_setup_scale_factors_for_frame(
+          &sf,
+          get_frame_new_buffer(cm)->y_crop_width,
+          get_frame_new_buffer(cm)->y_crop_height,
+          get_frame_new_buffer(cm)->y_crop_width,
+          get_frame_new_buffer(cm)->y_crop_height);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-    for (frame = 0; frame < frames_to_blur; ++frame) {
-      if (cm->mi_cols * MI_SIZE != frames[frame]->y_width ||
-          cm->mi_rows * MI_SIZE != frames[frame]->y_height) {
-        if (vp9_realloc_frame_buffer(&cpi->svc.scaled_frames[frame_used],
-                                     cm->width, cm->height,
-                                     cm->subsampling_x, cm->subsampling_y,
+      for (frame = 0; frame < frames_to_blur; ++frame) {
+        if (cm->mi_cols * MI_SIZE != frames[frame]->y_width ||
+            cm->mi_rows * MI_SIZE != frames[frame]->y_height) {
+          if (vp9_realloc_frame_buffer(&cpi->svc.scaled_frames[frame_used],
+                                       cm->width, cm->height,
+                                       cm->subsampling_x, cm->subsampling_y,
 #if CONFIG_VP9_HIGHBITDEPTH
-                                     cm->use_highbitdepth,
+                                       cm->use_highbitdepth,
 #endif
-                                     VP9_ENC_BORDER_IN_PIXELS, NULL, NULL,
-                                     NULL))
-          vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
-                             "Failed to reallocate alt_ref_buffer");
-
-        frames[frame] = vp9_scale_if_required(cm, frames[frame],
-                            &cpi->svc.scaled_frames[frame_used]);
-        ++frame_used;
+                                       VP9_ENC_BORDER_IN_PIXELS, NULL, NULL,
+                                       NULL)) {
+            vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+                               "Failed to reallocate alt_ref_buffer");
+          }
+          frames[frame] = vp9_scale_if_required(
+              cm, frames[frame], &cpi->svc.scaled_frames[frame_used]);
+          ++frame_used;
+        }
       }
-    }
-  } else {
-    // ARF is produced at the native frame size and resized when coded.
+    } else {
+      // ARF is produced at the native frame size and resized when coded.
 #if CONFIG_VP9_HIGHBITDEPTH
-    vp9_setup_scale_factors_for_frame(&sf,
-                                      frames[0]->y_crop_width,
-                                      frames[0]->y_crop_height,
-                                      frames[0]->y_crop_width,
-                                      frames[0]->y_crop_height,
-                                      cm->use_highbitdepth);
+      vp9_setup_scale_factors_for_frame(&sf,
+                                        frames[0]->y_crop_width,
+                                        frames[0]->y_crop_height,
+                                        frames[0]->y_crop_width,
+                                        frames[0]->y_crop_height,
+                                        cm->use_highbitdepth);
 #else
-    vp9_setup_scale_factors_for_frame(&sf,
-                                      frames[0]->y_crop_width,
-                                      frames[0]->y_crop_height,
-                                      frames[0]->y_crop_width,
-                                      frames[0]->y_crop_height);
+      vp9_setup_scale_factors_for_frame(&sf,
+                                        frames[0]->y_crop_width,
+                                        frames[0]->y_crop_height,
+                                        frames[0]->y_crop_width,
+                                        frames[0]->y_crop_height);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+    }
   }
 
   temporal_filter_iterate_c(cpi, frames, frames_to_blur,

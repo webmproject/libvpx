@@ -27,7 +27,7 @@ static void print_mi_data(VP9_COMMON *cm, FILE *file, const char *descriptor,
   int mi_row, mi_col;
   int mi_index = 0;
   // TODO(hkuang): Fix this debug function.
-  MODE_INFO **mi = NULL;
+  MODE_INFO **mi = &cm->mi;
   int rows = cm->mi_rows;
   int cols = cm->mi_cols;
   char prefix = descriptor[0];
@@ -53,7 +53,7 @@ void vp9_print_modes_and_motion_vectors(VP9_COMMON *cm, const char *file) {
   int mi_index = 0;
   FILE *mvs = fopen(file, "a");
   // TODO(hkuang): Fix this debug function.
-  MODE_INFO **mi = NULL;
+  MODE_INFO **mi = &cm->mi;
   int rows = cm->mi_rows;
   int cols = cm->mi_cols;
 
