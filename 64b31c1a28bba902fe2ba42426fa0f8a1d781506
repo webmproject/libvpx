@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAdn//UjI\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 445,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-10-07T04:25:20Z",
+      "side": 1,
+      "message": "Since the sse and error (s_avg - d_avg) is already normalized via vp9_avg_8x8, and fill_variance assumes sum sse/error as input, we should pass 1 instead of 64 in fill_variance() to get the correct variance?\n\nThis seems to be have been the cause of partition pattern suddenly changing under small lighting change in my test.",
+      "revId": "64b31c1a28bba902fe2ba42426fa0f8a1d781506",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Uj4\u003d",
         "filename": "vp9/encoder/vp9_pickmode.c",
         "patchSetId": 15
