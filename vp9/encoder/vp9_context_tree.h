@@ -11,9 +11,10 @@
 #ifndef VP9_ENCODER_VP9_CONTEXT_TREE_H_
 #define VP9_ENCODER_VP9_CONTEXT_TREE_H_
 
-#include "vp9/common/vp9_entropymode.h"
+#include "vp9/common/vp9_blockd.h"
 
 struct VP9_COMP;
+struct VP9Common;
 
 // Structure to hold snapshot of coding context during the mode picking process
 typedef struct {
