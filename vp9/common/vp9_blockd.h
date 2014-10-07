@@ -47,6 +47,8 @@ typedef enum {
   PLANE_TYPES
 } PLANE_TYPE;
 
+#define MAX_MB_PLANE 3
+
 typedef char ENTROPY_CONTEXT;
 
 static INLINE int combine_entropy_contexts(ENTROPY_CONTEXT a,
@@ -159,8 +161,6 @@ enum mv_precision {
   MV_PRECISION_Q3,
   MV_PRECISION_Q4
 };
-
-enum { MAX_MB_PLANE = 3 };
 
 struct buf_2d {
   uint8_t *buf;
