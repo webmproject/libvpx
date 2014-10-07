@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Uj4\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 565,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-10-07T00:19:27Z",
+      "side": 1,
+      "message": "Should this be commented out directly or only skip under the same speed feature as a condition VAR_BASED_PARTITION too?",
+      "revId": "64b31c1a28bba902fe2ba42426fa0f8a1d781506",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
