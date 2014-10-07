@@ -211,6 +211,7 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
         x->bsse[(i << 2) + block_idx] = sse;
         sum_sse += sse;
 
+        x->skip_txfm[(i << 2) + block_idx] = 0;
         if (!x->select_tx_size) {
           // Check if all ac coefficients can be quantized to zero.
           if (var < p->quant_thred[1] >> shift) {
@@ -219,8 +220,6 @@ static void model_rd_for_sb(VP9_COMP *cpi, BLOCK_SIZE bsize,
             // Check if dc coefficient can be quantized to zero.
             if (sse - var < p->quant_thred[0] >> shift)
               x->skip_txfm[(i << 2) + block_idx] = 1;
-          } else {
-            x->skip_txfm[(i << 2) + block_idx] = 0;
           }
         }
 
@@ -1050,6 +1049,7 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
     for (i = 0; i < TX_MODES; i++)
       tx_cache[i] = INT64_MAX;
 
+  vpx_memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
   /* Y Search for intra prediction mode */
   for (mode = DC_PRED; mode <= TM_PRED; mode++) {
     int64_t local_tx_cache[TX_MODES];
@@ -1149,6 +1149,7 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int this_rate_tokenonly, this_rate, s;
   int64_t this_distortion, this_sse;
 
+  vpx_memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
   for (mode = DC_PRED; mode <= TM_PRED; ++mode) {
     if (!(cpi->sf.intra_uv_mode_mask[max_tx_size] & (1 << mode)))
       continue;
@@ -1187,6 +1188,7 @@ static int64_t rd_sbuv_dcpred(const VP9_COMP *cpi, MACROBLOCK *x,
   int64_t unused;
 
   x->e_mbd.mi[0].src_mi->mbmi.uv_mode = DC_PRED;
+  vpx_memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
   super_block_uvrd(cpi, x, rate_tokenonly, distortion,
                    skippable, &unused, bsize, INT64_MAX);
   *rate = *rate_tokenonly + cpi->intra_uv_mode_cost[cm->frame_type][DC_PRED];
@@ -2649,8 +2651,6 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           best_filter = mbmi->interp_filter;
           if (cm->interp_filter == SWITCHABLE && i && !intpel_mv)
             best_needs_copy = !best_needs_copy;
-          vpx_memcpy(skip_txfm, x->skip_txfm, sizeof(skip_txfm));
-          vpx_memcpy(bsse, x->bsse, sizeof(bsse));
         }
 
         if ((cm->interp_filter == SWITCHABLE && newbest) ||
@@ -2658,6 +2658,9 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
              cm->interp_filter == mbmi->interp_filter)) {
           pred_exists = 1;
           tmp_rd = best_rd;
+
+          vpx_memcpy(skip_txfm, x->skip_txfm, sizeof(skip_txfm));
+          vpx_memcpy(bsse, x->bsse, sizeof(bsse));
         }
       }
       restore_dst_buf(xd, orig_dst, orig_dst_stride);
@@ -3212,6 +3215,8 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
     if (ref_frame == INTRA_FRAME) {
       TX_SIZE uv_tx;
+
+      vpx_memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
       super_block_yrd(cpi, x, &rate_y, &distortion_y, &skippable,
                       NULL, bsize, tx_cache, best_rd);
 
@@ -3990,6 +3995,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
         // then dont bother looking at UV
         vp9_build_inter_predictors_sbuv(&x->e_mbd, mi_row, mi_col,
                                         BLOCK_8X8);
+        vpx_memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
         super_block_uvrd(cpi, x, &rate_uv, &distortion_uv, &uv_skippable,
                          &uv_sse, BLOCK_8X8, tmp_best_rdu);
         if (rate_uv == INT_MAX)
