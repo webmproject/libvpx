@@ -31,9 +31,6 @@
 static void make_grayscale(YV12_BUFFER_CONFIG *yuv);
 #endif
 
-static const int widths[]  = {4, 4, 8, 8,  8, 16, 16, 16, 32, 32, 32, 64, 64};
-static const int heights[] = {4, 8, 4, 8, 16,  8, 16, 32, 16, 32, 64, 32, 64};
-
 static int absdiff_thresh(BLOCK_SIZE bs, int increase_denoising) {
   (void)bs;
   return 3 + (increase_denoising ? 1 : 0);
@@ -52,7 +49,9 @@ static int noise_motion_thresh(BLOCK_SIZE bs, int increase_denoising) {
 }
 
 static unsigned int sse_thresh(BLOCK_SIZE bs, int increase_denoising) {
-  return widths[bs] * heights[bs] * (increase_denoising ? 60 : 40);
+  return (4 << b_width_log2_lookup[bs]) *
+         (4 << b_height_log2_lookup[bs]) *
+         (increase_denoising ? 60 : 40);
 }
 
 static int sse_diff_thresh(BLOCK_SIZE bs, int increase_denoising,
@@ -61,25 +60,31 @@ static int sse_diff_thresh(BLOCK_SIZE bs, int increase_denoising,
       noise_motion_thresh(bs, increase_denoising)) {
     return 0;
   } else {
-    return widths[bs] * heights[bs] * 20;
+    return (4 << b_width_log2_lookup[bs]) *
+           (4 << b_height_log2_lookup[bs]) * 20;
   }
 }
 
-static int total_adj_strong_thresh(BLOCK_SIZE bs, int increase_denoising) {
-  return widths[bs] * heights[bs] * (increase_denoising ? 3 : 2);
+int total_adj_strong_thresh(BLOCK_SIZE bs, int increase_denoising) {
+  return (4 << b_width_log2_lookup[bs]) *
+         (4 << b_height_log2_lookup[bs]) * (increase_denoising ? 3 : 2);
 }
 
 static int total_adj_weak_thresh(BLOCK_SIZE bs, int increase_denoising) {
-  return widths[bs] * heights[bs] * (increase_denoising ? 3 : 2);
+  return (4 << b_width_log2_lookup[bs]) *
+         (4 << b_height_log2_lookup[bs]) * (increase_denoising ? 3 : 2);
 }
 
-static VP9_DENOISER_DECISION denoiser_filter(const uint8_t *sig, int sig_stride,
-                                             const uint8_t *mc_avg,
-                                             int mc_avg_stride,
-                                             uint8_t *avg, int avg_stride,
-                                             int increase_denoising,
-                                             BLOCK_SIZE bs,
-                                             int motion_magnitude) {
+// TODO(jackychen): If increase_denoising is enabled in the future,
+// we might need to update the code for calculating 'total_adj' in
+// case the C code is not bit-exact with corresponding sse2 code.
+int vp9_denoiser_filter_c(const uint8_t *sig, int sig_stride,
+                          const uint8_t *mc_avg,
+                          int mc_avg_stride,
+                          uint8_t *avg, int avg_stride,
+                          int increase_denoising,
+                          BLOCK_SIZE bs,
+                          int motion_magnitude) {
   int r, c;
   const uint8_t *sig_start = sig;
   const uint8_t *mc_avg_start = mc_avg;
@@ -102,8 +107,8 @@ static VP9_DENOISER_DECISION denoiser_filter(const uint8_t *sig, int sig_stride,
   }
 
   // First attempt to apply a strong temporal denoising filter.
-  for (r = 0; r < heights[bs]; ++r) {
-    for (c = 0; c < widths[bs]; ++c) {
+  for (r = 0; r < (4 << b_height_log2_lookup[bs]); ++r) {
+    for (c = 0; c < (4 << b_width_log2_lookup[bs]); ++c) {
       diff = mc_avg[c] - sig[c];
       absdiff = abs(diff);
 
@@ -152,8 +157,8 @@ static VP9_DENOISER_DECISION denoiser_filter(const uint8_t *sig, int sig_stride,
   mc_avg =  mc_avg_start;
   avg = avg_start;
   sig = sig_start;
-  for (r = 0; r < heights[bs]; ++r) {
-    for (c = 0; c < widths[bs]; ++c) {
+  for (r = 0; r < (4 << b_height_log2_lookup[bs]); ++r) {
+    for (c = 0; c < (4 << b_width_log2_lookup[bs]); ++c) {
       diff = mc_avg[c] - sig[c];
       adj = abs(diff);
       if (adj > delta) {
@@ -193,8 +198,8 @@ static uint8_t *block_start(uint8_t *framebuf, int stride,
 static void copy_block(uint8_t *dest, int dest_stride,
                        const uint8_t *src, int src_stride, BLOCK_SIZE bs) {
   int r;
-  for (r = 0; r < heights[bs]; ++r) {
-    vpx_memcpy(dest, src, widths[bs]);
+  for (r = 0; r < (4 << b_height_log2_lookup[bs]); ++r) {
+    vpx_memcpy(dest, src, (4 << b_width_log2_lookup[bs]));
     dest += dest_stride;
     src += src_stride;
   }
@@ -336,10 +341,10 @@ void vp9_denoiser_denoise(VP9_DENOISER *denoiser, MACROBLOCK *mb,
                                          &motion_magnitude);
 
   if (decision == FILTER_BLOCK) {
-    decision = denoiser_filter(src.buf, src.stride,
-                               mc_avg_start, mc_avg.y_stride,
-                               avg_start, avg.y_stride,
-                               0, bs, motion_magnitude);
+    decision = vp9_denoiser_filter(src.buf, src.stride,
+                                 mc_avg_start, mc_avg.y_stride,
+                                 avg_start, avg.y_stride,
+                                 0, bs, motion_magnitude);
   }
 
   if (decision == FILTER_BLOCK) {
