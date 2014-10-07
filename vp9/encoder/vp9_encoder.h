@@ -14,12 +14,10 @@
 #include <stdio.h>
 
 #include "./vpx_config.h"
-#include "vpx_ports/mem.h"
 #include "vpx/internal/vpx_codec_internal.h"
 #include "vpx/vp8cx.h"
 
 #include "vp9/common/vp9_ppflags.h"
-#include "vp9/common/vp9_entropy.h"
 #include "vp9/common/vp9_entropymode.h"
 #include "vp9/common/vp9_onyxc_int.h"
 
