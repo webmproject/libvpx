@@ -190,7 +190,11 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd, PLANE_TYPE type,
       }
     }
     v = (val * dqv) >> dq_shift;
+#if CONFIG_COEFFICIENT_RANGE_CHECKING
+    dqcoeff[scan[c]] = check_range(vp9_read_bit(r) ? -v : v);
+#else
     dqcoeff[scan[c]] = vp9_read_bit(r) ? -v : v;
+#endif
     token_cache[scan[c]] = vp9_pt_energy_class[token];
     ++c;
     ctx = get_coef_context(nb, token_cache, c);
