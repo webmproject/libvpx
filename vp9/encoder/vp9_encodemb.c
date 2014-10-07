@@ -814,7 +814,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
   const scan_order *scan_order;
   TX_TYPE tx_type;
   PREDICTION_MODE mode;
-  const int bwl = b_width_log2(plane_bsize);
+  const int bwl = b_width_log2_lookup[plane_bsize];
   const int diff_stride = 4 * (1 << bwl);
   uint8_t *src, *dst;
   int16_t *src_diff;

@@ -339,7 +339,7 @@ static void encode_breakout_test(VP9_COMP *cpi, MACROBLOCK *x,
 
     // Adjust ac threshold according to partition size.
     thresh_ac >>=
-        8 - (b_width_log2(bsize) + b_height_log2(bsize));
+        8 - (b_width_log2_lookup[bsize] + b_height_log2_lookup[bsize]);
 
     thresh_dc = (xd->plane[0].dequant[0] * xd->plane[0].dequant[0] >> 6);
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -433,7 +433,7 @@ static void estimate_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
   pd->dst.buf = &dst_buf_base[4 * (j * dst_stride + i)];
   // Use source buffer as an approximation for the fully reconstructed buffer.
   vp9_predict_intra_block(xd, block >> (2 * tx_size),
-                          b_width_log2(plane_bsize),
+                          b_width_log2_lookup[plane_bsize],
                           tx_size, args->mode,
                           p->src.buf, src_stride,
                           pd->dst.buf, dst_stride,

@@ -131,7 +131,7 @@ static const REF_DEFINITION vp9_ref_order[MAX_REFS] = {
 
 static int raster_block_offset(BLOCK_SIZE plane_bsize,
                                int raster_block, int stride) {
-  const int bw = b_width_log2(plane_bsize);
+  const int bw = b_width_log2_lookup[plane_bsize];
   const int y = 4 * (raster_block >> bw);
   const int x = 4 * (raster_block & ((1 << bw) - 1));
   return y * stride + x;
@@ -2074,14 +2074,14 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   if (cpi->sf.adaptive_motion_search && bsize < BLOCK_64X64) {
-    int boffset = 2 * (b_width_log2(BLOCK_64X64) - MIN(b_height_log2(bsize),
-                                                       b_width_log2(bsize)));
+    int boffset = 2 * (b_width_log2_lookup[BLOCK_64X64] -
+          MIN(b_height_log2_lookup[bsize], b_width_log2_lookup[bsize]));
     step_param = MAX(step_param, boffset);
   }
 
   if (cpi->sf.adaptive_motion_search) {
-    int bwl = b_width_log2(bsize);
-    int bhl = b_height_log2(bsize);
+    int bwl = b_width_log2_lookup[bsize];
+    int bhl = b_height_log2_lookup[bsize];
     int i;
     int tlevel = x->pred_mv_sad[ref] >> (bwl + bhl + 4);
 
@@ -2376,8 +2376,8 @@ static void rd_encode_breakout_test(VP9_COMP *cpi, MACROBLOCK *x,
     thresh_ac = clamp(thresh_ac, min_thresh, max_thresh);
 
     // Adjust threshold according to partition size.
-    thresh_ac >>= 8 - (b_width_log2(bsize) +
-        b_height_log2(bsize));
+    thresh_ac >>= 8 - (b_width_log2_lookup[bsize] +
+        b_height_log2_lookup[bsize]);
     thresh_dc = (xd->plane[0].dequant[0] * xd->plane[0].dequant[0] >> 6);
 #if CONFIG_VP9_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {

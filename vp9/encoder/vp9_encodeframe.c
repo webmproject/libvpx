@@ -1012,7 +1012,7 @@ static void encode_sb(VP9_COMP *cpi, const TileInfo *const tile,
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
 
-  const int bsl = b_width_log2(bsize), hbs = (1 << bsl) / 4;
+  const int bsl = b_width_log2_lookup[bsize], hbs = (1 << bsl) / 4;
   int ctx;
   PARTITION_TYPE partition;
   BLOCK_SIZE subsize = bsize;
@@ -1441,7 +1441,7 @@ static void encode_sb_rt(VP9_COMP *cpi, const TileInfo *const tile,
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
 
-  const int bsl = b_width_log2(bsize), hbs = (1 << bsl) / 4;
+  const int bsl = b_width_log2_lookup[bsize], hbs = (1 << bsl) / 4;
   int ctx;
   PARTITION_TYPE partition;
   BLOCK_SIZE subsize;
@@ -1514,7 +1514,7 @@ static void rd_use_partition(VP9_COMP *cpi,
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   const int mis = cm->mi_stride;
-  const int bsl = b_width_log2(bsize);
+  const int bsl = b_width_log2_lookup[bsize];
   const int mi_step = num_4x4_blocks_wide_lookup[bsize] / 2;
   const int bss = (1 << bsl) / 4;
   int i, pl;
@@ -2270,8 +2270,8 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
           pc_tree->partitioning = PARTITION_NONE;
 
         // Adjust dist breakout threshold according to the partition size.
-        dist_breakout_thr >>= 8 - (b_width_log2(bsize) +
-            b_height_log2(bsize));
+        dist_breakout_thr >>= 8 - (b_width_log2_lookup[bsize] +
+            b_height_log2_lookup[bsize]);
 
         rate_breakout_thr *= num_pels_log2_lookup[bsize];
 
@@ -2727,7 +2727,7 @@ static void fill_mode_info_sb(VP9_COMMON *cm, MACROBLOCK *x,
                               BLOCK_SIZE bsize, BLOCK_SIZE subsize,
                               PC_TREE *pc_tree) {
   MACROBLOCKD *xd = &x->e_mbd;
-  int bsl = b_width_log2(bsize), hbs = (1 << bsl) / 4;
+  int bsl = b_width_log2_lookup[bsize], hbs = (1 << bsl) / 4;
   PARTITION_TYPE partition = pc_tree->partitioning;
 
   assert(bsize >= BLOCK_8X8);
@@ -2856,8 +2856,8 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
           pc_tree->partitioning = PARTITION_NONE;
 
         // Adjust threshold according to partition size.
-        stop_thresh >>= 8 - (b_width_log2(bsize) +
-            b_height_log2(bsize));
+        stop_thresh >>= 8 - (b_width_log2_lookup[bsize] +
+            b_height_log2_lookup[bsize]);
 
         stop_thresh_rd = RDCOST(x->rdmult, x->rddiv, 0, stop_thresh);
         // If obtained distortion is very small, choose current partition
@@ -3049,7 +3049,7 @@ static void nonrd_use_partition(VP9_COMP *cpi,
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
-  const int bsl = b_width_log2(bsize), hbs = (1 << bsl) / 4;
+  const int bsl = b_width_log2_lookup[bsize], hbs = (1 << bsl) / 4;
   const int mis = cm->mi_stride;
   PARTITION_TYPE partition;
   BLOCK_SIZE subsize;
