@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Ubc\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 18
+      },
+      "lineNbr": 338,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-10-07T21:18:37Z",
+      "side": 1,
+      "message": "Can we make these numbers (4, 64) constants?",
+      "revId": "928e4f6e68ec91c089483f10730d45e080939864",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//UbU\u003d",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 18
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-10-07T21:18:37Z",
+      "side": 1,
+      "message": "Remove/modify the comment above.",
+      "revId": "928e4f6e68ec91c089483f10730d45e080939864",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//UbY\u003d",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 18
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-10-07T21:18:37Z",
+      "side": 1,
+      "message": "Why do you need NSTEP? Will it not slow down the encode?",
+      "revId": "928e4f6e68ec91c089483f10730d45e080939864",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
