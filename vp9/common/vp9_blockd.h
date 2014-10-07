@@ -111,10 +111,6 @@ typedef enum {
   MAX_REF_FRAMES = 4
 } MV_REFERENCE_FRAME;
 
-static INLINE int mi_width_log2(BLOCK_SIZE sb_type) {
-  return mi_width_log2_lookup[sb_type];
-}
-
 // This structure now relates to 8x8 block regions.
 typedef struct {
   // Common for both INTER and INTRA blocks

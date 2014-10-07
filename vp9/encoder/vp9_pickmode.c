@@ -492,7 +492,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   const int *const rd_threshes = cpi->rd.threshes[segment_id][bsize];
   const int *const rd_thresh_freq_fact = cpi->rd.thresh_freq_fact[bsize];
   INTERP_FILTER filter_ref = cm->interp_filter;
-  const int bsl = mi_width_log2(bsize);
+  const int bsl = mi_width_log2_lookup[bsize];
   const int pred_filter_search = cm->interp_filter == SWITCHABLE ?
       (((mi_row + mi_col) >> bsl) +
        get_chessboard_index(cm->current_video_frame)) & 0x1 : 0;

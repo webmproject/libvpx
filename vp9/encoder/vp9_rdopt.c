@@ -3096,7 +3096,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                 tile->mi_col_end - mi_col);
       const int mi_height = MIN(num_8x8_blocks_high_lookup[bsize],
                                 tile->mi_row_end - mi_row);
-      const int bsl = mi_width_log2(bsize);
+      const int bsl = mi_width_log2_lookup[bsize];
       int cb_partition_search_ctrl = (((mi_row + mi_col) >> bsl)
           + get_chessboard_index(cm->current_video_frame)) & 0x1;
       MB_MODE_INFO *ref_mbmi;
