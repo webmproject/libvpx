@@ -16,6 +16,24 @@
       "revId": "983a6a3f6b866ae93a17d2026759382e80a4b9d7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//UQw\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1090,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-10-08T19:39:02Z",
+      "side": 1,
+      "message": "Done.  Increased the threshold and added to denoising file where most parameters are set. This is mainly to avoid filtering with old key frame because of poor/wrong sse match (for very noisy input).",
+      "parentUuid": "AAAAdn//UQ4\u003d",
+      "revId": "983a6a3f6b866ae93a17d2026759382e80a4b9d7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
