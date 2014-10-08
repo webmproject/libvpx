@@ -247,6 +247,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//UNs\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 59
+      },
+      "lineNbr": 1554,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-10-08T23:50:51Z",
+      "side": 1,
+      "message": "There is a buf inside. It is YV12_BUFFER_CONFIG buf; You use it 2 lines down.\n\nI was suggesting this to be consistent:\nRefCntBuffer *const frame_buf \u003d \u0026pool-\u003eframe_bufs[idx];\n\nbecause everywhere else in the code you have:\nRefCntBuffer *const frame_bufs \u003d cm-\u003ebuffer_pool-\u003eframe_bufs;\n\nWhy is it ref_buf here and frame_bufs other places?",
+      "parentUuid": "AAAAdn//WCE\u003d",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//WDY\u003d",
         "filename": "vp9/decoder/vp9_decodeframe.c",
         "patchSetId": 59
@@ -1185,6 +1203,24 @@
       "side": 1,
       "message": "If all the threads are busy, it will return frame 0. Otherwise, decoder will return NULL.",
       "parentUuid": "AAAAdn//WSg\u003d",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//UNU\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 59
+      },
+      "lineNbr": 731,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-10-08T23:50:51Z",
+      "side": 1,
+      "message": "If you look at my sequence above all threads are not busy. So it will return NULL?",
+      "parentUuid": "AAAAdn//WFs\u003d",
       "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
