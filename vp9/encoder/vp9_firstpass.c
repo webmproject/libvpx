@@ -46,6 +46,7 @@
 #define GF_MAX_BOOST        96.0
 #define INTRA_MODE_PENALTY  1024
 #define KF_MAX_BOOST        128.0
+#define MIN_ARF_BOOST       240
 #define MIN_DECAY_FACTOR    0.01
 #define MIN_GF_INTERVAL     4
 #define MIN_KF_BOOST        300
@@ -1410,6 +1411,7 @@ static int calc_arf_boost(VP9_COMP *cpi, int offset,
   arf_boost = (*f_boost + *b_boost);
   if (arf_boost < ((b_frames + f_frames) * 20))
     arf_boost = ((b_frames + f_frames) * 20);
+  arf_boost = MAX(arf_boost, MIN_ARF_BOOST);
 
   return arf_boost;
 }
@@ -1687,6 +1689,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   int b_boost = 0;
   int flash_detected;
   int active_max_gf_interval;
+  int active_min_gf_interval;
   int64_t gf_group_bits;
   double gf_group_error_left;
   int gf_arf_bits;
@@ -1715,21 +1718,27 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // Motion breakout threshold for loop below depends on image size.
   mv_ratio_accumulator_thresh = (cpi->common.width + cpi->common.height) / 4.0;
 
-  // Work out a maximum interval for the GF group.
+  // Set a maximum and minimum interval for the GF group.
   // If the image appears almost completely static we can extend beyond this.
-  if (cpi->multi_arf_allowed) {
-    active_max_gf_interval = rc->max_gf_interval;
-  } else {
-   // The value chosen depends on the active Q range. At low Q we have
-   // bits to spare and are better with a smaller interval and smaller boost.
-   // At high Q when there are few bits to spare we are better with a longer
-   // interval to spread the cost of the GF.
-   active_max_gf_interval =
-     12 + ((int)vp9_convert_qindex_to_q(rc->last_q[INTER_FRAME],
-                                        cpi->common.bit_depth) >> 5);
+  {
+    int int_max_q =
+      (int)(vp9_convert_qindex_to_q(twopass->active_worst_quality,
+                                   cpi->common.bit_depth));
+    active_min_gf_interval = MIN_GF_INTERVAL + MIN(2, int_max_q / 200);
+    if (active_min_gf_interval > rc->max_gf_interval)
+      active_min_gf_interval = rc->max_gf_interval;
 
-   if (active_max_gf_interval > rc->max_gf_interval)
-     active_max_gf_interval = rc->max_gf_interval;
+    if (cpi->multi_arf_allowed) {
+      active_max_gf_interval = rc->max_gf_interval;
+    } else {
+      // The value chosen depends on the active Q range. At low Q we have
+      // bits to spare and are better with a smaller interval and smaller boost.
+      // At high Q when there are few bits to spare we are better with a longer
+      // interval to spread the cost of the GF.
+      active_max_gf_interval = 12 + MIN(4, (int_max_q / 32));
+      if (active_max_gf_interval > rc->max_gf_interval)
+        active_max_gf_interval = rc->max_gf_interval;
+    }
   }
 
   i = 0;
@@ -1785,7 +1794,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       (i >= active_max_gf_interval && (zero_motion_accumulator < 0.995)) ||
       (
         // Don't break out with a very short interval.
-        (i > MIN_GF_INTERVAL) &&
+        (i > active_min_gf_interval) &&
         (!flash_detected) &&
         ((mv_ratio_accumulator > mv_ratio_accumulator_thresh) ||
          (abs_mv_in_out_accumulator > 3.0) ||
@@ -2401,8 +2410,9 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
       FILE *fpfile;
       fpfile = fopen("arf.stt", "a");
       ++arf_count;
-      fprintf(fpfile, "%10d %10d %10d %10ld\n",
-              cm->current_video_frame, rc->kf_boost, arf_count, rc->gfu_boost);
+      fprintf(fpfile, "%10d %10ld %10d %10d %10ld\n",
+              cm->current_video_frame, rc->frames_till_gf_update_due,
+              rc->kf_boost, arf_count, rc->gfu_boost);
 
       fclose(fpfile);
     }
