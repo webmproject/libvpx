@@ -1760,7 +1760,7 @@ static void test_decode(struct stream_state  *stream,
       if (dec_img.fmt & VPX_IMG_FMT_HIGHBITDEPTH) {
         vpx_img_alloc(&dec_img, dec_img.fmt - VPX_IMG_FMT_HIGHBITDEPTH,
                       dec_img.d_w, dec_img.d_h, 16);
-        vpx_img_cast_16_to_8(&dec_img, &ref_dec.img);
+        vpx_img_truncate_16_to_8(&dec_img, &ref_dec.img);
       }
     }
 #endif
