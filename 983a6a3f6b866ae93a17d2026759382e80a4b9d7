@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//UQ4\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1090,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-10-08T19:16:34Z",
+      "side": 1,
+      "message": "Use\n#define MAX_GF_ARF_DENOISE_RANGE 10\nor something similar rather than using a magic number.",
+      "revId": "983a6a3f6b866ae93a17d2026759382e80a4b9d7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
