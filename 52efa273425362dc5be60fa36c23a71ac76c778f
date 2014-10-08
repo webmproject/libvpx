@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//URU\u003d",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 721,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-10-08T18:53:48Z",
+      "side": 1,
+      "message": "I think mv_err_cost should be called here since the variance is used instead of sad.",
+      "revId": "52efa273425362dc5be60fa36c23a71ac76c778f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//URQ\u003d",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 907,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-10-08T18:53:48Z",
+      "side": 1,
+      "message": "May use another name for sad_list, and also update the above comment.",
+      "revId": "52efa273425362dc5be60fa36c23a71ac76c778f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
