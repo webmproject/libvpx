@@ -1440,59 +1440,62 @@ void vp9_fdct32x32_rd_c(const int16_t *input, tran_low_t *out, int stride) {
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
-void vp9_high_fdct4x4_c(const int16_t *input, tran_low_t *output, int stride) {
+void vp9_highbd_fdct4x4_c(const int16_t *input, tran_low_t *output,
+                          int stride) {
   vp9_fdct4x4_c(input, output, stride);
 }
 
-void vp9_high_fht4x4_c(const int16_t *input, tran_low_t *output,
-                       int stride, int tx_type) {
+void vp9_highbd_fht4x4_c(const int16_t *input, tran_low_t *output,
+                         int stride, int tx_type) {
   vp9_fht4x4_c(input, output, stride, tx_type);
 }
 
-void vp9_high_fdct8x8_1_c(const int16_t *input, tran_low_t *final_output,
-                          int stride) {
+void vp9_highbd_fdct8x8_1_c(const int16_t *input, tran_low_t *final_output,
+                            int stride) {
   vp9_fdct8x8_1_c(input, final_output, stride);
 }
 
-void vp9_high_fdct8x8_c(const int16_t *input, tran_low_t *final_output,
-                        int stride) {
+void vp9_highbd_fdct8x8_c(const int16_t *input, tran_low_t *final_output,
+                          int stride) {
   vp9_fdct8x8_c(input, final_output, stride);
 }
 
-void vp9_high_fdct16x16_1_c(const int16_t *input, tran_low_t *output,
-                            int stride) {
+void vp9_highbd_fdct16x16_1_c(const int16_t *input, tran_low_t *output,
+                              int stride) {
   vp9_fdct16x16_1_c(input, output, stride);
 }
 
-void vp9_high_fdct16x16_c(const int16_t *input, tran_low_t *output,
-                          int stride) {
+void vp9_highbd_fdct16x16_c(const int16_t *input, tran_low_t *output,
+                            int stride) {
   vp9_fdct16x16_c(input, output, stride);
 }
 
-void vp9_high_fht8x8_c(const int16_t *input, tran_low_t *output,
-                  int stride, int tx_type) {
+void vp9_highbd_fht8x8_c(const int16_t *input, tran_low_t *output,
+                         int stride, int tx_type) {
   vp9_fht8x8_c(input, output, stride, tx_type);
 }
 
-void vp9_high_fwht4x4_c(const int16_t *input, tran_low_t *output, int stride) {
+void vp9_highbd_fwht4x4_c(const int16_t *input, tran_low_t *output,
+                          int stride) {
   vp9_fwht4x4_c(input, output, stride);
 }
 
-void vp9_high_fht16x16_c(const int16_t *input, tran_low_t *output,
-                    int stride, int tx_type) {
+void vp9_highbd_fht16x16_c(const int16_t *input, tran_low_t *output,
+                           int stride, int tx_type) {
   vp9_fht16x16_c(input, output, stride, tx_type);
 }
 
-void vp9_high_fdct32x32_1_c(const int16_t *input, tran_low_t *out, int stride) {
+void vp9_highbd_fdct32x32_1_c(const int16_t *input, tran_low_t *out,
+                              int stride) {
   vp9_fdct32x32_1_c(input, out, stride);
 }
 
-void vp9_high_fdct32x32_c(const int16_t *input, tran_low_t *out, int stride) {
+void vp9_highbd_fdct32x32_c(const int16_t *input, tran_low_t *out, int stride) {
   vp9_fdct32x32_c(input, out, stride);
 }
 
-void vp9_high_fdct32x32_rd_c(const int16_t *input, tran_low_t *out,
-                             int stride) {
+void vp9_highbd_fdct32x32_rd_c(const int16_t *input, tran_low_t *out,
+                               int stride) {
   vp9_fdct32x32_rd_c(input, out, stride);
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH

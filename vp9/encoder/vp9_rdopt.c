@@ -286,10 +286,10 @@ int64_t vp9_block_error_c(const tran_low_t *coeff, const tran_low_t *dqcoeff,
 
 
 #if CONFIG_VP9_HIGHBITDEPTH
-int64_t vp9_high_block_error_c(const tran_low_t *coeff,
-                               const tran_low_t *dqcoeff,
-                               intptr_t block_size,
-                               int64_t *ssz, int bd) {
+int64_t vp9_highbd_block_error_c(const tran_low_t *coeff,
+                                 const tran_low_t *dqcoeff,
+                                 intptr_t block_size,
+                                 int64_t *ssz, int bd) {
   int i;
   int64_t error = 0, sqcoeff = 0;
   int shift = 2 * (bd - 8);
@@ -412,8 +412,8 @@ static void dist_block(int plane, int block, TX_SIZE tx_size,
   tran_low_t *const coeff = BLOCK_OFFSET(p->coeff, block);
   tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
 #if CONFIG_VP9_HIGHBITDEPTH
-  args->dist = vp9_high_block_error(coeff, dqcoeff, 16 << ss_txfrm_size,
-                                    &this_sse, bd) >> shift;
+  args->dist = vp9_highbd_block_error(coeff, dqcoeff, 16 << ss_txfrm_size,
+                                      &this_sse, bd) >> shift;
 #else
   args->dist = vp9_block_error(coeff, dqcoeff, 16 << ss_txfrm_size,
                                &this_sse) >> shift;
@@ -795,36 +795,36 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
                                   x->skip_encode ? src : dst,
                                   x->skip_encode ? src_stride : dst_stride,
                                   dst, dst_stride, idx, idy, 0);
-          vp9_high_subtract_block(4, 4, src_diff, 8, src, src_stride,
-                                  dst, dst_stride, xd->bd);
+          vp9_highbd_subtract_block(4, 4, src_diff, 8, src, src_stride,
+                                    dst, dst_stride, xd->bd);
           if (xd->lossless) {
             const scan_order *so = &vp9_default_scan_orders[TX_4X4];
-            vp9_high_fwht4x4(src_diff, coeff, 8);
+            vp9_highbd_fwht4x4(src_diff, coeff, 8);
             vp9_regular_quantize_b_4x4(x, 0, block, so->scan, so->iscan);
             ratey += cost_coeffs(x, 0, block, tempa + idx, templ + idy, TX_4X4,
                                  so->scan, so->neighbors,
                                  cpi->sf.use_fast_coef_costing);
             if (RDCOST(x->rdmult, x->rddiv, ratey, distortion) >= best_rd)
               goto next_highbd;
-            vp9_high_iwht4x4_add(BLOCK_OFFSET(pd->dqcoeff, block),
-                                 dst, dst_stride,
-                                 p->eobs[block], xd->bd);
+            vp9_highbd_iwht4x4_add(BLOCK_OFFSET(pd->dqcoeff, block),
+                                   dst, dst_stride,
+                                   p->eobs[block], xd->bd);
           } else {
             int64_t unused;
             const TX_TYPE tx_type = get_tx_type_4x4(PLANE_TYPE_Y, xd, block);
             const scan_order *so = &vp9_scan_orders[TX_4X4][tx_type];
-            vp9_high_fht4x4(src_diff, coeff, 8, tx_type);
+            vp9_highbd_fht4x4(src_diff, coeff, 8, tx_type);
             vp9_regular_quantize_b_4x4(x, 0, block, so->scan, so->iscan);
             ratey += cost_coeffs(x, 0, block, tempa + idx, templ + idy, TX_4X4,
                                  so->scan, so->neighbors,
                                  cpi->sf.use_fast_coef_costing);
-            distortion += vp9_high_block_error(coeff,
-                                               BLOCK_OFFSET(pd->dqcoeff, block),
-                                               16, &unused, xd->bd) >> 2;
+            distortion += vp9_highbd_block_error(
+                coeff, BLOCK_OFFSET(pd->dqcoeff, block),
+                16, &unused, xd->bd) >> 2;
             if (RDCOST(x->rdmult, x->rddiv, ratey, distortion) >= best_rd)
               goto next_highbd;
-            vp9_high_iht4x4_add(tx_type, BLOCK_OFFSET(pd->dqcoeff, block),
-                                dst, dst_stride, p->eobs[block], xd->bd);
+            vp9_highbd_iht4x4_add(tx_type, BLOCK_OFFSET(pd->dqcoeff, block),
+                                  dst, dst_stride, p->eobs[block], xd->bd);
           }
         }
       }
@@ -1319,13 +1319,13 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
                                                pd->pre[ref].stride)];
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    vp9_high_build_inter_predictor(pre, pd->pre[ref].stride,
-                                   dst, pd->dst.stride,
-                                   &mi->bmi[i].as_mv[ref].as_mv,
-                                   &xd->block_refs[ref]->sf, width, height, ref,
-                                   kernel, MV_PRECISION_Q3,
-                                   mi_col * MI_SIZE + 4 * (i % 2),
-                                   mi_row * MI_SIZE + 4 * (i / 2), xd->bd);
+    vp9_highbd_build_inter_predictor(pre, pd->pre[ref].stride,
+                                     dst, pd->dst.stride,
+                                     &mi->bmi[i].as_mv[ref].as_mv,
+                                     &xd->block_refs[ref]->sf, width, height,
+                                     ref, kernel, MV_PRECISION_Q3,
+                                     mi_col * MI_SIZE + 4 * (i % 2),
+                                     mi_row * MI_SIZE + 4 * (i / 2), xd->bd);
   } else {
     vp9_build_inter_predictor(pre, pd->pre[ref].stride,
                               dst, pd->dst.stride,
@@ -1348,7 +1348,7 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    vp9_high_subtract_block(
+    vp9_highbd_subtract_block(
         height, width, raster_block_offset_int16(BLOCK_8X8, i, p->src_diff), 8,
         src, p->src.stride, dst, pd->dst.stride, xd->bd);
   } else {
@@ -1375,9 +1375,9 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
       vp9_regular_quantize_b_4x4(x, 0, k, so->scan, so->iscan);
 #if CONFIG_VP9_HIGHBITDEPTH
       if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-        thisdistortion += vp9_high_block_error(coeff,
-                                               BLOCK_OFFSET(pd->dqcoeff, k),
-                                               16, &ssz, xd->bd);
+        thisdistortion += vp9_highbd_block_error(coeff,
+                                                 BLOCK_OFFSET(pd->dqcoeff, k),
+                                                 16, &ssz, xd->bd);
       } else {
         thisdistortion += vp9_block_error(coeff, BLOCK_OFFSET(pd->dqcoeff, k),
                                           16, &ssz);
@@ -2223,15 +2223,15 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     // Get pred block from second frame.
 #if CONFIG_VP9_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-      vp9_high_build_inter_predictor(ref_yv12[!id].buf,
-                                     ref_yv12[!id].stride,
-                                     second_pred, pw,
-                                     &frame_mv[refs[!id]].as_mv,
-                                     &xd->block_refs[!id]->sf,
-                                     pw, ph, 0,
-                                     kernel, MV_PRECISION_Q3,
-                                     mi_col * MI_SIZE, mi_row * MI_SIZE,
-                                     xd->bd);
+      vp9_highbd_build_inter_predictor(ref_yv12[!id].buf,
+                                       ref_yv12[!id].stride,
+                                       second_pred, pw,
+                                       &frame_mv[refs[!id]].as_mv,
+                                       &xd->block_refs[!id]->sf,
+                                       pw, ph, 0,
+                                       kernel, MV_PRECISION_Q3,
+                                       mi_col * MI_SIZE, mi_row * MI_SIZE,
+                                       xd->bd);
     } else {
       vp9_build_inter_predictor(ref_yv12[!id].buf,
                                 ref_yv12[!id].stride,

@@ -3257,16 +3257,16 @@ static int set_var_thresh_from_histogram(VP9_COMP *cpi) {
       if (cm->use_highbitdepth) {
         switch (cm->bit_depth) {
           case VPX_BITS_8:
-            vp9_high_get16x16var(src, src_stride, last_src, last_stride,
-                                 &var16->sse, &var16->sum);
+            vp9_highbd_get16x16var(src, src_stride, last_src, last_stride,
+                                   &var16->sse, &var16->sum);
             break;
           case VPX_BITS_10:
-            vp9_high_10_get16x16var(src, src_stride, last_src, last_stride,
+            vp9_highbd_10_get16x16var(src, src_stride, last_src, last_stride,
                                     &var16->sse, &var16->sum);
             break;
           case VPX_BITS_12:
-            vp9_high_12_get16x16var(src, src_stride, last_src, last_stride,
-                                    &var16->sse, &var16->sum);
+            vp9_highbd_12_get16x16var(src, src_stride, last_src, last_stride,
+                                      &var16->sse, &var16->sum);
             break;
           default:
             assert(0 && "cm->bit_depth should be VPX_BITS_8, VPX_BITS_10"
@@ -3426,8 +3426,9 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   if (cm->use_highbitdepth)
     x->fwd_txm4x4 = xd->lossless ? vp9_fwht4x4 : vp9_fdct4x4;
   else
-    x->fwd_txm4x4 = xd->lossless ? vp9_high_fwht4x4 : vp9_high_fdct4x4;
-  x->high_itxm_add = xd->lossless ? vp9_high_iwht4x4_add : vp9_high_idct4x4_add;
+    x->fwd_txm4x4 = xd->lossless ? vp9_highbd_fwht4x4 : vp9_highbd_fdct4x4;
+  x->highbd_itxm_add = xd->lossless ? vp9_highbd_iwht4x4_add :
+                                      vp9_highbd_idct4x4_add;
 #else
   x->fwd_txm4x4 = xd->lossless ? vp9_fwht4x4 : vp9_fdct4x4;
 #endif  // CONFIG_VP9_HIGHBITDEPTH

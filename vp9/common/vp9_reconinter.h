@@ -40,14 +40,14 @@ void vp9_build_inter_predictor(const uint8_t *src, int src_stride,
                                int x, int y);
 
 #if CONFIG_VP9_HIGHBITDEPTH
-void vp9_high_build_inter_predictor(const uint8_t *src, int src_stride,
-                                    uint8_t *dst, int dst_stride,
-                                    const MV *mv_q3,
-                                    const struct scale_factors *sf,
-                                    int w, int h, int do_avg,
-                                    const InterpKernel *kernel,
-                                    enum mv_precision precision,
-                                    int x, int y, int bd);
+void vp9_highbd_build_inter_predictor(const uint8_t *src, int src_stride,
+                                      uint8_t *dst, int dst_stride,
+                                      const MV *mv_q3,
+                                      const struct scale_factors *sf,
+                                      int w, int h, int do_avg,
+                                      const InterpKernel *kernel,
+                                      enum mv_precision precision,
+                                      int x, int y, int bd);
 #endif
 
 static INLINE int scaled_buffer_offset(int x_offset, int y_offset, int stride,

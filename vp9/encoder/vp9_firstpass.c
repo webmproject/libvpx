@@ -289,37 +289,37 @@ static vp9_variance_fn_t highbd_get_block_variance_fn(BLOCK_SIZE bsize,
     default:
       switch (bsize) {
         case BLOCK_8X8:
-          return vp9_high_mse8x8;
+          return vp9_highbd_mse8x8;
         case BLOCK_16X8:
-          return vp9_high_mse16x8;
+          return vp9_highbd_mse16x8;
         case BLOCK_8X16:
-          return vp9_high_mse8x16;
+          return vp9_highbd_mse8x16;
         default:
-          return vp9_high_mse16x16;
+          return vp9_highbd_mse16x16;
       }
       break;
     case 10:
       switch (bsize) {
         case BLOCK_8X8:
-          return vp9_high_10_mse8x8;
+          return vp9_highbd_10_mse8x8;
         case BLOCK_16X8:
-          return vp9_high_10_mse16x8;
+          return vp9_highbd_10_mse16x8;
         case BLOCK_8X16:
-          return vp9_high_10_mse8x16;
+          return vp9_highbd_10_mse8x16;
         default:
-          return vp9_high_10_mse16x16;
+          return vp9_highbd_10_mse16x16;
       }
       break;
     case 12:
       switch (bsize) {
         case BLOCK_8X8:
-          return vp9_high_12_mse8x8;
+          return vp9_highbd_12_mse8x8;
         case BLOCK_16X8:
-          return vp9_high_12_mse16x8;
+          return vp9_highbd_12_mse16x8;
         case BLOCK_8X16:
-          return vp9_high_12_mse8x16;
+          return vp9_highbd_12_mse8x16;
         default:
-          return vp9_high_12_mse16x16;
+          return vp9_highbd_12_mse16x16;
       }
       break;
   }

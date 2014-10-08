@@ -291,8 +291,8 @@ static INLINE const uint8_t *pre(const uint8_t *buf, int stride, int r, int c) {
   if (second_pred != NULL) {                                                 \
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {                       \
       DECLARE_ALIGNED_ARRAY(16, uint16_t, comp_pred16, 64 * 64);             \
-      vp9_high_comp_avg_pred(comp_pred16, second_pred, w, h, y + offset,     \
-                             y_stride);                                      \
+      vp9_highbd_comp_avg_pred(comp_pred16, second_pred, w, h, y + offset,   \
+                               y_stride);                                    \
       besterr = vfp->vf(CONVERT_TO_BYTEPTR(comp_pred16), w, z, src_stride,   \
                         sse1);                                               \
     } else {                                                                 \

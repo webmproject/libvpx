@@ -287,11 +287,11 @@ void iht16x16_ref(const tran_low_t *in, uint8_t *dest, int stride,
 
 #if CONFIG_VP9_HIGHBITDEPTH
 void idct16x16_10(const tran_low_t *in, uint8_t *out, int stride) {
-  vp9_high_idct16x16_256_add_c(in, out, stride, 10);
+  vp9_highbd_idct16x16_256_add_c(in, out, stride, 10);
 }
 
 void idct16x16_12(const tran_low_t *in, uint8_t *out, int stride) {
-  vp9_high_idct16x16_256_add_c(in, out, stride, 12);
+  vp9_highbd_idct16x16_256_add_c(in, out, stride, 12);
 }
 
 void idct16x16_10_ref(const tran_low_t *in, uint8_t *out, int stride,
@@ -305,11 +305,11 @@ void idct16x16_12_ref(const tran_low_t *in, uint8_t *out, int stride,
 }
 
 void iht16x16_10(const tran_low_t *in, uint8_t *out, int stride, int tx_type) {
-  vp9_high_iht16x16_256_add_c(in, out, stride, tx_type, 10);
+  vp9_highbd_iht16x16_256_add_c(in, out, stride, tx_type, 10);
 }
 
 void iht16x16_12(const tran_low_t *in, uint8_t *out, int stride, int tx_type) {
-  vp9_high_iht16x16_256_add_c(in, out, stride, tx_type, 12);
+  vp9_highbd_iht16x16_256_add_c(in, out, stride, tx_type, 12);
 }
 #endif
 
@@ -709,8 +709,8 @@ using std::tr1::make_tuple;
 INSTANTIATE_TEST_CASE_P(
     C, Trans16x16DCT,
     ::testing::Values(
-        make_tuple(&vp9_high_fdct16x16_c, &idct16x16_10, 0, VPX_BITS_10),
-        make_tuple(&vp9_high_fdct16x16_c, &idct16x16_12, 0, VPX_BITS_12),
+        make_tuple(&vp9_highbd_fdct16x16_c, &idct16x16_10, 0, VPX_BITS_10),
+        make_tuple(&vp9_highbd_fdct16x16_c, &idct16x16_12, 0, VPX_BITS_12),
         make_tuple(&vp9_fdct16x16_c, &vp9_idct16x16_256_add_c, 0, VPX_BITS_8)));
 #else
 INSTANTIATE_TEST_CASE_P(
@@ -723,14 +723,14 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     C, Trans16x16HT,
     ::testing::Values(
-        make_tuple(&vp9_high_fht16x16_c, &iht16x16_10, 0, VPX_BITS_10),
-        make_tuple(&vp9_high_fht16x16_c, &iht16x16_10, 1, VPX_BITS_10),
-        make_tuple(&vp9_high_fht16x16_c, &iht16x16_10, 2, VPX_BITS_10),
-        make_tuple(&vp9_high_fht16x16_c, &iht16x16_10, 3, VPX_BITS_10),
-        make_tuple(&vp9_high_fht16x16_c, &iht16x16_12, 0, VPX_BITS_12),
-        make_tuple(&vp9_high_fht16x16_c, &iht16x16_12, 1, VPX_BITS_12),
-        make_tuple(&vp9_high_fht16x16_c, &iht16x16_12, 2, VPX_BITS_12),
-        make_tuple(&vp9_high_fht16x16_c, &iht16x16_12, 3, VPX_BITS_12),
+        make_tuple(&vp9_highbd_fht16x16_c, &iht16x16_10, 0, VPX_BITS_10),
+        make_tuple(&vp9_highbd_fht16x16_c, &iht16x16_10, 1, VPX_BITS_10),
+        make_tuple(&vp9_highbd_fht16x16_c, &iht16x16_10, 2, VPX_BITS_10),
+        make_tuple(&vp9_highbd_fht16x16_c, &iht16x16_10, 3, VPX_BITS_10),
+        make_tuple(&vp9_highbd_fht16x16_c, &iht16x16_12, 0, VPX_BITS_12),
+        make_tuple(&vp9_highbd_fht16x16_c, &iht16x16_12, 1, VPX_BITS_12),
+        make_tuple(&vp9_highbd_fht16x16_c, &iht16x16_12, 2, VPX_BITS_12),
+        make_tuple(&vp9_highbd_fht16x16_c, &iht16x16_12, 3, VPX_BITS_12),
         make_tuple(&vp9_fht16x16_c, &vp9_iht16x16_256_add_c, 0, VPX_BITS_8),
         make_tuple(&vp9_fht16x16_c, &vp9_iht16x16_256_add_c, 1, VPX_BITS_8),
         make_tuple(&vp9_fht16x16_c, &vp9_iht16x16_256_add_c, 2, VPX_BITS_8),
