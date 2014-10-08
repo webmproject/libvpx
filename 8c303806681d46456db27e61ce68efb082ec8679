@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//UQM\u003d",
+        "filename": "vp8/encoder/denoising.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-10-08T19:55:51Z",
+      "side": 1,
+      "message": "will keep it as it, to match same style.",
+      "parentUuid": "AAAAdn//UQc\u003d",
+      "revId": "8c303806681d46456db27e61ce68efb082ec8679",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//UQU\u003d",
         "filename": "vp8/encoder/pickinter.c",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2014-10-08T19:45:01Z",
       "side": 1,
       "message": "alignment..",
+      "revId": "8c303806681d46456db27e61ce68efb082ec8679",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//UQE\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1088,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-10-08T19:55:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//UQU\u003d",
       "revId": "8c303806681d46456db27e61ce68efb082ec8679",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
