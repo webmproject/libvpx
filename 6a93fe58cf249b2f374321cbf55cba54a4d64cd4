@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//UUE\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-10-08T17:44:35Z",
+      "side": 1,
+      "message": "const?",
+      "revId": "6a93fe58cf249b2f374321cbf55cba54a4d64cd4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//UUA\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-10-08T17:44:35Z",
+      "side": 1,
+      "message": "const?",
+      "revId": "6a93fe58cf249b2f374321cbf55cba54a4d64cd4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//UT8\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-10-08T17:44:35Z",
+      "side": 1,
+      "message": "const?",
+      "revId": "6a93fe58cf249b2f374321cbf55cba54a4d64cd4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//UT4\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-10-08T17:44:35Z",
+      "side": 1,
+      "message": "const?",
+      "revId": "6a93fe58cf249b2f374321cbf55cba54a4d64cd4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//UTg\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-10-08T17:44:35Z",
+      "side": 1,
+      "message": "Can this be moved to outside the loop? i.e. accumulate sum_see for all planes, so we do not need to initialize skip_sse_sb, but assign once before return?",
+      "revId": "6a93fe58cf249b2f374321cbf55cba54a4d64cd4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
