@@ -563,7 +563,7 @@ static int calc_active_worst_quality_one_pass_cbr(const VP9_COMP *cpi) {
   int adjustment = 0;
   int active_worst_quality;
   if (cm->frame_type == KEY_FRAME)
-    return rc->worst_quality;
+    return rc->worst_quality * 4 / 5;
   if (cm->current_video_frame > 1)
     active_worst_quality = MIN(rc->worst_quality,
                                rc->avg_frame_qindex[INTER_FRAME] * 5 / 4);
