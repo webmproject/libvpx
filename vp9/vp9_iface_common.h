@@ -87,6 +87,8 @@ static vpx_codec_err_t image2yuvconfig(const vpx_image_t *img,
                                             : yv12->y_width;
   yv12->uv_height = img->y_chroma_shift == 1 ? (1 + yv12->y_height) / 2
                                              : yv12->y_height;
+  yv12->uv_crop_width = yv12->uv_width;
+  yv12->uv_crop_height = yv12->uv_height;
 
   yv12->y_stride = img->stride[VPX_PLANE_Y];
   yv12->uv_stride = img->stride[VPX_PLANE_U];

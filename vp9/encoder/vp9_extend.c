@@ -110,10 +110,10 @@ void vp9_copy_and_extend_frame(const YV12_BUFFER_CONFIG *src,
   // Motion estimation may use src block variance with the block size up
   // to 64x64, so the right and bottom need to be extended to 64 multiple
   // or up to 16, whichever is greater.
-  const int eb_y = MAX(ALIGN_POWER_OF_TWO(src->y_width, 6) - src->y_width,
-                       16);
-  const int er_y = MAX(ALIGN_POWER_OF_TWO(src->y_height, 6) - src->y_height,
-                       16);
+  const int eb_y = MAX(src->y_width + 16, ALIGN_POWER_OF_TWO(src->y_width, 6))
+      - src->y_crop_width;
+  const int er_y = MAX(src->y_height + 16, ALIGN_POWER_OF_TWO(src->y_height, 6))
+      - src->y_crop_height;
   const int uv_width_subsampling = (src->uv_width != src->y_width);
   const int uv_height_subsampling = (src->uv_height != src->y_height);
   const int et_uv = et_y >> uv_height_subsampling;
@@ -125,17 +125,17 @@ void vp9_copy_and_extend_frame(const YV12_BUFFER_CONFIG *src,
   if (src->flags & YV12_FLAG_HIGHBITDEPTH) {
     highbd_copy_and_extend_plane(src->y_buffer, src->y_stride,
                                  dst->y_buffer, dst->y_stride,
-                                 src->y_width, src->y_height,
+                                 src->y_crop_width, src->y_crop_height,
                                  et_y, el_y, eb_y, er_y);
 
     highbd_copy_and_extend_plane(src->u_buffer, src->uv_stride,
                                  dst->u_buffer, dst->uv_stride,
-                                 src->uv_width, src->uv_height,
+                                 src->uv_crop_width, src->uv_crop_height,
                                  et_uv, el_uv, eb_uv, er_uv);
 
     highbd_copy_and_extend_plane(src->v_buffer, src->uv_stride,
                                  dst->v_buffer, dst->uv_stride,
-                                 src->uv_width, src->uv_height,
+                                 src->uv_crop_width, src->uv_crop_height,
                                  et_uv, el_uv, eb_uv, er_uv);
     return;
   }
@@ -143,17 +143,17 @@ void vp9_copy_and_extend_frame(const YV12_BUFFER_CONFIG *src,
 
   copy_and_extend_plane(src->y_buffer, src->y_stride,
                         dst->y_buffer, dst->y_stride,
-                        src->y_width, src->y_height,
+                        src->y_crop_width, src->y_crop_height,
                         et_y, el_y, eb_y, er_y);
 
   copy_and_extend_plane(src->u_buffer, src->uv_stride,
                         dst->u_buffer, dst->uv_stride,
-                        src->uv_width, src->uv_height,
+                        src->uv_crop_width, src->uv_crop_height,
                         et_uv, el_uv, eb_uv, er_uv);
 
   copy_and_extend_plane(src->v_buffer, src->uv_stride,
                         dst->v_buffer, dst->uv_stride,
-                        src->uv_width, src->uv_height,
+                        src->uv_crop_width, src->uv_crop_height,
                         et_uv, el_uv, eb_uv, er_uv);
 }
 
