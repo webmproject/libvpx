@@ -109,8 +109,6 @@ typedef struct {
 
   int kf_zeromotion_pct;
   int last_kfgroup_zeromotion_pct;
-  int gf_zeromotion_pct;
-
   int active_worst_quality;
 
   GF_GROUP gf_group;

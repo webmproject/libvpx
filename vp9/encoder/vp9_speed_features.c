@@ -151,7 +151,6 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
       sf->intra_y_mode_mask[i] = INTRA_DC;
       sf->intra_uv_mode_mask[i] = INTRA_DC;
     }
-    cpi->allow_encode_breakout = ENCODE_BREAKOUT_ENABLED;
   }
   if (speed >= 6) {
     sf->mv.reduce_first_step_size = 1;
