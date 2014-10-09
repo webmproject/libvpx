@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAdn//Ukw\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 68
+      },
+      "lineNbr": 892,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-10-09T19:40:14Z",
+      "side": 1,
+      "message": "Fixed the loopfilter tsan issue.",
+      "revId": "f27d2184e247a7423d4017a96e43293f65d9e3ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//UNw\u003d",
         "filename": "vp9/decoder/vp9_decodeframe.c",
         "patchSetId": 68
@@ -13,6 +30,24 @@
       "writtenOn": "2014-10-08T23:51:03Z",
       "side": 1,
       "message": "Does this happen in non frame parallel mode?",
+      "revId": "f27d2184e247a7423d4017a96e43293f65d9e3ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//UFs\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 68
+      },
+      "lineNbr": 1220,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-10-09T19:40:14Z",
+      "side": 1,
+      "message": "It did before. But not in the latest patch due to the bug that a worker thread\u0027s reference frame may be released by another worker thread. So next_ref_frame_map will be generated in serial decode. I will update this comment.",
+      "parentUuid": "AAAAdn//UNw\u003d",
       "revId": "f27d2184e247a7423d4017a96e43293f65d9e3ad",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -36,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//UFo\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 68
+      },
+      "lineNbr": 1630,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-10-09T19:40:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//UNo\u003d",
+      "revId": "f27d2184e247a7423d4017a96e43293f65d9e3ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//UNc\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 68
@@ -53,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//UFQ\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 68
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-10-09T19:40:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//UNc\u003d",
+      "revId": "f27d2184e247a7423d4017a96e43293f65d9e3ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//UNY\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 68
@@ -64,6 +135,24 @@
       "writtenOn": "2014-10-08T23:51:03Z",
       "side": 1,
       "message": "If you want to declare pool then move up one scope. If not then just use ctx-\u003ebuffer_pool.",
+      "revId": "f27d2184e247a7423d4017a96e43293f65d9e3ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//UFw\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 68
+      },
+      "lineNbr": 716,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-10-09T19:40:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//UNY\u003d",
       "revId": "f27d2184e247a7423d4017a96e43293f65d9e3ad",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
