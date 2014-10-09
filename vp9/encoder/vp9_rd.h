@@ -117,6 +117,12 @@ typedef struct RD_OPT {
   int RDDIV;
 } RD_OPT;
 
+typedef struct RD_COST {
+  int rate;
+  int64_t dist;
+  int64_t rdcost;
+} RD_COST;
+
 struct TileInfo;
 struct VP9_COMP;
 struct macroblock;

@@ -2702,8 +2702,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 }
 
 void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
-                               int *returnrate, int64_t *returndist,
-                               BLOCK_SIZE bsize,
+                               RD_COST *rd_cost, BLOCK_SIZE bsize,
                                PICK_MODE_CONTEXT *ctx, int64_t best_rd) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -2720,14 +2719,14 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     if (rd_pick_intra_sby_mode(cpi, x, &rate_y, &rate_y_tokenonly,
                                &dist_y, &y_skip, bsize, tx_cache,
                                best_rd) >= best_rd) {
-      *returnrate = INT_MAX;
+      rd_cost->rate = INT_MAX;
       return;
     }
   } else {
     y_skip = 0;
     if (rd_pick_intra_sub_8x8_y_mode(cpi, x, &rate_y, &rate_y_tokenonly,
                                      &dist_y, best_rd) >= best_rd) {
-      *returnrate = INT_MAX;
+      rd_cost->rate = INT_MAX;
       return;
     }
   }
@@ -2739,14 +2738,15 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                           max_uv_tx_size);
 
   if (y_skip && uv_skip) {
-    *returnrate = rate_y + rate_uv - rate_y_tokenonly - rate_uv_tokenonly +
-                  vp9_cost_bit(vp9_get_skip_prob(cm, xd), 1);
-    *returndist = dist_y + dist_uv;
+    rd_cost->rate = rate_y + rate_uv - rate_y_tokenonly - rate_uv_tokenonly +
+                    vp9_cost_bit(vp9_get_skip_prob(cm, xd), 1);
+    rd_cost->dist = dist_y + dist_uv;
     vp9_zero(ctx->tx_rd_diff);
   } else {
     int i;
-    *returnrate = rate_y + rate_uv + vp9_cost_bit(vp9_get_skip_prob(cm, xd), 0);
-    *returndist = dist_y + dist_uv;
+    rd_cost->rate = rate_y + rate_uv +
+                      vp9_cost_bit(vp9_get_skip_prob(cm, xd), 0);
+    rd_cost->dist = dist_y + dist_uv;
     if (cpi->sf.tx_size_search_method == USE_FULL_RD)
       for (i = 0; i < TX_MODES; i++) {
         if (tx_cache[i] < INT64_MAX && tx_cache[cm->tx_mode] < INT64_MAX)
@@ -2757,6 +2757,7 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   ctx->mic = *xd->mi[0].src_mi;
+  rd_cost->rdcost = RDCOST(x->rdmult, x->rddiv, rd_cost->rate, rd_cost->dist);
 }
 
 static void update_rd_thresh_fact(VP9_COMP *cpi, int bsize,
@@ -2784,9 +2785,7 @@ static void update_rd_thresh_fact(VP9_COMP *cpi, int bsize,
 int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                   const TileInfo *const tile,
                                   int mi_row, int mi_col,
-                                  int *returnrate,
-                                  int64_t *returndistortion,
-                                  BLOCK_SIZE bsize,
+                                  RD_COST *rd_cost, BLOCK_SIZE bsize,
                                   PICK_MODE_CONTEXT *ctx,
                                   int64_t best_rd_so_far) {
   VP9_COMMON *const cm = &cpi->common;
@@ -2859,7 +2858,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     }
   }
 
-  *returnrate = INT_MAX;
+  rd_cost->rate = INT_MAX;
 
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
     x->pred_mv_sad[ref_frame] = INT_MAX;
@@ -3256,8 +3255,9 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
           best_pred_sse = x->pred_sse[ref_frame];
         }
 
-        *returnrate = rate2;
-        *returndistortion = distortion2;
+        rd_cost->rate = rate2;
+        rd_cost->dist = distortion2;
+        rd_cost->rdcost = this_rd;
         best_rd = this_rd;
         best_mbmode = *mbmi;
         best_skip2 = this_skip2;
@@ -3473,8 +3473,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 }
 
 int64_t vp9_rd_pick_inter_mode_sb_seg_skip(VP9_COMP *cpi, MACROBLOCK *x,
-                                           int *returnrate,
-                                           int64_t *returndistortion,
+                                           RD_COST *rd_cost,
                                            BLOCK_SIZE bsize,
                                            PICK_MODE_CONTEXT *ctx,
                                            int64_t best_rd_so_far) {
@@ -3505,7 +3504,7 @@ int64_t vp9_rd_pick_inter_mode_sb_seg_skip(VP9_COMP *cpi, MACROBLOCK *x,
   for (i = LAST_FRAME; i < MAX_REF_FRAMES; ++i)
     x->pred_mv_sad[i] = INT_MAX;
 
-  *returnrate = INT_MAX;
+  rd_cost->rate = INT_MAX;
 
   assert(vp9_segfeature_active(&cm->seg, segment_id, SEG_LVL_SKIP));
 
@@ -3554,11 +3553,14 @@ int64_t vp9_rd_pick_inter_mode_sb_seg_skip(VP9_COMP *cpi, MACROBLOCK *x,
   rate2 += ref_costs_single[LAST_FRAME];
   this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
 
-  *returnrate = rate2;
-  *returndistortion = distortion2;
+  rd_cost->rate = rate2;
+  rd_cost->dist = distortion2;
+  rd_cost->rdcost = this_rd;
 
-  if (this_rd >= best_rd_so_far)
+  if (this_rd >= best_rd_so_far) {
+    rd_cost->rdcost = INT64_MAX;
     return INT64_MAX;
+  }
 
   assert((cm->interp_filter == SWITCHABLE) ||
          (cm->interp_filter == mbmi->interp_filter));
@@ -3580,8 +3582,7 @@ int64_t vp9_rd_pick_inter_mode_sb_seg_skip(VP9_COMP *cpi, MACROBLOCK *x,
 int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
                                       const TileInfo *const tile,
                                       int mi_row, int mi_col,
-                                      int *returnrate,
-                                      int64_t *returndistortion,
+                                      RD_COST *rd_cost,
                                       BLOCK_SIZE bsize,
                                       PICK_MODE_CONTEXT *ctx,
                                       int64_t best_rd_so_far) {
@@ -3639,7 +3640,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     best_filter_rd[i] = INT64_MAX;
   rate_uv_intra = INT_MAX;
 
-  *returnrate = INT_MAX;
+  rd_cost->rate = INT_MAX;
 
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ref_frame++) {
     if (cpi->ref_frame_flags & flag_list[ref_frame]) {
@@ -4014,8 +4015,9 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
           max_plane = 1;
         }
 
-        *returnrate = rate2;
-        *returndistortion = distortion2;
+        rd_cost->rate = rate2;
+        rd_cost->dist = distortion2;
+        rd_cost->rdcost = this_rd;
         best_rd = this_rd;
         best_yrd = best_rd -
                    RDCOST(x->rdmult, x->rddiv, rate_uv, distortion_uv);
@@ -4124,8 +4126,9 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   if (best_rd == INT64_MAX) {
-    *returnrate = INT_MAX;
-    *returndistortion = INT64_MAX;
+    rd_cost->rate = INT_MAX;
+    rd_cost->dist = INT64_MAX;
+    rd_cost->rdcost = INT64_MAX;
     return best_rd;
   }
 
