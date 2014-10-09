@@ -27,6 +27,8 @@ extern "C" {
 #define SUM_DIFF_FROM_AVG_THRESH_UV (8 * 8 * 8)
 #define MOTION_MAGNITUDE_THRESHOLD_UV (8*3)
 
+#define MAX_GF_ARF_DENOISE_RANGE (16)
+
 enum vp8_denoiser_decision
 {
   COPY_BLOCK,

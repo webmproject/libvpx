@@ -1083,7 +1083,14 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         {
 
             /* Store for later use by denoiser. */
-            if (this_mode == ZEROMV && sse < zero_mv_sse )
+            // Dont' denoise with GOLDEN OR ALTREF is they are old reference
+            // frames (greater than MAX_GF_ARF_DENOISE_RANGE frames in past).
+            int skip_old_reference = ((this_ref_frame != LAST_FRAME) &&
+                (cpi->common.current_video_frame -
+                 cpi->current_ref_frames[this_ref_frame] >
+                 MAX_GF_ARF_DENOISE_RANGE)) ? 1 : 0;
+            if (this_mode == ZEROMV && sse < zero_mv_sse &&
+                !skip_old_reference)
             {
                 zero_mv_sse = sse;
                 x->best_zeromv_reference_frame =
@@ -1092,7 +1099,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 
             /* Store the best NEWMV in x for later use in the denoiser. */
             if (x->e_mbd.mode_info_context->mbmi.mode == NEWMV &&
-                    sse < best_sse)
+                sse < best_sse && !skip_old_reference)
             {
                 best_sse = sse;
                 x->best_sse_inter_mode = NEWMV;
