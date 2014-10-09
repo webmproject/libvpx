@@ -1973,27 +1973,11 @@ static void store_coding_context(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
                          int64_t best_filter_diff[SWITCHABLE_FILTER_CONTEXTS],
                          int skippable) {
   MACROBLOCKD *const xd = &x->e_mbd;
-  int plane, has_high_freq_coeff = 0;
-  BLOCK_SIZE bsize = xd->mi[0].src_mi->mbmi.sb_type;
-
-  if (bsize >= BLOCK_8X8) {
-    int max_plane = is_inter_block(&xd->mi[0].src_mi->mbmi)
-                        ? MAX_MB_PLANE : 1;
-    for (plane = 0; plane < max_plane; ++plane) {
-      x->plane[plane].eobs = ctx->eobs_pbuf[plane][1];
-      has_high_freq_coeff |= vp9_has_high_freq_in_plane(x, bsize, plane);
-    }
-
-    for (plane = max_plane; plane < MAX_MB_PLANE; ++plane) {
-      x->plane[plane].eobs = ctx->eobs_pbuf[plane][2];
-      has_high_freq_coeff |= vp9_has_high_freq_in_plane(x, bsize, plane);
-    }
-  }
 
   // Take a snapshot of the coding context so it can be
   // restored if we decide to encode this way
   ctx->skip = x->skip;
-  ctx->skippable = skippable || !has_high_freq_coeff;
+  ctx->skippable = skippable;
   ctx->best_mode_index = mode_index;
   ctx->mic = *xd->mi[0].src_mi;
   ctx->single_pred_diff = (int)comp_pred_diff[SINGLE_REFERENCE];
@@ -3463,6 +3447,24 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   // TODO(yunqingwang): Moving this line in front of the above best_filter_diff
   // updating code causes PSNR loss. Need to figure out the confliction.
   x->skip |= best_mode_skippable;
+
+  if (!best_mode_skippable && !x->select_tx_size) {
+    int has_high_freq_coeff = 0;
+    int plane;
+    int max_plane = is_inter_block(&xd->mi[0].src_mi->mbmi)
+                        ? MAX_MB_PLANE : 1;
+    for (plane = 0; plane < max_plane; ++plane) {
+      x->plane[plane].eobs = ctx->eobs_pbuf[plane][1];
+      has_high_freq_coeff |= vp9_has_high_freq_in_plane(x, bsize, plane);
+    }
+
+    for (plane = max_plane; plane < MAX_MB_PLANE; ++plane) {
+      x->plane[plane].eobs = ctx->eobs_pbuf[plane][2];
+      has_high_freq_coeff |= vp9_has_high_freq_in_plane(x, bsize, plane);
+    }
+
+    best_mode_skippable |= !has_high_freq_coeff;
+  }
 
   store_coding_context(x, ctx, best_mode_index, best_pred_diff,
                        best_tx_diff, best_filter_diff, best_mode_skippable);
