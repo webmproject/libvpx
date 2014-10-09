@@ -435,10 +435,16 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
 
   for (ref = 0; ref < 1 + is_compound; ++ref) {
     const MV_REFERENCE_FRAME frame = mbmi->ref_frame[ref];
-    const int ref_idx = frame - LAST_FRAME;
-    if ((!vp9_is_valid_scale(&cm->frame_refs[ref_idx].sf)))
+    RefBuffer *ref_buf = &cm->frame_refs[frame - LAST_FRAME];
+    xd->block_refs[ref] = ref_buf;
+    if ((!vp9_is_valid_scale(&ref_buf->sf)))
       vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
                          "Reference frame has invalid dimensions");
+    if (ref_buf->buf->corrupted)
+      vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+                         "Block reference is corrupt");
+    vp9_setup_pre_planes(xd, ref, ref_buf->buf, mi_row, mi_col,
+                         &ref_buf->sf);
     vp9_find_mv_refs(cm, xd, tile, mi, frame, mbmi->ref_mvs[frame],
                      mi_row, mi_col);
   }

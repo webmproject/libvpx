@@ -384,18 +384,6 @@ static MB_MODE_INFO *set_offsets(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   return &xd->mi[0].mbmi;
 }
 
-static void set_ref(VP9_COMMON *const cm, MACROBLOCKD *const xd,
-                    int idx, int mi_row, int mi_col) {
-  MB_MODE_INFO *const mbmi = &xd->mi[0].src_mi->mbmi;
-  RefBuffer *ref_buffer = &cm->frame_refs[mbmi->ref_frame[idx] - LAST_FRAME];
-  xd->block_refs[idx] = ref_buffer;
-  if (ref_buffer->buf->corrupted)
-    vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
-                       "Block reference is corrupt");
-  vp9_setup_pre_planes(xd, idx, ref_buffer->buf, mi_row, mi_col,
-                       &ref_buffer->sf);
-}
-
 static void decode_block(VP9_COMMON *const cm, MACROBLOCKD *const xd,
                          const TileInfo *const tile,
                          int mi_row, int mi_col,
@@ -420,11 +408,6 @@ static void decode_block(VP9_COMMON *const cm, MACROBLOCKD *const xd,
     vp9_foreach_transformed_block(xd, bsize,
                                   predict_and_reconstruct_intra_block, &arg);
   } else {
-    // Setup
-    set_ref(cm, xd, 0, mi_row, mi_col);
-    if (has_second_ref(mbmi))
-      set_ref(cm, xd, 1, mi_row, mi_col);
-
     // Prediction
     vp9_dec_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
 
