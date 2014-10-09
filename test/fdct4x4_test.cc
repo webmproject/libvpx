@@ -53,27 +53,27 @@ void fwht4x4_ref(const int16_t *in, tran_low_t *out, int stride,
 
 #if CONFIG_VP9_HIGHBITDEPTH
 void idct4x4_10(const tran_low_t *in, uint8_t *out, int stride) {
-  vp9_high_idct4x4_16_add_c(in, out, stride, 10);
+  vp9_highbd_idct4x4_16_add_c(in, out, stride, 10);
 }
 
 void idct4x4_12(const tran_low_t *in, uint8_t *out, int stride) {
-  vp9_high_idct4x4_16_add_c(in, out, stride, 12);
+  vp9_highbd_idct4x4_16_add_c(in, out, stride, 12);
 }
 
 void iht4x4_10(const tran_low_t *in, uint8_t *out, int stride, int tx_type) {
-  vp9_high_iht4x4_16_add_c(in, out, stride, tx_type, 10);
+  vp9_highbd_iht4x4_16_add_c(in, out, stride, tx_type, 10);
 }
 
 void iht4x4_12(const tran_low_t *in, uint8_t *out, int stride, int tx_type) {
-  vp9_high_iht4x4_16_add_c(in, out, stride, tx_type, 12);
+  vp9_highbd_iht4x4_16_add_c(in, out, stride, tx_type, 12);
 }
 
 void iwht4x4_10(const tran_low_t *in, uint8_t *out, int stride) {
-  vp9_high_iwht4x4_16_add_c(in, out, stride, 10);
+  vp9_highbd_iwht4x4_16_add_c(in, out, stride, 10);
 }
 
 void iwht4x4_12(const tran_low_t *in, uint8_t *out, int stride) {
-  vp9_high_iwht4x4_16_add_c(in, out, stride, 12);
+  vp9_highbd_iwht4x4_16_add_c(in, out, stride, 12);
 }
 #endif
 
@@ -408,8 +408,8 @@ using std::tr1::make_tuple;
 INSTANTIATE_TEST_CASE_P(
     C, Trans4x4DCT,
     ::testing::Values(
-        make_tuple(&vp9_high_fdct4x4_c, &idct4x4_10, 0, VPX_BITS_10),
-        make_tuple(&vp9_high_fdct4x4_c, &idct4x4_12, 0, VPX_BITS_12),
+        make_tuple(&vp9_highbd_fdct4x4_c, &idct4x4_10, 0, VPX_BITS_10),
+        make_tuple(&vp9_highbd_fdct4x4_c, &idct4x4_12, 0, VPX_BITS_12),
         make_tuple(&vp9_fdct4x4_c, &vp9_idct4x4_16_add_c, 0, VPX_BITS_8)));
 #else
 INSTANTIATE_TEST_CASE_P(
@@ -422,14 +422,14 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     C, Trans4x4HT,
     ::testing::Values(
-        make_tuple(&vp9_high_fht4x4_c, &iht4x4_10, 0, VPX_BITS_10),
-        make_tuple(&vp9_high_fht4x4_c, &iht4x4_10, 1, VPX_BITS_10),
-        make_tuple(&vp9_high_fht4x4_c, &iht4x4_10, 2, VPX_BITS_10),
-        make_tuple(&vp9_high_fht4x4_c, &iht4x4_10, 3, VPX_BITS_10),
-        make_tuple(&vp9_high_fht4x4_c, &iht4x4_12, 0, VPX_BITS_12),
-        make_tuple(&vp9_high_fht4x4_c, &iht4x4_12, 1, VPX_BITS_12),
-        make_tuple(&vp9_high_fht4x4_c, &iht4x4_12, 2, VPX_BITS_12),
-        make_tuple(&vp9_high_fht4x4_c, &iht4x4_12, 3, VPX_BITS_12),
+        make_tuple(&vp9_highbd_fht4x4_c, &iht4x4_10, 0, VPX_BITS_10),
+        make_tuple(&vp9_highbd_fht4x4_c, &iht4x4_10, 1, VPX_BITS_10),
+        make_tuple(&vp9_highbd_fht4x4_c, &iht4x4_10, 2, VPX_BITS_10),
+        make_tuple(&vp9_highbd_fht4x4_c, &iht4x4_10, 3, VPX_BITS_10),
+        make_tuple(&vp9_highbd_fht4x4_c, &iht4x4_12, 0, VPX_BITS_12),
+        make_tuple(&vp9_highbd_fht4x4_c, &iht4x4_12, 1, VPX_BITS_12),
+        make_tuple(&vp9_highbd_fht4x4_c, &iht4x4_12, 2, VPX_BITS_12),
+        make_tuple(&vp9_highbd_fht4x4_c, &iht4x4_12, 3, VPX_BITS_12),
         make_tuple(&vp9_fht4x4_c, &vp9_iht4x4_16_add_c, 0, VPX_BITS_8),
         make_tuple(&vp9_fht4x4_c, &vp9_iht4x4_16_add_c, 1, VPX_BITS_8),
         make_tuple(&vp9_fht4x4_c, &vp9_iht4x4_16_add_c, 2, VPX_BITS_8),
@@ -448,8 +448,8 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     C, Trans4x4WHT,
     ::testing::Values(
-        make_tuple(&vp9_high_fwht4x4_c, &iwht4x4_10, 0, VPX_BITS_10),
-        make_tuple(&vp9_high_fwht4x4_c, &iwht4x4_12, 0, VPX_BITS_12),
+        make_tuple(&vp9_highbd_fwht4x4_c, &iwht4x4_10, 0, VPX_BITS_10),
+        make_tuple(&vp9_highbd_fwht4x4_c, &iwht4x4_12, 0, VPX_BITS_12),
         make_tuple(&vp9_fwht4x4_c, &vp9_iwht4x4_16_add_c, 0, VPX_BITS_8)));
 #else
 INSTANTIATE_TEST_CASE_P(

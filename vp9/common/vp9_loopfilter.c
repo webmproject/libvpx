@@ -393,14 +393,14 @@ static void filter_selectively_vert_row2(PLANE_TYPE plane_type,
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
-static void high_filter_selectively_vert_row2(PLANE_TYPE plane_type,
-                                              uint16_t *s, int pitch,
-                                              unsigned int mask_16x16_l,
-                                              unsigned int mask_8x8_l,
-                                              unsigned int mask_4x4_l,
-                                              unsigned int mask_4x4_int_l,
-                                              const loop_filter_info_n *lfi_n,
-                                              const uint8_t *lfl, int bd) {
+static void highbd_filter_selectively_vert_row2(PLANE_TYPE plane_type,
+                                                uint16_t *s, int pitch,
+                                                unsigned int mask_16x16_l,
+                                                unsigned int mask_8x8_l,
+                                                unsigned int mask_4x4_l,
+                                                unsigned int mask_4x4_int_l,
+                                                const loop_filter_info_n *lfi_n,
+                                                const uint8_t *lfl, int bd) {
   const int mask_shift = plane_type ? 4 : 8;
   const int mask_cutoff = plane_type ? 0xf : 0xff;
   const int lfl_forward = plane_type ? 4 : 8;
@@ -590,13 +590,13 @@ static void filter_selectively_horiz(uint8_t *s, int pitch,
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
-static void high_filter_selectively_horiz(uint16_t *s, int pitch,
-                                          unsigned int mask_16x16,
-                                          unsigned int mask_8x8,
-                                          unsigned int mask_4x4,
-                                          unsigned int mask_4x4_int,
-                                          const loop_filter_info_n *lfi_n,
-                                          const uint8_t *lfl, int bd) {
+static void highbd_filter_selectively_horiz(uint16_t *s, int pitch,
+                                            unsigned int mask_16x16,
+                                            unsigned int mask_8x8,
+                                            unsigned int mask_4x4,
+                                            unsigned int mask_4x4_int,
+                                            const loop_filter_info_n *lfi_n,
+                                            const uint8_t *lfl, int bd) {
   unsigned int mask;
   int count;
 
@@ -1111,13 +1111,13 @@ static void filter_selectively_vert(uint8_t *s, int pitch,
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
-static void high_filter_selectively_vert(uint16_t *s, int pitch,
-                                         unsigned int mask_16x16,
-                                         unsigned int mask_8x8,
-                                         unsigned int mask_4x4,
-                                         unsigned int mask_4x4_int,
-                                         const loop_filter_info_n *lfi_n,
-                                         const uint8_t *lfl, int bd) {
+static void highbd_filter_selectively_vert(uint16_t *s, int pitch,
+                                           unsigned int mask_16x16,
+                                           unsigned int mask_8x8,
+                                           unsigned int mask_4x4,
+                                           unsigned int mask_4x4_int,
+                                           const loop_filter_info_n *lfi_n,
+                                           const uint8_t *lfl, int bd) {
   unsigned int mask;
 
   for (mask = mask_16x16 | mask_8x8 | mask_4x4 | mask_4x4_int;
@@ -1249,14 +1249,14 @@ static void filter_block_plane_non420(VP9_COMMON *cm,
     border_mask = ~(mi_col == 0);
 #if CONFIG_VP9_HIGHBITDEPTH
     if (cm->use_highbitdepth) {
-      high_filter_selectively_vert(CONVERT_TO_SHORTPTR(dst->buf),
-                                   dst->stride,
-                                   mask_16x16_c & border_mask,
-                                   mask_8x8_c & border_mask,
-                                   mask_4x4_c & border_mask,
-                                   mask_4x4_int[r],
-                                   &cm->lf_info, &lfl[r << 3],
-                                   (int)cm->bit_depth);
+      highbd_filter_selectively_vert(CONVERT_TO_SHORTPTR(dst->buf),
+                                     dst->stride,
+                                     mask_16x16_c & border_mask,
+                                     mask_8x8_c & border_mask,
+                                     mask_4x4_c & border_mask,
+                                     mask_4x4_int[r],
+                                     &cm->lf_info, &lfl[r << 3],
+                                     (int)cm->bit_depth);
     } else {
       filter_selectively_vert(dst->buf, dst->stride,
                               mask_16x16_c & border_mask,
@@ -1298,14 +1298,14 @@ static void filter_block_plane_non420(VP9_COMMON *cm,
     }
 #if CONFIG_VP9_HIGHBITDEPTH
     if (cm->use_highbitdepth) {
-      high_filter_selectively_horiz(CONVERT_TO_SHORTPTR(dst->buf),
-                                    dst->stride,
-                                    mask_16x16_r,
-                                    mask_8x8_r,
-                                    mask_4x4_r,
-                                    mask_4x4_int_r,
-                                    &cm->lf_info, &lfl[r << 3],
-                                    (int)cm->bit_depth);
+      highbd_filter_selectively_horiz(CONVERT_TO_SHORTPTR(dst->buf),
+                                      dst->stride,
+                                      mask_16x16_r,
+                                      mask_8x8_r,
+                                      mask_4x4_r,
+                                      mask_4x4_int_r,
+                                      &cm->lf_info, &lfl[r << 3],
+                                      (int)cm->bit_depth);
     } else {
       filter_selectively_horiz(dst->buf, dst->stride,
                                mask_16x16_r,
@@ -1350,15 +1350,15 @@ void vp9_filter_block_plane(VP9_COMMON *const cm,
       // Disable filtering on the leftmost column.
 #if CONFIG_VP9_HIGHBITDEPTH
       if (cm->use_highbitdepth) {
-        high_filter_selectively_vert_row2(plane->plane_type,
-                                          CONVERT_TO_SHORTPTR(dst->buf),
-                                          dst->stride,
-                                          mask_16x16_l,
-                                          mask_8x8_l,
-                                          mask_4x4_l,
-                                          mask_4x4_int_l,
-                                          &cm->lf_info, &lfm->lfl_y[r << 3],
-                                          (int)cm->bit_depth);
+        highbd_filter_selectively_vert_row2(plane->plane_type,
+                                            CONVERT_TO_SHORTPTR(dst->buf),
+                                            dst->stride,
+                                            mask_16x16_l,
+                                            mask_8x8_l,
+                                            mask_4x4_l,
+                                            mask_4x4_int_l,
+                                            &cm->lf_info, &lfm->lfl_y[r << 3],
+                                            (int)cm->bit_depth);
       } else {
         filter_selectively_vert_row2(plane->plane_type,
                                      dst->buf, dst->stride,
@@ -1409,15 +1409,15 @@ void vp9_filter_block_plane(VP9_COMMON *const cm,
 
 #if CONFIG_VP9_HIGHBITDEPTH
       if (cm->use_highbitdepth) {
-        high_filter_selectively_horiz(CONVERT_TO_SHORTPTR(dst->buf),
-                                      dst->stride,
-                                      mask_16x16_r,
-                                      mask_8x8_r,
-                                      mask_4x4_r,
-                                      mask_4x4_int & 0xff,
-                                      &cm->lf_info,
-                                      &lfm->lfl_y[r << 3],
-                                      (int)cm->bit_depth);
+        highbd_filter_selectively_horiz(CONVERT_TO_SHORTPTR(dst->buf),
+                                        dst->stride,
+                                        mask_16x16_r,
+                                        mask_8x8_r,
+                                        mask_4x4_r,
+                                        mask_4x4_int & 0xff,
+                                        &cm->lf_info,
+                                        &lfm->lfl_y[r << 3],
+                                        (int)cm->bit_depth);
       } else {
         filter_selectively_horiz(dst->buf, dst->stride,
                                  mask_16x16_r,
@@ -1468,16 +1468,16 @@ void vp9_filter_block_plane(VP9_COMMON *const cm,
         // Disable filtering on the leftmost column.
 #if CONFIG_VP9_HIGHBITDEPTH
         if (cm->use_highbitdepth) {
-          high_filter_selectively_vert_row2(plane->plane_type,
-                                            CONVERT_TO_SHORTPTR(dst->buf),
-                                            dst->stride,
-                                            mask_16x16_l,
-                                            mask_8x8_l,
-                                            mask_4x4_l,
-                                            mask_4x4_int_l,
-                                            &cm->lf_info,
-                                            &lfm->lfl_uv[r << 1],
-                                            (int)cm->bit_depth);
+          highbd_filter_selectively_vert_row2(plane->plane_type,
+                                              CONVERT_TO_SHORTPTR(dst->buf),
+                                              dst->stride,
+                                              mask_16x16_l,
+                                              mask_8x8_l,
+                                              mask_4x4_l,
+                                              mask_4x4_int_l,
+                                              &cm->lf_info,
+                                              &lfm->lfl_uv[r << 1],
+                                              (int)cm->bit_depth);
         } else {
           filter_selectively_vert_row2(plane->plane_type,
                                        dst->buf, dst->stride,
@@ -1534,15 +1534,15 @@ void vp9_filter_block_plane(VP9_COMMON *const cm,
 
 #if CONFIG_VP9_HIGHBITDEPTH
       if (cm->use_highbitdepth) {
-        high_filter_selectively_horiz(CONVERT_TO_SHORTPTR(dst->buf),
-                                      dst->stride,
-                                      mask_16x16_r,
-                                      mask_8x8_r,
-                                      mask_4x4_r,
-                                      mask_4x4_int_r,
-                                      &cm->lf_info,
-                                      &lfm->lfl_uv[r << 1],
-                                      (int)cm->bit_depth);
+        highbd_filter_selectively_horiz(CONVERT_TO_SHORTPTR(dst->buf),
+                                        dst->stride,
+                                        mask_16x16_r,
+                                        mask_8x8_r,
+                                        mask_4x4_r,
+                                        mask_4x4_int_r,
+                                        &cm->lf_info,
+                                        &lfm->lfl_uv[r << 1],
+                                        (int)cm->bit_depth);
       } else {
         filter_selectively_horiz(dst->buf, dst->stride,
                                  mask_16x16_r,

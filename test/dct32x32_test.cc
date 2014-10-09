@@ -80,11 +80,11 @@ typedef std::tr1::tuple<FwdTxfmFunc, InvTxfmFunc, int, vpx_bit_depth_t>
 
 #if CONFIG_VP9_HIGHBITDEPTH
 void idct32x32_10(const tran_low_t *in, uint8_t *out, int stride) {
-  vp9_high_idct32x32_1024_add_c(in, out, stride, 10);
+  vp9_highbd_idct32x32_1024_add_c(in, out, stride, 10);
 }
 
 void idct32x32_12(const tran_low_t *in, uint8_t *out, int stride) {
-  vp9_high_idct32x32_1024_add_c(in, out, stride, 12);
+  vp9_highbd_idct32x32_1024_add_c(in, out, stride, 12);
 }
 #endif
 
@@ -311,13 +311,13 @@ using std::tr1::make_tuple;
 INSTANTIATE_TEST_CASE_P(
     C, Trans32x32Test,
     ::testing::Values(
-        make_tuple(&vp9_high_fdct32x32_c,
+        make_tuple(&vp9_highbd_fdct32x32_c,
                    &idct32x32_10, 0, VPX_BITS_10),
-        make_tuple(&vp9_high_fdct32x32_rd_c,
+        make_tuple(&vp9_highbd_fdct32x32_rd_c,
                    &idct32x32_10, 1, VPX_BITS_10),
-        make_tuple(&vp9_high_fdct32x32_c,
+        make_tuple(&vp9_highbd_fdct32x32_c,
                    &idct32x32_12, 0, VPX_BITS_12),
-        make_tuple(&vp9_high_fdct32x32_rd_c,
+        make_tuple(&vp9_highbd_fdct32x32_rd_c,
                    &idct32x32_12, 1, VPX_BITS_12),
         make_tuple(&vp9_fdct32x32_c,
                    &vp9_idct32x32_1024_add_c, 0, VPX_BITS_8),

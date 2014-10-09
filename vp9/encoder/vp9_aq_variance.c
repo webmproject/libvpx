@@ -131,9 +131,9 @@ static unsigned int block_variance(VP9_COMP *cpi, MACROBLOCK *x,
     int avg;
 #if CONFIG_VP9_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-      high_variance(x->plane[0].src.buf, x->plane[0].src.stride,
-                    CONVERT_TO_BYTEPTR(vp9_highbd_64_zeros), 0, bw, bh, &sse,
-                    &avg);
+      highbd_variance(x->plane[0].src.buf, x->plane[0].src.stride,
+                      CONVERT_TO_BYTEPTR(vp9_highbd_64_zeros), 0, bw, bh,
+                      &sse, &avg);
       sse >>= 2 * (xd->bd - 8);
       avg >>= (xd->bd - 8);
     } else {
