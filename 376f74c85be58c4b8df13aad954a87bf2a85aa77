@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//UNE\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 6
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-10-09T00:18:46Z",
+      "side": 1,
+      "message": "pedantry: functions",
+      "revId": "376f74c85be58c4b8df13aad954a87bf2a85aa77",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//UM8\u003d",
+        "filename": "vp9/common/x86/vp9_asm_stubs.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-10-09T00:18:46Z",
+      "side": 1,
+      "message": "\u003e80; I suspect jenkins already mentioned this, though",
+      "revId": "376f74c85be58c4b8df13aad954a87bf2a85aa77",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//UM4\u003d",
+        "filename": "vp9/encoder/vp9_quantize.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 363,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-10-09T00:18:46Z",
+      "side": 1,
+      "message": "should probably keep this one aligned",
+      "revId": "376f74c85be58c4b8df13aad954a87bf2a85aa77",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//UM0\u003d",
+        "filename": "vp9/encoder/vp9_quantize.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 477,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-10-09T00:18:46Z",
+      "side": 1,
+      "message": "ditto; wrap at \u003d if necessary",
+      "revId": "376f74c85be58c4b8df13aad954a87bf2a85aa77",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
