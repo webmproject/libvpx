@@ -394,7 +394,6 @@ static void set_ref(VP9_COMMON *const cm, MACROBLOCKD *const xd,
                        "Block reference is corrupt");
   vp9_setup_pre_planes(xd, idx, ref_buffer->buf, mi_row, mi_col,
                        &ref_buffer->sf);
-  xd->corrupted |= ref_buffer->buf->corrupted;
 }
 
 static void decode_block(VP9_COMMON *const cm, MACROBLOCKD *const xd,
