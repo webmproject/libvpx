@@ -396,9 +396,10 @@ static int set_vt_partitioning(VP9_COMP *cpi,
   const int block_width = num_8x8_blocks_wide_lookup[bsize];
   const int block_height = num_8x8_blocks_high_lookup[bsize];
   // TODO(debargha): Choose this more intelligently.
-  const int64_t threshold_multiplier = cm->frame_type == KEY_FRAME ? 64 : 4;
-  int64_t threshold = threshold_multiplier *
-      vp9_convert_qindex_to_q(cm->base_qindex, cm->bit_depth);
+  const int threshold_multiplier = cm->frame_type == KEY_FRAME ? 64 : 4;
+  int64_t threshold =
+      (int64_t)(threshold_multiplier *
+                vp9_convert_qindex_to_q(cm->base_qindex, cm->bit_depth));
   assert(block_height == block_width);
   tree_to_node(data, bsize, &vt);
 
