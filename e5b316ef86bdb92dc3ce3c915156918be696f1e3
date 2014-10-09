@@ -265,6 +265,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//UF0\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 59
+      },
+      "lineNbr": 1554,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-10-09T19:40:06Z",
+      "side": 1,
+      "message": "Per offline dicussion, change name to be ref_frame_buf. Keep ref in the name to make variable more understandable.",
+      "parentUuid": "AAAAdn//UNs\u003d",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//WDY\u003d",
         "filename": "vp9/decoder/vp9_decodeframe.c",
         "patchSetId": 59
@@ -1221,6 +1239,24 @@
       "side": 1,
       "message": "If you look at my sequence above all threads are not busy. So it will return NULL?",
       "parentUuid": "AAAAdn//WFs\u003d",
+      "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//UF4\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 59
+      },
+      "lineNbr": 731,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-10-09T19:40:06Z",
+      "side": 1,
+      "message": "A thread is free only after -\u003esync and available_threads gets increased.  So even the thread finish decoding, it is still consider busy until main thread fetches the frame.",
+      "parentUuid": "AAAAdn//UNU\u003d",
       "revId": "e5b316ef86bdb92dc3ce3c915156918be696f1e3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
