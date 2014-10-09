@@ -1628,7 +1628,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
           int sadpb = x->sadperbit4;
           MV mvp_full;
           int max_mv;
-          int sad_list[5];
+          int cost_list[5];
 
           /* Is the best so far sufficiently good that we cant justify doing
            * and new motion search. */
@@ -1674,7 +1674,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
           bestsme = vp9_full_pixel_search(
               cpi, x, bsize, &mvp_full, step_param, sadpb,
-              cpi->sf.mv.subpel_search_method != SUBPEL_TREE ? sad_list : NULL,
+              cpi->sf.mv.subpel_search_method != SUBPEL_TREE ? cost_list : NULL,
               &bsi->ref_mv[0]->as_mv, new_mv,
               INT_MAX, 1);
 
@@ -1688,7 +1688,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                            sadpb, 16, &cpi->fn_ptr[bsize],
                                            &bsi->ref_mv[0]->as_mv,
                                            &best_mv->as_mv);
-            sad_list[1] = sad_list[2] = sad_list[3] = sad_list[4] = INT_MAX;
+            cost_list[1] = cost_list[2] = cost_list[3] = cost_list[4] = INT_MAX;
             if (thissme < bestsme) {
               bestsme = thissme;
               *new_mv = best_mv->as_mv;
@@ -1709,7 +1709,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
                 x->errorperbit, &cpi->fn_ptr[bsize],
                 cpi->sf.mv.subpel_force_stop,
                 cpi->sf.mv.subpel_iters_per_step,
-                cond_sad_list(cpi, sad_list),
+                cond_cost_list(cpi, cost_list),
                 x->nmvjointcost, x->mvcost,
                 &distortion,
                 &x->pred_sse[mbmi->ref_frame[0]],
@@ -2043,7 +2043,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   int tmp_col_max = x->mv_col_max;
   int tmp_row_min = x->mv_row_min;
   int tmp_row_max = x->mv_row_max;
-  int sad_list[5];
+  int cost_list[5];
 
   const YV12_BUFFER_CONFIG *scaled_ref_frame = vp9_get_scaled_ref_frame(cpi,
                                                                         ref);
@@ -2115,7 +2115,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   mvp_full.row >>= 3;
 
   bestsme = vp9_full_pixel_search(cpi, x, bsize, &mvp_full, step_param, sadpb,
-                                  cond_sad_list(cpi, sad_list),
+                                  cond_cost_list(cpi, cost_list),
                                   &ref_mv, &tmp_mv->as_mv, INT_MAX, 1);
 
   x->mv_col_min = tmp_col_min;
@@ -2131,7 +2131,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                  &cpi->fn_ptr[bsize],
                                  cpi->sf.mv.subpel_force_stop,
                                  cpi->sf.mv.subpel_iters_per_step,
-                                 cond_sad_list(cpi, sad_list),
+                                 cond_cost_list(cpi, cost_list),
                                  x->nmvjointcost, x->mvcost,
                                  &dis, &x->pred_sse[ref], NULL, 0, 0);
   }
