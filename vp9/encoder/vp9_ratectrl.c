@@ -280,7 +280,7 @@ void vp9_rc_init(const VP9EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
   }
 
   rc->last_q[KEY_FRAME] = oxcf->best_allowed_q;
-  rc->last_q[INTER_FRAME] = oxcf->best_allowed_q;
+  rc->last_q[INTER_FRAME] = oxcf->worst_allowed_q;
 
   rc->buffer_level =    rc->starting_buffer_level;
   rc->bits_off_target = rc->starting_buffer_level;
@@ -302,7 +302,6 @@ void vp9_rc_init(const VP9EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
   rc->source_alt_ref_active = 0;
 
   rc->frames_till_gf_update_due = 0;
-
   rc->ni_av_qi = oxcf->worst_allowed_q;
   rc->ni_tot_qi = 0;
   rc->ni_frames = 0;
@@ -989,6 +988,21 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi,
           (active_best_quality < cq_level)) {
         active_best_quality = cq_level;
       }
+    }
+  }
+
+  // Extenstion to max or min Q if undershoot or overshoot is outside
+  // the permitted range.
+  if ((cpi->oxcf.rc_mode == VPX_VBR) &&
+      (cpi->twopass.gf_zeromotion_pct < VLOW_MOTION_THRESHOLD)) {
+    if (frame_is_intra_only(cm) ||
+        (!rc->is_src_frame_alt_ref &&
+         (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame))) {
+      active_best_quality -= cpi->twopass.extend_minq;
+      active_worst_quality += (cpi->twopass.extend_maxq / 2);
+    } else {
+      active_best_quality -= cpi->twopass.extend_minq / 2;
+      active_worst_quality += cpi->twopass.extend_maxq;
     }
   }
 
