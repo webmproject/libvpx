@@ -87,8 +87,6 @@ typedef struct {
   int long_rolling_target_bits;
   int long_rolling_actual_bits;
 
-  int rate_error_estimate;
-
   int64_t total_actual_bits;
   int64_t total_target_bits;
   int64_t total_target_vs_actual;
