@@ -453,6 +453,7 @@ static void choose_partitioning(VP9_COMP *cpi,
   const YV12_BUFFER_CONFIG *yv12 = get_ref_frame_buffer(cpi, LAST_FRAME);
   const struct scale_factors *const sf = &cm->frame_refs[LAST_FRAME - 1].sf;
 
+  vp9_clear_system_state();
   vp9_zero(vt);
   set_offsets(cpi, tile, mi_row, mi_col, BLOCK_64X64);
 
