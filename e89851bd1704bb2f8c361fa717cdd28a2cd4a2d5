@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//T/A\u003d",
+        "filename": "test/vp8_denoiser_sse2_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-10T08:33:33Z",
+      "side": 1,
+      "message": "const",
+      "revId": "e89851bd1704bb2f8c361fa717cdd28a2cd4a2d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//T+8\u003d",
+        "filename": "test/vp8_denoiser_sse2_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-10T08:33:33Z",
+      "side": 1,
+      "message": "you should use static_cast. is uint8 important here? seems the param is unsigned int, that or plain int would be simpler",
+      "revId": "e89851bd1704bb2f8c361fa717cdd28a2cd4a2d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//T/E\u003d",
+        "filename": "test/vp8_denoiser_sse2_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-10T08:33:33Z",
+      "side": 1,
+      "message": "the alignment was correct before; only indent 4 when you break after a \u0027function(\u0027 or \u003d",
+      "revId": "e89851bd1704bb2f8c361fa717cdd28a2cd4a2d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//T+4\u003d",
+        "filename": "test/vp8_denoiser_sse2_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-10T08:33:33Z",
+      "side": 1,
+      "message": "this is fine; alternatively you can break after ...filter_c( and the indent 4",
+      "revId": "e89851bd1704bb2f8c361fa717cdd28a2cd4a2d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//T+0\u003d",
+        "filename": "test/vp9_denoiser_sse2_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-10T08:33:33Z",
+      "side": 1,
+      "message": "use static_cast or can you just parameterize it with BLOCK_SIZE",
+      "revId": "e89851bd1704bb2f8c361fa717cdd28a2cd4a2d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//T+w\u003d",
+        "filename": "test/vp9_denoiser_sse2_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-10T08:33:33Z",
+      "side": 1,
+      "message": "const / break after \u003d / static_cast",
+      "revId": "e89851bd1704bb2f8c361fa717cdd28a2cd4a2d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//T+s\u003d",
+        "filename": "test/vp9_denoiser_sse2_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-10T08:33:33Z",
+      "side": 1,
+      "message": "if this is common enough we can extract it to a Clip8b() or so in a common area later",
+      "revId": "e89851bd1704bb2f8c361fa717cdd28a2cd4a2d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//T+o\u003d",
+        "filename": "test/vp9_denoiser_sse2_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-10T08:33:33Z",
+      "side": 1,
+      "message": "fix indent",
+      "revId": "e89851bd1704bb2f8c361fa717cdd28a2cd4a2d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
