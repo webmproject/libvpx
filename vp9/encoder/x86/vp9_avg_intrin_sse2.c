@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include <immintrin.h>
+#include <emmintrin.h>
 #include "vpx_ports/mem.h"
 
 
