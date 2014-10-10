@@ -19,6 +19,23 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//T8s\u003d",
+        "filename": "test/vp8_denoiser_sse2_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2014-10-10T16:34:57Z",
+      "side": 1,
+      "message": "Do we need a const before motion_magnitude_ran?",
+      "revId": "e89851bd1704bb2f8c361fa717cdd28a2cd4a2d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//T+8\u003d",
         "filename": "test/vp8_denoiser_sse2_test.cc",
         "patchSetId": 2
@@ -30,6 +47,24 @@
       "writtenOn": "2014-10-10T08:33:33Z",
       "side": 1,
       "message": "you should use static_cast. is uint8 important here? seems the param is unsigned int, that or plain int would be simpler",
+      "revId": "e89851bd1704bb2f8c361fa717cdd28a2cd4a2d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//T8o\u003d",
+        "filename": "test/vp8_denoiser_sse2_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2014-10-10T16:34:57Z",
+      "side": 1,
+      "message": "It is not important here. I can use a plain int instead.",
+      "parentUuid": "AAAAdn//T+8\u003d",
       "revId": "e89851bd1704bb2f8c361fa717cdd28a2cd4a2d5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +88,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//T8g\u003d",
+        "filename": "test/vp8_denoiser_sse2_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2014-10-10T16:34:57Z",
+      "side": 1,
+      "message": "changed back",
+      "parentUuid": "AAAAdn//T/E\u003d",
+      "revId": "e89851bd1704bb2f8c361fa717cdd28a2cd4a2d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//T+4\u003d",
         "filename": "test/vp8_denoiser_sse2_test.cc",
         "patchSetId": 2
@@ -64,6 +117,24 @@
       "writtenOn": "2014-10-10T08:33:33Z",
       "side": 1,
       "message": "this is fine; alternatively you can break after ...filter_c( and the indent 4",
+      "revId": "e89851bd1704bb2f8c361fa717cdd28a2cd4a2d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//T8c\u003d",
+        "filename": "test/vp8_denoiser_sse2_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2014-10-10T16:34:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//T+4\u003d",
       "revId": "e89851bd1704bb2f8c361fa717cdd28a2cd4a2d5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +158,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//T8Y\u003d",
+        "filename": "test/vp9_denoiser_sse2_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2014-10-10T16:34:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//T+0\u003d",
+      "revId": "e89851bd1704bb2f8c361fa717cdd28a2cd4a2d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//T+w\u003d",
         "filename": "test/vp9_denoiser_sse2_test.cc",
         "patchSetId": 2
@@ -98,6 +187,24 @@
       "writtenOn": "2014-10-10T08:33:33Z",
       "side": 1,
       "message": "const / break after \u003d / static_cast",
+      "revId": "e89851bd1704bb2f8c361fa717cdd28a2cd4a2d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//T8U\u003d",
+        "filename": "test/vp9_denoiser_sse2_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2014-10-10T16:34:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//T+w\u003d",
       "revId": "e89851bd1704bb2f8c361fa717cdd28a2cd4a2d5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +228,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//T8Q\u003d",
+        "filename": "test/vp9_denoiser_sse2_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2014-10-10T16:34:57Z",
+      "side": 1,
+      "message": "I don\u0027t know whether other part will use this. But it seems to be useful in the testing for denoiser. We can extract it later if we find other usage of it.",
+      "parentUuid": "AAAAdn//T+s\u003d",
+      "revId": "e89851bd1704bb2f8c361fa717cdd28a2cd4a2d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//T+o\u003d",
         "filename": "test/vp9_denoiser_sse2_test.cc",
         "patchSetId": 2
@@ -132,6 +257,24 @@
       "writtenOn": "2014-10-10T08:33:33Z",
       "side": 1,
       "message": "fix indent",
+      "revId": "e89851bd1704bb2f8c361fa717cdd28a2cd4a2d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//T8M\u003d",
+        "filename": "test/vp9_denoiser_sse2_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2014-10-10T16:34:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//T+o\u003d",
       "revId": "e89851bd1704bb2f8c361fa717cdd28a2cd4a2d5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
