@@ -38,15 +38,16 @@
 #define OUTPUT_FPF          0
 #define ARF_STATS_OUTPUT    0
 
+#define BOOST_BREAKOUT      12.5
 #define BOOST_FACTOR        12.5
-#define ERR_DIVISOR         125.0
+#define ERR_DIVISOR         128.0
 #define FACTOR_PT_LOW       0.70
 #define FACTOR_PT_HIGH      0.90
 #define FIRST_PASS_Q        10.0
 #define GF_MAX_BOOST        96.0
 #define INTRA_MODE_PENALTY  1024
 #define KF_MAX_BOOST        128.0
-#define MIN_ARF_BOOST       240
+#define MIN_ARF_GF_BOOST    240
 #define MIN_DECAY_FACTOR    0.01
 #define MIN_GF_INTERVAL     4
 #define MIN_KF_BOOST        300
@@ -1180,6 +1181,8 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
   // Reset the vbr bits off target counter
   cpi->rc.vbr_bits_off_target = 0;
 
+  cpi->rc.rate_error_estimate = 0;
+
   // Static sequence monitor variables.
   twopass->kf_zeromotion_pct = 100;
   twopass->last_kfgroup_zeromotion_pct = 100;
@@ -1314,11 +1317,14 @@ static double calc_frame_boost(VP9_COMP *cpi,
                                double this_frame_mv_in_out,
                                double max_boost) {
   double frame_boost;
+  const double lq = vp9_convert_qindex_to_q(cpi->rc.last_q[INTER_FRAME],
+                                            cpi->common.bit_depth);
+  const double q_correction = MIN((0.8 + (lq * 0.001)), 1.0);
 
   // Underlying boost factor is based on inter error ratio.
   frame_boost = (BASELINE_ERR_PER_MB * cpi->common.MBs) /
                 DOUBLE_DIVIDE_CHECK(this_frame->coded_error);
-  frame_boost = frame_boost * BOOST_FACTOR;
+  frame_boost = frame_boost * BOOST_FACTOR * q_correction;
 
   // Increase boost for frames where new data coming into frame (e.g. zoom out).
   // Slightly reduce boost if there is a net balance of motion out of the frame
@@ -1329,7 +1335,7 @@ static double calc_frame_boost(VP9_COMP *cpi,
   else
     frame_boost += frame_boost * (this_frame_mv_in_out / 2.0);
 
-  return MIN(frame_boost, max_boost);
+  return MIN(frame_boost, max_boost * q_correction);
 }
 
 static int calc_arf_boost(VP9_COMP *cpi, int offset,
@@ -1418,7 +1424,7 @@ static int calc_arf_boost(VP9_COMP *cpi, int offset,
   arf_boost = (*f_boost + *b_boost);
   if (arf_boost < ((b_frames + f_frames) * 20))
     arf_boost = ((b_frames + f_frames) * 20);
-  arf_boost = MAX(arf_boost, MIN_ARF_BOOST);
+  arf_boost = MAX(arf_boost, MIN_ARF_GF_BOOST);
 
   return arf_boost;
 }
@@ -1731,6 +1737,9 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     int int_max_q =
       (int)(vp9_convert_qindex_to_q(twopass->active_worst_quality,
                                    cpi->common.bit_depth));
+    int int_lbq =
+      (int)(vp9_convert_qindex_to_q(rc->last_boosted_qindex,
+                                   cpi->common.bit_depth));
     active_min_gf_interval = MIN_GF_INTERVAL + MIN(2, int_max_q / 200);
     if (active_min_gf_interval > rc->max_gf_interval)
       active_min_gf_interval = rc->max_gf_interval;
@@ -1742,7 +1751,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       // bits to spare and are better with a smaller interval and smaller boost.
       // At high Q when there are few bits to spare we are better with a longer
       // interval to spread the cost of the GF.
-      active_max_gf_interval = 12 + MIN(4, (int_max_q / 24));
+      active_max_gf_interval = 12 + MIN(4, (int_lbq / 6));
       if (active_max_gf_interval > rc->max_gf_interval)
         active_max_gf_interval = rc->max_gf_interval;
     }
@@ -1806,7 +1815,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
         ((mv_ratio_accumulator > mv_ratio_accumulator_thresh) ||
          (abs_mv_in_out_accumulator > 3.0) ||
          (mv_in_out_accumulator < -2.0) ||
-         ((boost_score - old_boost_score) < BOOST_FACTOR)))) {
+         ((boost_score - old_boost_score) < BOOST_BREAKOUT)))) {
       boost_score = old_boost_score;
       break;
     }
@@ -1852,7 +1861,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       (cpi->multi_arf_allowed && (rc->baseline_gf_interval >= 6) &&
       (zero_motion_accumulator < 0.995)) ? 1 : 0;
   } else {
-    rc->gfu_boost = MAX((int)boost_score, 125);
+    rc->gfu_boost = MAX((int)boost_score, MIN_ARF_GF_BOOST);
     rc->source_alt_ref_pending = 0;
   }
 
@@ -1869,7 +1878,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
         (rc->gfu_boost * gfboost_qadjust(q, cpi->common.bit_depth)) / 100;
 
     // Set max and minimum boost and hence minimum allocation.
-    boost = clamp(boost, 125, (rc->baseline_gf_interval + 1) * 200);
+    boost = clamp(boost, MIN_ARF_GF_BOOST,
+                  (rc->baseline_gf_interval + 1) * 200);
 
     // Calculate the extra bits to be used for boosted frame(s)
     gf_arf_bits = calculate_boost_bits(rc->baseline_gf_interval,
@@ -2222,10 +2232,23 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   twopass->modified_error_left -= kf_group_err;
 }
 
+#define VBR_PCT_ADJUSTMENT_LIMIT 50
 // For VBR...adjustment to the frame target based on error from previous frames
-void vbr_rate_correction(int * this_frame_target,
+void vbr_rate_correction(VP9_COMP *cpi,
+                         int * this_frame_target,
                          const int64_t vbr_bits_off_target) {
-  int max_delta = (*this_frame_target * 15) / 100;
+  int max_delta;
+  double position_factor = 1.0;
+
+  // How far through the clip are we.
+  // This number is used to damp the per frame rate correction.
+  // Range 0 - 1.0
+  if (cpi->twopass.total_stats.count) {
+    position_factor = sqrt((double)cpi->common.current_video_frame /
+                           cpi->twopass.total_stats.count);
+  }
+  max_delta = (int)(position_factor *
+                    ((*this_frame_target * VBR_PCT_ADJUSTMENT_LIMIT) / 100));
 
   // vbr_bits_off_target > 0 means we have extra bits to spend
   if (vbr_bits_off_target > 0) {
@@ -2323,7 +2346,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
 
     // Correction to rate target based on prior over or under shoot.
     if (cpi->oxcf.rc_mode == VPX_VBR)
-      vbr_rate_correction(&target_rate, rc->vbr_bits_off_target);
+      vbr_rate_correction(cpi, &target_rate, rc->vbr_bits_off_target);
 
     vp9_rc_set_frame_target(cpi, target_rate);
     cm->frame_type = INTER_FRAME;
@@ -2426,7 +2449,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
 
   // Correction to rate target based on prior over or under shoot.
   if (cpi->oxcf.rc_mode == VPX_VBR)
-    vbr_rate_correction(&target_rate, rc->vbr_bits_off_target);
+    vbr_rate_correction(cpi, &target_rate, rc->vbr_bits_off_target);
 
   vp9_rc_set_frame_target(cpi, target_rate);
 
@@ -2434,19 +2457,28 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
   subtract_stats(&twopass->total_left_stats, &this_frame);
 }
 
+#define MINQ_ADJ_LIMIT 32
+#define Q_LIMIT_STEP 1
 void vp9_twopass_postencode_update(VP9_COMP *cpi) {
   TWO_PASS *const twopass = &cpi->twopass;
   RATE_CONTROL *const rc = &cpi->rc;
+  const int bits_used = rc->base_frame_target;
 
   // VBR correction is done through rc->vbr_bits_off_target. Based on the
   // sign of this value, a limited % adjustment is made to the target rate
   // of subsequent frames, to try and push it back towards 0. This method
   // is designed to prevent extreme behaviour at the end of a clip
   // or group of frames.
-  const int bits_used = rc->base_frame_target;
   rc->vbr_bits_off_target += rc->base_frame_target - rc->projected_frame_size;
-
   twopass->bits_left = MAX(twopass->bits_left - bits_used, 0);
+
+  // Calculate the pct rc error.
+  if (rc->total_actual_bits) {
+    rc->rate_error_estimate =
+      (int)((rc->vbr_bits_off_target * 100) / rc->total_actual_bits);
+  } else {
+    rc->rate_error_estimate = 0;
+  }
 
   if (cpi->common.frame_type != KEY_FRAME &&
       !vp9_is_upper_layer_key_frame(cpi)) {
@@ -2457,4 +2489,32 @@ void vp9_twopass_postencode_update(VP9_COMP *cpi) {
 
   // Increment the gf group index ready for the next frame.
   ++twopass->gf_group.index;
+
+  // If the rate control is drifting consider adjustment ot min or maxq.
+  // Only make adjustments on gf/arf
+  if ((cpi->oxcf.rc_mode == VPX_VBR) &&
+      (cpi->twopass.gf_zeromotion_pct < VLOW_MOTION_THRESHOLD) &&
+      !cpi->rc.is_src_frame_alt_ref) {
+    const int maxq_adj_limit =
+      rc->worst_quality - twopass->active_worst_quality;
+
+    // Undershoot.
+    if (rc->rate_error_estimate > cpi->oxcf.under_shoot_pct) {
+      --twopass->extend_maxq;
+      if (rc->rolling_target_bits >= rc->rolling_actual_bits)
+        twopass->extend_minq += Q_LIMIT_STEP;
+    // Overshoot.
+    } else if (rc->rate_error_estimate < -cpi->oxcf.over_shoot_pct) {
+      --twopass->extend_minq;
+      if (rc->rolling_target_bits < rc->rolling_actual_bits)
+        twopass->extend_maxq += Q_LIMIT_STEP;
+    } else {
+      if (rc->rolling_target_bits < rc->rolling_actual_bits)
+        --twopass->extend_minq;
+      if (rc->rolling_target_bits > rc->rolling_actual_bits)
+        --twopass->extend_maxq;
+    }
+    twopass->extend_minq = clamp(twopass->extend_minq, 0, MINQ_ADJ_LIMIT);
+    twopass->extend_maxq = clamp(twopass->extend_maxq, 0, maxq_adj_limit);
+  }
 }
