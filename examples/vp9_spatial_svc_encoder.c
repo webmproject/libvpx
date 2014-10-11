@@ -209,7 +209,7 @@ static void parse_command_line(int argc, const char **argv_,
       max_bitrate = arg_parse_uint(&arg);
 #if CONFIG_VP9_HIGHBITDEPTH
     } else if (arg_match(&arg, &bitdepth_arg, argi)) {
-      enc_cfg->g_bit_depth = arg_parse_enum(&arg);
+      enc_cfg->g_bit_depth = arg_parse_enum_or_int(&arg);
       switch (enc_cfg->g_bit_depth) {
         case VPX_BITS_8:
           enc_cfg->g_input_bit_depth = 8;
