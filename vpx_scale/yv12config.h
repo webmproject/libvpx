@@ -15,6 +15,7 @@
 extern "C" {
 #endif
 
+#include "./vpx_config.h"
 #include "vpx/vpx_codec.h"
 #include "vpx/vpx_frame_buffer.h"
 #include "vpx/vpx_integer.h"

@@ -10,7 +10,6 @@
 
 #include <assert.h>
 
-#include "./vpx_config.h"
 #include "vpx_scale/yv12config.h"
 #include "vpx_mem/vpx_mem.h"
 #if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
