@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//T2s\u003d",
+        "filename": "test/vp9_denoiser_sse2_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-11T09:58:43Z",
+      "side": 1,
+      "message": "what about making this parameterized on BLOCK_SIZE?",
+      "revId": "fba020cea1fb70026578bcdcfa4a98a7c75e500e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//T2o\u003d",
+        "filename": "test/vp9_denoiser_sse2_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-11T09:58:43Z",
+      "side": 1,
+      "message": "try to be consistent between the 2 tests; this would be indented 4 is you want this style. or you could break after the first \u0027(\u0027 and indent 4.",
+      "revId": "fba020cea1fb70026578bcdcfa4a98a7c75e500e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
