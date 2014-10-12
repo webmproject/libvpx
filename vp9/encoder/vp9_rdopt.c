@@ -3448,7 +3448,7 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   // updating code causes PSNR loss. Need to figure out the confliction.
   x->skip |= best_mode_skippable;
 
-  if (!best_mode_skippable && !x->select_tx_size) {
+  if (!x->skip && !x->select_tx_size) {
     int has_high_freq_coeff = 0;
     int plane;
     int max_plane = is_inter_block(&xd->mi[0].src_mi->mbmi)
