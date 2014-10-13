@@ -2782,12 +2782,12 @@ static void update_rd_thresh_fact(VP9_COMP *cpi, int bsize,
   }
 }
 
-int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
-                                  const TileInfo *const tile,
-                                  int mi_row, int mi_col,
-                                  RD_COST *rd_cost, BLOCK_SIZE bsize,
-                                  PICK_MODE_CONTEXT *ctx,
-                                  int64_t best_rd_so_far) {
+void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
+                               const TileInfo *const tile,
+                               int mi_row, int mi_col,
+                               RD_COST *rd_cost, BLOCK_SIZE bsize,
+                               PICK_MODE_CONTEXT *ctx,
+                               int64_t best_rd_so_far) {
   VP9_COMMON *const cm = &cpi->common;
   RD_OPT *const rd_opt = &cpi->rd;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -3387,8 +3387,10 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       best_mbmode.mode = ZEROMV;
   }
 
-  if (best_mode_index < 0 || best_rd >= best_rd_so_far)
-    return INT64_MAX;
+  if (best_mode_index < 0 || best_rd >= best_rd_so_far) {
+    rd_cost->rdcost = INT64_MAX;
+    return;
+  }
 
   // If we used an estimate for the uv intra rd in the loop above...
   if (cpi->sf.use_uv_intra_rd_estimate) {
@@ -3468,15 +3470,13 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
   store_coding_context(x, ctx, best_mode_index, best_pred_diff,
                        best_tx_diff, best_filter_diff, best_mode_skippable);
-
-  return best_rd;
 }
 
-int64_t vp9_rd_pick_inter_mode_sb_seg_skip(VP9_COMP *cpi, MACROBLOCK *x,
-                                           RD_COST *rd_cost,
-                                           BLOCK_SIZE bsize,
-                                           PICK_MODE_CONTEXT *ctx,
-                                           int64_t best_rd_so_far) {
+void vp9_rd_pick_inter_mode_sb_seg_skip(VP9_COMP *cpi, MACROBLOCK *x,
+                                        RD_COST *rd_cost,
+                                        BLOCK_SIZE bsize,
+                                        PICK_MODE_CONTEXT *ctx,
+                                        int64_t best_rd_so_far) {
   VP9_COMMON *const cm = &cpi->common;
   RD_OPT *const rd_opt = &cpi->rd;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -3559,7 +3559,7 @@ int64_t vp9_rd_pick_inter_mode_sb_seg_skip(VP9_COMP *cpi, MACROBLOCK *x,
 
   if (this_rd >= best_rd_so_far) {
     rd_cost->rdcost = INT64_MAX;
-    return INT64_MAX;
+    return;
   }
 
   assert((cm->interp_filter == SWITCHABLE) ||
@@ -3575,17 +3575,15 @@ int64_t vp9_rd_pick_inter_mode_sb_seg_skip(VP9_COMP *cpi, MACROBLOCK *x,
     swap_block_ptr(x, ctx, 1, 0, 0, MAX_MB_PLANE);
   store_coding_context(x, ctx, THR_ZEROMV,
                        best_pred_diff, best_tx_diff, best_filter_diff, 0);
-
-  return this_rd;
 }
 
-int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
-                                      const TileInfo *const tile,
-                                      int mi_row, int mi_col,
-                                      RD_COST *rd_cost,
-                                      BLOCK_SIZE bsize,
-                                      PICK_MODE_CONTEXT *ctx,
-                                      int64_t best_rd_so_far) {
+void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
+                                   const TileInfo *const tile,
+                                   int mi_row, int mi_col,
+                                   RD_COST *rd_cost,
+                                   BLOCK_SIZE bsize,
+                                   PICK_MODE_CONTEXT *ctx,
+                                   int64_t best_rd_so_far) {
   VP9_COMMON *const cm = &cpi->common;
   RD_OPT *const rd_opt = &cpi->rd;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -4109,8 +4107,10 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       break;
   }
 
-  if (best_rd >= best_rd_so_far)
-    return INT64_MAX;
+  if (best_rd >= best_rd_so_far) {
+    rd_cost->rdcost = INT64_MAX;
+    return;
+  }
 
   // If we used an estimate for the uv intra rd in the loop above...
   if (cpi->sf.use_uv_intra_rd_estimate) {
@@ -4129,7 +4129,7 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     rd_cost->rate = INT_MAX;
     rd_cost->dist = INT64_MAX;
     rd_cost->rdcost = INT64_MAX;
-    return best_rd;
+    return;
   }
 
   assert((cm->interp_filter == SWITCHABLE) ||
@@ -4175,7 +4175,5 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 
   store_coding_context(x, ctx, best_ref_index,
                        best_pred_diff, best_tx_diff, best_filter_diff, 0);
-
-  return best_rd;
 }
 
