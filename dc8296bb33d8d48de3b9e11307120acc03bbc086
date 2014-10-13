@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//T0E\u003d",
+        "filename": "test/vp9_denoiser_sse2_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-13T09:39:22Z",
+      "side": 1,
+      "message": "the cast shouldn\u0027t be necessary now",
+      "revId": "dc8296bb33d8d48de3b9e11307120acc03bbc086",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//T0A\u003d",
+        "filename": "test/vp9_denoiser_sse2_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-13T09:39:22Z",
+      "side": 1,
+      "message": "fix alignment and whitespace",
+      "revId": "dc8296bb33d8d48de3b9e11307120acc03bbc086",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Tz8\u003d",
+        "filename": "test/vp9_denoiser_sse2_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-13T09:39:22Z",
+      "side": 1,
+      "message": "match this layout in the vp8 test, it\u0027s a bit more concise",
+      "revId": "dc8296bb33d8d48de3b9e11307120acc03bbc086",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
