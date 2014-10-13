@@ -183,7 +183,7 @@ static void parse_command_line(int argc, const char **argv_,
       enc_cfg->kf_min_dist = arg_parse_uint(&arg);
       enc_cfg->kf_max_dist = enc_cfg->kf_min_dist;
     } else if (arg_match(&arg, &scale_factors_arg, argi)) {
-      snprintf(string_options, 1024, "%s scale-factors=%s",
+      snprintf(string_options, sizeof(string_options), "%s scale-factors=%s",
                string_options, arg.val);
     } else if (arg_match(&arg, &passes_arg, argi)) {
       passes = arg_parse_uint(&arg);
@@ -198,10 +198,10 @@ static void parse_command_line(int argc, const char **argv_,
     } else if (arg_match(&arg, &fpf_name_arg, argi)) {
       fpf_file_name = arg.val;
     } else if (arg_match(&arg, &min_q_arg, argi)) {
-      snprintf(string_options, 1024, "%s min-quantizers=%s",
+      snprintf(string_options, sizeof(string_options), "%s min-quantizers=%s",
                string_options, arg.val);
     } else if (arg_match(&arg, &max_q_arg, argi)) {
-      snprintf(string_options, 1024, "%s max-quantizers=%s",
+      snprintf(string_options, sizeof(string_options), "%s max-quantizers=%s",
                string_options, arg.val);
     } else if (arg_match(&arg, &min_bitrate_arg, argi)) {
       min_bitrate = arg_parse_uint(&arg);

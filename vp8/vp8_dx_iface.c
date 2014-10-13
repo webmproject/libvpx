@@ -112,22 +112,19 @@ static vpx_codec_err_t vp8_init(vpx_codec_ctx_t *ctx,
      * structure. More memory may be required at the time the stream
      * information becomes known.
      */
-    if (!ctx->priv)
-    {
-        vp8_init_ctx(ctx);
-        priv = (vpx_codec_alg_priv_t *)ctx->priv;
+    if (!ctx->priv) {
+      vp8_init_ctx(ctx);
+      priv = (vpx_codec_alg_priv_t *)ctx->priv;
 
-        /* initialize number of fragments to zero */
-        priv->fragments.count = 0;
-        /* is input fragments enabled? */
-        priv->fragments.enabled =
-            (priv->base.init_flags & VPX_CODEC_USE_INPUT_FRAGMENTS);
+      /* initialize number of fragments to zero */
+      priv->fragments.count = 0;
+      /* is input fragments enabled? */
+      priv->fragments.enabled =
+          (priv->base.init_flags & VPX_CODEC_USE_INPUT_FRAGMENTS);
 
-        /*post processing level initialized to do nothing */
-    }
-    else
-    {
-        priv = (vpx_codec_alg_priv_t *)ctx->priv;
+      /*post processing level initialized to do nothing */
+    } else {
+      priv = (vpx_codec_alg_priv_t *)ctx->priv;
     }
 
     priv->yv12_frame_buffers.use_frame_threads =
@@ -138,11 +135,10 @@ static vpx_codec_err_t vp8_init(vpx_codec_ctx_t *ctx,
 
     if (priv->yv12_frame_buffers.use_frame_threads &&
         ((ctx->priv->init_flags & VPX_CODEC_USE_ERROR_CONCEALMENT) ||
-         (ctx->priv->init_flags & VPX_CODEC_USE_INPUT_FRAGMENTS)))
-    {
-        /* row-based threading, error concealment, and input fragments will
-         * not be supported when using frame-based threading */
-        res = VPX_CODEC_INVALID_PARAM;
+         (ctx->priv->init_flags & VPX_CODEC_USE_INPUT_FRAGMENTS))) {
+      /* row-based threading, error concealment, and input fragments will
+       * not be supported when using frame-based threading */
+      res = VPX_CODEC_INVALID_PARAM;
     }
 
     return res;
