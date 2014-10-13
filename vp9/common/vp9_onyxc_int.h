@@ -143,7 +143,6 @@ typedef struct VP9Common {
   int prev_mi_idx;
   int mi_alloc_size;
   MODE_INFO *mip_array[2];
-  MODE_INFO **mi_grid_base_array[2];
 
   MODE_INFO *mip; /* Base of allocated array */
   MODE_INFO *mi;  /* Corresponds to upper left visible macroblock */
