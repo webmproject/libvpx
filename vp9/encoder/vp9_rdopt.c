@@ -2790,6 +2790,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                int64_t best_rd_so_far) {
   VP9_COMMON *const cm = &cpi->common;
   RD_OPT *const rd_opt = &cpi->rd;
+  SPEED_FEATURES *const sf = &cpi->sf;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0].src_mi->mbmi;
   const struct segmentation *const seg = &cm->seg;
@@ -2828,15 +2829,15 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int best_skip2 = 0;
   uint8_t ref_frame_skip_mask[2] = { 0 };
   uint16_t mode_skip_mask[MAX_REF_FRAMES] = { 0 };
-  int mode_skip_start = cpi->sf.mode_skip_start + 1;
+  int mode_skip_start = sf->mode_skip_start + 1;
   const int *const rd_threshes = rd_opt->threshes[segment_id][bsize];
   const int *const rd_thresh_freq_fact = rd_opt->thresh_freq_fact[bsize];
   int64_t mode_threshold[MAX_MODES];
   int *mode_map = rd_opt->mode_map[bsize];
-  const int mode_search_skip_flags = cpi->sf.mode_search_skip_flags;
+  const int mode_search_skip_flags = sf->mode_search_skip_flags;
   vp9_zero(best_mbmode);
 
-  x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
+  x->skip_encode = sf->skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
 
   estimate_ref_frame_costs(cm, xd, segment_id, ref_costs_single, ref_costs_comp,
                            &comp_mode_p);
@@ -2877,7 +2878,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       // are masked out.
       ref_frame_skip_mask[0] |= (1 << ref_frame);
       ref_frame_skip_mask[1] |= SECOND_REF_FRAME_MASK;
-    } else if (cpi->sf.reference_masking) {
+    } else if (sf->reference_masking) {
       for (i = LAST_FRAME; i <= ALTREF_FRAME; ++i) {
         // Skip fixed mv modes for poor references
         if ((x->pred_mv_sad[ref_frame] >> 2) > x->pred_mv_sad[i]) {
@@ -2915,37 +2916,37 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   if (cpi->rc.is_src_frame_alt_ref) {
-    if (cpi->sf.alt_ref_search_fp) {
+    if (sf->alt_ref_search_fp) {
       mode_skip_mask[ALTREF_FRAME] = 0;
       ref_frame_skip_mask[0] = ~(1 << ALTREF_FRAME);
       ref_frame_skip_mask[1] = SECOND_REF_FRAME_MASK;
     }
   }
 
-  if (cpi->sf.alt_ref_search_fp)
+  if (sf->alt_ref_search_fp)
     if (!cm->show_frame && x->pred_mv_sad[GOLDEN_FRAME] < INT_MAX)
       if (x->pred_mv_sad[ALTREF_FRAME] > (x->pred_mv_sad[GOLDEN_FRAME] << 1))
         mode_skip_mask[ALTREF_FRAME] |= INTER_ALL;
 
-  if (cpi->sf.adaptive_mode_search) {
+  if (sf->adaptive_mode_search) {
     if (cm->show_frame && !cpi->rc.is_src_frame_alt_ref &&
         cpi->rc.frames_since_golden >= 3)
       if (x->pred_mv_sad[GOLDEN_FRAME] > (x->pred_mv_sad[LAST_FRAME] << 1))
         mode_skip_mask[GOLDEN_FRAME] |= INTER_ALL;
   }
 
-  if (bsize > cpi->sf.max_intra_bsize) {
+  if (bsize > sf->max_intra_bsize) {
     ref_frame_skip_mask[0] |= (1 << INTRA_FRAME);
     ref_frame_skip_mask[1] |= (1 << INTRA_FRAME);
   }
 
   mode_skip_mask[INTRA_FRAME] |=
-      ~(cpi->sf.intra_y_mode_mask[max_txsize_lookup[bsize]]);
+      ~(sf->intra_y_mode_mask[max_txsize_lookup[bsize]]);
 
   for (i = 0; i < MAX_MODES; ++i)
     mode_threshold[i] = ((int64_t)rd_threshes[i] * rd_thresh_freq_fact[i]) >> 5;
 
-  midx =  cpi->sf.schedule_mode_search ? mode_skip_start : 0;
+  midx =  sf->schedule_mode_search ? mode_skip_start : 0;
   while (midx > 4) {
     uint8_t end_pos = 0;
     for (i = 5; i < midx; ++i) {
@@ -3009,13 +3010,13 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       continue;
 
     // Test best rd so far against threshold for trying this mode.
-    if (best_mode_skippable && cpi->sf.schedule_mode_search)
+    if (best_mode_skippable && sf->schedule_mode_search)
       mode_threshold[mode_index] <<= 1;
 
     if (best_rd < mode_threshold[mode_index])
       continue;
 
-    if (cpi->sf.motion_field_mode_search) {
+    if (sf->motion_field_mode_search) {
       const int mi_width  = MIN(num_8x8_blocks_wide_lookup[bsize],
                                 tile->mi_col_end - mi_col);
       const int mi_height = MIN(num_8x8_blocks_high_lookup[bsize],
@@ -3089,7 +3090,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     }
 
     if (ref_frame == INTRA_FRAME) {
-      if (cpi->sf.adaptive_mode_search)
+      if (sf->adaptive_mode_search)
         if ((x->source_variance << num_pels_log2_lookup[bsize]) > best_pred_sse)
           continue;
 
@@ -3393,7 +3394,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   // If we used an estimate for the uv intra rd in the loop above...
-  if (cpi->sf.use_uv_intra_rd_estimate) {
+  if (sf->use_uv_intra_rd_estimate) {
     // Do Intra UV best rd mode selection if best mode choice above was intra.
     if (best_mbmode.ref_frame[0] == INTRA_FRAME) {
       TX_SIZE uv_tx_size;
@@ -3586,6 +3587,7 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
                                    int64_t best_rd_so_far) {
   VP9_COMMON *const cm = &cpi->common;
   RD_OPT *const rd_opt = &cpi->rd;
+  SPEED_FEATURES *const sf = &cpi->sf;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0].src_mi->mbmi;
   const struct segmentation *const seg = &cm->seg;
@@ -3619,7 +3621,7 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   int best_skip2 = 0;
   int ref_frame_skip_mask[2] = { 0 };
 
-  x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
+  x->skip_encode = sf->skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
   vpx_memset(x->zcoeff_blk[TX_4X4], 0, 4);
   vp9_zero(best_mbmode);
 
@@ -3672,7 +3674,7 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 
     // Look at the reference frame of the best mode so far and set the
     // skip mask to look at a subset of the remaining modes.
-    if (ref_index > 2 && cpi->sf.mode_skip_start < MAX_MODES) {
+    if (ref_index > 2 && sf->mode_skip_start < MAX_MODES) {
       if (ref_index == 3) {
         switch (best_mbmode.ref_frame[0]) {
           case INTRA_FRAME:
@@ -3717,7 +3719,7 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       if (vp9_segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME))
         continue;
 
-      if ((cpi->sf.mode_search_skip_flags & FLAG_SKIP_COMP_BESTINTRA) &&
+      if ((sf->mode_search_skip_flags & FLAG_SKIP_COMP_BESTINTRA) &&
           best_mbmode.ref_frame[0] == INTRA_FRAME)
         continue;
     }
@@ -3821,12 +3823,12 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 
       if (cm->interp_filter != BILINEAR) {
         tmp_best_filter = EIGHTTAP;
-        if (x->source_variance < cpi->sf.disable_filter_search_var_thresh) {
+        if (x->source_variance < sf->disable_filter_search_var_thresh) {
           tmp_best_filter = EIGHTTAP;
-        } else if (cpi->sf.adaptive_pred_interp_filter == 1 &&
+        } else if (sf->adaptive_pred_interp_filter == 1 &&
                    ctx->pred_interp_filter < SWITCHABLE) {
           tmp_best_filter = ctx->pred_interp_filter;
-        } else if (cpi->sf.adaptive_pred_interp_filter == 2) {
+        } else if (sf->adaptive_pred_interp_filter == 2) {
           tmp_best_filter = ctx->pred_interp_filter < SWITCHABLE ?
                               ctx->pred_interp_filter : 0;
         } else {
@@ -3879,7 +3881,7 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
               }
               pred_exists = 1;
               if (switchable_filter_index == 0 &&
-                  cpi->sf.use_rd_breakout &&
+                  sf->use_rd_breakout &&
                   best_rd < INT64_MAX) {
                 if (tmp_best_rdu / 2 > best_rd) {
                   // skip searching the other filters if the first is
@@ -4031,7 +4033,7 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 
         // TODO(debargha): enhance this test with a better distortion prediction
         // based on qp, activity mask and history
-        if ((cpi->sf.mode_search_skip_flags & FLAG_EARLY_TERMINATE) &&
+        if ((sf->mode_search_skip_flags & FLAG_EARLY_TERMINATE) &&
             (ref_index > MIN_EARLY_TERM_INDEX)) {
           int qstep = xd->plane[0].dequant[1];
           // TODO(debargha): Enhance this by specializing for each mode_index
@@ -4113,7 +4115,7 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   // If we used an estimate for the uv intra rd in the loop above...
-  if (cpi->sf.use_uv_intra_rd_estimate) {
+  if (sf->use_uv_intra_rd_estimate) {
     // Do Intra UV best rd mode selection if best mode choice above was intra.
     if (best_mbmode.ref_frame[0] == INTRA_FRAME) {
       *mbmi = best_mbmode;
