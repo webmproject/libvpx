@@ -50,9 +50,9 @@ static INLINE __m128i vp9_denoiser_16x1_sse2(const uint8_t *sig,
                                              const __m128i l21,
                                              __m128i acc_diff) {
   // Calculate differences
-  const __m128i v_sig = _mm_loadu_si128((__m128i *)(&sig[0]));
+  const __m128i v_sig = _mm_loadu_si128((const __m128i *)(&sig[0]));
   const __m128i v_mc_running_avg_y = _mm_loadu_si128(
-                                     (__m128i *)(&mc_running_avg_y[0]));
+                                     (const __m128i *)(&mc_running_avg_y[0]));
   __m128i v_running_avg_y;
   const __m128i pdiff = _mm_subs_epu8(v_mc_running_avg_y, v_sig);
   const __m128i ndiff = _mm_subs_epu8(v_sig, v_mc_running_avg_y);
@@ -103,9 +103,9 @@ static INLINE __m128i vp9_denoiser_adj_16x1_sse2(const uint8_t *sig,
                                               __m128i acc_diff) {
   __m128i v_running_avg_y = _mm_loadu_si128((__m128i *)(&running_avg_y[0]));
   // Calculate differences.
-  const __m128i v_sig = _mm_loadu_si128((__m128i *)(&sig[0]));
+  const __m128i v_sig = _mm_loadu_si128((const __m128i *)(&sig[0]));
   const __m128i v_mc_running_avg_y =
-                _mm_loadu_si128((__m128i *)(&mc_running_avg_y[0]));
+                _mm_loadu_si128((const __m128i *)(&mc_running_avg_y[0]));
   const __m128i pdiff = _mm_subs_epu8(v_mc_running_avg_y, v_sig);
   const __m128i ndiff = _mm_subs_epu8(v_sig, v_mc_running_avg_y);
   // Obtain the sign. FF if diff is negative.
@@ -357,9 +357,9 @@ static int vp9_denoiser_64_32_16xM_sse2(const uint8_t *sig, int sig_stride,
   const __m128i l21 = _mm_set1_epi8(1);
   int sum_diff = 0;
 
-  for (int i = 0; i < 4; i++) {
-    for (int j = 0; j < 4; j++) {
-      acc_diff[i][j] = _mm_setzero_si128();
+  for (c = 0; c < 4; ++c) {
+    for (r = 0; r < 4; ++r) {
+      acc_diff[c][r] = _mm_setzero_si128();
     }
   }
 
