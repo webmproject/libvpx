@@ -656,10 +656,8 @@ static INTERP_FILTER read_interp_filter(struct vp9_read_bit_buffer *rb) {
 
 void vp9_read_frame_size(struct vp9_read_bit_buffer *rb,
                          int *width, int *height) {
-  const int w = vp9_rb_read_literal(rb, 16) + 1;
-  const int h = vp9_rb_read_literal(rb, 16) + 1;
-  *width = w;
-  *height = h;
+  *width = vp9_rb_read_literal(rb, 16) + 1;
+  *height = vp9_rb_read_literal(rb, 16) + 1;
 }
 
 static void setup_display_size(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
