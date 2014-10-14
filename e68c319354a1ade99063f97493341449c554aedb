@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//TU0\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2300,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-10-14T10:24:04Z",
+      "side": 1,
+      "message": "What about the case above where we have blown through the max allowed bandwidth. It would seem that in that case we do not allow resize.",
+      "revId": "e68c319354a1ade99063f97493341449c554aedb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//TUs\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 3032,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-10-14T10:24:04Z",
+      "side": 1,
+      "message": "We will need to handle the case of over max allowed frame rate and support resize in this case.",
+      "revId": "e68c319354a1ade99063f97493341449c554aedb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
