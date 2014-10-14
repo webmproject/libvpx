@@ -307,7 +307,7 @@ void vp9_filter_block1d16_v8_avx2(unsigned char *src_ptr,
   __m256i addFilterReg64;
   __m256i srcReg32b1, srcReg32b2, srcReg32b3, srcReg32b4, srcReg32b5;
   __m256i srcReg32b6, srcReg32b7, srcReg32b8, srcReg32b9, srcReg32b10;
-  __m256i srcReg32b11, srcReg32b12, srcReg32b13, filtersReg32;
+  __m256i srcReg32b11, srcReg32b12, filtersReg32;
   __m256i firstFilters, secondFilters, thirdFilters, forthFilters;
   unsigned int i;
   unsigned int src_stride, dst_stride;
@@ -409,35 +409,35 @@ void vp9_filter_block1d16_v8_avx2(unsigned char *src_ptr,
      // multiply 2 adjacent elements with the filter and add the result
      srcReg32b10 = _mm256_maddubs_epi16(srcReg32b10, firstFilters);
      srcReg32b6 = _mm256_maddubs_epi16(srcReg32b4, forthFilters);
-     srcReg32b1 = _mm256_maddubs_epi16(srcReg32b1, firstFilters);
-     srcReg32b8 = _mm256_maddubs_epi16(srcReg32b7, forthFilters);
 
      // add and saturate the results together
      srcReg32b10 = _mm256_adds_epi16(srcReg32b10, srcReg32b6);
-     srcReg32b1 = _mm256_adds_epi16(srcReg32b1, srcReg32b8);
-
 
      // multiply 2 adjacent elements with the filter and add the result
      srcReg32b8 = _mm256_maddubs_epi16(srcReg32b11, secondFilters);
-     srcReg32b6 = _mm256_maddubs_epi16(srcReg32b3, secondFilters);
-
-     // multiply 2 adjacent elements with the filter and add the result
      srcReg32b12 = _mm256_maddubs_epi16(srcReg32b2, thirdFilters);
-     srcReg32b13 = _mm256_maddubs_epi16(srcReg32b5, thirdFilters);
-
 
      // add and saturate the results together
      srcReg32b10 = _mm256_adds_epi16(srcReg32b10,
                    _mm256_min_epi16(srcReg32b8, srcReg32b12));
-     srcReg32b1 = _mm256_adds_epi16(srcReg32b1,
-                  _mm256_min_epi16(srcReg32b6, srcReg32b13));
-
-     // add and saturate the results together
      srcReg32b10 = _mm256_adds_epi16(srcReg32b10,
                    _mm256_max_epi16(srcReg32b8, srcReg32b12));
-     srcReg32b1 = _mm256_adds_epi16(srcReg32b1,
-                  _mm256_max_epi16(srcReg32b6, srcReg32b13));
 
+     // multiply 2 adjacent elements with the filter and add the result
+     srcReg32b1 = _mm256_maddubs_epi16(srcReg32b1, firstFilters);
+     srcReg32b6 = _mm256_maddubs_epi16(srcReg32b7, forthFilters);
+
+     srcReg32b1 = _mm256_adds_epi16(srcReg32b1, srcReg32b6);
+
+     // multiply 2 adjacent elements with the filter and add the result
+     srcReg32b8 = _mm256_maddubs_epi16(srcReg32b3, secondFilters);
+     srcReg32b12 = _mm256_maddubs_epi16(srcReg32b5, thirdFilters);
+
+     // add and saturate the results together
+     srcReg32b1 = _mm256_adds_epi16(srcReg32b1,
+                  _mm256_min_epi16(srcReg32b8, srcReg32b12));
+     srcReg32b1 = _mm256_adds_epi16(srcReg32b1,
+                  _mm256_max_epi16(srcReg32b8, srcReg32b12));
 
      srcReg32b10 = _mm256_adds_epi16(srcReg32b10, addFilterReg64);
      srcReg32b1 = _mm256_adds_epi16(srcReg32b1, addFilterReg64);

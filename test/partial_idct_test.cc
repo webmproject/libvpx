@@ -229,6 +229,7 @@ INSTANTIATE_TEST_CASE_P(
                    &vp9_idct4x4_16_add_c,
                    &vp9_idct4x4_1_add_c,
                    TX_4X4, 1)));
+
 #if HAVE_NEON_ASM
 INSTANTIATE_TEST_CASE_P(
     NEON, PartialIDctTest,
@@ -259,7 +260,7 @@ INSTANTIATE_TEST_CASE_P(
                    TX_4X4, 1)));
 #endif
 
-#if HAVE_SSE2 && !CONFIG_VP9_HIGH
+#if HAVE_SSE2 && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(
     SSE2, PartialIDctTest,
     ::testing::Values(
@@ -293,7 +294,8 @@ INSTANTIATE_TEST_CASE_P(
                    TX_4X4, 1)));
 #endif
 
-#if HAVE_SSSE3 && ARCH_X86_64 && !CONFIG_VP9_HIGH
+#if HAVE_SSSE3 && ARCH_X86_64 && !CONFIG_VP9_HIGHBITDEPTH && \
+    !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(
     SSSE3_64, PartialIDctTest,
     ::testing::Values(
@@ -303,7 +305,7 @@ INSTANTIATE_TEST_CASE_P(
                    TX_8X8, 12)));
 #endif
 
-#if HAVE_SSSE3  && !CONFIG_VP9_HIGH
+#if HAVE_SSSE3 && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(
     SSSE3, PartialIDctTest,
     ::testing::Values(

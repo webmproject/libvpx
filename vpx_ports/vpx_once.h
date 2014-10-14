@@ -18,65 +18,64 @@
 #include <stdlib.h>
 static void once(void (*func)(void))
 {
-    static CRITICAL_SECTION *lock;
-    static LONG waiters;
-    static int done;
-    void *lock_ptr = &lock;
+  static CRITICAL_SECTION *lock;
+  static LONG waiters;
+  static int done;
+  void *lock_ptr = &lock;
 
-    /* If the initialization is complete, return early. This isn't just an
-     * optimization, it prevents races on the destruction of the global
-     * lock.
-     */
-    if(done)
-        return;
+  /* If the initialization is complete, return early. This isn't just an
+   * optimization, it prevents races on the destruction of the global
+   * lock.
+   */
+  if (done)
+    return;
 
-    InterlockedIncrement(&waiters);
+  InterlockedIncrement(&waiters);
 
-    /* Get a lock. We create one and try to make it the one-true-lock,
-     * throwing it away if we lost the race.
-     */
+  /* Get a lock. We create one and try to make it the one-true-lock,
+   * throwing it away if we lost the race.
+   */
 
+  {
+    /* Scope to protect access to new_lock */
+    CRITICAL_SECTION *new_lock = malloc(sizeof(CRITICAL_SECTION));
+    InitializeCriticalSection(new_lock);
+    if (InterlockedCompareExchangePointer(lock_ptr, new_lock, NULL) != NULL)
     {
-        /* Scope to protect access to new_lock */
-        CRITICAL_SECTION *new_lock = malloc(sizeof(CRITICAL_SECTION));
-        InitializeCriticalSection(new_lock);
-        if (InterlockedCompareExchangePointer(lock_ptr, new_lock, NULL) != NULL)
-        {
-            DeleteCriticalSection(new_lock);
-            free(new_lock);
-        }
+      DeleteCriticalSection(new_lock);
+      free(new_lock);
     }
+  }
 
-    /* At this point, we have a lock that can be synchronized on. We don't
-     * care which thread actually performed the allocation.
-     */
+  /* At this point, we have a lock that can be synchronized on. We don't
+   * care which thread actually performed the allocation.
+   */
 
-    EnterCriticalSection(lock);
+  EnterCriticalSection(lock);
 
-    if (!done)
-    {
-        func();
-        done = 1;
-    }
+  if (!done) {
+    func();
+    done = 1;
+  }
 
-    LeaveCriticalSection(lock);
+  LeaveCriticalSection(lock);
 
-    /* Last one out should free resources. The destructed objects are
-     * protected by checking if(done) above.
-     */
-    if(!InterlockedDecrement(&waiters))
-    {
-        DeleteCriticalSection(lock);
-        free(lock);
-        lock = NULL;
-    }
+  /* Last one out should free resources. The destructed objects are
+   * protected by checking if(done) above.
+   */
+  if (!InterlockedDecrement(&waiters)) {
+    DeleteCriticalSection(lock);
+    free(lock);
+    lock = NULL;
+  }
 }
 
 
 #elif CONFIG_MULTITHREAD && defined(__OS2__)
 #define INCL_DOS
 #include <os2.h>
-static void once(void (*func)(void)) {
+static void once(void (*func)(void))
+{
   static int done;
 
   /* If the initialization is complete, return early. */
@@ -102,8 +101,8 @@ static void once(void (*func)(void)) {
 #include <pthread.h>
 static void once(void (*func)(void))
 {
-    static pthread_once_t lock = PTHREAD_ONCE_INIT;
-    pthread_once(&lock, func);
+  static pthread_once_t lock = PTHREAD_ONCE_INIT;
+  pthread_once(&lock, func);
 }
 
 
@@ -115,13 +114,12 @@ static void once(void (*func)(void))
 
 static void once(void (*func)(void))
 {
-    static int done;
+  static int done;
 
-    if(!done)
-    {
-        func();
-        done = 1;
-    }
+  if (!done) {
+    func();
+    done = 1;
+  }
 }
 #endif
 

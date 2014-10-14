@@ -14,8 +14,9 @@
 #include <intrin.h>  // For __cpuidex()
 #endif
 #if !defined(__pnacl__) && !defined(__CLR_VER) && \
-    !defined(__native_client__) && defined(_M_X64) && \
-    defined(_MSC_VER) && (_MSC_FULL_VER >= 160040219)
+    !defined(__native_client__)  && \
+    defined(_MSC_VER) && (_MSC_FULL_VER >= 160040219) && \
+    (defined(_M_IX86) || defined(_M_X64))
 #include <immintrin.h>  // For _xgetbv()
 #endif
 
@@ -97,7 +98,7 @@ int TestOsSaveYmm() {
   uint32 xcr0 = 0u;
 #if defined(_MSC_VER) && (_MSC_FULL_VER >= 160040219)
   xcr0 = (uint32)(_xgetbv(0));  // VS2010 SP1 required.
-#elif defined(_M_IX86)
+#elif defined(_M_IX86) && defined(_MSC_VER)
   __asm {
     xor        ecx, ecx    // xcr 0
     _asm _emit 0x0f _asm _emit 0x01 _asm _emit 0xd0  // For VS2010 and earlier.
@@ -256,11 +257,16 @@ int InitCpuFlags(void) {
   if (getenv("LIBYUV_DISABLE_MIPS_DSPR2")) {
     cpu_info_ &= ~kCpuHasMIPS_DSPR2;
   }
-#elif defined(__arm__)
+#elif defined(__arm__) || defined(__aarch64__)
 // gcc -mfpu=neon defines __ARM_NEON__
 // __ARM_NEON__ generates code that requires Neon.  NaCL also requires Neon.
 // For Linux, /proc/cpuinfo can be tested but without that assume Neon.
 #if defined(__ARM_NEON__) || defined(__native_client__) || !defined(__linux__)
+  cpu_info_ = kCpuHasNEON;
+// For aarch64(arm64), /proc/cpuinfo's feature is not complete, e.g. no neon
+// flag in it.
+// So for aarch64, neon enabling is hard coded here.
+#elif defined(__aarch64__)
   cpu_info_ = kCpuHasNEON;
 #else
   // Linux arm parse text file for neon detect.

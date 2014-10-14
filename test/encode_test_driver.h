@@ -189,20 +189,21 @@ class EncoderTest {
   virtual void RunLoop(VideoSource *video);
 
   // Hook to be called at the beginning of a pass.
-  virtual void BeginPassHook(unsigned int pass) {}
+  virtual void BeginPassHook(unsigned int /*pass*/) {}
 
   // Hook to be called at the end of a pass.
   virtual void EndPassHook() {}
 
   // Hook to be called before encoding a frame.
-  virtual void PreEncodeFrameHook(VideoSource *video) {}
-  virtual void PreEncodeFrameHook(VideoSource *video, Encoder *encoder) {}
+  virtual void PreEncodeFrameHook(VideoSource* /*video*/) {}
+  virtual void PreEncodeFrameHook(VideoSource* /*video*/,
+                                  Encoder* /*encoder*/) {}
 
   // Hook to be called on every compressed data packet.
-  virtual void FramePktHook(const vpx_codec_cx_pkt_t *pkt) {}
+  virtual void FramePktHook(const vpx_codec_cx_pkt_t* /*pkt*/) {}
 
   // Hook to be called on every PSNR packet.
-  virtual void PSNRPktHook(const vpx_codec_cx_pkt_t *pkt) {}
+  virtual void PSNRPktHook(const vpx_codec_cx_pkt_t* /*pkt*/) {}
 
   // Hook to determine whether the encode loop should continue.
   virtual bool Continue() const {
@@ -218,19 +219,19 @@ class EncoderTest {
                             const vpx_image_t *img2);
 
   // Hook to be called on every decompressed frame.
-  virtual void DecompressedFrameHook(const vpx_image_t& img,
-                                     vpx_codec_pts_t pts) {}
+  virtual void DecompressedFrameHook(const vpx_image_t& /*img*/,
+                                     vpx_codec_pts_t /*pts*/) {}
 
   // Hook to be called to handle decode result. Return true to continue.
   virtual bool HandleDecodeResult(const vpx_codec_err_t res_dec,
-                                  const VideoSource& /* video */,
+                                  const VideoSource& /*video*/,
                                   Decoder *decoder) {
     EXPECT_EQ(VPX_CODEC_OK, res_dec) << decoder->DecodeError();
     return VPX_CODEC_OK == res_dec;
   }
 
   // Hook that can modify the encoder's output data
-  virtual const vpx_codec_cx_pkt_t * MutateEncoderOutputHook(
+  virtual const vpx_codec_cx_pkt_t *MutateEncoderOutputHook(
       const vpx_codec_cx_pkt_t *pkt) {
     return pkt;
   }

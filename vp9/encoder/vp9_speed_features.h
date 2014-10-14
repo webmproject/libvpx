@@ -17,6 +17,47 @@
 extern "C" {
 #endif
 
+enum {
+  INTRA_ALL       = (1 << DC_PRED) |
+                    (1 << V_PRED) | (1 << H_PRED) |
+                    (1 << D45_PRED) | (1 << D135_PRED) |
+                    (1 << D117_PRED) | (1 << D153_PRED) |
+                    (1 << D207_PRED) | (1 << D63_PRED) |
+                    (1 << TM_PRED),
+  INTRA_DC        = (1 << DC_PRED),
+  INTRA_DC_TM     = (1 << DC_PRED) | (1 << TM_PRED),
+  INTRA_DC_H_V    = (1 << DC_PRED) | (1 << V_PRED) | (1 << H_PRED),
+  INTRA_DC_TM_H_V = (1 << DC_PRED) | (1 << TM_PRED) | (1 << V_PRED) |
+                    (1 << H_PRED)
+};
+
+enum {
+  INTER_ALL = (1 << NEARESTMV) | (1 << NEARMV) | (1 << ZEROMV) | (1 << NEWMV),
+  INTER_NEAREST = (1 << NEARESTMV),
+  INTER_NEAREST_NEW = (1 << NEARESTMV) | (1 << NEWMV),
+  INTER_NEAREST_ZERO = (1 << NEARESTMV) | (1 << ZEROMV),
+  INTER_NEAREST_NEW_ZERO = (1 << NEARESTMV) | (1 << ZEROMV) | (1 << NEWMV),
+  INTER_NEAREST_NEAR_NEW = (1 << NEARESTMV) | (1 << NEARMV) | (1 << NEWMV),
+  INTER_NEAREST_NEAR_ZERO = (1 << NEARESTMV) | (1 << NEARMV) | (1 << ZEROMV),
+};
+
+enum {
+  DISABLE_ALL_INTER_SPLIT   = (1 << THR_COMP_GA) |
+                              (1 << THR_COMP_LA) |
+                              (1 << THR_ALTR) |
+                              (1 << THR_GOLD) |
+                              (1 << THR_LAST),
+
+  DISABLE_ALL_SPLIT         = (1 << THR_INTRA) | DISABLE_ALL_INTER_SPLIT,
+
+  DISABLE_COMPOUND_SPLIT    = (1 << THR_COMP_GA) | (1 << THR_COMP_LA),
+
+  LAST_AND_INTRA_SPLIT_ONLY = (1 << THR_COMP_GA) |
+                              (1 << THR_COMP_LA) |
+                              (1 << THR_ALTR) |
+                              (1 << THR_GOLD)
+};
+
 typedef enum {
   DIAMOND = 0,
   NSTEP = 1,
@@ -40,6 +81,9 @@ typedef enum {
 
 typedef enum {
   SUBPEL_TREE = 0,
+  SUBPEL_TREE_PRUNED = 1,           // Prunes 1/2-pel searches
+  SUBPEL_TREE_PRUNED_MORE = 2,      // Prunes 1/2-pel searches more aggressively
+  SUBPEL_TREE_PRUNED_EVENMORE = 3,  // Prunes 1/2- and 1/4-pel searches
   // Other methods to come
 } SUBPEL_SEARCH_METHODS;
 
@@ -63,7 +107,8 @@ typedef enum {
 typedef enum {
   NOT_IN_USE = 0,
   RELAXED_NEIGHBORING_MIN_MAX = 1,
-  STRICT_NEIGHBORING_MIN_MAX = 2
+  CONSTRAIN_NEIGHBORING_MIN_MAX = 2,
+  STRICT_NEIGHBORING_MIN_MAX = 3
 } AUTO_MIN_MAX_MODE;
 
 typedef enum {
@@ -85,11 +130,6 @@ typedef enum {
   // Skips comp inter modes if the best so far is an intra mode.
   FLAG_SKIP_COMP_BESTINTRA = 1 << 1,
 
-  // Skips comp inter modes if the best single intermode so far does
-  // not have the same reference as one of the two references being
-  // tested.
-  FLAG_SKIP_COMP_REFMISMATCH = 1 << 2,
-
   // Skips oblique intra modes if the best so far is an inter mode.
   FLAG_SKIP_INTRA_BESTINTER = 1 << 3,
 
@@ -100,6 +140,12 @@ typedef enum {
   // Skips intra modes other than DC_PRED if the source variance is small
   FLAG_SKIP_INTRA_LOWVAR = 1 << 5,
 } MODE_SEARCH_SKIP_LOGIC;
+
+typedef enum {
+  FLAG_SKIP_EIGHTTAP = 1 << EIGHTTAP,
+  FLAG_SKIP_EIGHTTAP_SMOOTH = 1 << EIGHTTAP_SMOOTH,
+  FLAG_SKIP_EIGHTTAP_SHARP = 1 << EIGHTTAP_SHARP,
+} INTERP_FILTER_MASK;
 
 typedef enum {
   // Search partitions using RD/NONRD criterion
@@ -277,11 +323,16 @@ typedef struct SPEED_FEATURES {
   // point for this motion search and limits the search range around it.
   int adaptive_motion_search;
 
+  int schedule_mode_search;
+
   // Allows sub 8x8 modes to use the prediction filter that was determined
   // best for 8x8 mode. If set to 0 we always re check all the filters for
   // sizes less than 8x8, 1 means we check all filter modes if no 8x8 filter
   // was selected, and 2 means we use 8 tap if no 8x8 filter mode was selected.
   int adaptive_pred_interp_filter;
+
+  // Adaptive prediction mode search
+  int adaptive_mode_search;
 
   // Chessboard pattern prediction filter type search
   int cb_pred_filter_search;
@@ -289,6 +340,8 @@ typedef struct SPEED_FEATURES {
   int cb_partition_search;
 
   int motion_field_mode_search;
+
+  int alt_ref_search_fp;
 
   // Fast quantization process path
   int use_quant_fp;
@@ -308,9 +361,6 @@ typedef struct SPEED_FEATURES {
   // The heuristics selected are based on  flags
   // defined in the MODE_SEARCH_SKIP_HEURISTICS enum
   unsigned int mode_search_skip_flags;
-
-  // A source variance threshold below which the split mode is disabled
-  unsigned int disable_split_var_thresh;
 
   // A source variance threshold below which filter search is disabled
   // Choose a very large value (UINT_MAX) to use 8-tap always
@@ -376,6 +426,23 @@ typedef struct SPEED_FEATURES {
 
   // default interp filter choice
   INTERP_FILTER default_interp_filter;
+
+  // Early termination in transform size search, which only applies while
+  // tx_size_search_method is USE_FULL_RD.
+  int tx_size_search_breakout;
+
+  // adaptive interp_filter search to allow skip of certain filter types.
+  int adaptive_interp_filter_search;
+
+  // mask for skip evaluation of certain interp_filter type.
+  INTERP_FILTER_MASK interp_filter_search_mask;
+
+  // Partition search early breakout thresholds.
+  int64_t partition_search_breakout_dist_thr;
+  int partition_search_breakout_rate_thr;
+
+  // Allow skipping partition search for still image frame
+  int allow_partition_search_skip;
 } SPEED_FEATURES;
 
 struct VP9_COMP;

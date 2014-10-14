@@ -73,7 +73,7 @@ class InvalidFileTest
   void RunTest() {
     const DecodeParam input = GET_PARAM(1);
     libvpx_test::CompressedVideoSource *video = NULL;
-    vpx_codec_dec_cfg_t cfg = {0};
+    vpx_codec_dec_cfg_t cfg = vpx_codec_dec_cfg_t();
     cfg.threads = input.threads;
     const std::string filename = input.filename;
 
@@ -113,9 +113,14 @@ TEST_P(InvalidFileTest, ReturnCode) {
 const DecodeParam kVP9InvalidFileTests[] = {
   {1, "invalid-vp90-02-v2.webm"},
   {1, "invalid-vp90-2-00-quantizer-00.webm.ivf.s5861_r01-05_b6-.v2.ivf"},
-  {1, "invalid-vp90-03-v2.webm"},
+  {1, "invalid-vp90-03-v3.webm"},
   {1, "invalid-vp90-2-00-quantizer-11.webm.ivf.s52984_r01-05_b6-.ivf"},
   {1, "invalid-vp90-2-00-quantizer-11.webm.ivf.s52984_r01-05_b6-z.ivf"},
+  {1, "invalid-vp90-2-12-droppable_1.ivf.s3676_r01-05_b6-.ivf"},
+  {1, "invalid-vp90-2-05-resize.ivf.s59293_r01-05_b6-.ivf"},
+  {1, "invalid-vp90-2-09-subpixel-00.ivf.s20492_r01-05_b6-.v2.ivf"},
+  {1, "invalid-vp91-2-mixedrefcsp-444to420.ivf"},
+  {1, "invalid-vp90-2-12-droppable_1.ivf.s73804_r01-05_b6-.ivf"},
 };
 
 VP9_INSTANTIATE_TEST_CASE(InvalidFileTest,
@@ -126,9 +131,9 @@ VP9_INSTANTIATE_TEST_CASE(InvalidFileTest,
 class InvalidFileInvalidPeekTest : public InvalidFileTest {
  protected:
   InvalidFileInvalidPeekTest() : InvalidFileTest() {}
-  virtual void HandlePeekResult(libvpx_test::Decoder *const decoder,
-                                libvpx_test::CompressedVideoSource *video,
-                                const vpx_codec_err_t res_peek) {}
+  virtual void HandlePeekResult(libvpx_test::Decoder *const /*decoder*/,
+                                libvpx_test::CompressedVideoSource* /*video*/,
+                                const vpx_codec_err_t /*res_peek*/) {}
 };
 
 TEST_P(InvalidFileInvalidPeekTest, ReturnCode) {
@@ -144,6 +149,10 @@ VP9_INSTANTIATE_TEST_CASE(InvalidFileInvalidPeekTest,
 
 const DecodeParam kMultiThreadedVP9InvalidFileTests[] = {
   {4, "invalid-vp90-2-08-tile_1x4_frame_parallel_all_key.webm"},
+  {4, "invalid-"
+      "vp90-2-08-tile_1x2_frame_parallel.webm.ivf.s47039_r01-05_b6-.ivf"},
+  {2, "invalid-vp90-2-09-aq2.webm.ivf.s3984_r01-05_b6-.v2.ivf"},
+  {4, "invalid-vp90-2-09-subpixel-00.ivf.s19552_r01-05_b6-.v2.ivf"},
 };
 
 INSTANTIATE_TEST_CASE_P(

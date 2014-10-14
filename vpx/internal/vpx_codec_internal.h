@@ -286,8 +286,6 @@ typedef const struct vpx_codec_enc_cfg_map {
   vpx_codec_enc_cfg_t cfg;
 } vpx_codec_enc_cfg_map_t;
 
-#define NOT_IMPLEMENTED 0
-
 /*!\brief Decoder algorithm interface interface
  *
  * All decoders \ref MUST expose a variable of this type.
@@ -337,9 +335,6 @@ typedef struct vpx_codec_priv_cb_pair {
  * and the pointer cast to the proper type.
  */
 struct vpx_codec_priv {
-  unsigned int                    sz;
-  vpx_codec_iface_t              *iface;
-  struct vpx_codec_alg_priv      *alg_priv;
   const char                     *err_detail;
   vpx_codec_flags_t               init_flags;
   struct {
@@ -347,8 +342,7 @@ struct vpx_codec_priv {
     vpx_codec_priv_cb_pair_t    put_slice_cb;
   } dec;
   struct {
-    int                         tbd;
-    struct vpx_fixed_buf        cx_data_dst_buf;
+    vpx_fixed_buf_t             cx_data_dst_buf;
     unsigned int                cx_data_pad_before;
     unsigned int                cx_data_pad_after;
     vpx_codec_cx_pkt_t          cx_data_pkt;

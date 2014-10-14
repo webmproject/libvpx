@@ -31,7 +31,8 @@ typedef enum SVC_LOG_LEVEL {
 
 typedef struct {
   // public interface to svc_command options
-  int spatial_layers;               // number of layers
+  int spatial_layers;               // number of spatial layers
+  int temporal_layers;               // number of temporal layers
   SVC_LOG_LEVEL log_level;  // amount of information to display
   int log_print;  // when set, printf log messages instead of returning the
                   // message with svc_get_message
@@ -49,22 +50,6 @@ typedef struct {
  *         quantizers=<q1>,<q2>,...
  */
 vpx_codec_err_t vpx_svc_set_options(SvcContext *svc_ctx, const char *options);
-
-/**
- * Set SVC quantizer values
- * values comma separated, ordered from lowest resolution to highest
- * e.g., "60,53,39,33,27"
- */
-vpx_codec_err_t vpx_svc_set_quantizers(SvcContext *svc_ctx,
-                                       const char *quantizer_values);
-
-/**
- * Set SVC scale factors
- * values comma separated, ordered from lowest resolution to highest
- * e.g.,  "4/16,5/16,7/16,11/16,16/16"
- */
-vpx_codec_err_t vpx_svc_set_scale_factors(SvcContext *svc_ctx,
-                                          const char *scale_factors);
 
 /**
  * initialize SVC encoding
@@ -93,51 +78,6 @@ const char *vpx_svc_dump_statistics(SvcContext *svc_ctx);
  *  get status message from previous encode
  */
 const char *vpx_svc_get_message(const SvcContext *svc_ctx);
-
-/**
- * return size of encoded data to be returned by vpx_svc_get_buffer.
- * it needs to be called before vpx_svc_get_buffer.
- */
-size_t vpx_svc_get_frame_size(const SvcContext *svc_ctx);
-
-/**
- * return buffer with encoded data. encoder will maintain a list of frame
- * buffers. each call of vpx_svc_get_buffer() will return one frame.
- */
-void *vpx_svc_get_buffer(SvcContext *svc_ctx);
-
-/**
- * return size of two pass rate control stats data to be returned by
- * vpx_svc_get_rc_stats_buffer
- */
-size_t vpx_svc_get_rc_stats_buffer_size(const SvcContext *svc_ctx);
-
-/**
- * return buffer two pass of rate control stats data
- */
-char *vpx_svc_get_rc_stats_buffer(const SvcContext *svc_ctx);
-
-/**
- * return spatial resolution of the specified layer
- */
-vpx_codec_err_t vpx_svc_get_layer_resolution(const SvcContext *svc_ctx,
-                                             int layer,
-                                             unsigned int *width,
-                                             unsigned int *height);
-/**
- * return number of frames that have been encoded
- */
-int vpx_svc_get_encode_frame_count(const SvcContext *svc_ctx);
-
-/**
- * return 1 if last encoded frame was a keyframe
- */
-int vpx_svc_is_keyframe(const SvcContext *svc_ctx);
-
-/**
- * force the next frame to be a keyframe
- */
-void vpx_svc_set_keyframe(SvcContext *svc_ctx);
 
 #ifdef __cplusplus
 }  // extern "C"

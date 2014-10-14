@@ -684,9 +684,10 @@ typedef struct VP8_COMP
     int    mr_low_res_mb_cols;
     /* Indicate if lower-res mv info is available */
     unsigned char  mr_low_res_mv_avail;
+#endif
     /* The frame number of each reference frames */
     unsigned int current_ref_frames[MAX_REF_FRAMES];
-#endif
+    MV_REFERENCE_FRAME closest_reference_frame;
 
     struct rd_costs_struct
     {

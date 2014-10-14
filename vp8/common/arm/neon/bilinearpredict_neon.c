@@ -10,7 +10,7 @@
 
 #include <arm_neon.h>
 
-static const uint16_t bifilter4_coeff[8][2] = {
+static const uint8_t bifilter4_coeff[8][2] = {
     {128,   0},
     {112,  16},
     { 96,  32},
@@ -64,8 +64,8 @@ void vp8_bilinear_predict4x4_neon(
         q1u8 = vcombine_u8(d2u8, d3u8);
         q2u8 = vcombine_u8(d4u8, d5u8);
 
-        d0u8 = vdup_n_u8((uint8_t)bifilter4_coeff[xoffset][0]);
-        d1u8 = vdup_n_u8((uint8_t)bifilter4_coeff[xoffset][1]);
+        d0u8 = vdup_n_u8(bifilter4_coeff[xoffset][0]);
+        d1u8 = vdup_n_u8(bifilter4_coeff[xoffset][1]);
 
         q4u64  = vshrq_n_u64(vreinterpretq_u64_u8(q1u8), 8);
         q5u64  = vshrq_n_u64(vreinterpretq_u64_u8(q2u8), 8);
@@ -155,8 +155,8 @@ void vp8_bilinear_predict8x4_neon(
         q4u8 = vld1q_u8(src_ptr); src_ptr += src_pixels_per_line;
         q5u8 = vld1q_u8(src_ptr);
 
-        d0u8 = vdup_n_u8((uint8_t)bifilter4_coeff[xoffset][0]);
-        d1u8 = vdup_n_u8((uint8_t)bifilter4_coeff[xoffset][1]);
+        d0u8 = vdup_n_u8(bifilter4_coeff[xoffset][0]);
+        d1u8 = vdup_n_u8(bifilter4_coeff[xoffset][1]);
 
         q6u16 = vmull_u8(vget_low_u8(q1u8), d0u8);
         q7u16 = vmull_u8(vget_low_u8(q2u8), d0u8);
@@ -245,8 +245,8 @@ void vp8_bilinear_predict8x8_neon(
         q3u8 = vld1q_u8(src_ptr); src_ptr += src_pixels_per_line;
         q4u8 = vld1q_u8(src_ptr); src_ptr += src_pixels_per_line;
 
-        d0u8 = vdup_n_u8((uint8_t)bifilter4_coeff[xoffset][0]);
-        d1u8 = vdup_n_u8((uint8_t)bifilter4_coeff[xoffset][1]);
+        d0u8 = vdup_n_u8(bifilter4_coeff[xoffset][0]);
+        d1u8 = vdup_n_u8(bifilter4_coeff[xoffset][1]);
 
         q6u16 = vmull_u8(vget_low_u8(q1u8), d0u8);
         q7u16 = vmull_u8(vget_low_u8(q2u8), d0u8);

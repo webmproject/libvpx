@@ -13,8 +13,8 @@
 #ifdef HAVE_JPEG
 #include <assert.h>
 
-#if !defined(__pnacl__) && !defined(__CLR_VER) && !defined(COVERAGE_ENABLED) &&\
-    !defined(TARGET_IPHONE_SIMULATOR)
+#if !defined(__pnacl__) && !defined(__CLR_VER) && \
+    !defined(COVERAGE_ENABLED) && !defined(TARGET_IPHONE_SIMULATOR)
 // Must be included before jpeglib.
 #include <setjmp.h>
 #define HAVE_SETJMP
@@ -101,7 +101,7 @@ LIBYUV_BOOL MJpegDecoder::LoadFrame(const uint8* src, size_t src_len) {
   }
 
   buf_.data = src;
-  buf_.len = (int)(src_len);
+  buf_.len = static_cast<int>(src_len);
   buf_vec_.pos = 0;
   decompress_struct_->client_data = &buf_vec_;
 #ifdef HAVE_SETJMP
@@ -411,7 +411,7 @@ void init_source(j_decompress_ptr cinfo) {
 }
 
 boolean fill_input_buffer(j_decompress_ptr cinfo) {
-  BufferVector* buf_vec = (BufferVector*)(cinfo->client_data);
+  BufferVector* buf_vec = reinterpret_cast<BufferVector*>(cinfo->client_data);
   if (buf_vec->pos >= buf_vec->len) {
     assert(0 && "No more data");
     // ERROR: No more data
@@ -447,7 +447,7 @@ void ErrorHandler(j_common_ptr cinfo) {
   // ERROR: Error in jpeglib: buf
 #endif
 
-  SetJmpErrorMgr* mgr = (SetJmpErrorMgr*)(cinfo->err);
+  SetJmpErrorMgr* mgr = reinterpret_cast<SetJmpErrorMgr*>(cinfo->err);
   // This rewinds the call stack to the point of the corresponding setjmp()
   // and causes it to return (for a second time) with value 1.
   longjmp(mgr->setjmp_buffer, 1);

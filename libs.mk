@@ -133,6 +133,8 @@ ifeq ($(CONFIG_VP9_DECODER),yes)
   CODEC_DOC_SECTIONS += vp9 vp9_decoder
 endif
 
+VP9_PREFIX=vp9/
+$(BUILD_PFX)$(VP9_PREFIX)%.c.o: CFLAGS += -Wextra
 
 ifeq ($(CONFIG_ENCODERS),yes)
   CODEC_DOC_SECTIONS += encoder
@@ -529,7 +531,6 @@ libs.doxy: $(CODEC_DOC_SRCS)
 	@echo "    [CREATE] $@"
 	@rm -f $@
 	@echo "INPUT += $^" >> $@
-	@echo "PREDEFINED = VPX_CODEC_DISABLE_COMPAT" >> $@
 	@echo "INCLUDE_PATH += ." >> $@;
 	@echo "ENABLED_SECTIONS += $(sort $(CODEC_DOC_SECTIONS))" >> $@
 

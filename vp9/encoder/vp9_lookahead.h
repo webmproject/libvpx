@@ -30,10 +30,6 @@ struct lookahead_entry {
   int64_t             ts_start;
   int64_t             ts_end;
   unsigned int        flags;
-
-#if CONFIG_SPATIAL_SVC
-  vpx_svc_parameters_t svc_params[VPX_SS_MAX_LAYERS];
-#endif
 };
 
 // The max of past frames we want to keep in the queue.
@@ -56,8 +52,8 @@ struct lookahead_ctx *vp9_lookahead_init(unsigned int width,
                                          unsigned int height,
                                          unsigned int subsampling_x,
                                          unsigned int subsampling_y,
-#if CONFIG_VP9_HIGH
-                                         unsigned int use_high,
+#if CONFIG_VP9_HIGHBITDEPTH
+                                         int use_highbitdepth,
 #endif
                                          unsigned int depth);
 

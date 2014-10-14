@@ -71,6 +71,7 @@ class ExternalFrameBufferList {
     if (ext_fb_list_[idx].size < min_size) {
       delete [] ext_fb_list_[idx].data;
       ext_fb_list_[idx].data = new uint8_t[min_size];
+      memset(ext_fb_list_[idx].data, 0, min_size);
       ext_fb_list_[idx].size = min_size;
     }
 
@@ -285,7 +286,7 @@ class ExternalFrameBufferTest : public ::testing::Test {
     video_->Init();
     video_->Begin();
 
-    vpx_codec_dec_cfg_t cfg = {0};
+    vpx_codec_dec_cfg_t cfg = vpx_codec_dec_cfg_t();
     decoder_ = new libvpx_test::VP9Decoder(cfg, 0);
     ASSERT_TRUE(decoder_ != NULL);
   }

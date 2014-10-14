@@ -51,6 +51,12 @@ typedef enum {
 
   THR_NEARMV,
   THR_NEARA,
+  THR_NEARG,
+
+  THR_ZEROMV,
+  THR_ZEROG,
+  THR_ZEROA,
+
   THR_COMP_NEARESTLA,
   THR_COMP_NEARESTGA,
 
@@ -58,13 +64,9 @@ typedef enum {
 
   THR_COMP_NEARLA,
   THR_COMP_NEWLA,
-  THR_NEARG,
   THR_COMP_NEARGA,
   THR_COMP_NEWGA,
 
-  THR_ZEROMV,
-  THR_ZEROG,
-  THR_ZEROA,
   THR_COMP_ZEROLA,
   THR_COMP_ZEROGA,
 
@@ -97,6 +99,8 @@ typedef struct RD_OPT {
 
   int threshes[MAX_SEGMENTS][BLOCK_SIZES][MAX_MODES];
   int thresh_freq_fact[BLOCK_SIZES][MAX_MODES];
+
+  int mode_map[BLOCK_SIZES][MAX_MODES];
 
   int64_t comp_pred_diff[REFERENCE_MODES];
   int64_t prediction_type_threshes[MAX_REF_FRAMES][REFERENCE_MODES];
@@ -158,6 +162,10 @@ void vp9_setup_pred_block(const MACROBLOCKD *xd,
                           int mi_row, int mi_col,
                           const struct scale_factors *scale,
                           const struct scale_factors *scale_uv);
+
+int vp9_get_intra_cost_penalty(int qindex, int qdelta,
+                               vpx_bit_depth_t bit_depth);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

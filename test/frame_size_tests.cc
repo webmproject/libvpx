@@ -27,7 +27,7 @@ class VP9FrameSizeTestsLarge
   }
 
   virtual bool HandleDecodeResult(const vpx_codec_err_t res_dec,
-                                  const libvpx_test::VideoSource &video,
+                                  const libvpx_test::VideoSource& /*video*/,
                                   libvpx_test::Decoder *decoder) {
     EXPECT_EQ(expected_res_, res_dec) << decoder->DecodeError();
     return !::testing::Test::HasFailure();
@@ -72,10 +72,25 @@ TEST_F(VP9FrameSizeTestsLarge, ValidSizes) {
   // one for each lag in frames (for 2 pass), and then one for each possible
   // reference buffer (8) - we can end up with up to 30 buffers of roughly this
   // size or almost 1 gig of memory.
+  // In total the allocations will exceed 2GiB which may cause a failure with
+  // mingw + wine, use a smaller size in that case.
+#if defined(_WIN32) && !defined(_WIN64)
+  video.SetSize(4096, 3072);
+#else
   video.SetSize(4096, 4096);
+#endif
   video.set_limit(2);
   expected_res_ = VPX_CODEC_OK;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 #endif
+}
+
+TEST_F(VP9FrameSizeTestsLarge, OneByOneVideo) {
+  ::libvpx_test::RandomVideoSource video;
+
+  video.SetSize(1, 1);
+  video.set_limit(2);
+  expected_res_ = VPX_CODEC_OK;
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 }
 }  // namespace

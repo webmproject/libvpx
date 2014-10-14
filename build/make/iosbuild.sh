@@ -43,7 +43,7 @@ build_target() {
   mkdir "${target}"
   cd "${target}"
   eval "../../${LIBVPX_SOURCE_DIR}/configure" --target="${target}" \
-      --disable-docs ${devnull}
+      --disable-docs ${EXTRA_CONFIGURE_ARGS} ${devnull}
   export DIST_DIR
   eval make -j ${MAKE_JOBS} dist ${devnull}
   cd "${old_pwd}"
@@ -62,7 +62,7 @@ target_to_preproc_symbol() {
       echo "__ARM_ARCH_6__"
       ;;
     armv7-*)
-      echo "__ARM_ARCH_7__"
+      echo "__ARM_ARCH_7A__"
       ;;
     armv7s-*)
       echo "__ARM_ARCH_7S__"
@@ -206,6 +206,10 @@ trap cleanup EXIT
 # Parse the command line.
 while [ -n "$1" ]; do
   case "$1" in
+    --extra-configure-args)
+      EXTRA_CONFIGURE_ARGS="$2"
+      shift
+      ;;
     --help)
       iosbuild_usage
       exit
@@ -235,6 +239,7 @@ if [ "${VERBOSE}" = "yes" ]; then
 cat << EOF
   BUILD_ROOT=${BUILD_ROOT}
   DIST_DIR=${DIST_DIR}
+  EXTRA_CONFIGURE_ARGS=${EXTRA_CONFIGURE_ARGS}
   FRAMEWORK_DIR=${FRAMEWORK_DIR}
   HEADER_DIR=${HEADER_DIR}
   MAKE_JOBS=${MAKE_JOBS}

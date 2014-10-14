@@ -108,7 +108,8 @@ extern "C"
          * For temporal denoiser: noise_sensitivity = 0 means off,
          * noise_sensitivity = 1 means temporal denoiser on for Y channel only,
          * noise_sensitivity = 2 means temporal denoiser on for all channels.
-         * noise_sensitivity >= 3 means aggressive denoising mode.
+         * noise_sensitivity = 3 means aggressive denoising mode.
+         * noise_sensitivity >= 4 means adaptive denoising mode.
          * Temporal denoiser is enabled via the configuration option:
          * CONFIG_TEMPORAL_DENOISING.
          * For spatial denoiser: noise_sensitivity controls the amount of
@@ -223,7 +224,7 @@ extern "C"
         int arnr_strength;
         int arnr_type;
 
-        struct vpx_fixed_buf        two_pass_stats_in;
+        vpx_fixed_buf_t        two_pass_stats_in;
         struct vpx_codec_pkt_list  *output_pkt_list;
 
         vp8e_tuning tuning;

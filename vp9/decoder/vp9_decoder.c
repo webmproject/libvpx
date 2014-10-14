@@ -25,6 +25,7 @@
 #include "vp9/common/vp9_postproc.h"
 #endif
 #include "vp9/common/vp9_quant_common.h"
+#include "vp9/common/vp9_reconintra.h"
 #include "vp9/common/vp9_systemdependent.h"
 
 #include "vp9/decoder/vp9_decodeframe.h"
@@ -36,7 +37,8 @@ static void initialize_dec() {
   static int init_done = 0;
 
   if (!init_done) {
-    vp9_init_neighbors();
+    vp9_rtcd();
+    vp9_init_intra_predictors();
     init_done = 1;
   }
 }
@@ -57,17 +59,16 @@ VP9Decoder *vp9_decoder_create() {
   }
 
   cm->error.setjmp = 1;
+  pbi->need_resync = 1;
   initialize_dec();
-  cm->bit_depth = VPX_BITS_8;
-
-  vp9_rtcd();
 
   // Initialize the references to not point to any frame buffers.
   vpx_memset(&cm->ref_frame_map, -1, sizeof(cm->ref_frame_map));
 
   cm->current_video_frame = 0;
-  cm->dequant_bit_depth = VPX_BITS_NOT_SET;
   pbi->ready_for_new_data = 1;
+  cm->bit_depth = VPX_BITS_8;
+  cm->dequant_bit_depth = VPX_BITS_8;
 
   // vp9_init_dequantizer() is first called here. Add check in
   // frame_init_dequantizer() to avoid unnecessary calling of
@@ -98,10 +99,8 @@ void vp9_decoder_remove(VP9Decoder *pbi) {
   }
   vpx_free(pbi->tile_workers);
 
-  if (pbi->num_tile_workers) {
-    const int sb_rows =
-        mi_cols_aligned_to_sb(cm->mi_rows) >> MI_BLOCK_SIZE_LOG2;
-    vp9_loop_filter_dealloc(&pbi->lf_row_sync, sb_rows);
+  if (pbi->num_tile_workers > 0) {
+    vp9_loop_filter_dealloc(&pbi->lf_row_sync);
   }
 
   vp9_remove_common(cm);
@@ -240,6 +239,7 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
   cm->new_fb_idx = get_free_fb(cm);
 
   if (setjmp(cm->error.jmp)) {
+    pbi->need_resync = 1;
     cm->error.setjmp = 0;
     vp9_clear_system_state();
 
@@ -315,4 +315,68 @@ int vp9_get_raw_frame(VP9Decoder *pbi, YV12_BUFFER_CONFIG *sd,
 #endif /*!CONFIG_POSTPROC*/
   vp9_clear_system_state();
   return ret;
+}
+
+vpx_codec_err_t vp9_parse_superframe_index(const uint8_t *data,
+                                           size_t data_sz,
+                                           uint32_t sizes[8], int *count,
+                                           vpx_decrypt_cb decrypt_cb,
+                                           void *decrypt_state) {
+  // A chunk ending with a byte matching 0xc0 is an invalid chunk unless
+  // it is a super frame index. If the last byte of real video compression
+  // data is 0xc0 the encoder must add a 0 byte. If we have the marker but
+  // not the associated matching marker byte at the front of the index we have
+  // an invalid bitstream and need to return an error.
+
+  uint8_t marker;
+
+  assert(data_sz);
+  marker = read_marker(decrypt_cb, decrypt_state, data + data_sz - 1);
+  *count = 0;
+
+  if ((marker & 0xe0) == 0xc0) {
+    const uint32_t frames = (marker & 0x7) + 1;
+    const uint32_t mag = ((marker >> 3) & 0x3) + 1;
+    const size_t index_sz = 2 + mag * frames;
+
+    // This chunk is marked as having a superframe index but doesn't have
+    // enough data for it, thus it's an invalid superframe index.
+    if (data_sz < index_sz)
+      return VPX_CODEC_CORRUPT_FRAME;
+
+    {
+      const uint8_t marker2 = read_marker(decrypt_cb, decrypt_state,
+                                          data + data_sz - index_sz);
+
+      // This chunk is marked as having a superframe index but doesn't have
+      // the matching marker byte at the front of the index therefore it's an
+      // invalid chunk.
+      if (marker != marker2)
+        return VPX_CODEC_CORRUPT_FRAME;
+    }
+
+    {
+      // Found a valid superframe index.
+      uint32_t i, j;
+      const uint8_t *x = &data[data_sz - index_sz + 1];
+
+      // Frames has a maximum of 8 and mag has a maximum of 4.
+      uint8_t clear_buffer[32];
+      assert(sizeof(clear_buffer) >= frames * mag);
+      if (decrypt_cb) {
+        decrypt_cb(decrypt_state, x, clear_buffer, frames * mag);
+        x = clear_buffer;
+      }
+
+      for (i = 0; i < frames; ++i) {
+        uint32_t this_sz = 0;
+
+        for (j = 0; j < mag; ++j)
+          this_sz |= (*x++) << (j * 8);
+        sizes[i] = this_sz;
+      }
+      *count = frames;
+    }
+  }
+  return VPX_CODEC_OK;
 }

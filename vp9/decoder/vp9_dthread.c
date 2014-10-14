@@ -99,7 +99,7 @@ static void loop_filter_rows_mt(const YV12_BUFFER_CONFIG *const frame_buffer,
 
   for (r = start; r < stop; r += num_lf_workers) {
     const int mi_row = r << MI_BLOCK_SIZE_LOG2;
-    MODE_INFO **const mi = cm->mi_grid_visible + mi_row * cm->mi_stride;
+    MODE_INFO *const mi = cm->mi + mi_row * cm->mi_stride;
 
     for (c = 0; c < sb_cols; ++c) {
       const int mi_col = c << MI_BLOCK_SIZE_LOG2;
@@ -121,10 +121,10 @@ static void loop_filter_rows_mt(const YV12_BUFFER_CONFIG *const frame_buffer,
 }
 
 // Row-based multi-threaded loopfilter hook
-static int loop_filter_row_worker(void *arg1, void *arg2) {
-  TileWorkerData *const tile_data = (TileWorkerData*)arg1;
+static int loop_filter_row_worker(TileWorkerData *const tile_data,
+                                  void *unused) {
   LFWorkerData *const lf_data = &tile_data->lfdata;
-  (void) arg2;
+  (void)unused;
   loop_filter_rows_mt(lf_data->frame_buffer, lf_data->cm, lf_data->planes,
                       lf_data->start, lf_data->stop, lf_data->y_only,
                       lf_data->lf_sync, lf_data->num_lf_workers);
@@ -145,23 +145,12 @@ void vp9_loop_filter_frame_mt(YV12_BUFFER_CONFIG *frame,
   const int num_workers = MIN(pbi->max_threads & ~1, tile_cols);
   int i;
 
-  // Allocate memory used in thread synchronization.
-  // This always needs to be done even if frame_filter_level is 0.
-  if (!cm->current_video_frame || cm->last_height != cm->height) {
-    if (cm->last_height != cm->height) {
-      const int aligned_last_height =
-          ALIGN_POWER_OF_TWO(cm->last_height, MI_SIZE_LOG2);
-      const int last_sb_rows =
-          mi_cols_aligned_to_sb(aligned_last_height >> MI_SIZE_LOG2) >>
-          MI_BLOCK_SIZE_LOG2;
-
-      vp9_loop_filter_dealloc(lf_sync, last_sb_rows);
-    }
-
-    vp9_loop_filter_alloc(cm, lf_sync, sb_rows, cm->width);
-  }
-
   if (!frame_filter_level) return;
+
+  if (!lf_sync->sync_range || cm->last_height != cm->height) {
+    vp9_loop_filter_dealloc(lf_sync);
+    vp9_loop_filter_alloc(lf_sync, cm, sb_rows, cm->width);
+  }
 
   vp9_loop_filter_frame_init(cm, frame_filter_level);
 
@@ -225,21 +214,28 @@ static int get_sync_range(int width) {
 }
 
 // Allocate memory for lf row synchronization
-void vp9_loop_filter_alloc(VP9_COMMON *cm, VP9LfSync *lf_sync, int rows,
+void vp9_loop_filter_alloc(VP9LfSync *lf_sync, VP9_COMMON *cm, int rows,
                            int width) {
+  lf_sync->rows = rows;
 #if CONFIG_MULTITHREAD
-  int i;
+  {
+    int i;
 
-  CHECK_MEM_ERROR(cm, lf_sync->mutex_,
-                  vpx_malloc(sizeof(*lf_sync->mutex_) * rows));
-  for (i = 0; i < rows; ++i) {
-    pthread_mutex_init(&lf_sync->mutex_[i], NULL);
-  }
+    CHECK_MEM_ERROR(cm, lf_sync->mutex_,
+                    vpx_malloc(sizeof(*lf_sync->mutex_) * rows));
+    if (lf_sync->mutex_) {
+      for (i = 0; i < rows; ++i) {
+        pthread_mutex_init(&lf_sync->mutex_[i], NULL);
+      }
+    }
 
-  CHECK_MEM_ERROR(cm, lf_sync->cond_,
-                  vpx_malloc(sizeof(*lf_sync->cond_) * rows));
-  for (i = 0; i < rows; ++i) {
-    pthread_cond_init(&lf_sync->cond_[i], NULL);
+    CHECK_MEM_ERROR(cm, lf_sync->cond_,
+                    vpx_malloc(sizeof(*lf_sync->cond_) * rows));
+    if (lf_sync->cond_) {
+      for (i = 0; i < rows; ++i) {
+        pthread_cond_init(&lf_sync->cond_[i], NULL);
+      }
+    }
   }
 #endif  // CONFIG_MULTITHREAD
 
@@ -251,23 +247,19 @@ void vp9_loop_filter_alloc(VP9_COMMON *cm, VP9LfSync *lf_sync, int rows,
 }
 
 // Deallocate lf synchronization related mutex and data
-void vp9_loop_filter_dealloc(VP9LfSync *lf_sync, int rows) {
-#if !CONFIG_MULTITHREAD
-  (void)rows;
-#endif  // !CONFIG_MULTITHREAD
-
+void vp9_loop_filter_dealloc(VP9LfSync *lf_sync) {
   if (lf_sync != NULL) {
 #if CONFIG_MULTITHREAD
     int i;
 
     if (lf_sync->mutex_ != NULL) {
-      for (i = 0; i < rows; ++i) {
+      for (i = 0; i < lf_sync->rows; ++i) {
         pthread_mutex_destroy(&lf_sync->mutex_[i]);
       }
       vpx_free(lf_sync->mutex_);
     }
     if (lf_sync->cond_ != NULL) {
-      for (i = 0; i < rows; ++i) {
+      for (i = 0; i < lf_sync->rows; ++i) {
         pthread_cond_destroy(&lf_sync->cond_[i]);
       }
       vpx_free(lf_sync->cond_);

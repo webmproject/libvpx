@@ -39,6 +39,8 @@ typedef struct {
 } FIRSTPASS_MB_STATS;
 #endif
 
+#define VLOW_MOTION_THRESHOLD 950
+
 typedef struct {
   double frame;
   double intra_error;
@@ -93,8 +95,6 @@ typedef struct {
   double modified_error_min;
   double modified_error_max;
   double modified_error_left;
-  double kf_intra_err_min;
-  double gf_intra_err_min;
 
 #if CONFIG_FP_MB_STATS
   uint8_t *frame_mb_stats_buf;
@@ -110,9 +110,11 @@ typedef struct {
   int sr_update_lag;
 
   int kf_zeromotion_pct;
+  int last_kfgroup_zeromotion_pct;
   int gf_zeromotion_pct;
-
   int active_worst_quality;
+  int extend_minq;
+  int extend_maxq;
 
   GF_GROUP gf_group;
 } TWO_PASS;
@@ -121,7 +123,7 @@ struct VP9_COMP;
 
 void vp9_init_first_pass(struct VP9_COMP *cpi);
 void vp9_rc_get_first_pass_params(struct VP9_COMP *cpi);
-void vp9_first_pass(struct VP9_COMP *cpi);
+void vp9_first_pass(struct VP9_COMP *cpi, const struct lookahead_entry *source);
 void vp9_end_first_pass(struct VP9_COMP *cpi);
 
 void vp9_init_second_pass(struct VP9_COMP *cpi);

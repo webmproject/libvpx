@@ -224,7 +224,8 @@ void vpx_img_write(const vpx_image_t *img, FILE *file) {
   for (plane = 0; plane < 3; ++plane) {
     const unsigned char *buf = img->planes[plane];
     const int stride = img->stride[plane];
-    const int w = vpx_img_plane_width(img, plane);
+    const int w = vpx_img_plane_width(img, plane) *
+        ((img->fmt & VPX_IMG_FMT_HIGHBITDEPTH) ? 2 : 1);
     const int h = vpx_img_plane_height(img, plane);
     int y;
 
@@ -241,18 +242,10 @@ int vpx_img_read(vpx_image_t *img, FILE *file) {
   for (plane = 0; plane < 3; ++plane) {
     unsigned char *buf = img->planes[plane];
     const int stride = img->stride[plane];
-#if CONFIG_VP9_HIGH
-    int w = vpx_img_plane_width(img, plane);
-#else
-    const int w = vpx_img_plane_width(img, plane);
-#endif
+    const int w = vpx_img_plane_width(img, plane) *
+        ((img->fmt & VPX_IMG_FMT_HIGHBITDEPTH) ? 2 : 1);
     const int h = vpx_img_plane_height(img, plane);
     int y;
-#if CONFIG_VP9_HIGH
-    if (img->fmt & VPX_IMG_FMT_HIGHBITDEPTH) {
-      w *= sizeof(uint16_t);
-    }
-#endif
 
     for (y = 0; y < h; ++y) {
       if (fread(buf, 1, w, file) != (size_t)w)
@@ -275,3 +268,219 @@ double sse_to_psnr(double samples, double peak, double sse) {
     return kMaxPSNR;
   }
 }
+
+// TODO(debargha): Consolidate the functions below into a separate file.
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+static void highbd_img_upshift(vpx_image_t *dst, vpx_image_t *src,
+                               int input_shift) {
+  // Note the offset is 1 less than half.
+  const int offset = input_shift > 0 ? (1 << (input_shift - 1)) - 1 : 0;
+  int plane;
+  if (dst->w != src->w || dst->h != src->h ||
+      dst->x_chroma_shift != src->x_chroma_shift ||
+      dst->y_chroma_shift != src->y_chroma_shift ||
+      dst->fmt != src->fmt || input_shift < 0) {
+    fatal("Unsupported image conversion");
+  }
+  switch (src->fmt) {
+    case VPX_IMG_FMT_I42016:
+    case VPX_IMG_FMT_I42216:
+    case VPX_IMG_FMT_I44416:
+    case VPX_IMG_FMT_I44016:
+      break;
+    default:
+      fatal("Unsupported image conversion");
+      break;
+  }
+  for (plane = 0; plane < 3; plane++) {
+    int w = src->w;
+    int h = src->h;
+    int x, y;
+    if (plane) {
+      w >>= src->x_chroma_shift;
+      h >>= src->y_chroma_shift;
+    }
+    for (y = 0; y < h; y++) {
+      uint16_t *p_src =
+          (uint16_t *)(src->planes[plane] + y * src->stride[plane]);
+      uint16_t *p_dst =
+          (uint16_t *)(dst->planes[plane] + y * dst->stride[plane]);
+      for (x = 0; x < w; x++)
+        *p_dst++ = (*p_src++ << input_shift) + offset;
+    }
+  }
+}
+
+static void lowbd_img_upshift(vpx_image_t *dst, vpx_image_t *src,
+                              int input_shift) {
+  // Note the offset is 1 less than half.
+  const int offset = input_shift > 0 ? (1 << (input_shift - 1)) - 1 : 0;
+  int plane;
+  if (dst->w != src->w || dst->h != src->h ||
+      dst->x_chroma_shift != src->x_chroma_shift ||
+      dst->y_chroma_shift != src->y_chroma_shift ||
+      dst->fmt != src->fmt + VPX_IMG_FMT_HIGHBITDEPTH ||
+      input_shift < 0) {
+    fatal("Unsupported image conversion");
+  }
+  switch (src->fmt) {
+    case VPX_IMG_FMT_I420:
+    case VPX_IMG_FMT_I422:
+    case VPX_IMG_FMT_I444:
+    case VPX_IMG_FMT_I440:
+      break;
+    default:
+      fatal("Unsupported image conversion");
+      break;
+  }
+  for (plane = 0; plane < 3; plane++) {
+    int w = src->w;
+    int h = src->h;
+    int x, y;
+    if (plane) {
+      w = (w + src->x_chroma_shift) >> src->x_chroma_shift;
+      h = (h + src->y_chroma_shift) >> src->y_chroma_shift;
+    }
+    for (y = 0; y < h; y++) {
+      uint8_t *p_src = src->planes[plane] + y * src->stride[plane];
+      uint16_t *p_dst =
+          (uint16_t *)(dst->planes[plane] + y * dst->stride[plane]);
+      for (x = 0; x < w; x++) {
+        *p_dst++ = (*p_src++ << input_shift) + offset;
+      }
+    }
+  }
+}
+
+void vpx_img_upshift(vpx_image_t *dst, vpx_image_t *src,
+                     int input_shift) {
+  if (src->fmt & VPX_IMG_FMT_HIGHBITDEPTH) {
+    highbd_img_upshift(dst, src, input_shift);
+  } else {
+    lowbd_img_upshift(dst, src, input_shift);
+  }
+}
+
+void vpx_img_truncate_16_to_8(vpx_image_t *dst, vpx_image_t *src) {
+  int plane;
+  if (dst->fmt + VPX_IMG_FMT_HIGHBITDEPTH != src->fmt ||
+      dst->d_w != src->d_w || dst->d_h != src->d_h ||
+      dst->x_chroma_shift != src->x_chroma_shift ||
+      dst->y_chroma_shift != src->y_chroma_shift) {
+    fatal("Unsupported image conversion");
+  }
+  switch (dst->fmt) {
+    case VPX_IMG_FMT_I420:
+    case VPX_IMG_FMT_I422:
+    case VPX_IMG_FMT_I444:
+    case VPX_IMG_FMT_I440:
+      break;
+    default:
+      fatal("Unsupported image conversion");
+      break;
+  }
+  for (plane = 0; plane < 3; plane++) {
+    int w = src->d_w;
+    int h = src->d_h;
+    int x, y;
+    if (plane) {
+      w >>= src->x_chroma_shift;
+      h >>= src->y_chroma_shift;
+    }
+    for (y = 0; y < h; y++) {
+      uint16_t *p_src =
+          (uint16_t *)(src->planes[plane] + y * src->stride[plane]);
+      uint8_t *p_dst = dst->planes[plane] + y * dst->stride[plane];
+      for (x = 0; x < w; x++) {
+        *p_dst++ = *p_src++;
+      }
+    }
+  }
+}
+
+static void highbd_img_downshift(vpx_image_t *dst, vpx_image_t *src,
+                                 int down_shift) {
+  int plane;
+  if (dst->d_w != src->d_w || dst->d_h != src->d_h ||
+      dst->x_chroma_shift != src->x_chroma_shift ||
+      dst->y_chroma_shift != src->y_chroma_shift ||
+      dst->fmt != src->fmt || down_shift < 0) {
+    fatal("Unsupported image conversion");
+  }
+  switch (src->fmt) {
+    case VPX_IMG_FMT_I42016:
+    case VPX_IMG_FMT_I42216:
+    case VPX_IMG_FMT_I44416:
+    case VPX_IMG_FMT_I44016:
+      break;
+    default:
+      fatal("Unsupported image conversion");
+      break;
+  }
+  for (plane = 0; plane < 3; plane++) {
+    int w = src->d_w;
+    int h = src->d_h;
+    int x, y;
+    if (plane) {
+      w = (w + src->x_chroma_shift) >> src->x_chroma_shift;
+      h = (h + src->y_chroma_shift) >> src->y_chroma_shift;
+    }
+    for (y = 0; y < h; y++) {
+      uint16_t *p_src =
+          (uint16_t *)(src->planes[plane] + y * src->stride[plane]);
+      uint16_t *p_dst =
+          (uint16_t *)(dst->planes[plane] + y * dst->stride[plane]);
+      for (x = 0; x < w; x++)
+        *p_dst++ = *p_src++ >> down_shift;
+    }
+  }
+}
+
+static void lowbd_img_downshift(vpx_image_t *dst, vpx_image_t *src,
+                                int down_shift) {
+  int plane;
+  if (dst->d_w != src->d_w || dst->d_h != src->d_h ||
+      dst->x_chroma_shift != src->x_chroma_shift ||
+      dst->y_chroma_shift != src->y_chroma_shift ||
+      src->fmt != dst->fmt + VPX_IMG_FMT_HIGHBITDEPTH ||
+      down_shift < 0) {
+    fatal("Unsupported image conversion");
+  }
+  switch (dst->fmt) {
+    case VPX_IMG_FMT_I420:
+    case VPX_IMG_FMT_I422:
+    case VPX_IMG_FMT_I444:
+    case VPX_IMG_FMT_I440:
+      break;
+    default:
+      fatal("Unsupported image conversion");
+      break;
+  }
+  for (plane = 0; plane < 3; plane++) {
+    int w = src->d_w;
+    int h = src->d_h;
+    int x, y;
+    if (plane) {
+      w = (w + src->x_chroma_shift) >> src->x_chroma_shift;
+      h = (h + src->y_chroma_shift) >> src->y_chroma_shift;
+    }
+    for (y = 0; y < h; y++) {
+      uint16_t *p_src =
+          (uint16_t *)(src->planes[plane] + y * src->stride[plane]);
+      uint8_t *p_dst = dst->planes[plane] + y * dst->stride[plane];
+      for (x = 0; x < w; x++) {
+        *p_dst++ = *p_src++ >> down_shift;
+      }
+    }
+  }
+}
+
+void vpx_img_downshift(vpx_image_t *dst, vpx_image_t *src,
+                       int down_shift) {
+  if (dst->fmt & VPX_IMG_FMT_HIGHBITDEPTH) {
+    highbd_img_downshift(dst, src, down_shift);
+  } else {
+    lowbd_img_downshift(dst, src, down_shift);
+  }
+}
+#endif  // CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH

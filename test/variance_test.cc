@@ -35,6 +35,14 @@ using ::std::tr1::make_tuple;
 using ::std::tr1::tuple;
 using libvpx_test::ACMRandom;
 
+static unsigned int mb_ss_ref(const int16_t *src) {
+  unsigned int res = 0;
+  for (int i = 0; i < 256; ++i) {
+    res += src[i] * src[i];
+  }
+  return res;
+}
+
 static unsigned int variance_ref(const uint8_t *ref, const uint8_t *src,
                                  int l2w, int l2h, unsigned int *sse_ptr) {
   int se = 0;
@@ -76,6 +84,50 @@ static unsigned int subpel_variance_ref(const uint8_t *ref, const uint8_t *src,
   return sse - (((int64_t) se * se) >> (l2w + l2h));
 }
 
+typedef unsigned int (*SumOfSquaresFunction)(const int16_t *src);
+
+class SumOfSquaresTest : public ::testing::TestWithParam<SumOfSquaresFunction> {
+ public:
+  SumOfSquaresTest() : func_(GetParam()) {}
+
+  virtual ~SumOfSquaresTest() {
+    libvpx_test::ClearSystemState();
+  }
+
+ protected:
+  void ConstTest();
+  void RefTest();
+
+  SumOfSquaresFunction func_;
+  ACMRandom rnd_;
+};
+
+void SumOfSquaresTest::ConstTest() {
+  int16_t mem[256];
+  unsigned int res;
+  for (int v = 0; v < 256; ++v) {
+    for (int i = 0; i < 256; ++i) {
+      mem[i] = v;
+    }
+    ASM_REGISTER_STATE_CHECK(res = func_(mem));
+    EXPECT_EQ(256u * (v * v), res);
+  }
+}
+
+void SumOfSquaresTest::RefTest() {
+  int16_t mem[256];
+  for (int i = 0; i < 100; ++i) {
+    for (int j = 0; j < 256; ++j) {
+      mem[j] = rnd_.Rand8() - rnd_.Rand8();
+    }
+
+    const unsigned int expected = mb_ss_ref(mem);
+    unsigned int res;
+    ASM_REGISTER_STATE_CHECK(res = func_(mem));
+    EXPECT_EQ(expected, res);
+  }
+}
+
 template<typename VarianceFunctionType>
 class VarianceTest
     : public ::testing::TestWithParam<tuple<int, int, VarianceFunctionType> > {
@@ -88,7 +140,7 @@ class VarianceTest
     height_ = 1 << log2height_;
     variance_ = get<2>(params);
 
-    rnd(ACMRandom::DeterministicSeed());
+    rnd_.Reset(ACMRandom::DeterministicSeed());
     block_size_ = width_ * height_;
     src_ = reinterpret_cast<uint8_t *>(vpx_memalign(16, block_size_));
     ref_ = new uint8_t[block_size_];
@@ -107,7 +159,7 @@ class VarianceTest
   void RefTest();
   void OneQuarterTest();
 
-  ACMRandom rnd;
+  ACMRandom rnd_;
   uint8_t* src_;
   uint8_t* ref_;
   int width_, log2width_;
@@ -135,8 +187,8 @@ template<typename VarianceFunctionType>
 void VarianceTest<VarianceFunctionType>::RefTest() {
   for (int i = 0; i < 10; ++i) {
     for (int j = 0; j < block_size_; j++) {
-      src_[j] = rnd.Rand8();
-      ref_[j] = rnd.Rand8();
+      src_[j] = rnd_.Rand8();
+      ref_[j] = rnd_.Rand8();
     }
     unsigned int sse1, sse2;
     unsigned int var1;
@@ -161,6 +213,99 @@ void VarianceTest<VarianceFunctionType>::OneQuarterTest() {
   const unsigned int expected = block_size_ * 255 * 255 / 4;
   EXPECT_EQ(expected, var);
 }
+
+#if CONFIG_VP8_ENCODER
+template<typename MseFunctionType>
+class MseTest
+    : public ::testing::TestWithParam<tuple<int, int, MseFunctionType> > {
+ public:
+  virtual void SetUp() {
+    const tuple<int, int, MseFunctionType>& params = this->GetParam();
+    log2width_  = get<0>(params);
+    width_ = 1 << log2width_;
+    log2height_ = get<1>(params);
+    height_ = 1 << log2height_;
+    mse_ = get<2>(params);
+
+    rnd(ACMRandom::DeterministicSeed());
+    block_size_ = width_ * height_;
+    src_ = reinterpret_cast<uint8_t *>(vpx_memalign(16, block_size_));
+    ref_ = new uint8_t[block_size_];
+    ASSERT_TRUE(src_ != NULL);
+    ASSERT_TRUE(ref_ != NULL);
+  }
+
+  virtual void TearDown() {
+    vpx_free(src_);
+    delete[] ref_;
+    libvpx_test::ClearSystemState();
+  }
+
+ protected:
+  void RefTest_mse();
+  void RefTest_sse();
+  void MaxTest_mse();
+  void MaxTest_sse();
+
+  ACMRandom rnd;
+  uint8_t* src_;
+  uint8_t* ref_;
+  int width_, log2width_;
+  int height_, log2height_;
+  int block_size_;
+  MseFunctionType mse_;
+};
+
+template<typename MseFunctionType>
+void MseTest<MseFunctionType>::RefTest_mse() {
+  for (int i = 0; i < 10; ++i) {
+    for (int j = 0; j < block_size_; j++) {
+      src_[j] = rnd.Rand8();
+      ref_[j] = rnd.Rand8();
+    }
+    unsigned int sse1, sse2;
+    ASM_REGISTER_STATE_CHECK(mse_(src_, width_, ref_, width_, &sse1));
+    variance_ref(src_, ref_, log2width_, log2height_, &sse2);
+    EXPECT_EQ(sse1, sse2);
+  }
+}
+
+template<typename MseFunctionType>
+void MseTest<MseFunctionType>::RefTest_sse() {
+  for (int i = 0; i < 10; ++i) {
+    for (int j = 0; j < block_size_; j++) {
+      src_[j] = rnd.Rand8();
+      ref_[j] = rnd.Rand8();
+    }
+    unsigned int sse2;
+    unsigned int var1;
+    ASM_REGISTER_STATE_CHECK(
+        var1 = mse_(src_, width_, ref_, width_));
+    variance_ref(src_, ref_, log2width_, log2height_, &sse2);
+    EXPECT_EQ(var1, sse2);
+  }
+}
+
+template<typename MseFunctionType>
+void MseTest<MseFunctionType>::MaxTest_mse() {
+  memset(src_, 255, block_size_);
+  memset(ref_, 0, block_size_);
+  unsigned int sse;
+  ASM_REGISTER_STATE_CHECK(mse_(src_, width_, ref_, width_, &sse));
+  const unsigned int expected = block_size_ * 255 * 255;
+  EXPECT_EQ(expected, sse);
+}
+
+template<typename MseFunctionType>
+void MseTest<MseFunctionType>::MaxTest_sse() {
+  memset(src_, 255, block_size_);
+  memset(ref_, 0, block_size_);
+  unsigned int var;
+  ASM_REGISTER_STATE_CHECK(var = mse_(src_, width_, ref_, width_));
+  const unsigned int expected = block_size_ * 255 * 255;
+  EXPECT_EQ(expected, var);
+}
+#endif
 
 #if CONFIG_VP9_ENCODER
 
@@ -206,7 +351,7 @@ class SubpelVarianceTest
     height_ = 1 << log2height_;
     subpel_variance_ = get<2>(params);
 
-    rnd(ACMRandom::DeterministicSeed());
+    rnd_.Reset(ACMRandom::DeterministicSeed());
     block_size_ = width_ * height_;
     src_ = reinterpret_cast<uint8_t *>(vpx_memalign(16, block_size_));
     sec_ = reinterpret_cast<uint8_t *>(vpx_memalign(16, block_size_));
@@ -226,7 +371,7 @@ class SubpelVarianceTest
  protected:
   void RefTest();
 
-  ACMRandom rnd;
+  ACMRandom rnd_;
   uint8_t *src_;
   uint8_t *ref_;
   uint8_t *sec_;
@@ -241,10 +386,10 @@ void SubpelVarianceTest<SubpelVarianceFunctionType>::RefTest() {
   for (int x = 0; x < 16; ++x) {
     for (int y = 0; y < 16; ++y) {
       for (int j = 0; j < block_size_; j++) {
-        src_[j] = rnd.Rand8();
+        src_[j] = rnd_.Rand8();
       }
       for (int j = 0; j < block_size_ + width_ + height_ + 1; j++) {
-        ref_[j] = rnd.Rand8();
+        ref_[j] = rnd_.Rand8();
       }
       unsigned int sse1, sse2;
       unsigned int var1;
@@ -263,11 +408,11 @@ void SubpelVarianceTest<vp9_subp_avg_variance_fn_t>::RefTest() {
   for (int x = 0; x < 16; ++x) {
     for (int y = 0; y < 16; ++y) {
       for (int j = 0; j < block_size_; j++) {
-        src_[j] = rnd.Rand8();
-        sec_[j] = rnd.Rand8();
+        src_[j] = rnd_.Rand8();
+        sec_[j] = rnd_.Rand8();
       }
       for (int j = 0; j < block_size_ + width_ + height_ + 1; j++) {
-        ref_[j] = rnd.Rand8();
+        ref_[j] = rnd_.Rand8();
       }
       unsigned int sse1, sse2;
       unsigned int var1;
@@ -291,11 +436,30 @@ void SubpelVarianceTest<vp9_subp_avg_variance_fn_t>::RefTest() {
 namespace vp8 {
 
 #if CONFIG_VP8_ENCODER
+typedef unsigned int (*vp8_sse_fn_t)(const unsigned char *src_ptr,
+    int source_stride, const unsigned char *ref_ptr, int  ref_stride);
+
+typedef MseTest<vp8_sse_fn_t> VP8SseTest;
+typedef MseTest<vp8_variance_fn_t> VP8MseTest;
 typedef VarianceTest<vp8_variance_fn_t> VP8VarianceTest;
 
+TEST_P(VP8SseTest, Ref_sse) { RefTest_sse(); }
+TEST_P(VP8SseTest, Max_sse) { MaxTest_sse(); }
+TEST_P(VP8MseTest, Ref_mse) { RefTest_mse(); }
+TEST_P(VP8MseTest, Max_mse) { MaxTest_mse(); }
 TEST_P(VP8VarianceTest, Zero) { ZeroTest(); }
 TEST_P(VP8VarianceTest, Ref) { RefTest(); }
 TEST_P(VP8VarianceTest, OneQuarter) { OneQuarterTest(); }
+
+const vp8_sse_fn_t get4x4sse_cs_c = vp8_get4x4sse_cs_c;
+INSTANTIATE_TEST_CASE_P(
+    C, VP8SseTest,
+    ::testing::Values(make_tuple(2, 2, get4x4sse_cs_c)));
+
+const vp8_variance_fn_t mse16x16_c = vp8_mse16x16_c;
+INSTANTIATE_TEST_CASE_P(
+    C, VP8MseTest,
+    ::testing::Values(make_tuple(4, 4, mse16x16_c)));
 
 const vp8_variance_fn_t variance4x4_c = vp8_variance4x4_c;
 const vp8_variance_fn_t variance8x8_c = vp8_variance8x8_c;
@@ -311,6 +475,16 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(4, 4, variance16x16_c)));
 
 #if HAVE_NEON
+const vp8_sse_fn_t get4x4sse_cs_neon = vp8_get4x4sse_cs_neon;
+INSTANTIATE_TEST_CASE_P(
+    NEON, VP8SseTest,
+    ::testing::Values(make_tuple(2, 2, get4x4sse_cs_neon)));
+
+const vp8_variance_fn_t mse16x16_neon = vp8_mse16x16_neon;
+INSTANTIATE_TEST_CASE_P(
+    NEON, VP8MseTest,
+    ::testing::Values(make_tuple(4, 4, mse16x16_neon)));
+
 const vp8_variance_fn_t variance8x8_neon = vp8_variance8x8_neon;
 const vp8_variance_fn_t variance8x16_neon = vp8_variance8x16_neon;
 const vp8_variance_fn_t variance16x8_neon = vp8_variance16x8_neon;
@@ -322,6 +496,7 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(4, 3, variance16x8_neon),
                       make_tuple(4, 4, variance16x16_neon)));
 #endif
+
 
 #if HAVE_MMX
 const vp8_variance_fn_t variance4x4_mmx = vp8_variance4x4_mmx;
@@ -362,6 +537,13 @@ INSTANTIATE_TEST_CASE_P(
 namespace vp9 {
 
 #if CONFIG_VP9_ENCODER
+
+TEST_P(SumOfSquaresTest, Const) { ConstTest(); }
+TEST_P(SumOfSquaresTest, Ref) { RefTest(); }
+
+INSTANTIATE_TEST_CASE_P(C, SumOfSquaresTest,
+                        ::testing::Values(vp9_get_mb_ss_c));
+
 typedef VarianceTest<vp9_variance_fn_t> VP9VarianceTest;
 typedef SubpelVarianceTest<vp9_subpixvariance_fn_t> VP9SubpelVarianceTest;
 typedef SubpelVarianceTest<vp9_subp_avg_variance_fn_t> VP9SubpelAvgVarianceTest;
@@ -485,23 +667,12 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(6, 5, subpel_avg_variance64x32_c),
                       make_tuple(6, 6, subpel_avg_variance64x64_c)));
 
-#if HAVE_MMX
-const vp9_variance_fn_t variance4x4_mmx = vp9_variance4x4_mmx;
-const vp9_variance_fn_t variance8x8_mmx = vp9_variance8x8_mmx;
-const vp9_variance_fn_t variance8x16_mmx = vp9_variance8x16_mmx;
-const vp9_variance_fn_t variance16x8_mmx = vp9_variance16x8_mmx;
-const vp9_variance_fn_t variance16x16_mmx = vp9_variance16x16_mmx;
-INSTANTIATE_TEST_CASE_P(
-    MMX, VP9VarianceTest,
-    ::testing::Values(make_tuple(2, 2, variance4x4_mmx),
-                      make_tuple(3, 3, variance8x8_mmx),
-                      make_tuple(3, 4, variance8x16_mmx),
-                      make_tuple(4, 3, variance16x8_mmx),
-                      make_tuple(4, 4, variance16x16_mmx)));
-#endif
-
 #if HAVE_SSE2
 #if CONFIG_USE_X86INC
+
+INSTANTIATE_TEST_CASE_P(SSE2, SumOfSquaresTest,
+                        ::testing::Values(vp9_get_mb_ss_sse2));
+
 const vp9_variance_fn_t variance4x4_sse2 = vp9_variance4x4_sse2;
 const vp9_variance_fn_t variance4x8_sse2 = vp9_variance4x8_sse2;
 const vp9_variance_fn_t variance8x4_sse2 = vp9_variance8x4_sse2;

@@ -11,11 +11,8 @@
 #ifndef VP9_ENCODER_VP9_BLOCK_H_
 #define VP9_ENCODER_VP9_BLOCK_H_
 
-#include "vp9/common/vp9_idct.h"
 #include "vp9/common/vp9_entropymv.h"
 #include "vp9/common/vp9_entropy.h"
-#include "vpx_ports/mem.h"
-#include "vp9/common/vp9_onyxc_int.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -77,16 +74,12 @@ struct macroblock {
   int pred_mv_sad[MAX_REF_FRAMES];
 
   int nmvjointcost[MV_JOINTS];
-  int nmvcosts[2][MV_VALS];
   int *nmvcost[2];
-  int nmvcosts_hp[2][MV_VALS];
   int *nmvcost_hp[2];
   int **mvcost;
 
   int nmvjointsadcost[MV_JOINTS];
-  int nmvsadcosts[2][MV_VALS];
   int *nmvsadcost[2];
-  int nmvsadcosts_hp[2][MV_VALS];
   int *nmvsadcost_hp[2];
   int **mvsadcost;
 
@@ -117,19 +110,18 @@ struct macroblock {
   int quant_fp;
 
   // skip forward transform and quantization
-  int skip_txfm[MAX_MB_PLANE];
+  uint8_t skip_txfm[MAX_MB_PLANE << 2];
 
-  int64_t bsse[MAX_MB_PLANE];
+  int64_t bsse[MAX_MB_PLANE << 2];
 
   // Used to store sub partition's choices.
   MV pred_mv[MAX_REF_FRAMES];
 
   void (*fwd_txm4x4)(const int16_t *input, tran_low_t *output, int stride);
   void (*itxm_add)(const tran_low_t *input, uint8_t *dest, int stride, int eob);
-
-#if CONFIG_VP9_HIGH
-  void (*high_itxm_add)(const tran_low_t *input, uint8_t *dest, int stride,
-                        int eob, int bps);
+#if CONFIG_VP9_HIGHBITDEPTH
+  void (*highbd_itxm_add)(const tran_low_t *input, uint8_t *dest, int stride,
+                          int eob, int bd);
 #endif
 };
 

@@ -1,5 +1,5 @@
 ;
-;  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
+;  Copyright (c) 2014 The WebM project authors. All Rights Reserved.
 ;
 ;  Use of this source code is governed by a BSD-style license
 ;  that can be found in the LICENSE file in the root of the source
@@ -34,7 +34,7 @@
     punpcklwd   xmm3, xmm4
     punpcklwd   xmm1, xmm7
 
-    movdqa      k0k6, xmm0      
+    movdqa      k0k6, xmm0
     movdqa      k2k5, xmm2
     movdqa      k3k4, xmm3
     movdqa      k1k7, xmm1
@@ -42,9 +42,9 @@
     movq        xmm6, rcx
     pshufd      xmm6, xmm6, 0
     movdqa      krd, xmm6
-    
+
     ;Compute max and min values of a pixel
-    mov         rdx, 0x00010001                 
+    mov         rdx, 0x00010001
     movsxd      rcx, DWORD PTR arg(6)      ;bps
     movq        xmm0, rdx
     movq        xmm1, rcx
@@ -55,7 +55,7 @@
     pxor        xmm1, xmm1
     movdqa      max, xmm0                  ;max value (for clamping)
     movdqa      min, xmm1                  ;min value (for clamping)
-    
+
 %endm
 
 %macro HIGH_APPLY_FILTER_4 1
@@ -70,9 +70,9 @@
     pmaddwd     xmm3, k3k4
 
     paddd       xmm0, xmm1                  ;sum
-    paddd       xmm0, xmm2        
+    paddd       xmm0, xmm2
     paddd       xmm0, xmm3
-    
+
     paddd       xmm0, krd                   ;rounding
     psrad       xmm0, 7                     ;shift
     packssdw    xmm0, xmm0                  ;pack to word
@@ -80,7 +80,7 @@
     ;clamp the values
     pminsw      xmm0, max
     pmaxsw      xmm0, min
-    
+
 %if %1
     movq        xmm1, [rdi]
     pavgw       xmm0, xmm1
@@ -118,9 +118,9 @@
     movq        xmm6, rcx
     pshufd      xmm6, xmm6, 0
     movdqa      krd, xmm6                   ;rounding
-    
+
     ;Compute max and min values of a pixel
-    mov         rdx, 0x00010001                 
+    mov         rdx, 0x00010001
     movsxd      rcx, DWORD PTR arg(6)       ;bps
     movq        xmm0, rdx
     movq        xmm1, rcx
@@ -149,14 +149,14 @@
     movdqu      temp, xmm4
     movdqa      xmm4, xmm0
     punpcklwd   xmm0, xmm1
-    punpckhwd   xmm4, xmm1  
+    punpckhwd   xmm4, xmm1
     movdqa      xmm1, xmm6
     punpcklwd   xmm6, xmm7
     punpckhwd   xmm1, xmm7
     movdqa      xmm7, xmm2
     punpcklwd   xmm2, xmm5
     punpckhwd   xmm7, xmm5
-    
+
     movdqu      xmm5, temp
     movdqu      temp, xmm4
     movdqa      xmm4, xmm3
@@ -185,11 +185,11 @@
     psrad       xmm0, 7                     ;shift
     psrad       xmm5, 7
     packssdw    xmm0, xmm5                  ;pack back to word
-    
+
     ;clamp the values
     pminsw      xmm0, max
     pmaxsw      xmm0, min
-    
+
 %if %1
     movdqu      xmm1, [rdi + %2]
     pavgw       xmm0, xmm1
@@ -206,8 +206,8 @@
 ;    unsigned int   output_height,
 ;    short *filter
 ;)
-global sym(vp9_high_filter_block1d4_v8_sse2) PRIVATE
-sym(vp9_high_filter_block1d4_v8_sse2):
+global sym(vp9_highbd_filter_block1d4_v8_sse2) PRIVATE
+sym(vp9_highbd_filter_block1d4_v8_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
@@ -276,8 +276,8 @@ sym(vp9_high_filter_block1d4_v8_sse2):
 ;    unsigned int   output_height,
 ;    short *filter
 ;)
-global sym(vp9_high_filter_block1d8_v8_sse2) PRIVATE
-sym(vp9_high_filter_block1d8_v8_sse2):
+global sym(vp9_highbd_filter_block1d8_v8_sse2) PRIVATE
+sym(vp9_highbd_filter_block1d8_v8_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
@@ -335,8 +335,8 @@ sym(vp9_high_filter_block1d8_v8_sse2):
 ;    unsigned int   output_height,
 ;    short *filter
 ;)
-global sym(vp9_high_filter_block1d16_v8_sse2) PRIVATE
-sym(vp9_high_filter_block1d16_v8_sse2):
+global sym(vp9_highbd_filter_block1d16_v8_sse2) PRIVATE
+sym(vp9_highbd_filter_block1d16_v8_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
@@ -389,8 +389,8 @@ sym(vp9_high_filter_block1d16_v8_sse2):
     pop         rbp
     ret
 
-global sym(vp9_high_filter_block1d4_v8_avg_sse2) PRIVATE
-sym(vp9_high_filter_block1d4_v8_avg_sse2):
+global sym(vp9_highbd_filter_block1d4_v8_avg_sse2) PRIVATE
+sym(vp9_highbd_filter_block1d4_v8_avg_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
@@ -450,8 +450,8 @@ sym(vp9_high_filter_block1d4_v8_avg_sse2):
     pop         rbp
     ret
 
-global sym(vp9_high_filter_block1d8_v8_avg_sse2) PRIVATE
-sym(vp9_high_filter_block1d8_v8_avg_sse2):
+global sym(vp9_highbd_filter_block1d8_v8_avg_sse2) PRIVATE
+sym(vp9_highbd_filter_block1d8_v8_avg_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
@@ -499,8 +499,8 @@ sym(vp9_high_filter_block1d8_v8_avg_sse2):
     pop         rbp
     ret
 
-global sym(vp9_high_filter_block1d16_v8_avg_sse2) PRIVATE
-sym(vp9_high_filter_block1d16_v8_avg_sse2):
+global sym(vp9_highbd_filter_block1d16_v8_avg_sse2) PRIVATE
+sym(vp9_highbd_filter_block1d16_v8_avg_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
@@ -561,8 +561,8 @@ sym(vp9_high_filter_block1d16_v8_avg_sse2):
 ;    unsigned int    output_height,
 ;    short *filter
 ;)
-global sym(vp9_high_filter_block1d4_h8_sse2) PRIVATE
-sym(vp9_high_filter_block1d4_h8_sse2):
+global sym(vp9_highbd_filter_block1d4_h8_sse2) PRIVATE
+sym(vp9_highbd_filter_block1d4_h8_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
@@ -636,8 +636,8 @@ sym(vp9_high_filter_block1d4_h8_sse2):
 ;    unsigned int    output_height,
 ;    short *filter
 ;)
-global sym(vp9_high_filter_block1d8_h8_sse2) PRIVATE
-sym(vp9_high_filter_block1d8_h8_sse2):
+global sym(vp9_highbd_filter_block1d8_h8_sse2) PRIVATE
+sym(vp9_highbd_filter_block1d8_h8_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
@@ -702,8 +702,8 @@ sym(vp9_high_filter_block1d8_h8_sse2):
 ;    unsigned int    output_height,
 ;    short *filter
 ;)
-global sym(vp9_high_filter_block1d16_h8_sse2) PRIVATE
-sym(vp9_high_filter_block1d16_h8_sse2):
+global sym(vp9_highbd_filter_block1d16_h8_sse2) PRIVATE
+sym(vp9_highbd_filter_block1d16_h8_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
@@ -770,8 +770,8 @@ sym(vp9_high_filter_block1d16_h8_sse2):
     pop         rbp
     ret
 
-global sym(vp9_high_filter_block1d4_h8_avg_sse2) PRIVATE
-sym(vp9_high_filter_block1d4_h8_avg_sse2):
+global sym(vp9_highbd_filter_block1d4_h8_avg_sse2) PRIVATE
+sym(vp9_highbd_filter_block1d4_h8_avg_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
@@ -836,8 +836,8 @@ sym(vp9_high_filter_block1d4_h8_avg_sse2):
     pop         rbp
     ret
 
-global sym(vp9_high_filter_block1d8_h8_avg_sse2) PRIVATE
-sym(vp9_high_filter_block1d8_h8_avg_sse2):
+global sym(vp9_highbd_filter_block1d8_h8_avg_sse2) PRIVATE
+sym(vp9_highbd_filter_block1d8_h8_avg_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
@@ -893,8 +893,8 @@ sym(vp9_high_filter_block1d8_h8_avg_sse2):
     pop         rbp
     ret
 
-global sym(vp9_high_filter_block1d16_h8_avg_sse2) PRIVATE
-sym(vp9_high_filter_block1d16_h8_avg_sse2):
+global sym(vp9_highbd_filter_block1d16_h8_avg_sse2) PRIVATE
+sym(vp9_highbd_filter_block1d16_h8_avg_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7

@@ -10,7 +10,7 @@
 
 #include "libyuv/row.h"
 
-#if defined (_M_X64)
+#if defined (_M_X64) && !defined(LIBYUV_DISABLE_X86) && defined(_MSC_VER)
 #include <emmintrin.h>
 #include <tmmintrin.h>  // For _mm_maddubs_epi16
 #endif
@@ -21,7 +21,8 @@ extern "C" {
 #endif
 
 // This module is for Visual C.
-#if !defined(LIBYUV_DISABLE_X86) && defined(_MSC_VER)
+#if !defined(LIBYUV_DISABLE_X86) && defined(_MSC_VER) && \
+    (defined(_M_IX86) || defined(_M_X64))
 
 #define YG 74  /* (int8)(1.164 * 64 + 0.5) */
 
@@ -78,7 +79,6 @@ void I422ToARGBRow_SSSE3(const uint8* y_buf,
                          const uint8* v_buf,
                          uint8* dst_argb,
                          int width) {
-
   __m128i xmm0, xmm1, xmm2, xmm3;
   const __m128i xmm5 = _mm_set1_epi8(-1);
   const __m128i xmm4 = _mm_setzero_si128();
@@ -132,7 +132,6 @@ void I422ToARGBRow_Unaligned_SSSE3(const uint8* y_buf,
                                    const uint8* v_buf,
                                    uint8* dst_argb,
                                    int width) {
-
   __m128i xmm0, xmm1, xmm2, xmm3;
   const __m128i xmm5 = _mm_set1_epi8(-1);
   const __m128i xmm4 = _mm_setzero_si128();

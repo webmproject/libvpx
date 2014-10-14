@@ -144,6 +144,24 @@ is_windows_target() {
   fi
 }
 
+# Echoes path to $1 when it's executable and exists in ${LIBVPX_BIN_PATH}, or an
+# empty string. Caller is responsible for testing the string once the function
+# returns.
+vpx_tool_path() {
+  local readonly tool_name="$1"
+  local tool_path="${LIBVPX_BIN_PATH}/${tool_name}${VPX_TEST_EXE_SUFFIX}"
+  if [ ! -x "${tool_path}" ]; then
+    # Try one directory up: when running via examples.sh the tool could be in
+    # the parent directory of $LIBVPX_BIN_PATH.
+    tool_path="${LIBVPX_BIN_PATH}/../${tool_name}${VPX_TEST_EXE_SUFFIX}"
+  fi
+
+  if [ ! -x "${tool_path}" ]; then
+    tool_path=""
+  fi
+  echo "${tool_path}"
+}
+
 # Echoes yes to stdout when the file named by positional parameter one exists
 # in LIBVPX_BIN_PATH, and is executable.
 vpx_tool_available() {
@@ -182,11 +200,11 @@ webm_io_available() {
   [ "$(vpx_config_option_enabled CONFIG_WEBM_IO)" = "yes" ] && echo yes
 }
 
-# Filters strings from positional parameter one using the filter specified by
-# positional parameter two. Filter behavior depends on the presence of a third
-# positional parameter. When parameter three is present, strings that match the
-# filter are excluded. When omitted, strings matching the filter are included.
-# The filtered string is echoed to stdout.
+# Filters strings from $1 using the filter specified by $2. Filter behavior
+# depends on the presence of $3. When $3 is present, strings that match the
+# filter are excluded. When $3 is omitted, strings matching the filter are
+# included.
+# The filtered result is echoed to stdout.
 filter_strings() {
   strings=${1}
   filter=${2}
@@ -235,6 +253,15 @@ run_tests() {
     tests_to_filter=$(filter_strings "${tests_to_filter}" ${VPX_TEST_FILTER})
   fi
 
+  # User requested test listing: Dump test names and return.
+  if [ "${VPX_TEST_LIST_TESTS}" = "yes" ]; then
+    for test_name in $tests_to_filter; do
+      echo ${test_name}
+    done
+    return
+  fi
+
+  # Combine environment and actual tests.
   local tests_to_run="${env_tests} ${tests_to_filter}"
 
   check_git_hashes
@@ -265,6 +292,7 @@ cat << EOF
     --prefix: Allows for a user specified prefix to be inserted before all test
               programs. Grants the ability, for example, to run test programs
               within valgrind.
+    --list-tests: List all test names and exit without actually running tests.
     --verbose: Verbose output.
 
     When the --bin-path option is not specified the script attempts to use
@@ -323,6 +351,9 @@ while [ -n "$1" ]; do
       ;;
     --show-program-output)
       devnull=
+      ;;
+    --list-tests)
+      VPX_TEST_LIST_TESTS=yes
       ;;
     *)
       vpx_test_usage
@@ -383,6 +414,7 @@ vlog "$(basename "${0%.*}") test configuration:
   VP9_WEBM_FILE=${VP9_WEBM_FILE}
   VPX_TEST_EXE_SUFFIX=${VPX_TEST_EXE_SUFFIX}
   VPX_TEST_FILTER=${VPX_TEST_FILTER}
+  VPX_TEST_LIST_TESTS=${VPX_TEST_LIST_TESTS}
   VPX_TEST_OUTPUT_DIR=${VPX_TEST_OUTPUT_DIR}
   VPX_TEST_PREFIX=${VPX_TEST_PREFIX}
   VPX_TEST_RAND=${VPX_TEST_RAND}

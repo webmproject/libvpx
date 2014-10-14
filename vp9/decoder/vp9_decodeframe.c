@@ -196,29 +196,29 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
   if (eob > 0) {
     TX_TYPE tx_type = DCT_DCT;
     tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
-#if CONFIG_VP9_HIGH
-    if (xd->cur_buf->flags&YV12_FLAG_HIGHBITDEPTH) {
+#if CONFIG_VP9_HIGHBITDEPTH
+    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       if (xd->lossless) {
         tx_type = DCT_DCT;
-        vp9_high_iwht4x4_add(dqcoeff, dst, stride, eob, xd->bps);
+        vp9_highbd_iwht4x4_add(dqcoeff, dst, stride, eob, xd->bd);
       } else {
         const PLANE_TYPE plane_type = pd->plane_type;
         switch (tx_size) {
           case TX_4X4:
             tx_type = get_tx_type_4x4(plane_type, xd, block);
-            vp9_high_iht4x4_add(tx_type, dqcoeff, dst, stride, eob, xd->bps);
+            vp9_highbd_iht4x4_add(tx_type, dqcoeff, dst, stride, eob, xd->bd);
             break;
           case TX_8X8:
             tx_type = get_tx_type(plane_type, xd);
-            vp9_high_iht8x8_add(tx_type, dqcoeff, dst, stride, eob, xd->bps);
+            vp9_highbd_iht8x8_add(tx_type, dqcoeff, dst, stride, eob, xd->bd);
             break;
           case TX_16X16:
             tx_type = get_tx_type(plane_type, xd);
-            vp9_high_iht16x16_add(tx_type, dqcoeff, dst, stride, eob, xd->bps);
+            vp9_highbd_iht16x16_add(tx_type, dqcoeff, dst, stride, eob, xd->bd);
             break;
           case TX_32X32:
             tx_type = DCT_DCT;
-            vp9_high_idct32x32_add(dqcoeff, dst, stride, eob, xd->bps);
+            vp9_highbd_idct32x32_add(dqcoeff, dst, stride, eob, xd->bd);
             break;
           default:
             assert(0 && "Invalid transform size");
@@ -249,6 +249,7 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
             break;
           default:
             assert(0 && "Invalid transform size");
+            return;
         }
       }
     }
@@ -277,9 +278,11 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
           break;
         default:
           assert(0 && "Invalid transform size");
+          return;
       }
     }
-#endif
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
     if (eob == 1) {
       vpx_memset(dqcoeff, 0, 2 * sizeof(dqcoeff[0]));
     } else {
@@ -306,7 +309,7 @@ static void predict_and_reconstruct_intra_block(int plane, int block,
   VP9_COMMON *const cm = args->cm;
   MACROBLOCKD *const xd = args->xd;
   struct macroblockd_plane *const pd = &xd->plane[plane];
-  MODE_INFO *const mi = xd->mi[0];
+  MODE_INFO *const mi = xd->mi[0].src_mi;
   const PREDICTION_MODE mode = (plane == 0) ? get_y_mode(mi, block)
                                             : mi->mbmi.uv_mode;
   int x, y;
@@ -315,7 +318,7 @@ static void predict_and_reconstruct_intra_block(int plane, int block,
   dst = &pd->dst.buf[4 * y * pd->dst.stride + 4 * x];
 
   vp9_predict_intra_block(xd, block >> (tx_size << 1),
-                          b_width_log2(plane_bsize), tx_size, mode,
+                          b_width_log2_lookup[plane_bsize], tx_size, mode,
                           dst, pd->dst.stride, dst, pd->dst.stride,
                           x, y, plane);
 
@@ -362,12 +365,14 @@ static MB_MODE_INFO *set_offsets(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   const int offset = mi_row * cm->mi_stride + mi_col;
   int x, y;
 
-  xd->mi = cm->mi_grid_visible + offset;
-  xd->mi[0] = &cm->mi[offset];
-  xd->mi[0]->mbmi.sb_type = bsize;
+  xd->mi = cm->mi + offset;
+  xd->mi[0].src_mi = &xd->mi[0];  // Point to self.
+  xd->mi[0].mbmi.sb_type = bsize;
+
   for (y = 0; y < y_mis; ++y)
-    for (x = !y; x < x_mis; ++x)
-      xd->mi[y * cm->mi_stride + x] = xd->mi[0];
+    for (x = !y; x < x_mis; ++x) {
+      xd->mi[y * cm->mi_stride + x].src_mi = &xd->mi[0];
+    }
 
   set_skip_context(xd, mi_row, mi_col);
 
@@ -376,20 +381,7 @@ static MB_MODE_INFO *set_offsets(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   set_mi_row_col(xd, tile, mi_row, bh, mi_col, bw, cm->mi_rows, cm->mi_cols);
 
   vp9_setup_dst_planes(xd->plane, get_frame_new_buffer(cm), mi_row, mi_col);
-  return &xd->mi[0]->mbmi;
-}
-
-static void set_ref(VP9_COMMON *const cm, MACROBLOCKD *const xd,
-                    int idx, int mi_row, int mi_col) {
-  MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
-  RefBuffer *ref_buffer = &cm->frame_refs[mbmi->ref_frame[idx] - LAST_FRAME];
-  xd->block_refs[idx] = ref_buffer;
-  if (!vp9_is_valid_scale(&ref_buffer->sf))
-    vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
-                       "Invalid scale factors");
-  vp9_setup_pre_planes(xd, idx, ref_buffer->buf, mi_row, mi_col,
-                       &ref_buffer->sf);
-  xd->corrupted |= ref_buffer->buf->corrupted;
+  return &xd->mi[0].mbmi;
 }
 
 static void decode_block(VP9_COMMON *const cm, MACROBLOCKD *const xd,
@@ -408,8 +400,7 @@ static void decode_block(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   } else {
     if (cm->seg.enabled)
       setup_plane_dequants(cm, xd, vp9_get_qindex(&cm->seg, mbmi->segment_id,
-                                                  cm->base_qindex,
-                                                  cm->bit_depth));
+                                                  cm->base_qindex));
   }
 
   if (!is_inter_block(mbmi)) {
@@ -417,11 +408,6 @@ static void decode_block(VP9_COMMON *const cm, MACROBLOCKD *const xd,
     vp9_foreach_transformed_block(xd, bsize,
                                   predict_and_reconstruct_intra_block, &arg);
   } else {
-    // Setup
-    set_ref(cm, xd, 0, mi_row, mi_col);
-    if (has_second_ref(mbmi))
-      set_ref(cm, xd, 1, mi_row, mi_col);
-
     // Prediction
     vp9_dec_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
 
@@ -554,8 +540,7 @@ static void read_coef_probs(FRAME_CONTEXT *fc, TX_MODE tx_mode,
 }
 
 static void setup_segmentation(struct segmentation *seg,
-                               struct vp9_read_bit_buffer *rb,
-                               vpx_bit_depth_t bit_depth) {
+                               struct vp9_read_bit_buffer *rb) {
   int i, j;
 
   seg->update_map = 0;
@@ -641,11 +626,11 @@ static int read_delta_q(struct vp9_read_bit_buffer *rb, int *delta_q) {
 static void setup_quantization(VP9_COMMON *const cm, MACROBLOCKD *const xd,
                                struct vp9_read_bit_buffer *rb) {
   int update = 0;
+
   cm->base_qindex = vp9_rb_read_literal(rb, QINDEX_BITS);
   update |= read_delta_q(rb, &cm->y_dc_delta_q);
   update |= read_delta_q(rb, &cm->uv_dc_delta_q);
   update |= read_delta_q(rb, &cm->uv_ac_delta_q);
-
   if (update || cm->bit_depth != cm->dequant_bit_depth) {
     vp9_init_dequantizer(cm);
     cm->dequant_bit_depth = cm->bit_depth;
@@ -655,9 +640,8 @@ static void setup_quantization(VP9_COMMON *const cm, MACROBLOCKD *const xd,
                  cm->y_dc_delta_q == 0 &&
                  cm->uv_dc_delta_q == 0 &&
                  cm->uv_ac_delta_q == 0;
-
-#if CONFIG_VP9_HIGH
-  xd->bps = (int)cm->bit_depth;
+#if CONFIG_VP9_HIGHBITDEPTH
+  xd->bd = (int)cm->bit_depth;
 #endif
 }
 
@@ -692,11 +676,14 @@ static void resize_context_buffers(VP9_COMMON *cm, int width, int height) {
                        "Width and height beyond allowed size.");
 #endif
   if (cm->width != width || cm->height != height) {
-    const int new_rows = ALIGN_POWER_OF_TWO(height,
-                                            MI_SIZE_LOG2) >> MI_SIZE_LOG2;
-    const int new_cols = ALIGN_POWER_OF_TWO(width,
-                                            MI_SIZE_LOG2) >> MI_SIZE_LOG2;
-    if (calc_mi_size(new_rows) * calc_mi_size(new_cols) > cm->mi_alloc_size) {
+    const int new_mi_rows =
+        ALIGN_POWER_OF_TWO(height, MI_SIZE_LOG2) >> MI_SIZE_LOG2;
+    const int new_mi_cols =
+        ALIGN_POWER_OF_TWO(width,  MI_SIZE_LOG2) >> MI_SIZE_LOG2;
+
+    // Allocations in vp9_alloc_context_buffers() depend on individual
+    // dimensions as well as the overall size.
+    if (new_mi_cols > cm->mi_cols || new_mi_rows > cm->mi_rows) {
       if (vp9_alloc_context_buffers(cm, width, height))
         vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                            "Failed to allocate context buffers");
@@ -716,17 +703,28 @@ static void setup_frame_size(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
   setup_display_size(cm, rb);
 
   if (vp9_realloc_frame_buffer(
-      get_frame_new_buffer(cm), cm->width, cm->height,
-      cm->subsampling_x, cm->subsampling_y,
-#if CONFIG_VP9_HIGH
-      cm->use_high,
+          get_frame_new_buffer(cm), cm->width, cm->height,
+          cm->subsampling_x, cm->subsampling_y,
+#if CONFIG_VP9_HIGHBITDEPTH
+          cm->use_highbitdepth,
 #endif
-      VP9_DEC_BORDER_IN_PIXELS,
-      &cm->frame_bufs[cm->new_fb_idx].raw_frame_buffer,
-      cm->get_fb_cb, cm->cb_priv)) {
+          VP9_DEC_BORDER_IN_PIXELS,
+          &cm->frame_bufs[cm->new_fb_idx].raw_frame_buffer, cm->get_fb_cb,
+          cm->cb_priv)) {
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate frame buffer");
   }
+  cm->frame_bufs[cm->new_fb_idx].buf.subsampling_x = cm->subsampling_x;
+  cm->frame_bufs[cm->new_fb_idx].buf.subsampling_y = cm->subsampling_y;
+  cm->frame_bufs[cm->new_fb_idx].buf.bit_depth = (unsigned int)cm->bit_depth;
+}
+
+static INLINE int valid_ref_frame_img_fmt(vpx_bit_depth_t ref_bit_depth,
+                                          int ref_xss, int ref_yss,
+                                          vpx_bit_depth_t this_bit_depth,
+                                          int this_xss, int this_yss) {
+  return ref_bit_depth == this_bit_depth && ref_xss == this_xss &&
+         ref_yss == this_yss;
 }
 
 static void setup_frame_size_with_refs(VP9_COMMON *cm,
@@ -739,6 +737,10 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
       YV12_BUFFER_CONFIG *const buf = cm->frame_refs[i].buf;
       width = buf->y_crop_width;
       height = buf->y_crop_height;
+      if (buf->corrupted) {
+        vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+                           "Frame reference is corrupt");
+      }
       found = 1;
       break;
     }
@@ -762,6 +764,18 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
   if (!has_valid_ref_frame)
     vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
                        "Referenced frame has invalid size");
+  for (i = 0; i < REFS_PER_FRAME; ++i) {
+    RefBuffer *const ref_frame = &cm->frame_refs[i];
+    if (!valid_ref_frame_img_fmt(
+            ref_frame->buf->bit_depth,
+            ref_frame->buf->subsampling_x,
+            ref_frame->buf->subsampling_y,
+            cm->bit_depth,
+            cm->subsampling_x,
+            cm->subsampling_y))
+      vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+                         "Referenced frame has incompatible color space");
+  }
 
   resize_context_buffers(cm, width, height);
   setup_display_size(cm, rb);
@@ -769,8 +783,8 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
   if (vp9_realloc_frame_buffer(
           get_frame_new_buffer(cm), cm->width, cm->height,
           cm->subsampling_x, cm->subsampling_y,
-#if CONFIG_VP9_HIGH
-          cm->use_high,
+#if CONFIG_VP9_HIGHBITDEPTH
+          cm->use_highbitdepth,
 #endif
           VP9_DEC_BORDER_IN_PIXELS,
           &cm->frame_bufs[cm->new_fb_idx].raw_frame_buffer, cm->get_fb_cb,
@@ -778,6 +792,9 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate frame buffer");
   }
+  cm->frame_bufs[cm->new_fb_idx].buf.subsampling_x = cm->subsampling_x;
+  cm->frame_bufs[cm->new_fb_idx].buf.subsampling_y = cm->subsampling_y;
+  cm->frame_bufs[cm->new_fb_idx].buf.bit_depth = (unsigned int)cm->bit_depth;
 }
 
 static void setup_tile_info(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
@@ -885,6 +902,8 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
 
   if (cm->lf.filter_level) {
     LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
+    // Be sure to sync as we might be resuming after a failed frame decode.
+    winterface->sync(&pbi->lf_worker);
     lf_data->frame_buffer = get_frame_new_buffer(cm);
     lf_data->cm = cm;
     vp9_copy(lf_data->planes, pbi->mb.plane);
@@ -954,7 +973,7 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
         pbi->mb.corrupted |= tile_data->xd.corrupted;
       }
       // Loopfilter one row.
-      if (cm->lf.filter_level) {
+      if (cm->lf.filter_level && !pbi->mb.corrupted) {
         const int lf_start = mi_row - MI_BLOCK_SIZE;
         LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
 
@@ -977,7 +996,7 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
   }
 
   // Loopfilter remaining rows in the frame.
-  if (cm->lf.filter_level) {
+  if (cm->lf.filter_level && !pbi->mb.corrupted) {
     LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
     winterface->sync(&pbi->lf_worker);
     lf_data->start = lf_data->stop;
@@ -991,9 +1010,8 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
   return vp9_reader_find_end(&tile_data->bit_reader);
 }
 
-static int tile_worker_hook(void *arg1, void *arg2) {
-  TileWorkerData *const tile_data = (TileWorkerData*)arg1;
-  const TileInfo *const tile = (TileInfo*)arg2;
+static int tile_worker_hook(TileWorkerData *const tile_data,
+                            const TileInfo *const tile) {
   int mi_row, mi_col;
 
   for (mi_row = tile->mi_row_start; mi_row < tile->mi_row_end;
@@ -1066,6 +1084,7 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
 
   // Reset tile decoding hook
   for (n = 0; n < num_workers; ++n) {
+    winterface->sync(&pbi->tile_workers[n]);
     pbi->tile_workers[n].hook = (VP9WorkerHook)tile_worker_hook;
   }
 
@@ -1170,14 +1189,14 @@ static void read_bitdepth_colorspace_sampling(
     VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
   if (cm->profile >= PROFILE_2) {
     cm->bit_depth = vp9_rb_read_bit(rb) ? VPX_BITS_12 : VPX_BITS_10;
-#if CONFIG_VP9_HIGH
-    cm->use_high = 1;
+#if CONFIG_VP9_HIGHBITDEPTH
+    cm->use_highbitdepth = 1;
 #endif
   } else {
-#if CONFIG_VP9_HIGH
-    cm->use_high = 0;
-#endif
     cm->bit_depth = VPX_BITS_8;
+#if CONFIG_VP9_HIGHBITDEPTH
+    cm->use_highbitdepth = 0;
+#endif
   }
   cm->color_space = (COLOR_SPACE)vp9_rb_read_literal(rb, 3);
   if (cm->color_space != SRGB) {
@@ -1222,6 +1241,7 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
                          "Invalid frame marker");
 
   cm->profile = vp9_read_profile(rb);
+
   if (cm->profile >= MAX_PROFILES)
     vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
                        "Unsupported bitstream profile");
@@ -1261,6 +1281,7 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
     }
 
     setup_frame_size(cm, rb);
+    pbi->need_resync = 0;
   } else {
     cm->intra_only = cm->show_frame ? 0 : vp9_rb_read_bit(rb);
 
@@ -1281,13 +1302,14 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
         cm->color_space = BT_601;
         cm->subsampling_y = cm->subsampling_x = 1;
         cm->bit_depth = VPX_BITS_8;
-#if CONFIG_VP9_HIGH
-        cm->use_high = 0;
+#if CONFIG_VP9_HIGHBITDEPTH
+        cm->use_highbitdepth = 0;
 #endif
       }
 
       pbi->refresh_frame_flags = vp9_rb_read_literal(rb, REF_FRAMES);
       setup_frame_size(cm, rb);
+      pbi->need_resync = 0;
     } else {
       pbi->refresh_frame_flags = vp9_rb_read_literal(rb, REF_FRAMES);
       for (i = 0; i < REFS_PER_FRAME; ++i) {
@@ -1306,11 +1328,12 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
 
       for (i = 0; i < REFS_PER_FRAME; ++i) {
         RefBuffer *const ref_buf = &cm->frame_refs[i];
-#if CONFIG_VP9_HIGH
+#if CONFIG_VP9_HIGHBITDEPTH
         vp9_setup_scale_factors_for_frame(&ref_buf->sf,
                                           ref_buf->buf->y_crop_width,
                                           ref_buf->buf->y_crop_height,
-                                          cm->width, cm->height, cm->use_high);
+                                          cm->width, cm->height,
+                                          cm->use_highbitdepth);
 #else
         vp9_setup_scale_factors_for_frame(&ref_buf->sf,
                                           ref_buf->buf->y_crop_width,
@@ -1322,9 +1345,16 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
       }
     }
   }
-#if CONFIG_VP9_HIGH
+#if CONFIG_VP9_HIGHBITDEPTH
   get_frame_new_buffer(cm)->bit_depth = cm->bit_depth;
 #endif
+
+  if (pbi->need_resync) {
+    vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+                       "Keyframe / intra-only frame required to reset decoder"
+                       " state");
+  }
+
   if (!cm->error_resilient_mode) {
     cm->refresh_frame_context = vp9_rb_read_bit(rb);
     cm->frame_parallel_decoding_mode = vp9_rb_read_bit(rb);
@@ -1342,7 +1372,7 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
 
   setup_loopfilter(&cm->lf, rb);
   setup_quantization(cm, &pbi->mb, rb);
-  setup_segmentation(&cm->seg, rb, cm->bit_depth);
+  setup_segmentation(&cm->seg, rb);
 
   setup_tile_info(cm, rb);
   sz = vp9_rb_read_literal(rb, 16);
@@ -1524,9 +1554,11 @@ void vp9_decode_frame(VP9Decoder *pbi,
   if (pbi->max_threads > 1 && tile_rows == 1 && tile_cols > 1 &&
       cm->frame_parallel_decoding_mode) {
     *p_data_end = decode_tiles_mt(pbi, data + first_partition_size, data_end);
-    // If multiple threads are used to decode tiles, then we use those threads
-    // to do parallel loopfiltering.
-    vp9_loop_filter_frame_mt(new_fb, pbi, cm, cm->lf.filter_level, 0);
+    if (!xd->corrupted) {
+      // If multiple threads are used to decode tiles, then we use those threads
+      // to do parallel loopfiltering.
+      vp9_loop_filter_frame_mt(new_fb, pbi, cm, cm->lf.filter_level, 0);
+    }
   } else {
     *p_data_end = decode_tiles(pbi, data + first_partition_size, data_end);
   }

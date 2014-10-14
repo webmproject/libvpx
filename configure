@@ -111,6 +111,7 @@ all_platforms="${all_platforms} armv7-win32-vs11"
 all_platforms="${all_platforms} armv7-win32-vs12"
 all_platforms="${all_platforms} armv7s-darwin-gcc"
 all_platforms="${all_platforms} mips32-linux-gcc"
+all_platforms="${all_platforms} mips64-linux-gcc"
 all_platforms="${all_platforms} ppc32-darwin8-gcc"
 all_platforms="${all_platforms} ppc32-darwin9-gcc"
 all_platforms="${all_platforms} ppc32-linux-gcc"
@@ -210,7 +211,6 @@ enable_feature spatial_resampling
 enable_feature multithread
 enable_feature os_support
 enable_feature temporal_denoising
-enable_feature high_quant
 
 [ -d "${source_path}/../include" ] && enable_feature alt_tree_layout
 for d in vp8 vp9; do
@@ -255,6 +255,8 @@ ARCH_EXT_LIST="
     mips32
     dspr2
 
+    mips64
+
     mmx
     sse
     sse2
@@ -276,12 +278,10 @@ HAVE_LIST="
     unistd_h
 "
 EXPERIMENT_LIST="
-    vp9_high
     spatial_svc
-    high_quant
     vp9_temporal_denoising
-    emulate_hw_high
     fp_mb_stats
+    emulate_hardware
 "
 CONFIG_LIST="
     external_build
@@ -335,6 +335,7 @@ CONFIG_LIST="
     multi_res_encoding
     temporal_denoising
     coefficient_range_checking
+    vp9_highbitdepth
     experimental
     size_limit
     ${EXPERIMENT_LIST}
@@ -393,6 +394,7 @@ CMDLINE_SELECT="
     multi_res_encoding
     temporal_denoising
     coefficient_range_checking
+    vp9_highbitdepth
     experimental
 "
 

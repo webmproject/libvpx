@@ -49,7 +49,7 @@ open CONFIG_FILE, $opts{config} or
 
 my %config = ();
 while (<CONFIG_FILE>) {
-  next if !/^CONFIG_/;
+  next if !/^(?:CONFIG_|HAVE_)/;
   chomp;
   my @pair = split /=/;
   $config{$pair[0]} = $pair[1];
@@ -209,14 +209,16 @@ sub common_top() {
 #define RTCD_EXTERN extern
 #endif
 
+EOF
+
+process_forward_decls();
+print <<EOF;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 EOF
-
-process_forward_decls();
-print "\n";
 declare_function_pointers("c", @ALL_ARCHS);
 
 print <<EOF;
@@ -365,13 +367,13 @@ if ($opts{arch} eq 'x86') {
   @REQUIRES = filter(keys %required ? keys %required : qw/mmx sse sse2/);
   &require(@REQUIRES);
   x86;
-} elsif ($opts{arch} eq 'mips32') {
-  @ALL_ARCHS = filter(qw/mips32/);
+} elsif ($opts{arch} eq 'mips32' || $opts{arch} eq 'mips64') {
+  @ALL_ARCHS = filter("$opts{arch}");
   open CONFIG_FILE, $opts{config} or
     die "Error opening config file '$opts{config}': $!\n";
   while (<CONFIG_FILE>) {
     if (/HAVE_DSPR2=yes/) {
-      @ALL_ARCHS = filter(qw/mips32 dspr2/);
+      @ALL_ARCHS = filter("$opts{arch}", qw/dspr2/);
       last;
     }
   }
@@ -388,7 +390,7 @@ if ($opts{arch} eq 'x86') {
   @REQUIRES = filter(keys %required ? keys %required : qw/media/);
   &require(@REQUIRES);
   arm;
-} elsif ($opts{arch} eq 'armv8') {
+} elsif ($opts{arch} eq 'armv8' || $opts{arch} eq 'arm64' ) {
   @ALL_ARCHS = filter(qw/neon/);
   arm;
 } else {

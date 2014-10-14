@@ -43,8 +43,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define VPX_CODEC_DISABLE_COMPAT 1
-
 #include "vpx/vp8dx.h"
 #include "vpx/vpx_decoder.h"
 

@@ -89,8 +89,8 @@ struct VpxInputContext {
   enum VideoFileType file_type;
   uint32_t width;
   uint32_t height;
-  uint8_t  bit_depth;
   vpx_img_fmt_t fmt;
+  vpx_bit_depth_t bit_depth;
   int only_i420;
   uint32_t fourcc;
   struct VpxRational framerate;
@@ -103,17 +103,25 @@ struct VpxInputContext {
 extern "C" {
 #endif
 
+#if defined(__GNUC__)
+#define VPX_NO_RETURN __attribute__((noreturn))
+#else
+#define VPX_NO_RETURN
+#endif
+
 /* Sets a stdio stream into binary mode */
 FILE *set_binary_mode(FILE *stream);
 
-void die(const char *fmt, ...);
-void fatal(const char *fmt, ...);
+void die(const char *fmt, ...) VPX_NO_RETURN;
+void fatal(const char *fmt, ...) VPX_NO_RETURN;
 void warn(const char *fmt, ...);
 
-void die_codec(vpx_codec_ctx_t *ctx, const char *s);
+void die_codec(vpx_codec_ctx_t *ctx, const char *s) VPX_NO_RETURN;
 
 /* The tool including this file must define usage_exit() */
-void usage_exit();
+void usage_exit() VPX_NO_RETURN;
+
+#undef VPX_NO_RETURN
 
 int read_yuv_frame(struct VpxInputContext *input_ctx, vpx_image_t *yuv_frame);
 
@@ -140,6 +148,12 @@ void vpx_img_write(const vpx_image_t *img, FILE *file);
 int vpx_img_read(vpx_image_t *img, FILE *file);
 
 double sse_to_psnr(double samples, double peak, double mse);
+
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+void vpx_img_upshift(vpx_image_t *dst, vpx_image_t *src, int input_shift);
+void vpx_img_downshift(vpx_image_t *dst, vpx_image_t *src, int down_shift);
+void vpx_img_truncate_16_to_8(vpx_image_t *dst, vpx_image_t *src);
+#endif
 
 #ifdef __cplusplus
 }  /* extern "C" */

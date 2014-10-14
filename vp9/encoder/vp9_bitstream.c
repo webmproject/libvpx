@@ -12,8 +12,6 @@
 #include <stdio.h>
 #include <limits.h>
 
-#include "./vpx_config.h"
-
 #include "vpx/vpx_encoder.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem_ops.h"
@@ -132,14 +130,18 @@ static void pack_mb_tokens(vp9_writer *w,
     int i = 0;
     int v = a->value;
     int n = a->len;
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_QUANT
-    const vp9_extra_bit *const b =
-        bit_depth == VPX_BITS_12 ? &vp9_extra_bits_high12[t] :
-        bit_depth == VPX_BITS_10 ? &vp9_extra_bits_high10[t] :
-        &vp9_extra_bits[t];
+#if CONFIG_VP9_HIGHBITDEPTH
+    const vp9_extra_bit *b;
+    if (bit_depth == VPX_BITS_12)
+      b = &vp9_extra_bits_high12[t];
+    else if (bit_depth == VPX_BITS_10)
+      b = &vp9_extra_bits_high10[t];
+    else
+      b = &vp9_extra_bits[t];
 #else
     const vp9_extra_bit *const b = &vp9_extra_bits[t];
-#endif
+    (void) bit_depth;
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
     /* skip one or two nodes */
     if (p->skip_eob_node) {
@@ -199,7 +201,7 @@ static void write_segment_id(vp9_writer *w, const struct segmentation *seg,
 // This function encodes the reference frame
 static void write_ref_frames(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                              vp9_writer *w) {
-  const MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
+  const MB_MODE_INFO *const mbmi = &xd->mi[0].src_mi->mbmi;
   const int is_compound = has_second_ref(mbmi);
   const int segment_id = mbmi->segment_id;
 
@@ -304,6 +306,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
       vp9_write_token(w, vp9_switchable_interp_tree,
                       cm->fc.switchable_interp_prob[ctx],
                       &switchable_interp_encodings[mbmi->interp_filter]);
+      ++cpi->interp_filter_selected[0][mbmi->interp_filter];
     } else {
       assert(mbmi->interp_filter == cm->interp_filter);
     }
@@ -338,11 +341,12 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
 }
 
 static void write_mb_modes_kf(const VP9_COMMON *cm, const MACROBLOCKD *xd,
-                              MODE_INFO **mi_8x8, vp9_writer *w) {
+                              MODE_INFO *mi_8x8, vp9_writer *w) {
   const struct segmentation *const seg = &cm->seg;
-  const MODE_INFO *const mi = mi_8x8[0];
-  const MODE_INFO *const above_mi = mi_8x8[-xd->mi_stride];
-  const MODE_INFO *const left_mi = xd->left_available ? mi_8x8[-1] : NULL;
+  const MODE_INFO *const mi = mi_8x8;
+  const MODE_INFO *const above_mi = mi_8x8[-xd->mi_stride].src_mi;
+  const MODE_INFO *const left_mi =
+      xd->left_available ? mi_8x8[-1].src_mi : NULL;
   const MB_MODE_INFO *const mbmi = &mi->mbmi;
   const BLOCK_SIZE bsize = mbmi->sb_type;
 
@@ -381,8 +385,8 @@ static void write_modes_b(VP9_COMP *cpi, const TileInfo *const tile,
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   MODE_INFO *m;
 
-  xd->mi = cm->mi_grid_visible + (mi_row * cm->mi_stride + mi_col);
-  m = xd->mi[0];
+  xd->mi = cm->mi + (mi_row * cm->mi_stride + mi_col);
+  m = xd->mi;
 
   set_mi_row_col(xd, tile,
                  mi_row, num_8x8_blocks_high_lookup[m->mbmi.sb_type],
@@ -427,7 +431,7 @@ static void write_modes_sb(VP9_COMP *cpi,
   const VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
 
-  const int bsl = b_width_log2(bsize);
+  const int bsl = b_width_log2_lookup[bsize];
   const int bs = (1 << bsl) / 4;
   PARTITION_TYPE partition;
   BLOCK_SIZE subsize;
@@ -436,7 +440,7 @@ static void write_modes_sb(VP9_COMP *cpi,
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return;
 
-  m = cm->mi_grid_visible[mi_row * cm->mi_stride + mi_col];
+  m = cm->mi[mi_row * cm->mi_stride + mi_col].src_mi;
 
   partition = partition_lookup[bsl][m->mbmi.sb_type];
   write_partition(cm, xd, bs, mi_row, mi_col, partition, bsize, w);
@@ -679,8 +683,6 @@ static void update_coef_probs(VP9_COMP *cpi, vp9_writer* w) {
   TX_SIZE tx_size;
   vp9_coeff_stats frame_branch_ct[TX_SIZES][PLANE_TYPES];
   vp9_coeff_probs_model frame_coef_probs[TX_SIZES][PLANE_TYPES];
-
-  vp9_clear_system_state();
 
   for (tx_size = TX_4X4; tx_size <= TX_32X32; ++tx_size)
     build_tree_distribution(cpi, tx_size, frame_branch_ct[tx_size],
@@ -1008,8 +1010,10 @@ static void write_frame_size_with_refs(VP9_COMP *cpi,
 
     // Set "found" to 0 for temporal svc and for spatial svc key frame
     if (cpi->use_svc &&
-        (cpi->svc.number_spatial_layers == 1 ||
-         cpi->svc.layer_context[cpi->svc.spatial_layer_id].is_key_frame)) {
+        ((cpi->svc.number_temporal_layers > 1 &&
+         cpi->oxcf.rc_mode == VPX_CBR) ||
+        (cpi->svc.number_spatial_layers > 1 &&
+         cpi->svc.layer_context[cpi->svc.spatial_layer_id].is_key_frame))) {
       found = 0;
     }
     vp9_wb_write_bit(wb, found);
@@ -1093,7 +1097,16 @@ static void write_uncompressed_header(VP9_COMP *cpi,
     write_bitdepth_colorspace_sampling(cm, wb);
     write_frame_size(cm, wb);
   } else {
-    if (!cm->show_frame)
+    // In spatial svc if it's not error_resilient_mode then we need to code all
+    // visible frames as invisible. But we need to keep the show_frame flag so
+    // that the publisher could know whether it is supposed to be visible.
+    // So we will code the show_frame flag as it is. Then code the intra_only
+    // bit here. This will make the bitstream incompatible. In the player we
+    // will change to show_frame flag to 0, then add an one byte frame with
+    // show_existing_frame flag which tells the decoder which frame we want to
+    // show.
+    if (!cm->show_frame ||
+        (is_two_pass_svc(cpi) && cm->error_resilient_mode == 0))
       vp9_wb_write_bit(wb, cm->intra_only);
 
     if (!cm->error_resilient_mode)

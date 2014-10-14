@@ -21,6 +21,7 @@
 #include "./vpx_config.h"
 #include "./vp9_rtcd.h"
 #include "vp9/common/vp9_entropy.h"
+#include "vpx/vpx_codec.h"
 #include "vpx/vpx_integer.h"
 
 using libvpx_test::ACMRandom;
@@ -37,7 +38,7 @@ static int round(double x) {
 
 const int kNumCoeffs = 1024;
 const double kPi = 3.141592653589793238462643383279502884;
-void reference_32x32_dct_1d(const double in[32], double out[32], int stride) {
+void reference_32x32_dct_1d(const double in[32], double out[32]) {
   const double kInvSqrt2 = 0.707106781186547524400844362104;
   for (int k = 0; k < 32; k++) {
     out[k] = 0.0;
@@ -55,7 +56,7 @@ void reference_32x32_dct_2d(const int16_t input[kNumCoeffs],
     double temp_in[32], temp_out[32];
     for (int j = 0; j < 32; ++j)
       temp_in[j] = input[j*32 + i];
-    reference_32x32_dct_1d(temp_in, temp_out, 1);
+    reference_32x32_dct_1d(temp_in, temp_out);
     for (int j = 0; j < 32; ++j)
       output[j * 32 + i] = temp_out[j];
   }
@@ -64,7 +65,7 @@ void reference_32x32_dct_2d(const int16_t input[kNumCoeffs],
     double temp_in[32], temp_out[32];
     for (int j = 0; j < 32; ++j)
       temp_in[j] = output[j + i*32];
-    reference_32x32_dct_1d(temp_in, temp_out, 1);
+    reference_32x32_dct_1d(temp_in, temp_out);
     // Scale by some magic number
     for (int j = 0; j < 32; ++j)
       output[j + i * 32] = temp_out[j] / 4;
@@ -74,28 +75,27 @@ void reference_32x32_dct_2d(const int16_t input[kNumCoeffs],
 typedef void (*FwdTxfmFunc)(const int16_t *in, tran_low_t *out, int stride);
 typedef void (*InvTxfmFunc)(const tran_low_t *in, uint8_t *out, int stride);
 
-typedef std::tr1::tuple<FwdTxfmFunc, InvTxfmFunc, int, int> Trans32x32Param;
+typedef std::tr1::tuple<FwdTxfmFunc, InvTxfmFunc, int, vpx_bit_depth_t>
+    Trans32x32Param;
 
-#if CONFIG_VP9_HIGH
-
+#if CONFIG_VP9_HIGHBITDEPTH
 void idct32x32_10(const tran_low_t *in, uint8_t *out, int stride) {
-  vp9_high_idct32x32_1024_add_c(in, out, stride, 10);
+  vp9_highbd_idct32x32_1024_add_c(in, out, stride, 10);
 }
 
 void idct32x32_12(const tran_low_t *in, uint8_t *out, int stride) {
-  vp9_high_idct32x32_1024_add_c(in, out, stride, 12);
+  vp9_highbd_idct32x32_1024_add_c(in, out, stride, 12);
 }
-
 #endif
 
 class Trans32x32Test : public ::testing::TestWithParam<Trans32x32Param> {
  public:
   virtual ~Trans32x32Test() {}
   virtual void SetUp() {
-    fwd_txfm_  = GET_PARAM(0);
-    inv_txfm_  = GET_PARAM(1);
-    version_   = GET_PARAM(2);  // 0: high precision forward transform
-                                // 1: low precision version for rd loop
+    fwd_txfm_ = GET_PARAM(0);
+    inv_txfm_ = GET_PARAM(1);
+    version_  = GET_PARAM(2);  // 0: high precision forward transform
+                               // 1: low precision version for rd loop
     bit_depth_ = GET_PARAM(3);
     mask_ = (1 << bit_depth_) - 1;
   }
@@ -104,7 +104,7 @@ class Trans32x32Test : public ::testing::TestWithParam<Trans32x32Param> {
 
  protected:
   int version_;
-  int bit_depth_;
+  vpx_bit_depth_t bit_depth_;
   int mask_;
   FwdTxfmFunc fwd_txfm_;
   InvTxfmFunc inv_txfm_;
@@ -118,36 +118,45 @@ TEST_P(Trans32x32Test, AccuracyCheck) {
   DECLARE_ALIGNED_ARRAY(16, int16_t, test_input_block, kNumCoeffs);
   DECLARE_ALIGNED_ARRAY(16, tran_low_t, test_temp_block, kNumCoeffs);
   DECLARE_ALIGNED_ARRAY(16, uint8_t, dst, kNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(16, uint16_t, dst16, kNumCoeffs);
   DECLARE_ALIGNED_ARRAY(16, uint8_t, src, kNumCoeffs);
+#if CONFIG_VP9_HIGHBITDEPTH
+  DECLARE_ALIGNED_ARRAY(16, uint16_t, dst16, kNumCoeffs);
   DECLARE_ALIGNED_ARRAY(16, uint16_t, src16, kNumCoeffs);
+#endif
 
   for (int i = 0; i < count_test_block; ++i) {
-    // Initialize a test block with input range [-255, 255].
+    // Initialize a test block with input range [-mask_, mask_].
     for (int j = 0; j < kNumCoeffs; ++j) {
       if (bit_depth_ == 8) {
         src[j] = rnd.Rand8();
         dst[j] = rnd.Rand8();
         test_input_block[j] = src[j] - dst[j];
+#if CONFIG_VP9_HIGHBITDEPTH
       } else {
         src16[j] = rnd.Rand16() & mask_;
         dst16[j] = rnd.Rand16() & mask_;
         test_input_block[j] = src16[j] - dst16[j];
+#endif
       }
     }
 
     ASM_REGISTER_STATE_CHECK(fwd_txfm_(test_input_block, test_temp_block, 32));
-    if (bit_depth_ == 8)
+    if (bit_depth_ == VPX_BITS_8) {
       ASM_REGISTER_STATE_CHECK(inv_txfm_(test_temp_block, dst, 32));
-#if CONFIG_VP9_HIGH
-    else
+#if CONFIG_VP9_HIGHBITDEPTH
+    } else {
       ASM_REGISTER_STATE_CHECK(inv_txfm_(test_temp_block,
                                          CONVERT_TO_BYTEPTR(dst16), 32));
 #endif
+    }
 
     for (int j = 0; j < kNumCoeffs; ++j) {
-      const uint32_t diff = bit_depth_ == 8 ? dst[j] - src[j] :
-                                              dst16[j] - src16[j];
+#if CONFIG_VP9_HIGHBITDEPTH
+      const uint32_t diff =
+          bit_depth_ == VPX_BITS_8 ? dst[j] - src[j] : dst16[j] - src16[j];
+#else
+      const uint32_t diff = dst[j] - src[j];
+#endif
       const uint32_t error = diff * diff;
       if (max_error < error)
         max_error = error;
@@ -247,38 +256,47 @@ TEST_P(Trans32x32Test, InverseAccuracy) {
   DECLARE_ALIGNED_ARRAY(16, int16_t, in, kNumCoeffs);
   DECLARE_ALIGNED_ARRAY(16, tran_low_t, coeff, kNumCoeffs);
   DECLARE_ALIGNED_ARRAY(16, uint8_t, dst, kNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(16, uint16_t, dst16, kNumCoeffs);
   DECLARE_ALIGNED_ARRAY(16, uint8_t, src, kNumCoeffs);
+#if CONFIG_VP9_HIGHBITDEPTH
+  DECLARE_ALIGNED_ARRAY(16, uint16_t, dst16, kNumCoeffs);
   DECLARE_ALIGNED_ARRAY(16, uint16_t, src16, kNumCoeffs);
+#endif
 
   for (int i = 0; i < count_test_block; ++i) {
     double out_r[kNumCoeffs];
 
     // Initialize a test block with input range [-255, 255]
     for (int j = 0; j < kNumCoeffs; ++j) {
-      if (bit_depth_ == 8) {
+      if (bit_depth_ == VPX_BITS_8) {
         src[j] = rnd.Rand8();
         dst[j] = rnd.Rand8();
         in[j] = src[j] - dst[j];
+#if CONFIG_VP9_HIGHBITDEPTH
       } else {
         src16[j] = rnd.Rand16() & mask_;
         dst16[j] = rnd.Rand16() & mask_;
         in[j] = src16[j] - dst16[j];
+#endif
       }
     }
 
     reference_32x32_dct_2d(in, out_r);
     for (int j = 0; j < kNumCoeffs; ++j)
       coeff[j] = round(out_r[j]);
-
-    if (bit_depth_ == 8)
+    if (bit_depth_ == VPX_BITS_8) {
       ASM_REGISTER_STATE_CHECK(inv_txfm_(coeff, dst, 32));
-#if CONFIG_VP9_HIGH
-    else
+#if CONFIG_VP9_HIGHBITDEPTH
+    } else {
       ASM_REGISTER_STATE_CHECK(inv_txfm_(coeff, CONVERT_TO_BYTEPTR(dst16), 32));
 #endif
+    }
     for (int j = 0; j < kNumCoeffs; ++j) {
-      const int diff = bit_depth_ == 8 ? dst[j] - src[j] : dst16[j] - src16[j];
+#if CONFIG_VP9_HIGHBITDEPTH
+      const int diff =
+          bit_depth_ == VPX_BITS_8 ? dst[j] - src[j] : dst16[j] - src16[j];
+#else
+      const int diff = dst[j] - src[j];
+#endif
       const int error = diff * diff;
       EXPECT_GE(1, error)
           << "Error: 32x32 IDCT has error " << error
@@ -289,51 +307,59 @@ TEST_P(Trans32x32Test, InverseAccuracy) {
 
 using std::tr1::make_tuple;
 
-#if CONFIG_VP9_HIGH
+#if CONFIG_VP9_HIGHBITDEPTH
 INSTANTIATE_TEST_CASE_P(
     C, Trans32x32Test,
     ::testing::Values(
-        make_tuple(&vp9_fdct32x32_c, &vp9_idct32x32_1024_add_c, 0, 8),
-        make_tuple(&vp9_fdct32x32_rd_c, &vp9_idct32x32_1024_add_c, 1, 8),
-        make_tuple(&vp9_high_fdct32x32_c, &idct32x32_10, 0, 10),
-        make_tuple(&vp9_high_fdct32x32_rd_c, &idct32x32_10, 1, 10),
-        make_tuple(&vp9_high_fdct32x32_c, &idct32x32_12, 0, 12),
-        make_tuple(&vp9_high_fdct32x32_rd_c, &idct32x32_12, 1, 12)));
+        make_tuple(&vp9_highbd_fdct32x32_c,
+                   &idct32x32_10, 0, VPX_BITS_10),
+        make_tuple(&vp9_highbd_fdct32x32_rd_c,
+                   &idct32x32_10, 1, VPX_BITS_10),
+        make_tuple(&vp9_highbd_fdct32x32_c,
+                   &idct32x32_12, 0, VPX_BITS_12),
+        make_tuple(&vp9_highbd_fdct32x32_rd_c,
+                   &idct32x32_12, 1, VPX_BITS_12),
+        make_tuple(&vp9_fdct32x32_c,
+                   &vp9_idct32x32_1024_add_c, 0, VPX_BITS_8),
+        make_tuple(&vp9_fdct32x32_rd_c,
+                   &vp9_idct32x32_1024_add_c, 1, VPX_BITS_8)));
 #else
 INSTANTIATE_TEST_CASE_P(
     C, Trans32x32Test,
     ::testing::Values(
-        make_tuple(&vp9_fdct32x32_c, &vp9_idct32x32_1024_add_c, 0, 8),
-        make_tuple(&vp9_fdct32x32_rd_c, &vp9_idct32x32_1024_add_c, 1, 8)));
+        make_tuple(&vp9_fdct32x32_c,
+                   &vp9_idct32x32_1024_add_c, 0, VPX_BITS_8),
+        make_tuple(&vp9_fdct32x32_rd_c,
+                   &vp9_idct32x32_1024_add_c, 1, VPX_BITS_8)));
 #endif
 
-#if HAVE_NEON_ASM && !CONFIG_VP9_HIGH
+#if HAVE_NEON_ASM && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(
     NEON, Trans32x32Test,
     ::testing::Values(
         make_tuple(&vp9_fdct32x32_c,
-                   &vp9_idct32x32_1024_add_neon, 0, 8),
+                   &vp9_idct32x32_1024_add_neon, 0, VPX_BITS_8),
         make_tuple(&vp9_fdct32x32_rd_c,
-                   &vp9_idct32x32_1024_add_neon, 1, 8)));
+                   &vp9_idct32x32_1024_add_neon, 1, VPX_BITS_8)));
 #endif
 
-#if HAVE_SSE2 && !CONFIG_VP9_HIGH
+#if HAVE_SSE2 && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(
     SSE2, Trans32x32Test,
     ::testing::Values(
         make_tuple(&vp9_fdct32x32_sse2,
-                   &vp9_idct32x32_1024_add_sse2, 0, 8),
+                   &vp9_idct32x32_1024_add_sse2, 0, VPX_BITS_8),
         make_tuple(&vp9_fdct32x32_rd_sse2,
-                   &vp9_idct32x32_1024_add_sse2, 1, 8)));
+                   &vp9_idct32x32_1024_add_sse2, 1, VPX_BITS_8)));
 #endif
 
-#if HAVE_AVX2 && !CONFIG_VP9_HIGH
+#if HAVE_AVX2 && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(
     AVX2, Trans32x32Test,
     ::testing::Values(
         make_tuple(&vp9_fdct32x32_avx2,
-                   &vp9_idct32x32_1024_add_sse2, 0, 8),
+                   &vp9_idct32x32_1024_add_sse2, 0, VPX_BITS_8),
         make_tuple(&vp9_fdct32x32_rd_avx2,
-                   &vp9_idct32x32_1024_add_sse2, 1, 8)));
+                   &vp9_idct32x32_1024_add_sse2, 1, VPX_BITS_8)));
 #endif
 }  // namespace

@@ -12,8 +12,8 @@
 #ifndef VP9_ENCODER_VP9_RATECTRL_H_
 #define VP9_ENCODER_VP9_RATECTRL_H_
 
-#include "vpx/vpx_integer.h"
 #include "vpx/vpx_codec.h"
+#include "vpx/vpx_integer.h"
 
 #include "vp9/common/vp9_blockd.h"
 
@@ -42,6 +42,7 @@ typedef struct {
   int sb64_target_rate;
   int last_q[FRAME_TYPES];         // Separate values for Intra/Inter
   int last_boosted_qindex;         // Last boosted GF/KF/ARF q
+  int last_kf_qindex;              // Q index of the last key frame coded.
 
   int gfu_boost;
   int last_boost;
@@ -85,6 +86,8 @@ typedef struct {
 
   int long_rolling_target_bits;
   int long_rolling_actual_bits;
+
+  int rate_error_estimate;
 
   int64_t total_actual_bits;
   int64_t total_target_bits;

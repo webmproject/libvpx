@@ -245,13 +245,13 @@ esac
 case "$target" in
     x86_64*)
         platforms[0]="x64"
-        asm_Debug_cmdline="yasm -Xvc -g cv8 -f \$(PlatformName) ${yasmincs} &quot;\$(InputPath)&quot;"
-        asm_Release_cmdline="yasm -Xvc -f \$(PlatformName) ${yasmincs} &quot;\$(InputPath)&quot;"
+        asm_Debug_cmdline="yasm -Xvc -g cv8 -f win64 ${yasmincs} &quot;\$(InputPath)&quot;"
+        asm_Release_cmdline="yasm -Xvc -f win64 ${yasmincs} &quot;\$(InputPath)&quot;"
     ;;
     x86*)
         platforms[0]="Win32"
-        asm_Debug_cmdline="yasm -Xvc -g cv8 -f \$(PlatformName) ${yasmincs} &quot;\$(InputPath)&quot;"
-        asm_Release_cmdline="yasm -Xvc -f \$(PlatformName) ${yasmincs} &quot;\$(InputPath)&quot;"
+        asm_Debug_cmdline="yasm -Xvc -g cv8 -f win32 ${yasmincs} &quot;\$(InputPath)&quot;"
+        asm_Release_cmdline="yasm -Xvc -f win32 ${yasmincs} &quot;\$(InputPath)&quot;"
     ;;
     *) die "Unsupported target $target!"
     ;;

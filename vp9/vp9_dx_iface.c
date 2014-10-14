@@ -22,7 +22,6 @@
 #include "vp9/decoder/vp9_decoder.h"
 #include "vp9/decoder/vp9_decodeframe.h"
 #include "vp9/decoder/vp9_read_bit_buffer.h"
-#include "vp9/decoder/vp9_decodeframe.h"
 
 #include "vp9/vp9_iface_common.h"
 
@@ -59,29 +58,22 @@ static vpx_codec_err_t decoder_init(vpx_codec_ctx_t *ctx,
   (void)data;
 
   if (!ctx->priv) {
-    vpx_codec_alg_priv_t *alg_priv = vpx_memalign(32, sizeof(*alg_priv));
-    if (alg_priv == NULL)
+    vpx_codec_alg_priv_t *const priv = vpx_calloc(1, sizeof(*priv));
+    if (priv == NULL)
       return VPX_CODEC_MEM_ERROR;
 
-    vp9_zero(*alg_priv);
-
-    ctx->priv = (vpx_codec_priv_t *)alg_priv;
-    ctx->priv->sz = sizeof(*ctx->priv);
-    ctx->priv->iface = ctx->iface;
-    ctx->priv->alg_priv = alg_priv;
-    ctx->priv->alg_priv->si.sz = sizeof(ctx->priv->alg_priv->si);
+    ctx->priv = (vpx_codec_priv_t *)priv;
     ctx->priv->init_flags = ctx->init_flags;
-    ctx->priv->alg_priv->flushed = 0;
-    ctx->priv->alg_priv->frame_parallel_decode =
-        (ctx->init_flags & VPX_CODEC_USE_FRAME_THREADING);
 
-    // Disable frame parallel decoding for now.
-    ctx->priv->alg_priv->frame_parallel_decode = 0;
+    priv->si.sz = sizeof(priv->si);
+    priv->flushed = 0;
+    priv->frame_parallel_decode =
+        (ctx->init_flags & VPX_CODEC_USE_FRAME_THREADING);
+    priv->frame_parallel_decode = 0;  // Disable for now
 
     if (ctx->config.dec) {
-      // Update the reference to the config structure to an internal copy.
-      ctx->priv->alg_priv->cfg = *ctx->config.dec;
-      ctx->config.dec = &ctx->priv->alg_priv->cfg;
+      priv->cfg = *ctx->config.dec;
+      ctx->config.dec = &priv->cfg;
     }
   }
 
@@ -153,6 +145,7 @@ static vpx_codec_err_t decoder_peek_si_internal(const uint8_t *data,
 
     if (frame_marker != VP9_FRAME_MARKER)
       return VPX_CODEC_UNSUP_BITSTREAM;
+
     if (profile >= MAX_PROFILES) return VPX_CODEC_UNSUP_BITSTREAM;
 
     if (vp9_rb_read_bit(&rb)) {  // show an existing frame
@@ -170,9 +163,9 @@ static vpx_codec_err_t decoder_peek_si_internal(const uint8_t *data,
     if (si->is_kf) {
       if (!vp9_read_sync_code(&rb))
         return VPX_CODEC_UNSUP_BITSTREAM;
+
       if (!parse_bitdepth_colorspace_sampling(profile, &rb))
         return VPX_CODEC_UNSUP_BITSTREAM;
-
       vp9_read_frame_size(&rb, (int *)&si->w, (int *)&si->h);
     } else {
       intra_only_flag = show_frame ? 0 : vp9_rb_read_bit(&rb);
@@ -332,81 +325,6 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t *ctx,
   return VPX_CODEC_OK;
 }
 
-static INLINE uint8_t read_marker(vpx_decrypt_cb decrypt_cb,
-                                  void *decrypt_state,
-                                  const uint8_t *data) {
-  if (decrypt_cb) {
-    uint8_t marker;
-    decrypt_cb(decrypt_state, data, &marker, 1);
-    return marker;
-  }
-  return *data;
-}
-
-static vpx_codec_err_t parse_superframe_index(const uint8_t *data,
-                                              size_t data_sz,
-                                              uint32_t sizes[8], int *count,
-                                              vpx_decrypt_cb decrypt_cb,
-                                              void *decrypt_state) {
-  // A chunk ending with a byte matching 0xc0 is an invalid chunk unless
-  // it is a super frame index. If the last byte of real video compression
-  // data is 0xc0 the encoder must add a 0 byte. If we have the marker but
-  // not the associated matching marker byte at the front of the index we have
-  // an invalid bitstream and need to return an error.
-
-  uint8_t marker;
-
-  assert(data_sz);
-  marker = read_marker(decrypt_cb, decrypt_state, data + data_sz - 1);
-  *count = 0;
-
-  if ((marker & 0xe0) == 0xc0) {
-    const uint32_t frames = (marker & 0x7) + 1;
-    const uint32_t mag = ((marker >> 3) & 0x3) + 1;
-    const size_t index_sz = 2 + mag * frames;
-
-    // This chunk is marked as having a superframe index but doesn't have
-    // enough data for it, thus it's an invalid superframe index.
-    if (data_sz < index_sz)
-      return VPX_CODEC_CORRUPT_FRAME;
-
-    {
-      const uint8_t marker2 = read_marker(decrypt_cb, decrypt_state,
-                                          data + data_sz - index_sz);
-
-      // This chunk is marked as having a superframe index but doesn't have
-      // the matching marker byte at the front of the index therefore it's an
-      // invalid chunk.
-      if (marker != marker2)
-        return VPX_CODEC_CORRUPT_FRAME;
-    }
-
-    {
-      // Found a valid superframe index.
-      uint32_t i, j;
-      const uint8_t *x = &data[data_sz - index_sz + 1];
-
-      // Frames has a maximum of 8 and mag has a maximum of 4.
-      uint8_t clear_buffer[32];
-      assert(sizeof(clear_buffer) >= frames * mag);
-      if (decrypt_cb) {
-        decrypt_cb(decrypt_state, x, clear_buffer, frames * mag);
-        x = clear_buffer;
-      }
-
-      for (i = 0; i < frames; ++i) {
-        uint32_t this_sz = 0;
-
-        for (j = 0; j < mag; ++j)
-          this_sz |= (*x++) << (j * 8);
-        sizes[i] = this_sz;
-      }
-      *count = frames;
-    }
-  }
-  return VPX_CODEC_OK;
-}
-
 static vpx_codec_err_t decoder_decode(vpx_codec_alg_priv_t *ctx,
                                       const uint8_t *data, unsigned int data_sz,
                                       void *user_priv, long deadline) {
@@ -424,8 +342,8 @@ static vpx_codec_err_t decoder_decode(vpx_codec_alg_priv_t *ctx,
   // Reset flushed when receiving a valid frame.
   ctx->flushed = 0;
 
-  res = parse_superframe_index(data, data_sz, frame_sizes, &frame_count,
-                               ctx->decrypt_cb, ctx->decrypt_state);
+  res = vp9_parse_superframe_index(data, data_sz, frame_sizes, &frame_count,
+                                   ctx->decrypt_cb, ctx->decrypt_state);
   if (res != VPX_CODEC_OK)
     return res;
 
@@ -675,15 +593,14 @@ static vpx_codec_err_t ctrl_get_bit_depth(vpx_codec_alg_priv_t *ctx,
     if (ctx->pbi) {
       const VP9_COMMON *const cm = &ctx->pbi->common;
       *bit_depth = cm->bit_depth;
+      return VPX_CODEC_OK;
     } else {
       return VPX_CODEC_ERROR;
     }
-    return VPX_CODEC_OK;
   } else {
     return VPX_CODEC_INVALID_PARAM;
   }
 }
-
 
 static vpx_codec_err_t ctrl_set_invert_tile_order(vpx_codec_alg_priv_t *ctx,
                                                   va_list args) {
@@ -742,12 +659,12 @@ CODEC_INTERFACE(vpx_codec_vp9_dx) = {
   },
   { // NOLINT
     0,
-    NOT_IMPLEMENTED,  // vpx_codec_enc_cfg_map_t
-    NOT_IMPLEMENTED,  // vpx_codec_encode_fn_t
-    NOT_IMPLEMENTED,  // vpx_codec_get_cx_data_fn_t
-    NOT_IMPLEMENTED,  // vpx_codec_enc_config_set_fn_t
-    NOT_IMPLEMENTED,  // vpx_codec_get_global_headers_fn_t
-    NOT_IMPLEMENTED,  // vpx_codec_get_preview_frame_fn_t
-    NOT_IMPLEMENTED   // vpx_codec_enc_mr_get_mem_loc_fn_t
+    NULL,  // vpx_codec_enc_cfg_map_t
+    NULL,  // vpx_codec_encode_fn_t
+    NULL,  // vpx_codec_get_cx_data_fn_t
+    NULL,  // vpx_codec_enc_config_set_fn_t
+    NULL,  // vpx_codec_get_global_headers_fn_t
+    NULL,  // vpx_codec_get_preview_frame_fn_t
+    NULL   // vpx_codec_enc_mr_get_mem_loc_fn_t
   }
 };

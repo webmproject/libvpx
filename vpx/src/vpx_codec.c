@@ -88,8 +88,7 @@ vpx_codec_err_t vpx_codec_destroy(vpx_codec_ctx_t *ctx) {
   else if (!ctx->iface || !ctx->priv)
     res = VPX_CODEC_ERROR;
   else {
-    if (ctx->priv->alg_priv)
-      ctx->iface->destroy(ctx->priv->alg_priv);
+    ctx->iface->destroy((vpx_codec_alg_priv_t *)ctx->priv);
 
     ctx->iface = NULL;
     ctx->name = NULL;
@@ -125,7 +124,7 @@ vpx_codec_err_t vpx_codec_control_(vpx_codec_ctx_t  *ctx,
         va_list  ap;
 
         va_start(ap, ctrl_id);
-        res = entry->fn(ctx->priv->alg_priv, ap);
+        res = entry->fn((vpx_codec_alg_priv_t *)ctx->priv, ap);
         va_end(ap);
         break;
       }

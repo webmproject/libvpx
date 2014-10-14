@@ -1,6 +1,6 @@
 Name: libyuv
 URL: http://code.google.com/p/libyuv/
-Version: 1041
+Version: 1060
 License: BSD
 License File: LICENSE
 
@@ -13,4 +13,4 @@ which down-samples the original input video (f.g. 1280x720) a number of times
 in order to encode multiple resolution bit streams.
 
 Local Modifications:
-None.
+cherry-pick 'Issue 24479004: Fix building with MSVC for arm'

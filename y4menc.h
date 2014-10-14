@@ -11,7 +11,6 @@
 #ifndef Y4MENC_H_
 #define Y4MENC_H_
 
-#include <assert.h>
 #include "./tools_common.h"
 
 #include "vpx/vpx_decoder.h"

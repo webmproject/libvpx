@@ -31,6 +31,7 @@ LIBYUV_SRCS +=  third_party/libyuv/include/libyuv/basic_types.h  \
                 third_party/libyuv/source/scale_common.cc \
                 third_party/libyuv/source/scale_mips.cc \
                 third_party/libyuv/source/scale_neon.cc \
+                third_party/libyuv/source/scale_neon64.cc \
                 third_party/libyuv/source/scale_posix.cc \
                 third_party/libyuv/source/scale_win.cc \
 
@@ -113,7 +114,7 @@ vpx_temporal_svc_encoder.SRCS        += video_common.h
 vpx_temporal_svc_encoder.SRCS        += video_writer.h video_writer.c
 vpx_temporal_svc_encoder.GUID        = B18C08F2-A439-4502-A78E-849BE3D60947
 vpx_temporal_svc_encoder.DESCRIPTION = Temporal SVC Encoder
-EXAMPLES-$(CONFIG_VP8_DECODER)     += simple_decoder.c
+EXAMPLES-$(CONFIG_DECODERS)        += simple_decoder.c
 simple_decoder.GUID                 = D3BBF1E9-2427-450D-BBFF-B2843C1D44CC
 simple_decoder.SRCS                += ivfdec.h ivfdec.c
 simple_decoder.SRCS                += tools_common.h tools_common.c
@@ -122,7 +123,7 @@ simple_decoder.SRCS                += video_reader.h video_reader.c
 simple_decoder.SRCS                += vpx_ports/mem_ops.h
 simple_decoder.SRCS                += vpx_ports/mem_ops_aligned.h
 simple_decoder.DESCRIPTION          = Simplified decoder loop
-EXAMPLES-$(CONFIG_VP8_DECODER)     += postproc.c
+EXAMPLES-$(CONFIG_DECODERS)        += postproc.c
 postproc.SRCS                      += ivfdec.h ivfdec.c
 postproc.SRCS                      += tools_common.h tools_common.c
 postproc.SRCS                      += video_common.h
@@ -131,7 +132,7 @@ postproc.SRCS                      += vpx_ports/mem_ops.h
 postproc.SRCS                      += vpx_ports/mem_ops_aligned.h
 postproc.GUID                       = 65E33355-F35E-4088-884D-3FD4905881D7
 postproc.DESCRIPTION                = Decoder postprocessor control
-EXAMPLES-$(CONFIG_VP8_DECODER)     += decode_to_md5.c
+EXAMPLES-$(CONFIG_DECODERS)        += decode_to_md5.c
 decode_to_md5.SRCS                 += md5_utils.h md5_utils.c
 decode_to_md5.SRCS                 += ivfdec.h ivfdec.c
 decode_to_md5.SRCS                 += tools_common.h tools_common.c
@@ -141,29 +142,34 @@ decode_to_md5.SRCS                 += vpx_ports/mem_ops.h
 decode_to_md5.SRCS                 += vpx_ports/mem_ops_aligned.h
 decode_to_md5.GUID                  = 59120B9B-2735-4BFE-B022-146CA340FE42
 decode_to_md5.DESCRIPTION           = Frame by frame MD5 checksum
-EXAMPLES-$(CONFIG_VP8_ENCODER)  += simple_encoder.c
+EXAMPLES-$(CONFIG_ENCODERS)     += simple_encoder.c
 simple_encoder.SRCS             += ivfenc.h ivfenc.c
 simple_encoder.SRCS             += tools_common.h tools_common.c
 simple_encoder.SRCS             += video_common.h
 simple_encoder.SRCS             += video_writer.h video_writer.c
 simple_encoder.GUID              = 4607D299-8A71-4D2C-9B1D-071899B6FBFD
 simple_encoder.DESCRIPTION       = Simplified encoder loop
-EXAMPLES-$(CONFIG_VP8_ENCODER)  += twopass_encoder.c
+EXAMPLES-$(CONFIG_VP9_ENCODER)  += vp9_lossless_encoder.c
+vp9_lossless_encoder.SRCS       += ivfenc.h ivfenc.c
+vp9_lossless_encoder.SRCS       += tools_common.h tools_common.c
+vp9_lossless_encoder.SRCS       += video_common.h
+vp9_lossless_encoder.SRCS       += video_writer.h video_writer.c
+vp9_lossless_encoder.GUID        = B63C7C88-5348-46DC-A5A6-CC151EF93366
+vp9_lossless_encoder.DESCRIPTION = Simplified lossless VP9 encoder
+EXAMPLES-$(CONFIG_ENCODERS)     += twopass_encoder.c
 twopass_encoder.SRCS            += ivfenc.h ivfenc.c
 twopass_encoder.SRCS            += tools_common.h tools_common.c
 twopass_encoder.SRCS            += video_common.h
 twopass_encoder.SRCS            += video_writer.h video_writer.c
 twopass_encoder.GUID             = 73494FA6-4AF9-4763-8FBB-265C92402FD8
 twopass_encoder.DESCRIPTION      = Two-pass encoder loop
-ifeq ($(CONFIG_DECODERS),yes)
-EXAMPLES-$(CONFIG_VP8_ENCODER)  += decode_with_drops.c
+EXAMPLES-$(CONFIG_DECODERS)     += decode_with_drops.c
 decode_with_drops.SRCS          += ivfdec.h ivfdec.c
 decode_with_drops.SRCS          += tools_common.h tools_common.c
 decode_with_drops.SRCS          += video_common.h
 decode_with_drops.SRCS          += video_reader.h video_reader.c
 decode_with_drops.SRCS          += vpx_ports/mem_ops.h
 decode_with_drops.SRCS          += vpx_ports/mem_ops_aligned.h
-endif
 decode_with_drops.GUID           = CE5C53C4-8DDA-438A-86ED-0DDD3CDB8D26
 decode_with_drops.DESCRIPTION    = Drops frames while decoding
 EXAMPLES-$(CONFIG_ENCODERS)        += set_maps.c
@@ -185,7 +191,9 @@ vp8cx_set_ref.DESCRIPTION           = VP8 set encoder reference frame
 ifeq ($(CONFIG_MULTI_RES_ENCODING),yes)
 ifeq ($(CONFIG_LIBYUV),yes)
 EXAMPLES-$(CONFIG_VP8_ENCODER)          += vp8_multi_resolution_encoder.c
+vp8_multi_resolution_encoder.SRCS       += ivfenc.h ivfenc.c
 vp8_multi_resolution_encoder.SRCS       += tools_common.h tools_common.c
+vp8_multi_resolution_encoder.SRCS       += video_writer.h video_writer.c
 vp8_multi_resolution_encoder.SRCS       += $(LIBYUV_SRCS)
 vp8_multi_resolution_encoder.GUID        = 04f8738e-63c8-423b-90fa-7c2703a374de
 vp8_multi_resolution_encoder.DESCRIPTION = VP8 Multiple-resolution Encoding

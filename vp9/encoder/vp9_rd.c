@@ -96,10 +96,9 @@ static void fill_token_costs(vp9_coeff_cost *c,
 static int sad_per_bit16lut_8[QINDEX_RANGE];
 static int sad_per_bit4lut_8[QINDEX_RANGE];
 
-#if CONFIG_VP9_HIGH
+#if CONFIG_VP9_HIGHBITDEPTH
 static int sad_per_bit16lut_10[QINDEX_RANGE];
 static int sad_per_bit4lut_10[QINDEX_RANGE];
-
 static int sad_per_bit16lut_12[QINDEX_RANGE];
 static int sad_per_bit4lut_12[QINDEX_RANGE];
 #endif
@@ -120,7 +119,7 @@ static void init_me_luts_bd(int *bit16lut, int *bit4lut, int range,
 void vp9_init_me_luts() {
   init_me_luts_bd(sad_per_bit16lut_8, sad_per_bit4lut_8, QINDEX_RANGE,
                   VPX_BITS_8);
-#if CONFIG_VP9_HIGH
+#if CONFIG_VP9_HIGHBITDEPTH
   init_me_luts_bd(sad_per_bit16lut_10, sad_per_bit4lut_10, QINDEX_RANGE,
                   VPX_BITS_10);
   init_me_luts_bd(sad_per_bit16lut_12, sad_per_bit4lut_12, QINDEX_RANGE,
@@ -133,13 +132,13 @@ static const int rd_boost_factor[16] = {
   8, 8, 4, 4, 2, 2, 1, 0
 };
 static const int rd_frame_type_factor[FRAME_UPDATE_TYPES] = {
-128, 144, 128, 128, 144
+  128, 144, 128, 128, 144
 };
 
 int vp9_compute_rd_mult(const VP9_COMP *cpi, int qindex) {
   const int64_t q = vp9_dc_quant(qindex, 0, cpi->common.bit_depth);
-  int rdmult = 88 * q * q / 24;
-#if CONFIG_VP9_HIGH
+#if CONFIG_VP9_HIGHBITDEPTH
+  int64_t rdmult = 0;
   switch (cpi->common.bit_depth) {
     case VPX_BITS_8:
       rdmult = 88 * q * q / 24;
@@ -152,8 +151,11 @@ int vp9_compute_rd_mult(const VP9_COMP *cpi, int qindex) {
       break;
     default:
       assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10 or VPX_BITS_12");
+      return -1;
   }
-#endif
+#else
+  int64_t rdmult = 88 * q * q / 24;
+#endif  // CONFIG_VP9_HIGHBITDEPTH
   if (cpi->oxcf.pass == 2 && (cpi->common.frame_type != KEY_FRAME)) {
     const GF_GROUP *const gf_group = &cpi->twopass.gf_group;
     const FRAME_UPDATE_TYPE frame_type = gf_group->update_type[gf_group->index];
@@ -162,12 +164,12 @@ int vp9_compute_rd_mult(const VP9_COMP *cpi, int qindex) {
     rdmult = (rdmult * rd_frame_type_factor[frame_type]) >> 7;
     rdmult += ((rdmult * rd_boost_factor[boost_index]) >> 7);
   }
-  return rdmult;
+  return (int)rdmult;
 }
 
 static int compute_rd_thresh_factor(int qindex, vpx_bit_depth_t bit_depth) {
   double q;
-#if CONFIG_VP9_HIGH
+#if CONFIG_VP9_HIGHBITDEPTH
   switch (bit_depth) {
     case VPX_BITS_8:
       q = vp9_dc_quant(qindex, 0, VPX_BITS_8) / 4.0;
@@ -185,13 +187,13 @@ static int compute_rd_thresh_factor(int qindex, vpx_bit_depth_t bit_depth) {
 #else
   (void) bit_depth;
   q = vp9_dc_quant(qindex, 0, VPX_BITS_8) / 4.0;
-#endif
+#endif  // CONFIG_VP9_HIGHBITDEPTH
   // TODO(debargha): Adjust the function below.
   return MAX((int)(pow(q, RD_THRESH_POW) * 5.12), 8);
 }
 
 void vp9_initialize_me_consts(VP9_COMP *cpi, int qindex) {
-#if CONFIG_VP9_HIGH
+#if CONFIG_VP9_HIGHBITDEPTH
   switch (cpi->common.bit_depth) {
     case VPX_BITS_8:
       cpi->mb.sadperbit16 = sad_per_bit16lut_8[qindex];
@@ -211,16 +213,16 @@ void vp9_initialize_me_consts(VP9_COMP *cpi, int qindex) {
 #else
   cpi->mb.sadperbit16 = sad_per_bit16lut_8[qindex];
   cpi->mb.sadperbit4 = sad_per_bit4lut_8[qindex];
-#endif
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 }
 
 static void set_block_thresholds(const VP9_COMMON *cm, RD_OPT *rd) {
   int i, bsize, segment_id;
 
   for (segment_id = 0; segment_id < MAX_SEGMENTS; ++segment_id) {
-    const int qindex = clamp(
-      vp9_get_qindex(&cm->seg, segment_id, cm->base_qindex, cm->bit_depth) +
-      cm->y_dc_delta_q, 0, MAXQ);
+    const int qindex =
+        clamp(vp9_get_qindex(&cm->seg, segment_id, cm->base_qindex) +
+              cm->y_dc_delta_q, 0, MAXQ);
     const int q = compute_rd_thresh_factor(qindex, cm->bit_depth);
 
     for (bsize = 0; bsize < BLOCK_SIZES; ++bsize) {
@@ -433,21 +435,17 @@ void vp9_mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
                  uint8_t *ref_y_buffer, int ref_y_stride,
                  int ref_frame, BLOCK_SIZE block_size) {
   MACROBLOCKD *xd = &x->e_mbd;
-  MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
-  int_mv this_mv;
+  MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
   int i;
   int zero_seen = 0;
   int best_index = 0;
   int best_sad = INT_MAX;
   int this_sad = INT_MAX;
   int max_mv = 0;
-
   uint8_t *src_y_ptr = x->plane[0].src.buf;
   uint8_t *ref_y_ptr;
-  int row_offset, col_offset;
-  int num_mv_refs = MAX_MV_REF_CANDIDATES +
+  const int num_mv_refs = MAX_MV_REF_CANDIDATES +
                     (cpi->sf.adaptive_motion_search &&
-                     cpi->common.show_frame &&
                      block_size < cpi->sf.max_partition_size);
 
   MV pred_mv[3];
@@ -457,19 +455,16 @@ void vp9_mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
 
   // Get the sad for each candidate reference mv.
   for (i = 0; i < num_mv_refs; ++i) {
-    this_mv.as_mv = pred_mv[i];
+    const MV *this_mv = &pred_mv[i];
 
-    max_mv = MAX(max_mv,
-                 MAX(abs(this_mv.as_mv.row), abs(this_mv.as_mv.col)) >> 3);
-    // Only need to check zero mv once.
-    if (!this_mv.as_int && zero_seen)
+    max_mv = MAX(max_mv, MAX(abs(this_mv->row), abs(this_mv->col)) >> 3);
+    if (is_zero_mv(this_mv) && zero_seen)
       continue;
 
-    zero_seen = zero_seen || !this_mv.as_int;
+    zero_seen |= is_zero_mv(this_mv);
 
-    row_offset = this_mv.as_mv.row >> 3;
-    col_offset = this_mv.as_mv.col >> 3;
-    ref_y_ptr = ref_y_buffer + (ref_y_stride * row_offset) + col_offset;
+    ref_y_ptr =
+        &ref_y_buffer[ref_y_stride * (this_mv->row >> 3) + (this_mv->col >> 3)];
 
     // Find sad for current vector.
     this_sad = cpi->fn_ptr[block_size].sdf(src_y_ptr, x->plane[0].src.stride,
@@ -519,7 +514,7 @@ const YV12_BUFFER_CONFIG *vp9_get_scaled_ref_frame(const VP9_COMP *cpi,
 
 int vp9_get_switchable_rate(const VP9_COMP *cpi) {
   const MACROBLOCKD *const xd = &cpi->mb.e_mbd;
-  const MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
+  const MB_MODE_INFO *const mbmi = &xd->mi[0].src_mi->mbmi;
   const int ctx = vp9_get_pred_context_switchable_interp(xd);
   return SWITCHABLE_INTERP_RATE_FACTOR *
              cpi->switchable_interp_costs[ctx][mbmi->interp_filter];
@@ -532,11 +527,17 @@ void vp9_set_rd_speed_thresholds(VP9_COMP *cpi) {
 
   // Set baseline threshold values.
   for (i = 0; i < MAX_MODES; ++i)
-    rd->thresh_mult[i] = is_best_mode(cpi->oxcf.mode) ? -500 : 0;
+    rd->thresh_mult[i] = cpi->oxcf.mode == BEST ? -500 : 0;
 
-  rd->thresh_mult[THR_NEARESTMV] = 0;
-  rd->thresh_mult[THR_NEARESTG] = 0;
-  rd->thresh_mult[THR_NEARESTA] = 0;
+  if (sf->adaptive_rd_thresh) {
+    rd->thresh_mult[THR_NEARESTMV] = 300;
+    rd->thresh_mult[THR_NEARESTG] = 300;
+    rd->thresh_mult[THR_NEARESTA] = 300;
+  } else {
+    rd->thresh_mult[THR_NEARESTMV] = 0;
+    rd->thresh_mult[THR_NEARESTG] = 0;
+    rd->thresh_mult[THR_NEARESTA] = 0;
+  }
 
   rd->thresh_mult[THR_DC] += 1000;
 
@@ -575,41 +576,6 @@ void vp9_set_rd_speed_thresholds(VP9_COMP *cpi) {
   rd->thresh_mult[THR_D153_PRED] += 2500;
   rd->thresh_mult[THR_D207_PRED] += 2500;
   rd->thresh_mult[THR_D63_PRED] += 2500;
-
-  // Disable frame modes if flags not set.
-  if (!(cpi->ref_frame_flags & VP9_LAST_FLAG)) {
-    rd->thresh_mult[THR_NEWMV    ] = INT_MAX;
-    rd->thresh_mult[THR_NEARESTMV] = INT_MAX;
-    rd->thresh_mult[THR_ZEROMV   ] = INT_MAX;
-    rd->thresh_mult[THR_NEARMV   ] = INT_MAX;
-  }
-  if (!(cpi->ref_frame_flags & VP9_GOLD_FLAG)) {
-    rd->thresh_mult[THR_NEARESTG ] = INT_MAX;
-    rd->thresh_mult[THR_ZEROG    ] = INT_MAX;
-    rd->thresh_mult[THR_NEARG    ] = INT_MAX;
-    rd->thresh_mult[THR_NEWG     ] = INT_MAX;
-  }
-  if (!(cpi->ref_frame_flags & VP9_ALT_FLAG)) {
-    rd->thresh_mult[THR_NEARESTA ] = INT_MAX;
-    rd->thresh_mult[THR_ZEROA    ] = INT_MAX;
-    rd->thresh_mult[THR_NEARA    ] = INT_MAX;
-    rd->thresh_mult[THR_NEWA     ] = INT_MAX;
-  }
-
-  if ((cpi->ref_frame_flags & (VP9_LAST_FLAG | VP9_ALT_FLAG)) !=
-      (VP9_LAST_FLAG | VP9_ALT_FLAG)) {
-    rd->thresh_mult[THR_COMP_ZEROLA   ] = INT_MAX;
-    rd->thresh_mult[THR_COMP_NEARESTLA] = INT_MAX;
-    rd->thresh_mult[THR_COMP_NEARLA   ] = INT_MAX;
-    rd->thresh_mult[THR_COMP_NEWLA    ] = INT_MAX;
-  }
-  if ((cpi->ref_frame_flags & (VP9_GOLD_FLAG | VP9_ALT_FLAG)) !=
-      (VP9_GOLD_FLAG | VP9_ALT_FLAG)) {
-    rd->thresh_mult[THR_COMP_ZEROGA   ] = INT_MAX;
-    rd->thresh_mult[THR_COMP_NEARESTGA] = INT_MAX;
-    rd->thresh_mult[THR_COMP_NEARGA   ] = INT_MAX;
-    rd->thresh_mult[THR_COMP_NEWGA    ] = INT_MAX;
-  }
 }
 
 void vp9_set_rd_speed_thresholds_sub8x8(VP9_COMP *cpi) {
@@ -618,7 +584,7 @@ void vp9_set_rd_speed_thresholds_sub8x8(VP9_COMP *cpi) {
   int i;
 
   for (i = 0; i < MAX_REFS; ++i)
-    rd->thresh_mult_sub8x8[i] = is_best_mode(cpi->oxcf.mode)  ? -500 : 0;
+    rd->thresh_mult_sub8x8[i] = cpi->oxcf.mode == BEST ? -500 : 0;
 
   rd->thresh_mult_sub8x8[THR_LAST] += 2500;
   rd->thresh_mult_sub8x8[THR_GOLD] += 2500;
@@ -631,18 +597,25 @@ void vp9_set_rd_speed_thresholds_sub8x8(VP9_COMP *cpi) {
   for (i = 0; i < MAX_REFS; ++i)
     if (sf->disable_split_mask & (1 << i))
       rd->thresh_mult_sub8x8[i] = INT_MAX;
-
-  // Disable mode test if frame flag is not set.
-  if (!(cpi->ref_frame_flags & VP9_LAST_FLAG))
-    rd->thresh_mult_sub8x8[THR_LAST] = INT_MAX;
-  if (!(cpi->ref_frame_flags & VP9_GOLD_FLAG))
-    rd->thresh_mult_sub8x8[THR_GOLD] = INT_MAX;
-  if (!(cpi->ref_frame_flags & VP9_ALT_FLAG))
-    rd->thresh_mult_sub8x8[THR_ALTR] = INT_MAX;
-  if ((cpi->ref_frame_flags & (VP9_LAST_FLAG | VP9_ALT_FLAG)) !=
-      (VP9_LAST_FLAG | VP9_ALT_FLAG))
-    rd->thresh_mult_sub8x8[THR_COMP_LA] = INT_MAX;
-  if ((cpi->ref_frame_flags & (VP9_GOLD_FLAG | VP9_ALT_FLAG)) !=
-      (VP9_GOLD_FLAG | VP9_ALT_FLAG))
-    rd->thresh_mult_sub8x8[THR_COMP_GA] = INT_MAX;
 }
+
+int vp9_get_intra_cost_penalty(int qindex, int qdelta,
+                               vpx_bit_depth_t bit_depth) {
+  const int q = vp9_dc_quant(qindex, qdelta, bit_depth);
+#if CONFIG_VP9_HIGHBITDEPTH
+  switch (bit_depth) {
+    case VPX_BITS_8:
+      return 20 * q;
+    case VPX_BITS_10:
+      return 5 * q;
+    case VPX_BITS_12:
+      return ROUND_POWER_OF_TWO(5 * q, 2);
+    default:
+      assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10 or VPX_BITS_12");
+      return -1;
+  }
+#else
+  return 20 * q;
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+}
+

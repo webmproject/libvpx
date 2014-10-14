@@ -15,8 +15,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "./vpx_config.h"
-
 #include "vp9/common/vp9_common.h"
 #include "vp9/encoder/vp9_resize.h"
 
@@ -314,7 +312,7 @@ static void interpolate(const uint8_t *const input, int inlength,
 static void down2_symeven(const uint8_t *const input, int length,
                           uint8_t *output) {
   // Actual filter len = 2 * filter_len_half.
-  static const int16_t *filter = vp9_down2_symeven_half_filter;
+  const int16_t *filter = vp9_down2_symeven_half_filter;
   const int filter_len_half = sizeof(vp9_down2_symeven_half_filter) / 2;
   int i, j;
   uint8_t *optr = output;
@@ -370,7 +368,7 @@ static void down2_symeven(const uint8_t *const input, int length,
 static void down2_symodd(const uint8_t *const input, int length,
                          uint8_t *output) {
   // Actual filter len = 2 * filter_len_half - 1.
-  static const int16_t *filter = vp9_down2_symodd_half_filter;
+  const int16_t *filter = vp9_down2_symodd_half_filter;
   const int filter_len_half = sizeof(vp9_down2_symodd_half_filter) / 2;
   int i, j;
   uint8_t *optr = output;
@@ -531,11 +529,11 @@ void vp9_resize_plane(const uint8_t *const input,
   free(arrbuf);
 }
 
-#if CONFIG_VP9_HIGH
-static void high_interpolate(const uint16_t *const input, int inlength,
-                             uint16_t *output, int outlength, int bps) {
-  const int64_t delta = (((uint64_t)inlength << 32) + outlength / 2) /
-      outlength;
+#if CONFIG_VP9_HIGHBITDEPTH
+static void highbd_interpolate(const uint16_t *const input, int inlength,
+                               uint16_t *output, int outlength, int bd) {
+  const int64_t delta =
+      (((uint64_t)inlength << 32) + outlength / 2) / outlength;
   const int64_t offset = inlength > outlength ?
       (((int64_t)(inlength - outlength) << 31) + outlength / 2) / outlength :
       -(((int64_t)(outlength - inlength) << 31) + outlength / 2) / outlength;
@@ -570,10 +568,10 @@ static void high_interpolate(const uint16_t *const input, int inlength,
       sum = 0;
       for (k = 0; k < INTERP_TAPS; ++k) {
         const int pk = int_pel - INTERP_TAPS / 2 + 1 + k;
-        sum += filter[k] * input[(pk < 0 ? 0 :
-                                  (pk >= inlength ? inlength - 1 : pk))];
+        sum += filter[k] *
+            input[(pk < 0 ? 0 : (pk >= inlength ? inlength - 1 : pk))];
       }
-      *optr++ = clip_pixel_bps(ROUND_POWER_OF_TWO(sum, FILTER_BITS), bps);
+      *optr++ = clip_pixel_highbd(ROUND_POWER_OF_TWO(sum, FILTER_BITS), bd);
     }
   } else {
     // Initial part.
@@ -584,10 +582,10 @@ static void high_interpolate(const uint16_t *const input, int inlength,
       filter = interp_filters[sub_pel];
       sum = 0;
       for (k = 0; k < INTERP_TAPS; ++k)
-        sum += filter[k] * input[(int_pel - INTERP_TAPS / 2 + 1 + k < 0 ?
-                                  0 :
-                                  int_pel - INTERP_TAPS / 2 + 1 + k)];
-      *optr++ = clip_pixel_bps(ROUND_POWER_OF_TWO(sum, FILTER_BITS), bps);
+        sum += filter[k] *
+            input[(int_pel - INTERP_TAPS / 2 + 1 + k < 0 ?
+                   0 : int_pel - INTERP_TAPS / 2 + 1 + k)];
+      *optr++ = clip_pixel_highbd(ROUND_POWER_OF_TWO(sum, FILTER_BITS), bd);
     }
     // Middle part.
     for (; x <= x2; ++x, y += delta) {
@@ -598,7 +596,7 @@ static void high_interpolate(const uint16_t *const input, int inlength,
       sum = 0;
       for (k = 0; k < INTERP_TAPS; ++k)
         sum += filter[k] * input[int_pel - INTERP_TAPS / 2 + 1 + k];
-      *optr++ = clip_pixel_bps(ROUND_POWER_OF_TWO(sum, FILTER_BITS), bps);
+      *optr++ = clip_pixel_highbd(ROUND_POWER_OF_TWO(sum, FILTER_BITS), bd);
     }
     // End part.
     for (; x < outlength; ++x, y += delta) {
@@ -611,13 +609,13 @@ static void high_interpolate(const uint16_t *const input, int inlength,
         sum += filter[k] * input[(int_pel - INTERP_TAPS / 2 + 1 + k >=
                                   inlength ?  inlength - 1 :
                                   int_pel - INTERP_TAPS / 2 + 1 + k)];
-      *optr++ = clip_pixel_bps(ROUND_POWER_OF_TWO(sum, FILTER_BITS), bps);
+      *optr++ = clip_pixel_highbd(ROUND_POWER_OF_TWO(sum, FILTER_BITS), bd);
     }
   }
 }
 
-static void high_down2_symeven(const uint16_t *const input, int length,
-                               uint16_t *output, int bps) {
+static void highbd_down2_symeven(const uint16_t *const input, int length,
+                                 uint16_t *output, int bd) {
   // Actual filter len = 2 * filter_len_half.
   static const int16_t *filter = vp9_down2_symeven_half_filter;
   const int filter_len_half = sizeof(vp9_down2_symeven_half_filter) / 2;
@@ -637,7 +635,7 @@ static void high_down2_symeven(const uint16_t *const input, int length,
             filter[j];
       }
       sum >>= FILTER_BITS;
-      *optr++ = clip_pixel_bps(sum, bps);
+      *optr++ = clip_pixel_highbd(sum, bd);
     }
   } else {
     // Initial part.
@@ -647,7 +645,7 @@ static void high_down2_symeven(const uint16_t *const input, int length,
         sum += (input[(i - j < 0 ? 0 : i - j)] + input[i + 1 + j]) * filter[j];
       }
       sum >>= FILTER_BITS;
-      *optr++ = clip_pixel_bps(sum, bps);
+      *optr++ = clip_pixel_highbd(sum, bd);
     }
     // Middle part.
     for (; i < l2; i += 2) {
@@ -656,7 +654,7 @@ static void high_down2_symeven(const uint16_t *const input, int length,
         sum += (input[i - j] + input[i + 1 + j]) * filter[j];
       }
       sum >>= FILTER_BITS;
-      *optr++ = clip_pixel_bps(sum, bps);
+      *optr++ = clip_pixel_highbd(sum, bd);
     }
     // End part.
     for (; i < length; i += 2) {
@@ -667,13 +665,13 @@ static void high_down2_symeven(const uint16_t *const input, int length,
             filter[j];
       }
       sum >>= FILTER_BITS;
-      *optr++ = clip_pixel_bps(sum, bps);
+      *optr++ = clip_pixel_highbd(sum, bd);
     }
   }
 }
 
-static void high_down2_symodd(const uint16_t *const input, int length,
-                              uint16_t *output, int bps) {
+static void highbd_down2_symodd(const uint16_t *const input, int length,
+                              uint16_t *output, int bd) {
   // Actual filter len = 2 * filter_len_half - 1.
   static const int16_t *filter = vp9_down2_symodd_half_filter;
   const int filter_len_half = sizeof(vp9_down2_symodd_half_filter) / 2;
@@ -693,7 +691,7 @@ static void high_down2_symodd(const uint16_t *const input, int length,
             filter[j];
       }
       sum >>= FILTER_BITS;
-      *optr++ = clip_pixel_bps(sum, bps);
+      *optr++ = clip_pixel_highbd(sum, bd);
     }
   } else {
     // Initial part.
@@ -703,7 +701,7 @@ static void high_down2_symodd(const uint16_t *const input, int length,
         sum += (input[(i - j < 0 ? 0 : i - j)] + input[i + j]) * filter[j];
       }
       sum >>= FILTER_BITS;
-      *optr++ = clip_pixel_bps(sum, bps);
+      *optr++ = clip_pixel_highbd(sum, bd);
     }
     // Middle part.
     for (; i < l2; i += 2) {
@@ -712,7 +710,7 @@ static void high_down2_symodd(const uint16_t *const input, int length,
         sum += (input[i - j] + input[i + j]) * filter[j];
       }
       sum >>= FILTER_BITS;
-      *optr++ = clip_pixel_bps(sum, bps);
+      *optr++ = clip_pixel_highbd(sum, bd);
     }
     // End part.
     for (; i < length; i += 2) {
@@ -722,17 +720,17 @@ static void high_down2_symodd(const uint16_t *const input, int length,
             filter[j];
       }
       sum >>= FILTER_BITS;
-      *optr++ = clip_pixel_bps(sum, bps);
+      *optr++ = clip_pixel_highbd(sum, bd);
     }
   }
 }
 
-static void high_resize_multistep(const uint16_t *const input,
-                                  int length,
-                                  uint16_t *output,
-                                  int olength,
-                                  uint16_t *buf,
-                                  int bps) {
+static void highbd_resize_multistep(const uint16_t *const input,
+                                    int length,
+                                    uint16_t *output,
+                                    int olength,
+                                    uint16_t *buf,
+                                    int bd) {
   int steps;
   if (length == olength) {
     memcpy(output, input, sizeof(uint16_t) * length);
@@ -761,23 +759,23 @@ static void high_resize_multistep(const uint16_t *const input,
       else
         out = (s & 1 ? otmp2 : otmp);
       if (filteredlength & 1)
-        high_down2_symodd(in, filteredlength, out, bps);
+        highbd_down2_symodd(in, filteredlength, out, bd);
       else
-        high_down2_symeven(in, filteredlength, out, bps);
+        highbd_down2_symeven(in, filteredlength, out, bd);
       filteredlength = proj_filteredlength;
     }
     if (filteredlength != olength) {
-      high_interpolate(out, filteredlength, output, olength, bps);
+      highbd_interpolate(out, filteredlength, output, olength, bd);
     }
     if (tmpbuf)
       free(tmpbuf);
   } else {
-    high_interpolate(input, length, output, olength, bps);
+    highbd_interpolate(input, length, output, olength, bd);
   }
 }
 
-static void high_fill_col_to_arr(uint16_t *img, int stride, int len,
-                                 uint16_t *arr) {
+static void highbd_fill_col_to_arr(uint16_t *img, int stride, int len,
+                                   uint16_t *arr) {
   int i;
   uint16_t *iptr = img;
   uint16_t *aptr = arr;
@@ -786,8 +784,8 @@ static void high_fill_col_to_arr(uint16_t *img, int stride, int len,
   }
 }
 
-static void high_fill_arr_to_col(uint16_t *img, int stride, int len,
-                                 uint16_t *arr) {
+static void highbd_fill_arr_to_col(uint16_t *img, int stride, int len,
+                                   uint16_t *arr) {
   int i;
   uint16_t *iptr = img;
   uint16_t *aptr = arr;
@@ -796,35 +794,36 @@ static void high_fill_arr_to_col(uint16_t *img, int stride, int len,
   }
 }
 
-void vp9_high_resize_plane(const uint8_t *const input,
-                           int height,
-                           int width,
-                           int in_stride,
-                           uint8_t *output,
-                           int height2,
-                           int width2,
-                           int out_stride,
-                           int bps) {
+void vp9_highbd_resize_plane(const uint8_t *const input,
+                             int height,
+                             int width,
+                             int in_stride,
+                             uint8_t *output,
+                             int height2,
+                             int width2,
+                             int out_stride,
+                             int bd) {
   int i;
   uint16_t *intbuf = (uint16_t *)malloc(sizeof(uint16_t) * width2 * height);
   uint16_t *tmpbuf = (uint16_t *)malloc(sizeof(uint16_t) *
                                         (width < height ? height : width));
   uint16_t *arrbuf = (uint16_t *)malloc(sizeof(uint16_t) * (height + height2));
-  for (i = 0; i < height; ++i)
-    high_resize_multistep(CONVERT_TO_SHORTPTR(input + in_stride * i), width,
-                          intbuf + width2 * i, width2, tmpbuf, bps);
+  for (i = 0; i < height; ++i) {
+    highbd_resize_multistep(CONVERT_TO_SHORTPTR(input + in_stride * i), width,
+                            intbuf + width2 * i, width2, tmpbuf, bd);
+  }
   for (i = 0; i < width2; ++i) {
-    high_fill_col_to_arr(intbuf + i, width2, height, arrbuf);
-    high_resize_multistep(arrbuf, height, arrbuf + height, height2, tmpbuf,
-                          bps);
-    high_fill_arr_to_col(CONVERT_TO_SHORTPTR(output + i), out_stride, height2,
-                         arrbuf + height);
+    highbd_fill_col_to_arr(intbuf + i, width2, height, arrbuf);
+    highbd_resize_multistep(arrbuf, height, arrbuf + height, height2, tmpbuf,
+                            bd);
+    highbd_fill_arr_to_col(CONVERT_TO_SHORTPTR(output + i), out_stride, height2,
+                           arrbuf + height);
   }
   free(intbuf);
   free(tmpbuf);
   free(arrbuf);
 }
-#endif
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 void vp9_resize_frame420(const uint8_t *const y,
                          int y_stride,
@@ -871,3 +870,51 @@ void vp9_resize_frame444(const uint8_t *const y, int y_stride,
   vp9_resize_plane(v, height, width, uv_stride,
                    ov, oheight, owidth, ouv_stride);
 }
+
+#if CONFIG_VP9_HIGHBITDEPTH
+void vp9_highbd_resize_frame420(const uint8_t *const y,
+                                int y_stride,
+                                const uint8_t *const u, const uint8_t *const v,
+                                int uv_stride,
+                                int height, int width,
+                                uint8_t *oy, int oy_stride,
+                                uint8_t *ou, uint8_t *ov, int ouv_stride,
+                                int oheight, int owidth, int bd) {
+  vp9_highbd_resize_plane(y, height, width, y_stride,
+                          oy, oheight, owidth, oy_stride, bd);
+  vp9_highbd_resize_plane(u, height / 2, width / 2, uv_stride,
+                          ou, oheight / 2, owidth / 2, ouv_stride, bd);
+  vp9_highbd_resize_plane(v, height / 2, width / 2, uv_stride,
+                          ov, oheight / 2, owidth / 2, ouv_stride, bd);
+}
+
+void vp9_highbd_resize_frame422(const uint8_t *const y, int y_stride,
+                                const uint8_t *const u, const uint8_t *const v,
+                                int uv_stride,
+                                int height, int width,
+                                uint8_t *oy, int oy_stride,
+                                uint8_t *ou, uint8_t *ov, int ouv_stride,
+                                int oheight, int owidth, int bd) {
+  vp9_highbd_resize_plane(y, height, width, y_stride,
+                          oy, oheight, owidth, oy_stride, bd);
+  vp9_highbd_resize_plane(u, height, width / 2, uv_stride,
+                          ou, oheight, owidth / 2, ouv_stride, bd);
+  vp9_highbd_resize_plane(v, height, width / 2, uv_stride,
+                          ov, oheight, owidth / 2, ouv_stride, bd);
+}
+
+void vp9_highbd_resize_frame444(const uint8_t *const y, int y_stride,
+                                const uint8_t *const u, const uint8_t *const v,
+                                int uv_stride,
+                                int height, int width,
+                                uint8_t *oy, int oy_stride,
+                                uint8_t *ou, uint8_t *ov, int ouv_stride,
+                                int oheight, int owidth, int bd) {
+  vp9_highbd_resize_plane(y, height, width, y_stride,
+                          oy, oheight, owidth, oy_stride, bd);
+  vp9_highbd_resize_plane(u, height, width, uv_stride,
+                          ou, oheight, owidth, ouv_stride, bd);
+  vp9_highbd_resize_plane(v, height, width, uv_stride,
+                          ov, oheight, owidth, ouv_stride, bd);
+}
+#endif  // CONFIG_VP9_HIGHBITDEPTH

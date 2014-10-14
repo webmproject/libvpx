@@ -15,13 +15,15 @@
 #include <string.h>
 #include <limits.h>
 
+#include "./vpx_config.h"
+
+#if CONFIG_LIBYUV
 #include "third_party/libyuv/include/libyuv/scale.h"
+#endif
 
 #include "./args.h"
 #include "./ivfdec.h"
 
-#define VPX_CODEC_DISABLE_COMPAT 1
-#include "./vpx_config.h"
 #include "vpx/vpx_decoder.h"
 #include "vpx_ports/mem_ops.h"
 #include "vpx_ports/vpx_timer.h"
@@ -45,52 +47,49 @@ struct VpxDecInputContext {
   struct WebmInputContext *webm_ctx;
 };
 
-static const arg_def_t looparg = ARG_DEF(NULL, "loops", 1,
-                                          "Number of times to decode the file");
-static const arg_def_t codecarg = ARG_DEF(NULL, "codec", 1,
-                                          "Codec to use");
-static const arg_def_t use_yv12 = ARG_DEF(NULL, "yv12", 0,
-                                          "Output raw YV12 frames");
-static const arg_def_t use_i420 = ARG_DEF(NULL, "i420", 0,
-                                          "Output raw I420 frames");
-static const arg_def_t flipuvarg = ARG_DEF(NULL, "flipuv", 0,
-                                           "Flip the chroma planes in the output");
-static const arg_def_t rawvideo = ARG_DEF(NULL, "rawvideo", 0,
-                                          "Output raw YUV frames");
-static const arg_def_t noblitarg = ARG_DEF(NULL, "noblit", 0,
-                                           "Don't process the decoded frames");
-static const arg_def_t progressarg = ARG_DEF(NULL, "progress", 0,
-                                             "Show progress after each frame decodes");
-static const arg_def_t limitarg = ARG_DEF(NULL, "limit", 1,
-                                          "Stop decoding after n frames");
-static const arg_def_t skiparg = ARG_DEF(NULL, "skip", 1,
-                                         "Skip the first n input frames");
-static const arg_def_t postprocarg = ARG_DEF(NULL, "postproc", 0,
-                                             "Postprocess decoded frames");
-static const arg_def_t summaryarg = ARG_DEF(NULL, "summary", 0,
-                                            "Show timing summary");
-static const arg_def_t outputfile = ARG_DEF("o", "output", 1,
-                                            "Output file name pattern (see below)");
-static const arg_def_t threadsarg = ARG_DEF("t", "threads", 1,
-                                            "Max threads to use");
-static const arg_def_t verbosearg = ARG_DEF("v", "verbose", 0,
-                                            "Show version string");
-static const arg_def_t error_concealment = ARG_DEF(NULL, "error-concealment", 0,
-                                                   "Enable decoder error-concealment");
-static const arg_def_t scalearg = ARG_DEF("S", "scale", 0,
-                                            "Scale output frames uniformly");
-static const arg_def_t continuearg =
-    ARG_DEF("k", "keep-going", 0, "(debug) Continue decoding after error");
-
-static const arg_def_t fb_arg =
-    ARG_DEF(NULL, "frame-buffers", 1, "Number of frame buffers to use");
-
+static const arg_def_t looparg = ARG_DEF(
+    NULL, "loops", 1, "Number of times to decode the file");
+static const arg_def_t codecarg = ARG_DEF(
+    NULL, "codec", 1, "Codec to use");
+static const arg_def_t use_yv12 = ARG_DEF(
+    NULL, "yv12", 0, "Output raw YV12 frames");
+static const arg_def_t use_i420 = ARG_DEF(
+    NULL, "i420", 0, "Output raw I420 frames");
+static const arg_def_t flipuvarg = ARG_DEF(
+    NULL, "flipuv", 0, "Flip the chroma planes in the output");
+static const arg_def_t rawvideo = ARG_DEF(
+    NULL, "rawvideo", 0, "Output raw YUV frames");
+static const arg_def_t noblitarg = ARG_DEF(
+    NULL, "noblit", 0, "Don't process the decoded frames");
+static const arg_def_t progressarg = ARG_DEF(
+    NULL, "progress", 0, "Show progress after each frame decodes");
+static const arg_def_t limitarg = ARG_DEF(
+    NULL, "limit", 1, "Stop decoding after n frames");
+static const arg_def_t skiparg = ARG_DEF(
+    NULL, "skip", 1, "Skip the first n input frames");
+static const arg_def_t postprocarg = ARG_DEF(
+    NULL, "postproc", 0, "Postprocess decoded frames");
+static const arg_def_t summaryarg = ARG_DEF(
+    NULL, "summary", 0, "Show timing summary");
+static const arg_def_t outputfile = ARG_DEF(
+    "o", "output", 1, "Output file name pattern (see below)");
+static const arg_def_t threadsarg = ARG_DEF(
+    "t", "threads", 1, "Max threads to use");
+static const arg_def_t verbosearg = ARG_DEF(
+    "v", "verbose", 0, "Show version string");
+static const arg_def_t error_concealment = ARG_DEF(
+    NULL, "error-concealment", 0, "Enable decoder error-concealment");
+static const arg_def_t scalearg = ARG_DEF(
+    "S", "scale", 0, "Scale output frames uniformly");
+static const arg_def_t continuearg = ARG_DEF(
+    "k", "keep-going", 0, "(debug) Continue decoding after error");
+static const arg_def_t fb_arg = ARG_DEF(
+    NULL, "frame-buffers", 1, "Number of frame buffers to use");
 static const arg_def_t md5arg = ARG_DEF(
     NULL, "md5", 0, "Compute the MD5 sum of the decoded frame");
-#if CONFIG_VP9_HIGH
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
 static const arg_def_t outbitdeptharg = ARG_DEF(
-    NULL, "output-bit-depth", 1,
-    "Output bit-depth for decoded frames");
+    NULL, "output-bit-depth", 1, "Output bit-depth for decoded frames");
 #endif
 
 static const arg_def_t *all_args[] = {
@@ -98,7 +97,7 @@ static const arg_def_t *all_args[] = {
   &progressarg, &limitarg, &skiparg, &postprocarg, &summaryarg, &outputfile,
   &threadsarg, &verbosearg, &scalearg, &fb_arg,
   &md5arg, &error_concealment, &continuearg,
-#if CONFIG_VP9_HIGH
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
   &outbitdeptharg,
 #endif
   NULL
@@ -131,9 +130,10 @@ static const arg_def_t *vp8_pp_args[] = {
 };
 #endif
 
+#if CONFIG_LIBYUV
 static INLINE int vpx_image_scale(vpx_image_t *src, vpx_image_t *dst,
                                   FilterModeEnum mode) {
-#if CONFIG_VP9_HIGH
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
   if (src->fmt == VPX_IMG_FMT_I42016) {
     assert(dst->fmt == VPX_IMG_FMT_I42016);
     return I420Scale_16((uint16_t*)src->planes[VPX_PLANE_Y],
@@ -165,6 +165,7 @@ static INLINE int vpx_image_scale(vpx_image_t *src, vpx_image_t *dst,
                    dst->d_w, dst->d_h,
                    mode);
 }
+#endif
 
 void usage_exit() {
   int i;
@@ -288,10 +289,10 @@ static void update_image_md5(const vpx_image_t *img, const int planes[3],
 static void write_image_file(const vpx_image_t *img, const int planes[3],
                              FILE *file) {
   int i, y;
-  int bytes_per_sample = 1;
-#if CONFIG_VP9_HIGH
-  if (img->fmt & VPX_IMG_FMT_HIGHBITDEPTH)
-    bytes_per_sample = 2;
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+  const int bytes_per_sample = ((img->fmt & VPX_IMG_FMT_HIGHBITDEPTH) ? 2 : 1);
+#else
+  const int bytes_per_sample = 1;
 #endif
 
   for (i = 0; i < 3; ++i) {
@@ -380,7 +381,7 @@ int get_vp9_frame_buffer(void *cb_priv, size_t min_size,
 
   if (ext_fb_list->ext_fb[i].size < min_size) {
     free(ext_fb_list->ext_fb[i].data);
-    ext_fb_list->ext_fb[i].data = (uint8_t *)malloc(min_size);
+    ext_fb_list->ext_fb[i].data = (uint8_t *)calloc(min_size, sizeof(uint8_t));
     if (!ext_fb_list->ext_fb[i].data)
       return -1;
 
@@ -522,177 +523,7 @@ static FILE *open_outfile(const char *name) {
   }
 }
 
-#if CONFIG_VP9_HIGH
-static void high_img_upshift(vpx_image_t *dst, vpx_image_t *src,
-                             int input_shift) {
-  const int offset = input_shift > 0 ? (1 << (input_shift - 1)) : 0;
-  int plane;
-  if (dst->d_w != src->d_w || dst->d_h != src->d_h ||
-      dst->x_chroma_shift != src->x_chroma_shift ||
-      dst->y_chroma_shift != src->y_chroma_shift ||
-      dst->fmt != src->fmt || input_shift < 0) {
-    fatal("Unsupported image conversion");
-  }
-  switch (src->fmt) {
-    case VPX_IMG_FMT_I42016:
-    case VPX_IMG_FMT_I42216:
-    case VPX_IMG_FMT_I44416:
-      break;
-    default:
-      fatal("Unsupported image conversion");
-      break;
-  }
-  for (plane = 0; plane < 3; plane++) {
-    int w = src->d_w;
-    int h = src->d_h;
-    int x, y;
-    if (plane) {
-      w = (w + src->x_chroma_shift) >> src->x_chroma_shift;
-      h = (h + src->y_chroma_shift) >> src->y_chroma_shift;
-    }
-    for (y = 0; y < h; y++) {
-      uint16_t *p_src = (uint16_t *)(src->planes[plane] +
-                                     y * src->stride[plane]);
-      uint16_t *p_dst = (uint16_t *)(dst->planes[plane] +
-                                     y * dst->stride[plane]);
-      for (x = 0; x < w; x++)
-        *p_dst++ = (*p_src++ << input_shift) + offset;
-    }
-  }
-}
-
-static void low_img_upshift(vpx_image_t *dst, vpx_image_t *src,
-                            int input_shift) {
-  const int offset = input_shift > 0 ? (1 << (input_shift - 1)) : 0;
-  int plane;
-  if (dst->d_w != src->d_w || dst->d_h != src->d_h ||
-      dst->x_chroma_shift != src->x_chroma_shift ||
-      dst->y_chroma_shift != src->y_chroma_shift ||
-      dst->fmt != src->fmt + VPX_IMG_FMT_HIGHBITDEPTH ||
-      input_shift < 0) {
-    fatal("Unsupported image conversion");
-  }
-  switch (src->fmt) {
-    case VPX_IMG_FMT_I420:
-    case VPX_IMG_FMT_I422:
-    case VPX_IMG_FMT_I444:
-      break;
-    default:
-      fatal("Unsupported image conversion");
-      break;
-  }
-  for (plane = 0; plane < 3; plane++) {
-    int w = src->d_w;
-    int h = src->d_h;
-    int x, y;
-    if (plane) {
-      w = (w + src->x_chroma_shift) >> src->x_chroma_shift;
-      h = (h + src->y_chroma_shift) >> src->y_chroma_shift;
-    }
-    for (y = 0; y < h; y++) {
-      uint8_t *p_src = src->planes[plane] + y * src->stride[plane];
-      uint16_t *p_dst = (uint16_t *)(dst->planes[plane] +
-                                     y * dst->stride[plane]);
-      for (x = 0; x < w; x++) {
-        *p_dst++ = (*p_src++ << input_shift) + offset;
-      }
-    }
-  }
-}
-
-static void img_upshift(vpx_image_t *dst, vpx_image_t *src,
-                        int input_shift) {
-  if (src->fmt & VPX_IMG_FMT_HIGHBITDEPTH) {
-    high_img_upshift(dst, src, input_shift);
-  } else {
-    low_img_upshift(dst, src, input_shift);
-  }
-}
-
-static void high_img_downshift(vpx_image_t *dst, vpx_image_t *src,
-                               int down_shift) {
-  int plane;
-  if (dst->d_w != src->d_w || dst->d_h != src->d_h ||
-      dst->x_chroma_shift != src->x_chroma_shift ||
-      dst->y_chroma_shift != src->y_chroma_shift ||
-      dst->fmt != src->fmt || down_shift < 0) {
-    fatal("Unsupported image conversion");
-  }
-  switch (src->fmt) {
-    case VPX_IMG_FMT_I42016:
-    case VPX_IMG_FMT_I42216:
-    case VPX_IMG_FMT_I44416:
-      break;
-    default:
-      fatal("Unsupported image conversion");
-      break;
-  }
-  for (plane = 0; plane < 3; plane++) {
-    int w = src->d_w;
-    int h = src->d_h;
-    int x, y;
-    if (plane) {
-      w = (w + src->x_chroma_shift) >> src->x_chroma_shift;
-      h = (h + src->y_chroma_shift) >> src->y_chroma_shift;
-    }
-    for (y = 0; y < h; y++) {
-      uint16_t *p_src = (uint16_t *)(src->planes[plane] +
-                                     y * src->stride[plane]);
-      uint16_t *p_dst = (uint16_t *)(dst->planes[plane] +
-                                     y * dst->stride[plane]);
-      for (x = 0; x < w; x++)
-        *p_dst++ = *p_src++ >> down_shift;
-    }
-  }
-}
-
-static void low_img_downshift(vpx_image_t *dst, vpx_image_t *src,
-                            int down_shift) {
-  int plane;
-  if (dst->d_w != src->d_w || dst->d_h != src->d_h ||
-      dst->x_chroma_shift != src->x_chroma_shift ||
-      dst->y_chroma_shift != src->y_chroma_shift ||
-      src->fmt != dst->fmt + VPX_IMG_FMT_HIGHBITDEPTH ||
-      down_shift < 0) {
-    fatal("Unsupported image conversion");
-  }
-  switch (dst->fmt) {
-    case VPX_IMG_FMT_I420:
-    case VPX_IMG_FMT_I422:
-    case VPX_IMG_FMT_I444:
-      break;
-    default:
-      fatal("Unsupported image conversion");
-      break;
-  }
-  for (plane = 0; plane < 3; plane++) {
-    int w = src->d_w;
-    int h = src->d_h;
-    int x, y;
-    if (plane) {
-      w = (w + src->x_chroma_shift) >> src->x_chroma_shift;
-      h = (h + src->y_chroma_shift) >> src->y_chroma_shift;
-    }
-    for (y = 0; y < h; y++) {
-      uint16_t *p_src = (uint16_t *)(src->planes[plane] +
-                                     y * src->stride[plane]);
-      uint8_t *p_dst = dst->planes[plane] + y * dst->stride[plane];
-      for (x = 0; x < w; x++) {
-        *p_dst++ = *p_src++ >> down_shift;
-      }
-    }
-  }
-}
-
-static void img_downshift(vpx_image_t *dst, vpx_image_t *src,
-                          int down_shift) {
-  if (dst->fmt & VPX_IMG_FMT_HIGHBITDEPTH) {
-    high_img_downshift(dst, src, down_shift);
-  } else {
-    low_img_downshift(dst, src, down_shift);
-  }
-}
-
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
 static int img_shifted_realloc_required(const vpx_image_t *img,
                                         const vpx_image_t *shifted,
                                         vpx_img_fmt_t required_fmt) {
@@ -726,8 +557,8 @@ int main_loop(int argc, const char **argv_) {
   int                     opt_yv12 = 0;
   int                     opt_i420 = 0;
   vpx_codec_dec_cfg_t     cfg = {0, 0, 0};
-#if CONFIG_VP9_HIGH
-  int                     out_bit_depth = 0;
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+  int                     output_bit_depth = 0;
 #endif
 #if CONFIG_VP8_DECODER
   vp8_postproc_cfg_t      vp8_pp_cfg = {0};
@@ -740,7 +571,7 @@ int main_loop(int argc, const char **argv_) {
   int                     dec_flags = 0;
   int                     do_scale = 0;
   vpx_image_t             *scaled_img = NULL;
-#if CONFIG_VP9_HIGH
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
   vpx_image_t             *img_shifted = NULL;
 #endif
   int                     frame_avail, got_data;
@@ -757,7 +588,8 @@ int main_loop(int argc, const char **argv_) {
   struct VpxDecInputContext input = {NULL, NULL};
   struct VpxInputContext vpx_input_ctx;
 #if CONFIG_WEBM_IO
-  struct WebmInputContext webm_ctx = {0};
+  struct WebmInputContext webm_ctx;
+  memset(&(webm_ctx), 0, sizeof(webm_ctx));
   input.webm_ctx = &webm_ctx;
 #endif
   input.vpx_input_ctx = &vpx_input_ctx;
@@ -782,18 +614,17 @@ int main_loop(int argc, const char **argv_) {
       use_y4m = 0;
       flipuv = 1;
       opt_yv12 = 1;
-#if CONFIG_VP9_HIGH
-      out_bit_depth = 8;  // For yv12 8-bit depth output is assumed
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
+      output_bit_depth = 8;  // For yv12 8-bit depth output is assumed
 #endif
     } else if (arg_match(&arg, &use_i420, argi)) {
       use_y4m = 0;
       flipuv = 0;
       opt_i420 = 1;
+    } else if (arg_match(&arg, &rawvideo, argi)) {
+      use_y4m = 0;
     } else if (arg_match(&arg, &flipuvarg, argi))
       flipuv = 1;
-    else if (arg_match(&arg, &rawvideo, argi)) {
-      use_y4m = 0;
-    }
     else if (arg_match(&arg, &noblitarg, argi))
       noblit = 1;
     else if (arg_match(&arg, &progressarg, argi))
@@ -816,13 +647,13 @@ int main_loop(int argc, const char **argv_) {
       do_scale = 1;
     else if (arg_match(&arg, &fb_arg, argi))
       num_external_frame_buffers = arg_parse_uint(&arg);
-
-#if CONFIG_VP9_HIGH
+    else if (arg_match(&arg, &continuearg, argi))
+      keep_going = 1;
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
     else if (arg_match(&arg, &outbitdeptharg, argi)) {
-      out_bit_depth = arg_parse_uint(&arg);
+      output_bit_depth = arg_parse_uint(&arg);
     }
 #endif
-
 #if CONFIG_VP8_DECODER
     else if (arg_match(&arg, &addnoise_level, argi)) {
       postproc = 1;
@@ -872,11 +703,8 @@ int main_loop(int argc, const char **argv_) {
       }
     } else if (arg_match(&arg, &error_concealment, argi)) {
       ec_enabled = 1;
-    } else if (arg_match(&arg, &continuearg, argi)) {
-      keep_going = 1;
     }
-
-#endif
+#endif  // CONFIG_VP8_DECODER
     else
       argj++;
   }
@@ -940,7 +768,7 @@ int main_loop(int argc, const char **argv_) {
   if (use_y4m && !noblit) {
     if (!single_file) {
       fprintf(stderr, "YUV4MPEG2 not supported with output patterns,"
-              " try --i420 or --yv12.\n");
+              " try --i420 or --yv12 or --rawvideo.\n");
       return EXIT_FAILURE;
     }
 
@@ -1008,6 +836,7 @@ int main_loop(int argc, const char **argv_) {
     return EXIT_FAILURE;
   }
 #endif
+
 
   if (arg_skip)
     fprintf(stderr, "Skipping first %d frames.\n", arg_skip);
@@ -1129,15 +958,16 @@ int main_loop(int argc, const char **argv_) {
 #endif
         }
       }
-#if CONFIG_VP9_HIGH
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
       // Default to codec bit depth if output bit depth not set
-      if (!out_bit_depth)
-        out_bit_depth = img->bit_depth;
+      if (!output_bit_depth) {
+        output_bit_depth = img->bit_depth;
+      }
       // Shift up or down if necessary
-      if (out_bit_depth != img->bit_depth) {
-        vpx_img_fmt_t shifted_fmt = out_bit_depth == 8
-            ? img->fmt ^ (img->fmt & VPX_IMG_FMT_HIGHBITDEPTH)
-            : img->fmt | VPX_IMG_FMT_HIGHBITDEPTH;
+      if (output_bit_depth != img->bit_depth) {
+        const vpx_img_fmt_t shifted_fmt = output_bit_depth == 8 ?
+            img->fmt ^ (img->fmt & VPX_IMG_FMT_HIGHBITDEPTH) :
+            img->fmt | VPX_IMG_FMT_HIGHBITDEPTH;
         if (img_shifted &&
             img_shifted_realloc_required(img, img_shifted, shifted_fmt)) {
           vpx_img_free(img_shifted);
@@ -1146,20 +976,27 @@ int main_loop(int argc, const char **argv_) {
         if (!img_shifted) {
           img_shifted = vpx_img_alloc(NULL, shifted_fmt,
                                       img->d_w, img->d_h, 16);
-          img_shifted->bit_depth = out_bit_depth;
+          img_shifted->bit_depth = output_bit_depth;
         }
-        if (out_bit_depth > img->bit_depth) {
-          img_upshift(img_shifted, img, out_bit_depth - img->bit_depth);
+        if (output_bit_depth > img->bit_depth) {
+          vpx_img_upshift(img_shifted, img,
+                          output_bit_depth - img->bit_depth);
         } else {
-          img_downshift(img_shifted, img, img->bit_depth - out_bit_depth);
+          vpx_img_downshift(img_shifted, img,
+                            img->bit_depth - output_bit_depth);
         }
         img = img_shifted;
       }
 #endif
+
       if (single_file) {
         if (use_y4m) {
           char buf[Y4M_BUFFER_SIZE] = {0};
           size_t len = 0;
+          if (img->fmt == VPX_IMG_FMT_I440 || img->fmt == VPX_IMG_FMT_I44016) {
+            fprintf(stderr, "Cannot produce y4m output for 440 sampling.\n");
+            goto fail;
+          }
           if (frame_out == 1) {
             // Y4M file header
             len = y4m_write_file_header(buf, sizeof(buf),
@@ -1261,7 +1098,7 @@ fail:
     free(buf);
 
   if (scaled_img) vpx_img_free(scaled_img);
-#if CONFIG_VP9_HIGH
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
   if (img_shifted) vpx_img_free(img_shifted);
 #endif
 

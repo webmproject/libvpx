@@ -10,10 +10,9 @@
 
 #include <assert.h>
 
-#include "./vpx_config.h"
 #include "vpx_scale/yv12config.h"
 #include "vpx_mem/vpx_mem.h"
-#if CONFIG_VP9_HIGH
+#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
 #include "vp9/common/vp9_common.h"
 #endif
 
@@ -140,8 +139,8 @@ int vp9_free_frame_buffer(YV12_BUFFER_CONFIG *ybf) {
 int vp9_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
                              int width, int height,
                              int ss_x, int ss_y,
-#if CONFIG_VP9_HIGH
-                             int use_high,
+#if CONFIG_VP9_HIGHBITDEPTH
+                             int use_highbitdepth,
 #endif
                              int border,
                              vpx_codec_frame_buffer_t *fb,
@@ -168,22 +167,21 @@ int vp9_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
     const int alpha_border_h = border;
     const uint64_t alpha_plane_size = (alpha_height + 2 * alpha_border_h) *
                                       (uint64_t)alpha_stride;
-#if CONFIG_VP9_HIGH
-    const uint64_t frame_size = (1 + use_high) * (yplane_size +
-                                2 * uvplane_size + alpha_plane_size);
+#if CONFIG_VP9_HIGHBITDEPTH
+    const uint64_t frame_size = (1 + use_highbitdepth) *
+        (yplane_size + 2 * uvplane_size + alpha_plane_size);
 #else
     const uint64_t frame_size = yplane_size + 2 * uvplane_size +
                                 alpha_plane_size;
-#endif
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 #else
-#if CONFIG_VP9_HIGH
-    const uint64_t frame_size = (1 + use_high) * (yplane_size +
-                                2 * uvplane_size);
+#if CONFIG_VP9_HIGHBITDEPTH
+    const uint64_t frame_size =
+        (1 + use_highbitdepth) * (yplane_size + 2 * uvplane_size);
 #else
     const uint64_t frame_size = yplane_size + 2 * uvplane_size;
-#endif
-#endif
-
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_ALPHA
     if (cb != NULL) {
       const int align_addr_extra_size = 31;
       const uint64_t external_frame_size = frame_size + align_addr_extra_size;
@@ -199,11 +197,6 @@ int vp9_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
 
       if (fb->data == NULL || fb->size < external_frame_size)
         return -1;
-
-      // This memset is needed for fixing valgrind error from C loop filter
-      // due to access uninitialized memory in frame border. It could be
-      // removed if border is totally removed.
-      vpx_memset(fb->data, 0, fb->size);
 
       ybf->buffer_alloc = (uint8_t *)yv12_align_addr(fb->data, 32);
     } else if (frame_size > (size_t)ybf->buffer_alloc_sz) {
@@ -248,22 +241,25 @@ int vp9_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
 
     ybf->border = border;
     ybf->frame_size = (int)frame_size;
-#if CONFIG_VP9_HIGH
-    if (use_high) {
+    ybf->subsampling_x = ss_x;
+    ybf->subsampling_y = ss_y;
+
+#if CONFIG_VP9_HIGHBITDEPTH
+    if (use_highbitdepth) {
       // Store uint16 addresses when using 16bit framebuffers
       uint8_t *p = CONVERT_TO_BYTEPTR(ybf->buffer_alloc);
       ybf->y_buffer = p + (border * y_stride) + border;
       ybf->u_buffer = p + yplane_size +
-                    (uv_border_h * uv_stride) + uv_border_w;
+          (uv_border_h * uv_stride) + uv_border_w;
       ybf->v_buffer = p + yplane_size + uvplane_size +
-                    (uv_border_h * uv_stride) + uv_border_w;
+          (uv_border_h * uv_stride) + uv_border_w;
       ybf->flags = YV12_FLAG_HIGHBITDEPTH;
     } else {
       ybf->y_buffer = ybf->buffer_alloc + (border * y_stride) + border;
       ybf->u_buffer = ybf->buffer_alloc + yplane_size +
-                    (uv_border_h * uv_stride) + uv_border_w;
+          (uv_border_h * uv_stride) + uv_border_w;
       ybf->v_buffer = ybf->buffer_alloc + yplane_size + uvplane_size +
-                    (uv_border_h * uv_stride) + uv_border_w;
+          (uv_border_h * uv_stride) + uv_border_w;
       ybf->flags = 0;
     }
 #else
@@ -272,7 +268,7 @@ int vp9_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
                     (uv_border_h * uv_stride) + uv_border_w;
     ybf->v_buffer = ybf->buffer_alloc + yplane_size + uvplane_size +
                     (uv_border_h * uv_stride) + uv_border_w;
-#endif
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 #if CONFIG_ALPHA
     ybf->alpha_width = alpha_width;
@@ -290,18 +286,17 @@ int vp9_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
 int vp9_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
                            int width, int height,
                            int ss_x, int ss_y,
-#if CONFIG_VP9_HIGH
-                           int use_high,
+#if CONFIG_VP9_HIGHBITDEPTH
+                           int use_highbitdepth,
 #endif
                            int border) {
   if (ybf) {
     vp9_free_frame_buffer(ybf);
     return vp9_realloc_frame_buffer(ybf, width, height, ss_x, ss_y,
-#if CONFIG_VP9_HIGH
-                                    use_high,
+#if CONFIG_VP9_HIGHBITDEPTH
+                                    use_highbitdepth,
 #endif
-                                    border,
-                                    NULL, NULL, NULL);
+                                    border, NULL, NULL, NULL);
   }
   return -2;
 }

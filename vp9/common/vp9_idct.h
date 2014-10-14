@@ -14,14 +14,12 @@
 #include <assert.h>
 
 #include "./vpx_config.h"
-#include "vpx/vpx_integer.h"
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_enums.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 
 // Constants and Macros used by all idct/dct functions
 #define DCT_CONST_BITS 14
@@ -35,14 +33,6 @@ extern "C" {
 
 #define dual_set_epi16(a, b) \
   _mm_set_epi16(b, b, b, b, a, a, a, a)
-
-#if CONFIG_VP9_HIGH
-typedef int64_t tran_high_t;
-typedef int32_t tran_low_t;
-#else
-typedef int32_t tran_high_t;
-typedef int16_t tran_low_t;
-#endif
 
 // Constants:
 //  for (int i = 1; i< 32; ++i)
@@ -87,25 +77,29 @@ static const tran_high_t sinpi_2_9 = 9929;
 static const tran_high_t sinpi_3_9 = 13377;
 static const tran_high_t sinpi_4_9 = 15212;
 
-static INLINE tran_low_t dct_const_round_shift(tran_high_t input) {
-  tran_high_t rv = ROUND_POWER_OF_TWO(input, DCT_CONST_BITS);
-  #if CONFIG_VP9_HIGH
+static INLINE tran_low_t check_range(tran_high_t input) {
+#if CONFIG_VP9_HIGHBITDEPTH
   // For valid highbitdepth VP9 streams, intermediate stage coefficients will
   // stay within the ranges:
   // - 8 bit: signed 16 bit integer
   // - 10 bit: signed 18 bit integer
   // - 12 bit: signed 20 bit integer
-  #elif CONFIG_COEFFICIENT_RANGE_CHECKING
+#elif CONFIG_COEFFICIENT_RANGE_CHECKING
   // For valid VP9 input streams, intermediate stage coefficients should always
   // stay within the range of a signed 16 bit integer. Coefficients can go out
   // of this range for invalid/corrupt VP9 streams. However, strictly checking
   // this range for every intermediate coefficient can burdensome for a decoder,
   // therefore the following assertion is only enabled when configured with
   // --enable-coefficient-range-checking.
-  assert(INT16_MIN <= rv);
-  assert(rv <= INT16_MAX);
+  assert(INT16_MIN <= input);
+  assert(input <= INT16_MAX);
 #endif
-  return (tran_low_t)rv;
+  return (tran_low_t)input;
+}
+
+static INLINE tran_low_t dct_const_round_shift(tran_high_t input) {
+  tran_high_t rv = ROUND_POWER_OF_TWO(input, DCT_CONST_BITS);
+  return check_range(rv);
 }
 
 typedef void (*transform_1d)(const tran_low_t*, tran_low_t*);
@@ -114,23 +108,22 @@ typedef struct {
   transform_1d cols, rows;  // vertical and horizontal
 } transform_2d;
 
-#if CONFIG_VP9_HIGH
-typedef void (*high_transform_1d)(const tran_low_t*, tran_low_t*, int bps);
+#if CONFIG_VP9_HIGHBITDEPTH
+typedef void (*highbd_transform_1d)(const tran_low_t*, tran_low_t*, int bd);
 
 typedef struct {
-  high_transform_1d cols, rows;  // vertical and horizontal
-} high_transform_2d;
-#endif
+  highbd_transform_1d cols, rows;  // vertical and horizontal
+} highbd_transform_2d;
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 void vp9_iwht4x4_add(const tran_low_t *input, uint8_t *dest, int stride,
                      int eob);
-
 void vp9_idct4x4_add(const tran_low_t *input, uint8_t *dest, int stride,
                      int eob);
 void vp9_idct8x8_add(const tran_low_t *input, uint8_t *dest, int stride,
                      int eob);
-void vp9_idct16x16_add(const tran_low_t *input, uint8_t *dest, int stride,
-                       int eob);
+void vp9_idct16x16_add(const tran_low_t *input, uint8_t *dest, int stride, int
+                       eob);
 void vp9_idct32x32_add(const tran_low_t *input, uint8_t *dest, int stride,
                        int eob);
 
@@ -141,26 +134,24 @@ void vp9_iht8x8_add(TX_TYPE tx_type, const tran_low_t *input, uint8_t *dest,
 void vp9_iht16x16_add(TX_TYPE tx_type, const tran_low_t *input, uint8_t *dest,
                       int stride, int eob);
 
-#if CONFIG_VP9_HIGH
-void vp9_high_iwht4x4_add(const tran_low_t *input, uint8_t *dest, int stride,
-                          int eob, int bps);
-void vp9_high_idct4x4_add(const tran_low_t *input, uint8_t *dest, int stride,
-                          int eob, int bps);
-void vp9_high_idct8x8_add(const tran_low_t *input, uint8_t *dest, int stride,
-                          int eob, int bps);
-void vp9_high_idct16x16_add(const tran_low_t *input, uint8_t *dest, int stride,
-                            int eob, int bps);
-void vp9_high_idct32x32_add(const tran_low_t *input, uint8_t *dest, int stride,
-                            int eob, int bps);
-void vp9_high_iht4x4_add(TX_TYPE tx_type, const tran_low_t *input,
-                         uint8_t *dest, int stride, int eob, int bps);
-void vp9_high_iht8x8_add(TX_TYPE tx_type, const tran_low_t *input,
-                         uint8_t *dest, int stride, int eob, int bps);
-void vp9_high_iht16x16_add(TX_TYPE tx_type, const tran_low_t *input,
-                           uint8_t *dest, int stride, int eob, int bps);
-#endif
-
-
+#if CONFIG_VP9_HIGHBITDEPTH
+void vp9_highbd_iwht4x4_add(const tran_low_t *input, uint8_t *dest, int stride,
+                            int eob, int bd);
+void vp9_highbd_idct4x4_add(const tran_low_t *input, uint8_t *dest, int stride,
+                            int eob, int bd);
+void vp9_highbd_idct8x8_add(const tran_low_t *input, uint8_t *dest, int stride,
+                            int eob, int bd);
+void vp9_highbd_idct16x16_add(const tran_low_t *input, uint8_t *dest,
+                              int stride, int eob, int bd);
+void vp9_highbd_idct32x32_add(const tran_low_t *input, uint8_t *dest,
+                              int stride, int eob, int bd);
+void vp9_highbd_iht4x4_add(TX_TYPE tx_type, const tran_low_t *input,
+                           uint8_t *dest, int stride, int eob, int bd);
+void vp9_highbd_iht8x8_add(TX_TYPE tx_type, const tran_low_t *input,
+                           uint8_t *dest, int stride, int eob, int bd);
+void vp9_highbd_iht16x16_add(TX_TYPE tx_type, const tran_low_t *input,
+                             uint8_t *dest, int stride, int eob, int bd);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 #ifdef __cplusplus
 }  // extern "C"
 #endif

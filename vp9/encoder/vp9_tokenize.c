@@ -13,8 +13,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "./vpx_config.h"
-
 #include "vpx_mem/vpx_mem.h"
 
 #include "vp9/common/vp9_entropy.h"
@@ -30,8 +28,7 @@ const TOKENVALUE *vp9_dct_value_tokens_ptr;
 static int16_t dct_value_cost[DCT_MAX_VALUE * 2];
 const int16_t *vp9_dct_value_cost_ptr;
 
-
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_QUANT
+#if CONFIG_VP9_HIGHBITDEPTH
 static TOKENVALUE dct_value_tokens_high10[DCT_MAX_VALUE_HIGH10 * 2];
 const TOKENVALUE *vp9_dct_value_tokens_high10_ptr;
 static int16_t dct_value_cost_high10[DCT_MAX_VALUE_HIGH10 * 2];
@@ -72,12 +69,19 @@ const vp9_tree_index vp9_coef_con_tree[TREE_SIZE(ENTROPY_TOKENS)] = {
 
 static vp9_tree_index cat1[2], cat2[4], cat3[6], cat4[8], cat5[10], cat6[28];
 
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_QUANT
-static vp9_tree_index cat1_high10[2], cat2_high10[4], cat3_high10[6],
-                      cat4_high10[8], cat5_high10[10], cat6_high10[32];
-
-static vp9_tree_index cat1_high12[2], cat2_high12[4], cat3_high12[6],
-                      cat4_high12[8], cat5_high12[10], cat6_high12[36];
+#if CONFIG_VP9_HIGHBITDEPTH
+static vp9_tree_index cat1_high10[2];
+static vp9_tree_index cat2_high10[4];
+static vp9_tree_index cat3_high10[6];
+static vp9_tree_index cat4_high10[8];
+static vp9_tree_index cat5_high10[10];
+static vp9_tree_index cat6_high10[32];
+static vp9_tree_index cat1_high12[2];
+static vp9_tree_index cat2_high12[4];
+static vp9_tree_index cat3_high12[6];
+static vp9_tree_index cat4_high12[8];
+static vp9_tree_index cat5_high12[10];
+static vp9_tree_index cat6_high12[36];
 #endif
 
 static void init_bit_tree(vp9_tree_index *p, int n) {
@@ -98,14 +102,13 @@ static void init_bit_trees() {
   init_bit_tree(cat4, 4);
   init_bit_tree(cat5, 5);
   init_bit_tree(cat6, 14);
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_QUANT
+#if CONFIG_VP9_HIGHBITDEPTH
   init_bit_tree(cat1_high10, 1);
   init_bit_tree(cat2_high10, 2);
   init_bit_tree(cat3_high10, 3);
   init_bit_tree(cat4_high10, 4);
   init_bit_tree(cat5_high10, 5);
   init_bit_tree(cat6_high10, 16);
-
   init_bit_tree(cat1_high12, 1);
   init_bit_tree(cat2_high12, 2);
   init_bit_tree(cat3_high12, 3);
@@ -130,7 +133,7 @@ const vp9_extra_bit vp9_extra_bits[ENTROPY_TOKENS] = {
   {0, 0, 0, 0}                               // EOB_TOKEN
 };
 
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_QUANT
+#if CONFIG_VP9_HIGHBITDEPTH
 const vp9_extra_bit vp9_extra_bits_high10[ENTROPY_TOKENS] = {
   {0, 0, 0, 0},                                            // ZERO_TOKEN
   {0, 0, 0, 1},                                            // ONE_TOKEN
@@ -219,7 +222,7 @@ void vp9_tokenize_initialize() {
 
   tokenize_init_one(dct_value_tokens + DCT_MAX_VALUE, vp9_extra_bits,
                     dct_value_cost + DCT_MAX_VALUE, DCT_MAX_VALUE);
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_QUANT
+#if CONFIG_VP9_HIGHBITDEPTH
   vp9_dct_value_tokens_high10_ptr = dct_value_tokens_high10 +
       DCT_MAX_VALUE_HIGH10;
   vp9_dct_value_cost_high10_ptr = dct_value_cost_high10 + DCT_MAX_VALUE_HIGH10;
@@ -296,7 +299,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   uint8_t token_cache[32 * 32];
   struct macroblock_plane *p = &cpi->mb.plane[plane];
   struct macroblockd_plane *pd = &xd->plane[plane];
-  MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
+  MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
   int pt; /* near block/prev token context index */
   int c;
   TOKENEXTRA *t = *tp;        /* store tokens starting here */
@@ -326,7 +329,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   scan = so->scan;
   nb = so->neighbors;
   c = 0;
-#if CONFIG_VP9_HIGH && CONFIG_HIGH_QUANT
+#if CONFIG_VP9_HIGHBITDEPTH
   if (cpi->common.profile >= PROFILE_2) {
     dct_value_tokens = (cpi->common.bit_depth == VPX_BITS_10 ?
                         vp9_dct_value_tokens_high10_ptr :
@@ -337,6 +340,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
 #else
   dct_value_tokens = vp9_dct_value_tokens_ptr;
 #endif
+
   while (c < eob) {
     int v = 0;
     int skip_eob = 0;
@@ -353,6 +357,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
       pt = get_coef_context(nb, token_cache, c);
       v = qcoeff[scan[c]];
     }
+
     add_token(&t, coef_probs[band[c]][pt],
               dct_value_tokens[v].extra,
               (uint8_t)dct_value_tokens[v].token,
@@ -360,8 +365,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
               counts[band[c]][pt]);
     eob_branch[band[c]][pt] += !skip_eob;
 
-    token_cache[scan[c]] =
-        vp9_pt_energy_class[dct_value_tokens[v].token];
+    token_cache[scan[c]] = vp9_pt_energy_class[dct_value_tokens[v].token];
     ++c;
     pt = get_coef_context(nb, token_cache, c);
   }
@@ -399,11 +403,29 @@ int vp9_is_skippable_in_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
   return result;
 }
 
+static void has_high_freq_coeff(int plane, int block,
+                                BLOCK_SIZE plane_bsize, TX_SIZE tx_size,
+                                void *argv) {
+  struct is_skippable_args *args = argv;
+  int eobs = (tx_size == TX_4X4) ? 3 : 10;
+  (void) plane_bsize;
+
+  *(args->skippable) |= (args->x->plane[plane].eobs[block] > eobs);
+}
+
+int vp9_has_high_freq_in_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
+  int result = 0;
+  struct is_skippable_args args = {x, &result};
+  vp9_foreach_transformed_block_in_plane(&x->e_mbd, bsize, plane,
+                                         has_high_freq_coeff, &args);
+  return result;
+}
+
 void vp9_tokenize_sb(VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,
                      BLOCK_SIZE bsize) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &cpi->mb.e_mbd;
-  MB_MODE_INFO *const mbmi = &xd->mi[0]->mbmi;
+  MB_MODE_INFO *const mbmi = &xd->mi[0].src_mi->mbmi;
   TOKENEXTRA *t_backup = *t;
   const int ctx = vp9_get_skip_context(xd);
   const int skip_inc = !vp9_segfeature_active(&cm->seg, mbmi->segment_id,

@@ -11,8 +11,6 @@
 #ifndef VP9_COMMON_VP9_SEG_COMMON_H_
 #define VP9_COMMON_VP9_SEG_COMMON_H_
 
-#include "vpx/vpx_codec.h"
-
 #include "vp9/common/vp9_prob.h"
 
 #ifdef __cplusplus

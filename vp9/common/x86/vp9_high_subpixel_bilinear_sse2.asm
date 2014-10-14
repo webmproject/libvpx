@@ -14,18 +14,18 @@
     mov         rdx, arg(5)                 ;filter ptr
     mov         rsi, arg(0)                 ;src_ptr
     mov         rdi, arg(2)                 ;output_ptr
-    mov         rcx, 0x00000040             
+    mov         rcx, 0x00000040
 
     movdqa      xmm3, [rdx]                 ;load filters
     pshuflw     xmm4, xmm3, 11111111b       ;k3
     psrldq      xmm3, 8
-    pshuflw     xmm3, xmm3, 0b              ;k4         
+    pshuflw     xmm3, xmm3, 0b              ;k4
     punpcklwd   xmm4, xmm3                  ;k3k4
 
     movq        xmm3, rcx                   ;rounding
     pshufd      xmm3, xmm3, 0
 
-    mov         rdx, 0x00010001                 
+    mov         rdx, 0x00010001
     movsxd      rcx, DWORD PTR arg(6)       ;bps
     movq        xmm5, rdx
     movq        xmm2, rcx
@@ -43,7 +43,7 @@
 %macro HIGH_APPLY_FILTER_4 1
 
     punpcklwd   xmm0, xmm1                  ;two row in one register
-    pmaddwd     xmm0, xmm4                  ;multiply the filter factors    
+    pmaddwd     xmm0, xmm4                  ;multiply the filter factors
 
     paddd       xmm0, xmm3                  ;rounding
     psrad       xmm0, 7                     ;shift
@@ -52,7 +52,7 @@
     ;clamp the values
     pminsw      xmm0, xmm5
     pmaxsw      xmm0, xmm2
-    
+
 %if %1
     movq        xmm1, [rdi]
     pavgw       xmm0, xmm1
@@ -70,7 +70,7 @@
     mov         rsi, arg(0)                 ;src_ptr
     mov         rdi, arg(2)                 ;output_ptr
     mov         rcx, 0x00000040
-    
+
     movdqa      xmm6, [rdx]                 ;load filters
 
     pshuflw     xmm7, xmm6, 11111111b       ;k3
@@ -81,7 +81,7 @@
     movq        xmm4, rcx                   ;rounding
     pshufd      xmm4, xmm4, 0
 
-    mov         rdx, 0x00010001                 
+    mov         rdx, 0x00010001
     movsxd      rcx, DWORD PTR arg(6)       ;bps
     movq        xmm8, rdx
     movq        xmm5, rcx
@@ -102,17 +102,17 @@
     punpcklwd   xmm0, xmm1
     pmaddwd     xmm6, xmm7
     pmaddwd     xmm0, xmm7
-    
+
     paddd       xmm6, xmm4                  ;rounding
     paddd       xmm0, xmm4                  ;rounding
     psrad       xmm6, 7                     ;shift
     psrad       xmm0, 7                     ;shift
-    packssdw    xmm0, xmm6                  ;pack back to word     
-   
+    packssdw    xmm0, xmm6                  ;pack back to word
+
     ;clamp the values
     pminsw      xmm0, xmm8
     pmaxsw      xmm0, xmm5
-                                         
+
 %if %1
     movdqu      xmm1, [rdi]
     pavgw       xmm0, xmm1
@@ -124,38 +124,38 @@
     dec         rcx
 %endm
 
-%macro HIGH_APPLY_FILTER_16 1           
+%macro HIGH_APPLY_FILTER_16 1
     movdqa      xmm9, xmm0
     movdqa      xmm6, xmm2
     punpckhwd   xmm9, xmm1
     punpckhwd   xmm6, xmm3
     punpcklwd   xmm0, xmm1
     punpcklwd   xmm2, xmm3
-    
+
     pmaddwd     xmm9, xmm7
     pmaddwd     xmm6, xmm7
     pmaddwd     xmm0, xmm7
     pmaddwd     xmm2, xmm7
-    
+
     paddd       xmm9, xmm4                  ;rounding
     paddd       xmm6, xmm4
     paddd       xmm0, xmm4
     paddd       xmm2, xmm4
-    
+
     psrad       xmm9, 7                     ;shift
     psrad       xmm6, 7
     psrad       xmm0, 7
     psrad       xmm2, 7
-    
+
     packssdw    xmm0, xmm9                  ;pack back to word
     packssdw    xmm2, xmm6                  ;pack back to word
-        
+
     ;clamp the values
     pminsw      xmm0, xmm8
     pmaxsw      xmm0, xmm5
     pminsw      xmm2, xmm8
     pmaxsw      xmm2, xmm5
-    
+
 %if %1
     movdqu      xmm1, [rdi]
     movdqu      xmm3, [rdi + 16]
@@ -171,8 +171,8 @@
 %endm
 %endif
 
-global sym(vp9_high_filter_block1d4_v2_sse2) PRIVATE
-sym(vp9_high_filter_block1d4_v2_sse2):
+global sym(vp9_highbd_filter_block1d4_v2_sse2) PRIVATE
+sym(vp9_highbd_filter_block1d4_v2_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
@@ -196,8 +196,8 @@ sym(vp9_high_filter_block1d4_v2_sse2):
     ret
 
 %if ARCH_X86_64
-global sym(vp9_high_filter_block1d8_v2_sse2) PRIVATE
-sym(vp9_high_filter_block1d8_v2_sse2):
+global sym(vp9_highbd_filter_block1d8_v2_sse2) PRIVATE
+sym(vp9_highbd_filter_block1d8_v2_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
@@ -222,8 +222,8 @@ sym(vp9_high_filter_block1d8_v2_sse2):
     pop         rbp
     ret
 
-global sym(vp9_high_filter_block1d16_v2_sse2) PRIVATE
-sym(vp9_high_filter_block1d16_v2_sse2):
+global sym(vp9_highbd_filter_block1d16_v2_sse2) PRIVATE
+sym(vp9_highbd_filter_block1d16_v2_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
@@ -248,11 +248,11 @@ sym(vp9_high_filter_block1d16_v2_sse2):
     RESTORE_XMM
     UNSHADOW_ARGS
     pop         rbp
-    ret   
+    ret
 %endif
-    
-global sym(vp9_high_filter_block1d4_v2_avg_sse2) PRIVATE
-sym(vp9_high_filter_block1d4_v2_avg_sse2):
+
+global sym(vp9_highbd_filter_block1d4_v2_avg_sse2) PRIVATE
+sym(vp9_highbd_filter_block1d4_v2_avg_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
@@ -276,8 +276,8 @@ sym(vp9_high_filter_block1d4_v2_avg_sse2):
     ret
 
 %if ARCH_X86_64
-global sym(vp9_high_filter_block1d8_v2_avg_sse2) PRIVATE
-sym(vp9_high_filter_block1d8_v2_avg_sse2):
+global sym(vp9_highbd_filter_block1d8_v2_avg_sse2) PRIVATE
+sym(vp9_highbd_filter_block1d8_v2_avg_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
@@ -302,8 +302,8 @@ sym(vp9_high_filter_block1d8_v2_avg_sse2):
     pop         rbp
     ret
 
-global sym(vp9_high_filter_block1d16_v2_avg_sse2) PRIVATE
-sym(vp9_high_filter_block1d16_v2_avg_sse2):
+global sym(vp9_highbd_filter_block1d16_v2_avg_sse2) PRIVATE
+sym(vp9_highbd_filter_block1d16_v2_avg_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
@@ -331,8 +331,8 @@ sym(vp9_high_filter_block1d16_v2_avg_sse2):
     ret
 %endif
 
-global sym(vp9_high_filter_block1d4_h2_sse2) PRIVATE
-sym(vp9_high_filter_block1d4_h2_sse2):
+global sym(vp9_highbd_filter_block1d4_h2_sse2) PRIVATE
+sym(vp9_highbd_filter_block1d4_h2_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
@@ -344,7 +344,7 @@ sym(vp9_high_filter_block1d4_h2_sse2):
 .loop:
     movdqu      xmm0, [rsi]                 ;load src
     movdqa      xmm1, xmm0
-    psrldq      xmm1, 2                 
+    psrldq      xmm1, 2
 
     HIGH_APPLY_FILTER_4 0
     jnz         .loop
@@ -357,8 +357,8 @@ sym(vp9_high_filter_block1d4_h2_sse2):
     ret
 
 %if ARCH_X86_64
-global sym(vp9_high_filter_block1d8_h2_sse2) PRIVATE
-sym(vp9_high_filter_block1d8_h2_sse2):
+global sym(vp9_highbd_filter_block1d8_h2_sse2) PRIVATE
+sym(vp9_highbd_filter_block1d8_h2_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
@@ -383,8 +383,8 @@ sym(vp9_high_filter_block1d8_h2_sse2):
     pop         rbp
     ret
 
-global sym(vp9_high_filter_block1d16_h2_sse2) PRIVATE
-sym(vp9_high_filter_block1d16_h2_sse2):
+global sym(vp9_highbd_filter_block1d16_h2_sse2) PRIVATE
+sym(vp9_highbd_filter_block1d16_h2_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
@@ -412,8 +412,8 @@ sym(vp9_high_filter_block1d16_h2_sse2):
     ret
 %endif
 
-global sym(vp9_high_filter_block1d4_h2_avg_sse2) PRIVATE
-sym(vp9_high_filter_block1d4_h2_avg_sse2):
+global sym(vp9_highbd_filter_block1d4_h2_avg_sse2) PRIVATE
+sym(vp9_highbd_filter_block1d4_h2_avg_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
@@ -438,8 +438,8 @@ sym(vp9_high_filter_block1d4_h2_avg_sse2):
     ret
 
 %if ARCH_X86_64
-global sym(vp9_high_filter_block1d8_h2_avg_sse2) PRIVATE
-sym(vp9_high_filter_block1d8_h2_avg_sse2):
+global sym(vp9_highbd_filter_block1d8_h2_avg_sse2) PRIVATE
+sym(vp9_highbd_filter_block1d8_h2_avg_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
@@ -464,8 +464,8 @@ sym(vp9_high_filter_block1d8_h2_avg_sse2):
     pop         rbp
     ret
 
-global sym(vp9_high_filter_block1d16_h2_avg_sse2) PRIVATE
-sym(vp9_high_filter_block1d16_h2_avg_sse2):
+global sym(vp9_highbd_filter_block1d16_h2_avg_sse2) PRIVATE
+sym(vp9_highbd_filter_block1d16_h2_avg_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7

@@ -18,6 +18,8 @@
 extern "C" {
 #endif
 
+#define MOTION_MAGNITUDE_THRESHOLD (8 * 3)
+
 typedef enum vp9_denoiser_decision {
   COPY_BLOCK,
   FILTER_BLOCK
@@ -42,12 +44,20 @@ void vp9_denoiser_denoise(VP9_DENOISER *denoiser, MACROBLOCK *mb,
 
 void vp9_denoiser_reset_frame_stats(PICK_MODE_CONTEXT *ctx);
 
-void vp9_denoiser_update_frame_stats(VP9_DENOISER *denoiser, MB_MODE_INFO *mbmi,
+void vp9_denoiser_update_frame_stats(MB_MODE_INFO *mbmi,
                                      unsigned int sse, PREDICTION_MODE mode,
                                      PICK_MODE_CONTEXT *ctx);
 
 int vp9_denoiser_alloc(VP9_DENOISER *denoiser, int width, int height,
-                       int ssx, int ssy, int border);
+                       int ssx, int ssy,
+#if CONFIG_VP9_HIGHBITDEPTH
+                       int use_highbitdepth,
+#endif
+                       int border);
+
+#if CONFIG_VP9_TEMPORAL_DENOISING
+int total_adj_strong_thresh(BLOCK_SIZE bs, int increase_denoising);
+#endif
 
 void vp9_denoiser_free(VP9_DENOISER *denoiser);
 

@@ -242,7 +242,8 @@ void vp9_cyclic_refresh_setup(VP9_COMP *const cpi) {
     // Set the q delta for segment 1.
     qindex_delta = vp9_compute_qdelta_by_rate(rc, cm->frame_type,
                                               cm->base_qindex,
-                                              rate_ratio_qdelta, cm->bit_depth);
+                                              rate_ratio_qdelta,
+                                              cm->bit_depth);
     // TODO(marpan): Incorporate the actual-vs-target rate over/undershoot from
     // previous encoded frame.
     if (-qindex_delta > cr->max_qdelta_perc * cm->base_qindex / 100)

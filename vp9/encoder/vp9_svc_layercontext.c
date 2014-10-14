@@ -24,7 +24,7 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
   svc->spatial_layer_id = 0;
   svc->temporal_layer_id = 0;
 
-  if (svc->number_temporal_layers > 1) {
+  if (svc->number_temporal_layers > 1 && cpi->oxcf.rc_mode == VPX_CBR) {
     layer_end = svc->number_temporal_layers;
   } else {
     layer_end = svc->number_spatial_layers;
@@ -36,6 +36,8 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
     int i;
     lc->current_video_frame_in_layer = 0;
     lc->layer_size = 0;
+    lc->frames_from_key_frame = 0;
+    lc->last_frame_type = FRAME_TYPES;
     lrc->ni_av_qi = oxcf->worst_allowed_q;
     lrc->total_actual_bits = 0;
     lrc->total_target_vs_actual = 0;
@@ -50,7 +52,7 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
       lrc->rate_correction_factors[i] = 1.0;
     }
 
-    if (svc->number_temporal_layers > 1) {
+    if (svc->number_temporal_layers > 1 && cpi->oxcf.rc_mode == VPX_CBR) {
       lc->target_bandwidth = oxcf->ts_target_bitrate[layer];
       lrc->last_q[INTER_FRAME] = oxcf->worst_allowed_q;
       lrc->avg_frame_qindex[INTER_FRAME] = oxcf->worst_allowed_q;
@@ -69,13 +71,14 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
       lc->gold_ref_idx = -1;
     }
 
-    lrc->buffer_level = vp9_rescale((int)(oxcf->starting_buffer_level_ms),
-                                    lc->target_bandwidth, 1000);
+    lrc->buffer_level = oxcf->starting_buffer_level_ms *
+                            lc->target_bandwidth / 1000;
     lrc->bits_off_target = lrc->buffer_level;
   }
 
   // Still have extra buffer for base layer golden frame
-  if (svc->number_spatial_layers > 1 && alt_ref_idx < REF_FRAMES)
+  if (!(svc->number_temporal_layers > 1 && cpi->oxcf.rc_mode == VPX_CBR)
+      && alt_ref_idx < REF_FRAMES)
     svc->layer_context[0].gold_ref_idx = alt_ref_idx;
 }
 
@@ -89,7 +92,7 @@ void vp9_update_layer_context_change_config(VP9_COMP *const cpi,
   int layer_end;
   float bitrate_alloc = 1.0;
 
-  if (svc->number_temporal_layers > 1) {
+  if (svc->number_temporal_layers > 1 && cpi->oxcf.rc_mode == VPX_CBR) {
     layer_end = svc->number_temporal_layers;
   } else {
     layer_end = svc->number_spatial_layers;
@@ -99,7 +102,7 @@ void vp9_update_layer_context_change_config(VP9_COMP *const cpi,
     LAYER_CONTEXT *const lc = &svc->layer_context[layer];
     RATE_CONTROL *const lrc = &lc->rc;
 
-    if (svc->number_temporal_layers > 1) {
+    if (svc->number_temporal_layers > 1 && cpi->oxcf.rc_mode == VPX_CBR) {
       lc->target_bandwidth = oxcf->ts_target_bitrate[layer];
     } else {
       lc->target_bandwidth = oxcf->ss_target_bitrate[layer];
@@ -115,7 +118,7 @@ void vp9_update_layer_context_change_config(VP9_COMP *const cpi,
     lrc->bits_off_target = MIN(lrc->bits_off_target, lrc->maximum_buffer_size);
     lrc->buffer_level = MIN(lrc->buffer_level, lrc->maximum_buffer_size);
     // Update framerate-related quantities.
-    if (svc->number_temporal_layers > 1) {
+    if (svc->number_temporal_layers > 1 && cpi->oxcf.rc_mode == VPX_CBR) {
       lc->framerate = cpi->framerate / oxcf->ts_rate_decimator[layer];
     } else {
       lc->framerate = cpi->framerate;
@@ -128,16 +131,16 @@ void vp9_update_layer_context_change_config(VP9_COMP *const cpi,
   }
 }
 
-static LAYER_CONTEXT *get_layer_context(SVC *svc) {
-  return svc->number_temporal_layers > 1 ?
-         &svc->layer_context[svc->temporal_layer_id] :
-         &svc->layer_context[svc->spatial_layer_id];
+static LAYER_CONTEXT *get_layer_context(VP9_COMP *const cpi) {
+  return (cpi->svc.number_temporal_layers > 1 && cpi->oxcf.rc_mode == VPX_CBR) ?
+         &cpi->svc.layer_context[cpi->svc.temporal_layer_id] :
+         &cpi->svc.layer_context[cpi->svc.spatial_layer_id];
 }
 
 void vp9_update_temporal_layer_framerate(VP9_COMP *const cpi) {
   SVC *const svc = &cpi->svc;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
-  LAYER_CONTEXT *const lc = get_layer_context(svc);
+  LAYER_CONTEXT *const lc = get_layer_context(cpi);
   RATE_CONTROL *const lrc = &lc->rc;
   const int layer = svc->temporal_layer_id;
 
@@ -159,7 +162,7 @@ void vp9_update_temporal_layer_framerate(VP9_COMP *const cpi) {
 
 void vp9_update_spatial_layer_framerate(VP9_COMP *const cpi, double framerate) {
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
-  LAYER_CONTEXT *const lc = get_layer_context(&cpi->svc);
+  LAYER_CONTEXT *const lc = get_layer_context(cpi);
   RATE_CONTROL *const lrc = &lc->rc;
 
   lc->framerate = framerate;
@@ -172,7 +175,7 @@ void vp9_update_spatial_layer_framerate(VP9_COMP *const cpi, double framerate) {
 }
 
 void vp9_restore_layer_context(VP9_COMP *const cpi) {
-  LAYER_CONTEXT *const lc = get_layer_context(&cpi->svc);
+  LAYER_CONTEXT *const lc = get_layer_context(cpi);
   const int old_frame_since_key = cpi->rc.frames_since_key;
   const int old_frame_to_key = cpi->rc.frames_to_key;
 
@@ -190,7 +193,7 @@ void vp9_restore_layer_context(VP9_COMP *const cpi) {
 
 void vp9_save_layer_context(VP9_COMP *const cpi) {
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
-  LAYER_CONTEXT *const lc = get_layer_context(&cpi->svc);
+  LAYER_CONTEXT *const lc = get_layer_context(cpi);
 
   lc->rc = cpi->rc;
   lc->twopass = cpi->twopass;
@@ -214,71 +217,62 @@ void vp9_init_second_pass_spatial_svc(VP9_COMP *cpi) {
   svc->spatial_layer_id = 0;
 }
 
-void vp9_inc_frame_in_layer(SVC *svc) {
-  LAYER_CONTEXT *const lc = (svc->number_temporal_layers > 1)
-      ? &svc->layer_context[svc->temporal_layer_id]
-      : &svc->layer_context[svc->spatial_layer_id];
+void vp9_inc_frame_in_layer(VP9_COMP *const cpi) {
+  LAYER_CONTEXT *const lc =
+      (cpi->svc.number_temporal_layers > 1 && cpi->oxcf.rc_mode == VPX_CBR) ?
+      &cpi->svc.layer_context[cpi->svc.temporal_layer_id] :
+      &cpi->svc.layer_context[cpi->svc.spatial_layer_id];
   ++lc->current_video_frame_in_layer;
+  ++lc->frames_from_key_frame;
 }
 
 int vp9_is_upper_layer_key_frame(const VP9_COMP *const cpi) {
-  return is_spatial_svc(cpi) &&
+  return is_two_pass_svc(cpi) &&
          cpi->svc.spatial_layer_id > 0 &&
          cpi->svc.layer_context[cpi->svc.spatial_layer_id].is_key_frame;
 }
 
 #if CONFIG_SPATIAL_SVC
-int vp9_svc_lookahead_push(const VP9_COMP *const cpi, struct lookahead_ctx *ctx,
-                           YV12_BUFFER_CONFIG *src, int64_t ts_start,
-                           int64_t ts_end, unsigned int flags) {
-  struct lookahead_entry *buf;
-  int i, index;
+static void get_layer_resolution(const int width_org, const int height_org,
+                                 const int num, const int den,
+                                 int *width_out, int *height_out) {
+  int w, h;
 
-  if (vp9_lookahead_push(ctx, src, ts_start, ts_end, flags))
-    return 1;
+  if (width_out == NULL || height_out == NULL || den == 0)
+    return;
 
-  index = ctx->write_idx - 1;
-  if (index < 0)
-    index += ctx->max_sz;
+  w = width_org * num / den;
+  h = height_org * num / den;
 
-  buf = ctx->buf + index;
+  // make height and width even to make chrome player happy
+  w += w % 2;
+  h += h % 2;
 
-  if (buf == NULL)
-    return 1;
-
-  // Store svc parameters for each layer
-  for (i = 0; i < cpi->svc.number_spatial_layers; ++i)
-    buf->svc_params[i] = cpi->svc.layer_context[i].svc_params_received;
-
-  return 0;
+  *width_out = w;
+  *height_out = h;
 }
 
-static int copy_svc_params(VP9_COMP *const cpi, struct lookahead_entry *buf) {
-  int layer_id;
-  vpx_svc_parameters_t *layer_param;
+int vp9_svc_start_frame(VP9_COMP *const cpi) {
+  int width = 0, height = 0;
   LAYER_CONTEXT *lc;
+  int count = 1 << (cpi->svc.number_temporal_layers - 1);
 
-  // Find the next layer to be encoded
-  for (layer_id = 0; layer_id < cpi->svc.number_spatial_layers; ++layer_id) {
-    if (buf->svc_params[layer_id].spatial_layer >=0)
-      break;
+  cpi->svc.spatial_layer_id = cpi->svc.spatial_layer_to_encode;
+  lc = &cpi->svc.layer_context[cpi->svc.spatial_layer_id];
+
+  cpi->svc.temporal_layer_id = 0;
+  while ((lc->current_video_frame_in_layer % count) != 0) {
+    ++cpi->svc.temporal_layer_id;
+    count >>= 1;
   }
 
-  if (layer_id == cpi->svc.number_spatial_layers)
-    return 1;
-
-  layer_param = &buf->svc_params[layer_id];
-  cpi->svc.spatial_layer_id = layer_param->spatial_layer;
-  cpi->svc.temporal_layer_id = layer_param->temporal_layer;
   cpi->ref_frame_flags = VP9_ALT_FLAG | VP9_GOLD_FLAG | VP9_LAST_FLAG;
-
-  lc = &cpi->svc.layer_context[cpi->svc.spatial_layer_id];
 
   cpi->lst_fb_idx = cpi->svc.spatial_layer_id;
 
-  if (cpi->svc.spatial_layer_id < 1)
-      cpi->gld_fb_idx = lc->gold_ref_idx >= 0 ?
-                        lc->gold_ref_idx : cpi->lst_fb_idx;
+  if (cpi->svc.spatial_layer_id == 0)
+    cpi->gld_fb_idx = (lc->gold_ref_idx >= 0) ?
+                      lc->gold_ref_idx : cpi->lst_fb_idx;
   else
     cpi->gld_fb_idx = cpi->svc.spatial_layer_id - 1;
 
@@ -313,33 +307,22 @@ static int copy_svc_params(VP9_COMP *const cpi, struct lookahead_entry *buf) {
     }
   }
 
-  if (vp9_set_size_literal(cpi, layer_param->width, layer_param->height) != 0)
+  get_layer_resolution(cpi->oxcf.width, cpi->oxcf.height,
+                       lc->scaling_factor_num, lc->scaling_factor_den,
+                       &width, &height);
+  if (vp9_set_size_literal(cpi, width, height) != 0)
     return VPX_CODEC_INVALID_PARAM;
 
-  cpi->oxcf.worst_allowed_q =
-      vp9_quantizer_to_qindex(layer_param->max_quantizer);
-  cpi->oxcf.best_allowed_q =
-      vp9_quantizer_to_qindex(layer_param->min_quantizer);
+  cpi->oxcf.worst_allowed_q = vp9_quantizer_to_qindex(lc->max_q);
+  cpi->oxcf.best_allowed_q = vp9_quantizer_to_qindex(lc->min_q);
 
   vp9_change_config(cpi, &cpi->oxcf);
 
   vp9_set_high_precision_mv(cpi, 1);
 
-  cpi->alt_ref_source = get_layer_context(&cpi->svc)->alt_ref_source;
+  cpi->alt_ref_source = get_layer_context(cpi)->alt_ref_source;
 
   return 0;
-}
-
-struct lookahead_entry *vp9_svc_lookahead_peek(VP9_COMP *const cpi,
-                                               struct lookahead_ctx *ctx,
-                                               int index, int copy_params) {
-  struct lookahead_entry *buf = vp9_lookahead_peek(ctx, index);
-
-  if (buf != NULL && copy_params != 0) {
-    if (copy_svc_params(cpi, buf) != 0)
-      return NULL;
-  }
-  return buf;
 }
 
 struct lookahead_entry *vp9_svc_lookahead_pop(VP9_COMP *const cpi,
@@ -348,11 +331,9 @@ struct lookahead_entry *vp9_svc_lookahead_pop(VP9_COMP *const cpi,
   struct lookahead_entry *buf = NULL;
 
   if (ctx->sz && (drain || ctx->sz == ctx->max_sz - MAX_PRE_FRAMES)) {
-    buf = vp9_svc_lookahead_peek(cpi, ctx, 0, 1);
+    buf = vp9_lookahead_peek(ctx, 0);
     if (buf != NULL) {
-      // Only remove the buffer when pop the highest layer. Simply set the
-      // spatial_layer to -1 for lower layers.
-      buf->svc_params[cpi->svc.spatial_layer_id].spatial_layer = -1;
+      // Only remove the buffer when pop the highest layer.
       if (cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 1) {
         vp9_lookahead_pop(ctx, drain);
       }

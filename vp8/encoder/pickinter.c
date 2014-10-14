@@ -487,6 +487,7 @@ static int evaluate_inter_mode(unsigned int* sse, int rate2, int* distortion2,
     MB_PREDICTION_MODE this_mode = x->e_mbd.mode_info_context->mbmi.mode;
     int_mv mv = x->e_mbd.mode_info_context->mbmi.mv;
     int this_rd;
+    int denoise_aggressive = 0;
     /* Exit early and don't compute the distortion if this macroblock
      * is marked inactive. */
     if (cpi->active_map_enabled && x->active_ptr[0] == 0)
@@ -505,17 +506,18 @@ static int evaluate_inter_mode(unsigned int* sse, int rate2, int* distortion2,
 
     this_rd = RDCOST(x->rdmult, x->rddiv, rate2, *distortion2);
 
-    /* Adjust rd to bias to ZEROMV */
-    if(this_mode == ZEROMV)
-    {
-        /* Bias to ZEROMV on LAST_FRAME reference when it is available. */
-        if ((cpi->ref_frame_flags & VP8_LAST_FRAME &
-            cpi->common.refresh_last_frame)
-            && x->e_mbd.mode_info_context->mbmi.ref_frame != LAST_FRAME)
-            rd_adj = 100;
+#if CONFIG_TEMPORAL_DENOISING
+    if (cpi->oxcf.noise_sensitivity > 0) {
+      denoise_aggressive =
+        (cpi->denoiser.denoiser_mode == kDenoiserOnYUVAggressive) ? 1 : 0;
+    }
+#endif
 
-        // rd_adj <= 100
-        this_rd = ((int64_t)this_rd) * rd_adj / 100;
+    // Adjust rd for ZEROMV and LAST, if LAST is the closest reference frame.
+    if (this_mode == ZEROMV &&
+        x->e_mbd.mode_info_context->mbmi.ref_frame == LAST_FRAME &&
+        (denoise_aggressive || cpi->closest_reference_frame == LAST_FRAME)) {
+      this_rd = ((int64_t)this_rd) * rd_adj / 100;
     }
 
     check_for_encode_breakout(*sse, x);
@@ -1080,7 +1082,14 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         {
 
             /* Store for later use by denoiser. */
-            if (this_mode == ZEROMV && sse < zero_mv_sse )
+            // Dont' denoise with GOLDEN OR ALTREF is they are old reference
+            // frames (greater than MAX_GF_ARF_DENOISE_RANGE frames in past).
+            int skip_old_reference = ((this_ref_frame != LAST_FRAME) &&
+                (cpi->common.current_video_frame -
+                 cpi->current_ref_frames[this_ref_frame] >
+                 MAX_GF_ARF_DENOISE_RANGE)) ? 1 : 0;
+            if (this_mode == ZEROMV && sse < zero_mv_sse &&
+                !skip_old_reference)
             {
                 zero_mv_sse = sse;
                 x->best_zeromv_reference_frame =
@@ -1089,7 +1098,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 
             /* Store the best NEWMV in x for later use in the denoiser. */
             if (x->e_mbd.mode_info_context->mbmi.mode == NEWMV &&
-                    sse < best_sse)
+                sse < best_sse && !skip_old_reference)
             {
                 best_sse = sse;
                 x->best_sse_inter_mode = NEWMV;

@@ -133,13 +133,13 @@ static bool compare_img(const vpx_image_t *img1,
   return match;
 }
 
-void EncoderTest::MismatchHook(const vpx_image_t *img1,
-                               const vpx_image_t *img2) {
+void EncoderTest::MismatchHook(const vpx_image_t* /*img1*/,
+                               const vpx_image_t* /*img2*/) {
   ASSERT_TRUE(0) << "Encode/Decode mismatch found";
 }
 
 void EncoderTest::RunLoop(VideoSource *video) {
-  vpx_codec_dec_cfg_t dec_cfg = {0};
+  vpx_codec_dec_cfg_t dec_cfg = vpx_codec_dec_cfg_t();
 
   stats_.Reset();
 

@@ -11,8 +11,6 @@
 #ifndef VP9_ENCODER_VP9_SSIM_H_
 #define VP9_ENCODER_VP9_SSIM_H_
 
-#include "./vpx_config.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -20,21 +18,24 @@ extern "C" {
 #include "vpx_scale/yv12config.h"
 
 double vp9_calc_ssim(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest,
-                     int lumamask, double *weight);
+                     double *weight);
 
 double vp9_calc_ssimg(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest,
                       double *ssim_y, double *ssim_u, double *ssim_v);
 
-#if CONFIG_VP9_HIGH
-double vp9_high_calc_ssim(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest,
-                          int lumamask, double *weight,
-                          unsigned int bps, unsigned int shift);
+#if CONFIG_VP9_HIGHBITDEPTH
+double vp9_highbd_calc_ssim(YV12_BUFFER_CONFIG *source,
+                            YV12_BUFFER_CONFIG *dest,
+                            double *weight,
+                            unsigned int bd);
 
-double vp9_high_calc_ssimg(YV12_BUFFER_CONFIG *source,
-                           YV12_BUFFER_CONFIG *dest, double *ssim_y,
-                           double *ssim_u, double *ssim_v,
-                           unsigned int bps, unsigned int shift);
-#endif
+double vp9_highbd_calc_ssimg(YV12_BUFFER_CONFIG *source,
+                             YV12_BUFFER_CONFIG *dest,
+                             double *ssim_y,
+                             double *ssim_u,
+                             double *ssim_v,
+                             unsigned int bd);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 #ifdef __cplusplus
 }  // extern "C"

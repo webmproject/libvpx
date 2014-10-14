@@ -38,14 +38,15 @@ typedef struct VP9LfSyncData {
   // The optimal sync_range for different resolution and platform should be
   // determined by testing. Currently, it is chosen to be a power-of-2 number.
   int sync_range;
+  int rows;
 } VP9LfSync;
 
 // Allocate memory for loopfilter row synchronization.
-void vp9_loop_filter_alloc(struct VP9Common *cm, VP9LfSync *lf_sync,
-                           int rows, int width);
+void vp9_loop_filter_alloc(VP9LfSync *lf_sync, VP9_COMMON *cm, int rows,
+                           int width);
 
 // Deallocate loopfilter synchronization related mutex and data.
-void vp9_loop_filter_dealloc(VP9LfSync *lf_sync, int rows);
+void vp9_loop_filter_dealloc(VP9LfSync *lf_sync);
 
 // Multi-threaded loopfilter that uses the tile threads.
 void vp9_loop_filter_frame_mt(YV12_BUFFER_CONFIG *frame,

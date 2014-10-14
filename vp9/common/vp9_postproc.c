@@ -19,14 +19,13 @@
 #include "vpx_scale/vpx_scale.h"
 #include "vpx_scale/yv12config.h"
 
+#if CONFIG_VP9_HIGHBITDEPTH
+#include "vp9/common/vp9_common.h"
+#endif
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_postproc.h"
 #include "vp9/common/vp9_systemdependent.h"
 #include "vp9/common/vp9_textblit.h"
-
-#if CONFIG_VP9_HIGH
-#include "vp9/common/vp9_common.h"
-#endif
 
 #if CONFIG_VP9_POSTPROC
 static const short kernel5[] = {
@@ -95,6 +94,7 @@ void vp9_post_proc_down_and_across_c(const uint8_t *src_ptr,
   int v;
   int pitch = src_pixels_per_line;
   uint8_t d[8];
+  (void)dst_pixels_per_line;
 
   for (row = 0; row < rows; row++) {
     /* post_proc_down for one row */
@@ -151,19 +151,18 @@ void vp9_post_proc_down_and_across_c(const uint8_t *src_ptr,
 
     /* next row */
     src_ptr += pitch;
-    dst_ptr += dst_pixels_per_line;
+    dst_ptr += pitch;
   }
 }
 
-#if CONFIG_VP9_HIGH
-
-void vp9_high_post_proc_down_and_across_c(const uint16_t *src_ptr,
-                                          uint16_t *dst_ptr,
-                                          int src_pixels_per_line,
-                                          int dst_pixels_per_line,
-                                          int rows,
-                                          int cols,
-                                          int flimit) {
+#if CONFIG_VP9_HIGHBITDEPTH
+void vp9_highbd_post_proc_down_and_across_c(const uint16_t *src_ptr,
+                                            uint16_t *dst_ptr,
+                                            int src_pixels_per_line,
+                                            int dst_pixels_per_line,
+                                            int rows,
+                                            int cols,
+                                            int flimit) {
   uint16_t const *p_src;
   uint16_t *p_dst;
   int row;
@@ -174,7 +173,7 @@ void vp9_high_post_proc_down_and_across_c(const uint16_t *src_ptr,
   uint16_t d[8];
 
   for (row = 0; row < rows; row++) {
-    /* post_proc_down for one row */
+    // post_proc_down for one row.
     p_src = src_ptr;
     p_dst = dst_ptr;
 
@@ -190,6 +189,7 @@ void vp9_high_post_proc_down_and_across_c(const uint16_t *src_ptr,
       }
 
       v = (kernel >> 3);
+
     down_skip_convolve:
       p_dst[col] = v;
     }
@@ -215,8 +215,8 @@ void vp9_high_post_proc_down_and_across_c(const uint16_t *src_ptr,
       }
 
       d[col & 7] = (kernel >> 3);
-    across_skip_convolve:
 
+    across_skip_convolve:
       if (col >= 2)
         p_dst[col - 2] = d[(col - 2) & 7];
     }
@@ -231,8 +231,7 @@ void vp9_high_post_proc_down_and_across_c(const uint16_t *src_ptr,
     dst_ptr += dst_pixels_per_line;
   }
 }
-
-#endif
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 static int q2mbl(int x) {
   if (x < 20) x = 20;
@@ -244,18 +243,16 @@ static int q2mbl(int x) {
 void vp9_mbpost_proc_across_ip_c(uint8_t *src, int pitch,
                                  int rows, int cols, int flimit) {
   int r, c, i;
-
   uint8_t *s = src;
   uint8_t d[16];
 
-
   for (r = 0; r < rows; r++) {
     int sumsq = 0;
-    int sum   = 0;
+    int sum = 0;
 
     for (i = -8; i <= 6; i++) {
       sumsq += s[i] * s[i];
-      sum   += s[i];
+      sum += s[i];
       d[i + 8] = 0;
     }
 
@@ -263,7 +260,7 @@ void vp9_mbpost_proc_across_ip_c(uint8_t *src, int pitch,
       int x = s[c + 7] - s[c - 8];
       int y = s[c + 7] + s[c - 8];
 
-      sum  += x;
+      sum += x;
       sumsq += x * y;
 
       d[c & 15] = s[c];
@@ -274,15 +271,13 @@ void vp9_mbpost_proc_across_ip_c(uint8_t *src, int pitch,
 
       s[c - 8] = d[(c - 8) & 15];
     }
-
     s += pitch;
   }
 }
 
-#if CONFIG_VP9_HIGH
-
-void vp9_high_mbpost_proc_across_ip_c(uint16_t *src, int pitch,
-                                      int rows, int cols, int flimit) {
+#if CONFIG_VP9_HIGHBITDEPTH
+void vp9_highbd_mbpost_proc_across_ip_c(uint16_t *src, int pitch,
+                                        int rows, int cols, int flimit) {
   int r, c, i;
 
   uint16_t *s = src;
@@ -318,53 +313,18 @@ void vp9_high_mbpost_proc_across_ip_c(uint16_t *src, int pitch,
     s += pitch;
   }
 }
-
-#endif
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 void vp9_mbpost_proc_down_c(uint8_t *dst, int pitch,
                             int rows, int cols, int flimit) {
   int r, c, i;
-  const int16_t *rv3 = &vp9_rv[63 & rand()]; // NOLINT
+  const short *rv3 = &vp9_rv[63 & rand()]; // NOLINT
 
   for (c = 0; c < cols; c++) {
     uint8_t *s = &dst[c];
     int sumsq = 0;
     int sum   = 0;
     uint8_t d[16];
-    const int16_t *rv2 = rv3 + ((c * 17) & 127);
-
-    for (i = -8; i <= 6; i++) {
-      sumsq += s[i * pitch] * s[i * pitch];
-      sum   += s[i * pitch];
-    }
-
-    for (r = 0; r < rows + 8; r++) {
-      sumsq += s[7 * pitch] * s[ 7 * pitch] - s[-8 * pitch] * s[-8 * pitch];
-      sum  += s[7 * pitch] - s[-8 * pitch];
-      d[r & 15] = s[0];
-
-      if (sumsq * 15 - sum * sum < flimit) {
-        d[r & 15] = (rv2[r & 127] + sum + s[0]) >> 4;
-      }
-
-      s[-8 * pitch] = d[(r - 8) & 15];
-      s += pitch;
-    }
-  }
-}
-
-#if CONFIG_VP9_HIGH
-
-void vp9_high_mbpost_proc_down_c(uint16_t *dst, int pitch,
-                                 int rows, int cols, int flimit) {
-  int r, c, i;
-  const short *rv3 = &vp9_rv[63 & rand()]; // NOLINT
-
-  for (c = 0; c < cols; c++) {
-    uint16_t *s = &dst[c];
-    int sumsq = 0;
-    int sum   = 0;
-    uint16_t d[16];
     const short *rv2 = rv3 + ((c * 17) & 127);
 
     for (i = -8; i <= 6; i++) {
@@ -387,7 +347,39 @@ void vp9_high_mbpost_proc_down_c(uint16_t *dst, int pitch,
   }
 }
 
-#endif
+#if CONFIG_VP9_HIGHBITDEPTH
+void vp9_highbd_mbpost_proc_down_c(uint16_t *dst, int pitch,
+                                   int rows, int cols, int flimit) {
+  int r, c, i;
+  const int16_t *rv3 = &vp9_rv[63 & rand()];  // NOLINT
+
+  for (c = 0; c < cols; c++) {
+    uint16_t *s = &dst[c];
+    int sumsq = 0;
+    int sum = 0;
+    uint16_t d[16];
+    const int16_t *rv2 = rv3 + ((c * 17) & 127);
+
+    for (i = -8; i <= 6; i++) {
+      sumsq += s[i * pitch] * s[i * pitch];
+      sum += s[i * pitch];
+    }
+
+    for (r = 0; r < rows + 8; r++) {
+      sumsq += s[7 * pitch] * s[ 7 * pitch] - s[-8 * pitch] * s[-8 * pitch];
+      sum += s[7 * pitch] - s[-8 * pitch];
+      d[r & 15] = s[0];
+
+      if (sumsq * 15 - sum * sum < flimit) {
+        d[r & 15] = (rv2[r & 127] + sum + s[0]) >> 4;
+      }
+
+      s[-8 * pitch] = d[(r - 8) & 15];
+      s += pitch;
+    }
+  }
+}
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 static void deblock_and_de_macro_block(YV12_BUFFER_CONFIG   *source,
                                        YV12_BUFFER_CONFIG   *post,
@@ -398,31 +390,33 @@ static void deblock_and_de_macro_block(YV12_BUFFER_CONFIG   *source,
   int ppl = (int)(level + .5);
   (void) low_var_thresh;
   (void) flag;
-#if CONFIG_VP9_HIGH
+
+#if CONFIG_VP9_HIGHBITDEPTH
   if (source->flags & YV12_FLAG_HIGHBITDEPTH) {
-    vp9_high_post_proc_down_and_across(CONVERT_TO_SHORTPTR(source->y_buffer),
-                                       CONVERT_TO_SHORTPTR(post->y_buffer),
-                                       source->y_stride, post->y_stride,
-                                       source->y_height, source->y_width, ppl);
+    vp9_highbd_post_proc_down_and_across(CONVERT_TO_SHORTPTR(source->y_buffer),
+                                         CONVERT_TO_SHORTPTR(post->y_buffer),
+                                         source->y_stride, post->y_stride,
+                                         source->y_height, source->y_width,
+                                         ppl);
 
-    vp9_high_mbpost_proc_across_ip(CONVERT_TO_SHORTPTR(post->y_buffer),
-                                   post->y_stride, post->y_height,
-                                   post->y_width, q2mbl(q));
+    vp9_highbd_mbpost_proc_across_ip(CONVERT_TO_SHORTPTR(post->y_buffer),
+                                     post->y_stride, post->y_height,
+                                     post->y_width, q2mbl(q));
 
-    vp9_high_mbpost_proc_down(CONVERT_TO_SHORTPTR(post->y_buffer),
-                              post->y_stride, post->y_height,
-                              post->y_width, q2mbl(q));
+    vp9_highbd_mbpost_proc_down(CONVERT_TO_SHORTPTR(post->y_buffer),
+                                post->y_stride, post->y_height,
+                                post->y_width, q2mbl(q));
 
-    vp9_high_post_proc_down_and_across(CONVERT_TO_SHORTPTR(source->u_buffer),
-                                       CONVERT_TO_SHORTPTR(post->u_buffer),
-                                       source->uv_stride, post->uv_stride,
-                                       source->uv_height, source->uv_width,
-                                       ppl);
-    vp9_high_post_proc_down_and_across(CONVERT_TO_SHORTPTR(source->v_buffer),
-                                       CONVERT_TO_SHORTPTR(post->v_buffer),
-                                       source->uv_stride, post->uv_stride,
-                                       source->uv_height, source->uv_width,
-                                       ppl);
+    vp9_highbd_post_proc_down_and_across(CONVERT_TO_SHORTPTR(source->u_buffer),
+                                         CONVERT_TO_SHORTPTR(post->u_buffer),
+                                         source->uv_stride, post->uv_stride,
+                                         source->uv_height, source->uv_width,
+                                         ppl);
+    vp9_highbd_post_proc_down_and_across(CONVERT_TO_SHORTPTR(source->v_buffer),
+                                         CONVERT_TO_SHORTPTR(post->v_buffer),
+                                         source->uv_stride, post->uv_stride,
+                                         source->uv_height, source->uv_width,
+                                         ppl);
   } else {
     vp9_post_proc_down_and_across(source->y_buffer, post->y_buffer,
                                   source->y_stride, post->y_stride,
@@ -458,7 +452,7 @@ static void deblock_and_de_macro_block(YV12_BUFFER_CONFIG   *source,
   vp9_post_proc_down_and_across(source->v_buffer, post->v_buffer,
                                 source->uv_stride, post->uv_stride,
                                 source->uv_height, source->uv_width, ppl);
-#endif
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 }
 
 void vp9_deblock(const YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst,
@@ -476,14 +470,14 @@ void vp9_deblock(const YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst,
   const int dst_strides[3] = {dst->y_stride, dst->uv_stride, dst->uv_stride};
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
-#if CONFIG_VP9_HIGH
+#if CONFIG_VP9_HIGHBITDEPTH
     assert((src->flags & YV12_FLAG_HIGHBITDEPTH) ==
            (dst->flags & YV12_FLAG_HIGHBITDEPTH));
     if (src->flags & YV12_FLAG_HIGHBITDEPTH) {
-      vp9_high_post_proc_down_and_across(CONVERT_TO_SHORTPTR(srcs[i]),
-                                         CONVERT_TO_SHORTPTR(dsts[i]),
-                                         src_strides[i], dst_strides[i],
-                                         src_heights[i], src_widths[i], ppl);
+      vp9_highbd_post_proc_down_and_across(CONVERT_TO_SHORTPTR(srcs[i]),
+                                           CONVERT_TO_SHORTPTR(dsts[i]),
+                                           src_strides[i], dst_strides[i],
+                                           src_heights[i], src_widths[i], ppl);
     } else {
       vp9_post_proc_down_and_across(srcs[i], dsts[i],
                                     src_strides[i], dst_strides[i],
@@ -493,7 +487,7 @@ void vp9_deblock(const YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst,
     vp9_post_proc_down_and_across(srcs[i], dsts[i],
                                   src_strides[i], dst_strides[i],
                                   src_heights[i], src_widths[i], ppl);
-#endif
+#endif  // CONFIG_VP9_HIGHBITDEPTH
   }
 }
 
@@ -515,18 +509,17 @@ void vp9_denoise(const YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst,
     const int src_stride = src_strides[i];
     const int src_width = src_widths[i] - 4;
     const int src_height = src_heights[i] - 4;
-
     const int dst_stride = dst_strides[i];
 
-#if CONFIG_VP9_HIGH
+#if CONFIG_VP9_HIGHBITDEPTH
     assert((src->flags & YV12_FLAG_HIGHBITDEPTH) ==
            (dst->flags & YV12_FLAG_HIGHBITDEPTH));
     if (src->flags & YV12_FLAG_HIGHBITDEPTH) {
       const uint16_t *const src = CONVERT_TO_SHORTPTR(srcs[i] + 2 * src_stride
                                                       + 2);
       uint16_t *const dst = CONVERT_TO_SHORTPTR(dsts[i] + 2 * dst_stride + 2);
-      vp9_high_post_proc_down_and_across(src, dst, src_stride, dst_stride,
-                                         src_height, src_width, ppl);
+      vp9_highbd_post_proc_down_and_across(src, dst, src_stride, dst_stride,
+                                           src_height, src_width, ppl);
     } else {
       const uint8_t *const src = srcs[i] + 2 * src_stride + 2;
       uint8_t *const dst = dsts[i] + 2 * dst_stride + 2;
@@ -537,7 +530,6 @@ void vp9_denoise(const YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst,
 #else
     const uint8_t *const src = srcs[i] + 2 * src_stride + 2;
     uint8_t *const dst = dsts[i] + 2 * dst_stride + 2;
-
     vp9_post_proc_down_and_across(src, dst, src_stride, dst_stride,
                                   src_height, src_width, ppl);
 #endif
@@ -605,6 +597,9 @@ void vp9_plane_add_noise_c(uint8_t *start, char *noise,
                            unsigned int width, unsigned int height, int pitch) {
   unsigned int i, j;
 
+  // TODO(jbb): why does simd code use both but c doesn't,  normalize and
+  // fix..
+  (void) bothclamp;
   for (i = 0; i < height; i++) {
     uint8_t *pos = start + i * pitch;
     char  *ref = (char *)(noise + (rand() & 0xff));  // NOLINT
@@ -641,8 +636,8 @@ int vp9_post_proc_frame(struct VP9Common *cm,
 #if CONFIG_VP9_POSTPROC || CONFIG_INTERNAL_STATS
   if (vp9_realloc_frame_buffer(&cm->post_proc_buffer, cm->width, cm->height,
                                cm->subsampling_x, cm->subsampling_y,
-#if CONFIG_VP9_HIGH
-                               cm->use_high,
+#if CONFIG_VP9_HIGHBITDEPTH
+                               cm->use_highbitdepth,
 #endif
                                VP9_DEC_BORDER_IN_PIXELS, NULL, NULL, NULL) < 0)
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,

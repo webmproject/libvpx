@@ -106,7 +106,7 @@ void DecoderTest::RunLoop(CompressedVideoSource *video,
 }
 
 void DecoderTest::RunLoop(CompressedVideoSource *video) {
-  vpx_codec_dec_cfg_t dec_cfg = {0};
+  vpx_codec_dec_cfg_t dec_cfg = vpx_codec_dec_cfg_t();
   RunLoop(video, dec_cfg);
 }
 

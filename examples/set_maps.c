@@ -42,11 +42,11 @@
 // Use the `simple_decoder` example to decode this sample, and observe
 // the change in the image at frames 22, 33, and 44.
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define VPX_CODEC_DISABLE_COMPAT 1
 #include "vpx/vp8cx.h"
 #include "vpx/vpx_encoder.h"
 
@@ -125,10 +125,11 @@ static void unset_active_map(const vpx_codec_enc_cfg_t *cfg,
     die_codec(codec, "Failed to set active map");
 }
 
-static void encode_frame(vpx_codec_ctx_t *codec,
-                         vpx_image_t *img,
-                         int frame_index,
-                         VpxVideoWriter *writer) {
+static int encode_frame(vpx_codec_ctx_t *codec,
+                        vpx_image_t *img,
+                        int frame_index,
+                        VpxVideoWriter *writer) {
+  int got_pkts = 0;
   vpx_codec_iter_t iter = NULL;
   const vpx_codec_cx_pkt_t *pkt = NULL;
   const vpx_codec_err_t res = vpx_codec_encode(codec, img, frame_index, 1, 0,
@@ -137,6 +138,8 @@ static void encode_frame(vpx_codec_ctx_t *codec,
     die_codec(codec, "Failed to encode frame");
 
   while ((pkt = vpx_codec_get_cx_data(codec, &iter)) != NULL) {
+    got_pkts = 1;
+
     if (pkt->kind == VPX_CODEC_CX_FRAME_PKT) {
       const int keyframe = (pkt->data.frame.flags & VPX_FRAME_IS_KEY) != 0;
       if (!vpx_video_writer_write_frame(writer,
@@ -150,6 +153,8 @@ static void encode_frame(vpx_codec_ctx_t *codec,
       fflush(stdout);
     }
   }
+
+  return got_pkts;
 }
 
 int main(int argc, char **argv) {
@@ -172,9 +177,10 @@ int main(int argc, char **argv) {
   memset(&info, 0, sizeof(info));
 
   encoder = get_vpx_encoder_by_name(argv[1]);
-  if (!encoder)
+  if (encoder == NULL) {
     die("Unsupported codec.");
-
+  }
+  assert(encoder != NULL);
   info.codec_fourcc = encoder->fourcc;
   info.frame_width = strtol(argv[2], NULL, 0);
   info.frame_height = strtol(argv[3], NULL, 0);
@@ -217,6 +223,7 @@ int main(int argc, char **argv) {
   if (vpx_codec_enc_init(&codec, encoder->codec_interface(), &cfg, 0))
     die_codec(&codec, "Failed to initialize encoder");
 
+  // Encode frames.
   while (vpx_img_read(&raw, infile)) {
     ++frame_count;
 
@@ -230,7 +237,10 @@ int main(int argc, char **argv) {
 
     encode_frame(&codec, &raw, frame_count, writer);
   }
-  encode_frame(&codec, NULL, -1, writer);
+
+  // Flush encoder.
+  while (encode_frame(&codec, NULL, -1, writer)) {}
+
   printf("\n");
   fclose(infile);
   printf("Processed %d frames.\n", frame_count);

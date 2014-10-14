@@ -9,11 +9,9 @@
  */
 
 #include "./vpx_config.h"
+#include "./vp9_rtcd.h"
 
 #include "vpx_mem/vpx_mem.h"
-#include "vpx_ports/vpx_once.h"
-
-#include "./vp9_rtcd.h"
 
 #include "vp9/common/vp9_reconintra.h"
 #include "vp9/common/vp9_onyxc_int.h"
@@ -42,12 +40,12 @@ const TX_TYPE intra_mode_to_tx_type_lookup[INTRA_MODES] = {
     type##_predictor(dst, stride, size, above, left); \
   }
 
-#if CONFIG_VP9_HIGH
-#define intra_pred_high_sized(type, size) \
-  void vp9_high_##type##_predictor_##size##x##size##_c( \
+#if CONFIG_VP9_HIGHBITDEPTH
+#define intra_pred_highbd_sized(type, size) \
+  void vp9_highbd_##type##_predictor_##size##x##size##_c( \
       uint16_t *dst, ptrdiff_t stride, const uint16_t *above, \
-      const uint16_t *left, int bps) { \
-    high_##type##_predictor(dst, stride, size, above, left, bps); \
+      const uint16_t *left, int bd) { \
+    highbd_##type##_predictor(dst, stride, size, above, left, bd); \
   }
 
 #define intra_pred_allsizes(type) \
@@ -55,82 +53,95 @@ const TX_TYPE intra_mode_to_tx_type_lookup[INTRA_MODES] = {
   intra_pred_sized(type, 8) \
   intra_pred_sized(type, 16) \
   intra_pred_sized(type, 32) \
-  intra_pred_high_sized(type, 4) \
-  intra_pred_high_sized(type, 8) \
-  intra_pred_high_sized(type, 16) \
-  intra_pred_high_sized(type, 32)
+  intra_pred_highbd_sized(type, 4) \
+  intra_pred_highbd_sized(type, 8) \
+  intra_pred_highbd_sized(type, 16) \
+  intra_pred_highbd_sized(type, 32)
+
 #else
+
 #define intra_pred_allsizes(type) \
   intra_pred_sized(type, 4) \
   intra_pred_sized(type, 8) \
   intra_pred_sized(type, 16) \
   intra_pred_sized(type, 32)
-#endif
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
-#if CONFIG_VP9_HIGH
-
-static INLINE void high_d207_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
-                                       const uint16_t *above,
-                                       const uint16_t *left, int bps) {
+#if CONFIG_VP9_HIGHBITDEPTH
+static INLINE void highbd_d207_predictor(uint16_t *dst, ptrdiff_t stride,
+                                         int bs, const uint16_t *above,
+                                         const uint16_t *left, int bd) {
   int r, c;
+  (void) above;
+  (void) bd;
 
-  // first column
-  for (r = 0; r < bs - 1; ++r)
+  // First column.
+  for (r = 0; r < bs - 1; ++r) {
     dst[r * stride] = ROUND_POWER_OF_TWO(left[r] + left[r + 1], 1);
+  }
   dst[(bs - 1) * stride] = left[bs - 1];
   dst++;
 
-  // second column
-  for (r = 0; r < bs - 2; ++r)
+  // Second column.
+  for (r = 0; r < bs - 2; ++r) {
     dst[r * stride] = ROUND_POWER_OF_TWO(left[r] + left[r + 1] * 2 +
                                          left[r + 2], 2);
+  }
   dst[(bs - 2) * stride] = ROUND_POWER_OF_TWO(left[bs - 2] +
                                               left[bs - 1] * 3, 2);
   dst[(bs - 1) * stride] = left[bs - 1];
   dst++;
 
-  // rest of last row
+  // Rest of last row.
   for (c = 0; c < bs - 2; ++c)
     dst[(bs - 1) * stride + c] = left[bs - 1];
 
-  for (r = bs - 2; r >= 0; --r)
+  for (r = bs - 2; r >= 0; --r) {
     for (c = 0; c < bs - 2; ++c)
       dst[r * stride + c] = dst[(r + 1) * stride + c - 2];
+  }
 }
 
-static INLINE void high_d63_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
-                                      const uint16_t *above,
-                                      const uint16_t *left, int bps) {
+static INLINE void highbd_d63_predictor(uint16_t *dst, ptrdiff_t stride,
+                                        int bs, const uint16_t *above,
+                                        const uint16_t *left, int bd) {
   int r, c;
+  (void) left;
+  (void) bd;
   for (r = 0; r < bs; ++r) {
-    for (c = 0; c < bs; ++c)
+    for (c = 0; c < bs; ++c) {
       dst[c] = r & 1 ? ROUND_POWER_OF_TWO(above[r/2 + c] +
                                           above[r/2 + c + 1] * 2 +
                                           above[r/2 + c + 2], 2)
                      : ROUND_POWER_OF_TWO(above[r/2 + c] +
                                           above[r/2 + c + 1], 1);
+    }
     dst += stride;
   }
 }
 
-static INLINE void high_d45_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
-                                      const uint16_t *above,
-                                      const uint16_t *left, int bps) {
+static INLINE void highbd_d45_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
+                                        const uint16_t *above,
+                                        const uint16_t *left, int bd) {
   int r, c;
+  (void) left;
+  (void) bd;
   for (r = 0; r < bs; ++r) {
-    for (c = 0; c < bs; ++c)
+    for (c = 0; c < bs; ++c) {
       dst[c] = r + c + 2 < bs * 2 ?  ROUND_POWER_OF_TWO(above[r + c] +
                                                         above[r + c + 1] * 2 +
                                                         above[r + c + 2], 2)
                                   : above[bs * 2 - 1];
+    }
     dst += stride;
   }
 }
 
-static INLINE void high_d117_predictor(uint16_t *dst, ptrdiff_t stride,
-                                       int bs, const uint16_t *above,
-                                       const uint16_t *left, int bps) {
+static INLINE void highbd_d117_predictor(uint16_t *dst, ptrdiff_t stride,
+                                         int bs, const uint16_t *above,
+                                         const uint16_t *left, int bd) {
   int r, c;
+  (void) bd;
 
   // first row
   for (c = 0; c < bs; c++)
@@ -157,10 +168,11 @@ static INLINE void high_d117_predictor(uint16_t *dst, ptrdiff_t stride,
   }
 }
 
-static INLINE void high_d135_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
-                                       const uint16_t *above,
-                                       const uint16_t *left, int bps) {
+static INLINE void highbd_d135_predictor(uint16_t *dst, ptrdiff_t stride,
+                                         int bs, const uint16_t *above,
+                                         const uint16_t *left, int bd) {
   int r, c;
+  (void) bd;
   dst[0] = ROUND_POWER_OF_TWO(left[0] + above[-1] * 2 + above[0], 2);
   for (c = 1; c < bs; c++)
     dst[c] = ROUND_POWER_OF_TWO(above[c - 2] + above[c - 1] * 2 + above[c], 2);
@@ -178,10 +190,11 @@ static INLINE void high_d135_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
   }
 }
 
-static INLINE void high_d153_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
-                                       const uint16_t *above,
-                                       const uint16_t *left, int bps) {
+static INLINE void highbd_d153_predictor(uint16_t *dst, ptrdiff_t stride,
+                                         int bs, const uint16_t *above,
+                                         const uint16_t *left, int bd) {
   int r, c;
+  (void) bd;
   dst[0] = ROUND_POWER_OF_TWO(above[-1] + left[0], 1);
   for (r = 1; r < bs; r++)
     dst[r * stride] = ROUND_POWER_OF_TWO(left[r - 1] + left[r], 1);
@@ -205,56 +218,63 @@ static INLINE void high_d153_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
   }
 }
 
-static INLINE void high_v_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
-                                    const uint16_t *above,
-                                    const uint16_t *left, int bps) {
+static INLINE void highbd_v_predictor(uint16_t *dst, ptrdiff_t stride,
+                                      int bs, const uint16_t *above,
+                                      const uint16_t *left, int bd) {
   int r;
-
+  (void) left;
+  (void) bd;
   for (r = 0; r < bs; r++) {
     vpx_memcpy(dst, above, bs * sizeof(uint16_t));
     dst += stride;
   }
 }
 
-static INLINE void high_h_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
-                                    const uint16_t *above, const uint16_t *left,
-                                    int bps) {
+static INLINE void highbd_h_predictor(uint16_t *dst, ptrdiff_t stride,
+                                      int bs, const uint16_t *above,
+                                      const uint16_t *left, int bd) {
   int r;
-
+  (void) above;
+  (void) bd;
   for (r = 0; r < bs; r++) {
     vpx_memset16(dst, left[r], bs);
     dst += stride;
   }
 }
 
-static INLINE void high_tm_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
-                                     const uint16_t *above,
-                                     const uint16_t *left, int bps) {
+static INLINE void highbd_tm_predictor(uint16_t *dst, ptrdiff_t stride,
+                                       int bs, const uint16_t *above,
+                                       const uint16_t *left, int bd) {
   int r, c;
   int ytop_left = above[-1];
+  (void) bd;
 
   for (r = 0; r < bs; r++) {
     for (c = 0; c < bs; c++)
-      dst[c] = clip_pixel_bps(left[r] + above[c] - ytop_left, bps);
+      dst[c] = clip_pixel_highbd(left[r] + above[c] - ytop_left, bd);
     dst += stride;
   }
 }
 
-static INLINE void high_dc_128_predictor(uint16_t *dst, ptrdiff_t stride,
-                                         int bs, const uint16_t *above,
-                                         const uint16_t *left, int bps) {
+static INLINE void highbd_dc_128_predictor(uint16_t *dst, ptrdiff_t stride,
+                                           int bs, const uint16_t *above,
+                                           const uint16_t *left, int bd) {
   int r;
+  (void) above;
+  (void) left;
 
   for (r = 0; r < bs; r++) {
-    vpx_memset16(dst, 128 << (bps - 8), bs);
+    vpx_memset16(dst, 128 << (bd - 8), bs);
     dst += stride;
   }
 }
 
-static INLINE void high_dc_left_predictor(uint16_t *dst, ptrdiff_t stride,
-                                          int bs, const uint16_t *above,
-                                          const uint16_t *left, int bps) {
+static INLINE void highbd_dc_left_predictor(uint16_t *dst, ptrdiff_t stride,
+                                            int bs, const uint16_t *above,
+                                            const uint16_t *left, int bd) {
   int i, r, expected_dc, sum = 0;
+  (void) above;
+  (void) bd;
 
   for (i = 0; i < bs; i++)
     sum += left[i];
@@ -266,10 +286,12 @@ static INLINE void high_dc_left_predictor(uint16_t *dst, ptrdiff_t stride,
   }
 }
 
-static INLINE void high_dc_top_predictor(uint16_t *dst, ptrdiff_t stride,
-                                         int bs, const uint16_t *above,
-                                         const uint16_t *left, int bps) {
+static INLINE void highbd_dc_top_predictor(uint16_t *dst, ptrdiff_t stride,
+                                           int bs, const uint16_t *above,
+                                           const uint16_t *left, int bd) {
   int i, r, expected_dc, sum = 0;
+  (void) left;
+  (void) bd;
 
   for (i = 0; i < bs; i++)
     sum += above[i];
@@ -281,11 +303,12 @@ static INLINE void high_dc_top_predictor(uint16_t *dst, ptrdiff_t stride,
   }
 }
 
-static INLINE void high_dc_predictor(uint16_t *dst, ptrdiff_t stride,
-                                     int bs, const uint16_t *above,
-                                     const uint16_t *left, int bps) {
+static INLINE void highbd_dc_predictor(uint16_t *dst, ptrdiff_t stride,
+                                       int bs, const uint16_t *above,
+                                       const uint16_t *left, int bd) {
   int i, r, expected_dc, sum = 0;
   const int count = 2 * bs;
+  (void) bd;
 
   for (i = 0; i < bs; i++) {
     sum += above[i];
@@ -299,7 +322,7 @@ static INLINE void high_dc_predictor(uint16_t *dst, ptrdiff_t stride,
     dst += stride;
   }
 }
-#endif
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 static INLINE void d207_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
                                   const uint8_t *above, const uint8_t *left) {
@@ -545,65 +568,60 @@ intra_pred_allsizes(dc)
 typedef void (*intra_pred_fn)(uint8_t *dst, ptrdiff_t stride,
                               const uint8_t *above, const uint8_t *left);
 
-static intra_pred_fn pred[INTRA_MODES][4];
-static intra_pred_fn dc_pred[2][2][4];
+static intra_pred_fn pred[INTRA_MODES][TX_SIZES];
+static intra_pred_fn dc_pred[2][2][TX_SIZES];
 
-#if CONFIG_VP9_HIGH
+#if CONFIG_VP9_HIGHBITDEPTH
 typedef void (*intra_high_pred_fn)(uint16_t *dst, ptrdiff_t stride,
                                    const uint16_t *above, const uint16_t *left,
-                                   int bps);
+                                   int bd);
 static intra_high_pred_fn pred_high[INTRA_MODES][4];
 static intra_high_pred_fn dc_pred_high[2][2][4];
-#endif
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
-static void init_intra_pred_fn_ptrs(void) {
-#define intra_pred_allsizes(l, type) \
-  l[0] = vp9_##type##_predictor_4x4; \
-  l[1] = vp9_##type##_predictor_8x8; \
-  l[2] = vp9_##type##_predictor_16x16; \
-  l[3] = vp9_##type##_predictor_32x32
+void vp9_init_intra_predictors() {
+#define INIT_ALL_SIZES(p, type) \
+  p[TX_4X4] = vp9_##type##_predictor_4x4; \
+  p[TX_8X8] = vp9_##type##_predictor_8x8; \
+  p[TX_16X16] = vp9_##type##_predictor_16x16; \
+  p[TX_32X32] = vp9_##type##_predictor_32x32
 
-  intra_pred_allsizes(pred[V_PRED], v);
-  intra_pred_allsizes(pred[H_PRED], h);
-  intra_pred_allsizes(pred[D207_PRED], d207);
-  intra_pred_allsizes(pred[D45_PRED], d45);
-  intra_pred_allsizes(pred[D63_PRED], d63);
-  intra_pred_allsizes(pred[D117_PRED], d117);
-  intra_pred_allsizes(pred[D135_PRED], d135);
-  intra_pred_allsizes(pred[D153_PRED], d153);
-  intra_pred_allsizes(pred[TM_PRED], tm);
+  INIT_ALL_SIZES(pred[V_PRED], v);
+  INIT_ALL_SIZES(pred[H_PRED], h);
+  INIT_ALL_SIZES(pred[D207_PRED], d207);
+  INIT_ALL_SIZES(pred[D45_PRED], d45);
+  INIT_ALL_SIZES(pred[D63_PRED], d63);
+  INIT_ALL_SIZES(pred[D117_PRED], d117);
+  INIT_ALL_SIZES(pred[D135_PRED], d135);
+  INIT_ALL_SIZES(pred[D153_PRED], d153);
+  INIT_ALL_SIZES(pred[TM_PRED], tm);
 
-  intra_pred_allsizes(dc_pred[0][0], dc_128);
-  intra_pred_allsizes(dc_pred[0][1], dc_top);
-  intra_pred_allsizes(dc_pred[1][0], dc_left);
-  intra_pred_allsizes(dc_pred[1][1], dc);
+  INIT_ALL_SIZES(dc_pred[0][0], dc_128);
+  INIT_ALL_SIZES(dc_pred[0][1], dc_top);
+  INIT_ALL_SIZES(dc_pred[1][0], dc_left);
+  INIT_ALL_SIZES(dc_pred[1][1], dc);
+
+#if CONFIG_VP9_HIGHBITDEPTH
+  INIT_ALL_SIZES(pred_high[V_PRED], highbd_v);
+  INIT_ALL_SIZES(pred_high[H_PRED], highbd_h);
+  INIT_ALL_SIZES(pred_high[D207_PRED], highbd_d207);
+  INIT_ALL_SIZES(pred_high[D45_PRED], highbd_d45);
+  INIT_ALL_SIZES(pred_high[D63_PRED], highbd_d63);
+  INIT_ALL_SIZES(pred_high[D117_PRED], highbd_d117);
+  INIT_ALL_SIZES(pred_high[D135_PRED], highbd_d135);
+  INIT_ALL_SIZES(pred_high[D153_PRED], highbd_d153);
+  INIT_ALL_SIZES(pred_high[TM_PRED], highbd_tm);
+
+  INIT_ALL_SIZES(dc_pred_high[0][0], highbd_dc_128);
+  INIT_ALL_SIZES(dc_pred_high[0][1], highbd_dc_top);
+  INIT_ALL_SIZES(dc_pred_high[1][0], highbd_dc_left);
+  INIT_ALL_SIZES(dc_pred_high[1][1], highbd_dc);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
 #undef intra_pred_allsizes
-#if CONFIG_VP9_HIGH
-#define intra_pred_allsizes(l, type) \
-  l[0] = vp9_##type##_predictor_4x4; \
-  l[1] = vp9_##type##_predictor_8x8; \
-  l[2] = vp9_##type##_predictor_16x16; \
-  l[3] = vp9_##type##_predictor_32x32
-
-  intra_pred_allsizes(pred_high[V_PRED], high_v);
-  intra_pred_allsizes(pred_high[H_PRED], high_h);
-  intra_pred_allsizes(pred_high[D207_PRED], high_d207);
-  intra_pred_allsizes(pred_high[D45_PRED], high_d45);
-  intra_pred_allsizes(pred_high[D63_PRED], high_d63);
-  intra_pred_allsizes(pred_high[D117_PRED], high_d117);
-  intra_pred_allsizes(pred_high[D135_PRED], high_d135);
-  intra_pred_allsizes(pred_high[D153_PRED], high_d153);
-  intra_pred_allsizes(pred_high[TM_PRED], high_tm);
-
-  intra_pred_allsizes(dc_pred_high[0][0], high_dc_128);
-  intra_pred_allsizes(dc_pred_high[0][1], high_dc_top);
-  intra_pred_allsizes(dc_pred_high[1][0], high_dc_left);
-  intra_pred_allsizes(dc_pred_high[1][1], high_dc);
-#undef intra_pred_allsizes
-#endif
 }
 
-#if CONFIG_VP9_HIGH
+#if CONFIG_VP9_HIGHBITDEPTH
 static void build_intra_predictors_high(const MACROBLOCKD *xd,
                                         const uint8_t *ref8,
                                         int ref_stride,
@@ -615,7 +633,7 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
                                         int left_available,
                                         int right_available,
                                         int x, int y,
-                                        int plane, int bps) {
+                                        int plane, int bd) {
   int i;
   uint16_t *dst = CONVERT_TO_SHORTPTR(dst8);
   uint16_t *ref = CONVERT_TO_SHORTPTR(ref8);
@@ -628,14 +646,12 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
   int x0, y0;
   const struct macroblockd_plane *const pd = &xd->plane[plane];
   //  int base=128;
-  int base = 128 << (bps - 8);
+  int base = 128 << (bd - 8);
   // 127 127 127 .. 127 127 127 127 127 127
   // 129  A   B  ..  Y   Z
   // 129  C   D  ..  W   X
   // 129  E   F  ..  U   V
   // 129  G   H  ..  S   T   T   T   T   T
-
-  once(init_intra_pred_fn_ptrs);
 
   // Get current frame pointer, width and height.
   if (plane == 0) {
@@ -735,13 +751,13 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
   if (mode == DC_PRED) {
     dc_pred_high[left_available][up_available][tx_size](dst, dst_stride,
                                                         const_above_row,
-                                                        left_col, xd->bps);
+                                                        left_col, xd->bd);
   } else {
     pred_high[mode][tx_size](dst, dst_stride, const_above_row, left_col,
-                             xd->bps);
+                             xd->bd);
   }
 }
-#endif
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
                                    int ref_stride, uint8_t *dst, int dst_stride,
@@ -765,8 +781,6 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
   // 129  E   F  ..  U   V
   // 129  G   H  ..  S   T   T   T   T   T
   // ..
-
-  once(init_intra_pred_fn_ptrs);
 
   // Get current frame pointer, width and height.
   if (plane == 0) {
@@ -861,8 +875,7 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
   // predict
   if (mode == DC_PRED) {
     dc_pred[left_available][up_available][tx_size](dst, dst_stride,
-                                                   const_above_row,
-                                                   left_col);
+                                                   const_above_row, left_col);
   } else {
     pred[mode][tx_size](dst, dst_stride, const_above_row, left_col);
   }
@@ -882,11 +895,11 @@ void vp9_predict_intra_block(const MACROBLOCKD *xd, int block_idx, int bwl_in,
   const int y = loff * 4;
 
   assert(bwl >= 0);
-#if CONFIG_VP9_HIGH
-  if (xd->cur_buf->flags&YV12_FLAG_HIGHBITDEPTH) {
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     build_intra_predictors_high(xd, ref, ref_stride, dst, dst_stride, mode,
                                 tx_size, have_top, have_left, have_right,
-                                x, y, plane, xd->bps);
+                                x, y, plane, xd->bd);
     return;
   }
 #endif

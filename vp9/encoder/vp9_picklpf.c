@@ -40,15 +40,16 @@ static int try_filter_frame(const YV12_BUFFER_CONFIG *sd, VP9_COMP *const cpi,
 
   vp9_loop_filter_frame(cm->frame_to_show, cm, &cpi->mb.e_mbd, filt_level, 1,
                         partial_frame);
-#if CONFIG_VP9_HIGH
-  if (cm->use_high) {
-    filt_err = vp9_high_get_y_sse(sd, cm->frame_to_show, cm->bit_depth);
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (cm->use_highbitdepth) {
+    filt_err = vp9_highbd_get_y_sse(sd, cm->frame_to_show, cm->bit_depth);
   } else {
     filt_err = vp9_get_y_sse(sd, cm->frame_to_show);
   }
 #else
   filt_err = vp9_get_y_sse(sd, cm->frame_to_show);
-#endif
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
   // Re-instate the unfiltered frame
   vpx_yv12_copy_y(&cpi->last_frame_uf, cm->frame_to_show);
 
@@ -84,7 +85,6 @@ static int search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
   while (filter_step > 0) {
     const int filt_high = MIN(filt_mid + filter_step, max_filter_level);
     const int filt_low = MAX(filt_mid - filter_step, min_filter_level);
-    int filt_err;
 
     // Bias against raising loop filter in favor of lowering it.
     int bias = (best_err >> (15 - (filt_mid / 8))) * filter_step;
@@ -99,17 +99,14 @@ static int search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
     if (filt_direction <= 0 && filt_low != filt_mid) {
       // Get Low filter error score
       if (ss_err[filt_low] < 0) {
-        filt_err = try_filter_frame(sd, cpi, filt_low, partial_frame);
-        ss_err[filt_low] = filt_err;
-      } else {
-        filt_err = ss_err[filt_low];
+        ss_err[filt_low] = try_filter_frame(sd, cpi, filt_low, partial_frame);
       }
       // If value is close to the best so far then bias towards a lower loop
       // filter value.
-      if ((filt_err - bias) < best_err) {
+      if ((ss_err[filt_low] - bias) < best_err) {
         // Was it actually better than the previous best?
-        if (filt_err < best_err)
-          best_err = filt_err;
+        if (ss_err[filt_low] < best_err)
+          best_err = ss_err[filt_low];
 
         filt_best = filt_low;
       }
@@ -118,14 +115,11 @@ static int search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
     // Now look at filt_high
     if (filt_direction >= 0 && filt_high != filt_mid) {
       if (ss_err[filt_high] < 0) {
-        filt_err = try_filter_frame(sd, cpi, filt_high, partial_frame);
-        ss_err[filt_high] = filt_err;
-      } else {
-        filt_err = ss_err[filt_high];
+        ss_err[filt_high] = try_filter_frame(sd, cpi, filt_high, partial_frame);
       }
       // Was it better than the previous best?
-      if (filt_err < (best_err - bias)) {
-        best_err = filt_err;
+      if (ss_err[filt_high] < (best_err - bias)) {
+        best_err = ss_err[filt_high];
         filt_best = filt_high;
       }
     }
@@ -157,10 +151,10 @@ void vp9_pick_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
     const int min_filter_level = 0;
     const int max_filter_level = get_max_filter_level(cpi);
     const int q = vp9_ac_quant(cm->base_qindex, 0, cm->bit_depth);
-    int filt_guess;
     // These values were determined by linear fitting the result of the
     // searched level, filt_guess = q * 0.316206 + 3.87252
-#if CONFIG_VP9_HIGH
+#if CONFIG_VP9_HIGHDEPTH
+    int filt_guess;
     switch (cm->bit_depth) {
       case VPX_BITS_8:
         filt_guess = ROUND_POWER_OF_TWO(q * 20723 + 1015158, 18);
@@ -177,8 +171,8 @@ void vp9_pick_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
         return;
     }
 #else
-    filt_guess = ROUND_POWER_OF_TWO(q * 20723 + 1015158, 18);
-#endif
+    int filt_guess = ROUND_POWER_OF_TWO(q * 20723 + 1015158, 18);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
     if (cm->frame_type == KEY_FRAME)
       filt_guess -= 4;
     lf->filter_level = clamp(filt_guess, min_filter_level, max_filter_level);
