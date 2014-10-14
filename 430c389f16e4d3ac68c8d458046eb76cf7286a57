@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//TFI\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4661,
+      "author": {
+        "id": 1002403
+      },
+      "writtenOn": "2014-10-14T23:06:30Z",
+      "side": 1,
+      "message": "Thanks for fixing all these up!\nI am not sure what is the purpose of swapping here, so tentatively removed it in my previous patch.",
+      "revId": "430c389f16e4d3ac68c8d458046eb76cf7286a57",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
