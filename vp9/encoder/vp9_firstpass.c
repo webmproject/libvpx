@@ -2478,6 +2478,7 @@ void vp9_twopass_postencode_update(VP9_COMP *cpi) {
   if (rc->total_actual_bits) {
     rc->rate_error_estimate =
       (int)((rc->vbr_bits_off_target * 100) / rc->total_actual_bits);
+    rc->rate_error_estimate = clamp(rc->rate_error_estimate, -100, 100);
   } else {
     rc->rate_error_estimate = 0;
   }
