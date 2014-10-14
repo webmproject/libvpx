@@ -19,6 +19,40 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//TUg\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2873,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-10-14T10:31:22Z",
+      "side": 1,
+      "message": "I am not sure this is the right thing to do any more. We will have to experiment but resetting each time may cause us to bob up and down more (compared to the damped behaviour I put in the two pass patch). It will also cause us to do more recodes.  In the two pass patch I had a two level threshold for down sample and then two sample back up. It may be that we can still take guidance from the two pass code on when to drop down and then use this as a second level trap where the two pass code gets it wrong and we go over size.",
+      "revId": "e68c319354a1ade99063f97493341449c554aedb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//TUk\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 3029,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-10-14T10:31:22Z",
+      "side": 1,
+      "message": "I think this is wrong. We will need to reset the upper and lower Q bounds and allow the recode loop to find an appropriate Q at the new size so that we level off at the upper bound rate. Otherwise we will see a sudden dip in rate and quality when we resize down. This happened automatically in the patch I put up where the switch occurred in the two pass code because the size decision happened before the recode loop.",
+      "revId": "e68c319354a1ade99063f97493341449c554aedb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//TUs\u003d",
         "filename": "vp9/encoder/vp9_encoder.c",
         "patchSetId": 3
