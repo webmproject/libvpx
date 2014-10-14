@@ -16,6 +16,24 @@
       "revId": "c4dc766eb7d567929ab4c86eb9abfe643fb0e27d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//TFs\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 4622,
+      "author": {
+        "id": 1002403
+      },
+      "writtenOn": "2014-10-14T22:32:43Z",
+      "side": 1,
+      "message": "Oh sure, you are right!",
+      "parentUuid": "AAAAdn//TF8\u003d",
+      "revId": "c4dc766eb7d567929ab4c86eb9abfe643fb0e27d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
