@@ -225,6 +225,9 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   }
   vpx_memset(&cpi->svc.scaled_frames[0], 0,
              MAX_LAG_BUFFERS * sizeof(cpi->svc.scaled_frames[0]));
+
+  vp9_free_frame_buffer(&cpi->svc.empty_frame.img);
+  vpx_memset(&cpi->svc.empty_frame, 0, sizeof(cpi->svc.empty_frame));
 }
 
 static void save_coding_context(VP9_COMP *cpi) {
@@ -2635,7 +2638,10 @@ void set_frame_size(VP9_COMP *cpi) {
 
   // For two pass encodes analyse the first pass stats and determine
   // the bit allocation and other parameters for this frame / group of frames.
-  if ((oxcf->pass == 2) && (!cpi->use_svc || is_two_pass_svc(cpi))) {
+  if ((oxcf->pass == 2) &&
+      (!cpi->use_svc ||
+       (is_two_pass_svc(cpi) &&
+        cpi->svc.encode_empty_frame_state != ENCODING))) {
     vp9_rc_get_second_pass_params(cpi);
   }
 
@@ -3134,7 +3140,9 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     }
   }
   if (is_two_pass_svc(cpi) && cm->error_resilient_mode == 0) {
+    // Use the last frame context for the empty frame.
     cm->frame_context_idx =
+        (cpi->svc.encode_empty_frame_state == ENCODING) ? FRAME_CONTEXTS - 1 :
         cpi->svc.spatial_layer_id * cpi->svc.number_temporal_layers +
         cpi->svc.temporal_layer_id;
 
@@ -3269,7 +3277,9 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   cpi->ref_frame_flags = get_ref_frame_flags(cpi);
 
   cm->last_frame_type = cm->frame_type;
-  vp9_rc_postencode_update(cpi, *size);
+
+  if (!(is_two_pass_svc(cpi) && cpi->svc.encode_empty_frame_state == ENCODING))
+    vp9_rc_postencode_update(cpi, *size);
 
 #if 0
   output_frame_level_debug_stats(cpi);
@@ -3293,12 +3303,8 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   cm->last_height = cm->height;
 
   // reset to normal state now that we are done.
-  if (!cm->show_existing_frame) {
-    if (is_two_pass_svc(cpi) && cm->error_resilient_mode == 0)
-      cm->last_show_frame = 0;
-    else
-      cm->last_show_frame = cm->show_frame;
-  }
+  if (!cm->show_existing_frame)
+    cm->last_show_frame = cm->show_frame;
 
   if (cm->show_frame) {
     vp9_swap_mi_and_prev_mi(cm);
@@ -3335,7 +3341,9 @@ static void Pass2Encode(VP9_COMP *cpi, size_t *size,
                         uint8_t *dest, unsigned int *frame_flags) {
   cpi->allow_encode_breakout = ENCODE_BREAKOUT_ENABLED;
   encode_frame_to_data_rate(cpi, size, dest, frame_flags);
-  vp9_twopass_postencode_update(cpi);
+
+  if (!(is_two_pass_svc(cpi) && cpi->svc.encode_empty_frame_state == ENCODING))
+    vp9_twopass_postencode_update(cpi);
 }
 
 static void check_initial_width(VP9_COMP *cpi,
@@ -3513,6 +3521,9 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   if (is_two_pass_svc(cpi)) {
 #if CONFIG_SPATIAL_SVC
     vp9_svc_start_frame(cpi);
+    // Use a small empty frame instead of a real frame
+    if (cpi->svc.encode_empty_frame_state == ENCODING)
+      source = &cpi->svc.empty_frame;
 #endif
     if (oxcf->pass == 2)
       vp9_restore_layer_context(cpi);
@@ -3531,6 +3542,11 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
   // Should we encode an arf frame.
   arf_src_index = get_arf_src_index(cpi);
+
+  // Skip alt frame if we encode the empty frame
+  if (is_two_pass_svc(cpi) && source != NULL)
+    arf_src_index = 0;
+
   if (arf_src_index) {
     assert(arf_src_index <= rc->frames_to_key);
 
@@ -3818,10 +3834,18 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
 #endif
 
-  if (is_two_pass_svc(cpi) && cm->show_frame) {
-    ++cpi->svc.spatial_layer_to_encode;
-    if (cpi->svc.spatial_layer_to_encode >= cpi->svc.number_spatial_layers)
-      cpi->svc.spatial_layer_to_encode = 0;
+  if (is_two_pass_svc(cpi)) {
+    if (cpi->svc.encode_empty_frame_state == ENCODING)
+      cpi->svc.encode_empty_frame_state = ENCODED;
+
+    if (cm->show_frame) {
+      ++cpi->svc.spatial_layer_to_encode;
+      if (cpi->svc.spatial_layer_to_encode >= cpi->svc.number_spatial_layers)
+        cpi->svc.spatial_layer_to_encode = 0;
+
+      // May need the empty frame after an visible frame.
+      cpi->svc.encode_empty_frame_state = NEED_TO_ENCODE;
+    }
   }
   return 0;
 }
@@ -3912,10 +3936,6 @@ int vp9_set_size_literal(VP9_COMP *cpi, unsigned int width,
 
   if (width) {
     cm->width = width;
-    if (cm->width * 5 < cpi->initial_width) {
-      cm->width = cpi->initial_width / 5 + 1;
-      printf("Warning: Desired width too small, changed to %d\n", cm->width);
-    }
     if (cm->width > cpi->initial_width) {
       cm->width = cpi->initial_width;
       printf("Warning: Desired width too large, changed to %d\n", cm->width);
@@ -3924,10 +3944,6 @@ int vp9_set_size_literal(VP9_COMP *cpi, unsigned int width,
 
   if (height) {
     cm->height = height;
-    if (cm->height * 5 < cpi->initial_height) {
-      cm->height = cpi->initial_height / 5 + 1;
-      printf("Warning: Desired height too small, changed to %d\n", cm->height);
-    }
     if (cm->height > cpi->initial_height) {
       cm->height = cpi->initial_height;
       printf("Warning: Desired height too large, changed to %d\n", cm->height);

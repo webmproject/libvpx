@@ -2406,6 +2406,9 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
         cpi->ref_frame_flags &=
             (~VP9_LAST_FLAG & ~VP9_GOLD_FLAG & ~VP9_ALT_FLAG);
         lc->frames_from_key_frame = 0;
+        // Reset the empty frame resolution since we have a key frame.
+        cpi->svc.empty_frame_width = cm->width;
+        cpi->svc.empty_frame_height = cm->height;
       }
     } else {
       cm->frame_type = INTER_FRAME;

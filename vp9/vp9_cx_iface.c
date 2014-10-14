@@ -188,11 +188,9 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
     }
     if (alt_ref_sum > REF_FRAMES - cfg->ss_number_layers)
       ERROR("Not enough ref buffers for svc alt ref frames");
-    if ((cfg->ss_number_layers > 3 ||
-         cfg->ss_number_layers * cfg->ts_number_layers > 4) &&
+    if (cfg->ss_number_layers * cfg->ts_number_layers > 3 &&
         cfg->g_error_resilient == 0)
-    ERROR("Multiple frame context are not supported for more than 3 spatial "
-          "layers or more than 4 spatial x temporal layers");
+    ERROR("Multiple frame context are not supported for more than 3 layers");
   }
 #endif
 

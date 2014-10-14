@@ -350,7 +350,7 @@ void assign_layer_bitrates(const SvcContext *svc_ctx,
       }
     }
 
-    for (i = 0; i < svc_ctx->spatial_layers; ++i) {
+    for (i = 0; i < VPX_SS_MAX_LAYERS; ++i) {
       if (total > 0) {
         enc_cfg->ss_target_bitrate[i] = (unsigned int)
             (enc_cfg->rc_target_bitrate * alloc_ratio[i] / total);

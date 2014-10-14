@@ -1013,7 +1013,11 @@ static void write_frame_size_with_refs(VP9_COMP *cpi,
         ((cpi->svc.number_temporal_layers > 1 &&
          cpi->oxcf.rc_mode == VPX_CBR) ||
         (cpi->svc.number_spatial_layers > 1 &&
-         cpi->svc.layer_context[cpi->svc.spatial_layer_id].is_key_frame))) {
+         cpi->svc.layer_context[cpi->svc.spatial_layer_id].is_key_frame) ||
+        (is_two_pass_svc(cpi) &&
+         cpi->svc.encode_empty_frame_state == ENCODING &&
+         cpi->svc.layer_context[0].frames_from_key_frame <
+         cpi->svc.number_temporal_layers + 1))) {
       found = 0;
     }
     vp9_wb_write_bit(wb, found);
@@ -1105,8 +1109,7 @@ static void write_uncompressed_header(VP9_COMP *cpi,
     // will change to show_frame flag to 0, then add an one byte frame with
     // show_existing_frame flag which tells the decoder which frame we want to
     // show.
-    if (!cm->show_frame ||
-        (is_two_pass_svc(cpi) && cm->error_resilient_mode == 0))
+    if (!cm->show_frame)
       vp9_wb_write_bit(wb, cm->intra_only);
 
     if (!cm->error_resilient_mode)
