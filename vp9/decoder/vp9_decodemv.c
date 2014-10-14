@@ -223,7 +223,6 @@ static int read_mv_component(vp9_reader *r,
   fr = vp9_read_tree(r, vp9_mv_fp_tree, class0 ? mvcomp->class0_fp[d]
                                                : mvcomp->fp);
 
-
   // High precision part (if hp is not used, the default value of the hp is 1)
   hp = usehp ? vp9_read(r, class0 ? mvcomp->class0_hp : mvcomp->hp)
              : 1;

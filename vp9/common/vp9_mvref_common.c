@@ -24,10 +24,7 @@ static void find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
         ? cm->prev_mi[mi_row * xd->mi_stride + mi_col].src_mi
         : NULL;
   const MB_MODE_INFO *const prev_mbmi = prev_mi ? &prev_mi->src_mi->mbmi : NULL;
-
-
   const POSITION *const mv_ref_search = mv_ref_blocks[mi->mbmi.sb_type];
-
   int different_ref_found = 0;
   int context_counter = 0;
 
@@ -126,7 +123,6 @@ static void lower_mv_precision(MV *mv, int allow_hp) {
       mv->col += (mv->col > 0 ? -1 : 1);
   }
 }
-
 
 void vp9_find_best_ref_mvs(MACROBLOCKD *xd, int allow_hp,
                            int_mv *mvlist, int_mv *nearest, int_mv *near) {
