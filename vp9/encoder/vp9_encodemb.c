@@ -593,7 +593,7 @@ void vp9_encode_sb_supertx(MACROBLOCK *x, BLOCK_SIZE bsize) {
     vp9_subtract_plane(x, bsize, plane);
     vp9_get_entropy_contexts(bsize, tx_size, pd,
                              ctx.ta[plane], ctx.tl[plane]);
-    encode_block(plane, 0, plane_size, b_width_log2(plane_size), &arg);
+    encode_block(plane, 0, plane_size, bsize_to_tx_size(plane_size), &arg);
   }
 }
 #endif

@@ -87,7 +87,7 @@ static void rd_supertx_sb(VP9_COMP *cpi, const TileInfo *const tile,
                           int *tmp_rate, int64_t *tmp_dist,
                           int *skippable, int64_t *sse,
 #if CONFIG_EXT_TX
-                          int *best_tx,
+                          EXT_TX_TYPE *best_tx,
 #endif
                           PC_TREE *pc_tree);
 #endif
@@ -1446,7 +1446,7 @@ static void encode_sb(VP9_COMP *cpi, const TileInfo *const tile,
       bsize <= BLOCK_32X32 &&
       partition != PARTITION_NONE) {
     int supertx_enabled;
-    TX_SIZE supertx_size = b_width_log2(bsize);
+    TX_SIZE supertx_size = bsize_to_tx_size(bsize);
     supertx_enabled = check_supertx_sb(bsize, supertx_size, pc_tree);
     if (supertx_enabled) {
       const int mi_width = num_8x8_blocks_wide_lookup[bsize];
@@ -1496,7 +1496,7 @@ static void encode_sb(VP9_COMP *cpi, const TileInfo *const tile,
           cm->counts.supertxsplit[supertx_size][1]++;
         cm->counts.supertx_size[supertx_size]++;
 #if CONFIG_EXT_TX
-        if (supertx_size <= TX_16X16 && !xd->mi[0]->mbmi.skip)
+        if (supertx_size < TX_32X32 && !xd->mi[0]->mbmi.skip)
           ++cm->counts.ext_tx[xd->mi[0]->mbmi.ext_txfrm];
 #endif
         (*tp)->token = EOSB_TOKEN;
@@ -2725,7 +2725,7 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
 #if CONFIG_SUPERTX
       if (cm->frame_type != KEY_FRAME &&
           sum_rd < INT64_MAX) {
-        TX_SIZE supertx_size = b_width_log2(bsize);
+        TX_SIZE supertx_size = bsize_to_tx_size(bsize);  // b_width_log2(bsize);
         best_partition = pc_tree->partitioning;
         pc_tree->partitioning = PARTITION_SPLIT;
 
@@ -2736,7 +2736,7 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
           int skippable = 1;
           int64_t sse = 0;
 #if CONFIG_EXT_TX
-          int best_tx = 0;
+          EXT_TX_TYPE best_tx = NORM;
 #endif
 
           tmp_rate = sum_rate_nocoef;
@@ -2806,7 +2806,7 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
       if (cm->frame_type != KEY_FRAME &&
           sum_rd < INT64_MAX && i == 4 &&
           bsize <= BLOCK_32X32) {
-        TX_SIZE supertx_size = b_width_log2(bsize);
+        TX_SIZE supertx_size = bsize_to_tx_size(bsize);
         best_partition = pc_tree->partitioning;
         pc_tree->partitioning = PARTITION_SPLIT;
 
@@ -2817,7 +2817,7 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
           int skippable = 1;
           int64_t sse = 0;
 #if CONFIG_EXT_TX
-          int best_tx = 0;
+          EXT_TX_TYPE best_tx = NORM;
 #endif
 
           tmp_rate = sum_rate_nocoef;
@@ -2931,7 +2931,7 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
         !abort_flag &&
         sum_rd < INT64_MAX &&
         bsize <= BLOCK_32X32) {
-      TX_SIZE supertx_size = b_width_log2(bsize);
+      TX_SIZE supertx_size = bsize_to_tx_size(bsize);
       best_partition = pc_tree->partitioning;
       pc_tree->partitioning = PARTITION_HORZ;
 
@@ -2942,7 +2942,7 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
         int skippable = 1;
         int64_t sse = 0;
 #if CONFIG_EXT_TX
-        int best_tx = 0;
+        EXT_TX_TYPE best_tx = NORM;
 #endif
 
         tmp_rate = sum_rate_nocoef;
@@ -3050,7 +3050,7 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
         !abort_flag &&
         sum_rd < INT64_MAX &&
         bsize <= BLOCK_32X32) {
-      TX_SIZE supertx_size = b_width_log2(bsize);
+      TX_SIZE supertx_size = bsize_to_tx_size(bsize);
       best_partition = pc_tree->partitioning;
       pc_tree->partitioning = PARTITION_VERT;
 
@@ -3061,7 +3061,7 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
         int skippable = 1;
         int64_t sse = 0;
 #if CONFIG_EXT_TX
-        int best_tx = 0;
+        EXT_TX_TYPE best_tx = NORM;
 #endif
 
         tmp_rate = sum_rate_nocoef;
@@ -4380,7 +4380,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
     }
 
 #if CONFIG_EXT_TX
-    if (mbmi->tx_size <= TX_16X16 &&
+    if (mbmi->tx_size < TX_32X32 &&
         is_inter_block(mbmi) &&
         bsize >= BLOCK_8X8 &&
         !mbmi->skip &&
@@ -4812,7 +4812,7 @@ static void rd_supertx_sb(VP9_COMP *cpi, const TileInfo *const tile,
                           int *tmp_rate, int64_t *tmp_dist,
                           int *skippable, int64_t *sse,
 #if CONFIG_EXT_TX
-                          int *best_tx,
+                          EXT_TX_TYPE *best_tx,
 #endif
                           PC_TREE *pc_tree) {
   VP9_COMMON *const cm = &cpi->common;
@@ -4835,11 +4835,12 @@ static void rd_supertx_sb(VP9_COMP *cpi, const TileInfo *const tile,
 
   set_offsets(cpi, tile, mi_row, mi_col, bsize);
 #if CONFIG_EXT_TX
-  *best_tx = 0;
+  *best_tx = NORM;
 #endif
 
   for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
-    TX_SIZE tx_size = plane ? (b_width_log2(bsize) - 1) : b_width_log2(bsize);
+    TX_SIZE tx_size =
+        plane ? (bsize_to_tx_size(bsize) - 1) : bsize_to_tx_size(bsize);
     vp9_subtract_plane(x, bsize, plane);
 #if CONFIG_EXT_TX
     if (bsize <= BLOCK_16X16 && plane == 0) {
@@ -4867,8 +4868,8 @@ static void rd_supertx_sb(VP9_COMP *cpi, const TileInfo *const tile,
       xd->mi[0]->mbmi.ext_txfrm = best_tx_nostx;
     } else {
 #endif
-    txfm_rd_in_plane_supertx(x, &this_rate, &this_dist, &pnskip, &pnsse,
-                             INT64_MAX, plane, bsize, tx_size, 0);
+      txfm_rd_in_plane_supertx(x, &this_rate, &this_dist, &pnskip, &pnsse,
+                               INT64_MAX, plane, bsize, tx_size, 0);
 #if CONFIG_EXT_TX
     }
 #endif
@@ -4884,7 +4885,7 @@ static void rd_supertx_sb(VP9_COMP *cpi, const TileInfo *const tile,
 #if CONFIG_EXT_TX
     if (bsize <= BLOCK_16X16)
       *tmp_rate -= vp9_cost_bit(cm->fc.ext_tx_prob, *best_tx);
-    *best_tx = 0;
+    *best_tx = NORM;
 #endif
   } else {
     if (RDCOST(x->rdmult, x->rddiv, *tmp_rate - base_rate, *tmp_dist)

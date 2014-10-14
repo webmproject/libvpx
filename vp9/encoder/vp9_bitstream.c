@@ -50,7 +50,7 @@ static int vp9_check_supertx(VP9_COMMON *cm, int mi_row, int mi_col,
 
   mi = cm->mi_grid_visible + (mi_row * cm->mi_stride + mi_col);
 
-  return mi[0]->mbmi.tx_size == b_width_log2(bsize) &&
+  return mi[0]->mbmi.tx_size == bsize_to_tx_size(bsize) &&
          mi[0]->mbmi.sb_type < bsize;
 }
 #endif
@@ -613,7 +613,7 @@ static void write_modes_sb(VP9_COMP *cpi,
                  cm->mi_rows, cm->mi_cols);
   if (!supertx_enabled && cm->frame_type != KEY_FRAME &&
       partition != PARTITION_NONE && bsize <= BLOCK_32X32) {
-    TX_SIZE supertx_size = b_width_log2(bsize);
+    TX_SIZE supertx_size = bsize_to_tx_size(bsize);  // b_width_log2(bsize);
     vp9_prob prob = partition == PARTITION_SPLIT ?
                     cm->fc.supertxsplit_prob[supertx_size] :
                     cm->fc.supertx_prob[supertx_size];

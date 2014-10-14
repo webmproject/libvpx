@@ -131,6 +131,17 @@ static INLINE int mi_width_log2(BLOCK_SIZE sb_type) {
   return mi_width_log2_lookup[sb_type];
 }
 
+#if CONFIG_SUPERTX
+static INLINE TX_SIZE bsize_to_tx_size(BLOCK_SIZE bsize) {
+  const TX_SIZE tx_size_lookup[BLOCK_SIZES] = {
+    TX_4X4, TX_4X4, TX_4X4,
+    TX_8X8, TX_8X8, TX_8X8,
+    TX_16X16, TX_16X16, TX_16X16,
+    TX_32X32, TX_32X32, TX_32X32, TX_32X32};
+  return tx_size_lookup[bsize];
+}
+#endif
+
 #if CONFIG_MASKED_INTERINTER
 #define MASK_BITS_SML   3
 #define MASK_BITS_MED   4
