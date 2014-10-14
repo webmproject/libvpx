@@ -585,8 +585,6 @@ static void init_config(struct VP9_COMP *cpi, VP9EncoderConfig *oxcf) {
   cpi->ref_frame_flags = 0;
 
   init_buffer_indices(cpi);
-
-  set_tile_limits(cpi);
 }
 
 static void set_rc_buffer_sizes(RATE_CONTROL *rc,
