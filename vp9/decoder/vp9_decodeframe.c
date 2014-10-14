@@ -749,7 +749,7 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
   if (!found)
     vp9_read_frame_size(rb, &width, &height);
 
-  if (width <=0 || height <= 0)
+  if (width <= 0 || height <= 0)
     vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
                        "Invalid frame size");
 
