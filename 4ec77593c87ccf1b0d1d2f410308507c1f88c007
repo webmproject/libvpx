@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//TXo\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 2705,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-10-14T10:07:03Z",
+      "side": 1,
+      "message": "do these functions belong here or in the rate control module.\n\nThis will also cause a merge conflict with other RC changes I have made to better hit the target and will need to be modified.",
+      "revId": "4ec77593c87ccf1b0d1d2f410308507c1f88c007",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
