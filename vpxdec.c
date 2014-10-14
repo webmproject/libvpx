@@ -47,52 +47,49 @@ struct VpxDecInputContext {
   struct WebmInputContext *webm_ctx;
 };
 
-static const arg_def_t looparg = ARG_DEF(NULL, "loops", 1,
-                                          "Number of times to decode the file");
-static const arg_def_t codecarg = ARG_DEF(NULL, "codec", 1,
-                                          "Codec to use");
-static const arg_def_t use_yv12 = ARG_DEF(NULL, "yv12", 0,
-                                          "Output raw YV12 frames");
-static const arg_def_t use_i420 = ARG_DEF(NULL, "i420", 0,
-                                          "Output raw I420 frames");
-static const arg_def_t flipuvarg = ARG_DEF(NULL, "flipuv", 0,
-                                           "Flip the chroma planes in the output");
-static const arg_def_t rawvideo = ARG_DEF(NULL, "rawvideo", 0,
-                                          "Output raw YUV frames");
-static const arg_def_t noblitarg = ARG_DEF(NULL, "noblit", 0,
-                                           "Don't process the decoded frames");
-static const arg_def_t progressarg = ARG_DEF(NULL, "progress", 0,
-                                             "Show progress after each frame decodes");
-static const arg_def_t limitarg = ARG_DEF(NULL, "limit", 1,
-                                          "Stop decoding after n frames");
-static const arg_def_t skiparg = ARG_DEF(NULL, "skip", 1,
-                                         "Skip the first n input frames");
-static const arg_def_t postprocarg = ARG_DEF(NULL, "postproc", 0,
-                                             "Postprocess decoded frames");
-static const arg_def_t summaryarg = ARG_DEF(NULL, "summary", 0,
-                                            "Show timing summary");
-static const arg_def_t outputfile = ARG_DEF("o", "output", 1,
-                                            "Output file name pattern (see below)");
-static const arg_def_t threadsarg = ARG_DEF("t", "threads", 1,
-                                            "Max threads to use");
-static const arg_def_t verbosearg = ARG_DEF("v", "verbose", 0,
-                                            "Show version string");
-static const arg_def_t error_concealment = ARG_DEF(NULL, "error-concealment", 0,
-                                                   "Enable decoder error-concealment");
-static const arg_def_t scalearg = ARG_DEF("S", "scale", 0,
-                                            "Scale output frames uniformly");
-static const arg_def_t continuearg =
-    ARG_DEF("k", "keep-going", 0, "(debug) Continue decoding after error");
-
-static const arg_def_t fb_arg =
-    ARG_DEF(NULL, "frame-buffers", 1, "Number of frame buffers to use");
-
-static const arg_def_t md5arg = ARG_DEF(NULL, "md5", 0,
-                                        "Compute the MD5 sum of the decoded frame");
+static const arg_def_t looparg = ARG_DEF(
+    NULL, "loops", 1, "Number of times to decode the file");
+static const arg_def_t codecarg = ARG_DEF(
+    NULL, "codec", 1, "Codec to use");
+static const arg_def_t use_yv12 = ARG_DEF(
+    NULL, "yv12", 0, "Output raw YV12 frames");
+static const arg_def_t use_i420 = ARG_DEF(
+    NULL, "i420", 0, "Output raw I420 frames");
+static const arg_def_t flipuvarg = ARG_DEF(
+    NULL, "flipuv", 0, "Flip the chroma planes in the output");
+static const arg_def_t rawvideo = ARG_DEF(
+    NULL, "rawvideo", 0, "Output raw YUV frames");
+static const arg_def_t noblitarg = ARG_DEF(
+    NULL, "noblit", 0, "Don't process the decoded frames");
+static const arg_def_t progressarg = ARG_DEF(
+    NULL, "progress", 0, "Show progress after each frame decodes");
+static const arg_def_t limitarg = ARG_DEF(
+    NULL, "limit", 1, "Stop decoding after n frames");
+static const arg_def_t skiparg = ARG_DEF(
+    NULL, "skip", 1, "Skip the first n input frames");
+static const arg_def_t postprocarg = ARG_DEF(
+    NULL, "postproc", 0, "Postprocess decoded frames");
+static const arg_def_t summaryarg = ARG_DEF(
+    NULL, "summary", 0, "Show timing summary");
+static const arg_def_t outputfile = ARG_DEF(
+    "o", "output", 1, "Output file name pattern (see below)");
+static const arg_def_t threadsarg = ARG_DEF(
+    "t", "threads", 1, "Max threads to use");
+static const arg_def_t verbosearg = ARG_DEF(
+    "v", "verbose", 0, "Show version string");
+static const arg_def_t error_concealment = ARG_DEF(
+    NULL, "error-concealment", 0, "Enable decoder error-concealment");
+static const arg_def_t scalearg = ARG_DEF(
+    "S", "scale", 0, "Scale output frames uniformly");
+static const arg_def_t continuearg = ARG_DEF(
+    "k", "keep-going", 0, "(debug) Continue decoding after error");
+static const arg_def_t fb_arg = ARG_DEF(
+    NULL, "frame-buffers", 1, "Number of frame buffers to use");
+static const arg_def_t md5arg = ARG_DEF(
+    NULL, "md5", 0, "Compute the MD5 sum of the decoded frame");
 #if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
 static const arg_def_t outbitdeptharg = ARG_DEF(
-    NULL, "output-bit-depth", 1,
-    "Output bit-depth for decoded frames");
+    NULL, "output-bit-depth", 1, "Output bit-depth for decoded frames");
 #endif
 
 static const arg_def_t *all_args[] = {

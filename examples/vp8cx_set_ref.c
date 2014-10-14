@@ -178,7 +178,7 @@ int main(int argc, char **argv) {
   }
 
   // Flush encoder.
-  while (encode_frame(&codec, NULL, -1, writer)) {};
+  while (encode_frame(&codec, NULL, -1, writer)) {}
 
   printf("\n");
   fclose(infile);
