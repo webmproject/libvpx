@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//TQs\u003d",
+        "filename": "vp9/encoder/x86/vp9_denoiser_sse2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-14T14:53:27Z",
+      "side": 1,
+      "message": "note this won\u0027t build under windows; you\u0027re limited to 3 params that require this alignment on x86/older visual studio\u0027s. to keep this structure they\u0027ll need to be converted to pointers.",
+      "revId": "d55b124492180af50e1e307aa48e444654b664f1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
