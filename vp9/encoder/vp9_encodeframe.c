@@ -2573,16 +2573,15 @@ static void encode_rd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
                              sf->always_this_block_size);
       rd_use_partition(cpi, tile, mi, tp, mi_row, mi_col, BLOCK_64X64,
                        &dummy_rate, &dummy_dist, 1, cpi->pc_root);
-    } else if (cpi->partition_search_skippable_frame ||
-               sf->partition_search_type == VAR_BASED_FIXED_PARTITION) {
+    } else if (cpi->partition_search_skippable_frame) {
       BLOCK_SIZE bsize;
       set_offsets(cpi, tile, mi_row, mi_col, BLOCK_64X64);
       bsize = get_rd_var_based_fixed_partition(cpi, mi_row, mi_col);
       set_fixed_partitioning(cpi, tile, mi, mi_row, mi_col, bsize);
       rd_use_partition(cpi, tile, mi, tp, mi_row, mi_col, BLOCK_64X64,
                        &dummy_rate, &dummy_dist, 1, cpi->pc_root);
-      } else if (sf->partition_search_type == VAR_BASED_PARTITION &&
-                 cm->frame_type != KEY_FRAME ) {
+    } else if (sf->partition_search_type == VAR_BASED_PARTITION &&
+               cm->frame_type != KEY_FRAME ) {
       choose_partitioning(cpi, tile, mi_row, mi_col);
       rd_use_partition(cpi, tile, mi, tp, mi_row, mi_col, BLOCK_64X64,
                        &dummy_rate, &dummy_dist, 1, cpi->pc_root);
@@ -3175,7 +3174,6 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
         nonrd_use_partition(cpi, tile, mi, tp, mi_row, mi_col, BLOCK_64X64,
                             1, &dummy_rate, &dummy_dist, cpi->pc_root);
         break;
-      case VAR_BASED_FIXED_PARTITION:
       case FIXED_PARTITION:
         bsize = sf->partition_search_type == FIXED_PARTITION ?
                 sf->always_this_block_size :
