@@ -271,6 +271,10 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->partition_search_type = REFERENCE_PARTITION;
     sf->use_nonrd_pick_mode = 1;
     sf->allow_skip_recode = 0;
+    sf->inter_mode_mask[BLOCK_32X32] = INTER_NEAREST_NEW_ZERO;
+    sf->inter_mode_mask[BLOCK_32X64] = INTER_NEAREST_NEW_ZERO;
+    sf->inter_mode_mask[BLOCK_64X32] = INTER_NEAREST_NEW_ZERO;
+    sf->inter_mode_mask[BLOCK_64X64] = INTER_NEAREST_NEW_ZERO;
   }
 
   if (speed >= 6) {
@@ -285,10 +289,6 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->partition_search_type = VAR_BASED_PARTITION;
     sf->search_type_check_frequency = 50;
     sf->mv.search_method = NSTEP;
-    sf->inter_mode_mask[BLOCK_32X32] = INTER_NEAREST_NEW_ZERO;
-    sf->inter_mode_mask[BLOCK_32X64] = INTER_NEAREST_NEW_ZERO;
-    sf->inter_mode_mask[BLOCK_64X32] = INTER_NEAREST_NEW_ZERO;
-    sf->inter_mode_mask[BLOCK_64X64] = INTER_NEAREST_NEW_ZERO;
 
     sf->tx_size_search_method = is_keyframe ? USE_LARGESTALL : USE_TX_8X8;
 

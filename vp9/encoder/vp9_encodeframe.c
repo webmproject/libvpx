@@ -3158,7 +3158,6 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
     int64_t dummy_dist = 0;
     const int idx_str = cm->mi_stride * mi_row + mi_col;
     MODE_INFO *mi = cm->mi + idx_str;
-    MODE_INFO *prev_mi = (cm->prev_mip + cm->mi_stride + 1 + idx_str)->src_mi;
     BLOCK_SIZE bsize;
     x->in_static_area = 0;
     x->source_variance = UINT_MAX;
@@ -3196,7 +3195,7 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
                                &dummy_rate, &dummy_dist, 1, INT64_MAX,
                                cpi->pc_root);
         } else {
-          copy_partitioning(cm, mi, prev_mi);
+          choose_partitioning(cpi, tile, mi_row, mi_col);
           nonrd_use_partition(cpi, tile, mi, tp, mi_row, mi_col,
                               BLOCK_64X64, 1, &dummy_rate, &dummy_dist,
                               cpi->pc_root);
