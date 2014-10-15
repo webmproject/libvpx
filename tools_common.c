@@ -276,7 +276,7 @@ static void highbd_img_upshift(vpx_image_t *dst, vpx_image_t *src,
   // Note the offset is 1 less than half.
   const int offset = input_shift > 0 ? (1 << (input_shift - 1)) - 1 : 0;
   int plane;
-  if (dst->w != src->w || dst->h != src->h ||
+  if (dst->d_w != src->d_w || dst->d_h != src->d_h ||
       dst->x_chroma_shift != src->x_chroma_shift ||
       dst->y_chroma_shift != src->y_chroma_shift ||
       dst->fmt != src->fmt || input_shift < 0) {
@@ -293,12 +293,12 @@ static void highbd_img_upshift(vpx_image_t *dst, vpx_image_t *src,
       break;
   }
   for (plane = 0; plane < 3; plane++) {
-    int w = src->w;
-    int h = src->h;
+    int w = src->d_w;
+    int h = src->d_h;
     int x, y;
     if (plane) {
-      w >>= src->x_chroma_shift;
-      h >>= src->y_chroma_shift;
+      w = (w + src->x_chroma_shift) >> src->x_chroma_shift;
+      h = (h + src->y_chroma_shift) >> src->y_chroma_shift;
     }
     for (y = 0; y < h; y++) {
       uint16_t *p_src =
@@ -316,7 +316,7 @@ static void lowbd_img_upshift(vpx_image_t *dst, vpx_image_t *src,
   // Note the offset is 1 less than half.
   const int offset = input_shift > 0 ? (1 << (input_shift - 1)) - 1 : 0;
   int plane;
-  if (dst->w != src->w || dst->h != src->h ||
+  if (dst->d_w != src->d_w || dst->d_h != src->d_h ||
       dst->x_chroma_shift != src->x_chroma_shift ||
       dst->y_chroma_shift != src->y_chroma_shift ||
       dst->fmt != src->fmt + VPX_IMG_FMT_HIGHBITDEPTH ||
@@ -334,8 +334,8 @@ static void lowbd_img_upshift(vpx_image_t *dst, vpx_image_t *src,
       break;
   }
   for (plane = 0; plane < 3; plane++) {
-    int w = src->w;
-    int h = src->h;
+    int w = src->d_w;
+    int h = src->d_h;
     int x, y;
     if (plane) {
       w = (w + src->x_chroma_shift) >> src->x_chroma_shift;
@@ -384,8 +384,8 @@ void vpx_img_truncate_16_to_8(vpx_image_t *dst, vpx_image_t *src) {
     int h = src->d_h;
     int x, y;
     if (plane) {
-      w >>= src->x_chroma_shift;
-      h >>= src->y_chroma_shift;
+      w = (w + src->x_chroma_shift) >> src->x_chroma_shift;
+      h = (h + src->y_chroma_shift) >> src->y_chroma_shift;
     }
     for (y = 0; y < h; y++) {
       uint16_t *p_src =
