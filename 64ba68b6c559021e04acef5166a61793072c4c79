@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//TEA\u003d",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-15T10:03:30Z",
+      "side": 1,
+      "message": "rd_cost_XXX would make more sense; you\u0027ll want to prefix them with vp9 as they\u0027re used across modules.",
+      "revId": "64ba68b6c559021e04acef5166a61793072c4c79",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//TD8\u003d",
+        "filename": "vp9/encoder/vp9_rd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-15T10:03:30Z",
+      "side": 1,
+      "message": "you should add a note about the difference between these two, it seems like you need both styles",
+      "revId": "64ba68b6c559021e04acef5166a61793072c4c79",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
