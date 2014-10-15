@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//TBM\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 406,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-10-15T18:27:24Z",
+      "side": 1,
+      "message": "how about convert the section to \"ToDo\" if this will be experimented later, or just removed?",
+      "revId": "ec3c224b0dfaae17848da9df8293a075be635f0b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//TBE\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 492,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-10-15T18:27:24Z",
+      "side": 1,
+      "message": "So, should intra_cost_penalty be scaled/adapted based on block size in general?",
+      "revId": "ec3c224b0dfaae17848da9df8293a075be635f0b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//TBI\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 716,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-10-15T18:27:24Z",
+      "side": 1,
+      "message": "How about convert this to TODO, or remove?",
+      "revId": "ec3c224b0dfaae17848da9df8293a075be635f0b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
