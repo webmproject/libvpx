@@ -275,6 +275,12 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->inter_mode_mask[BLOCK_32X64] = INTER_NEAREST_NEW_ZERO;
     sf->inter_mode_mask[BLOCK_64X32] = INTER_NEAREST_NEW_ZERO;
     sf->inter_mode_mask[BLOCK_64X64] = INTER_NEAREST_NEW_ZERO;
+
+    if (MIN(cm->width, cm->height) >= 720)
+      sf->partition_search_breakout_dist_thr = (1 << 25);
+    else
+      sf->partition_search_breakout_dist_thr = (1 << 23);
+    sf->partition_search_breakout_rate_thr = 200;
   }
 
   if (speed >= 6) {
