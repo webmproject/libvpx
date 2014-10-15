@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//S/g\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 406,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-10-15T19:08:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//TBM\u003d",
+      "revId": "ec3c224b0dfaae17848da9df8293a075be635f0b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//TBE\u003d",
         "filename": "vp9/encoder/vp9_pickmode.c",
         "patchSetId": 2
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//S/U\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 492,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-10-15T19:08:47Z",
+      "side": 1,
+      "message": "maybe, but just wanted to change behavior smaller block sizes for now.",
+      "parentUuid": "AAAAdn//TBE\u003d",
+      "revId": "ec3c224b0dfaae17848da9df8293a075be635f0b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//TBI\u003d",
         "filename": "vp9/encoder/vp9_pickmode.c",
         "patchSetId": 2
@@ -47,6 +83,24 @@
       "writtenOn": "2014-10-15T18:27:24Z",
       "side": 1,
       "message": "How about convert this to TODO, or remove?",
+      "revId": "ec3c224b0dfaae17848da9df8293a075be635f0b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//S/c\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 716,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-10-15T19:08:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//TBI\u003d",
       "revId": "ec3c224b0dfaae17848da9df8293a075be635f0b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
