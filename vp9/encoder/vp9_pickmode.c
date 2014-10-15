@@ -486,8 +486,12 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   // var_y and sse_y are saved to be used in skipping checking
   unsigned int var_y = UINT_MAX;
   unsigned int sse_y = UINT_MAX;
+  // Reduce the intra cost penalty for small blocks (<=16x16).
+  const int reduction_fac =
+      (cpi->sf.partition_search_type == VAR_BASED_PARTITION &&
+       bsize <= BLOCK_16X16) ? 4 : 1;
   const int intra_cost_penalty = vp9_get_intra_cost_penalty(
-      cm->base_qindex, cm->y_dc_delta_q, cm->bit_depth);
+      cm->base_qindex, cm->y_dc_delta_q, cm->bit_depth) / reduction_fac;
   const int64_t inter_mode_thresh = RDCOST(x->rdmult, x->rddiv,
                                            intra_cost_penalty, 0);
   const int intra_mode_cost = 50;
