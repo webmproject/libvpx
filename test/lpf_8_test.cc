@@ -23,6 +23,8 @@
 #include "vp9/common/vp9_entropy.h"
 #include "vpx/vpx_integer.h"
 
+#define MAX_LOOP_FILTER 63
+
 using libvpx_test::ACMRandom;
 
 namespace {
@@ -51,8 +53,9 @@ typedef void (*dual_loop_op_t)(uint8_t *s, int p, const uint8_t *blimit0,
                                const uint8_t *thresh1);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-typedef std::tr1::tuple<loop_op_t, loop_op_t, int> loop8_param_t;
-typedef std::tr1::tuple<dual_loop_op_t, dual_loop_op_t, int> dualloop8_param_t;
+typedef std::tr1::tuple<loop_op_t, loop_op_t, vpx_bit_depth_t> loop8_param_t;
+typedef std::tr1::tuple<dual_loop_op_t, dual_loop_op_t,
+                        vpx_bit_depth_t> dualloop8_param_t;
 
 #if HAVE_SSE2
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -119,7 +122,7 @@ class Loop8Test6Param : public ::testing::TestWithParam<loop8_param_t> {
   virtual void TearDown() { libvpx_test::ClearSystemState(); }
 
  protected:
-  int bit_depth_;
+  vpx_bit_depth_t bit_depth_;
   int mask_;
   loop_op_t loopfilter_op_;
   loop_op_t ref_loopfilter_op_;
@@ -138,7 +141,7 @@ class Loop8Test9Param : public ::testing::TestWithParam<dualloop8_param_t> {
   virtual void TearDown() { libvpx_test::ClearSystemState(); }
 
  protected:
-  int bit_depth_;
+  vpx_bit_depth_t bit_depth_;
   int mask_;
   dual_loop_op_t loopfilter_op_;
   dual_loop_op_t ref_loopfilter_op_;
@@ -148,7 +151,7 @@ TEST_P(Loop8Test6Param, OperationCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   const int count_test_block = number_of_iterations;
 #if CONFIG_VP9_HIGHBITDEPTH
-  int32_t bd = bit_depth_;
+  vpx_bit_depth_t bd = bit_depth_;
   DECLARE_ALIGNED_ARRAY(16, uint16_t, s, kNumCoeffs);
   DECLARE_ALIGNED_ARRAY(16, uint16_t, ref_s, kNumCoeffs);
 #else
@@ -160,11 +163,18 @@ TEST_P(Loop8Test6Param, OperationCheck) {
   for (int i = 0; i < count_test_block; ++i) {
     int err_count = 0;
     uint8_t tmp = rnd.Rand8();
+    // mblim  <= 3 * MAX_LOOP_FILTER + 4
+    while (tmp > 3 * MAX_LOOP_FILTER + 4) {
+      tmp = rnd.Rand8();
+    }
     DECLARE_ALIGNED(16, const uint8_t, blimit[16]) = {
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp,
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp
     };
     tmp = rnd.Rand8();
+    while (tmp > MAX_LOOP_FILTER) {  // lim  <= MAX_LOOP_FILTER
+      tmp = rnd.Rand8();
+    }
     DECLARE_ALIGNED(16, const uint8_t, limit[16])  = {
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp,
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp
@@ -211,7 +221,7 @@ TEST_P(Loop8Test6Param, OperationCheck) {
     ASM_REGISTER_STATE_CHECK(
         loopfilter_op_(s + 8 + p * 8, p, blimit, limit, thresh, count, bd));
 #else
-    ref_loopfilter_op_(ref_s+8+p*8, p, blimit, limit, thresh, count);
+    ref_loopfilter_op_(ref_s + 8 + p * 8, p, blimit, limit, thresh, count);
     ASM_REGISTER_STATE_CHECK(
         loopfilter_op_(s + 8 + p * 8, p, blimit, limit, thresh, count));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
@@ -234,7 +244,7 @@ TEST_P(Loop8Test6Param, ValueCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   const int count_test_block = number_of_iterations;
 #if CONFIG_VP9_HIGHBITDEPTH
-  const int32_t bd = bit_depth_;
+  vpx_bit_depth_t bd = bit_depth_;
   DECLARE_ALIGNED_ARRAY(16, uint16_t, s, kNumCoeffs);
   DECLARE_ALIGNED_ARRAY(16, uint16_t, ref_s, kNumCoeffs);
 #else
@@ -246,11 +256,17 @@ TEST_P(Loop8Test6Param, ValueCheck) {
   for (int i = 0; i < count_test_block; ++i) {
     int err_count = 0;
     uint8_t tmp = rnd.Rand8();
+    while (tmp > 3*MAX_LOOP_FILTER + 4) {  // mblim  <= 3*MAX_LOOP_FILTER + 4
+      tmp = rnd.Rand8();
+    }
     DECLARE_ALIGNED(16, const uint8_t, blimit[16]) = {
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp,
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp
     };
     tmp = rnd.Rand8();
+    while (tmp > MAX_LOOP_FILTER) {  // lim  <= MAX_LOOP_FILTER
+      tmp = rnd.Rand8();
+    }
     DECLARE_ALIGNED(16, const uint8_t, limit[16])  = {
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp,
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp
@@ -271,7 +287,7 @@ TEST_P(Loop8Test6Param, ValueCheck) {
     ASM_REGISTER_STATE_CHECK(
         loopfilter_op_(s + 8 + p * 8, p, blimit, limit, thresh, count, bd));
 #else
-    ref_loopfilter_op_(ref_s+8+p*8, p, blimit, limit, thresh, count);
+    ref_loopfilter_op_(ref_s + 8 + p * 8, p, blimit, limit, thresh, count);
     ASM_REGISTER_STATE_CHECK(
         loopfilter_op_(s + 8 + p * 8, p, blimit, limit, thresh, count));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
@@ -293,7 +309,7 @@ TEST_P(Loop8Test9Param, OperationCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   const int count_test_block = number_of_iterations;
 #if CONFIG_VP9_HIGHBITDEPTH
-  const int32_t bd = bit_depth_;
+  vpx_bit_depth_t bd = bit_depth_;
   DECLARE_ALIGNED_ARRAY(16, uint16_t, s, kNumCoeffs);
   DECLARE_ALIGNED_ARRAY(16, uint16_t, ref_s, kNumCoeffs);
 #else
@@ -305,11 +321,19 @@ TEST_P(Loop8Test9Param, OperationCheck) {
   for (int i = 0; i < count_test_block; ++i) {
     int err_count = 0;
     uint8_t tmp = rnd.Rand8();
+    // mblim  <= 3 * MAX_LOOP_FILTER + 4
+    while (tmp > 3 * MAX_LOOP_FILTER + 4) {
+      tmp = rnd.Rand8();
+    }
     DECLARE_ALIGNED(16, const uint8_t, blimit0[16]) = {
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp,
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp
     };
     tmp = rnd.Rand8();
+    // lim  <= MAX_LOOP_FILTER
+    while (tmp > MAX_LOOP_FILTER) {
+      tmp = rnd.Rand8();
+    }
     DECLARE_ALIGNED(16, const uint8_t, limit0[16])  = {
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp,
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp
@@ -320,11 +344,18 @@ TEST_P(Loop8Test9Param, OperationCheck) {
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp
     };
     tmp = rnd.Rand8();
+    // mblim  <= 3 * MAX_LOOP_FILTER + 4
+    while (tmp > 3 * MAX_LOOP_FILTER + 4) {
+      tmp = rnd.Rand8();
+    }
     DECLARE_ALIGNED(16, const uint8_t, blimit1[16]) = {
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp,
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp
     };
     tmp = rnd.Rand8();
+    while (tmp > MAX_LOOP_FILTER) {  // lim  <= MAX_LOOP_FILTER
+      tmp = rnd.Rand8();
+    }
     DECLARE_ALIGNED(16, const uint8_t, limit1[16])  = {
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp,
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp
@@ -407,11 +438,18 @@ TEST_P(Loop8Test9Param, ValueCheck) {
   for (int i = 0; i < count_test_block; ++i) {
     int err_count = 0;
     uint8_t tmp = rnd.Rand8();
+    // mblim  <= 3 * MAX_LOOP_FILTER + 4
+    while (tmp > 3 * MAX_LOOP_FILTER + 4) {
+      tmp = rnd.Rand8();
+    }
     DECLARE_ALIGNED(16, const uint8_t, blimit0[16]) = {
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp,
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp
     };
     tmp = rnd.Rand8();
+    while (tmp > MAX_LOOP_FILTER) {  // lim  <= MAX_LOOP_FILTER
+      tmp = rnd.Rand8();
+    }
     DECLARE_ALIGNED(16, const uint8_t, limit0[16])  = {
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp,
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp
@@ -422,11 +460,17 @@ TEST_P(Loop8Test9Param, ValueCheck) {
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp
     };
     tmp = rnd.Rand8();
+    while (tmp > 3 * MAX_LOOP_FILTER + 4) {  // mblim  <= 3*MAX_LOOP_FILTER + 4
+      tmp = rnd.Rand8();
+    }
     DECLARE_ALIGNED(16, const uint8_t, blimit1[16]) = {
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp,
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp
     };
     tmp = rnd.Rand8();
+    while (tmp > MAX_LOOP_FILTER) {  // lim  <= MAX_LOOP_FILTER
+      tmp = rnd.Rand8();
+    }
     DECLARE_ALIGNED(16, const uint8_t, limit1[16])  = {
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp,
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp
@@ -442,7 +486,7 @@ TEST_P(Loop8Test9Param, ValueCheck) {
       ref_s[j] = s[j];
     }
 #if CONFIG_VP9_HIGHBITDEPTH
-    const int32_t bd = bit_depth_;
+    vpx_bit_depth_t bd = bit_depth_;
     ref_loopfilter_op_(ref_s + 8 + p * 8, p, blimit0, limit0, thresh0,
                        blimit1, limit1, thresh1, bd);
     ASM_REGISTER_STATE_CHECK(
@@ -477,48 +521,51 @@ INSTANTIATE_TEST_CASE_P(
     SSE2_C_COMPARE_SINGLE, Loop8Test6Param,
     ::testing::Values(
         make_tuple(&vp9_highbd_lpf_horizontal_4_sse2,
-                   &vp9_highbd_lpf_horizontal_4_c, 8),
+                   &vp9_highbd_lpf_horizontal_4_c, VPX_BITS_8),
         make_tuple(&vp9_highbd_lpf_vertical_4_sse2,
-                   &vp9_highbd_lpf_vertical_4_c, 8),
+                   &vp9_highbd_lpf_vertical_4_c, VPX_BITS_8),
         make_tuple(&vp9_highbd_lpf_horizontal_8_sse2,
-                   &vp9_highbd_lpf_horizontal_8_c, 8),
+                   &vp9_highbd_lpf_horizontal_8_c, VPX_BITS_8),
         make_tuple(&vp9_highbd_lpf_horizontal_16_sse2,
-                   &vp9_highbd_lpf_horizontal_16_c, 8),
+                   &vp9_highbd_lpf_horizontal_16_c, VPX_BITS_8),
         make_tuple(&vp9_highbd_lpf_vertical_8_sse2,
-                   &vp9_highbd_lpf_vertical_8_c, 8),
+                   &vp9_highbd_lpf_vertical_8_c, VPX_BITS_8),
         make_tuple(&wrapper_vertical_16_sse2,
-                   &wrapper_vertical_16_c, 8),
+                   &wrapper_vertical_16_c, VPX_BITS_8),
         make_tuple(&vp9_highbd_lpf_horizontal_4_sse2,
-                   &vp9_highbd_lpf_horizontal_4_c, 10),
+                   &vp9_highbd_lpf_horizontal_4_c, VPX_BITS_10),
         make_tuple(&vp9_highbd_lpf_vertical_4_sse2,
-                   &vp9_highbd_lpf_vertical_4_c, 10),
+                   &vp9_highbd_lpf_vertical_4_c, VPX_BITS_10),
         make_tuple(&vp9_highbd_lpf_horizontal_8_sse2,
-                   &vp9_highbd_lpf_horizontal_8_c, 10),
+                   &vp9_highbd_lpf_horizontal_8_c, VPX_BITS_10),
         make_tuple(&vp9_highbd_lpf_horizontal_16_sse2,
-                   &vp9_highbd_lpf_horizontal_16_c, 10),
+                   &vp9_highbd_lpf_horizontal_16_c, VPX_BITS_10),
         make_tuple(&vp9_highbd_lpf_vertical_8_sse2,
-                   &vp9_highbd_lpf_vertical_8_c, 10),
+                   &vp9_highbd_lpf_vertical_8_c, VPX_BITS_10),
         make_tuple(&wrapper_vertical_16_sse2,
-                   &wrapper_vertical_16_c, 10),
+                   &wrapper_vertical_16_c, VPX_BITS_10),
         make_tuple(&vp9_highbd_lpf_horizontal_4_sse2,
-                   &vp9_highbd_lpf_horizontal_4_c, 12),
+                   &vp9_highbd_lpf_horizontal_4_c, VPX_BITS_12),
         make_tuple(&vp9_highbd_lpf_vertical_4_sse2,
-                   &vp9_highbd_lpf_vertical_4_c, 12),
+                   &vp9_highbd_lpf_vertical_4_c, VPX_BITS_12),
         make_tuple(&vp9_highbd_lpf_horizontal_8_sse2,
-                   &vp9_highbd_lpf_horizontal_8_c, 12),
+                   &vp9_highbd_lpf_horizontal_8_c, VPX_BITS_12),
         make_tuple(&vp9_highbd_lpf_horizontal_16_sse2,
-                   &vp9_highbd_lpf_horizontal_16_c, 12),
+                   &vp9_highbd_lpf_horizontal_16_c, VPX_BITS_12),
         make_tuple(&vp9_highbd_lpf_vertical_8_sse2,
-                   &vp9_highbd_lpf_vertical_8_c, 12),
+                   &vp9_highbd_lpf_vertical_8_c, VPX_BITS_12),
         make_tuple(&wrapper_vertical_16_sse2,
-                   &wrapper_vertical_16_c, 12)));
+                   &wrapper_vertical_16_c, VPX_BITS_12)));
 #else
 INSTANTIATE_TEST_CASE_P(
     SSE2_C_COMPARE_SINGLE, Loop8Test6Param,
     ::testing::Values(
-        make_tuple(&vp9_lpf_horizontal_8_sse2, &vp9_lpf_horizontal_8_c, 8),
-        make_tuple(&vp9_lpf_horizontal_16_sse2, &vp9_lpf_horizontal_16_c, 8),
-        make_tuple(&vp9_lpf_vertical_8_sse2, &vp9_lpf_vertical_8_c, 8)));
+        make_tuple(&vp9_lpf_horizontal_8_sse2, &vp9_lpf_horizontal_8_c,
+                   VPX_BITS_8),
+        make_tuple(&vp9_lpf_horizontal_16_sse2, &vp9_lpf_horizontal_16_c,
+                   VPX_BITS_8),
+        make_tuple(&vp9_lpf_vertical_8_sse2, &vp9_lpf_vertical_8_c,
+                   VPX_BITS_8)));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif
 
@@ -528,60 +575,61 @@ INSTANTIATE_TEST_CASE_P(
     SSE2_C_COMPARE_DUAL, Loop8Test6Param,
     ::testing::Values(
         make_tuple(&wrapper_vertical_16_dual_sse2,
-                   &wrapper_vertical_16_dual_c, 8),
+                   &wrapper_vertical_16_dual_c, VPX_BITS_8),
         make_tuple(&wrapper_vertical_16_dual_sse2,
-                   &wrapper_vertical_16_dual_c, 10),
+                   &wrapper_vertical_16_dual_c, VPX_BITS_10),
         make_tuple(&wrapper_vertical_16_dual_sse2,
-                   &wrapper_vertical_16_dual_c, 12)));
+                   &wrapper_vertical_16_dual_c, VPX_BITS_12)));
 #else
 INSTANTIATE_TEST_CASE_P(
     SSE2_C_COMPARE_DUAL, Loop8Test6Param,
     ::testing::Values(
-        make_tuple(&wrapper_vertical_16_sse2, &wrapper_vertical_16_c, 8)));
+        make_tuple(&wrapper_vertical_16_sse2, &wrapper_vertical_16_c,
+                   VPX_BITS_8)));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // HAVE_SSE2
 
 #if HAVE_SSE2
 #if CONFIG_VP9_HIGHBITDEPTH
 INSTANTIATE_TEST_CASE_P(
-    SSE_C_COMPARE_DUAL, Loop8Test9Param,
+    SSE2_C_COMPARE_DUAL, Loop8Test9Param,
     ::testing::Values(
         make_tuple(&vp9_highbd_lpf_horizontal_4_dual_sse2,
-                   &vp9_highbd_lpf_horizontal_4_dual_c, 8),
+                   &vp9_highbd_lpf_horizontal_4_dual_c, VPX_BITS_8),
         make_tuple(&vp9_highbd_lpf_horizontal_8_dual_sse2,
-                   &vp9_highbd_lpf_horizontal_8_dual_c, 8),
+                   &vp9_highbd_lpf_horizontal_8_dual_c, VPX_BITS_8),
         make_tuple(&vp9_highbd_lpf_vertical_4_dual_sse2,
-                   &vp9_highbd_lpf_vertical_4_dual_c, 8),
+                   &vp9_highbd_lpf_vertical_4_dual_c, VPX_BITS_8),
         make_tuple(&vp9_highbd_lpf_vertical_8_dual_sse2,
-                   &vp9_highbd_lpf_vertical_8_dual_c, 8),
+                   &vp9_highbd_lpf_vertical_8_dual_c, VPX_BITS_8),
         make_tuple(&vp9_highbd_lpf_horizontal_4_dual_sse2,
-                   &vp9_highbd_lpf_horizontal_4_dual_c, 10),
+                   &vp9_highbd_lpf_horizontal_4_dual_c, VPX_BITS_10),
         make_tuple(&vp9_highbd_lpf_horizontal_8_dual_sse2,
-                   &vp9_highbd_lpf_horizontal_8_dual_c, 10),
+                   &vp9_highbd_lpf_horizontal_8_dual_c, VPX_BITS_10),
         make_tuple(&vp9_highbd_lpf_vertical_4_dual_sse2,
-                   &vp9_highbd_lpf_vertical_4_dual_c, 10),
+                   &vp9_highbd_lpf_vertical_4_dual_c, VPX_BITS_10),
         make_tuple(&vp9_highbd_lpf_vertical_8_dual_sse2,
-                   &vp9_highbd_lpf_vertical_8_dual_c, 10),
+                   &vp9_highbd_lpf_vertical_8_dual_c, VPX_BITS_10),
         make_tuple(&vp9_highbd_lpf_horizontal_4_dual_sse2,
-                   &vp9_highbd_lpf_horizontal_4_dual_c, 12),
+                   &vp9_highbd_lpf_horizontal_4_dual_c, VPX_BITS_12),
         make_tuple(&vp9_highbd_lpf_horizontal_8_dual_sse2,
-                   &vp9_highbd_lpf_horizontal_8_dual_c, 12),
+                   &vp9_highbd_lpf_horizontal_8_dual_c, VPX_BITS_12),
         make_tuple(&vp9_highbd_lpf_vertical_4_dual_sse2,
-                   &vp9_highbd_lpf_vertical_4_dual_c, 12),
+                   &vp9_highbd_lpf_vertical_4_dual_c, VPX_BITS_12),
         make_tuple(&vp9_highbd_lpf_vertical_8_dual_sse2,
-                   &vp9_highbd_lpf_vertical_8_dual_c, 12)));
+                   &vp9_highbd_lpf_vertical_8_dual_c, VPX_BITS_12)));
 #else
 INSTANTIATE_TEST_CASE_P(
-    SSE_C_COMPARE_DUAL, Loop8Test9Param,
+    SSE2_C_COMPARE_DUAL, Loop8Test9Param,
     ::testing::Values(
         make_tuple(&vp9_lpf_horizontal_4_dual_sse2,
-                   &vp9_lpf_horizontal_4_dual_c, 8),
+                   &vp9_lpf_horizontal_4_dual_c, VPX_BITS_8),
         make_tuple(&vp9_lpf_horizontal_8_dual_sse2,
-                   &vp9_lpf_horizontal_8_dual_c, 8),
+                   &vp9_lpf_horizontal_8_dual_c, VPX_BITS_8),
         make_tuple(&vp9_lpf_vertical_4_dual_sse2,
-                   &vp9_lpf_vertical_4_dual_c, 8),
+                   &vp9_lpf_vertical_4_dual_c, VPX_BITS_8),
         make_tuple(&vp9_lpf_vertical_8_dual_sse2,
-                   &vp9_lpf_vertical_8_dual_c, 8)));
+                   &vp9_lpf_vertical_8_dual_c, VPX_BITS_8)));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif
 }  // namespace
