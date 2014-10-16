@@ -1500,9 +1500,7 @@ void vp9_rc_set_gf_max_interval(const VP9_COMP *const cpi,
   rc->max_gf_interval = 16;
 
   // Extended interval for genuinely static scenes
-  rc->static_scene_max_gf_interval = oxcf->key_freq >> 1;
-  if (rc->static_scene_max_gf_interval > (MAX_LAG_BUFFERS * 2))
-    rc->static_scene_max_gf_interval = MAX_LAG_BUFFERS * 2;
+  rc->static_scene_max_gf_interval = MAX_LAG_BUFFERS * 2;
 
   if (is_altref_enabled(cpi)) {
     if (rc->static_scene_max_gf_interval > oxcf->lag_in_frames - 1)
