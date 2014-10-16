@@ -719,6 +719,9 @@ void vp9_temporal_filter(VP9_COMP *cpi, int distance) {
           ++frame_used;
         }
       }
+      cm->mi = cm->mip + cm->mi_stride + 1;
+      cpi->mb.e_mbd.mi = cm->mi;
+      cpi->mb.e_mbd.mi[0].src_mi = &cpi->mb.e_mbd.mi[0];
     } else {
       // ARF is produced at the native frame size and resized when coded.
 #if CONFIG_VP9_HIGHBITDEPTH

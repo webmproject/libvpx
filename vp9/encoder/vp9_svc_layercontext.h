@@ -50,6 +50,16 @@ typedef struct {
 
   int spatial_layer_to_encode;
 
+  // Workaround for multiple frame contexts
+  enum {
+    ENCODED = 0,
+    ENCODING,
+    NEED_TO_ENCODE
+  }encode_empty_frame_state;
+  struct lookahead_entry empty_frame;
+  int empty_frame_width;
+  int empty_frame_height;
+
   // Store scaled source frames to be used for temporal filter to generate
   // a alt ref frame.
   YV12_BUFFER_CONFIG scaled_frames[MAX_LAG_BUFFERS];
