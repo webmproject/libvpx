@@ -114,6 +114,7 @@ VP9_CX_SRCS-$(HAVE_SSE3) += encoder/x86/vp9_sad_sse3.asm
 VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_quantize_sse2.c
 ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_highbd_quantize_intrin_sse2.c
+VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_highbd_sad4d_sse2.asm
 endif
 
 ifeq ($(CONFIG_USE_X86INC),yes)
@@ -123,6 +124,9 @@ VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_sad_sse2.asm
 VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_subtract_sse2.asm
 VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_variance_sse2.c
 VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_subpel_variance.asm
+ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
+VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_highbd_sad_sse2.asm
+endif
 endif
 
 ifeq ($(ARCH_X86_64),yes)
