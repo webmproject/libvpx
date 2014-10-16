@@ -522,6 +522,13 @@ INSTANTIATE_TEST_CASE_P(
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif
 
+#if HAVE_AVX2 && (!CONFIG_VP9_HIGHBITDEPTH)
+INSTANTIATE_TEST_CASE_P(
+    AVX2_C_COMPARE_SINGLE, Loop8Test6Param,
+    ::testing::Values(
+        make_tuple(&vp9_lpf_horizontal_16_avx2, &vp9_lpf_horizontal_16_c, 8)));
+#endif
+
 #if HAVE_SSE2
 #if CONFIG_VP9_HIGHBITDEPTH
 INSTANTIATE_TEST_CASE_P(
@@ -584,4 +591,5 @@ INSTANTIATE_TEST_CASE_P(
                    &vp9_lpf_vertical_8_dual_c, 8)));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif
+
 }  // namespace
