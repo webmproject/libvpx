@@ -533,8 +533,19 @@ static void choose_partitioning(VP9_COMP *cpi,
         int sum = 0;
 
         if (x_idx < pixels_wide && y_idx < pixels_high) {
-          int s_avg = vp9_avg_8x8(s + y_idx * sp + x_idx, sp);
-          int d_avg = vp9_avg_8x8(d + y_idx * dp + x_idx, dp);
+          int s_avg, d_avg;
+#if CONFIG_VP9_HIGHBITDEPTH
+          if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+            s_avg = vp9_highbd_avg_8x8(s + y_idx * sp + x_idx, sp);
+            d_avg = vp9_highbd_avg_8x8(d + y_idx * dp + x_idx, dp);
+          } else {
+            s_avg = vp9_avg_8x8(s + y_idx * sp + x_idx, sp);
+            d_avg = vp9_avg_8x8(d + y_idx * dp + x_idx, dp);
+          }
+#else
+          s_avg = vp9_avg_8x8(s + y_idx * sp + x_idx, sp);
+          d_avg = vp9_avg_8x8(d + y_idx * dp + x_idx, dp);
+#endif
           sum = s_avg - d_avg;
           sse = sum * sum;
         }
