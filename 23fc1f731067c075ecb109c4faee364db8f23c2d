@@ -16,6 +16,24 @@
       "revId": "23fc1f731067c075ecb109c4faee364db8f23c2d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//S68\u003d",
+        "filename": "tools_common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-10-16T00:27:55Z",
+      "side": 1,
+      "message": "Won\u0027t work since src-\u003ex_chroma_shift can be 0.",
+      "parentUuid": "AAAAdn//TAg\u003d",
+      "revId": "23fc1f731067c075ecb109c4faee364db8f23c2d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
