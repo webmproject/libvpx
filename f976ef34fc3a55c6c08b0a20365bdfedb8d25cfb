@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//S4U\u003d",
+        "filename": "vp9/encoder/x86/vp9_denoiser_sse2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 360,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-16T09:10:20Z",
+      "side": 1,
+      "message": "you\u0027ll have other issues on windows with constructs like this, maybe make this dependent on the gcc warning fix, then this commit might have a change of actually fixing the build on msvs",
+      "revId": "f976ef34fc3a55c6c08b0a20365bdfedb8d25cfb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
