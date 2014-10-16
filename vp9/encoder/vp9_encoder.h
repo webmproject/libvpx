@@ -481,6 +481,15 @@ static INLINE int get_token_alloc(int mb_rows, int mb_cols) {
   return mb_rows * mb_cols * (16 * 16 * 3 + 4);
 }
 
+// Get the allocated token size for a tile. It does the same calculation as in
+// the frame token allocation.
+static INLINE int allocated_tokens(TileInfo tile) {
+  int tile_mb_rows = (tile.mi_row_end - tile.mi_row_start + 1) >> 1;
+  int tile_mb_cols = (tile.mi_col_end - tile.mi_col_start + 1) >> 1;
+
+  return get_token_alloc(tile_mb_rows, tile_mb_cols);
+}
+
 int vp9_get_y_sse(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b);
 #if CONFIG_VP9_HIGHBITDEPTH
 int vp9_highbd_get_y_sse(const YV12_BUFFER_CONFIG *a,
