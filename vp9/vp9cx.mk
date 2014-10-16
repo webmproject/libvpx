@@ -101,6 +101,9 @@ VP9_CX_SRCS-$(HAVE_AVX2) += encoder/x86/vp9_sad4d_intrin_avx2.c
 VP9_CX_SRCS-$(HAVE_AVX2) += encoder/x86/vp9_subpel_variance_impl_intrin_avx2.c
 VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_temporal_filter_apply_sse2.asm
 VP9_CX_SRCS-$(HAVE_SSE3) += encoder/x86/vp9_sad_sse3.asm
+ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
+VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_highbd_sad4d_sse2.asm
+endif
 
 ifeq ($(CONFIG_USE_X86INC),yes)
 VP9_CX_SRCS-$(HAVE_MMX) += encoder/x86/vp9_dct_mmx.asm
@@ -109,6 +112,9 @@ VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_sad_sse2.asm
 VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_subtract_sse2.asm
 VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_variance_sse2.c
 VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_subpel_variance.asm
+ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
+VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_highbd_sad_sse2.asm
+endif
 endif
 
 ifeq ($(ARCH_X86_64),yes)
