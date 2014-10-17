@@ -34,6 +34,24 @@
       "revId": "61b17d18898ecf8f25dac8bc792fc406beeb35b7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//SpQ\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 940,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-10-17T18:28:44Z",
+      "side": 1,
+      "message": "Each tile has sb_cols/(# of tiles) super_blocks. But, the last tile may have less pixels for some extreme image widths. Will change the tile token allocation according to # of pixel in the tile to cover all cases. Thanks for pointing out it.",
+      "parentUuid": "AAAAdn//SvM\u003d",
+      "revId": "61b17d18898ecf8f25dac8bc792fc406beeb35b7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
