@@ -16,6 +16,24 @@
       "revId": "f976ef34fc3a55c6c08b0a20365bdfedb8d25cfb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Su8\u003d",
+        "filename": "vp9/encoder/x86/vp9_denoiser_sse2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 360,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2014-10-17T03:53:13Z",
+      "side": 1,
+      "message": "I will upload the patch for gcc issue first. The windows build issue will be based on that and finally do the code style change.",
+      "parentUuid": "AAAAdn//S4U\u003d",
+      "revId": "f976ef34fc3a55c6c08b0a20365bdfedb8d25cfb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
