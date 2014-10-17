@@ -232,6 +232,8 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
       cm->frame_refs[0].buf->corrupted = 1;
   }
 
+  pbi->ready_for_new_data = 0;
+
   // Check if the previous frame was a frame without any references to it.
   if (cm->new_fb_idx >= 0 && cm->frame_bufs[cm->new_fb_idx].ref_count == 0)
     cm->release_fb_cb(cm->cb_priv,
@@ -279,8 +281,6 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
     cm->current_video_frame++;
   }
 
-  pbi->ready_for_new_data = 0;
-
   cm->error.setjmp = 0;
   return retcode;
 }
@@ -296,11 +296,11 @@ int vp9_get_raw_frame(VP9Decoder *pbi, YV12_BUFFER_CONFIG *sd,
   if (pbi->ready_for_new_data == 1)
     return ret;
 
+  pbi->ready_for_new_data = 1;
+
   /* no raw frame to show!!! */
   if (!cm->show_frame)
     return ret;
-
-  pbi->ready_for_new_data = 1;
 
 #if CONFIG_VP9_POSTPROC
   if (!cm->show_existing_frame) {
