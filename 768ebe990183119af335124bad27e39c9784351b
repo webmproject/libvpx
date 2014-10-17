@@ -34,6 +34,24 @@
       "revId": "768ebe990183119af335124bad27e39c9784351b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Srw\u003d",
+        "filename": "vp9/encoder/vp9_speed_features.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-10-17T15:47:16Z",
+      "side": 1,
+      "message": "If we do not have dependency on the value, I suggester that we either just remove the values, or at least make all of them have consistent values.",
+      "parentUuid": "AAAAdn//Su0\u003d",
+      "revId": "768ebe990183119af335124bad27e39c9784351b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
