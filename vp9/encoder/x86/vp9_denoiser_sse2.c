@@ -41,13 +41,13 @@ static INLINE int sum_diff_16x1(__m128i acc_diff) {
 static INLINE __m128i vp9_denoiser_16x1_sse2(const uint8_t *sig,
                                              const uint8_t *mc_running_avg_y,
                                              uint8_t *running_avg_y,
-                                             const __m128i k_0,
-                                             const __m128i k_4,
-                                             const __m128i k_8,
-                                             const __m128i k_16,
-                                             const __m128i l3,
-                                             const __m128i l32,
-                                             const __m128i l21,
+                                             const __m128i *k_0,
+                                             const __m128i *k_4,
+                                             const __m128i *k_8,
+                                             const __m128i *k_16,
+                                             const __m128i *l3,
+                                             const __m128i *l32,
+                                             const __m128i *l21,
                                              __m128i acc_diff) {
   // Calculate differences
   const __m128i v_sig = _mm_loadu_si128((const __m128i *)(&sig[0]));
@@ -57,24 +57,24 @@ static INLINE __m128i vp9_denoiser_16x1_sse2(const uint8_t *sig,
   const __m128i pdiff = _mm_subs_epu8(v_mc_running_avg_y, v_sig);
   const __m128i ndiff = _mm_subs_epu8(v_sig, v_mc_running_avg_y);
   // Obtain the sign. FF if diff is negative.
-  const __m128i diff_sign = _mm_cmpeq_epi8(pdiff, k_0);
+  const __m128i diff_sign = _mm_cmpeq_epi8(pdiff, *k_0);
   // Clamp absolute difference to 16 to be used to get mask. Doing this
   // allows us to use _mm_cmpgt_epi8, which operates on signed byte.
   const __m128i clamped_absdiff = _mm_min_epu8(
-                                  _mm_or_si128(pdiff, ndiff), k_16);
+                                  _mm_or_si128(pdiff, ndiff), *k_16);
   // Get masks for l2 l1 and l0 adjustments.
-  const __m128i mask2 = _mm_cmpgt_epi8(k_16, clamped_absdiff);
-  const __m128i mask1 = _mm_cmpgt_epi8(k_8, clamped_absdiff);
-  const __m128i mask0 = _mm_cmpgt_epi8(k_4, clamped_absdiff);
+  const __m128i mask2 = _mm_cmpgt_epi8(*k_16, clamped_absdiff);
+  const __m128i mask1 = _mm_cmpgt_epi8(*k_8, clamped_absdiff);
+  const __m128i mask0 = _mm_cmpgt_epi8(*k_4, clamped_absdiff);
   // Get adjustments for l2, l1, and l0.
-  __m128i adj2 = _mm_and_si128(mask2, l32);
-  const __m128i adj1 = _mm_and_si128(mask1, l21);
+  __m128i adj2 = _mm_and_si128(mask2, *l32);
+  const __m128i adj1 = _mm_and_si128(mask1, *l21);
   const __m128i adj0 = _mm_and_si128(mask0, clamped_absdiff);
   __m128i adj,  padj, nadj;
 
   // Combine the adjustments and get absolute adjustments.
   adj2 = _mm_add_epi8(adj2, adj1);
-  adj = _mm_sub_epi8(l3, adj2);
+  adj = _mm_sub_epi8(*l3, adj2);
   adj = _mm_andnot_si128(mask0, adj);
   adj = _mm_or_si128(adj, adj0);
 
@@ -178,8 +178,8 @@ static int vp9_denoiser_4xM_sse2(const uint8_t *sig, int sig_stride,
     acc_diff = vp9_denoiser_16x1_sse2(sig_buffer[r],
                                       mc_running_buffer[r],
                                       running_buffer[r],
-                                      k_0, k_4, k_8, k_16,
-                                      l3, l32, l21, acc_diff);
+                                      &k_0, &k_4, &k_8, &k_16,
+                                      &l3, &l32, &l21, acc_diff);
     vpx_memcpy(running_avg_y, running_buffer[r], 4);
     vpx_memcpy(running_avg_y + avg_y_stride, running_buffer[r] + 4, 4);
     vpx_memcpy(running_avg_y + avg_y_stride * 2,
@@ -279,8 +279,8 @@ static int vp9_denoiser_8xM_sse2(const uint8_t *sig, int sig_stride,
     acc_diff = vp9_denoiser_16x1_sse2(sig_buffer[r],
                                       mc_running_buffer[r],
                                       running_buffer[r],
-                                      k_0, k_4, k_8, k_16,
-                                      l3, l32, l21, acc_diff);
+                                      &k_0, &k_4, &k_8, &k_16,
+                                      &l3, &l32, &l21, acc_diff);
     vpx_memcpy(running_avg_y, running_buffer[r], 8);
     vpx_memcpy(running_avg_y + avg_y_stride, running_buffer[r] + 8, 8);
     // Update pointers for next iteration.
@@ -368,8 +368,8 @@ static int vp9_denoiser_64_32_16xM_sse2(const uint8_t *sig, int sig_stride,
       acc_diff[c>>4][r>>4] = vp9_denoiser_16x1_sse2(
                                sig, mc_running_avg_y,
                                running_avg_y,
-                               k_0, k_4, k_8, k_16,
-                               l3, l32, l21, acc_diff[c>>4][r>>4]);
+                               &k_0, &k_4, &k_8, &k_16,
+                               &l3, &l32, &l21, acc_diff[c>>4][r>>4]);
       // Update pointers for next iteration.
       sig += 16;
       mc_running_avg_y += 16;
