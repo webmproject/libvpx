@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//SnA\u003d",
+        "filename": "vp9/encoder/x86/vp9_highbd_sad_sse2.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-10-17T23:18:57Z",
+      "side": 1,
+      "message": "Please fix",
+      "revId": "5402d337ef57a1c0fbd5c4764d43c5927cf40f38",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//SnY\u003d",
+        "filename": "vp9/encoder/x86/vp9_highbd_sad_sse2.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-10-17T23:18:57Z",
+      "side": 1,
+      "message": "vp9_highbd_sad64x{32,64}",
+      "revId": "5402d337ef57a1c0fbd5c4764d43c5927cf40f38",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Sng\u003d",
+        "filename": "vp9/encoder/x86/vp9_highbd_sad_sse2.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-10-17T23:18:57Z",
+      "side": 1,
+      "message": "Nit: It seems inconsistent to mix usage of literal multiples of 16 and mmsize*n, but the original code uses it so okay",
+      "revId": "5402d337ef57a1c0fbd5c4764d43c5927cf40f38",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
