@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Svg\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 940,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-10-17T00:43:24Z",
+      "side": 1,
+      "message": "Depending on size, the last tile may have quite different size than the rest tiles, so this calculation here may not work perfectly for an image size where last tile is very small.",
+      "revId": "61b17d18898ecf8f25dac8bc792fc406beeb35b7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
