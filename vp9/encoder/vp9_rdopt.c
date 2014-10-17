@@ -3394,6 +3394,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   if (best_mode_index < 0 || best_rd >= best_rd_so_far) {
+    rd_cost->rate = INT_MAX;
     rd_cost->rdcost = INT64_MAX;
     return;
   }
@@ -3564,6 +3565,7 @@ void vp9_rd_pick_inter_mode_sb_seg_skip(VP9_COMP *cpi, MACROBLOCK *x,
   rd_cost->rdcost = this_rd;
 
   if (this_rd >= best_rd_so_far) {
+    rd_cost->rate = INT_MAX;
     rd_cost->rdcost = INT64_MAX;
     return;
   }
@@ -4115,6 +4117,7 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   if (best_rd >= best_rd_so_far) {
+    rd_cost->rate = INT_MAX;
     rd_cost->rdcost = INT64_MAX;
     return;
   }
