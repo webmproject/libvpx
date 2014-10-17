@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Sqs\u003d",
+        "filename": "vp9/common/x86/vp9_loopfilter_intrin_avx2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 413,
+      "author": {
+        "id": 1108495
+      },
+      "writtenOn": "2014-10-17T16:57:56Z",
+      "side": 1,
+      "message": "it was already tested with 4.8.1 and 4.9.1",
+      "parentUuid": "AAAAdn//Sq4\u003d",
+      "revId": "6ee1adee255c59f1be63ed91d0080e9ad6d65c58",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Sq8\u003d",
         "filename": "vp9/common/x86/vp9_loopfilter_intrin_avx2.c",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2014-10-17T16:52:27Z",
       "side": 1,
       "message": "Could an unpacking with 0 be used instead of shuffling? (something like: _mm256_unpacklo_epi8)",
+      "revId": "6ee1adee255c59f1be63ed91d0080e9ad6d65c58",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Sqo\u003d",
+        "filename": "vp9/common/x86/vp9_loopfilter_intrin_avx2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 617,
+      "author": {
+        "id": 1108495
+      },
+      "writtenOn": "2014-10-17T16:57:56Z",
+      "side": 1,
+      "message": "I can do unpacking the problem is that I will have to do 2 loads\n8 bytes to the first half of the register and another load to the second half of the register it will be more expensive then using broadcast+ shuffle",
+      "parentUuid": "AAAAdn//Sq8\u003d",
       "revId": "6ee1adee255c59f1be63ed91d0080e9ad6d65c58",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
