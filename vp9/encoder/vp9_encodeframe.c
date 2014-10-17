@@ -813,6 +813,7 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
   }
   ctx->is_coded = 0;
   ctx->skippable = 0;
+  ctx->pred_pixel_ready = 0;
   x->skip_recode = 0;
 
   // Set to zero to make sure we do not use the previous encoded frame stats
@@ -2837,6 +2838,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     ctx->mic.mbmi = xd->mi[0].src_mi->mbmi;
     ctx->skip_txfm[0] = x->skip_txfm[0];
     ctx->skip = x->skip;
+    ctx->pred_pixel_ready = 0;
 
     if (this_rate != INT_MAX) {
       int pl = partition_plane_context(xd, mi_row, mi_col, bsize);
@@ -2922,6 +2924,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     pc_tree->horizontal[0].mic.mbmi = xd->mi[0].src_mi->mbmi;
     pc_tree->horizontal[0].skip_txfm[0] = x->skip_txfm[0];
     pc_tree->horizontal[0].skip = x->skip;
+    pc_tree->horizontal[0].pred_pixel_ready = 0;
 
     sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
 
@@ -2934,6 +2937,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
       pc_tree->horizontal[1].mic.mbmi = xd->mi[0].src_mi->mbmi;
       pc_tree->horizontal[1].skip_txfm[0] = x->skip_txfm[0];
       pc_tree->horizontal[1].skip = x->skip;
+      pc_tree->horizontal[1].pred_pixel_ready = 0;
 
       if (this_rate == INT_MAX) {
         sum_rd = INT64_MAX;
@@ -2966,6 +2970,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     pc_tree->vertical[0].mic.mbmi = xd->mi[0].src_mi->mbmi;
     pc_tree->vertical[0].skip_txfm[0] = x->skip_txfm[0];
     pc_tree->vertical[0].skip = x->skip;
+    pc_tree->vertical[0].pred_pixel_ready = 0;
     sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
     if (sum_rd < best_rd && mi_col + ms < cm->mi_cols) {
       load_pred_mv(x, ctx);
@@ -2975,6 +2980,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
       pc_tree->vertical[1].mic.mbmi = xd->mi[0].src_mi->mbmi;
       pc_tree->vertical[1].skip_txfm[0] = x->skip_txfm[0];
       pc_tree->vertical[1].skip = x->skip;
+      pc_tree->vertical[1].pred_pixel_ready = 0;
       if (this_rate == INT_MAX) {
         sum_rd = INT64_MAX;
       } else {
@@ -3034,6 +3040,138 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     assert(tp_orig == *tp);
   }
 }
+
+static void nonrd_select_partition(VP9_COMP *cpi,
+                                   const TileInfo *const tile,
+                                   MODE_INFO *mi,
+                                   TOKENEXTRA **tp,
+                                   int mi_row, int mi_col,
+                                   BLOCK_SIZE bsize, int output_enabled,
+                                   int *totrate, int64_t *totdist,
+                                   PC_TREE *pc_tree) {
+  VP9_COMMON *const cm = &cpi->common;
+  MACROBLOCK *const x = &cpi->mb;
+  MACROBLOCKD *const xd = &x->e_mbd;
+  const int bsl = b_width_log2_lookup[bsize], hbs = (1 << bsl) / 4;
+  const int mis = cm->mi_stride;
+  PARTITION_TYPE partition;
+  BLOCK_SIZE subsize;
+  int rate = INT_MAX;
+  int64_t dist = INT64_MAX;
+
+  if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
+    return;
+
+  subsize = (bsize >= BLOCK_8X8) ? mi[0].src_mi->mbmi.sb_type : BLOCK_4X4;
+  partition = partition_lookup[bsl][subsize];
+
+  if (bsize == BLOCK_32X32 && partition != PARTITION_NONE &&
+      subsize >= BLOCK_16X16) {
+    cpi->sf.max_partition_size = BLOCK_32X32;
+    cpi->sf.min_partition_size = BLOCK_8X8;
+    nonrd_pick_partition(cpi, tile, tp, mi_row, mi_col, bsize,
+                         totrate, totdist, 0, INT64_MAX, pc_tree);
+  } else if (bsize == BLOCK_16X16 && partition != PARTITION_NONE) {
+    cpi->sf.max_partition_size = BLOCK_16X16;
+    cpi->sf.min_partition_size = BLOCK_8X8;
+    nonrd_pick_partition(cpi, tile, tp, mi_row, mi_col, bsize,
+                         totrate, totdist, 0, INT64_MAX, pc_tree);
+  } else {
+    switch (partition) {
+      case PARTITION_NONE:
+        nonrd_pick_sb_modes(cpi, tile, mi_row, mi_col, totrate, totdist,
+                            subsize, &pc_tree->none);
+        pc_tree->none.mic.mbmi = xd->mi[0].src_mi->mbmi;
+        pc_tree->none.skip_txfm[0] = x->skip_txfm[0];
+        pc_tree->none.skip = x->skip;
+        pc_tree->none.pred_pixel_ready = 1;
+        break;
+      case PARTITION_VERT:
+        nonrd_pick_sb_modes(cpi, tile, mi_row, mi_col, totrate, totdist,
+                            subsize, &pc_tree->vertical[0]);
+        pc_tree->vertical[0].mic.mbmi = xd->mi[0].src_mi->mbmi;
+        pc_tree->vertical[0].skip_txfm[0] = x->skip_txfm[0];
+        pc_tree->vertical[0].skip = x->skip;
+        pc_tree->vertical[0].pred_pixel_ready = 1;
+        if (mi_col + hbs < cm->mi_cols) {
+          nonrd_pick_sb_modes(cpi, tile, mi_row, mi_col + hbs,
+                              &rate, &dist, subsize, &pc_tree->vertical[1]);
+          pc_tree->vertical[1].mic.mbmi = xd->mi[0].src_mi->mbmi;
+          pc_tree->vertical[1].skip_txfm[0] = x->skip_txfm[0];
+          pc_tree->vertical[1].skip = x->skip;
+          pc_tree->vertical[1].pred_pixel_ready = 1;
+          if (rate != INT_MAX && dist != INT64_MAX &&
+              *totrate != INT_MAX && *totdist != INT64_MAX) {
+            *totrate += rate;
+            *totdist += dist;
+          }
+        }
+        break;
+      case PARTITION_HORZ:
+        nonrd_pick_sb_modes(cpi, tile, mi_row, mi_col, totrate, totdist,
+                            subsize, &pc_tree->horizontal[0]);
+        pc_tree->horizontal[0].mic.mbmi = xd->mi[0].src_mi->mbmi;
+        pc_tree->horizontal[0].skip_txfm[0] = x->skip_txfm[0];
+        pc_tree->horizontal[0].skip = x->skip;
+        pc_tree->horizontal[0].pred_pixel_ready = 1;
+        if (mi_row + hbs < cm->mi_rows) {
+          nonrd_pick_sb_modes(cpi, tile, mi_row + hbs, mi_col,
+                              &rate, &dist, subsize, &pc_tree->horizontal[0]);
+          pc_tree->horizontal[1].mic.mbmi = xd->mi[0].src_mi->mbmi;
+          pc_tree->horizontal[1].skip_txfm[0] = x->skip_txfm[0];
+          pc_tree->horizontal[1].skip = x->skip;
+          pc_tree->horizontal[1].pred_pixel_ready = 1;
+          if (rate != INT_MAX && dist != INT64_MAX &&
+              *totrate != INT_MAX && *totdist != INT64_MAX) {
+            *totrate += rate;
+            *totdist += dist;
+          }
+        }
+        break;
+      case PARTITION_SPLIT:
+        subsize = get_subsize(bsize, PARTITION_SPLIT);
+        nonrd_select_partition(cpi, tile, mi, tp, mi_row, mi_col,
+                               subsize, output_enabled, totrate, totdist,
+                               pc_tree->split[0]);
+        nonrd_select_partition(cpi, tile, mi + hbs, tp,
+                               mi_row, mi_col + hbs, subsize, output_enabled,
+                               &rate, &dist, pc_tree->split[1]);
+        if (rate != INT_MAX && dist != INT64_MAX &&
+            *totrate != INT_MAX && *totdist != INT64_MAX) {
+          *totrate += rate;
+          *totdist += dist;
+        }
+        nonrd_select_partition(cpi, tile, mi + hbs * mis, tp,
+                               mi_row + hbs, mi_col, subsize, output_enabled,
+                               &rate, &dist, pc_tree->split[2]);
+        if (rate != INT_MAX && dist != INT64_MAX &&
+            *totrate != INT_MAX && *totdist != INT64_MAX) {
+          *totrate += rate;
+          *totdist += dist;
+        }
+        nonrd_select_partition(cpi, tile, mi + hbs * mis + hbs, tp,
+                              mi_row + hbs, mi_col + hbs, subsize,
+                              output_enabled, &rate, &dist, pc_tree->split[3]);
+        if (rate != INT_MAX && dist != INT64_MAX &&
+            *totrate != INT_MAX && *totdist != INT64_MAX) {
+          *totrate += rate;
+          *totdist += dist;
+        }
+        break;
+      default:
+        assert("Invalid partition type.");
+        break;
+    }
+  }
+
+  if (bsize == BLOCK_64X64 && output_enabled) {
+    if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ)
+      vp9_cyclic_refresh_set_rate_and_dist_sb(cpi->cyclic_refresh,
+                                              *totrate, *totdist);
+    encode_sb_rt(cpi, tile, tp, mi_row, mi_col, 1, bsize, pc_tree);
+  }
+}
+
 
 static void nonrd_use_partition(VP9_COMP *cpi,
                                 const TileInfo *const tile,
@@ -3193,21 +3331,23 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
                             1, &dummy_rate, &dummy_dist, cpi->pc_root);
         break;
       case REFERENCE_PARTITION:
-        if (sf->partition_check ||
-            !(x->in_static_area = is_background(cpi, tile, mi_row, mi_col))) {
-          set_modeinfo_offsets(cm, xd, mi_row, mi_col);
+        set_offsets(cpi, tile, mi_row, mi_col, BLOCK_64X64);
+        x->in_static_area = is_background(cpi, tile, mi_row, mi_col);
+
+        if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cm->seg.enabled &&
+            xd->mi[0].src_mi->mbmi.segment_id && x->in_static_area) {
           auto_partition_range(cpi, tile, mi_row, mi_col,
                                &sf->min_partition_size,
                                &sf->max_partition_size);
           nonrd_pick_partition(cpi, tile, tp, mi_row, mi_col, BLOCK_64X64,
-                               &dummy_rate, &dummy_dist, 1, INT64_MAX,
-                               cpi->pc_root);
+                               &dummy_rate, &dummy_dist, 1,
+                               INT64_MAX, cpi->pc_root);
         } else {
           choose_partitioning(cpi, tile, mi_row, mi_col);
-          nonrd_use_partition(cpi, tile, mi, tp, mi_row, mi_col,
-                              BLOCK_64X64, 1, &dummy_rate, &dummy_dist,
-                              cpi->pc_root);
+          nonrd_select_partition(cpi, tile, mi, tp, mi_row, mi_col, BLOCK_64X64,
+                                 1, &dummy_rate, &dummy_dist, cpi->pc_root);
         }
+
         break;
       default:
         assert(0);
@@ -3737,7 +3877,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
       vp9_setup_pre_planes(xd, ref, cfg, mi_row, mi_col,
                            &xd->block_refs[ref]->sf);
     }
-    if (!cpi->sf.reuse_inter_pred_sby || seg_skip)
+    if (!(cpi->sf.reuse_inter_pred_sby && ctx->pred_pixel_ready) || seg_skip)
       vp9_build_inter_predictors_sby(xd, mi_row, mi_col, MAX(bsize, BLOCK_8X8));
 
     vp9_build_inter_predictors_sbuv(xd, mi_row, mi_col, MAX(bsize, BLOCK_8X8));
