@@ -16,6 +16,24 @@
       "revId": "61b17d18898ecf8f25dac8bc792fc406beeb35b7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//SvM\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 940,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-10-17T03:43:13Z",
+      "side": 1,
+      "message": "Plenty of memory is allocated to cpi-\u003etok. Jim\u0027s comment in get_token_alloc() mentioned that \"We assume 3 planes all at full resolution. We assume up to 1 token per pixel, and then allow a head room of 4.\" So there should be enough storage for each tile. Right?",
+      "parentUuid": "AAAAdn//Svg\u003d",
+      "revId": "61b17d18898ecf8f25dac8bc792fc406beeb35b7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
