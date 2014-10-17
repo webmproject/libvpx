@@ -44,6 +44,18 @@
 // Factor to weigh the rate for switchable interp filters.
 #define SWITCHABLE_INTERP_RATE_FACTOR 1
 
+void vp9_rd_cost_reset(RD_COST *rd_cost) {
+  rd_cost->rate = INT_MAX;
+  rd_cost->dist = INT64_MAX;
+  rd_cost->rdcost = INT64_MAX;
+}
+
+void vp9_rd_cost_init(RD_COST *rd_cost) {
+  rd_cost->rate = 0;
+  rd_cost->dist = 0;
+  rd_cost->rdcost = 0;
+}
+
 // The baseline rd thresholds for breaking out of the rd loop for
 // certain modes are assumed to be based on 8x8 blocks.
 // This table is used to correct for block size.

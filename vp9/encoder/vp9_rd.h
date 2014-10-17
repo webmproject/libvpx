@@ -123,6 +123,11 @@ typedef struct RD_COST {
   int64_t rdcost;
 } RD_COST;
 
+// Reset the rate distortion cost values to maximum (invalid) value.
+void vp9_rd_cost_reset(RD_COST *rd_cost);
+// Initialize the rate distortion cost values to zero.
+void vp9_rd_cost_init(RD_COST *rd_cost);
+
 struct TileInfo;
 struct VP9_COMP;
 struct macroblock;
