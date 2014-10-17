@@ -69,6 +69,24 @@
       "revId": "6ee1adee255c59f1be63ed91d0080e9ad6d65c58",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Sqg\u003d",
+        "filename": "vp9/common/x86/vp9_loopfilter_intrin_avx2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 617,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-10-17T17:16:07Z",
+      "side": 1,
+      "message": "I was thinking to do:\n  p256_7 \u003d _mm256_unpacklo_epi8(p256_7, ZERO_REG)",
+      "parentUuid": "AAAAdn//Sqo\u003d",
+      "revId": "6ee1adee255c59f1be63ed91d0080e9ad6d65c58",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
