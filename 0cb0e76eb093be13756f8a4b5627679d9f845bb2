@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//SuY\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-17T08:47:49Z",
+      "side": 1,
+      "message": "this is OK, but you should cherry-pick -x or manually add the commit hash, as that will be more stable than a gerrit link",
+      "revId": "0cb0e76eb093be13756f8a4b5627679d9f845bb2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
