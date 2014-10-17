@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Sq4\u003d",
+        "filename": "vp9/common/x86/vp9_loopfilter_intrin_avx2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 413,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-10-17T16:52:27Z",
+      "side": 1,
+      "message": "Could you test this workaround using different gcc version?",
+      "revId": "6ee1adee255c59f1be63ed91d0080e9ad6d65c58",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Sq8\u003d",
+        "filename": "vp9/common/x86/vp9_loopfilter_intrin_avx2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 617,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-10-17T16:52:27Z",
+      "side": 1,
+      "message": "Could an unpacking with 0 be used instead of shuffling? (something like: _mm256_unpacklo_epi8)",
+      "revId": "6ee1adee255c59f1be63ed91d0080e9ad6d65c58",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
