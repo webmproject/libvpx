@@ -616,6 +616,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         continue;
 
       if (this_mode == NEWMV) {
+        if (ref_frame > LAST_FRAME)
+          continue;
         if (cpi->sf.partition_search_type != VAR_BASED_PARTITION &&
             this_rdc.rdcost < (int64_t)(1 << num_pels_log2_lookup[bsize]))
           continue;
@@ -756,7 +758,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     }
     // If the current reference frame is valid and we found a usable mode,
     // we are done.
-    if (best_rdc.rdcost < INT64_MAX)
+    if (best_rdc.rdcost < INT64_MAX && ref_frame == GOLDEN_FRAME)
       break;
   }
 
