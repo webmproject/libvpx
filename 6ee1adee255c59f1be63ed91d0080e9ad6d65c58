@@ -87,6 +87,24 @@
       "revId": "6ee1adee255c59f1be63ed91d0080e9ad6d65c58",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//SqQ\u003d",
+        "filename": "vp9/common/x86/vp9_loopfilter_intrin_avx2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 617,
+      "author": {
+        "id": 1108495
+      },
+      "writtenOn": "2014-10-17T17:28:45Z",
+      "side": 1,
+      "message": "the data in the register looks like that\n1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16\nif you will do unpacklo it will look like:\n1,0,2,0,3,0,4,0,5,0,6,0,7,0,8,0,1,0,2,0,3,0,4,0,5,0,6,0,7,0,8,0\nand you need the register to be:\n1,0,2,0,3,0,4,0,5,0,6,0,7,0,8,0,9,0,10,0,11,0,12,0,13,0,14,0,15,0,16,0\n\nThat\u0027s why I mentioned to you that you need to do twice load in order to use unpack",
+      "parentUuid": "AAAAdn//Sqg\u003d",
+      "revId": "6ee1adee255c59f1be63ed91d0080e9ad6d65c58",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
