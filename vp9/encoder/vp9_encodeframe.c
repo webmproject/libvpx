@@ -2833,8 +2833,13 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
       this_rate += cpi->partition_cost[pl][PARTITION_NONE];
       sum_rd = RDCOST(x->rdmult, x->rddiv, this_rate, this_dist);
       if (sum_rd < best_rd) {
-        int64_t stop_thresh = 4096;
-        int64_t stop_thresh_rd;
+        int dist_breakout_thr = sf->partition_search_breakout_dist_thr;
+        int64_t rate_breakout_thr = sf->partition_search_breakout_rate_thr;
+
+        dist_breakout_thr >>= 8 - (b_width_log2_lookup[bsize] +
+            b_height_log2_lookup[bsize]);
+
+        rate_breakout_thr *= num_pels_log2_lookup[bsize];
 
         best_rate = this_rate;
         best_dist = this_dist;
@@ -2842,14 +2847,9 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
         if (bsize >= BLOCK_8X8)
           pc_tree->partitioning = PARTITION_NONE;
 
-        // Adjust threshold according to partition size.
-        stop_thresh >>= 8 - (b_width_log2_lookup[bsize] +
-            b_height_log2_lookup[bsize]);
-
-        stop_thresh_rd = RDCOST(x->rdmult, x->rddiv, 0, stop_thresh);
-        // If obtained distortion is very small, choose current partition
-        // and stop splitting.
-        if (!x->e_mbd.lossless && best_rd < stop_thresh_rd) {
+        if (!x->e_mbd.lossless &&
+            this_rate < rate_breakout_thr &&
+            this_dist < dist_breakout_thr) {
           do_split = 0;
           do_rect = 0;
         }
