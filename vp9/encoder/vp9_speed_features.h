@@ -149,16 +149,12 @@ typedef enum {
 
 typedef enum {
   // Search partitions using RD/NONRD criterion
-  SEARCH_PARTITION = 0,
+  SEARCH_PARTITION,
 
   // Always use a fixed size partition
-  FIXED_PARTITION = 1,
+  FIXED_PARTITION,
 
-  // Use a fixed size partition in every 64X64 SB, where the size is
-  // determined based on source variance
-  VAR_BASED_FIXED_PARTITION = 2,
-
-  REFERENCE_PARTITION = 3,
+  REFERENCE_PARTITION,
 
   // Use an arbitrary partitioning scheme based on source variance within
   // a 64X64 SB
