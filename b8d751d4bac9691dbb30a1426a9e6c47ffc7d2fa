@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Sdc\u003d",
+        "filename": "test/dct16x16_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 610,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-10-20T22:28:44Z",
+      "side": 1,
+      "message": "Why generating random transform coefficients here?\n\nThe stress test should be applying forward transform to random residual pixels and then testing the inverse transform functions.",
+      "revId": "b8d751d4bac9691dbb30a1426a9e6c47ffc7d2fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//SdY\u003d",
+        "filename": "test/dct16x16_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 926,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-10-20T22:28:44Z",
+      "side": 1,
+      "message": "I am not sure if I understand the term \"Optimizations take effect at a threshold of 3155\"?\n\nWhy use 3167 here?",
+      "revId": "b8d751d4bac9691dbb30a1426a9e6c47ffc7d2fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//SdU\u003d",
+        "filename": "test/fdct8x8_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 747,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-10-20T22:28:44Z",
+      "side": 1,
+      "message": "same question here. why 6225?",
+      "revId": "b8d751d4bac9691dbb30a1426a9e6c47ffc7d2fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//SdM\u003d",
+        "filename": "vp9/common/vp9_rtcd_defs.pl",
+        "patchSetId": 4
+      },
+      "lineNbr": 1200,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-10-20T22:28:44Z",
+      "side": 1,
+      "message": "This set of functions are for 8 bit depth? Are they the same as definitions in line 1238 - 1274? Why repeat them here?",
+      "revId": "b8d751d4bac9691dbb30a1426a9e6c47ffc7d2fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//SdQ\u003d",
+        "filename": "vp9/encoder/vp9_dct.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-10-20T22:28:44Z",
+      "side": 1,
+      "message": "Do not use global variable.",
+      "revId": "b8d751d4bac9691dbb30a1426a9e6c47ffc7d2fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
