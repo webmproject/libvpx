@@ -66,13 +66,6 @@ static void swap_yv12(YV12_BUFFER_CONFIG *a, YV12_BUFFER_CONFIG *b) {
   *b = temp;
 }
 
-static int gfboost_qadjust(int qindex, vpx_bit_depth_t bit_depth) {
-  const double q = vp9_convert_qindex_to_q(qindex, bit_depth);
-  return (int)((0.00000828 * q * q * q) +
-               (-0.0055 * q * q) +
-               (1.32 * q) + 79.3);
-}
-
 // Resets the first pass file to the given position using a relative seek from
 // the current position.
 static void reset_fpf_position(TWO_PASS *p,
@@ -1317,14 +1310,15 @@ static double calc_frame_boost(VP9_COMP *cpi,
                                double this_frame_mv_in_out,
                                double max_boost) {
   double frame_boost;
-  const double lq = vp9_convert_qindex_to_q(cpi->rc.last_q[INTER_FRAME],
-                                            cpi->common.bit_depth);
-  const double q_correction = MIN((0.8 + (lq * 0.001)), 1.0);
+  const double lq =
+    vp9_convert_qindex_to_q(cpi->rc.avg_frame_qindex[INTER_FRAME],
+                            cpi->common.bit_depth);
+  const double boost_correction = MIN((0.5 + (lq * 0.015)), 1.5);
 
   // Underlying boost factor is based on inter error ratio.
   frame_boost = (BASELINE_ERR_PER_MB * cpi->common.MBs) /
                 DOUBLE_DIVIDE_CHECK(this_frame->coded_error);
-  frame_boost = frame_boost * BOOST_FACTOR * q_correction;
+  frame_boost = frame_boost * BOOST_FACTOR * boost_correction;
 
   // Increase boost for frames where new data coming into frame (e.g. zoom out).
   // Slightly reduce boost if there is a net balance of motion out of the frame
@@ -1335,7 +1329,7 @@ static double calc_frame_boost(VP9_COMP *cpi,
   else
     frame_boost += frame_boost * (this_frame_mv_in_out / 2.0);
 
-  return MIN(frame_boost, max_boost * q_correction);
+  return MIN(frame_boost, max_boost * boost_correction);
 }
 
 static int calc_arf_boost(VP9_COMP *cpi, int offset,
@@ -1874,19 +1868,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   gf_group_bits = calculate_total_gf_group_bits(cpi, gf_group_err);
 
   // Calculate the extra bits to be used for boosted frame(s)
-  {
-    int q = rc->last_q[INTER_FRAME];
-    int boost =
-        (rc->gfu_boost * gfboost_qadjust(q, cpi->common.bit_depth)) / 100;
-
-    // Set max and minimum boost and hence minimum allocation.
-    boost = clamp(boost, MIN_ARF_GF_BOOST,
-                  (rc->baseline_gf_interval + 1) * 200);
-
-    // Calculate the extra bits to be used for boosted frame(s)
-    gf_arf_bits = calculate_boost_bits(rc->baseline_gf_interval,
-                                       boost, gf_group_bits);
-  }
+  gf_arf_bits = calculate_boost_bits(rc->baseline_gf_interval,
+                                     rc->gfu_boost, gf_group_bits);
 
   // Adjust KF group bits and error remaining.
   twopass->kf_group_error_left -= (int64_t)gf_group_err;
@@ -2380,7 +2363,11 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
                                                 section_target_bandwidth);
     twopass->active_worst_quality = tmp_q;
     rc->ni_av_qi = tmp_q;
+    rc->last_q[INTER_FRAME] = tmp_q;
     rc->avg_q = vp9_convert_qindex_to_q(tmp_q, cm->bit_depth);
+    rc->avg_frame_qindex[INTER_FRAME] = tmp_q;
+    rc->last_q[KEY_FRAME] = (tmp_q + cpi->oxcf.best_allowed_q) / 2;
+    rc->avg_frame_qindex[KEY_FRAME] = rc->last_q[KEY_FRAME];
   }
   vp9_zero(this_frame);
   if (EOF == input_stats(twopass, &this_frame))
