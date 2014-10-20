@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Scc\u003d",
+        "filename": "vp9/common/arm/neon/vp9_convolve8_avg_neon.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-20T23:34:56Z",
+      "side": 1,
+      "message": "include the header file which has this",
+      "revId": "8429168e90230a5c17d966b7732bd6d8e8425578",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ScQ\u003d",
+        "filename": "vp9/common/arm/neon/vp9_convolve8_avg_neon.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-20T23:34:56Z",
+      "side": 1,
+      "message": "name the variable \"filter_x_q\" or \"filter\" since this function doesn\u0027t use filter_y",
+      "revId": "8429168e90230a5c17d966b7732bd6d8e8425578",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ScM\u003d",
+        "filename": "vp9/common/arm/neon/vp9_convolve8_avg_neon.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-20T23:34:56Z",
+      "side": 1,
+      "message": "since s is reset on each loop and the offset is known, just do:\n src0 \u003d vld1_8(src);\n src1 \u003d vld1_8(src + src_stride);\n src2 \u003d vld1_8(src + 2 * src_stride);",
+      "revId": "8429168e90230a5c17d966b7732bd6d8e8425578",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ScI\u003d",
+        "filename": "vp9/common/arm/neon/vp9_convolve8_avg_neon.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-20T23:34:56Z",
+      "side": 1,
+      "message": "src01 \u003d vcombine\n src23 \u003d vcombilne",
+      "revId": "8429168e90230a5c17d966b7732bd6d8e8425578",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ScE\u003d",
+        "filename": "vp9/common/arm/neon/vp9_convolve8_avg_neon.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-20T23:34:56Z",
+      "side": 1,
+      "message": "the variable names are still very opaque and you\u0027ve removed all the comments from the original file. if the data types are critical, they can be included in the name but most of these are only used once / have the same type",
+      "revId": "8429168e90230a5c17d966b7732bd6d8e8425578",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ScA\u003d",
+        "filename": "vp9/common/arm/neon/vp9_convolve8_neon.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-20T23:34:56Z",
+      "side": 1,
+      "message": "these names are much better. the extra type info is not always necessary. these would be much more readable as \"ci_q_0, ci_q_1 ... and ci_d_0, ci_d_1 ... since the only important distinction is one is being used for full Q sized registers and the other for the half size D registers.",
+      "revId": "8429168e90230a5c17d966b7732bd6d8e8425578",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Sb8\u003d",
+        "filename": "vp9/common/arm/neon/vp9_convolve8_neon.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-20T23:34:56Z",
+      "side": 1,
+      "message": "put the src/dst adjustments and the and of the loop and only change i here:\nfor() {\n...\nsrc +\u003d\ndst +\u003d\n}",
+      "revId": "8429168e90230a5c17d966b7732bd6d8e8425578",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
