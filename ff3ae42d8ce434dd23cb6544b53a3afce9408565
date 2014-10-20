@@ -16,6 +16,24 @@
       "revId": "ff3ae42d8ce434dd23cb6544b53a3afce9408565",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ShQ\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1070,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-20T16:37:20Z",
+      "side": 1,
+      "message": "there\u0027s an implicit requirement due to the x86 assembly no doubt, much like other allocations in the code. it\u0027s unfortunate that they\u0027re not very well documented.",
+      "parentUuid": "AAAAdn//ShY\u003d",
+      "revId": "ff3ae42d8ce434dd23cb6544b53a3afce9408565",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
