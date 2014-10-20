@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Sgk\u003d",
+        "filename": "vp9/encoder/x86/vp9_highbd_subpel_variance.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-10-20T17:24:45Z",
+      "side": 1,
+      "message": "I don\u0027t think we can assign fixmes to ronald",
+      "revId": "e861fc7298183e4009e5740617284cad0c6fb18d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Sgo\u003d",
+        "filename": "vp9/encoder/x86/vp9_highbd_subpel_variance.asm",
+        "patchSetId": 4
+      },
+      "lineNbr": 326,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-10-20T17:24:45Z",
+      "side": 1,
+      "message": "If you aren\u0027t doing ssse3 versions of these functions then it probably doesn\u0027t make sense to include these sections.",
+      "revId": "e861fc7298183e4009e5740617284cad0c6fb18d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
