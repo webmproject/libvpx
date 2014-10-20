@@ -4844,11 +4844,12 @@ static void rd_supertx_sb(VP9_COMP *cpi, const TileInfo *const tile,
     vp9_subtract_plane(x, bsize, plane);
 #if CONFIG_EXT_TX
     if (bsize <= BLOCK_16X16 && plane == 0) {
-      int txfm, this_rate_tx, pnskip_tx,
+      EXT_TX_TYPE txfm;
+      int this_rate_tx, pnskip_tx,
           best_tx_nostx = xd->mi[0]->mbmi.ext_txfrm;
       int64_t this_dist_tx, pnsse_tx, rd, bestrd_tx = INT64_MAX;
 
-      for (txfm = 0; txfm < EXT_TX_TYPES; txfm++) {
+      for (txfm = NORM; txfm < EXT_TX_TYPES; txfm++) {
         xd->mi[0]->mbmi.ext_txfrm = txfm;
         txfm_rd_in_plane_supertx(x, &this_rate_tx, &this_dist_tx,
                                  &pnskip_tx, &pnsse_tx,
@@ -4864,9 +4865,10 @@ static void rd_supertx_sb(VP9_COMP *cpi, const TileInfo *const tile,
           pnsse = pnsse_tx;
         }
       }
-
       xd->mi[0]->mbmi.ext_txfrm = best_tx_nostx;
     } else {
+      xd->mi[0]->mbmi.ext_txfrm = NORM;
+
 #endif
       txfm_rd_in_plane_supertx(x, &this_rate, &this_dist, &pnskip, &pnsse,
                                INT64_MAX, plane, bsize, tx_size, 0);
@@ -4898,7 +4900,7 @@ static void rd_supertx_sb(VP9_COMP *cpi, const TileInfo *const tile,
 #if CONFIG_EXT_TX
       if (bsize <= BLOCK_16X16)
         *tmp_rate -= vp9_cost_bit(cm->fc.ext_tx_prob, *best_tx);
-      *best_tx = 0;
+      *best_tx = NORM;
 #endif
       x->skip = 1;
     }
