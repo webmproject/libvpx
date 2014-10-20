@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Sbk\u003d",
+        "filename": "vp9/common/vp9_rtcd_defs.pl",
+        "patchSetId": 11
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-20T23:39:42Z",
+      "side": 0,
+      "message": "seems unrelated? please make a separate change if this is to fix something else.",
+      "revId": "2040bb58fbec7d06d5bdb1f6628bb058d3132ebf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Sbs\u003d",
+        "filename": "vp9/common/vp9_rtcd_defs.pl",
+        "patchSetId": 11
+      },
+      "lineNbr": 308,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-20T23:39:42Z",
+      "side": 0,
+      "message": "this line can be removed. it was only to map neon_asm to neon in the function name",
+      "revId": "2040bb58fbec7d06d5bdb1f6628bb058d3132ebf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
