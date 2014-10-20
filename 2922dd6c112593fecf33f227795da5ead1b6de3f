@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//SjQ\u003d",
+        "filename": "vp9/encoder/x86/vp9_denoiser_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-20T11:23:47Z",
+      "side": 1,
+      "message": "for something like this it might be more readable to bring the function down to the next line since it will all fit.\nthis applies to most of the cases that follow",
+      "revId": "2922dd6c112593fecf33f227795da5ead1b6de3f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//SjM\u003d",
+        "filename": "vp9/encoder/x86/vp9_denoiser_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-20T11:23:47Z",
+      "side": 1,
+      "message": "uint8_t",
+      "revId": "2922dd6c112593fecf33f227795da5ead1b6de3f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//SjI\u003d",
+        "filename": "vp9/encoder/x86/vp9_denoiser_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-20T11:23:47Z",
+      "side": 1,
+      "message": "uint8_t",
+      "revId": "2922dd6c112593fecf33f227795da5ead1b6de3f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
