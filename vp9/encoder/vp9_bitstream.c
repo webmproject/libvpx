@@ -935,26 +935,27 @@ static size_t encode_tiles(VP9_COMP *cpi, uint8_t *data_ptr) {
   size_t total_size = 0;
   const int tile_cols = 1 << cm->log2_tile_cols;
   const int tile_rows = 1 << cm->log2_tile_rows;
+  TileInfo tile[4][1 << 6];
+  TOKENEXTRA *pre_tok = cpi->tok;
+  int tile_tok = 0;
 
   vpx_memset(cm->above_seg_context, 0, sizeof(*cm->above_seg_context) *
              mi_cols_aligned_to_sb(cm->mi_cols));
 
-  tok[0][0] = cpi->tok;
-  for (tile_row = 0; tile_row < tile_rows; tile_row++) {
-    if (tile_row)
-      tok[tile_row][0] = tok[tile_row - 1][tile_cols - 1] +
-                         cpi->tok_count[tile_row - 1][tile_cols - 1];
+  for (tile_row = 0; tile_row < tile_rows; ++tile_row) {
+    for (tile_col = 0; tile_col < tile_cols; ++tile_col) {
+      vp9_tile_init(&tile[tile_row][tile_col], cm, tile_row, tile_col);
 
-    for (tile_col = 1; tile_col < tile_cols; tile_col++)
-      tok[tile_row][tile_col] = tok[tile_row][tile_col - 1] +
-                                cpi->tok_count[tile_row][tile_col - 1];
+      tok[tile_row][tile_col] = pre_tok + tile_tok;
+      pre_tok = tok[tile_row][tile_col];
+      tile_tok = allocated_tokens(tile[tile_row][tile_col]);
+    }
   }
 
   for (tile_row = 0; tile_row < tile_rows; tile_row++) {
     for (tile_col = 0; tile_col < tile_cols; tile_col++) {
-      TileInfo tile;
+      const TileInfo * const ptile = &tile[tile_row][tile_col];
 
-      vp9_tile_init(&tile, cm, tile_row, tile_col);
       tok_end = tok[tile_row][tile_col] + cpi->tok_count[tile_row][tile_col];
 
       if (tile_col < tile_cols - 1 || tile_row < tile_rows - 1)
@@ -962,7 +963,7 @@ static size_t encode_tiles(VP9_COMP *cpi, uint8_t *data_ptr) {
       else
         vp9_start_encode(&residual_bc, data_ptr + total_size);
 
-      write_modes(cpi, &tile, &residual_bc, &tok[tile_row][tile_col], tok_end);
+      write_modes(cpi, ptile, &residual_bc, &tok[tile_row][tile_col], tok_end);
       assert(tok[tile_row][tile_col] == tok_end);
       vp9_stop_encode(&residual_bc);
       if (tile_col < tile_cols - 1 || tile_row < tile_rows - 1) {
