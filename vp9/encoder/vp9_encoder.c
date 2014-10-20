@@ -1436,25 +1436,6 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
 
   cpi->refresh_alt_ref_frame = 0;
 
-  // Note that at the moment multi_arf will not work with svc.
-  // For the current check in all the execution paths are defaulted to 0
-  // pending further tuning and testing. The code is left in place here
-  // as a place holder in regard to the required paths.
-  cpi->multi_arf_last_grp_enabled = 0;
-  if (oxcf->pass == 2) {
-    if (cpi->use_svc) {
-      cpi->multi_arf_allowed = 0;
-      cpi->multi_arf_enabled = 0;
-    } else {
-      // Disable by default for now.
-      cpi->multi_arf_allowed = 0;
-      cpi->multi_arf_enabled = 0;
-    }
-  } else {
-    cpi->multi_arf_allowed = 0;
-    cpi->multi_arf_enabled = 0;
-  }
-
   cpi->b_calculate_psnr = CONFIG_INTERNAL_STATS;
 #if CONFIG_INTERNAL_STATS
   cpi->b_calculate_ssimg = 0;
@@ -3431,6 +3412,16 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
   vp9_set_high_precision_mv(cpi, ALTREF_HIGH_PRECISION_MV);
 
+  // Is multi-arf enabled.
+  // Note that at the moment multi_arf is only configured for 2 pass VBR and
+  // will not work properly with svc.
+  if ((oxcf->pass == 2) && !cpi->use_svc &&
+      (cpi->oxcf.enable_auto_arf > 1) && (cpi->oxcf.rc_mode == VPX_VBR))
+    cpi->multi_arf_allowed = 1;
+  else
+    cpi->multi_arf_allowed = 0;
+  cpi->multi_arf_last_grp_enabled = 0;
+
   // Normal defaults
   cm->reset_frame_context = 0;
   cm->refresh_frame_context = 1;
@@ -3456,7 +3447,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
         int i;
         // Reference a hidden frame from a lower layer
         for (i = cpi->svc.spatial_layer_id - 1; i >= 0; --i) {
-          if (oxcf->ss_play_alternate[i]) {
+          if (oxcf->ss_enable_auto_arf[i]) {
             cpi->gld_fb_idx = cpi->svc.layer_context[i].alt_ref_idx;
             break;
           }

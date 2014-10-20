@@ -85,7 +85,7 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
                                           oxcf->best_allowed_q) / 2;
       lrc->avg_frame_qindex[INTER_FRAME] = (oxcf->worst_allowed_q +
                                             oxcf->best_allowed_q) / 2;
-      if (oxcf->ss_play_alternate[layer])
+      if (oxcf->ss_enable_auto_arf[layer])
         lc->alt_ref_idx = alt_ref_idx++;
       else
         lc->alt_ref_idx = -1;
@@ -305,7 +305,7 @@ int vp9_svc_start_frame(VP9_COMP *const cpi) {
       cpi->ref_frame_flags &= (~VP9_LAST_FLAG & ~VP9_ALT_FLAG);
     }
   } else {
-    if (cpi->oxcf.ss_play_alternate[cpi->svc.spatial_layer_id]) {
+    if (cpi->oxcf.ss_enable_auto_arf[cpi->svc.spatial_layer_id]) {
       cpi->alt_fb_idx = lc->alt_ref_idx;
       if (!lc->has_alt_frame)
         cpi->ref_frame_flags &= (~VP9_ALT_FLAG);
@@ -317,7 +317,7 @@ int vp9_svc_start_frame(VP9_COMP *const cpi) {
         LAYER_CONTEXT *lc_lower =
             &cpi->svc.layer_context[cpi->svc.spatial_layer_id - 1];
 
-        if (cpi->oxcf.ss_play_alternate[cpi->svc.spatial_layer_id - 1] &&
+        if (cpi->oxcf.ss_enable_auto_arf[cpi->svc.spatial_layer_id - 1] &&
             lc_lower->alt_ref_source != NULL)
           cpi->alt_fb_idx = lc_lower->alt_ref_idx;
         else if (cpi->svc.spatial_layer_id >= 2)
