@@ -205,7 +205,6 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->disable_filter_search_var_thresh = 50;
     sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
     sf->auto_min_max_partition_size = RELAXED_NEIGHBORING_MIN_MAX;
-    sf->use_lastframe_partitioning = LAST_FRAME_PARTITION_LOW_MOTION;
     sf->lf_motion_threshold = LOW_MOTION_THRESHOLD;
     sf->adjust_partitioning_from_last_frame = 1;
     sf->last_partitioning_redo_frequency = 3;
@@ -217,7 +216,6 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
   if (speed >= 3) {
     sf->use_square_partition_only = 1;
     sf->disable_filter_search_var_thresh = 100;
-    sf->use_lastframe_partitioning = LAST_FRAME_PARTITION_ALL;
     sf->constrain_copy_partition = 1;
     sf->use_uv_intra_rd_estimate = 1;
     sf->skip_encode_sb = 1;
@@ -348,7 +346,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->mv.fullpel_search_step_param = 6;
   sf->comp_inter_joint_search_thresh = BLOCK_4X4;
   sf->adaptive_rd_thresh = 0;
-  sf->use_lastframe_partitioning = LAST_FRAME_PARTITION_OFF;
   sf->tx_size_search_method = USE_FULL_RD;
   sf->use_lp32x32fdct = 0;
   sf->adaptive_motion_search = 0;

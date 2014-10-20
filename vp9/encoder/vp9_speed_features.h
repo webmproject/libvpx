@@ -93,12 +93,6 @@ typedef enum {
 } MOTION_THRESHOLD;
 
 typedef enum {
-  LAST_FRAME_PARTITION_OFF = 0,
-  LAST_FRAME_PARTITION_LOW_MOTION = 1,
-  LAST_FRAME_PARTITION_ALL = 2
-} LAST_FRAME_PARTITION_METHOD;
-
-typedef enum {
   USE_FULL_RD = 0,
   USE_LARGESTALL,
   USE_TX_8X8
@@ -242,15 +236,6 @@ typedef struct SPEED_FEATURES {
   // level within a frame.
   int allow_skip_recode;
 
-  // This variable allows us to reuse the last frames partition choices
-  // (64x64 v 32x32 etc) for this frame. It can be set to only use the last
-  // frame as a starting point in low motion scenes or always use it. If set
-  // we use last partitioning_redo frequency to determine how often to redo
-  // the partitioning from scratch. Adjust_partitioning_from_last_frame
-  // enables us to adjust up or down one partitioning from the last frames
-  // partitioning.
-  LAST_FRAME_PARTITION_METHOD use_lastframe_partitioning;
-
   // The threshold is to determine how slow the motino is, it is used when
   // use_lastframe_partitioning is set to LAST_FRAME_PARTITION_LOW_MOTION
   MOTION_THRESHOLD lf_motion_threshold;
@@ -263,8 +248,6 @@ typedef struct SPEED_FEATURES {
   // Low precision 32x32 fdct keeps everything in 16 bits and thus is less
   // precise but significantly faster than the non lp version.
   int use_lp32x32fdct;
-
-  // TODO(JBB): remove this as its no longer used.
 
   // After looking at the first set of modes (set by index here), skip
   // checking modes for reference frames that don't match the reference frame
