@@ -2892,7 +2892,8 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
 
 #if CONFIG_SUPERTX
-    abort_flag = sum_rd >= best_rd;
+    abort_flag = (sum_rd >= best_rd && bsize > BLOCK_8X8) ||
+                 (sum_rate == INT_MAX && bsize == BLOCK_8X8);
 #endif
     if (sum_rd < best_rd && mi_row + mi_step < cm->mi_rows) {
       PICK_MODE_CONTEXT *ctx = &pc_tree->horizontal[0];
@@ -3009,7 +3010,8 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
                      &pc_tree->vertical[0], best_rd, 0);
     sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
 #if CONFIG_SUPERTX
-    abort_flag = sum_rd >= best_rd;
+    abort_flag = (sum_rd >= best_rd && bsize > BLOCK_8X8) ||
+                 (sum_rate == INT_MAX && bsize == BLOCK_8X8);
 #endif
     if (sum_rd < best_rd && mi_col + mi_step < cm->mi_cols) {
       update_state(cpi, &pc_tree->vertical[0], mi_row, mi_col, subsize, 0);

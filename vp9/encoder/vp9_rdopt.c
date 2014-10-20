@@ -4879,6 +4879,11 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_COPY_CODING
   mbmi->copy_mode = NOREF;
 #endif
+#if CONFIG_SUPERTX
+  best_rd_so_far = INT64_MAX;
+  best_rd = best_rd_so_far;
+  best_yrd = best_rd_so_far;
+#endif
 
   x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
   vpx_memset(x->zcoeff_blk[TX_4X4], 0, 4);
@@ -5396,7 +5401,16 @@ int64_t vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   if (best_rd >= best_rd_so_far)
+#if CONFIG_SUPERTX
+  {
+    *returnrate = INT_MAX;
+    *returnrate_nocoef = INT_MAX;
+    *returndistortion = INT64_MAX;
+#endif
     return INT64_MAX;
+#if CONFIG_SUPERTX
+  }
+#endif
 
   // If we used an estimate for the uv intra rd in the loop above...
   if (cpi->sf.use_uv_intra_rd_estimate) {
