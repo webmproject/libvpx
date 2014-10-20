@@ -625,6 +625,20 @@ INSTANTIATE_TEST_CASE_P(SSE3, SADTest, ::testing::Values(
 
 #if HAVE_AVX2
 #if CONFIG_VP9_ENCODER
+const SadMxNVp9Func sad_64x64_avx2_vp9 = vp9_sad64x64_avx2;
+const SadMxNVp9Func sad_64x32_avx2_vp9 = vp9_sad64x32_avx2;
+const SadMxNVp9Func sad_32x64_avx2_vp9 = vp9_sad32x64_avx2;
+const SadMxNVp9Func sad_32x32_avx2_vp9 = vp9_sad32x32_avx2;
+const SadMxNVp9Func sad_32x16_avx2_vp9 = vp9_sad32x16_avx2;
+const SadMxNVp9Param avx2_vp9_tests[] = {
+  make_tuple(64, 64, sad_64x64_avx2_vp9),
+  make_tuple(64, 32, sad_64x32_avx2_vp9),
+  make_tuple(32, 64, sad_32x64_avx2_vp9),
+  make_tuple(32, 32, sad_32x32_avx2_vp9),
+  make_tuple(32, 16, sad_32x16_avx2_vp9),
+};
+INSTANTIATE_TEST_CASE_P(AVX2, SADVP9Test, ::testing::ValuesIn(avx2_vp9_tests));
+
 const SadMxNx4Func sad_64x64x4d_avx2 = vp9_sad64x64x4d_avx2;
 const SadMxNx4Func sad_32x32x4d_avx2 = vp9_sad32x32x4d_avx2;
 INSTANTIATE_TEST_CASE_P(AVX2, SADx4Test, ::testing::Values(
