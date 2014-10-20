@@ -2843,7 +2843,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
       this_rate += cpi->partition_cost[pl][PARTITION_NONE];
       sum_rd = RDCOST(x->rdmult, x->rddiv, this_rate, this_dist);
       if (sum_rd < best_rd) {
-        int dist_breakout_thr = sf->partition_search_breakout_dist_thr;
+        int64_t dist_breakout_thr = sf->partition_search_breakout_dist_thr;
         int64_t rate_breakout_thr = sf->partition_search_breakout_rate_thr;
 
         dist_breakout_thr >>= 8 - (b_width_log2_lookup[bsize] +
