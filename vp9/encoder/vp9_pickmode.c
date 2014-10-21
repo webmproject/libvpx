@@ -460,11 +460,8 @@ static const THR_MODES mode_idx[MAX_REF_FRAMES - 1][INTER_MODES] = {
 // this needs various further optimizations. to be continued..
 void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                          const TileInfo *const tile,
-                         int mi_row, int mi_col,
-                         int *returnrate,
-                         int64_t *returndistortion,
-                         BLOCK_SIZE bsize,
-                         PICK_MODE_CONTEXT *ctx) {
+                         int mi_row, int mi_col, RD_COST *rd_cost,
+                         BLOCK_SIZE bsize, PICK_MODE_CONTEXT *ctx) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0].src_mi->mbmi;
@@ -478,11 +475,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   struct buf_2d yv12_mb[4][MAX_MB_PLANE];
   static const int flag_list[4] = { 0, VP9_LAST_FLAG, VP9_GOLD_FLAG,
                                     VP9_ALT_FLAG };
-  int64_t best_rd = INT64_MAX;
-  int64_t this_rd = INT64_MAX;
+  RD_COST this_rdc, best_rdc;
   uint8_t skip_txfm = 0;
-  int rate = INT_MAX;
-  int64_t dist = INT64_MAX;
   // var_y and sse_y are saved to be used in skipping checking
   unsigned int var_y = UINT_MAX;
   unsigned int sse_y = UINT_MAX;
@@ -543,8 +537,9 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   x->skip = 0;
 
   // initialize mode decisions
-  *returnrate = INT_MAX;
-  *returndistortion = INT64_MAX;
+  vp9_rd_cost_reset(&best_rdc);
+  vp9_rd_cost_reset(&this_rdc);
+  vp9_rd_cost_reset(rd_cost);
   vpx_memset(mbmi, 0, sizeof(MB_MODE_INFO));
   mbmi->sb_type = bsize;
   mbmi->ref_frame[0] = NONE;
@@ -614,17 +609,17 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       mode_rd_thresh =
           rd_threshes[mode_idx[ref_frame -
                                LAST_FRAME][INTER_OFFSET(this_mode)]];
-      if (rd_less_than_thresh(best_rd, mode_rd_thresh,
+      if (rd_less_than_thresh(best_rdc.rdcost, mode_rd_thresh,
                               rd_thresh_freq_fact[this_mode]))
         continue;
 
       if (this_mode == NEWMV) {
         if (cpi->sf.partition_search_type != VAR_BASED_PARTITION &&
-            this_rd < (int64_t)(1 << num_pels_log2_lookup[bsize]))
+            this_rdc.rdcost < (int64_t)(1 << num_pels_log2_lookup[bsize]))
           continue;
         if (!combined_motion_search(cpi, x, bsize, mi_row, mi_col,
                                     &frame_mv[NEWMV][ref_frame],
-                                    &rate_mv, best_rd))
+                                    &rate_mv, best_rdc.rdcost))
           continue;
       }
 
@@ -697,30 +692,34 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
         mbmi->interp_filter = best_filter;
         mbmi->tx_size = pf_tx_size[mbmi->interp_filter];
-        rate = pf_rate[mbmi->interp_filter];
-        dist = pf_dist[mbmi->interp_filter];
+        this_rdc.rate = pf_rate[mbmi->interp_filter];
+        this_rdc.dist = pf_dist[mbmi->interp_filter];
         var_y = pf_var[mbmi->interp_filter];
         sse_y = pf_sse[mbmi->interp_filter];
         x->skip_txfm[0] = skip_txfm;
       } else {
         mbmi->interp_filter = (filter_ref == SWITCHABLE) ? EIGHTTAP: filter_ref;
         vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
-        model_rd_for_sb_y(cpi, bsize, x, xd, &rate, &dist, &var_y, &sse_y);
+        model_rd_for_sb_y(cpi, bsize, x, xd, &this_rdc.rate, &this_rdc.dist,
+                          &var_y, &sse_y);
       }
 
-      rate += rate_mv;
-      rate += cpi->inter_mode_cost[mbmi->mode_context[ref_frame]]
+      this_rdc.rate += rate_mv;
+      this_rdc.rate += cpi->inter_mode_cost[mbmi->mode_context[ref_frame]]
                                   [INTER_OFFSET(this_mode)];
-      this_rd = RDCOST(x->rdmult, x->rddiv, rate, dist);
+      this_rdc.rdcost = RDCOST(x->rdmult, x->rddiv,
+                               this_rdc.rate, this_rdc.dist);
 
       // Skipping checking: test to see if this block can be reconstructed by
       // prediction only.
       if (cpi->allow_encode_breakout) {
         encode_breakout_test(cpi, x, bsize, mi_row, mi_col, ref_frame,
-                             this_mode, var_y, sse_y, yv12_mb, &rate, &dist);
+                             this_mode, var_y, sse_y, yv12_mb,
+                             &this_rdc.rate, &this_rdc.dist);
         if (x->skip) {
-          rate += rate_mv;
-          this_rd = RDCOST(x->rdmult, x->rddiv, rate, dist);
+          this_rdc.rate += rate_mv;
+          this_rdc.rdcost = RDCOST(x->rdmult, x->rddiv,
+                                   this_rdc.rate, this_rdc.dist);
         }
       }
 
@@ -732,10 +731,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       (void)ctx;
 #endif
 
-      if (this_rd < best_rd || x->skip) {
-        best_rd = this_rd;
-        *returnrate = rate;
-        *returndistortion = dist;
+      if (this_rdc.rdcost < best_rdc.rdcost || x->skip) {
+        best_rdc = this_rdc;
         best_mode = this_mode;
         best_pred_filter = mbmi->interp_filter;
         best_tx_size = mbmi->tx_size;
@@ -757,7 +754,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     }
     // If the current reference frame is valid and we found a usable mode,
     // we are done.
-    if (best_rd < INT64_MAX)
+    if (best_rdc.rdcost < INT64_MAX)
       break;
   }
 
@@ -790,7 +787,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
   // Perform intra prediction search, if the best SAD is above a certain
   // threshold.
-  if (!x->skip && best_rd > inter_mode_thresh &&
+  if (!x->skip && best_rdc.rdcost > inter_mode_thresh &&
       bsize <= cpi->sf.max_intra_bsize) {
     PREDICTION_MODE this_mode;
     struct estimate_block_intra_args args = { cpi, x, DC_PRED, 0, 0 };
@@ -812,16 +809,15 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       vp9_foreach_transformed_block_in_plane(xd, bsize, 0,
                                              estimate_block_intra, &args);
       mbmi->tx_size = saved_tx_size;
-      rate = args.rate;
-      dist = args.dist;
-      rate += cpi->mbmode_cost[this_mode];
-      rate += intra_cost_penalty;
-      this_rd = RDCOST(x->rdmult, x->rddiv, rate, dist);
+      this_rdc.rate = args.rate;
+      this_rdc.dist = args.dist;
+      this_rdc.rate += cpi->mbmode_cost[this_mode];
+      this_rdc.rate += intra_cost_penalty;
+      this_rdc.rdcost = RDCOST(x->rdmult, x->rddiv,
+                               this_rdc.rate, this_rdc.dist);
 
-      if (this_rd + intra_mode_cost < best_rd) {
-        best_rd = this_rd;
-        *returnrate = rate;
-        *returndistortion = dist;
+      if (this_rdc.rdcost + intra_mode_cost < best_rdc.rdcost) {
+        best_rdc = this_rdc;
         mbmi->mode = this_mode;
         mbmi->tx_size = intra_tx_size;
         mbmi->ref_frame[0] = INTRA_FRAME;
@@ -834,4 +830,6 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     if (cpi->sf.reuse_inter_pred_sby)
       pd->dst = orig_dst;
   }
+
+  *rd_cost = best_rdc;
 }
