@@ -276,7 +276,8 @@ static void update_image_md5(const vpx_image_t *img, const int planes[3],
     const int plane = planes[i];
     const unsigned char *buf = img->planes[plane];
     const int stride = img->stride[plane];
-    const int w = vpx_img_plane_width(img, plane);
+    const int w = vpx_img_plane_width(img, plane) *
+                ((img->fmt & VPX_IMG_FMT_HIGHBITDEPTH) ? 2 : 1);
     const int h = vpx_img_plane_height(img, plane);
 
     for (y = 0; y < h; ++y) {
