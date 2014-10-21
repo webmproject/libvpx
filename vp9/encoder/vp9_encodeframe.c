@@ -2554,10 +2554,6 @@ static void encode_rd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
 
     const int idx_str = cm->mi_stride * mi_row + mi_col;
     MODE_INFO *mi = cm->mi + idx_str;
-    MODE_INFO *prev_mi = NULL;
-
-    if (cm->frame_type != KEY_FRAME)
-      prev_mi = (cm->prev_mip + cm->mi_stride + 1 + idx_str)->src_mi;
 
     if (sf->adaptive_pred_interp_filter) {
       for (i = 0; i < 64; ++i)
@@ -2574,9 +2570,6 @@ static void encode_rd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
     vp9_zero(cpi->mb.pred_mv);
     cpi->pc_root->index = 0;
 
-    // TODO(yunqingwang): use_lastframe_partitioning is no longer used in good-
-    // quality encoding. Need to evaluate it in real-time encoding later to
-    // decide if it can be removed too. And then, do the code cleanup.
     cpi->mb.source_variance = UINT_MAX;
     if (sf->partition_search_type == FIXED_PARTITION) {
       set_offsets(cpi, tile, mi_row, mi_col, BLOCK_64X64);
@@ -2594,25 +2587,6 @@ static void encode_rd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
     } else if (sf->partition_search_type == VAR_BASED_PARTITION &&
                cm->frame_type != KEY_FRAME ) {
       choose_partitioning(cpi, tile, mi_row, mi_col);
-      rd_use_partition(cpi, tile, mi, tp, mi_row, mi_col, BLOCK_64X64,
-                       &dummy_rate, &dummy_dist, 1, cpi->pc_root);
-    } else if (sf->partition_search_type == SEARCH_PARTITION &&
-               sf->use_lastframe_partitioning &&
-               (cpi->rc.frames_since_key %
-                   sf->last_partitioning_redo_frequency) &&
-               cm->prev_mi &&
-               cm->show_frame &&
-               cm->frame_type != KEY_FRAME &&
-               !cpi->rc.is_src_frame_alt_ref &&
-               ((sf->use_lastframe_partitioning !=
-                   LAST_FRAME_PARTITION_LOW_MOTION) ||
-                   !sb_has_motion(cm, prev_mi, sf->lf_motion_threshold))) {
-      if (sf->constrain_copy_partition &&
-          sb_has_motion(cm, prev_mi, sf->lf_motion_threshold))
-        constrain_copy_partitioning(cpi, tile, mi, prev_mi,
-                                    mi_row, mi_col, BLOCK_16X16);
-      else
-        copy_partitioning(cm, mi, prev_mi);
       rd_use_partition(cpi, tile, mi, tp, mi_row, mi_col, BLOCK_64X64,
                        &dummy_rate, &dummy_dist, 1, cpi->pc_root);
     } else {
