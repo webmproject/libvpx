@@ -178,13 +178,12 @@ typedef struct VP9EncoderConfig {
   int ts_number_layers;  // Number of temporal layers.
   // Bitrate allocation for spatial layers.
   int ss_target_bitrate[VPX_SS_MAX_LAYERS];
-  int ss_play_alternate[VPX_SS_MAX_LAYERS];
+  int ss_enable_auto_arf[VPX_SS_MAX_LAYERS];
   // Bitrate allocation (CBR mode) and framerate factor, for temporal layers.
   int ts_target_bitrate[VPX_TS_MAX_LAYERS];
   int ts_rate_decimator[VPX_TS_MAX_LAYERS];
 
-  // these parameters aren't to be used in final build don't use!!!
-  int play_alternate;
+  int enable_auto_arf;
 
   int encode_breakout;  // early breakout : for video conf recommend 800
 
@@ -520,9 +519,9 @@ static INLINE int is_two_pass_svc(const struct VP9_COMP *const cpi) {
 
 static INLINE int is_altref_enabled(const VP9_COMP *const cpi) {
   return cpi->oxcf.mode != REALTIME && cpi->oxcf.lag_in_frames > 0 &&
-         (cpi->oxcf.play_alternate &&
+         (cpi->oxcf.enable_auto_arf &&
           (!is_two_pass_svc(cpi) ||
-           cpi->oxcf.ss_play_alternate[cpi->svc.spatial_layer_id]));
+           cpi->oxcf.ss_enable_auto_arf[cpi->svc.spatial_layer_id]));
 }
 
 static INLINE void set_ref_ptrs(VP9_COMMON *cm, MACROBLOCKD *xd,

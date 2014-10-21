@@ -202,7 +202,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
     ERROR("kf_min_dist not supported in auto mode, use 0 "
           "or kf_max_dist instead.");
 
-  RANGE_CHECK_BOOL(extra_cfg,  enable_auto_alt_ref);
+  RANGE_CHECK(extra_cfg, enable_auto_alt_ref, 0, 2);
   RANGE_CHECK(extra_cfg, cpu_used, -16, 16);
   RANGE_CHECK_HI(extra_cfg, noise_sensitivity, 6);
   RANGE_CHECK(extra_cfg, tile_columns, 0, 6);
@@ -412,7 +412,7 @@ static vpx_codec_err_t set_encoder_config(
 
   oxcf->speed                  =  abs(extra_cfg->cpu_used);
   oxcf->encode_breakout        =  extra_cfg->static_thresh;
-  oxcf->play_alternate         =  extra_cfg->enable_auto_alt_ref;
+  oxcf->enable_auto_arf        =  extra_cfg->enable_auto_alt_ref;
   oxcf->noise_sensitivity      =  extra_cfg->noise_sensitivity;
   oxcf->sharpness              =  extra_cfg->sharpness;
 
@@ -445,13 +445,13 @@ static vpx_codec_err_t set_encoder_config(
     for (i = 0; i < VPX_SS_MAX_LAYERS; ++i) {
       oxcf->ss_target_bitrate[i] =  1000 * cfg->ss_target_bitrate[i];
 #if CONFIG_SPATIAL_SVC
-      oxcf->ss_play_alternate[i] =  cfg->ss_enable_auto_alt_ref[i];
+      oxcf->ss_enable_auto_arf[i] =  cfg->ss_enable_auto_alt_ref[i];
 #endif
     }
   } else if (oxcf->ss_number_layers == 1) {
     oxcf->ss_target_bitrate[0] = (int)oxcf->target_bandwidth;
 #if CONFIG_SPATIAL_SVC
-    oxcf->ss_play_alternate[0] = extra_cfg->enable_auto_alt_ref;
+    oxcf->ss_enable_auto_arf[0] = extra_cfg->enable_auto_alt_ref;
 #endif
   }
 
@@ -493,7 +493,7 @@ static vpx_codec_err_t set_encoder_config(
   printf("two_pass_vbrmin_section: %d\n", oxcf->two_pass_vbrmin_section);
   printf("two_pass_vbrmax_section: %d\n", oxcf->two_pass_vbrmax_section);
   printf("lag_in_frames: %d\n", oxcf->lag_in_frames);
-  printf("play_alternate: %d\n", oxcf->play_alternate);
+  printf("enable_auto_arf: %d\n", oxcf->enable_auto_arf);
   printf("Version: %d\n", oxcf->Version);
   printf("encode_breakout: %d\n", oxcf->encode_breakout);
   printf("error resilient: %d\n", oxcf->error_resilient_mode);
