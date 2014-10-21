@@ -216,7 +216,6 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
   if (speed >= 3) {
     sf->use_square_partition_only = 1;
     sf->disable_filter_search_var_thresh = 100;
-    sf->constrain_copy_partition = 1;
     sf->use_uv_intra_rd_estimate = 1;
     sf->skip_encode_sb = 1;
     sf->mv.subpel_iters_per_step = 1;
@@ -365,7 +364,6 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->min_partition_size = BLOCK_4X4;
   sf->adjust_partitioning_from_last_frame = 0;
   sf->last_partitioning_redo_frequency = 4;
-  sf->constrain_copy_partition = 0;
   sf->disable_split_mask = 0;
   sf->mode_search_skip_flags = 0;
   sf->force_frame_boost = 0;
