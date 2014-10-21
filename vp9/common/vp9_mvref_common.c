@@ -45,9 +45,11 @@ static void find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
       different_ref_found = 1;
 
       if (candidate->ref_frame[0] == ref_frame)
-        ADD_MV_REF_LIST(get_sub_block_mv(candidate_mi, 0, mv_ref->col, block));
+        ADD_MV_REF_LIST(get_sub_block_mv(candidate_mi, 0, mv_ref->col, block),
+                        refmv_count, mv_ref_list, Done);
       else if (candidate->ref_frame[1] == ref_frame)
-        ADD_MV_REF_LIST(get_sub_block_mv(candidate_mi, 1, mv_ref->col, block));
+        ADD_MV_REF_LIST(get_sub_block_mv(candidate_mi, 1, mv_ref->col, block),
+                        refmv_count, mv_ref_list, Done);
     }
   }
 
@@ -62,18 +64,18 @@ static void find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
       different_ref_found = 1;
 
       if (candidate->ref_frame[0] == ref_frame)
-        ADD_MV_REF_LIST(candidate->mv[0]);
+        ADD_MV_REF_LIST(candidate->mv[0], refmv_count, mv_ref_list, Done);
       else if (candidate->ref_frame[1] == ref_frame)
-        ADD_MV_REF_LIST(candidate->mv[1]);
+        ADD_MV_REF_LIST(candidate->mv[1], refmv_count, mv_ref_list, Done);
     }
   }
 
   // Check the last frame's mode and mv info.
   if (prev_mbmi) {
     if (prev_mbmi->ref_frame[0] == ref_frame)
-      ADD_MV_REF_LIST(prev_mbmi->mv[0]);
+      ADD_MV_REF_LIST(prev_mbmi->mv[0], refmv_count, mv_ref_list, Done);
     else if (prev_mbmi->ref_frame[1] == ref_frame)
-      ADD_MV_REF_LIST(prev_mbmi->mv[1]);
+      ADD_MV_REF_LIST(prev_mbmi->mv[1], refmv_count, mv_ref_list, Done);
   }
 
   // Since we couldn't find 2 mvs from the same reference frame
@@ -87,14 +89,16 @@ static void find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                                               * xd->mi_stride].src_mi->mbmi;
 
         // If the candidate is INTRA we don't want to consider its mv.
-        IF_DIFF_REF_FRAME_ADD_MV(candidate);
+        IF_DIFF_REF_FRAME_ADD_MV(candidate, ref_frame, ref_sign_bias,
+                                 refmv_count, mv_ref_list, Done);
       }
     }
   }
 
   // Since we still don't have a candidate we'll try the last frame.
   if (prev_mbmi)
-    IF_DIFF_REF_FRAME_ADD_MV(prev_mbmi);
+    IF_DIFF_REF_FRAME_ADD_MV(prev_mbmi, ref_frame, ref_sign_bias, refmv_count,
+                             mv_ref_list, Done);
 
  Done:
 
