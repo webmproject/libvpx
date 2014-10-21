@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//SXM\u003d",
+        "filename": "test/dct16x16_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 610,
+      "author": {
+        "id": 1115299
+      },
+      "writtenOn": "2014-10-21T10:29:41Z",
+      "side": 1,
+      "message": "The stress test Trans16x16DCT does apply the forward transform to random residual pixels and then testing the inverse transform functions.\n\nThis code is defining an additional test to get more test coverage of some particular corner cases that are important in the method chosen to optimize the inverse transform.",
+      "parentUuid": "AAAAdn//Sdc\u003d",
+      "revId": "b8d751d4bac9691dbb30a1426a9e6c47ffc7d2fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//SdY\u003d",
         "filename": "test/dct16x16_test.cc",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2014-10-20T22:28:44Z",
       "side": 1,
       "message": "I am not sure if I understand the term \"Optimizations take effect at a threshold of 3155\"?\n\nWhy use 3167 here?",
+      "revId": "b8d751d4bac9691dbb30a1426a9e6c47ffc7d2fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//SXI\u003d",
+        "filename": "test/dct16x16_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 926,
+      "author": {
+        "id": 1115299
+      },
+      "writtenOn": "2014-10-21T10:29:41Z",
+      "side": 1,
+      "message": "The x86 optimizations to the idct16x16 take different code paths depending on the size of the coefficients.  (The common case of small coefficients can be decode more efficiently.)  This test case is trying to explore the space around the switching threshold.  The switching threshold is 3155, so the test code uses values just slightly higher than the switching threshold to try and detect interesting corner cases.",
+      "parentUuid": "AAAAdn//SdY\u003d",
       "revId": "b8d751d4bac9691dbb30a1426a9e6c47ffc7d2fa",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//SXE\u003d",
+        "filename": "test/fdct8x8_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 747,
+      "author": {
+        "id": 1115299
+      },
+      "writtenOn": "2014-10-21T10:29:41Z",
+      "side": 1,
+      "message": "The x86 optimizations to the idct8x8 take different code paths depending on the size of the coefficients.  (The common case of small coefficients can be decode more efficiently.)  This test case is trying to explore the space around the switching threshold.  The switching threshold is 6201, so the test code uses values just slightly higher than the switching threshold to try and detect interesting corner cases.",
+      "parentUuid": "AAAAdn//SdU\u003d",
+      "revId": "b8d751d4bac9691dbb30a1426a9e6c47ffc7d2fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//SdM\u003d",
         "filename": "vp9/common/vp9_rtcd_defs.pl",
         "patchSetId": 4
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//SW8\u003d",
+        "filename": "vp9/common/vp9_rtcd_defs.pl",
+        "patchSetId": 4
+      },
+      "lineNbr": 1200,
+      "author": {
+        "id": 1115299
+      },
+      "writtenOn": "2014-10-21T10:29:41Z",
+      "side": 1,
+      "message": "They are not the same from the point of view of assembler optimized functions.  The issue is that tran_low_t is a different datatype depending on CONFIG_VP9_HIGHBITDEPTH so it is possible for some targets to have optimizations only for one set of these branches.\n\nHaving said that, the current code would indeed work and would be more concise if the common routines were not split out into different sections so feel free to change this if you prefer the more compact style.",
+      "parentUuid": "AAAAdn//SdM\u003d",
+      "revId": "b8d751d4bac9691dbb30a1426a9e6c47ffc7d2fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//SdQ\u003d",
         "filename": "vp9/encoder/vp9_dct.h",
         "patchSetId": 4
@@ -81,6 +153,24 @@
       "writtenOn": "2014-10-20T22:28:44Z",
       "side": 1,
       "message": "Do not use global variable.",
+      "revId": "b8d751d4bac9691dbb30a1426a9e6c47ffc7d2fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//SXA\u003d",
+        "filename": "vp9/encoder/vp9_dct.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1115299
+      },
+      "writtenOn": "2014-10-21T10:29:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//SdQ\u003d",
       "revId": "b8d751d4bac9691dbb30a1426a9e6c47ffc7d2fa",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
