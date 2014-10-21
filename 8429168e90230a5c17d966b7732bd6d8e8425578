@@ -87,6 +87,40 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//SaE\u003d",
+        "filename": "vp9/common/arm/neon/vp9_convolve8_neon.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-21T01:20:16Z",
+      "side": 1,
+      "message": "same - use the header",
+      "revId": "8429168e90230a5c17d966b7732bd6d8e8425578",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//SaA\u003d",
+        "filename": "vp9/common/arm/neon/vp9_convolve8_neon.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-21T01:20:16Z",
+      "side": 1,
+      "message": "These functions are\nor\nThis function is",
+      "revId": "8429168e90230a5c17d966b7732bd6d8e8425578",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//ScA\u003d",
         "filename": "vp9/common/arm/neon/vp9_convolve8_neon.c",
         "patchSetId": 11
@@ -115,6 +149,159 @@
       "writtenOn": "2014-10-20T23:34:56Z",
       "side": 1,
       "message": "put the src/dst adjustments and the and of the loop and only change i here:\nfor() {\n...\nsrc +\u003d\ndst +\u003d\n}",
+      "revId": "8429168e90230a5c17d966b7732bd6d8e8425578",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//SZ8\u003d",
+        "filename": "vp9/common/arm/neon/vp9_convolve8_neon.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-21T01:20:16Z",
+      "side": 1,
+      "message": "use src directly",
+      "revId": "8429168e90230a5c17d966b7732bd6d8e8425578",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//SZ4\u003d",
+        "filename": "vp9/common/arm/neon/vp9_convolve8_neon.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-21T01:20:16Z",
+      "side": 1,
+      "message": "src + stride",
+      "revId": "8429168e90230a5c17d966b7732bd6d8e8425578",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//SZ0\u003d",
+        "filename": "vp9/common/arm/neon/vp9_convolve8_neon.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-21T01:20:16Z",
+      "side": 1,
+      "message": "src + 2 * stride",
+      "revId": "8429168e90230a5c17d966b7732bd6d8e8425578",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//SZw\u003d",
+        "filename": "vp9/common/arm/neon/vp9_convolve8_neon.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-21T01:20:16Z",
+      "side": 1,
+      "message": "don\u0027t need a comment for just extending the vectors unless it\u0027s to say *why* you\u0027re extending the vectors",
+      "revId": "8429168e90230a5c17d966b7732bd6d8e8425578",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//SZs\u003d",
+        "filename": "vp9/common/arm/neon/vp9_convolve8_neon.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-21T01:20:16Z",
+      "side": 1,
+      "message": "this seems to put the date in an unordered state. what\u0027s the purpose of this?",
+      "revId": "8429168e90230a5c17d966b7732bd6d8e8425578",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//SZo\u003d",
+        "filename": "vp9/common/arm/neon/vp9_convolve8_neon.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 213,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-21T01:20:16Z",
+      "side": 1,
+      "message": "only put the i values in the for statement. put the others in the body of the loop",
+      "revId": "8429168e90230a5c17d966b7732bd6d8e8425578",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//SZk\u003d",
+        "filename": "vp9/common/arm/neon/vp9_convolve8_neon.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-21T01:20:16Z",
+      "side": 1,
+      "message": "unless ps is used elsewhere, just use psrc directly like above",
+      "revId": "8429168e90230a5c17d966b7732bd6d8e8425578",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//SZg\u003d",
+        "filename": "vp9/common/arm/neon/vp9_convolve8_neon.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-21T01:20:16Z",
+      "side": 1,
+      "message": "be careful with this cast - ios clang has been causing issues by adding alignment directives automatically. since this is offset by 7, that might be an issue",
+      "revId": "8429168e90230a5c17d966b7732bd6d8e8425578",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//SZc\u003d",
+        "filename": "vp9/common/arm/neon/vp9_convolve8_neon.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 358,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-21T01:20:16Z",
+      "side": 1,
+      "message": "use pdst (or dst?) directly",
       "revId": "8429168e90230a5c17d966b7732bd6d8e8425578",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
