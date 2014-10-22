@@ -29,12 +29,6 @@ struct optimize_ctx {
   ENTROPY_CONTEXT tl[MAX_MB_PLANE][16];
 };
 
-struct encode_b_args {
-  MACROBLOCK *x;
-  struct optimize_ctx *ctx;
-  int8_t *skip;
-};
-
 void vp9_subtract_block_c(int rows, int cols,
                           int16_t *diff, ptrdiff_t diff_stride,
                           const uint8_t *src, ptrdiff_t src_stride,
@@ -802,7 +796,7 @@ void vp9_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize) {
   }
 }
 
-static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
+void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                TX_SIZE tx_size, void *arg) {
   struct encode_b_args* const args = arg;
   MACROBLOCK *const x = args->x;
@@ -1040,18 +1034,10 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
     *(args->skip) = 0;
 }
 
-void vp9_encode_block_intra(MACROBLOCK *x, int plane, int block,
-                            BLOCK_SIZE plane_bsize, TX_SIZE tx_size,
-                            int8_t *skip) {
-  struct encode_b_args arg = {x, NULL, skip};
-  encode_block_intra(plane, block, plane_bsize, tx_size, &arg);
-}
-
-
 void vp9_encode_intra_block_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
   const MACROBLOCKD *const xd = &x->e_mbd;
   struct encode_b_args arg = {x, NULL, &xd->mi[0].src_mi->mbmi.skip};
 
-  vp9_foreach_transformed_block_in_plane(xd, bsize, plane, encode_block_intra,
-                                         &arg);
+  vp9_foreach_transformed_block_in_plane(xd, bsize, plane,
+                                         vp9_encode_block_intra, &arg);
 }
