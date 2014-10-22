@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//SOI\u003d",
+        "filename": "vp9/encoder/x86/vp9_denoiser_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2014-10-22T17:39:22Z",
+      "side": 0,
+      "message": "This comment is from vp8, I can also change it in vp8.",
+      "parentUuid": "AAAAdn//SRU\u003d",
+      "revId": "0615a196e220afed1f175f5e27801a9f334c4488",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//SRM\u003d",
         "filename": "vp9/encoder/x86/vp9_denoiser_sse2.c",
         "patchSetId": 2
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//SOE\u003d",
+        "filename": "vp9/encoder/x86/vp9_denoiser_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2014-10-22T17:39:22Z",
+      "side": 0,
+      "message": "Done",
+      "parentUuid": "AAAAdn//SRM\u003d",
+      "revId": "0615a196e220afed1f175f5e27801a9f334c4488",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//SRI\u003d",
         "filename": "vp9/encoder/x86/vp9_denoiser_sse2.c",
         "patchSetId": 2
@@ -47,6 +83,24 @@
       "writtenOn": "2014-10-22T08:56:31Z",
       "side": 0,
       "message": "same comments here; how similar is this code block to 194? can this be refactored into a function (in a future commit)?",
+      "revId": "0615a196e220afed1f175f5e27801a9f334c4488",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//SNM\u003d",
+        "filename": "vp9/encoder/x86/vp9_denoiser_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2014-10-22T17:39:22Z",
+      "side": 0,
+      "message": "Yes. I planed to refactor vp9_denoiser_8xM_sse2 and vp9_denoiser_4xM_sse2 to make them one function. Will do this in next commit.",
+      "parentUuid": "AAAAdn//SRI\u003d",
       "revId": "0615a196e220afed1f175f5e27801a9f334c4488",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
