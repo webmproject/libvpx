@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//SL0\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.h",
+        "patchSetId": 70
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-10-22T17:47:27Z",
+      "side": 1,
+      "message": "Sorry. Misunderstood what you said. Now delete them and change the declaration of the function below.",
+      "parentUuid": "AAAAdn//SMI\u003d",
+      "revId": "01b19af1634a1fcdb4d811ea7a6344dab86a1259",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//SQ8\u003d",
         "filename": "vp9/decoder/vp9_decodemv.c",
         "patchSetId": 70
