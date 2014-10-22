@@ -142,8 +142,6 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
 
   if (speed >= 5) {
     int i;
-
-    sf->partition_search_type = FIXED_PARTITION;
     sf->optimize_coefficients = 0;
     sf->mv.search_method = HEX;
     sf->disable_filter_search_var_thresh = 500;
@@ -151,8 +149,7 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
       sf->intra_y_mode_mask[i] = INTRA_DC;
       sf->intra_uv_mode_mask[i] = INTRA_DC;
     }
-  }
-  if (speed >= 6) {
+    sf->partition_search_breakout_rate_thr = 500;
     sf->mv.reduce_first_step_size = 1;
   }
 }
