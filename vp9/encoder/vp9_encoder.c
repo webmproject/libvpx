@@ -3417,7 +3417,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   // Note that at the moment multi_arf is only configured for 2 pass VBR and
   // will not work properly with svc.
   if ((oxcf->pass == 2) && !cpi->use_svc &&
-      (cpi->oxcf.enable_auto_arf > 1) && (cpi->oxcf.rc_mode == VPX_VBR))
+      (cpi->oxcf.enable_auto_arf > 1))
     cpi->multi_arf_allowed = 1;
   else
     cpi->multi_arf_allowed = 0;
