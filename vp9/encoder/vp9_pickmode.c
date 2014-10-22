@@ -635,7 +635,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       // motion vector is at sub-pixel accuracy level for luma component, i.e.,
       // the last three bits are all zeros.
       if (cpi->sf.reuse_inter_pred_sby) {
-        if (this_mode == NEARESTMV) {
+        if (!this_mode_pred) {
           this_mode_pred = &tmp[3];
         } else {
           this_mode_pred = &tmp[get_pred_buffer(tmp, 3)];
