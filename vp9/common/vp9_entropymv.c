@@ -196,7 +196,7 @@ static void adapt_probs(const vp9_tree_index *tree, const vp9_prob *pre_probs,
 void vp9_adapt_mv_probs(VP9_COMMON *cm, int allow_hp) {
   int i, j;
 
-  nmv_context *fc = &cm->fc.nmvc;
+  nmv_context *fc = &cm->fc->nmvc;
   const nmv_context *pre_fc = &cm->frame_contexts[cm->frame_context_idx].nmvc;
   const nmv_context_counts *counts = &cm->counts.mv;
 
@@ -229,5 +229,5 @@ void vp9_adapt_mv_probs(VP9_COMMON *cm, int allow_hp) {
 }
 
 void vp9_init_mv_probs(VP9_COMMON *cm) {
-  cm->fc.nmvc = default_nmv_context;
+  cm->fc->nmvc = default_nmv_context;
 }

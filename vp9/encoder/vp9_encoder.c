@@ -134,7 +134,7 @@ static void setup_frame(VP9_COMP *cpi) {
     cpi->refresh_alt_ref_frame = 1;
     vp9_zero(cpi->interp_filter_selected);
   } else {
-    cm->fc = cm->frame_contexts[cm->frame_context_idx];
+    *cm->fc = cm->frame_contexts[cm->frame_context_idx];
     vp9_zero(cpi->interp_filter_selected[0]);
   }
 }
@@ -159,6 +159,11 @@ void vp9_initialize_enc() {
 static void dealloc_compressor_data(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   int i;
+
+  vpx_free(cm->fc);
+  cm->fc = NULL;
+  vpx_free(cm->frame_contexts);
+  cm->frame_contexts = NULL;
 
   // Delete sementation map
   vpx_free(cpi->segmentation_map);
@@ -257,7 +262,7 @@ static void save_coding_context(VP9_COMP *cpi) {
   vp9_copy(cc->last_ref_lf_deltas, cm->lf.last_ref_deltas);
   vp9_copy(cc->last_mode_lf_deltas, cm->lf.last_mode_deltas);
 
-  cc->fc = cm->fc;
+  cc->fc = *cm->fc;
 }
 
 static void restore_coding_context(VP9_COMP *cpi) {
@@ -286,7 +291,7 @@ static void restore_coding_context(VP9_COMP *cpi) {
   vp9_copy(cm->lf.last_ref_deltas, cc->last_ref_lf_deltas);
   vp9_copy(cm->lf.last_mode_deltas, cc->last_mode_lf_deltas);
 
-  cm->fc = cc->fc;
+  *cm->fc = cc->fc;
 }
 
 static void configure_static_seg_features(VP9_COMP *cpi) {
@@ -1373,6 +1378,12 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
   }
 
   cm->error.setjmp = 1;
+
+  CHECK_MEM_ERROR(cm, cm->fc,
+                  (FRAME_CONTEXT *)vpx_calloc(1, sizeof(*cm->fc)));
+  CHECK_MEM_ERROR(cm, cm->frame_contexts,
+                  (FRAME_CONTEXT *)vpx_calloc(FRAME_CONTEXTS,
+                  sizeof(*cm->frame_contexts)));
 
   cpi->use_svc = 0;
 
@@ -3647,7 +3658,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   }
 
   if (cm->refresh_frame_context)
-    cm->frame_contexts[cm->frame_context_idx] = cm->fc;
+    cm->frame_contexts[cm->frame_context_idx] = *cm->fc;
 
   // Frame was dropped, release scaled references.
   if (*size == 0) {

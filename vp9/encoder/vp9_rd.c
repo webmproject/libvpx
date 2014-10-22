@@ -53,7 +53,7 @@ static const uint8_t rd_thresh_block_size_factor[BLOCK_SIZES] = {
 };
 
 static void fill_mode_costs(VP9_COMP *cpi) {
-  const FRAME_CONTEXT *const fc = &cpi->common.fc;
+  const FRAME_CONTEXT *const fc = cpi->common.fc;
   int i, j;
 
   for (i = 0; i < INTRA_MODES; ++i)
@@ -268,7 +268,7 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
   set_block_thresholds(cm, rd);
 
   if (!cpi->sf.use_nonrd_pick_mode || cm->frame_type == KEY_FRAME) {
-    fill_token_costs(x->token_costs, cm->fc.coef_probs);
+    fill_token_costs(x->token_costs, cm->fc->coef_probs);
 
     for (i = 0; i < PARTITION_CONTEXTS; ++i)
       vp9_cost_tokens(cpi->partition_cost[i], get_partition_probs(cm, i),
@@ -283,11 +283,11 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
       vp9_build_nmv_cost_table(x->nmvjointcost,
                                cm->allow_high_precision_mv ? x->nmvcost_hp
                                                            : x->nmvcost,
-                               &cm->fc.nmvc, cm->allow_high_precision_mv);
+                               &cm->fc->nmvc, cm->allow_high_precision_mv);
 
       for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
         vp9_cost_tokens((int *)cpi->inter_mode_cost[i],
-                        cm->fc.inter_mode_probs[i], vp9_inter_mode_tree);
+                        cm->fc->inter_mode_probs[i], vp9_inter_mode_tree);
     }
   }
 }
