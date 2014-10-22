@@ -3334,11 +3334,6 @@ static void process_denoiser_mode_change(VP8_COMP *cpi) {
       int index = block_index_row + (j >> 4);
       if (cpi->consec_zero_last[index] >= min_consec_zero_last) {
         unsigned int sse;
-        const unsigned int mse = vp8_mse16x16(src + j,
-                                              ystride,
-                                              dst + j,
-                                              ystride,
-                                              &sse);
         const unsigned int var = vp8_variance16x16(src + j,
                                                    ystride,
                                                    dst + j,
@@ -3347,14 +3342,15 @@ static void process_denoiser_mode_change(VP8_COMP *cpi) {
         // Only consider this block as valid for noise measurement
         // if the sum_diff average of the current and previous frame
         // is small (to avoid effects from lighting change).
-        if ((mse - var) < 256) {
+        if ((sse - var) < 256) {
+          unsigned int sse2;
           const unsigned int act = vp8_variance16x16(src + j,
                                                      ystride,
                                                      const_source,
                                                      0,
-                                                     &sse);
+                                                     &sse2);
           if (act > 0)
-            total += mse / act;
+            total += sse / act;
           num_blocks++;
         }
       }
