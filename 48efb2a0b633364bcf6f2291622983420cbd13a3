@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//SRk\u003d",
+        "filename": "vp9/encoder/x86/vp9_denoiser_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-22T08:56:31Z",
+      "side": 1,
+      "message": "this alignment is off as these aren\u0027t contained in the () condition",
+      "revId": "48efb2a0b633364bcf6f2291622983420cbd13a3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//SRg\u003d",
+        "filename": "vp9/encoder/x86/vp9_denoiser_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-22T08:56:31Z",
+      "side": 1,
+      "message": "const",
+      "revId": "48efb2a0b633364bcf6f2291622983420cbd13a3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//SRc\u003d",
+        "filename": "vp9/encoder/x86/vp9_denoiser_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-22T08:56:31Z",
+      "side": 1,
+      "message": "here too, the alignment is off by one",
+      "revId": "48efb2a0b633364bcf6f2291622983420cbd13a3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//SRY\u003d",
+        "filename": "vp9/encoder/x86/vp9_denoiser_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 333,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-22T08:56:31Z",
+      "side": 1,
+      "message": "here too",
+      "revId": "48efb2a0b633364bcf6f2291622983420cbd13a3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
