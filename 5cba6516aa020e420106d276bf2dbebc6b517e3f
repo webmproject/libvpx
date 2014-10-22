@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//SKg\u003d",
+        "filename": "vp9/encoder/x86/vp9_denoiser_sse2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-22T18:05:19Z",
+      "side": 1,
+      "message": "you should be consistent with the placement of \u0027\u003e\u003e\u0027; as mentioned this is duplicated code so for now it\u0027s all right if you\u0027re going to make another cleanup pass",
+      "revId": "5cba6516aa020e420106d276bf2dbebc6b517e3f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
