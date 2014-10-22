@@ -19,42 +19,34 @@
     mov         rcx, 0x00000040
 
     movdqa      xmm7, [rdx]                 ;load filters
-    pshuflw     xmm0, xmm7, 0b              ;k0
-    pshuflw     xmm1, xmm7, 01010101b       ;k1
-    pshuflw     xmm2, xmm7, 10101010b       ;k2
-    pshuflw     xmm3, xmm7, 11111111b       ;k3
+    pshuflw     xmm10, xmm7, 0b              ;k0
+    pshuflw     xmm11, xmm7, 01010101b       ;k1
+    pshuflw     xmm12, xmm7, 10101010b       ;k2
+    pshuflw     xmm13, xmm7, 11111111b       ;k3
     psrldq      xmm7, 8
     pshuflw     xmm4, xmm7, 0b              ;k4
     pshuflw     xmm5, xmm7, 01010101b       ;k5
     pshuflw     xmm6, xmm7, 10101010b       ;k6
     pshuflw     xmm7, xmm7, 11111111b       ;k7
 
-    punpcklwd   xmm0, xmm6
-    punpcklwd   xmm2, xmm5
-    punpcklwd   xmm3, xmm4
-    punpcklwd   xmm1, xmm7
+    punpcklwd   xmm10, xmm6
+    punpcklwd   xmm12, xmm5
+    punpcklwd   xmm13, xmm4
+    punpcklwd   xmm11, xmm7
 
-    movdqa      k0k6, xmm0
-    movdqa      k2k5, xmm2
-    movdqa      k3k4, xmm3
-    movdqa      k1k7, xmm1
-
-    movq        xmm6, rcx
-    pshufd      xmm6, xmm6, 0
-    movdqa      krd, xmm6
+    movq        xmm9, rcx
+    pshufd      xmm9, xmm9, 0
 
     ;Compute max and min values of a pixel
     mov         rdx, 0x00010001
     movsxd      rcx, DWORD PTR arg(6)      ;bps
-    movq        xmm0, rdx
+    movq        xmm14, rdx
     movq        xmm1, rcx
-    pshufd      xmm0, xmm0, 0b
-    movdqa      xmm2, xmm0
-    psllw       xmm0, xmm1
-    psubw       xmm0, xmm2
-    pxor        xmm1, xmm1
-    movdqa      max, xmm0                  ;max value (for clamping)
-    movdqa      min, xmm1                  ;min value (for clamping)
+    pshufd      xmm14, xmm14, 0b
+    movdqa      xmm2, xmm14
+    psllw       xmm14, xmm1
+    psubw       xmm14, xmm2                 ;max value (for clamping)
+    pxor        xmm8, xmm8                ;min value (for clamping)
 
 %endm
 
@@ -64,22 +56,22 @@
     punpcklwd   xmm2, xmm5
     punpcklwd   xmm3, xmm4
 
-    pmaddwd     xmm0, k0k6                  ;multiply the filter factors
-    pmaddwd     xmm1, k1k7
-    pmaddwd     xmm2, k2k5
-    pmaddwd     xmm3, k3k4
+    pmaddwd     xmm0, xmm10                 ;multiply the filter factors
+    pmaddwd     xmm1, xmm11
+    pmaddwd     xmm2, xmm12
+    pmaddwd     xmm3, xmm13
 
     paddd       xmm0, xmm1                  ;sum
     paddd       xmm0, xmm2
     paddd       xmm0, xmm3
 
-    paddd       xmm0, krd                   ;rounding
+    paddd       xmm0, xmm9                  ;rounding
     psrad       xmm0, 7                     ;shift
     packssdw    xmm0, xmm0                  ;pack to word
 
     ;clamp the values
-    pminsw      xmm0, max
-    pmaxsw      xmm0, min
+    pminsw      xmm0, xmm14
+    pmaxsw      xmm0, xmm8
 
 %if %1
     movq        xmm1, [rdi]
@@ -95,42 +87,34 @@
     mov         rcx, 0x00000040
 
     movdqa      xmm7, [rdx]                 ;load filters
-    pshuflw     xmm0, xmm7, 0b              ;k0
+    pshuflw     xmm10, xmm7, 0b             ;k0
     pshuflw     xmm1, xmm7, 01010101b       ;k1
-    pshuflw     xmm2, xmm7, 10101010b       ;k2
-    pshuflw     xmm3, xmm7, 11111111b       ;k3
+    pshuflw     xmm12, xmm7, 10101010b      ;k2
+    pshuflw     xmm13, xmm7, 11111111b      ;k3
     pshufhw     xmm4, xmm7, 0b              ;k4
     pshufhw     xmm5, xmm7, 01010101b       ;k5
-    pshufhw     xmm6, xmm7, 10101010b       ;k6
+    pshufhw     xmm11, xmm7, 10101010b      ;k6
     pshufhw     xmm7, xmm7, 11111111b       ;k7
-    punpcklqdq  xmm2, xmm2
-    punpcklqdq  xmm3, xmm3
-    punpcklwd   xmm0, xmm1
-    punpckhwd   xmm6, xmm7
-    punpckhwd   xmm2, xmm5
-    punpckhwd   xmm3, xmm4
+    punpcklqdq  xmm12, xmm12
+    punpcklqdq  xmm13, xmm13
+    punpcklwd   xmm10, xmm1
+    punpckhwd   xmm11, xmm7
+    punpckhwd   xmm12, xmm5
+    punpckhwd   xmm13, xmm4
 
-    movdqa      k0k1, xmm0                  ;store filter factors on stack
-    movdqa      k6k7, xmm6
-    movdqa      k2k5, xmm2
-    movdqa      k3k4, xmm3
-
-    movq        xmm6, rcx
-    pshufd      xmm6, xmm6, 0
-    movdqa      krd, xmm6                   ;rounding
+    movq        xmm9, rcx
+    pshufd      xmm9, xmm9, 0              ;rounding
 
     ;Compute max and min values of a pixel
     mov         rdx, 0x00010001
     movsxd      rcx, DWORD PTR arg(6)       ;bps
-    movq        xmm0, rdx
+    movq        xmm14, rdx
     movq        xmm1, rcx
-    pshufd      xmm0, xmm0, 0b
-    movdqa      xmm2, xmm0
-    psllw       xmm0, xmm1
-    psubw       xmm0, xmm2
-    pxor        xmm1, xmm1
-    movdqa      max, xmm0                  ;max value (for clamping)
-    movdqa      min, xmm1                  ;min value (for clamping)
+    pshufd      xmm14, xmm14, 0b
+    movdqa      xmm2, xmm14
+    psllw       xmm14, xmm1
+    psubw       xmm14, xmm2                 ;max value (for clamping)
+    pxor        xmm15, xmm15                ;min value (for clamping)
 %endm
 
 %macro LOAD_VERT_8 1
@@ -146,7 +130,7 @@
 %endm
 
 %macro HIGH_APPLY_FILTER_8 2
-    movdqu      temp, xmm4
+    movdqa      xmm8, xmm4
     movdqa      xmm4, xmm0
     punpcklwd   xmm0, xmm1
     punpckhwd   xmm4, xmm1
@@ -157,21 +141,21 @@
     punpcklwd   xmm2, xmm5
     punpckhwd   xmm7, xmm5
 
-    movdqu      xmm5, temp
-    movdqu      temp, xmm4
+    movdqa      xmm5, xmm8
+    movdqa      xmm8, xmm4
     movdqa      xmm4, xmm3
     punpcklwd   xmm3, xmm5
     punpckhwd   xmm4, xmm5
-    movdqu      xmm5, temp
+    movdqa      xmm5, xmm8
 
-    pmaddwd     xmm0, k0k1
-    pmaddwd     xmm5, k0k1
-    pmaddwd     xmm6, k6k7
-    pmaddwd     xmm1, k6k7
-    pmaddwd     xmm2, k2k5
-    pmaddwd     xmm7, k2k5
-    pmaddwd     xmm3, k3k4
-    pmaddwd     xmm4, k3k4
+    pmaddwd     xmm0, xmm10
+    pmaddwd     xmm5, xmm10
+    pmaddwd     xmm6, xmm11
+    pmaddwd     xmm1, xmm11
+    pmaddwd     xmm2, xmm12
+    pmaddwd     xmm7, xmm12
+    pmaddwd     xmm3, xmm13
+    pmaddwd     xmm4, xmm13
 
     paddd       xmm0, xmm6
     paddd       xmm0, xmm2
@@ -180,15 +164,15 @@
     paddd       xmm5, xmm7
     paddd       xmm5, xmm4
 
-    paddd       xmm0, krd                   ;rounding
-    paddd       xmm5, krd
+    paddd       xmm0, xmm9                  ;rounding
+    paddd       xmm5, xmm9
     psrad       xmm0, 7                     ;shift
     psrad       xmm5, 7
     packssdw    xmm0, xmm5                  ;pack back to word
 
     ;clamp the values
-    pminsw      xmm0, max
-    pmaxsw      xmm0, min
+    pminsw      xmm0, xmm14
+    pmaxsw      xmm0, xmm15
 
 %if %1
     movdqu      xmm1, [rdi + %2]
@@ -211,21 +195,11 @@ sym(vp9_highbd_filter_block1d4_v8_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
-    SAVE_XMM 7
+    SAVE_XMM 14
     push        rsi
     push        rdi
     push        rbx
     ; end prolog
-
-    ALIGN_STACK 16, rax
-    sub         rsp, 16 * 7
-    %define k0k6 [rsp + 16 * 0]
-    %define k2k5 [rsp + 16 * 1]
-    %define k3k4 [rsp + 16 * 2]
-    %define k1k7 [rsp + 16 * 3]
-    %define krd [rsp + 16 * 4]
-    %define max [rsp + 16 * 5]
-    %define min [rsp + 16 * 6]
 
     HIGH_GET_FILTERS_4
 
@@ -256,8 +230,6 @@ sym(vp9_highbd_filter_block1d4_v8_sse2):
     dec         rcx
     jnz         .loop
 
-    add rsp, 16 * 7
-    pop rsp
     pop rbx
     ; begin epilog
     pop rdi
@@ -281,22 +253,11 @@ sym(vp9_highbd_filter_block1d8_v8_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
-    SAVE_XMM 7
+    SAVE_XMM 15
     push        rsi
     push        rdi
     push        rbx
     ; end prolog
-
-    ALIGN_STACK 16, rax
-    sub         rsp, 16 * 8
-    %define k0k1 [rsp + 16 * 0]
-    %define k6k7 [rsp + 16 * 1]
-    %define k2k5 [rsp + 16 * 2]
-    %define k3k4 [rsp + 16 * 3]
-    %define krd [rsp + 16 * 4]
-    %define temp [rsp + 16 * 5]
-    %define max [rsp + 16 * 6]
-    %define min [rsp + 16 * 7]
 
     HIGH_GET_FILTERS
 
@@ -315,8 +276,6 @@ sym(vp9_highbd_filter_block1d8_v8_sse2):
     dec         rcx
     jnz         .loop
 
-    add rsp, 16 * 8
-    pop rsp
     pop rbx
     ; begin epilog
     pop rdi
@@ -340,22 +299,11 @@ sym(vp9_highbd_filter_block1d16_v8_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
-    SAVE_XMM 7
+    SAVE_XMM 15
     push        rsi
     push        rdi
     push        rbx
     ; end prolog
-
-    ALIGN_STACK 16, rax
-    sub         rsp, 16 * 8
-    %define k0k1 [rsp + 16 * 0]
-    %define k6k7 [rsp + 16 * 1]
-    %define k2k5 [rsp + 16 * 2]
-    %define k3k4 [rsp + 16 * 3]
-    %define krd [rsp + 16 * 4]
-    %define temp [rsp + 16 * 5]
-    %define max [rsp + 16 * 6]
-    %define min [rsp + 16 * 7]
 
     HIGH_GET_FILTERS
 
@@ -378,8 +326,6 @@ sym(vp9_highbd_filter_block1d16_v8_sse2):
     dec         rcx
     jnz         .loop
 
-    add rsp, 16 * 8
-    pop rsp
     pop rbx
     ; begin epilog
     pop rdi
@@ -394,21 +340,11 @@ sym(vp9_highbd_filter_block1d4_v8_avg_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
-    SAVE_XMM 7
+    SAVE_XMM 14
     push        rsi
     push        rdi
     push        rbx
     ; end prolog
-
-    ALIGN_STACK 16, rax
-    sub         rsp, 16 * 7
-    %define k0k6 [rsp + 16 * 0]
-    %define k2k5 [rsp + 16 * 1]
-    %define k3k4 [rsp + 16 * 2]
-    %define k1k7 [rsp + 16 * 3]
-    %define krd [rsp + 16 * 4]
-    %define max [rsp + 16 * 5]
-    %define min [rsp + 16 * 6]
 
     HIGH_GET_FILTERS_4
 
@@ -439,8 +375,6 @@ sym(vp9_highbd_filter_block1d4_v8_avg_sse2):
     dec         rcx
     jnz         .loop
 
-    add rsp, 16 * 7
-    pop rsp
     pop rbx
     ; begin epilog
     pop rdi
@@ -455,22 +389,11 @@ sym(vp9_highbd_filter_block1d8_v8_avg_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
-    SAVE_XMM 7
+    SAVE_XMM 15
     push        rsi
     push        rdi
     push        rbx
     ; end prolog
-
-    ALIGN_STACK 16, rax
-    sub         rsp, 16 * 8
-    %define k0k1 [rsp + 16 * 0]
-    %define k6k7 [rsp + 16 * 1]
-    %define k2k5 [rsp + 16 * 2]
-    %define k3k4 [rsp + 16 * 3]
-    %define krd [rsp + 16 * 4]
-    %define temp [rsp + 16 * 5]
-    %define max [rsp + 16 * 6]
-    %define min [rsp + 16 * 7]
 
     HIGH_GET_FILTERS
 
@@ -488,8 +411,6 @@ sym(vp9_highbd_filter_block1d8_v8_avg_sse2):
     dec         rcx
     jnz         .loop
 
-    add rsp, 16 * 8
-    pop rsp
     pop rbx
     ; begin epilog
     pop rdi
@@ -504,22 +425,11 @@ sym(vp9_highbd_filter_block1d16_v8_avg_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
-    SAVE_XMM 7
+    SAVE_XMM 15
     push        rsi
     push        rdi
     push        rbx
     ; end prolog
-
-    ALIGN_STACK 16, rax
-    sub         rsp, 16 * 8
-    %define k0k1 [rsp + 16 * 0]
-    %define k6k7 [rsp + 16 * 1]
-    %define k2k5 [rsp + 16 * 2]
-    %define k3k4 [rsp + 16 * 3]
-    %define krd [rsp + 16 * 4]
-    %define temp [rsp + 16 * 5]
-    %define max [rsp + 16 * 6]
-    %define min [rsp + 16 * 7]
 
     HIGH_GET_FILTERS
 
@@ -541,8 +451,6 @@ sym(vp9_highbd_filter_block1d16_v8_avg_sse2):
     dec         rcx
     jnz         .loop
 
-    add rsp, 16 * 8
-    pop rsp
     pop rbx
     ; begin epilog
     pop rdi
@@ -566,20 +474,10 @@ sym(vp9_highbd_filter_block1d4_h8_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
-    SAVE_XMM 7
+    SAVE_XMM 14
     push        rsi
     push        rdi
     ; end prolog
-
-    ALIGN_STACK 16, rax
-    sub         rsp, 16 * 7
-    %define k0k6 [rsp + 16 * 0]
-    %define k2k5 [rsp + 16 * 1]
-    %define k3k4 [rsp + 16 * 2]
-    %define k1k7 [rsp + 16 * 3]
-    %define krd [rsp + 16 * 4]
-    %define max [rsp + 16 * 5]
-    %define min [rsp + 16 * 6]
 
     HIGH_GET_FILTERS_4
 
@@ -591,6 +489,16 @@ sym(vp9_highbd_filter_block1d4_h8_sse2):
     lea         rax, [rax + rax]            ;bytes per line
     lea         rdx, [rdx + rdx]
     movsxd      rcx, DWORD PTR arg(4)       ;output_height
+
+.load
+    prefetcht0  [rsi - 6]
+    prefetcht0  [rsi + 17]
+    lea         rsi, [rsi + rax]
+    dec         rcx
+    jnz         .load
+
+    mov         rsi, arg(0)
+    movsxd      rcx, DWORD PTR arg(4)
 
 .loop:
     movdqu      xmm0,   [rsi - 6]           ;load src
@@ -616,9 +524,6 @@ sym(vp9_highbd_filter_block1d4_h8_sse2):
     dec         rcx
     jnz         .loop
 
-    add rsp, 16 * 7
-    pop rsp
-
     ; begin epilog
     pop rdi
     pop rsi
@@ -641,21 +546,10 @@ sym(vp9_highbd_filter_block1d8_h8_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
-    SAVE_XMM 7
+    SAVE_XMM 15
     push        rsi
     push        rdi
     ; end prolog
-
-    ALIGN_STACK 16, rax
-    sub         rsp, 16 * 8
-    %define k0k1 [rsp + 16 * 0]
-    %define k6k7 [rsp + 16 * 1]
-    %define k2k5 [rsp + 16 * 2]
-    %define k3k4 [rsp + 16 * 3]
-    %define krd [rsp + 16 * 4]
-    %define temp [rsp + 16 * 5]
-    %define max [rsp + 16 * 6]
-    %define min [rsp + 16 * 7]
 
     HIGH_GET_FILTERS
 
@@ -664,6 +558,16 @@ sym(vp9_highbd_filter_block1d8_h8_sse2):
     lea         rax, [rax + rax]            ;bytes per line
     lea         rdx, [rdx + rdx]
     movsxd      rcx, DWORD PTR arg(4)       ;output_height
+
+.load
+    prefetcht0  [rsi - 6]
+    prefetcht0  [rsi + 23]
+    lea         rsi, [rsi + rax]
+    dec         rcx
+    jnz         .load
+
+    mov         rsi, arg(0)
+    movsxd      rcx, DWORD PTR arg(4)
 
 .loop:
     movdqu      xmm0,   [rsi - 6]           ;load src
@@ -681,9 +585,6 @@ sym(vp9_highbd_filter_block1d8_h8_sse2):
     lea         rdi, [rdi + rdx]
     dec         rcx
     jnz         .loop
-
-    add rsp, 16 * 8
-    pop rsp
 
     ; begin epilog
     pop rdi
@@ -707,21 +608,10 @@ sym(vp9_highbd_filter_block1d16_h8_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
-    SAVE_XMM 7
+    SAVE_XMM 15
     push        rsi
     push        rdi
     ; end prolog
-
-    ALIGN_STACK 16, rax
-    sub         rsp, 16 * 8
-    %define k0k1 [rsp + 16 * 0]
-    %define k6k7 [rsp + 16 * 1]
-    %define k2k5 [rsp + 16 * 2]
-    %define k3k4 [rsp + 16 * 3]
-    %define krd [rsp + 16 * 4]
-    %define temp [rsp + 16 * 5]
-    %define max [rsp + 16 * 6]
-    %define min [rsp + 16 * 7]
 
     HIGH_GET_FILTERS
 
@@ -730,6 +620,16 @@ sym(vp9_highbd_filter_block1d16_h8_sse2):
     lea         rax, [rax + rax]            ;bytes per line
     lea         rdx, [rdx + rdx]
     movsxd      rcx, DWORD PTR arg(4)       ;output_height
+
+.load
+    prefetcht0  [rsi - 6]
+    prefetcht0  [rsi + 31]
+    lea         rsi, [rsi + rax]
+    dec         rcx
+    jnz         .load
+
+    mov         rsi, arg(0)
+    movsxd      rcx, DWORD PTR arg(4)
 
 .loop:
     movdqu      xmm0,   [rsi - 6]           ;load src
@@ -759,9 +659,6 @@ sym(vp9_highbd_filter_block1d16_h8_sse2):
     dec         rcx
     jnz         .loop
 
-    add rsp, 16 * 8
-    pop rsp
-
     ; begin epilog
     pop rdi
     pop rsi
@@ -775,20 +672,10 @@ sym(vp9_highbd_filter_block1d4_h8_avg_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
-    SAVE_XMM 7
+    SAVE_XMM 14
     push        rsi
     push        rdi
     ; end prolog
-
-    ALIGN_STACK 16, rax
-    sub         rsp, 16 * 7
-    %define k0k6 [rsp + 16 * 0]
-    %define k2k5 [rsp + 16 * 1]
-    %define k3k4 [rsp + 16 * 2]
-    %define k1k7 [rsp + 16 * 3]
-    %define krd [rsp + 16 * 4]
-    %define max [rsp + 16 * 5]
-    %define min [rsp + 16 * 6]
 
     HIGH_GET_FILTERS_4
 
@@ -800,6 +687,16 @@ sym(vp9_highbd_filter_block1d4_h8_avg_sse2):
     lea         rax, [rax + rax]            ;bytes per line
     lea         rdx, [rdx + rdx]
     movsxd      rcx, DWORD PTR arg(4)       ;output_height
+
+.load
+    prefetcht0  [rsi - 6]
+    prefetcht0  [rsi + 17]
+    lea         rsi, [rsi + rax]
+    dec         rcx
+    jnz         .load
+
+    mov         rsi, arg(0)
+    movsxd      rcx, DWORD PTR arg(4)
 
 .loop:
     movdqu      xmm0,   [rsi - 6]           ;load src
@@ -825,9 +722,6 @@ sym(vp9_highbd_filter_block1d4_h8_avg_sse2):
     dec         rcx
     jnz         .loop
 
-    add rsp, 16 * 7
-    pop rsp
-
     ; begin epilog
     pop rdi
     pop rsi
@@ -841,21 +735,10 @@ sym(vp9_highbd_filter_block1d8_h8_avg_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
-    SAVE_XMM 7
+    SAVE_XMM 15
     push        rsi
     push        rdi
     ; end prolog
-
-    ALIGN_STACK 16, rax
-    sub         rsp, 16 * 8
-    %define k0k1 [rsp + 16 * 0]
-    %define k6k7 [rsp + 16 * 1]
-    %define k2k5 [rsp + 16 * 2]
-    %define k3k4 [rsp + 16 * 3]
-    %define krd [rsp + 16 * 4]
-    %define temp [rsp + 16 * 5]
-    %define max [rsp + 16 * 6]
-    %define min [rsp + 16 * 7]
 
     HIGH_GET_FILTERS
 
@@ -864,6 +747,16 @@ sym(vp9_highbd_filter_block1d8_h8_avg_sse2):
     lea         rax, [rax + rax]            ;bytes per line
     lea         rdx, [rdx + rdx]
     movsxd      rcx, DWORD PTR arg(4)       ;output_height
+
+.load
+    prefetcht0  [rsi - 6]
+    prefetcht0  [rsi + 23]
+    lea         rsi, [rsi + rax]
+    dec         rcx
+    jnz         .load
+
+    mov         rsi, arg(0)
+    movsxd      rcx, DWORD PTR arg(4)
 
 .loop:
     movdqu      xmm0,   [rsi - 6]           ;load src
@@ -882,8 +775,6 @@ sym(vp9_highbd_filter_block1d8_h8_avg_sse2):
     dec         rcx
     jnz         .loop
 
-    add rsp, 16 * 8
-    pop rsp
 
     ; begin epilog
     pop rdi
@@ -898,21 +789,10 @@ sym(vp9_highbd_filter_block1d16_h8_avg_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
-    SAVE_XMM 7
+    SAVE_XMM 15
     push        rsi
     push        rdi
     ; end prolog
-
-    ALIGN_STACK 16, rax
-    sub         rsp, 16 * 8
-    %define k0k1 [rsp + 16 * 0]
-    %define k6k7 [rsp + 16 * 1]
-    %define k2k5 [rsp + 16 * 2]
-    %define k3k4 [rsp + 16 * 3]
-    %define krd [rsp + 16 * 4]
-    %define temp [rsp + 16 * 5]
-    %define max [rsp + 16 * 6]
-    %define min [rsp + 16 * 7]
 
     HIGH_GET_FILTERS
 
@@ -921,6 +801,16 @@ sym(vp9_highbd_filter_block1d16_h8_avg_sse2):
     lea         rax, [rax + rax]            ;bytes per line
     lea         rdx, [rdx + rdx]
     movsxd      rcx, DWORD PTR arg(4)       ;output_height
+
+.load
+    prefetcht0  [rsi - 6]
+    prefetcht0  [rsi + 31]
+    lea         rsi, [rsi + rax]
+    dec         rcx
+    jnz         .load
+
+    mov         rsi, arg(0)
+    movsxd      rcx, DWORD PTR arg(4)
 
 .loop:
     movdqu      xmm0,   [rsi - 6]           ;load src
@@ -949,9 +839,6 @@ sym(vp9_highbd_filter_block1d16_h8_avg_sse2):
     lea         rdi, [rdi + rdx]
     dec         rcx
     jnz         .loop
-
-    add rsp, 16 * 8
-    pop rsp
 
     ; begin epilog
     pop rdi
