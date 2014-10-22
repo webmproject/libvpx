@@ -78,7 +78,7 @@
 
     mov             r10, r6                 ; w loop counter
 
-loop_horiz_v
+vp9_convolve8_avg_loop_horiz_v
     vld1.8          {d24}, [r0], r1
     vld1.8          {d25}, [r0], r1
     vld1.8          {d26}, [r0], r1
@@ -101,7 +101,7 @@ loop_horiz_v
 
     add             r0, r0, #3
 
-loop_horiz
+vp9_convolve8_avg_loop_horiz
     add             r5, r0, #64
 
     vld1.32         {d28[]}, [r0], r1
@@ -170,14 +170,14 @@ loop_horiz
     vmov            q9,  q13
 
     subs            r6, r6, #4              ; w -= 4
-    bgt             loop_horiz
+    bgt             vp9_convolve8_avg_loop_horiz
 
     ; outer loop
     mov             r6, r10                 ; restore w counter
     add             r0, r0, r9              ; src += src_stride * 4 - w
     add             r2, r2, r12             ; dst += dst_stride * 4 - w
     subs            r7, r7, #4              ; h -= 4
-    bgt loop_horiz_v
+    bgt vp9_convolve8_avg_loop_horiz_v
 
     pop             {r4-r10, pc}
 
@@ -203,7 +203,7 @@ loop_horiz
     lsl             r1, r1, #1
     lsl             r3, r3, #1
 
-loop_vert_h
+vp9_convolve8_avg_loop_vert_h
     mov             r4, r0
     add             r7, r0, r1, asr #1
     mov             r5, r2
@@ -223,7 +223,7 @@ loop_vert_h
     vmovl.u8        q10, d20
     vmovl.u8        q11, d22
 
-loop_vert
+vp9_convolve8_avg_loop_vert
     ; always process a 4x4 block at a time
     vld1.u32        {d24[0]}, [r7], r1
     vld1.u32        {d26[0]}, [r4], r1
@@ -288,13 +288,13 @@ loop_vert
     vmov            d22, d25
 
     subs            r12, r12, #4            ; h -= 4
-    bgt             loop_vert
+    bgt             vp9_convolve8_avg_loop_vert
 
     ; outer loop
     add             r0, r0, #4
     add             r2, r2, #4
     subs            r6, r6, #4              ; w -= 4
-    bgt             loop_vert_h
+    bgt             vp9_convolve8_avg_loop_vert_h
 
     pop             {r4-r8, pc}
 
