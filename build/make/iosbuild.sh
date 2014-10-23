@@ -26,7 +26,6 @@ LIBVPX_SOURCE_DIR=$(dirname "$0" | sed -e s,/build/make,,)
 LIPO=$(xcrun -sdk iphoneos${SDK} -find lipo)
 ORIG_PWD="$(pwd)"
 TARGETS="arm64-darwin-gcc
-         armv6-darwin-gcc
          armv7-darwin-gcc
          armv7s-darwin-gcc
          x86-iphonesimulator-gcc
