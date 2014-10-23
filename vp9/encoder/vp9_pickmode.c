@@ -493,7 +493,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   const int8_t segment_id = mbmi->segment_id;
   const int *const rd_threshes = cpi->rd.threshes[segment_id][bsize];
   const int *const rd_thresh_freq_fact = cpi->rd.thresh_freq_fact[bsize];
-  INTERP_FILTER filter_ref = cm->interp_filter;
+  INTERP_FILTER filter_ref;
   const int bsl = mi_width_log2_lookup[bsize];
   const int pred_filter_search = cm->interp_filter == SWITCHABLE ?
       (((mi_row + mi_col) >> bsl) +
@@ -536,6 +536,13 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   x->skip_encode = cpi->sf.skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
   x->skip = 0;
 
+  if (xd->up_available)
+    filter_ref = xd->mi[-xd->mi_stride].src_mi->mbmi.interp_filter;
+  else if (xd->left_available)
+    filter_ref = xd->mi[-1].src_mi->mbmi.interp_filter;
+  else
+    filter_ref = cm->interp_filter;
+
   // initialize mode decisions
   vp9_rd_cost_reset(&best_rdc);
   vp9_rd_cost_reset(&this_rdc);
@@ -555,11 +562,6 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     x->pred_mv_sad[ref_frame] = INT_MAX;
     frame_mv[NEWMV][ref_frame].as_int = INVALID_MV;
     frame_mv[ZEROMV][ref_frame].as_int = 0;
-
-    if (xd->up_available)
-      filter_ref = xd->mi[-xd->mi_stride].src_mi->mbmi.interp_filter;
-    else if (xd->left_available)
-      filter_ref = xd->mi[-1].src_mi->mbmi.interp_filter;
 
     if (cpi->ref_frame_flags & flag_list[ref_frame]) {
       const YV12_BUFFER_CONFIG *yv12 = get_ref_frame_buffer(cpi, ref_frame);
