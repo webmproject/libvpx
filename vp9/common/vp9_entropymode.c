@@ -350,7 +350,7 @@ static void adapt_probs(const vp9_tree_index *tree,
 
 void vp9_adapt_mode_probs(VP9_COMMON *cm) {
   int i, j;
-  FRAME_CONTEXT *fc = &cm->fc;
+  FRAME_CONTEXT *fc = cm->fc;
   const FRAME_CONTEXT *pre_fc = &cm->frame_contexts[cm->frame_context_idx];
   const FRAME_COUNTS *counts = &cm->counts;
 
@@ -451,17 +451,17 @@ void vp9_setup_past_independence(VP9_COMMON *cm) {
   lf->last_sharpness_level = -1;
 
   vp9_default_coef_probs(cm);
-  vp9_init_mode_probs(&cm->fc);
+  vp9_init_mode_probs(cm->fc);
   vp9_init_mv_probs(cm);
 
   if (cm->frame_type == KEY_FRAME ||
       cm->error_resilient_mode || cm->reset_frame_context == 3) {
     // Reset all frame contexts.
     for (i = 0; i < FRAME_CONTEXTS; ++i)
-      cm->frame_contexts[i] = cm->fc;
+      cm->frame_contexts[i] = *cm->fc;
   } else if (cm->reset_frame_context == 2) {
     // Reset only the frame context specified in the frame header.
-    cm->frame_contexts[cm->frame_context_idx] = cm->fc;
+    cm->frame_contexts[cm->frame_context_idx] = *cm->fc;
   }
 
   if (frame_is_intra_only(cm))

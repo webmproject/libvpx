@@ -127,7 +127,7 @@ static REFERENCE_MODE read_frame_reference_mode(const VP9_COMMON *cm,
 }
 
 static void read_frame_reference_mode_probs(VP9_COMMON *cm, vp9_reader *r) {
-  FRAME_CONTEXT *const fc = &cm->fc;
+  FRAME_CONTEXT *const fc = cm->fc;
   int i;
 
   if (cm->reference_mode == REFERENCE_MODE_SELECT)
@@ -1386,7 +1386,7 @@ static int read_compressed_header(VP9Decoder *pbi, const uint8_t *data,
                                   size_t partition_size) {
   VP9_COMMON *const cm = &pbi->common;
   MACROBLOCKD *const xd = &pbi->mb;
-  FRAME_CONTEXT *const fc = &cm->fc;
+  FRAME_CONTEXT *const fc = cm->fc;
   vp9_reader r;
   int k;
 
@@ -1540,7 +1540,7 @@ void vp9_decode_frame(VP9Decoder *pbi,
   setup_plane_dequants(cm, xd, cm->base_qindex);
   vp9_setup_block_planes(xd, cm->subsampling_x, cm->subsampling_y);
 
-  cm->fc = cm->frame_contexts[cm->frame_context_idx];
+  *cm->fc = cm->frame_contexts[cm->frame_context_idx];
   vp9_zero(cm->counts);
   vp9_zero(xd->dqcoeff);
 
@@ -1580,5 +1580,5 @@ void vp9_decode_frame(VP9Decoder *pbi,
   }
 
   if (cm->refresh_frame_context)
-    cm->frame_contexts[cm->frame_context_idx] = cm->fc;
+    cm->frame_contexts[cm->frame_context_idx] = *cm->fc;
 }

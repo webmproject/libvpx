@@ -163,7 +163,7 @@ static void write_mv_update(const vp9_tree_index *tree,
 
 void vp9_write_nmv_probs(VP9_COMMON *cm, int usehp, vp9_writer *w) {
   int i, j;
-  nmv_context *const mvc = &cm->fc.nmvc;
+  nmv_context *const mvc = &cm->fc->nmvc;
   nmv_context_counts *const counts = &cm->counts.mv;
 
   write_mv_update(vp9_mv_joint_tree, mvc->joints, counts->joints, MV_JOINTS, w);

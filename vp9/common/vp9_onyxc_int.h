@@ -169,8 +169,8 @@ typedef struct VP9Common {
   MV_REFERENCE_FRAME comp_var_ref[2];
   REFERENCE_MODE reference_mode;
 
-  FRAME_CONTEXT fc;  /* this frame entropy */
-  FRAME_CONTEXT frame_contexts[FRAME_CONTEXTS];
+  FRAME_CONTEXT *fc;  /* this frame entropy */
+  FRAME_CONTEXT *frame_contexts;   // FRAME_CONTEXTS
   unsigned int  frame_context_idx; /* Context to use/update */
   FRAME_COUNTS counts;
 
@@ -261,7 +261,7 @@ static INLINE int frame_is_intra_only(const VP9_COMMON *const cm) {
 static INLINE const vp9_prob* get_partition_probs(const VP9_COMMON *cm,
                                                   int ctx) {
   return frame_is_intra_only(cm) ? vp9_kf_partition_probs[ctx]
-                                 : cm->fc.partition_prob[ctx];
+                                 : cm->fc->partition_prob[ctx];
 }
 
 static INLINE void set_skip_context(MACROBLOCKD *xd, int mi_row, int mi_col) {

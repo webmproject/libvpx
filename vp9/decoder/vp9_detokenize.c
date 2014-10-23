@@ -58,7 +58,7 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd, PLANE_TYPE type,
                         int ctx, const int16_t *scan, const int16_t *nb,
                         vp9_reader *r) {
   const int max_eob = 16 << (tx_size << 1);
-  const FRAME_CONTEXT *const fc = &cm->fc;
+  const FRAME_CONTEXT *const fc = cm->fc;
   FRAME_COUNTS *const counts = &cm->counts;
   const int ref = is_inter_block(&xd->mi[0].src_mi->mbmi);
   int band, c = 0;

@@ -59,6 +59,13 @@ VP9Decoder *vp9_decoder_create() {
   }
 
   cm->error.setjmp = 1;
+
+  CHECK_MEM_ERROR(cm, cm->fc,
+                  (FRAME_CONTEXT *)vpx_calloc(1, sizeof(*cm->fc)));
+  CHECK_MEM_ERROR(cm, cm->frame_contexts,
+                  (FRAME_CONTEXT *)vpx_calloc(FRAME_CONTEXTS,
+                  sizeof(*cm->frame_contexts)));
+
   pbi->need_resync = 1;
   initialize_dec();
 
@@ -87,6 +94,11 @@ VP9Decoder *vp9_decoder_create() {
 void vp9_decoder_remove(VP9Decoder *pbi) {
   VP9_COMMON *const cm = &pbi->common;
   int i;
+
+  vpx_free(cm->fc);
+  cm->fc = NULL;
+  vpx_free(cm->frame_contexts);
+  cm->frame_contexts = NULL;
 
   vp9_get_worker_interface()->end(&pbi->lf_worker);
   vpx_free(pbi->lf_worker.data1);
