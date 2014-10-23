@@ -164,6 +164,8 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   cm->fc = NULL;
   vpx_free(cm->frame_contexts);
   cm->frame_contexts = NULL;
+  vpx_free(cpi->tile_data);
+  cpi->tile_data = NULL;
 
   // Delete sementation map
   vpx_free(cpi->segmentation_map);
@@ -1392,6 +1394,7 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
 
   cm->current_video_frame = 0;
   cpi->partition_search_skippable_frame = 0;
+  cpi->tile_data = NULL;
 
   // Create the encoder segmentation map and set all entries to 0
   CHECK_MEM_ERROR(cm, cpi->segmentation_map,
