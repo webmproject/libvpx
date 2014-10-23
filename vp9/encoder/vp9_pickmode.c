@@ -599,8 +599,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       int rate_mv = 0;
       int mode_rd_thresh;
 
-      if (const_motion[ref_frame] &&
-          (this_mode == NEARMV || this_mode == ZEROMV))
+      if (const_motion[ref_frame] && this_mode == NEARMV)
         continue;
 
       if (!(cpi->sf.inter_mode_mask[bsize] & (1 << this_mode)))
