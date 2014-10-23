@@ -1446,6 +1446,7 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
 #endif
 
   cpi->refresh_alt_ref_frame = 0;
+  cpi->multi_arf_last_grp_enabled = 0;
 
   cpi->b_calculate_psnr = CONFIG_INTERNAL_STATS;
 #if CONFIG_INTERNAL_STATS
@@ -3431,7 +3432,6 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     cpi->multi_arf_allowed = 1;
   else
     cpi->multi_arf_allowed = 0;
-  cpi->multi_arf_last_grp_enabled = 0;
 
   // Normal defaults
   cm->reset_frame_context = 0;
