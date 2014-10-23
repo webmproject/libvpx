@@ -45,6 +45,12 @@ void vp9_quantize_dc_32x32(const tran_low_t *coeff_ptr, int skip_block,
                            const int16_t *round_ptr, const int16_t quant_ptr,
                            tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
                            const int16_t dequant_ptr, uint16_t *eob_ptr);
+#if CONFIG_TX64X64
+void vp9_quantize_dc_64x64(const tran_low_t *coeff_ptr, int skip_block,
+                           const int16_t *round_ptr, const int16_t quant_ptr,
+                           tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
+                           const int16_t dequant_ptr, uint16_t *eob_ptr);
+#endif  // CONFIG_TX64X64
 void vp9_regular_quantize_b_4x4(MACROBLOCK *x, int plane, int block,
                                 const int16_t *scan, const int16_t *iscan);
 
@@ -61,7 +67,17 @@ void vp9_highbd_quantize_dc_32x32(const tran_low_t *coeff_ptr,
                                   tran_low_t *dqcoeff_ptr,
                                   const int16_t dequant_ptr,
                                   uint16_t *eob_ptr);
-#endif
+#if CONFIG_TX64X64
+void vp9_highbd_quantize_dc_64x64(const tran_low_t *coeff_ptr,
+                                  int skip_block,
+                                  const int16_t *round_ptr,
+                                  const int16_t quant_ptr,
+                                  tran_low_t *qcoeff_ptr,
+                                  tran_low_t *dqcoeff_ptr,
+                                  const int16_t dequant_ptr,
+                                  uint16_t *eob_ptr);
+#endif  // CONFIG_TX64X64
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 struct VP9_COMP;
 struct VP9Common;

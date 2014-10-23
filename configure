@@ -282,6 +282,7 @@ EXPERIMENT_LIST="
     vp9_temporal_denoising
     fp_mb_stats
     emulate_hardware
+    tx64x64
 "
 CONFIG_LIST="
     external_build

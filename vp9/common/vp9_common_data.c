@@ -101,22 +101,35 @@ const TX_SIZE max_txsize_lookup[BLOCK_SIZES] = {
   TX_4X4,   TX_4X4,   TX_4X4,
   TX_8X8,   TX_8X8,   TX_8X8,
   TX_16X16, TX_16X16, TX_16X16,
-  TX_32X32, TX_32X32, TX_32X32, TX_32X32
+  TX_32X32, TX_32X32, TX_32X32,
+#if CONFIG_TX64X64
+  TX_64X64,
+#else
+  TX_32X32,
+#endif
 };
 
 const BLOCK_SIZE txsize_to_bsize[TX_SIZES] = {
-    BLOCK_4X4,  // TX_4X4
-    BLOCK_8X8,  // TX_8X8
+    BLOCK_4X4,    // TX_4X4
+    BLOCK_8X8,    // TX_8X8
     BLOCK_16X16,  // TX_16X16
     BLOCK_32X32,  // TX_32X32
+#if CONFIG_TX64X64
+    BLOCK_32X32,  // TX_64X64
+#endif
 };
 
 const TX_SIZE tx_mode_to_biggest_tx_size[TX_MODES] = {
-  TX_4X4,  // ONLY_4X4
-  TX_8X8,  // ALLOW_8X8
+  TX_4X4,    // ONLY_4X4
+  TX_8X8,    // ALLOW_8X8
   TX_16X16,  // ALLOW_16X16
   TX_32X32,  // ALLOW_32X32
+#if CONFIG_TX64X64
+  TX_64X64,  // ALLOW_64X64
+  TX_64X64,  // TX_MODE_SELECT
+#else
   TX_32X32,  // TX_MODE_SELECT
+#endif
 };
 
 const BLOCK_SIZE ss_size_lookup[BLOCK_SIZES][2][2] = {

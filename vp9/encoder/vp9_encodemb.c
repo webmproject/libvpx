@@ -135,16 +135,16 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
   struct macroblock_plane *const p = &mb->plane[plane];
   struct macroblockd_plane *const pd = &xd->plane[plane];
   const int ref = is_inter_block(&xd->mi[0].src_mi->mbmi);
-  vp9_token_state tokens[1025][2];
-  unsigned best_index[1025][2];
-  uint8_t token_cache[1024];
+  vp9_token_state tokens[MAX_NUM_COEFS + 1][2];
+  unsigned best_index[MAX_NUM_COEFS + 1][2];
+  uint8_t token_cache[MAX_NUM_COEFS];
   const tran_low_t *const coeff = BLOCK_OFFSET(mb->plane[plane].coeff, block);
   tran_low_t *const qcoeff = BLOCK_OFFSET(p->qcoeff, block);
   tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
   const int eob = p->eobs[block];
   const PLANE_TYPE type = pd->plane_type;
   const int default_eob = 16 << (tx_size << 1);
-  const int mul = 1 + (tx_size == TX_32X32);
+  const int mul = 1 << (tx_size >= TX_32X32 ? tx_size - TX_16X16 : 0);
   const int16_t *dequant_ptr = pd->dequant;
   const uint8_t *const band_translate = get_band_translate(tx_size);
   const scan_order *const so = get_scan(xd, tx_size, type, block);
@@ -392,6 +392,16 @@ void vp9_xform_quant_fp(MACROBLOCK *x, int plane, int block,
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     switch (tx_size) {
+#if CONFIG_TX64X64
+      case TX_64X64:
+        vp9_highbd_fdct64x64(src_diff, coeff, diff_stride);
+        vp9_highbd_quantize_fp_64x64(coeff, 4096, x->skip_block, p->zbin,
+                                     p->round_fp, p->quant_fp, p->quant_shift,
+                                     qcoeff, dqcoeff, pd->dequant,
+                                     p->zbin_extra, eob, scan_order->scan,
+                                     scan_order->iscan);
+        break;
+#endif  // CONFIG_TX64X64
       case TX_32X32:
         highbd_fdct32x32(x->use_lp32x32fdct, src_diff, coeff, diff_stride);
         vp9_highbd_quantize_fp_32x32(coeff, 1024, x->skip_block, p->zbin,
@@ -429,6 +439,15 @@ void vp9_xform_quant_fp(MACROBLOCK *x, int plane, int block,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
   switch (tx_size) {
+#if CONFIG_TX64X64
+    case TX_64X64:
+      vp9_fdct64x64(src_diff, coeff, diff_stride);
+      vp9_quantize_fp_64x64(coeff, 4096, x->skip_block, p->zbin, p->round_fp,
+                            p->quant_fp, p->quant_shift, qcoeff, dqcoeff,
+                            pd->dequant, p->zbin_extra, eob, scan_order->scan,
+                            scan_order->iscan);
+      break;
+#endif  // CONFIG_TX64X64
     case TX_32X32:
       fdct32x32(x->use_lp32x32fdct, src_diff, coeff, diff_stride);
       vp9_quantize_fp_32x32(coeff, 1024, x->skip_block, p->zbin, p->round_fp,
@@ -482,6 +501,14 @@ void vp9_xform_quant_dc(MACROBLOCK *x, int plane, int block,
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     switch (tx_size) {
+#if CONFIG_TX64X64
+      case TX_64X64:
+        vp9_highbd_fdct64x64_1(src_diff, coeff, diff_stride);
+        vp9_highbd_quantize_dc_64x64(coeff, x->skip_block, p->round,
+                                     p->quant_fp[0], qcoeff, dqcoeff,
+                                     pd->dequant[0], eob);
+        break;
+#endif  // CONFIG_TX64X64
       case TX_32X32:
         vp9_highbd_fdct32x32_1(src_diff, coeff, diff_stride);
         vp9_highbd_quantize_dc_32x32(coeff, x->skip_block, p->round,
@@ -514,6 +541,14 @@ void vp9_xform_quant_dc(MACROBLOCK *x, int plane, int block,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
   switch (tx_size) {
+#if CONFIG_TX64X64
+    case TX_64X64:
+      vp9_fdct64x64_1(src_diff, coeff, diff_stride);
+      vp9_quantize_dc_64x64(coeff, x->skip_block, p->round,
+                            p->quant_fp[0], qcoeff, dqcoeff,
+                            pd->dequant[0], eob);
+      break;
+#endif  // CONFIG_TX64X64
     case TX_32X32:
       vp9_fdct32x32_1(src_diff, coeff, diff_stride);
       vp9_quantize_dc_32x32(coeff, x->skip_block, p->round,
@@ -563,6 +598,15 @@ void vp9_xform_quant(MACROBLOCK *x, int plane, int block,
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
      switch (tx_size) {
+#if CONFIG_TX64X64
+      case TX_64X64:
+        vp9_highbd_fdct64x64(src_diff, coeff, diff_stride);
+        vp9_highbd_quantize_b_64x64(coeff, 4096, x->skip_block, p->zbin,
+                                    p->round, p->quant, p->quant_shift, qcoeff,
+                                    dqcoeff, pd->dequant, p->zbin_extra, eob,
+                                    scan_order->scan, scan_order->iscan);
+        break;
+#endif  // CONFIG_TX64X64
       case TX_32X32:
         highbd_fdct32x32(x->use_lp32x32fdct, src_diff, coeff, diff_stride);
         vp9_highbd_quantize_b_32x32(coeff, 1024, x->skip_block, p->zbin,
@@ -599,6 +643,15 @@ void vp9_xform_quant(MACROBLOCK *x, int plane, int block,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
   switch (tx_size) {
+#if CONFIG_TX64X64
+    case TX_64X64:
+      vp9_fdct64x64(src_diff, coeff, diff_stride);
+      vp9_quantize_b_64x64(coeff, 4096, x->skip_block, p->zbin, p->round,
+                           p->quant, p->quant_shift, qcoeff, dqcoeff,
+                           pd->dequant, p->zbin_extra, eob, scan_order->scan,
+                           scan_order->iscan);
+      break;
+#endif  // CONFIG_TX64X64
     case TX_32X32:
       fdct32x32(x->use_lp32x32fdct, src_diff, coeff, diff_stride);
       vp9_quantize_b_32x32(coeff, 1024, x->skip_block, p->zbin, p->round,
@@ -649,6 +702,7 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
   dst = &pd->dst.buf[4 * j * pd->dst.stride + 4 * i];
   a = &ctx->ta[plane][i];
   l = &ctx->tl[plane][j];
+  if (plane) assert(tx_size != TX_64X64);
 
   // TODO(jingning): per transformed block zero forcing only enabled for
   // luma component. will integrate chroma components as well.
@@ -695,6 +749,12 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     switch (tx_size) {
+#if CONFIG_TX64X64
+      case TX_64X64:
+        vp9_highbd_idct64x64_add(dqcoeff, dst, pd->dst.stride,
+                                 p->eobs[block], xd->bd);
+        break;
+#endif  // CONFIG_TX64X64
       case TX_32X32:
         vp9_highbd_idct32x32_add(dqcoeff, dst, pd->dst.stride,
                                  p->eobs[block], xd->bd);
@@ -722,6 +782,11 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
   switch (tx_size) {
+#if CONFIG_TX64X64
+    case TX_64X64:
+      vp9_idct64x64_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
+      break;
+#endif
     case TX_32X32:
       vp9_idct32x32_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
       break;
@@ -832,6 +897,29 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     switch (tx_size) {
+#if CONFIG_TX64X64
+      case TX_64X64:
+        scan_order = &vp9_default_scan_orders[TX_64X64];
+        mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
+        vp9_predict_intra_block(xd, block >> 8, bwl, TX_64X64, mode,
+                                x->skip_encode ? src : dst,
+                                x->skip_encode ? src_stride : dst_stride,
+                                dst, dst_stride, i, j, plane);
+        if (!x->skip_recode) {
+          vp9_highbd_subtract_block(64, 64, src_diff, diff_stride,
+                                    src, src_stride, dst, dst_stride, xd->bd);
+          vp9_highbd_fdct64x64(src_diff, coeff, diff_stride);
+          vp9_highbd_quantize_b_64x64(coeff, 4096, x->skip_block, p->zbin,
+                                      p->round, p->quant, p->quant_shift,
+                                      qcoeff, dqcoeff, pd->dequant,
+                                      p->zbin_extra, eob,
+                                      scan_order->scan, scan_order->iscan);
+          if (!x->skip_encode && *eob) {
+            vp9_highbd_idct64x64_add(dqcoeff, dst, dst_stride, *eob, xd->bd);
+          }
+        }
+        break;
+#endif  // CONFIG_TX64X64
       case TX_32X32:
         scan_order = &vp9_default_scan_orders[TX_32X32];
         mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
@@ -941,6 +1029,28 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
   switch (tx_size) {
+#if CONFIG_TX64X64
+    case TX_64X64:
+      assert(plane == 0);
+      scan_order = &vp9_default_scan_orders[TX_64X64];
+      mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
+      vp9_predict_intra_block(xd, block >> 8, bwl, TX_64X64, mode,
+                              x->skip_encode ? src : dst,
+                              x->skip_encode ? src_stride : dst_stride,
+                              dst, dst_stride, i, j, plane);
+      if (!x->skip_recode) {
+        vp9_subtract_block(64, 64, src_diff, diff_stride,
+                           src, src_stride, dst, dst_stride);
+        vp9_fdct64x64(src_diff, coeff, diff_stride);
+        vp9_quantize_b_64x64(coeff, 4096, x->skip_block, p->zbin, p->round,
+                             p->quant, p->quant_shift, qcoeff, dqcoeff,
+                             pd->dequant, p->zbin_extra, eob, scan_order->scan,
+                             scan_order->iscan);
+      }
+      if (!x->skip_encode && *eob)
+        vp9_idct64x64_add(dqcoeff, dst, dst_stride, *eob);
+      break;
+#endif  // CONFIG_TX64X64
     case TX_32X32:
       scan_order = &vp9_default_scan_orders[TX_32X32];
       mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;

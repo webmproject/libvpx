@@ -296,7 +296,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   VP9_COMP *cpi = args->cpi;
   MACROBLOCKD *xd = args->xd;
   TOKENEXTRA **tp = args->tp;
-  uint8_t token_cache[32 * 32];
+  uint8_t token_cache[MAX_NUM_COEFS];
   struct macroblock_plane *p = &cpi->mb.plane[plane];
   struct macroblockd_plane *pd = &xd->plane[plane];
   MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
@@ -374,7 +374,6 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
                        counts[band[c]][pt]);
     ++eob_branch[band[c]][pt];
   }
-
   *tp = t;
 
   vp9_set_contexts(xd, pd, plane_bsize, tx_size, c > 0, aoff, loff);

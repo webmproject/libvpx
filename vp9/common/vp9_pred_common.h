@@ -107,6 +107,10 @@ static INLINE const vp9_prob *get_tx_probs(TX_SIZE max_tx_size, int ctx,
       return tx_probs->p16x16[ctx];
     case TX_32X32:
       return tx_probs->p32x32[ctx];
+#if CONFIG_TX64X64
+    case TX_64X64:
+      return tx_probs->p64x64[ctx];
+#endif
     default:
       assert(0 && "Invalid max_tx_size.");
       return NULL;
@@ -128,6 +132,10 @@ static INLINE unsigned int *get_tx_counts(TX_SIZE max_tx_size, int ctx,
       return tx_counts->p16x16[ctx];
     case TX_32X32:
       return tx_counts->p32x32[ctx];
+#if CONFIG_TX64X64
+    case TX_64X64:
+      return tx_counts->p64x64[ctx];
+#endif
     default:
       assert(0 && "Invalid max_tx_size.");
       return NULL;

@@ -661,11 +661,23 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
 
   // FIXME(rbultje) I'm pretty sure this should go to the end of this block
   // (i.e. after the output_enabled)
+#if CONFIG_TX64X64
+  if (bsize < BLOCK_64X64) {
+    if (bsize < BLOCK_32X32) {
+      if (bsize < BLOCK_16X16) {
+        ctx->tx_rd_diff[ALLOW_16X16] = ctx->tx_rd_diff[ALLOW_8X8];
+      }
+      ctx->tx_rd_diff[ALLOW_32X32] = ctx->tx_rd_diff[ALLOW_16X16];
+    }
+    ctx->tx_rd_diff[ALLOW_64X64] = ctx->tx_rd_diff[ALLOW_32X32];
+  }
+#else
   if (bsize < BLOCK_32X32) {
     if (bsize < BLOCK_16X16)
       ctx->tx_rd_diff[ALLOW_16X16] = ctx->tx_rd_diff[ALLOW_8X8];
     ctx->tx_rd_diff[ALLOW_32X32] = ctx->tx_rd_diff[ALLOW_16X16];
   }
+#endif
 
   if (is_inter_block(mbmi) && mbmi->sb_type < BLOCK_8X8) {
     mbmi->mv[0].as_int = mi->bmi[3].as_mv[0].as_int;
@@ -2581,8 +2593,8 @@ static void encode_rd_sb_row(VP9_COMP *cpi, const TileInfo *const tile,
       set_fixed_partitioning(cpi, tile, mi, mi_row, mi_col, bsize);
       rd_use_partition(cpi, tile, mi, tp, mi_row, mi_col, BLOCK_64X64,
                        &dummy_rate, &dummy_dist, 1, cpi->pc_root);
-      } else if (sf->partition_search_type == VAR_BASED_PARTITION &&
-                 cm->frame_type != KEY_FRAME ) {
+    } else if (sf->partition_search_type == VAR_BASED_PARTITION &&
+               cm->frame_type != KEY_FRAME ) {
       choose_partitioning(cpi, tile, mi_row, mi_col);
       rd_use_partition(cpi, tile, mi, tp, mi_row, mi_col, BLOCK_64X64,
                        &dummy_rate, &dummy_dist, 1, cpi->pc_root);
@@ -2678,7 +2690,11 @@ static TX_MODE select_tx_mode(const VP9_COMP *cpi) {
   if (cpi->mb.e_mbd.lossless)
     return ONLY_4X4;
   if (cpi->sf.tx_size_search_method == USE_LARGESTALL)
+#if CONFIG_TX64X64
+    return ALLOW_64X64;
+#else
     return ALLOW_32X32;
+#endif
   else if (cpi->sf.tx_size_search_method == USE_FULL_RD||
            cpi->sf.tx_size_search_method == USE_TX_8X8)
     return TX_MODE_SELECT;
@@ -3404,9 +3420,9 @@ static void encode_frame_internal(VP9_COMP *cpi) {
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (cm->use_highbitdepth)
-    x->fwd_txm4x4 = xd->lossless ? vp9_fwht4x4 : vp9_fdct4x4;
-  else
     x->fwd_txm4x4 = xd->lossless ? vp9_highbd_fwht4x4 : vp9_highbd_fdct4x4;
+  else
+    x->fwd_txm4x4 = xd->lossless ? vp9_fwht4x4 : vp9_fdct4x4;
   x->highbd_itxm_add = xd->lossless ? vp9_highbd_iwht4x4_add :
                                       vp9_highbd_idct4x4_add;
 #else
@@ -3581,41 +3597,99 @@ void vp9_encode_frame(VP9_COMP *cpi) {
       }
     }
 
+#if CONFIG_TX64X64
     if (cm->tx_mode == TX_MODE_SELECT) {
-      int count4x4 = 0;
-      int count8x8_lp = 0, count8x8_8x8p = 0;
+      int count4x4_lp = 0;
+      int count8x8_8x8p = 0, count8x8_lp = 0;
       int count16x16_16x16p = 0, count16x16_lp = 0;
-      int count32x32 = 0;
+      int count32x32_32x32p = 0, count32x32_lp = 0;
+      int count64x64_64x64p = 0;
 
       for (i = 0; i < TX_SIZE_CONTEXTS; ++i) {
-        count4x4 += cm->counts.tx.p32x32[i][TX_4X4];
-        count4x4 += cm->counts.tx.p16x16[i][TX_4X4];
-        count4x4 += cm->counts.tx.p8x8[i][TX_4X4];
+        count4x4_lp += cm->counts.tx.p64x64[i][TX_4X4];
+        count4x4_lp += cm->counts.tx.p32x32[i][TX_4X4];
+        count4x4_lp += cm->counts.tx.p16x16[i][TX_4X4];
+        count4x4_lp += cm->counts.tx.p8x8[i][TX_4X4];
+
+        count8x8_lp += cm->counts.tx.p64x64[i][TX_8X8];
+        count8x8_lp += cm->counts.tx.p32x32[i][TX_8X8];
+        count8x8_lp += cm->counts.tx.p16x16[i][TX_8X8];
+        count8x8_8x8p += cm->counts.tx.p8x8[i][TX_8X8];
+
+        count16x16_lp += cm->counts.tx.p64x64[i][TX_16X16];
+        count16x16_lp += cm->counts.tx.p32x32[i][TX_16X16];
+        count16x16_16x16p += cm->counts.tx.p16x16[i][TX_16X16];
+
+        count32x32_lp += cm->counts.tx.p64x64[i][TX_32X32];
+        count32x32_32x32p += cm->counts.tx.p32x32[i][TX_32X32];
+
+        count64x64_64x64p += cm->counts.tx.p64x64[i][TX_64X64];
+      }
+
+      if (count4x4_lp == 0 && count16x16_lp == 0 && count16x16_16x16p == 0 &&
+          count32x32_lp == 0 && count32x32_32x32p == 0 &&
+          count64x64_64x64p == 0) {
+        cm->tx_mode = ALLOW_8X8;
+        reset_skip_tx_size(cm, TX_8X8);
+      } else if (count8x8_8x8p == 0 && count8x8_lp == 0 &&
+                 count16x16_16x16p == 0 && count16x16_lp == 0 &&
+                 count32x32_32x32p == 0 && count32x32_lp == 0 &&
+                 count64x64_64x64p == 0) {
+        cm->tx_mode = ONLY_4X4;
+        reset_skip_tx_size(cm, TX_4X4);
+      } else if (count4x4_lp == 0 && count8x8_lp == 0 && count16x16_lp == 0 &&
+                 count32x32_lp == 0) {
+        cm->tx_mode = ALLOW_64X64;
+      } else if (count4x4_lp == 0 && count8x8_lp == 0 && count16x16_lp == 0 &&
+                 count64x64_64x64p == 0) {
+        cm->tx_mode = ALLOW_32X32;
+        reset_skip_tx_size(cm, TX_32X32);
+      } else if (count4x4_lp == 0 && count8x8_lp == 0 &&
+                 count32x32_lp == 0 && count32x32_32x32p == 0 &&
+                 count64x64_64x64p == 0) {
+        cm->tx_mode = ALLOW_16X16;
+        reset_skip_tx_size(cm, TX_16X16);
+      }
+    }
+#else
+    if (cm->tx_mode == TX_MODE_SELECT) {
+      int count4x4_lp = 0;
+      int count8x8_8x8p = 0, count8x8_lp = 0;
+      int count16x16_16x16p = 0, count16x16_lp = 0;
+      int count32x32_32x32p = 0;
+
+      for (i = 0; i < TX_SIZE_CONTEXTS; ++i) {
+        count4x4_lp += cm->counts.tx.p32x32[i][TX_4X4];
+        count4x4_lp += cm->counts.tx.p16x16[i][TX_4X4];
+        count4x4_lp += cm->counts.tx.p8x8[i][TX_4X4];
 
         count8x8_lp += cm->counts.tx.p32x32[i][TX_8X8];
         count8x8_lp += cm->counts.tx.p16x16[i][TX_8X8];
         count8x8_8x8p += cm->counts.tx.p8x8[i][TX_8X8];
 
-        count16x16_16x16p += cm->counts.tx.p16x16[i][TX_16X16];
         count16x16_lp += cm->counts.tx.p32x32[i][TX_16X16];
-        count32x32 += cm->counts.tx.p32x32[i][TX_32X32];
+        count16x16_16x16p += cm->counts.tx.p16x16[i][TX_16X16];
+        count32x32_32x32p += cm->counts.tx.p32x32[i][TX_32X32];
       }
 
-      if (count4x4 == 0 && count16x16_lp == 0 && count16x16_16x16p == 0 &&
-          count32x32 == 0) {
+      if (count4x4_lp == 0 && count16x16_lp == 0 && count16x16_16x16p == 0 &&
+          count32x32_32x32p == 0) {
         cm->tx_mode = ALLOW_8X8;
         reset_skip_tx_size(cm, TX_8X8);
       } else if (count8x8_8x8p == 0 && count16x16_16x16p == 0 &&
-                 count8x8_lp == 0 && count16x16_lp == 0 && count32x32 == 0) {
+                 count8x8_lp == 0 && count16x16_lp == 0 &&
+                 count32x32_32x32p == 0) {
         cm->tx_mode = ONLY_4X4;
         reset_skip_tx_size(cm, TX_4X4);
-      } else if (count8x8_lp == 0 && count16x16_lp == 0 && count4x4 == 0) {
+      } else if (count8x8_lp == 0 && count16x16_lp == 0 && count4x4_lp == 0) {
         cm->tx_mode = ALLOW_32X32;
-      } else if (count32x32 == 0 && count8x8_lp == 0 && count4x4 == 0) {
+      } else if (count32x32_32x32p == 0 && count8x8_lp == 0 &&
+                 count4x4_lp == 0) {
         cm->tx_mode = ALLOW_16X16;
         reset_skip_tx_size(cm, TX_16X16);
       }
     }
+#endif
   } else {
     cm->reference_mode = SINGLE_REFERENCE;
     encode_frame_internal(cpi);

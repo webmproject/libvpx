@@ -24,15 +24,21 @@ extern "C" {
 struct VP9Common;
 
 struct tx_probs {
-  vp9_prob p32x32[TX_SIZE_CONTEXTS][TX_SIZES - 1];
-  vp9_prob p16x16[TX_SIZE_CONTEXTS][TX_SIZES - 2];
-  vp9_prob p8x8[TX_SIZE_CONTEXTS][TX_SIZES - 3];
+#if CONFIG_TX64X64
+  vp9_prob p64x64[TX_SIZE_CONTEXTS][4];
+#endif
+  vp9_prob p32x32[TX_SIZE_CONTEXTS][3];
+  vp9_prob p16x16[TX_SIZE_CONTEXTS][2];
+  vp9_prob p8x8[TX_SIZE_CONTEXTS][1];
 };
 
 struct tx_counts {
-  unsigned int p32x32[TX_SIZE_CONTEXTS][TX_SIZES];
-  unsigned int p16x16[TX_SIZE_CONTEXTS][TX_SIZES - 1];
-  unsigned int p8x8[TX_SIZE_CONTEXTS][TX_SIZES - 2];
+#if CONFIG_TX64X64
+  unsigned int p64x64[TX_SIZE_CONTEXTS][5];
+#endif
+  unsigned int p32x32[TX_SIZE_CONTEXTS][4];
+  unsigned int p16x16[TX_SIZE_CONTEXTS][3];
+  unsigned int p8x8[TX_SIZE_CONTEXTS][2];
 };
 
 typedef struct frame_contexts {
@@ -88,6 +94,10 @@ void vp9_init_mode_probs(FRAME_CONTEXT *fc);
 
 void vp9_adapt_mode_probs(struct VP9Common *cm);
 
+#if CONFIG_TX64X64
+void tx_counts_to_branch_counts_64x64(const unsigned int *tx_count_64x64p,
+                                      unsigned int (*ct_64x64p)[2]);
+#endif
 void tx_counts_to_branch_counts_32x32(const unsigned int *tx_count_32x32p,
                                       unsigned int (*ct_32x32p)[2]);
 void tx_counts_to_branch_counts_16x16(const unsigned int *tx_count_16x16p,

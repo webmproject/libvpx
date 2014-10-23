@@ -340,6 +340,9 @@ static const int16_t band_counts[TX_SIZES][8] = {
   { 1, 2, 3, 4, 11,   64 - 21, 0 },
   { 1, 2, 3, 4, 11,  256 - 21, 0 },
   { 1, 2, 3, 4, 11, 1024 - 21, 0 },
+#if CONFIG_TX64X64
+  { 1, 2, 3, 4, 11, 4096 - 21, 0 },
+#endif
 };
 static INLINE int cost_coeffs(MACROBLOCK *x,
                               int plane, int block,
@@ -357,7 +360,7 @@ static INLINE int cost_coeffs(MACROBLOCK *x,
   const tran_low_t *const qcoeff = BLOCK_OFFSET(p->qcoeff, block);
   unsigned int (*token_costs)[2][COEFF_CONTEXTS][ENTROPY_TOKENS] =
                    x->token_costs[tx_size][type][is_inter_block(mbmi)];
-  uint8_t token_cache[32 * 32];
+  uint8_t token_cache[MAX_NUM_COEFS];
   int pt = combine_entropy_contexts(*A, *L);
   int c, cost;
   // Check for consistency of tx_size with mode info
@@ -416,6 +419,8 @@ static INLINE int cost_coeffs(MACROBLOCK *x,
   return cost;
 }
 
+#define right_shift_signed(x, s) ((s) < 0 ? (x) << (-(s)) : (x) >> (s))
+
 #if CONFIG_VP9_HIGHBITDEPTH
 static void dist_block(int plane, int block, TX_SIZE tx_size,
                        struct rdcost_block_args* args, int bd) {
@@ -429,17 +434,23 @@ static void dist_block(int plane, int block, TX_SIZE tx_size,
   const struct macroblock_plane *const p = &x->plane[plane];
   const struct macroblockd_plane *const pd = &xd->plane[plane];
   int64_t this_sse;
+#if CONFIG_TX64X64
+  int shift = (tx_size == TX_64X64 ? -2 : (tx_size == TX_32X32 ? 0 : 2));
+#else
   int shift = tx_size == TX_32X32 ? 0 : 2;
+#endif
   tran_low_t *const coeff = BLOCK_OFFSET(p->coeff, block);
   tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
+
 #if CONFIG_VP9_HIGHBITDEPTH
-  args->dist = vp9_highbd_block_error(coeff, dqcoeff, 16 << ss_txfrm_size,
-                                      &this_sse, bd) >> shift;
+  args->dist = right_shift_signed(
+      vp9_highbd_block_error(
+          coeff, dqcoeff, 16 << ss_txfrm_size, &this_sse, bd), shift);
 #else
-  args->dist = vp9_block_error(coeff, dqcoeff, 16 << ss_txfrm_size,
-                               &this_sse) >> shift;
+  args->dist = right_shift_signed(
+      vp9_block_error(coeff, dqcoeff, 16 << ss_txfrm_size, &this_sse), shift);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-  args->sse  = this_sse >> shift;
+  args->sse = right_shift_signed(this_sse, shift);
 
   if (x->skip_encode && !is_inter_block(&xd->mi[0].src_mi->mbmi)) {
     // TODO(jingning): tune the model to better capture the distortion.
@@ -514,9 +525,12 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
 #if CONFIG_VP9_HIGHBITDEPTH
         dc_correct >>= ((xd->bd - 8) * 2);
 #endif
-        if (tx_size != TX_32X32)
+        if (tx_size < TX_32X32)
           dc_correct >>= 2;
-
+#if CONFIG_TX64X64
+        else if (tx_size == TX_64X64)
+          dc_correct <<= 2;
+#endif
         args->dist = MAX(0, args->sse - dc_correct);
       }
     } else {
@@ -629,10 +643,15 @@ static void choose_tx_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
   vp9_prob skip_prob = vp9_get_skip_prob(cm, xd);
   int r[TX_SIZES][2], s[TX_SIZES];
   int64_t d[TX_SIZES], sse[TX_SIZES];
-  int64_t rd[TX_SIZES][2] = {{INT64_MAX, INT64_MAX},
-                             {INT64_MAX, INT64_MAX},
-                             {INT64_MAX, INT64_MAX},
-                             {INT64_MAX, INT64_MAX}};
+  int64_t rd[TX_SIZES][2] = {
+    {INT64_MAX, INT64_MAX},
+    {INT64_MAX, INT64_MAX},
+    {INT64_MAX, INT64_MAX},
+    {INT64_MAX, INT64_MAX},
+#if CONFIG_TX64X64
+    {INT64_MAX, INT64_MAX},
+#endif
+  };
   int n, m;
   int s0, s1;
   const TX_SIZE max_mode_tx_size = tx_mode_to_biggest_tx_size[cm->tx_mode];
@@ -681,7 +700,6 @@ static void choose_tx_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
   mbmi->tx_size = cm->tx_mode == TX_MODE_SELECT ?
                       best_tx : MIN(max_tx_size, max_mode_tx_size);
 
-
   *distortion = d[mbmi->tx_size];
   *rate       = r[mbmi->tx_size][cm->tx_mode == TX_MODE_SELECT];
   *skip       = s[mbmi->tx_size];
@@ -691,8 +709,14 @@ static void choose_tx_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
   tx_cache[ALLOW_8X8] = rd[TX_8X8][0];
   tx_cache[ALLOW_16X16] = rd[MIN(max_tx_size, TX_16X16)][0];
   tx_cache[ALLOW_32X32] = rd[MIN(max_tx_size, TX_32X32)][0];
+#if CONFIG_TX64X64
+  tx_cache[ALLOW_64X64] = rd[MIN(max_tx_size, TX_64X64)][0];
+#endif
 
-  if (max_tx_size == TX_32X32 && best_tx == TX_32X32) {
+#if CONFIG_TX64X64
+  if (max_tx_size >= TX_64X64 && best_tx == TX_64X64) {
+    tx_cache[TX_MODE_SELECT] = rd[TX_64X64][1];
+  } else if (max_tx_size >= TX_32X32 && best_tx == TX_32X32) {
     tx_cache[TX_MODE_SELECT] = rd[TX_32X32][1];
   } else if (max_tx_size >= TX_16X16 && best_tx == TX_16X16) {
     tx_cache[TX_MODE_SELECT] = rd[TX_16X16][1];
@@ -701,6 +725,17 @@ static void choose_tx_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
   } else {
     tx_cache[TX_MODE_SELECT] = rd[TX_4X4][1];
   }
+#else
+  if (max_tx_size >= TX_32X32 && best_tx == TX_32X32) {
+    tx_cache[TX_MODE_SELECT] = rd[TX_32X32][1];
+  } else if (max_tx_size >= TX_16X16 && best_tx == TX_16X16) {
+    tx_cache[TX_MODE_SELECT] = rd[TX_16X16][1];
+  } else if (rd[TX_8X8][1] < rd[TX_4X4][1]) {
+    tx_cache[TX_MODE_SELECT] = rd[TX_8X8][1];
+  } else {
+    tx_cache[TX_MODE_SELECT] = rd[TX_4X4][1];
+  }
+#endif
 }
 
 static void super_block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
@@ -1970,12 +2005,13 @@ static void estimate_ref_frame_costs(const VP9_COMMON *cm,
   }
 }
 
-static void store_coding_context(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
-                         int mode_index,
-                         int64_t comp_pred_diff[REFERENCE_MODES],
-                         const int64_t tx_size_diff[TX_MODES],
-                         int64_t best_filter_diff[SWITCHABLE_FILTER_CONTEXTS],
-                         int skippable) {
+static void store_coding_context(
+    MACROBLOCK *x, PICK_MODE_CONTEXT *ctx,
+    int mode_index,
+    int64_t comp_pred_diff[REFERENCE_MODES],
+    const int64_t tx_size_diff[TX_MODES],
+    int64_t best_filter_diff[SWITCHABLE_FILTER_CONTEXTS],
+    int skippable) {
   MACROBLOCKD *const xd = &x->e_mbd;
 
   // Take a snapshot of the coding context so it can be

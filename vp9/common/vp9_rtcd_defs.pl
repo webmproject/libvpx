@@ -224,6 +224,47 @@ specialize qw/vp9_dc_left_predictor_32x32/;
 add_proto qw/void vp9_dc_128_predictor_32x32/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
 specialize qw/vp9_dc_128_predictor_32x32/;
 
+if (vpx_config("CONFIG_TX64X64") eq "yes") {
+  add_proto qw/void vp9_d207_predictor_64x64/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
+  specialize qw/vp9_d207_predictor_64x64/;
+
+  add_proto qw/void vp9_d45_predictor_64x64/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
+  specialize qw/vp9_d45_predictor_64x64/;
+
+  add_proto qw/void vp9_d63_predictor_64x64/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
+  specialize qw/vp9_d63_predictor_64x64/;
+
+  add_proto qw/void vp9_h_predictor_64x64/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
+  specialize qw/vp9_h_predictor_64x64/;
+
+  add_proto qw/void vp9_d117_predictor_64x64/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
+  specialize qw/vp9_d117_predictor_64x64/;
+
+  add_proto qw/void vp9_d135_predictor_64x64/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
+  specialize qw/vp9_d135_predictor_64x64/;
+
+  add_proto qw/void vp9_d153_predictor_64x64/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
+  specialize qw/vp9_d153_predictor_64x64/;
+
+  add_proto qw/void vp9_v_predictor_64x64/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
+  specialize qw/vp9_v_predictor_64x64/;
+
+  add_proto qw/void vp9_tm_predictor_64x64/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
+  specialize qw/vp9_tm_predictor_64x64/;
+
+  add_proto qw/void vp9_dc_predictor_64x64/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
+  specialize qw/vp9_dc_predictor_64x64/;
+
+  add_proto qw/void vp9_dc_top_predictor_64x64/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
+  specialize qw/vp9_dc_top_predictor_64x64/;
+
+  add_proto qw/void vp9_dc_left_predictor_64x64/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
+  specialize qw/vp9_dc_left_predictor_64x64/;
+
+  add_proto qw/void vp9_dc_128_predictor_64x64/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
+  specialize qw/vp9_dc_128_predictor_64x64/;
+}
+
 #
 # Loopfilter
 #
@@ -366,6 +407,11 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   add_proto qw/void vp9_idct32x32_1_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
   specialize qw/vp9_idct32x32_1_add/;
 
+  if (vpx_config("CONFIG_TX64X64") eq "yes") {
+    add_proto qw/void vp9_idct64x64_4096_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
+    specialize qw/vp9_idct64x64_4096_add/;
+  }
+
   add_proto qw/void vp9_iht4x4_16_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int tx_type";
   specialize qw/vp9_iht4x4_16_add/;
 
@@ -418,6 +464,11 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 
     add_proto qw/void vp9_idct32x32_1_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
     specialize qw/vp9_idct32x32_1_add/;
+
+    if (vpx_config("CONFIG_TX64X64") eq "yes") {
+      add_proto qw/void vp9_idct64x64_4096_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
+      specialize qw/vp9_idct64x64_4096_add/;
+    }
 
     add_proto qw/void vp9_iht4x4_16_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int tx_type";
     specialize qw/vp9_iht4x4_16_add/;
@@ -479,6 +530,11 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
     add_proto qw/void vp9_idct32x32_1_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
     specialize qw/vp9_idct32x32_1_add sse2 neon_asm dspr2/;
     $vp9_idct32x32_1_add_neon_asm=vp9_idct32x32_1_add_neon;
+
+    if (vpx_config("CONFIG_TX64X64") eq "yes") {
+      add_proto qw/void vp9_idct64x64_4096_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
+      specialize qw/vp9_idct64x64_4096_add/;
+    }
 
     add_proto qw/void vp9_iht4x4_16_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int tx_type";
     specialize qw/vp9_iht4x4_16_add sse2 neon_asm dspr2/;
@@ -662,6 +718,46 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   add_proto qw/void vp9_highbd_dc_128_predictor_32x32/, "uint16_t *dst, ptrdiff_t y_stride, const uint16_t *above, const uint16_t *left, int bd";
   specialize qw/vp9_highbd_dc_128_predictor_32x32/;
 
+  if (vpx_config("CONFIG_TX64X64") eq "yes") {
+    add_proto qw/void vp9_highbd_d207_predictor_64x64/, "uint16_t *dst, ptrdiff_t y_stride, const uint16_t *above, const uint16_t *left, int bd";
+    specialize qw/vp9_highbd_d207_predictor_64x64/;
+
+    add_proto qw/void vp9_highbd_d45_predictor_64x64/, "uint16_t *dst, ptrdiff_t y_stride, const uint16_t *above, const uint16_t *left, int bd";
+    specialize qw/vp9_highbd_d45_predictor_64x64/;
+
+    add_proto qw/void vp9_highbd_d63_predictor_64x64/, "uint16_t *dst, ptrdiff_t y_stride, const uint16_t *above, const uint16_t *left, int bd";
+    specialize qw/vp9_highbd_d63_predictor_64x64/;
+
+    add_proto qw/void vp9_highbd_h_predictor_64x64/, "uint16_t *dst, ptrdiff_t y_stride, const uint16_t *above, const uint16_t *left, int bd";
+    specialize qw/vp9_highbd_h_predictor_64x64/;
+
+    add_proto qw/void vp9_highbd_d117_predictor_64x64/, "uint16_t *dst, ptrdiff_t y_stride, const uint16_t *above, const uint16_t *left, int bd";
+    specialize qw/vp9_highbd_d117_predictor_64x64/;
+
+    add_proto qw/void vp9_highbd_d135_predictor_64x64/, "uint16_t *dst, ptrdiff_t y_stride, const uint16_t *above, const uint16_t *left, int bd";
+    specialize qw/vp9_highbd_d135_predictor_64x64/;
+
+    add_proto qw/void vp9_highbd_d153_predictor_64x64/, "uint16_t *dst, ptrdiff_t y_stride, const uint16_t *above, const uint16_t *left, int bd";
+    specialize qw/vp9_highbd_d153_predictor_64x64/;
+
+    add_proto qw/void vp9_highbd_v_predictor_64x64/, "uint16_t *dst, ptrdiff_t y_stride, const uint16_t *above, const uint16_t *left, int bd";
+    specialize qw/vp9_highbd_v_predictor_64x64/;
+
+    add_proto qw/void vp9_highbd_tm_predictor_64x64/, "uint16_t *dst, ptrdiff_t y_stride, const uint16_t *above, const uint16_t *left, int bd";
+    specialize qw/vp9_highbd_tm_predictor_64x64/;
+
+    add_proto qw/void vp9_highbd_dc_predictor_64x64/, "uint16_t *dst, ptrdiff_t y_stride, const uint16_t *above, const uint16_t *left, int bd";
+    specialize qw/vp9_highbd_dc_predictor_64x64/;
+
+    add_proto qw/void vp9_highbd_dc_top_predictor_64x64/, "uint16_t *dst, ptrdiff_t y_stride, const uint16_t *above, const uint16_t *left, int bd";
+    specialize qw/vp9_highbd_dc_top_predictor_64x64/;
+
+    add_proto qw/void vp9_highbd_dc_left_predictor_64x64/, "uint16_t *dst, ptrdiff_t y_stride, const uint16_t *above, const uint16_t *left, int bd";
+    specialize qw/vp9_highbd_dc_left_predictor_64x64/;
+
+    add_proto qw/void vp9_highbd_dc_128_predictor_64x64/, "uint16_t *dst, ptrdiff_t y_stride, const uint16_t *above, const uint16_t *left, int bd";
+    specialize qw/vp9_highbd_dc_128_predictor_64x64/;
+  }
   #
   # Sub Pixel Filters
   #
@@ -773,6 +869,11 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 
   add_proto qw/void vp9_highbd_idct32x32_1024_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int bd";
   specialize qw/vp9_highbd_idct32x32_1024_add/;
+
+  if (vpx_config("CONFIG_TX64X64") eq "yes") {
+    add_proto qw/void vp9_highbd_idct64x64_4096_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int bd";
+    specialize qw/vp9_highbd_idct64x64_4096_add/;
+  }
 
   add_proto qw/void vp9_highbd_idct32x32_34_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int bd";
   specialize qw/vp9_highbd_idct32x32_34_add/;
@@ -1144,6 +1245,14 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 
   add_proto qw/void vp9_quantize_b_32x32/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, int zbin_oq_value, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan";
   specialize qw/vp9_quantize_b_32x32/;
+
+  if (vpx_config("CONFIG_TX64X64") eq "yes") {
+    add_proto qw/void vp9_quantize_fp_64x64/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, int zbin_oq_value, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan";
+    specialize qw/vp9_quantize_fp_64x64/;
+
+    add_proto qw/void vp9_quantize_b_64x64/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, int zbin_oq_value, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan";
+    specialize qw/vp9_quantize_b_64x64/;
+  }
 } else {
   add_proto qw/int64_t vp9_block_error/, "const tran_low_t *coeff, const tran_low_t *dqcoeff, intptr_t block_size, int64_t *ssz";
   specialize qw/vp9_block_error avx2/, "$sse2_x86inc";
@@ -1159,6 +1268,14 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 
   add_proto qw/void vp9_quantize_b_32x32/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, int zbin_oq_value, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan";
   specialize qw/vp9_quantize_b_32x32/, "$ssse3_x86_64";
+
+  if (vpx_config("CONFIG_TX64X64") eq "yes") {
+    add_proto qw/void vp9_quantize_fp_64x64/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, int zbin_oq_value, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan";
+    specialize qw/vp9_quantize_fp_64x64/;
+
+    add_proto qw/void vp9_quantize_b_64x64/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, int zbin_oq_value, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan";
+    specialize qw/vp9_quantize_b_64x64/;
+  }
 }
 
 #
@@ -1213,6 +1330,14 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 
   add_proto qw/void vp9_fdct32x32_rd/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/vp9_fdct32x32_rd/;
+
+  if (vpx_config("CONFIG_TX64X64") eq "yes") {
+    add_proto qw/void vp9_fdct64x64_1/, "const int16_t *input, tran_low_t *output, int stride";
+    specialize qw/vp9_fdct64x64_1/;
+
+    add_proto qw/void vp9_fdct64x64/, "const int16_t *input, tran_low_t *output, int stride";
+    specialize qw/vp9_fdct64x64/;
+  }
 } else {
   add_proto qw/void vp9_fht4x4/, "const int16_t *input, tran_low_t *output, int stride, int tx_type";
   specialize qw/vp9_fht4x4 sse2/;
@@ -1252,6 +1377,14 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 
   add_proto qw/void vp9_fdct32x32_rd/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/vp9_fdct32x32_rd sse2 avx2/;
+
+  if (vpx_config("CONFIG_TX64X64") eq "yes") {
+    add_proto qw/void vp9_fdct64x64_1/, "const int16_t *input, tran_low_t *output, int stride";
+    specialize qw/vp9_fdct64x64_1/;
+
+    add_proto qw/void vp9_fdct64x64/, "const int16_t *input, tran_low_t *output, int stride";
+    specialize qw/vp9_fdct64x64/;
+  }
 }
 
 #
@@ -1868,6 +2001,14 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   add_proto qw/void vp9_highbd_quantize_b_32x32/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, int zbin_oq_value, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan";
   specialize qw/vp9_highbd_quantize_b_32x32/;
 
+  if (vpx_config("CONFIG_TX64X64") eq "yes") {
+    add_proto qw/void vp9_highbd_quantize_fp_64x64/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, int zbin_oq_value, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan";
+    specialize qw/vp9_highbd_quantize_fp_64x64/;
+
+    add_proto qw/void vp9_highbd_quantize_b_64x64/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, int zbin_oq_value, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan";
+    specialize qw/vp9_highbd_quantize_b_64x64/;
+  }
+
   #
   # Structured Similarity (SSIM)
   #
@@ -1912,6 +2053,14 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 
   add_proto qw/void vp9_highbd_fdct32x32_rd/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/vp9_highbd_fdct32x32_rd/;
+
+  if (vpx_config("CONFIG_TX64X64") eq "yes") {
+    add_proto qw/void vp9_highbd_fdct64x64_1/, "const int16_t *input, tran_low_t *output, int stride";
+    specialize qw/vp9_highbd_fdct64x64_1/;
+
+    add_proto qw/void vp9_highbd_fdct64x64/, "const int16_t *input, tran_low_t *output, int stride";
+    specialize qw/vp9_highbd_fdct64x64/;
+  }
 
   add_proto qw/void vp9_highbd_temporal_filter_apply/, "uint8_t *frame1, unsigned int stride, uint8_t *frame2, unsigned int block_width, unsigned int block_height, int strength, int filter_weight, unsigned int *accumulator, uint16_t *count";
   specialize qw/vp9_highbd_temporal_filter_apply/;

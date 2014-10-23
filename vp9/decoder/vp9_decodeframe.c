@@ -80,8 +80,15 @@ static int decode_unsigned_max(struct vp9_read_bit_buffer *rb, int max) {
 
 static TX_MODE read_tx_mode(vp9_reader *r) {
   TX_MODE tx_mode = vp9_read_literal(r, 2);
+#if CONFIG_TX64X64
+  if (tx_mode == 2)
+    tx_mode += vp9_read_bit(r);      // ALLOW_16X16 and ALLOW_32X32
+  else if (tx_mode == 3)
+    tx_mode += 1 + vp9_read_bit(r);  // ALLOW_64X64 and TX_MODE_SELECT
+#else
   if (tx_mode == ALLOW_32X32)
     tx_mode += vp9_read_bit(r);
+#endif
   return tx_mode;
 }
 
@@ -89,16 +96,22 @@ static void read_tx_mode_probs(struct tx_probs *tx_probs, vp9_reader *r) {
   int i, j;
 
   for (i = 0; i < TX_SIZE_CONTEXTS; ++i)
-    for (j = 0; j < TX_SIZES - 3; ++j)
+    for (j = 0; j < 1; ++j)
       vp9_diff_update_prob(r, &tx_probs->p8x8[i][j]);
 
   for (i = 0; i < TX_SIZE_CONTEXTS; ++i)
-    for (j = 0; j < TX_SIZES - 2; ++j)
+    for (j = 0; j < 2; ++j)
       vp9_diff_update_prob(r, &tx_probs->p16x16[i][j]);
 
   for (i = 0; i < TX_SIZE_CONTEXTS; ++i)
-    for (j = 0; j < TX_SIZES - 1; ++j)
+    for (j = 0; j < 3; ++j)
       vp9_diff_update_prob(r, &tx_probs->p32x32[i][j]);
+
+#if CONFIG_TX64X64
+  for (i = 0; i < TX_SIZE_CONTEXTS; ++i)
+    for (j = 0; j < 4; ++j)
+      vp9_diff_update_prob(r, &tx_probs->p64x64[i][j]);
+#endif
 }
 
 static void read_switchable_interp_probs(FRAME_CONTEXT *fc, vp9_reader *r) {
@@ -220,6 +233,12 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
             tx_type = DCT_DCT;
             vp9_highbd_idct32x32_add(dqcoeff, dst, stride, eob, xd->bd);
             break;
+#if CONFIG_TX64X64
+          case TX_64X64:
+            tx_type = DCT_DCT;
+            vp9_highbd_idct64x64_add(dqcoeff, dst, stride, eob, xd->bd);
+            break;
+#endif
           default:
             assert(0 && "Invalid transform size");
         }
@@ -247,6 +266,12 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
             tx_type = DCT_DCT;
             vp9_idct32x32_add(dqcoeff, dst, stride, eob);
             break;
+#if CONFIG_TX64X64
+          case TX_64X64:
+            tx_type = DCT_DCT;
+            vp9_idct64x64_add(dqcoeff, dst, stride, eob);
+            break;
+#endif
           default:
             assert(0 && "Invalid transform size");
             return;
@@ -276,6 +301,12 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
           tx_type = DCT_DCT;
           vp9_idct32x32_add(dqcoeff, dst, stride, eob);
           break;
+#if CONFIG_TX64X64
+        case TX_64X64:
+          tx_type = DCT_DCT;
+          vp9_idct64x64_add(dqcoeff, dst, stride, eob);
+          break;
+#endif
         default:
           assert(0 && "Invalid transform size");
           return;
@@ -321,7 +352,6 @@ static void predict_and_reconstruct_intra_block(int plane, int block,
                           b_width_log2_lookup[plane_bsize], tx_size, mode,
                           dst, pd->dst.stride, dst, pd->dst.stride,
                           x, y, plane);
-
   if (!mi->mbmi.skip) {
     const int eob = vp9_decode_block_tokens(cm, xd, plane, block,
                                             plane_bsize, x, y, tx_size,
@@ -701,14 +731,14 @@ static void setup_frame_size(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
   setup_display_size(cm, rb);
 
   if (vp9_realloc_frame_buffer(
-          get_frame_new_buffer(cm), cm->width, cm->height,
-          cm->subsampling_x, cm->subsampling_y,
+      get_frame_new_buffer(cm), cm->width, cm->height,
+      cm->subsampling_x, cm->subsampling_y,
 #if CONFIG_VP9_HIGHBITDEPTH
-          cm->use_highbitdepth,
+      cm->use_highbitdepth,
 #endif
-          VP9_DEC_BORDER_IN_PIXELS,
-          &cm->frame_bufs[cm->new_fb_idx].raw_frame_buffer, cm->get_fb_cb,
-          cm->cb_priv)) {
+      VP9_DEC_BORDER_IN_PIXELS,
+      &cm->frame_bufs[cm->new_fb_idx].raw_frame_buffer, cm->get_fb_cb,
+      cm->cb_priv)) {
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate frame buffer");
   }
@@ -779,14 +809,14 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
   setup_display_size(cm, rb);
 
   if (vp9_realloc_frame_buffer(
-          get_frame_new_buffer(cm), cm->width, cm->height,
-          cm->subsampling_x, cm->subsampling_y,
+      get_frame_new_buffer(cm), cm->width, cm->height,
+      cm->subsampling_x, cm->subsampling_y,
 #if CONFIG_VP9_HIGHBITDEPTH
-          cm->use_highbitdepth,
+      cm->use_highbitdepth,
 #endif
-          VP9_DEC_BORDER_IN_PIXELS,
-          &cm->frame_bufs[cm->new_fb_idx].raw_frame_buffer, cm->get_fb_cb,
-          cm->cb_priv)) {
+      VP9_DEC_BORDER_IN_PIXELS,
+      &cm->frame_bufs[cm->new_fb_idx].raw_frame_buffer, cm->get_fb_cb,
+      cm->cb_priv)) {
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate frame buffer");
   }

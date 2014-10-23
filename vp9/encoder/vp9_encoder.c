@@ -3136,7 +3136,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   release_scaled_references(cpi);
   vp9_update_reference_frames(cpi);
 
-  for (t = TX_4X4; t <= TX_32X32; t++)
+  for (t = TX_4X4; t < TX_SIZES; t++)
     full_to_model_counts(cm->counts.coef[t], cpi->coef_counts[t]);
 
   if (!cm->error_resilient_mode && !cm->frame_parallel_decoding_mode)
