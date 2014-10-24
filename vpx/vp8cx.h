@@ -194,6 +194,20 @@ enum vp8e_enc_control_id {
    */
   VP8E_SET_MAX_INTRA_BITRATE_PCT,
 
+  /*!\brief Max data rate for Inter frames
+   *
+   * This value controls additional clamping on the maximum size of an
+   * inter frame. It is expressed as a percentage of the average
+   * per-frame bitrate, with the special (and default) value 0 meaning
+   * unlimited, or no additional clamping beyond the codec's built-in
+   * algorithm.
+   *
+   * For example, to allow no more than 4.5 frames worth of bitrate
+   * to an inter frame, set this to 450.
+   *
+   */
+  VP8E_SET_MAX_INTER_BITRATE_PCT,
+
 
   /* TODO(jkoleszar): Move to vp9cx.h */
   VP9E_SET_LOSSLESS,
@@ -360,6 +374,7 @@ VPX_CTRL_USE_TYPE(VP8E_GET_LAST_QUANTIZER,     int *)
 VPX_CTRL_USE_TYPE(VP8E_GET_LAST_QUANTIZER_64,  int *)
 
 VPX_CTRL_USE_TYPE(VP8E_SET_MAX_INTRA_BITRATE_PCT, unsigned int)
+VPX_CTRL_USE_TYPE(VP8E_SET_MAX_INTER_BITRATE_PCT, unsigned int)
 
 VPX_CTRL_USE_TYPE(VP9E_SET_LOSSLESS, unsigned int)
 

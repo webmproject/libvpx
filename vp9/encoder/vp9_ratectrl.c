@@ -196,6 +196,7 @@ static int estimate_bits_at_q(FRAME_TYPE frame_type, int q, int mbs,
 
 int vp9_rc_clamp_pframe_target_size(const VP9_COMP *const cpi, int target) {
   const RATE_CONTROL *rc = &cpi->rc;
+  const VP9EncoderConfig *oxcf = &cpi->oxcf;
   const int min_frame_target = MAX(rc->min_frame_bandwidth,
                                    rc->avg_frame_bandwidth >> 5);
   if (target < min_frame_target)
@@ -210,6 +211,11 @@ int vp9_rc_clamp_pframe_target_size(const VP9_COMP *const cpi, int target) {
   // Clip the frame target to the maximum allowed value.
   if (target > rc->max_frame_bandwidth)
     target = rc->max_frame_bandwidth;
+  if (oxcf->rc_max_inter_bitrate_pct) {
+    const int max_rate = rc->avg_frame_bandwidth *
+                         oxcf->rc_max_inter_bitrate_pct / 100;
+    target = MIN(target, max_rate);
+  }
   return target;
 }
 
@@ -1346,6 +1352,11 @@ static int calc_pframe_target_size_one_pass_cbr(const VP9_COMP *cpi) {
     // Increase the target bandwidth for this frame.
     const int pct_high = (int)MIN(-diff / one_pct_bits, oxcf->over_shoot_pct);
     target += (target * pct_high) / 200;
+  }
+  if (oxcf->rc_max_inter_bitrate_pct) {
+    const int max_rate = rc->avg_frame_bandwidth *
+                         oxcf->rc_max_inter_bitrate_pct / 100;
+    target = MIN(target, max_rate);
   }
   return MAX(min_frame_target, target);
 }
