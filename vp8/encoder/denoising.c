@@ -374,7 +374,7 @@ void vp8_denoiser_set_parameters(VP8_DENOISER *denoiser, int mode) {
   } else if (mode == 3) {
     denoiser->denoiser_mode = kDenoiserOnYUVAggressive;
   } else {
-    denoiser->denoiser_mode = kDenoiserOnAdaptive;
+    denoiser->denoiser_mode = kDenoiserOnYUV;
   }
   if (denoiser->denoiser_mode != kDenoiserOnYUVAggressive) {
     denoiser->denoise_pars.scale_sse_thresh = 1;
@@ -393,7 +393,7 @@ void vp8_denoiser_set_parameters(VP8_DENOISER *denoiser, int mode) {
     denoiser->denoise_pars.pickmode_mv_bias = 75;
     denoiser->denoise_pars.qp_thresh = 85;
     denoiser->denoise_pars.consec_zerolast = 15;
-    denoiser->denoise_pars.spatial_blur = 20;
+    denoiser->denoise_pars.spatial_blur = 0;
   }
 }
 
@@ -453,16 +453,16 @@ int vp8_denoiser_allocate(VP8_DENOISER *denoiser, int width, int height,
     // Bitrate thresholds and noise metric (nmse) thresholds for switching to
     // aggressive mode.
     // TODO(marpan): Adjust thresholds, including effect on resolution.
-    denoiser->bitrate_threshold = 300000;  // (bits/sec).
-    denoiser->threshold_aggressive_mode = 35;
+    denoiser->bitrate_threshold = 400000;  // (bits/sec).
+    denoiser->threshold_aggressive_mode = 80;
     if (width * height > 1280 * 720) {
-      denoiser->bitrate_threshold = 2000000;
-      denoiser->threshold_aggressive_mode = 1400;
+      denoiser->bitrate_threshold = 2500000;
+      denoiser->threshold_aggressive_mode = 180;
     } else if (width * height > 960 * 540) {
-      denoiser->bitrate_threshold = 800000;
-      denoiser->threshold_aggressive_mode = 150;
+      denoiser->bitrate_threshold = 1000000;
+      denoiser->threshold_aggressive_mode = 120;
     } else if (width * height > 640 * 480) {
-      denoiser->bitrate_threshold = 500000;
+      denoiser->bitrate_threshold = 600000;
       denoiser->threshold_aggressive_mode = 100;
     }
     return 0;
