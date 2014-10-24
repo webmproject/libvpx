@@ -750,26 +750,11 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   add_proto qw/void vp9_highbd_idct4x4_1_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int bd";
   specialize qw/vp9_highbd_idct4x4_1_add/;
 
-  add_proto qw/void vp9_highbd_idct4x4_16_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int bd";
-  specialize qw/vp9_highbd_idct4x4_16_add/;
-
   add_proto qw/void vp9_highbd_idct8x8_1_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int bd";
   specialize qw/vp9_highbd_idct8x8_1_add/;
 
-  add_proto qw/void vp9_highbd_idct8x8_64_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int bd";
-  specialize qw/vp9_highbd_idct8x8_64_add/;
-
-  add_proto qw/void vp9_highbd_idct8x8_10_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int bd";
-  specialize qw/vp9_highbd_idct8x8_10_add/;
-
   add_proto qw/void vp9_highbd_idct16x16_1_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int bd";
   specialize qw/vp9_highbd_idct16x16_1_add/;
-
-  add_proto qw/void vp9_highbd_idct16x16_256_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int bd";
-  specialize qw/vp9_highbd_idct16x16_256_add/;
-
-  add_proto qw/void vp9_highbd_idct16x16_10_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int bd";
-  specialize qw/vp9_highbd_idct16x16_10_add/;
 
   add_proto qw/void vp9_highbd_idct32x32_1024_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int bd";
   specialize qw/vp9_highbd_idct32x32_1024_add/;
@@ -796,6 +781,42 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 
   add_proto qw/void vp9_highbd_iwht4x4_16_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int bd";
   specialize qw/vp9_highbd_iwht4x4_16_add/;
+
+  # Force C versions if CONFIG_EMULATE_HARDWARE is 1
+  if (vpx_config("CONFIG_EMULATE_HARDWARE") eq "yes") {
+
+    add_proto qw/void vp9_highbd_idct4x4_16_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int bd";
+    specialize qw/vp9_highbd_idct4x4_16_add/;
+
+    add_proto qw/void vp9_highbd_idct8x8_64_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int bd";
+    specialize qw/vp9_highbd_idct8x8_64_add/;
+
+    add_proto qw/void vp9_highbd_idct8x8_10_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int bd";
+    specialize qw/vp9_highbd_idct8x8_10_add/;
+
+    add_proto qw/void vp9_highbd_idct16x16_256_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int bd";
+    specialize qw/vp9_highbd_idct16x16_256_add/;
+
+    add_proto qw/void vp9_highbd_idct16x16_10_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int bd";
+    specialize qw/vp9_highbd_idct16x16_10_add/;
+
+  } else {
+
+    add_proto qw/void vp9_highbd_idct4x4_16_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int bd";
+    specialize qw/vp9_highbd_idct4x4_16_add sse2/;
+
+    add_proto qw/void vp9_highbd_idct8x8_64_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int bd";
+    specialize qw/vp9_highbd_idct8x8_64_add sse2/;
+
+    add_proto qw/void vp9_highbd_idct8x8_10_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int bd";
+    specialize qw/vp9_highbd_idct8x8_10_add sse2/;
+
+    add_proto qw/void vp9_highbd_idct16x16_256_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int bd";
+    specialize qw/vp9_highbd_idct16x16_256_add sse2/;
+
+    add_proto qw/void vp9_highbd_idct16x16_10_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int bd";
+    specialize qw/vp9_highbd_idct16x16_10_add sse2/;
+  }
 }
 
 #
@@ -1181,43 +1202,43 @@ if (vpx_config("CONFIG_INTERNAL_STATS") eq "yes") {
 
 if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   add_proto qw/void vp9_fht4x4/, "const int16_t *input, tran_low_t *output, int stride, int tx_type";
-  specialize qw/vp9_fht4x4/;
+  specialize qw/vp9_fht4x4 sse2/;
 
   add_proto qw/void vp9_fht8x8/, "const int16_t *input, tran_low_t *output, int stride, int tx_type";
-  specialize qw/vp9_fht8x8/;
+  specialize qw/vp9_fht8x8 sse2/;
 
   add_proto qw/void vp9_fht16x16/, "const int16_t *input, tran_low_t *output, int stride, int tx_type";
-  specialize qw/vp9_fht16x16/;
+  specialize qw/vp9_fht16x16 sse2/;
 
   add_proto qw/void vp9_fwht4x4/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vp9_fwht4x4/;
+  specialize qw/vp9_fwht4x4/, "$mmx_x86inc";
 
   add_proto qw/void vp9_fdct4x4_1/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vp9_fdct4x4_1/;
+  specialize qw/vp9_fdct4x4_1 sse2/;
 
   add_proto qw/void vp9_fdct4x4/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vp9_fdct4x4/;
+  specialize qw/vp9_fdct4x4 sse2/;
 
   add_proto qw/void vp9_fdct8x8_1/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vp9_fdct8x8_1/;
+  specialize qw/vp9_fdct8x8_1 sse2/;
 
   add_proto qw/void vp9_fdct8x8/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vp9_fdct8x8/;
+  specialize qw/vp9_fdct8x8 sse2/;
 
   add_proto qw/void vp9_fdct16x16_1/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vp9_fdct16x16_1/;
+  specialize qw/vp9_fdct16x16_1 sse2/;
 
   add_proto qw/void vp9_fdct16x16/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vp9_fdct16x16/;
+  specialize qw/vp9_fdct16x16 sse2/;
 
   add_proto qw/void vp9_fdct32x32_1/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vp9_fdct32x32_1/;
+  specialize qw/vp9_fdct32x32_1 sse2/;
 
   add_proto qw/void vp9_fdct32x32/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vp9_fdct32x32/;
+  specialize qw/vp9_fdct32x32 sse2/;
 
   add_proto qw/void vp9_fdct32x32_rd/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vp9_fdct32x32_rd/;
+  specialize qw/vp9_fdct32x32_rd sse2/;
 } else {
   add_proto qw/void vp9_fht4x4/, "const int16_t *input, tran_low_t *output, int stride, int tx_type";
   specialize qw/vp9_fht4x4 sse2/;
@@ -1882,40 +1903,40 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 
   # fdct functions
   add_proto qw/void vp9_highbd_fht4x4/, "const int16_t *input, tran_low_t *output, int stride, int tx_type";
-  specialize qw/vp9_highbd_fht4x4/;
+  specialize qw/vp9_highbd_fht4x4 sse2/;
 
   add_proto qw/void vp9_highbd_fht8x8/, "const int16_t *input, tran_low_t *output, int stride, int tx_type";
-  specialize qw/vp9_highbd_fht8x8/;
+  specialize qw/vp9_highbd_fht8x8 sse2/;
 
   add_proto qw/void vp9_highbd_fht16x16/, "const int16_t *input, tran_low_t *output, int stride, int tx_type";
-  specialize qw/vp9_highbd_fht16x16/;
+  specialize qw/vp9_highbd_fht16x16 sse2/;
 
   add_proto qw/void vp9_highbd_fwht4x4/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/vp9_highbd_fwht4x4/;
 
   add_proto qw/void vp9_highbd_fdct4x4/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vp9_highbd_fdct4x4/;
+  specialize qw/vp9_highbd_fdct4x4 sse2/;
 
   add_proto qw/void vp9_highbd_fdct8x8_1/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/vp9_highbd_fdct8x8_1/;
 
   add_proto qw/void vp9_highbd_fdct8x8/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vp9_highbd_fdct8x8/;
+  specialize qw/vp9_highbd_fdct8x8 sse2/;
 
   add_proto qw/void vp9_highbd_fdct16x16_1/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/vp9_highbd_fdct16x16_1/;
 
   add_proto qw/void vp9_highbd_fdct16x16/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vp9_highbd_fdct16x16/;
+  specialize qw/vp9_highbd_fdct16x16 sse2/;
 
   add_proto qw/void vp9_highbd_fdct32x32_1/, "const int16_t *input, tran_low_t *output, int stride";
   specialize qw/vp9_highbd_fdct32x32_1/;
 
   add_proto qw/void vp9_highbd_fdct32x32/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vp9_highbd_fdct32x32/;
+  specialize qw/vp9_highbd_fdct32x32 sse2/;
 
   add_proto qw/void vp9_highbd_fdct32x32_rd/, "const int16_t *input, tran_low_t *output, int stride";
-  specialize qw/vp9_highbd_fdct32x32_rd/;
+  specialize qw/vp9_highbd_fdct32x32_rd sse2/;
 
   add_proto qw/void vp9_highbd_temporal_filter_apply/, "uint8_t *frame1, unsigned int stride, uint8_t *frame2, unsigned int block_width, unsigned int block_height, int strength, int filter_weight, unsigned int *accumulator, uint16_t *count";
   specialize qw/vp9_highbd_temporal_filter_apply/;
