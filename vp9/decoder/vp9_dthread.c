@@ -92,12 +92,12 @@ static void loop_filter_rows_mt(const YV12_BUFFER_CONFIG *const frame_buffer,
                                 VP9_COMMON *const cm,
                                 struct macroblockd_plane planes[MAX_MB_PLANE],
                                 int start, int stop, int y_only,
-                                VP9LfSync *const lf_sync, int num_lf_workers) {
+                                VP9LfSync *const lf_sync) {
   const int num_planes = y_only ? 1 : MAX_MB_PLANE;
   int r, c;  // SB row and col
   const int sb_cols = mi_cols_aligned_to_sb(cm->mi_cols) >> MI_BLOCK_SIZE_LOG2;
 
-  for (r = start; r < stop; r += num_lf_workers) {
+  for (r = start; r < stop; r += lf_sync->num_workers) {
     const int mi_row = r << MI_BLOCK_SIZE_LOG2;
     MODE_INFO *const mi = cm->mi + mi_row * cm->mi_stride;
 
@@ -121,35 +121,35 @@ static void loop_filter_rows_mt(const YV12_BUFFER_CONFIG *const frame_buffer,
 }
 
 // Row-based multi-threaded loopfilter hook
-static int loop_filter_row_worker(TileWorkerData *const tile_data,
-                                  void *unused) {
-  LFWorkerData *const lf_data = &tile_data->lfdata;
-  (void)unused;
+static int loop_filter_row_worker(VP9LfSync *const lf_sync,
+                                  LFWorkerData *const lf_data) {
   loop_filter_rows_mt(lf_data->frame_buffer, lf_data->cm, lf_data->planes,
-                      lf_data->start, lf_data->stop, lf_data->y_only,
-                      lf_data->lf_sync, lf_data->num_lf_workers);
+                      lf_data->start, lf_data->stop, lf_data->y_only, lf_sync);
   return 1;
 }
 
 // VP9 decoder: Implement multi-threaded loopfilter that uses the tile
 // threads.
-void vp9_loop_filter_frame_mt(YV12_BUFFER_CONFIG *frame,
-                              VP9Decoder *pbi, VP9_COMMON *cm,
+void vp9_loop_filter_frame_mt(VP9LfSync *lf_sync,
+                              YV12_BUFFER_CONFIG *frame,
+                              struct macroblockd_plane planes[MAX_MB_PLANE],
+                              VP9_COMMON *cm,
+                              VP9Worker *workers, int nworkers,
                               int frame_filter_level,
                               int y_only) {
-  VP9LfSync *const lf_sync = &pbi->lf_row_sync;
   const VP9WorkerInterface *const winterface = vp9_get_worker_interface();
   // Number of superblock rows and cols
   const int sb_rows = mi_cols_aligned_to_sb(cm->mi_rows) >> MI_BLOCK_SIZE_LOG2;
   const int tile_cols = 1 << cm->log2_tile_cols;
-  const int num_workers = MIN(pbi->max_threads & ~1, tile_cols);
+  const int num_workers = MIN(nworkers, tile_cols);
   int i;
 
   if (!frame_filter_level) return;
 
-  if (!lf_sync->sync_range || cm->last_height != cm->height) {
+  if (!lf_sync->sync_range || cm->last_height != cm->height ||
+      num_workers > lf_sync->num_workers) {
     vp9_loop_filter_dealloc(lf_sync);
-    vp9_loop_filter_alloc(lf_sync, cm, sb_rows, cm->width);
+    vp9_loop_filter_alloc(lf_sync, cm, sb_rows, cm->width, num_workers);
   }
 
   vp9_loop_filter_frame_init(cm, frame_filter_level);
@@ -158,32 +158,26 @@ void vp9_loop_filter_frame_mt(YV12_BUFFER_CONFIG *frame,
   vpx_memset(lf_sync->cur_sb_col, -1, sizeof(*lf_sync->cur_sb_col) * sb_rows);
 
   // Set up loopfilter thread data.
-  // The decoder is using num_workers instead of pbi->num_tile_workers
-  // because it has been observed that using more threads on the
-  // loopfilter, than there are tile columns in the frame will hurt
-  // performance on Android. This is because the system will only
-  // schedule the tile decode workers on cores equal to the number
-  // of tile columns. Then if the decoder tries to use more threads for the
-  // loopfilter, it will hurt performance because of contention. If the
-  // multithreading code changes in the future then the number of workers
-  // used by the loopfilter should be revisited.
+  // The decoder is capping num_workers because it has been observed that using
+  // more threads on the loopfilter than there are cores will hurt performance
+  // on Android. This is because the system will only schedule the tile decode
+  // workers on cores equal to the number of tile columns. Then if the decoder
+  // tries to use more threads for the loopfilter, it will hurt performance
+  // because of contention. If the multithreading code changes in the future
+  // then the number of workers used by the loopfilter should be revisited.
   for (i = 0; i < num_workers; ++i) {
-    VP9Worker *const worker = &pbi->tile_workers[i];
-    TileWorkerData *const tile_data = (TileWorkerData*)worker->data1;
-    LFWorkerData *const lf_data = &tile_data->lfdata;
+    VP9Worker *const worker = &workers[i];
+    LFWorkerData *const lf_data = &lf_sync->lfdata[i];
 
     worker->hook = (VP9WorkerHook)loop_filter_row_worker;
+    worker->data1 = lf_sync;
+    worker->data2 = lf_data;
 
     // Loopfilter data
-    lf_data->frame_buffer = frame;
-    lf_data->cm = cm;
-    vp9_copy(lf_data->planes, pbi->mb.plane);
+    vp9_loop_filter_data_reset(lf_data, frame, cm, planes);
     lf_data->start = i;
     lf_data->stop = sb_rows;
-    lf_data->y_only = y_only;   // always do all planes in decoder
-
-    lf_data->lf_sync = lf_sync;
-    lf_data->num_lf_workers = num_workers;
+    lf_data->y_only = y_only;
 
     // Start loopfiltering
     if (i == num_workers - 1) {
@@ -195,7 +189,7 @@ void vp9_loop_filter_frame_mt(YV12_BUFFER_CONFIG *frame,
 
   // Wait till all rows are finished
   for (i = 0; i < num_workers; ++i) {
-    winterface->sync(&pbi->tile_workers[i]);
+    winterface->sync(&workers[i]);
   }
 }
 
@@ -215,7 +209,7 @@ static int get_sync_range(int width) {
 
 // Allocate memory for lf row synchronization
 void vp9_loop_filter_alloc(VP9LfSync *lf_sync, VP9_COMMON *cm, int rows,
-                           int width) {
+                           int width, int num_workers) {
   lf_sync->rows = rows;
 #if CONFIG_MULTITHREAD
   {
@@ -238,6 +232,10 @@ void vp9_loop_filter_alloc(VP9LfSync *lf_sync, VP9_COMMON *cm, int rows,
     }
   }
 #endif  // CONFIG_MULTITHREAD
+
+  CHECK_MEM_ERROR(cm, lf_sync->lfdata,
+                  vpx_malloc(num_workers * sizeof(*lf_sync->lfdata)));
+  lf_sync->num_workers = num_workers;
 
   CHECK_MEM_ERROR(cm, lf_sync->cur_sb_col,
                   vpx_malloc(sizeof(*lf_sync->cur_sb_col) * rows));
@@ -265,6 +263,7 @@ void vp9_loop_filter_dealloc(VP9LfSync *lf_sync) {
       vpx_free(lf_sync->cond_);
     }
 #endif  // CONFIG_MULTITHREAD
+    vpx_free(lf_sync->lfdata);
     vpx_free(lf_sync->cur_sb_col);
     // clear the structure as the source of this call may be a resize in which
     // case this call will be followed by an _alloc() which may fail.

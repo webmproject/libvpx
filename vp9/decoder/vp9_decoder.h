@@ -46,6 +46,8 @@ typedef struct VP9Decoder {
 
   VP9Worker lf_worker;
   VP9Worker *tile_workers;
+  TileWorkerData *tile_worker_data;
+  TileInfo *tile_worker_info;
   int num_tile_workers;
 
   TileData *tile_data;
