@@ -17,6 +17,7 @@
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/common/vp9_idct.h"
 #include "vp9/common/vp9_systemdependent.h"
+#include "vp9/encoder/vp9_dct.h"
 
 static INLINE tran_high_t fdct_round_shift(tran_high_t input) {
   tran_high_t rv = ROUND_POWER_OF_TWO(input, DCT_CONST_BITS);
@@ -26,7 +27,7 @@ static INLINE tran_high_t fdct_round_shift(tran_high_t input) {
   return rv;
 }
 
-static void fdct4(const tran_low_t *input, tran_low_t *output) {
+void vp9_fdct4(const tran_low_t *input, tran_low_t *output) {
   tran_high_t step[4];
   tran_high_t temp1, temp2;
 
@@ -123,7 +124,7 @@ void vp9_fdct4x4_c(const int16_t *input, tran_low_t *output, int stride) {
   }
 }
 
-static void fadst4(const tran_low_t *input, tran_low_t *output) {
+void vp9_fadst4(const tran_low_t *input, tran_low_t *output) {
   tran_high_t x0, x1, x2, x3;
   tran_high_t s0, s1, s2, s3, s4, s5, s6, s7;
 
@@ -163,13 +164,6 @@ static void fadst4(const tran_low_t *input, tran_low_t *output) {
   output[3] = (tran_low_t)fdct_round_shift(s3);
 }
 
-static const transform_2d FHT_4[] = {
-  { fdct4,  fdct4  },  // DCT_DCT  = 0
-  { fadst4, fdct4  },  // ADST_DCT = 1
-  { fdct4,  fadst4 },  // DCT_ADST = 2
-  { fadst4, fadst4 }   // ADST_ADST = 3
-};
-
 void vp9_fht4x4_c(const int16_t *input, tran_low_t *output,
                   int stride, int tx_type) {
   if (tx_type == DCT_DCT) {
@@ -203,7 +197,7 @@ void vp9_fht4x4_c(const int16_t *input, tran_low_t *output,
   }
 }
 
-static void fdct8(const tran_low_t *input, tran_low_t *output) {
+void vp9_fdct8(const tran_low_t *input, tran_low_t *output) {
   tran_high_t s0, s1, s2, s3, s4, s5, s6, s7;  // canbe16
   tran_high_t t0, t1, t2, t3;                  // needs32
   tran_high_t x0, x1, x2, x3;                  // canbe16
@@ -331,7 +325,7 @@ void vp9_fdct8x8_c(const int16_t *input, tran_low_t *final_output, int stride) {
 
   // Rows
   for (i = 0; i < 8; ++i) {
-    fdct8(&intermediate[i * 8], &final_output[i * 8]);
+    vp9_fdct8(&intermediate[i * 8], &final_output[i * 8]);
     for (j = 0; j < 8; ++j)
       final_output[j + i * 8] /= 2;
   }
@@ -413,7 +407,7 @@ void vp9_fdct8x8_quant_c(const int16_t *input, int stride,
 
   // Rows
   for (i = 0; i < 8; ++i) {
-    fdct8(&intermediate[i * 8], &coeff_ptr[i * 8]);
+    vp9_fdct8(&intermediate[i * 8], &coeff_ptr[i * 8]);
     for (j = 0; j < 8; ++j)
       coeff_ptr[j + i * 8] /= 2;
   }
@@ -641,7 +635,7 @@ void vp9_fdct16x16_c(const int16_t *input, tran_low_t *output, int stride) {
   }
 }
 
-static void fadst8(const tran_low_t *input, tran_low_t *output) {
+void vp9_fadst8(const tran_low_t *input, tran_low_t *output) {
   tran_high_t s0, s1, s2, s3, s4, s5, s6, s7;
 
   tran_high_t x0 = input[7];
@@ -711,13 +705,6 @@ static void fadst8(const tran_low_t *input, tran_low_t *output) {
   output[6] = (tran_low_t)x5;
   output[7] = (tran_low_t)-x1;
 }
-
-static const transform_2d FHT_8[] = {
-  { fdct8,  fdct8  },  // DCT_DCT  = 0
-  { fadst8, fdct8  },  // ADST_DCT = 1
-  { fdct8,  fadst8 },  // DCT_ADST = 2
-  { fadst8, fadst8 }   // ADST_ADST = 3
-};
 
 void vp9_fht8x8_c(const int16_t *input, tran_low_t *output,
                   int stride, int tx_type) {
@@ -807,7 +794,7 @@ void vp9_fwht4x4_c(const int16_t *input, tran_low_t *output, int stride) {
 }
 
 // Rewrote to use same algorithm as others.
-static void fdct16(const tran_low_t in[16], tran_low_t out[16]) {
+void vp9_fdct16(const tran_low_t in[16], tran_low_t out[16]) {
   tran_high_t step1[8];      // canbe16
   tran_high_t step2[8];      // canbe16
   tran_high_t step3[8];      // canbe16
@@ -948,7 +935,7 @@ static void fdct16(const tran_low_t in[16], tran_low_t out[16]) {
   out[15] = (tran_low_t)fdct_round_shift(temp2);
 }
 
-static void fadst16(const tran_low_t *input, tran_low_t *output) {
+void vp9_fadst16(const tran_low_t *input, tran_low_t *output) {
   tran_high_t s0, s1, s2, s3, s4, s5, s6, s7, s8;
   tran_high_t s9, s10, s11, s12, s13, s14, s15;
 
@@ -1111,13 +1098,6 @@ static void fadst16(const tran_low_t *input, tran_low_t *output) {
   output[15] = (tran_low_t)-x1;
 }
 
-static const transform_2d FHT_16[] = {
-  { fdct16,  fdct16  },  // DCT_DCT  = 0
-  { fadst16, fdct16  },  // ADST_DCT = 1
-  { fdct16,  fadst16 },  // DCT_ADST = 2
-  { fadst16, fadst16 }   // ADST_ADST = 3
-};
-
 void vp9_fht16x16_c(const int16_t *input, tran_low_t *output,
                     int stride, int tx_type) {
   if (tx_type == DCT_DCT) {
@@ -1162,7 +1142,7 @@ static INLINE tran_high_t half_round_shift(tran_high_t input) {
   return rv;
 }
 
-static void fdct32(const tran_high_t *input, tran_high_t *output, int round) {
+void vp9_fdct32(const tran_high_t *input, tran_high_t *output, int round) {
   tran_high_t step[32];
   // Stage 1
   step[0] = input[0] + input[(32 - 1)];
@@ -1505,7 +1485,7 @@ void vp9_fdct32x32_c(const int16_t *input, tran_low_t *out, int stride) {
     tran_high_t temp_in[32], temp_out[32];
     for (j = 0; j < 32; ++j)
       temp_in[j] = input[j * stride + i] * 4;
-    fdct32(temp_in, temp_out, 0);
+    vp9_fdct32(temp_in, temp_out, 0);
     for (j = 0; j < 32; ++j)
       output[j * 32 + i] = (temp_out[j] + 1 + (temp_out[j] > 0)) >> 2;
   }
@@ -1515,7 +1495,7 @@ void vp9_fdct32x32_c(const int16_t *input, tran_low_t *out, int stride) {
     tran_high_t temp_in[32], temp_out[32];
     for (j = 0; j < 32; ++j)
       temp_in[j] = output[j + i * 32];
-    fdct32(temp_in, temp_out, 0);
+    vp9_fdct32(temp_in, temp_out, 0);
     for (j = 0; j < 32; ++j)
       out[j + i * 32] =
           (tran_low_t)((temp_out[j] + 1 + (temp_out[j] < 0)) >> 2);
@@ -1534,7 +1514,7 @@ void vp9_fdct32x32_rd_c(const int16_t *input, tran_low_t *out, int stride) {
     tran_high_t temp_in[32], temp_out[32];
     for (j = 0; j < 32; ++j)
       temp_in[j] = input[j * stride + i] * 4;
-    fdct32(temp_in, temp_out, 0);
+    vp9_fdct32(temp_in, temp_out, 0);
     for (j = 0; j < 32; ++j)
       // TODO(cd): see quality impact of only doing
       //           output[j * 32 + i] = (temp_out[j] + 1) >> 2;
@@ -1547,7 +1527,7 @@ void vp9_fdct32x32_rd_c(const int16_t *input, tran_low_t *out, int stride) {
     tran_high_t temp_in[32], temp_out[32];
     for (j = 0; j < 32; ++j)
       temp_in[j] = output[j + i * 32];
-    fdct32(temp_in, temp_out, 1);
+    vp9_fdct32(temp_in, temp_out, 1);
     for (j = 0; j < 32; ++j)
       out[j + i * 32] = (tran_low_t)temp_out[j];
   }

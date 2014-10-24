@@ -118,6 +118,28 @@ typedef struct {
 } highbd_transform_2d;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
+#if CONFIG_EMULATE_HARDWARE
+// When CONFIG_EMULATE_HARDWARE is 1 the transform performs a
+// non-normative method to handle overflows. A stream that causes
+// overflows  in the inverse transform is considered invalid in VP9,
+// and a hardware implementer is free to choose any reasonable
+// method to handle overflows. However to aid in hardware
+// verification they can use a specific implementation of the
+// WRAPLOW() macro below that is identical to their intended
+// hardware implementation (and also use configure options to trigger
+// the C-implementation of the transform).
+//
+// The particular WRAPLOW implementation below performs strict
+// overflow wrapping to match common hardware implementations.
+// bd of 8 uses trans_low with 16bits, need to remove 16bits
+// bd of 10 uses trans_low with 18bits, need to remove 14bits
+// bd of 12 uses trans_low with 20bits, need to remove 12bits
+// bd of x uses trans_low with 8+x bits, need to remove 24-x bits
+#define WRAPLOW(x, bd) ((((int32_t)(x)) << (24 - bd)) >> (24 - bd))
+#else
+#define WRAPLOW(x, bd) (x)
+#endif  // CONFIG_EMULATE_HARDWARE
+
 void vp9_iwht4x4_add(const tran_low_t *input, uint8_t *dest, int stride,
                      int eob);
 void vp9_idct4x4_add(const tran_low_t *input, uint8_t *dest, int stride,
@@ -137,6 +159,9 @@ void vp9_iht16x16_add(TX_TYPE tx_type, const tran_low_t *input, uint8_t *dest,
                       int stride, int eob);
 
 #if CONFIG_VP9_HIGHBITDEPTH
+void vp9_highbd_idct4(const tran_low_t *input, tran_low_t *output, int bd);
+void vp9_highbd_idct8(const tran_low_t *input, tran_low_t *output, int bd);
+void vp9_highbd_idct16(const tran_low_t *input, tran_low_t *output, int bd);
 void vp9_highbd_iwht4x4_add(const tran_low_t *input, uint8_t *dest, int stride,
                             int eob, int bd);
 void vp9_highbd_idct4x4_add(const tran_low_t *input, uint8_t *dest, int stride,
@@ -153,6 +178,11 @@ void vp9_highbd_iht8x8_add(TX_TYPE tx_type, const tran_low_t *input,
                            uint8_t *dest, int stride, int eob, int bd);
 void vp9_highbd_iht16x16_add(TX_TYPE tx_type, const tran_low_t *input,
                              uint8_t *dest, int stride, int eob, int bd);
+static INLINE uint16_t highbd_clip_pixel_add(uint16_t dest, tran_high_t trans,
+                                             int bd) {
+  trans = WRAPLOW(trans, bd);
+  return clip_pixel_highbd(WRAPLOW(dest + trans, bd), bd);
+}
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #ifdef __cplusplus
 }  // extern "C"
