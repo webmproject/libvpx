@@ -16,6 +16,24 @@
       "revId": "28d3ff16a9385cd16f6fbe27b8a2eda295bd5561",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//R3M\u003d",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-10-24T17:20:46Z",
+      "side": 1,
+      "message": "Done, added comments for both variables.",
+      "parentUuid": "AAAAdn//R4E\u003d",
+      "revId": "28d3ff16a9385cd16f6fbe27b8a2eda295bd5561",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
