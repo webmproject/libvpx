@@ -16,6 +16,24 @@
       "revId": "eee201c221cdff90a4e74d4cf8917875684f0e2a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//R30\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1601,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-10-24T17:15:32Z",
+      "side": 1,
+      "message": "At this point, the non-RD part still needs it.\nWill get this deprecated after converting the non-RD coding mode into tile-based.",
+      "parentUuid": "AAAAdn//R4Q\u003d",
+      "revId": "eee201c221cdff90a4e74d4cf8917875684f0e2a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
