@@ -112,9 +112,6 @@ typedef struct {
   // Common for both INTER and INTRA blocks
   BLOCK_SIZE sb_type;
   PREDICTION_MODE mode;
-#if CONFIG_FILTERINTRA
-  int filterbit, uv_filterbit;
-#endif
   TX_SIZE tx_size;
   int8_t skip;
   int8_t segment_id;
@@ -130,17 +127,11 @@ typedef struct {
   uint8_t mode_context[MAX_REF_FRAMES];
   INTERP_FILTER interp_filter;
 
-#if CONFIG_EXT_TX
-  EXT_TX_TYPE ext_txfrm;
-#endif
 } MB_MODE_INFO;
 
 typedef struct MODE_INFO {
   struct MODE_INFO *src_mi;
   MB_MODE_INFO mbmi;
-#if CONFIG_FILTERINTRA
-  int b_filter_info[4];
-#endif
   b_mode_info bmi[4];
 } MODE_INFO;
 
@@ -148,17 +139,6 @@ static INLINE PREDICTION_MODE get_y_mode(const MODE_INFO *mi, int block) {
   return mi->mbmi.sb_type < BLOCK_8X8 ? mi->bmi[block].as_mode
                                       : mi->mbmi.mode;
 }
-
-#if CONFIG_FILTERINTRA
-static INLINE int is_filter_allowed(PREDICTION_MODE mode) {
-  (void)mode;
-  return 1;
-}
-
-static INLINE int is_filter_enabled(TX_SIZE txsize) {
-  return (txsize < TX_SIZES);
-}
-#endif
 
 static INLINE int is_inter_block(const MB_MODE_INFO *mbmi) {
   return mbmi->ref_frame[0] > INTRA_FRAME;
@@ -257,33 +237,13 @@ static INLINE BLOCK_SIZE get_subsize(BLOCK_SIZE bsize,
 
 extern const TX_TYPE intra_mode_to_tx_type_lookup[INTRA_MODES];
 
-#if CONFIG_EXT_TX
-static TX_TYPE ext_tx_to_txtype(EXT_TX_TYPE ext_tx) {
-  switch (ext_tx) {
-    case NORM:
-    default:
-      return DCT_DCT;
-    case ALT:
-      return ADST_ADST;
-  }
-}
-#endif
-
 static INLINE TX_TYPE get_tx_type(PLANE_TYPE plane_type,
                                   const MACROBLOCKD *xd) {
   const MB_MODE_INFO *const mbmi = &xd->mi[0].src_mi->mbmi;
 
-#if CONFIG_EXT_TX
-  if (plane_type != PLANE_TYPE_Y || xd->lossless)
-      return DCT_DCT;
-
-  if (is_inter_block(mbmi)) {
-    return ext_tx_to_txtype(mbmi->ext_txfrm);
-  }
-#else
   if (plane_type != PLANE_TYPE_Y || xd->lossless || is_inter_block(mbmi))
     return DCT_DCT;
-#endif
+
   return intra_mode_to_tx_type_lookup[mbmi->mode];
 }
 
@@ -291,17 +251,8 @@ static INLINE TX_TYPE get_tx_type_4x4(PLANE_TYPE plane_type,
                                       const MACROBLOCKD *xd, int ib) {
   const MODE_INFO *const mi = xd->mi[0].src_mi;
 
-#if CONFIG_EXT_TX
-  if (plane_type != PLANE_TYPE_Y || xd->lossless)
-      return DCT_DCT;
-
-  if (is_inter_block(&mi->mbmi)) {
-    return ext_tx_to_txtype(mi->mbmi.ext_txfrm);
-  }
-#else
   if (plane_type != PLANE_TYPE_Y || xd->lossless || is_inter_block(&mi->mbmi))
     return DCT_DCT;
-#endif
 
   return intra_mode_to_tx_type_lookup[get_y_mode(mi, ib)];
 }
