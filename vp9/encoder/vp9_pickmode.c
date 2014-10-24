@@ -460,6 +460,10 @@ static const THR_MODES mode_idx[MAX_REF_FRAMES][4] = {
   {THR_NEARESTA, THR_NEARA, THR_ZEROA, THR_NEWA},
 };
 
+static const PREDICTION_MODE intra_mode_list[] = {
+  DC_PRED, V_PRED, H_PRED, TM_PRED
+};
+
 // TODO(jingning) placeholder for inter-frame non-RD mode decision.
 // this needs various further optimizations. to be continued..
 void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
@@ -796,11 +800,11 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   // threshold.
   if (!x->skip && best_rdc.rdcost > inter_mode_thresh &&
       bsize <= cpi->sf.max_intra_bsize) {
-    PREDICTION_MODE this_mode;
     struct estimate_block_intra_args args = { cpi, x, DC_PRED, 0, 0 };
     const TX_SIZE intra_tx_size =
         MIN(max_txsize_lookup[bsize],
             tx_mode_to_biggest_tx_size[cpi->common.tx_mode]);
+    int i;
 
     if (reuse_inter_pred && best_pred != NULL) {
       if (best_pred->data == orig_dst.buf) {
@@ -813,17 +817,18 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     }
     pd->dst = orig_dst;
 
-    // Change the limit of this loop to add other intra prediction
-    // mode tests.
-    for (this_mode = DC_PRED; this_mode <= DC_PRED; ++this_mode) {
+    for (i = 0; i < 4; ++i) {
       const TX_SIZE saved_tx_size = mbmi->tx_size;
+      const PREDICTION_MODE this_mode = intra_mode_list[i];
+      if (!((1 << this_mode) & cpi->sf.intra_y_mode_mask[intra_tx_size]))
+        continue;
+      skip_txfm = x->skip_txfm[0];
       args.mode = this_mode;
       args.rate = 0;
       args.dist = 0;
       mbmi->tx_size = intra_tx_size;
       vp9_foreach_transformed_block_in_plane(xd, bsize, 0,
                                              estimate_block_intra, &args);
-      mbmi->tx_size = saved_tx_size;
       this_rdc.rate = args.rate;
       this_rdc.dist = args.dist;
       this_rdc.rate += cpi->mbmode_cost[this_mode];
@@ -840,6 +845,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         mbmi->mv[0].as_int = INVALID_MV;
       } else {
         x->skip_txfm[0] = skip_txfm;
+        mbmi->tx_size = saved_tx_size;
       }
     }
   }

@@ -204,7 +204,6 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
   VP9_COMMON *const cm = &cpi->common;
   const int is_keyframe = cm->frame_type == KEY_FRAME;
   const int frames_since_key = is_keyframe ? 0 : cpi->rc.frames_since_key;
-  (void) content;
   sf->static_segmentation = 0;
   sf->adaptive_rd_thresh = 1;
   sf->use_fast_coef_costing = 1;
@@ -305,6 +304,16 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     // This feature is only enabled when partition search is disabled.
     sf->reuse_inter_pred_sby = 1;
     sf->partition_search_breakout_rate_thr = 200;
+    if (!is_keyframe) {
+      int i;
+      if (content == VP9E_CONTENT_SCREEN) {
+        for (i = 0; i < TX_SIZES; ++i)
+          sf->intra_y_mode_mask[i] = INTRA_DC_TM_H_V;
+      } else {
+        for (i = 0; i < TX_SIZES; i++)
+          sf->intra_y_mode_mask[i] = INTRA_DC;
+      }
+    }
   }
 
   if (speed >= 6) {
