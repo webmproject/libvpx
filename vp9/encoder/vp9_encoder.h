@@ -44,6 +44,7 @@ extern "C" {
 #endif
 
 #define DEFAULT_GF_INTERVAL         10
+#define INVALID_REF_BUFFER_IDX      -1  // Marks an invalid reference buffer id.
 
 typedef struct {
   int nmvjointcost[MV_JOINTS];
@@ -241,7 +242,7 @@ typedef struct VP9_COMP {
   // For a still frame, this flag is set to 1 to skip partition search.
   int partition_search_skippable_frame;
 
-  int scaled_ref_idx[3];
+  int scaled_ref_idx[MAX_REF_FRAMES];
   int lst_fb_idx;
   int gld_fb_idx;
   int alt_fb_idx;
@@ -374,6 +375,10 @@ typedef struct VP9_COMP {
 
   int initial_width;
   int initial_height;
+  int initial_mbs;  // Number of MBs in the full-size frame; to be used to
+                    // normalize the firstpass stats. This will differ from the
+                    // number of MBs in the current frame when the frame is
+                    // scaled.
 
   int use_svc;
 
