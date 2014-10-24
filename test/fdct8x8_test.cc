@@ -71,6 +71,7 @@ typedef void (*IhtFunc)(const tran_low_t *in, uint8_t *out, int stride,
 
 typedef std::tr1::tuple<FdctFunc, IdctFunc, int, vpx_bit_depth_t> Dct8x8Param;
 typedef std::tr1::tuple<FhtFunc, IhtFunc, int, vpx_bit_depth_t> Ht8x8Param;
+typedef std::tr1::tuple<IdctFunc, IdctFunc, int, vpx_bit_depth_t> Idct8x8Param;
 
 void fdct8x8_ref(const int16_t *in, tran_low_t *out, int stride, int tx_type) {
   vp9_fdct8x8_c(in, out, stride);
@@ -96,6 +97,32 @@ void iht8x8_10(const tran_low_t *in, uint8_t *out, int stride, int tx_type) {
 void iht8x8_12(const tran_low_t *in, uint8_t *out, int stride, int tx_type) {
   vp9_highbd_iht8x8_64_add_c(in, out, stride, tx_type, 12);
 }
+
+void idct8x8_10_add_10_c(const tran_low_t *in, uint8_t *out, int stride) {
+  vp9_highbd_idct8x8_10_add_c(in, out, stride, 10);
+}
+
+void idct8x8_10_add_12_c(const tran_low_t *in, uint8_t *out, int stride) {
+  vp9_highbd_idct8x8_10_add_c(in, out, stride, 12);
+}
+
+#if HAVE_SSE2
+void idct8x8_10_add_10_sse2(const tran_low_t *in, uint8_t *out, int stride) {
+  vp9_highbd_idct8x8_10_add_sse2(in, out, stride, 10);
+}
+
+void idct8x8_10_add_12_sse2(const tran_low_t *in, uint8_t *out, int stride) {
+  vp9_highbd_idct8x8_10_add_sse2(in, out, stride, 12);
+}
+
+void idct8x8_64_add_10_sse2(const tran_low_t *in, uint8_t *out, int stride) {
+  vp9_highbd_idct8x8_64_add_sse2(in, out, stride, 10);
+}
+
+void idct8x8_64_add_12_sse2(const tran_low_t *in, uint8_t *out, int stride) {
+  vp9_highbd_idct8x8_64_add_sse2(in, out, stride, 12);
+}
+#endif
 #endif
 
 class FwdTrans8x8TestBase {
@@ -146,9 +173,10 @@ class FwdTrans8x8TestBase {
     memset(count_sign_block, 0, sizeof(count_sign_block));
 
     for (int i = 0; i < count_test_block; ++i) {
-      // Initialize a test block with input range [-15, 15].
+      // Initialize a test block with input range [-mask_/16, mask_/16].
       for (int j = 0; j < 64; ++j)
-        test_input_block[j] = (rnd.Rand8() >> 4) - (rnd.Rand8() >> 4);
+        test_input_block[j] = ((rnd.Rand16() & mask_) >> 4) -
+                              ((rnd.Rand16() & mask_) >> 4);
       ASM_REGISTER_STATE_CHECK(
           RunFwdTxfm(test_input_block, test_output_block, pitch_));
 
@@ -188,7 +216,7 @@ class FwdTrans8x8TestBase {
 #endif
 
     for (int i = 0; i < count_test_block; ++i) {
-      // Initialize a test block with input range [-255, 255].
+      // Initialize a test block with input range [-mask_, mask_].
       for (int j = 0; j < 64; ++j) {
         if (bit_depth_ == VPX_BITS_8) {
           src[j] = rnd.Rand8();
@@ -427,6 +455,63 @@ class FwdTrans8x8TestBase {
       }
     }
   }
+
+void CompareInvReference(IdctFunc ref_txfm, int thresh) {
+    ACMRandom rnd(ACMRandom::DeterministicSeed());
+    const int count_test_block = 10000;
+    const int eob = 12;
+    DECLARE_ALIGNED_ARRAY(16, tran_low_t, coeff, kNumCoeffs);
+    DECLARE_ALIGNED_ARRAY(16, uint8_t, dst, kNumCoeffs);
+    DECLARE_ALIGNED_ARRAY(16, uint8_t, ref, kNumCoeffs);
+#if CONFIG_VP9_HIGHBITDEPTH
+    DECLARE_ALIGNED_ARRAY(16, uint16_t, dst16, kNumCoeffs);
+    DECLARE_ALIGNED_ARRAY(16, uint16_t, ref16, kNumCoeffs);
+#endif
+    const int16_t *scan = vp9_default_scan_orders[TX_8X8].scan;
+
+    for (int i = 0; i < count_test_block; ++i) {
+      for (int j = 0; j < kNumCoeffs; ++j) {
+        if (j < eob) {
+          // Random values less than the threshold, either positive or negative
+          coeff[scan[j]] = rnd(thresh) * (1-2*(i%2));
+        } else {
+          coeff[scan[j]] = 0;
+        }
+        if (bit_depth_ == VPX_BITS_8) {
+          dst[j] = 0;
+          ref[j] = 0;
+#if CONFIG_VP9_HIGHBITDEPTH
+        } else {
+          dst16[j] = 0;
+          ref16[j] = 0;
+#endif
+        }
+      }
+      if (bit_depth_ == VPX_BITS_8) {
+        ref_txfm(coeff, ref, pitch_);
+        ASM_REGISTER_STATE_CHECK(RunInvTxfm(coeff, dst, pitch_));
+#if CONFIG_VP9_HIGHBITDEPTH
+      } else {
+        ref_txfm(coeff, CONVERT_TO_BYTEPTR(ref16), pitch_);
+        ASM_REGISTER_STATE_CHECK(RunInvTxfm(coeff, CONVERT_TO_BYTEPTR(dst16),
+                                            pitch_));
+#endif
+      }
+
+      for (int j = 0; j < kNumCoeffs; ++j) {
+#if CONFIG_VP9_HIGHBITDEPTH
+        const uint32_t diff =
+            bit_depth_ == VPX_BITS_8 ? dst[j] - ref[j] : dst16[j] - ref16[j];
+#else
+        const uint32_t diff = dst[j] - ref[j];
+#endif
+        const uint32_t error = diff * diff;
+        EXPECT_EQ(0u, error)
+            << "Error: 8x8 IDCT has error " << error
+            << " at index " << j;
+      }
+    }
+  }
   int pitch_;
   int tx_type_;
   FhtFunc fwd_txfm_ref;
@@ -526,6 +611,38 @@ TEST_P(FwdTrans8x8HT, ExtremalCheck) {
   RunExtremalCheck();
 }
 
+class InvTrans8x8DCT
+    : public FwdTrans8x8TestBase,
+      public ::testing::TestWithParam<Idct8x8Param> {
+ public:
+  virtual ~InvTrans8x8DCT() {}
+
+  virtual void SetUp() {
+    ref_txfm_ = GET_PARAM(0);
+    inv_txfm_ = GET_PARAM(1);
+    thresh_   = GET_PARAM(2);
+    pitch_    = 8;
+    bit_depth_ = GET_PARAM(3);
+    mask_ = (1 << bit_depth_) - 1;
+  }
+
+  virtual void TearDown() { libvpx_test::ClearSystemState(); }
+
+ protected:
+  void RunInvTxfm(tran_low_t *out, uint8_t *dst, int stride) {
+    inv_txfm_(out, dst, stride);
+  }
+  void RunFwdTxfm(int16_t *out, tran_low_t *dst, int stride) {}
+
+  IdctFunc ref_txfm_;
+  IdctFunc inv_txfm_;
+  int thresh_;
+};
+
+TEST_P(InvTrans8x8DCT, CompareReference) {
+  CompareInvReference(ref_txfm_, thresh_);
+}
+
 using std::tr1::make_tuple;
 
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -597,6 +714,45 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_fht8x8_sse2, &vp9_iht8x8_64_add_sse2, 2, VPX_BITS_8),
         make_tuple(&vp9_fht8x8_sse2, &vp9_iht8x8_64_add_sse2, 3, VPX_BITS_8)));
 #endif
+
+#if HAVE_SSE2 && CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+INSTANTIATE_TEST_CASE_P(
+    SSE2, FwdTrans8x8DCT,
+    ::testing::Values(
+        make_tuple(&vp9_highbd_fdct8x8_c,
+                   &idct8x8_64_add_10_sse2, 12, VPX_BITS_10),
+        make_tuple(&vp9_highbd_fdct8x8_sse2,
+                   &idct8x8_64_add_10_sse2, 12, VPX_BITS_10),
+        make_tuple(&vp9_highbd_fdct8x8_c,
+                   &idct8x8_64_add_12_sse2, 12, VPX_BITS_12),
+        make_tuple(&vp9_highbd_fdct8x8_sse2,
+                   &idct8x8_64_add_12_sse2, 12, VPX_BITS_12),
+        make_tuple(&vp9_fdct8x8_sse2, &vp9_idct8x8_64_add_c, 0, VPX_BITS_8)));
+
+
+INSTANTIATE_TEST_CASE_P(
+    SSE2, FwdTrans8x8HT,
+    ::testing::Values(
+        make_tuple(&vp9_fht8x8_sse2, &vp9_iht8x8_64_add_c, 0, VPX_BITS_8),
+        make_tuple(&vp9_fht8x8_sse2, &vp9_iht8x8_64_add_c, 1, VPX_BITS_8),
+        make_tuple(&vp9_fht8x8_sse2, &vp9_iht8x8_64_add_c, 2, VPX_BITS_8),
+        make_tuple(&vp9_fht8x8_sse2, &vp9_iht8x8_64_add_c, 3, VPX_BITS_8)));
+
+// Optimizations take effect at a threshold of 6201, so we use a value close to
+// that to test both branches.
+INSTANTIATE_TEST_CASE_P(
+    SSE2, InvTrans8x8DCT,
+    ::testing::Values(
+        make_tuple(&idct8x8_10_add_10_c,
+                   &idct8x8_10_add_10_sse2, 6225, VPX_BITS_10),
+        make_tuple(&idct8x8_10,
+                   &idct8x8_64_add_10_sse2, 6225, VPX_BITS_10),
+        make_tuple(&idct8x8_10_add_12_c,
+                   &idct8x8_10_add_12_sse2, 6225, VPX_BITS_12),
+        make_tuple(&idct8x8_12,
+                   &idct8x8_64_add_12_sse2, 6225, VPX_BITS_12)));
+#endif
+
 
 #if HAVE_SSSE3 && ARCH_X86_64 && !CONFIG_VP9_HIGHBITDEPTH && \
     !CONFIG_EMULATE_HARDWARE
