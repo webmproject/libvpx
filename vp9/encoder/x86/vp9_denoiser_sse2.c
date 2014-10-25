@@ -125,18 +125,16 @@ static INLINE __m128i vp9_denoiser_adj_16x1_sse2(
   return acc_diff;
 }
 
-static int vp9_denoiser_4xM_sse2(const uint8_t *sig, int sig_stride,
-                                 const uint8_t *mc_running_avg_y,
-                                 int mc_avg_y_stride,
-                                 uint8_t *running_avg_y, int avg_y_stride,
-                                 int increase_denoising,
-                                 BLOCK_SIZE bs,
-                                 int motion_magnitude) {
+// Denoiser for 4xM and 8xM blocks.
+static int vp9_denoiser_NxM_sse2_small(
+    const uint8_t *sig, int sig_stride, const uint8_t *mc_running_avg_y,
+    int mc_avg_y_stride, uint8_t *running_avg_y, int avg_y_stride,
+    int increase_denoising, BLOCK_SIZE bs, int motion_magnitude, int width) {
   int sum_diff_thresh, r, sum_diff = 0;
   const int shift_inc  = (increase_denoising &&
                           motion_magnitude <= MOTION_MAGNITUDE_THRESHOLD) ?
                          1 : 0;
-  uint8_t sig_buffer[2][16], mc_running_buffer[2][16], running_buffer[2][16];
+  uint8_t sig_buffer[8][16], mc_running_buffer[8][16], running_buffer[8][16];
   __m128i acc_diff = _mm_setzero_si128();
   const __m128i k_0 = _mm_setzero_si128();
   const __m128i k_4 = _mm_set1_epi8(4 + shift_inc);
@@ -149,41 +147,46 @@ static int vp9_denoiser_4xM_sse2(const uint8_t *sig, int sig_stride,
   const __m128i l32 = _mm_set1_epi8(2);
   // Difference between level 2 and level 1 is 1.
   const __m128i l21 = _mm_set1_epi8(1);
+  const uint8_t shift = (width == 4) ? 2 : 1;
 
-  for (r = 0; r < ((4 << b_height_log2_lookup[bs]) >> 2); ++r) {
-    vpx_memcpy(sig_buffer[r], sig, 4);
-    vpx_memcpy(sig_buffer[r] + 4, sig + sig_stride, 4);
-    vpx_memcpy(sig_buffer[r] + 8, sig + sig_stride * 2, 4);
-    vpx_memcpy(sig_buffer[r] + 12, sig + sig_stride * 3, 4);
-    vpx_memcpy(mc_running_buffer[r], mc_running_avg_y, 4);
-    vpx_memcpy(mc_running_buffer[r] + 4, mc_running_avg_y +
-               mc_avg_y_stride, 4);
-    vpx_memcpy(mc_running_buffer[r] + 8, mc_running_avg_y +
-               mc_avg_y_stride * 2, 4);
-    vpx_memcpy(mc_running_buffer[r] + 12, mc_running_avg_y +
-               mc_avg_y_stride * 3, 4);
-    vpx_memcpy(running_buffer[r], running_avg_y, 4);
-    vpx_memcpy(running_buffer[r] + 4, running_avg_y +
-               avg_y_stride, 4);
-    vpx_memcpy(running_buffer[r] + 8, running_avg_y +
-               avg_y_stride * 2, 4);
-    vpx_memcpy(running_buffer[r] + 12, running_avg_y +
-               avg_y_stride * 3, 4);
+  for (r = 0; r < ((4 << b_height_log2_lookup[bs]) >> shift); ++r) {
+    vpx_memcpy(sig_buffer[r], sig, width);
+    vpx_memcpy(sig_buffer[r] + width, sig + sig_stride, width);
+    vpx_memcpy(mc_running_buffer[r], mc_running_avg_y, width);
+    vpx_memcpy(mc_running_buffer[r] + width,
+               mc_running_avg_y + mc_avg_y_stride, width);
+    vpx_memcpy(running_buffer[r], running_avg_y, width);
+    vpx_memcpy(running_buffer[r] + width,
+               running_avg_y + avg_y_stride, width);
+    if (width == 4) {
+      vpx_memcpy(sig_buffer[r] + width * 2, sig + sig_stride * 2, width);
+      vpx_memcpy(sig_buffer[r] + width * 3, sig + sig_stride * 3, width);
+      vpx_memcpy(mc_running_buffer[r] + width * 2,
+                 mc_running_avg_y + mc_avg_y_stride * 2, width);
+      vpx_memcpy(mc_running_buffer[r] + width * 3,
+                 mc_running_avg_y + mc_avg_y_stride * 3, width);
+      vpx_memcpy(running_buffer[r] + width * 2,
+                 running_avg_y + avg_y_stride * 2, width);
+      vpx_memcpy(running_buffer[r] + width * 3,
+                 running_avg_y + avg_y_stride * 3, width);
+    }
     acc_diff = vp9_denoiser_16x1_sse2(sig_buffer[r],
                                       mc_running_buffer[r],
                                       running_buffer[r],
                                       &k_0, &k_4, &k_8, &k_16,
                                       &l3, &l32, &l21, acc_diff);
-    vpx_memcpy(running_avg_y, running_buffer[r], 4);
-    vpx_memcpy(running_avg_y + avg_y_stride, running_buffer[r] + 4, 4);
-    vpx_memcpy(running_avg_y + avg_y_stride * 2,
-               running_buffer[r] + 8, 4);
-    vpx_memcpy(running_avg_y + avg_y_stride * 3,
-               running_buffer[r] + 12, 4);
+    vpx_memcpy(running_avg_y, running_buffer[r], width);
+    vpx_memcpy(running_avg_y + avg_y_stride, running_buffer[r] + width, width);
+    if (width == 4) {
+      vpx_memcpy(running_avg_y + avg_y_stride * 2,
+                 running_buffer[r] + width * 2, width);
+      vpx_memcpy(running_avg_y + avg_y_stride * 3,
+                 running_buffer[r] + width * 3, width);
+    }
     // Update pointers for next iteration.
-    sig += (sig_stride << 2);
-    mc_running_avg_y += (mc_avg_y_stride << 2);
-    running_avg_y += (avg_y_stride << 2);
+    sig += (sig_stride << shift);
+    mc_running_avg_y += (mc_avg_y_stride << shift);
+    running_avg_y += (avg_y_stride << shift);
   }
 
   {
@@ -206,19 +209,21 @@ static int vp9_denoiser_4xM_sse2(const uint8_t *sig, int sig_stride,
       if (delta < 4) {
         const __m128i k_delta = _mm_set1_epi8(delta);
         running_avg_y -= avg_y_stride * (4 << b_height_log2_lookup[bs]);
-        sum_diff = 0;
-        for (r = 0; r < ((4 << b_height_log2_lookup[bs]) >> 2); ++r) {
+        for (r = 0; r < ((4 << b_height_log2_lookup[bs]) >> shift); ++r) {
           acc_diff = vp9_denoiser_adj_16x1_sse2(
               sig_buffer[r], mc_running_buffer[r], running_buffer[r],
               k_0, k_delta, acc_diff);
-          vpx_memcpy(running_avg_y, running_buffer[r], 4);
-          vpx_memcpy(running_avg_y + avg_y_stride, running_buffer[r] + 4, 4);
-          vpx_memcpy(running_avg_y + avg_y_stride * 2,
-                     running_buffer[r] + 8, 4);
-          vpx_memcpy(running_avg_y + avg_y_stride * 3,
-                     running_buffer[r] + 12, 4);
+          vpx_memcpy(running_avg_y, running_buffer[r], width);
+          vpx_memcpy(running_avg_y + avg_y_stride,
+                     running_buffer[r] + width, width);
+          if (width == 4) {
+            vpx_memcpy(running_avg_y + avg_y_stride * 2,
+                       running_buffer[r] + width * 2, width);
+            vpx_memcpy(running_avg_y + avg_y_stride * 3,
+                       running_buffer[r] + width * 3, width);
+          }
           // Update pointers for next iteration.
-          running_avg_y += (avg_y_stride << 2);
+          running_avg_y += (avg_y_stride << shift);
         }
         sum_diff = sum_diff_16x1(acc_diff);
         if (abs(sum_diff) > sum_diff_thresh) {
@@ -232,101 +237,14 @@ static int vp9_denoiser_4xM_sse2(const uint8_t *sig, int sig_stride,
   return FILTER_BLOCK;
 }
 
-static int vp9_denoiser_8xM_sse2(const uint8_t *sig, int sig_stride,
-                                 const uint8_t *mc_running_avg_y,
-                                 int mc_avg_y_stride,
-                                 uint8_t *running_avg_y, int avg_y_stride,
-                                 int increase_denoising,
-                                 BLOCK_SIZE bs,
-                                 int motion_magnitude) {
-  int sum_diff_thresh, r, sum_diff = 0;
-  const int shift_inc  = (increase_denoising &&
-                          motion_magnitude <= MOTION_MAGNITUDE_THRESHOLD) ?
-                         1 : 0;
-  uint8_t sig_buffer[8][16], mc_running_buffer[8][16], running_buffer[8][16];
-  __m128i acc_diff = _mm_setzero_si128();
-  const __m128i k_0 = _mm_setzero_si128();
-  const __m128i k_4 = _mm_set1_epi8(4 + shift_inc);
-  const __m128i k_8 = _mm_set1_epi8(8);
-  const __m128i k_16 = _mm_set1_epi8(16);
-  // Modify each level's adjustment according to motion_magnitude.
-  const __m128i l3 = _mm_set1_epi8(
-      (motion_magnitude <= MOTION_MAGNITUDE_THRESHOLD) ? 7 + shift_inc : 6);
-  // Difference between level 3 and level 2 is 2.
-  const __m128i l32 = _mm_set1_epi8(2);
-  // Difference between level 2 and level 1 is 1.
-  const __m128i l21 = _mm_set1_epi8(1);
-
-  for (r = 0; r < ((4 << b_height_log2_lookup[bs]) >> 1); ++r) {
-    vpx_memcpy(sig_buffer[r], sig, 8);
-    vpx_memcpy(sig_buffer[r] + 8, sig + sig_stride, 8);
-    vpx_memcpy(mc_running_buffer[r], mc_running_avg_y, 8);
-    vpx_memcpy(mc_running_buffer[r] + 8, mc_running_avg_y +
-               mc_avg_y_stride, 8);
-    vpx_memcpy(running_buffer[r], running_avg_y, 8);
-    vpx_memcpy(running_buffer[r] + 8, running_avg_y +
-               avg_y_stride, 8);
-    acc_diff = vp9_denoiser_16x1_sse2(sig_buffer[r],
-                                      mc_running_buffer[r],
-                                      running_buffer[r],
-                                      &k_0, &k_4, &k_8, &k_16,
-                                      &l3, &l32, &l21, acc_diff);
-    vpx_memcpy(running_avg_y, running_buffer[r], 8);
-    vpx_memcpy(running_avg_y + avg_y_stride, running_buffer[r] + 8, 8);
-    // Update pointers for next iteration.
-    sig += (sig_stride << 1);
-    mc_running_avg_y += (mc_avg_y_stride << 1);
-    running_avg_y += (avg_y_stride << 1);
-  }
-
-  {
-    sum_diff = sum_diff_16x1(acc_diff);
-    sum_diff_thresh = total_adj_strong_thresh(bs, increase_denoising);
-    if (abs(sum_diff) > sum_diff_thresh) {
-      // Before returning to copy the block (i.e., apply no denoising),
-      // check if we can still apply some (weaker) temporal filtering to
-      // this block, that would otherwise not be denoised at all. Simplest
-      // is to apply an additional adjustment to running_avg_y to bring it
-      // closer to sig. The adjustment is capped by a maximum delta, and
-      // chosen such that in most cases the resulting sum_diff will be
-      // within the acceptable range given by sum_diff_thresh.
-
-      // The delta is set by the excess of absolute pixel diff over the
-      // threshold.
-      const int delta = ((abs(sum_diff) - sum_diff_thresh)
-                         >> num_pels_log2_lookup[bs]) + 1;
-      // Only apply the adjustment for max delta up to 3.
-      if (delta < 4) {
-        const __m128i k_delta = _mm_set1_epi8(delta);
-        running_avg_y -= avg_y_stride * (4 << b_height_log2_lookup[bs]);
-        for (r = 0; r < ((4 << b_height_log2_lookup[bs]) >> 1); ++r) {
-          acc_diff = vp9_denoiser_adj_16x1_sse2(
-              sig_buffer[r], mc_running_buffer[r], running_buffer[r],
-              k_0, k_delta, acc_diff);
-          vpx_memcpy(running_avg_y, running_buffer[r], 8);
-          vpx_memcpy(running_avg_y + avg_y_stride, running_buffer[r] + 8, 8);
-          // Update pointers for next iteration.
-          running_avg_y += (avg_y_stride << 1);
-        }
-        sum_diff = sum_diff_16x1(acc_diff);
-        if (abs(sum_diff) > sum_diff_thresh) {
-          return COPY_BLOCK;
-        }
-      } else {
-        return COPY_BLOCK;
-      }
-    }
-  }
-  return FILTER_BLOCK;
-}
-
-static int vp9_denoiser_64_32_16xM_sse2(const uint8_t *sig, int sig_stride,
-                                        const uint8_t *mc_running_avg_y,
-                                        int mc_avg_y_stride,
-                                        uint8_t *running_avg_y,
-                                        int avg_y_stride,
-                                        int increase_denoising, BLOCK_SIZE bs,
-                                        int motion_magnitude) {
+// Denoiser for 16xM, 32xM and 64xM blocks
+static int vp9_denoiser_NxM_sse2_big(const uint8_t *sig, int sig_stride,
+                                     const uint8_t *mc_running_avg_y,
+                                     int mc_avg_y_stride,
+                                     uint8_t *running_avg_y,
+                                     int avg_y_stride,
+                                     int increase_denoising, BLOCK_SIZE bs,
+                                     int motion_magnitude) {
   int sum_diff_thresh, r, c, sum_diff = 0;
   const int shift_inc  = (increase_denoising &&
                           motion_magnitude <= MOTION_MAGNITUDE_THRESHOLD) ?
@@ -433,25 +351,25 @@ int vp9_denoiser_filter_sse2(const uint8_t *sig, int sig_stride,
                              BLOCK_SIZE bs,
                              int motion_magnitude) {
   if (bs == BLOCK_4X4 || bs == BLOCK_4X8) {
-    return vp9_denoiser_4xM_sse2(sig, sig_stride,
-                                 mc_avg, mc_avg_stride,
-                                 avg, avg_stride,
-                                 increase_denoising,
-                                 bs, motion_magnitude);
+    return vp9_denoiser_NxM_sse2_small(sig, sig_stride,
+                                       mc_avg, mc_avg_stride,
+                                       avg, avg_stride,
+                                       increase_denoising,
+                                       bs, motion_magnitude, 4);
   } else if (bs == BLOCK_8X4 || bs == BLOCK_8X8 || bs == BLOCK_8X16) {
-    return vp9_denoiser_8xM_sse2(sig, sig_stride,
-                                 mc_avg, mc_avg_stride,
-                                 avg, avg_stride,
-                                 increase_denoising,
-                                 bs, motion_magnitude);
+    return vp9_denoiser_NxM_sse2_small(sig, sig_stride,
+                                       mc_avg, mc_avg_stride,
+                                       avg, avg_stride,
+                                       increase_denoising,
+                                       bs, motion_magnitude, 8);
   } else if (bs == BLOCK_16X8 || bs == BLOCK_16X16 || bs == BLOCK_16X32 ||
              bs == BLOCK_32X16|| bs == BLOCK_32X32 || bs == BLOCK_32X64 ||
              bs == BLOCK_64X32 || bs == BLOCK_64X64) {
-    return vp9_denoiser_64_32_16xM_sse2(sig, sig_stride,
-                                        mc_avg, mc_avg_stride,
-                                        avg, avg_stride,
-                                        increase_denoising,
-                                        bs, motion_magnitude);
+    return vp9_denoiser_NxM_sse2_big(sig, sig_stride,
+                                     mc_avg, mc_avg_stride,
+                                     avg, avg_stride,
+                                     increase_denoising,
+                                     bs, motion_magnitude);
   } else {
     return COPY_BLOCK;
   }
