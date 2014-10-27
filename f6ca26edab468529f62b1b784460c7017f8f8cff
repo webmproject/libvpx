@@ -52,6 +52,24 @@
       "revId": "f6ca26edab468529f62b1b784460c7017f8f8cff",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//RyA\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1331,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-10-27T17:00:40Z",
+      "side": 1,
+      "message": "I think it is a great idea to adjust it based on recent context, i.e. how often the golden frames are referenced, and how helpful when they are referenced, etc.\n\nThe current number 5 is rather an arbitrary number, so is the golden reference placement too, need further experiment to work out a better adjustment strategy.",
+      "parentUuid": "AAAAdn//RyM\u003d",
+      "revId": "f6ca26edab468529f62b1b784460c7017f8f8cff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
