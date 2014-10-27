@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Rvo\u003d",
+        "filename": "vp9/encoder/x86/vp9_denoiser_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-27T19:46:32Z",
+      "side": 1,
+      "message": "this might be better named \u0027NxM\u0027 with a note about supported widths",
+      "revId": "ac99d94f8f4c09a237ab96ed24d59a95bf1bb45a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Rvg\u003d",
+        "filename": "vp9/encoder/x86/vp9_denoiser_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-27T19:46:32Z",
+      "side": 1,
+      "message": "it\u0027d be more readable if you broke these on the comma where possible to keep the parameter grouping",
+      "revId": "ac99d94f8f4c09a237ab96ed24d59a95bf1bb45a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Rvk\u003d",
+        "filename": "vp9/encoder/x86/vp9_denoiser_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-27T19:46:32Z",
+      "side": 1,
+      "message": "you can bring the first \u0027width\u0027 up to the next line and break after the comma I think",
+      "revId": "ac99d94f8f4c09a237ab96ed24d59a95bf1bb45a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
