@@ -126,6 +126,8 @@ typedef struct VP9EncoderConfig {
   unsigned int rc_max_intra_bitrate_pct;
   // maximum allowed bitrate for any inter frame in % of bitrate target.
   unsigned int rc_max_inter_bitrate_pct;
+  // percent of rate boost for golden frame in CBR mode.
+  unsigned int gf_cbr_boost_pct;
 
   MODE mode;
   int pass;

@@ -351,6 +351,8 @@ static const arg_def_t max_intra_rate_pct = ARG_DEF(
     NULL, "max-intra-rate", 1, "Max I-frame bitrate (pct)");
 static const arg_def_t max_inter_rate_pct = ARG_DEF(
     NULL, "max-inter-rate", 1, "Max P-frame bitrate (pct)");
+static const arg_def_t gf_cbr_boost_pct = ARG_DEF(
+    NULL, "gf-cbr-boost", 1, "Boost for Golden Frame in CBR mode (pct)");
 
 #if CONFIG_VP8_ENCODER
 static const arg_def_t token_parts = ARG_DEF(
@@ -416,7 +418,8 @@ static const arg_def_t tune_content = ARG_DEF_ENUM(
 static const arg_def_t *vp9_args[] = {
   &cpu_used, &auto_altref, &sharpness, &static_thresh,
   &tile_cols, &tile_rows, &arnr_maxframes, &arnr_strength, &arnr_type,
-  &tune_ssim, &cq_level, &max_intra_rate_pct, &max_inter_rate_pct, &lossless,
+  &tune_ssim, &cq_level, &max_intra_rate_pct, &max_inter_rate_pct,
+  &gf_cbr_boost_pct, &lossless,
   &frame_parallel_decoding, &aq_mode, &frame_periodic_boost,
   &noise_sens, &tune_content,
 #if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
@@ -430,7 +433,7 @@ static const int vp9_arg_ctrl_map[] = {
   VP9E_SET_TILE_COLUMNS, VP9E_SET_TILE_ROWS,
   VP8E_SET_ARNR_MAXFRAMES, VP8E_SET_ARNR_STRENGTH, VP8E_SET_ARNR_TYPE,
   VP8E_SET_TUNING, VP8E_SET_CQ_LEVEL, VP8E_SET_MAX_INTRA_BITRATE_PCT,
-  VP8E_SET_MAX_INTER_BITRATE_PCT,
+  VP8E_SET_MAX_INTER_BITRATE_PCT, VP8E_SET_GF_CBR_BOOST_PCT,
   VP9E_SET_LOSSLESS, VP9E_SET_FRAME_PARALLEL_DECODING, VP9E_SET_AQ_MODE,
   VP9E_SET_FRAME_PERIODIC_BOOST, VP9E_SET_NOISE_SENSITIVITY,
   VP9E_SET_TUNE_CONTENT,
