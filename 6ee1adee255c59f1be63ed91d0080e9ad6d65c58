@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//RwY\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-27T18:57:49Z",
+      "side": 1,
+      "message": "Unfortunately it\u0027s not reasonable to add full files to the test suite for issues like this since they are both unlikely to fully exercise the function and difficult due to size (and other issues) to distribute.",
+      "parentUuid": "AAAAdn//Rwg\u003d",
+      "revId": "6ee1adee255c59f1be63ed91d0080e9ad6d65c58",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Rw8\u003d",
         "filename": "/COMMIT_MSG",
         "patchSetId": 3
