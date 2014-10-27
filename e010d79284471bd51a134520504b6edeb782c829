@@ -16,6 +16,24 @@
       "revId": "e010d79284471bd51a134520504b6edeb782c829",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Rzk\u003d",
+        "filename": "vp9/common/arm/neon/vp9_convolve8_neon.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 333,
+      "author": {
+        "id": 1117679
+      },
+      "writtenOn": "2014-10-27T01:29:59Z",
+      "side": 1,
+      "message": "Yes, I had.\n\ne.g.\n\nbefore:\n(uint32_t *)pdst + dst_stride\n// it will trigger alignment by Clang due to dst_stride and type of uint32_t.\n\nafter:\n(uint8_t *)pdst + (dst_stride \u003c\u003c 2)\n// equal to code in \u0027before\u0027, used to avoid alignment issue.\n// pdst\u0027s type is uint8_t here, so there would be no alignment issue because add operation is based on uint8_t.",
+      "parentUuid": "AAAAdn//R5I\u003d",
+      "revId": "e010d79284471bd51a134520504b6edeb782c829",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
