@@ -123,7 +123,10 @@ typedef struct VP9EncoderConfig {
   int noise_sensitivity;  // pre processing blur: recommendation 0
   int sharpness;  // sharpening output: recommendation 0:
   int speed;
+  // maximum allowed bitrate for any intra frame in % of bitrate target.
   unsigned int rc_max_intra_bitrate_pct;
+  // maximum allowed bitrate for any inter frame in % of bitrate target.
+  unsigned int rc_max_inter_bitrate_pct;
 
   MODE mode;
   int pass;
