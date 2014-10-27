@@ -20,13 +20,11 @@ static void find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                              int block, int mi_row, int mi_col) {
   const int *ref_sign_bias = cm->ref_frame_sign_bias;
   int i, refmv_count = 0;
-  const MODE_INFO *prev_mi = !cm->error_resilient_mode && cm->prev_mi
-        ? cm->prev_mi[mi_row * xd->mi_stride + mi_col].src_mi
-        : NULL;
-  const MB_MODE_INFO *const prev_mbmi = prev_mi ? &prev_mi->src_mi->mbmi : NULL;
   const POSITION *const mv_ref_search = mv_ref_blocks[mi->mbmi.sb_type];
   int different_ref_found = 0;
   int context_counter = 0;
+  const MV_REF *const  prev_frame_mvs = cm->use_prev_frame_mvs ?
+      cm->prev_frame->mvs + mi_row * cm->mi_cols + mi_col : NULL;
 
   // Blank the reference vector list
   vpx_memset(mv_ref_list, 0, sizeof(*mv_ref_list) * MAX_MV_REF_CANDIDATES);
@@ -71,11 +69,12 @@ static void find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
   }
 
   // Check the last frame's mode and mv info.
-  if (prev_mbmi) {
-    if (prev_mbmi->ref_frame[0] == ref_frame)
-      ADD_MV_REF_LIST(prev_mbmi->mv[0], refmv_count, mv_ref_list, Done);
-    else if (prev_mbmi->ref_frame[1] == ref_frame)
-      ADD_MV_REF_LIST(prev_mbmi->mv[1], refmv_count, mv_ref_list, Done);
+  if (cm->use_prev_frame_mvs) {
+    if (prev_frame_mvs->ref_frame[0] == ref_frame) {
+      ADD_MV_REF_LIST(prev_frame_mvs->mv[0], refmv_count, mv_ref_list, Done);
+    } else if (prev_frame_mvs->ref_frame[1] == ref_frame) {
+      ADD_MV_REF_LIST(prev_frame_mvs->mv[1], refmv_count, mv_ref_list, Done);
+    }
   }
 
   // Since we couldn't find 2 mvs from the same reference frame
@@ -96,9 +95,30 @@ static void find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
   }
 
   // Since we still don't have a candidate we'll try the last frame.
-  if (prev_mbmi)
-    IF_DIFF_REF_FRAME_ADD_MV(prev_mbmi, ref_frame, ref_sign_bias, refmv_count,
-                             mv_ref_list, Done);
+  if (cm->use_prev_frame_mvs) {
+    if (prev_frame_mvs->ref_frame[0] != ref_frame &&
+        prev_frame_mvs->ref_frame[0] > INTRA_FRAME) {
+      int_mv mv = prev_frame_mvs->mv[0];
+      if (ref_sign_bias[prev_frame_mvs->ref_frame[0]] !=
+          ref_sign_bias[ref_frame]) {
+        mv.as_mv.row *= -1;
+        mv.as_mv.col *= -1;
+      }
+      ADD_MV_REF_LIST(mv, refmv_count, mv_ref_list, Done);
+    }
+
+    if (prev_frame_mvs->ref_frame[1] > INTRA_FRAME &&
+        prev_frame_mvs->ref_frame[1] != ref_frame &&
+        prev_frame_mvs->mv[1].as_int != prev_frame_mvs->mv[0].as_int) {
+      int_mv mv = prev_frame_mvs->mv[1];
+      if (ref_sign_bias[prev_frame_mvs->ref_frame[1]] !=
+          ref_sign_bias[ref_frame]) {
+        mv.as_mv.row *= -1;
+        mv.as_mv.col *= -1;
+      }
+      ADD_MV_REF_LIST(mv, refmv_count, mv_ref_list, Done);
+    }
+  }
 
  Done:
 

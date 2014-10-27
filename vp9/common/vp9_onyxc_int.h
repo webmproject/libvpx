@@ -56,9 +56,16 @@ typedef enum {
   REFERENCE_MODES       = 3,
 } REFERENCE_MODE;
 
+typedef struct {
+  int_mv mv[2];
+  MV_REFERENCE_FRAME ref_frame[2];
+} MV_REF;
 
 typedef struct {
   int ref_count;
+  MV_REF *mvs;
+  int mi_rows;
+  int mi_cols;
   vpx_codec_frame_buffer_t raw_frame_buffer;
   YV12_BUFFER_CONFIG buf;
 } RefCntBuffer;
@@ -91,6 +98,10 @@ typedef struct VP9Common {
   YV12_BUFFER_CONFIG *frame_to_show;
 
   RefCntBuffer frame_bufs[FRAME_BUFFERS];
+  RefCntBuffer *prev_frame;
+
+  // TODO(hkuang): Combine this with cur_buf in macroblockd.
+  RefCntBuffer *cur_frame;
 
   int ref_frame_map[REF_FRAMES]; /* maps fb_idx to reference slot */
 
@@ -148,6 +159,10 @@ typedef struct VP9Common {
   MODE_INFO *mi;  /* Corresponds to upper left visible macroblock */
   MODE_INFO *prev_mip; /* MODE_INFO array 'mip' from last decoded frame */
   MODE_INFO *prev_mi;  /* 'mi' from last frame (points into prev_mip) */
+
+
+  // Whether to use previous frame's motion vectors for prediction.
+  int use_prev_frame_mvs;
 
   // Persistent mb segment id map used in prediction.
   unsigned char *last_frame_seg_map;

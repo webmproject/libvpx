@@ -425,7 +425,6 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
   MB_MODE_INFO *const mbmi = &mi->mbmi;
   const BLOCK_SIZE bsize = mbmi->sb_type;
   const int allow_hp = cm->allow_high_precision_mv;
-
   int_mv nearestmv[2], nearmv[2];
   int inter_mode_ctx, ref, is_compound;
 
@@ -544,8 +543,27 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
 void vp9_read_mode_info(VP9_COMMON *cm, MACROBLOCKD *xd,
                         const TileInfo *const tile,
                         int mi_row, int mi_col, vp9_reader *r) {
+  MODE_INFO *const mi = xd->mi[0].src_mi;
+  const int bw = num_8x8_blocks_wide_lookup[mi->mbmi.sb_type];
+  const int bh = num_8x8_blocks_high_lookup[mi->mbmi.sb_type];
+  const int x_mis = MIN(bw, cm->mi_cols - mi_col);
+  const int y_mis = MIN(bh, cm->mi_rows - mi_row);
+  MV_REF* frame_mvs = cm->cur_frame->mvs + mi_row * cm->mi_cols + mi_col;
+  int w, h;
+
   if (frame_is_intra_only(cm))
     read_intra_frame_mode_info(cm, xd, mi_row, mi_col, r);
   else
     read_inter_frame_mode_info(cm, xd, tile, mi_row, mi_col, r);
+
+  for (h = 0; h < y_mis; ++h) {
+    MV_REF *const frame_mv = frame_mvs + h * cm->mi_cols;
+    for (w = 0; w < x_mis; ++w) {
+      MV_REF *const mv = frame_mv + w;
+      mv->ref_frame[0] = mi->src_mi->mbmi.ref_frame[0];
+      mv->ref_frame[1] = mi->src_mi->mbmi.ref_frame[1];
+      mv->mv[0].as_int = mi->src_mi->mbmi.mv[0].as_int;
+      mv->mv[1].as_int = mi->src_mi->mbmi.mv[1].as_int;
+    }
+  }
 }

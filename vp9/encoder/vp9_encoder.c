@@ -2420,6 +2420,7 @@ void vp9_scale_references(VP9_COMP *cpi) {
 #if CONFIG_VP9_HIGHBITDEPTH
       if (ref->y_crop_width != cm->width || ref->y_crop_height != cm->height) {
         const int new_fb = get_free_fb(cm);
+        cm->cur_frame = &cm->frame_bufs[new_fb];
         vp9_realloc_frame_buffer(&cm->frame_bufs[new_fb].buf,
                                  cm->width, cm->height,
                                  cm->subsampling_x, cm->subsampling_y,
@@ -2437,6 +2438,15 @@ void vp9_scale_references(VP9_COMP *cpi) {
         scale_and_extend_frame(ref, &cm->frame_bufs[new_fb].buf);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
         cpi->scaled_ref_idx[ref_frame - 1] = new_fb;
+        if (cm->frame_bufs[new_fb].mvs == NULL ||
+            cm->frame_bufs[new_fb].mi_rows < cm->mi_rows ||
+            cm->frame_bufs[new_fb].mi_cols < cm->mi_cols) {
+          cm->frame_bufs[new_fb].mvs =
+            (MV_REF *)vpx_calloc(cm->mi_rows * cm->mi_cols,
+                                 sizeof(*cm->frame_bufs[new_fb].mvs));
+          cm->frame_bufs[new_fb].mi_rows = cm->mi_rows;
+          cm->frame_bufs[new_fb].mi_cols = cm->mi_cols;
+        }
       } else {
         cpi->scaled_ref_idx[ref_frame - 1] = idx;
         ++cm->frame_bufs[idx].ref_count;
@@ -3279,13 +3289,13 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
   if (cm->show_frame) {
     vp9_swap_mi_and_prev_mi(cm);
-
     // Don't increment frame counters if this was an altref buffer
     // update not a real frame
     ++cm->current_video_frame;
     if (cpi->use_svc)
       vp9_inc_frame_in_layer(cpi);
   }
+  cm->prev_frame = cm->cur_frame;
 
   if (is_two_pass_svc(cpi))
     cpi->svc.layer_context[cpi->svc.spatial_layer_id].last_frame_type =
@@ -3630,6 +3640,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   // held.
   cm->frame_bufs[cm->new_fb_idx].ref_count--;
   cm->new_fb_idx = get_free_fb(cm);
+  cm->cur_frame = &cm->frame_bufs[cm->new_fb_idx];
 
   if (!cpi->use_svc && cpi->multi_arf_allowed) {
     if (cm->frame_type == KEY_FRAME) {

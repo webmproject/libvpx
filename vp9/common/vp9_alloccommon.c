@@ -92,6 +92,7 @@ void vp9_free_ref_frame_buffers(VP9_COMMON *cm) {
     if (cm->frame_bufs[i].ref_count > 0 &&
         cm->frame_bufs[i].raw_frame_buffer.data != NULL) {
       cm->release_fb_cb(cm->cb_priv, &cm->frame_bufs[i].raw_frame_buffer);
+      vpx_free(cm->frame_bufs[i].mvs);
       cm->frame_bufs[i].ref_count = 0;
     }
   }
@@ -166,6 +167,16 @@ int vp9_alloc_ref_frame_buffers(VP9_COMMON *cm, int width, int height) {
 #endif
                                VP9_ENC_BORDER_IN_PIXELS) < 0)
       goto fail;
+    if (cm->frame_bufs[i].mvs == NULL) {
+      cm->frame_bufs[i].mvs =
+          (MV_REF *)vpx_calloc(cm->mi_rows * cm->mi_cols,
+                               sizeof(*cm->frame_bufs[i].mvs));
+      if (cm->frame_bufs[i].mvs == NULL)
+        goto fail;
+
+      cm->frame_bufs[i].mi_rows = cm->mi_rows;
+      cm->frame_bufs[i].mi_cols = cm->mi_cols;
+    }
   }
 
   init_frame_bufs(cm);
