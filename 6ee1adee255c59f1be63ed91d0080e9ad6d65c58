@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAdn//Rw4\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-27T18:38:43Z",
+      "side": 1,
+      "message": "is this caught by the tests? i see some tests for lpf_8 but they don\u0027t seem to cover this.",
+      "revId": "6ee1adee255c59f1be63ed91d0080e9ad6d65c58",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Rw8\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-27T18:38:43Z",
+      "side": 1,
+      "message": "Please add a line with BUG\u003d867 or a link to https://code.google.com/p/webm/issues/detail?id\u003d867",
+      "revId": "6ee1adee255c59f1be63ed91d0080e9ad6d65c58",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Sp8\u003d",
         "filename": "vp9/common/x86/vp9_loopfilter_intrin_avx2.c",
         "patchSetId": 3
@@ -66,6 +100,23 @@
       "side": 1,
       "message": "it was already tested with 4.8.1 and 4.9.1",
       "parentUuid": "AAAAdn//Sq4\u003d",
+      "revId": "6ee1adee255c59f1be63ed91d0080e9ad6d65c58",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Rw0\u003d",
+        "filename": "vp9/common/x86/vp9_loopfilter_intrin_avx2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 422,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-27T18:38:43Z",
+      "side": 1,
+      "message": "is there a performance penalty for this? is it possible to isolate which version of 4.9 this occurs in? if this is slower, i would prefer:\n#if (not the broken gcc)\nold version of code\n#else (broken version of gc)\nthis code",
       "revId": "6ee1adee255c59f1be63ed91d0080e9ad6d65c58",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
