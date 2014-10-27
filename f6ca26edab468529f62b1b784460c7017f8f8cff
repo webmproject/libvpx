@@ -34,6 +34,24 @@
       "revId": "f6ca26edab468529f62b1b784460c7017f8f8cff",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//RyM\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1331,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-10-27T16:48:19Z",
+      "side": 1,
+      "message": "I guess I was just uncertain where the number comes from....is this something you think we will want to change or adjust experimentally, or perhaps adjust based on recent context?",
+      "parentUuid": "AAAAdn//RyU\u003d",
+      "revId": "f6ca26edab468529f62b1b784460c7017f8f8cff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
