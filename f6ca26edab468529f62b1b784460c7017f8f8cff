@@ -16,6 +16,24 @@
       "revId": "f6ca26edab468529f62b1b784460c7017f8f8cff",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//RyU\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1331,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-10-27T15:57:56Z",
+      "side": 1,
+      "message": "The boost level/target is capped below by the rc_max_inter_bitrate_pct. \n\ndo you suggest that we make a separate control for the initial value too?",
+      "parentUuid": "AAAAdn//RzA\u003d",
+      "revId": "f6ca26edab468529f62b1b784460c7017f8f8cff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
