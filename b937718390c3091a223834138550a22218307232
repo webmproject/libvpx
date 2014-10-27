@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Rws\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 1340,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-10-27T18:43:32Z",
+      "side": 1,
+      "message": "if  cpi-\u003erefresh_golden_frame \u003d\u003d 0, shouldn\u0027t we leave target \u003d rc-\u003eavg_frame_bandwidth (current behavior)?",
+      "revId": "b937718390c3091a223834138550a22218307232",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
