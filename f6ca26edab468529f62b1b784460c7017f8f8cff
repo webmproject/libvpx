@@ -70,6 +70,24 @@
       "revId": "f6ca26edab468529f62b1b784460c7017f8f8cff",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Rxg\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1331,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-10-27T17:15:59Z",
+      "side": 1,
+      "message": "In patch #8, I revised the ratio to be initialized on over_shoot_pct parameter from encoder config. which can be controlled in the command line of vpxenc by --overshoot-pct.",
+      "parentUuid": "AAAAdn//RyA\u003d",
+      "revId": "f6ca26edab468529f62b1b784460c7017f8f8cff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
