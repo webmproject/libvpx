@@ -2791,12 +2791,12 @@ static void update_rd_thresh_fact(VP9_COMP *cpi, TileDataEnc *tile_data,
 void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
                                TileDataEnc *tile_data,
                                MACROBLOCK *x,
-                               const TileInfo *const tile,
                                int mi_row, int mi_col,
                                RD_COST *rd_cost, BLOCK_SIZE bsize,
                                PICK_MODE_CONTEXT *ctx,
                                int64_t best_rd_so_far) {
   VP9_COMMON *const cm = &cpi->common;
+  TileInfo *const tile_info = &tile_data->tile_info;
   RD_OPT *const rd_opt = &cpi->rd;
   SPEED_FEATURES *const sf = &cpi->sf;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -2872,7 +2872,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
     x->pred_mv_sad[ref_frame] = INT_MAX;
     if (cpi->ref_frame_flags & flag_list[ref_frame]) {
-      setup_buffer_inter(cpi, x, tile, ref_frame, bsize, mi_row, mi_col,
+      setup_buffer_inter(cpi, x, tile_info, ref_frame, bsize, mi_row, mi_col,
                          frame_mv[NEARESTMV], frame_mv[NEARMV], yv12_mb);
     }
     frame_mv[NEWMV][ref_frame].as_int = INVALID_MV;
@@ -3026,9 +3026,9 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
 
     if (sf->motion_field_mode_search) {
       const int mi_width  = MIN(num_8x8_blocks_wide_lookup[bsize],
-                                tile->mi_col_end - mi_col);
+                                tile_info->mi_col_end - mi_col);
       const int mi_height = MIN(num_8x8_blocks_high_lookup[bsize],
-                                tile->mi_row_end - mi_row);
+                                tile_info->mi_row_end - mi_row);
       const int bsl = mi_width_log2_lookup[bsize];
       int cb_partition_search_ctrl = (((mi_row + mi_col) >> bsl)
           + get_chessboard_index(cm->current_video_frame)) & 0x1;
@@ -3039,7 +3039,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
       int_mv ref_mv;
       ref_mv.as_int = INVALID_MV;
 
-      if ((mi_row - 1) >= tile->mi_row_start) {
+      if ((mi_row - 1) >= tile_info->mi_row_start) {
         ref_mv = xd->mi[-xd->mi_stride].src_mi->mbmi.mv[0];
         rf = xd->mi[-xd->mi_stride].src_mi->mbmi.ref_frame[0];
         for (i = 0; i < mi_width; ++i) {
@@ -3050,7 +3050,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
         }
       }
 
-      if ((mi_col - 1) >= tile->mi_col_start) {
+      if ((mi_col - 1) >= tile_info->mi_col_start) {
         if (ref_mv.as_int == INVALID_MV)
           ref_mv = xd->mi[-1].src_mi->mbmi.mv[0];
         if (rf == NONE)
@@ -3593,13 +3593,13 @@ void vp9_rd_pick_inter_mode_sb_seg_skip(VP9_COMP *cpi,
 void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
                                    TileDataEnc *tile_data,
                                    MACROBLOCK *x,
-                                   const TileInfo *const tile,
                                    int mi_row, int mi_col,
                                    RD_COST *rd_cost,
                                    BLOCK_SIZE bsize,
                                    PICK_MODE_CONTEXT *ctx,
                                    int64_t best_rd_so_far) {
   VP9_COMMON *const cm = &cpi->common;
+  TileInfo *const tile_info = &tile_data->tile_info;
   RD_OPT *const rd_opt = &cpi->rd;
   SPEED_FEATURES *const sf = &cpi->sf;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -3658,10 +3658,10 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
 
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ref_frame++) {
     if (cpi->ref_frame_flags & flag_list[ref_frame]) {
-      setup_buffer_inter(cpi, x, tile,
-                             ref_frame, bsize, mi_row, mi_col,
-                             frame_mv[NEARESTMV], frame_mv[NEARMV],
-                             yv12_mb);
+      setup_buffer_inter(cpi, x, tile_info,
+                         ref_frame, bsize, mi_row, mi_col,
+                         frame_mv[NEARESTMV], frame_mv[NEARMV],
+                         yv12_mb);
     } else {
       ref_frame_skip_mask[0] |= (1 << ref_frame);
       ref_frame_skip_mask[1] |= SECOND_REF_FRAME_MASK;
@@ -3852,7 +3852,7 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
             int newbest, rs;
             int64_t rs_rd;
             mbmi->interp_filter = switchable_filter_index;
-            tmp_rd = rd_pick_best_sub8x8_mode(cpi, x, tile,
+            tmp_rd = rd_pick_best_sub8x8_mode(cpi, x, tile_info,
                                               &mbmi->ref_mvs[ref_frame][0],
                                               second_ref, best_yrd, &rate,
                                               &rate_y, &distortion,
@@ -3918,7 +3918,7 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
       if (!pred_exists) {
         // Handles the special case when a filter that is not in the
         // switchable list (bilinear, 6-tap) is indicated at the frame level
-        tmp_rd = rd_pick_best_sub8x8_mode(cpi, x, tile,
+        tmp_rd = rd_pick_best_sub8x8_mode(cpi, x, tile_info,
                                           &mbmi->ref_mvs[ref_frame][0],
                                           second_ref, best_yrd, &rate, &rate_y,
                                           &distortion, &skippable, &total_sse,

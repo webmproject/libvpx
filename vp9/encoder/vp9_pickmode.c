@@ -459,10 +459,11 @@ static const THR_MODES mode_idx[MAX_REF_FRAMES - 1][INTER_MODES] = {
 // TODO(jingning) placeholder for inter-frame non-RD mode decision.
 // this needs various further optimizations. to be continued..
 void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
-                         const TileInfo *const tile, TileDataEnc *tile_data,
+                         TileDataEnc *tile_data,
                          int mi_row, int mi_col, RD_COST *rd_cost,
                          BLOCK_SIZE bsize, PICK_MODE_CONTEXT *ctx) {
   VP9_COMMON *const cm = &cpi->common;
+  TileInfo *const tile_info = &tile_data->tile_info;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0].src_mi->mbmi;
   struct macroblockd_plane *const pd = &xd->plane[0];
@@ -571,10 +572,11 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                            sf, sf);
 
       if (!cm->error_resilient_mode)
-        vp9_find_mv_refs(cm, xd, tile, xd->mi[0].src_mi, ref_frame,
+        vp9_find_mv_refs(cm, xd, tile_info, xd->mi[0].src_mi, ref_frame,
                          candidates, mi_row, mi_col);
       else
-        const_motion[ref_frame] = mv_refs_rt(cm, xd, tile, xd->mi[0].src_mi,
+        const_motion[ref_frame] = mv_refs_rt(cm, xd, tile_info,
+                                             xd->mi[0].src_mi,
                                              ref_frame, candidates,
                                              mi_row, mi_col);
 

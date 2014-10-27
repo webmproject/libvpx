@@ -229,6 +229,7 @@ static INLINE int is_lossless_requested(const VP9EncoderConfig *cfg) {
 
 // TODO(jingning) All spatially adaptive variables should go to TileDataEnc.
 typedef struct TileDataEnc {
+  TileInfo tile_info;
   int thresh_freq_fact[BLOCK_SIZES][MAX_MODES];
   int mode_map[BLOCK_SIZES][MAX_MODES];
 } TileDataEnc;
