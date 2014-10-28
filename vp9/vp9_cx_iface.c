@@ -34,6 +34,7 @@ struct vp9_extracfg {
   unsigned int                cq_level;  // constrained quality level
   unsigned int                rc_max_intra_bitrate_pct;
   unsigned int                rc_max_inter_bitrate_pct;
+  unsigned int                gf_cbr_boost_pct;
   unsigned int                lossless;
   unsigned int                frame_parallel_decoding_mode;
   AQ_MODE                     aq_mode;
@@ -56,6 +57,7 @@ static struct vp9_extracfg default_extra_cfg = {
   10,                         // cq_level
   0,                          // rc_max_intra_bitrate_pct
   0,                          // rc_max_inter_bitrate_pct
+  0,                          // gf_cbr_boost_pct
   0,                          // lossless
   0,                          // frame_parallel_decoding_mode
   NO_AQ,                      // aq_mode
@@ -383,6 +385,7 @@ static vpx_codec_err_t set_encoder_config(
   oxcf->target_bandwidth = 1000 * cfg->rc_target_bitrate;
   oxcf->rc_max_intra_bitrate_pct = extra_cfg->rc_max_intra_bitrate_pct;
   oxcf->rc_max_inter_bitrate_pct = extra_cfg->rc_max_inter_bitrate_pct;
+  oxcf->gf_cbr_boost_pct = extra_cfg->gf_cbr_boost_pct;
 
   oxcf->best_allowed_q =
       extra_cfg->lossless ? 0 : vp9_quantizer_to_qindex(cfg->rc_min_quantizer);
@@ -657,6 +660,14 @@ static vpx_codec_err_t ctrl_set_rc_max_inter_bitrate_pct(
   struct vp9_extracfg extra_cfg = ctx->extra_cfg;
   extra_cfg.rc_max_inter_bitrate_pct =
       CAST(VP8E_SET_MAX_INTER_BITRATE_PCT, args);
+  return update_extra_cfg(ctx, &extra_cfg);
+}
+
+static vpx_codec_err_t ctrl_set_rc_gf_cbr_boost_pct(
+    vpx_codec_alg_priv_t *ctx, va_list args) {
+  struct vp9_extracfg extra_cfg = ctx->extra_cfg;
+  extra_cfg.gf_cbr_boost_pct =
+      CAST(VP8E_SET_GF_CBR_BOOST_PCT, args);
   return update_extra_cfg(ctx, &extra_cfg);
 }
 
@@ -1278,6 +1289,7 @@ static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   {VP8E_SET_CQ_LEVEL,                 ctrl_set_cq_level},
   {VP8E_SET_MAX_INTRA_BITRATE_PCT,    ctrl_set_rc_max_intra_bitrate_pct},
   {VP8E_SET_MAX_INTER_BITRATE_PCT,    ctrl_set_rc_max_inter_bitrate_pct},
+  {VP8E_SET_GF_CBR_BOOST_PCT,         ctrl_set_rc_gf_cbr_boost_pct},
   {VP9E_SET_LOSSLESS,                 ctrl_set_lossless},
   {VP9E_SET_FRAME_PARALLEL_DECODING,  ctrl_set_frame_parallel_decoding_mode},
   {VP9E_SET_AQ_MODE,                  ctrl_set_aq_mode},
