@@ -450,7 +450,8 @@ static void estimate_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
   args->dist += dist;
 }
 
-static const THR_MODES mode_idx[MAX_REF_FRAMES - 1][INTER_MODES] = {
+static const THR_MODES mode_idx[MAX_REF_FRAMES][4] = {
+  {THR_DC, THR_H_PRED, THR_V_PRED},
   {THR_NEARESTMV, THR_NEARMV, THR_ZEROMV, THR_NEWMV},
   {THR_NEARESTG, THR_NEARG, THR_ZEROG, THR_NEWG},
   {THR_NEARESTA, THR_NEARA, THR_ZEROA, THR_NEWA},
@@ -558,7 +559,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                         EIGHTTAP : cm->interp_filter;
   mbmi->segment_id = segment_id;
 
-  for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
+  for (ref_frame = LAST_FRAME; ref_frame <= GOLDEN_FRAME; ++ref_frame) {
     PREDICTION_MODE this_mode;
     x->pred_mv_sad[ref_frame] = INT_MAX;
     frame_mv[NEWMV][ref_frame].as_int = INVALID_MV;
@@ -610,8 +611,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         continue;
 
       mode_rd_thresh =
-          rd_threshes[mode_idx[ref_frame -
-                               LAST_FRAME][INTER_OFFSET(this_mode)]];
+          rd_threshes[mode_idx[ref_frame][INTER_OFFSET(this_mode)]];
       if (rd_less_than_thresh(best_rdc.rdcost, mode_rd_thresh,
                               rd_thresh_freq_fact[this_mode]))
         continue;
@@ -757,10 +757,9 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       if (x->skip)
         break;
     }
-    // If the current reference frame is valid and we found a usable mode,
-    // we are done.
-    if (best_rdc.rdcost < INT64_MAX && ref_frame == GOLDEN_FRAME)
-      break;
+
+    // Check that a prediction mode has been selected.
+    assert(best_rdc.rdcost < INT64_MAX);
   }
 
   // If best prediction is not in dst buf, then copy the prediction block from
@@ -835,6 +834,13 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     if (cpi->sf.reuse_inter_pred_sby)
       pd->dst = orig_dst;
   }
+
+  if (is_inter_block(mbmi))
+    vp9_update_rd_thresh_fact(cpi, tile_data, bsize,
+                              mode_idx[ref_frame][INTER_OFFSET(mbmi->mode)]);
+  else
+    vp9_update_rd_thresh_fact(cpi, tile_data, bsize,
+                              mode_idx[ref_frame][mbmi->mode]);
 
   *rd_cost = best_rdc;
 }

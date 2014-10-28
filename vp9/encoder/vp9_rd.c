@@ -611,6 +611,29 @@ void vp9_set_rd_speed_thresholds_sub8x8(VP9_COMP *cpi) {
       rd->thresh_mult_sub8x8[i] = INT_MAX;
 }
 
+// TODO(jingning) Refactor this function. Use targeted smaller struct as inputs.
+void vp9_update_rd_thresh_fact(VP9_COMP *cpi, TileDataEnc *tile_data,
+                               int bsize, int best_mode_index) {
+  if (cpi->sf.adaptive_rd_thresh > 0) {
+    const int top_mode = bsize < BLOCK_8X8 ? MAX_REFS : MAX_MODES;
+    int mode;
+    for (mode = 0; mode < top_mode; ++mode) {
+      const BLOCK_SIZE min_size = MAX(bsize - 1, BLOCK_4X4);
+      const BLOCK_SIZE max_size = MIN(bsize + 2, BLOCK_64X64);
+      BLOCK_SIZE bs;
+      for (bs = min_size; bs <= max_size; ++bs) {
+        int *const fact = &tile_data->thresh_freq_fact[bs][mode];
+        if (mode == best_mode_index) {
+          *fact -= (*fact >> 4);
+        } else {
+          *fact = MIN(*fact + RD_THRESH_INC,
+                      cpi->sf.adaptive_rd_thresh * RD_THRESH_MAX_FACT);
+        }
+      }
+    }
+  }
+}
+
 int vp9_get_intra_cost_penalty(int qindex, int qdelta,
                                vpx_bit_depth_t bit_depth) {
   const int q = vp9_dc_quant(qindex, qdelta, bit_depth);

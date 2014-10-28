@@ -38,9 +38,6 @@
 #include "vp9/encoder/vp9_rdopt.h"
 #include "vp9/encoder/vp9_variance.h"
 
-#define RD_THRESH_MAX_FACT 64
-#define RD_THRESH_INC      1
-
 #define LAST_FRAME_MODE_MASK    ((1 << GOLDEN_FRAME) | (1 << ALTREF_FRAME) | \
                                  (1 << INTRA_FRAME))
 #define GOLDEN_FRAME_MODE_MASK  ((1 << LAST_FRAME) | (1 << ALTREF_FRAME) | \
@@ -2765,29 +2762,6 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   rd_cost->rdcost = RDCOST(x->rdmult, x->rddiv, rd_cost->rate, rd_cost->dist);
 }
 
-// TODO(jingning) Refactor this function. Use targeted smaller struct as inputs.
-static void update_rd_thresh_fact(VP9_COMP *cpi, TileDataEnc *tile_data,
-                                  int bsize, int best_mode_index) {
-  if (cpi->sf.adaptive_rd_thresh > 0) {
-    const int top_mode = bsize < BLOCK_8X8 ? MAX_REFS : MAX_MODES;
-    int mode;
-    for (mode = 0; mode < top_mode; ++mode) {
-      const BLOCK_SIZE min_size = MAX(bsize - 1, BLOCK_4X4);
-      const BLOCK_SIZE max_size = MIN(bsize + 2, BLOCK_64X64);
-      BLOCK_SIZE bs;
-      for (bs = min_size; bs <= max_size; ++bs) {
-        int *const fact = &tile_data->thresh_freq_fact[bs][mode];
-        if (mode == best_mode_index) {
-          *fact -= (*fact >> 4);
-        } else {
-          *fact = MIN(*fact + RD_THRESH_INC,
-                      cpi->sf.adaptive_rd_thresh * RD_THRESH_MAX_FACT);
-        }
-      }
-    }
-  }
-}
-
 void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
                                TileDataEnc *tile_data,
                                MACROBLOCK *x,
@@ -3423,7 +3397,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
          !is_inter_block(&best_mbmode));
 
   if (!cpi->rc.is_src_frame_alt_ref)
-    update_rd_thresh_fact(cpi, tile_data, bsize, best_mode_index);
+    vp9_update_rd_thresh_fact(cpi, tile_data, bsize, best_mode_index);
 
   // macroblock modes
   *mbmi = best_mbmode;
@@ -3578,7 +3552,7 @@ void vp9_rd_pick_inter_mode_sb_seg_skip(VP9_COMP *cpi,
   assert((cm->interp_filter == SWITCHABLE) ||
          (cm->interp_filter == mbmi->interp_filter));
 
-  update_rd_thresh_fact(cpi, tile_data, bsize, THR_ZEROMV);
+  vp9_update_rd_thresh_fact(cpi, tile_data, bsize, THR_ZEROMV);
 
   vp9_zero(best_pred_diff);
   vp9_zero(best_filter_diff);
@@ -4153,7 +4127,7 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
          (cm->interp_filter == best_mbmode.interp_filter) ||
          !is_inter_block(&best_mbmode));
 
-  update_rd_thresh_fact(cpi, tile_data, bsize, best_ref_index);
+  vp9_update_rd_thresh_fact(cpi, tile_data, bsize, best_ref_index);
 
   // macroblock modes
   *mbmi = best_mbmode;

@@ -36,6 +36,9 @@ extern "C" {
 #define MAX_MODES 30
 #define MAX_REFS  6
 
+#define RD_THRESH_MAX_FACT 64
+#define RD_THRESH_INC      1
+
 // This enumerator type needs to be kept aligned with the mode order in
 // const MODE_DEFINITION vp9_mode_order[MAX_MODES] used in the rd code.
 typedef enum {
@@ -129,6 +132,7 @@ void vp9_rd_cost_reset(RD_COST *rd_cost);
 void vp9_rd_cost_init(RD_COST *rd_cost);
 
 struct TileInfo;
+struct TileDataEnc;
 struct VP9_COMP;
 struct macroblock;
 
@@ -157,6 +161,10 @@ void vp9_get_entropy_contexts(BLOCK_SIZE bsize, TX_SIZE tx_size,
 void vp9_set_rd_speed_thresholds(struct VP9_COMP *cpi);
 
 void vp9_set_rd_speed_thresholds_sub8x8(struct VP9_COMP *cpi);
+
+void vp9_update_rd_thresh_fact(struct VP9_COMP *cpi,
+                               struct TileDataEnc *tile_data,
+                               int bsize, int best_mode_index);
 
 static INLINE int rd_less_than_thresh(int64_t best_rd, int thresh,
                                       int thresh_fact) {
