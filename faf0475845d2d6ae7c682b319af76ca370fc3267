@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Rqo\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 1339,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-10-28T15:52:05Z",
+      "side": 1,
+      "message": "Is this going to work with af_ratio and calculation as an int?\nSurely if oxcf-\u003egf_cbr_boost_pct \u003d 150 we want ratio 2.5 not 2",
+      "revId": "faf0475845d2d6ae7c682b319af76ca370fc3267",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
