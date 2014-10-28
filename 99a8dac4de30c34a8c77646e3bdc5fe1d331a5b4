@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Rpc\u003d",
+        "filename": "vp9/encoder/x86/vp9_denoiser_sse2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 241,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-28T17:37:45Z",
+      "side": 1,
+      "message": "these suffixes don\u0027t add that much clarity, but OK. I don\u0027t have a much better suggestion \u0027small blocks\u0027 and ditching the NxM would still require further comment explanation",
+      "revId": "99a8dac4de30c34a8c77646e3bdc5fe1d331a5b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
