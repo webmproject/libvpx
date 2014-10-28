@@ -2478,7 +2478,6 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
 }
 
 #define MINQ_ADJ_LIMIT 32
-#define Q_LIMIT_STEP 1
 void vp9_twopass_postencode_update(VP9_COMP *cpi) {
   TWO_PASS *const twopass = &cpi->twopass;
   RATE_CONTROL *const rc = &cpi->rc;
@@ -2523,16 +2522,22 @@ void vp9_twopass_postencode_update(VP9_COMP *cpi) {
     if (rc->rate_error_estimate > cpi->oxcf.under_shoot_pct) {
       --twopass->extend_maxq;
       if (rc->rolling_target_bits >= rc->rolling_actual_bits)
-        twopass->extend_minq += Q_LIMIT_STEP;
+        ++twopass->extend_minq;
     // Overshoot.
     } else if (rc->rate_error_estimate < -cpi->oxcf.over_shoot_pct) {
       --twopass->extend_minq;
       if (rc->rolling_target_bits < rc->rolling_actual_bits)
-        twopass->extend_maxq += Q_LIMIT_STEP;
+        ++twopass->extend_maxq;
     } else {
+      // Adjustment for extreme local overshoot.
+      if (rc->projected_frame_size > (2 * rc->base_frame_target) &&
+          rc->projected_frame_size > (2 * rc->avg_frame_bandwidth))
+        ++twopass->extend_maxq;
+
+      // Unwind undershoot or overshoot adjustment.
       if (rc->rolling_target_bits < rc->rolling_actual_bits)
         --twopass->extend_minq;
-      if (rc->rolling_target_bits > rc->rolling_actual_bits)
+      else if (rc->rolling_target_bits > rc->rolling_actual_bits)
         --twopass->extend_maxq;
     }
     twopass->extend_minq = clamp(twopass->extend_minq, 0, MINQ_ADJ_LIMIT);
