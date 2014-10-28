@@ -1339,7 +1339,18 @@ static int calc_pframe_target_size_one_pass_cbr(const VP9_COMP *cpi) {
   const int64_t diff = rc->optimal_buffer_level - rc->buffer_level;
   const int64_t one_pct_bits = 1 + rc->optimal_buffer_level / 100;
   int min_frame_target = MAX(rc->avg_frame_bandwidth >> 4, FRAME_OVERHEAD_BITS);
-  int target = rc->avg_frame_bandwidth;
+  int target;
+
+  if (oxcf->gf_cbr_boost_pct) {
+    const int af_ratio_pct = oxcf->gf_cbr_boost_pct + 100;
+    target =  cpi->refresh_golden_frame ?
+      (rc->avg_frame_bandwidth * rc->baseline_gf_interval * af_ratio_pct) /
+      (rc->baseline_gf_interval * 100 + af_ratio_pct - 100) :
+      (rc->avg_frame_bandwidth * rc->baseline_gf_interval * 100) /
+      (rc->baseline_gf_interval * 100 + af_ratio_pct - 100);
+  } else {
+    target = rc->avg_frame_bandwidth;
+  }
   if (svc->number_temporal_layers > 1 &&
       oxcf->rc_mode == VPX_CBR) {
     // Note that for layers, avg_frame_bandwidth is the cumulative
@@ -1453,15 +1464,25 @@ void vp9_rc_get_one_pass_cbr_params(VP9_COMP *cpi) {
     rc->frames_to_key = cpi->oxcf.key_freq;
     rc->kf_boost = DEFAULT_KF_BOOST;
     rc->source_alt_ref_active = 0;
-    target = calc_iframe_target_size_one_pass_cbr(cpi);
   } else {
     cm->frame_type = INTER_FRAME;
-    target = calc_pframe_target_size_one_pass_cbr(cpi);
   }
+  if (rc->frames_till_gf_update_due == 0) {
+    rc->baseline_gf_interval = DEFAULT_GF_INTERVAL;
+    rc->frames_till_gf_update_due = rc->baseline_gf_interval;
+    // NOTE: frames_till_gf_update_due must be <= frames_to_key.
+    if (rc->frames_till_gf_update_due > rc->frames_to_key)
+      rc->frames_till_gf_update_due = rc->frames_to_key;
+    cpi->refresh_golden_frame = 1;
+    rc->gfu_boost = DEFAULT_GF_BOOST;
+  }
+
+  if (cm->frame_type == KEY_FRAME)
+    target = calc_iframe_target_size_one_pass_cbr(cpi);
+  else
+    target = calc_pframe_target_size_one_pass_cbr(cpi);
+
   vp9_rc_set_frame_target(cpi, target);
-  // Don't use gf_update by default in CBR mode.
-  rc->frames_till_gf_update_due = INT_MAX;
-  rc->baseline_gf_interval = INT_MAX;
 }
 
 int vp9_compute_qdelta(const RATE_CONTROL *rc, double qstart, double qtarget,
