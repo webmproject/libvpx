@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Rh8\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-29T22:06:57Z",
+      "side": 1,
+      "message": "Taken from blockd.h. Did some backwards math and added some constants that looked correctish.",
+      "parentUuid": "AAAAdn//RlM\u003d",
+      "revId": "259f2f46eea02431d665c0ba8dff6819029091f7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//RlI\u003d",
         "filename": "test/quantize_test.cc",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2014-10-29T14:55:49Z",
       "side": 1,
       "message": "ditto on the 25",
+      "revId": "259f2f46eea02431d665c0ba8dff6819029091f7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Rh4\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-29T22:06:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//RlI\u003d",
       "revId": "259f2f46eea02431d665c0ba8dff6819029091f7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Rh0\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-29T22:06:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//RlE\u003d",
+      "revId": "259f2f46eea02431d665c0ba8dff6819029091f7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Rk4\u003d",
         "filename": "test/quantize_test.cc",
         "patchSetId": 4
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//RiA\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-29T22:06:57Z",
+      "side": 1,
+      "message": "I was trying to avoid tuples because I got ugly c++ errors but Tom helped me through it.",
+      "parentUuid": "AAAAdn//Rk4\u003d",
+      "revId": "259f2f46eea02431d665c0ba8dff6819029091f7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Rk0\u003d",
         "filename": "test/quantize_test.cc",
         "patchSetId": 4
@@ -81,6 +153,24 @@
       "writtenOn": "2014-10-29T14:55:49Z",
       "side": 1,
       "message": "What does this test do? There is no check to see if speed is greater than some threashold. Can jenkins handle a test like this?",
+      "revId": "259f2f46eea02431d665c0ba8dff6819029091f7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//RiI\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-29T22:06:57Z",
+      "side": 1,
+      "message": "It\u0027s kinda useful for manual testing. I was using the output times to compare intrinsics vs assembly.",
+      "parentUuid": "AAAAdn//Rk0\u003d",
       "revId": "259f2f46eea02431d665c0ba8dff6819029091f7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
