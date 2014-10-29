@@ -56,22 +56,57 @@ class ErrorResilienceTestLarge : public ::libvpx_test::EncoderTest,
     nframes_++;
   }
 
-  virtual void PreEncodeFrameHook(libvpx_test::VideoSource *video) {
+  //
+  // Frame flags and layer id for temporal layers.
+  // For two layers, test pattern is:
+  //   1     3
+  // 0    2     .....
+  // LAST is updated on base/layer 0, GOLDEN  updated on layer 1.
+  int SetFrameFlags(int frame_num, int num_temp_layers) {
+    int frame_flags = 0;
+    if (num_temp_layers == 2) {
+      if (frame_num % 2 == 0) {
+        // Layer 0: predict from L and ARF, update L.
+        frame_flags = VP8_EFLAG_NO_REF_GF |
+                      VP8_EFLAG_NO_UPD_GF |
+                      VP8_EFLAG_NO_UPD_ARF;
+      } else {
+        // Layer 1: predict from L, GF, and ARF, and update GF.
+        frame_flags = VP8_EFLAG_NO_UPD_ARF |
+                      VP8_EFLAG_NO_UPD_LAST;
+      }
+    }
+    return frame_flags;
+  }
+
+  virtual void PreEncodeFrameHook(libvpx_test::VideoSource *video,
+                                  ::libvpx_test::Encoder *encoder) {
     frame_flags_ &= ~(VP8_EFLAG_NO_UPD_LAST |
                       VP8_EFLAG_NO_UPD_GF |
                       VP8_EFLAG_NO_UPD_ARF);
-    if (droppable_nframes_ > 0 &&
-        (cfg_.g_pass == VPX_RC_LAST_PASS || cfg_.g_pass == VPX_RC_ONE_PASS)) {
+    // For temporal layer case.
+    if (cfg_.ts_number_layers > 1) {
+      frame_flags_ = SetFrameFlags(video->frame(), cfg_.ts_number_layers);
       for (unsigned int i = 0; i < droppable_nframes_; ++i) {
         if (droppable_frames_[i] == video->frame()) {
-          std::cout << "             Encoding droppable frame: "
+          std::cout << "Encoding droppable frame: "
                     << droppable_frames_[i] << "\n";
-          frame_flags_ |= (VP8_EFLAG_NO_UPD_LAST |
-                           VP8_EFLAG_NO_UPD_GF |
-                           VP8_EFLAG_NO_UPD_ARF);
-          return;
         }
       }
+    } else {
+       if (droppable_nframes_ > 0 &&
+         (cfg_.g_pass == VPX_RC_LAST_PASS || cfg_.g_pass == VPX_RC_ONE_PASS)) {
+         for (unsigned int i = 0; i < droppable_nframes_; ++i) {
+           if (droppable_frames_[i] == video->frame()) {
+             std::cout << "Encoding droppable frame: "
+                       << droppable_frames_[i] << "\n";
+             frame_flags_ |= (VP8_EFLAG_NO_UPD_LAST |
+                              VP8_EFLAG_NO_UPD_GF |
+                              VP8_EFLAG_NO_UPD_ARF);
+             return;
+           }
+         }
+       }
     }
   }
 
@@ -234,6 +269,51 @@ TEST_P(ErrorResilienceTestLarge, DropFramesWithoutRecovery) {
             << psnr_resilience_mismatch << "\n";
   EXPECT_GT(psnr_resilience_mismatch, 20.0);
 #endif
+}
+
+// Check for successful decoding and no encoder/decoder mismatch
+// if we lose (i.e., drop before decoding) the enhancement layer frames for a
+// two layer temporal pattern. The base layer does not predict from the top
+// layer, so successful decoding is expected.
+TEST_P(ErrorResilienceTestLarge, 2LayersDropEnhancement) {
+  const vpx_rational timebase = { 33333333, 1000000000 };
+  cfg_.g_timebase = timebase;
+  cfg_.rc_target_bitrate = 500;
+  cfg_.g_lag_in_frames = 0;
+
+  cfg_.rc_end_usage = VPX_CBR;
+  // 2 Temporal layers, no spatial layers, CBR mode.
+  cfg_.ss_number_layers = 1;
+  cfg_.ts_number_layers = 2;
+  cfg_.ts_rate_decimator[0] = 2;
+  cfg_.ts_rate_decimator[1] = 1;
+  cfg_.ts_periodicity = 2;
+  cfg_.ts_target_bitrate[0] = 60 * cfg_.rc_target_bitrate / 100;
+  cfg_.ts_target_bitrate[1] = cfg_.rc_target_bitrate;
+
+  init_flags_ = VPX_CODEC_USE_PSNR;
+
+  libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+                                     timebase.den, timebase.num, 0, 40);
+
+  // Error resilient mode ON.
+  cfg_.g_error_resilient = 1;
+  cfg_.kf_mode = VPX_KF_DISABLED;
+
+  // The odd frames are the enhancement layer for 2 layer pattern, so set
+  // those frames as droppable. Drop the last 7 frames.
+  unsigned int num_droppable_frames = 7;
+  unsigned int droppable_frame_list[] = {27, 29, 31, 33, 35, 37, 39};
+  SetDroppableFrames(num_droppable_frames, droppable_frame_list);
+  SetErrorFrames(num_droppable_frames, droppable_frame_list);
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  // Test that no mismatches have been found
+  std::cout << "             Mismatch frames: "
+            << GetMismatchFrames() << "\n";
+  EXPECT_EQ(GetMismatchFrames(), (unsigned int) 0);
+
+  // Reset previously set of error/droppable frames.
+  Reset();
 }
 
 VP8_INSTANTIATE_TEST_CASE(ErrorResilienceTestLarge, ONE_PASS_TEST_MODES);
