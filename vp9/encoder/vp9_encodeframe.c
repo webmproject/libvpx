@@ -2678,6 +2678,22 @@ static void fill_mode_info_sb(VP9_COMMON *cm, MACROBLOCK *x,
   }
 }
 
+// Reset the prediction pixel ready flag recursively.
+static void pred_pixel_ready_reset(PC_TREE *pc_tree, BLOCK_SIZE bsize) {
+  pc_tree->none.pred_pixel_ready = 0;
+  pc_tree->horizontal[0].pred_pixel_ready = 0;
+  pc_tree->horizontal[1].pred_pixel_ready = 0;
+  pc_tree->vertical[0].pred_pixel_ready = 0;
+  pc_tree->vertical[1].pred_pixel_ready = 0;
+
+  if (bsize > BLOCK_8X8) {
+    BLOCK_SIZE subsize = get_subsize(bsize, PARTITION_SPLIT);
+    int i;
+    for (i = 0; i < 4; ++i)
+      pred_pixel_ready_reset(pc_tree->split[i], subsize);
+  }
+}
+
 static void nonrd_pick_partition(VP9_COMP *cpi,
                                  TileDataEnc *tile_data,
                                  TOKENEXTRA **tp, int mi_row,
@@ -2736,6 +2752,10 @@ static void nonrd_pick_partition(VP9_COMP *cpi,
     partition_vert_allowed &= force_vert_split;
   }
 
+  ctx->pred_pixel_ready = !(partition_vert_allowed ||
+                            partition_horz_allowed ||
+                            do_split);
+
   // PARTITION_NONE
   if (partition_none_allowed) {
     nonrd_pick_sb_modes(cpi, tile_data, mi_row, mi_col,
@@ -2743,7 +2763,6 @@ static void nonrd_pick_partition(VP9_COMP *cpi,
     ctx->mic.mbmi = xd->mi[0].src_mi->mbmi;
     ctx->skip_txfm[0] = x->skip_txfm[0];
     ctx->skip = x->skip;
-    ctx->pred_pixel_ready = 0;
 
     if (this_rdc.rate != INT_MAX) {
       int pl = partition_plane_context(xd, mi_row, mi_col, bsize);
@@ -2819,17 +2838,17 @@ static void nonrd_pick_partition(VP9_COMP *cpi,
     subsize = get_subsize(bsize, PARTITION_HORZ);
     if (sf->adaptive_motion_search)
       load_pred_mv(x, ctx);
-
+    pc_tree->horizontal[0].pred_pixel_ready = 1;
     nonrd_pick_sb_modes(cpi, tile_data, mi_row, mi_col, &sum_rdc, subsize,
                         &pc_tree->horizontal[0]);
 
     pc_tree->horizontal[0].mic.mbmi = xd->mi[0].src_mi->mbmi;
     pc_tree->horizontal[0].skip_txfm[0] = x->skip_txfm[0];
     pc_tree->horizontal[0].skip = x->skip;
-    pc_tree->horizontal[0].pred_pixel_ready = 0;
 
     if (sum_rdc.rdcost < best_rdc.rdcost && mi_row + ms < cm->mi_rows) {
       load_pred_mv(x, ctx);
+      pc_tree->horizontal[1].pred_pixel_ready = 1;
       nonrd_pick_sb_modes(cpi, tile_data, mi_row + ms, mi_col,
                           &this_rdc, subsize,
                           &pc_tree->horizontal[1]);
@@ -2837,7 +2856,6 @@ static void nonrd_pick_partition(VP9_COMP *cpi,
       pc_tree->horizontal[1].mic.mbmi = xd->mi[0].src_mi->mbmi;
       pc_tree->horizontal[1].skip_txfm[0] = x->skip_txfm[0];
       pc_tree->horizontal[1].skip = x->skip;
-      pc_tree->horizontal[1].pred_pixel_ready = 0;
 
       if (this_rdc.rate == INT_MAX) {
         vp9_rd_cost_reset(&sum_rdc);
@@ -2854,32 +2872,32 @@ static void nonrd_pick_partition(VP9_COMP *cpi,
     if (sum_rdc.rdcost < best_rdc.rdcost) {
       best_rdc = sum_rdc;
       pc_tree->partitioning = PARTITION_HORZ;
+    } else {
+      pred_pixel_ready_reset(pc_tree, bsize);
     }
   }
 
   // PARTITION_VERT
   if (partition_vert_allowed && do_rect) {
     subsize = get_subsize(bsize, PARTITION_VERT);
-
     if (sf->adaptive_motion_search)
       load_pred_mv(x, ctx);
-
+    pc_tree->vertical[0].pred_pixel_ready = 1;
     nonrd_pick_sb_modes(cpi, tile_data, mi_row, mi_col, &sum_rdc, subsize,
                         &pc_tree->vertical[0]);
     pc_tree->vertical[0].mic.mbmi = xd->mi[0].src_mi->mbmi;
     pc_tree->vertical[0].skip_txfm[0] = x->skip_txfm[0];
     pc_tree->vertical[0].skip = x->skip;
-    pc_tree->vertical[0].pred_pixel_ready = 0;
 
     if (sum_rdc.rdcost < best_rdc.rdcost && mi_col + ms < cm->mi_cols) {
       load_pred_mv(x, ctx);
+      pc_tree->vertical[1].pred_pixel_ready = 1;
       nonrd_pick_sb_modes(cpi, tile_data, mi_row, mi_col + ms,
                           &this_rdc, subsize,
                           &pc_tree->vertical[1]);
       pc_tree->vertical[1].mic.mbmi = xd->mi[0].src_mi->mbmi;
       pc_tree->vertical[1].skip_txfm[0] = x->skip_txfm[0];
       pc_tree->vertical[1].skip = x->skip;
-      pc_tree->vertical[1].pred_pixel_ready = 0;
 
       if (this_rdc.rate == INT_MAX) {
         vp9_rd_cost_reset(&sum_rdc);
@@ -2896,6 +2914,8 @@ static void nonrd_pick_partition(VP9_COMP *cpi,
     if (sum_rdc.rdcost < best_rdc.rdcost) {
       best_rdc = sum_rdc;
       pc_tree->partitioning = PARTITION_VERT;
+    } else {
+      pred_pixel_ready_reset(pc_tree, bsize);
     }
   }
 
@@ -2977,27 +2997,27 @@ static void nonrd_select_partition(VP9_COMP *cpi,
   } else {
     switch (partition) {
       case PARTITION_NONE:
+        pc_tree->none.pred_pixel_ready = 1;
         nonrd_pick_sb_modes(cpi, tile_data, mi_row, mi_col, rd_cost,
                             subsize, &pc_tree->none);
         pc_tree->none.mic.mbmi = xd->mi[0].src_mi->mbmi;
         pc_tree->none.skip_txfm[0] = x->skip_txfm[0];
         pc_tree->none.skip = x->skip;
-        pc_tree->none.pred_pixel_ready = 1;
         break;
       case PARTITION_VERT:
+        pc_tree->vertical[0].pred_pixel_ready = 1;
         nonrd_pick_sb_modes(cpi, tile_data, mi_row, mi_col, rd_cost,
                             subsize, &pc_tree->vertical[0]);
         pc_tree->vertical[0].mic.mbmi = xd->mi[0].src_mi->mbmi;
         pc_tree->vertical[0].skip_txfm[0] = x->skip_txfm[0];
         pc_tree->vertical[0].skip = x->skip;
-        pc_tree->vertical[0].pred_pixel_ready = 1;
         if (mi_col + hbs < cm->mi_cols) {
+          pc_tree->vertical[1].pred_pixel_ready = 1;
           nonrd_pick_sb_modes(cpi, tile_data, mi_row, mi_col + hbs,
                               &this_rdc, subsize, &pc_tree->vertical[1]);
           pc_tree->vertical[1].mic.mbmi = xd->mi[0].src_mi->mbmi;
           pc_tree->vertical[1].skip_txfm[0] = x->skip_txfm[0];
           pc_tree->vertical[1].skip = x->skip;
-          pc_tree->vertical[1].pred_pixel_ready = 1;
           if (this_rdc.rate != INT_MAX && this_rdc.dist != INT64_MAX &&
               rd_cost->rate != INT_MAX && rd_cost->dist != INT64_MAX) {
             rd_cost->rate += this_rdc.rate;
@@ -3006,19 +3026,19 @@ static void nonrd_select_partition(VP9_COMP *cpi,
         }
         break;
       case PARTITION_HORZ:
+        pc_tree->horizontal[0].pred_pixel_ready = 1;
         nonrd_pick_sb_modes(cpi, tile_data, mi_row, mi_col, rd_cost,
                             subsize, &pc_tree->horizontal[0]);
         pc_tree->horizontal[0].mic.mbmi = xd->mi[0].src_mi->mbmi;
         pc_tree->horizontal[0].skip_txfm[0] = x->skip_txfm[0];
         pc_tree->horizontal[0].skip = x->skip;
-        pc_tree->horizontal[0].pred_pixel_ready = 1;
         if (mi_row + hbs < cm->mi_rows) {
+          pc_tree->horizontal[1].pred_pixel_ready = 1;
           nonrd_pick_sb_modes(cpi, tile_data, mi_row + hbs, mi_col,
                               &this_rdc, subsize, &pc_tree->horizontal[0]);
           pc_tree->horizontal[1].mic.mbmi = xd->mi[0].src_mi->mbmi;
           pc_tree->horizontal[1].skip_txfm[0] = x->skip_txfm[0];
           pc_tree->horizontal[1].skip = x->skip;
-          pc_tree->horizontal[1].pred_pixel_ready = 1;
           if (this_rdc.rate != INT_MAX && this_rdc.dist != INT64_MAX &&
               rd_cost->rate != INT_MAX && rd_cost->dist != INT64_MAX) {
             rd_cost->rate += this_rdc.rate;
@@ -3096,6 +3116,7 @@ static void nonrd_use_partition(VP9_COMP *cpi,
 
   switch (partition) {
     case PARTITION_NONE:
+      pc_tree->none.pred_pixel_ready = 1;
       nonrd_pick_sb_modes(cpi, tile_data, mi_row, mi_col, rd_cost,
                           subsize, &pc_tree->none);
       pc_tree->none.mic.mbmi = xd->mi[0].src_mi->mbmi;
@@ -3103,12 +3124,14 @@ static void nonrd_use_partition(VP9_COMP *cpi,
       pc_tree->none.skip = x->skip;
       break;
     case PARTITION_VERT:
+      pc_tree->vertical[0].pred_pixel_ready = 1;
       nonrd_pick_sb_modes(cpi, tile_data, mi_row, mi_col, rd_cost,
                           subsize, &pc_tree->vertical[0]);
       pc_tree->vertical[0].mic.mbmi = xd->mi[0].src_mi->mbmi;
       pc_tree->vertical[0].skip_txfm[0] = x->skip_txfm[0];
       pc_tree->vertical[0].skip = x->skip;
       if (mi_col + hbs < cm->mi_cols) {
+        pc_tree->vertical[1].pred_pixel_ready = 1;
         nonrd_pick_sb_modes(cpi, tile_data, mi_row, mi_col + hbs,
                             &this_rdc, subsize, &pc_tree->vertical[1]);
         pc_tree->vertical[1].mic.mbmi = xd->mi[0].src_mi->mbmi;
@@ -3122,12 +3145,14 @@ static void nonrd_use_partition(VP9_COMP *cpi,
       }
       break;
     case PARTITION_HORZ:
+      pc_tree->horizontal[0].pred_pixel_ready = 1;
       nonrd_pick_sb_modes(cpi, tile_data, mi_row, mi_col, rd_cost,
                           subsize, &pc_tree->horizontal[0]);
       pc_tree->horizontal[0].mic.mbmi = xd->mi[0].src_mi->mbmi;
       pc_tree->horizontal[0].skip_txfm[0] = x->skip_txfm[0];
       pc_tree->horizontal[0].skip = x->skip;
       if (mi_row + hbs < cm->mi_rows) {
+        pc_tree->horizontal[1].pred_pixel_ready = 1;
         nonrd_pick_sb_modes(cpi, tile_data, mi_row + hbs, mi_col,
                             &this_rdc, subsize, &pc_tree->horizontal[0]);
         pc_tree->horizontal[1].mic.mbmi = xd->mi[0].src_mi->mbmi;

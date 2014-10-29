@@ -515,8 +515,9 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   PRED_BUFFER *best_pred = NULL;
   PRED_BUFFER *this_mode_pred = NULL;
   const int pixels_in_block = bh * bw;
+  int reuse_inter_pred = cpi->sf.reuse_inter_pred_sby && ctx->pred_pixel_ready;
 
-  if (cpi->sf.reuse_inter_pred_sby) {
+  if (reuse_inter_pred) {
     int i;
     for (i = 0; i < 3; i++) {
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -639,7 +640,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       // Search for the best prediction filter type, when the resulting
       // motion vector is at sub-pixel accuracy level for luma component, i.e.,
       // the last three bits are all zeros.
-      if (cpi->sf.reuse_inter_pred_sby) {
+      if (reuse_inter_pred) {
         if (!this_mode_pred) {
           this_mode_pred = &tmp[3];
         } else {
@@ -677,7 +678,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
             best_cost = cost;
             skip_txfm = x->skip_txfm[0];
 
-            if (cpi->sf.reuse_inter_pred_sby) {
+            if (reuse_inter_pred) {
               if (this_mode_pred != current_pred) {
                 free_pred_buffer(this_mode_pred);
                 this_mode_pred = current_pred;
@@ -692,7 +693,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           }
         }
 
-        if (cpi->sf.reuse_inter_pred_sby && this_mode_pred != current_pred)
+        if (reuse_inter_pred && this_mode_pred != current_pred)
           free_pred_buffer(current_pred);
 
         mbmi->interp_filter = best_filter;
@@ -744,13 +745,12 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         best_ref_frame = ref_frame;
         skip_txfm = x->skip_txfm[0];
 
-        if (cpi->sf.reuse_inter_pred_sby) {
+        if (reuse_inter_pred) {
           free_pred_buffer(best_pred);
-
           best_pred = this_mode_pred;
         }
       } else {
-        if (cpi->sf.reuse_inter_pred_sby)
+        if (reuse_inter_pred)
           free_pred_buffer(this_mode_pred);
       }
 
@@ -764,7 +764,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
   // If best prediction is not in dst buf, then copy the prediction block from
   // temp buf to dst buf.
-  if (best_pred != NULL && cpi->sf.reuse_inter_pred_sby &&
+  if (best_pred != NULL && reuse_inter_pred &&
       best_pred->data != orig_dst.buf) {
     pd->dst = orig_dst;
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -799,7 +799,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         MIN(max_txsize_lookup[bsize],
             tx_mode_to_biggest_tx_size[cpi->common.tx_mode]);
 
-    if (cpi->sf.reuse_inter_pred_sby) {
+    if (reuse_inter_pred) {
       pd->dst.buf = tmp[0].data;
       pd->dst.stride = bw;
     }
@@ -831,7 +831,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         x->skip_txfm[0] = skip_txfm;
       }
     }
-    if (cpi->sf.reuse_inter_pred_sby)
+    if (reuse_inter_pred)
       pd->dst = orig_dst;
   }
 
