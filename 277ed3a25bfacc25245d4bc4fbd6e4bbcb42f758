@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Rj4\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 453,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-10-29T17:50:19Z",
+      "side": 1,
+      "message": "Using this \"INTER_MODES\" macro here is now a bit confusing.",
+      "revId": "277ed3a25bfacc25245d4bc4fbd6e4bbcb42f758",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Rj0\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 762,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-10-29T17:50:19Z",
+      "side": 1,
+      "message": "Given the loop stop at GOLEN_FRAME, can this breakout be removed or replaced by assert(best_rdc.rdcost \u003c INT64_MAX)?",
+      "revId": "277ed3a25bfacc25245d4bc4fbd6e4bbcb42f758",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
