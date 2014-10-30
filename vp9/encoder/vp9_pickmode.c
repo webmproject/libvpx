@@ -65,7 +65,8 @@ static int mv_refs_rt(const VP9_COMMON *cm, const MACROBLOCKD *xd,
       different_ref_found = 1;
 
       if (candidate->ref_frame[0] == ref_frame)
-        ADD_MV_REF_LIST(get_sub_block_mv(candidate_mi, 0, mv_ref->col, -1));
+        ADD_MV_REF_LIST(get_sub_block_mv(candidate_mi, 0, mv_ref->col, -1),
+                        refmv_count, mv_ref_list, Done);
     }
   }
 
@@ -82,7 +83,7 @@ static int mv_refs_rt(const VP9_COMMON *cm, const MACROBLOCKD *xd,
       different_ref_found = 1;
 
       if (candidate->ref_frame[0] == ref_frame)
-        ADD_MV_REF_LIST(candidate->mv[0]);
+        ADD_MV_REF_LIST(candidate->mv[0], refmv_count, mv_ref_list, Done);
     }
   }
 
@@ -97,7 +98,8 @@ static int mv_refs_rt(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                                               * xd->mi_stride].src_mi->mbmi;
 
         // If the candidate is INTRA we don't want to consider its mv.
-        IF_DIFF_REF_FRAME_ADD_MV(candidate);
+        IF_DIFF_REF_FRAME_ADD_MV(candidate, ref_frame, ref_sign_bias,
+                                 refmv_count, mv_ref_list, Done);
       }
     }
   }

@@ -158,29 +158,32 @@ static INLINE int_mv scale_mv(const MB_MODE_INFO *mbmi, int ref,
 // This macro is used to add a motion vector mv_ref list if it isn't
 // already in the list.  If it's the second motion vector it will also
 // skip all additional processing and jump to done!
-#define ADD_MV_REF_LIST(mv) \
+#define ADD_MV_REF_LIST(mv, refmv_count, mv_ref_list, Done) \
   do { \
     if (refmv_count) { \
-      if ((mv).as_int != mv_ref_list[0].as_int) { \
-        mv_ref_list[refmv_count] = (mv); \
+      if ((mv).as_int != (mv_ref_list)[0].as_int) { \
+        (mv_ref_list)[(refmv_count)] = (mv); \
         goto Done; \
       } \
     } else { \
-      mv_ref_list[refmv_count++] = (mv); \
+      (mv_ref_list)[(refmv_count)++] = (mv); \
     } \
   } while (0)
 
 // If either reference frame is different, not INTRA, and they
 // are different from each other scale and add the mv to our list.
-#define IF_DIFF_REF_FRAME_ADD_MV(mbmi) \
+#define IF_DIFF_REF_FRAME_ADD_MV(mbmi, ref_frame, ref_sign_bias, refmv_count, \
+                                 mv_ref_list, Done) \
   do { \
     if (is_inter_block(mbmi)) { \
       if ((mbmi)->ref_frame[0] != ref_frame) \
-        ADD_MV_REF_LIST(scale_mv((mbmi), 0, ref_frame, ref_sign_bias)); \
+        ADD_MV_REF_LIST(scale_mv((mbmi), 0, ref_frame, ref_sign_bias), \
+                        refmv_count, mv_ref_list, Done); \
       if (has_second_ref(mbmi) && \
           (mbmi)->ref_frame[1] != ref_frame && \
           (mbmi)->mv[1].as_int != (mbmi)->mv[0].as_int) \
-        ADD_MV_REF_LIST(scale_mv((mbmi), 1, ref_frame, ref_sign_bias)); \
+        ADD_MV_REF_LIST(scale_mv((mbmi), 1, ref_frame, ref_sign_bias), \
+                        refmv_count, mv_ref_list, Done); \
     } \
   } while (0)
 
