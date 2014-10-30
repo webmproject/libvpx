@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Rf0\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2758,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-10-30T01:44:13Z",
+      "side": 1,
+      "message": "can it be just: \nctx-\u003epred_pixel_ready \u003d !do_split \u0026\u0026 !partition_vert_allowed \u0026\u0026 !partition_horz_allowed;",
+      "revId": "283a25b02c2743af775bd675eed6302214df4fba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
