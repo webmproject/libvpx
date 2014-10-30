@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAdn//ReQ\u003d",
+        "filename": "vp9/common/vp9_alloccommon.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-30T14:01:06Z",
+      "side": 1,
+      "message": "as Yaowu said, fix the type name + use sizeof(var)",
+      "revId": "1b1d733cb60ed96d464ff0a718f7139d3b57e39b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Rgg\u003d",
         "filename": "vp9/common/vp9_onyxc_int.h",
         "patchSetId": 4
