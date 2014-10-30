@@ -475,7 +475,8 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
     return;
 
   if (!is_inter_block(mbmi)) {
-    vp9_encode_block_intra(x, plane, block, plane_bsize, tx_size, &mbmi->skip);
+    struct encode_b_args arg = {x, NULL, &mbmi->skip};
+    vp9_encode_block_intra(plane, block, plane_bsize, tx_size, &arg);
 #if CONFIG_VP9_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       dist_block(plane, block, tx_size, args, xd->bd);
