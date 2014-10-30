@@ -319,10 +319,6 @@ typedef struct SPEED_FEATURES {
   // Fast quantization process path
   int use_quant_fp;
 
-  // Search through variable block partition types in non-RD mode decision
-  // encoding process for RTC.
-  int partition_check;
-
   // Use finer quantizer in every other few frames that run variable block
   // partition type search.
   int force_frame_boost;
