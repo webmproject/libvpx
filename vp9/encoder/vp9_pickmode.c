@@ -604,6 +604,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     for (this_mode = NEARESTMV; this_mode <= NEWMV; ++this_mode) {
       int rate_mv = 0;
       int mode_rd_thresh;
+      int mode_index = mode_idx[ref_frame][INTER_OFFSET(this_mode)];
 
       if (const_motion[ref_frame] && this_mode == NEARMV)
         continue;
@@ -611,10 +612,9 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       if (!(cpi->sf.inter_mode_mask[bsize] & (1 << this_mode)))
         continue;
 
-      mode_rd_thresh =
-          rd_threshes[mode_idx[ref_frame][INTER_OFFSET(this_mode)]];
+      mode_rd_thresh = rd_threshes[mode_index];
       if (rd_less_than_thresh(best_rdc.rdcost, mode_rd_thresh,
-                              rd_thresh_freq_fact[this_mode]))
+                              rd_thresh_freq_fact[mode_index]))
         continue;
 
       if (this_mode == NEWMV) {
@@ -837,12 +837,12 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
   if (is_inter_block(mbmi))
     vp9_update_rd_thresh_fact(tile_data->thresh_freq_fact,
-                              cpi->sf.adaptive_rd_thresh, bsize,
-                              mode_idx[ref_frame][INTER_OFFSET(mbmi->mode)]);
+                            cpi->sf.adaptive_rd_thresh, bsize,
+                            mode_idx[best_ref_frame][INTER_OFFSET(mbmi->mode)]);
   else
     vp9_update_rd_thresh_fact(tile_data->thresh_freq_fact,
                               cpi->sf.adaptive_rd_thresh, bsize,
-                              mode_idx[ref_frame][mbmi->mode]);
+                              mode_idx[INTRA_FRAME][mbmi->mode]);
 
   *rd_cost = best_rdc;
 }
