@@ -151,6 +151,7 @@ const DecodeParam kMultiThreadedVP9InvalidFileTests[] = {
   {4, "invalid-vp90-2-08-tile_1x4_frame_parallel_all_key.webm"},
   {4, "invalid-"
       "vp90-2-08-tile_1x2_frame_parallel.webm.ivf.s47039_r01-05_b6-.ivf"},
+  {4, "invalid-vp90-2-08-tile_1x8_frame_parallel.webm.ivf.s288_r01-05_b6-.ivf"},
   {2, "invalid-vp90-2-09-aq2.webm.ivf.s3984_r01-05_b6-.v2.ivf"},
   {4, "invalid-vp90-2-09-subpixel-00.ivf.s19552_r01-05_b6-.v2.ivf"},
 };

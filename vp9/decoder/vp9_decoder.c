@@ -117,11 +117,6 @@ void vp9_decoder_remove(VP9Decoder *pbi) {
   VP9_COMMON *const cm = &pbi->common;
   int i;
 
-  vpx_free(cm->fc);
-  cm->fc = NULL;
-  vpx_free(cm->frame_contexts);
-  cm->frame_contexts = NULL;
-
   vp9_get_worker_interface()->end(&pbi->lf_worker);
   vpx_free(pbi->lf_worker.data1);
   vpx_free(pbi->tile_data);
