@@ -77,6 +77,9 @@ typedef enum {
   TX_8X8 = 1,                      // 8x8 transform
   TX_16X16 = 2,                    // 16x16 transform
   TX_32X32 = 3,                    // 32x32 transform
+#if CONFIG_TX64X64
+  TX_64X64 = 4,                    // 64x64 transform
+#endif
   TX_SIZES
 } TX_SIZE;
 
@@ -86,8 +89,11 @@ typedef enum {
   ALLOW_8X8           = 1,        // allow block transform size up to 8x8
   ALLOW_16X16         = 2,        // allow block transform size up to 16x16
   ALLOW_32X32         = 3,        // allow block transform size up to 32x32
-  TX_MODE_SELECT      = 4,        // transform specified for each block
-  TX_MODES            = 5,
+#if CONFIG_TX64X64
+  ALLOW_64X64         = 4,        // allow block transform size up to 32x32
+#endif
+  TX_MODE_SELECT,                 // transform specified for each block
+  TX_MODES,
 } TX_MODE;
 
 typedef enum {

@@ -90,10 +90,20 @@ extern const vp9_extra_bit vp9_extra_bits_high10[ENTROPY_TOKENS];
 extern const vp9_extra_bit vp9_extra_bits_high12[ENTROPY_TOKENS];
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
+#if CONFIG_TX64X64
+#define DCT_MAX_VALUE           32768
+#else
 #define DCT_MAX_VALUE           16384
+#endif  // CONFIG_TX64X64
+
 #if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_TX64X64
+#define DCT_MAX_VALUE_HIGH10   131072
+#define DCT_MAX_VALUE_HIGH12   524288
+#else
 #define DCT_MAX_VALUE_HIGH10    65536
 #define DCT_MAX_VALUE_HIGH12   262144
+#endif  // CONFIG_TX64X64
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 /* Coefficients are predicted via a 3-dimensional probability table. */
@@ -153,7 +163,14 @@ static INLINE void reset_skip_context(MACROBLOCKD *xd, BLOCK_SIZE bsize) {
 // This macro is currently unused but may be used by certain implementations
 #define MAXBAND_INDEX 21
 
-DECLARE_ALIGNED(16, extern const uint8_t, vp9_coefband_trans_8x8plus[1024]);
+#if CONFIG_TX64X64
+#define MAX_NUM_COEFS 4096
+#else
+#define MAX_NUM_COEFS 1024
+#endif
+
+DECLARE_ALIGNED(16, extern const uint8_t,
+                vp9_coefband_trans_8x8plus[MAX_NUM_COEFS]);
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_coefband_trans_4x4[16]);
 
 static INLINE const uint8_t *get_band_translate(TX_SIZE tx_size) {
@@ -204,6 +221,12 @@ static INLINE int get_entropy_context(TX_SIZE tx_size, const ENTROPY_CONTEXT *a,
       above_ec = !!*(const uint64_t *)a;
       left_ec  = !!*(const uint64_t *)l;
       break;
+#if CONFIG_TX64X64
+    case TX_64X64:
+      above_ec = !!*(const uint64_t *)a;
+      left_ec  = !!*(const uint64_t *)l;
+      break;
+#endif
     default:
       assert(0 && "Invalid transform size.");
       break;

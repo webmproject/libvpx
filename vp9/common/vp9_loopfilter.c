@@ -38,6 +38,9 @@ static const uint64_t left_64x64_txform_mask[TX_SIZES]= {
   0xffffffffffffffff,  // TX_8x8
   0x5555555555555555,  // TX_16x16
   0x1111111111111111,  // TX_32x32
+#if CONFIG_TX64X64
+  0x0101010101010101,  // TX_64x64
+#endif
 };
 
 // 64 bit masks for above transform size. Each 1 represents a position where
@@ -62,6 +65,9 @@ static const uint64_t above_64x64_txform_mask[TX_SIZES]= {
   0xffffffffffffffff,  // TX_8x8
   0x00ff00ff00ff00ff,  // TX_16x16
   0x000000ff000000ff,  // TX_32x32
+#if CONFIG_TX64X64
+  0x00000000000000ff,  // TX_64x64
+#endif
 };
 
 // 64 bit masks for prediction sizes (left). Each 1 represents a position
@@ -140,6 +146,9 @@ static const uint16_t left_64x64_txform_mask_uv[TX_SIZES]= {
   0xffff,  // TX_8x8
   0x5555,  // TX_16x16
   0x1111,  // TX_32x32
+#if CONFIG_TX64X64
+  0x0101,  // TX_64x64, never used
+#endif
 };
 
 static const uint16_t above_64x64_txform_mask_uv[TX_SIZES]= {
@@ -147,6 +156,9 @@ static const uint16_t above_64x64_txform_mask_uv[TX_SIZES]= {
   0xffff,  // TX_8x8
   0x0f0f,  // TX_16x16
   0x000f,  // TX_32x32
+#if CONFIG_TX64X64
+  0x0003,  // TX_64x64, never used
+#endif
 };
 
 // 16 bit left mask to shift and set for each uv prediction size.

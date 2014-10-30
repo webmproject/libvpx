@@ -1439,6 +1439,458 @@ void vp9_fdct32x32_rd_c(const int16_t *input, tran_low_t *out, int stride) {
   }
 }
 
+#if CONFIG_TX64X64
+// TODO(debargha): Using a floating point implementation for now.
+// Should re-use the 32x32 integer dct we already have.
+static void dct32_1d(double *input, double *output, int stride) {
+  static const double C1 = 0.998795456205;  // cos(pi * 1 / 64)
+  static const double C2 = 0.995184726672;  // cos(pi * 2 / 64)
+  static const double C3 = 0.989176509965;  // cos(pi * 3 / 64)
+  static const double C4 = 0.980785280403;  // cos(pi * 4 / 64)
+  static const double C5 = 0.970031253195;  // cos(pi * 5 / 64)
+  static const double C6 = 0.956940335732;  // cos(pi * 6 / 64)
+  static const double C7 = 0.941544065183;  // cos(pi * 7 / 64)
+  static const double C8 = 0.923879532511;  // cos(pi * 8 / 64)
+  static const double C9 = 0.903989293123;  // cos(pi * 9 / 64)
+  static const double C10 = 0.881921264348;  // cos(pi * 10 / 64)
+  static const double C11 = 0.857728610000;  // cos(pi * 11 / 64)
+  static const double C12 = 0.831469612303;  // cos(pi * 12 / 64)
+  static const double C13 = 0.803207531481;  // cos(pi * 13 / 64)
+  static const double C14 = 0.773010453363;  // cos(pi * 14 / 64)
+  static const double C15 = 0.740951125355;  // cos(pi * 15 / 64)
+  static const double C16 = 0.707106781187;  // cos(pi * 16 / 64)
+  static const double C17 = 0.671558954847;  // cos(pi * 17 / 64)
+  static const double C18 = 0.634393284164;  // cos(pi * 18 / 64)
+  static const double C19 = 0.595699304492;  // cos(pi * 19 / 64)
+  static const double C20 = 0.555570233020;  // cos(pi * 20 / 64)
+  static const double C21 = 0.514102744193;  // cos(pi * 21 / 64)
+  static const double C22 = 0.471396736826;  // cos(pi * 22 / 64)
+  static const double C23 = 0.427555093430;  // cos(pi * 23 / 64)
+  static const double C24 = 0.382683432365;  // cos(pi * 24 / 64)
+  static const double C25 = 0.336889853392;  // cos(pi * 25 / 64)
+  static const double C26 = 0.290284677254;  // cos(pi * 26 / 64)
+  static const double C27 = 0.242980179903;  // cos(pi * 27 / 64)
+  static const double C28 = 0.195090322016;  // cos(pi * 28 / 64)
+  static const double C29 = 0.146730474455;  // cos(pi * 29 / 64)
+  static const double C30 = 0.098017140330;  // cos(pi * 30 / 64)
+  static const double C31 = 0.049067674327;  // cos(pi * 31 / 64)
+
+  double step[32];
+
+  // Stage 1
+  step[0] = input[stride*0] + input[stride*(32 - 1)];
+  step[1] = input[stride*1] + input[stride*(32 - 2)];
+  step[2] = input[stride*2] + input[stride*(32 - 3)];
+  step[3] = input[stride*3] + input[stride*(32 - 4)];
+  step[4] = input[stride*4] + input[stride*(32 - 5)];
+  step[5] = input[stride*5] + input[stride*(32 - 6)];
+  step[6] = input[stride*6] + input[stride*(32 - 7)];
+  step[7] = input[stride*7] + input[stride*(32 - 8)];
+  step[8] = input[stride*8] + input[stride*(32 - 9)];
+  step[9] = input[stride*9] + input[stride*(32 - 10)];
+  step[10] = input[stride*10] + input[stride*(32 - 11)];
+  step[11] = input[stride*11] + input[stride*(32 - 12)];
+  step[12] = input[stride*12] + input[stride*(32 - 13)];
+  step[13] = input[stride*13] + input[stride*(32 - 14)];
+  step[14] = input[stride*14] + input[stride*(32 - 15)];
+  step[15] = input[stride*15] + input[stride*(32 - 16)];
+  step[16] = -input[stride*16] + input[stride*(32 - 17)];
+  step[17] = -input[stride*17] + input[stride*(32 - 18)];
+  step[18] = -input[stride*18] + input[stride*(32 - 19)];
+  step[19] = -input[stride*19] + input[stride*(32 - 20)];
+  step[20] = -input[stride*20] + input[stride*(32 - 21)];
+  step[21] = -input[stride*21] + input[stride*(32 - 22)];
+  step[22] = -input[stride*22] + input[stride*(32 - 23)];
+  step[23] = -input[stride*23] + input[stride*(32 - 24)];
+  step[24] = -input[stride*24] + input[stride*(32 - 25)];
+  step[25] = -input[stride*25] + input[stride*(32 - 26)];
+  step[26] = -input[stride*26] + input[stride*(32 - 27)];
+  step[27] = -input[stride*27] + input[stride*(32 - 28)];
+  step[28] = -input[stride*28] + input[stride*(32 - 29)];
+  step[29] = -input[stride*29] + input[stride*(32 - 30)];
+  step[30] = -input[stride*30] + input[stride*(32 - 31)];
+  step[31] = -input[stride*31] + input[stride*(32 - 32)];
+
+  // Stage 2
+  output[stride*0] = step[0] + step[16 - 1];
+  output[stride*1] = step[1] + step[16 - 2];
+  output[stride*2] = step[2] + step[16 - 3];
+  output[stride*3] = step[3] + step[16 - 4];
+  output[stride*4] = step[4] + step[16 - 5];
+  output[stride*5] = step[5] + step[16 - 6];
+  output[stride*6] = step[6] + step[16 - 7];
+  output[stride*7] = step[7] + step[16 - 8];
+  output[stride*8] = -step[8] + step[16 - 9];
+  output[stride*9] = -step[9] + step[16 - 10];
+  output[stride*10] = -step[10] + step[16 - 11];
+  output[stride*11] = -step[11] + step[16 - 12];
+  output[stride*12] = -step[12] + step[16 - 13];
+  output[stride*13] = -step[13] + step[16 - 14];
+  output[stride*14] = -step[14] + step[16 - 15];
+  output[stride*15] = -step[15] + step[16 - 16];
+
+  output[stride*16] = step[16];
+  output[stride*17] = step[17];
+  output[stride*18] = step[18];
+  output[stride*19] = step[19];
+
+  output[stride*20] = (-step[20] + step[27])*C16;
+  output[stride*21] = (-step[21] + step[26])*C16;
+  output[stride*22] = (-step[22] + step[25])*C16;
+  output[stride*23] = (-step[23] + step[24])*C16;
+
+  output[stride*24] = (step[24] + step[23])*C16;
+  output[stride*25] = (step[25] + step[22])*C16;
+  output[stride*26] = (step[26] + step[21])*C16;
+  output[stride*27] = (step[27] + step[20])*C16;
+
+  output[stride*28] = step[28];
+  output[stride*29] = step[29];
+  output[stride*30] = step[30];
+  output[stride*31] = step[31];
+
+  // Stage 3
+  step[0] = output[stride*0] + output[stride*(8 - 1)];
+  step[1] = output[stride*1] + output[stride*(8 - 2)];
+  step[2] = output[stride*2] + output[stride*(8 - 3)];
+  step[3] = output[stride*3] + output[stride*(8 - 4)];
+  step[4] = -output[stride*4] + output[stride*(8 - 5)];
+  step[5] = -output[stride*5] + output[stride*(8 - 6)];
+  step[6] = -output[stride*6] + output[stride*(8 - 7)];
+  step[7] = -output[stride*7] + output[stride*(8 - 8)];
+  step[8] = output[stride*8];
+  step[9] = output[stride*9];
+  step[10] = (-output[stride*10] + output[stride*13])*C16;
+  step[11] = (-output[stride*11] + output[stride*12])*C16;
+  step[12] = (output[stride*12] + output[stride*11])*C16;
+  step[13] = (output[stride*13] + output[stride*10])*C16;
+  step[14] = output[stride*14];
+  step[15] = output[stride*15];
+
+  step[16] = output[stride*16] + output[stride*23];
+  step[17] = output[stride*17] + output[stride*22];
+  step[18] = output[stride*18] + output[stride*21];
+  step[19] = output[stride*19] + output[stride*20];
+  step[20] = -output[stride*20] + output[stride*19];
+  step[21] = -output[stride*21] + output[stride*18];
+  step[22] = -output[stride*22] + output[stride*17];
+  step[23] = -output[stride*23] + output[stride*16];
+  step[24] = -output[stride*24] + output[stride*31];
+  step[25] = -output[stride*25] + output[stride*30];
+  step[26] = -output[stride*26] + output[stride*29];
+  step[27] = -output[stride*27] + output[stride*28];
+  step[28] = output[stride*28] + output[stride*27];
+  step[29] = output[stride*29] + output[stride*26];
+  step[30] = output[stride*30] + output[stride*25];
+  step[31] = output[stride*31] + output[stride*24];
+
+  // Stage 4
+  output[stride*0] = step[0] + step[3];
+  output[stride*1] = step[1] + step[2];
+  output[stride*2] = -step[2] + step[1];
+  output[stride*3] = -step[3] + step[0];
+  output[stride*4] = step[4];
+  output[stride*5] = (-step[5] + step[6])*C16;
+  output[stride*6] = (step[6] + step[5])*C16;
+  output[stride*7] = step[7];
+  output[stride*8] = step[8] + step[11];
+  output[stride*9] = step[9] + step[10];
+  output[stride*10] = -step[10] + step[9];
+  output[stride*11] = -step[11] + step[8];
+  output[stride*12] = -step[12] + step[15];
+  output[stride*13] = -step[13] + step[14];
+  output[stride*14] = step[14] + step[13];
+  output[stride*15] = step[15] + step[12];
+
+  output[stride*16] = step[16];
+  output[stride*17] = step[17];
+  output[stride*18] = step[18]*-C8 + step[29]*C24;
+  output[stride*19] = step[19]*-C8 + step[28]*C24;
+  output[stride*20] = step[20]*-C24 + step[27]*-C8;
+  output[stride*21] = step[21]*-C24 + step[26]*-C8;
+  output[stride*22] = step[22];
+  output[stride*23] = step[23];
+  output[stride*24] = step[24];
+  output[stride*25] = step[25];
+  output[stride*26] = step[26]*C24 + step[21]*-C8;
+  output[stride*27] = step[27]*C24 + step[20]*-C8;
+  output[stride*28] = step[28]*C8 + step[19]*C24;
+  output[stride*29] = step[29]*C8 + step[18]*C24;
+  output[stride*30] = step[30];
+  output[stride*31] = step[31];
+
+  // Stage 5
+  step[0] = (output[stride*0] + output[stride*1]) * C16;
+  step[1] = (-output[stride*1] + output[stride*0]) * C16;
+  step[2] = output[stride*2]*C24 + output[stride*3] * C8;
+  step[3] = output[stride*3]*C24 - output[stride*2] * C8;
+  step[4] = output[stride*4] + output[stride*5];
+  step[5] = -output[stride*5] + output[stride*4];
+  step[6] = -output[stride*6] + output[stride*7];
+  step[7] = output[stride*7] + output[stride*6];
+  step[8] = output[stride*8];
+  step[9] = output[stride*9]*-C8 + output[stride*14]*C24;
+  step[10] = output[stride*10]*-C24 + output[stride*13]*-C8;
+  step[11] = output[stride*11];
+  step[12] = output[stride*12];
+  step[13] = output[stride*13]*C24 + output[stride*10]*-C8;
+  step[14] = output[stride*14]*C8 + output[stride*9]*C24;
+  step[15] = output[stride*15];
+
+  step[16] = output[stride*16] + output[stride*19];
+  step[17] = output[stride*17] + output[stride*18];
+  step[18] = -output[stride*18] + output[stride*17];
+  step[19] = -output[stride*19] + output[stride*16];
+  step[20] = -output[stride*20] + output[stride*23];
+  step[21] = -output[stride*21] + output[stride*22];
+  step[22] = output[stride*22] + output[stride*21];
+  step[23] = output[stride*23] + output[stride*20];
+  step[24] = output[stride*24] + output[stride*27];
+  step[25] = output[stride*25] + output[stride*26];
+  step[26] = -output[stride*26] + output[stride*25];
+  step[27] = -output[stride*27] + output[stride*24];
+  step[28] = -output[stride*28] + output[stride*31];
+  step[29] = -output[stride*29] + output[stride*30];
+  step[30] = output[stride*30] + output[stride*29];
+  step[31] = output[stride*31] + output[stride*28];
+
+  // Stage 6
+  output[stride*0] = step[0];
+  output[stride*1] = step[1];
+  output[stride*2] = step[2];
+  output[stride*3] = step[3];
+  output[stride*4] = step[4]*C28 + step[7]*C4;
+  output[stride*5] = step[5]*C12 + step[6]*C20;
+  output[stride*6] = step[6]*C12 + step[5]*-C20;
+  output[stride*7] = step[7]*C28 + step[4]*-C4;
+  output[stride*8] = step[8] + step[9];
+  output[stride*9] = -step[9] + step[8];
+  output[stride*10] = -step[10] + step[11];
+  output[stride*11] = step[11] + step[10];
+  output[stride*12] = step[12] + step[13];
+  output[stride*13] = -step[13] + step[12];
+  output[stride*14] = -step[14] + step[15];
+  output[stride*15] = step[15] + step[14];
+
+  output[stride*16] = step[16];
+  output[stride*17] = step[17]*-C4 + step[30]*C28;
+  output[stride*18] = step[18]*-C28 + step[29]*-C4;
+  output[stride*19] = step[19];
+  output[stride*20] = step[20];
+  output[stride*21] = step[21]*-C20 + step[26]*C12;
+  output[stride*22] = step[22]*-C12 + step[25]*-C20;
+  output[stride*23] = step[23];
+  output[stride*24] = step[24];
+  output[stride*25] = step[25]*C12 + step[22]*-C20;
+  output[stride*26] = step[26]*C20 + step[21]*C12;
+  output[stride*27] = step[27];
+  output[stride*28] = step[28];
+  output[stride*29] = step[29]*C28 + step[18]*-C4;
+  output[stride*30] = step[30]*C4 + step[17]*C28;
+  output[stride*31] = step[31];
+
+  // Stage 7
+  step[0] = output[stride*0];
+  step[1] = output[stride*1];
+  step[2] = output[stride*2];
+  step[3] = output[stride*3];
+  step[4] = output[stride*4];
+  step[5] = output[stride*5];
+  step[6] = output[stride*6];
+  step[7] = output[stride*7];
+  step[8] = output[stride*8]*C30 + output[stride*15]*C2;
+  step[9] = output[stride*9]*C14 + output[stride*14]*C18;
+  step[10] = output[stride*10]*C22 + output[stride*13]*C10;
+  step[11] = output[stride*11]*C6 + output[stride*12]*C26;
+  step[12] = output[stride*12]*C6 + output[stride*11]*-C26;
+  step[13] = output[stride*13]*C22 + output[stride*10]*-C10;
+  step[14] = output[stride*14]*C14 + output[stride*9]*-C18;
+  step[15] = output[stride*15]*C30 + output[stride*8]*-C2;
+
+  step[16] = output[stride*16] + output[stride*17];
+  step[17] = -output[stride*17] + output[stride*16];
+  step[18] = -output[stride*18] + output[stride*19];
+  step[19] = output[stride*19] + output[stride*18];
+  step[20] = output[stride*20] + output[stride*21];
+  step[21] = -output[stride*21] + output[stride*20];
+  step[22] = -output[stride*22] + output[stride*23];
+  step[23] = output[stride*23] + output[stride*22];
+  step[24] = output[stride*24] + output[stride*25];
+  step[25] = -output[stride*25] + output[stride*24];
+  step[26] = -output[stride*26] + output[stride*27];
+  step[27] = output[stride*27] + output[stride*26];
+  step[28] = output[stride*28] + output[stride*29];
+  step[29] = -output[stride*29] + output[stride*28];
+  step[30] = -output[stride*30] + output[stride*31];
+  step[31] = output[stride*31] + output[stride*30];
+
+  // Final stage --- outputs indices are bit-reversed.
+  output[stride*0] = step[0];
+  output[stride*16] = step[1];
+  output[stride*8] = step[2];
+  output[stride*24] = step[3];
+  output[stride*4] = step[4];
+  output[stride*20] = step[5];
+  output[stride*12] = step[6];
+  output[stride*28] = step[7];
+  output[stride*2] = step[8];
+  output[stride*18] = step[9];
+  output[stride*10] = step[10];
+  output[stride*26] = step[11];
+  output[stride*6] = step[12];
+  output[stride*22] = step[13];
+  output[stride*14] = step[14];
+  output[stride*30] = step[15];
+
+  output[stride*1] = step[16]*C31 + step[31]*C1;
+  output[stride*17] = step[17]*C15 + step[30]*C17;
+  output[stride*9] = step[18]*C23 + step[29]*C9;
+  output[stride*25] = step[19]*C7 + step[28]*C25;
+  output[stride*5] = step[20]*C27 + step[27]*C5;
+  output[stride*21] = step[21]*C11 + step[26]*C21;
+  output[stride*13] = step[22]*C19 + step[25]*C13;
+  output[stride*29] = step[23]*C3 + step[24]*C29;
+  output[stride*3] = step[24]*C3 + step[23]*-C29;
+  output[stride*19] = step[25]*C19 + step[22]*-C13;
+  output[stride*11] = step[26]*C11 + step[21]*-C21;
+  output[stride*27] = step[27]*C27 + step[20]*-C5;
+  output[stride*7] = step[28]*C7 + step[19]*-C25;
+  output[stride*23] = step[29]*C23 + step[18]*-C9;
+  output[stride*15] = step[30]*C15 + step[17]*-C17;
+  output[stride*31] = step[31]*C31 + step[16]*-C1;
+}
+
+static void dct64_1d(double *input, double *output, int stride) {
+  double step1[64], step2[64];
+  int i;
+  static const double C[64] = {
+    1.00000000000000000000,  // cos(0 * pi / 128)
+    0.99969881869620424997,  // cos(1 * pi / 128)
+    0.99879545620517240501,  // cos(2 * pi / 128)
+    0.99729045667869020697,  // cos(3 * pi / 128)
+    0.99518472667219692873,  // cos(4 * pi / 128)
+    0.99247953459870996706,  // cos(5 * pi / 128)
+    0.98917650996478101444,  // cos(6 * pi / 128)
+    0.98527764238894122162,  // cos(7 * pi / 128)
+    0.98078528040323043058,  // cos(8 * pi / 128)
+    0.97570213003852857003,  // cos(9 * pi / 128)
+    0.97003125319454397424,  // cos(10 * pi / 128)
+    0.96377606579543984022,  // cos(11 * pi / 128)
+    0.95694033573220882438,  // cos(12 * pi / 128)
+    0.94952818059303667475,  // cos(13 * pi / 128)
+    0.94154406518302080631,  // cos(14 * pi / 128)
+    0.93299279883473895669,  // cos(15 * pi / 128)
+    0.92387953251128673848,  // cos(16 * pi / 128)
+    0.91420975570353069095,  // cos(17 * pi / 128)
+    0.90398929312344333820,  // cos(18 * pi / 128)
+    0.89322430119551532446,  // cos(19 * pi / 128)
+    0.88192126434835504956,  // cos(20 * pi / 128)
+    0.87008699110871146054,  // cos(21 * pi / 128)
+    0.85772861000027211809,  // cos(22 * pi / 128)
+    0.84485356524970711689,  // cos(23 * pi / 128)
+    0.83146961230254523567,  // cos(24 * pi / 128)
+    0.81758481315158371139,  // cos(25 * pi / 128)
+    0.80320753148064494287,  // cos(26 * pi / 128)
+    0.78834642762660633863,  // cos(27 * pi / 128)
+    0.77301045336273699338,  // cos(28 * pi / 128)
+    0.75720884650648456748,  // cos(29 * pi / 128)
+    0.74095112535495921691,  // cos(30 * pi / 128)
+    0.72424708295146700276,  // cos(31 * pi / 128)
+    0.70710678118654757274,  // cos(32 * pi / 128)
+    0.68954054473706694051,  // cos(33 * pi / 128)
+    0.67155895484701844111,  // cos(34 * pi / 128)
+    0.65317284295377686654,  // cos(35 * pi / 128)
+    0.63439328416364559882,  // cos(36 * pi / 128)
+    0.61523159058062693028,  // cos(37 * pi / 128)
+    0.59569930449243346793,  // cos(38 * pi / 128)
+    0.57580819141784544968,  // cos(39 * pi / 128)
+    0.55557023301960228867,  // cos(40 * pi / 128)
+    0.53499761988709737537,  // cos(41 * pi / 128)
+    0.51410274419322177231,  // cos(42 * pi / 128)
+    0.49289819222978414892,  // cos(43 * pi / 128)
+    0.47139673682599780857,  // cos(44 * pi / 128)
+    0.44961132965460659516,  // cos(45 * pi / 128)
+    0.42755509343028219593,  // cos(46 * pi / 128)
+    0.40524131400498980549,  // cos(47 * pi / 128)
+    0.38268343236508983729,  // cos(48 * pi / 128)
+    0.35989503653498827740,  // cos(49 * pi / 128)
+    0.33688985339222005111,  // cos(50 * pi / 128)
+    0.31368174039889151761,  // cos(51 * pi / 128)
+    0.29028467725446227554,  // cos(52 * pi / 128)
+    0.26671275747489842090,  // cos(53 * pi / 128)
+    0.24298017990326398197,  // cos(54 * pi / 128)
+    0.21910124015686976984,  // cos(55 * pi / 128)
+    0.19509032201612830359,  // cos(56 * pi / 128)
+    0.17096188876030135595,  // cos(57 * pi / 128)
+    0.14673047445536174793,  // cos(58 * pi / 128)
+    0.12241067519921627893,  // cos(59 * pi / 128)
+    0.09801714032956077016,  // cos(60 * pi / 128)
+    0.07356456359966745406,  // cos(61 * pi / 128)
+    0.04906767432741813290,  // cos(62 * pi / 128)
+    0.02454122852291226731,  // cos(63 * pi / 128)
+  };
+
+  for (i = 0; i < 32; ++i) {
+    step1[i] = input[stride * i] + input[stride * (63 - i)];
+    step1[32 + i] = (input[stride * i] -
+                     input[stride * (63 - i)]) * C[i * 2 + 1];
+  }
+
+  dct32_1d(step1, step2, 1);
+  dct32_1d(step1 + 32, step2 + 32, 1);
+
+  for (i = 0; i < 64; i += 2) {
+    output[stride*i] = step2[i / 2];
+  }
+  output[stride * 1] = 2 * step2[32] * C[32];
+  for (i = 3; i < 64; i += 2) {
+    output[stride * i] = 2 * step2[32 + i / 2] - output[stride * (i - 2)];
+  }
+}
+
+void vp9_fdct64x64_c(const int16_t *input, tran_low_t *out, int stride) {
+  // vp9_clear_system_state();  // Make it simd safe : __asm emms;
+  {
+    int i, j;
+    double output[4096];
+    // First transform columns
+    for (i = 0; i < 64; i++) {
+      double temp_in[64], temp_out[64];
+      for (j = 0; j < 64; j++)
+        temp_in[j] = input[j * stride + i];
+      dct64_1d(temp_in, temp_out, 1);
+      for (j = 0; j < 64; j++)
+        output[j * 64 + i] = temp_out[j];
+    }
+    // Then transform rows
+    for (i = 0; i < 64; ++i) {
+      double temp_in[64], temp_out[64];
+      for (j = 0; j < 64; ++j)
+        temp_in[j] = output[j + i * 64];
+      dct64_1d(temp_in, temp_out, 1);
+      for (j = 0; j < 64; ++j)
+        output[j + i * 64] = temp_out[j];
+    }
+    // Scale by some magic number
+    for (i = 0; i < 4096; i++) {
+      out[i] = (tran_low_t)round(output[i] / 16);
+    }
+  }
+  // vp9_clear_system_state();  // Make it simd safe : __asm emms;
+}
+
+void vp9_fdct64x64_1_c(const int16_t *input, tran_low_t *output, int stride) {
+  int r, c;
+  tran_low_t sum = 0;
+  for (r = 0; r < 64; ++r)
+    for (c = 0; c < 64; ++c)
+      sum += input[r * stride + c];
+
+  output[0] = sum >> 5;
+  output[1] = 0;
+}
+#endif
+
 #if CONFIG_VP9_HIGHBITDEPTH
 void vp9_highbd_fdct4x4_c(const int16_t *input, tran_low_t *output,
                           int stride) {
@@ -1498,4 +1950,15 @@ void vp9_highbd_fdct32x32_rd_c(const int16_t *input, tran_low_t *out,
                                int stride) {
   vp9_fdct32x32_rd_c(input, out, stride);
 }
+
+#if CONFIG_TX64X64
+void vp9_highbd_fdct64x64_1_c(const int16_t *input, tran_low_t *out,
+                              int stride) {
+  vp9_fdct64x64_1_c(input, out, stride);
+}
+
+void vp9_highbd_fdct64x64_c(const int16_t *input, tran_low_t *out, int stride) {
+  vp9_fdct64x64_c(input, out, stride);
+}
+#endif  // CONFIG_TX64X64
 #endif  // CONFIG_VP9_HIGHBITDEPTH

@@ -32,7 +32,7 @@
 #define INCREMENT_COUNT(token)                              \
   do {                                                      \
      if (!cm->frame_parallel_decoding_mode)                 \
-       ++coef_counts[band][ctx][token];                      \
+       ++coef_counts[band][ctx][token];                     \
   } while (0)
 
 static INLINE int read_coeff(const vp9_prob *probs, int n, vp9_reader *r) {
@@ -69,9 +69,9 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd, PLANE_TYPE type,
       counts->coef[tx_size][type][ref];
   unsigned int (*eob_branch_count)[COEFF_CONTEXTS] =
       counts->eob_branch[tx_size][type][ref];
-  uint8_t token_cache[32 * 32];
+  uint8_t token_cache[MAX_NUM_COEFS];
   const uint8_t *band_translate = get_band_translate(tx_size);
-  const int dq_shift = (tx_size == TX_32X32);
+  const int dq_shift = (tx_size > TX_16X16) ? tx_size - TX_16X16 : 0;
   int v, token;
   int16_t dqv = dq[0];
   const uint8_t *cat1_prob;
@@ -214,6 +214,9 @@ int vp9_decode_block_tokens(VP9_COMMON *cm, MACROBLOCKD *xd,
   const int eob = decode_coefs(cm, xd, pd->plane_type,
                                BLOCK_OFFSET(pd->dqcoeff, block), tx_size,
                                pd->dequant, ctx, so->scan, so->neighbors, r);
+#if CONFIG_TX64X64
+  if (plane > 0) assert(tx_size != TX_64X64);
+#endif
   vp9_set_contexts(xd, pd, plane_bsize, tx_size, eob > 0, x, y);
   return eob;
 }

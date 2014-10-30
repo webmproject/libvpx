@@ -229,7 +229,7 @@ const vp9_tree_index vp9_intra_mode_tree[TREE_SIZE(INTRA_MODES)] = {
   -D135_PRED, -D117_PRED,           /* 5 = D135_NODE */
   -D45_PRED, 14,                    /* 6 = D45_NODE */
   -D63_PRED, 16,                    /* 7 = D63_NODE */
-  -D153_PRED, -D207_PRED             /* 8 = D153_NODE */
+  -D153_PRED, -D207_PRED            /* 8 = D153_NODE */
 };
 
 const vp9_tree_index vp9_inter_mode_tree[TREE_SIZE(INTER_MODES)] = {
@@ -265,6 +265,11 @@ static const vp9_prob default_single_ref_p[REF_CONTEXTS][2] = {
 };
 
 static const struct tx_probs default_tx_probs = {
+#if CONFIG_TX64X64
+  { { 3, 3, 136, 37 },
+    { 3, 5, 52,  13 } },
+#endif
+
   { { 3, 136, 37 },
     { 5, 52,  13 } },
 
@@ -274,6 +279,26 @@ static const struct tx_probs default_tx_probs = {
   { { 100 },
     { 66  } }
 };
+
+#if CONFIG_TX64X64
+void tx_counts_to_branch_counts_64x64(const unsigned int *tx_count_64x64p,
+                                      unsigned int (*ct_64x64p)[2]) {
+  ct_64x64p[0][0] = tx_count_64x64p[TX_4X4];
+  ct_64x64p[0][1] = tx_count_64x64p[TX_8X8] +
+                    tx_count_64x64p[TX_16X16] +
+                    tx_count_64x64p[TX_32X32] +
+                    tx_count_64x64p[TX_64X64];
+  ct_64x64p[1][0] = tx_count_64x64p[TX_8X8];
+  ct_64x64p[1][1] = tx_count_64x64p[TX_16X16] +
+                    tx_count_64x64p[TX_32X32] +
+                    tx_count_64x64p[TX_64X64];
+  ct_64x64p[2][0] = tx_count_64x64p[TX_16X16];
+  ct_64x64p[2][1] = tx_count_64x64p[TX_32X32] +
+                    tx_count_64x64p[TX_64X64];
+  ct_64x64p[3][0] = tx_count_64x64p[TX_32X32];
+  ct_64x64p[3][1] = tx_count_64x64p[TX_64X64];
+}
+#endif
 
 void tx_counts_to_branch_counts_32x32(const unsigned int *tx_count_32x32p,
                                       unsigned int (*ct_32x32p)[2]) {
@@ -392,25 +417,34 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
 
   if (cm->tx_mode == TX_MODE_SELECT) {
     int j;
-    unsigned int branch_ct_8x8p[TX_SIZES - 3][2];
-    unsigned int branch_ct_16x16p[TX_SIZES - 2][2];
-    unsigned int branch_ct_32x32p[TX_SIZES - 1][2];
+    unsigned int branch_ct_8x8p[1][2];
+    unsigned int branch_ct_16x16p[2][2];
+    unsigned int branch_ct_32x32p[3][2];
+#if CONFIG_TX64X64
+    unsigned int branch_ct_64x64p[4][2];
+#endif
 
     for (i = 0; i < TX_SIZE_CONTEXTS; ++i) {
       tx_counts_to_branch_counts_8x8(counts->tx.p8x8[i], branch_ct_8x8p);
-      for (j = 0; j < TX_SIZES - 3; ++j)
+      for (j = 0; j < 1; ++j)
         fc->tx_probs.p8x8[i][j] = adapt_prob(pre_fc->tx_probs.p8x8[i][j],
                                              branch_ct_8x8p[j]);
 
       tx_counts_to_branch_counts_16x16(counts->tx.p16x16[i], branch_ct_16x16p);
-      for (j = 0; j < TX_SIZES - 2; ++j)
+      for (j = 0; j < 2; ++j)
         fc->tx_probs.p16x16[i][j] = adapt_prob(pre_fc->tx_probs.p16x16[i][j],
                                                branch_ct_16x16p[j]);
 
       tx_counts_to_branch_counts_32x32(counts->tx.p32x32[i], branch_ct_32x32p);
-      for (j = 0; j < TX_SIZES - 1; ++j)
+      for (j = 0; j < 3; ++j)
         fc->tx_probs.p32x32[i][j] = adapt_prob(pre_fc->tx_probs.p32x32[i][j],
                                                branch_ct_32x32p[j]);
+#if CONFIG_TX64X64
+      tx_counts_to_branch_counts_64x64(counts->tx.p64x64[i], branch_ct_64x64p);
+      for (j = 0; j < 4; ++j)
+        fc->tx_probs.p64x64[i][j] = adapt_prob(pre_fc->tx_probs.p64x64[i][j],
+                                               branch_ct_64x64p[j]);
+#endif
     }
   }
 

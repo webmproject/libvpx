@@ -88,8 +88,13 @@ static void write_selected_tx_size(const VP9_COMMON *cm,
   vp9_write(w, tx_size != TX_4X4, tx_probs[0]);
   if (tx_size != TX_4X4 && max_tx_size >= TX_16X16) {
     vp9_write(w, tx_size != TX_8X8, tx_probs[1]);
-    if (tx_size != TX_8X8 && max_tx_size >= TX_32X32)
+    if (tx_size != TX_8X8 && max_tx_size >= TX_32X32) {
       vp9_write(w, tx_size != TX_16X16, tx_probs[2]);
+#if CONFIG_TX64X64
+      if (tx_size != TX_16X16 && max_tx_size >= TX_64X64)
+        vp9_write(w, tx_size != TX_32X32, tx_probs[3]);
+#endif
+    }
   }
 }
 
@@ -684,7 +689,7 @@ static void update_coef_probs(VP9_COMP *cpi, vp9_writer* w) {
   vp9_coeff_stats frame_branch_ct[TX_SIZES][PLANE_TYPES];
   vp9_coeff_probs_model frame_coef_probs[TX_SIZES][PLANE_TYPES];
 
-  for (tx_size = TX_4X4; tx_size <= TX_32X32; ++tx_size)
+  for (tx_size = TX_4X4; tx_size <= max_tx_size; ++tx_size)
     build_tree_distribution(cpi, tx_size, frame_branch_ct[tx_size],
                             frame_coef_probs[tx_size]);
 
@@ -815,37 +820,60 @@ static void encode_segmentation(VP9_COMMON *cm, MACROBLOCKD *xd,
 
 static void encode_txfm_probs(VP9_COMMON *cm, vp9_writer *w) {
   // Mode
+#if CONFIG_TX64X64
+  if (cm->tx_mode == ALLOW_16X16 || cm->tx_mode == ALLOW_32X32) {
+    vp9_write_literal(w, 2, 2);
+    vp9_write_bit(w, cm->tx_mode == ALLOW_32X32);
+  } else if (cm->tx_mode == ALLOW_64X64 || cm->tx_mode == TX_MODE_SELECT) {
+    vp9_write_literal(w, 3, 2);
+    vp9_write_bit(w, cm->tx_mode == TX_MODE_SELECT);
+  } else {
+    vp9_write_literal(w, cm->tx_mode, 2);
+  }
+#else
   vp9_write_literal(w, MIN(cm->tx_mode, ALLOW_32X32), 2);
   if (cm->tx_mode >= ALLOW_32X32)
     vp9_write_bit(w, cm->tx_mode == TX_MODE_SELECT);
+#endif  // CONFIG_TX64X64
 
   // Probabilities
   if (cm->tx_mode == TX_MODE_SELECT) {
     int i, j;
-    unsigned int ct_8x8p[TX_SIZES - 3][2];
-    unsigned int ct_16x16p[TX_SIZES - 2][2];
-    unsigned int ct_32x32p[TX_SIZES - 1][2];
-
+    unsigned int ct_8x8p[1][2];
+    unsigned int ct_16x16p[2][2];
+    unsigned int ct_32x32p[3][2];
+#if CONFIG_TX64X64
+    unsigned int ct_64x64p[4][2];
+#endif
 
     for (i = 0; i < TX_SIZE_CONTEXTS; i++) {
       tx_counts_to_branch_counts_8x8(cm->counts.tx.p8x8[i], ct_8x8p);
-      for (j = 0; j < TX_SIZES - 3; j++)
+      for (j = 0; j < 1; j++)
         vp9_cond_prob_diff_update(w, &cm->fc.tx_probs.p8x8[i][j], ct_8x8p[j]);
     }
 
     for (i = 0; i < TX_SIZE_CONTEXTS; i++) {
       tx_counts_to_branch_counts_16x16(cm->counts.tx.p16x16[i], ct_16x16p);
-      for (j = 0; j < TX_SIZES - 2; j++)
+      for (j = 0; j < 2; j++)
         vp9_cond_prob_diff_update(w, &cm->fc.tx_probs.p16x16[i][j],
                                   ct_16x16p[j]);
     }
 
     for (i = 0; i < TX_SIZE_CONTEXTS; i++) {
       tx_counts_to_branch_counts_32x32(cm->counts.tx.p32x32[i], ct_32x32p);
-      for (j = 0; j < TX_SIZES - 1; j++)
+      for (j = 0; j < 3; j++)
         vp9_cond_prob_diff_update(w, &cm->fc.tx_probs.p32x32[i][j],
                                   ct_32x32p[j]);
     }
+
+#if CONFIG_TX64X64
+    for (i = 0; i < TX_SIZE_CONTEXTS; i++) {
+      tx_counts_to_branch_counts_64x64(cm->counts.tx.p64x64[i], ct_64x64p);
+      for (j = 0; j < 4; j++)
+        vp9_cond_prob_diff_update(w, &cm->fc.tx_probs.p64x64[i][j],
+                                  ct_64x64p[j]);
+    }
+#endif  // CONFIG_TX64X64
   }
 }
 

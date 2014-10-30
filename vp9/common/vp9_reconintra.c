@@ -47,7 +47,34 @@ const TX_TYPE intra_mode_to_tx_type_lookup[INTRA_MODES] = {
       const uint16_t *left, int bd) { \
     highbd_##type##_predictor(dst, stride, size, above, left, bd); \
   }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
+#if CONFIG_TX64X64
+
+#if CONFIG_VP9_HIGHBITDEPTH
+#define intra_pred_allsizes(type) \
+  intra_pred_sized(type, 4) \
+  intra_pred_sized(type, 8) \
+  intra_pred_sized(type, 16) \
+  intra_pred_sized(type, 32) \
+  intra_pred_sized(type, 64) \
+  intra_pred_highbd_sized(type, 4) \
+  intra_pred_highbd_sized(type, 8) \
+  intra_pred_highbd_sized(type, 16) \
+  intra_pred_highbd_sized(type, 32) \
+  intra_pred_highbd_sized(type, 64)
+#else
+#define intra_pred_allsizes(type) \
+  intra_pred_sized(type, 4) \
+  intra_pred_sized(type, 8) \
+  intra_pred_sized(type, 16) \
+  intra_pred_sized(type, 32) \
+  intra_pred_sized(type, 64)
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
+#else   // CONFIG_TX64X64
+
+#if CONFIG_VP9_HIGHBITDEPTH
 #define intra_pred_allsizes(type) \
   intra_pred_sized(type, 4) \
   intra_pred_sized(type, 8) \
@@ -57,15 +84,15 @@ const TX_TYPE intra_mode_to_tx_type_lookup[INTRA_MODES] = {
   intra_pred_highbd_sized(type, 8) \
   intra_pred_highbd_sized(type, 16) \
   intra_pred_highbd_sized(type, 32)
-
 #else
-
 #define intra_pred_allsizes(type) \
   intra_pred_sized(type, 4) \
   intra_pred_sized(type, 8) \
   intra_pred_sized(type, 16) \
   intra_pred_sized(type, 32)
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+
+#endif  // CONFIG_TX64X64
 
 #if CONFIG_VP9_HIGHBITDEPTH
 static INLINE void highbd_d207_predictor(uint16_t *dst, ptrdiff_t stride,
@@ -575,16 +602,25 @@ static intra_pred_fn dc_pred[2][2][TX_SIZES];
 typedef void (*intra_high_pred_fn)(uint16_t *dst, ptrdiff_t stride,
                                    const uint16_t *above, const uint16_t *left,
                                    int bd);
-static intra_high_pred_fn pred_high[INTRA_MODES][4];
-static intra_high_pred_fn dc_pred_high[2][2][4];
+static intra_high_pred_fn pred_high[INTRA_MODES][TX_SIZES];
+static intra_high_pred_fn dc_pred_high[2][2][TX_SIZES];
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 void vp9_init_intra_predictors() {
+#if CONFIG_TX64X64
+#define INIT_ALL_SIZES(p, type) \
+  p[TX_4X4] = vp9_##type##_predictor_4x4; \
+  p[TX_8X8] = vp9_##type##_predictor_8x8; \
+  p[TX_16X16] = vp9_##type##_predictor_16x16; \
+  p[TX_32X32] = vp9_##type##_predictor_32x32; \
+  p[TX_64X64] = vp9_##type##_predictor_64x64
+#else
 #define INIT_ALL_SIZES(p, type) \
   p[TX_4X4] = vp9_##type##_predictor_4x4; \
   p[TX_8X8] = vp9_##type##_predictor_8x8; \
   p[TX_16X16] = vp9_##type##_predictor_16x16; \
   p[TX_32X32] = vp9_##type##_predictor_32x32
+#endif
 
   INIT_ALL_SIZES(pred[V_PRED], v);
   INIT_ALL_SIZES(pred[H_PRED], h);
@@ -638,7 +674,11 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
   uint16_t *dst = CONVERT_TO_SHORTPTR(dst8);
   uint16_t *ref = CONVERT_TO_SHORTPTR(ref8);
   DECLARE_ALIGNED_ARRAY(16, uint16_t, left_col, 64);
+#if CONFIG_TX64X64
+  DECLARE_ALIGNED_ARRAY(16, uint16_t, above_data, 256 + 16);
+#else
   DECLARE_ALIGNED_ARRAY(16, uint16_t, above_data, 128 + 16);
+#endif
   uint16_t *above_row = above_data + 16;
   const uint16_t *const_above_row = above_row;
   const int bs = 4 << tx_size;
@@ -767,7 +807,11 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
                                    int plane) {
   int i;
   DECLARE_ALIGNED_ARRAY(16, uint8_t, left_col, 64);
+#if CONFIG_TX64X64
+  DECLARE_ALIGNED_ARRAY(16, uint8_t, above_data, 256 + 16);
+#else
   DECLARE_ALIGNED_ARRAY(16, uint8_t, above_data, 128 + 16);
+#endif
   uint8_t *above_row = above_data + 16;
   const uint8_t *const_above_row = above_row;
   const int bs = 4 << tx_size;
