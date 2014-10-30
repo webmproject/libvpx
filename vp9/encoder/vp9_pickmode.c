@@ -836,10 +836,12 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   if (is_inter_block(mbmi))
-    vp9_update_rd_thresh_fact(cpi, tile_data, bsize,
+    vp9_update_rd_thresh_fact(tile_data->thresh_freq_fact,
+                              cpi->sf.adaptive_rd_thresh, bsize,
                               mode_idx[ref_frame][INTER_OFFSET(mbmi->mode)]);
   else
-    vp9_update_rd_thresh_fact(cpi, tile_data, bsize,
+    vp9_update_rd_thresh_fact(tile_data->thresh_freq_fact,
+                              cpi->sf.adaptive_rd_thresh, bsize,
                               mode_idx[ref_frame][mbmi->mode]);
 
   *rd_cost = best_rdc;

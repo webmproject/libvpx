@@ -3397,7 +3397,8 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
          !is_inter_block(&best_mbmode));
 
   if (!cpi->rc.is_src_frame_alt_ref)
-    vp9_update_rd_thresh_fact(cpi, tile_data, bsize, best_mode_index);
+    vp9_update_rd_thresh_fact(tile_data->thresh_freq_fact,
+                              sf->adaptive_rd_thresh, bsize, best_mode_index);
 
   // macroblock modes
   *mbmi = best_mbmode;
@@ -3552,7 +3553,8 @@ void vp9_rd_pick_inter_mode_sb_seg_skip(VP9_COMP *cpi,
   assert((cm->interp_filter == SWITCHABLE) ||
          (cm->interp_filter == mbmi->interp_filter));
 
-  vp9_update_rd_thresh_fact(cpi, tile_data, bsize, THR_ZEROMV);
+  vp9_update_rd_thresh_fact(tile_data->thresh_freq_fact,
+                            cpi->sf.adaptive_rd_thresh, bsize, THR_ZEROMV);
 
   vp9_zero(best_pred_diff);
   vp9_zero(best_filter_diff);
@@ -4127,7 +4129,8 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
          (cm->interp_filter == best_mbmode.interp_filter) ||
          !is_inter_block(&best_mbmode));
 
-  vp9_update_rd_thresh_fact(cpi, tile_data, bsize, best_ref_index);
+  vp9_update_rd_thresh_fact(tile_data->thresh_freq_fact,
+                            sf->adaptive_rd_thresh, bsize, best_ref_index);
 
   // macroblock modes
   *mbmi = best_mbmode;
