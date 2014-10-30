@@ -16,6 +16,24 @@
       "revId": "01f896bf9b26609a53469c21e847921bed2e0374",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Rdw\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1688,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-10-30T15:41:22Z",
+      "side": 1,
+      "message": "I need cm pointer while freeing the memory later. Just a cleanup.",
+      "parentUuid": "AAAAdn//ReE\u003d",
+      "revId": "01f896bf9b26609a53469c21e847921bed2e0374",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
