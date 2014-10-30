@@ -257,8 +257,6 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
                                                   : STRICT_NEIGHBORING_MIN_MAX;
     sf->max_partition_size = BLOCK_32X32;
     sf->min_partition_size = BLOCK_8X8;
-    sf->partition_check =
-        (frames_since_key % sf->last_partitioning_redo_frequency == 1);
     sf->force_frame_boost = is_keyframe ||
         (frames_since_key % (sf->last_partitioning_redo_frequency << 1) == 1);
     sf->max_delta_qindex = is_keyframe ? 20 : 15;
