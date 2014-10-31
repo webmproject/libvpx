@@ -74,8 +74,10 @@ static TX_SIZE read_selected_tx_size(VP9_COMMON *cm, MACROBLOCKD *xd,
   return (TX_SIZE)tx_size;
 }
 
-static TX_SIZE read_tx_size(VP9_COMMON *cm, MACROBLOCKD *xd, TX_MODE tx_mode,
-                            BLOCK_SIZE bsize, int allow_select, vp9_reader *r) {
+static TX_SIZE read_tx_size(VP9_COMMON *cm, MACROBLOCKD *xd,
+                            int allow_select, vp9_reader *r) {
+  TX_MODE tx_mode = cm->tx_mode;
+  BLOCK_SIZE bsize = xd->mi[0].src_mi->mbmi.sb_type;
   const TX_SIZE max_tx_size = max_txsize_lookup[bsize];
   if (allow_select && tx_mode == TX_MODE_SELECT && bsize >= BLOCK_8X8)
     return read_selected_tx_size(cm, xd, max_tx_size, r);
@@ -169,7 +171,7 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
 
   mbmi->segment_id = read_intra_segment_id(cm, xd, mi_row, mi_col, r);
   mbmi->skip = read_skip(cm, xd, mbmi->segment_id, r);
-  mbmi->tx_size = read_tx_size(cm, xd, cm->tx_mode, bsize, 1, r);
+  mbmi->tx_size = read_tx_size(cm, xd, 1, r);
   mbmi->ref_frame[0] = INTRA_FRAME;
   mbmi->ref_frame[1] = NONE;
 
@@ -532,8 +534,7 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
   mbmi->segment_id = read_inter_segment_id(cm, xd, mi_row, mi_col, r);
   mbmi->skip = read_skip(cm, xd, mbmi->segment_id, r);
   inter_block = read_is_inter_block(cm, xd, mbmi->segment_id, r);
-  mbmi->tx_size = read_tx_size(cm, xd, cm->tx_mode, mbmi->sb_type,
-                               !mbmi->skip || !inter_block, r);
+  mbmi->tx_size = read_tx_size(cm, xd, !mbmi->skip || !inter_block, r);
 
   if (inter_block)
     read_inter_block_mode_info(cm, xd, tile, mi, mi_row, mi_col, r);

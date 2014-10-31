@@ -79,9 +79,9 @@ static void prob_diff_update(const vp9_tree_index *tree,
 }
 
 static void write_selected_tx_size(const VP9_COMMON *cm,
-                                   const MACROBLOCKD *xd,
-                                   TX_SIZE tx_size, BLOCK_SIZE bsize,
-                                   vp9_writer *w) {
+                                   const MACROBLOCKD *xd, vp9_writer *w) {
+  TX_SIZE tx_size = xd->mi[0].src_mi->mbmi.tx_size;
+  BLOCK_SIZE bsize = xd->mi[0].src_mi->mbmi.sb_type;
   const TX_SIZE max_tx_size = max_txsize_lookup[bsize];
   const vp9_prob *const tx_probs = get_tx_probs2(max_tx_size, xd,
                                                  &cm->fc->tx_probs);
@@ -270,7 +270,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
   if (bsize >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT &&
       !(is_inter &&
         (skip || vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP)))) {
-    write_selected_tx_size(cm, xd, mbmi->tx_size, bsize, w);
+    write_selected_tx_size(cm, xd, w);
   }
 
   if (!is_inter) {
@@ -356,7 +356,7 @@ static void write_mb_modes_kf(const VP9_COMMON *cm, const MACROBLOCKD *xd,
   write_skip(cm, xd, mbmi->segment_id, mi, w);
 
   if (bsize >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT)
-    write_selected_tx_size(cm, xd, mbmi->tx_size, bsize, w);
+    write_selected_tx_size(cm, xd, w);
 
   if (bsize >= BLOCK_8X8) {
     write_intra_mode(w, mbmi->mode, get_y_mode_probs(mi, above_mi, left_mi, 0));
