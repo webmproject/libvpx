@@ -16,6 +16,40 @@
       "revId": "122068fbcd88191957f3576b6356897ced95bae0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//RWI\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-10-31T23:12:14Z",
+      "side": 1,
+      "message": "private:",
+      "revId": "122068fbcd88191957f3576b6356897ced95bae0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//RWE\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-10-31T23:12:14Z",
+      "side": 1,
+      "message": "private:",
+      "revId": "122068fbcd88191957f3576b6356897ced95bae0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
