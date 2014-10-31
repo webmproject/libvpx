@@ -162,8 +162,7 @@ void vp9_set_rd_speed_thresholds(struct VP9_COMP *cpi);
 
 void vp9_set_rd_speed_thresholds_sub8x8(struct VP9_COMP *cpi);
 
-void vp9_update_rd_thresh_fact(struct VP9_COMP *cpi,
-                               struct TileDataEnc *tile_data,
+void vp9_update_rd_thresh_fact(int (*fact)[MAX_MODES], int rd_thresh,
                                int bsize, int best_mode_index);
 
 static INLINE int rd_less_than_thresh(int64_t best_rd, int thresh,
