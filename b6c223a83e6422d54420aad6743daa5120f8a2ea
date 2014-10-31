@@ -1,0 +1,191 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//RZg\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-31T12:08:31Z",
+      "side": 1,
+      "message": "the order should be c/c++/\u0027other\u0027(gtest)/ours\n\nhttp://google-styleguide.googlecode.com/svn/trunk/cppguide.html#Names_and_Order_of_Includes",
+      "revId": "b6c223a83e6422d54420aad6743daa5120f8a2ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//RZc\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-31T12:08:31Z",
+      "side": 1,
+      "message": "drop this line",
+      "revId": "b6c223a83e6422d54420aad6743daa5120f8a2ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//RZY\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-31T12:08:31Z",
+      "side": 1,
+      "message": "static isn\u0027t necessary in an anonymous namespace",
+      "revId": "b6c223a83e6422d54420aad6743daa5120f8a2ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//RZk\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-31T12:08:31Z",
+      "side": 1,
+      "message": "you can merge some of these lines I think",
+      "revId": "b6c223a83e6422d54420aad6743daa5120f8a2ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//RZo\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-31T12:08:31Z",
+      "side": 1,
+      "message": "should be indented 4",
+      "revId": "b6c223a83e6422d54420aad6743daa5120f8a2ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//RaA\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-31T12:08:31Z",
+      "side": 1,
+      "message": "members vars are lower-case with underscores",
+      "revId": "b6c223a83e6422d54420aad6743daa5120f8a2ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//RZ8\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-31T12:08:31Z",
+      "side": 1,
+      "message": "this can be done in SetUp to reduce the redundant code",
+      "revId": "b6c223a83e6422d54420aad6743daa5120f8a2ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//RZ4\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-31T12:08:31Z",
+      "side": 1,
+      "message": "drop this line",
+      "revId": "b6c223a83e6422d54420aad6743daa5120f8a2ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//RZs\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 241,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-31T12:08:31Z",
+      "side": 1,
+      "message": "prefer preincrement",
+      "revId": "b6c223a83e6422d54420aad6743daa5120f8a2ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//RZw\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-31T12:08:31Z",
+      "side": 1,
+      "message": "for most of these you can break after the \u0027(\u0027 indent 4 and you\u0027ll be able to join the make_tuple lines; clang-format might be helpful here",
+      "revId": "b6c223a83e6422d54420aad6743daa5120f8a2ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//RZ0\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 283,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-10-31T12:08:31Z",
+      "side": 1,
+      "message": "indent would be 4 here, but you can bring this up to the next line and align the params to make_tuple",
+      "revId": "b6c223a83e6422d54420aad6743daa5120f8a2ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
