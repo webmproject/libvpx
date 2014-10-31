@@ -14,7 +14,6 @@ VP8_CX_SRCS-$(ARCH_ARM)  += vp8cx_arm.mk
 #File list for arm
 # encoder
 VP8_CX_SRCS-$(ARCH_ARM)  += encoder/arm/dct_arm.c
-VP8_CX_SRCS-$(ARCH_ARM)  += encoder/arm/quantize_arm.c
 
 #File list for edsp
 # encoder

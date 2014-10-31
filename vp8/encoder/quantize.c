@@ -101,7 +101,7 @@ void vp8_regular_quantize_b_c(BLOCK *b, BLOCKD *d)
     *d->eob = (char)(eob + 1);
 }
 
-void vp8_quantize_mby_c(MACROBLOCK *x)
+void vp8_quantize_mby(MACROBLOCK *x)
 {
     int i;
     int has_2nd_order = (x->e_mbd.mode_info_context->mbmi.mode != B_PRED
@@ -114,7 +114,7 @@ void vp8_quantize_mby_c(MACROBLOCK *x)
         x->quantize_b(&x->block[24], &x->e_mbd.block[24]);
 }
 
-void vp8_quantize_mb_c(MACROBLOCK *x)
+void vp8_quantize_mb(MACROBLOCK *x)
 {
     int i;
     int has_2nd_order=(x->e_mbd.mode_info_context->mbmi.mode != B_PRED
@@ -125,30 +125,13 @@ void vp8_quantize_mb_c(MACROBLOCK *x)
 }
 
 
-void vp8_quantize_mbuv_c(MACROBLOCK *x)
+void vp8_quantize_mbuv(MACROBLOCK *x)
 {
     int i;
 
     for (i = 16; i < 24; i++)
         x->quantize_b(&x->block[i], &x->e_mbd.block[i]);
 }
-
-/* quantize_b_pair function pointer in MACROBLOCK structure is set to one of
- * these two C functions if corresponding optimized routine is not available.
- * NEON optimized version implements currently the fast quantization for pair
- * of blocks. */
-void vp8_regular_quantize_b_pair(BLOCK *b1, BLOCK *b2, BLOCKD *d1, BLOCKD *d2)
-{
-    vp8_regular_quantize_b(b1, d1);
-    vp8_regular_quantize_b(b2, d2);
-}
-
-void vp8_fast_quantize_b_pair_c(BLOCK *b1, BLOCK *b2, BLOCKD *d1, BLOCKD *d2)
-{
-    vp8_fast_quantize_b_c(b1, d1);
-    vp8_fast_quantize_b_c(b2, d2);
-}
-
 
 static const int qrounding_factors[129] =
 {

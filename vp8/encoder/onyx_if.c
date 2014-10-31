@@ -1083,12 +1083,10 @@ void vp8_set_speed_features(VP8_COMP *cpi)
     if (cpi->sf.improved_quant)
     {
         cpi->mb.quantize_b      = vp8_regular_quantize_b;
-        cpi->mb.quantize_b_pair = vp8_regular_quantize_b_pair;
     }
     else
     {
         cpi->mb.quantize_b      = vp8_fast_quantize_b;
-        cpi->mb.quantize_b_pair = vp8_fast_quantize_b_pair;
     }
     if (cpi->sf.improved_quant != last_improved_quant)
         vp8cx_init_quantizer(cpi);
