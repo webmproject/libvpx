@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//RYY\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-31T18:04:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//RZg\u003d",
+      "revId": "b6c223a83e6422d54420aad6743daa5120f8a2ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//RZc\u003d",
         "filename": "test/quantize_test.cc",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2014-10-31T12:08:31Z",
       "side": 1,
       "message": "drop this line",
+      "revId": "b6c223a83e6422d54420aad6743daa5120f8a2ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//RYU\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-31T18:04:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//RZc\u003d",
       "revId": "b6c223a83e6422d54420aad6743daa5120f8a2ea",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//RYQ\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-31T18:04:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//RZY\u003d",
+      "revId": "b6c223a83e6422d54420aad6743daa5120f8a2ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//RZk\u003d",
         "filename": "test/quantize_test.cc",
         "patchSetId": 5
@@ -64,6 +118,24 @@
       "writtenOn": "2014-10-31T12:08:31Z",
       "side": 1,
       "message": "you can merge some of these lines I think",
+      "revId": "b6c223a83e6422d54420aad6743daa5120f8a2ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//RYI\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-31T18:04:34Z",
+      "side": 1,
+      "message": "Well, clang-format has some interesting ideas.",
+      "parentUuid": "AAAAdn//RZk\u003d",
       "revId": "b6c223a83e6422d54420aad6743daa5120f8a2ea",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//RYE\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-31T18:04:34Z",
+      "side": 1,
+      "message": "clang-format pulled it up to the previous line.",
+      "parentUuid": "AAAAdn//RZo\u003d",
+      "revId": "b6c223a83e6422d54420aad6743daa5120f8a2ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//RaA\u003d",
         "filename": "test/quantize_test.cc",
         "patchSetId": 5
@@ -98,6 +188,24 @@
       "writtenOn": "2014-10-31T12:08:31Z",
       "side": 1,
       "message": "members vars are lower-case with underscores",
+      "revId": "b6c223a83e6422d54420aad6743daa5120f8a2ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//RYA\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-31T18:04:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//RaA\u003d",
       "revId": "b6c223a83e6422d54420aad6743daa5120f8a2ea",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//RX8\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-31T18:04:34Z",
+      "side": 1,
+      "message": "good call. will do",
+      "parentUuid": "AAAAdn//RZ8\u003d",
+      "revId": "b6c223a83e6422d54420aad6743daa5120f8a2ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//RZ4\u003d",
         "filename": "test/quantize_test.cc",
         "patchSetId": 5
@@ -132,6 +258,24 @@
       "writtenOn": "2014-10-31T12:08:31Z",
       "side": 1,
       "message": "drop this line",
+      "revId": "b6c223a83e6422d54420aad6743daa5120f8a2ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//RX4\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-31T18:04:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//RZ4\u003d",
       "revId": "b6c223a83e6422d54420aad6743daa5120f8a2ea",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//RX0\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 241,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-31T18:04:34Z",
+      "side": 1,
+      "message": "Frank didn\u0027t really like the speed test. It just prints out a number. Useful for manual review, but not much else.",
+      "parentUuid": "AAAAdn//RZs\u003d",
+      "revId": "b6c223a83e6422d54420aad6743daa5120f8a2ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//RZw\u003d",
         "filename": "test/quantize_test.cc",
         "patchSetId": 5
@@ -172,6 +334,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//RXw\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-31T18:04:34Z",
+      "side": 1,
+      "message": "clang-format is very trick. I was using tools/ftfy.sh before.",
+      "parentUuid": "AAAAdn//RZw\u003d",
+      "revId": "b6c223a83e6422d54420aad6743daa5120f8a2ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//RZ0\u003d",
         "filename": "test/quantize_test.cc",
         "patchSetId": 5
@@ -183,6 +363,24 @@
       "writtenOn": "2014-10-31T12:08:31Z",
       "side": 1,
       "message": "indent would be 4 here, but you can bring this up to the next line and align the params to make_tuple",
+      "revId": "b6c223a83e6422d54420aad6743daa5120f8a2ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//RXs\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 283,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-10-31T18:04:34Z",
+      "side": 1,
+      "message": "took clang-format\u0027s suggestion",
+      "parentUuid": "AAAAdn//RZ0\u003d",
       "revId": "b6c223a83e6422d54420aad6743daa5120f8a2ea",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
