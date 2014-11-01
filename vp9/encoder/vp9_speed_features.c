@@ -295,16 +295,16 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
   }
 
   if (speed >= 7) {
+    sf->adaptive_rd_thresh = 3;
     sf->mv.search_method = FAST_DIAMOND;
     sf->mv.fullpel_search_step_param = 10;
     sf->lpf_pick = LPF_PICK_MINIMAL_LPF;
     sf->encode_breakout_thresh = (MIN(cm->width, cm->height) >= 720) ?
         800 : 300;
-    sf->elevate_newmv_thresh = 2500;
   }
 
   if (speed >= 12) {
-    sf->elevate_newmv_thresh = 4000;
+    sf->adaptive_rd_thresh = 4;
     sf->mv.subpel_force_stop = 2;
   }
 
@@ -386,7 +386,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
   sf->search_type_check_frequency = 50;
   sf->encode_breakout_thresh = 0;
   sf->elevate_newmv_thresh = 0;
-  // Recode loop tolerence %.
+  // Recode loop tolerance %.
   sf->recode_tolerance = 25;
   sf->default_interp_filter = SWITCHABLE;
   sf->tx_size_search_breakout = 0;
