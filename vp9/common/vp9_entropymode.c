@@ -266,8 +266,8 @@ static const vp9_prob default_single_ref_p[REF_CONTEXTS][2] = {
 
 static const struct tx_probs default_tx_probs = {
 #if CONFIG_TX64X64
-  { { 3, 3, 136, 37 },
-    { 3, 5, 52,  13 } },
+  { { 1, 3, 136, 48 },
+    { 1, 5, 52,  24 } },
 #endif
 
   { { 3, 136, 37 },
@@ -298,7 +298,7 @@ void tx_counts_to_branch_counts_64x64(const unsigned int *tx_count_64x64p,
   ct_64x64p[3][0] = tx_count_64x64p[TX_32X32];
   ct_64x64p[3][1] = tx_count_64x64p[TX_64X64];
 }
-#endif
+#endif  // CONFIG_TX64X64
 
 void tx_counts_to_branch_counts_32x32(const unsigned int *tx_count_32x32p,
                                       unsigned int (*ct_32x32p)[2]) {

@@ -67,21 +67,21 @@ const vp9_tree_index vp9_coef_con_tree[TREE_SIZE(ENTROPY_TOKENS)] = {
   -CATEGORY5_TOKEN, -CATEGORY6_TOKEN   // 7 = CAT_FIVE
 };
 
-static vp9_tree_index cat1[2], cat2[4], cat3[6], cat4[8], cat5[10], cat6[28];
-
+static vp9_tree_index cat1[2], cat2[4], cat3[6], cat4[8], cat5[10],
+                      cat6[NUM_CAT6_BITS * 2];
 #if CONFIG_VP9_HIGHBITDEPTH
 static vp9_tree_index cat1_high10[2];
 static vp9_tree_index cat2_high10[4];
 static vp9_tree_index cat3_high10[6];
 static vp9_tree_index cat4_high10[8];
 static vp9_tree_index cat5_high10[10];
-static vp9_tree_index cat6_high10[32];
+static vp9_tree_index cat6_high10[NUM_CAT6_BITS_HIGH10 * 2];
 static vp9_tree_index cat1_high12[2];
 static vp9_tree_index cat2_high12[4];
 static vp9_tree_index cat3_high12[6];
 static vp9_tree_index cat4_high12[8];
 static vp9_tree_index cat5_high12[10];
-static vp9_tree_index cat6_high12[36];
+static vp9_tree_index cat6_high12[NUM_CAT6_BITS_HIGH12 * 2];
 #endif
 
 static void init_bit_tree(vp9_tree_index *p, int n) {
@@ -101,20 +101,20 @@ static void init_bit_trees() {
   init_bit_tree(cat3, 3);
   init_bit_tree(cat4, 4);
   init_bit_tree(cat5, 5);
-  init_bit_tree(cat6, 14);
+  init_bit_tree(cat6, NUM_CAT6_BITS);
 #if CONFIG_VP9_HIGHBITDEPTH
   init_bit_tree(cat1_high10, 1);
   init_bit_tree(cat2_high10, 2);
   init_bit_tree(cat3_high10, 3);
   init_bit_tree(cat4_high10, 4);
   init_bit_tree(cat5_high10, 5);
-  init_bit_tree(cat6_high10, 16);
+  init_bit_tree(cat6_high10, NUM_CAT6_BITS_HIGH10);
   init_bit_tree(cat1_high12, 1);
   init_bit_tree(cat2_high12, 2);
   init_bit_tree(cat3_high12, 3);
   init_bit_tree(cat4_high12, 4);
   init_bit_tree(cat5_high12, 5);
-  init_bit_tree(cat6_high12, 18);
+  init_bit_tree(cat6_high12, NUM_CAT6_BITS_HIGH12);
 #endif
 }
 
@@ -129,7 +129,7 @@ const vp9_extra_bit vp9_extra_bits[ENTROPY_TOKENS] = {
   {cat3, vp9_cat3_prob, 3,  CAT3_MIN_VAL},   // CATEGORY3_TOKEN
   {cat4, vp9_cat4_prob, 4,  CAT4_MIN_VAL},   // CATEGORY4_TOKEN
   {cat5, vp9_cat5_prob, 5,  CAT5_MIN_VAL},   // CATEGORY5_TOKEN
-  {cat6, vp9_cat6_prob, 14, CAT6_MIN_VAL},   // CATEGORY6_TOKEN
+  {cat6, vp9_cat6_prob, NUM_CAT6_BITS, CAT6_MIN_VAL},   // CATEGORY6_TOKEN
   {0, 0, 0, 0}                               // EOB_TOKEN
 };
 
@@ -145,7 +145,8 @@ const vp9_extra_bit vp9_extra_bits_high10[ENTROPY_TOKENS] = {
   {cat3_high10, vp9_cat3_prob_high10, 3,  CAT3_MIN_VAL},   // CATEGORY3_TOKEN
   {cat4_high10, vp9_cat4_prob_high10, 4,  CAT4_MIN_VAL},   // CATEGORY4_TOKEN
   {cat5_high10, vp9_cat5_prob_high10, 5,  CAT5_MIN_VAL},   // CATEGORY5_TOKEN
-  {cat6_high10, vp9_cat6_prob_high10, 16, CAT6_MIN_VAL},   // CATEGORY6_TOKEN
+  {cat6_high10, vp9_cat6_prob_high10, NUM_CAT6_BITS_HIGH10, CAT6_MIN_VAL},
+                                                           // CATEGORY6_TOKEN
   {0, 0, 0, 0}                                             // EOB_TOKEN
 };
 const vp9_extra_bit vp9_extra_bits_high12[ENTROPY_TOKENS] = {
@@ -159,7 +160,8 @@ const vp9_extra_bit vp9_extra_bits_high12[ENTROPY_TOKENS] = {
   {cat3_high12, vp9_cat3_prob_high12, 3,  CAT3_MIN_VAL},   // CATEGORY3_TOKEN
   {cat4_high12, vp9_cat4_prob_high12, 4,  CAT4_MIN_VAL},   // CATEGORY4_TOKEN
   {cat5_high12, vp9_cat5_prob_high12, 5,  CAT5_MIN_VAL},   // CATEGORY5_TOKEN
-  {cat6_high12, vp9_cat6_prob_high12, 18, CAT6_MIN_VAL},   // CATEGORY6_TOKEN
+  {cat6_high12, vp9_cat6_prob_high12, NUM_CAT6_BITS_HIGH12, CAT6_MIN_VAL},
+                                                           // CATEGORY6_TOKEN
   {0, 0, 0, 0}                                             // EOB_TOKEN
 };
 #endif

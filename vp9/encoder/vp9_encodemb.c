@@ -702,7 +702,9 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
   dst = &pd->dst.buf[4 * j * pd->dst.stride + 4 * i];
   a = &ctx->ta[plane][i];
   l = &ctx->tl[plane][j];
+#if CONFIG_TX64X64
   if (plane) assert(tx_size != TX_64X64);
+#endif
 
   // TODO(jingning): per transformed block zero forcing only enabled for
   // luma component. will integrate chroma components as well.

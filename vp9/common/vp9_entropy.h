@@ -50,13 +50,35 @@ DECLARE_ALIGNED(16, extern const uint8_t, vp9_pt_energy_class[ENTROPY_TOKENS]);
 #define CAT5_MIN_VAL   35
 #define CAT6_MIN_VAL   67
 
+#if CONFIG_TX64X64
+#define DCT_MAX_VALUE              32768
+#define NUM_CAT6_BITS                 15
+#else
+#define DCT_MAX_VALUE              16384
+#define NUM_CAT6_BITS                 14
+#endif  // CONFIG_TX64X64
+
+#if CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_TX64X64
+#define DCT_MAX_VALUE_HIGH10      131072
+#define DCT_MAX_VALUE_HIGH12      524288
+#define NUM_CAT6_BITS_HIGH10          17
+#define NUM_CAT6_BITS_HIGH12          19
+#else
+#define DCT_MAX_VALUE_HIGH10       65536
+#define DCT_MAX_VALUE_HIGH12      262144
+#define NUM_CAT6_BITS_HIGH10          16
+#define NUM_CAT6_BITS_HIGH12          18
+#endif  // CONFIG_TX64X64
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
 // Extra bit probabilities.
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat1_prob[1]);
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat2_prob[2]);
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat3_prob[3]);
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat4_prob[4]);
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat5_prob[5]);
-DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat6_prob[14]);
+DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat6_prob[NUM_CAT6_BITS]);
 
 #if CONFIG_VP9_HIGHBITDEPTH
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat1_prob_high10[1]);
@@ -64,13 +86,15 @@ DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat2_prob_high10[2]);
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat3_prob_high10[3]);
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat4_prob_high10[4]);
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat5_prob_high10[5]);
-DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat6_prob_high10[16]);
+DECLARE_ALIGNED(16, extern const uint8_t,
+                vp9_cat6_prob_high10[NUM_CAT6_BITS_HIGH10]);
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat1_prob_high12[1]);
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat2_prob_high12[2]);
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat3_prob_high12[3]);
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat4_prob_high12[4]);
 DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat5_prob_high12[5]);
-DECLARE_ALIGNED(16, extern const uint8_t, vp9_cat6_prob_high12[18]);
+DECLARE_ALIGNED(16, extern const uint8_t,
+                vp9_cat6_prob_high12[NUM_CAT6_BITS_HIGH12]);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 #define EOB_MODEL_TOKEN 3
@@ -88,22 +112,6 @@ extern const vp9_extra_bit vp9_extra_bits[ENTROPY_TOKENS];
 #if CONFIG_VP9_HIGHBITDEPTH
 extern const vp9_extra_bit vp9_extra_bits_high10[ENTROPY_TOKENS];
 extern const vp9_extra_bit vp9_extra_bits_high12[ENTROPY_TOKENS];
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-
-#if CONFIG_TX64X64
-#define DCT_MAX_VALUE           32768
-#else
-#define DCT_MAX_VALUE           16384
-#endif  // CONFIG_TX64X64
-
-#if CONFIG_VP9_HIGHBITDEPTH
-#if CONFIG_TX64X64
-#define DCT_MAX_VALUE_HIGH10   131072
-#define DCT_MAX_VALUE_HIGH12   524288
-#else
-#define DCT_MAX_VALUE_HIGH10    65536
-#define DCT_MAX_VALUE_HIGH12   262144
-#endif  // CONFIG_TX64X64
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 /* Coefficients are predicted via a 3-dimensional probability table. */

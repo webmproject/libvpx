@@ -171,20 +171,22 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd, PLANE_TYPE type,
 #if CONFIG_VP9_HIGHBITDEPTH
           switch (cm->bit_depth) {
             case VPX_BITS_8:
-              val = CAT6_MIN_VAL + read_coeff(cat6_prob, 14, r);
+              val = CAT6_MIN_VAL + read_coeff(cat6_prob, NUM_CAT6_BITS, r);
               break;
             case VPX_BITS_10:
-              val = CAT6_MIN_VAL + read_coeff(cat6_prob, 16, r);
+              val = CAT6_MIN_VAL +
+                    read_coeff(cat6_prob, NUM_CAT6_BITS_HIGH10, r);
               break;
             case VPX_BITS_12:
-              val = CAT6_MIN_VAL + read_coeff(cat6_prob, 18, r);
+              val = CAT6_MIN_VAL +
+                    read_coeff(cat6_prob, NUM_CAT6_BITS_HIGH12, r);
               break;
             default:
               assert(0);
               return -1;
           }
 #else
-          val = CAT6_MIN_VAL + read_coeff(cat6_prob, 14, r);
+          val = CAT6_MIN_VAL + read_coeff(cat6_prob, NUM_CAT6_BITS, r);
 #endif
           break;
       }
