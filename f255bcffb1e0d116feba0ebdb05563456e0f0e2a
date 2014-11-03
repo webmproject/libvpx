@@ -16,6 +16,24 @@
       "revId": "f255bcffb1e0d116feba0ebdb05563456e0f0e2a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//RSI\u003d",
+        "filename": "test/webm_video_source.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-11-03T19:19:24Z",
+      "side": 1,
+      "message": "Done. Right.",
+      "parentUuid": "AAAAdn//RTo\u003d",
+      "revId": "f255bcffb1e0d116feba0ebdb05563456e0f0e2a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
