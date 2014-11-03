@@ -16,6 +16,24 @@
       "revId": "34da2dd845c5c59667c4f4b97420ada0ce9cf371",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ROw\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-11-03T22:15:52Z",
+      "side": 1,
+      "message": "lol i\u0027m just dumb",
+      "parentUuid": "AAAAdn//RPs\u003d",
+      "revId": "34da2dd845c5c59667c4f4b97420ada0ce9cf371",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
