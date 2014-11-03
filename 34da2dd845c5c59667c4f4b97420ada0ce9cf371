@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//RPs\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 9
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-11-03T20:51:40Z",
+      "side": 1,
+      "message": "using the type directly for the sizeof because using the var caused a build failure:\n ../libvpx/test/quantize_test.cc:73:60: error: use of undeclared identifier \u0027macroblock_dst_\u0027; did you mean \u0027macroblockd_dst_\u0027?\n        reinterpret_cast\u003cMACROBLOCKD *\u003e(vpx_calloc(sizeof(*macroblock_dst_), 1));\n                                                           ^~~~~~~~~~~~~~~\n                                                           macroblockd_dst_\n ../libvpx/test/quantize_test.cc:116:16: note: \u0027macroblockd_dst_\u0027 declared here\n  MACROBLOCKD *macroblockd_dst_;\n               ^\n 1 error generated.",
+      "revId": "34da2dd845c5c59667c4f4b97420ada0ce9cf371",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
