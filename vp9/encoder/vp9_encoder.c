@@ -2983,7 +2983,9 @@ static int get_ref_frame_flags(const VP9_COMP *cpi) {
   if (gold_is_last)
     flags &= ~VP9_GOLD_FLAG;
 
-  if (cpi->rc.frames_till_gf_update_due == INT_MAX && !is_two_pass_svc(cpi))
+  if (cpi->rc.frames_till_gf_update_due == INT_MAX &&
+      (cpi->svc.number_temporal_layers == 1 &&
+       cpi->svc.number_spatial_layers == 1))
     flags &= ~VP9_GOLD_FLAG;
 
   if (alt_is_last)
