@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//RS0\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-11-03T17:54:20Z",
+      "side": 1,
+      "message": "not necessary. just me lazily copying some other allocations. calloc is documented to initialize to 0 too.",
+      "parentUuid": "AAAAdn//RUE\u003d",
+      "revId": "122068fbcd88191957f3576b6356897ced95bae0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//RT4\u003d",
         "filename": "test/quantize_test.cc",
         "patchSetId": 7
@@ -53,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//RS4\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-11-03T17:54:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//RT4\u003d",
+      "revId": "122068fbcd88191957f3576b6356897ced95bae0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//RT8\u003d",
         "filename": "test/quantize_test.cc",
         "patchSetId": 7
@@ -64,6 +100,75 @@
       "writtenOn": "2014-11-03T10:37:58Z",
       "side": 1,
       "message": "fix alignment here and elsewhere",
+      "revId": "122068fbcd88191957f3576b6356897ced95bae0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//RS8\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-11-03T17:54:20Z",
+      "side": 1,
+      "message": "it looks a little strange but i think i can line them up like that in my head. this was the output of clang-format",
+      "parentUuid": "AAAAdn//RT8\u003d",
+      "revId": "122068fbcd88191957f3576b6356897ced95bae0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//RSk\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-11-03T17:54:20Z",
+      "side": 1,
+      "message": "matches up to the opening paren of memcmp",
+      "revId": "122068fbcd88191957f3576b6356897ced95bae0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//RSg\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-11-03T17:54:20Z",
+      "side": 1,
+      "message": "part of the previous argument, but not part of the sizeof call. indented 4 because of that",
+      "revId": "122068fbcd88191957f3576b6356897ced95bae0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//RSc\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-11-03T17:54:20Z",
+      "side": 1,
+      "message": "not part of the expect_eq call, just a continuation of that line.",
       "revId": "122068fbcd88191957f3576b6356897ced95bae0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -104,6 +209,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//RSo\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-11-03T17:54:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//RWI\u003d",
+      "revId": "122068fbcd88191957f3576b6356897ced95bae0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//RWE\u003d",
         "filename": "test/quantize_test.cc",
         "patchSetId": 7
@@ -121,6 +244,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//RSs\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-11-03T17:54:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//RWE\u003d",
+      "revId": "122068fbcd88191957f3576b6356897ced95bae0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//RT0\u003d",
         "filename": "test/quantize_test.cc",
         "patchSetId": 7
@@ -132,6 +273,24 @@
       "writtenOn": "2014-11-03T10:37:58Z",
       "side": 1,
       "message": "technically the comparison is done by the next call. you could probably merge these",
+      "revId": "122068fbcd88191957f3576b6356897ced95bae0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//RSw\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-11-03T17:54:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//RT0\u003d",
       "revId": "122068fbcd88191957f3576b6356897ced95bae0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
