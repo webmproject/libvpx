@@ -2,6 +2,74 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAdn//RUA\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-11-03T10:37:58Z",
+      "side": 1,
+      "message": "this would be first as it\u0027s technically an \u0027other\u0027 lib.",
+      "revId": "122068fbcd88191957f3576b6356897ced95bae0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//RUE\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-11-03T10:37:58Z",
+      "side": 1,
+      "message": "merge these 2 lines and prefer c++ style casts (reinterpret here)\n\nis alignment necessary? would a calloc do?",
+      "revId": "122068fbcd88191957f3576b6356897ced95bae0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//RT4\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-11-03T10:37:58Z",
+      "side": 1,
+      "message": "you should include string.h for this, don\u0027t rely on vpx includes to pull it for you",
+      "revId": "122068fbcd88191957f3576b6356897ced95bae0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//RT8\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-11-03T10:37:58Z",
+      "side": 1,
+      "message": "fix alignment here and elsewhere",
+      "revId": "122068fbcd88191957f3576b6356897ced95bae0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//RXc\u003d",
         "filename": "test/quantize_test.cc",
         "patchSetId": 7
@@ -47,6 +115,23 @@
       "writtenOn": "2014-10-31T23:12:14Z",
       "side": 1,
       "message": "private:",
+      "revId": "122068fbcd88191957f3576b6356897ced95bae0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//RT0\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-11-03T10:37:58Z",
+      "side": 1,
+      "message": "technically the comparison is done by the next call. you could probably merge these",
       "revId": "122068fbcd88191957f3576b6356897ced95bae0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
