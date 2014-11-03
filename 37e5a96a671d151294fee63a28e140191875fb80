@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//RQ4\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-11-03T20:07:02Z",
+      "side": 1,
+      "message": "could be *const",
+      "revId": "37e5a96a671d151294fee63a28e140191875fb80",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//RQ0\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-11-03T20:07:02Z",
+      "side": 1,
+      "message": "fix cast",
+      "revId": "37e5a96a671d151294fee63a28e140191875fb80",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//RQw\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-11-03T20:07:02Z",
+      "side": 1,
+      "message": "can be private too probably",
+      "revId": "37e5a96a671d151294fee63a28e140191875fb80",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
