@@ -139,6 +139,47 @@ static void setup_frame(VP9_COMP *cpi) {
   }
 }
 
+static void vp9_enc_setup_mi(VP9_COMMON *cm) {
+  int i;
+  cm->mi = cm->mip + cm->mi_stride + 1;
+  vpx_memset(cm->mip, 0, cm->mi_stride * (cm->mi_rows + 1) * sizeof(*cm->mip));
+  cm->prev_mi = cm->prev_mip + cm->mi_stride + 1;
+  // Clear top border row
+  vpx_memset(cm->prev_mip, 0, sizeof(*cm->prev_mip) * cm->mi_stride);
+  // Clear left border column
+  for (i = 1; i < cm->mi_rows + 1; ++i)
+    vpx_memset(&cm->prev_mip[i * cm->mi_stride], 0, sizeof(*cm->prev_mip));
+}
+
+static int vp9_enc_alloc_mi(VP9_COMMON *cm, int mi_size) {
+  cm->mip = vpx_calloc(mi_size, sizeof(*cm->mip));
+  if (!cm->mip)
+    return 1;
+  cm->prev_mip = vpx_calloc(mi_size, sizeof(*cm->prev_mip));
+  if (!cm->prev_mip)
+    return 1;
+  cm->mi_alloc_size = mi_size;
+  return 0;
+}
+
+static void vp9_enc_free_mi(VP9_COMMON *cm) {
+  vpx_free(cm->mip);
+  cm->mip = NULL;
+  vpx_free(cm->prev_mip);
+  cm->prev_mip = NULL;
+}
+
+static void vp9_swap_mi_and_prev_mi(VP9_COMMON *cm) {
+  // Current mip will be the prev_mip for the next frame.
+  MODE_INFO *temp = cm->prev_mip;
+  cm->prev_mip = cm->mip;
+  cm->mip = temp;
+
+  // Update the upper left visible macroblock ptrs.
+  cm->mi = cm->mip + cm->mi_stride + 1;
+  cm->prev_mi = cm->prev_mip + cm->mi_stride + 1;
+}
+
 void vp9_initialize_enc() {
   static int init_done = 0;
 
@@ -1380,6 +1421,9 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
   }
 
   cm->error.setjmp = 1;
+  cm->alloc_mi = vp9_enc_alloc_mi;
+  cm->free_mi = vp9_enc_free_mi;
+  cm->setup_mi = vp9_enc_setup_mi;
 
   CHECK_MEM_ERROR(cm, cm->fc,
                   (FRAME_CONTEXT *)vpx_calloc(1, sizeof(*cm->fc)));
