@@ -213,36 +213,37 @@ TEST_P(QuantizeTestPair, TestMultipleQ) {
 INSTANTIATE_TEST_CASE_P(
     SSE2, QuantizeTest,
     ::testing::Values(
-        make_tuple(vp8_fast_quantize_b_sse2, vp8_fast_quantize_b_c),
-        make_tuple(vp8_regular_quantize_b_sse2, vp8_regular_quantize_b_c)));
+        make_tuple(&vp8_fast_quantize_b_sse2, &vp8_fast_quantize_b_c),
+        make_tuple(&vp8_regular_quantize_b_sse2, &vp8_regular_quantize_b_c)));
 #endif  // HAVE_SSE2
 
 #if HAVE_SSSE3
 INSTANTIATE_TEST_CASE_P(SSSE3, QuantizeTest,
-                        ::testing::Values(make_tuple(vp8_fast_quantize_b_ssse3,
-                                                     vp8_fast_quantize_b_c)));
+                        ::testing::Values(make_tuple(&vp8_fast_quantize_b_ssse3,
+                                                     &vp8_fast_quantize_b_c)));
 #endif  // HAVE_SSSE3
 
 #if HAVE_SSE4_1
-INSTANTIATE_TEST_CASE_P(SSE4_1, QuantizeTest, ::testing::Values(make_tuple(
-                                                  vp8_regular_quantize_b_sse4_1,
-                                                  vp8_regular_quantize_b_c)));
+INSTANTIATE_TEST_CASE_P(
+    SSE4_1, QuantizeTest,
+    ::testing::Values(make_tuple(&vp8_regular_quantize_b_sse4_1,
+                                 &vp8_regular_quantize_b_c)));
 #endif  // HAVE_SSE4_1
 
 #if HAVE_MEDIA
 INSTANTIATE_TEST_CASE_P(MEDIA, QuantizeTest,
-                        ::testing::Values(make_tuple(vp8_fast_quantize_b_armv6,
-                                                     vp8_fast_quantize_b_c)));
+                        ::testing::Values(make_tuple(&vp8_fast_quantize_b_armv6,
+                                                     &vp8_fast_quantize_b_c)));
 #endif  // HAVE_MEDIA
 
 #if HAVE_NEON_ASM
 INSTANTIATE_TEST_CASE_P(NEON, QuantizeTest,
-                        ::testing::Values(make_tuple(vp8_fast_quantize_b_neon,
-                                                     vp8_fast_quantize_b_c)));
+                        ::testing::Values(make_tuple(&vp8_fast_quantize_b_neon,
+                                                     &vp8_fast_quantize_b_c)));
 
 INSTANTIATE_TEST_CASE_P(
     NEON, QuantizeTestPair,
-    ::testing::Values(make_tuple(vp8_fast_quantize_b_pair_neon,
-                                 vp8_fast_quantize_b_pair_c)));
+    ::testing::Values(make_tuple(&vp8_fast_quantize_b_pair_neon,
+                                 &vp8_fast_quantize_b_pair_c)));
 #endif  // HAVE_NEON_ASM
 }  // namespace
