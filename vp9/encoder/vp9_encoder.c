@@ -584,7 +584,7 @@ static void init_config(struct VP9_COMP *cpi, VP9EncoderConfig *oxcf) {
   if ((cpi->svc.number_temporal_layers > 1 && cpi->oxcf.rc_mode == VPX_CBR) ||
       ((cpi->svc.number_temporal_layers > 1 ||
         cpi->svc.number_spatial_layers > 1) &&
-       cpi->oxcf.pass == 2)) {
+       cpi->oxcf.pass != 1)) {
     vp9_init_layer_context(cpi);
   }
 
@@ -1285,7 +1285,7 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
       cpi->oxcf.rc_mode == VPX_CBR) ||
       ((cpi->svc.number_temporal_layers > 1 ||
         cpi->svc.number_spatial_layers > 1) &&
-       cpi->oxcf.pass == 2)) {
+       cpi->oxcf.pass != 1)) {
     vp9_update_layer_context_change_config(cpi,
                                            (int)cpi->oxcf.target_bandwidth);
   }

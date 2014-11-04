@@ -531,9 +531,8 @@ void vp9_apply_encoding_flags(VP9_COMP *cpi, vpx_enc_frame_flags_t flags);
 
 static INLINE int is_two_pass_svc(const struct VP9_COMP *const cpi) {
   return cpi->use_svc &&
-         (cpi->svc.number_temporal_layers > 1 ||
-          cpi->svc.number_spatial_layers > 1) &&
-         (cpi->oxcf.pass == 1 || cpi->oxcf.pass == 2);
+         ((cpi->svc.number_spatial_layers > 1) ||
+         (cpi->svc.number_temporal_layers > 1 && cpi->oxcf.pass != 0));
 }
 
 static INLINE int is_altref_enabled(const VP9_COMP *const cpi) {
