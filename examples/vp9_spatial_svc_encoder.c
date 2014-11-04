@@ -60,6 +60,11 @@ static const arg_def_t min_bitrate_arg =
     ARG_DEF(NULL, "min-bitrate", 1, "Minimum bitrate");
 static const arg_def_t max_bitrate_arg =
     ARG_DEF(NULL, "max-bitrate", 1, "Maximum bitrate");
+static const arg_def_t lag_in_frame_arg =
+    ARG_DEF(NULL, "lag-in-frames", 1, "Number of frame to input before "
+        "generating any outputs");
+static const arg_def_t rc_end_usage_arg =
+    ARG_DEF(NULL, "rc-end-usage", 1, "0 - 3: VBR, CBR, CQ, Q");
 
 #if CONFIG_VP9_HIGHBITDEPTH
 static const struct arg_enum_list bitdepth_enum[] = {
@@ -80,11 +85,11 @@ static const arg_def_t *svc_args[] = {
   &timebase_arg,      &bitrate_arg,       &skip_frames_arg, &spatial_layers_arg,
   &kf_dist_arg,       &scale_factors_arg, &passes_arg,      &pass_arg,
   &fpf_name_arg,      &min_q_arg,         &max_q_arg,       &min_bitrate_arg,
-  &max_bitrate_arg,   &temporal_layers_arg,
+  &max_bitrate_arg,   &temporal_layers_arg,                 &lag_in_frame_arg,
 #if CONFIG_VP9_HIGHBITDEPTH
   &bitdepth_arg,
 #endif
-  NULL
+  &rc_end_usage_arg,  NULL
 };
 
 static const uint32_t default_frames_to_skip = 0;
@@ -207,6 +212,10 @@ static void parse_command_line(int argc, const char **argv_,
       min_bitrate = arg_parse_uint(&arg);
     } else if (arg_match(&arg, &max_bitrate_arg, argi)) {
       max_bitrate = arg_parse_uint(&arg);
+    } else if (arg_match(&arg, &lag_in_frame_arg, argi)) {
+      enc_cfg->g_lag_in_frames = arg_parse_uint(&arg);
+    } else if (arg_match(&arg, &rc_end_usage_arg, argi)) {
+      enc_cfg->rc_end_usage = arg_parse_uint(&arg);
 #if CONFIG_VP9_HIGHBITDEPTH
     } else if (arg_match(&arg, &bitdepth_arg, argi)) {
       enc_cfg->g_bit_depth = arg_parse_enum_or_int(&arg);
