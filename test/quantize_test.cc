@@ -69,9 +69,8 @@ class QuantizeTestBase {
     vp8cx_frame_init_quantizer(vp8_comp_);
 
     // Copy macroblockd from the reference to get pre-set-up dequant values.
-    macroblockd_dst_ =
-        reinterpret_cast<MACROBLOCKD *>(
-            vpx_calloc(sizeof(*macroblockd_dst_), 1));
+    macroblockd_dst_ = reinterpret_cast<MACROBLOCKD *>(
+        vpx_memalign(32, sizeof(*macroblockd_dst_)));
     vpx_memcpy(macroblockd_dst_, &vp8_comp_->mb.e_mbd,
                sizeof(*macroblockd_dst_));
     // Fix block pointers - currently they point to the blocks in the reference
