@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//REw\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-11-04T22:22:25Z",
+      "side": 1,
+      "message": "I\u0027m not seeing any difference at all on nexus 4 with --cpu-used\u003d-6 (intrinsic code included the follow-on patch to remove pair quantizer)",
+      "parentUuid": "AAAAdn//RNU\u003d",
+      "revId": "7ae75c3d525d79b9b28652fb34082cf81a5de9ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//RNY\u003d",
         "filename": "vp8/encoder/arm/neon/fastquantizeb_neon.c",
         "patchSetId": 3
