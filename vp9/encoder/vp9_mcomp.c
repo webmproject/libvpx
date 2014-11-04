@@ -590,6 +590,13 @@ int vp9_find_best_sub_pixel_tree_pruned(const MACROBLOCK *x,
   return besterr;
 }
 
+const MV search_step_table[12] = {
+    // left, right, up, down
+    {0, -4}, {0, 4}, {-4, 0}, {4, 0},
+    {0, -2}, {0, 2}, {-2, 0}, {2, 0},
+    {0, -1}, {0, 1}, {-1, 0}, {1, 0}
+};
+
 int vp9_find_best_sub_pixel_tree(const MACROBLOCK *x,
                                  MV *bestmv, const MV *ref_mv,
                                  int allow_hp,
@@ -603,43 +610,134 @@ int vp9_find_best_sub_pixel_tree(const MACROBLOCK *x,
                                  unsigned int *sse1,
                                  const uint8_t *second_pred,
                                  int w, int h) {
-  SETUP_SUBPEL_SEARCH;
-  SETUP_CENTER_ERROR;
+  const uint8_t *const z = x->plane[0].src.buf;
+  const uint8_t *const src_address = z;
+  const int src_stride = x->plane[0].src.stride;
+  const MACROBLOCKD *xd = &x->e_mbd;
+  unsigned int besterr = INT_MAX;
+  unsigned int sse;
+  unsigned int whichdir = 0;
+  int thismse;
+  const int y_stride = xd->plane[0].pre[0].stride;
+  const int offset = bestmv->row * y_stride + bestmv->col;
+  const uint8_t *const y = xd->plane[0].pre[0].buf;
+
+  int rr = ref_mv->row;
+  int rc = ref_mv->col;
+  int br = bestmv->row * 8;
+  int bc = bestmv->col * 8;
+  int hstep = 4;
+  int iter, round = 3 - forced_stop;
+  const int minc = MAX(x->mv_col_min * 8, ref_mv->col - MV_MAX);
+  const int maxc = MIN(x->mv_col_max * 8, ref_mv->col + MV_MAX);
+  const int minr = MAX(x->mv_row_min * 8, ref_mv->row - MV_MAX);
+  const int maxr = MIN(x->mv_row_max * 8, ref_mv->row + MV_MAX);
+  int tr = br;
+  int tc = bc;
+  const MV *search_step = search_step_table;
+  int idx, best_idx = -1;
+  unsigned int cost_array[5];
+
+  if (!(allow_hp && vp9_use_mv_hp(ref_mv)))
+    if (round == 3)
+      round = 2;
+
+  bestmv->row *= 8;
+  bestmv->col *= 8;
+
+  if (second_pred != NULL) {
+    DECLARE_ALIGNED_ARRAY(16, uint8_t, comp_pred, 64 * 64);
+    vp9_comp_avg_pred(comp_pred, second_pred, w, h, y + offset, y_stride);
+    besterr = vfp->vf(comp_pred, w, src_address, src_stride, sse1);
+  } else {
+    besterr = vfp->vf(y + offset, y_stride, src_address, src_stride, sse1);
+  }
+  *distortion = besterr;
+  besterr += mv_err_cost(bestmv, ref_mv, mvjcost, mvcost, error_per_bit);
+
   (void) cost_list;  // to silence compiler warning
 
-  // Each subsequent iteration checks at least one point in
-  // common with the last iteration could be 2 ( if diag selected)
-  // 1/2 pel
-  FIRST_LEVEL_CHECKS;
-  if (halfiters > 1) {
-    SECOND_LEVEL_CHECKS;
+  for (iter = 0; iter < round; ++iter) {
+    // Check vertical and horizontal sub-pixel positions.
+    for (idx = 0; idx < 4; ++idx) {
+      tr = br + search_step[idx].row;
+      tc = bc + search_step[idx].col;
+      if (tc >= minc && tc <= maxc && tr >= minr && tr <= maxr) {
+        const uint8_t *const pre_address = y + (tr >> 3) * y_stride + (tc >> 3);
+        int row_offset = (tr & 0x07) << 1;
+        int col_offset = (tc & 0x07) << 1;
+        MV this_mv;
+        this_mv.row = tr;
+        this_mv.col = tc;
+        if (second_pred == NULL)
+          thismse = vfp->svf(pre_address, y_stride, col_offset, row_offset,
+                             src_address, src_stride, &sse);
+        else
+          thismse = vfp->svaf(pre_address, y_stride, col_offset, row_offset,
+                              src_address, src_stride, &sse, second_pred);
+        cost_array[idx] = thismse +
+            mv_err_cost(&this_mv, ref_mv, mvjcost, mvcost, error_per_bit);
+
+        if (cost_array[idx] < besterr) {
+          best_idx = idx;
+          besterr = cost_array[idx];
+          *distortion = thismse;
+          *sse1 = sse;
+        }
+      } else {
+        cost_array[idx] = INT_MAX;
+      }
+    }
+
+    // Check diagonal sub-pixel position
+    tc = bc + (cost_array[0] < cost_array[1] ? -hstep : hstep);
+    tr = br + (cost_array[2] < cost_array[3] ? -hstep : hstep);
+    if (tc >= minc && tc <= maxc && tr >= minr && tr <= maxr) {
+      const uint8_t *const pre_address = y + (tr >> 3) * y_stride + (tc >> 3);
+      int row_offset = (tr & 0x07) << 1;
+      int col_offset = (tc & 0x07) << 1;
+      MV this_mv = {tr, tc};
+      if (second_pred == NULL)
+        thismse = vfp->svf(pre_address, y_stride, col_offset, row_offset,
+                           src_address, src_stride, &sse);
+      else
+        thismse = vfp->svaf(pre_address, y_stride, col_offset, row_offset,
+                            src_address, src_stride, &sse, second_pred);
+      cost_array[4] = thismse +
+          mv_err_cost(&this_mv, ref_mv, mvjcost, mvcost, error_per_bit);
+
+      if (cost_array[4] < besterr) {
+        best_idx = 4;
+        besterr = cost_array[4];
+        *distortion = thismse;
+        *sse1 = sse;
+      }
+    } else {
+      cost_array[idx] = INT_MAX;
+    }
+
+    if (best_idx < 4 && best_idx >= 0) {
+      br += search_step[best_idx].row;
+      bc += search_step[best_idx].col;
+    } else if (best_idx == 4) {
+      br = tr;
+      bc = tc;
+    }
+
+    if (iters_per_step > 1)
+      SECOND_LEVEL_CHECKS;
+
+    tr = br;
+    tc = bc;
+
+    search_step += 4;
+    hstep >>= 1;
+    best_idx = -1;
   }
-  tr = br;
-  tc = bc;
 
   // Each subsequent iteration checks at least one point in common with
   // the last iteration could be 2 ( if diag selected) 1/4 pel
 
-  // Note forced_stop: 0 - full, 1 - qtr only, 2 - half only
-  if (forced_stop != 2) {
-    hstep >>= 1;
-    FIRST_LEVEL_CHECKS;
-    if (quarteriters > 1) {
-      SECOND_LEVEL_CHECKS;
-    }
-    tr = br;
-    tc = bc;
-  }
-
-  if (allow_hp && vp9_use_mv_hp(ref_mv) && forced_stop == 0) {
-    hstep >>= 1;
-    FIRST_LEVEL_CHECKS;
-    if (eighthiters > 1) {
-      SECOND_LEVEL_CHECKS;
-    }
-    tr = br;
-    tc = bc;
-  }
   // These lines insure static analysis doesn't warn that
   // tr and tc aren't used after the above point.
   (void) tr;
