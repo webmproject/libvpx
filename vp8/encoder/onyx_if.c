@@ -1363,15 +1363,20 @@ static void init_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
     cm->version = oxcf->Version;
     vp8_setup_version(cm);
 
-    /* frame rate is not available on the first frame, as it's derived from
+    /* Frame rate is not available on the first frame, as it's derived from
      * the observed timestamps. The actual value used here doesn't matter
-     * too much, as it will adapt quickly. If the reciprocal of the timebase
-     * seems like a reasonable framerate, then use that as a guess, otherwise
-     * use 30.
+     * too much, as it will adapt quickly.
      */
-    cpi->framerate = (double)(oxcf->timebase.den) /
-                     (double)(oxcf->timebase.num);
+    if (oxcf->timebase.num > 0) {
+      cpi->framerate = (double)(oxcf->timebase.den) /
+                       (double)(oxcf->timebase.num);
+    } else {
+      cpi->framerate = 30;
+    }
 
+    /* If the reciprocal of the timebase seems like a reasonable framerate,
+     * then use that as a guess, otherwise use 30.
+     */
     if (cpi->framerate > 180)
         cpi->framerate = 30;
 
