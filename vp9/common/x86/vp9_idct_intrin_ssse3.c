@@ -36,7 +36,7 @@ static void idct16_8col(__m128i *in, int round) {
   const __m128i k__cospi_m24_m08 = pair_set_epi16(-cospi_24_64, -cospi_8_64);
   const __m128i k__DCT_CONST_ROUNDING = _mm_set1_epi32(DCT_CONST_ROUNDING);
   const __m128i k__cospi_p16_p16_x2 = pair_set_epi16(23170, 23170);
-  const __m128i k__cospi_p16_p16 = _mm_set1_epi16(cospi_16_64);
+  const __m128i k__cospi_p16_p16 = _mm_set1_epi16((int16_t)cospi_16_64);
   const __m128i k__cospi_m16_p16 = pair_set_epi16(-cospi_16_64, cospi_16_64);
 
   __m128i v[16], u[16], s[16], t[16];

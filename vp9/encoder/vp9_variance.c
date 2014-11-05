@@ -298,8 +298,8 @@ void highbd_variance(const uint8_t *a8, int  a_stride,
   uint64_t sse_long = 0;
   uint64_t sum_long = 0;
   highbd_variance64(a8, a_stride, b8, b_stride, w, h, &sse_long, &sum_long);
-  *sse = sse_long;
-  *sum = sum_long;
+  *sse = (unsigned int)sse_long;
+  *sum = (int)sum_long;
 }
 
 void highbd_10_variance(const uint8_t *a8, int  a_stride,
@@ -309,8 +309,8 @@ void highbd_10_variance(const uint8_t *a8, int  a_stride,
   uint64_t sse_long = 0;
   uint64_t sum_long = 0;
   highbd_variance64(a8, a_stride, b8, b_stride, w, h, &sse_long, &sum_long);
-  *sum = ROUND_POWER_OF_TWO(sum_long, 2);
-  *sse = ROUND_POWER_OF_TWO(sse_long, 4);
+  *sum = (int)ROUND_POWER_OF_TWO(sum_long, 2);
+  *sse = (unsigned int)ROUND_POWER_OF_TWO(sse_long, 4);
 }
 
 void highbd_12_variance(const uint8_t *a8, int  a_stride,
@@ -320,8 +320,8 @@ void highbd_12_variance(const uint8_t *a8, int  a_stride,
   uint64_t sse_long = 0;
   uint64_t sum_long = 0;
   highbd_variance64(a8, a_stride, b8, b_stride, w, h, &sse_long, &sum_long);
-  *sum = ROUND_POWER_OF_TWO(sum_long, 4);
-  *sse = ROUND_POWER_OF_TWO(sse_long, 8);
+  *sum = (int)ROUND_POWER_OF_TWO(sum_long, 4);
+  *sse = (unsigned int)ROUND_POWER_OF_TWO(sse_long, 8);
 }
 
 static void highbd_var_filter_block2d_bil_first_pass(

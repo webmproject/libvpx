@@ -29,10 +29,12 @@ extern "C" {
 #define UNIT_QUANT_FACTOR (1 << UNIT_QUANT_SHIFT)
 
 #define pair_set_epi16(a, b) \
-  _mm_set_epi16(b, a, b, a, b, a, b, a)
+  _mm_set_epi16((int16_t)(b), (int16_t)(a), (int16_t)(b), (int16_t)(a), \
+                (int16_t)(b), (int16_t)(a), (int16_t)(b), (int16_t)(a))
 
 #define dual_set_epi16(a, b) \
-  _mm_set_epi16(b, b, b, b, a, a, a, a)
+  _mm_set_epi16((int16_t)(b), (int16_t)(b), (int16_t)(b), (int16_t)(b), \
+                (int16_t)(a), (int16_t)(a), (int16_t)(a), (int16_t)(a))
 
 // Constants:
 //  for (int i = 1; i< 32; ++i)
