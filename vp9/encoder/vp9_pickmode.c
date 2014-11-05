@@ -518,6 +518,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   PRED_BUFFER *this_mode_pred = NULL;
   const int pixels_in_block = bh * bw;
   int reuse_inter_pred = cpi->sf.reuse_inter_pred_sby && ctx->pred_pixel_ready;
+  int ref_frame_skip_mask = 0;
 
   if (reuse_inter_pred) {
     int i;
@@ -563,7 +564,6 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   mbmi->segment_id = segment_id;
 
   for (ref_frame = LAST_FRAME; ref_frame <= GOLDEN_FRAME; ++ref_frame) {
-    PREDICTION_MODE this_mode;
     x->pred_mv_sad[ref_frame] = INT_MAX;
     frame_mv[NEWMV][ref_frame].as_int = INVALID_MV;
     frame_mv[ZEROMV][ref_frame].as_int = 0;
@@ -572,6 +572,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       const YV12_BUFFER_CONFIG *yv12 = get_ref_frame_buffer(cpi, ref_frame);
       int_mv *const candidates = mbmi->ref_mvs[ref_frame];
       const struct scale_factors *const sf = &cm->frame_refs[ref_frame - 1].sf;
+
       vp9_setup_pred_block(xd, yv12_mb[ref_frame], yv12, mi_row, mi_col,
                            sf, sf);
 
@@ -592,8 +593,23 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         vp9_mv_pred(cpi, x, yv12_mb[ref_frame][0].buf, yv12->y_stride,
                     ref_frame, bsize);
     } else {
-      continue;
+      ref_frame_skip_mask |= (1 << ref_frame);
     }
+  }
+
+  for (ref_frame = LAST_FRAME; ref_frame <= GOLDEN_FRAME; ++ref_frame) {
+    PREDICTION_MODE this_mode;
+    int i = (ref_frame == LAST_FRAME) ? GOLDEN_FRAME : LAST_FRAME;
+
+    if (!(cpi->ref_frame_flags & flag_list[ref_frame]))
+      continue;
+
+    if (cpi->ref_frame_flags & flag_list[i])
+      if (x->pred_mv_sad[ref_frame] > (x->pred_mv_sad[i] << 1))
+        ref_frame_skip_mask |= (1 << ref_frame);
+
+    if (ref_frame_skip_mask & (1 << ref_frame))
+      continue;
 
     // Select prediction reference frames.
     xd->plane[0].pre[0] = yv12_mb[ref_frame][0];
