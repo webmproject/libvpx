@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//RBg\u003d",
+        "filename": "test/test_vectors.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-11-05T00:42:19Z",
+      "side": 1,
+      "message": "Please generate new type_code",
+      "revId": "275e6a333fa7b6b2b98ec795c487cdaca9a31f6d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
