@@ -32,10 +32,8 @@ const int kNumBlocks = 25;
 const int kNumBlockEntries = 16;
 
 typedef void (*VP8Quantize)(BLOCK *b, BLOCKD *d);
-typedef void (*VP8QuantizePair)(BLOCK *b0, BLOCK *b1, BLOCKD *d0, BLOCKD *d1);
 
 typedef std::tr1::tuple<VP8Quantize, VP8Quantize> VP8QuantizeParam;
-typedef std::tr1::tuple<VP8QuantizePair, VP8QuantizePair> VP8QuantizePairParam;
 
 using libvpx_test::ACMRandom;
 using std::tr1::make_tuple;
@@ -144,34 +142,6 @@ class QuantizeTest : public QuantizeTestBase,
   VP8Quantize c_quant_;
 };
 
-class QuantizeTestPair : public QuantizeTestBase,
-                         public ::testing::TestWithParam<VP8QuantizePairParam> {
- protected:
-  virtual void SetUp() {
-    SetupCompressor();
-    asm_quant_pair_ = GET_PARAM(0);
-    c_quant_pair_ = GET_PARAM(1);
-  }
-
-  void RunComparison() {
-    // Skip the last, unpaired, block.
-    for (int i = 0; i < kNumBlocks - 1; i += 2) {
-      ASM_REGISTER_STATE_CHECK(c_quant_pair_(
-          &vp8_comp_->mb.block[i], &vp8_comp_->mb.block[i + 1],
-          &vp8_comp_->mb.e_mbd.block[i], &vp8_comp_->mb.e_mbd.block[i + 1]));
-      ASM_REGISTER_STATE_CHECK(asm_quant_pair_(
-          &vp8_comp_->mb.block[i], &vp8_comp_->mb.block[i + 1],
-          &macroblockd_dst_->block[i], &macroblockd_dst_->block[i + 1]));
-    }
-
-    CheckOutput();
-  }
-
- private:
-  VP8QuantizePair asm_quant_pair_;
-  VP8QuantizePair c_quant_pair_;
-};
-
 TEST_P(QuantizeTest, TestZeroInput) {
   FillCoeffConstant(0);
   RunComparison();
@@ -183,24 +153,6 @@ TEST_P(QuantizeTest, TestRandomInput) {
 }
 
 TEST_P(QuantizeTest, TestMultipleQ) {
-  for (int q = 0; q < QINDEX_RANGE; ++q) {
-    UpdateQuantizer(q);
-    FillCoeffRandom();
-    RunComparison();
-  }
-}
-
-TEST_P(QuantizeTestPair, TestZeroInput) {
-  FillCoeffConstant(0);
-  RunComparison();
-}
-
-TEST_P(QuantizeTestPair, TestRandomInput) {
-  FillCoeffRandom();
-  RunComparison();
-}
-
-TEST_P(QuantizeTestPair, TestMultipleQ) {
   for (int q = 0; q < QINDEX_RANGE; ++q) {
     UpdateQuantizer(q);
     FillCoeffRandom();
@@ -239,10 +191,5 @@ INSTANTIATE_TEST_CASE_P(MEDIA, QuantizeTest,
 INSTANTIATE_TEST_CASE_P(NEON, QuantizeTest,
                         ::testing::Values(make_tuple(&vp8_fast_quantize_b_neon,
                                                      &vp8_fast_quantize_b_c)));
-
-INSTANTIATE_TEST_CASE_P(
-    NEON, QuantizeTestPair,
-    ::testing::Values(make_tuple(&vp8_fast_quantize_b_pair_neon,
-                                 &vp8_fast_quantize_b_pair_c)));
 #endif  // HAVE_NEON_ASM
 }  // namespace
