@@ -216,7 +216,7 @@ static void iadst4_sse2(__m128i *in) {
   const __m128i k__sinpi_p03_p02 = pair_set_epi16(sinpi_3_9, sinpi_2_9);
   const __m128i k__sinpi_p02_m01 = pair_set_epi16(sinpi_2_9, -sinpi_1_9);
   const __m128i k__sinpi_p03_m04 = pair_set_epi16(sinpi_3_9, -sinpi_4_9);
-  const __m128i k__sinpi_p03_p03 = _mm_set1_epi16(sinpi_3_9);
+  const __m128i k__sinpi_p03_p03 = _mm_set1_epi16((int16_t)sinpi_3_9);
   const __m128i kZero = _mm_set1_epi16(0);
   const __m128i k__DCT_CONST_ROUNDING = _mm_set1_epi32(DCT_CONST_ROUNDING);
   __m128i u[8], v[8], in7;
@@ -641,7 +641,7 @@ static void iadst8_sse2(__m128i *in) {
   const __m128i k__cospi_p24_m08 = pair_set_epi16(cospi_24_64, -cospi_8_64);
   const __m128i k__cospi_m24_p08 = pair_set_epi16(-cospi_24_64, cospi_8_64);
   const __m128i k__cospi_p16_m16 = pair_set_epi16(cospi_16_64, -cospi_16_64);
-  const __m128i k__cospi_p16_p16 = _mm_set1_epi16(cospi_16_64);
+  const __m128i k__cospi_p16_p16 = _mm_set1_epi16((int16_t)cospi_16_64);
   const __m128i k__const_0 = _mm_set1_epi16(0);
   const __m128i k__DCT_CONST_ROUNDING = _mm_set1_epi32(DCT_CONST_ROUNDING);
 
@@ -1530,8 +1530,8 @@ static void iadst16_8col(__m128i *in) {
   const __m128i k__cospi_p08_p24 = pair_set_epi16(cospi_8_64, cospi_24_64);
   const __m128i k__cospi_p24_m08 = pair_set_epi16(cospi_24_64, -cospi_8_64);
   const __m128i k__cospi_m24_p08 = pair_set_epi16(-cospi_24_64, cospi_8_64);
-  const __m128i k__cospi_m16_m16 = _mm_set1_epi16(-cospi_16_64);
-  const __m128i k__cospi_p16_p16 = _mm_set1_epi16(cospi_16_64);
+  const __m128i k__cospi_m16_m16 = _mm_set1_epi16((int16_t)-cospi_16_64);
+  const __m128i k__cospi_p16_p16 = _mm_set1_epi16((int16_t)cospi_16_64);
   const __m128i k__cospi_p16_m16 = pair_set_epi16(cospi_16_64, -cospi_16_64);
   const __m128i k__cospi_m16_p16 = pair_set_epi16(-cospi_16_64, cospi_16_64);
   const __m128i k__DCT_CONST_ROUNDING = _mm_set1_epi32(DCT_CONST_ROUNDING);
@@ -1985,7 +1985,7 @@ static void idct16_8col(__m128i *in) {
   const __m128i k__cospi_p04_p28 = pair_set_epi16(cospi_4_64, cospi_28_64);
   const __m128i k__cospi_p12_m20 = pair_set_epi16(cospi_12_64, -cospi_20_64);
   const __m128i k__cospi_p20_p12 = pair_set_epi16(cospi_20_64, cospi_12_64);
-  const __m128i k__cospi_p16_p16 = _mm_set1_epi16(cospi_16_64);
+  const __m128i k__cospi_p16_p16 = _mm_set1_epi16((int16_t)cospi_16_64);
   const __m128i k__cospi_p16_m16 = pair_set_epi16(cospi_16_64, -cospi_16_64);
   const __m128i k__cospi_p24_m08 = pair_set_epi16(cospi_24_64, -cospi_8_64);
   const __m128i k__cospi_p08_p24 = pair_set_epi16(cospi_8_64, cospi_24_64);

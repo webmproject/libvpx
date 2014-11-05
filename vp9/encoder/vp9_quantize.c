@@ -56,7 +56,7 @@ void vp9_highbd_quantize_dc(const tran_low_t *coeff_ptr, int skip_block,
     const int64_t tmp =
         (clamp(abs_coeff + round_ptr[rc != 0], INT32_MIN, INT32_MAX) *
          quant) >> 16;
-    qcoeff_ptr[rc]  = (tmp ^ coeff_sign) - coeff_sign;
+    qcoeff_ptr[rc] = (tran_low_t)((tmp ^ coeff_sign) - coeff_sign);
     dqcoeff_ptr[rc] = qcoeff_ptr[rc] * dequant_ptr;
     if (tmp)
       eob = 0;
@@ -107,7 +107,7 @@ void vp9_highbd_quantize_dc_32x32(const tran_low_t *coeff_ptr,
     const int64_t tmp =
         (clamp(abs_coeff + round_ptr[rc != 0], INT32_MIN, INT32_MAX) *
          quant) >> 15;
-    qcoeff_ptr[rc]  = (tmp ^ coeff_sign) - coeff_sign;
+    qcoeff_ptr[rc] = (tran_low_t)((tmp ^ coeff_sign) - coeff_sign);
     dqcoeff_ptr[rc] = qcoeff_ptr[rc] * dequant_ptr / 2;
     if (tmp)
       eob = 0;
@@ -197,7 +197,7 @@ void vp9_highbd_quantize_fp_c(const tran_low_t *coeff_ptr,
           (clamp(abs_coeff + round_ptr[rc != 0], INT32_MIN, INT32_MAX) *
            quant_ptr[rc != 0]) >> 16;
 
-      qcoeff_ptr[rc] = (tmp ^ coeff_sign) - coeff_sign;
+      qcoeff_ptr[rc] = (tran_low_t)((tmp ^ coeff_sign) - coeff_sign);
       dqcoeff_ptr[rc] = qcoeff_ptr[rc] * dequant_ptr[rc != 0];
 
       if (tmp)
@@ -284,7 +284,7 @@ void vp9_highbd_quantize_fp_32x32_c(const tran_low_t *coeff_ptr,
         tmp = clamp(abs_coeff + ROUND_POWER_OF_TWO(round_ptr[rc != 0], 1),
                     INT32_MIN, INT32_MAX);
         tmp = (tmp * quant_ptr[rc != 0]) >> 15;
-        qcoeff_ptr[rc] = (tmp ^ coeff_sign) - coeff_sign;
+        qcoeff_ptr[rc] = (tran_low_t)((tmp ^ coeff_sign) - coeff_sign);
         dqcoeff_ptr[rc] = qcoeff_ptr[rc] * dequant_ptr[rc != 0] / 2;
       }
 
@@ -393,7 +393,7 @@ void vp9_highbd_quantize_b_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
                             INT32_MIN, INT32_MAX);
         tmp = ((((tmp * quant_ptr[rc != 0]) >> 16) + tmp) *
                   quant_shift_ptr[rc != 0]) >> 16;  // quantization
-        qcoeff_ptr[rc]  = (tmp ^ coeff_sign) - coeff_sign;
+        qcoeff_ptr[rc]  = (tran_low_t)((tmp ^ coeff_sign) - coeff_sign);
         dqcoeff_ptr[rc] = qcoeff_ptr[rc] * dequant_ptr[rc != 0];
 
         if (tmp)
@@ -510,7 +510,7 @@ void vp9_highbd_quantize_b_32x32_c(const tran_low_t *coeff_ptr,
       tmp = ((((tmp * quant_ptr[rc != 0]) >> 16) + tmp) *
                quant_shift_ptr[rc != 0]) >> 15;
 
-      qcoeff_ptr[rc] = (tmp ^ coeff_sign) - coeff_sign;
+      qcoeff_ptr[rc] = (tran_low_t)((tmp ^ coeff_sign) - coeff_sign);
       dqcoeff_ptr[rc] = qcoeff_ptr[rc] * dequant_ptr[rc != 0] / 2;
 
       if (tmp)

@@ -58,38 +58,38 @@ void vp9_fdct4x4_sse2(const int16_t *input, int16_t *output, int stride) {
   // These are the coefficients used for the multiplies.
   // In the comments, pN means cos(N pi /64) and mN is -cos(N pi /64),
   // where cospi_N_64 = cos(N pi /64)
-  const __m128i k__cospi_A = _mm_setr_epi16(cospi_16_64, cospi_16_64,
-                                            cospi_16_64, cospi_16_64,
-                                            cospi_16_64, -cospi_16_64,
-                                            cospi_16_64, -cospi_16_64);
-  const __m128i k__cospi_B = _mm_setr_epi16(cospi_16_64, -cospi_16_64,
-                                            cospi_16_64, -cospi_16_64,
-                                            cospi_16_64, cospi_16_64,
-                                            cospi_16_64, cospi_16_64);
-  const __m128i k__cospi_C = _mm_setr_epi16(cospi_8_64, cospi_24_64,
-                                            cospi_8_64, cospi_24_64,
-                                            cospi_24_64, -cospi_8_64,
-                                            cospi_24_64, -cospi_8_64);
-  const __m128i k__cospi_D = _mm_setr_epi16(cospi_24_64, -cospi_8_64,
-                                            cospi_24_64, -cospi_8_64,
-                                            cospi_8_64, cospi_24_64,
-                                            cospi_8_64, cospi_24_64);
-  const __m128i k__cospi_E = _mm_setr_epi16(cospi_16_64, cospi_16_64,
-                                            cospi_16_64, cospi_16_64,
-                                            cospi_16_64, cospi_16_64,
-                                            cospi_16_64, cospi_16_64);
-  const __m128i k__cospi_F = _mm_setr_epi16(cospi_16_64, -cospi_16_64,
-                                            cospi_16_64, -cospi_16_64,
-                                            cospi_16_64, -cospi_16_64,
-                                            cospi_16_64, -cospi_16_64);
-  const __m128i k__cospi_G = _mm_setr_epi16(cospi_8_64, cospi_24_64,
-                                            cospi_8_64, cospi_24_64,
-                                            -cospi_8_64, -cospi_24_64,
-                                            -cospi_8_64, -cospi_24_64);
-  const __m128i k__cospi_H = _mm_setr_epi16(cospi_24_64, -cospi_8_64,
-                                            cospi_24_64, -cospi_8_64,
-                                            -cospi_24_64, cospi_8_64,
-                                            -cospi_24_64, cospi_8_64);
+  const __m128i k__cospi_A = _mm_setr_epi16((int16_t)cospi_16_64, (int16_t)cospi_16_64,
+                                            (int16_t)cospi_16_64, (int16_t)cospi_16_64,
+                                            (int16_t)cospi_16_64, (int16_t)-cospi_16_64,
+                                            (int16_t)cospi_16_64, (int16_t)-cospi_16_64);
+  const __m128i k__cospi_B = _mm_setr_epi16((int16_t)cospi_16_64, (int16_t)-cospi_16_64,
+                                            (int16_t)cospi_16_64, (int16_t)-cospi_16_64,
+                                            (int16_t)cospi_16_64, (int16_t)cospi_16_64,
+                                            (int16_t)cospi_16_64, (int16_t)cospi_16_64);
+  const __m128i k__cospi_C = _mm_setr_epi16((int16_t)cospi_8_64, (int16_t)cospi_24_64,
+                                            (int16_t)cospi_8_64, (int16_t)cospi_24_64,
+                                            (int16_t)cospi_24_64, (int16_t)-cospi_8_64,
+                                            (int16_t)cospi_24_64, (int16_t)-cospi_8_64);
+  const __m128i k__cospi_D = _mm_setr_epi16((int16_t)cospi_24_64, (int16_t)-cospi_8_64,
+                                            (int16_t)cospi_24_64, (int16_t)-cospi_8_64,
+                                            (int16_t)cospi_8_64, (int16_t)cospi_24_64,
+                                            (int16_t)cospi_8_64, (int16_t)cospi_24_64);
+  const __m128i k__cospi_E = _mm_setr_epi16((int16_t)cospi_16_64, (int16_t)cospi_16_64,
+                                            (int16_t)cospi_16_64, (int16_t)cospi_16_64,
+                                            (int16_t)cospi_16_64, (int16_t)cospi_16_64,
+                                            (int16_t)cospi_16_64, (int16_t)cospi_16_64);
+  const __m128i k__cospi_F = _mm_setr_epi16((int16_t)cospi_16_64, (int16_t)-cospi_16_64,
+                                            (int16_t)cospi_16_64, (int16_t)-cospi_16_64,
+                                            (int16_t)cospi_16_64, (int16_t)-cospi_16_64,
+                                            (int16_t)cospi_16_64, (int16_t)-cospi_16_64);
+  const __m128i k__cospi_G = _mm_setr_epi16((int16_t)cospi_8_64, (int16_t)cospi_24_64,
+                                            (int16_t)cospi_8_64, (int16_t)cospi_24_64,
+                                            (int16_t)-cospi_8_64, (int16_t)-cospi_24_64,
+                                            (int16_t)-cospi_8_64, (int16_t)-cospi_24_64);
+  const __m128i k__cospi_H = _mm_setr_epi16((int16_t)cospi_24_64, (int16_t)-cospi_8_64,
+                                            (int16_t)cospi_24_64, (int16_t)-cospi_8_64,
+                                            (int16_t)-cospi_24_64, (int16_t)cospi_8_64,
+                                            (int16_t)-cospi_24_64, (int16_t)cospi_8_64);
 
   const __m128i k__DCT_CONST_ROUNDING = _mm_set1_epi32(DCT_CONST_ROUNDING);
   // This second rounding constant saves doing some extra adds at the end
@@ -296,7 +296,7 @@ static INLINE void transpose_4x4(__m128i *res) {
 }
 
 void fdct4_sse2(__m128i *in) {
-  const __m128i k__cospi_p16_p16 = _mm_set1_epi16(cospi_16_64);
+  const __m128i k__cospi_p16_p16 = _mm_set1_epi16((int16_t)cospi_16_64);
   const __m128i k__cospi_p16_m16 = pair_set_epi16(cospi_16_64, -cospi_16_64);
   const __m128i k__cospi_p08_p24 = pair_set_epi16(cospi_8_64, cospi_24_64);
   const __m128i k__cospi_p24_m08 = pair_set_epi16(cospi_24_64, -cospi_8_64);
@@ -333,7 +333,7 @@ void fadst4_sse2(__m128i *in) {
   const __m128i k__sinpi_p04_m01 = pair_set_epi16(sinpi_4_9, -sinpi_1_9);
   const __m128i k__sinpi_p03_p04 = pair_set_epi16(sinpi_3_9, sinpi_4_9);
   const __m128i k__sinpi_m03_p02 = pair_set_epi16(-sinpi_3_9, sinpi_2_9);
-  const __m128i k__sinpi_p03_p03 = _mm_set1_epi16(sinpi_3_9);
+  const __m128i k__sinpi_p03_p03 = _mm_set1_epi16((int16_t)sinpi_3_9);
   const __m128i kZero = _mm_set1_epi16(0);
   const __m128i k__DCT_CONST_ROUNDING = _mm_set1_epi32(DCT_CONST_ROUNDING);
   __m128i u[8], v[8];
@@ -454,7 +454,7 @@ void vp9_fdct8x8_sse2(const int16_t *input, int16_t *output, int stride) {
   //    When we use them, in one case, they are all the same. In all others
   //    it's a pair of them that we need to repeat four times. This is done
   //    by constructing the 32 bit constant corresponding to that pair.
-  const __m128i k__cospi_p16_p16 = _mm_set1_epi16(cospi_16_64);
+  const __m128i k__cospi_p16_p16 = _mm_set1_epi16((int16_t)cospi_16_64);
   const __m128i k__cospi_p16_m16 = pair_set_epi16(cospi_16_64, -cospi_16_64);
   const __m128i k__cospi_p24_p08 = pair_set_epi16(cospi_24_64, cospi_8_64);
   const __m128i k__cospi_m08_p24 = pair_set_epi16(-cospi_8_64, cospi_24_64);
@@ -784,7 +784,7 @@ static INLINE void write_buffer_8x8(int16_t *output, __m128i *res, int stride) {
 
 void fdct8_sse2(__m128i *in) {
   // constants
-  const __m128i k__cospi_p16_p16 = _mm_set1_epi16(cospi_16_64);
+  const __m128i k__cospi_p16_p16 = _mm_set1_epi16((int16_t)cospi_16_64);
   const __m128i k__cospi_p16_m16 = pair_set_epi16(cospi_16_64, -cospi_16_64);
   const __m128i k__cospi_p24_p08 = pair_set_epi16(cospi_24_64, cospi_8_64);
   const __m128i k__cospi_m08_p24 = pair_set_epi16(-cospi_8_64, cospi_24_64);
@@ -936,7 +936,7 @@ void fadst8_sse2(__m128i *in) {
   const __m128i k__cospi_p24_m08 = pair_set_epi16(cospi_24_64, -cospi_8_64);
   const __m128i k__cospi_m24_p08 = pair_set_epi16(-cospi_24_64, cospi_8_64);
   const __m128i k__cospi_p16_m16 = pair_set_epi16(cospi_16_64, -cospi_16_64);
-  const __m128i k__cospi_p16_p16 = _mm_set1_epi16(cospi_16_64);
+  const __m128i k__cospi_p16_p16 = _mm_set1_epi16((int16_t)cospi_16_64);
   const __m128i k__const_0 = _mm_set1_epi16(0);
   const __m128i k__DCT_CONST_ROUNDING = _mm_set1_epi32(DCT_CONST_ROUNDING);
 
@@ -1271,7 +1271,7 @@ void vp9_fdct16x16_sse2(const int16_t *input, int16_t *output, int stride) {
   //    When we use them, in one case, they are all the same. In all others
   //    it's a pair of them that we need to repeat four times. This is done
   //    by constructing the 32 bit constant corresponding to that pair.
-  const __m128i k__cospi_p16_p16 = _mm_set1_epi16(cospi_16_64);
+  const __m128i k__cospi_p16_p16 = _mm_set1_epi16((int16_t)cospi_16_64);
   const __m128i k__cospi_p16_m16 = pair_set_epi16(cospi_16_64, -cospi_16_64);
   const __m128i k__cospi_p24_p08 = pair_set_epi16(cospi_24_64, cospi_8_64);
   const __m128i k__cospi_p08_m24 = pair_set_epi16(cospi_8_64, -cospi_24_64);
@@ -1914,7 +1914,7 @@ static INLINE void right_shift_16x16(__m128i *res0, __m128i *res1) {
 void fdct16_8col(__m128i *in) {
   // perform 16x16 1-D DCT for 8 columns
   __m128i i[8], s[8], p[8], t[8], u[16], v[16];
-  const __m128i k__cospi_p16_p16 = _mm_set1_epi16(cospi_16_64);
+  const __m128i k__cospi_p16_p16 = _mm_set1_epi16((int16_t)cospi_16_64);
   const __m128i k__cospi_p16_m16 = pair_set_epi16(cospi_16_64, -cospi_16_64);
   const __m128i k__cospi_m16_p16 = pair_set_epi16(-cospi_16_64, cospi_16_64);
   const __m128i k__cospi_p24_p08 = pair_set_epi16(cospi_24_64, cospi_8_64);
@@ -2261,8 +2261,8 @@ void fadst16_8col(__m128i *in) {
   const __m128i k__cospi_p08_p24 = pair_set_epi16(cospi_8_64, cospi_24_64);
   const __m128i k__cospi_p24_m08 = pair_set_epi16(cospi_24_64, -cospi_8_64);
   const __m128i k__cospi_m24_p08 = pair_set_epi16(-cospi_24_64, cospi_8_64);
-  const __m128i k__cospi_m16_m16 = _mm_set1_epi16(-cospi_16_64);
-  const __m128i k__cospi_p16_p16 = _mm_set1_epi16(cospi_16_64);
+  const __m128i k__cospi_m16_m16 = _mm_set1_epi16((int16_t)-cospi_16_64);
+  const __m128i k__cospi_p16_p16 = _mm_set1_epi16((int16_t)cospi_16_64);
   const __m128i k__cospi_p16_m16 = pair_set_epi16(cospi_16_64, -cospi_16_64);
   const __m128i k__cospi_m16_p16 = pair_set_epi16(-cospi_16_64, cospi_16_64);
   const __m128i k__DCT_CONST_ROUNDING = _mm_set1_epi32(DCT_CONST_ROUNDING);

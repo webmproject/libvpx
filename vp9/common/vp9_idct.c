@@ -34,7 +34,7 @@
 // bd of x uses trans_low with 8+x bits, need to remove 24-x bits
 #define WRAPLOW(x, bd) ((((int32_t)(x)) << (24 - bd)) >> (24 - bd))
 #else
-#define WRAPLOW(x, bd) (x)
+#define WRAPLOW(x, bd) ((int32_t)(x))
 #endif  // CONFIG_EMULATE_HARDWARE
 
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -367,14 +367,14 @@ static void iadst8(const tran_low_t *input, tran_low_t *output) {
   }
 
   // stage 1
-  s0 = cospi_2_64  * x0 + cospi_30_64 * x1;
-  s1 = cospi_30_64 * x0 - cospi_2_64  * x1;
-  s2 = cospi_10_64 * x2 + cospi_22_64 * x3;
-  s3 = cospi_22_64 * x2 - cospi_10_64 * x3;
-  s4 = cospi_18_64 * x4 + cospi_14_64 * x5;
-  s5 = cospi_14_64 * x4 - cospi_18_64 * x5;
-  s6 = cospi_26_64 * x6 + cospi_6_64  * x7;
-  s7 = cospi_6_64  * x6 - cospi_26_64 * x7;
+  s0 = (int)(cospi_2_64  * x0 + cospi_30_64 * x1);
+  s1 = (int)(cospi_30_64 * x0 - cospi_2_64  * x1);
+  s2 = (int)(cospi_10_64 * x2 + cospi_22_64 * x3);
+  s3 = (int)(cospi_22_64 * x2 - cospi_10_64 * x3);
+  s4 = (int)(cospi_18_64 * x4 + cospi_14_64 * x5);
+  s5 = (int)(cospi_14_64 * x4 - cospi_18_64 * x5);
+  s6 = (int)(cospi_26_64 * x6 + cospi_6_64  * x7);
+  s7 = (int)(cospi_6_64  * x6 - cospi_26_64 * x7);
 
   x0 = WRAPLOW(dct_const_round_shift(s0 + s4), 8);
   x1 = WRAPLOW(dct_const_round_shift(s1 + s5), 8);
@@ -386,14 +386,14 @@ static void iadst8(const tran_low_t *input, tran_low_t *output) {
   x7 = WRAPLOW(dct_const_round_shift(s3 - s7), 8);
 
   // stage 2
-  s0 = x0;
-  s1 = x1;
-  s2 = x2;
-  s3 = x3;
-  s4 =  cospi_8_64  * x4 + cospi_24_64 * x5;
-  s5 =  cospi_24_64 * x4 - cospi_8_64  * x5;
-  s6 = -cospi_24_64 * x6 + cospi_8_64  * x7;
-  s7 =  cospi_8_64  * x6 + cospi_24_64 * x7;
+  s0 = (int)x0;
+  s1 = (int)x1;
+  s2 = (int)x2;
+  s3 = (int)x3;
+  s4 = (int)(cospi_8_64 * x4 + cospi_24_64 * x5);
+  s5 = (int)(cospi_24_64 * x4 - cospi_8_64 * x5);
+  s6 = (int)(-cospi_24_64 * x6 + cospi_8_64 * x7);
+  s7 = (int)(cospi_8_64 * x6 + cospi_24_64 * x7);
 
   x0 = WRAPLOW(s0 + s2, 8);
   x1 = WRAPLOW(s1 + s3, 8);
@@ -405,10 +405,10 @@ static void iadst8(const tran_low_t *input, tran_low_t *output) {
   x7 = WRAPLOW(dct_const_round_shift(s5 - s7), 8);
 
   // stage 3
-  s2 = cospi_16_64 * (x2 + x3);
-  s3 = cospi_16_64 * (x2 - x3);
-  s6 = cospi_16_64 * (x6 + x7);
-  s7 = cospi_16_64 * (x6 - x7);
+  s2 = (int)(cospi_16_64 * (x2 + x3));
+  s3 = (int)(cospi_16_64 * (x2 - x3));
+  s6 = (int)(cospi_16_64 * (x6 + x7));
+  s7 = (int)(cospi_16_64 * (x6 - x7));
 
   x2 = WRAPLOW(dct_const_round_shift(s2), 8);
   x3 = WRAPLOW(dct_const_round_shift(s3), 8);
