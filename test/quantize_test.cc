@@ -187,9 +187,9 @@ INSTANTIATE_TEST_CASE_P(MEDIA, QuantizeTest,
                                                      &vp8_fast_quantize_b_c)));
 #endif  // HAVE_MEDIA
 
-#if HAVE_NEON_ASM
+#if HAVE_NEON
 INSTANTIATE_TEST_CASE_P(NEON, QuantizeTest,
                         ::testing::Values(make_tuple(&vp8_fast_quantize_b_neon,
                                                      &vp8_fast_quantize_b_c)));
-#endif  // HAVE_NEON_ASM
+#endif  // HAVE_NEON
 }  // namespace
