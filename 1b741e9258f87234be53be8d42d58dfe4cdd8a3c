@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Q0k\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-11-06T19:37:47Z",
+      "side": 1,
+      "message": "() are unnecessary",
+      "revId": "1b741e9258f87234be53be8d42d58dfe4cdd8a3c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Q0s\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-11-06T19:37:47Z",
+      "side": 1,
+      "message": "See my comment from the encoder",
+      "revId": "1b741e9258f87234be53be8d42d58dfe4cdd8a3c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Q0U\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 265,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-11-06T19:37:47Z",
+      "side": 1,
+      "message": "Remove the commented out copy of this line, also no () are needed around mbmi-\u003etx_skip_uv and mbmi-\u003etx_skip.",
+      "revId": "1b741e9258f87234be53be8d42d58dfe4cdd8a3c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Q0M\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-11-06T19:37:47Z",
+      "side": 1,
+      "message": "Again.",
+      "revId": "1b741e9258f87234be53be8d42d58dfe4cdd8a3c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Q3Q\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 375,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-11-06T19:37:47Z",
+      "side": 1,
+      "message": "vp9_write_bit",
+      "revId": "1b741e9258f87234be53be8d42d58dfe4cdd8a3c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Q3A\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 391,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-11-06T19:37:47Z",
+      "side": 1,
+      "message": "Why does the magic factor here wind up being 120?\nYou use this constant everywhere. Please declare it only once.",
+      "revId": "1b741e9258f87234be53be8d42d58dfe4cdd8a3c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Q3Y\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 716,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-11-06T19:37:47Z",
+      "side": 1,
+      "message": "please remove",
+      "revId": "1b741e9258f87234be53be8d42d58dfe4cdd8a3c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
