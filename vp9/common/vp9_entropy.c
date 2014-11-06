@@ -21,7 +21,7 @@ const vp9_prob vp9_cat3_prob[] = { 173, 148, 140 };
 const vp9_prob vp9_cat4_prob[] = { 176, 155, 140, 135 };
 const vp9_prob vp9_cat5_prob[] = { 180, 157, 141, 134, 130 };
 const vp9_prob vp9_cat6_prob[] = {
-#if TX_64X64
+#if CONFIG_TX64X64
     255,
 #endif
     254, 254, 254, 252, 249, 243, 230, 196, 177, 153, 140, 133, 130, 129
@@ -34,7 +34,7 @@ const vp9_prob vp9_cat3_prob_high10[] = { 173, 148, 140 };
 const vp9_prob vp9_cat4_prob_high10[] = { 176, 155, 140, 135 };
 const vp9_prob vp9_cat5_prob_high10[] = { 180, 157, 141, 134, 130 };
 const vp9_prob vp9_cat6_prob_high10[] = {
-#if TX_64X64
+#if CONFIG_TX64X64
     255,
 #endif
     255, 255, 254, 254, 254, 252, 249, 243,
@@ -47,7 +47,7 @@ const vp9_prob vp9_cat3_prob_high12[] = { 173, 148, 140 };
 const vp9_prob vp9_cat4_prob_high12[] = { 176, 155, 140, 135 };
 const vp9_prob vp9_cat5_prob_high12[] = { 180, 157, 141, 134, 130 };
 const vp9_prob vp9_cat6_prob_high12[] = {
-#if TX_64X64
+#if CONFIG_TX64X64
     255,
 #endif
     255, 255, 255, 255, 254, 254, 254, 252, 249,

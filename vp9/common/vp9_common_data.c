@@ -115,7 +115,7 @@ const BLOCK_SIZE txsize_to_bsize[TX_SIZES] = {
     BLOCK_16X16,  // TX_16X16
     BLOCK_32X32,  // TX_32X32
 #if CONFIG_TX64X64
-    BLOCK_32X32,  // TX_64X64
+    BLOCK_64X64,  // TX_64X64
 #endif
 };
 
