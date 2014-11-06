@@ -96,7 +96,6 @@ typedef struct VP9Common {
 #endif
 
   YV12_BUFFER_CONFIG *frame_to_show;
-
   RefCntBuffer frame_bufs[FRAME_BUFFERS];
   RefCntBuffer *prev_frame;
 
@@ -149,16 +148,19 @@ typedef struct VP9Common {
 
   /* We allocate a MODE_INFO struct for each macroblock, together with
      an extra row on top and column on the left to simplify prediction. */
-
-  int mi_idx;
-  int prev_mi_idx;
   int mi_alloc_size;
-  MODE_INFO *mip_array[2];
-
   MODE_INFO *mip; /* Base of allocated array */
   MODE_INFO *mi;  /* Corresponds to upper left visible macroblock */
+
+  // TODO(agrange): Move prev_mi into encoder structure.
+  // prev_mip and prev_mi will only be allocated in VP9 encoder.
   MODE_INFO *prev_mip; /* MODE_INFO array 'mip' from last decoded frame */
   MODE_INFO *prev_mi;  /* 'mi' from last frame (points into prev_mip) */
+
+  // Separate mi functions between encoder and decoder.
+  int (*alloc_mi)(struct VP9Common *cm, int mi_size);
+  void (*free_mi)(struct VP9Common *cm);
+  void (*setup_mi)(struct VP9Common *cm);
 
 
   // Whether to use previous frame's motion vectors for prediction.

@@ -43,6 +43,24 @@ static void initialize_dec() {
   }
 }
 
+static void vp9_dec_setup_mi(VP9_COMMON *cm) {
+  cm->mi = cm->mip + cm->mi_stride + 1;
+  vpx_memset(cm->mip, 0, cm->mi_stride * (cm->mi_rows + 1) * sizeof(*cm->mip));
+}
+
+static int vp9_dec_alloc_mi(VP9_COMMON *cm, int mi_size) {
+  cm->mip = vpx_calloc(mi_size, sizeof(*cm->mip));
+  if (!cm->mip)
+    return 1;
+  cm->mi_alloc_size = mi_size;
+  return 0;
+}
+
+static void vp9_dec_free_mi(VP9_COMMON *cm) {
+  vpx_free(cm->mip);
+  cm->mip = NULL;
+}
+
 VP9Decoder *vp9_decoder_create() {
   VP9Decoder *const pbi = vpx_memalign(32, sizeof(*pbi));
   VP9_COMMON *const cm = pbi ? &pbi->common : NULL;
@@ -76,6 +94,10 @@ VP9Decoder *vp9_decoder_create() {
   pbi->ready_for_new_data = 1;
   cm->bit_depth = VPX_BITS_8;
   cm->dequant_bit_depth = VPX_BITS_8;
+
+  cm->alloc_mi = vp9_dec_alloc_mi;
+  cm->free_mi = vp9_dec_free_mi;
+  cm->setup_mi = vp9_dec_setup_mi;
 
   // vp9_init_dequantizer() is first called here. Add check in
   // frame_init_dequantizer() to avoid unnecessary calling of
