@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Q4s\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1779,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-11-06T10:21:12Z",
+      "side": 1,
+      "message": "somewhat unrelated to the fix, but it\u0027s odd that there\u0027s a \u0027remove_common\u0027 function and these are free\u0027d after it. can this just be moved to that location?",
+      "revId": "7970630a022aa85ff61ada5deea85279ef3e5148",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
