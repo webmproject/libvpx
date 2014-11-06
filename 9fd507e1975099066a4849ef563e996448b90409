@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Q64\u003d",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-11-06T05:19:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Q78\u003d",
+      "revId": "9fd507e1975099066a4849ef563e996448b90409",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Q74\u003d",
         "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
         "patchSetId": 4
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Q60\u003d",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-11-06T05:19:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Q74\u003d",
+      "revId": "9fd507e1975099066a4849ef563e996448b90409",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Q8A\u003d",
         "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
         "patchSetId": 4
@@ -47,6 +83,24 @@
       "writtenOn": "2014-11-06T00:43:11Z",
       "side": 1,
       "message": "are these variables still used anywhere? since they\u0027re now removed from candidate_refresh_aq().",
+      "revId": "9fd507e1975099066a4849ef563e996448b90409",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Q68\u003d",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-11-06T05:19:13Z",
+      "side": 1,
+      "message": "they are used in line 98.",
+      "parentUuid": "AAAAdn//Q8A\u003d",
       "revId": "9fd507e1975099066a4849ef563e996448b90409",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
