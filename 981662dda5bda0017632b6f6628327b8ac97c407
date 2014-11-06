@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//QzM\u003d",
+        "filename": "vp9/common/vp9_idct.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-11-06T20:20:20Z",
+      "side": 1,
+      "message": "static const int\n\nI\u0027m still a bit curious as to how this was derived. I understand that out unquantized coeffs are scaled larger than our quantized coeffs, but in the lossless case (with transform) the scaling is 4. How did you arrive on 120 here?",
+      "revId": "981662dda5bda0017632b6f6628327b8ac97c407",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
