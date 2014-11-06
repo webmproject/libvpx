@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Q78\u003d",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-11-06T00:43:11Z",
+      "side": 1,
+      "message": "update the comment to reflect logic change",
+      "revId": "9fd507e1975099066a4849ef563e996448b90409",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Q74\u003d",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-11-06T00:43:11Z",
+      "side": 1,
+      "message": "would prefer to also return 0 (i.e., not apply delta-qp)  if non-zero mv (or at least if |mv| \u003e thresh) is used?",
+      "revId": "9fd507e1975099066a4849ef563e996448b90409",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Q8A\u003d",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-11-06T00:43:11Z",
+      "side": 1,
+      "message": "are these variables still used anywhere? since they\u0027re now removed from candidate_refresh_aq().",
+      "revId": "9fd507e1975099066a4849ef563e996448b90409",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
