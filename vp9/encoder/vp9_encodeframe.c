@@ -641,6 +641,9 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
     // Else for cyclic refresh mode update the segment map, set the segment id
     // and then update the quantizer.
     if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) {
+
+      vp9_cyclic_refresh_set_rate_and_dist_sb(cpi->cyclic_refresh,
+                                              ctx->rate, ctx->dist);
       vp9_cyclic_refresh_update_segment(cpi, &xd->mi[0].src_mi->mbmi,
                                         mi_row, mi_col, bsize, 1);
     }
@@ -910,6 +913,9 @@ static void rd_pick_sb_modes(VP9_COMP *cpi,
   // refactored to provide proper exit/return handle.
   if (rd_cost->rate == INT_MAX)
     rd_cost->rdcost = INT64_MAX;
+
+  ctx->rate = rd_cost->rate;
+  ctx->dist = rd_cost->dist;
 }
 
 static void update_stats(VP9_COMMON *cm, const MACROBLOCK *x) {
@@ -1334,6 +1340,8 @@ static void update_state_rt(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
                                                  : cm->last_frame_seg_map;
       mbmi->segment_id = vp9_get_segment_id(cm, map, bsize, mi_row, mi_col);
     } else {
+      vp9_cyclic_refresh_set_rate_and_dist_sb(cpi->cyclic_refresh,
+                                              ctx->rate, ctx->dist);
     // Setting segmentation map for cyclic_refresh
       vp9_cyclic_refresh_update_segment(cpi, mbmi, mi_row, mi_col, bsize, 1);
     }
@@ -1725,10 +1733,6 @@ static void rd_use_partition(VP9_COMP *cpi,
       vp9_select_in_frame_q_segment(cpi, mi_row, mi_col,
                                     output_enabled, chosen_rdc.rate);
     }
-
-    if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ)
-      vp9_cyclic_refresh_set_rate_and_dist_sb(cpi->cyclic_refresh,
-                                              chosen_rdc.rate, chosen_rdc.dist);
     encode_sb(cpi, tile_info, tp, mi_row, mi_col, output_enabled, bsize,
               pc_tree);
   }
@@ -2467,10 +2471,6 @@ static void rd_pick_partition(VP9_COMP *cpi,
     if ((cpi->oxcf.aq_mode == COMPLEXITY_AQ) && cm->seg.update_map)
       vp9_select_in_frame_q_segment(cpi, mi_row, mi_col, output_enabled,
                                     best_rdc.rate);
-    if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ)
-      vp9_cyclic_refresh_set_rate_and_dist_sb(cpi->cyclic_refresh,
-                                              best_rdc.rate, best_rdc.dist);
-
     encode_sb(cpi, tile_info, tp, mi_row, mi_col, output_enabled,
               bsize, pc_tree);
   }
@@ -2638,7 +2638,7 @@ static void nonrd_pick_sb_modes(VP9_COMP *cpi,
   mbmi->sb_type = bsize;
 
   if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cm->seg.enabled)
-    if (mbmi->segment_id && x->in_static_area)
+    if (mbmi->segment_id)
       x->rdmult = vp9_cyclic_refresh_get_rdmult(cpi->cyclic_refresh);
 
   if (vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP))
@@ -2651,6 +2651,9 @@ static void nonrd_pick_sb_modes(VP9_COMP *cpi,
 
   if (rd_cost->rate == INT_MAX)
     vp9_rd_cost_reset(rd_cost);
+
+  ctx->rate = rd_cost->rate;
+  ctx->dist = rd_cost->dist;
 }
 
 static void fill_mode_info_sb(VP9_COMMON *cm, MACROBLOCK *x,
@@ -2973,11 +2976,6 @@ static void nonrd_pick_partition(VP9_COMP *cpi,
       vp9_select_in_frame_q_segment(cpi, mi_row, mi_col, output_enabled,
                                     best_rdc.rate);
     }
-
-    if (oxcf->aq_mode == CYCLIC_REFRESH_AQ)
-      vp9_cyclic_refresh_set_rate_and_dist_sb(cpi->cyclic_refresh,
-                                              best_rdc.rate, best_rdc.dist);
-
     encode_sb_rt(cpi, tile_info, tp, mi_row, mi_col, output_enabled,
                  bsize, pc_tree);
   }
@@ -3114,12 +3112,8 @@ static void nonrd_select_partition(VP9_COMP *cpi,
     }
   }
 
-  if (bsize == BLOCK_64X64 && output_enabled) {
-    if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ)
-      vp9_cyclic_refresh_set_rate_and_dist_sb(cpi->cyclic_refresh,
-                                              rd_cost->rate, rd_cost->dist);
+  if (bsize == BLOCK_64X64 && output_enabled)
     encode_sb_rt(cpi, tile_info, tp, mi_row, mi_col, 1, bsize, pc_tree);
-  }
 }
 
 
@@ -3232,13 +3226,9 @@ static void nonrd_use_partition(VP9_COMP *cpi,
       break;
   }
 
-  if (bsize == BLOCK_64X64 && output_enabled) {
-    if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ)
-      vp9_cyclic_refresh_set_rate_and_dist_sb(cpi->cyclic_refresh,
-                                              rd_cost->rate, rd_cost->dist);
+  if (bsize == BLOCK_64X64 && output_enabled)
     encode_sb_rt(cpi, &tile_data->tile_info, tp, mi_row, mi_col,
                  1, bsize, pc_tree);
-  }
 }
 
 static void encode_nonrd_sb_row(VP9_COMP *cpi,
@@ -3263,7 +3253,6 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi,
     const int idx_str = cm->mi_stride * mi_row + mi_col;
     MODE_INFO *mi = cm->mi + idx_str;
     BLOCK_SIZE bsize;
-    x->in_static_area = 0;
     x->source_variance = UINT_MAX;
     vp9_zero(x->pred_mv);
     vp9_rd_cost_init(&dummy_rdc);
@@ -3290,10 +3279,8 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi,
         break;
       case REFERENCE_PARTITION:
         set_offsets(cpi, tile_info, mi_row, mi_col, BLOCK_64X64);
-        x->in_static_area = is_background(cpi, tile_info, mi_row, mi_col);
-
         if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cm->seg.enabled &&
-            xd->mi[0].src_mi->mbmi.segment_id && x->in_static_area) {
+            xd->mi[0].src_mi->mbmi.segment_id) {
           auto_partition_range(cpi, tile_info, mi_row, mi_col,
                                &sf->min_partition_size,
                                &sf->max_partition_size);

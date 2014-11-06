@@ -46,6 +46,11 @@ typedef struct {
   int64_t tx_rd_diff[TX_MODES];
   int64_t best_filter_diff[SWITCHABLE_FILTER_CONTEXTS];
 
+  // TODO(jingning) Use RD_COST struct here instead. This involves a boarder
+  // scope of refactoring.
+  int rate;
+  int64_t dist;
+
 #if CONFIG_VP9_TEMPORAL_DENOISING
   unsigned int newmv_sse;
   unsigned int zeromv_sse;
