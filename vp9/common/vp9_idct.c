@@ -246,10 +246,10 @@ void vp9_idct8x8_1_add_c(const tran_low_t *input, uint8_t *dest, int stride) {
 static void iadst4(const tran_low_t *input, tran_low_t *output) {
   tran_high_t s0, s1, s2, s3, s4, s5, s6, s7;
 
-  tran_high_t x0 = input[0];
-  tran_high_t x1 = input[1];
-  tran_high_t x2 = input[2];
-  tran_high_t x3 = input[3];
+  tran_low_t x0 = input[0];
+  tran_low_t x1 = input[1];
+  tran_low_t x2 = input[2];
+  tran_low_t x3 = input[3];
 
   if (!(x0 | x1 | x2 | x3)) {
     output[0] = output[1] = output[2] = output[3] = 0;
@@ -265,24 +265,19 @@ static void iadst4(const tran_low_t *input, tran_low_t *output) {
   s6 = sinpi_4_9 * x3;
   s7 = x0 - x2 + x3;
 
-  x0 = s0 + s3 + s5;
-  x1 = s1 - s4 - s6;
-  x2 = sinpi_3_9 * s7;
-  x3 = s2;
-
-  s0 = x0 + x3;
-  s1 = x1 + x3;
-  s2 = x2;
-  s3 = x0 + x1 - x3;
+  s0 = s0 + s3 + s5;
+  s1 = s1 - s4 - s6;
+  s3 = s2;
+  s2 = sinpi_3_9 * s7;
 
   // 1-D transform scaling factor is sqrt(2).
   // The overall dynamic range is 14b (input) + 14b (multiplication scaling)
   // + 1b (addition) = 29b.
   // Hence the output bit depth is 15b.
-  output[0] = WRAPLOW(dct_const_round_shift(s0), 8);
-  output[1] = WRAPLOW(dct_const_round_shift(s1), 8);
+  output[0] = WRAPLOW(dct_const_round_shift(s0 + s3), 8);
+  output[1] = WRAPLOW(dct_const_round_shift(s1 + s3), 8);
   output[2] = WRAPLOW(dct_const_round_shift(s2), 8);
-  output[3] = WRAPLOW(dct_const_round_shift(s3), 8);
+  output[3] = WRAPLOW(dct_const_round_shift(s0 + s1 - s3), 8);
 }
 
 void vp9_iht4x4_16_add_c(const tran_low_t *input, uint8_t *dest, int stride,
@@ -1672,10 +1667,10 @@ void vp9_highbd_idct8x8_1_add_c(const tran_low_t *input, uint8_t *dest8,
 static void highbd_iadst4(const tran_low_t *input, tran_low_t *output, int bd) {
   tran_high_t s0, s1, s2, s3, s4, s5, s6, s7;
 
-  tran_high_t x0 = input[0];
-  tran_high_t x1 = input[1];
-  tran_high_t x2 = input[2];
-  tran_high_t x3 = input[3];
+  tran_low_t x0 = input[0];
+  tran_low_t x1 = input[1];
+  tran_low_t x2 = input[2];
+  tran_low_t x3 = input[3];
   (void) bd;
 
   if (!(x0 | x1 | x2 | x3)) {
@@ -1690,26 +1685,21 @@ static void highbd_iadst4(const tran_low_t *input, tran_low_t *output, int bd) {
   s4 = sinpi_1_9 * x2;
   s5 = sinpi_2_9 * x3;
   s6 = sinpi_4_9 * x3;
-  s7 = x0 - x2 + x3;
+  s7 = (tran_high_t)(x0 - x2 + x3);
 
-  x0 = s0 + s3 + s5;
-  x1 = s1 - s4 - s6;
-  x2 = sinpi_3_9 * s7;
-  x3 = s2;
-
-  s0 = x0 + x3;
-  s1 = x1 + x3;
-  s2 = x2;
-  s3 = x0 + x1 - x3;
+  s0 = s0 + s3 + s5;
+  s1 = s1 - s4 - s6;
+  s3 = s2;
+  s2 = sinpi_3_9 * s7;
 
   // 1-D transform scaling factor is sqrt(2).
   // The overall dynamic range is 14b (input) + 14b (multiplication scaling)
   // + 1b (addition) = 29b.
   // Hence the output bit depth is 15b.
-  output[0] = WRAPLOW(dct_const_round_shift(s0), bd);
-  output[1] = WRAPLOW(dct_const_round_shift(s1), bd);
+  output[0] = WRAPLOW(dct_const_round_shift(s0 + s3), bd);
+  output[1] = WRAPLOW(dct_const_round_shift(s1 + s3), bd);
   output[2] = WRAPLOW(dct_const_round_shift(s2), bd);
-  output[3] = WRAPLOW(dct_const_round_shift(s3), bd);
+  output[3] = WRAPLOW(dct_const_round_shift(s0 + s1 - s3), bd);
 }
 
 void vp9_highbd_iht4x4_16_add_c(const tran_low_t *input, uint8_t *dest8,
@@ -1749,14 +1739,14 @@ void vp9_highbd_iht4x4_16_add_c(const tran_low_t *input, uint8_t *dest8,
 static void highbd_iadst8(const tran_low_t *input, tran_low_t *output, int bd) {
   tran_high_t s0, s1, s2, s3, s4, s5, s6, s7;
 
-  tran_high_t x0 = input[7];
-  tran_high_t x1 = input[0];
-  tran_high_t x2 = input[5];
-  tran_high_t x3 = input[2];
-  tran_high_t x4 = input[3];
-  tran_high_t x5 = input[4];
-  tran_high_t x6 = input[1];
-  tran_high_t x7 = input[6];
+  tran_low_t x0 = input[7];
+  tran_low_t x1 = input[0];
+  tran_low_t x2 = input[5];
+  tran_low_t x3 = input[2];
+  tran_low_t x4 = input[3];
+  tran_low_t x5 = input[4];
+  tran_low_t x6 = input[1];
+  tran_low_t x7 = input[6];
   (void) bd;
 
   if (!(x0 | x1 | x2 | x3 | x4 | x5 | x6 | x7)) {
@@ -2083,22 +2073,22 @@ static void highbd_iadst16(const tran_low_t *input, tran_low_t *output,
   tran_high_t s0, s1, s2, s3, s4, s5, s6, s7, s8;
   tran_high_t s9, s10, s11, s12, s13, s14, s15;
 
-  tran_high_t x0 = input[15];
-  tran_high_t x1 = input[0];
-  tran_high_t x2 = input[13];
-  tran_high_t x3 = input[2];
-  tran_high_t x4 = input[11];
-  tran_high_t x5 = input[4];
-  tran_high_t x6 = input[9];
-  tran_high_t x7 = input[6];
-  tran_high_t x8 = input[7];
-  tran_high_t x9 = input[8];
-  tran_high_t x10 = input[5];
-  tran_high_t x11 = input[10];
-  tran_high_t x12 = input[3];
-  tran_high_t x13 = input[12];
-  tran_high_t x14 = input[1];
-  tran_high_t x15 = input[14];
+  tran_low_t x0 = input[15];
+  tran_low_t x1 = input[0];
+  tran_low_t x2 = input[13];
+  tran_low_t x3 = input[2];
+  tran_low_t x4 = input[11];
+  tran_low_t x5 = input[4];
+  tran_low_t x6 = input[9];
+  tran_low_t x7 = input[6];
+  tran_low_t x8 = input[7];
+  tran_low_t x9 = input[8];
+  tran_low_t x10 = input[5];
+  tran_low_t x11 = input[10];
+  tran_low_t x12 = input[3];
+  tran_low_t x13 = input[12];
+  tran_low_t x14 = input[1];
+  tran_low_t x15 = input[14];
   (void) bd;
 
   if (!(x0 | x1 | x2 | x3 | x4 | x5 | x6 | x7 | x8
