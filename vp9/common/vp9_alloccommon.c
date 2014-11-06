@@ -145,6 +145,11 @@ void vp9_remove_common(VP9_COMMON *cm) {
   vp9_free_ref_frame_buffers(cm);
   vp9_free_context_buffers(cm);
   vp9_free_internal_frame_buffers(&cm->int_frame_buffers);
+
+  vpx_free(cm->fc);
+  cm->fc = NULL;
+  vpx_free(cm->frame_contexts);
+  cm->frame_contexts = NULL;
 }
 
 void vp9_init_context_buffers(VP9_COMMON *cm) {

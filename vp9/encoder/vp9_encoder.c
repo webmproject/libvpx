@@ -201,10 +201,6 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   int i;
 
-  vpx_free(cm->fc);
-  cm->fc = NULL;
-  vpx_free(cm->frame_contexts);
-  cm->frame_contexts = NULL;
   vpx_free(cpi->tile_data);
   cpi->tile_data = NULL;
 
@@ -1733,12 +1729,13 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
 }
 
 void vp9_remove_compressor(VP9_COMP *cpi) {
+  VP9_COMMON *const cm = &cpi->common;
   unsigned int i;
 
   if (!cpi)
     return;
 
-  if (cpi && (cpi->common.current_video_frame > 0)) {
+  if (cpi && (cm->current_video_frame > 0)) {
 #if CONFIG_INTERNAL_STATS
 
     vp9_clear_system_state();
@@ -1821,7 +1818,7 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
   }
 #endif
 
-  vp9_remove_common(&cpi->common);
+  vp9_remove_common(cm);
   vpx_free(cpi);
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
