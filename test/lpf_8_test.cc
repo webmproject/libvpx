@@ -474,7 +474,7 @@ using std::tr1::make_tuple;
 #if HAVE_SSE2
 #if CONFIG_VP9_HIGHBITDEPTH
 INSTANTIATE_TEST_CASE_P(
-    SSE2_C_COMPARE_SINGLE, Loop8Test6Param,
+    SSE2, Loop8Test6Param,
     ::testing::Values(
         make_tuple(&vp9_highbd_lpf_horizontal_4_sse2,
                    &vp9_highbd_lpf_horizontal_4_c, 8),
@@ -511,29 +511,7 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_highbd_lpf_vertical_8_sse2,
                    &vp9_highbd_lpf_vertical_8_c, 12),
         make_tuple(&wrapper_vertical_16_sse2,
-                   &wrapper_vertical_16_c, 12)));
-#else
-INSTANTIATE_TEST_CASE_P(
-    SSE2_C_COMPARE_SINGLE, Loop8Test6Param,
-    ::testing::Values(
-        make_tuple(&vp9_lpf_horizontal_8_sse2, &vp9_lpf_horizontal_8_c, 8),
-        make_tuple(&vp9_lpf_horizontal_16_sse2, &vp9_lpf_horizontal_16_c, 8),
-        make_tuple(&vp9_lpf_vertical_8_sse2, &vp9_lpf_vertical_8_c, 8)));
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-#endif
-
-#if HAVE_AVX2 && (!CONFIG_VP9_HIGHBITDEPTH)
-INSTANTIATE_TEST_CASE_P(
-    AVX2_C_COMPARE_SINGLE, Loop8Test6Param,
-    ::testing::Values(
-        make_tuple(&vp9_lpf_horizontal_16_avx2, &vp9_lpf_horizontal_16_c, 8)));
-#endif
-
-#if HAVE_SSE2
-#if CONFIG_VP9_HIGHBITDEPTH
-INSTANTIATE_TEST_CASE_P(
-    SSE2_C_COMPARE_DUAL, Loop8Test6Param,
-    ::testing::Values(
+                   &wrapper_vertical_16_c, 12),
         make_tuple(&wrapper_vertical_16_dual_sse2,
                    &wrapper_vertical_16_dual_c, 8),
         make_tuple(&wrapper_vertical_16_dual_sse2,
@@ -542,16 +520,26 @@ INSTANTIATE_TEST_CASE_P(
                    &wrapper_vertical_16_dual_c, 12)));
 #else
 INSTANTIATE_TEST_CASE_P(
-    SSE2_C_COMPARE_DUAL, Loop8Test6Param,
+    SSE2, Loop8Test6Param,
     ::testing::Values(
+        make_tuple(&vp9_lpf_horizontal_8_sse2, &vp9_lpf_horizontal_8_c, 8),
+        make_tuple(&vp9_lpf_horizontal_16_sse2, &vp9_lpf_horizontal_16_c, 8),
+        make_tuple(&vp9_lpf_vertical_8_sse2, &vp9_lpf_vertical_8_c, 8),
         make_tuple(&wrapper_vertical_16_sse2, &wrapper_vertical_16_c, 8)));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-#endif  // HAVE_SSE2
+#endif
+
+#if HAVE_AVX2 && (!CONFIG_VP9_HIGHBITDEPTH)
+INSTANTIATE_TEST_CASE_P(
+    AVX2, Loop8Test6Param,
+    ::testing::Values(
+        make_tuple(&vp9_lpf_horizontal_16_avx2, &vp9_lpf_horizontal_16_c, 8)));
+#endif
 
 #if HAVE_SSE2
 #if CONFIG_VP9_HIGHBITDEPTH
 INSTANTIATE_TEST_CASE_P(
-    SSE_C_COMPARE_DUAL, Loop8Test9Param,
+    SSE2, Loop8Test9Param,
     ::testing::Values(
         make_tuple(&vp9_highbd_lpf_horizontal_4_dual_sse2,
                    &vp9_highbd_lpf_horizontal_4_dual_c, 8),
@@ -579,7 +567,7 @@ INSTANTIATE_TEST_CASE_P(
                    &vp9_highbd_lpf_vertical_8_dual_c, 12)));
 #else
 INSTANTIATE_TEST_CASE_P(
-    SSE_C_COMPARE_DUAL, Loop8Test9Param,
+    SSE2, Loop8Test9Param,
     ::testing::Values(
         make_tuple(&vp9_lpf_horizontal_4_dual_sse2,
                    &vp9_lpf_horizontal_4_dual_c, 8),
