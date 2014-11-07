@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//QpM\u003d",
+        "filename": "test/lpf_8_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 542,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-11-07T23:09:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Qpo\u003d",
+      "revId": "b67a706d70848c19e67007deb9ea9b28187b1de3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Qpk\u003d",
         "filename": "test/lpf_8_test.cc",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2014-11-07T21:03:07Z",
       "side": 1,
       "message": "Same as above",
+      "revId": "b67a706d70848c19e67007deb9ea9b28187b1de3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//QpI\u003d",
+        "filename": "test/lpf_8_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 570,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-11-07T23:09:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Qpk\u003d",
       "revId": "b67a706d70848c19e67007deb9ea9b28187b1de3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
