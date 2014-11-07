@@ -1472,6 +1472,9 @@ static int read_compressed_header(VP9Decoder *pbi, const uint8_t *data,
         vp9_diff_update_prob(&r, &fc->partition_prob[j][i]);
 
     read_mv_probs(nmvc, cm->allow_high_precision_mv, &r);
+#if CONFIG_EXT_TX
+    vp9_diff_update_prob(&r, &fc->ext_tx_prob);
+#endif
   }
 
   return vp9_reader_has_error(&r);
@@ -1523,6 +1526,10 @@ static void debug_check_frame_counts(const VP9_COMMON *const cm) {
   assert(!memcmp(&cm->counts.tx, &zero_counts.tx, sizeof(cm->counts.tx)));
   assert(!memcmp(cm->counts.skip, zero_counts.skip, sizeof(cm->counts.skip)));
   assert(!memcmp(&cm->counts.mv, &zero_counts.mv, sizeof(cm->counts.mv)));
+#if CONFIG_EXT_TX
+  assert(!memcmp(cm->counts.ext_tx, zero_counts.ext_tx,
+                 sizeof(cm->counts.ext_tx)));
+#endif
 }
 #endif  // NDEBUG
 

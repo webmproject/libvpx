@@ -277,6 +277,15 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
         (skip || vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP)))) {
     write_selected_tx_size(cm, xd, mbmi->tx_size, bsize, w);
   }
+#if CONFIG_EXT_TX
+    if (is_inter &&
+        mbmi->tx_size <= TX_16X16 &&
+        bsize >= BLOCK_8X8 &&
+        !mbmi->skip &&
+        !vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
+      vp9_write(w, mbmi->ext_txfrm, cm->fc.ext_tx_prob);
+    }
+#endif
 
   if (!is_inter) {
     if (bsize >= BLOCK_8X8) {
@@ -1290,6 +1299,10 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
                        cm->counts.partition[i], PARTITION_TYPES, &header_bc);
 
     vp9_write_nmv_probs(cm, cm->allow_high_precision_mv, &header_bc);
+
+#if CONFIG_EXT_TX
+    vp9_cond_prob_diff_update(&header_bc, &fc->ext_tx_prob, cm->counts.ext_tx);
+#endif
   }
 
   vp9_stop_encode(&header_bc);

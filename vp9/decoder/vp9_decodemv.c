@@ -666,11 +666,25 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
 
   mbmi->mv[0].as_int = 0;
   mbmi->mv[1].as_int = 0;
+
   mbmi->segment_id = read_inter_segment_id(cm, xd, mi_row, mi_col, r);
   mbmi->skip = read_skip(cm, xd, mbmi->segment_id, r);
   inter_block = read_is_inter_block(cm, xd, mbmi->segment_id, r);
   mbmi->tx_size = read_tx_size(cm, xd, cm->tx_mode, mbmi->sb_type,
                                !mbmi->skip || !inter_block, r);
+#if CONFIG_EXT_TX
+  if (inter_block &&
+      mbmi->tx_size <= TX_16X16 &&
+      mbmi->sb_type >= BLOCK_8X8 &&
+      !vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP) &&
+      !mbmi->skip) {
+    mbmi->ext_txfrm = vp9_read(r, cm->fc.ext_tx_prob);
+    if (!cm->frame_parallel_decoding_mode)
+      ++cm->counts.ext_tx[mbmi->ext_txfrm];
+  } else {
+    mbmi->ext_txfrm = NORM;
+  }
+#endif
 
   if (inter_block)
     read_inter_block_mode_info(cm, xd, tile, mi, mi_row, mi_col, r);

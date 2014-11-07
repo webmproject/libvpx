@@ -592,6 +592,9 @@ void vp9_xform_quant(MACROBLOCK *x, int plane, int block,
   const int diff_stride = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
   int i, j;
   const int16_t *src_diff;
+#if CONFIG_EXT_TX
+  MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
+#endif
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &i, &j);
   src_diff = &p->src_diff[4 * (j * diff_stride + i)];
 
@@ -615,21 +618,45 @@ void vp9_xform_quant(MACROBLOCK *x, int plane, int block,
                                     scan_order->scan, scan_order->iscan);
         break;
       case TX_16X16:
+#if CONFIG_EXT_TX
+        if (plane != 0 || mbmi->ext_txfrm == NORM) {
+          vp9_highbd_fdct16x16(src_diff, coeff, diff_stride);
+        } else {
+          vp9_highbd_fht16x16(src_diff, coeff, diff_stride, ADST_ADST);
+        }
+#else
         vp9_highbd_fdct16x16(src_diff, coeff, diff_stride);
+#endif
         vp9_highbd_quantize_b(coeff, 256, x->skip_block, p->zbin, p->round,
                               p->quant, p->quant_shift, qcoeff, dqcoeff,
                               pd->dequant, p->zbin_extra, eob,
                               scan_order->scan, scan_order->iscan);
         break;
       case TX_8X8:
+#if CONFIG_EXT_TX
+        if (plane != 0 || mbmi->ext_txfrm == NORM) {
+          vp9_highbd_fdct8x8(src_diff, coeff, diff_stride);
+        } else {
+          vp9_highbd_fht8x8(src_diff, coeff, diff_stride, ADST_ADST);
+        }
+#else
         vp9_highbd_fdct8x8(src_diff, coeff, diff_stride);
+#endif
         vp9_highbd_quantize_b(coeff, 64, x->skip_block, p->zbin, p->round,
                               p->quant, p->quant_shift, qcoeff, dqcoeff,
                               pd->dequant, p->zbin_extra, eob,
                               scan_order->scan, scan_order->iscan);
         break;
       case TX_4X4:
+#if CONFIG_EXT_TX
+        if (plane != 0 || mbmi->ext_txfrm == NORM) {
+          x->fwd_txm4x4(src_diff, coeff, diff_stride);
+        } else {
+          vp9_highbd_fht4x4(src_diff, coeff, diff_stride, ADST_ADST);
+        }
+#else
         x->fwd_txm4x4(src_diff, coeff, diff_stride);
+#endif
         vp9_highbd_quantize_b(coeff, 16, x->skip_block, p->zbin, p->round,
                               p->quant, p->quant_shift, qcoeff, dqcoeff,
                               pd->dequant, p->zbin_extra, eob,
@@ -660,21 +687,45 @@ void vp9_xform_quant(MACROBLOCK *x, int plane, int block,
                            scan_order->iscan);
       break;
     case TX_16X16:
+#if CONFIG_EXT_TX
+      if (plane != 0 || mbmi->ext_txfrm == NORM) {
+        vp9_fdct16x16(src_diff, coeff, diff_stride);
+      } else {
+        vp9_fht16x16(src_diff, coeff, diff_stride, ADST_ADST);
+      }
+#else
       vp9_fdct16x16(src_diff, coeff, diff_stride);
+#endif
       vp9_quantize_b(coeff, 256, x->skip_block, p->zbin, p->round,
                      p->quant, p->quant_shift, qcoeff, dqcoeff,
                      pd->dequant, p->zbin_extra, eob,
                      scan_order->scan, scan_order->iscan);
       break;
     case TX_8X8:
+#if CONFIG_EXT_TX
+      if (plane != 0 || mbmi->ext_txfrm == NORM) {
+        vp9_fdct8x8(src_diff, coeff, diff_stride);
+      } else {
+        vp9_fht8x8(src_diff, coeff, diff_stride, ADST_ADST);
+      }
+#else
       vp9_fdct8x8(src_diff, coeff, diff_stride);
+#endif
       vp9_quantize_b(coeff, 64, x->skip_block, p->zbin, p->round,
                      p->quant, p->quant_shift, qcoeff, dqcoeff,
                      pd->dequant, p->zbin_extra, eob,
                      scan_order->scan, scan_order->iscan);
       break;
     case TX_4X4:
+#if CONFIG_EXT_TX
+      if (plane != 0 || mbmi->ext_txfrm == NORM) {
+        x->fwd_txm4x4(src_diff, coeff, diff_stride);
+      } else {
+        vp9_fht4x4(src_diff, coeff, diff_stride, ADST_ADST);
+      }
+#else
       x->fwd_txm4x4(src_diff, coeff, diff_stride);
+#endif
       vp9_quantize_b(coeff, 16, x->skip_block, p->zbin, p->round,
                      p->quant, p->quant_shift, qcoeff, dqcoeff,
                      pd->dequant, p->zbin_extra, eob,
@@ -698,6 +749,9 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
   int i, j;
   uint8_t *dst;
   ENTROPY_CONTEXT *a, *l;
+#if CONFIG_EXT_TX
+  MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
+#endif
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &i, &j);
   dst = &pd->dst.buf[4 * j * pd->dst.stride + 4 * i];
   a = &ctx->ta[plane][i];
@@ -762,19 +816,52 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
                                  p->eobs[block], xd->bd);
         break;
       case TX_16X16:
+#if CONFIG_EXT_TX
+        if (plane != 0 || mbmi->ext_txfrm == NORM) {
+          vp9_highbd_idct16x16_add(dqcoeff, dst, pd->dst.stride,
+                                   p->eobs[block], xd->bd);
+        } else {
+          vp9_highbd_iht16x16_add(ADST_ADST, dqcoeff, dst, pd->dst.stride,
+                                  p->eobs[block], xd->bd);
+        }
+#else
         vp9_highbd_idct16x16_add(dqcoeff, dst, pd->dst.stride,
                                  p->eobs[block], xd->bd);
+#endif
         break;
       case TX_8X8:
+#if CONFIG_EXT_TX
+        if (plane != 0 || mbmi->ext_txfrm == NORM) {
+          vp9_highbd_idct8x8_add(dqcoeff, dst, pd->dst.stride,
+                                 p->eobs[block], xd->bd);
+        } else {
+          vp9_highbd_iht8x8_add(ADST_ADST, dqcoeff, dst, pd->dst.stride,
+                                p->eobs[block], xd->bd);
+        }
+#else
         vp9_highbd_idct8x8_add(dqcoeff, dst, pd->dst.stride,
                                p->eobs[block], xd->bd);
+#endif
         break;
       case TX_4X4:
+#if CONFIG_EXT_TX
+        if (plane != 0 || mbmi->ext_txfrm == NORM) {
+          // this is like vp9_short_idct4x4 but has a special case around eob<=1
+          // which is significant (not just an optimization) for the lossless
+          // case.
+          x->highbd_itxm_add(dqcoeff, dst, pd->dst.stride,
+                             p->eobs[block], xd->bd);
+        } else {
+          vp9_highbd_iht4x4_add(ADST_ADST, dqcoeff, dst, pd->dst.stride,
+                                p->eobs[block], xd->bd);
+        }
+#else
         // this is like vp9_short_idct4x4 but has a special case around eob<=1
         // which is significant (not just an optimization) for the lossless
         // case.
         x->highbd_itxm_add(dqcoeff, dst, pd->dst.stride,
                            p->eobs[block], xd->bd);
+#endif
         break;
       default:
         assert(0 && "Invalid transform size");
@@ -793,16 +880,46 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
       vp9_idct32x32_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
       break;
     case TX_16X16:
+#if CONFIG_EXT_TX
+      if (plane != 0 || mbmi->ext_txfrm == NORM) {
+        vp9_idct16x16_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
+      } else {
+        vp9_iht16x16_add(ADST_ADST, dqcoeff, dst, pd->dst.stride,
+                         p->eobs[block]);
+      }
+#else
       vp9_idct16x16_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
+#endif
       break;
     case TX_8X8:
+#if CONFIG_EXT_TX
+      if (plane != 0 || mbmi->ext_txfrm == NORM) {
+        vp9_idct8x8_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
+      } else {
+        vp9_iht8x8_add(ADST_ADST, dqcoeff, dst, pd->dst.stride,
+                       p->eobs[block]);
+      }
+#else
       vp9_idct8x8_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
+#endif
       break;
     case TX_4X4:
+#if CONFIG_EXT_TX
+      if (plane != 0 || mbmi->ext_txfrm == NORM) {
+        // this is like vp9_short_idct4x4 but has a special case around eob<=1
+        // which is significant (not just an optimization) for the lossless
+        // case.
+        x->itxm_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
+      } else {
+        vp9_iht4x4_add(ADST_ADST, dqcoeff, dst, pd->dst.stride,
+                       p->eobs[block]);
+      }
+#else
       // this is like vp9_short_idct4x4 but has a special case around eob<=1
       // which is significant (not just an optimization) for the lossless
       // case.
       x->itxm_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
+#endif
       break;
     default:
       assert(0 && "Invalid transform size");
@@ -819,6 +936,10 @@ static void encode_block_pass1(int plane, int block, BLOCK_SIZE plane_bsize,
   tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
   int i, j;
   uint8_t *dst;
+#if CONFIG_EXT_TX
+  MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
+  mbmi->ext_txfrm = NORM;
+#endif
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &i, &j);
   dst = &pd->dst.buf[4 * j * pd->dst.stride + 4 * i];
 
@@ -958,7 +1079,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
         mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
         vp9_predict_intra_block(xd, block >> 4, bwl, TX_16X16, mode,
 #if CONFIG_FILTERINTRA
-                              fbit,
+                                fbit,
 #endif
                                 x->skip_encode ? src : dst,
                                 x->skip_encode ? src_stride : dst_stride,
@@ -983,7 +1104,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
         mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
         vp9_predict_intra_block(xd, block >> 2, bwl, TX_8X8, mode,
 #if CONFIG_FILTERINTRA
-                              fbit,
+                                fbit,
 #endif
                                 x->skip_encode ? src : dst,
                                 x->skip_encode ? src_stride : dst_stride,
@@ -1008,7 +1129,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
         mode = plane == 0 ? get_y_mode(xd->mi[0].src_mi, block) : mbmi->uv_mode;
         vp9_predict_intra_block(xd, block, bwl, TX_4X4, mode,
 #if CONFIG_FILTERINTRA
-                              fbit,
+                                fbit,
 #endif
                                 x->skip_encode ? src : dst,
                                 x->skip_encode ? src_stride : dst_stride,
