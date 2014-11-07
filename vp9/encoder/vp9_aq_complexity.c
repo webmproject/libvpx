@@ -11,8 +11,9 @@
 #include <limits.h>
 #include <math.h>
 
+#include "vp9/encoder/vp9_aq_variance.h"
+#include "vp9/encoder/vp9_encodeframe.h"
 #include "vp9/common/vp9_seg_common.h"
-
 #include "vp9/encoder/vp9_segmentation.h"
 
 #define AQ_C_SEGMENTS  3
@@ -22,6 +23,7 @@ static const double aq_c_q_adj_factor[AQ_C_STRENGTHS][AQ_C_SEGMENTS] =
   {{1.0, 1.0, 1.0}, {1.0, 2.0, 1.0}, {1.0, 1.5, 2.5}};
 static const double aq_c_transitions[AQ_C_STRENGTHS][AQ_C_SEGMENTS] =
   {{1.0, 1.0, 1.0}, {1.0, 0.25, 0.0}, {1.0, 0.5, 0.25}};
+static const double aq_c_var_thresholds[AQ_C_SEGMENTS] = {100.0, 12.0, 10.0};
 
 static int get_aq_c_strength(int q_index, vpx_bit_depth_t bit_depth) {
   // Approximate base quatizer (truncated to int)
@@ -94,7 +96,7 @@ void vp9_setup_in_frame_q_adj(VP9_COMP *cpi) {
 // An "aq_strength" value determines how many segments are supported,
 // the set of transition points to use and the extent of the quantizer
 // adjustment for each segment (configured in vp9_setup_in_frame_q_adj()).
-void vp9_select_in_frame_q_segment(VP9_COMP *cpi,
+void vp9_select_in_frame_q_segment(VP9_COMP *cpi, BLOCK_SIZE bs,
                                    int mi_row, int mi_col,
                                    int output_enabled, int projected_rate) {
   VP9_COMMON *const cm = &cpi->common;
@@ -118,6 +120,10 @@ void vp9_select_in_frame_q_segment(VP9_COMP *cpi,
                             (bw * bh);
     const int aq_strength = get_aq_c_strength(cm->base_qindex, cm->bit_depth);
     const int active_segments = aq_c_active_segments[aq_strength];
+    double logvar;
+
+    vp9_setup_src_planes(&cpi->mb, cpi->Source, mi_row, mi_col);
+    logvar = vp9_log_block_var(cpi, &cpi->mb, bs);
 
     // The number of segments considered and the transition points used to
     // select them is determined by the "aq_strength" value.
@@ -127,8 +133,9 @@ void vp9_select_in_frame_q_segment(VP9_COMP *cpi,
     // with no Q adjustment.
     segment = active_segments - 1;
     while (segment > 0) {
-      if (projected_rate <
-          (target_rate * aq_c_transitions[aq_strength][segment])) {
+      if ((projected_rate <
+          target_rate * aq_c_transitions[aq_strength][segment]) &&
+          (logvar < aq_c_var_thresholds[segment])) {
         break;
       }
       --segment;
