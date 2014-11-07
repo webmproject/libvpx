@@ -53,6 +53,7 @@
 #define MIN_KF_BOOST        300
 #define NEW_MV_MODE_PENALTY 32
 #define SVC_FACTOR_PT_LOW   0.45
+#define DARK_THRESH         64
 
 #define DOUBLE_DIVIDE_CHECK(x) ((x) < 0 ? (x) - 0.000001 : (x) + 0.000001)
 
@@ -106,10 +107,11 @@ static void output_stats(FIRSTPASS_STATS *stats,
     FILE *fpfile;
     fpfile = fopen("firstpass.stt", "a");
 
-    fprintf(fpfile, "%12.0f %12.0f %12.0f %12.0f %12.4f %12.4f"
+    fprintf(fpfile, "%12.0f %12.4f %12.0f %12.0f %12.0f %12.4f %12.4f"
             "%12.4f %12.4f %12.4f %12.4f %12.4f %12.4f %12.4f"
             "%12.0f %12.0f %12.4f %12.0f %12.0f %12.4f\n",
             stats->frame,
+            stats->weight,
             stats->intra_error,
             stats->coded_error,
             stats->sr_coded_error,
@@ -144,7 +146,8 @@ static void output_fpmb_stats(uint8_t *this_frame_mb_stats, VP9_COMMON *cm,
 #endif
 
 static void zero_stats(FIRSTPASS_STATS *section) {
-  section->frame      = 0.0;
+  section->frame = 0.0;
+  section->weight = 0.0;
   section->intra_error = 0.0;
   section->coded_error = 0.0;
   section->sr_coded_error = 0.0;
@@ -168,6 +171,7 @@ static void zero_stats(FIRSTPASS_STATS *section) {
 static void accumulate_stats(FIRSTPASS_STATS *section,
                              const FIRSTPASS_STATS *frame) {
   section->frame += frame->frame;
+  section->weight += frame->weight;
   section->spatial_layer_id = frame->spatial_layer_id;
   section->intra_error += frame->intra_error;
   section->coded_error += frame->coded_error;
@@ -191,6 +195,7 @@ static void accumulate_stats(FIRSTPASS_STATS *section,
 static void subtract_stats(FIRSTPASS_STATS *section,
                            const FIRSTPASS_STATS *frame) {
   section->frame -= frame->frame;
+  section->weight -= frame->weight;
   section->intra_error -= frame->intra_error;
   section->coded_error -= frame->coded_error;
   section->sr_coded_error -= frame->sr_coded_error;
@@ -217,10 +222,11 @@ static double calculate_modified_err(const TWO_PASS *twopass,
                                      const VP9EncoderConfig *oxcf,
                                      const FIRSTPASS_STATS *this_frame) {
   const FIRSTPASS_STATS *const stats = &twopass->total_stats;
-  const double av_err = stats->coded_error / stats->count;
-  const double modified_error = av_err *
-      pow(this_frame->coded_error / DOUBLE_DIVIDE_CHECK(av_err),
-          oxcf->two_pass_vbrbias / 100.0);
+  const double av_weight = stats->weight / stats->count;
+  const double av_err = (stats->coded_error * av_weight) / stats->count;
+  const double modified_error =
+    av_err * pow(this_frame->coded_error * this_frame->weight /
+                 DOUBLE_DIVIDE_CHECK(av_err), oxcf->two_pass_vbrbias / 100.0);
   return fclamp(modified_error,
                 twopass->modified_error_min, twopass->modified_error_max);
 }
@@ -480,6 +486,8 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
   const YV12_BUFFER_CONFIG *first_ref_buf = lst_yv12;
   LAYER_CONTEXT *const lc = is_two_pass_svc(cpi) ?
         &cpi->svc.layer_context[cpi->svc.spatial_layer_id] : NULL;
+  double intra_factor = 0.0;
+  double brightness_factor = 0.0;
 
 #if CONFIG_FP_MB_STATS
   if (cpi->use_fp_mb_stats) {
@@ -587,6 +595,9 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
       const int use_dc_pred = (mb_col || mb_row) && (!mb_col || !mb_row);
       double error_weight = 1.0;
       const BLOCK_SIZE bsize = get_bsize(cm, mb_row, mb_col);
+      double log_intra;
+      int level_sample;
+
 #if CONFIG_FP_MB_STATS
       const int mb_index = mb_row * cm->mb_cols + mb_col;
 #endif
@@ -634,6 +645,25 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
         }
       }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+
+      log_intra = log(this_error + 1.0);
+      if (log_intra < 10.0)
+        intra_factor += 1.0 + ((10.0 - log_intra) * 0.05);
+      else
+        intra_factor += 1.0;
+
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (cm->use_highbitdepth)
+        level_sample = CONVERT_TO_SHORTPTR(x->plane[0].src.buf)[0];
+      else
+        level_sample = x->plane[0].src.buf[0];
+#else
+      level_sample = x->plane[0].src.buf[0];
+#endif
+      if ((level_sample < DARK_THRESH) && (log_intra < 9.0))
+        brightness_factor += 1.0 + (0.01 * (DARK_THRESH - level_sample));
+      else
+        brightness_factor += 1.0;
 
       if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
         vp9_clear_system_state();
@@ -943,6 +973,10 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
         cpi->oxcf.allow_spatial_resampling ? cpi->initial_mbs : cpi->common.MBs;
     const double min_err = 200 * sqrt(num_mbs);
 
+    intra_factor = intra_factor / (double)num_mbs;
+    brightness_factor = brightness_factor / (double)num_mbs;
+    fps.weight = intra_factor * brightness_factor;
+
     fps.frame = cm->current_video_frame;
     fps.spatial_layer_id = cpi->svc.spatial_layer_id;
     fps.coded_error = (double)(coded_error >> 8) + min_err;
@@ -1094,7 +1128,8 @@ static int get_twopass_worst_quality(const VP9_COMP *cpi,
     // content at the given rate.
     for (q = rc->best_quality; q < rc->worst_quality; ++q) {
       const double factor =
-          calc_correction_factor(err_per_mb, ERR_DIVISOR - ediv_size_correction,
+          calc_correction_factor(err_per_mb,
+                                 ERR_DIVISOR - ediv_size_correction,
                                  is_svc_upper_layer ? SVC_FACTOR_PT_LOW :
                                  FACTOR_PT_LOW, FACTOR_PT_HIGH, q,
                                  cpi->common.bit_depth);
@@ -1319,14 +1354,14 @@ static double calc_frame_boost(VP9_COMP *cpi,
   const double lq =
     vp9_convert_qindex_to_q(cpi->rc.avg_frame_qindex[INTER_FRAME],
                             cpi->common.bit_depth);
-  const double boost_correction = MIN((0.5 + (lq * 0.015)), 1.5);
+  const double boost_q_correction = MIN((0.5 + (lq * 0.015)), 1.5);
   const int num_mbs =
       cpi->oxcf.allow_spatial_resampling ? cpi->initial_mbs : cpi->common.MBs;
 
   // Underlying boost factor is based on inter error ratio.
   frame_boost = (BASELINE_ERR_PER_MB * num_mbs) /
                 DOUBLE_DIVIDE_CHECK(this_frame->coded_error);
-  frame_boost = frame_boost * BOOST_FACTOR * boost_correction;
+  frame_boost = frame_boost * BOOST_FACTOR * boost_q_correction;
 
   // Increase boost for frames where new data coming into frame (e.g. zoom out).
   // Slightly reduce boost if there is a net balance of motion out of the frame
@@ -1337,7 +1372,7 @@ static double calc_frame_boost(VP9_COMP *cpi,
   else
     frame_boost += frame_boost * (this_frame_mv_in_out / 2.0);
 
-  return MIN(frame_boost, max_boost * boost_correction);
+  return MIN(frame_boost, max_boost * boost_q_correction);
 }
 
 static int calc_arf_boost(VP9_COMP *cpi, int offset,

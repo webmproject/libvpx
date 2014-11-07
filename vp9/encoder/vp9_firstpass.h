@@ -43,6 +43,7 @@ typedef struct {
 
 typedef struct {
   double frame;
+  double weight;
   double intra_error;
   double coded_error;
   double sr_coded_error;
