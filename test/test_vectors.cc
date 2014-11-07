@@ -181,6 +181,7 @@ const char *const kVP9TestVectors[] = {
   "vp90-2-14-resize-fp-tiles-8-2.webm", "vp90-2-14-resize-fp-tiles-8-4.webm",
   "vp90-2-15-segkey.webm", "vp90-2-15-segkey_adpq.webm",
   "vp91-2-04-yuv444.webm",
+  "vp90-2-20-big_superframe-01.webm", "vp90-2-20-big_superframe-02.webm",
 };
 const int kNumVP9TestVectors = NELEMENTS(kVP9TestVectors);
 #endif  // CONFIG_VP9_DECODER
