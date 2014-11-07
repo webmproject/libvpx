@@ -220,6 +220,22 @@ extern "C" {
   } vpx_codec_cx_pkt_t; /**< alias for struct vpx_codec_cx_pkt */
 
 
+  /*!\brief Encoder return output buffer callback
+   *
+   * This callback function, when registered, returns with packets when each
+   * spatial layer is encoded.
+   */
+  // putting the definitions here for now. (agrange: find if there
+  // is a better place for this)
+  typedef void (* vpx_codec_enc_output_cx_pkt_cb_fn_t)(vpx_codec_cx_pkt_t *pkt,
+                                                       void *user_data);
+
+  /*!\brief Callback function pointer / user data pair storage */
+  typedef struct vpx_codec_enc_output_cx_cb_pair {
+    vpx_codec_enc_output_cx_pkt_cb_fn_t output_cx_pkt;
+    void                            *user_priv;
+  } vpx_codec_priv_output_cx_pkt_cb_pair_t;
+
   /*!\brief Rational Number
    *
    * This structure holds a fractional value.

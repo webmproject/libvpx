@@ -44,8 +44,6 @@ _CRTIMP char *__cdecl strtok_s(char *str, const char *delim, char **context);
 #define SVC_REFERENCE_FRAMES 8
 #define SUPERFRAME_SLOTS (8)
 #define SUPERFRAME_BUFFER_SIZE (SUPERFRAME_SLOTS * sizeof(uint32_t) + 2)
-#define OPTION_BUFFER_SIZE 1024
-#define COMPONENTS 4  // psnr & sse statistics maintained for total, y, u, v
 
 #define MAX_QUANTIZER 63
 
@@ -81,61 +79,35 @@ typedef struct FrameData {
   struct FrameData         *next;
 } FrameData;
 
-typedef struct SvcInternal {
-  char options[OPTION_BUFFER_SIZE];        // set by vpx_svc_set_options
-
-  // values extracted from option, quantizers
-  vpx_svc_extra_cfg_t svc_params;
-  int enable_auto_alt_ref[VPX_SS_MAX_LAYERS];
-  int bitrates[VPX_SS_MAX_LAYERS];
-
-  // accumulated statistics
-  double psnr_sum[VPX_SS_MAX_LAYERS][COMPONENTS];   // total/Y/U/V
-  uint64_t sse_sum[VPX_SS_MAX_LAYERS][COMPONENTS];
-  uint32_t bytes_sum[VPX_SS_MAX_LAYERS];
-
-  // codec encoding values
-  int width;    // width of highest layer
-  int height;   // height of highest layer
-  int kf_dist;  // distance between keyframes
-
-  // state variables
-  int psnr_pkt_received;
-  int layer;
-  int use_multiple_frame_contexts;
-
-  char message_buffer[2048];
-  vpx_codec_ctx_t *codec_ctx;
-} SvcInternal;
-
-static SvcInternal *get_svc_internal(SvcContext *svc_ctx) {
+static SvcInternal_t *get_svc_internal(SvcContext_t *svc_ctx) {
   if (svc_ctx == NULL) return NULL;
   if (svc_ctx->internal == NULL) {
-    SvcInternal *const si = (SvcInternal *)malloc(sizeof(*si));
+    SvcInternal_t *const si = (SvcInternal_t *)malloc(sizeof(*si));
     if (si != NULL) {
       memset(si, 0, sizeof(*si));
     }
     svc_ctx->internal = si;
   }
-  return (SvcInternal *)svc_ctx->internal;
+  return (SvcInternal_t *)svc_ctx->internal;
 }
 
-static const SvcInternal *get_const_svc_internal(const SvcContext *svc_ctx) {
+static const SvcInternal_t *get_const_svc_internal(
+    const SvcContext_t *svc_ctx) {
   if (svc_ctx == NULL) return NULL;
-  return (const SvcInternal *)svc_ctx->internal;
+  return (const SvcInternal_t *)svc_ctx->internal;
 }
 
-static void svc_log_reset(SvcContext *svc_ctx) {
-  SvcInternal *const si = (SvcInternal *)svc_ctx->internal;
+static void svc_log_reset(SvcContext_t *svc_ctx) {
+  SvcInternal_t *const si = (SvcInternal_t *)svc_ctx->internal;
   si->message_buffer[0] = '\0';
 }
 
-static int svc_log(SvcContext *svc_ctx, SVC_LOG_LEVEL level,
+static int svc_log(SvcContext_t *svc_ctx, SVC_LOG_LEVEL level,
                    const char *fmt, ...) {
   char buf[512];
   int retval = 0;
   va_list ap;
-  SvcInternal *const si = get_svc_internal(svc_ctx);
+  SvcInternal_t *const si = get_svc_internal(svc_ctx);
 
   if (level > svc_ctx->log_level) {
     return retval;
@@ -183,7 +155,7 @@ static vpx_codec_err_t extract_option(LAYER_OPTION_TYPE type,
   return VPX_CODEC_OK;
 }
 
-static vpx_codec_err_t parse_layer_options_from_string(SvcContext *svc_ctx,
+static vpx_codec_err_t parse_layer_options_from_string(SvcContext_t *svc_ctx,
                                                        LAYER_OPTION_TYPE type,
                                                        const char *input,
                                                        int *option0,
@@ -228,12 +200,12 @@ static vpx_codec_err_t parse_layer_options_from_string(SvcContext *svc_ctx,
  *         quantizers=<q1>,<q2>,...
  * svc_mode = [i|ip|alt_ip|gf]
  */
-static vpx_codec_err_t parse_options(SvcContext *svc_ctx, const char *options) {
+static vpx_codec_err_t parse_options(SvcContext_t *svc_ctx, const char *options) {
   char *input_string;
   char *option_name;
   char *option_value;
   char *input_ptr;
-  SvcInternal *const si = get_svc_internal(svc_ctx);
+  SvcInternal_t *const si = get_svc_internal(svc_ctx);
   vpx_codec_err_t res = VPX_CODEC_OK;
   int i, alt_ref_enabled = 0;
 
@@ -315,8 +287,9 @@ static vpx_codec_err_t parse_options(SvcContext *svc_ctx, const char *options) {
   return res;
 }
 
-vpx_codec_err_t vpx_svc_set_options(SvcContext *svc_ctx, const char *options) {
-  SvcInternal *const si = get_svc_internal(svc_ctx);
+vpx_codec_err_t vpx_svc_set_options(SvcContext_t *svc_ctx,
+                                    const char *options) {
+  SvcInternal_t *const si = get_svc_internal(svc_ctx);
   if (svc_ctx == NULL || options == NULL || si == NULL) {
     return VPX_CODEC_INVALID_PARAM;
   }
@@ -325,10 +298,10 @@ vpx_codec_err_t vpx_svc_set_options(SvcContext *svc_ctx, const char *options) {
   return VPX_CODEC_OK;
 }
 
-void assign_layer_bitrates(const SvcContext *svc_ctx,
+void assign_layer_bitrates(const SvcContext_t *svc_ctx,
                            vpx_codec_enc_cfg_t *const enc_cfg) {
   int i;
-  const SvcInternal *const si = get_const_svc_internal(svc_ctx);
+  const SvcInternal_t *const si = get_const_svc_internal(svc_ctx);
 
   if (si->bitrates[0] != 0) {
     enc_cfg->rc_target_bitrate = 0;
@@ -359,12 +332,12 @@ void assign_layer_bitrates(const SvcContext *svc_ctx,
   }
 }
 
-vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
+vpx_codec_err_t vpx_svc_init(SvcContext_t *svc_ctx, vpx_codec_ctx_t *codec_ctx,
                              vpx_codec_iface_t *iface,
                              vpx_codec_enc_cfg_t *enc_cfg) {
   vpx_codec_err_t res;
   int i;
-  SvcInternal *const si = get_svc_internal(svc_ctx);
+  SvcInternal_t *const si = get_svc_internal(svc_ctx);
   if (svc_ctx == NULL || codec_ctx == NULL || iface == NULL ||
       enc_cfg == NULL) {
     return VPX_CODEC_INVALID_PARAM;
@@ -454,13 +427,15 @@ vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
  * Encode a frame into multiple layers
  * Create a superframe containing the individual layers
  */
-vpx_codec_err_t vpx_svc_encode(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
-                               struct vpx_image *rawimg, vpx_codec_pts_t pts,
+vpx_codec_err_t vpx_svc_encode(SvcContext_t *svc_ctx,
+                               vpx_codec_ctx_t *codec_ctx,
+                               struct vpx_image *rawimg,
+                               vpx_codec_pts_t pts,
                                int64_t duration, int deadline) {
   vpx_codec_err_t res;
   vpx_codec_iter_t iter;
   const vpx_codec_cx_pkt_t *cx_pkt;
-  SvcInternal *const si = get_svc_internal(svc_ctx);
+  SvcInternal_t *const si = get_svc_internal(svc_ctx);
   if (svc_ctx == NULL || codec_ctx == NULL || si == NULL) {
     return VPX_CODEC_INVALID_PARAM;
   }
@@ -523,8 +498,8 @@ vpx_codec_err_t vpx_svc_encode(SvcContext *svc_ctx, vpx_codec_ctx_t *codec_ctx,
   return VPX_CODEC_OK;
 }
 
-const char *vpx_svc_get_message(const SvcContext *svc_ctx) {
-  const SvcInternal *const si = get_const_svc_internal(svc_ctx);
+const char *vpx_svc_get_message(const SvcContext_t *svc_ctx) {
+  const SvcInternal_t *const si = get_const_svc_internal(svc_ctx);
   if (svc_ctx == NULL || si == NULL) return NULL;
   return si->message_buffer;
 }
@@ -535,7 +510,7 @@ static double calc_psnr(double d) {
 }
 
 // dump accumulated statistics and reset accumulated values
-const char *vpx_svc_dump_statistics(SvcContext *svc_ctx) {
+const char *vpx_svc_dump_statistics(SvcContext_t *svc_ctx) {
   int number_of_frames;
   int i, j;
   uint32_t bytes_total = 0;
@@ -544,7 +519,7 @@ const char *vpx_svc_dump_statistics(SvcContext *svc_ctx) {
   double mse[COMPONENTS];
   double y_scale;
 
-  SvcInternal *const si = get_svc_internal(svc_ctx);
+  SvcInternal_t *const si = get_svc_internal(svc_ctx);
   if (svc_ctx == NULL || si == NULL) return NULL;
 
   svc_log_reset(svc_ctx);
@@ -594,12 +569,12 @@ const char *vpx_svc_dump_statistics(SvcContext *svc_ctx) {
   return vpx_svc_get_message(svc_ctx);
 }
 
-void vpx_svc_release(SvcContext *svc_ctx) {
-  SvcInternal *si;
+void vpx_svc_release(SvcContext_t *svc_ctx) {
+  SvcInternal_t *si;
   if (svc_ctx == NULL) return;
   // do not use get_svc_internal as it will unnecessarily allocate an
-  // SvcInternal if it was not already allocated
-  si = (SvcInternal *)svc_ctx->internal;
+  // SvcInternal_t if it was not already allocated
+  si = (SvcInternal_t *)svc_ctx->internal;
   if (si != NULL) {
     free(si);
     svc_ctx->internal = NULL;

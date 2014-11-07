@@ -83,6 +83,7 @@ struct vpx_codec_alg_priv {
   vp8_postproc_cfg_t      preview_ppcfg;
   vpx_codec_pkt_list_decl(256) pkt_list;
   unsigned int                 fixed_kf_cntr;
+  vpx_codec_priv_output_cx_pkt_cb_pair_t output_cx_pkt_cb;
 };
 
 static VP9_REFFRAME ref_frame_to_vp9_reframe(vpx_ref_frame_type_t frame) {
@@ -994,6 +995,24 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
           ctx->pending_frame_magnitude |= size;
           cx_data += size;
           cx_data_sz -= size;
+
+          if (ctx->output_cx_pkt_cb.output_cx_pkt) {
+            pkt.kind = VPX_CODEC_CX_FRAME_PKT;
+            pkt.data.frame.pts = ticks_to_timebase_units(timebase,
+                                                         dst_time_stamp);
+            pkt.data.frame.duration =
+               (unsigned long)ticks_to_timebase_units(timebase,
+                   dst_end_time_stamp - dst_time_stamp);
+            pkt.data.frame.flags = get_frame_pkt_flags(cpi, lib_flags);
+            pkt.data.frame.buf = ctx->pending_cx_data;
+            pkt.data.frame.sz  = size;
+            ctx->pending_cx_data = NULL;
+            ctx->pending_cx_data_sz = 0;
+            ctx->pending_frame_count = 0;
+            ctx->pending_frame_magnitude = 0;
+            ctx->output_cx_pkt_cb.output_cx_pkt(
+                &pkt, ctx->output_cx_pkt_cb.user_priv);
+          }
           continue;
         }
 
@@ -1009,7 +1028,9 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
           ctx->pending_frame_sizes[ctx->pending_frame_count++] = size;
           ctx->pending_frame_magnitude |= size;
           ctx->pending_cx_data_sz += size;
-          size += write_superframe_index(ctx);
+          // write the superframe only for the case when
+          if (!ctx->output_cx_pkt_cb.output_cx_pkt)
+            size += write_superframe_index(ctx);
           pkt.data.frame.buf = ctx->pending_cx_data;
           pkt.data.frame.sz  = ctx->pending_cx_data_sz;
           ctx->pending_cx_data = NULL;
@@ -1021,11 +1042,16 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
           pkt.data.frame.sz  = size;
         }
         pkt.data.frame.partition_id = -1;
-        vpx_codec_pkt_list_add(&ctx->pkt_list.head, &pkt);
+
+        if(ctx->output_cx_pkt_cb.output_cx_pkt)
+          ctx->output_cx_pkt_cb.output_cx_pkt(&pkt, ctx->output_cx_pkt_cb.user_priv);
+        else
+          vpx_codec_pkt_list_add(&ctx->pkt_list.head, &pkt);
+
         cx_data += size;
         cx_data_sz -= size;
 #if CONFIG_SPATIAL_SVC
-        if (is_two_pass_svc(cpi)) {
+        if (is_two_pass_svc(cpi) && !ctx->output_cx_pkt_cb.output_cx_pkt) {
           vpx_codec_cx_pkt_t pkt_sizes, pkt_psnr;
           int i;
           vp9_zero(pkt_sizes);
@@ -1038,7 +1064,9 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
             pkt_psnr.data.layer_psnr[i] = lc->psnr_pkt;
             lc->layer_size = 0;
           }
+
           vpx_codec_pkt_list_add(&ctx->pkt_list.head, &pkt_sizes);
+
           vpx_codec_pkt_list_add(&ctx->pkt_list.head, &pkt_psnr);
         }
 #endif
@@ -1239,6 +1267,18 @@ static vpx_codec_err_t ctrl_set_svc_layer_id(vpx_codec_alg_priv_t *ctx,
   return VPX_CODEC_OK;
 }
 
+static vpx_codec_err_t ctrl_get_svc_layer_id(vpx_codec_alg_priv_t *ctx,
+                                             va_list args) {
+  vpx_svc_layer_id_t *data = va_arg(args, vpx_svc_layer_id_t *);
+  VP9_COMP *const cpi = (VP9_COMP *)ctx->cpi;
+  SVC *const svc = &cpi->svc;
+
+  data->spatial_layer_id = svc->spatial_layer_id;
+  data->temporal_layer_id = svc->temporal_layer_id;
+
+  return VPX_CODEC_OK;
+}
+
 static vpx_codec_err_t ctrl_set_svc_parameters(vpx_codec_alg_priv_t *ctx,
                                                va_list args) {
   VP9_COMP *const cpi = ctx->cpi;
@@ -1253,6 +1293,16 @@ static vpx_codec_err_t ctrl_set_svc_parameters(vpx_codec_alg_priv_t *ctx,
     lc->scaling_factor_num = params->scaling_factor_num[i];
     lc->scaling_factor_den = params->scaling_factor_den[i];
   }
+
+  return VPX_CODEC_OK;
+}
+
+static vpx_codec_err_t ctrl_register_cx_callback(vpx_codec_alg_priv_t *ctx,
+                                                 va_list args) {
+  vpx_codec_priv_output_cx_pkt_cb_pair_t *cbp =
+      (vpx_codec_priv_output_cx_pkt_cb_pair_t *)va_arg(args, void *);
+  ctx->output_cx_pkt_cb.output_cx_pkt = cbp->output_cx_pkt;
+  ctx->output_cx_pkt_cb.user_priv = cbp->user_priv;
 
   return VPX_CODEC_OK;
 }
@@ -1296,6 +1346,7 @@ static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   {VP9E_SET_FRAME_PERIODIC_BOOST,     ctrl_set_frame_periodic_boost},
   {VP9E_SET_SVC,                      ctrl_set_svc},
   {VP9E_SET_SVC_PARAMETERS,           ctrl_set_svc_parameters},
+  {VP9E_REGISTER_CX_CALLBACK,         ctrl_register_cx_callback},
   {VP9E_SET_SVC_LAYER_ID,             ctrl_set_svc_layer_id},
   {VP9E_SET_TUNE_CONTENT,             ctrl_set_tune_content},
   {VP9E_SET_NOISE_SENSITIVITY,        ctrl_set_noise_sensitivity},
@@ -1304,6 +1355,7 @@ static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   {VP8E_GET_LAST_QUANTIZER,           ctrl_get_quantizer},
   {VP8E_GET_LAST_QUANTIZER_64,        ctrl_get_quantizer64},
   {VP9_GET_REFERENCE,                 ctrl_get_reference},
+  {VP9E_GET_SVC_LAYER_ID,             ctrl_get_svc_layer_id},
 
   { -1, NULL},
 };
