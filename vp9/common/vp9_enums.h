@@ -104,7 +104,7 @@ typedef enum {
   BT_709     = 2,  // YUV
   SMPTE_170  = 3,  // YUV
   SMPTE_240  = 4,  // YUV
-  RESERVED_1 = 5,
+  BT_2020    = 5,  // YUV
   RESERVED_2 = 6,
   SRGB       = 7   // RGB
 } COLOR_SPACE;
