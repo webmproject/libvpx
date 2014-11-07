@@ -56,6 +56,9 @@ typedef struct frame_contexts {
   struct tx_probs tx_probs;
   vp9_prob skip_probs[SKIP_CONTEXTS];
   nmv_context nmvc;
+#if CONFIG_FILTERINTRA
+  vp9_prob filterintra_prob[TX_SIZES][INTRA_MODES];
+#endif
 } FRAME_CONTEXT;
 
 typedef struct {
@@ -75,6 +78,9 @@ typedef struct {
   struct tx_counts tx;
   unsigned int skip[SKIP_CONTEXTS][2];
   nmv_context_counts mv;
+#if CONFIG_FILTERINTRA
+  unsigned int filterintra[TX_SIZES][INTRA_MODES][2];
+#endif
 } FRAME_COUNTS;
 
 extern const vp9_prob vp9_kf_uv_mode_prob[INTRA_MODES][INTRA_MODES - 1];

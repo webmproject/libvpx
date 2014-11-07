@@ -281,6 +281,12 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
   if (!is_inter) {
     if (bsize >= BLOCK_8X8) {
       write_intra_mode(w, mode, cm->fc.y_mode_prob[size_group_lookup[bsize]]);
+#if CONFIG_FILTERINTRA
+      if (is_filter_allowed(mode) && is_filter_enabled(mbmi->tx_size)) {
+        vp9_write(w, mbmi->filterbit,
+                  cm->fc.filterintra_prob[mbmi->tx_size][mode]);
+      }
+#endif
     } else {
       int idx, idy;
       const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];
@@ -289,10 +295,23 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
         for (idx = 0; idx < 2; idx += num_4x4_w) {
           const PREDICTION_MODE b_mode = mi->bmi[idy * 2 + idx].as_mode;
           write_intra_mode(w, b_mode, cm->fc.y_mode_prob[0]);
+#if CONFIG_FILTERINTRA
+          if (is_filter_allowed(b_mode)) {
+            vp9_write(w, mi->b_filter_info[idy * 2 + idx],
+                      cm->fc.filterintra_prob[0][b_mode]);
+          }
+#endif
         }
       }
     }
     write_intra_mode(w, mbmi->uv_mode, cm->fc.uv_mode_prob[mode]);
+#if CONFIG_FILTERINTRA
+    if (is_filter_allowed(mbmi->uv_mode) &&
+        is_filter_enabled(get_uv_tx_size(mbmi, &xd->plane[1]))) {
+      vp9_write(w, mbmi->uv_filterbit,
+                cm->fc.filterintra_prob[get_uv_tx_size(mbmi, &xd->plane[1])][mbmi->uv_mode]);
+    }
+#endif
   } else {
     const int mode_ctx = mbmi->mode_context[mbmi->ref_frame[0]];
     const vp9_prob *const inter_probs = cm->fc.inter_mode_probs[mode_ctx];
@@ -365,6 +384,11 @@ static void write_mb_modes_kf(const VP9_COMMON *cm, const MACROBLOCKD *xd,
 
   if (bsize >= BLOCK_8X8) {
     write_intra_mode(w, mbmi->mode, get_y_mode_probs(mi, above_mi, left_mi, 0));
+#if CONFIG_FILTERINTRA
+    if (is_filter_allowed(mbmi->mode) && is_filter_enabled(mbmi->tx_size))
+      vp9_write(w, mbmi->filterbit,
+                cm->fc.filterintra_prob[mbmi->tx_size][mbmi->mode]);
+#endif
   } else {
     const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];
     const int num_4x4_h = num_4x4_blocks_high_lookup[bsize];
@@ -375,11 +399,22 @@ static void write_mb_modes_kf(const VP9_COMMON *cm, const MACROBLOCKD *xd,
         const int block = idy * 2 + idx;
         write_intra_mode(w, mi->bmi[block].as_mode,
                          get_y_mode_probs(mi, above_mi, left_mi, block));
+#if CONFIG_FILTERINTRA
+        if (is_filter_allowed(mi->bmi[block].as_mode))
+          vp9_write(w, mi->b_filter_info[block],
+                    cm->fc.filterintra_prob[0][mi->bmi[block].as_mode]);
+#endif
       }
     }
   }
 
   write_intra_mode(w, mbmi->uv_mode, vp9_kf_uv_mode_prob[mbmi->mode]);
+#if CONFIG_FILTERINTRA
+  if (is_filter_allowed(mbmi->uv_mode) &&
+      is_filter_enabled(get_uv_tx_size(mbmi, &xd->plane[1])))
+    vp9_write(w, mbmi->uv_filterbit,
+              cm->fc.filterintra_prob[get_uv_tx_size(mbmi, &xd->plane[1])][mbmi->uv_mode]);
+#endif
 }
 
 static void write_modes_b(VP9_COMP *cpi, const TileInfo *const tile,

@@ -345,11 +345,24 @@ static void predict_and_reconstruct_intra_block(int plane, int block,
                                             : mi->mbmi.uv_mode;
   int x, y;
   uint8_t *dst;
+#if CONFIG_FILTERINTRA
+  int fbit;
+  if (plane == 0)
+    if (mi->mbmi.sb_type < BLOCK_8X8)
+      fbit = mi->b_filter_info[block];
+    else
+      fbit = is_filter_enabled(tx_size) ? mi->mbmi.filterbit : 0;
+  else
+    fbit = is_filter_enabled(tx_size) ? mi->mbmi.uv_filterbit : 0;
+#endif
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &x, &y);
   dst = &pd->dst.buf[4 * y * pd->dst.stride + 4 * x];
 
   vp9_predict_intra_block(xd, block >> (tx_size << 1),
                           b_width_log2_lookup[plane_bsize], tx_size, mode,
+#if CONFIG_FILTERINTRA
+                          fbit,
+#endif
                           dst, pd->dst.stride, dst, pd->dst.stride,
                           x, y, plane);
   if (!mi->mbmi.skip) {

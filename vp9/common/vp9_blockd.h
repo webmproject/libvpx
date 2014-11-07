@@ -112,6 +112,9 @@ typedef struct {
   // Common for both INTER and INTRA blocks
   BLOCK_SIZE sb_type;
   PREDICTION_MODE mode;
+#if CONFIG_FILTERINTRA
+  int filterbit, uv_filterbit;
+#endif
   TX_SIZE tx_size;
   int8_t skip;
   int8_t segment_id;
@@ -131,6 +134,9 @@ typedef struct {
 typedef struct MODE_INFO {
   struct MODE_INFO *src_mi;
   MB_MODE_INFO mbmi;
+#if CONFIG_FILTERINTRA
+  int b_filter_info[4];
+#endif
   b_mode_info bmi[4];
 } MODE_INFO;
 
@@ -138,6 +144,16 @@ static INLINE PREDICTION_MODE get_y_mode(const MODE_INFO *mi, int block) {
   return mi->mbmi.sb_type < BLOCK_8X8 ? mi->bmi[block].as_mode
                                       : mi->mbmi.mode;
 }
+
+#if CONFIG_FILTERINTRA
+static INLINE int is_filter_allowed(PREDICTION_MODE mode) {
+  return 1;
+}
+
+static INLINE int is_filter_enabled(TX_SIZE txsize) {
+  return (txsize <= TX_32X32);
+}
+#endif
 
 static INLINE int is_inter_block(const MB_MODE_INFO *mbmi) {
   return mbmi->ref_frame[0] > INTRA_FRAME;

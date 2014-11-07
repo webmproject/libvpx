@@ -924,10 +924,233 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
     pred[mode][tx_size](dst, dst_stride, const_above_row, left_col);
   }
 }
+#if CONFIG_FILTERINTRA
+static void filter_intra_predictors_4tap(uint8_t *ypred_ptr, int y_stride,
+                                         int bs,
+                                         const uint8_t *yabove_row,
+                                         const uint8_t *yleft_col,
+                                         int mode) {
+  static const int prec_bits = 10;
+  static const int round_val = 511;
+
+  int k, r, c;
+#if CONFIG_TX64X64
+  int pred[65][129];
+#else
+  int pred[33][65];
+#endif
+  int mean, ipred;
+
+  int taps4_4[10][4] = {
+      {735, 881, -537, -54},
+      {1005, 519, -488, -11},
+      {383, 990, -343, -6},
+      {442, 805, -542, 319},
+      {658, 616, -133, -116},
+      {875, 442, -141, -151},
+      {386, 741, -23, -80},
+      {390, 1027, -446, 51},
+      {679, 606, -523, 262},
+      {903, 922, -778, -23}
+  };
+  int taps4_8[10][4] = {
+      {648, 803, -444, 16},
+      {972, 620, -576, 7},
+      {561, 967, -499, -5},
+      {585, 762, -468, 144},
+      {596, 619, -182, -9},
+      {895, 459, -176, -153},
+      {557, 722, -126, -129},
+      {601, 839, -523, 105},
+      {562, 709, -499, 251},
+      {803, 872, -695, 43}
+  };
+  int taps4_16[10][4] = {
+      {423, 728, -347, 111},
+      {963, 685, -665, 23},
+      {281, 1024, -480, 216},
+      {640, 596, -437, 78},
+      {429, 669, -259, 99},
+      {740, 646, -415, 23},
+      {568, 771, -346, 40},
+      {404, 833, -486, 209},
+      {398, 712, -423, 307},
+      {939, 935, -887, 17}
+  };
+  int taps4_32[10][4] = {
+      {477, 737, -393, 150},
+      {881, 630, -546, 67},
+      {506, 984, -443, -20},
+      {114, 459, -270, 528},
+      {433, 528, 14, 3},
+      {837, 470, -301, -30},
+      {181, 777, 89, -107},
+      {-29, 716, -232, 259},
+      {589, 646, -495, 255},
+      {740, 884, -728, 77}
+  };
+
+  const int c1 = (bs >= 32) ? taps4_32[mode][0] : ((bs >= 16) ?
+      taps4_16[mode][0] : ((bs >= 8) ? taps4_8[mode][0] : taps4_4[mode][0]));
+  const int c2 = (bs >= 32) ? taps4_32[mode][1] : ((bs >= 16) ?
+      taps4_16[mode][1] : ((bs >= 8) ? taps4_8[mode][1] : taps4_4[mode][1]));
+  const int c3 = (bs >= 32) ? taps4_32[mode][2] : ((bs >= 16) ?
+      taps4_16[mode][2] : ((bs >= 8) ? taps4_8[mode][2] : taps4_4[mode][2]));
+  const int c4 = (bs >= 32) ? taps4_32[mode][3] : ((bs >= 16) ?
+      taps4_16[mode][3] : ((bs >= 8) ? taps4_8[mode][3] : taps4_4[mode][3]));
+
+  k = 0;
+  mean = 0;
+  while (k < bs) {
+    mean = mean + (int)yleft_col[k];
+    mean = mean + (int)yabove_row[k];
+    k++;
+  }
+  mean = (mean + bs) / (2 * bs);
+
+  for (r = 0; r < bs; r++)
+    pred[r + 1][0] = (int)yleft_col[r] - mean;
+
+  for (c = 0; c < 2 * bs + 1; c++)
+    pred[0][c] = (int)yabove_row[c - 1] - mean;
+
+  for (r = 1; r < bs + 1; r++)
+    for (c = 1; c < 2 * bs + 1 - r; c++) {
+      ipred = c1 * pred[r - 1][c] + c2 * pred[r][c - 1]
+                    + c3 * pred[r - 1][c - 1] + c4 * pred[r - 1][c + 1];
+      pred[r][c] = ipred < 0 ? -((-ipred + round_val) >> prec_bits) :
+                               ((ipred + round_val) >> prec_bits);
+    }
+
+  for (r = 0; r < bs; r++) {
+    for (c = 0; c < bs; c++) {
+      ipred = pred[r + 1][c + 1] + mean;
+      ypred_ptr[c] = clip_pixel(ipred);
+    }
+    ypred_ptr += y_stride;
+  }
+}
+
+static void build_filter_intra_predictors(const MACROBLOCKD *xd,
+                                          const uint8_t *ref, int ref_stride,
+                                          uint8_t *dst, int dst_stride,
+                                          PREDICTION_MODE mode, TX_SIZE tx_size,
+                                          int up_available, int left_available,
+                                          int right_available, int x, int y,
+                                          int plane) {
+  int i;
+  DECLARE_ALIGNED_ARRAY(16, uint8_t, left_col, 64);
+  DECLARE_ALIGNED_ARRAY(16, uint8_t, above_data, 128 + 16);
+  uint8_t *above_row = above_data + 16;
+  const uint8_t *const_above_row = above_row;
+  const int bs = 4 << tx_size;
+  int frame_width, frame_height;
+  int x0, y0;
+  const struct macroblockd_plane *const pd = &xd->plane[plane];
+
+  // Get current frame pointer, width and height.
+  if (plane == 0) {
+    frame_width = xd->cur_buf->y_width;
+    frame_height = xd->cur_buf->y_height;
+  } else {
+    frame_width = xd->cur_buf->uv_width;
+    frame_height = xd->cur_buf->uv_height;
+  }
+
+  // Get block position in current frame.
+  x0 = (-xd->mb_to_left_edge >> (3 + pd->subsampling_x)) + x;
+  y0 = (-xd->mb_to_top_edge >> (3 + pd->subsampling_y)) + y;
+
+  vpx_memset(left_col, 129, 64);
+
+  // left
+  if (left_available) {
+    if (xd->mb_to_bottom_edge < 0) {
+      /* slower path if the block needs border extension */
+      if (y0 + bs <= frame_height) {
+        for (i = 0; i < bs; ++i)
+          left_col[i] = ref[i * ref_stride - 1];
+      } else {
+        const int extend_bottom = frame_height - y0;
+        for (i = 0; i < extend_bottom; ++i)
+          left_col[i] = ref[i * ref_stride - 1];
+        for (; i < bs; ++i)
+          left_col[i] = ref[(extend_bottom - 1) * ref_stride - 1];
+      }
+    } else {
+      /* faster path if the block does not need extension */
+      for (i = 0; i < bs; ++i)
+        left_col[i] = ref[i * ref_stride - 1];
+    }
+  }
+
+  // TODO(hkuang) do not extend 2*bs pixels for all modes.
+  // above
+  if (up_available) {
+    const uint8_t *above_ref = ref - ref_stride;
+    if (xd->mb_to_right_edge < 0) {
+      /* slower path if the block needs border extension */
+      if (x0 + 2 * bs <= frame_width) {
+        if (right_available && bs == 4) {
+          vpx_memcpy(above_row, above_ref, 2 * bs);
+        } else {
+          vpx_memcpy(above_row, above_ref, bs);
+          vpx_memset(above_row + bs, above_row[bs - 1], bs);
+        }
+      } else if (x0 + bs <= frame_width) {
+        const int r = frame_width - x0;
+        if (right_available && bs == 4) {
+          vpx_memcpy(above_row, above_ref, r);
+          vpx_memset(above_row + r, above_row[r - 1],
+                     x0 + 2 * bs - frame_width);
+        } else {
+          vpx_memcpy(above_row, above_ref, bs);
+          vpx_memset(above_row + bs, above_row[bs - 1], bs);
+        }
+      } else if (x0 <= frame_width) {
+        const int r = frame_width - x0;
+        if (right_available && bs == 4) {
+          vpx_memcpy(above_row, above_ref, r);
+          vpx_memset(above_row + r, above_row[r - 1],
+                     x0 + 2 * bs - frame_width);
+        } else {
+          vpx_memcpy(above_row, above_ref, r);
+          vpx_memset(above_row + r, above_row[r - 1],
+                     x0 + 2 * bs - frame_width);
+        }
+      }
+      above_row[-1] = left_available ? above_ref[-1] : 129;
+    } else {
+      /* faster path if the block does not need extension */
+      if (bs == 4 && right_available && left_available) {
+        const_above_row = above_ref;
+      } else {
+        vpx_memcpy(above_row, above_ref, bs);
+        if (bs == 4 && right_available)
+          vpx_memcpy(above_row + bs, above_ref + bs, bs);
+        else
+          vpx_memset(above_row + bs, above_row[bs - 1], bs);
+        above_row[-1] = left_available ? above_ref[-1] : 129;
+      }
+    }
+  } else {
+    vpx_memset(above_row, 127, bs * 2);
+    above_row[-1] = 127;
+  }
+
+  // predict
+  filter_intra_predictors_4tap(dst, dst_stride, bs, const_above_row, left_col,
+                               mode);
+}
+#endif
+
 
 void vp9_predict_intra_block(const MACROBLOCKD *xd, int block_idx, int bwl_in,
                              TX_SIZE tx_size, PREDICTION_MODE mode,
-                             const uint8_t *ref, int ref_stride,
+#if CONFIG_FILTERINTRA
+                             int filterbit,
+#endif
+                            const uint8_t *ref, int ref_stride,
                              uint8_t *dst, int dst_stride,
                              int aoff, int loff, int plane) {
   const int bwl = bwl_in - tx_size;
@@ -937,6 +1160,10 @@ void vp9_predict_intra_block(const MACROBLOCKD *xd, int block_idx, int bwl_in,
   const int have_right = ((block_idx & wmask) != wmask);
   const int x = aoff * 4;
   const int y = loff * 4;
+#if CONFIG_FILTERINTRA
+  const int filterflag = is_filter_allowed(mode) && is_filter_enabled(tx_size)
+                         && filterbit;
+#endif
 
   assert(bwl >= 0);
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -947,6 +1174,15 @@ void vp9_predict_intra_block(const MACROBLOCKD *xd, int block_idx, int bwl_in,
     return;
   }
 #endif
+#if CONFIG_FILTERINTRA
+  if (!filterflag) {
+#endif
   build_intra_predictors(xd, ref, ref_stride, dst, dst_stride, mode, tx_size,
                          have_top, have_left, have_right, x, y, plane);
+#if CONFIG_FILTERINTRA
+  } else {
+    build_filter_intra_predictors(xd, ref, ref_stride, dst, dst_stride, mode,
+                        tx_size, have_top, have_left, have_right, x, y, plane);
+  }
+#endif
 }

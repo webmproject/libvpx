@@ -883,6 +883,9 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
   const scan_order *scan_order;
   TX_TYPE tx_type;
   PREDICTION_MODE mode;
+#if CONFIG_FILTERINTRA
+  int fbit = 0;
+#endif
   const int bwl = b_width_log2_lookup[plane_bsize];
   const int diff_stride = 4 * (1 << bwl);
   uint8_t *src, *dst;
@@ -904,6 +907,9 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
         scan_order = &vp9_default_scan_orders[TX_64X64];
         mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
         vp9_predict_intra_block(xd, block >> 8, bwl, TX_64X64, mode,
+#if CONFIG_FILTERINTRA
+                              fbit,
+#endif
                                 x->skip_encode ? src : dst,
                                 x->skip_encode ? src_stride : dst_stride,
                                 dst, dst_stride, i, j, plane);
@@ -926,6 +932,9 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
         scan_order = &vp9_default_scan_orders[TX_32X32];
         mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
         vp9_predict_intra_block(xd, block >> 6, bwl, TX_32X32, mode,
+#if CONFIG_FILTERINTRA
+                              fbit,
+#endif
                                 x->skip_encode ? src : dst,
                                 x->skip_encode ? src_stride : dst_stride,
                                 dst, dst_stride, i, j, plane);
@@ -948,6 +957,9 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
         scan_order = &vp9_scan_orders[TX_16X16][tx_type];
         mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
         vp9_predict_intra_block(xd, block >> 4, bwl, TX_16X16, mode,
+#if CONFIG_FILTERINTRA
+                              fbit,
+#endif
                                 x->skip_encode ? src : dst,
                                 x->skip_encode ? src_stride : dst_stride,
                                 dst, dst_stride, i, j, plane);
@@ -970,6 +982,9 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
         scan_order = &vp9_scan_orders[TX_8X8][tx_type];
         mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
         vp9_predict_intra_block(xd, block >> 2, bwl, TX_8X8, mode,
+#if CONFIG_FILTERINTRA
+                              fbit,
+#endif
                                 x->skip_encode ? src : dst,
                                 x->skip_encode ? src_stride : dst_stride,
                                 dst, dst_stride, i, j, plane);
@@ -992,6 +1007,9 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
         scan_order = &vp9_scan_orders[TX_4X4][tx_type];
         mode = plane == 0 ? get_y_mode(xd->mi[0].src_mi, block) : mbmi->uv_mode;
         vp9_predict_intra_block(xd, block, bwl, TX_4X4, mode,
+#if CONFIG_FILTERINTRA
+                              fbit,
+#endif
                                 x->skip_encode ? src : dst,
                                 x->skip_encode ? src_stride : dst_stride,
                                 dst, dst_stride, i, j, plane);
@@ -1029,7 +1047,12 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
     return;
   }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-
+#if CONFIG_FILTERINTRA
+      if (mbmi->sb_type < BLOCK_8X8 && plane == 0)
+        fbit = xd->mi[0].b_filter_info[block];
+      else
+        fbit = plane == 0 ? mbmi->filterbit : mbmi->uv_filterbit;
+#endif
   switch (tx_size) {
 #if CONFIG_TX64X64
     case TX_64X64:
@@ -1037,6 +1060,9 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
       scan_order = &vp9_default_scan_orders[TX_64X64];
       mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
       vp9_predict_intra_block(xd, block >> 8, bwl, TX_64X64, mode,
+#if CONFIG_FILTERINTRA
+                              fbit,
+#endif
                               x->skip_encode ? src : dst,
                               x->skip_encode ? src_stride : dst_stride,
                               dst, dst_stride, i, j, plane);
@@ -1057,6 +1083,9 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
       scan_order = &vp9_default_scan_orders[TX_32X32];
       mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
       vp9_predict_intra_block(xd, block >> 6, bwl, TX_32X32, mode,
+#if CONFIG_FILTERINTRA
+                              fbit,
+#endif
                               x->skip_encode ? src : dst,
                               x->skip_encode ? src_stride : dst_stride,
                               dst, dst_stride, i, j, plane);
@@ -1077,6 +1106,9 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
       scan_order = &vp9_scan_orders[TX_16X16][tx_type];
       mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
       vp9_predict_intra_block(xd, block >> 4, bwl, TX_16X16, mode,
+#if CONFIG_FILTERINTRA
+                              fbit,
+#endif
                               x->skip_encode ? src : dst,
                               x->skip_encode ? src_stride : dst_stride,
                               dst, dst_stride, i, j, plane);
@@ -1097,6 +1129,9 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
       scan_order = &vp9_scan_orders[TX_8X8][tx_type];
       mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
       vp9_predict_intra_block(xd, block >> 2, bwl, TX_8X8, mode,
+#if CONFIG_FILTERINTRA
+                              fbit,
+#endif
                               x->skip_encode ? src : dst,
                               x->skip_encode ? src_stride : dst_stride,
                               dst, dst_stride, i, j, plane);
@@ -1117,6 +1152,9 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
       scan_order = &vp9_scan_orders[TX_4X4][tx_type];
       mode = plane == 0 ? get_y_mode(xd->mi[0].src_mi, block) : mbmi->uv_mode;
       vp9_predict_intra_block(xd, block, bwl, TX_4X4, mode,
+#if CONFIG_FILTERINTRA
+                              fbit,
+#endif
                               x->skip_encode ? src : dst,
                               x->skip_encode ? src_stride : dst_stride,
                               dst, dst_stride, i, j, plane);

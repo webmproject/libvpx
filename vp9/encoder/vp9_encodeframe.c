@@ -3727,10 +3727,18 @@ void vp9_encode_frame(VP9_COMP *cpi) {
   }
 }
 
-static void sum_intra_stats(FRAME_COUNTS *counts, const MODE_INFO *mi) {
+static void sum_intra_stats(FRAME_COUNTS *counts,
+#if CONFIG_FILTERINTRA
+  const MACROBLOCKD* xd,
+#endif
+ const MODE_INFO *mi) {
   const PREDICTION_MODE y_mode = mi->mbmi.mode;
   const PREDICTION_MODE uv_mode = mi->mbmi.uv_mode;
   const BLOCK_SIZE bsize = mi->mbmi.sb_type;
+#if CONFIG_FILTERINTRA
+  const int uv_fbit = mi->mbmi.uv_filterbit;
+  int fbit = mi->mbmi.filterbit;
+#endif
 
   if (bsize < BLOCK_8X8) {
     int idx, idy;
@@ -3738,12 +3746,31 @@ static void sum_intra_stats(FRAME_COUNTS *counts, const MODE_INFO *mi) {
     const int num_4x4_h = num_4x4_blocks_high_lookup[bsize];
     for (idy = 0; idy < 2; idy += num_4x4_h)
       for (idx = 0; idx < 2; idx += num_4x4_w)
+#if CONFIG_FILTERINTRA
+      {
+#endif
         ++counts->y_mode[0][mi->bmi[idy * 2 + idx].as_mode];
+#if CONFIG_FILTERINTRA
+        if (is_filter_allowed(mi->bmi[idy * 2 + idx].as_mode)) {
+          fbit = mi->b_filter_info[idy * 2 + idx];
+          ++counts->filterintra[0][mi->bmi[idy * 2 + idx].as_mode][fbit];
+        }
+      }
+#endif
   } else {
     ++counts->y_mode[size_group_lookup[bsize]][y_mode];
+#if CONFIG_FILTERINTRA
+    if (is_filter_allowed(y_mode) && is_filter_enabled(mi->mbmi.tx_size))
+      ++counts->filterintra[mi->mbmi.tx_size][y_mode][fbit];
+#endif
   }
 
   ++counts->uv_mode[y_mode][uv_mode];
+#if CONFIG_FILTERINTRA
+  if (is_filter_allowed(uv_mode) &&
+      is_filter_enabled(get_uv_tx_size(&(mi->mbmi), &xd->plane[1])))
+    ++counts->filterintra[get_uv_tx_size(&(mi->mbmi), &xd->plane[1])][uv_mode][uv_fbit];
+#endif
 }
 
 static int get_zbin_mode_boost(const MB_MODE_INFO *mbmi, int enabled) {
@@ -3810,7 +3837,11 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
     for (plane = 0; plane < MAX_MB_PLANE; ++plane)
       vp9_encode_intra_block_plane(x, MAX(bsize, BLOCK_8X8), plane);
     if (output_enabled)
-      sum_intra_stats(&cm->counts, mi);
+      sum_intra_stats(&cm->counts,
+#if CONFIG_FILTERINTRA
+        xd,
+#endif
+    mi);
     vp9_tokenize_sb(cpi, t, !output_enabled, MAX(bsize, BLOCK_8X8));
   } else {
     int ref;

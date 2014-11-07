@@ -283,6 +283,7 @@ EXPERIMENT_LIST="
     fp_mb_stats
     emulate_hardware
     tx64x64
+    filterintra
 "
 CONFIG_LIST="
     external_build
