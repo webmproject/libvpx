@@ -85,7 +85,6 @@ static void update_state_sb_supertx(VP9_COMP *cpi, const TileInfo *const tile,
 static void rd_supertx_sb(VP9_COMP *cpi, const TileInfo *const tile,
                           int mi_row, int mi_col, BLOCK_SIZE bsize,
                           int *tmp_rate, int64_t *tmp_dist,
-                          int *skippable, int64_t *sse,
 #if CONFIG_EXT_TX
                           EXT_TX_TYPE *best_tx,
 #endif
@@ -2733,8 +2732,6 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
         sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
 
         if (is_inter_mode(pc_tree->leaf_split[0]->mic.mbmi.mode)) {
-          int skippable = 1;
-          int64_t sse = 0;
 #if CONFIG_EXT_TX
           EXT_TX_TYPE best_tx = NORM;
 #endif
@@ -2743,7 +2740,6 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
           tmp_dist = 0;
           restore_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
           rd_supertx_sb(cpi, tile, mi_row, mi_col, bsize, &tmp_rate, &tmp_dist,
-                        &skippable, &sse,
 #if CONFIG_EXT_TX
                         &best_tx,
 #endif
@@ -2814,8 +2810,6 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
         sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
 
         if (!check_intra_sb(cpi, tile, mi_row, mi_col, bsize, pc_tree)) {
-          int skippable = 1;
-          int64_t sse = 0;
 #if CONFIG_EXT_TX
           EXT_TX_TYPE best_tx = NORM;
 #endif
@@ -2824,7 +2818,6 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
           tmp_dist = 0;
           restore_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
           rd_supertx_sb(cpi, tile, mi_row, mi_col, bsize, &tmp_rate, &tmp_dist,
-                        &skippable, &sse,
 #if CONFIG_EXT_TX
                         &best_tx,
 #endif
@@ -2940,8 +2933,6 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
       sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
 
       if (!check_intra_sb(cpi, tile, mi_row, mi_col, bsize, pc_tree)) {
-        int skippable = 1;
-        int64_t sse = 0;
 #if CONFIG_EXT_TX
         EXT_TX_TYPE best_tx = NORM;
 #endif
@@ -2950,7 +2941,6 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
         tmp_dist = 0;
         restore_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
         rd_supertx_sb(cpi, tile, mi_row, mi_col, bsize, &tmp_rate, &tmp_dist,
-                      &skippable, &sse,
 #if CONFIG_EXT_TX
                       &best_tx,
 #endif
@@ -3060,8 +3050,6 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
       sum_rd = RDCOST(x->rdmult, x->rddiv, sum_rate, sum_dist);
 
       if (!check_intra_sb(cpi, tile, mi_row, mi_col, bsize, pc_tree)) {
-        int skippable = 1;
-        int64_t sse = 0;
 #if CONFIG_EXT_TX
         EXT_TX_TYPE best_tx = NORM;
 #endif
@@ -3070,7 +3058,6 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
         tmp_dist = 0;
         restore_context(cpi, mi_row, mi_col, a, l, sa, sl, bsize);
         rd_supertx_sb(cpi, tile, mi_row, mi_col, bsize, &tmp_rate, &tmp_dist,
-                      &skippable, &sse,
 #if CONFIG_EXT_TX
                       &best_tx,
 #endif
@@ -4812,7 +4799,6 @@ static void predict_sb_complex(VP9_COMP *cpi, const TileInfo *const tile,
 static void rd_supertx_sb(VP9_COMP *cpi, const TileInfo *const tile,
                           int mi_row, int mi_col, BLOCK_SIZE bsize,
                           int *tmp_rate, int64_t *tmp_dist,
-                          int *skippable, int64_t *sse,
 #if CONFIG_EXT_TX
                           EXT_TX_TYPE *best_tx,
 #endif
@@ -4820,10 +4806,18 @@ static void rd_supertx_sb(VP9_COMP *cpi, const TileInfo *const tile,
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
-  int plane, pnskip, this_rate, base_rate = *tmp_rate;
-  int64_t pnsse, this_dist;
+  int plane, pnskip, skippable, skippable_uv, rate_uv, this_rate,
+      base_rate = *tmp_rate;
+  int64_t sse, pnsse, sse_uv, this_dist, dist_uv;
   uint8_t *dst_buf[3];
   int dst_stride[3];
+  TX_SIZE tx_size;
+#if CONFIG_EXT_TX
+  EXT_TX_TYPE txfm, best_tx_nostx = xd->mi[0]->mbmi.ext_txfrm;
+  int tmp_rate_tx = 0, skip_tx = 0;
+  int64_t tmp_dist_tx = 0, rd_tx, bestrd_tx = INT64_MAX;
+  uint8_t tmp_zcoeff_blk = 0;
+#endif
 
   update_state_sb_supertx(cpi, tile, mi_row, mi_col, bsize, 0, pc_tree);
   vp9_setup_dst_planes(xd->plane, get_frame_new_buffer(cm),
@@ -4840,72 +4834,74 @@ static void rd_supertx_sb(VP9_COMP *cpi, const TileInfo *const tile,
   *best_tx = NORM;
 #endif
 
-  for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
-    TX_SIZE tx_size =
-        plane ? (bsize_to_tx_size(bsize) - 1) : bsize_to_tx_size(bsize);
+  // chroma
+  skippable_uv = 1;
+  rate_uv = 0;
+  dist_uv = 0;
+  sse_uv = 0;
+  for (plane = 1; plane < MAX_MB_PLANE; ++plane) {
+    tx_size = bsize_to_tx_size(bsize) - 1;
     vp9_subtract_plane(x, bsize, plane);
-#if CONFIG_EXT_TX
-    if (bsize <= BLOCK_16X16 && plane == 0) {
-      EXT_TX_TYPE txfm;
-      int this_rate_tx, pnskip_tx,
-          best_tx_nostx = xd->mi[0]->mbmi.ext_txfrm;
-      int64_t this_dist_tx, pnsse_tx, rd, bestrd_tx = INT64_MAX;
-
-      for (txfm = NORM; txfm < EXT_TX_TYPES; txfm++) {
-        xd->mi[0]->mbmi.ext_txfrm = txfm;
-        txfm_rd_in_plane_supertx(x, &this_rate_tx, &this_dist_tx,
-                                 &pnskip_tx, &pnsse_tx,
-                                 INT64_MAX, plane, bsize, tx_size, 0);
-        this_rate_tx += vp9_cost_bit(cm->fc.ext_tx_prob, txfm);
-        rd = RDCOST(x->rdmult, x->rddiv, this_rate_tx, this_dist_tx);
-        if (rd < bestrd_tx * 0.97 || bestrd_tx == INT64_MAX) {
-          *best_tx = txfm;
-          bestrd_tx = rd;
-          this_rate = this_rate_tx;
-          this_dist = this_dist_tx;
-          pnskip = pnskip_tx;
-          pnsse = pnsse_tx;
-        }
-      }
-      xd->mi[0]->mbmi.ext_txfrm = best_tx_nostx;
-    } else {
-      xd->mi[0]->mbmi.ext_txfrm = NORM;
-
-#endif
-      txfm_rd_in_plane_supertx(x, &this_rate, &this_dist, &pnskip, &pnsse,
-                               INT64_MAX, plane, bsize, tx_size, 0);
-#if CONFIG_EXT_TX
-    }
-#endif
-    *tmp_rate += this_rate;
-    *tmp_dist += this_dist;
-    *sse += pnsse;
-    *skippable &= pnskip;
+    txfm_rd_in_plane_supertx(x, &this_rate, &this_dist, &pnskip, &pnsse,
+                             INT64_MAX, plane, bsize, tx_size, 0);
+    rate_uv += this_rate;
+    dist_uv += this_dist;
+    sse_uv += pnsse;
+    skippable_uv &= pnskip;
   }
-  x->skip = 0;
-  if (*skippable) {
-    *tmp_rate = base_rate;
-    *tmp_rate += vp9_cost_bit(vp9_get_skip_prob(cm, xd), 1);
+
+  // luma
+  tx_size = bsize_to_tx_size(bsize);
+  vp9_subtract_plane(x, bsize, 0);
 #if CONFIG_EXT_TX
-    if (bsize <= BLOCK_16X16)
-      *tmp_rate -= vp9_cost_bit(cm->fc.ext_tx_prob, *best_tx);
-    *best_tx = NORM;
+  for (txfm = NORM; txfm < EXT_TX_TYPES; txfm++) {
+    if (tx_size > TX_16X16 && txfm != NORM)
+      continue;
+
+    xd->mi[0]->mbmi.ext_txfrm = txfm;
 #endif
-  } else {
-    if (RDCOST(x->rdmult, x->rddiv, *tmp_rate - base_rate, *tmp_dist)
-        < RDCOST(x->rdmult, x->rddiv, 0, *sse)) {
-      *tmp_rate += vp9_cost_bit(vp9_get_skip_prob(cm, xd), 0);
-    } else {
-      *tmp_rate = base_rate;
-      *tmp_dist = *sse;
-      *tmp_rate += vp9_cost_bit(vp9_get_skip_prob(cm, xd), 1);
-#if CONFIG_EXT_TX
-      if (bsize <= BLOCK_16X16)
-        *tmp_rate -= vp9_cost_bit(cm->fc.ext_tx_prob, *best_tx);
-      *best_tx = NORM;
-#endif
+    txfm_rd_in_plane_supertx(x, &this_rate, &this_dist, &pnskip, &pnsse,
+                             INT64_MAX, 0, bsize, tx_size, 0);
+    *tmp_rate = rate_uv + this_rate;
+    *tmp_dist = dist_uv + this_dist;
+    sse = sse_uv + pnsse;
+    skippable = skippable_uv && pnskip;
+
+    if (skippable) {
+      *tmp_rate = vp9_cost_bit(vp9_get_skip_prob(cm, xd), 1);
       x->skip = 1;
+    } else {
+#if CONFIG_EXT_TX
+      if (tx_size <= TX_16X16)
+        *tmp_rate += vp9_cost_bit(cm->fc.ext_tx_prob, txfm);
+#endif
+      if (RDCOST(x->rdmult, x->rddiv, *tmp_rate, *tmp_dist)
+          < RDCOST(x->rdmult, x->rddiv, 0, sse)) {
+        *tmp_rate += vp9_cost_bit(vp9_get_skip_prob(cm, xd), 0);
+        x->skip = 0;
+      } else {
+        *tmp_dist = sse;
+        *tmp_rate = vp9_cost_bit(vp9_get_skip_prob(cm, xd), 1);
+        x->skip = 1;
+      }
+    }
+    *tmp_rate += base_rate;
+#if CONFIG_EXT_TX
+    rd_tx = RDCOST(x->rdmult, x->rddiv, *tmp_rate, *tmp_dist);
+    if (rd_tx < bestrd_tx * 0.97 || txfm == NORM) {
+      *best_tx = txfm;
+      bestrd_tx = rd_tx;
+      tmp_rate_tx = *tmp_rate;
+      tmp_dist_tx = *tmp_dist;
+      skip_tx = x->skip;
+      tmp_zcoeff_blk = x->zcoeff_blk[tx_size][0];
     }
   }
+  x->zcoeff_blk[tx_size][0] = tmp_zcoeff_blk;
+  *tmp_rate = tmp_rate_tx;
+  *tmp_dist = tmp_dist_tx;
+  x->skip = skip_tx;
+  xd->mi[0]->mbmi.ext_txfrm = best_tx_nostx;
+#endif
 }
 #endif

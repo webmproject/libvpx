@@ -4521,13 +4521,10 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
   for (copy_mode = REF0;
        copy_mode < MIN(REF0 + inter_ref_count, COPY_MODE_COUNT); copy_mode++) {
-    int64_t this_rd = INT64_MAX;
-    int rate2 = 0, rate_y = 0, rate_uv = 0;
-    int64_t distortion2 = 0, distortion_y = 0, distortion_uv = 0;
-    int this_skip2 = 0, skippable = 0, skippable_y = 0, skippable_uv = 0;
-    int64_t ssey, sseuv, total_sse = INT64_MAX;
-    int64_t tx_cache[TX_MODES];
-    int i;
+    int i, rate2, rate_y, rate_uv, rate_copy_mode, this_skip2,
+        skippable, skippable_y, skippable_uv;
+    int64_t distortion2, distortion_y, distortion_uv, this_rd,
+            ssey, sseuv, total_sse, tx_cache[TX_MODES];
 #if CONFIG_EXT_TX
     EXT_TX_TYPE tx_type, best_tx_type;
     TX_SIZE best_tx_size;
@@ -4574,25 +4571,23 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       total_sse = ssey + sseuv;
 
       if (skippable) {
-        vp9_prob skip_prob = vp9_get_skip_prob(cm, xd);
-
         rate2 -= (rate_y + rate_uv);
         rate_y = 0;
         rate_uv = 0;
-        if (skip_prob) {
-          int prob_skip_cost = vp9_cost_bit(skip_prob, 1);
-          rate2 += prob_skip_cost;
-        }
+        rate2 += vp9_cost_bit(vp9_get_skip_prob(cm, xd), 1);
         this_skip2 = 1;
       } else if (!xd->lossless) {
-        if (RDCOST(x->rdmult, x->rddiv, rate_y + rate_uv, distortion2) <
+#if CONFIG_EXT_TX
+        if (mbmi->tx_size < TX_32X32)
+          rate2 += vp9_cost_bit(cm->fc.ext_tx_prob, tx_type);
+#endif
+        if (RDCOST(x->rdmult, x->rddiv, rate2, distortion2) <
             RDCOST(x->rdmult, x->rddiv, 0, total_sse)) {
           rate2 += vp9_cost_bit(vp9_get_skip_prob(cm, xd), 0);
           this_skip2 = 0;
         } else {
           rate2 = vp9_cost_bit(vp9_get_skip_prob(cm, xd), 1);
           distortion2 = total_sse;
-          assert(total_sse >= 0);
           rate_y = 0;
           rate_uv = 0;
           this_skip2 = 1;
@@ -4602,8 +4597,6 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         this_skip2 = 0;
       }
 #if CONFIG_EXT_TX
-      if (mbmi->tx_size < TX_32X32 && !this_skip2)
-        rate2 += vp9_cost_bit(cm->fc.ext_tx_prob, tx_type);
       this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
       if (tx_type == NORM || this_rd < (bestrd_tx * 0.97)) {
         bestrd_tx = this_rd;
@@ -4629,31 +4622,22 @@ int64_t vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     this_skip2 = this_skip2_tx;
 #endif
 
-    rate2 += vp9_cost_bit(cm->fc.copy_noref_prob[copy_mode_context][bsize], 1);
-    switch (inter_ref_count) {
-      case 1:
-        break;
-      case 2:
-        rate2 += cpi->copy_mode_cost_l2[copy_mode_context][copy_mode - REF0];
-        break;
-      default:
-        rate2 += cpi->copy_mode_cost[copy_mode_context][copy_mode - REF0];
-        break;
-    }
+    rate_copy_mode =
+        vp9_cost_bit(cm->fc.copy_noref_prob[copy_mode_context][bsize], 1);
+    if (inter_ref_count == 2)
+      rate_copy_mode +=
+          cpi->copy_mode_cost_l2[copy_mode_context][copy_mode - REF0];
+    else if (inter_ref_count > 2)
+      rate_copy_mode +=
+          cpi->copy_mode_cost[copy_mode_context][copy_mode - REF0];
+    rate2 += rate_copy_mode;
     this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
 
     if (this_rd < best_rd) {
       *returnrate = rate2;
       *returndistortion = distortion2;
 #if CONFIG_SUPERTX
-      *returnrate_nocoef =
-          vp9_cost_bit(cm->fc.copy_noref_prob[copy_mode_context][bsize], 1);
-      if (inter_ref_count == 2)
-        *returnrate_nocoef +=
-            cpi->copy_mode_cost_l2[copy_mode_context][copy_mode - REF0];
-      else if (inter_ref_count > 2)
-        *returnrate_nocoef +=
-            cpi->copy_mode_cost[copy_mode_context][copy_mode - REF0];
+      *returnrate_nocoef = rate_copy_mode;
 #endif
       best_rd = this_rd;
       best_mbmode = *mbmi;
