@@ -1,0 +1,276 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Qng\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-11-08T01:09:07Z",
+      "side": 1,
+      "message": "Move this down two lines",
+      "revId": "4bc693257db0fc5d3d6a136ed2daa125d871100e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//QnI\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-11-08T01:09:07Z",
+      "side": 1,
+      "message": "this fits on one line",
+      "revId": "4bc693257db0fc5d3d6a136ed2daa125d871100e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Qnc\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-11-08T01:09:07Z",
+      "side": 1,
+      "message": "Not certain it will work everywhere, but this signature would be shorter if uint32_t and uint8_t were used instead of unsigned int and unsigned char.",
+      "revId": "4bc693257db0fc5d3d6a136ed2daa125d871100e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//QnQ\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-11-08T01:09:07Z",
+      "side": 1,
+      "message": "This fits on one line",
+      "revId": "4bc693257db0fc5d3d6a136ed2daa125d871100e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//QnM\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-11-08T01:09:07Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "4bc693257db0fc5d3d6a136ed2daa125d871100e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//QnA\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-11-08T01:09:07Z",
+      "side": 1,
+      "message": "attach cast to var",
+      "revId": "4bc693257db0fc5d3d6a136ed2daa125d871100e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Qm8\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-11-08T01:09:07Z",
+      "side": 1,
+      "message": "get rid of this horizontal alignment spacing",
+      "revId": "4bc693257db0fc5d3d6a136ed2daa125d871100e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Qm4\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-11-08T01:09:07Z",
+      "side": 1,
+      "message": "Spaces around \u0027-\u0027",
+      "revId": "4bc693257db0fc5d3d6a136ed2daa125d871100e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Qm0\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-11-08T01:09:07Z",
+      "side": 1,
+      "message": "This and the next two instances are more readable (IMO) this way:\n\n          sad +\u003d \n              abs(source8[h * source_stride_ + w] -\n                  reference8[h * reference_stride_ + w]);",
+      "revId": "4bc693257db0fc5d3d6a136ed2daa125d871100e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Qmw\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-11-08T01:09:07Z",
+      "side": 1,
+      "message": "indent +2",
+      "revId": "4bc693257db0fc5d3d6a136ed2daa125d871100e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Qmo\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-11-08T01:09:07Z",
+      "side": 1,
+      "message": "Fix indent here and on in the next two assignments to int tmp. The second line should only be +4 indent from the first line.\n\nAlso, I think all three tmps can be const (could be wrong; I don\u0027t remember what happens inside ROUND_POWER_OF_TWO and I\u0027m being lazy so I don\u0027t want to dig it out right now :) ).",
+      "revId": "4bc693257db0fc5d3d6a136ed2daa125d871100e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Qmk\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 1060,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-11-08T01:09:07Z",
+      "side": 1,
+      "message": "The first two fit on one line",
+      "revId": "4bc693257db0fc5d3d6a136ed2daa125d871100e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Qmg\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 1127,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-11-08T01:09:07Z",
+      "side": 1,
+      "message": "remove the horizontal alignment",
+      "revId": "4bc693257db0fc5d3d6a136ed2daa125d871100e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Qmc\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 1140,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-11-08T01:09:07Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "4bc693257db0fc5d3d6a136ed2daa125d871100e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//QmY\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 1179,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-11-08T01:09:07Z",
+      "side": 1,
+      "message": "down through here",
+      "revId": "4bc693257db0fc5d3d6a136ed2daa125d871100e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//QmU\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 1205,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-11-08T01:09:07Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "4bc693257db0fc5d3d6a136ed2daa125d871100e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
