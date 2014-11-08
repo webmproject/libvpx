@@ -443,6 +443,8 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t *ctx,
           &ctx->frame_workers[ctx->next_submit_worker_id],
           &ctx->frame_workers[ctx->last_submit_worker_id]);
 
+    frame_worker_data->pbi->ready_for_new_data = 0;
+
     // Copy the compressed data into worker's internal buffer.
     // TODO(hkuang): Will all the workers allocate the same size
     // as the size of the first intra frame be better? This will
@@ -757,10 +759,10 @@ static vpx_image_t *decoder_get_frame(vpx_codec_alg_priv_t *ctx,
           (ctx->next_output_worker_id + 1) % ctx->num_frame_workers;
       // Wait for the frame from worker thread.
       winterface->sync(worker);
-      ++ctx->available_threads;
       if (vp9_get_raw_frame(frame_worker_data->pbi, &sd, &flags) == 0) {
         VP9_COMMON *const cm = &frame_worker_data->pbi->common;
         RefCntBuffer *const frame_bufs = cm->buffer_pool->frame_bufs;
+        ++ctx->available_threads;
         release_last_output_frame(ctx);
         ctx->last_show_frame = frame_worker_data->pbi->common.new_fb_idx;
         yuvconfig2image(&ctx->img, &sd, frame_worker_data->user_priv);

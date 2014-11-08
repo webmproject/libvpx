@@ -272,6 +272,8 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
       cm->frame_refs[0].buf->corrupted = 1;
   }
 
+  pbi->ready_for_new_data = 0;
+
   // Check if the previous frame was a frame without any references to it.
   // Release frame buffer if not decoding in frame parallel mode.
   if (!pbi->frame_parallel_decode && cm->new_fb_idx >= 0
@@ -296,6 +298,7 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
 
   if (setjmp(cm->error.jmp)) {
     cm->error.setjmp = 0;
+    pbi->ready_for_new_data = 1;
 
     // We do not know if the missing frame(s) was supposed to update
     // any of the reference buffers, but we act conservative and
@@ -354,8 +357,6 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
     vp9_swap_current_and_last_seg_map(cm);
   }
 
-  pbi->ready_for_new_data = 0;
-
   cm->error.setjmp = 0;
   return retcode;
 }
@@ -370,11 +371,11 @@ int vp9_get_raw_frame(VP9Decoder *pbi, YV12_BUFFER_CONFIG *sd,
   if (pbi->ready_for_new_data == 1)
     return ret;
 
+  pbi->ready_for_new_data = 1;
+
   /* no raw frame to show!!! */
   if (pbi->common.show_frame == 0)
     return ret;
-
-  pbi->ready_for_new_data = 1;
 
 #if CONFIG_VP9_POSTPROC
   ret = vp9_post_proc_frame(&pbi->common, sd, flags);
