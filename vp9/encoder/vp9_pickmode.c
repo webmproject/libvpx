@@ -778,6 +778,9 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
     // Check that a prediction mode has been selected.
     assert(best_rdc.rdcost < INT64_MAX);
+
+    if (x->skip)
+      break;
   }
 
   // If best prediction is not in dst buf, then copy the prediction block from
