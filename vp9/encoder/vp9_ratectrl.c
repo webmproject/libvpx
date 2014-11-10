@@ -369,8 +369,8 @@ static double get_rate_correction_factor(const VP9_COMP *cpi) {
     return rc->rate_correction_factors[rf_lvl];
   } else {
     if ((cpi->refresh_alt_ref_frame || cpi->refresh_golden_frame) &&
-        !rc->is_src_frame_alt_ref &&
-        !(cpi->use_svc && cpi->oxcf.rc_mode == VPX_CBR))
+        !rc->is_src_frame_alt_ref && !cpi->use_svc &&
+        cpi->oxcf.rc_mode != VPX_CBR)
       return rc->rate_correction_factors[GF_ARF_STD];
     else
       return rc->rate_correction_factors[INTER_NORMAL];
@@ -388,8 +388,8 @@ static void set_rate_correction_factor(VP9_COMP *cpi, double factor) {
     rc->rate_correction_factors[rf_lvl] = factor;
   } else {
     if ((cpi->refresh_alt_ref_frame || cpi->refresh_golden_frame) &&
-        !rc->is_src_frame_alt_ref &&
-        !(cpi->use_svc && cpi->oxcf.rc_mode == VPX_CBR))
+        !rc->is_src_frame_alt_ref && !cpi->use_svc &&
+        cpi->oxcf.rc_mode != VPX_CBR)
       rc->rate_correction_factors[GF_ARF_STD] = factor;
     else
       rc->rate_correction_factors[INTER_NORMAL] = factor;
@@ -1186,8 +1186,8 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
 
   // Post encode loop adjustment of Q prediction.
   vp9_rc_update_rate_correction_factors(
-      cpi, (cpi->sf.recode_loop >= ALLOW_RECODE_KFARFGF ||
-            oxcf->rc_mode == VPX_CBR) ? 2 : 0);
+      cpi, (cpi->sf.recode_loop >= ALLOW_RECODE_KFARFGF) ? 2 :
+            ((oxcf->rc_mode == VPX_CBR) ? 1 : 0));
 
   // Keep a record of last Q and ambient average Q.
   if (cm->frame_type == KEY_FRAME) {
