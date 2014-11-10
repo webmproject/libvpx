@@ -163,8 +163,8 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
   RANGE_CHECK(cfg,        g_pass,         VPX_RC_ONE_PASS, VPX_RC_LAST_PASS);
 
   if (cfg->rc_resize_allowed == 1) {
-    RANGE_CHECK(cfg, rc_scaled_width, 1, cfg->g_w);
-    RANGE_CHECK(cfg, rc_scaled_height, 1, cfg->g_h);
+    RANGE_CHECK(cfg, rc_scaled_width, 0, cfg->g_w);
+    RANGE_CHECK(cfg, rc_scaled_height, 0, cfg->g_h);
   }
 
   RANGE_CHECK(cfg, ss_number_layers, 1, VPX_SS_MAX_LAYERS);
@@ -398,9 +398,15 @@ static vpx_codec_err_t set_encoder_config(
   oxcf->under_shoot_pct         = cfg->rc_undershoot_pct;
   oxcf->over_shoot_pct          = cfg->rc_overshoot_pct;
 
-  oxcf->allow_spatial_resampling = cfg->rc_resize_allowed;
-  oxcf->scaled_frame_width       = cfg->rc_scaled_width;
-  oxcf->scaled_frame_height      = cfg->rc_scaled_height;
+  oxcf->scaled_frame_width  = cfg->rc_scaled_width;
+  oxcf->scaled_frame_height = cfg->rc_scaled_height;
+  if (cfg->rc_resize_allowed == 1) {
+    oxcf->resize_mode =
+        (oxcf->scaled_frame_width == 0 || oxcf->scaled_frame_height == 0) ?
+            RESIZE_DYNAMIC : RESIZE_FIXED;
+  } else {
+    oxcf->resize_mode = RESIZE_NONE;
+  }
 
   oxcf->maximum_buffer_size_ms   = is_vbr ? 240000 : cfg->rc_buf_sz;
   oxcf->starting_buffer_level_ms = is_vbr ? 60000 : cfg->rc_buf_initial_sz;
@@ -1383,8 +1389,8 @@ static vpx_codec_enc_cfg_map_t encoder_usage_cfg_map[] = {
 
       0,                  // rc_dropframe_thresh
       0,                  // rc_resize_allowed
-      1,                  // rc_scaled_width
-      1,                  // rc_scaled_height
+      0,                  // rc_scaled_width
+      0,                  // rc_scaled_height
       60,                 // rc_resize_down_thresold
       30,                 // rc_resize_up_thresold
 

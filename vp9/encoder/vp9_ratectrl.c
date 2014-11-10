@@ -1575,3 +1575,43 @@ void vp9_rc_update_framerate(VP9_COMP *cpi) {
 
   vp9_rc_set_gf_max_interval(cpi, rc);
 }
+
+#define VBR_PCT_ADJUSTMENT_LIMIT 50
+// For VBR...adjustment to the frame target based on error from previous frames
+static void vbr_rate_correction(VP9_COMP *cpi,
+                                int *this_frame_target,
+                                int64_t vbr_bits_off_target) {
+  int max_delta;
+  double position_factor = 1.0;
+
+  // How far through the clip are we.
+  // This number is used to damp the per frame rate correction.
+  // Range 0 - 1.0
+  if (cpi->twopass.total_stats.count) {
+    position_factor = sqrt((double)cpi->common.current_video_frame /
+                           cpi->twopass.total_stats.count);
+  }
+  max_delta = (int)(position_factor *
+                    ((*this_frame_target * VBR_PCT_ADJUSTMENT_LIMIT) / 100));
+
+  // vbr_bits_off_target > 0 means we have extra bits to spend
+  if (vbr_bits_off_target > 0) {
+    *this_frame_target +=
+      (vbr_bits_off_target > max_delta) ? max_delta
+                                        : (int)vbr_bits_off_target;
+  } else {
+    *this_frame_target -=
+      (vbr_bits_off_target < -max_delta) ? max_delta
+                                         : (int)-vbr_bits_off_target;
+  }
+}
+
+void vp9_set_target_rate(VP9_COMP *cpi) {
+  RATE_CONTROL *const rc = &cpi->rc;
+  int target_rate = rc->base_frame_target;
+
+  // Correction to rate target based on prior over or under shoot.
+  if (cpi->oxcf.rc_mode == VPX_VBR)
+    vbr_rate_correction(cpi, &target_rate, rc->vbr_bits_off_target);
+  vp9_rc_set_frame_target(cpi, target_rate);
+}

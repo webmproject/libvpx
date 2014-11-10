@@ -16,12 +16,61 @@
 // Intra only frames, golden frames (except alt ref overlays) and
 // alt ref frames tend to be coded at a higher than ambient quality
 static int frame_is_boosted(const VP9_COMP *cpi) {
-  return frame_is_intra_only(&cpi->common) ||
-         cpi->refresh_alt_ref_frame ||
-         (cpi->refresh_golden_frame && !cpi->rc.is_src_frame_alt_ref) ||
-         vp9_is_upper_layer_key_frame(cpi);
+  return frame_is_kf_gf_arf(cpi) || vp9_is_upper_layer_key_frame(cpi);
 }
 
+static void set_good_speed_feature_framesize_dependent(VP9_COMMON *cm,
+                                                       SPEED_FEATURES *sf,
+                                                       int speed) {
+  if (speed >= 1) {
+    if (MIN(cm->width, cm->height) >= 720) {
+      sf->disable_split_mask = cm->show_frame ? DISABLE_ALL_SPLIT
+                                              : DISABLE_ALL_INTER_SPLIT;
+      sf->partition_search_breakout_dist_thr = (1 << 23);
+    } else {
+      sf->disable_split_mask = DISABLE_COMPOUND_SPLIT;
+      sf->partition_search_breakout_dist_thr = (1 << 21);
+    }
+  }
+
+  if (speed >= 2) {
+    if (MIN(cm->width, cm->height) >= 720) {
+      sf->disable_split_mask = cm->show_frame ? DISABLE_ALL_SPLIT
+                                              : DISABLE_ALL_INTER_SPLIT;
+      sf->adaptive_pred_interp_filter = 0;
+      sf->partition_search_breakout_dist_thr = (1 << 24);
+      sf->partition_search_breakout_rate_thr = 120;
+    } else {
+      sf->disable_split_mask = LAST_AND_INTRA_SPLIT_ONLY;
+      sf->partition_search_breakout_dist_thr = (1 << 22);
+      sf->partition_search_breakout_rate_thr = 100;
+    }
+  }
+
+  if (speed >= 3) {
+    if (MIN(cm->width, cm->height) >= 720) {
+      sf->disable_split_mask = DISABLE_ALL_SPLIT;
+      sf->schedule_mode_search = cm->base_qindex < 220 ? 1 : 0;
+      sf->partition_search_breakout_dist_thr = (1 << 25);
+      sf->partition_search_breakout_rate_thr = 200;
+    } else {
+      sf->max_intra_bsize = BLOCK_32X32;
+      sf->disable_split_mask = DISABLE_ALL_INTER_SPLIT;
+      sf->schedule_mode_search = cm->base_qindex < 175 ? 1 : 0;
+      sf->partition_search_breakout_dist_thr = (1 << 23);
+      sf->partition_search_breakout_rate_thr = 120;
+    }
+  }
+
+  if (speed >= 4) {
+    if (MIN(cm->width, cm->height) >= 720) {
+      sf->partition_search_breakout_dist_thr = (1 << 26);
+    } else {
+      sf->partition_search_breakout_dist_thr = (1 << 24);
+    }
+    sf->disable_split_mask = DISABLE_ALL_SPLIT;
+  }
+}
 
 static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
                                    SPEED_FEATURES *sf, int speed) {
@@ -34,11 +83,6 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
     sf->use_square_partition_only = !frame_is_intra_only(cm);
     sf->less_rectangular_check  = 1;
 
-    if (MIN(cm->width, cm->height) >= 720)
-      sf->disable_split_mask = cm->show_frame ? DISABLE_ALL_SPLIT
-                                              : DISABLE_ALL_INTER_SPLIT;
-    else
-      sf->disable_split_mask = DISABLE_COMPOUND_SPLIT;
     sf->use_rd_breakout = 1;
     sf->adaptive_motion_search = 1;
     sf->mv.auto_mv_step_size = 1;
@@ -54,29 +98,12 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
     sf->intra_uv_mode_mask[TX_16X16] = INTRA_DC_H_V;
 
     sf->tx_size_search_breakout = 1;
-
-    if (MIN(cm->width, cm->height) >= 720)
-      sf->partition_search_breakout_dist_thr = (1 << 23);
-    else
-      sf->partition_search_breakout_dist_thr = (1 << 21);
     sf->partition_search_breakout_rate_thr = 80;
   }
 
   if (speed >= 2) {
     sf->tx_size_search_method = frame_is_boosted(cpi) ? USE_FULL_RD
                                                       : USE_LARGESTALL;
-
-    if (MIN(cm->width, cm->height) >= 720) {
-      sf->disable_split_mask = cm->show_frame ? DISABLE_ALL_SPLIT
-                                              : DISABLE_ALL_INTER_SPLIT;
-      sf->adaptive_pred_interp_filter = 0;
-      sf->partition_search_breakout_dist_thr = (1 << 24);
-      sf->partition_search_breakout_rate_thr = 120;
-    } else {
-      sf->disable_split_mask = LAST_AND_INTRA_SPLIT_ONLY;
-      sf->partition_search_breakout_dist_thr = (1 << 22);
-      sf->partition_search_breakout_rate_thr = 100;
-    }
 
     sf->reference_masking = 1;
     sf->mode_search_skip_flags = FLAG_SKIP_INTRA_DIRMISMATCH |
@@ -93,18 +120,6 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
   if (speed >= 3) {
     sf->tx_size_search_method = frame_is_intra_only(cm) ? USE_FULL_RD
                                                         : USE_LARGESTALL;
-    if (MIN(cm->width, cm->height) >= 720) {
-      sf->disable_split_mask = DISABLE_ALL_SPLIT;
-      sf->schedule_mode_search = cm->base_qindex < 220 ? 1 : 0;
-      sf->partition_search_breakout_dist_thr = (1 << 25);
-      sf->partition_search_breakout_rate_thr = 200;
-    } else {
-      sf->max_intra_bsize = BLOCK_32X32;
-      sf->disable_split_mask = DISABLE_ALL_INTER_SPLIT;
-      sf->schedule_mode_search = cm->base_qindex < 175 ? 1 : 0;
-      sf->partition_search_breakout_dist_thr = (1 << 23);
-      sf->partition_search_breakout_rate_thr = 120;
-    }
     sf->mv.subpel_search_method = SUBPEL_TREE_PRUNED;
     sf->adaptive_pred_interp_filter = 0;
     sf->adaptive_mode_search = 1;
@@ -122,7 +137,6 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
   if (speed >= 4) {
     sf->use_square_partition_only = 1;
     sf->tx_size_search_method = USE_LARGESTALL;
-    sf->disable_split_mask = DISABLE_ALL_SPLIT;
     sf->mv.search_method = BIGDIA;
     sf->mv.subpel_search_method = SUBPEL_TREE_PRUNED_MORE;
     sf->adaptive_rd_thresh = 4;
@@ -132,11 +146,6 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
     sf->use_fast_coef_updates = ONE_LOOP_REDUCED;
     sf->use_fast_coef_costing = 1;
     sf->motion_field_mode_search = !boosted;
-
-    if (MIN(cm->width, cm->height) >= 720)
-      sf->partition_search_breakout_dist_thr = (1 << 26);
-    else
-      sf->partition_search_breakout_dist_thr = (1 << 24);
     sf->partition_search_breakout_rate_thr = 300;
   }
 
@@ -151,6 +160,42 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
     }
     sf->partition_search_breakout_rate_thr = 500;
     sf->mv.reduce_first_step_size = 1;
+  }
+}
+
+static void set_rt_speed_feature_framesize_dependent(VP9_COMP *cpi,
+    SPEED_FEATURES *sf, int speed) {
+  VP9_COMMON *const cm = &cpi->common;
+
+  if (speed >= 1) {
+    if (MIN(cm->width, cm->height) >= 720) {
+      sf->disable_split_mask = cm->show_frame ? DISABLE_ALL_SPLIT
+                                              : DISABLE_ALL_INTER_SPLIT;
+    } else {
+      sf->disable_split_mask = DISABLE_COMPOUND_SPLIT;
+    }
+  }
+
+  if (speed >= 2) {
+    if (MIN(cm->width, cm->height) >= 720) {
+      sf->disable_split_mask = cm->show_frame ? DISABLE_ALL_SPLIT
+                                              : DISABLE_ALL_INTER_SPLIT;
+    } else {
+      sf->disable_split_mask = LAST_AND_INTRA_SPLIT_ONLY;
+    }
+  }
+
+  if (speed >= 5) {
+    if (MIN(cm->width, cm->height) >= 720) {
+      sf->partition_search_breakout_dist_thr = (1 << 25);
+    } else {
+      sf->partition_search_breakout_dist_thr = (1 << 23);
+    }
+  }
+
+  if (speed >= 7) {
+    sf->encode_breakout_thresh = (MIN(cm->width, cm->height) >= 720) ?
+        800 : 300;
   }
 }
 
@@ -169,12 +214,6 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->tx_size_search_method = frame_is_intra_only(cm) ? USE_FULL_RD
                                                         : USE_LARGESTALL;
 
-    if (MIN(cm->width, cm->height) >= 720)
-      sf->disable_split_mask = cm->show_frame ? DISABLE_ALL_SPLIT
-                                              : DISABLE_ALL_INTER_SPLIT;
-    else
-      sf->disable_split_mask = DISABLE_COMPOUND_SPLIT;
-
     sf->use_rd_breakout = 1;
 
     sf->adaptive_motion_search = 1;
@@ -187,12 +226,6 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
   }
 
   if (speed >= 2) {
-    if (MIN(cm->width, cm->height) >= 720)
-      sf->disable_split_mask = cm->show_frame ? DISABLE_ALL_SPLIT
-                                              : DISABLE_ALL_INTER_SPLIT;
-    else
-      sf->disable_split_mask = LAST_AND_INTRA_SPLIT_ONLY;
-
     sf->mode_search_skip_flags = FLAG_SKIP_INTRA_DIRMISMATCH |
                                  FLAG_SKIP_INTRA_BESTINTER |
                                  FLAG_SKIP_COMP_BESTINTRA |
@@ -270,11 +303,6 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->adaptive_rd_thresh = 2;
     // This feature is only enabled when partition search is disabled.
     sf->reuse_inter_pred_sby = 1;
-
-    if (MIN(cm->width, cm->height) >= 720)
-      sf->partition_search_breakout_dist_thr = (1 << 25);
-    else
-      sf->partition_search_breakout_dist_thr = (1 << 23);
     sf->partition_search_breakout_rate_thr = 200;
   }
 
@@ -299,8 +327,6 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->mv.search_method = FAST_DIAMOND;
     sf->mv.fullpel_search_step_param = 10;
     sf->lpf_pick = LPF_PICK_MINIMAL_LPF;
-    sf->encode_breakout_thresh = (MIN(cm->width, cm->height) >= 720) ?
-        800 : 300;
   }
 
   if (speed >= 12) {
@@ -316,7 +342,37 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
   }
 }
 
-void vp9_set_speed_features(VP9_COMP *cpi) {
+void vp9_set_speed_features_framesize_dependent(VP9_COMP *cpi) {
+  SPEED_FEATURES *const sf = &cpi->sf;
+  VP9_COMMON *const cm = &cpi->common;
+  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
+  RD_OPT *const rd = &cpi->rd;
+  int i;
+
+  if (oxcf->mode == REALTIME) {
+    set_rt_speed_feature_framesize_dependent(cpi, sf, oxcf->speed);
+  } else if (oxcf->mode == GOOD) {
+    set_good_speed_feature_framesize_dependent(cm, sf, oxcf->speed);
+  }
+
+  if (sf->disable_split_mask == DISABLE_ALL_SPLIT) {
+    sf->adaptive_pred_interp_filter = 0;
+  }
+
+  if (cpi->encode_breakout && oxcf->mode == REALTIME &&
+      sf->encode_breakout_thresh > cpi->encode_breakout) {
+    cpi->encode_breakout = sf->encode_breakout_thresh;
+  }
+
+  // Check for masked out split cases.
+  for (i = 0; i < MAX_REFS; ++i) {
+    if (sf->disable_split_mask & (1 << i)) {
+      rd->thresh_mult_sub8x8[i] = INT_MAX;
+    }
+  }
+}
+
+void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
   SPEED_FEATURES *const sf = &cpi->sf;
   VP9_COMMON *const cm = &cpi->common;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
@@ -427,14 +483,7 @@ void vp9_set_speed_features(VP9_COMP *cpi) {
 
   cpi->mb.optimize = sf->optimize_coefficients == 1 && oxcf->pass != 1;
 
-  if (sf->disable_split_mask == DISABLE_ALL_SPLIT)
-    sf->adaptive_pred_interp_filter = 0;
-
   if (!cpi->oxcf.frame_periodic_boost) {
     sf->max_delta_qindex = 0;
   }
-
-  if (cpi->encode_breakout && oxcf->mode == REALTIME &&
-      sf->encode_breakout_thresh > cpi->encode_breakout)
-    cpi->encode_breakout = sf->encode_breakout_thresh;
 }
