@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Qjs\u003d",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-11-10T21:28:00Z",
+      "side": 1,
+      "message": "Move this to the end of the definition so that the two newly added enums extend rather than modify the existing API.",
+      "revId": "8c7e17d45db4f26bd16eb869f2ce90daa9699e50",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Qjg\u003d",
+        "filename": "vpx/vpx_encoder.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-11-10T21:28:00Z",
+      "side": 1,
+      "message": "Indent this code to match the local style.",
+      "revId": "8c7e17d45db4f26bd16eb869f2ce90daa9699e50",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
