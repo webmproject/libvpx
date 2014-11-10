@@ -535,6 +535,7 @@ void vp8_set_quantizer(struct VP8_COMP *cpi, int Q)
     MACROBLOCKD *mbd = &cpi->mb.e_mbd;
     int update = 0;
     int new_delta_q;
+    int new_uv_delta_q;
     cm->base_qindex = Q;
 
     /* if any of the delta_q values are changing update flag has to be set */
@@ -542,8 +543,6 @@ void vp8_set_quantizer(struct VP8_COMP *cpi, int Q)
 
     cm->y1dc_delta_q = 0;
     cm->y2ac_delta_q = 0;
-    cm->uvdc_delta_q = 0;
-    cm->uvac_delta_q = 0;
 
     if (Q < 4)
     {
@@ -555,6 +554,21 @@ void vp8_set_quantizer(struct VP8_COMP *cpi, int Q)
     update |= cm->y2dc_delta_q != new_delta_q;
     cm->y2dc_delta_q = new_delta_q;
 
+    new_uv_delta_q = 0;
+    // For screen content, lower the q value for UV channel. For now, select
+    // conservative delta; same delta for dc and ac, and decrease it with lower
+    // Q, and set to 0 below some threshold. May want to condition this in
+    // future on the variance/energy in UV channel.
+    if (cpi->oxcf.screen_content_mode && Q > 40) {
+      new_uv_delta_q = -(int)(0.15 * Q);
+      // Check range: magnitude of delta is 4 bits.
+      if (new_uv_delta_q < -15) {
+        new_uv_delta_q = -15;
+      }
+    }
+    update |= cm->uvdc_delta_q != new_uv_delta_q;
+    cm->uvdc_delta_q = new_uv_delta_q;
+    cm->uvac_delta_q = new_uv_delta_q;
 
     /* Set Segment specific quatizers */
     mbd->segment_feature_data[MB_LVL_ALT_Q][0] = cpi->segment_feature_data[MB_LVL_ALT_Q][0];

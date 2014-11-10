@@ -513,10 +513,18 @@ typedef struct VP8_COMP
     signed char *cyclic_refresh_map;
     // Count on how many (consecutive) times a macroblock uses ZER0MV_LAST.
     unsigned char *consec_zero_last;
+    // Counter that is reset when a block is checked for a mode-bias against
+    // ZEROMV_LASTREF.
+    unsigned char *consec_zero_last_mvbias;
 
     // Frame counter for the temporal pattern. Counter is rest when the temporal
     // layers are changed dynamically (run-time change).
     unsigned int temporal_pattern_counter;
+    // Temporal layer id.
+    int temporal_layer_id;
+
+    // Measure of average squared difference between source and denoised signal.
+    int mse_source_denoised;
 
 #if CONFIG_MULTITHREAD
     /* multithread data */
@@ -687,6 +695,7 @@ typedef struct VP8_COMP
 #endif
     /* The frame number of each reference frames */
     unsigned int current_ref_frames[MAX_REF_FRAMES];
+    // Closest reference frame to current frame.
     MV_REFERENCE_FRAME closest_reference_frame;
 
     struct rd_costs_struct

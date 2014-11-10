@@ -215,11 +215,15 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                                   LAST_FRAME) {
                             // Increment, check for wrap-around.
                             if (cpi->consec_zero_last[map_index+mb_col] < 255)
-                              cpi->consec_zero_last[map_index+mb_col] +=
-                                  1;
+                              cpi->consec_zero_last[map_index+mb_col] += 1;
+                            if (cpi->consec_zero_last_mvbias[map_index+mb_col] < 255)
+                              cpi->consec_zero_last_mvbias[map_index+mb_col] += 1;
                           } else {
                             cpi->consec_zero_last[map_index+mb_col] = 0;
+                            cpi->consec_zero_last_mvbias[map_index+mb_col] = 0;
                           }
+                          if (x->zero_last_dot_suppress)
+                            cpi->consec_zero_last_mvbias[map_index+mb_col] = 0;
                         }
 
                         /* Special case code for cyclic refresh
@@ -505,6 +509,7 @@ void vp8cx_init_mbrthread_data(VP8_COMP *cpi,
         mb->intra_error = 0;
         vp8_zero(mb->count_mb_ref_frame_usage);
         mb->mbs_tested_so_far = 0;
+        mb->mbs_zero_last_dot_suppress = 0;
     }
 }
 
