@@ -822,17 +822,11 @@ process_common_toolchain() {
             soft_enable neon
             soft_enable neon_asm
             soft_enable media
-            soft_enable edsp
             soft_enable fast_unaligned
             ;;
         armv6)
             soft_enable media
-            soft_enable edsp
             soft_enable fast_unaligned
-            ;;
-        armv5te)
-            soft_enable edsp
-            disable_feature fast_unaligned
             ;;
         esac
 

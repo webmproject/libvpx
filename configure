@@ -451,8 +451,6 @@ process_targets() {
     enabled child || write_common_config_banner
     enabled universal || write_common_target_config_h  ${BUILD_PFX}vpx_config.h
 
-    # TODO: add host tools target (obj_int_extract, etc)
-
     # For fat binaries, call configure recursively to configure for each
     # binary architecture to be included.
     if enabled universal; then

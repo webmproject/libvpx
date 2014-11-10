@@ -454,8 +454,7 @@ add_proto qw/void vp8_regular_quantize_b/, "struct block *, struct blockd *";
 specialize qw/vp8_regular_quantize_b sse2 sse4_1/;
 
 add_proto qw/void vp8_fast_quantize_b/, "struct block *, struct blockd *";
-specialize qw/vp8_fast_quantize_b sse2 ssse3 media neon/;
-$vp8_fast_quantize_b_media=vp8_fast_quantize_b_armv6;
+specialize qw/vp8_fast_quantize_b sse2 ssse3 neon/;
 
 #
 # Block subtraction
@@ -473,16 +472,13 @@ specialize qw/vp8_mbuverror mmx sse2/;
 $vp8_mbuverror_sse2=vp8_mbuverror_xmm;
 
 add_proto qw/void vp8_subtract_b/, "struct block *be, struct blockd *bd, int pitch";
-specialize qw/vp8_subtract_b mmx sse2 media neon/;
-$vp8_subtract_b_media=vp8_subtract_b_armv6;
+specialize qw/vp8_subtract_b mmx sse2 neon/;
 
 add_proto qw/void vp8_subtract_mby/, "short *diff, unsigned char *src, int src_stride, unsigned char *pred, int pred_stride";
-specialize qw/vp8_subtract_mby mmx sse2 media neon/;
-$vp8_subtract_mby_media=vp8_subtract_mby_armv6;
+specialize qw/vp8_subtract_mby mmx sse2 neon/;
 
 add_proto qw/void vp8_subtract_mbuv/, "short *diff, unsigned char *usrc, unsigned char *vsrc, int src_stride, unsigned char *upred, unsigned char *vpred, int pred_stride";
-specialize qw/vp8_subtract_mbuv mmx sse2 media neon/;
-$vp8_subtract_mbuv_media=vp8_subtract_mbuv_armv6;
+specialize qw/vp8_subtract_mbuv mmx sse2 neon/;
 
 #
 # Motion search

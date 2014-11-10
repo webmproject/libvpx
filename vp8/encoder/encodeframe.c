@@ -574,7 +574,7 @@ void encode_mb_row(VP8_COMP *cpi,
         /* pack tokens for this MB */
         {
             int tok_count = *tp - tp_start;
-            pack_tokens(w, tp_start, tok_count);
+            vp8_pack_tokens(w, tp_start, tok_count);
         }
 #endif
         /* Increment pointer into gf usage flags structure. */

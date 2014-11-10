@@ -261,7 +261,7 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                     /* pack tokens for this MB */
                     {
                         int tok_count = tp - tp_start;
-                        pack_tokens(w, tp_start, tok_count);
+                        vp8_pack_tokens(w, tp_start, tok_count);
                     }
 #else
                     cpi->tplist[mb_row].stop = tp;

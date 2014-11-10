@@ -181,12 +181,6 @@ INSTANTIATE_TEST_CASE_P(
                                  &vp8_regular_quantize_b_c)));
 #endif  // HAVE_SSE4_1
 
-#if HAVE_MEDIA
-INSTANTIATE_TEST_CASE_P(MEDIA, QuantizeTest,
-                        ::testing::Values(make_tuple(&vp8_fast_quantize_b_armv6,
-                                                     &vp8_fast_quantize_b_c)));
-#endif  // HAVE_MEDIA
-
 #if HAVE_NEON
 INSTANTIATE_TEST_CASE_P(NEON, QuantizeTest,
                         ::testing::Values(make_tuple(&vp8_fast_quantize_b_neon,

@@ -43,7 +43,7 @@
 # will remove any NEON dependency.
 
 # To change to building armeabi, run ./libvpx/configure again, but with
-# --target=arm5te-android-gcc and modify the Application.mk file to
+# --target=armv6-android-gcc and modify the Application.mk file to
 # set APP_ABI := armeabi
 #
 # Running ndk-build will build libvpx and include it in your project.
@@ -60,7 +60,7 @@ ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
   include $(CONFIG_DIR)libs-armv7-android-gcc.mk
   LOCAL_ARM_MODE := arm
 else ifeq  ($(TARGET_ARCH_ABI),armeabi)
-  include $(CONFIG_DIR)libs-armv5te-android-gcc.mk
+  include $(CONFIG_DIR)libs-armv6-android-gcc.mk
   LOCAL_ARM_MODE := arm
 else ifeq  ($(TARGET_ARCH_ABI),arm64-v8a)
   include $(CONFIG_DIR)libs-armv8-android-gcc.mk
@@ -91,51 +91,8 @@ LOCAL_CFLAGS := -O3
 # like x86inc.asm and x86_abi_support.asm
 LOCAL_ASMFLAGS := -I$(LIBVPX_PATH)
 
-# -----------------------------------------------------------------------------
-# Template  : asm_offsets_template
-# Arguments : 1: assembly offsets file to be created
-#             2: c file to base assembly offsets on
-# Returns   : None
-# Usage     : $(eval $(call asm_offsets_template,<asmfile>, <srcfile>
-# Rationale : Create offsets at compile time using for structures that are
-#             defined in c, but used in assembly functions.
-# -----------------------------------------------------------------------------
-define asm_offsets_template
-
-_SRC:=$(2)
-_OBJ:=$(ASM_CNV_PATH)/$$(notdir $(2)).S
-
-_FLAGS = $$($$(my)CFLAGS) \
-          $$(call get-src-file-target-cflags,$(2)) \
-          $$(call host-c-includes,$$(LOCAL_C_INCLUDES) $$(CONFIG_DIR)) \
-          $$(LOCAL_CFLAGS) \
-          $$(NDK_APP_CFLAGS) \
-          $$(call host-c-includes,$$($(my)C_INCLUDES)) \
-          -DINLINE_ASM \
-          -S \
-
-_TEXT = "Compile $$(call get-src-file-text,$(2))"
-_CC   = $$(TARGET_CC)
-
-$$(eval $$(call ev-build-file))
-
-$(1) : $$(_OBJ) $(2)
-	@mkdir -p $$(dir $$@)
-	@grep $(OFFSET_PATTERN) $$< | tr -d '\#' | $(CONFIG_DIR)$(ASM_CONVERSION) > $$@
-endef
-
-# Use ads2gas script to convert from RVCT format to GAS format.  This
-#  puts the processed file under $(ASM_CNV_PATH).  Local clean rule
-#  to handle removing these
-ifeq ($(CONFIG_VP8_ENCODER), yes)
-  ASM_CNV_OFFSETS_DEPEND += $(ASM_CNV_PATH)/vp8_asm_enc_offsets.asm
-endif
-ifeq ($(HAVE_NEON_ASM), yes)
-  ASM_CNV_OFFSETS_DEPEND += $(ASM_CNV_PATH)/vpx_scale_asm_offsets.asm
-endif
-
 .PRECIOUS: %.asm.s
-$(ASM_CNV_PATH)/libvpx/%.asm.s: $(LIBVPX_PATH)/%.asm $(ASM_CNV_OFFSETS_DEPEND)
+$(ASM_CNV_PATH)/libvpx/%.asm.s: $(LIBVPX_PATH)/%.asm
 	@mkdir -p $(dir $@)
 	@$(CONFIG_DIR)$(ASM_CONVERSION) <$< > $@
 
@@ -224,23 +181,10 @@ endif
 clean:
 	@echo "Clean: ads2gas files [$(TARGET_ARCH_ABI)]"
 	@$(RM) $(CODEC_SRCS_ASM_ADS2GAS) $(CODEC_SRCS_ASM_NEON_ADS2GAS)
-	@$(RM) $(patsubst %.asm, %.*, $(ASM_CNV_OFFSETS_DEPEND))
 	@$(RM) -r $(ASM_CNV_PATH)
 	@$(RM) $(CLEAN-OBJS)
 
 include $(BUILD_SHARED_LIBRARY)
-
-ifeq ($(HAVE_NEON), yes)
-  $(eval $(call asm_offsets_template,\
-    $(ASM_CNV_PATH)/vpx_scale_asm_offsets.asm, \
-    $(LIBVPX_PATH)/vpx_scale/vpx_scale_asm_offsets.c))
-endif
-
-ifeq ($(CONFIG_VP8_ENCODER), yes)
-  $(eval $(call asm_offsets_template,\
-    $(ASM_CNV_PATH)/vp8_asm_enc_offsets.asm, \
-    $(LIBVPX_PATH)/vp8/encoder/vp8_asm_enc_offsets.c))
-endif
 
 ifeq ($(CONFIG_RUNTIME_CPU_DETECT),yes)
 $(call import-module,cpufeatures)
