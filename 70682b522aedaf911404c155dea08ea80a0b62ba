@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//QlQ\u003d",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 1574,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-11-10T15:34:38Z",
+      "side": 1,
+      "message": "Because of the way our build script works, we cannot use SSE2_8, SSE2_10, etc. The first argument needs to be SSE2.\nCan you refactor this accordingly ? Otherwise the build will fail in certain configurations.",
+      "revId": "70682b522aedaf911404c155dea08ea80a0b62ba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
