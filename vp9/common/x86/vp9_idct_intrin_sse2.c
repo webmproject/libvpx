@@ -4463,11 +4463,11 @@ void vp9_highbd_idct16x16_10_add_sse2(const tran_low_t *input, uint8_t *dest8,
   // Find the min & max for the row transform
   // Since all non-zero dct coefficients are in upper-left 4x4 area,
   // we only need to consider first 4 rows here.
-  max_input = _mm_max_epi16(inptr[0], inptr[2]);
-  min_input = _mm_min_epi16(inptr[0], inptr[2]);
+  max_input = _mm_max_epi16(inptr[0], inptr[1]);
+  min_input = _mm_min_epi16(inptr[0], inptr[1]);
   for (i = 2; i < 4; i++) {
-    max_input = _mm_max_epi16(max_input, inptr[2*i]);
-    min_input = _mm_min_epi16(min_input, inptr[2*i]);
+    max_input = _mm_max_epi16(max_input, inptr[i]);
+    min_input = _mm_min_epi16(min_input, inptr[i]);
   }
   max_input = _mm_cmpgt_epi16(max_input, max);
   min_input = _mm_cmplt_epi16(min_input, min);
