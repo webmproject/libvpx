@@ -19,6 +19,57 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Qg8\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 596,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-11-10T23:38:28Z",
+      "side": 1,
+      "message": "Can you try changing this to \u0026xd-\u003emi[0].src_mi-\u003embmi ?",
+      "revId": "6dbd1edb0a16cfadf3135e8100b65ef047ed06a1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Qg0\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 729,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-11-10T23:38:28Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "6dbd1edb0a16cfadf3135e8100b65ef047ed06a1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Qg4\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 880,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-11-10T23:38:28Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "6dbd1edb0a16cfadf3135e8100b65ef047ed06a1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//QhU\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 1
