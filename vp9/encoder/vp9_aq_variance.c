@@ -52,14 +52,6 @@ double vp9_vaq_rdmult_ratio(int energy) {
   return RDMULT_RATIO(energy);
 }
 
-double vp9_vaq_inv_q_ratio(int energy) {
-  ENERGY_IN_BOUNDS(energy);
-
-  vp9_clear_system_state();
-
-  return Q_RATIO(-energy);
-}
-
 void vp9_vaq_init() {
   int i;
   double base_ratio;

@@ -593,7 +593,6 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
     for (mb_col = 0; mb_col < cm->mb_cols; ++mb_col) {
       int this_error;
       const int use_dc_pred = (mb_col || mb_row) && (!mb_col || !mb_row);
-      double error_weight = 1.0;
       const BLOCK_SIZE bsize = get_bsize(cm, mb_row, mb_col);
       double log_intra;
       int level_sample;
@@ -614,11 +613,6 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
                      mb_row << 1, num_8x8_blocks_high_lookup[bsize],
                      mb_col << 1, num_8x8_blocks_wide_lookup[bsize],
                      cm->mi_rows, cm->mi_cols);
-
-      if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
-        const int energy = vp9_block_energy(cpi, x, bsize);
-        error_weight = vp9_vaq_inv_q_ratio(energy);
-      }
 
       // Do intra 16x16 prediction.
       x->skip_encode = 0;
@@ -664,11 +658,6 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
         brightness_factor += 1.0 + (0.01 * (DARK_THRESH - level_sample));
       else
         brightness_factor += 1.0;
-
-      if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
-        vp9_clear_system_state();
-        this_error = (int)(this_error * error_weight);
-      }
 
       // Intrapenalty below deals with situations where the intra and inter
       // error scores are very low (e.g. a plain black frame).
@@ -741,20 +730,12 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
           // Test last reference frame using the previous best mv as the
           // starting point (best reference) for the search.
           first_pass_motion_search(cpi, x, &best_ref_mv, &mv, &motion_error);
-          if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
-            vp9_clear_system_state();
-            motion_error = (int)(motion_error * error_weight);
-          }
 
           // If the current best reference mv is not centered on 0,0 then do a
           // 0,0 based search as well.
           if (!is_zero_mv(&best_ref_mv)) {
             tmp_err = INT_MAX;
             first_pass_motion_search(cpi, x, &zero_mv, &tmp_mv, &tmp_err);
-            if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
-              vp9_clear_system_state();
-              tmp_err = (int)(tmp_err * error_weight);
-            }
 
             if (tmp_err < motion_error) {
               motion_error = tmp_err;
@@ -785,10 +766,6 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
 
             first_pass_motion_search(cpi, x, &zero_mv, &tmp_mv,
                                      &gf_motion_error);
-            if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
-              vp9_clear_system_state();
-              gf_motion_error = (int)(gf_motion_error * error_weight);
-            }
 
             if (gf_motion_error < motion_error && gf_motion_error < this_error)
               ++second_ref_count;
