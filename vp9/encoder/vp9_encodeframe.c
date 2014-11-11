@@ -2707,15 +2707,15 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
       if (cpi->sf.adaptive_pred_interp_filter && partition_none_allowed)
         pc_tree->leaf_split[0]->pred_interp_filter =
             ctx->mic.mbmi.interp_filter;
-#if !CONFIG_SUPERTX
-      rd_pick_sb_modes(cpi, tile, mi_row, mi_col, &sum_rate,
-                       &sum_dist, subsize,
-                       pc_tree->leaf_split[0], best_rd, 0);
-#else
+#if CONFIG_SUPERTX
       rd_pick_sb_modes(cpi, tile, mi_row, mi_col, &sum_rate,
                        &sum_rate_nocoef,
                        &sum_dist, subsize,
                        pc_tree->leaf_split[0], INT64_MAX, 0);
+#else
+      rd_pick_sb_modes(cpi, tile, mi_row, mi_col, &sum_rate,
+                       &sum_dist, subsize,
+                       pc_tree->leaf_split[0], best_rd, 0);
 #endif
       if (sum_rate == INT_MAX)
         sum_rd = INT64_MAX;
@@ -2762,10 +2762,10 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
       }
 #endif
     } else {
-#if !CONFIG_SUPERTX
-      for (i = 0; i < 4 && sum_rd < best_rd; ++i) {
-#else
+#if CONFIG_SUPERTX
       for (i = 0; i < 4 && sum_rd < INT64_MAX; ++i) {
+#else
+      for (i = 0; i < 4 && sum_rd < best_rd; ++i) {
 #endif
       const int x_idx = (i & 1) * mi_step;
       const int y_idx = (i >> 1) * mi_step;
@@ -2775,16 +2775,16 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
 
         if (cpi->sf.adaptive_motion_search)
           load_pred_mv(x, ctx);
-#if !CONFIG_SUPERTX
-        rd_pick_partition(cpi, tile, tp, mi_row + y_idx, mi_col + x_idx,
-                          subsize, &this_rate, &this_dist, i != 3,
-                          best_rd - sum_rd, pc_tree->split[i]);
-#else
+#if CONFIG_SUPERTX
         rd_pick_partition(cpi, tile, tp, mi_row + y_idx, mi_col + x_idx,
                           subsize, &this_rate,
                           &this_rate_nocoef,
                           &this_dist, i != 3,
                           INT64_MAX - sum_rd, pc_tree->split[i]);
+#else
+        rd_pick_partition(cpi, tile, tp, mi_row + y_idx, mi_col + x_idx,
+                          subsize, &this_rate, &this_dist, i != 3,
+                          best_rd - sum_rd, pc_tree->split[i]);
 #endif
 
         if (this_rate == INT_MAX) {
@@ -2899,15 +2899,15 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
           partition_none_allowed)
         pc_tree->horizontal[1].pred_interp_filter =
             ctx->mic.mbmi.interp_filter;
-#if !CONFIG_SUPERTX
-      rd_pick_sb_modes(cpi, tile, mi_row + mi_step, mi_col, &this_rate,
-                       &this_dist, subsize, &pc_tree->horizontal[1],
-                       best_rd - sum_rd, 1);
-#else
+#if CONFIG_SUPERTX
       rd_pick_sb_modes(cpi, tile, mi_row + mi_step, mi_col, &this_rate,
                        &this_rate_nocoef,
                        &this_dist, subsize, &pc_tree->horizontal[1],
                        INT64_MAX, 1);
+#else
+      rd_pick_sb_modes(cpi, tile, mi_row + mi_step, mi_col, &this_rate,
+                       &this_dist, subsize, &pc_tree->horizontal[1],
+                       best_rd - sum_rd, 1);
 #endif
       if (this_rate == INT_MAX) {
         sum_rd = INT64_MAX;
@@ -3014,16 +3014,16 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
           partition_none_allowed)
         pc_tree->vertical[1].pred_interp_filter =
             ctx->mic.mbmi.interp_filter;
-#if !CONFIG_SUPERTX
-      rd_pick_sb_modes(cpi, tile, mi_row, mi_col + mi_step, &this_rate,
-                       &this_dist, subsize,
-                       &pc_tree->vertical[1], best_rd - sum_rd,
-                       1);
-#else
+#if CONFIG_SUPERTX
       rd_pick_sb_modes(cpi, tile, mi_row, mi_col + mi_step, &this_rate,
                        &this_rate_nocoef,
                        &this_dist, subsize,
                        &pc_tree->vertical[1], INT64_MAX,
+                       1);
+#else
+      rd_pick_sb_modes(cpi, tile, mi_row, mi_col + mi_step, &this_rate,
+                       &this_dist, subsize,
+                       &pc_tree->vertical[1], best_rd - sum_rd,
                        1);
 #endif
       if (this_rate == INT_MAX) {
@@ -4170,36 +4170,36 @@ void vp9_encode_frame(VP9_COMP *cpi) {
         count32x32 += cm->counts.tx.p32x32[i][TX_32X32];
       }
 
-#if !CONFIG_SUPERTX
-      if (count4x4 == 0 && count16x16_lp == 0 && count16x16_16x16p == 0 &&
-          count32x32 == 0) {
-#else
+#if CONFIG_SUPERTX
       if (count4x4 == 0 && count16x16_lp == 0 && count16x16_16x16p == 0 &&
           count32x32 == 0 &&
           cm->counts.supertx_size[TX_16X16] == 0 &&
           cm->counts.supertx_size[TX_32X32] == 0) {
+#else
+      if (count4x4 == 0 && count16x16_lp == 0 && count16x16_16x16p == 0 &&
+          count32x32 == 0) {
 #endif
         cm->tx_mode = ALLOW_8X8;
         reset_skip_tx_size(cm, TX_8X8);
-#if !CONFIG_SUPERTX
-      } else if (count8x8_8x8p == 0 && count16x16_16x16p == 0 &&
-                 count8x8_lp == 0 && count16x16_lp == 0 && count32x32 == 0) {
-#else
+#if CONFIG_SUPERTX
       } else if (count8x8_8x8p == 0 && count16x16_16x16p == 0 &&
           count8x8_lp == 0 && count16x16_lp == 0 && count32x32 == 0 &&
           cm->counts.supertx_size[TX_8X8] == 0 &&
           cm->counts.supertx_size[TX_16X16] == 0 &&
           cm->counts.supertx_size[TX_32X32] == 0) {
+#else
+      } else if (count8x8_8x8p == 0 && count16x16_16x16p == 0 &&
+                 count8x8_lp == 0 && count16x16_lp == 0 && count32x32 == 0) {
 #endif
         cm->tx_mode = ONLY_4X4;
         reset_skip_tx_size(cm, TX_4X4);
       } else if (count8x8_lp == 0 && count16x16_lp == 0 && count4x4 == 0) {
         cm->tx_mode = ALLOW_32X32;
-#if !CONFIG_SUPERTX
-      } else if (count32x32 == 0 && count8x8_lp == 0 && count4x4 == 0) {
-#else
+#if CONFIG_SUPERTX
       } else if (count32x32 == 0 && count8x8_lp == 0 && count4x4 == 0 &&
           cm->counts.supertx_size[TX_32X32] == 0) {
+#else
+      } else if (count32x32 == 0 && count8x8_lp == 0 && count4x4 == 0) {
 #endif
         cm->tx_mode = ALLOW_16X16;
         reset_skip_tx_size(cm, TX_16X16);

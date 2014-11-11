@@ -539,13 +539,13 @@ static void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
       uint8_t tmp_dst[4096];
       inter_predictor(pre, pre_buf->stride, tmp_dst, 64,
                      subpel_x, subpel_y, sf, w, h, 0, kernel, xs, ys);
-#if !CONFIG_SUPERTX
-      build_masked_compound(dst, dst_buf->stride, tmp_dst, 64,
-                            mi->mbmi.mask_index, mi->mbmi.sb_type, h, w);
-#else
+#if CONFIG_SUPERTX
       build_masked_compound_extend(dst, dst_buf->stride, tmp_dst, 64, plane,
                                    mi->mbmi.mask_index, mi->mbmi.sb_type,
                                    mask_offset_x, mask_offset_y, h, w);
+#else
+      build_masked_compound(dst, dst_buf->stride, tmp_dst, 64,
+                            mi->mbmi.mask_index, mi->mbmi.sb_type, h, w);
 #endif
     } else {
 #endif
@@ -1050,13 +1050,13 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
       uint8_t tmp_dst[4096];
       inter_predictor(buf_ptr, buf_stride, tmp_dst, 64,
                      subpel_x, subpel_y, sf, w, h, 0, kernel, xs, ys);
-#if !CONFIG_SUPERTX
-      build_masked_compound(dst, dst_buf->stride, tmp_dst, 64,
-                            mi->mbmi.mask_index, mi->mbmi.sb_type, h, w);
-#else
+#if CONFIG_SUPERTX
       build_masked_compound_extend(dst, dst_buf->stride, tmp_dst, 64, plane,
                                    mi->mbmi.mask_index, mi->mbmi.sb_type,
                                    mask_offset_x, mask_offset_y, h, w);
+#else
+      build_masked_compound(dst, dst_buf->stride, tmp_dst, 64,
+                            mi->mbmi.mask_index, mi->mbmi.sb_type, h, w);
 #endif
     } else {
 #endif

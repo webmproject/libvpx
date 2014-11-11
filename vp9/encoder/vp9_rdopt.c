@@ -788,10 +788,10 @@ void vp9_get_entropy_contexts(BLOCK_SIZE bsize, TX_SIZE tx_size,
   }
 }
 
-#if !CONFIG_SUPERTX
-static void txfm_rd_in_plane(MACROBLOCK *x,
-#else
+#if CONFIG_SUPERTX
 void txfm_rd_in_plane(MACROBLOCK *x,
+#else
+static void txfm_rd_in_plane(MACROBLOCK *x,
 #endif
                              int *rate, int64_t *distortion,
                              int *skippable, int64_t *sse,

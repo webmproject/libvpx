@@ -174,10 +174,10 @@ static int read_inter_segment_id(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   return segment_id;
 }
 
-#if !CONFIG_SUPERTX
-static int read_skip(VP9_COMMON *cm, const MACROBLOCKD *xd,
-#else
+#if CONFIG_SUPERTX
 int read_skip(VP9_COMMON *cm, const MACROBLOCKD *xd,
+#else
+static int read_skip(VP9_COMMON *cm, const MACROBLOCKD *xd,
 #endif
                      int segment_id, vp9_reader *r) {
   if (vp9_segfeature_active(&cm->seg, segment_id, SEG_LVL_SKIP)) {
