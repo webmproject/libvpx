@@ -77,6 +77,7 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
       lc->target_bandwidth = oxcf->ts_target_bitrate[layer];
       lrc->last_q[INTER_FRAME] = oxcf->worst_allowed_q;
       lrc->avg_frame_qindex[INTER_FRAME] = oxcf->worst_allowed_q;
+      lrc->avg_frame_qindex[KEY_FRAME] = oxcf->worst_allowed_q;
     } else {
       lc->target_bandwidth = oxcf->ss_target_bitrate[layer];
       lrc->last_q[KEY_FRAME] = oxcf->best_allowed_q;
