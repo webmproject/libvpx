@@ -34,6 +34,10 @@ extern "C" {
 #define dual_set_epi16(a, b) \
   _mm_set_epi16(b, b, b, b, a, a, a, a)
 
+#if CONFIG_TX_SKIP
+#define TX_SKIP_SHIFT 2
+#endif
+
 // Constants:
 //  for (int i = 1; i< 32; ++i)
 //    printf("static const int cospi_%d_64 = %.0f;\n", i,
@@ -164,3 +168,7 @@ void vp9_highbd_iht16x16_add(TX_TYPE tx_type, const tran_low_t *input,
 #endif
 
 #endif  // VP9_COMMON_VP9_IDCT_H_
+#if CONFIG_TX_SKIP
+void vp9_tx_identity_add(const tran_low_t *input, uint8_t *dest,
+                         int stride, int bs);
+#endif

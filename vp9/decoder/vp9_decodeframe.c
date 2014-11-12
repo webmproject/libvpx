@@ -206,12 +206,19 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
                                     TX_SIZE tx_size, uint8_t *dst, int stride,
                                     int eob) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
+#if CONFIG_TX_SKIP
+  MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
+#endif
   if (eob > 0) {
     TX_TYPE tx_type = DCT_DCT;
     tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
 #if CONFIG_VP9_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+#if CONFIG_TX_SKIP
+      if (xd->lossless && !mbmi->tx_skip[plane != 0]) {
+#else
       if (xd->lossless) {
+#endif  // CONFIG_TX_SKIP
         tx_type = DCT_DCT;
         vp9_highbd_iwht4x4_add(dqcoeff, dst, stride, eob, xd->bd);
       } else {
@@ -219,32 +226,77 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
         switch (tx_size) {
           case TX_4X4:
             tx_type = get_tx_type_4x4(plane_type, xd, block);
+#if CONFIG_TX_SKIP
+            if (mbmi->tx_skip[plane != 0]) {
+              vp9_tx_identity_add(dqcoeff, dst, stride, 4);
+            } else {
+              vp9_highbd_iht4x4_add(tx_type, dqcoeff, dst, stride, eob, xd->bd);
+            }
+#else
             vp9_highbd_iht4x4_add(tx_type, dqcoeff, dst, stride, eob, xd->bd);
+#endif
             break;
           case TX_8X8:
             tx_type = get_tx_type(plane_type, xd);
+#if CONFIG_TX_SKIP
+            if (mbmi->tx_skip[plane != 0]) {
+              vp9_tx_identity_add(dqcoeff, dst, stride, 8);
+            } else {
+              vp9_highbd_iht8x8_add(tx_type, dqcoeff, dst, stride, eob, xd->bd);
+            }
+#else
             vp9_highbd_iht8x8_add(tx_type, dqcoeff, dst, stride, eob, xd->bd);
+#endif
             break;
           case TX_16X16:
             tx_type = get_tx_type(plane_type, xd);
+#if CONFIG_TX_SKIP
+            if (mbmi->tx_skip[plane != 0]) {
+              vp9_tx_identity_add(dqcoeff, dst, stride, 16);
+            } else {
+              vp9_highbd_iht16x16_add(tx_type, dqcoeff, dst, stride, eob,
+                                      xd->bd);
+            }
+#else
             vp9_highbd_iht16x16_add(tx_type, dqcoeff, dst, stride, eob, xd->bd);
+#endif
             break;
           case TX_32X32:
             tx_type = DCT_DCT;
+#if CONFIG_TX_SKIP
+            if (mbmi->tx_skip[plane != 0]) {
+              vp9_tx_identity_add(dqcoeff, dst, stride, 32);
+            } else {
             vp9_highbd_idct32x32_add(dqcoeff, dst, stride, eob, xd->bd);
+            }
+#else
+            vp9_highbd_idct32x32_add(dqcoeff, dst, stride, eob, xd->bd);
+#endif
             break;
 #if CONFIG_TX64X64
           case TX_64X64:
             tx_type = DCT_DCT;
+#if CONFIG_TX_SKIP
+            if (mbmi->tx_skip[plane != 0]) {
+              vp9_tx_identity_add(dqcoeff, dst, stride, 64);
+            } else {
+              vp9_highbd_idct64x64_add(dqcoeff, dst, stride, eob, xd->bd);
+            }
+#else
             vp9_highbd_idct64x64_add(dqcoeff, dst, stride, eob, xd->bd);
+#endif  // CONFIG_TX_SKIP
             break;
-#endif
+#endif  // CONFIG_TX64X64
           default:
             assert(0 && "Invalid transform size");
         }
       }
     } else {
+#if CONFIG_TX_SKIP
+      if (xd->lossless && !mbmi->tx_skip[plane != 0]) {
+#else
       if (xd->lossless) {
+#endif
         tx_type = DCT_DCT;
         vp9_iwht4x4_add(dqcoeff, dst, stride, eob);
       } else {
@@ -252,26 +304,66 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
         switch (tx_size) {
           case TX_4X4:
             tx_type = get_tx_type_4x4(plane_type, xd, block);
+#if CONFIG_TX_SKIP
+            if (mbmi->tx_skip[plane != 0]) {
+              vp9_tx_identity_add(dqcoeff, dst, stride, 4);
+            } else {
+              vp9_iht4x4_add(tx_type, dqcoeff, dst, stride, eob);
+            }
+#else
             vp9_iht4x4_add(tx_type, dqcoeff, dst, stride, eob);
+#endif
             break;
           case TX_8X8:
             tx_type = get_tx_type(plane_type, xd);
+#if CONFIG_TX_SKIP
+            if (mbmi->tx_skip[plane != 0]) {
+              vp9_tx_identity_add(dqcoeff, dst, stride, 8);
+            } else {
+              vp9_iht8x8_add(tx_type, dqcoeff, dst, stride, eob);
+            }
+#else
             vp9_iht8x8_add(tx_type, dqcoeff, dst, stride, eob);
+#endif
             break;
           case TX_16X16:
             tx_type = get_tx_type(plane_type, xd);
+#if CONFIG_TX_SKIP
+            if (mbmi->tx_skip[plane != 0]) {
+              vp9_tx_identity_add(dqcoeff, dst, stride, 16);
+            } else {
+              vp9_iht16x16_add(tx_type, dqcoeff, dst, stride, eob);
+            }
+#else
             vp9_iht16x16_add(tx_type, dqcoeff, dst, stride, eob);
+#endif
             break;
           case TX_32X32:
             tx_type = DCT_DCT;
+#if CONFIG_TX_SKIP
+            if (mbmi->tx_skip[plane != 0]) {
+              vp9_tx_identity_add(dqcoeff, dst, stride, 32);
+            } else {
+              vp9_idct32x32_add(dqcoeff, dst, stride, eob);
+            }
+#else
             vp9_idct32x32_add(dqcoeff, dst, stride, eob);
+#endif
             break;
 #if CONFIG_TX64X64
           case TX_64X64:
             tx_type = DCT_DCT;
-            vp9_idct64x64_add(dqcoeff, dst, stride, eob);
+#if CONFIG_TX_SKIP
+            if (mbmi->tx_skip[plane != 0]) {
+              vp9_tx_identity_add(dqcoeff, dst, stride, 64);
+            } else {
+              vp9_idct64x64_add(dqcoeff, dst, stride, eob);
+            }
+#else
+              vp9_idct64x64_add(dqcoeff, dst, stride, eob);
+#endif  // CONFIG_TX_SKIP
             break;
-#endif
+#endif  // CONFIG_TX64X64
           default:
             assert(0 && "Invalid transform size");
             return;
@@ -279,7 +371,11 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
       }
     }
 #else
+#if CONFIG_TX_SKIP
+    if (xd->lossless && !mbmi->tx_skip[plane != 0]) {
+#else
     if (xd->lossless) {
+#endif
       tx_type = DCT_DCT;
       vp9_iwht4x4_add(dqcoeff, dst, stride, eob);
     } else {
@@ -287,26 +383,66 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
       switch (tx_size) {
         case TX_4X4:
           tx_type = get_tx_type_4x4(plane_type, xd, block);
+#if CONFIG_TX_SKIP
+          if (mbmi->tx_skip[plane != 0]) {
+            vp9_tx_identity_add(dqcoeff, dst, stride, 4);
+          } else {
+            vp9_iht4x4_add(tx_type, dqcoeff, dst, stride, eob);
+          }
+#else
           vp9_iht4x4_add(tx_type, dqcoeff, dst, stride, eob);
+#endif
           break;
         case TX_8X8:
           tx_type = get_tx_type(plane_type, xd);
+#if CONFIG_TX_SKIP
+          if (mbmi->tx_skip[plane != 0]) {
+            vp9_tx_identity_add(dqcoeff, dst, stride, 8);
+          } else {
+            vp9_iht8x8_add(tx_type, dqcoeff, dst, stride, eob);
+          }
+#else
           vp9_iht8x8_add(tx_type, dqcoeff, dst, stride, eob);
+#endif
           break;
         case TX_16X16:
           tx_type = get_tx_type(plane_type, xd);
+#if CONFIG_TX_SKIP
+          if (mbmi->tx_skip[plane != 0]) {
+            vp9_tx_identity_add(dqcoeff, dst, stride, 16);
+          } else {
+            vp9_iht16x16_add(tx_type, dqcoeff, dst, stride, eob);
+          }
+#else
           vp9_iht16x16_add(tx_type, dqcoeff, dst, stride, eob);
-          break;
+#endif
+  break;
         case TX_32X32:
           tx_type = DCT_DCT;
+#if CONFIG_TX_SKIP
+          if (mbmi->tx_skip[plane != 0]) {
+            vp9_tx_identity_add(dqcoeff, dst, stride, 32);
+          } else {
+            vp9_idct32x32_add(dqcoeff, dst, stride, eob);;
+          }
+#else
           vp9_idct32x32_add(dqcoeff, dst, stride, eob);
+#endif
           break;
 #if CONFIG_TX64X64
         case TX_64X64:
           tx_type = DCT_DCT;
+#if CONFIG_TX_SKIP
+          if (mbmi->tx_skip[plane != 0]) {
+            vp9_tx_identity_add(dqcoeff, dst, stride, 64);
+          } else {
+            vp9_idct64x64_add(dqcoeff, dst, stride, eob);;
+          }
+#else
           vp9_idct64x64_add(dqcoeff, dst, stride, eob);
+#endif  // CONFIG_TX_SKIP
           break;
-#endif
+#endif  // CONFIG_TX64X64
         default:
           assert(0 && "Invalid transform size");
           return;

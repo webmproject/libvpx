@@ -1439,6 +1439,16 @@ void vp9_fdct32x32_rd_c(const int16_t *input, tran_low_t *out, int stride) {
   }
 }
 
+#if CONFIG_TX_SKIP
+void vp9_tx_identity(const int16_t *input, tran_low_t *out, int stride,
+                     int bs) {
+  int r, c;
+  for (r = 0; r < bs; r++)
+    for (c = 0; c < bs; c++)
+      out[bs * r + c] = input[stride * r + c] << TX_SKIP_SHIFT;
+}
+#endif
+
 #if CONFIG_TX64X64
 // TODO(debargha): Using a floating point implementation for now.
 // Should re-use the 32x32 integer dct we already have.
