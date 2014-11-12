@@ -16,6 +16,24 @@
       "revId": "2c016381bf61d22bf9b12aafb643dd8c2a4d5e85",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//QXs\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-11-12T22:27:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//QYQ\u003d",
+      "revId": "2c016381bf61d22bf9b12aafb643dd8c2a4d5e85",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
