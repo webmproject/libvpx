@@ -237,13 +237,16 @@ enum vp8e_enc_control_id {
 
   VP9E_SET_SVC,
   VP9E_SET_SVC_PARAMETERS,
+
   /*!\brief control function to set svc layer for spatial and temporal.
    * \note Valid ranges: 0..#vpx_codec_enc_cfg::ss_number_layers for spatial
    *                     layer and 0..#vpx_codec_enc_cfg::ts_number_layers for
    *                     temporal layer.
    */
   VP9E_SET_SVC_LAYER_ID,
-  VP9E_SET_TUNE_CONTENT
+  VP9E_SET_TUNE_CONTENT,
+  VP9E_GET_SVC_LAYER_ID,
+  VP9E_REGISTER_CX_CALLBACK,
 };
 
 /*!\brief vpx 1-D scaling mode
@@ -365,6 +368,7 @@ VPX_CTRL_USE_TYPE(VP8E_SET_SCALEMODE,          vpx_scaling_mode_t *)
 
 VPX_CTRL_USE_TYPE(VP9E_SET_SVC,                int)
 VPX_CTRL_USE_TYPE(VP9E_SET_SVC_PARAMETERS,     void *)
+VPX_CTRL_USE_TYPE(VP9E_REGISTER_CX_CALLBACK,   void *)
 VPX_CTRL_USE_TYPE(VP9E_SET_SVC_LAYER_ID,       vpx_svc_layer_id_t *)
 
 VPX_CTRL_USE_TYPE(VP8E_SET_CPUUSED,            int)
@@ -385,6 +389,7 @@ VPX_CTRL_USE_TYPE(VP9E_SET_TILE_ROWS,  int)
 
 VPX_CTRL_USE_TYPE(VP8E_GET_LAST_QUANTIZER,     int *)
 VPX_CTRL_USE_TYPE(VP8E_GET_LAST_QUANTIZER_64,  int *)
+VPX_CTRL_USE_TYPE(VP9E_GET_SVC_LAYER_ID,  vpx_svc_layer_id_t *)
 
 VPX_CTRL_USE_TYPE(VP8E_SET_MAX_INTRA_BITRATE_PCT, unsigned int)
 VPX_CTRL_USE_TYPE(VP8E_SET_MAX_INTER_BITRATE_PCT, unsigned int)

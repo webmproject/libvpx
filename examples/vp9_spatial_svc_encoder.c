@@ -125,7 +125,7 @@ void usage_exit() {
 }
 
 static void parse_command_line(int argc, const char **argv_,
-                               AppInput *app_input, SvcContext *svc_ctx,
+                               AppInput *app_input, SvcContext_t *svc_ctx,
                                vpx_codec_enc_cfg_t *enc_cfg) {
   struct arg arg = {0};
   char **argv = NULL;
@@ -322,7 +322,7 @@ int main(int argc, const char **argv) {
   VpxVideoInfo info = {0};
   vpx_codec_ctx_t codec;
   vpx_codec_enc_cfg_t enc_cfg;
-  SvcContext svc_ctx;
+  SvcContext_t svc_ctx;
   uint32_t i;
   uint32_t frame_cnt = 0;
   vpx_image_t raw;
