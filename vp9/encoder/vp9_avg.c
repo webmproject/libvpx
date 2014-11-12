@@ -19,6 +19,15 @@ unsigned int vp9_avg_8x8_c(const uint8_t *s, int p) {
   return (sum + 32) >> 6;
 }
 
+unsigned int vp9_avg_4x4_c(const uint8_t *s, int p) {
+  int i, j;
+  int sum = 0;
+  for (i = 0; i < 4; ++i, s+=p)
+    for (j = 0; j < 4; sum += s[j], ++j) {}
+
+  return (sum + 8) >> 4;
+}
+
 #if CONFIG_VP9_HIGHBITDEPTH
 unsigned int vp9_highbd_avg_8x8_c(const uint8_t *s8, int p) {
   int i, j;
@@ -29,5 +38,16 @@ unsigned int vp9_highbd_avg_8x8_c(const uint8_t *s8, int p) {
 
   return (sum + 32) >> 6;
 }
+
+unsigned int vp9_highbd_avg_4x4_c(const uint8_t *s8, int p) {
+  int i, j;
+  int sum = 0;
+  const uint16_t* s = CONVERT_TO_SHORTPTR(s8);
+  for (i = 0; i < 4; ++i, s+=p)
+    for (j = 0; j < 4; sum += s[j], ++j) {}
+
+  return (sum + 8) >> 4;
+}
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+
 

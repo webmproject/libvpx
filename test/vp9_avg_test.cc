@@ -57,12 +57,20 @@ class AverageTestBase : public ::testing::Test {
   }
 
   // Sum Pixels
-  unsigned int ReferenceAverage(const uint8_t* source, int pitch ) {
+  unsigned int ReferenceAverage8x8(const uint8_t* source, int pitch ) {
     unsigned int average = 0;
     for (int h = 0; h < 8; ++h)
       for (int w = 0; w < 8; ++w)
         average += source[h * source_stride_ + w];
     return ((average + 32) >> 6);
+  }
+
+  unsigned int ReferenceAverage4x4(const uint8_t* source, int pitch ) {
+    unsigned int average = 0;
+    for (int h = 0; h < 4; ++h)
+      for (int w = 0; w < 4; ++w)
+        average += source[h * source_stride_ + w];
+    return ((average + 8) >> 4);
   }
 
   void FillConstant(uint8_t fill_constant) {
@@ -85,7 +93,7 @@ class AverageTestBase : public ::testing::Test {
 };
 typedef unsigned int (*AverageFunction)(const uint8_t* s, int pitch);
 
-typedef std::tr1::tuple<int, int, int, AverageFunction> AvgFunc;
+typedef std::tr1::tuple<int, int, int, int, AverageFunction> AvgFunc;
 
 class AverageTest
     : public AverageTestBase,
@@ -95,12 +103,18 @@ class AverageTest
 
  protected:
   void CheckAverages() {
-    unsigned int expected = ReferenceAverage(source_data_+ GET_PARAM(2),
-                                             source_stride_);
+    unsigned int expected = 0;
+    if (GET_PARAM(3) == 8) {
+      expected = ReferenceAverage8x8(source_data_+ GET_PARAM(2),
+                                     source_stride_);
+    } else  if (GET_PARAM(3) == 4) {
+      expected = ReferenceAverage4x4(source_data_+ GET_PARAM(2),
+                                     source_stride_);
+    }
 
-    ASM_REGISTER_STATE_CHECK(GET_PARAM(3)(source_data_+ GET_PARAM(2),
+    ASM_REGISTER_STATE_CHECK(GET_PARAM(4)(source_data_+ GET_PARAM(2),
                                           source_stride_));
-    unsigned int actual = GET_PARAM(3)(source_data_+ GET_PARAM(2),
+    unsigned int actual = GET_PARAM(4)(source_data_+ GET_PARAM(2),
                                        source_stride_);
 
     EXPECT_EQ(expected, actual);
@@ -134,16 +148,20 @@ using std::tr1::make_tuple;
 INSTANTIATE_TEST_CASE_P(
     C, AverageTest,
     ::testing::Values(
-        make_tuple(16, 16, 1, &vp9_avg_8x8_c)));
+        make_tuple(16, 16, 1, 8, &vp9_avg_8x8_c),
+        make_tuple(16, 16, 1, 4, &vp9_avg_4x4_c)));
 
 
 #if HAVE_SSE2
 INSTANTIATE_TEST_CASE_P(
     SSE2, AverageTest,
     ::testing::Values(
-        make_tuple(16, 16, 0, &vp9_avg_8x8_sse2),
-        make_tuple(16, 16, 5, &vp9_avg_8x8_sse2),
-        make_tuple(32, 32, 15, &vp9_avg_8x8_sse2)));
+        make_tuple(16, 16, 0, 8, &vp9_avg_8x8_sse2),
+        make_tuple(16, 16, 5, 8, &vp9_avg_8x8_sse2),
+        make_tuple(32, 32, 15, 8, &vp9_avg_8x8_sse2),
+        make_tuple(16, 16, 0, 4, &vp9_avg_4x4_sse2),
+        make_tuple(16, 16, 5, 4, &vp9_avg_4x4_sse2),
+        make_tuple(32, 32, 15, 4, &vp9_avg_4x4_sse2)));
 
 #endif
 

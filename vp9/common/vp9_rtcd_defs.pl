@@ -1135,9 +1135,14 @@ specialize qw/vp9_get_mb_ss/, "$sse2_x86inc";
 add_proto qw/unsigned int vp9_avg_8x8/, "const uint8_t *, int p";
 specialize qw/vp9_avg_8x8 sse2/;
 
+add_proto qw/unsigned int vp9_avg_4x4/, "const uint8_t *, int p";
+specialize qw/vp9_avg_4x4 sse2/;
+
 if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   add_proto qw/unsigned int vp9_highbd_avg_8x8/, "const uint8_t *, int p";
   specialize qw/vp9_highbd_avg_8x8/;
+  add_proto qw/unsigned int vp9_highbd_avg_4x4/, "const uint8_t *, int p";
+  specialize qw/vp9_highbd_avg_4x4/;
 }
 
 # ENCODEMB INVOKE
