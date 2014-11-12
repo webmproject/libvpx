@@ -3635,6 +3635,13 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     if (source != NULL) {
       cm->show_frame = 1;
       cm->intra_only = 0;
+      // if the flags indicate intra frame, but if the current picture is for
+      // non-zero spatial layer, it should not be an intra picture.
+      // TODO(Won Kap): this needs to change if per-layer intra frame is
+      // allowed.
+      if ((source->flags | VPX_EFLAG_FORCE_KF) && cpi->svc.spatial_layer_id) {
+        source->flags &= ~(unsigned int)(VPX_EFLAG_FORCE_KF);
+      }
 
       // Check to see if the frame should be encoded as an arf overlay.
       check_src_altref(cpi, source);
