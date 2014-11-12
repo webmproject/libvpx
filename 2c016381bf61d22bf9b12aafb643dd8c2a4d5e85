@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//QYQ\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-11-12T21:02:49Z",
+      "side": 1,
+      "message": "annnnd I\u0027m a terrible person: I must have forgotten that I was reviewing c++ when I commented here. Please use static_cast or reinterpret_cast. (Sorry)",
+      "revId": "2c016381bf61d22bf9b12aafb643dd8c2a4d5e85",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
