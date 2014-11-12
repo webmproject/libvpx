@@ -486,8 +486,8 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
   const YV12_BUFFER_CONFIG *first_ref_buf = lst_yv12;
   LAYER_CONTEXT *const lc = is_two_pass_svc(cpi) ?
         &cpi->svc.layer_context[cpi->svc.spatial_layer_id] : NULL;
-  double intra_factor = 0.0;
-  double brightness_factor = 0.0;
+  double intra_factor;
+  double brightness_factor;
 
 #if CONFIG_FP_MB_STATS
   if (cpi->use_fp_mb_stats) {
@@ -496,6 +496,9 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
 #endif
 
   vp9_clear_system_state();
+
+  intra_factor = 0.0;
+  brightness_factor = 0.0;
 
   set_first_pass_params(cpi);
   vp9_set_quantizer(cm, find_fp_qindex(cm->bit_depth));
@@ -640,6 +643,7 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
       }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
+      vp9_clear_system_state();
       log_intra = log(this_error + 1.0);
       if (log_intra < 10.0)
         intra_factor += 1.0 + ((10.0 - log_intra) * 0.05);
@@ -938,7 +942,6 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
     vp9_clear_system_state();
   }
 
-  vp9_clear_system_state();
   {
     FIRSTPASS_STATS fps;
     // The minimum error here insures some bit allocation to frames even
