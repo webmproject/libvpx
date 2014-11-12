@@ -851,6 +851,7 @@ static void rd_pick_sb_modes(VP9_COMP *cpi,
   if (aq_mode == VARIANCE_AQ) {
     const int energy = bsize <= BLOCK_16X16 ? x->mb_energy
                                             : vp9_block_energy(cpi, x, bsize);
+    int segment_qindex;
     if (cm->frame_type == KEY_FRAME ||
         cpi->refresh_alt_ref_frame ||
         (cpi->refresh_golden_frame && !cpi->rc.is_src_frame_alt_ref)) {
@@ -860,11 +861,13 @@ static void rd_pick_sb_modes(VP9_COMP *cpi,
                                                     : cm->last_frame_seg_map;
       mbmi->segment_id = vp9_get_segment_id(cm, map, bsize, mi_row, mi_col);
     }
-
-    rdmult_ratio = vp9_vaq_rdmult_ratio(energy);
     vp9_init_plane_quantizers(cpi, x);
     vp9_clear_system_state();
-    x->rdmult = (int)round(x->rdmult * rdmult_ratio);
+    segment_qindex = vp9_get_qindex(&cm->seg, mbmi->segment_id,
+                                    cm->base_qindex);
+    x->rdmult = vp9_compute_rd_mult(cpi, segment_qindex + cm->y_dc_delta_q);
+    vp9_clear_system_state();
+    rdmult_ratio = (double)x->rdmult / orig_rdmult;
   } else if (aq_mode == COMPLEXITY_AQ) {
     const int mi_offset = mi_row * cm->mi_cols + mi_col;
     unsigned char complexity = cpi->complexity_map[mi_offset];

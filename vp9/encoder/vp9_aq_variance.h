@@ -19,8 +19,6 @@ extern "C" {
 #endif
 
 unsigned int vp9_vaq_segment_id(int energy);
-double vp9_vaq_rdmult_ratio(int energy);
-
 void vp9_vaq_init();
 void vp9_vaq_frame_setup(VP9_COMP *cpi);
 
