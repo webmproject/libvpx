@@ -441,7 +441,8 @@ static void estimate_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
   vp9_predict_intra_block(xd, block >> (2 * tx_size),
                           b_width_log2_lookup[plane_bsize],
                           tx_size, args->mode,
-                          p->src.buf, src_stride,
+                          x->skip_encode ? p->src.buf : pd->dst.buf,
+                          x->skip_encode ? src_stride : dst_stride,
                           pd->dst.buf, dst_stride,
                           i, j, 0);
   // This procedure assumes zero offset from p->src.buf and pd->dst.buf.
@@ -783,25 +784,6 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       break;
   }
 
-  // If best prediction is not in dst buf, then copy the prediction block from
-  // temp buf to dst buf.
-  if (best_pred != NULL && reuse_inter_pred &&
-      best_pred->data != orig_dst.buf) {
-    pd->dst = orig_dst;
-#if CONFIG_VP9_HIGHBITDEPTH
-    if (cm->use_highbitdepth) {
-      vp9_highbd_convolve_copy(best_pred->data, bw, pd->dst.buf, pd->dst.stride,
-                               NULL, 0, NULL, 0, bw, bh, xd->bd);
-    } else {
-      vp9_convolve_copy(best_pred->data, bw, pd->dst.buf, pd->dst.stride,
-                        NULL, 0, NULL, 0, bw, bh);
-    }
-#else
-    vp9_convolve_copy(best_pred->data, bw, pd->dst.buf, pd->dst.stride, NULL, 0,
-                      NULL, 0, bw, bh);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-  }
-
   mbmi->mode          = best_mode;
   mbmi->interp_filter = best_pred_filter;
   mbmi->tx_size       = best_tx_size;
@@ -820,11 +802,18 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         MIN(max_txsize_lookup[bsize],
             tx_mode_to_biggest_tx_size[cpi->common.tx_mode]);
 
-    if (reuse_inter_pred) {
-      pd->dst.buf = tmp[0].data;
-      pd->dst.stride = bw;
+    if (best_pred != NULL && reuse_inter_pred &&
+        best_pred->data == orig_dst.buf) {
+      this_mode_pred = &tmp[get_pred_buffer(tmp, 3)];
+      vp9_convolve_copy(best_pred->data, best_pred->stride,
+                        this_mode_pred->data, this_mode_pred->stride,
+                        NULL, 0, NULL, 0, bw, bh);
+      best_pred = this_mode_pred;
     }
+    pd->dst = orig_dst;
 
+    // Change the limit of this loop to add other intra prediction
+    // mode tests.
     for (this_mode = DC_PRED; this_mode <= DC_PRED; ++this_mode) {
       const TX_SIZE saved_tx_size = mbmi->tx_size;
       args.mode = this_mode;
@@ -852,8 +841,25 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         x->skip_txfm[0] = skip_txfm;
       }
     }
-    if (reuse_inter_pred)
-      pd->dst = orig_dst;
+  }
+
+  pd->dst = orig_dst;
+  if (reuse_inter_pred && best_pred->data != orig_dst.buf &&
+      is_inter_mode(mbmi->mode)) {
+#if CONFIG_VP9_HIGHBITDEPTH
+    if (cm->use_highbitdepth)
+      vp9_highbd_convolve_copy(best_pred->data, best_pred->stride,
+                               pd->dst.buf, pd->dst.stride, NULL, 0,
+                               NULL, 0, bw, bh, xd->bd);
+    else
+      vp9_convolve_copy(best_pred->data, best_pred->stride,
+                        pd->dst.buf, pd->dst.stride, NULL, 0,
+                        NULL, 0, bw, bh);
+#else
+    vp9_convolve_copy(best_pred->data, best_pred->stride,
+                      pd->dst.buf, pd->dst.stride, NULL, 0,
+                      NULL, 0, bw, bh);
+#endif
   }
 
   if (is_inter_block(mbmi))
