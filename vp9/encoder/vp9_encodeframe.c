@@ -3886,6 +3886,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
 #if CONFIG_EXT_TX
     if (mbmi->tx_size < TX_32X32 &&
         is_inter_block(mbmi) &&
+        cm->base_qindex > 0 &&
         bsize >= BLOCK_8X8 &&
         !mbmi->skip &&
         !vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {

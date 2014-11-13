@@ -262,17 +262,18 @@ static INLINE TX_TYPE get_tx_type(PLANE_TYPE plane_type,
   const MB_MODE_INFO *const mbmi = &xd->mi[0].src_mi->mbmi;
 
 #if CONFIG_EXT_TX
-  if (plane_type != PLANE_TYPE_Y)
+  if (plane_type != PLANE_TYPE_Y || xd->lossless || mbmi->tx_size >= TX_32X32)
       return DCT_DCT;
 
   if (is_inter_block(mbmi)) {
-    if (mbmi->ext_txfrm == NORM || mbmi->tx_size >= TX_32X32)
+    if (mbmi->ext_txfrm == NORM)
       return DCT_DCT;
     else
       return ADST_ADST;
   }
 #else
-  if (plane_type != PLANE_TYPE_Y || is_inter_block(mbmi))
+  if (plane_type != PLANE_TYPE_Y || xd->lossless || is_inter_block(mbmi) ||
+      mbmi->tx_size >= TX_32X32)
     return DCT_DCT;
 #endif
   return intra_mode_to_tx_type_lookup[mbmi->mode];

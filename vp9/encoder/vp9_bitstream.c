@@ -279,7 +279,8 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
   }
 #if CONFIG_EXT_TX
     if (is_inter &&
-        mbmi->tx_size <= TX_16X16 &&
+        mbmi->tx_size < TX_32X32 &&
+        cm->base_qindex > 0 &&
         bsize >= BLOCK_8X8 &&
         !mbmi->skip &&
         !vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {

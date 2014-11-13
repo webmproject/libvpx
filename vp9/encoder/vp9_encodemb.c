@@ -649,7 +649,7 @@ void vp9_xform_quant(MACROBLOCK *x, int plane, int block,
         break;
       case TX_4X4:
 #if CONFIG_EXT_TX
-        if (plane != 0 || mbmi->ext_txfrm == NORM) {
+        if (plane != 0 || mbmi->ext_txfrm == NORM || xd->lossless) {
           x->fwd_txm4x4(src_diff, coeff, diff_stride);
         } else {
           vp9_highbd_fht4x4(src_diff, coeff, diff_stride, ADST_ADST);
@@ -718,7 +718,7 @@ void vp9_xform_quant(MACROBLOCK *x, int plane, int block,
       break;
     case TX_4X4:
 #if CONFIG_EXT_TX
-      if (plane != 0 || mbmi->ext_txfrm == NORM) {
+      if (plane != 0 || mbmi->ext_txfrm == NORM || xd->lossless) {
         x->fwd_txm4x4(src_diff, coeff, diff_stride);
       } else {
         vp9_fht4x4(src_diff, coeff, diff_stride, ADST_ADST);
@@ -845,7 +845,7 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
         break;
       case TX_4X4:
 #if CONFIG_EXT_TX
-        if (plane != 0 || mbmi->ext_txfrm == NORM) {
+        if (plane != 0 || mbmi->ext_txfrm == NORM || xd->lossless) {
           // this is like vp9_short_idct4x4 but has a special case around eob<=1
           // which is significant (not just an optimization) for the lossless
           // case.
@@ -905,7 +905,7 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
       break;
     case TX_4X4:
 #if CONFIG_EXT_TX
-      if (plane != 0 || mbmi->ext_txfrm == NORM) {
+      if (plane != 0 || mbmi->ext_txfrm == NORM || xd->lossless) {
         // this is like vp9_short_idct4x4 but has a special case around eob<=1
         // which is significant (not just an optimization) for the lossless
         // case.
