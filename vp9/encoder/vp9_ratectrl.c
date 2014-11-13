@@ -430,7 +430,7 @@ void vp9_rc_update_rate_correction_factors(VP9_COMP *cpi, int damp_var) {
       adjustment_limit = 0.75;
       break;
     case 1:
-      adjustment_limit = 0.375;
+      adjustment_limit = 0.125 + 0.5 * MIN(1, fabs(log10(0.01 * correction_factor)));
       break;
     case 2:
     default:
