@@ -338,9 +338,9 @@ static unsigned int highbd_get_prediction_error(BLOCK_SIZE bsize,
 
 // Refine the motion search range according to the frame dimension
 // for first pass test.
-static int get_search_range(const VP9_COMMON *cm) {
+static int get_search_range(const VP9_COMP *cpi) {
   int sr = 0;
-  const int dim = MIN(cm->width, cm->height);
+  const int dim = MIN(cpi->initial_width, cpi->initial_height);
 
   while ((dim << sr) < MAX_FULL_PEL_VAL)
     ++sr;
@@ -360,7 +360,7 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
 
   int step_param = 3;
   int further_steps = (MAX_MVSEARCH_STEPS - 1) - step_param;
-  const int sr = get_search_range(&cpi->common);
+  const int sr = get_search_range(cpi);
   step_param += sr;
   further_steps -= sr;
 
@@ -950,7 +950,8 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
     // Initial estimate here uses sqrt(mbs) to define the min_err, where the
     // number of mbs is proportional to the image area.
     const int num_mbs =
-        cpi->oxcf.allow_spatial_resampling ? cpi->initial_mbs : cpi->common.MBs;
+        cpi->oxcf.resize_mode == RESIZE_FIXED ?
+            cpi->initial_mbs : cpi->common.MBs;
     const double min_err = 200 * sqrt(num_mbs);
 
     intra_factor = intra_factor / (double)num_mbs;
@@ -1091,7 +1092,8 @@ static int get_twopass_worst_quality(const VP9_COMP *cpi,
     return rc->worst_quality;  // Highest value allowed
   } else {
     const int num_mbs =
-        cpi->oxcf.allow_spatial_resampling ? cpi->initial_mbs : cpi->common.MBs;
+        cpi->oxcf.resize_mode == RESIZE_FIXED ?
+            cpi->initial_mbs : cpi->common.MBs;
     const double section_err = stats->coded_error / stats->count;
     const double err_per_mb = section_err / num_mbs;
     const double speed_term = 1.0 + 0.04 * oxcf->speed;
@@ -1209,7 +1211,8 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
 static double get_sr_decay_rate(const VP9_COMP *cpi,
                                 const FIRSTPASS_STATS *frame) {
   const int num_mbs =
-      cpi->oxcf.allow_spatial_resampling ? cpi->initial_mbs : cpi->common.MBs;
+      cpi->oxcf.resize_mode == RESIZE_FIXED ?
+          cpi->initial_mbs : cpi->common.MBs;
   double sr_diff =
       (frame->sr_coded_error - frame->coded_error) / num_mbs;
   double sr_decay = 1.0;
@@ -1336,7 +1339,8 @@ static double calc_frame_boost(VP9_COMP *cpi,
                             cpi->common.bit_depth);
   const double boost_q_correction = MIN((0.5 + (lq * 0.015)), 1.5);
   const int num_mbs =
-      cpi->oxcf.allow_spatial_resampling ? cpi->initial_mbs : cpi->common.MBs;
+      cpi->oxcf.resize_mode == RESIZE_FIXED ?
+          cpi->initial_mbs : cpi->common.MBs;
 
   // Underlying boost factor is based on inter error ratio.
   frame_boost = (BASELINE_ERR_PER_MB * num_mbs) /
@@ -1747,7 +1751,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
   // Motion breakout threshold for loop below depends on image size.
   mv_ratio_accumulator_thresh =
-      (cpi->common.height + cpi->common.width) / 4.0;
+      (cpi->initial_height + cpi->initial_width) / 4.0;
 
   // Set a maximum and minimum interval for the GF group.
   // If the image appears almost completely static we can extend beyond this.
@@ -1805,8 +1809,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
       // Monitor for static sections.
       zero_motion_accumulator =
-        MIN(zero_motion_accumulator,
-            get_zero_motion_factor(cpi, &next_frame));
+        MIN(zero_motion_accumulator, get_zero_motion_factor(cpi, &next_frame));
 
       // Break clause to detect very still sections after motion. For example,
       // a static image after a fade or other transition.
@@ -2238,36 +2241,6 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // The count of bits left is adjusted elsewhere based on real coded frame
   // sizes.
   twopass->modified_error_left -= kf_group_err;
-}
-
-#define VBR_PCT_ADJUSTMENT_LIMIT 50
-// For VBR...adjustment to the frame target based on error from previous frames
-void vbr_rate_correction(VP9_COMP *cpi,
-                         int * this_frame_target,
-                         const int64_t vbr_bits_off_target) {
-  int max_delta;
-  double position_factor = 1.0;
-
-  // How far through the clip are we.
-  // This number is used to damp the per frame rate correction.
-  // Range 0 - 1.0
-  if (cpi->twopass.total_stats.count) {
-    position_factor = sqrt((double)cpi->common.current_video_frame /
-                           cpi->twopass.total_stats.count);
-  }
-  max_delta = (int)(position_factor *
-                    ((*this_frame_target * VBR_PCT_ADJUSTMENT_LIMIT) / 100));
-
-  // vbr_bits_off_target > 0 means we have extra bits to spend
-  if (vbr_bits_off_target > 0) {
-    *this_frame_target +=
-      (vbr_bits_off_target > max_delta) ? max_delta
-                                        : (int)vbr_bits_off_target;
-  } else {
-    *this_frame_target -=
-      (vbr_bits_off_target < -max_delta) ? max_delta
-                                         : (int)-vbr_bits_off_target;
-  }
 }
 
 // Define the reference buffers that will be updated post encode.

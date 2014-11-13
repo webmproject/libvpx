@@ -591,18 +591,13 @@ void vp9_set_rd_speed_thresholds(VP9_COMP *cpi) {
 }
 
 void vp9_set_rd_speed_thresholds_sub8x8(VP9_COMP *cpi) {
-  const SPEED_FEATURES *const sf = &cpi->sf;
-  RD_OPT *const rd = &cpi->rd;
-  int i;
   static const int thresh_mult[2][MAX_REFS] =
       {{2500, 2500, 2500, 4500, 4500, 2500},
        {2000, 2000, 2000, 4000, 4000, 2000}};
-
-  for (i = 0; i < MAX_REFS; ++i) {
-    rd->thresh_mult_sub8x8[i] =
-        (sf->disable_split_mask & (1 << i)) ?
-            INT_MAX : thresh_mult[cpi->oxcf.mode == BEST][i];
-  }
+  RD_OPT *const rd = &cpi->rd;
+  const int idx = cpi->oxcf.mode == BEST;
+  vpx_memcpy(rd->thresh_mult_sub8x8, thresh_mult[idx],
+             sizeof(thresh_mult[idx]));
 }
 
 void vp9_update_rd_thresh_fact(int (*factor_buf)[MAX_MODES], int rd_thresh,

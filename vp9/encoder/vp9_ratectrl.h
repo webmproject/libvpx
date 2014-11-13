@@ -198,6 +198,8 @@ void vp9_rc_update_framerate(struct VP9_COMP *cpi);
 void vp9_rc_set_gf_max_interval(const struct VP9_COMP *const cpi,
                                 RATE_CONTROL *const rc);
 
+void vp9_set_target_rate(struct VP9_COMP *cpi);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
