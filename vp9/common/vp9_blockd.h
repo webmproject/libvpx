@@ -257,23 +257,31 @@ static INLINE BLOCK_SIZE get_subsize(BLOCK_SIZE bsize,
 
 extern const TX_TYPE intra_mode_to_tx_type_lookup[INTRA_MODES];
 
+#if CONFIG_EXT_TX
+static TX_TYPE ext_tx_to_txtype(EXT_TX_TYPE ext_tx) {
+  switch (ext_tx) {
+    case NORM:
+    default:
+      return DCT_DCT;
+    case ALT:
+      return ADST_ADST;
+  }
+}
+#endif
+
 static INLINE TX_TYPE get_tx_type(PLANE_TYPE plane_type,
                                   const MACROBLOCKD *xd) {
   const MB_MODE_INFO *const mbmi = &xd->mi[0].src_mi->mbmi;
 
 #if CONFIG_EXT_TX
-  if (plane_type != PLANE_TYPE_Y || xd->lossless || mbmi->tx_size >= TX_32X32)
+  if (plane_type != PLANE_TYPE_Y || xd->lossless)
       return DCT_DCT;
 
   if (is_inter_block(mbmi)) {
-    if (mbmi->ext_txfrm == NORM)
-      return DCT_DCT;
-    else
-      return ADST_ADST;
+    return ext_tx_to_txtype(mbmi->ext_txfrm);
   }
 #else
-  if (plane_type != PLANE_TYPE_Y || xd->lossless || is_inter_block(mbmi) ||
-      mbmi->tx_size >= TX_32X32)
+  if (plane_type != PLANE_TYPE_Y || xd->lossless || is_inter_block(mbmi))
     return DCT_DCT;
 #endif
   return intra_mode_to_tx_type_lookup[mbmi->mode];
@@ -288,10 +296,7 @@ static INLINE TX_TYPE get_tx_type_4x4(PLANE_TYPE plane_type,
       return DCT_DCT;
 
   if (is_inter_block(&mi->mbmi)) {
-    if (mi->mbmi.ext_txfrm == NORM)
-      return DCT_DCT;
-    else
-      return ADST_ADST;
+    return ext_tx_to_txtype(mi->mbmi.ext_txfrm);
   }
 #else
   if (plane_type != PLANE_TYPE_Y || xd->lossless || is_inter_block(&mi->mbmi))
