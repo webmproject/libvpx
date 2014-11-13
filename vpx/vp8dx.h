@@ -78,6 +78,13 @@ enum vp8_dec_control_id {
   /** control function to get the bit depth of the stream. */
   VP9D_GET_BIT_DEPTH,
 
+  /** control function to set the byte alignment of the planes in the reference
+   * buffers. Valid values are power of 2, from 32 to 1024. A value of 0 sets
+   * legacy alignment. I.e. Y plane is aligned to 32 bytes, U plane directly
+   * follows Y plane, and V plane directly follows U plane. Default value is 0.
+   */
+  VP9_SET_BYTE_ALIGNMENT,
+
   /** For testing. */
   VP9_INVERT_TILE_DECODE_ORDER,
 
