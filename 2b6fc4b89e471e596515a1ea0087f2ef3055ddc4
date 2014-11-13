@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//QO0\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 2308,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-11-13T17:26:26Z",
+      "side": 1,
+      "message": "I moved frame_is_kf_gf_arf into vp9_encoder.h and modified frame_is_boosted to call it. Other substitutions to use this function will require an additional patch.",
+      "parentUuid": "AAAAdn//QWs\u003d",
+      "revId": "2b6fc4b89e471e596515a1ea0087f2ef3055ddc4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//QWo\u003d",
         "filename": "vp9/encoder/vp9_encoder.c",
         "patchSetId": 16
@@ -30,6 +48,24 @@
       "writtenOn": "2014-11-13T00:16:20Z",
       "side": 1,
       "message": "Will we also need to reset top and bottom if size changed to make sure we settle on the correct q?",
+      "revId": "2b6fc4b89e471e596515a1ea0087f2ef3055ddc4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//QO4\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 2821,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-11-13T17:26:26Z",
+      "side": 1,
+      "message": "Moved into the above \u0027if\u0027 to handle case where frame size changes.",
+      "parentUuid": "AAAAdn//QWo\u003d",
       "revId": "2b6fc4b89e471e596515a1ea0087f2ef3055ddc4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//QO8\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 1581,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-11-13T17:26:26Z",
+      "side": 1,
+      "message": "It\u0027s only called in this file so I made it static.",
+      "parentUuid": "AAAAdn//QWc\u003d",
+      "revId": "2b6fc4b89e471e596515a1ea0087f2ef3055ddc4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//QWk\u003d",
         "filename": "vp9/encoder/vp9_ratectrl.c",
         "patchSetId": 16
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//QPA\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 1609,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-11-13T17:26:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//QWk\u003d",
+      "revId": "2b6fc4b89e471e596515a1ea0087f2ef3055ddc4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//QWY\u003d",
         "filename": "vp9/encoder/vp9_ratectrl.h",
         "patchSetId": 16
@@ -81,6 +153,24 @@
       "writtenOn": "2014-11-13T00:16:20Z",
       "side": 1,
       "message": "vp9_ ?\n\nAlso should (VP9_)vbr_rate_correction() be here if it is nowe defined in ratectrl.c.",
+      "revId": "2b6fc4b89e471e596515a1ea0087f2ef3055ddc4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//QOs\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-11-13T17:26:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//QWY\u003d",
       "revId": "2b6fc4b89e471e596515a1ea0087f2ef3055ddc4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
