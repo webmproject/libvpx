@@ -25,10 +25,11 @@
 #define ENERGY_IN_BOUNDS(energy)\
   assert((energy) >= ENERGY_MIN && (energy) <= ENERGY_MAX)
 
-static double q_ratio[MAX_SEGMENTS] = { 1, 1, 1, 1, 1, 1, 1, 1 };
-static int segment_id[MAX_SEGMENTS] = { 5, 3, 1, 0, 2, 4, 6, 7 };
+static double q_ratio[MAX_SEGMENTS] =
+  {1.0, 0.875, 1.143, 1.0, 1.0, 1.0, 1.0, 1.0};
 
-#define Q_RATIO(i) q_ratio[(i) - ENERGY_MIN]
+static int segment_id[ENERGY_SPAN] = {1, 0, 2};
+
 #define SEGMENT_ID(i) segment_id[(i) - ENERGY_MIN]
 
 DECLARE_ALIGNED(16, static const uint8_t, vp9_64_zeros[64]) = {0};
@@ -38,23 +39,7 @@ DECLARE_ALIGNED(16, static const uint16_t, vp9_highbd_64_zeros[64]) = {0};
 
 unsigned int vp9_vaq_segment_id(int energy) {
   ENERGY_IN_BOUNDS(energy);
-
   return SEGMENT_ID(energy);
-}
-
-void vp9_vaq_init() {
-  int i;
-  double base_ratio;
-
-  assert(ENERGY_SPAN <= MAX_SEGMENTS);
-
-  vp9_clear_system_state();
-
-  base_ratio = 1.5;
-
-  for (i = ENERGY_MIN; i <= ENERGY_MAX; i++) {
-    Q_RATIO(i) = pow(base_ratio, i/3.0);
-  }
 }
 
 void vp9_vaq_frame_setup(VP9_COMP *cpi) {
@@ -71,20 +56,20 @@ void vp9_vaq_frame_setup(VP9_COMP *cpi) {
 
     seg->abs_delta = SEGMENT_DELTADATA;
 
-  vp9_clear_system_state();
+    vp9_clear_system_state();
 
-    for (i = ENERGY_MIN; i <= ENERGY_MAX; i++) {
+    for (i = 0; i < MAX_SEGMENTS; i++) {
       int qindex_delta;
 
-      if (Q_RATIO(i) == 1) {
-        // No need to enable SEG_LVL_ALT_Q for this segment
+      // No need to enable SEG_LVL_ALT_Q for this segment
+      if (q_ratio[i] == 1.0) {
         continue;
       }
 
-      qindex_delta = vp9_compute_qdelta(&cpi->rc, base_q, base_q * Q_RATIO(i),
+      qindex_delta = vp9_compute_qdelta(&cpi->rc, base_q, base_q * q_ratio[i],
                                         cm->bit_depth);
-      vp9_set_segdata(seg, SEGMENT_ID(i), SEG_LVL_ALT_Q, qindex_delta);
-      vp9_enable_segfeature(seg, SEGMENT_ID(i), SEG_LVL_ALT_Q);
+      vp9_set_segdata(seg, i, SEG_LVL_ALT_Q, qindex_delta);
+      vp9_enable_segfeature(seg, i, SEG_LVL_ALT_Q);
     }
   }
 }
