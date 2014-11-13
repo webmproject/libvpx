@@ -641,11 +641,8 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
     // Else for cyclic refresh mode update the segment map, set the segment id
     // and then update the quantizer.
     if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) {
-
-      vp9_cyclic_refresh_set_rate_and_dist_sb(cpi->cyclic_refresh,
-                                              ctx->rate, ctx->dist);
       vp9_cyclic_refresh_update_segment(cpi, &xd->mi[0].src_mi->mbmi,
-                                        mi_row, mi_col, bsize, 1);
+                                        mi_row, mi_col, bsize, 1, ctx->rate);
     }
   }
 
@@ -1310,10 +1307,9 @@ static void update_state_rt(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
                                                  : cm->last_frame_seg_map;
       mbmi->segment_id = vp9_get_segment_id(cm, map, bsize, mi_row, mi_col);
     } else {
-      vp9_cyclic_refresh_set_rate_and_dist_sb(cpi->cyclic_refresh,
-                                              ctx->rate, ctx->dist);
     // Setting segmentation map for cyclic_refresh
-      vp9_cyclic_refresh_update_segment(cpi, mbmi, mi_row, mi_col, bsize, 1);
+      vp9_cyclic_refresh_update_segment(cpi, mbmi, mi_row, mi_col, bsize, 1,
+                                        ctx->rate);
     }
     vp9_init_plane_quantizers(cpi, x);
   }
