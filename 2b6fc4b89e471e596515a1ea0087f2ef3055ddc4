@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//QWs\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 2308,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-11-13T00:16:20Z",
+      "side": 1,
+      "message": "This appears to be similar to frame_is_boosted() ?\n\nstatic int frame_is_boosted((const VP9_COMP *cpi) {\n  return frame_is_intra_only(\u0026cpi-\u003ecommon) ||\n         cpi-\u003erefresh_alt_ref_frame ||\n         (cpi-\u003erefresh_golden_frame \u0026\u0026 !cpi-\u003erc.is_src_frame_alt_ref) ||\n         vp9_is_upper_layer_key_frame(cpi);\n}\n\nWould this actually be a better test. It seems like we test the combination of kf gf arf pretty often and a function thoughout would be neater. Does not need to be part of this patch though.",
+      "revId": "2b6fc4b89e471e596515a1ea0087f2ef3055ddc4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//QWo\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 2821,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-11-13T00:16:20Z",
+      "side": 1,
+      "message": "Will we also need to reset top and bottom if size changed to make sure we settle on the correct q?",
+      "revId": "2b6fc4b89e471e596515a1ea0087f2ef3055ddc4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//QWc\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 1581,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-11-13T00:16:20Z",
+      "side": 1,
+      "message": "See comment below.",
+      "revId": "2b6fc4b89e471e596515a1ea0087f2ef3055ddc4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//QWk\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 1609,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-11-13T00:16:20Z",
+      "side": 1,
+      "message": "if this is used in another module and not static shouldn\u0027t it be vp9_* ?",
+      "revId": "2b6fc4b89e471e596515a1ea0087f2ef3055ddc4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//QWY\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-11-13T00:16:20Z",
+      "side": 1,
+      "message": "vp9_ ?\n\nAlso should (VP9_)vbr_rate_correction() be here if it is nowe defined in ratectrl.c.",
+      "revId": "2b6fc4b89e471e596515a1ea0087f2ef3055ddc4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
