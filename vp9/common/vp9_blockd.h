@@ -77,6 +77,17 @@ typedef enum {
   NEARMV,
   ZEROMV,
   NEWMV,
+#if CONFIG_COMPOUND_MODES
+  NEAREST_NEARESTMV,
+  NEAREST_NEARMV,
+  NEAR_NEARESTMV,
+  NEAREST_NEWMV,
+  NEW_NEARESTMV,
+  NEAR_NEWMV,
+  NEW_NEARMV,
+  ZERO_ZEROMV,
+  NEW_NEWMV,
+#endif
   MB_MODE_COUNT
 } PREDICTION_MODE;
 
@@ -94,11 +105,25 @@ static INLINE int is_inter_mode(PREDICTION_MODE mode) {
   return mode >= NEARESTMV && mode <= NEWMV;
 }
 
+#if CONFIG_COMPOUND_MODES
+static INLINE int is_inter_compound_mode(PREDICTION_MODE mode) {
+  return mode >= NEAREST_NEARESTMV && mode <= NEW_NEWMV;
+}
+#endif
+
 #define INTRA_MODES (TM_PRED + 1)
 
 #define INTER_MODES (1 + NEWMV - NEARESTMV)
 
 #define INTER_OFFSET(mode) ((mode) - NEARESTMV)
+
+#if CONFIG_COMPOUND_MODES
+
+#define INTER_COMPOUND_MODES (1 + NEW_NEWMV - NEAREST_NEARESTMV)
+
+#define INTER_COMPOUND_OFFSET(mode) ((mode) - NEAREST_NEARESTMV)
+
+#endif
 
 #if CONFIG_TX64X64
 #define MAXTXLEN 64
@@ -296,6 +321,7 @@ extern const TX_TYPE intra_mode_to_tx_type_lookup[INTRA_MODES];
 #if CONFIG_SUPERTX
 
 #define PARTITION_SUPERTX_CONTEXTS 2
+
 #if CONFIG_TX64X64
 #define MAX_SUPERTX_BLOCK_SIZE BLOCK_64X64
 #else

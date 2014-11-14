@@ -241,6 +241,18 @@ static void inc_mvs(const MB_MODE_INFO *mbmi, const int_mv mvs[2],
   }
 }
 
+#if CONFIG_COMPOUND_MODES
+static void inc_compound_single_mv(const MB_MODE_INFO *mbmi,
+                                   int ref_idx,
+                                   const int_mv mvs[2],
+                                   nmv_context_counts *counts) {
+  const MV *ref = &mbmi->ref_mvs[mbmi->ref_frame[ref_idx]][0].as_mv;
+  const MV diff = {mvs[ref_idx].as_mv.row - ref->row,
+                   mvs[ref_idx].as_mv.col - ref->col};
+  vp9_inc_mv(&diff, counts);
+}
+#endif
+
 void vp9_update_mv_count(VP9_COMMON *cm, const MACROBLOCKD *xd) {
   const MODE_INFO *mi = xd->mi[0].src_mi;
   const MB_MODE_INFO *const mbmi = &mi->mbmi;
@@ -253,13 +265,35 @@ void vp9_update_mv_count(VP9_COMMON *cm, const MACROBLOCKD *xd) {
     for (idy = 0; idy < 2; idy += num_4x4_h) {
       for (idx = 0; idx < 2; idx += num_4x4_w) {
         const int i = idy * 2 + idx;
+#if CONFIG_COMPOUND_MODES
+        if (mi->bmi[i].as_mode == NEWMV || mi->bmi[i].as_mode == NEW_NEWMV)
+#else
         if (mi->bmi[i].as_mode == NEWMV)
+#endif
           inc_mvs(mbmi, mi->bmi[i].as_mv, &cm->counts.mv);
+#if CONFIG_COMPOUND_MODES
+        else if (mi->bmi[i].as_mode == NEAREST_NEWMV ||
+                 mi->bmi[i].as_mode == NEAR_NEWMV)
+          inc_compound_single_mv(mbmi, 1, mi->bmi[i].as_mv, &cm->counts.mv);
+        else if (mi->bmi[i].as_mode == NEW_NEARESTMV ||
+                 mi->bmi[i].as_mode == NEW_NEARMV)
+          inc_compound_single_mv(mbmi, 0, mi->bmi[i].as_mv, &cm->counts.mv);
+#endif
       }
     }
   } else {
+#if CONFIG_COMPOUND_MODES
+    if (mbmi->mode == NEWMV || mbmi->mode == NEW_NEWMV)
+#else
     if (mbmi->mode == NEWMV)
+#endif
       inc_mvs(mbmi, mbmi->mv, &cm->counts.mv);
+#if CONFIG_COMPOUND_MODES
+    else if (mbmi->mode == NEAREST_NEWMV || mbmi->mode == NEAR_NEWMV)
+      inc_compound_single_mv(mbmi, 1, mbmi->mv, &cm->counts.mv);
+    else if (mbmi->mode == NEW_NEARESTMV || mbmi->mode == NEW_NEARMV)
+      inc_compound_single_mv(mbmi, 0, mbmi->mv, &cm->counts.mv);
+#endif
   }
 }
 

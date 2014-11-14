@@ -391,6 +391,10 @@ typedef struct VP9_COMP {
 
   int mbmode_cost[INTRA_MODES];
   unsigned int inter_mode_cost[INTER_MODE_CONTEXTS][INTER_MODES];
+#if CONFIG_COMPOUND_MODES
+  unsigned int inter_compound_mode_cost[INTER_MODE_CONTEXTS]
+                                       [INTER_COMPOUND_MODES];
+#endif
   int intra_uv_mode_cost[FRAME_TYPES][INTRA_MODES];
   int y_mode_costs[INTRA_MODES][INTRA_MODES][INTRA_MODES];
   int switchable_interp_costs[SWITCHABLE_FILTER_CONTEXTS][SWITCHABLE_FILTERS];

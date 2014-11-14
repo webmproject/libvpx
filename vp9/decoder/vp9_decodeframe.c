@@ -1024,12 +1024,13 @@ static void decode_block(VP9_COMMON *const cm, MACROBLOCKD *const xd,
 #else
   MB_MODE_INFO *mbmi = set_offsets(cm, xd, tile, bsize, mi_row, mi_col);
   vp9_read_mode_info(cm, xd, tile, mi_row, mi_col, r);
-#endif
+#endif  // CONFIG_SUPERTX
 #if CONFIG_TX_SKIP
   q_idx = vp9_get_qindex(&cm->seg, mbmi->segment_id, cm->base_qindex);
   mbmi->tx_skip_shift = q_idx > TX_SKIP_SHIFT_THRESH ?
                         TX_SKIP_SHIFT_HQ : TX_SKIP_SHIFT_LQ;
 #endif
+
 #if CONFIG_SUPERTX
   if (!supertx_enabled) {
 #endif
@@ -1039,11 +1040,11 @@ static void decode_block(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   if (mbmi->skip) {
     reset_skip_context(xd, bsize);
   } else {
-    if (cm->seg.enabled)
+    if (cm->seg.enabled) {
       setup_plane_dequants(cm, xd, vp9_get_qindex(&cm->seg, mbmi->segment_id,
                                                   cm->base_qindex));
+    }
   }
-
   if (!is_inter_block(mbmi)) {
     struct intra_args arg = { cm, xd, r };
     vp9_foreach_transformed_block(xd, bsize,
@@ -1056,6 +1057,7 @@ static void decode_block(VP9_COMMON *const cm, MACROBLOCKD *const xd,
     if (!mbmi->skip) {
       int eobtotal = 0;
       struct inter_args arg = { cm, xd, r, &eobtotal };
+
       vp9_foreach_transformed_block(xd, bsize, reconstruct_inter_block, &arg);
       if (!less8x8 && eobtotal == 0)
         mbmi->skip = 1;  // skip loopfilter
@@ -1709,10 +1711,13 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
       tile_data->xd = pbi->mb;
       tile_data->xd.corrupted = 0;
       vp9_tile_init(&tile, tile_data->cm, tile_row, tile_col);
+
       setup_token_decoder(buf->data, data_end, buf->size, &cm->error,
                           &tile_data->bit_reader, pbi->decrypt_cb,
                           pbi->decrypt_state);
+
       init_macroblockd(cm, &tile_data->xd);
+
       vp9_zero(tile_data->xd.dqcoeff);
     }
   }
@@ -2179,6 +2184,17 @@ static void read_supertx_probs(FRAME_CONTEXT *fc, vp9_reader *r) {
 }
 #endif  // CONFIG_SUPERTX
 
+#if CONFIG_COMPOUND_MODES
+static void read_inter_compound_mode_probs(FRAME_CONTEXT *fc, vp9_reader *r) {
+  int i, j;
+  if (vp9_read(r, GROUP_DIFF_UPDATE_PROB)) {
+    for (j = 0; j < INTER_MODE_CONTEXTS; ++j)
+      for (i = 0; i < INTER_COMPOUND_MODES - 1; ++i)
+        vp9_diff_update_prob(r, &fc->inter_compound_mode_probs[j][i]);
+  }
+}
+#endif  // CONFIG_COMPOUND_MODES
+
 static int read_compressed_header(VP9Decoder *pbi, const uint8_t *data,
                                   size_t partition_size) {
   VP9_COMMON *const cm = &pbi->common;
@@ -2211,6 +2227,9 @@ static int read_compressed_header(VP9Decoder *pbi, const uint8_t *data,
     int i, j;
 
     read_inter_mode_probs(fc, &r);
+#if CONFIG_COMPOUND_MODES
+    read_inter_compound_mode_probs(fc, &r);
+#endif
 
     if (cm->interp_filter == SWITCHABLE)
       read_switchable_interp_probs(fc, &r);
@@ -2325,6 +2344,11 @@ static void debug_check_frame_counts(const VP9_COMMON *const cm) {
   assert(!memcmp(cm->counts.ext_tx, zero_counts.ext_tx,
                  sizeof(cm->counts.ext_tx)));
 #endif
+#if CONFIG_COMPOUND_MODES
+  assert(!memcmp(cm->counts.inter_compound_mode,
+                 zero_counts.inter_compound_mode,
+                 sizeof(cm->counts.inter_compound_mode)));
+#endif
 }
 #endif  // NDEBUG
 
@@ -2407,7 +2431,6 @@ void vp9_decode_frame(VP9Decoder *pbi,
   }
 
   new_fb->corrupted |= xd->corrupted;
-
   if (!new_fb->corrupted) {
     if (!cm->error_resilient_mode && !cm->frame_parallel_decoding_mode) {
       vp9_adapt_coef_probs(cm);

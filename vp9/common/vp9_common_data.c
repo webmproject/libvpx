@@ -188,4 +188,4 @@ const TX_SIZE uvsupertx_size_lookup[TX_SIZES][2][2] = {
 const int partition_supertx_context_lookup[PARTITION_TYPES] = {
   -1, 0, 0, 1
 };
-#endif
+#endif  // CONFIG_SUPERTX

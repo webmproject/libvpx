@@ -31,6 +31,45 @@ enum {
                     (1 << H_PRED)
 };
 
+#if CONFIG_COMPOUND_MODES
+enum {
+  INTER_ALL =
+      (1 << NEARESTMV) | (1 << NEARMV) | (1 << ZEROMV) | (1 << NEWMV) |
+      (1 << NEAREST_NEARESTMV) | (1 << ZERO_ZEROMV) | (1 << NEAREST_NEARMV) |
+      (1 << NEAR_NEARESTMV) | (1 << NEW_NEWMV) | (1 << NEAREST_NEWMV) |
+      (1 << NEAR_NEWMV) | (1 << NEW_NEARMV) | (1 << NEW_NEARESTMV),
+  INTER_NEAREST = (1 << NEARESTMV) | (1 << NEAREST_NEARESTMV) |
+                  (1 << NEAREST_NEARMV) | (1 << NEAR_NEARESTMV) |
+                  (1 << NEW_NEARESTMV) | (1 << NEAREST_NEWMV),
+  INTER_NEAREST_NEW = (1 << NEARESTMV) | (1 << NEWMV) |
+                      (1 << NEAREST_NEARESTMV) | (1 << NEW_NEWMV) |
+                      (1 << NEAR_NEARESTMV) | (1 << NEAREST_NEARMV) |
+                      (1 << NEW_NEARESTMV) | (1 << NEAREST_NEWMV) |
+                      (1 << NEW_NEARMV) | (1 << NEAR_NEWMV),
+  INTER_NEAREST_ZERO = (1 << NEARESTMV) | (1 << ZEROMV) |
+                       (1 << NEAREST_NEARESTMV) | (1 << ZERO_ZEROMV) |
+                       (1 << NEAREST_NEARMV) | (1 << NEAR_NEARESTMV) |
+                       (1 << NEAREST_NEWMV) | (1 << NEW_NEARESTMV),
+  INTER_NEAREST_NEW_ZERO =
+      (1 << NEARESTMV) | (1 << ZEROMV) | (1 << NEWMV) |
+      (1 << NEAREST_NEARESTMV) | (1 << ZERO_ZEROMV) | (1 << NEW_NEWMV) |
+      (1 << NEAREST_NEARMV) | (1 << NEAR_NEARESTMV) |
+      (1 << NEW_NEARESTMV) | (1 << NEAREST_NEWMV) |
+      (1 << NEW_NEARMV) | (1 << NEAR_NEWMV),
+  INTER_NEAREST_NEAR_NEW =
+      (1 << NEARESTMV) | (1 << NEARMV) | (1 << NEWMV) |
+      (1 << NEAREST_NEARESTMV) | (1 << NEW_NEWMV) |
+      (1 << NEAREST_NEARMV) | (1 << NEAR_NEARESTMV) |
+      (1 << NEW_NEARESTMV) | (1 << NEAREST_NEWMV) |
+      (1 << NEW_NEARMV) | (1 << NEAR_NEWMV),
+  INTER_NEAREST_NEAR_ZERO =
+      (1 << NEARESTMV) | (1 << NEARMV) | (1 << ZEROMV) |
+      (1 << NEAREST_NEARESTMV) | (1 << ZERO_ZEROMV) |
+      (1 << NEAREST_NEARMV) | (1 << NEAR_NEARESTMV) |
+      (1 << NEAREST_NEWMV) | (1 << NEW_NEARESTMV) |
+      (1 << NEW_NEARMV) | (1 << NEAR_NEWMV)
+};
+#else
 enum {
   INTER_ALL = (1 << NEARESTMV) | (1 << NEARMV) | (1 << ZEROMV) | (1 << NEWMV),
   INTER_NEAREST = (1 << NEARESTMV),
@@ -40,6 +79,7 @@ enum {
   INTER_NEAREST_NEAR_NEW = (1 << NEARESTMV) | (1 << NEARMV) | (1 << NEWMV),
   INTER_NEAREST_NEAR_ZERO = (1 << NEARESTMV) | (1 << NEARMV) | (1 << ZEROMV),
 };
+#endif
 
 enum {
   DISABLE_ALL_INTER_SPLIT   = (1 << THR_COMP_GA) |

@@ -290,6 +290,7 @@ EXPERIMENT_LIST="
     copy_mode
     interintra
     wedge_partition
+    compound_modes
 "
 CONFIG_LIST="
     external_build
