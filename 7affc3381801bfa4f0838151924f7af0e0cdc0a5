@@ -16,6 +16,24 @@
       "revId": "7affc3381801bfa4f0838151924f7af0e0cdc0a5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//QGk\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 576,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-11-14T01:19:51Z",
+      "side": 1,
+      "message": "yes your right, should be for first few frames,  will fix tomorrow.",
+      "parentUuid": "AAAAdn//QHI\u003d",
+      "revId": "7affc3381801bfa4f0838151924f7af0e0cdc0a5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
