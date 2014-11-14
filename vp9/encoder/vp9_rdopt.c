@@ -1859,7 +1859,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
           for (midx = 0; midx < INTER_MODES; ++midx)
             bsi->rdstat[iy][midx].brdcost = INT64_MAX;
         bsi->segment_rd = INT64_MAX;
-        return INT64_MAX;;
+        return INT64_MAX;
       }
 
       mode_idx = INTER_OFFSET(mode_selected);
@@ -1882,7 +1882,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
           for (midx = 0; midx < INTER_MODES; ++midx)
             bsi->rdstat[iy][midx].brdcost = INT64_MAX;
         bsi->segment_rd = INT64_MAX;
-        return INT64_MAX;;
+        return INT64_MAX;
       }
     }
   } /* for each label */
@@ -2105,24 +2105,27 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   if (cpi->sf.adaptive_motion_search) {
     int bwl = b_width_log2_lookup[bsize];
     int bhl = b_height_log2_lookup[bsize];
-    int i;
     int tlevel = x->pred_mv_sad[ref] >> (bwl + bhl + 4);
 
     if (tlevel < 5)
       step_param += 2;
 
-    for (i = LAST_FRAME; i <= ALTREF_FRAME && cm->show_frame; ++i) {
-      if ((x->pred_mv_sad[ref] >> 3) > x->pred_mv_sad[i]) {
-        x->pred_mv[ref].row = 0;
-        x->pred_mv[ref].col = 0;
-        tmp_mv->as_int = INVALID_MV;
+    // prev_mv_sad is not setup for dynamically scaled frames.
+    if (cpi->oxcf.resize_mode != RESIZE_DYNAMIC) {
+      int i;
+      for (i = LAST_FRAME; i <= ALTREF_FRAME && cm->show_frame; ++i) {
+        if ((x->pred_mv_sad[ref] >> 3) > x->pred_mv_sad[i]) {
+          x->pred_mv[ref].row = 0;
+          x->pred_mv[ref].col = 0;
+          tmp_mv->as_int = INVALID_MV;
 
-        if (scaled_ref_frame) {
-          int i;
-          for (i = 0; i < MAX_MB_PLANE; i++)
-            xd->plane[i].pre[0] = backup_yv12[i];
+          if (scaled_ref_frame) {
+            int i;
+            for (i = 0; i < MAX_MB_PLANE; ++i)
+              xd->plane[i].pre[0] = backup_yv12[i];
+          }
+          return;
         }
-        return;
       }
     }
   }
@@ -3517,6 +3520,8 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
 
     best_mode_skippable |= !has_high_freq_coeff;
   }
+
+  assert(best_mode_index >= 0);
 
   store_coding_context(x, ctx, best_mode_index, best_pred_diff,
                        best_tx_diff, best_filter_diff, best_mode_skippable);
