@@ -1157,6 +1157,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//QBc\u003d",
+        "filename": "vp9/encoder/x86/vp9_highbd_variance_sse2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-11-14T18:23:36Z",
+      "side": 1,
+      "message": "hah, I should read the file extension",
+      "parentUuid": "AAAAdn//QC8\u003d",
+      "revId": "61d56807382aae8964eb627bff6562b2798a7548",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//QTM\u003d",
         "filename": "vp9/encoder/x86/vp9_highbd_variance_sse2.c",
         "patchSetId": 4
