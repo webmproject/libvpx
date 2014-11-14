@@ -254,12 +254,12 @@ class SADTestBase : public ::testing::Test {
       for (int w = 0; w < width_; ++w) {
 #if CONFIG_VP9_HIGHBITDEPTH
         if (!use_high_bit_depth_) {
-          data8[h * stride + w] = fill_constant;
+          data8[h * stride + w] = static_cast<uint8_t>(fill_constant);
         } else {
           data16[h * stride + w] = fill_constant;
         }
 #else
-        data[h * stride + w] = fill_constant;
+        data[h * stride + w] = static_cast<uint8_t>(fill_constant);
 #endif
       }
     }
