@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//P+Q\u003d",
+        "filename": "vp9/encoder/x86/vp9_highbd_variance_sse2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-11-14T23:18:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//QBU\u003d",
+      "revId": "c9fcaa1dffc339c7f4c14d04ae2c3189276dc657",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//QBQ\u003d",
         "filename": "vp9/encoder/x86/vp9_highbd_variance_sse2.c",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2014-11-14T19:08:19Z",
       "side": 1,
       "message": "remove alignment",
+      "revId": "c9fcaa1dffc339c7f4c14d04ae2c3189276dc657",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//P+M\u003d",
+        "filename": "vp9/encoder/x86/vp9_highbd_variance_sse2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-11-14T23:18:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//QBQ\u003d",
       "revId": "c9fcaa1dffc339c7f4c14d04ae2c3189276dc657",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//P+I\u003d",
+        "filename": "vp9/encoder/x86/vp9_highbd_variance_sse2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-11-14T23:18:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//QBM\u003d",
+      "revId": "c9fcaa1dffc339c7f4c14d04ae2c3189276dc657",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//QAQ\u003d",
         "filename": "vp9/encoder/x86/vp9_highbd_variance_sse2.c",
         "patchSetId": 5
@@ -64,6 +118,24 @@
       "writtenOn": "2014-11-14T19:08:19Z",
       "side": 1,
       "message": "weird indent; this continues throughout from this point (mostly)",
+      "revId": "c9fcaa1dffc339c7f4c14d04ae2c3189276dc657",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//P+E\u003d",
+        "filename": "vp9/encoder/x86/vp9_highbd_variance_sse2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 358,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-11-14T23:18:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//QAQ\u003d",
       "revId": "c9fcaa1dffc339c7f4c14d04ae2c3189276dc657",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//P+A\u003d",
+        "filename": "vp9/encoder/x86/vp9_highbd_variance_sse2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 403,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-11-14T23:18:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//QBI\u003d",
+      "revId": "c9fcaa1dffc339c7f4c14d04ae2c3189276dc657",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//QAM\u003d",
         "filename": "vp9/encoder/x86/vp9_highbd_variance_sse2.c",
         "patchSetId": 5
@@ -98,6 +188,24 @@
       "writtenOn": "2014-11-14T19:08:19Z",
       "side": 1,
       "message": "drop alignment",
+      "revId": "c9fcaa1dffc339c7f4c14d04ae2c3189276dc657",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//P98\u003d",
+        "filename": "vp9/encoder/x86/vp9_highbd_variance_sse2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 573,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-11-14T23:18:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//QAM\u003d",
       "revId": "c9fcaa1dffc339c7f4c14d04ae2c3189276dc657",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
