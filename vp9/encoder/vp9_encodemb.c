@@ -386,6 +386,10 @@ void vp9_xform_quant_fp(MACROBLOCK *x, int plane, int block,
   const int diff_stride = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
   int i, j;
   const int16_t *src_diff;
+#if CONFIG_EXT_TX
+  TX_TYPE tx_type;
+#endif
+
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &i, &j);
   src_diff = &p->src_diff[4 * (j * diff_stride + i)];
 
@@ -411,21 +415,48 @@ void vp9_xform_quant_fp(MACROBLOCK *x, int plane, int block,
                                      scan_order->iscan);
         break;
       case TX_16X16:
+#if CONFIG_EXT_TX
+        tx_type = get_tx_type(plane, xd);
+        if (tx_type == DCT_DCT) {
+          vp9_highbd_fdct16x16(src_diff, coeff, diff_stride);
+        } else {
+          vp9_highbd_fht16x16(src_diff, coeff, diff_stride, tx_type);
+        }
+#else
         vp9_highbd_fdct16x16(src_diff, coeff, diff_stride);
+#endif
         vp9_highbd_quantize_fp(coeff, 256, x->skip_block, p->zbin, p->round_fp,
                                p->quant_fp, p->quant_shift, qcoeff, dqcoeff,
                                pd->dequant, p->zbin_extra, eob,
                                scan_order->scan, scan_order->iscan);
         break;
       case TX_8X8:
+#if CONFIG_EXT_TX
+        tx_type = get_tx_type(plane, xd);
+        if (tx_type == DCT_DCT) {
+          vp9_highbd_fdct8x8(src_diff, coeff, diff_stride);
+        } else {
+          vp9_highbd_fht8x8(src_diff, coeff, diff_stride, tx_type);
+        }
+#else
         vp9_highbd_fdct8x8(src_diff, coeff, diff_stride);
+#endif
         vp9_highbd_quantize_fp(coeff, 64, x->skip_block, p->zbin, p->round_fp,
                                p->quant_fp, p->quant_shift, qcoeff, dqcoeff,
                                pd->dequant, p->zbin_extra, eob,
                                scan_order->scan, scan_order->iscan);
         break;
       case TX_4X4:
+#if CONFIG_EXT_TX
+        tx_type = get_tx_type_4x4(plane, xd, block);
+        if (tx_type == DCT_DCT) {
+          x->fwd_txm4x4(src_diff, coeff, diff_stride);
+        } else {
+          vp9_highbd_fht4x4(src_diff, coeff, diff_stride, tx_type);
+        }
+#else
         x->fwd_txm4x4(src_diff, coeff, diff_stride);
+#endif
         vp9_highbd_quantize_fp(coeff, 16, x->skip_block, p->zbin, p->round_fp,
                                p->quant_fp, p->quant_shift, qcoeff, dqcoeff,
                                pd->dequant, p->zbin_extra, eob,
@@ -456,21 +487,48 @@ void vp9_xform_quant_fp(MACROBLOCK *x, int plane, int block,
                             scan_order->iscan);
       break;
     case TX_16X16:
+#if CONFIG_EXT_TX
+      tx_type = get_tx_type(plane, xd);
+      if (tx_type == DCT_DCT) {
+        vp9_fdct16x16(src_diff, coeff, diff_stride);
+      } else {
+        vp9_fht16x16(src_diff, coeff, diff_stride, tx_type);
+      }
+#else
       vp9_fdct16x16(src_diff, coeff, diff_stride);
+#endif
       vp9_quantize_fp(coeff, 256, x->skip_block, p->zbin, p->round_fp,
                       p->quant_fp, p->quant_shift, qcoeff, dqcoeff,
                       pd->dequant, p->zbin_extra, eob,
                       scan_order->scan, scan_order->iscan);
       break;
     case TX_8X8:
+#if CONFIG_EXT_TX
+      tx_type = get_tx_type(plane, xd);
+      if (tx_type == DCT_DCT) {
+        vp9_fdct8x8(src_diff, coeff, diff_stride);
+      } else {
+        vp9_fht8x8(src_diff, coeff, diff_stride, tx_type);
+      }
+#else
       vp9_fdct8x8(src_diff, coeff, diff_stride);
+#endif
       vp9_quantize_fp(coeff, 64, x->skip_block, p->zbin, p->round_fp,
                       p->quant_fp, p->quant_shift, qcoeff, dqcoeff,
                       pd->dequant, p->zbin_extra, eob,
                       scan_order->scan, scan_order->iscan);
       break;
     case TX_4X4:
+#if CONFIG_EXT_TX
+      tx_type = get_tx_type_4x4(plane, xd, block);
+      if (tx_type == DCT_DCT) {
+        x->fwd_txm4x4(src_diff, coeff, diff_stride);
+      } else {
+        vp9_fht4x4(src_diff, coeff, diff_stride, tx_type);
+      }
+#else
       x->fwd_txm4x4(src_diff, coeff, diff_stride);
+#endif
       vp9_quantize_fp(coeff, 16, x->skip_block, p->zbin, p->round_fp,
                       p->quant_fp, p->quant_shift, qcoeff, dqcoeff,
                       pd->dequant, p->zbin_extra, eob,
@@ -494,6 +552,9 @@ void vp9_xform_quant_dc(MACROBLOCK *x, int plane, int block,
   const int diff_stride = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
   int i, j;
   const int16_t *src_diff;
+#if CONFIG_EXT_TX
+  TX_TYPE tx_type;
+#endif
 
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &i, &j);
   src_diff = &p->src_diff[4 * (j * diff_stride + i)];
@@ -516,19 +577,46 @@ void vp9_xform_quant_dc(MACROBLOCK *x, int plane, int block,
                                      pd->dequant[0], eob);
         break;
       case TX_16X16:
+#if CONFIG_EXT_TX
+        tx_type = get_tx_type(plane, xd);
+        if (tx_type == DCT_DCT) {
+          vp9_highbd_fdct16x16_1(src_diff, coeff, diff_stride);
+        } else {
+          vp9_highbd_fht16x16(src_diff, coeff, diff_stride, tx_type);
+        }
+#else
         vp9_highbd_fdct16x16_1(src_diff, coeff, diff_stride);
+#endif
         vp9_highbd_quantize_dc(coeff, x->skip_block, p->round,
                                p->quant_fp[0], qcoeff, dqcoeff,
                                pd->dequant[0], eob);
         break;
       case TX_8X8:
+#if CONFIG_EXT_TX
+        tx_type = get_tx_type(plane, xd);
+        if (tx_type == DCT_DCT) {
+          vp9_highbd_fdct8x8_1(src_diff, coeff, diff_stride);
+        } else {
+          vp9_highbd_fht8x8(src_diff, coeff, diff_stride, tx_type);
+        }
+#else
         vp9_highbd_fdct8x8_1(src_diff, coeff, diff_stride);
+#endif
         vp9_highbd_quantize_dc(coeff, x->skip_block, p->round,
                                p->quant_fp[0], qcoeff, dqcoeff,
                                pd->dequant[0], eob);
         break;
       case TX_4X4:
+#if CONFIG_EXT_TX
+        tx_type = get_tx_type_4x4(plane, xd, block);
+        if (tx_type == DCT_DCT) {
+          x->fwd_txm4x4(src_diff, coeff, diff_stride);
+        } else {
+          vp9_highbd_fht4x4(src_diff, coeff, diff_stride, tx_type);
+        }
+#else
         x->fwd_txm4x4(src_diff, coeff, diff_stride);
+#endif
         vp9_highbd_quantize_dc(coeff, x->skip_block, p->round,
                                p->quant_fp[0], qcoeff, dqcoeff,
                                pd->dequant[0], eob);
@@ -556,19 +644,46 @@ void vp9_xform_quant_dc(MACROBLOCK *x, int plane, int block,
                             pd->dequant[0], eob);
       break;
     case TX_16X16:
+#if CONFIG_EXT_TX
+      tx_type = get_tx_type(plane, xd);
+      if (tx_type == DCT_DCT) {
+        vp9_fdct16x16_1(src_diff, coeff, diff_stride);
+      } else {
+        vp9_fht16x16(src_diff, coeff, diff_stride, tx_type);
+      }
+#else
       vp9_fdct16x16_1(src_diff, coeff, diff_stride);
+#endif
       vp9_quantize_dc(coeff, x->skip_block, p->round,
                      p->quant_fp[0], qcoeff, dqcoeff,
                      pd->dequant[0], eob);
       break;
     case TX_8X8:
+#if CONFIG_EXT_TX
+      tx_type = get_tx_type(plane, xd);
+      if (tx_type == DCT_DCT) {
+        vp9_fdct8x8_1(src_diff, coeff, diff_stride);
+      } else {
+        vp9_fht8x8(src_diff, coeff, diff_stride, tx_type);
+      }
+#else
       vp9_fdct8x8_1(src_diff, coeff, diff_stride);
+#endif
       vp9_quantize_dc(coeff, x->skip_block, p->round,
                       p->quant_fp[0], qcoeff, dqcoeff,
                       pd->dequant[0], eob);
       break;
     case TX_4X4:
+#if CONFIG_EXT_TX
+      tx_type = get_tx_type_4x4(plane, xd, block);
+      if (tx_type == DCT_DCT) {
+        x->fwd_txm4x4(src_diff, coeff, diff_stride);
+      } else {
+        vp9_fht4x4(src_diff, coeff, diff_stride, tx_type);
+      }
+#else
       x->fwd_txm4x4(src_diff, coeff, diff_stride);
+#endif
       vp9_quantize_dc(coeff, x->skip_block, p->round,
                       p->quant_fp[0], qcoeff, dqcoeff,
                       pd->dequant[0], eob);
@@ -593,7 +708,7 @@ void vp9_xform_quant(MACROBLOCK *x, int plane, int block,
   int i, j;
   const int16_t *src_diff;
 #if CONFIG_EXT_TX
-  MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
+  TX_TYPE tx_type;
 #endif
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &i, &j);
   src_diff = &p->src_diff[4 * (j * diff_stride + i)];
@@ -619,10 +734,11 @@ void vp9_xform_quant(MACROBLOCK *x, int plane, int block,
         break;
       case TX_16X16:
 #if CONFIG_EXT_TX
-        if (plane != 0 || mbmi->ext_txfrm == NORM) {
+        tx_type = get_tx_type(plane, xd);
+        if (tx_type == DCT_DCT) {
           vp9_highbd_fdct16x16(src_diff, coeff, diff_stride);
         } else {
-          vp9_highbd_fht16x16(src_diff, coeff, diff_stride, ADST_ADST);
+          vp9_highbd_fht16x16(src_diff, coeff, diff_stride, tx_type);
         }
 #else
         vp9_highbd_fdct16x16(src_diff, coeff, diff_stride);
@@ -634,10 +750,11 @@ void vp9_xform_quant(MACROBLOCK *x, int plane, int block,
         break;
       case TX_8X8:
 #if CONFIG_EXT_TX
-        if (plane != 0 || mbmi->ext_txfrm == NORM) {
+        tx_type = get_tx_type(plane, xd);
+        if (tx_type == DCT_DCT) {
           vp9_highbd_fdct8x8(src_diff, coeff, diff_stride);
         } else {
-          vp9_highbd_fht8x8(src_diff, coeff, diff_stride, ADST_ADST);
+          vp9_highbd_fht8x8(src_diff, coeff, diff_stride, tx_type);
         }
 #else
         vp9_highbd_fdct8x8(src_diff, coeff, diff_stride);
@@ -649,10 +766,11 @@ void vp9_xform_quant(MACROBLOCK *x, int plane, int block,
         break;
       case TX_4X4:
 #if CONFIG_EXT_TX
-        if (plane != 0 || mbmi->ext_txfrm == NORM || xd->lossless) {
+        tx_type = get_tx_type_4x4(plane, xd, block);
+        if (tx_type == DCT_DCT) {
           x->fwd_txm4x4(src_diff, coeff, diff_stride);
         } else {
-          vp9_highbd_fht4x4(src_diff, coeff, diff_stride, ADST_ADST);
+          vp9_highbd_fht4x4(src_diff, coeff, diff_stride, tx_type);
         }
 #else
         x->fwd_txm4x4(src_diff, coeff, diff_stride);
@@ -688,10 +806,11 @@ void vp9_xform_quant(MACROBLOCK *x, int plane, int block,
       break;
     case TX_16X16:
 #if CONFIG_EXT_TX
-      if (plane != 0 || mbmi->ext_txfrm == NORM) {
+      tx_type = get_tx_type(plane, xd);
+      if (tx_type == DCT_DCT) {
         vp9_fdct16x16(src_diff, coeff, diff_stride);
       } else {
-        vp9_fht16x16(src_diff, coeff, diff_stride, ADST_ADST);
+        vp9_fht16x16(src_diff, coeff, diff_stride, tx_type);
       }
 #else
       vp9_fdct16x16(src_diff, coeff, diff_stride);
@@ -703,10 +822,11 @@ void vp9_xform_quant(MACROBLOCK *x, int plane, int block,
       break;
     case TX_8X8:
 #if CONFIG_EXT_TX
-      if (plane != 0 || mbmi->ext_txfrm == NORM) {
+      tx_type = get_tx_type(plane, xd);
+      if (tx_type == DCT_DCT) {
         vp9_fdct8x8(src_diff, coeff, diff_stride);
       } else {
-        vp9_fht8x8(src_diff, coeff, diff_stride, ADST_ADST);
+        vp9_fht8x8(src_diff, coeff, diff_stride, tx_type);
       }
 #else
       vp9_fdct8x8(src_diff, coeff, diff_stride);
@@ -718,10 +838,11 @@ void vp9_xform_quant(MACROBLOCK *x, int plane, int block,
       break;
     case TX_4X4:
 #if CONFIG_EXT_TX
-      if (plane != 0 || mbmi->ext_txfrm == NORM || xd->lossless) {
+      tx_type = get_tx_type_4x4(plane, xd, block);
+      if (tx_type == DCT_DCT) {
         x->fwd_txm4x4(src_diff, coeff, diff_stride);
       } else {
-        vp9_fht4x4(src_diff, coeff, diff_stride, ADST_ADST);
+        vp9_fht4x4(src_diff, coeff, diff_stride, tx_type);
       }
 #else
       x->fwd_txm4x4(src_diff, coeff, diff_stride);
