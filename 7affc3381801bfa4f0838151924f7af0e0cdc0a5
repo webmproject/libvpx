@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//QHI\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 576,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-11-14T00:47:52Z",
+      "side": 1,
+      "message": "Do you really want to always use min of rc-\u003eavg_frame_qindex[INTER_FRAME] and  rc-\u003eavg_frame_qindex[KEY_FRAME] for frames after frame 1 here ? I would have thought this is only desirable for the first few frames?",
+      "revId": "7affc3381801bfa4f0838151924f7af0e0cdc0a5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
