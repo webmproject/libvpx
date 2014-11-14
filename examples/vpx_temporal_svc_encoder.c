@@ -61,6 +61,15 @@ struct RateControlMetrics {
   double layer_avg_rate_mismatch[VPX_TS_MAX_LAYERS];
   // Actual encoding bitrate per layer (cumulative).
   double layer_encoding_bitrate[VPX_TS_MAX_LAYERS];
+  // Average of the short-time encoder actual bitrate.
+  // TODO(marpan): Should we add these short-time stats for each layer?
+  double avg_st_encoding_bitrate;
+  // Variance of the short-time encoder actual bitrate.
+  double variance_st_encoding_bitrate;
+  // Window (number of frames) for computing short-timee encoding bitrate.
+  int window_size;
+  // Number of window measurements.
+  int window_count;
 };
 
 // Note: these rate control metrics assume only 1 key frame in the
@@ -92,6 +101,10 @@ static void set_rate_control_metrics(struct RateControlMetrics *rc,
     rc->layer_avg_frame_size[i] = 0.0;
     rc->layer_avg_rate_mismatch[i] = 0.0;
   }
+  rc->window_count = 0;
+  rc->window_size = 15;
+  rc->avg_st_encoding_bitrate = 0.0;
+  rc->variance_st_encoding_bitrate = 0.0;
 }
 
 static void printout_rate_control_summary(struct RateControlMetrics *rc,
@@ -99,6 +112,7 @@ static void printout_rate_control_summary(struct RateControlMetrics *rc,
                                           int frame_cnt) {
   unsigned int i = 0;
   int tot_num_frames = 0;
+  double perc_fluctuation = 0.0;
   printf("Total number of processed frames: %d\n\n", frame_cnt -1);
   printf("Rate control layer stats for %d layer(s):\n\n",
       cfg->ts_number_layers);
@@ -125,6 +139,17 @@ static void printout_rate_control_summary(struct RateControlMetrics *rc,
         100.0 * num_dropped / rc->layer_input_frames[i]);
     printf("\n");
   }
+  rc->avg_st_encoding_bitrate = rc->avg_st_encoding_bitrate / rc->window_count;
+  rc->variance_st_encoding_bitrate =
+      rc->variance_st_encoding_bitrate / rc->window_count -
+      (rc->avg_st_encoding_bitrate * rc->avg_st_encoding_bitrate);
+  perc_fluctuation = 100.0 * sqrt(rc->variance_st_encoding_bitrate) /
+      rc->avg_st_encoding_bitrate;
+  printf("Short-time stats, for window of %d frames: \n",rc->window_size);
+  printf("Average, rms-variance, and percent-fluct: %f %f %f \n",
+         rc->avg_st_encoding_bitrate,
+         sqrt(rc->variance_st_encoding_bitrate),
+         perc_fluctuation);
   if ((frame_cnt - 1) != tot_num_frames)
     die("Error: Number of input frames not equal to output! \n");
 }
@@ -469,6 +494,9 @@ int main(int argc, char **argv) {
 #else
   const int min_args = min_args_base;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+  double sum_bitrate = 0.0;
+  double sum_bitrate2 = 0.0;
+  double framerate  = 30.0;
 
   exec_name = argv[0];
   // Check usage and arguments.
@@ -604,6 +632,7 @@ int main(int argc, char **argv) {
     die("Failed to open %s for reading", argv[1]);
   }
 
+  framerate = cfg.g_timebase.den / cfg.g_timebase.num;
   // Open an output file for each stream.
   for (i = 0; i < cfg.ts_number_layers; ++i) {
     char file_name[PATH_MAX];
@@ -652,7 +681,7 @@ int main(int argc, char **argv) {
   // For generating smaller key frames, use a smaller max_intra_size_pct
   // value, like 100 or 200.
   {
-    const int max_intra_size_pct = 200;
+    const int max_intra_size_pct = 900;
     vpx_codec_control(&codec, VP8E_SET_MAX_INTRA_BITRATE_PCT,
                       max_intra_size_pct);
   }
@@ -703,6 +732,33 @@ int main(int argc, char **argv) {
                   fabs(8.0 * pkt->data.frame.sz - rc.layer_pfb[i]) /
                   rc.layer_pfb[i];
               ++rc.layer_enc_frames[i];
+            }
+          }
+          // Update for short-time encoding bitrate states, for moving window
+          // of size rc->window, shifted by rc->window / 2.
+          // Ignore first window segment, due to key frame.
+          if (frame_cnt > rc.window_size) {
+            sum_bitrate += 0.001 * 8.0 * pkt->data.frame.sz * framerate;
+            if (frame_cnt % rc.window_size == 0) {
+              rc.window_count += 1;
+              rc.avg_st_encoding_bitrate += sum_bitrate / rc.window_size;
+              rc.variance_st_encoding_bitrate +=
+                  (sum_bitrate / rc.window_size) *
+                  (sum_bitrate / rc.window_size);
+              sum_bitrate = 0.0;
+            }
+          }
+          // Second shifted window.
+          if (frame_cnt > rc.window_size + rc.window_size / 2) {
+            sum_bitrate2 += 0.001 * 8.0 * pkt->data.frame.sz * framerate;
+            if (frame_cnt > 2 * rc.window_size &&
+                frame_cnt % rc.window_size == 0) {
+              rc.window_count += 1;
+              rc.avg_st_encoding_bitrate += sum_bitrate2 / rc.window_size;
+              rc.variance_st_encoding_bitrate +=
+                  (sum_bitrate2 / rc.window_size) *
+                  (sum_bitrate2 / rc.window_size);
+              sum_bitrate2 = 0.0;
             }
           }
           break;
