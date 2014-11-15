@@ -235,6 +235,9 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   cpi->nmvsadcosts_hp[0] = NULL;
   cpi->nmvsadcosts_hp[1] = NULL;
 
+  vpx_free(cpi->frame_counts);
+  cpi->frame_counts = NULL;
+
   vp9_cyclic_refresh_free(cpi->cyclic_refresh);
   cpi->cyclic_refresh = NULL;
 
@@ -1475,6 +1478,9 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
                   vpx_calloc(MV_VALS, sizeof(*cpi->nmvsadcosts_hp[0])));
   CHECK_MEM_ERROR(cm, cpi->nmvsadcosts_hp[1],
                   vpx_calloc(MV_VALS, sizeof(*cpi->nmvsadcosts_hp[1])));
+
+  CHECK_MEM_ERROR(cm, cpi->frame_counts, vpx_calloc(1,
+                  sizeof(*cpi->frame_counts)));
 
   for (i = 0; i < (sizeof(cpi->mbgraph_stats) /
                    sizeof(cpi->mbgraph_stats[0])); i++) {
@@ -3289,7 +3295,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   vp9_update_reference_frames(cpi);
 
   for (t = TX_4X4; t <= TX_32X32; t++)
-    full_to_model_counts(cm->counts.coef[t], cpi->coef_counts[t]);
+    full_to_model_counts(cm->counts.coef[t], cpi->frame_counts->coef_counts[t]);
 
   if (!cm->error_resilient_mode && !cm->frame_parallel_decoding_mode)
     vp9_adapt_coef_probs(cm);
