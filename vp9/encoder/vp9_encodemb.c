@@ -872,6 +872,7 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
   ENTROPY_CONTEXT *a, *l;
 #if CONFIG_EXT_TX
   MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
+  TX_TYPE tx_type;
 #endif
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &i, &j);
   dst = &pd->dst.buf[4 * j * pd->dst.stride + 4 * i];
@@ -938,11 +939,12 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
         break;
       case TX_16X16:
 #if CONFIG_EXT_TX
-        if (plane != 0 || mbmi->ext_txfrm == NORM) {
+        tx_type = get_tx_type(plane, xd);
+        if (tx_type == DCT_DCT) {
           vp9_highbd_idct16x16_add(dqcoeff, dst, pd->dst.stride,
                                    p->eobs[block], xd->bd);
         } else {
-          vp9_highbd_iht16x16_add(ADST_ADST, dqcoeff, dst, pd->dst.stride,
+          vp9_highbd_iht16x16_add(tx_type, dqcoeff, dst, pd->dst.stride,
                                   p->eobs[block], xd->bd);
         }
 #else
@@ -952,11 +954,12 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
         break;
       case TX_8X8:
 #if CONFIG_EXT_TX
-        if (plane != 0 || mbmi->ext_txfrm == NORM) {
+        tx_type = get_tx_type(plane, xd);
+        if (tx_type == DCT_DCT) {
           vp9_highbd_idct8x8_add(dqcoeff, dst, pd->dst.stride,
                                  p->eobs[block], xd->bd);
         } else {
-          vp9_highbd_iht8x8_add(ADST_ADST, dqcoeff, dst, pd->dst.stride,
+          vp9_highbd_iht8x8_add(tx_type, dqcoeff, dst, pd->dst.stride,
                                 p->eobs[block], xd->bd);
         }
 #else
@@ -966,14 +969,15 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
         break;
       case TX_4X4:
 #if CONFIG_EXT_TX
-        if (plane != 0 || mbmi->ext_txfrm == NORM || xd->lossless) {
+        tx_type = get_tx_type_4x4(plane, xd, block);
+        if (tx_type == DCT_DCT) {
           // this is like vp9_short_idct4x4 but has a special case around eob<=1
           // which is significant (not just an optimization) for the lossless
           // case.
           x->highbd_itxm_add(dqcoeff, dst, pd->dst.stride,
                              p->eobs[block], xd->bd);
         } else {
-          vp9_highbd_iht4x4_add(ADST_ADST, dqcoeff, dst, pd->dst.stride,
+          vp9_highbd_iht4x4_add(tx_type, dqcoeff, dst, pd->dst.stride,
                                 p->eobs[block], xd->bd);
         }
 #else
@@ -1002,10 +1006,11 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
       break;
     case TX_16X16:
 #if CONFIG_EXT_TX
-      if (plane != 0 || mbmi->ext_txfrm == NORM) {
+      tx_type = get_tx_type(plane, xd);
+      if (tx_type == DCT_DCT) {
         vp9_idct16x16_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
       } else {
-        vp9_iht16x16_add(ADST_ADST, dqcoeff, dst, pd->dst.stride,
+        vp9_iht16x16_add(tx_type, dqcoeff, dst, pd->dst.stride,
                          p->eobs[block]);
       }
 #else
@@ -1014,10 +1019,11 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
       break;
     case TX_8X8:
 #if CONFIG_EXT_TX
-      if (plane != 0 || mbmi->ext_txfrm == NORM) {
+      tx_type = get_tx_type(plane, xd);
+      if (tx_type == DCT_DCT) {
         vp9_idct8x8_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
       } else {
-        vp9_iht8x8_add(ADST_ADST, dqcoeff, dst, pd->dst.stride,
+        vp9_iht8x8_add(tx_type, dqcoeff, dst, pd->dst.stride,
                        p->eobs[block]);
       }
 #else
@@ -1026,13 +1032,14 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
       break;
     case TX_4X4:
 #if CONFIG_EXT_TX
-      if (plane != 0 || mbmi->ext_txfrm == NORM || xd->lossless) {
+      tx_type = get_tx_type_4x4(plane, xd, block);
+      if (tx_type == DCT_DCT) {
         // this is like vp9_short_idct4x4 but has a special case around eob<=1
         // which is significant (not just an optimization) for the lossless
         // case.
         x->itxm_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
       } else {
-        vp9_iht4x4_add(ADST_ADST, dqcoeff, dst, pd->dst.stride,
+        vp9_iht4x4_add(tx_type, dqcoeff, dst, pd->dst.stride,
                        p->eobs[block]);
       }
 #else
