@@ -82,6 +82,10 @@ static void fill_mode_costs(VP9_COMP *cpi) {
   for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
     vp9_cost_tokens(cpi->switchable_interp_costs[i],
                     fc->switchable_interp_prob[i], vp9_switchable_interp_tree);
+#if CONFIG_EXT_TX
+  for (i = TX_4X4; i <= TX_16X16; ++i)
+    vp9_cost_tokens(cpi->ext_tx_costs[i], fc->ext_tx_prob[i], vp9_ext_tx_tree);
+#endif
 }
 
 static void fill_token_costs(vp9_coeff_cost *c,
@@ -638,4 +642,3 @@ int vp9_get_intra_cost_penalty(int qindex, int qdelta,
   return 20 * q;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 }
-

@@ -60,7 +60,7 @@ typedef struct frame_contexts {
   vp9_prob filterintra_prob[TX_SIZES][INTRA_MODES];
 #endif
 #if CONFIG_EXT_TX
-  vp9_prob ext_tx_prob;
+  vp9_prob ext_tx_prob[3][EXT_TX_TYPES - 1];
 #endif
 } FRAME_CONTEXT;
 
@@ -85,7 +85,7 @@ typedef struct {
   unsigned int filterintra[TX_SIZES][INTRA_MODES][2];
 #endif
 #if CONFIG_EXT_TX
-  unsigned int ext_tx[2];
+  unsigned int ext_tx[3][EXT_TX_TYPES];
 #endif
 } FRAME_COUNTS;
 
@@ -99,6 +99,9 @@ extern const vp9_tree_index vp9_inter_mode_tree[TREE_SIZE(INTER_MODES)];
 extern const vp9_tree_index vp9_partition_tree[TREE_SIZE(PARTITION_TYPES)];
 extern const vp9_tree_index vp9_switchable_interp_tree
                                 [TREE_SIZE(SWITCHABLE_FILTERS)];
+#if CONFIG_EXT_TX
+extern const vp9_tree_index vp9_ext_tx_tree[TREE_SIZE(EXT_TX_TYPES)];
+#endif
 
 void vp9_setup_past_independence(struct VP9Common *cm);
 

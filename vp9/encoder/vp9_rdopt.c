@@ -626,6 +626,11 @@ static void choose_largest_tx_size(VP9_COMP *cpi, MACROBLOCK *x,
   txfm_rd_in_plane(x, rate, distortion, skip,
                    sse, ref_best_rd, 0, bs,
                    mbmi->tx_size, cpi->sf.use_fast_coef_costing);
+#if CONFIG_EXT_TX
+  if (is_inter_block(mbmi) && mbmi->tx_size < TX_32X32 && bs >= BLOCK_8X8 &&
+      !xd->lossless && *rate != INT_MAX)
+    *rate += cpi->ext_tx_costs[mbmi->tx_size][mbmi->ext_txfrm];
+#endif
 }
 
 static void choose_tx_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
@@ -667,6 +672,11 @@ static void choose_tx_size_from_rd(VP9_COMP *cpi, MACROBLOCK *x,
     txfm_rd_in_plane(x, &r[n][0], &d[n], &s[n],
                      &sse[n], ref_best_rd, 0, bs, n,
                      cpi->sf.use_fast_coef_costing);
+#if CONFIG_EXT_TX
+    if (is_inter_block(mbmi) && n < TX_32X32 && bs >= BLOCK_8X8 &&
+        !xd->lossless && r[n][0] != INT_MAX)
+      r[n][0] += cpi->ext_tx_costs[n][mbmi->ext_txfrm];
+#endif
     r[n][1] = r[n][0];
     if (r[n][0] < INT_MAX) {
       for (m = 0; m <= n - (n == (int) max_tx_size); m++) {
@@ -1185,7 +1195,7 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
 #endif
 
     super_block_yrd(cpi, x, &this_rate_tokenonly, &this_distortion,
-        &s, NULL, bsize, local_tx_cache, best_rd);
+                    &s, NULL, bsize, local_tx_cache, best_rd);
 
     if (this_rate_tokenonly == INT_MAX)
       continue;
@@ -2965,8 +2975,6 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         super_block_yrd(cpi, x, &rate_y_tx, &distortion_y_tx, &dummy, psse,
                         bsize, txfm_cache, INT64_MAX);
         assert(rate_y_tx != INT_MAX);
-        if (mbmi->tx_size < TX_32X32)
-          rate_y_tx += vp9_cost_bit(cm->fc.ext_tx_prob, i);
         assert(rate_y_tx >= 0);
         rdcost_tx = RDCOST(x->rdmult, x->rddiv, rate_y_tx, distortion_y_tx);
         rdcost_tx = MIN(rdcost_tx, RDCOST(x->rdmult, x->rddiv, 0, *psse));
@@ -3021,10 +3029,6 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     }
 
     *rate2 += *rate_y;
-#if CONFIG_EXT_TX
-    if (mbmi->tx_size < TX_32X32 && !xd->lossless)
-      *rate2 += vp9_cost_bit(cm->fc.ext_tx_prob, mbmi->ext_txfrm);
-#endif
     *distortion += distortion_y;
 
     rdcosty = RDCOST(x->rdmult, x->rddiv, *rate2, *distortion);

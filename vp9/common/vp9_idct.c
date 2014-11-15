@@ -432,6 +432,74 @@ static const transform_2d IHT_8[] = {
   { iadst8, iadst8 }   // ADST_ADST = 3
 };
 
+#if CONFIG_EXT_TX
+void fliplr(uint8_t *dest, int stride, int l) {
+  int i, j;
+  for (i = 0; i < l; ++i) {
+    for (j = 0; j < l / 2; ++j) {
+      const uint8_t tmp = dest[i * stride + j];
+      dest[i * stride + j] = dest[i * stride + l - 1 - j];
+      dest[i * stride + l - 1 - j] = tmp;
+    }
+  }
+}
+
+void flipud(uint8_t *dest, int stride, int l) {
+  int i, j;
+  for (j = 0; j < l; ++j) {
+    for (i = 0; i < l / 2; ++i) {
+      const uint8_t tmp = dest[i * stride + j];
+      dest[i * stride + j] = dest[(l - 1 - i) * stride + j];
+      dest[(l - 1 - i) * stride + j] = tmp;
+    }
+  }
+}
+
+void fliplrud(uint8_t *dest, int stride, int l) {
+  int i, j;
+  for (i = 0; i < l / 2; ++i) {
+    for (j = 0; j < l; ++j) {
+      const uint8_t tmp = dest[i * stride + j];
+      dest[i * stride + j] = dest[(l - 1 - i) * stride + l - 1 - j];
+      dest[(l - 1 - i) * stride + l - 1 - j] = tmp;
+    }
+  }
+}
+
+void fliplr16(uint16_t *dest, int stride, int l) {
+  int i, j;
+  for (i = 0; i < l; ++i) {
+    for (j = 0; j < l / 2; ++j) {
+      const uint16_t tmp = dest[i * stride + j];
+      dest[i * stride + j] = dest[i * stride + l - 1 - j];
+      dest[i * stride + l - 1 - j] = tmp;
+    }
+  }
+}
+
+void flipud16(uint16_t *dest, int stride, int l) {
+  int i, j;
+  for (j = 0; j < l; ++j) {
+    for (i = 0; i < l / 2; ++i) {
+      const uint16_t tmp = dest[i * stride + j];
+      dest[i * stride + j] = dest[(l - 1 - i) * stride + j];
+      dest[(l - 1 - i) * stride + j] = tmp;
+    }
+  }
+}
+
+void fliplrud16(uint16_t *dest, int stride, int l) {
+  int i, j;
+  for (i = 0; i < l / 2; ++i) {
+    for (j = 0; j < l; ++j) {
+      const uint16_t tmp = dest[i * stride + j];
+      dest[i * stride + j] = dest[(l - 1 - i) * stride + l - 1 - j];
+      dest[(l - 1 - i) * stride + l - 1 - j] = tmp;
+    }
+  }
+}
+#endif  // CONFIG_EXT_TX
+
 void vp9_iht8x8_64_add_c(const tran_low_t *input, uint8_t *dest, int stride,
                          int tx_type) {
   int i, j;
@@ -1433,16 +1501,61 @@ void vp9_idct32x32_add(const tran_low_t *input, uint8_t *dest, int stride,
 // iht
 void vp9_iht4x4_add(TX_TYPE tx_type, const tran_low_t *input, uint8_t *dest,
                     int stride, int eob) {
-  if (tx_type == DCT_DCT)
+  if (tx_type == DCT_DCT) {
     vp9_idct4x4_add(input, dest, stride, eob);
-  else
+#if CONFIG_EXT_TX
+  } else if (tx_type == FLIPADST_DCT) {
+    flipud(dest, stride, 4);
+    vp9_iht4x4_16_add(input, dest, stride, ADST_DCT);
+    flipud(dest, stride, 4);
+  } else if (tx_type == DCT_FLIPADST) {
+    fliplr(dest, stride, 4);
+    vp9_iht4x4_16_add(input, dest, stride, DCT_ADST);
+    fliplr(dest, stride, 4);
+  } else if (tx_type == FLIPADST_FLIPADST) {
+    fliplrud(dest, stride, 4);
+    vp9_iht4x4_16_add(input, dest, stride, ADST_ADST);
+    fliplrud(dest, stride, 4);
+  } else if (tx_type == ADST_FLIPADST) {
+    fliplr(dest, stride, 4);
+    vp9_iht4x4_16_add(input, dest, stride, ADST_ADST);
+    fliplr(dest, stride, 4);
+  } else if (tx_type == FLIPADST_ADST) {
+    flipud(dest, stride, 4);
+    vp9_iht4x4_16_add(input, dest, stride, ADST_ADST);
+    flipud(dest, stride, 4);
+#endif  // CONFIG_EXT_TX
+  } else {
     vp9_iht4x4_16_add(input, dest, stride, tx_type);
+  }
 }
 
 void vp9_iht8x8_add(TX_TYPE tx_type, const tran_low_t *input, uint8_t *dest,
                     int stride, int eob) {
   if (tx_type == DCT_DCT) {
     vp9_idct8x8_add(input, dest, stride, eob);
+#if CONFIG_EXT_TX
+  } else if (tx_type == FLIPADST_DCT) {
+    flipud(dest, stride, 8);
+    vp9_iht8x8_64_add(input, dest, stride, ADST_DCT);
+    flipud(dest, stride, 8);
+  } else if (tx_type == DCT_FLIPADST) {
+    fliplr(dest, stride, 8);
+    vp9_iht8x8_64_add(input, dest, stride, DCT_ADST);
+    fliplr(dest, stride, 8);
+  } else if (tx_type == FLIPADST_FLIPADST) {
+    fliplrud(dest, stride, 8);
+    vp9_iht8x8_64_add(input, dest, stride, ADST_ADST);
+    fliplrud(dest, stride, 8);
+  } else if (tx_type == ADST_FLIPADST) {
+    fliplr(dest, stride, 8);
+    vp9_iht8x8_64_add(input, dest, stride, ADST_ADST);
+    fliplr(dest, stride, 8);
+  } else if (tx_type == FLIPADST_ADST) {
+    flipud(dest, stride, 8);
+    vp9_iht8x8_64_add(input, dest, stride, ADST_ADST);
+    flipud(dest, stride, 8);
+#endif  // CONFIG_EXT_TX
   } else {
     vp9_iht8x8_64_add(input, dest, stride, tx_type);
   }
@@ -1452,6 +1565,28 @@ void vp9_iht16x16_add(TX_TYPE tx_type, const tran_low_t *input, uint8_t *dest,
                       int stride, int eob) {
   if (tx_type == DCT_DCT) {
     vp9_idct16x16_add(input, dest, stride, eob);
+#if CONFIG_EXT_TX
+  } else if (tx_type == FLIPADST_DCT) {
+    flipud(dest, stride, 16);
+    vp9_iht16x16_256_add(input, dest, stride, ADST_DCT);
+    flipud(dest, stride, 16);
+  } else if (tx_type == DCT_FLIPADST) {
+    fliplr(dest, stride, 16);
+    vp9_iht16x16_256_add(input, dest, stride, DCT_ADST);
+    fliplr(dest, stride, 16);
+  } else if (tx_type == FLIPADST_FLIPADST) {
+    fliplrud(dest, stride, 16);
+    vp9_iht16x16_256_add(input, dest, stride, ADST_ADST);
+    fliplrud(dest, stride, 16);
+  } else if (tx_type == ADST_FLIPADST) {
+    fliplr(dest, stride, 16);
+    vp9_iht16x16_256_add(input, dest, stride, ADST_ADST);
+    fliplr(dest, stride, 16);
+  } else if (tx_type == FLIPADST_ADST) {
+    flipud(dest, stride, 16);
+    vp9_iht16x16_256_add(input, dest, stride, ADST_ADST);
+    flipud(dest, stride, 16);
+#endif  // CONFIG_EXT_TX
   } else {
     vp9_iht16x16_256_add(input, dest, stride, tx_type);
   }
@@ -3340,16 +3475,61 @@ void vp9_highbd_idct32x32_add(const tran_low_t *input, uint8_t *dest,
 // iht
 void vp9_highbd_iht4x4_add(TX_TYPE tx_type, const tran_low_t *input,
                            uint8_t *dest, int stride, int eob, int bd) {
-  if (tx_type == DCT_DCT)
+  if (tx_type == DCT_DCT) {
     vp9_highbd_idct4x4_add(input, dest, stride, eob, bd);
-  else
+#if CONFIG_EXT_TX
+  } else if (tx_type == FLIPADST_DCT) {
+    flipud16(CONVERT_TO_SHORTPTR(dest), stride, 4);
+    vp9_highbd_iht4x4_16_add(input, dest, stride, ADST_DCT, bd);
+    flipud16(CONVERT_TO_SHORTPTR(dest), stride, 4);
+  } else if (tx_type == DCT_FLIPADST) {
+    fliplr16(CONVERT_TO_SHORTPTR(dest), stride, 4);
+    vp9_highbd_iht4x4_16_add(input, dest, stride, DCT_ADST, bd);
+    fliplr16(CONVERT_TO_SHORTPTR(dest), stride, 4);
+  } else if (tx_type == FLIPADST_FLIPADST) {
+    fliplrud16(CONVERT_TO_SHORTPTR(dest), stride, 4);
+    vp9_highbd_iht4x4_16_add(input, dest, stride, ADST_ADST, bd);
+    fliplrud16(CONVERT_TO_SHORTPTR(dest), stride, 4);
+  } else if (tx_type == ADST_FLIPADST) {
+    fliplr16(CONVERT_TO_SHORTPTR(dest), stride, 4);
+    vp9_highbd_iht4x4_16_add(input, dest, stride, ADST_ADST, bd);
+    fliplr16(CONVERT_TO_SHORTPTR(dest), stride, 4);
+  } else if (tx_type == FLIPADST_ADST) {
+    flipud16(CONVERT_TO_SHORTPTR(dest), stride, 4);
+    vp9_highbd_iht4x4_16_add(input, dest, stride, ADST_ADST, bd);
+    flipud16(CONVERT_TO_SHORTPTR(dest), stride, 4);
+#endif  // CONFIG_EXT_TX
+  } else {
     vp9_highbd_iht4x4_16_add(input, dest, stride, tx_type, bd);
+  }
 }
 
 void vp9_highbd_iht8x8_add(TX_TYPE tx_type, const tran_low_t *input,
                            uint8_t *dest, int stride, int eob, int bd) {
   if (tx_type == DCT_DCT) {
     vp9_highbd_idct8x8_add(input, dest, stride, eob, bd);
+#if CONFIG_EXT_TX
+  } else if (tx_type == FLIPADST_DCT) {
+    flipud16(CONVERT_TO_SHORTPTR(dest), stride, 8);
+    vp9_highbd_iht8x8_64_add(input, dest, stride, ADST_DCT, bd);
+    flipud16(CONVERT_TO_SHORTPTR(dest), stride, 8);
+  } else if (tx_type == DCT_FLIPADST) {
+    fliplr16(CONVERT_TO_SHORTPTR(dest), stride, 8);
+    vp9_highbd_iht8x8_64_add(input, dest, stride, DCT_ADST, bd);
+    fliplr16(CONVERT_TO_SHORTPTR(dest), stride, 8);
+  } else if (tx_type == FLIPADST_FLIPADST) {
+    fliplrud16(CONVERT_TO_SHORTPTR(dest), stride, 8);
+    vp9_highbd_iht8x8_64_add(input, dest, stride, ADST_ADST, bd);
+    fliplrud16(CONVERT_TO_SHORTPTR(dest), stride, 8);
+  } else if (tx_type == ADST_FLIPADST) {
+    fliplr16(CONVERT_TO_SHORTPTR(dest), stride, 8);
+    vp9_highbd_iht8x8_64_add(input, dest, stride, ADST_ADST, bd);
+    fliplr16(CONVERT_TO_SHORTPTR(dest), stride, 8);
+  } else if (tx_type == FLIPADST_ADST) {
+    flipud16(CONVERT_TO_SHORTPTR(dest), stride, 8);
+    vp9_highbd_iht8x8_64_add(input, dest, stride, ADST_ADST, bd);
+    flipud16(CONVERT_TO_SHORTPTR(dest), stride, 8);
+#endif  // CONFIG_EXT_TX
   } else {
     vp9_highbd_iht8x8_64_add(input, dest, stride, tx_type, bd);
   }
@@ -3359,6 +3539,28 @@ void vp9_highbd_iht16x16_add(TX_TYPE tx_type, const tran_low_t *input,
                            uint8_t *dest, int stride, int eob, int bd) {
   if (tx_type == DCT_DCT) {
     vp9_highbd_idct16x16_add(input, dest, stride, eob, bd);
+#if CONFIG_EXT_TX
+  } else if (tx_type == FLIPADST_DCT) {
+    flipud16(CONVERT_TO_SHORTPTR(dest), stride, 16);
+    vp9_highbd_iht16x16_256_add(input, dest, stride, ADST_DCT, bd);
+    flipud16(CONVERT_TO_SHORTPTR(dest), stride, 16);
+  } else if (tx_type == DCT_FLIPADST) {
+    fliplr16(CONVERT_TO_SHORTPTR(dest), stride, 16);
+    vp9_highbd_iht16x16_256_add(input, dest, stride, DCT_ADST, bd);
+    fliplr16(CONVERT_TO_SHORTPTR(dest), stride, 16);
+  } else if (tx_type == FLIPADST_FLIPADST) {
+    fliplrud16(CONVERT_TO_SHORTPTR(dest), stride, 16);
+    vp9_highbd_iht16x16_256_add(input, dest, stride, ADST_ADST, bd);
+    fliplrud16(CONVERT_TO_SHORTPTR(dest), stride, 16);
+  } else if (tx_type == ADST_FLIPADST) {
+    fliplr16(CONVERT_TO_SHORTPTR(dest), stride, 16);
+    vp9_highbd_iht16x16_256_add(input, dest, stride, ADST_ADST, bd);
+    fliplr16(CONVERT_TO_SHORTPTR(dest), stride, 16);
+  } else if (tx_type == FLIPADST_ADST) {
+    flipud16(CONVERT_TO_SHORTPTR(dest), stride, 16);
+    vp9_highbd_iht16x16_256_add(input, dest, stride, ADST_ADST, bd);
+    flipud16(CONVERT_TO_SHORTPTR(dest), stride, 16);
+#endif  // CONFIG_EXT_TX
   } else {
     vp9_highbd_iht16x16_256_add(input, dest, stride, tx_type, bd);
   }

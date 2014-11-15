@@ -3835,7 +3835,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
         bsize >= BLOCK_8X8 &&
         !mbmi->skip &&
         !vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
-      ++cm->counts.ext_tx[mbmi->ext_txfrm];
+      ++cm->counts.ext_tx[mbmi->tx_size][mbmi->ext_txfrm];
     }
 #endif
   }

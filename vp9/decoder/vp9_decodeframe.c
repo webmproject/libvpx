@@ -1609,7 +1609,9 @@ static int read_compressed_header(VP9Decoder *pbi, const uint8_t *data,
 
     read_mv_probs(nmvc, cm->allow_high_precision_mv, &r);
 #if CONFIG_EXT_TX
-    vp9_diff_update_prob(&r, &fc->ext_tx_prob);
+    for (j = TX_4X4; j <= TX_16X16; ++j)
+      for (i = 0; i < EXT_TX_TYPES - 1; ++i)
+        vp9_diff_update_prob(&r, &fc->ext_tx_prob[j][i]);
 #endif
   }
 

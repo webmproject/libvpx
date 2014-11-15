@@ -261,15 +261,13 @@ static INLINE BLOCK_SIZE get_subsize(BLOCK_SIZE bsize,
 extern const TX_TYPE intra_mode_to_tx_type_lookup[INTRA_MODES];
 
 #if CONFIG_EXT_TX
-static TX_TYPE ext_tx_to_txtype(EXT_TX_TYPE ext_tx) {
-  switch (ext_tx) {
-    case NORM:
-    default:
-      return DCT_DCT;
-    case ALT:
-      return ADST_ADST;
-  }
-}
+static TX_TYPE ext_tx_to_txtype[EXT_TX_TYPES] = {
+  DCT_DCT,
+  ADST_ADST,
+  FLIPADST_FLIPADST,
+  ADST_FLIPADST,
+  FLIPADST_ADST
+};
 #endif
 
 static INLINE TX_TYPE get_tx_type(PLANE_TYPE plane_type,
@@ -281,7 +279,7 @@ static INLINE TX_TYPE get_tx_type(PLANE_TYPE plane_type,
       return DCT_DCT;
 
   if (is_inter_block(mbmi)) {
-    return ext_tx_to_txtype(mbmi->ext_txfrm);
+    return ext_tx_to_txtype[mbmi->ext_txfrm];
   }
 #else
   if (plane_type != PLANE_TYPE_Y || xd->lossless || is_inter_block(mbmi))
@@ -299,7 +297,7 @@ static INLINE TX_TYPE get_tx_type_4x4(PLANE_TYPE plane_type,
       return DCT_DCT;
 
   if (is_inter_block(&mi->mbmi)) {
-    return ext_tx_to_txtype(mi->mbmi.ext_txfrm);
+    return ext_tx_to_txtype[mi->mbmi.ext_txfrm];
   }
 #else
   if (plane_type != PLANE_TYPE_Y || xd->lossless || is_inter_block(&mi->mbmi))

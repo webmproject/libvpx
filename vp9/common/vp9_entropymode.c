@@ -13,10 +13,6 @@
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_seg_common.h"
 
-#if CONFIG_EXT_TX
-static const vp9_prob default_ext_tx_prob = 216;
-#endif
-
 const vp9_prob vp9_kf_y_mode_prob[INTRA_MODES][INTRA_MODES][INTRA_MODES - 1] = {
   {  // above = dc
     { 137,  30,  42, 148, 151, 207,  70,  52,  91 },  // left = dc
@@ -294,6 +290,21 @@ static const struct tx_probs default_tx_probs = {
     { 66  } }
 };
 
+#if CONFIG_EXT_TX
+const vp9_tree_index vp9_ext_tx_tree[TREE_SIZE(EXT_TX_TYPES)] = {
+  -NORM, 2,
+  4, 6,
+  -ALT1, -ALT2,
+  -ALT3, -ALT4,
+};
+
+static const vp9_prob default_ext_tx_prob[3][EXT_TX_TYPES - 1] = {
+  { 224, 128, 128, 128 },
+  { 208, 128, 128, 128 },
+  { 192, 128, 128, 128 },
+};
+#endif  // CONFIG_EXT_TX
+
 #if CONFIG_TX64X64
 void tx_counts_to_branch_counts_64x64(const unsigned int *tx_count_64x64p,
                                       unsigned int (*ct_64x64p)[2]) {
@@ -369,7 +380,7 @@ void vp9_init_mode_probs(FRAME_CONTEXT *fc) {
   vp9_copy(fc->filterintra_prob, default_filterintra_prob);
 #endif
 #if CONFIG_EXT_TX
-  fc->ext_tx_prob = default_ext_tx_prob;
+  vp9_copy(fc->ext_tx_prob, default_ext_tx_prob);
 #endif
 }
 
@@ -390,7 +401,7 @@ static void adapt_probs(const vp9_tree_index *tree,
                         const vp9_prob *pre_probs, const unsigned int *counts,
                         vp9_prob *probs) {
   vp9_tree_merge_probs(tree, pre_probs, counts, COUNT_SAT, MAX_UPDATE_FACTOR,
-                   probs);
+                       probs);
 }
 
 void vp9_adapt_mode_probs(VP9_COMMON *cm) {
@@ -472,14 +483,17 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
   for (i = 0; i < TX_SIZES; ++i)
     for (j = 0; j < INTRA_MODES; ++j)
       fc->filterintra_prob[i][j] = adapt_prob(pre_fc->filterintra_prob[i][j],
-                                   counts->filterintra[i][j]);
+                                              counts->filterintra[i][j]);
 #endif
 
   for (i = 0; i < SKIP_CONTEXTS; ++i)
     fc->skip_probs[i] = adapt_prob(pre_fc->skip_probs[i], counts->skip[i]);
 
 #if CONFIG_EXT_TX
-  fc->ext_tx_prob = adapt_prob(pre_fc->ext_tx_prob, counts->ext_tx);
+  for (i = TX_4X4; i <= TX_16X16; ++i) {
+    adapt_probs(vp9_ext_tx_tree, pre_fc->ext_tx_prob[i], counts->ext_tx[i],
+                fc->ext_tx_prob[i]);
+  }
 #endif
 }
 
