@@ -1410,7 +1410,7 @@ static void cal_nmvsadcosts_hp(int *mvsadcost[2]) {
 
 
 VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
-  unsigned int i, j;
+  unsigned int i;
   VP9_COMP *const cpi = vpx_memalign(32, sizeof(VP9_COMP));
   VP9_COMMON *const cm = cpi != NULL ? &cpi->common : NULL;
 
@@ -1645,14 +1645,6 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
                   vpx_calloc(cm->MBs, sizeof(diff)));
   cpi->source_var_thresh = 0;
   cpi->frames_till_next_var_check = 0;
-
-  // Default rd threshold factors for mode selection
-  for (i = 0; i < BLOCK_SIZES; ++i) {
-    for (j = 0; j < MAX_MODES; ++j) {
-      cpi->rd.thresh_freq_fact[i][j] = 32;
-      cpi->rd.mode_map[i][j] = j;
-    }
-  }
 
 #define BFP(BT, SDF, SDAF, VF, SVF, SVAF, SDX3F, SDX8F, SDX4DF)\
     cpi->fn_ptr[BT].sdf            = SDF; \
