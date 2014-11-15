@@ -119,6 +119,10 @@ typedef enum {
   ALT2 = 2,
   ALT3 = 3,
   ALT4 = 4,
+  ALT5 = 5,
+  ALT6 = 6,
+  ALT7 = 7,
+  ALT8 = 8,
   EXT_TX_TYPES
 } EXT_TX_TYPE;
 #endif

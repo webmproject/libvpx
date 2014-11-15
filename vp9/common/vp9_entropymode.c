@@ -293,15 +293,19 @@ static const struct tx_probs default_tx_probs = {
 #if CONFIG_EXT_TX
 const vp9_tree_index vp9_ext_tx_tree[TREE_SIZE(EXT_TX_TYPES)] = {
   -NORM, 2,
-  4, 6,
+  4, 10,
+  6, 8,
   -ALT1, -ALT2,
   -ALT3, -ALT4,
+  12, 14,
+  -ALT5, -ALT6,
+  -ALT7, -ALT8,
 };
 
 static const vp9_prob default_ext_tx_prob[3][EXT_TX_TYPES - 1] = {
-  { 224, 128, 128, 128 },
-  { 208, 128, 128, 128 },
-  { 192, 128, 128, 128 },
+  { 240, 128, 128, 128, 128, 128, 128, 128 },
+  { 208, 128, 128, 128, 128, 128, 128, 128 },
+  { 176, 128, 128, 128, 128, 128, 128, 128 },
 };
 #endif  // CONFIG_EXT_TX
 
