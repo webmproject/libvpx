@@ -66,6 +66,12 @@ struct SPEED_FEATURES;
 
 int vp9_init_search_range(int size);
 
+int vp9_refining_search_sad(const struct macroblock *x,
+                            struct mv *ref_mv,
+                            int sad_per_bit, int distance,
+                            const struct vp9_variance_vtable *fn_ptr,
+                            const struct mv *center_mv);
+
 // Runs sequence of diamond searches in smaller steps for RD
 int vp9_full_pixel_diamond(const struct VP9_COMP *cpi, MACROBLOCK *x,
                            MV *mvp_full, int step_param,
