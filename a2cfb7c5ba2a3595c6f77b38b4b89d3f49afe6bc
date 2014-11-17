@@ -36,6 +36,57 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//P5k\u003d",
+        "filename": "vp9/common/vp9_idct.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3404,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-11-17T17:59:45Z",
+      "side": 1,
+      "message": "Wouldn\u0027t the shift value change depending on the scale of the transform size?\nsizes \u003c 32x32 would be 3, 32x32 would be 2, 64x64 would be 2.",
+      "revId": "a2cfb7c5ba2a3595c6f77b38b4b89d3f49afe6bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//P5g\u003d",
+        "filename": "vp9/common/vp9_idct.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3405,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-11-17T17:59:45Z",
+      "side": 1,
+      "message": "I think the above forward transform function should be moved to encoder/vp9_dct.c",
+      "revId": "a2cfb7c5ba2a3595c6f77b38b4b89d3f49afe6bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//P5c\u003d",
+        "filename": "vp9/common/vp9_idct.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3408,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-11-17T17:59:45Z",
+      "side": 1,
+      "message": "Name the functions with vp9_ prefix.\nvp9_identity_tx(), vp9_iidentity_tx()",
+      "revId": "a2cfb7c5ba2a3595c6f77b38b4b89d3f49afe6bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//P6E\u003d",
         "filename": "vp9/common/vp9_idct.c",
         "patchSetId": 1
@@ -47,6 +98,23 @@
       "writtenOn": "2014-11-17T17:43:37Z",
       "side": 1,
       "message": "use clip_pixel() here?",
+      "revId": "a2cfb7c5ba2a3595c6f77b38b4b89d3f49afe6bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//P5Y\u003d",
+        "filename": "vp9/common/vp9_idct.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3416,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-11-17T17:59:45Z",
+      "side": 1,
+      "message": "Can you also add highbd versions of these functions? \nIf you want, you can add a TODO and do them later.",
       "revId": "a2cfb7c5ba2a3595c6f77b38b4b89d3f49afe6bc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
