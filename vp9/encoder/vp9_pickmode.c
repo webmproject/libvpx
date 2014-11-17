@@ -802,13 +802,14 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         MIN(max_txsize_lookup[bsize],
             tx_mode_to_biggest_tx_size[cpi->common.tx_mode]);
 
-    if (best_pred != NULL && reuse_inter_pred &&
-        best_pred->data == orig_dst.buf) {
-      this_mode_pred = &tmp[get_pred_buffer(tmp, 3)];
-      vp9_convolve_copy(best_pred->data, best_pred->stride,
-                        this_mode_pred->data, this_mode_pred->stride,
-                        NULL, 0, NULL, 0, bw, bh);
-      best_pred = this_mode_pred;
+    if (reuse_inter_pred && best_pred != NULL) {
+      if (best_pred->data == orig_dst.buf) {
+        this_mode_pred = &tmp[get_pred_buffer(tmp, 3)];
+        vp9_convolve_copy(best_pred->data, best_pred->stride,
+                          this_mode_pred->data, this_mode_pred->stride,
+                          NULL, 0, NULL, 0, bw, bh);
+        best_pred = this_mode_pred;
+      }
     }
     pd->dst = orig_dst;
 
@@ -844,22 +845,24 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   pd->dst = orig_dst;
-  if (reuse_inter_pred && best_pred->data != orig_dst.buf &&
-      is_inter_mode(mbmi->mode)) {
+
+  if (reuse_inter_pred && best_pred != NULL) {
+    if (best_pred->data != orig_dst.buf && is_inter_mode(mbmi->mode)) {
 #if CONFIG_VP9_HIGHBITDEPTH
-    if (cm->use_highbitdepth)
-      vp9_highbd_convolve_copy(best_pred->data, best_pred->stride,
-                               pd->dst.buf, pd->dst.stride, NULL, 0,
-                               NULL, 0, bw, bh, xd->bd);
-    else
+      if (cm->use_highbitdepth)
+        vp9_highbd_convolve_copy(best_pred->data, best_pred->stride,
+                                 pd->dst.buf, pd->dst.stride, NULL, 0,
+                                 NULL, 0, bw, bh, xd->bd);
+      else
+        vp9_convolve_copy(best_pred->data, best_pred->stride,
+                          pd->dst.buf, pd->dst.stride, NULL, 0,
+                          NULL, 0, bw, bh);
+#else
       vp9_convolve_copy(best_pred->data, best_pred->stride,
                         pd->dst.buf, pd->dst.stride, NULL, 0,
                         NULL, 0, bw, bh);
-#else
-    vp9_convolve_copy(best_pred->data, best_pred->stride,
-                      pd->dst.buf, pd->dst.stride, NULL, 0,
-                      NULL, 0, bw, bh);
 #endif
+    }
   }
 
   if (is_inter_block(mbmi))
