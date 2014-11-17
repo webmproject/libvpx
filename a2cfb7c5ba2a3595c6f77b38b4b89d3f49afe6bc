@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//P6g\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-11-17T17:43:37Z",
+      "side": 1,
+      "message": "is tx_skip really just tx_skip_y? or it is meant for both y and uv?",
+      "revId": "a2cfb7c5ba2a3595c6f77b38b4b89d3f49afe6bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//P50\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-11-17T17:43:37Z",
+      "side": 1,
+      "message": "After looking at where these two are used in the rest of the patch,  it might make more senses we use in tx_skip[planes]. So when used, we can use a single look up the needed value.",
+      "revId": "a2cfb7c5ba2a3595c6f77b38b4b89d3f49afe6bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//P6E\u003d",
+        "filename": "vp9/common/vp9_idct.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3414,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-11-17T17:43:37Z",
+      "side": 1,
+      "message": "use clip_pixel() here?",
+      "revId": "a2cfb7c5ba2a3595c6f77b38b4b89d3f49afe6bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//P5w\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 618,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-11-17T17:43:37Z",
+      "side": 1,
+      "message": "alignment is strange here.",
+      "revId": "a2cfb7c5ba2a3595c6f77b38b4b89d3f49afe6bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//P5s\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 619,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-11-17T17:43:37Z",
+      "side": 1,
+      "message": "same as above",
+      "revId": "a2cfb7c5ba2a3595c6f77b38b4b89d3f49afe6bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
