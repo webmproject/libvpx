@@ -241,6 +241,13 @@ typedef struct TileDataEnc {
   int mode_map[BLOCK_SIZES][MAX_MODES];
 } TileDataEnc;
 
+typedef struct {
+  vp9_coeff_count coef_counts[TX_SIZES][PLANE_TYPES];
+  int64_t comp_pred_diff[REFERENCE_MODES];
+  int64_t tx_select_diff[TX_MODES];
+  int64_t filter_diff[SWITCHABLE_FILTER_CONTEXTS];
+} COUNTS;
+
 typedef struct VP9_COMP {
   QUANTS quants;
   MACROBLOCK *mb;
@@ -287,6 +294,7 @@ typedef struct VP9_COMP {
   int ambient_err;
 
   RD_OPT rd;
+  COUNTS *frame_counts;
 
   CODING_CONTEXT coding_context;
 
@@ -305,7 +313,6 @@ typedef struct VP9_COMP {
   RATE_CONTROL rc;
   double framerate;
 
-  vp9_coeff_count coef_counts[TX_SIZES][PLANE_TYPES];
   int interp_filter_selected[MAX_REF_FRAMES][SWITCHABLE];
 
   struct vpx_codec_pkt_list  *output_pkt_list;

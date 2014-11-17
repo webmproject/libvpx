@@ -500,7 +500,7 @@ static void write_modes(VP9_COMP *cpi,
 static void build_tree_distribution(VP9_COMP *cpi, TX_SIZE tx_size,
                                     vp9_coeff_stats *coef_branch_ct,
                                     vp9_coeff_probs_model *coef_probs) {
-  vp9_coeff_count *coef_counts = cpi->coef_counts[tx_size];
+  vp9_coeff_count *coef_counts = cpi->frame_counts->coef_counts[tx_size];
   unsigned int (*eob_branch_ct)[REF_TYPES][COEF_BANDS][COEFF_CONTEXTS] =
       cpi->common.counts.eob_branch[tx_size];
   int i, j, k, l, m;

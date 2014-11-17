@@ -311,7 +311,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   const scan_order *so;
   const int ref = is_inter_block(mbmi);
   unsigned int (*const counts)[COEFF_CONTEXTS][ENTROPY_TOKENS] =
-      cpi->coef_counts[tx_size][type][ref];
+      cpi->frame_counts->coef_counts[tx_size][type][ref];
   vp9_prob (*const coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
       cpi->common.fc->coef_probs[tx_size][type][ref];
   unsigned int (*const eob_branch)[COEFF_CONTEXTS] =

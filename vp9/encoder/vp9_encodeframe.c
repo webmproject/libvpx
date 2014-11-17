@@ -602,7 +602,7 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
                          int output_enabled) {
   int i, x_idx, y;
   VP9_COMMON *const cm = &cpi->common;
-  RD_OPT *const rd_opt = &cpi->rd;
+  COUNTS *const counts = cpi->frame_counts;
   MACROBLOCK *const x = cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   struct macroblock_plane *const p = x->plane;
@@ -695,7 +695,7 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
 
   if (!vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
     for (i = 0; i < TX_MODES; i++)
-      rd_opt->tx_select_diff[i] += ctx->tx_rd_diff[i];
+      counts->tx_select_diff[i] += ctx->tx_rd_diff[i];
   }
 
 #if CONFIG_INTERNAL_STATS
@@ -728,12 +728,12 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
       }
     }
 
-    rd_opt->comp_pred_diff[SINGLE_REFERENCE] += ctx->single_pred_diff;
-    rd_opt->comp_pred_diff[COMPOUND_REFERENCE] += ctx->comp_pred_diff;
-    rd_opt->comp_pred_diff[REFERENCE_MODE_SELECT] += ctx->hybrid_pred_diff;
+    counts->comp_pred_diff[SINGLE_REFERENCE] += ctx->single_pred_diff;
+    counts->comp_pred_diff[COMPOUND_REFERENCE] += ctx->comp_pred_diff;
+    counts->comp_pred_diff[REFERENCE_MODE_SELECT] += ctx->hybrid_pred_diff;
 
     for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
-      rd_opt->filter_diff[i] += ctx->best_filter_diff[i];
+      counts->filter_diff[i] += ctx->best_filter_diff[i];
   }
 
   for (h = 0; h < y_mis; ++h) {
@@ -3495,15 +3495,16 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   MACROBLOCK *const x = cpi->mb;
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
+  COUNTS *const counts = cpi->frame_counts;
 
   xd->mi = cm->mi;
   xd->mi[0].src_mi = &xd->mi[0];
 
   vp9_zero(cm->counts);
-  vp9_zero(cpi->coef_counts);
-  vp9_zero(rd_opt->comp_pred_diff);
-  vp9_zero(rd_opt->filter_diff);
-  vp9_zero(rd_opt->tx_select_diff);
+  vp9_zero(counts->coef_counts);
+  vp9_zero(counts->comp_pred_diff);
+  vp9_zero(counts->filter_diff);
+  vp9_zero(counts->tx_select_diff);
   vp9_zero(rd_opt->tx_select_threshes);
 
   xd->lossless = cm->base_qindex == 0 &&
@@ -3610,6 +3611,7 @@ static INTERP_FILTER get_interp_filter(
 void vp9_encode_frame(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   RD_OPT *const rd_opt = &cpi->rd;
+  COUNTS *const counts = cpi->frame_counts;
 
   // In the longer term the encoder should be generalized to match the
   // decoder such that we allow compound where one of the 3 buffers has a
@@ -3667,13 +3669,13 @@ void vp9_encode_frame(VP9_COMP *cpi) {
     encode_frame_internal(cpi);
 
     for (i = 0; i < REFERENCE_MODES; ++i)
-      mode_thrs[i] = (mode_thrs[i] + rd_opt->comp_pred_diff[i] / cm->MBs) / 2;
+      mode_thrs[i] = (mode_thrs[i] + counts->comp_pred_diff[i] / cm->MBs) / 2;
 
     for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
-      filter_thrs[i] = (filter_thrs[i] + rd_opt->filter_diff[i] / cm->MBs) / 2;
+      filter_thrs[i] = (filter_thrs[i] + counts->filter_diff[i] / cm->MBs) / 2;
 
     for (i = 0; i < TX_MODES; ++i) {
-      int64_t pd = rd_opt->tx_select_diff[i];
+      int64_t pd = counts->tx_select_diff[i];
       if (i == TX_MODE_SELECT)
         pd -= RDCOST(cpi->mb->rdmult, cpi->mb->rddiv, 2048 * (TX_SIZES - 1), 0);
       tx_thrs[i] = (tx_thrs[i] + (int)(pd / cm->MBs)) / 2;
