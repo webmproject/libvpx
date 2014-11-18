@@ -1752,7 +1752,7 @@ int vp9_full_pixel_diamond(const VP9_COMP *cpi, MACROBLOCK *x,
   if (do_refine) {
     const int search_range = 8;
     MV best_mv = *dst_mv;
-    thissme = cpi->refining_search_sad(x, &best_mv, sadpb, search_range,
+    thissme = vp9_refining_search_sad(x, &best_mv, sadpb, search_range,
                                        fn_ptr, ref_mv);
     if (thissme < INT_MAX)
       thissme = vp9_get_mvpred_var(x, &best_mv, ref_mv, fn_ptr, 1);
@@ -1956,11 +1956,11 @@ int vp9_full_search_sadx8(const MACROBLOCK *x, const MV *ref_mv,
   return best_sad;
 }
 
-int vp9_refining_search_sad_c(const MACROBLOCK *x,
-                              MV *ref_mv, int error_per_bit,
-                              int search_range,
-                              const vp9_variance_fn_ptr_t *fn_ptr,
-                              const MV *center_mv) {
+int vp9_refining_search_sad(const MACROBLOCK *x,
+                            MV *ref_mv, int error_per_bit,
+                            int search_range,
+                            const vp9_variance_fn_ptr_t *fn_ptr,
+                            const MV *center_mv) {
   const MACROBLOCKD *const xd = &x->e_mbd;
   const MV neighbors[4] = {{ -1, 0}, {0, -1}, {0, 1}, {1, 0}};
   const struct buf_2d *const what = &x->plane[0].src;
