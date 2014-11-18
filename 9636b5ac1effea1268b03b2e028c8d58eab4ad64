@@ -34,6 +34,24 @@
       "revId": "9636b5ac1effea1268b03b2e028c8d58eab4ad64",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Pyk\u003d",
+        "filename": "test/blockiness_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-11-18T18:55:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//PzI\u003d",
+      "revId": "9636b5ac1effea1268b03b2e028c8d58eab4ad64",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
