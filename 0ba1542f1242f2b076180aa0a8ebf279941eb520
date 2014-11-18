@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Pyg\u003d",
+        "filename": "vpx/svc_context.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2014-11-18T18:55:28Z",
+      "side": 1,
+      "message": "Including interface changes with new features when they are separable is poor form.\n\nThis broke the borg regression.\n\nAlso I thought we agreed we were going to stop appending _t to struct names.",
+      "revId": "0ba1542f1242f2b076180aa0a8ebf279941eb520",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
