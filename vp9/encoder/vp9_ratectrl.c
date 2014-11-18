@@ -563,18 +563,23 @@ static int calc_active_worst_quality_one_pass_cbr(const VP9_COMP *cpi) {
   const VP9_COMMON *const cm = &cpi->common;
   const RATE_CONTROL *rc = &cpi->rc;
   // Buffer level below which we push active_worst to worst_quality.
-  int64_t critical_level = rc->optimal_buffer_level >> 2;
+  int64_t critical_level = rc->optimal_buffer_level >> 3;
   int64_t buff_lvl_step = 0;
   int adjustment = 0;
   int active_worst_quality;
+  int ambient_qp;
   if (cm->frame_type == KEY_FRAME)
-    return rc->worst_quality * 4 / 5;
-  if (cm->current_video_frame > 1)
-    active_worst_quality = MIN(rc->worst_quality,
-                               rc->avg_frame_qindex[INTER_FRAME] * 5 / 4);
-  else
-    active_worst_quality = MIN(rc->worst_quality,
-                               rc->avg_frame_qindex[KEY_FRAME] * 3 / 2);
+    return rc->worst_quality;
+  // For ambient_qp we use minimum of avg_frame_qindex[KEY_FRAME/INTER_FRAME]
+  // for the first few frames following key frame. These are both initialized
+  // to worst_quality and updated with (3/4, 1/4) average in postencode_update.
+  // So for first few frames following key, the qp of that key frame is weighted
+  // into the active_worst_quality setting.
+  ambient_qp = (cm->current_video_frame < 5) ?
+      MIN(rc->avg_frame_qindex[INTER_FRAME], rc->avg_frame_qindex[KEY_FRAME]) :
+      rc->avg_frame_qindex[INTER_FRAME];
+  active_worst_quality = MIN(rc->worst_quality,
+                             ambient_qp * 5 / 4);
   if (rc->buffer_level > rc->optimal_buffer_level) {
     // Adjust down.
     // Maximum limit for down adjustment, ~30%.
@@ -592,12 +597,11 @@ static int calc_active_worst_quality_one_pass_cbr(const VP9_COMP *cpi) {
     if (critical_level) {
       buff_lvl_step = (rc->optimal_buffer_level - critical_level);
       if (buff_lvl_step) {
-        adjustment =
-            (int)((rc->worst_quality - rc->avg_frame_qindex[INTER_FRAME]) *
-                  (rc->optimal_buffer_level - rc->buffer_level) /
-                  buff_lvl_step);
+        adjustment = (int)((rc->worst_quality - ambient_qp) *
+                           (rc->optimal_buffer_level - rc->buffer_level) /
+                           buff_lvl_step);
       }
-      active_worst_quality = rc->avg_frame_qindex[INTER_FRAME] + adjustment;
+      active_worst_quality = ambient_qp + adjustment;
     }
   } else {
     // Set to worst_quality if buffer is below critical level.
