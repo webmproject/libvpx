@@ -29,7 +29,7 @@ typedef enum SVC_LOG_LEVEL {
   SVC_LOG_DEBUG
 } SVC_LOG_LEVEL;
 
-typedef struct SvcContext {
+typedef struct {
   // public interface to svc_command options
   int spatial_layers;               // number of spatial layers
   int temporal_layers;               // number of temporal layers
@@ -39,7 +39,7 @@ typedef struct SvcContext {
 
   // private storage for vpx_svc_encode
   void *internal;
-} SvcContext_t;
+} SvcContext;
 
 #define OPTION_BUFFER_SIZE 1024
 #define COMPONENTS 4  // psnr & sse statistics maintained for total, y, u, v
@@ -79,19 +79,19 @@ typedef struct SvcInternal {
  *         scaling-factors=<n1>/<d1>,<n2>/<d2>,...
  *         quantizers=<q1>,<q2>,...
  */
-vpx_codec_err_t vpx_svc_set_options(SvcContext_t *svc_ctx, const char *options);
+vpx_codec_err_t vpx_svc_set_options(SvcContext *svc_ctx, const char *options);
 
 /**
  * initialize SVC encoding
  */
-vpx_codec_err_t vpx_svc_init(SvcContext_t *svc_ctx,
+vpx_codec_err_t vpx_svc_init(SvcContext *svc_ctx,
                              vpx_codec_ctx_t *codec_ctx,
                              vpx_codec_iface_t *iface,
                              vpx_codec_enc_cfg_t *cfg);
 /**
  * encode a frame of video with multiple layers
  */
-vpx_codec_err_t vpx_svc_encode(SvcContext_t *svc_ctx,
+vpx_codec_err_t vpx_svc_encode(SvcContext *svc_ctx,
                                vpx_codec_ctx_t *codec_ctx,
                                struct vpx_image *rawimg,
                                vpx_codec_pts_t pts,
@@ -100,17 +100,17 @@ vpx_codec_err_t vpx_svc_encode(SvcContext_t *svc_ctx,
 /**
  * finished with svc encoding, release allocated resources
  */
-void vpx_svc_release(SvcContext_t *svc_ctx);
+void vpx_svc_release(SvcContext *svc_ctx);
 
 /**
  * dump accumulated statistics and reset accumulated values
  */
-const char *vpx_svc_dump_statistics(SvcContext_t *svc_ctx);
+const char *vpx_svc_dump_statistics(SvcContext *svc_ctx);
 
 /**
  *  get status message from previous encode
  */
-const char *vpx_svc_get_message(const SvcContext_t *svc_ctx);
+const char *vpx_svc_get_message(const SvcContext *svc_ctx);
 
 #ifdef __cplusplus
 }  // extern "C"
