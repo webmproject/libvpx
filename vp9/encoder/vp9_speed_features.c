@@ -204,6 +204,7 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
   VP9_COMMON *const cm = &cpi->common;
   const int is_keyframe = cm->frame_type == KEY_FRAME;
   const int frames_since_key = is_keyframe ? 0 : cpi->rc.frames_since_key;
+  (void) content;
   sf->static_segmentation = 0;
   sf->adaptive_rd_thresh = 1;
   sf->use_fast_coef_costing = 1;
@@ -307,13 +308,6 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
   }
 
   if (speed >= 6) {
-    if (content == VP9E_CONTENT_SCREEN) {
-      int i;
-      // Allow fancy modes at all sizes since SOURCE_VAR_BASED_PARTITION is used
-      for (i = 0; i < BLOCK_SIZES; ++i)
-        sf->inter_mode_mask[i] = INTER_NEAREST_NEAR_NEW;
-    }
-
     // Adaptively switch between SOURCE_VAR_BASED_PARTITION and FIXED_PARTITION.
     sf->partition_search_type = VAR_BASED_PARTITION;
     sf->search_type_check_frequency = 50;
