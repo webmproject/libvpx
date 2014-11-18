@@ -430,7 +430,8 @@ void vp9_rc_update_rate_correction_factors(VP9_COMP *cpi, int damp_var) {
       adjustment_limit = 0.75;
       break;
     case 1:
-      adjustment_limit = 0.125 + 0.5 * MIN(1, fabs(log10(0.01 * correction_factor)));
+      adjustment_limit = 0.25 +
+          0.5 * MIN(1, fabs(log10(0.01 * correction_factor)));
       break;
     case 2:
     default:
@@ -438,12 +439,21 @@ void vp9_rc_update_rate_correction_factors(VP9_COMP *cpi, int damp_var) {
       break;
   }
 
+  cpi->rc.q_2_frame = cpi->rc.q_1_frame;
+  cpi->rc.q_1_frame = cm->base_qindex;
+  cpi->rc.rc_2_frame = cpi->rc.rc_1_frame;
+  if (correction_factor > 110)
+    cpi->rc.rc_1_frame = -1;
+  else if (correction_factor < 90)
+    cpi->rc.rc_1_frame = 1;
+  else
+    cpi->rc.rc_1_frame = 0;
+
   if (correction_factor > 102) {
     // We are not already at the worst allowable quality
     correction_factor = (int)(100 + ((correction_factor - 100) *
                                   adjustment_limit));
     rate_correction_factor = (rate_correction_factor * correction_factor) / 100;
-
     // Keep rate_correction_factor within limits
     if (rate_correction_factor > MAX_BPB_FACTOR)
       rate_correction_factor = MAX_BPB_FACTOR;
@@ -494,6 +504,14 @@ int vp9_rc_regulate_q(const VP9_COMP *cpi, int target_bits_per_frame,
     }
   } while (++i <= active_worst_quality);
 
+  // In CBR mode, this makes sure q is between oscillating Qs to prevent
+  // resonance.
+  if (cpi->oxcf.rc_mode == VPX_CBR &&
+      (cpi->rc.rc_1_frame * cpi->rc.rc_2_frame == -1) &&
+      cpi->rc.q_1_frame != cpi->rc.q_2_frame) {
+    q = clamp(q, MIN(cpi->rc.q_1_frame, cpi->rc.q_2_frame),
+              MAX(cpi->rc.q_1_frame, cpi->rc.q_2_frame));
+  }
   return q;
 }
 
