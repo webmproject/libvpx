@@ -438,11 +438,11 @@ void vp9_xform_quant_fp(MACROBLOCK *x, int plane, int block,
                       scan_order->scan, scan_order->iscan);
       break;
     case TX_8X8:
-      vp9_fdct8x8(src_diff, coeff, diff_stride);
-      vp9_quantize_fp(coeff, 64, x->skip_block, p->zbin, p->round_fp,
-                      p->quant_fp, p->quant_shift, qcoeff, dqcoeff,
-                      pd->dequant, p->zbin_extra, eob,
-                      scan_order->scan, scan_order->iscan);
+      vp9_fdct8x8_quant(src_diff, diff_stride, coeff, 64,
+                        x->skip_block, p->zbin, p->round_fp,
+                        p->quant_fp, p->quant_shift, qcoeff, dqcoeff,
+                        pd->dequant, p->zbin_extra, eob,
+                        scan_order->scan, scan_order->iscan);
       break;
     case TX_4X4:
       x->fwd_txm4x4(src_diff, coeff, diff_stride);
@@ -652,6 +652,10 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
     return;
   }
 
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (!x->skip_recode)
+    vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
+#else
   if (!x->skip_recode) {
     if (max_txsize_lookup[plane_bsize] == tx_size) {
       if (x->skip_txfm[(plane << 2) + (block >> (tx_size << 1))] == 0) {
@@ -670,9 +674,13 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
         return;
       }
     } else {
-      vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
+      if (x->quant_fp)
+        vp9_xform_quant_fp(x, plane, block, plane_bsize, tx_size);
+      else
+        vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
     }
   }
+#endif
 
   if (x->optimize && (!x->skip_recode || !x->skip_optimize)) {
     const int ctx = combine_entropy_contexts(*a, *l);
