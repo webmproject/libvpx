@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//PzI\u003d",
+        "filename": "test/blockiness_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-11-18T17:32:46Z",
+      "side": 1,
+      "message": "maybe it is personal preference, but  would the following work too with out if \u0026 else?\n\nconst int value \u003d ((h/4) ^ (w/4)) \u0026 1) * 255;\nFillConstant(data + h * stride + w, stride, value, 4, 4);",
+      "revId": "9636b5ac1effea1268b03b2e028c8d58eab4ad64",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
