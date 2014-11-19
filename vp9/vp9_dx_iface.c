@@ -290,11 +290,37 @@ static int frame_worker_hook(void *arg1, void *arg2) {
   FrameWorkerData *const frame_worker_data = (FrameWorkerData *)arg1;
   const uint8_t *data = frame_worker_data->data;
   (void)arg2;
+
   frame_worker_data->result =
       vp9_receive_compressed_data(frame_worker_data->pbi,
                                   frame_worker_data->data_size,
                                   &data);
   frame_worker_data->data_end = data;
+
+  if (frame_worker_data->pbi->frame_parallel_decode) {
+    // In frame parallel decoding, a worker thread must successfully decode all
+    // the compressed data.
+    if (frame_worker_data->result != 0 ||
+        frame_worker_data->data + frame_worker_data->data_size - 1 > data) {
+      VP9Worker *const worker = frame_worker_data->pbi->frame_worker_owner;
+      BufferPool *const pool = frame_worker_data->pbi->common.buffer_pool;
+      // Signal all the other threads that are waiting for this frame.
+      vp9_frameworker_lock_stats(worker);
+      frame_worker_data->frame_context_ready = 1;
+      lock_buffer_pool(pool);
+      frame_worker_data->pbi->cur_buf->buf.corrupted = 1;
+      unlock_buffer_pool(pool);
+      frame_worker_data->pbi->need_resync = 1;
+      vp9_frameworker_signal_stats(worker);
+      vp9_frameworker_unlock_stats(worker);
+      return 0;
+    }
+  } else if (frame_worker_data->result != 0) {
+    // Check decode result in serial decode.
+    frame_worker_data->pbi->cur_buf->buf.corrupted = 1;
+    frame_worker_data->pbi->need_resync = 1;
+  }
+
   return !frame_worker_data->result;
 }
 
@@ -444,7 +470,6 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t *ctx,
           &ctx->frame_workers[ctx->last_submit_worker_id]);
 
     frame_worker_data->pbi->ready_for_new_data = 0;
-
     // Copy the compressed data into worker's internal buffer.
     // TODO(hkuang): Will all the workers allocate the same size
     // as the size of the first intra frame be better? This will
@@ -474,6 +499,7 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t *ctx,
         (ctx->next_submit_worker_id + 1) % ctx->num_frame_workers;
 
     --ctx->available_threads;
+    worker->had_error = 0;
     winterface->launch(worker);
   }
 
@@ -714,11 +740,7 @@ static void release_last_output_frame(vpx_codec_alg_priv_t *ctx) {
   if (ctx->frame_parallel_decode && ctx->last_show_frame >= 0) {
     BufferPool *const pool = ctx->buffer_pool;
     lock_buffer_pool(pool);
-    --frame_bufs[ctx->last_show_frame].ref_count;
-    if (frame_bufs[ctx->last_show_frame].ref_count == 0) {
-      pool->release_fb_cb(pool->cb_priv,
-                          &frame_bufs[ctx->last_show_frame].raw_frame_buffer);
-    }
+    decrease_ref_count(ctx->last_show_frame, frame_bufs, pool);
     unlock_buffer_pool(pool);
   }
 }
@@ -758,8 +780,12 @@ static vpx_image_t *decoder_get_frame(vpx_codec_alg_priv_t *ctx,
       ctx->next_output_worker_id =
           (ctx->next_output_worker_id + 1) % ctx->num_frame_workers;
       // Wait for the frame from worker thread.
-      winterface->sync(worker);
-      if (vp9_get_raw_frame(frame_worker_data->pbi, &sd, &flags) == 0) {
+      if (!winterface->sync(worker)) {
+        // Decoding failed. Release the worker thread.
+        ++ctx->available_threads;
+        if (ctx->flushed != 1)
+          return img;
+      } else if (vp9_get_raw_frame(frame_worker_data->pbi, &sd, &flags) == 0) {
         VP9_COMMON *const cm = &frame_worker_data->pbi->common;
         RefCntBuffer *const frame_bufs = cm->buffer_pool->frame_bufs;
         ++ctx->available_threads;

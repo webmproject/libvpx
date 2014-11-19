@@ -648,6 +648,7 @@ static void apply_frame_size(VP9_COMMON *cm, int width, int height) {
           cm->subsampling_x, cm->subsampling_y, VP9_DEC_BORDER_IN_PIXELS,
           &pool->frame_bufs[cm->new_fb_idx].raw_frame_buffer, pool->get_fb_cb,
           pool->cb_priv)) {
+    unlock_buffer_pool(pool);
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate frame buffer");
   }
@@ -1165,6 +1166,10 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
     }
 
     setup_frame_size(cm, rb);
+    if (pbi->need_resync) {
+      vpx_memset(&cm->ref_frame_map, -1, sizeof(cm->ref_frame_map));
+      pbi->need_resync = 0;
+    }
   } else {
     cm->intra_only = cm->show_frame ? 0 : vp9_rb_read_bit(rb);
 
@@ -1176,6 +1181,10 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
 
       pbi->refresh_frame_flags = vp9_rb_read_literal(rb, REF_FRAMES);
       setup_frame_size(cm, rb);
+      if (pbi->need_resync) {
+        vpx_memset(&cm->ref_frame_map, -1, sizeof(cm->ref_frame_map));
+        pbi->need_resync = 0;
+      }
     } else {
       pbi->refresh_frame_flags = vp9_rb_read_literal(rb, REF_FRAMES);
       for (i = 0; i < REFS_PER_FRAME; ++i) {
@@ -1201,6 +1210,12 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
           vp9_extend_frame_borders(ref_buf->buf);
       }
     }
+  }
+
+  if (pbi->need_resync) {
+    vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+                       "Keyframe / intra-only frame required to reset decoder"
+                       " state");
   }
 
   if (!cm->error_resilient_mode) {
@@ -1239,6 +1254,7 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
       ++frame_bufs[cm->ref_frame_map[ref_index]].ref_count;
   }
   unlock_buffer_pool(pool);
+  pbi->hold_ref_buf = 1;
 
   if (frame_is_intra_only(cm) || cm->error_resilient_mode)
     vp9_setup_past_independence(cm);
@@ -1457,9 +1473,7 @@ void vp9_decode_frame(VP9Decoder *pbi,
     *p_data_end = decode_tiles(pbi, data + first_partition_size, data_end);
   }
 
-  new_fb->corrupted |= xd->corrupted;
-
-  if (!new_fb->corrupted) {
+  if (!xd->corrupted) {
     if (!cm->error_resilient_mode && !cm->frame_parallel_decoding_mode) {
       vp9_adapt_coef_probs(cm);
 
@@ -1470,6 +1484,9 @@ void vp9_decode_frame(VP9Decoder *pbi,
     } else {
       debug_check_frame_counts(cm);
     }
+  } else {
+    vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+                       "Decode failed. Frame data is corrupted.");
   }
 
   // Non frame parallel update frame context here.

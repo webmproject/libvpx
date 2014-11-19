@@ -58,6 +58,7 @@ VP9Decoder *vp9_decoder_create(BufferPool *const pool) {
   }
 
   cm->error.setjmp = 1;
+  pbi->need_resync = 1;
   initialize_dec();
 
   vp9_rtcd();
@@ -197,16 +198,6 @@ int vp9_get_reference_dec(VP9Decoder *pbi, int index, YV12_BUFFER_CONFIG **fb) {
   return 0;
 }
 
-static INLINE void decrease_ref_count(int idx, RefCntBuffer *const frame_bufs,
-                                      BufferPool *const pool) {
-  if (idx >= 0) {
-    --frame_bufs[idx].ref_count;
-    if (frame_bufs[idx].ref_count == 0) {
-      pool->release_fb_cb(pool->cb_priv, &frame_bufs[idx].raw_frame_buffer);
-    }
-  }
-}
-
 /* If any buffer updating is signaled it should be done here. */
 static void swap_frame_buffers(VP9Decoder *pbi) {
   int ref_index = 0, mask;
@@ -235,7 +226,7 @@ static void swap_frame_buffers(VP9Decoder *pbi) {
     cm->ref_frame_map[ref_index] = cm->next_ref_frame_map[ref_index];
   }
   unlock_buffer_pool(pool);
-
+  pbi->hold_ref_buf = 0;
   cm->frame_to_show = get_frame_new_buffer(cm);
 
   if (!pbi->frame_parallel_decode || !cm->show_frame) {
@@ -256,7 +247,6 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
   RefCntBuffer *const frame_bufs = cm->buffer_pool->frame_bufs;
   const uint8_t *source = *psource;
   int retcode = 0;
-
   cm->error.error_code = VPX_CODEC_OK;
 
   if (size == 0) {
@@ -282,7 +272,7 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
                         &frame_bufs[cm->new_fb_idx].raw_frame_buffer);
   cm->new_fb_idx = get_free_fb(cm);
 
-
+  pbi->hold_ref_buf = 0;
   if (pbi->frame_parallel_decode) {
     VP9Worker *const worker = pbi->frame_worker_owner;
     vp9_frameworker_lock_stats(worker);
@@ -300,18 +290,35 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
     cm->error.setjmp = 0;
     pbi->ready_for_new_data = 1;
 
-    // We do not know if the missing frame(s) was supposed to update
-    // any of the reference buffers, but we act conservative and
-    // mark only the last buffer as corrupted.
-    //
-    // TODO(jkoleszar): Error concealment is undefined and non-normative
-    // at this point, but if it becomes so, [0] may not always be the correct
-    // thing to do here.
-    if (cm->frame_refs[0].idx != INT_MAX && cm->frame_refs[0].buf != NULL)
-      cm->frame_refs[0].buf->corrupted = 1;
+    lock_buffer_pool(pool);
+    // Release all the reference buffers if worker thread is holding them.
+    if (pbi->hold_ref_buf == 1) {
+      int ref_index = 0, mask;
+      VP9_COMMON *const cm = &pbi->common;
+      BufferPool *const pool = cm->buffer_pool;
+      RefCntBuffer *const frame_bufs = cm->buffer_pool->frame_bufs;
+      for (mask = pbi->refresh_frame_flags; mask; mask >>= 1) {
+        const int old_idx = cm->ref_frame_map[ref_index];
+        // Current thread releases the holding of reference frame.
+        decrease_ref_count(old_idx, frame_bufs, pool);
 
-    if (frame_bufs[cm->new_fb_idx].ref_count > 0)
-      --frame_bufs[cm->new_fb_idx].ref_count;
+        // Release the reference frame in reference map.
+        if ((mask & 1) && old_idx >= 0) {
+          decrease_ref_count(old_idx, frame_bufs, pool);
+        }
+        ++ref_index;
+      }
+
+      // Current thread releases the holding of reference frame.
+      for (; ref_index < REF_FRAMES && !cm->show_existing_frame; ++ref_index) {
+        const int old_idx = cm->ref_frame_map[ref_index];
+        decrease_ref_count(old_idx, frame_bufs, pool);
+      }
+      pbi->hold_ref_buf = 0;
+    }
+    // Release current frame.
+    decrease_ref_count(cm->new_fb_idx, frame_bufs, pool);
+    unlock_buffer_pool(pool);
 
     return -1;
   }

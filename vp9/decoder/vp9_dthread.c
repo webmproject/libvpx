@@ -320,7 +320,7 @@ void vp9_frameworker_wait(VP9Worker *const worker, RefCntBuffer *const ref_buf,
 
   // Enabling the following line of code will get harmless tsan error but
   // will get best performance.
-  // if (ref_buf->row >= row) return;
+  // if (ref_buf->row >= row && ref_buf->buf.corrupted != 1) return;
 
   {
     // Find the worker thread that owns the reference frame. If the reference
@@ -340,9 +340,18 @@ void vp9_frameworker_wait(VP9Worker *const worker, RefCntBuffer *const ref_buf,
 #endif
 
     vp9_frameworker_lock_stats(ref_worker);
-    while (ref_buf->row < row && pbi->cur_buf == ref_buf) {
+    while (ref_buf->row < row && pbi->cur_buf == ref_buf &&
+           ref_buf->buf.corrupted != 1) {
       pthread_cond_wait(&ref_worker_data->stats_cond,
                         &ref_worker_data->stats_mutex);
+    }
+
+    if (ref_buf->buf.corrupted == 1) {
+      FrameWorkerData *const worker_data = (FrameWorkerData *)worker->data1;
+      vp9_frameworker_unlock_stats(ref_worker);
+      vpx_internal_error(&worker_data->pbi->common.error,
+                         VPX_CODEC_CORRUPT_FRAME,
+                         "Worker %p failed to decode frame", worker);
     }
     vp9_frameworker_unlock_stats(ref_worker);
   }
@@ -358,8 +367,11 @@ void vp9_frameworker_broadcast(RefCntBuffer *const buf, int row) {
   VP9Worker *worker = buf->frame_worker_owner;
 
 #ifdef DEBUG_THREAD
-  printf("%d %p worker decode to (%d) \r\n", worker_data->worker_id,
-         buf->frame_worker_owner, row);
+  {
+    FrameWorkerData *const worker_data = (FrameWorkerData *)worker->data1;
+    printf("%d %p worker decode to (%d) \r\n", worker_data->worker_id,
+           buf->frame_worker_owner, row);
+  }
 #endif
 
   vp9_frameworker_lock_stats(worker);
@@ -403,7 +415,7 @@ void vp9_frameworker_copy_context(VP9Worker *const dst_worker,
     dst_cm->prev_mi_grid_visible = src_cm->mi_grid_visible;
     dst_cm->last_frame_seg_map = src_cm->current_frame_seg_map;
   }
-
+  dst_worker_data->pbi->need_resync = src_worker_data->pbi->need_resync;
   vp9_frameworker_unlock_stats(src_worker);
 
   dst_worker_data->pbi->prev_buf =

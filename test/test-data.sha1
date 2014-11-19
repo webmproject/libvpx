@@ -4,8 +4,8 @@ fe346136b9b8c1e6f6084cc106485706915795e4  invalid-vp90-01.webm
 25751f5d3b05ff03f0719ad42cd625348eb8961e  invalid-vp90-01.webm.res
 d78e2fceba5ac942246503ec8366f879c4775ca5  invalid-vp90-02.webm
 2dadee5306245fa5eeb0f99652d0e17afbcba96d  invalid-vp90-02.webm.res
-df1a1453feb3c00d7d89746c7003b4163523bff3  invalid-vp90-03.webm
-8fe6fd82bf537340f586f97a7ae31fb37ccda302  invalid-vp90-03.webm.res
+df1a1453feb3c00d7d89746c7003b4163523bff3  invalid-vp90-03-v3.webm
+4935c62becc68c13642a03db1e6d3e2331c1c612  invalid-vp90-03-v3.webm.res
 a432f96ff0a787268e2f94a8092ab161a18d1b06  park_joy_90p_10_420.y4m
 0b194cc312c3a2e84d156a221b0a5eb615dfddc5  park_joy_90p_10_422.y4m
 ff0e0a21dc2adc95b8c1b37902713700655ced17  park_joy_90p_10_444.y4m
@@ -667,3 +667,6 @@ f97088c7359fc8d3d5aa5eafe57bc7308b3ee124  vp90-2-20-big_superframe-01.webm
 7c0ed8d04c4d06c5411dd2e5de2411d37f092db5  vp90-2-20-big_superframe-02.webm.md5
 667ec8718c982aef6be07eb94f083c2efb9d2d16  vp90-2-07-frame_parallel-1.webm
 bfc82bf848e9c05020d61e3ffc1e62f25df81d19  vp90-2-07-frame_parallel-1.webm.md5
+efd5a51d175cfdacd169ed23477729dc558030dc  invalid-vp90-2-07-frame_parallel-1.webm
+9f912712ec418be69adb910e2ca886a63c4cec08  invalid-vp90-2-07-frame_parallel-2.webm
+445f5a53ca9555341852997ccdd480a51540bd14  invalid-vp90-2-07-frame_parallel-3.webm

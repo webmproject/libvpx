@@ -65,6 +65,8 @@ typedef struct VP9Decoder {
 
   int max_threads;
   int inv_tile_order;
+  int need_resync;  // wait for key/intra-only frame.
+  int hold_ref_buf;  // hold the reference buffer.
 } VP9Decoder;
 
 int vp9_receive_compressed_data(struct VP9Decoder *pbi,
@@ -87,6 +89,21 @@ int vp9_get_reference_dec(struct VP9Decoder *pbi,
 struct VP9Decoder *vp9_decoder_create(BufferPool *const pool);
 
 void vp9_decoder_remove(struct VP9Decoder *pbi);
+
+static INLINE void decrease_ref_count(int idx, RefCntBuffer *const frame_bufs,
+                                      BufferPool *const pool) {
+  if (idx >= 0) {
+    --frame_bufs[idx].ref_count;
+    // A worker may only get a free framebuffer index when calling get_free_fb.
+    // But the private buffer is not set up until finish decoding header.
+    // So any error happens during decoding header, the frame_bufs will not
+    // have valid priv buffer.
+    if (frame_bufs[idx].ref_count == 0 &&
+        frame_bufs[idx].raw_frame_buffer.priv) {
+      pool->release_fb_cb(pool->cb_priv, &frame_bufs[idx].raw_frame_buffer);
+    }
+  }
+}
 
 #ifdef __cplusplus
 }  // extern "C"

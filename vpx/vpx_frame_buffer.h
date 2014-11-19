@@ -26,7 +26,7 @@ extern "C" {
  *  Each thread will use one work buffer.
  * TODO(hkuang): Add support to set number of worker threads dynamically.
  */
-#define VPX_MAXIMUM_WORK_BUFFERS 4
+#define VPX_MAXIMUM_WORK_BUFFERS 8
 
 /*!\brief The maximum number of reference buffers that a VP9 encoder may use.
  */
