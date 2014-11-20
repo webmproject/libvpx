@@ -132,8 +132,13 @@ double vp9_log_block_var(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bs) {
   return log(var + 1.0);
 }
 
+#define DEFAULT_E_MIDPOINT 10.0;
 int vp9_block_energy(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bs) {
   double energy;
-  energy = 0.9 * (vp9_log_block_var(cpi, x, bs) - 10.0);
+  double energy_midpoint;
+  vp9_clear_system_state();
+  energy_midpoint =
+    (cpi->oxcf.pass == 2) ? cpi->twopass.mb_av_energy : DEFAULT_E_MIDPOINT;
+  energy = vp9_log_block_var(cpi, x, bs) - energy_midpoint;
   return clamp((int)round(energy), ENERGY_MIN, ENERGY_MAX);
 }

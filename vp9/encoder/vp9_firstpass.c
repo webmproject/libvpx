@@ -2457,6 +2457,15 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
 
   rc->base_frame_target = target_rate;
 
+  {
+    const int num_mbs = (cpi->oxcf.resize_mode != RESIZE_NONE)
+                        ? cpi->initial_mbs : cpi->common.MBs;
+    // The multiplication by 256 reverses a scaling factor of (>> 8)
+    // applied when combining MB error values for the frame.
+    twopass->mb_av_energy =
+      log(((this_frame.intra_error * 256.0) / num_mbs) + 1.0);
+  }
+
   // Update the total stats remaining structure.
   subtract_stats(&twopass->total_left_stats, &this_frame);
 }

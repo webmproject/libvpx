@@ -96,6 +96,7 @@ typedef struct {
   double modified_error_min;
   double modified_error_max;
   double modified_error_left;
+  double mb_av_energy;
 
 #if CONFIG_FP_MB_STATS
   uint8_t *frame_mb_stats_buf;
