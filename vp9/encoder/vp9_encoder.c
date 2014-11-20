@@ -103,7 +103,7 @@ static INLINE void Scale2Ratio(VPX_SCALING mode, int *hr, int *hs) {
 }
 
 void vp9_set_high_precision_mv(VP9_COMP *cpi, int allow_high_precision_mv) {
-  MACROBLOCK *const mb = cpi->mb;
+  MACROBLOCK *const mb = &cpi->mb;
   cpi->common.allow_high_precision_mv = allow_high_precision_mv;
   if (cpi->common.allow_high_precision_mv) {
     mb->mvcost = mb->nmvcost_hp;
@@ -255,9 +255,6 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
 
   vp9_free_pc_tree(cpi);
 
-  vpx_free(cpi->mb);
-  cpi->mb = NULL;
-
   for (i = 0; i < cpi->svc.number_spatial_layers; ++i) {
     LAYER_CONTEXT *const lc = &cpi->svc.layer_context[i];
     vpx_free(lc->rc_twopass_stats_in.buf);
@@ -288,7 +285,7 @@ static void save_coding_context(VP9_COMP *cpi) {
   // restored with a call to vp9_restore_coding_context. These functions are
   // intended for use in a re-code loop in vp9_compress_frame where the
   // quantizer value is adjusted between loop iterations.
-  vp9_copy(cc->nmvjointcost,  cpi->mb->nmvjointcost);
+  vp9_copy(cc->nmvjointcost,  cpi->mb.nmvjointcost);
 
   vpx_memcpy(cc->nmvcosts[0], cpi->nmvcosts[0],
              MV_VALS * sizeof(*cpi->nmvcosts[0]));
@@ -316,7 +313,7 @@ static void restore_coding_context(VP9_COMP *cpi) {
 
   // Restore key state variables to the snapshot state stored in the
   // previous call to vp9_save_coding_context.
-  vp9_copy(cpi->mb->nmvjointcost, cc->nmvjointcost);
+  vp9_copy(cpi->mb.nmvjointcost, cc->nmvjointcost);
 
   vpx_memcpy(cpi->nmvcosts[0], cc->nmvcosts[0],
              MV_VALS * sizeof(*cc->nmvcosts[0]));
@@ -549,9 +546,6 @@ void vp9_alloc_compressor_data(VP9_COMP *cpi) {
 
   vp9_alloc_context_buffers(cm, cm->width, cm->height);
 
-  vpx_free(cpi->mb);
-  CHECK_MEM_ERROR(cm, cpi->mb, vpx_calloc(1, sizeof(*cpi->mb)));
-
   vpx_free(cpi->tok);
 
   {
@@ -559,12 +553,12 @@ void vp9_alloc_compressor_data(VP9_COMP *cpi) {
     CHECK_MEM_ERROR(cm, cpi->tok, vpx_calloc(tokens, sizeof(*cpi->tok)));
   }
 
-  vp9_setup_pc_tree(cm, cpi);
+  vp9_setup_pc_tree(&cpi->common, cpi);
 }
 
 static void update_frame_size(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
-  MACROBLOCKD *const xd = &cpi->mb->e_mbd;
+  MACROBLOCKD *const xd = &cpi->mb.e_mbd;
 
   vp9_set_mb_mi(cm, cm->width, cm->height);
   vp9_init_context_buffers(cm);
@@ -1278,7 +1272,7 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
 
   cpi->oxcf = *oxcf;
 #if CONFIG_VP9_HIGHBITDEPTH
-  cpi->mb->e_mbd.bd = (int)cm->bit_depth;
+  cpi->mb.e_mbd.bd = (int)cm->bit_depth;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
   rc->baseline_gf_interval = DEFAULT_GF_INTERVAL;
@@ -1543,18 +1537,18 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
 
   cpi->first_time_stamp_ever = INT64_MAX;
 
-  cal_nmvjointsadcost(cpi->mb->nmvjointsadcost);
-  cpi->mb->nmvcost[0] = &cpi->nmvcosts[0][MV_MAX];
-  cpi->mb->nmvcost[1] = &cpi->nmvcosts[1][MV_MAX];
-  cpi->mb->nmvsadcost[0] = &cpi->nmvsadcosts[0][MV_MAX];
-  cpi->mb->nmvsadcost[1] = &cpi->nmvsadcosts[1][MV_MAX];
-  cal_nmvsadcosts(cpi->mb->nmvsadcost);
+  cal_nmvjointsadcost(cpi->mb.nmvjointsadcost);
+  cpi->mb.nmvcost[0] = &cpi->nmvcosts[0][MV_MAX];
+  cpi->mb.nmvcost[1] = &cpi->nmvcosts[1][MV_MAX];
+  cpi->mb.nmvsadcost[0] = &cpi->nmvsadcosts[0][MV_MAX];
+  cpi->mb.nmvsadcost[1] = &cpi->nmvsadcosts[1][MV_MAX];
+  cal_nmvsadcosts(cpi->mb.nmvsadcost);
 
-  cpi->mb->nmvcost_hp[0] = &cpi->nmvcosts_hp[0][MV_MAX];
-  cpi->mb->nmvcost_hp[1] = &cpi->nmvcosts_hp[1][MV_MAX];
-  cpi->mb->nmvsadcost_hp[0] = &cpi->nmvsadcosts_hp[0][MV_MAX];
-  cpi->mb->nmvsadcost_hp[1] = &cpi->nmvsadcosts_hp[1][MV_MAX];
-  cal_nmvsadcosts_hp(cpi->mb->nmvsadcost_hp);
+  cpi->mb.nmvcost_hp[0] = &cpi->nmvcosts_hp[0][MV_MAX];
+  cpi->mb.nmvcost_hp[1] = &cpi->nmvcosts_hp[1][MV_MAX];
+  cpi->mb.nmvsadcost_hp[0] = &cpi->nmvsadcosts_hp[0][MV_MAX];
+  cpi->mb.nmvsadcost_hp[1] = &cpi->nmvsadcosts_hp[1][MV_MAX];
+  cal_nmvsadcosts_hp(cpi->mb.nmvsadcost_hp);
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
 #ifdef OUTPUT_YUV_DENOISED
@@ -2045,7 +2039,7 @@ static void generate_psnr_packet(VP9_COMP *cpi) {
   PSNR_STATS psnr;
 #if CONFIG_VP9_HIGHBITDEPTH
   calc_highbd_psnr(cpi->Source, cpi->common.frame_to_show, &psnr,
-                   cpi->mb->e_mbd.bd, cpi->oxcf.input_bit_depth);
+                   cpi->mb.e_mbd.bd, cpi->oxcf.input_bit_depth);
 #else
   calc_psnr(cpi->Source, cpi->common.frame_to_show, &psnr);
 #endif
@@ -2426,7 +2420,7 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
 }
 
 static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
-  MACROBLOCKD *xd = &cpi->mb->e_mbd;
+  MACROBLOCKD *xd = &cpi->mb.e_mbd;
   struct loopfilter *lf = &cm->lf;
   if (xd->lossless) {
       lf->filter_level = 0;
@@ -2691,7 +2685,7 @@ void set_frame_size(VP9_COMP *cpi) {
   int ref_frame;
   VP9_COMMON *const cm = &cpi->common;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
-  MACROBLOCKD *const xd = &cpi->mb->e_mbd;
+  MACROBLOCKD *const xd = &cpi->mb.e_mbd;
 
   if (oxcf->pass == 2 &&
       cm->current_video_frame == 0 &&
@@ -3738,15 +3732,15 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     const int lossless = is_lossless_requested(oxcf);
 #if CONFIG_VP9_HIGHBITDEPTH
     if (cpi->oxcf.use_highbitdepth)
-      cpi->mb->fwd_txm4x4 = lossless ? vp9_highbd_fwht4x4 : vp9_highbd_fdct4x4;
+      cpi->mb.fwd_txm4x4 = lossless ? vp9_highbd_fwht4x4 : vp9_highbd_fdct4x4;
     else
-      cpi->mb->fwd_txm4x4 = lossless ? vp9_fwht4x4 : vp9_fdct4x4;
-    cpi->mb->highbd_itxm_add = lossless ? vp9_highbd_iwht4x4_add :
+      cpi->mb.fwd_txm4x4 = lossless ? vp9_fwht4x4 : vp9_fdct4x4;
+    cpi->mb.highbd_itxm_add = lossless ? vp9_highbd_iwht4x4_add :
                                          vp9_highbd_idct4x4_add;
 #else
-    cpi->mb->fwd_txm4x4 = lossless ? vp9_fwht4x4 : vp9_fdct4x4;
+    cpi->mb.fwd_txm4x4 = lossless ? vp9_fwht4x4 : vp9_fdct4x4;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-    cpi->mb->itxm_add = lossless ? vp9_iwht4x4_add : vp9_idct4x4_add;
+    cpi->mb.itxm_add = lossless ? vp9_iwht4x4_add : vp9_idct4x4_add;
     vp9_first_pass(cpi, source);
   } else if (oxcf->pass == 2 &&
       (!cpi->use_svc || is_two_pass_svc(cpi))) {
@@ -3799,7 +3793,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
         YV12_BUFFER_CONFIG *pp = &cm->post_proc_buffer;
         PSNR_STATS psnr;
 #if CONFIG_VP9_HIGHBITDEPTH
-        calc_highbd_psnr(orig, recon, &psnr, cpi->mb->e_mbd.bd,
+        calc_highbd_psnr(orig, recon, &psnr, cpi->mb.e_mbd.bd,
                          cpi->oxcf.input_bit_depth);
 #else
         calc_psnr(orig, recon, &psnr);
@@ -3824,7 +3818,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
           vp9_clear_system_state();
 
 #if CONFIG_VP9_HIGHBITDEPTH
-          calc_highbd_psnr(orig, pp, &psnr, cpi->mb->e_mbd.bd,
+          calc_highbd_psnr(orig, pp, &psnr, cpi->mb.e_mbd.bd,
                            cpi->oxcf.input_bit_depth);
 #else
           calc_psnr(orig, pp, &psnr2);

@@ -252,7 +252,7 @@ static void set_entropy_context_b(int plane, int block, BLOCK_SIZE plane_bsize,
                                   TX_SIZE tx_size, void *arg) {
   struct tokenize_b_args* const args = arg;
   MACROBLOCKD *const xd = args->xd;
-  struct macroblock_plane *p = &args->cpi->mb->plane[plane];
+  struct macroblock_plane *p = &args->cpi->mb.plane[plane];
   struct macroblockd_plane *pd = &xd->plane[plane];
   int aoff, loff;
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &aoff, &loff);
@@ -297,7 +297,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   MACROBLOCKD *xd = args->xd;
   TOKENEXTRA **tp = args->tp;
   uint8_t token_cache[32 * 32];
-  struct macroblock_plane *p = &cpi->mb->plane[plane];
+  struct macroblock_plane *p = &cpi->mb.plane[plane];
   struct macroblockd_plane *pd = &xd->plane[plane];
   MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
   int pt; /* near block/prev token context index */
@@ -424,7 +424,7 @@ int vp9_has_high_freq_in_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
 void vp9_tokenize_sb(VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,
                      BLOCK_SIZE bsize) {
   VP9_COMMON *const cm = &cpi->common;
-  MACROBLOCKD *const xd = &cpi->mb->e_mbd;
+  MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0].src_mi->mbmi;
   TOKENEXTRA *t_backup = *t;
   const int ctx = vp9_get_skip_context(xd);

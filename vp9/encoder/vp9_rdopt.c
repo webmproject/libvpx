@@ -1225,7 +1225,7 @@ static void choose_intra_uv_mode(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
                                  int *rate_uv, int *rate_uv_tokenonly,
                                  int64_t *dist_uv, int *skip_uv,
                                  PREDICTION_MODE *mode_uv) {
-  MACROBLOCK *const x = cpi->mb;
+  MACROBLOCK *const x = &cpi->mb;
 
   // Use an estimated rd for uv_intra based on DC_PRED if the
   // appropriate speed flag is set.

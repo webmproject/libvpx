@@ -238,7 +238,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
                                 vp9_writer *w) {
   VP9_COMMON *const cm = &cpi->common;
   const nmv_context *nmvc = &cm->fc->nmvc;
-  const MACROBLOCK *const x = cpi->mb;
+  const MACROBLOCK *const x = &cpi->mb;
   const MACROBLOCKD *const xd = &x->e_mbd;
   const struct segmentation *const seg = &cm->seg;
   const MB_MODE_INFO *const mbmi = &mi->mbmi;
@@ -382,7 +382,7 @@ static void write_modes_b(VP9_COMP *cpi, const TileInfo *const tile,
                           const TOKENEXTRA *const tok_end,
                           int mi_row, int mi_col) {
   const VP9_COMMON *const cm = &cpi->common;
-  MACROBLOCKD *const xd = &cpi->mb->e_mbd;
+  MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   MODE_INFO *m;
 
   xd->mi = cm->mi + (mi_row * cm->mi_stride + mi_col);
@@ -429,7 +429,7 @@ static void write_modes_sb(VP9_COMP *cpi,
                            TOKENEXTRA **tok, const TOKENEXTRA *const tok_end,
                            int mi_row, int mi_col, BLOCK_SIZE bsize) {
   const VP9_COMMON *const cm = &cpi->common;
-  MACROBLOCKD *const xd = &cpi->mb->e_mbd;
+  MACROBLOCKD *const xd = &cpi->mb.e_mbd;
 
   const int bsl = b_width_log2_lookup[bsize];
   const int bs = (1 << bsl) / 4;
@@ -489,7 +489,7 @@ static void write_modes(VP9_COMP *cpi,
 
   for (mi_row = tile->mi_row_start; mi_row < tile->mi_row_end;
        mi_row += MI_BLOCK_SIZE) {
-    vp9_zero(cpi->mb->e_mbd.left_seg_context);
+    vp9_zero(cpi->mb.e_mbd.left_seg_context);
     for (mi_col = tile->mi_col_start; mi_col < tile->mi_col_end;
          mi_col += MI_BLOCK_SIZE)
       write_modes_sb(cpi, tile, w, tok, tok_end, mi_row, mi_col,
@@ -1150,14 +1150,14 @@ static void write_uncompressed_header(VP9_COMP *cpi,
 
   encode_loopfilter(&cm->lf, wb);
   encode_quantization(cm, wb);
-  encode_segmentation(cm, &cpi->mb->e_mbd, wb);
+  encode_segmentation(cm, &cpi->mb.e_mbd, wb);
 
   write_tile_info(cm, wb);
 }
 
 static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
   VP9_COMMON *const cm = &cpi->common;
-  MACROBLOCKD *const xd = &cpi->mb->e_mbd;
+  MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   FRAME_CONTEXT *const fc = cm->fc;
   vp9_writer header_bc;
 
