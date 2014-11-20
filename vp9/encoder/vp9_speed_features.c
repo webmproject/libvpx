@@ -294,7 +294,7 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
         (frames_since_key % (sf->last_partitioning_redo_frequency << 1) == 1);
     sf->max_delta_qindex = is_keyframe ? 20 : 15;
     sf->partition_search_type = REFERENCE_PARTITION;
-    sf->use_nonrd_pick_mode = 1;
+    sf->use_nonrd_pick_mode = !is_keyframe;
     sf->allow_skip_recode = 0;
     sf->inter_mode_mask[BLOCK_32X32] = INTER_NEAREST_NEW_ZERO;
     sf->inter_mode_mask[BLOCK_32X64] = INTER_NEAREST_NEW_ZERO;
@@ -319,6 +319,9 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
   if (speed >= 6) {
     // Adaptively switch between SOURCE_VAR_BASED_PARTITION and FIXED_PARTITION.
     sf->partition_search_type = VAR_BASED_PARTITION;
+
+    // Turn on this to use non-RD key frame coding mode.
+    // sf->use_nonrd_pick_mode = 1;
     sf->search_type_check_frequency = 50;
     sf->mv.search_method = NSTEP;
     sf->tx_size_search_method = is_keyframe ? USE_LARGESTALL : USE_TX_8X8;
