@@ -234,7 +234,7 @@ class SADTestBase : public ::testing::Test {
 #else
         const int tmp = second_pred[h * width_ + w] +
             reference[h * reference_stride_ + w];
-        const uint8_t comp_pred = ROUND_POWER_OF_TWO(tmp, 1);
+        const uint8_t comp_pred = (tmp + 1) >> 1;
         sad += abs(source[h * source_stride_ + w] - comp_pred);
 #endif
       }
