@@ -450,7 +450,7 @@ static void set_first_pass_params(VP9_COMP *cpi) {
 
 void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
   int mb_row, mb_col;
-  MACROBLOCK *const x = cpi->mb;
+  MACROBLOCK *const x = &cpi->mb;
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
   TileInfo tile;

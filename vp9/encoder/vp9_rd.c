@@ -208,23 +208,23 @@ void vp9_initialize_me_consts(VP9_COMP *cpi, int qindex) {
 #if CONFIG_VP9_HIGHBITDEPTH
   switch (cpi->common.bit_depth) {
     case VPX_BITS_8:
-      cpi->mb->sadperbit16 = sad_per_bit16lut_8[qindex];
-      cpi->mb->sadperbit4 = sad_per_bit4lut_8[qindex];
+      cpi->mb.sadperbit16 = sad_per_bit16lut_8[qindex];
+      cpi->mb.sadperbit4 = sad_per_bit4lut_8[qindex];
       break;
     case VPX_BITS_10:
-      cpi->mb->sadperbit16 = sad_per_bit16lut_10[qindex];
-      cpi->mb->sadperbit4 = sad_per_bit4lut_10[qindex];
+      cpi->mb.sadperbit16 = sad_per_bit16lut_10[qindex];
+      cpi->mb.sadperbit4 = sad_per_bit4lut_10[qindex];
       break;
     case VPX_BITS_12:
-      cpi->mb->sadperbit16 = sad_per_bit16lut_12[qindex];
-      cpi->mb->sadperbit4 = sad_per_bit4lut_12[qindex];
+      cpi->mb.sadperbit16 = sad_per_bit16lut_12[qindex];
+      cpi->mb.sadperbit4 = sad_per_bit4lut_12[qindex];
       break;
     default:
       assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10 or VPX_BITS_12");
   }
 #else
-  cpi->mb->sadperbit16 = sad_per_bit16lut_8[qindex];
-  cpi->mb->sadperbit4 = sad_per_bit4lut_8[qindex];
+  cpi->mb.sadperbit16 = sad_per_bit16lut_8[qindex];
+  cpi->mb.sadperbit4 = sad_per_bit4lut_8[qindex];
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 }
 
@@ -262,7 +262,7 @@ static void set_block_thresholds(const VP9_COMMON *cm, RD_OPT *rd) {
 
 void vp9_initialize_rd_consts(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
-  MACROBLOCK *const x = cpi->mb;
+  MACROBLOCK *const x = &cpi->mb;
   RD_OPT *const rd = &cpi->rd;
   int i;
 
@@ -525,7 +525,7 @@ const YV12_BUFFER_CONFIG *vp9_get_scaled_ref_frame(const VP9_COMP *cpi,
 }
 
 int vp9_get_switchable_rate(const VP9_COMP *cpi) {
-  const MACROBLOCKD *const xd = &cpi->mb->e_mbd;
+  const MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   const MB_MODE_INFO *const mbmi = &xd->mi[0].src_mi->mbmi;
   const int ctx = vp9_get_pred_context_switchable_interp(xd);
   return SWITCHABLE_INTERP_RATE_FACTOR *

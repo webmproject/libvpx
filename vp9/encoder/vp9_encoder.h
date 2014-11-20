@@ -250,7 +250,7 @@ typedef struct {
 
 typedef struct VP9_COMP {
   QUANTS quants;
-  MACROBLOCK *mb;
+  MACROBLOCK mb;
   VP9_COMMON common;
   VP9EncoderConfig oxcf;
   struct lookahead_ctx    *lookahead;

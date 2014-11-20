@@ -480,7 +480,7 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
     cpi->find_fractional_mv_step = vp9_find_best_sub_pixel_tree_pruned_evenmore;
   }
 
-  cpi->mb->optimize = sf->optimize_coefficients == 1 && oxcf->pass != 1;
+  cpi->mb.optimize = sf->optimize_coefficients == 1 && oxcf->pass != 1;
 
   if (!cpi->oxcf.frame_periodic_boost) {
     sf->max_delta_qindex = 0;

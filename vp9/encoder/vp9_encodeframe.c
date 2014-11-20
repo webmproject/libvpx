@@ -157,7 +157,7 @@ static unsigned int get_sby_perpixel_diff_variance(VP9_COMP *cpi,
 static BLOCK_SIZE get_rd_var_based_fixed_partition(VP9_COMP *cpi,
                                                    int mi_row,
                                                    int mi_col) {
-  unsigned int var = get_sby_perpixel_diff_variance(cpi, &cpi->mb->plane[0].src,
+  unsigned int var = get_sby_perpixel_diff_variance(cpi, &cpi->mb.plane[0].src,
                                                     mi_row, mi_col,
                                                     BLOCK_64X64);
   if (var < 8)
@@ -173,7 +173,7 @@ static BLOCK_SIZE get_rd_var_based_fixed_partition(VP9_COMP *cpi,
 static BLOCK_SIZE get_nonrd_var_based_fixed_partition(VP9_COMP *cpi,
                                                       int mi_row,
                                                       int mi_col) {
-  unsigned int var = get_sby_perpixel_diff_variance(cpi, &cpi->mb->plane[0].src,
+  unsigned int var = get_sby_perpixel_diff_variance(cpi, &cpi->mb.plane[0].src,
                                                     mi_row, mi_col,
                                                     BLOCK_64X64);
   if (var < 4)
@@ -197,7 +197,7 @@ static INLINE void set_modeinfo_offsets(VP9_COMMON *const cm,
 
 static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
                         int mi_row, int mi_col, BLOCK_SIZE bsize) {
-  MACROBLOCK *const x = cpi->mb;
+  MACROBLOCK *const x = &cpi->mb;
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *mbmi;
@@ -266,7 +266,7 @@ static void set_block_size(VP9_COMP * const cpi,
                            int mi_row, int mi_col,
                            BLOCK_SIZE bsize) {
   if (cpi->common.mi_cols > mi_col && cpi->common.mi_rows > mi_row) {
-    MACROBLOCKD *const xd = &cpi->mb->e_mbd;
+    MACROBLOCKD *const xd = &cpi->mb.e_mbd;
     set_modeinfo_offsets(&cpi->common, xd, mi_row, mi_col);
     xd->mi[0].src_mi->mbmi.sb_type = bsize;
     duplicate_mode_info_in_sb(&cpi->common, xd, mi_row, mi_col, bsize);
@@ -457,8 +457,8 @@ static void choose_partitioning(VP9_COMP *cpi,
                                 const TileInfo *const tile,
                                 int mi_row, int mi_col) {
   VP9_COMMON * const cm = &cpi->common;
-  MACROBLOCK *x = cpi->mb;
-  MACROBLOCKD *xd = &cpi->mb->e_mbd;
+  MACROBLOCK *x = &cpi->mb;
+  MACROBLOCKD *xd = &cpi->mb.e_mbd;
 
   int i, j, k;
   v64x64 vt;
@@ -603,7 +603,7 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   int i, x_idx, y;
   VP9_COMMON *const cm = &cpi->common;
   COUNTS *const counts = cpi->frame_counts;
-  MACROBLOCK *const x = cpi->mb;
+  MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   struct macroblock_plane *const p = x->plane;
   struct macroblockd_plane *const pd = xd->plane;
@@ -800,7 +800,7 @@ static void rd_pick_sb_modes(VP9_COMP *cpi,
                              int64_t best_rd) {
   VP9_COMMON *const cm = &cpi->common;
   TileInfo *const tile_info = &tile_data->tile_info;
-  MACROBLOCK *const x = cpi->mb;
+  MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *mbmi;
   struct macroblock_plane *const p = x->plane;
@@ -959,7 +959,7 @@ static void restore_context(VP9_COMP *cpi, int mi_row, int mi_col,
                             ENTROPY_CONTEXT l[16 * MAX_MB_PLANE],
                             PARTITION_CONTEXT sa[8], PARTITION_CONTEXT sl[8],
                             BLOCK_SIZE bsize) {
-  MACROBLOCK *const x = cpi->mb;
+  MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   int p;
   const int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bsize];
@@ -990,7 +990,7 @@ static void save_context(VP9_COMP *cpi, int mi_row, int mi_col,
                          ENTROPY_CONTEXT l[16 * MAX_MB_PLANE],
                          PARTITION_CONTEXT sa[8], PARTITION_CONTEXT sl[8],
                          BLOCK_SIZE bsize) {
-  const MACROBLOCK *const x = cpi->mb;
+  const MACROBLOCK *const x = &cpi->mb;
   const MACROBLOCKD *const xd = &x->e_mbd;
   int p;
   const int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bsize];
@@ -1027,7 +1027,7 @@ static void encode_b(VP9_COMP *cpi, const TileInfo *const tile,
   encode_superblock(cpi, tp, output_enabled, mi_row, mi_col, bsize, ctx);
 
   if (output_enabled) {
-    update_stats(&cpi->common, cpi->mb);
+    update_stats(&cpi->common, &cpi->mb);
 
     (*tp)->token = EOSB_TOKEN;
     (*tp)++;
@@ -1039,7 +1039,7 @@ static void encode_sb(VP9_COMP *cpi, const TileInfo *const tile,
                       int output_enabled, BLOCK_SIZE bsize,
                       PC_TREE *pc_tree) {
   VP9_COMMON *const cm = &cpi->common;
-  MACROBLOCK *const x = cpi->mb;
+  MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
 
   const int bsl = b_width_log2_lookup[bsize], hbs = (1 << bsl) / 4;
@@ -1198,7 +1198,7 @@ static void set_source_var_based_partition(VP9_COMP *cpi,
                                            MODE_INFO *mi_8x8,
                                            int mi_row, int mi_col) {
   VP9_COMMON *const cm = &cpi->common;
-  MACROBLOCK *const x = cpi->mb;
+  MACROBLOCK *const x = &cpi->mb;
   const int mis = cm->mi_stride;
   const int row8x8_remaining = tile->mi_row_end - mi_row;
   const int col8x8_remaining = tile->mi_col_end - mi_col;
@@ -1282,7 +1282,7 @@ static void set_source_var_based_partition(VP9_COMP *cpi,
 static void update_state_rt(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
                             int mi_row, int mi_col, int bsize) {
   VP9_COMMON *const cm = &cpi->common;
-  MACROBLOCK *const x = cpi->mb;
+  MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   MODE_INFO *const mi = xd->mi[0].src_mi;
   MB_MODE_INFO *const mbmi = &xd->mi[0].src_mi->mbmi;
@@ -1347,13 +1347,13 @@ static void encode_b_rt(VP9_COMP *cpi, const TileInfo *const tile,
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
   if (cpi->oxcf.noise_sensitivity > 0 && output_enabled) {
-    vp9_denoiser_denoise(&cpi->denoiser, cpi->mb, mi_row, mi_col,
+    vp9_denoiser_denoise(&cpi->denoiser, &cpi->mb, mi_row, mi_col,
                          MAX(BLOCK_8X8, bsize), ctx);
   }
 #endif
 
   encode_superblock(cpi, tp, output_enabled, mi_row, mi_col, bsize, ctx);
-  update_stats(&cpi->common, cpi->mb);
+  update_stats(&cpi->common, &cpi->mb);
 
   (*tp)->token = EOSB_TOKEN;
   (*tp)++;
@@ -1364,7 +1364,7 @@ static void encode_sb_rt(VP9_COMP *cpi, const TileInfo *const tile,
                          int output_enabled, BLOCK_SIZE bsize,
                          PC_TREE *pc_tree) {
   VP9_COMMON *const cm = &cpi->common;
-  MACROBLOCK *const x = cpi->mb;
+  MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
 
   const int bsl = b_width_log2_lookup[bsize], hbs = (1 << bsl) / 4;
@@ -1439,7 +1439,7 @@ static void rd_use_partition(VP9_COMP *cpi,
                              int do_recon, PC_TREE *pc_tree) {
   VP9_COMMON *const cm = &cpi->common;
   TileInfo *const tile_info = &tile_data->tile_info;
-  MACROBLOCK *const x = cpi->mb;
+  MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   const int mis = cm->mi_stride;
   const int bsl = b_width_log2_lookup[bsize];
@@ -1768,7 +1768,7 @@ static void rd_auto_partition_range(VP9_COMP *cpi, const TileInfo *const tile,
                                     BLOCK_SIZE *min_block_size,
                                     BLOCK_SIZE *max_block_size) {
   VP9_COMMON *const cm = &cpi->common;
-  MACROBLOCKD *const xd = &cpi->mb->e_mbd;
+  MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   MODE_INFO *mi = xd->mi[0].src_mi;
   const int left_in_image = xd->left_available && mi[-1].src_mi;
   const int above_in_image = xd->up_available && mi[-xd->mi_stride].src_mi;
@@ -1864,7 +1864,7 @@ static void auto_partition_range(VP9_COMP *cpi, const TileInfo *const tile,
                                  BLOCK_SIZE *min_block_size,
                                  BLOCK_SIZE *max_block_size) {
   VP9_COMMON *const cm = &cpi->common;
-  MACROBLOCKD *const xd = &cpi->mb->e_mbd;
+  MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   MODE_INFO *mi_8x8 = xd->mi;
   const int left_in_image = xd->left_available && mi_8x8[-1].src_mi;
   const int above_in_image = xd->up_available &&
@@ -2039,7 +2039,7 @@ static void rd_pick_partition(VP9_COMP *cpi,
                               int64_t best_rd, PC_TREE *pc_tree) {
   VP9_COMMON *const cm = &cpi->common;
   TileInfo *const tile_info = &tile_data->tile_info;
-  MACROBLOCK *const x = cpi->mb;
+  MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   const int mi_step = num_8x8_blocks_wide_lookup[bsize] / 2;
   ENTROPY_CONTEXT l[16 * MAX_MB_PLANE], a[16 * MAX_MB_PLANE];
@@ -2114,7 +2114,7 @@ static void rd_pick_partition(VP9_COMP *cpi,
 #if CONFIG_FP_MB_STATS
   if (cpi->use_fp_mb_stats) {
     set_offsets(cpi, tile_info, mi_row, mi_col, bsize);
-    src_diff_var = get_sby_perpixel_diff_variance(cpi, &cpi->mb->plane[0].src,
+    src_diff_var = get_sby_perpixel_diff_variance(cpi, &cpi->mb.plane[0].src,
                                                   mi_row, mi_col, bsize);
   }
 #endif
@@ -2244,7 +2244,7 @@ static void rd_pick_partition(VP9_COMP *cpi,
             if (src_diff_var == UINT_MAX) {
               set_offsets(cpi, tile_info, mi_row, mi_col, bsize);
               src_diff_var = get_sby_perpixel_diff_variance(
-                  cpi, &cpi->mb->plane[0].src, mi_row, mi_col, bsize);
+                  cpi, &cpi->mb.plane[0].src, mi_row, mi_col, bsize);
             }
             if (src_diff_var < 8) {
               do_split = 0;
@@ -2456,7 +2456,7 @@ static void encode_rd_sb_row(VP9_COMP *cpi,
                              TOKENEXTRA **tp) {
   VP9_COMMON *const cm = &cpi->common;
   TileInfo *const tile_info = &tile_data->tile_info;
-  MACROBLOCKD *const xd = &cpi->mb->e_mbd;
+  MACROBLOCKD *const xd = &cpi->mb.e_mbd;
   SPEED_FEATURES *const sf = &cpi->sf;
   int mi_col;
 
@@ -2487,10 +2487,10 @@ static void encode_rd_sb_row(VP9_COMP *cpi,
       }
     }
 
-    vp9_zero(cpi->mb->pred_mv);
+    vp9_zero(cpi->mb.pred_mv);
     cpi->pc_root->index = 0;
 
-    cpi->mb->source_variance = UINT_MAX;
+    cpi->mb.source_variance = UINT_MAX;
     if (sf->partition_search_type == FIXED_PARTITION) {
       set_offsets(cpi, tile_info, mi_row, mi_col, BLOCK_64X64);
       set_fixed_partitioning(cpi, tile_info, mi, mi_row, mi_col,
@@ -2524,7 +2524,7 @@ static void encode_rd_sb_row(VP9_COMP *cpi,
 }
 
 static void init_encode_frame_mb_context(VP9_COMP *cpi) {
-  MACROBLOCK *const x = cpi->mb;
+  MACROBLOCK *const x = &cpi->mb;
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
   const int aligned_mi_cols = mi_cols_aligned_to_sb(cm->mi_cols);
@@ -2579,7 +2579,7 @@ static MV_REFERENCE_FRAME get_frame_type(const VP9_COMP *cpi) {
 }
 
 static TX_MODE select_tx_mode(const VP9_COMP *cpi) {
-  if (cpi->mb->e_mbd.lossless)
+  if (cpi->mb.e_mbd.lossless)
     return ONLY_4X4;
   if (cpi->sf.tx_size_search_method == USE_LARGESTALL)
     return ALLOW_32X32;
@@ -2596,7 +2596,7 @@ static void nonrd_pick_sb_modes(VP9_COMP *cpi,
                                 BLOCK_SIZE bsize, PICK_MODE_CONTEXT *ctx) {
   VP9_COMMON *const cm = &cpi->common;
   TileInfo *const tile_info = &tile_data->tile_info;
-  MACROBLOCK *const x = cpi->mb;
+  MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *mbmi;
   set_offsets(cpi, tile_info, mi_row, mi_col, bsize);
@@ -2705,7 +2705,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi,
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   VP9_COMMON *const cm = &cpi->common;
   TileInfo *const tile_info = &tile_data->tile_info;
-  MACROBLOCK *const x = cpi->mb;
+  MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   const int ms = num_8x8_blocks_wide_lookup[bsize] / 2;
   TOKENEXTRA *tp_orig = *tp;
@@ -2964,7 +2964,7 @@ static void nonrd_select_partition(VP9_COMP *cpi,
                                    RD_COST *rd_cost, PC_TREE *pc_tree) {
   VP9_COMMON *const cm = &cpi->common;
   TileInfo *const tile_info = &tile_data->tile_info;
-  MACROBLOCK *const x = cpi->mb;
+  MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   const int bsl = b_width_log2_lookup[bsize], hbs = (1 << bsl) / 4;
   const int mis = cm->mi_stride;
@@ -3092,7 +3092,7 @@ static void nonrd_use_partition(VP9_COMP *cpi,
                                 RD_COST *rd_cost, PC_TREE *pc_tree) {
   VP9_COMMON *const cm = &cpi->common;
   TileInfo *tile_info = &tile_data->tile_info;
-  MACROBLOCK *const x = cpi->mb;
+  MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   const int bsl = b_width_log2_lookup[bsize], hbs = (1 << bsl) / 4;
   const int mis = cm->mi_stride;
@@ -3222,7 +3222,7 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi,
   SPEED_FEATURES *const sf = &cpi->sf;
   VP9_COMMON *const cm = &cpi->common;
   TileInfo *const tile_info = &tile_data->tile_info;
-  MACROBLOCK *const x = cpi->mb;
+  MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   int mi_col;
 
@@ -3492,7 +3492,7 @@ static int input_fpmb_stats(FIRSTPASS_MB_STATS *firstpass_mb_stats,
 static void encode_frame_internal(VP9_COMP *cpi) {
   SPEED_FEATURES *const sf = &cpi->sf;
   RD_OPT *const rd_opt = &cpi->rd;
-  MACROBLOCK *const x = cpi->mb;
+  MACROBLOCK *const x = &cpi->mb;
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
   COUNTS *const counts = cpi->frame_counts;
@@ -3677,7 +3677,7 @@ void vp9_encode_frame(VP9_COMP *cpi) {
     for (i = 0; i < TX_MODES; ++i) {
       int64_t pd = counts->tx_select_diff[i];
       if (i == TX_MODE_SELECT)
-        pd -= RDCOST(cpi->mb->rdmult, cpi->mb->rddiv, 2048 * (TX_SIZES - 1), 0);
+        pd -= RDCOST(cpi->mb.rdmult, cpi->mb.rddiv, 2048 * (TX_SIZES - 1), 0);
       tx_thrs[i] = (tx_thrs[i] + (int)(pd / cm->MBs)) / 2;
     }
 
@@ -3781,7 +3781,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
                               int mi_row, int mi_col, BLOCK_SIZE bsize,
                               PICK_MODE_CONTEXT *ctx) {
   VP9_COMMON *const cm = &cpi->common;
-  MACROBLOCK *const x = cpi->mb;
+  MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   MODE_INFO *mi_8x8 = xd->mi;
   MODE_INFO *mi = mi_8x8;
