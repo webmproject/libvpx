@@ -67,6 +67,11 @@ struct macroblock {
   int rdmult;
   int mb_energy;
 
+  // These are set to their default values at the beginning, and then adjusted
+  // further in the encoding process.
+  BLOCK_SIZE min_partition_size;
+  BLOCK_SIZE max_partition_size;
+
   int mv_best_ref_index[MAX_REF_FRAMES];
   unsigned int max_mv_context[MAX_REF_FRAMES];
   unsigned int source_variance;

@@ -2058,8 +2058,8 @@ static void rd_pick_partition(VP9_COMP *cpi,
   const int xss = x->e_mbd.plane[1].subsampling_x;
   const int yss = x->e_mbd.plane[1].subsampling_y;
 
-  BLOCK_SIZE min_size = cpi->sf.min_partition_size;
-  BLOCK_SIZE max_size = cpi->sf.max_partition_size;
+  BLOCK_SIZE min_size = x->min_partition_size;
+  BLOCK_SIZE max_size = x->max_partition_size;
 
 #if CONFIG_FP_MB_STATS
   unsigned int src_diff_var = UINT_MAX;
@@ -2456,7 +2456,8 @@ static void encode_rd_sb_row(VP9_COMP *cpi,
                              TOKENEXTRA **tp) {
   VP9_COMMON *const cm = &cpi->common;
   TileInfo *const tile_info = &tile_data->tile_info;
-  MACROBLOCKD *const xd = &cpi->mb.e_mbd;
+  MACROBLOCK *const x = &cpi->mb;
+  MACROBLOCKD *const xd = &x->e_mbd;
   SPEED_FEATURES *const sf = &cpi->sf;
   int mi_col;
 
@@ -2514,8 +2515,8 @@ static void encode_rd_sb_row(VP9_COMP *cpi,
       if (sf->auto_min_max_partition_size) {
         set_offsets(cpi, tile_info, mi_row, mi_col, BLOCK_64X64);
         rd_auto_partition_range(cpi, tile_info, mi_row, mi_col,
-                                &sf->min_partition_size,
-                                &sf->max_partition_size);
+                                &x->min_partition_size,
+                                &x->max_partition_size);
       }
       rd_pick_partition(cpi, tile_data, tp, mi_row, mi_col, BLOCK_64X64,
                         &dummy_rdc, INT64_MAX, cpi->pc_root);
@@ -2738,15 +2739,15 @@ static void nonrd_pick_partition(VP9_COMP *cpi,
   // Determine partition types in search according to the speed features.
   // The threshold set here has to be of square block size.
   if (sf->auto_min_max_partition_size) {
-    partition_none_allowed &= (bsize <= sf->max_partition_size &&
-                               bsize >= sf->min_partition_size);
-    partition_horz_allowed &= ((bsize <= sf->max_partition_size &&
-                                bsize > sf->min_partition_size) ||
+    partition_none_allowed &= (bsize <= x->max_partition_size &&
+                               bsize >= x->min_partition_size);
+    partition_horz_allowed &= ((bsize <= x->max_partition_size &&
+                                bsize > x->min_partition_size) ||
                                 force_horz_split);
-    partition_vert_allowed &= ((bsize <= sf->max_partition_size &&
-                                bsize > sf->min_partition_size) ||
+    partition_vert_allowed &= ((bsize <= x->max_partition_size &&
+                                bsize > x->min_partition_size) ||
                                 force_vert_split);
-    do_split &= bsize > sf->min_partition_size;
+    do_split &= bsize > x->min_partition_size;
   }
   if (sf->use_square_partition_only) {
     partition_horz_allowed &= force_horz_split;
@@ -2981,13 +2982,13 @@ static void nonrd_select_partition(VP9_COMP *cpi,
 
   if (bsize == BLOCK_32X32 && partition != PARTITION_NONE &&
       subsize >= BLOCK_16X16) {
-    cpi->sf.max_partition_size = BLOCK_32X32;
-    cpi->sf.min_partition_size = BLOCK_8X8;
+    x->max_partition_size = BLOCK_32X32;
+    x->min_partition_size = BLOCK_8X8;
     nonrd_pick_partition(cpi, tile_data, tp, mi_row, mi_col, bsize,
                          rd_cost, 0, INT64_MAX, pc_tree);
   } else if (bsize == BLOCK_16X16 && partition != PARTITION_NONE) {
-    cpi->sf.max_partition_size = BLOCK_16X16;
-    cpi->sf.min_partition_size = BLOCK_8X8;
+    x->max_partition_size = BLOCK_16X16;
+    x->min_partition_size = BLOCK_8X8;
     nonrd_pick_partition(cpi, tile_data, tp, mi_row, mi_col, bsize,
                          rd_cost, 0, INT64_MAX, pc_tree);
   } else {
@@ -3266,8 +3267,8 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi,
         if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cm->seg.enabled &&
             xd->mi[0].src_mi->mbmi.segment_id) {
           auto_partition_range(cpi, tile_info, mi_row, mi_col,
-                               &sf->min_partition_size,
-                               &sf->max_partition_size);
+                               &x->min_partition_size,
+                               &x->max_partition_size);
           nonrd_pick_partition(cpi, tile_data, tp, mi_row, mi_col,
                                BLOCK_64X64, &dummy_rdc, 1,
                                INT64_MAX, cpi->pc_root);
