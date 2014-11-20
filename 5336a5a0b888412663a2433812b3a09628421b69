@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Pns\u003d",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-11-20T00:12:44Z",
+      "side": 1,
+      "message": "As mentioned I think having a separate rate correction factor for the segment is likely to be too unstable because the complexity of groups of blocks that are refreshed in successive blocks is not necessarily well correlated (less so than the overall complexity of the frames)",
+      "revId": "5336a5a0b888412663a2433812b3a09628421b69",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Pnk\u003d",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-11-20T00:12:44Z",
+      "side": 1,
+      "message": "why double above and float here?",
+      "revId": "5336a5a0b888412663a2433812b3a09628421b69",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Pnc\u003d",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-11-20T00:12:44Z",
+      "side": 1,
+      "message": "? The comment says for the previous frame. Do we not have the deltaq and number of blocks that will be used for this frame available?",
+      "revId": "5336a5a0b888412663a2433812b3a09628421b69",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//PnQ\u003d",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-11-20T00:12:44Z",
+      "side": 1,
+      "message": "I assume deltatq is negative here for the refresh segment?",
+      "revId": "5336a5a0b888412663a2433812b3a09628421b69",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//PnU\u003d",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-11-20T00:12:44Z",
+      "side": 1,
+      "message": "Why do you do this averaging? I would have thought you are only interested in the current frame.",
+      "revId": "5336a5a0b888412663a2433812b3a09628421b69",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
