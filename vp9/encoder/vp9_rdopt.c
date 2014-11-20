@@ -2359,7 +2359,8 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                  INTERP_FILTER (*single_filter)[MAX_REF_FRAMES],
                                  int (*single_skippable)[MAX_REF_FRAMES],
                                  int64_t *psse,
-                                 const int64_t ref_best_rd) {
+                                 const int64_t ref_best_rd,
+                                 int64_t *mask_filter) {
   VP9_COMMON *cm = &cpi->common;
   RD_OPT *rd_opt = &cpi->rd;
   MACROBLOCKD *xd = &x->e_mbd;
@@ -2500,7 +2501,6 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
   // Search for best switchable filter by checking the variance of
   // pred error irrespective of whether the filter will be used
-  rd_opt->mask_filter = 0;
   for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
     rd_opt->filter_cache[i] = INT64_MAX;
 
@@ -2529,7 +2529,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
               MIN(rd_opt->filter_cache[SWITCHABLE_FILTERS], rd + rs_rd);
           if (cm->interp_filter == SWITCHABLE)
             rd += rs_rd;
-          rd_opt->mask_filter = MAX(rd_opt->mask_filter, rd);
+          *mask_filter = MAX(*mask_filter, rd);
         } else {
           int rate_sum = 0;
           int64_t dist_sum = 0;
@@ -2562,7 +2562,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
               MIN(rd_opt->filter_cache[SWITCHABLE_FILTERS], rd + rs_rd);
           if (cm->interp_filter == SWITCHABLE)
             rd += rs_rd;
-          rd_opt->mask_filter = MAX(rd_opt->mask_filter, rd);
+          *mask_filter = MAX(*mask_filter, rd);
 
           if (i == 0 && intpel_mv) {
             tmp_rate_sum = rate_sum;
@@ -2818,6 +2818,8 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
   int64_t mode_threshold[MAX_MODES];
   int *mode_map = tile_data->mode_map[bsize];
   const int mode_search_skip_flags = sf->mode_search_skip_flags;
+  int64_t mask_filter = 0;
+
   vp9_zero(best_mbmode);
 
   x->skip_encode = sf->skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
@@ -3162,7 +3164,8 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
                                   &disable_skip, frame_mv,
                                   mi_row, mi_col,
                                   single_newmv, single_inter_filter,
-                                  single_skippable, &total_sse, best_rd);
+                                  single_skippable, &total_sse, best_rd,
+                                  &mask_filter);
       if (this_rd == INT64_MAX)
         continue;
 
@@ -3315,7 +3318,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
             // access to the rate-distortion cost. it only knows that the cost
             // should be above the maximum valid value. hence it takes the known
             // maximum plus an arbitrary constant as the rate-distortion cost.
-            adj_rd = rd_opt->mask_filter - ref + 10;
+            adj_rd = mask_filter - ref + 10;
           else
             adj_rd = rd_opt->filter_cache[i] - ref;
 
@@ -3505,7 +3508,6 @@ void vp9_rd_pick_inter_mode_sb_seg_skip(VP9_COMP *cpi,
 
   // Search for best switchable filter by checking the variance of
   // pred error irrespective of whether the filter will be used
-  rd_opt->mask_filter = 0;
   for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
     rd_opt->filter_cache[i] = INT64_MAX;
 
@@ -3611,6 +3613,7 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
   b_mode_info best_bmodes[4];
   int best_skip2 = 0;
   int ref_frame_skip_mask[2] = { 0 };
+  int64_t mask_filter = 0;
 
   x->skip_encode = sf->skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
   vpx_memset(x->zcoeff_blk[TX_4X4], 0, 4);
@@ -3808,7 +3811,6 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
           rd_opt->threshes[segment_id][bsize][THR_ALTR];
       this_rd_thresh = (ref_frame == GOLDEN_FRAME) ?
       rd_opt->threshes[segment_id][bsize][THR_GOLD] : this_rd_thresh;
-      rd_opt->mask_filter = 0;
       for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
         rd_opt->filter_cache[i] = INT64_MAX;
 
@@ -3849,7 +3851,7 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
             if (cm->interp_filter == SWITCHABLE)
               tmp_rd += rs_rd;
 
-            rd_opt->mask_filter = MAX(rd_opt->mask_filter, tmp_rd);
+            mask_filter = MAX(mask_filter, tmp_rd);
 
             newbest = (tmp_rd < tmp_best_rd);
             if (newbest) {
@@ -4084,7 +4086,7 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
           // access to the rate-distortion cost. it only knows that the cost
           // should be above the maximum valid value. hence it takes the known
           // maximum plus an arbitrary constant as the rate-distortion cost.
-          adj_rd = rd_opt->mask_filter - ref + 10;
+          adj_rd = mask_filter - ref + 10;
         else
           adj_rd = rd_opt->filter_cache[i] - ref;
 
