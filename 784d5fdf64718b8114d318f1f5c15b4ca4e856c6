@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//PgM\u003d",
+        "filename": "vp9/encoder/vp9_aq_complexity.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-11-20T17:03:13Z",
+      "side": 1,
+      "message": "mb is now a pointer in cpi, no need for \"\u0026\"",
+      "revId": "784d5fdf64718b8114d318f1f5c15b4ca4e856c6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//PgI\u003d",
+        "filename": "vp9/encoder/vp9_aq_complexity.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-11-20T17:03:13Z",
+      "side": 1,
+      "message": "same here, should be just \"cpi-\u003emb\"",
+      "revId": "784d5fdf64718b8114d318f1f5c15b4ca4e856c6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
