@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//PZU\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-11-20T22:51:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//PaA\u003d",
+      "revId": "5dd9516bf52e9d4e89da074a4f61ceb8ad1fb3c6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//PaE\u003d",
         "filename": "test/quantize_test.cc",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//PZY\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-11-20T22:51:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//PaE\u003d",
+      "revId": "5dd9516bf52e9d4e89da074a4f61ceb8ad1fb3c6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//PZ8\u003d",
         "filename": "vp8/encoder/arm/neon/fastquantizeb_neon.c",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2014-11-20T22:40:20Z",
       "side": 1,
       "message": "-1?",
+      "revId": "5dd9516bf52e9d4e89da074a4f61ceb8ad1fb3c6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//PZQ\u003d",
+        "filename": "vp8/encoder/arm/neon/fastquantizeb_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-11-20T22:51:40Z",
+      "side": 1,
+      "message": "Heh, I was trying to be more explicit (in the original commit and the update) by using the hex values. Guess that failed.",
+      "parentUuid": "AAAAdn//PZ8\u003d",
       "revId": "5dd9516bf52e9d4e89da074a4f61ceb8ad1fb3c6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
