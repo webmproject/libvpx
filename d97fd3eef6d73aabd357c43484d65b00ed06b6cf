@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Pgs\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-11-20T15:29:27Z",
+      "side": 1,
+      "message": "should use a prob value for these rather use half. You can add do that in a separate patch later.",
+      "revId": "d97fd3eef6d73aabd357c43484d65b00ed06b6cf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
