@@ -2360,9 +2360,9 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                  int (*single_skippable)[MAX_REF_FRAMES],
                                  int64_t *psse,
                                  const int64_t ref_best_rd,
-                                 int64_t *mask_filter) {
+                                 int64_t *mask_filter,
+                                 int64_t filter_cache[]) {
   VP9_COMMON *cm = &cpi->common;
-  RD_OPT *rd_opt = &cpi->rd;
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
   const int is_comp_pred = has_second_ref(mbmi);
@@ -2502,7 +2502,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   // Search for best switchable filter by checking the variance of
   // pred error irrespective of whether the filter will be used
   for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
-    rd_opt->filter_cache[i] = INT64_MAX;
+    filter_cache[i] = INT64_MAX;
 
   if (cm->interp_filter != BILINEAR) {
     if (x->source_variance < cpi->sf.disable_filter_search_var_thresh) {
@@ -2524,9 +2524,9 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
         if (i > 0 && intpel_mv) {
           rd = RDCOST(x->rdmult, x->rddiv, tmp_rate_sum, tmp_dist_sum);
-          rd_opt->filter_cache[i] = rd;
-          rd_opt->filter_cache[SWITCHABLE_FILTERS] =
-              MIN(rd_opt->filter_cache[SWITCHABLE_FILTERS], rd + rs_rd);
+          filter_cache[i] = rd;
+          filter_cache[SWITCHABLE_FILTERS] =
+              MIN(filter_cache[SWITCHABLE_FILTERS], rd + rs_rd);
           if (cm->interp_filter == SWITCHABLE)
             rd += rs_rd;
           *mask_filter = MAX(*mask_filter, rd);
@@ -2557,9 +2557,9 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                           &tmp_skip_sb, &tmp_skip_sse);
 
           rd = RDCOST(x->rdmult, x->rddiv, rate_sum, dist_sum);
-          rd_opt->filter_cache[i] = rd;
-          rd_opt->filter_cache[SWITCHABLE_FILTERS] =
-              MIN(rd_opt->filter_cache[SWITCHABLE_FILTERS], rd + rs_rd);
+          filter_cache[i] = rd;
+          filter_cache[SWITCHABLE_FILTERS] =
+              MIN(filter_cache[SWITCHABLE_FILTERS], rd + rs_rd);
           if (cm->interp_filter == SWITCHABLE)
             rd += rs_rd;
           *mask_filter = MAX(*mask_filter, rd);
@@ -2819,10 +2819,14 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
   int *mode_map = tile_data->mode_map[bsize];
   const int mode_search_skip_flags = sf->mode_search_skip_flags;
   int64_t mask_filter = 0;
+  int64_t filter_cache[SWITCHABLE_FILTER_CONTEXTS];
 
   vp9_zero(best_mbmode);
 
   x->skip_encode = sf->skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
+
+  for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
+    filter_cache[i] = INT64_MAX;
 
   estimate_ref_frame_costs(cm, xd, segment_id, ref_costs_single, ref_costs_comp,
                            &comp_mode_p);
@@ -3165,7 +3169,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
                                   mi_row, mi_col,
                                   single_newmv, single_inter_filter,
                                   single_skippable, &total_sse, best_rd,
-                                  &mask_filter);
+                                  &mask_filter, filter_cache);
       if (this_rd == INT64_MAX)
         continue;
 
@@ -3306,21 +3310,21 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
 
       /* keep record of best filter type */
       if (!mode_excluded && cm->interp_filter != BILINEAR) {
-        int64_t ref = rd_opt->filter_cache[cm->interp_filter == SWITCHABLE ?
+        int64_t ref = filter_cache[cm->interp_filter == SWITCHABLE ?
                               SWITCHABLE_FILTERS : cm->interp_filter];
 
         for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; i++) {
           int64_t adj_rd;
           if (ref == INT64_MAX)
             adj_rd = 0;
-          else if (rd_opt->filter_cache[i] == INT64_MAX)
+          else if (filter_cache[i] == INT64_MAX)
             // when early termination is triggered, the encoder does not have
             // access to the rate-distortion cost. it only knows that the cost
             // should be above the maximum valid value. hence it takes the known
             // maximum plus an arbitrary constant as the rate-distortion cost.
             adj_rd = mask_filter - ref + 10;
           else
-            adj_rd = rd_opt->filter_cache[i] - ref;
+            adj_rd = filter_cache[i] - ref;
 
           adj_rd += this_rd;
           best_filter_rd[i] = MIN(best_filter_rd[i], adj_rd);
@@ -3469,7 +3473,6 @@ void vp9_rd_pick_inter_mode_sb_seg_skip(VP9_COMP *cpi,
                                         PICK_MODE_CONTEXT *ctx,
                                         int64_t best_rd_so_far) {
   VP9_COMMON *const cm = &cpi->common;
-  RD_OPT *const rd_opt = &cpi->rd;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0].src_mi->mbmi;
   unsigned char segment_id = mbmi->segment_id;
@@ -3505,11 +3508,6 @@ void vp9_rd_pick_inter_mode_sb_seg_skip(VP9_COMP *cpi,
   mbmi->ref_frame[1] = NONE;
   mbmi->mv[0].as_int = 0;
   x->skip = 1;
-
-  // Search for best switchable filter by checking the variance of
-  // pred error irrespective of whether the filter will be used
-  for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
-    rd_opt->filter_cache[i] = INT64_MAX;
 
   if (cm->interp_filter != BILINEAR) {
     best_filter = EIGHTTAP;
@@ -3614,10 +3612,14 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
   int best_skip2 = 0;
   int ref_frame_skip_mask[2] = { 0 };
   int64_t mask_filter = 0;
+  int64_t filter_cache[SWITCHABLE_FILTER_CONTEXTS];
 
   x->skip_encode = sf->skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
   vpx_memset(x->zcoeff_blk[TX_4X4], 0, 4);
   vp9_zero(best_mbmode);
+
+  for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
+    filter_cache[i] = INT64_MAX;
 
   for (i = 0; i < 4; i++) {
     int j;
@@ -3812,7 +3814,7 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
       this_rd_thresh = (ref_frame == GOLDEN_FRAME) ?
       rd_opt->threshes[segment_id][bsize][THR_GOLD] : this_rd_thresh;
       for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
-        rd_opt->filter_cache[i] = INT64_MAX;
+        filter_cache[i] = INT64_MAX;
 
       if (cm->interp_filter != BILINEAR) {
         tmp_best_filter = EIGHTTAP;
@@ -3844,9 +3846,9 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
               continue;
             rs = vp9_get_switchable_rate(cpi);
             rs_rd = RDCOST(x->rdmult, x->rddiv, rs, 0);
-            rd_opt->filter_cache[switchable_filter_index] = tmp_rd;
-            rd_opt->filter_cache[SWITCHABLE_FILTERS] =
-                MIN(rd_opt->filter_cache[SWITCHABLE_FILTERS],
+            filter_cache[switchable_filter_index] = tmp_rd;
+            filter_cache[SWITCHABLE_FILTERS] =
+                MIN(filter_cache[SWITCHABLE_FILTERS],
                     tmp_rd + rs_rd);
             if (cm->interp_filter == SWITCHABLE)
               tmp_rd += rs_rd;
@@ -4075,20 +4077,20 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
     /* keep record of best filter type */
     if (!mode_excluded && !disable_skip && ref_frame != INTRA_FRAME &&
         cm->interp_filter != BILINEAR) {
-      int64_t ref = rd_opt->filter_cache[cm->interp_filter == SWITCHABLE ?
+      int64_t ref = filter_cache[cm->interp_filter == SWITCHABLE ?
                               SWITCHABLE_FILTERS : cm->interp_filter];
       int64_t adj_rd;
       for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; i++) {
         if (ref == INT64_MAX)
           adj_rd = 0;
-        else if (rd_opt->filter_cache[i] == INT64_MAX)
+        else if (filter_cache[i] == INT64_MAX)
           // when early termination is triggered, the encoder does not have
           // access to the rate-distortion cost. it only knows that the cost
           // should be above the maximum valid value. hence it takes the known
           // maximum plus an arbitrary constant as the rate-distortion cost.
           adj_rd = mask_filter - ref + 10;
         else
-          adj_rd = rd_opt->filter_cache[i] - ref;
+          adj_rd = filter_cache[i] - ref;
 
         adj_rd += this_rd;
         best_filter_rd[i] = MIN(best_filter_rd[i], adj_rd);
