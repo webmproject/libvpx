@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//PeQ\u003d",
+        "filename": "vp9/encoder/vp9_aq_variance.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-11-20T20:24:55Z",
+      "side": 1,
+      "message": "++i",
+      "revId": "3ea6cb87165c0617174612af20168be2395c35ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//PeM\u003d",
+        "filename": "vp9/encoder/vp9_aq_variance.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-11-20T20:24:55Z",
+      "side": 1,
+      "message": "period at end of line",
+      "revId": "3ea6cb87165c0617174612af20168be2395c35ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
