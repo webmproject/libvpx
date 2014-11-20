@@ -60,7 +60,6 @@ struct vpx_codec_alg_priv
     vpx_decrypt_cb          decrypt_cb;
     void                    *decrypt_state;
     vpx_image_t             img;
-    int                     flushed;
     int                     img_setup;
     struct frame_buffers    yv12_frame_buffers;
     void                    *user_priv;
@@ -89,7 +88,6 @@ static void vp8_init_ctx(vpx_codec_ctx_t *ctx)
     priv->si.sz = sizeof(priv->si);
     priv->decrypt_cb = NULL;
     priv->decrypt_state = NULL;
-    priv->flushed = 0;
 
     if (ctx->config.dec)
     {
@@ -307,6 +305,11 @@ update_fragments(vpx_codec_alg_priv_t  *ctx,
         return 0;
     }
 
+    if (!ctx->fragments.enabled && (data == NULL && data_sz == 0))
+    {
+        return 0;
+    }
+
     if (!ctx->fragments.enabled)
     {
         ctx->fragments.ptrs[0] = data;
@@ -327,13 +330,10 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t  *ctx,
     unsigned int resolution_change = 0;
     unsigned int w, h;
 
-    if (data == NULL && data_sz == 0) {
-      ctx->flushed = 1;
-      return VPX_CODEC_OK;
+    if (!ctx->fragments.enabled && (data == NULL && data_sz == 0))
+    {
+        return 0;
     }
-
-    /* Reset flushed when receiving a valid frame */
-    ctx->flushed = 0;
 
     /* Update the input fragment data */
     if(update_fragments(ctx, data, data_sz, &res) <= 0)

@@ -185,6 +185,11 @@ class EncoderTest {
   // Map the TestMode enum to the deadline_ and passes_ variables.
   void SetMode(TestMode mode);
 
+  // Set encoder flag.
+  void set_init_flags(unsigned long flag) {  // NOLINT(runtime/int)
+    init_flags_ = flag;
+  }
+
   // Main loop
   virtual void RunLoop(VideoSource *video);
 

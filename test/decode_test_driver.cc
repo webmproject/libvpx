@@ -110,4 +110,12 @@ void DecoderTest::RunLoop(CompressedVideoSource *video) {
   RunLoop(video, dec_cfg);
 }
 
+void DecoderTest::set_cfg(const vpx_codec_dec_cfg_t &dec_cfg) {
+  memcpy(&cfg_, &dec_cfg, sizeof(cfg_));
+}
+
+void DecoderTest::set_flags(const vpx_codec_flags_t flags) {
+  flags_ = flags;
+}
+
 }  // namespace libvpx_test
