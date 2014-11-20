@@ -147,6 +147,14 @@ TEST_P(QuantizeTest, TestZeroInput) {
   RunComparison();
 }
 
+TEST_P(QuantizeTest, TestLargeNegativeInput) {
+  FillCoeffConstant(0);
+  // Generate a qcoeff which contains 512/-512 (0x0100/0xFE00) to catch issues
+  // like BUG=883 where the constant being compared was incorrectly initialized.
+  vp8_comp_->mb.coeff[0] = -8191;
+  RunComparison();
+}
+
 TEST_P(QuantizeTest, TestRandomInput) {
   FillCoeffRandom();
   RunComparison();

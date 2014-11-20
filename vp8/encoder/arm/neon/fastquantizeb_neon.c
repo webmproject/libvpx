@@ -19,7 +19,7 @@ static const uint16_t inv_zig_zag[16] = {
 };
 
 void vp8_fast_quantize_b_neon(BLOCK *b, BLOCKD *d) {
-    const int16x8_t one_q = vdupq_n_s16(0xff),
+    const int16x8_t one_q = vdupq_n_s16(-1),
                     z0 = vld1q_s16(b->coeff),
                     z1 = vld1q_s16(b->coeff + 8),
                     round0 = vld1q_s16(b->round),
