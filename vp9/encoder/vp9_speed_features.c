@@ -288,8 +288,8 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->use_quant_fp = !is_keyframe;
     sf->auto_min_max_partition_size = is_keyframe ? RELAXED_NEIGHBORING_MIN_MAX
                                                   : STRICT_NEIGHBORING_MIN_MAX;
-    sf->max_partition_size = BLOCK_32X32;
-    sf->min_partition_size = BLOCK_8X8;
+    sf->default_max_partition_size = BLOCK_32X32;
+    sf->default_min_partition_size = BLOCK_8X8;
     sf->force_frame_boost = is_keyframe ||
         (frames_since_key % (sf->last_partitioning_redo_frequency << 1) == 1);
     sf->max_delta_qindex = is_keyframe ? 20 : 15;
@@ -376,6 +376,7 @@ void vp9_set_speed_features_framesize_dependent(VP9_COMP *cpi) {
 void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
   SPEED_FEATURES *const sf = &cpi->sf;
   VP9_COMMON *const cm = &cpi->common;
+  MACROBLOCK *const x = &cpi->mb;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   int i;
 
@@ -407,8 +408,8 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
   sf->less_rectangular_check = 0;
   sf->use_square_partition_only = 0;
   sf->auto_min_max_partition_size = NOT_IN_USE;
-  sf->max_partition_size = BLOCK_64X64;
-  sf->min_partition_size = BLOCK_4X4;
+  sf->default_max_partition_size = BLOCK_64X64;
+  sf->default_min_partition_size = BLOCK_4X4;
   sf->adjust_partitioning_from_last_frame = 0;
   sf->last_partitioning_redo_frequency = 4;
   sf->disable_split_mask = 0;
@@ -482,7 +483,10 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
     cpi->find_fractional_mv_step = vp9_find_best_sub_pixel_tree_pruned_evenmore;
   }
 
-  cpi->mb.optimize = sf->optimize_coefficients == 1 && oxcf->pass != 1;
+  x->optimize = sf->optimize_coefficients == 1 && oxcf->pass != 1;
+
+  x->min_partition_size = sf->default_min_partition_size;
+  x->max_partition_size = sf->default_max_partition_size;
 
   if (!cpi->oxcf.frame_periodic_boost) {
     sf->max_delta_qindex = 0;
