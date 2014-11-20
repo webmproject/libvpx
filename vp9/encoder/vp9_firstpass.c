@@ -949,9 +949,8 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
     // where the typical "real" energy per MB also falls.
     // Initial estimate here uses sqrt(mbs) to define the min_err, where the
     // number of mbs is proportional to the image area.
-    const int num_mbs =
-        cpi->oxcf.resize_mode == RESIZE_FIXED ?
-            cpi->initial_mbs : cpi->common.MBs;
+    const int num_mbs = (cpi->oxcf.resize_mode != RESIZE_NONE)
+                        ? cpi->initial_mbs : cpi->common.MBs;
     const double min_err = 200 * sqrt(num_mbs);
 
     intra_factor = intra_factor / (double)num_mbs;
@@ -1091,9 +1090,8 @@ static int get_twopass_worst_quality(const VP9_COMP *cpi,
   if (section_target_bandwidth <= 0) {
     return rc->worst_quality;  // Highest value allowed
   } else {
-    const int num_mbs =
-        cpi->oxcf.resize_mode == RESIZE_FIXED ?
-            cpi->initial_mbs : cpi->common.MBs;
+    const int num_mbs = (cpi->oxcf.resize_mode != RESIZE_NONE)
+                        ? cpi->initial_mbs : cpi->common.MBs;
     const double section_err = stats->coded_error / stats->count;
     const double err_per_mb = section_err / num_mbs;
     const double speed_term = 1.0 + 0.04 * oxcf->speed;
@@ -1210,9 +1208,8 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
 
 static double get_sr_decay_rate(const VP9_COMP *cpi,
                                 const FIRSTPASS_STATS *frame) {
-  const int num_mbs =
-      cpi->oxcf.resize_mode == RESIZE_FIXED ?
-          cpi->initial_mbs : cpi->common.MBs;
+  const int num_mbs = (cpi->oxcf.resize_mode != RESIZE_NONE)
+                      ? cpi->initial_mbs : cpi->common.MBs;
   double sr_diff =
       (frame->sr_coded_error - frame->coded_error) / num_mbs;
   double sr_decay = 1.0;
@@ -1338,9 +1335,8 @@ static double calc_frame_boost(VP9_COMP *cpi,
     vp9_convert_qindex_to_q(cpi->rc.avg_frame_qindex[INTER_FRAME],
                             cpi->common.bit_depth);
   const double boost_q_correction = MIN((0.5 + (lq * 0.015)), 1.5);
-  const int num_mbs =
-      cpi->oxcf.resize_mode == RESIZE_FIXED ?
-          cpi->initial_mbs : cpi->common.MBs;
+  const int num_mbs = (cpi->oxcf.resize_mode != RESIZE_NONE)
+                      ? cpi->initial_mbs : cpi->common.MBs;
 
   // Underlying boost factor is based on inter error ratio.
   frame_boost = (BASELINE_ERR_PER_MB * num_mbs) /
