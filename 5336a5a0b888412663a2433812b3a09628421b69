@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Pmk\u003d",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-11-20T01:34:12Z",
+      "side": 1,
+      "message": "Yeah its probably not worth trying to update it. Its kept fixed to the frame level correction factor in current patch. Will likely just remove this variable.",
+      "parentUuid": "AAAAdn//Pns\u003d",
+      "revId": "5336a5a0b888412663a2433812b3a09628421b69",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Pnk\u003d",
         "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2014-11-20T00:12:44Z",
       "side": 1,
       "message": "why double above and float here?",
+      "revId": "5336a5a0b888412663a2433812b3a09628421b69",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Pmg\u003d",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-11-20T01:34:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Pnk\u003d",
       "revId": "5336a5a0b888412663a2433812b3a09628421b69",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Pmc\u003d",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-11-20T01:34:12Z",
+      "side": 1,
+      "message": "Meant to say something like \"...delta-q that was used for the encoded frame\".  So yes the  delta q and num_seg_blocks here are the ones used in the encoded frame.\n\nChanged comments to clarify that this function is called  in the postencode.",
+      "parentUuid": "AAAAdn//Pnc\u003d",
+      "revId": "5336a5a0b888412663a2433812b3a09628421b69",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//PnQ\u003d",
         "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
         "patchSetId": 5
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//PmY\u003d",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-11-20T01:34:12Z",
+      "side": 1,
+      "message": "yes it should always be negative.",
+      "parentUuid": "AAAAdn//PnQ\u003d",
+      "revId": "5336a5a0b888412663a2433812b3a09628421b69",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//PnU\u003d",
         "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
         "patchSetId": 5
@@ -81,6 +153,24 @@
       "writtenOn": "2014-11-20T00:12:44Z",
       "side": 1,
       "message": "Why do you do this averaging? I would have thought you are only interested in the current frame.",
+      "revId": "5336a5a0b888412663a2433812b3a09628421b69",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//PmU\u003d",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-11-20T01:34:12Z",
+      "side": 1,
+      "message": "Removed the averaging. Should be the target # for the current frame.\n\nAlthough in the encoding process we may not refresh some of those (because they are coded as intra or non-zero mv), so the actual may be lower...",
+      "parentUuid": "AAAAdn//PnU\u003d",
       "revId": "5336a5a0b888412663a2433812b3a09628421b69",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
