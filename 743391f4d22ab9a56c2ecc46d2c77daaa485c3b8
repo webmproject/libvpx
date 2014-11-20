@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Pbk\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-11-20T20:51:40Z",
+      "side": 1,
+      "message": "sincei/since typo",
+      "revId": "743391f4d22ab9a56c2ecc46d2c77daaa485c3b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
