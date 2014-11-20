@@ -34,6 +34,24 @@
       "revId": "5db4b77789d7882502a7abede76e0ae073bc56af",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Pdk\u003d",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-11-20T20:21:36Z",
+      "side": 0,
+      "message": "you\u0027d have to pull the protos from the rtcd and place them here temporarily as I did with AVX2. this is useful to try to repro while working on a fix.",
+      "parentUuid": "AAAAdn//Pd8\u003d",
+      "revId": "5db4b77789d7882502a7abede76e0ae073bc56af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
