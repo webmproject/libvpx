@@ -639,9 +639,6 @@ process_common_toolchain() {
                 tgt_isa=armv7
                 float_abi=softfp
                 ;;
-            armv5te*)
-                tgt_isa=armv5te
-                ;;
             *x86_64*|*amd64*)
                 tgt_isa=x86_64
                 ;;
