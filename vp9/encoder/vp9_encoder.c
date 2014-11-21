@@ -3720,10 +3720,6 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
     set_frame_size(cpi);
   }
 
-  if (oxcf->aq_mode == VARIANCE_AQ) {
-    vp9_vaq_init();
-  }
-
   for (i = 0; i < MAX_REF_FRAMES; ++i)
     cpi->scaled_ref_idx[i] = INVALID_REF_BUFFER_IDX;
 
