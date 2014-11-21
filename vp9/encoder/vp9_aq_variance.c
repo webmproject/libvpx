@@ -19,15 +19,15 @@
 #include "vp9/encoder/vp9_segmentation.h"
 #include "vp9/common/vp9_systemdependent.h"
 
-#define ENERGY_MIN (-1)
+#define ENERGY_MIN (-4)
 #define ENERGY_MAX (1)
 #define ENERGY_SPAN (ENERGY_MAX - ENERGY_MIN +  1)
 #define ENERGY_IN_BOUNDS(energy)\
   assert((energy) >= ENERGY_MIN && (energy) <= ENERGY_MAX)
 
 static const double rate_ratio[MAX_SEGMENTS] =
-  {1.143, 1.0, 0.875, 1.0, 1.0, 1.0, 1.0, 1.0};
-static const int segment_id[ENERGY_SPAN] = {0, 1, 2};
+  {2.5, 2.0, 1.5, 1.0, 0.75, 1.0, 1.0, 1.0};
+static const int segment_id[ENERGY_SPAN] = {0, 1, 1, 2, 3, 4};
 
 #define SEGMENT_ID(i) segment_id[(i) - ENERGY_MIN]
 
