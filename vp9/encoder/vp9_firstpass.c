@@ -450,13 +450,13 @@ static void set_first_pass_params(VP9_COMP *cpi) {
 
 void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
   int mb_row, mb_col;
-  MACROBLOCK *const x = &cpi->mb;
+  MACROBLOCK *const x = &cpi->td.mb;
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
   TileInfo tile;
   struct macroblock_plane *const p = x->plane;
   struct macroblockd_plane *const pd = xd->plane;
-  const PICK_MODE_CONTEXT *ctx = &cpi->pc_root->none;
+  const PICK_MODE_CONTEXT *ctx = &cpi->td.pc_root->none;
   int i;
 
   int recon_yoffset, recon_uvoffset;

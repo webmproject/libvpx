@@ -138,7 +138,8 @@ void vp9_model_rd_from_var_lapndz(unsigned int var, unsigned int n,
                                   unsigned int qstep, int *rate,
                                   int64_t *dist);
 
-int vp9_get_switchable_rate(const struct VP9_COMP *cpi);
+int vp9_get_switchable_rate(const struct VP9_COMP *cpi,
+                            const MACROBLOCKD *const xd);
 
 const YV12_BUFFER_CONFIG *vp9_get_scaled_ref_frame(const struct VP9_COMP *cpi,
                                                    int ref_frame);

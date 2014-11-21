@@ -52,9 +52,10 @@ int vp9_is_skippable_in_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane);
 int vp9_has_high_freq_in_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane);
 
 struct VP9_COMP;
+struct ThreadData;
 
-void vp9_tokenize_sb(struct VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,
-                     BLOCK_SIZE bsize);
+void vp9_tokenize_sb(struct VP9_COMP *cpi, struct ThreadData *td,
+                     TOKENEXTRA **t, int dry_run, BLOCK_SIZE bsize);
 
 extern const int16_t *vp9_dct_value_cost_ptr;
 /* TODO: The Token field should be broken out into a separate char array to

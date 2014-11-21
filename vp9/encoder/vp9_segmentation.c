@@ -37,10 +37,6 @@ void vp9_set_segment_data(struct segmentation *seg,
   seg->abs_delta = abs_delta;
 
   vpx_memcpy(seg->feature_data, feature_data, sizeof(seg->feature_data));
-
-  // TBD ?? Set the feature mask
-  // vpx_memcpy(cpi->mb.e_mbd.segment_feature_mask, 0,
-  //            sizeof(cpi->mb.e_mbd.segment_feature_mask));
 }
 void vp9_disable_segfeature(struct segmentation *seg, int segment_id,
                             SEG_LVL_FEATURES feature_id) {

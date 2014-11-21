@@ -701,7 +701,7 @@ void vp9_update_zbin_extra(VP9_COMP *cpi, MACROBLOCK *x) {
 
 void vp9_frame_init_quantizer(VP9_COMP *cpi) {
   cpi->zbin_mode_boost = 0;
-  vp9_init_plane_quantizers(cpi, &cpi->mb);
+  vp9_init_plane_quantizers(cpi, &cpi->td.mb);
 }
 
 void vp9_set_quantizer(VP9_COMMON *cm, int q) {

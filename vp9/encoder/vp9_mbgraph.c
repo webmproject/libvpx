@@ -24,7 +24,7 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
                                               MV *dst_mv,
                                               int mb_row,
                                               int mb_col) {
-  MACROBLOCK *const x = &cpi->mb;
+  MACROBLOCK *const x = &cpi->td.mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   const MV_SPEED_FEATURES *const mv_sf = &cpi->sf.mv;
   const vp9_variance_fn_ptr_t v_fn_ptr = cpi->fn_ptr[BLOCK_16X16];
@@ -80,7 +80,7 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
 
 static int do_16x16_motion_search(VP9_COMP *cpi, const MV *ref_mv,
                                   int_mv *dst_mv, int mb_row, int mb_col) {
-  MACROBLOCK *const x = &cpi->mb;
+  MACROBLOCK *const x = &cpi->td.mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   unsigned int err, tmp_err;
   MV tmp_mv;
@@ -117,7 +117,7 @@ static int do_16x16_motion_search(VP9_COMP *cpi, const MV *ref_mv,
 }
 
 static int do_16x16_zerozero_search(VP9_COMP *cpi, int_mv *dst_mv) {
-  MACROBLOCK *const x = &cpi->mb;
+  MACROBLOCK *const x = &cpi->td.mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   unsigned int err;
 
@@ -131,7 +131,7 @@ static int do_16x16_zerozero_search(VP9_COMP *cpi, int_mv *dst_mv) {
   return err;
 }
 static int find_best_16x16_intra(VP9_COMP *cpi, PREDICTION_MODE *pbest_mode) {
-  MACROBLOCK   *const x  = &cpi->mb;
+  MACROBLOCK   *const x  = &cpi->td.mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   PREDICTION_MODE best_mode = -1, mode;
   unsigned int best_err = INT_MAX;
@@ -174,7 +174,7 @@ static void update_mbgraph_mb_stats
   int mb_row,
   int mb_col
 ) {
-  MACROBLOCK *const x = &cpi->mb;
+  MACROBLOCK *const x = &cpi->td.mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   int intra_error;
   VP9_COMMON *cm = &cpi->common;
@@ -229,7 +229,7 @@ static void update_mbgraph_frame_stats(VP9_COMP *cpi,
                                        YV12_BUFFER_CONFIG *buf,
                                        YV12_BUFFER_CONFIG *golden_ref,
                                        YV12_BUFFER_CONFIG *alt_ref) {
-  MACROBLOCK *const x = &cpi->mb;
+  MACROBLOCK *const x = &cpi->td.mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   VP9_COMMON *const cm = &cpi->common;
 

@@ -17,9 +17,11 @@ extern "C" {
 #endif
 
 struct VP9_COMP;
+struct macroblock;
 
 // Select a segment for the current SB64.
-void vp9_select_in_frame_q_segment(struct VP9_COMP *cpi, BLOCK_SIZE bs,
+void vp9_select_in_frame_q_segment(struct VP9_COMP *cpi, struct macroblock *x,
+                                   BLOCK_SIZE bs,
                                    int mi_row, int mi_col,
                                    int output_enabled, int projected_rate);
 

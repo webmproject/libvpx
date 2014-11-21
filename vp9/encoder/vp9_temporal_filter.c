@@ -213,7 +213,7 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
                                               uint8_t *arf_frame_buf,
                                               uint8_t *frame_ptr_buf,
                                               int stride) {
-  MACROBLOCK *const x = &cpi->mb;
+  MACROBLOCK *const x = &cpi->td.mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   const MV_SPEED_FEATURES *const mv_sf = &cpi->sf.mv;
   int step_param;
@@ -282,7 +282,7 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
   int mb_uv_offset = 0;
   DECLARE_ALIGNED_ARRAY(16, unsigned int, accumulator, 16 * 16 * 3);
   DECLARE_ALIGNED_ARRAY(16, uint16_t, count, 16 * 16 * 3);
-  MACROBLOCKD *mbd = &cpi->mb.e_mbd;
+  MACROBLOCKD *mbd = &cpi->td.mb.e_mbd;
   YV12_BUFFER_CONFIG *f = frames[alt_ref_index];
   uint8_t *dst1, *dst2;
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -321,8 +321,8 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
     //  8 - VP9_INTERP_EXTEND.
     // To keep the mv in play for both Y and UV planes the max that it
     //  can be on a border is therefore 16 - (2*VP9_INTERP_EXTEND+1).
-    cpi->mb.mv_row_min = -((mb_row * 16) + (17 - 2 * VP9_INTERP_EXTEND));
-    cpi->mb.mv_row_max = ((mb_rows - 1 - mb_row) * 16)
+    cpi->td.mb.mv_row_min = -((mb_row * 16) + (17 - 2 * VP9_INTERP_EXTEND));
+    cpi->td.mb.mv_row_max = ((mb_rows - 1 - mb_row) * 16)
                          + (17 - 2 * VP9_INTERP_EXTEND);
 
     for (mb_col = 0; mb_col < mb_cols; mb_col++) {
@@ -332,8 +332,8 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
       vpx_memset(accumulator, 0, 16 * 16 * 3 * sizeof(accumulator[0]));
       vpx_memset(count, 0, 16 * 16 * 3 * sizeof(count[0]));
 
-      cpi->mb.mv_col_min = -((mb_col * 16) + (17 - 2 * VP9_INTERP_EXTEND));
-      cpi->mb.mv_col_max = ((mb_cols - 1 - mb_col) * 16)
+      cpi->td.mb.mv_col_min = -((mb_col * 16) + (17 - 2 * VP9_INTERP_EXTEND));
+      cpi->td.mb.mv_col_max = ((mb_cols - 1 - mb_col) * 16)
                            + (17 - 2 * VP9_INTERP_EXTEND);
 
       for (frame = 0; frame < frame_count; frame++) {
@@ -653,6 +653,7 @@ static void adjust_arnr_filter(VP9_COMP *cpi,
 void vp9_temporal_filter(VP9_COMP *cpi, int distance) {
   VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
+  MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
   int frame;
   int frames_to_blur;
   int start_frame;
@@ -720,8 +721,8 @@ void vp9_temporal_filter(VP9_COMP *cpi, int distance) {
         }
       }
       cm->mi = cm->mip + cm->mi_stride + 1;
-      cpi->mb.e_mbd.mi = cm->mi;
-      cpi->mb.e_mbd.mi[0].src_mi = &cpi->mb.e_mbd.mi[0];
+      xd->mi = cm->mi;
+      xd->mi[0].src_mi = &xd->mi[0];
     } else {
       // ARF is produced at the native frame size and resized when coded.
 #if CONFIG_VP9_HIGHBITDEPTH

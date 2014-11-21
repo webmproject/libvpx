@@ -96,7 +96,8 @@ void vp9_setup_in_frame_q_adj(VP9_COMP *cpi) {
 // An "aq_strength" value determines how many segments are supported,
 // the set of transition points to use and the extent of the quantizer
 // adjustment for each segment (configured in vp9_setup_in_frame_q_adj()).
-void vp9_select_in_frame_q_segment(VP9_COMP *cpi, BLOCK_SIZE bs,
+void vp9_select_in_frame_q_segment(VP9_COMP *cpi, MACROBLOCK *mb,
+                                   BLOCK_SIZE bs,
                                    int mi_row, int mi_col,
                                    int output_enabled, int projected_rate) {
   VP9_COMMON *const cm = &cpi->common;
@@ -122,8 +123,8 @@ void vp9_select_in_frame_q_segment(VP9_COMP *cpi, BLOCK_SIZE bs,
     const int active_segments = aq_c_active_segments[aq_strength];
     double logvar;
 
-    vp9_setup_src_planes(&cpi->mb, cpi->Source, mi_row, mi_col);
-    logvar = vp9_log_block_var(cpi, &cpi->mb, bs);
+    vp9_setup_src_planes(mb, cpi->Source, mi_row, mi_col);
+    logvar = vp9_log_block_var(cpi, mb, bs);
 
     // The number of segments considered and the transition points used to
     // select them is determined by the "aq_strength" value.

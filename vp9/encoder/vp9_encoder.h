@@ -241,16 +241,26 @@ typedef struct TileDataEnc {
   int mode_map[BLOCK_SIZES][MAX_MODES];
 } TileDataEnc;
 
-typedef struct {
+typedef struct RD_COUNTS {
   vp9_coeff_count coef_counts[TX_SIZES][PLANE_TYPES];
   int64_t comp_pred_diff[REFERENCE_MODES];
   int64_t tx_select_diff[TX_MODES];
   int64_t filter_diff[SWITCHABLE_FILTER_CONTEXTS];
-} COUNTS;
+} RD_COUNTS;
+
+typedef struct ThreadData {
+  MACROBLOCK mb;
+  RD_COUNTS rd_counts;
+  FRAME_COUNTS *counts;
+
+  PICK_MODE_CONTEXT *leaf_tree;
+  PC_TREE *pc_tree;
+  PC_TREE *pc_root;
+} ThreadData;
 
 typedef struct VP9_COMP {
   QUANTS quants;
-  MACROBLOCK mb;
+  ThreadData td;
   VP9_COMMON common;
   VP9EncoderConfig oxcf;
   struct lookahead_ctx    *lookahead;
@@ -294,7 +304,6 @@ typedef struct VP9_COMP {
   int ambient_err;
 
   RD_OPT rd;
-  COUNTS *frame_counts;
 
   CODING_CONTEXT coding_context;
 
@@ -424,10 +433,6 @@ typedef struct VP9_COMP {
   int intra_uv_mode_cost[FRAME_TYPES][INTRA_MODES];
   int y_mode_costs[INTRA_MODES][INTRA_MODES][INTRA_MODES];
   int switchable_interp_costs[SWITCHABLE_FILTER_CONTEXTS][SWITCHABLE_FILTERS];
-
-  PICK_MODE_CONTEXT *leaf_tree;
-  PC_TREE *pc_tree;
-  PC_TREE *pc_root;
   int partition_cost[PARTITION_CONTEXTS][PARTITION_TYPES];
 
   int multi_arf_allowed;

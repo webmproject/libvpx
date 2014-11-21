@@ -744,7 +744,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           model_rd_for_sb_y(cpi, bsize, x, xd, &pf_rate[filter],
                             &pf_dist[filter], &pf_var[filter], &pf_sse[filter]);
           cost = RDCOST(x->rdmult, x->rddiv,
-                        vp9_get_switchable_rate(cpi) + pf_rate[filter],
+                        vp9_get_switchable_rate(cpi, xd) + pf_rate[filter],
                         pf_dist[filter]);
           pf_tx_size[filter] = mbmi->tx_size;
           if (cost < best_cost) {

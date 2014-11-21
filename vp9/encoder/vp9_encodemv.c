@@ -161,10 +161,10 @@ static void write_mv_update(const vp9_tree_index *tree,
     update_mv(w, branch_ct[i], &probs[i], MV_UPDATE_PROB);
 }
 
-void vp9_write_nmv_probs(VP9_COMMON *cm, int usehp, vp9_writer *w) {
+void vp9_write_nmv_probs(VP9_COMMON *cm, int usehp, vp9_writer *w,
+                         nmv_context_counts *const counts) {
   int i, j;
   nmv_context *const mvc = &cm->fc->nmvc;
-  nmv_context_counts *const counts = &cm->counts.mv;
 
   write_mv_update(vp9_mv_joint_tree, mvc->joints, counts->joints, MV_JOINTS, w);
 
@@ -241,7 +241,8 @@ static void inc_mvs(const MB_MODE_INFO *mbmi, const int_mv mvs[2],
   }
 }
 
-void vp9_update_mv_count(VP9_COMMON *cm, const MACROBLOCKD *xd) {
+void vp9_update_mv_count(ThreadData *td) {
+  const MACROBLOCKD *xd = &td->mb.e_mbd;
   const MODE_INFO *mi = xd->mi[0].src_mi;
   const MB_MODE_INFO *const mbmi = &mi->mbmi;
 
@@ -254,12 +255,12 @@ void vp9_update_mv_count(VP9_COMMON *cm, const MACROBLOCKD *xd) {
       for (idx = 0; idx < 2; idx += num_4x4_w) {
         const int i = idy * 2 + idx;
         if (mi->bmi[i].as_mode == NEWMV)
-          inc_mvs(mbmi, mi->bmi[i].as_mv, &cm->counts.mv);
+          inc_mvs(mbmi, mi->bmi[i].as_mv, &td->counts->mv);
       }
     }
   } else {
     if (mbmi->mode == NEWMV)
-      inc_mvs(mbmi, mbmi->mv, &cm->counts.mv);
+      inc_mvs(mbmi, mbmi->mv, &td->counts->mv);
   }
 }
 

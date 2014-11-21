@@ -15,6 +15,7 @@
 
 struct VP9_COMP;
 struct VP9Common;
+struct ThreadData;
 
 // Structure to hold snapshot of coding context during the mode picking process
 typedef struct {
@@ -79,7 +80,7 @@ typedef struct PC_TREE {
   };
 } PC_TREE;
 
-void vp9_setup_pc_tree(struct VP9Common *cm, struct VP9_COMP *cpi);
-void vp9_free_pc_tree(struct VP9_COMP *cpi);
+void vp9_setup_pc_tree(struct VP9Common *cm, struct ThreadData *td);
+void vp9_free_pc_tree(struct ThreadData *td);
 
 #endif /* VP9_ENCODER_VP9_CONTEXT_TREE_H_ */

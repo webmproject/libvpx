@@ -244,15 +244,17 @@ void vp9_tokenize_initialize() {
 
 struct tokenize_b_args {
   VP9_COMP *cpi;
-  MACROBLOCKD *xd;
+  ThreadData *td;
   TOKENEXTRA **tp;
 };
 
 static void set_entropy_context_b(int plane, int block, BLOCK_SIZE plane_bsize,
                                   TX_SIZE tx_size, void *arg) {
   struct tokenize_b_args* const args = arg;
-  MACROBLOCKD *const xd = args->xd;
-  struct macroblock_plane *p = &args->cpi->mb.plane[plane];
+  ThreadData *const td = args->td;
+  MACROBLOCK *const x = &td->mb;
+  MACROBLOCKD *const xd = &x->e_mbd;
+  struct macroblock_plane *p = &x->plane[plane];
   struct macroblockd_plane *pd = &xd->plane[plane];
   int aoff, loff;
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &aoff, &loff);
@@ -294,10 +296,12 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
                        TX_SIZE tx_size, void *arg) {
   struct tokenize_b_args* const args = arg;
   VP9_COMP *cpi = args->cpi;
-  MACROBLOCKD *xd = args->xd;
+  ThreadData *const td = args->td;
+  MACROBLOCK *const x = &td->mb;
+  MACROBLOCKD *const xd = &x->e_mbd;
   TOKENEXTRA **tp = args->tp;
   uint8_t token_cache[32 * 32];
-  struct macroblock_plane *p = &cpi->mb.plane[plane];
+  struct macroblock_plane *p = &x->plane[plane];
   struct macroblockd_plane *pd = &xd->plane[plane];
   MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
   int pt; /* near block/prev token context index */
@@ -311,11 +315,11 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   const scan_order *so;
   const int ref = is_inter_block(mbmi);
   unsigned int (*const counts)[COEFF_CONTEXTS][ENTROPY_TOKENS] =
-      cpi->frame_counts->coef_counts[tx_size][type][ref];
+      td->rd_counts.coef_counts[tx_size][type][ref];
   vp9_prob (*const coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
       cpi->common.fc->coef_probs[tx_size][type][ref];
   unsigned int (*const eob_branch)[COEFF_CONTEXTS] =
-      cpi->common.counts.eob_branch[tx_size][type][ref];
+      td->counts->eob_branch[tx_size][type][ref];
   const uint8_t *const band = get_band_translate(tx_size);
   const int seg_eob = get_tx_eob(&cpi->common.seg, segment_id, tx_size);
   const TOKENVALUE *dct_value_tokens;
@@ -421,19 +425,20 @@ int vp9_has_high_freq_in_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
   return result;
 }
 
-void vp9_tokenize_sb(VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,
-                     BLOCK_SIZE bsize) {
+void vp9_tokenize_sb(VP9_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
+                     int dry_run, BLOCK_SIZE bsize) {
   VP9_COMMON *const cm = &cpi->common;
-  MACROBLOCKD *const xd = &cpi->mb.e_mbd;
+  MACROBLOCK *const x = &td->mb;
+  MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0].src_mi->mbmi;
   TOKENEXTRA *t_backup = *t;
   const int ctx = vp9_get_skip_context(xd);
   const int skip_inc = !vp9_segfeature_active(&cm->seg, mbmi->segment_id,
                                               SEG_LVL_SKIP);
-  struct tokenize_b_args arg = {cpi, xd, t};
+  struct tokenize_b_args arg = {cpi, td, t};
   if (mbmi->skip) {
     if (!dry_run)
-      cm->counts.skip[ctx][1] += skip_inc;
+      td->counts->skip[ctx][1] += skip_inc;
     reset_skip_context(xd, bsize);
     if (dry_run)
       *t = t_backup;
@@ -441,7 +446,7 @@ void vp9_tokenize_sb(VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,
   }
 
   if (!dry_run) {
-    cm->counts.skip[ctx][0] += skip_inc;
+    td->counts->skip[ctx][0] += skip_inc;
     vp9_foreach_transformed_block(xd, bsize, tokenize_b, &arg);
   } else {
     vp9_foreach_transformed_block(xd, bsize, set_entropy_context_b, &arg);
