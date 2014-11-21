@@ -25,10 +25,9 @@
 #define ENERGY_IN_BOUNDS(energy)\
   assert((energy) >= ENERGY_MIN && (energy) <= ENERGY_MAX)
 
-static double q_ratio[MAX_SEGMENTS] =
-  {1.0, 0.875, 1.143, 1.0, 1.0, 1.0, 1.0, 1.0};
-
-static int segment_id[ENERGY_SPAN] = {1, 0, 2};
+static double rate_ratio[MAX_SEGMENTS] =
+  {1.143, 1.0, 0.875, 1.0, 1.0, 1.0, 1.0, 1.0};
+static int segment_id[ENERGY_SPAN] = {0, 1, 2};
 
 #define SEGMENT_ID(i) segment_id[(i) - ENERGY_MIN]
 
@@ -45,7 +44,6 @@ unsigned int vp9_vaq_segment_id(int energy) {
 void vp9_vaq_frame_setup(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
   struct segmentation *seg = &cm->seg;
-  const double base_q = vp9_convert_qindex_to_q(cm->base_qindex, cm->bit_depth);
   int i;
 
   if (cm->frame_type == KEY_FRAME ||
@@ -59,15 +57,23 @@ void vp9_vaq_frame_setup(VP9_COMP *cpi) {
     vp9_clear_system_state();
 
     for (i = 0; i < MAX_SEGMENTS; i++) {
-      int qindex_delta;
+      int qindex_delta =
+          vp9_compute_qdelta_by_rate(&cpi->rc, cm->frame_type, cm->base_qindex,
+                                     rate_ratio[i], cm->bit_depth);
+
+      // We don't allow Q0 in a segment if the base Q is not 0.
+      // Q0 (lossless) implies 4x4 only and in AQ mode a segment
+      // Q delta is sometimes applied without going back around the rd loop.
+      // This could lead to an illegal combination of partition size and q.
+      if ((cm->base_qindex != 0) && ((cm->base_qindex + qindex_delta) == 0)) {
+        qindex_delta = -cm->base_qindex + 1;
+      }
 
       // No need to enable SEG_LVL_ALT_Q for this segment
-      if (q_ratio[i] == 1.0) {
+      if (rate_ratio[i] == 1.0) {
         continue;
       }
 
-      qindex_delta = vp9_compute_qdelta(&cpi->rc, base_q, base_q * q_ratio[i],
-                                        cm->bit_depth);
       vp9_set_segdata(seg, i, SEG_LVL_ALT_Q, qindex_delta);
       vp9_enable_segfeature(seg, i, SEG_LVL_ALT_Q);
     }
