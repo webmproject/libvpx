@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//PPw\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 6
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-11-21T19:46:10Z",
+      "side": 1,
+      "message": "delete this line",
+      "revId": "1fbdb72106b5f85bce8c3bc62a89ceda6dec912b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//PPs\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 6
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-11-21T19:46:10Z",
+      "side": 1,
+      "message": "delete this line",
+      "revId": "1fbdb72106b5f85bce8c3bc62a89ceda6dec912b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//PQA\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 6
+      },
+      "lineNbr": 580,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-11-21T19:46:10Z",
+      "side": 1,
+      "message": "fix indent",
+      "revId": "1fbdb72106b5f85bce8c3bc62a89ceda6dec912b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//PP4\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 6
+      },
+      "lineNbr": 783,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-11-21T19:46:10Z",
+      "side": 1,
+      "message": "fix indent",
+      "revId": "1fbdb72106b5f85bce8c3bc62a89ceda6dec912b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//PP0\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 6
+      },
+      "lineNbr": 804,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-11-21T19:46:10Z",
+      "side": 1,
+      "message": "fix indent",
+      "revId": "1fbdb72106b5f85bce8c3bc62a89ceda6dec912b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
