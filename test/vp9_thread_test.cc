@@ -207,7 +207,7 @@ int Reset(VP9Worker *const /*worker*/) { return 1; }
 int Sync(VP9Worker *const worker) { return !worker->had_error; }
 
 void Execute(VP9Worker *const worker) {
-  worker->had_error |= worker->hook(worker->data1, worker->data2);
+  worker->had_error |= !worker->hook(worker->data1, worker->data2);
 }
 
 void Launch(VP9Worker *const worker) { Execute(worker); }
