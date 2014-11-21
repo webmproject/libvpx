@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//PWM\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-11-21T02:27:13Z",
+      "side": 1,
+      "message": "/Normalize indent/",
+      "revId": "b143fc68670cb617191d9183d6dab218ba520b0a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//PWE\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 482,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-11-21T02:27:13Z",
+      "side": 1,
+      "message": "indent 2 here\n\nhttp://google-styleguide.googlecode.com/svn/trunk/shell.xml#Case_statement",
+      "revId": "b143fc68670cb617191d9183d6dab218ba520b0a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
