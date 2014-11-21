@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//PNM\u003d",
+        "filename": "vp9/encoder/vp9_aq_variance.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-11-21T20:30:55Z",
+      "side": 1,
+      "message": "Also note that this was not a change in this patch.",
+      "parentUuid": "AAAAdn//PN4\u003d",
+      "revId": "3d1e8c9a85d0bb16049cb1622f1d2d9a034c5379",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//PPg\u003d",
         "filename": "vp9/encoder/vp9_aq_variance.c",
         "patchSetId": 4
