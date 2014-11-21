@@ -617,9 +617,17 @@ DECLARE_ARG 7, 8, 9, 10, 11, 12, 13, 14
         %elifidn __OUTPUT_FORMAT__,elf64
             global %1:function hidden
         %elifidn __OUTPUT_FORMAT__,macho32
-            global %1:private_extern
+            %ifdef __NASM_VER__
+                global %1
+            %else
+                global %1:private_extern
+            %endif
         %elifidn __OUTPUT_FORMAT__,macho64
-            global %1:private_extern
+            %ifdef __NASM_VER__
+                global %1
+            %else
+                global %1:private_extern
+            %endif
         %else
             global %1
         %endif
