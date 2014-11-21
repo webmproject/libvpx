@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//PMI\u003d",
+        "filename": "vp9/encoder/vp9_aq_variance.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-11-21T22:09:35Z",
+      "side": 1,
+      "message": "Already fixed in another patch.",
+      "parentUuid": "AAAAdn//PPY\u003d",
+      "revId": "1663eff7f8e8e820c6037157fcc9917d8ece9c28",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//PPM\u003d",
         "filename": "vp9/encoder/vp9_aq_variance.c",
         "patchSetId": 5
@@ -47,6 +65,24 @@
       "writtenOn": "2014-11-21T19:58:36Z",
       "side": 1,
       "message": "What is Q0? Do you mean \"q \u003d\u003d 0\"?",
+      "revId": "1663eff7f8e8e820c6037157fcc9917d8ece9c28",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//PMU\u003d",
+        "filename": "vp9/encoder/vp9_aq_variance.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-11-21T22:09:35Z",
+      "side": 1,
+      "message": "Q index 0 not allowed. I think this should be clear from the test cm-\u003ebase_qindex !\u003d 0. Will clarrify in next patch",
+      "parentUuid": "AAAAdn//PPM\u003d",
       "revId": "1663eff7f8e8e820c6037157fcc9917d8ece9c28",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -81,6 +117,24 @@
       "writtenOn": "2014-11-21T19:58:36Z",
       "side": 1,
       "message": "Full-stop at end of line.",
+      "revId": "1663eff7f8e8e820c6037157fcc9917d8ece9c28",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//PMM\u003d",
+        "filename": "vp9/encoder/vp9_aq_variance.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-11-21T22:09:35Z",
+      "side": 1,
+      "message": "This already fixed in another patch.",
+      "parentUuid": "AAAAdn//PPQ\u003d",
       "revId": "1663eff7f8e8e820c6037157fcc9917d8ece9c28",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
