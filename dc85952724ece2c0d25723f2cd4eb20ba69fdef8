@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//PWs\u003d",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-11-21T01:44:19Z",
+      "side": 1,
+      "message": "float again? Is there any reason for this? In general we use double",
+      "revId": "dc85952724ece2c0d25723f2cd4eb20ba69fdef8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
