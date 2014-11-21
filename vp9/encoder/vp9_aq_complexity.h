@@ -19,9 +19,9 @@ extern "C" {
 struct VP9_COMP;
 
 // Select a segment for the current SB64.
-void vp9_select_in_frame_q_segment(struct VP9_COMP *cpi, int mi_row, int mi_col,
+void vp9_select_in_frame_q_segment(struct VP9_COMP *cpi, BLOCK_SIZE bs,
+                                   int mi_row, int mi_col,
                                    int output_enabled, int projected_rate);
-
 
 // This function sets up a set of segments with delta Q values around
 // the baseline frame quantizer.

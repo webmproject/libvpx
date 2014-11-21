@@ -1699,7 +1699,7 @@ static void rd_use_partition(VP9_COMP *cpi,
     // and and if necessary apply a Q delta using segmentation to get
     // closer to the target.
     if ((cpi->oxcf.aq_mode == COMPLEXITY_AQ) && cm->seg.update_map) {
-      vp9_select_in_frame_q_segment(cpi, mi_row, mi_col,
+      vp9_select_in_frame_q_segment(cpi, bsize, mi_row, mi_col,
                                     output_enabled, chosen_rdc.rate);
     }
     encode_sb(cpi, tile_info, tp, mi_row, mi_col, output_enabled, bsize,
@@ -2438,7 +2438,7 @@ static void rd_pick_partition(VP9_COMP *cpi,
     // and and if necessary apply a Q delta using segmentation to get
     // closer to the target.
     if ((cpi->oxcf.aq_mode == COMPLEXITY_AQ) && cm->seg.update_map)
-      vp9_select_in_frame_q_segment(cpi, mi_row, mi_col, output_enabled,
+      vp9_select_in_frame_q_segment(cpi, bsize, mi_row, mi_col, output_enabled,
                                     best_rdc.rate);
     encode_sb(cpi, tile_info, tp, mi_row, mi_col, output_enabled,
               bsize, pc_tree);
@@ -2943,7 +2943,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi,
     // and and if necessary apply a Q delta using segmentation to get
     // closer to the target.
     if ((oxcf->aq_mode == COMPLEXITY_AQ) && cm->seg.update_map) {
-      vp9_select_in_frame_q_segment(cpi, mi_row, mi_col, output_enabled,
+      vp9_select_in_frame_q_segment(cpi, bsize, mi_row, mi_col, output_enabled,
                                     best_rdc.rate);
     }
     encode_sb_rt(cpi, tile_info, tp, mi_row, mi_col, output_enabled,
