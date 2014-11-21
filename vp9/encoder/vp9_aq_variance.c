@@ -26,11 +26,9 @@
   assert((energy) >= ENERGY_MIN && (energy) <= ENERGY_MAX)
 
 static double q_ratio[MAX_SEGMENTS] = { 1, 1, 1, 1, 1, 1, 1, 1 };
-static double rdmult_ratio[MAX_SEGMENTS] = { 1, 1, 1, 1, 1, 1, 1, 1 };
 static int segment_id[MAX_SEGMENTS] = { 5, 3, 1, 0, 2, 4, 6, 7 };
 
 #define Q_RATIO(i) q_ratio[(i) - ENERGY_MIN]
-#define RDMULT_RATIO(i) rdmult_ratio[(i) - ENERGY_MIN]
 #define SEGMENT_ID(i) segment_id[(i) - ENERGY_MIN]
 
 DECLARE_ALIGNED(16, static const uint8_t, vp9_64_zeros[64]) = {0};
@@ -42,14 +40,6 @@ unsigned int vp9_vaq_segment_id(int energy) {
   ENERGY_IN_BOUNDS(energy);
 
   return SEGMENT_ID(energy);
-}
-
-double vp9_vaq_rdmult_ratio(int energy) {
-  ENERGY_IN_BOUNDS(energy);
-
-  vp9_clear_system_state();
-
-  return RDMULT_RATIO(energy);
 }
 
 void vp9_vaq_init() {
@@ -71,8 +61,6 @@ void vp9_vaq_frame_setup(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
   struct segmentation *seg = &cm->seg;
   const double base_q = vp9_convert_qindex_to_q(cm->base_qindex, cm->bit_depth);
-  const int base_rdmult = vp9_compute_rd_mult(cpi, cm->base_qindex +
-                                              cm->y_dc_delta_q);
   int i;
 
   if (cm->frame_type == KEY_FRAME ||
@@ -86,11 +74,10 @@ void vp9_vaq_frame_setup(VP9_COMP *cpi) {
   vp9_clear_system_state();
 
     for (i = ENERGY_MIN; i <= ENERGY_MAX; i++) {
-      int qindex_delta, segment_rdmult;
+      int qindex_delta;
 
       if (Q_RATIO(i) == 1) {
         // No need to enable SEG_LVL_ALT_Q for this segment
-        RDMULT_RATIO(i) = 1;
         continue;
       }
 
@@ -98,11 +85,6 @@ void vp9_vaq_frame_setup(VP9_COMP *cpi) {
                                         cm->bit_depth);
       vp9_set_segdata(seg, SEGMENT_ID(i), SEG_LVL_ALT_Q, qindex_delta);
       vp9_enable_segfeature(seg, SEGMENT_ID(i), SEG_LVL_ALT_Q);
-
-      segment_rdmult = vp9_compute_rd_mult(cpi, cm->base_qindex + qindex_delta +
-                                           cm->y_dc_delta_q);
-
-      RDMULT_RATIO(i) = (double) segment_rdmult / base_rdmult;
     }
   }
 }
