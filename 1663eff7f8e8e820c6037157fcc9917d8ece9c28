@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//PK0\u003d",
+        "filename": "vp9/encoder/vp9_aq_variance.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-11-21T23:29:11Z",
+      "side": 1,
+      "message": "Done in next patch",
+      "parentUuid": "AAAAdn//PPU\u003d",
+      "revId": "1663eff7f8e8e820c6037157fcc9917d8ece9c28",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//PPY\u003d",
         "filename": "vp9/encoder/vp9_aq_variance.c",
         "patchSetId": 5
@@ -100,6 +118,24 @@
       "writtenOn": "2014-11-21T19:58:36Z",
       "side": 1,
       "message": "\"...implies 4x4 transform only...\"",
+      "revId": "1663eff7f8e8e820c6037157fcc9917d8ece9c28",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//PKw\u003d",
+        "filename": "vp9/encoder/vp9_aq_variance.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-11-21T23:29:11Z",
+      "side": 1,
+      "message": "Clarified in next patch",
+      "parentUuid": "AAAAdn//PPI\u003d",
       "revId": "1663eff7f8e8e820c6037157fcc9917d8ece9c28",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
