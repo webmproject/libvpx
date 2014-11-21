@@ -807,10 +807,8 @@ static void rd_pick_sb_modes(VP9_COMP *cpi,
   struct macroblockd_plane *const pd = xd->plane;
   const AQ_MODE aq_mode = cpi->oxcf.aq_mode;
   int i, orig_rdmult;
-  double rdmult_ratio;
 
   vp9_clear_system_state();
-  rdmult_ratio = 1.0;  // avoid uninitialized warnings
 
   // Use the lower precision, but faster, 32x32 fdct for mode selection.
   x->use_lp32x32fdct = 1;
@@ -866,8 +864,6 @@ static void rd_pick_sb_modes(VP9_COMP *cpi,
     segment_qindex = vp9_get_qindex(&cm->seg, mbmi->segment_id,
                                     cm->base_qindex);
     x->rdmult = vp9_compute_rd_mult(cpi, segment_qindex + cm->y_dc_delta_q);
-    vp9_clear_system_state();
-    rdmult_ratio = (double)x->rdmult / orig_rdmult;
   } else if (aq_mode == COMPLEXITY_AQ) {
     const int mi_offset = mi_row * cm->mi_cols + mi_col;
     unsigned char complexity = cpi->complexity_map[mi_offset];
@@ -899,12 +895,6 @@ static void rd_pick_sb_modes(VP9_COMP *cpi,
       vp9_rd_pick_inter_mode_sub8x8(cpi, tile_data, x, mi_row, mi_col,
                                     rd_cost, bsize, ctx, best_rd);
     }
-  }
-
-  if (aq_mode == VARIANCE_AQ && rd_cost->rate != INT_MAX) {
-    vp9_clear_system_state();
-    rd_cost->rate = (int)round(rd_cost->rate * rdmult_ratio);
-    rd_cost->rdcost = RDCOST(x->rdmult, x->rddiv, rd_cost->rate, rd_cost->dist);
   }
 
   x->rdmult = orig_rdmult;
