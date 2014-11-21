@@ -16,6 +16,24 @@
       "revId": "fc47c5d653342084718a70f9e7fdd5e5e267507e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//POE\u003d",
+        "filename": "vp9/encoder/vp9_aq_variance.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2014-11-21T20:20:55Z",
+      "side": 1,
+      "message": "fixed on another patch",
+      "parentUuid": "AAAAdn//POQ\u003d",
+      "revId": "fc47c5d653342084718a70f9e7fdd5e5e267507e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
