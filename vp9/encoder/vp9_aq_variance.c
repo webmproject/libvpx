@@ -25,9 +25,9 @@
 #define ENERGY_IN_BOUNDS(energy)\
   assert((energy) >= ENERGY_MIN && (energy) <= ENERGY_MAX)
 
-static double rate_ratio[MAX_SEGMENTS] =
+static const double rate_ratio[MAX_SEGMENTS] =
   {1.143, 1.0, 0.875, 1.0, 1.0, 1.0, 1.0, 1.0};
-static int segment_id[ENERGY_SPAN] = {0, 1, 2};
+static const int segment_id[ENERGY_SPAN] = {0, 1, 2};
 
 #define SEGMENT_ID(i) segment_id[(i) - ENERGY_MIN]
 
@@ -56,20 +56,20 @@ void vp9_vaq_frame_setup(VP9_COMP *cpi) {
 
     vp9_clear_system_state();
 
-    for (i = 0; i < MAX_SEGMENTS; i++) {
+    for (i = 0; i < MAX_SEGMENTS; ++i) {
       int qindex_delta =
           vp9_compute_qdelta_by_rate(&cpi->rc, cm->frame_type, cm->base_qindex,
                                      rate_ratio[i], cm->bit_depth);
 
-      // We don't allow Q0 in a segment if the base Q is not 0.
-      // Q0 (lossless) implies 4x4 only and in AQ mode a segment
+      // We don't allow qindex 0 in a segment if the base value is not 0.
+      // Q index 0 (lossless) implies 4x4 encoding only and in AQ mode a segment
       // Q delta is sometimes applied without going back around the rd loop.
       // This could lead to an illegal combination of partition size and q.
       if ((cm->base_qindex != 0) && ((cm->base_qindex + qindex_delta) == 0)) {
         qindex_delta = -cm->base_qindex + 1;
       }
 
-      // No need to enable SEG_LVL_ALT_Q for this segment
+      // No need to enable SEG_LVL_ALT_Q for this segment.
       if (rate_ratio[i] == 1.0) {
         continue;
       }
@@ -138,7 +138,7 @@ double vp9_log_block_var(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bs) {
   return log(var + 1.0);
 }
 
-#define DEFAULT_E_MIDPOINT 10.0;
+#define DEFAULT_E_MIDPOINT 10.0
 int vp9_block_energy(VP9_COMP *cpi, MACROBLOCK *x, BLOCK_SIZE bs) {
   double energy;
   double energy_midpoint;
