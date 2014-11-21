@@ -265,28 +265,22 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    vp9_model_rd_from_var_lapndz(var,
-                                 1 << num_pels_log2_lookup[bsize],
-                                 ac_quant >> (xd->bd - 5),
-                                 &rate,
-                                 &dist);
+    vp9_model_rd_from_var_lapndz(var, 1 << num_pels_log2_lookup[bsize],
+                                 ac_quant >> (xd->bd - 5), &rate, &dist);
   } else {
-    vp9_model_rd_from_var_lapndz(var,
-                                 1 << num_pels_log2_lookup[bsize],
-                                 ac_quant >> 3,
-                                 &rate,
-                                 &dist);
+    vp9_model_rd_from_var_lapndz(var, 1 << num_pels_log2_lookup[bsize],
+                                 ac_quant >> 3, &rate, &dist);
   }
 #else
-  vp9_model_rd_from_var_lapndz(var,
-                               1 << num_pels_log2_lookup[bsize],
-                               ac_quant >> 3,
-                               &rate,
-                               &dist);
+  vp9_model_rd_from_var_lapndz(var, 1 << num_pels_log2_lookup[bsize],
+                               ac_quant >> 3, &rate, &dist);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
   *out_rate_sum += rate;
   *out_dist_sum += dist << 4;
+
+  if (*out_rate_sum == 0)
+    x->skip_txfm[0] = 1;
 }
 
 static int get_pred_buffer(PRED_BUFFER *p, int len) {

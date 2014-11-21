@@ -657,27 +657,34 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
     vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
 #else
   if (!x->skip_recode) {
-    if (max_txsize_lookup[plane_bsize] == tx_size) {
-      if (x->skip_txfm[(plane << 2) + (block >> (tx_size << 1))] == 0) {
-        // full forward transform and quantization
-        if (x->quant_fp)
-          vp9_xform_quant_fp(x, plane, block, plane_bsize, tx_size);
-        else
-          vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
-      } else if (x->skip_txfm[(plane << 2) + (block >> (tx_size << 1))] == 2) {
-        // fast path forward transform and quantization
-        vp9_xform_quant_dc(x, plane, block, plane_bsize, tx_size);
-      } else {
+    if (x->quant_fp) {
+      // Encoding process for rtc mode
+      if (x->skip_txfm[0] == 1 && plane == 0) {
         // skip forward transform
         p->eobs[block] = 0;
         *a = *l = 0;
         return;
+      } else {
+        vp9_xform_quant_fp(x, plane, block, plane_bsize, tx_size);
       }
     } else {
-      if (x->quant_fp)
-        vp9_xform_quant_fp(x, plane, block, plane_bsize, tx_size);
-      else
+      if (max_txsize_lookup[plane_bsize] == tx_size) {
+        int txfm_blk_index = (plane << 2) + (block >> (tx_size << 1));
+        if (x->skip_txfm[txfm_blk_index] == 0) {
+          // full forward transform and quantization
+          vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
+        } else if (x->skip_txfm[txfm_blk_index]== 2) {
+          // fast path forward transform and quantization
+          vp9_xform_quant_dc(x, plane, block, plane_bsize, tx_size);
+        } else {
+          // skip forward transform
+          p->eobs[block] = 0;
+          *a = *l = 0;
+          return;
+        }
+      } else {
         vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
+      }
     }
   }
 #endif
