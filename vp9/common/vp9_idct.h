@@ -35,7 +35,8 @@ extern "C" {
   _mm_set_epi16(b, b, b, b, a, a, a, a)
 
 #if CONFIG_TX_SKIP
-#define TX_SKIP_SHIFT 2
+#define TX_SKIP_SHIFT_LQ 2
+#define TX_SKIP_SHIFT_HQ 3
 #endif
 
 // Constants:
@@ -170,5 +171,5 @@ void vp9_highbd_iht16x16_add(TX_TYPE tx_type, const tran_low_t *input,
 #endif  // VP9_COMMON_VP9_IDCT_H_
 #if CONFIG_TX_SKIP
 void vp9_tx_identity_add(const tran_low_t *input, uint8_t *dest,
-                         int stride, int bs);
+                         int stride, int bs, int shift);
 #endif

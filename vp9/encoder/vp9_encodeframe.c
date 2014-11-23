@@ -1167,6 +1167,9 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
   const AQ_MODE aq_mode = cpi->oxcf.aq_mode;
   int i, orig_rdmult;
   double rdmult_ratio;
+#if CONFIG_TX_SKIP
+  int q_idx;
+#endif
 
   vp9_clear_system_state();
   rdmult_ratio = 1.0;  // avoid uninitialized warnings
@@ -1177,6 +1180,11 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
   set_offsets(cpi, tile, mi_row, mi_col, bsize);
   mbmi = &xd->mi[0].src_mi->mbmi;
   mbmi->sb_type = bsize;
+#if CONFIG_TX_SKIP
+  q_idx = vp9_get_qindex(&cm->seg, mbmi->segment_id, cm->base_qindex);
+  mbmi->tx_skip_shift = q_idx > TX_SKIP_SHIFT_THRESH ?
+      TX_SKIP_SHIFT_HQ : TX_SKIP_SHIFT_LQ;
+#endif
 
   for (i = 0; i < MAX_MB_PLANE; ++i) {
     p[i].coeff = ctx->coeff_pbuf[i][0];
@@ -4705,6 +4713,21 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
         !mbmi->skip &&
         !vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
       ++cm->counts.ext_tx[mbmi->tx_size][mbmi->ext_txfrm];
+    }
+#endif
+#if CONFIG_TX_SKIP
+    if (bsize >= BLOCK_8X8) {
+#if CONFIG_SUPERTX
+      int q_idx = cm->base_qindex;
+#else
+      int q_idx = vp9_get_qindex(&cm->seg, mbmi->segment_id, cm->base_qindex);
+#endif
+      int try_tx_skip = is_inter_block(mbmi) ? q_idx <= TX_SKIP_Q_THRESH_INTER :
+                                               q_idx <= TX_SKIP_Q_THRESH_INTRA;
+      if (try_tx_skip) {
+        ++cm->counts.y_tx_skip[is_inter_block(mbmi)][mbmi->tx_skip[0]];
+        ++cm->counts.uv_tx_skip[mbmi->tx_skip[0]][mbmi->tx_skip[1]];
+      }
     }
 #endif
   }

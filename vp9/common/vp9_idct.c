@@ -1594,11 +1594,11 @@ void vp9_iht16x16_add(TX_TYPE tx_type, const tran_low_t *input, uint8_t *dest,
 
 #if CONFIG_TX_SKIP
 void vp9_tx_identity_add(const tran_low_t *input, uint8_t *dest,
-                         int stride, int bs) {
+                         int stride, int bs, int shift) {
   int r, c, temp;
   for (r = 0; r < bs; r++)
     for (c = 0; c < bs; c++) {
-      temp = dest[r * stride + c] + (input[r * bs + c] >> TX_SKIP_SHIFT);
+      temp = dest[r * stride + c] + (input[r * bs + c] >> shift);
       dest[r * stride + c] = clip_pixel(temp);
     }
 }

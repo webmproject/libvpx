@@ -13,6 +13,10 @@
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_seg_common.h"
 
+#if CONFIG_TX_SKIP
+static const vp9_prob default_y_tx_skip_prob[2] = {190, 210};
+static const vp9_prob default_uv_tx_skip_prob[2] = {250, 160};
+#endif
 const vp9_prob vp9_kf_y_mode_prob[INTRA_MODES][INTRA_MODES][INTRA_MODES - 1] = {
   {  // above = dc
     { 137,  30,  42, 148, 151, 207,  70,  52,  91 },  // left = dc
@@ -406,6 +410,10 @@ void vp9_init_mode_probs(FRAME_CONTEXT *fc) {
   vp9_copy(fc->supertx_prob, default_supertx_prob);
   vp9_copy(fc->supertxsplit_prob, default_supertxsplit_prob);
 #endif
+#if CONFIG_TX_SKIP
+  vp9_copy(fc->y_tx_skip_prob, default_y_tx_skip_prob);
+  vp9_copy(fc->uv_tx_skip_prob, default_uv_tx_skip_prob);
+#endif
 }
 
 const vp9_tree_index vp9_switchable_interp_tree
@@ -530,6 +538,14 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
                                           counts->supertxsplit[i]);
   }
 #endif  // CONFIG_SUPERTX
+#if CONFIG_TX_SKIP
+  for (i = 0; i < 2; i++)
+    fc->y_tx_skip_prob[i] = adapt_prob(pre_fc->y_tx_skip_prob[i],
+                                       counts->y_tx_skip[i]);
+  for (i = 0; i < 2; i++)
+    fc->uv_tx_skip_prob[i] = adapt_prob(pre_fc->uv_tx_skip_prob[i],
+                                        counts->uv_tx_skip[i]);
+#endif  // CONFIG_TX_SKIP
 }
 
 static void set_default_lf_deltas(struct loopfilter *lf) {

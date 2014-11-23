@@ -297,11 +297,6 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
   skip = write_skip(cm, xd, segment_id, mi, w);
 #endif  // CONFIG_SUPERTX
 
-#if CONFIG_TX_SKIP
-  vp9_write_bit(w, mbmi->tx_skip[0]);
-  vp9_write_bit(w, mbmi->tx_skip[1]);
-#endif
-
 #if CONFIG_SUPERTX
   if (!supertx_enabled) {
 #endif
@@ -333,6 +328,22 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
                     &ext_tx_encodings[mbmi->ext_txfrm]);
   }
 #endif  // CONFIG_EXT_TX
+
+#if CONFIG_TX_SKIP
+  if (bsize >= BLOCK_8X8) {
+#if CONFIG_SUPERTX
+    int q_idx = cm->base_qindex;
+#else
+    int q_idx = vp9_get_qindex(seg, segment_id, cm->base_qindex);
+#endif
+    int try_tx_skip = is_inter ? q_idx <= TX_SKIP_Q_THRESH_INTER :
+                                 q_idx <= TX_SKIP_Q_THRESH_INTRA;
+    if (try_tx_skip) {
+      vp9_write(w, mbmi->tx_skip[0], cm->fc.y_tx_skip_prob[is_inter]);
+      vp9_write(w, mbmi->tx_skip[1], cm->fc.uv_tx_skip_prob[mbmi->tx_skip[0]]);
+    }
+  }
+#endif
 
   if (!is_inter) {
     if (bsize >= BLOCK_8X8) {
@@ -434,13 +445,20 @@ static void write_mb_modes_kf(const VP9_COMMON *cm, const MACROBLOCKD *xd,
     write_segment_id(w, seg, mbmi->segment_id);
 
   write_skip(cm, xd, mbmi->segment_id, mi, w);
-#if CONFIG_TX_SKIP
-  vp9_write_bit(w, mbmi->tx_skip[0]);
-  vp9_write_bit(w, mbmi->tx_skip[1]);
-#endif
 
   if (bsize >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT)
     write_selected_tx_size(cm, xd, mbmi->tx_size, bsize, w);
+
+#if CONFIG_TX_SKIP
+  if (bsize >= BLOCK_8X8) {
+    int q_idx = vp9_get_qindex(seg, mbmi->segment_id, cm->base_qindex);
+    int try_tx_skip = q_idx <= TX_SKIP_Q_THRESH_INTRA;
+    if (try_tx_skip) {
+      vp9_write(w, mbmi->tx_skip[0], cm->fc.y_tx_skip_prob[0]);
+      vp9_write(w, mbmi->tx_skip[1], cm->fc.uv_tx_skip_prob[mbmi->tx_skip[0]]);
+    }
+  }
+#endif
 
   if (bsize >= BLOCK_8X8) {
     write_intra_mode(w, mbmi->mode, get_y_mode_probs(mi, above_mi, left_mi, 0));
@@ -1442,6 +1460,14 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
       prob_diff_update(vp9_ext_tx_tree, cm->fc.ext_tx_prob[i],
                        cm->counts.ext_tx[i], EXT_TX_TYPES, &header_bc);
     }
+#endif
+#if CONFIG_TX_SKIP
+    for (i = 0; i < 2; i++)
+      vp9_cond_prob_diff_update(&header_bc, &fc->y_tx_skip_prob[i],
+                                cm->counts.y_tx_skip[i]);
+    for (i = 0; i < 2; i++)
+      vp9_cond_prob_diff_update(&header_bc, &fc->uv_tx_skip_prob[i],
+                                cm->counts.uv_tx_skip[i]);
 #endif
   }
 

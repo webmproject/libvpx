@@ -208,6 +208,7 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
   struct macroblockd_plane *const pd = &xd->plane[plane];
 #if CONFIG_TX_SKIP
   MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
+  int shift = mbmi->tx_skip_shift;
 #endif
   if (eob > 0) {
     TX_TYPE tx_type = DCT_DCT;
@@ -228,7 +229,7 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
             tx_type = get_tx_type_4x4(plane_type, xd, block);
 #if CONFIG_TX_SKIP
             if (mbmi->tx_skip[plane != 0]) {
-              vp9_tx_identity_add(dqcoeff, dst, stride, 4);
+              vp9_tx_identity_add(dqcoeff, dst, stride, 4, shift);
             } else {
               vp9_highbd_iht4x4_add(tx_type, dqcoeff, dst, stride, eob, xd->bd);
             }
@@ -240,7 +241,7 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
             tx_type = get_tx_type(plane_type, xd);
 #if CONFIG_TX_SKIP
             if (mbmi->tx_skip[plane != 0]) {
-              vp9_tx_identity_add(dqcoeff, dst, stride, 8);
+              vp9_tx_identity_add(dqcoeff, dst, stride, 8, shift);
             } else {
               vp9_highbd_iht8x8_add(tx_type, dqcoeff, dst, stride, eob, xd->bd);
             }
@@ -252,7 +253,7 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
             tx_type = get_tx_type(plane_type, xd);
 #if CONFIG_TX_SKIP
             if (mbmi->tx_skip[plane != 0]) {
-              vp9_tx_identity_add(dqcoeff, dst, stride, 16);
+              vp9_tx_identity_add(dqcoeff, dst, stride, 16, shift);
             } else {
               vp9_highbd_iht16x16_add(tx_type, dqcoeff, dst, stride, eob,
                                       xd->bd);
@@ -265,7 +266,7 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
             tx_type = DCT_DCT;
 #if CONFIG_TX_SKIP
             if (mbmi->tx_skip[plane != 0]) {
-              vp9_tx_identity_add(dqcoeff, dst, stride, 32);
+              vp9_tx_identity_add(dqcoeff, dst, stride, 32, shift);
             } else {
             vp9_highbd_idct32x32_add(dqcoeff, dst, stride, eob, xd->bd);
             }
@@ -278,7 +279,7 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
             tx_type = DCT_DCT;
 #if CONFIG_TX_SKIP
             if (mbmi->tx_skip[plane != 0]) {
-              vp9_tx_identity_add(dqcoeff, dst, stride, 64);
+              vp9_tx_identity_add(dqcoeff, dst, stride, 64, shift);
             } else {
               vp9_highbd_idct64x64_add(dqcoeff, dst, stride, eob, xd->bd);
             }
@@ -306,7 +307,7 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
             tx_type = get_tx_type_4x4(plane_type, xd, block);
 #if CONFIG_TX_SKIP
             if (mbmi->tx_skip[plane != 0]) {
-              vp9_tx_identity_add(dqcoeff, dst, stride, 4);
+              vp9_tx_identity_add(dqcoeff, dst, stride, 4, shift);
             } else {
               vp9_iht4x4_add(tx_type, dqcoeff, dst, stride, eob);
             }
@@ -318,7 +319,7 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
             tx_type = get_tx_type(plane_type, xd);
 #if CONFIG_TX_SKIP
             if (mbmi->tx_skip[plane != 0]) {
-              vp9_tx_identity_add(dqcoeff, dst, stride, 8);
+              vp9_tx_identity_add(dqcoeff, dst, stride, 8, shift);
             } else {
               vp9_iht8x8_add(tx_type, dqcoeff, dst, stride, eob);
             }
@@ -330,7 +331,7 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
             tx_type = get_tx_type(plane_type, xd);
 #if CONFIG_TX_SKIP
             if (mbmi->tx_skip[plane != 0]) {
-              vp9_tx_identity_add(dqcoeff, dst, stride, 16);
+              vp9_tx_identity_add(dqcoeff, dst, stride, 16, shift);
             } else {
               vp9_iht16x16_add(tx_type, dqcoeff, dst, stride, eob);
             }
@@ -342,7 +343,7 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
             tx_type = DCT_DCT;
 #if CONFIG_TX_SKIP
             if (mbmi->tx_skip[plane != 0]) {
-              vp9_tx_identity_add(dqcoeff, dst, stride, 32);
+              vp9_tx_identity_add(dqcoeff, dst, stride, 32, shift);
             } else {
               vp9_idct32x32_add(dqcoeff, dst, stride, eob);
             }
@@ -355,7 +356,7 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
             tx_type = DCT_DCT;
 #if CONFIG_TX_SKIP
             if (mbmi->tx_skip[plane != 0]) {
-              vp9_tx_identity_add(dqcoeff, dst, stride, 64);
+              vp9_tx_identity_add(dqcoeff, dst, stride, 64, shift);
             } else {
               vp9_idct64x64_add(dqcoeff, dst, stride, eob);
             }
@@ -385,7 +386,7 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
           tx_type = get_tx_type_4x4(plane_type, xd, block);
 #if CONFIG_TX_SKIP
           if (mbmi->tx_skip[plane != 0]) {
-            vp9_tx_identity_add(dqcoeff, dst, stride, 4);
+            vp9_tx_identity_add(dqcoeff, dst, stride, 4, shift);
           } else {
             vp9_iht4x4_add(tx_type, dqcoeff, dst, stride, eob);
           }
@@ -397,7 +398,7 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
           tx_type = get_tx_type(plane_type, xd);
 #if CONFIG_TX_SKIP
           if (mbmi->tx_skip[plane != 0]) {
-            vp9_tx_identity_add(dqcoeff, dst, stride, 8);
+            vp9_tx_identity_add(dqcoeff, dst, stride, 8, shift);
           } else {
             vp9_iht8x8_add(tx_type, dqcoeff, dst, stride, eob);
           }
@@ -409,19 +410,19 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
           tx_type = get_tx_type(plane_type, xd);
 #if CONFIG_TX_SKIP
           if (mbmi->tx_skip[plane != 0]) {
-            vp9_tx_identity_add(dqcoeff, dst, stride, 16);
+            vp9_tx_identity_add(dqcoeff, dst, stride, 16, shift);
           } else {
             vp9_iht16x16_add(tx_type, dqcoeff, dst, stride, eob);
           }
 #else
           vp9_iht16x16_add(tx_type, dqcoeff, dst, stride, eob);
 #endif
-  break;
+          break;
         case TX_32X32:
           tx_type = DCT_DCT;
 #if CONFIG_TX_SKIP
           if (mbmi->tx_skip[plane != 0]) {
-            vp9_tx_identity_add(dqcoeff, dst, stride, 32);
+            vp9_tx_identity_add(dqcoeff, dst, stride, 32, shift);
           } else {
             vp9_idct32x32_add(dqcoeff, dst, stride, eob);;
           }
@@ -434,7 +435,7 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
           tx_type = DCT_DCT;
 #if CONFIG_TX_SKIP
           if (mbmi->tx_skip[plane != 0]) {
-            vp9_tx_identity_add(dqcoeff, dst, stride, 64);
+            vp9_tx_identity_add(dqcoeff, dst, stride, 64, shift);
           } else {
             vp9_idct64x64_add(dqcoeff, dst, stride, eob);;
           }
@@ -884,6 +885,9 @@ static void decode_block(VP9_COMMON *const cm, MACROBLOCKD *const xd,
                          int mi_row, int mi_col,
                          vp9_reader *r, BLOCK_SIZE bsize) {
   const int less8x8 = bsize < BLOCK_8X8;
+#if CONFIG_TX_SKIP
+  int q_idx;
+#endif
 #if CONFIG_SUPERTX
   MB_MODE_INFO *mbmi;
   if (supertx_enabled) {
@@ -896,7 +900,11 @@ static void decode_block(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   MB_MODE_INFO *mbmi = set_offsets(cm, xd, tile, bsize, mi_row, mi_col);
   vp9_read_mode_info(cm, xd, tile, mi_row, mi_col, r);
 #endif
-
+#if CONFIG_TX_SKIP
+  q_idx = vp9_get_qindex(&cm->seg, mbmi->segment_id, cm->base_qindex);
+  mbmi->tx_skip_shift = q_idx > TX_SKIP_SHIFT_THRESH ?
+                        TX_SKIP_SHIFT_HQ : TX_SKIP_SHIFT_LQ;
+#endif
 #if CONFIG_SUPERTX
   if (!supertx_enabled) {
 #endif
@@ -2063,6 +2071,12 @@ static int read_compressed_header(VP9Decoder *pbi, const uint8_t *data,
     for (j = TX_4X4; j <= TX_16X16; ++j)
       for (i = 0; i < EXT_TX_TYPES - 1; ++i)
         vp9_diff_update_prob(&r, &fc->ext_tx_prob[j][i]);
+#endif
+#if CONFIG_TX_SKIP
+  for (i = 0; i < 2; i++)
+    vp9_diff_update_prob(&r, &fc->y_tx_skip_prob[i]);
+  for (i = 0; i < 2; i++)
+    vp9_diff_update_prob(&r, &fc->uv_tx_skip_prob[i]);
 #endif
   }
 

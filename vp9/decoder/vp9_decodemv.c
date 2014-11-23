@@ -179,13 +179,26 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
 
   mbmi->segment_id = read_intra_segment_id(cm, xd, mi_row, mi_col, r);
   mbmi->skip = read_skip(cm, xd, mbmi->segment_id, r);
-#if CONFIG_TX_SKIP
-  mbmi->tx_skip[0] = vp9_read_bit(r);
-  mbmi->tx_skip[1] = vp9_read_bit(r);
-#endif
   mbmi->tx_size = read_tx_size(cm, xd, cm->tx_mode, bsize, 1, r);
   mbmi->ref_frame[0] = INTRA_FRAME;
   mbmi->ref_frame[1] = NONE;
+
+#if CONFIG_TX_SKIP
+  if (mbmi->sb_type >= BLOCK_8X8) {
+    int q_idx = vp9_get_qindex(&cm->seg, mbmi->segment_id, cm->base_qindex);
+    int try_tx_skip = q_idx <= TX_SKIP_Q_THRESH_INTRA;
+    if (try_tx_skip) {
+      mbmi->tx_skip[0] = vp9_read(r, cm->fc.y_tx_skip_prob[0]);
+      mbmi->tx_skip[1] = vp9_read(r, cm->fc.uv_tx_skip_prob[mbmi->tx_skip[0]]);
+    } else {
+      mbmi->tx_skip[0] = 0;
+      mbmi->tx_skip[1] = 0;
+    }
+  } else {
+    mbmi->tx_skip[0] = 0;
+    mbmi->tx_skip[1] = 0;
+  }
+#endif
 
   switch (bsize) {
     case BLOCK_4X4:
@@ -566,9 +579,6 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
                                        MACROBLOCKD *const xd,
                                        const TileInfo *const tile,
                                        MODE_INFO *const mi,
-#if CONFIG_SUPERTX && CONFIG_EXT_TX
-                                       int supertx_enabled,
-#endif
                                        int mi_row, int mi_col, vp9_reader *r) {
   MB_MODE_INFO *const mbmi = &mi->mbmi;
   const BLOCK_SIZE bsize = mbmi->sb_type;
@@ -686,10 +696,6 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
 #endif
     mbmi->segment_id = read_inter_segment_id(cm, xd, mi_row, mi_col, r);
     mbmi->skip = read_skip(cm, xd, mbmi->segment_id, r);
-#if CONFIG_TX_SKIP
-    mbmi->tx_skip[0] = vp9_read_bit(r);
-    mbmi->tx_skip[1] = vp9_read_bit(r);
-#endif
     inter_block = read_is_inter_block(cm, xd, mbmi->segment_id, r);
     mbmi->tx_size = read_tx_size(cm, xd, cm->tx_mode, mbmi->sb_type,
                                  !mbmi->skip || !inter_block, r);
@@ -721,11 +727,38 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
   }
 #endif  // CONFIG_SUPERTX
 
+#if CONFIG_TX_SKIP
+  if (mbmi->sb_type >= BLOCK_8X8) {
+#if CONFIG_SUPERTX
+    int q_idx = cm->base_qindex;
+#else
+    int q_idx = vp9_get_qindex(&cm->seg, mbmi->segment_id, cm->base_qindex);
+#endif
+    int try_tx_skip = inter_block ? q_idx <= TX_SKIP_Q_THRESH_INTER :
+                                    q_idx <= TX_SKIP_Q_THRESH_INTRA;
+    if (try_tx_skip) {
+      mbmi->tx_skip[0] = vp9_read(r, cm->fc.y_tx_skip_prob[inter_block]);
+      mbmi->tx_skip[1] = vp9_read(r, cm->fc.uv_tx_skip_prob[mbmi->tx_skip[0]]);
+#if CONFIG_SUPERTX
+      if (!cm->frame_parallel_decoding_mode && !supertx_enabled) {
+#else
+      if (!cm->frame_parallel_decoding_mode) {
+#endif
+        ++cm->counts.y_tx_skip[inter_block][mbmi->tx_skip[0]];
+        ++cm->counts.uv_tx_skip[mbmi->tx_skip[0]][mbmi->tx_skip[1]];
+      }
+    } else {
+      mbmi->tx_skip[0] = 0;
+      mbmi->tx_skip[1] = 0;
+    }
+  } else {
+    mbmi->tx_skip[0] = 0;
+    mbmi->tx_skip[1] = 0;
+  }
+#endif  // CONFIG_TX_SKIP
+
   if (inter_block) {
     read_inter_block_mode_info(cm, xd, tile, mi,
-#if CONFIG_SUPERTX && CONFIG_EXT_TX
-                               supertx_enabled,
-#endif
                                mi_row, mi_col, r);
   } else {
     read_intra_block_mode_info(cm, mi,

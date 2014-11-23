@@ -66,6 +66,10 @@ typedef struct frame_contexts {
   vp9_prob supertx_prob[TX_SIZES];
   vp9_prob supertxsplit_prob[TX_SIZES];
 #endif
+#if CONFIG_TX_SKIP
+  vp9_prob y_tx_skip_prob[2];
+  vp9_prob uv_tx_skip_prob[2];
+#endif
 } FRAME_CONTEXT;
 
 typedef struct {
@@ -95,6 +99,10 @@ typedef struct {
   unsigned int supertx[TX_SIZES][2];
   unsigned int supertxsplit[TX_SIZES][2];
   unsigned int supertx_size[BLOCK_SIZES];
+#endif
+#if CONFIG_TX_SKIP
+  unsigned int y_tx_skip[2][2];
+  unsigned int uv_tx_skip[2][2];
 #endif
 } FRAME_COUNTS;
 

@@ -141,6 +141,7 @@ typedef struct {
 #endif
 #if CONFIG_TX_SKIP
   int tx_skip[PLANE_TYPES];
+  int tx_skip_shift;
 #endif
 } MB_MODE_INFO;
 
