@@ -464,6 +464,57 @@ static const PREDICTION_MODE intra_mode_list[] = {
   DC_PRED, V_PRED, H_PRED, TM_PRED
 };
 
+void vp9_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *rd_cost,
+                         BLOCK_SIZE bsize, PICK_MODE_CONTEXT *ctx) {
+  MACROBLOCKD *const xd = &x->e_mbd;
+  MB_MODE_INFO *const mbmi = &xd->mi[0].src_mi->mbmi;
+  RD_COST this_rdc, best_rdc;
+  PREDICTION_MODE this_mode;
+  struct estimate_block_intra_args args = { cpi, x, DC_PRED, 0, 0 };
+  const TX_SIZE intra_tx_size =
+      MIN(max_txsize_lookup[bsize],
+          tx_mode_to_biggest_tx_size[cpi->common.tx_mode]);
+  MODE_INFO *const mic = xd->mi[0].src_mi;
+  int *bmode_costs;
+  const MODE_INFO *above_mi = xd->mi[-xd->mi_stride].src_mi;
+  const MODE_INFO *left_mi = xd->left_available ? xd->mi[-1].src_mi : NULL;
+  const PREDICTION_MODE A = vp9_above_block_mode(mic, above_mi, 0);
+  const PREDICTION_MODE L = vp9_left_block_mode(mic, left_mi, 0);
+  bmode_costs = cpi->y_mode_costs[A][L];
+
+  (void) ctx;
+  vp9_rd_cost_reset(&best_rdc);
+  vp9_rd_cost_reset(&this_rdc);
+
+  mbmi->ref_frame[0] = INTRA_FRAME;
+  mbmi->mv[0].as_int = INVALID_MV;
+  mbmi->uv_mode = DC_PRED;
+  vpx_memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
+
+  // Change the limit of this loop to add other intra prediction
+  // mode tests.
+  for (this_mode = DC_PRED; this_mode <= H_PRED; ++this_mode) {
+    args.mode = this_mode;
+    args.rate = 0;
+    args.dist = 0;
+    mbmi->tx_size = intra_tx_size;
+    vp9_foreach_transformed_block_in_plane(xd, bsize, 0,
+                                           estimate_block_intra, &args);
+    this_rdc.rate = args.rate;
+    this_rdc.dist = args.dist;
+    this_rdc.rate += bmode_costs[this_mode];
+    this_rdc.rdcost = RDCOST(x->rdmult, x->rddiv,
+                             this_rdc.rate, this_rdc.dist);
+
+    if (this_rdc.rdcost < best_rdc.rdcost) {
+      best_rdc = this_rdc;
+      mbmi->mode = this_mode;
+    }
+  }
+
+  *rd_cost = best_rdc;
+}
+
 // TODO(jingning) placeholder for inter-frame non-RD mode decision.
 // this needs various further optimizations. to be continued..
 void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
