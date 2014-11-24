@@ -530,7 +530,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   static const int flag_list[4] = { 0, VP9_LAST_FLAG, VP9_GOLD_FLAG,
                                     VP9_ALT_FLAG };
   RD_COST this_rdc, best_rdc;
-  uint8_t skip_txfm = 0;
+  uint8_t skip_txfm = 0, best_mode_skip_txfm = 0;
   // var_y and sse_y are saved to be used in skipping checking
   unsigned int var_y = UINT_MAX;
   unsigned int sse_y = UINT_MAX;
@@ -678,7 +678,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       if (!(cpi->sf.inter_mode_mask[bsize] & (1 << this_mode)))
         continue;
 
-      mode_rd_thresh = rd_threshes[mode_index];
+      mode_rd_thresh = best_mode_skip_txfm ? rd_threshes[mode_index] << 1 :
+                                             rd_threshes[mode_index];
       if (rd_less_than_thresh(best_rdc.rdcost, mode_rd_thresh,
                               rd_thresh_freq_fact[mode_index]))
         continue;
@@ -809,7 +810,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         best_pred_filter = mbmi->interp_filter;
         best_tx_size = mbmi->tx_size;
         best_ref_frame = ref_frame;
-        skip_txfm = x->skip_txfm[0];
+        best_mode_skip_txfm = x->skip_txfm[0];
 
         if (reuse_inter_pred) {
           free_pred_buffer(best_pred);
@@ -837,7 +838,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   mbmi->ref_frame[0]  = best_ref_frame;
   mbmi->mv[0].as_int  = frame_mv[best_mode][best_ref_frame].as_int;
   xd->mi[0].src_mi->bmi[0].as_mv[0].as_int = mbmi->mv[0].as_int;
-  x->skip_txfm[0] = skip_txfm;
+  x->skip_txfm[0] = best_mode_skip_txfm;
 
   // Perform intra prediction search, if the best SAD is above a certain
   // threshold.
@@ -887,7 +888,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         mbmi->uv_mode = this_mode;
         mbmi->mv[0].as_int = INVALID_MV;
       } else {
-        x->skip_txfm[0] = skip_txfm;
+        x->skip_txfm[0] = best_mode_skip_txfm;
         mbmi->tx_size = saved_tx_size;
       }
     }
