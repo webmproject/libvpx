@@ -140,6 +140,8 @@ class SADTestBase : public ::testing::Test {
       reference_data_ = CONVERT_TO_BYTEPTR(reference_data16_);
       second_pred_ = CONVERT_TO_BYTEPTR(second_pred16_);
     }
+#else
+    bit_depth_ = VPX_BITS_8;
 #endif
     mask_ = (1 << bit_depth_) - 1;
     source_stride_ = (width_ + 31) & ~31;
