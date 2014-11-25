@@ -548,8 +548,6 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       cm->base_qindex, cm->y_dc_delta_q, cm->bit_depth) / reduction_fac;
   const int64_t inter_mode_thresh = RDCOST(x->rdmult, x->rddiv,
                                            intra_cost_penalty, 0);
-  const int intra_mode_cost = 50;
-
   const int8_t segment_id = mbmi->segment_id;
   const int *const rd_threshes = cpi->rd.threshes[segment_id][bsize];
   const int *const rd_thresh_freq_fact = tile_data->thresh_freq_fact[bsize];
@@ -887,7 +885,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       this_rdc.rdcost = RDCOST(x->rdmult, x->rddiv,
                                this_rdc.rate, this_rdc.dist);
 
-      if (this_rdc.rdcost + intra_mode_cost < best_rdc.rdcost) {
+      if (this_rdc.rdcost < best_rdc.rdcost) {
         best_rdc = this_rdc;
         mbmi->mode = this_mode;
         mbmi->tx_size = intra_tx_size;
