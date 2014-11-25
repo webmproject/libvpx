@@ -252,7 +252,7 @@ static MV average_split_mvs(const struct macroblockd_plane *pd,
       res = mi_mv_pred_q4(mi, ref);
       break;
     default:
-      assert(ss_idx <= 3 || ss_idx >= 0);
+      assert(ss_idx <= 3 && ss_idx >= 0);
   }
   return res;
 }
