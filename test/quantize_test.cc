@@ -55,10 +55,10 @@ class QuantizeTestBase {
     rnd_.Reset(ACMRandom::DeterministicSeed());
 
     // The full configuration is necessary to generate the quantization tables.
-    VP8_CONFIG *const vp8_config =
-        reinterpret_cast<VP8_CONFIG *>(vpx_calloc(sizeof(*vp8_config), 1));
+    VP8_CONFIG vp8_config;
+    vpx_memset(&vp8_config, 0, sizeof(vp8_config));
 
-    vp8_comp_ = vp8_create_compressor(vp8_config);
+    vp8_comp_ = vp8_create_compressor(&vp8_config);
 
     // Set the tables based on a quantizer of 0.
     vp8_set_quantizer(vp8_comp_, 0);
