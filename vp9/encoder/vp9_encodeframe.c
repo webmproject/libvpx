@@ -3422,32 +3422,29 @@ static int get_skip_encode_frame(const VP9_COMMON *cm, ThreadData *const td) {
          cm->show_frame;
 }
 
-static void tile_data_init(TileDataEnc *tile_data) {
-  int i, j;
-  for (i = 0; i < BLOCK_SIZES; ++i) {
-    for (j = 0; j < MAX_MODES; ++j) {
-      tile_data->thresh_freq_fact[i][j] = 32;
-      tile_data->mode_map[i][j] = j;
-    }
-  }
-}
-
-static void encode_tiles(VP9_COMP *cpi) {
+static void init_tile_data(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   const int tile_cols = 1 << cm->log2_tile_cols;
   const int tile_rows = 1 << cm->log2_tile_rows;
-
   int tile_col, tile_row;
-  TOKENEXTRA *tok[4][1 << 6];
-  TOKENEXTRA *pre_tok = cpi->tok;
+  TOKENEXTRA *pre_tok = cpi->tile_tok[0][0];
   int tile_tok = 0;
 
   if (cpi->tile_data == NULL) {
     CHECK_MEM_ERROR(cm, cpi->tile_data,
         vpx_malloc(tile_cols * tile_rows * sizeof(*cpi->tile_data)));
     for (tile_row = 0; tile_row < tile_rows; ++tile_row)
-      for (tile_col = 0; tile_col < tile_cols; ++tile_col)
-        tile_data_init(&cpi->tile_data[tile_row * tile_cols + tile_col]);
+      for (tile_col = 0; tile_col < tile_cols; ++tile_col) {
+        TileDataEnc *tile_data =
+            &cpi->tile_data[tile_row * tile_cols + tile_col];
+        int i, j;
+        for (i = 0; i < BLOCK_SIZES; ++i) {
+          for (j = 0; j < MAX_MODES; ++j) {
+            tile_data->thresh_freq_fact[i][j] = 32;
+            tile_data->mode_map[i][j] = j;
+          }
+        }
+      }
   }
 
   for (tile_row = 0; tile_row < tile_rows; ++tile_row) {
@@ -3456,32 +3453,41 @@ static void encode_tiles(VP9_COMP *cpi) {
           &cpi->tile_data[tile_row * tile_cols + tile_col].tile_info;
       vp9_tile_init(tile_info, cm, tile_row, tile_col);
 
-      tok[tile_row][tile_col] = pre_tok + tile_tok;
-      pre_tok = tok[tile_row][tile_col];
+      cpi->tile_tok[tile_row][tile_col] = pre_tok + tile_tok;
+      pre_tok = cpi->tile_tok[tile_row][tile_col];
       tile_tok = allocated_tokens(*tile_info);
     }
   }
+}
+
+static void encode_tiles(VP9_COMP *cpi) {
+  VP9_COMMON *const cm = &cpi->common;
+  const int tile_cols = 1 << cm->log2_tile_cols;
+  const int tile_rows = 1 << cm->log2_tile_rows;
+  int tile_col, tile_row;
+
+  init_tile_data(cpi);
 
   for (tile_row = 0; tile_row < tile_rows; ++tile_row) {
     for (tile_col = 0; tile_col < tile_cols; ++tile_col) {
       const TileInfo * const tile_info =
           &cpi->tile_data[tile_row * tile_cols + tile_col].tile_info;
-      TOKENEXTRA * const old_tok = tok[tile_row][tile_col];
+      TOKENEXTRA *tok = cpi->tile_tok[tile_row][tile_col];
       int mi_row;
-      TileDataEnc *this_tile = &cpi->tile_data[tile_row * tile_cols + tile_col];
+      TileDataEnc *this_tile =
+          &cpi->tile_data[tile_row * tile_cols + tile_col];
 
       for (mi_row = tile_info->mi_row_start; mi_row < tile_info->mi_row_end;
            mi_row += MI_BLOCK_SIZE) {
         if (cpi->sf.use_nonrd_pick_mode)
-          encode_nonrd_sb_row(cpi, &cpi->td, this_tile, mi_row,
-                              &tok[tile_row][tile_col]);
+          encode_nonrd_sb_row(cpi, &cpi->td, this_tile, mi_row, &tok);
         else
-          encode_rd_sb_row(cpi, &cpi->td, this_tile, mi_row,
-                           &tok[tile_row][tile_col]);
+          encode_rd_sb_row(cpi, &cpi->td, this_tile, mi_row, &tok);
       }
       cpi->tok_count[tile_row][tile_col] =
-          (unsigned int)(tok[tile_row][tile_col] - old_tok);
-      assert(tok[tile_row][tile_col] - old_tok <= allocated_tokens(*tile_info));
+          (unsigned int)(tok - cpi->tile_tok[tile_row][tile_col]);
+      assert(tok - cpi->tile_tok[tile_row][tile_col] <=
+          allocated_tokens(*tile_info));
     }
   }
 }

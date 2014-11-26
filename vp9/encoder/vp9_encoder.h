@@ -297,7 +297,7 @@ typedef struct VP9_COMP {
 
   YV12_BUFFER_CONFIG last_frame_uf;
 
-  TOKENEXTRA *tok;
+  TOKENEXTRA *tile_tok[4][1 << 6];
   unsigned int tok_count[4][1 << 6];
 
   // Ambient reconstruction err target for force key frames

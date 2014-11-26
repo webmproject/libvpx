@@ -247,8 +247,8 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   vp9_free_frame_buffer(&cpi->alt_ref_buffer);
   vp9_lookahead_destroy(cpi->lookahead);
 
-  vpx_free(cpi->tok);
-  cpi->tok = 0;
+  vpx_free(cpi->tile_tok[0][0]);
+  cpi->tile_tok[0][0] = 0;
 
   vp9_free_pc_tree(&cpi->td);
 
@@ -543,11 +543,12 @@ void vp9_alloc_compressor_data(VP9_COMP *cpi) {
 
   vp9_alloc_context_buffers(cm, cm->width, cm->height);
 
-  vpx_free(cpi->tok);
+  vpx_free(cpi->tile_tok[0][0]);
 
   {
     unsigned int tokens = get_token_alloc(cm->mb_rows, cm->mb_cols);
-    CHECK_MEM_ERROR(cm, cpi->tok, vpx_calloc(tokens, sizeof(*cpi->tok)));
+    CHECK_MEM_ERROR(cm, cpi->tile_tok[0][0],
+        vpx_calloc(tokens, sizeof(*cpi->tile_tok[0][0])));
   }
 
   vp9_setup_pc_tree(&cpi->common, &cpi->td);
@@ -1800,7 +1801,6 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
 #endif
 
   dealloc_compressor_data(cpi);
-  vpx_free(cpi->tok);
 
   for (i = 0; i < sizeof(cpi->mbgraph_stats) /
                   sizeof(cpi->mbgraph_stats[0]); ++i) {
