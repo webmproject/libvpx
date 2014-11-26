@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//O14\u003d",
+        "filename": "test/vp9_frame_parallel_test.cc",
+        "patchSetId": 16
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-11-26T19:03:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//O5M\u003d",
+      "revId": "64e96065a4300538ce6432b644da972fbe689961",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//O5Q\u003d",
         "filename": "test/vp9_frame_parallel_test.cc",
         "patchSetId": 16
@@ -53,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//O10\u003d",
+        "filename": "test/vp9_frame_parallel_test.cc",
+        "patchSetId": 16
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-11-26T19:03:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//O5E\u003d",
+      "revId": "64e96065a4300538ce6432b644da972fbe689961",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//O5A\u003d",
         "filename": "test/vp9_frame_parallel_test.cc",
         "patchSetId": 16
@@ -64,6 +100,24 @@
       "writtenOn": "2014-11-25T23:03:19Z",
       "side": 1,
       "message": "Input",
+      "revId": "64e96065a4300538ce6432b644da972fbe689961",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//O18\u003d",
+        "filename": "test/vp9_frame_parallel_test.cc",
+        "patchSetId": 16
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-11-26T19:03:37Z",
+      "side": 1,
+      "message": "Done. Sorry did not correct this error inherited from previous commit.",
+      "parentUuid": "AAAAdn//O5A\u003d",
       "revId": "64e96065a4300538ce6432b644da972fbe689961",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +141,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//O1w\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 291,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-11-26T19:03:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//O4w\u003d",
+      "revId": "64e96065a4300538ce6432b644da972fbe689961",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//O48\u003d",
         "filename": "vp9/decoder/vp9_decoder.c",
         "patchSetId": 16
@@ -104,6 +176,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//O1s\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 293,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-11-26T19:03:37Z",
+      "side": 1,
+      "message": "Yes.  There are only two cases that other thread will be blocked. Main thread will be blocked by copying context and other thread will be blocked by waiting pixels.  At the end of the worker function hook, the failing thread will set the decoding buf to be corrupted, set context ready to be 1 to let main thread pass through and signal all the other thread its status. Then in the vp9_frameworker_wait function, if other thread detected that the reference buf is corrupted, they will do an error jmp.",
+      "parentUuid": "AAAAdn//O48\u003d",
+      "revId": "64e96065a4300538ce6432b644da972fbe689961",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//O4s\u003d",
         "filename": "vp9/decoder/vp9_decoder.h",
         "patchSetId": 16
@@ -115,6 +205,24 @@
       "writtenOn": "2014-11-25T23:03:19Z",
       "side": 1,
       "message": "acquire",
+      "revId": "64e96065a4300538ce6432b644da972fbe689961",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//O1o\u003d",
+        "filename": "vp9/decoder/vp9_decoder.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-11-26T19:03:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//O4s\u003d",
       "revId": "64e96065a4300538ce6432b644da972fbe689961",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -149,6 +257,24 @@
       "writtenOn": "2014-11-25T23:03:19Z",
       "side": 1,
       "message": "failed",
+      "revId": "64e96065a4300538ce6432b644da972fbe689961",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//O1k\u003d",
+        "filename": "vp9/decoder/vp9_dthread.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 355,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-11-26T19:03:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//O4o\u003d",
       "revId": "64e96065a4300538ce6432b644da972fbe689961",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
