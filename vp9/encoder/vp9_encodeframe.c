@@ -700,7 +700,7 @@ static void update_state(VP9_COMP *cpi, ThreadData *td,
   mi_addr->src_mi = mi_addr;
 
   // If segmentation in use
-  if (seg->enabled && output_enabled) {
+  if (seg->enabled) {
     // For in frame complexity AQ copy the segment id from the segment map.
     if (cpi->oxcf.aq_mode == COMPLEXITY_AQ) {
       const uint8_t *const map = seg->update_map ? cpi->segmentation_map
@@ -863,6 +863,18 @@ static void set_mode_info_seg_skip(MACROBLOCK *x, TX_MODE tx_mode,
   vp9_rd_cost_init(rd_cost);
 }
 
+static int set_segment_rdmult(VP9_COMP *const cpi,
+                               MACROBLOCK *const x,
+                               int8_t segment_id) {
+  int segment_qindex;
+  VP9_COMMON *const cm = &cpi->common;
+  vp9_init_plane_quantizers(cpi, x);
+  vp9_clear_system_state();
+  segment_qindex = vp9_get_qindex(&cm->seg, segment_id,
+                                  cm->base_qindex);
+  return vp9_compute_rd_mult(cpi, segment_qindex + cm->y_dc_delta_q);
+}
+
 static void rd_pick_sb_modes(VP9_COMP *cpi,
                              TileDataEnc *tile_data,
                              MACROBLOCK *const x,
@@ -919,7 +931,6 @@ static void rd_pick_sb_modes(VP9_COMP *cpi,
   if (aq_mode == VARIANCE_AQ) {
     const int energy = bsize <= BLOCK_16X16 ? x->mb_energy
                                             : vp9_block_energy(cpi, x, bsize);
-    int segment_qindex;
     if (cm->frame_type == KEY_FRAME ||
         cpi->refresh_alt_ref_frame ||
         (cpi->refresh_golden_frame && !cpi->rc.is_src_frame_alt_ref)) {
@@ -929,18 +940,9 @@ static void rd_pick_sb_modes(VP9_COMP *cpi,
                                                     : cm->last_frame_seg_map;
       mbmi->segment_id = vp9_get_segment_id(cm, map, bsize, mi_row, mi_col);
     }
-    vp9_init_plane_quantizers(cpi, x);
-    vp9_clear_system_state();
-    segment_qindex = vp9_get_qindex(&cm->seg, mbmi->segment_id,
-                                    cm->base_qindex);
-    x->rdmult = vp9_compute_rd_mult(cpi, segment_qindex + cm->y_dc_delta_q);
+    x->rdmult = set_segment_rdmult(cpi, x, mbmi->segment_id);
   } else if (aq_mode == COMPLEXITY_AQ) {
-    const int mi_offset = mi_row * cm->mi_cols + mi_col;
-    unsigned char complexity = cpi->complexity_map[mi_offset];
-    const int is_edge = (mi_row <= 1) || (mi_row >= (cm->mi_rows - 2)) ||
-                        (mi_col <= 1) || (mi_col >= (cm->mi_cols - 2));
-    if (!is_edge && (complexity > 128))
-      x->rdmult += ((x->rdmult * (complexity - 128)) / 256);
+    x->rdmult = set_segment_rdmult(cpi, x, mbmi->segment_id);
   } else if (aq_mode == CYCLIC_REFRESH_AQ) {
     const uint8_t *const map = cm->seg.update_map ? cpi->segmentation_map
                                                   : cm->last_frame_seg_map;
@@ -965,6 +967,16 @@ static void rd_pick_sb_modes(VP9_COMP *cpi,
       vp9_rd_pick_inter_mode_sub8x8(cpi, tile_data, x, mi_row, mi_col,
                                     rd_cost, bsize, ctx, best_rd);
     }
+  }
+
+
+  // Examine the resulting rate and for AQ mode 2 make a segment choice.
+  if ((rd_cost->rate != INT_MAX) &&
+      (aq_mode == COMPLEXITY_AQ) && (bsize >= BLOCK_16X16) &&
+      (cm->frame_type == KEY_FRAME ||
+       cpi->refresh_alt_ref_frame ||
+       (cpi->refresh_golden_frame && !cpi->rc.is_src_frame_alt_ref))) {
+    vp9_caq_select_segment(cpi, x, bsize, mi_row, mi_col, rd_cost->rate);
   }
 
   x->rdmult = orig_rdmult;
@@ -1761,14 +1773,6 @@ static void rd_use_partition(VP9_COMP *cpi,
 
   if (do_recon) {
     int output_enabled = (bsize == BLOCK_64X64);
-
-    // Check the projected output rate for this SB against it's target
-    // and and if necessary apply a Q delta using segmentation to get
-    // closer to the target.
-    if ((cpi->oxcf.aq_mode == COMPLEXITY_AQ) && cm->seg.update_map) {
-      vp9_select_in_frame_q_segment(cpi, x, bsize, mi_row, mi_col,
-                                    output_enabled, chosen_rdc.rate);
-    }
     encode_sb(cpi, td, tile_info, tp, mi_row, mi_col, output_enabled, bsize,
               pc_tree);
   }
@@ -2500,13 +2504,6 @@ static void rd_pick_partition(VP9_COMP *cpi, ThreadData *td,
   if (best_rdc.rate < INT_MAX && best_rdc.dist < INT64_MAX &&
       pc_tree->index != 3) {
     int output_enabled = (bsize == BLOCK_64X64);
-
-    // Check the projected output rate for this SB against it's target
-    // and and if necessary apply a Q delta using segmentation to get
-    // closer to the target.
-    if ((cpi->oxcf.aq_mode == COMPLEXITY_AQ) && cm->seg.update_map)
-      vp9_select_in_frame_q_segment(cpi, x, bsize, mi_row, mi_col,
-                                    output_enabled, best_rdc.rate);
     encode_sb(cpi, td, tile_info, tp, mi_row, mi_col, output_enabled,
               bsize, pc_tree);
   }
@@ -2784,7 +2781,6 @@ static void nonrd_pick_partition(VP9_COMP *cpi, ThreadData *td,
                                  int do_recon, int64_t best_rd,
                                  PC_TREE *pc_tree) {
   const SPEED_FEATURES *const sf = &cpi->sf;
-  const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   VP9_COMMON *const cm = &cpi->common;
   TileInfo *const tile_info = &tile_data->tile_info;
   MACROBLOCK *const x = &td->mb;
@@ -3016,14 +3012,6 @@ static void nonrd_pick_partition(VP9_COMP *cpi, ThreadData *td,
 
   if (best_rdc.rate < INT_MAX && best_rdc.dist < INT64_MAX && do_recon) {
     int output_enabled = (bsize == BLOCK_64X64);
-
-    // Check the projected output rate for this SB against it's target
-    // and and if necessary apply a Q delta using segmentation to get
-    // closer to the target.
-    if ((oxcf->aq_mode == COMPLEXITY_AQ) && cm->seg.update_map) {
-      vp9_select_in_frame_q_segment(cpi, x, bsize, mi_row, mi_col,
-                                    output_enabled, best_rdc.rate);
-    }
     encode_sb_rt(cpi, td, tile_info, tp, mi_row, mi_col, output_enabled,
                  bsize, pc_tree);
   }
