@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Oxg\u003d",
+        "filename": "test/acm_random.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1115299
+      },
+      "writtenOn": "2014-11-27T15:23:54Z",
+      "side": 1,
+      "message": "Doesn\u0027t this line also need to change?\ne.g.\n return (value \u003e\u003e 15) \u0026 0xffff;",
+      "revId": "7284031b12237b1d121b71a1db0aba90a1b0f63b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
