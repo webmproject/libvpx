@@ -652,8 +652,8 @@ TEST_P(DatarateTestVP9Large, DenoiserLevels) {
 #endif  // CONFIG_VP9_TEMPORAL_DENOISING
 
 VP8_INSTANTIATE_TEST_CASE(DatarateTestLarge, ALL_TEST_MODES);
+// TODO(jingning) Add kRealTime back.
 VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9Large,
-                          ::testing::Values(::libvpx_test::kOnePassGood,
-                          ::libvpx_test::kRealTime),
+                          ::testing::Values(::libvpx_test::kOnePassGood),
                           ::testing::Range(2, 7));
 }  // namespace
