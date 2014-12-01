@@ -230,4 +230,7 @@ void vp9_adapt_mv_probs(VP9_COMMON *cm, int allow_hp) {
 
 void vp9_init_mv_probs(VP9_COMMON *cm) {
   cm->fc.nmvc = default_nmv_context;
+#if CONFIG_INTRABC
+  cm->fc.ndvc = default_nmv_context;
+#endif  // CONFIG_INTRABC
 }

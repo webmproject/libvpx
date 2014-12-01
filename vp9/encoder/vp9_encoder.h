@@ -47,6 +47,9 @@ extern "C" {
 
 typedef struct {
   int nmvjointcost[MV_JOINTS];
+#if CONFIG_INTRABC
+  int ndvcosts[2][MV_VALS];
+#endif  // CONFIG_INTRABC
   int nmvcosts[2][MV_VALS];
   int nmvcosts_hp[2][MV_VALS];
 
@@ -271,6 +274,7 @@ typedef struct VP9_COMP {
 
   CODING_CONTEXT coding_context;
 
+  int *ndvcosts[2];
   int *nmvcosts[2];
   int *nmvcosts_hp[2];
   int *nmvsadcosts[2];

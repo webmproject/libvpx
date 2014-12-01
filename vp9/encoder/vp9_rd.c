@@ -309,7 +309,11 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
       vp9_build_nmv_cost_table(x->nmvjointcost,
                                cm->allow_high_precision_mv ? x->nmvcost_hp
                                                            : x->nmvcost,
-                               &cm->fc.nmvc, cm->allow_high_precision_mv);
+                               &cm->fc.nmvc,
+#if CONFIG_INTRABC
+                               1,
+#endif  // CONFIG_INTRABC
+                               cm->allow_high_precision_mv);
 
       for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
         vp9_cost_tokens((int *)cpi->inter_mode_cost[i],
@@ -321,6 +325,12 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
                         cm->fc.inter_compound_mode_probs[i],
                         vp9_inter_compound_mode_tree);
 #endif
+#if CONFIG_INTRABC
+    } else {
+      vp9_build_nmv_cost_table(x->nmvjointcost,
+                               x->ndvcost,
+                               &cm->fc.ndvc, 0, 0);
+#endif  // CONFIG_INTRABC
     }
   }
 

@@ -261,6 +261,9 @@ int vp9_construct_ref_inter_list(VP9_COMMON *cm,  MACROBLOCKD *xd,
                                  MB_MODE_INFO *ref_list[18]);
 #endif  // CONFIG_COPY_MODE
 
+#if CONFIG_INTRABC
+void vp9_find_ref_dv(int_mv *ref_dv, int mi_row, int mi_col);
+#endif  // CONFIOG_INTRABC
 #ifdef __cplusplus
 }  // extern "C"
 #endif

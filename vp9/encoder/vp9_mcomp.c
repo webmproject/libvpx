@@ -1505,6 +1505,8 @@ int vp9_diamond_search_sad_c(const MACROBLOCK *x,
   best_address = in_what;
 
   // Check the starting position
+  assert(what != NULL);
+  assert(in_what != NULL);
   bestsad = fn_ptr->sdf(what, what_stride, in_what, in_what_stride)
                 + mvsad_err_cost(x, best_mv, &fcenter_mv, sad_per_bit);
 

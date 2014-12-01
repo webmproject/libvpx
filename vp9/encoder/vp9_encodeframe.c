@@ -1373,7 +1373,11 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
     vpx_memcpy(cpi->common.current_palette_count, ctx->palette_count_buf,
                ctx->palette_buf_size * sizeof(ctx->palette_count_buf[0]));
 #endif
-    vp9_rd_pick_intra_mode_sb(cpi, x, rd_cost, bsize, ctx, best_rd);
+    vp9_rd_pick_intra_mode_sb(cpi, x,
+#if CONFIG_INTRABC
+                              mi_row, mi_col,
+#endif  // CONFIG_INTRABC
+                              rd_cost, bsize, ctx, best_rd);
 #if CONFIG_PALETTE
     cpi->common.current_palette_size = n;
     vpx_memcpy(cpi->common.current_palette_colors,
@@ -4975,7 +4979,11 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
 
   set_ref_ptrs(cm, xd, mbmi->ref_frame[0], mbmi->ref_frame[1]);
 
-  if (!is_inter_block(mbmi)) {
+  if (!is_inter_block(mbmi)
+#if CONFIG_INTRABC
+      && !is_intrabc_mode(mbmi->mode)
+#endif  // CONFIG_INTRABC
+      ) {
     int plane;
     mbmi->skip = 1;
     for (plane = 0; plane < MAX_MB_PLANE; ++plane)

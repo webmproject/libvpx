@@ -171,6 +171,13 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   vpx_free(cpi->complexity_map);
   cpi->complexity_map = NULL;
 
+#if CONFIG_INTRABC
+  vpx_free(cpi->ndvcosts[0]);
+  vpx_free(cpi->ndvcosts[1]);
+  cpi->ndvcosts[0] = NULL;
+  cpi->ndvcosts[1] = NULL;
+#endif  // CONFIG_INTRABC
+
   vpx_free(cpi->nmvcosts[0]);
   vpx_free(cpi->nmvcosts[1]);
   cpi->nmvcosts[0] = NULL;
@@ -240,6 +247,12 @@ static void save_coding_context(VP9_COMP *cpi) {
   // quantizer value is adjusted between loop iterations.
   vp9_copy(cc->nmvjointcost,  cpi->mb.nmvjointcost);
 
+#if CONFIG_INTRABC
+  vpx_memcpy(cc->ndvcosts[0], cpi->ndvcosts[0],
+             MV_VALS * sizeof(*cpi->ndvcosts[0]));
+  vpx_memcpy(cc->ndvcosts[1], cpi->ndvcosts[1],
+             MV_VALS * sizeof(*cpi->ndvcosts[1]));
+#endif  // CONFIG_INTRABC
   vpx_memcpy(cc->nmvcosts[0], cpi->nmvcosts[0],
              MV_VALS * sizeof(*cpi->nmvcosts[0]));
   vpx_memcpy(cc->nmvcosts[1], cpi->nmvcosts[1],
@@ -268,6 +281,12 @@ static void restore_coding_context(VP9_COMP *cpi) {
   // previous call to vp9_save_coding_context.
   vp9_copy(cpi->mb.nmvjointcost, cc->nmvjointcost);
 
+#if CONFIG_INTRABC
+  vpx_memcpy(cpi->ndvcosts[0], cc->ndvcosts[0],
+             MV_VALS * sizeof(*cc->ndvcosts[0]));
+  vpx_memcpy(cpi->ndvcosts[1], cc->ndvcosts[1],
+             MV_VALS * sizeof(*cc->ndvcosts[1]));
+#endif  // CONFIG_INTRABC
   vpx_memcpy(cpi->nmvcosts[0], cc->nmvcosts[0],
              MV_VALS * sizeof(*cc->nmvcosts[0]));
   vpx_memcpy(cpi->nmvcosts[1], cc->nmvcosts[1],
@@ -1400,6 +1419,12 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
   CHECK_MEM_ERROR(cm, cpi->coding_context.last_frame_seg_map_copy,
                   vpx_calloc(cm->mi_rows * cm->mi_cols, 1));
 
+#if CONFIG_INTRABC
+  CHECK_MEM_ERROR(cm, cpi->ndvcosts[0],
+                  vpx_calloc(MV_VALS, sizeof(*cpi->ndvcosts[0])));
+  CHECK_MEM_ERROR(cm, cpi->ndvcosts[1],
+                  vpx_calloc(MV_VALS, sizeof(*cpi->ndvcosts[1])));
+#endif  // CONFIG_INTRABC
   CHECK_MEM_ERROR(cm, cpi->nmvcosts[0],
                   vpx_calloc(MV_VALS, sizeof(*cpi->nmvcosts[0])));
   CHECK_MEM_ERROR(cm, cpi->nmvcosts[1],
@@ -1478,6 +1503,10 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
   cpi->first_time_stamp_ever = INT64_MAX;
 
   cal_nmvjointsadcost(cpi->mb.nmvjointsadcost);
+#if CONFIG_INTRABC
+  cpi->mb.ndvcost[0] = &cpi->ndvcosts[0][MV_MAX];
+  cpi->mb.ndvcost[1] = &cpi->ndvcosts[1][MV_MAX];
+#endif  // CONFIG_INTRABC
   cpi->mb.nmvcost[0] = &cpi->nmvcosts[0][MV_MAX];
   cpi->mb.nmvcost[1] = &cpi->nmvcosts[1][MV_MAX];
   cpi->mb.nmvsadcost[0] = &cpi->nmvsadcosts[0][MV_MAX];

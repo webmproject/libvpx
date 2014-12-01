@@ -76,6 +76,7 @@ struct macroblock {
   int pred_mv_sad[MAX_REF_FRAMES];
 
   int nmvjointcost[MV_JOINTS];
+  int *ndvcost[2];
   int *nmvcost[2];
   int *nmvcost_hp[2];
   int **mvcost;

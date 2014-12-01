@@ -295,6 +295,7 @@ EXPERIMENT_LIST="
     palette
     new_quant
     newmvref
+    intrabc
 "
 CONFIG_LIST="
     external_build

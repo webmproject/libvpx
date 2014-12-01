@@ -406,3 +406,16 @@ int vp9_construct_ref_inter_list(VP9_COMMON *cm,  MACROBLOCKD *xd,
   return ref_num;
 }
 #endif  // CONFIG_COPY_MODE
+
+#if CONFIG_INTRABC
+void vp9_find_ref_dv(int_mv *ref_dv, int mi_row, int mi_col) {
+  (void) mi_col;
+  if (mi_row < 8) {
+    ref_dv->as_mv.row = 0;
+    ref_dv->as_mv.col = -8 * 8;
+  } else {
+    ref_dv->as_mv.row = -8 * 8;
+    ref_dv->as_mv.col = 0;
+  }
+}
+#endif  // CONFIG_INTRABC

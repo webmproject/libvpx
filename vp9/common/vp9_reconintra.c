@@ -27,6 +27,9 @@ const TX_TYPE intra_mode_to_tx_type_lookup[INTRA_MODES] = {
   DCT_ADST,   // D207
   ADST_DCT,   // D63
   ADST_ADST,  // TM
+#if CONFIG_INTRABC
+  DCT_DCT,    // BC
+#endif  // CONFIG_INTRABC
 };
 
 // This serves as a wrapper function, so that all the prediction functions
@@ -872,6 +875,9 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
   int x0, y0;
   const struct macroblockd_plane *const pd = &xd->plane[plane];
 
+#if CONFIG_INTRABC
+  assert(!is_intrabc_mode(mode));
+#endif  // CONFIG_INTRABC
   // 127 127 127 .. 127 127 127 127 127 127
   // 129  A   B  ..  Y   Z
   // 129  C   D  ..  W   X

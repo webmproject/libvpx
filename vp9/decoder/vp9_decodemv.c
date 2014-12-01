@@ -210,6 +210,40 @@ static int read_skip(VP9_COMMON *cm, const MACROBLOCKD *xd,
   }
 }
 
+static INLINE int is_mv_valid(const MV *mv) {
+  return mv->row > MV_LOW && mv->row < MV_UPP &&
+         mv->col > MV_LOW && mv->col < MV_UPP;
+}
+
+#if CONFIG_INTRABC
+static INLINE void read_mv(vp9_reader *r, MV *mv, const MV *ref,
+                           const nmv_context *ctx,
+                           nmv_context_counts *counts,
+                           int use_subpel,
+                           int allow_hp);
+
+static INLINE int assign_dv(VP9_COMMON *cm, PREDICTION_MODE mode,
+                            int_mv *mv, const int_mv *ref_mv, vp9_reader *r) {
+  int ret = 1;
+
+  switch (mode) {
+    case NEWDV: {
+      nmv_context_counts *const mv_counts = cm->frame_parallel_decoding_mode ?
+                                            NULL : &cm->counts.dv;
+      read_mv(r, &mv->as_mv, &ref_mv->as_mv, &cm->fc.ndvc, mv_counts,
+              0, 0);
+      ret = ret && is_mv_valid(&mv->as_mv) && (mv->as_int != 0);
+      // TODO(aconverse): additional validation
+      break;
+    }
+    default: {
+      ret = 1;
+    }
+  }
+  return ret;
+}
+#endif  // CONFIG_INTRABC
+
 static void read_intra_frame_mode_info(VP9_COMMON *const cm,
                                        MACROBLOCKD *const xd,
                                        int mi_row, int mi_col, vp9_reader *r) {
@@ -219,6 +253,10 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
   const MODE_INFO *left_mi  = xd->left_available ? xd->mi[-1].src_mi : NULL;
   const BLOCK_SIZE bsize = mbmi->sb_type;
   int i;
+#if CONFIG_INTRABC
+  int_mv dv_ref;
+  vp9_find_ref_dv(&dv_ref, mi_row, mi_col);
+#endif  // CONFIG_INTRABC
 
   mbmi->segment_id = read_intra_segment_id(cm, xd, mi_row, mi_col, r);
   mbmi->skip = read_skip(cm, xd, mbmi->segment_id, r);
@@ -420,6 +458,9 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
       }
       mbmi->filterbit = mi->b_filter_info[3];
 #endif
+#if CONFIG_INTRABC
+      xd->corrupted |= !assign_dv(cm, mbmi->mode, &mbmi->mv[0], &dv_ref, r);
+#endif  // CONFIG_INTRABC
       mbmi->mode = mi->bmi[3].as_mode;
       break;
     case BLOCK_4X8:
@@ -432,6 +473,9 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
       else
         mi->b_filter_info[0] = mi->b_filter_info[2] = 0;
 #endif
+#if CONFIG_INTRABC
+      xd->corrupted |= !assign_dv(cm, mbmi->mode, &mbmi->mv[0], &dv_ref, r);
+#endif  // CONFIG_INTRABC
       mi->bmi[1].as_mode = mi->bmi[3].as_mode = mbmi->mode =
           read_intra_mode(r, get_y_mode_probs(mi, above_mi, left_mi, 1));
 #if CONFIG_FILTERINTRA
@@ -441,6 +485,9 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
       else
         mi->b_filter_info[1] = mi->b_filter_info[3] = mbmi->filterbit = 0;
 #endif
+#if CONFIG_INTRABC
+      xd->corrupted |= !assign_dv(cm, mbmi->mode, &mbmi->mv[0], &dv_ref, r);
+#endif  // CONFIG_INTRABC
       break;
     case BLOCK_8X4:
       mi->bmi[0].as_mode = mi->bmi[1].as_mode =
@@ -452,6 +499,9 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
       else
         mi->b_filter_info[0] = mi->b_filter_info[1] = 0;
 #endif
+#if CONFIG_INTRABC
+      xd->corrupted |= !assign_dv(cm, mbmi->mode, &mbmi->mv[0], &dv_ref, r);
+#endif  // CONFIG_INTRABC
       mi->bmi[2].as_mode = mi->bmi[3].as_mode = mbmi->mode =
           read_intra_mode(r, get_y_mode_probs(mi, above_mi, left_mi, 2));
 #if CONFIG_FILTERINTRA
@@ -461,6 +511,9 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
       else
         mi->b_filter_info[2] = mi->b_filter_info[3] = mbmi->filterbit = 0;
 #endif
+#if CONFIG_INTRABC
+      xd->corrupted |= !assign_dv(cm, mbmi->mode, &mbmi->mv[0], &dv_ref, r);
+#endif  // CONFIG_INTRABC
       break;
     default:
 #if CONFIG_PALETTE
@@ -482,14 +535,22 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
       else
         mbmi->filterbit = 0;
 #endif  // CONFIG_FILTERINTRA
+#if CONFIG_INTRABC
+      xd->corrupted |= !assign_dv(cm, mbmi->mode, &mbmi->mv[0], &dv_ref, r);
+#endif  // CONFIG_INTRABC
   }
 
+#if CONFIG_INTRABC
+  if (is_intrabc_mode(mbmi->mode)) {
+    mbmi->uv_mode = mbmi->mode;
+    mbmi->interp_filter = BILINEAR;
+  } else
+#endif  // CONFIG_INTRABC
 #if CONFIG_PALETTE
   if (!mbmi->palette_enabled[1])
-    mbmi->uv_mode = read_intra_mode(r, vp9_kf_uv_mode_prob[mbmi->mode]);
-#else
+#endif  // CONFIG_PALETTE
   mbmi->uv_mode = read_intra_mode(r, vp9_kf_uv_mode_prob[mbmi->mode]);
-#endif
+
 #if CONFIG_FILTERINTRA
   if (is_filter_enabled(get_uv_tx_size(mbmi, &xd->plane[1])) &&
       is_filter_allowed(mbmi->uv_mode)
@@ -505,7 +566,11 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
 }
 
 static int read_mv_component(vp9_reader *r,
-                             const nmv_component *mvcomp, int usehp) {
+                             const nmv_component *mvcomp,
+#if CONFIG_INTRABC
+                             int usesubpel,
+#endif  // CONFIG_INTRABC
+                             int usehp) {
   int mag, d, fr, hp;
   const int sign = vp9_read(r, mvcomp->sign);
   const int mv_class = vp9_read_tree(r, vp9_mv_class_tree, mvcomp->classes);
@@ -523,6 +588,9 @@ static int read_mv_component(vp9_reader *r,
       d |= vp9_read(r, mvcomp->bits[i]) << i;
   }
 
+#if CONFIG_INTRABC
+  if (usesubpel) {
+#endif  // CONFIG_INTRABC
   // Fractional part
   fr = vp9_read_tree(r, vp9_mv_fp_tree, class0 ? mvcomp->class0_fp[d]
                                                : mvcomp->fp);
@@ -530,6 +598,12 @@ static int read_mv_component(vp9_reader *r,
   // High precision part (if hp is not used, the default value of the hp is 1)
   hp = usehp ? vp9_read(r, class0 ? mvcomp->class0_hp : mvcomp->hp)
              : 1;
+#if CONFIG_INTRABC
+  } else {
+    fr = 3;
+    hp = 1;
+  }
+#endif  // CONFIG_INTRABC
 
   // Result
   mag = vp9_get_mv_mag(mv_class, (d << 3) | (fr << 1) | hp) + 1;
@@ -538,17 +612,29 @@ static int read_mv_component(vp9_reader *r,
 
 static INLINE void read_mv(vp9_reader *r, MV *mv, const MV *ref,
                            const nmv_context *ctx,
-                           nmv_context_counts *counts, int allow_hp) {
+                           nmv_context_counts *counts,
+#if CONFIG_INTRABC
+                           int use_subpel,
+#endif  // CONFIG_INTRABC
+                           int allow_hp) {
   const MV_JOINT_TYPE joint_type =
       (MV_JOINT_TYPE)vp9_read_tree(r, vp9_mv_joint_tree, ctx->joints);
   const int use_hp = allow_hp && vp9_use_mv_hp(ref);
   MV diff = {0, 0};
 
   if (mv_joint_vertical(joint_type))
-    diff.row = read_mv_component(r, &ctx->comps[0], use_hp);
+    diff.row = read_mv_component(r, &ctx->comps[0],
+#if CONFIG_INTRABC
+                                 use_subpel,
+#endif  // CONFIG_INTRABC
+                                 use_hp);
 
   if (mv_joint_horizontal(joint_type))
-    diff.col = read_mv_component(r, &ctx->comps[1], use_hp);
+    diff.col = read_mv_component(r, &ctx->comps[1],
+#if CONFIG_INTRABC
+                                 use_subpel,
+#endif  // CONFIG_INTRABC
+                                 use_hp);
 
   vp9_inc_mv(&diff, counts);
 
@@ -771,11 +857,6 @@ static void read_intra_block_mode_info(VP9_COMMON *const cm, MODE_INFO *mi,
 #endif  // CONFIG_FILTERINTRA
 }
 
-static INLINE int is_mv_valid(const MV *mv) {
-  return mv->row > MV_LOW && mv->row < MV_UPP &&
-         mv->col > MV_LOW && mv->col < MV_UPP;
-}
-
 static INLINE int assign_mv(VP9_COMMON *cm, PREDICTION_MODE mode,
                             int_mv mv[2], int_mv ref_mv[2],
                             int_mv nearest_mv[2], int_mv near_mv[2],
@@ -796,6 +877,9 @@ static INLINE int assign_mv(VP9_COMMON *cm, PREDICTION_MODE mode,
                                             NULL : &cm->counts.mv;
       for (i = 0; i < 1 + is_compound; ++i) {
         read_mv(r, &mv[i].as_mv, &ref_mv[i].as_mv, &cm->fc.nmvc, mv_counts,
+#if CONFIG_INTRABC
+                1,
+#endif  // CONFIG_INTRABC
                 allow_hp);
         ret = ret && is_mv_valid(&mv[i].as_mv);
         assert(ret);
@@ -827,6 +911,9 @@ static INLINE int assign_mv(VP9_COMMON *cm, PREDICTION_MODE mode,
       assert(is_compound);
       for (i = 0; i < 2; ++i) {
         read_mv(r, &mv[i].as_mv, &ref_mv[i].as_mv, &cm->fc.nmvc, mv_counts,
+#if CONFIG_INTRABC
+                1,
+#endif  // CONFIG_INTRABC
                 allow_hp);
         ret = ret && is_mv_valid(&mv[i].as_mv);
       }
@@ -855,6 +942,9 @@ static INLINE int assign_mv(VP9_COMMON *cm, PREDICTION_MODE mode,
                                             NULL : &cm->counts.mv;
       assert(is_compound);
       read_mv(r, &mv[0].as_mv, &ref_mv[0].as_mv, &cm->fc.nmvc, mv_counts,
+#if CONFIG_INTRABC
+              1,
+#endif  // CONFIG_INTRABC
               allow_hp);
       ret = ret && is_mv_valid(&mv[0].as_mv);
       mv[1].as_int = nearest_mv[1].as_int;
@@ -866,6 +956,9 @@ static INLINE int assign_mv(VP9_COMMON *cm, PREDICTION_MODE mode,
       assert(is_compound);
       mv[0].as_int = nearest_mv[0].as_int;
       read_mv(r, &mv[1].as_mv, &ref_mv[1].as_mv, &cm->fc.nmvc, mv_counts,
+#if CONFIG_INTRABC
+              1,
+#endif  // CONFIG_INTRABC
               allow_hp);
       ret = ret && is_mv_valid(&mv[1].as_mv);
       break;
@@ -876,6 +969,9 @@ static INLINE int assign_mv(VP9_COMMON *cm, PREDICTION_MODE mode,
       assert(is_compound);
       mv[0].as_int = near_mv[0].as_int;
       read_mv(r, &mv[1].as_mv, &ref_mv[1].as_mv, &cm->fc.nmvc, mv_counts,
+#if CONFIG_INTRABC
+              1,
+#endif  // CONFIG_INTRABC
           allow_hp);
       ret = ret && is_mv_valid(&mv[1].as_mv);
       break;
@@ -885,6 +981,9 @@ static INLINE int assign_mv(VP9_COMMON *cm, PREDICTION_MODE mode,
                         NULL : &cm->counts.mv;
       assert(is_compound);
       read_mv(r, &mv[0].as_mv, &ref_mv[0].as_mv, &cm->fc.nmvc, mv_counts,
+#if CONFIG_INTRABC
+              1,
+#endif  // CONFIG_INTRABC
           allow_hp);
       ret = ret && is_mv_valid(&mv[0].as_mv);
       mv[1].as_int = near_mv[1].as_int;

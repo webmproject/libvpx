@@ -1261,7 +1261,12 @@ static void decode_block(VP9_COMMON *const cm, MACROBLOCKD *const xd,
                                                   cm->base_qindex));
     }
   }
-  if (!is_inter_block(mbmi)) {
+
+  if (!is_inter_block(mbmi)
+#if CONFIG_INTRABC
+      && !is_intrabc_mode(mbmi->mode)
+#endif  // CONFIG_INTRABC
+      ) {
     struct intra_args arg = { cm, xd, r };
     vp9_foreach_transformed_block(xd, bsize,
                                   predict_and_reconstruct_intra_block, &arg);
@@ -1969,6 +1974,7 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
         }
         pbi->mb.corrupted |= tile_data->xd.corrupted;
       }
+#if !CONFIG_INTRABC
       // Loopfilter one row.
       if (cm->lf.filter_level && !pbi->mb.corrupted) {
         const int lf_start = mi_row - MI_BLOCK_SIZE;
@@ -1989,6 +1995,7 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
           winterface->execute(&pbi->lf_worker);
         }
       }
+#endif  // !CONFIG_INTRABC
     }
   }
 

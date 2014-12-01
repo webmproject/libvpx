@@ -215,6 +215,9 @@ static const uint16_t above_border_uv = 0x000f;
 
 static const int mode_lf_lut[MB_MODE_COUNT] = {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  // INTRA_MODES
+#if CONFIG_INTRABC
+  0,
+#endif  // CONFIG_INTRABC
   1, 1, 0, 1,                    // INTER_MODES (ZEROMV == 0)
 #if CONFIG_NEWMVREF
   1,  // NEAR_FORNEWMV mode

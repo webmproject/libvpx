@@ -628,13 +628,23 @@ static void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
   struct macroblockd_plane *const pd = &xd->plane[plane];
   const MODE_INFO *mi = xd->mi[0].src_mi;
   const int is_compound = has_second_ref(&mi->mbmi);
+#if CONFIG_INTRABC
+  const int is_intrabc = is_intrabc_mode(mi->mbmi.mode);
+#endif  // CONFIG_INTRABC
   const InterpKernel *kernel = vp9_get_interp_kernel(mi->mbmi.interp_filter);
   int ref;
+#if CONFIG_INTRABC
+  assert(!is_intrabc || mi->mbmi.interp_filter == BILINEAR);
+#endif  // CONFIG_INTRABC
 
   for (ref = 0; ref < 1 + is_compound; ++ref) {
     const struct scale_factors *const sf = &xd->block_refs[ref]->sf;
-    struct buf_2d *const pre_buf = &pd->pre[ref];
     struct buf_2d *const dst_buf = &pd->dst;
+    struct buf_2d *const pre_buf =
+#if CONFIG_INTRABC
+        is_intrabc ? dst_buf :
+#endif  // CONFIG_INTRABC
+        &pd->pre[ref];
     uint8_t *const dst = dst_buf->buf + dst_buf->stride * y + x;
     const MV mv = mi->mbmi.sb_type < BLOCK_8X8
                ? average_split_mvs(pd, mi, ref, block)
@@ -655,6 +665,9 @@ static void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
     const int is_scaled = vp9_is_scaled(sf);
 
     if (is_scaled) {
+#if CONFIG_INTRABC
+      assert(!is_intrabc);
+#endif  // CONFIG_INTRABC
       pre = pre_buf->buf + scaled_buffer_offset(x, y, pre_buf->stride, sf);
       scaled_mv = vp9_scale_mv(&mv_q4, mi_x + x, mi_y + y, sf);
       xs = sf->x_step_q4;
@@ -778,6 +791,9 @@ void vp9_build_inter_predictors_sby(MACROBLOCKD *xd, int mi_row, int mi_col,
   build_inter_predictors_for_planes(xd, bsize, mi_row, mi_col, 0, 0);
 #if CONFIG_INTERINTRA
   if (xd->mi[0].src_mi->mbmi.ref_frame[1] == INTRA_FRAME &&
+#if CONFIG_INTRABC
+      xd->mi[0].src_mi->mbmi.ref_frame[0] != INTRA_FRAME &&
+#endif  // CONFIG_INTRABC
       is_interintra_allowed(xd->mi[0].src_mi->mbmi.sb_type))
     vp9_build_interintra_predictors_sby(xd, xd->plane[0].dst.buf,
                                         xd->plane[0].dst.stride, bsize);
@@ -790,6 +806,9 @@ void vp9_build_inter_predictors_sbuv(MACROBLOCKD *xd, int mi_row, int mi_col,
                                     MAX_MB_PLANE - 1);
 #if CONFIG_INTERINTRA
   if (xd->mi[0].src_mi->mbmi.ref_frame[1] == INTRA_FRAME &&
+#if CONFIG_INTRABC
+      xd->mi[0].src_mi->mbmi.ref_frame[0] != INTRA_FRAME &&
+#endif  // CONFIG_INTRABC
       is_interintra_allowed(xd->mi[0].src_mi->mbmi.sb_type))
     vp9_build_interintra_predictors_sbuv(xd, xd->plane[1].dst.buf,
                                          xd->plane[2].dst.buf,
@@ -804,6 +823,9 @@ void vp9_build_inter_predictors_sb(MACROBLOCKD *xd, int mi_row, int mi_col,
                                     MAX_MB_PLANE - 1);
 #if CONFIG_INTERINTRA
   if (xd->mi[0].src_mi->mbmi.ref_frame[1] == INTRA_FRAME &&
+#if CONFIG_INTRABC
+      xd->mi[0].src_mi->mbmi.ref_frame[0] != INTRA_FRAME &&
+#endif  // CONFIG_INTRABC
       is_interintra_allowed(xd->mi[0].src_mi->mbmi.sb_type))
     vp9_build_interintra_predictors(xd, xd->plane[0].dst.buf,
                                     xd->plane[1].dst.buf, xd->plane[2].dst.buf,
@@ -1210,11 +1232,29 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
   const int is_compound = has_second_ref(&mi->mbmi);
   const InterpKernel *kernel = vp9_get_interp_kernel(mi->mbmi.interp_filter);
   int ref;
+#if CONFIG_INTRABC
+  const int is_intrabc = is_intrabc_mode(mi->mbmi.mode);
+  struct scale_factors sf1;
+
+  vp9_setup_scale_factors_for_frame(&sf1, 64, 64, 64, 64);
+
+  assert(!is_intrabc || !is_compound);
+#endif  // CONFIG_INTRABC
 
   for (ref = 0; ref < 1 + is_compound; ++ref) {
+    struct buf_2d *const dst_buf = &pd->dst;
+#if CONFIG_INTRABC
+    const struct scale_factors *const sf =
+        is_intrabc ? &sf1 : &xd->block_refs[ref]->sf;
+    struct buf_2d *const pre_buf =
+        is_intrabc ? dst_buf : &pd->pre[ref];
+    const YV12_BUFFER_CONFIG *ref_buf =
+        is_intrabc ? xd->cur_buf : xd->block_refs[ref]->buf;
+#else
     const struct scale_factors *const sf = &xd->block_refs[ref]->sf;
     struct buf_2d *const pre_buf = &pd->pre[ref];
-    struct buf_2d *const dst_buf = &pd->dst;
+    const YV12_BUFFER_CONFIG *ref_buf = xd->block_refs[ref]->buf;
+#endif  // CONFIG_INTRABC
     uint8_t *const dst = dst_buf->buf + dst_buf->stride * y + x;
     const MV mv = mi->mbmi.sb_type < BLOCK_8X8
         ? average_split_mvs(pd, mi, ref, block)
@@ -1228,7 +1268,6 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
     int xs, ys, x0, y0, x0_16, y0_16, frame_width, frame_height, buf_stride,
         subpel_x, subpel_y;
     uint8_t *ref_frame, *buf_ptr;
-    const YV12_BUFFER_CONFIG *ref_buf = xd->block_refs[ref]->buf;
     const int is_scaled = vp9_is_scaled(sf);
 
     // Get reference frame pointer, width and height.
@@ -1246,6 +1285,10 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
       // Co-ordinate of containing block to pixel precision.
       int x_start = (-xd->mb_to_left_edge >> (3 + pd->subsampling_x));
       int y_start = (-xd->mb_to_top_edge >> (3 + pd->subsampling_y));
+
+#if CONFIG_INTRABC
+      assert(!is_intrabc);
+#endif  // CONFIG_INTRABC
 
       // Co-ordinate of the block to 1/16th pixel precision.
       x0_16 = (x_start + x) << SUBPEL_BITS;
@@ -1301,13 +1344,13 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
       int y1 = ((y0_16 + (h - 1) * ys) >> SUBPEL_BITS) + 1;
       int x_pad = 0, y_pad = 0;
 
-      if (subpel_x || (sf->x_step_q4 != SUBPEL_SHIFTS)) {
+      if (subpel_x || (sf && sf->x_step_q4 != SUBPEL_SHIFTS)) {
         x0 -= VP9_INTERP_EXTEND - 1;
         x1 += VP9_INTERP_EXTEND;
         x_pad = 1;
       }
 
-      if (subpel_y || (sf->y_step_q4 != SUBPEL_SHIFTS)) {
+      if (subpel_y || (sf && sf->y_step_q4 != SUBPEL_SHIFTS)) {
         y0 -= VP9_INTERP_EXTEND - 1;
         y1 += VP9_INTERP_EXTEND;
         y_pad = 1;
