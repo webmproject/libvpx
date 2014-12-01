@@ -511,9 +511,8 @@ process_common_cmdline() {
         ;;
         --force-target=*) toolchain="${toolchain:-${optval}}"; enable_feature force_toolchain
         ;;
-        --cpu)
-        ;;
-        --cpu=*) tune_cpu="$optval"
+        --cpu=*)
+        tune_cpu="$optval"
         ;;
         --extra-cflags=*)
         extra_cflags="${optval}"
