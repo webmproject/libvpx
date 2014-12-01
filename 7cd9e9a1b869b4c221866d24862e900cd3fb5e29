@@ -1,0 +1,939 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Ot8\u003d",
+        "filename": "test/dct16x16_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 341,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "// HAVE_SSE2",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Ot4\u003d",
+        "filename": "test/dct16x16_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 342,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "// CONFIG_VP9_HIGHBITDEPTH",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Ous\u003d",
+        "filename": "test/dct16x16_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 595,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "new line",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Ouk\u003d",
+        "filename": "test/dct16x16_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 613,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "spaces between operators",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Ouo\u003d",
+        "filename": "test/dct16x16_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 651,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "new line",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Ouc\u003d",
+        "filename": "test/dct16x16_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 801,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "drop alignment",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Otw\u003d",
+        "filename": "test/dct16x16_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 933,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "// HAVE_SSE2 \u0026\u0026 CONFIG_VP9_HIGHBITDEPTH \u0026\u0026 !CONFIG_EMULATE_HARDWARE",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Ots\u003d",
+        "filename": "test/dct32x32_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "// CONFIG_VP9_HIGHBITDEPTH",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Oto\u003d",
+        "filename": "test/dct32x32_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 374,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "// HAVE_SSE2 \u0026\u0026 CONFIG_VP9_HIGHBITDEPTH \u0026\u0026 !CONFIG_EMULATE_HARDWARE",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//OuI\u003d",
+        "filename": "test/fdct4x4_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "// HAVE_SSE2",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//OuE\u003d",
+        "filename": "test/fdct4x4_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "// CONFIG_VP9_HIGHBITDEPTH",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Otk\u003d",
+        "filename": "test/fdct4x4_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 535,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "//  HAVE_SSE2 \u0026\u0026 CONFIG_VP9_HIGHBITDEPTH \u0026\u0026 !CONFIG_EMULATE_HARDWARE",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Otg\u003d",
+        "filename": "test/fdct8x8_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "// HAVE_SSE2",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Otc\u003d",
+        "filename": "test/fdct8x8_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "// CONFIG_VP9_HIGHBITDEPTH",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//OtY\u003d",
+        "filename": "test/fdct8x8_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "spaces between ops (just the \u0027/\u0027s)",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//OtU\u003d",
+        "filename": "test/fdct8x8_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 624,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "remove alignment",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//OtQ\u003d",
+        "filename": "test/fdct8x8_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 754,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "// HAVE_SSE2 \u0026\u0026 CONFIG_VP9_HIGHBITDEPTH \u0026\u0026 !CONFIG_EMULATE_HARDWARE",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//OtE\u003d",
+        "filename": "vp9/common/x86/vp9_idct_intrin_sse2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4112,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "braces",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//OtM\u003d",
+        "filename": "vp9/common/x86/vp9_idct_intrin_sse2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4115,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "weird indent",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Os8\u003d",
+        "filename": "vp9/common/x86/vp9_idct_intrin_sse2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4216,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "ditto braces/weird indent",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Os4\u003d",
+        "filename": "vp9/common/x86/vp9_idct_intrin_sse2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4320,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "please fix this throughout",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Oss\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct32x32_sse2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "I think vp9/common and vp9/encoder should be grouped with vpx_ports/mem.h coming after",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Osk\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct32x32_sse2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "// FDCT32x32_HIGH_PRECISION",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Oso\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct32x32_sse2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "// DCT_HIGH_BIT_DEPTH",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Osg\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct32x32_sse2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "remove horiz align",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//OsU\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct32x32_sse2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "// DCT_HIGH_BIT_DEPTH",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Osc\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct32x32_sse2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 292,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "ditto align removal",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//OsY\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct32x32_sse2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 299,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "weird indent",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//OsQ\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct32x32_sse2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "// DCT_HIGH_BIT_DEPTH",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//OsI\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct32x32_sse2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 316,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "ditto align",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//OsM\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct32x32_sse2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 325,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "weird indent",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//OsA\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct32x32_sse2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 351,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "weird indent",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//OsE\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct32x32_sse2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 370,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "remove alignment",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Or8\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct32x32_sse2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 381,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "ditto indent",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Or4\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct32x32_sse2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 460,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "fix indent",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Or0\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct32x32_sse2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 517,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "remove alignement",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Orw\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct32x32_sse2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 547,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "fix indent",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Ors\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct32x32_sse2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 636,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "fix indent",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Ork\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct32x32_sse2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 691,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "All of these sections (appear) to repeat the same issues:\n- Fix the weird indent\n- Add // DCT_HIGH_BIT_DEPTH comment to endif\n\nI was going to include the stepX[ Y] bit, but I see the horizontal alignment is pretty heavily spread throughout this file-- you can leave those alone if you\u0027d like.\n\nAnyway, please fix these throughout. Not pointing them out anymore.",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Orc\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_impl_sse2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "This scoping doesn\u0027t seem necessary",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//OrY\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_impl_sse2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "// DCT_HIGH_BIT_DEPTH\n(throughout)",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//OrU\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_impl_sse2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "scoping necessary?",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Oq8\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2264,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "align",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Oq4\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2297,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "align",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Oq0\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 2328,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "align",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//OqU\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "align above 3 (off by one under paren)",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//OqQ\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "align",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//OqM\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "align",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//OqI\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "weird indent above 4 statements",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//OqE\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "weird indent above 2",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Op8\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "align",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Op4\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "align",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Op0\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 211,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "weird indent/align",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Opw\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 263,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "// CONFIG_VP9_HIGHBITDEPTH",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//OqA\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 286,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-01T22:34:06Z",
+      "side": 1,
+      "message": "weird indent",
+      "revId": "7cd9e9a1b869b4c221866d24862e900cd3fb5e29",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
