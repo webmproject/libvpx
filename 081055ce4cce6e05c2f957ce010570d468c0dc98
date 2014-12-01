@@ -16,6 +16,24 @@
       "revId": "081055ce4cce6e05c2f957ce010570d468c0dc98",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//OpM\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3220,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2014-12-01T23:15:33Z",
+      "side": 1,
+      "message": "The definition of mode_chosen_counts is as follows:\n  unsigned int mode_chosen_counts[MAX_MODES];\nso I think sizeof(cpi-\u003emode_chosen_counts) gives the size of the array, in bytes.",
+      "parentUuid": "AAAAdn//Oqo\u003d",
+      "revId": "081055ce4cce6e05c2f957ce010570d468c0dc98",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
