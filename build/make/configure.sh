@@ -495,8 +495,6 @@ process_common_cmdline() {
         toolchain="${toolchain:-${optval}}"
         enable_feature force_toolchain
         ;;
-      --cpu)
-        ;;
       --cpu=*)
         tune_cpu="$optval"
         ;;
@@ -842,10 +840,6 @@ EOF
             if enabled neon || enabled neon_asm; then
               check_add_cflags -mfpu=neon #-ftree-vectorize
               check_add_asflags -mfpu=neon
-            fi
-
-            if [ -z "${tune_cpu}" ]; then
-              tune_cpu=cortex-a8
             fi
           else
             check_add_cflags -march=${tgt_isa}

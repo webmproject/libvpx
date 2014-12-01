@@ -26,6 +26,7 @@ Advanced options:
   ${toggle_unit_tests}            unit tests
   ${toggle_decode_perf_tests}     build decoder perf tests with unit tests
   ${toggle_encode_perf_tests}     build encoder perf tests with unit tests
+  --cpu=CPU                       tune for the specified CPU (ARM: cortex-a8, X86: sse3)
   --libc=PATH                     path to alternate libc
   --size-limit=WxH                max size to allow in the decoder
   --as={yasm|nasm|auto}           use specified assembler [auto, yasm preferred]
