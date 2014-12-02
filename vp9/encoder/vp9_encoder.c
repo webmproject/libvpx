@@ -35,6 +35,7 @@
 #include "vp9/encoder/vp9_context_tree.h"
 #include "vp9/encoder/vp9_encodeframe.h"
 #include "vp9/encoder/vp9_encodemv.h"
+#include "vp9/encoder/vp9_ethread.h"
 #include "vp9/encoder/vp9_firstpass.h"
 #include "vp9/encoder/vp9_mbgraph.h"
 #include "vp9/encoder/vp9_encoder.h"
@@ -1728,6 +1729,7 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
 void vp9_remove_compressor(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   unsigned int i;
+  int t;
 
   if (!cpi)
     return;
@@ -1799,6 +1801,24 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
     vp9_denoiser_free(&(cpi->denoiser));
   }
 #endif
+
+  for (t = 0; t < cpi->num_workers; ++t) {
+    VP9Worker *const worker = &cpi->workers[t];
+    EncWorkerData *const thread_data = (EncWorkerData*)worker->data1;
+
+    // Deallocate allocated threads.
+    vp9_get_worker_interface()->end(worker);
+
+    // Deallocate allocated thread data.
+    if (t < cpi->num_workers - 1) {
+      vpx_free(thread_data->td->counts);
+      vp9_free_pc_tree(thread_data->td);
+      vpx_free(thread_data->td);
+    }
+
+    vpx_free(worker->data1);
+  }
+  vpx_free(cpi->workers);
 
   dealloc_compressor_data(cpi);
 
