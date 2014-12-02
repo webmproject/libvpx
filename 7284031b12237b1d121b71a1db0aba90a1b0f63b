@@ -16,6 +16,24 @@
       "revId": "7284031b12237b1d121b71a1db0aba90a1b0f63b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Ofg\u003d",
+        "filename": "test/acm_random.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-12-02T01:22:02Z",
+      "side": 1,
+      "message": "good point, but this kind of thing should be done separately:\n\nhttps://gerrit.chromium.org/gerrit/#/c/73135/",
+      "parentUuid": "AAAAdn//Oxg\u003d",
+      "revId": "7284031b12237b1d121b71a1db0aba90a1b0f63b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
