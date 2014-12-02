@@ -286,42 +286,53 @@ static INLINE const uint8_t *pre(const uint8_t *buf, int stride, int r, int c) {
   bestmv->row *= 8;                                                        \
   bestmv->col *= 8;
 
+static INLINE unsigned int setup_center_error(const MACROBLOCKD *xd,
+                                              const MV *bestmv,
+                                              const MV *ref_mv,
+                                              int error_per_bit,
+                                              const vp9_variance_fn_ptr_t *vfp,
+                                              const uint8_t *const src,
+                                              const int src_stride,
+                                              const uint8_t *const y,
+                                              int y_stride,
+                                              const uint8_t *second_pred,
+                                              int w, int h, int offset,
+                                              int *mvjcost, int *mvcost[2],
+                                              unsigned int *sse1,
+                                              int *distortion) {
+  unsigned int besterr;
 #if CONFIG_VP9_HIGHBITDEPTH
-#define SETUP_CENTER_ERROR                                                   \
-  if (second_pred != NULL) {                                                 \
-    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {                       \
-      DECLARE_ALIGNED_ARRAY(16, uint16_t, comp_pred16, 64 * 64);             \
-      vp9_highbd_comp_avg_pred(comp_pred16, second_pred, w, h, y + offset,   \
-                               y_stride);                                    \
-      besterr = vfp->vf(CONVERT_TO_BYTEPTR(comp_pred16), w, z, src_stride,   \
-                        sse1);                                               \
-    } else {                                                                 \
-      DECLARE_ALIGNED_ARRAY(16, uint8_t, comp_pred, 64 * 64);                \
-      vp9_comp_avg_pred(comp_pred, second_pred, w, h, y + offset, y_stride); \
-      besterr = vfp->vf(comp_pred, w, z, src_stride, sse1);                  \
-    }                                                                        \
-  } else {                                                                   \
-    besterr = vfp->vf(y + offset, y_stride, z, src_stride, sse1);            \
-  }                                                                          \
-  *distortion = besterr;                                                     \
+  if (second_pred != NULL) {
+    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+      DECLARE_ALIGNED_ARRAY(16, uint16_t, comp_pred16, 64 * 64);
+      vp9_highbd_comp_avg_pred(comp_pred16, second_pred, w, h, y + offset,
+                               y_stride);
+      besterr = vfp->vf(CONVERT_TO_BYTEPTR(comp_pred16), w, src, src_stride,
+                        sse1);
+    } else {
+      DECLARE_ALIGNED_ARRAY(16, uint8_t, comp_pred, 64 * 64);
+      vp9_comp_avg_pred(comp_pred, second_pred, w, h, y + offset, y_stride);
+      besterr = vfp->vf(comp_pred, w, src, src_stride, sse1);
+    }
+  } else {
+    besterr = vfp->vf(y + offset, y_stride, src, src_stride, sse1);
+  }
+  *distortion = besterr;
   besterr += mv_err_cost(bestmv, ref_mv, mvjcost, mvcost, error_per_bit);
-
 #else
-
-#define SETUP_CENTER_ERROR                                                   \
-  if (second_pred != NULL) {                                                 \
-    DECLARE_ALIGNED_ARRAY(16, uint8_t, comp_pred, 64 * 64);                  \
-    vp9_comp_avg_pred(comp_pred, second_pred, w, h, y + offset, y_stride);   \
-    besterr = vfp->vf(comp_pred, w, z, src_stride, sse1);                    \
-  } else {                                                                   \
-    besterr = vfp->vf(y + offset, y_stride, z, src_stride, sse1);            \
-  }                                                                          \
-  *distortion = besterr;                                                     \
+  (void) xd;
+  if (second_pred != NULL) {
+    DECLARE_ALIGNED_ARRAY(16, uint8_t, comp_pred, 64 * 64);
+    vp9_comp_avg_pred(comp_pred, second_pred, w, h, y + offset, y_stride);
+    besterr = vfp->vf(comp_pred, w, src, src_stride, sse1);
+  } else {
+    besterr = vfp->vf(y + offset, y_stride, src, src_stride, sse1);
+  }
+  *distortion = besterr;
   besterr += mv_err_cost(bestmv, ref_mv, mvjcost, mvcost, error_per_bit);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-
-
-
+  return besterr;
+}
 
 static INLINE int divide_and_round(const int n, const int d) {
   return ((n < 0) ^ (d < 0)) ? ((n - d / 2) / d) : ((n + d / 2) / d);
@@ -365,7 +376,10 @@ int vp9_find_best_sub_pixel_tree_pruned_evenmore(
     const uint8_t *second_pred,
     int w, int h) {
   SETUP_SUBPEL_SEARCH;
-  SETUP_CENTER_ERROR;
+  besterr = setup_center_error(xd, bestmv, ref_mv, error_per_bit, vfp,
+                               z, src_stride, y, y_stride, second_pred,
+                               w, h, offset, mvjcost, mvcost,
+                               sse1, distortion);
   (void) halfiters;
   (void) quarteriters;
   (void) eighthiters;
@@ -441,7 +455,10 @@ int vp9_find_best_sub_pixel_tree_pruned_more(const MACROBLOCK *x,
                                              const uint8_t *second_pred,
                                              int w, int h) {
   SETUP_SUBPEL_SEARCH;
-  SETUP_CENTER_ERROR;
+  besterr = setup_center_error(xd, bestmv, ref_mv, error_per_bit, vfp,
+                               z, src_stride, y, y_stride, second_pred,
+                               w, h, offset, mvjcost, mvcost,
+                               sse1, distortion);
   if (cost_list &&
       cost_list[0] != INT_MAX && cost_list[1] != INT_MAX &&
       cost_list[2] != INT_MAX && cost_list[3] != INT_MAX &&
@@ -512,7 +529,10 @@ int vp9_find_best_sub_pixel_tree_pruned(const MACROBLOCK *x,
                                         const uint8_t *second_pred,
                                         int w, int h) {
   SETUP_SUBPEL_SEARCH;
-  SETUP_CENTER_ERROR;
+  besterr = setup_center_error(xd, bestmv, ref_mv, error_per_bit, vfp,
+                               z, src_stride, y, y_stride, second_pred,
+                               w, h, offset, mvjcost, mvcost,
+                               sse1, distortion);
   if (cost_list &&
       cost_list[0] != INT_MAX && cost_list[1] != INT_MAX &&
       cost_list[2] != INT_MAX && cost_list[3] != INT_MAX &&
@@ -645,15 +665,10 @@ int vp9_find_best_sub_pixel_tree(const MACROBLOCK *x,
   bestmv->row *= 8;
   bestmv->col *= 8;
 
-  if (second_pred != NULL) {
-    DECLARE_ALIGNED_ARRAY(16, uint8_t, comp_pred, 64 * 64);
-    vp9_comp_avg_pred(comp_pred, second_pred, w, h, y + offset, y_stride);
-    besterr = vfp->vf(comp_pred, w, src_address, src_stride, sse1);
-  } else {
-    besterr = vfp->vf(y + offset, y_stride, src_address, src_stride, sse1);
-  }
-  *distortion = besterr;
-  besterr += mv_err_cost(bestmv, ref_mv, mvjcost, mvcost, error_per_bit);
+  besterr = setup_center_error(xd, bestmv, ref_mv, error_per_bit, vfp,
+                               z, src_stride, y, y_stride, second_pred,
+                               w, h, offset, mvjcost, mvcost,
+                               sse1, distortion);
 
   (void) cost_list;  // to silence compiler warning
 
