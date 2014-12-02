@@ -115,6 +115,10 @@ struct VP9EncoderConfig;
 void vp9_rc_init(const struct VP9EncoderConfig *oxcf, int pass,
                  RATE_CONTROL *rc);
 
+int vp9_estimate_bits_at_q(FRAME_TYPE frame_kind, int q, int mbs,
+                           double correction_factor,
+                           vpx_bit_depth_t bit_depth);
+
 double vp9_convert_qindex_to_q(int qindex, vpx_bit_depth_t bit_depth);
 
 void vp9_rc_init_minq_luts();

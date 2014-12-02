@@ -18,6 +18,7 @@
 #include "vpx_mem/vpx_mem.h"
 
 #include "vp9/common/vp9_alloccommon.h"
+#include "vp9/encoder/vp9_aq_cyclicrefresh.h"
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_entropymode.h"
 #include "vp9/common/vp9_quant_common.h"
@@ -185,9 +186,9 @@ int vp9_rc_bits_per_mb(FRAME_TYPE frame_type, int qindex,
   return (int)(enumerator * correction_factor / q);
 }
 
-static int estimate_bits_at_q(FRAME_TYPE frame_type, int q, int mbs,
-                              double correction_factor,
-                              vpx_bit_depth_t bit_depth) {
+int vp9_estimate_bits_at_q(FRAME_TYPE frame_type, int q, int mbs,
+                           double correction_factor,
+                           vpx_bit_depth_t bit_depth) {
   const int bpm = (int)(vp9_rc_bits_per_mb(frame_type, q, correction_factor,
                                            bit_depth));
   return MAX(FRAME_OVERHEAD_BITS,
@@ -231,7 +232,6 @@ int vp9_rc_clamp_iframe_target_size(const VP9_COMP *const cpi, int target) {
     target = rc->max_frame_bandwidth;
   return target;
 }
-
 
 // Update the buffer level for higher layers, given the encoded current layer.
 static void update_layer_buffer_level(SVC *svc, int encoded_frame_size) {
@@ -414,10 +414,16 @@ void vp9_rc_update_rate_correction_factors(VP9_COMP *cpi, int damp_var) {
   // Work out how big we would have expected the frame to be at this Q given
   // the current correction factor.
   // Stay in double to avoid int overflow when values are large
-  projected_size_based_on_q = estimate_bits_at_q(cm->frame_type,
-                                                 cm->base_qindex, cm->MBs,
-                                                 rate_correction_factor,
-                                                 cm->bit_depth);
+  if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cpi->common.seg.enabled) {
+    projected_size_based_on_q =
+        vp9_cyclic_refresh_estimate_bits_at_q(cpi, rate_correction_factor);
+  } else {
+    projected_size_based_on_q = vp9_estimate_bits_at_q(cpi->common.frame_type,
+                                                       cm->base_qindex,
+                                                       cm->MBs,
+                                                       rate_correction_factor,
+                                                       cm->bit_depth);
+  }
   // Work out a size correction factor.
   if (projected_size_based_on_q > FRAME_OVERHEAD_BITS)
     correction_factor = (100 * cpi->rc.projected_frame_size) /
@@ -477,7 +483,7 @@ int vp9_rc_regulate_q(const VP9_COMP *cpi, int target_bits_per_frame,
   const VP9_COMMON *const cm = &cpi->common;
   int q = active_worst_quality;
   int last_error = INT_MAX;
-  int i, target_bits_per_mb;
+  int i, target_bits_per_mb, bits_per_mb_at_this_q;
   const double correction_factor = get_rate_correction_factor(cpi);
 
   // Calculate required scaling factor based on target frame size and size of
@@ -488,9 +494,14 @@ int vp9_rc_regulate_q(const VP9_COMP *cpi, int target_bits_per_frame,
   i = active_best_quality;
 
   do {
-    const int bits_per_mb_at_this_q = (int)vp9_rc_bits_per_mb(cm->frame_type, i,
-                                                              correction_factor,
-                                                              cm->bit_depth);
+    if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cm->seg.enabled) {
+      bits_per_mb_at_this_q =
+          (int)vp9_cyclic_refresh_rc_bits_per_mb(cpi, i, correction_factor);
+    } else {
+      bits_per_mb_at_this_q = (int)vp9_rc_bits_per_mb(cm->frame_type, i,
+                                                      correction_factor,
+                                                      cm->bit_depth);
+    }
 
     if (bits_per_mb_at_this_q <= target_bits_per_mb) {
       if ((target_bits_per_mb - bits_per_mb_at_this_q) <= last_error)
@@ -1202,6 +1213,10 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   RATE_CONTROL *const rc = &cpi->rc;
   const int qindex = cm->base_qindex;
+
+  if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cm->seg.enabled) {
+    vp9_cyclic_refresh_update_actual_count(cpi);
+  }
 
   // Update rate control heuristics
   rc->projected_frame_size = (int)(bytes_used << 3);
