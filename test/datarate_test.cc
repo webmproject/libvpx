@@ -514,6 +514,9 @@ TEST_P(DatarateTestVP9Large, BasicRateTargeting2TemporalLayers) {
   cfg_.ts_rate_decimator[0] = 2;
   cfg_.ts_rate_decimator[1] = 1;
 
+  if (deadline_ == VPX_DL_REALTIME)
+    cfg_.g_error_resilient = 1;
+
   ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
                                        30, 1, 0, 200);
   for (int i = 200; i <= 800; i += 200) {
@@ -652,8 +655,8 @@ TEST_P(DatarateTestVP9Large, DenoiserLevels) {
 #endif  // CONFIG_VP9_TEMPORAL_DENOISING
 
 VP8_INSTANTIATE_TEST_CASE(DatarateTestLarge, ALL_TEST_MODES);
-// TODO(jingning) Add kRealTime back.
 VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9Large,
-                          ::testing::Values(::libvpx_test::kOnePassGood),
+                          ::testing::Values(::libvpx_test::kOnePassGood,
+                                            ::libvpx_test::kRealTime),
                           ::testing::Range(2, 7));
 }  // namespace
