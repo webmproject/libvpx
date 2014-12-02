@@ -79,6 +79,9 @@ const short vp9_rv[] = {
   0, 9, 5, 5, 11, 10, 13, 9, 10, 13,
 };
 
+static const uint8_t q_diff_thresh = 20;
+static const uint8_t last_q_thresh = 170;
+
 void vp9_post_proc_down_and_across_c(const uint8_t *src_ptr,
                                      uint8_t *dst_ptr,
                                      int src_pixels_per_line,
@@ -616,6 +619,17 @@ void vp9_plane_add_noise_c(uint8_t *start, char *noise,
   }
 }
 
+static void swap_mi_and_prev_mi(VP9_COMMON *cm) {
+  // Current mip will be the prev_mip for the next frame.
+  MODE_INFO *temp = cm->postproc_state.prev_mip;
+  cm->postproc_state.prev_mip = cm->mip;
+  cm->mip = temp;
+
+  // Update the upper left visible macroblock ptrs.
+  cm->mi = cm->mip + cm->mi_stride + 1;
+  cm->postproc_state.prev_mi = cm->postproc_state.prev_mip + cm->mi_stride + 1;
+}
+
 int vp9_post_proc_frame(struct VP9Common *cm,
                         YV12_BUFFER_CONFIG *dest, vp9_ppflags_t *ppflags) {
   const int q = MIN(63, cm->lf.filter_level * 10 / 6);
@@ -633,6 +647,42 @@ int vp9_post_proc_frame(struct VP9Common *cm,
 
   vp9_clear_system_state();
 
+  // Alloc memory for prev_mip in the first frame.
+  if (cm->current_video_frame == 1) {
+    cm->postproc_state.last_base_qindex = cm->base_qindex;
+    cm->postproc_state.last_frame_valid = 1;
+    ppstate->prev_mip = vpx_calloc(cm->mi_alloc_size, sizeof(*cm->mip));
+    if (!ppstate->prev_mip) {
+      return 1;
+    }
+    ppstate->prev_mi = ppstate->prev_mip + cm->mi_stride + 1;
+    vpx_memset(ppstate->prev_mip, 0,
+               cm->mi_stride * (cm->mi_rows + 1) * sizeof(*cm->mip));
+  }
+
+  // Allocate post_proc_buffer_int if needed.
+  if ((flags & VP9D_MFQE) && !cm->post_proc_buffer_int.buffer_alloc) {
+    if ((flags & VP9D_DEMACROBLOCK) || (flags & VP9D_DEBLOCK)) {
+      const int width = ALIGN_POWER_OF_TWO(cm->width, 4);
+      const int height = ALIGN_POWER_OF_TWO(cm->height, 4);
+
+      if (vp9_alloc_frame_buffer(&cm->post_proc_buffer_int, width, height,
+                                 cm->subsampling_x, cm->subsampling_y,
+#if CONFIG_VP9_HIGHBITDEPTH
+                                 cm->use_highbitdepth,
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+                                 VP9_ENC_BORDER_IN_PIXELS) < 0) {
+        vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+                           "Failed to allocate MFQE framebuffer");
+      }
+
+      // Ensure that postproc is set to all 0s so that post proc
+      // doesn't pull random data in from edge.
+      vpx_memset(cm->post_proc_buffer_int.buffer_alloc, 128,
+                 cm->post_proc_buffer.frame_size);
+    }
+  }
+
 #if CONFIG_VP9_POSTPROC || CONFIG_INTERNAL_STATS
   if (vp9_realloc_frame_buffer(&cm->post_proc_buffer, cm->width, cm->height,
                                cm->subsampling_x, cm->subsampling_y,
@@ -644,7 +694,27 @@ int vp9_post_proc_frame(struct VP9Common *cm,
                        "Failed to allocate post-processing buffer");
 #endif
 
-  if (flags & VP9D_DEMACROBLOCK) {
+  if ((flags & VP9D_MFQE) && cm->current_video_frame >= 2 &&
+      cm->postproc_state.last_frame_valid &&
+      cm->postproc_state.last_base_qindex <= last_q_thresh &&
+      cm->base_qindex - cm->postproc_state.last_base_qindex >= q_diff_thresh) {
+    vp9_mfqe(cm);
+    // TODO(jackychen): Consider whether enable deblocking by default
+    // if mfqe is enabled. Need to take both the quality and the speed
+    // into consideration.
+    if ((flags & VP9D_DEMACROBLOCK) || (flags & VP9D_DEBLOCK)) {
+      vp8_yv12_copy_frame(ppbuf, &cm->post_proc_buffer_int);
+    }
+    if ((flags & VP9D_DEMACROBLOCK) && cm->post_proc_buffer_int.buffer_alloc) {
+      deblock_and_de_macro_block(&cm->post_proc_buffer_int, ppbuf,
+                                 q + (ppflags->deblocking_level - 5) * 10,
+                                 1, 0);
+    } else if (flags & VP9D_DEBLOCK) {
+      vp9_deblock(&cm->post_proc_buffer_int, ppbuf, q);
+    } else {
+      vp8_yv12_copy_frame(&cm->post_proc_buffer_int, ppbuf);
+    }
+  } else if (flags & VP9D_DEMACROBLOCK) {
     deblock_and_de_macro_block(cm->frame_to_show, ppbuf,
                                q + (ppflags->deblocking_level - 5) * 10, 1, 0);
   } else if (flags & VP9D_DEBLOCK) {
@@ -652,6 +722,9 @@ int vp9_post_proc_frame(struct VP9Common *cm,
   } else {
     vp8_yv12_copy_frame(cm->frame_to_show, ppbuf);
   }
+
+  cm->postproc_state.last_base_qindex = cm->base_qindex;
+  cm->postproc_state.last_frame_valid = 1;
 
   if (flags & VP9D_ADDNOISE) {
     const int noise_level = ppflags->noise_level;
@@ -673,6 +746,7 @@ int vp9_post_proc_frame(struct VP9Common *cm,
   dest->uv_width = dest->y_width >> cm->subsampling_x;
   dest->uv_height = dest->y_height >> cm->subsampling_y;
 
+  swap_mi_and_prev_mi(cm);
   return 0;
 }
 #endif
