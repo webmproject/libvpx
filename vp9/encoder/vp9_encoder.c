@@ -3642,7 +3642,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
       // non-zero spatial layer, it should not be an intra picture.
       // TODO(Won Kap): this needs to change if per-layer intra frame is
       // allowed.
-      if ((source->flags | VPX_EFLAG_FORCE_KF) && cpi->svc.spatial_layer_id) {
+      if ((source->flags & VPX_EFLAG_FORCE_KF) && cpi->svc.spatial_layer_id) {
         source->flags &= ~(unsigned int)(VPX_EFLAG_FORCE_KF);
       }
 
