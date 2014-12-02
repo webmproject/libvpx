@@ -2476,6 +2476,7 @@ void vp9_scale_references(VP9_COMP *cpi) {
         if (cm->frame_bufs[new_fb].mvs == NULL ||
             cm->frame_bufs[new_fb].mi_rows < cm->mi_rows ||
             cm->frame_bufs[new_fb].mi_cols < cm->mi_cols) {
+          vpx_free(cm->frame_bufs[new_fb].mvs);
           cm->frame_bufs[new_fb].mvs =
             (MV_REF *)vpx_calloc(cm->mi_rows * cm->mi_cols,
                                  sizeof(*cm->frame_bufs[new_fb].mvs));
