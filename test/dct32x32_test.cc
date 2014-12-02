@@ -79,6 +79,10 @@ typedef std::tr1::tuple<FwdTxfmFunc, InvTxfmFunc, int, vpx_bit_depth_t>
     Trans32x32Param;
 
 #if CONFIG_VP9_HIGHBITDEPTH
+void idct32x32_8(const tran_low_t *in, uint8_t *out, int stride) {
+  vp9_highbd_idct32x32_1024_add_c(in, out, stride, 8);
+}
+
 void idct32x32_10(const tran_low_t *in, uint8_t *out, int stride) {
   vp9_highbd_idct32x32_1024_add_c(in, out, stride, 10);
 }
@@ -86,7 +90,7 @@ void idct32x32_10(const tran_low_t *in, uint8_t *out, int stride) {
 void idct32x32_12(const tran_low_t *in, uint8_t *out, int stride) {
   vp9_highbd_idct32x32_1024_add_c(in, out, stride, 12);
 }
-#endif
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 class Trans32x32Test : public ::testing::TestWithParam<Trans32x32Param> {
  public:
@@ -114,7 +118,7 @@ TEST_P(Trans32x32Test, AccuracyCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   uint32_t max_error = 0;
   int64_t total_error = 0;
-  const int count_test_block = 1000;
+  const int count_test_block = 10000;
   DECLARE_ALIGNED_ARRAY(16, int16_t, test_input_block, kNumCoeffs);
   DECLARE_ALIGNED_ARRAY(16, tran_low_t, test_temp_block, kNumCoeffs);
   DECLARE_ALIGNED_ARRAY(16, uint8_t, dst, kNumCoeffs);
@@ -127,7 +131,7 @@ TEST_P(Trans32x32Test, AccuracyCheck) {
   for (int i = 0; i < count_test_block; ++i) {
     // Initialize a test block with input range [-mask_, mask_].
     for (int j = 0; j < kNumCoeffs; ++j) {
-      if (bit_depth_ == 8) {
+      if (bit_depth_ == VPX_BITS_8) {
         src[j] = rnd.Rand8();
         dst[j] = rnd.Rand8();
         test_input_block[j] = src[j] - dst[j];
@@ -282,7 +286,7 @@ TEST_P(Trans32x32Test, InverseAccuracy) {
 
     reference_32x32_dct_2d(in, out_r);
     for (int j = 0; j < kNumCoeffs; ++j)
-      coeff[j] = round(out_r[j]);
+      coeff[j] = static_cast<tran_low_t>(round(out_r[j]));
     if (bit_depth_ == VPX_BITS_8) {
       ASM_REGISTER_STATE_CHECK(inv_txfm_(coeff, dst, 32));
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -331,7 +335,7 @@ INSTANTIATE_TEST_CASE_P(
                    &vp9_idct32x32_1024_add_c, 0, VPX_BITS_8),
         make_tuple(&vp9_fdct32x32_rd_c,
                    &vp9_idct32x32_1024_add_c, 1, VPX_BITS_8)));
-#endif
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 #if HAVE_NEON_ASM && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(
@@ -341,7 +345,7 @@ INSTANTIATE_TEST_CASE_P(
                    &vp9_idct32x32_1024_add_neon, 0, VPX_BITS_8),
         make_tuple(&vp9_fdct32x32_rd_c,
                    &vp9_idct32x32_1024_add_neon, 1, VPX_BITS_8)));
-#endif
+#endif  // HAVE_NEON_ASM && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 
 #if HAVE_SSE2 && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(
@@ -351,7 +355,23 @@ INSTANTIATE_TEST_CASE_P(
                    &vp9_idct32x32_1024_add_sse2, 0, VPX_BITS_8),
         make_tuple(&vp9_fdct32x32_rd_sse2,
                    &vp9_idct32x32_1024_add_sse2, 1, VPX_BITS_8)));
-#endif
+#endif  // HAVE_SSE2 && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+
+#if HAVE_SSE2 && CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+INSTANTIATE_TEST_CASE_P(
+    SSE2, Trans32x32Test,
+    ::testing::Values(
+        make_tuple(&vp9_highbd_fdct32x32_sse2, &idct32x32_10, 0, VPX_BITS_10),
+        make_tuple(&vp9_highbd_fdct32x32_rd_sse2, &idct32x32_10, 1,
+                   VPX_BITS_10),
+        make_tuple(&vp9_highbd_fdct32x32_sse2, &idct32x32_12, 0, VPX_BITS_12),
+        make_tuple(&vp9_highbd_fdct32x32_rd_sse2, &idct32x32_12, 1,
+                   VPX_BITS_12),
+        make_tuple(&vp9_fdct32x32_sse2, &vp9_idct32x32_1024_add_c, 0,
+                   VPX_BITS_8),
+        make_tuple(&vp9_fdct32x32_rd_sse2, &vp9_idct32x32_1024_add_c, 1,
+                   VPX_BITS_8)));
+#endif  // HAVE_SSE2 && CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 
 #if HAVE_AVX2 && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(
@@ -361,5 +381,5 @@ INSTANTIATE_TEST_CASE_P(
                    &vp9_idct32x32_1024_add_sse2, 0, VPX_BITS_8),
         make_tuple(&vp9_fdct32x32_rd_avx2,
                    &vp9_idct32x32_1024_add_sse2, 1, VPX_BITS_8)));
-#endif
+#endif  // HAVE_AVX2 && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 }  // namespace
