@@ -16,6 +16,24 @@
       "revId": "42cc19d6523666a9202448cba46cdb547335066c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Nrw\u003d",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 648,
+      "author": {
+        "id": 1115299
+      },
+      "writtenOn": "2014-12-02T20:31:59Z",
+      "side": 1,
+      "message": "As requested, I\u0027ve expanded the macro in patch set 2, however note that the macro SETUP_CENTER_ERROR is still used in various other places in this file.",
+      "parentUuid": "AAAAdn//Nw4\u003d",
+      "revId": "42cc19d6523666a9202448cba46cdb547335066c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
