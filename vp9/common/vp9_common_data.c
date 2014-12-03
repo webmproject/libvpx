@@ -171,3 +171,17 @@ const struct {
   {0,  8 },  // 64X32 - {0b0000, 0b1000}
   {0,  0 },  // 64X64 - {0b0000, 0b0000}
 };
+
+#if CONFIG_SUPERTX
+const TX_SIZE uvsupertx_size_lookup[TX_SIZES][2][2] = {
+//  ss_x == 0 ss_x == 0   ss_x == 1 ss_x == 1
+//  ss_y == 0 ss_y == 1   ss_y == 0 ss_y == 1
+  {{TX_4X4,   TX_4X4},   {TX_4X4,   TX_4X4}},
+  {{TX_8X8,   TX_4X4},   {TX_4X4,   TX_4X4}},
+  {{TX_16X16, TX_8X8},   {TX_8X8,   TX_8X8}},
+  {{TX_32X32, TX_16X16}, {TX_16X16, TX_16X16}},
+#if CONFIG_TX64X64
+  {{TX_64X64, TX_32X32}, {TX_32X32, TX_32X32}},
+#endif  // CONFIG_TX64X64
+};
+#endif

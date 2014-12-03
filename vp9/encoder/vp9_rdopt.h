@@ -33,6 +33,9 @@ void vp9_rd_pick_inter_mode_sb(struct VP9_COMP *cpi, struct macroblock *x,
                                const struct TileInfo *const tile,
                                int mi_row, int mi_col,
                                struct RD_COST *rd_cost,
+#if CONFIG_SUPERTX
+                               int *returnrate_nocoef,
+#endif
                                BLOCK_SIZE bsize, PICK_MODE_CONTEXT *ctx,
                                int64_t best_rd_so_far);
 
@@ -48,8 +51,26 @@ void vp9_rd_pick_inter_mode_sub8x8(struct VP9_COMP *cpi,
                                    const struct TileInfo *const tile,
                                    int mi_row, int mi_col,
                                    struct RD_COST *rd_cost,
+#if CONFIG_SUPERTX
+                                   int *returnrate_nocoef,
+#endif
                                    BLOCK_SIZE bsize, PICK_MODE_CONTEXT *ctx,
                                    int64_t best_rd_so_far);
+
+#if CONFIG_SUPERTX
+void txfm_rd_in_plane_supertx(MACROBLOCK *x,
+                              int *rate, int64_t *distortion,
+                              int *skippable, int64_t *sse,
+                              int64_t ref_best_rd, int plane,
+                              BLOCK_SIZE bsize, TX_SIZE tx_size,
+                              int use_fast_coef_casting);
+void txfm_rd_in_plane(MACROBLOCK *x,
+                      int *rate, int64_t *distortion,
+                      int *skippable, int64_t *sse,
+                      int64_t ref_best_rd, int plane,
+                      BLOCK_SIZE bsize, TX_SIZE tx_size,
+                      int use_fast_coef_casting);
+#endif
 #ifdef __cplusplus
 }  // extern "C"
 #endif

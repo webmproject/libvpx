@@ -449,3 +449,43 @@ void vp9_tokenize_sb(VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,
     *t = t_backup;
   }
 }
+
+#if CONFIG_SUPERTX
+void vp9_tokenize_sb_supertx(VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,
+                             BLOCK_SIZE bsize) {
+  VP9_COMMON *const cm = &cpi->common;
+  MACROBLOCKD *const xd = &cpi->mb.e_mbd;
+  MB_MODE_INFO *const mbmi = &xd->mi[0].mbmi;
+  TOKENEXTRA *t_backup = *t;
+  const int ctx = vp9_get_skip_context(xd);
+  const int skip_inc = !vp9_segfeature_active(&cm->seg, mbmi->segment_id,
+                                              SEG_LVL_SKIP);
+  struct tokenize_b_args arg = {cpi, xd, t};
+  int plane;
+  if (mbmi->skip) {
+    if (!dry_run)
+      cm->counts.skip[ctx][1] += skip_inc;
+    reset_skip_context(xd, bsize);
+    if (dry_run)
+      *t = t_backup;
+    return;
+  }
+
+  if (!dry_run) {
+    cm->counts.skip[ctx][0] += skip_inc;
+    for (plane = 0; plane < MAX_MB_PLANE; plane++) {
+      const BLOCK_SIZE plane_size =
+          get_plane_block_size(bsize, &xd->plane[plane]);
+      tokenize_b(plane, 0, plane_size, b_width_log2_lookup[plane_size], &arg);
+    }
+  } else {
+    for (plane = 0; plane < MAX_MB_PLANE; plane++) {
+      const BLOCK_SIZE plane_size =
+          get_plane_block_size(bsize, &xd->plane[plane]);
+      set_entropy_context_b(plane, 0, plane_size,
+                            b_width_log2_lookup[plane_size], &arg);
+    }
+    *t = t_backup;
+  }
+}
+#endif  // CONFIG_SUPERTX

@@ -76,6 +76,35 @@ void vp9_setup_pre_planes(MACROBLOCKD *xd, int idx,
                           const YV12_BUFFER_CONFIG *src, int mi_row, int mi_col,
                           const struct scale_factors *sf);
 
+#if CONFIG_SUPERTX
+struct macroblockd_plane;
+void vp9_build_inter_predictors_sby_sub8x8_extend(MACROBLOCKD *xd,
+                                                  int mi_row, int mi_col,
+                                                  int mi_row_ori,
+                                                  int mi_col_ori,
+                                                  BLOCK_SIZE top_bsize,
+                                                  PARTITION_TYPE partition);
+void vp9_build_inter_predictors_sbuv_sub8x8_extend(MACROBLOCKD *xd,
+                                                   int mi_row_ori,
+                                                   int mi_col_ori,
+                                                   BLOCK_SIZE top_bsize);
+void vp9_build_masked_inter_predictor_complex(
+    uint8_t *dst, int dst_stride, uint8_t *dst2, int dst2_stride,
+    const struct macroblockd_plane *pd, int mi_row, int mi_col,
+    int mi_row_ori, int mi_col_ori, BLOCK_SIZE bsize, BLOCK_SIZE top_bsize,
+    PARTITION_TYPE partition);
+void vp9_dec_build_inter_predictors_sby_sub8x8_extend(MACROBLOCKD *xd,
+                                                      int mi_row, int mi_col,
+                                                      int mi_row_ori,
+                                                      int mi_col_ori,
+                                                      BLOCK_SIZE top_bsize,
+                                                      PARTITION_TYPE p);
+void vp9_dec_build_inter_predictors_sbuv_sub8x8_extend(MACROBLOCKD *xd,
+                                                       int mi_row_ori,
+                                                       int mi_col_ori,
+                                                       BLOCK_SIZE top_bsize);
+#endif  // CONFIG_SUPERTX
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

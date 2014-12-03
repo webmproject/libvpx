@@ -82,6 +82,7 @@ static int search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
   filt_best = filt_mid;
   ss_err[filt_mid] = best_err;
 
+
   while (filter_step > 0) {
     const int filt_high = MIN(filt_mid + filter_step, max_filter_level);
     const int filt_low = MAX(filt_mid - filter_step, min_filter_level);
@@ -133,7 +134,6 @@ static int search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
       filt_mid = filt_best;
     }
   }
-
   return filt_best;
 }
 
@@ -153,7 +153,7 @@ void vp9_pick_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
     const int q = vp9_ac_quant(cm->base_qindex, 0, cm->bit_depth);
     // These values were determined by linear fitting the result of the
     // searched level, filt_guess = q * 0.316206 + 3.87252
-#if CONFIG_VP9_HIGHDEPTH
+#if CONFIG_VP9_HIGHBITDEPTH
     int filt_guess;
     switch (cm->bit_depth) {
       case VPX_BITS_8:

@@ -286,6 +286,7 @@ EXPERIMENT_LIST="
     filterintra
     ext_tx
     tx_skip
+    supertx
 "
 CONFIG_LIST="
     external_build
