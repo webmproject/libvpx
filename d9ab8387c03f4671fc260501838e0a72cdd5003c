@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Nio\u003d",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 329,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-12-03T20:40:55Z",
+      "side": 1,
+      "message": "How about replacing 100 / cr-\u003epercent_refresh with 10 directly and add a comment indicating that this number is from the division? so as to save unnecessary divisions.",
+      "revId": "d9ab8387c03f4671fc260501838e0a72cdd5003c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
