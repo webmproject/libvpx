@@ -163,12 +163,9 @@ typedef enum {
   // before the final run.
   TWO_LOOP = 0,
 
-  // No dry run conducted.
-  ONE_LOOP = 1,
-
   // No dry run, also only half the coef contexts and bands are updated.
   // The rest are not updated at all.
-  ONE_LOOP_REDUCED = 2
+  ONE_LOOP_REDUCED = 1
 } FAST_COEFF_UPDATE;
 
 typedef struct MV_SPEED_FEATURES {

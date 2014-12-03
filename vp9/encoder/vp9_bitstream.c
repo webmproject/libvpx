@@ -613,7 +613,6 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
       return;
     }
 
-    case ONE_LOOP:
     case ONE_LOOP_REDUCED: {
       int updates = 0;
       int noupdates_before_first = 0;
