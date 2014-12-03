@@ -236,6 +236,9 @@ typedef struct SPEED_FEATURES {
   // level within a frame.
   int allow_skip_recode;
 
+  // Coefficient probability model approximation step size
+  int coeff_prob_appx_step;
+
   // The threshold is to determine how slow the motino is, it is used when
   // use_lastframe_partitioning is set to LAST_FRAME_PARTITION_LOW_MOTION
   MOTION_THRESHOLD lf_motion_threshold;

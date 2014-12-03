@@ -249,7 +249,6 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->use_uv_intra_rd_estimate = 1;
     sf->skip_encode_sb = 1;
     sf->mv.subpel_iters_per_step = 1;
-    sf->use_fast_coef_updates = ONE_LOOP_REDUCED;
     sf->adaptive_rd_thresh = 4;
     sf->mode_skip_start = 6;
     sf->allow_skip_recode = 0;
@@ -304,6 +303,9 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     // This feature is only enabled when partition search is disabled.
     sf->reuse_inter_pred_sby = 1;
     sf->partition_search_breakout_rate_thr = 200;
+    sf->coeff_prob_appx_step = 4;
+    sf->use_fast_coef_updates = is_keyframe ? TWO_LOOP : ONE_LOOP_REDUCED;
+
     if (!is_keyframe) {
       int i;
       if (content == VP9E_CONTENT_SCREEN) {
@@ -394,6 +396,7 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
   sf->mv.subpel_force_stop = 0;
   sf->optimize_coefficients = !is_lossless_requested(&cpi->oxcf);
   sf->mv.reduce_first_step_size = 0;
+  sf->coeff_prob_appx_step = 1;
   sf->mv.auto_mv_step_size = 0;
   sf->mv.fullpel_search_step_param = 6;
   sf->comp_inter_joint_search_thresh = BLOCK_4X4;
