@@ -16,6 +16,24 @@
       "revId": "0d160536e2366ae1fc2e8ce69da1a9699391269e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Nno\u003d",
+        "filename": "vp9/encoder/vp9_subexp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-12-03T06:34:57Z",
+      "side": 1,
+      "message": "The above function uses step size +/-1 to search for the best probability and hence use the newp \u003d\u003d oldp as stop criterion.\n\nIn the new function, a coarse search with step size +/-4 is used. The for-loop then has to use newp \u003e oldp (or newp \u003c oldp) as the stop criterion, depending on the initial relative position.\n\nSeems easier to create a new branch to do so. Perhaps we could factor out common sub-functions laster to reduce the code size.",
+      "parentUuid": "AAAAdn//Nn4\u003d",
+      "revId": "0d160536e2366ae1fc2e8ce69da1a9699391269e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
