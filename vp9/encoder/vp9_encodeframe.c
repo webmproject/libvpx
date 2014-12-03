@@ -3460,9 +3460,9 @@ static void source_var_based_partition_search_method(VP9_COMP *cpi) {
       if (cpi->source_diff_var)
         vpx_free(cpi->source_diff_var);
 
-        CHECK_MEM_ERROR(cm, cpi->source_diff_var,
-                        vpx_calloc(cm->MBs, sizeof(diff)));
-      }
+      CHECK_MEM_ERROR(cm, cpi->source_diff_var,
+                      vpx_calloc(cm->MBs, sizeof(diff)));
+    }
 
     if (!cpi->frames_till_next_var_check)
       cpi->frames_till_next_var_check = set_var_thresh_from_histogram(cpi);
