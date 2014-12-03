@@ -535,6 +535,8 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
   const vp9_prob upd = DIFF_UPDATE_PROB;
   const int entropy_nodes_update = UNCONSTRAINED_NODES;
   int i, j, k, l, t;
+  int stepsize = cpi->sf.coeff_prob_appx_step;
+
   switch (cpi->sf.use_fast_coef_updates) {
     case TWO_LOOP: {
       /* dry run to see if there is any update at all needed */
@@ -552,7 +554,7 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
                 if (t == PIVOT_NODE)
                   s = vp9_prob_diff_update_savings_search_model(
                       frame_branch_ct[i][j][k][l][0],
-                      old_coef_probs[i][j][k][l], &newp, upd);
+                      old_coef_probs[i][j][k][l], &newp, upd, stepsize);
                 else
                   s = vp9_prob_diff_update_savings_search(
                       frame_branch_ct[i][j][k][l][t], oldp, &newp, upd);
@@ -590,7 +592,7 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
                 if (t == PIVOT_NODE)
                   s = vp9_prob_diff_update_savings_search_model(
                       frame_branch_ct[i][j][k][l][0],
-                      old_coef_probs[i][j][k][l], &newp, upd);
+                      old_coef_probs[i][j][k][l], &newp, upd, stepsize);
                 else
                   s = vp9_prob_diff_update_savings_search(
                       frame_branch_ct[i][j][k][l][t],
@@ -613,14 +615,14 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
 
     case ONE_LOOP:
     case ONE_LOOP_REDUCED: {
-      const int prev_coef_contexts_to_update =
-          cpi->sf.use_fast_coef_updates == ONE_LOOP_REDUCED ?
-              COEFF_CONTEXTS >> 1 : COEFF_CONTEXTS;
-      const int coef_band_to_update =
-          cpi->sf.use_fast_coef_updates == ONE_LOOP_REDUCED ?
-              COEF_BANDS >> 1 : COEF_BANDS;
       int updates = 0;
       int noupdates_before_first = 0;
+
+      if (tx_size >= TX_16X16 && cpi->sf.tx_size_search_method == USE_TX_8X8) {
+        vp9_write_bit(bc, 0);
+        return;
+      }
+
       for (i = 0; i < PLANE_TYPES; ++i) {
         for (j = 0; j < REF_TYPES; ++j) {
           for (k = 0; k < COEF_BANDS; ++k) {
@@ -631,21 +633,19 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
                 vp9_prob *oldp = old_coef_probs[i][j][k][l] + t;
                 int s;
                 int u = 0;
-                if (l >= prev_coef_contexts_to_update ||
-                    k >= coef_band_to_update) {
-                  u = 0;
+
+                if (t == PIVOT_NODE) {
+                  s = vp9_prob_diff_update_savings_search_model(
+                      frame_branch_ct[i][j][k][l][0],
+                      old_coef_probs[i][j][k][l], &newp, upd, stepsize);
                 } else {
-                  if (t == PIVOT_NODE)
-                    s = vp9_prob_diff_update_savings_search_model(
-                        frame_branch_ct[i][j][k][l][0],
-                        old_coef_probs[i][j][k][l], &newp, upd);
-                  else
-                    s = vp9_prob_diff_update_savings_search(
-                        frame_branch_ct[i][j][k][l][t],
-                        *oldp, &newp, upd);
-                  if (s > 0 && newp != *oldp)
-                    u = 1;
+                  s = vp9_prob_diff_update_savings_search(
+                      frame_branch_ct[i][j][k][l][t],
+                      *oldp, &newp, upd);
                 }
+
+                if (s > 0 && newp != *oldp)
+                  u = 1;
                 updates += u;
                 if (u == 0 && updates == 0) {
                   noupdates_before_first++;
