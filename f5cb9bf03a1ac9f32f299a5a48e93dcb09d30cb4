@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//NnU\u003d",
+        "filename": "vp9/encoder/vp9_subexp.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-12-03T06:45:36Z",
+      "side": 1,
+      "message": "Seems to me that you can replace this function with your new one, and pass step magnitude as a parameter. step will be 1 for all speed settings that use this function, and 4 for all speed settings that is  intended to use the other function. That way we will save a bunch of duplicate code.",
+      "revId": "f5cb9bf03a1ac9f32f299a5a48e93dcb09d30cb4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
