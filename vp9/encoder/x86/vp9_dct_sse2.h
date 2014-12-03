@@ -43,99 +43,144 @@ static INLINE __m128i k_packs_epi64(__m128i a, __m128i b) {
   return _mm_unpacklo_epi64(buf0, buf1);
 }
 
-static INLINE int check_epi16_overflow_x2(__m128i reg0, __m128i reg1) {
+static INLINE int check_epi16_overflow_x2(const __m128i *preg0,
+                                          const __m128i *preg1) {
   const __m128i max_overflow = _mm_set1_epi16(0x7fff);
   const __m128i min_overflow = _mm_set1_epi16(0x8000);
-  __m128i cmp0 = _mm_or_si128(_mm_cmpeq_epi16(reg0, max_overflow),
-                              _mm_cmpeq_epi16(reg0, min_overflow));
-  __m128i cmp1 = _mm_or_si128(_mm_cmpeq_epi16(reg1, max_overflow),
-                              _mm_cmpeq_epi16(reg1, min_overflow));
+  __m128i cmp0 = _mm_or_si128(_mm_cmpeq_epi16(*preg0, max_overflow),
+                              _mm_cmpeq_epi16(*preg0, min_overflow));
+  __m128i cmp1 = _mm_or_si128(_mm_cmpeq_epi16(*preg1, max_overflow),
+                              _mm_cmpeq_epi16(*preg1, min_overflow));
   cmp0 = _mm_or_si128(cmp0, cmp1);
   return _mm_movemask_epi8(cmp0);
 }
 
-static INLINE int check_epi16_overflow_x4(__m128i reg0, __m128i reg1,
-                                          __m128i reg2, __m128i reg3) {
+static INLINE int check_epi16_overflow_x4(const __m128i *preg0,
+                                          const __m128i *preg1,
+                                          const __m128i *preg2,
+                                          const __m128i *preg3) {
   const __m128i max_overflow = _mm_set1_epi16(0x7fff);
   const __m128i min_overflow = _mm_set1_epi16(0x8000);
-  __m128i cmp0 = _mm_or_si128(_mm_cmpeq_epi16(reg0, max_overflow),
-                              _mm_cmpeq_epi16(reg0, min_overflow));
-  __m128i cmp1 = _mm_or_si128(_mm_cmpeq_epi16(reg1, max_overflow),
-                              _mm_cmpeq_epi16(reg1, min_overflow));
-  __m128i cmp2 = _mm_or_si128(_mm_cmpeq_epi16(reg2, max_overflow),
-                              _mm_cmpeq_epi16(reg2, min_overflow));
-  __m128i cmp3 = _mm_or_si128(_mm_cmpeq_epi16(reg3, max_overflow),
-                              _mm_cmpeq_epi16(reg3, min_overflow));
+  __m128i cmp0 = _mm_or_si128(_mm_cmpeq_epi16(*preg0, max_overflow),
+                              _mm_cmpeq_epi16(*preg0, min_overflow));
+  __m128i cmp1 = _mm_or_si128(_mm_cmpeq_epi16(*preg1, max_overflow),
+                              _mm_cmpeq_epi16(*preg1, min_overflow));
+  __m128i cmp2 = _mm_or_si128(_mm_cmpeq_epi16(*preg2, max_overflow),
+                              _mm_cmpeq_epi16(*preg2, min_overflow));
+  __m128i cmp3 = _mm_or_si128(_mm_cmpeq_epi16(*preg3, max_overflow),
+                              _mm_cmpeq_epi16(*preg3, min_overflow));
   cmp0 = _mm_or_si128(_mm_or_si128(cmp0, cmp1), _mm_or_si128(cmp2, cmp3));
   return _mm_movemask_epi8(cmp0);
 }
 
-static INLINE int check_epi16_overflow_x8(__m128i reg0, __m128i reg1,
-                                          __m128i reg2, __m128i reg3,
-                                          __m128i reg4, __m128i reg5,
-                                          __m128i reg6, __m128i reg7) {
+static INLINE int check_epi16_overflow_x8(const __m128i *preg0,
+                                          const __m128i *preg1,
+                                          const __m128i *preg2,
+                                          const __m128i *preg3,
+                                          const __m128i *preg4,
+                                          const __m128i *preg5,
+                                          const __m128i *preg6,
+                                          const __m128i *preg7) {
   int res0, res1;
-  res0 = check_epi16_overflow_x4(reg0, reg1, reg2, reg3);
-  res1 = check_epi16_overflow_x4(reg4, reg5, reg6, reg7);
+  res0 = check_epi16_overflow_x4(preg0, preg1, preg2, preg3);
+  res1 = check_epi16_overflow_x4(preg4, preg5, preg6, preg7);
   return res0 + res1;
 }
 
-static INLINE int check_epi16_overflow_x12(__m128i reg0, __m128i reg1,
-                                   __m128i reg2, __m128i reg3, __m128i reg4,
-                                   __m128i reg5, __m128i reg6, __m128i reg7,
-                                   __m128i reg8, __m128i reg9, __m128i reg10,
-                                   __m128i reg11) {
+static INLINE int check_epi16_overflow_x12(const __m128i *preg0,
+                                           const __m128i *preg1,
+                                           const __m128i *preg2,
+                                           const __m128i *preg3,
+                                           const __m128i *preg4,
+                                           const __m128i *preg5,
+                                           const __m128i *preg6,
+                                           const __m128i *preg7,
+                                           const __m128i *preg8,
+                                           const __m128i *preg9,
+                                           const __m128i *preg10,
+                                           const __m128i *preg11) {
   int res0, res1;
-  res0 = check_epi16_overflow_x4(reg0, reg1, reg2, reg3);
-  res1 = check_epi16_overflow_x4(reg4, reg5, reg6, reg7);
+  res0 = check_epi16_overflow_x4(preg0, preg1, preg2, preg3);
+  res1 = check_epi16_overflow_x4(preg4, preg5, preg6, preg7);
   if (!res0)
-    res0 = check_epi16_overflow_x4(reg8, reg9, reg10, reg11);
+    res0 = check_epi16_overflow_x4(preg8, preg9, preg10, preg11);
   return res0 + res1;
 }
 
-static INLINE int check_epi16_overflow_x16(__m128i reg0,  __m128i reg1,
-                                    __m128i reg2, __m128i reg3,  __m128i reg4,
-                                    __m128i reg5, __m128i reg6,  __m128i reg7,
-                                    __m128i reg8, __m128i reg9,  __m128i reg10,
-                                    __m128i reg11, __m128i reg12, __m128i reg13,
-                                    __m128i reg14, __m128i reg15) {
+static INLINE int check_epi16_overflow_x16(const __m128i *preg0,
+                                           const __m128i *preg1,
+                                           const __m128i *preg2,
+                                           const __m128i *preg3,
+                                           const __m128i *preg4,
+                                           const __m128i *preg5,
+                                           const __m128i *preg6,
+                                           const __m128i *preg7,
+                                           const __m128i *preg8,
+                                           const __m128i *preg9,
+                                           const __m128i *preg10,
+                                           const __m128i *preg11,
+                                           const __m128i *preg12,
+                                           const __m128i *preg13,
+                                           const __m128i *preg14,
+                                           const __m128i *preg15) {
   int res0, res1;
-  res0 = check_epi16_overflow_x4(reg0, reg1, reg2, reg3);
-  res1 = check_epi16_overflow_x4(reg4, reg5, reg6, reg7);
+  res0 = check_epi16_overflow_x4(preg0, preg1, preg2, preg3);
+  res1 = check_epi16_overflow_x4(preg4, preg5, preg6, preg7);
   if (!res0) {
-    res0 = check_epi16_overflow_x4(reg8, reg9, reg10, reg11);
+    res0 = check_epi16_overflow_x4(preg8, preg9, preg10, preg11);
     if (!res1)
-      res1 = check_epi16_overflow_x4(reg12, reg13, reg14, reg15);
+      res1 = check_epi16_overflow_x4(preg12, preg13, preg14, preg15);
   }
   return res0 + res1;
 }
 
-static INLINE int check_epi16_overflow_x32(__m128i reg0,  __m128i reg1,
-                                __m128i reg2, __m128i reg3,  __m128i reg4,
-                                __m128i reg5, __m128i reg6,  __m128i reg7,
-                                __m128i reg8, __m128i reg9,  __m128i reg10,
-                                __m128i reg11, __m128i reg12, __m128i reg13,
-                                __m128i reg14, __m128i reg15, __m128i reg16,
-                                __m128i reg17, __m128i reg18, __m128i reg19,
-                                __m128i reg20, __m128i reg21, __m128i reg22,
-                                __m128i reg23, __m128i reg24, __m128i reg25,
-                                __m128i reg26, __m128i reg27, __m128i reg28,
-                                __m128i reg29, __m128i reg30, __m128i reg31) {
+static INLINE int check_epi16_overflow_x32(const __m128i *preg0,
+                                           const __m128i *preg1,
+                                           const __m128i *preg2,
+                                           const __m128i *preg3,
+                                           const __m128i *preg4,
+                                           const __m128i *preg5,
+                                           const __m128i *preg6,
+                                           const __m128i *preg7,
+                                           const __m128i *preg8,
+                                           const __m128i *preg9,
+                                           const __m128i *preg10,
+                                           const __m128i *preg11,
+                                           const __m128i *preg12,
+                                           const __m128i *preg13,
+                                           const __m128i *preg14,
+                                           const __m128i *preg15,
+                                           const __m128i *preg16,
+                                           const __m128i *preg17,
+                                           const __m128i *preg18,
+                                           const __m128i *preg19,
+                                           const __m128i *preg20,
+                                           const __m128i *preg21,
+                                           const __m128i *preg22,
+                                           const __m128i *preg23,
+                                           const __m128i *preg24,
+                                           const __m128i *preg25,
+                                           const __m128i *preg26,
+                                           const __m128i *preg27,
+                                           const __m128i *preg28,
+                                           const __m128i *preg29,
+                                           const __m128i *preg30,
+                                           const __m128i *preg31) {
   int res0, res1;
-  res0 = check_epi16_overflow_x4(reg0, reg1, reg2, reg3);
-  res1 = check_epi16_overflow_x4(reg4, reg5, reg6, reg7);
+  res0 = check_epi16_overflow_x4(preg0, preg1, preg2, preg3);
+  res1 = check_epi16_overflow_x4(preg4, preg5, preg6, preg7);
   if (!res0) {
-    res0 = check_epi16_overflow_x4(reg8, reg9, reg10, reg11);
+    res0 = check_epi16_overflow_x4(preg8, preg9, preg10, preg11);
     if (!res1) {
-      res1 = check_epi16_overflow_x4(reg12, reg13, reg14, reg15);
+      res1 = check_epi16_overflow_x4(preg12, preg13, preg14, preg15);
       if (!res0) {
-        res0 = check_epi16_overflow_x4(reg16, reg17, reg18, reg19);
+        res0 = check_epi16_overflow_x4(preg16, preg17, preg18, preg19);
         if (!res1) {
-          res1 = check_epi16_overflow_x4(reg20, reg21, reg22, reg23);
+          res1 = check_epi16_overflow_x4(preg20, preg21, preg22, preg23);
           if (!res0) {
-            res0 = check_epi16_overflow_x4(reg24, reg25, reg26, reg27);
+            res0 = check_epi16_overflow_x4(preg24, preg25, preg26, preg27);
             if (!res1)
-              res1 = check_epi16_overflow_x4(reg28, reg29, reg30, reg31);
+              res1 = check_epi16_overflow_x4(preg28, preg29, preg30, preg31);
           }
         }
       }
@@ -144,14 +189,17 @@ static INLINE int check_epi16_overflow_x32(__m128i reg0,  __m128i reg1,
   return res0 + res1;
 }
 
-static INLINE int k_check_epi32_overflow_4(__m128i reg0, __m128i reg1,
-                 __m128i reg2, __m128i reg3, const __m128i* zero) {
+static INLINE int k_check_epi32_overflow_4(const __m128i *preg0,
+                                           const __m128i *preg1,
+                                           const __m128i *preg2,
+                                           const __m128i *preg3,
+                                           const __m128i *zero) {
   __m128i minus_one = _mm_set1_epi32(-1);
   // Check for overflows
-  __m128i reg0_shifted = _mm_slli_epi64(reg0, 1);
-  __m128i reg1_shifted = _mm_slli_epi64(reg1, 1);
-  __m128i reg2_shifted = _mm_slli_epi64(reg2, 1);
-  __m128i reg3_shifted = _mm_slli_epi64(reg3, 1);
+  __m128i reg0_shifted = _mm_slli_epi64(*preg0, 1);
+  __m128i reg1_shifted = _mm_slli_epi64(*preg1, 1);
+  __m128i reg2_shifted = _mm_slli_epi64(*preg2, 1);
+  __m128i reg3_shifted = _mm_slli_epi64(*preg3, 1);
   __m128i reg0_top_dwords = _mm_shuffle_epi32(
       reg0_shifted, _MM_SHUFFLE(0, 0, 3, 1));
   __m128i reg1_top_dwords = _mm_shuffle_epi32(
@@ -173,65 +221,107 @@ static INLINE int k_check_epi32_overflow_4(__m128i reg0, __m128i reg1,
   return (overflow_01 + overflow_23);
 }
 
-static INLINE int k_check_epi32_overflow_8(__m128i reg0, __m128i reg1,
-                                           __m128i reg2, __m128i reg3,
-                                           __m128i reg4, __m128i reg5,
-                                           __m128i reg6, __m128i reg7,
-                                           const __m128i* zero) {
-  int overflow = k_check_epi32_overflow_4(reg0, reg1, reg2, reg3, zero);
+static INLINE int k_check_epi32_overflow_8(const __m128i *preg0,
+                                           const __m128i *preg1,
+                                           const __m128i *preg2,
+                                           const __m128i *preg3,
+                                           const __m128i *preg4,
+                                           const __m128i *preg5,
+                                           const __m128i *preg6,
+                                           const __m128i *preg7,
+                                           const __m128i *zero) {
+  int overflow = k_check_epi32_overflow_4(preg0, preg1, preg2, preg3, zero);
   if (!overflow) {
-    overflow = k_check_epi32_overflow_4(reg4, reg5, reg6, reg7, zero);
+    overflow = k_check_epi32_overflow_4(preg4, preg5, preg6, preg7, zero);
   }
   return overflow;
 }
 
-static INLINE int k_check_epi32_overflow_16(
-    __m128i reg0, __m128i reg1, __m128i reg2, __m128i reg3,
-    __m128i reg4, __m128i reg5, __m128i reg6, __m128i reg7,
-    __m128i reg8, __m128i reg9, __m128i reg10, __m128i reg11,
-    __m128i reg12, __m128i reg13, __m128i reg14, __m128i reg15,
-    const __m128i* zero) {
-  int overflow = k_check_epi32_overflow_4(reg0, reg1, reg2, reg3, zero);
+static INLINE int k_check_epi32_overflow_16(const __m128i *preg0,
+                                            const __m128i *preg1,
+                                            const __m128i *preg2,
+                                            const __m128i *preg3,
+                                            const __m128i *preg4,
+                                            const __m128i *preg5,
+                                            const __m128i *preg6,
+                                            const __m128i *preg7,
+                                            const __m128i *preg8,
+                                            const __m128i *preg9,
+                                            const __m128i *preg10,
+                                            const __m128i *preg11,
+                                            const __m128i *preg12,
+                                            const __m128i *preg13,
+                                            const __m128i *preg14,
+                                            const __m128i *preg15,
+                                            const __m128i *zero) {
+  int overflow = k_check_epi32_overflow_4(preg0, preg1, preg2, preg3, zero);
   if (!overflow) {
-    overflow = k_check_epi32_overflow_4(reg4, reg5, reg6, reg7, zero);
+    overflow = k_check_epi32_overflow_4(preg4, preg5, preg6, preg7, zero);
     if (!overflow) {
-      overflow = k_check_epi32_overflow_4(reg8, reg9, reg10, reg11, zero);
+      overflow = k_check_epi32_overflow_4(preg8, preg9, preg10, preg11,
+                                          zero);
       if (!overflow) {
-        overflow = k_check_epi32_overflow_4(reg12, reg13, reg14, reg15, zero);
+        overflow = k_check_epi32_overflow_4(preg12, preg13, preg14, preg15,
+                                            zero);
       }
     }
   }
   return overflow;
 }
 
-static INLINE int k_check_epi32_overflow_32(
-    __m128i reg0, __m128i reg1, __m128i reg2, __m128i reg3,
-    __m128i reg4, __m128i reg5, __m128i reg6, __m128i reg7,
-    __m128i reg8, __m128i reg9, __m128i reg10, __m128i reg11,
-    __m128i reg12, __m128i reg13, __m128i reg14, __m128i reg15,
-    __m128i reg16, __m128i reg17, __m128i reg18, __m128i reg19,
-    __m128i reg20, __m128i reg21, __m128i reg22, __m128i reg23,
-    __m128i reg24, __m128i reg25, __m128i reg26, __m128i reg27,
-    __m128i reg28, __m128i reg29, __m128i reg30, __m128i reg31,
-    const __m128i* zero) {
-  int overflow = k_check_epi32_overflow_4(reg0, reg1, reg2, reg3, zero);
+static INLINE int k_check_epi32_overflow_32(const __m128i *preg0,
+                                            const __m128i *preg1,
+                                            const __m128i *preg2,
+                                            const __m128i *preg3,
+                                            const __m128i *preg4,
+                                            const __m128i *preg5,
+                                            const __m128i *preg6,
+                                            const __m128i *preg7,
+                                            const __m128i *preg8,
+                                            const __m128i *preg9,
+                                            const __m128i *preg10,
+                                            const __m128i *preg11,
+                                            const __m128i *preg12,
+                                            const __m128i *preg13,
+                                            const __m128i *preg14,
+                                            const __m128i *preg15,
+                                            const __m128i *preg16,
+                                            const __m128i *preg17,
+                                            const __m128i *preg18,
+                                            const __m128i *preg19,
+                                            const __m128i *preg20,
+                                            const __m128i *preg21,
+                                            const __m128i *preg22,
+                                            const __m128i *preg23,
+                                            const __m128i *preg24,
+                                            const __m128i *preg25,
+                                            const __m128i *preg26,
+                                            const __m128i *preg27,
+                                            const __m128i *preg28,
+                                            const __m128i *preg29,
+                                            const __m128i *preg30,
+                                            const __m128i *preg31,
+                                            const __m128i *zero) {
+  int overflow = k_check_epi32_overflow_4(preg0, preg1, preg2, preg3, zero);
   if (!overflow) {
-    overflow = k_check_epi32_overflow_4(reg4, reg5, reg6, reg7, zero);
+    overflow = k_check_epi32_overflow_4(preg4, preg5, preg6, preg7, zero);
     if (!overflow) {
-      overflow = k_check_epi32_overflow_4(reg8, reg9, reg10, reg11, zero);
+      overflow = k_check_epi32_overflow_4(preg8, preg9, preg10, preg11, zero);
       if (!overflow) {
-        overflow = k_check_epi32_overflow_4(reg12, reg13, reg14, reg15, zero);
+        overflow = k_check_epi32_overflow_4(preg12, preg13, preg14, preg15,
+                                            zero);
         if (!overflow) {
-          overflow = k_check_epi32_overflow_4(reg16, reg17, reg18, reg19, zero);
+          overflow = k_check_epi32_overflow_4(preg16, preg17, preg18, preg19,
+                                              zero);
           if (!overflow) {
-            overflow = k_check_epi32_overflow_4(reg20, reg21,
-                                                reg22, reg23, zero);
+            overflow = k_check_epi32_overflow_4(preg20, preg21,
+                                                preg22, preg23, zero);
             if (!overflow) {
-              overflow = k_check_epi32_overflow_4(reg24, reg25,
-                                                  reg26, reg27, zero);
+              overflow = k_check_epi32_overflow_4(preg24, preg25,
+                                                  preg26, preg27, zero);
               if (!overflow) {
-                overflow = k_check_epi32_overflow_4(reg28, reg29,
-                                                    reg30, reg31, zero);
+                overflow = k_check_epi32_overflow_4(preg28, preg29,
+                                                    preg30, preg31, zero);
               }
             }
           }
@@ -242,51 +332,52 @@ static INLINE int k_check_epi32_overflow_32(
   return overflow;
 }
 
-static INLINE void store_output(const __m128i output, tran_low_t* dst_ptr) {
+static INLINE void store_output(const __m128i *poutput, tran_low_t* dst_ptr) {
 #if CONFIG_VP9_HIGHBITDEPTH
   const __m128i zero = _mm_setzero_si128();
-  const __m128i sign_bits = _mm_cmplt_epi16(output, zero);
-  __m128i out0 = _mm_unpacklo_epi16(output, sign_bits);
-  __m128i out1 = _mm_unpackhi_epi16(output, sign_bits);
+  const __m128i sign_bits = _mm_cmplt_epi16(*poutput, zero);
+  __m128i out0 = _mm_unpacklo_epi16(*poutput, sign_bits);
+  __m128i out1 = _mm_unpackhi_epi16(*poutput, sign_bits);
   _mm_store_si128((__m128i *)(dst_ptr), out0);
   _mm_store_si128((__m128i *)(dst_ptr + 4), out1);
 #else
-  _mm_store_si128((__m128i *)(dst_ptr), output);
+  _mm_store_si128((__m128i *)(dst_ptr), *poutput);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 }
 
-static INLINE void storeu_output(const __m128i output, tran_low_t* dst_ptr) {
+static INLINE void storeu_output(const __m128i *poutput, tran_low_t* dst_ptr) {
 #if CONFIG_VP9_HIGHBITDEPTH
   const __m128i zero = _mm_setzero_si128();
-  const __m128i sign_bits = _mm_cmplt_epi16(output, zero);
-  __m128i out0 = _mm_unpacklo_epi16(output, sign_bits);
-  __m128i out1 = _mm_unpackhi_epi16(output, sign_bits);
+  const __m128i sign_bits = _mm_cmplt_epi16(*poutput, zero);
+  __m128i out0 = _mm_unpacklo_epi16(*poutput, sign_bits);
+  __m128i out1 = _mm_unpackhi_epi16(*poutput, sign_bits);
   _mm_storeu_si128((__m128i *)(dst_ptr), out0);
   _mm_storeu_si128((__m128i *)(dst_ptr + 4), out1);
 #else
-  _mm_storeu_si128((__m128i *)(dst_ptr), output);
+  _mm_storeu_si128((__m128i *)(dst_ptr), *poutput);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 }
 
 
-static INLINE __m128i mult_round_shift(const __m128i in0, const __m128i in1,
-                                       const __m128i multiplier,
-                                       const __m128i rounding,
+static INLINE __m128i mult_round_shift(const __m128i *pin0,
+                                       const __m128i *pin1,
+                                       const __m128i *pmultiplier,
+                                       const __m128i *prounding,
                                        const int shift) {
-  const __m128i u0 = _mm_madd_epi16(in0, multiplier);
-  const __m128i u1 = _mm_madd_epi16(in1, multiplier);
-  const __m128i v0 = _mm_add_epi32(u0, rounding);
-  const __m128i v1 = _mm_add_epi32(u1, rounding);
+  const __m128i u0 = _mm_madd_epi16(*pin0, *pmultiplier);
+  const __m128i u1 = _mm_madd_epi16(*pin1, *pmultiplier);
+  const __m128i v0 = _mm_add_epi32(u0, *prounding);
+  const __m128i v1 = _mm_add_epi32(u1, *prounding);
   const __m128i w0 = _mm_srai_epi32(v0, shift);
   const __m128i w1 = _mm_srai_epi32(v1, shift);
   return _mm_packs_epi32(w0, w1);
 }
 
 static INLINE void transpose_and_output8x8(
-    const __m128i in00, const __m128i in01,
-    const __m128i in02, const __m128i in03,
-    const __m128i in04, const __m128i in05,
-    const __m128i in06, const __m128i in07,
+    const __m128i *pin00, const __m128i *pin01,
+    const __m128i *pin02, const __m128i *pin03,
+    const __m128i *pin04, const __m128i *pin05,
+    const __m128i *pin06, const __m128i *pin07,
     const int pass, int16_t* out0_ptr,
     tran_low_t* out1_ptr) {
   // 00 01 02 03 04 05 06 07
@@ -297,14 +388,14 @@ static INLINE void transpose_and_output8x8(
   // 50 51 52 53 54 55 56 57
   // 60 61 62 63 64 65 66 67
   // 70 71 72 73 74 75 76 77
-  const __m128i tr0_0 = _mm_unpacklo_epi16(in00, in01);
-  const __m128i tr0_1 = _mm_unpacklo_epi16(in02, in03);
-  const __m128i tr0_2 = _mm_unpackhi_epi16(in00, in01);
-  const __m128i tr0_3 = _mm_unpackhi_epi16(in02, in03);
-  const __m128i tr0_4 = _mm_unpacklo_epi16(in04, in05);
-  const __m128i tr0_5 = _mm_unpacklo_epi16(in06, in07);
-  const __m128i tr0_6 = _mm_unpackhi_epi16(in04, in05);
-  const __m128i tr0_7 = _mm_unpackhi_epi16(in06, in07);
+  const __m128i tr0_0 = _mm_unpacklo_epi16(*pin00, *pin01);
+  const __m128i tr0_1 = _mm_unpacklo_epi16(*pin02, *pin03);
+  const __m128i tr0_2 = _mm_unpackhi_epi16(*pin00, *pin01);
+  const __m128i tr0_3 = _mm_unpackhi_epi16(*pin02, *pin03);
+  const __m128i tr0_4 = _mm_unpacklo_epi16(*pin04, *pin05);
+  const __m128i tr0_5 = _mm_unpacklo_epi16(*pin06, *pin07);
+  const __m128i tr0_6 = _mm_unpackhi_epi16(*pin04, *pin05);
+  const __m128i tr0_7 = _mm_unpackhi_epi16(*pin06, *pin07);
   // 00 10 01 11 02 12 03 13
   // 20 30 21 31 22 32 23 33
   // 04 14 05 15 06 16 07 17
@@ -355,14 +446,14 @@ static INLINE void transpose_and_output8x8(
     _mm_storeu_si128((__m128i*)(out0_ptr + 6 * 16), tr2_6);
     _mm_storeu_si128((__m128i*)(out0_ptr + 7 * 16), tr2_7);
   } else {
-    storeu_output(tr2_0, (out1_ptr + 0 * 16));
-    storeu_output(tr2_1, (out1_ptr + 1 * 16));
-    storeu_output(tr2_2, (out1_ptr + 2 * 16));
-    storeu_output(tr2_3, (out1_ptr + 3 * 16));
-    storeu_output(tr2_4, (out1_ptr + 4 * 16));
-    storeu_output(tr2_5, (out1_ptr + 5 * 16));
-    storeu_output(tr2_6, (out1_ptr + 6 * 16));
-    storeu_output(tr2_7, (out1_ptr + 7 * 16));
+    storeu_output(&tr2_0, (out1_ptr + 0 * 16));
+    storeu_output(&tr2_1, (out1_ptr + 1 * 16));
+    storeu_output(&tr2_2, (out1_ptr + 2 * 16));
+    storeu_output(&tr2_3, (out1_ptr + 3 * 16));
+    storeu_output(&tr2_4, (out1_ptr + 4 * 16));
+    storeu_output(&tr2_5, (out1_ptr + 5 * 16));
+    storeu_output(&tr2_6, (out1_ptr + 6 * 16));
+    storeu_output(&tr2_7, (out1_ptr + 7 * 16));
   }
 }
 

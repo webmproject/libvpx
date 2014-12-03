@@ -40,7 +40,7 @@ void vp9_fdct4x4_1_sse2(const int16_t *input, tran_low_t *output, int stride) {
 
   in1 = _mm_add_epi32(tmp, in0);
   in0 = _mm_slli_epi32(in1, 1);
-  store_output(in0, output);
+  store_output(&in0, output);
 }
 
 static INLINE void load_buffer_4x4(const int16_t *input, __m128i *in,
@@ -72,8 +72,8 @@ static INLINE void write_buffer_4x4(tran_low_t *output, __m128i *res) {
   __m128i out23 = _mm_add_epi16(in23, kOne);
   out01 = _mm_srai_epi16(out01, 2);
   out23 = _mm_srai_epi16(out23, 2);
-  store_output(out01, (output + 0 * 8));
-  store_output(out23, (output + 1 * 8));
+  store_output(&out01, (output + 0 * 8));
+  store_output(&out23, (output + 1 * 8));
 }
 
 static INLINE void transpose_4x4(__m128i *res) {
@@ -245,7 +245,7 @@ void vp9_fdct8x8_1_sse2(const int16_t *input, tran_low_t *output, int stride) {
   in0 = _mm_srli_si128(sum, 8);
 
   in1 = _mm_add_epi32(sum, in0);
-  store_output(in1, output);
+  store_output(&in1, output);
 }
 
 void vp9_fdct8x8_quant_sse2(const int16_t *input, int stride,
@@ -759,14 +759,14 @@ static INLINE void right_shift_8x8(__m128i *res, int const bit) {
 // write 8x8 array
 static INLINE void write_buffer_8x8(tran_low_t *output, __m128i *res,
                                     int stride) {
-  store_output(res[0], (output + 0 * stride));
-  store_output(res[1], (output + 1 * stride));
-  store_output(res[2], (output + 2 * stride));
-  store_output(res[3], (output + 3 * stride));
-  store_output(res[4], (output + 4 * stride));
-  store_output(res[5], (output + 5 * stride));
-  store_output(res[6], (output + 6 * stride));
-  store_output(res[7], (output + 7 * stride));
+  store_output(&res[0], (output + 0 * stride));
+  store_output(&res[1], (output + 1 * stride));
+  store_output(&res[2], (output + 2 * stride));
+  store_output(&res[3], (output + 3 * stride));
+  store_output(&res[4], (output + 4 * stride));
+  store_output(&res[5], (output + 5 * stride));
+  store_output(&res[6], (output + 6 * stride));
+  store_output(&res[7], (output + 7 * stride));
 }
 
 // perform in-place transpose
@@ -1292,7 +1292,7 @@ void vp9_fdct16x16_1_sse2(const int16_t *input, tran_low_t *output,
 
   in1 = _mm_add_epi32(sum, in0);
   in1 = _mm_srai_epi32(in1, 1);
-  store_output(in1, output);
+  store_output(&in1, output);
 }
 
 static INLINE void load_buffer_16x16(const int16_t* input, __m128i *in0,
@@ -2251,7 +2251,7 @@ void vp9_fdct32x32_1_sse2(const int16_t *input, tran_low_t *output,
 
   in1 = _mm_add_epi32(sum, in0);
   in1 = _mm_srai_epi32(in1, 3);
-  store_output(in1, output);
+  store_output(&in1, output);
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
