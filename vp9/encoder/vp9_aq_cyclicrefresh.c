@@ -319,6 +319,20 @@ void vp9_cyclic_refresh_update_map(VP9_COMP *const cpi) {
   cr->sb_index = i;
 }
 
+// Set/update global/frame level cyclic refresh parameters.
+void vp9_cyclic_refresh_update_parameters(VP9_COMP *const cpi) {
+  const RATE_CONTROL *const rc = &cpi->rc;
+  CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
+  cr->percent_refresh = 10;
+  // Use larger delta-qp (increase rate_ratio_qdelta) for first few (~4)
+  // periods of the refresh cycle, after a key frame. This corresponds to ~40
+  // frames with cr->percent_refresh = 10.
+  if (rc->frames_since_key <  40)
+    cr->rate_ratio_qdelta = 3.0;
+  else
+    cr->rate_ratio_qdelta = 2.0;
+}
+
 // Setup cyclic background refresh: set delta q and segmentation map.
 void vp9_cyclic_refresh_setup(VP9_COMP *const cpi) {
   VP9_COMMON *const cm = &cpi->common;
@@ -343,9 +357,6 @@ void vp9_cyclic_refresh_setup(VP9_COMP *const cpi) {
     int qindex2;
     const double q = vp9_convert_qindex_to_q(cm->base_qindex, cm->bit_depth);
     vp9_clear_system_state();
-    // Some of these parameters may be set via codec-control function later.
-    cr->percent_refresh = 10;
-    cr->rate_ratio_qdelta = 2.0;
     cr->max_qdelta_perc = 50;
     cr->min_block_size = BLOCK_8X8;
     cr->time_for_refresh = 0;
