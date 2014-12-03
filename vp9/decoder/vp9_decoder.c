@@ -273,8 +273,19 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
   cm->cur_frame = &cm->frame_bufs[cm->new_fb_idx];
 
   if (setjmp(cm->error.jmp)) {
+    const VP9WorkerInterface *const winterface = vp9_get_worker_interface();
+    int i;
+
     pbi->need_resync = 1;
     cm->error.setjmp = 0;
+
+    // Synchronize all threads immediately as a subsequent decode call may
+    // cause a resize invalidating some allocations.
+    winterface->sync(&pbi->lf_worker);
+    for (i = 0; i < pbi->num_tile_workers; ++i) {
+      winterface->sync(&pbi->tile_workers[i]);
+    }
+
     vp9_clear_system_state();
 
     // We do not know if the missing frame(s) was supposed to update
