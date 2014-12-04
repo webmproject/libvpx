@@ -75,7 +75,7 @@ void FDCT4x4_2D(const int16_t *input, tran_low_t *output, int stride) {
   // This second rounding constant saves doing some extra adds at the end
   const __m128i k__DCT_CONST_ROUNDING2 = _mm_set1_epi32(DCT_CONST_ROUNDING
                                                +(DCT_CONST_ROUNDING << 1));
-  const int DCT_CONST_BITS2 =  DCT_CONST_BITS+2;
+  const int DCT_CONST_BITS2 =  DCT_CONST_BITS + 2;
   const __m128i k__nonzero_bias_a = _mm_setr_epi16(0, 1, 1, 1, 1, 1, 1, 1);
   const __m128i k__nonzero_bias_b = _mm_setr_epi16(1, 0, 0, 0, 0, 0, 0, 0);
   __m128i in0, in1;
@@ -170,7 +170,7 @@ void FDCT4x4_2D(const int16_t *input, tran_low_t *output, int stride) {
     const __m128i x0 = _mm_packs_epi32(w0, w1);
     const __m128i x1 = _mm_packs_epi32(w2, w3);
 #if DCT_HIGH_BIT_DEPTH
-    overflow = check_epi16_overflow_x2(x0, x1);
+    overflow = check_epi16_overflow_x2(&x0, &x1);
     if (overflow) {
       vp9_highbd_fdct4x4_c(input, output, stride);
       return;
@@ -192,7 +192,7 @@ void FDCT4x4_2D(const int16_t *input, tran_low_t *output, int stride) {
     // t0 = [c0 c1 c8 c9  c4  c5  cC  cD]
     // t1 = [c3 c2 cB cA -c7 -c6 -cF -cE]
 #if DCT_HIGH_BIT_DEPTH
-    overflow = check_epi16_overflow_x2(t0, t1);
+    overflow = check_epi16_overflow_x2(&t0, &t1);
     if (overflow) {
       vp9_highbd_fdct4x4_c(input, output, stride);
       return;
@@ -231,7 +231,7 @@ void FDCT4x4_2D(const int16_t *input, tran_low_t *output, int stride) {
       const __m128i x0 = _mm_packs_epi32(w0, w1);
       const __m128i x1 = _mm_packs_epi32(w2, w3);
 #if DCT_HIGH_BIT_DEPTH
-      overflow = check_epi16_overflow_x2(x0, x1);
+      overflow = check_epi16_overflow_x2(&x0, &x1);
       if (overflow) {
         vp9_highbd_fdct4x4_c(input, output, stride);
         return;
@@ -254,8 +254,8 @@ void FDCT4x4_2D(const int16_t *input, tran_low_t *output, int stride) {
   // Post-condition (v + 1) >> 2 is now incorporated into previous
   // add and right-shift commands.  Only 2 store instructions needed
   // because we are using the fact that 1/3 are stored just after 0/2.
-  storeu_output(in0, output + 0 * 4);
-  storeu_output(in1, output + 2 * 4);
+  storeu_output(&in0, output + 0 * 4);
+  storeu_output(&in1, output + 2 * 4);
 }
 
 
@@ -314,7 +314,8 @@ void FDCT8x8_2D(const int16_t *input, tran_low_t *output, int stride) {
     const __m128i q7 = SUB_EPI16(in0, in7);
 #if DCT_HIGH_BIT_DEPTH
     if (pass == 1) {
-      overflow = check_epi16_overflow_x8(q0, q1, q2, q3, q4, q5, q6, q7);
+      overflow = check_epi16_overflow_x8(&q0, &q1, &q2, &q3,
+                                         &q4, &q5, &q6, &q7);
       if (overflow) {
         vp9_highbd_fdct8x8_c(input, output, stride);
         return;
@@ -329,7 +330,7 @@ void FDCT8x8_2D(const int16_t *input, tran_low_t *output, int stride) {
       const __m128i r2 = SUB_EPI16(q1, q2);
       const __m128i r3 = SUB_EPI16(q0, q3);
 #if DCT_HIGH_BIT_DEPTH
-      overflow = check_epi16_overflow_x4(r0, r1, r2, r3);
+      overflow = check_epi16_overflow_x4(&r0, &r1, &r2, &r3);
       if (overflow) {
         vp9_highbd_fdct8x8_c(input, output, stride);
         return;
@@ -372,7 +373,7 @@ void FDCT8x8_2D(const int16_t *input, tran_low_t *output, int stride) {
         res2 = _mm_packs_epi32(w4, w5);
         res6 = _mm_packs_epi32(w6, w7);
 #if DCT_HIGH_BIT_DEPTH
-        overflow = check_epi16_overflow_x4(res0, res4, res2, res6);
+        overflow = check_epi16_overflow_x4(&res0, &res4, &res2, &res6);
         if (overflow) {
           vp9_highbd_fdct8x8_c(input, output, stride);
           return;
@@ -402,7 +403,7 @@ void FDCT8x8_2D(const int16_t *input, tran_low_t *output, int stride) {
       const __m128i r0 = _mm_packs_epi32(s0, s1);
       const __m128i r1 = _mm_packs_epi32(s2, s3);
 #if DCT_HIGH_BIT_DEPTH
-      overflow = check_epi16_overflow_x2(r0, r1);
+      overflow = check_epi16_overflow_x2(&r0, &r1);
       if (overflow) {
         vp9_highbd_fdct8x8_c(input, output, stride);
         return;
@@ -415,7 +416,7 @@ void FDCT8x8_2D(const int16_t *input, tran_low_t *output, int stride) {
         const __m128i x2 = SUB_EPI16(q7, r1);
         const __m128i x3 = ADD_EPI16(q7, r1);
 #if DCT_HIGH_BIT_DEPTH
-        overflow = check_epi16_overflow_x4(x0, x1, x2, x3);
+        overflow = check_epi16_overflow_x4(&x0, &x1, &x2, &x3);
         if (overflow) {
           vp9_highbd_fdct8x8_c(input, output, stride);
           return;
@@ -458,7 +459,7 @@ void FDCT8x8_2D(const int16_t *input, tran_low_t *output, int stride) {
           res5 = _mm_packs_epi32(w4, w5);
           res3 = _mm_packs_epi32(w6, w7);
 #if DCT_HIGH_BIT_DEPTH
-          overflow = check_epi16_overflow_x4(res1, res7, res5, res3);
+          overflow = check_epi16_overflow_x4(&res1, &res7, &res5, &res3);
           if (overflow) {
             vp9_highbd_fdct8x8_c(input, output, stride);
             return;
@@ -557,14 +558,14 @@ void FDCT8x8_2D(const int16_t *input, tran_low_t *output, int stride) {
     in6 = _mm_srai_epi16(in6, 1);
     in7 = _mm_srai_epi16(in7, 1);
     // store results
-    store_output(in0, (output + 0 * 8));
-    store_output(in1, (output + 1 * 8));
-    store_output(in2, (output + 2 * 8));
-    store_output(in3, (output + 3 * 8));
-    store_output(in4, (output + 4 * 8));
-    store_output(in5, (output + 5 * 8));
-    store_output(in6, (output + 6 * 8));
-    store_output(in7, (output + 7 * 8));
+    store_output(&in0, (output + 0 * 8));
+    store_output(&in1, (output + 1 * 8));
+    store_output(&in2, (output + 2 * 8));
+    store_output(&in3, (output + 3 * 8));
+    store_output(&in4, (output + 4 * 8));
+    store_output(&in5, (output + 5 * 8));
+    store_output(&in6, (output + 6 * 8));
+    store_output(&in7, (output + 7 * 8));
   }
 }
 
@@ -720,8 +721,8 @@ void FDCT16x16_2D(const int16_t *input, tran_low_t *output, int stride) {
         input6 = ADD_EPI16(in06, in09);
         input7 = ADD_EPI16(in07, in08);
 #if DCT_HIGH_BIT_DEPTH
-        overflow = check_epi16_overflow_x8(input0, input1, input2, input3,
-                           input4, input5, input6, input7);
+        overflow = check_epi16_overflow_x8(&input0, &input1, &input2, &input3,
+                                           &input4, &input5, &input6, &input7);
         if (overflow) {
           vp9_highbd_fdct16x16_c(input, output, stride);
           return;
@@ -739,8 +740,10 @@ void FDCT16x16_2D(const int16_t *input, tran_low_t *output, int stride) {
         step1_6 = SUB_EPI16(in01, in14);
         step1_7 = SUB_EPI16(in00, in15);
 #if DCT_HIGH_BIT_DEPTH
-        overflow = check_epi16_overflow_x8(step1_0, step1_1, step1_2, step1_3,
-                           step1_4, step1_5, step1_6, step1_7);
+        overflow = check_epi16_overflow_x8(&step1_0, &step1_1,
+                                           &step1_2, &step1_3,
+                                           &step1_4, &step1_5,
+                                           &step1_6, &step1_7);
         if (overflow) {
           vp9_highbd_fdct16x16_c(input, output, stride);
           return;
@@ -759,7 +762,8 @@ void FDCT16x16_2D(const int16_t *input, tran_low_t *output, int stride) {
         const __m128i q6 = SUB_EPI16(input1, input6);
         const __m128i q7 = SUB_EPI16(input0, input7);
 #if DCT_HIGH_BIT_DEPTH
-        overflow = check_epi16_overflow_x8(q0, q1, q2, q3, q4, q5, q6, q7);
+        overflow = check_epi16_overflow_x8(&q0, &q1, &q2, &q3,
+                                           &q4, &q5, &q6, &q7);
         if (overflow) {
           vp9_highbd_fdct16x16_c(input, output, stride);
           return;
@@ -773,7 +777,7 @@ void FDCT16x16_2D(const int16_t *input, tran_low_t *output, int stride) {
           const __m128i r2 = SUB_EPI16(q1, q2);
           const __m128i r3 = SUB_EPI16(q0, q3);
 #if DCT_HIGH_BIT_DEPTH
-          overflow = check_epi16_overflow_x4(r0, r1, r2, r3);
+          overflow = check_epi16_overflow_x4(&r0, &r1, &r2, &r3);
           if (overflow) {
             vp9_highbd_fdct16x16_c(input, output, stride);
             return;
@@ -786,16 +790,16 @@ void FDCT16x16_2D(const int16_t *input, tran_low_t *output, int stride) {
             const __m128i t1 = _mm_unpackhi_epi16(r0, r1);
             const __m128i t2 = _mm_unpacklo_epi16(r2, r3);
             const __m128i t3 = _mm_unpackhi_epi16(r2, r3);
-            res00 = mult_round_shift(t0, t1, k__cospi_p16_p16,
-                                     k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
-            res08 = mult_round_shift(t0, t1, k__cospi_p16_m16,
-                                     k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
-            res04 = mult_round_shift(t2, t3, k__cospi_p24_p08,
-                                     k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
-            res12 = mult_round_shift(t2, t3, k__cospi_m08_p24,
-                                     k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
+            res00 = mult_round_shift(&t0, &t1, &k__cospi_p16_p16,
+                                     &k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
+            res08 = mult_round_shift(&t0, &t1, &k__cospi_p16_m16,
+                                     &k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
+            res04 = mult_round_shift(&t2, &t3, &k__cospi_p24_p08,
+                                     &k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
+            res12 = mult_round_shift(&t2, &t3, &k__cospi_m08_p24,
+                                     &k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
 #if DCT_HIGH_BIT_DEPTH
-            overflow = check_epi16_overflow_x4(res00, res08, res04, res12);
+            overflow = check_epi16_overflow_x4(&res00, &res08, &res04, &res12);
             if (overflow) {
               vp9_highbd_fdct16x16_c(input, output, stride);
               return;
@@ -809,12 +813,14 @@ void FDCT16x16_2D(const int16_t *input, tran_low_t *output, int stride) {
           // into 32 bits.
           const __m128i d0 = _mm_unpacklo_epi16(q6, q5);
           const __m128i d1 = _mm_unpackhi_epi16(q6, q5);
-          const __m128i r0 = mult_round_shift(d0, d1, k__cospi_p16_m16,
-                                k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
-          const __m128i r1 = mult_round_shift(d0, d1, k__cospi_p16_p16,
-                                k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
+          const __m128i r0 = mult_round_shift(&d0, &d1, &k__cospi_p16_m16,
+                                              &k__DCT_CONST_ROUNDING,
+                                              DCT_CONST_BITS);
+          const __m128i r1 = mult_round_shift(&d0, &d1, &k__cospi_p16_p16,
+                                              &k__DCT_CONST_ROUNDING,
+                                              DCT_CONST_BITS);
 #if DCT_HIGH_BIT_DEPTH
-          overflow = check_epi16_overflow_x2(r0, r1);
+          overflow = check_epi16_overflow_x2(&r0, &r1);
           if (overflow) {
             vp9_highbd_fdct16x16_c(input, output, stride);
             return;
@@ -827,7 +833,7 @@ void FDCT16x16_2D(const int16_t *input, tran_low_t *output, int stride) {
             const __m128i x2 = SUB_EPI16(q7, r1);
             const __m128i x3 = ADD_EPI16(q7, r1);
 #if DCT_HIGH_BIT_DEPTH
-            overflow = check_epi16_overflow_x4(x0, x1, x2, x3);
+            overflow = check_epi16_overflow_x4(&x0, &x1, &x2, &x3);
             if (overflow) {
               vp9_highbd_fdct16x16_c(input, output, stride);
               return;
@@ -840,16 +846,17 @@ void FDCT16x16_2D(const int16_t *input, tran_low_t *output, int stride) {
               const __m128i t1 = _mm_unpackhi_epi16(x0, x3);
               const __m128i t2 = _mm_unpacklo_epi16(x1, x2);
               const __m128i t3 = _mm_unpackhi_epi16(x1, x2);
-              res02 = mult_round_shift(t0, t1, k__cospi_p28_p04,
-                                k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
-              res14 = mult_round_shift(t0, t1, k__cospi_m04_p28,
-                                k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
-              res10 = mult_round_shift(t2, t3, k__cospi_p12_p20,
-                                k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
-              res06 = mult_round_shift(t2, t3, k__cospi_m20_p12,
-                                k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
+              res02 = mult_round_shift(&t0, &t1, &k__cospi_p28_p04,
+                                       &k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
+              res14 = mult_round_shift(&t0, &t1, &k__cospi_m04_p28,
+                                       &k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
+              res10 = mult_round_shift(&t2, &t3, &k__cospi_p12_p20,
+                                       &k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
+              res06 = mult_round_shift(&t2, &t3, &k__cospi_m20_p12,
+                                       &k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
 #if DCT_HIGH_BIT_DEPTH
-              overflow = check_epi16_overflow_x4(res02, res14, res10, res06);
+              overflow = check_epi16_overflow_x4(&res02, &res14,
+                                                 &res10, &res06);
               if (overflow) {
                 vp9_highbd_fdct16x16_c(input, output, stride);
                 return;
@@ -867,17 +874,17 @@ void FDCT16x16_2D(const int16_t *input, tran_low_t *output, int stride) {
           const __m128i t1 = _mm_unpackhi_epi16(step1_5, step1_2);
           const __m128i t2 = _mm_unpacklo_epi16(step1_4, step1_3);
           const __m128i t3 = _mm_unpackhi_epi16(step1_4, step1_3);
-          step2_2 = mult_round_shift(t0, t1, k__cospi_p16_m16,
-                                     k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
-          step2_3 = mult_round_shift(t2, t3, k__cospi_p16_m16,
-                                     k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
-          step2_5 = mult_round_shift(t0, t1, k__cospi_p16_p16,
-                                     k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
-          step2_4 = mult_round_shift(t2, t3, k__cospi_p16_p16,
-                                     k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
+          step2_2 = mult_round_shift(&t0, &t1, &k__cospi_p16_m16,
+                                     &k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
+          step2_3 = mult_round_shift(&t2, &t3, &k__cospi_p16_m16,
+                                     &k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
+          step2_5 = mult_round_shift(&t0, &t1, &k__cospi_p16_p16,
+                                     &k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
+          step2_4 = mult_round_shift(&t2, &t3, &k__cospi_p16_p16,
+                                     &k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
 #if DCT_HIGH_BIT_DEPTH
-          overflow = check_epi16_overflow_x4(step2_2, step2_3, step2_5,
-                                             step2_4);
+          overflow = check_epi16_overflow_x4(&step2_2, &step2_3, &step2_5,
+                                             &step2_4);
           if (overflow) {
             vp9_highbd_fdct16x16_c(input, output, stride);
             return;
@@ -895,8 +902,10 @@ void FDCT16x16_2D(const int16_t *input, tran_low_t *output, int stride) {
           step3_6 = ADD_EPI16(step1_6, step2_5);
           step3_7 = ADD_EPI16(step1_7, step2_4);
 #if DCT_HIGH_BIT_DEPTH
-          overflow = check_epi16_overflow_x8(step3_0, step3_1, step3_2, step3_3,
-                             step3_4, step3_5, step3_6, step3_7);
+          overflow = check_epi16_overflow_x8(&step3_0, &step3_1,
+                                             &step3_2, &step3_3,
+                                             &step3_4, &step3_5,
+                                             &step3_6, &step3_7);
           if (overflow) {
             vp9_highbd_fdct16x16_c(input, output, stride);
             return;
@@ -909,17 +918,17 @@ void FDCT16x16_2D(const int16_t *input, tran_low_t *output, int stride) {
           const __m128i t1 = _mm_unpackhi_epi16(step3_1, step3_6);
           const __m128i t2 = _mm_unpacklo_epi16(step3_2, step3_5);
           const __m128i t3 = _mm_unpackhi_epi16(step3_2, step3_5);
-          step2_1 = mult_round_shift(t0, t1, k__cospi_m08_p24,
-                                     k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
-          step2_2 = mult_round_shift(t2, t3, k__cospi_p24_p08,
-                                     k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
-          step2_6 = mult_round_shift(t0, t1, k__cospi_p24_p08,
-                                     k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
-          step2_5 = mult_round_shift(t2, t3, k__cospi_p08_m24,
-                                     k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
+          step2_1 = mult_round_shift(&t0, &t1, &k__cospi_m08_p24,
+                                     &k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
+          step2_2 = mult_round_shift(&t2, &t3, &k__cospi_p24_p08,
+                                     &k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
+          step2_6 = mult_round_shift(&t0, &t1, &k__cospi_p24_p08,
+                                     &k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
+          step2_5 = mult_round_shift(&t2, &t3, &k__cospi_p08_m24,
+                                     &k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
 #if DCT_HIGH_BIT_DEPTH
-          overflow = check_epi16_overflow_x4(step2_1, step2_2, step2_6,
-                                             step2_5);
+          overflow = check_epi16_overflow_x4(&step2_1, &step2_2, &step2_6,
+                                             &step2_5);
           if (overflow) {
             vp9_highbd_fdct16x16_c(input, output, stride);
             return;
@@ -937,8 +946,10 @@ void FDCT16x16_2D(const int16_t *input, tran_low_t *output, int stride) {
           step1_6 = SUB_EPI16(step3_7, step2_6);
           step1_7 = ADD_EPI16(step3_7, step2_6);
 #if DCT_HIGH_BIT_DEPTH
-          overflow = check_epi16_overflow_x8(step1_0, step1_1, step1_2, step1_3,
-                             step1_4, step1_5, step1_6, step1_7);
+          overflow = check_epi16_overflow_x8(&step1_0, &step1_1,
+                                             &step1_2, &step1_3,
+                                             &step1_4, &step1_5,
+                                             &step1_6, &step1_7);
           if (overflow) {
             vp9_highbd_fdct16x16_c(input, output, stride);
             return;
@@ -951,16 +962,16 @@ void FDCT16x16_2D(const int16_t *input, tran_low_t *output, int stride) {
           const __m128i t1 = _mm_unpackhi_epi16(step1_0, step1_7);
           const __m128i t2 = _mm_unpacklo_epi16(step1_1, step1_6);
           const __m128i t3 = _mm_unpackhi_epi16(step1_1, step1_6);
-          res01 = mult_round_shift(t0, t1, k__cospi_p30_p02,
-                                     k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
-          res09 = mult_round_shift(t2, t3, k__cospi_p14_p18,
-                                     k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
-          res15 = mult_round_shift(t0, t1, k__cospi_m02_p30,
-                                     k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
-          res07 = mult_round_shift(t2, t3, k__cospi_m18_p14,
-                                     k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
+          res01 = mult_round_shift(&t0, &t1, &k__cospi_p30_p02,
+                                   &k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
+          res09 = mult_round_shift(&t2, &t3, &k__cospi_p14_p18,
+                                   &k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
+          res15 = mult_round_shift(&t0, &t1, &k__cospi_m02_p30,
+                                   &k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
+          res07 = mult_round_shift(&t2, &t3, &k__cospi_m18_p14,
+                                   &k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
 #if DCT_HIGH_BIT_DEPTH
-          overflow = check_epi16_overflow_x4(res01, res09, res15, res07);
+          overflow = check_epi16_overflow_x4(&res01, &res09, &res15, &res07);
           if (overflow) {
             vp9_highbd_fdct16x16_c(input, output, stride);
             return;
@@ -972,16 +983,16 @@ void FDCT16x16_2D(const int16_t *input, tran_low_t *output, int stride) {
           const __m128i t1 = _mm_unpackhi_epi16(step1_2, step1_5);
           const __m128i t2 = _mm_unpacklo_epi16(step1_3, step1_4);
           const __m128i t3 = _mm_unpackhi_epi16(step1_3, step1_4);
-          res05 = mult_round_shift(t0, t1, k__cospi_p22_p10,
-                                     k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
-          res13 = mult_round_shift(t2, t3, k__cospi_p06_p26,
-                                     k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
-          res11 = mult_round_shift(t0, t1, k__cospi_m10_p22,
-                                     k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
-          res03 = mult_round_shift(t2, t3, k__cospi_m26_p06,
-                                     k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
+          res05 = mult_round_shift(&t0, &t1, &k__cospi_p22_p10,
+                                   &k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
+          res13 = mult_round_shift(&t2, &t3, &k__cospi_p06_p26,
+                                   &k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
+          res11 = mult_round_shift(&t0, &t1, &k__cospi_m10_p22,
+                                   &k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
+          res03 = mult_round_shift(&t2, &t3, &k__cospi_m26_p06,
+                                   &k__DCT_CONST_ROUNDING, DCT_CONST_BITS);
 #if DCT_HIGH_BIT_DEPTH
-          overflow = check_epi16_overflow_x4(res05, res13, res11, res03);
+          overflow = check_epi16_overflow_x4(&res05, &res13, &res11, &res03);
           if (overflow) {
             vp9_highbd_fdct16x16_c(input, output, stride);
             return;
@@ -990,11 +1001,11 @@ void FDCT16x16_2D(const int16_t *input, tran_low_t *output, int stride) {
         }
       }
       // Transpose the results, do it as two 8x8 transposes.
-      transpose_and_output8x8(res00, res01, res02, res03,
-                              res04, res05, res06, res07,
+      transpose_and_output8x8(&res00, &res01, &res02, &res03,
+                              &res04, &res05, &res06, &res07,
                               pass, out0, out1);
-      transpose_and_output8x8(res08, res09, res10, res11,
-                              res12, res13, res14, res15,
+      transpose_and_output8x8(&res08, &res09, &res10, &res11,
+                              &res12, &res13, &res14, &res15,
                               pass, out0 + 8, out1 + 8);
       if (pass == 0) {
         out0 += 8*16;

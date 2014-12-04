@@ -269,8 +269,9 @@ void FDCT32x32_2D(const int16_t *input,
           step1[30] = SUB_EPI16(in01, in30);
           step1[31] = SUB_EPI16(in00, in31);
 #if DCT_HIGH_BIT_DEPTH
-          overflow = check_epi16_overflow_x8(step1[0], step1[1], step1[2],
-                        step1[3], step1[28], step1[29], step1[30], step1[31]);
+          overflow = check_epi16_overflow_x8(&step1[0], &step1[1], &step1[2],
+                                             &step1[3], &step1[28], &step1[29],
+                                             &step1[30], &step1[31]);
           if (overflow) {
             HIGH_FDCT32x32_2D_ROWS_C(intermediate, output_org);
             return;
@@ -295,9 +296,9 @@ void FDCT32x32_2D(const int16_t *input,
           step1[26] = SUB_EPI16(in05, in26);
           step1[27] = SUB_EPI16(in04, in27);
 #if DCT_HIGH_BIT_DEPTH
-          overflow = check_epi16_overflow_x8(step1[4], step1[5], step1[6],
-                                             step1[7], step1[24], step1[25],
-                                             step1[26], step1[27]);
+          overflow = check_epi16_overflow_x8(&step1[4], &step1[5], &step1[6],
+                                             &step1[7], &step1[24], &step1[25],
+                                             &step1[26], &step1[27]);
           if (overflow) {
             HIGH_FDCT32x32_2D_ROWS_C(intermediate, output_org);
             return;
@@ -322,9 +323,9 @@ void FDCT32x32_2D(const int16_t *input,
           step1[22] = SUB_EPI16(in09, in22);
           step1[23] = SUB_EPI16(in08, in23);
 #if DCT_HIGH_BIT_DEPTH
-          overflow = check_epi16_overflow_x8(step1[8], step1[9], step1[10],
-                                             step1[11], step1[20], step1[21],
-                                             step1[22], step1[23]);
+          overflow = check_epi16_overflow_x8(&step1[8], &step1[9], &step1[10],
+                                             &step1[11], &step1[20], &step1[21],
+                                             &step1[22], &step1[23]);
           if (overflow) {
             HIGH_FDCT32x32_2D_ROWS_C(intermediate, output_org);
             return;
@@ -349,9 +350,9 @@ void FDCT32x32_2D(const int16_t *input,
           step1[18] = SUB_EPI16(in13, in18);
           step1[19] = SUB_EPI16(in12, in19);
 #if DCT_HIGH_BIT_DEPTH
-          overflow = check_epi16_overflow_x8(step1[12], step1[13], step1[14],
-                                             step1[15], step1[16], step1[17],
-                                             step1[18], step1[19]);
+          overflow = check_epi16_overflow_x8(&step1[12], &step1[13], &step1[14],
+                                             &step1[15], &step1[16], &step1[17],
+                                             &step1[18], &step1[19]);
           if (overflow) {
             HIGH_FDCT32x32_2D_ROWS_C(intermediate, output_org);
             return;
@@ -379,10 +380,10 @@ void FDCT32x32_2D(const int16_t *input,
         step2[15] = SUB_EPI16(step1[0], step1[15]);
 #if DCT_HIGH_BIT_DEPTH
         overflow = check_epi16_overflow_x16(
-            step2[0], step2[1], step2[2], step2[3],
-            step2[4], step2[5], step2[6], step2[7],
-            step2[8], step2[9], step2[10], step2[11],
-            step2[12], step2[13], step2[14], step2[15]);
+            &step2[0], &step2[1], &step2[2], &step2[3],
+            &step2[4], &step2[5], &step2[6], &step2[7],
+            &step2[8], &step2[9], &step2[10], &step2[11],
+            &step2[12], &step2[13], &step2[14], &step2[15]);
         if (overflow) {
           if (pass == 0)
             HIGH_FDCT32x32_2D_C(input, output_org, stride);
@@ -460,9 +461,9 @@ void FDCT32x32_2D(const int16_t *input,
         step2[26] = _mm_packs_epi32(s2_26_6, s2_26_7);
         step2[27] = _mm_packs_epi32(s2_27_6, s2_27_7);
 #if DCT_HIGH_BIT_DEPTH
-        overflow = check_epi16_overflow_x8(step2[20], step2[21], step2[22],
-                                           step2[23], step2[24], step2[25],
-                                           step2[26], step2[27]);
+        overflow = check_epi16_overflow_x8(&step2[20], &step2[21], &step2[22],
+                                           &step2[23], &step2[24], &step2[25],
+                                           &step2[26], &step2[27]);
         if (overflow) {
           if (pass == 0)
             HIGH_FDCT32x32_2D_C(input, output_org, stride);
@@ -544,14 +545,14 @@ void FDCT32x32_2D(const int16_t *input,
         step1[31] = SUB_EPI16(step1[31], s3_31_0);
 #if DCT_HIGH_BIT_DEPTH
         overflow = check_epi16_overflow_x32(
-            step2[0], step2[1], step2[2], step2[3],
-            step2[4], step2[5], step2[6], step2[7],
-            step2[8], step2[9], step2[10], step2[11],
-            step2[12], step2[13], step2[14], step2[15],
-            step1[16], step1[17], step1[18], step1[19],
-            step2[20], step2[21], step2[22], step2[23],
-            step2[24], step2[25], step2[26], step2[27],
-            step1[28], step1[29], step1[30], step1[31]);
+            &step2[0], &step2[1], &step2[2], &step2[3],
+            &step2[4], &step2[5], &step2[6], &step2[7],
+            &step2[8], &step2[9], &step2[10], &step2[11],
+            &step2[12], &step2[13], &step2[14], &step2[15],
+            &step1[16], &step1[17], &step1[18], &step1[19],
+            &step2[20], &step2[21], &step2[22], &step2[23],
+            &step2[24], &step2[25], &step2[26], &step2[27],
+            &step1[28], &step1[29], &step1[30], &step1[31]);
         if (overflow) {
           HIGH_FDCT32x32_2D_ROWS_C(intermediate, output_org);
           return;
@@ -639,9 +640,9 @@ void FDCT32x32_2D(const int16_t *input,
         step3[6] = SUB_EPI16(step2[(8 - 7)], step2[6]);
         step3[7] = SUB_EPI16(step2[(8 - 8)], step2[7]);
 #if DCT_HIGH_BIT_DEPTH
-        overflow = check_epi16_overflow_x8(step3[0], step3[1], step3[2],
-                                           step3[3], step3[4], step3[5],
-                                           step3[6], step3[7]);
+        overflow = check_epi16_overflow_x8(&step3[0], &step3[1], &step3[2],
+                                           &step3[3], &step3[4], &step3[5],
+                                           &step3[6], &step3[7]);
         if (overflow) {
           if (pass == 0)
             HIGH_FDCT32x32_2D_C(input, output_org, stride);
@@ -687,8 +688,8 @@ void FDCT32x32_2D(const int16_t *input,
         step3[12] = _mm_packs_epi32(s3_12_6, s3_12_7);
         step3[13] = _mm_packs_epi32(s3_13_6, s3_13_7);
 #if DCT_HIGH_BIT_DEPTH
-        overflow = check_epi16_overflow_x4(step3[10], step3[11],
-                                           step3[12], step3[13]);
+        overflow = check_epi16_overflow_x4(&step3[10], &step3[11],
+                                           &step3[12], &step3[13]);
         if (overflow) {
           if (pass == 0)
             HIGH_FDCT32x32_2D_C(input, output_org, stride);
@@ -717,10 +718,10 @@ void FDCT32x32_2D(const int16_t *input,
         step3[31] = ADD_EPI16(step2[24], step1[31]);
 #if DCT_HIGH_BIT_DEPTH
         overflow = check_epi16_overflow_x16(
-            step3[16], step3[17], step3[18], step3[19],
-            step3[20], step3[21], step3[22], step3[23],
-            step3[24], step3[25], step3[26], step3[27],
-            step3[28], step3[29], step3[30], step3[31]);
+            &step3[16], &step3[17], &step3[18], &step3[19],
+            &step3[20], &step3[21], &step3[22], &step3[23],
+            &step3[24], &step3[25], &step3[26], &step3[27],
+            &step3[28], &step3[29], &step3[30], &step3[31]);
         if (overflow) {
           if (pass == 0)
             HIGH_FDCT32x32_2D_C(input, output_org, stride);
@@ -747,10 +748,10 @@ void FDCT32x32_2D(const int16_t *input,
         step1[15] = ADD_EPI16(step3[12], step2[15]);
 #if DCT_HIGH_BIT_DEPTH
         overflow = check_epi16_overflow_x16(
-            step1[0], step1[1], step1[2], step1[3],
-            step1[4], step1[5], step1[6], step1[7],
-            step1[8], step1[9], step1[10], step1[11],
-            step1[12], step1[13], step1[14], step1[15]);
+            &step1[0], &step1[1], &step1[2], &step1[3],
+            &step1[4], &step1[5], &step1[6], &step1[7],
+            &step1[8], &step1[9], &step1[10], &step1[11],
+            &step1[12], &step1[13], &step1[14], &step1[15]);
         if (overflow) {
           if (pass == 0)
             HIGH_FDCT32x32_2D_C(input, output_org, stride);
@@ -780,7 +781,7 @@ void FDCT32x32_2D(const int16_t *input,
         step1[5] = _mm_packs_epi32(s1_05_6, s1_05_7);
         step1[6] = _mm_packs_epi32(s1_06_6, s1_06_7);
 #if DCT_HIGH_BIT_DEPTH
-        overflow = check_epi16_overflow_x2(step1[5], step1[6]);
+        overflow = check_epi16_overflow_x2(&step1[5], &step1[6]);
         if (overflow) {
           if (pass == 0)
             HIGH_FDCT32x32_2D_C(input, output_org, stride);
@@ -858,9 +859,9 @@ void FDCT32x32_2D(const int16_t *input,
         step1[28] = _mm_packs_epi32(s1_28_6, s1_28_7);
         step1[29] = _mm_packs_epi32(s1_29_6, s1_29_7);
 #if DCT_HIGH_BIT_DEPTH
-        overflow = check_epi16_overflow_x8(step1[18], step1[19], step1[20],
-                                           step1[21], step1[26], step1[27],
-                                           step1[28], step1[29]);
+        overflow = check_epi16_overflow_x8(&step1[18], &step1[19], &step1[20],
+                                           &step1[21], &step1[26], &step1[27],
+                                           &step1[28], &step1[29]);
         if (overflow) {
           if (pass == 0)
             HIGH_FDCT32x32_2D_C(input, output_org, stride);
@@ -877,8 +878,8 @@ void FDCT32x32_2D(const int16_t *input,
         step2[6] = SUB_EPI16(step3[7], step1[6]);
         step2[7] = ADD_EPI16(step1[6], step3[7]);
 #if DCT_HIGH_BIT_DEPTH
-        overflow = check_epi16_overflow_x4(step2[4], step2[5],
-                                           step2[6], step2[7]);
+        overflow = check_epi16_overflow_x4(&step2[4], &step2[5],
+                                           &step2[6], &step2[7]);
         if (overflow) {
           if (pass == 0)
             HIGH_FDCT32x32_2D_C(input, output_org, stride);
@@ -924,7 +925,8 @@ void FDCT32x32_2D(const int16_t *input,
         out[ 8] = _mm_packs_epi32(out_08_6, out_08_7);
         out[24] = _mm_packs_epi32(out_24_6, out_24_7);
 #if DCT_HIGH_BIT_DEPTH
-        overflow = check_epi16_overflow_x4(out[0], out[16], out[8], out[24]);
+        overflow = check_epi16_overflow_x4(&out[0], &out[16],
+                                           &out[8], &out[24]);
         if (overflow) {
           if (pass == 0)
             HIGH_FDCT32x32_2D_C(input, output_org, stride);
@@ -970,8 +972,8 @@ void FDCT32x32_2D(const int16_t *input,
         step2[13] = _mm_packs_epi32(s2_13_6, s2_13_7);
         step2[14] = _mm_packs_epi32(s2_14_6, s2_14_7);
 #if DCT_HIGH_BIT_DEPTH
-        overflow = check_epi16_overflow_x4(step2[9], step2[10],
-                                           step2[13], step2[14]);
+        overflow = check_epi16_overflow_x4(&step2[9], &step2[10],
+                                           &step2[13], &step2[14]);
         if (overflow) {
           if (pass == 0)
             HIGH_FDCT32x32_2D_C(input, output_org, stride);
@@ -1000,10 +1002,10 @@ void FDCT32x32_2D(const int16_t *input,
         step2[31] = ADD_EPI16(step1[28], step3[31]);
 #if DCT_HIGH_BIT_DEPTH
         overflow = check_epi16_overflow_x16(
-            step2[16], step2[17], step2[18], step2[19],
-            step2[20], step2[21], step2[22], step2[23],
-            step2[24], step2[25], step2[26], step2[27],
-            step2[28], step2[29], step2[30], step2[31]);
+            &step2[16], &step2[17], &step2[18], &step2[19],
+            &step2[20], &step2[21], &step2[22], &step2[23],
+            &step2[24], &step2[25], &step2[26], &step2[27],
+            &step2[28], &step2[29], &step2[30], &step2[31]);
         if (overflow) {
           if (pass == 0)
             HIGH_FDCT32x32_2D_C(input, output_org, stride);
@@ -1054,7 +1056,8 @@ void FDCT32x32_2D(const int16_t *input,
         out[12] = _mm_packs_epi32(out_12_6, out_12_7);
         out[28] = _mm_packs_epi32(out_28_6, out_28_7);
 #if DCT_HIGH_BIT_DEPTH
-        overflow = check_epi16_overflow_x4(out[4], out[20], out[12], out[28]);
+        overflow = check_epi16_overflow_x4(&out[4], &out[20],
+                                           &out[12], &out[28]);
         if (overflow) {
           if (pass == 0)
             HIGH_FDCT32x32_2D_C(input, output_org, stride);
@@ -1074,9 +1077,9 @@ void FDCT32x32_2D(const int16_t *input,
         step3[14] = SUB_EPI16(step1[15], step2[14]);
         step3[15] = ADD_EPI16(step2[14], step1[15]);
 #if DCT_HIGH_BIT_DEPTH
-        overflow = check_epi16_overflow_x8(step3[8], step3[9], step3[10],
-                                           step3[11], step3[12], step3[13],
-                                           step3[14], step3[15]);
+        overflow = check_epi16_overflow_x8(&step3[8], &step3[9], &step3[10],
+                                           &step3[11], &step3[12], &step3[13],
+                                           &step3[14], &step3[15]);
         if (overflow) {
           if (pass == 0)
             HIGH_FDCT32x32_2D_C(input, output_org, stride);
@@ -1155,9 +1158,9 @@ void FDCT32x32_2D(const int16_t *input,
         step3[29] = _mm_packs_epi32(s3_29_6, s3_29_7);
         step3[30] = _mm_packs_epi32(s3_30_6, s3_30_7);
 #if DCT_HIGH_BIT_DEPTH
-        overflow = check_epi16_overflow_x8(step3[17], step3[18], step3[21],
-                                           step3[22], step3[25], step3[26],
-                                           step3[29], step3[30]);
+        overflow = check_epi16_overflow_x8(&step3[17], &step3[18], &step3[21],
+                                           &step3[22], &step3[25], &step3[26],
+                                           &step3[29], &step3[30]);
         if (overflow) {
           if (pass == 0)
             HIGH_FDCT32x32_2D_C(input, output_org, stride);
@@ -1236,8 +1239,9 @@ void FDCT32x32_2D(const int16_t *input,
         out[14] = _mm_packs_epi32(out_14_6, out_14_7);
         out[30] = _mm_packs_epi32(out_30_6, out_30_7);
 #if DCT_HIGH_BIT_DEPTH
-        overflow = check_epi16_overflow_x8(out[2], out[18], out[10], out[26],
-                                           out[6], out[22], out[14], out[30]);
+        overflow = check_epi16_overflow_x8(&out[2], &out[18], &out[10],
+                                           &out[26], &out[6], &out[22],
+                                           &out[14], &out[30]);
         if (overflow) {
           if (pass == 0)
             HIGH_FDCT32x32_2D_C(input, output_org, stride);
@@ -1266,10 +1270,10 @@ void FDCT32x32_2D(const int16_t *input,
         step1[31] = ADD_EPI16(step3[30], step2[31]);
 #if DCT_HIGH_BIT_DEPTH
         overflow = check_epi16_overflow_x16(
-            step1[16], step1[17], step1[18], step1[19],
-            step1[20], step1[21], step1[22], step1[23],
-            step1[24], step1[25], step1[26], step1[27],
-            step1[28], step1[29], step1[30], step1[31]);
+            &step1[16], &step1[17], &step1[18], &step1[19],
+            &step1[20], &step1[21], &step1[22], &step1[23],
+            &step1[24], &step1[25], &step1[26], &step1[27],
+            &step1[28], &step1[29], &step1[30], &step1[31]);
         if (overflow) {
           if (pass == 0)
             HIGH_FDCT32x32_2D_C(input, output_org, stride);
@@ -1348,8 +1352,9 @@ void FDCT32x32_2D(const int16_t *input,
         out[15] = _mm_packs_epi32(out_15_6, out_15_7);
         out[31] = _mm_packs_epi32(out_31_6, out_31_7);
 #if DCT_HIGH_BIT_DEPTH
-        overflow = check_epi16_overflow_x8(out[1], out[17], out[9], out[25],
-                                           out[7], out[23], out[15], out[31]);
+        overflow = check_epi16_overflow_x8(&out[1], &out[17], &out[9],
+                                           &out[25], &out[7], &out[23],
+                                           &out[15], &out[31]);
         if (overflow) {
           if (pass == 0)
             HIGH_FDCT32x32_2D_C(input, output_org, stride);
@@ -1427,8 +1432,9 @@ void FDCT32x32_2D(const int16_t *input,
         out[11] = _mm_packs_epi32(out_11_6, out_11_7);
         out[27] = _mm_packs_epi32(out_27_6, out_27_7);
 #if DCT_HIGH_BIT_DEPTH
-        overflow = check_epi16_overflow_x8(out[5], out[21], out[13], out[29],
-                                           out[3], out[19], out[11], out[27]);
+        overflow = check_epi16_overflow_x8(&out[5], &out[21], &out[13],
+                                           &out[29], &out[3], &out[19],
+                                           &out[11], &out[27]);
         if (overflow) {
           if (pass == 0)
             HIGH_FDCT32x32_2D_C(input, output_org, stride);
@@ -1697,8 +1703,8 @@ void FDCT32x32_2D(const int16_t *input,
         v[6] = k_madd_epi32(u[2], k32_p16_p16);
         v[7] = k_madd_epi32(u[3], k32_p16_p16);
 #if DCT_HIGH_BIT_DEPTH
-        overflow = k_check_epi32_overflow_8(v[0], v[1], v[2], v[3], v[4], v[5],
-                                            v[6], v[7], &kZero);
+        overflow = k_check_epi32_overflow_8(&v[0], &v[1], &v[2], &v[3],
+                                            &v[4], &v[5], &v[6], &v[7], &kZero);
         if (overflow) {
           HIGH_FDCT32x32_2D_ROWS_C(intermediate, output_org);
           return;
@@ -1776,10 +1782,11 @@ void FDCT32x32_2D(const int16_t *input,
 
 #if DCT_HIGH_BIT_DEPTH
           overflow = k_check_epi32_overflow_32(
-              v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7],
-              v[8], v[9], v[10], v[11], v[12], v[13], v[14], v[15],
-              v[16], v[17], v[18], v[19], v[20], v[21], v[22], v[23],
-              v[24], v[25], v[26], v[27], v[28], v[29], v[30], v[31], &kZero);
+              &v[0], &v[1], &v[2], &v[3], &v[4], &v[5], &v[6], &v[7],
+              &v[8], &v[9], &v[10], &v[11], &v[12], &v[13], &v[14], &v[15],
+              &v[16], &v[17], &v[18], &v[19], &v[20], &v[21], &v[22], &v[23],
+              &v[24], &v[25], &v[26], &v[27], &v[28], &v[29], &v[30], &v[31],
+              &kZero);
           if (overflow) {
             HIGH_FDCT32x32_2D_ROWS_C(intermediate, output_org);
             return;
@@ -1883,8 +1890,9 @@ void FDCT32x32_2D(const int16_t *input,
 
 #if DCT_HIGH_BIT_DEPTH
           overflow = k_check_epi32_overflow_16(
-              v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7],
-              v[8], v[9], v[10], v[11], v[12], v[13], v[14], v[15], &kZero);
+              &v[0], &v[1], &v[2], &v[3], &v[4], &v[5], &v[6], &v[7],
+              &v[8], &v[9], &v[10], &v[11], &v[12], &v[13], &v[14], &v[15],
+              &kZero);
           if (overflow) {
             HIGH_FDCT32x32_2D_ROWS_C(intermediate, output_org);
             return;
@@ -1959,7 +1967,8 @@ void FDCT32x32_2D(const int16_t *input,
           out[ 8] = _mm_packs_epi32(u[4], u[5]);
           out[24] = _mm_packs_epi32(u[6], u[7]);
 #if DCT_HIGH_BIT_DEPTH
-          overflow = check_epi16_overflow_x4(out[0], out[16], out[8], out[24]);
+          overflow = check_epi16_overflow_x4(&out[0], &out[16],
+                                             &out[8], &out[24]);
           if (overflow) {
             HIGH_FDCT32x32_2D_ROWS_C(intermediate, output_org);
             return;
@@ -1999,8 +2008,9 @@ void FDCT32x32_2D(const int16_t *input,
 
 #if DCT_HIGH_BIT_DEPTH
           overflow = k_check_epi32_overflow_16(
-              v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7],
-              v[8], v[9], v[10], v[11], v[12], v[13], v[14], v[15], &kZero);
+              &v[0], &v[1], &v[2], &v[3], &v[4], &v[5], &v[6], &v[7],
+              &v[8], &v[9], &v[10], &v[11], &v[12], &v[13], &v[14], &v[15],
+              &kZero);
           if (overflow) {
             HIGH_FDCT32x32_2D_ROWS_C(intermediate, output_org);
             return;
@@ -2110,8 +2120,9 @@ void FDCT32x32_2D(const int16_t *input,
 
 #if DCT_HIGH_BIT_DEPTH
           overflow = k_check_epi32_overflow_16(
-              v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7],
-              v[8], v[9], v[10], v[11], v[12], v[13], v[14], v[15], &kZero);
+              &v[0], &v[1], &v[2], &v[3], &v[4], &v[5], &v[6], &v[7],
+              &v[8], &v[9], &v[10], &v[11], &v[12], &v[13], &v[14], &v[15],
+              &kZero);
           if (overflow) {
             HIGH_FDCT32x32_2D_ROWS_C(intermediate, output_org);
             return;
@@ -2185,7 +2196,8 @@ void FDCT32x32_2D(const int16_t *input,
           out[12] = _mm_packs_epi32(u[4], u[5]);
           out[28] = _mm_packs_epi32(u[6], u[7]);
 #if DCT_HIGH_BIT_DEPTH
-          overflow = check_epi16_overflow_x4(out[4], out[20], out[12], out[28]);
+          overflow = check_epi16_overflow_x4(&out[4], &out[20],
+                                             &out[12], &out[28]);
           if (overflow) {
             HIGH_FDCT32x32_2D_ROWS_C(intermediate, output_org);
             return;
@@ -2271,10 +2283,11 @@ void FDCT32x32_2D(const int16_t *input,
 
 #if DCT_HIGH_BIT_DEPTH
           overflow = k_check_epi32_overflow_32(
-              v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7],
-              v[8], v[9], v[10], v[11], v[12], v[13], v[14], v[15],
-              v[16], v[17], v[18], v[19], v[20], v[21], v[22], v[23],
-              v[24], v[25], v[26], v[27], v[28], v[29], v[30], v[31], &kZero);
+              &v[0], &v[1], &v[2], &v[3], &v[4], &v[5], &v[6], &v[7],
+              &v[8], &v[9], &v[10], &v[11], &v[12], &v[13], &v[14], &v[15],
+              &v[16], &v[17], &v[18], &v[19], &v[20], &v[21], &v[22], &v[23],
+              &v[24], &v[25], &v[26], &v[27], &v[28], &v[29], &v[30], &v[31],
+              &kZero);
           if (overflow) {
             HIGH_FDCT32x32_2D_ROWS_C(intermediate, output_org);
             return;
@@ -2394,10 +2407,11 @@ void FDCT32x32_2D(const int16_t *input,
 
 #if DCT_HIGH_BIT_DEPTH
           overflow = k_check_epi32_overflow_32(
-              v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7],
-              v[8], v[9], v[10], v[11], v[12], v[13], v[14], v[15],
-              v[16], v[17], v[18], v[19], v[20], v[21], v[22], v[23],
-              v[24], v[25], v[26], v[27], v[28], v[29], v[30], v[31], &kZero);
+              &v[0], &v[1], &v[2], &v[3], &v[4], &v[5], &v[6], &v[7],
+              &v[8], &v[9], &v[10], &v[11], &v[12], &v[13], &v[14], &v[15],
+              &v[16], &v[17], &v[18], &v[19], &v[20], &v[21], &v[22], &v[23],
+              &v[24], &v[25], &v[26], &v[27], &v[28], &v[29], &v[30], &v[31],
+              &kZero);
           if (overflow) {
             HIGH_FDCT32x32_2D_ROWS_C(intermediate, output_org);
             return;
@@ -2531,8 +2545,9 @@ void FDCT32x32_2D(const int16_t *input,
           out[14] = _mm_packs_epi32(u[12], u[13]);
           out[30] = _mm_packs_epi32(u[14], u[15]);
 #if DCT_HIGH_BIT_DEPTH
-          overflow = check_epi16_overflow_x8(out[2], out[18], out[10], out[26],
-                             out[6], out[22], out[14], out[30]);
+          overflow = check_epi16_overflow_x8(&out[2], &out[18], &out[10],
+                                             &out[26], &out[6], &out[22],
+                                             &out[14], &out[30]);
           if (overflow) {
             HIGH_FDCT32x32_2D_ROWS_C(intermediate, output_org);
             return;
@@ -2636,10 +2651,11 @@ void FDCT32x32_2D(const int16_t *input,
 
 #if DCT_HIGH_BIT_DEPTH
           overflow = k_check_epi32_overflow_32(
-              v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7],
-              v[8], v[9], v[10], v[11], v[12], v[13], v[14], v[15],
-              v[16], v[17], v[18], v[19], v[20], v[21], v[22], v[23],
-              v[24], v[25], v[26], v[27], v[28], v[29], v[30], v[31], &kZero);
+              &v[0], &v[1], &v[2], &v[3], &v[4], &v[5], &v[6], &v[7],
+              &v[8], &v[9], &v[10], &v[11], &v[12], &v[13], &v[14], &v[15],
+              &v[16], &v[17], &v[18], &v[19], &v[20], &v[21], &v[22], &v[23],
+              &v[24], &v[25], &v[26], &v[27], &v[28], &v[29], &v[30], &v[31],
+              &kZero);
           if (overflow) {
             HIGH_FDCT32x32_2D_ROWS_C(intermediate, output_org);
             return;
@@ -2773,8 +2789,9 @@ void FDCT32x32_2D(const int16_t *input,
           out[15] = _mm_packs_epi32(u[12], u[13]);
           out[31] = _mm_packs_epi32(u[14], u[15]);
 #if DCT_HIGH_BIT_DEPTH
-          overflow = check_epi16_overflow_x8(out[1], out[17], out[9], out[25],
-                                             out[7], out[23], out[15], out[31]);
+          overflow = check_epi16_overflow_x8(&out[1], &out[17], &out[9],
+                                             &out[25], &out[7], &out[23],
+                                             &out[15], &out[31]);
           if (overflow) {
             HIGH_FDCT32x32_2D_ROWS_C(intermediate, output_org);
             return;
@@ -2843,10 +2860,11 @@ void FDCT32x32_2D(const int16_t *input,
 
 #if DCT_HIGH_BIT_DEPTH
           overflow = k_check_epi32_overflow_32(
-              v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7],
-              v[8], v[9], v[10], v[11], v[12], v[13], v[14], v[15],
-              v[16], v[17], v[18], v[19], v[20], v[21], v[22], v[23],
-              v[24], v[25], v[26], v[27], v[28], v[29], v[30], v[31], &kZero);
+              &v[0], &v[1], &v[2], &v[3], &v[4], &v[5], &v[6], &v[7],
+              &v[8], &v[9], &v[10], &v[11], &v[12], &v[13], &v[14], &v[15],
+              &v[16], &v[17], &v[18], &v[19], &v[20], &v[21], &v[22], &v[23],
+              &v[24], &v[25], &v[26], &v[27], &v[28], &v[29], &v[30], &v[31],
+              &kZero);
           if (overflow) {
             HIGH_FDCT32x32_2D_ROWS_C(intermediate, output_org);
             return;
@@ -2980,8 +2998,9 @@ void FDCT32x32_2D(const int16_t *input,
           out[11] = _mm_packs_epi32(u[12], u[13]);
           out[27] = _mm_packs_epi32(u[14], u[15]);
 #if DCT_HIGH_BIT_DEPTH
-          overflow = check_epi16_overflow_x8(out[5], out[21], out[13], out[29],
-                                             out[3], out[19], out[11], out[27]);
+          overflow = check_epi16_overflow_x8(&out[5], &out[21], &out[13],
+                                             &out[29], &out[3], &out[19],
+                                             &out[11], &out[27]);
           if (overflow) {
             HIGH_FDCT32x32_2D_ROWS_C(intermediate, output_org);
             return;
@@ -3107,14 +3126,14 @@ void FDCT32x32_2D(const int16_t *input,
             // Process next 8x8
             output0 += 8;
           } else {
-            storeu_output(tr2_0, (output1 + 0 * 32));
-            storeu_output(tr2_1, (output1 + 1 * 32));
-            storeu_output(tr2_2, (output1 + 2 * 32));
-            storeu_output(tr2_3, (output1 + 3 * 32));
-            storeu_output(tr2_4, (output1 + 4 * 32));
-            storeu_output(tr2_5, (output1 + 5 * 32));
-            storeu_output(tr2_6, (output1 + 6 * 32));
-            storeu_output(tr2_7, (output1 + 7 * 32));
+            storeu_output(&tr2_0, (output1 + 0 * 32));
+            storeu_output(&tr2_1, (output1 + 1 * 32));
+            storeu_output(&tr2_2, (output1 + 2 * 32));
+            storeu_output(&tr2_3, (output1 + 3 * 32));
+            storeu_output(&tr2_4, (output1 + 4 * 32));
+            storeu_output(&tr2_5, (output1 + 5 * 32));
+            storeu_output(&tr2_6, (output1 + 6 * 32));
+            storeu_output(&tr2_7, (output1 + 7 * 32));
             // Process next 8x8
             output1 += 8;
           }
