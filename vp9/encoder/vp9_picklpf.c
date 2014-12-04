@@ -153,7 +153,7 @@ void vp9_pick_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
     const int q = vp9_ac_quant(cm->base_qindex, 0, cm->bit_depth);
     // These values were determined by linear fitting the result of the
     // searched level, filt_guess = q * 0.316206 + 3.87252
-#if CONFIG_VP9_HIGHDEPTH
+#if CONFIG_VP9_HIGHBITDEPTH
     int filt_guess;
     switch (cm->bit_depth) {
       case VPX_BITS_8:
