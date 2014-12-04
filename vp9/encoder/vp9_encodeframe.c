@@ -2662,6 +2662,15 @@ static TX_MODE select_tx_mode(const VP9_COMP *cpi, MACROBLOCKD *const xd) {
     return cpi->common.tx_mode;
 }
 
+static void hybrid_intra_mode_search(VP9_COMP *cpi, MACROBLOCK *const x,
+                                     RD_COST *rd_cost, BLOCK_SIZE bsize,
+                                     PICK_MODE_CONTEXT *ctx) {
+  if (bsize < BLOCK_16X16)
+    vp9_rd_pick_intra_mode_sb(cpi, x, rd_cost, bsize, ctx, INT64_MAX);
+  else
+    vp9_pick_intra_mode(cpi, x, rd_cost, bsize, ctx);
+}
+
 static void nonrd_pick_sb_modes(VP9_COMP *cpi,
                                 TileDataEnc *tile_data, MACROBLOCK *const x,
                                 int mi_row, int mi_col, RD_COST *rd_cost,
@@ -2679,7 +2688,7 @@ static void nonrd_pick_sb_modes(VP9_COMP *cpi,
       x->rdmult = vp9_cyclic_refresh_get_rdmult(cpi->cyclic_refresh);
 
   if (cm->frame_type == KEY_FRAME)
-    vp9_pick_intra_mode(cpi, x, rd_cost, bsize, ctx);
+    hybrid_intra_mode_search(cpi, x, rd_cost, bsize, ctx);
   else if (vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP))
     set_mode_info_seg_skip(x, cm->tx_mode, rd_cost, bsize);
   else
@@ -3603,6 +3612,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
       cpi->sf.partition_search_type == VAR_BASED_PARTITION) {
     cm->tx_mode = ALLOW_16X16;
   }
+
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (cm->use_highbitdepth)
