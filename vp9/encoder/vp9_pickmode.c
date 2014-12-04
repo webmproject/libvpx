@@ -852,9 +852,20 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     if (reuse_inter_pred && best_pred != NULL) {
       if (best_pred->data == orig_dst.buf) {
         this_mode_pred = &tmp[get_pred_buffer(tmp, 3)];
+#if CONFIG_VP9_HIGHBITDEPTH
+        if (cm->use_highbitdepth)
+          vp9_highbd_convolve_copy(best_pred->data, best_pred->stride,
+                                   this_mode_pred->data, this_mode_pred->stride,
+                                   NULL, 0, NULL, 0, bw, bh, xd->bd);
+        else
+          vp9_convolve_copy(best_pred->data, best_pred->stride,
+                          this_mode_pred->data, this_mode_pred->stride,
+                          NULL, 0, NULL, 0, bw, bh);
+#else
         vp9_convolve_copy(best_pred->data, best_pred->stride,
                           this_mode_pred->data, this_mode_pred->stride,
                           NULL, 0, NULL, 0, bw, bh);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
         best_pred = this_mode_pred;
       }
     }
@@ -910,7 +921,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       vp9_convolve_copy(best_pred->data, best_pred->stride,
                         pd->dst.buf, pd->dst.stride, NULL, 0,
                         NULL, 0, bw, bh);
-#endif
+#endif  // CONFIG_VP9_HIGHBITDEPTH
     }
   }
 
