@@ -53,6 +53,9 @@ void vp9_cyclic_refresh_update__map(struct VP9_COMP *const cpi);
 // Update the actual number of blocks that were applied the segment delta q.
 void vp9_cyclic_refresh_update_actual_count(struct VP9_COMP *const cpi);
 
+// Set/update global/frame level refresh parameters.
+void vp9_cyclic_refresh_update_parameters(struct VP9_COMP *const cpi);
+
 // Setup cyclic background refresh: set delta q and segmentation map.
 void vp9_cyclic_refresh_setup(struct VP9_COMP *const cpi);
 

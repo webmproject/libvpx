@@ -1483,6 +1483,12 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
       target = calc_pframe_target_size_one_pass_cbr(cpi);
     }
   }
+
+  // Any update/change of global cyclic refresh parameters (amount/delta-qp)
+  // should be done here, before the frame qp is selected.
+  if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ)
+    vp9_cyclic_refresh_update_parameters(cpi);
+
   vp9_rc_set_frame_target(cpi, target);
   rc->frames_till_gf_update_due = INT_MAX;
   rc->baseline_gf_interval = INT_MAX;
@@ -1515,6 +1521,11 @@ void vp9_rc_get_one_pass_cbr_params(VP9_COMP *cpi) {
     cpi->refresh_golden_frame = 1;
     rc->gfu_boost = DEFAULT_GF_BOOST;
   }
+
+  // Any update/change of global cyclic refresh parameters (amount/delta-qp)
+  // should be done here, before the frame qp is selected.
+  if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ)
+    vp9_cyclic_refresh_update_parameters(cpi);
 
   if (cm->frame_type == KEY_FRAME)
     target = calc_iframe_target_size_one_pass_cbr(cpi);
