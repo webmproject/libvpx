@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//NSM\u003d",
+        "filename": "configure",
+        "patchSetId": 4
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-12-04T23:02:47Z",
+      "side": 1,
+      "message": "don\u0027t think we need to add this feature to experiment.",
+      "revId": "71b42f22cde4f3a9c71d6cf1aa5858ef779f3ae8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//NSA\u003d",
+        "filename": "vp9/common/vp9_mfqe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-12-04T23:02:47Z",
+      "side": 1,
+      "message": "add vp9_mfqe.h file and declare the functions there, with comments explaining their functionality.",
+      "revId": "71b42f22cde4f3a9c71d6cf1aa5858ef779f3ae8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//NSU\u003d",
+        "filename": "vp9/common/vp9_mfqe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-12-04T23:02:47Z",
+      "side": 1,
+      "message": "use cm-\u003emi_rows/cm-\u003emi_cols",
+      "revId": "71b42f22cde4f3a9c71d6cf1aa5858ef779f3ae8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//NSQ\u003d",
+        "filename": "vp9/common/vp9_postproc.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 619,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-12-04T23:02:47Z",
+      "side": 1,
+      "message": "you can remove the CONFIG_VP9_MFQE.\nThe mfqe feature is already under the flag VP9D_MFQE, and we have the CONFIG_VP9_POSTPROC.",
+      "revId": "71b42f22cde4f3a9c71d6cf1aa5858ef779f3ae8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
