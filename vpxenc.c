@@ -354,13 +354,16 @@ static const arg_def_t max_inter_rate_pct = ARG_DEF(
 static const arg_def_t gf_cbr_boost_pct = ARG_DEF(
     NULL, "gf-cbr-boost", 1, "Boost for Golden Frame in CBR mode (pct)");
 
+static const arg_def_t screen_content_mode = ARG_DEF(NULL, "screen-content-mode", 1,
+                                                     "Screen content mode");
+
 #if CONFIG_VP8_ENCODER
 static const arg_def_t token_parts = ARG_DEF(
     NULL, "token-parts", 1, "Number of token partitions to use, log2");
 static const arg_def_t *vp8_args[] = {
   &cpu_used, &auto_altref, &noise_sens, &sharpness, &static_thresh,
   &token_parts, &arnr_maxframes, &arnr_strength, &arnr_type,
-  &tune_ssim, &cq_level, &max_intra_rate_pct,
+  &tune_ssim, &cq_level, &max_intra_rate_pct, &screen_content_mode,
   NULL
 };
 static const int vp8_arg_ctrl_map[] = {
@@ -369,6 +372,7 @@ static const int vp8_arg_ctrl_map[] = {
   VP8E_SET_TOKEN_PARTITIONS,
   VP8E_SET_ARNR_MAXFRAMES, VP8E_SET_ARNR_STRENGTH, VP8E_SET_ARNR_TYPE,
   VP8E_SET_TUNING, VP8E_SET_CQ_LEVEL, VP8E_SET_MAX_INTRA_BITRATE_PCT,
+  VP8E_SET_SCREEN_CONTENT_MODE,
   0
 };
 #endif

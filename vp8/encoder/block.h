@@ -125,6 +125,8 @@ typedef struct macroblock
 
     int optimize;
     int q_index;
+    int is_skin;
+    int denoise_zeromv;
 
 #if CONFIG_TEMPORAL_DENOISING
     int increase_denoising;
@@ -161,6 +163,8 @@ typedef struct macroblock
     void (*short_walsh4x4)(short *input, short *output, int pitch);
     void (*quantize_b)(BLOCK *b, BLOCKD *d);
 
+    unsigned int mbs_zero_last_dot_suppress;
+    int zero_last_dot_suppress;
 } MACROBLOCK;
 
 

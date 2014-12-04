@@ -193,6 +193,7 @@ enum vp8e_enc_control_id {
    *
    */
   VP8E_SET_MAX_INTRA_BITRATE_PCT,
+  VP8E_SET_FRAME_FLAGS,           /**< control function to set reference and update frame flags */
 
   /*!\brief Max data rate for Inter frames
    *
@@ -221,6 +222,17 @@ enum vp8e_enc_control_id {
    *
    */
   VP8E_SET_GF_CBR_BOOST_PCT,
+
+  /*!\brief Codec control function to set the temporal layer id
+   *
+   * For temporal scalability: this control allows the application to set the
+   * layer id for each frame to be encoded. Note that this control must be set
+   * for every frame prior to encoding. The usage of this control function
+   * supersedes the internal temporal pattern counter, which is now deprecated.
+   */
+  VP8E_SET_TEMPORAL_LAYER_ID,
+
+  VP8E_SET_SCREEN_CONTENT_MODE,  /**<control function to set encoder screen content mode */
 
   /* TODO(jkoleszar): Move to vp9cx.h */
   VP9E_SET_LOSSLESS,
@@ -362,6 +374,8 @@ VPX_CTRL_USE_TYPE_DEPRECATED(VP8E_UPD_ENTROPY,            int)
 VPX_CTRL_USE_TYPE_DEPRECATED(VP8E_UPD_REFERENCE,          int)
 VPX_CTRL_USE_TYPE_DEPRECATED(VP8E_USE_REFERENCE,          int)
 
+VPX_CTRL_USE_TYPE(VP8E_SET_FRAME_FLAGS,        int)
+VPX_CTRL_USE_TYPE(VP8E_SET_TEMPORAL_LAYER_ID,  int)
 VPX_CTRL_USE_TYPE(VP8E_SET_ROI_MAP,            vpx_roi_map_t *)
 VPX_CTRL_USE_TYPE(VP8E_SET_ACTIVEMAP,          vpx_active_map_t *)
 VPX_CTRL_USE_TYPE(VP8E_SET_SCALEMODE,          vpx_scaling_mode_t *)
@@ -395,6 +409,9 @@ VPX_CTRL_USE_TYPE(VP8E_SET_MAX_INTRA_BITRATE_PCT, unsigned int)
 VPX_CTRL_USE_TYPE(VP8E_SET_MAX_INTER_BITRATE_PCT, unsigned int)
 
 VPX_CTRL_USE_TYPE(VP8E_SET_GF_CBR_BOOST_PCT, unsigned int)
+
+VPX_CTRL_USE_TYPE(VP8E_SET_SCREEN_CONTENT_MODE, unsigned int)
+
 VPX_CTRL_USE_TYPE(VP9E_SET_LOSSLESS, unsigned int)
 
 VPX_CTRL_USE_TYPE(VP9E_SET_FRAME_PARALLEL_DECODING, unsigned int)

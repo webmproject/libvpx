@@ -522,7 +522,8 @@ void encode_mb_row(VP8_COMP *cpi,
             }
 
 #endif
-            // Keep track of how many (consecutive) times a block is coded
+
+            // Keep track of how many (consecutive) times a  block is coded
             // as ZEROMV_LASTREF, for base layer frames.
             // Reset to 0 if its coded as anything else.
             if (cpi->current_layer == 0) {
@@ -531,9 +532,14 @@ void encode_mb_row(VP8_COMP *cpi,
                 // Increment, check for wrap-around.
                 if (cpi->consec_zero_last[map_index+mb_col] < 255)
                   cpi->consec_zero_last[map_index+mb_col] += 1;
+                if (cpi->consec_zero_last_mvbias[map_index+mb_col] < 255)
+                  cpi->consec_zero_last_mvbias[map_index+mb_col] += 1;
               } else {
                 cpi->consec_zero_last[map_index+mb_col] = 0;
+                cpi->consec_zero_last_mvbias[map_index+mb_col] = 0;
               }
+              if (x->zero_last_dot_suppress)
+                cpi->consec_zero_last_mvbias[map_index+mb_col] = 0;
             }
 
             /* Special case code for cyclic refresh

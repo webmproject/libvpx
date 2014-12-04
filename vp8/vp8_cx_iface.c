@@ -37,6 +37,7 @@ struct vp8_extracfg
     vp8e_tuning                 tuning;
     unsigned int                cq_level;         /* constrained quality level */
     unsigned int                rc_max_intra_bitrate_pct;
+    unsigned int                screen_content_mode;
 
 };
 
@@ -62,6 +63,7 @@ static struct vp8_extracfg default_extracfg = {
   0,                          /* tuning*/
   10,                         /* cq_level */
   0,                          /* rc_max_intra_bitrate_pct */
+  0,                          /* screen_content_mode */
 };
 
 struct vpx_codec_alg_priv
@@ -79,6 +81,7 @@ struct vpx_codec_alg_priv
     /* pkt_list size depends on the maximum number of lagged frames allowed. */
     vpx_codec_pkt_list_decl(64) pkt_list;
     unsigned int                fixed_kf_cntr;
+    vpx_enc_frame_flags_t   control_frame_flags;
 };
 
 
@@ -194,6 +197,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
     RANGE_CHECK_HI(vp8_cfg, arnr_strength,   6);
     RANGE_CHECK(vp8_cfg, arnr_type,       1, 3);
     RANGE_CHECK(vp8_cfg, cq_level, 0, 63);
+    RANGE_CHECK_BOOL(vp8_cfg, screen_content_mode);
     if (finalize && (cfg->rc_end_usage == VPX_CQ || cfg->rc_end_usage == VPX_Q))
         RANGE_CHECK(vp8_cfg, cq_level,
                     cfg->rc_min_quantizer, cfg->rc_max_quantizer);
@@ -231,7 +235,8 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
         RANGE_CHECK_HI(cfg, ts_periodicity, 16);
 
         for (i=1; i<cfg->ts_number_layers; i++)
-            if (cfg->ts_target_bitrate[i] <= cfg->ts_target_bitrate[i-1])
+            if (cfg->ts_target_bitrate[i] <= cfg->ts_target_bitrate[i-1] && 
+                cfg->rc_target_bitrate > 0)
                 ERROR("ts_target_bitrate entries are not strictly increasing");
 
         RANGE_CHECK(cfg, ts_rate_decimator[cfg->ts_number_layers-1], 1, 1);
@@ -396,6 +401,8 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
     oxcf->arnr_type              = vp8_cfg.arnr_type;
 
     oxcf->tuning                 = vp8_cfg.tuning;
+
+    oxcf->screen_content_mode    = vp8_cfg.screen_content_mode;
 
     /*
         printf("Current VP8 Settings: \n");
@@ -586,6 +593,15 @@ static vpx_codec_err_t set_rc_max_intra_bitrate_pct(vpx_codec_alg_priv_t *ctx,
   return update_extracfg(ctx, &extra_cfg);
 }
 
+static vpx_codec_err_t set_screen_content_mode(vpx_codec_alg_priv_t *ctx,
+                                               va_list args)
+{
+  struct vp8_extracfg extra_cfg = ctx->vp8_cfg;
+  extra_cfg.screen_content_mode =
+      CAST(VP8E_SET_SCREEN_CONTENT_MODE, args);
+  return update_extracfg(ctx, &extra_cfg);
+}
+
 static vpx_codec_err_t vp8e_mr_alloc_mem(const vpx_codec_enc_cfg_t *cfg,
                                         void **mem_loc)
 {
@@ -768,27 +784,9 @@ static void pick_quickcompress_mode(vpx_codec_alg_priv_t  *ctx,
     }
 }
 
-
-static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
-                                   const vpx_image_t     *img,
-                                   vpx_codec_pts_t        pts,
-                                   unsigned long          duration,
-                                   vpx_enc_frame_flags_t  flags,
-                                   unsigned long          deadline)
+static vpx_codec_err_t set_reference_and_update(vpx_codec_alg_priv_t *ctx,
+                                                int flags)
 {
-    vpx_codec_err_t res = VPX_CODEC_OK;
-
-    if (!ctx->cfg.rc_target_bitrate)
-        return res;
-
-    if (img)
-        res = validate_img(ctx, img);
-
-    if (!res)
-        res = validate_config(ctx, &ctx->cfg, &ctx->vp8_cfg, 1);
-
-    pick_quickcompress_mode(ctx, duration, deadline);
-    vpx_codec_pkt_list_init(&ctx->pkt_list);
 
     /* Handle Flags */
     if (((flags & VP8_EFLAG_NO_UPD_GF) && (flags & VP8_EFLAG_FORCE_GF))
@@ -837,6 +835,42 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
     {
         vp8_update_entropy(ctx->cpi, 0);
     }
+
+    return VPX_CODEC_OK;
+}
+
+static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
+                                   const vpx_image_t     *img,
+                                   vpx_codec_pts_t        pts,
+                                   unsigned long          duration,
+                                   vpx_enc_frame_flags_t  flags,
+                                   unsigned long          deadline)
+{
+    vpx_codec_err_t res = VPX_CODEC_OK;
+
+    if (!ctx->cfg.rc_target_bitrate)
+        return res;
+
+    if (!ctx->cfg.rc_target_bitrate)
+        return res;
+
+    if (img)
+        res = validate_img(ctx, img);
+
+    if (!res)
+        res = validate_config(ctx, &ctx->cfg, &ctx->vp8_cfg, 1);
+
+    pick_quickcompress_mode(ctx, duration, deadline);
+    vpx_codec_pkt_list_init(&ctx->pkt_list);
+
+    // If no flags are set in the encode call, then use the frame flags as
+    // defined via the control function: vp8e_set_frame_flags.
+    if (!flags) {
+        flags = ctx->control_frame_flags;
+    }
+    ctx->control_frame_flags = 0;
+
+    res = set_reference_and_update(ctx, flags);
 
     /* Handle fixed keyframe intervals */
     if (ctx->cfg.kf_mode == VPX_KF_AUTO
@@ -1140,6 +1174,25 @@ static vpx_codec_err_t vp8e_use_reference(vpx_codec_alg_priv_t *ctx,
     return VPX_CODEC_OK;
 }
 
+static vpx_codec_err_t vp8e_set_frame_flags(vpx_codec_alg_priv_t *ctx,
+                                            va_list args)
+{
+    int frame_flags = va_arg(args, int);
+    ctx->control_frame_flags = frame_flags;
+    return set_reference_and_update(ctx, frame_flags);
+}
+
+static vpx_codec_err_t vp8e_set_temporal_layer_id(vpx_codec_alg_priv_t *ctx,
+                                                  va_list args)
+{
+    int layer_id = va_arg(args, int);
+    if (layer_id < 0 || layer_id >= (int)ctx->cfg.ts_number_layers) {
+      return VPX_CODEC_INVALID_PARAM;
+    }
+    ctx->cpi->temporal_layer_id = layer_id;
+    return VPX_CODEC_OK;
+}
+
 static vpx_codec_err_t vp8e_set_roi_map(vpx_codec_alg_priv_t *ctx,
                                         va_list args)
 {
@@ -1214,6 +1267,8 @@ static vpx_codec_ctrl_fn_map_t vp8e_ctf_maps[] =
     {VP8E_UPD_ENTROPY,                  vp8e_update_entropy},
     {VP8E_UPD_REFERENCE,                vp8e_update_reference},
     {VP8E_USE_REFERENCE,                vp8e_use_reference},
+    {VP8E_SET_FRAME_FLAGS,              vp8e_set_frame_flags},
+    {VP8E_SET_TEMPORAL_LAYER_ID,        vp8e_set_temporal_layer_id},
     {VP8E_SET_ROI_MAP,                  vp8e_set_roi_map},
     {VP8E_SET_ACTIVEMAP,                vp8e_set_activemap},
     {VP8E_SET_SCALEMODE,                vp8e_set_scalemode},
@@ -1231,6 +1286,7 @@ static vpx_codec_ctrl_fn_map_t vp8e_ctf_maps[] =
     {VP8E_SET_TUNING,                   set_tuning},
     {VP8E_SET_CQ_LEVEL,                 set_cq_level},
     {VP8E_SET_MAX_INTRA_BITRATE_PCT,    set_rc_max_intra_bitrate_pct},
+    {VP8E_SET_SCREEN_CONTENT_MODE,      set_screen_content_mode},
     { -1, NULL},
 };
 
