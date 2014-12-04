@@ -21,6 +21,7 @@
 #include "./vpx_config.h"
 #include "./vp9_rtcd.h"
 #include "vp9/common/vp9_entropy.h"
+#include "vp9/common/vp9_loopfilter.h"
 #include "vpx/vpx_integer.h"
 
 using libvpx_test::ACMRandom;
@@ -159,12 +160,12 @@ TEST_P(Loop8Test6Param, OperationCheck) {
   int first_failure = -1;
   for (int i = 0; i < count_test_block; ++i) {
     int err_count = 0;
-    uint8_t tmp = rnd.Rand8();
+    uint8_t tmp = static_cast<uint8_t>(rnd(3 * MAX_LOOP_FILTER + 4));
     DECLARE_ALIGNED(16, const uint8_t, blimit[16]) = {
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp,
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp
     };
-    tmp = rnd.Rand8();
+    tmp = static_cast<uint8_t>(rnd(MAX_LOOP_FILTER));
     DECLARE_ALIGNED(16, const uint8_t, limit[16])  = {
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp,
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp
@@ -243,14 +244,27 @@ TEST_P(Loop8Test6Param, ValueCheck) {
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   int err_count_total = 0;
   int first_failure = -1;
+
+  // NOTE: The code in vp9_loopfilter.c:update_sharpness computes mblim as a
+  // function of sharpness_lvl and the loopfilter lvl as:
+  // block_inside_limit = lvl >> ((sharpness_lvl > 0) + (sharpness_lvl > 4));
+  // ...
+  // vpx_memset(lfi->lfthr[lvl].mblim, (2 * (lvl + 2) + block_inside_limit),
+  //            SIMD_WIDTH);
+  // This means that the largest value for mblim will occur when sharpness_lvl
+  // is equal to 0, and lvl is equal to its greatest value (MAX_LOOP_FILTER).
+  // In this case block_inside_limit will be equal to MAX_LOOP_FILTER and
+  // therefore mblim will be equal to (2 * (lvl + 2) + block_inside_limit) =
+  // 2 * (MAX_LOOP_FILTER + 2) + MAX_LOOP_FILTER = 3 * MAX_LOOP_FILTER + 4
+
   for (int i = 0; i < count_test_block; ++i) {
     int err_count = 0;
-    uint8_t tmp = rnd.Rand8();
+    uint8_t tmp = static_cast<uint8_t>(rnd(3 * MAX_LOOP_FILTER + 4));
     DECLARE_ALIGNED(16, const uint8_t, blimit[16]) = {
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp,
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp
     };
-    tmp = rnd.Rand8();
+    tmp = static_cast<uint8_t>(rnd(MAX_LOOP_FILTER));
     DECLARE_ALIGNED(16, const uint8_t, limit[16])  = {
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp,
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp
@@ -304,12 +318,12 @@ TEST_P(Loop8Test9Param, OperationCheck) {
   int first_failure = -1;
   for (int i = 0; i < count_test_block; ++i) {
     int err_count = 0;
-    uint8_t tmp = rnd.Rand8();
+    uint8_t tmp = static_cast<uint8_t>(rnd(3 * MAX_LOOP_FILTER + 4));
     DECLARE_ALIGNED(16, const uint8_t, blimit0[16]) = {
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp,
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp
     };
-    tmp = rnd.Rand8();
+    tmp = static_cast<uint8_t>(rnd(MAX_LOOP_FILTER));
     DECLARE_ALIGNED(16, const uint8_t, limit0[16])  = {
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp,
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp
@@ -319,12 +333,12 @@ TEST_P(Loop8Test9Param, OperationCheck) {
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp,
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp
     };
-    tmp = rnd.Rand8();
+    tmp = static_cast<uint8_t>(rnd(3 * MAX_LOOP_FILTER + 4));
     DECLARE_ALIGNED(16, const uint8_t, blimit1[16]) = {
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp,
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp
     };
-    tmp = rnd.Rand8();
+    tmp = static_cast<uint8_t>(rnd(MAX_LOOP_FILTER));
     DECLARE_ALIGNED(16, const uint8_t, limit1[16])  = {
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp,
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp
@@ -406,12 +420,12 @@ TEST_P(Loop8Test9Param, ValueCheck) {
   int first_failure = -1;
   for (int i = 0; i < count_test_block; ++i) {
     int err_count = 0;
-    uint8_t tmp = rnd.Rand8();
+    uint8_t tmp = static_cast<uint8_t>(rnd(3 * MAX_LOOP_FILTER + 4));
     DECLARE_ALIGNED(16, const uint8_t, blimit0[16]) = {
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp,
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp
     };
-    tmp = rnd.Rand8();
+    tmp = static_cast<uint8_t>(rnd(MAX_LOOP_FILTER));
     DECLARE_ALIGNED(16, const uint8_t, limit0[16])  = {
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp,
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp
@@ -421,12 +435,12 @@ TEST_P(Loop8Test9Param, ValueCheck) {
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp,
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp
     };
-    tmp = rnd.Rand8();
+    tmp = static_cast<uint8_t>(rnd(3 * MAX_LOOP_FILTER + 4));
     DECLARE_ALIGNED(16, const uint8_t, blimit1[16]) = {
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp,
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp
     };
-    tmp = rnd.Rand8();
+    tmp = static_cast<uint8_t>(rnd(MAX_LOOP_FILTER));
     DECLARE_ALIGNED(16, const uint8_t, limit1[16])  = {
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp,
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp
@@ -519,10 +533,8 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&wrapper_vertical_16_dual_sse2,
                    &wrapper_vertical_16_dual_c, 12)));
 #else
-// TODO(peter.derivaz): re-enable after these handle the expanded range [0, 255]
-// returned from Rand8().
 INSTANTIATE_TEST_CASE_P(
-    DISABLED_SSE2, Loop8Test6Param,
+    SSE2, Loop8Test6Param,
     ::testing::Values(
         make_tuple(&vp9_lpf_horizontal_8_sse2, &vp9_lpf_horizontal_8_c, 8),
         make_tuple(&vp9_lpf_horizontal_16_sse2, &vp9_lpf_horizontal_16_c, 8),
@@ -532,10 +544,8 @@ INSTANTIATE_TEST_CASE_P(
 #endif
 
 #if HAVE_AVX2 && (!CONFIG_VP9_HIGHBITDEPTH)
-// TODO(peter.derivaz): re-enable after these handle the expanded range [0, 255]
-// returned from Rand8().
 INSTANTIATE_TEST_CASE_P(
-    DISABLED_AVX2, Loop8Test6Param,
+    AVX2, Loop8Test6Param,
     ::testing::Values(
         make_tuple(&vp9_lpf_horizontal_16_avx2, &vp9_lpf_horizontal_16_c, 8)));
 #endif
@@ -570,10 +580,8 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_highbd_lpf_vertical_8_dual_sse2,
                    &vp9_highbd_lpf_vertical_8_dual_c, 12)));
 #else
-// TODO(peter.derivaz): re-enable after these handle the expanded range [0, 255]
-// returned from Rand8().
 INSTANTIATE_TEST_CASE_P(
-    DISABLED_SSE2, Loop8Test9Param,
+    SSE2, Loop8Test9Param,
     ::testing::Values(
         make_tuple(&vp9_lpf_horizontal_4_dual_sse2,
                    &vp9_lpf_horizontal_4_dual_c, 8),
