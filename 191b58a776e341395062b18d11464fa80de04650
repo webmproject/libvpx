@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//NUA\u003d",
+        "filename": "test/codec_factory.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-12-04T22:12:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Opg\u003d",
+      "revId": "191b58a776e341395062b18d11464fa80de04650",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//OpY\u003d",
         "filename": "test/decode_test_driver.h",
         "patchSetId": 6
@@ -30,6 +48,24 @@
       "writtenOn": "2014-12-02T02:20:36Z",
       "side": 1,
       "message": "cfg_(0) will 0 initialize and can be done in the init list",
+      "revId": "191b58a776e341395062b18d11464fa80de04650",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//NTg\u003d",
+        "filename": "test/decode_test_driver.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-12-04T22:12:46Z",
+      "side": 1,
+      "message": "Seems not working.  Get compile error as this is a struct but not int.",
+      "parentUuid": "AAAAdn//OpY\u003d",
       "revId": "191b58a776e341395062b18d11464fa80de04650",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//NTs\u003d",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 211,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-12-04T22:12:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Nxo\u003d",
+      "revId": "191b58a776e341395062b18d11464fa80de04650",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Nxk\u003d",
         "filename": "test/encode_test_driver.cc",
         "patchSetId": 6
@@ -64,6 +118,24 @@
       "writtenOn": "2014-12-02T02:20:36Z",
       "side": 1,
       "message": "delete this line",
+      "revId": "191b58a776e341395062b18d11464fa80de04650",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//NTo\u003d",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-12-04T22:12:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Nxk\u003d",
       "revId": "191b58a776e341395062b18d11464fa80de04650",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//NTk\u003d",
+        "filename": "test/encode_test_driver.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-12-04T22:12:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Nxg\u003d",
+      "revId": "191b58a776e341395062b18d11464fa80de04650",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Nxc\u003d",
         "filename": "test/vp8_fragments_test.cc",
         "patchSetId": 6
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//NTc\u003d",
+        "filename": "test/vp8_fragments_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-12-04T22:12:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Nxc\u003d",
+      "revId": "191b58a776e341395062b18d11464fa80de04650",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//NxY\u003d",
         "filename": "test/vp8_fragments_test.cc",
         "patchSetId": 6
@@ -115,6 +223,24 @@
       "writtenOn": "2014-12-02T02:20:36Z",
       "side": 1,
       "message": "this member and the overridden HandleDecodeResult don\u0027t seem necessary.",
+      "revId": "191b58a776e341395062b18d11464fa80de04650",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//NTY\u003d",
+        "filename": "test/vp8_fragments_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2014-12-04T22:12:46Z",
+      "side": 1,
+      "message": "Without them, the test could not check the decode error which is necessary.",
+      "parentUuid": "AAAAdn//NxY\u003d",
       "revId": "191b58a776e341395062b18d11464fa80de04650",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
