@@ -3217,11 +3217,8 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   vp9_clear_system_state();
 
 #if CONFIG_INTERNAL_STATS
-  {
-    int i;
-    for (i = 0; i < MAX_MODES; ++i)
-      cpi->mode_chosen_counts[i] = 0;
-  }
+  vpx_memset(cpi->mode_chosen_counts, 0,
+             MAX_MODES * sizeof(*cpi->mode_chosen_counts));
 #endif
 
   if (cpi->sf.recode_loop == DISALLOW_RECODE) {
