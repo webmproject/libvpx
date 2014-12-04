@@ -652,10 +652,6 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
     return;
   }
 
-#if CONFIG_VP9_HIGHBITDEPTH
-  if (!x->skip_recode)
-    vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
-#else
   if (!x->skip_recode) {
     if (x->quant_fp) {
       // Encoding process for rtc mode
@@ -687,7 +683,6 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
       }
     }
   }
-#endif
 
   if (x->optimize && (!x->skip_recode || !x->skip_optimize)) {
     const int ctx = combine_entropy_contexts(*a, *l);
