@@ -499,7 +499,6 @@ static void choose_partitioning(VP9_COMP *cpi,
   const struct scale_factors *const sf = &cm->frame_refs[LAST_FRAME - 1].sf;
 
   vp9_clear_system_state();
-  vp9_zero(vt);
   set_offsets(cpi, tile, x, mi_row, mi_col, BLOCK_64X64);
 
   if (xd->mb_to_right_edge < 0)
