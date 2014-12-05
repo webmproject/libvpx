@@ -192,6 +192,10 @@ typedef struct macroblockd {
   int mi_stride;
 
   MODE_INFO *mi;
+  MODE_INFO *left_mi;
+  MODE_INFO *above_mi;
+  MB_MODE_INFO *left_mbmi;
+  MB_MODE_INFO *above_mbmi;
 
   int up_available;
   int left_available;

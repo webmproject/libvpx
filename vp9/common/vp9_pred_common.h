@@ -18,20 +18,12 @@
 extern "C" {
 #endif
 
-static INLINE const MODE_INFO *get_above_mi(const MACROBLOCKD *const xd) {
-  return xd->up_available ? xd->mi[-xd->mi_stride].src_mi : NULL;
-}
-
-static INLINE const MODE_INFO *get_left_mi(const MACROBLOCKD *const xd) {
-  return xd->left_available ? xd->mi[-1].src_mi : NULL;
-}
-
 int vp9_get_segment_id(const VP9_COMMON *cm, const uint8_t *segment_ids,
                        BLOCK_SIZE bsize, int mi_row, int mi_col);
 
 static INLINE int vp9_get_pred_context_seg_id(const MACROBLOCKD *xd) {
-  const MODE_INFO *const above_mi = get_above_mi(xd);
-  const MODE_INFO *const left_mi = get_left_mi(xd);
+  const MODE_INFO *const above_mi = xd->above_mi;
+  const MODE_INFO *const left_mi = xd->left_mi;
   const int above_sip = (above_mi != NULL) ?
                         above_mi->mbmi.seg_id_predicted : 0;
   const int left_sip = (left_mi != NULL) ? left_mi->mbmi.seg_id_predicted : 0;
@@ -45,8 +37,8 @@ static INLINE vp9_prob vp9_get_pred_prob_seg_id(const struct segmentation *seg,
 }
 
 static INLINE int vp9_get_skip_context(const MACROBLOCKD *xd) {
-  const MODE_INFO *const above_mi = get_above_mi(xd);
-  const MODE_INFO *const left_mi = get_left_mi(xd);
+  const MODE_INFO *const above_mi = xd->above_mi;
+  const MODE_INFO *const left_mi = xd->left_mi;
   const int above_skip = (above_mi != NULL) ? above_mi->mbmi.skip : 0;
   const int left_skip = (left_mi != NULL) ? left_mi->mbmi.skip : 0;
   return above_skip + left_skip;
