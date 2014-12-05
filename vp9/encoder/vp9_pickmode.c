@@ -687,7 +687,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         if (ref_frame > LAST_FRAME)
           continue;
         if (cpi->sf.partition_search_type != VAR_BASED_PARTITION &&
-            this_rdc.rdcost < (int64_t)(1 << num_pels_log2_lookup[bsize]))
+            best_rdc.rdcost < (int64_t)(1 << num_pels_log2_lookup[bsize]))
           continue;
         if (!combined_motion_search(cpi, x, bsize, mi_row, mi_col,
                                     &frame_mv[NEWMV][ref_frame],
