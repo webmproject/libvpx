@@ -20,6 +20,7 @@
 #include "vp9/common/vp9_ppflags.h"
 #include "vp9/common/vp9_entropymode.h"
 #include "vp9/common/vp9_onyxc_int.h"
+#include "vp9/common/vp9_thread.h"
 
 #include "vp9/encoder/vp9_aq_cyclicrefresh.h"
 #include "vp9/encoder/vp9_context_tree.h"
@@ -215,6 +216,8 @@ typedef struct VP9EncoderConfig {
 
   int tile_columns;
   int tile_rows;
+
+  int max_threads;
 
   vpx_fixed_buf_t two_pass_stats_in;
   struct vpx_codec_pkt_list *output_pkt_list;
@@ -442,6 +445,10 @@ typedef struct VP9_COMP {
 #if CONFIG_VP9_TEMPORAL_DENOISING
   VP9_DENOISER denoiser;
 #endif
+
+  // Multi-threading
+  int num_workers;
+  VP9Worker *workers;
 } VP9_COMP;
 
 void vp9_initialize_enc();

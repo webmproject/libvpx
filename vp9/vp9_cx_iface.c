@@ -355,6 +355,7 @@ static vpx_codec_err_t set_encoder_config(
     const struct vp9_extracfg *extra_cfg) {
   const int is_vbr = cfg->rc_end_usage == VPX_VBR;
   oxcf->profile = cfg->g_profile;
+  oxcf->max_threads = (int)cfg->g_threads;
   oxcf->width   = cfg->g_w;
   oxcf->height  = cfg->g_h;
   oxcf->bit_depth = cfg->g_bit_depth;

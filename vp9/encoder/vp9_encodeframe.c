@@ -36,6 +36,7 @@
 #include "vp9/encoder/vp9_encodeframe.h"
 #include "vp9/encoder/vp9_encodemb.h"
 #include "vp9/encoder/vp9_encodemv.h"
+#include "vp9/encoder/vp9_ethread.h"
 #include "vp9/encoder/vp9_extend.h"
 #include "vp9/encoder/vp9_pickmode.h"
 #include "vp9/encoder/vp9_rd.h"
@@ -3488,7 +3489,7 @@ static int get_skip_encode_frame(const VP9_COMMON *cm, ThreadData *const td) {
          cm->show_frame;
 }
 
-static void init_tile_data(VP9_COMP *cpi) {
+void vp9_init_tile_data(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   const int tile_cols = 1 << cm->log2_tile_cols;
   const int tile_rows = 1 << cm->log2_tile_rows;
@@ -3526,36 +3527,40 @@ static void init_tile_data(VP9_COMP *cpi) {
   }
 }
 
+void vp9_encode_tile(VP9_COMP *cpi, ThreadData *td,
+                     int tile_row, int tile_col) {
+  VP9_COMMON *const cm = &cpi->common;
+  const int tile_cols = 1 << cm->log2_tile_cols;
+  TileDataEnc *this_tile =
+      &cpi->tile_data[tile_row * tile_cols + tile_col];
+  const TileInfo * const tile_info = &this_tile->tile_info;
+  TOKENEXTRA *tok = cpi->tile_tok[tile_row][tile_col];
+  int mi_row;
+
+  for (mi_row = tile_info->mi_row_start; mi_row < tile_info->mi_row_end;
+       mi_row += MI_BLOCK_SIZE) {
+    if (cpi->sf.use_nonrd_pick_mode)
+      encode_nonrd_sb_row(cpi, td, this_tile, mi_row, &tok);
+    else
+      encode_rd_sb_row(cpi, td, this_tile, mi_row, &tok);
+  }
+  cpi->tok_count[tile_row][tile_col] =
+      (unsigned int)(tok - cpi->tile_tok[tile_row][tile_col]);
+  assert(tok - cpi->tile_tok[tile_row][tile_col] <=
+      allocated_tokens(*tile_info));
+}
+
 static void encode_tiles(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   const int tile_cols = 1 << cm->log2_tile_cols;
   const int tile_rows = 1 << cm->log2_tile_rows;
   int tile_col, tile_row;
 
-  init_tile_data(cpi);
+  vp9_init_tile_data(cpi);
 
-  for (tile_row = 0; tile_row < tile_rows; ++tile_row) {
-    for (tile_col = 0; tile_col < tile_cols; ++tile_col) {
-      const TileInfo * const tile_info =
-          &cpi->tile_data[tile_row * tile_cols + tile_col].tile_info;
-      TOKENEXTRA *tok = cpi->tile_tok[tile_row][tile_col];
-      int mi_row;
-      TileDataEnc *this_tile =
-          &cpi->tile_data[tile_row * tile_cols + tile_col];
-
-      for (mi_row = tile_info->mi_row_start; mi_row < tile_info->mi_row_end;
-           mi_row += MI_BLOCK_SIZE) {
-        if (cpi->sf.use_nonrd_pick_mode)
-          encode_nonrd_sb_row(cpi, &cpi->td, this_tile, mi_row, &tok);
-        else
-          encode_rd_sb_row(cpi, &cpi->td, this_tile, mi_row, &tok);
-      }
-      cpi->tok_count[tile_row][tile_col] =
-          (unsigned int)(tok - cpi->tile_tok[tile_row][tile_col]);
-      assert(tok - cpi->tile_tok[tile_row][tile_col] <=
-          allocated_tokens(*tile_info));
-    }
-  }
+  for (tile_row = 0; tile_row < tile_rows; ++tile_row)
+    for (tile_col = 0; tile_col < tile_cols; ++tile_col)
+      vp9_encode_tile(cpi, &cpi->td, tile_row, tile_col);
 }
 
 #if CONFIG_FP_MB_STATS
@@ -3667,7 +3672,11 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   }
 #endif
 
-    encode_tiles(cpi);
+    // If allowed, encoding tiles in parallel with one thread handling one tile.
+    if (MIN(cpi->oxcf.max_threads, 1 << cm->log2_tile_cols) > 1)
+      vp9_encode_tiles_mt(cpi);
+    else
+      encode_tiles(cpi);
 
     vpx_usec_timer_mark(&emr_timer);
     cpi->time_encode_sb_row += vpx_usec_timer_elapsed(&emr_timer);
