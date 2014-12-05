@@ -106,7 +106,8 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
                                                       : USE_LARGESTALL;
 
     sf->reference_masking = 1;
-    sf->mode_search_skip_flags = FLAG_SKIP_INTRA_DIRMISMATCH |
+    sf->mode_search_skip_flags = (cm->frame_type == KEY_FRAME) ? 0 :
+                                 FLAG_SKIP_INTRA_DIRMISMATCH |
                                  FLAG_SKIP_INTRA_BESTINTER |
                                  FLAG_SKIP_COMP_BESTINTRA |
                                  FLAG_SKIP_INTRA_LOWVAR;
@@ -140,7 +141,8 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
     sf->mv.search_method = BIGDIA;
     sf->mv.subpel_search_method = SUBPEL_TREE_PRUNED_MORE;
     sf->adaptive_rd_thresh = 4;
-    sf->mode_search_skip_flags |= FLAG_EARLY_TERMINATE;
+    if (cm->frame_type != KEY_FRAME)
+      sf->mode_search_skip_flags |= FLAG_EARLY_TERMINATE;
     sf->disable_filter_search_var_thresh = 200;
     sf->use_lp32x32fdct = 1;
     sf->use_fast_coef_updates = ONE_LOOP_REDUCED;
@@ -226,7 +228,8 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
   }
 
   if (speed >= 2) {
-    sf->mode_search_skip_flags = FLAG_SKIP_INTRA_DIRMISMATCH |
+    sf->mode_search_skip_flags = (cm->frame_type == KEY_FRAME) ? 0 :
+                                 FLAG_SKIP_INTRA_DIRMISMATCH |
                                  FLAG_SKIP_INTRA_BESTINTER |
                                  FLAG_SKIP_COMP_BESTINTRA |
                                  FLAG_SKIP_INTRA_LOWVAR;
@@ -305,6 +308,7 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->partition_search_breakout_rate_thr = 200;
     sf->coeff_prob_appx_step = 4;
     sf->use_fast_coef_updates = is_keyframe ? TWO_LOOP : ONE_LOOP_REDUCED;
+    sf->mode_search_skip_flags = FLAG_SKIP_INTRA_DIRMISMATCH;
 
     if (!is_keyframe) {
       int i;

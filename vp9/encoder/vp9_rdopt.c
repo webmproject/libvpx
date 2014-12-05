@@ -1072,6 +1072,16 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
   /* Y Search for intra prediction mode */
   for (mode = DC_PRED; mode <= TM_PRED; mode++) {
     int64_t local_tx_cache[TX_MODES];
+
+    if (cpi->sf.use_nonrd_pick_mode) {
+      // These speed features are turned on in hybrid non-RD and RD mode
+      // for key frame coding in the context of real-time setting.
+      if (conditional_skipintra(mode, mode_selected))
+          continue;
+      if (*skippable)
+        break;
+    }
+
     mic->mbmi.mode = mode;
 
     super_block_yrd(cpi, x, &this_rate_tokenonly, &this_distortion,
