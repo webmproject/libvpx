@@ -16,6 +16,24 @@
       "revId": "07711e9b2733ef89bb6dd87f4008dc7aea39ba1d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//NJQ\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2669,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-12-05T17:50:27Z",
+      "side": 1,
+      "message": "When this function is called, the block size has already pre-determined by block variance etc.\n\nThis part is saying that if the selected block size is below 16x16, it is a sign that it contains high energy and should be more carefully tested via RD loop.",
+      "parentUuid": "AAAAdn//NJo\u003d",
+      "revId": "07711e9b2733ef89bb6dd87f4008dc7aea39ba1d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
