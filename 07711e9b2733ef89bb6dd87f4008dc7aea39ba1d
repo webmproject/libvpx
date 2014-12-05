@@ -70,6 +70,24 @@
       "revId": "07711e9b2733ef89bb6dd87f4008dc7aea39ba1d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//NI4\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2669,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-12-05T17:59:13Z",
+      "side": 1,
+      "message": "how much speed decrease does this make? if it x2, should it be under flag for now, instead of default behavior..",
+      "parentUuid": "AAAAdn//NJI\u003d",
+      "revId": "07711e9b2733ef89bb6dd87f4008dc7aea39ba1d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
