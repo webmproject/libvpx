@@ -3641,12 +3641,15 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   vp9_initialize_rd_consts(cpi);
   vp9_initialize_me_consts(cpi, cm->base_qindex);
   init_encode_frame_mb_context(cpi);
-  set_prev_mi(cm);
   cm->use_prev_frame_mvs = !cm->error_resilient_mode &&
                            cm->width == cm->last_width &&
                            cm->height == cm->last_height &&
                            !cm->intra_only &&
                            cm->last_show_frame;
+  // Special case: set prev_mi to NULL when the previous mode info
+  // context cannot be used.
+  cm->prev_mi = cm->use_prev_frame_mvs ?
+                  cm->prev_mip + cm->mi_stride + 1 : NULL;
 
   x->quant_fp = cpi->sf.use_quant_fp;
   vp9_zero(x->skip_txfm);
