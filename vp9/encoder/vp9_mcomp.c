@@ -2142,7 +2142,7 @@ int vp9_full_pixel_search(VP9_COMP *cpi, MACROBLOCK *x,
                                    1, cost_list, fn_ptr, ref_mv, tmp_mv);
       break;
     default:
-      assert(!"Invalid search method.");
+      assert(0 && "Invalid search method.");
   }
 
   if (method != NSTEP && rd && var < var_max)
