@@ -3846,7 +3846,8 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
 #if CONFIG_VP9_HIGHBITDEPTH
           if (cm->use_highbitdepth) {
-            frame_ssim2 = vp9_highbd_calc_ssim(orig, recon, &weight, xd->bd);
+            frame_ssim2 = vp9_highbd_calc_ssim(orig, recon, &weight,
+                                               (int)cm->bit_depth);
           } else {
             frame_ssim2 = vp9_calc_ssim(orig, recon, &weight);
           }
@@ -3860,7 +3861,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 #if CONFIG_VP9_HIGHBITDEPTH
           if (cm->use_highbitdepth) {
             frame_ssim2 = vp9_highbd_calc_ssim(
-                orig, &cm->post_proc_buffer, &weight, xd->bd);
+                orig, &cm->post_proc_buffer, &weight, (int)cm->bit_depth);
           } else {
             frame_ssim2 = vp9_calc_ssim(orig, &cm->post_proc_buffer, &weight);
           }
@@ -3888,7 +3889,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 #if CONFIG_VP9_HIGHBITDEPTH
         if (cm->use_highbitdepth) {
           frame_all = vp9_highbd_calc_ssimg(cpi->Source, cm->frame_to_show, &y,
-                                            &u, &v, xd->bd);
+                                            &u, &v, (int)cm->bit_depth);
         } else {
           frame_all = vp9_calc_ssimg(cpi->Source, cm->frame_to_show, &y, &u,
                                      &v);
