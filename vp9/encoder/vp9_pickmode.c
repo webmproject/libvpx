@@ -601,7 +601,6 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   vp9_rd_cost_reset(&best_rdc);
   vp9_rd_cost_reset(&this_rdc);
   vp9_rd_cost_reset(rd_cost);
-  vpx_memset(mbmi, 0, sizeof(MB_MODE_INFO));
   mbmi->sb_type = bsize;
   mbmi->ref_frame[0] = NONE;
   mbmi->ref_frame[1] = NONE;
