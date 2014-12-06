@@ -1164,7 +1164,7 @@ static void encode_sb(VP9_COMP *cpi, ThreadData *td,
       }
       break;
     default:
-      assert("Invalid partition type.");
+      assert(0 && "Invalid partition type.");
       break;
   }
 
@@ -1491,7 +1491,7 @@ static void encode_sb_rt(VP9_COMP *cpi, ThreadData *td,
                    output_enabled, subsize, pc_tree->split[3]);
       break;
     default:
-      assert("Invalid partition type.");
+      assert(0 && "Invalid partition type.");
       break;
   }
 
@@ -3156,7 +3156,7 @@ static void nonrd_select_partition(VP9_COMP *cpi,
         }
         break;
       default:
-        assert("Invalid partition type.");
+        assert(0 && "Invalid partition type.");
         break;
     }
   }
@@ -3291,7 +3291,7 @@ static void nonrd_use_partition(VP9_COMP *cpi,
       }
       break;
     default:
-      assert("Invalid partition type.");
+      assert(0 && "Invalid partition type.");
       break;
   }
 
