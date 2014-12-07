@@ -16,6 +16,24 @@
       "revId": "7f39eac1d17f9db4588ec9408290f6c5c9cdd5a7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//NAo\u003d",
+        "filename": "vp9/common/vp9_mfqe.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2014-12-07T00:40:18Z",
+      "side": 1,
+      "message": "There are unit tests cover the function vp9_variance16x16, vp9_variance32x32 and etc. These functions have sse2 version and the unit test can ensure they are bitexact with the C version.\nNo unit test for the logic in this function. But the logic part is quite simple, it is easy to make sure the logic is correct by our local test. The logic part might also be change slightly in the future if we have better idea on that.",
+      "parentUuid": "AAAAdn//NA0\u003d",
+      "revId": "7f39eac1d17f9db4588ec9408290f6c5c9cdd5a7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
