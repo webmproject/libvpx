@@ -77,6 +77,7 @@ void Encoder::Flush() {
 
 void EncoderTest::InitializeConfig() {
   const vpx_codec_err_t res = codec_->DefaultEncoderConfig(&cfg_, 0);
+  dec_cfg_ = vpx_codec_dec_cfg_t();
   ASSERT_EQ(VPX_CODEC_OK, res);
 }
 
@@ -139,8 +140,6 @@ void EncoderTest::MismatchHook(const vpx_image_t* /*img1*/,
 }
 
 void EncoderTest::RunLoop(VideoSource *video) {
-  vpx_codec_dec_cfg_t dec_cfg = vpx_codec_dec_cfg_t();
-
   stats_.Reset();
 
   ASSERT_TRUE(passes_ == 1 || passes_ == 2);
@@ -158,7 +157,7 @@ void EncoderTest::RunLoop(VideoSource *video) {
     Encoder* const encoder = codec_->CreateEncoder(cfg_, deadline_, init_flags_,
                                                    &stats_);
     ASSERT_TRUE(encoder != NULL);
-    Decoder* const decoder = codec_->CreateDecoder(dec_cfg, 0);
+    Decoder* const decoder = codec_->CreateDecoder(dec_cfg_, 0);
     bool again;
     for (again = true, video->Begin(); again; video->Next()) {
       again = (video->img() != NULL);
