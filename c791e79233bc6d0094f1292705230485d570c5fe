@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//M/E\u003d",
+        "filename": "vp9/common/x86/vp9_subpixel_8t_ssse3.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 800,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-12-08T16:46:39Z",
+      "side": 1,
+      "message": "Delete tabs",
+      "revId": "c791e79233bc6d0094f1292705230485d570c5fe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//M/A\u003d",
+        "filename": "vp9/common/x86/vp9_subpixel_8t_ssse3.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 815,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-12-08T16:46:39Z",
+      "side": 1,
+      "message": "Delete tabs",
+      "revId": "c791e79233bc6d0094f1292705230485d570c5fe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
