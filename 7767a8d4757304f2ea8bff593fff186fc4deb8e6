@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//M+0\u003d",
+        "filename": "test/decode_perf_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-12-08T17:49:14Z",
+      "side": 1,
+      "message": "Sorry saw static and assumed it was not.",
+      "parentUuid": "AAAAdn//M/M\u003d",
+      "revId": "7767a8d4757304f2ea8bff593fff186fc4deb8e6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//M/Y\u003d",
         "filename": "test/decode_perf_test.cc",
         "patchSetId": 2
@@ -65,6 +83,40 @@
       "writtenOn": "2014-12-08T07:02:14Z",
       "side": 1,
       "message": "outfile and out_frames?",
+      "revId": "7767a8d4757304f2ea8bff593fff186fc4deb8e6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//M+w\u003d",
+        "filename": "test/decode_perf_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-12-08T17:49:14Z",
+      "side": 1,
+      "message": "As discussed upping lag will fix the crash.",
+      "revId": "7767a8d4757304f2ea8bff593fff186fc4deb8e6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//M+s\u003d",
+        "filename": "test/decode_perf_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-12-08T17:49:14Z",
+      "side": 1,
+      "message": "For the 720p file I would set tile columns to at least 2. You could set it higher as the width will set a max number of tiles.",
       "revId": "7767a8d4757304f2ea8bff593fff186fc4deb8e6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -114,6 +166,40 @@
         "id": 1002054
       },
       "writtenOn": "2014-12-08T07:02:14Z",
+      "side": 1,
+      "message": "uint32_t",
+      "revId": "7767a8d4757304f2ea8bff593fff186fc4deb8e6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//M+o\u003d",
+        "filename": "test/decode_perf_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-12-08T17:49:14Z",
+      "side": 1,
+      "message": "2?",
+      "revId": "7767a8d4757304f2ea8bff593fff186fc4deb8e6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//M+k\u003d",
+        "filename": "test/decode_perf_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 286,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-12-08T17:49:14Z",
       "side": 1,
       "message": "uint32_t",
       "revId": "7767a8d4757304f2ea8bff593fff186fc4deb8e6",
