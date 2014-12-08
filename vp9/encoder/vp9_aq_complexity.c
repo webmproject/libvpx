@@ -23,7 +23,7 @@ static const double aq_c_q_adj_factor[AQ_C_STRENGTHS][AQ_C_SEGMENTS] =
   {{1.0, 1.0, 1.0}, {1.0, 2.0, 1.0}, {1.0, 1.5, 2.5}};
 static const double aq_c_transitions[AQ_C_STRENGTHS][AQ_C_SEGMENTS] =
   {{1.0, 1.0, 1.0}, {1.0, 0.25, 0.0}, {1.0, 0.5, 0.25}};
-static const double aq_c_var_thresholds[AQ_C_SEGMENTS] = {100.0, 12.0, 10.0};
+static const double aq_c_var_thresholds[AQ_C_SEGMENTS] = {100.0, -1.0, -2.0};
 
 static int get_aq_c_strength(int q_index, vpx_bit_depth_t bit_depth) {
   // Approximate base quatizer (truncated to int)
@@ -90,6 +90,8 @@ void vp9_setup_in_frame_q_adj(VP9_COMP *cpi) {
   }
 }
 
+#define DEFAULT_LV_THRESH 10.0
+
 // Select a segment for the current SB64 block.
 // The choice of segment for a block depends on the ratio of the projected
 // bits for the block vs a target average.
@@ -122,6 +124,11 @@ void vp9_select_in_frame_q_segment(VP9_COMP *cpi, MACROBLOCK *mb,
     const int aq_strength = get_aq_c_strength(cm->base_qindex, cm->bit_depth);
     const int active_segments = aq_c_active_segments[aq_strength];
     double logvar;
+    double low_var_thresh;
+
+    vp9_clear_system_state();
+    low_var_thresh =
+      (cpi->oxcf.pass == 2) ? cpi->twopass.mb_av_energy : DEFAULT_LV_THRESH;
 
     vp9_setup_src_planes(mb, cpi->Source, mi_row, mi_col);
     logvar = vp9_log_block_var(cpi, mb, bs);
@@ -136,7 +143,7 @@ void vp9_select_in_frame_q_segment(VP9_COMP *cpi, MACROBLOCK *mb,
     while (segment > 0) {
       if ((projected_rate <
           target_rate * aq_c_transitions[aq_strength][segment]) &&
-          (logvar < aq_c_var_thresholds[segment])) {
+          (logvar < (low_var_thresh + aq_c_var_thresholds[segment]))) {
         break;
       }
       --segment;
