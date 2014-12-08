@@ -805,7 +805,12 @@ process_common_toolchain() {
           ;;
         armv7|armv7s)
           soft_enable neon
-          soft_enable neon_asm
+          # Only enable neon_asm when neon is also enabled.
+          enabled neon && soft_enable neon_asm
+          # If someone tries to force it through, die.
+          if disabled neon && enabled neon_asm; then
+            die "Disabling neon while keeping neon-asm is not supported"
+          fi
           soft_enable media
           soft_enable fast_unaligned
           ;;
