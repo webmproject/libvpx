@@ -51,6 +51,57 @@
       "revId": "7f39eac1d17f9db4588ec9408290f6c5c9cdd5a7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//M78\u003d",
+        "filename": "vp9/common/vp9_mfqe.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-12-08T21:32:46Z",
+      "side": 1,
+      "message": "maybe compute (mi_row \u003c\u003c 3/2) * y_stride + (mi_col \u003c\u003c 3/2) once and reuse....?",
+      "revId": "7f39eac1d17f9db4588ec9408290f6c5c9cdd5a7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//M8E\u003d",
+        "filename": "vp9/common/vp9_postproc.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 728,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-12-08T21:32:46Z",
+      "side": 1,
+      "message": "should this be?\ncm-\u003epostproc_state.last_base_qindex \u003d cm-\u003ebase_qindex\n\ndon\u0027t see where cm-\u003epostproc_state.last_q is used?",
+      "revId": "7f39eac1d17f9db4588ec9408290f6c5c9cdd5a7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//M8I\u003d",
+        "filename": "vp9/common/vp9_postproc.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2014-12-08T21:32:46Z",
+      "side": 1,
+      "message": "put these in (alphabetical) order: blockd, mfqe, and then ppflags?",
+      "revId": "7f39eac1d17f9db4588ec9408290f6c5c9cdd5a7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
