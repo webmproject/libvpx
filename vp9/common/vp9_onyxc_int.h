@@ -309,6 +309,21 @@ static INLINE void set_mi_row_col(MACROBLOCKD *xd, const TileInfo *const tile,
   // Are edges available for intra prediction?
   xd->up_available    = (mi_row != 0);
   xd->left_available  = (mi_col > tile->mi_col_start);
+  if (xd->up_available) {
+    xd->above_mi = xd->mi[-xd->mi_stride].src_mi;
+    xd->above_mbmi = &xd->above_mi->mbmi;;
+  } else {
+    xd->above_mi = NULL;
+    xd->above_mbmi = NULL;
+  }
+
+  if (xd->left_available) {
+    xd->left_mi = xd->mi[-1].src_mi;
+    xd->left_mbmi = &xd->left_mi->mbmi;;
+  } else {
+    xd->left_mi = NULL;
+    xd->left_mbmi = NULL;
+  }
 }
 
 static INLINE void update_partition_context(MACROBLOCKD *xd,

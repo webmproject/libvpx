@@ -346,9 +346,8 @@ static void write_mb_modes_kf(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                               MODE_INFO *mi_8x8, vp9_writer *w) {
   const struct segmentation *const seg = &cm->seg;
   const MODE_INFO *const mi = mi_8x8;
-  const MODE_INFO *const above_mi = mi_8x8[-xd->mi_stride].src_mi;
-  const MODE_INFO *const left_mi =
-      xd->left_available ? mi_8x8[-1].src_mi : NULL;
+  const MODE_INFO *const above_mi = xd->above_mi;
+  const MODE_INFO *const left_mi = xd->left_mi;
   const MB_MODE_INFO *const mbmi = &mi->mbmi;
   const BLOCK_SIZE bsize = mbmi->sb_type;
 
