@@ -1118,7 +1118,7 @@ EOF
       bits=32
       enabled x86_64 && bits=64
       check_cpp <<EOF && bits=x32
-#ifndef __ILP32__
+#if !defined(__ILP32__) || !defined(__x86_64__)
 #error "not x32"
 #endif
 EOF
