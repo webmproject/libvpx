@@ -122,8 +122,8 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
   pcmpgtw                         m7, m6, m0               ; m7 = c[i] >= zbin
   pcmpgtw                        m12, m11, m0              ; m12 = c[i] >= zbin
 %ifidn %1, b_32x32
-  pmovmskb                        r6, m7
-  pmovmskb                        r2, m12
+  pmovmskb                       r6d, m7
+  pmovmskb                       r2d, m12
   or                              r6, r2
   jz .skip_iter
 %endif
@@ -308,8 +308,8 @@ cglobal quantize_%1, 0, %2, 15, coeff, ncoeff, skip, zbin, round, quant, \
 %ifidn %1, fp_32x32
   pcmpgtw                         m7, m6,  m0
   pcmpgtw                        m12, m11, m0
-  pmovmskb                        r6, m7
-  pmovmskb                        r2, m12
+  pmovmskb                       r6d, m7
+  pmovmskb                       r2d, m12
 
   or                              r6, r2
   jz .skip_iter
