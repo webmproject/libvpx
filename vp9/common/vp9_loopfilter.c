@@ -968,7 +968,7 @@ void vp9_setup_mask(VP9_COMMON *const cm, const int mi_row, const int mi_col,
       break;
   }
   // The largest loopfilter we have is 16x16 so we use the 16x16 mask
-  // for 32x32 transforms also also.
+  // for 32x32 transforms also.
   lfm->left_y[TX_16X16] |= lfm->left_y[TX_32X32];
   lfm->above_y[TX_16X16] |= lfm->above_y[TX_32X32];
   lfm->left_uv[TX_16X16] |= lfm->left_uv[TX_32X32];
