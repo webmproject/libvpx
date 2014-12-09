@@ -135,6 +135,23 @@
       "revId": "41ae04c578fc45186fdd401996c0514a73912f02",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//MuA\u003d",
+        "filename": "vp9/common/vp9_postproc.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 619,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-12-09T20:58:21Z",
+      "side": 1,
+      "message": "these can just be static const values declared at the top of this file for now. if there\u0027s additional computation to be done they can be made functions later",
+      "revId": "41ae04c578fc45186fdd401996c0514a73912f02",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
