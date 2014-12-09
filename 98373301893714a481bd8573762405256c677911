@@ -16,6 +16,24 @@
       "revId": "98373301893714a481bd8573762405256c677911",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//M0A\u003d",
+        "filename": "vp9/common/vp9_rtcd_defs.pl",
+        "patchSetId": 7
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2014-12-09T05:08:35Z",
+      "side": 1,
+      "message": "For the most part it works OK, but it buggers things (specifically in for the followup patch: the test. could use if neon instead of if neon or neon_asm for the test) if --disable-neon is used without --disable-neon-asm. Mixed feelings on whether that is \"supported\"",
+      "parentUuid": "AAAAdn//M0s\u003d",
+      "revId": "98373301893714a481bd8573762405256c677911",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
