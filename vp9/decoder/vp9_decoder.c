@@ -288,16 +288,6 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
 
     vp9_clear_system_state();
 
-    // We do not know if the missing frame(s) was supposed to update
-    // any of the reference buffers, but we act conservative and
-    // mark only the last buffer as corrupted.
-    //
-    // TODO(jkoleszar): Error concealment is undefined and non-normative
-    // at this point, but if it becomes so, [0] may not always be the correct
-    // thing to do here.
-    if (cm->frame_refs[0].idx != INT_MAX && cm->frame_refs[0].buf != NULL)
-      cm->frame_refs[0].buf->corrupted = 1;
-
     if (cm->new_fb_idx > 0 && cm->frame_bufs[cm->new_fb_idx].ref_count > 0)
       cm->frame_bufs[cm->new_fb_idx].ref_count--;
 

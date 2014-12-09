@@ -747,10 +747,6 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
       YV12_BUFFER_CONFIG *const buf = cm->frame_refs[i].buf;
       width = buf->y_crop_width;
       height = buf->y_crop_height;
-      if (buf->corrupted) {
-        vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
-                           "Frame reference is corrupt");
-      }
       found = 1;
       break;
     }
@@ -978,9 +974,12 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
                            &tile_data->bit_reader, BLOCK_64X64);
         }
         pbi->mb.corrupted |= tile_data->xd.corrupted;
+        if (pbi->mb.corrupted)
+            vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+                               "Failed to decode tile data");
       }
       // Loopfilter one row.
-      if (cm->lf.filter_level && !pbi->mb.corrupted) {
+      if (cm->lf.filter_level) {
         const int lf_start = mi_row - MI_BLOCK_SIZE;
         LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
 
@@ -1003,7 +1002,7 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
   }
 
   // Loopfilter remaining rows in the frame.
-  if (cm->lf.filter_level && !pbi->mb.corrupted) {
+  if (cm->lf.filter_level) {
     LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
     winterface->sync(&pbi->lf_worker);
     lf_data->start = lf_data->stop;
@@ -1564,6 +1563,9 @@ void vp9_decode_frame(VP9Decoder *pbi,
 
   xd->corrupted = 0;
   new_fb->corrupted = read_compressed_header(pbi, data, first_partition_size);
+  if (new_fb->corrupted)
+    vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+                       "Decode failed. Frame data header is corrupted.");
 
   // TODO(jzern): remove frame_parallel_decoding_mode restriction for
   // single-frame tile decoding.
@@ -1576,6 +1578,10 @@ void vp9_decode_frame(VP9Decoder *pbi,
       vp9_loop_filter_frame_mt(&pbi->lf_row_sync, new_fb, pbi->mb.plane, cm,
                                pbi->tile_workers, pbi->num_tile_workers,
                                cm->lf.filter_level, 0);
+    } else {
+      vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+                         "Decode failed. Frame data is corrupted.");
+
     }
   } else {
     *p_data_end = decode_tiles(pbi, data + first_partition_size, data_end);
