@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//MrM\u003d",
+        "filename": "test/decode_perf_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-12-09T22:37:38Z",
+      "side": 1,
+      "message": "prefer (non-static) const char kNew...[] \u003d \"...\";",
+      "revId": "c2638bd80a7134ae2b04d258993ccd03e5586579",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//MrI\u003d",
+        "filename": "test/decode_perf_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-12-09T22:37:38Z",
+      "side": 1,
+      "message": "align these or treat them as an initializer list (indent 4 and one per line)",
+      "revId": "c2638bd80a7134ae2b04d258993ccd03e5586579",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Mq4\u003d",
+        "filename": "test/decode_perf_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-12-09T22:37:38Z",
+      "side": 1,
+      "message": "you could run into problems trying to write to this directory, you might want to look at y4m_test for temporary file options",
+      "revId": "c2638bd80a7134ae2b04d258993ccd03e5586579",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//MrE\u003d",
+        "filename": "test/decode_perf_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-12-09T22:37:38Z",
+      "side": 1,
+      "message": "ASSERT_TRUE(... !\u003d NULL)",
+      "revId": "c2638bd80a7134ae2b04d258993ccd03e5586579",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//MrA\u003d",
+        "filename": "test/decode_perf_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-12-09T22:37:38Z",
+      "side": 1,
+      "message": "!\u003d NULL",
+      "revId": "c2638bd80a7134ae2b04d258993ccd03e5586579",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Mq0\u003d",
+        "filename": "test/decode_perf_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-12-09T22:37:38Z",
+      "side": 1,
+      "message": "how about you just check the result",
+      "revId": "c2638bd80a7134ae2b04d258993ccd03e5586579",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Mqw\u003d",
+        "filename": "test/decode_perf_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-12-09T22:37:38Z",
+      "side": 1,
+      "message": "return false",
+      "revId": "c2638bd80a7134ae2b04d258993ccd03e5586579",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Mqs\u003d",
+        "filename": "test/decode_perf_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-12-09T22:37:38Z",
+      "side": 1,
+      "message": "delete this line",
+      "revId": "c2638bd80a7134ae2b04d258993ccd03e5586579",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Mqo\u003d",
+        "filename": "test/decode_perf_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-12-09T22:37:38Z",
+      "side": 1,
+      "message": "prefer static_cast\u003cdouble\u003e",
+      "revId": "c2638bd80a7134ae2b04d258993ccd03e5586579",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
