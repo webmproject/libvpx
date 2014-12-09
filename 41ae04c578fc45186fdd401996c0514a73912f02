@@ -16,6 +16,23 @@
       "revId": "41ae04c578fc45186fdd401996c0514a73912f02",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Muw\u003d",
+        "filename": "vp9/common/vp9_mfqe.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-12-09T20:54:32Z",
+      "side": 1,
+      "message": "just use memcpy unless you have anything to support this \u0027#else\u0027",
+      "revId": "41ae04c578fc45186fdd401996c0514a73912f02",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
