@@ -272,7 +272,6 @@ static void set_block_size(VP9_COMP * const cpi,
   if (cpi->common.mi_cols > mi_col && cpi->common.mi_rows > mi_row) {
     set_modeinfo_offsets(&cpi->common, xd, mi_row, mi_col);
     xd->mi[0].src_mi->mbmi.sb_type = bsize;
-    duplicate_mode_info_in_sb(&cpi->common, xd, mi_row, mi_col, bsize);
   }
 }
 
