@@ -152,6 +152,40 @@
       "revId": "41ae04c578fc45186fdd401996c0514a73912f02",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Mt4\u003d",
+        "filename": "vp9/common/vp9_postproc.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-12-09T20:59:17Z",
+      "side": 1,
+      "message": "just one space after the type",
+      "revId": "41ae04c578fc45186fdd401996c0514a73912f02",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Mt0\u003d",
+        "filename": "vp9/common/vp9_postproc.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-12-09T20:59:17Z",
+      "side": 1,
+      "message": "put this before the function protos",
+      "revId": "41ae04c578fc45186fdd401996c0514a73912f02",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
