@@ -3247,18 +3247,25 @@ static void nonrd_use_partition(VP9_COMP *cpi,
       break;
     case PARTITION_SPLIT:
       subsize = get_subsize(bsize, PARTITION_SPLIT);
-      nonrd_use_partition(cpi, td, tile_data, mi, tp, mi_row, mi_col,
-                          subsize, output_enabled, dummy_cost,
-                          pc_tree->split[0]);
-      nonrd_use_partition(cpi, td, tile_data, mi + hbs, tp,
-                          mi_row, mi_col + hbs, subsize, output_enabled,
-                          dummy_cost, pc_tree->split[1]);
-      nonrd_use_partition(cpi, td, tile_data, mi + hbs * mis, tp,
-                          mi_row + hbs, mi_col, subsize, output_enabled,
-                          dummy_cost, pc_tree->split[2]);
-      nonrd_use_partition(cpi, td, tile_data, mi + hbs * mis + hbs, tp,
-                          mi_row + hbs, mi_col + hbs, subsize, output_enabled,
-                          dummy_cost, pc_tree->split[3]);
+      if (bsize == BLOCK_8X8) {
+        nonrd_pick_sb_modes(cpi, tile_data, x, mi_row, mi_col, dummy_cost,
+                            subsize, pc_tree->leaf_split[0]);
+        encode_b_rt(cpi, td, tile_info, tp, mi_row, mi_col,
+                    output_enabled, subsize, pc_tree->leaf_split[0]);
+      } else {
+        nonrd_use_partition(cpi, td, tile_data, mi, tp, mi_row, mi_col,
+                            subsize, output_enabled, dummy_cost,
+                            pc_tree->split[0]);
+        nonrd_use_partition(cpi, td, tile_data, mi + hbs, tp,
+                            mi_row, mi_col + hbs, subsize, output_enabled,
+                            dummy_cost, pc_tree->split[1]);
+        nonrd_use_partition(cpi, td, tile_data, mi + hbs * mis, tp,
+                            mi_row + hbs, mi_col, subsize, output_enabled,
+                            dummy_cost, pc_tree->split[2]);
+        nonrd_use_partition(cpi, td, tile_data, mi + hbs * mis + hbs, tp,
+                            mi_row + hbs, mi_col + hbs, subsize, output_enabled,
+                            dummy_cost, pc_tree->split[3]);
+      }
       break;
     default:
       assert(0 && "Invalid partition type.");
@@ -3299,6 +3306,9 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi,
     // Set the partition type of the 64X64 block
     switch (sf->partition_search_type) {
       case VAR_BASED_PARTITION:
+        // TODO(jingning) Only key frame coding supports sub8x8 block at this
+        // point. To be continued to enable sub8x8 block mode decision for
+        // P frames.
         choose_partitioning(cpi, tile_info, x, mi_row, mi_col);
         nonrd_use_partition(cpi, td, tile_data, mi, tp, mi_row, mi_col,
                             BLOCK_64X64, 1, &dummy_rdc, td->pc_root);
