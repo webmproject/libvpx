@@ -622,7 +622,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       vp9_setup_pred_block(xd, yv12_mb[ref_frame], yv12, mi_row, mi_col,
                            sf, sf);
 
-      if (!cm->error_resilient_mode)
+      if (cm->use_prev_frame_mvs)
         vp9_find_mv_refs(cm, xd, tile_info, xd->mi[0].src_mi, ref_frame,
                          candidates, mi_row, mi_col);
       else
