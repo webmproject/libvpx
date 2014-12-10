@@ -189,10 +189,10 @@ static BLOCK_SIZE get_nonrd_var_based_fixed_partition(VP9_COMP *cpi,
 
 // Lighter version of set_offsets that only sets the mode info
 // pointers.
-static INLINE void set_modeinfo_offsets(VP9_COMMON *const cm,
-                                        MACROBLOCKD *const xd,
-                                        int mi_row,
-                                        int mi_col) {
+static INLINE void set_mode_info_offsets(VP9_COMMON *const cm,
+                                         MACROBLOCKD *const xd,
+                                         int mi_row,
+                                         int mi_col) {
   const int idx_str = xd->mi_stride * mi_row + mi_col;
   xd->mi = cm->mi + idx_str;
   xd->mi[0].src_mi = &xd->mi[0];
@@ -210,7 +210,7 @@ static void set_offsets(VP9_COMP *cpi, const TileInfo *const tile,
 
   set_skip_context(xd, mi_row, mi_col);
 
-  set_modeinfo_offsets(cm, xd, mi_row, mi_col);
+  set_mode_info_offsets(cm, xd, mi_row, mi_col);
 
   mbmi = &xd->mi[0].src_mi->mbmi;
 
@@ -270,7 +270,7 @@ static void set_block_size(VP9_COMP * const cpi,
                            int mi_row, int mi_col,
                            BLOCK_SIZE bsize) {
   if (cpi->common.mi_cols > mi_col && cpi->common.mi_rows > mi_row) {
-    set_modeinfo_offsets(&cpi->common, xd, mi_row, mi_col);
+    set_mode_info_offsets(&cpi->common, xd, mi_row, mi_col);
     xd->mi[0].src_mi->mbmi.sb_type = bsize;
   }
 }
@@ -2718,27 +2718,27 @@ static void fill_mode_info_sb(VP9_COMMON *cm, MACROBLOCK *x,
 
   switch (partition) {
     case PARTITION_NONE:
-      set_modeinfo_offsets(cm, xd, mi_row, mi_col);
+      set_mode_info_offsets(cm, xd, mi_row, mi_col);
       *(xd->mi[0].src_mi) = pc_tree->none.mic;
       duplicate_mode_info_in_sb(cm, xd, mi_row, mi_col, bsize);
       break;
     case PARTITION_VERT:
-      set_modeinfo_offsets(cm, xd, mi_row, mi_col);
+      set_mode_info_offsets(cm, xd, mi_row, mi_col);
       *(xd->mi[0].src_mi) = pc_tree->vertical[0].mic;
       duplicate_mode_info_in_sb(cm, xd, mi_row, mi_col, bsize);
 
       if (mi_col + hbs < cm->mi_cols) {
-        set_modeinfo_offsets(cm, xd, mi_row, mi_col + hbs);
+        set_mode_info_offsets(cm, xd, mi_row, mi_col + hbs);
         *(xd->mi[0].src_mi) = pc_tree->vertical[1].mic;
         duplicate_mode_info_in_sb(cm, xd, mi_row, mi_col + hbs, bsize);
       }
       break;
     case PARTITION_HORZ:
-      set_modeinfo_offsets(cm, xd, mi_row, mi_col);
+      set_mode_info_offsets(cm, xd, mi_row, mi_col);
       *(xd->mi[0].src_mi) = pc_tree->horizontal[0].mic;
       duplicate_mode_info_in_sb(cm, xd, mi_row, mi_col, bsize);
       if (mi_row + hbs < cm->mi_rows) {
-        set_modeinfo_offsets(cm, xd, mi_row + hbs, mi_col);
+        set_mode_info_offsets(cm, xd, mi_row + hbs, mi_col);
         *(xd->mi[0].src_mi) = pc_tree->horizontal[1].mic;
         duplicate_mode_info_in_sb(cm, xd, mi_row + hbs, mi_col, bsize);
       }
