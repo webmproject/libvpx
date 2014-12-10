@@ -213,9 +213,6 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   vpx_free(cpi->coding_context.last_frame_seg_map_copy);
   cpi->coding_context.last_frame_seg_map_copy = NULL;
 
-  vpx_free(cpi->complexity_map);
-  cpi->complexity_map = NULL;
-
   vpx_free(cpi->nmvcosts[0]);
   vpx_free(cpi->nmvcosts[1]);
   cpi->nmvcosts[0] = NULL;
@@ -1443,10 +1440,6 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
 
   // Create the encoder segmentation map and set all entries to 0
   CHECK_MEM_ERROR(cm, cpi->segmentation_map,
-                  vpx_calloc(cm->mi_rows * cm->mi_cols, 1));
-
-  // Create a complexity map used for rd adjustment
-  CHECK_MEM_ERROR(cm, cpi->complexity_map,
                   vpx_calloc(cm->mi_rows * cm->mi_cols, 1));
 
   // Create a map used for cyclic background refresh.

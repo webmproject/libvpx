@@ -351,8 +351,6 @@ typedef struct VP9_COMP {
   // segment threashold for encode breakout
   int  segment_encode_breakout[MAX_SEGMENTS];
 
-  unsigned char *complexity_map;
-
   CYCLIC_REFRESH *cyclic_refresh;
 
   fractional_mv_step_fp *find_fractional_mv_step;
