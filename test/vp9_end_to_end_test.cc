@@ -82,6 +82,7 @@ class EndToEndTestLarge
       cfg_.g_lag_in_frames = 0;
       cfg_.rc_end_usage = VPX_CBR;
     }
+    dec_cfg_.threads = 4;
     test_video_param_ = GET_PARAM(2);
   }
 
@@ -98,6 +99,8 @@ class EndToEndTestLarge
   virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
                                   ::libvpx_test::Encoder *encoder) {
     if (video->frame() == 1) {
+      encoder->Control(VP9E_SET_FRAME_PARALLEL_DECODING, 1);
+      encoder->Control(VP9E_SET_TILE_COLUMNS, 4);
       encoder->Control(VP8E_SET_CPUUSED, kCpuUsed);
       if (encoding_mode_ != ::libvpx_test::kRealTime) {
         encoder->Control(VP8E_SET_ENABLEAUTOALTREF, 1);
