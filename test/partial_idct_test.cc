@@ -230,7 +230,7 @@ INSTANTIATE_TEST_CASE_P(
                    &vp9_idct4x4_1_add_c,
                    TX_4X4, 1)));
 
-#if HAVE_NEON_ASM
+#if HAVE_NEON
 INSTANTIATE_TEST_CASE_P(
     NEON, PartialIDctTest,
     ::testing::Values(
@@ -258,7 +258,7 @@ INSTANTIATE_TEST_CASE_P(
                    &vp9_idct4x4_16_add_c,
                    &vp9_idct4x4_1_add_neon,
                    TX_4X4, 1)));
-#endif
+#endif  // HAVE_NEON
 
 #if HAVE_SSE2 && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(
