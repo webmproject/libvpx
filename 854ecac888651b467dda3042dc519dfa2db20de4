@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//MSc\u003d",
+        "filename": "test/byte_alignment_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-12-11T22:50:05Z",
+      "side": 1,
+      "message": "kBa..., should at least start with k given the const + remaining camel case",
+      "revId": "854ecac888651b467dda3042dc519dfa2db20de4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//MSo\u003d",
+        "filename": "test/byte_alignment_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-12-11T22:50:05Z",
+      "side": 1,
+      "message": "0u is probably enough",
+      "revId": "854ecac888651b467dda3042dc519dfa2db20de4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//MS0\u003d",
+        "filename": "test/byte_alignment_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-12-11T22:50:05Z",
+      "side": 1,
+      "message": "OpenMd5File to match the other",
+      "revId": "854ecac888651b467dda3042dc519dfa2db20de4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//MSw\u003d",
+        "filename": "test/byte_alignment_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-12-11T22:50:05Z",
+      "side": 1,
+      "message": "MD5 in the string here",
+      "revId": "854ecac888651b467dda3042dc519dfa2db20de4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//MSk\u003d",
+        "filename": "test/byte_alignment_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-12-11T22:50:05Z",
+      "side": 1,
+      "message": "MD5",
+      "revId": "854ecac888651b467dda3042dc519dfa2db20de4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
