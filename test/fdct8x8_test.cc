@@ -62,6 +62,10 @@ void reference_8x8_dct_2d(const int16_t input[kNumCoeffs],
 using libvpx_test::ACMRandom;
 
 namespace {
+
+const int kSignBiasMaxDiff255 = 1500;
+const int kSignBiasMaxDiff15 = 10000;
+
 typedef void (*FdctFunc)(const int16_t *in, tran_low_t *out, int stride);
 typedef void (*IdctFunc)(const tran_low_t *in, uint8_t *out, int stride);
 typedef void (*FhtFunc)(const int16_t *in, tran_low_t *out, int stride,
@@ -160,7 +164,7 @@ class FwdTrans8x8TestBase {
 
     for (int j = 0; j < 64; ++j) {
       const int diff = abs(count_sign_block[j][0] - count_sign_block[j][1]);
-      const int max_diff = 1125;
+      const int max_diff = kSignBiasMaxDiff255;
       EXPECT_LT(diff, max_diff << (bit_depth_ - 8))
           << "Error: 8x8 FDCT/FHT has a sign bias > "
           << 1. * max_diff / count_test_block * 100 << "%"
@@ -190,9 +194,9 @@ class FwdTrans8x8TestBase {
 
     for (int j = 0; j < 64; ++j) {
       const int diff = abs(count_sign_block[j][0] - count_sign_block[j][1]);
-      const int max_diff = 10000;
+      const int max_diff = kSignBiasMaxDiff15;
       EXPECT_LT(diff, max_diff << (bit_depth_ - 8))
-          << "Error: 4x4 FDCT/FHT has a sign bias > "
+          << "Error: 8x8 FDCT/FHT has a sign bias > "
           << 1. * max_diff / count_test_block * 100 << "%"
           << " for input range [-15, 15] at index " << j
           << " count0: " << count_sign_block[j][0]
@@ -646,36 +650,24 @@ TEST_P(InvTrans8x8DCT, CompareReference) {
 using std::tr1::make_tuple;
 
 #if CONFIG_VP9_HIGHBITDEPTH
-// TODO(jingning): re-enable after this handles the expanded range [0, 65535]
-// returned from Rand16().
-INSTANTIATE_TEST_CASE_P(
-    DISABLED_C, FwdTrans8x8DCT,
-    ::testing::Values(
-        make_tuple(&vp9_fdct8x8_c, &vp9_idct8x8_64_add_c, 0, VPX_BITS_8)));
 INSTANTIATE_TEST_CASE_P(
     C, FwdTrans8x8DCT,
     ::testing::Values(
+        make_tuple(&vp9_fdct8x8_c, &vp9_idct8x8_64_add_c, 0, VPX_BITS_8),
         make_tuple(&vp9_highbd_fdct8x8_c, &idct8x8_10, 0, VPX_BITS_10),
         make_tuple(&vp9_highbd_fdct8x8_c, &idct8x8_12, 0, VPX_BITS_12)));
 #else
-// TODO(jingning): re-enable after this handles the expanded range [0, 65535]
-// returned from Rand16().
 INSTANTIATE_TEST_CASE_P(
-    DISABLED_C, FwdTrans8x8DCT,
+    C, FwdTrans8x8DCT,
     ::testing::Values(
         make_tuple(&vp9_fdct8x8_c, &vp9_idct8x8_64_add_c, 0, VPX_BITS_8)));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 #if CONFIG_VP9_HIGHBITDEPTH
-// TODO(jingning): re-enable after this handles the expanded range [0, 65535]
-// returned from Rand16().
-INSTANTIATE_TEST_CASE_P(
-    DISABLED_C, FwdTrans8x8HT,
-    ::testing::Values(
-        make_tuple(&vp9_fht8x8_c, &vp9_iht8x8_64_add_c, 0, VPX_BITS_8)));
 INSTANTIATE_TEST_CASE_P(
     C, FwdTrans8x8HT,
     ::testing::Values(
+        make_tuple(&vp9_fht8x8_c, &vp9_iht8x8_64_add_c, 0, VPX_BITS_8),
         make_tuple(&vp9_highbd_fht8x8_c, &iht8x8_10, 0, VPX_BITS_10),
         make_tuple(&vp9_highbd_fht8x8_c, &iht8x8_10, 1, VPX_BITS_10),
         make_tuple(&vp9_highbd_fht8x8_c, &iht8x8_10, 2, VPX_BITS_10),
@@ -691,12 +683,9 @@ INSTANTIATE_TEST_CASE_P(
 // TODO(jingning): re-enable after this handles the expanded range [0, 65535]
 // returned from Rand16().
 INSTANTIATE_TEST_CASE_P(
-    DISABLED_C, FwdTrans8x8HT,
-    ::testing::Values(
-        make_tuple(&vp9_fht8x8_c, &vp9_iht8x8_64_add_c, 0, VPX_BITS_8)));
-INSTANTIATE_TEST_CASE_P(
     C, FwdTrans8x8HT,
     ::testing::Values(
+        make_tuple(&vp9_fht8x8_c, &vp9_iht8x8_64_add_c, 0, VPX_BITS_8),
         make_tuple(&vp9_fht8x8_c, &vp9_iht8x8_64_add_c, 1, VPX_BITS_8),
         make_tuple(&vp9_fht8x8_c, &vp9_iht8x8_64_add_c, 2, VPX_BITS_8),
         make_tuple(&vp9_fht8x8_c, &vp9_iht8x8_64_add_c, 3, VPX_BITS_8)));
@@ -706,12 +695,12 @@ INSTANTIATE_TEST_CASE_P(
 // TODO(jingning): re-enable after this handles the expanded range [0, 65535]
 // returned from Rand16().
 INSTANTIATE_TEST_CASE_P(
-    DISABLED_NEON, FwdTrans8x8DCT,
+    NEON, FwdTrans8x8DCT,
     ::testing::Values(
         make_tuple(&vp9_fdct8x8_neon, &vp9_idct8x8_64_add_neon, 0,
                    VPX_BITS_8)));
 INSTANTIATE_TEST_CASE_P(
-    DISABLED_NEON, FwdTrans8x8HT,
+    NEON, FwdTrans8x8HT,
     ::testing::Values(
         make_tuple(&vp9_fht8x8_c, &vp9_iht8x8_64_add_neon, 0, VPX_BITS_8),
         make_tuple(&vp9_fht8x8_c, &vp9_iht8x8_64_add_neon, 1, VPX_BITS_8),
@@ -723,32 +712,24 @@ INSTANTIATE_TEST_CASE_P(
 // TODO(jingning): re-enable after these handle the expanded range [0, 65535]
 // returned from Rand16().
 INSTANTIATE_TEST_CASE_P(
-    DISABLED_SSE2, FwdTrans8x8DCT,
+    SSE2, FwdTrans8x8DCT,
     ::testing::Values(
         make_tuple(&vp9_fdct8x8_sse2, &vp9_idct8x8_64_add_sse2, 0,
                    VPX_BITS_8)));
 INSTANTIATE_TEST_CASE_P(
-    DISABLED_SSE2, FwdTrans8x8HT,
-    ::testing::Values(
-        make_tuple(&vp9_fht8x8_sse2, &vp9_iht8x8_64_add_sse2, 0, VPX_BITS_8)));
-INSTANTIATE_TEST_CASE_P(
     SSE2, FwdTrans8x8HT,
     ::testing::Values(
+        make_tuple(&vp9_fht8x8_sse2, &vp9_iht8x8_64_add_sse2, 0, VPX_BITS_8),
         make_tuple(&vp9_fht8x8_sse2, &vp9_iht8x8_64_add_sse2, 1, VPX_BITS_8),
         make_tuple(&vp9_fht8x8_sse2, &vp9_iht8x8_64_add_sse2, 2, VPX_BITS_8),
         make_tuple(&vp9_fht8x8_sse2, &vp9_iht8x8_64_add_sse2, 3, VPX_BITS_8)));
 #endif  // HAVE_SSE2 && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 
 #if HAVE_SSE2 && CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
-// TODO(jingning): re-enable after these handle the expanded range [0, 65535]
-// returned from Rand16().
-INSTANTIATE_TEST_CASE_P(
-    DISABLED_SSE2, FwdTrans8x8DCT,
-    ::testing::Values(
-        make_tuple(&vp9_fdct8x8_sse2, &vp9_idct8x8_64_add_c, 0, VPX_BITS_8)));
 INSTANTIATE_TEST_CASE_P(
     SSE2, FwdTrans8x8DCT,
     ::testing::Values(
+        make_tuple(&vp9_fdct8x8_sse2, &vp9_idct8x8_64_add_c, 0, VPX_BITS_8),
         make_tuple(&vp9_highbd_fdct8x8_c,
                    &idct8x8_64_add_10_sse2, 12, VPX_BITS_10),
         make_tuple(&vp9_highbd_fdct8x8_sse2,
@@ -761,12 +742,9 @@ INSTANTIATE_TEST_CASE_P(
 // TODO(jingning): re-enable after these handle the expanded range [0, 65535]
 // returned from Rand16().
 INSTANTIATE_TEST_CASE_P(
-    DISABLED_SSE2, FwdTrans8x8HT,
-    ::testing::Values(
-        make_tuple(&vp9_fht8x8_sse2, &vp9_iht8x8_64_add_c, 0, VPX_BITS_8)));
-INSTANTIATE_TEST_CASE_P(
     SSE2, FwdTrans8x8HT,
     ::testing::Values(
+        make_tuple(&vp9_fht8x8_sse2, &vp9_iht8x8_64_add_c, 0, VPX_BITS_8),
         make_tuple(&vp9_fht8x8_sse2, &vp9_iht8x8_64_add_c, 1, VPX_BITS_8),
         make_tuple(&vp9_fht8x8_sse2, &vp9_iht8x8_64_add_c, 2, VPX_BITS_8),
         make_tuple(&vp9_fht8x8_sse2, &vp9_iht8x8_64_add_c, 3, VPX_BITS_8)));
@@ -791,7 +769,7 @@ INSTANTIATE_TEST_CASE_P(
 // TODO(jingning): re-enable after this handles the expanded range [0, 65535]
 // returned from Rand16().
 INSTANTIATE_TEST_CASE_P(
-    DISABLED_SSSE3, FwdTrans8x8DCT,
+    SSSE3, FwdTrans8x8DCT,
     ::testing::Values(
         make_tuple(&vp9_fdct8x8_ssse3, &vp9_idct8x8_64_add_ssse3, 0,
                    VPX_BITS_8)));
