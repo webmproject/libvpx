@@ -327,7 +327,6 @@ typedef enum {
 static void tree_to_node(void *data, BLOCK_SIZE bsize, variance_node *node) {
   int i;
   node->part_variances = NULL;
-  vpx_memset(node->split, 0, sizeof(node->split));
   switch (bsize) {
     case BLOCK_64X64: {
       v64x64 *vt = (v64x64 *) data;
@@ -376,7 +375,10 @@ static void fill_variance(int64_t s2, int64_t s, int c, var *v) {
   v->sum_square_error = s2;
   v->sum_error = s;
   v->count = c;
-  if (c > 0)
+}
+
+static void get_variance(var *v) {
+  if (v->count > 0)
     v->variance = (int)(256 *
                         (v->sum_square_error - v->sum_error * v->sum_error /
                          v->count) / v->count);
@@ -433,6 +435,7 @@ static int set_vt_partitioning(VP9_COMP *cpi,
   // variance is below threshold, otherwise split will be selected.
   // No check for vert/horiz split as too few samples for variance.
   if (bsize == bsize_ref) {
+    get_variance(&vt.part_variances->none);
     if (mi_col + block_width / 2 < cm->mi_cols &&
         mi_row + block_height / 2 < cm->mi_rows &&
         vt.part_variances->none.variance < threshold_bsize_ref) {
@@ -441,6 +444,7 @@ static int set_vt_partitioning(VP9_COMP *cpi,
     }
     return 0;
   } else if (bsize > bsize_ref) {
+    get_variance(&vt.part_variances->none);
     // For key frame, for bsize above 32X32, or very high variance, take split.
     if (cm->frame_type == KEY_FRAME &&
         (bsize > BLOCK_32X32 ||
@@ -454,24 +458,32 @@ static int set_vt_partitioning(VP9_COMP *cpi,
       set_block_size(cpi, xd, mi_row, mi_col, bsize);
       return 1;
     }
+
     // Check vertical split.
-    if (mi_row + block_height / 2 < cm->mi_rows &&
-        vt.part_variances->vert[0].variance < threshold_low &&
-        vt.part_variances->vert[1].variance < threshold_low) {
-      BLOCK_SIZE subsize = get_subsize(bsize, PARTITION_VERT);
-      set_block_size(cpi, xd, mi_row, mi_col, subsize);
-      set_block_size(cpi, xd, mi_row, mi_col + block_width / 2, subsize);
-      return 1;
+    if (mi_row + block_height / 2 < cm->mi_rows) {
+      get_variance(&vt.part_variances->vert[0]);
+      get_variance(&vt.part_variances->vert[1]);
+      if (vt.part_variances->vert[0].variance < threshold_low &&
+          vt.part_variances->vert[1].variance < threshold_low) {
+        BLOCK_SIZE subsize = get_subsize(bsize, PARTITION_VERT);
+        set_block_size(cpi, xd, mi_row, mi_col, subsize);
+        set_block_size(cpi, xd, mi_row, mi_col + block_width / 2, subsize);
+        return 1;
+      }
     }
     // Check horizontal split.
-    if (mi_col + block_width / 2 < cm->mi_cols &&
-        vt.part_variances->horz[0].variance < threshold_low &&
-        vt.part_variances->horz[1].variance < threshold_low) {
-      BLOCK_SIZE subsize = get_subsize(bsize, PARTITION_HORZ);
-      set_block_size(cpi, xd, mi_row, mi_col, subsize);
-      set_block_size(cpi, xd, mi_row + block_height / 2, mi_col, subsize);
-      return 1;
+    if (mi_col + block_width / 2 < cm->mi_cols) {
+      get_variance(&vt.part_variances->horz[0]);
+      get_variance(&vt.part_variances->horz[1]);
+      if (vt.part_variances->horz[0].variance < threshold_low &&
+          vt.part_variances->horz[1].variance < threshold_low) {
+        BLOCK_SIZE subsize = get_subsize(bsize, PARTITION_HORZ);
+        set_block_size(cpi, xd, mi_row, mi_col, subsize);
+        set_block_size(cpi, xd, mi_row + block_height / 2, mi_col, subsize);
+        return 1;
+      }
     }
+
     return 0;
   }
   return 0;
