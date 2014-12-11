@@ -4260,7 +4260,7 @@ void vp9_highbd_idct8x8_10_add_sse2(const tran_low_t *input, uint8_t *dest8,
     // N.B. Only first 4 cols contain non-zero coeffs
     max_input = _mm_max_epi16(inptr[0], inptr[1]);
     min_input = _mm_min_epi16(inptr[0], inptr[1]);
-    for (i = 2; i < 4; i++) {
+    for (i = 2; i < 8; i++) {
       max_input = _mm_max_epi16(max_input, inptr[i]);
       min_input = _mm_min_epi16(min_input, inptr[i]);
     }
