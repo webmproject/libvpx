@@ -3716,9 +3716,9 @@ void vp9_encode_frame(VP9_COMP *cpi) {
              cm->ref_frame_sign_bias[GOLDEN_FRAME]) ||
         (cm->ref_frame_sign_bias[ALTREF_FRAME] ==
              cm->ref_frame_sign_bias[LAST_FRAME])) {
-      cm->allow_comp_inter_inter = 0;
+      cpi->allow_comp_inter_inter = 0;
     } else {
-      cm->allow_comp_inter_inter = 1;
+      cpi->allow_comp_inter_inter = 1;
       cm->comp_fixed_ref = ALTREF_FRAME;
       cm->comp_var_ref[0] = LAST_FRAME;
       cm->comp_var_ref[1] = GOLDEN_FRAME;
@@ -3742,7 +3742,7 @@ void vp9_encode_frame(VP9_COMP *cpi) {
     const int is_alt_ref = frame_type == ALTREF_FRAME;
 
     /* prediction (compound, single or hybrid) mode selection */
-    if (is_alt_ref || !cm->allow_comp_inter_inter)
+    if (is_alt_ref || !cpi->allow_comp_inter_inter)
       cm->reference_mode = SINGLE_REFERENCE;
     else if (mode_thrs[COMPOUND_REFERENCE] > mode_thrs[SINGLE_REFERENCE] &&
              mode_thrs[COMPOUND_REFERENCE] >

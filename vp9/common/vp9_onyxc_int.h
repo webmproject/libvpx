@@ -182,7 +182,6 @@ typedef struct VP9Common {
   struct segmentation seg;
 
   // Context probabilities for reference frame prediction
-  int allow_comp_inter_inter;
   MV_REFERENCE_FRAME comp_fixed_ref;
   MV_REFERENCE_FRAME comp_var_ref[2];
   REFERENCE_MODE reference_mode;
