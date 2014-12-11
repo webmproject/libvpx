@@ -278,7 +278,7 @@ static void set_block_size(VP9_COMP * const cpi,
 typedef struct {
   int64_t sum_square_error;
   int64_t sum_error;
-  int count;
+  int log2_count;
   int variance;
 } var;
 
@@ -374,21 +374,18 @@ static void tree_to_node(void *data, BLOCK_SIZE bsize, variance_node *node) {
 static void fill_variance(int64_t s2, int64_t s, int c, var *v) {
   v->sum_square_error = s2;
   v->sum_error = s;
-  v->count = c;
+  v->log2_count = c;
 }
 
 static void get_variance(var *v) {
-  if (v->count > 0)
-    v->variance = (int)(256 *
-                        (v->sum_square_error - v->sum_error * v->sum_error /
-                         v->count) / v->count);
-  else
-    v->variance = 0;
+  v->variance = (int)(256 * (v->sum_square_error -
+      ((v->sum_error * v->sum_error) >> v->log2_count)) >> v->log2_count);
 }
 
 void sum_2_variances(const var *a, const var *b, var *r) {
+  assert(a->log2_count == b->log2_count);
   fill_variance(a->sum_square_error + b->sum_square_error,
-                a->sum_error + b->sum_error, a->count + b->count, r);
+                a->sum_error + b->sum_error, a->log2_count + 1, r);
 }
 
 static void fill_variance_tree(void *data, BLOCK_SIZE bsize) {
@@ -585,7 +582,7 @@ static void choose_partitioning(VP9_COMP *cpi,
           // If variance is based on 8x8 downsampling, we stop here and have
           // one sample for 8x8 block (so use 1 for count in fill_variance),
           // which of course means variance = 0 for 8x8 block.
-          fill_variance(sse, sum, 1, &vst->split[k].part_variances.none);
+          fill_variance(sse, sum, 0, &vst->split[k].part_variances.none);
         } else {
           // For key frame, go down to 4x4.
           v8x8 *vst2 = &vst->split[k];
@@ -603,7 +600,7 @@ static void choose_partitioning(VP9_COMP *cpi,
             // If variance is based on 4x4 downsampling, we stop here and have
             // one sample for 4x4 block (so use 1 for count in fill_variance),
             // which of course means variance = 0 for 4x4 block.
-           fill_variance(sse, sum, 1, &vst2->split[m].part_variances.none);
+           fill_variance(sse, sum, 0, &vst2->split[m].part_variances.none);
           }
         }
       }
