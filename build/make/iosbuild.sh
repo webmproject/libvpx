@@ -57,9 +57,6 @@ target_to_preproc_symbol() {
     arm64-*)
       echo "__aarch64__"
       ;;
-    armv6-*)
-      echo "__ARM_ARCH_6__"
-      ;;
     armv7-*)
       echo "__ARM_ARCH_7A__"
       ;;
@@ -186,9 +183,12 @@ iosbuild_usage() {
 cat << EOF
   Usage: ${0##*/} [arguments]
     --help: Display this message and exit.
+    --extra-configure-args <args>: Extra args to pass when configuring libvpx.
     --jobs: Number of make jobs.
     --preserve-build-output: Do not delete the build directory.
     --show-build-output: Show output from each library build.
+    --targets <targets>: Override default target list. Defaults:
+         ${TARGETS}
     --verbose: Output information about the environment and each stage of the
                build.
 EOF
@@ -222,6 +222,10 @@ while [ -n "$1" ]; do
       ;;
     --show-build-output)
       devnull=
+      ;;
+    --targets)
+      TARGETS="$2"
+      shift
       ;;
     --verbose)
       VERBOSE=yes
