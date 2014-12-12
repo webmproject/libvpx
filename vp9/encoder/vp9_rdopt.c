@@ -3065,7 +3065,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
 
     comp_pred = second_ref_frame > INTRA_FRAME;
     if (comp_pred) {
-      if (!cm->allow_comp_inter_inter)
+      if (!cpi->allow_comp_inter_inter)
         continue;
 
       // Skip compound inter modes if ARF is not available.
@@ -3715,7 +3715,7 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
 
     comp_pred = second_ref_frame > INTRA_FRAME;
     if (comp_pred) {
-      if (!cm->allow_comp_inter_inter)
+      if (!cpi->allow_comp_inter_inter)
         continue;
       if (!(cpi->ref_frame_flags & flag_list[second_ref_frame]))
         continue;

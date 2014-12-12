@@ -1183,7 +1183,7 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
       vp9_cond_prob_diff_update(&header_bc, &fc->intra_inter_prob[i],
                                 counts->intra_inter[i]);
 
-    if (cm->allow_comp_inter_inter) {
+    if (cpi->allow_comp_inter_inter) {
       const int use_compound_pred = cm->reference_mode != SINGLE_REFERENCE;
       const int use_hybrid_pred = cm->reference_mode == REFERENCE_MODE_SELECT;
 
