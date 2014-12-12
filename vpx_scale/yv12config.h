@@ -73,9 +73,10 @@ int vp9_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
 #if CONFIG_VP9_HIGHBITDEPTH
                            int use_highbitdepth,
 #endif
-                           int border);
+                           int border, int byte_alignment);
 
-// Updates the yv12 buffer config with the frame buffer. If cb is not
+// Updates the yv12 buffer config with the frame buffer. |byte_alignment| must
+// be a power of 2, from 32 to 1024. 0 sets legacy alignment. If cb is not
 // NULL, then libvpx is using the frame buffer callbacks to handle memory.
 // If cb is not NULL, libvpx will call cb with minimum size in bytes needed
 // to decode the current frame. If cb is NULL, libvpx will allocate memory
@@ -87,6 +88,7 @@ int vp9_realloc_frame_buffer(YV12_BUFFER_CONFIG *ybf,
                              int use_highbitdepth,
 #endif
                              int border,
+                             int byte_alignment,
                              vpx_codec_frame_buffer_t *fb,
                              vpx_get_frame_buffer_cb_fn_t cb,
                              void *cb_priv);
