@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//MOk\u003d",
+        "filename": "test/test.mk",
+        "patchSetId": 12
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-12-12T01:32:20Z",
+      "side": 1,
+      "message": "My suggestion as we discussed offline - is to keep the test generic and instead add ./vpx_config.h to vp9_dx_iface.c. But it is up to you.",
+      "revId": "da618be0a305b4f678e8023ca5580b4a31fe74d2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//MOs\u003d",
+        "filename": "test/vp9_encoder_parms_get_to_decoder.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-12-12T01:32:20Z",
+      "side": 1,
+      "message": "I think the two above are not needed",
+      "revId": "da618be0a305b4f678e8023ca5580b4a31fe74d2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
