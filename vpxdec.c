@@ -131,7 +131,7 @@ static const arg_def_t *vp8_pp_args[] = {
 #endif
 
 #if CONFIG_LIBYUV
-static INLINE int vpx_image_scale(vpx_image_t *src, vpx_image_t *dst,
+static INLINE int libyuv_scale(vpx_image_t *src, vpx_image_t *dst,
                                   FilterModeEnum mode) {
 #if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
   if (src->fmt == VPX_IMG_FMT_I42016) {
@@ -948,7 +948,7 @@ int main_loop(int argc, const char **argv_) {
 
         if (img->d_w != scaled_img->d_w || img->d_h != scaled_img->d_h) {
 #if CONFIG_LIBYUV
-          vpx_image_scale(img, scaled_img, kFilterBox);
+          libyuv_scale(img, scaled_img, kFilterBox);
           img = scaled_img;
 #else
           fprintf(stderr, "Failed  to scale output frame: %s.\n"
