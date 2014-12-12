@@ -97,6 +97,10 @@ class Decoder {
 
   bool IsVP8() const;
 
+  vpx_codec_ctx_t * GetDecoder() {
+    return &decoder_;
+  }
+
  protected:
   virtual vpx_codec_iface_t* CodecInterface() const = 0;
 
