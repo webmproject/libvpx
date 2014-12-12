@@ -312,9 +312,11 @@ void vp9_filter_block1d8_v8_intrin_ssse3(unsigned char *src_ptr,
                                          unsigned int out_pitch,
                                          unsigned int output_height,
                                          int16_t *filter) {
-  __m128i addFilterReg64, filtersReg, minReg, srcRegFilt6;
+  __m128i addFilterReg64, filtersReg, minReg;
   __m128i firstFilters, secondFilters, thirdFilters, forthFilters;
-  __m128i srcRegFilt1, srcRegFilt2, srcRegFilt3, srcRegFilt4, srcRegFilt5;
+  __m128i srcRegFilt1, srcRegFilt2, srcRegFilt3, srcRegFilt5;
+  __m128i srcReg1, srcReg2, srcReg3, srcReg4, srcReg5, srcReg6, srcReg7;
+  __m128i srcReg8;
   unsigned int i;
 
   // create a register with 0,64,0,64,0,64,0,64,0,64,0,64,0,64,0,64
@@ -333,27 +335,26 @@ void vp9_filter_block1d8_v8_intrin_ssse3(unsigned char *src_ptr,
   // duplicate only the forth 16 bits in the filter
   forthFilters = _mm_shuffle_epi8(filtersReg, _mm_set1_epi16(0x706u));
 
+  // load the first 7 rows of 8 bytes
+  srcReg1 = _mm_loadl_epi64((__m128i *)&src_ptr[0]);
+  srcReg2 = _mm_loadl_epi64((__m128i *)&(src_ptr + src_pitch)[0]);
+  srcReg3 = _mm_loadl_epi64((__m128i *)&(src_ptr + src_pitch * 2)[0]);
+  srcReg4 = _mm_loadl_epi64((__m128i *)&(src_ptr + src_pitch * 3)[0]);
+  srcReg5 = _mm_loadl_epi64((__m128i *)&(src_ptr + src_pitch * 4)[0]);
+  srcReg6 = _mm_loadl_epi64((__m128i *)&(src_ptr + src_pitch * 5)[0]);
+  srcReg7 = _mm_loadl_epi64((__m128i *)&(src_ptr + src_pitch * 6)[0]);
+
   for (i = 0; i < output_height; i++) {
-    // load the first 8 bytes
-    srcRegFilt1 = _mm_loadl_epi64((__m128i *)&src_ptr[0]);
-    // load the next 8 bytes in stride of src_pitch
-    srcRegFilt2 = _mm_loadl_epi64((__m128i *)&(src_ptr+src_pitch)[0]);
-    srcRegFilt3 = _mm_loadl_epi64((__m128i *)&(src_ptr+src_pitch*2)[0]);
-    srcRegFilt4 = _mm_loadl_epi64((__m128i *)&(src_ptr+src_pitch*3)[0]);
+    // load the last 8 bytes
+    srcReg8 = _mm_loadl_epi64((__m128i *)&(src_ptr + src_pitch * 7)[0]);
 
     // merge the result together
-    srcRegFilt1 = _mm_unpacklo_epi8(srcRegFilt1, srcRegFilt2);
-    srcRegFilt3 = _mm_unpacklo_epi8(srcRegFilt3, srcRegFilt4);
-
-    // load the next 8 bytes in stride of src_pitch
-    srcRegFilt2 = _mm_loadl_epi64((__m128i *)&(src_ptr+src_pitch*4)[0]);
-    srcRegFilt4 = _mm_loadl_epi64((__m128i *)&(src_ptr+src_pitch*5)[0]);
-    srcRegFilt5 = _mm_loadl_epi64((__m128i *)&(src_ptr+src_pitch*6)[0]);
-    srcRegFilt6 = _mm_loadl_epi64((__m128i *)&(src_ptr+src_pitch*7)[0]);
+    srcRegFilt1 = _mm_unpacklo_epi8(srcReg1, srcReg2);
+    srcRegFilt3 = _mm_unpacklo_epi8(srcReg3, srcReg4);
 
     // merge the result together
-    srcRegFilt2 = _mm_unpacklo_epi8(srcRegFilt2, srcRegFilt4);
-    srcRegFilt5 = _mm_unpacklo_epi8(srcRegFilt5, srcRegFilt6);
+    srcRegFilt2 = _mm_unpacklo_epi8(srcReg5, srcReg6);
+    srcRegFilt5 = _mm_unpacklo_epi8(srcReg7, srcReg8);
 
     // multiply 2 adjacent elements with the filter and add the result
     srcRegFilt1 = _mm_maddubs_epi16(srcRegFilt1, firstFilters);
@@ -376,6 +377,15 @@ void vp9_filter_block1d8_v8_intrin_ssse3(unsigned char *src_ptr,
     srcRegFilt1 = _mm_packus_epi16(srcRegFilt1, srcRegFilt1);
 
     src_ptr+=src_pitch;
+
+    // shift down a row
+    srcReg1 = srcReg2;
+    srcReg2 = srcReg3;
+    srcReg3 = srcReg4;
+    srcReg4 = srcReg5;
+    srcReg5 = srcReg6;
+    srcReg6 = srcReg7;
+    srcReg7 = srcReg8;
 
     // save only 8 bytes convolve result
     _mm_storel_epi64((__m128i*)&output_ptr[0], srcRegFilt1);
