@@ -249,14 +249,14 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    vp9_model_rd_from_var_lapndz(sse - var, 1 << num_pels_log2_lookup[bsize],
+    vp9_model_rd_from_var_lapndz(sse - var, num_pels_log2_lookup[bsize],
                                  dc_quant >> (xd->bd - 5), &rate, &dist);
   } else {
-    vp9_model_rd_from_var_lapndz(sse - var, 1 << num_pels_log2_lookup[bsize],
+    vp9_model_rd_from_var_lapndz(sse - var, num_pels_log2_lookup[bsize],
                                  dc_quant >> 3, &rate, &dist);
   }
 #else
-  vp9_model_rd_from_var_lapndz(sse - var, 1 << num_pels_log2_lookup[bsize],
+  vp9_model_rd_from_var_lapndz(sse - var, num_pels_log2_lookup[bsize],
                                dc_quant >> 3, &rate, &dist);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
@@ -265,14 +265,14 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    vp9_model_rd_from_var_lapndz(var, 1 << num_pels_log2_lookup[bsize],
+    vp9_model_rd_from_var_lapndz(var, num_pels_log2_lookup[bsize],
                                  ac_quant >> (xd->bd - 5), &rate, &dist);
   } else {
-    vp9_model_rd_from_var_lapndz(var, 1 << num_pels_log2_lookup[bsize],
+    vp9_model_rd_from_var_lapndz(var, num_pels_log2_lookup[bsize],
                                  ac_quant >> 3, &rate, &dist);
   }
 #else
-  vp9_model_rd_from_var_lapndz(var, 1 << num_pels_log2_lookup[bsize],
+  vp9_model_rd_from_var_lapndz(var, num_pels_log2_lookup[bsize],
                                ac_quant >> 3, &rate, &dist);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
