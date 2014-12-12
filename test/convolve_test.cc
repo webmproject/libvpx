@@ -10,6 +10,7 @@
 
 #include <string.h>
 #include "test/acm_random.h"
+#include "test/clear_system_state.h"
 #include "test/register_state_check.h"
 #include "test/util.h"
 #include "third_party/googletest/src/include/gtest/gtest.h"
@@ -314,6 +315,8 @@ class ConvolveTest : public ::testing::TestWithParam<ConvolveParam> {
         vpx_memalign(kDataAlignment, (kOutputBufferSize) * sizeof(uint16_t)));
 #endif
   }
+
+  virtual void TearDown() { libvpx_test::ClearSystemState(); }
 
   static void TearDownTestCase() {
     vpx_free(input_ - 1);
