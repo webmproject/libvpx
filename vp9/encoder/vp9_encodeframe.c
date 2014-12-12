@@ -3124,7 +3124,7 @@ static void nonrd_select_partition(VP9_COMP *cpi,
         if (mi_row + hbs < cm->mi_rows) {
           pc_tree->horizontal[1].pred_pixel_ready = 1;
           nonrd_pick_sb_modes(cpi, tile_data, x, mi_row + hbs, mi_col,
-                              &this_rdc, subsize, &pc_tree->horizontal[0]);
+                              &this_rdc, subsize, &pc_tree->horizontal[1]);
           pc_tree->horizontal[1].mic.mbmi = xd->mi[0].src_mi->mbmi;
           pc_tree->horizontal[1].skip_txfm[0] = x->skip_txfm[0];
           pc_tree->horizontal[1].skip = x->skip;
@@ -3248,7 +3248,7 @@ static void nonrd_use_partition(VP9_COMP *cpi,
       if (mi_row + hbs < cm->mi_rows) {
         pc_tree->horizontal[1].pred_pixel_ready = 1;
         nonrd_pick_sb_modes(cpi, tile_data, x, mi_row + hbs, mi_col,
-                            dummy_cost, subsize, &pc_tree->horizontal[0]);
+                            dummy_cost, subsize, &pc_tree->horizontal[1]);
         pc_tree->horizontal[1].mic.mbmi = xd->mi[0].src_mi->mbmi;
         pc_tree->horizontal[1].skip_txfm[0] = x->skip_txfm[0];
         pc_tree->horizontal[1].skip = x->skip;
