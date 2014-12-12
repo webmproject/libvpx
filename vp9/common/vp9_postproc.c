@@ -683,7 +683,6 @@ int vp9_post_proc_frame(struct VP9Common *cm,
     }
   }
 
-#if CONFIG_VP9_POSTPROC || CONFIG_INTERNAL_STATS
   if (vp9_realloc_frame_buffer(&cm->post_proc_buffer, cm->width, cm->height,
                                cm->subsampling_x, cm->subsampling_y,
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -692,7 +691,6 @@ int vp9_post_proc_frame(struct VP9Common *cm,
                                VP9_DEC_BORDER_IN_PIXELS, NULL, NULL, NULL) < 0)
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate post-processing buffer");
-#endif
 
   if ((flags & VP9D_MFQE) && cm->current_video_frame >= 2 &&
       cm->postproc_state.last_frame_valid &&
@@ -749,4 +747,4 @@ int vp9_post_proc_frame(struct VP9Common *cm,
   swap_mi_and_prev_mi(cm);
   return 0;
 }
-#endif
+#endif  // CONFIG_VP9_POSTPROC

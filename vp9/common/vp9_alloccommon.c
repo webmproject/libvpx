@@ -44,8 +44,10 @@ void vp9_free_ref_frame_buffers(VP9_COMMON *cm) {
     vp9_free_frame_buffer(&cm->frame_bufs[i].buf);
   }
 
+#if CONFIG_VP9_POSTPROC
   vp9_free_frame_buffer(&cm->post_proc_buffer);
   vp9_free_frame_buffer(&cm->post_proc_buffer_int);
+#endif
 }
 
 void vp9_free_context_buffers(VP9_COMMON *cm) {
@@ -126,7 +128,7 @@ int vp9_alloc_ref_frame_buffers(VP9_COMMON *cm, int width, int height) {
 
   init_frame_bufs(cm);
 
-#if CONFIG_INTERNAL_STATS || CONFIG_VP9_POSTPROC
+#if CONFIG_VP9_POSTPROC
   if (vp9_alloc_frame_buffer(&cm->post_proc_buffer, width, height, ss_x, ss_y,
 #if CONFIG_VP9_HIGHBITDEPTH
                              cm->use_highbitdepth,
