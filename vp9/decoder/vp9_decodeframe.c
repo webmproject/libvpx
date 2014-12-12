@@ -952,7 +952,6 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
                           &tile_data->bit_reader, pbi->decrypt_cb,
                           pbi->decrypt_state);
       init_macroblockd(cm, &tile_data->xd);
-      vp9_zero(tile_data->xd.dqcoeff);
     }
   }
 
@@ -1149,7 +1148,6 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
                           &tile_data->bit_reader, pbi->decrypt_cb,
                           pbi->decrypt_state);
       init_macroblockd(cm, &tile_data->xd);
-      vp9_zero(tile_data->xd.dqcoeff);
 
       worker->had_error = 0;
       if (i == num_workers - 1 || n == tile_cols - 1) {
@@ -1559,7 +1557,6 @@ void vp9_decode_frame(VP9Decoder *pbi,
 
   *cm->fc = cm->frame_contexts[cm->frame_context_idx];
   vp9_zero(cm->counts);
-  vp9_zero(xd->dqcoeff);
 
   xd->corrupted = 0;
   new_fb->corrupted = read_compressed_header(pbi, data, first_partition_size);
