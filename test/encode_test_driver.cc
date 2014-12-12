@@ -17,6 +17,21 @@
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
 namespace libvpx_test {
+void Encoder::InitEncoder(VideoSource *video) {
+  vpx_codec_err_t res;
+  const vpx_image_t *img = video->img();
+
+  if (video->img() && !encoder_.priv) {
+    cfg_.g_w = img->d_w;
+    cfg_.g_h = img->d_h;
+    cfg_.g_timebase = video->timebase();
+    cfg_.rc_twopass_stats_in = stats_->buf();
+    res = vpx_codec_enc_init(&encoder_, CodecInterface(), &cfg_,
+                             init_flags_);
+    ASSERT_EQ(VPX_CODEC_OK, res) << EncoderError();
+  }
+}
+
 void Encoder::EncodeFrame(VideoSource *video, const unsigned long frame_flags) {
   if (video->img())
     EncodeFrameInternal(*video, frame_flags);
@@ -38,17 +53,6 @@ void Encoder::EncodeFrameInternal(const VideoSource &video,
                                   const unsigned long frame_flags) {
   vpx_codec_err_t res;
   const vpx_image_t *img = video.img();
-
-  // Handle first frame initialization
-  if (!encoder_.priv) {
-    cfg_.g_w = img->d_w;
-    cfg_.g_h = img->d_h;
-    cfg_.g_timebase = video.timebase();
-    cfg_.rc_twopass_stats_in = stats_->buf();
-    res = vpx_codec_enc_init(&encoder_, CodecInterface(), &cfg_,
-                             init_flags_);
-    ASSERT_EQ(VPX_CODEC_OK, res) << EncoderError();
-  }
 
   // Handle frame resizing
   if (cfg_.g_w != img->d_w || cfg_.g_h != img->d_h) {
@@ -160,6 +164,9 @@ void EncoderTest::RunLoop(VideoSource *video) {
                                                    &stats_);
     ASSERT_TRUE(encoder != NULL);
 
+    video->Begin();
+    encoder->InitEncoder(video);
+
     unsigned long dec_init_flags = 0;  // NOLINT
     // Use fragment decoder if encoder outputs partitions.
     // NOTE: fragment decoder and partition encoder are only supported by VP8.
@@ -167,7 +174,7 @@ void EncoderTest::RunLoop(VideoSource *video) {
       dec_init_flags |= VPX_CODEC_USE_INPUT_FRAGMENTS;
     Decoder* const decoder = codec_->CreateDecoder(dec_cfg, dec_init_flags, 0);
     bool again;
-    for (again = true, video->Begin(); again; video->Next()) {
+    for (again = true; again; video->Next()) {
       again = (video->img() != NULL);
 
       PreEncodeFrameHook(video);
