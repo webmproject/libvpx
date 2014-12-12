@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "./vpx_config.h"
 #include "./vpx_version.h"
 
 #include "vpx/internal/vpx_codec_internal.h"
