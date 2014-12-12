@@ -190,3 +190,12 @@ void vp9_cond_prob_diff_update(vp9_writer *w, vp9_prob *oldp,
     vp9_write(w, 0, upd);
   }
 }
+
+int vp9_cond_prob_diff_update_savings(vp9_prob *oldp,
+                                      const unsigned int ct[2]) {
+  const vp9_prob upd = DIFF_UPDATE_PROB;
+  vp9_prob newp = get_binary_prob(ct[0], ct[1]);
+  const int savings = vp9_prob_diff_update_savings_search(ct, *oldp, &newp,
+                                                          upd);
+  return savings;
+}

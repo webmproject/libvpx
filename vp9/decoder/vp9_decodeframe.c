@@ -999,13 +999,11 @@ static void decode_partition(VP9_COMMON *const cm, MACROBLOCKD *const xd,
       partition != PARTITION_NONE &&
       bsize <= MAX_SUPERTX_BLOCK_SIZE &&
       !supertx_enabled) {
-    if (partition == PARTITION_SPLIT) {
-      supertx_enabled = vp9_read(r, cm->fc.supertxsplit_prob[supertx_size]);
-      cm->counts.supertxsplit[supertx_size][supertx_enabled]++;
-    } else {
-      supertx_enabled = vp9_read(r, cm->fc.supertx_prob[supertx_size]);
-      cm->counts.supertx[supertx_size][supertx_enabled]++;
-    }
+    const int supertx_context =
+        partition_supertx_context_lookup[partition];
+    supertx_enabled = vp9_read(
+        r, cm->fc.supertx_prob[supertx_context][supertx_size]);
+    cm->counts.supertx[supertx_context][supertx_size][supertx_enabled]++;
   }
   if (supertx_enabled && read_token) {
     int offset = mi_row * cm->mi_stride + mi_col;
@@ -2020,6 +2018,30 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
   return sz;
 }
 
+#if CONFIG_EXT_TX
+static void read_ext_tx_probs(FRAME_CONTEXT *fc, vp9_reader *r) {
+  int i, j;
+  if (vp9_read(r, GROUP_DIFF_UPDATE_PROB)) {
+    for (j = TX_4X4; j <= TX_16X16; ++j)
+      for (i = 0; i < EXT_TX_TYPES - 1; ++i)
+        vp9_diff_update_prob(r, &fc->ext_tx_prob[j][i]);
+  }
+}
+#endif  // CONFIG_EXT_TX
+
+#if CONFIG_SUPERTX
+static void read_supertx_probs(FRAME_CONTEXT *fc, vp9_reader *r) {
+  int i, j;
+  if (vp9_read(r, GROUP_DIFF_UPDATE_PROB)) {
+    for (i = 0; i < PARTITION_SUPERTX_CONTEXTS; ++i) {
+      for (j = 1; j < TX_SIZES; ++j) {
+        vp9_diff_update_prob(r, &fc->supertx_prob[i][j]);
+      }
+    }
+  }
+}
+#endif  // CONFIG_SUPERTX
+
 static int read_compressed_header(VP9Decoder *pbi, const uint8_t *data,
                                   size_t partition_size) {
   VP9_COMMON *const cm = &pbi->common;
@@ -2068,9 +2090,10 @@ static int read_compressed_header(VP9Decoder *pbi, const uint8_t *data,
 
     read_mv_probs(nmvc, cm->allow_high_precision_mv, &r);
 #if CONFIG_EXT_TX
-    for (j = TX_4X4; j <= TX_16X16; ++j)
-      for (i = 0; i < EXT_TX_TYPES - 1; ++i)
-        vp9_diff_update_prob(&r, &fc->ext_tx_prob[j][i]);
+    read_ext_tx_probs(fc, &r);
+#endif
+#if CONFIG_SUPERTX
+    read_supertx_probs(fc, &r);
 #endif
 #if CONFIG_TX_SKIP
   for (i = 0; i < 2; i++)

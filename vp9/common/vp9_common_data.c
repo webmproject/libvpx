@@ -184,4 +184,8 @@ const TX_SIZE uvsupertx_size_lookup[TX_SIZES][2][2] = {
   {{TX_64X64, TX_32X32}, {TX_32X32, TX_32X32}},
 #endif  // CONFIG_TX64X64
 };
+
+const int partition_supertx_context_lookup[PARTITION_TYPES] = {
+  -1, 0, 0, 1
+};
 #endif

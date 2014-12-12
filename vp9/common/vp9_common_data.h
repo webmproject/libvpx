@@ -34,6 +34,7 @@ extern const TX_SIZE tx_mode_to_biggest_tx_size[TX_MODES];
 extern const BLOCK_SIZE ss_size_lookup[BLOCK_SIZES][2][2];
 #if CONFIG_SUPERTX
 extern const TX_SIZE uvsupertx_size_lookup[TX_SIZES][2][2];
+extern const int partition_supertx_context_lookup[PARTITION_TYPES];
 #endif
 
 #ifdef __cplusplus

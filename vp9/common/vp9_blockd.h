@@ -268,11 +268,13 @@ static INLINE BLOCK_SIZE get_subsize(BLOCK_SIZE bsize,
 extern const TX_TYPE intra_mode_to_tx_type_lookup[INTRA_MODES];
 
 #if CONFIG_SUPERTX
+
+#define PARTITION_SUPERTX_CONTEXTS 2
 #if CONFIG_TX64X64
 #define MAX_SUPERTX_BLOCK_SIZE BLOCK_64X64
 #else
 #define MAX_SUPERTX_BLOCK_SIZE BLOCK_32X32
-#endif
+#endif  // CONFIG_TX64X64
 
 static INLINE TX_SIZE bsize_to_tx_size(BLOCK_SIZE bsize) {
   const TX_SIZE bsize_to_tx_size_lookup[BLOCK_SIZES] = {
@@ -308,7 +310,7 @@ static TX_TYPE ext_tx_to_txtype[EXT_TX_TYPES] = {
   FLIPADST_DCT,
   DCT_FLIPADST,
 };
-#endif
+#endif  // CONFIG_EXT_TX
 
 static INLINE TX_TYPE get_tx_type(PLANE_TYPE plane_type,
                                   const MACROBLOCKD *xd) {

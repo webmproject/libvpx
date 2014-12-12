@@ -704,9 +704,6 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
         mbmi->tx_size <= TX_16X16 &&
         cm->base_qindex > 0 &&
         mbmi->sb_type >= BLOCK_8X8 &&
-#if CONFIG_SUPERTX
-      !supertx_enabled &&
-#endif
       !vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP) &&
       !mbmi->skip) {
       mbmi->ext_txfrm = vp9_read_tree(r, vp9_ext_tx_tree,

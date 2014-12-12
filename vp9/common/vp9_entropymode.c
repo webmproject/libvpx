@@ -314,20 +314,17 @@ static const vp9_prob default_ext_tx_prob[3][EXT_TX_TYPES - 1] = {
 #endif  // CONFIG_EXT_TX
 
 #if CONFIG_SUPERTX
-static const vp9_prob default_supertx_prob[TX_SIZES] = {
-  255, 160, 160, 160,
+static const vp9_prob default_supertx_prob[PARTITION_SUPERTX_CONTEXTS]
+                                          [TX_SIZES] = {
 #if CONFIG_TX64X64
-  160
+  { 1, 160, 160, 170, 170 },
+  { 1, 200, 200, 210, 210 },
+#else
+  { 1, 160, 160, 170 },
+  { 1, 200, 200, 210 },
 #endif
 };
-
-static const vp9_prob default_supertxsplit_prob[TX_SIZES] = {
-  255, 200, 200, 200,
-#if CONFIG_TX64X64
-  200
-#endif
-};
-#endif
+#endif  // CONFIG_SUPERTX
 
 #if CONFIG_TX64X64
 void tx_counts_to_branch_counts_64x64(const unsigned int *tx_count_64x64p,
@@ -408,7 +405,6 @@ void vp9_init_mode_probs(FRAME_CONTEXT *fc) {
 #endif
 #if CONFIG_SUPERTX
   vp9_copy(fc->supertx_prob, default_supertx_prob);
-  vp9_copy(fc->supertxsplit_prob, default_supertxsplit_prob);
 #endif
 #if CONFIG_TX_SKIP
   vp9_copy(fc->y_tx_skip_prob, default_y_tx_skip_prob);
@@ -529,13 +525,11 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
 #endif  // CONFIG_EXT_TX
 
 #if CONFIG_SUPERTX
-  for (i = 1; i < TX_SIZES; ++i) {
-    fc->supertx_prob[i] = adapt_prob(pre_fc->supertx_prob[i],
-                                     counts->supertx[i]);
-  }
-  for (i = 1; i < TX_SIZES; ++i) {
-    fc->supertxsplit_prob[i] = adapt_prob(pre_fc->supertxsplit_prob[i],
-                                          counts->supertxsplit[i]);
+  for (i = 0; i < PARTITION_SUPERTX_CONTEXTS; ++i) {
+    for (j = 1; j < TX_SIZES; ++j) {
+      fc->supertx_prob[i][j] = adapt_prob(pre_fc->supertx_prob[i][j],
+                                          counts->supertx[i][j]);
+    }
   }
 #endif  // CONFIG_SUPERTX
 #if CONFIG_TX_SKIP
