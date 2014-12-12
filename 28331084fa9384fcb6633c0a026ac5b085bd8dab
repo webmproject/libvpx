@@ -16,6 +16,24 @@
       "revId": "28331084fa9384fcb6633c0a026ac5b085bd8dab",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//MIo\u003d",
+        "filename": "build/make/iosbuild.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2014-12-12T20:53:57Z",
+      "side": 1,
+      "message": "yeah... I\u0027ll add that. I was lazy and made these changes on my windows box. I want to actually run it before adding that here (to make sure it\u0027s readable).",
+      "parentUuid": "AAAAdn//MI4\u003d",
+      "revId": "28331084fa9384fcb6633c0a026ac5b085bd8dab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
