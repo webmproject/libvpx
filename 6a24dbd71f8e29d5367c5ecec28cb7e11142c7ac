@@ -16,6 +16,24 @@
       "revId": "6a24dbd71f8e29d5367c5ecec28cb7e11142c7ac",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//MFc\u003d",
+        "filename": "vp9/common/x86/vp9_subpixel_8t_intrin_ssse3.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 425,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-12-12T22:32:56Z",
+      "side": 1,
+      "message": "this file could use a cosmetic patch as a follow-up",
+      "parentUuid": "AAAAdn//MHE\u003d",
+      "revId": "6a24dbd71f8e29d5367c5ecec28cb7e11142c7ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
