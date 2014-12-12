@@ -423,8 +423,9 @@ static int set_vt_partitioning(VP9_COMP *cpi,
 
   if (cm->frame_type == KEY_FRAME) {
     bsize_ref = BLOCK_8X8;
-    // Choose lower thresholds for key frame variance to favor split.
-    threshold_bsize_ref = threshold >> 1;
+    // Choose lower thresholds for key frame variance to favor split, but keep
+    // threshold for splitting to 4x4 block still fairly high for now.
+    threshold_bsize_ref = threshold << 2;
     threshold_low = threshold >> 2;
   }
 
@@ -646,8 +647,6 @@ static void choose_partitioning(VP9_COMP *cpi,
             for (k = 0; k < 4; ++k) {
               const int x8_idx = (k & 1);
               const int y8_idx = (k >> 1);
-              // TODO(marpan): Allow for setting 4x4 partition on key frame.
-              /*
               if (cm->frame_type == KEY_FRAME) {
                 if (!set_vt_partitioning(cpi, xd,
                                          &vt.split[i].split[j].split[k],
@@ -660,12 +659,11 @@ static void choose_partitioning(VP9_COMP *cpi,
                                    BLOCK_4X4);
                 }
               } else {
-              */
                 set_block_size(cpi, xd,
                                (mi_row + y32_idx + y16_idx + y8_idx),
                                (mi_col + x32_idx + x16_idx + x8_idx),
                                BLOCK_8X8);
-              // }
+               }
             }
           }
         }
