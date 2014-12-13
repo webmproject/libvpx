@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//MA4\u003d",
+        "filename": "build/make/iosbuild.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-12-13T04:05:02Z",
+      "side": 1,
+      "message": "oh maybe I get something similar with verbose, I was just a bit bothered when I got nothing when running with no flags...",
+      "revId": "d356dce759fe8ce0cb05fad97aeac3ea69469b2f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
