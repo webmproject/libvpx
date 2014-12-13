@@ -95,6 +95,7 @@ ifneq ($(CONFIG_VP8_ENCODER)$(CONFIG_VP8_DECODER),)
 # These tests require both the encoder and decoder to be built.
 ifeq ($(CONFIG_VP8_ENCODER)$(CONFIG_VP8_DECODER),yesyes)
 LIBVPX_TEST_SRCS-yes                   += vp8_boolcoder_test.cc
+LIBVPX_TEST_SRCS-yes                   += vp8_fragments_test.cc
 endif
 
 LIBVPX_TEST_SRCS-$(CONFIG_POSTPROC)    += pp_filter_test.cc
