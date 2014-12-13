@@ -172,7 +172,12 @@ build_framework() {
 # Trap function. Cleans up the subtree used to build all targets contained in
 # $TARGETS.
 cleanup() {
+  local readonly res=$?
   cd "${ORIG_PWD}"
+
+  if [ $res -ne 0 ]; then
+    elog "build exited with error ($res)"
+  fi
 
   if [ "${PRESERVE_BUILD_OUTPUT}" != "yes" ]; then
     rm -rf "${BUILD_ROOT}"
@@ -192,6 +197,10 @@ cat << EOF
     --verbose: Output information about the environment and each stage of the
                build.
 EOF
+}
+
+elog() {
+  echo "${0##*/} failed because: $@" 1>&2
 }
 
 vlog() {
@@ -255,3 +264,5 @@ EOF
 fi
 
 build_framework "${TARGETS}"
+echo "Successfully built '${FRAMEWORK_DIR}' for:"
+echo "         ${TARGETS}"
