@@ -34,6 +34,24 @@
       "revId": "6a24dbd71f8e29d5367c5ecec28cb7e11142c7ac",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//MCo\u003d",
+        "filename": "vp9/common/x86/vp9_subpixel_8t_intrin_ssse3.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 425,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-12-13T00:14:52Z",
+      "side": 1,
+      "message": "Yes. I wanted to keep the noise down.",
+      "parentUuid": "AAAAdn//MFc\u003d",
+      "revId": "6a24dbd71f8e29d5367c5ecec28cb7e11142c7ac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
