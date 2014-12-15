@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//L5I\u003d",
+        "filename": "test/codec_factory.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-12-15T22:30:50Z",
+      "side": 1,
+      "message": "I don\u0027t think you should need this.",
+      "revId": "3ae2c86806a4c99205afd3f3ea068af502b9befc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//L5A\u003d",
+        "filename": "test/codec_factory.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-12-15T22:30:50Z",
+      "side": 1,
+      "message": "This should be the default -\u003e You shouldn\u0027t need this.   If we need to do anything we should do it in the codec not here.   We don\u0027t want to force people using the api to have to initialize a decryptor.",
+      "revId": "3ae2c86806a4c99205afd3f3ea068af502b9befc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//L5E\u003d",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-12-15T22:30:50Z",
+      "side": 1,
+      "message": "This should be unnecessary.",
+      "revId": "3ae2c86806a4c99205afd3f3ea068af502b9befc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
