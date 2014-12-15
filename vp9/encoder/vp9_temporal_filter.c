@@ -710,8 +710,9 @@ void vp9_temporal_filter(VP9_COMP *cpi, int distance) {
 #if CONFIG_VP9_HIGHBITDEPTH
                                        cm->use_highbitdepth,
 #endif
-                                       VP9_ENC_BORDER_IN_PIXELS, NULL, NULL,
-                                       NULL)) {
+                                       VP9_ENC_BORDER_IN_PIXELS,
+                                       cm->byte_alignment,
+                                       NULL, NULL, NULL)) {
             vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                                "Failed to reallocate alt_ref_buffer");
           }
