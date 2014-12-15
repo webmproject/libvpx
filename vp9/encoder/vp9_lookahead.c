@@ -65,7 +65,6 @@ struct lookahead_ctx *vp9_lookahead_init(unsigned int width,
   // Allocate the lookahead structures
   ctx = calloc(1, sizeof(*ctx));
   if (ctx) {
-    const int legacy_byte_alignment = 0;
     unsigned int i;
     ctx->max_sz = depth;
     ctx->buf = calloc(depth, sizeof(*ctx->buf));
@@ -77,8 +76,7 @@ struct lookahead_ctx *vp9_lookahead_init(unsigned int width,
 #if CONFIG_VP9_HIGHBITDEPTH
                                  use_highbitdepth,
 #endif
-                                 VP9_ENC_BORDER_IN_PIXELS,
-                                 legacy_byte_alignment))
+                                 VP9_ENC_BORDER_IN_PIXELS))
         goto bail;
   }
   return ctx;

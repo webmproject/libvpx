@@ -72,19 +72,15 @@ class Decoder {
   }
 
   void Control(int ctrl_id, int arg) {
-    Control(ctrl_id, arg, VPX_CODEC_OK);
+    InitOnce();
+    const vpx_codec_err_t res = vpx_codec_control_(&decoder_, ctrl_id, arg);
+    ASSERT_EQ(VPX_CODEC_OK, res) << DecodeError();
   }
 
   void Control(int ctrl_id, const void *arg) {
     InitOnce();
     const vpx_codec_err_t res = vpx_codec_control_(&decoder_, ctrl_id, arg);
     ASSERT_EQ(VPX_CODEC_OK, res) << DecodeError();
-  }
-
-  void Control(int ctrl_id, int arg, vpx_codec_err_t expected_value) {
-    InitOnce();
-    const vpx_codec_err_t res = vpx_codec_control_(&decoder_, ctrl_id, arg);
-    ASSERT_EQ(expected_value, res) << DecodeError();
   }
 
   const char* DecodeError() {
