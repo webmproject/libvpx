@@ -872,7 +872,6 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       const PREDICTION_MODE this_mode = intra_mode_list[i];
       if (!((1 << this_mode) & cpi->sf.intra_y_mode_mask[intra_tx_size]))
         continue;
-      skip_txfm = x->skip_txfm[0];
       args.mode = this_mode;
       args.rate = 0;
       args.dist = 0;
@@ -893,10 +892,13 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         mbmi->ref_frame[0] = INTRA_FRAME;
         mbmi->uv_mode = this_mode;
         mbmi->mv[0].as_int = INVALID_MV;
-      } else {
-        x->skip_txfm[0] = best_mode_skip_txfm;
-        mbmi->tx_size = best_tx_size;
       }
+    }
+
+    // Reset mb_mode_info to the best inter mode.
+    if (mbmi->ref_frame[0] != INTRA_FRAME) {
+      x->skip_txfm[0] = best_mode_skip_txfm;
+      mbmi->tx_size = best_tx_size;
     }
   }
 
