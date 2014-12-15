@@ -22,8 +22,17 @@ const unsigned int kHeight = 90;
 const unsigned int kFramerate = 50;
 const unsigned int kFrames = 10;
 const int kBitrate = 500;
-const int kCpuUsed = 2;
-const double psnr_threshold = 35.0;
+// List of psnr thresholds for speed settings 0-7 and 5 encoding modes
+const double kPsnrThreshold[][5] = {
+  { 36.0, 37.0, 37.0, 37.0, 37.0 },
+  { 35.0, 36.0, 36.0, 36.0, 36.0 },
+  { 34.0, 35.0, 35.0, 35.0, 35.0 },
+  { 33.0, 34.0, 34.0, 34.0, 34.0 },
+  { 32.0, 33.0, 33.0, 33.0, 33.0 },
+  { 31.0, 32.0, 32.0, 32.0, 32.0 },
+  { 30.0, 31.0, 31.0, 31.0, 31.0 },
+  { 29.0, 30.0, 30.0, 30.0, 30.0 },
+};
 
 typedef struct {
   const char *filename;
@@ -33,7 +42,7 @@ typedef struct {
   unsigned int profile;
 } TestVideoParam;
 
-const TestVideoParam TestVectors[] = {
+const TestVideoParam kTestVectors[] = {
   {"park_joy_90p_8_420.y4m", 8, VPX_IMG_FMT_I420, VPX_BITS_8, 0},
   {"park_joy_90p_8_422.y4m", 8, VPX_IMG_FMT_I422, VPX_BITS_8, 1},
   {"park_joy_90p_8_444.y4m", 8, VPX_IMG_FMT_I444, VPX_BITS_8, 1},
@@ -50,6 +59,16 @@ const TestVideoParam TestVectors[] = {
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 };
 
+// Encoding modes tested
+const libvpx_test::TestMode kEncodingModeVectors[] = {
+  ::libvpx_test::kTwoPassGood,
+  ::libvpx_test::kOnePassGood,
+  ::libvpx_test::kRealTime,
+};
+
+// Speed settings tested
+const int kCpuUsedVectors[] = {1, 2, 3, 5, 6};
+
 int is_extension_y4m(const char *filename) {
   const char *dot = strrchr(filename, '.');
   if (!dot || dot == filename)
@@ -60,11 +79,13 @@ int is_extension_y4m(const char *filename) {
 
 class EndToEndTestLarge
     : public ::libvpx_test::EncoderTest,
-      public ::libvpx_test::CodecTestWith2Params<libvpx_test::TestMode, \
-                                                 TestVideoParam> {
+      public ::libvpx_test::CodecTestWith3Params<libvpx_test::TestMode, \
+                                                 TestVideoParam, int> {
  protected:
   EndToEndTestLarge()
       : EncoderTest(GET_PARAM(0)),
+        test_video_param_(GET_PARAM(2)),
+        cpu_used_(GET_PARAM(3)),
         psnr_(0.0),
         nframes_(0),
         encoding_mode_(GET_PARAM(1)) {
@@ -81,9 +102,11 @@ class EndToEndTestLarge
     } else {
       cfg_.g_lag_in_frames = 0;
       cfg_.rc_end_usage = VPX_CBR;
+      cfg_.rc_buf_sz = 1000;
+      cfg_.rc_buf_initial_sz = 500;
+      cfg_.rc_buf_optimal_sz = 600;
     }
     dec_cfg_.threads = 4;
-    test_video_param_ = GET_PARAM(2);
   }
 
   virtual void BeginPassHook(unsigned int) {
@@ -101,7 +124,7 @@ class EndToEndTestLarge
     if (video->frame() == 1) {
       encoder->Control(VP9E_SET_FRAME_PARALLEL_DECODING, 1);
       encoder->Control(VP9E_SET_TILE_COLUMNS, 4);
-      encoder->Control(VP8E_SET_CPUUSED, kCpuUsed);
+      encoder->Control(VP8E_SET_CPUUSED, cpu_used_);
       if (encoding_mode_ != ::libvpx_test::kRealTime) {
         encoder->Control(VP8E_SET_ENABLEAUTOALTREF, 1);
         encoder->Control(VP8E_SET_ARNR_MAXFRAMES, 7);
@@ -117,7 +140,12 @@ class EndToEndTestLarge
     return 0.0;
   }
 
+  double GetPsnrThreshold() {
+    return kPsnrThreshold[cpu_used_][encoding_mode_];
+  }
+
   TestVideoParam test_video_param_;
+  int cpu_used_;
 
  private:
   double psnr_;
@@ -132,6 +160,8 @@ TEST_P(EndToEndTestLarge, EndtoEndPSNRTest) {
   cfg_.g_input_bit_depth = test_video_param_.input_bit_depth;
   cfg_.g_bit_depth = test_video_param_.bit_depth;
   init_flags_ = VPX_CODEC_USE_PSNR;
+  if (cfg_.g_bit_depth > 8)
+    init_flags_ |= VPX_CODEC_USE_HIGHBITDEPTH;
 
   libvpx_test::VideoSource *video;
   if (is_extension_y4m(test_video_param_.filename)) {
@@ -146,13 +176,14 @@ TEST_P(EndToEndTestLarge, EndtoEndPSNRTest) {
 
   ASSERT_NO_FATAL_FAILURE(RunLoop(video));
   const double psnr = GetAveragePsnr();
-  EXPECT_GT(psnr, psnr_threshold);
+  EXPECT_GT(psnr, GetPsnrThreshold());
   delete(video);
 }
 
 VP9_INSTANTIATE_TEST_CASE(
     EndToEndTestLarge,
-    ::testing::Values(::libvpx_test::kTwoPassGood, ::libvpx_test::kOnePassGood),
-    ::testing::ValuesIn(TestVectors));
+    ::testing::ValuesIn(kEncodingModeVectors),
+    ::testing::ValuesIn(kTestVectors),
+    ::testing::ValuesIn(kCpuUsedVectors));
 
 }  // namespace
