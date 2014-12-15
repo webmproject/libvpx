@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//L2s\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2477,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-12-15T23:36:39Z",
+      "side": 1,
+      "message": "I\u0027m a little nervous of the aggressiveness of this -  will for instance we start picking new mv that\u0027s slightly worse than nearest for some situations in which new mv is \u003c 8x cost of mv.  \n\nMaybe we should clamp this.   \n\nAlso seems weird to me to assume that 0,0 means no motion vector rather a motion vector of 0,0 - should we keep some sort of flag around that tells us the difference?   Ie if 0,0 was not just the cheapest but the best that\u0027s something different than what you are trying to adjust for.",
+      "revId": "f33a5d1fda8ba72977fa44becbb86a445b60cfd5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
