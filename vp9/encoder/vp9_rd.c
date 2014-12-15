@@ -379,7 +379,7 @@ static void model_rd_norm(int xsq_q10, int *r_q10, int *d_q10) {
   *d_q10 = (dist_tab_q10[xq] * b_q10 + dist_tab_q10[xq + 1] * a_q10) >> 10;
 }
 
-void vp9_model_rd_from_var_lapndz(unsigned int var, unsigned int n,
+void vp9_model_rd_from_var_lapndz(unsigned int var, unsigned int n_log2,
                                   unsigned int qstep, int *rate,
                                   int64_t *dist) {
   // This function models the rate and distortion for a Laplacian
@@ -395,10 +395,10 @@ void vp9_model_rd_from_var_lapndz(unsigned int var, unsigned int n,
     int d_q10, r_q10;
     static const uint32_t MAX_XSQ_Q10 = 245727;
     const uint64_t xsq_q10_64 =
-        ((((uint64_t)qstep * qstep * n) << 10) + (var >> 1)) / var;
+        (((uint64_t)qstep * qstep << (n_log2 + 10)) + (var >> 1)) / var;
     const int xsq_q10 = (int)MIN(xsq_q10_64, MAX_XSQ_Q10);
     model_rd_norm(xsq_q10, &r_q10, &d_q10);
-    *rate = (n * r_q10 + 2) >> 2;
+    *rate = ((r_q10 << n_log2) + 2) >> 2;
     *dist = (var * (int64_t)d_q10 + 512) >> 10;
   }
 }
