@@ -593,7 +593,16 @@ static void choose_partitioning(VP9_COMP *cpi,
             unsigned int sse = 0;
             int sum = 0;
             if (x4_idx < pixels_wide && y4_idx < pixels_high) {
+#if CONFIG_VP9_HIGHBITDEPTH
+              int s_avg;
+              if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+                s_avg = vp9_highbd_avg_4x4(s + y4_idx * sp + x4_idx, sp);
+              } else {
+                s_avg = vp9_avg_4x4(s + y4_idx * sp + x4_idx, sp);
+              }
+#else
               int s_avg = vp9_avg_4x4(s + y4_idx * sp + x4_idx, sp);
+#endif
               // For key frame, reference is set to 128.
               sum = s_avg - 128;
               sse = sum * sum;
