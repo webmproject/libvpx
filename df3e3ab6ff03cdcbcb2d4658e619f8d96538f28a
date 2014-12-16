@@ -52,6 +52,24 @@
       "revId": "df3e3ab6ff03cdcbcb2d4658e619f8d96538f28a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Lw8\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 899,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-12-16T18:00:54Z",
+      "side": 1,
+      "message": "yes, Marco pointed this out yesterday.\n\nWe should store the best mode\u0027s tx_size for intra mode. This will change the coding statistics, so will do it in a separate CL.",
+      "parentUuid": "AAAAdn//LxE\u003d",
+      "revId": "df3e3ab6ff03cdcbcb2d4658e619f8d96538f28a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
