@@ -220,6 +220,12 @@ void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
                                    int block, int ref, int mi_row, int mi_col,
                                    int_mv *nearest, int_mv *near);
 
+#if CONFIG_COPY_MODE
+int vp9_construct_ref_inter_list(VP9_COMMON *cm,  MACROBLOCKD *xd,
+                                 BLOCK_SIZE bsize, int mi_row, int mi_col,
+                                 MB_MODE_INFO *ref_list[18]);
+#endif  // CONFIG_COPY_MODE
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

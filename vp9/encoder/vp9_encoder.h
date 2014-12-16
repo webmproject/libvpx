@@ -397,6 +397,10 @@ typedef struct VP9_COMP {
 #if CONFIG_EXT_TX
   int ext_tx_costs[3][EXT_TX_TYPES];
 #endif
+#if CONFIG_COPY_MODE
+  int copy_mode_cost_l2[COPY_MODE_CONTEXTS][2];
+  int copy_mode_cost[COPY_MODE_CONTEXTS][COPY_MODE_COUNT - 1];
+#endif
 
   PICK_MODE_CONTEXT *leaf_tree;
   PC_TREE *pc_tree;

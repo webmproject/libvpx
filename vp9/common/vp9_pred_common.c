@@ -383,3 +383,47 @@ int vp9_get_segment_id(const VP9_COMMON *cm, const uint8_t *segment_ids,
   assert(segment_id >= 0 && segment_id < MAX_SEGMENTS);
   return segment_id;
 }
+
+#if CONFIG_COPY_MODE
+int vp9_get_copy_mode_context(const MACROBLOCKD *xd) {
+  const MB_MODE_INFO *const above_mbmi = get_mbmi(get_above_mi(xd));
+  const MB_MODE_INFO *const left_mbmi = get_mbmi(get_left_mi(xd));
+  const int has_above = above_mbmi != NULL;
+  const int has_left = left_mbmi != NULL;
+
+  if (has_above && has_left) {
+    const int above_intra = !is_inter_block(above_mbmi);
+    const int left_intra = !is_inter_block(left_mbmi);
+
+    if (above_intra && left_intra) {
+      return 4;
+    } else if (above_intra || left_intra) {
+      return 3;
+    } else {
+      const int above_predict = above_mbmi->copy_mode != NOREF;
+      const int left_predict = left_mbmi->copy_mode != NOREF;
+      if (above_predict && left_predict)
+        return 0;
+      else if (above_predict || left_predict)
+        return 1;
+      else
+        return 2;
+    }
+  } else if (has_above || has_left) {
+    const MB_MODE_INFO *const ref_mbmi = has_above ? above_mbmi : left_mbmi;
+    const int ref_intra = !is_inter_block(ref_mbmi);
+
+    if (ref_intra) {
+      return 3;
+    } else {
+     const int ref_predict = ref_mbmi != NOREF;
+      if (ref_predict)
+        return 0;
+      else
+        return 1;
+    }
+  } else {
+    return 0;
+  }
+}
+#endif  // CONFIG_COPY_MODE

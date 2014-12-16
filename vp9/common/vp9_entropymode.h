@@ -58,17 +58,22 @@ typedef struct frame_contexts {
   nmv_context nmvc;
 #if CONFIG_FILTERINTRA
   vp9_prob filterintra_prob[TX_SIZES][INTRA_MODES];
-#endif
+#endif  // CONFIG_FILTERINTRA
 #if CONFIG_EXT_TX
   vp9_prob ext_tx_prob[3][EXT_TX_TYPES - 1];
-#endif
+#endif  // CONFIG_EXT_TX
 #if CONFIG_SUPERTX
   vp9_prob supertx_prob[PARTITION_SUPERTX_CONTEXTS][TX_SIZES];
-#endif
+#endif  // CONFIG_SUPERTX
 #if CONFIG_TX_SKIP
   vp9_prob y_tx_skip_prob[2];
   vp9_prob uv_tx_skip_prob[2];
-#endif
+#endif  // CONFIG_TX_SKIP
+#if CONFIG_COPY_MODE
+  vp9_prob copy_noref_prob[COPY_MODE_CONTEXTS][BLOCK_SIZES];
+  vp9_prob copy_mode_probs_l2[COPY_MODE_CONTEXTS][1];
+  vp9_prob copy_mode_probs[COPY_MODE_CONTEXTS][COPY_MODE_COUNT - 2];
+#endif  // CONFIG_COPY_MODE
 } FRAME_CONTEXT;
 
 typedef struct {
@@ -102,6 +107,11 @@ typedef struct {
   unsigned int y_tx_skip[2][2];
   unsigned int uv_tx_skip[2][2];
 #endif
+#if CONFIG_COPY_MODE
+  unsigned int copy_noref[COPY_MODE_CONTEXTS][BLOCK_SIZES][2];
+  unsigned int copy_mode_l2[COPY_MODE_CONTEXTS][2];
+  unsigned int copy_mode[COPY_MODE_CONTEXTS][COPY_MODE_COUNT - 1];
+#endif  // CONFIG_COPY_MODE
 } FRAME_COUNTS;
 
 extern const vp9_prob vp9_kf_uv_mode_prob[INTRA_MODES][INTRA_MODES - 1];
@@ -117,6 +127,10 @@ extern const vp9_tree_index vp9_switchable_interp_tree
 #if CONFIG_EXT_TX
 extern const vp9_tree_index vp9_ext_tx_tree[TREE_SIZE(EXT_TX_TYPES)];
 #endif
+#if CONFIG_COPY_MODE
+extern const vp9_tree_index vp9_copy_mode_tree_l2[TREE_SIZE(2)];
+extern const vp9_tree_index vp9_copy_mode_tree[TREE_SIZE(COPY_MODE_COUNT - 1)];
+#endif  // CONFIG_COPY_MODE
 
 void vp9_setup_past_independence(struct VP9Common *cm);
 

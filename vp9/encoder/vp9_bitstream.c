@@ -41,6 +41,10 @@ static struct vp9_token inter_mode_encodings[INTER_MODES];
 #if CONFIG_EXT_TX
 static struct vp9_token ext_tx_encodings[EXT_TX_TYPES];
 #endif
+#if CONFIG_COPY_MODE
+static struct vp9_token copy_mode_encodings_l2[2];
+static struct vp9_token copy_mode_encodings[COPY_MODE_COUNT - 1];
+#endif
 
 #if CONFIG_SUPERTX
 static int vp9_check_supertx(VP9_COMMON *cm, int mi_row, int mi_col,
@@ -62,6 +66,10 @@ void vp9_entropy_mode_init() {
 #if CONFIG_EXT_TX
   vp9_tokens_from_tree(ext_tx_encodings, vp9_ext_tx_tree);
 #endif
+#if CONFIG_COPY_MODE
+  vp9_tokens_from_tree(copy_mode_encodings_l2, vp9_copy_mode_tree_l2);
+  vp9_tokens_from_tree(copy_mode_encodings, vp9_copy_mode_tree);
+#endif  // CONFIG_COPY_MODE
 }
 
 static void write_intra_mode(vp9_writer *w, PREDICTION_MODE mode,
@@ -75,6 +83,21 @@ static void write_inter_mode(vp9_writer *w, PREDICTION_MODE mode,
   vp9_write_token(w, vp9_inter_mode_tree, probs,
                   &inter_mode_encodings[INTER_OFFSET(mode)]);
 }
+
+#if CONFIG_COPY_MODE
+static void write_copy_mode(VP9_COMMON *cm, vp9_writer *w, COPY_MODE mode,
+                            int inter_ref_count, int copy_mode_context) {
+  if (inter_ref_count == 2) {
+    vp9_write_token(w, vp9_copy_mode_tree_l2,
+                    cm->fc.copy_mode_probs_l2[copy_mode_context],
+                    &copy_mode_encodings_l2[mode - REF0]);
+  } else if (inter_ref_count > 2) {
+    vp9_write_token(w, vp9_copy_mode_tree,
+                    cm->fc.copy_mode_probs[copy_mode_context],
+                    &copy_mode_encodings[mode - REF0]);
+  }
+}
+#endif  // CONFIG_COPY_MODE
 
 static void encode_unsigned_max(struct vp9_write_bit_buffer *wb,
                                 int data, int max) {
@@ -341,6 +364,16 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
   const int is_inter = is_inter_block(mbmi);
   const int is_compound = has_second_ref(mbmi);
   int skip, ref;
+#if CONFIG_COPY_MODE
+  int copy_mode_context = vp9_get_copy_mode_context(xd);
+  if (bsize >= BLOCK_8X8 && mbmi->inter_ref_count > 0) {
+    vp9_write(w, mbmi->copy_mode != NOREF,
+              cm->fc.copy_noref_prob[copy_mode_context][bsize]);
+    if (mbmi->copy_mode != NOREF)
+      write_copy_mode(cm, w, mbmi->copy_mode, mbmi->inter_ref_count,
+                      copy_mode_context);
+  }
+#endif
 
   if (seg->update_map) {
     if (seg->temporal_update) {
@@ -366,8 +399,11 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
 #if CONFIG_SUPERTX
   if (!supertx_enabled) {
 #endif
-  if (!vp9_segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME))
-    vp9_write(w, is_inter, vp9_get_intra_inter_prob(cm, xd));
+#if CONFIG_COPY_MODE
+  if (mbmi->copy_mode == NOREF)
+#endif
+    if (!vp9_segfeature_active(seg, segment_id, SEG_LVL_REF_FRAME))
+      vp9_write(w, is_inter, vp9_get_intra_inter_prob(cm, xd));
 #if CONFIG_SUPERTX
   }
 #endif
@@ -409,7 +445,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
       vp9_write(w, mbmi->tx_skip[1], cm->fc.uv_tx_skip_prob[mbmi->tx_skip[0]]);
     }
   }
-#endif
+#endif  // CONFIG_TX_SKIP
 
   if (!is_inter) {
     if (bsize >= BLOCK_8X8) {
@@ -445,7 +481,11 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
                 cm->fc.filterintra_prob[get_uv_tx_size(mbmi, &xd->plane[1])][mbmi->uv_mode]);
     }
 #endif
+#if CONFIG_COPY_MODE
+  } else if (mbmi->copy_mode == NOREF) {
+#else
   } else {
+#endif
     const int mode_ctx = mbmi->mode_context[mbmi->ref_frame[0]];
     const vp9_prob *const inter_probs = cm->fc.inter_mode_probs[mode_ctx];
     write_ref_frames(cm, xd, w);
@@ -1534,6 +1574,15 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
     for (i = 0; i < 2; i++)
       vp9_cond_prob_diff_update(&header_bc, &fc->uv_tx_skip_prob[i],
                                 cm->counts.uv_tx_skip[i]);
+#endif
+#if CONFIG_COPY_MODE
+    for (i = 0; i < COPY_MODE_CONTEXTS; i++) {
+      prob_diff_update(vp9_copy_mode_tree_l2, cm->fc.copy_mode_probs_l2[i],
+                       cm->counts.copy_mode_l2[i], 2, &header_bc);
+      prob_diff_update(vp9_copy_mode_tree, cm->fc.copy_mode_probs[i],
+                       cm->counts.copy_mode[i], COPY_MODE_COUNT - 1,
+                       &header_bc);
+    }
 #endif
   }
 

@@ -184,3 +184,164 @@ void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
       assert("Invalid block index.");
   }
 }
+
+#if CONFIG_COPY_MODE
+static int compare_interinfo(MB_MODE_INFO *mbmi, MB_MODE_INFO *ref_mbmi) {
+  if (mbmi == ref_mbmi) {
+    return 1;
+  } else {
+    int is_same;
+    if (mbmi->ref_frame[0] == ref_mbmi->ref_frame[0] &&
+        mbmi->ref_frame[1] == ref_mbmi->ref_frame[1]) {
+      if (mbmi->ref_frame[1] > INTRA_FRAME)
+        is_same = mbmi->mv[0].as_int == ref_mbmi->mv[0].as_int &&
+                  mbmi->mv[1].as_int == ref_mbmi->mv[1].as_int &&
+                  mbmi->interp_filter == ref_mbmi->interp_filter;
+      else
+        is_same = mbmi->mv[0].as_int == ref_mbmi->mv[0].as_int &&
+                  mbmi->interp_filter == ref_mbmi->interp_filter;
+    } else {
+      is_same = 0;
+    }
+
+    return is_same;
+  }
+}
+
+static int check_inside(VP9_COMMON *cm, int mi_row, int mi_col) {
+  return mi_row >= 0 && mi_col >= 0 &&
+         mi_row < cm->mi_rows && mi_col < cm->mi_cols;
+}
+
+static int is_right_available(BLOCK_SIZE bsize, int mi_row, int mi_col) {
+  int depth, max_depth = 4 - MIN(b_width_log2_lookup[bsize],
+                                 b_height_log2_lookup[bsize]);
+  int block[4] = {0};
+
+  if (bsize == BLOCK_64X64)
+    return 1;
+  mi_row = mi_row % 8;
+  mi_col = mi_col % 8;
+  for (depth = 1; depth <= max_depth; depth++) {
+    block[depth] = (mi_row >> (3 - depth)) * 2 + (mi_col >> (3 - depth));
+    mi_row = mi_row % (8 >> depth);
+    mi_col = mi_col % (8 >> depth);
+  }
+
+  if (b_width_log2_lookup[bsize] < b_height_log2_lookup[bsize]) {
+    if (block[max_depth] == 0)
+      return 1;
+  } else if (b_width_log2_lookup[bsize] > b_height_log2_lookup[bsize]) {
+    if (block[max_depth] > 0)
+      return 0;
+  } else {
+    if (block[max_depth] == 0 || block[max_depth] == 2)
+      return 1;
+    else if (block[max_depth] == 3)
+      return 0;
+  }
+
+  for (depth = max_depth - 1; depth > 0; depth--) {
+    if (block[depth] == 0 || block[depth] == 2)
+      return 1;
+    else if (block[depth] == 3)
+      return 0;
+  }
+  return 1;
+}
+
+static int is_second_rec(int mi_row, int mi_col, BLOCK_SIZE bsize) {
+  int bw = 4 << b_width_log2_lookup[bsize];
+  int bh = 4 << b_height_log2_lookup[bsize];
+
+  if (bw < bh)
+    return (mi_col << 3) % (bw << 1) == 0 ? 0 : 1;
+  else if (bh < bw)
+    return (mi_row << 3) % (bh << 1) == 0 ? 0 : 2;
+  else
+    return 0;
+}
+
+int vp9_construct_ref_inter_list(VP9_COMMON *cm,  MACROBLOCKD *xd,
+                                 BLOCK_SIZE bsize, int mi_row, int mi_col,
+                                 MB_MODE_INFO *ref_list[18]) {
+  int bw = 4 << b_width_log2_lookup[bsize];
+  int bh = 4 << b_height_log2_lookup[bsize];
+  int row_offset, col_offset;
+  int mi_offset;
+  MB_MODE_INFO *ref_mbmi;
+  int ref_index, ref_num = 0;
+  int row_offset_cand[18], col_offset_cand[18];
+  int offset_num = 0, i, switchflag;
+  int is_sec_rec = is_second_rec(mi_row, mi_col, bsize);
+
+  if (is_sec_rec != 2) {
+    row_offset_cand[offset_num] = -1; col_offset_cand[offset_num] = 0;
+    offset_num++;
+  }
+  if (is_sec_rec != 1) {
+    row_offset_cand[offset_num] = bh / 16; col_offset_cand[offset_num] = -1;
+    offset_num++;
+  }
+
+  row_offset = bh / 8 - 1;
+  col_offset = 1;
+  if (is_sec_rec < 2)
+    switchflag = 1;
+  else
+    switchflag = 0;
+  while ((is_sec_rec == 0 && ((row_offset >=0) || col_offset < (bw / 8 + 1))) ||
+         (is_sec_rec == 1 && col_offset < (bw / 8 + 1)) ||
+         (is_sec_rec == 2 && row_offset >=0)) {
+    switch (switchflag) {
+      case 0:
+        if (row_offset >= 0) {
+          if (row_offset != bh / 16) {
+            row_offset_cand[offset_num] = row_offset;
+            col_offset_cand[offset_num] = -1;
+            offset_num++;
+          }
+          row_offset--;
+        }
+        break;
+      case 1:
+        if (col_offset < (bw / 8 + 1)) {
+          row_offset_cand[offset_num] = -1;
+          col_offset_cand[offset_num] = col_offset;
+          offset_num++;
+          col_offset++;
+        }
+        break;
+      default:
+        assert(0);
+    }
+    if (is_sec_rec == 0)
+      switchflag = 1 - switchflag;
+  }
+  row_offset_cand[offset_num] = -1;
+  col_offset_cand[offset_num] = -1;
+  offset_num++;
+
+  for (i = 0; i < offset_num; i++) {
+    row_offset = row_offset_cand[i];
+    col_offset = col_offset_cand[i];
+    if ((col_offset < (bw / 8) ||
+        (col_offset == (bw / 8) && is_right_available(bsize, mi_row, mi_col)))
+        && check_inside(cm, mi_row + row_offset, mi_col + col_offset)) {
+      mi_offset = row_offset * cm->mi_stride + col_offset;
+      ref_mbmi = &xd->mi[mi_offset].src_mi->mbmi;
+      if (is_inter_block(ref_mbmi)) {
+        for (ref_index = 0; ref_index < ref_num; ref_index++) {
+          if (compare_interinfo(ref_mbmi, ref_list[ref_index]))
+            break;
+        }
+        if (ref_index == ref_num) {
+          ref_list[ref_num] = ref_mbmi;
+          ref_num++;
+        }
+      }
+    }
+  }
+  return ref_num;
+}
+#endif  // CONFIG_COPY_MODE

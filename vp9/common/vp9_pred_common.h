@@ -142,6 +142,10 @@ static INLINE unsigned int *get_tx_counts(TX_SIZE max_tx_size, int ctx,
   }
 }
 
+#if CONFIG_COPY_MODE
+int vp9_get_copy_mode_context(const MACROBLOCKD *xd);
+#endif  // CONFIG_COPY_MODE
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

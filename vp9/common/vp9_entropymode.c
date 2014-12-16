@@ -259,7 +259,11 @@ const vp9_tree_index vp9_partition_tree[TREE_SIZE(PARTITION_TYPES)] = {
 };
 
 static const vp9_prob default_intra_inter_p[INTRA_INTER_CONTEXTS] = {
+#if CONFIG_COPY_MODE
+  35, 112, 187, 225
+#else
   9, 102, 187, 225
+#endif
 };
 
 static const vp9_prob default_comp_inter_p[COMP_INTER_CONTEXTS] = {
@@ -325,6 +329,43 @@ static const vp9_prob default_supertx_prob[PARTITION_SUPERTX_CONTEXTS]
 #endif
 };
 #endif  // CONFIG_SUPERTX
+
+#if CONFIG_COPY_MODE
+static const vp9_prob default_copy_noref_prob[COPY_MODE_CONTEXTS]
+                                             [BLOCK_SIZES] = {
+  {255, 255, 255,  82, 148, 182,  65, 193, 158,  70, 138, 101,  23},
+  {255, 255, 255, 118, 153, 161, 123, 169, 157,  82, 101, 123,  88},
+  {255, 255, 255, 130, 178, 226, 194, 196, 174, 173, 135, 144, 141},
+  {255, 255, 255, 178, 218, 225, 197, 230, 222, 215, 220, 220, 220},
+  {255, 255, 255, 243, 248, 241, 233, 249, 249, 249, 249, 249, 249}
+};
+
+static const vp9_prob default_copy_mode_probs_l2[COPY_MODE_CONTEXTS][1] = {
+  {207},
+  {135},
+  {141},
+  {189},
+  {209}
+};
+
+const vp9_tree_index vp9_copy_mode_tree_l2[TREE_SIZE(2)] = {
+  -(REF0 - REF0), -(REF1 - REF0)
+};
+
+static const vp9_prob default_copy_mode_probs[COPY_MODE_CONTEXTS]
+                                             [COPY_MODE_COUNT - 2] = {
+  {130, 159},
+  {126, 176},
+  {120, 150},
+  {158, 183},
+  {149, 125}
+};
+
+const vp9_tree_index vp9_copy_mode_tree[TREE_SIZE(COPY_MODE_COUNT - 1)] = {
+  -(REF0 - REF0),  2,
+  -(REF1 - REF0),  -(REF2 - REF0)
+};
+#endif  // CONFIG_COPY_MODE
 
 #if CONFIG_TX64X64
 void tx_counts_to_branch_counts_64x64(const unsigned int *tx_count_64x64p,
@@ -399,17 +440,22 @@ void vp9_init_mode_probs(FRAME_CONTEXT *fc) {
   vp9_copy(fc->inter_mode_probs, default_inter_mode_probs);
 #if CONFIG_FILTERINTRA
   vp9_copy(fc->filterintra_prob, default_filterintra_prob);
-#endif
+#endif  // CONFIG_FILTERINTRA
 #if CONFIG_EXT_TX
   vp9_copy(fc->ext_tx_prob, default_ext_tx_prob);
-#endif
+#endif  // CONFIG_EXT_TX
 #if CONFIG_SUPERTX
   vp9_copy(fc->supertx_prob, default_supertx_prob);
-#endif
+#endif  // CONFIG_SUPERTX
 #if CONFIG_TX_SKIP
   vp9_copy(fc->y_tx_skip_prob, default_y_tx_skip_prob);
   vp9_copy(fc->uv_tx_skip_prob, default_uv_tx_skip_prob);
-#endif
+#endif  // CONFIG_TX_SKIP
+#if CONFIG_COPY_MODE
+  vp9_copy(fc->copy_noref_prob, default_copy_noref_prob);
+  vp9_copy(fc->copy_mode_probs_l2, default_copy_mode_probs_l2);
+  vp9_copy(fc->copy_mode_probs, default_copy_mode_probs);
+#endif  // CONFIG_COPY_MODE
 }
 
 const vp9_tree_index vp9_switchable_interp_tree
@@ -540,6 +586,18 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
     fc->uv_tx_skip_prob[i] = adapt_prob(pre_fc->uv_tx_skip_prob[i],
                                         counts->uv_tx_skip[i]);
 #endif  // CONFIG_TX_SKIP
+#if CONFIG_COPY_MODE
+  for (i = 0; i < COPY_MODE_CONTEXTS; i++) {
+    for (j = BLOCK_8X8; j < BLOCK_SIZES; j++) {
+      fc->copy_noref_prob[i][j] =
+          adapt_prob(pre_fc->copy_noref_prob[i][j], counts->copy_noref[i][j]);
+    }
+    adapt_probs(vp9_copy_mode_tree_l2, pre_fc->copy_mode_probs_l2[i],
+                counts->copy_mode_l2[i], fc->copy_mode_probs_l2[i]);
+    adapt_probs(vp9_copy_mode_tree, pre_fc->copy_mode_probs[i],
+                counts->copy_mode[i], fc->copy_mode_probs[i]);
+  }
+#endif  // CONFIG_COPY_MODE
 }
 
 static void set_default_lf_deltas(struct loopfilter *lf) {

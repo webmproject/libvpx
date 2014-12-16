@@ -306,6 +306,15 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
                         cm->fc.inter_mode_probs[i], vp9_inter_mode_tree);
     }
   }
+
+#if CONFIG_COPY_MODE
+  for (i = 0; i < COPY_MODE_CONTEXTS; ++i) {
+    vp9_cost_tokens((int *)cpi->copy_mode_cost_l2[i],
+                    cm->fc.copy_mode_probs_l2[i], vp9_copy_mode_tree_l2);
+    vp9_cost_tokens((int *)cpi->copy_mode_cost[i],
+                    cm->fc.copy_mode_probs[i], vp9_copy_mode_tree);
+  }
+#endif  // CONFIG_COPY_MODE
 }
 
 static void model_rd_norm(int xsq_q10, int *r_q10, int *d_q10) {

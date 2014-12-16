@@ -30,6 +30,10 @@ extern "C" {
 #define SKIP_CONTEXTS 3
 #define INTER_MODE_CONTEXTS 7
 
+#if CONFIG_COPY_MODE
+#define COPY_MODE_CONTEXTS 5
+#endif  // CONFIG_COPY_MODE
+
 /* Segment Feature Masks */
 #define MAX_MV_REF_CANDIDATES 2
 
@@ -75,6 +79,16 @@ typedef enum {
   NEWMV,
   MB_MODE_COUNT
 } PREDICTION_MODE;
+
+#if CONFIG_COPY_MODE
+typedef enum {
+  NOREF,
+  REF0,
+  REF1,
+  REF2,
+  COPY_MODE_COUNT
+} COPY_MODE;
+#endif  // CONFIG_COPY_MODE
 
 static INLINE int is_inter_mode(PREDICTION_MODE mode) {
   return mode >= NEARESTMV && mode <= NEWMV;
@@ -143,6 +157,10 @@ typedef struct {
   int tx_skip[PLANE_TYPES];
   int tx_skip_shift;
 #endif
+#if CONFIG_COPY_MODE
+  COPY_MODE copy_mode;
+  int inter_ref_count;
+#endif  // CONFIG_COPY_MODE
 } MB_MODE_INFO;
 
 typedef struct MODE_INFO {

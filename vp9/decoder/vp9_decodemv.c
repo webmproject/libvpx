@@ -54,6 +54,36 @@ static PREDICTION_MODE read_inter_mode(VP9_COMMON *cm, vp9_reader *r, int ctx) {
   return NEARESTMV + mode;
 }
 
+#if CONFIG_COPY_MODE
+static COPY_MODE read_copy_mode(VP9_COMMON *cm, vp9_reader *r,
+                                int num_candidate, int ctx) {
+  COPY_MODE mode;
+
+  switch (num_candidate) {
+    case 0:
+      assert(0);
+      break;
+    case 1:
+      mode = REF0;
+      break;
+    case 2:
+      mode = REF0 + vp9_read_tree(r, vp9_copy_mode_tree_l2,
+                                  cm->fc.copy_mode_probs_l2[ctx]);
+      if (!cm->frame_parallel_decoding_mode)
+          ++cm->counts.copy_mode_l2[ctx][mode - REF0];
+      break;
+    default:
+      mode = REF0 + vp9_read_tree(r, vp9_copy_mode_tree,
+                                  cm->fc.copy_mode_probs[ctx]);
+      if (!cm->frame_parallel_decoding_mode)
+          ++cm->counts.copy_mode[ctx][mode - REF0];
+      break;
+  }
+
+  return mode;
+}
+#endif  // CONFIG_COPY_MODE
+
 static int read_segment_id(vp9_reader *r, const struct segmentation *seg) {
   return vp9_read_tree(r, vp9_segment_tree, seg->tree_probs);
 }
@@ -587,7 +617,10 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
   int_mv nearestmv[2], nearmv[2];
   int inter_mode_ctx, ref, is_compound;
 
-  read_ref_frames(cm, xd, r, mbmi->segment_id, mbmi->ref_frame);
+#if CONFIG_COPY_MODE
+  if (mbmi->copy_mode == NOREF)
+#endif
+    read_ref_frames(cm, xd, r, mbmi->segment_id, mbmi->ref_frame);
   is_compound = has_second_ref(mbmi);
 
   for (ref = 0; ref < 1 + is_compound; ++ref) {
@@ -602,9 +635,16 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
                          "Block reference is corrupt");
     vp9_setup_pre_planes(xd, ref, ref_buf->buf, mi_row, mi_col,
                          &ref_buf->sf);
-    vp9_find_mv_refs(cm, xd, tile, mi, frame, mbmi->ref_mvs[frame],
-                     mi_row, mi_col);
+#if CONFIG_COPY_MODE
+    if (mbmi->copy_mode == NOREF)
+#endif
+      vp9_find_mv_refs(cm, xd, tile, mi, frame, mbmi->ref_mvs[frame],
+                       mi_row, mi_col);
   }
+#if CONFIG_COPY_MODE
+  if (mbmi->copy_mode != NOREF)
+    return;
+#endif
 
   inter_mode_ctx = mbmi->mode_context[mbmi->ref_frame[0]];
 
@@ -687,16 +727,66 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
   MODE_INFO *const mi = xd->mi[0].src_mi;
   MB_MODE_INFO *const mbmi = &mi->mbmi;
   int inter_block;
+#if CONFIG_COPY_MODE
+  int num_candidate = 0;
+  MB_MODE_INFO *inter_ref_list[18] = {NULL};
+#endif
 
   mbmi->mv[0].as_int = 0;
   mbmi->mv[1].as_int = 0;
+
+#if CONFIG_COPY_MODE
+  if (mbmi->sb_type >= BLOCK_8X8)
+    num_candidate = vp9_construct_ref_inter_list(
+        cm, xd, mbmi->sb_type, mi_row, mi_col, inter_ref_list);
+  if (mbmi->sb_type >= BLOCK_8X8 && num_candidate > 0) {
+    int ctx = vp9_get_copy_mode_context(xd);
+    int is_copy = vp9_read(r, cm->fc.copy_noref_prob[ctx][mbmi->sb_type]);
+
+    ++cm->counts.copy_noref[ctx][mbmi->sb_type][is_copy];
+    if (!is_copy) {
+      mbmi->copy_mode = NOREF;
+    } else {
+      mbmi->copy_mode = read_copy_mode(cm, r, num_candidate, ctx);
+    }
+  } else {
+    mbmi->copy_mode = NOREF;
+  }
+  if (mbmi->copy_mode != NOREF) {
+    BLOCK_SIZE bsize_backup = mbmi->sb_type;
+    int skip_backup = mbmi->skip;
+    COPY_MODE copy_mode_backup = mbmi->copy_mode;
+#if CONFIG_SUPERTX
+    TX_SIZE tx_size_backup = mbmi->tx_size;
+#endif
+#if CONFIG_EXT_TX
+    EXT_TX_TYPE ext_txfrm_backup = mbmi->ext_txfrm;
+#endif
+
+    inter_block = 1;
+    *mbmi = *inter_ref_list[mbmi->copy_mode - REF0];
+#if CONFIG_SUPERTX
+    mbmi->tx_size = tx_size_backup;
+#endif
+#if CONFIG_EXT_TX
+    mbmi->ext_txfrm = ext_txfrm_backup;
+#endif
+    mbmi->sb_type = bsize_backup;
+    mbmi->mode = NEARESTMV;
+    mbmi->skip = skip_backup;
+    mbmi->copy_mode = copy_mode_backup;
+  }
+#endif  // CONFIG_COPY_MODE
 
 #if CONFIG_SUPERTX
   if (!supertx_enabled) {
 #endif
     mbmi->segment_id = read_inter_segment_id(cm, xd, mi_row, mi_col, r);
     mbmi->skip = read_skip(cm, xd, mbmi->segment_id, r);
-    inter_block = read_is_inter_block(cm, xd, mbmi->segment_id, r);
+#if CONFIG_COPY_MODE
+    if (mbmi->copy_mode == NOREF)
+#endif
+      inter_block = read_is_inter_block(cm, xd, mbmi->segment_id, r);
     mbmi->tx_size = read_tx_size(cm, xd, cm->tx_mode, mbmi->sb_type,
                                  !mbmi->skip || !inter_block, r);
 #if CONFIG_EXT_TX
@@ -720,7 +810,10 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
     mbmi->segment_id = 0;
     inter_block = 1;
     if (!cm->frame_parallel_decoding_mode)
-      ++cm->counts.intra_inter[ctx][1];
+#if CONFIG_COPY_MODE
+      if (mbmi->copy_mode == NOREF)
+#endif
+        ++cm->counts.intra_inter[ctx][1];
   }
 #endif  // CONFIG_SUPERTX
 
