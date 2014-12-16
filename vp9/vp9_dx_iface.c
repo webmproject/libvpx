@@ -44,6 +44,7 @@ struct vpx_codec_alg_priv {
   int                     flushed;
   int                     invert_tile_order;
   int                     frame_parallel_decode;  // frame-based threading.
+  int                     byte_alignment;
 
   // External frame buffer info to save for VP9 common.
   void *ext_priv;  // Private data associated with the external frame buffers.
@@ -219,6 +220,7 @@ static void init_buffer_callbacks(vpx_codec_alg_priv_t *ctx) {
   VP9_COMMON *const cm = &ctx->pbi->common;
 
   cm->new_fb_idx = -1;
+  cm->byte_alignment = ctx->byte_alignment;
 
   if (ctx->get_ext_fb_cb != NULL && ctx->release_ext_fb_cb != NULL) {
     cm->get_fb_cb = ctx->get_ext_fb_cb;
@@ -617,6 +619,27 @@ static vpx_codec_err_t ctrl_set_decryptor(vpx_codec_alg_priv_t *ctx,
   return VPX_CODEC_OK;
 }
 
+static vpx_codec_err_t ctrl_set_byte_alignment(vpx_codec_alg_priv_t *ctx,
+                                               va_list args) {
+  const int legacy_byte_alignment = 0;
+  const int min_byte_alignment = 32;
+  const int max_byte_alignment = 1024;
+  const int byte_alignment = va_arg(args, int);
+
+  if (byte_alignment != legacy_byte_alignment &&
+      (byte_alignment < min_byte_alignment ||
+       byte_alignment > max_byte_alignment ||
+       (byte_alignment & (byte_alignment - 1)) != 0))
+    return VPX_CODEC_INVALID_PARAM;
+
+  ctx->byte_alignment = byte_alignment;
+  if (ctx->pbi != NULL) {
+    VP9_COMMON *const cm = &ctx->pbi->common;
+    cm->byte_alignment = byte_alignment;
+  }
+  return VPX_CODEC_OK;
+}
+
 static vpx_codec_ctrl_fn_map_t decoder_ctrl_maps[] = {
   {VP8_COPY_REFERENCE,            ctrl_copy_reference},
 
@@ -629,6 +652,7 @@ static vpx_codec_ctrl_fn_map_t decoder_ctrl_maps[] = {
   {VP8_SET_DBG_DISPLAY_MV,        ctrl_set_dbg_options},
   {VP9_INVERT_TILE_DECODE_ORDER,  ctrl_set_invert_tile_order},
   {VPXD_SET_DECRYPTOR,            ctrl_set_decryptor},
+  {VP9_SET_BYTE_ALIGNMENT,        ctrl_set_byte_alignment},
 
   // Getters
   {VP8D_GET_LAST_REF_UPDATES,     ctrl_get_last_ref_updates},

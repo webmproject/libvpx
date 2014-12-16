@@ -208,6 +208,7 @@ typedef struct VP9Common {
   int frame_parallel_decoding_mode;
 
   int log2_tile_cols, log2_tile_rows;
+  int byte_alignment;
 
   // Private data associated with the frame buffer callbacks.
   void *cb_priv;

@@ -425,6 +425,7 @@ int vp9_denoiser_alloc(VP9_DENOISER *denoiser, int width, int height,
 #endif
                        int border) {
   int i, fail;
+  const int legacy_byte_alignment = 0;
   assert(denoiser != NULL);
 
   for (i = 0; i < MAX_REF_FRAMES; ++i) {
@@ -433,7 +434,7 @@ int vp9_denoiser_alloc(VP9_DENOISER *denoiser, int width, int height,
 #if CONFIG_VP9_HIGHBITDEPTH
                                   use_highbitdepth,
 #endif
-                                  border);
+                                  border, legacy_byte_alignment);
     if (fail) {
       vp9_denoiser_free(denoiser);
       return 1;
@@ -448,7 +449,7 @@ int vp9_denoiser_alloc(VP9_DENOISER *denoiser, int width, int height,
 #if CONFIG_VP9_HIGHBITDEPTH
                                 use_highbitdepth,
 #endif
-                                border);
+                                border, legacy_byte_alignment);
   if (fail) {
     vp9_denoiser_free(denoiser);
     return 1;

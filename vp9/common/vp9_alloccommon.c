@@ -112,7 +112,8 @@ int vp9_alloc_ref_frame_buffers(VP9_COMMON *cm, int width, int height) {
 #if CONFIG_VP9_HIGHBITDEPTH
                                cm->use_highbitdepth,
 #endif
-                               VP9_ENC_BORDER_IN_PIXELS) < 0)
+                               VP9_ENC_BORDER_IN_PIXELS,
+                               cm->byte_alignment) < 0)
       goto fail;
     if (cm->frame_bufs[i].mvs == NULL) {
       cm->frame_bufs[i].mvs =
@@ -133,7 +134,8 @@ int vp9_alloc_ref_frame_buffers(VP9_COMMON *cm, int width, int height) {
 #if CONFIG_VP9_HIGHBITDEPTH
                              cm->use_highbitdepth,
 #endif
-                             VP9_ENC_BORDER_IN_PIXELS) < 0)
+                             VP9_ENC_BORDER_IN_PIXELS,
+                             cm->byte_alignment) < 0)
     goto fail;
 #endif
 

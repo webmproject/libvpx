@@ -719,6 +719,7 @@ static void setup_frame_size(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
           cm->use_highbitdepth,
 #endif
           VP9_DEC_BORDER_IN_PIXELS,
+          cm->byte_alignment,
           &cm->frame_bufs[cm->new_fb_idx].raw_frame_buffer, cm->get_fb_cb,
           cm->cb_priv)) {
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
@@ -793,6 +794,7 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
           cm->use_highbitdepth,
 #endif
           VP9_DEC_BORDER_IN_PIXELS,
+          cm->byte_alignment,
           &cm->frame_bufs[cm->new_fb_idx].raw_frame_buffer, cm->get_fb_cb,
           cm->cb_priv)) {
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
