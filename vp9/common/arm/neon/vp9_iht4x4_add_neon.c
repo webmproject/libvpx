@@ -12,6 +12,7 @@
 #include <assert.h>
 
 #include "./vp9_rtcd.h"
+#include "./vpx_config.h"
 #include "vp9/common/vp9_common.h"
 
 static int16_t sinpi_1_9 = 0x14a3;
@@ -22,7 +23,7 @@ static int16_t cospi_8_64 = 0x3b21;
 static int16_t cospi_16_64 = 0x2d41;
 static int16_t cospi_24_64 = 0x187e;
 
-static inline void TRANSPOSE4X4(
+static INLINE void TRANSPOSE4X4(
         int16x8_t *q8s16,
         int16x8_t *q9s16) {
     int32x4_t q8s32, q9s32;
@@ -41,7 +42,7 @@ static inline void TRANSPOSE4X4(
     return;
 }
 
-static inline void GENERATE_COSINE_CONSTANTS(
+static INLINE void GENERATE_COSINE_CONSTANTS(
         int16x4_t *d0s16,
         int16x4_t *d1s16,
         int16x4_t *d2s16) {
@@ -51,7 +52,7 @@ static inline void GENERATE_COSINE_CONSTANTS(
     return;
 }
 
-static inline void GENERATE_SINE_CONSTANTS(
+static INLINE void GENERATE_SINE_CONSTANTS(
         int16x4_t *d3s16,
         int16x4_t *d4s16,
         int16x4_t *d5s16,
@@ -63,7 +64,7 @@ static inline void GENERATE_SINE_CONSTANTS(
     return;
 }
 
-static inline void IDCT4x4_1D(
+static INLINE void IDCT4x4_1D(
         int16x4_t *d0s16,
         int16x4_t *d1s16,
         int16x4_t *d2s16,
@@ -103,7 +104,7 @@ static inline void IDCT4x4_1D(
     return;
 }
 
-static inline void IADST4x4_1D(
+static INLINE void IADST4x4_1D(
         int16x4_t *d3s16,
         int16x4_t *d4s16,
         int16x4_t *d5s16,

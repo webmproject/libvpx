@@ -11,7 +11,9 @@
 #include <arm_neon.h>
 #include "vp9/common/vp9_idct.h"
 
-static inline void LD_16x8(
+#include "./vpx_config.h"
+
+static INLINE void LD_16x8(
         uint8_t *d,
         int d_stride,
         uint8x16_t *q8u8,
@@ -40,7 +42,7 @@ static inline void LD_16x8(
     return;
 }
 
-static inline void ADD_DIFF_16x8(
+static INLINE void ADD_DIFF_16x8(
         uint8x16_t qdiffu8,
         uint8x16_t *q8u8,
         uint8x16_t *q9u8,
@@ -61,7 +63,7 @@ static inline void ADD_DIFF_16x8(
     return;
 }
 
-static inline void SUB_DIFF_16x8(
+static INLINE void SUB_DIFF_16x8(
         uint8x16_t qdiffu8,
         uint8x16_t *q8u8,
         uint8x16_t *q9u8,
@@ -82,7 +84,7 @@ static inline void SUB_DIFF_16x8(
     return;
 }
 
-static inline void ST_16x8(
+static INLINE void ST_16x8(
         uint8_t *d,
         int d_stride,
         uint8x16_t *q8u8,

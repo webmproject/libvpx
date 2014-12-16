@@ -12,6 +12,7 @@
 #include <assert.h>
 
 #include "./vp9_rtcd.h"
+#include "./vpx_config.h"
 #include "vp9/common/vp9_common.h"
 
 static int16_t cospi_2_64 = 16305;
@@ -30,7 +31,7 @@ static int16_t cospi_26_64 = 4756;
 static int16_t cospi_28_64 = 3196;
 static int16_t cospi_30_64 = 1606;
 
-static inline void TRANSPOSE8X8(
+static INLINE void TRANSPOSE8X8(
         int16x8_t *q8s16,
         int16x8_t *q9s16,
         int16x8_t *q10s16,
@@ -99,7 +100,7 @@ static inline void TRANSPOSE8X8(
     return;
 }
 
-static inline void IDCT8x8_1D(
+static INLINE void IDCT8x8_1D(
         int16x8_t *q8s16,
         int16x8_t *q9s16,
         int16x8_t *q10s16,
@@ -255,7 +256,7 @@ static inline void IDCT8x8_1D(
     return;
 }
 
-static inline void IADST8X8_1D(
+static INLINE void IADST8X8_1D(
         int16x8_t *q8s16,
         int16x8_t *q9s16,
         int16x8_t *q10s16,
