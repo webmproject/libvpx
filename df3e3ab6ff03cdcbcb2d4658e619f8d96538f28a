@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//LxU\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 899,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-12-16T17:37:58Z",
+      "side": 1,
+      "message": "are these necessary? if final choice is not intra mode, then these two values should have stayed correct?",
+      "revId": "df3e3ab6ff03cdcbcb2d4658e619f8d96538f28a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
