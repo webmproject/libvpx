@@ -50,6 +50,7 @@ typedef struct frame_contexts {
   struct tx_probs tx_probs;
   vp9_prob skip_probs[SKIP_CONTEXTS];
   nmv_context nmvc;
+  int initialized;
 } FRAME_CONTEXT;
 
 typedef struct {

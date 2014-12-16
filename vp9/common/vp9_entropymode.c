@@ -453,6 +453,7 @@ void vp9_setup_past_independence(VP9_COMMON *cm) {
   vp9_default_coef_probs(cm);
   vp9_init_mode_probs(cm->fc);
   vp9_init_mv_probs(cm);
+  cm->fc->initialized = 1;
 
   if (cm->frame_type == KEY_FRAME ||
       cm->error_resilient_mode || cm->reset_frame_context == 3) {

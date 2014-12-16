@@ -1556,6 +1556,10 @@ void vp9_decode_frame(VP9Decoder *pbi,
   vp9_setup_block_planes(xd, cm->subsampling_x, cm->subsampling_y);
 
   *cm->fc = cm->frame_contexts[cm->frame_context_idx];
+  if (!cm->fc->initialized)
+    vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
+                       "Uninitialized entropy context.");
+
   vp9_zero(cm->counts);
 
   xd->corrupted = 0;
