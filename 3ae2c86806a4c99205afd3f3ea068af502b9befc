@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//L2k\u003d",
+        "filename": "test/codec_factory.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2014-12-16T00:09:19Z",
+      "side": 1,
+      "message": "I looked up your test failure ( the other patch).   It only happens when in spatial_svc mode - That\u0027s when the encoder and decoder private structure sizes were mismatched.  \n\nMy patch ( now merged) fixes that problem.",
+      "parentUuid": "AAAAdn//L5A\u003d",
+      "revId": "3ae2c86806a4c99205afd3f3ea068af502b9befc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//L5E\u003d",
         "filename": "test/encode_test_driver.cc",
         "patchSetId": 4
