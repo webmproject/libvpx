@@ -16,6 +16,24 @@
       "revId": "df3e3ab6ff03cdcbcb2d4658e619f8d96538f28a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//LxM\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 899,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-12-16T17:44:00Z",
+      "side": 1,
+      "message": "skip_txfm and tx_size are changed in the intra mode search stage estimate_block_intra. If intra mode is not selected, we need to reset it back to the inter mode state.",
+      "parentUuid": "AAAAdn//LxU\u003d",
+      "revId": "df3e3ab6ff03cdcbcb2d4658e619f8d96538f28a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
