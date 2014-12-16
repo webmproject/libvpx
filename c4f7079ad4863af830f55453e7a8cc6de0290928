@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//L4Y\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-12-16T00:15:35Z",
+      "side": 1,
+      "message": "you can make this the old commit name + if you reuse the change-id from the first one you\u0027ll be able to find both in gerrit search",
+      "revId": "c4f7079ad4863af830f55453e7a8cc6de0290928",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
