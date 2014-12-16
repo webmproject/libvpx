@@ -522,8 +522,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   struct macroblockd_plane *const pd = &xd->plane[0];
   PREDICTION_MODE best_mode = ZEROMV;
   MV_REFERENCE_FRAME ref_frame, best_ref_frame = LAST_FRAME;
-  TX_SIZE best_tx_size = MIN(max_txsize_lookup[bsize],
-                             tx_mode_to_biggest_tx_size[cm->tx_mode]);
+  TX_SIZE best_tx_size = TX_SIZES;
   INTERP_FILTER best_pred_filter = EIGHTTAP;
   int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES];
   struct buf_2d yv12_mb[4][MAX_MB_PLANE];
@@ -870,7 +869,6 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     pd->dst = orig_dst;
 
     for (i = 0; i < 4; ++i) {
-      const TX_SIZE saved_tx_size = mbmi->tx_size;
       const PREDICTION_MODE this_mode = intra_mode_list[i];
       if (!((1 << this_mode) & cpi->sf.intra_y_mode_mask[intra_tx_size]))
         continue;
@@ -897,7 +895,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         mbmi->mv[0].as_int = INVALID_MV;
       } else {
         x->skip_txfm[0] = best_mode_skip_txfm;
-        mbmi->tx_size = saved_tx_size;
+        mbmi->tx_size = best_tx_size;
       }
     }
   }
