@@ -22,7 +22,8 @@ DIST_DIR="_dist"
 FRAMEWORK_DIR="VPX.framework"
 HEADER_DIR="${FRAMEWORK_DIR}/Headers/vpx"
 MAKE_JOBS=1
-LIBVPX_SOURCE_DIR=$(dirname "$0" | sed -e s,/build/make,,)
+SCRIPT_DIR=$(dirname "$0")
+LIBVPX_SOURCE_DIR=$(cd ${SCRIPT_DIR}/../..; pwd)
 LIPO=$(xcrun -sdk iphoneos${SDK} -find lipo)
 ORIG_PWD="$(pwd)"
 TARGETS="arm64-darwin-gcc
@@ -41,7 +42,7 @@ build_target() {
 
   mkdir "${target}"
   cd "${target}"
-  eval "../../${LIBVPX_SOURCE_DIR}/configure" --target="${target}" \
+  eval "${LIBVPX_SOURCE_DIR}/configure" --target="${target}" \
       --disable-docs ${EXTRA_CONFIGURE_ARGS} ${devnull}
   export DIST_DIR
   eval make -j ${MAKE_JOBS} dist ${devnull}
