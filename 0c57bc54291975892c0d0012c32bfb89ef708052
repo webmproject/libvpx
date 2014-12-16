@@ -16,6 +16,24 @@
       "revId": "0c57bc54291975892c0d0012c32bfb89ef708052",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//L1k\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 874,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-12-16T01:53:07Z",
+      "side": 1,
+      "message": "Done\n\nno need to store this flag for intra mode indeed.",
+      "parentUuid": "AAAAdn//L1s\u003d",
+      "revId": "0c57bc54291975892c0d0012c32bfb89ef708052",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
