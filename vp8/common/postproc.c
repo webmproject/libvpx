@@ -518,6 +518,7 @@ void vp8_plane_add_noise_c(unsigned char *Start, char *noise,
                            unsigned int Width, unsigned int Height, int Pitch)
 {
     unsigned int i, j;
+    (void)bothclamp;
 
     for (i = 0; i < Height; i++)
     {

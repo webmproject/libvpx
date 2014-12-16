@@ -384,6 +384,8 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
         oxcf->mr_down_sampling_factor.den = mr_cfg->mr_down_sampling_factor.den;
         oxcf->mr_low_res_mode_info        = mr_cfg->mr_low_res_mode_info;
     }
+#else
+    (void)mr_cfg;
 #endif
 
     oxcf->cpu_used               = vp8_cfg.cpu_used;
@@ -628,6 +630,9 @@ static vpx_codec_err_t vp8e_mr_alloc_mem(const vpx_codec_enc_cfg_t *cfg,
         *mem_loc = (void *)shared_mem_loc;
         res = VPX_CODEC_OK;
     }
+#else
+    (void)cfg;
+    (void)mem_loc;
 #endif
     return res;
 }

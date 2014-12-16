@@ -888,6 +888,8 @@ int vp8_hex_search
     fcenter_mv.as_mv.row = center_mv->as_mv.row >> 3;
     fcenter_mv.as_mv.col = center_mv->as_mv.col >> 3;
 
+    (void)mvcost;
+
     /* adjust ref_mv to make sure it is within MV range */
     vp8_clamp_mv(ref_mv, x->mv_col_min, x->mv_col_max, x->mv_row_min, x->mv_row_max);
     br = ref_mv->as_mv.row;
@@ -911,6 +913,8 @@ int vp8_hex_search
     else if (search_param >= 1) hex_range = 63;
 
     dia_range = 8;
+#else
+    (void)search_param;
 #endif
 
     /* hex search */

@@ -837,6 +837,9 @@ static int rd_cost_mbuv(MACROBLOCK *mb)
 static int rd_inter16x16_uv(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
                             int *distortion, int fullpixel)
 {
+    (void)cpi;
+    (void)fullpixel;
+
     vp8_build_inter16x16_predictors_mbuv(&x->e_mbd);
     vp8_subtract_mbuv(x->src_diff,
         x->src.u_buffer, x->src.v_buffer, x->src.uv_stride,
@@ -854,6 +857,9 @@ static int rd_inter16x16_uv(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
 static int rd_inter4x4_uv(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
                           int *distortion, int fullpixel)
 {
+    (void)cpi;
+    (void)fullpixel;
+
     vp8_build_inter4x4_predictors_mbuv(&x->e_mbd);
     vp8_subtract_mbuv(x->src_diff,
         x->src.u_buffer, x->src.v_buffer, x->src.uv_stride,

@@ -74,6 +74,7 @@ static unsigned long vp8_priv_sz(const vpx_codec_dec_cfg_t *si, vpx_codec_flags_
      * known)
      */
     (void)si;
+    (void)flags;
     return sizeof(vpx_codec_alg_priv_t);
 }
 
@@ -647,6 +648,8 @@ static vpx_codec_err_t vp8_set_postproc(vpx_codec_alg_priv_t *ctx,
         return VPX_CODEC_INVALID_PARAM;
 
 #else
+    (void)ctx;
+    (void)args;
     return VPX_CODEC_INCAPABLE;
 #endif
 }
