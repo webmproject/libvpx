@@ -210,17 +210,85 @@ static void mfqe_partition(VP9_COMMON *cm, MODE_INFO *mi, BLOCK_SIZE bs,
     return;
   }
   // No MFQE on blocks smaller than 16x16
-  if (partition == PARTITION_SPLIT && bs == BLOCK_16X16) {
+  if (bs == BLOCK_16X16) {
     partition = PARTITION_NONE;
   }
+  if (bs == BLOCK_64X64) {
+    mi_offset = 4;
+    y_offset = 32;
+    uv_offset = 16;
+  } else {
+    mi_offset = 2;
+    y_offset = 16;
+    uv_offset = 8;
+  }
   switch (partition) {
+    BLOCK_SIZE mfqe_bs, bs_tmp;
     case PARTITION_HORZ:
+      if (bs == BLOCK_64X64) {
+        mfqe_bs = BLOCK_64X32;
+        bs_tmp = BLOCK_32X32;
+      } else {
+        mfqe_bs = BLOCK_32X16;
+        bs_tmp = BLOCK_16X16;
+      }
+      if (mfqe_decision(mi, mfqe_bs)) {
+        // Do mfqe on the first square partition.
+        mfqe_block(bs_tmp, y, u, v, y_stride, uv_stride,
+                   yd, ud, vd, yd_stride, uvd_stride);
+        // Do mfqe on the second square partition.
+        mfqe_block(bs_tmp, y + y_offset, u + uv_offset, v + uv_offset,
+                   y_stride, uv_stride, yd + y_offset, ud + uv_offset,
+                   vd + uv_offset, yd_stride, uvd_stride);
+      }
+      if (mfqe_decision(mi + mi_offset * cm->mi_stride, mfqe_bs)) {
+        // Do mfqe on the first square partition.
+        mfqe_block(bs_tmp, y + y_offset * y_stride, u + uv_offset * uv_stride,
+                   v + uv_offset * uv_stride, y_stride, uv_stride,
+                   yd + y_offset * yd_stride, ud + uv_offset * uvd_stride,
+                   vd + uv_offset * uvd_stride, yd_stride, uvd_stride);
+        // Do mfqe on the second square partition.
+        mfqe_block(bs_tmp, y + y_offset * y_stride + y_offset,
+                   u + uv_offset * uv_stride + uv_offset,
+                   v + uv_offset * uv_stride + uv_offset, y_stride,
+                   uv_stride, yd + y_offset * yd_stride + y_offset,
+                   ud + uv_offset * uvd_stride + uv_offset,
+                   vd + uv_offset * uvd_stride + uv_offset,
+                   yd_stride, uvd_stride);
+      }
+      break;
     case PARTITION_VERT:
-      // If current block size is not square.
-      // Copy the block from current frame(i.e., no mfqe is done).
-      // TODO(jackychen): Rectangle blocks should also be taken into account.
-      copy_block(y, u, v, y_stride, uv_stride, yd, ud, vd,
-                 yd_stride, uvd_stride, bs);
+      if (bs == BLOCK_64X64) {
+        mfqe_bs = BLOCK_32X64;
+        bs_tmp = BLOCK_32X32;
+      } else {
+        mfqe_bs = BLOCK_16X32;
+        bs_tmp = BLOCK_16X16;
+      }
+      if (mfqe_decision(mi, mfqe_bs)) {
+        // Do mfqe on the first square partition.
+        mfqe_block(bs_tmp, y, u, v, y_stride, uv_stride,
+                   yd, ud, vd, yd_stride, uvd_stride);
+        // Do mfqe on the second square partition.
+        mfqe_block(bs_tmp, y + y_offset * y_stride, u + uv_offset * uv_stride,
+                   v + uv_offset * uv_stride, y_stride, uv_stride,
+                   yd + y_offset * yd_stride, ud + uv_offset * uvd_stride,
+                   vd + uv_offset * uvd_stride, yd_stride, uvd_stride);
+      }
+      if (mfqe_decision(mi + mi_offset, mfqe_bs)) {
+        // Do mfqe on the first square partition.
+        mfqe_block(bs_tmp, y + y_offset, u + uv_offset, v + uv_offset,
+                   y_stride, uv_stride, yd + y_offset, ud + uv_offset,
+                   vd + uv_offset, yd_stride, uvd_stride);
+        // Do mfqe on the second square partition.
+        mfqe_block(bs_tmp, y + y_offset * y_stride + y_offset,
+                   u + uv_offset * uv_stride + uv_offset,
+                   v + uv_offset * uv_stride + uv_offset, y_stride,
+                   uv_stride, yd + y_offset * yd_stride + y_offset,
+                   ud + uv_offset * uvd_stride + uv_offset,
+                   vd + uv_offset * uvd_stride + uv_offset,
+                   yd_stride, uvd_stride);
+      }
       break;
     case PARTITION_NONE:
       if (mfqe_decision(mi, cur_bs)) {
@@ -234,15 +302,6 @@ static void mfqe_partition(VP9_COMMON *cm, MODE_INFO *mi, BLOCK_SIZE bs,
       }
       break;
     case PARTITION_SPLIT:
-      if (bs == BLOCK_64X64) {
-        mi_offset = 4;
-        y_offset = 32;
-        uv_offset = 16;
-      } else {
-        mi_offset = 2;
-        y_offset = 16;
-        uv_offset = 8;
-      }
       // Recursion on four square partitions, e.g. if bs is 64X64,
       // then look into four 32X32 blocks in it.
       mfqe_partition(cm, mi, subsize, y, u, v, y_stride, uv_stride, yd, ud, vd,
