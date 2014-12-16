@@ -82,6 +82,7 @@ static unsigned int tt_activity_measure( VP8_COMP *cpi, MACROBLOCK *x )
 {
     unsigned int act;
     unsigned int sse;
+    (void)cpi;
     /* TODO: This could also be done over smaller areas (8x8), but that would
      *  require extensive changes elsewhere, as lambda is assumed to be fixed
      *  over an entire MB in most of the code.
@@ -1149,6 +1150,8 @@ static void sum_intra_stats(VP8_COMP *cpi, MACROBLOCK *x)
         while (++b < 16);
     }
 
+#else
+    (void)cpi;
 #endif
 
     ++x->ymode_count[m];

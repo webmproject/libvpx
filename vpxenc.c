@@ -1197,6 +1197,7 @@ static int parse_stream_params(struct VpxEncoderConfig *global,
 static void validate_stream_config(const struct stream_state *stream,
                                    const struct VpxEncoderConfig *global) {
   const struct stream_state *streami;
+  (void)global;
 
   if (!stream->config.cfg.g_w || !stream->config.cfg.g_h)
     fatal("Stream %d: Specify stream dimensions with --width (-w) "

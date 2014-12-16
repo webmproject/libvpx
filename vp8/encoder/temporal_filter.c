@@ -163,6 +163,8 @@ static int vp8_temporal_filter_find_matching_mb_c
     int pre = d->offset;
     int pre_stride = x->e_mbd.pre.y_stride;
 
+    (void)error_thresh;
+
     best_ref_mv1.as_int = 0;
     best_ref_mv1_full.as_mv.col = best_ref_mv1.as_mv.col >>3;
     best_ref_mv1_full.as_mv.row = best_ref_mv1.as_mv.row >>3;

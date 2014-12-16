@@ -180,6 +180,7 @@ int vp8_skip_fractional_mv_step(MACROBLOCK *mb, BLOCK *b, BLOCKD *d,
     (void) ref_mv;
     (void) error_per_bit;
     (void) vfp;
+    (void) mb;
     (void) mvcost;
     (void) distortion;
     (void) sse;

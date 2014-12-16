@@ -261,6 +261,7 @@ void vp8_loop_filter_row_simple(VP8_COMMON *cm, MODE_INFO *mode_info_context,
     int mb_col;
     int filter_level;
     loop_filter_info_n *lfi_n = &cm->lf_info;
+    (void)post_uvstride;
 
     for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)
     {

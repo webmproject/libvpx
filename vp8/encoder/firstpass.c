@@ -132,6 +132,7 @@ static void output_stats(const VP8_COMP            *cpi,
                          FIRSTPASS_STATS            *stats)
 {
     struct vpx_codec_cx_pkt pkt;
+    (void)cpi;
     pkt.kind = VPX_CODEC_STATS_PKT;
     pkt.data.twopass_stats.buf = stats;
     pkt.data.twopass_stats.sz = sizeof(FIRSTPASS_STATS);
@@ -418,6 +419,7 @@ static void zz_motion_search( VP8_COMP *cpi, MACROBLOCK * x,
     int raw_stride = raw_buffer->y_stride;
     unsigned char *ref_ptr;
     int ref_stride = x->e_mbd.pre.y_stride;
+    (void)cpi;
 
     /* Set up pointers for this macro block raw buffer */
     raw_ptr = (unsigned char *)(raw_buffer->y_buffer + recon_yoffset
@@ -1409,6 +1411,7 @@ void vp8_init_second_pass(VP8_COMP *cpi)
 
 void vp8_end_second_pass(VP8_COMP *cpi)
 {
+  (void)cpi;
 }
 
 /* This function gives and estimate of how badly we believe the prediction
@@ -1419,6 +1422,7 @@ static double get_prediction_decay_rate(VP8_COMP *cpi, FIRSTPASS_STATS *next_fra
     double prediction_decay_rate;
     double motion_decay;
     double motion_pct = next_frame->pcnt_motion;
+    (void)cpi;
 
     /* Initial basis is the % mbs inter coded */
     prediction_decay_rate = next_frame->pcnt_inter;
@@ -1547,6 +1551,7 @@ static void accumulate_frame_motion_stats(
     double this_frame_mvr_ratio;
     double this_frame_mvc_ratio;
     double motion_pct;
+    (void)cpi;
 
     /* Accumulate motion stats. */
     motion_pct = this_frame->pcnt_motion;
