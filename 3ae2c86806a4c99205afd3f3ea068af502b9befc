@@ -68,6 +68,24 @@
       "revId": "3ae2c86806a4c99205afd3f3ea068af502b9befc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//LwM\u003d",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-12-16T18:42:17Z",
+      "side": 1,
+      "message": "You are right. This part is not needed. Thanks.",
+      "parentUuid": "AAAAdn//L5E\u003d",
+      "revId": "3ae2c86806a4c99205afd3f3ea068af502b9befc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
