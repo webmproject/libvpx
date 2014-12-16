@@ -1,5 +1,6 @@
 text vpx_codec_enc_config_default
 text vpx_codec_enc_config_set
+text vpx_codec_enc_init_multi_ver
 text vpx_codec_enc_init_ver
 text vpx_codec_encode
 text vpx_codec_get_cx_data
