@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Lr8\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 878,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-12-17T00:21:10Z",
+      "side": 1,
+      "message": "intra_tx_size is the largest possible transform size. It is used by vp9_foreach_transformed_block_in_plane as the effective prediction size. We can then adjust the actual transform size within estimate_block_intra, depending on the prediction residual statistics.",
+      "parentUuid": "AAAAdn//LsQ\u003d",
+      "revId": "3d0674bd09fffb0a8966e6129b2679676e98d2bd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//LsM\u003d",
         "filename": "vp9/encoder/vp9_pickmode.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2014-12-17T00:15:45Z",
       "side": 1,
       "message": "What about x-\u003eskip_txfm[0]? That still seems clobbered.",
+      "revId": "3d0674bd09fffb0a8966e6129b2679676e98d2bd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Lr4\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 904,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-12-17T00:21:10Z",
+      "side": 1,
+      "message": "x-\u003eskip_txfm[0] is not in use for intra block coding. so we don\u0027t need to restore it if intra mode is selected.",
+      "parentUuid": "AAAAdn//LsM\u003d",
       "revId": "3d0674bd09fffb0a8966e6129b2679676e98d2bd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
