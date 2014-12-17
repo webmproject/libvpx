@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//LjM\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 613,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-12-17T18:59:13Z",
+      "side": 1,
+      "message": "A second thought.. this change may result in creating invalid bit-stream if the VAR_BASED_PARTITION were turned on in good quality setting (for youtube). In other words, certain combination of the speed feature could result fatal failure here.\n\nI kind of lean towards not to make regular coding flow more complex by adding speed features.\n\nIf we think this intra block should use 4x4 transform, is that possible to directly set the coding block size to be sub8x8 directly?",
+      "revId": "ee08631f65283506118e121fbd70f84f6fa56707",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
