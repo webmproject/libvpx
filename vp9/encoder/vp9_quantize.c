@@ -122,14 +122,13 @@ void vp9_quantize_fp_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
                        const int16_t *quant_ptr, const int16_t *quant_shift_ptr,
                        tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
                        const int16_t *dequant_ptr,
-                       int zbin_oq_value, uint16_t *eob_ptr,
+                       uint16_t *eob_ptr,
                        const int16_t *scan, const int16_t *iscan) {
   int i, eob = -1;
   // TODO(jingning) Decide the need of these arguments after the
   // quantization process is completed.
   (void)zbin_ptr;
   (void)quant_shift_ptr;
-  (void)zbin_oq_value;
   (void)iscan;
 
   vpx_memset(qcoeff_ptr, 0, n_coeffs * sizeof(*qcoeff_ptr));
@@ -168,7 +167,6 @@ void vp9_highbd_quantize_fp_c(const tran_low_t *coeff_ptr,
                               tran_low_t *qcoeff_ptr,
                               tran_low_t *dqcoeff_ptr,
                               const int16_t *dequant_ptr,
-                              int zbin_oq_value,
                               uint16_t *eob_ptr,
                               const int16_t *scan,
                               const int16_t *iscan) {
@@ -178,7 +176,6 @@ void vp9_highbd_quantize_fp_c(const tran_low_t *coeff_ptr,
   // quantization process is completed.
   (void)zbin_ptr;
   (void)quant_shift_ptr;
-  (void)zbin_oq_value;
   (void)iscan;
 
   vpx_memset(qcoeff_ptr, 0, count * sizeof(*qcoeff_ptr));
@@ -217,12 +214,11 @@ void vp9_quantize_fp_32x32_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
                              const int16_t *quant_shift_ptr,
                              tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
                              const int16_t *dequant_ptr,
-                             int zbin_oq_value, uint16_t *eob_ptr,
+                             uint16_t *eob_ptr,
                              const int16_t *scan, const int16_t *iscan) {
   int i, eob = -1;
   (void)zbin_ptr;
   (void)quant_shift_ptr;
-  (void)zbin_oq_value;
   (void)iscan;
 
   vpx_memset(qcoeff_ptr, 0, n_coeffs * sizeof(*qcoeff_ptr));
@@ -261,12 +257,11 @@ void vp9_highbd_quantize_fp_32x32_c(const tran_low_t *coeff_ptr,
                                     tran_low_t *qcoeff_ptr,
                                     tran_low_t *dqcoeff_ptr,
                                     const int16_t *dequant_ptr,
-                                    int zbin_oq_value, uint16_t *eob_ptr,
+                                    uint16_t *eob_ptr,
                                     const int16_t *scan, const int16_t *iscan) {
   int i, eob = -1;
   (void)zbin_ptr;
   (void)quant_shift_ptr;
-  (void)zbin_oq_value;
   (void)iscan;
 
   vpx_memset(qcoeff_ptr, 0, n_coeffs * sizeof(*qcoeff_ptr));
@@ -302,13 +297,11 @@ void vp9_quantize_b_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
                       const int16_t *quant_ptr, const int16_t *quant_shift_ptr,
                       tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
                       const int16_t *dequant_ptr,
-                      int zbin_oq_value, uint16_t *eob_ptr,
+                      uint16_t *eob_ptr,
                       const int16_t *scan, const int16_t *iscan) {
   int i, non_zero_count = (int)n_coeffs, eob = -1;
-  const int zbins[2] = { zbin_ptr[0] + zbin_oq_value,
-                         zbin_ptr[1] + zbin_oq_value };
-  const int nzbins[2] = { zbins[0] * -1,
-                          zbins[1] * -1 };
+  const int zbins[2] = {zbin_ptr[0], zbin_ptr[1]};
+  const int nzbins[2] = {zbins[0] * -1, zbins[1] * -1};
   (void)iscan;
 
   vpx_memset(qcoeff_ptr, 0, n_coeffs * sizeof(*qcoeff_ptr));
@@ -355,14 +348,12 @@ void vp9_highbd_quantize_b_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
                              const int16_t *round_ptr, const int16_t *quant_ptr,
                              const int16_t *quant_shift_ptr,
                              tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
-                             const int16_t *dequant_ptr, int zbin_oq_value,
+                             const int16_t *dequant_ptr,
                              uint16_t *eob_ptr, const int16_t *scan,
                              const int16_t *iscan) {
   int i, non_zero_count = (int)n_coeffs, eob = -1;
-  const int zbins[2] = { zbin_ptr[0] + zbin_oq_value,
-                         zbin_ptr[1] + zbin_oq_value };
-  const int nzbins[2] = { zbins[0] * -1,
-                          zbins[1] * -1 };
+  const int zbins[2] = {zbin_ptr[0], zbin_ptr[1]};
+  const int nzbins[2] = {zbins[0] * -1, zbins[1] * -1};
   (void)iscan;
 
   vpx_memset(qcoeff_ptr, 0, n_coeffs * sizeof(*qcoeff_ptr));
@@ -412,10 +403,10 @@ void vp9_quantize_b_32x32_c(const tran_low_t *coeff_ptr, intptr_t n_coeffs,
                             const int16_t *quant_shift_ptr,
                             tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
                             const int16_t *dequant_ptr,
-                            int zbin_oq_value, uint16_t *eob_ptr,
+                            uint16_t *eob_ptr,
                             const int16_t *scan, const int16_t *iscan) {
-  const int zbins[2] = { ROUND_POWER_OF_TWO(zbin_ptr[0] + zbin_oq_value, 1),
-                         ROUND_POWER_OF_TWO(zbin_ptr[1] + zbin_oq_value, 1) };
+  const int zbins[2] = {ROUND_POWER_OF_TWO(zbin_ptr[0], 1),
+                        ROUND_POWER_OF_TWO(zbin_ptr[1], 1)};
   const int nzbins[2] = {zbins[0] * -1, zbins[1] * -1};
 
   int idx = 0;
@@ -471,11 +462,11 @@ void vp9_highbd_quantize_b_32x32_c(const tran_low_t *coeff_ptr,
                                    tran_low_t *qcoeff_ptr,
                                    tran_low_t *dqcoeff_ptr,
                                    const int16_t *dequant_ptr,
-                                   int zbin_oq_value, uint16_t *eob_ptr,
+                                   uint16_t *eob_ptr,
                                    const int16_t *scan, const int16_t *iscan) {
-  const int zbins[2] = { ROUND_POWER_OF_TWO(zbin_ptr[0] + zbin_oq_value, 1),
-                         ROUND_POWER_OF_TWO(zbin_ptr[1] + zbin_oq_value, 1) };
-  const int nzbins[2] = { zbins[0] * -1, zbins[1] * -1 };
+  const int zbins[2] = {ROUND_POWER_OF_TWO(zbin_ptr[0], 1),
+                        ROUND_POWER_OF_TWO(zbin_ptr[1], 1)};
+  const int nzbins[2] = {zbins[0] * -1, zbins[1] * -1};
 
   int idx = 0;
   int idx_arr[1024];
@@ -534,7 +525,7 @@ void vp9_regular_quantize_b_4x4(MACROBLOCK *x, int plane, int block,
                         p->zbin, p->round, p->quant, p->quant_shift,
                         BLOCK_OFFSET(p->qcoeff, block),
                         BLOCK_OFFSET(pd->dqcoeff, block),
-                        pd->dequant, p->zbin_extra, &p->eobs[block],
+                        pd->dequant, &p->eobs[block],
                         scan, iscan);
     return;
   }
@@ -544,7 +535,7 @@ void vp9_regular_quantize_b_4x4(MACROBLOCK *x, int plane, int block,
            p->zbin, p->round, p->quant, p->quant_shift,
            BLOCK_OFFSET(p->qcoeff, block),
            BLOCK_OFFSET(pd->dqcoeff, block),
-           pd->dequant, p->zbin_extra, &p->eobs[block], scan, iscan);
+           pd->dequant, &p->eobs[block], scan, iscan);
 }
 
 static void invert_quant(int16_t *quant, int16_t *shift, int d) {
@@ -641,8 +632,6 @@ void vp9_init_plane_quantizers(VP9_COMP *cpi, MACROBLOCK *x) {
   const int segment_id = xd->mi[0].src_mi->mbmi.segment_id;
   const int qindex = vp9_get_qindex(&cm->seg, segment_id, cm->base_qindex);
   const int rdmult = vp9_compute_rd_mult(cpi, qindex + cm->y_dc_delta_q);
-  // TODO(paulwilkins): 0 value for zbin for now pending follow on patch.
-  const int zbin = 0;
   int i;
 
   // Y
@@ -652,13 +641,10 @@ void vp9_init_plane_quantizers(VP9_COMP *cpi, MACROBLOCK *x) {
   x->plane[0].quant_shift = quants->y_quant_shift[qindex];
   x->plane[0].zbin = quants->y_zbin[qindex];
   x->plane[0].round = quants->y_round[qindex];
-  x->plane[0].zbin_extra = (int16_t)((cm->y_dequant[qindex][1] * zbin) >> 7);
   xd->plane[0].dequant = cm->y_dequant[qindex];
 
-  x->plane[0].quant_thred[0] = (x->plane[0].zbin[0] + x->plane[0].zbin_extra) *
-      (x->plane[0].zbin[0] + x->plane[0].zbin_extra);
-  x->plane[0].quant_thred[1] = (x->plane[0].zbin[1] + x->plane[0].zbin_extra) *
-      (x->plane[0].zbin[1] + x->plane[0].zbin_extra);
+  x->plane[0].quant_thred[0] = x->plane[0].zbin[0] * x->plane[0].zbin[0];
+  x->plane[0].quant_thred[1] = x->plane[0].zbin[1] * x->plane[0].zbin[1];
 
   // UV
   for (i = 1; i < 3; i++) {
@@ -668,15 +654,10 @@ void vp9_init_plane_quantizers(VP9_COMP *cpi, MACROBLOCK *x) {
     x->plane[i].quant_shift = quants->uv_quant_shift[qindex];
     x->plane[i].zbin = quants->uv_zbin[qindex];
     x->plane[i].round = quants->uv_round[qindex];
-    x->plane[i].zbin_extra = (int16_t)((cm->uv_dequant[qindex][1] * zbin) >> 7);
     xd->plane[i].dequant = cm->uv_dequant[qindex];
 
-    x->plane[i].quant_thred[0] =
-        (x->plane[i].zbin[0] + x->plane[i].zbin_extra) *
-        (x->plane[i].zbin[0] + x->plane[i].zbin_extra);
-    x->plane[i].quant_thred[1] =
-        (x->plane[i].zbin[1] + x->plane[i].zbin_extra) *
-        (x->plane[i].zbin[1] + x->plane[i].zbin_extra);
+    x->plane[i].quant_thred[0] = x->plane[i].zbin[0] * x->plane[i].zbin[0];
+    x->plane[i].quant_thred[1] = x->plane[i].zbin[1] * x->plane[i].zbin[1];
   }
 
   x->skip_block = vp9_segfeature_active(&cm->seg, segment_id, SEG_LVL_SKIP);
@@ -686,15 +667,6 @@ void vp9_init_plane_quantizers(VP9_COMP *cpi, MACROBLOCK *x) {
   x->errorperbit += (x->errorperbit == 0);
 
   vp9_initialize_me_consts(cpi, x->q_index);
-}
-
-void vp9_update_zbin_extra(MACROBLOCK *x) {
-  const int y_zbin_extra = 0;
-  const int uv_zbin_extra = 0;
-
-  x->plane[0].zbin_extra = (int16_t)y_zbin_extra;
-  x->plane[1].zbin_extra = (int16_t)uv_zbin_extra;
-  x->plane[2].zbin_extra = (int16_t)uv_zbin_extra;
 }
 
 void vp9_frame_init_quantizer(VP9_COMP *cpi) {

@@ -24,7 +24,6 @@ void vp9_highbd_quantize_b_sse2(const tran_low_t *coeff_ptr,
                                 tran_low_t *qcoeff_ptr,
                                 tran_low_t *dqcoeff_ptr,
                                 const int16_t *dequant_ptr,
-                                int zbin_oq_value,
                                 uint16_t *eob_ptr,
                                 const int16_t *scan,
                                 const int16_t *iscan) {
@@ -32,11 +31,11 @@ void vp9_highbd_quantize_b_sse2(const tran_low_t *coeff_ptr,
   __m128i zbins[2];
   __m128i nzbins[2];
 
-  zbins[0] = _mm_set_epi32((int)(zbin_ptr[1] + zbin_oq_value),
-                           (int)(zbin_ptr[1] + zbin_oq_value),
-                           (int)(zbin_ptr[1] + zbin_oq_value),
-                           (int)(zbin_ptr[0] + zbin_oq_value));
-  zbins[1] = _mm_set1_epi32((int)(zbin_ptr[1] + zbin_oq_value));
+  zbins[0] = _mm_set_epi32((int)zbin_ptr[1],
+                           (int)zbin_ptr[1],
+                           (int)zbin_ptr[1],
+                           (int)zbin_ptr[0]);
+  zbins[1] = _mm_set1_epi32((int)zbin_ptr[1]);
 
   nzbins[0] = _mm_setzero_si128();
   nzbins[1] = _mm_setzero_si128();
@@ -111,7 +110,6 @@ void vp9_highbd_quantize_b_32x32_sse2(const tran_low_t *coeff_ptr,
                                       tran_low_t *qcoeff_ptr,
                                       tran_low_t *dqcoeff_ptr,
                                       const int16_t *dequant_ptr,
-                                      int zbin_oq_value,
                                       uint16_t *eob_ptr,
                                       const int16_t *scan,
                                       const int16_t *iscan) {
@@ -120,14 +118,14 @@ void vp9_highbd_quantize_b_32x32_sse2(const tran_low_t *coeff_ptr,
   int idx = 0;
   int idx_arr[1024];
   int i, eob = -1;
-  const int zbin0_tmp = ROUND_POWER_OF_TWO(zbin_ptr[0] + zbin_oq_value, 1);
-  const int zbin1_tmp = ROUND_POWER_OF_TWO(zbin_ptr[1] + zbin_oq_value, 1);
+  const int zbin0_tmp = ROUND_POWER_OF_TWO(zbin_ptr[0], 1);
+  const int zbin1_tmp = ROUND_POWER_OF_TWO(zbin_ptr[1], 1);
   (void)scan;
-  zbins[0] = _mm_set_epi32((zbin1_tmp + zbin_oq_value),
-                           (zbin1_tmp + zbin_oq_value),
-                           (zbin1_tmp + zbin_oq_value),
-                           (zbin0_tmp + zbin_oq_value));
-  zbins[1] = _mm_set1_epi32((zbin1_tmp + zbin_oq_value));
+  zbins[0] = _mm_set_epi32(zbin1_tmp,
+                           zbin1_tmp,
+                           zbin1_tmp,
+                           zbin0_tmp);
+  zbins[1] = _mm_set1_epi32(zbin1_tmp);
 
   nzbins[0] = _mm_setzero_si128();
   nzbins[1] = _mm_setzero_si128();

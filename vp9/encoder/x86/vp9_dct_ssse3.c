@@ -23,7 +23,7 @@ void vp9_fdct8x8_quant_ssse3(const int16_t *input, int stride,
                              const int16_t* quant_shift_ptr,
                              int16_t* qcoeff_ptr,
                              int16_t* dqcoeff_ptr, const int16_t* dequant_ptr,
-                             int zbin_oq_value, uint16_t* eob_ptr,
+                             uint16_t* eob_ptr,
                              const int16_t* scan_ptr,
                              const int16_t* iscan_ptr) {
   __m128i zero;
@@ -57,7 +57,6 @@ void vp9_fdct8x8_quant_ssse3(const int16_t *input, int stride,
   (void)scan_ptr;
   (void)zbin_ptr;
   (void)quant_shift_ptr;
-  (void)zbin_oq_value;
   (void)coeff_ptr;
 
   // Pre-condition input (shift by two)
