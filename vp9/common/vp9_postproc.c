@@ -637,12 +637,6 @@ int vp9_post_proc_frame(struct VP9Common *cm,
   YV12_BUFFER_CONFIG *const ppbuf = &cm->post_proc_buffer;
   struct postproc_state *const ppstate = &cm->postproc_state;
 
-#if CONFIG_VP9_HIGHBITDEPTH
-  const int flag_highbit = 1;
-#else
-  const int flag_highbit = 0;
-#endif
-
   if (!cm->frame_to_show)
     return -1;
 
@@ -701,7 +695,7 @@ int vp9_post_proc_frame(struct VP9Common *cm,
                        "Failed to allocate post-processing buffer");
 
   if ((flags & VP9D_MFQE) && cm->current_video_frame >= 2 &&
-      cm->postproc_state.last_frame_valid && !flag_highbit &&
+      cm->postproc_state.last_frame_valid && cm->bit_depth == 8 &&
       cm->postproc_state.last_base_qindex <= last_q_thresh &&
       cm->base_qindex - cm->postproc_state.last_base_qindex >= q_diff_thresh) {
     vp9_mfqe(cm);
