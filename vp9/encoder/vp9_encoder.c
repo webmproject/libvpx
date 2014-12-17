@@ -192,7 +192,6 @@ void vp9_initialize_enc() {
     vp9_init_me_luts();
     vp9_rc_init_minq_luts();
     vp9_entropy_mv_init();
-    vp9_entropy_mode_init();
     vp9_temporal_filter_init();
     init_done = 1;
   }
