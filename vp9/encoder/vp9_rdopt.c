@@ -2726,6 +2726,7 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   x->skip_encode = 0;
   ctx->skip = 0;
   xd->mi[0].src_mi->mbmi.ref_frame[0] = INTRA_FRAME;
+  xd->mi[0].src_mi->mbmi.ref_frame[1] = NONE;
 
   if (bsize >= BLOCK_8X8) {
     if (rd_pick_intra_sby_mode(cpi, x, &rate_y, &rate_y_tokenonly,
