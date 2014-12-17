@@ -271,6 +271,7 @@ static INLINE void init_macroblockd(VP9_COMMON *cm, MACROBLOCKD *xd) {
 
   xd->above_seg_context = cm->above_seg_context;
   xd->mi_stride = cm->mi_stride;
+  xd->error_info = &cm->error;
 }
 
 static INLINE int frame_is_intra_only(const VP9_COMMON *const cm) {

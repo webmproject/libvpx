@@ -14,6 +14,7 @@
 #include "./vpx_config.h"
 #include "vp9/common/vp9_thread.h"
 #include "vp9/decoder/vp9_reader.h"
+#include "vpx/internal/vpx_codec_internal.h"
 
 struct VP9Common;
 struct VP9Decoder;
@@ -22,6 +23,7 @@ typedef struct TileWorkerData {
   struct VP9Common *cm;
   vp9_reader bit_reader;
   DECLARE_ALIGNED(16, struct macroblockd, xd);
+  struct vpx_internal_error_info error_info;
 } TileWorkerData;
 
 // Loopfilter row synchronization
