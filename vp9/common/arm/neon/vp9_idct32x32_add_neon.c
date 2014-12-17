@@ -10,6 +10,8 @@
 
 #include <arm_neon.h>
 
+#include "./vpx_config.h"
+
 static int16_t cospi_1_64 = 16364;
 static int16_t cospi_2_64 = 16305;
 static int16_t cospi_3_64 = 16207;
@@ -57,7 +59,7 @@ static int16_t cospi_31_64 = 804;
 #define  STORE_COMBINE_CENTER_RESULTS(r10, r9) \
        __STORE_COMBINE_CENTER_RESULTS(r10, r9, stride, \
                                       q6s16, q7s16, q8s16, q9s16);
-static inline void __STORE_COMBINE_CENTER_RESULTS(
+static INLINE void __STORE_COMBINE_CENTER_RESULTS(
         uint8_t *p1,
         uint8_t *p2,
         int stride,
@@ -105,7 +107,7 @@ static inline void __STORE_COMBINE_CENTER_RESULTS(
 #define  STORE_COMBINE_EXTREME_RESULTS(r7, r6); \
        __STORE_COMBINE_EXTREME_RESULTS(r7, r6, stride, \
                                       q4s16, q5s16, q6s16, q7s16);
-static inline void __STORE_COMBINE_EXTREME_RESULTS(
+static INLINE void __STORE_COMBINE_EXTREME_RESULTS(
         uint8_t *p1,
         uint8_t *p2,
         int stride,
@@ -152,7 +154,7 @@ static inline void __STORE_COMBINE_EXTREME_RESULTS(
 
 #define DO_BUTTERFLY_STD(const_1, const_2, qA, qB) \
         DO_BUTTERFLY(q14s16, q13s16, const_1, const_2, qA, qB);
-static inline void DO_BUTTERFLY(
+static INLINE void DO_BUTTERFLY(
         int16x8_t q14s16,
         int16x8_t q13s16,
         int16_t first_const,
@@ -194,7 +196,7 @@ static inline void DO_BUTTERFLY(
     return;
 }
 
-static inline void idct32_transpose_pair(
+static INLINE void idct32_transpose_pair(
         int16_t *input,
         int16_t *t_buf) {
     int16_t *in;
@@ -288,7 +290,7 @@ static inline void idct32_transpose_pair(
     return;
 }
 
-static inline void idct32_bands_end_1st_pass(
+static INLINE void idct32_bands_end_1st_pass(
         int16_t *out,
         int16x8_t q2s16,
         int16x8_t q3s16,
@@ -383,7 +385,7 @@ static inline void idct32_bands_end_1st_pass(
     return;
 }
 
-static inline void idct32_bands_end_2nd_pass(
+static INLINE void idct32_bands_end_2nd_pass(
         int16_t *out,
         uint8_t *dest,
         int stride,

@@ -11,6 +11,9 @@
 #include <stddef.h>
 #include <arm_neon.h>
 
+#include "./vpx_config.h"
+#include "vpx_ports/mem.h"
+
 void vp9_convolve8_horiz_c(const uint8_t *src, ptrdiff_t src_stride,
                            uint8_t *dst, ptrdiff_t dst_stride,
                            const int16_t *filter_x, int x_step_q4,
@@ -22,7 +25,7 @@ void vp9_convolve8_vert_c(const uint8_t *src, ptrdiff_t src_stride,
                            const int16_t *filter_y, int y_step_q4,
                            int w, int h);
 
-static inline int32x4_t MULTIPLY_BY_Q0(
+static INLINE int32x4_t MULTIPLY_BY_Q0(
         int16x4_t dsrc0,
         int16x4_t dsrc1,
         int16x4_t dsrc2,

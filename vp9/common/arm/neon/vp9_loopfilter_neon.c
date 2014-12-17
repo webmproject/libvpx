@@ -10,7 +10,9 @@
 
 #include <arm_neon.h>
 
-static inline void vp9_loop_filter_neon(
+#include "./vpx_config.h"
+
+static INLINE void vp9_loop_filter_neon(
         uint8x8_t dblimit,    // flimit
         uint8x8_t dlimit,     // limit
         uint8x8_t dthresh,    // thresh
@@ -271,7 +273,7 @@ void vp9_lpf_vertical_4_neon(
     return;
 }
 
-static inline void vp9_mbloop_filter_neon(
+static INLINE void vp9_mbloop_filter_neon(
         uint8x8_t dblimit,   // mblimit
         uint8x8_t dlimit,    // limit
         uint8x8_t dthresh,   // thresh

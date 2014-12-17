@@ -10,6 +10,8 @@
 
 #include <arm_neon.h>
 
+#include "./vpx_config.h"
+
 static int16_t cospi_4_64 = 16069;
 static int16_t cospi_8_64 = 15137;
 static int16_t cospi_12_64 = 13623;
@@ -18,7 +20,7 @@ static int16_t cospi_20_64 = 9102;
 static int16_t cospi_24_64 = 6270;
 static int16_t cospi_28_64 = 3196;
 
-static inline void TRANSPOSE8X8(
+static INLINE void TRANSPOSE8X8(
         int16x8_t *q8s16,
         int16x8_t *q9s16,
         int16x8_t *q10s16,
@@ -87,7 +89,7 @@ static inline void TRANSPOSE8X8(
     return;
 }
 
-static inline void IDCT8x8_1D(
+static INLINE void IDCT8x8_1D(
         int16x8_t *q8s16,
         int16x8_t *q9s16,
         int16x8_t *q10s16,
