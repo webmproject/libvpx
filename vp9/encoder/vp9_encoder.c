@@ -3148,12 +3148,6 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
   vp9_clear_system_state();
 
-  // Enable or disable mode based tweaking of the zbin.
-  // For 2 pass only used where GF/ARF prediction quality
-  // is above a threshold.
-  cpi->zbin_mode_boost = 0;
-  cpi->zbin_mode_boost_enabled = 0;
-
   // Set the arf sign bias for this frame.
   set_arf_sign_bias(cpi);
 

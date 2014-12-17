@@ -315,9 +315,6 @@ typedef struct VP9_COMP {
   int *nmvsadcosts[2];
   int *nmvsadcosts_hp[2];
 
-  int zbin_mode_boost;
-  int zbin_mode_boost_enabled;
-
   int64_t last_time_stamp_seen;
   int64_t last_end_time_stamp_seen;
   int64_t first_time_stamp_ever;
