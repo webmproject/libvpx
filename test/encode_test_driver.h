@@ -104,6 +104,8 @@ class Encoder {
     return CxDataIterator(&encoder_);
   }
 
+  void InitEncoder(VideoSource *video);
+
   const vpx_image_t *GetPreviewFrame() {
     return vpx_codec_get_preview_frame(&encoder_);
   }
