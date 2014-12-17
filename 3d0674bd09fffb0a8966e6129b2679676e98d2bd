@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Lkg\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 848,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-12-17T17:24:34Z",
+      "side": 1,
+      "message": "Done\n\nthe use of TX_SIZES is to avoid uninitialized variable warning.",
+      "parentUuid": "AAAAdn//Lk0\u003d",
+      "revId": "3d0674bd09fffb0a8966e6129b2679676e98d2bd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//LsQ\u003d",
         "filename": "vp9/encoder/vp9_pickmode.c",
         "patchSetId": 1
