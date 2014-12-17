@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//LpU\u003d",
+        "filename": "vp9/common/vp9_postproc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 696,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2014-12-17T04:51:11Z",
+      "side": 1,
+      "message": "why not just use (cm-\u003ebit_depth \u003d\u003d 8) in the check and remove the flag_highbit?",
+      "revId": "3d9caa3a0a199e0df20f855d67a0b5e17a84550b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
