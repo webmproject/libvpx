@@ -202,6 +202,86 @@ static void setup_plane_dequants(VP9_COMMON *cm, MACROBLOCKD *xd, int q_index) {
     xd->plane[i].dequant = cm->uv_dequant[q_index];
 }
 
+#if CONFIG_TX_SKIP
+static void vp9_intra_dpcm_add(tran_low_t *dqcoeff, uint8_t *dst, int stride,
+                               PREDICTION_MODE mode, int bs, int shift) {
+  int r, c, temp;
+
+  switch (mode) {
+    case H_PRED:
+      for (r = 0; r < bs; r++) {
+        temp = dst[r * stride] + (dqcoeff[r * bs] >> shift);
+        dst[r * stride] = clip_pixel(temp);
+      }
+      for (r = 0; r < bs; r++)
+        for (c = 1; c < bs; c++) {
+          temp = dst[r * stride + c - 1] +
+              (dqcoeff[r * bs + c] >> shift);
+          dst[r * stride + c] = clip_pixel(temp);
+        }
+      break;
+    case V_PRED:
+      for (c = 0; c < bs; c++) {
+        temp = dst[c] + (dqcoeff[c] >> shift);
+        dst[c] = clip_pixel(temp);
+      }
+      for (r = 1; r < bs; r++)
+        for (c = 0; c < bs; c++) {
+          temp = dst[(r - 1) * stride + c] +
+              (dqcoeff[r * bs + c] >> shift);
+          dst[r * stride + c] = clip_pixel(temp);
+        }
+      break;
+    case TM_PRED:
+      for (c = 0; c < bs; c++) {
+        temp = dst[c] + (dqcoeff[c] >> shift);
+        dst[c] = clip_pixel(temp);
+      }
+      for (r = 1; r < bs; r++) {
+        temp = dst[r * stride] + (dqcoeff[r * bs] >> shift);
+        dst[r * stride] = clip_pixel(temp);
+      }
+      for (r = 1; r < bs; r++)
+        for (c = 1; c < bs; c++) {
+          temp = dst[stride * r + c - 1] + dst[stride * (r - 1) + c] -
+                 dst[stride * (r - 1) + c - 1];
+          temp = clip_pixel(temp);
+          temp = temp + (dqcoeff[r * bs + c] >> shift);
+          dst[stride * r + c] = clip_pixel(temp);
+        }
+      break;
+    default:
+      break;
+  }
+}
+
+static void vp9_intra_dpcm_add_nocoeff(uint8_t *dst, int stride,
+                                       PREDICTION_MODE mode, int bs) {
+  int r, c, temp;
+
+  switch (mode) {
+    case H_PRED:
+      for (r = 0; r < bs; r++)
+        memset(dst + r * stride + 1, dst[r * stride], bs - 1);
+      break;
+    case V_PRED:
+      for (r = 1; r < bs; r++)
+        memcpy(dst + r * stride, dst, bs * sizeof(*dst));
+      break;
+    case TM_PRED:
+      for (r = 1; r < bs; r++)
+        for (c = 1; c < bs; c++) {
+          temp = dst[stride * r + c - 1] + dst[stride * (r - 1) + c] -
+              dst[stride * (r - 1) + c - 1];
+          dst[stride * r + c] = clip_pixel(temp);
+        }
+      break;
+    default:
+      break;
+  }
+}
+#endif  // CONFIG_TX_SKIP
+
 static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
                                     TX_SIZE tx_size, uint8_t *dst, int stride,
                                     int eob) {
@@ -209,6 +289,8 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
 #if CONFIG_TX_SKIP
   MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
   int shift = mbmi->tx_skip_shift;
+  PREDICTION_MODE mode = (plane == 0) ? get_y_mode(xd->mi[0].src_mi, block):
+                                        mbmi->uv_mode;
 #endif
   if (eob > 0) {
     TX_TYPE tx_type = DCT_DCT;
@@ -386,7 +468,10 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
           tx_type = get_tx_type_4x4(plane_type, xd, block);
 #if CONFIG_TX_SKIP
           if (mbmi->tx_skip[plane != 0]) {
-            vp9_tx_identity_add(dqcoeff, dst, stride, 4, shift);
+            if (mode == V_PRED || mode == H_PRED || mode == TM_PRED)
+              vp9_intra_dpcm_add(dqcoeff, dst, stride, mode, 4, shift);
+            else
+              vp9_tx_identity_add(dqcoeff, dst, stride, 4, shift);
           } else {
             vp9_iht4x4_add(tx_type, dqcoeff, dst, stride, eob);
           }
@@ -398,7 +483,10 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
           tx_type = get_tx_type(plane_type, xd);
 #if CONFIG_TX_SKIP
           if (mbmi->tx_skip[plane != 0]) {
-            vp9_tx_identity_add(dqcoeff, dst, stride, 8, shift);
+            if (mode == V_PRED || mode == H_PRED || mode == TM_PRED)
+              vp9_intra_dpcm_add(dqcoeff, dst, stride, mode, 8, shift);
+            else
+              vp9_tx_identity_add(dqcoeff, dst, stride, 8, shift);
           } else {
             vp9_iht8x8_add(tx_type, dqcoeff, dst, stride, eob);
           }
@@ -410,7 +498,10 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
           tx_type = get_tx_type(plane_type, xd);
 #if CONFIG_TX_SKIP
           if (mbmi->tx_skip[plane != 0]) {
-            vp9_tx_identity_add(dqcoeff, dst, stride, 16, shift);
+            if (mode == V_PRED || mode == H_PRED || mode == TM_PRED)
+              vp9_intra_dpcm_add(dqcoeff, dst, stride, mode, 16, shift);
+            else
+              vp9_tx_identity_add(dqcoeff, dst, stride, 16, shift);
           } else {
             vp9_iht16x16_add(tx_type, dqcoeff, dst, stride, eob);
           }
@@ -422,7 +513,10 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
           tx_type = DCT_DCT;
 #if CONFIG_TX_SKIP
           if (mbmi->tx_skip[plane != 0]) {
-            vp9_tx_identity_add(dqcoeff, dst, stride, 32, shift);
+            if (mode == V_PRED || mode == H_PRED || mode == TM_PRED)
+              vp9_intra_dpcm_add(dqcoeff, dst, stride, mode, 32, shift);
+            else
+              vp9_tx_identity_add(dqcoeff, dst, stride, 32, shift);
           } else {
             vp9_idct32x32_add(dqcoeff, dst, stride, eob);;
           }
@@ -482,6 +576,9 @@ static void predict_and_reconstruct_intra_block(int plane, int block,
                                             : mi->mbmi.uv_mode;
   int x, y;
   uint8_t *dst;
+#if CONFIG_TX_SKIP
+  int no_coeff = 0;
+#endif
 #if CONFIG_FILTERINTRA
   int fbit;
   if (plane == 0)
@@ -508,7 +605,26 @@ static void predict_and_reconstruct_intra_block(int plane, int block,
                                             args->r);
     inverse_transform_block(xd, plane, block, tx_size, dst, pd->dst.stride,
                             eob);
+#if CONFIG_TX_SKIP
+    no_coeff = !eob;
+#endif
   }
+
+#if CONFIG_TX_SKIP
+  if ((mi->mbmi.skip || no_coeff) && mi->mbmi.tx_skip[plane != 0] &&
+      mode == TM_PRED && tx_size <= TX_32X32) {
+    int bs = 4 * (1 << tx_size);
+    vp9_intra_dpcm_add_nocoeff(dst, pd->dst.stride, mode, bs);
+  }
+#endif
+
+#if CONFIG_TX_SKIP && CONFIG_FILTERINTRA
+  if ((mi->mbmi.skip || no_coeff) && mi->mbmi.tx_skip[plane != 0] &&
+      (mode == H_PRED || mode == V_PRED) && fbit) {
+    int bs = 4 * (1 << tx_size);
+    vp9_intra_dpcm_add_nocoeff(dst, pd->dst.stride, mode, bs);
+  }
+#endif
 }
 
 struct inter_args {

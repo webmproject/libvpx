@@ -1593,14 +1593,20 @@ void vp9_iht16x16_add(TX_TYPE tx_type, const tran_low_t *input, uint8_t *dest,
 }
 
 #if CONFIG_TX_SKIP
+void vp9_tx_identity_add_rect(const tran_low_t *input, uint8_t *dest,
+                              int row, int col,
+                              int stride_in, int stride_out, int shift) {
+  int r, c, temp;
+  for (r = 0; r < row; r++)
+    for (c = 0; c < col; c++) {
+      temp = dest[r * stride_out + c] + (input[r * stride_in + c] >> shift);
+      dest[r * stride_out + c] = clip_pixel(temp);
+    }
+}
+
 void vp9_tx_identity_add(const tran_low_t *input, uint8_t *dest,
                          int stride, int bs, int shift) {
-  int r, c, temp;
-  for (r = 0; r < bs; r++)
-    for (c = 0; c < bs; c++) {
-      temp = dest[r * stride + c] + (input[r * bs + c] >> shift);
-      dest[r * stride + c] = clip_pixel(temp);
-    }
+  vp9_tx_identity_add_rect(input, dest, bs, bs, bs, stride, shift);
 }
 #endif
 
