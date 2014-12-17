@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Lio\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-12-17T19:16:31Z",
+      "side": 1,
+      "message": "As discussed, maybe modify the commit message to correctly reflect the change.",
+      "revId": "b0960e0be3f0cbf0ca564b81a61596dcc82a67c0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Lj0\u003d",
+        "filename": "test/decode_perf_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-12-17T19:16:31Z",
+      "side": 1,
+      "message": "remove space between static_cast and \u003c",
+      "revId": "b0960e0be3f0cbf0ca564b81a61596dcc82a67c0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
