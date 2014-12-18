@@ -15,6 +15,7 @@
 #include "./vpx_scale_rtcd.h"
 
 #include "vpx_mem/vpx_mem.h"
+#include "vpx_ports/vpx_once.h"
 #include "vpx_ports/vpx_timer.h"
 #include "vpx_scale/vpx_scale.h"
 
@@ -34,7 +35,7 @@
 #include "vp9/decoder/vp9_dthread.h"
 
 static void initialize_dec() {
-  static int init_done = 0;
+  static volatile int init_done = 0;
 
   if (!init_done) {
     vp9_rtcd();
@@ -85,7 +86,7 @@ VP9Decoder *vp9_decoder_create() {
                   sizeof(*cm->frame_contexts)));
 
   pbi->need_resync = 1;
-  initialize_dec();
+  once(initialize_dec);
 
   // Initialize the references to not point to any frame buffers.
   vpx_memset(&cm->ref_frame_map, -1, sizeof(cm->ref_frame_map));
