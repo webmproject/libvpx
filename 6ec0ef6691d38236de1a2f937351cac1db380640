@@ -16,6 +16,24 @@
       "revId": "6ec0ef6691d38236de1a2f937351cac1db380640",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//La8\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 840,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-12-18T20:14:12Z",
+      "side": 1,
+      "message": "x-\u003eskip can only be 1 if encode_breakout_test is turned on. In this setting, best_rdc.rdcost should be strictly less than INT64_MAX, so the intra mode search will be skipped.",
+      "parentUuid": "AAAAdn//Lbc\u003d",
+      "revId": "6ec0ef6691d38236de1a2f937351cac1db380640",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
