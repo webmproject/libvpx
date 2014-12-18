@@ -37,6 +37,7 @@
 #include "vp9/encoder/vp9_rd.h"
 #include "vp9/encoder/vp9_rdopt.h"
 #include "vp9/encoder/vp9_variance.h"
+#include "vp9/encoder/vp9_aq_variance.h"
 
 #define LAST_FRAME_MODE_MASK    ((1 << GOLDEN_FRAME) | (1 << ALTREF_FRAME) | \
                                  (1 << INTRA_FRAME))
@@ -48,6 +49,7 @@
 #define SECOND_REF_FRAME_MASK   ((1 << ALTREF_FRAME) | 0x01)
 
 #define MIN_EARLY_TERM_INDEX    3
+#define NEW_MV_DISCOUNT_FACTOR  8
 
 typedef struct {
   PREDICTION_MODE mode;
@@ -75,6 +77,7 @@ struct rdcost_block_args {
   const scan_order *so;
 };
 
+#define LAST_NEW_MV_INDEX 6
 static const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
   {NEARESTMV, {LAST_FRAME,   NONE}},
   {NEARESTMV, {ALTREF_FRAME, NONE}},
@@ -2355,6 +2358,27 @@ static INLINE void restore_dst_buf(MACROBLOCKD *xd,
   }
 }
 
+// In some situations we want to discount tha pparent cost of a new motion
+// vector. Where there is a subtle motion field and especially where there is
+// low spatial complexity then it can be hard to cover the cost of a new motion
+// vector in a single block, even if that motion vector reduces distortion.
+// However, once established that vector may be usable through the nearest and
+// near mv modes to reduce distortion in subsequent blocks and also improve
+// visual quality.
+static int discount_newmv_test(const VP9_COMP *cpi,
+                               int this_mode,
+                               int_mv this_mv,
+                               int_mv (*mode_mv)[MAX_REF_FRAMES],
+                               int ref_frame) {
+  return (!cpi->rc.is_src_frame_alt_ref &&
+          (this_mode == NEWMV) &&
+          (this_mv.as_int != 0) &&
+          ((mode_mv[NEARESTMV][ref_frame].as_int == 0) ||
+           (mode_mv[NEARESTMV][ref_frame].as_int == INVALID_MV)) &&
+          ((mode_mv[NEARMV][ref_frame].as_int == 0) ||
+           (mode_mv[NEARMV][ref_frame].as_int == INVALID_MV)));
+}
+
 static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                  BLOCK_SIZE bsize,
                                  int64_t txfm_cache[],
@@ -2464,10 +2488,20 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                            &tmp_mv, &rate_mv);
       if (tmp_mv.as_int == INVALID_MV)
         return INT64_MAX;
-      *rate2 += rate_mv;
+
       frame_mv[refs[0]].as_int =
           xd->mi[0].src_mi->bmi[0].as_mv[0].as_int = tmp_mv.as_int;
       single_newmv[refs[0]].as_int = tmp_mv.as_int;
+
+      // Estimate the rate implications of a new mv but discount this
+      // under certain circumstances where we want to help initiate a weak
+      // motion field, where the distortion gain for a single block may not
+      // be enough to overcome the cost of a new mv.
+      if (discount_newmv_test(cpi, this_mode, tmp_mv, mode_mv, refs[0])) {
+        *rate2 += MAX((rate_mv / NEW_MV_DISCOUNT_FACTOR), 1);
+      } else {
+        *rate2 += rate_mv;
+      }
     }
   }
 
@@ -2492,11 +2526,20 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     orig_dst_stride[i] = xd->plane[i].dst.stride;
   }
 
-  /* We don't include the cost of the second reference here, because there
-   * are only three options: Last/Golden, ARF/Last or Golden/ARF, or in other
-   * words if you present them in that order, the second one is always known
-   * if the first is known */
-  *rate2 += cost_mv_ref(cpi, this_mode, mbmi->mode_context[refs[0]]);
+  // We don't include the cost of the second reference here, because there
+  // are only three options: Last/Golden, ARF/Last or Golden/ARF, or in other
+  // words if you present them in that order, the second one is always known
+  // if the first is known.
+  //
+  // Under some circumstances we discount the cost of new mv mode to encourage
+  // initiation of a motion field.
+  if (discount_newmv_test(cpi, this_mode, frame_mv[refs[0]],
+                          mode_mv, refs[0])) {
+    *rate2 += MIN(cost_mv_ref(cpi, this_mode, mbmi->mode_context[refs[0]]),
+                  cost_mv_ref(cpi, NEARESTMV, mbmi->mode_context[refs[0]]));
+  } else {
+    *rate2 += cost_mv_ref(cpi, this_mode, mbmi->mode_context[refs[0]]);
+  }
 
   if (RDCOST(x->rdmult, x->rddiv, *rate2, 0) > ref_best_rd &&
       mbmi->mode != NEARESTMV)
@@ -2942,7 +2985,9 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
   mode_skip_mask[INTRA_FRAME] |=
       ~(sf->intra_y_mode_mask[max_txsize_lookup[bsize]]);
 
-  for (i = 0; i < MAX_MODES; ++i)
+  for (i = 0; i <= LAST_NEW_MV_INDEX; ++i)
+    mode_threshold[i] = 0;
+  for (i = LAST_NEW_MV_INDEX + 1; i < MAX_MODES; ++i)
     mode_threshold[i] = ((int64_t)rd_threshes[i] * rd_thresh_freq_fact[i]) >> 5;
 
   midx =  sf->schedule_mode_search ? mode_skip_start : 0;
