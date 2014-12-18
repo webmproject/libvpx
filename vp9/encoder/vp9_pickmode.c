@@ -837,8 +837,9 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
   // Perform intra prediction search, if the best SAD is above a certain
   // threshold.
-  if (!x->skip && best_rdc.rdcost > inter_mode_thresh &&
-      bsize <= cpi->sf.max_intra_bsize) {
+  if (best_rdc.rdcost == INT64_MAX ||
+      (!x->skip && best_rdc.rdcost > inter_mode_thresh &&
+       bsize <= cpi->sf.max_intra_bsize)) {
     struct estimate_block_intra_args args = { cpi, x, DC_PRED, 0, 0 };
     const TX_SIZE intra_tx_size =
         MIN(max_txsize_lookup[bsize],
