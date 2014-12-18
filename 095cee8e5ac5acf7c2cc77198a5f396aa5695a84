@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//LcQ\u003d",
+        "filename": "vpx/internal/vpx_codec_internal.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 421,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2014-12-18T17:01:00Z",
+      "side": 1,
+      "message": "Kind of a shame having this code here as it makes it pretty ugly. Do you think after some time we will be fairly certain that setjmp will be called from the same thread as it was set? Then we could remove it?",
+      "revId": "095cee8e5ac5acf7c2cc77198a5f396aa5695a84",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
