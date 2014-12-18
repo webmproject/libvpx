@@ -4597,7 +4597,7 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
           distortion2 = total_sse;
           assert(total_sse >= 0);
           rate2 -= (rate_y + rate_uv);
-          distortion_uv = uv_sse;
+          // distortion_uv = uv_sse;
           this_skip2 = 1;
           rate_y = 0;
           rate_uv = 0;
