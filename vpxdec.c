@@ -908,7 +908,8 @@ int main_loop(int argc, const char **argv_) {
 
     if (vpx_codec_control(&decoder, VP8D_GET_FRAME_CORRUPTED, &corrupted)) {
       warn("Failed VP8_GET_FRAME_CORRUPTED: %s", vpx_codec_error(&decoder));
-      goto fail;
+      if (!keep_going)
+        goto fail;
     }
     frames_corrupted += corrupted;
 
