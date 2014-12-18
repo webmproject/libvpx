@@ -328,8 +328,10 @@ static const arg_def_t sharpness = ARG_DEF(
     NULL, "sharpness", 1, "Loop filter sharpness (0..7)");
 static const arg_def_t static_thresh = ARG_DEF(
     NULL, "static-thresh", 1, "Motion detection threshold");
-static const arg_def_t cpu_used = ARG_DEF(
+static const arg_def_t cpu_used_vp8 = ARG_DEF(
     NULL, "cpu-used", 1, "CPU Used (-16..16)");
+static const arg_def_t cpu_used_vp9 = ARG_DEF(
+    NULL, "cpu-used", 1, "CPU Used (-8..8)");
 static const arg_def_t auto_altref = ARG_DEF(
     NULL, "auto-alt-ref", 1, "Enable automatic alt reference frames");
 static const arg_def_t arnr_maxframes = ARG_DEF(
@@ -361,7 +363,7 @@ static const arg_def_t screen_content_mode = ARG_DEF(NULL, "screen-content-mode"
 static const arg_def_t token_parts = ARG_DEF(
     NULL, "token-parts", 1, "Number of token partitions to use, log2");
 static const arg_def_t *vp8_args[] = {
-  &cpu_used, &auto_altref, &noise_sens, &sharpness, &static_thresh,
+  &cpu_used_vp8, &auto_altref, &noise_sens, &sharpness, &static_thresh,
   &token_parts, &arnr_maxframes, &arnr_strength, &arnr_type,
   &tune_ssim, &cq_level, &max_intra_rate_pct, &screen_content_mode,
   NULL
@@ -420,7 +422,7 @@ static const arg_def_t tune_content = ARG_DEF_ENUM(
     NULL, "tune-content", 1, "Tune content type", tune_content_enum);
 
 static const arg_def_t *vp9_args[] = {
-  &cpu_used, &auto_altref, &sharpness, &static_thresh,
+  &cpu_used_vp9, &auto_altref, &sharpness, &static_thresh,
   &tile_cols, &tile_rows, &arnr_maxframes, &arnr_strength, &arnr_type,
   &tune_ssim, &cq_level, &max_intra_rate_pct, &max_inter_rate_pct,
   &gf_cbr_boost_pct, &lossless,

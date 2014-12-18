@@ -339,17 +339,9 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->mv.fullpel_search_step_param = 10;
     sf->lpf_pick = LPF_PICK_MINIMAL_LPF;
   }
-
-  if (speed >= 12) {
+  if (speed >= 8) {
     sf->adaptive_rd_thresh = 4;
     sf->mv.subpel_force_stop = 2;
-  }
-
-  if (speed >= 13) {
-    int i;
-    sf->max_intra_bsize = BLOCK_32X32;
-    for (i = 0; i < BLOCK_SIZES; ++i)
-      sf->inter_mode_mask[i] = INTER_NEAREST;
   }
 }
 
