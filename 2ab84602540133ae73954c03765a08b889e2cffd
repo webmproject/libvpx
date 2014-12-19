@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//LPA\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 4108,
+      "author": {
+        "id": 1002403
+      },
+      "writtenOn": "2014-12-19T22:26:15Z",
+      "side": 1,
+      "message": "Missing this function caused previous big performance drop. Do not know why vp9_subtract_plane is removed from super_block_yrd(), but still in super_block_uvrd().",
+      "revId": "2ab84602540133ae73954c03765a08b889e2cffd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
