@@ -16,6 +16,24 @@
       "revId": "60e9b731cf8945403dbcf149a0f6dc745e5cabe1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//LYA\u003d",
+        "filename": "test/test-data.mk",
+        "patchSetId": 7
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2014-12-19T00:23:45Z",
+      "side": 0,
+      "message": "Yes, I can. I was thinking to have a longer clip. But, the current tests only encode 5 frames. This one is enough. Thanks.",
+      "parentUuid": "AAAAdn//LZA\u003d",
+      "revId": "60e9b731cf8945403dbcf149a0f6dc745e5cabe1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
