@@ -448,7 +448,7 @@ typedef struct VP9_COMP {
   VP9Worker *workers;
 } VP9_COMP;
 
-void vp9_initialize_enc();
+void vp9_initialize_enc(void);
 
 struct VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf);
 void vp9_remove_compressor(VP9_COMP *cpi);

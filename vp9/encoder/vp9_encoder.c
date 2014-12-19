@@ -181,7 +181,7 @@ static void vp9_swap_mi_and_prev_mi(VP9_COMMON *cm) {
   cm->prev_mi = cm->prev_mip + cm->mi_stride + 1;
 }
 
-void vp9_initialize_enc() {
+void vp9_initialize_enc(void) {
   static volatile int init_done = 0;
 
   if (!init_done) {
