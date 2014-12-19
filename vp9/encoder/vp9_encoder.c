@@ -182,7 +182,7 @@ static void vp9_swap_mi_and_prev_mi(VP9_COMMON *cm) {
 }
 
 void vp9_initialize_enc() {
-  static int init_done = 0;
+  static volatile int init_done = 0;
 
   if (!init_done) {
     vp9_rtcd();
