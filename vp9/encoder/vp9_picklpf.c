@@ -33,16 +33,17 @@ static int get_max_filter_level(const VP9_COMP *cpi) {
 }
 
 
-static int try_filter_frame(const YV12_BUFFER_CONFIG *sd, VP9_COMP *const cpi,
-                            int filt_level, int partial_frame) {
+static int64_t try_filter_frame(const YV12_BUFFER_CONFIG *sd,
+                                VP9_COMP *const cpi,
+                                int filt_level, int partial_frame) {
   VP9_COMMON *const cm = &cpi->common;
-  int filt_err;
+  int64_t filt_err;
 
   vp9_loop_filter_frame(cm->frame_to_show, cm, &cpi->td.mb.e_mbd, filt_level, 1,
                         partial_frame);
 #if CONFIG_VP9_HIGHBITDEPTH
   if (cm->use_highbitdepth) {
-    filt_err = vp9_highbd_get_y_sse(sd, cm->frame_to_show, cm->bit_depth);
+    filt_err = vp9_highbd_get_y_sse(sd, cm->frame_to_show);
   } else {
     filt_err = vp9_get_y_sse(sd, cm->frame_to_show);
   }
@@ -63,14 +64,15 @@ static int search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
   const int min_filter_level = 0;
   const int max_filter_level = get_max_filter_level(cpi);
   int filt_direction = 0;
-  int best_err, filt_best;
+  int64_t best_err;
+  int filt_best;
 
   // Start the search at the previous frame filter level unless it is now out of
   // range.
   int filt_mid = clamp(lf->filter_level, min_filter_level, max_filter_level);
   int filter_step = filt_mid < 16 ? 4 : filt_mid / 4;
   // Sum squared error at each filter level
-  int ss_err[MAX_LOOP_FILTER + 1];
+  int64_t ss_err[MAX_LOOP_FILTER + 1];
 
   // Set each entry to -1
   vpx_memset(ss_err, 0xFF, sizeof(ss_err));
@@ -87,7 +89,7 @@ static int search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
     const int filt_low = MAX(filt_mid - filter_step, min_filter_level);
 
     // Bias against raising loop filter in favor of lowering it.
-    int bias = (best_err >> (15 - (filt_mid / 8))) * filter_step;
+    int64_t bias = (best_err >> (15 - (filt_mid / 8))) * filter_step;
 
     if ((cpi->oxcf.pass == 2) && (cpi->twopass.section_intra_rating < 20))
       bias = (bias * cpi->twopass.section_intra_rating) / 20;

@@ -2549,7 +2549,7 @@ static void full_to_model_counts(vp9_coeff_count_model *model_count,
 static void output_frame_level_debug_stats(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   FILE *const f = fopen("tmp.stt", cm->current_video_frame ? "a" : "w");
-  int recon_err;
+  int64_t recon_err;
 
   vp9_clear_system_state();
 
@@ -2561,7 +2561,7 @@ static void output_frame_level_debug_stats(VP9_COMP *cpi) {
         "%7.2lf %7.2lf %7.2lf %7.2lf %7.2lf"
         "%6d %6d %5d %5d %5d "
         "%10"PRId64" %10.3lf"
-        "%10lf %8u %10d %10d %10d\n",
+        "%10lf %8u %10"PRId64" %10d %10d\n",
         cpi->common.current_video_frame, cpi->rc.this_frame_target,
         cpi->rc.projected_frame_size,
         cpi->rc.projected_frame_size / cpi->common.MBs,
@@ -2890,15 +2890,14 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
            rc->this_key_frame_forced &&
            (rc->projected_frame_size < rc->max_frame_bandwidth)) {
         int last_q = q;
-        int kf_err;
+        int64_t kf_err;
 
-        int high_err_target = cpi->ambient_err;
-        int low_err_target = cpi->ambient_err >> 1;
+        int64_t high_err_target = cpi->ambient_err;
+        int64_t low_err_target = cpi->ambient_err >> 1;
 
 #if CONFIG_VP9_HIGHBITDEPTH
         if (cm->use_highbitdepth) {
-          kf_err = vp9_highbd_get_y_sse(cpi->Source, get_frame_new_buffer(cm),
-                                        cm->bit_depth);
+          kf_err = vp9_highbd_get_y_sse(cpi->Source, get_frame_new_buffer(cm));
         } else {
           kf_err = vp9_get_y_sse(cpi->Source, get_frame_new_buffer(cm));
         }
@@ -2919,7 +2918,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
           q_high = q > q_low ? q - 1 : q_low;
 
           // Adjust Q
-          q = (q * high_err_target) / kf_err;
+          q = (int)((q * high_err_target) / kf_err);
           q = MIN(q, (q_high + q_low) >> 1);
         } else if (kf_err < low_err_target &&
                    rc->projected_frame_size >= frame_under_shoot_limit) {
@@ -2928,7 +2927,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
           q_low = q < q_high ? q + 1 : q_high;
 
           // Adjust Q
-          q = (q * low_err_target) / kf_err;
+          q = (int)((q * low_err_target) / kf_err);
           q = MIN(q, (q_high + q_low + 1) >> 1);
         }
 
@@ -3256,8 +3255,7 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 #if CONFIG_VP9_HIGHBITDEPTH
     if (cm->use_highbitdepth) {
       cpi->ambient_err = vp9_highbd_get_y_sse(cpi->Source,
-                                              get_frame_new_buffer(cm),
-                                              cm->bit_depth);
+                                              get_frame_new_buffer(cm));
     } else {
       cpi->ambient_err = vp9_get_y_sse(cpi->Source, get_frame_new_buffer(cm));
     }
@@ -4026,41 +4024,25 @@ void vp9_set_svc(VP9_COMP *cpi, int use_svc) {
   return;
 }
 
-int vp9_get_y_sse(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b) {
+int64_t vp9_get_y_sse(const YV12_BUFFER_CONFIG *a,
+                      const YV12_BUFFER_CONFIG *b) {
   assert(a->y_crop_width == b->y_crop_width);
   assert(a->y_crop_height == b->y_crop_height);
 
-  return (int)get_sse(a->y_buffer, a->y_stride, b->y_buffer, b->y_stride,
-                      a->y_crop_width, a->y_crop_height);
+  return get_sse(a->y_buffer, a->y_stride, b->y_buffer, b->y_stride,
+                 a->y_crop_width, a->y_crop_height);
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
-int vp9_highbd_get_y_sse(const YV12_BUFFER_CONFIG *a,
-                         const YV12_BUFFER_CONFIG *b,
-                         vpx_bit_depth_t bit_depth) {
-  unsigned int sse;
-  int sum;
+int64_t vp9_highbd_get_y_sse(const YV12_BUFFER_CONFIG *a,
+                             const YV12_BUFFER_CONFIG *b) {
   assert(a->y_crop_width == b->y_crop_width);
   assert(a->y_crop_height == b->y_crop_height);
   assert((a->flags & YV12_FLAG_HIGHBITDEPTH) != 0);
   assert((b->flags & YV12_FLAG_HIGHBITDEPTH) != 0);
-  switch (bit_depth) {
-    case VPX_BITS_8:
-      highbd_variance(a->y_buffer, a->y_stride, b->y_buffer, b->y_stride,
-                      a->y_crop_width, a->y_crop_height, &sse, &sum);
-      return (int) sse;
-    case VPX_BITS_10:
-      highbd_10_variance(a->y_buffer, a->y_stride, b->y_buffer, b->y_stride,
-                         a->y_crop_width, a->y_crop_height, &sse, &sum);
-      return (int) sse;
-    case VPX_BITS_12:
-      highbd_12_variance(a->y_buffer, a->y_stride, b->y_buffer, b->y_stride,
-                         a->y_crop_width, a->y_crop_height, &sse, &sum);
-      return (int) sse;
-    default:
-      assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10 or VPX_BITS_12");
-      return -1;
-  }
+
+  return highbd_get_sse(a->y_buffer, a->y_stride, b->y_buffer, b->y_stride,
+                        a->y_crop_width, a->y_crop_height);
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
