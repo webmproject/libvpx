@@ -845,6 +845,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         MIN(max_txsize_lookup[bsize],
             tx_mode_to_biggest_tx_size[cpi->common.tx_mode]);
     int i;
+    TX_SIZE best_intra_tx_size = TX_SIZES;
 
     if (reuse_inter_pred && best_pred != NULL) {
       if (best_pred->data == orig_dst.buf) {
@@ -888,7 +889,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       if (this_rdc.rdcost < best_rdc.rdcost) {
         best_rdc = this_rdc;
         mbmi->mode = this_mode;
-        mbmi->tx_size = intra_tx_size;
+        best_intra_tx_size = mbmi->tx_size;
         mbmi->ref_frame[0] = INTRA_FRAME;
         mbmi->uv_mode = this_mode;
         mbmi->mv[0].as_int = INVALID_MV;
@@ -899,6 +900,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     if (mbmi->ref_frame[0] != INTRA_FRAME) {
       x->skip_txfm[0] = best_mode_skip_txfm;
       mbmi->tx_size = best_tx_size;
+    } else {
+      mbmi->tx_size = best_intra_tx_size;
     }
   }
 
