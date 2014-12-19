@@ -30,7 +30,7 @@ namespace {
 
 const int kMaxPsnr = 100;
 const double kUsecsInSec = 1000000.0;
-static const char *kNewEncodeOutputFile = "new_encode.ivf";
+const char kNewEncodeOutputFile[] = "new_encode.ivf";
 
 /*
  DecodePerfTest takes a tuple of filename + number of threads to decode with
@@ -111,7 +111,8 @@ TEST_P(DecodePerfTest, PerfTest) {
 INSTANTIATE_TEST_CASE_P(VP9, DecodePerfTest,
                         ::testing::ValuesIn(kVP9DecodePerfVectors));
 
-class VP9NewEncodeDecodePerfTest : public ::libvpx_test::EncoderTest,
+class VP9NewEncodeDecodePerfTest :
+    public ::libvpx_test::EncoderTest,
     public ::libvpx_test::CodecTestWithParam<libvpx_test::TestMode> {
  protected:
   VP9NewEncodeDecodePerfTest()
@@ -154,10 +155,11 @@ class VP9NewEncodeDecodePerfTest : public ::libvpx_test::EncoderTest,
     const std::string data_path = getenv("LIBVPX_TEST_DATA_PATH");
     const std::string path_to_source = data_path + "/" + kNewEncodeOutputFile;
     outfile_ = fopen(path_to_source.c_str(), "wb");
+    ASSERT_TRUE(outfile_ != NULL);
   }
 
   virtual void EndPassHook() {
-    if (outfile_) {
+    if (outfile_ != NULL) {
       if (!fseek(outfile_, 0, SEEK_SET))
         ivf_write_file_header(outfile_, &cfg_, VP9_FOURCC, out_frames_);
       fclose(outfile_);
@@ -174,10 +176,10 @@ class VP9NewEncodeDecodePerfTest : public ::libvpx_test::EncoderTest,
 
     // Write frame header and data.
     ivf_write_frame_header(outfile_, out_frames_, pkt->data.frame.sz);
-    (void)fwrite(pkt->data.frame.buf, 1, pkt->data.frame.sz, outfile_);
+    ASSERT_GT(fwrite(pkt->data.frame.buf, 1, pkt->data.frame.sz, outfile_), 0);
   }
 
-  virtual bool DoDecode() { return 0; }
+  virtual bool DoDecode() { return false; }
 
   void set_speed(unsigned int speed) {
     speed_ = speed;
@@ -189,7 +191,6 @@ class VP9NewEncodeDecodePerfTest : public ::libvpx_test::EncoderTest,
   FILE *outfile_;
   uint32_t out_frames_;
 };
-
 
 struct EncodePerfTestVideo {
   EncodePerfTestVideo(const char *name_, uint32_t width_, uint32_t height_,
@@ -251,9 +252,9 @@ TEST_P(VP9NewEncodeDecodePerfTest, PerfTest) {
 
   vpx_usec_timer_mark(&t);
   const double elapsed_secs =
-      double(vpx_usec_timer_elapsed(&t)) / kUsecsInSec;
+      static_cast<double>(vpx_usec_timer_elapsed(&t)) / kUsecsInSec;
   const unsigned decode_frames = decode_video.frame_number();
-  const double fps = double(decode_frames) / elapsed_secs;
+  const double fps = static_cast<double>(decode_frames) / elapsed_secs;
 
   printf("{\n");
   printf("\t\"type\" : \"decode_perf_test\",\n");
