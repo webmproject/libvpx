@@ -640,26 +640,28 @@ INSTANTIATE_TEST_CASE_P(
                    &wrapper_vertical_16_c, 8),
         make_tuple(&wrapper_vertical_16_dual_neon,
                    &wrapper_vertical_16_dual_c, 8),
+        make_tuple(&vp9_lpf_horizontal_8_neon,
+                   &vp9_lpf_horizontal_8_c, 8),
+        make_tuple(&vp9_lpf_vertical_8_neon,
+                   &vp9_lpf_vertical_8_c, 8),
 #endif  // HAVE_NEON_ASM
         make_tuple(&vp9_lpf_horizontal_4_neon,
                    &vp9_lpf_horizontal_4_c, 8),
-        make_tuple(&vp9_lpf_horizontal_8_neon,
-                   &vp9_lpf_horizontal_8_c, 8),
         make_tuple(&vp9_lpf_vertical_4_neon,
-                   &vp9_lpf_vertical_4_c, 8),
-        make_tuple(&vp9_lpf_vertical_8_neon,
-                   &vp9_lpf_vertical_8_c, 8)));
+                   &vp9_lpf_vertical_4_c, 8)));
 INSTANTIATE_TEST_CASE_P(
     NEON, Loop8Test9Param,
     ::testing::Values(
-        make_tuple(&vp9_lpf_horizontal_4_dual_neon,
-                   &vp9_lpf_horizontal_4_dual_c, 8),
+#if HAVE_NEON_ASM
         make_tuple(&vp9_lpf_horizontal_8_dual_neon,
                    &vp9_lpf_horizontal_8_dual_c, 8),
-        make_tuple(&vp9_lpf_vertical_4_dual_neon,
-                   &vp9_lpf_vertical_4_dual_c, 8),
         make_tuple(&vp9_lpf_vertical_8_dual_neon,
-                   &vp9_lpf_vertical_8_dual_c, 8)));
+                   &vp9_lpf_vertical_8_dual_c, 8),
+#endif  // HAVE_NEON_ASM
+        make_tuple(&vp9_lpf_horizontal_4_dual_neon,
+                   &vp9_lpf_horizontal_4_dual_c, 8),
+        make_tuple(&vp9_lpf_vertical_4_dual_neon,
+                   &vp9_lpf_vertical_4_dual_c, 8)));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // HAVE_NEON
 
