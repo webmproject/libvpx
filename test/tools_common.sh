@@ -261,6 +261,9 @@ run_tests() {
     return
   fi
 
+  # Don't bother with the environment tests if everything else was disabled.
+  [ -z "${tests_to_filter}" ] && return
+
   # Combine environment and actual tests.
   local tests_to_run="${env_tests} ${tests_to_filter}"
 
