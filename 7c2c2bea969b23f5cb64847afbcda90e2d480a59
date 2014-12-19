@@ -69,6 +69,23 @@
       "revId": "7c2c2bea969b23f5cb64847afbcda90e2d480a59",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//LQk\u003d",
+        "filename": "test/vp9_ethread_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2014-12-19T19:49:59Z",
+      "side": 1,
+      "message": "Range(1, 7)",
+      "revId": "7c2c2bea969b23f5cb64847afbcda90e2d480a59",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
