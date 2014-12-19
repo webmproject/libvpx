@@ -926,14 +926,23 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     }
   }
 
-  if (is_inter_block(mbmi))
-    vp9_update_rd_thresh_fact(tile_data->thresh_freq_fact,
-                            cpi->sf.adaptive_rd_thresh, bsize,
-                            mode_idx[best_ref_frame][INTER_OFFSET(mbmi->mode)]);
-  else
-    vp9_update_rd_thresh_fact(tile_data->thresh_freq_fact,
-                              cpi->sf.adaptive_rd_thresh, bsize,
-                              mode_idx[INTRA_FRAME][mbmi->mode]);
+  if (cpi->sf.adaptive_rd_thresh) {
+    THR_MODES best_mode_idx = is_inter_block(mbmi) ?
+        mode_idx[best_ref_frame][INTER_OFFSET(mbmi->mode)] :
+        mode_idx[INTRA_FRAME][mbmi->mode];
+    PREDICTION_MODE this_mode;
+    for (ref_frame = LAST_FRAME; ref_frame <= GOLDEN_FRAME; ++ref_frame) {
+      for (this_mode = NEARESTMV; this_mode <= NEWMV; ++this_mode) {
+        THR_MODES thr_mode_idx = mode_idx[ref_frame][INTER_OFFSET(this_mode)];
+        int *freq_fact = &tile_data->thresh_freq_fact[bsize][thr_mode_idx];
+        if (thr_mode_idx == best_mode_idx)
+          *freq_fact -= (*freq_fact >> 4);
+        else
+          *freq_fact = MIN(*freq_fact + RD_THRESH_INC,
+                           cpi->sf.adaptive_rd_thresh * RD_THRESH_MAX_FACT);
+      }
+    }
+  }
 
   *rd_cost = best_rdc;
 }
