@@ -40,6 +40,8 @@ struct macroblock_plane {
   int16_t *round;
 
   int64_t quant_thred[2];
+  // Zbin Over Quant value
+  int16_t zbin_extra;
 };
 
 /* The [2] dimension is for whether we skip the EOB node (i.e. if previous
