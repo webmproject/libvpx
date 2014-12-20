@@ -188,8 +188,22 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
     int q_idx = vp9_get_qindex(&cm->seg, mbmi->segment_id, cm->base_qindex);
     int try_tx_skip = q_idx <= TX_SKIP_Q_THRESH_INTRA;
     if (try_tx_skip) {
-      mbmi->tx_skip[0] = vp9_read(r, cm->fc.y_tx_skip_prob[0]);
-      mbmi->tx_skip[1] = vp9_read(r, cm->fc.uv_tx_skip_prob[mbmi->tx_skip[0]]);
+      if (xd->lossless) {
+        if (mbmi->tx_size == TX_4X4)
+          mbmi->tx_skip[0] = vp9_read(r, cm->fc.y_tx_skip_prob[0]);
+        else
+          mbmi->tx_skip[0] = 1;
+
+        if (get_uv_tx_size(mbmi, &xd->plane[1]) == TX_4X4)
+          mbmi->tx_skip[1] =
+            vp9_read(r, cm->fc.uv_tx_skip_prob[mbmi->tx_skip[0]]);
+        else
+          mbmi->tx_skip[1] = 1;
+        } else {
+          mbmi->tx_skip[0] = vp9_read(r, cm->fc.y_tx_skip_prob[0]);
+          mbmi->tx_skip[1] =
+            vp9_read(r, cm->fc.uv_tx_skip_prob[mbmi->tx_skip[0]]);
+        }
     } else {
       mbmi->tx_skip[0] = 0;
       mbmi->tx_skip[1] = 0;
@@ -730,12 +744,38 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
     int q_idx = cm->base_qindex;
 #else
     int q_idx = vp9_get_qindex(&cm->seg, mbmi->segment_id, cm->base_qindex);
-#endif
+#endif  // CONFIG_SUPERTX
     int try_tx_skip = inter_block ? q_idx <= TX_SKIP_Q_THRESH_INTER :
                                     q_idx <= TX_SKIP_Q_THRESH_INTRA;
+#if CONFIG_SUPERTX
     if (try_tx_skip) {
-      mbmi->tx_skip[0] = vp9_read(r, cm->fc.y_tx_skip_prob[inter_block]);
-      mbmi->tx_skip[1] = vp9_read(r, cm->fc.uv_tx_skip_prob[mbmi->tx_skip[0]]);
+#else
+    if (try_tx_skip && !mbmi->skip) {
+#endif  // CONFIG_SUPERTX
+      if (xd->lossless) {
+#if CONFIG_SUPERTX
+        if (1)
+#else
+        if (mbmi->tx_size == TX_4X4)
+#endif  // CONFIG_SUPERTX
+          mbmi->tx_skip[0] = vp9_read(r, cm->fc.y_tx_skip_prob[inter_block]);
+        else
+          mbmi->tx_skip[0] = 1;
+
+#if CONFIG_SUPERTX
+        if (1)
+#else
+        if (get_uv_tx_size(mbmi, &xd->plane[1]) == TX_4X4)
+#endif  // CONFIG_SUPERTX
+          mbmi->tx_skip[1] =
+            vp9_read(r, cm->fc.uv_tx_skip_prob[mbmi->tx_skip[0]]);
+        else
+          mbmi->tx_skip[1] = 1;
+      } else {
+        mbmi->tx_skip[0] = vp9_read(r, cm->fc.y_tx_skip_prob[inter_block]);
+        mbmi->tx_skip[1] =
+          vp9_read(r, cm->fc.uv_tx_skip_prob[mbmi->tx_skip[0]]);
+      }
 #if CONFIG_SUPERTX
       if (!cm->frame_parallel_decoding_mode && !supertx_enabled) {
 #else

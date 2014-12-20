@@ -2045,7 +2045,9 @@ static void read_supertx_probs(FRAME_CONTEXT *fc, vp9_reader *r) {
 static int read_compressed_header(VP9Decoder *pbi, const uint8_t *data,
                                   size_t partition_size) {
   VP9_COMMON *const cm = &pbi->common;
+#if !CONFIG_TX_SKIP
   MACROBLOCKD *const xd = &pbi->mb;
+#endif
   FRAME_CONTEXT *const fc = &cm->fc;
   vp9_reader r;
   int k;
@@ -2055,7 +2057,11 @@ static int read_compressed_header(VP9Decoder *pbi, const uint8_t *data,
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate bool decoder 0");
 
+#if CONFIG_TX_SKIP
+  cm->tx_mode = read_tx_mode(&r);
+#else
   cm->tx_mode = xd->lossless ? ONLY_4X4 : read_tx_mode(&r);
+#endif
   if (cm->tx_mode == TX_MODE_SELECT)
     read_tx_mode_probs(&fc->tx_probs, &r);
   read_coef_probs(fc, cm->tx_mode, &r);

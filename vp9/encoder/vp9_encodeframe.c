@@ -3439,8 +3439,10 @@ static MV_REFERENCE_FRAME get_frame_type(const VP9_COMP *cpi) {
 }
 
 static TX_MODE select_tx_mode(const VP9_COMP *cpi) {
+#if !CONFIG_TX_SKIP
   if (cpi->mb.e_mbd.lossless)
     return ONLY_4X4;
+#endif
   if (cpi->sf.tx_size_search_method == USE_LARGESTALL)
 #if CONFIG_TX64X64
     return ALLOW_64X64;
@@ -4741,7 +4743,11 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
 #endif
       int try_tx_skip = is_inter_block(mbmi) ? q_idx <= TX_SKIP_Q_THRESH_INTER :
                                                q_idx <= TX_SKIP_Q_THRESH_INTRA;
+#if CONFIG_SUPERTX
       if (try_tx_skip) {
+#else
+      if (try_tx_skip && !(mbmi->skip || seg_skip)) {
+#endif
         ++cm->counts.y_tx_skip[is_inter_block(mbmi)][mbmi->tx_skip[0]];
         ++cm->counts.uv_tx_skip[mbmi->tx_skip[0]][mbmi->tx_skip[1]];
       }
