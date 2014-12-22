@@ -24,24 +24,23 @@ void vp9_tokenize_initialize();
 
 #define EOSB_TOKEN 127     // Not signalled, encoder only
 
+#if CONFIG_VP9_HIGHBITDEPTH
+  typedef int32_t EXTRABIT;
+#else
+  typedef int16_t EXTRABIT;
+#endif
+
+
 typedef struct {
   int16_t token;
-#if CONFIG_VP9_HIGHBITDEPTH
-  int32_t extra;
-#else
-  int16_t extra;
-#endif
+  EXTRABIT extra;
 } TOKENVALUE;
 
 typedef struct {
   const vp9_prob *context_tree;
-#if CONFIG_VP9_HIGHBITDEPTH
-  int32_t extra;
-#else
-  int16_t         extra;
-#endif
-  uint8_t         token;
-  uint8_t         skip_eob_node;
+  EXTRABIT extra;
+  uint8_t token;
+  uint8_t skip_eob_node;
 } TOKENEXTRA;
 
 extern const vp9_tree_index vp9_coef_tree[];
@@ -63,12 +62,32 @@ extern const int16_t *vp9_dct_value_cost_ptr;
  *  fields are not.
  */
 extern const TOKENVALUE *vp9_dct_value_tokens_ptr;
+extern const TOKENVALUE *vp9_dct_cat_lt_10_value_tokens;
 #if CONFIG_VP9_HIGHBITDEPTH
 extern const int16_t *vp9_dct_value_cost_high10_ptr;
 extern const TOKENVALUE *vp9_dct_value_tokens_high10_ptr;
 extern const int16_t *vp9_dct_value_cost_high12_ptr;
 extern const TOKENVALUE *vp9_dct_value_tokens_high12_ptr;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+
+static INLINE void vp9_get_token_extra(int v, int16_t *token, EXTRABIT *extra) {
+  if (v >= CAT6_MIN_VAL || v <= -CAT6_MIN_VAL) {
+    *token = CATEGORY6_TOKEN;
+    if (v >= CAT6_MIN_VAL)
+      *extra = 2 * v - 2 * CAT6_MIN_VAL;
+    else
+      *extra = -2 * v - 2 * CAT6_MIN_VAL + 1;
+    return;
+  }
+  *token = vp9_dct_cat_lt_10_value_tokens[v].token;
+  *extra = vp9_dct_cat_lt_10_value_tokens[v].extra;
+}
+static INLINE int16_t vp9_get_token(int v) {
+  if (v >= CAT6_MIN_VAL || v <= -CAT6_MIN_VAL)
+    return 10;
+  return vp9_dct_cat_lt_10_value_tokens[v].token;
+}
+
 
 #ifdef __cplusplus
 }  // extern "C"

@@ -373,7 +373,7 @@ static INLINE int cost_coeffs(MACROBLOCK *x,
 
     // dc token
     int v = qcoeff[0];
-    int prev_t = vp9_dct_value_tokens_ptr[v].token;
+    int prev_t = vp9_get_token(v);
     cost = (*token_costs)[0][pt][prev_t] + vp9_dct_value_cost_ptr[v];
     token_cache[0] = vp9_pt_energy_class[prev_t];
     ++token_costs;
@@ -384,7 +384,7 @@ static INLINE int cost_coeffs(MACROBLOCK *x,
       int t;
 
       v = qcoeff[rc];
-      t = vp9_dct_value_tokens_ptr[v].token;
+      t = vp9_get_token(v);
       if (use_fast_coef_costing) {
         cost += (*token_costs)[!prev_t][!prev_t][t] + vp9_dct_value_cost_ptr[v];
       } else {
