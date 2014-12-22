@@ -152,11 +152,10 @@ const vp9_extra_bit vp9_extra_bits_high12[ENTROPY_TOKENS] = {
 };
 #endif
 
-struct vp9_token vp9_coef_encodings[ENTROPY_TOKENS];
-
-void vp9_coef_tree_initialize() {
-  vp9_tokens_from_tree(vp9_coef_encodings, vp9_coef_tree);
-}
+const struct vp9_token vp9_coef_encodings[ENTROPY_TOKENS] = {
+  {2, 2}, {6, 3}, {28, 5}, {58, 6}, {59, 6}, {60, 6}, {61, 6}, {124, 7},
+  {125, 7}, {126, 7}, {127, 7}, {0, 1}
+};
 
 static void tokenize_init_one(TOKENVALUE *t, const vp9_extra_bit *const e,
                               int16_t *value_cost, int max_value) {
