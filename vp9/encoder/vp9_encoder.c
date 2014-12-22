@@ -51,7 +51,6 @@
 #include "vp9/encoder/vp9_resize.h"
 #include "vp9/encoder/vp9_svc_layercontext.h"
 
-void vp9_coef_tree_initialize();
 
 #define SHARP_FILTER_QTHRESH 0          /* Q threshold for 8-tap sharp filter */
 
@@ -187,7 +186,6 @@ void vp9_initialize_enc(void) {
   if (!init_done) {
     vp9_rtcd();
     vp9_init_intra_predictors();
-    vp9_coef_tree_initialize();
     vp9_tokenize_initialize();
     vp9_init_me_luts();
     vp9_rc_init_minq_luts();
