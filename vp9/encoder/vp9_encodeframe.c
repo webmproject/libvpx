@@ -4766,8 +4766,6 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
 
   set_ref_ptrs(cm, xd, mbmi->ref_frame[0], mbmi->ref_frame[1]);
 
-  vp9_update_zbin_extra(x);
-
   if (!is_inter_block(mbmi)) {
     int plane;
     mbmi->skip = 1;
@@ -4979,8 +4977,6 @@ static void predict_superblock(VP9_COMP *cpi,
 
   set_ref_ptrs(cm, xd, mbmi->ref_frame[0], mbmi->ref_frame[1]);
 
-  vp9_update_zbin_extra(x);
-
   for (ref = 0; ref < 1 + is_compound; ++ref) {
     YV12_BUFFER_CONFIG *cfg = get_ref_frame_buffer(cpi,
                                                    mbmi->ref_frame[ref]);
@@ -5010,8 +5006,6 @@ static void predict_superblock_sub8x8_extend(VP9_COMP *cpi,
   const int is_compound = has_second_ref(mbmi);
 
   set_ref_ptrs(cm, xd, mbmi->ref_frame[0], mbmi->ref_frame[1]);
-
-  vp9_update_zbin_extra(x);
 
   for (ref = 0; ref < 1 + is_compound; ++ref) {
     YV12_BUFFER_CONFIG *cfg = get_ref_frame_buffer(cpi,

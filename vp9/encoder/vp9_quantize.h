@@ -84,8 +84,6 @@ struct VP9Common;
 
 void vp9_frame_init_quantizer(struct VP9_COMP *cpi);
 
-void vp9_update_zbin_extra(MACROBLOCK *x);
-
 void vp9_init_plane_quantizers(struct VP9_COMP *cpi, MACROBLOCK *x);
 
 void vp9_init_quantizer(struct VP9_COMP *cpi);
@@ -101,7 +99,7 @@ void vp9_quantize_rect(const tran_low_t *coeff_ptr, int row, int col,
                        const int16_t *zbin_ptr, const int16_t *round_ptr,
                        const int16_t *quant_ptr, const int16_t *quant_shift_ptr,
                        tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
-                       const int16_t *dequant_ptr, int zbin_oq_value,
+                       const int16_t *dequant_ptr,
                        int logsizeby32, int stride, int has_dc);
 
 int get_eob(tran_low_t *qcoeff_ptr, intptr_t n_coeffs, const int16_t *scan);
