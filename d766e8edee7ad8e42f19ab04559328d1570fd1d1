@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//LJk\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2014-12-22T17:46:47Z",
+      "side": 1,
+      "message": "you can just make this the original change description for readability. best practice is to revert, push the original change, then updates to fix the breakage",
+      "revId": "d766e8edee7ad8e42f19ab04559328d1570fd1d1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
