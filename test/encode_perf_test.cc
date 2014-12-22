@@ -7,6 +7,7 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
+#include <string>
 #include "third_party/googletest/src/include/gtest/gtest.h"
 #include "./vpx_config.h"
 #include "./vpx_version.h"
@@ -51,6 +52,7 @@ const EncodePerfTestVideo kVP9EncodePerfTestVectors[] = {
 };
 
 const int kEncodePerfTestSpeeds[] = { 5, 6, 7, 8 };
+const int kEncodePerfTestThreads[] = { 1, 2, 4 };
 
 #define NELEMENTS(x) (sizeof((x)) / sizeof((x)[0]))
 
@@ -63,7 +65,8 @@ class VP9EncodePerfTest
         min_psnr_(kMaxPsnr),
         nframes_(0),
         encoding_mode_(GET_PARAM(1)),
-        speed_(0) {}
+        speed_(0),
+        threads_(1) {}
 
   virtual ~VP9EncodePerfTest() {}
 
@@ -82,12 +85,18 @@ class VP9EncodePerfTest
     cfg_.rc_buf_optimal_sz = 600;
     cfg_.rc_resize_allowed = 0;
     cfg_.rc_end_usage = VPX_CBR;
+    cfg_.g_error_resilient = 1;
+    cfg_.g_threads = threads_;
   }
 
   virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
                                   ::libvpx_test::Encoder *encoder) {
-    if (video->frame() == 1) {
+    if (video->frame() == 0) {
+      const int log2_tile_columns = 3;
       encoder->Control(VP8E_SET_CPUUSED, speed_);
+      encoder->Control(VP9E_SET_TILE_COLUMNS, log2_tile_columns);
+      encoder->Control(VP9E_SET_FRAME_PARALLEL_DECODING, 1);
+      encoder->Control(VP8E_SET_ENABLEAUTOALTREF, 0);
     }
   }
 
@@ -113,54 +122,77 @@ class VP9EncodePerfTest
     speed_ = speed;
   }
 
+  void set_threads(unsigned int threads) {
+    threads_ = threads;
+  }
+
  private:
   double min_psnr_;
   unsigned int nframes_;
   libvpx_test::TestMode encoding_mode_;
   unsigned speed_;
+  unsigned int threads_;
 };
 
 TEST_P(VP9EncodePerfTest, PerfTest) {
   for (size_t i = 0; i < NELEMENTS(kVP9EncodePerfTestVectors); ++i) {
     for (size_t j = 0; j < NELEMENTS(kEncodePerfTestSpeeds); ++j) {
-      SetUp();
+      for (size_t k = 0; k < NELEMENTS(kEncodePerfTestThreads); ++k) {
+        if (kVP9EncodePerfTestVectors[i].width < 512 &&
+            kEncodePerfTestThreads[k] > 1)
+          continue;
+        else if (kVP9EncodePerfTestVectors[i].width < 1024 &&
+                 kEncodePerfTestThreads[k] > 2)
+          continue;
 
-      const vpx_rational timebase = { 33333333, 1000000000 };
-      cfg_.g_timebase = timebase;
-      cfg_.rc_target_bitrate = kVP9EncodePerfTestVectors[i].bitrate;
+        set_threads(kEncodePerfTestThreads[k]);
+        SetUp();
 
-      init_flags_ = VPX_CODEC_USE_PSNR;
+        const vpx_rational timebase = { 33333333, 1000000000 };
+        cfg_.g_timebase = timebase;
+        cfg_.rc_target_bitrate = kVP9EncodePerfTestVectors[i].bitrate;
 
-      const unsigned frames = kVP9EncodePerfTestVectors[i].frames;
-      const char *video_name = kVP9EncodePerfTestVectors[i].name;
-      libvpx_test::I420VideoSource video(
-          video_name,
-          kVP9EncodePerfTestVectors[i].width,
-          kVP9EncodePerfTestVectors[i].height,
-          timebase.den, timebase.num, 0,
-          kVP9EncodePerfTestVectors[i].frames);
-      set_speed(kEncodePerfTestSpeeds[j]);
+        init_flags_ = VPX_CODEC_USE_PSNR;
 
-      vpx_usec_timer t;
-      vpx_usec_timer_start(&t);
+        const unsigned frames = kVP9EncodePerfTestVectors[i].frames;
+        const char *video_name = kVP9EncodePerfTestVectors[i].name;
+        libvpx_test::I420VideoSource video(
+            video_name,
+            kVP9EncodePerfTestVectors[i].width,
+            kVP9EncodePerfTestVectors[i].height,
+            timebase.den, timebase.num, 0,
+            kVP9EncodePerfTestVectors[i].frames);
+        set_speed(kEncodePerfTestSpeeds[j]);
 
-      ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+        vpx_usec_timer t;
+        vpx_usec_timer_start(&t);
 
-      vpx_usec_timer_mark(&t);
-      const double elapsed_secs = vpx_usec_timer_elapsed(&t) / kUsecsInSec;
-      const double fps = frames / elapsed_secs;
-      const double minimum_psnr = min_psnr();
+        ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 
-      printf("{\n");
-      printf("\t\"type\" : \"encode_perf_test\",\n");
-      printf("\t\"version\" : \"%s\",\n", VERSION_STRING_NOSP);
-      printf("\t\"videoName\" : \"%s\",\n", video_name);
-      printf("\t\"encodeTimeSecs\" : %f,\n", elapsed_secs);
-      printf("\t\"totalFrames\" : %u,\n", frames);
-      printf("\t\"framesPerSecond\" : %f,\n", fps);
-      printf("\t\"minPsnr\" : %f,\n", minimum_psnr);
-      printf("\t\"speed\" : %d\n", kEncodePerfTestSpeeds[j]);
-      printf("}\n");
+        vpx_usec_timer_mark(&t);
+        const double elapsed_secs = vpx_usec_timer_elapsed(&t) / kUsecsInSec;
+        const double fps = frames / elapsed_secs;
+        const double minimum_psnr = min_psnr();
+        std::string display_name(video_name);
+        if (kEncodePerfTestThreads[k] > 1) {
+          char thread_count[32];
+          snprintf(thread_count, sizeof(thread_count), "_t-%d",
+                   kEncodePerfTestThreads[k]);
+          display_name += thread_count;
+        }
+
+        printf("{\n");
+        printf("\t\"type\" : \"encode_perf_test\",\n");
+        printf("\t\"version\" : \"%s\",\n", VERSION_STRING_NOSP);
+        printf("\t\"videoName\" : \"%s\",\n", display_name.c_str());
+        printf("\t\"encodeTimeSecs\" : %f,\n", elapsed_secs);
+        printf("\t\"totalFrames\" : %u,\n", frames);
+        printf("\t\"framesPerSecond\" : %f,\n", fps);
+        printf("\t\"minPsnr\" : %f,\n", minimum_psnr);
+        printf("\t\"speed\" : %d\n", kEncodePerfTestSpeeds[j]);
+        printf("\t\"threads\" : %d\n", kEncodePerfTestThreads[k]);
+        printf("}\n");
+      }
     }
   }
 }
