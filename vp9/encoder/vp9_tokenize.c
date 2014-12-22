@@ -67,21 +67,31 @@ const vp9_tree_index vp9_coef_con_tree[TREE_SIZE(ENTROPY_TOKENS)] = {
   -CATEGORY5_TOKEN, -CATEGORY6_TOKEN   // 7 = CAT_FIVE
 };
 
-static vp9_tree_index cat1[2], cat2[4], cat3[6], cat4[8], cat5[10], cat6[28];
+static const vp9_tree_index cat1[2] = {0, 0};
+static const vp9_tree_index cat2[4] = {2, 2, 0, 0};
+static const vp9_tree_index cat3[6] = {2, 2, 4, 4, 0, 0};
+static const vp9_tree_index cat4[8] = {2, 2, 4, 4, 6, 6, 0, 0};
+static const vp9_tree_index cat5[10] = {2, 2, 4, 4, 6, 6, 8, 8, 0, 0};
+static const vp9_tree_index cat6[28] = {2, 2, 4, 4, 6, 6, 8, 8, 10, 10, 12, 12,
+    14, 14, 16, 16, 18, 18, 20, 20, 22, 22, 24, 24, 26, 26, 0, 0};
 
 #if CONFIG_VP9_HIGHBITDEPTH
-static vp9_tree_index cat1_high10[2];
-static vp9_tree_index cat2_high10[4];
-static vp9_tree_index cat3_high10[6];
-static vp9_tree_index cat4_high10[8];
-static vp9_tree_index cat5_high10[10];
-static vp9_tree_index cat6_high10[32];
-static vp9_tree_index cat1_high12[2];
-static vp9_tree_index cat2_high12[4];
-static vp9_tree_index cat3_high12[6];
-static vp9_tree_index cat4_high12[8];
-static vp9_tree_index cat5_high12[10];
-static vp9_tree_index cat6_high12[36];
+static const vp9_tree_index cat1_high10[2] = {0, 0};
+static const vp9_tree_index cat2_high10[4] = {2, 2, 0, 0};
+static const vp9_tree_index cat3_high10[6] = {2, 2, 4, 4, 0, 0};
+static const vp9_tree_index cat4_high10[8] = {2, 2, 4, 4, 6, 6, 0, 0};
+static const vp9_tree_index cat5_high10[10] = {2, 2, 4, 4, 6, 6, 8, 8, 0, 0};
+static const vp9_tree_index cat6_high10[32] = {2, 2, 4, 4, 6, 6, 8, 8, 10, 10,
+  12, 12, 14, 14, 16, 16, 18, 18, 20, 20, 22, 22, 24, 24, 26, 26, 28, 28,
+  30, 30, 0, 0};
+static const vp9_tree_index cat1_high12[2] = {0, 0};
+static const vp9_tree_index cat2_high12[4] = {2, 2, 0, 0};
+static const vp9_tree_index cat3_high12[6] = {2, 2, 4, 4, 0, 0};
+static const vp9_tree_index cat4_high12[8] = {2, 2, 4, 4, 6, 6, 0, 0};
+static const vp9_tree_index cat5_high12[10] = {2, 2, 4, 4, 6, 6, 8, 8, 0, 0};
+static const vp9_tree_index cat6_high12[36] = {2, 2, 4, 4, 6, 6, 8, 8, 10, 10,
+  12, 12, 14, 14, 16, 16, 18, 18, 20, 20, 22, 22, 24, 24, 26, 26, 28, 28,
+  30, 30, 32, 32, 34, 34, 0, 0};
 #endif
 
 static void init_bit_tree(vp9_tree_index *p, int n) {
@@ -95,28 +105,6 @@ static void init_bit_tree(vp9_tree_index *p, int n) {
   p[0] = p[1] = 0;
 }
 
-static void init_bit_trees() {
-  init_bit_tree(cat1, 1);
-  init_bit_tree(cat2, 2);
-  init_bit_tree(cat3, 3);
-  init_bit_tree(cat4, 4);
-  init_bit_tree(cat5, 5);
-  init_bit_tree(cat6, 14);
-#if CONFIG_VP9_HIGHBITDEPTH
-  init_bit_tree(cat1_high10, 1);
-  init_bit_tree(cat2_high10, 2);
-  init_bit_tree(cat3_high10, 3);
-  init_bit_tree(cat4_high10, 4);
-  init_bit_tree(cat5_high10, 5);
-  init_bit_tree(cat6_high10, 16);
-  init_bit_tree(cat1_high12, 1);
-  init_bit_tree(cat2_high12, 2);
-  init_bit_tree(cat3_high12, 3);
-  init_bit_tree(cat4_high12, 4);
-  init_bit_tree(cat5_high12, 5);
-  init_bit_tree(cat6_high12, 18);
-#endif
-}
 
 const vp9_extra_bit vp9_extra_bits[ENTROPY_TOKENS] = {
   {0, 0, 0, 0},                              // ZERO_TOKEN
@@ -167,7 +155,6 @@ const vp9_extra_bit vp9_extra_bits_high12[ENTROPY_TOKENS] = {
 struct vp9_token vp9_coef_encodings[ENTROPY_TOKENS];
 
 void vp9_coef_tree_initialize() {
-  init_bit_trees();
   vp9_tokens_from_tree(vp9_coef_encodings, vp9_coef_tree);
 }
 
