@@ -18,7 +18,7 @@ void vp9_quantize_b_sse2(const int16_t* coeff_ptr, intptr_t n_coeffs,
                          const int16_t* round_ptr, const int16_t* quant_ptr,
                          const int16_t* quant_shift_ptr, int16_t* qcoeff_ptr,
                          int16_t* dqcoeff_ptr, const int16_t* dequant_ptr,
-                         int zbin_oq_value, uint16_t* eob_ptr,
+                         uint16_t* eob_ptr,
                          const int16_t* scan_ptr,
                          const int16_t* iscan_ptr) {
   __m128i zero;
@@ -39,13 +39,10 @@ void vp9_quantize_b_sse2(const int16_t* coeff_ptr, intptr_t n_coeffs,
 
       // Setup global values
       {
-        __m128i zbin_oq;
         __m128i pw_1;
-        zbin_oq = _mm_set1_epi16(zbin_oq_value);
         zbin = _mm_load_si128((const __m128i*)zbin_ptr);
         round = _mm_load_si128((const __m128i*)round_ptr);
         quant = _mm_load_si128((const __m128i*)quant_ptr);
-        zbin = _mm_add_epi16(zbin, zbin_oq);
         pw_1 = _mm_set1_epi16(1);
         zbin = _mm_sub_epi16(zbin, pw_1);
         dequant = _mm_load_si128((const __m128i*)dequant_ptr);
@@ -229,14 +226,13 @@ void vp9_quantize_fp_sse2(const int16_t* coeff_ptr, intptr_t n_coeffs,
                           const int16_t* round_ptr, const int16_t* quant_ptr,
                           const int16_t* quant_shift_ptr, int16_t* qcoeff_ptr,
                           int16_t* dqcoeff_ptr, const int16_t* dequant_ptr,
-                          int zbin_oq_value, uint16_t* eob_ptr,
+                          uint16_t* eob_ptr,
                           const int16_t* scan_ptr,
                           const int16_t* iscan_ptr) {
   __m128i zero;
   (void)scan_ptr;
   (void)zbin_ptr;
   (void)quant_shift_ptr;
-  (void)zbin_oq_value;
 
   coeff_ptr += n_coeffs;
   iscan_ptr += n_coeffs;

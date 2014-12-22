@@ -68,8 +68,6 @@ struct VP9Common;
 
 void vp9_frame_init_quantizer(struct VP9_COMP *cpi);
 
-void vp9_update_zbin_extra(MACROBLOCK *x);
-
 void vp9_init_plane_quantizers(struct VP9_COMP *cpi, MACROBLOCK *x);
 
 void vp9_init_quantizer(struct VP9_COMP *cpi);
