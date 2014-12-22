@@ -516,6 +516,20 @@ void vp9_setup_pred_block(const MACROBLOCKD *xd,
   }
 }
 
+int vp9_raster_block_offset(BLOCK_SIZE plane_bsize,
+                            int raster_block, int stride) {
+  const int bw = b_width_log2_lookup[plane_bsize];
+  const int y = 4 * (raster_block >> bw);
+  const int x = 4 * (raster_block & ((1 << bw) - 1));
+  return y * stride + x;
+}
+
+int16_t* vp9_raster_block_offset_int16(BLOCK_SIZE plane_bsize,
+                                       int raster_block, int16_t *base) {
+  const int stride = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
+  return base + vp9_raster_block_offset(plane_bsize, raster_block, stride);
+}
+
 const YV12_BUFFER_CONFIG *vp9_get_scaled_ref_frame(const VP9_COMP *cpi,
                                                    int ref_frame) {
   const VP9_COMMON *const cm = &cpi->common;
