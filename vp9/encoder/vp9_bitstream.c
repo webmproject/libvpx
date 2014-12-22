@@ -34,17 +34,15 @@
 #include "vp9/encoder/vp9_tokenize.h"
 #include "vp9/encoder/vp9_write_bit_buffer.h"
 
-static struct vp9_token intra_mode_encodings[INTRA_MODES];
-static struct vp9_token switchable_interp_encodings[SWITCHABLE_FILTERS];
-static struct vp9_token partition_encodings[PARTITION_TYPES];
-static struct vp9_token inter_mode_encodings[INTER_MODES];
-
-void vp9_entropy_mode_init() {
-  vp9_tokens_from_tree(intra_mode_encodings, vp9_intra_mode_tree);
-  vp9_tokens_from_tree(switchable_interp_encodings, vp9_switchable_interp_tree);
-  vp9_tokens_from_tree(partition_encodings, vp9_partition_tree);
-  vp9_tokens_from_tree(inter_mode_encodings, vp9_inter_mode_tree);
-}
+static const struct vp9_token intra_mode_encodings[INTRA_MODES] = {
+  {0, 1}, {6, 3}, {28, 5}, {30, 5}, {58, 6}, {59, 6}, {126, 7}, {127, 7},
+  {62, 6}, {2, 2}};
+static const struct vp9_token switchable_interp_encodings[SWITCHABLE_FILTERS] =
+  {{0, 1}, {2, 2}, {3, 2}};
+static const struct vp9_token partition_encodings[PARTITION_TYPES] =
+  {{0, 1}, {2, 2}, {6, 3}, {7, 3}};
+static const struct vp9_token inter_mode_encodings[INTER_MODES] =
+  {{2, 2}, {6, 3}, {0, 1}, {7, 3}};
 
 static void write_intra_mode(vp9_writer *w, PREDICTION_MODE mode,
                              const vp9_prob *probs) {
