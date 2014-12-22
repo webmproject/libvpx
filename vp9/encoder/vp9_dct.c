@@ -339,7 +339,7 @@ void vp9_fdct8x8_quant_c(const int16_t *input, int stride,
                          const int16_t *quant_shift_ptr,
                          tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
                          const int16_t *dequant_ptr,
-                         int zbin_oq_value, uint16_t *eob_ptr,
+                         uint16_t *eob_ptr,
                          const int16_t *scan, const int16_t *iscan) {
   int eob = -1;
 
@@ -416,7 +416,6 @@ void vp9_fdct8x8_quant_c(const int16_t *input, int stride,
   // quantization process is completed.
   (void)zbin_ptr;
   (void)quant_shift_ptr;
-  (void)zbin_oq_value;
   (void)iscan;
 
   vpx_memset(qcoeff_ptr, 0, n_coeffs * sizeof(*qcoeff_ptr));

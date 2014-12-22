@@ -3893,8 +3893,6 @@ static void encode_superblock(VP9_COMP *cpi, ThreadData *td,
 
   set_ref_ptrs(cm, xd, mbmi->ref_frame[0], mbmi->ref_frame[1]);
 
-  vp9_update_zbin_extra(x);
-
   if (!is_inter_block(mbmi)) {
     int plane;
     mbmi->skip = 1;
