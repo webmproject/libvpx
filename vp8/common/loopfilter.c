@@ -254,7 +254,7 @@ void vp8_loop_filter_row_normal(VP8_COMMON *cm, MODE_INFO *mode_info_context,
 }
 
 void vp8_loop_filter_row_simple(VP8_COMMON *cm, MODE_INFO *mode_info_context,
-                         int mb_row, int post_ystride,
+                         int mb_row, int post_ystride, int post_uvstride,
                          unsigned char *y_ptr, unsigned char *u_ptr,
                          unsigned char *v_ptr)
 {
