@@ -176,7 +176,8 @@ class VP9NewEncodeDecodePerfTest :
 
     // Write frame header and data.
     ivf_write_frame_header(outfile_, out_frames_, pkt->data.frame.sz);
-    ASSERT_GT(fwrite(pkt->data.frame.buf, 1, pkt->data.frame.sz, outfile_), 0);
+    ASSERT_EQ(fwrite(pkt->data.frame.buf, 1, pkt->data.frame.sz, outfile_),
+              pkt->data.frame.sz);
   }
 
   virtual bool DoDecode() { return false; }
