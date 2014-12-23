@@ -81,6 +81,7 @@ typedef struct {
   const vp9_prob *prob;
   int len;
   int base_val;
+  const int16_t *cost;
 } vp9_extra_bit;
 
 // indexed by token value

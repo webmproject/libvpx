@@ -360,6 +360,12 @@ static INLINE int cost_coeffs(MACROBLOCK *x,
   uint8_t token_cache[32 * 32];
   int pt = combine_entropy_contexts(*A, *L);
   int c, cost;
+#if CONFIG_VP9_HIGHBITDEPTH
+  const int16_t *cat6_high_cost = vp9_get_high_cost_table(xd->bd);
+#else
+  const int16_t *cat6_high_cost = vp9_get_high_cost_table(8);
+#endif
+
   // Check for consistency of tx_size with mode info
   assert(type == PLANE_TYPE_Y ? mbmi->tx_size == tx_size
                               : get_uv_tx_size(mbmi, pd) == tx_size);
@@ -373,23 +379,29 @@ static INLINE int cost_coeffs(MACROBLOCK *x,
 
     // dc token
     int v = qcoeff[0];
-    int prev_t = vp9_get_token(v);
-    cost = (*token_costs)[0][pt][prev_t] + vp9_dct_value_cost_ptr[v];
+    int16_t prev_t;
+    EXTRABIT e;
+    vp9_get_token_extra(v, &prev_t, &e);
+    cost = (*token_costs)[0][pt][prev_t] +
+        vp9_get_cost(prev_t, e, cat6_high_cost);
+
     token_cache[0] = vp9_pt_energy_class[prev_t];
     ++token_costs;
 
     // ac tokens
     for (c = 1; c < eob; c++) {
       const int rc = scan[c];
-      int t;
+      int16_t t;
 
       v = qcoeff[rc];
-      t = vp9_get_token(v);
+      vp9_get_token_extra(v, &t, &e);
       if (use_fast_coef_costing) {
-        cost += (*token_costs)[!prev_t][!prev_t][t] + vp9_dct_value_cost_ptr[v];
+        cost += (*token_costs)[!prev_t][!prev_t][t] +
+            vp9_get_cost(t, e, cat6_high_cost);
       } else {
         pt = get_coef_context(nb, token_cache, c);
-        cost += (*token_costs)[!prev_t][pt][t] + vp9_dct_value_cost_ptr[v];
+        cost += (*token_costs)[!prev_t][pt][t] +
+            vp9_get_cost(t, e, cat6_high_cost);
         token_cache[rc] = vp9_pt_energy_class[t];
       }
       prev_t = t;

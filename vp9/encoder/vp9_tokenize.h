@@ -20,8 +20,6 @@
 extern "C" {
 #endif
 
-void vp9_tokenize_initialize();
-
 #define EOSB_TOKEN 127     // Not signalled, encoder only
 
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -63,11 +61,29 @@ extern const int16_t *vp9_dct_value_cost_ptr;
  */
 extern const TOKENVALUE *vp9_dct_value_tokens_ptr;
 extern const TOKENVALUE *vp9_dct_cat_lt_10_value_tokens;
+extern const int16_t vp9_cat6_low_cost[256];
+extern const int16_t vp9_cat6_high_cost[128];
+extern const int16_t vp9_cat6_high10_high_cost[512];
+extern const int16_t vp9_cat6_high12_high_cost[2048];
+static INLINE int16_t vp9_get_cost(uint8_t token, EXTRABIT extrabits,
+                                   const int16_t *cat6_high_table) {
+  if (token != CATEGORY6_TOKEN)
+    return vp9_extra_bits[token].cost[extrabits];
+  return vp9_cat6_low_cost[extrabits & 0xff]
+      + cat6_high_table[extrabits >> 8];
+}
+
 #if CONFIG_VP9_HIGHBITDEPTH
-extern const int16_t *vp9_dct_value_cost_high10_ptr;
-extern const TOKENVALUE *vp9_dct_value_tokens_high10_ptr;
-extern const int16_t *vp9_dct_value_cost_high12_ptr;
-extern const TOKENVALUE *vp9_dct_value_tokens_high12_ptr;
+static INLINE const int16_t* vp9_get_high_cost_table(int bit_depth) {
+  return bit_depth == 8 ? vp9_cat6_high_cost
+      : (bit_depth == 10 ? vp9_cat6_high10_high_cost :
+         vp9_cat6_high12_high_cost);
+}
+#else
+static INLINE const int16_t* vp9_get_high_cost_table(int bit_depth) {
+  (void) bit_depth;
+  return vp9_cat6_high_cost;
+}
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
 static INLINE void vp9_get_token_extra(int v, int16_t *token, EXTRABIT *extra) {
