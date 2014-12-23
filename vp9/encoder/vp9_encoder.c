@@ -1406,8 +1406,8 @@ static void cal_nmvsadcosts_hp(int *mvsadcost[2]) {
 
 VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
   unsigned int i;
-  VP9_COMP *const cpi = vpx_memalign(32, sizeof(VP9_COMP));
-  VP9_COMMON *const cm = cpi != NULL ? &cpi->common : NULL;
+  VP9_COMP *volatile const cpi = vpx_memalign(32, sizeof(VP9_COMP));
+  VP9_COMMON *volatile const cm = cpi != NULL ? &cpi->common : NULL;
 
   if (!cm)
     return NULL;
