@@ -1485,7 +1485,7 @@ static void encode_sb(VP9_COMP *cpi, const TileInfo *const tile,
 #if CONFIG_SUPERTX
   if (cm->frame_type != KEY_FRAME &&
       bsize <= MAX_SUPERTX_BLOCK_SIZE &&
-      partition != PARTITION_NONE) {
+      partition != PARTITION_NONE && !xd->lossless) {
     int supertx_enabled;
     TX_SIZE supertx_size = bsize_to_tx_size(bsize);
     supertx_enabled = check_supertx_sb(bsize, supertx_size, pc_tree);
@@ -2901,7 +2901,8 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
 #endif
       }
 #if CONFIG_SUPERTX
-      if (cm->frame_type != KEY_FRAME && sum_rdc.rdcost < INT64_MAX) {
+      if (cm->frame_type != KEY_FRAME && sum_rdc.rdcost < INT64_MAX &&
+          !xd->lossless) {
         TX_SIZE supertx_size = bsize_to_tx_size(bsize);  // b_width_log2(bsize);
         best_partition = pc_tree->partitioning;
         pc_tree->partitioning = PARTITION_SPLIT;
@@ -2989,7 +2990,7 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
       }
 #if CONFIG_SUPERTX
       if (cm->frame_type != KEY_FRAME && sum_rdc.rdcost < INT64_MAX &&
-          i == 4 && bsize <= MAX_SUPERTX_BLOCK_SIZE) {
+          i == 4 && bsize <= MAX_SUPERTX_BLOCK_SIZE  && !xd->lossless) {
         TX_SIZE supertx_size = bsize_to_tx_size(bsize);
         best_partition = pc_tree->partitioning;
         pc_tree->partitioning = PARTITION_SPLIT;
@@ -3119,7 +3120,8 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     }
 #if CONFIG_SUPERTX
     if (cm->frame_type != KEY_FRAME && !abort_flag &&
-        sum_rdc.rdcost < INT64_MAX && bsize <= MAX_SUPERTX_BLOCK_SIZE) {
+        sum_rdc.rdcost < INT64_MAX && bsize <= MAX_SUPERTX_BLOCK_SIZE &&
+        !xd->lossless) {
       TX_SIZE supertx_size = bsize_to_tx_size(bsize);
       best_partition = pc_tree->partitioning;
       pc_tree->partitioning = PARTITION_HORZ;
@@ -3236,7 +3238,8 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
     }
 #if CONFIG_SUPERTX
     if (cm->frame_type != KEY_FRAME && !abort_flag &&
-        sum_rdc.rdcost < INT64_MAX && bsize <= MAX_SUPERTX_BLOCK_SIZE) {
+        sum_rdc.rdcost < INT64_MAX && bsize <= MAX_SUPERTX_BLOCK_SIZE &&
+        !xd->lossless) {
       TX_SIZE supertx_size = bsize_to_tx_size(bsize);
       best_partition = pc_tree->partitioning;
       pc_tree->partitioning = PARTITION_VERT;
