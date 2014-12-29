@@ -3083,7 +3083,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                     bsize, txfm_cache, ref_best_rd);
 #if CONFIG_TX_SKIP
     if (vp9_get_qindex(&cm->seg, mbmi->segment_id, cm->base_qindex) <=
-          TX_SKIP_Q_THRESH_INTER) {
+        TX_SKIP_Q_THRESH_INTER) {
       mbmi->tx_skip[0] = 1;
       super_block_yrd(cpi, x, &rate_s, &distortion_s, &skippable_s, &psse_s,
                       bsize, tx_cache_s, ref_best_rd);
@@ -3123,7 +3123,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
 #if CONFIG_TX_SKIP
     if (vp9_get_qindex(&cm->seg, mbmi->segment_id, cm->base_qindex) <=
-          TX_SKIP_Q_THRESH_INTER) {
+        TX_SKIP_Q_THRESH_INTER) {
       super_block_uvrd(cpi, x, rate_uv, &distortion_uv, &skippable_uv,
                        &sseuv, bsize, ref_best_rd - rdcosty);
       mbmi->tx_skip[1] = 1;
@@ -3154,7 +3154,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     }
 #if CONFIG_TX_SKIP
     if (vp9_get_qindex(&cm->seg, mbmi->segment_id, cm->base_qindex) <=
-          TX_SKIP_Q_THRESH_INTER)
+        TX_SKIP_Q_THRESH_INTER)
       *rate_uv += vp9_cost_bit(cpi->common.fc.uv_tx_skip_prob[mbmi->tx_skip[0]],
                                mbmi->tx_skip[1]);
 #endif
