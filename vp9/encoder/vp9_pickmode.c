@@ -662,6 +662,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     clamp_mv2(&frame_mv[NEARMV][ref_frame].as_mv, xd);
 
     mbmi->ref_frame[0] = ref_frame;
+    set_ref_ptrs(cm, xd, ref_frame, NONE);
 
     for (this_mode = NEARESTMV; this_mode <= NEWMV; ++this_mode) {
       int rate_mv = 0;
