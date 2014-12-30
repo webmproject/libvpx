@@ -960,7 +960,6 @@ void vp9_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   MV_REFERENCE_FRAME ref_frame, second_ref_frame = NONE;
   MV_REFERENCE_FRAME best_ref_frame = NONE;
   unsigned char segment_id = mbmi->segment_id;
-  int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES];
   struct buf_2d yv12_mb[4][MAX_MB_PLANE];
   static const int flag_list[4] = { 0, VP9_LAST_FLAG, VP9_GOLD_FLAG,
                                     VP9_ALT_FLAG };
@@ -975,28 +974,24 @@ void vp9_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
   ctx->pred_pixel_ready = 0;
 
   for (ref_frame = LAST_FRAME; ref_frame <= GOLDEN_FRAME; ref_frame++) {
-      x->pred_mv_sad[ref_frame] = INT_MAX;
-      frame_mv[NEWMV][ref_frame].as_int = INVALID_MV;
-      frame_mv[ZEROMV][ref_frame].as_int = 0;
+    int_mv dummy_mv[2];
+    x->pred_mv_sad[ref_frame] = INT_MAX;
 
-      if (cpi->ref_frame_flags & flag_list[ref_frame]) {
-        const YV12_BUFFER_CONFIG *yv12 = get_ref_frame_buffer(cpi, ref_frame);
-        int_mv *const candidates = mbmi->ref_mvs[ref_frame];
-        const struct scale_factors *const sf =
+    if (cpi->ref_frame_flags & flag_list[ref_frame]) {
+      const YV12_BUFFER_CONFIG *yv12 = get_ref_frame_buffer(cpi, ref_frame);
+      int_mv *const candidates = mbmi->ref_mvs[ref_frame];
+      const struct scale_factors *const sf =
                              &cm->frame_refs[ref_frame - 1].sf;
-        vp9_setup_pred_block(xd, yv12_mb[ref_frame], yv12, mi_row, mi_col,
-                             sf, sf);
-        vp9_find_mv_refs(cm, xd, tile_info, xd->mi[0].src_mi, ref_frame,
-                         candidates, mi_row, mi_col);
+      vp9_setup_pred_block(xd, yv12_mb[ref_frame], yv12, mi_row, mi_col,
+                           sf, sf);
+      vp9_find_mv_refs(cm, xd, tile_info, xd->mi[0].src_mi, ref_frame,
+                       candidates, mi_row, mi_col);
 
-        vp9_find_best_ref_mvs(xd, cm->allow_high_precision_mv, candidates,
-                              &frame_mv[NEARESTMV][ref_frame],
-                              &frame_mv[NEARMV][ref_frame]);
-      } else {
-        ref_frame_skip_mask |= (1 << ref_frame);
-      }
-      frame_mv[NEWMV][ref_frame].as_int = INVALID_MV;
-      frame_mv[ZEROMV][ref_frame].as_int = 0;
+      vp9_find_best_ref_mvs(xd, cm->allow_high_precision_mv, candidates,
+                            &dummy_mv[0], &dummy_mv[1]);
+    } else {
+      ref_frame_skip_mask |= (1 << ref_frame);
+    }
   }
 
   mbmi->sb_type = bsize;
@@ -1036,7 +1031,7 @@ void vp9_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
 
     for (idy = 0; idy < 2; idy += num_4x4_blocks_high) {
       for (idx = 0; idx < 2; idx += num_4x4_blocks_wide) {
-        int_mv frame_mv[MB_MODE_COUNT][MAX_REF_FRAMES];
+        int_mv b_mv[MB_MODE_COUNT];
         int64_t b_best_rd = INT64_MAX;
         const int i = idy * 2 + idx;
         PREDICTION_MODE this_mode;
@@ -1062,15 +1057,14 @@ void vp9_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
             &pd->pre[0].buf[vp9_raster_block_offset(BLOCK_8X8,
                                                     i, pd->pre[0].stride)];
 
-        frame_mv[ZEROMV][ref_frame].as_int = 0;
-        frame_mv[NEWMV][ref_frame].as_int = INVALID_MV;
+        b_mv[ZEROMV].as_int = 0;
+        b_mv[NEWMV].as_int = INVALID_MV;
         vp9_append_sub8x8_mvs_for_idx(cm, xd, tile_info, i, 0, mi_row, mi_col,
-                                      &frame_mv[NEARESTMV][ref_frame],
-                                      &frame_mv[NEARMV][ref_frame]);
+                                      &b_mv[NEARESTMV],
+                                      &b_mv[NEARMV]);
 
         for (this_mode = NEARESTMV; this_mode <= NEWMV; ++this_mode) {
-          xd->mi[0].bmi[i].as_mv[0].as_int =
-              frame_mv[this_mode][ref_frame].as_int;
+          xd->mi[0].bmi[i].as_mv[0].as_int = b_mv[this_mode].as_int;
 
           if (this_mode == NEWMV) {
             const int step_param = cpi->sf.mv.fullpel_search_step_param;
@@ -1084,8 +1078,8 @@ void vp9_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
             int dummy_dist;
 
             if (i == 0) {
-              mvp_full.row = frame_mv[NEARESTMV][ref_frame].as_mv.row >> 3;
-              mvp_full.col = frame_mv[NEARESTMV][ref_frame].as_mv.col >> 3;
+              mvp_full.row = b_mv[NEARESTMV].as_mv.row >> 3;
+              mvp_full.col = b_mv[NEARESTMV].as_mv.col >> 3;
             } else {
               mvp_full.row = xd->mi[0].bmi[0].as_mv[0].as_mv.row >> 3;
               mvp_full.col = xd->mi[0].bmi[0].as_mv[0].as_mv.col >> 3;
