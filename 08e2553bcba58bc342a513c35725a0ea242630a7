@@ -16,6 +16,24 @@
       "revId": "08e2553bcba58bc342a513c35725a0ea242630a7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//K6w\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2014-12-30T17:26:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//K7A\u003d",
+      "revId": "08e2553bcba58bc342a513c35725a0ea242630a7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
