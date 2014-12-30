@@ -64,8 +64,7 @@ void Encoder::EncodeFrameInternal(const VideoSource &video,
 
   // Encode the frame
   API_REGISTER_STATE_CHECK(
-      res = vpx_codec_encode(&encoder_,
-                             video.img(), video.pts(), video.duration(),
+      res = vpx_codec_encode(&encoder_, img, video.pts(), video.duration(),
                              frame_flags, deadline_));
   ASSERT_EQ(VPX_CODEC_OK, res) << EncoderError();
 }

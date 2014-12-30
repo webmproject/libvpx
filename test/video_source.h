@@ -175,8 +175,8 @@ class DummyVideoSource : public VideoSource {
   void SetSize(unsigned int width, unsigned int height) {
     if (width != width_ || height != height_) {
       vpx_img_free(img_);
-      raw_sz_ = ((width + 31)&~31) * height * 3 / 2;
       img_ = vpx_img_alloc(NULL, VPX_IMG_FMT_I420, width, height, 32);
+      raw_sz_ = ((img_->w + 31) & ~31) * img_->h * 3 / 2;
       width_ = width;
       height_ = height;
     }
