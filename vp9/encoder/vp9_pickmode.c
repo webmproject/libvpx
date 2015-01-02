@@ -540,8 +540,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       cm->base_qindex, cm->y_dc_delta_q, cm->bit_depth) >> reduction_fac;
   const int64_t inter_mode_thresh = RDCOST(x->rdmult, x->rddiv,
                                            intra_cost_penalty, 0);
-  const int8_t segment_id = mbmi->segment_id;
-  const int *const rd_threshes = cpi->rd.threshes[segment_id][bsize];
+  const int *const rd_threshes = cpi->rd.threshes[mbmi->segment_id][bsize];
   const int *const rd_thresh_freq_fact = tile_data->thresh_freq_fact[bsize];
   INTERP_FILTER filter_ref;
   const int bsl = mi_width_log2_lookup[bsize];
@@ -605,7 +604,6 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                       tx_mode_to_biggest_tx_size[cm->tx_mode]);
   mbmi->interp_filter = cm->interp_filter == SWITCHABLE ?
                         EIGHTTAP : cm->interp_filter;
-  mbmi->segment_id = segment_id;
 
   for (ref_frame = LAST_FRAME; ref_frame <= GOLDEN_FRAME; ++ref_frame) {
     x->pred_mv_sad[ref_frame] = INT_MAX;
