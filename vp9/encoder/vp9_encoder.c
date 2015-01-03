@@ -2139,19 +2139,19 @@ void vp9_write_yuv_frame_420(YV12_BUFFER_CONFIG *s, FILE *f) {
   } while (--h);
 
   src = s->u_buffer;
-  h = s->uv_height / 2;
+  h = s->uv_height;
 
   do {
-    fwrite(src, s->uv_width / 2, 1, f);
-    src += s->uv_stride + s->uv_width / 2;
+    fwrite(src, s->uv_width, 1, f);
+    src += s->uv_stride;
   } while (--h);
 
   src = s->v_buffer;
-  h = s->uv_height / 2;
+  h = s->uv_height;
 
   do {
-    fwrite(src, s->uv_width / 2, 1, f);
-    src += s->uv_stride + s->uv_width / 2;
+    fwrite(src, s->uv_width, 1, f);
+    src += s->uv_stride;
   } while (--h);
 }
 #endif
