@@ -1347,17 +1347,6 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
 #if CONFIG_VP9_HIGHBITDEPTH
   highbd_set_var_fns(cpi);
 #endif
-
-#if CONFIG_VP9_TEMPORAL_DENOISING
-  if (cpi->oxcf.noise_sensitivity > 0) {
-    vp9_denoiser_alloc(&(cpi->denoiser), cm->width, cm->height,
-                       cm->subsampling_x, cm->subsampling_y,
-#if CONFIG_VP9_HIGHBITDEPTH
-                       cm->use_highbitdepth,
-#endif
-                       VP9_ENC_BORDER_IN_PIXELS);
-  }
-#endif
 }
 
 #ifndef M_LOG2_E
@@ -3408,6 +3397,20 @@ static void check_initial_width(VP9_COMP *cpi,
   }
 }
 
+#if CONFIG_VP9_TEMPORAL_DENOISING
+static void setup_denoiser_buffer(VP9_COMP *cpi) {
+  VP9_COMMON *const cm = &cpi->common;
+  if (cpi->oxcf.noise_sensitivity > 0 &&
+      !cpi->denoiser.frame_buffer_initialized) {
+    vp9_denoiser_alloc(&(cpi->denoiser), cm->width, cm->height,
+                       cm->subsampling_x, cm->subsampling_y,
+#if CONFIG_VP9_HIGHBITDEPTH
+                       cm->use_highbitdepth,
+#endif
+                       VP9_ENC_BORDER_IN_PIXELS);
+  }
+}
+#endif
 
 int vp9_receive_raw_frame(VP9_COMP *cpi, unsigned int frame_flags,
                           YV12_BUFFER_CONFIG *sd, int64_t time_stamp,
@@ -3424,6 +3427,9 @@ int vp9_receive_raw_frame(VP9_COMP *cpi, unsigned int frame_flags,
   check_initial_width(cpi, subsampling_x, subsampling_y);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
+#if CONFIG_VP9_TEMPORAL_DENOISING
+  setup_denoiser_buffer(cpi);
+#endif
   vpx_usec_timer_start(&timer);
 
   if (vp9_lookahead_push(cpi->lookahead, sd, time_stamp, end_time, frame_flags))
@@ -3997,6 +4003,10 @@ int vp9_set_size_literal(VP9_COMP *cpi, unsigned int width,
 #else
   check_initial_width(cpi, 1, 1);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+
+#if CONFIG_VP9_TEMPORAL_DENOISING
+  setup_denoiser_buffer(cpi);
+#endif
 
   if (width) {
     cm->width = width;
