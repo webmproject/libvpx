@@ -167,10 +167,10 @@ static void mfqe_block(BLOCK_SIZE bs, const uint8_t *y, const uint8_t *u,
   // it might be a lighting change in smooth area. When there is a
   // lighting change in smooth area, it is dangerous to do MFQE.
   if (sad > 1 && sad < sad_thr && vdiff > sad * 3 && vdiff < 150) {
-    // TODO(jackychen): Add weighted average in the calculation.
-    // Currently, the data is copied from last frame without averaging.
+    int weight = ((float)sad / (sad_thr - 1)) * ((float)vdiff / (150 - 1)) *
+                 (1 << MFQE_PRECISION);
     apply_ifactor(y, y_stride, yd, yd_stride, u, v, uv_stride,
-                  ud, vd, uvd_stride, bs, 0);
+                  ud, vd, uvd_stride, bs, weight);
   } else {
     // Copy the block from current frame (i.e., no mfqe is done).
     copy_block(y, u, v, y_stride, uv_stride, yd, ud, vd,
