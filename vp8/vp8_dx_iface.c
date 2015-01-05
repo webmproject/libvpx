@@ -188,7 +188,7 @@ static vpx_codec_err_t vp8_peek_si_internal(const uint8_t *data,
 
             /* vet via sync code */
             if (clear[3] != 0x9d || clear[4] != 0x01 || clear[5] != 0x2a)
-                res = VPX_CODEC_UNSUP_BITSTREAM;
+                return VPX_CODEC_UNSUP_BITSTREAM;
 
             si->w = (clear[6] | (clear[7] << 8)) & 0x3fff;
             si->h = (clear[8] | (clear[9] << 8)) & 0x3fff;
@@ -402,7 +402,7 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t  *ctx,
     if (!res)
     {
         VP8D_COMP *pbi = ctx->yv12_frame_buffers.pbi[0];
-        if(resolution_change)
+        if (resolution_change)
         {
             VP8_COMMON *const pc = & pbi->common;
             MACROBLOCKD *const xd  = & pbi->mb;
