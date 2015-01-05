@@ -93,7 +93,7 @@ typedef struct vp9_token_state {
   int           rate;
   int           error;
   int           next;
-  signed char   token;
+  int16_t       token;
   short         qc;
 } vp9_token_state;
 

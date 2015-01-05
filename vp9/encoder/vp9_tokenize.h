@@ -65,7 +65,7 @@ extern const int16_t vp9_cat6_low_cost[256];
 extern const int16_t vp9_cat6_high_cost[128];
 extern const int16_t vp9_cat6_high10_high_cost[512];
 extern const int16_t vp9_cat6_high12_high_cost[2048];
-static INLINE int16_t vp9_get_cost(uint8_t token, EXTRABIT extrabits,
+static INLINE int16_t vp9_get_cost(int16_t token, EXTRABIT extrabits,
                                    const int16_t *cat6_high_table) {
   if (token != CATEGORY6_TOKEN)
     return vp9_extra_bits[token].cost[extrabits];
