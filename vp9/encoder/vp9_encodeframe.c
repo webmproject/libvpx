@@ -55,9 +55,6 @@ static void encode_superblock(VP9_COMP *cpi, ThreadData * td,
                               int mi_row, int mi_col, BLOCK_SIZE bsize,
                               PICK_MODE_CONTEXT *ctx);
 
-// Motion vector component magnitude threshold for defining fast motion.
-#define FAST_MOTION_MV_THRESH 24
-
 // This is used as a reference when computing the source variance for the
 //  purposes of activity masking.
 // Eventually this should be replaced by custom no-reference routines,
