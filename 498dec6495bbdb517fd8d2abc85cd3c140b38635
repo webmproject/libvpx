@@ -16,6 +16,24 @@
       "revId": "498dec6495bbdb517fd8d2abc85cd3c140b38635",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Kxw\u003d",
+        "filename": "vp9/common/vp9_mfqe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2015-01-06T00:38:10Z",
+      "side": 1,
+      "message": "What about change to the following?\nconst int weight \u003d (int)((int64_t)sad * vdiff  * (1 \u003c\u003c MFQE_PRECISION) / (sad_thr - 1) / (150 - 1));",
+      "parentUuid": "AAAAdn//KyA\u003d",
+      "revId": "498dec6495bbdb517fd8d2abc85cd3c140b38635",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
