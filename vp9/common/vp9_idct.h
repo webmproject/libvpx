@@ -80,13 +80,7 @@ static const tran_high_t sinpi_3_9 = 13377;
 static const tran_high_t sinpi_4_9 = 15212;
 
 static INLINE tran_low_t check_range(tran_high_t input) {
-#if CONFIG_VP9_HIGHBITDEPTH
-  // For valid highbitdepth VP9 streams, intermediate stage coefficients will
-  // stay within the ranges:
-  // - 8 bit: signed 16 bit integer
-  // - 10 bit: signed 18 bit integer
-  // - 12 bit: signed 20 bit integer
-#elif CONFIG_COEFFICIENT_RANGE_CHECKING
+#if CONFIG_COEFFICIENT_RANGE_CHECKING
   // For valid VP9 input streams, intermediate stage coefficients should always
   // stay within the range of a signed 16 bit integer. Coefficients can go out
   // of this range for invalid/corrupt VP9 streams. However, strictly checking
@@ -95,7 +89,7 @@ static INLINE tran_low_t check_range(tran_high_t input) {
   // --enable-coefficient-range-checking.
   assert(INT16_MIN <= input);
   assert(input <= INT16_MAX);
-#endif
+#endif  // CONFIG_COEFFICIENT_RANGE_CHECKING
   return (tran_low_t)input;
 }
 
@@ -103,6 +97,32 @@ static INLINE tran_low_t dct_const_round_shift(tran_high_t input) {
   tran_high_t rv = ROUND_POWER_OF_TWO(input, DCT_CONST_BITS);
   return check_range(rv);
 }
+
+#if CONFIG_VP9_HIGHBITDEPTH
+static INLINE tran_low_t highbd_check_range(tran_high_t input,
+                                            int bd) {
+#if CONFIG_COEFFICIENT_RANGE_CHECKING
+  // For valid highbitdepth VP9 streams, intermediate stage coefficients will
+  // stay within the ranges:
+  // - 8 bit: signed 16 bit integer
+  // - 10 bit: signed 18 bit integer
+  // - 12 bit: signed 20 bit integer
+  const int32_t int_max = (1 << (7 + bd)) - 1;
+  const int32_t int_min = -int_max - 1;
+  assert(int_min <= input);
+  assert(input <= int_max);
+  (void) int_min;
+#endif  // CONFIG_COEFFICIENT_RANGE_CHECKING
+  (void) bd;
+  return (tran_low_t)input;
+}
+
+static INLINE tran_low_t highbd_dct_const_round_shift(tran_high_t input,
+                                                      int bd) {
+  tran_high_t rv = ROUND_POWER_OF_TWO(input, DCT_CONST_BITS);
+  return highbd_check_range(rv, bd);
+}
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 typedef void (*transform_1d)(const tran_low_t*, tran_low_t*);
 
