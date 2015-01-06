@@ -15,12 +15,11 @@
 
 #include "vpx/vpx_codec.h"
 #include "vpx_scale/yv12config.h"
-
+#include "vp9/common/vp9_loopfilter_thread.h"
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_ppflags.h"
 #include "vp9/common/vp9_thread.h"
-
-#include "vp9/decoder/vp9_dthread.h"
+#include "vp9/decoder/vp9_reader.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,6 +31,13 @@ typedef struct TileData {
   vp9_reader bit_reader;
   DECLARE_ALIGNED(16, MACROBLOCKD, xd);
 } TileData;
+
+typedef struct TileWorkerData {
+  VP9_COMMON *cm;
+  vp9_reader bit_reader;
+  DECLARE_ALIGNED(16, MACROBLOCKD, xd);
+  struct vpx_internal_error_info error_info;
+} TileWorkerData;
 
 typedef struct VP9Decoder {
   DECLARE_ALIGNED(16, MACROBLOCKD, mb);

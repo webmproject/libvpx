@@ -32,7 +32,6 @@
 #include "vp9/decoder/vp9_decodeframe.h"
 #include "vp9/decoder/vp9_decoder.h"
 #include "vp9/decoder/vp9_detokenize.h"
-#include "vp9/decoder/vp9_dthread.h"
 
 static void initialize_dec(void) {
   static volatile int init_done = 0;

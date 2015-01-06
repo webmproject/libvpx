@@ -97,6 +97,11 @@ void vp9_filter_block_plane(struct VP9Common *const cm,
                             int mi_row,
                             LOOP_FILTER_MASK *lfm);
 
+void vp9_filter_block_plane_non420(struct VP9Common *cm,
+                                   struct macroblockd_plane *plane,
+                                   MODE_INFO *mi_8x8,
+                                   int mi_row, int mi_col);
+
 void vp9_loop_filter_init(struct VP9Common *cm);
 
 // Update the loop filter for the current frame.

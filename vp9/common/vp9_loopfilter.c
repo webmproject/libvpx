@@ -1149,10 +1149,10 @@ static void highbd_filter_selectively_vert(uint16_t *s, int pitch,
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-static void filter_block_plane_non420(VP9_COMMON *cm,
-                                      struct macroblockd_plane *plane,
-                                      MODE_INFO *mi_8x8,
-                                      int mi_row, int mi_col) {
+void vp9_filter_block_plane_non420(VP9_COMMON *cm,
+                                   struct macroblockd_plane *plane,
+                                   MODE_INFO *mi_8x8,
+                                   int mi_row, int mi_col) {
   const int ss_x = plane->subsampling_x;
   const int ss_y = plane->subsampling_y;
   const int row_step = 1 << ss_y;
@@ -1598,8 +1598,8 @@ void vp9_loop_filter_rows(YV12_BUFFER_CONFIG *frame_buffer,
         if (use_420)
           vp9_filter_block_plane(cm, &planes[plane], mi_row, &lfm);
         else
-          filter_block_plane_non420(cm, &planes[plane], mi + mi_col,
-                                    mi_row, mi_col);
+          vp9_filter_block_plane_non420(cm, &planes[plane], mi + mi_col,
+                                        mi_row, mi_col);
       }
     }
   }

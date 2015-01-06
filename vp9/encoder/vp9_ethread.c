@@ -167,16 +167,15 @@ void vp9_encode_tiles_mt(VP9_COMP *cpi) {
     CHECK_MEM_ERROR(cm, cpi->workers,
                     vpx_malloc(num_workers * sizeof(*cpi->workers)));
 
+    CHECK_MEM_ERROR(cm, cpi->tile_thr_data,
+                    vpx_calloc(num_workers, sizeof(*cpi->tile_thr_data)));
+
     for (i = 0; i < num_workers; i++) {
       VP9Worker *const worker = &cpi->workers[i];
-      EncWorkerData *thread_data;
+      EncWorkerData *thread_data = &cpi->tile_thr_data[i];
 
       ++cpi->num_workers;
-
       winterface->init(worker);
-      CHECK_MEM_ERROR(cm, worker->data1,
-                      (EncWorkerData*)vpx_calloc(1, sizeof(EncWorkerData)));
-      thread_data = (EncWorkerData*)worker->data1;
 
       if (i < num_workers - 1) {
       thread_data->cpi = cpi;
@@ -205,17 +204,18 @@ void vp9_encode_tiles_mt(VP9_COMP *cpi) {
         thread_data->td = &cpi->td;
       }
 
-      // data2 is unused.
-      worker->data2 = NULL;
-
       winterface->sync(worker);
-      worker->hook = (VP9WorkerHook)enc_worker_hook;
     }
   }
 
   for (i = 0; i < num_workers; i++) {
     VP9Worker *const worker = &cpi->workers[i];
-    EncWorkerData *const thread_data = (EncWorkerData*)worker->data1;
+    EncWorkerData *thread_data;
+
+    worker->hook = (VP9WorkerHook)enc_worker_hook;
+    worker->data1 = &cpi->tile_thr_data[i];
+    worker->data2 = NULL;
+    thread_data = (EncWorkerData*)worker->data1;
 
     // Before encoding a frame, copy the thread data from cpi.
     thread_data->td->mb = cpi->td.mb;
