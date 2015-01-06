@@ -136,12 +136,26 @@ static void copy_block(const uint8_t *y, const uint8_t *u, const uint8_t *v,
   }
 }
 
+static void get_thr(BLOCK_SIZE bs, int qdiff, int *sad_thr, int *vdiff_thr) {
+  const int adj = qdiff >> MFQE_PRECISION;
+  if (bs == BLOCK_16X16) {
+    *sad_thr = 7 + adj;
+  } else if (bs == BLOCK_32X32) {
+    *sad_thr = 6 + adj;
+  } else {  // BLOCK_64X64
+    *sad_thr = 5 + adj;
+  }
+  *vdiff_thr = 125 + qdiff;
+}
+
 static void mfqe_block(BLOCK_SIZE bs, const uint8_t *y, const uint8_t *u,
                        const uint8_t *v, int y_stride, int uv_stride,
-                       uint8_t *yd, uint8_t *ud, uint8_t *vd,
-                       int yd_stride, int uvd_stride) {
-  int sad, sad_thr, vdiff;
+                       uint8_t *yd, uint8_t *ud, uint8_t *vd, int yd_stride,
+                       int uvd_stride, int qdiff) {
+  int sad, sad_thr, vdiff, vdiff_thr;
   uint32_t sse;
+
+  get_thr(bs, qdiff, &sad_thr, &vdiff_thr);
 
   if (bs == BLOCK_16X16) {
     vdiff = (vp9_variance16x16(y, y_stride, yd, yd_stride, &sse) + 128) >> 8;
@@ -154,23 +168,18 @@ static void mfqe_block(BLOCK_SIZE bs, const uint8_t *y, const uint8_t *u,
     sad = (vp9_sad64x64(y, y_stride, yd, yd_stride) + 2048) >> 12;
   }
 
-  if (bs == BLOCK_16X16) {
-    sad_thr = 8;
-  } else if (bs == BLOCK_32X32) {
-    sad_thr = 7;
-  } else {  // BLOCK_64X64
-    sad_thr = 6;
-  }
-
-  // TODO(jackychen): More experiments and remove magic numbers.
   // vdiff > sad * 3 means vdiff should not be too small, otherwise,
   // it might be a lighting change in smooth area. When there is a
   // lighting change in smooth area, it is dangerous to do MFQE.
-  if (sad > 1 && sad < sad_thr && vdiff > sad * 3 && vdiff < 150) {
-    int weight = ((float)sad / (sad_thr - 1)) * ((float)vdiff / (150 - 1)) *
-                 (1 << MFQE_PRECISION);
-    apply_ifactor(y, y_stride, yd, yd_stride, u, v, uv_stride,
-                  ud, vd, uvd_stride, bs, weight);
+  if (sad > 1 && vdiff > sad * 3) {
+    const int weight = 1 << MFQE_PRECISION;
+    int ifactor = weight * sad * vdiff / (sad_thr * vdiff_thr);
+    // When ifactor equals weight, no MFQE is done.
+    if (ifactor > weight) {
+      ifactor = weight;
+    }
+    apply_ifactor(y, y_stride, yd, yd_stride, u, v, uv_stride, ud, vd,
+                  uvd_stride, bs, ifactor);
   } else {
     // Copy the block from current frame (i.e., no mfqe is done).
     copy_block(y, u, v, y_stride, uv_stride, yd, ud, vd,
@@ -199,8 +208,7 @@ static void mfqe_partition(VP9_COMMON *cm, MODE_INFO *mi, BLOCK_SIZE bs,
                            int yd_stride, int uvd_stride) {
   int mi_offset, y_offset, uv_offset;
   const BLOCK_SIZE cur_bs = mi->mbmi.sb_type;
-  // TODO(jackychen): Consider how and whether to use qdiff in MFQE.
-  // int qdiff = cm->base_qindex - cm->postproc_state.last_base_qindex;
+  const int qdiff = cm->base_qindex - cm->postproc_state.last_base_qindex;
   const int bsl = b_width_log2_lookup[bs];
   PARTITION_TYPE partition = partition_lookup[bsl][cur_bs];
   const BLOCK_SIZE subsize = get_subsize(bs, partition);
@@ -235,18 +243,18 @@ static void mfqe_partition(VP9_COMMON *cm, MODE_INFO *mi, BLOCK_SIZE bs,
       if (mfqe_decision(mi, mfqe_bs)) {
         // Do mfqe on the first square partition.
         mfqe_block(bs_tmp, y, u, v, y_stride, uv_stride,
-                   yd, ud, vd, yd_stride, uvd_stride);
+                   yd, ud, vd, yd_stride, uvd_stride, qdiff);
         // Do mfqe on the second square partition.
         mfqe_block(bs_tmp, y + y_offset, u + uv_offset, v + uv_offset,
                    y_stride, uv_stride, yd + y_offset, ud + uv_offset,
-                   vd + uv_offset, yd_stride, uvd_stride);
+                   vd + uv_offset, yd_stride, uvd_stride, qdiff);
       }
       if (mfqe_decision(mi + mi_offset * cm->mi_stride, mfqe_bs)) {
         // Do mfqe on the first square partition.
         mfqe_block(bs_tmp, y + y_offset * y_stride, u + uv_offset * uv_stride,
                    v + uv_offset * uv_stride, y_stride, uv_stride,
                    yd + y_offset * yd_stride, ud + uv_offset * uvd_stride,
-                   vd + uv_offset * uvd_stride, yd_stride, uvd_stride);
+                   vd + uv_offset * uvd_stride, yd_stride, uvd_stride, qdiff);
         // Do mfqe on the second square partition.
         mfqe_block(bs_tmp, y + y_offset * y_stride + y_offset,
                    u + uv_offset * uv_stride + uv_offset,
@@ -254,7 +262,7 @@ static void mfqe_partition(VP9_COMMON *cm, MODE_INFO *mi, BLOCK_SIZE bs,
                    uv_stride, yd + y_offset * yd_stride + y_offset,
                    ud + uv_offset * uvd_stride + uv_offset,
                    vd + uv_offset * uvd_stride + uv_offset,
-                   yd_stride, uvd_stride);
+                   yd_stride, uvd_stride, qdiff);
       }
       break;
     case PARTITION_VERT:
@@ -268,18 +276,18 @@ static void mfqe_partition(VP9_COMMON *cm, MODE_INFO *mi, BLOCK_SIZE bs,
       if (mfqe_decision(mi, mfqe_bs)) {
         // Do mfqe on the first square partition.
         mfqe_block(bs_tmp, y, u, v, y_stride, uv_stride,
-                   yd, ud, vd, yd_stride, uvd_stride);
+                   yd, ud, vd, yd_stride, uvd_stride, qdiff);
         // Do mfqe on the second square partition.
         mfqe_block(bs_tmp, y + y_offset * y_stride, u + uv_offset * uv_stride,
                    v + uv_offset * uv_stride, y_stride, uv_stride,
                    yd + y_offset * yd_stride, ud + uv_offset * uvd_stride,
-                   vd + uv_offset * uvd_stride, yd_stride, uvd_stride);
+                   vd + uv_offset * uvd_stride, yd_stride, uvd_stride, qdiff);
       }
       if (mfqe_decision(mi + mi_offset, mfqe_bs)) {
         // Do mfqe on the first square partition.
         mfqe_block(bs_tmp, y + y_offset, u + uv_offset, v + uv_offset,
                    y_stride, uv_stride, yd + y_offset, ud + uv_offset,
-                   vd + uv_offset, yd_stride, uvd_stride);
+                   vd + uv_offset, yd_stride, uvd_stride, qdiff);
         // Do mfqe on the second square partition.
         mfqe_block(bs_tmp, y + y_offset * y_stride + y_offset,
                    u + uv_offset * uv_stride + uv_offset,
@@ -287,14 +295,14 @@ static void mfqe_partition(VP9_COMMON *cm, MODE_INFO *mi, BLOCK_SIZE bs,
                    uv_stride, yd + y_offset * yd_stride + y_offset,
                    ud + uv_offset * uvd_stride + uv_offset,
                    vd + uv_offset * uvd_stride + uv_offset,
-                   yd_stride, uvd_stride);
+                   yd_stride, uvd_stride, qdiff);
       }
       break;
     case PARTITION_NONE:
       if (mfqe_decision(mi, cur_bs)) {
         // Do mfqe on this partition.
         mfqe_block(cur_bs, y, u, v, y_stride, uv_stride,
-                   yd, ud, vd, yd_stride, uvd_stride);
+                   yd, ud, vd, yd_stride, uvd_stride, qdiff);
       } else {
         // Copy the block from current frame(i.e., no mfqe is done).
         copy_block(y, u, v, y_stride, uv_stride, yd, ud, vd,
