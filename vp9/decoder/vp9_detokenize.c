@@ -14,6 +14,9 @@
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_entropy.h"
+#if CONFIG_COEFFICIENT_RANGE_CHECKING
+#include "vp9/common/vp9_idct.h"
+#endif
 
 #include "vp9/decoder/vp9_detokenize.h"
 
@@ -32,7 +35,7 @@
 #define INCREMENT_COUNT(token)                              \
   do {                                                      \
      if (!cm->frame_parallel_decoding_mode)                 \
-       ++coef_counts[band][ctx][token];                      \
+       ++coef_counts[band][ctx][token];                     \
   } while (0)
 
 static INLINE int read_coeff(const vp9_prob *probs, int n, vp9_reader *r) {
@@ -191,10 +194,15 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd, PLANE_TYPE type,
     }
     v = (val * dqv) >> dq_shift;
 #if CONFIG_COEFFICIENT_RANGE_CHECKING
+#if CONFIG_VP9_HIGHBITDEPTH
+    dqcoeff[scan[c]] = highbd_check_range((vp9_read_bit(r) ? -v : v),
+                                          cm->bit_depth);
+#else
     dqcoeff[scan[c]] = check_range(vp9_read_bit(r) ? -v : v);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 #else
     dqcoeff[scan[c]] = vp9_read_bit(r) ? -v : v;
-#endif
+#endif  // CONFIG_COEFFICIENT_RANGE_CHECKING
     token_cache[scan[c]] = vp9_pt_energy_class[token];
     ++c;
     ctx = get_coef_context(nb, token_cache, c);
