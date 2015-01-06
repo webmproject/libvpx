@@ -16,6 +16,24 @@
       "revId": "d179c81afeb1ae9b82b42ce345acd5c8872bae99",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//KyU\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-01-06T00:10:15Z",
+      "side": 1,
+      "message": "Upon closely examine the minimum size for valid vp9 streams: \n\nWith \"show_existing_frame\" frames:\nMinimum data size for profile 0 and 1 is 1 byte (8bits)\nMinimum data size for profile 2 and 3 is 2 bytes (9bits)\nOtherwise:\nMinimum data size is 8 bytes.\n\nI have redone a patch #3, which makes sure the calls to bit reader within decoder_peek_si_internal() to have enough data.",
+      "parentUuid": "AAAAdn//K0I\u003d",
+      "revId": "d179c81afeb1ae9b82b42ce345acd5c8872bae99",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
