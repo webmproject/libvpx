@@ -1780,9 +1780,7 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
   }
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
-  if (cpi->oxcf.noise_sensitivity > 0) {
-    vp9_denoiser_free(&(cpi->denoiser));
-  }
+  vp9_denoiser_free(&(cpi->denoiser));
 #endif
 
   for (t = 0; t < cpi->num_workers; ++t) {
