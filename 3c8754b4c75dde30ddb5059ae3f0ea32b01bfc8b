@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//KaI\u003d",
+        "filename": "vp9/common/arm/neon/vp9_dc_reconintra_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-01-07T22:11:44Z",
+      "side": 1,
+      "message": "val[] should be initialized directly; this won\u0027t build under msvs",
+      "revId": "3c8754b4c75dde30ddb5059ae3f0ea32b01bfc8b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//KaE\u003d",
+        "filename": "vp9/common/arm/neon/vp9_dc_reconintra_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-01-07T22:11:44Z",
+      "side": 1,
+      "message": "\u0027\u003e\u003e\u0027 would be better, here and elsewhere",
+      "revId": "3c8754b4c75dde30ddb5059ae3f0ea32b01bfc8b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
