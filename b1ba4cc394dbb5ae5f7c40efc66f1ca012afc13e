@@ -16,6 +16,24 @@
       "revId": "b1ba4cc394dbb5ae5f7c40efc66f1ca012afc13e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Kes\u003d",
+        "filename": "vp9/common/arm/neon/vp9_loopfilter_4_neon.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-01-07T19:07:54Z",
+      "side": 1,
+      "message": "Indeed it is copy/paste",
+      "parentUuid": "AAAAdn//KjY\u003d",
+      "revId": "b1ba4cc394dbb5ae5f7c40efc66f1ca012afc13e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
