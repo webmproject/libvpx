@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//KpA\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1352,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2015-01-07T00:21:34Z",
+      "side": 0,
+      "message": "Should we also check cpi-\u003edenoiser.frame_buffer_initialized here? For instance, in the latest unit test patch, we change denoiser config for each frame, each frame will allocate the buffer.",
+      "revId": "5b860e1251c62f0561274ffdec53ec879250b268",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
