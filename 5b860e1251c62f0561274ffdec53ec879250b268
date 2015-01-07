@@ -16,6 +16,24 @@
       "revId": "5b860e1251c62f0561274ffdec53ec879250b268",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Ko0\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1352,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-01-07T00:23:32Z",
+      "side": 0,
+      "message": "The new place will be checked in every frame coding, i.e., covering the case noise_sensitivity changed dynamically. This part could be removed now.",
+      "parentUuid": "AAAAdn//KpA\u003d",
+      "revId": "5b860e1251c62f0561274ffdec53ec879250b268",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
