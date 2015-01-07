@@ -485,15 +485,13 @@ static void make_grayscale(YV12_BUFFER_CONFIG *yuv) {
   uint8_t *u = yuv->u_buffer;
   uint8_t *v = yuv->v_buffer;
 
-  // The '/2's are there because we have a 440 buffer, but we want to output
-  // 420.
-  for (r = 0; r < yuv->uv_height / 2; ++r) {
-    for (c = 0; c < yuv->uv_width / 2; ++c) {
+  for (r = 0; r < yuv->uv_height; ++r) {
+    for (c = 0; c < yuv->uv_width; ++c) {
       u[c] = UINT8_MAX / 2;
       v[c] = UINT8_MAX / 2;
     }
-    u += yuv->uv_stride + yuv->uv_width / 2;
-    v += yuv->uv_stride + yuv->uv_width / 2;
+    u += yuv->uv_stride;
+    v += yuv->uv_stride;
   }
 }
 #endif
