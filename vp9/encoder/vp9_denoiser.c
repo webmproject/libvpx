@@ -458,12 +458,14 @@ int vp9_denoiser_alloc(VP9_DENOISER *denoiser, int width, int height,
   make_grayscale(&denoiser->running_avg_y[i]);
 #endif
   denoiser->increase_denoising = 0;
+  denoiser->frame_buffer_initialized = 1;
 
   return 0;
 }
 
 void vp9_denoiser_free(VP9_DENOISER *denoiser) {
   int i;
+  denoiser->frame_buffer_initialized = 0;
   if (denoiser == NULL) {
     return;
   }
