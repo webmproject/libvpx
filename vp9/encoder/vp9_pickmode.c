@@ -1165,7 +1165,7 @@ void vp9_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
     }  // loop through sub8x8 blocks
 
     if (this_rd < best_rd) {
-      this_rd = best_rd;
+      best_rd = this_rd;
       best_ref_frame = ref_frame;
     }
   }  // reference frames
