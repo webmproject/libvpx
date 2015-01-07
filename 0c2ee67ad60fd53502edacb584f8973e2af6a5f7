@@ -16,6 +16,24 @@
       "revId": "0c2ee67ad60fd53502edacb584f8973e2af6a5f7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Kgk\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1175,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2015-01-07T17:26:58Z",
+      "side": 0,
+      "message": "NO it is not needed anymore, since encodeframe already resets the entire counts structure to zero before encoding a frame. Note that all other symbols in the bitstream already do the right thing. Only the counts for this symbol was left around within pack.",
+      "parentUuid": "AAAAdn//Kgs\u003d",
+      "revId": "0c2ee67ad60fd53502edacb584f8973e2af6a5f7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
