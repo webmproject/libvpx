@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Kjg\u003d",
+        "filename": "test/lpf_8_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 636,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-01-07T06:51:05Z",
+      "side": 1,
+      "message": "would be nice in the future to reorganize anyway, rather than have some explanatory note",
+      "revId": "fca0037e3bf5f62b897cc533e050663edf7b0db8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
