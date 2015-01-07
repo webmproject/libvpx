@@ -313,10 +313,11 @@ class DatarateTestVP9Large : public ::libvpx_test::EncoderTest,
 
   virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
                                   ::libvpx_test::Encoder *encoder) {
-    if (video->frame() == 1) {
+    if (video->frame() == 1)
       encoder->Control(VP8E_SET_CPUUSED, set_cpu_used_);
-      encoder->Control(VP9E_SET_NOISE_SENSITIVITY, denoiser_on_);
-    }
+
+    encoder->Control(VP9E_SET_NOISE_SENSITIVITY, denoiser_on_);
+
     if (cfg_.ts_number_layers > 1) {
       if (video->frame() == 1) {
         encoder->Control(VP9E_SET_SVC, 1);
