@@ -238,7 +238,7 @@ static void swap_frame_buffers(VP9Decoder *pbi) {
 
   // Invalidate these references until the next frame starts.
   for (ref_index = 0; ref_index < 3; ref_index++)
-    cm->frame_refs[ref_index].idx = INT_MAX;
+    cm->frame_refs[ref_index].idx = -1;
 }
 
 int vp9_receive_compressed_data(VP9Decoder *pbi,
@@ -258,7 +258,7 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
     // TODO(jkoleszar): Error concealment is undefined and non-normative
     // at this point, but if it becomes so, [0] may not always be the correct
     // thing to do here.
-    if (cm->frame_refs[0].idx != INT_MAX)
+    if (cm->frame_refs[0].idx > 0)
       cm->frame_refs[0].buf->corrupted = 1;
   }
 
