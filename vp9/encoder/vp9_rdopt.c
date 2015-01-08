@@ -122,6 +122,23 @@ static const MODE_DEFINITION vp9_mode_order[MAX_MODES] = {
   {D63_PRED,  {INTRA_FRAME,  NONE}},
   {D117_PRED, {INTRA_FRAME,  NONE}},
   {D45_PRED,  {INTRA_FRAME,  NONE}},
+
+#if CONFIG_INTERINTRA
+  {ZEROMV,    {LAST_FRAME,   INTRA_FRAME}},
+  {NEARESTMV, {LAST_FRAME,   INTRA_FRAME}},
+  {NEARMV,    {LAST_FRAME,   INTRA_FRAME}},
+  {NEWMV,     {LAST_FRAME,   INTRA_FRAME}},
+
+  {ZEROMV,    {GOLDEN_FRAME, INTRA_FRAME}},
+  {NEARESTMV, {GOLDEN_FRAME, INTRA_FRAME}},
+  {NEARMV,    {GOLDEN_FRAME, INTRA_FRAME}},
+  {NEWMV,     {GOLDEN_FRAME, INTRA_FRAME}},
+
+  {ZEROMV,    {ALTREF_FRAME, INTRA_FRAME}},
+  {NEARESTMV, {ALTREF_FRAME, INTRA_FRAME}},
+  {NEARMV,    {ALTREF_FRAME, INTRA_FRAME}},
+  {NEWMV,     {ALTREF_FRAME, INTRA_FRAME}},
+#endif  // CONFIG_INTERINTRA
 };
 
 static const REF_DEFINITION vp9_ref_order[MAX_REFS] = {
@@ -1168,7 +1185,7 @@ static int64_t rd_pick_intra_sub_8x8_y_mode(VP9_COMP *cpi, MACROBLOCK *mb,
         bmode_costs  = cpi->y_mode_costs[A][L];
       }
 
-      this_rd = rd_pick_intra4x4block(cpi, mb, i, &best_mode, 
+      this_rd = rd_pick_intra4x4block(cpi, mb, i, &best_mode,
 #if CONFIG_FILTERINTRA
                                       &best_fbit,
 #endif
@@ -1881,6 +1898,9 @@ static int check_best_zero_mv(
   if ((this_mode == NEARMV || this_mode == NEARESTMV || this_mode == ZEROMV) &&
       frame_mv[this_mode][ref_frames[0]].as_int == 0 &&
       (ref_frames[1] == NONE ||
+#if CONFIG_INTERINTRA
+       ref_frames[1] == INTRA_FRAME ||
+#endif
        frame_mv[this_mode][ref_frames[1]].as_int == 0)) {
     int rfc = mode_context[ref_frames[0]];
     int c1 = cost_mv_ref(cpi, NEARMV, rfc);
@@ -1893,7 +1913,11 @@ static int check_best_zero_mv(
       if (c2 > c3) return 0;
     } else {
       assert(this_mode == ZEROMV);
-      if (ref_frames[1] == NONE) {
+      if (ref_frames[1] == NONE
+#if CONFIG_INTERINTRA
+          || ref_frames[1] == INTRA_FRAME
+#endif
+         ) {
         if ((c3 >= c2 && frame_mv[NEARESTMV][ref_frames[0]].as_int == 0) ||
             (c3 >= c1 && frame_mv[NEARMV][ref_frames[0]].as_int == 0))
           return 0;
@@ -2741,6 +2765,10 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                  int_mv single_newmv[MAX_REF_FRAMES],
                                  INTERP_FILTER (*single_filter)[MAX_REF_FRAMES],
                                  int (*single_skippable)[MAX_REF_FRAMES],
+#if CONFIG_INTERINTRA
+                                 int *compmode_interintra_cost,
+                                 int single_newmv_rate[MAX_REF_FRAMES],
+#endif
                                  int64_t *psse,
                                  const int64_t ref_best_rd) {
   VP9_COMMON *cm = &cpi->common;
@@ -2768,6 +2796,10 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   uint8_t *orig_dst[MAX_MB_PLANE];
   int orig_dst_stride[MAX_MB_PLANE];
   int rs = 0;
+#if CONFIG_INTERINTRA
+  int rate_mv_tmp = 0;
+  const int is_comp_interintra_pred = (mbmi->ref_frame[1] == INTRA_FRAME);
+#endif
   INTERP_FILTER best_filter = SWITCHABLE;
   uint8_t skip_txfm[MAX_MB_PLANE << 2] = {0};
   int64_t bsse[MAX_MB_PLANE << 2] = {0};
@@ -2830,9 +2862,26 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                    &mbmi->ref_mvs[refs[1]][0].as_mv,
                                    x->nmvjointcost, x->mvcost, MV_COST_WEIGHT);
       }
+#if !CONFIG_INTERINTRA
       *rate2 += rate_mv;
+#endif
     } else {
       int_mv tmp_mv;
+#if CONFIG_INTERINTRA
+      if (!is_comp_interintra_pred) {
+        single_motion_search(cpi, x, bsize, mi_row, mi_col,
+                             &tmp_mv, &rate_mv);
+        if (tmp_mv.as_int == INVALID_MV)
+          return INT64_MAX;
+        frame_mv[refs[0]].as_int =
+            xd->mi[0].src_mi->bmi[0].as_mv[0].as_int = tmp_mv.as_int;
+        single_newmv[refs[0]].as_int = tmp_mv.as_int;
+        single_newmv_rate[refs[0]] = rate_mv;
+      } else {
+        frame_mv[refs[0]].as_int = single_newmv[refs[0]].as_int;
+        rate_mv = single_newmv_rate[refs[0]];
+      }
+#else
       single_motion_search(cpi, x, bsize, mi_row, mi_col,
                            &tmp_mv, &rate_mv);
       if (tmp_mv.as_int == INVALID_MV)
@@ -2841,7 +2890,11 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       frame_mv[refs[0]].as_int =
           xd->mi[0].src_mi->bmi[0].as_mv[0].as_int = tmp_mv.as_int;
       single_newmv[refs[0]].as_int = tmp_mv.as_int;
+#endif  // CONFIG_INTERINTRA
     }
+#if CONFIG_INTERINTRA
+    rate_mv_tmp = rate_mv;
+#endif
   }
 
   for (i = 0; i < is_comp_pred + 1; ++i) {
@@ -2925,6 +2978,10 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
           if ((cm->interp_filter == SWITCHABLE &&
                (!i || best_needs_copy)) ||
+#if CONFIG_INTERINTRA
+              (is_inter_mode(this_mode) && is_comp_interintra_pred &&
+               is_interintra_allowed(mbmi->sb_type)) ||
+#endif
               (cm->interp_filter != SWITCHABLE &&
                (cm->interp_filter == mbmi->interp_filter ||
                 (i == 0 && intpel_mv)))) {
@@ -2987,6 +3044,61 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   mbmi->interp_filter = cm->interp_filter != SWITCHABLE ?
       cm->interp_filter : best_filter;
   rs = cm->interp_filter == SWITCHABLE ? vp9_get_switchable_rate(cpi) : 0;
+
+#if CONFIG_INTERINTRA
+  if ((!is_comp_pred) && is_comp_interintra_pred &&
+      is_interintra_allowed(mbmi->sb_type)) {
+    PREDICTION_MODE interintra_mode, best_interintra_mode = DC_PRED;
+    int64_t best_interintra_rd = INT64_MAX;
+    int rmode, rate_sum;
+    int64_t dist_sum;
+    int j;
+    mbmi->ref_frame[1] = NONE;
+    for (j = 0; j < MAX_MB_PLANE; j++) {
+      xd->plane[j].dst.buf = tmp_buf + j * 64 * 64;
+      xd->plane[j].dst.stride = 64;
+    }
+    vp9_build_inter_predictors_sb(xd, mi_row, mi_col, bsize);
+    restore_dst_buf(xd, orig_dst, orig_dst_stride);
+    mbmi->ref_frame[1] = INTRA_FRAME;
+
+    for (interintra_mode = DC_PRED; interintra_mode <= TM_PRED;
+        ++interintra_mode) {
+      mbmi->interintra_mode = interintra_mode;
+      mbmi->interintra_uv_mode = interintra_mode;
+      rmode = cpi->mbmode_cost[mbmi->interintra_mode];
+      vp9_build_interintra_predictors(xd, tmp_buf, tmp_buf + 64 * 64,
+                                      tmp_buf + 2* 64 * 64, 64, 64, 64, bsize);
+      model_rd_for_sb(cpi, bsize, x, xd, &rate_sum, &dist_sum,
+                      &skip_txfm_sb, &skip_sse_sb);
+      rd = RDCOST(x->rdmult, x->rddiv, rmode + rate_sum, dist_sum);
+      if (rd < best_interintra_rd) {
+        best_interintra_rd = rd;
+        best_interintra_mode = interintra_mode;
+      }
+    }
+    mbmi->interintra_mode = best_interintra_mode;
+    mbmi->interintra_uv_mode = best_interintra_mode;
+    if (ref_best_rd < INT64_MAX &&
+        best_interintra_rd / 2 > ref_best_rd) {
+      return INT64_MAX;
+    }
+
+    pred_exists = 0;
+    tmp_rd = best_interintra_rd;
+  }
+  if (!is_comp_pred && is_interintra_allowed(mbmi->sb_type)) {
+    *compmode_interintra_cost = vp9_cost_bit(cm->fc.interintra_prob[bsize],
+                                             is_comp_interintra_pred);
+    if (is_comp_interintra_pred) {
+      *compmode_interintra_cost += cpi->mbmode_cost[mbmi->interintra_mode];
+    }
+  }
+#endif  // CONFIG_INTERINTRA
+
+#if CONFIG_INTERINTRA
+  *rate2 += rate_mv_tmp;
+#endif
 
   if (pred_exists) {
     if (best_needs_copy) {
@@ -3310,6 +3422,9 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_FILTERINTRA
   int fbit_uv[TX_SIZES];
 #endif
+#if CONFIG_INTERINTRA
+  int single_newmv_rate[MAX_REF_FRAMES] = { 0 };
+#endif  // CONFIG_INTERINTRA
   const int intra_cost_penalty = vp9_get_intra_cost_penalty(
       cm->base_qindex, cm->y_dc_delta_q, cm->bit_depth);
   int best_skip2 = 0;
@@ -3471,6 +3586,9 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     int64_t this_rd = INT64_MAX;
     int disable_skip = 0;
     int compmode_cost = 0;
+#if CONFIG_INTERINTRA
+    int compmode_interintra_cost = 0;
+#endif
     int rate2 = 0, rate_y = 0, rate_uv = 0;
     int64_t distortion2 = 0, distortion_y = 0, distortion_uv = 0;
     int skippable = 0;
@@ -3626,6 +3744,11 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                               this_mode, ref_frames))
         continue;
     }
+#if CONFIG_INTERINTRA
+    if (ref_frame > INTRA_FRAME && second_ref_frame == INTRA_FRAME &&
+        !is_interintra_allowed(bsize))
+      continue;
+#endif
 
     mbmi->mode = this_mode;
     mbmi->uv_mode = DC_PRED;
@@ -3656,6 +3779,10 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 
     for (i = 0; i < TX_MODES; ++i)
       tx_cache[i] = INT64_MAX;
+#if CONFIG_INTERINTRA
+    mbmi->interintra_mode = (PREDICTION_MODE)(DC_PRED - 1);
+    mbmi->interintra_uv_mode = (PREDICTION_MODE)(DC_PRED - 1);
+#endif
 
     if (ref_frame == INTRA_FRAME) {
       TX_SIZE uv_tx;
@@ -3773,6 +3900,12 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         rate2 += intra_cost_penalty;
       distortion2 = distortion_y + distortion_uv;
     } else {
+#if CONFIG_INTERINTRA
+      if (second_ref_frame == INTRA_FRAME) {
+        mbmi->interintra_mode = best_intra_mode;
+        mbmi->interintra_uv_mode = best_intra_mode;
+      }
+#endif
 #if CONFIG_EXT_TX
       mbmi->ext_txfrm = NORM;
 #endif
@@ -3782,8 +3915,14 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
                                   &rate_y, &rate_uv,
                                   &disable_skip, frame_mv,
                                   mi_row, mi_col,
-                                  single_newmv, single_inter_filter,
-                                  single_skippable, &total_sse, best_rd);
+                                  single_newmv,
+                                  single_inter_filter,
+                                  single_skippable,
+#if CONFIG_INTERINTRA
+                                  &compmode_interintra_cost,
+                                  single_newmv_rate,
+#endif
+                                  &total_sse, best_rd);
       if (this_rd == INT64_MAX)
         continue;
 
@@ -3792,6 +3931,10 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       if (cm->reference_mode == REFERENCE_MODE_SELECT)
         rate2 += compmode_cost;
     }
+
+#if CONFIG_INTERINTRA
+    rate2 += compmode_interintra_cost;
+#endif  // CONFIG_INTERINTRA
 
     // Estimate the reference frame signaling cost and add it
     // to the rolling cost variable.
@@ -4113,6 +4256,10 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 #endif
 
     *mbmi = *inter_ref_list[copy_mode - REF0];
+#if CONFIG_INTERINTRA
+    if (mbmi->ref_frame[1] == INTRA_FRAME)
+      mbmi->ref_frame[1] = NONE;
+#endif
     mbmi->sb_type = bsize;
     mbmi->inter_ref_count = inter_ref_count;
     mbmi->copy_mode = copy_mode;

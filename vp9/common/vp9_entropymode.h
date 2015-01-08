@@ -74,6 +74,9 @@ typedef struct frame_contexts {
   vp9_prob copy_mode_probs_l2[COPY_MODE_CONTEXTS][1];
   vp9_prob copy_mode_probs[COPY_MODE_CONTEXTS][COPY_MODE_COUNT - 2];
 #endif  // CONFIG_COPY_MODE
+#if CONFIG_INTERINTRA
+  vp9_prob interintra_prob[BLOCK_SIZES];
+#endif  // CONFIG_INTERINTRA
 } FRAME_CONTEXT;
 
 typedef struct {
@@ -112,6 +115,9 @@ typedef struct {
   unsigned int copy_mode_l2[COPY_MODE_CONTEXTS][2];
   unsigned int copy_mode[COPY_MODE_CONTEXTS][COPY_MODE_COUNT - 1];
 #endif  // CONFIG_COPY_MODE
+#if CONFIG_INTERINTRA
+  unsigned int interintra[BLOCK_SIZES][2];
+#endif  // CONFIG_INTERINTRA
 } FRAME_COUNTS;
 
 extern const vp9_prob vp9_kf_uv_mode_prob[INTRA_MODES][INTRA_MODES - 1];

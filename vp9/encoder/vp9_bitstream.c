@@ -528,6 +528,19 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
     } else {
       assert(mbmi->interp_filter == cm->interp_filter);
     }
+#if CONFIG_INTERINTRA
+    if (cpi->common.reference_mode != COMPOUND_REFERENCE &&
+        is_interintra_allowed(bsize) &&
+        is_inter_mode(mode) &&
+        (mbmi->ref_frame[1] <= INTRA_FRAME)) {
+        vp9_write(w, mbmi->ref_frame[1] == INTRA_FRAME,
+                  cm->fc.interintra_prob[bsize]);
+        if (mbmi->ref_frame[1] == INTRA_FRAME) {
+          write_intra_mode(w, mbmi->interintra_mode,
+                           cm->fc.y_mode_prob[size_group_lookup[bsize]]);
+      }
+    }
+#endif  // CONFIG_INTERINTRA
 
     if (bsize < BLOCK_8X8) {
       const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];
@@ -1622,6 +1635,17 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
                        &header_bc);
     }
 #endif
+#if CONFIG_INTERINTRA
+    if (cm->reference_mode != COMPOUND_REFERENCE) {
+      for (i = 0; i < BLOCK_SIZES; i++) {
+        if (is_interintra_allowed(i)) {
+          vp9_cond_prob_diff_update(&header_bc,
+                                    &fc->interintra_prob[i],
+                                    cm->counts.interintra[i]);
+        }
+      }
+    }
+#endif  // CONFIG_INTERINTRA
   }
 
   vp9_stop_encode(&header_bc);

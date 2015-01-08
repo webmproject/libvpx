@@ -2116,6 +2116,15 @@ static int read_compressed_header(VP9Decoder *pbi, const uint8_t *data,
         vp9_diff_update_prob(&r, &fc->copy_mode_probs[j][i]);
     }
 #endif
+#if CONFIG_INTERINTRA
+    if (cm->reference_mode != COMPOUND_REFERENCE) {
+      for (i = 0; i < BLOCK_SIZES; i++) {
+        if (is_interintra_allowed(i)) {
+          vp9_diff_update_prob(&r, &fc->interintra_prob[i]);
+        }
+      }
+    }
+#endif  // CONFIG_INTERINTRA
   }
 
   return vp9_reader_has_error(&r);

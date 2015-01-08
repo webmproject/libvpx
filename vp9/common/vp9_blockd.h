@@ -161,6 +161,10 @@ typedef struct {
   COPY_MODE copy_mode;
   int inter_ref_count;
 #endif  // CONFIG_COPY_MODE
+#if CONFIG_INTERINTRA
+  PREDICTION_MODE interintra_mode;
+  PREDICTION_MODE interintra_uv_mode;
+#endif  // CONFIG_INTERINTRA
 } MB_MODE_INFO;
 
 typedef struct MODE_INFO {
@@ -428,6 +432,12 @@ static INLINE void txfrm_block_to_raster_xy(BLOCK_SIZE plane_bsize,
 void vp9_set_contexts(const MACROBLOCKD *xd, struct macroblockd_plane *pd,
                       BLOCK_SIZE plane_bsize, TX_SIZE tx_size, int has_eob,
                       int aoff, int loff);
+
+#if CONFIG_INTERINTRA
+static INLINE int is_interintra_allowed(BLOCK_SIZE sb_type) {
+  return ((sb_type >= BLOCK_8X8) && (sb_type < BLOCK_64X64));
+}
+#endif  // CONFIG_INTERINTRA
 
 #ifdef __cplusplus
 }  // extern "C"

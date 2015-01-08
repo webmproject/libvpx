@@ -588,6 +588,9 @@ static void choose_partitioning(VP9_COMP *cpi,
     vp9_setup_pre_planes(xd, 0, yv12, mi_row, mi_col, sf);
 
     xd->mi[0].src_mi->mbmi.ref_frame[0] = LAST_FRAME;
+#if CONFIG_INTERINTRA
+    xd->mi[0].src_mi->mbmi.ref_frame[1] = NONE;
+#endif  // CONFIG_INTERINTRA
     xd->mi[0].src_mi->mbmi.sb_type = BLOCK_64X64;
     vp9_find_best_ref_mvs(xd, cm->allow_high_precision_mv,
                           xd->mi[0].src_mi->mbmi.ref_mvs[LAST_FRAME],
@@ -857,6 +860,18 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
         const int ctx = vp9_get_pred_context_switchable_interp(xd);
         ++cm->counts.switchable_interp[ctx][mbmi->interp_filter];
       }
+#if CONFIG_INTERINTRA
+      if (is_interintra_allowed(bsize) &&
+          is_inter_mode(mbmi->mode) &&
+          (mbmi->ref_frame[1] <= INTRA_FRAME)) {
+        if (mbmi->ref_frame[1] == INTRA_FRAME) {
+          ++cm->counts.y_mode[size_group_lookup[bsize]][mbmi->interintra_mode];
+          ++cm->counts.interintra[bsize][1];
+        } else {
+          ++cm->counts.interintra[bsize][0];
+        }
+      }
+#endif
     }
 
     rd_opt->comp_pred_diff[SINGLE_REFERENCE] += ctx->single_pred_diff;
@@ -956,6 +971,19 @@ static void update_state_supertx(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
         const int ctx = vp9_get_pred_context_switchable_interp(xd);
         ++cm->counts.switchable_interp[ctx][mbmi->interp_filter];
       }
+#if CONFIG_INTERINTRA
+      if (is_interintra_allowed(bsize) &&
+          is_inter_mode(mbmi->mode) &&
+          (mbmi->ref_frame[1] <= INTRA_FRAME)) {
+        if (mbmi->ref_frame[1] == INTRA_FRAME) {
+          assert(0);
+          ++cm->counts.y_mode[size_group_lookup[bsize]][mbmi->interintra_mode];
+          ++cm->counts.interintra[bsize][1];
+        } else {
+          ++cm->counts.interintra[bsize][0];
+        }
+      }
+#endif  // CONFIG_INTERINTRA
     }
 
     rd_opt->comp_pred_diff[SINGLE_REFERENCE] += ctx->single_pred_diff;
@@ -4801,7 +4829,12 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
 
 #if CONFIG_SUPERTX
 static int check_intra_b(PICK_MODE_CONTEXT *ctx) {
+#if CONFIG_INTERINTRA
+  return !is_inter_mode((&ctx->mic)->mbmi.mode) ||
+         (ctx->mic.mbmi.ref_frame[1] == INTRA_FRAME);
+#else
   return !is_inter_mode((&ctx->mic)->mbmi.mode);
+#endif  // CONFIG_INTERINTRA
 }
 
 static int check_intra_sb(VP9_COMP *cpi, const TileInfo *const tile,

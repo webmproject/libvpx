@@ -685,6 +685,21 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
                       ? read_switchable_interp_filter(cm, xd, r)
                       : cm->interp_filter;
 
+#if CONFIG_INTERINTRA
+    if (is_interintra_allowed(bsize) &&
+        is_inter_mode(mbmi->mode) &&
+        (mbmi->ref_frame[1] <= INTRA_FRAME)) {
+      mbmi->ref_frame[1] = vp9_read(r, cm->fc.interintra_prob[bsize]) ?
+                           INTRA_FRAME : NONE;
+      cm->counts.interintra[bsize][mbmi->ref_frame[1] == INTRA_FRAME]++;
+      if (mbmi->ref_frame[1] == INTRA_FRAME) {
+        mbmi->interintra_mode =
+            read_intra_mode_y(cm, r, size_group_lookup[bsize]);
+        mbmi->interintra_uv_mode = mbmi->interintra_mode;
+      }
+    }
+#endif  // CONFIG_INTERINTRA
+
   if (bsize < BLOCK_8X8) {
     const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];  // 1 or 2
     const int num_4x4_h = num_4x4_blocks_high_lookup[bsize];  // 1 or 2
@@ -779,6 +794,10 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
 
     inter_block = 1;
     *mbmi = *inter_ref_list[mbmi->copy_mode - REF0];
+#if CONFIG_INTERINTRA
+    if (mbmi->ref_frame[1] == INTRA_FRAME)
+      mbmi->ref_frame[1] = NONE;
+#endif  // CONFIG_INTERINTRA
 #if CONFIG_SUPERTX
     mbmi->tx_size = tx_size_backup;
 #endif

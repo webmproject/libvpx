@@ -65,6 +65,9 @@ static unsigned int do_16x16_motion_iteration(VP9_COMP *cpi,
 
   xd->mi[0].src_mi->mbmi.mode = NEWMV;
   xd->mi[0].src_mi->mbmi.mv[0].as_mv = *dst_mv;
+#if CONFIG_INTERINTRA
+  xd->mi[0].src_mi->mbmi.ref_frame[1] = NONE;
+#endif
 
   vp9_build_inter_predictors_sby(xd, mb_row, mb_col, BLOCK_16X16);
 

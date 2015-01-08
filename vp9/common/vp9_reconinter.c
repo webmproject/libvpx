@@ -353,18 +353,41 @@ static void build_inter_predictors_for_planes(MACROBLOCKD *xd, BLOCK_SIZE bsize,
 void vp9_build_inter_predictors_sby(MACROBLOCKD *xd, int mi_row, int mi_col,
                                     BLOCK_SIZE bsize) {
   build_inter_predictors_for_planes(xd, bsize, mi_row, mi_col, 0, 0);
+#if CONFIG_INTERINTRA
+  if (xd->mi[0].src_mi->mbmi.ref_frame[1] == INTRA_FRAME &&
+      is_interintra_allowed(xd->mi[0].src_mi->mbmi.sb_type))
+    vp9_build_interintra_predictors_sby(xd, xd->plane[0].dst.buf,
+                                        xd->plane[0].dst.stride, bsize);
+#endif  // CONFIG_INTERINTRA
 }
 
 void vp9_build_inter_predictors_sbuv(MACROBLOCKD *xd, int mi_row, int mi_col,
                                      BLOCK_SIZE bsize) {
   build_inter_predictors_for_planes(xd, bsize, mi_row, mi_col, 1,
                                     MAX_MB_PLANE - 1);
+#if CONFIG_INTERINTRA
+  if (xd->mi[0].src_mi->mbmi.ref_frame[1] == INTRA_FRAME &&
+      is_interintra_allowed(xd->mi[0].src_mi->mbmi.sb_type))
+    vp9_build_interintra_predictors_sbuv(xd, xd->plane[1].dst.buf,
+                                         xd->plane[2].dst.buf,
+                                         xd->plane[1].dst.stride,
+                                         xd->plane[2].dst.stride, bsize);
+#endif  // CONFIG_INTERINTRA
 }
 
 void vp9_build_inter_predictors_sb(MACROBLOCKD *xd, int mi_row, int mi_col,
                                    BLOCK_SIZE bsize) {
   build_inter_predictors_for_planes(xd, bsize, mi_row, mi_col, 0,
                                     MAX_MB_PLANE - 1);
+#if CONFIG_INTERINTRA
+  if (xd->mi[0].src_mi->mbmi.ref_frame[1] == INTRA_FRAME &&
+      is_interintra_allowed(xd->mi[0].src_mi->mbmi.sb_type))
+    vp9_build_interintra_predictors(xd, xd->plane[0].dst.buf,
+                                    xd->plane[1].dst.buf, xd->plane[2].dst.buf,
+                                    xd->plane[0].dst.stride,
+                                    xd->plane[1].dst.stride,
+                                    xd->plane[2].dst.stride, bsize);
+#endif  // CONFIG_INTERINTRA
 }
 
 #if CONFIG_SUPERTX
@@ -765,15 +788,25 @@ void vp9_dec_build_inter_predictors_sb(MACROBLOCKD *xd, int mi_row, int mi_col,
                                  0, 0, bw, bh, mi_x, mi_y);
     }
   }
+#if CONFIG_INTERINTRA
+  if (xd->mi[0].src_mi->mbmi.ref_frame[1] == INTRA_FRAME &&
+      is_interintra_allowed(xd->mi[0].src_mi->mbmi.sb_type))
+    vp9_build_interintra_predictors(xd, xd->plane[0].dst.buf,
+                                    xd->plane[1].dst.buf, xd->plane[2].dst.buf,
+                                    xd->plane[0].dst.stride,
+                                    xd->plane[1].dst.stride,
+                                    xd->plane[2].dst.stride, bsize);
+#endif  // CONFIG_INTERINTRA
 }
 
 #if CONFIG_SUPERTX
-void vp9_dec_build_inter_predictors_sby_sub8x8_extend(MACROBLOCKD *xd,
-                                                  int mi_row, int mi_col,
-                                                  int mi_row_ori,
-                                                  int mi_col_ori,
-                                                  BLOCK_SIZE top_bsize,
-                                                  PARTITION_TYPE partition) {
+void vp9_dec_build_inter_predictors_sby_sub8x8_extend(
+    MACROBLOCKD *xd,
+    int mi_row, int mi_col,
+    int mi_row_ori,
+    int mi_col_ori,
+    BLOCK_SIZE top_bsize,
+    PARTITION_TYPE partition) {
   const int mi_x = mi_col_ori * MI_SIZE;
   const int mi_y = mi_row_ori * MI_SIZE;
   uint8_t *orig_dst;
