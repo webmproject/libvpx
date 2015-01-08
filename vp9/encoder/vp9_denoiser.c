@@ -195,15 +195,6 @@ static uint8_t *block_start(uint8_t *framebuf, int stride,
   return framebuf + (stride * mi_row * 8) + (mi_col * 8);
 }
 
-static void copy_block(uint8_t *dest, int dest_stride,
-                       const uint8_t *src, int src_stride, BLOCK_SIZE bs) {
-  int r;
-  for (r = 0; r < (4 << b_height_log2_lookup[bs]); ++r) {
-    vpx_memcpy(dest, src, (4 << b_width_log2_lookup[bs]));
-    dest += dest_stride;
-    src += src_stride;
-  }
-}
 
 static VP9_DENOISER_DECISION perform_motion_compensation(VP9_DENOISER *denoiser,
                                                          MACROBLOCK *mb,
@@ -348,9 +339,15 @@ void vp9_denoiser_denoise(VP9_DENOISER *denoiser, MACROBLOCK *mb,
   }
 
   if (decision == FILTER_BLOCK) {
-    copy_block(src.buf, src.stride, avg_start, avg.y_stride, bs);
+    vp9_convolve_copy(avg_start, avg.y_stride, src.buf, src.stride,
+                      NULL, 0, NULL, 0,
+                      num_4x4_blocks_wide_lookup[bs] << 2,
+                      num_4x4_blocks_high_lookup[bs] << 2);
   } else {  // COPY_BLOCK
-    copy_block(avg_start, avg.y_stride, src.buf, src.stride, bs);
+    vp9_convolve_copy(src.buf, src.stride, avg_start, avg.y_stride,
+                      NULL, 0, NULL, 0,
+                      num_4x4_blocks_wide_lookup[bs] << 2,
+                      num_4x4_blocks_high_lookup[bs] << 2);
   }
 }
 
