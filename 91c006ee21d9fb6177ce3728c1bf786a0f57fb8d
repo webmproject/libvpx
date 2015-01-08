@@ -16,6 +16,24 @@
       "revId": "91c006ee21d9fb6177ce3728c1bf786a0f57fb8d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//KVU\u003d",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 322,
+      "author": {
+        "id": 1116554
+      },
+      "writtenOn": "2015-01-08T02:25:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//KWM\u003d",
+      "revId": "91c006ee21d9fb6177ce3728c1bf786a0f57fb8d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
