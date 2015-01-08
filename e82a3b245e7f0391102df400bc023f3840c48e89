@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//KU4\u003d",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 326,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-01-08T02:37:50Z",
+      "side": 1,
+      "message": "a bool would work here too, but this is fine",
+      "revId": "e82a3b245e7f0391102df400bc023f3840c48e89",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
