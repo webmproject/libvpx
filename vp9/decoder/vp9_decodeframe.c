@@ -1546,8 +1546,6 @@ void vp9_decode_frame(VP9Decoder *pbi,
     vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
                        "Truncated packet or corrupt header length");
 
-  init_macroblockd(cm, &pbi->mb);
-
   cm->use_prev_frame_mvs = !cm->error_resilient_mode &&
                            cm->width == cm->last_width &&
                            cm->height == cm->last_height &&
