@@ -463,8 +463,8 @@ static void decode_partition(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   subsize = get_subsize(bsize, partition);
   uv_subsize = ss_size_lookup[subsize][cm->subsampling_x][cm->subsampling_y];
   if (subsize >= BLOCK_8X8 && uv_subsize == BLOCK_INVALID)
-    vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
-                       "Invalid block size.");
+    vpx_internal_error(xd->error_info,
+                       VPX_CODEC_CORRUPT_FRAME, "Invalid block size.");
   if (subsize < BLOCK_8X8) {
     decode_block(cm, xd, tile, mi_row, mi_col, r, subsize);
   } else {
@@ -1021,6 +1021,15 @@ static int tile_worker_hook(TileWorkerData *const tile_data,
                             const TileInfo *const tile) {
   int mi_row, mi_col;
 
+  if (setjmp(tile_data->error_info.jmp)) {
+    tile_data->error_info.setjmp = 0;
+    tile_data->xd.corrupted = 1;
+    return 0;
+  }
+
+  tile_data->error_info.setjmp = 1;
+  tile_data->xd.error_info = &tile_data->error_info;
+
   for (mi_row = tile->mi_row_start; mi_row < tile->mi_row_end;
        mi_row += MI_BLOCK_SIZE) {
     vp9_zero(tile_data->xd.left_context);
@@ -1167,6 +1176,10 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
 
     for (; i > 0; --i) {
       VP9Worker *const worker = &pbi->tile_workers[i - 1];
+      // TODO(jzern): The tile may have specific error data associated with
+      // its vpx_internal_error_info which could be propagated to the main info
+      // in cm. Additionally once the threads have been synced and an error is
+      // detected, there's no point in continuing to decode tiles.
       pbi->mb.corrupted |= !winterface->sync(worker);
     }
     if (final_worker > -1) {

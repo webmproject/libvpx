@@ -438,7 +438,7 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
     RefBuffer *ref_buf = &cm->frame_refs[frame - LAST_FRAME];
     xd->block_refs[ref] = ref_buf;
     if ((!vp9_is_valid_scale(&ref_buf->sf)))
-      vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
+      vpx_internal_error(xd->error_info, VPX_CODEC_UNSUP_BITSTREAM,
                          "Reference frame has invalid dimensions");
     vp9_setup_pre_planes(xd, ref, ref_buf->buf, mi_row, mi_col,
                          &ref_buf->sf);
@@ -451,7 +451,7 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
   if (vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
     mbmi->mode = ZEROMV;
     if (bsize < BLOCK_8X8) {
-        vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
+        vpx_internal_error(xd->error_info, VPX_CODEC_UNSUP_BITSTREAM,
                            "Invalid usage of segement feature on small blocks");
         return;
     }
