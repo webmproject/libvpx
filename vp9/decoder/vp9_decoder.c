@@ -63,8 +63,8 @@ static void vp9_dec_free_mi(VP9_COMMON *cm) {
 }
 
 VP9Decoder *vp9_decoder_create() {
-  VP9Decoder *const pbi = vpx_memalign(32, sizeof(*pbi));
-  VP9_COMMON *const cm = pbi ? &pbi->common : NULL;
+  VP9Decoder *volatile const pbi = vpx_memalign(32, sizeof(*pbi));
+  VP9_COMMON *volatile const cm = pbi ? &pbi->common : NULL;
 
   if (!cm)
     return NULL;
@@ -243,7 +243,7 @@ static void swap_frame_buffers(VP9Decoder *pbi) {
 
 int vp9_receive_compressed_data(VP9Decoder *pbi,
                                 size_t size, const uint8_t **psource) {
-  VP9_COMMON *const cm = &pbi->common;
+  VP9_COMMON *volatile const cm = &pbi->common;
   const uint8_t *source = *psource;
   int retcode = 0;
 
