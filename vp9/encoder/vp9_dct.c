@@ -170,7 +170,6 @@ void vp9_fht4x4_c(const int16_t *input, tran_low_t *output,
     vp9_fdct4x4_c(input, output, stride);
   } else {
     tran_low_t out[4 * 4];
-    tran_low_t *outptr = &out[0];
     int i, j;
     tran_low_t temp_in[4], temp_out[4];
     const transform_2d ht = FHT_4[tx_type];
@@ -183,7 +182,7 @@ void vp9_fht4x4_c(const int16_t *input, tran_low_t *output,
         temp_in[0] += 1;
       ht.cols(temp_in, temp_out);
       for (j = 0; j < 4; ++j)
-        outptr[j * 4 + i] = temp_out[j];
+        out[j * 4 + i] = temp_out[j];
     }
 
     // Rows
@@ -711,7 +710,6 @@ void vp9_fht8x8_c(const int16_t *input, tran_low_t *output,
     vp9_fdct8x8_c(input, output, stride);
   } else {
     tran_low_t out[64];
-    tran_low_t *outptr = &out[0];
     int i, j;
     tran_low_t temp_in[8], temp_out[8];
     const transform_2d ht = FHT_8[tx_type];
@@ -722,7 +720,7 @@ void vp9_fht8x8_c(const int16_t *input, tran_low_t *output,
         temp_in[j] = input[j * stride + i] * 4;
       ht.cols(temp_in, temp_out);
       for (j = 0; j < 8; ++j)
-        outptr[j * 8 + i] = temp_out[j];
+        out[j * 8 + i] = temp_out[j];
     }
 
     // Rows
@@ -1103,7 +1101,6 @@ void vp9_fht16x16_c(const int16_t *input, tran_low_t *output,
     vp9_fdct16x16_c(input, output, stride);
   } else {
     tran_low_t out[256];
-    tran_low_t *outptr = &out[0];
     int i, j;
     tran_low_t temp_in[16], temp_out[16];
     const transform_2d ht = FHT_16[tx_type];
@@ -1114,7 +1111,7 @@ void vp9_fht16x16_c(const int16_t *input, tran_low_t *output,
         temp_in[j] = input[j * stride + i] * 4;
       ht.cols(temp_in, temp_out);
       for (j = 0; j < 16; ++j)
-        outptr[j * 16 + i] = (temp_out[j] + 1 + (temp_out[j] < 0)) >> 2;
+        out[j * 16 + i] = (temp_out[j] + 1 + (temp_out[j] < 0)) >> 2;
     }
 
     // Rows
