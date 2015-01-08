@@ -605,6 +605,10 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   mbmi->interp_filter = cm->interp_filter == SWITCHABLE ?
                         EIGHTTAP : cm->interp_filter;
 
+#if CONFIG_VP9_TEMPORAL_DENOISING
+  vp9_denoiser_reset_frame_stats(ctx);
+#endif
+
   for (ref_frame = LAST_FRAME; ref_frame <= GOLDEN_FRAME; ++ref_frame) {
     x->pred_mv_sad[ref_frame] = INT_MAX;
     frame_mv[NEWMV][ref_frame].as_int = INVALID_MV;
