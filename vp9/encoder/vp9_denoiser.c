@@ -49,9 +49,7 @@ static int noise_motion_thresh(BLOCK_SIZE bs, int increase_denoising) {
 }
 
 static unsigned int sse_thresh(BLOCK_SIZE bs, int increase_denoising) {
-  return (4 << b_width_log2_lookup[bs]) *
-         (4 << b_height_log2_lookup[bs]) *
-         (increase_denoising ? 60 : 40);
+  return (1 << num_pels_log2_lookup[bs]) * (increase_denoising ? 60 : 40);
 }
 
 static int sse_diff_thresh(BLOCK_SIZE bs, int increase_denoising,
@@ -60,19 +58,16 @@ static int sse_diff_thresh(BLOCK_SIZE bs, int increase_denoising,
       noise_motion_thresh(bs, increase_denoising)) {
     return 0;
   } else {
-    return (4 << b_width_log2_lookup[bs]) *
-           (4 << b_height_log2_lookup[bs]) * 20;
+    return (1 << num_pels_log2_lookup[bs]) * 20;
   }
 }
 
 int total_adj_strong_thresh(BLOCK_SIZE bs, int increase_denoising) {
-  return (4 << b_width_log2_lookup[bs]) *
-         (4 << b_height_log2_lookup[bs]) * (increase_denoising ? 3 : 2);
+  return (1 << num_pels_log2_lookup[bs]) * (increase_denoising ? 3 : 2);
 }
 
 static int total_adj_weak_thresh(BLOCK_SIZE bs, int increase_denoising) {
-  return (4 << b_width_log2_lookup[bs]) *
-         (4 << b_height_log2_lookup[bs]) * (increase_denoising ? 3 : 2);
+  return (1 << num_pels_log2_lookup[bs]) * (increase_denoising ? 3 : 2);
 }
 
 // TODO(jackychen): If increase_denoising is enabled in the future,
