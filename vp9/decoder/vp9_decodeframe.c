@@ -727,6 +727,8 @@ static void setup_frame_size(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
   }
   cm->frame_bufs[cm->new_fb_idx].buf.subsampling_x = cm->subsampling_x;
   cm->frame_bufs[cm->new_fb_idx].buf.subsampling_y = cm->subsampling_y;
+  cm->frame_bufs[cm->new_fb_idx].buf.color_space =
+      (vpx_color_space_t)cm->color_space;
   cm->frame_bufs[cm->new_fb_idx].buf.bit_depth = (unsigned int)cm->bit_depth;
 }
 
