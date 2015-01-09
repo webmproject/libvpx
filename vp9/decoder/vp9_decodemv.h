@@ -26,10 +26,6 @@ void vp9_read_mode_info(VP9_COMMON *cm, MACROBLOCKD *xd,
 #endif
                         int mi_row, int mi_col, vp9_reader *r);
 
-#if CONFIG_SUPERTX
-int read_skip(VP9_COMMON *cm, const MACROBLOCKD *xd,
-              int segment_id, vp9_reader *r);
-#endif
 #ifdef __cplusplus
 }  // extern "C"
 #endif

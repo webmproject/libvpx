@@ -180,11 +180,7 @@ static int read_inter_segment_id(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   return segment_id;
 }
 
-#if CONFIG_SUPERTX
-int read_skip(VP9_COMMON *cm, const MACROBLOCKD *xd,
-#else
 static int read_skip(VP9_COMMON *cm, const MACROBLOCKD *xd,
-#endif
                      int segment_id, vp9_reader *r) {
   if (vp9_segfeature_active(&cm->seg, segment_id, SEG_LVL_SKIP)) {
     return 1;
@@ -792,10 +788,10 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
   }
 #endif  // CONFIG_COPY_MODE
 
+  mbmi->segment_id = read_inter_segment_id(cm, xd, mi_row, mi_col, r);
 #if CONFIG_SUPERTX
   if (!supertx_enabled) {
 #endif
-    mbmi->segment_id = read_inter_segment_id(cm, xd, mi_row, mi_col, r);
     mbmi->skip = read_skip(cm, xd, mbmi->segment_id, r);
 #if CONFIG_COPY_MODE
     if (mbmi->copy_mode == NOREF)
@@ -821,7 +817,6 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
 #if CONFIG_SUPERTX
   } else {
     const int ctx = vp9_get_intra_inter_context(xd);
-    mbmi->segment_id = 0;
     inter_block = 1;
     if (!cm->frame_parallel_decoding_mode)
 #if CONFIG_COPY_MODE
@@ -833,11 +828,7 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
 
 #if CONFIG_TX_SKIP
   if (mbmi->sb_type >= BLOCK_8X8) {
-#if CONFIG_SUPERTX
-    int q_idx = cm->base_qindex;
-#else
     int q_idx = vp9_get_qindex(&cm->seg, mbmi->segment_id, cm->base_qindex);
-#endif  // CONFIG_SUPERTX
     int try_tx_skip = inter_block ? q_idx <= TX_SKIP_Q_THRESH_INTER :
                                     q_idx <= TX_SKIP_Q_THRESH_INTRA;
 #if CONFIG_SUPERTX

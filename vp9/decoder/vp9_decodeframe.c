@@ -967,10 +967,21 @@ static PARTITION_TYPE read_partition(VP9_COMMON *cm, MACROBLOCKD *xd, int hbs,
   return p;
 }
 
+#if CONFIG_SUPERTX
+static int read_skip_without_seg(VP9_COMMON *cm, const MACROBLOCKD *xd,
+                                 vp9_reader *r) {
+  const int ctx = vp9_get_skip_context(xd);
+  const int skip = vp9_read(r, cm->fc.skip_probs[ctx]);
+  if (!cm->frame_parallel_decoding_mode)
+    ++cm->counts.skip[ctx][skip];
+  return skip;
+}
+#endif  // CONFIG_SUPERTX
+
 static void decode_partition(VP9_COMMON *const cm, MACROBLOCKD *const xd,
                              const TileInfo *const tile,
 #if CONFIG_SUPERTX
-                             int read_token, int supertx_enabled,
+                             int supertx_enabled,
 #endif
                              int mi_row, int mi_col,
                              vp9_reader* r, BLOCK_SIZE bsize) {
@@ -978,12 +989,13 @@ static void decode_partition(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   PARTITION_TYPE partition;
   BLOCK_SIZE subsize, uv_subsize;
 #if CONFIG_SUPERTX
+  const int read_token = !supertx_enabled;
   int skip = 0;
   TX_SIZE supertx_size = b_width_log2_lookup[bsize];
 #if CONFIG_EXT_TX
   int txfm = NORM;
 #endif
-#endif
+#endif  // CONFIG_SUPERTX
 
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return;
@@ -1013,8 +1025,8 @@ static void decode_partition(VP9_COMMON *const cm, MACROBLOCKD *const xd,
                    mi_col, num_8x8_blocks_wide_lookup[bsize],
                    cm->mi_rows, cm->mi_cols);
     set_skip_context(xd, mi_row, mi_col);
-    // Here we assume mbmi->segment_id = 0
-    skip = read_skip(cm, xd, 0, r);
+    // Here skip is read without using any segment level feature
+    skip = read_skip_without_seg(cm, xd, r);
     if (skip)
       reset_skip_context(xd, bsize);
 #if CONFIG_EXT_TX
@@ -1070,13 +1082,13 @@ static void decode_partition(VP9_COMMON *const cm, MACROBLOCKD *const xd,
         break;
       case PARTITION_SPLIT:
 #if CONFIG_SUPERTX
-        decode_partition(cm, xd, tile, !supertx_enabled, supertx_enabled,
+        decode_partition(cm, xd, tile, supertx_enabled,
                          mi_row, mi_col, r, subsize);
-        decode_partition(cm, xd, tile, !supertx_enabled, supertx_enabled,
+        decode_partition(cm, xd, tile, supertx_enabled,
                          mi_row, mi_col + hbs, r, subsize);
-        decode_partition(cm, xd, tile, !supertx_enabled, supertx_enabled,
+        decode_partition(cm, xd, tile, supertx_enabled,
                          mi_row + hbs, mi_col, r, subsize);
-        decode_partition(cm, xd, tile, !supertx_enabled, supertx_enabled,
+        decode_partition(cm, xd, tile, supertx_enabled,
                          mi_row + hbs, mi_col + hbs, r, subsize);
 #else
         decode_partition(cm, xd, tile, mi_row,       mi_col,       r, subsize);
@@ -1596,7 +1608,7 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
              mi_col += MI_BLOCK_SIZE) {
           decode_partition(tile_data->cm, &tile_data->xd, &tile,
 #if CONFIG_SUPERTX
-                           1, 0,
+                           0,
 #endif
                            mi_row, mi_col,
                            &tile_data->bit_reader, BLOCK_64X64);
@@ -1653,7 +1665,7 @@ static int tile_worker_hook(TileWorkerData *const tile_data,
          mi_col += MI_BLOCK_SIZE) {
       decode_partition(tile_data->cm, &tile_data->xd, tile,
 #if CONFIG_SUPERTX
-                       1, 0,
+                       0,
 #endif
                        mi_row, mi_col, &tile_data->bit_reader, BLOCK_64X64);
     }

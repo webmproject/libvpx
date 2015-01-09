@@ -433,11 +433,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
 
 #if CONFIG_TX_SKIP
   if (bsize >= BLOCK_8X8) {
-#if CONFIG_SUPERTX
-    int q_idx = cm->base_qindex;
-#else
     int q_idx = vp9_get_qindex(seg, segment_id, cm->base_qindex);
-#endif  // CONFIG_SUPERTX
     int try_tx_skip = is_inter ? q_idx <= TX_SKIP_Q_THRESH_INTER :
                                  q_idx <= TX_SKIP_Q_THRESH_INTRA;
 #if CONFIG_SUPERTX
@@ -695,7 +691,7 @@ static void write_modes_sb(VP9_COMP *cpi,
                            const TileInfo *const tile, vp9_writer *w,
                            TOKENEXTRA **tok, const TOKENEXTRA *const tok_end,
 #if CONFIG_SUPERTX
-                           int pack_token, int supertx_enabled,
+                           int supertx_enabled,
 #endif
                            int mi_row, int mi_col, BLOCK_SIZE bsize) {
   const VP9_COMMON *const cm = &cpi->common;
@@ -706,6 +702,9 @@ static void write_modes_sb(VP9_COMP *cpi,
   PARTITION_TYPE partition;
   BLOCK_SIZE subsize;
   MODE_INFO *m = NULL;
+#if CONFIG_SUPERTX
+  const int pack_token = !supertx_enabled;
+#endif
 
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return;
@@ -784,22 +783,22 @@ static void write_modes_sb(VP9_COMP *cpi,
       case PARTITION_SPLIT:
         write_modes_sb(cpi, tile, w, tok, tok_end,
 #if CONFIG_SUPERTX
-                       !supertx_enabled, supertx_enabled,
+                       supertx_enabled,
 #endif
                        mi_row, mi_col, subsize);
         write_modes_sb(cpi, tile, w, tok, tok_end,
 #if CONFIG_SUPERTX
-                       !supertx_enabled, supertx_enabled,
+                       supertx_enabled,
 #endif
                        mi_row, mi_col + bs, subsize);
         write_modes_sb(cpi, tile, w, tok, tok_end,
 #if CONFIG_SUPERTX
-                       !supertx_enabled, supertx_enabled,
+                       supertx_enabled,
 #endif
                        mi_row + bs, mi_col, subsize);
         write_modes_sb(cpi, tile, w, tok, tok_end,
 #if CONFIG_SUPERTX
-                       !supertx_enabled, supertx_enabled,
+                       supertx_enabled,
 #endif
                        mi_row + bs, mi_col + bs, subsize);
         break;
@@ -832,7 +831,7 @@ static void write_modes(VP9_COMP *cpi,
          mi_col += MI_BLOCK_SIZE)
       write_modes_sb(cpi, tile, w, tok, tok_end,
 #if CONFIG_SUPERTX
-                     1, 0,
+                     0,
 #endif
                      mi_row, mi_col, BLOCK_64X64);
   }
