@@ -543,7 +543,7 @@ static void highbd_forw_tx16x16(MACROBLOCK *x, int plane,
     copy_flipud(src_diff, diff_stride, 16, src_diff2, 16);
     vp9_highbd_fht16x16(src_diff2, coeff, 16, ADST_ADST);
   } else {
-    vp9_fht16x16(src_diff, coeff, diff_stride, tx_type);
+    vp9_highbd_fht16x16(src_diff, coeff, diff_stride, tx_type);
   }
 }
 
