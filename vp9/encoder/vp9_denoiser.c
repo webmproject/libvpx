@@ -190,7 +190,6 @@ static uint8_t *block_start(uint8_t *framebuf, int stride,
   return framebuf + (stride * mi_row * 8) + (mi_col * 8);
 }
 
-
 static VP9_DENOISER_DECISION perform_motion_compensation(VP9_DENOISER *denoiser,
                                                          MACROBLOCK *mb,
                                                          BLOCK_SIZE bs,
@@ -205,27 +204,17 @@ static VP9_DENOISER_DECISION perform_motion_compensation(VP9_DENOISER *denoiser,
   MV_REFERENCE_FRAME frame;
   MACROBLOCKD *filter_mbd = &mb->e_mbd;
   MB_MODE_INFO *mbmi = &filter_mbd->mi[0].src_mi->mbmi;
-
   MB_MODE_INFO saved_mbmi;
   int i, j;
   struct buf_2d saved_dst[MAX_MB_PLANE];
   struct buf_2d saved_pre[MAX_MB_PLANE][2];  // 2 pre buffers
 
-  // We will restore these after motion compensation.
-  saved_mbmi = *mbmi;
-  for (i = 0; i < MAX_MB_PLANE; ++i) {
-    for (j = 0; j < 2; ++j) {
-      saved_pre[i][j] = filter_mbd->plane[i].pre[j];
-    }
-    saved_dst[i] = filter_mbd->plane[i].dst;
-  }
-
   mv_col = ctx->best_sse_mv.as_mv.col;
   mv_row = ctx->best_sse_mv.as_mv.row;
-
   *motion_magnitude = mv_row * mv_row + mv_col * mv_col;
-
   frame = ctx->best_reference_frame;
+
+  saved_mbmi = *mbmi;
 
   // If the best reference frame uses inter-prediction and there is enough of a
   // difference in sum-squared-error, use it.
@@ -245,6 +234,26 @@ static VP9_DENOISER_DECISION perform_motion_compensation(VP9_DENOISER *denoiser,
     ctx->best_sse_inter_mode = ZEROMV;
     ctx->best_sse_mv.as_int = 0;
     ctx->newmv_sse = ctx->zeromv_sse;
+  }
+
+  if (ctx->newmv_sse > sse_thresh(bs, increase_denoising)) {
+    // Restore everything to its original state
+    *mbmi = saved_mbmi;
+    return COPY_BLOCK;
+  }
+  if (mv_row * mv_row + mv_col * mv_col >
+      8 * noise_motion_thresh(bs, increase_denoising)) {
+    // Restore everything to its original state
+    *mbmi = saved_mbmi;
+    return COPY_BLOCK;
+  }
+
+  // We will restore these after motion compensation.
+  for (i = 0; i < MAX_MB_PLANE; ++i) {
+    for (j = 0; j < 2; ++j) {
+      saved_pre[i][j] = filter_mbd->plane[i].pre[j];
+    }
+    saved_dst[i] = filter_mbd->plane[i].dst;
   }
 
   // Set the pointers in the MACROBLOCKD to point to the buffers in the denoiser
@@ -299,13 +308,6 @@ static VP9_DENOISER_DECISION perform_motion_compensation(VP9_DENOISER *denoiser,
   mv_row = ctx->best_sse_mv.as_mv.row;
   mv_col = ctx->best_sse_mv.as_mv.col;
 
-  if (ctx->newmv_sse > sse_thresh(bs, increase_denoising)) {
-    return COPY_BLOCK;
-  }
-  if (mv_row * mv_row + mv_col * mv_col >
-      8 * noise_motion_thresh(bs, increase_denoising)) {
-    return COPY_BLOCK;
-  }
   return FILTER_BLOCK;
 }
 
