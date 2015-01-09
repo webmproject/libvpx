@@ -563,7 +563,7 @@ static void init_config(struct VP9_COMP *cpi, VP9EncoderConfig *oxcf) {
 #if CONFIG_VP9_HIGHBITDEPTH
   cm->use_highbitdepth = oxcf->use_highbitdepth;
 #endif
-  cm->color_space = UNKNOWN;
+  cm->color_space = oxcf->color_space;
 
   cm->width = oxcf->width;
   cm->height = oxcf->height;
