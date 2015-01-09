@@ -781,7 +781,7 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
             cm->subsampling_x,
             cm->subsampling_y))
       vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
-                         "Referenced frame has incompatible color space");
+                         "Referenced frame has incompatible color format");
   }
 
   resize_context_buffers(cm, width, height);
@@ -1324,7 +1324,7 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
       } else {
         // NOTE: The intra-only frame header does not include the specification
         // of either the color format or color sub-sampling in profile 0. VP9
-        // specifies that the default color space should be YUV 4:2:0 in this
+        // specifies that the default color format should be YUV 4:2:0 in this
         // case (normative).
         cm->color_space = BT_601;
         cm->subsampling_y = cm->subsampling_x = 1;

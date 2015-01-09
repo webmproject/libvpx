@@ -351,9 +351,9 @@ static int get_image_bps(const vpx_image_t *img) {
 }
 
 static vpx_codec_err_t set_encoder_config(
-    VP9EncoderConfig *oxcf,
-    const vpx_codec_enc_cfg_t *cfg,
-    const struct vp9_extracfg *extra_cfg) {
+  VP9EncoderConfig *oxcf,
+  const vpx_codec_enc_cfg_t *cfg,
+  const struct vp9_extracfg *extra_cfg) {
   const int is_vbr = cfg->rc_end_usage == VPX_VBR;
   oxcf->profile = cfg->g_profile;
   oxcf->max_threads = (int)cfg->g_threads;
