@@ -753,45 +753,46 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     int ref_frame_map[4];
     int sign_bias = 0;
     int dot_artifact_candidate = 0;
-    // For detecting dot artifact.
-    unsigned char* target = x->src.y_buffer;
-    unsigned char* target_u = x->block[16].src + *x->block[16].base_src;
-    unsigned char* target_v = x->block[20].src + *x->block[20].base_src;
-    int stride = x->src.y_stride;
-    int stride_uv = x->block[16].src_stride;
-#if CONFIG_TEMPORAL_DENOISING
-    if (cpi->oxcf.noise_sensitivity) {
-      int uv_denoise = (cpi->oxcf.noise_sensitivity >= 2) ? 1 : 0;
-      target =
-          cpi->denoiser.yv12_running_avg[LAST_FRAME].y_buffer + recon_yoffset;
-      stride = cpi->denoiser.yv12_running_avg[LAST_FRAME].y_stride;
-      if (uv_denoise) {
-        target_u =
-            cpi->denoiser.yv12_running_avg[LAST_FRAME].u_buffer + recon_uvoffset;
-        target_v =
-            cpi->denoiser.yv12_running_avg[LAST_FRAME].v_buffer + recon_uvoffset;
-        stride_uv = cpi->denoiser.yv12_running_avg[LAST_FRAME].uv_stride;
-      }
-    }
-#endif
-
     get_predictor_pointers(cpi, plane, recon_yoffset, recon_uvoffset);
 
-    dot_artifact_candidate =
-        check_dot_artifact_candidate(cpi, x,
-            target, stride,
-            plane[LAST_FRAME][0], mb_row, mb_col, 0);
-    // If not found in Y channel, check UV channel.
-    if (!dot_artifact_candidate) {
+    // If the current frame is using LAST as a reference, check for
+    // biasing the mode selection for dot artifacts.
+    if (cpi->ref_frame_flags & VP8_LAST_FRAME) {
+      unsigned char* target_y = x->src.y_buffer;
+      unsigned char* target_u = x->block[16].src + *x->block[16].base_src;
+      unsigned char* target_v = x->block[20].src + *x->block[20].base_src;
+      int stride = x->src.y_stride;
+      int stride_uv = x->block[16].src_stride;
+#if CONFIG_TEMPORAL_DENOISING
+      if (cpi->oxcf.noise_sensitivity) {
+        const int uv_denoise = (cpi->oxcf.noise_sensitivity >= 2) ? 1 : 0;
+        target_y =
+            cpi->denoiser.yv12_running_avg[LAST_FRAME].y_buffer + recon_yoffset;
+        stride = cpi->denoiser.yv12_running_avg[LAST_FRAME].y_stride;
+        if (uv_denoise) {
+          target_u =
+              cpi->denoiser.yv12_running_avg[LAST_FRAME].u_buffer +
+                  recon_uvoffset;
+          target_v =
+              cpi->denoiser.yv12_running_avg[LAST_FRAME].v_buffer +
+                  recon_uvoffset;
+          stride_uv = cpi->denoiser.yv12_running_avg[LAST_FRAME].uv_stride;
+        }
+      }
+#endif
       dot_artifact_candidate =
-          check_dot_artifact_candidate(cpi, x,
-              target_u, stride_uv,
-              plane[LAST_FRAME][1], mb_row, mb_col, 1);
+          check_dot_artifact_candidate(cpi, x, target_y, stride,
+              plane[LAST_FRAME][0], mb_row, mb_col, 0);
+      // If not found in Y channel, check UV channel.
       if (!dot_artifact_candidate) {
         dot_artifact_candidate =
-            check_dot_artifact_candidate(cpi, x,
-                target_v, stride_uv,
-                plane[LAST_FRAME][2], mb_row, mb_col, 2);
+            check_dot_artifact_candidate(cpi, x, target_u, stride_uv,
+                plane[LAST_FRAME][1], mb_row, mb_col, 1);
+        if (!dot_artifact_candidate) {
+          dot_artifact_candidate =
+              check_dot_artifact_candidate(cpi, x, target_v, stride_uv,
+                  plane[LAST_FRAME][2], mb_row, mb_col, 2);
+        }
       }
     }
 
