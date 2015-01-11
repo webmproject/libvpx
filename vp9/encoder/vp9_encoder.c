@@ -3436,13 +3436,13 @@ int vp9_receive_raw_frame(VP9_COMP *cpi, unsigned int frame_flags,
   if ((cm->profile == PROFILE_0 || cm->profile == PROFILE_2) &&
       (subsampling_x != 1 || subsampling_y != 1)) {
     vpx_internal_error(&cm->error, VPX_CODEC_INVALID_PARAM,
-                       "Non-4:2:0 color space requires profile 1 or 3");
+                       "Non-4:2:0 color format requires profile 1 or 3");
     res = -1;
   }
   if ((cm->profile == PROFILE_1 || cm->profile == PROFILE_3) &&
       (subsampling_x == 1 && subsampling_y == 1)) {
     vpx_internal_error(&cm->error, VPX_CODEC_INVALID_PARAM,
-                       "4:2:0 color space requires profile 0 or 2");
+                       "4:2:0 color format requires profile 0 or 2");
     res = -1;
   }
 
