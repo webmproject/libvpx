@@ -191,6 +191,15 @@ static int compare_interinfo(MB_MODE_INFO *mbmi, MB_MODE_INFO *ref_mbmi) {
     return 1;
   } else {
     int is_same;
+#if CONFIG_INTERINTRA
+    MV_REFERENCE_FRAME mbmi_ref1_backup = mbmi->ref_frame[1];
+    MV_REFERENCE_FRAME refmbmi_ref1_backup = ref_mbmi->ref_frame[1];
+
+    if (mbmi->ref_frame[1] == INTRA_FRAME)
+      mbmi->ref_frame[1] = NONE;
+    if (ref_mbmi->ref_frame[1] == INTRA_FRAME)
+      ref_mbmi->ref_frame[1] = NONE;
+#endif  // CONFIG_INTERINTRA
     if (mbmi->ref_frame[0] == ref_mbmi->ref_frame[0] &&
         mbmi->ref_frame[1] == ref_mbmi->ref_frame[1]) {
       if (mbmi->ref_frame[1] > INTRA_FRAME)
@@ -203,6 +212,10 @@ static int compare_interinfo(MB_MODE_INFO *mbmi, MB_MODE_INFO *ref_mbmi) {
     } else {
       is_same = 0;
     }
+#if CONFIG_INTERINTRA
+    mbmi->ref_frame[1] = mbmi_ref1_backup;
+    ref_mbmi->ref_frame[1] = refmbmi_ref1_backup;
+#endif  // CONFIG_INTERINTRA
 
     return is_same;
   }

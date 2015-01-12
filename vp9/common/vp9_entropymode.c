@@ -13,10 +13,17 @@
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_seg_common.h"
 
+#if CONFIG_INTERINTRA
+static const vp9_prob default_interintra_prob[BLOCK_SIZES] = {
+  192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192
+};
+#endif  // CONFIG_INTERINTRA
+
 #if CONFIG_TX_SKIP
 static const vp9_prob default_y_tx_skip_prob[2] = {190, 210};
 static const vp9_prob default_uv_tx_skip_prob[2] = {250, 160};
-#endif
+#endif  // CONFIG_TX_SKIP
+
 const vp9_prob vp9_kf_y_mode_prob[INTRA_MODES][INTRA_MODES][INTRA_MODES - 1] = {
   {  // above = dc
     { 137,  30,  42, 148, 151, 207,  70,  52,  91 },  // left = dc
@@ -456,6 +463,9 @@ void vp9_init_mode_probs(FRAME_CONTEXT *fc) {
   vp9_copy(fc->copy_mode_probs_l2, default_copy_mode_probs_l2);
   vp9_copy(fc->copy_mode_probs, default_copy_mode_probs);
 #endif  // CONFIG_COPY_MODE
+#if CONFIG_INTERINTRA
+  vp9_copy(fc->interintra_prob, default_interintra_prob);
+#endif  // CONFIG_INTERINTRA
 }
 
 const vp9_tree_index vp9_switchable_interp_tree
@@ -598,6 +608,13 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
                 counts->copy_mode[i], fc->copy_mode_probs[i]);
   }
 #endif  // CONFIG_COPY_MODE
+#if CONFIG_INTERINTRA
+  for (i = 0; i < BLOCK_SIZES; ++i) {
+    if (is_interintra_allowed(i))
+      fc->interintra_prob[i] = adapt_prob(pre_fc->interintra_prob[i],
+                                          counts->interintra[i]);
+  }
+#endif  // CONFIG_INTERINTRA
 }
 
 static void set_default_lf_deltas(struct loopfilter *lf) {

@@ -28,6 +28,26 @@ void vp9_predict_intra_block(const MACROBLOCKD *xd, int block_idx, int bwl_in,
                              const uint8_t *ref, int ref_stride,
                              uint8_t *dst, int dst_stride,
                              int aoff, int loff, int plane);
+
+#if CONFIG_INTERINTRA
+void vp9_build_interintra_predictors(MACROBLOCKD *xd,
+                                     uint8_t *ypred,
+                                     uint8_t *upred,
+                                     uint8_t *vpred,
+                                     int ystride,
+                                     int ustride,
+                                     int vstride,
+                                     BLOCK_SIZE bsize);
+void vp9_build_interintra_predictors_sby(MACROBLOCKD *xd,
+                                         uint8_t *ypred,
+                                         int ystride,
+                                         BLOCK_SIZE bsize);
+void vp9_build_interintra_predictors_sbuv(MACROBLOCKD *xd,
+                                          uint8_t *upred,
+                                          uint8_t *vpred,
+                                          int ustride, int vstride,
+                                          BLOCK_SIZE bsize);
+#endif  // CONFIG_INTERINTRA
 #ifdef __cplusplus
 }  // extern "C"
 #endif

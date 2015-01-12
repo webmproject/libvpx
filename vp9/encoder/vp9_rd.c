@@ -609,6 +609,24 @@ void vp9_set_rd_speed_thresholds(VP9_COMP *cpi) {
   rd->thresh_mult[THR_D153_PRED] += 2500;
   rd->thresh_mult[THR_D207_PRED] += 2500;
   rd->thresh_mult[THR_D63_PRED] += 2500;
+
+#if CONFIG_INTERINTRA
+  rd->thresh_mult[THR_COMP_INTERINTRA_ZEROL   ] += 1500;
+  rd->thresh_mult[THR_COMP_INTERINTRA_ZEROG   ] += 1500;
+  rd->thresh_mult[THR_COMP_INTERINTRA_ZEROA   ] += 1500;
+
+  rd->thresh_mult[THR_COMP_INTERINTRA_NEARESTL] += 1500;
+  rd->thresh_mult[THR_COMP_INTERINTRA_NEARESTG] += 1500;
+  rd->thresh_mult[THR_COMP_INTERINTRA_NEARESTA] += 1500;
+
+  rd->thresh_mult[THR_COMP_INTERINTRA_NEARL   ] += 1500;
+  rd->thresh_mult[THR_COMP_INTERINTRA_NEARG   ] += 1500;
+  rd->thresh_mult[THR_COMP_INTERINTRA_NEARA   ] += 1500;
+
+  rd->thresh_mult[THR_COMP_INTERINTRA_NEWL    ] += 2000;
+  rd->thresh_mult[THR_COMP_INTERINTRA_NEWG    ] += 2000;
+  rd->thresh_mult[THR_COMP_INTERINTRA_NEWA    ] += 2000;
+#endif
 }
 
 void vp9_set_rd_speed_thresholds_sub8x8(VP9_COMP *cpi) {
