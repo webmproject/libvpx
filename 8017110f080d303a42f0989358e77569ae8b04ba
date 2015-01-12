@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//KF0\u003d",
+        "filename": "test/error_resilience_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-01-12T19:43:47Z",
+      "side": 1,
+      "message": "This comment needs updating to explain the role of pattern_switch.",
+      "revId": "8017110f080d303a42f0989358e77569ae8b04ba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//KF8\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 761,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-01-12T19:43:47Z",
+      "side": 1,
+      "message": "target_y for consistency.",
+      "revId": "8017110f080d303a42f0989358e77569ae8b04ba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//KF4\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 768,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-01-12T19:43:47Z",
+      "side": 1,
+      "message": "const",
+      "revId": "8017110f080d303a42f0989358e77569ae8b04ba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
