@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//KEs\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-01-12T21:44:11Z",
+      "side": 1,
+      "message": "It is preferred to have commit message formatted with: \na short one sentence summary as title, and more details after a blank line after the title.\n\nSome example on this subject: https://github.com/erlang/otp/wiki/Writing-good-commit-messages",
+      "revId": "919692d6c5952395718df149423c4511f99bfbdd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
