@@ -1255,14 +1255,8 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
         break;
       case TX_16X16:
 #if CONFIG_EXT_TX
-        tx_type = get_tx_type(plane, xd);
-        if (tx_type == DCT_DCT) {
-          vp9_highbd_idct16x16_add(dqcoeff, dst, pd->dst.stride,
-                                   p->eobs[block], xd->bd);
-        } else {
-          vp9_highbd_iht16x16_add(tx_type, dqcoeff, dst, pd->dst.stride,
-                                  p->eobs[block], xd->bd);
-        }
+        vp9_highbd_iht16x16_add(tx_type, dqcoeff, dst, pd->dst.stride,
+                                p->eobs[block], xd->bd);
 #else
         vp9_highbd_idct16x16_add(dqcoeff, dst, pd->dst.stride,
                                  p->eobs[block], xd->bd);
@@ -1270,14 +1264,8 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
         break;
       case TX_8X8:
 #if CONFIG_EXT_TX
-        tx_type = get_tx_type(plane, xd);
-        if (tx_type == DCT_DCT) {
-          vp9_highbd_idct8x8_add(dqcoeff, dst, pd->dst.stride,
-                                 p->eobs[block], xd->bd);
-        } else {
-          vp9_highbd_iht8x8_add(tx_type, dqcoeff, dst, pd->dst.stride,
-                                p->eobs[block], xd->bd);
-        }
+        vp9_highbd_iht8x8_add(tx_type, dqcoeff, dst, pd->dst.stride,
+                              p->eobs[block], xd->bd);
 #else
         vp9_highbd_idct8x8_add(dqcoeff, dst, pd->dst.stride,
                                p->eobs[block], xd->bd);
@@ -1287,7 +1275,7 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
 #if CONFIG_EXT_TX
         tx_type = get_tx_type_4x4(plane, xd, block);
         if (tx_type == DCT_DCT) {
-          // this is like vp9_short_idct4x4 but has a special case around eob<=1
+          // This is like vp9_short_idct4x4 but has a special case around eob<=1
           // which is significant (not just an optimization) for the lossless
           // case.
           x->highbd_itxm_add(dqcoeff, dst, pd->dst.stride,
@@ -1297,7 +1285,7 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
                                 p->eobs[block], xd->bd);
         }
 #else
-        // this is like vp9_short_idct4x4 but has a special case around eob<=1
+        // This is like vp9_short_idct4x4 but has a special case around eob<=1
         // which is significant (not just an optimization) for the lossless
         // case.
         x->highbd_itxm_add(dqcoeff, dst, pd->dst.stride,
@@ -1322,26 +1310,14 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
       break;
     case TX_16X16:
 #if CONFIG_EXT_TX
-      tx_type = get_tx_type(plane, xd);
-      if (tx_type == DCT_DCT) {
-        vp9_idct16x16_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
-      } else {
-        vp9_iht16x16_add(tx_type, dqcoeff, dst, pd->dst.stride,
-                         p->eobs[block]);
-      }
+      vp9_iht16x16_add(tx_type, dqcoeff, dst, pd->dst.stride, p->eobs[block]);
 #else
       vp9_idct16x16_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
 #endif
       break;
     case TX_8X8:
 #if CONFIG_EXT_TX
-      tx_type = get_tx_type(plane, xd);
-      if (tx_type == DCT_DCT) {
-        vp9_idct8x8_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
-      } else {
-        vp9_iht8x8_add(tx_type, dqcoeff, dst, pd->dst.stride,
-                       p->eobs[block]);
-      }
+      vp9_iht8x8_add(tx_type, dqcoeff, dst, pd->dst.stride, p->eobs[block]);
 #else
       vp9_idct8x8_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
 #endif
@@ -1350,18 +1326,16 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
 #if CONFIG_EXT_TX
       tx_type = get_tx_type_4x4(plane, xd, block);
       if (tx_type == DCT_DCT) {
-        // this is like vp9_short_idct4x4 but has a special case around eob<=1
+        // This is like vp9_short_idct4x4 but has a special case around eob<=1
         // which is significant (not just an optimization) for the lossless
         // case.
         x->itxm_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
       } else {
-        vp9_iht4x4_add(tx_type, dqcoeff, dst, pd->dst.stride,
-                       p->eobs[block]);
+        vp9_iht4x4_add(tx_type, dqcoeff, dst, pd->dst.stride, p->eobs[block]);
       }
 #else
-      // this is like vp9_short_idct4x4 but has a special case around eob<=1
-      // which is significant (not just an optimization) for the lossless
-      // case.
+      // This is like vp9_short_idct4x4 but has a special case around eob<=1
+      // which is significant (not just an optimization) for the lossless case.
       x->itxm_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
 #endif
       break;
