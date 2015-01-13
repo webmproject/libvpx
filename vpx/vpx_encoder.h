@@ -220,6 +220,22 @@ extern "C" {
   } vpx_codec_cx_pkt_t; /**< alias for struct vpx_codec_cx_pkt */
 
 
+  /*!\brief Encoder return output buffer callback
+   *
+   * This callback function, when registered, returns with packets when each
+   * spatial layer is encoded.
+   */
+  // putting the definitions here for now. (agrange: find if there
+  // is a better place for this)
+  typedef void (* vpx_codec_enc_output_cx_pkt_cb_fn_t)(vpx_codec_cx_pkt_t *pkt,
+                                                       void *user_data);
+
+  /*!\brief Callback function pointer / user data pair storage */
+  typedef struct vpx_codec_enc_output_cx_cb_pair {
+    vpx_codec_enc_output_cx_pkt_cb_fn_t output_cx_pkt; /**< Callback function */
+    void                            *user_priv; /**< Pointer to private data */
+  } vpx_codec_priv_output_cx_pkt_cb_pair_t;
+
   /*!\brief Rational Number
    *
    * This structure holds a fractional value.
@@ -721,10 +737,10 @@ extern "C" {
    *
    */
   typedef struct vpx_svc_parameters {
-    int max_quantizers[VPX_SS_MAX_LAYERS];
-    int min_quantizers[VPX_SS_MAX_LAYERS];
-    int scaling_factor_num[VPX_SS_MAX_LAYERS];
-    int scaling_factor_den[VPX_SS_MAX_LAYERS];
+    int max_quantizers[VPX_SS_MAX_LAYERS]; /**< Max Q for each layer */
+    int min_quantizers[VPX_SS_MAX_LAYERS]; /**< Min Q for each layer */
+    int scaling_factor_num[VPX_SS_MAX_LAYERS]; /**< Scaling factor-numerator*/
+    int scaling_factor_den[VPX_SS_MAX_LAYERS]; /**< Scaling factor-denominator*/
   } vpx_svc_extra_cfg_t;
 
 
