@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//J84\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_variance_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-01-13T20:53:30Z",
+      "side": 0,
+      "message": "nit: #include \"./vpx_config.h\" for the INLINE definition. Probably pulled in through one of the other headers now.",
+      "revId": "0337bae9b3cdb2869073911b0efc2b4f3cfcf595",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}

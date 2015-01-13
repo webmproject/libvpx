@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//J80\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_variance_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-01-13T20:53:30Z",
+      "side": 1,
+      "message": "nit: use the same style as the existing code: / (kWidth32 * kHeight64)",
+      "revId": "7fcc2a19fa36b70770554994e6a3b21fbb39bde9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
