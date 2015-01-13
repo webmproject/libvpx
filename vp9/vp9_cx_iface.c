@@ -83,6 +83,7 @@ struct vpx_codec_alg_priv {
   size_t                  pending_frame_sizes[8];
   size_t                  pending_frame_magnitude;
   vpx_image_t             preview_img;
+  vpx_enc_frame_flags_t   next_frame_flags;
   vp8_postproc_cfg_t      preview_ppcfg;
   vpx_codec_pkt_list_decl(256) pkt_list;
   unsigned int                 fixed_kf_cntr;
@@ -524,9 +525,17 @@ static vpx_codec_err_t set_encoder_config(
 static vpx_codec_err_t encoder_set_config(vpx_codec_alg_priv_t *ctx,
                                           const vpx_codec_enc_cfg_t  *cfg) {
   vpx_codec_err_t res;
+  int force_key = 0;
 
-  if (cfg->g_w != ctx->cfg.g_w || cfg->g_h != ctx->cfg.g_h)
-    ERROR("Cannot change width or height after initialization");
+  if (cfg->g_w != ctx->cfg.g_w || cfg->g_h != ctx->cfg.g_h) {
+    if (cfg->g_lag_in_frames > 1 || cfg->g_pass != VPX_RC_ONE_PASS)
+      ERROR("Cannot change width or height after initialization");
+    if ((ctx->cpi->initial_width && (int)cfg->g_w > ctx->cpi->initial_width) ||
+        (ctx->cpi->initial_height && (int)cfg->g_h > ctx->cpi->initial_height))
+      ERROR("Cannot increase width or height larger than their initial values");
+    if (!valid_ref_frame_size(ctx->cfg.g_w, ctx->cfg.g_h, cfg->g_w, cfg->g_h))
+      force_key = 1;
+  }
 
   // Prevent increasing lag_in_frames. This check is stricter than it needs
   // to be -- the limit is not increasing past the first lag_in_frames
@@ -542,6 +551,9 @@ static vpx_codec_err_t encoder_set_config(vpx_codec_alg_priv_t *ctx,
     set_encoder_config(&ctx->oxcf, &ctx->cfg, &ctx->extra_cfg);
     vp9_change_config(ctx->cpi, &ctx->oxcf);
   }
+
+  if (force_key)
+    ctx->next_frame_flags |= VPX_EFLAG_FORCE_KF;
 
   return res;
 }
@@ -955,10 +967,11 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
 
       // Store the original flags in to the frame buffer. Will extract the
       // key frame flag when we actually encode this frame.
-      if (vp9_receive_raw_frame(cpi, flags,
+      if (vp9_receive_raw_frame(cpi, flags | ctx->next_frame_flags,
                                 &sd, dst_time_stamp, dst_end_time_stamp)) {
         res = update_error_state(ctx, &cpi->common.error);
       }
+      ctx->next_frame_flags = 0;
     }
 
     cx_data = ctx->cx_data;
