@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//J9U\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-01-13T20:36:19Z",
+      "side": 1,
+      "message": "Clarify purpose of VP9_INVERT_TILE_DECODE_ORDER",
+      "revId": "94762ed0b74385dccfe03db24c08810a69bcc108",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
