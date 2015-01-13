@@ -1055,7 +1055,7 @@ static void write_bitdepth_colorspace_sampling(
     vp9_wb_write_bit(wb, cm->bit_depth == VPX_BITS_10 ? 0 : 1);
   }
   vp9_wb_write_literal(wb, cm->color_space, 3);
-  if (cm->color_space != SRGB) {
+  if (cm->color_space != VPX_CS_SRGB) {
     vp9_wb_write_bit(wb, 0);  // 0: [16, 235] (i.e. xvYCC), 1: [0, 255]
     if (cm->profile == PROFILE_1 || cm->profile == PROFILE_3) {
       assert(cm->subsampling_x != 1 || cm->subsampling_y != 1);
