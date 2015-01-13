@@ -279,6 +279,7 @@ static void get_layer_resolution(const int width_org, const int height_org,
 int vp9_svc_start_frame(VP9_COMP *const cpi) {
   int width = 0, height = 0;
   LAYER_CONTEXT *lc;
+  struct lookahead_entry *buf;
   int count = 1 << (cpi->svc.number_temporal_layers - 1);
 
   cpi->svc.spatial_layer_id = cpi->svc.spatial_layer_to_encode;
@@ -339,8 +340,11 @@ int vp9_svc_start_frame(VP9_COMP *const cpi) {
   // since its previous frame could be changed during decoding time. The idea is
   // we put a empty invisible frame in front of them, then we will not use
   // prev_mi when encoding these frames.
+
+  buf = vp9_lookahead_peek(cpi->lookahead, 0);
   if (cpi->oxcf.error_resilient_mode == 0 && cpi->oxcf.pass == 2 &&
-      cpi->svc.encode_empty_frame_state == NEED_TO_ENCODE) {
+      cpi->svc.encode_empty_frame_state == NEED_TO_ENCODE &&
+      lc->rc.frames_to_key != 0 && !(buf->flags & VPX_EFLAG_FORCE_KF)) {
     if ((cpi->svc.number_temporal_layers > 1 &&
          cpi->svc.temporal_layer_id < cpi->svc.number_temporal_layers - 1) ||
         (cpi->svc.number_spatial_layers > 1 &&
