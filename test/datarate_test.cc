@@ -38,6 +38,8 @@ class DatarateTestLarge : public ::libvpx_test::EncoderTest,
     first_drop_ = 0;
     bits_total_ = 0;
     duration_ = 0.0;
+    denoiser_offon_test_ = 0;
+    denoiser_offon_period_ = -1;
   }
 
   virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
@@ -45,6 +47,17 @@ class DatarateTestLarge : public ::libvpx_test::EncoderTest,
     if (video->frame() == 1) {
       encoder->Control(VP8E_SET_NOISE_SENSITIVITY, denoiser_on_);
     }
+
+    if (denoiser_offon_test_) {
+      ASSERT_GT(denoiser_offon_period_, 0)
+          << "denoiser_offon_period_ is not positive.";
+      if ((video->frame() + 1) % denoiser_offon_period_ == 0) {
+        // Flip denoiser_on_ periodically
+        denoiser_on_ ^= 1;
+      }
+      encoder->Control(VP8E_SET_NOISE_SENSITIVITY, denoiser_on_);
+    }
+
     const vpx_rational_t tb = video->timebase();
     timebase_ = static_cast<double>(tb.num) / tb.den;
     duration_ = 0;
@@ -124,6 +137,8 @@ class DatarateTestLarge : public ::libvpx_test::EncoderTest,
   double effective_datarate_;
   size_t bits_in_last_frame_;
   int denoiser_on_;
+  int denoiser_offon_test_;
+  int denoiser_offon_period_;
 };
 
 #if CONFIG_TEMPORAL_DENOISING
@@ -154,6 +169,29 @@ TEST_P(DatarateTestLarge, DenoiserLevels) {
     ASSERT_LE(cfg_.rc_target_bitrate, file_datarate_ * 1.3)
         << " The datarate for the file missed the target!";
   }
+}
+
+// Check basic datarate targeting, for a single bitrate, when denoiser is off
+// and on.
+TEST_P(DatarateTestLarge, DenoiserOffOn) {
+  cfg_.rc_buf_initial_sz = 500;
+  cfg_.rc_dropframe_thresh = 1;
+  cfg_.rc_max_quantizer = 56;
+  cfg_.rc_end_usage = VPX_CBR;
+  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+                                       30, 1, 0, 299);
+  cfg_.rc_target_bitrate = 300;
+  ResetModel();
+  // The denoiser is off by default.
+  denoiser_on_ = 0;
+  // Set the offon test flag.
+  denoiser_offon_test_ = 1;
+  denoiser_offon_period_ = 100;
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+  ASSERT_GE(cfg_.rc_target_bitrate, effective_datarate_ * 0.95)
+      << " The datarate for the file exceeds the target!";
+  ASSERT_LE(cfg_.rc_target_bitrate, file_datarate_ * 1.3)
+      << " The datarate for the file missed the target!";
 }
 #endif  // CONFIG_TEMPORAL_DENOISING
 
@@ -669,7 +707,7 @@ TEST_P(DatarateTestVP9Large, DenoiserLevels) {
 
 // Check basic datarate targeting, for a single bitrate, when denoiser is off
 // and on.
-TEST_P(DatarateTestVP9Large, DenoiserOffon) {
+TEST_P(DatarateTestVP9Large, DenoiserOffOn) {
   cfg_.rc_buf_initial_sz = 500;
   cfg_.rc_buf_optimal_sz = 500;
   cfg_.rc_buf_sz = 1000;
