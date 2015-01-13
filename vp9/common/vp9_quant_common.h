@@ -23,7 +23,7 @@ extern "C" {
 #define QINDEX_RANGE (MAXQ - MINQ + 1)
 #define QINDEX_BITS 8
 #if CONFIG_TX_SKIP
-#define TX_SKIP_Q_THRESH_INTER -1
+#define TX_SKIP_Q_THRESH_INTER 0
 #define TX_SKIP_Q_THRESH_INTRA 255
 #define TX_SKIP_SHIFT_THRESH 0
 #endif  // CONFIG_TX_SKIP
