@@ -971,19 +971,6 @@ static void update_state_supertx(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
         const int ctx = vp9_get_pred_context_switchable_interp(xd);
         ++cm->counts.switchable_interp[ctx][mbmi->interp_filter];
       }
-#if CONFIG_INTERINTRA
-      if (is_interintra_allowed(bsize) &&
-          is_inter_mode(mbmi->mode) &&
-          (mbmi->ref_frame[1] <= INTRA_FRAME)) {
-        if (mbmi->ref_frame[1] == INTRA_FRAME) {
-          assert(0);
-          ++cm->counts.y_mode[size_group_lookup[bsize]][mbmi->interintra_mode];
-          ++cm->counts.interintra[bsize][1];
-        } else {
-          ++cm->counts.interintra[bsize][0];
-        }
-      }
-#endif  // CONFIG_INTERINTRA
     }
 
     rd_opt->comp_pred_diff[SINGLE_REFERENCE] += ctx->single_pred_diff;

@@ -528,7 +528,10 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
     if (cpi->common.reference_mode != COMPOUND_REFERENCE &&
         is_interintra_allowed(bsize) &&
         is_inter_mode(mode) &&
-        (mbmi->ref_frame[1] <= INTRA_FRAME)) {
+#if CONFIG_SUPERTX
+        !supertx_enabled &&
+#endif
+        mbmi->ref_frame[1] <= INTRA_FRAME) {
         vp9_write(w, mbmi->ref_frame[1] == INTRA_FRAME,
                   cm->fc.interintra_prob[bsize]);
         if (mbmi->ref_frame[1] == INTRA_FRAME) {
