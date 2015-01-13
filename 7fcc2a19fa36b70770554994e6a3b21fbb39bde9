@@ -16,6 +16,24 @@
       "revId": "7fcc2a19fa36b70770554994e6a3b21fbb39bde9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//J7o\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_variance_neon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2015-01-13T23:09:21Z",
+      "side": 1,
+      "message": "I\u0027m going to switch the other functions to a shift in a follow up CL. Without a shift 4.9 adds 8 instructions.",
+      "parentUuid": "AAAAdn//J80\u003d",
+      "revId": "7fcc2a19fa36b70770554994e6a3b21fbb39bde9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
