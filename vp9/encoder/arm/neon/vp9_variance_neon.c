@@ -10,6 +10,7 @@
 
 #include <arm_neon.h>
 #include "./vp9_rtcd.h"
+#include "./vpx_config.h"
 
 #include "vpx_ports/mem.h"
 #include "vpx/vpx_integer.h"
@@ -28,6 +29,8 @@ enum { kHeight16PlusOne = 17 };
 enum { kWidth32 = 32 };
 enum { kHeight32 = 32 };
 enum { kHeight32PlusOne = 33 };
+enum { kWidth64 = 64 };
+enum { kHeight64 = 64 };
 enum { kPixelStepOne = 1 };
 enum { kAlign16 = 16 };
 
@@ -206,6 +209,30 @@ unsigned int vp9_variance32x32_neon(const uint8_t *a, int a_stride,
   int sum;
   variance_neon_w8(a, a_stride, b, b_stride, kWidth32, kHeight32, sse, &sum);
   return *sse - (((int64_t)sum * sum) / (kWidth32 * kHeight32));
+}
+
+unsigned int vp9_variance32x64_neon(const uint8_t *a, int a_stride,
+                                    const uint8_t *b, int b_stride,
+                                    unsigned int *sse) {
+  int sum;
+  variance_neon_w8(a, a_stride, b, b_stride, kWidth32, kHeight64, sse, &sum);
+  return *sse - (((int64_t)sum * sum) >> 11);  // >> 11 = / 32 * 64
+}
+
+unsigned int vp9_variance64x32_neon(const uint8_t *a, int a_stride,
+                                    const uint8_t *b, int b_stride,
+                                    unsigned int *sse) {
+  int sum;
+  variance_neon_w8(a, a_stride, b, b_stride, kWidth64, kHeight32, sse, &sum);
+  return *sse - (((int64_t)sum * sum) >> 11);  // >> 11 = / 64 * 32
+}
+
+unsigned int vp9_variance64x64_neon(const uint8_t *a, int a_stride,
+                                    const uint8_t *b, int b_stride,
+                                    unsigned int *sse) {
+  int sum;
+  variance_neon_w8(a, a_stride, b, b_stride, kWidth64, kHeight64, sse, &sum);
+  return *sse - (((int64_t)sum * sum) >> 12);  // >> 12 = / 64 * 64
 }
 
 unsigned int vp9_sub_pixel_variance32x32_neon(const uint8_t *src,

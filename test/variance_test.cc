@@ -1914,11 +1914,17 @@ INSTANTIATE_TEST_CASE_P(
 const vp9_variance_fn_t variance8x8_neon = vp9_variance8x8_neon;
 const vp9_variance_fn_t variance16x16_neon = vp9_variance16x16_neon;
 const vp9_variance_fn_t variance32x32_neon = vp9_variance32x32_neon;
+const vp9_variance_fn_t variance32x64_neon = vp9_variance32x64_neon;
+const vp9_variance_fn_t variance64x32_neon = vp9_variance64x32_neon;
+const vp9_variance_fn_t variance64x64_neon = vp9_variance64x64_neon;
 INSTANTIATE_TEST_CASE_P(
     NEON, VP9VarianceTest,
     ::testing::Values(make_tuple(3, 3, variance8x8_neon, 0),
                       make_tuple(4, 4, variance16x16_neon, 0),
-                      make_tuple(5, 5, variance32x32_neon, 0)));
+                      make_tuple(5, 5, variance32x32_neon, 0),
+                      make_tuple(5, 6, variance32x64_neon, 0),
+                      make_tuple(6, 5, variance64x32_neon, 0),
+                      make_tuple(6, 6, variance64x64_neon, 0)));
 
 const vp9_subpixvariance_fn_t subpel_variance8x8_neon =
     vp9_sub_pixel_variance8x8_neon;
