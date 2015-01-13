@@ -257,9 +257,349 @@ static MV average_split_mvs(const struct macroblockd_plane *pd,
   return res;
 }
 
+#if CONFIG_WEDGE_PARTITION
+#define WEDGE_WEIGHT_BITS 6
+
+static int get_masked_weight(int m) {
+  #define SMOOTHER_LEN  32
+  static const uint8_t smoothfn[2 * SMOOTHER_LEN + 1] = {
+      0,  0,  0,  0,  0,  0,  0,  0,
+      0,  0,  0,  0,  0,  1,  1,  1,
+      1,  1,  2,  2,  3,  4,  5,  6,
+      8,  9, 12, 14, 17, 21, 24, 28,
+      32,
+      36, 40, 43, 47, 50, 52, 55, 56,
+      58, 59, 60, 61, 62, 62, 63, 63,
+      63, 63, 63, 64, 64, 64, 64, 64,
+      64, 64, 64, 64, 64, 64, 64, 64,
+  };
+  if (m < -SMOOTHER_LEN)
+    return 0;
+  else if (m > SMOOTHER_LEN)
+    return (1 << WEDGE_WEIGHT_BITS);
+  else
+    return smoothfn[m + SMOOTHER_LEN];
+}
+
+static int get_hard_mask(int m) {
+  return 1 << WEDGE_WEIGHT_BITS * (m > 0);
+}
+
+// Equation of line: f(x, y) = a[0]*(x - a[2]*w/4) + a[1]*(y - a[3]*h/4) = 0
+// The soft mask is obtained by computing f(x, y) and then calling
+// get_masked_weight(f(x, y)).
+static const int wedge_params_sml[1 << WEDGE_BITS_SML][4] = {
+  {-1,  2, 2, 2},
+  { 1, -2, 2, 2},
+  {-2,  1, 2, 2},
+  { 2, -1, 2, 2},
+  { 2,  1, 2, 2},
+  {-2, -1, 2, 2},
+  { 1,  2, 2, 2},
+  {-1, -2, 2, 2},
+};
+
+static const int wedge_params_med_hgtw[1 << WEDGE_BITS_MED][4] = {
+  {-1,  2, 2, 2},
+  { 1, -2, 2, 2},
+  {-2,  1, 2, 2},
+  { 2, -1, 2, 2},
+  { 2,  1, 2, 2},
+  {-2, -1, 2, 2},
+  { 1,  2, 2, 2},
+  {-1, -2, 2, 2},
+
+  {-1,  2, 2, 1},
+  { 1, -2, 2, 1},
+  {-1,  2, 2, 3},
+  { 1, -2, 2, 3},
+  { 1,  2, 2, 1},
+  {-1, -2, 2, 1},
+  { 1,  2, 2, 3},
+  {-1, -2, 2, 3},
+};
+
+static const int wedge_params_med_hltw[1 << WEDGE_BITS_MED][4] = {
+  {-1,  2, 2, 2},
+  { 1, -2, 2, 2},
+  {-2,  1, 2, 2},
+  { 2, -1, 2, 2},
+  { 2,  1, 2, 2},
+  {-2, -1, 2, 2},
+  { 1,  2, 2, 2},
+  {-1, -2, 2, 2},
+
+  {-2,  1, 1, 2},
+  { 2, -1, 1, 2},
+  {-2,  1, 3, 2},
+  { 2, -1, 3, 2},
+  { 2,  1, 1, 2},
+  {-2, -1, 1, 2},
+  { 2,  1, 3, 2},
+  {-2, -1, 3, 2},
+};
+
+static const int wedge_params_med_heqw[1 << WEDGE_BITS_MED][4] = {
+  {-1,  2, 2, 2},
+  { 1, -2, 2, 2},
+  {-2,  1, 2, 2},
+  { 2, -1, 2, 2},
+  { 2,  1, 2, 2},
+  {-2, -1, 2, 2},
+  { 1,  2, 2, 2},
+  {-1, -2, 2, 2},
+
+  { 0,  2, 0, 1},
+  { 0, -2, 0, 1},
+  { 0,  2, 0, 3},
+  { 0, -2, 0, 3},
+  { 2,  0, 1, 0},
+  {-2,  0, 1, 0},
+  { 2,  0, 3, 0},
+  {-2,  0, 3, 0},
+};
+
+static const int wedge_params_big_hgtw[1 << WEDGE_BITS_BIG][4] = {
+  {-1,  2, 2, 2},
+  { 1, -2, 2, 2},
+  {-2,  1, 2, 2},
+  { 2, -1, 2, 2},
+  { 2,  1, 2, 2},
+  {-2, -1, 2, 2},
+  { 1,  2, 2, 2},
+  {-1, -2, 2, 2},
+
+  {-1,  2, 2, 1},
+  { 1, -2, 2, 1},
+  {-1,  2, 2, 3},
+  { 1, -2, 2, 3},
+  { 1,  2, 2, 1},
+  {-1, -2, 2, 1},
+  { 1,  2, 2, 3},
+  {-1, -2, 2, 3},
+
+  {-2,  1, 1, 2},
+  { 2, -1, 1, 2},
+  {-2,  1, 3, 2},
+  { 2, -1, 3, 2},
+  { 2,  1, 1, 2},
+  {-2, -1, 1, 2},
+  { 2,  1, 3, 2},
+  {-2, -1, 3, 2},
+
+  { 0,  2, 0, 1},
+  { 0, -2, 0, 1},
+  { 0,  2, 0, 2},
+  { 0, -2, 0, 2},
+  { 0,  2, 0, 3},
+  { 0, -2, 0, 3},
+  { 2,  0, 2, 0},
+  {-2,  0, 2, 0},
+};
+
+static const int wedge_params_big_hltw[1 << WEDGE_BITS_BIG][4] = {
+  {-1,  2, 2, 2},
+  { 1, -2, 2, 2},
+  {-2,  1, 2, 2},
+  { 2, -1, 2, 2},
+  { 2,  1, 2, 2},
+  {-2, -1, 2, 2},
+  { 1,  2, 2, 2},
+  {-1, -2, 2, 2},
+
+  {-1,  2, 2, 1},
+  { 1, -2, 2, 1},
+  {-1,  2, 2, 3},
+  { 1, -2, 2, 3},
+  { 1,  2, 2, 1},
+  {-1, -2, 2, 1},
+  { 1,  2, 2, 3},
+  {-1, -2, 2, 3},
+
+  {-2,  1, 1, 2},
+  { 2, -1, 1, 2},
+  {-2,  1, 3, 2},
+  { 2, -1, 3, 2},
+  { 2,  1, 1, 2},
+  {-2, -1, 1, 2},
+  { 2,  1, 3, 2},
+  {-2, -1, 3, 2},
+
+  { 0,  2, 0, 2},
+  { 0, -2, 0, 2},
+  { 2,  0, 1, 0},
+  {-2,  0, 1, 0},
+  { 2,  0, 2, 0},
+  {-2,  0, 2, 0},
+  { 2,  0, 3, 0},
+  {-2,  0, 3, 0},
+};
+
+static const int wedge_params_big_heqw[1 << WEDGE_BITS_BIG][4] = {
+  {-1,  2, 2, 2},
+  { 1, -2, 2, 2},
+  {-2,  1, 2, 2},
+  { 2, -1, 2, 2},
+  { 2,  1, 2, 2},
+  {-2, -1, 2, 2},
+  { 1,  2, 2, 2},
+  {-1, -2, 2, 2},
+
+  {-1,  2, 2, 1},
+  { 1, -2, 2, 1},
+  {-1,  2, 2, 3},
+  { 1, -2, 2, 3},
+  { 1,  2, 2, 1},
+  {-1, -2, 2, 1},
+  { 1,  2, 2, 3},
+  {-1, -2, 2, 3},
+
+  {-2,  1, 1, 2},
+  { 2, -1, 1, 2},
+  {-2,  1, 3, 2},
+  { 2, -1, 3, 2},
+  { 2,  1, 1, 2},
+  {-2, -1, 1, 2},
+  { 2,  1, 3, 2},
+  {-2, -1, 3, 2},
+
+  { 0,  2, 0, 1},
+  { 0, -2, 0, 1},
+  { 0,  2, 0, 3},
+  { 0, -2, 0, 3},
+  { 2,  0, 1, 0},
+  {-2,  0, 1, 0},
+  { 2,  0, 3, 0},
+  {-2,  0, 3, 0},
+};
+
+static const int *get_wedge_params(int wedge_index,
+                                   BLOCK_SIZE sb_type,
+                                   int h, int w) {
+  const int *a = NULL;
+  const int wedge_bits = get_wedge_bits(sb_type);
+
+  if (wedge_index == WEDGE_NONE)
+    return NULL;
+
+  if (wedge_bits == WEDGE_BITS_SML) {
+    a = wedge_params_sml[wedge_index];
+  } else if (wedge_bits == WEDGE_BITS_MED) {
+    if (h > w)
+      a = wedge_params_med_hgtw[wedge_index];
+    else if (h < w)
+      a = wedge_params_med_hltw[wedge_index];
+    else
+      a = wedge_params_med_heqw[wedge_index];
+  } else if (wedge_bits == WEDGE_BITS_BIG) {
+    if (h > w)
+      a = wedge_params_big_hgtw[wedge_index];
+    else if (h < w)
+      a = wedge_params_big_hltw[wedge_index];
+    else
+      a = wedge_params_big_heqw[wedge_index];
+  } else {
+    assert(0);
+  }
+  return a;
+}
+
+void vp9_generate_masked_weight(int wedge_index,
+                                BLOCK_SIZE sb_type,
+                                int h, int w,
+                                uint8_t *mask, int stride) {
+  int i, j;
+  const int *a = get_wedge_params(wedge_index, sb_type, h, w);
+  if (!a) return;
+  for (i = 0; i < h; ++i)
+    for (j = 0; j < w; ++j) {
+      int x = (j - (a[2] * w) / 4);
+      int y = (i - (a[3] * h) / 4);
+      int m = a[0] * x + a[1] * y;
+      mask[i * stride + j] = get_masked_weight(m);
+    }
+}
+
+void vp9_generate_hard_mask(int wedge_index, BLOCK_SIZE sb_type,
+                            int h, int w, uint8_t *mask, int stride) {
+  int i, j;
+  const int *a = get_wedge_params(wedge_index, sb_type, h, w);
+  if (!a) return;
+  for (i = 0; i < h; ++i)
+    for (j = 0; j < w; ++j) {
+      int x = (j - (a[2] * w) / 4);
+      int y = (i - (a[3] * h) / 4);
+      int m = a[0] * x + a[1] * y;
+      mask[i * stride + j] = get_hard_mask(m);
+    }
+}
+
+static void build_masked_compound(uint8_t *dst, int dst_stride,
+                                  uint8_t *dst2, int dst2_stride,
+                                  int wedge_index, BLOCK_SIZE sb_type,
+                                  int h, int w) {
+  int i, j;
+  uint8_t mask[4096];
+  vp9_generate_masked_weight(wedge_index, sb_type, h, w, mask, 64);
+  for (i = 0; i < h; ++i)
+    for (j = 0; j < w; ++j) {
+      int m = mask[i * 64 + j];
+      dst[i * dst_stride + j] = (dst[i * dst_stride + j] * m +
+                                 dst2[i * dst2_stride + j] *
+                                 ((1 << WEDGE_WEIGHT_BITS) - m) +
+                                 (1 << (WEDGE_WEIGHT_BITS - 1))) >>
+                                 WEDGE_WEIGHT_BITS;
+    }
+}
+
+#if CONFIG_SUPERTX
+void generate_masked_weight_extend(int wedge_index, int plane,
+                                   BLOCK_SIZE sb_type, int h, int w,
+                                   int wedge_offset_x, int wedge_offset_y,
+                                   uint8_t *mask, int stride) {
+  int i, j;
+  int subh = (plane ? 2 : 4) << b_height_log2_lookup[sb_type];
+  int subw = (plane ? 2 : 4) << b_width_log2_lookup[sb_type];
+  const int *a = get_wedge_params(wedge_index, sb_type, subh, subw);
+  if (!a) return;
+  for (i = 0; i < h; ++i)
+    for (j = 0; j < w; ++j) {
+      int x = (j - (a[2] * subw) / 4 - wedge_offset_x);
+      int y = (i - (a[3] * subh) / 4 - wedge_offset_y);
+      int m = a[0] * x + a[1] * y;
+      mask[i * stride + j] = get_masked_weight(m);
+    }
+}
+
+static void build_masked_compound_extend(uint8_t *dst, int dst_stride,
+                                         uint8_t *dst2, int dst2_stride,
+                                         int plane,
+                                         int wedge_index, BLOCK_SIZE sb_type,
+                                         int wedge_offset_x, int wedge_offset_y,
+                                         int h, int w) {
+  int i, j;
+  uint8_t mask[4096];
+  generate_masked_weight_extend(wedge_index, plane, sb_type, h, w,
+                                wedge_offset_x, wedge_offset_y, mask, 64);
+  for (i = 0; i < h; ++i)
+    for (j = 0; j < w; ++j) {
+      int m = mask[i * 64 + j];
+      dst[i * dst_stride + j] = (dst[i * dst_stride + j] * m +
+                                 dst2[i * dst2_stride + j] *
+                                 ((1 << WEDGE_WEIGHT_BITS) - m) +
+                                 (1 << (WEDGE_WEIGHT_BITS - 1))) >>
+                                 WEDGE_WEIGHT_BITS;
+    }
+}
+#endif  // CONFIG_SUPERTX
+#endif  // CONFIG_WEDGE_PARTITION
+
 static void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
                                    int bw, int bh,
                                    int x, int y, int w, int h,
+#if CONFIG_SUPERTX && CONFIG_WEDGE_PARTITION
+                                   int wedge_offset_x, int wedge_offset_y,
+#endif  // CONFIG_SUPERTX && CONFIG_WEDGE_PARTITION
                                    int mi_x, int mi_y) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
   const MODE_INFO *mi = xd->mi[0].src_mi;
@@ -306,6 +646,38 @@ static void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
     pre += (scaled_mv.row >> SUBPEL_BITS) * pre_buf->stride
            + (scaled_mv.col >> SUBPEL_BITS);
 
+#if CONFIG_WEDGE_PARTITION
+    if (ref && get_wedge_bits(mi->mbmi.sb_type)
+        && mi->mbmi.use_wedge_interinter) {
+      uint8_t tmp_dst[4096];
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+        high_inter_predictor(pre, pre_buf->stride, tmp_dst, 64,
+                             subpel_x, subpel_y, sf, w, h, ref, kernel, xs, ys,
+                             xd->bd);
+      } else {
+        inter_predictor(pre, pre_buf->stride, tmp_dst, 64,
+                        subpel_x, subpel_y, sf, w, h, ref, kernel, xs, ys);
+      }
+#else
+      inter_predictor(pre, pre_buf->stride, tmp_dst, 64,
+                      subpel_x, subpel_y, sf, w, h, 0, kernel, xs, ys);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_SUPERTX
+      // TODO(debargha): Need high bitdepth versions
+      build_masked_compound_extend(dst, dst_buf->stride, tmp_dst, 64, plane,
+                                   mi->mbmi.wedge_index, mi->mbmi.sb_type,
+                                   wedge_offset_x, wedge_offset_y, h, w);
+#else
+      build_masked_compound(dst, dst_buf->stride, tmp_dst, 64,
+                            mi->mbmi.wedge_index, mi->mbmi.sb_type, h, w);
+#endif  // CONFIG_SUPERTX
+    } else {
+      inter_predictor(pre, pre_buf->stride, dst, dst_buf->stride,
+                      subpel_x, subpel_y, sf, w, h, ref, kernel, xs, ys);
+    }
+#else  // CONFIG_WEDGE_PARTITION
+
 #if CONFIG_VP9_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       high_inter_predictor(pre, pre_buf->stride, dst, dst_buf->stride,
@@ -319,6 +691,7 @@ static void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
     inter_predictor(pre, pre_buf->stride, dst, dst_buf->stride,
                     subpel_x, subpel_y, sf, w, h, ref, kernel, xs, ys);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_WEDGE_PARTITION
   }
 }
 
@@ -342,10 +715,18 @@ static void build_inter_predictors_for_planes(MACROBLOCKD *xd, BLOCK_SIZE bsize,
       for (y = 0; y < num_4x4_h; ++y)
         for (x = 0; x < num_4x4_w; ++x)
            build_inter_predictors(xd, plane, i++, bw, bh,
-                                  4 * x, 4 * y, 4, 4, mi_x, mi_y);
+                                  4 * x, 4 * y, 4, 4,
+#if CONFIG_SUPERTX && CONFIG_WEDGE_PARTITION
+                                  0, 0,
+#endif
+                                  mi_x, mi_y);
     } else {
       build_inter_predictors(xd, plane, 0, bw, bh,
-                             0, 0, bw, bh, mi_x, mi_y);
+                             0, 0, bw, bh,
+#if CONFIG_SUPERTX && CONFIG_WEDGE_PARTITION
+                             0, 0,
+#endif
+                             mi_x, mi_y);
     }
   }
 }
@@ -483,6 +864,39 @@ void vp9_build_masked_inter_predictor_complex(
   }
 }
 
+#if CONFIG_WEDGE_PARTITION
+void vp9_build_inter_predictors_sb_extend(MACROBLOCKD *xd,
+                                          int mi_row, int mi_col,
+                                          int mi_row_ori, int mi_col_ori,
+                                          BLOCK_SIZE bsize) {
+  int plane;
+  const int mi_x = mi_col_ori * MI_SIZE;
+  const int mi_y = mi_row_ori * MI_SIZE;
+  const int wedge_offset_x = (mi_col - mi_col_ori) * MI_SIZE;
+  const int wedge_offset_y = (mi_row - mi_row_ori) * MI_SIZE;
+  for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
+    const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize,
+                                                        &xd->plane[plane]);
+    const int num_4x4_w = num_4x4_blocks_wide_lookup[plane_bsize];
+    const int num_4x4_h = num_4x4_blocks_high_lookup[plane_bsize];
+    const int bw = 4 * num_4x4_w;
+    const int bh = 4 * num_4x4_h;
+
+    if (xd->mi[0].src_mi->mbmi.sb_type < BLOCK_8X8) {
+      int i = 0, x, y;
+      assert(bsize == BLOCK_8X8);
+      for (y = 0; y < num_4x4_h; ++y)
+        for (x = 0; x < num_4x4_w; ++x)
+           build_inter_predictors(xd, plane, i++, bw, bh, 4 * x, 4 * y, 4, 4,
+                                  wedge_offset_x, wedge_offset_y, mi_x, mi_y);
+    } else {
+      build_inter_predictors(xd, plane, 0, bw, bh, 0, 0, bw, bh,
+                             wedge_offset_x, wedge_offset_y, mi_x, mi_y);
+    }
+  }
+}
+#endif  // CONFIG_WEDGE_PARTITION
+
 void vp9_build_inter_predictors_sby_sub8x8_extend(MACROBLOCKD *xd,
                                                   int mi_row, int mi_col,
                                                   int mi_row_ori,
@@ -491,6 +905,10 @@ void vp9_build_inter_predictors_sby_sub8x8_extend(MACROBLOCKD *xd,
                                                   PARTITION_TYPE partition) {
   const int mi_x = mi_col_ori * MI_SIZE;
   const int mi_y = mi_row_ori * MI_SIZE;
+#if CONFIG_WEDGE_PARTITION
+  const int wedge_offset_x = (mi_col - mi_col_ori) * MI_SIZE;
+  const int wedge_offset_y = (mi_row - mi_row_ori) * MI_SIZE;
+#endif  // CONFIG_WEDGE_PARTITION
   uint8_t *orig_dst;
   int orig_dst_stride;
   int bw = 4 << b_width_log2_lookup[top_bsize];
@@ -502,6 +920,9 @@ void vp9_build_inter_predictors_sby_sub8x8_extend(MACROBLOCKD *xd,
   orig_dst = xd->plane[0].dst.buf;
   orig_dst_stride = xd->plane[0].dst.stride;
   build_inter_predictors(xd, 0, 0, bw, bh, 0, 0, bw, bh,
+#if CONFIG_WEDGE_PARTITION
+                         wedge_offset_x, wedge_offset_y,
+#endif
                          mi_x, mi_y);
 
   xd->plane[0].dst.buf = tmp_buf;
@@ -509,22 +930,37 @@ void vp9_build_inter_predictors_sby_sub8x8_extend(MACROBLOCKD *xd,
   switch (partition) {
     case PARTITION_HORZ:
       build_inter_predictors(xd, 0, 2, bw, bh, 0, 0, bw, bh,
+#if CONFIG_WEDGE_PARTITION
+                             wedge_offset_x, wedge_offset_y,
+#endif
                              mi_x, mi_y);
       break;
     case PARTITION_VERT:
       build_inter_predictors(xd, 0, 1, bw, bh, 0, 0, bw, bh,
+#if CONFIG_WEDGE_PARTITION
+                             wedge_offset_x, wedge_offset_y,
+#endif
                              mi_x, mi_y);
       break;
     case PARTITION_SPLIT:
       build_inter_predictors(xd, 0, 1, bw, bh, 0, 0, bw, bh,
+#if CONFIG_WEDGE_PARTITION
+                             wedge_offset_x, wedge_offset_y,
+#endif
                              mi_x, mi_y);
       xd->plane[0].dst.buf = tmp_buf1;
       xd->plane[0].dst.stride = MAXTXLEN;
       build_inter_predictors(xd, 0, 2, bw, bh, 0, 0, bw, bh,
+#if CONFIG_WEDGE_PARTITION
+                             wedge_offset_x, wedge_offset_y,
+#endif
                              mi_x, mi_y);
       xd->plane[0].dst.buf = tmp_buf2;
       xd->plane[0].dst.stride = MAXTXLEN;
       build_inter_predictors(xd, 0, 3, bw, bh, 0, 0, bw, bh,
+#if CONFIG_WEDGE_PARTITION
+                             wedge_offset_x, wedge_offset_y,
+#endif
                              mi_x, mi_y);
       break;
     default:
@@ -563,12 +999,19 @@ void vp9_build_inter_predictors_sby_sub8x8_extend(MACROBLOCKD *xd,
 }
 
 void vp9_build_inter_predictors_sbuv_sub8x8_extend(MACROBLOCKD *xd,
+#if CONFIG_WEDGE_PARTITION
+                                                   int mi_row, int mi_col,
+#endif
                                                    int mi_row_ori,
                                                    int mi_col_ori,
                                                    BLOCK_SIZE top_bsize) {
   int plane;
   const int mi_x = mi_col_ori * MI_SIZE;
   const int mi_y = mi_row_ori * MI_SIZE;
+#if CONFIG_WEDGE_PARTITION
+  const int wedge_offset_x = (mi_col - mi_col_ori) * MI_SIZE;
+  const int wedge_offset_y = (mi_row - mi_row_ori) * MI_SIZE;
+#endif
   for (plane = 1; plane < MAX_MB_PLANE; ++plane) {
     const BLOCK_SIZE plane_bsize = get_plane_block_size(top_bsize,
                                                         &xd->plane[plane]);
@@ -578,6 +1021,9 @@ void vp9_build_inter_predictors_sbuv_sub8x8_extend(MACROBLOCKD *xd,
     const int bh = 4 * num_4x4_h;
 
     build_inter_predictors(xd, plane, 0, bw, bh, 0, 0, bw, bh,
+#if CONFIG_WEDGE_PARTITION
+                           wedge_offset_x, wedge_offset_y,
+#endif
                            mi_x, mi_y);
   }
 }
@@ -588,6 +1034,9 @@ void vp9_build_inter_predictors_sbuv_sub8x8_extend(MACROBLOCKD *xd,
 static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
                                        int bw, int bh,
                                        int x, int y, int w, int h,
+#if CONFIG_SUPERTX && CONFIG_WEDGE_PARTITION
+                                       int wedge_offset_x, int wedge_offset_y,
+#endif
                                        int mi_x, int mi_y) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
   const MODE_INFO *mi = xd->mi[0].src_mi;
@@ -748,6 +1197,50 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
       }
     }
 
+#if CONFIG_WEDGE_PARTITION
+    if (ref && get_wedge_bits(mi->mbmi.sb_type)
+        && mi->mbmi.use_wedge_interinter) {
+      uint8_t tmp_dst[4096];
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+        high_inter_predictor(buf_ptr, buf_stride, tmp_dst, 64,
+                             subpel_x, subpel_y, sf, w, h, ref, kernel,
+                             xs, ys, xd->bd);
+      } else {
+        inter_predictor(buf_ptr, buf_stride, tmp_dst, 64,
+                        subpel_x, subpel_y, sf, w, h, ref, kernel, xs, ys);
+      }
+#else
+      inter_predictor(buf_ptr, buf_stride, tmp_dst, 64,
+                     subpel_x, subpel_y, sf, w, h, 0, kernel, xs, ys);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_SUPERTX
+      // TODO(debargha): highbitdepth versions
+      build_masked_compound_extend(dst, dst_buf->stride, tmp_dst, 64, plane,
+                                   mi->mbmi.wedge_index, mi->mbmi.sb_type,
+                                   wedge_offset_x, wedge_offset_y, h, w);
+#else
+      build_masked_compound(dst, dst_buf->stride, tmp_dst, 64,
+                            mi->mbmi.wedge_index, mi->mbmi.sb_type, h, w);
+#endif  // CONFIG_SUPERTX
+    } else {
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+        high_inter_predictor(buf_ptr, buf_stride, dst, dst_buf->stride,
+                             subpel_x, subpel_y, sf, w, h, ref, kernel,
+                             xs, ys, xd->bd);
+      } else {
+        inter_predictor(buf_ptr, buf_stride, dst, dst_buf->stride, subpel_x,
+                        subpel_y, sf, w, h, ref, kernel, xs, ys);
+      }
+#else
+      inter_predictor(buf_ptr, buf_stride, dst, dst_buf->stride, subpel_x,
+                      subpel_y, sf, w, h, ref, kernel, xs, ys);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+    }
+
+#else  // CONFIG_WEDGE_PARTITION
+
 #if CONFIG_VP9_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       high_inter_predictor(buf_ptr, buf_stride, dst, dst_buf->stride, subpel_x,
@@ -760,6 +1253,7 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
     inter_predictor(buf_ptr, buf_stride, dst, dst_buf->stride, subpel_x,
                     subpel_y, sf, w, h, ref, kernel, xs, ys);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_WEDGE_PARTITION
   }
 }
 
@@ -782,10 +1276,18 @@ void vp9_dec_build_inter_predictors_sb(MACROBLOCKD *xd, int mi_row, int mi_col,
       for (y = 0; y < num_4x4_h; ++y)
         for (x = 0; x < num_4x4_w; ++x)
           dec_build_inter_predictors(xd, plane, i++, bw, bh,
-                                     4 * x, 4 * y, 4, 4, mi_x, mi_y);
+                                     4 * x, 4 * y, 4, 4,
+#if CONFIG_SUPERTX && CONFIG_WEDGE_PARTITION
+                                     0, 0,
+#endif
+                                     mi_x, mi_y);
     } else {
       dec_build_inter_predictors(xd, plane, 0, bw, bh,
-                                 0, 0, bw, bh, mi_x, mi_y);
+                                 0, 0, bw, bh,
+#if CONFIG_SUPERTX && CONFIG_WEDGE_PARTITION
+                                 0, 0,
+#endif
+                                 mi_x, mi_y);
     }
   }
 #if CONFIG_INTERINTRA
@@ -800,6 +1302,41 @@ void vp9_dec_build_inter_predictors_sb(MACROBLOCKD *xd, int mi_row, int mi_col,
 }
 
 #if CONFIG_SUPERTX
+#if CONFIG_WEDGE_PARTITION
+void vp9_dec_build_inter_predictors_sb_extend(MACROBLOCKD *xd,
+                                              int mi_row, int mi_col,
+                                              int mi_row_ori, int mi_col_ori,
+                                              BLOCK_SIZE bsize) {
+  int plane;
+  const int mi_x = mi_col_ori * MI_SIZE;
+  const int mi_y = mi_row_ori * MI_SIZE;
+  const int wedge_offset_x = (mi_col - mi_col_ori) * MI_SIZE;
+  const int wedge_offset_y = (mi_row - mi_row_ori) * MI_SIZE;
+  for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
+    const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize,
+                                                        &xd->plane[plane]);
+    const int num_4x4_w = num_4x4_blocks_wide_lookup[plane_bsize];
+    const int num_4x4_h = num_4x4_blocks_high_lookup[plane_bsize];
+    const int bw = 4 * num_4x4_w;
+    const int bh = 4 * num_4x4_h;
+
+    if (xd->mi[0].src_mi->mbmi.sb_type < BLOCK_8X8) {
+      int i = 0, x, y;
+      assert(bsize == BLOCK_8X8);
+      for (y = 0; y < num_4x4_h; ++y)
+        for (x = 0; x < num_4x4_w; ++x)
+          dec_build_inter_predictors(xd, plane, i++, bw, bh, 4 * x, 4 * y, 4, 4,
+                                     wedge_offset_x, wedge_offset_y,
+                                     mi_x, mi_y);
+    } else {
+      dec_build_inter_predictors(xd, plane, 0, bw, bh, 0, 0, bw, bh,
+                                 wedge_offset_x, wedge_offset_y,
+                                 mi_x, mi_y);
+    }
+  }
+}
+#endif  // CONFIG_WEDGE_PARTITION
+
 void vp9_dec_build_inter_predictors_sby_sub8x8_extend(
     MACROBLOCKD *xd,
     int mi_row, int mi_col,
@@ -809,6 +1346,10 @@ void vp9_dec_build_inter_predictors_sby_sub8x8_extend(
     PARTITION_TYPE partition) {
   const int mi_x = mi_col_ori * MI_SIZE;
   const int mi_y = mi_row_ori * MI_SIZE;
+#if CONFIG_WEDGE_PARTITION
+  const int wedge_offset_x = (mi_col - mi_col_ori) * MI_SIZE;
+  const int wedge_offset_y = (mi_row - mi_row_ori) * MI_SIZE;
+#endif
   uint8_t *orig_dst;
   int orig_dst_stride;
   int bw = 4 << b_width_log2_lookup[top_bsize];
@@ -820,6 +1361,9 @@ void vp9_dec_build_inter_predictors_sby_sub8x8_extend(
   orig_dst = xd->plane[0].dst.buf;
   orig_dst_stride = xd->plane[0].dst.stride;
   dec_build_inter_predictors(xd, 0, 0, bw, bh, 0, 0, bw, bh,
+#if CONFIG_WEDGE_PARTITION
+                             wedge_offset_x, wedge_offset_y,
+#endif
                              mi_x, mi_y);
 
   xd->plane[0].dst.buf = tmp_buf;
@@ -827,22 +1371,37 @@ void vp9_dec_build_inter_predictors_sby_sub8x8_extend(
   switch (partition) {
     case PARTITION_HORZ:
       dec_build_inter_predictors(xd, 0, 2, bw, bh, 0, 0, bw, bh,
+#if CONFIG_WEDGE_PARTITION
+                                 wedge_offset_x, wedge_offset_y,
+#endif
                                  mi_x, mi_y);
       break;
     case PARTITION_VERT:
       dec_build_inter_predictors(xd, 0, 1, bw, bh, 0, 0, bw, bh,
+#if CONFIG_WEDGE_PARTITION
+                                 wedge_offset_x, wedge_offset_y,
+#endif
                                  mi_x, mi_y);
       break;
     case PARTITION_SPLIT:
       dec_build_inter_predictors(xd, 0, 1, bw, bh, 0, 0, bw, bh,
+#if CONFIG_WEDGE_PARTITION
+                                 wedge_offset_x, wedge_offset_y,
+#endif
                                  mi_x, mi_y);
       xd->plane[0].dst.buf = tmp_buf1;
       xd->plane[0].dst.stride = MAXTXLEN;
       dec_build_inter_predictors(xd, 0, 2, bw, bh, 0, 0, bw, bh,
+#if CONFIG_WEDGE_PARTITION
+                                 wedge_offset_x, wedge_offset_y,
+#endif
                                  mi_x, mi_y);
       xd->plane[0].dst.buf = tmp_buf2;
       xd->plane[0].dst.stride = MAXTXLEN;
       dec_build_inter_predictors(xd, 0, 3, bw, bh, 0, 0, bw, bh,
+#if CONFIG_WEDGE_PARTITION
+                                 wedge_offset_x, wedge_offset_y,
+#endif
                                  mi_x, mi_y);
       break;
     default:
@@ -881,12 +1440,19 @@ void vp9_dec_build_inter_predictors_sby_sub8x8_extend(
 }
 
 void vp9_dec_build_inter_predictors_sbuv_sub8x8_extend(MACROBLOCKD *xd,
+#if CONFIG_WEDGE_PARTITION
+                                                       int mi_row, int mi_col,
+#endif
                                                        int mi_row_ori,
                                                        int mi_col_ori,
                                                        BLOCK_SIZE top_bsize) {
   int plane;
   const int mi_x = mi_col_ori * MI_SIZE;
   const int mi_y = mi_row_ori * MI_SIZE;
+#if CONFIG_WEDGE_PARTITION
+  const int wedge_offset_x = (mi_col - mi_col_ori) * MI_SIZE;
+  const int wedge_offset_y = (mi_row - mi_row_ori) * MI_SIZE;
+#endif
   for (plane = 1; plane < MAX_MB_PLANE; ++plane) {
     const BLOCK_SIZE plane_bsize = get_plane_block_size(top_bsize,
                                                         &xd->plane[plane]);
@@ -896,6 +1462,9 @@ void vp9_dec_build_inter_predictors_sbuv_sub8x8_extend(MACROBLOCKD *xd,
     const int bh = 4 * num_4x4_h;
 
     dec_build_inter_predictors(xd, plane, 0, bw, bh, 0, 0, bw, bh,
+#if CONFIG_WEDGE_PARTITION
+                               wedge_offset_x, wedge_offset_y,
+#endif
                                mi_x, mi_y);
   }
 }

@@ -289,6 +289,7 @@ EXPERIMENT_LIST="
     supertx
     copy_mode
     interintra
+    wedge_partition
 "
 CONFIG_LIST="
     external_build

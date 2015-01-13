@@ -13,6 +13,12 @@
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_seg_common.h"
 
+#if CONFIG_WEDGE_PARTITION
+static const vp9_prob default_wedge_interinter_prob[BLOCK_SIZES] = {
+  192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192
+};
+#endif  // CONFIG_WEDGE_PARTITION
+
 #if CONFIG_INTERINTRA
 static const vp9_prob default_interintra_prob[BLOCK_SIZES] = {
   192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192
@@ -179,7 +185,7 @@ static const vp9_prob default_filterintra_prob[TX_SIZES][INTRA_MODES] = {
   {175,   203,   213,    86,    45,    71,    41,   150,   125,   154},
   {235,   230,   154,   202,   154,   205,    37,   128,     0,   202}
 };
-#endif
+#endif  // CONFIG_FILTERINTRA
 
 const vp9_prob vp9_kf_partition_probs[PARTITION_CONTEXTS]
                                      [PARTITION_TYPES - 1] = {
@@ -466,6 +472,9 @@ void vp9_init_mode_probs(FRAME_CONTEXT *fc) {
 #if CONFIG_INTERINTRA
   vp9_copy(fc->interintra_prob, default_interintra_prob);
 #endif  // CONFIG_INTERINTRA
+#if CONFIG_WEDGE_PARTITION
+  vp9_copy(fc->wedge_interinter_prob, default_wedge_interinter_prob);
+#endif  // CONFIG_WEDGE_PARTITION
 }
 
 const vp9_tree_index vp9_switchable_interp_tree
@@ -615,6 +624,14 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
                                           counts->interintra[i]);
   }
 #endif  // CONFIG_INTERINTRA
+#if CONFIG_WEDGE_PARTITION
+  for (i = 0; i < BLOCK_SIZES; ++i) {
+    if (get_wedge_bits(i))
+      fc->wedge_interinter_prob[i] = adapt_prob
+          (pre_fc->wedge_interinter_prob[i],
+           counts->wedge_interinter[i]);
+  }
+#endif  // CONFIG_WEDGE_PARTITION
 }
 
 static void set_default_lf_deltas(struct loopfilter *lf) {

@@ -649,3 +649,98 @@ void vp9_highbd_comp_avg_pred(uint16_t *comp_pred, const uint8_t *pred8,
   }
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+
+#if CONFIG_WEDGE_PARTITION
+// TODO(debargha): Need highbd versions of these
+void masked_variance(const uint8_t *a, int  a_stride,
+                     const uint8_t *b, int  b_stride,
+                     const uint8_t *m, int  m_stride,
+                     int  w, int  h, unsigned int *sse, int *sum) {
+  int i, j;
+
+  *sum = 0;
+  *sse = 0;
+
+  for (i = 0; i < h; i++) {
+    for (j = 0; j < w; j++) {
+      const int diff = (a[j] - b[j]) * (m[j]);
+      *sum += diff;
+      *sse += diff * diff;
+    }
+
+    a += a_stride;
+    b += b_stride;
+    m += m_stride;
+  }
+  *sum = (*sum >= 0) ? ((*sum + 31) >> 6) : -((-*sum + 31) >> 6);
+  *sse = (*sse + 2047) >> 12;
+}
+
+#define MASK_VAR(W, H) \
+unsigned int vp9_masked_variance##W##x##H##_c(const uint8_t *a, int a_stride, \
+                                              const uint8_t *b, int b_stride, \
+                                              const uint8_t *m, int m_stride, \
+                                              unsigned int *sse) { \
+  int sum; \
+  masked_variance(a, a_stride, b, b_stride, m, m_stride, W, H, sse, &sum); \
+  return *sse - (((int64_t)sum * sum) / (W * H)); \
+}
+
+#define MASK_SUBPIX_VAR(W, H) \
+unsigned int vp9_masked_sub_pixel_variance##W##x##H##_c( \
+  const uint8_t *src, int  src_stride, \
+  int xoffset, int  yoffset, \
+  const uint8_t *dst, int dst_stride, \
+  const uint8_t *msk, int msk_stride, \
+  unsigned int *sse) { \
+  uint16_t fdata3[(H + 1) * W]; \
+  uint8_t temp2[H * W]; \
+\
+  var_filter_block2d_bil_first_pass(src, fdata3, src_stride, 1, H + 1, W, \
+                                    BILINEAR_FILTERS_2TAP(xoffset)); \
+  var_filter_block2d_bil_second_pass(fdata3, temp2, W, W, H, W, \
+                                     BILINEAR_FILTERS_2TAP(yoffset)); \
+\
+  return vp9_masked_variance##W##x##H##_c(temp2, W, dst, dst_stride, \
+                                          msk, msk_stride, sse); \
+}
+
+MASK_VAR(4, 4)
+MASK_SUBPIX_VAR(4, 4)
+
+MASK_VAR(4, 8)
+MASK_SUBPIX_VAR(4, 8)
+
+MASK_VAR(8, 4)
+MASK_SUBPIX_VAR(8, 4)
+
+MASK_VAR(8, 8)
+MASK_SUBPIX_VAR(8, 8)
+
+MASK_VAR(8, 16)
+MASK_SUBPIX_VAR(8, 16)
+
+MASK_VAR(16, 8)
+MASK_SUBPIX_VAR(16, 8)
+
+MASK_VAR(16, 16)
+MASK_SUBPIX_VAR(16, 16)
+
+MASK_VAR(16, 32)
+MASK_SUBPIX_VAR(16, 32)
+
+MASK_VAR(32, 16)
+MASK_SUBPIX_VAR(32, 16)
+
+MASK_VAR(32, 32)
+MASK_SUBPIX_VAR(32, 32)
+
+MASK_VAR(32, 64)
+MASK_SUBPIX_VAR(32, 64)
+
+MASK_VAR(64, 32)
+MASK_SUBPIX_VAR(64, 32)
+
+MASK_VAR(64, 64)
+MASK_SUBPIX_VAR(64, 64)
+#endif  // CONFIG_WEDGE_PARTITION

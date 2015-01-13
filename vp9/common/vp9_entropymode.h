@@ -77,6 +77,9 @@ typedef struct frame_contexts {
 #if CONFIG_INTERINTRA
   vp9_prob interintra_prob[BLOCK_SIZES];
 #endif  // CONFIG_INTERINTRA
+#if CONFIG_WEDGE_PARTITION
+  vp9_prob wedge_interinter_prob[BLOCK_SIZES];
+#endif  // CONFIG_WEDGE_PARTITION
 } FRAME_CONTEXT;
 
 typedef struct {
@@ -118,6 +121,9 @@ typedef struct {
 #if CONFIG_INTERINTRA
   unsigned int interintra[BLOCK_SIZES][2];
 #endif  // CONFIG_INTERINTRA
+#if CONFIG_WEDGE_PARTITION
+  unsigned int wedge_interinter[BLOCK_SIZES][2];
+#endif  // CONFIG_WEDGE_PARTITION
 } FRAME_COUNTS;
 
 extern const vp9_prob vp9_kf_uv_mode_prob[INTRA_MODES][INTRA_MODES - 1];

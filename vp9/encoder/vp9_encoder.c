@@ -1655,6 +1655,40 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
       vp9_sub_pixel_avg_variance4x4,
       vp9_sad4x4x3, vp9_sad4x4x8, vp9_sad4x4x4d)
 
+#if CONFIG_WEDGE_PARTITION
+#define MBFP(BT, MSDF, MVF, MSVF)         \
+  cpi->fn_ptr[BT].msdf            = MSDF; \
+  cpi->fn_ptr[BT].mvf             = MVF;  \
+  cpi->fn_ptr[BT].msvf            = MSVF;
+
+  MBFP(BLOCK_64X64, vp9_masked_sad64x64, vp9_masked_variance64x64,
+       vp9_masked_sub_pixel_variance64x64)
+  MBFP(BLOCK_64X32, vp9_masked_sad64x32, vp9_masked_variance64x32,
+         vp9_masked_sub_pixel_variance64x32)
+  MBFP(BLOCK_32X64, vp9_masked_sad32x64, vp9_masked_variance32x64,
+         vp9_masked_sub_pixel_variance32x64)
+  MBFP(BLOCK_32X32, vp9_masked_sad32x32, vp9_masked_variance32x32,
+       vp9_masked_sub_pixel_variance32x32)
+  MBFP(BLOCK_32X16, vp9_masked_sad32x16, vp9_masked_variance32x16,
+       vp9_masked_sub_pixel_variance32x16)
+  MBFP(BLOCK_16X32, vp9_masked_sad16x32, vp9_masked_variance16x32,
+       vp9_masked_sub_pixel_variance16x32)
+  MBFP(BLOCK_16X16, vp9_masked_sad16x16, vp9_masked_variance16x16,
+         vp9_masked_sub_pixel_variance16x16)
+  MBFP(BLOCK_16X8, vp9_masked_sad16x8, vp9_masked_variance16x8,
+         vp9_masked_sub_pixel_variance16x8)
+  MBFP(BLOCK_8X16, vp9_masked_sad8x16, vp9_masked_variance8x16,
+         vp9_masked_sub_pixel_variance8x16)
+  MBFP(BLOCK_8X8, vp9_masked_sad8x8, vp9_masked_variance8x8,
+       vp9_masked_sub_pixel_variance8x8)
+  MBFP(BLOCK_4X8, vp9_masked_sad4x8, vp9_masked_variance4x8,
+       vp9_masked_sub_pixel_variance4x8)
+  MBFP(BLOCK_8X4, vp9_masked_sad8x4, vp9_masked_variance8x4,
+       vp9_masked_sub_pixel_variance8x4)
+  MBFP(BLOCK_4X4, vp9_masked_sad4x4, vp9_masked_variance4x4,
+       vp9_masked_sub_pixel_variance4x4)
+#endif  // CONFIG_WEDGE_PARTITION
+
 #if CONFIG_VP9_HIGHBITDEPTH
   highbd_set_var_fns(cpi);
 #endif

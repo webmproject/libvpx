@@ -567,6 +567,17 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
                         allow_hp);
       }
     }
+#if CONFIG_WEDGE_PARTITION
+    if (cm->reference_mode != SINGLE_REFERENCE &&
+        is_inter_mode(mode) &&
+        get_wedge_bits(bsize) &&
+        mbmi->ref_frame[1] > INTRA_FRAME) {
+      vp9_write(w, mbmi->use_wedge_interinter,
+                cm->fc.wedge_interinter_prob[bsize]);
+      if (mbmi->use_wedge_interinter)
+        vp9_write_literal(w, mbmi->wedge_index, get_wedge_bits(bsize));
+    }
+#endif  // CONFIG_WEDGE_PARTITION
   }
 }
 
@@ -1648,6 +1659,15 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
       }
     }
 #endif  // CONFIG_INTERINTRA
+#if CONFIG_WEDGE_PARTITION
+    if (cm->reference_mode != SINGLE_REFERENCE) {
+      for (i = 0; i < BLOCK_SIZES; i++)
+        if (get_wedge_bits(i))
+          vp9_cond_prob_diff_update(&header_bc,
+                                    &fc->wedge_interinter_prob[i],
+                                    cm->counts.wedge_interinter[i]);
+    }
+#endif  // CONFIG_WEDGE_PARTITION
   }
 
   vp9_stop_encode(&header_bc);

@@ -786,7 +786,12 @@ static void dec_predict_b_extend(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   if (has_second_ref(&xd->mi[0].mbmi))
     set_ref(cm, xd, 1, mi_row_ori, mi_col_ori);
   mbmi->tx_size = b_width_log2_lookup[top_bsize];
+#if CONFIG_WEDGE_PARTITION
+  vp9_dec_build_inter_predictors_sb_extend(xd, mi_row, mi_col,
+                                           mi_row_ori, mi_col_ori, top_bsize);
+#else
   vp9_dec_build_inter_predictors_sb(xd, mi_row_ori, mi_col_ori, top_bsize);
+#endif  // CONFIG_WEDGE_PARTITION
 }
 
 static void dec_predict_b_sub8x8_extend(VP9_COMMON *const cm,
@@ -806,7 +811,11 @@ static void dec_predict_b_sub8x8_extend(VP9_COMMON *const cm,
   vp9_dec_build_inter_predictors_sby_sub8x8_extend(xd, mi_row, mi_col,
                                                    mi_row_ori, mi_col_ori,
                                                    top_bsize, partition);
-  vp9_dec_build_inter_predictors_sbuv_sub8x8_extend(xd, mi_row_ori, mi_col_ori,
+  vp9_dec_build_inter_predictors_sbuv_sub8x8_extend(xd,
+#if CONFIG_WEDGE_PARTITION
+                                                    mi_row, mi_col,
+#endif
+                                                    mi_row_ori, mi_col_ori,
                                                     top_bsize);
 }
 
@@ -2253,6 +2262,14 @@ static int read_compressed_header(VP9Decoder *pbi, const uint8_t *data,
       }
     }
 #endif  // CONFIG_INTERINTRA
+#if CONFIG_WEDGE_PARTITION
+    if (cm->reference_mode != SINGLE_REFERENCE) {
+      for (i = 0; i < BLOCK_SIZES; i++) {
+        if (get_wedge_bits(i))
+          vp9_diff_update_prob(&r, &fc->wedge_interinter_prob[i]);
+      }
+    }
+#endif  // CONFIG_WEDGE_PARTITION
   }
 
   return vp9_reader_has_error(&r);
