@@ -16,6 +16,24 @@
       "revId": "d6662f70081e914d23c80b8cffea96cd196a3d68",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//J/s\u003d",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 530,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-01-13T18:17:06Z",
+      "side": 1,
+      "message": "Can we reference a frame of a different size without scaling? That\u0027s what I really want to do here.",
+      "parentUuid": "AAAAdn//KAQ\u003d",
+      "revId": "d6662f70081e914d23c80b8cffea96cd196a3d68",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
