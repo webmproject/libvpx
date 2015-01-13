@@ -1193,7 +1193,7 @@ void vp9_predict_intra_block(const MACROBLOCKD *xd, int block_idx, int bwl_in,
 }
 
 #if CONFIG_INTERINTRA
-static INLINE TX_SIZE intra_size_log2_for_interintra(int bs) {
+static INLINE TX_SIZE blocklen_to_txsize(int bs) {
   switch (bs) {
     case 4:
       return TX_4X4;
@@ -1498,11 +1498,11 @@ static void build_intra_predictors_for_interintra(
     int right_available, int plane) {
   if (bw == bh) {
     build_intra_predictors(xd, src, src_stride, pred_ptr, stride,
-                           mode, intra_size_log2_for_interintra(bw),
+                           mode, blocklen_to_txsize(bw),
                            up_available, left_available, right_available,
                            0, 0, plane);
   } else if (bw < bh) {
-    const TX_SIZE tx_size = intra_size_log2_for_interintra(bw);
+    const TX_SIZE tx_size = blocklen_to_txsize(bw);
     uint8_t *src_bottom = src + bw * src_stride;
     uint8_t *pred_ptr_bottom = pred_ptr + bw * stride;
     build_intra_predictors(
@@ -1514,7 +1514,7 @@ static void build_intra_predictors_for_interintra(
         up_available, left_available, 0,
         1, 0, bw, plane);
   } else {
-    const TX_SIZE tx_size = intra_size_log2_for_interintra(bh);
+    const TX_SIZE tx_size = blocklen_to_txsize(bh);
     uint8_t *src_right = src + bh;
     uint8_t *pred_ptr_right = pred_ptr + bh;
     build_intra_predictors(

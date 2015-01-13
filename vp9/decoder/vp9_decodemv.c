@@ -448,7 +448,7 @@ static INLINE INTERP_FILTER read_switchable_interp_filter(
 
 static void read_intra_block_mode_info(VP9_COMMON *const cm, MODE_INFO *mi,
 #if CONFIG_FILTERINTRA
-  MACROBLOCKD *const xd,
+                                       MACROBLOCKD *const xd,
 #endif
                                        vp9_reader *r) {
   MB_MODE_INFO *const mbmi = &mi->mbmi;
@@ -619,6 +619,9 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
                                        MACROBLOCKD *const xd,
                                        const TileInfo *const tile,
                                        MODE_INFO *const mi,
+#if CONFIG_SUPERTX
+                                       int supertx_enabled,
+#endif
                                        int mi_row, int mi_col, vp9_reader *r) {
   MB_MODE_INFO *const mbmi = &mi->mbmi;
   const BLOCK_SIZE bsize = mbmi->sb_type;
@@ -684,7 +687,10 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
 #if CONFIG_INTERINTRA
     if (is_interintra_allowed(bsize) &&
         is_inter_mode(mbmi->mode) &&
-        (mbmi->ref_frame[1] <= INTRA_FRAME)) {
+#if CONFIG_SUPERTX
+        !supertx_enabled &&
+#endif
+        mbmi->ref_frame[1] <= INTRA_FRAME) {
       mbmi->ref_frame[1] = vp9_read(r, cm->fc.interintra_prob[bsize]) ?
                            INTRA_FRAME : NONE;
       cm->counts.interintra[bsize][mbmi->ref_frame[1] == INTRA_FRAME]++;
@@ -899,6 +905,9 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
 
   if (inter_block) {
     read_inter_block_mode_info(cm, xd, tile, mi,
+#if CONFIG_SUPERTX
+                               supertx_enabled,
+#endif
                                mi_row, mi_col, r);
   } else {
     read_intra_block_mode_info(cm, mi,
