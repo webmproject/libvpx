@@ -232,8 +232,8 @@ extern "C" {
 
   /*!\brief Callback function pointer / user data pair storage */
   typedef struct vpx_codec_enc_output_cx_cb_pair {
-    vpx_codec_enc_output_cx_pkt_cb_fn_t output_cx_pkt;
-    void                            *user_priv;
+    vpx_codec_enc_output_cx_pkt_cb_fn_t output_cx_pkt; /**< Callback function */
+    void                            *user_priv; /**< Pointer to private data */
   } vpx_codec_priv_output_cx_pkt_cb_pair_t;
 
   /*!\brief Rational Number
@@ -737,10 +737,10 @@ extern "C" {
    *
    */
   typedef struct vpx_svc_parameters {
-    int max_quantizers[VPX_SS_MAX_LAYERS];
-    int min_quantizers[VPX_SS_MAX_LAYERS];
-    int scaling_factor_num[VPX_SS_MAX_LAYERS];
-    int scaling_factor_den[VPX_SS_MAX_LAYERS];
+    int max_quantizers[VPX_SS_MAX_LAYERS]; /**< Max Q for each layer */
+    int min_quantizers[VPX_SS_MAX_LAYERS]; /**< Min Q for each layer */
+    int scaling_factor_num[VPX_SS_MAX_LAYERS]; /**< Scaling factor-numerator*/
+    int scaling_factor_den[VPX_SS_MAX_LAYERS]; /**< Scaling factor-denominator*/
   } vpx_svc_extra_cfg_t;
 
 
