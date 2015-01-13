@@ -1976,8 +1976,8 @@ static void read_bitdepth_colorspace_sampling(
     cm->use_highbitdepth = 0;
 #endif
   }
-  cm->color_space = (COLOR_SPACE)vp9_rb_read_literal(rb, 3);
-  if (cm->color_space != SRGB) {
+  cm->color_space = vp9_rb_read_literal(rb, 3);
+  if (cm->color_space != VPX_CS_SRGB) {
     vp9_rb_read_bit(rb);  // [16,235] (including xvycc) vs [0,255] range
     if (cm->profile == PROFILE_1 || cm->profile == PROFILE_3) {
       cm->subsampling_x = vp9_rb_read_bit(rb);
@@ -2077,7 +2077,7 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
         // of either the color format or color sub-sampling in profile 0. VP9
         // specifies that the default color space should be YUV 4:2:0 in this
         // case (normative).
-        cm->color_space = BT_601;
+        cm->color_space = VPX_CS_BT_601;
         cm->subsampling_y = cm->subsampling_x = 1;
         cm->bit_depth = VPX_BITS_8;
 #if CONFIG_VP9_HIGHBITDEPTH
