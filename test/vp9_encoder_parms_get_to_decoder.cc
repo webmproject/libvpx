@@ -65,14 +65,15 @@ struct EncodeParameters {
   int32_t lossless;
   int32_t error_resilient;
   int32_t frame_parallel;
+  vpx_color_space_t cs;
   // TODO(JBB): quantizers / bitrate
 };
 
 const EncodeParameters kVP9EncodeParameterSet[] = {
-    {0, 0, 0, 1, 0},
-    {0, 0, 0, 0, 0},
-    {0, 0, 1, 0, 0},
-    {0, 2, 0, 0, 1},
+    {0, 0, 0, 1, 0, VPX_CS_BT_601},
+    {0, 0, 0, 0, 0, VPX_CS_BT_709},
+    {0, 0, 1, 0, 0, VPX_CS_BT_2020},
+    {0, 2, 0, 0, 1, VPX_CS_UNKNOWN},
     // TODO(JBB): Test profiles (requires more work).
 };
 
@@ -109,6 +110,7 @@ class Vp9EncoderParmsGetToDecoder
   virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
                                   ::libvpx_test::Encoder *encoder) {
     if (video->frame() == 1) {
+      encoder->Control(VP9E_SET_COLOR_SPACE, encode_parms.cs);
       encoder->Control(VP9E_SET_LOSSLESS, encode_parms.lossless);
       encoder->Control(VP9E_SET_FRAME_PARALLEL_DECODING,
                        encode_parms.frame_parallel);
@@ -147,7 +149,7 @@ class Vp9EncoderParmsGetToDecoder
       EXPECT_EQ(common->frame_parallel_decoding_mode,
                 encode_parms.frame_parallel);
     }
-
+    EXPECT_EQ(common->color_space, encode_parms.cs);
     EXPECT_EQ(common->log2_tile_cols, encode_parms.tile_cols);
     EXPECT_EQ(common->log2_tile_rows, encode_parms.tile_rows);
 

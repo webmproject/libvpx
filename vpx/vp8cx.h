@@ -259,6 +259,19 @@ enum vp8e_enc_control_id {
   VP9E_SET_TUNE_CONTENT,
   VP9E_GET_SVC_LAYER_ID,
   VP9E_REGISTER_CX_CALLBACK,
+
+  /*!\brief control function to set color space info.
+   * \note Valid ranges: 0..7, default is "UNKNOWN".
+   *                     0 = UNKNOWN,
+   *                     1 = BT_601
+   *                     2 = BT_709
+   *                     3 = SMPTE_170
+   *                     4 = SMPTE_240
+   *                     5 = BT_2020
+   *                     6 = RESERVED
+   *                     7 = SRGB
+   */
+  VP9E_SET_COLOR_SPACE,
 };
 
 /*!\brief vpx 1-D scaling mode
@@ -423,6 +436,8 @@ VPX_CTRL_USE_TYPE(VP9E_SET_FRAME_PERIODIC_BOOST, unsigned int)
 VPX_CTRL_USE_TYPE(VP9E_SET_NOISE_SENSITIVITY,  unsigned int)
 
 VPX_CTRL_USE_TYPE(VP9E_SET_TUNE_CONTENT, int) /* vp9e_tune_content */
+
+VPX_CTRL_USE_TYPE(VP9E_SET_COLOR_SPACE, int)
 /*! @} - end defgroup vp8_encoder */
 #ifdef __cplusplus
 }  // extern "C"

@@ -99,17 +99,6 @@ typedef enum {
 } TX_TYPE;
 
 typedef enum {
-  UNKNOWN    = 0,
-  BT_601     = 1,  // YUV
-  BT_709     = 2,  // YUV
-  SMPTE_170  = 3,  // YUV
-  SMPTE_240  = 4,  // YUV
-  BT_2020    = 5,  // YUV
-  RESERVED_2 = 6,
-  SRGB       = 7   // RGB
-} COLOR_SPACE;
-
-typedef enum {
   VP9_LAST_FLAG = 1 << 0,
   VP9_GOLD_FLAG = 1 << 1,
   VP9_ALT_FLAG = 1 << 2,
