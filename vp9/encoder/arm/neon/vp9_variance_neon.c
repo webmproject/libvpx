@@ -92,7 +92,7 @@ unsigned int vp9_variance8x8_neon(const uint8_t *a, int a_stride,
                                   unsigned int *sse) {
   int sum;
   variance_neon_w8(a, a_stride, b, b_stride, kWidth8, kHeight8, sse, &sum);
-  return *sse - (((int64_t)sum * sum) / (kWidth8 * kHeight8));
+  return *sse - (((int64_t)sum * sum) >> 6);  //  >> 6 = / 8 * 8
 }
 
 void vp9_get16x16var_neon(const uint8_t *src_ptr, int source_stride,
@@ -107,7 +107,7 @@ unsigned int vp9_variance16x16_neon(const uint8_t *a, int a_stride,
                                     unsigned int *sse) {
   int sum;
   variance_neon_w8(a, a_stride, b, b_stride, kWidth16, kHeight16, sse, &sum);
-  return *sse - (((int64_t)sum * sum) / (kWidth16 * kHeight16));
+  return *sse - (((int64_t)sum * sum) >> 8);  //  >> 8 = / 16 * 16
 }
 
 static void var_filter_block2d_bil_w8(const uint8_t *src_ptr,
@@ -209,7 +209,7 @@ unsigned int vp9_variance32x32_neon(const uint8_t *a, int a_stride,
                                     unsigned int *sse) {
   int sum;
   variance_neon_w8(a, a_stride, b, b_stride, kWidth32, kHeight32, sse, &sum);
-  return *sse - (((int64_t)sum * sum) / (kWidth32 * kHeight32));
+  return *sse - (((int64_t)sum * sum) >> 10);  // >> 10 = / 32 * 32
 }
 
 unsigned int vp9_variance32x64_neon(const uint8_t *a, int a_stride,
