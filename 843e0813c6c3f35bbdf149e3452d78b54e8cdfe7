@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//J2I\u003d",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-01-14T18:03:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//J3c\u003d",
+      "revId": "843e0813c6c3f35bbdf149e3452d78b54e8cdfe7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//J3U\u003d",
         "filename": "vpx/vp8cx.h",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-01-14T16:41:23Z",
       "side": 1,
       "message": "remove \u003d\u003e  to each other tile column\n\neasiy -\u003e easy \ndecodnig -\u003e decoding.\n\nnot sure what log2 unit means why not spell out all possible values  ?",
+      "revId": "843e0813c6c3f35bbdf149e3452d78b54e8cdfe7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//J2E\u003d",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-01-14T18:03:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//J3U\u003d",
       "revId": "843e0813c6c3f35bbdf149e3452d78b54e8cdfe7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//J1o\u003d",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-01-14T18:03:45Z",
+      "side": 1,
+      "message": "I gave it another try, see if it better describes the purpose.",
+      "parentUuid": "AAAAdn//J3Q\u003d",
+      "revId": "843e0813c6c3f35bbdf149e3452d78b54e8cdfe7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//J3M\u003d",
         "filename": "vpx/vp8cx.h",
         "patchSetId": 1
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//J1g\u003d",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 282,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-01-14T18:03:45Z",
+      "side": 1,
+      "message": "Same here, I rephrased the description to see if you like it better.",
+      "parentUuid": "AAAAdn//J3M\u003d",
+      "revId": "843e0813c6c3f35bbdf149e3452d78b54e8cdfe7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//J3I\u003d",
         "filename": "vpx/vp8cx.h",
         "patchSetId": 1
@@ -81,6 +153,24 @@
       "writtenOn": "2015-01-14T16:41:23Z",
       "side": 1,
       "message": "has segment -\u003e has a segment\nallow -\u003e allows the\nimprove subjective -\u003e improve the subjective\n\ndisalbed -\u003e disabled.",
+      "revId": "843e0813c6c3f35bbdf149e3452d78b54e8cdfe7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//J1c\u003d",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-01-14T18:03:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//J3I\u003d",
       "revId": "843e0813c6c3f35bbdf149e3452d78b54e8cdfe7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
