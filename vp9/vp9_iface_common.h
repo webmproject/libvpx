@@ -34,6 +34,7 @@ static void yuvconfig2image(vpx_image_t *img, const YV12_BUFFER_CONFIG  *yv12,
       bps = 12;
     }
   }
+  img->cs = yv12->color_space;
   img->bit_depth = 8;
   img->w = yv12->y_stride;
   img->h = ALIGN_POWER_OF_TWO(yv12->y_height + 2 * VP9_ENC_BORDER_IN_PIXELS, 3);
@@ -92,6 +93,7 @@ static vpx_codec_err_t image2yuvconfig(const vpx_image_t *img,
 
   yv12->y_stride = img->stride[VPX_PLANE_Y];
   yv12->uv_stride = img->stride[VPX_PLANE_U];
+  yv12->color_space = img->cs;
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (img->fmt & VPX_IMG_FMT_HIGHBITDEPTH) {
