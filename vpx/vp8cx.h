@@ -337,6 +337,12 @@ enum vp8e_enc_control_id {
    *                     temporal layer.
    */
   VP9E_SET_SVC_LAYER_ID,
+
+  /*!\brief control function to set content type.
+   * \note Valid parameter range:
+   *              VP9E_CONTENT_DEFAULT = Regular video content (Default)
+   *              VP9E_CONTENT_SCREEN  = Screen capture content
+   */
   VP9E_SET_TUNE_CONTENT,
   VP9E_GET_SVC_LAYER_ID,
   VP9E_REGISTER_CX_CALLBACK,
