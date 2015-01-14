@@ -621,8 +621,8 @@ static void txfm_rd_in_plane(MACROBLOCK *x,
   args.use_fast_coef_costing = use_fast_coef_casting;
 
 #if CONFIG_TX_SKIP
-  if (xd->lossless && tx_size != TX_4X4 &&
-      !xd->mi[0].src_mi->mbmi.tx_skip[plane != 0]) {
+  if (xd->lossless && (tx_size == TX_32X32 ||
+      (tx_size != TX_4X4 && !xd->mi[0].src_mi->mbmi.tx_skip[plane != 0]))) {
     *rate       = INT_MAX;
     *distortion = INT64_MAX;
     *sse        = INT64_MAX;
