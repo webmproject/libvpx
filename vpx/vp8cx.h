@@ -328,7 +328,17 @@ enum vp8e_enc_control_id {
    */
   VP9E_SET_NOISE_SENSITIVITY,
 
+  /*!\brief control function to turn on/off SVC in encoder.
+   * \note Return value is VPX_CODEC_INVALID_PARAM if the encoder does not
+   *       support SVC in its current encoding mode
+   *  0: off, 1: on
+   */
   VP9E_SET_SVC,
+
+  /*!\brief control function to set parameters for SVC.
+   * \note Parameters contain min_q, max_q, scaling factor for each of the
+   *       SVC layers.
+   */
   VP9E_SET_SVC_PARAMETERS,
 
   /*!\brief control function to set svc layer for spatial and temporal.
