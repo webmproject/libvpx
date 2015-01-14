@@ -1255,6 +1255,7 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
         break;
       case TX_16X16:
 #if CONFIG_EXT_TX
+        tx_type = get_tx_type(plane, xd);
         vp9_highbd_iht16x16_add(tx_type, dqcoeff, dst, pd->dst.stride,
                                 p->eobs[block], xd->bd);
 #else
@@ -1264,6 +1265,7 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
         break;
       case TX_8X8:
 #if CONFIG_EXT_TX
+        tx_type = get_tx_type(plane, xd);
         vp9_highbd_iht8x8_add(tx_type, dqcoeff, dst, pd->dst.stride,
                               p->eobs[block], xd->bd);
 #else
@@ -1310,6 +1312,7 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
       break;
     case TX_16X16:
 #if CONFIG_EXT_TX
+      tx_type = get_tx_type(plane, xd);
       vp9_iht16x16_add(tx_type, dqcoeff, dst, pd->dst.stride, p->eobs[block]);
 #else
       vp9_idct16x16_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);
@@ -1317,6 +1320,7 @@ static void encode_block(int plane, int block, BLOCK_SIZE plane_bsize,
       break;
     case TX_8X8:
 #if CONFIG_EXT_TX
+      tx_type = get_tx_type(plane, xd);
       vp9_iht8x8_add(tx_type, dqcoeff, dst, pd->dst.stride, p->eobs[block]);
 #else
       vp9_idct8x8_add(dqcoeff, dst, pd->dst.stride, p->eobs[block]);

@@ -268,7 +268,7 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
             if (mbmi->tx_skip[plane != 0]) {
               vp9_tx_identity_add(dqcoeff, dst, stride, 32, shift);
             } else {
-            vp9_highbd_idct32x32_add(dqcoeff, dst, stride, eob, xd->bd);
+              vp9_highbd_idct32x32_add(dqcoeff, dst, stride, eob, xd->bd);
             }
 #else
             vp9_highbd_idct32x32_add(dqcoeff, dst, stride, eob, xd->bd);
