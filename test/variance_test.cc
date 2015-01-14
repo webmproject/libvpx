@@ -1932,11 +1932,14 @@ const vp9_subpixvariance_fn_t subpel_variance16x16_neon =
     vp9_sub_pixel_variance16x16_neon;
 const vp9_subpixvariance_fn_t subpel_variance32x32_neon =
     vp9_sub_pixel_variance32x32_neon;
+const vp9_subpixvariance_fn_t subpel_variance64x64_neon =
+    vp9_sub_pixel_variance64x64_neon;
 INSTANTIATE_TEST_CASE_P(
     NEON, VP9SubpelVarianceTest,
     ::testing::Values(make_tuple(3, 3, subpel_variance8x8_neon, 0),
                       make_tuple(4, 4, subpel_variance16x16_neon, 0),
-                      make_tuple(5, 5, subpel_variance32x32_neon, 0)));
+                      make_tuple(5, 5, subpel_variance32x32_neon, 0),
+                      make_tuple(6, 6, subpel_variance64x64_neon, 0)));
 #endif  // HAVE_NEON
 #endif  // CONFIG_VP9_ENCODER
 
