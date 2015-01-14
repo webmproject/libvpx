@@ -31,6 +31,7 @@ enum { kHeight32 = 32 };
 enum { kHeight32PlusOne = 33 };
 enum { kWidth64 = 64 };
 enum { kHeight64 = 64 };
+enum { kHeight64PlusOne = 65 };
 enum { kPixelStepOne = 1 };
 enum { kAlign16 = 16 };
 
@@ -251,4 +252,22 @@ unsigned int vp9_sub_pixel_variance32x32_neon(const uint8_t *src,
   var_filter_block2d_bil_w16(fdata3, temp2, kWidth32, kWidth32, kHeight32,
                              kWidth32, BILINEAR_FILTERS_2TAP(yoffset));
   return vp9_variance32x32_neon(temp2, kWidth32, dst, dst_stride, sse);
+}
+
+unsigned int vp9_sub_pixel_variance64x64_neon(const uint8_t *src,
+                                              int src_stride,
+                                              int xoffset,
+                                              int yoffset,
+                                              const uint8_t *dst,
+                                              int dst_stride,
+                                              unsigned int *sse) {
+  DECLARE_ALIGNED_ARRAY(kAlign16, uint8_t, temp2, kHeight64 * kWidth64);
+  DECLARE_ALIGNED_ARRAY(kAlign16, uint8_t, fdata3, kHeight64PlusOne * kWidth64);
+
+  var_filter_block2d_bil_w16(src, fdata3, src_stride, kPixelStepOne,
+                             kHeight64PlusOne, kWidth64,
+                             BILINEAR_FILTERS_2TAP(xoffset));
+  var_filter_block2d_bil_w16(fdata3, temp2, kWidth64, kWidth64, kHeight64,
+                             kWidth64, BILINEAR_FILTERS_2TAP(yoffset));
+  return vp9_variance64x64_neon(temp2, kWidth64, dst, dst_stride, sse);
 }
