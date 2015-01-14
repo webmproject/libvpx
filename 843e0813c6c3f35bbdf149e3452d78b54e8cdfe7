@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//J3c\u003d",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2015-01-14T16:41:23Z",
+      "side": 1,
+      "message": "grammar :   \nwhere -\u003e in which\nthe perfect copy -\u003e a perfect copy",
+      "revId": "843e0813c6c3f35bbdf149e3452d78b54e8cdfe7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//J3U\u003d",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2015-01-14T16:41:23Z",
+      "side": 1,
+      "message": "remove \u003d\u003e  to each other tile column\n\neasiy -\u003e easy \ndecodnig -\u003e decoding.\n\nnot sure what log2 unit means why not spell out all possible values  ?",
+      "revId": "843e0813c6c3f35bbdf149e3452d78b54e8cdfe7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//J3Q\u003d",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2015-01-14T16:41:23Z",
+      "side": 1,
+      "message": "I\u0027m not actually sure what this does at all?",
+      "revId": "843e0813c6c3f35bbdf149e3452d78b54e8cdfe7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//J3M\u003d",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 282,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2015-01-14T16:41:23Z",
+      "side": 1,
+      "message": "Not really described well -\u003e  This one has to do with enabling frames to be decoded in parallel but lagged not just parallel decoding of bitstreams like tile columns",
+      "revId": "843e0813c6c3f35bbdf149e3452d78b54e8cdfe7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//J3I\u003d",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2015-01-14T16:41:23Z",
+      "side": 1,
+      "message": "has segment -\u003e has a segment\nallow -\u003e allows the\nimprove subjective -\u003e improve the subjective\n\ndisalbed -\u003e disabled.",
+      "revId": "843e0813c6c3f35bbdf149e3452d78b54e8cdfe7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
