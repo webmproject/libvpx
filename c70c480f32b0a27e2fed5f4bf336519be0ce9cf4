@@ -16,6 +16,24 @@
       "revId": "c70c480f32b0a27e2fed5f4bf336519be0ce9cf4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Jlo\u003d",
+        "filename": "vpx_ports/x86.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-01-15T22:53:41Z",
+      "side": 1,
+      "message": "it\u0027s not a constraint here, but an input param (they map to the registers):\n\nhttps://gcc.gnu.org/onlinedocs/gcc/Extended-Asm.html#Extended-Asm\n\ncompare:\n\nhttps://gerrit.chromium.org/gerrit/gitweb?p\u003dwebm/libwebp.git;a\u003dblob;f\u003dsrc/dsp/cpu.c;h\u003d42e58249d6ae6eb964bf62b0b94bbab2978a080a;hb\u003dHEAD#l38",
+      "parentUuid": "AAAAdn//JrI\u003d",
+      "revId": "c70c480f32b0a27e2fed5f4bf336519be0ce9cf4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
