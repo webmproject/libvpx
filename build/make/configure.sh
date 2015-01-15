@@ -1243,10 +1243,14 @@ EOF
   fi
 
   tgt_os_no_version=$(echo "${tgt_os}" | tr -d "[0-9]")
+  if [ "${tgt_os_no_version}" = "darwin" ] || \
+     [ "${tgt_os_no_version}" = "openbsd" ] || [ "`uname`" = "OpenBSD" ]; then
+    openbsd_like=yes
+  fi
   # Default use_x86inc to yes when we are 64 bit, non-pic, or on any
   # non-Darwin target.
   if [ "${tgt_isa}" = "x86_64" ] || [ "${pic}" != "yes" ] || \
-      [ "${tgt_os_no_version}" != "darwin" ]; then
+      [ "${openbsd_like}" != "yes" ]; then
     soft_enable use_x86inc
   fi
 
