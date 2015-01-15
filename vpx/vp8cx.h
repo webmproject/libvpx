@@ -308,7 +308,20 @@ enum vp8e_enc_control_id {
    * By default, encoder operates with AQ_Mode 0(adaptive quantization off).
    */
   VP9E_SET_AQ_MODE,
+
+  /*!\brief Codec control function to enable/disable periodic Q boost
+   *
+   * One VP9 encoder speed feature is to enable quality boost by lowering
+   * frame level Q periodically. This control function provides a mean to
+   * turn on/off this feature.
+   *               0 = off
+   *               1 = on
+   *
+   * By default, the encoder is allowed to use this feature for appropriate
+   * encoding modes.
+   */
   VP9E_SET_FRAME_PERIODIC_BOOST,
+
   /*!\brief control function to set noise sensitivity
    *
    *  0: off, 1: OnYOnly
