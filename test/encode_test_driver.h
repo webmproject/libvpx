@@ -140,6 +140,12 @@ class Encoder {
   }
 #endif
 
+  void Config(const vpx_codec_enc_cfg_t *cfg) {
+    const vpx_codec_err_t res = vpx_codec_enc_config_set(&encoder_, cfg);
+    ASSERT_EQ(VPX_CODEC_OK, res) << EncoderError();
+    cfg_ = *cfg;
+  }
+
   void set_deadline(unsigned long deadline) {
     deadline_ = deadline;
   }
