@@ -183,7 +183,9 @@ void vp9_encode_tiles_mt(VP9_COMP *cpi) {
 
       // Allocate thread data.
       CHECK_MEM_ERROR(cm, thread_data->td,
-                      vpx_calloc(1, sizeof(*thread_data->td)));
+                      vpx_memalign(32, sizeof(*thread_data->td)));
+      vp9_zero(*thread_data->td);
+
       // Set up pc_tree.
       thread_data->td->leaf_tree = NULL;
       thread_data->td->pc_tree = NULL;
