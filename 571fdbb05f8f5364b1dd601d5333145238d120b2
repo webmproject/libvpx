@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Jos\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 442,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2015-01-15T19:50:21Z",
+      "side": 1,
+      "message": "prefer: !(skip \u0026\u0026 is_inter) - more intuitive",
+      "revId": "571fdbb05f8f5364b1dd601d5333145238d120b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
