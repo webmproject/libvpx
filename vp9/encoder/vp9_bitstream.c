@@ -439,7 +439,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
 #if CONFIG_SUPERTX
     if (try_tx_skip) {
 #else
-    if (try_tx_skip && !skip) {
+    if (try_tx_skip && (!skip || !is_inter)) {
 #endif  // CONFIG_SUPERTX
       if (xd->lossless) {
 #if CONFIG_SUPERTX

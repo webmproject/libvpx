@@ -1439,6 +1439,109 @@ void vp9_encode_sb_supertx(MACROBLOCK *x, BLOCK_SIZE bsize) {
 }
 #endif
 
+#if CONFIG_TX_SKIP
+static int vp9_dpcm_intra(uint8_t *src, int src_stride,
+                          uint8_t *dst, int dst_stride,
+                          int16_t *src_diff, int diff_stride,
+                          tran_low_t *coeff, tran_low_t *qcoeff,
+                          tran_low_t *dqcoeff, struct macroblock_plane *p,
+                          struct macroblockd_plane *pd,
+                          const scan_order *scan_order, PREDICTION_MODE mode,
+                          int bs, int shift, int logsizeby32) {
+  int i, j, eob, temp;
+  vpx_memset(qcoeff, 0, bs * bs * sizeof(*qcoeff));
+  vpx_memset(dqcoeff, 0, bs * bs * sizeof(*dqcoeff));
+
+  switch (mode) {
+    case H_PRED:
+      for (i = 0 ; i < bs; i++) {
+        vp9_subtract_block_c(bs, 1, src_diff + i, diff_stride,
+                             src + i, src_stride,
+                             dst + i, dst_stride);
+        vp9_tx_identity_rect(src_diff + i, coeff + i, bs, 1,
+                             diff_stride, bs, shift);
+        vp9_quantize_rect(coeff + i, bs, 1, p->zbin, p->round, p->quant,
+                          p->quant_shift, qcoeff + i, dqcoeff + i,
+                          pd->dequant, p->zbin_extra, logsizeby32, bs, i == 0);
+        vp9_tx_identity_add_rect(dqcoeff + i, dst + i, bs, 1,
+                                 bs, dst_stride, shift);
+        if ( i < bs - 1 && 1)
+          for (j = 0 ; j < bs; j++)
+            *(dst + j * dst_stride + i + 1) =
+                *(dst + j * dst_stride + i);
+      }
+      break;
+    case V_PRED:
+      for (i = 0 ; i < bs; i++) {
+        vp9_subtract_block_c(1, bs, src_diff + diff_stride * i,
+                             diff_stride,
+                             src + src_stride * i, src_stride,
+                             dst + dst_stride * i, dst_stride);
+        vp9_tx_identity_rect(src_diff + diff_stride * i,
+                             coeff + bs * i, 1, bs,
+                             diff_stride, bs, shift);
+        vp9_quantize_rect(coeff + bs * i, 1, bs, p->zbin, p->round, p->quant,
+                          p->quant_shift, qcoeff + bs * i, dqcoeff + bs * i,
+                          pd->dequant, p->zbin_extra, logsizeby32, bs, i == 0);
+        vp9_tx_identity_add_rect(dqcoeff + bs * i, dst + dst_stride * i,
+                                 1, bs, bs, dst_stride, shift);
+        if (i < bs - 1)
+          vpx_memcpy(dst + (i + 1) * dst_stride,
+                     dst + i * dst_stride, bs * sizeof(dst[0]));
+      }
+      break;
+    case TM_PRED:
+      vp9_subtract_block_c(1, bs, src_diff, diff_stride, src, src_stride,
+                           dst, dst_stride);
+      vp9_tx_identity_rect(src_diff, coeff, 1, bs, diff_stride, bs, shift);
+      vp9_quantize_rect(coeff, 1, bs, p->zbin, p->round, p->quant,
+                        p->quant_shift, qcoeff, dqcoeff, pd->dequant,
+                        p->zbin_extra, logsizeby32, bs, 1);
+      vp9_tx_identity_add_rect(dqcoeff, dst, 1, bs, bs, dst_stride, shift);
+
+      vp9_subtract_block_c(bs -1, 1, src_diff + diff_stride, diff_stride,
+                           src + src_stride, src_stride,
+                           dst + dst_stride, dst_stride);
+      vp9_tx_identity_rect(src_diff + diff_stride, coeff + bs, bs - 1, 1,
+                           diff_stride, bs, shift);
+      vp9_quantize_rect(coeff + bs, bs - 1, 1, p->zbin, p->round, p->quant,
+                        p->quant_shift, qcoeff + bs, dqcoeff + bs,
+                        pd->dequant, p->zbin_extra, logsizeby32, bs, 0);
+      vp9_tx_identity_add_rect(dqcoeff + bs, dst + dst_stride, bs - 1, 1,
+                               bs, dst_stride, shift);
+
+      for (i = 1 ; i < bs; i++) {
+        for (j = 1 ; j < bs; j++) {
+          temp = dst[(i - 1) * dst_stride + j] + dst[i * dst_stride + j - 1] -
+                 dst[(i - 1) * dst_stride + j - 1];
+          temp = clip_pixel(temp);
+          dst[i * dst_stride + j] = temp;
+          vp9_subtract_block_c(1, 1, src_diff + diff_stride * i + j,
+                               diff_stride, src + src_stride * i + j,
+                               src_stride, dst + dst_stride * i + j,
+                               dst_stride);
+          vp9_tx_identity_rect(src_diff + i * diff_stride + j,
+                               coeff + bs * i + j, 1, 1, diff_stride,
+                               bs, shift);
+          vp9_quantize_rect(coeff + bs * i + j, 1, 1, p->zbin, p->round,
+                            p->quant, p->quant_shift, qcoeff + bs * i + j,
+                            dqcoeff + bs * i + j, pd->dequant,
+                            p->zbin_extra, logsizeby32, bs, 0);
+          vp9_tx_identity_add_rect(dqcoeff + bs * i + j,
+                                   dst + dst_stride * i + j, 1, 1, bs,
+                                   dst_stride, shift);
+        }
+      }
+      break;
+    default:
+      break;
+  }
+
+  eob = get_eob(qcoeff, bs * bs, scan_order->scan);
+  return eob;
+}
+#endif  // CONFIG_TX_SKIP
+
 static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                TX_SIZE tx_size, void *arg) {
   struct encode_b_args* const args = arg;
@@ -1516,6 +1619,14 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                     dst, dst_stride, i, j, plane);
 
             if (!x->skip_recode) {
+              if (mode == V_PRED || mode == H_PRED || mode == TM_PRED) {
+                *eob = vp9_dpcm_intra(src, src_stride, dst, dst_stride,
+                                      src_diff, diff_stride,
+                                      coeff, qcoeff, dqcoeff, p, pd,
+                                      scan_order, mode, 32, shift, 0);
+                break;
+              }
+
               vp9_subtract_block(32, 32, src_diff, diff_stride,
                                  src, src_stride, dst, dst_stride);
               vp9_tx_identity(src_diff, coeff, diff_stride, 32, shift);
@@ -1541,6 +1652,14 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                     x->skip_encode ? src_stride : dst_stride,
                                     dst, dst_stride, i, j, plane);
             if (!x->skip_recode) {
+              if (mode == V_PRED || mode == H_PRED || mode == TM_PRED) {
+                *eob = vp9_dpcm_intra(src, src_stride, dst, dst_stride,
+                                      src_diff, diff_stride,
+                                      coeff, qcoeff, dqcoeff, p, pd,
+                                      scan_order, mode, 16, shift, -1);
+                break;
+              }
+
               vp9_subtract_block(16, 16, src_diff, diff_stride,
                                  src, src_stride, dst, dst_stride);
               vp9_tx_identity(src_diff, coeff, diff_stride, 16, shift);
@@ -1565,6 +1684,14 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                     x->skip_encode ? src_stride : dst_stride,
                                     dst, dst_stride, i, j, plane);
             if (!x->skip_recode) {
+              if (mode == V_PRED || mode == H_PRED || mode == TM_PRED) {
+                *eob = vp9_dpcm_intra(src, src_stride, dst, dst_stride,
+                                      src_diff, diff_stride,
+                                      coeff, qcoeff, dqcoeff, p, pd,
+                                      scan_order, mode, 8, shift, -1);
+                break;
+              }
+
               vp9_subtract_block(8, 8, src_diff, diff_stride,
                                  src, src_stride, dst, dst_stride);
               vp9_tx_identity(src_diff, coeff, diff_stride, 8, shift);
@@ -1591,6 +1718,14 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                     dst, dst_stride, i, j, plane);
 
             if (!x->skip_recode) {
+              if (mode == V_PRED || mode == H_PRED || mode == TM_PRED) {
+                *eob = vp9_dpcm_intra(src, src_stride, dst, dst_stride,
+                                      src_diff, diff_stride,
+                                      coeff, qcoeff, dqcoeff, p, pd,
+                                      scan_order, mode, 4, shift, -1);
+                break;
+              }
+
               vp9_subtract_block(4, 4, src_diff, diff_stride,
                                  src, src_stride, dst, dst_stride);
               vp9_tx_identity(src_diff, coeff, diff_stride, 4, shift);

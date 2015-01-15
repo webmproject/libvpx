@@ -96,6 +96,17 @@ int vp9_quantizer_to_qindex(int quantizer);
 
 int vp9_qindex_to_quantizer(int qindex);
 
+#if CONFIG_TX_SKIP
+void vp9_quantize_rect(const tran_low_t *coeff_ptr, int row, int col,
+                       const int16_t *zbin_ptr, const int16_t *round_ptr,
+                       const int16_t *quant_ptr, const int16_t *quant_shift_ptr,
+                       tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
+                       const int16_t *dequant_ptr, int zbin_oq_value,
+                       int logsizeby32, int stride, int has_dc);
+
+int get_eob(tran_low_t *qcoeff_ptr, intptr_t n_coeffs, const int16_t *scan);
+#endif
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

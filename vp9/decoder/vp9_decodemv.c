@@ -746,6 +746,9 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
     xd->corrupted |= !assign_mv(cm, mbmi->mode, mbmi->mv, nearestmv,
                                 nearestmv, nearmv, is_compound, allow_hp, r);
   }
+#if CONFIG_TX_SKIP
+    mbmi->uv_mode = mbmi->mode;
+#endif
 }
 
 static void read_inter_frame_mode_info(VP9_COMMON *const cm,
@@ -859,7 +862,7 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
 #if CONFIG_SUPERTX
     if (try_tx_skip) {
 #else
-    if (try_tx_skip && !mbmi->skip) {
+    if (try_tx_skip && (!mbmi->skip || !inter_block)) {
 #endif  // CONFIG_SUPERTX
       if (xd->lossless) {
 #if CONFIG_SUPERTX

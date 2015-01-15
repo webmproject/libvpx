@@ -39,6 +39,9 @@ void vp9_encode_block_intra(MACROBLOCK *x, int plane, int block,
 void vp9_encode_intra_block_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane);
 
 #if CONFIG_TX_SKIP
+void vp9_tx_identity_rect(const int16_t *input, tran_low_t *out,
+                          int row, int col,
+                          int stride_in, int stride_out, int shift);
 void vp9_tx_identity(const int16_t *input, tran_low_t *out, int stride,
                      int bs, int shift);
 #endif

@@ -4800,7 +4800,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
 #if CONFIG_SUPERTX
       if (try_tx_skip) {
 #else
-      if (try_tx_skip && !(mbmi->skip || seg_skip)) {
+      if (try_tx_skip && (!(mbmi->skip || seg_skip) || !is_inter_block(mbmi))) {
 #endif
         ++cm->counts.y_tx_skip[is_inter_block(mbmi)][mbmi->tx_skip[0]];
         ++cm->counts.uv_tx_skip[mbmi->tx_skip[0]][mbmi->tx_skip[1]];
