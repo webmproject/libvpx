@@ -165,4 +165,14 @@ INSTANTIATE_TEST_CASE_P(
 
 #endif
 
+#if HAVE_NEON
+INSTANTIATE_TEST_CASE_P(
+    NEON, AverageTest,
+    ::testing::Values(
+        make_tuple(16, 16, 0, 8, &vp9_avg_8x8_neon),
+        make_tuple(16, 16, 5, 8, &vp9_avg_8x8_neon),
+        make_tuple(32, 32, 15, 8, &vp9_avg_8x8_neon)));
+
+#endif
+
 }  // namespace

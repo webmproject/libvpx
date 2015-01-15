@@ -1098,7 +1098,7 @@ add_proto qw/unsigned int vp9_get_mb_ss/, "const int16_t *";
 specialize qw/vp9_get_mb_ss/, "$sse2_x86inc";
 
 add_proto qw/unsigned int vp9_avg_8x8/, "const uint8_t *, int p";
-specialize qw/vp9_avg_8x8 sse2/;
+specialize qw/vp9_avg_8x8 sse2 neon/;
 
 add_proto qw/unsigned int vp9_avg_4x4/, "const uint8_t *, int p";
 specialize qw/vp9_avg_4x4 sse2/;
