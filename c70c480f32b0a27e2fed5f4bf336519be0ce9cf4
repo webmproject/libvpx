@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//JrI\u003d",
+        "filename": "vpx_ports/x86.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-01-15T16:04:54Z",
+      "side": 1,
+      "message": "it no longer sets eax/ecx to 7/0, but the first params are 7 and 0. looking at the macro, these are \u0027func\u0027 and \u0027func2\u0027 with constraints a and c which I can\u0027t seem to find documentation for c and this: https://gcc.gnu.org/onlinedocs/gcc/Simple-Constraints.html#Simple-Constraints seems to suggest a is for \u0027address\u0027\n\nunless it\u0027s aliasing a and c to ax and cx? inline assembly is ugh.",
+      "revId": "c70c480f32b0a27e2fed5f4bf336519be0ce9cf4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
