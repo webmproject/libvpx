@@ -68,14 +68,14 @@ extern "C" {
 
   /*!\brief List of supported color spaces */
   typedef enum vpx_color_space {
-    VPX_CS_UNKNOWN    = 0,  // Unknown
-    VPX_CS_BT_601     = 1,  // BT.601
-    VPX_CS_BT_709     = 2,  // BT.709
-    VPX_CS_SMPTE_170  = 3,  // SMPTE.170
-    VPX_CS_SMPTE_240  = 4,  // SMPTE.240
-    VPX_CS_BT_2020    = 5,  // BT.2020
-    VPX_CS_RESERVED   = 6,  // Reserved
-    VPX_CS_SRGB       = 7   // sRGB
+    VPX_CS_UNKNOWN    = 0,  /**< Unknown */
+    VPX_CS_BT_601     = 1,  /**< BT.601 */
+    VPX_CS_BT_709     = 2,  /**< BT.709 */
+    VPX_CS_SMPTE_170  = 3,  /**< SMPTE.170 */
+    VPX_CS_SMPTE_240  = 4,  /**< SMPTE.240 */
+    VPX_CS_BT_2020    = 5,  /**< BT.2020 */
+    VPX_CS_RESERVED   = 6,  /**< Reserved */
+    VPX_CS_SRGB       = 7   /**< sRGB */
   } vpx_color_space_t; /**< alias for enum vpx_color_space */
 
   /**\brief Image Descriptor */
