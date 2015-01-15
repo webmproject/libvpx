@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Ju4\u003d",
+        "filename": "vpx/vp8dx.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2015-01-15T00:07:22Z",
+      "side": 1,
+      "message": "Why is this exposed to users?   Especially now that we have threading code that uses tiles to get this right. It seems a weird way to do this,  especially given that the unit tests can read directly into the code ...",
+      "revId": "997155357b718d1a8c552781e1bcc7067e3a3891",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
