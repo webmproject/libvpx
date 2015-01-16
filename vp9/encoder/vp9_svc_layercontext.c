@@ -344,7 +344,8 @@ int vp9_svc_start_frame(VP9_COMP *const cpi) {
   buf = vp9_lookahead_peek(cpi->lookahead, 0);
   if (cpi->oxcf.error_resilient_mode == 0 && cpi->oxcf.pass == 2 &&
       cpi->svc.encode_empty_frame_state == NEED_TO_ENCODE &&
-      lc->rc.frames_to_key != 0 && !(buf->flags & VPX_EFLAG_FORCE_KF)) {
+      lc->rc.frames_to_key != 0 &&
+      !(buf != NULL && (buf->flags & VPX_EFLAG_FORCE_KF))) {
     if ((cpi->svc.number_temporal_layers > 1 &&
          cpi->svc.temporal_layer_id < cpi->svc.number_temporal_layers - 1) ||
         (cpi->svc.number_spatial_layers > 1 &&
