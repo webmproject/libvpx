@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAdn//Jg4\u003d",
+        "filename": "vpx_ports/x86.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-01-16T07:00:19Z",
+      "side": 1,
+      "message": "probably want to avoid this on non-x86/x64 targets...",
+      "revId": "c70c480f32b0a27e2fed5f4bf336519be0ce9cf4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//JrI\u003d",
         "filename": "vpx_ports/x86.h",
         "patchSetId": 2
