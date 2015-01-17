@@ -50,9 +50,10 @@ static INLINE int horizontal_add_s32x4(const int32x4_t v_32x4) {
   return vget_lane_s32(c, 0);
 }
 
+// w * h must be less than 2048 or local variable v_sum may overflow.
 static void variance_neon_w8(const uint8_t *a, int a_stride,
                              const uint8_t *b, int b_stride,
-                             int w, int h, unsigned int *sse, int *sum) {
+                             int w, int h, uint32_t *sse, int *sum) {
   int i, j;
   int16x8_t v_sum = vdupq_n_s16(0);
   int32x4_t v_sse_lo = vdupq_n_s32(0);
@@ -215,25 +216,56 @@ unsigned int vp9_variance32x32_neon(const uint8_t *a, int a_stride,
 unsigned int vp9_variance32x64_neon(const uint8_t *a, int a_stride,
                                     const uint8_t *b, int b_stride,
                                     unsigned int *sse) {
-  int sum;
-  variance_neon_w8(a, a_stride, b, b_stride, kWidth32, kHeight64, sse, &sum);
-  return *sse - (((int64_t)sum * sum) >> 11);  // >> 11 = / 32 * 64
+  int sum1, sum2;
+  uint32_t sse1, sse2;
+  variance_neon_w8(a, a_stride, b, b_stride, kWidth32, kHeight32, &sse1, &sum1);
+  variance_neon_w8(a + (kHeight32 * a_stride), a_stride,
+                   b + (kHeight32 * b_stride), b_stride, kWidth32, kHeight32,
+                   &sse2, &sum2);
+  *sse = sse1 + sse2;
+  sum1 += sum2;
+  return *sse - (((int64_t)sum1 * sum1) >> 11);  // >> 11 = / 32 * 64
 }
 
 unsigned int vp9_variance64x32_neon(const uint8_t *a, int a_stride,
                                     const uint8_t *b, int b_stride,
                                     unsigned int *sse) {
-  int sum;
-  variance_neon_w8(a, a_stride, b, b_stride, kWidth64, kHeight32, sse, &sum);
-  return *sse - (((int64_t)sum * sum) >> 11);  // >> 11 = / 64 * 32
+  int sum1, sum2;
+  uint32_t sse1, sse2;
+  variance_neon_w8(a, a_stride, b, b_stride, kWidth64, kHeight16, &sse1, &sum1);
+  variance_neon_w8(a + (kHeight16 * a_stride), a_stride,
+                   b + (kHeight16 * b_stride), b_stride, kWidth64, kHeight16,
+                   &sse2, &sum2);
+  *sse = sse1 + sse2;
+  sum1 += sum2;
+  return *sse - (((int64_t)sum1 * sum1) >> 11);  // >> 11 = / 32 * 64
 }
 
 unsigned int vp9_variance64x64_neon(const uint8_t *a, int a_stride,
                                     const uint8_t *b, int b_stride,
                                     unsigned int *sse) {
-  int sum;
-  variance_neon_w8(a, a_stride, b, b_stride, kWidth64, kHeight64, sse, &sum);
-  return *sse - (((int64_t)sum * sum) >> 12);  // >> 12 = / 64 * 64
+  int sum1, sum2;
+  uint32_t sse1, sse2;
+
+  variance_neon_w8(a, a_stride, b, b_stride, kWidth64, kHeight16, &sse1, &sum1);
+  variance_neon_w8(a + (kHeight16 * a_stride), a_stride,
+                   b + (kHeight16 * b_stride), b_stride, kWidth64, kHeight16,
+                   &sse2, &sum2);
+  sse1 += sse2;
+  sum1 += sum2;
+
+  variance_neon_w8(a + (kHeight16 * 2 * a_stride), a_stride,
+                   b + (kHeight16 * 2 * b_stride), b_stride,
+                   kWidth64, kHeight16, &sse2, &sum2);
+  sse1 += sse2;
+  sum1 += sum2;
+
+  variance_neon_w8(a + (kHeight16 * 3 * a_stride), a_stride,
+                   b + (kHeight16 * 3 * b_stride), b_stride,
+                   kWidth64, kHeight16, &sse2, &sum2);
+  *sse = sse1 + sse2;
+  sum1 += sum2;
+  return *sse - (((int64_t)sum1 * sum1) >> 12);  // >> 12 = / 64 * 64
 }
 
 unsigned int vp9_sub_pixel_variance32x32_neon(const uint8_t *src,
