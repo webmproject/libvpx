@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//JaU\u003d",
+        "filename": "vp9/common/vp9_loopfilter_thread.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 285,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-01-17T01:07:15Z",
+      "side": 1,
+      "message": "not necessary",
+      "revId": "1405bcf4b2faf19bffffe017b091168a5a66fcd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//JaQ\u003d",
+        "filename": "vp9/common/vp9_loopfilter_thread.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-01-17T01:07:15Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "1405bcf4b2faf19bffffe017b091168a5a66fcd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
