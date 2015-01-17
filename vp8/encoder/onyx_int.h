@@ -665,6 +665,9 @@ typedef struct VP8_COMP
 
     int droppable;
 
+    int initial_width;
+    int initial_height;
+
 #if CONFIG_TEMPORAL_DENOISING
     VP8_DENOISER denoiser;
 #endif
