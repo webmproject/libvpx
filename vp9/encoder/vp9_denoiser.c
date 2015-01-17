@@ -352,6 +352,7 @@ static void copy_frame(YV12_BUFFER_CONFIG dest, const YV12_BUFFER_CONFIG src) {
   int r;
   const uint8_t *srcbuf = src.y_buffer;
   uint8_t *destbuf = dest.y_buffer;
+
   assert(dest.y_width == src.y_width);
   assert(dest.y_height == src.y_height);
 
@@ -362,13 +363,13 @@ static void copy_frame(YV12_BUFFER_CONFIG dest, const YV12_BUFFER_CONFIG src) {
   }
 }
 
-static void swap_frame_buffer(YV12_BUFFER_CONFIG dest,
-                              YV12_BUFFER_CONFIG src) {
-  uint8_t *tmp_buf = dest.y_buffer;
-  assert(dest.y_width == src.y_width);
-  assert(dest.y_height == src.y_height);
-  dest.y_buffer = src.y_buffer;
-  src.y_buffer = tmp_buf;
+static void swap_frame_buffer(YV12_BUFFER_CONFIG *dest,
+                              YV12_BUFFER_CONFIG *src) {
+  uint8_t *tmp_buf = dest->y_buffer;
+  assert(dest->y_width == src->y_width);
+  assert(dest->y_height == src->y_height);
+  dest->y_buffer = src->y_buffer;
+  src->y_buffer = tmp_buf;
 }
 
 void vp9_denoiser_update_frame_info(VP9_DENOISER *denoiser,
@@ -387,16 +388,16 @@ void vp9_denoiser_update_frame_info(VP9_DENOISER *denoiser,
 
   /* For non key frames */
   if (refresh_alt_ref_frame) {
-    swap_frame_buffer(denoiser->running_avg_y[ALTREF_FRAME],
-                      denoiser->running_avg_y[INTRA_FRAME]);
+    swap_frame_buffer(&denoiser->running_avg_y[ALTREF_FRAME],
+                      &denoiser->running_avg_y[INTRA_FRAME]);
   }
   if (refresh_golden_frame) {
-    swap_frame_buffer(denoiser->running_avg_y[GOLDEN_FRAME],
-                      denoiser->running_avg_y[INTRA_FRAME]);
+    swap_frame_buffer(&denoiser->running_avg_y[GOLDEN_FRAME],
+                      &denoiser->running_avg_y[INTRA_FRAME]);
   }
   if (refresh_last_frame) {
-    swap_frame_buffer(denoiser->running_avg_y[LAST_FRAME],
-                      denoiser->running_avg_y[INTRA_FRAME]);
+    swap_frame_buffer(&denoiser->running_avg_y[LAST_FRAME],
+                      &denoiser->running_avg_y[INTRA_FRAME]);
   }
 }
 
