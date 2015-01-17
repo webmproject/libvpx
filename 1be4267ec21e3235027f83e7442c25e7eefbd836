@@ -34,6 +34,24 @@
       "revId": "1be4267ec21e3235027f83e7442c25e7eefbd836",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//JZY\u003d",
+        "filename": "vp9/common/vp9_loopfilter_thread.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-01-17T01:55:02Z",
+      "side": 0,
+      "message": "that\u0027s the point though, code moves so best to document the assumptions...",
+      "parentUuid": "AAAAdn//JZ4\u003d",
+      "revId": "1be4267ec21e3235027f83e7442c25e7eefbd836",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
