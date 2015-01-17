@@ -16,6 +16,24 @@
       "revId": "1be4267ec21e3235027f83e7442c25e7eefbd836",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//JZ4\u003d",
+        "filename": "vp9/common/vp9_loopfilter_thread.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2015-01-17T01:19:53Z",
+      "side": 0,
+      "message": "The above line of code is moved in vp9_loop_filter_frame_mt(). frame_filter_level is not used in this function. No need to asset it.",
+      "parentUuid": "AAAAdn//JaI\u003d",
+      "revId": "1be4267ec21e3235027f83e7442c25e7eefbd836",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
