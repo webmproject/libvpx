@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//JSg\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_avg_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2015-01-20T22:36:37Z",
+      "side": 1,
+      "message": "I tried this as well. If I do all the loads up front and keep the summing code the same, the code generated is exactly the same.",
+      "parentUuid": "AAAAdn//JXc\u003d",
+      "revId": "6e7e1cf32f85f91ddfcb49a807e598e8ead131fe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//JXY\u003d",
         "filename": "vp9/encoder/arm/neon/vp9_avg_neon.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-01-17T04:07:16Z",
       "side": 1,
       "message": "you could vrshr and then extract the lane, but in practice I doubt it would make much difference",
+      "revId": "6e7e1cf32f85f91ddfcb49a807e598e8ead131fe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//JTA\u003d",
+        "filename": "vp9/encoder/arm/neon/vp9_avg_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2015-01-20T22:36:37Z",
+      "side": 1,
+      "message": "I checked and it adds one neon and removes 2 arm instructions. But I think the delay on waiting for the input register to the vrshr instruction will be greater than the 2 arm instructions. Again in practice, not sure of the difference if any. So I think it is best to leave as is.",
+      "parentUuid": "AAAAdn//JXY\u003d",
       "revId": "6e7e1cf32f85f91ddfcb49a807e598e8ead131fe",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
