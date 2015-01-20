@@ -9,13 +9,9 @@
  */
 
 #include "./vpx_config.h"
-
 #include "vpx_mem/vpx_mem.h"
-
+#include "vp9/common/vp9_loopfilter_thread.h"
 #include "vp9/common/vp9_reconinter.h"
-
-#include "vp9/decoder/vp9_dthread.h"
-#include "vp9/decoder/vp9_decoder.h"
 
 #if CONFIG_MULTITHREAD
 static INLINE void mutex_lock(pthread_mutex_t *const mutex) {
@@ -88,21 +84,23 @@ static INLINE void sync_write(VP9LfSync *const lf_sync, int r, int c,
 }
 
 // Implement row loopfiltering for each thread.
-static void loop_filter_rows_mt(const YV12_BUFFER_CONFIG *const frame_buffer,
-                                VP9_COMMON *const cm,
-                                struct macroblockd_plane planes[MAX_MB_PLANE],
-                                int start, int stop, int y_only,
-                                VP9LfSync *const lf_sync) {
+static INLINE
+void thread_loop_filter_rows(const YV12_BUFFER_CONFIG *const frame_buffer,
+                             VP9_COMMON *const cm,
+                             struct macroblockd_plane planes[MAX_MB_PLANE],
+                             int start, int stop, int y_only,
+                             VP9LfSync *const lf_sync) {
   const int num_planes = y_only ? 1 : MAX_MB_PLANE;
-  int r, c;  // SB row and col
   const int sb_cols = mi_cols_aligned_to_sb(cm->mi_cols) >> MI_BLOCK_SIZE_LOG2;
+  int mi_row, mi_col;
 
-  for (r = start; r < stop; r += lf_sync->num_workers) {
-    const int mi_row = r << MI_BLOCK_SIZE_LOG2;
+  for (mi_row = start; mi_row < stop;
+       mi_row += lf_sync->num_workers * MI_BLOCK_SIZE) {
     MODE_INFO *const mi = cm->mi + mi_row * cm->mi_stride;
 
-    for (c = 0; c < sb_cols; ++c) {
-      const int mi_col = c << MI_BLOCK_SIZE_LOG2;
+    for (mi_col = 0; mi_col < cm->mi_cols; mi_col += MI_BLOCK_SIZE) {
+      const int r = mi_row >> MI_BLOCK_SIZE_LOG2;
+      const int c = mi_col >> MI_BLOCK_SIZE_LOG2;
       LOOP_FILTER_MASK lfm;
       int plane;
 
@@ -123,36 +121,32 @@ static void loop_filter_rows_mt(const YV12_BUFFER_CONFIG *const frame_buffer,
 // Row-based multi-threaded loopfilter hook
 static int loop_filter_row_worker(VP9LfSync *const lf_sync,
                                   LFWorkerData *const lf_data) {
-  loop_filter_rows_mt(lf_data->frame_buffer, lf_data->cm, lf_data->planes,
-                      lf_data->start, lf_data->stop, lf_data->y_only, lf_sync);
+  thread_loop_filter_rows(lf_data->frame_buffer, lf_data->cm, lf_data->planes,
+                          lf_data->start, lf_data->stop, lf_data->y_only,
+                          lf_sync);
   return 1;
 }
 
-// VP9 decoder: Implement multi-threaded loopfilter that uses the tile
-// threads.
-void vp9_loop_filter_frame_mt(VP9LfSync *lf_sync,
-                              YV12_BUFFER_CONFIG *frame,
-                              struct macroblockd_plane planes[MAX_MB_PLANE],
-                              VP9_COMMON *cm,
-                              VP9Worker *workers, int nworkers,
-                              int frame_filter_level,
-                              int y_only) {
+static void loop_filter_rows_mt(YV12_BUFFER_CONFIG *frame,
+                                VP9_COMMON *cm,
+                                struct macroblockd_plane planes[MAX_MB_PLANE],
+                                int start, int stop, int y_only,
+                                VP9Worker *workers, int nworkers,
+                                VP9LfSync *lf_sync) {
   const VP9WorkerInterface *const winterface = vp9_get_worker_interface();
   // Number of superblock rows and cols
   const int sb_rows = mi_cols_aligned_to_sb(cm->mi_rows) >> MI_BLOCK_SIZE_LOG2;
+  // Decoder may allocate more threads than number of tiles based on user's
+  // input.
   const int tile_cols = 1 << cm->log2_tile_cols;
   const int num_workers = MIN(nworkers, tile_cols);
   int i;
-
-  if (!frame_filter_level) return;
 
   if (!lf_sync->sync_range || cm->last_height != cm->height ||
       num_workers > lf_sync->num_workers) {
     vp9_loop_filter_dealloc(lf_sync);
     vp9_loop_filter_alloc(lf_sync, cm, sb_rows, cm->width, num_workers);
   }
-
-  vp9_loop_filter_frame_init(cm, frame_filter_level);
 
   // Initialize cur_sb_col to -1 for all SB rows.
   vpx_memset(lf_sync->cur_sb_col, -1, sizeof(*lf_sync->cur_sb_col) * sb_rows);
@@ -175,8 +169,8 @@ void vp9_loop_filter_frame_mt(VP9LfSync *lf_sync,
 
     // Loopfilter data
     vp9_loop_filter_data_reset(lf_data, frame, cm, planes);
-    lf_data->start = i;
-    lf_data->stop = sb_rows;
+    lf_data->start = start + i * MI_BLOCK_SIZE;
+    lf_data->stop = stop;
     lf_data->y_only = y_only;
 
     // Start loopfiltering
@@ -193,8 +187,33 @@ void vp9_loop_filter_frame_mt(VP9LfSync *lf_sync,
   }
 }
 
+void vp9_loop_filter_frame_mt(YV12_BUFFER_CONFIG *frame,
+                              VP9_COMMON *cm,
+                              struct macroblockd_plane planes[MAX_MB_PLANE],
+                              int frame_filter_level,
+                              int y_only, int partial_frame,
+                              VP9Worker *workers, int num_workers,
+                              VP9LfSync *lf_sync) {
+  int start_mi_row, end_mi_row, mi_rows_to_filter;
+
+  if (!frame_filter_level) return;
+
+  start_mi_row = 0;
+  mi_rows_to_filter = cm->mi_rows;
+  if (partial_frame && cm->mi_rows > 8) {
+    start_mi_row = cm->mi_rows >> 1;
+    start_mi_row &= 0xfffffff8;
+    mi_rows_to_filter = MAX(cm->mi_rows / 8, 8);
+  }
+  end_mi_row = start_mi_row + mi_rows_to_filter;
+  vp9_loop_filter_frame_init(cm, frame_filter_level);
+
+  loop_filter_rows_mt(frame, cm, planes, start_mi_row, end_mi_row,
+                      y_only, workers, num_workers, lf_sync);
+}
+
 // Set up nsync by width.
-static int get_sync_range(int width) {
+static INLINE int get_sync_range(int width) {
   // nsync numbers are picked by testing. For example, for 4k
   // video, using 4 gives best performance.
   if (width < 640)

@@ -36,7 +36,6 @@
 #include "vp9/decoder/vp9_decodemv.h"
 #include "vp9/decoder/vp9_decoder.h"
 #include "vp9/decoder/vp9_dsubexp.h"
-#include "vp9/decoder/vp9_dthread.h"
 #include "vp9/decoder/vp9_read_bit_buffer.h"
 #include "vp9/decoder/vp9_reader.h"
 
@@ -1591,9 +1590,9 @@ void vp9_decode_frame(VP9Decoder *pbi,
     if (!xd->corrupted) {
       // If multiple threads are used to decode tiles, then we use those threads
       // to do parallel loopfiltering.
-      vp9_loop_filter_frame_mt(&pbi->lf_row_sync, new_fb, pbi->mb.plane, cm,
-                               pbi->tile_workers, pbi->num_tile_workers,
-                               cm->lf.filter_level, 0);
+      vp9_loop_filter_frame_mt(new_fb, cm, pbi->mb.plane, cm->lf.filter_level,
+                               0, 0, pbi->tile_workers, pbi->num_tile_workers,
+                               &pbi->lf_row_sync);
     } else {
       vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
                          "Decode failed. Frame data is corrupted.");

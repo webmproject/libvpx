@@ -19,6 +19,7 @@
 
 #include "vp9/common/vp9_ppflags.h"
 #include "vp9/common/vp9_entropymode.h"
+#include "vp9/common/vp9_loopfilter_thread.h"
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_thread.h"
 
@@ -36,6 +37,7 @@
 #include "vp9/encoder/vp9_svc_layercontext.h"
 #include "vp9/encoder/vp9_tokenize.h"
 #include "vp9/encoder/vp9_variance.h"
+
 #if CONFIG_VP9_TEMPORAL_DENOISING
 #include "vp9/encoder/vp9_denoiser.h"
 #endif
@@ -262,6 +264,8 @@ typedef struct ThreadData {
   PC_TREE *pc_root;
 } ThreadData;
 
+struct EncWorkerData;
+
 typedef struct VP9_COMP {
   QUANTS quants;
   ThreadData td;
@@ -447,6 +451,8 @@ typedef struct VP9_COMP {
   // Multi-threading
   int num_workers;
   VP9Worker *workers;
+  struct EncWorkerData *tile_thr_data;
+  VP9LfSync lf_row_sync;
 } VP9_COMP;
 
 void vp9_initialize_enc(void);
