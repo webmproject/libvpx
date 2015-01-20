@@ -10,7 +10,7 @@
 #ifndef VPX_VP8CX_H_
 #define VPX_VP8CX_H_
 
-/*!\defgroup vp8_encoder WebM VP8 Encoder
+/*!\defgroup vp8_encoder WebM VP8/VP9 Encoder
  * \ingroup vp8
  *
  * @{
@@ -18,7 +18,7 @@
 #include "./vp8.h"
 
 /*!\file
- * \brief Provides definitions for using the VP8 encoder algorithm within the
+ * \brief Provides definitions for using VP8 or VP9 encoder algorithm within the
  *        vpx Codec Interface.
  */
 
@@ -28,17 +28,20 @@ extern "C" {
 
 /*!\name Algorithm interface for VP8
  *
- * This interface provides the capability to encode raw VP8 streams, as would
- * be found in AVI files.
+ * This interface provides the capability to encode raw VP8 streams.
  * @{
  */
 extern vpx_codec_iface_t  vpx_codec_vp8_cx_algo;
 extern vpx_codec_iface_t *vpx_codec_vp8_cx(void);
+/*!@} - end algorithm interface member group*/
 
-/* TODO(jkoleszar): These move to VP9 in a later patch set. */
+/*!\name Algorithm interface for VP9
+ *
+ * This interface provides the capability to encode raw VP9 streams.
+ * @{
+ */
 extern vpx_codec_iface_t  vpx_codec_vp9_cx_algo;
 extern vpx_codec_iface_t *vpx_codec_vp9_cx(void);
-
 /*!@} - end algorithm interface member group*/
 
 
