@@ -28,6 +28,7 @@ struct WebmInputContext {
   int block_frame_index;
   int video_track_index;
   uint64_t timestamp_ns;
+  int is_key_frame;
 };
 
 // Checks if the input is a WebM file. If so, initializes WebMInputContext so

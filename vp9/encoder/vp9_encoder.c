@@ -204,8 +204,6 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   // Delete sementation map
   vpx_free(cpi->segmentation_map);
   cpi->segmentation_map = NULL;
-  vpx_free(cm->last_frame_seg_map);
-  cm->last_frame_seg_map = NULL;
   vpx_free(cpi->coding_context.last_frame_seg_map_copy);
   cpi->coding_context.last_frame_seg_map_copy = NULL;
 
@@ -1395,7 +1393,8 @@ static void cal_nmvsadcosts_hp(int *mvsadcost[2]) {
 }
 
 
-VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
+VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
+                                BufferPool *const pool) {
   unsigned int i;
   VP9_COMP *volatile const cpi = vpx_memalign(32, sizeof(VP9_COMP));
   VP9_COMMON *volatile const cm = cpi != NULL ? &cpi->common : NULL;
@@ -1423,6 +1422,7 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf) {
                   sizeof(*cm->frame_contexts)));
 
   cpi->use_svc = 0;
+  cpi->common.buffer_pool = pool;
 
   init_config(cpi, oxcf);
   vp9_rc_init(&cpi->oxcf, oxcf->pass, &cpi->rc);
@@ -2343,13 +2343,14 @@ static int recode_loop_test(const VP9_COMP *cpi,
 
 void vp9_update_reference_frames(VP9_COMP *cpi) {
   VP9_COMMON * const cm = &cpi->common;
+  BufferPool *const pool = cm->buffer_pool;
 
   // At this point the new frame has been encoded.
   // If any buffer copy / swapping is signaled it should be done here.
   if (cm->frame_type == KEY_FRAME) {
-    ref_cnt_fb(cm->frame_bufs,
+    ref_cnt_fb(pool->frame_bufs,
                &cm->ref_frame_map[cpi->gld_fb_idx], cm->new_fb_idx);
-    ref_cnt_fb(cm->frame_bufs,
+    ref_cnt_fb(pool->frame_bufs,
                &cm->ref_frame_map[cpi->alt_fb_idx], cm->new_fb_idx);
   } else if (vp9_preserve_existing_gf(cpi)) {
     // We have decided to preserve the previously existing golden frame as our
@@ -2362,7 +2363,7 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
     // slot and, if we're updating the GF, the current frame becomes the new GF.
     int tmp;
 
-    ref_cnt_fb(cm->frame_bufs,
+    ref_cnt_fb(pool->frame_bufs,
                &cm->ref_frame_map[cpi->alt_fb_idx], cm->new_fb_idx);
 
     tmp = cpi->alt_fb_idx;
@@ -2381,7 +2382,7 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
         arf_idx = gf_group->arf_update_idx[gf_group->index];
       }
 
-      ref_cnt_fb(cm->frame_bufs,
+      ref_cnt_fb(pool->frame_bufs,
                  &cm->ref_frame_map[arf_idx], cm->new_fb_idx);
       vpx_memcpy(cpi->interp_filter_selected[ALTREF_FRAME],
                  cpi->interp_filter_selected[0],
@@ -2389,7 +2390,7 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
     }
 
     if (cpi->refresh_golden_frame) {
-      ref_cnt_fb(cm->frame_bufs,
+      ref_cnt_fb(pool->frame_bufs,
                  &cm->ref_frame_map[cpi->gld_fb_idx], cm->new_fb_idx);
       if (!cpi->rc.is_src_frame_alt_ref)
         vpx_memcpy(cpi->interp_filter_selected[GOLDEN_FRAME],
@@ -2403,7 +2404,7 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
   }
 
   if (cpi->refresh_last_frame) {
-    ref_cnt_fb(cm->frame_bufs,
+    ref_cnt_fb(pool->frame_bufs,
                &cm->ref_frame_map[cpi->lst_fb_idx], cm->new_fb_idx);
     if (!cpi->rc.is_src_frame_alt_ref)
       vpx_memcpy(cpi->interp_filter_selected[LAST_FRAME],
@@ -2462,44 +2463,45 @@ void vp9_scale_references(VP9_COMP *cpi) {
     // Need to convert from VP9_REFFRAME to index into ref_mask (subtract 1).
     if (cpi->ref_frame_flags & ref_mask[ref_frame - 1]) {
       const int idx = cm->ref_frame_map[get_ref_frame_idx(cpi, ref_frame)];
-      const YV12_BUFFER_CONFIG *const ref = &cm->frame_bufs[idx].buf;
+       BufferPool *const pool = cm->buffer_pool;
+      const YV12_BUFFER_CONFIG *const ref = &pool->frame_bufs[idx].buf;
 
 #if CONFIG_VP9_HIGHBITDEPTH
       if (ref->y_crop_width != cm->width || ref->y_crop_height != cm->height) {
         const int new_fb = get_free_fb(cm);
-        cm->cur_frame = &cm->frame_bufs[new_fb];
-        vp9_realloc_frame_buffer(&cm->frame_bufs[new_fb].buf,
+        cm->cur_frame = &pool->frame_bufs[new_fb];
+        vp9_realloc_frame_buffer(&pool->frame_bufs[new_fb].buf,
                                  cm->width, cm->height,
                                  cm->subsampling_x, cm->subsampling_y,
                                  cm->use_highbitdepth,
                                  VP9_ENC_BORDER_IN_PIXELS, cm->byte_alignment,
                                  NULL, NULL, NULL);
-        scale_and_extend_frame(ref, &cm->frame_bufs[new_fb].buf,
+        scale_and_extend_frame(ref, &pool->frame_bufs[new_fb].buf,
                                (int)cm->bit_depth);
 #else
       if (ref->y_crop_width != cm->width || ref->y_crop_height != cm->height) {
         const int new_fb = get_free_fb(cm);
-        vp9_realloc_frame_buffer(&cm->frame_bufs[new_fb].buf,
+        vp9_realloc_frame_buffer(&pool->frame_bufs[new_fb].buf,
                                  cm->width, cm->height,
                                  cm->subsampling_x, cm->subsampling_y,
                                  VP9_ENC_BORDER_IN_PIXELS, cm->byte_alignment,
                                  NULL, NULL, NULL);
-        scale_and_extend_frame(ref, &cm->frame_bufs[new_fb].buf);
+        scale_and_extend_frame(ref, &pool->frame_bufs[new_fb].buf);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
         cpi->scaled_ref_idx[ref_frame - 1] = new_fb;
-        if (cm->frame_bufs[new_fb].mvs == NULL ||
-            cm->frame_bufs[new_fb].mi_rows < cm->mi_rows ||
-            cm->frame_bufs[new_fb].mi_cols < cm->mi_cols) {
-          vpx_free(cm->frame_bufs[new_fb].mvs);
-          cm->frame_bufs[new_fb].mvs =
+        if (pool->frame_bufs[new_fb].mvs == NULL ||
+            pool->frame_bufs[new_fb].mi_rows < cm->mi_rows ||
+            pool->frame_bufs[new_fb].mi_cols < cm->mi_cols) {
+          vpx_free(pool->frame_bufs[new_fb].mvs);
+          pool->frame_bufs[new_fb].mvs =
             (MV_REF *)vpx_calloc(cm->mi_rows * cm->mi_cols,
-                                 sizeof(*cm->frame_bufs[new_fb].mvs));
-          cm->frame_bufs[new_fb].mi_rows = cm->mi_rows;
-          cm->frame_bufs[new_fb].mi_cols = cm->mi_cols;
+                                 sizeof(*pool->frame_bufs[new_fb].mvs));
+          pool->frame_bufs[new_fb].mi_rows = cm->mi_rows;
+          pool->frame_bufs[new_fb].mi_cols = cm->mi_cols;
         }
       } else {
         cpi->scaled_ref_idx[ref_frame - 1] = idx;
-        ++cm->frame_bufs[idx].ref_count;
+        ++pool->frame_bufs[idx].ref_count;
       }
     } else {
       cpi->scaled_ref_idx[ref_frame - 1] = INVALID_REF_BUFFER_IDX;
@@ -2512,8 +2514,8 @@ static void release_scaled_references(VP9_COMP *cpi) {
   int i;
   for (i = 0; i < MAX_REF_FRAMES; ++i) {
     const int idx = cpi->scaled_ref_idx[i];
-    RefCntBuffer *const buf =
-        idx != INVALID_REF_BUFFER_IDX ? &cm->frame_bufs[idx] : NULL;
+    RefCntBuffer *const buf = idx != INVALID_REF_BUFFER_IDX ?
+        &cm->buffer_pool->frame_bufs[idx] : NULL;
     if (buf != NULL) {
       --buf->ref_count;
       cpi->scaled_ref_idx[i] = INVALID_REF_BUFFER_IDX;
@@ -2730,7 +2732,7 @@ void set_frame_size(VP9_COMP *cpi) {
 
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
     const int idx = cm->ref_frame_map[get_ref_frame_idx(cpi, ref_frame)];
-    YV12_BUFFER_CONFIG *const buf = &cm->frame_bufs[idx].buf;
+    YV12_BUFFER_CONFIG *const buf = &cm->buffer_pool->frame_bufs[idx].buf;
     RefBuffer *const ref_buf = &cm->frame_refs[ref_frame - 1];
     ref_buf->buf = buf;
     ref_buf->idx = idx;
@@ -3559,6 +3561,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
                             int64_t *time_stamp, int64_t *time_end, int flush) {
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   VP9_COMMON *const cm = &cpi->common;
+  BufferPool *const pool = cm->buffer_pool;
   RATE_CONTROL *const rc = &cpi->rc;
   struct vpx_usec_timer  cmptimer;
   YV12_BUFFER_CONFIG *force_src_buffer = NULL;
@@ -3713,9 +3716,9 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
   // Find a free buffer for the new frame, releasing the reference previously
   // held.
-  cm->frame_bufs[cm->new_fb_idx].ref_count--;
+  pool->frame_bufs[cm->new_fb_idx].ref_count--;
   cm->new_fb_idx = get_free_fb(cm);
-  cm->cur_frame = &cm->frame_bufs[cm->new_fb_idx];
+  cm->cur_frame = &pool->frame_bufs[cm->new_fb_idx];
 
   if (!cpi->use_svc && cpi->multi_arf_allowed) {
     if (cm->frame_type == KEY_FRAME) {
