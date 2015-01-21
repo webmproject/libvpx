@@ -4975,9 +4975,7 @@ static void predict_superblock(VP9_COMP *cpi,
 
   set_ref_ptrs(cm, xd, mbmi->ref_frame[0], mbmi->ref_frame[1]);
 
-  cpi->zbin_mode_boost = get_zbin_mode_boost(mbmi,
-                                             cpi->zbin_mode_boost_enabled);
-  vp9_update_zbin_extra(cpi, x);
+  vp9_update_zbin_extra(x);
 
   for (ref = 0; ref < 1 + is_compound; ++ref) {
     YV12_BUFFER_CONFIG *cfg = get_ref_frame_buffer(cpi,
@@ -5009,9 +5007,7 @@ static void predict_superblock_sub8x8_extend(VP9_COMP *cpi,
 
   set_ref_ptrs(cm, xd, mbmi->ref_frame[0], mbmi->ref_frame[1]);
 
-  cpi->zbin_mode_boost = get_zbin_mode_boost(mbmi,
-                                             cpi->zbin_mode_boost_enabled);
-  vp9_update_zbin_extra(cpi, x);
+  vp9_update_zbin_extra(x);
 
   for (ref = 0; ref < 1 + is_compound; ++ref) {
     YV12_BUFFER_CONFIG *cfg = get_ref_frame_buffer(cpi,

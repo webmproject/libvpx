@@ -5070,14 +5070,14 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   for (copy_mode = REF0;
        copy_mode < (COPY_MODE)(MIN(REF0 + inter_ref_count, COPY_MODE_COUNT));
        copy_mode++) {
-    int i, rate2, rate_y, rate_uv, rate_copy_mode, this_skip2,
-        skippable, skippable_y, skippable_uv;
+    int i, rate2, rate_y, rate_uv, rate_copy_mode, this_skip2;
+    int skippable = 0, skippable_y, skippable_uv;
     int64_t distortion2, distortion_y, distortion_uv, this_rd,
             ssey, sseuv, total_sse, tx_cache[TX_MODES];
 #if CONFIG_EXT_TX
     EXT_TX_TYPE tx_type, best_tx_type = NORM;
     TX_SIZE best_tx_size;
-    int rate2_tx, this_skip2_tx;
+    int rate2_tx, this_skip2_tx = 0;
     int64_t distortion2_tx, bestrd_tx = INT64_MAX;
     uint8_t tmp_zcoeff_blk[256];
 #endif  // CONFIG_EXT_TX
