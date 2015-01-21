@@ -1843,6 +1843,9 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
   twopass->gf_zeromotion_pct = (int)(zero_motion_accumulator * 1000.0);
 
+  // Was the group length constrained by the requirement for a new KF?
+  rc->constrained_gf_group = (i >= rc->frames_to_key) ? 1 : 0;
+
   // Set the interval until the next gf.
   if (cpi->common.frame_type == KEY_FRAME || rc->source_alt_ref_active)
     rc->baseline_gf_interval = i - 1;
