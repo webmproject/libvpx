@@ -95,12 +95,11 @@ static vpx_codec_err_t decoder_destroy(vpx_codec_alg_priv_t *ctx) {
 
 static int parse_bitdepth_colorspace_sampling(
     BITSTREAM_PROFILE profile, struct vp9_read_bit_buffer *rb) {
-  const int sRGB = 7;
-  int colorspace;
+  vpx_color_space_t color_space;
   if (profile >= PROFILE_2)
     rb->bit_offset += 1;  // Bit-depth 10 or 12.
-  colorspace = vp9_rb_read_literal(rb, 3);
-  if (colorspace != sRGB) {
+  color_space = (vpx_color_space_t)vp9_rb_read_literal(rb, 3);
+  if (color_space != VPX_CS_SRGB) {
     rb->bit_offset += 1;  // [16,235] (including xvycc) vs [0,255] range.
     if (profile == PROFILE_1 || profile == PROFILE_3) {
       rb->bit_offset += 2;  // subsampling x/y.
