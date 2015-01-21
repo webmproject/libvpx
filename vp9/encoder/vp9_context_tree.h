@@ -30,6 +30,12 @@ typedef struct {
   tran_low_t *qcoeff_pbuf[MAX_MB_PLANE][3];
   tran_low_t *dqcoeff_pbuf[MAX_MB_PLANE][3];
   uint16_t *eobs_pbuf[MAX_MB_PLANE][3];
+#if CONFIG_PALETTE
+  uint8_t *color_index_map;
+  uint8_t palette_colors_buf[PALETTE_BUF_SIZE];
+  int palette_buf_size;
+  int palette_count_buf[PALETTE_BUF_SIZE];
+#endif
 
   int is_coded;
   int num_4x4_blk;
@@ -72,6 +78,9 @@ typedef struct PC_TREE {
     struct PC_TREE *split[4];
     PICK_MODE_CONTEXT *leaf_split[4];
   };
+#if CONFIG_PALETTE
+  PICK_MODE_CONTEXT current;
+#endif
 } PC_TREE;
 
 void vp9_setup_pc_tree(struct VP9Common *cm, struct VP9_COMP *cpi);

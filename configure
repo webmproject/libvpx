@@ -292,6 +292,7 @@ EXPERIMENT_LIST="
     wedge_partition
     compound_modes
     global_motion
+    palette
 "
 CONFIG_LIST="
     external_build

@@ -127,6 +127,30 @@ typedef enum {
 } EXT_TX_TYPE;
 #endif
 
+#if CONFIG_PALETTE
+typedef enum {
+  TWO_COLORS,
+  THREE_COLORS,
+  FOUR_COLORS,
+  FIVE_COLORS,
+  SIX_COLORS,
+  SEVEN_COLORS,
+  EIGHT_COLORS,
+  PALETTE_SIZES
+} PALETTE_SIZE;
+
+typedef enum {
+  ONE_BITS,
+  TWO_BITS,
+  THREE_BITS,
+  FOUR_BITS,
+  FIVE_BITS,
+  SIX_BITS,
+  MAX_BITS,
+  PALETTE_RUN_LENGTHS
+} PALETTE_RUN_LENGTH;
+#endif
+
 typedef enum {
   UNKNOWN    = 0,
   BT_601     = 1,  // YUV

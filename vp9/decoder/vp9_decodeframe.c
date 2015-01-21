@@ -2296,6 +2296,10 @@ static int read_compressed_header(VP9Decoder *pbi, const uint8_t *data,
     }
 #endif  // CONFIG_WEDGE_PARTITION
   }
+#if CONFIG_PALETTE
+  if (frame_is_intra_only(cm))
+    cm->allow_palette_mode = vp9_read_bit(&r);
+#endif
 
   return vp9_reader_has_error(&r);
 }

@@ -200,6 +200,15 @@ typedef struct VP9Common {
 
   PARTITION_CONTEXT *above_seg_context;
   ENTROPY_CONTEXT *above_context;
+
+#if CONFIG_PALETTE
+  uint8_t current_palette_colors[PALETTE_BUF_SIZE];
+  int current_palette_size;
+  int current_palette_count[PALETTE_BUF_SIZE];
+  int allow_palette_mode;
+  int palette_counter;
+  int block_counter;
+#endif
 } VP9_COMMON;
 
 static INLINE YV12_BUFFER_CONFIG *get_ref_frame(VP9_COMMON *cm, int index) {
@@ -249,6 +258,10 @@ static INLINE void init_macroblockd(VP9_COMMON *cm, MACROBLOCKD *xd) {
     xd->above_context[i] = cm->above_context +
         i * sizeof(*cm->above_context) * 2 * mi_cols_aligned_to_sb(cm->mi_cols);
   }
+
+#if CONFIG_PALETTE
+  xd->plane[0].color_index_map = xd->color_index_map;
+#endif
 
   xd->above_seg_context = cm->above_seg_context;
   xd->mi_stride = cm->mi_stride;

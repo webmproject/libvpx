@@ -66,6 +66,10 @@ typedef struct frame_contexts {
 #if CONFIG_EXT_TX
   vp9_prob ext_tx_prob[3][EXT_TX_TYPES - 1];
 #endif  // CONFIG_EXT_TX
+#if CONFIG_PALETTE
+  vp9_prob palette_size_prob[10][PALETTE_SIZES - 1];
+  vp9_prob palette_run_length_prob[10][PALETTE_RUN_LENGTHS - 1];
+#endif  // CONFIG_PALETTE
 #if CONFIG_SUPERTX
   vp9_prob supertx_prob[PARTITION_SUPERTX_CONTEXTS][TX_SIZES];
 #endif  // CONFIG_SUPERTX
@@ -151,6 +155,11 @@ extern const vp9_tree_index vp9_switchable_interp_tree
                                 [TREE_SIZE(SWITCHABLE_FILTERS)];
 #if CONFIG_EXT_TX
 extern const vp9_tree_index vp9_ext_tx_tree[TREE_SIZE(EXT_TX_TYPES)];
+#endif
+#if CONFIG_PALETTE
+extern const vp9_tree_index vp9_palette_size_tree[TREE_SIZE(PALETTE_SIZES)];
+extern const vp9_tree_index
+vp9_palette_run_length_tree[TREE_SIZE(PALETTE_RUN_LENGTHS)];
 #endif
 #if CONFIG_COPY_MODE
 extern const vp9_tree_index vp9_copy_mode_tree_l2[TREE_SIZE(2)];

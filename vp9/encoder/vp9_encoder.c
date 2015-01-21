@@ -2602,6 +2602,11 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
     if (loop_count == 0)
       setup_frame(cpi);
 
+#if CONFIG_PALETTE
+    if (loop_count == 0 && frame_is_intra_only(cm))
+      cm->allow_palette_mode = 1;
+#endif
+
     // Variance adaptive and in frame q adjustment experiments are mutually
     // exclusive.
     if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
@@ -2772,6 +2777,14 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
     if (rc->is_src_frame_alt_ref &&
         rc->projected_frame_size < rc->max_frame_bandwidth)
       loop = 0;
+
+#if CONFIG_PALETTE
+    if (frame_is_intra_only(cm) && cm->allow_palette_mode &&
+        cm->palette_counter * 100 < cm->block_counter) {
+      cm->allow_palette_mode = 0;
+      loop = 1;
+    }
+#endif
 
     if (loop) {
       loop_count++;

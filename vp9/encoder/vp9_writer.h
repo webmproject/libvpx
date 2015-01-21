@@ -89,6 +89,29 @@ static INLINE void vp9_write_literal(vp9_writer *w, int data, int bits) {
     vp9_write_bit(w, 1 & (data >> bit));
 }
 
+static INLINE void vp9_encode_uniform(vp9_writer *w, int n, int v) {
+  int l = get_unsigned_bits(n);
+  int m = (1 << l) - n;
+  if (l == 0)
+    return;
+  if (v < m) {
+    vp9_write_literal(w, v, l - 1);
+  } else {
+    vp9_write_literal(w, m + ((v - m) >> 1), l - 1);
+    vp9_write_literal(w, (v - m) & 1, 1);
+  }
+}
+
+static INLINE int vp9_encode_uniform_cost(int n, int v) {
+  int l = get_unsigned_bits(n), m = (1 << l) - n;
+  if (l == 0)
+    return 0;
+  if (v < m)
+    return l - 1;
+  else
+    return l;
+}
+
 #define vp9_write_prob(w, v) vp9_write_literal((w), (v), 8)
 
 #ifdef __cplusplus

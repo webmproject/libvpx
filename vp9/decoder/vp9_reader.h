@@ -112,6 +112,19 @@ static INLINE int vp9_read_tree(vp9_reader *r, const vp9_tree_index *tree,
   return -i;
 }
 
+static INLINE int vp9_decode_uniform(vp9_reader *r, int n) {
+  int l = get_unsigned_bits(n);
+  int m = (1 << l) - n;
+  int v= vp9_read_literal(r, l-1);
+
+  if (l == 0)
+    return 0;
+  if (v < m)
+    return v;
+  else
+    return (v << 1) - m + vp9_read_literal(r, 1);
+}
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

@@ -20,6 +20,9 @@
 #include "vp9/common/vp9_entropymode.h"
 #include "vp9/common/vp9_idct.h"
 #include "vp9/common/vp9_mvref_common.h"
+#if CONFIG_PALETTE
+#include "vp9/common/vp9_palette.h"
+#endif
 #include "vp9/common/vp9_pred_common.h"
 #include "vp9/common/vp9_quant_common.h"
 #include "vp9/common/vp9_reconinter.h"
@@ -869,10 +872,18 @@ static void super_block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
   assert(bs == xd->mi[0].src_mi->mbmi.sb_type);
 
 #if CONFIG_TX_SKIP
-  if (cpi->sf.tx_size_search_method == USE_LARGESTALL) {
+  if (cpi->sf.tx_size_search_method == USE_LARGESTALL
+#if CONFIG_PALETTE
+      || x->e_mbd.mi[0].src_mi->mbmi.palette_enabled
+#endif  // CONFIG_PALETTE
+      ) {
 #else
-  if (cpi->sf.tx_size_search_method == USE_LARGESTALL || xd->lossless) {
-#endif
+  if (cpi->sf.tx_size_search_method == USE_LARGESTALL || xd->lossless
+#if CONFIG_PALETTE
+      || xd->mi[0].src_mi->mbmi.palette_enabled
+#endif  // CONFIG_PALETTE
+  ) {
+#endif  // CONFIG_TX_SKIP
     vpx_memset(txfm_cache, 0, TX_MODES * sizeof(int64_t));
     choose_largest_tx_size(cpi, x, rate, distortion, skip, ret_sse, ref_best_rd,
                            bs);
@@ -1086,7 +1097,10 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
 #if CONFIG_TX_SKIP
     xd->mi[0].src_mi->mbmi.tx_skip[0] = 0;
     xd->mi[0].src_mi->mbmi.tx_skip[1] = 0;
-#endif
+#endif  // CONFIG_TX_SKIP
+#if CONFIG_PALETTE
+    xd->mi[0].src_mi->mbmi.palette_enabled = 0;
+#endif  // CONFIG_PALETTE
     for (idy = 0; idy < num_4x4_blocks_high; ++idy) {
       for (idx = 0; idx < num_4x4_blocks_wide; ++idx) {
         const int block = ib + idy * 2 + idx;
@@ -1284,6 +1298,19 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
                              cpi->common.base_qindex);
   int try_tx_skip = q_idx <= TX_SKIP_Q_THRESH_INTRA;
 #endif
+#if CONFIG_PALETTE
+  int palette_selected = 0, best_n = 0, best_l = 0, colors;
+  int best_m1 = 0, best_m2 = 0, palette_delta_bitdepth = 0;
+  int rows = 4 * num_4x4_blocks_high_lookup[bsize];
+  int cols = 4 * num_4x4_blocks_wide_lookup[bsize];
+  int src_stride = x->plane[0].src.stride;
+  uint8_t *src = x->plane[0].src.buf;
+  uint16_t best_runs[PALETTE_MAX_RUNS];
+  uint8_t best_palette[PALETTE_MAX_SIZE], best_map[4096];
+  uint8_t best_index[PALETTE_MAX_SIZE], best_literal[PALETTE_MAX_SIZE];
+  int8_t palette_color_delta[PALETTE_MAX_SIZE];
+  PALETTE_SCAN_ORDER best_ps = H_SCAN;
+#endif
   bmode_costs = cpi->y_mode_costs[A][L];
 
   if (cpi->sf.tx_size_search_method == USE_FULL_RD)
@@ -1310,6 +1337,10 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
     mic->mbmi.tx_skip[0] = 0;
 #endif
 
+#if CONFIG_PALETTE
+    mic->mbmi.palette_enabled = 0;
+#endif
+
     super_block_yrd(cpi, x, &this_rate_tokenonly, &this_distortion,
                     &s, NULL, bsize, local_tx_cache, best_rd);
 
@@ -1325,6 +1356,10 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
     if (is_filter_allowed(mode) && is_filter_enabled(mic->mbmi.tx_size))
       this_rate += vp9_cost_bit(cpi->common.fc.filterintra_prob
                                 [mic->mbmi.tx_size][mode], fbit);
+#endif
+#if CONFIG_PALETTE
+    if (this_rate != INT_MAX && cpi->common.allow_palette_mode)
+      this_rate += vp9_cost_bit(128, 0);
 #endif
     this_rd = RDCOST(x->rdmult, x->rddiv, this_rate, this_distortion);
 
@@ -1404,6 +1439,257 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
   }
 #endif
 
+#if CONFIG_PALETTE
+  mic->mbmi.palette_enabled = 0;
+  mic->mbmi.palette_size = 0;
+  mic->mbmi.current_palette_size = cpi->common.current_palette_size;
+  colors = count_colors(src, src_stride, rows, cols);
+  if (colors > 1 && colors <= 64 && cpi->common.allow_palette_mode) {
+    int n, r, c, i, j, temp, max_itr = 50, k;
+    int indices[4096];
+    int l, m1, m2, d = get_bit_depth(rows * cols);
+    int bits, best_bits = 0, total_bits, best_total_bits;
+    int palette_size_cost[PALETTE_SIZES];
+    int palette_run_length_cost[PALETTE_RUN_LENGTHS];
+    double data[4096];
+    double centroids[PALETTE_MAX_SIZE];
+    double lb = src[0], ub = src[0], val;
+    int64_t local_tx_cache[TX_MODES];
+    PALETTE_SCAN_ORDER ps;
+    uint8_t map[4096];
+#if CONFIG_TX_SKIP
+    int this_rate_tokenonly_s, s_s;
+    int64_t this_distortion_s;
+#endif
+
+    memset(data, 0, sizeof(data[0] * 4096));
+    memset(indices, 0, sizeof(indices[0] * 4096));
+    mic->mbmi.palette_enabled = 1;
+    vp9_cost_tokens(palette_size_cost,
+                    cpi->common.fc.palette_size_prob[bsize - BLOCK_8X8],
+                    vp9_palette_size_tree);
+    vp9_cost_tokens(palette_run_length_cost,
+                    cpi->common.fc.palette_run_length_prob[bsize - BLOCK_8X8],
+                    vp9_palette_run_length_tree);
+#if CONFIG_FILTERINTRA
+    mic->mbmi.filterbit = 0;
+#endif
+    for (r = 0; r < rows; r++) {
+      for (c = 0; c < cols; c++) {
+        val = src[r * src_stride + c];
+        data[r * cols + c] = val;
+        if (val < lb)
+          lb = val;
+        else if (val > ub)
+          ub = val;
+      }
+    }
+
+    for (n = colors > PALETTE_MAX_SIZE ? PALETTE_MAX_SIZE : colors;
+        n >= 2; n--) {
+      for (i = 0; i < n; i++)
+        centroids[i] = lb + (2 * i + 1) * (ub - lb) / n / 2;
+      r = k_means(data, centroids, indices, rows * cols, n, 1, max_itr);
+      insertion_sort(centroids, n);
+      i = 1;
+      k = n;
+      while (i < k) {
+        if (centroids[i] == centroids[i - 1]) {
+          j = i;
+          while (j < k - 1) {
+            centroids[j] = centroids[j + 1];
+            j++;
+          }
+          k--;
+        } else {
+          i++;
+        }
+      }
+
+      mic->mbmi.palette_size = k;
+      for (i = 0; i < k; i++)
+        mic->mbmi.palette_colors[i] = clip_pixel(round(centroids[i]));
+
+      best_total_bits = INT_MAX;
+      for (bits = 0; bits < 1 << PALETTE_DELTA_BIT; bits++) {
+        m1 = 0;
+        m2 = 0;
+        for (j = 0; j < k; j++) {
+          temp = palette_color_lookup(cpi->common.current_palette_colors,
+                                      cpi->common.current_palette_size,
+                                      mic->mbmi.palette_colors[j], bits);
+          if (temp >= 0) {
+            mic->mbmi.palette_indexed_colors[m1] = temp;
+            mic->mbmi.palette_color_delta[m1] =
+                mic->mbmi.palette_colors[j] -
+                cpi->common.current_palette_colors[temp];
+            m1++;
+          } else {
+            mic->mbmi.palette_literal_colors[m2] =
+                mic->mbmi.palette_colors[j];
+            m2++;
+          }
+        }
+        total_bits = m1 * get_bit_depth(cpi->common.current_palette_size) +
+            m1 * (bits == 0 ? 0 : bits + 1) + m2 * 8;
+        if (total_bits <= best_total_bits) {
+          best_total_bits = total_bits;
+          best_bits = bits;
+        }
+      }
+
+      m1 = 0;
+      m2 = 0;
+      for (i = 0; i < k; i++) {
+        temp = palette_color_lookup(cpi->common.current_palette_colors,
+                                    cpi->common.current_palette_size,
+                                    mic->mbmi.palette_colors[i], best_bits);
+        if (temp >= 0) {
+          mic->mbmi.palette_indexed_colors[m1] = temp;
+          mic->mbmi.palette_color_delta[m1] =
+              mic->mbmi.palette_colors[i] -
+              cpi->common.current_palette_colors[temp];
+          m1++;
+        } else {
+          mic->mbmi.palette_literal_colors[m2] =
+              mic->mbmi.palette_colors[i];
+          m2++;
+        }
+      }
+      if (m1 == PALETTE_MAX_SIZE)
+        continue;
+      mic->mbmi.palette_indexed_size = m1;
+      mic->mbmi.palette_literal_size = m2;
+      mic->mbmi.palette_delta_bitdepth = best_bits;
+
+      calc_indices(data, centroids, indices, rows * cols, k, 1);
+      for (r = 0; r < rows; r++) {
+        for (c = 0; c < cols; c++) {
+          xd->plane[0].color_index_map[r * cols + c] = indices[r * cols + c];
+        }
+      }
+
+      for (ps = H_SCAN; ps < PALETTE_SCAN_ORDERS; ps++) {
+        int scan_order[4096];
+        mic->mbmi.palette_scan_order = ps;
+
+        switch (ps) {
+          case H_SCAN:
+            memcpy(map, xd->plane[0].color_index_map, rows * cols);
+            break;
+          case V_SCAN:
+            transpose_block(xd->plane[0].color_index_map,
+                            map, rows, cols);
+            break;
+          case SPIN_SCAN:
+            spin_scan_order(scan_order, rows, cols);
+            for (i = 0; i < rows * cols; i++)
+              map[i] = xd->plane[0].color_index_map[scan_order[i]];
+            break;
+          case ZZ_SCAN:
+            zz_scan_order(scan_order, rows, cols);
+            for (i = 0; i < rows * cols; i++)
+              map[i] = xd->plane[0].color_index_map[scan_order[i]];
+            break;
+          default:
+            break;
+        }
+
+        l = run_lengh_encoding(map, rows * cols, mic->mbmi.palette_runs,
+                               palette_max_run(bsize));
+        if (!l) {
+          continue;
+        }
+
+#if CONFIG_TX_SKIP
+        mic->mbmi.tx_skip[0] = 0;
+#endif
+        super_block_yrd(cpi, x, &this_rate_tokenonly, &this_distortion,
+                        &s, NULL, bsize, local_tx_cache, best_rd);
+#if CONFIG_TX_SKIP
+        if (try_tx_skip) {
+          if (this_rate_tokenonly != INT_MAX)
+            this_rate_tokenonly +=
+                vp9_cost_bit(cpi->common.fc.y_tx_skip_prob[0], 0);
+
+          mic->mbmi.tx_skip[0] = 1;
+          super_block_yrd(cpi, x, &this_rate_tokenonly_s, &this_distortion_s,
+                          &s_s, NULL, bsize, local_tx_cache, best_rd);
+          if (this_rate_tokenonly_s != INT_MAX)
+          this_rate_tokenonly_s +=
+              vp9_cost_bit(cpi->common.fc.y_tx_skip_prob[0], 1);
+
+          if ((this_rate_tokenonly_s != INT_MAX &&
+              this_rate_tokenonly == INT_MAX) ||
+              (RDCOST(x->rdmult, x->rddiv, this_rate_tokenonly, this_distortion)
+              >  RDCOST(x->rdmult, x->rddiv, this_rate_tokenonly_s,
+                        this_distortion_s))) {
+            mic->mbmi.tx_skip[0] = 1;
+          } else {
+            mic->mbmi.tx_skip[0] = 0;
+          }
+        } else {
+          mic->mbmi.tx_skip[0] = 0;
+        }
+
+        super_block_yrd(cpi, x, &this_rate_tokenonly, &this_distortion,
+                        &s, NULL, bsize, local_tx_cache, best_rd);
+        if (this_rate_tokenonly != INT_MAX)
+          this_rate_tokenonly += vp9_cost_bit(cpi->common.fc.y_tx_skip_prob[0],
+                                              mic->mbmi.tx_skip[0]);
+#endif
+        if (this_rate_tokenonly == INT_MAX) {
+          continue;
+        }
+
+        this_rate = this_rate_tokenonly +
+            (1 + vp9_encode_uniform_cost(MIN(k + 1, 8), m1) + PALETTE_DELTA_BIT
+                + get_bit_depth(palette_max_run(bsize)) + 2 +
+                get_bit_depth(mic->mbmi.current_palette_size) * m1 +
+                mic->mbmi.palette_delta_bitdepth * m1 +
+                8 * m2 + get_bit_depth(k) * (l >> 1)) * vp9_cost_bit(128, 0) +
+                palette_size_cost[k - 2];
+        for (i = 0; i < l; i += 2) {
+          int bits = get_bit_depth(mic->mbmi.palette_runs[i + 1]);
+          this_rate += palette_run_length_cost[bits > 6 ? 6 : bits - 1];
+          this_rate += (bits > 6 ? d : bits) * vp9_cost_bit(128, 0);
+        }
+        this_rd = RDCOST(x->rdmult, x->rddiv, this_rate, this_distortion);
+        if (this_rd < best_rd) {
+          mode_selected   = DC_PRED;
+          best_rd         = this_rd;
+          best_tx         = mic->mbmi.tx_size;
+          *rate           = this_rate;
+          *rate_tokenonly = this_rate_tokenonly;
+          *distortion     = this_distortion;
+          *skippable      = s;
+          best_n = k;
+          best_l = l;
+          palette_selected = 1;
+          best_ps = ps;
+          best_m1 = mic->mbmi.palette_indexed_size;
+          best_m2 = mic->mbmi.palette_literal_size;
+          palette_delta_bitdepth = mic->mbmi.palette_delta_bitdepth;
+          memcpy(best_palette, mic->mbmi.palette_colors,
+                 k * sizeof(best_palette[0]));
+          memcpy(best_runs, mic->mbmi.palette_runs, l * sizeof(best_runs[0]));
+          memcpy(best_map, xd->plane[0].color_index_map,
+                 rows * cols * sizeof(best_map[0]));
+          memcpy(best_index, mic->mbmi.palette_indexed_colors,
+                 best_m1 * sizeof(best_index[0]));
+          memcpy(palette_color_delta, mic->mbmi.palette_color_delta,
+                 best_m1 * sizeof(palette_color_delta[0]));
+          memcpy(best_literal, mic->mbmi.palette_literal_colors,
+                 best_m2 * sizeof(best_literal[0]));
+#if CONFIG_TX_SKIP
+          tx_skipped = mic->mbmi.tx_skip[0];
+#endif  // CONFIG_TX_SKIP
+        }
+      }
+    }
+  }
+#endif
+
   mic->mbmi.mode = mode_selected;
 #if CONFIG_FILTERINTRA
   if (is_filter_enabled(best_tx))
@@ -1414,6 +1700,32 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
   mic->mbmi.tx_size = best_tx;
 #if CONFIG_TX_SKIP
   mic->mbmi.tx_skip[0] = tx_skipped;
+#endif
+#if CONFIG_PALETTE
+  mic->mbmi.palette_enabled = palette_selected;
+  if (palette_selected) {
+    mic->mbmi.palette_size = best_n;
+    mic->mbmi.palette_run_length = best_l;
+    mic->mbmi.palette_scan_order = best_ps;
+    mic->mbmi.palette_indexed_size = best_m1;
+    mic->mbmi.palette_literal_size = best_m2;
+    mic->mbmi.palette_delta_bitdepth = palette_delta_bitdepth;
+    memcpy(mic->mbmi.palette_colors, best_palette,
+           best_n * sizeof(best_palette[0]));
+    memcpy(mic->mbmi.palette_runs, best_runs, best_l * sizeof(best_runs[0]));
+    memcpy(xd->plane[0].color_index_map, best_map,
+           4 * num_4x4_blocks_high_lookup[bsize] *
+           4 * num_4x4_blocks_wide_lookup[bsize] * sizeof(best_map[0]));
+    memcpy(mic->mbmi.palette_indexed_colors, best_index,
+           best_m1 * sizeof(best_index[0]));
+    memcpy(mic->mbmi.palette_color_delta, palette_color_delta,
+           best_m1 * sizeof(palette_color_delta[0]));
+    memcpy(mic->mbmi.palette_literal_colors, best_literal,
+           best_m2 * sizeof(best_literal[0]));
+#if CONFIG_FILTERINTRA
+    mic->mbmi.filterbit = 0;
+#endif  // CONFIG_FILTERINTRA
+  }
 #endif
 
   return best_rd;
@@ -4128,6 +4440,14 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       rd_cost->rate = INT_MAX;
       return;
     }
+#if CONFIG_PALETTE
+    if (xd->mi[0].src_mi->mbmi.palette_enabled) {
+      palette_color_insertion(ctx->palette_colors_buf,
+                              &ctx->palette_buf_size,
+                              ctx->palette_count_buf,
+                              &(xd->mi[0].src_mi->mbmi));
+    }
+#endif
   } else {
     y_skip = 0;
     if (rd_pick_intra_sub_8x8_y_mode(cpi, x, &rate_y, &rate_y_tokenonly,
@@ -4255,7 +4575,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int tx_skipped_uv[TX_SIZES];
   int q_idx = vp9_get_qindex(seg, segment_id, cm->base_qindex);
   int try_tx_skip = q_idx <= TX_SKIP_Q_THRESH_INTRA;
-#endif
+#endif  // CONFIG_TX_SKIP
 #if CONFIG_COPY_MODE
   COPY_MODE copy_mode;
   int inter_ref_count;
@@ -4644,10 +4964,13 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_TX_SKIP
     mbmi->tx_skip[0] = 0;
     mbmi->tx_skip[1] = 0;
-#endif
+#endif  // CONFIG_TX_SKIP
 #if CONFIG_COPY_MODE
     mbmi->copy_mode = NOREF;
-#endif
+#endif  // CONFIG_COPY_MODE
+#if CONFIG_PALETTE
+    mbmi->palette_enabled = 0;
+#endif  // CONFIG_PALETTE
     // Evaluate all sub-pel filters irrespective of whether we can use
     // them for this frame.
     mbmi->interp_filter = cm->interp_filter == SWITCHABLE ? EIGHTTAP
