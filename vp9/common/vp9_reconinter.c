@@ -264,11 +264,18 @@ void vp9_build_inter_predictors_sby(MACROBLOCKD *xd, int mi_row, int mi_col,
                                     BLOCK_SIZE bsize) {
   build_inter_predictors_for_planes(xd, bsize, mi_row, mi_col, 0, 0);
 }
+
+void vp9_build_inter_predictors_sbp(MACROBLOCKD *xd, int mi_row, int mi_col,
+                                    BLOCK_SIZE bsize, int plane) {
+  build_inter_predictors_for_planes(xd, bsize, mi_row, mi_col, plane, plane);
+}
+
 void vp9_build_inter_predictors_sbuv(MACROBLOCKD *xd, int mi_row, int mi_col,
                                      BLOCK_SIZE bsize) {
   build_inter_predictors_for_planes(xd, bsize, mi_row, mi_col, 1,
                                     MAX_MB_PLANE - 1);
 }
+
 void vp9_build_inter_predictors_sb(MACROBLOCKD *xd, int mi_row, int mi_col,
                                    BLOCK_SIZE bsize) {
   build_inter_predictors_for_planes(xd, bsize, mi_row, mi_col, 0,
