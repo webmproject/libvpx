@@ -16,6 +16,24 @@
       "revId": "0f6046b65a1e13b12232ae0d3acc08859439b782",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//JQQ\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 498,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-01-21T17:59:39Z",
+      "side": 1,
+      "message": "changed the condition to avoid multiplication",
+      "parentUuid": "AAAAdn//JRg\u003d",
+      "revId": "0f6046b65a1e13b12232ae0d3acc08859439b782",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
