@@ -144,6 +144,7 @@ class ResizeTest : public ::libvpx_test::EncoderTest,
 
 TEST_P(ResizeTest, TestExternalResizeWorks) {
   ResizingVideoSource video;
+  cfg_.g_lag_in_frames = 0;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 
   for (std::vector<FrameInfo>::const_iterator info = frame_info_list_.begin();
@@ -153,9 +154,9 @@ TEST_P(ResizeTest, TestExternalResizeWorks) {
     const unsigned int expected_h = ScaleForFrameNumber(frame, kInitialHeight);
 
     EXPECT_EQ(expected_w, info->w)
-        << "Frame " << frame << "had unexpected width";
+        << "Frame " << frame << " had unexpected width";
     EXPECT_EQ(expected_h, info->h)
-        << "Frame " << frame << "had unexpected height";
+        << "Frame " << frame << " had unexpected height";
   }
 }
 
@@ -261,6 +262,8 @@ TEST_P(ResizeInternalTest, TestInternalResizeWorks) {
 }
 
 VP8_INSTANTIATE_TEST_CASE(ResizeTest, ONE_PASS_TEST_MODES);
+VP9_INSTANTIATE_TEST_CASE(ResizeTest,
+                          ::testing::Values(::libvpx_test::kRealTime));
 VP9_INSTANTIATE_TEST_CASE(ResizeInternalTest,
                           ::testing::Values(::libvpx_test::kOnePassBest));
 }  // namespace

@@ -1312,6 +1312,8 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
 
   cm->display_width = cpi->oxcf.width;
   cm->display_height = cpi->oxcf.height;
+  cm->width = cpi->oxcf.width;
+  cm->height = cpi->oxcf.height;
 
   if (cpi->initial_width) {
     // Increasing the size of the frame beyond the first seen frame, or some
