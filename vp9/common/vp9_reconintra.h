@@ -47,6 +47,12 @@ void vp9_build_interintra_predictors_sbuv(MACROBLOCKD *xd,
                                           uint8_t *vpred,
                                           int ustride, int vstride,
                                           BLOCK_SIZE bsize);
+#if CONFIG_WEDGE_PARTITION
+void vp9_generate_masked_weight_interintra(int wedge_index,
+                                           BLOCK_SIZE sb_type,
+                                           int h, int w,
+                                           uint8_t *mask, int stride);
+#endif  // CONFIG_WEDGE_PARTITION
 #endif  // CONFIG_INTERINTRA
 #ifdef __cplusplus
 }  // extern "C"

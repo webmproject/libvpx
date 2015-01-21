@@ -804,10 +804,25 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
       mbmi->ref_frame[1] = vp9_read(r, cm->fc.interintra_prob[bsize]) ?
                            INTRA_FRAME : NONE;
       cm->counts.interintra[bsize][mbmi->ref_frame[1] == INTRA_FRAME]++;
+#if CONFIG_WEDGE_PARTITION
+      mbmi->use_wedge_interintra = 0;
+#endif  // CONFIG_WEDGE_PARTITION
       if (mbmi->ref_frame[1] == INTRA_FRAME) {
         mbmi->interintra_mode =
             read_intra_mode_y(cm, r, size_group_lookup[bsize]);
         mbmi->interintra_uv_mode = mbmi->interintra_mode;
+#if CONFIG_WEDGE_PARTITION
+        if (get_wedge_bits(bsize)) {
+          mbmi->use_wedge_interintra = vp9_read(
+              r, cm->fc.wedge_interintra_prob[bsize]);
+          cm->counts.wedge_interintra[bsize][mbmi->use_wedge_interintra]++;
+          if (mbmi->use_wedge_interintra) {
+            mbmi->interintra_wedge_index = vp9_read_literal(
+                r, get_wedge_bits(bsize));
+            mbmi->interintra_uv_wedge_index = mbmi->interintra_wedge_index;
+          }
+        }
+#endif  // CONFIG_WEDGE_PARTITION
       }
     }
 #endif  // CONFIG_INTERINTRA
@@ -876,14 +891,16 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
 #if CONFIG_WEDGE_PARTITION
   mbmi->use_wedge_interinter = 0;
   if (cm->reference_mode != SINGLE_REFERENCE &&
+#if CONFIG_COMPOUND_MODES
       is_inter_compound_mode(mbmi->mode) &&
+#endif  // CONFIG_COMPOUND_MODES
       get_wedge_bits(bsize) &&
       mbmi->ref_frame[1] > INTRA_FRAME) {
     mbmi->use_wedge_interinter =
         vp9_read(r, cm->fc.wedge_interinter_prob[bsize]);
     cm->counts.wedge_interinter[bsize][mbmi->use_wedge_interinter]++;
     if (mbmi->use_wedge_interinter) {
-      mbmi->wedge_index = vp9_read_literal(r, get_wedge_bits(bsize));
+      mbmi->interinter_wedge_index = vp9_read_literal(r, get_wedge_bits(bsize));
     }
   }
 #endif  // CONFIG_WEDGE_PARTITION

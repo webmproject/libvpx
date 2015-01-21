@@ -80,6 +80,9 @@ typedef struct frame_contexts {
 #endif  // CONFIG_COPY_MODE
 #if CONFIG_INTERINTRA
   vp9_prob interintra_prob[BLOCK_SIZES];
+#if CONFIG_WEDGE_PARTITION
+  vp9_prob wedge_interintra_prob[BLOCK_SIZES];
+#endif  // CONFIG_WEDGE_PARTITION
 #endif  // CONFIG_INTERINTRA
 #if CONFIG_WEDGE_PARTITION
   vp9_prob wedge_interinter_prob[BLOCK_SIZES];
@@ -127,6 +130,9 @@ typedef struct {
 #endif  // CONFIG_COPY_MODE
 #if CONFIG_INTERINTRA
   unsigned int interintra[BLOCK_SIZES][2];
+#if CONFIG_WEDGE_PARTITION
+  unsigned int wedge_interintra[BLOCK_SIZES][2];
+#endif  // CONFIG_WEDGE_PARTITION
 #endif  // CONFIG_INTERINTRA
 #if CONFIG_WEDGE_PARTITION
   unsigned int wedge_interinter[BLOCK_SIZES][2];

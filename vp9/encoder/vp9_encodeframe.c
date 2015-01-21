@@ -871,6 +871,10 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
         if (mbmi->ref_frame[1] == INTRA_FRAME) {
           ++cm->counts.y_mode[size_group_lookup[bsize]][mbmi->interintra_mode];
           ++cm->counts.interintra[bsize][1];
+#if CONFIG_WEDGE_PARTITION
+          if (get_wedge_bits(bsize))
+            ++cm->counts.wedge_interintra[bsize][mbmi->use_wedge_interintra];
+#endif  // CONFIG_WEDGE_PARTITION
         } else {
           ++cm->counts.interintra[bsize][0];
         }

@@ -258,7 +258,6 @@ static MV average_split_mvs(const struct macroblockd_plane *pd,
 }
 
 #if CONFIG_WEDGE_PARTITION
-#define WEDGE_WEIGHT_BITS 6
 
 static int get_masked_weight(int m) {
   #define SMOOTHER_LEN  32
@@ -666,11 +665,13 @@ static void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
 #if CONFIG_SUPERTX
       // TODO(debargha): Need high bitdepth versions
       build_masked_compound_extend(dst, dst_buf->stride, tmp_dst, 64, plane,
-                                   mi->mbmi.wedge_index, mi->mbmi.sb_type,
+                                   mi->mbmi.interinter_wedge_index,
+                                   mi->mbmi.sb_type,
                                    wedge_offset_x, wedge_offset_y, h, w);
 #else
       build_masked_compound(dst, dst_buf->stride, tmp_dst, 64,
-                            mi->mbmi.wedge_index, mi->mbmi.sb_type, h, w);
+                            mi->mbmi.interinter_wedge_index, mi->mbmi.sb_type,
+                            h, w);
 #endif  // CONFIG_SUPERTX
     } else {
       inter_predictor(pre, pre_buf->stride, dst, dst_buf->stride,
@@ -1217,11 +1218,13 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
 #if CONFIG_SUPERTX
       // TODO(debargha): highbitdepth versions
       build_masked_compound_extend(dst, dst_buf->stride, tmp_dst, 64, plane,
-                                   mi->mbmi.wedge_index, mi->mbmi.sb_type,
+                                   mi->mbmi.interinter_wedge_index,
+                                   mi->mbmi.sb_type,
                                    wedge_offset_x, wedge_offset_y, h, w);
 #else
       build_masked_compound(dst, dst_buf->stride, tmp_dst, 64,
-                            mi->mbmi.wedge_index, mi->mbmi.sb_type, h, w);
+                            mi->mbmi.interinter_wedge_index, mi->mbmi.sb_type,
+                            h, w);
 #endif  // CONFIG_SUPERTX
     } else {
 #if CONFIG_VP9_HIGHBITDEPTH

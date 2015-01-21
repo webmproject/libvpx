@@ -23,6 +23,11 @@ static const vp9_prob default_wedge_interinter_prob[BLOCK_SIZES] = {
 static const vp9_prob default_interintra_prob[BLOCK_SIZES] = {
   192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192
 };
+#if CONFIG_WEDGE_PARTITION
+static const vp9_prob default_wedge_interintra_prob[BLOCK_SIZES] = {
+  192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192, 192
+};
+#endif  // CONFIG_WEDGE_PARTITION
 #endif  // CONFIG_INTERINTRA
 
 #if CONFIG_TX_SKIP
@@ -502,6 +507,9 @@ void vp9_init_mode_probs(FRAME_CONTEXT *fc) {
 #endif  // CONFIG_COPY_MODE
 #if CONFIG_INTERINTRA
   vp9_copy(fc->interintra_prob, default_interintra_prob);
+#if CONFIG_WEDGE_PARTITION
+  vp9_copy(fc->wedge_interintra_prob, default_wedge_interintra_prob);
+#endif  // CONFIG_WEDGE_PARTITION
 #endif  // CONFIG_INTERINTRA
 #if CONFIG_WEDGE_PARTITION
   vp9_copy(fc->wedge_interinter_prob, default_wedge_interinter_prob);
@@ -662,7 +670,15 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
       fc->interintra_prob[i] = adapt_prob(pre_fc->interintra_prob[i],
                                           counts->interintra[i]);
   }
+#if CONFIG_WEDGE_PARTITION
+  for (i = 0; i < BLOCK_SIZES; ++i) {
+    if (is_interintra_allowed(i) && get_wedge_bits(i))
+      fc->wedge_interintra_prob[i] = adapt_prob(
+          pre_fc->wedge_interintra_prob[i], counts->wedge_interintra[i]);
+  }
+#endif  // CONFIG_WEDGE_PARTITION
 #endif  // CONFIG_INTERINTRA
+
 #if CONFIG_WEDGE_PARTITION
   for (i = 0; i < BLOCK_SIZES; ++i) {
     if (get_wedge_bits(i))

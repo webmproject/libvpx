@@ -2279,6 +2279,12 @@ static int read_compressed_header(VP9Decoder *pbi, const uint8_t *data,
           vp9_diff_update_prob(&r, &fc->interintra_prob[i]);
         }
       }
+#if CONFIG_WEDGE_PARTITION
+      for (i = 0; i < BLOCK_SIZES; i++) {
+        if (is_interintra_allowed(i) && get_wedge_bits(i))
+          vp9_diff_update_prob(&r, &fc->wedge_interintra_prob[i]);
+      }
+#endif  // CONFIG_WEDGE_PARTITION
     }
 #endif  // CONFIG_INTERINTRA
 #if CONFIG_WEDGE_PARTITION

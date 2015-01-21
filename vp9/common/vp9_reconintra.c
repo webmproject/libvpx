@@ -1218,14 +1218,295 @@ static INLINE TX_SIZE blocklen_to_txsize(int bs) {
   }
 }
 
+#if CONFIG_WEDGE_PARTITION
+
+static int get_masked_weight_interintra(int m) {
+#define SMOOTHER_LEN_INTERINTRA  32
+  static const uint8_t smoothfn[2 * SMOOTHER_LEN_INTERINTRA + 1] = {
+      0,  0,  0,  0,  0,  0,  0,  0,
+      0,  0,  0,  0,  0,  1,  1,  1,
+      1,  1,  2,  2,  3,  4,  5,  6,
+      8,  9, 12, 14, 17, 21, 24, 28,
+      32,
+      36, 40, 43, 47, 50, 52, 55, 56,
+      58, 59, 60, 61, 62, 62, 63, 63,
+      63, 63, 63, 64, 64, 64, 64, 64,
+      64, 64, 64, 64, 64, 64, 64, 64,
+  };
+  if (m < -SMOOTHER_LEN_INTERINTRA)
+    return 0;
+  else if (m > SMOOTHER_LEN_INTERINTRA)
+    return (1 << WEDGE_WEIGHT_BITS);
+  else
+    return smoothfn[m + SMOOTHER_LEN_INTERINTRA];
+}
+
+static int get_hard_mask_interintra(int m) {
+  return m > 0;
+}
+
+// Equation of line: f(x, y) = a[0]*(x - a[2]*w/4) + a[1]*(y - a[3]*h/4) = 0
+// The soft mask is obtained by computing f(x, y) and then calling
+// get_masked_weight(f(x, y)).
+static const int wedge_params_sml_interintra[1 << WEDGE_BITS_SML][4] = {
+  {-1,  2, 2, 2},
+  { 1, -2, 2, 2},
+  {-2,  1, 2, 2},
+  { 2, -1, 2, 2},
+  { 2,  1, 2, 2},
+  {-2, -1, 2, 2},
+  { 1,  2, 2, 2},
+  {-1, -2, 2, 2},
+};
+
+static const int wedge_params_med_hgtw_interintra[1 << WEDGE_BITS_MED][4] = {
+  {-1,  2, 2, 2},
+  { 1, -2, 2, 2},
+  {-2,  1, 2, 2},
+  { 2, -1, 2, 2},
+  { 2,  1, 2, 2},
+  {-2, -1, 2, 2},
+  { 1,  2, 2, 2},
+  {-1, -2, 2, 2},
+
+  {-1,  2, 2, 1},
+  { 1, -2, 2, 1},
+  {-1,  2, 2, 3},
+  { 1, -2, 2, 3},
+  { 1,  2, 2, 1},
+  {-1, -2, 2, 1},
+  { 1,  2, 2, 3},
+  {-1, -2, 2, 3},
+};
+
+static const int wedge_params_med_hltw_interintra[1 << WEDGE_BITS_MED][4] = {
+  {-1,  2, 2, 2},
+  { 1, -2, 2, 2},
+  {-2,  1, 2, 2},
+  { 2, -1, 2, 2},
+  { 2,  1, 2, 2},
+  {-2, -1, 2, 2},
+  { 1,  2, 2, 2},
+  {-1, -2, 2, 2},
+
+  {-2,  1, 1, 2},
+  { 2, -1, 1, 2},
+  {-2,  1, 3, 2},
+  { 2, -1, 3, 2},
+  { 2,  1, 1, 2},
+  {-2, -1, 1, 2},
+  { 2,  1, 3, 2},
+  {-2, -1, 3, 2},
+};
+
+static const int wedge_params_med_heqw_interintra[1 << WEDGE_BITS_MED][4] = {
+  {-1,  2, 2, 2},
+  { 1, -2, 2, 2},
+  {-2,  1, 2, 2},
+  { 2, -1, 2, 2},
+  { 2,  1, 2, 2},
+  {-2, -1, 2, 2},
+  { 1,  2, 2, 2},
+  {-1, -2, 2, 2},
+
+  { 0,  2, 0, 1},
+  { 0, -2, 0, 1},
+  { 0,  2, 0, 3},
+  { 0, -2, 0, 3},
+  { 2,  0, 1, 0},
+  {-2,  0, 1, 0},
+  { 2,  0, 3, 0},
+  {-2,  0, 3, 0},
+};
+
+static const int wedge_params_big_hgtw_interintra[1 << WEDGE_BITS_BIG][4] = {
+  {-1,  2, 2, 2},
+  { 1, -2, 2, 2},
+  {-2,  1, 2, 2},
+  { 2, -1, 2, 2},
+  { 2,  1, 2, 2},
+  {-2, -1, 2, 2},
+  { 1,  2, 2, 2},
+  {-1, -2, 2, 2},
+
+  {-1,  2, 2, 1},
+  { 1, -2, 2, 1},
+  {-1,  2, 2, 3},
+  { 1, -2, 2, 3},
+  { 1,  2, 2, 1},
+  {-1, -2, 2, 1},
+  { 1,  2, 2, 3},
+  {-1, -2, 2, 3},
+
+  {-2,  1, 1, 2},
+  { 2, -1, 1, 2},
+  {-2,  1, 3, 2},
+  { 2, -1, 3, 2},
+  { 2,  1, 1, 2},
+  {-2, -1, 1, 2},
+  { 2,  1, 3, 2},
+  {-2, -1, 3, 2},
+
+  { 0,  2, 0, 1},
+  { 0, -2, 0, 1},
+  { 0,  2, 0, 2},
+  { 0, -2, 0, 2},
+  { 0,  2, 0, 3},
+  { 0, -2, 0, 3},
+  { 2,  0, 2, 0},
+  {-2,  0, 2, 0},
+};
+
+static const int wedge_params_big_hltw_interintra[1 << WEDGE_BITS_BIG][4] = {
+  {-1,  2, 2, 2},
+  { 1, -2, 2, 2},
+  {-2,  1, 2, 2},
+  { 2, -1, 2, 2},
+  { 2,  1, 2, 2},
+  {-2, -1, 2, 2},
+  { 1,  2, 2, 2},
+  {-1, -2, 2, 2},
+
+  {-1,  2, 2, 1},
+  { 1, -2, 2, 1},
+  {-1,  2, 2, 3},
+  { 1, -2, 2, 3},
+  { 1,  2, 2, 1},
+  {-1, -2, 2, 1},
+  { 1,  2, 2, 3},
+  {-1, -2, 2, 3},
+
+  {-2,  1, 1, 2},
+  { 2, -1, 1, 2},
+  {-2,  1, 3, 2},
+  { 2, -1, 3, 2},
+  { 2,  1, 1, 2},
+  {-2, -1, 1, 2},
+  { 2,  1, 3, 2},
+  {-2, -1, 3, 2},
+
+  { 0,  2, 0, 2},
+  { 0, -2, 0, 2},
+  { 2,  0, 1, 0},
+  {-2,  0, 1, 0},
+  { 2,  0, 2, 0},
+  {-2,  0, 2, 0},
+  { 2,  0, 3, 0},
+  {-2,  0, 3, 0},
+};
+
+static const int wedge_params_big_heqw_interintra[1 << WEDGE_BITS_BIG][4] = {
+  {-1,  2, 2, 2},
+  { 1, -2, 2, 2},
+  {-2,  1, 2, 2},
+  { 2, -1, 2, 2},
+  { 2,  1, 2, 2},
+  {-2, -1, 2, 2},
+  { 1,  2, 2, 2},
+  {-1, -2, 2, 2},
+
+  {-1,  2, 2, 1},
+  { 1, -2, 2, 1},
+  {-1,  2, 2, 3},
+  { 1, -2, 2, 3},
+  { 1,  2, 2, 1},
+  {-1, -2, 2, 1},
+  { 1,  2, 2, 3},
+  {-1, -2, 2, 3},
+
+  {-2,  1, 1, 2},
+  { 2, -1, 1, 2},
+  {-2,  1, 3, 2},
+  { 2, -1, 3, 2},
+  { 2,  1, 1, 2},
+  {-2, -1, 1, 2},
+  { 2,  1, 3, 2},
+  {-2, -1, 3, 2},
+
+  { 0,  2, 0, 1},
+  { 0, -2, 0, 1},
+  { 0,  2, 0, 3},
+  { 0, -2, 0, 3},
+  { 2,  0, 1, 0},
+  {-2,  0, 1, 0},
+  { 2,  0, 3, 0},
+  {-2,  0, 3, 0},
+};
+
+static const int *get_wedge_params_interintra(int wedge_index,
+                                              BLOCK_SIZE sb_type,
+                                              int h, int w) {
+  const int *a = NULL;
+  const int wedge_bits = get_wedge_bits(sb_type);
+
+  if (wedge_index == WEDGE_NONE)
+    return NULL;
+
+  if (wedge_bits == WEDGE_BITS_SML) {
+    a = wedge_params_sml_interintra[wedge_index];
+  } else if (wedge_bits == WEDGE_BITS_MED) {
+    if (h > w)
+      a = wedge_params_med_hgtw_interintra[wedge_index];
+    else if (h < w)
+      a = wedge_params_med_hltw_interintra[wedge_index];
+    else
+      a = wedge_params_med_heqw_interintra[wedge_index];
+  } else if (wedge_bits == WEDGE_BITS_BIG) {
+    if (h > w)
+      a = wedge_params_big_hgtw_interintra[wedge_index];
+    else if (h < w)
+      a = wedge_params_big_hltw_interintra[wedge_index];
+    else
+      a = wedge_params_big_heqw_interintra[wedge_index];
+  } else {
+    assert(0);
+  }
+  return a;
+}
+
+void vp9_generate_masked_weight_interintra(int wedge_index,
+                                           BLOCK_SIZE sb_type,
+                                           int h, int w,
+                                           uint8_t *mask, int stride) {
+  int i, j;
+  const int *a = get_wedge_params_interintra(wedge_index, sb_type, h, w);
+  if (!a) return;
+  for (i = 0; i < h; ++i)
+    for (j = 0; j < w; ++j) {
+      int x = (j - (a[2] * w) / 4);
+      int y = (i - (a[3] * h) / 4);
+      int m = a[0] * x + a[1] * y;
+      mask[i * stride + j] = get_masked_weight_interintra(m);
+    }
+}
+
+void vp9_generate_hard_mask_interintra(int wedge_index, BLOCK_SIZE sb_type,
+                            int h, int w, uint8_t *mask, int stride) {
+  int i, j;
+  const int *a = get_wedge_params_interintra(wedge_index, sb_type, h, w);
+  if (!a) return;
+  for (i = 0; i < h; ++i)
+    for (j = 0; j < w; ++j) {
+      int x = (j - (a[2] * w) / 4);
+      int y = (i - (a[3] * h) / 4);
+      int m = a[0] * x + a[1] * y;
+      mask[i * stride + j] = get_hard_mask_interintra(m);
+    }
+}
+#endif  // CONFIG_WEDGE_PARTITION
+
 static void combine_interintra(PREDICTION_MODE mode,
+#if CONFIG_WEDGE_PARTITION
+                               int use_wedge_interintra,
+                               int wedge_index,
+#endif  // CONFIG_WEDGE_PARTITION
+                               BLOCK_SIZE bsize,
                                uint8_t *comppred,
                                int compstride,
                                uint8_t *interpred,
                                int interstride,
                                uint8_t *intrapred,
-                               int intrastride,
-                               int bw, int bh) {
+                               int intrastride) {
   static const int scale_bits = 8;
   static const int scale_max = 256;
   static const int scale_round = 127;
@@ -1239,6 +1520,8 @@ static void combine_interintra(PREDICTION_MODE mode,
        70,  70,  69,  69,  69,  69,  68,  68,
        68,  68,  68,  67,  67,  67,  67,  67,
   };
+  const int bw = 4 << b_width_log2_lookup[bsize];
+  const int bh = 4 << b_height_log2_lookup[bsize];
 
   int size = MAX(bw, bh);
   int size_scale = (size >= 64 ? 1 :
@@ -1246,6 +1529,23 @@ static void combine_interintra(PREDICTION_MODE mode,
                     size == 16 ? 4 :
                     size == 8  ? 8 : 16);
   int i, j;
+
+#if CONFIG_WEDGE_PARTITION
+  if (use_wedge_interintra && get_wedge_bits(bsize)) {
+    uint8_t mask[4096];
+    vp9_generate_masked_weight_interintra(wedge_index, bsize, bh, bw, mask, bw);
+    for (i = 0; i < bh; ++i) {
+      for (j = 0; j < bw; ++j) {
+        int m = mask[i * bw + j];
+        comppred[i * compstride + j] =
+            (intrapred[i * intrastride + j] * m +
+             interpred[i * interstride + j] * ((1 << WEDGE_WEIGHT_BITS) - m) +
+             (1 << (WEDGE_WEIGHT_BITS - 1))) >> WEDGE_WEIGHT_BITS;
+      }
+    }
+    return;
+  }
+#endif  // CONFIG_WEDGE_PARTITION
 
   switch (mode) {
     case V_PRED:
@@ -1541,8 +1841,13 @@ void vp9_build_interintra_predictors_sby(MACROBLOCKD *xd,
       xd->mi[0].src_mi->mbmi.interintra_mode, bw, bh,
       xd->up_available, xd->left_available, 0, 0);
   combine_interintra(xd->mi[0].src_mi->mbmi.interintra_mode,
+#if CONFIG_WEDGE_PARTITION
+                     xd->mi[0].src_mi->mbmi.use_wedge_interintra,
+                     xd->mi[0].src_mi->mbmi.interintra_wedge_index,
+#endif  // CONFIG_WEDGE_PARTITION
+                     bsize,
                      xd->plane[0].dst.buf, xd->plane[0].dst.stride,
-                     ypred, ystride, intrapredictor, bw, bw, bh);
+                     ypred, ystride, intrapredictor, bw);
 }
 
 void vp9_build_interintra_predictors_sbuv(MACROBLOCKD *xd,
@@ -1550,8 +1855,9 @@ void vp9_build_interintra_predictors_sbuv(MACROBLOCKD *xd,
                                           uint8_t *vpred,
                                           int ustride, int vstride,
                                           BLOCK_SIZE bsize) {
-  int bwl = b_width_log2_lookup[bsize], bw = 2 << bwl;
-  int bhl = b_height_log2_lookup[bsize], bh = 2 << bhl;
+  BLOCK_SIZE uvbsize = get_plane_block_size(bsize, &xd->plane[1]);
+  int bw = 4 << b_width_log2_lookup[uvbsize];
+  int bh = 4 << b_height_log2_lookup[uvbsize];
   uint8_t uintrapredictor[4096];
   uint8_t vintrapredictor[4096];
   build_intra_predictors_for_interintra(
@@ -1565,11 +1871,21 @@ void vp9_build_interintra_predictors_sbuv(MACROBLOCKD *xd,
       xd->mi[0].src_mi->mbmi.interintra_uv_mode, bw, bh,
       xd->up_available, xd->left_available, 0, 2);
   combine_interintra(xd->mi[0].src_mi->mbmi.interintra_uv_mode,
+#if CONFIG_WEDGE_PARTITION
+                     xd->mi[0].src_mi->mbmi.use_wedge_interintra,
+                     xd->mi[0].src_mi->mbmi.interintra_uv_wedge_index,
+#endif  // CONFIG_WEDGE_PARTITION
+                     uvbsize,
                      xd->plane[1].dst.buf, xd->plane[1].dst.stride,
-                     upred, ustride, uintrapredictor, bw, bw, bh);
+                     upred, ustride, uintrapredictor, bw);
   combine_interintra(xd->mi[0].src_mi->mbmi.interintra_uv_mode,
+#if CONFIG_WEDGE_PARTITION
+                     xd->mi[0].src_mi->mbmi.use_wedge_interintra,
+                     xd->mi[0].src_mi->mbmi.interintra_uv_wedge_index,
+#endif  // CONFIG_WEDGE_PARTITION
+                     uvbsize,
                      xd->plane[2].dst.buf, xd->plane[2].dst.stride,
-                     vpred, vstride, vintrapredictor, bw, bw, bh);
+                     vpred, vstride, vintrapredictor, bw);
 }
 
 void vp9_build_interintra_predictors(MACROBLOCKD *xd,

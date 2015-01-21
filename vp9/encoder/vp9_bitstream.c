@@ -585,11 +585,21 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
         !supertx_enabled &&
 #endif
         mbmi->ref_frame[1] <= INTRA_FRAME) {
-        vp9_write(w, mbmi->ref_frame[1] == INTRA_FRAME,
-                  cm->fc.interintra_prob[bsize]);
-        if (mbmi->ref_frame[1] == INTRA_FRAME) {
-          write_intra_mode(w, mbmi->interintra_mode,
-                           cm->fc.y_mode_prob[size_group_lookup[bsize]]);
+      vp9_write(w, mbmi->ref_frame[1] == INTRA_FRAME,
+                cm->fc.interintra_prob[bsize]);
+      if (mbmi->ref_frame[1] == INTRA_FRAME) {
+        write_intra_mode(w, mbmi->interintra_mode,
+                         cm->fc.y_mode_prob[size_group_lookup[bsize]]);
+#if CONFIG_WEDGE_PARTITION
+        if (get_wedge_bits(bsize)) {
+          vp9_write(w, mbmi->use_wedge_interintra,
+                    cm->fc.wedge_interintra_prob[bsize]);
+          if (mbmi->use_wedge_interintra) {
+            vp9_write_literal(w, mbmi->interintra_wedge_index,
+                              get_wedge_bits(bsize));
+          }
+        }
+#endif  // CONFIG_WEDGE_PARTITION
       }
     }
 #endif  // CONFIG_INTERINTRA
@@ -660,13 +670,16 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
     }
 #if CONFIG_WEDGE_PARTITION
     if (cm->reference_mode != SINGLE_REFERENCE &&
+#if CONFIG_COMPOUND_MODES
         is_inter_compound_mode(mode) &&
+#endif  // CONFIG_COMPOUND_MODES
         get_wedge_bits(bsize) &&
         mbmi->ref_frame[1] > INTRA_FRAME) {
       vp9_write(w, mbmi->use_wedge_interinter,
                 cm->fc.wedge_interinter_prob[bsize]);
       if (mbmi->use_wedge_interinter)
-        vp9_write_literal(w, mbmi->wedge_index, get_wedge_bits(bsize));
+        vp9_write_literal(w, mbmi->interinter_wedge_index,
+                          get_wedge_bits(bsize));
     }
 #endif  // CONFIG_WEDGE_PARTITION
   }
@@ -1751,6 +1764,14 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
                                     cm->counts.interintra[i]);
         }
       }
+#if CONFIG_WEDGE_PARTITION
+      for (i = 0; i < BLOCK_SIZES; i++) {
+        if (is_interintra_allowed(i) && get_wedge_bits(i))
+          vp9_cond_prob_diff_update(&header_bc,
+                                    &fc->wedge_interintra_prob[i],
+                                    cm->counts.wedge_interintra[i]);
+      }
+#endif  // CONFIG_WEDGE_PARTITION
     }
 #endif  // CONFIG_INTERINTRA
 #if CONFIG_WEDGE_PARTITION

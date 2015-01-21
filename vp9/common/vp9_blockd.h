@@ -189,10 +189,15 @@ typedef struct {
 #if CONFIG_INTERINTRA
   PREDICTION_MODE interintra_mode;
   PREDICTION_MODE interintra_uv_mode;
+#if CONFIG_WEDGE_PARTITION
+  int use_wedge_interintra;
+  int interintra_wedge_index;
+  int interintra_uv_wedge_index;
+#endif  // CONFIG_WEDGE_PARTITION
 #endif  // CONFIG_INTERINTRA
 #if CONFIG_WEDGE_PARTITION
   int use_wedge_interinter;
-  int wedge_index;
+  int interinter_wedge_index;
 #endif  // CONFIG_WEDGE_PARTITION
 } MB_MODE_INFO;
 
@@ -474,6 +479,8 @@ static INLINE int is_interintra_allowed(BLOCK_SIZE sb_type) {
 #define WEDGE_BITS_MED   4
 #define WEDGE_BITS_BIG   5
 #define WEDGE_NONE      -1
+
+#define WEDGE_WEIGHT_BITS 6
 
 static inline int get_wedge_bits(BLOCK_SIZE sb_type) {
   if (sb_type < BLOCK_8X8)
