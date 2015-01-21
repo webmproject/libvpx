@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//JRg\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 498,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-01-21T01:56:37Z",
+      "side": 1,
+      "message": "No need to do 352 * 288 for every 64x64 block. This should be done in frame level or even above.",
+      "revId": "0f6046b65a1e13b12232ae0d3acc08859439b782",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
