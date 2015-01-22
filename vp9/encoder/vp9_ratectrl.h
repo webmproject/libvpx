@@ -55,6 +55,7 @@ typedef struct {
   int max_gf_interval;
   int static_scene_max_gf_interval;
   int baseline_gf_interval;
+  int constrained_gf_group;
   int frames_to_key;
   int frames_since_key;
   int this_key_frame_forced;
