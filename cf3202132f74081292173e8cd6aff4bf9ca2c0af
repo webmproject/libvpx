@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//JB4\u003d",
+        "filename": "vp9/common/vp9_entropymode.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 341,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-01-22T23:55:34Z",
+      "side": 0,
+      "message": "this function had two different usage, for mode/mv and for transform cofficients, the former can be simplified to reduce one divide.",
+      "parentUuid": "AAAAdn//JCQ\u003d",
+      "revId": "cf3202132f74081292173e8cd6aff4bf9ca2c0af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//JCY\u003d",
         "filename": "vp9/common/vp9_entropymode.c",
         "patchSetId": 2
@@ -47,6 +65,24 @@
       "writtenOn": "2015-01-22T23:46:44Z",
       "side": 0,
       "message": "is this the same as the function below?",
+      "revId": "cf3202132f74081292173e8cd6aff4bf9ca2c0af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//JCA\u003d",
+        "filename": "vp9/common/vp9_prob.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-01-22T23:55:34Z",
+      "side": 0,
+      "message": "No, the one below used for mode/mv probability update, where two parameters are always 20 and 128, which leads to the possible simplification to lookup",
+      "parentUuid": "AAAAdn//JCM\u003d",
       "revId": "cf3202132f74081292173e8cd6aff4bf9ca2c0af",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
