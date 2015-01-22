@@ -446,7 +446,6 @@ void vp9_set_speed_features_framesize_independent(VP9_COMP *cpi) {
   sf->always_this_block_size = BLOCK_16X16;
   sf->search_type_check_frequency = 50;
   sf->encode_breakout_thresh = 0;
-  sf->elevate_newmv_thresh = 0;
   // Recode loop tolerance %.
   sf->recode_tolerance = 25;
   sf->default_interp_filter = SWITCHABLE;
