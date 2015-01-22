@@ -18,6 +18,10 @@ set -e
 devnull='> /dev/null 2>&1'
 
 BUILD_ROOT="_iosbuild"
+CONFIGURE_ARGS="--disable-docs
+                --disable-examples
+                --disable-libyuv
+                --disable-unit-tests"
 DIST_DIR="_dist"
 FRAMEWORK_DIR="VPX.framework"
 HEADER_DIR="${FRAMEWORK_DIR}/Headers/vpx"
@@ -43,7 +47,7 @@ build_target() {
   mkdir "${target}"
   cd "${target}"
   eval "${LIBVPX_SOURCE_DIR}/configure" --target="${target}" \
-      --disable-docs ${EXTRA_CONFIGURE_ARGS} ${devnull}
+    ${CONFIGURE_ARGS} ${EXTRA_CONFIGURE_ARGS} ${devnull}
   export DIST_DIR
   eval make -j ${MAKE_JOBS} dist ${devnull}
   cd "${old_pwd}"
@@ -252,6 +256,7 @@ if [ "${VERBOSE}" = "yes" ]; then
 cat << EOF
   BUILD_ROOT=${BUILD_ROOT}
   DIST_DIR=${DIST_DIR}
+  CONFIGURE_ARGS=${CONFIGURE_ARGS}
   EXTRA_CONFIGURE_ARGS=${EXTRA_CONFIGURE_ARGS}
   FRAMEWORK_DIR=${FRAMEWORK_DIR}
   HEADER_DIR=${HEADER_DIR}
