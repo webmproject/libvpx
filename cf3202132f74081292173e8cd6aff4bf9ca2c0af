@@ -54,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//JBU\u003d",
+        "filename": "vp9/common/vp9_entropymode.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-01-23T00:17:34Z",
+      "side": 0,
+      "message": "done\nin patch#3",
+      "parentUuid": "AAAAdn//JCY\u003d",
+      "revId": "cf3202132f74081292173e8cd6aff4bf9ca2c0af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//JCM\u003d",
         "filename": "vp9/common/vp9_prob.h",
         "patchSetId": 2
