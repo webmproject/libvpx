@@ -390,9 +390,6 @@ typedef struct SPEED_FEATURES {
   // enabled in real time mode.
   int encode_breakout_thresh;
 
-  // In real time encoding, increase the threshold for NEWMV.
-  int elevate_newmv_thresh;
-
   // default interp filter choice
   INTERP_FILTER default_interp_filter;
 
