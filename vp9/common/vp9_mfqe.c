@@ -35,14 +35,26 @@ static void filter_by_weight(const uint8_t *src, int src_stride,
   }
 }
 
+void vp9_filter_by_weight8x8_c(const uint8_t *src, int src_stride,
+                               uint8_t *dst, int dst_stride, int src_weight) {
+  filter_by_weight(src, src_stride, dst, dst_stride, 8, src_weight);
+}
+
+void vp9_filter_by_weight16x16_c(const uint8_t *src, int src_stride,
+                                 uint8_t *dst, int dst_stride,
+                                 int src_weight) {
+  filter_by_weight(src, src_stride, dst, dst_stride, 16, src_weight);
+}
+
 static void filter_by_weight32x32(const uint8_t *src, int src_stride,
                                   uint8_t *dst, int dst_stride, int weight) {
-  filter_by_weight(src, src_stride, dst, dst_stride, 16, weight);
-  filter_by_weight(src + 16, src_stride, dst + 16, dst_stride, 16, weight);
-  filter_by_weight(src + src_stride * 16, src_stride, dst + dst_stride * 16,
-                   dst_stride, 16, weight);
-  filter_by_weight(src + src_stride * 16 + 16, src_stride,
-                   dst + dst_stride * 16 + 16, dst_stride, 16, weight);
+  vp9_filter_by_weight16x16(src, src_stride, dst, dst_stride, weight);
+  vp9_filter_by_weight16x16(src + 16, src_stride, dst + 16, dst_stride,
+                            weight);
+  vp9_filter_by_weight16x16(src + src_stride * 16, src_stride,
+                            dst + dst_stride * 16, dst_stride, weight);
+  vp9_filter_by_weight16x16(src + src_stride * 16 + 16, src_stride,
+                            dst + dst_stride * 16 + 16, dst_stride, weight);
 }
 
 static void filter_by_weight64x64(const uint8_t *src, int src_stride,
@@ -62,13 +74,13 @@ static void apply_ifactor(const uint8_t *y, int y_stride, uint8_t *yd,
                           int uvd_stride, BLOCK_SIZE block_size,
                           int weight) {
   if (block_size == BLOCK_16X16) {
-    filter_by_weight(y, y_stride, yd, yd_stride, 16, weight);
-    filter_by_weight(u, uv_stride, ud, uvd_stride, 8, weight);
-    filter_by_weight(v, uv_stride, vd, uvd_stride, 8, weight);
+    vp9_filter_by_weight16x16(y, y_stride, yd, yd_stride, weight);
+    vp9_filter_by_weight8x8(u, uv_stride, ud, uvd_stride, weight);
+    vp9_filter_by_weight8x8(v, uv_stride, vd, uvd_stride, weight);
   } else if (block_size == BLOCK_32X32) {
     filter_by_weight32x32(y, y_stride, yd, yd_stride, weight);
-    filter_by_weight(u, uv_stride, ud, uvd_stride, 16, weight);
-    filter_by_weight(v, uv_stride, vd, uvd_stride, 16, weight);
+    vp9_filter_by_weight16x16(u, uv_stride, ud, uvd_stride, weight);
+    vp9_filter_by_weight16x16(v, uv_stride, vd, uvd_stride, weight);
   } else if (block_size == BLOCK_64X64) {
     filter_by_weight64x64(y, y_stride, yd, yd_stride, weight);
     filter_by_weight32x32(u, uv_stride, ud, uvd_stride, weight);
