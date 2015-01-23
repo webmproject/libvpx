@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//JBM\u003d",
+        "filename": "build/make/iosbuild.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-01-23T00:28:22Z",
+      "side": 1,
+      "message": "for what this script does this should be OK; having some validation via the unit tests might be nice, but I don\u0027t think that was possible with the earlier build anyway, right?",
+      "revId": "1387f4dedfc495fcc81f156459cb58fca03f5491",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
