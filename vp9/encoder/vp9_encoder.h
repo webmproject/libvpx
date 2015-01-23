@@ -457,8 +457,7 @@ typedef struct VP9_COMP {
 
 void vp9_initialize_enc(void);
 
-struct VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
-                                       BufferPool *const pool);
+struct VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf);
 void vp9_remove_compressor(VP9_COMP *cpi);
 
 void vp9_change_config(VP9_COMP *cpi, const VP9EncoderConfig *oxcf);
@@ -519,9 +518,8 @@ static INLINE int get_ref_frame_idx(const VP9_COMP *cpi,
 
 static INLINE YV12_BUFFER_CONFIG *get_ref_frame_buffer(
     VP9_COMP *cpi, MV_REFERENCE_FRAME ref_frame) {
-  VP9_COMMON *const cm = &cpi->common;
-  BufferPool *const pool = cm->buffer_pool;
-  return &pool->frame_bufs[cm->ref_frame_map[get_ref_frame_idx(cpi, ref_frame)]]
+  VP9_COMMON * const cm = &cpi->common;
+  return &cm->frame_bufs[cm->ref_frame_map[get_ref_frame_idx(cpi, ref_frame)]]
       .buf;
 }
 
