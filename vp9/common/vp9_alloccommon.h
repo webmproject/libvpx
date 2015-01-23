@@ -32,8 +32,6 @@ void vp9_free_state_buffers(struct VP9Common *cm);
 
 void vp9_set_mb_mi(struct VP9Common *cm, int width, int height);
 
-void vp9_swap_current_and_last_seg_map(struct VP9Common *cm);
-
 #ifdef __cplusplus
 }  // extern "C"
 #endif

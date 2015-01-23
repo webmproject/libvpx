@@ -88,8 +88,6 @@ struct vpx_codec_alg_priv {
   vpx_codec_pkt_list_decl(256) pkt_list;
   unsigned int                 fixed_kf_cntr;
   vpx_codec_priv_output_cx_pkt_cb_pair_t output_cx_pkt_cb;
-  // BufferPool that holds all reference frames.
-  BufferPool              *buffer_pool;
 };
 
 static VP9_REFFRAME ref_frame_to_vp9_reframe(vpx_ref_frame_type_t frame) {
@@ -739,10 +737,6 @@ static vpx_codec_err_t encoder_init(vpx_codec_ctx_t *ctx,
     ctx->priv = (vpx_codec_priv_t *)priv;
     ctx->priv->init_flags = ctx->init_flags;
     ctx->priv->enc.total_encoders = 1;
-    priv->buffer_pool =
-        (BufferPool *)vpx_calloc(1, sizeof(BufferPool));
-    if (priv->buffer_pool == NULL)
-      return VPX_CODEC_MEM_ERROR;
 
     if (ctx->config.enc) {
       // Update the reference to the config structure to an internal copy.
@@ -761,7 +755,7 @@ static vpx_codec_err_t encoder_init(vpx_codec_ctx_t *ctx,
       priv->oxcf.use_highbitdepth =
           (ctx->init_flags & VPX_CODEC_USE_HIGHBITDEPTH) ? 1 : 0;
 #endif
-      priv->cpi = vp9_create_compressor(&priv->oxcf, priv->buffer_pool);
+      priv->cpi = vp9_create_compressor(&priv->oxcf);
       if (priv->cpi == NULL)
         res = VPX_CODEC_MEM_ERROR;
       else
@@ -775,7 +769,6 @@ static vpx_codec_err_t encoder_init(vpx_codec_ctx_t *ctx,
 static vpx_codec_err_t encoder_destroy(vpx_codec_alg_priv_t *ctx) {
   free(ctx->cx_data);
   vp9_remove_compressor(ctx->cpi);
-  vpx_free(ctx->buffer_pool);
   vpx_free(ctx);
   return VPX_CODEC_OK;
 }
