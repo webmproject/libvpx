@@ -3047,8 +3047,8 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
       }
     }
 
-    if (ref_frame_skip_mask[0] & (1 << ref_frame) &&
-        ref_frame_skip_mask[1] & (1 << MAX(0, second_ref_frame)))
+    if ((ref_frame_skip_mask[0] & (1 << ref_frame)) &&
+        (ref_frame_skip_mask[1] & (1 << MAX(0, second_ref_frame))))
       continue;
 
     if (mode_skip_mask[ref_frame] & (1 << this_mode))
@@ -3750,8 +3750,8 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
       }
     }
 
-    if (ref_frame_skip_mask[0] & (1 << ref_frame) &&
-        ref_frame_skip_mask[1] & (1 << MAX(0, second_ref_frame)))
+    if ((ref_frame_skip_mask[0] & (1 << ref_frame)) &&
+        (ref_frame_skip_mask[1] & (1 << MAX(0, second_ref_frame))))
       continue;
 
     // Test best rd so far against threshold for trying this mode.
