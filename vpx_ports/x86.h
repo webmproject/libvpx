@@ -189,7 +189,7 @@ x86_simd_caps(void) {
   if (reg_ecx & BIT(19)) flags |= HAS_SSE4_1;
 
   // bits 27 (OSXSAVE) & 28 (256-bit AVX)
-  if (reg_ecx & (BIT(27) | BIT(28))) {
+  if ((reg_ecx & (BIT(27) | BIT(28))) == (BIT(27) | BIT(28))) {
     if ((xgetbv() & 0x6) == 0x6) {
       flags |= HAS_AVX;
 
