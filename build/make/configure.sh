@@ -606,6 +606,13 @@ setup_gnu_toolchain() {
   EXE_SFX=
 }
 
+# Reliably find the newest available Darwin SDKs. (Older versions of
+# xcrun don't support --show-sdk-path.)
+show_darwin_sdk_path() {
+  xcrun --sdk $1 --show-sdk-path 2>/dev/null ||
+    xcodebuild -sdk $1 -version Path 2>/dev/null
+}
+
 process_common_toolchain() {
   if [ -z "$toolchain" ]; then
     gcctarget="${CHOST:-$(gcc -dumpmachine 2> /dev/null)}"
@@ -729,30 +736,16 @@ process_common_toolchain() {
   IOS_VERSION_MIN="6.0"
 
   # Handle darwin variants. Newer SDKs allow targeting older
-  # platforms, so find the newest SDK available.
+  # platforms, so use the newest one available.
   case ${toolchain} in
     *-darwin*)
-      if [ -z "${DEVELOPER_DIR}" ]; then
-        DEVELOPER_DIR=`xcode-select -print-path 2> /dev/null`
-        [ $? -ne 0 ] && OSX_SKIP_DIR_CHECK=1
-      fi
-      if [ -z "${OSX_SKIP_DIR_CHECK}" ]; then
-        OSX_SDK_ROOTS="${DEVELOPER_DIR}/SDKs"
-        OSX_SDK_VERSIONS="MacOSX10.4u.sdk MacOSX10.5.sdk MacOSX10.6.sdk"
-        OSX_SDK_VERSIONS="${OSX_SDK_VERSIONS} MacOSX10.7.sdk"
-        for v in ${OSX_SDK_VERSIONS}; do
-          if [ -d "${OSX_SDK_ROOTS}/${v}" ]; then
-            osx_sdk_dir="${OSX_SDK_ROOTS}/${v}"
-          fi
-        done
+      osx_sdk_dir="$(show_darwin_sdk_path macosx)"
+      if [ -d "${osx_sdk_dir}" ]; then
+        add_cflags  "-isysroot ${osx_sdk_dir}"
+        add_ldflags "-isysroot ${osx_sdk_dir}"
       fi
       ;;
   esac
-
-  if [ -d "${osx_sdk_dir}" ]; then
-    add_cflags  "-isysroot ${osx_sdk_dir}"
-    add_ldflags "-isysroot ${osx_sdk_dir}"
-  fi
 
   case ${toolchain} in
     *-darwin8-*)
@@ -786,9 +779,11 @@ process_common_toolchain() {
     *-iphonesimulator-*)
       add_cflags  "-miphoneos-version-min=${IOS_VERSION_MIN}"
       add_ldflags "-miphoneos-version-min=${IOS_VERSION_MIN}"
-      osx_sdk_dir="$(xcrun --sdk iphonesimulator --show-sdk-path)"
-      add_cflags  "-isysroot ${osx_sdk_dir}"
-      add_ldflags "-isysroot ${osx_sdk_dir}"
+      iossim_sdk_dir="$(show_darwin_sdk_path iphonesimulator)"
+      if [ -d "${iossim_sdk_dir}" ]; then
+        add_cflags  "-isysroot ${iossim_sdk_dir}"
+        add_ldflags "-isysroot ${iossim_sdk_dir}"
+      fi
       ;;
   esac
 
@@ -960,7 +955,7 @@ EOF
           ;;
 
         darwin*)
-          XCRUN_FIND="xcrun --sdk iphoneos -find"
+          XCRUN_FIND="xcrun --sdk iphoneos --find"
           CXX="$(${XCRUN_FIND} clang++)"
           CC="$(${XCRUN_FIND} clang)"
           AR="$(${XCRUN_FIND} ar)"
@@ -987,9 +982,13 @@ EOF
           # options that were put in above
           ASFLAGS="-arch ${tgt_isa} -g"
 
-          alt_libc="$(xcrun --sdk iphoneos --show-sdk-path)"
-          add_cflags -arch ${tgt_isa} -isysroot ${alt_libc}
+          add_cflags -arch ${tgt_isa}
           add_ldflags -arch ${tgt_isa}
+
+          alt_libc="$(show_darwin_sdk_path iphoneos)"
+          if [ -d "${alt_libc}" ]; then
+            add_cflags -isysroot ${alt_libc}
+          fi
 
           if [ "${LD}" = "${CXX}" ]; then
             add_ldflags -miphoneos-version-min="${IOS_VERSION_MIN}"
