@@ -105,3 +105,58 @@ void vp9_sad64x64x4d_neon(const uint8_t *src, int src_stride,
   res[2] = horizontal_long_add_16x8(vec_sum_ref2_lo, vec_sum_ref2_hi);
   res[3] = horizontal_long_add_16x8(vec_sum_ref3_lo, vec_sum_ref3_hi);
 }
+
+void vp9_sad16x16x4d_neon(const uint8_t *src, int src_stride,
+                          const uint8_t* const ref[4], int ref_stride,
+                          unsigned int *res) {
+  int i;
+  uint16x8_t vec_sum_ref0_lo = vdupq_n_u16(0);
+  uint16x8_t vec_sum_ref0_hi = vdupq_n_u16(0);
+  uint16x8_t vec_sum_ref1_lo = vdupq_n_u16(0);
+  uint16x8_t vec_sum_ref1_hi = vdupq_n_u16(0);
+  uint16x8_t vec_sum_ref2_lo = vdupq_n_u16(0);
+  uint16x8_t vec_sum_ref2_hi = vdupq_n_u16(0);
+  uint16x8_t vec_sum_ref3_lo = vdupq_n_u16(0);
+  uint16x8_t vec_sum_ref3_hi = vdupq_n_u16(0);
+  const uint8_t *ref0, *ref1, *ref2, *ref3;
+  ref0 = ref[0];
+  ref1 = ref[1];
+  ref2 = ref[2];
+  ref3 = ref[3];
+
+  for (i = 0; i < 16; ++i) {
+    const uint8x16_t vec_src = vld1q_u8(src);
+    const uint8x16_t vec_ref0 = vld1q_u8(ref0);
+    const uint8x16_t vec_ref1 = vld1q_u8(ref1);
+    const uint8x16_t vec_ref2 = vld1q_u8(ref2);
+    const uint8x16_t vec_ref3 = vld1q_u8(ref3);
+
+    vec_sum_ref0_lo = vabal_u8(vec_sum_ref0_lo, vget_low_u8(vec_src),
+                               vget_low_u8(vec_ref0));
+    vec_sum_ref0_hi = vabal_u8(vec_sum_ref0_hi, vget_high_u8(vec_src),
+                               vget_high_u8(vec_ref0));
+    vec_sum_ref1_lo = vabal_u8(vec_sum_ref1_lo, vget_low_u8(vec_src),
+                               vget_low_u8(vec_ref1));
+    vec_sum_ref1_hi = vabal_u8(vec_sum_ref1_hi, vget_high_u8(vec_src),
+                               vget_high_u8(vec_ref1));
+    vec_sum_ref2_lo = vabal_u8(vec_sum_ref2_lo, vget_low_u8(vec_src),
+                               vget_low_u8(vec_ref2));
+    vec_sum_ref2_hi = vabal_u8(vec_sum_ref2_hi, vget_high_u8(vec_src),
+                               vget_high_u8(vec_ref2));
+    vec_sum_ref3_lo = vabal_u8(vec_sum_ref3_lo, vget_low_u8(vec_src),
+                               vget_low_u8(vec_ref3));
+    vec_sum_ref3_hi = vabal_u8(vec_sum_ref3_hi, vget_high_u8(vec_src),
+                               vget_high_u8(vec_ref3));
+
+    src += src_stride;
+    ref0 += ref_stride;
+    ref1 += ref_stride;
+    ref2 += ref_stride;
+    ref3 += ref_stride;
+  }
+
+  res[0] = horizontal_long_add_16x8(vec_sum_ref0_lo, vec_sum_ref0_hi);
+  res[1] = horizontal_long_add_16x8(vec_sum_ref1_lo, vec_sum_ref1_hi);
+  res[2] = horizontal_long_add_16x8(vec_sum_ref2_lo, vec_sum_ref2_hi);
+  res[3] = horizontal_long_add_16x8(vec_sum_ref3_lo, vec_sum_ref3_hi);
+}
