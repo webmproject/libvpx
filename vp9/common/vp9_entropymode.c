@@ -334,20 +334,6 @@ const vp9_tree_index vp9_switchable_interp_tree
   -EIGHTTAP_SMOOTH, -EIGHTTAP_SHARP
 };
 
-#define COUNT_SAT 20
-#define MAX_UPDATE_FACTOR 128
-
-static int adapt_prob(vp9_prob pre_prob, const unsigned int ct[2]) {
-  return merge_probs(pre_prob, ct, COUNT_SAT, MAX_UPDATE_FACTOR);
-}
-
-static void adapt_probs(const vp9_tree_index *tree,
-                        const vp9_prob *pre_probs, const unsigned int *counts,
-                        vp9_prob *probs) {
-  vp9_tree_merge_probs(tree, pre_probs, counts, COUNT_SAT, MAX_UPDATE_FACTOR,
-                   probs);
-}
-
 void vp9_adapt_mode_probs(VP9_COMMON *cm) {
   int i, j;
   FRAME_CONTEXT *fc = cm->fc;
@@ -355,39 +341,41 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
   const FRAME_COUNTS *counts = &cm->counts;
 
   for (i = 0; i < INTRA_INTER_CONTEXTS; i++)
-    fc->intra_inter_prob[i] = adapt_prob(pre_fc->intra_inter_prob[i],
-                                         counts->intra_inter[i]);
+    fc->intra_inter_prob[i] = mode_mv_merge_probs(pre_fc->intra_inter_prob[i],
+                                                  counts->intra_inter[i]);
   for (i = 0; i < COMP_INTER_CONTEXTS; i++)
-    fc->comp_inter_prob[i] = adapt_prob(pre_fc->comp_inter_prob[i],
-                                        counts->comp_inter[i]);
+    fc->comp_inter_prob[i] = mode_mv_merge_probs(pre_fc->comp_inter_prob[i],
+                                                 counts->comp_inter[i]);
   for (i = 0; i < REF_CONTEXTS; i++)
-    fc->comp_ref_prob[i] = adapt_prob(pre_fc->comp_ref_prob[i],
-                                      counts->comp_ref[i]);
+    fc->comp_ref_prob[i] = mode_mv_merge_probs(pre_fc->comp_ref_prob[i],
+                                               counts->comp_ref[i]);
   for (i = 0; i < REF_CONTEXTS; i++)
     for (j = 0; j < 2; j++)
-      fc->single_ref_prob[i][j] = adapt_prob(pre_fc->single_ref_prob[i][j],
-                                             counts->single_ref[i][j]);
+      fc->single_ref_prob[i][j] = mode_mv_merge_probs(
+          pre_fc->single_ref_prob[i][j], counts->single_ref[i][j]);
 
   for (i = 0; i < INTER_MODE_CONTEXTS; i++)
-    adapt_probs(vp9_inter_mode_tree, pre_fc->inter_mode_probs[i],
+    vp9_tree_merge_probs(vp9_inter_mode_tree, pre_fc->inter_mode_probs[i],
                 counts->inter_mode[i], fc->inter_mode_probs[i]);
 
   for (i = 0; i < BLOCK_SIZE_GROUPS; i++)
-    adapt_probs(vp9_intra_mode_tree, pre_fc->y_mode_prob[i],
+    vp9_tree_merge_probs(vp9_intra_mode_tree, pre_fc->y_mode_prob[i],
                 counts->y_mode[i], fc->y_mode_prob[i]);
 
   for (i = 0; i < INTRA_MODES; ++i)
-    adapt_probs(vp9_intra_mode_tree, pre_fc->uv_mode_prob[i],
-                counts->uv_mode[i], fc->uv_mode_prob[i]);
+    vp9_tree_merge_probs(vp9_intra_mode_tree, pre_fc->uv_mode_prob[i],
+                         counts->uv_mode[i], fc->uv_mode_prob[i]);
 
   for (i = 0; i < PARTITION_CONTEXTS; i++)
-    adapt_probs(vp9_partition_tree, pre_fc->partition_prob[i],
-                counts->partition[i], fc->partition_prob[i]);
+    vp9_tree_merge_probs(vp9_partition_tree, pre_fc->partition_prob[i],
+                         counts->partition[i], fc->partition_prob[i]);
 
   if (cm->interp_filter == SWITCHABLE) {
     for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; i++)
-      adapt_probs(vp9_switchable_interp_tree, pre_fc->switchable_interp_prob[i],
-                  counts->switchable_interp[i], fc->switchable_interp_prob[i]);
+      vp9_tree_merge_probs(vp9_switchable_interp_tree,
+                           pre_fc->switchable_interp_prob[i],
+                           counts->switchable_interp[i],
+                           fc->switchable_interp_prob[i]);
   }
 
   if (cm->tx_mode == TX_MODE_SELECT) {
@@ -399,23 +387,24 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
     for (i = 0; i < TX_SIZE_CONTEXTS; ++i) {
       tx_counts_to_branch_counts_8x8(counts->tx.p8x8[i], branch_ct_8x8p);
       for (j = 0; j < TX_SIZES - 3; ++j)
-        fc->tx_probs.p8x8[i][j] = adapt_prob(pre_fc->tx_probs.p8x8[i][j],
-                                             branch_ct_8x8p[j]);
+        fc->tx_probs.p8x8[i][j] = mode_mv_merge_probs(
+            pre_fc->tx_probs.p8x8[i][j], branch_ct_8x8p[j]);
 
       tx_counts_to_branch_counts_16x16(counts->tx.p16x16[i], branch_ct_16x16p);
       for (j = 0; j < TX_SIZES - 2; ++j)
-        fc->tx_probs.p16x16[i][j] = adapt_prob(pre_fc->tx_probs.p16x16[i][j],
-                                               branch_ct_16x16p[j]);
+        fc->tx_probs.p16x16[i][j] = mode_mv_merge_probs(
+            pre_fc->tx_probs.p16x16[i][j], branch_ct_16x16p[j]);
 
       tx_counts_to_branch_counts_32x32(counts->tx.p32x32[i], branch_ct_32x32p);
       for (j = 0; j < TX_SIZES - 1; ++j)
-        fc->tx_probs.p32x32[i][j] = adapt_prob(pre_fc->tx_probs.p32x32[i][j],
-                                               branch_ct_32x32p[j]);
+        fc->tx_probs.p32x32[i][j] = mode_mv_merge_probs(
+            pre_fc->tx_probs.p32x32[i][j], branch_ct_32x32p[j]);
     }
   }
 
   for (i = 0; i < SKIP_CONTEXTS; ++i)
-    fc->skip_probs[i] = adapt_prob(pre_fc->skip_probs[i], counts->skip[i]);
+    fc->skip_probs[i] = mode_mv_merge_probs(
+        pre_fc->skip_probs[i], counts->skip[i]);
 }
 
 static void set_default_lf_deltas(struct loopfilter *lf) {
