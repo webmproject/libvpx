@@ -16,6 +16,24 @@
       "revId": "1387f4dedfc495fcc81f156459cb58fca03f5491",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Ixs\u003d",
+        "filename": "build/make/iosbuild.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2015-01-26T23:10:17Z",
+      "side": 1,
+      "message": "It might be possible... I\u0027ll mess around with this some later on this week. There\u0027s nothing stopping us from running the unit tests and examples on jailbroken devices/desktops.",
+      "parentUuid": "AAAAdn//JBM\u003d",
+      "revId": "1387f4dedfc495fcc81f156459cb58fca03f5491",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
