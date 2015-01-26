@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//I2Q\u003d",
+        "filename": "vp9/common/x86/vp9_idct_intrin_sse2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 3641,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-01-26T16:40:41Z",
+      "side": 1,
+      "message": "This aligned array has same size, 32x32x2\u003d2048bytes,  as the old one, 16x128?",
+      "revId": "cdb6dea1fe21098a70e9881ec3664b1ae80fd4a2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
