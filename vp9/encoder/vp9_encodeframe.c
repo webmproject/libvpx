@@ -402,7 +402,7 @@ static int set_vt_partitioning(VP9_COMP *cpi,
                                BLOCK_SIZE bsize,
                                int mi_row,
                                int mi_col,
-                               int threshold,
+                               int64_t threshold,
                                BLOCK_SIZE bsize_min) {
   VP9_COMMON * const cm = &cpi->common;
   variance_node vt;
