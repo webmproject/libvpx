@@ -1,0 +1,225 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//I1w\u003d",
+        "filename": "vp9/common/vp9_entropymode.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-01-26T19:30:40Z",
+      "side": 1,
+      "message": "Conventionally, do we better have\n-AFFINEMV, -NEWMV\nhere, to have \"-NEWMV\" always be the right-most leaf node?",
+      "revId": "3f9d8e34fc8ebac606ccf5fa12fa89fe140512ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//I1g\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-01-26T19:30:40Z",
+      "side": 1,
+      "message": "Should the above two lines be:\nfor (j \u003d 0; j \u003c cols; j++) {\n  for (i \u003d 0; i \u003c rows; i++) {",
+      "revId": "3f9d8e34fc8ebac606ccf5fa12fa89fe140512ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//I0o\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-01-26T19:30:40Z",
+      "side": 1,
+      "message": "May fix the line indentation.",
+      "revId": "3f9d8e34fc8ebac606ccf5fa12fa89fe140512ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//I1Y\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-01-26T19:30:40Z",
+      "side": 1,
+      "message": "Above line may be removed, to be consistent with the coding style as the following \"go down\" option?",
+      "revId": "3f9d8e34fc8ebac606ccf5fa12fa89fe140512ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//I1M\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-01-26T19:30:40Z",
+      "side": 1,
+      "message": "The above two lines are identical among all 4 cases. Maybe they could be all moved outside switch(){}?",
+      "revId": "3f9d8e34fc8ebac606ccf5fa12fa89fe140512ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//I1I\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-01-26T19:30:40Z",
+      "side": 1,
+      "message": "Add comment here?\n// right",
+      "revId": "3f9d8e34fc8ebac606ccf5fa12fa89fe140512ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//I1E\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 257,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-01-26T19:30:40Z",
+      "side": 1,
+      "message": "Add comment here?\n// up",
+      "revId": "3f9d8e34fc8ebac606ccf5fa12fa89fe140512ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//I1A\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-01-26T19:30:40Z",
+      "side": 1,
+      "message": "Add comment here?\n// down",
+      "revId": "3f9d8e34fc8ebac606ccf5fa12fa89fe140512ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//I04\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 286,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-01-26T19:30:40Z",
+      "side": 1,
+      "message": "May remove the empty line.",
+      "revId": "3f9d8e34fc8ebac606ccf5fa12fa89fe140512ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//I0w\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-01-26T19:30:40Z",
+      "side": 1,
+      "message": "May remove the empty line.",
+      "revId": "3f9d8e34fc8ebac606ccf5fa12fa89fe140512ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//I0k\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 373,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-01-26T19:30:40Z",
+      "side": 1,
+      "message": "May fix the line indentation.",
+      "revId": "3f9d8e34fc8ebac606ccf5fa12fa89fe140512ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//I0c\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 450,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-01-26T19:30:40Z",
+      "side": 1,
+      "message": "May remove the extra empty line.",
+      "revId": "3f9d8e34fc8ebac606ccf5fa12fa89fe140512ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//I0Y\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 469,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-01-26T19:30:40Z",
+      "side": 1,
+      "message": "May add a space in (2 * j + m +1) before \"1\".",
+      "revId": "3f9d8e34fc8ebac606ccf5fa12fa89fe140512ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
