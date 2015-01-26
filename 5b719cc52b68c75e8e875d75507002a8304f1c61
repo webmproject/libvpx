@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//I2Y\u003d",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2015-01-26T16:38:06Z",
+      "side": 1,
+      "message": "perhaps a #define to replace these numbers with an explanatory comment re units. 1/8 pel ?",
+      "revId": "5b719cc52b68c75e8e875d75507002a8304f1c61",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//I2g\u003d",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 356,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2015-01-26T16:38:06Z",
+      "side": 1,
+      "message": "This and the accompanying comment are a bit confusing. Comment says scaled by 256 but then there is a \u003c\u003c 7.",
+      "revId": "5b719cc52b68c75e8e875d75507002a8304f1c61",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
