@@ -42,9 +42,8 @@ int vp9_cyclic_refresh_rc_bits_per_mb(const struct VP9_COMP *cpi, int i,
 // and segmentation map.
 void vp9_cyclic_refresh_update_segment(struct VP9_COMP *const cpi,
                                        MB_MODE_INFO *const mbmi,
-                                       int mi_row, int mi_col,
-                                       BLOCK_SIZE bsize, int use_rd,
-                                       int64_t rate_sb);
+                                       int mi_row, int mi_col, BLOCK_SIZE bsize,
+                                       int64_t rate, int64_t dist);
 
 // Update the segmentation map, and related quantities: cyclic refresh map,
 // refresh sb_index, and target number of blocks to be refreshed.
