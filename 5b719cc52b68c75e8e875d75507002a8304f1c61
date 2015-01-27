@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Izg\u003d",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-01-27T00:45:32Z",
+      "side": 1,
+      "message": "done. added the motion threshold to the cr struct.",
+      "parentUuid": "AAAAdn//I2Y\u003d",
+      "revId": "5b719cc52b68c75e8e875d75507002a8304f1c61",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//I2g\u003d",
         "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
         "patchSetId": 9
@@ -30,6 +48,24 @@
       "writtenOn": "2015-01-26T16:38:06Z",
       "side": 1,
       "message": "This and the accompanying comment are a bit confusing. Comment says scaled by 256 but then there is a \u003c\u003c 7.",
+      "revId": "5b719cc52b68c75e8e875d75507002a8304f1c61",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Izk\u003d",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 356,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-01-27T00:45:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//I2g\u003d",
       "revId": "5b719cc52b68c75e8e875d75507002a8304f1c61",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
