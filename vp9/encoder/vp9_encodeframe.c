@@ -490,18 +490,23 @@ static void choose_partitioning(VP9_COMP *cpi,
   int pixels_wide = 64, pixels_high = 64;
   const YV12_BUFFER_CONFIG *yv12 = get_ref_frame_buffer(cpi, LAST_FRAME);
   const struct scale_factors *const sf = &cm->frame_refs[LAST_FRAME - 1].sf;
-
   // Always use 4x4 partition for key frame.
   int use_4x4_partition = (cm->frame_type == KEY_FRAME);
-
   int variance4x4downsample[16];
   int low_res = (cm->width <= 352 && cm->height <= 288) ? 1 : 0;
   const int threshold_multiplier = cm->frame_type == KEY_FRAME ? 80 : 4;
-  int64_t threshold_base = (int64_t)(threshold_multiplier *
+  int64_t threshold_base;
+  int64_t threshold;
+  int64_t threshold_bsize_min;
+  int64_t threshold_bsize_max;
+
+  vp9_clear_system_state();
+  threshold_base = (int64_t)(threshold_multiplier *
       vp9_convert_qindex_to_q(cm->base_qindex, cm->bit_depth));
-  int64_t threshold = threshold_base;
-  int64_t threshold_bsize_min = threshold_base << 6;
-  int64_t threshold_bsize_max = threshold_base;
+  threshold = threshold_base;
+  threshold_bsize_min = threshold_base << 6;
+  threshold_bsize_max = threshold_base;
+
   // Modify thresholds for key frame and for low-resolutions (set lower
   // thresholds to favor split).
   if (cm->frame_type == KEY_FRAME) {
@@ -512,7 +517,6 @@ static void choose_partitioning(VP9_COMP *cpi,
     threshold_bsize_max = threshold_base >> 2;
   }
 
-  vp9_clear_system_state();
   set_offsets(cpi, tile, x, mi_row, mi_col, BLOCK_64X64);
 
   if (xd->mb_to_right_edge < 0)
