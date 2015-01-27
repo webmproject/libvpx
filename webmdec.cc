@@ -41,6 +41,7 @@ void reset(struct WebmInputContext *const webm_ctx) {
   webm_ctx->block_frame_index = 0;
   webm_ctx->video_track_index = 0;
   webm_ctx->timestamp_ns = 0;
+  webm_ctx->is_key_frame = false;
 }
 
 void get_first_cluster(struct WebmInputContext *const webm_ctx) {
@@ -182,6 +183,7 @@ int webm_read_frame(struct WebmInputContext *webm_ctx,
   }
   *bytes_in_buffer = frame.len;
   webm_ctx->timestamp_ns = block->GetTime(cluster);
+  webm_ctx->is_key_frame = block->IsKey();
 
   mkvparser::MkvReader *const reader =
       reinterpret_cast<mkvparser::MkvReader*>(webm_ctx->reader);

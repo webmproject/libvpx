@@ -535,11 +535,12 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
     }
 
     if (cpi->ref_frame_flags & VP9_GOLD_FLAG) {
+      BufferPool *const pool = cm->buffer_pool;
       const int ref_idx =
           cm->ref_frame_map[get_ref_frame_idx(cpi, GOLDEN_FRAME)];
       const int scaled_idx = cpi->scaled_ref_idx[GOLDEN_FRAME - 1];
 
-      gld_yv12 = (scaled_idx != ref_idx) ? &cm->frame_bufs[scaled_idx].buf :
+      gld_yv12 = (scaled_idx != ref_idx) ? &pool->frame_bufs[scaled_idx].buf :
                  get_ref_frame_buffer(cpi, GOLDEN_FRAME);
     } else {
       gld_yv12 = NULL;

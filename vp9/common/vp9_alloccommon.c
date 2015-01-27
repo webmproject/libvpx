@@ -17,6 +17,24 @@
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_systemdependent.h"
 
+// TODO(hkuang): Don't need to lock the whole pool after implementing atomic
+// frame reference count.
+void lock_buffer_pool(BufferPool *const pool) {
+#if CONFIG_MULTITHREAD
+  pthread_mutex_lock(&pool->pool_mutex);
+#else
+  (void)pool;
+#endif
+}
+
+void unlock_buffer_pool(BufferPool *const pool) {
+#if CONFIG_MULTITHREAD
+  pthread_mutex_unlock(&pool->pool_mutex);
+#else
+  (void)pool;
+#endif
+}
+
 void vp9_set_mb_mi(VP9_COMMON *cm, int width, int height) {
   const int aligned_width = ALIGN_POWER_OF_TWO(width, MI_SIZE_LOG2);
   const int aligned_height = ALIGN_POWER_OF_TWO(height, MI_SIZE_LOG2);
@@ -30,18 +48,54 @@ void vp9_set_mb_mi(VP9_COMMON *cm, int width, int height) {
   cm->MBs = cm->mb_rows * cm->mb_cols;
 }
 
+static int alloc_seg_map(VP9_COMMON *cm, int seg_map_size) {
+  int i;
+
+  for (i = 0; i < NUM_PING_PONG_BUFFERS; ++i) {
+    cm->seg_map_array[i] = (uint8_t *)vpx_calloc(seg_map_size, 1);
+    if (cm->seg_map_array[i] == NULL)
+      return 1;
+  }
+
+  // Init the index.
+  cm->seg_map_idx = 0;
+  cm->prev_seg_map_idx = 1;
+
+  cm->current_frame_seg_map = cm->seg_map_array[cm->seg_map_idx];
+  if (!cm->frame_parallel_decode)
+    cm->last_frame_seg_map = cm->seg_map_array[cm->prev_seg_map_idx];
+
+  return 0;
+}
+
+static void free_seg_map(VP9_COMMON *cm) {
+  int i;
+
+  for (i = 0; i < NUM_PING_PONG_BUFFERS; ++i) {
+    vpx_free(cm->seg_map_array[i]);
+    cm->seg_map_array[i] = NULL;
+  }
+
+  cm->current_frame_seg_map = NULL;
+
+  if (!cm->frame_parallel_decode) {
+    cm->last_frame_seg_map = NULL;
+  }
+}
+
 void vp9_free_ref_frame_buffers(VP9_COMMON *cm) {
+  BufferPool *const pool = cm->buffer_pool;
   int i;
 
   for (i = 0; i < FRAME_BUFFERS; ++i) {
-    if (cm->frame_bufs[i].ref_count > 0 &&
-        cm->frame_bufs[i].raw_frame_buffer.data != NULL) {
-      cm->release_fb_cb(cm->cb_priv, &cm->frame_bufs[i].raw_frame_buffer);
-      cm->frame_bufs[i].ref_count = 0;
+    if (pool->frame_bufs[i].ref_count > 0 &&
+        pool->frame_bufs[i].raw_frame_buffer.data != NULL) {
+      pool->release_fb_cb(pool->cb_priv, &pool->frame_bufs[i].raw_frame_buffer);
+      pool->frame_bufs[i].ref_count = 0;
     }
-    vpx_free(cm->frame_bufs[i].mvs);
-    cm->frame_bufs[i].mvs = NULL;
-    vp9_free_frame_buffer(&cm->frame_bufs[i].buf);
+    vpx_free(pool->frame_bufs[i].mvs);
+    pool->frame_bufs[i].mvs = NULL;
+    vp9_free_frame_buffer(&pool->frame_bufs[i].buf);
   }
 
 #if CONFIG_VP9_POSTPROC
@@ -52,8 +106,7 @@ void vp9_free_ref_frame_buffers(VP9_COMMON *cm) {
 
 void vp9_free_context_buffers(VP9_COMMON *cm) {
   cm->free_mi(cm);
-  vpx_free(cm->last_frame_seg_map);
-  cm->last_frame_seg_map = NULL;
+  free_seg_map(cm);
   vpx_free(cm->above_context);
   cm->above_context = NULL;
   vpx_free(cm->above_seg_context);
@@ -67,8 +120,10 @@ int vp9_alloc_context_buffers(VP9_COMMON *cm, int width, int height) {
   if (cm->alloc_mi(cm, cm->mi_stride * calc_mi_size(cm->mi_rows)))
     goto fail;
 
-  cm->last_frame_seg_map = (uint8_t *)vpx_calloc(cm->mi_rows * cm->mi_cols, 1);
-  if (!cm->last_frame_seg_map) goto fail;
+  // Create the segmentation map structure and set to 0.
+  free_seg_map(cm);
+  if (alloc_seg_map(cm, cm->mi_rows * cm->mi_cols))
+    goto fail;
 
   cm->above_context = (ENTROPY_CONTEXT *)vpx_calloc(
       2 * mi_cols_aligned_to_sb(cm->mi_cols) * MAX_MB_PLANE,
@@ -87,14 +142,15 @@ int vp9_alloc_context_buffers(VP9_COMMON *cm, int width, int height) {
 }
 
 static void init_frame_bufs(VP9_COMMON *cm) {
+  BufferPool *const pool = cm->buffer_pool;
   int i;
 
   cm->new_fb_idx = FRAME_BUFFERS - 1;
-  cm->frame_bufs[cm->new_fb_idx].ref_count = 1;
+  pool->frame_bufs[cm->new_fb_idx].ref_count = 1;
 
   for (i = 0; i < REF_FRAMES; ++i) {
     cm->ref_frame_map[i] = i;
-    cm->frame_bufs[i].ref_count = 1;
+    pool->frame_bufs[i].ref_count = 1;
   }
 }
 
@@ -106,8 +162,9 @@ int vp9_alloc_ref_frame_buffers(VP9_COMMON *cm, int width, int height) {
   vp9_free_ref_frame_buffers(cm);
 
   for (i = 0; i < FRAME_BUFFERS; ++i) {
-    cm->frame_bufs[i].ref_count = 0;
-    if (vp9_alloc_frame_buffer(&cm->frame_bufs[i].buf, width, height,
+    BufferPool *const pool = cm->buffer_pool;
+    pool->frame_bufs[i].ref_count = 0;
+    if (vp9_alloc_frame_buffer(&pool->frame_bufs[i].buf, width, height,
                                ss_x, ss_y,
 #if CONFIG_VP9_HIGHBITDEPTH
                                cm->use_highbitdepth,
@@ -115,15 +172,15 @@ int vp9_alloc_ref_frame_buffers(VP9_COMMON *cm, int width, int height) {
                                VP9_ENC_BORDER_IN_PIXELS,
                                cm->byte_alignment) < 0)
       goto fail;
-    if (cm->frame_bufs[i].mvs == NULL) {
-      cm->frame_bufs[i].mvs =
+    if (pool->frame_bufs[i].mvs == NULL) {
+      pool->frame_bufs[i].mvs =
           (MV_REF *)vpx_calloc(cm->mi_rows * cm->mi_cols,
-                               sizeof(*cm->frame_bufs[i].mvs));
-      if (cm->frame_bufs[i].mvs == NULL)
+                               sizeof(*pool->frame_bufs[i].mvs));
+      if (pool->frame_bufs[i].mvs == NULL)
         goto fail;
 
-      cm->frame_bufs[i].mi_rows = cm->mi_rows;
-      cm->frame_bufs[i].mi_cols = cm->mi_cols;
+      pool->frame_bufs[i].mi_rows = cm->mi_rows;
+      pool->frame_bufs[i].mi_cols = cm->mi_cols;
     }
   }
 
@@ -149,7 +206,6 @@ int vp9_alloc_ref_frame_buffers(VP9_COMMON *cm, int width, int height) {
 void vp9_remove_common(VP9_COMMON *cm) {
   vp9_free_ref_frame_buffers(cm);
   vp9_free_context_buffers(cm);
-  vp9_free_internal_frame_buffers(&cm->int_frame_buffers);
 
   vpx_free(cm->fc);
   cm->fc = NULL;
@@ -159,6 +215,16 @@ void vp9_remove_common(VP9_COMMON *cm) {
 
 void vp9_init_context_buffers(VP9_COMMON *cm) {
   cm->setup_mi(cm);
-  if (cm->last_frame_seg_map)
+  if (cm->last_frame_seg_map && !cm->frame_parallel_decode)
     vpx_memset(cm->last_frame_seg_map, 0, cm->mi_rows * cm->mi_cols);
+}
+
+void vp9_swap_current_and_last_seg_map(VP9_COMMON *cm) {
+  // Swap indices.
+  const int tmp = cm->seg_map_idx;
+  cm->seg_map_idx = cm->prev_seg_map_idx;
+  cm->prev_seg_map_idx = tmp;
+
+  cm->current_frame_seg_map = cm->seg_map_array[cm->seg_map_idx];
+  cm->last_frame_seg_map = cm->seg_map_array[cm->prev_seg_map_idx];
 }

@@ -12,6 +12,7 @@
 #include <cstdlib>
 #include <string>
 #include "third_party/googletest/src/include/gtest/gtest.h"
+#include "../tools_common.h"
 #include "./vpx_config.h"
 #include "test/codec_factory.h"
 #include "test/decode_test_driver.h"
@@ -26,10 +27,24 @@
 
 namespace {
 
+enum DecodeMode {
+  kSerialMode,
+  kFrameParallMode
+};
+
+const int kDecodeMode = 0;
+const int kThreads = 1;
+const int kFileName = 2;
+
+typedef std::tr1::tuple<int, int, const char*> DecodeParam;
+
 class TestVectorTest : public ::libvpx_test::DecoderTest,
-    public ::libvpx_test::CodecTestWithParam<const char*> {
+    public ::libvpx_test::CodecTestWithParam<DecodeParam> {
  protected:
-  TestVectorTest() : DecoderTest(GET_PARAM(0)), md5_file_(NULL) {}
+  TestVectorTest()
+      : DecoderTest(GET_PARAM(0)),
+        md5_file_(NULL) {
+  }
 
   virtual ~TestVectorTest() {
     if (md5_file_)
@@ -71,8 +86,25 @@ class TestVectorTest : public ::libvpx_test::DecoderTest,
 // checksums match the correct md5 data, then the test is passed. Otherwise,
 // the test failed.
 TEST_P(TestVectorTest, MD5Match) {
-  const std::string filename = GET_PARAM(1);
+  const DecodeParam input = GET_PARAM(1);
+  const std::string filename = std::tr1::get<kFileName>(input);
+  const int threads = std::tr1::get<kThreads>(input);
+  const int mode = std::tr1::get<kDecodeMode>(input);
   libvpx_test::CompressedVideoSource *video = NULL;
+  vpx_codec_flags_t flags = 0;
+  vpx_codec_dec_cfg_t cfg = {0};
+  char str[256];
+
+  if (mode == kFrameParallMode) {
+    flags |= VPX_CODEC_USE_FRAME_THREADING;
+  }
+
+  cfg.threads = threads;
+
+  snprintf(str, sizeof(str) / sizeof(str[0]) - 1,
+           "file: %s  mode: %s threads: %d",
+           filename.c_str(), mode == 0 ? "Serial" : "Parallel", threads);
+  SCOPED_TRACE(str);
 
   // Open compressed video file.
   if (filename.substr(filename.length() - 3, 3) == "ivf") {
@@ -92,18 +124,53 @@ TEST_P(TestVectorTest, MD5Match) {
   const std::string md5_filename = filename + ".md5";
   OpenMD5File(md5_filename);
 
+  // Set decode config and flags.
+  set_cfg(cfg);
+  set_flags(flags);
+
   // Decode frame, and check the md5 matching.
-  ASSERT_NO_FATAL_FAILURE(RunLoop(video));
+  ASSERT_NO_FATAL_FAILURE(RunLoop(video, cfg));
   delete video;
 }
 
-VP8_INSTANTIATE_TEST_CASE(TestVectorTest,
-                          ::testing::ValuesIn(libvpx_test::kVP8TestVectors,
-                                              libvpx_test::kVP8TestVectors +
-                                              libvpx_test::kNumVP8TestVectors));
-VP9_INSTANTIATE_TEST_CASE(TestVectorTest,
-                          ::testing::ValuesIn(libvpx_test::kVP9TestVectors,
-                                              libvpx_test::kVP9TestVectors +
-                                              libvpx_test::kNumVP9TestVectors));
+// Test VP8 decode in serial mode with single thread.
+// NOTE: VP8 only support serial mode.
+INSTANTIATE_TEST_CASE_P(
+    VP8, TestVectorTest,
+    ::testing::Combine(
+        ::testing::Values(
+            static_cast<const libvpx_test::CodecFactory *>(&libvpx_test::kVP8)),
+        ::testing::Combine(
+            ::testing::Values(0),  // Serial Mode.
+            ::testing::Values(1),  // Single thread.
+            ::testing::ValuesIn(libvpx_test::kVP8TestVectors,
+                                libvpx_test::kVP8TestVectors +
+                                    libvpx_test::kNumVP8TestVectors))));
 
+// Test VP9 decode in serial mode with single thread.
+INSTANTIATE_TEST_CASE_P(
+    VP9, TestVectorTest,
+    ::testing::Combine(
+        ::testing::Values(
+            static_cast<const libvpx_test::CodecFactory *>(&libvpx_test::kVP9)),
+        ::testing::Combine(
+            ::testing::Values(0),  // Serial Mode.
+            ::testing::Values(1),  // Single thread.
+            ::testing::ValuesIn(libvpx_test::kVP9TestVectors,
+                                libvpx_test::kVP9TestVectors +
+                                    libvpx_test::kNumVP9TestVectors))));
+
+
+// Test VP9 decode in frame parallel mode with different number of threads.
+INSTANTIATE_TEST_CASE_P(
+    VP9MultiThreadedFrameParallel, TestVectorTest,
+    ::testing::Combine(
+        ::testing::Values(
+            static_cast<const libvpx_test::CodecFactory *>(&libvpx_test::kVP9)),
+        ::testing::Combine(
+            ::testing::Values(1),        // Frame Parallel mode.
+            ::testing::Range(2, 9),      // With 2 ~ 8 threads.
+            ::testing::ValuesIn(libvpx_test::kVP9TestVectors,
+                                libvpx_test::kVP9TestVectors +
+                                    libvpx_test::kNumVP9TestVectors))));
 }  // namespace

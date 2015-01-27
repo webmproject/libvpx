@@ -554,6 +554,8 @@ LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-06-bilinear.webm
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-06-bilinear.webm.md5
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-07-frame_parallel.webm
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-07-frame_parallel.webm.md5
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-07-frame_parallel-1.webm
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-07-frame_parallel-1.webm.md5
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-08-tile-4x1.webm
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-08-tile-4x1.webm.md5
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-08-tile-4x4.webm
@@ -660,6 +662,10 @@ LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp91-2-04-yuv440.webm
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp91-2-04-yuv440.webm.md5
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp91-2-04-yuv444.webm
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp91-2-04-yuv444.webm.md5
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-20-big_superframe-01.webm
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-20-big_superframe-01.webm.md5
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-20-big_superframe-02.webm
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-20-big_superframe-02.webm.md5
 ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp92-2-20-10bit-yuv420.webm
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp92-2-20-10bit-yuv420.webm.md5
@@ -712,6 +718,9 @@ LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += invalid-vp90-2-12-droppable_1.ivf.s738
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += invalid-vp90-2-12-droppable_1.ivf.s73804_r01-05_b6-.ivf.res
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += invalid-vp91-2-mixedrefcsp-444to420.ivf
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += invalid-vp91-2-mixedrefcsp-444to420.ivf.res
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += invalid-vp90-2-07-frame_parallel-1.webm
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += invalid-vp90-2-07-frame_parallel-2.webm
+LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += invalid-vp90-2-07-frame_parallel-3.webm
 
 ifeq ($(CONFIG_DECODE_PERF_TESTS),yes)
 # NewEncode Test
