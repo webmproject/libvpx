@@ -2955,18 +2955,18 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
 
           if (undershoot_seen || loop_count > 1) {
             // Update rate_correction_factor unless
-            vp9_rc_update_rate_correction_factors(cpi, 1);
+            vp9_rc_update_rate_correction_factors(cpi);
 
             q = (q_high + q_low + 1) / 2;
           } else {
             // Update rate_correction_factor unless
-            vp9_rc_update_rate_correction_factors(cpi, 0);
+            vp9_rc_update_rate_correction_factors(cpi);
 
             q = vp9_rc_regulate_q(cpi, rc->this_frame_target,
                                    bottom_index, MAX(q_high, top_index));
 
             while (q < q_low && retries < 10) {
-              vp9_rc_update_rate_correction_factors(cpi, 0);
+              vp9_rc_update_rate_correction_factors(cpi);
               q = vp9_rc_regulate_q(cpi, rc->this_frame_target,
                                      bottom_index, MAX(q_high, top_index));
               retries++;
@@ -2979,10 +2979,10 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
           q_high = q > q_low ? q - 1 : q_low;
 
           if (overshoot_seen || loop_count > 1) {
-            vp9_rc_update_rate_correction_factors(cpi, 1);
+            vp9_rc_update_rate_correction_factors(cpi);
             q = (q_high + q_low) / 2;
           } else {
-            vp9_rc_update_rate_correction_factors(cpi, 0);
+            vp9_rc_update_rate_correction_factors(cpi);
             q = vp9_rc_regulate_q(cpi, rc->this_frame_target,
                                    bottom_index, top_index);
             // Special case reset for qlow for constrained quality.
@@ -2995,7 +2995,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
             }
 
             while (q > q_high && retries < 10) {
-              vp9_rc_update_rate_correction_factors(cpi, 0);
+              vp9_rc_update_rate_correction_factors(cpi);
               q = vp9_rc_regulate_q(cpi, rc->this_frame_target,
                                      bottom_index, top_index);
               retries++;
