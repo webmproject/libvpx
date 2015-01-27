@@ -5235,10 +5235,6 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         rate2 += vp9_cost_bit(vp9_get_skip_prob(cm, xd), 1);
         this_skip2 = 1;
       } else if (!xd->lossless) {
-#if CONFIG_EXT_TX
-        if (mbmi->tx_size < TX_32X32)
-          rate2 += cpi->ext_tx_costs[mbmi->tx_size][mbmi->ext_txfrm];
-#endif  // CONFIG_EXT_TX
         if (RDCOST(x->rdmult, x->rddiv, rate2, distortion2) <
             RDCOST(x->rdmult, x->rddiv, 0, total_sse)) {
           rate2 += vp9_cost_bit(vp9_get_skip_prob(cm, xd), 0);
