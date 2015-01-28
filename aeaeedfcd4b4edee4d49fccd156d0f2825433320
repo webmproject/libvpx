@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Ikc\u003d",
+        "filename": "vp9/encoder/vp9_lookahead.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-01-28T18:04:16Z",
+      "side": 1,
+      "message": "Don\u0027t we need to check against the buf-\u003eimg crop dimensions here, since width/height etc are also crop sizes?",
+      "revId": "aeaeedfcd4b4edee4d49fccd156d0f2825433320",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Ikg\u003d",
+        "filename": "vp9/encoder/vp9_lookahead.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-01-28T18:04:16Z",
+      "side": 1,
+      "message": "assert(!larger_dimensions || new_dimensions);",
+      "revId": "aeaeedfcd4b4edee4d49fccd156d0f2825433320",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
