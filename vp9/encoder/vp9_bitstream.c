@@ -611,12 +611,10 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
     case ONE_LOOP_REDUCED: {
       int updates = 0;
       int noupdates_before_first = 0;
-
       if (tx_size >= TX_16X16 && cpi->sf.tx_size_search_method == USE_TX_8X8) {
         vp9_write_bit(bc, 0);
         return;
       }
-
       for (i = 0; i < PLANE_TYPES; ++i) {
         for (j = 0; j < REF_TYPES; ++j) {
           for (k = 0; k < COEF_BANDS; ++k) {
@@ -668,7 +666,6 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
       }
       return;
     }
-
     default:
       assert(0);
   }
@@ -678,16 +675,14 @@ static void update_coef_probs(VP9_COMP *cpi, vp9_writer* w) {
   const TX_MODE tx_mode = cpi->common.tx_mode;
   const TX_SIZE max_tx_size = tx_mode_to_biggest_tx_size[tx_mode];
   TX_SIZE tx_size;
-  vp9_coeff_stats frame_branch_ct[TX_SIZES][PLANE_TYPES];
-  vp9_coeff_probs_model frame_coef_probs[TX_SIZES][PLANE_TYPES];
-
-  for (tx_size = TX_4X4; tx_size <= TX_32X32; ++tx_size)
-    build_tree_distribution(cpi, tx_size, frame_branch_ct[tx_size],
-                            frame_coef_probs[tx_size]);
-
-  for (tx_size = TX_4X4; tx_size <= max_tx_size; ++tx_size)
-    update_coef_probs_common(w, cpi, tx_size, frame_branch_ct[tx_size],
-                             frame_coef_probs[tx_size]);
+  for (tx_size = TX_4X4; tx_size <= max_tx_size; ++tx_size) {
+    vp9_coeff_stats frame_branch_ct[PLANE_TYPES];
+    vp9_coeff_probs_model frame_coef_probs[PLANE_TYPES];
+    build_tree_distribution(cpi, tx_size, frame_branch_ct,
+                            frame_coef_probs);
+    update_coef_probs_common(w, cpi, tx_size, frame_branch_ct,
+                             frame_coef_probs);
+  }
 }
 
 static void encode_loopfilter(struct loopfilter *lf,
