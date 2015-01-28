@@ -1244,8 +1244,10 @@ INSTANTIATE_TEST_CASE_P(AVX2, SADx4Test, ::testing::Values(
 #endif  // HAVE_AVX2
 
 #if HAVE_NEON
+const SadMxNx4Func sad_16x16x4d_neon = vp9_sad16x16x4d_neon;
 const SadMxNx4Func sad_64x64x4d_neon = vp9_sad64x64x4d_neon;
 INSTANTIATE_TEST_CASE_P(NEON, SADx4Test, ::testing::Values(
+                        make_tuple(16, 16, sad_16x16x4d_neon, -1),
                         make_tuple(64, 64, sad_64x64x4d_neon, -1)));
 #endif  // HAVE_NEON
 #endif  // CONFIG_VP9_ENCODER
