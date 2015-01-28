@@ -152,6 +152,7 @@ VP9_CX_SRCS-$(HAVE_AVX2) += encoder/x86/vp9_variance_avx2.c
 
 VP9_CX_SRCS-$(HAVE_NEON) += encoder/arm/neon/vp9_avg_neon.c
 VP9_CX_SRCS-$(HAVE_NEON) += encoder/arm/neon/vp9_sad_neon.c
+VP9_CX_SRCS-$(HAVE_NEON) += encoder/arm/neon/vp9_sad4d_neon.c
 VP9_CX_SRCS-$(HAVE_NEON) += encoder/arm/neon/vp9_dct_neon.c
 VP9_CX_SRCS-$(HAVE_NEON) += encoder/arm/neon/vp9_variance_neon.c
 VP9_CX_SRCS-$(HAVE_NEON) += encoder/arm/neon/vp9_quantize_neon.c

@@ -1234,14 +1234,20 @@ INSTANTIATE_TEST_CASE_P(SSE3, SADTest, ::testing::Values(
 #endif  // CONFIG_USE_X86INC
 #endif  // HAVE_SSSE3
 
-#if HAVE_AVX2
 #if CONFIG_VP9_ENCODER
+#if HAVE_AVX2
 const SadMxNx4Func sad_64x64x4d_avx2 = vp9_sad64x64x4d_avx2;
 const SadMxNx4Func sad_32x32x4d_avx2 = vp9_sad32x32x4d_avx2;
 INSTANTIATE_TEST_CASE_P(AVX2, SADx4Test, ::testing::Values(
                         make_tuple(32, 32, sad_32x32x4d_avx2, -1),
                         make_tuple(64, 64, sad_64x64x4d_avx2, -1)));
-#endif  // CONFIG_VP9_ENCODER
 #endif  // HAVE_AVX2
+
+#if HAVE_NEON
+const SadMxNx4Func sad_64x64x4d_neon = vp9_sad64x64x4d_neon;
+INSTANTIATE_TEST_CASE_P(NEON, SADx4Test, ::testing::Values(
+                        make_tuple(64, 64, sad_64x64x4d_neon, -1)));
+#endif  // HAVE_NEON
+#endif  // CONFIG_VP9_ENCODER
 
 }  // namespace
