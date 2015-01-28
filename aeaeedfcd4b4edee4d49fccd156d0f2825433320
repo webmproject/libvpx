@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//IjE\u003d",
+        "filename": "vp9/encoder/vp9_lookahead.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-01-28T20:56:17Z",
+      "side": 1,
+      "message": "vp9_copy_and_extend_frame only uses src-\u003ey_crop_width source pixels. buf-\u003eimg.y_width is the amount of valid image buffer for pixels excluding border. buf-\u003eimg.y_crop_width is the number of those that are in the picture.  buf-\u003eimg.y_stride is the width including border pixels and alignment padding. \n\nSince we want to see if the new frame can get copied into the existing buffer we only care if src-\u003ey_crop_width can fit inside of buf-\u003eimg.y_width. We don\u0027t really care if the previous frame in the buffer has excessive buffer padding.  (and in fact it might if we transition big-\u003esmall-\u003ebig).",
+      "parentUuid": "AAAAdn//Ikc\u003d",
+      "revId": "aeaeedfcd4b4edee4d49fccd156d0f2825433320",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Ikg\u003d",
         "filename": "vp9/encoder/vp9_lookahead.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2015-01-28T18:04:16Z",
       "side": 1,
       "message": "assert(!larger_dimensions || new_dimensions);",
+      "revId": "aeaeedfcd4b4edee4d49fccd156d0f2825433320",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//IjA\u003d",
+        "filename": "vp9/encoder/vp9_lookahead.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-01-28T20:56:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Ikg\u003d",
       "revId": "aeaeedfcd4b4edee4d49fccd156d0f2825433320",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
