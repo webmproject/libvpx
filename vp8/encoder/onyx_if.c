@@ -1760,8 +1760,16 @@ void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
         reset_temporal_layer_change(cpi, oxcf, prev_number_of_layers);
     }
 
+    if (!cpi->initial_width)
+    {
+        cpi->initial_width = cpi->oxcf.Width;
+        cpi->initial_height = cpi->oxcf.Height;
+    }
+
     cm->Width       = cpi->oxcf.Width;
     cm->Height      = cpi->oxcf.Height;
+    assert(cm->Width <= cpi->initial_width);
+    assert(cm->Height <= cpi->initial_height);
 
     /* TODO(jkoleszar): if an internal spatial resampling is active,
      * and we downsize the input image, maybe we should clear the
