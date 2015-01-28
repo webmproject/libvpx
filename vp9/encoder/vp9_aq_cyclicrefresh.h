@@ -18,6 +18,18 @@
 extern "C" {
 #endif
 
+// The segment ids used in cyclic refresh: from base (no boost) to increasing
+// boost (higher delta-qp).
+#define CR_SEGMENT_ID_BASE    0
+#define CR_SEGMENT_ID_BOOST1  1
+#define CR_SEGMENT_ID_BOOST2  2
+
+// Maximum rate target ratio for setting segment delta-qp.
+#define CR_MAX_RATE_TARGET_RATIO 4.0
+
+// Boost factor for rate target ratio, for segment CR_SEGMENT_ID_BOOST2.
+#define CR_BOOST2_FAC 1.7
+
 struct VP9_COMP;
 
 struct CYCLIC_REFRESH;
