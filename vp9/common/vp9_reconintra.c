@@ -715,15 +715,9 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
         }
       } else if (x0 <= frame_width) {
         const int r = frame_width - x0;
-        if (right_available && bs == 4) {
-          vpx_memcpy(above_row, above_ref, r * sizeof(uint16_t));
-          vpx_memset16(above_row + r, above_row[r - 1],
+        vpx_memcpy(above_row, above_ref, r * sizeof(uint16_t));
+        vpx_memset16(above_row + r, above_row[r - 1],
                        x0 + 2 * bs - frame_width);
-        } else {
-          vpx_memcpy(above_row, above_ref, r * sizeof(uint16_t));
-          vpx_memset16(above_row + r, above_row[r - 1],
-                       x0 + 2 * bs - frame_width);
-        }
       }
       // TODO(Peter) this value should probably change for high bitdepth
       above_row[-1] = left_available ? above_ref[-1] : (base+1);
@@ -843,15 +837,9 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
         }
       } else if (x0 <= frame_width) {
         const int r = frame_width - x0;
-        if (right_available && bs == 4) {
-          vpx_memcpy(above_row, above_ref, r);
-          vpx_memset(above_row + r, above_row[r - 1],
+        vpx_memcpy(above_row, above_ref, r);
+        vpx_memset(above_row + r, above_row[r - 1],
                      x0 + 2 * bs - frame_width);
-        } else {
-          vpx_memcpy(above_row, above_ref, r);
-          vpx_memset(above_row + r, above_row[r - 1],
-                     x0 + 2 * bs - frame_width);
-        }
       }
       above_row[-1] = left_available ? above_ref[-1] : 129;
     } else {
