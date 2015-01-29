@@ -201,7 +201,7 @@ disabled(){
 soft_enable() {
   for var in $*; do
     if ! disabled $var; then
-      log_echo "  enabling $var"
+      enabled $var || log_echo "  enabling $var"
       enable_feature $var
     fi
   done
@@ -210,7 +210,7 @@ soft_enable() {
 soft_disable() {
   for var in $*; do
     if ! enabled $var; then
-      log_echo "  disabling $var"
+      disabled $var || log_echo "  disabling $var"
       disable_feature $var
     fi
   done
@@ -508,9 +508,11 @@ process_common_cmdline() {
         elif [ $action = "disable" ] && ! disabled $option ; then
           echo "${CMDLINE_SELECT}" | grep "^ *$option\$" >/dev/null ||
             die_unknown $opt
+          log_echo "  disabling $option"
         elif [ $action = "enable" ] && ! enabled $option ; then
           echo "${CMDLINE_SELECT}" | grep "^ *$option\$" >/dev/null ||
             die_unknown $opt
+          log_echo "  enabling $option"
         fi
         ${action}_feature $option
         ;;
