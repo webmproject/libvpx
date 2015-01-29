@@ -33,6 +33,7 @@ struct tx_counts {
   unsigned int p32x32[TX_SIZE_CONTEXTS][TX_SIZES];
   unsigned int p16x16[TX_SIZE_CONTEXTS][TX_SIZES - 1];
   unsigned int p8x8[TX_SIZE_CONTEXTS][TX_SIZES - 2];
+  unsigned int tx_totals[TX_SIZES];
 };
 
 typedef struct frame_contexts {
