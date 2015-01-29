@@ -1250,8 +1250,7 @@ EOF
   fi
 
   tgt_os_no_version=$(echo "${tgt_os}" | tr -d "[0-9]")
-  if [ "${tgt_os_no_version}" = "darwin" ] || \
-     [ "${tgt_os_no_version}" = "openbsd" ] || [ "`uname`" = "OpenBSD" ]; then
+  if [ "${tgt_os_no_version}" = "openbsd" ] || [ "`uname`" = "OpenBSD" ]; then
     openbsd_like=yes
   fi
   # Default use_x86inc to yes when we are 64 bit, non-pic, or on any
