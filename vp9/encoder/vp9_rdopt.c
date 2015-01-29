@@ -4703,7 +4703,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         int rate_y_tmp, rate0, rate1, skippable_tmp;
         int64_t distortion_y_tmp, tx_cache_tmp[TX_MODES];
         int tx_size_tmp = mbmi->tx_size;
-        mbmi->filterbit = 0;
+        mbmi->filterbit = 1;
 
         super_block_yrd(cpi, x, &rate_y_tmp, &distortion_y_tmp,
                         &skippable_tmp, NULL, bsize, tx_cache_tmp,
@@ -5199,6 +5199,10 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     mbmi->inter_ref_count = inter_ref_count;
     mbmi->copy_mode = copy_mode;
     mbmi->mode = NEARESTMV;
+#if CONFIG_TX_SKIP
+    mbmi->tx_skip[0] = 0;
+    mbmi->tx_skip[1] = 0;
+#endif
     x->skip = 0;
     set_ref_ptrs(cm, xd, mbmi->ref_frame[0], mbmi->ref_frame[1]);
     for (i = 0; i < MAX_MB_PLANE; i++) {
