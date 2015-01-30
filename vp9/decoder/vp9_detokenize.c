@@ -56,13 +56,13 @@ static const vp9_tree_index coeff_subtree_high[TREE_SIZE(ENTROPY_TOKENS)] = {
   -CATEGORY5_TOKEN, -CATEGORY6_TOKEN            /* 7 = CAT_FIVE */
 };
 
-static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd, PLANE_TYPE type,
+static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
+                        FRAME_COUNTS *counts, PLANE_TYPE type,
                         tran_low_t *dqcoeff, TX_SIZE tx_size, const int16_t *dq,
                         int ctx, const int16_t *scan, const int16_t *nb,
                         vp9_reader *r) {
   const int max_eob = 16 << (tx_size << 1);
   const FRAME_CONTEXT *const fc = cm->fc;
-  FRAME_COUNTS *const counts = &cm->counts;
   const int ref = is_inter_block(&xd->mi[0].src_mi->mbmi);
   int band, c = 0;
   const vp9_prob (*coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
@@ -213,13 +213,14 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd, PLANE_TYPE type,
 }
 
 int vp9_decode_block_tokens(VP9_COMMON *cm, MACROBLOCKD *xd,
-                            int plane, int block, BLOCK_SIZE plane_bsize,
-                            int x, int y, TX_SIZE tx_size, vp9_reader *r) {
+                            FRAME_COUNTS *counts, int plane, int block,
+                            BLOCK_SIZE plane_bsize, int x, int y,
+                            TX_SIZE tx_size, vp9_reader *r) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
   const int ctx = get_entropy_context(tx_size, pd->above_context + x,
                                                pd->left_context + y);
   const scan_order *so = get_scan(xd, tx_size, pd->plane_type, block);
-  const int eob = decode_coefs(cm, xd, pd->plane_type,
+  const int eob = decode_coefs(cm, xd, counts, pd->plane_type,
                                BLOCK_OFFSET(pd->dqcoeff, block), tx_size,
                                pd->dequant, ctx, so->scan, so->neighbors, r);
   vp9_set_contexts(xd, pd, plane_bsize, tx_size, eob > 0, x, y);
