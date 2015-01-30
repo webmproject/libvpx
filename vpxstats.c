@@ -41,6 +41,9 @@ int stats_open_file(stats_io_t *stats, const char *fpf, int pass) {
 
     stats->file = fopen(fpf, "rb");
 
+    if (stats->file == NULL)
+      fatal("First-pass stats file does not exist!");
+
     if (fseek(stats->file, 0, SEEK_END))
       fatal("First-pass stats file must be seekable!");
 
