@@ -1020,8 +1020,13 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
     int q_idx = vp9_get_qindex(&cm->seg, mbmi->segment_id, cm->base_qindex);
     int try_tx_skip = inter_block ? q_idx <= TX_SKIP_Q_THRESH_INTER :
                                     q_idx <= TX_SKIP_Q_THRESH_INTRA;
+#if CONFIG_COPY_MODE
+    if (mbmi->copy_mode != NOREF)
+      try_tx_skip = 0;
+#endif  // CONFIG_COPY_MODE
+
 #if CONFIG_SUPERTX
-    if (try_tx_skip) {
+    if (try_tx_skip && !supertx_enabled) {
 #else
     if (try_tx_skip && (!mbmi->skip || !inter_block)) {
 #endif  // CONFIG_SUPERTX

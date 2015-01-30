@@ -478,8 +478,15 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
     int q_idx = vp9_get_qindex(seg, segment_id, cm->base_qindex);
     int try_tx_skip = is_inter ? q_idx <= TX_SKIP_Q_THRESH_INTER :
                                  q_idx <= TX_SKIP_Q_THRESH_INTRA;
+
+#if CONFIG_COPY_MODE
+    if (mbmi->copy_mode != NOREF) {
+      try_tx_skip = 0;
+    }
+#endif  // CONFIG_COPY_MODE
+
 #if CONFIG_SUPERTX
-    if (try_tx_skip) {
+    if (try_tx_skip && !supertx_enabled) {
 #else
     if (try_tx_skip && (!skip || !is_inter)) {
 #endif  // CONFIG_SUPERTX

@@ -1090,7 +1090,11 @@ static void update_supertx_param(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   ctx->skip = x->skip;
 #if CONFIG_EXT_TX
   ctx->mic.mbmi.ext_txfrm = best_tx;
-#endif
+#endif  // CONFIG_EXT_TX
+#if CONFIG_TX_SKIP
+  ctx->mic.mbmi.tx_skip[0] = 0;
+  ctx->mic.mbmi.tx_skip[1] = 0;
+#endif  // CONFIG_EXT_TX
 }
 
 static void update_supertx_param_sb(VP9_COMP *cpi, int mi_row, int mi_col,
@@ -4833,6 +4837,11 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
       int q_idx = vp9_get_qindex(&cm->seg, mbmi->segment_id, cm->base_qindex);
       int try_tx_skip = is_inter_block(mbmi) ? q_idx <= TX_SKIP_Q_THRESH_INTER :
                                                q_idx <= TX_SKIP_Q_THRESH_INTRA;
+#if CONFIG_COPY_MODE
+      if (mbmi->copy_mode != NOREF)
+        try_tx_skip = 0;
+#endif  // CONFIG_COPY_MODE
+
 #if CONFIG_SUPERTX
       if (try_tx_skip) {
 #else
@@ -5301,6 +5310,11 @@ static void rd_supertx_sb(VP9_COMP *cpi, const TileInfo *const tile,
   set_offsets(cpi, tile, mi_row, mi_col, bsize);
 #if CONFIG_EXT_TX
   *best_tx = NORM;
+#endif
+
+#if CONFIG_TX_SKIP
+  xd->mi[0].mbmi.tx_skip[0] = 0;
+  xd->mi[0].mbmi.tx_skip[1] = 0;
 #endif
 
   // chroma
