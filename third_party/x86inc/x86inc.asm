@@ -78,6 +78,9 @@
 %macro SECTION_RODATA 0-1 16
     %ifidn __OUTPUT_FORMAT__,macho64
         SECTION .text align=%1
+    %elifidn __OUTPUT_FORMAT__,macho32
+        SECTION .text align=%1
+        fakegot:
     %elifidn __OUTPUT_FORMAT__,macho
         SECTION .text align=%1
         fakegot:

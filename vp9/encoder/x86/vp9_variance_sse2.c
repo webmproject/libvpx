@@ -314,13 +314,15 @@ unsigned int vp9_mse16x16_sse2(const uint8_t *src, int src_stride,
   return *sse;
 }
 
+// The 2 unused parameters are place holders for PIC enabled build.
 #define DECL(w, opt) \
 int vp9_sub_pixel_variance##w##xh_##opt(const uint8_t *src, \
                                         ptrdiff_t src_stride, \
                                         int x_offset, int y_offset, \
                                         const uint8_t *dst, \
                                         ptrdiff_t dst_stride, \
-                                        int height, unsigned int *sse)
+                                        int height, unsigned int *sse, \
+                                        void *unused0, void *unused)
 #define DECLS(opt1, opt2) \
 DECL(4, opt2); \
 DECL(8, opt1); \
@@ -342,26 +344,26 @@ unsigned int vp9_sub_pixel_variance##w##x##h##_##opt(const uint8_t *src, \
   unsigned int sse; \
   int se = vp9_sub_pixel_variance##wf##xh_##opt(src, src_stride, x_offset, \
                                                 y_offset, dst, dst_stride, \
-                                                h, &sse); \
+                                                h, &sse, NULL, NULL); \
   if (w > wf) { \
     unsigned int sse2; \
     int se2 = vp9_sub_pixel_variance##wf##xh_##opt(src + 16, src_stride, \
                                                    x_offset, y_offset, \
                                                    dst + 16, dst_stride, \
-                                                   h, &sse2); \
+                                                   h, &sse2, NULL, NULL); \
     se += se2; \
     sse += sse2; \
     if (w > wf * 2) { \
       se2 = vp9_sub_pixel_variance##wf##xh_##opt(src + 32, src_stride, \
                                                  x_offset, y_offset, \
                                                  dst + 32, dst_stride, \
-                                                 h, &sse2); \
+                                                 h, &sse2, NULL, NULL); \
       se += se2; \
       sse += sse2; \
       se2 = vp9_sub_pixel_variance##wf##xh_##opt(src + 48, src_stride, \
                                                  x_offset, y_offset, \
                                                  dst + 48, dst_stride, \
-                                                 h, &sse2); \
+                                                 h, &sse2, NULL, NULL); \
       se += se2; \
       sse += sse2; \
     } \
@@ -391,6 +393,7 @@ FNS(ssse3, ssse3);
 #undef FNS
 #undef FN
 
+// The 2 unused parameters are place holders for PIC enabled build.
 #define DECL(w, opt) \
 int vp9_sub_pixel_avg_variance##w##xh_##opt(const uint8_t *src, \
                                             ptrdiff_t src_stride, \
@@ -399,7 +402,8 @@ int vp9_sub_pixel_avg_variance##w##xh_##opt(const uint8_t *src, \
                                             ptrdiff_t dst_stride, \
                                             const uint8_t *sec, \
                                             ptrdiff_t sec_stride, \
-                                            int height, unsigned int *sse)
+                                            int height, unsigned int *sse, \
+                                            void *unused0, void *unused)
 #define DECLS(opt1, opt2) \
 DECL(4, opt2); \
 DECL(8, opt1); \
@@ -422,26 +426,30 @@ unsigned int vp9_sub_pixel_avg_variance##w##x##h##_##opt(const uint8_t *src, \
   unsigned int sse; \
   int se = vp9_sub_pixel_avg_variance##wf##xh_##opt(src, src_stride, x_offset, \
                                                     y_offset, dst, dst_stride, \
-                                                    sec, w, h, &sse); \
+                                                    sec, w, h, &sse, NULL, \
+                                                    NULL); \
   if (w > wf) { \
     unsigned int sse2; \
     int se2 = vp9_sub_pixel_avg_variance##wf##xh_##opt(src + 16, src_stride, \
                                                        x_offset, y_offset, \
                                                        dst + 16, dst_stride, \
-                                                       sec + 16, w, h, &sse2); \
+                                                       sec + 16, w, h, &sse2, \
+                                                       NULL, NULL); \
     se += se2; \
     sse += sse2; \
     if (w > wf * 2) { \
       se2 = vp9_sub_pixel_avg_variance##wf##xh_##opt(src + 32, src_stride, \
                                                      x_offset, y_offset, \
                                                      dst + 32, dst_stride, \
-                                                     sec + 32, w, h, &sse2); \
+                                                     sec + 32, w, h, &sse2, \
+                                                     NULL, NULL); \
       se += se2; \
       sse += sse2; \
       se2 = vp9_sub_pixel_avg_variance##wf##xh_##opt(src + 48, src_stride, \
                                                      x_offset, y_offset, \
                                                      dst + 48, dst_stride, \
-                                                     sec + 48, w, h, &sse2); \
+                                                     sec + 48, w, h, &sse2, \
+                                                     NULL, NULL); \
       se += se2; \
       sse += sse2; \
     } \
