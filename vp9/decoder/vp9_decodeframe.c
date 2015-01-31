@@ -1064,8 +1064,7 @@ static int tile_worker_hook(TileWorkerData *const tile_data,
     vp9_zero(tile_data->xd.left_seg_context);
     for (mi_col = tile->mi_col_start; mi_col < tile->mi_col_end;
          mi_col += MI_BLOCK_SIZE) {
-      decode_partition(tile_data->pbi, &tile_data->xd,
-                       &tile_data->pbi->common.counts,
+      decode_partition(tile_data->pbi, &tile_data->xd, &tile_data->counts,
                        tile, mi_row, mi_col, &tile_data->bit_reader,
                        BLOCK_64X64);
     }
@@ -1083,6 +1082,105 @@ static int compare_tile_buffers(const void *a, const void *b) {
     return 0;
   } else {
     return -1;
+  }
+}
+
+// Accumulate frame counts.
+static void accumulate_frame_counts(VP9_COMMON *cm, FRAME_COUNTS *counts) {
+  int i, j, k, l, m, n;
+
+  for (i = 0; i < BLOCK_SIZE_GROUPS; i++)
+    for (j = 0; j < INTRA_MODES; j++)
+      cm->counts.y_mode[i][j] += counts->y_mode[i][j];
+
+  for (i = 0; i < INTRA_MODES; i++)
+    for (j = 0; j < INTRA_MODES; j++)
+      cm->counts.uv_mode[i][j] += counts->uv_mode[i][j];
+
+  for (i = 0; i < PARTITION_CONTEXTS; i++)
+    for (j = 0; j < PARTITION_TYPES; j++)
+      cm->counts.partition[i][j] += counts->partition[i][j];
+
+  for (i = 0; i < TX_SIZES; i++)
+    for (j = 0; j < PLANE_TYPES; j++)
+      for (k = 0; k < REF_TYPES; k++)
+        for (l = 0; l < COEF_BANDS; l++)
+          for (m = 0; m < COEFF_CONTEXTS; m++) {
+            cm->counts.eob_branch[i][j][k][l][m] +=
+                counts->eob_branch[i][j][k][l][m];
+            for (n = 0; n < UNCONSTRAINED_NODES + 1; n++)
+              cm->counts.coef[i][j][k][l][m][n] +=
+                  counts->coef[i][j][k][l][m][n];
+          }
+
+  for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; i++)
+    for (j = 0; j < SWITCHABLE_FILTERS; j++)
+      cm->counts.switchable_interp[i][j] += counts->switchable_interp[i][j];
+
+  for (i = 0; i < INTER_MODE_CONTEXTS; i++)
+    for (j = 0; j < INTER_MODES; j++)
+      cm->counts.inter_mode[i][j] += counts->inter_mode[i][j];
+
+  for (i = 0; i < INTRA_INTER_CONTEXTS; i++)
+    for (j = 0; j < 2; j++)
+      cm->counts.intra_inter[i][j] += counts->intra_inter[i][j];
+
+  for (i = 0; i < COMP_INTER_CONTEXTS; i++)
+    for (j = 0; j < 2; j++)
+      cm->counts.comp_inter[i][j] += counts->comp_inter[i][j];
+
+  for (i = 0; i < REF_CONTEXTS; i++)
+    for (j = 0; j < 2; j++)
+      for (k = 0; k < 2; k++)
+      cm->counts.single_ref[i][j][k] += counts->single_ref[i][j][k];
+
+  for (i = 0; i < REF_CONTEXTS; i++)
+    for (j = 0; j < 2; j++)
+      cm->counts.comp_ref[i][j] += counts->comp_ref[i][j];
+
+  for (i = 0; i < TX_SIZE_CONTEXTS; i++) {
+    for (j = 0; j < TX_SIZES; j++)
+      cm->counts.tx.p32x32[i][j] += counts->tx.p32x32[i][j];
+
+    for (j = 0; j < TX_SIZES - 1; j++)
+      cm->counts.tx.p16x16[i][j] += counts->tx.p16x16[i][j];
+
+    for (j = 0; j < TX_SIZES - 2; j++)
+      cm->counts.tx.p8x8[i][j] += counts->tx.p8x8[i][j];
+  }
+
+  for (i = 0; i < SKIP_CONTEXTS; i++)
+    for (j = 0; j < 2; j++)
+      cm->counts.skip[i][j] += counts->skip[i][j];
+
+  for (i = 0; i < MV_JOINTS; i++)
+    cm->counts.mv.joints[i] += counts->mv.joints[i];
+
+  for (k = 0; k < 2; k++) {
+    nmv_component_counts *comps = &cm->counts.mv.comps[k];
+    nmv_component_counts *comps_t = &counts->mv.comps[k];
+
+    for (i = 0; i < 2; i++) {
+      comps->sign[i] += comps_t->sign[i];
+      comps->class0_hp[i] += comps_t->class0_hp[i];
+      comps->hp[i] += comps_t->hp[i];
+    }
+
+    for (i = 0; i < MV_CLASSES; i++)
+      comps->classes[i] += comps_t->classes[i];
+
+    for (i = 0; i < CLASS0_SIZE; i++) {
+      comps->class0[i] += comps_t->class0[i];
+      for (j = 0; j < MV_FP_SIZE; j++)
+        comps->class0_fp[i][j] += comps_t->class0_fp[i][j];
+    }
+
+    for (i = 0; i < MV_OFFSET_BITS; i++)
+      for (j = 0; j < 2; j++)
+        comps->bits[i][j] += comps_t->bits[i][j];
+
+    for (i = 0; i < MV_FP_SIZE; i++)
+      comps->fp[i] += comps_t->fp[i];
   }
 }
 
@@ -1172,6 +1270,17 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
     }
   }
 
+  // Initialize thread frame counts.
+  if (!cm->frame_parallel_decoding_mode) {
+    int i;
+
+    for (i = 0; i < num_workers; ++i) {
+      TileWorkerData *const tile_data =
+          (TileWorkerData*)pbi->tile_workers[i].data1;
+      vp9_zero(tile_data->counts);
+    }
+  }
+
   n = 0;
   while (n < tile_cols) {
     int i;
@@ -1184,7 +1293,7 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
       tile_data->pbi = pbi;
       tile_data->xd = pbi->mb;
       tile_data->xd.corrupted = 0;
-      vp9_tile_init(tile, &pbi->common, 0, buf->col);
+      vp9_tile_init(tile, cm, 0, buf->col);
       setup_token_decoder(buf->data, data_end, buf->size, &cm->error,
                           &tile_data->bit_reader, pbi->decrypt_cb,
                           pbi->decrypt_state);
@@ -1217,6 +1326,15 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
           (TileWorkerData*)pbi->tile_workers[final_worker].data1;
       bit_reader_end = vp9_reader_find_end(&tile_data->bit_reader);
       final_worker = -1;
+    }
+
+    // Accumulate thread frame counts.
+    if (n >= tile_cols && !cm->frame_parallel_decoding_mode) {
+      for (i = 0; i < num_workers; ++i) {
+        TileWorkerData *const tile_data =
+            (TileWorkerData*)pbi->tile_workers[i].data1;
+        accumulate_frame_counts(cm, &tile_data->counts);
+      }
     }
   }
 
@@ -1673,10 +1791,8 @@ void vp9_decode_frame(VP9Decoder *pbi,
     vp9_frameworker_unlock_stats(worker);
   }
 
-  // TODO(jzern): remove frame_parallel_decoding_mode restriction for
-  // single-frame tile decoding.
-  if (pbi->max_threads > 1 && tile_rows == 1 && tile_cols > 1 &&
-      cm->frame_parallel_decoding_mode) {
+  if (pbi->max_threads > 1 && tile_rows == 1 && tile_cols > 1) {
+    // Multi-threaded tile decoder
     *p_data_end = decode_tiles_mt(pbi, data + first_partition_size, data_end);
     if (!xd->corrupted) {
       // If multiple threads are used to decode tiles, then we use those threads
