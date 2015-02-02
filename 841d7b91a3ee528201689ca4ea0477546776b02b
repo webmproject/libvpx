@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//IPM\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 1163,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-02-02T21:56:29Z",
+      "side": 1,
+      "message": "Xcode",
+      "revId": "841d7b91a3ee528201689ca4ea0477546776b02b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//IPQ\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 1166,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-02-02T21:56:29Z",
+      "side": 1,
+      "message": "prefer [ -n \"$var\" ]",
+      "revId": "841d7b91a3ee528201689ca4ea0477546776b02b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//IPI\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 1167,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-02-02T21:56:29Z",
+      "side": 1,
+      "message": "you could still make this an info and let the normal die at 1170 occur to give some indication that yasm or nasm are acceptable without having to dup the string",
+      "revId": "841d7b91a3ee528201689ca4ea0477546776b02b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
