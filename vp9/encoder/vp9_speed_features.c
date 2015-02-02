@@ -337,11 +337,11 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     sf->adaptive_rd_thresh = 3;
     sf->mv.search_method = FAST_DIAMOND;
     sf->mv.fullpel_search_step_param = 10;
-    sf->lpf_pick = LPF_PICK_MINIMAL_LPF;
   }
   if (speed >= 8) {
     sf->adaptive_rd_thresh = 4;
     sf->mv.subpel_force_stop = 2;
+    sf->lpf_pick = LPF_PICK_MINIMAL_LPF;
   }
 }
 
