@@ -3805,6 +3805,9 @@ void vp9_encode_frame(VP9_COMP *cpi) {
     }
   }
 
+  vpx_memset(cpi->td.counts->tx.tx_totals, 0,
+             sizeof(cpi->td.counts->tx.tx_totals));
+
   if (cpi->sf.frame_parameter_update) {
     int i;
 
@@ -3891,7 +3894,6 @@ void vp9_encode_frame(VP9_COMP *cpi) {
         count16x16_lp += counts->tx.p32x32[i][TX_16X16];
         count32x32 += counts->tx.p32x32[i][TX_32X32];
       }
-
       if (count4x4 == 0 && count16x16_lp == 0 && count16x16_16x16p == 0 &&
           count32x32 == 0) {
         cm->tx_mode = ALLOW_8X8;
@@ -4015,5 +4017,7 @@ static void encode_superblock(VP9_COMP *cpi, ThreadData *td,
           if (mi_col + x < cm->mi_cols && mi_row + y < cm->mi_rows)
             mi_8x8[mis * y + x].src_mi->mbmi.tx_size = tx_size;
     }
+    ++td->counts->tx.tx_totals[mbmi->tx_size];
+    ++td->counts->tx.tx_totals[get_uv_tx_size(mbmi, &xd->plane[1])];
   }
 }
