@@ -16,6 +16,24 @@
       "revId": "606e9e4a49f0a5d7be571203857fa3dce27acdbc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//IOA\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1070,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2015-02-02T23:21:47Z",
+      "side": 1,
+      "message": "Yes. Very similar. I will refactor the code in another patch.",
+      "parentUuid": "AAAAdn//IOM\u003d",
+      "revId": "606e9e4a49f0a5d7be571203857fa3dce27acdbc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
