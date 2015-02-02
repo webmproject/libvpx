@@ -16,6 +16,24 @@
       "revId": "1e95eed8370202c1f7e54e8ee341dac40c73d859",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ISI\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 1167,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-02-02T16:40:50Z",
+      "side": 1,
+      "message": "yasm detection happens above and is preferred. this check only happens if only nasm is detected since yasm detection overwrites nasm.",
+      "parentUuid": "AAAAdn//IU4\u003d",
+      "revId": "1e95eed8370202c1f7e54e8ee341dac40c73d859",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
