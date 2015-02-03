@@ -723,10 +723,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       continue;
 
     // Select prediction reference frames.
-    xd->plane[0].pre[0] = yv12_mb[ref_frame][0];
-
-    vp9_setup_pre_planes(xd, 0, get_ref_frame_buffer(cpi, ref_frame),
-                         mi_row, mi_col, &cm->frame_refs[ref_frame - 1].sf);
+    for (i = 0; i < MAX_MB_PLANE; i++)
+      xd->plane[i].pre[0] = yv12_mb[ref_frame][i];
 
     clamp_mv2(&frame_mv[NEARESTMV][ref_frame].as_mv, xd);
     clamp_mv2(&frame_mv[NEARMV][ref_frame].as_mv, xd);
