@@ -341,6 +341,7 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
   if (speed >= 8) {
     sf->adaptive_rd_thresh = 4;
     sf->mv.subpel_force_stop = 2;
+    sf->lpf_pick = LPF_PICK_MINIMAL_LPF;
   }
 }
 

@@ -674,7 +674,7 @@ static void update_coef_probs(VP9_COMP *cpi, vp9_writer* w) {
   for (tx_size = TX_4X4; tx_size <= max_tx_size; ++tx_size) {
     vp9_coeff_stats frame_branch_ct[PLANE_TYPES];
     vp9_coeff_probs_model frame_coef_probs[PLANE_TYPES];
-    if (cpi->td.counts->tx.tx_totals[tx_size] == 0 ||
+    if (cpi->td.counts->tx.tx_totals[tx_size] <= 20 ||
         (tx_size >= TX_16X16 && cpi->sf.tx_size_search_method == USE_TX_8X8)) {
       vp9_write_bit(w, 0);
     } else {
