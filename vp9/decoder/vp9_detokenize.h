@@ -20,8 +20,9 @@ extern "C" {
 #endif
 
 int vp9_decode_block_tokens(VP9_COMMON *cm, MACROBLOCKD *xd,
-                            int plane, int block, BLOCK_SIZE plane_bsize,
-                            int x, int y, TX_SIZE tx_size, vp9_reader *r);
+                            FRAME_COUNTS *counts, int plane, int block,
+                            BLOCK_SIZE plane_bsize, int x, int y,
+                            TX_SIZE tx_size, vp9_reader *r);
 
 #ifdef __cplusplus
 }  // extern "C"
