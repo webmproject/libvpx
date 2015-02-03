@@ -1003,7 +1003,7 @@ unsigned int vp8_sub_pixel_variance8x8_neon(
         const unsigned char *dst,
         int dst_stride,
         unsigned int *sse) {
-  DECLARE_ALIGNED_ARRAY(kAlign16, uint8_t, temp2, kHeight8 * kWidth8);
+  DECLARE_ALIGNED_ARRAY(kAlign16, uint8_t, temp2, kHeight8PlusOne * kWidth8);
   DECLARE_ALIGNED_ARRAY(kAlign16, uint8_t, fdata3, kHeight8PlusOne * kWidth8);
   if (xoffset == 0) {
     var_filter_block2d_bil_w8(src, temp2, src_stride, kWidth8, kHeight8,
@@ -1021,4 +1021,3 @@ unsigned int vp8_sub_pixel_variance8x8_neon(
   }
   return variance8x8_neon(temp2, kWidth8, dst, dst_stride, sse);
 }
-
