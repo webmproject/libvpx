@@ -743,6 +743,12 @@ static vpx_codec_err_t encoder_init(vpx_codec_ctx_t *ctx,
     if (priv->buffer_pool == NULL)
       return VPX_CODEC_MEM_ERROR;
 
+#if CONFIG_MULTITHREAD
+    if (pthread_mutex_init(&priv->buffer_pool->pool_mutex, NULL)) {
+      return VPX_CODEC_MEM_ERROR;
+    }
+#endif
+
     if (ctx->config.enc) {
       // Update the reference to the config structure to an internal copy.
       priv->cfg = *ctx->config.enc;
@@ -774,6 +780,9 @@ static vpx_codec_err_t encoder_init(vpx_codec_ctx_t *ctx,
 static vpx_codec_err_t encoder_destroy(vpx_codec_alg_priv_t *ctx) {
   free(ctx->cx_data);
   vp9_remove_compressor(ctx->cpi);
+#if CONFIG_MULTITHREAD
+  pthread_mutex_destroy(&ctx->buffer_pool->pool_mutex);
+#endif
   vpx_free(ctx->buffer_pool);
   vpx_free(ctx);
   return VPX_CODEC_OK;
