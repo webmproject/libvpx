@@ -1812,12 +1812,6 @@ void dec_build_inter_predictors(VP9Decoder *const pbi, MACROBLOCKD *xd,
                ? average_split_mvs(pd, mi, ref, block)
                : mi->mbmi.mv[ref].as_mv;
 
-
-    // TODO(jkoleszar): This clamping is done in the incorrect place for the
-    // scaling case. It needs to be done on the scaled MV, not the pre-scaling
-    // MV. Note however that it performs the subsampling aware scaling so
-    // that the result is always q4.
-    // mv_precision precision is MV_PRECISION_Q4.
     const MV mv_q4 = clamp_mv_to_umv_border_sb(xd, &mv, bw, bh,
                                                pd->subsampling_x,
                                                pd->subsampling_y);
@@ -1829,6 +1823,7 @@ void dec_build_inter_predictors(VP9Decoder *const pbi, MACROBLOCKD *xd,
     const int idx = xd->block_refs[ref]->idx;
     BufferPool *const pool = pbi->common.buffer_pool;
     RefCntBuffer *const ref_frame_buf = &pool->frame_bufs[idx];
+    const int is_scaled = vp9_is_scaled(sf);
 
     // Get reference frame pointer, width and height.
     if (plane == 0) {
@@ -1842,7 +1837,7 @@ void dec_build_inter_predictors(VP9Decoder *const pbi, MACROBLOCKD *xd,
                            : ref_frame_buf->buf.v_buffer;
     }
 
-    if (vp9_is_scaled(sf)) {
+    if (is_scaled) {
       // Co-ordinate of containing block to pixel precision.
       int x_start = (-xd->mb_to_left_edge >> (3 + pd->subsampling_x));
       int y_start = (-xd->mb_to_top_edge >> (3 + pd->subsampling_y));
@@ -1897,20 +1892,19 @@ void dec_build_inter_predictors(VP9Decoder *const pbi, MACROBLOCKD *xd,
 
     // Do border extension if there is motion or the
     // width/height is not a multiple of 8 pixels.
-    if (scaled_mv.col || scaled_mv.row ||
+    if (is_scaled || scaled_mv.col || scaled_mv.row ||
         (frame_width & 0x7) || (frame_height & 0x7)) {
-      int x_pad = 0, y_pad = 0;
-
       // Get reference block bottom right horizontal coordinate.
       int x1 = ((x0_16 + (w - 1) * xs) >> SUBPEL_BITS) + 1;
+      int x_pad = 0, y_pad = 0;
 
-      if (subpel_x || (sf->x_step_q4 & SUBPEL_MASK)) {
+      if (subpel_x || (sf->x_step_q4 != SUBPEL_SHIFTS)) {
         x0 -= VP9_INTERP_EXTEND - 1;
         x1 += VP9_INTERP_EXTEND;
         x_pad = 1;
       }
 
-      if (subpel_y || (sf->y_step_q4 & SUBPEL_MASK)) {
+      if (subpel_y || (sf->y_step_q4 != SUBPEL_SHIFTS)) {
         y0 -= VP9_INTERP_EXTEND - 1;
         y1 += VP9_INTERP_EXTEND;
         y_pad = 1;
