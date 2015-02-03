@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//ILQ\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 1163,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-02-03T16:56:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//IPM\u003d",
+      "revId": "841d7b91a3ee528201689ca4ea0477546776b02b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//IPQ\u003d",
         "filename": "build/make/configure.sh",
         "patchSetId": 2
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//ILM\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 1166,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-02-03T16:56:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//IPQ\u003d",
+      "revId": "841d7b91a3ee528201689ca4ea0477546776b02b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//IPI\u003d",
         "filename": "build/make/configure.sh",
         "patchSetId": 2
@@ -47,6 +83,24 @@
       "writtenOn": "2015-02-02T21:56:29Z",
       "side": 1,
       "message": "you could still make this an info and let the normal die at 1170 occur to give some indication that yasm or nasm are acceptable without having to dup the string",
+      "revId": "841d7b91a3ee528201689ca4ea0477546776b02b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ILE\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 1167,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-02-03T16:56:51Z",
+      "side": 1,
+      "message": "ok, unset AS instead of \u0027die\u0027ing. left the check after searching for yasm though so if yasm is found, there is no spurious \"btw your nasm is too old but it doesn\u0027t actually matter because we\u0027re using yasm\" message.",
+      "parentUuid": "AAAAdn//IPI\u003d",
       "revId": "841d7b91a3ee528201689ca4ea0477546776b02b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
