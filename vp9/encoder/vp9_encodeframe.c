@@ -528,11 +528,12 @@ static void choose_partitioning(VP9_COMP *cpi,
   sp = x->plane[0].src.stride;
 
   if (cm->frame_type != KEY_FRAME) {
+    MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
     vp9_setup_pre_planes(xd, 0, yv12, mi_row, mi_col, sf);
-
-    xd->mi[0].src_mi->mbmi.ref_frame[0] = LAST_FRAME;
-    xd->mi[0].src_mi->mbmi.sb_type = BLOCK_64X64;
-    xd->mi[0].src_mi->mbmi.mv[0].as_int = 0;
+    mbmi->ref_frame[0] = LAST_FRAME;
+    mbmi->ref_frame[1] = NONE;
+    mbmi->sb_type = BLOCK_64X64;
+    mbmi->mv[0].as_int = 0;
     vp9_build_inter_predictors_sby(xd, mi_row, mi_col, BLOCK_64X64);
 
     d = xd->plane[0].dst.buf;
