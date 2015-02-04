@@ -52,6 +52,24 @@
       "revId": "cb411108a3830fb02c8f8a988b7f3b0e66d076c9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//IBg\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 740,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2015-02-04T18:01:44Z",
+      "side": 0,
+      "message": "OK I understand. This else statement would never be true for altref (non-displayable) frames.\n\nSo how did the parallel decoder ever work? Most files typically have 1+ altref frames per second. It seems like the decoder would have lost a thread on every altref frame.",
+      "parentUuid": "AAAAdn//ICE\u003d",
+      "revId": "cb411108a3830fb02c8f8a988b7f3b0e66d076c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
