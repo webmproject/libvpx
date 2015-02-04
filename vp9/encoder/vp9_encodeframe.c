@@ -504,7 +504,7 @@ static void choose_partitioning(VP9_COMP *cpi,
   threshold_base = (int64_t)(threshold_multiplier *
       vp9_convert_qindex_to_q(cm->base_qindex, cm->bit_depth));
   threshold = threshold_base;
-  threshold_bsize_min = threshold_base << 6;
+  threshold_bsize_min = threshold_base << cpi->oxcf.speed;
   threshold_bsize_max = threshold_base;
 
   // Modify thresholds for key frame and for low-resolutions (set lower
