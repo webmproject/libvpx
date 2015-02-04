@@ -34,6 +34,24 @@
       "revId": "cb411108a3830fb02c8f8a988b7f3b0e66d076c9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ICE\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 740,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2015-02-04T17:45:06Z",
+      "side": 0,
+      "message": "No. Let us say Worker A decoded frame 1 and did not show it and Worker B will show it. That means worker A will see \"do not show frame\" from the bitstream header when decoding frame 1. When master thread try to sync the Worker A and call vp9_get_raw_frame on Worker A,  Worker A will return nothing.  But available_threads should still increase by 1 in this case as Worker A has finished the job.\n\nLater when Worker B try to show the frame 1 with show_existing_frame, vp9_get_raw_frame will return the frame 1 to master thread.\n\nFor the vp9_get_raw_frame, there are two cases that this function will return NULL. One case is the worker did not receive any work and just return directly. And available_threads should not be increased in this case. Another case is the worker did not have displayable frame to return. And available_threads should be increased in this case",
+      "parentUuid": "AAAAdn//ICM\u003d",
+      "revId": "cb411108a3830fb02c8f8a988b7f3b0e66d076c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
