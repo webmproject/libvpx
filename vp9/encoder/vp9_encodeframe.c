@@ -3782,9 +3782,6 @@ static INTERP_FILTER get_interp_filter(
 
 void vp9_encode_frame(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
-  RD_OPT *const rd_opt = &cpi->rd;
-  FRAME_COUNTS *counts = cpi->td.counts;
-  RD_COUNTS *const rdc = &cpi->td.rd_counts;
 
   // In the longer term the encoder should be generalized to match the
   // decoder such that we allow compound where one of the 3 buffers has a
@@ -3806,11 +3803,11 @@ void vp9_encode_frame(VP9_COMP *cpi) {
     }
   }
 
-  vpx_memset(cpi->td.counts->tx.tx_totals, 0,
-             sizeof(cpi->td.counts->tx.tx_totals));
-
   if (cpi->sf.frame_parameter_update) {
     int i;
+    RD_OPT *const rd_opt = &cpi->rd;
+    FRAME_COUNTS *counts = cpi->td.counts;
+    RD_COUNTS *const rdc = &cpi->td.rd_counts;
 
     // This code does a single RD pass over the whole frame assuming
     // either compound, single or hybrid prediction as per whatever has
