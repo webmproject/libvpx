@@ -70,6 +70,24 @@
       "revId": "cb411108a3830fb02c8f8a988b7f3b0e66d076c9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//IBM\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 740,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2015-02-04T18:14:11Z",
+      "side": 0,
+      "message": "Kind of magic here. I see that I only lost at most one thread now. The reason is because a lot of the  call went to the function wait_and_cache_frame which handle this correctly.  As you see the more altref frames, the more wait_and_cache_frame will be called due to not enough workers. So later on, the master thread get the frame from cache directly. Let me dig into detail with you in the office. I see that i lost a thread on the 1st alref frame now.\n\nGood thing is the frame parallel decode should be faster than measured before.",
+      "parentUuid": "AAAAdn//IBg\u003d",
+      "revId": "cb411108a3830fb02c8f8a988b7f3b0e66d076c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
