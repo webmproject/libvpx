@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//IDo\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 2319,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2015-02-04T14:54:26Z",
+      "side": 1,
+      "message": "The magic number here probably needs to be changed to something that ties in to tests elsewhere (e.g. also a magic number in vp9_rc_set_frame_target())",
+      "revId": "f0557b40793d5b70c21d13f481244009b6980471",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ID0\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 2366,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2015-02-04T14:54:26Z",
+      "side": 1,
+      "message": "I know currently high limit is less than the scale threshold but if you were to change the scale down threshold at some point this might not be the case. The relationship between these thresholds is something that will need to be resolved (perhaps in a later patch as part of tuning the up and down decision). Perhaps place a TODO comment to highlight the issue.",
+      "revId": "f0557b40793d5b70c21d13f481244009b6980471",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//IDw\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 3004,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2015-02-04T14:54:26Z",
+      "side": 1,
+      "message": "There is a use of loop count below tested against \u003e 1 that concerns me. When we re-enter the loop after a resize what will be the consequence of the fact that loop_count is already \u003e 1. On the other hand setting back to 0 would cause problems as 0 indicates very first entry. There may be a conflict here between its use as a stats variable to output actual loop count and its use to indicate first loop and also loop \u003e 1.... e.g. if (undershoot_seen || loop_count \u003e 1)",
+      "revId": "f0557b40793d5b70c21d13f481244009b6980471",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//IDs\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 1185,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2015-02-04T14:54:26Z",
+      "side": 1,
+      "message": "The *2 here probably needs replacing by something other than a magic number so it ties in with tests elsewhere (e.g. scale_down())",
+      "revId": "f0557b40793d5b70c21d13f481244009b6980471",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//IDk\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 2124,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2015-02-04T14:54:26Z",
+      "side": 1,
+      "message": "Not new code I know but ++i;",
+      "revId": "f0557b40793d5b70c21d13f481244009b6980471",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
