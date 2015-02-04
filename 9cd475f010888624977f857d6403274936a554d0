@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//H8U\u003d",
+        "filename": "examples/resize_util.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2015-02-04T20:39:49Z",
+      "side": 1,
+      "message": "Not sure if I should have bothered fixing this file... Oh well, works now.",
+      "revId": "9cd475f010888624977f857d6403274936a554d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
