@@ -535,8 +535,7 @@ static void choose_partitioning(VP9_COMP *cpi,
     mbmi->ref_frame[1] = NONE;
     mbmi->sb_type = BLOCK_64X64;
     mbmi->mv[0].as_int = 0;
-    vp9_build_inter_predictors_sby(xd, mi_row, mi_col, BLOCK_64X64);
-    vp9_build_inter_predictors_sbuv(xd, mi_row, mi_col, BLOCK_64X64);
+    vp9_build_inter_predictors_sb(xd, mi_row, mi_col, BLOCK_64X64);
 
     for (i = 1; i <= 2; ++i) {
       struct macroblock_plane  *p = &x->plane[i];
