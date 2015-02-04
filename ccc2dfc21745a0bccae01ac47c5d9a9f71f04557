@@ -52,6 +52,24 @@
       "revId": "ccc2dfc21745a0bccae01ac47c5d9a9f71f04557",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//H7U\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 321,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2015-02-04T20:51:48Z",
+      "side": 1,
+      "message": "This longjmp will return to the hook as the hook will call vp9_receive_compressed_data. Then the hook will set need_resync to 1 there.",
+      "parentUuid": "AAAAdn//H8E\u003d",
+      "revId": "ccc2dfc21745a0bccae01ac47c5d9a9f71f04557",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
