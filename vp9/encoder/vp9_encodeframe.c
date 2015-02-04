@@ -491,10 +491,11 @@ static void choose_partitioning(VP9_COMP *cpi,
   const YV12_BUFFER_CONFIG *yv12 = get_ref_frame_buffer(cpi, LAST_FRAME);
   const struct scale_factors *const sf = &cm->frame_refs[LAST_FRAME - 1].sf;
   // Always use 4x4 partition for key frame.
-  int use_4x4_partition = (cm->frame_type == KEY_FRAME);
+  const int is_key_frame = (cm->frame_type == KEY_FRAME);
+  const int use_4x4_partition = is_key_frame;
   int variance4x4downsample[16];
   int low_res = (cm->width <= 352 && cm->height <= 288) ? 1 : 0;
-  const int threshold_multiplier = cm->frame_type == KEY_FRAME ? 80 : 4;
+  const int threshold_multiplier = is_key_frame ? 80 : 4;
   int64_t threshold_base;
   int64_t threshold;
   int64_t threshold_bsize_min;
@@ -509,7 +510,7 @@ static void choose_partitioning(VP9_COMP *cpi,
 
   // Modify thresholds for key frame and for low-resolutions (set lower
   // thresholds to favor split).
-  if (cm->frame_type == KEY_FRAME) {
+  if (is_key_frame) {
     threshold = threshold_base >> 2;
     threshold_bsize_min = threshold_base << 2;
   } else if (low_res) {
@@ -527,7 +528,7 @@ static void choose_partitioning(VP9_COMP *cpi,
   s = x->plane[0].src.buf;
   sp = x->plane[0].src.stride;
 
-  if (cm->frame_type != KEY_FRAME) {
+  if (!is_key_frame) {
     MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
     unsigned int var = 0, sse;
     vp9_setup_pre_planes(xd, 0, yv12, mi_row, mi_col, sf);
@@ -581,7 +582,7 @@ static void choose_partitioning(VP9_COMP *cpi,
       const int y16_idx = y32_idx + ((j >> 1) << 4);
       v16x16 *vst = &vt.split[i].split[j];
       variance4x4downsample[i2 + j] = 0;
-      if (cm->frame_type != KEY_FRAME) {
+      if (!is_key_frame) {
         for (k = 0; k < 4; k++) {
           int x8_idx = x16_idx + ((k & 1) << 3);
           int y8_idx = y16_idx + ((k >> 1) << 3);
@@ -616,7 +617,7 @@ static void choose_partitioning(VP9_COMP *cpi,
         if (low_res)
           get_variance(&vt.split[i].split[j].part_variances.none);
       }
-      if (cm->frame_type == KEY_FRAME || (low_res &&
+      if (is_key_frame || (low_res &&
           vt.split[i].split[j].part_variances.none.variance >
           (threshold << 1))) {
         // Go down to 4x4 down-sampling for variance.
@@ -624,7 +625,7 @@ static void choose_partitioning(VP9_COMP *cpi,
         for (k = 0; k < 4; k++) {
           int x8_idx = x16_idx + ((k & 1) << 3);
           int y8_idx = y16_idx + ((k >> 1) << 3);
-          v8x8 *vst2 = (cm->frame_type == KEY_FRAME) ? &vst->split[k] :
+          v8x8 *vst2 = is_key_frame ? &vst->split[k] :
               &vt2[i2 + j].split[k];
           for (m = 0; m < 4; m++) {
             int x4_idx = x8_idx + ((m & 1) << 2);
@@ -646,7 +647,7 @@ static void choose_partitioning(VP9_COMP *cpi,
               }
 #else
               int s_avg = vp9_avg_4x4(s + y4_idx * sp + x4_idx, sp);
-              if (cm->frame_type != KEY_FRAME)
+              if (!is_key_frame)
                 d_avg = vp9_avg_4x4(d + y4_idx * dp + x4_idx, dp);
 #endif
               sum = s_avg - d_avg;
@@ -667,7 +668,7 @@ static void choose_partitioning(VP9_COMP *cpi,
     const int i2 = i << 2;
     for (j = 0; j < 4; j++) {
       if (variance4x4downsample[i2 + j] == 1) {
-        v16x16 *vtemp = (cm->frame_type != KEY_FRAME) ? &vt2[i2 + j] :
+        v16x16 *vtemp = (!is_key_frame) ? &vt2[i2 + j] :
             &vt.split[i].split[j];
         for (m = 0; m < 4; m++) {
           fill_variance_tree(&vtemp->split[m], BLOCK_8X8);
@@ -706,7 +707,7 @@ static void choose_partitioning(VP9_COMP *cpi,
           // For inter frames: if variance4x4downsample[] == 1 for this 16x16
           // block, then the variance is based on 4x4 down-sampling, so use vt2
           // in set_vt_partioning(), otherwise use vt.
-          v16x16 *vtemp = (cm->frame_type != KEY_FRAME &&
+          v16x16 *vtemp = (!is_key_frame &&
                            variance4x4downsample[i2 + j] == 1) ?
                            &vt2[i2 + j] : &vt.split[i].split[j];
           if (!set_vt_partitioning(cpi, xd, vtemp, BLOCK_16X16,
