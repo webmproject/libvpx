@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//IE0\u003d",
+        "filename": "vp9/decoder/vp9_dthread.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-02-04T00:52:30Z",
+      "side": 1,
+      "message": "since you\u0027re checking for non-existence due to the difficulty in the preprocessor with joining these two conditions and not using it elsewhere, maybe just define a local symbol in the c file above the function and define something like BUILDING_WITH_TSAN",
+      "revId": "d8feb4e4c78400da37df4d815235acc241960960",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
