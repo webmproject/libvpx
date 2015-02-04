@@ -3700,10 +3700,8 @@ static void encode_frame_internal(VP9_COMP *cpi) {
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   x->itxm_add = xd->lossless ? vp9_iwht4x4_add : vp9_idct4x4_add;
 
-  if (xd->lossless) {
+  if (xd->lossless)
     x->optimize = 0;
-    cm->lf.filter_level = 0;
-  }
 
   cm->tx_mode = select_tx_mode(cpi, xd);
 
