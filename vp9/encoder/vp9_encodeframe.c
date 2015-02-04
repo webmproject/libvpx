@@ -529,12 +529,24 @@ static void choose_partitioning(VP9_COMP *cpi,
 
   if (cm->frame_type != KEY_FRAME) {
     MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
+    unsigned int var = 0, sse;
     vp9_setup_pre_planes(xd, 0, yv12, mi_row, mi_col, sf);
     mbmi->ref_frame[0] = LAST_FRAME;
     mbmi->ref_frame[1] = NONE;
     mbmi->sb_type = BLOCK_64X64;
     mbmi->mv[0].as_int = 0;
     vp9_build_inter_predictors_sby(xd, mi_row, mi_col, BLOCK_64X64);
+    vp9_build_inter_predictors_sbuv(xd, mi_row, mi_col, BLOCK_64X64);
+
+    for (i = 1; i <= 2; ++i) {
+      struct macroblock_plane  *p = &x->plane[i];
+      struct macroblockd_plane *pd = &xd->plane[i];
+      const BLOCK_SIZE bs = get_plane_block_size(BLOCK_64X64, pd);
+      var += cpi->fn_ptr[bs].vf(p->src.buf, p->src.stride,
+                                pd->dst.buf, pd->dst.stride, &sse);
+      if (sse > 2048)
+        x->color_sensitivity[i - 1] = 1;
+    }
 
     d = xd->plane[0].dst.buf;
     dp = xd->plane[0].dst.stride;
@@ -3382,6 +3394,8 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi,
     x->source_variance = UINT_MAX;
     vp9_zero(x->pred_mv);
     vp9_rd_cost_init(&dummy_rdc);
+    x->color_sensitivity[0] = 0;
+    x->color_sensitivity[1] = 0;
 
     // Set the partition type of the 64X64 block
     switch (sf->partition_search_type) {
@@ -3677,7 +3691,6 @@ static void encode_frame_internal(VP9_COMP *cpi) {
       cpi->sf.partition_search_type == VAR_BASED_PARTITION) {
     cm->tx_mode = ALLOW_16X16;
   }
-
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (cm->use_highbitdepth)
