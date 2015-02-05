@@ -513,6 +513,7 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t *ctx,
 
     frame_worker_data->frame_decoded = 0;
     frame_worker_data->frame_context_ready = 0;
+    frame_worker_data->received_frame = 1;
     frame_worker_data->data = frame_worker_data->scratch_buffer;
     frame_worker_data->user_priv = user_priv;
 
@@ -541,7 +542,9 @@ static void wait_worker_and_cache_frame(vpx_codec_alg_priv_t *ctx) {
   FrameWorkerData *const frame_worker_data = (FrameWorkerData *)worker->data1;
   ctx->next_output_worker_id =
       (ctx->next_output_worker_id + 1) % ctx->num_frame_workers;
+  // TODO(hkuang): Add worker error handling here.
   winterface->sync(worker);
+  frame_worker_data->received_frame = 0;
   ++ctx->available_threads;
   if (vp9_get_raw_frame(frame_worker_data->pbi, &sd, &flags) == 0) {
     VP9_COMMON *const cm = &frame_worker_data->pbi->common;
@@ -729,21 +732,27 @@ static vpx_image_t *decoder_get_frame(vpx_codec_alg_priv_t *ctx,
       ctx->next_output_worker_id =
           (ctx->next_output_worker_id + 1) % ctx->num_frame_workers;
       // Wait for the frame from worker thread.
-      if (!winterface->sync(worker)) {
+      if (winterface->sync(worker)) {
+        // Check if worker has received any frames.
+        if (frame_worker_data->received_frame == 1)
+          ++ctx->available_threads;
+        frame_worker_data->received_frame = 0;
+        if (vp9_get_raw_frame(frame_worker_data->pbi, &sd, &flags) == 0) {
+          VP9_COMMON *const cm = &frame_worker_data->pbi->common;
+          RefCntBuffer *const frame_bufs = cm->buffer_pool->frame_bufs;
+          release_last_output_frame(ctx);
+          ctx->last_show_frame = frame_worker_data->pbi->common.new_fb_idx;
+          yuvconfig2image(&ctx->img, &sd, frame_worker_data->user_priv);
+          ctx->img.fb_priv = frame_bufs[cm->new_fb_idx].raw_frame_buffer.priv;
+          img = &ctx->img;
+          return img;
+        }
+      } else {
         // Decoding failed. Release the worker thread.
+        frame_worker_data->received_frame = 0;
         ++ctx->available_threads;
         if (ctx->flushed != 1)
           return img;
-      } else if (vp9_get_raw_frame(frame_worker_data->pbi, &sd, &flags) == 0) {
-        VP9_COMMON *const cm = &frame_worker_data->pbi->common;
-        RefCntBuffer *const frame_bufs = cm->buffer_pool->frame_bufs;
-        ++ctx->available_threads;
-        release_last_output_frame(ctx);
-        ctx->last_show_frame = frame_worker_data->pbi->common.new_fb_idx;
-        yuvconfig2image(&ctx->img, &sd, frame_worker_data->user_priv);
-        ctx->img.fb_priv = frame_bufs[cm->new_fb_idx].raw_frame_buffer.priv;
-        img = &ctx->img;
-        return img;
       }
     } while (ctx->next_output_worker_id != ctx->next_submit_worker_id);
   }
