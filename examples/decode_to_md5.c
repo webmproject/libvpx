@@ -36,9 +36,9 @@
 #include "vpx/vp8dx.h"
 #include "vpx/vpx_decoder.h"
 
-#include "./md5_utils.h"
-#include "./tools_common.h"
-#include "./video_reader.h"
+#include "../md5_utils.h"
+#include "../tools_common.h"
+#include "../video_reader.h"
 #include "./vpx_config.h"
 
 static void get_image_md5(const vpx_image_t *img, unsigned char digest[16]) {
