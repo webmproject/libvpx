@@ -19,14 +19,14 @@
 #include <string.h>
 #include <time.h>
 
-#include "./args.h"
-#include "./tools_common.h"
-#include "./video_writer.h"
+#include "../args.h"
+#include "../tools_common.h"
+#include "../video_writer.h"
 
 #include "vpx/svc_context.h"
 #include "vpx/vp8cx.h"
 #include "vpx/vpx_encoder.h"
-#include "./vpxstats.h"
+#include "../vpxstats.h"
 
 static const arg_def_t skip_frames_arg =
     ARG_DEF("s", "skip-frames", 1, "input frames to skip");

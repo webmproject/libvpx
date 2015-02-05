@@ -15,8 +15,8 @@
 #include "vpx/vpx_encoder.h"
 #include "vpx/vp8cx.h"
 
-#include "./tools_common.h"
-#include "./video_writer.h"
+#include "../tools_common.h"
+#include "../video_writer.h"
 
 static const char *exec_name;
 
