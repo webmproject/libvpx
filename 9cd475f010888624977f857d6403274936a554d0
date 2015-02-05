@@ -33,6 +33,24 @@
       "revId": "9cd475f010888624977f857d6403274936a554d0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//H4o\u003d",
+        "filename": "examples/simple_decoder.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2015-02-05T00:10:36Z",
+      "side": 1,
+      "message": "Oops, done",
+      "parentUuid": "AAAAdn//H40\u003d",
+      "revId": "9cd475f010888624977f857d6403274936a554d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
