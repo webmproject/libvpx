@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//H2c\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 18
+      },
+      "lineNbr": 2319,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2015-02-05T11:36:35Z",
+      "side": 1,
+      "message": "New use of double. Have you checked this is emms / simd safe?  Also you probably need to have an explicit cast of the result to avoid possible loss of precision warnings in some environments.",
+      "revId": "00d80c5d12034ef71f195e9e46c924517b29d9c3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//H2g\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 18
+      },
+      "lineNbr": 1177,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2015-02-05T11:36:35Z",
+      "side": 1,
+      "message": "New use of double. Have you checked this is emms / simd safe?  Also you probably need to have an explicit cast of the result to avoid possible loss of precision warnings in some environments.",
+      "revId": "00d80c5d12034ef71f195e9e46c924517b29d9c3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
