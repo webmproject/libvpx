@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//H2I\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 1262,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-02-05T15:56:55Z",
+      "side": 1,
+      "message": "Nice, this should keep it from showing up in non-x86 builds and confusing people too.",
+      "revId": "769fe6e2b38d9dbb8b60f3af9e0555614d77caf8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
