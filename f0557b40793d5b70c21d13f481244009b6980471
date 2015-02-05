@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//H4M\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 2319,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-02-05T00:54:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//IDo\u003d",
+      "revId": "f0557b40793d5b70c21d13f481244009b6980471",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//ID0\u003d",
         "filename": "vp9/encoder/vp9_encoder.c",
         "patchSetId": 17
@@ -30,6 +48,24 @@
       "writtenOn": "2015-02-04T14:54:26Z",
       "side": 1,
       "message": "I know currently high limit is less than the scale threshold but if you were to change the scale down threshold at some point this might not be the case. The relationship between these thresholds is something that will need to be resolved (perhaps in a later patch as part of tuning the up and down decision). Perhaps place a TODO comment to highlight the issue.",
+      "revId": "f0557b40793d5b70c21d13f481244009b6980471",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//H4I\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 2366,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-02-05T00:54:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//ID0\u003d",
       "revId": "f0557b40793d5b70c21d13f481244009b6980471",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//H4E\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 3004,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-02-05T00:54:56Z",
+      "side": 1,
+      "message": "I added a second counter that gets reset to 0 when the frame size is changed. I use this in the two places that you refer to.",
+      "parentUuid": "AAAAdn//IDw\u003d",
+      "revId": "f0557b40793d5b70c21d13f481244009b6980471",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//IDs\u003d",
         "filename": "vp9/encoder/vp9_ratectrl.c",
         "patchSetId": 17
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//H4A\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 1185,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-02-05T00:54:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//IDs\u003d",
+      "revId": "f0557b40793d5b70c21d13f481244009b6980471",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//IDk\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 17
@@ -81,6 +153,24 @@
       "writtenOn": "2015-02-04T14:54:26Z",
       "side": 1,
       "message": "Not new code I know but ++i;",
+      "revId": "f0557b40793d5b70c21d13f481244009b6980471",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//H38\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 2124,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-02-05T00:54:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//IDk\u003d",
       "revId": "f0557b40793d5b70c21d13f481244009b6980471",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
