@@ -45,6 +45,13 @@ void vp9_frameworker_signal_stats(VP9Worker *const worker) {
 #endif
 }
 
+// This macro prevents thread_sanitizer from reporting known concurrent writes.
+#if defined(__has_feature)
+#if __has_feature(thread_sanitizer)
+#define BUILDING_WITH_TSAN
+#endif
+#endif
+
 // TODO(hkuang): Remove worker parameter as it is only used in debug code.
 void vp9_frameworker_wait(VP9Worker *const worker, RefCntBuffer *const ref_buf,
                           int row) {
@@ -52,9 +59,11 @@ void vp9_frameworker_wait(VP9Worker *const worker, RefCntBuffer *const ref_buf,
   if (!ref_buf)
     return;
 
-  // Enabling the following line of code will get harmless tsan error but
-  // will get best performance.
-  // if (ref_buf->row >= row && ref_buf->buf.corrupted != 1) return;
+#ifndef BUILDING_WITH_TSAN
+  // The following line of code will get harmless tsan error but it is the key
+  // to get best performance.
+  if (ref_buf->row >= row && ref_buf->buf.corrupted != 1) return;
+#endif
 
   {
     // Find the worker thread that owns the reference frame. If the reference
