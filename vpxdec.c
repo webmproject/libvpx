@@ -519,7 +519,7 @@ static FILE *open_outfile(const char *name) {
   } else {
     FILE *file = fopen(name, "wb");
     if (!file)
-      fatal("Failed to output file %s", name);
+      fatal("Failed to open output file '%s'", name);
     return file;
   }
 }
@@ -725,8 +725,7 @@ int main_loop(int argc, const char **argv_) {
   infile = strcmp(fn, "-") ? fopen(fn, "rb") : set_binary_mode(stdin);
 
   if (!infile) {
-    fprintf(stderr, "Failed to open file '%s'", strcmp(fn, "-") ? fn : "stdin");
-    return EXIT_FAILURE;
+    fatal("Failed to open input file '%s'", strcmp(fn, "-") ? fn : "stdin");
   }
 #if CONFIG_OS_SUPPORT
   /* Make sure we don't dump to the terminal, unless forced to with -o - */
