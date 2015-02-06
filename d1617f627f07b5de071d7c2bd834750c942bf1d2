@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAdn//Hss\u003d",
+        "filename": "vp9/common/vp9_thread.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-02-06T18:56:45Z",
+      "side": 1,
+      "message": "just add a note describing the reason for this; the frame worker buffers + the emulation layer on windows",
+      "revId": "d1617f627f07b5de071d7c2bd834750c942bf1d2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//HyI\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 2
