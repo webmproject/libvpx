@@ -54,7 +54,7 @@ typedef struct frame_contexts {
   int initialized;
 } FRAME_CONTEXT;
 
-typedef struct {
+typedef struct FRAME_COUNTS {
   unsigned int y_mode[BLOCK_SIZE_GROUPS][INTRA_MODES];
   unsigned int uv_mode[INTRA_MODES][INTRA_MODES];
   unsigned int partition[PARTITION_CONTEXTS][PARTITION_TYPES];
