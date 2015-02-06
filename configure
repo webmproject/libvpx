@@ -209,6 +209,7 @@ enable_feature install_libs
 
 enable_feature static
 enable_feature optimizations
+enable_feature dependency_tracking
 enable_feature fast_unaligned #allow unaligned accesses, if supported by hw
 enable_feature spatial_resampling
 enable_feature multithread
@@ -286,6 +287,7 @@ EXPERIMENT_LIST="
     emulate_hardware
 "
 CONFIG_LIST="
+    dependency_tracking
     external_build
     install_docs
     install_bins
@@ -344,6 +346,7 @@ CONFIG_LIST="
     ${EXPERIMENT_LIST}
 "
 CMDLINE_SELECT="
+    dependency_tracking
     external_build
     extra_warnings
     werror
