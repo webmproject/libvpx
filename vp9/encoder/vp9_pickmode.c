@@ -573,6 +573,10 @@ void vp9_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *rd_cost,
   *rd_cost = best_rdc;
 }
 
+static const PREDICTION_MODE inter_mode_set[INTER_MODES] = {
+    ZEROMV, NEARESTMV, NEARMV, NEWMV,
+};
+
 // TODO(jingning) placeholder for inter-frame non-RD mode decision.
 // this needs various further optimizations. to be continued..
 void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
@@ -732,10 +736,12 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     mbmi->ref_frame[0] = ref_frame;
     set_ref_ptrs(cm, xd, ref_frame, NONE);
 
-    for (this_mode = NEARESTMV; this_mode <= NEWMV; ++this_mode) {
+    for (i = 0; i < INTER_MODES; ++i) {
       int rate_mv = 0;
       int mode_rd_thresh;
-      int mode_index = mode_idx[ref_frame][INTER_OFFSET(this_mode)];
+      int mode_index;
+      this_mode = inter_mode_set[i];
+      mode_index = mode_idx[ref_frame][INTER_OFFSET(this_mode)];
 
       if (const_motion[ref_frame] && this_mode == NEARMV)
         continue;
