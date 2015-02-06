@@ -19,7 +19,7 @@
 
 #include "vp9/common/vp9_ppflags.h"
 #include "vp9/common/vp9_entropymode.h"
-#include "vp9/common/vp9_loopfilter_thread.h"
+#include "vp9/common/vp9_thread_common.h"
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_thread.h"
 

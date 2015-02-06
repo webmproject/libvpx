@@ -23,7 +23,7 @@
 #include "vp9/common/vp9_entropy.h"
 #include "vp9/common/vp9_entropymode.h"
 #include "vp9/common/vp9_idct.h"
-#include "vp9/common/vp9_loopfilter_thread.h"
+#include "vp9/common/vp9_thread_common.h"
 #include "vp9/common/vp9_pred_common.h"
 #include "vp9/common/vp9_quant_common.h"
 #include "vp9/common/vp9_reconintra.h"
