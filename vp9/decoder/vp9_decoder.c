@@ -257,14 +257,14 @@ static void swap_frame_buffers(VP9Decoder *pbi) {
 
   // Invalidate these references until the next frame starts.
   for (ref_index = 0; ref_index < 3; ref_index++)
-    cm->frame_refs[ref_index].idx = INT_MAX;
+    cm->frame_refs[ref_index].idx = -1;
 }
 
 int vp9_receive_compressed_data(VP9Decoder *pbi,
                                 size_t size, const uint8_t **psource) {
   VP9_COMMON *volatile const cm = &pbi->common;
-  BufferPool *const pool = cm->buffer_pool;
-  RefCntBuffer *const frame_bufs = cm->buffer_pool->frame_bufs;
+  BufferPool *volatile const pool = cm->buffer_pool;
+  RefCntBuffer *volatile const frame_bufs = cm->buffer_pool->frame_bufs;
   const uint8_t *source = *psource;
   int retcode = 0;
   cm->error.error_code = VPX_CODEC_OK;
@@ -278,8 +278,10 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
     // TODO(jkoleszar): Error concealment is undefined and non-normative
     // at this point, but if it becomes so, [0] may not always be the correct
     // thing to do here.
-    if (cm->frame_refs[0].idx > 0)
+    if (cm->frame_refs[0].idx > 0) {
+      assert(cm->frame_refs[0].buf != NULL);
       cm->frame_refs[0].buf->corrupted = 1;
+    }
   }
 
   pbi->ready_for_new_data = 0;
@@ -312,7 +314,6 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
 
   if (setjmp(cm->error.jmp)) {
     const VP9WorkerInterface *const winterface = vp9_get_worker_interface();
-    VP9_COMMON *const cm = &pbi->common;
     int i;
 
     cm->error.setjmp = 0;
@@ -329,8 +330,6 @@ int vp9_receive_compressed_data(VP9Decoder *pbi,
     // Release all the reference buffers if worker thread is holding them.
     if (pbi->hold_ref_buf == 1) {
       int ref_index = 0, mask;
-      BufferPool *const pool = cm->buffer_pool;
-      RefCntBuffer *const frame_bufs = cm->buffer_pool->frame_bufs;
       for (mask = pbi->refresh_frame_flags; mask; mask >>= 1) {
         const int old_idx = cm->ref_frame_map[ref_index];
         // Current thread releases the holding of reference frame.
