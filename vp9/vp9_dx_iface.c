@@ -404,6 +404,7 @@ static vpx_codec_err_t init_decoder(vpx_codec_alg_priv_t *ctx) {
     frame_worker_data->scratch_buffer = NULL;
     frame_worker_data->scratch_buffer_size = 0;
     frame_worker_data->frame_context_ready = 0;
+    frame_worker_data->received_frame = 0;
 #if CONFIG_MULTITHREAD
     if (pthread_mutex_init(&frame_worker_data->stats_mutex, NULL)) {
       set_error_detail(ctx, "Failed to allocate frame_worker_data mutex");
