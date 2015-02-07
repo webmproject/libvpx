@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Hnc\u003d",
+        "filename": "build/make/Makefile",
+        "patchSetId": 2
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-02-07T04:26:02Z",
+      "side": 1,
+      "message": "note this is a bit heavy handed (as is the dependency rule); one could instead setup a target to create the unique directories based on the objects before doing anything, but in most cases spawning the process is cheap",
+      "revId": "cbc9d51484cfe4a4d565bbedb3510676fc5c930a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
