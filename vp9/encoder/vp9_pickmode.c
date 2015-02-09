@@ -807,9 +807,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
           model_rd_for_sb_y(cpi, bsize, x, xd, &pf_rate[filter],
                             &pf_dist[filter], &pf_var[filter], &pf_sse[filter]);
-          cost = RDCOST(x->rdmult, x->rddiv,
-                        vp9_get_switchable_rate(cpi, xd) + pf_rate[filter],
-                        pf_dist[filter]);
+          pf_rate[filter] += vp9_get_switchable_rate(cpi, xd);
+          cost = RDCOST(x->rdmult, x->rddiv, pf_rate[filter], pf_dist[filter]);
           pf_tx_size[filter] = mbmi->tx_size;
           if (cost < best_cost) {
             best_filter = filter;
@@ -846,6 +845,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
         model_rd_for_sb_y(cpi, bsize, x, xd, &this_rdc.rate, &this_rdc.dist,
                           &var_y, &sse_y);
+        this_rdc.rate += cm->interp_filter == SWITCHABLE ?
+            vp9_get_switchable_rate(cpi, xd) : 0;
       }
 
       // chroma component rate-distortion cost modeling
