@@ -155,6 +155,9 @@ static INLINE int is_inter_compound_mode(PREDICTION_MODE mode) {
 typedef struct {
   PREDICTION_MODE as_mode;
   int_mv as_mv[2];  // first, second inter predictor motion vectors
+#if CONFIG_NEWMVREF_SUB8X8
+  int_mv ref_mv[2];
+#endif  // CONFIG_NEWMVREF_SUB8X8
 } b_mode_info;
 
 // Note that the rate-distortion optimization loop, bit-stream writer, and

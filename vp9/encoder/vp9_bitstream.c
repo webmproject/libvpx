@@ -646,22 +646,35 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
 #else
           if (b_mode == NEWMV) {
 #endif
-            for (ref = 0; ref < 1 + is_compound; ++ref)
+            for (ref = 0; ref < 1 + is_compound; ++ref) {
               vp9_encode_mv(cpi, w, &mi->bmi[j].as_mv[ref].as_mv,
+#if CONFIG_NEWMVREF_SUB8X8
+                            &mi->bmi[j].ref_mv[ref].as_mv,
+#else
                             &mbmi->ref_mvs[mbmi->ref_frame[ref]][0].as_mv,
+#endif  // CONFIG_NEWMVREF_SUB8X8
                             nmvc, allow_hp);
+            }
           }
 #if CONFIG_COMPOUND_MODES
           else if (b_mode == NEAREST_NEWMV || b_mode == NEAR_NEWMV) {
             vp9_encode_mv(cpi, w, &mi->bmi[j].as_mv[1].as_mv,
+#if CONFIG_NEWMVREF_SUB8X8
+                          &mi->bmi[j].ref_mv[1].as_mv,
+#else
                           &mbmi->ref_mvs[mbmi->ref_frame[1]][0].as_mv,
+#endif  // CONFIG_NEWMVREF_SUB8X8
                           nmvc, allow_hp);
           } else if (b_mode == NEW_NEARESTMV || b_mode == NEW_NEARMV) {
             vp9_encode_mv(cpi, w, &mi->bmi[j].as_mv[0].as_mv,
+#if CONFIG_NEWMVREF_SUB8X8
+                          &mi->bmi[j].ref_mv[0].as_mv,
+#else
                           &mbmi->ref_mvs[mbmi->ref_frame[0]][0].as_mv,
+#endif  // CONFIG_NEWMVREF_SUB8X8
                           nmvc, allow_hp);
           }
-#endif
+#endif  // CONFIG_COMPOUND_MODES
         }
       }
     } else {
