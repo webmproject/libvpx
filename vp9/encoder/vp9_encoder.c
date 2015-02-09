@@ -2800,7 +2800,10 @@ static void encode_without_recode_loop(VP9_COMP *cpi) {
   set_size_dependent_vars(cpi, &q, &bottom_index, &top_index);
 
   vp9_set_quantizer(cm, q);
+  vp9_set_vbp_thresholds(cpi, q);
+
   setup_frame(cpi);
+
   // Variance adaptive and in frame q adjustment experiments are mutually
   // exclusive.
   if (cpi->oxcf.aq_mode == VARIANCE_AQ) {

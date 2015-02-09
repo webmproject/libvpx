@@ -421,4 +421,3 @@ void vp9_set_speed_features_framesize_dependent(struct VP9_COMP *cpi);
 #endif
 
 #endif  // VP9_ENCODER_VP9_SPEED_FEATURES_H_
-
