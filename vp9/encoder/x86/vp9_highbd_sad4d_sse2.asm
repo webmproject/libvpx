@@ -215,12 +215,19 @@ SECTION .text
 ; where NxN = 64x64, 32x32, 16x16, 16x8, 8x16 or 8x8
 %macro HIGH_SADNXN4D 2
 %if UNIX64
-cglobal highbd_sad%1x%2x4d, 5, 9, 8, src, src_stride, ref1, ref_stride, \
-                              res, ref2, ref3, ref4, one
+cglobal highbd_sad%1x%2x4d, 5, 8, 8, src, src_stride, ref1, ref_stride, \
+                              res, ref2, ref3, ref4
 %else
-cglobal highbd_sad%1x%2x4d, 4, 8, 8, src, src_stride, ref1, ref_stride, \
-                              ref2, ref3, ref4, one
+cglobal highbd_sad%1x%2x4d, 4, 7, 8, src, src_stride, ref1, ref_stride, \
+                              ref2, ref3, ref4
 %endif
+
+; set m1
+  push                srcq
+  mov                 srcd, 0x00010001
+  movd                  m1, srcd
+  pshufd                m1, m1, 0x0
+  pop                 srcq
 
   movsxdifnidn src_strideq, src_strided
   movsxdifnidn ref_strideq, ref_strided
@@ -235,10 +242,6 @@ cglobal highbd_sad%1x%2x4d, 4, 8, 8, src, src_stride, ref1, ref_stride, \
   shl                ref3q, 1
   shl                ref4q, 1
   shl                ref1q, 1
-
-  mov                 oned, 0x00010001
-  movd                  m1, oned
-  pshufd                m1, m1, 0x0
 
   HIGH_PROCESS_%1x2x4 1, 0, 0, src_strideq, ref_strideq, 1
 %rep (%2-4)/2
