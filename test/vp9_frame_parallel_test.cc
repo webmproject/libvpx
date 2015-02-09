@@ -184,7 +184,7 @@ void DecodeInvalidFiles(const InvalidFileList files[]) {
   }
 }
 
-TEST(VP9MultiThreadedFrameParallel, DISABLED_InvalidFileTest) {
+TEST(VP9MultiThreadedFrameParallel, InvalidFileTest) {
   static const InvalidFileList files[] = {
     // invalid-vp90-2-07-frame_parallel-1.webm is a 40 frame video file with
     // one key frame for every ten frames. The 11th frame has corrupted data.
