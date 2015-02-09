@@ -33,6 +33,42 @@
       "revId": "f957ef0e01765406b4aeda460206936d2b322422",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Hhc\u003d",
+        "filename": "vp9/encoder/vp9_speed_features.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 414,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-02-09T21:41:08Z",
+      "side": 1,
+      "message": "done, changed to all lower case to be consistent with others.",
+      "parentUuid": "AAAAdn//HiU\u003d",
+      "revId": "f957ef0e01765406b4aeda460206936d2b322422",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Hhg\u003d",
+        "filename": "vp9/encoder/vp9_speed_features.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 414,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-02-09T21:41:08Z",
+      "side": 1,
+      "message": "done, moved them to VP9_COMP",
+      "parentUuid": "AAAAdn//Hic\u003d",
+      "revId": "f957ef0e01765406b4aeda460206936d2b322422",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
