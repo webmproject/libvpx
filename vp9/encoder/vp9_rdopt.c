@@ -2132,13 +2132,13 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
       const int i = idy * 2 + idx;
       int ref;
 
-#if CONFIG_COMPOUND_MODES
       for (ref = 0; ref < 1 + has_second_rf; ++ref) {
         const MV_REFERENCE_FRAME frame = mbmi->ref_frame[ref];
         frame_mv[ZEROMV][frame].as_int = 0;
         vp9_append_sub8x8_mvs_for_idx(cm, xd, tile, i, ref, mi_row, mi_col,
                                       &frame_mv[NEARESTMV][frame],
                                       &frame_mv[NEARMV][frame]);
+#if CONFIG_COMPOUND_MODES
         frame_mv[ZERO_ZEROMV][frame].as_int = 0;
         frame_mv[NEAREST_NEARESTMV][frame].as_int =
             frame_mv[NEARESTMV][frame].as_int;
@@ -2173,16 +2173,8 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
           frame_mv[NEAR_NEWMV][frame].as_int =
               frame_mv[NEWMV][frame].as_int;
         }
-      }
-#else
-      for (ref = 0; ref < 1 + has_second_rf; ++ref) {
-        const MV_REFERENCE_FRAME frame = mbmi->ref_frame[ref];
-        frame_mv[ZEROMV][frame].as_int = 0;
-        vp9_append_sub8x8_mvs_for_idx(cm, xd, tile, i, ref, mi_row, mi_col,
-                                      &frame_mv[NEARESTMV][frame],
-                                      &frame_mv[NEARMV][frame]);
-      }
 #endif
+      }
 
       // search for the best motion vector on this segment
 #if CONFIG_COMPOUND_MODES
