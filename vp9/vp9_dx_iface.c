@@ -363,6 +363,8 @@ static vpx_codec_err_t init_decoder(vpx_codec_alg_priv_t *ctx) {
   ctx->num_cache_frames = 0;
   ctx->num_frame_workers =
       (ctx->frame_parallel_decode == 1) ? ctx->cfg.threads: 1;
+  if (ctx->num_frame_workers > MAX_DECODE_THREADS)
+    ctx->num_frame_workers = MAX_DECODE_THREADS;
   ctx->available_threads = ctx->num_frame_workers;
   ctx->flushed = 0;
 
