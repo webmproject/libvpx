@@ -398,6 +398,22 @@ static const arg_def_t frame_periodic_boost = ARG_DEF(
     NULL, "frame-boost", 1,
     "Enable frame periodic boost (0: off (default), 1: on)");
 
+static const struct arg_enum_list color_space_enum[] = {
+  { "unknown", VPX_CS_UNKNOWN },
+  { "bt601", VPX_CS_BT_601 },
+  { "bt709", VPX_CS_BT_709 },
+  { "smpte170", VPX_CS_SMPTE_170 },
+  { "smpte240", VPX_CS_SMPTE_240 },
+  { "bt2020", VPX_CS_BT_2020 },
+  { "reserved", VPX_CS_RESERVED },
+  { "sRGB", VPX_CS_SRGB },
+  { NULL, 0 }
+};
+
+static const arg_def_t input_color_space = ARG_DEF_ENUM(
+    NULL, "color-space", 1,
+    "The color space of input content:", color_space_enum);
+
 #if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
 static const struct arg_enum_list bitdepth_enum[] = {
   {"8",  VPX_BITS_8},
@@ -429,7 +445,7 @@ static const arg_def_t *vp9_args[] = {
   &tune_ssim, &cq_level, &max_intra_rate_pct, &max_inter_rate_pct,
   &gf_cbr_boost_pct, &lossless,
   &frame_parallel_decoding, &aq_mode, &frame_periodic_boost,
-  &noise_sens, &tune_content,
+  &noise_sens, &tune_content, &input_color_space,
 #if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
   &bitdeptharg, &inbitdeptharg,
 #endif
