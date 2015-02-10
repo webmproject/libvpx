@@ -16,6 +16,24 @@
       "revId": "b15f5773bfcca830d36f924c533c84e5665aa926",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//HYs\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 487,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-02-10T17:00:18Z",
+      "side": 1,
+      "message": "Done as suggested, added  q to the parameter of this function",
+      "parentUuid": "AAAAdn//HdI\u003d",
+      "revId": "b15f5773bfcca830d36f924c533c84e5665aa926",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
