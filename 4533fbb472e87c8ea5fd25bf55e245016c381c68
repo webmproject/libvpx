@@ -16,6 +16,24 @@
       "revId": "4533fbb472e87c8ea5fd25bf55e245016c381c68",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//HdA\u003d",
+        "filename": "examples.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 341,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-02-10T00:37:41Z",
+      "side": 1,
+      "message": "\u003ddir for the most part (no trailing \u0027/\u0027)\n\nhttps://www.gnu.org/software/make/manual/make.html#Automatic-Variables\n\nI guess that\u0027s the only use of it and it\u0027s inconsistent with the rest. I\u0027ll change it.",
+      "parentUuid": "AAAAdn//Hdg\u003d",
+      "revId": "4533fbb472e87c8ea5fd25bf55e245016c381c68",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
