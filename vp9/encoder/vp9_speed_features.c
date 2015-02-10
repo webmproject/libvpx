@@ -105,7 +105,9 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
     sf->tx_size_search_method = frame_is_boosted(cpi) ? USE_FULL_RD
                                                       : USE_LARGESTALL;
 
-    sf->reference_masking = 1;
+    // Reference masking is not supported in dynamic scaling mode.
+    sf->reference_masking = cpi->oxcf.resize_mode != RESIZE_DYNAMIC ? 1 : 0;
+
     sf->mode_search_skip_flags = (cm->frame_type == KEY_FRAME) ? 0 :
                                  FLAG_SKIP_INTRA_DIRMISMATCH |
                                  FLAG_SKIP_INTRA_BESTINTER |
@@ -234,7 +236,10 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
                                  FLAG_SKIP_COMP_BESTINTRA |
                                  FLAG_SKIP_INTRA_LOWVAR;
     sf->adaptive_pred_interp_filter = 2;
-    sf->reference_masking = 1;
+
+    // Reference masking is not supported in dynamic scaling mode.
+    sf->reference_masking = cpi->oxcf.resize_mode != RESIZE_DYNAMIC ? 1 : 0;
+
     sf->disable_filter_search_var_thresh = 50;
     sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
     sf->auto_min_max_partition_size = RELAXED_NEIGHBORING_MIN_MAX;

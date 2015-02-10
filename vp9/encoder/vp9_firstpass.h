@@ -118,8 +118,8 @@ typedef struct {
   int kf_zeromotion_pct;
   int last_kfgroup_zeromotion_pct;
   int gf_zeromotion_pct;
-  int baseline_worst_quality;
   int active_worst_quality;
+  int baseline_active_worst_quality;
   int extend_minq;
   int extend_maxq;
 
@@ -138,6 +138,13 @@ void vp9_rc_get_second_pass_params(struct VP9_COMP *cpi);
 
 // Post encode update of the rate control parameters for 2-pass
 void vp9_twopass_postencode_update(struct VP9_COMP *cpi);
+
+void vp9_init_subsampling(struct VP9_COMP *cpi);
+
+void calculate_coded_size(struct VP9_COMP *cpi,
+                          int *scaled_frame_width,
+                          int *scaled_frame_height);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

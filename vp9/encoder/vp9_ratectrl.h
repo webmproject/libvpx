@@ -33,6 +33,27 @@ typedef enum {
   RATE_FACTOR_LEVELS = 5
 } RATE_FACTOR_LEVEL;
 
+// Internal frame scaling level.
+typedef enum {
+  UNSCALED = 0,     // Frame is unscaled.
+  SCALE_STEP1 = 1,  // First-level down-scaling.
+  FRAME_SCALE_STEPS
+} FRAME_SCALE_LEVEL;
+
+// Frame dimensions multiplier wrt the native frame size, in 1/16ths,
+// specified for the scale-up case.
+// e.g. 24 => 16/24 = 2/3 of native size. The restriction to 1/16th is
+// intended to match the capabilities of the normative scaling filters,
+// giving precedence to the up-scaling accuracy.
+static const int frame_scale_factor[FRAME_SCALE_STEPS] = {16, 24};
+
+// Multiplier of the target rate to be used as threshold for triggering scaling.
+static const double rate_thresh_mult[FRAME_SCALE_STEPS] = {1.0, 2.0};
+
+// Scale dependent Rate Correction Factor multipliers. Compensates for the
+// greater number of bits per pixel generated in down-scaled frames.
+static const double rcf_mult[FRAME_SCALE_STEPS] = {1.0, 2.0};
+
 typedef struct {
   // Rate targetting variables
   int base_frame_target;           // A baseline frame target before adjustment
@@ -100,6 +121,7 @@ typedef struct {
   int64_t starting_buffer_level;
   int64_t optimal_buffer_level;
   int64_t maximum_buffer_size;
+
   // rate control history for last frame(1) and the frame before(2).
   // -1: undershot
   //  1: overshoot
@@ -108,6 +130,13 @@ typedef struct {
   int rc_2_frame;
   int q_1_frame;
   int q_2_frame;
+
+  // Auto frame-scaling variables.
+  FRAME_SCALE_LEVEL frame_size_selector;
+  FRAME_SCALE_LEVEL next_frame_size_selector;
+  int frame_width[FRAME_SCALE_STEPS];
+  int frame_height[FRAME_SCALE_STEPS];
+  int rf_level_maxq[RATE_FACTOR_LEVELS];
 } RATE_CONTROL;
 
 struct VP9_COMP;
@@ -204,6 +233,8 @@ int vp9_compute_qdelta(const RATE_CONTROL *rc, double qstart, double qtarget,
 int vp9_compute_qdelta_by_rate(const RATE_CONTROL *rc, FRAME_TYPE frame_type,
                                int qindex, double rate_target_ratio,
                                vpx_bit_depth_t bit_depth);
+
+int vp9_frame_type_qdelta(const struct VP9_COMP *cpi, int rf_level, int q);
 
 void vp9_rc_update_framerate(struct VP9_COMP *cpi);
 
