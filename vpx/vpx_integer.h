@@ -37,6 +37,8 @@ typedef unsigned int   uint32_t;
 typedef signed __int64   int64_t;
 typedef unsigned __int64 uint64_t;
 #define INT64_MAX _I64_MAX
+#define INT32_MAX _I32_MAX
+#define INT32_MIN _I32_MIN
 #define INT16_MAX _I16_MAX
 #define INT16_MIN _I16_MIN
 #endif
