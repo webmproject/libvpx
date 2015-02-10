@@ -1432,8 +1432,6 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
                                           ref_buf->buf->y_crop_height,
                                           cm->width, cm->height);
 #endif
-        if (vp9_is_scaled(&ref_buf->sf))
-          vp9_extend_frame_borders(ref_buf->buf);
       }
     }
   }
