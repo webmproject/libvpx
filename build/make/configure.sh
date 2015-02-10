@@ -83,6 +83,8 @@ Build options:
   ${toggle_gprof}             enable/disable gprof profiling instrumentation
   ${toggle_gcov}              enable/disable gcov coverage instrumentation
   ${toggle_thumb}             enable/disable building arm assembly in thumb mode
+  ${toggle_dependency_tracking}
+                              disable to speed up one-time build
 
 Install options:
   ${toggle_install_docs}      control whether docs are installed

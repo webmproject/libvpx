@@ -338,6 +338,7 @@ $(foreach proj,$(call enabled,PROJECTS),\
 #
 %.dox: %.c
 	@echo "    [DOXY] $@"
+	@mkdir -p $(dir $@)
 	@echo "/*!\page example_$(@F:.dox=) $(@F:.dox=)" > $@
 	@echo "   \includelineno $(<F)" >> $@
 	@echo "*/" >> $@

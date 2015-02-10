@@ -489,7 +489,11 @@ libs.doxy: $(CODEC_DOC_SRCS)
 	@echo "ENABLED_SECTIONS += $(sort $(CODEC_DOC_SECTIONS))" >> $@
 
 ## Generate rtcd.h for all objects
+ifeq ($(CONFIG_DEPENDENCY_TRACKING),yes)
 $(OBJS-yes:.o=.d): $(RTCD)
+else
+$(OBJS-yes): $(RTCD)
+endif
 
 ## Update the global src list
 SRCS += $(CODEC_SRCS) $(LIBVPX_TEST_SRCS) $(GTEST_SRCS)
