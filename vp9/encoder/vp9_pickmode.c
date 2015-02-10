@@ -1130,8 +1130,6 @@ void vp9_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
         int64_t b_best_rd = INT64_MAX;
         const int i = idy * 2 + idx;
         PREDICTION_MODE this_mode;
-        int b_rate = 0;
-        int64_t b_dist = 0;
         RD_COST this_rdc;
         unsigned int var_y, sse_y;
 
@@ -1159,6 +1157,7 @@ void vp9_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
                                       &b_mv[NEARMV]);
 
         for (this_mode = NEARESTMV; this_mode <= NEWMV; ++this_mode) {
+          int b_rate = 0;
           xd->mi[0].bmi[i].as_mv[0].as_int = b_mv[this_mode].as_int;
 
           if (this_mode == NEWMV) {
@@ -1220,6 +1219,9 @@ void vp9_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
                                          &x->pred_sse[ref_frame], NULL, 0, 0);
 
             xd->mi[0].bmi[i].as_mv[0].as_mv = tmp_mv;
+          } else {
+            b_rate += cpi->inter_mode_cost[mbmi->mode_context[ref_frame]]
+                                          [INTER_OFFSET(this_mode)];
           }
 
           vp9_build_inter_predictor(pd->pre[0].buf, pd->pre[0].stride,
@@ -1236,7 +1238,6 @@ void vp9_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
                             &var_y, &sse_y);
 
           this_rdc.rate += b_rate;
-          this_rdc.dist += b_dist;
           this_rdc.rdcost = RDCOST(x->rdmult, x->rddiv,
                                    this_rdc.rate, this_rdc.dist);
           if (this_rdc.rdcost < b_best_rd) {
