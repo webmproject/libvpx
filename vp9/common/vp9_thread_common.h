@@ -15,6 +15,7 @@
 #include "vp9/common/vp9_thread.h"
 
 struct VP9Common;
+struct FRAME_COUNTS;
 
 // Loopfilter row synchronization
 typedef struct VP9LfSyncData {
@@ -49,5 +50,8 @@ void vp9_loop_filter_frame_mt(YV12_BUFFER_CONFIG *frame,
                               int y_only, int partial_frame,
                               VP9Worker *workers, int num_workers,
                               VP9LfSync *lf_sync);
+
+void vp9_accumulate_frame_counts(struct VP9Common *cm,
+                                 struct FRAME_COUNTS *counts, int is_dec);
 
 #endif  // VP9_COMMON_VP9_LOOPFILTER_THREAD_H_

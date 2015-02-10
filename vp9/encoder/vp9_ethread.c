@@ -12,105 +12,6 @@
 #include "vp9/encoder/vp9_encoder.h"
 #include "vp9/encoder/vp9_ethread.h"
 
-static void accumulate_frame_counts(VP9_COMMON *cm, ThreadData *td) {
-  int i, j, k, l, m;
-
-  for (i = 0; i < BLOCK_SIZE_GROUPS; i++)
-    for (j = 0; j < INTRA_MODES; j++)
-      cm->counts.y_mode[i][j] += td->counts->y_mode[i][j];
-
-  for (i = 0; i < INTRA_MODES; i++)
-    for (j = 0; j < INTRA_MODES; j++)
-      cm->counts.uv_mode[i][j] += td->counts->uv_mode[i][j];
-
-  for (i = 0; i < PARTITION_CONTEXTS; i++)
-    for (j = 0; j < PARTITION_TYPES; j++)
-      cm->counts.partition[i][j] += td->counts->partition[i][j];
-
-  for (i = 0; i < TX_SIZES; i++)
-    for (j = 0; j < PLANE_TYPES; j++)
-      for (k = 0; k < REF_TYPES; k++)
-        for (l = 0; l < COEF_BANDS; l++)
-          for (m = 0; m < COEFF_CONTEXTS; m++)
-            cm->counts.eob_branch[i][j][k][l][m] +=
-                td->counts->eob_branch[i][j][k][l][m];
-              // cm->counts.coef is only updated at frame level, so not need
-              // to accumulate it here.
-              // for (n = 0; n < UNCONSTRAINED_NODES + 1; n++)
-              //   cm->counts.coef[i][j][k][l][m][n] +=
-              //       td->counts->coef[i][j][k][l][m][n];
-
-  for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; i++)
-    for (j = 0; j < SWITCHABLE_FILTERS; j++)
-      cm->counts.switchable_interp[i][j] += td->counts->switchable_interp[i][j];
-
-  for (i = 0; i < INTER_MODE_CONTEXTS; i++)
-    for (j = 0; j < INTER_MODES; j++)
-      cm->counts.inter_mode[i][j] += td->counts->inter_mode[i][j];
-
-  for (i = 0; i < INTRA_INTER_CONTEXTS; i++)
-    for (j = 0; j < 2; j++)
-      cm->counts.intra_inter[i][j] += td->counts->intra_inter[i][j];
-
-  for (i = 0; i < COMP_INTER_CONTEXTS; i++)
-    for (j = 0; j < 2; j++)
-      cm->counts.comp_inter[i][j] += td->counts->comp_inter[i][j];
-
-  for (i = 0; i < REF_CONTEXTS; i++)
-    for (j = 0; j < 2; j++)
-      for (k = 0; k < 2; k++)
-      cm->counts.single_ref[i][j][k] += td->counts->single_ref[i][j][k];
-
-  for (i = 0; i < REF_CONTEXTS; i++)
-    for (j = 0; j < 2; j++)
-      cm->counts.comp_ref[i][j] += td->counts->comp_ref[i][j];
-
-  for (i = 0; i < TX_SIZE_CONTEXTS; i++) {
-    for (j = 0; j < TX_SIZES; j++)
-      cm->counts.tx.p32x32[i][j] += td->counts->tx.p32x32[i][j];
-
-    for (j = 0; j < TX_SIZES - 1; j++)
-      cm->counts.tx.p16x16[i][j] += td->counts->tx.p16x16[i][j];
-
-    for (j = 0; j < TX_SIZES - 2; j++)
-      cm->counts.tx.p8x8[i][j] += td->counts->tx.p8x8[i][j];
-  }
-
-  for (i = 0; i < SKIP_CONTEXTS; i++)
-    for (j = 0; j < 2; j++)
-      cm->counts.skip[i][j] += td->counts->skip[i][j];
-
-  for (i = 0; i < MV_JOINTS; i++)
-    cm->counts.mv.joints[i] += td->counts->mv.joints[i];
-
-  for (k = 0; k < 2; k++) {
-    nmv_component_counts *comps = &cm->counts.mv.comps[k];
-    nmv_component_counts *comps_t = &td->counts->mv.comps[k];
-
-    for (i = 0; i < 2; i++) {
-      comps->sign[i] += comps_t->sign[i];
-      comps->class0_hp[i] += comps_t->class0_hp[i];
-      comps->hp[i] += comps_t->hp[i];
-    }
-
-    for (i = 0; i < MV_CLASSES; i++)
-      comps->classes[i] += comps_t->classes[i];
-
-    for (i = 0; i < CLASS0_SIZE; i++) {
-      comps->class0[i] += comps_t->class0[i];
-      for (j = 0; j < MV_FP_SIZE; j++)
-        comps->class0_fp[i][j] += comps_t->class0_fp[i][j];
-    }
-
-    for (i = 0; i < MV_OFFSET_BITS; i++)
-      for (j = 0; j < 2; j++)
-        comps->bits[i][j] += comps_t->bits[i][j];
-
-    for (i = 0; i < MV_FP_SIZE; i++)
-      comps->fp[i] += comps_t->fp[i];
-  }
-}
-
 static void accumulate_rd_opt(ThreadData *td, ThreadData *td_t) {
   int i, j, k, l, m, n;
 
@@ -267,7 +168,7 @@ void vp9_encode_tiles_mt(VP9_COMP *cpi) {
 
     // Accumulate counters.
     if (i < num_workers - 1) {
-      accumulate_frame_counts(&cpi->common, thread_data->td);
+      vp9_accumulate_frame_counts(cm, thread_data->td->counts, 0);
       accumulate_rd_opt(&cpi->td, thread_data->td);
     }
   }
