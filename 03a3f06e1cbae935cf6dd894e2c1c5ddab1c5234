@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//HXA\u003d",
+        "filename": "vp9/encoder/vp9_motionmodel.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2015-02-10T18:30:51Z",
+      "side": 1,
+      "message": "indent",
+      "revId": "03a3f06e1cbae935cf6dd894e2c1c5ddab1c5234",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//HW8\u003d",
+        "filename": "vp9/vp9cx.mk",
+        "patchSetId": 5
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2015-02-10T18:30:51Z",
+      "side": 1,
+      "message": "can you also change the ones above to CONFIG_GLOBAL_MOTION ?",
+      "revId": "03a3f06e1cbae935cf6dd894e2c1c5ddab1c5234",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
