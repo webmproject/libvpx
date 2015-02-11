@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//HQo\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 416,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2015-02-11T16:04:30Z",
+      "side": 1,
+      "message": "Also not on segment 2? Comment out of date perhaps. Also this assumes 0 is the base un-boosted segment but this could be changed in the future. Wouldn\u0027t it be safer to explicitly identify the segment meanings via #defines or some such and then indicate if !BASE_SEGMENT and bsize \u003d\u003d 64x64 return.",
+      "revId": "92680048716621b0efdd5c34d32263058139af1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
