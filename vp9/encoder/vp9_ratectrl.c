@@ -1173,8 +1173,8 @@ void vp9_rc_set_frame_target(VP9_COMP *cpi, int target) {
   // Modify frame size target when down-scaling.
   if (cpi->oxcf.resize_mode == RESIZE_DYNAMIC &&
       rc->frame_size_selector != UNSCALED)
-    rc->this_frame_target =
-        rc->this_frame_target * rate_thresh_mult[rc->frame_size_selector];
+    rc->this_frame_target = (int)(rc->this_frame_target
+        * rate_thresh_mult[rc->frame_size_selector]);
 
   // Target rate per SB64 (including partial SB64s.
   rc->sb64_target_rate = ((int64_t)rc->this_frame_target * 64 * 64) /
