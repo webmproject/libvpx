@@ -345,7 +345,7 @@ cglobal highbd_tm_predictor_8x8, 5, 6, 5, dst, stride, above, left, bps, one
 
 %if ARCH_X86_64
 INIT_XMM sse2
-cglobal highbd_tm_predictor_16x16, 5, 6, 8, dst, stride, above, left, bps, one
+cglobal highbd_tm_predictor_16x16, 5, 6, 9, dst, stride, above, left, bps, one
   movd                  m2, [aboveq-2]
   mova                  m0, [aboveq]
   mova                  m1, [aboveq+16]
