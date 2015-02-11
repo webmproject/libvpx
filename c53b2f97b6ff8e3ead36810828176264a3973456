@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//HQU\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 811,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-02-11T17:12:28Z",
+      "side": 1,
+      "message": "The encoder can get here only when the filter type is switch-able.",
+      "parentUuid": "AAAAdn//HQ0\u003d",
+      "revId": "c53b2f97b6ff8e3ead36810828176264a3973456",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//HQw\u003d",
         "filename": "vp9/encoder/vp9_pickmode.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2015-02-11T15:34:32Z",
       "side": 1,
       "message": "Is this right? To get to here doesn\u0027t the filter ref have to be non switch-able in which case this this costing addition correct?",
+      "revId": "c53b2f97b6ff8e3ead36810828176264a3973456",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//HQQ\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 848,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-02-11T17:12:28Z",
+      "side": 1,
+      "message": "Done\n\nWe use a chessboard pattern filter type search for non-NEWMV modes. It is possible that when we reach here it is running in either switch-able in NEARESTMV/NEARMV mode or fixed filter type mode.\n\nAdded a check condition here to see if the filter cost should be included.",
+      "parentUuid": "AAAAdn//HQw\u003d",
       "revId": "c53b2f97b6ff8e3ead36810828176264a3973456",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
