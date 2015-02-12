@@ -509,8 +509,9 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
       args->sse  = x->bsse[(plane << 2) + (block >> (tx_size << 1))] << 4;
       args->dist = args->sse;
       if (x->plane[plane].eobs[block]) {
-        int64_t dc_correct = coeff[0] * coeff[0] -
-            (coeff[0] - dqcoeff[0]) * (coeff[0] - dqcoeff[0]);
+        const int64_t orig_sse = (int64_t)coeff[0] * coeff[0];
+        const int64_t resd_sse = coeff[0] - dqcoeff[0];
+        int64_t dc_correct = orig_sse - resd_sse * resd_sse;
 #if CONFIG_VP9_HIGHBITDEPTH
         dc_correct >>= ((xd->bd - 8) * 2);
 #endif
