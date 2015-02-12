@@ -25,8 +25,12 @@
 #define USE_FAST_CORNER
 #define MAX_CORNERS 4096
 
+struct VP9_COMP;
+
+const int CONFIDENCE_THRESHOLD = 40;
+
 typedef enum {
-  UNKNOWN = -1,
+  UNKNOWN_TRANSFORM = -1,
   HOMOGRAPHY,  // homography, 8-parameter
   AFFINE,      // affine, 6-parameter
   ROTZOOM      // simplified affine with rotation and zoom only, 4-parameter
@@ -65,5 +69,23 @@ int vp9_compute_global_motion_multiple_feature_based(TransformationType type,
                                                      int max_models,
                                                      double inlier_prob,
                                                      double *H);
+
+// Returns number of models actually returned: 1 - if success, 0 - if failure
+int vp9_compute_global_motion_single_block_based(struct VP9_COMP *cpi,
+                                                 TransformationType type,
+                                                 YV12_BUFFER_CONFIG *frm,
+                                                 YV12_BUFFER_CONFIG *ref,
+                                                 int blocksize,
+                                                 double *H);
+
+// Returns number of models actually returned: 1 - if success, 0 - if failure
+int vp9_compute_global_motion_multiple_block_based(struct VP9_COMP *cpi,
+                                                   TransformationType type,
+                                                   YV12_BUFFER_CONFIG *frm,
+                                                   YV12_BUFFER_CONFIG *ref,
+                                                   int blocksize,
+                                                   int max_models,
+                                                   double inlier_prob,
+                                                   double *H);
 
 #endif  // VP9_ENCODER_VP9_GLOBAL_MOTION_H

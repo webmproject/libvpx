@@ -14,10 +14,19 @@
 #include <math.h>
 #include <assert.h>
 
-#include "vp9_corner_detect.h"
-#include "vp9_corner_match.h"
-#include "vp9_ransac.h"
-#include "vp9_global_motion.h"
+
+#include "vpx_mem/vpx_mem.h"
+#include "vp9/encoder/vp9_segmentation.h"
+#include "vp9/encoder/vp9_mcomp.h"
+#include "vp9/common/vp9_blockd.h"
+#include "vp9/common/vp9_reconinter.h"
+#include "vp9/common/vp9_reconintra.h"
+#include "vp9/common/vp9_systemdependent.h"
+#include "vp9/encoder/vp9_corner_detect.h"
+#include "vp9/encoder/vp9_corner_match.h"
+#include "vp9/encoder/vp9_ransac.h"
+#include "vp9/encoder/vp9_global_motion.h"
+#include "vp9/encoder/vp9_motionmodel.h"
 
 // #define VERBOSE
 
@@ -321,6 +330,106 @@ int vp9_compute_global_motion_multiple_feature_based(TransformationType type,
   printf("Number of correspondences = %d\n", num_correspondences);
 #endif
   inlier_map = (int *)malloc(num_correspondences * sizeof(int));
+  num_inliers = compute_global_motion_multiple(type, correspondences,
+                                               num_correspondences, H,
+                                               max_models, inlier_prob,
+                                               &num_models, inlier_map);
+#ifdef VERBOSE
+  printf("Models = %d, Inliers = %d\n", num_models, num_inliers);
+  if (num_models)
+    printf("Error Score (inliers) = %g\n",
+           compute_error_score(type, correspondences, 4, correspondences + 2, 4,
+                               num_correspondences, H, inlier_map));
+#endif
+  (void) num_inliers;
+  free(correspondences);
+  free(inlier_map);
+  return num_models;
+}
+
+// Returns number of models actually returned: 1 - if success, 0 - if failure
+int vp9_compute_global_motion_single_block_based(struct VP9_COMP *cpi,
+                                                 TransformationType type,
+                                                 YV12_BUFFER_CONFIG *frm,
+                                                 YV12_BUFFER_CONFIG *ref,
+                                                 int blocksize,
+                                                 double *H) {
+  VP9_COMMON *const cm = &cpi->common;
+  int num_correspondences = 0;
+  int *correspondences;
+  int num_inliers;
+  int *inlier_map = NULL;
+
+  int i;
+  MV motionfield[4096];
+  double confidence[4096];
+
+  get_frame_motionfield(cpi, frm, ref, blocksize, motionfield, confidence);
+  correspondences = (int *)malloc(4 * cm->mb_rows * cm->mb_cols *
+                                  sizeof(*correspondences));
+  for (i = 0; i < cm->mb_rows * cm->mb_cols; i ++) {
+      int x = (i % cm->mb_cols) * blocksize + blocksize/2;
+      int y = (i / cm->mb_cols) * blocksize + blocksize/2;
+      if (confidence[i] > CONFIDENCE_THRESHOLD) {
+        correspondences[num_correspondences*4]   = x;
+        correspondences[num_correspondences*4+1] = y;
+        correspondences[num_correspondences*4+2] = motionfield[i].col + x;
+        correspondences[num_correspondences*4+3] = motionfield[i].row + y;
+        num_correspondences++;
+      }
+  }
+
+  inlier_map = (int *)malloc(num_correspondences * sizeof(*inlier_map));
+  num_inliers = compute_global_motion_single(type, correspondences,
+                                             num_correspondences, H,
+                                             inlier_map);
+#ifdef VERBOSE
+  printf("Inliers = %d\n", num_inliers);
+  printf("Error Score (inliers) = %g\n",
+         compute_error_score(type, correspondences, 4, correspondences + 2, 4,
+                             num_correspondences, H, inlier_map));
+#endif
+  free(correspondences);
+  free(inlier_map);
+  return (num_inliers > 0);
+}
+
+// Returns number of models actually returned
+int vp9_compute_global_motion_multiple_block_based(struct VP9_COMP *cpi,
+                                                   TransformationType type,
+                                                   YV12_BUFFER_CONFIG *frm,
+                                                   YV12_BUFFER_CONFIG *ref,
+                                                   int blocksize,
+                                                   int max_models,
+                                                   double inlier_prob,
+                                                   double *H) {
+  VP9_COMMON *const cm = &cpi->common;
+  int num_correspondences = 0;
+  int *correspondences;
+  int num_inliers;
+  int num_models = 0;
+  int *inlier_map = NULL;
+
+  int i;
+  MV motionfield[4096];
+  double confidence[4096];
+  get_frame_motionfield(cpi, frm, ref, blocksize, motionfield, confidence);
+  correspondences = (int *)malloc(4 * cm->mb_rows * cm->mb_cols *
+                                  sizeof(*correspondences));
+
+  for (i = 0; i < cm->mb_rows * cm->mb_cols; i ++) {
+      int x = (i % cm->mb_cols) * blocksize + blocksize/2;
+      int y = (i / cm->mb_cols) * blocksize + blocksize/2;
+      if (confidence[i] > CONFIDENCE_THRESHOLD) {
+        correspondences[num_correspondences*4]   = x;
+        correspondences[num_correspondences*4+1] = y;
+        correspondences[num_correspondences*4+2] = motionfield[i].col + x;
+        correspondences[num_correspondences*4+3] = motionfield[i].row + y;
+        num_correspondences++;
+      }
+  }
+
+  inlier_map = (int *)malloc(num_correspondences * sizeof(*inlier_map));
   num_inliers = compute_global_motion_multiple(type, correspondences,
                                                num_correspondences, H,
                                                max_models, inlier_prob,

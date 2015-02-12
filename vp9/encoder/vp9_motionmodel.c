@@ -214,12 +214,12 @@ static void get_mb_motionfield(VP9_COMP *cpi,
   xd->plane[0].dst.stride = tmp_dst_stride;
 }
 
-static void get_frame_motionfield(VP9_COMP *cpi,
-                                           YV12_BUFFER_CONFIG *buf,
-                                           YV12_BUFFER_CONFIG *ref,
-                                           int blocksize,
-                                           MV *motionfield,
-                                           double *confidence) {
+void get_frame_motionfield(struct VP9_COMP *cpi,
+                           YV12_BUFFER_CONFIG *buf,
+                           YV12_BUFFER_CONFIG *ref,
+                           int blocksize,
+                           MV *motionfield,
+                           double *confidence) {
   MACROBLOCK *const x = &cpi->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   VP9_COMMON *const cm = &cpi->common;
