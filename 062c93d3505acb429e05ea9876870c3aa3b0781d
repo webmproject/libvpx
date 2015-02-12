@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//HBI\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 514,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-02-12T20:32:17Z",
+      "side": 1,
+      "message": "this is probably not what you want; you\u0027re casting the result of the subtraction, but the math will be done as \u0027tran_low_t\u0027;\nI\u0027m guess the cast is unnecessary here. you could reorder things to make all 3 of these variables const btw",
+      "revId": "062c93d3505acb429e05ea9876870c3aa3b0781d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
