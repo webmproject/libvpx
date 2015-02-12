@@ -1386,12 +1386,13 @@ CODEC_INTERFACE(vpx_codec_vp8_cx) =
         NULL,    /* vpx_codec_get_si_fn_t     get_si; */
         NULL,    /* vpx_codec_decode_fn_t     decode; */
         NULL,    /* vpx_codec_frame_get_fn_t  frame_get; */
+        NULL,    /* vpx_codec_set_fb_fn_t     set_fb_fn; */
     },
     {
         1,                  /* 1 cfg map */
-        vp8e_usage_cfg_map, /* vpx_codec_enc_cfg_map_t    peek_si; */
+        vp8e_usage_cfg_map, /* vpx_codec_enc_cfg_map_t    cfg_maps; */
         vp8e_encode,        /* vpx_codec_encode_fn_t      encode; */
-        vp8e_get_cxdata,    /* vpx_codec_get_cx_data_fn_t   frame_get; */
+        vp8e_get_cxdata,    /* vpx_codec_get_cx_data_fn_t   get_cx_data; */
         vp8e_set_config,
         NULL,
         vp8e_get_preview,
