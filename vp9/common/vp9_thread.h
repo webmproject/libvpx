@@ -28,7 +28,7 @@ extern "C" {
 
 #if CONFIG_MULTITHREAD
 
-#if defined(_WIN32)
+#if defined(_WIN32) && !HAVE_PTHREAD_H
 #include <errno.h>  // NOLINT
 #include <process.h>  // NOLINT
 #include <windows.h>  // NOLINT
