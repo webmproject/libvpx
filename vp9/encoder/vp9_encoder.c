@@ -50,6 +50,7 @@
 #include "vp9/encoder/vp9_temporal_filter.h"
 #include "vp9/encoder/vp9_resize.h"
 #include "vp9/encoder/vp9_svc_layercontext.h"
+#include "vp9/encoder/vp9_skin_detection.h"
 
 
 #define SHARP_FILTER_QTHRESH 0          /* Q threshold for 8-tap sharp filter */
@@ -60,11 +61,13 @@
                                          // mv. Choose a very high value for
                                          // now so that HIGH_PRECISION is always
                                          // chosen.
-
 // #define OUTPUT_YUV_REC
 
 #ifdef OUTPUT_YUV_DENOISED
 FILE *yuv_denoised_file = NULL;
+#endif
+#ifdef OUTPUT_YUV_SKINMAP
+FILE *yuv_skinmap_file = NULL;
 #endif
 #ifdef OUTPUT_YUV_REC
 FILE *yuv_rec_file;
@@ -1541,6 +1544,9 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
   yuv_denoised_file = fopen("denoised.yuv", "ab");
 #endif
 #endif
+#ifdef OUTPUT_YUV_SKINMAP
+  yuv_skinmap_file = fopen("skinmap.yuv", "ab");
+#endif
 #ifdef OUTPUT_YUV_REC
   yuv_rec_file = fopen("rec.yuv", "wb");
 #endif
@@ -1829,6 +1835,9 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
   fclose(yuv_denoised_file);
 #endif
 #endif
+#ifdef OUTPUT_YUV_SKINMAP
+  fclose(yuv_skinmap_file);
+#endif
 #ifdef OUTPUT_YUV_REC
   fclose(yuv_rec_file);
 #endif
@@ -2116,8 +2125,7 @@ int vp9_update_entropy(VP9_COMP * cpi, int update) {
   return 0;
 }
 
-#if CONFIG_VP9_TEMPORAL_DENOISING
-#if defined(OUTPUT_YUV_DENOISED)
+#if defined(OUTPUT_YUV_DENOISED) || defined(OUTPUT_YUV_SKINMAP)
 // The denoiser buffer is allocated as a YUV 440 buffer. This function writes it
 // as YUV 420. We simply use the top-left pixels of the UV buffers, since we do
 // not denoise the UV channels at this time. If ever we implement UV channel
@@ -2147,7 +2155,6 @@ void vp9_write_yuv_frame_420(YV12_BUFFER_CONFIG *s, FILE *f) {
     src += s->uv_stride;
   } while (--h);
 }
-#endif
 #endif
 
 #ifdef OUTPUT_YUV_REC
@@ -3299,7 +3306,11 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   }
 #endif
 #endif
-
+#ifdef OUTPUT_YUV_SKINMAP
+  if (cpi->common.current_video_frame > 1) {
+    vp9_compute_skin_map(cpi, yuv_skinmap_file);
+  }
+#endif
 
   // Special case code to reduce pulsing when key frames are forced at a
   // fixed interval. Note the reconstruction error if it is the frame before
