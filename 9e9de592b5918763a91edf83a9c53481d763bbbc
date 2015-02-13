@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//G7M\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 927,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-02-13T17:11:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//G7g\u003d",
+      "revId": "9e9de592b5918763a91edf83a9c53481d763bbbc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//G7c\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//G7E\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 947,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-02-13T17:11:38Z",
+      "side": 1,
+      "message": "Will modify other functions in the same way in a follow-on patch.",
+      "parentUuid": "AAAAdn//G7c\u003d",
+      "revId": "9e9de592b5918763a91edf83a9c53481d763bbbc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//G7k\u003d",
         "filename": "vpx/vp8dx.h",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2015-02-13T16:45:20Z",
       "side": 1,
       "message": "The one above is for display, and what is this one fore?",
+      "revId": "9e9de592b5918763a91edf83a9c53481d763bbbc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//G7A\u003d",
+        "filename": "vpx/vp8dx.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-02-13T17:11:38Z",
+      "side": 1,
+      "message": "Improved the documentation of the two controls.",
+      "parentUuid": "AAAAdn//G7k\u003d",
       "revId": "9e9de592b5918763a91edf83a9c53481d763bbbc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
