@@ -923,6 +923,33 @@ static vpx_codec_err_t ctrl_get_frame_corrupted(vpx_codec_alg_priv_t *ctx,
   }
 }
 
+static vpx_codec_err_t ctrl_get_frame_size(vpx_codec_alg_priv_t *ctx,
+                                           va_list args) {
+  int *const frame_size = va_arg(args, int *);
+
+  // Only support this function in serial decode.
+  if (ctx->frame_parallel_decode) {
+    set_error_detail(ctx, "Not supported in frame parallel decode");
+    return VPX_CODEC_INCAPABLE;
+  }
+
+  if (frame_size) {
+    if (ctx->frame_workers) {
+      VP9Worker *const worker = ctx->frame_workers;
+      FrameWorkerData *const frame_worker_data =
+          (FrameWorkerData *)worker->data1;
+      const VP9_COMMON *const cm = &frame_worker_data->pbi->common;
+      frame_size[0] = cm->width;
+      frame_size[1] = cm->height;
+      return VPX_CODEC_OK;
+    } else {
+      return VPX_CODEC_ERROR;
+    }
+  } else {
+    return VPX_CODEC_INVALID_PARAM;
+  }
+}
+
 static vpx_codec_err_t ctrl_get_display_size(vpx_codec_alg_priv_t *ctx,
                                              va_list args) {
   int *const display_size = va_arg(args, int *);
@@ -1027,6 +1054,7 @@ static vpx_codec_ctrl_fn_map_t decoder_ctrl_maps[] = {
   {VP9_GET_REFERENCE,             ctrl_get_reference},
   {VP9D_GET_DISPLAY_SIZE,         ctrl_get_display_size},
   {VP9D_GET_BIT_DEPTH,            ctrl_get_bit_depth},
+  {VP9D_GET_FRAME_SIZE,           ctrl_get_frame_size},
 
   { -1, NULL},
 };
