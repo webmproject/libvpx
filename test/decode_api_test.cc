@@ -80,6 +80,7 @@ void TestVp9Controls(vpx_codec_ctx_t *dec) {
     VP8D_GET_LAST_REF_UPDATES,
     VP8D_GET_FRAME_CORRUPTED,
     VP9D_GET_DISPLAY_SIZE,
+    VP9D_GET_FRAME_SIZE
   };
   int val[2];
 
