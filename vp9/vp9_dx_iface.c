@@ -891,13 +891,13 @@ static vpx_codec_err_t ctrl_get_last_ref_updates(vpx_codec_alg_priv_t *ctx,
       FrameWorkerData *const frame_worker_data =
           (FrameWorkerData *)worker->data1;
       *update_info = frame_worker_data->pbi->refresh_frame_flags;
+      return VPX_CODEC_OK;
     } else {
       return VPX_CODEC_ERROR;
     }
-    return VPX_CODEC_OK;
-  } else {
-    return VPX_CODEC_INVALID_PARAM;
   }
+
+  return VPX_CODEC_INVALID_PARAM;
 }
 
 static vpx_codec_err_t ctrl_get_frame_corrupted(vpx_codec_alg_priv_t *ctx,
@@ -914,13 +914,13 @@ static vpx_codec_err_t ctrl_get_frame_corrupted(vpx_codec_alg_priv_t *ctx,
       if (frame_worker_data->pbi->common.frame_to_show == NULL)
         return VPX_CODEC_ERROR;
       *corrupted = frame_bufs[ctx->last_show_frame].buf.corrupted;
+      return VPX_CODEC_OK;
     } else {
       return VPX_CODEC_ERROR;
     }
-    return VPX_CODEC_OK;
-  } else {
-    return VPX_CODEC_INVALID_PARAM;
   }
+
+  return VPX_CODEC_INVALID_PARAM;
 }
 
 static vpx_codec_err_t ctrl_get_frame_size(vpx_codec_alg_priv_t *ctx,
@@ -945,9 +945,9 @@ static vpx_codec_err_t ctrl_get_frame_size(vpx_codec_alg_priv_t *ctx,
     } else {
       return VPX_CODEC_ERROR;
     }
-  } else {
-    return VPX_CODEC_INVALID_PARAM;
   }
+
+  return VPX_CODEC_INVALID_PARAM;
 }
 
 static vpx_codec_err_t ctrl_get_display_size(vpx_codec_alg_priv_t *ctx,
@@ -968,13 +968,13 @@ static vpx_codec_err_t ctrl_get_display_size(vpx_codec_alg_priv_t *ctx,
       const VP9_COMMON *const cm = &frame_worker_data->pbi->common;
       display_size[0] = cm->display_width;
       display_size[1] = cm->display_height;
+      return VPX_CODEC_OK;
     } else {
       return VPX_CODEC_ERROR;
     }
-    return VPX_CODEC_OK;
-  } else {
-    return VPX_CODEC_INVALID_PARAM;
   }
+
+  return VPX_CODEC_INVALID_PARAM;
 }
 
 static vpx_codec_err_t ctrl_get_bit_depth(vpx_codec_alg_priv_t *ctx,
@@ -992,9 +992,9 @@ static vpx_codec_err_t ctrl_get_bit_depth(vpx_codec_alg_priv_t *ctx,
     } else {
       return VPX_CODEC_ERROR;
     }
-  } else {
-    return VPX_CODEC_INVALID_PARAM;
   }
+
+  return VPX_CODEC_INVALID_PARAM;
 }
 
 static vpx_codec_err_t ctrl_set_invert_tile_order(vpx_codec_alg_priv_t *ctx,
