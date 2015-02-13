@@ -390,11 +390,11 @@ static void encode_breakout_test(VP9_COMP *cpi, MACROBLOCK *x,
     const unsigned int min_thresh =
         MIN(((unsigned int)x->encode_breakout << 4), max_thresh);
 #if CONFIG_VP9_HIGHBITDEPTH
-    const int shift = 2 * xd->bd - 16;
+    const int shift = (xd->bd << 1) - 16;
 #endif
 
     // Calculate threshold according to dequant value.
-    thresh_ac = (xd->plane[0].dequant[1] * xd->plane[0].dequant[1]) / 9;
+    thresh_ac = (xd->plane[0].dequant[1] * xd->plane[0].dequant[1]) >> 3;
 #if CONFIG_VP9_HIGHBITDEPTH
     if ((xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) && shift > 0) {
       thresh_ac = ROUND_POWER_OF_TWO(thresh_ac, shift);
@@ -436,14 +436,14 @@ static void encode_breakout_test(VP9_COMP *cpi, MACROBLOCK *x,
                                     xd->plane[1].dst.stride, &sse_u);
 
     // U skipping condition checking
-    if ((var_u * 4 <= thresh_ac) && (sse_u - var_u <= thresh_dc)) {
+    if (((var_u << 2) <= thresh_ac) && (sse_u - var_u <= thresh_dc)) {
       var_v = cpi->fn_ptr[uv_size].vf(x->plane[2].src.buf,
                                       x->plane[2].src.stride,
                                       xd->plane[2].dst.buf,
                                       xd->plane[2].dst.stride, &sse_v);
 
       // V skipping condition checking
-      if ((var_v * 4 <= thresh_ac) && (sse_v - var_v <= thresh_dc)) {
+      if (((var_v << 2) <= thresh_ac) && (sse_v - var_v <= thresh_dc)) {
         x->skip = 1;
 
         // The cost of skip bit needs to be added.
