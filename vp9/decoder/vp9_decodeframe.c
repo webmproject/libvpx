@@ -934,7 +934,6 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
     winterface->sync(&pbi->lf_worker);
     vp9_loop_filter_data_reset(lf_data, get_frame_new_buffer(cm), cm,
                                pbi->mb.plane);
-    vp9_loop_filter_frame_init(cm, cm->lf.filter_level);
   }
 
   assert(tile_rows <= 4);
