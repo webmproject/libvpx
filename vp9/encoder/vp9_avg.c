@@ -28,6 +28,36 @@ unsigned int vp9_avg_4x4_c(const uint8_t *s, int p) {
   return (sum + 8) >> 4;
 }
 
+// Integer projection onto row vectors.
+void vp9_int_pro_row_c(int16_t *hbuf, uint8_t const *ref,
+                       const int ref_stride, const int height) {
+  int idx;
+  for (idx = 0; idx < 16; ++idx) {
+    int i;
+    hbuf[idx] = 0;
+    for (i = 0; i < height; ++i)
+      hbuf[idx] += ref[i * ref_stride];
+    ++ref;
+  }
+}
+
+int16_t vp9_int_pro_col_c(uint8_t const *ref, const int width) {
+  int idx;
+  int16_t sum = 0;
+  for (idx = 0; idx < width; ++idx)
+    sum += ref[idx];
+  return sum;
+}
+
+int vp9_vector_sad_c(int16_t const *ref, int16_t const *src,
+                     const int width) {
+  int i;
+  int this_sad = 0;
+  for (i = 0; i < width; ++i)
+    this_sad += abs(ref[i] - src[i]);
+  return this_sad;
+}
+
 #if CONFIG_VP9_HIGHBITDEPTH
 unsigned int vp9_highbd_avg_8x8_c(const uint8_t *s8, int p) {
   int i, j;
