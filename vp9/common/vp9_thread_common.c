@@ -153,7 +153,7 @@ static void loop_filter_rows_mt(YV12_BUFFER_CONFIG *frame,
   const int num_workers = MIN(nworkers, tile_cols);
   int i;
 
-  if (!lf_sync->sync_range || cm->last_height != cm->height ||
+  if (!lf_sync->sync_range || sb_rows != lf_sync->rows ||
       num_workers > lf_sync->num_workers) {
     vp9_loop_filter_dealloc(lf_sync);
     vp9_loop_filter_alloc(lf_sync, cm, sb_rows, cm->width, num_workers);
