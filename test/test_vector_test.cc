@@ -135,32 +135,27 @@ TEST_P(TestVectorTest, MD5Match) {
 
 // Test VP8 decode in serial mode with single thread.
 // NOTE: VP8 only support serial mode.
-INSTANTIATE_TEST_CASE_P(
-    VP8, TestVectorTest,
+VP8_INSTANTIATE_TEST_CASE(
+    TestVectorTest,
     ::testing::Combine(
-        ::testing::Values(
-            static_cast<const libvpx_test::CodecFactory *>(&libvpx_test::kVP8)),
-        ::testing::Combine(
-            ::testing::Values(0),  // Serial Mode.
-            ::testing::Values(1),  // Single thread.
-            ::testing::ValuesIn(libvpx_test::kVP8TestVectors,
-                                libvpx_test::kVP8TestVectors +
-                                    libvpx_test::kNumVP8TestVectors))));
+        ::testing::Values(0),  // Serial Mode.
+        ::testing::Values(1),  // Single thread.
+        ::testing::ValuesIn(libvpx_test::kVP8TestVectors,
+                            libvpx_test::kVP8TestVectors +
+                                libvpx_test::kNumVP8TestVectors)));
 
 // Test VP9 decode in serial mode with single thread.
-INSTANTIATE_TEST_CASE_P(
-    VP9, TestVectorTest,
+VP9_INSTANTIATE_TEST_CASE(
+    TestVectorTest,
     ::testing::Combine(
-        ::testing::Values(
-            static_cast<const libvpx_test::CodecFactory *>(&libvpx_test::kVP9)),
-        ::testing::Combine(
-            ::testing::Values(0),  // Serial Mode.
-            ::testing::Values(1),  // Single thread.
-            ::testing::ValuesIn(libvpx_test::kVP9TestVectors,
-                                libvpx_test::kVP9TestVectors +
-                                    libvpx_test::kNumVP9TestVectors))));
+        ::testing::Values(0),  // Serial Mode.
+        ::testing::Values(1),  // Single thread.
+        ::testing::ValuesIn(libvpx_test::kVP9TestVectors,
+                            libvpx_test::kVP9TestVectors +
+                                libvpx_test::kNumVP9TestVectors)));
 
 
+#if CONFIG_VP9_DECODER
 // Test VP9 decode in frame parallel mode with different number of threads.
 INSTANTIATE_TEST_CASE_P(
     VP9MultiThreadedFrameParallel, TestVectorTest,
@@ -173,4 +168,5 @@ INSTANTIATE_TEST_CASE_P(
             ::testing::ValuesIn(libvpx_test::kVP9TestVectors,
                                 libvpx_test::kVP9TestVectors +
                                     libvpx_test::kNumVP9TestVectors))));
+#endif
 }  // namespace
