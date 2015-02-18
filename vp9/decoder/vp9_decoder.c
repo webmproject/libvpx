@@ -103,11 +103,6 @@ VP9Decoder *vp9_decoder_create(BufferPool *const pool) {
   cm->free_mi = vp9_dec_free_mi;
   cm->setup_mi = vp9_dec_setup_mi;
 
-  // vp9_init_dequantizer() is first called here. Add check in
-  // frame_init_dequantizer() to avoid unnecessary calling of
-  // vp9_init_dequantizer() for every frame.
-  vp9_init_dequantizer(cm);
-
   vp9_loop_filter_init(cm);
 
   cm->error.setjmp = 0;
