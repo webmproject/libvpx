@@ -483,6 +483,7 @@ static void alloc_raw_frame_buffers(VP9_COMP *cpi) {
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate lag buffers");
 
+  // TODO(agrange) Check if ARF is enabled and skip allocation if not.
   if (vp9_realloc_frame_buffer(&cpi->alt_ref_buffer,
                                oxcf->width, oxcf->height,
                                cm->subsampling_x, cm->subsampling_y,
@@ -493,13 +494,6 @@ static void alloc_raw_frame_buffers(VP9_COMP *cpi) {
                                NULL, NULL, NULL))
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate altref buffer");
-}
-
-static void alloc_ref_frame_buffers(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
-  if (vp9_alloc_ref_frame_buffers(cm, cm->width, cm->height))
-    vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
-                       "Failed to allocate frame buffers");
 }
 
 static void alloc_util_frame_buffers(VP9_COMP *cpi) {
@@ -2483,6 +2477,21 @@ static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
   vp9_extend_frame_inner_borders(cm->frame_to_show);
 }
 
+static INLINE void alloc_frame_mvs(const VP9_COMMON *cm,
+                                   int buffer_idx) {
+  RefCntBuffer *const new_fb_ptr = &cm->buffer_pool->frame_bufs[buffer_idx];
+  if (new_fb_ptr->mvs == NULL ||
+      new_fb_ptr->mi_rows < cm->mi_rows ||
+      new_fb_ptr->mi_cols < cm->mi_cols) {
+    vpx_free(new_fb_ptr->mvs);
+    new_fb_ptr->mvs =
+      (MV_REF *)vpx_calloc(cm->mi_rows * cm->mi_cols,
+                           sizeof(*new_fb_ptr->mvs));
+    new_fb_ptr->mi_rows = cm->mi_rows;
+    new_fb_ptr->mi_cols = cm->mi_cols;
+  }
+}
+
 void vp9_scale_references(VP9_COMP *cpi) {
   VP9_COMMON *cm = &cpi->common;
   MV_REFERENCE_FRAME ref_frame;
@@ -2491,13 +2500,19 @@ void vp9_scale_references(VP9_COMP *cpi) {
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
     // Need to convert from VP9_REFFRAME to index into ref_mask (subtract 1).
     if (cpi->ref_frame_flags & ref_mask[ref_frame - 1]) {
-      const int idx = cm->ref_frame_map[get_ref_frame_idx(cpi, ref_frame)];
-       BufferPool *const pool = cm->buffer_pool;
-      const YV12_BUFFER_CONFIG *const ref = &pool->frame_bufs[idx].buf;
+      BufferPool *const pool = cm->buffer_pool;
+      const YV12_BUFFER_CONFIG *const ref = get_ref_frame_buffer(cpi,
+                                                                 ref_frame);
+
+      if (ref == NULL) {
+        cpi->scaled_ref_idx[ref_frame - 1] = INVALID_IDX;
+        continue;
+      }
 
 #if CONFIG_VP9_HIGHBITDEPTH
       if (ref->y_crop_width != cm->width || ref->y_crop_height != cm->height) {
         const int new_fb = get_free_fb(cm);
+        RefCntBuffer *const new_fb_ptr = &pool->frame_bufs[new_fb];
         cm->cur_frame = &pool->frame_bufs[new_fb];
         vp9_realloc_frame_buffer(&pool->frame_bufs[new_fb].buf,
                                  cm->width, cm->height,
@@ -2505,35 +2520,28 @@ void vp9_scale_references(VP9_COMP *cpi) {
                                  cm->use_highbitdepth,
                                  VP9_ENC_BORDER_IN_PIXELS, cm->byte_alignment,
                                  NULL, NULL, NULL);
-        scale_and_extend_frame(ref, &pool->frame_bufs[new_fb].buf,
-                               (int)cm->bit_depth);
+        scale_and_extend_frame(ref, &new_fb_ptr->buf, (int)cm->bit_depth);
 #else
       if (ref->y_crop_width != cm->width || ref->y_crop_height != cm->height) {
         const int new_fb = get_free_fb(cm);
-        vp9_realloc_frame_buffer(&pool->frame_bufs[new_fb].buf,
+        RefCntBuffer *const new_fb_ptr = &pool->frame_bufs[new_fb];
+        vp9_realloc_frame_buffer(&new_fb_ptr->buf,
                                  cm->width, cm->height,
                                  cm->subsampling_x, cm->subsampling_y,
                                  VP9_ENC_BORDER_IN_PIXELS, cm->byte_alignment,
                                  NULL, NULL, NULL);
-        scale_and_extend_frame(ref, &pool->frame_bufs[new_fb].buf);
+        scale_and_extend_frame(ref, &new_fb_ptr->buf);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
         cpi->scaled_ref_idx[ref_frame - 1] = new_fb;
-        if (pool->frame_bufs[new_fb].mvs == NULL ||
-            pool->frame_bufs[new_fb].mi_rows < cm->mi_rows ||
-            pool->frame_bufs[new_fb].mi_cols < cm->mi_cols) {
-          vpx_free(pool->frame_bufs[new_fb].mvs);
-          pool->frame_bufs[new_fb].mvs =
-            (MV_REF *)vpx_calloc(cm->mi_rows * cm->mi_cols,
-                                 sizeof(*pool->frame_bufs[new_fb].mvs));
-          pool->frame_bufs[new_fb].mi_rows = cm->mi_rows;
-          pool->frame_bufs[new_fb].mi_cols = cm->mi_cols;
-        }
+
+        alloc_frame_mvs(cm, new_fb);
       } else {
-        cpi->scaled_ref_idx[ref_frame - 1] = idx;
-        ++pool->frame_bufs[idx].ref_count;
+        const int buf_idx = get_ref_frame_buf_idx(cpi, ref_frame);
+        cpi->scaled_ref_idx[ref_frame - 1] = buf_idx;
+        ++pool->frame_bufs[buf_idx].ref_count;
       }
     } else {
-      cpi->scaled_ref_idx[ref_frame - 1] = INVALID_REF_BUFFER_IDX;
+      cpi->scaled_ref_idx[ref_frame - 1] = INVALID_IDX;
     }
   }
 }
@@ -2543,11 +2551,11 @@ static void release_scaled_references(VP9_COMP *cpi) {
   int i;
   for (i = 0; i < MAX_REF_FRAMES; ++i) {
     const int idx = cpi->scaled_ref_idx[i];
-    RefCntBuffer *const buf = idx != INVALID_REF_BUFFER_IDX ?
+    RefCntBuffer *const buf = idx != INVALID_IDX ?
         &cm->buffer_pool->frame_bufs[idx] : NULL;
     if (buf != NULL) {
       --buf->ref_count;
-      cpi->scaled_ref_idx[i] = INVALID_REF_BUFFER_IDX;
+      cpi->scaled_ref_idx[i] = INVALID_IDX;
     }
   }
 }
@@ -2751,6 +2759,8 @@ void set_frame_size(VP9_COMP *cpi) {
     vp9_set_target_rate(cpi);
   }
 
+  alloc_frame_mvs(cm, cm->new_fb_idx);
+
   // Reset the frame pointers to the current frame size.
   vp9_realloc_frame_buffer(get_frame_new_buffer(cm),
                            cm->width, cm->height,
@@ -2765,24 +2775,30 @@ void set_frame_size(VP9_COMP *cpi) {
   init_motion_estimation(cpi);
 
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
-    const int idx = cm->ref_frame_map[get_ref_frame_idx(cpi, ref_frame)];
-    YV12_BUFFER_CONFIG *const buf = &cm->buffer_pool->frame_bufs[idx].buf;
     RefBuffer *const ref_buf = &cm->frame_refs[ref_frame - 1];
-    ref_buf->buf = buf;
-    ref_buf->idx = idx;
+    const int buf_idx = get_ref_frame_buf_idx(cpi, ref_frame);
+
+    ref_buf->idx = buf_idx;
+
+    if (buf_idx != INVALID_IDX) {
+      YV12_BUFFER_CONFIG *const buf = &cm->buffer_pool->frame_bufs[buf_idx].buf;
+      ref_buf->buf = buf;
 #if CONFIG_VP9_HIGHBITDEPTH
-    vp9_setup_scale_factors_for_frame(&ref_buf->sf,
-                                      buf->y_crop_width, buf->y_crop_height,
-                                      cm->width, cm->height,
-                                      (buf->flags & YV12_FLAG_HIGHBITDEPTH) ?
-                                          1 : 0);
+      vp9_setup_scale_factors_for_frame(&ref_buf->sf,
+                                        buf->y_crop_width, buf->y_crop_height,
+                                        cm->width, cm->height,
+                                        (buf->flags & YV12_FLAG_HIGHBITDEPTH) ?
+                                            1 : 0);
 #else
-    vp9_setup_scale_factors_for_frame(&ref_buf->sf,
-                                      buf->y_crop_width, buf->y_crop_height,
-                                      cm->width, cm->height);
+      vp9_setup_scale_factors_for_frame(&ref_buf->sf,
+                                        buf->y_crop_width, buf->y_crop_height,
+                                        cm->width, cm->height);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-    if (vp9_is_scaled(&ref_buf->sf))
-      vp9_extend_frame_borders(buf);
+      if (vp9_is_scaled(&ref_buf->sf))
+        vp9_extend_frame_borders(buf);
+    } else {
+      ref_buf->buf = NULL;
+    }
   }
 
   set_ref_ptrs(cm, xd, LAST_FRAME, LAST_FRAME);
@@ -3448,6 +3464,16 @@ static void Pass2Encode(VP9_COMP *cpi, size_t *size,
     vp9_twopass_postencode_update(cpi);
 }
 
+static void init_ref_frame_bufs(VP9_COMMON *cm) {
+  int i;
+  BufferPool *const pool = cm->buffer_pool;
+  cm->new_fb_idx = INVALID_IDX;
+  for (i = 0; i < REF_FRAMES; ++i) {
+    cm->ref_frame_map[i] = INVALID_IDX;
+    pool->frame_bufs[i].ref_count = 0;
+  }
+}
+
 static void check_initial_width(VP9_COMP *cpi,
 #if CONFIG_VP9_HIGHBITDEPTH
                                 int use_highbitdepth,
@@ -3468,7 +3494,7 @@ static void check_initial_width(VP9_COMP *cpi,
 #endif
 
     alloc_raw_frame_buffers(cpi);
-    alloc_ref_frame_buffers(cpi);
+    init_ref_frame_bufs(cm);
     alloc_util_frame_buffers(cpi);
 
     init_motion_estimation(cpi);  // TODO(agrange) This can be removed.
@@ -3793,8 +3819,14 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 
   // Find a free buffer for the new frame, releasing the reference previously
   // held.
-  pool->frame_bufs[cm->new_fb_idx].ref_count--;
+  if (cm->new_fb_idx != INVALID_IDX) {
+    --pool->frame_bufs[cm->new_fb_idx].ref_count;
+  }
   cm->new_fb_idx = get_free_fb(cm);
+
+  if (cm->new_fb_idx == INVALID_IDX)
+    return -1;
+
   cm->cur_frame = &pool->frame_bufs[cm->new_fb_idx];
 
   if (!cpi->use_svc && cpi->multi_arf_allowed) {
@@ -3821,7 +3853,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
   }
 
   for (i = 0; i < MAX_REF_FRAMES; ++i)
-    cpi->scaled_ref_idx[i] = INVALID_REF_BUFFER_IDX;
+    cpi->scaled_ref_idx[i] = INVALID_IDX;
 
   if (oxcf->pass == 1 &&
       (!cpi->use_svc || is_two_pass_svc(cpi))) {
@@ -3907,8 +3939,18 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
           PSNR_STATS psnr2;
           double frame_ssim2 = 0, weight = 0;
 #if CONFIG_VP9_POSTPROC
-          // TODO(agrange) Add resizing of post-proc buffer in here when the
-          // encoder is changed to use on-demand buffer allocation.
+          if (vp9_alloc_frame_buffer(&cm->post_proc_buffer,
+                                     recon->y_crop_width, recon->y_crop_height,
+                                     cm->subsampling_x, cm->subsampling_y,
+#if CONFIG_VP9_HIGHBITDEPTH
+                                     cm->use_highbitdepth,
+#endif
+                                     VP9_ENC_BORDER_IN_PIXELS,
+                                     cm->byte_alignment) < 0) {
+            vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+                               "Failed to allocate post processing buffer");
+          }
+
           vp9_deblock(cm->frame_to_show, &cm->post_proc_buffer,
                       cm->lf.filter_level * 10 / 6);
 #endif

@@ -147,8 +147,8 @@ int vp9_raster_block_offset(BLOCK_SIZE plane_bsize,
 int16_t* vp9_raster_block_offset_int16(BLOCK_SIZE plane_bsize,
                                        int raster_block, int16_t *base);
 
-const YV12_BUFFER_CONFIG *vp9_get_scaled_ref_frame(const struct VP9_COMP *cpi,
-                                                   int ref_frame);
+YV12_BUFFER_CONFIG *vp9_get_scaled_ref_frame(const struct VP9_COMP *cpi,
+                                             int ref_frame);
 
 void vp9_init_me_luts();
 

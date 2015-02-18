@@ -376,6 +376,8 @@ void vp9_update_mbgraph_stats(VP9_COMP *cpi) {
   int i, n_frames = vp9_lookahead_depth(cpi->lookahead);
   YV12_BUFFER_CONFIG *golden_ref = get_ref_frame_buffer(cpi, GOLDEN_FRAME);
 
+  assert(golden_ref != NULL);
+
   // we need to look ahead beyond where the ARF transitions into
   // being a GF - so exit if we don't look ahead beyond that
   if (n_frames <= cpi->rc.frames_till_gf_update_due)

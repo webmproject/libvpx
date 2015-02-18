@@ -1362,7 +1362,7 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
     pbi->refresh_frame_flags = (1 << REF_FRAMES) - 1;
 
     for (i = 0; i < REFS_PER_FRAME; ++i) {
-      cm->frame_refs[i].idx = -1;
+      cm->frame_refs[i].idx = INVALID_IDX;
       cm->frame_refs[i].buf = NULL;
     }
 

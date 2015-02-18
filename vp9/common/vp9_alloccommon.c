@@ -141,68 +141,6 @@ int vp9_alloc_context_buffers(VP9_COMMON *cm, int width, int height) {
   return 1;
 }
 
-static void init_frame_bufs(VP9_COMMON *cm) {
-  BufferPool *const pool = cm->buffer_pool;
-  int i;
-
-  cm->new_fb_idx = FRAME_BUFFERS - 1;
-  pool->frame_bufs[cm->new_fb_idx].ref_count = 1;
-
-  for (i = 0; i < REF_FRAMES; ++i) {
-    cm->ref_frame_map[i] = i;
-    pool->frame_bufs[i].ref_count = 1;
-  }
-}
-
-int vp9_alloc_ref_frame_buffers(VP9_COMMON *cm, int width, int height) {
-  int i;
-  const int ss_x = cm->subsampling_x;
-  const int ss_y = cm->subsampling_y;
-
-  vp9_free_ref_frame_buffers(cm);
-
-  for (i = 0; i < FRAME_BUFFERS; ++i) {
-    BufferPool *const pool = cm->buffer_pool;
-    pool->frame_bufs[i].ref_count = 0;
-    if (vp9_alloc_frame_buffer(&pool->frame_bufs[i].buf, width, height,
-                               ss_x, ss_y,
-#if CONFIG_VP9_HIGHBITDEPTH
-                               cm->use_highbitdepth,
-#endif
-                               VP9_ENC_BORDER_IN_PIXELS,
-                               cm->byte_alignment) < 0)
-      goto fail;
-    if (pool->frame_bufs[i].mvs == NULL) {
-      pool->frame_bufs[i].mvs =
-          (MV_REF *)vpx_calloc(cm->mi_rows * cm->mi_cols,
-                               sizeof(*pool->frame_bufs[i].mvs));
-      if (pool->frame_bufs[i].mvs == NULL)
-        goto fail;
-
-      pool->frame_bufs[i].mi_rows = cm->mi_rows;
-      pool->frame_bufs[i].mi_cols = cm->mi_cols;
-    }
-  }
-
-  init_frame_bufs(cm);
-
-#if CONFIG_VP9_POSTPROC
-  if (vp9_alloc_frame_buffer(&cm->post_proc_buffer, width, height, ss_x, ss_y,
-#if CONFIG_VP9_HIGHBITDEPTH
-                             cm->use_highbitdepth,
-#endif
-                             VP9_ENC_BORDER_IN_PIXELS,
-                             cm->byte_alignment) < 0)
-    goto fail;
-#endif
-
-  return 0;
-
- fail:
-  vp9_free_ref_frame_buffers(cm);
-  return 1;
-}
-
 void vp9_remove_common(VP9_COMMON *cm) {
   vp9_free_ref_frame_buffers(cm);
   vp9_free_context_buffers(cm);

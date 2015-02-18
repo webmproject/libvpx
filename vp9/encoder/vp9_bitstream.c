@@ -989,8 +989,6 @@ static void write_frame_size_with_refs(VP9_COMP *cpi,
   MV_REFERENCE_FRAME ref_frame;
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
     YV12_BUFFER_CONFIG *cfg = get_ref_frame_buffer(cpi, ref_frame);
-    found = cm->width == cfg->y_crop_width &&
-            cm->height == cfg->y_crop_height;
 
     // Set "found" to 0 for temporal svc and for spatial svc key frame
     if (cpi->use_svc &&
@@ -1003,6 +1001,9 @@ static void write_frame_size_with_refs(VP9_COMP *cpi,
          cpi->svc.layer_context[0].frames_from_key_frame <
          cpi->svc.number_temporal_layers + 1))) {
       found = 0;
+    } else if (cfg != NULL) {
+      found = cm->width == cfg->y_crop_width &&
+              cm->height == cfg->y_crop_height;
     }
     vp9_wb_write_bit(wb, found);
     if (found) {
@@ -1114,7 +1115,8 @@ static void write_uncompressed_header(VP9_COMP *cpi,
       MV_REFERENCE_FRAME ref_frame;
       vp9_wb_write_literal(wb, get_refresh_mask(cpi), REF_FRAMES);
       for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
-        vp9_wb_write_literal(wb, get_ref_frame_idx(cpi, ref_frame),
+        assert(get_ref_frame_map_idx(cpi, ref_frame) != INVALID_IDX);
+        vp9_wb_write_literal(wb, get_ref_frame_map_idx(cpi, ref_frame),
                              REF_FRAMES_LOG2);
         vp9_wb_write_bit(wb, cm->ref_frame_sign_bias[ref_frame]);
       }
