@@ -216,6 +216,8 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
   int64_t dist;
   struct macroblock_plane *const p = &x->plane[0];
   struct macroblockd_plane *const pd = &xd->plane[0];
+  const int64_t dc_thr = p->quant_thred[0] >> 6;
+  const int64_t ac_thr = p->quant_thred[1] >> 6;
   const uint32_t dc_quant = pd->dequant[0];
   const uint32_t ac_quant = pd->dequant[1];
   unsigned int var = cpi->fn_ptr[bsize].vf(p->src.buf, p->src.stride,
@@ -223,12 +225,14 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
   *var_y = var;
   *sse_y = sse;
 
-  if (sse < dc_quant * dc_quant >> 6)
-    x->skip_txfm[0] = 1;
-  else if (var < ac_quant * ac_quant >> 6)
+  x->skip_txfm[0] = 0;
+  // Check if all ac coefficients can be quantized to zero.
+  if (var < ac_thr || var == 0) {
     x->skip_txfm[0] = 2;
-  else
-    x->skip_txfm[0] = 0;
+    // Check if dc coefficient can be quantized to zero.
+    if (sse - var < dc_thr || sse == var)
+      x->skip_txfm[0] = 1;
+  }
 
   if (cpi->common.tx_mode == TX_MODE_SELECT) {
     if (sse > (var << 2))
