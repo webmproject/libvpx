@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//GnE\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3126,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2015-02-19T20:57:34Z",
+      "side": 1,
+      "message": "if best_rdc.rate \u003d\u003d INT_MAX || best_rdc.dist \u003d\u003d INT64_MAX, then assert(tp_orig \u003c *tp) won\u0027t be true, right?",
+      "revId": "83559e7357e1b2bb2cf55f4e8eb5d0f49dbccab6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
