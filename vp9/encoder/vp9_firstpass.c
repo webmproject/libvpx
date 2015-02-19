@@ -110,9 +110,9 @@ static void output_stats(FIRSTPASS_STATS *stats,
     FILE *fpfile;
     fpfile = fopen("firstpass.stt", "a");
 
-    fprintf(fpfile, "%12.0f %12.4f %12.0f %12.0f %12.0f %12.4f %12.4f"
-            "%12.4f %12.4f %12.4f %12.4f %12.4f %12.4f %12.4f"
-            "%12.0f %12.0f %12.4f %12.0f %12.0f %12.4f\n",
+    fprintf(fpfile, "%12.0lf %12.4lf %12.0lf %12.0lf %12.0lf %12.4lf %12.4lf"
+            "%12.4lf %12.4lf %12.4lf %12.4lf %12.4lf %12.4lf %12.4lf"
+            "%12.4lf %12.0lf %12.0lf %12.0lf %12.4lf\n",
             stats->frame,
             stats->weight,
             stats->intra_error,
