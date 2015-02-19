@@ -3129,7 +3129,7 @@ static void nonrd_pick_partition(VP9_COMP *cpi, ThreadData *td,
                  bsize, pc_tree);
   }
 
-  if (bsize == BLOCK_64X64) {
+  if (bsize == BLOCK_64X64 && do_recon) {
     assert(tp_orig < *tp);
     assert(best_rdc.rate < INT_MAX);
     assert(best_rdc.dist < INT64_MAX);
