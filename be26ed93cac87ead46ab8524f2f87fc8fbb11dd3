@@ -19,6 +19,40 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//GrM\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 567,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2015-02-19T16:44:55Z",
+      "side": 1,
+      "message": "why not subpixel? seems easy enough to try?",
+      "revId": "be26ed93cac87ead46ab8524f2f87fc8fbb11dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//GrI\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 584,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2015-02-19T16:44:55Z",
+      "side": 1,
+      "message": "uint_t const *  you shouldn\u0027t edit the data of either of these.",
+      "revId": "be26ed93cac87ead46ab8524f2f87fc8fbb11dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Grc\u003d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 5
@@ -30,6 +64,57 @@
       "writtenOn": "2015-02-19T15:11:25Z",
       "side": 1,
       "message": "I assume that the 128 width and height is the 64 blcok itself +/- 32 in either direction ?",
+      "revId": "be26ed93cac87ead46ab8524f2f87fc8fbb11dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//GrA\u003d",
+        "filename": "vp9/encoder/x86/vp9_avg_intrin_sse2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2015-02-19T16:44:55Z",
+      "side": 1,
+      "message": "const",
+      "revId": "be26ed93cac87ead46ab8524f2f87fc8fbb11dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Gq4\u003d",
+        "filename": "vp9/encoder/x86/vp9_avg_intrin_sse2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2015-02-19T16:44:55Z",
+      "side": 1,
+      "message": "const",
+      "revId": "be26ed93cac87ead46ab8524f2f87fc8fbb11dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Gq8\u003d",
+        "filename": "vp9/encoder/x86/vp9_avg_intrin_sse2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2015-02-19T16:44:55Z",
+      "side": 1,
+      "message": "used?",
       "revId": "be26ed93cac87ead46ab8524f2f87fc8fbb11dd3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
