@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//GnU\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 728,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2015-02-19T20:48:15Z",
+      "side": 1,
+      "message": "I would suggest adding a flag at the frame level to indicate if palette coding is to be used at all. That way you will save bits here for every block if palette coding is not used at all.\nMy guess is that the slight drop for non-screen content videos will disappear if you add that. There are many other instances in the bit-stream where frame level flags are used to enable/disable features completely.",
+      "revId": "43571875c6c189d58cca51c24c3b13c0662ee541",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
