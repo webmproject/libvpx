@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//GqI\u003d",
+        "filename": "vp9/encoder/vp9_avg.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-02-19T17:40:30Z",
+      "side": 1,
+      "message": "This function projects a block of 16 x height (\u003d64) pixels onto row vectors of size 16 x (16-bit).\n\nFixed the confusing comment.",
+      "parentUuid": "AAAAdn//Grg\u003d",
+      "revId": "be26ed93cac87ead46ab8524f2f87fc8fbb11dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//GrM\u003d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2015-02-19T16:44:55Z",
       "side": 1,
       "message": "why not subpixel? seems easy enough to try?",
+      "revId": "be26ed93cac87ead46ab8524f2f87fc8fbb11dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//GqE\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 567,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-02-19T17:40:30Z",
+      "side": 1,
+      "message": "will try this in later experiments.",
+      "parentUuid": "AAAAdn//GrM\u003d",
       "revId": "be26ed93cac87ead46ab8524f2f87fc8fbb11dd3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//GqA\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 584,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-02-19T17:40:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//GrI\u003d",
+      "revId": "be26ed93cac87ead46ab8524f2f87fc8fbb11dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Grc\u003d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 5
@@ -64,6 +118,24 @@
       "writtenOn": "2015-02-19T15:11:25Z",
       "side": 1,
       "message": "I assume that the 128 width and height is the 64 blcok itself +/- 32 in either direction ?",
+      "revId": "be26ed93cac87ead46ab8524f2f87fc8fbb11dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Gp8\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 589,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-02-19T17:40:30Z",
+      "side": 1,
+      "message": "Yes, that\u0027s correct.",
+      "parentUuid": "AAAAdn//Grc\u003d",
       "revId": "be26ed93cac87ead46ab8524f2f87fc8fbb11dd3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Gpw\u003d",
+        "filename": "vp9/encoder/x86/vp9_avg_intrin_sse2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-02-19T17:40:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//GrA\u003d",
+      "revId": "be26ed93cac87ead46ab8524f2f87fc8fbb11dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Gq4\u003d",
         "filename": "vp9/encoder/x86/vp9_avg_intrin_sse2.c",
         "patchSetId": 5
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Gp4\u003d",
+        "filename": "vp9/encoder/x86/vp9_avg_intrin_sse2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-02-19T17:40:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Gq4\u003d",
+      "revId": "be26ed93cac87ead46ab8524f2f87fc8fbb11dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Gq8\u003d",
         "filename": "vp9/encoder/x86/vp9_avg_intrin_sse2.c",
         "patchSetId": 5
@@ -115,6 +223,24 @@
       "writtenOn": "2015-02-19T16:44:55Z",
       "side": 1,
       "message": "used?",
+      "revId": "be26ed93cac87ead46ab8524f2f87fc8fbb11dd3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Gp0\u003d",
+        "filename": "vp9/encoder/x86/vp9_avg_intrin_sse2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-02-19T17:40:30Z",
+      "side": 1,
+      "message": "This function is used in motion_estimation() to compare vectors.",
+      "parentUuid": "AAAAdn//Gq8\u003d",
       "revId": "be26ed93cac87ead46ab8524f2f87fc8fbb11dd3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
