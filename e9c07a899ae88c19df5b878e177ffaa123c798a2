@@ -104,6 +104,24 @@
       "revId": "e9c07a899ae88c19df5b878e177ffaa123c798a2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//GmM\u003d",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 639,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-02-19T22:04:19Z",
+      "side": 1,
+      "message": "this is the same operation though so turning it into return read_bit ? read_signed : 0; should be fine. in most cases it will likely be inlined",
+      "parentUuid": "AAAAdn//Gng\u003d",
+      "revId": "e9c07a899ae88c19df5b878e177ffaa123c798a2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
