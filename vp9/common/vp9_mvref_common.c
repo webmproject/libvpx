@@ -23,7 +23,7 @@ static void find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
   const MODE_INFO *prev_mi = !cm->error_resilient_mode && cm->prev_mi
         ? cm->prev_mi[mi_row * xd->mi_stride + mi_col].src_mi
         : NULL;
-  const MB_MODE_INFO *const prev_mbmi = prev_mi ? &prev_mi->src_mi->mbmi : NULL;
+  const MB_MODE_INFO *const prev_mbmi = prev_mi ? &prev_mi->mbmi : NULL;
   const POSITION *const mv_ref_search = mv_ref_blocks[mi->mbmi.sb_type];
   int different_ref_found = 0;
   int context_counter = 0;
