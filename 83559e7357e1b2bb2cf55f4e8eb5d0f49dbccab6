@@ -16,6 +16,24 @@
       "revId": "83559e7357e1b2bb2cf55f4e8eb5d0f49dbccab6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Gmc\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3126,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-02-19T21:59:31Z",
+      "side": 1,
+      "message": "When bsize \u003d\u003d BLOCK64X64, best_rdc should be always less then max value, since it needs to pick a partition/coding mode.",
+      "parentUuid": "AAAAdn//GnE\u003d",
+      "revId": "83559e7357e1b2bb2cf55f4e8eb5d0f49dbccab6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
