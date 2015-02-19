@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//GqU\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2015-02-19T17:25:35Z",
+      "side": 1,
+      "message": "probably don\u0027t need var \u003d\u003d 0",
+      "revId": "25e5c45bc792ca87fb07682924ca60768ce2c4ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//GqQ\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2015-02-19T17:25:35Z",
+      "side": 1,
+      "message": "probably don\u0027t need sse \u003d\u003d var",
+      "revId": "25e5c45bc792ca87fb07682924ca60768ce2c4ab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
