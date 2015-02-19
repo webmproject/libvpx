@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Gqc\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1227,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2015-02-19T17:11:52Z",
+      "side": 1,
+      "message": "Do we need to duplicate. Isn\u0027t the else clause identical to the no high bit depth case.Having it duplicated increases risk of things getting out of step if there is a change.",
+      "revId": "d414e89da4d0fcb9e598d6d667e22664c7f9bceb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
