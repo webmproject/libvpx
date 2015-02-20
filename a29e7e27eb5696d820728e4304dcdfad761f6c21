@@ -16,6 +16,24 @@
       "revId": "a29e7e27eb5696d820728e4304dcdfad761f6c21",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//GiI\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1240,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-02-20T16:37:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//GjU\u003d",
+      "revId": "a29e7e27eb5696d820728e4304dcdfad761f6c21",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
