@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//GgQ\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 715,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-02-20T19:01:33Z",
+      "side": 1,
+      "message": "there\u0027s some unfortunate duplication; try leaving the param and check the value using an immediate in each branch. I\u0027d expect in most cases given the call sites the branch would be removed when inlined",
+      "revId": "3db6a8c467136821d2661b1fbe06b6dbdb7b5816",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
