@@ -712,9 +712,7 @@ static INLINE void load_buffer_8x8(const int16_t *input, __m128i *in,
 }
 
 // right shift and rounding
-static INLINE void right_shift_8x8(__m128i *res, int const bit) {
-  const __m128i kOne = _mm_set1_epi16(1);
-  const int bit_m02 = bit - 2;
+static INLINE void right_shift_8x8(__m128i *res, const int bit) {
   __m128i sign0 = _mm_srai_epi16(res[0], 15);
   __m128i sign1 = _mm_srai_epi16(res[1], 15);
   __m128i sign2 = _mm_srai_epi16(res[2], 15);
@@ -724,16 +722,16 @@ static INLINE void right_shift_8x8(__m128i *res, int const bit) {
   __m128i sign6 = _mm_srai_epi16(res[6], 15);
   __m128i sign7 = _mm_srai_epi16(res[7], 15);
 
-  if (bit_m02 >= 0) {
-    __m128i k_const_rounding = _mm_slli_epi16(kOne, bit_m02);
-    res[0] = _mm_add_epi16(res[0], k_const_rounding);
-    res[1] = _mm_add_epi16(res[1], k_const_rounding);
-    res[2] = _mm_add_epi16(res[2], k_const_rounding);
-    res[3] = _mm_add_epi16(res[3], k_const_rounding);
-    res[4] = _mm_add_epi16(res[4], k_const_rounding);
-    res[5] = _mm_add_epi16(res[5], k_const_rounding);
-    res[6] = _mm_add_epi16(res[6], k_const_rounding);
-    res[7] = _mm_add_epi16(res[7], k_const_rounding);
+  if (bit == 2) {
+    const __m128i const_rounding = _mm_set1_epi16(1);
+    res[0] = _mm_add_epi16(res[0], const_rounding);
+    res[1] = _mm_add_epi16(res[1], const_rounding);
+    res[2] = _mm_add_epi16(res[2], const_rounding);
+    res[3] = _mm_add_epi16(res[3], const_rounding);
+    res[4] = _mm_add_epi16(res[4], const_rounding);
+    res[5] = _mm_add_epi16(res[5], const_rounding);
+    res[6] = _mm_add_epi16(res[6], const_rounding);
+    res[7] = _mm_add_epi16(res[7], const_rounding);
   }
 
   res[0] = _mm_sub_epi16(res[0], sign0);
@@ -745,14 +743,25 @@ static INLINE void right_shift_8x8(__m128i *res, int const bit) {
   res[6] = _mm_sub_epi16(res[6], sign6);
   res[7] = _mm_sub_epi16(res[7], sign7);
 
-  res[0] = _mm_srai_epi16(res[0], bit);
-  res[1] = _mm_srai_epi16(res[1], bit);
-  res[2] = _mm_srai_epi16(res[2], bit);
-  res[3] = _mm_srai_epi16(res[3], bit);
-  res[4] = _mm_srai_epi16(res[4], bit);
-  res[5] = _mm_srai_epi16(res[5], bit);
-  res[6] = _mm_srai_epi16(res[6], bit);
-  res[7] = _mm_srai_epi16(res[7], bit);
+  if (bit == 1) {
+    res[0] = _mm_srai_epi16(res[0], 1);
+    res[1] = _mm_srai_epi16(res[1], 1);
+    res[2] = _mm_srai_epi16(res[2], 1);
+    res[3] = _mm_srai_epi16(res[3], 1);
+    res[4] = _mm_srai_epi16(res[4], 1);
+    res[5] = _mm_srai_epi16(res[5], 1);
+    res[6] = _mm_srai_epi16(res[6], 1);
+    res[7] = _mm_srai_epi16(res[7], 1);
+  } else {
+    res[0] = _mm_srai_epi16(res[0], 2);
+    res[1] = _mm_srai_epi16(res[1], 2);
+    res[2] = _mm_srai_epi16(res[2], 2);
+    res[3] = _mm_srai_epi16(res[3], 2);
+    res[4] = _mm_srai_epi16(res[4], 2);
+    res[5] = _mm_srai_epi16(res[5], 2);
+    res[6] = _mm_srai_epi16(res[6], 2);
+    res[7] = _mm_srai_epi16(res[7], 2);
+  }
 }
 
 // write 8x8 array
