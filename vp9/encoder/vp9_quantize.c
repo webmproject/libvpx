@@ -591,7 +591,7 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
       quants->y_round_fp[q][i] = (qrounding_factor_fp * quant) >> 7;
       quants->y_zbin[q][i] = ROUND_POWER_OF_TWO(qzbin_factor * quant, 7);
       quants->y_round[q][i] = (qrounding_factor * quant) >> 7;
-      cm->y_dequant[q][i] = quant;
+      cpi->y_dequant[q][i] = quant;
 
       // uv
       quant = i == 0 ? vp9_dc_quant(q, cm->uv_dc_delta_q, cm->bit_depth)
@@ -602,7 +602,7 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
       quants->uv_round_fp[q][i] = (qrounding_factor_fp * quant) >> 7;
       quants->uv_zbin[q][i] = ROUND_POWER_OF_TWO(qzbin_factor * quant, 7);
       quants->uv_round[q][i] = (qrounding_factor * quant) >> 7;
-      cm->uv_dequant[q][i] = quant;
+      cpi->uv_dequant[q][i] = quant;
     }
 
     for (i = 2; i < 8; i++) {
@@ -612,7 +612,7 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
       quants->y_quant_shift[q][i] = quants->y_quant_shift[q][1];
       quants->y_zbin[q][i] = quants->y_zbin[q][1];
       quants->y_round[q][i] = quants->y_round[q][1];
-      cm->y_dequant[q][i] = cm->y_dequant[q][1];
+      cpi->y_dequant[q][i] = cpi->y_dequant[q][1];
 
       quants->uv_quant[q][i] = quants->uv_quant[q][1];
       quants->uv_quant_fp[q][i] = quants->uv_quant_fp[q][1];
@@ -620,7 +620,7 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
       quants->uv_quant_shift[q][i] = quants->uv_quant_shift[q][1];
       quants->uv_zbin[q][i] = quants->uv_zbin[q][1];
       quants->uv_round[q][i] = quants->uv_round[q][1];
-      cm->uv_dequant[q][i] = cm->uv_dequant[q][1];
+      cpi->uv_dequant[q][i] = cpi->uv_dequant[q][1];
     }
   }
 }
@@ -641,7 +641,7 @@ void vp9_init_plane_quantizers(VP9_COMP *cpi, MACROBLOCK *x) {
   x->plane[0].quant_shift = quants->y_quant_shift[qindex];
   x->plane[0].zbin = quants->y_zbin[qindex];
   x->plane[0].round = quants->y_round[qindex];
-  xd->plane[0].dequant = cm->y_dequant[qindex];
+  xd->plane[0].dequant = cpi->y_dequant[qindex];
 
   x->plane[0].quant_thred[0] = x->plane[0].zbin[0] * x->plane[0].zbin[0];
   x->plane[0].quant_thred[1] = x->plane[0].zbin[1] * x->plane[0].zbin[1];
@@ -654,7 +654,7 @@ void vp9_init_plane_quantizers(VP9_COMP *cpi, MACROBLOCK *x) {
     x->plane[i].quant_shift = quants->uv_quant_shift[qindex];
     x->plane[i].zbin = quants->uv_zbin[qindex];
     x->plane[i].round = quants->uv_round[qindex];
-    xd->plane[i].dequant = cm->uv_dequant[qindex];
+    xd->plane[i].dequant = cpi->uv_dequant[qindex];
 
     x->plane[i].quant_thred[0] = x->plane[i].zbin[0] * x->plane[i].zbin[0];
     x->plane[i].quant_thred[1] = x->plane[i].zbin[1] * x->plane[i].zbin[1];
