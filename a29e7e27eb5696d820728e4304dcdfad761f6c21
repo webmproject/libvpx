@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//GjU\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1240,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2015-02-20T11:34:24Z",
+      "side": 1,
+      "message": "This still looks wrong. do we really want to always call vp9_build_inter_predictor(..) even if it is highbd? This has different functionality to what you had before.\n\nPerhaps\n#if CONFIG_VP9_HIGHBITDEPTH\n  if(xd-\u003ecur_buf-\u003eflags \u0026 YV12_FLAG_HIGHBITDEPTH) {\n    vp9_highbd_build_inter_predictor(..)\n  } else {\n#endif\n  vp9_build_inter_predictor(..)\n#if CONFIG_VP9_HIGHBITDEPTH\n}\n#endif",
+      "revId": "a29e7e27eb5696d820728e4304dcdfad761f6c21",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
