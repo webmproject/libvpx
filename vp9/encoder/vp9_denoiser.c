@@ -45,7 +45,7 @@ static int delta_thresh(BLOCK_SIZE bs, int increase_denoising) {
 static int noise_motion_thresh(BLOCK_SIZE bs, int increase_denoising) {
   (void)bs;
   (void)increase_denoising;
-  return 25 * 25;
+  return 625;
 }
 
 static unsigned int sse_thresh(BLOCK_SIZE bs, int increase_denoising) {
@@ -53,8 +53,8 @@ static unsigned int sse_thresh(BLOCK_SIZE bs, int increase_denoising) {
 }
 
 static int sse_diff_thresh(BLOCK_SIZE bs, int increase_denoising,
-                           int mv_row, int mv_col) {
-  if (mv_row * mv_row + mv_col * mv_col >
+                           int motion_magnitude) {
+  if (motion_magnitude >
       noise_motion_thresh(bs, increase_denoising)) {
     return 0;
   } else {
@@ -219,7 +219,7 @@ static VP9_DENOISER_DECISION perform_motion_compensation(VP9_DENOISER *denoiser,
   // If the best reference frame uses inter-prediction and there is enough of a
   // difference in sum-squared-error, use it.
   if (frame != INTRA_FRAME &&
-      sse_diff > sse_diff_thresh(bs, increase_denoising, mv_row, mv_col)) {
+      sse_diff > sse_diff_thresh(bs, increase_denoising, *motion_magnitude)) {
     mbmi->ref_frame[0] = ctx->best_reference_frame;
     mbmi->mode = ctx->best_sse_inter_mode;
     mbmi->mv[0] = ctx->best_sse_mv;
@@ -241,8 +241,8 @@ static VP9_DENOISER_DECISION perform_motion_compensation(VP9_DENOISER *denoiser,
     *mbmi = saved_mbmi;
     return COPY_BLOCK;
   }
-  if (mv_row * mv_row + mv_col * mv_col >
-      8 * noise_motion_thresh(bs, increase_denoising)) {
+  if (*motion_magnitude >
+     (noise_motion_thresh(bs, increase_denoising) << 3)) {
     // Restore everything to its original state
     *mbmi = saved_mbmi;
     return COPY_BLOCK;
