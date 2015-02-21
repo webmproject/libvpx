@@ -1068,8 +1068,7 @@ static int parse_stream_params(struct VpxEncoderConfig *global,
       continue;
     }
 
-    if (0) {
-    } else if (arg_match(&arg, &outputfile, argi)) {
+    if (arg_match(&arg, &outputfile, argi)) {
       config->out_fn = arg.val;
     } else if (arg_match(&arg, &fpf_name, argi)) {
       config->stats_fn = arg.val;
