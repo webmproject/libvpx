@@ -783,7 +783,9 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   }
 
 #if CONFIG_PALETTE
-  pd[0].color_index_map = ctx->color_index_map;
+  for (i = 0; i < 2; i++) {
+    pd[i].color_index_map = ctx->color_index_map[i];
+  }
 #endif
 
   // Restore the coding context of the MB to that that was in place
@@ -1285,7 +1287,9 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
     p[i].eobs = ctx->eobs_pbuf[i][0];
   }
 #if CONFIG_PALETTE
-  pd[0].color_index_map = ctx->color_index_map;
+  for (i = 0; i < 2; ++i) {
+    pd[i].color_index_map = ctx->color_index_map[i];
+  }
 #endif
   ctx->is_coded = 0;
   ctx->skippable = 0;
@@ -4964,14 +4968,14 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
     mi);
     vp9_tokenize_sb(cpi, t, !output_enabled, MAX(bsize, BLOCK_8X8));
 #if CONFIG_PALETTE
-    if (mbmi->palette_enabled && output_enabled) {
+    if (mbmi->palette_enabled[0] && output_enabled) {
       palette_color_insertion(cm->current_palette_colors,
                               &cm ->current_palette_size,
                               cm->current_palette_count, mbmi);
     }
     if (frame_is_intra_only(cm) && output_enabled && bsize >= BLOCK_8X8) {
       cm->block_counter++;
-      if (mbmi->palette_enabled)
+      if (mbmi->palette_enabled[0])
         cm->palette_counter++;
     }
 #endif

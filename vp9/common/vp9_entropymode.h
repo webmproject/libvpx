@@ -69,6 +69,8 @@ typedef struct frame_contexts {
 #if CONFIG_PALETTE
   vp9_prob palette_size_prob[10][PALETTE_SIZES - 1];
   vp9_prob palette_run_length_prob[10][PALETTE_RUN_LENGTHS - 1];
+  vp9_prob palette_uv_size_prob[10][PALETTE_SIZES - 1];
+  vp9_prob palette_uv_run_length_prob[10][PALETTE_RUN_LENGTHS - 1];
 #endif  // CONFIG_PALETTE
 #if CONFIG_SUPERTX
   vp9_prob supertx_prob[PARTITION_SUPERTX_CONTEXTS][TX_SIZES];

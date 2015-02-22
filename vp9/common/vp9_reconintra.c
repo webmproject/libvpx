@@ -1382,11 +1382,18 @@ void vp9_predict_intra_block(const MACROBLOCKD *xd, int block_idx, int bwl_in,
   if (!filterflag) {
 #endif  // CONFIG_FILTERINTRA
 #if CONFIG_PALETTE
-    if (xd->mi[0].src_mi->mbmi.palette_enabled && !plane) {
-      uint8_t *palette = xd->mi[0].src_mi->mbmi.palette_colors;
+    if (xd->mi[0].src_mi->mbmi.palette_enabled[plane !=0 ]) {
+      uint8_t *palette = xd->mi[0].src_mi->mbmi.palette_colors +
+          plane * PALETTE_MAX_SIZE;
       int bs = 4 * (1 << tx_size);
-      uint8_t *map = xd->plane[0].color_index_map;
-      int r, c, stride = 4 * (1 << bwl_in);
+      int stride = 4 * (1 << bwl_in);
+      int r, c;
+      uint8_t *map = NULL;
+
+      if (xd->plane[1].subsampling_x && xd->plane[1].subsampling_y)
+        map = xd->plane[plane != 0].color_index_map;
+      else if (!xd->plane[1].subsampling_x && !xd->plane[1].subsampling_y)
+        map = xd->plane[0].color_index_map;
 
       for (r = 0; r < bs; r++) {
         for (c = 0; c < bs; c++) {

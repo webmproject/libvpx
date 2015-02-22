@@ -31,7 +31,7 @@ typedef struct {
   tran_low_t *dqcoeff_pbuf[MAX_MB_PLANE][3];
   uint16_t *eobs_pbuf[MAX_MB_PLANE][3];
 #if CONFIG_PALETTE
-  uint8_t *color_index_map;
+  uint8_t *color_index_map[2];
   uint8_t palette_colors_buf[PALETTE_BUF_SIZE];
   int palette_buf_size;
   int palette_count_buf[PALETTE_BUF_SIZE];

@@ -44,8 +44,11 @@ static void alloc_mode_context(VP9_COMMON *cm, int num_4x4_blk,
     }
   }
 #if CONFIG_PALETTE
-  CHECK_MEM_ERROR(cm, ctx->color_index_map,
-                  vpx_memalign(16, num_pix * sizeof(ctx->color_index_map[0])));
+  for (i = 0; i < 2; i++) {
+    CHECK_MEM_ERROR(cm, ctx->color_index_map[i],
+                    vpx_memalign(16, num_pix *
+                                 sizeof(ctx->color_index_map[i][0])));
+  }
 #endif
 }
 
@@ -67,8 +70,10 @@ static void free_mode_context(PICK_MODE_CONTEXT *ctx) {
   }
 
 #if CONFIG_PALETTE
-  vpx_free(ctx->color_index_map);
-  ctx->color_index_map = 0;
+  for (i = 0; i < 2; i++) {
+    vpx_free(ctx->color_index_map[i]);
+    ctx->color_index_map[i] = 0;
+  }
 #endif
 }
 

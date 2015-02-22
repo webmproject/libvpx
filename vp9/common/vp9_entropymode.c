@@ -409,6 +409,33 @@ default_palette_run_length_prob[10][PALETTE_RUN_LENGTHS - 1] = {
     {  30,  12,  14,  18,  75,  75},
     {  72,  34,  32,  42,  42, 108},
 };
+
+static const vp9_prob default_palette_uv_size_prob[10][PALETTE_SIZES - 1] = {
+    { 180, 192, 207, 221,  55, 254},
+    { 128, 185, 235, 148, 180, 128},
+    { 128, 185, 235, 148, 180, 128},
+    { 150, 180, 211,  77, 147, 179},
+    { 128,  60, 195,  68, 120, 228},
+    { 128,  60, 195,  68, 120, 228},
+    { 228,  15,  17, 178,  47, 197},
+    { 103, 210, 145, 250, 190, 128},
+    { 103, 210, 145, 250, 190, 128},
+    {   5,  76, 230, 148, 239, 254},
+};
+
+static const vp9_prob
+default_palette_uv_run_length_prob[10][PALETTE_RUN_LENGTHS - 1] = {
+    {  81, 107, 112, 254, 128, 128},
+    { 120, 108, 130, 105, 250, 128},
+    { 120, 108, 130, 105, 250, 128},
+    { 107, 107, 143,  80,  60, 254},
+    { 110,  65,  80, 120,  50,  42},
+    { 110,  65,  80, 120,  50,  42},
+    {  95,   5,  15, 127,  15,  56},
+    {   5,   5,   5,  70,  75,  18},
+    {   5,   5,   5,  70,  75,  18},
+    {   5,   5,   5,   5, 157,   5},
+};
 #endif  // CONFIG_PALETTE
 
 #if CONFIG_SUPERTX
@@ -544,6 +571,8 @@ void vp9_init_mode_probs(FRAME_CONTEXT *fc) {
 #if CONFIG_PALETTE
   vp9_copy(fc->palette_size_prob, default_palette_size_prob);
   vp9_copy(fc->palette_run_length_prob, default_palette_run_length_prob);
+  vp9_copy(fc->palette_uv_size_prob, default_palette_uv_size_prob);
+  vp9_copy(fc->palette_uv_run_length_prob, default_palette_uv_run_length_prob);
 #endif  // CONFIG_PALETTE
 #if CONFIG_SUPERTX
   vp9_copy(fc->supertx_prob, default_supertx_prob);

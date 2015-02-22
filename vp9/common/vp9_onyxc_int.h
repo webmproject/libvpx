@@ -260,7 +260,9 @@ static INLINE void init_macroblockd(VP9_COMMON *cm, MACROBLOCKD *xd) {
   }
 
 #if CONFIG_PALETTE
-  xd->plane[0].color_index_map = xd->color_index_map;
+  for (i = 0; i < 2; ++i) {
+    xd->plane[i].color_index_map = xd->color_index_map[i];
+  }
 #endif
 
   xd->above_seg_context = cm->above_seg_context;

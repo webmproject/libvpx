@@ -107,7 +107,7 @@ void transpose_block(uint8_t *seq_in, uint8_t *seq_out, int rows, int cols) {
 void palette_color_insertion(uint8_t *old_colors, int *m, int *count,
                              MB_MODE_INFO *mbmi) {
   int k = *m, n = mbmi->palette_literal_size;
-  int i, j, l, idx, min_idx = -1;
+  int i, j, l, min_idx = -1;
   uint8_t *new_colors = mbmi->palette_literal_colors;
   uint8_t val;
 
@@ -129,48 +129,27 @@ void palette_color_insertion(uint8_t *old_colors, int *m, int *count,
   for (i = 0; i < n; i++) {
     val = new_colors[i];
     j = 0;
-    while (val > old_colors[j] && j < k)
+    while (val != old_colors[j] && j < k)
       j++;
     if (j < k && val == old_colors[j]) {
       count[j] += 8;
       continue;
     }
 
-    idx = j;
-    k++;
-    if (k > PALETTE_BUF_SIZE) {
-      k--;
+    if (k + 1 > PALETTE_BUF_SIZE) {
       min_idx = 0;
-      for (l = 1; l < k; l++) {
+      for (l = 1; l < k; l++)
         if (count[l] < count[min_idx])
           min_idx = l;
-      }
-
-      l = min_idx;
-      while (l < k - 1) {
-        old_colors[l] = old_colors[l + 1];
-        count[l] = count[l + 1];
-        l++;
-      }
-    }
-
-    if (min_idx < 0 || idx <= min_idx)
-      j = idx;
-    else
-      j = idx - 1;
-
-    if (j == k - 1) {
-      old_colors[k - 1] = val;
-      count[k - 1] = 8;
+      old_colors[min_idx] = val;
+      count[min_idx] = 8;
     } else {
-      for (l = k - 1; l > j; l--) {
-        old_colors[l] = old_colors[l - 1];
-        count[l] = count[l - 1];
-      }
-      old_colors[j] = val;
-      count[j] = 8;
+      old_colors[k] = val;
+      count[k] = 8;
+      k++;
     }
   }
+
   *m = k;
 }
 
@@ -209,7 +188,7 @@ int get_bit_depth(int n) {
 
 int palette_max_run(BLOCK_SIZE bsize) {
   int table[BLOCK_SIZES] = {
-      16, 16, 16, 32,  // BLOCK_4X4,   BLOCK_4X8,   BLOCK_8X4,   BLOCK_8X8
+      32, 32, 32, 32,  // BLOCK_4X4,   BLOCK_4X8,   BLOCK_8X4,   BLOCK_8X8
       64, 64, 64, 64,  // BLOCK_8X16,  BLOCK_16X8,  BLOCK_16X16, BLOCK_16X32
       64, 64, 64, 64,  // BLOCK_32X16, BLOCK_32X32, BLOCK_32X64, BLOCK_64X32
       64               // BLOCK_64X64
