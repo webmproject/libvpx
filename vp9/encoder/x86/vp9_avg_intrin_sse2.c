@@ -100,22 +100,14 @@ int16_t vp9_int_pro_col_sse2(uint8_t const *ref, const int width) {
   __m128i src_line = _mm_load_si128((const __m128i *)ref);
   __m128i s0 = _mm_sad_epu8(src_line, zero);
   __m128i s1;
-  (void) width;  // width = 64
+  int i;
 
-  ref += 16;
-  src_line = _mm_load_si128((const __m128i *)ref);
-  s1 = _mm_sad_epu8(src_line, zero);
-  s0 = _mm_adds_epu16(s0, s1);
-
-  ref += 16;
-  src_line = _mm_load_si128((const __m128i *)ref);
-  s1 = _mm_sad_epu8(src_line, zero);
-  s0 = _mm_adds_epu16(s0, s1);
-
-  ref += 16;
-  src_line = _mm_load_si128((const __m128i *)ref);
-  s1 = _mm_sad_epu8(src_line, zero);
-  s0 = _mm_adds_epu16(s0, s1);
+  for (i = 16; i < width; i += 16) {
+    ref += 16;
+    src_line = _mm_load_si128((const __m128i *)ref);
+    s1 = _mm_sad_epu8(src_line, zero);
+    s0 = _mm_adds_epu16(s0, s1);
+  }
 
   s1 = _mm_srli_si128(s0, 8);
   s0 = _mm_adds_epu16(s0, s1);
@@ -136,8 +128,6 @@ int vp9_vector_sad_sse2(int16_t const *ref, int16_t const *src,
   diff = _mm_xor_si128(diff, sign);
   sum = _mm_sub_epi16(diff, sign);
 
-  (void) width;  // width = 64;
-
   ref += 8;
   src += 8;
 
@@ -145,7 +135,7 @@ int vp9_vector_sad_sse2(int16_t const *ref, int16_t const *src,
   v1 = _mm_unpackhi_epi16(sum, zero);
   sum = _mm_add_epi32(v0, v1);
 
-  for (idx = 1; idx < 8; ++idx) {
+  for (idx = 8; idx < width; idx += 8) {
     v0 = _mm_loadu_si128((const __m128i *)ref);
     v1 = _mm_load_si128((const __m128i *)src);
     diff = _mm_subs_epi16(v0, v1);
