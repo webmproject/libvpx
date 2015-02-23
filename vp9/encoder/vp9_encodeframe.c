@@ -528,10 +528,10 @@ static int vector_match(int16_t *ref, int16_t *src) {
   }
   center = offset;
 
-  for (d = -8; d <= 8; d += 4) {
+  for (d = -8; d <= 8; d += 16) {
     int this_pos = offset + d;
     // check limit
-    if (this_pos < 0 || this_pos > 64 || this_pos == 32)
+    if (this_pos < 0 || this_pos > 64)
       continue;
     this_sad = vp9_vector_sad(&ref[this_pos], src, 64);
     if (this_sad < best_sad) {
@@ -541,10 +541,10 @@ static int vector_match(int16_t *ref, int16_t *src) {
   }
   offset = center;
 
-  for (d = -4; d <= 4; d += 2) {
+  for (d = -4; d <= 4; d += 8) {
     int this_pos = offset + d;
     // check limit
-    if (this_pos < 0 || this_pos > 64 || this_pos == 32)
+    if (this_pos < 0 || this_pos > 64)
       continue;
     this_sad = vp9_vector_sad(&ref[this_pos], src, 64);
     if (this_sad < best_sad) {
@@ -554,10 +554,23 @@ static int vector_match(int16_t *ref, int16_t *src) {
   }
   offset = center;
 
-  for (d = -2; d <= 2; d += 1) {
+  for (d = -2; d <= 2; d += 4) {
     int this_pos = offset + d;
     // check limit
-    if (this_pos < 0 || this_pos > 64 || this_pos == 32)
+    if (this_pos < 0 || this_pos > 64)
+      continue;
+    this_sad = vp9_vector_sad(&ref[this_pos], src, 64);
+    if (this_sad < best_sad) {
+      best_sad = this_sad;
+      center = this_pos;
+    }
+  }
+  offset = center;
+
+  for (d = -1; d <= 1; d += 2) {
+    int this_pos = offset + d;
+    // check limit
+    if (this_pos < 0 || this_pos > 64)
       continue;
     this_sad = vp9_vector_sad(&ref[this_pos], src, 64);
     if (this_sad < best_sad) {
