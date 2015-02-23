@@ -741,6 +741,7 @@ static void setup_frame_size(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
   pool->frame_bufs[cm->new_fb_idx].buf.subsampling_x = cm->subsampling_x;
   pool->frame_bufs[cm->new_fb_idx].buf.subsampling_y = cm->subsampling_y;
   pool->frame_bufs[cm->new_fb_idx].buf.bit_depth = (unsigned int)cm->bit_depth;
+  pool->frame_bufs[cm->new_fb_idx].buf.color_space = cm->color_space;
 }
 
 static INLINE int valid_ref_frame_img_fmt(vpx_bit_depth_t ref_bit_depth,
@@ -821,6 +822,7 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
   pool->frame_bufs[cm->new_fb_idx].buf.subsampling_x = cm->subsampling_x;
   pool->frame_bufs[cm->new_fb_idx].buf.subsampling_y = cm->subsampling_y;
   pool->frame_bufs[cm->new_fb_idx].buf.bit_depth = (unsigned int)cm->bit_depth;
+  pool->frame_bufs[cm->new_fb_idx].buf.color_space = cm->color_space;
 }
 
 static void setup_tile_info(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
@@ -1436,6 +1438,7 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
 #if CONFIG_VP9_HIGHBITDEPTH
   get_frame_new_buffer(cm)->bit_depth = cm->bit_depth;
 #endif
+  get_frame_new_buffer(cm)->color_space = cm->color_space;
 
   if (pbi->need_resync) {
     vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
