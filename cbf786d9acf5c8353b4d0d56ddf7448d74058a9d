@@ -16,6 +16,24 @@
       "revId": "cbf786d9acf5c8353b4d0d56ddf7448d74058a9d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//GWc\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 716,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-02-24T02:11:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//GYY\u003d",
+      "revId": "cbf786d9acf5c8353b4d0d56ddf7448d74058a9d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
