@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//GYY\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 716,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-02-24T01:38:16Z",
+      "side": 1,
+      "message": "could be local to the if(). there\u0027s some naming inconsistency throughout, I\u0027d prefer kConstantName or drop the k if you want lowercase",
+      "revId": "cbf786d9acf5c8353b4d0d56ddf7448d74058a9d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
