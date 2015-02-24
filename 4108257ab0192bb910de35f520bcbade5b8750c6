@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//GRw\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 715,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-02-24T19:57:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//GVs\u003d",
+      "revId": "4108257ab0192bb910de35f520bcbade5b8750c6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//GVo\u003d",
         "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2015-02-24T03:11:43Z",
       "side": 1,
       "message": "drop the \u0027k\u0027 and const is a bit redundant in the naming",
+      "revId": "4108257ab0192bb910de35f520bcbade5b8750c6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//GRs\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 726,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-02-24T19:57:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//GVo\u003d",
       "revId": "4108257ab0192bb910de35f520bcbade5b8750c6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
