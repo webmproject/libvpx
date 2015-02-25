@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//GKU\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-02-25T07:48:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//GLw\u003d",
+      "revId": "153f12373894ae7528cfd4016269fdac989d58ce",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//GLs\u003d",
         "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2015-02-25T07:02:39Z",
       "side": 1,
       "message": "you could localize t80 and make it const",
+      "revId": "153f12373894ae7528cfd4016269fdac989d58ce",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//GKo\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-02-25T07:48:18Z",
+      "side": 1,
+      "message": "t80 is used outside these if-else branches in line 40.",
+      "parentUuid": "AAAAdn//GLs\u003d",
       "revId": "153f12373894ae7528cfd4016269fdac989d58ce",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//GKM\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-02-25T07:48:18Z",
+      "side": 1,
+      "message": "will do it in a separate cosmetic cl.",
+      "parentUuid": "AAAAdn//GLo\u003d",
+      "revId": "153f12373894ae7528cfd4016269fdac989d58ce",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//GLk\u003d",
         "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
         "patchSetId": 2
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//GKg\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-02-25T07:48:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//GLk\u003d",
+      "revId": "153f12373894ae7528cfd4016269fdac989d58ce",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//GLg\u003d",
         "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
         "patchSetId": 2
@@ -81,6 +153,24 @@
       "writtenOn": "2015-02-25T07:02:39Z",
       "side": 1,
       "message": "here too",
+      "revId": "153f12373894ae7528cfd4016269fdac989d58ce",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//GKc\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-02-25T07:48:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//GLg\u003d",
       "revId": "153f12373894ae7528cfd4016269fdac989d58ce",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
