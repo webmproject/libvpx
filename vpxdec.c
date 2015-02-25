@@ -718,9 +718,10 @@ int main_loop(int argc, const char **argv_) {
   /* Handle non-option arguments */
   fn = argv[0];
 
-  if (!fn)
+  if (!fn) {
+    free(argv);
     usage_exit();
-
+  }
   /* Open file */
   infile = strcmp(fn, "-") ? fopen(fn, "rb") : set_binary_mode(stdin);
 
