@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//GG4\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 572,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-02-25T18:18:17Z",
+      "side": 1,
+      "message": "would using MV for type here be appropriate? so [0] and[1] below would be row and col in mv offset calculations?",
+      "revId": "2b06ffa39bdd0b719945a7e74dbbebb41da31acf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//GHA\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 627,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-02-25T18:18:17Z",
+      "side": 1,
+      "message": "Is this same as src_stride above?",
+      "revId": "2b06ffa39bdd0b719945a7e74dbbebb41da31acf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//GG8\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 629,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-02-25T18:18:17Z",
+      "side": 1,
+      "message": "Is this same as ref_stride above?",
+      "revId": "2b06ffa39bdd0b719945a7e74dbbebb41da31acf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
