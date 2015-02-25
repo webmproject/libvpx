@@ -587,7 +587,12 @@ static int vector_match(int16_t *ref, int16_t *src) {
   return (center - 32);
 }
 
-static void motion_estimation(MACROBLOCK *x) {
+static const MV search_pos[9] = {
+  {-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 0}, {0, 1},
+  {1, -1}, {1, 0}, {1, 1},
+};
+
+static void motion_estimation(VP9_COMP *cpi, MACROBLOCK *x) {
   MACROBLOCKD *xd = &x->e_mbd;
   DECLARE_ALIGNED(16, int16_t, hbuf[128]);
   DECLARE_ALIGNED(16, int16_t, vbuf[128]);
@@ -601,6 +606,8 @@ static void motion_estimation(MACROBLOCK *x) {
   const int ref_stride = xd->plane[0].pre[0].stride;
   uint8_t const *ref_buf, *src_buf;
   MV *tmp_mv = &xd->mi[0].src_mi->mbmi.mv[0].as_mv;
+  int best_sad;
+  MV this_mv;
 
   // Set up prediction 1-D reference set
   ref_buf = xd->plane[0].pre[0].buf + (-32);
@@ -631,6 +638,24 @@ static void motion_estimation(MACROBLOCK *x) {
 
   tmp_mv->col = vector_match(hbuf, src_hbuf);
   tmp_mv->row = vector_match(vbuf, src_vbuf);
+
+  best_sad = INT_MAX;
+  this_mv = *tmp_mv;
+  for (idx = 0; idx < 9; ++idx) {
+    int this_sad;
+    src_buf = x->plane[0].src.buf;
+    ref_buf = xd->plane[0].pre[0].buf +
+        (search_pos[idx].row + this_mv.row) * ref_stride +
+        (search_pos[idx].col + this_mv.col);
+
+    this_sad = cpi->fn_ptr[BLOCK_64X64].sdf(src_buf, src_stride,
+                                            ref_buf, ref_stride);
+    if (this_sad < best_sad) {
+      best_sad = this_sad;
+      tmp_mv->row = search_pos[idx].row + this_mv.row;
+      tmp_mv->col = search_pos[idx].col + this_mv.col;
+    }
+  }
 
   tmp_mv->row *= 8;
   tmp_mv->col *= 8;
@@ -689,9 +714,10 @@ static void choose_partitioning(VP9_COMP *cpi,
     mbmi->ref_frame[1] = NONE;
     mbmi->sb_type = BLOCK_64X64;
     mbmi->mv[0].as_int = 0;
+    mbmi->interp_filter = BILINEAR;
 
 #if GLOBAL_MOTION
-    motion_estimation(x);
+    motion_estimation(cpi, x);
 #endif
 
     vp9_build_inter_predictors_sb(xd, mi_row, mi_col, BLOCK_64X64);
