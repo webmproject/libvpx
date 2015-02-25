@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//GLw\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-02-25T07:02:39Z",
+      "side": 1,
+      "message": "you should make a cosmetic cl when finished to fix the indent here.",
+      "revId": "153f12373894ae7528cfd4016269fdac989d58ce",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//GLs\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-02-25T07:02:39Z",
+      "side": 1,
+      "message": "you could localize t80 and make it const",
+      "revId": "153f12373894ae7528cfd4016269fdac989d58ce",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//GLo\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-02-25T07:02:39Z",
+      "side": 1,
+      "message": "indent would be 4, another temporary might not hurt to separate the subtraction and make more readable",
+      "revId": "153f12373894ae7528cfd4016269fdac989d58ce",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//GLk\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-02-25T07:02:39Z",
+      "side": 1,
+      "message": "just _mm_set the value directly, it\u0027s constant",
+      "revId": "153f12373894ae7528cfd4016269fdac989d58ce",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//GLg\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-02-25T07:02:39Z",
+      "side": 1,
+      "message": "here too",
+      "revId": "153f12373894ae7528cfd4016269fdac989d58ce",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
