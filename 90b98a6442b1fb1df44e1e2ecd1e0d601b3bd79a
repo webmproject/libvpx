@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//GL8\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 715,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-02-25T06:57:05Z",
+      "side": 1,
+      "message": "I meant \u0027const int\u0027 by const coming first, the ordering is fine like this",
+      "revId": "90b98a6442b1fb1df44e1e2ecd1e0d601b3bd79a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//GL4\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_sse2.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 726,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-02-25T06:57:05Z",
+      "side": 1,
+      "message": "I still find \u0027const_\u0027 redundant in the name, but up to you",
+      "revId": "90b98a6442b1fb1df44e1e2ecd1e0d601b3bd79a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
