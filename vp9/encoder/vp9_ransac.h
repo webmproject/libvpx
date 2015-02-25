@@ -32,12 +32,21 @@ int ransacAffine(double *matched_points, int npoints,
 int ransacRotZoom(double *matched_points, int npoints,
                   int *number_of_inliers, int *best_inlier_indices,
                   double *bestH);
+int ransacTranslation(double *matched_points, int npoints,
+                      int *number_of_inliers, int *best_inlier_indices,
+                      double *bestH);
 
 void projectPointsHomography(double *mat, double *points, double *proj,
-                             const int n, const int stride_points, const int stride_proj);
+                             const int n, const int stride_points,
+                             const int stride_proj);
 void projectPointsAffine(double *mat, double *points, double *proj,
-                         const int n, const int stride_points, const int stride_proj);
+                         const int n, const int stride_points,
+                         const int stride_proj);
 void projectPointsRotZoom(double *mat, double *points, double *proj,
-                          const int n, const int stride_points, const int stride_proj);
+                          const int n, const int stride_points,
+                          const int stride_proj);
+void projectPointsTranslation(double *mat, double *points, double *proj,
+                              const int n, const int stride_points,
+                              const int stride_proj);
 
 #endif  // VP9_ENCODER_VP9_RANSAC_H

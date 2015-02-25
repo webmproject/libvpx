@@ -45,6 +45,8 @@ inline int get_numparams(TransformationType type) {
       return 6;
     case ROTZOOM:
       return 4;
+    case TRANSLATION:
+      return 2;
     default:
       assert(0);
       return 0;
@@ -59,6 +61,8 @@ inline ransacType get_ransacType(TransformationType type) {
       return ransacAffine;
     case ROTZOOM:
       return ransacRotZoom;
+    case TRANSLATION:
+      return ransacTranslation;
     default:
       assert(0);
       return NULL;
@@ -73,6 +77,8 @@ inline projectPointsType get_projectPointsType(TransformationType type) {
       return projectPointsAffine;
     case ROTZOOM:
       return projectPointsRotZoom;
+    case TRANSLATION:
+      return projectPointsTranslation;
     default:
       assert(0);
       return NULL;

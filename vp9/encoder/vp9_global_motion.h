@@ -33,7 +33,8 @@ typedef enum {
   UNKNOWN_TRANSFORM = -1,
   HOMOGRAPHY,  // homography, 8-parameter
   AFFINE,      // affine, 6-parameter
-  ROTZOOM      // simplified affine with rotation and zoom only, 4-parameter
+  ROTZOOM,     // simplified affine with rotation and zoom only, 4-parameter
+  TRANSLATION  // translational motion 2-parameter
 } TransformationType;
 
 inline int get_numparams(TransformationType type);

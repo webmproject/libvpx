@@ -632,7 +632,6 @@ static void denormalizeAffine(double *H, double *T1, double *T2) {
 
 static void denormalizeRotZoom(double *H, double *T1, double *T2) {
   double Ha[MAX_PARAMDIM];
-  memcpy(Ha, H, 6 * sizeof(*H));
   Ha[0] = H[0];
   Ha[1] = H[1];
   Ha[2] = H[2];
@@ -648,10 +647,30 @@ static void denormalizeRotZoom(double *H, double *T1, double *T2) {
   H[3] = Ha[5];
 }
 
+static void denormalizeTranslation(double *H, double *T1, double *T2) {
+  double Ha[MAX_PARAMDIM];
+  Ha[0] = 1;
+  Ha[1] = 0;
+  Ha[2] = H[0];
+  Ha[3] = 0;
+  Ha[4] = 1;
+  Ha[5] = H[1];
+  Ha[6] = Ha[7] = 0;
+  Ha[8] = 1;
+  denormalizeHomography(Ha, T1, T2);
+  H[0] = Ha[2];
+  H[1] = Ha[5];
+}
+
 static int is_collinear3(double *p1, double *p2, double *p3) {
   static const double collinear_eps = 1e-3;
-  const double v = (p2[0] - p1[0]) * (p3[1] - p1[1]) - (p2[1] - p1[1]) * (p3[0] - p1[0]);
+  const double v = (p2[0] - p1[0]) * (p3[1] - p1[1]) -
+                   (p2[1] - p1[1]) * (p3[0] - p1[0]);
   return fabs(v) < collinear_eps;
+}
+
+static int isDegenerateTranslation(double *p) {
+  return (p[0] - p[2]) * (p[0] - p[2]) + (p[1] - p[3]) * (p[1] - p[3]) <= 2;
 }
 
 static int isDegenerateAffine(double *p) {
@@ -665,7 +684,22 @@ static int isDegenerateHomography(double *p) {
          is_collinear3(p + 2, p + 4, p + 6);
 }
 
-void projectPointsRotZoom(double *mat, double *points, double *proj, const int n,
+void projectPointsTranslation(double *mat, double *points, double *proj,
+                              const int n,
+                              const int stride_points,
+                              const int stride_proj) {
+  int i;
+  for (i = 0; i < n; ++i) {
+    const double x = *(points++), y = *(points++);
+    *(proj++) = x + mat[0];
+    *(proj++) = y + mat[1];
+    points += stride_points - 2;
+    proj += stride_proj - 2;
+  }
+}
+
+void projectPointsRotZoom(double *mat, double *points,
+                          double *proj, const int n,
                           const int stride_points, const int stride_proj) {
   int i;
   for (i = 0; i < n; ++i) {
@@ -677,7 +711,8 @@ void projectPointsRotZoom(double *mat, double *points, double *proj, const int n
   }
 }
 
-void projectPointsAffine(double *mat, double *points, double *proj, const int n,
+void projectPointsAffine(double *mat, double *points,
+                         double *proj, const int n,
                          const int stride_points, const int stride_proj) {
   int i;
   for (i = 0; i < n; ++i) {
@@ -689,7 +724,8 @@ void projectPointsAffine(double *mat, double *points, double *proj, const int n,
   }
 }
 
-void projectPointsHomography(double *mat, double *points, double *proj, const int n,
+void projectPointsHomography(double *mat, double *points,
+                             double *proj, const int n,
                              const int stride_points, const int stride_proj) {
   int i;
   double x, y, Z;
@@ -701,6 +737,33 @@ void projectPointsHomography(double *mat, double *points, double *proj, const in
     points += stride_points - 2;
     proj += stride_proj - 2;
   }
+}
+
+int findTranslation(const int np, double *pts1, double *pts2, double *mat) {
+  const int np2 = np * 2;
+  int i;
+  double sx, sy, dx, dy;
+  double sumx, sumy;
+
+  double T1[9], T2[9];
+  normalizeHomography(pts1, np, T1);
+  normalizeHomography(pts2, np, T2);
+
+  sumx = 0;
+  sumy = 0;
+  for (i = 0; i < np; ++i) {
+    dx = *(pts2++);
+    dy = *(pts2++);
+    sx = *(pts1++);
+    sy = *(pts1++);
+
+    sumx += dx - sx;
+    sumy += dy - sy;
+  }
+  mat[0] = sumx / np;
+  mat[1] = sumy / np;
+  denormalizeTranslation(mat, T1, T2);
+  return 0;
 }
 
 int findRotZoom(const int np, double *pts1, double *pts2, double *mat) {
@@ -849,9 +912,10 @@ int findHomography(const int np, double *pts1, double *pts2, double *mat) {
 
   for (i = 0; i < 9; i++) mat[i] = V[i * 9 + mini];
   denormalizeHomography(mat, T1, T2);
-  // if (mat[8] == 0.0) return 1;
-  // for (i = 0; i < 9; i++) mat[i] /= mat[8];
   free(a);
+  if (mat[8] == 0.0) {
+    return 1;
+  }
   return 0;
 }
 
@@ -899,6 +963,23 @@ int findHomographyScale1(const int np, double *pts1, double *pts2,
   return 0;
 }
 
+int ransacTranslation(double *matched_points, int npoints,
+                      int *number_of_inliers,
+                      int *best_inlier_mask, double *bestH) {
+  return ransac_(matched_points,
+                 npoints,
+                 number_of_inliers,
+                 best_inlier_mask,
+                 bestH,
+                 2,
+                 2,
+                 isDegenerateTranslation,
+                 NULL,  // normalizeHomography,
+                 NULL,  // denormalizeRotZoom,
+                 findTranslation,
+                 projectPointsTranslation);
+}
+
 int ransacRotZoom(double *matched_points, int npoints,
                   int *number_of_inliers,
                   int *best_inlier_mask, double *bestH) {
@@ -936,16 +1017,26 @@ int ransacAffine(double *matched_points, int npoints,
 int ransacHomography(double *matched_points, int npoints,
                      int *number_of_inliers,
                      int *best_inlier_mask, double *bestH) {
-  return ransac_(matched_points,
-                 npoints,
-                 number_of_inliers,
-                 best_inlier_mask,
-                 bestH,
-                 4,
-                 8,
-                 isDegenerateHomography,
-                 NULL, // normalizeHomography,
-                 NULL, // denormalizeHomography,
-                 findHomography,
-                 projectPointsHomography);
+  int result =
+      ransac_(matched_points,
+              npoints,
+              number_of_inliers,
+              best_inlier_mask,
+              bestH,
+              4,
+              8,
+              isDegenerateHomography,
+              NULL, // normalizeHomography,
+              NULL, // denormalizeHomography,
+              findHomography,
+              projectPointsHomography);
+  if (!result) {
+    // normalize so that H33 = 1
+    int i;
+    double m = 1.0 / bestH[8];
+    for (i = 0; i < 8; ++i)
+      bestH[i] *= m;
+    bestH[8] = 1.0;
+  }
+  return result;
 }
