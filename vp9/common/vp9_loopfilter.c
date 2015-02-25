@@ -34,10 +34,10 @@
 //
 // A loopfilter should be applied to every other 8x8 horizontally.
 static const uint64_t left_64x64_txform_mask[TX_SIZES]= {
-  0xffffffffffffffff,  // TX_4X4
-  0xffffffffffffffff,  // TX_8x8
-  0x5555555555555555,  // TX_16x16
-  0x1111111111111111,  // TX_32x32
+  0xffffffffffffffffULL,  // TX_4X4
+  0xffffffffffffffffULL,  // TX_8x8
+  0x5555555555555555ULL,  // TX_16x16
+  0x1111111111111111ULL,  // TX_32x32
 };
 
 // 64 bit masks for above transform size. Each 1 represents a position where
@@ -58,10 +58,10 @@ static const uint64_t left_64x64_txform_mask[TX_SIZES]= {
 //
 // A loopfilter should be applied to every other 4 the row vertically.
 static const uint64_t above_64x64_txform_mask[TX_SIZES]= {
-  0xffffffffffffffff,  // TX_4X4
-  0xffffffffffffffff,  // TX_8x8
-  0x00ff00ff00ff00ff,  // TX_16x16
-  0x000000ff000000ff,  // TX_32x32
+  0xffffffffffffffffULL,  // TX_4X4
+  0xffffffffffffffffULL,  // TX_8x8
+  0x00ff00ff00ff00ffULL,  // TX_16x16
+  0x000000ff000000ffULL,  // TX_32x32
 };
 
 // 64 bit masks for prediction sizes (left). Each 1 represents a position
@@ -80,59 +80,59 @@ static const uint64_t above_64x64_txform_mask[TX_SIZES]= {
 //  00000000
 //  00000000
 static const uint64_t left_prediction_mask[BLOCK_SIZES] = {
-  0x0000000000000001,  // BLOCK_4X4,
-  0x0000000000000001,  // BLOCK_4X8,
-  0x0000000000000001,  // BLOCK_8X4,
-  0x0000000000000001,  // BLOCK_8X8,
-  0x0000000000000101,  // BLOCK_8X16,
-  0x0000000000000001,  // BLOCK_16X8,
-  0x0000000000000101,  // BLOCK_16X16,
-  0x0000000001010101,  // BLOCK_16X32,
-  0x0000000000000101,  // BLOCK_32X16,
-  0x0000000001010101,  // BLOCK_32X32,
-  0x0101010101010101,  // BLOCK_32X64,
-  0x0000000001010101,  // BLOCK_64X32,
-  0x0101010101010101,  // BLOCK_64X64
+  0x0000000000000001ULL,  // BLOCK_4X4,
+  0x0000000000000001ULL,  // BLOCK_4X8,
+  0x0000000000000001ULL,  // BLOCK_8X4,
+  0x0000000000000001ULL,  // BLOCK_8X8,
+  0x0000000000000101ULL,  // BLOCK_8X16,
+  0x0000000000000001ULL,  // BLOCK_16X8,
+  0x0000000000000101ULL,  // BLOCK_16X16,
+  0x0000000001010101ULL,  // BLOCK_16X32,
+  0x0000000000000101ULL,  // BLOCK_32X16,
+  0x0000000001010101ULL,  // BLOCK_32X32,
+  0x0101010101010101ULL,  // BLOCK_32X64,
+  0x0000000001010101ULL,  // BLOCK_64X32,
+  0x0101010101010101ULL,  // BLOCK_64X64
 };
 
 // 64 bit mask to shift and set for each prediction size.
 static const uint64_t above_prediction_mask[BLOCK_SIZES] = {
-  0x0000000000000001,  // BLOCK_4X4
-  0x0000000000000001,  // BLOCK_4X8
-  0x0000000000000001,  // BLOCK_8X4
-  0x0000000000000001,  // BLOCK_8X8
-  0x0000000000000001,  // BLOCK_8X16,
-  0x0000000000000003,  // BLOCK_16X8
-  0x0000000000000003,  // BLOCK_16X16
-  0x0000000000000003,  // BLOCK_16X32,
-  0x000000000000000f,  // BLOCK_32X16,
-  0x000000000000000f,  // BLOCK_32X32,
-  0x000000000000000f,  // BLOCK_32X64,
-  0x00000000000000ff,  // BLOCK_64X32,
-  0x00000000000000ff,  // BLOCK_64X64
+  0x0000000000000001ULL,  // BLOCK_4X4
+  0x0000000000000001ULL,  // BLOCK_4X8
+  0x0000000000000001ULL,  // BLOCK_8X4
+  0x0000000000000001ULL,  // BLOCK_8X8
+  0x0000000000000001ULL,  // BLOCK_8X16,
+  0x0000000000000003ULL,  // BLOCK_16X8
+  0x0000000000000003ULL,  // BLOCK_16X16
+  0x0000000000000003ULL,  // BLOCK_16X32,
+  0x000000000000000fULL,  // BLOCK_32X16,
+  0x000000000000000fULL,  // BLOCK_32X32,
+  0x000000000000000fULL,  // BLOCK_32X64,
+  0x00000000000000ffULL,  // BLOCK_64X32,
+  0x00000000000000ffULL,  // BLOCK_64X64
 };
 // 64 bit mask to shift and set for each prediction size. A bit is set for
 // each 8x8 block that would be in the left most block of the given block
 // size in the 64x64 block.
 static const uint64_t size_mask[BLOCK_SIZES] = {
-  0x0000000000000001,  // BLOCK_4X4
-  0x0000000000000001,  // BLOCK_4X8
-  0x0000000000000001,  // BLOCK_8X4
-  0x0000000000000001,  // BLOCK_8X8
-  0x0000000000000101,  // BLOCK_8X16,
-  0x0000000000000003,  // BLOCK_16X8
-  0x0000000000000303,  // BLOCK_16X16
-  0x0000000003030303,  // BLOCK_16X32,
-  0x0000000000000f0f,  // BLOCK_32X16,
-  0x000000000f0f0f0f,  // BLOCK_32X32,
-  0x0f0f0f0f0f0f0f0f,  // BLOCK_32X64,
-  0x00000000ffffffff,  // BLOCK_64X32,
-  0xffffffffffffffff,  // BLOCK_64X64
+  0x0000000000000001ULL,  // BLOCK_4X4
+  0x0000000000000001ULL,  // BLOCK_4X8
+  0x0000000000000001ULL,  // BLOCK_8X4
+  0x0000000000000001ULL,  // BLOCK_8X8
+  0x0000000000000101ULL,  // BLOCK_8X16,
+  0x0000000000000003ULL,  // BLOCK_16X8
+  0x0000000000000303ULL,  // BLOCK_16X16
+  0x0000000003030303ULL,  // BLOCK_16X32,
+  0x0000000000000f0fULL,  // BLOCK_32X16,
+  0x000000000f0f0f0fULL,  // BLOCK_32X32,
+  0x0f0f0f0f0f0f0f0fULL,  // BLOCK_32X64,
+  0x00000000ffffffffULL,  // BLOCK_64X32,
+  0xffffffffffffffffULL,  // BLOCK_64X64
 };
 
 // These are used for masking the left and above borders.
-static const uint64_t left_border =  0x1111111111111111;
-static const uint64_t above_border = 0x000000ff000000ff;
+static const uint64_t left_border =  0x1111111111111111ULL;
+static const uint64_t above_border = 0x000000ff000000ffULL;
 
 // 16 bit masks for uv transform sizes.
 static const uint16_t left_64x64_txform_mask_uv[TX_SIZES]= {
@@ -773,7 +773,7 @@ static void build_masks(const loop_filter_info_n *const lfi_n,
   // an 8x8 in that the internal ones can be skipped and don't depend on
   // the prediction block size.
   if (tx_size_y == TX_4X4)
-    *int_4x4_y |= (size_mask[block_size] & 0xffffffffffffffff) << shift_y;
+    *int_4x4_y |= (size_mask[block_size] & 0xffffffffffffffffULL) << shift_y;
 
   if (tx_size_uv == TX_4X4)
     *int_4x4_uv |= (size_mask_uv[block_size] & 0xffff) << shift_uv;
@@ -819,7 +819,7 @@ static void build_y_mask(const loop_filter_info_n *const lfi_n,
               left_64x64_txform_mask[tx_size_y]) << shift_y;
 
   if (tx_size_y == TX_4X4)
-    *int_4x4_y |= (size_mask[block_size] & 0xffffffffffffffff) << shift_y;
+    *int_4x4_y |= (size_mask[block_size] & 0xffffffffffffffffULL) << shift_y;
 }
 
 // This function sets up the bit masks for the entire 64x64 region represented
@@ -1021,7 +1021,7 @@ void vp9_setup_mask(VP9_COMMON *const cm, const int mi_row, const int mi_col,
 
     // Each pixel inside the border gets a 1, the multiply copies the border
     // to where we need it.
-    const uint64_t mask_y  = (((1 << columns) - 1)) * 0x0101010101010101;
+    const uint64_t mask_y  = (((1 << columns) - 1)) * 0x0101010101010101ULL;
     const uint16_t mask_uv = ((1 << ((columns + 1) >> 1)) - 1) * 0x1111;
 
     // Internal edges are not applied on the last column of the image so
@@ -1053,7 +1053,7 @@ void vp9_setup_mask(VP9_COMMON *const cm, const int mi_row, const int mi_col,
   // out.
   if (mi_col == 0) {
     for (i = 0; i < TX_32X32; i++) {
-      lfm->left_y[i] &= 0xfefefefefefefefe;
+      lfm->left_y[i] &= 0xfefefefefefefefeULL;
       lfm->left_uv[i] &= 0xeeee;
     }
   }
