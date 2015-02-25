@@ -369,10 +369,10 @@ static void set_offsets_extend(VP9_COMP *cpi, const TileInfo *const tile,
 #if CONFIG_PALETTE
 void copy_palette_info(PICK_MODE_CONTEXT *c, PICK_MODE_CONTEXT *p) {
   c->palette_buf_size = p->palette_buf_size;
-  memcpy(c->palette_colors_buf, p->palette_colors_buf,
-         c->palette_buf_size * sizeof(c->palette_colors_buf[0]));
-  memcpy(c->palette_count_buf, p->palette_count_buf,
-         c->palette_buf_size * sizeof(c->palette_count_buf[0]));
+  vpx_memcpy(c->palette_colors_buf, p->palette_colors_buf,
+             c->palette_buf_size * sizeof(c->palette_colors_buf[0]));
+  vpx_memcpy(c->palette_count_buf, p->palette_count_buf,
+             c->palette_buf_size * sizeof(c->palette_count_buf[0]));
 }
 #endif
 
@@ -1363,19 +1363,23 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
     uint8_t palette[PALETTE_BUF_SIZE];
     int count[PALETTE_BUF_SIZE];
 
-    memcpy(palette, cpi->common.current_palette_colors, n * sizeof(palette[0]));
-    memcpy(count, cpi->common.current_palette_count, n * sizeof(count[0]));
+    vpx_memcpy(palette, cpi->common.current_palette_colors,
+               n * sizeof(palette[0]));
+    vpx_memcpy(count, cpi->common.current_palette_count,
+               n * sizeof(count[0]));
     cpi->common.current_palette_size = ctx->palette_buf_size;
-    memcpy(cpi->common.current_palette_colors, ctx->palette_colors_buf,
-           ctx->palette_buf_size * sizeof(ctx->palette_colors_buf[0]));
-    memcpy(cpi->common.current_palette_count, ctx->palette_count_buf,
-           ctx->palette_buf_size * sizeof(ctx->palette_count_buf[0]));
+    vpx_memcpy(cpi->common.current_palette_colors, ctx->palette_colors_buf,
+               ctx->palette_buf_size * sizeof(ctx->palette_colors_buf[0]));
+    vpx_memcpy(cpi->common.current_palette_count, ctx->palette_count_buf,
+               ctx->palette_buf_size * sizeof(ctx->palette_count_buf[0]));
 #endif
     vp9_rd_pick_intra_mode_sb(cpi, x, rd_cost, bsize, ctx, best_rd);
 #if CONFIG_PALETTE
     cpi->common.current_palette_size = n;
-    memcpy(cpi->common.current_palette_colors, palette, n * sizeof(palette[0]));
-    memcpy(cpi->common.current_palette_count, count, n * sizeof(count[0]));
+    vpx_memcpy(cpi->common.current_palette_colors,
+               palette, n * sizeof(palette[0]));
+    vpx_memcpy(cpi->common.current_palette_count,
+               count, n * sizeof(count[0]));
 #endif
 #if CONFIG_SUPERTX
     *totalrate_nocoef = 0;
@@ -2831,18 +2835,18 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
   if (bsize == BLOCK_64X64) {
     c = &pc_tree->current;
     c->palette_buf_size = cm->current_palette_size;
-    memcpy(c->palette_colors_buf, cm->current_palette_colors,
-           c->palette_buf_size * sizeof(cm->current_palette_colors[0]));
-    memcpy(c->palette_count_buf, cm->current_palette_count,
-           c->palette_buf_size * sizeof(cm->current_palette_count[0]));
+    vpx_memcpy(c->palette_colors_buf, cm->current_palette_colors,
+               c->palette_buf_size * sizeof(cm->current_palette_colors[0]));
+    vpx_memcpy(c->palette_count_buf, cm->current_palette_count,
+               c->palette_buf_size * sizeof(cm->current_palette_count[0]));
   }
 
   c = &pc_tree->current;
   previous_size = c->palette_buf_size;
-  memcpy(previous_colors, c->palette_colors_buf,
-         previous_size * sizeof(previous_colors[0]));
-  memcpy(previous_count, c->palette_count_buf,
-         previous_size * sizeof(previous_count[0]));
+  vpx_memcpy(previous_colors, c->palette_colors_buf,
+             previous_size * sizeof(previous_colors[0]));
+  vpx_memcpy(previous_count, c->palette_count_buf,
+             previous_size * sizeof(previous_count[0]));
 
   c = &pc_tree->none;
   p = &pc_tree->current;
@@ -3141,10 +3145,10 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
         c = &pc_tree->split[i]->current;
         if (last < 0) {
           c->palette_buf_size = previous_size;
-          memcpy(c->palette_colors_buf, previous_colors,
-                 previous_size * sizeof(previous_colors[0]));
-          memcpy(c->palette_count_buf, previous_count,
-                 previous_size * sizeof(previous_count[0]));
+          vpx_memcpy(c->palette_colors_buf, previous_colors,
+                     previous_size * sizeof(previous_colors[0]));
+          vpx_memcpy(c->palette_count_buf, previous_count,
+                     previous_size * sizeof(previous_count[0]));
         } else {
           p = &pc_tree->split[last]->current;
           copy_palette_info(c, p);
@@ -3250,10 +3254,10 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
         } else {
           c = &pc_tree->current;
           c->palette_buf_size = previous_size;
-          memcpy(c->palette_colors_buf, previous_colors,
-                 previous_size * sizeof(previous_colors[0]));
-          memcpy(c->palette_count_buf, previous_count,
-                 previous_size * sizeof(previous_count[0]));
+          vpx_memcpy(c->palette_colors_buf, previous_colors,
+                     previous_size * sizeof(previous_colors[0]));
+          vpx_memcpy(c->palette_count_buf, previous_count,
+                     previous_size * sizeof(previous_count[0]));
         }
 #endif
       }
@@ -3282,10 +3286,10 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
 #if CONFIG_PALETTE
     c = &pc_tree->horizontal[0];
     c->palette_buf_size = previous_size;
-    memcpy(c->palette_colors_buf, previous_colors,
-           previous_size * sizeof(previous_colors[0]));
-    memcpy(c->palette_count_buf, previous_count,
-           previous_size * sizeof(previous_count[0]));
+    vpx_memcpy(c->palette_colors_buf, previous_colors,
+               previous_size * sizeof(previous_colors[0]));
+    vpx_memcpy(c->palette_count_buf, previous_count,
+               previous_size * sizeof(previous_count[0]));
     last = 0;
 #endif
 
@@ -3410,10 +3414,10 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
         } else {
           c = &pc_tree->current;
           c->palette_buf_size = previous_size;
-          memcpy(c->palette_colors_buf, previous_colors,
-                 previous_size * sizeof(previous_colors[0]));
-          memcpy(c->palette_count_buf, previous_count,
-                 previous_size * sizeof(previous_count[0]));
+          vpx_memcpy(c->palette_colors_buf, previous_colors,
+                     previous_size * sizeof(previous_colors[0]));
+          vpx_memcpy(c->palette_count_buf, previous_count,
+                     previous_size * sizeof(previous_count[0]));
         }
 #endif
       }
@@ -3437,10 +3441,10 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
 #if CONFIG_PALETTE
     c = &pc_tree->vertical[0];
     c->palette_buf_size = previous_size;
-    memcpy(c->palette_colors_buf, previous_colors,
-           previous_size * sizeof(previous_colors[0]));
-    memcpy(c->palette_count_buf, previous_count,
-           previous_size * sizeof(previous_count[0]));
+    vpx_memcpy(c->palette_colors_buf, previous_colors,
+               previous_size * sizeof(previous_colors[0]));
+    vpx_memcpy(c->palette_count_buf, previous_count,
+               previous_size * sizeof(previous_count[0]));
     last = 0;
 #endif
 
@@ -3562,10 +3566,10 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
         } else {
           c = &pc_tree->current;
           c->palette_buf_size = previous_size;
-          memcpy(c->palette_colors_buf, previous_colors,
-                 previous_size * sizeof(previous_colors[0]));
-          memcpy(c->palette_count_buf, previous_count,
-                 previous_size * sizeof(previous_count[0]));
+          vpx_memcpy(c->palette_colors_buf, previous_colors,
+                     previous_size * sizeof(previous_colors[0]));
+          vpx_memcpy(c->palette_count_buf, previous_count,
+                     previous_size * sizeof(previous_count[0]));
         }
 #endif
       }
@@ -4633,8 +4637,8 @@ static void encode_frame_internal(VP9_COMP *cpi) {
 #if CONFIG_PALETTE
   if (frame_is_intra_only(cm)) {
     cm->current_palette_size = 0;
-    memset(cm->current_palette_count, 0,
-           PALETTE_BUF_SIZE * sizeof(cm->current_palette_count[0]));
+    vpx_memset(cm->current_palette_count, 0,
+               PALETTE_BUF_SIZE * sizeof(cm->current_palette_count[0]));
     cm->palette_counter = 0;
     cm->block_counter = 0;
   }

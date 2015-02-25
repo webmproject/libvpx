@@ -124,7 +124,11 @@ struct macroblock {
 #if CONFIG_VP9_HIGHBITDEPTH
   void (*highbd_itxm_add)(const tran_low_t *input, uint8_t *dest, int stride,
                           int eob, int bd);
-#endif
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_PALETTE
+  DECLARE_ALIGNED(16, double, kmeans_data_buffer[MAX_MB_PLANE * 64 * 64]);
+  DECLARE_ALIGNED(16, int, kmeans_indices_buffer[64 * 64]);
+#endif  // CONFIG_PALETTE
 };
 
 #ifdef __cplusplus

@@ -29,7 +29,11 @@ int k_means(double *data, double *centroids, int *indices,
 void calc_indices(double *data, double *centroids, int *indices,
                   int n, int k, int dim);
 void zz_scan_order(int *order, int rows, int cols);
-void spin_scan_order(int *order, int rows, int cols);
+void spiral_scan_order(int *order, int rows, int cols);
+void palette_scan(uint8_t *color_index_map, uint8_t *sequence,
+                  int rows, int cols, PALETTE_SCAN_ORDER ps, int *scan_order);
+void palette_iscan(uint8_t *color_index_map, uint8_t *sequence,
+                   int rows, int cols, PALETTE_SCAN_ORDER ps, int *scan_order);
 #endif
 
 #endif  // VP9_COMMON_VP9_PALETTE_H_
