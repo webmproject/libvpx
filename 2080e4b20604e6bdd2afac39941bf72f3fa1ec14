@@ -16,6 +16,24 @@
       "revId": "2080e4b20604e6bdd2afac39941bf72f3fa1ec14",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//F/k\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-02-26T17:21:20Z",
+      "side": 1,
+      "message": "ok. will hold off other indent fixes and put them together in separate cl.",
+      "parentUuid": "AAAAdn//GCQ\u003d",
+      "revId": "2080e4b20604e6bdd2afac39941bf72f3fa1ec14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
