@@ -1963,11 +1963,13 @@ typedef struct {
 static void calc_psnr(const YV12_BUFFER_CONFIG *a, const YV12_BUFFER_CONFIG *b,
                       PSNR_STATS *psnr) {
   static const double peak = 255.0;
-  const int widths[3]        = {a->y_width,  a->uv_width,  a->uv_width };
-  const int heights[3]       = {a->y_height, a->uv_height, a->uv_height};
-  const uint8_t *a_planes[3] = {a->y_buffer, a->u_buffer,  a->v_buffer };
+  const int widths[3]        = {
+      a->y_crop_width, a->uv_crop_width, a->uv_crop_width};
+  const int heights[3]       = {
+      a->y_crop_height, a->uv_crop_height, a->uv_crop_height};
+  const uint8_t *a_planes[3] = {a->y_buffer, a->u_buffer, a->v_buffer};
   const int a_strides[3]     = {a->y_stride, a->uv_stride, a->uv_stride};
-  const uint8_t *b_planes[3] = {b->y_buffer, b->u_buffer,  b->v_buffer };
+  const uint8_t *b_planes[3] = {b->y_buffer, b->u_buffer, b->v_buffer};
   const int b_strides[3]     = {b->y_stride, b->uv_stride, b->uv_stride};
   int i;
   uint64_t total_sse = 0;
@@ -3451,7 +3453,12 @@ static void check_initial_width(VP9_COMP *cpi,
                                 int subsampling_x, int subsampling_y) {
   VP9_COMMON *const cm = &cpi->common;
 
-  if (!cpi->initial_width) {
+  if (!cpi->initial_width ||
+#if CONFIG_VP9_HIGHBITDEPTH
+      cm->use_highbitdepth != use_highbitdepth ||
+#endif
+      cm->subsampling_x != subsampling_x ||
+      cm->subsampling_y != subsampling_y) {
     cm->subsampling_x = subsampling_x;
     cm->subsampling_y = subsampling_y;
 #if CONFIG_VP9_HIGHBITDEPTH
