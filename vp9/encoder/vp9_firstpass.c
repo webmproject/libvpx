@@ -57,6 +57,8 @@
 #define SVC_FACTOR_PT_LOW   0.45
 #define DARK_THRESH         64
 #define DEFAULT_GRP_WEIGHT  1.0
+#define RC_FACTOR_MIN       0.75
+#define RC_FACTOR_MAX       1.75
 
 #define DOUBLE_DIVIDE_CHECK(x) ((x) < 0 ? (x) - 0.000001 : (x) + 0.000001)
 
@@ -1960,16 +1962,21 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     const int vbr_group_bits_per_frame =
       (int)(gf_group_bits / rc->baseline_gf_interval);
     const double group_av_err = gf_group_raw_error  / rc->baseline_gf_interval;
-    const int tmp_q =
-      get_twopass_worst_quality(cpi, group_av_err, vbr_group_bits_per_frame,
-                                twopass->kfgroup_inter_fraction);
-
-    if (tmp_q < twopass->baseline_active_worst_quality) {
-      twopass->active_worst_quality =
-        (tmp_q + twopass->baseline_active_worst_quality + 1) / 2;
+    int tmp_q;
+    // rc factor is a weight factor that corrects for local rate control drift.
+    double rc_factor = 1.0;
+    if (rc->rate_error_estimate > 0) {
+      rc_factor = MAX(RC_FACTOR_MIN,
+                      (double)(100 - rc->rate_error_estimate) / 100.0);
     } else {
-      twopass->active_worst_quality = tmp_q;
+      rc_factor = MIN(RC_FACTOR_MAX,
+                      (double)(100 - rc->rate_error_estimate) / 100.0);
     }
+    tmp_q =
+      get_twopass_worst_quality(cpi, group_av_err, vbr_group_bits_per_frame,
+                                twopass->kfgroup_inter_fraction * rc_factor);
+    twopass->active_worst_quality =
+      MAX(tmp_q, twopass->active_worst_quality >> 1);
   }
 #endif
 
@@ -2577,7 +2584,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
   subtract_stats(&twopass->total_left_stats, &this_frame);
 }
 
-#define MINQ_ADJ_LIMIT 32
+#define MINQ_ADJ_LIMIT 48
 void vp9_twopass_postencode_update(VP9_COMP *cpi) {
   TWO_PASS *const twopass = &cpi->twopass;
   RATE_CONTROL *const rc = &cpi->rc;
@@ -2610,8 +2617,7 @@ void vp9_twopass_postencode_update(VP9_COMP *cpi) {
   // Increment the gf group index ready for the next frame.
   ++twopass->gf_group.index;
 
-  // If the rate control is drifting consider adjustment ot min or maxq.
-  // Only make adjustments on gf/arf
+  // If the rate control is drifting consider adjustment to min or maxq.
   if ((cpi->oxcf.rc_mode == VPX_VBR) &&
       (cpi->twopass.gf_zeromotion_pct < VLOW_MOTION_THRESHOLD) &&
       !cpi->rc.is_src_frame_alt_ref) {
@@ -2640,6 +2646,7 @@ void vp9_twopass_postencode_update(VP9_COMP *cpi) {
       else if (rc->rolling_target_bits > rc->rolling_actual_bits)
         --twopass->extend_maxq;
     }
+
     twopass->extend_minq = clamp(twopass->extend_minq, 0, MINQ_ADJ_LIMIT);
     twopass->extend_maxq = clamp(twopass->extend_maxq, 0, maxq_adj_limit);
   }
