@@ -4077,7 +4077,7 @@ int vp9_set_size_literal(VP9_COMP *cpi, unsigned int width,
                          unsigned int height) {
   VP9_COMMON *cm = &cpi->common;
 #if CONFIG_VP9_HIGHBITDEPTH
-  check_initial_width(cpi, 1, 1, cm->use_highbitdepth);
+  check_initial_width(cpi, cm->use_highbitdepth, 1, 1);
 #else
   check_initial_width(cpi, 1, 1);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
