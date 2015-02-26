@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//GCQ\u003d",
+        "filename": "vp9/common/x86/vp9_high_loopfilter_intrin_sse2.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-02-26T03:17:53Z",
+      "side": 1,
+      "message": "it\u0027s better for larger cosmetics (like a reindent) to do them separately, so the change itself isn\u0027t lost in the noise...",
+      "revId": "2080e4b20604e6bdd2afac39941bf72f3fa1ec14",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
