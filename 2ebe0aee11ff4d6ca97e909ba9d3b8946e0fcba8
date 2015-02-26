@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//F8w\u003d",
+        "filename": "test/tools_common.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-02-26T21:00:12Z",
+      "side": 1,
+      "message": "should be more compatible than \u0027local -n\u0027 for instance",
+      "revId": "2ebe0aee11ff4d6ca97e909ba9d3b8946e0fcba8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
