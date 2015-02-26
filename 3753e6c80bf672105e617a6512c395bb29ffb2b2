@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//F7U\u003d",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 373,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-02-26T23:14:55Z",
+      "side": 1,
+      "message": "ugh the processing for q is a little more complicated than i thought. but it still makes q:\n 1828 / 4 \u003d 457 for 8bit\n 7312 / 16 \u003d 457 for 10bit\n 29247 / 64 \u003d 456.xxxxx for 12bit\n\nso all well within uint32_t, no worries at all.\n\ncomment could maybe be // q will not exceed 457: see vp9_convert_qindex_to_q(), vp9_ac_quant(), ac_qlookup*[]",
+      "revId": "3753e6c80bf672105e617a6512c395bb29ffb2b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
