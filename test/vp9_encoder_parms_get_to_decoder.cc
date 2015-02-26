@@ -56,7 +56,7 @@ struct EncodePerfTestVideo {
 };
 
 const EncodePerfTestVideo kVP9EncodePerfTestVectors[] = {
-    {"niklas_1280_720_30.yuv", 1280, 720, 600, 10},
+  {"niklas_1280_720_30.y4m", 1280, 720, 600, 10},
 };
 
 struct EncodeParameters {
