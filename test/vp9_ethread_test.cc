@@ -13,9 +13,9 @@
 #include "third_party/googletest/src/include/gtest/gtest.h"
 #include "test/codec_factory.h"
 #include "test/encode_test_driver.h"
-#include "test/i420_video_source.h"
-#include "test/util.h"
 #include "test/md5_helper.h"
+#include "test/util.h"
+#include "test/y4m_video_source.h"
 
 namespace {
 class VP9EncoderThreadTest
@@ -100,8 +100,7 @@ class VP9EncoderThreadTest
 TEST_P(VP9EncoderThreadTest, EncoderResultTest) {
   std::vector<std::string> single_thr_md5, multi_thr_md5;
 
-  ::libvpx_test::I420VideoSource video("niklas_1280_720_30.yuv", 1280, 720,
-                                       50, 1, 15, 20);
+  ::libvpx_test::Y4mVideoSource video("niklas_1280_720_30.y4m", 15, 20);
 
   cfg_.rc_target_bitrate = 1000;
 
