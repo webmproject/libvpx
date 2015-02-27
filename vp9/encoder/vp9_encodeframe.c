@@ -519,14 +519,14 @@ void vp9_set_vbp_thresholds(VP9_COMP *cpi, int q) {
 #endif
 
 #if GLOBAL_MOTION
-static int vector_match(int16_t *ref, int16_t *src, int length) {
+static int vector_match(int16_t *ref, int16_t *src, int bwl) {
   int best_sad = INT_MAX;
   int this_sad;
   int d;
   int center, offset = 0;
-  int bw = length;  // redundant variable, to be changed in the experiments.
+  int bw = 4 << bwl;  // redundant variable, to be changed in the experiments.
   for (d = 0; d <= bw; d += 16) {
-    this_sad = vp9_vector_sad(&ref[d], src, length);
+    this_sad = vp9_vector_var(&ref[d], src, bwl);
     if (this_sad < best_sad) {
       best_sad = this_sad;
       offset = d;
@@ -539,7 +539,7 @@ static int vector_match(int16_t *ref, int16_t *src, int length) {
     // check limit
     if (this_pos < 0 || this_pos > bw)
       continue;
-    this_sad = vp9_vector_sad(&ref[this_pos], src, length);
+    this_sad = vp9_vector_var(&ref[this_pos], src, bwl);
     if (this_sad < best_sad) {
       best_sad = this_sad;
       center = this_pos;
@@ -552,7 +552,7 @@ static int vector_match(int16_t *ref, int16_t *src, int length) {
     // check limit
     if (this_pos < 0 || this_pos > bw)
       continue;
-    this_sad = vp9_vector_sad(&ref[this_pos], src, length);
+    this_sad = vp9_vector_var(&ref[this_pos], src, bwl);
     if (this_sad < best_sad) {
       best_sad = this_sad;
       center = this_pos;
@@ -565,7 +565,7 @@ static int vector_match(int16_t *ref, int16_t *src, int length) {
     // check limit
     if (this_pos < 0 || this_pos > bw)
       continue;
-    this_sad = vp9_vector_sad(&ref[this_pos], src, length);
+    this_sad = vp9_vector_var(&ref[this_pos], src, bwl);
     if (this_sad < best_sad) {
       best_sad = this_sad;
       center = this_pos;
@@ -578,7 +578,7 @@ static int vector_match(int16_t *ref, int16_t *src, int length) {
     // check limit
     if (this_pos < 0 || this_pos > bw)
       continue;
-    this_sad = vp9_vector_sad(&ref[this_pos], src, length);
+    this_sad = vp9_vector_var(&ref[this_pos], src, bwl);
     if (this_sad < best_sad) {
       best_sad = this_sad;
       center = this_pos;
@@ -638,8 +638,8 @@ static void motion_estimation(VP9_COMP *cpi, MACROBLOCK *x,
   }
 
   // Find the best match per 1-D search
-  tmp_mv->col = vector_match(hbuf, src_hbuf, bw);
-  tmp_mv->row = vector_match(vbuf, src_vbuf, bh);
+  tmp_mv->col = vector_match(hbuf, src_hbuf, b_width_log2_lookup[bsize]);
+  tmp_mv->row = vector_match(vbuf, src_vbuf, b_height_log2_lookup[bsize]);
 
   best_sad = INT_MAX;
   this_mv = *tmp_mv;

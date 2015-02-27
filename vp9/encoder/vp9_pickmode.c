@@ -192,7 +192,6 @@ static int combined_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                  cond_cost_list(cpi, cost_list),
                                  x->nmvjointcost, x->mvcost,
                                  &dis, &x->pred_sse[ref], NULL, 0, 0);
-    x->pred_mv[ref] = tmp_mv->as_mv;
   }
 
   if (scaled_ref_frame) {
