@@ -727,10 +727,8 @@ LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += invalid-vp90-2-07-frame_parallel-2.web
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += invalid-vp90-2-07-frame_parallel-3.webm
 
 ifeq ($(CONFIG_DECODE_PERF_TESTS),yes)
-# NewEncode Test
-ifneq ($(CONFIG_VP9_ENCODER),yes)
-LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += niklas_1280_720_30.yuv
-endif
+# Encode / Decode test
+LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += niklas_1280_720_30.yuv
 # BBB VP9 streams
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-bbb_426x240_tile_1x1_180kbps.webm
 LIBVPX_TEST_DATA-$(CONFIG_VP9_DECODER) += vp90-2-bbb_640x360_tile_1x2_337kbps.webm
@@ -760,8 +758,12 @@ LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += desktop_640_360_30.yuv
 LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += kirland_640_480_30.yuv
 LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += macmarcomoving_640_480_30.yuv
 LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += macmarcostationary_640_480_30.yuv
+LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += niklas_1280_720_30.yuv
 LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += niklas_640_480_30.yuv
 LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += tacomanarrows_640_480_30.yuv
 LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += tacomasmallcameramovement_640_480_30.yuv
 LIBVPX_TEST_DATA-$(CONFIG_VP9_ENCODER) += thaloundeskmtg_640_480_30.yuv
 endif  # CONFIG_ENCODE_PERF_TESTS
+
+# sort and remove duplicates
+LIBVPX_TEST_DATA-yes := $(sort $(LIBVPX_TEST_DATA-yes))
