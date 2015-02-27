@@ -2002,8 +2002,10 @@ static void calc_highbd_psnr(const YV12_BUFFER_CONFIG *a,
                              PSNR_STATS *psnr,
                              unsigned int bit_depth,
                              unsigned int in_bit_depth) {
-  const int widths[3] = {a->y_width,  a->uv_width,  a->uv_width };
-  const int heights[3] = {a->y_height, a->uv_height, a->uv_height};
+  const int widths[3] =
+      {a->y_crop_width,  a->uv_crop_width,  a->uv_crop_width };
+  const int heights[3] =
+      {a->y_crop_height, a->uv_crop_height, a->uv_crop_height};
   const uint8_t *a_planes[3] = {a->y_buffer, a->u_buffer,  a->v_buffer };
   const int a_strides[3] = {a->y_stride, a->uv_stride, a->uv_stride};
   const uint8_t *b_planes[3] = {b->y_buffer, b->u_buffer,  b->v_buffer };
