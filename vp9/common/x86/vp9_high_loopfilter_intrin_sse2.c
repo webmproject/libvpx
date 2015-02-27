@@ -59,14 +59,7 @@ static void highbd_mb_lpf_horizontal_edge_w_sse2_8(uint16_t *s,
                                                    int bd) {
   const __m128i zero = _mm_set1_epi16(0);
   const __m128i one = _mm_set1_epi16(1);
-  const __m128i blimit = _mm_slli_epi16(
-      _mm_unpacklo_epi8(
-          _mm_load_si128((const __m128i *)_blimit), zero), bd - 8);
-  const __m128i limit = _mm_slli_epi16(
-      _mm_unpacklo_epi8(_mm_load_si128((const __m128i *)_limit), zero), bd - 8);
-  const __m128i thresh = _mm_slli_epi16(
-      _mm_unpacklo_epi8(
-          _mm_load_si128((const __m128i *)_thresh), zero), bd - 8);
+  __m128i blimit, limit, thresh;
   __m128i q7, p7, q6, p6, q5, p5, q4, p4, q3, p3, q2, p2, q1, p1, q0, p0;
   __m128i mask, hev, flat, flat2, abs_p1p0, abs_q1q0;
   __m128i ps1, qs1, ps0, qs0;
@@ -81,6 +74,26 @@ static void highbd_mb_lpf_horizontal_edge_w_sse2_8(uint16_t *s,
   __m128i sum_p7, sum_q7, sum_p3, sum_q3;
   __m128i t4, t3, t80, t1;
   __m128i eight, four;
+
+  if (bd == 8) {
+    blimit = _mm_unpacklo_epi8(_mm_load_si128((const __m128i *)_blimit), zero);
+    limit = _mm_unpacklo_epi8(_mm_load_si128((const __m128i *)_limit), zero);
+    thresh = _mm_unpacklo_epi8(_mm_load_si128((const __m128i *)_thresh), zero);
+  } else if (bd == 10) {
+    blimit = _mm_slli_epi16(
+        _mm_unpacklo_epi8(_mm_load_si128((const __m128i *)_blimit), zero), 2);
+    limit = _mm_slli_epi16(
+          _mm_unpacklo_epi8(_mm_load_si128((const __m128i *)_limit), zero), 2);
+    thresh = _mm_slli_epi16(
+          _mm_unpacklo_epi8(_mm_load_si128((const __m128i *)_thresh), zero), 2);
+  } else {  // bd == 12
+    blimit = _mm_slli_epi16(
+        _mm_unpacklo_epi8(_mm_load_si128((const __m128i *)_blimit), zero), 4);
+    limit = _mm_slli_epi16(
+          _mm_unpacklo_epi8(_mm_load_si128((const __m128i *)_limit), zero), 4);
+    thresh = _mm_slli_epi16(
+          _mm_unpacklo_epi8(_mm_load_si128((const __m128i *)_thresh), zero), 4);
+  }
 
   q4 = _mm_load_si128((__m128i *)(s + 4 * p));
   p4 = _mm_load_si128((__m128i *)(s - 5 * p));
@@ -135,7 +148,13 @@ static void highbd_mb_lpf_horizontal_edge_w_sse2_8(uint16_t *s,
   // highbd_filter4
   t4 = _mm_set1_epi16(4);
   t3 = _mm_set1_epi16(3);
-  t80 = _mm_slli_epi16(_mm_set1_epi16(0x80), bd - 8);
+  if (bd == 8)
+    t80 = _mm_set1_epi16(0x80);
+  else if (bd == 10)
+    t80 = _mm_set1_epi16(0x200);
+  else  // bd == 12
+    t80 = _mm_set1_epi16(0x800);
+
   t1 = _mm_set1_epi16(0x1);
 
   ps1 = _mm_subs_epi16(p1, t80);
@@ -150,7 +169,6 @@ static void highbd_mb_lpf_horizontal_edge_w_sse2_8(uint16_t *s,
   filt = _mm_adds_epi16(filt, work_a);
   filt = signed_char_clamp_bd_sse2(_mm_adds_epi16(filt, work_a), bd);
   filt = _mm_and_si128(filt, mask);
-
   filter1 = signed_char_clamp_bd_sse2(_mm_adds_epi16(filt, t4), bd);
   filter2 = signed_char_clamp_bd_sse2(_mm_adds_epi16(filt, t3), bd);
 
@@ -167,13 +185,13 @@ static void highbd_mb_lpf_horizontal_edge_w_sse2_8(uint16_t *s,
   filt = _mm_adds_epi16(filter1, t1);
   filt = _mm_srai_epi16(filt, 1);
   filt = _mm_andnot_si128(hev, filt);
-
   qs1 = _mm_adds_epi16(
       signed_char_clamp_bd_sse2(_mm_subs_epi16(qs1, filt), bd),
       t80);
   ps1 = _mm_adds_epi16(
       signed_char_clamp_bd_sse2(_mm_adds_epi16(ps1, filt), bd),
       t80);
+
   // end highbd_filter4
   // loopfilter done
 
@@ -189,7 +207,14 @@ static void highbd_mb_lpf_horizontal_edge_w_sse2_8(uint16_t *s,
   flat = _mm_max_epi16(work, flat);
   work = _mm_max_epi16(abs_p1p0, abs_q1q0);
   flat = _mm_max_epi16(work, flat);
-  flat = _mm_subs_epu16(flat, _mm_slli_epi16(one, bd - 8));
+
+  if (bd == 8)
+    flat = _mm_subs_epu16(flat, one);
+  else if (bd == 10)
+    flat = _mm_subs_epu16(flat, _mm_slli_epi16(one, 2));
+  else  // bd == 12
+    flat = _mm_subs_epu16(flat, _mm_slli_epi16(one, 4));
+
   flat = _mm_cmpeq_epi16(flat, zero);
   // end flat_mask4
 
@@ -229,7 +254,13 @@ static void highbd_mb_lpf_horizontal_edge_w_sse2_8(uint16_t *s,
                                     _mm_subs_epu16(q0, q7)));
   flat2 = _mm_max_epi16(work, flat2);
 
-  flat2 = _mm_subs_epu16(flat2, _mm_slli_epi16(one, bd - 8));
+  if (bd == 8)
+    flat2 = _mm_subs_epu16(flat2, one);
+  else if (bd == 10)
+    flat2 = _mm_subs_epu16(flat2, _mm_slli_epi16(one, 2));
+  else  // bd == 12
+    flat2 = _mm_subs_epu16(flat2, _mm_slli_epi16(one, 4));
+
   flat2 = _mm_cmpeq_epi16(flat2, zero);
   flat2 = _mm_and_si128(flat2, flat);  // flat2 & flat & mask
   // end highbd_flat_mask5
