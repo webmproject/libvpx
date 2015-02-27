@@ -15,24 +15,38 @@
 #include "vpx_ports/emmintrin_compat.h"
 
 static INLINE __m128i signed_char_clamp_bd_sse2(__m128i value, int bd) {
-    __m128i ubounded;
-    __m128i lbounded;
-    __m128i retval;
+  __m128i ubounded;
+  __m128i lbounded;
+  __m128i retval;
 
-    const __m128i zero = _mm_set1_epi16(0);
-    const __m128i one = _mm_set1_epi16(1);
-    const __m128i t80 = _mm_slli_epi16(_mm_set1_epi16(0x80), bd - 8);
-    const __m128i max = _mm_subs_epi16(
-        _mm_subs_epi16(_mm_slli_epi16(one, bd), one), t80);
-    const __m128i min = _mm_subs_epi16(zero, t80);
-    ubounded = _mm_cmpgt_epi16(value, max);
-    lbounded = _mm_cmplt_epi16(value, min);
-    retval = _mm_andnot_si128(_mm_or_si128(ubounded, lbounded), value);
-    ubounded = _mm_and_si128(ubounded, max);
-    lbounded = _mm_and_si128(lbounded, min);
-    retval = _mm_or_si128(retval, ubounded);
-    retval = _mm_or_si128(retval, lbounded);
-    return retval;
+  const __m128i zero = _mm_set1_epi16(0);
+  const __m128i one = _mm_set1_epi16(1);
+  __m128i t80, max, min;
+
+  if (bd == 8) {
+    t80 = _mm_set1_epi16(0x80);
+    max = _mm_subs_epi16(
+              _mm_subs_epi16(_mm_slli_epi16(one, 8), one), t80);
+  } else if (bd == 10) {
+    t80 = _mm_set1_epi16(0x200);
+    max = _mm_subs_epi16(
+              _mm_subs_epi16(_mm_slli_epi16(one, 10), one), t80);
+  } else {  // bd == 12
+    t80 = _mm_set1_epi16(0x800);
+    max = _mm_subs_epi16(
+              _mm_subs_epi16(_mm_slli_epi16(one, 12), one), t80);
+  }
+
+  min = _mm_subs_epi16(zero, t80);
+
+  ubounded = _mm_cmpgt_epi16(value, max);
+  lbounded = _mm_cmplt_epi16(value, min);
+  retval = _mm_andnot_si128(_mm_or_si128(ubounded, lbounded), value);
+  ubounded = _mm_and_si128(ubounded, max);
+  lbounded = _mm_and_si128(lbounded, min);
+  retval = _mm_or_si128(retval, ubounded);
+  retval = _mm_or_si128(retval, lbounded);
+  return retval;
 }
 
 // TODO(debargha, peter): Break up large functions into smaller ones
