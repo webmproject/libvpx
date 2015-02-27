@@ -519,13 +519,14 @@ void vp9_set_vbp_thresholds(VP9_COMP *cpi, int q) {
 #endif
 
 #if GLOBAL_MOTION
-static int vector_match(int16_t *ref, int16_t *src) {
+static int vector_match(int16_t *ref, int16_t *src, int length) {
   int best_sad = INT_MAX;
   int this_sad;
   int d;
   int center, offset = 0;
-  for (d = 0; d <= 64; d += 16) {
-    this_sad = vp9_vector_sad(&ref[d], src, 64);
+  int bw = length;  // redundant variable, to be changed in the experiments.
+  for (d = 0; d <= bw; d += 16) {
+    this_sad = vp9_vector_sad(&ref[d], src, length);
     if (this_sad < best_sad) {
       best_sad = this_sad;
       offset = d;
@@ -536,9 +537,9 @@ static int vector_match(int16_t *ref, int16_t *src) {
   for (d = -8; d <= 8; d += 16) {
     int this_pos = offset + d;
     // check limit
-    if (this_pos < 0 || this_pos > 64)
+    if (this_pos < 0 || this_pos > bw)
       continue;
-    this_sad = vp9_vector_sad(&ref[this_pos], src, 64);
+    this_sad = vp9_vector_sad(&ref[this_pos], src, length);
     if (this_sad < best_sad) {
       best_sad = this_sad;
       center = this_pos;
@@ -549,9 +550,9 @@ static int vector_match(int16_t *ref, int16_t *src) {
   for (d = -4; d <= 4; d += 8) {
     int this_pos = offset + d;
     // check limit
-    if (this_pos < 0 || this_pos > 64)
+    if (this_pos < 0 || this_pos > bw)
       continue;
-    this_sad = vp9_vector_sad(&ref[this_pos], src, 64);
+    this_sad = vp9_vector_sad(&ref[this_pos], src, length);
     if (this_sad < best_sad) {
       best_sad = this_sad;
       center = this_pos;
@@ -562,9 +563,9 @@ static int vector_match(int16_t *ref, int16_t *src) {
   for (d = -2; d <= 2; d += 4) {
     int this_pos = offset + d;
     // check limit
-    if (this_pos < 0 || this_pos > 64)
+    if (this_pos < 0 || this_pos > bw)
       continue;
-    this_sad = vp9_vector_sad(&ref[this_pos], src, 64);
+    this_sad = vp9_vector_sad(&ref[this_pos], src, length);
     if (this_sad < best_sad) {
       best_sad = this_sad;
       center = this_pos;
@@ -575,16 +576,16 @@ static int vector_match(int16_t *ref, int16_t *src) {
   for (d = -1; d <= 1; d += 2) {
     int this_pos = offset + d;
     // check limit
-    if (this_pos < 0 || this_pos > 64)
+    if (this_pos < 0 || this_pos > bw)
       continue;
-    this_sad = vp9_vector_sad(&ref[this_pos], src, 64);
+    this_sad = vp9_vector_sad(&ref[this_pos], src, length);
     if (this_sad < best_sad) {
       best_sad = this_sad;
       center = this_pos;
     }
   }
 
-  return (center - 32);
+  return (center - (bw >> 1));
 }
 
 static const MV search_pos[9] = {
@@ -592,16 +593,18 @@ static const MV search_pos[9] = {
   {1, -1}, {1, 0}, {1, 1},
 };
 
-static void motion_estimation(VP9_COMP *cpi, MACROBLOCK *x) {
+static void motion_estimation(VP9_COMP *cpi, MACROBLOCK *x,
+                              BLOCK_SIZE bsize) {
   MACROBLOCKD *xd = &x->e_mbd;
   DECLARE_ALIGNED(16, int16_t, hbuf[128]);
   DECLARE_ALIGNED(16, int16_t, vbuf[128]);
   DECLARE_ALIGNED(16, int16_t, src_hbuf[64]);
   DECLARE_ALIGNED(16, int16_t, src_vbuf[64]);
   int idx;
-  const int stride = 64;
-  const int search_width = 128;
-  const int search_height = 128;
+  const int bw = 4 << b_width_log2_lookup[bsize];
+  const int bh = 4 << b_height_log2_lookup[bsize];
+  const int search_width = bw << 1;
+  const int search_height = bh << 1;
   const int src_stride = x->plane[0].src.stride;
   const int ref_stride = xd->plane[0].pre[0].stride;
   uint8_t const *ref_buf, *src_buf;
@@ -610,34 +613,33 @@ static void motion_estimation(VP9_COMP *cpi, MACROBLOCK *x) {
   MV this_mv;
 
   // Set up prediction 1-D reference set
-  ref_buf = xd->plane[0].pre[0].buf + (-32);
+  ref_buf = xd->plane[0].pre[0].buf - (bw >> 1);
   for (idx = 0; idx < search_width; idx += 16) {
-    vp9_int_pro_row(&hbuf[idx], ref_buf, ref_stride, 64);
+    vp9_int_pro_row(&hbuf[idx], ref_buf, ref_stride, bh);
     ref_buf += 16;
   }
 
-  ref_buf = xd->plane[0].pre[0].buf + (-32) * ref_stride;
+  ref_buf = xd->plane[0].pre[0].buf - (bh >> 1) * ref_stride;
   for (idx = 0; idx < search_height; ++idx) {
-    vbuf[idx] = vp9_int_pro_col(ref_buf, 64);
+    vbuf[idx] = vp9_int_pro_col(ref_buf, bw);
     ref_buf += ref_stride;
   }
 
   // Set up src 1-D reference set
-  for (idx = 0; idx < stride; idx += 16) {
+  for (idx = 0; idx < bw; idx += 16) {
     src_buf = x->plane[0].src.buf + idx;
-    vp9_int_pro_row(&src_hbuf[idx], src_buf, src_stride, 64);
+    vp9_int_pro_row(&src_hbuf[idx], src_buf, src_stride, bh);
   }
 
   src_buf = x->plane[0].src.buf;
-  for (idx = 0; idx < stride; ++idx) {
-    src_vbuf[idx] = vp9_int_pro_col(src_buf, 64);
+  for (idx = 0; idx < bh; ++idx) {
+    src_vbuf[idx] = vp9_int_pro_col(src_buf, bw);
     src_buf += src_stride;
   }
 
   // Find the best match per 1-D search
-
-  tmp_mv->col = vector_match(hbuf, src_hbuf);
-  tmp_mv->row = vector_match(vbuf, src_vbuf);
+  tmp_mv->col = vector_match(hbuf, src_hbuf, bw);
+  tmp_mv->row = vector_match(vbuf, src_vbuf, bh);
 
   best_sad = INT_MAX;
   this_mv = *tmp_mv;
@@ -648,8 +650,8 @@ static void motion_estimation(VP9_COMP *cpi, MACROBLOCK *x) {
         (search_pos[idx].row + this_mv.row) * ref_stride +
         (search_pos[idx].col + this_mv.col);
 
-    this_sad = cpi->fn_ptr[BLOCK_64X64].sdf(src_buf, src_stride,
-                                            ref_buf, ref_stride);
+    this_sad = cpi->fn_ptr[bsize].sdf(src_buf, src_stride,
+                                      ref_buf, ref_stride);
     if (this_sad < best_sad) {
       best_sad = this_sad;
       tmp_mv->row = search_pos[idx].row + this_mv.row;
@@ -717,7 +719,7 @@ static void choose_partitioning(VP9_COMP *cpi,
     mbmi->interp_filter = BILINEAR;
 
 #if GLOBAL_MOTION
-    motion_estimation(cpi, x);
+    motion_estimation(cpi, x, BLOCK_64X64);
 #endif
 
     vp9_build_inter_predictors_sb(xd, mi_row, mi_col, BLOCK_64X64);
