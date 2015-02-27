@@ -179,7 +179,7 @@ INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += $(call enabled,CODEC_EXPORTS)
 # based build systems.
 libvpx_srcs.txt:
 	@echo "    [CREATE] $@"
-	@echo $(CODEC_SRCS) | xargs -n1 echo | sort -u > $@
+	@echo $(CODEC_SRCS) | xargs -n1 echo | LC_ALL=C sort -u > $@
 CLEAN-OBJS += libvpx_srcs.txt
 
 
@@ -356,7 +356,7 @@ libvpx_test_data_url=http://downloads.webmproject.org/test_data/libvpx/$(1)
 
 libvpx_test_srcs.txt:
 	@echo "    [CREATE] $@"
-	@echo $(LIBVPX_TEST_SRCS) | xargs -n1 echo | sort -u > $@
+	@echo $(LIBVPX_TEST_SRCS) | xargs -n1 echo | LC_ALL=C sort -u > $@
 CLEAN-OBJS += libvpx_test_srcs.txt
 
 $(LIBVPX_TEST_DATA): $(SRC_PATH_BARE)/test/test-data.sha1
