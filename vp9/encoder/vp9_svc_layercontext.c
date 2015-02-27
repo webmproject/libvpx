@@ -380,13 +380,14 @@ int vp9_svc_start_frame(VP9_COMP *const cpi) {
     }
   }
 
-  if (vp9_set_size_literal(cpi, width, height) != 0)
-    return VPX_CODEC_INVALID_PARAM;
-
   cpi->oxcf.worst_allowed_q = vp9_quantizer_to_qindex(lc->max_q);
   cpi->oxcf.best_allowed_q = vp9_quantizer_to_qindex(lc->min_q);
 
   vp9_change_config(cpi, &cpi->oxcf);
+
+  if (vp9_set_size_literal(cpi, width, height) != 0)
+    return VPX_CODEC_INVALID_PARAM;
+
   vp9_set_high_precision_mv(cpi, 1);
 
   cpi->alt_ref_source = get_layer_context(cpi)->alt_ref_source;
