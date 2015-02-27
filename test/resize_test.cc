@@ -360,6 +360,7 @@ class ResizingCspVideoSource : public ::libvpx_test::DummyVideoSource {
 
 TEST_P(ResizeCspTest, TestResizeCspWorks) {
   ResizingCspVideoSource video;
+  init_flags_ = VPX_CODEC_USE_PSNR;
   cfg_.rc_min_quantizer = cfg_.rc_max_quantizer = 48;
   cfg_.g_lag_in_frames = 0;
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
