@@ -110,9 +110,9 @@ void vp9_copy_and_extend_frame(const YV12_BUFFER_CONFIG *src,
   // Motion estimation may use src block variance with the block size up
   // to 64x64, so the right and bottom need to be extended to 64 multiple
   // or up to 16, whichever is greater.
-  const int eb_y = MAX(src->y_width + 16, ALIGN_POWER_OF_TWO(src->y_width, 6))
+  const int er_y = MAX(src->y_width + 16, ALIGN_POWER_OF_TWO(src->y_width, 6))
       - src->y_crop_width;
-  const int er_y = MAX(src->y_height + 16, ALIGN_POWER_OF_TWO(src->y_height, 6))
+  const int eb_y = MAX(src->y_height + 16, ALIGN_POWER_OF_TWO(src->y_height, 6))
       - src->y_crop_height;
   const int uv_width_subsampling = (src->uv_width != src->y_width);
   const int uv_height_subsampling = (src->uv_height != src->y_height);
