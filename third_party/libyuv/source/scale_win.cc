@@ -103,17 +103,16 @@ void ScaleRowDown2_SSE2(const uint8* src_ptr, ptrdiff_t src_stride,
     mov        edx, [esp + 12]       // dst_ptr
     mov        ecx, [esp + 16]       // dst_width
 
-    align      4
   wloop:
-    movdqa     xmm0, [eax]
-    movdqa     xmm1, [eax + 16]
+    movdqu     xmm0, [eax]
+    movdqu     xmm1, [eax + 16]
     lea        eax,  [eax + 32]
     psrlw      xmm0, 8               // isolate odd pixels.
     psrlw      xmm1, 8
     packuswb   xmm0, xmm1
-    sub        ecx, 16
-    movdqa     [edx], xmm0
+    movdqu     [edx], xmm0
     lea        edx, [edx + 16]
+    sub        ecx, 16
     jg         wloop
 
     ret
@@ -133,10 +132,9 @@ void ScaleRowDown2Linear_SSE2(const uint8* src_ptr, ptrdiff_t src_stride,
     pcmpeqb    xmm5, xmm5            // generate mask 0x00ff00ff
     psrlw      xmm5, 8
 
-    align      4
   wloop:
-    movdqa     xmm0, [eax]
-    movdqa     xmm1, [eax + 16]
+    movdqu     xmm0, [eax]
+    movdqu     xmm1, [eax + 16]
     lea        eax,  [eax + 32]
 
     movdqa     xmm2, xmm0            // average columns (32 to 16 pixels)
@@ -149,9 +147,9 @@ void ScaleRowDown2Linear_SSE2(const uint8* src_ptr, ptrdiff_t src_stride,
     pavgw      xmm1, xmm3
     packuswb   xmm0, xmm1
 
-    sub        ecx, 16
-    movdqa     [edx], xmm0
+    movdqu     [edx], xmm0
     lea        edx, [edx + 16]
+    sub        ecx, 16
     jg         wloop
 
     ret
@@ -172,120 +170,6 @@ void ScaleRowDown2Box_SSE2(const uint8* src_ptr, ptrdiff_t src_stride,
     pcmpeqb    xmm5, xmm5            // generate mask 0x00ff00ff
     psrlw      xmm5, 8
 
-    align      4
-  wloop:
-    movdqa     xmm0, [eax]
-    movdqa     xmm1, [eax + 16]
-    movdqa     xmm2, [eax + esi]
-    movdqa     xmm3, [eax + esi + 16]
-    lea        eax,  [eax + 32]
-    pavgb      xmm0, xmm2            // average rows
-    pavgb      xmm1, xmm3
-
-    movdqa     xmm2, xmm0            // average columns (32 to 16 pixels)
-    psrlw      xmm0, 8
-    movdqa     xmm3, xmm1
-    psrlw      xmm1, 8
-    pand       xmm2, xmm5
-    pand       xmm3, xmm5
-    pavgw      xmm0, xmm2
-    pavgw      xmm1, xmm3
-    packuswb   xmm0, xmm1
-
-    sub        ecx, 16
-    movdqa     [edx], xmm0
-    lea        edx, [edx + 16]
-    jg         wloop
-
-    pop        esi
-    ret
-  }
-}
-
-// Reads 32 pixels, throws half away and writes 16 pixels.
-// Alignment requirement: src_ptr 16 byte aligned, dst_ptr 16 byte aligned.
-__declspec(naked) __declspec(align(16))
-void ScaleRowDown2_Unaligned_SSE2(const uint8* src_ptr,
-                                  ptrdiff_t src_stride,
-                                  uint8* dst_ptr, int dst_width) {
-  __asm {
-    mov        eax, [esp + 4]        // src_ptr
-                                     // src_stride ignored
-    mov        edx, [esp + 12]       // dst_ptr
-    mov        ecx, [esp + 16]       // dst_width
-
-    align      4
-  wloop:
-    movdqu     xmm0, [eax]
-    movdqu     xmm1, [eax + 16]
-    lea        eax,  [eax + 32]
-    psrlw      xmm0, 8               // isolate odd pixels.
-    psrlw      xmm1, 8
-    packuswb   xmm0, xmm1
-    sub        ecx, 16
-    movdqu     [edx], xmm0
-    lea        edx, [edx + 16]
-    jg         wloop
-
-    ret
-  }
-}
-
-// Blends 32x1 rectangle to 16x1.
-// Alignment requirement: src_ptr 16 byte aligned, dst_ptr 16 byte aligned.
-__declspec(naked) __declspec(align(16))
-void ScaleRowDown2Linear_Unaligned_SSE2(const uint8* src_ptr,
-                                        ptrdiff_t src_stride,
-                                        uint8* dst_ptr, int dst_width) {
-  __asm {
-    mov        eax, [esp + 4]        // src_ptr
-                                     // src_stride
-    mov        edx, [esp + 12]       // dst_ptr
-    mov        ecx, [esp + 16]       // dst_width
-    pcmpeqb    xmm5, xmm5            // generate mask 0x00ff00ff
-    psrlw      xmm5, 8
-
-    align      4
-  wloop:
-    movdqu     xmm0, [eax]
-    movdqu     xmm1, [eax + 16]
-    lea        eax,  [eax + 32]
-
-    movdqa     xmm2, xmm0            // average columns (32 to 16 pixels)
-    psrlw      xmm0, 8
-    movdqa     xmm3, xmm1
-    psrlw      xmm1, 8
-    pand       xmm2, xmm5
-    pand       xmm3, xmm5
-    pavgw      xmm0, xmm2
-    pavgw      xmm1, xmm3
-    packuswb   xmm0, xmm1
-
-    sub        ecx, 16
-    movdqu     [edx], xmm0
-    lea        edx, [edx + 16]
-    jg         wloop
-
-    ret
-  }
-}
-
-// Blends 32x2 rectangle to 16x1.
-// Alignment requirement: src_ptr 16 byte aligned, dst_ptr 16 byte aligned.
-__declspec(naked) __declspec(align(16))
-void ScaleRowDown2Box_Unaligned_SSE2(const uint8* src_ptr,
-                                     ptrdiff_t src_stride,
-                                     uint8* dst_ptr, int dst_width) {
-  __asm {
-    push       esi
-    mov        eax, [esp + 4 + 4]    // src_ptr
-    mov        esi, [esp + 4 + 8]    // src_stride
-    mov        edx, [esp + 4 + 12]   // dst_ptr
-    mov        ecx, [esp + 4 + 16]   // dst_width
-    pcmpeqb    xmm5, xmm5            // generate mask 0x00ff00ff
-    psrlw      xmm5, 8
-
-    align      4
   wloop:
     movdqu     xmm0, [eax]
     movdqu     xmm1, [eax + 16]
@@ -305,9 +189,9 @@ void ScaleRowDown2Box_Unaligned_SSE2(const uint8* src_ptr,
     pavgw      xmm1, xmm3
     packuswb   xmm0, xmm1
 
-    sub        ecx, 16
     movdqu     [edx], xmm0
     lea        edx, [edx + 16]
+    sub        ecx, 16
     jg         wloop
 
     pop        esi
@@ -329,19 +213,18 @@ void ScaleRowDown4_SSE2(const uint8* src_ptr, ptrdiff_t src_stride,
     psrld      xmm5, 24
     pslld      xmm5, 16
 
-    align      4
   wloop:
-    movdqa     xmm0, [eax]
-    movdqa     xmm1, [eax + 16]
+    movdqu     xmm0, [eax]
+    movdqu     xmm1, [eax + 16]
     lea        eax,  [eax + 32]
     pand       xmm0, xmm5
     pand       xmm1, xmm5
     packuswb   xmm0, xmm1
     psrlw      xmm0, 8
     packuswb   xmm0, xmm0
-    sub        ecx, 8
     movq       qword ptr [edx], xmm0
     lea        edx, [edx + 8]
+    sub        ecx, 8
     jg         wloop
 
     ret
@@ -364,18 +247,17 @@ void ScaleRowDown4Box_SSE2(const uint8* src_ptr, ptrdiff_t src_stride,
     pcmpeqb    xmm7, xmm7            // generate mask 0x00ff00ff
     psrlw      xmm7, 8
 
-    align      4
   wloop:
-    movdqa     xmm0, [eax]
-    movdqa     xmm1, [eax + 16]
-    movdqa     xmm2, [eax + esi]
-    movdqa     xmm3, [eax + esi + 16]
+    movdqu     xmm0, [eax]
+    movdqu     xmm1, [eax + 16]
+    movdqu     xmm2, [eax + esi]
+    movdqu     xmm3, [eax + esi + 16]
     pavgb      xmm0, xmm2            // average rows
     pavgb      xmm1, xmm3
-    movdqa     xmm2, [eax + esi * 2]
-    movdqa     xmm3, [eax + esi * 2 + 16]
-    movdqa     xmm4, [eax + edi]
-    movdqa     xmm5, [eax + edi + 16]
+    movdqu     xmm2, [eax + esi * 2]
+    movdqu     xmm3, [eax + esi * 2 + 16]
+    movdqu     xmm4, [eax + edi]
+    movdqu     xmm5, [eax + edi + 16]
     lea        eax, [eax + 32]
     pavgb      xmm2, xmm4
     pavgb      xmm3, xmm5
@@ -398,9 +280,9 @@ void ScaleRowDown4Box_SSE2(const uint8* src_ptr, ptrdiff_t src_stride,
     pavgw      xmm0, xmm2
     packuswb   xmm0, xmm0
 
-    sub        ecx, 8
     movq       qword ptr [edx], xmm0
     lea        edx, [edx + 8]
+    sub        ecx, 8
     jg         wloop
 
     pop        edi
@@ -427,10 +309,9 @@ void ScaleRowDown34_SSSE3(const uint8* src_ptr, ptrdiff_t src_stride,
     movdqa     xmm4, kShuf1
     movdqa     xmm5, kShuf2
 
-    align      4
   wloop:
-    movdqa     xmm0, [eax]
-    movdqa     xmm1, [eax + 16]
+    movdqu     xmm0, [eax]
+    movdqu     xmm1, [eax + 16]
     lea        eax,  [eax + 32]
     movdqa     xmm2, xmm1
     palignr    xmm1, xmm0, 8
@@ -481,10 +362,9 @@ void ScaleRowDown34_1_Box_SSSE3(const uint8* src_ptr,
     movdqa     xmm6, kMadd11
     movdqa     xmm7, kRound34
 
-    align      4
   wloop:
-    movdqa     xmm0, [eax]           // pixels 0..7
-    movdqa     xmm1, [eax + esi]
+    movdqu     xmm0, [eax]           // pixels 0..7
+    movdqu     xmm1, [eax + esi]
     pavgb      xmm0, xmm1
     pshufb     xmm0, xmm2
     pmaddubsw  xmm0, xmm5
@@ -501,8 +381,8 @@ void ScaleRowDown34_1_Box_SSSE3(const uint8* src_ptr,
     psrlw      xmm0, 2
     packuswb   xmm0, xmm0
     movq       qword ptr [edx + 8], xmm0
-    movdqa     xmm0, [eax + 16]      // pixels 16..23
-    movdqa     xmm1, [eax + esi + 16]
+    movdqu     xmm0, [eax + 16]      // pixels 16..23
+    movdqu     xmm1, [eax + esi + 16]
     lea        eax, [eax + 32]
     pavgb      xmm0, xmm1
     pshufb     xmm0, xmm4
@@ -511,9 +391,9 @@ void ScaleRowDown34_1_Box_SSSE3(const uint8* src_ptr,
     paddsw     xmm0, xmm7
     psrlw      xmm0, 2
     packuswb   xmm0, xmm0
-    sub        ecx, 24
     movq       qword ptr [edx + 16], xmm0
     lea        edx, [edx + 24]
+    sub        ecx, 24
     jg         wloop
 
     pop        esi
@@ -540,10 +420,9 @@ void ScaleRowDown34_0_Box_SSSE3(const uint8* src_ptr,
     movdqa     xmm6, kMadd11
     movdqa     xmm7, kRound34
 
-    align      4
   wloop:
-    movdqa     xmm0, [eax]           // pixels 0..7
-    movdqa     xmm1, [eax + esi]
+    movdqu     xmm0, [eax]           // pixels 0..7
+    movdqu     xmm1, [eax + esi]
     pavgb      xmm1, xmm0
     pavgb      xmm0, xmm1
     pshufb     xmm0, xmm2
@@ -562,8 +441,8 @@ void ScaleRowDown34_0_Box_SSSE3(const uint8* src_ptr,
     psrlw      xmm0, 2
     packuswb   xmm0, xmm0
     movq       qword ptr [edx + 8], xmm0
-    movdqa     xmm0, [eax + 16]      // pixels 16..23
-    movdqa     xmm1, [eax + esi + 16]
+    movdqu     xmm0, [eax + 16]      // pixels 16..23
+    movdqu     xmm1, [eax + esi + 16]
     lea        eax, [eax + 32]
     pavgb      xmm1, xmm0
     pavgb      xmm0, xmm1
@@ -573,9 +452,9 @@ void ScaleRowDown34_0_Box_SSSE3(const uint8* src_ptr,
     paddsw     xmm0, xmm7
     psrlw      xmm0, 2
     packuswb   xmm0, xmm0
-    sub        ecx, 24
     movq       qword ptr [edx + 16], xmm0
     lea        edx, [edx+24]
+    sub        ecx, 24
     jg         wloop
 
     pop        esi
@@ -597,20 +476,19 @@ void ScaleRowDown38_SSSE3(const uint8* src_ptr, ptrdiff_t src_stride,
     movdqa     xmm4, kShuf38a
     movdqa     xmm5, kShuf38b
 
-    align      4
   xloop:
-    movdqa     xmm0, [eax]           // 16 pixels -> 0,1,2,3,4,5
-    movdqa     xmm1, [eax + 16]      // 16 pixels -> 6,7,8,9,10,11
+    movdqu     xmm0, [eax]           // 16 pixels -> 0,1,2,3,4,5
+    movdqu     xmm1, [eax + 16]      // 16 pixels -> 6,7,8,9,10,11
     lea        eax, [eax + 32]
     pshufb     xmm0, xmm4
     pshufb     xmm1, xmm5
     paddusb    xmm0, xmm1
 
-    sub        ecx, 12
     movq       qword ptr [edx], xmm0  // write 12 pixels
     movhlps    xmm1, xmm0
     movd       [edx + 8], xmm1
     lea        edx, [edx + 12]
+    sub        ecx, 12
     jg         xloop
 
     ret
@@ -633,10 +511,9 @@ void ScaleRowDown38_3_Box_SSSE3(const uint8* src_ptr,
     movdqa     xmm4, kScaleAc33
     pxor       xmm5, xmm5
 
-    align      4
   xloop:
-    movdqa     xmm0, [eax]           // sum up 3 rows into xmm0/1
-    movdqa     xmm6, [eax + esi]
+    movdqu     xmm0, [eax]           // sum up 3 rows into xmm0/1
+    movdqu     xmm6, [eax + esi]
     movhlps    xmm1, xmm0
     movhlps    xmm7, xmm6
     punpcklbw  xmm0, xmm5
@@ -645,7 +522,7 @@ void ScaleRowDown38_3_Box_SSSE3(const uint8* src_ptr,
     punpcklbw  xmm7, xmm5
     paddusw    xmm0, xmm6
     paddusw    xmm1, xmm7
-    movdqa     xmm6, [eax + esi * 2]
+    movdqu     xmm6, [eax + esi * 2]
     lea        eax, [eax + 16]
     movhlps    xmm7, xmm6
     punpcklbw  xmm6, xmm5
@@ -671,11 +548,11 @@ void ScaleRowDown38_3_Box_SSSE3(const uint8* src_ptr,
     pmulhuw    xmm6, xmm4            // divide by 9,9,6, 9,9,6
     packuswb   xmm6, xmm6
 
-    sub        ecx, 6
     movd       [edx], xmm6           // write 6 pixels
     psrlq      xmm6, 16
     movd       [edx + 2], xmm6
     lea        edx, [edx + 6]
+    sub        ecx, 6
     jg         xloop
 
     pop        esi
@@ -699,11 +576,11 @@ void ScaleRowDown38_2_Box_SSSE3(const uint8* src_ptr,
     movdqa     xmm4, kShufAb2
     movdqa     xmm5, kScaleAb2
 
-    align      4
   xloop:
-    movdqa     xmm0, [eax]           // average 2 rows into xmm0
-    pavgb      xmm0, [eax + esi]
+    movdqu     xmm0, [eax]           // average 2 rows into xmm0
+    movdqu     xmm1, [eax + esi]
     lea        eax, [eax + 16]
+    pavgb      xmm0, xmm1
 
     movdqa     xmm1, xmm0            // 16 pixels -> 0,1,2,3,4,5 of xmm1
     pshufb     xmm1, xmm2
@@ -716,11 +593,11 @@ void ScaleRowDown38_2_Box_SSSE3(const uint8* src_ptr,
     pmulhuw    xmm1, xmm5            // divide by 3,3,2, 3,3,2
     packuswb   xmm1, xmm1
 
-    sub        ecx, 6
     movd       [edx], xmm1           // write 6 pixels
     psrlq      xmm1, 16
     movd       [edx + 2], xmm1
     lea        edx, [edx + 6]
+    sub        ecx, 6
     jg         xloop
 
     pop        esi
@@ -747,10 +624,9 @@ void ScaleAddRows_SSE2(const uint8* src_ptr, ptrdiff_t src_stride,
     pxor       xmm4, xmm4
     dec        ebx
 
-    align      4
   xloop:
     // first row
-    movdqa     xmm0, [esi]
+    movdqu     xmm0, [esi]
     lea        eax, [esi + edx]
     movdqa     xmm1, xmm0
     punpcklbw  xmm0, xmm4
@@ -761,9 +637,8 @@ void ScaleAddRows_SSE2(const uint8* src_ptr, ptrdiff_t src_stride,
     je         ydone
 
     // sum remaining rows
-    align      4
   yloop:
-    movdqa     xmm2, [eax]       // read 16 pixels
+    movdqu     xmm2, [eax]       // read 16 pixels
     lea        eax, [eax + edx]  // advance to next row
     movdqa     xmm3, xmm2
     punpcklbw  xmm2, xmm4
@@ -773,10 +648,9 @@ void ScaleAddRows_SSE2(const uint8* src_ptr, ptrdiff_t src_stride,
     sub        ebp, 1
     jg         yloop
 
-    align      4
   ydone:
-    movdqa     [edi], xmm0
-    movdqa     [edi + 16], xmm1
+    movdqu     [edi], xmm0
+    movdqu     [edi + 16], xmm1
     lea        edi, [edi + 32]
 
     sub        ecx, 16
@@ -828,7 +702,6 @@ void ScaleFilterCols_SSSE3(uint8* dst_ptr, const uint8* src_ptr,
     pextrw     edx, xmm2, 3         // get x1 integer. preroll
 
     // 2 Pixel loop.
-    align      4
   xloop2:
     movdqa     xmm1, xmm2           // x0, x1 fractions.
     paddd      xmm2, xmm3           // x += dx
@@ -851,7 +724,6 @@ void ScaleFilterCols_SSSE3(uint8* dst_ptr, const uint8* src_ptr,
     sub        ecx, 2               // 2 pixels
     jge        xloop2
 
-    align      4
  xloop29:
 
     add        ecx, 2 - 1
@@ -869,7 +741,6 @@ void ScaleFilterCols_SSSE3(uint8* dst_ptr, const uint8* src_ptr,
     movd       ebx, xmm0
     mov        [edi], bl
 
-    align      4
  xloop99:
 
     pop        edi
@@ -889,17 +760,16 @@ void ScaleColsUp2_SSE2(uint8* dst_ptr, const uint8* src_ptr,
     mov        eax, [esp + 8]    // src_ptr
     mov        ecx, [esp + 12]   // dst_width
 
-    align      4
   wloop:
-    movdqa     xmm0, [eax]
+    movdqu     xmm0, [eax]
     lea        eax,  [eax + 16]
     movdqa     xmm1, xmm0
     punpcklbw  xmm0, xmm0
     punpckhbw  xmm1, xmm1
-    sub        ecx, 32
-    movdqa     [edx], xmm0
-    movdqa     [edx + 16], xmm1
+    movdqu     [edx], xmm0
+    movdqu     [edx + 16], xmm1
     lea        edx, [edx + 32]
+    sub        ecx, 32
     jg         wloop
 
     ret
@@ -918,15 +788,14 @@ void ScaleARGBRowDown2_SSE2(const uint8* src_argb,
     mov        edx, [esp + 12]       // dst_argb
     mov        ecx, [esp + 16]       // dst_width
 
-    align      4
   wloop:
-    movdqa     xmm0, [eax]
-    movdqa     xmm1, [eax + 16]
+    movdqu     xmm0, [eax]
+    movdqu     xmm1, [eax + 16]
     lea        eax,  [eax + 32]
     shufps     xmm0, xmm1, 0xdd
-    sub        ecx, 4
-    movdqa     [edx], xmm0
+    movdqu     [edx], xmm0
     lea        edx, [edx + 16]
+    sub        ecx, 4
     jg         wloop
 
     ret
@@ -945,18 +814,17 @@ void ScaleARGBRowDown2Linear_SSE2(const uint8* src_argb,
     mov        edx, [esp + 12]       // dst_argb
     mov        ecx, [esp + 16]       // dst_width
 
-    align      4
   wloop:
-    movdqa     xmm0, [eax]
-    movdqa     xmm1, [eax + 16]
+    movdqu     xmm0, [eax]
+    movdqu     xmm1, [eax + 16]
     lea        eax,  [eax + 32]
     movdqa     xmm2, xmm0
     shufps     xmm0, xmm1, 0x88      // even pixels
     shufps     xmm2, xmm1, 0xdd      // odd pixels
     pavgb      xmm0, xmm2
-    sub        ecx, 4
-    movdqa     [edx], xmm0
+    movdqu     [edx], xmm0
     lea        edx, [edx + 16]
+    sub        ecx, 4
     jg         wloop
 
     ret
@@ -976,12 +844,11 @@ void ScaleARGBRowDown2Box_SSE2(const uint8* src_argb,
     mov        edx, [esp + 4 + 12]   // dst_argb
     mov        ecx, [esp + 4 + 16]   // dst_width
 
-    align      4
   wloop:
-    movdqa     xmm0, [eax]
-    movdqa     xmm1, [eax + 16]
-    movdqa     xmm2, [eax + esi]
-    movdqa     xmm3, [eax + esi + 16]
+    movdqu     xmm0, [eax]
+    movdqu     xmm1, [eax + 16]
+    movdqu     xmm2, [eax + esi]
+    movdqu     xmm3, [eax + esi + 16]
     lea        eax,  [eax + 32]
     pavgb      xmm0, xmm2            // average rows
     pavgb      xmm1, xmm3
@@ -989,9 +856,9 @@ void ScaleARGBRowDown2Box_SSE2(const uint8* src_argb,
     shufps     xmm0, xmm1, 0x88      // even pixels
     shufps     xmm2, xmm1, 0xdd      // odd pixels
     pavgb      xmm0, xmm2
-    sub        ecx, 4
-    movdqa     [edx], xmm0
+    movdqu     [edx], xmm0
     lea        edx, [edx + 16]
+    sub        ecx, 4
     jg         wloop
 
     pop        esi
@@ -1016,7 +883,6 @@ void ScaleARGBRowDownEven_SSE2(const uint8* src_argb, ptrdiff_t src_stride,
     lea        ebx, [ebx * 4]
     lea        edi, [ebx + ebx * 2]
 
-    align      4
   wloop:
     movd       xmm0, [eax]
     movd       xmm1, [eax + ebx]
@@ -1026,9 +892,9 @@ void ScaleARGBRowDownEven_SSE2(const uint8* src_argb, ptrdiff_t src_stride,
     lea        eax,  [eax + ebx * 4]
     punpckldq  xmm2, xmm3
     punpcklqdq xmm0, xmm2
-    sub        ecx, 4
-    movdqa     [edx], xmm0
+    movdqu     [edx], xmm0
     lea        edx, [edx + 16]
+    sub        ecx, 4
     jg         wloop
 
     pop        edi
@@ -1057,7 +923,6 @@ void ScaleARGBRowDownEvenBox_SSE2(const uint8* src_argb,
     lea        ebx, [ebx * 4]
     lea        edi, [ebx + ebx * 2]
 
-    align      4
   wloop:
     movq       xmm0, qword ptr [eax]  // row0 4 pairs
     movhps     xmm0, qword ptr [eax + ebx]
@@ -1075,9 +940,9 @@ void ScaleARGBRowDownEvenBox_SSE2(const uint8* src_argb,
     shufps     xmm0, xmm1, 0x88      // even pixels
     shufps     xmm2, xmm1, 0xdd      // odd pixels
     pavgb      xmm0, xmm2
-    sub        ecx, 4
-    movdqa     [edx], xmm0
+    movdqu     [edx], xmm0
     lea        edx, [edx + 16]
+    sub        ecx, 4
     jg         wloop
 
     pop        edi
@@ -1118,7 +983,6 @@ void ScaleARGBCols_SSE2(uint8* dst_argb, const uint8* src_argb,
     jl         xloop49
 
     // 4 Pixel loop.
-    align      4
  xloop4:
     movd       xmm0, [esi + eax * 4]  // 1 source x0 pixels
     movd       xmm1, [esi + edx * 4]  // 1 source x1 pixels
@@ -1133,12 +997,11 @@ void ScaleARGBCols_SSE2(uint8* dst_argb, const uint8* src_argb,
     pextrw     edx, xmm2, 3           // get x1 integer. next iteration.
     punpckldq  xmm1, xmm4             // x2 x3
     punpcklqdq xmm0, xmm1             // x0 x1 x2 x3
-    sub        ecx, 4                 // 4 pixels
     movdqu     [edi], xmm0
     lea        edi, [edi + 16]
+    sub        ecx, 4                 // 4 pixels
     jge        xloop4
 
-    align      4
  xloop49:
     test       ecx, 2
     je         xloop29
@@ -1159,7 +1022,6 @@ void ScaleARGBCols_SSE2(uint8* dst_argb, const uint8* src_argb,
     // 1 Pixels.
     movd       xmm0, [esi + eax * 4]  // 1 source x2 pixels
     movd       dword ptr [edi], xmm0
-    align      4
  xloop99:
 
     pop        esi
@@ -1209,7 +1071,6 @@ void ScaleARGBFilterCols_SSSE3(uint8* dst_argb, const uint8* src_argb,
     pextrw     edx, xmm2, 3         // get x1 integer. preroll
 
     // 2 Pixel loop.
-    align      4
   xloop2:
     movdqa     xmm1, xmm2           // x0, x1 fractions.
     paddd      xmm2, xmm3           // x += dx
@@ -1229,7 +1090,6 @@ void ScaleARGBFilterCols_SSSE3(uint8* dst_argb, const uint8* src_argb,
     sub        ecx, 2               // 2 pixels
     jge        xloop2
 
-    align      4
  xloop29:
 
     add        ecx, 2 - 1
@@ -1246,7 +1106,6 @@ void ScaleARGBFilterCols_SSSE3(uint8* dst_argb, const uint8* src_argb,
     packuswb   xmm0, xmm0           // argb 8 bits, 1 pixel.
     movd       [edi], xmm0
 
-    align      4
  xloop99:
 
     pop        edi
@@ -1265,17 +1124,16 @@ void ScaleARGBColsUp2_SSE2(uint8* dst_argb, const uint8* src_argb,
     mov        eax, [esp + 8]    // src_argb
     mov        ecx, [esp + 12]   // dst_width
 
-    align      4
   wloop:
-    movdqa     xmm0, [eax]
+    movdqu     xmm0, [eax]
     lea        eax,  [eax + 16]
     movdqa     xmm1, xmm0
     punpckldq  xmm0, xmm0
     punpckhdq  xmm1, xmm1
-    sub        ecx, 8
-    movdqa     [edx], xmm0
-    movdqa     [edx + 16], xmm1
+    movdqu     [edx], xmm0
+    movdqu     [edx + 16], xmm1
     lea        edx, [edx + 32]
+    sub        ecx, 8
     jg         wloop
 
     ret

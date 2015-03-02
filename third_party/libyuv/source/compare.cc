@@ -19,6 +19,7 @@
 #include "libyuv/basic_types.h"
 #include "libyuv/cpu_id.h"
 #include "libyuv/row.h"
+#include "libyuv/video_common.h"
 
 #ifdef __cplusplus
 namespace libyuv {
@@ -78,6 +79,54 @@ uint32 HashDjb2(const uint8* src, uint64 count, uint32 seed) {
   return seed;
 }
 
+static uint32 ARGBDetectRow_C(const uint8* argb, int width) {
+  int x;
+  for (x = 0; x < width - 1; x += 2) {
+    if (argb[0] != 255) {  // First byte is not Alpha of 255, so not ARGB.
+      return FOURCC_BGRA;
+    }
+    if (argb[3] != 255) {  // 4th byte is not Alpha of 255, so not BGRA.
+      return FOURCC_ARGB;
+    }
+    if (argb[4] != 255) {  // Second pixel first byte is not Alpha of 255.
+      return FOURCC_BGRA;
+    }
+    if (argb[7] != 255) {  // Second pixel 4th byte is not Alpha of 255.
+      return FOURCC_ARGB;
+    }
+    argb += 8;
+  }
+  if (width & 1) {
+    if (argb[0] != 255) {  // First byte is not Alpha of 255, so not ARGB.
+      return FOURCC_BGRA;
+    }
+    if (argb[3] != 255) {  // 4th byte is not Alpha of 255, so not BGRA.
+      return FOURCC_ARGB;
+    }
+  }
+  return 0;
+}
+
+// Scan an opaque argb image and return fourcc based on alpha offset.
+// Returns FOURCC_ARGB, FOURCC_BGRA, or 0 if unknown.
+LIBYUV_API
+uint32 ARGBDetect(const uint8* argb, int stride_argb, int width, int height) {
+  uint32 fourcc = 0;
+  int h;
+
+  // Coalesce rows.
+  if (stride_argb == width * 4) {
+    width *= height;
+    height = 1;
+    stride_argb = 0;
+  }
+  for (h = 0; h < height && fourcc == 0; ++h) {
+    fourcc = ARGBDetectRow_C(argb, width);
+    argb += stride_argb;
+  }
+  return fourcc;
+}
+
 uint32 SumSquareError_C(const uint8* src_a, const uint8* src_b, int count);
 #if !defined(LIBYUV_DISABLE_NEON) && \
     (defined(__ARM_NEON__) || defined(LIBYUV_NEON) || defined(__aarch64__))
@@ -114,8 +163,7 @@ uint64 ComputeSumSquareError(const uint8* src_a, const uint8* src_b,
   }
 #endif
 #if defined(HAS_SUMSQUAREERROR_SSE2)
-  if (TestCpuFlag(kCpuHasSSE2) &&
-      IS_ALIGNED(src_a, 16) && IS_ALIGNED(src_b, 16)) {
+  if (TestCpuFlag(kCpuHasSSE2)) {
     // Note only used for multiples of 16 so count is not checked.
     SumSquareError = SumSquareError_SSE2;
   }

@@ -52,7 +52,8 @@ void CpuId(uint32 info_eax, uint32 info_ecx, uint32* cpu_info) {
 #if defined(_MSC_VER) && !defined(__clang__)
 #if (_MSC_FULL_VER >= 160040219)
   __cpuidex((int*)(cpu_info), info_eax, info_ecx);
-#elif defined(_M_IX86)
+#endif
+#if defined(_M_IX86)
   __asm {
     mov        eax, info_eax
     mov        ecx, info_ecx
@@ -98,13 +99,15 @@ int TestOsSaveYmm() {
   uint32 xcr0 = 0u;
 #if defined(_MSC_VER) && (_MSC_FULL_VER >= 160040219)
   xcr0 = (uint32)(_xgetbv(0));  // VS2010 SP1 required.
-#elif defined(_M_IX86) && defined(_MSC_VER)
+#endif
+#if defined(_M_IX86) && defined(_MSC_VER)
   __asm {
     xor        ecx, ecx    // xcr 0
     _asm _emit 0x0f _asm _emit 0x01 _asm _emit 0xd0  // For VS2010 and earlier.
     mov        xcr0, eax
   }
-#elif defined(__i386__) || defined(__x86_64__)
+#endif
+#if defined(__i386__) || defined(__x86_64__)
   asm(".byte 0x0f, 0x01, 0xd0" : "=a" (xcr0) : "c" (0) : "%edx");
 #endif  // defined(_MSC_VER)
   return((xcr0 & 6) == 6);  // Is ymm saved?
@@ -132,6 +135,12 @@ int ArmCpuCaps(const char* cpuinfo_name) {
     if (memcmp(cpuinfo_line, "Features", 8) == 0) {
       char* p = strstr(cpuinfo_line, " neon");
       if (p && (p[5] == ' ' || p[5] == '\n')) {
+        fclose(f);
+        return kCpuHasNEON;
+      }
+      // aarch64 uses asimd for Neon.
+      p = strstr(cpuinfo_line, " asimd");
+      if (p && (p[6] == ' ' || p[6] == '\n')) {
         fclose(f);
         return kCpuHasNEON;
       }
@@ -240,7 +249,8 @@ int InitCpuFlags(void) {
   if (TestEnv("LIBYUV_DISABLE_FMA3")) {
     cpu_info_ &= ~kCpuHasFMA3;
   }
-#elif defined(__mips__) && defined(__linux__)
+#endif
+#if defined(__mips__) && defined(__linux__)
   // Linux mips parse text file for dsp detect.
   cpu_info_ = MipsCpuCaps("dsp");  // set kCpuHasMIPS_DSP.
 #if defined(__mips_dspr2)
@@ -257,7 +267,8 @@ int InitCpuFlags(void) {
   if (getenv("LIBYUV_DISABLE_MIPS_DSPR2")) {
     cpu_info_ &= ~kCpuHasMIPS_DSPR2;
   }
-#elif defined(__arm__) || defined(__aarch64__)
+#endif
+#if defined(__arm__) || defined(__aarch64__)
 // gcc -mfpu=neon defines __ARM_NEON__
 // __ARM_NEON__ generates code that requires Neon.  NaCL also requires Neon.
 // For Linux, /proc/cpuinfo can be tested but without that assume Neon.
@@ -266,7 +277,8 @@ int InitCpuFlags(void) {
 // For aarch64(arm64), /proc/cpuinfo's feature is not complete, e.g. no neon
 // flag in it.
 // So for aarch64, neon enabling is hard coded here.
-#elif defined(__aarch64__)
+#endif
+#if defined(__aarch64__)
   cpu_info_ = kCpuHasNEON;
 #else
   // Linux arm parse text file for neon detect.

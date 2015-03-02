@@ -885,31 +885,23 @@ void ScalePlaneVertical(int src_height,
   assert(dst_height > 0);
   src_argb += (x >> 16) * bpp;
 #if defined(HAS_INTERPOLATEROW_SSE2)
-  if (TestCpuFlag(kCpuHasSSE2) && dst_width_bytes >= 16) {
+  if (TestCpuFlag(kCpuHasSSE2)) {
     InterpolateRow = InterpolateRow_Any_SSE2;
     if (IS_ALIGNED(dst_width_bytes, 16)) {
-      InterpolateRow = InterpolateRow_Unaligned_SSE2;
-      if (IS_ALIGNED(src_argb, 16) && IS_ALIGNED(src_stride, 16) &&
-          IS_ALIGNED(dst_argb, 16) && IS_ALIGNED(dst_stride, 16)) {
-        InterpolateRow = InterpolateRow_SSE2;
-      }
+      InterpolateRow = InterpolateRow_SSE2;
     }
   }
 #endif
 #if defined(HAS_INTERPOLATEROW_SSSE3)
-  if (TestCpuFlag(kCpuHasSSSE3) && dst_width_bytes >= 16) {
+  if (TestCpuFlag(kCpuHasSSSE3)) {
     InterpolateRow = InterpolateRow_Any_SSSE3;
     if (IS_ALIGNED(dst_width_bytes, 16)) {
-      InterpolateRow = InterpolateRow_Unaligned_SSSE3;
-      if (IS_ALIGNED(src_argb, 16) && IS_ALIGNED(src_stride, 16) &&
-          IS_ALIGNED(dst_argb, 16) && IS_ALIGNED(dst_stride, 16)) {
-        InterpolateRow = InterpolateRow_SSSE3;
-      }
+      InterpolateRow = InterpolateRow_SSSE3;
     }
   }
 #endif
 #if defined(HAS_INTERPOLATEROW_AVX2)
-  if (TestCpuFlag(kCpuHasAVX2) && dst_width_bytes >= 32) {
+  if (TestCpuFlag(kCpuHasAVX2)) {
     InterpolateRow = InterpolateRow_Any_AVX2;
     if (IS_ALIGNED(dst_width_bytes, 32)) {
       InterpolateRow = InterpolateRow_AVX2;
@@ -917,15 +909,15 @@ void ScalePlaneVertical(int src_height,
   }
 #endif
 #if defined(HAS_INTERPOLATEROW_NEON)
-  if (TestCpuFlag(kCpuHasNEON) && dst_width_bytes >= 16) {
+  if (TestCpuFlag(kCpuHasNEON)) {
     InterpolateRow = InterpolateRow_Any_NEON;
     if (IS_ALIGNED(dst_width_bytes, 16)) {
       InterpolateRow = InterpolateRow_NEON;
     }
   }
 #endif
-#if defined(HAS_INTERPOLATEROWS_MIPS_DSPR2)
-  if (TestCpuFlag(kCpuHasMIPS_DSPR2) && dst_width_bytes >= 4 &&
+#if defined(HAS_INTERPOLATEROW_MIPS_DSPR2)
+  if (TestCpuFlag(kCpuHasMIPS_DSPR2) &&
       IS_ALIGNED(src_argb, 4) && IS_ALIGNED(src_stride, 4) &&
       IS_ALIGNED(dst_argb, 4) && IS_ALIGNED(dst_stride, 4)) {
     InterpolateRow = InterpolateRow_Any_MIPS_DSPR2;
@@ -967,31 +959,23 @@ void ScalePlaneVertical_16(int src_height,
   assert(dst_height > 0);
   src_argb += (x >> 16) * wpp;
 #if defined(HAS_INTERPOLATEROW_16_SSE2)
-  if (TestCpuFlag(kCpuHasSSE2) && dst_width_bytes >= 16) {
+  if (TestCpuFlag(kCpuHasSSE2)) {
     InterpolateRow = InterpolateRow_Any_16_SSE2;
     if (IS_ALIGNED(dst_width_bytes, 16)) {
-      InterpolateRow = InterpolateRow_Unaligned_16_SSE2;
-      if (IS_ALIGNED(src_argb, 16) && IS_ALIGNED(src_stride, 16) &&
-          IS_ALIGNED(dst_argb, 16) && IS_ALIGNED(dst_stride, 16)) {
-        InterpolateRow = InterpolateRow_16_SSE2;
-      }
+      InterpolateRow = InterpolateRow_16_SSE2;
     }
   }
 #endif
 #if defined(HAS_INTERPOLATEROW_16_SSSE3)
-  if (TestCpuFlag(kCpuHasSSSE3) && dst_width_bytes >= 16) {
+  if (TestCpuFlag(kCpuHasSSSE3)) {
     InterpolateRow = InterpolateRow_Any_16_SSSE3;
     if (IS_ALIGNED(dst_width_bytes, 16)) {
-      InterpolateRow = InterpolateRow_Unaligned_16_SSSE3;
-      if (IS_ALIGNED(src_argb, 16) && IS_ALIGNED(src_stride, 16) &&
-          IS_ALIGNED(dst_argb, 16) && IS_ALIGNED(dst_stride, 16)) {
-        InterpolateRow = InterpolateRow_16_SSSE3;
-      }
+      InterpolateRow = InterpolateRow_16_SSSE3;
     }
   }
 #endif
 #if defined(HAS_INTERPOLATEROW_16_AVX2)
-  if (TestCpuFlag(kCpuHasAVX2) && dst_width_bytes >= 32) {
+  if (TestCpuFlag(kCpuHasAVX2)) {
     InterpolateRow = InterpolateRow_Any_16_AVX2;
     if (IS_ALIGNED(dst_width_bytes, 32)) {
       InterpolateRow = InterpolateRow_16_AVX2;
@@ -999,15 +983,15 @@ void ScalePlaneVertical_16(int src_height,
   }
 #endif
 #if defined(HAS_INTERPOLATEROW_16_NEON)
-  if (TestCpuFlag(kCpuHasNEON) && dst_width_bytes >= 16) {
+  if (TestCpuFlag(kCpuHasNEON)) {
     InterpolateRow = InterpolateRow_Any_16_NEON;
     if (IS_ALIGNED(dst_width_bytes, 16)) {
       InterpolateRow = InterpolateRow_16_NEON;
     }
   }
 #endif
-#if defined(HAS_INTERPOLATEROWS_16_MIPS_DSPR2)
-  if (TestCpuFlag(kCpuHasMIPS_DSPR2) && dst_width_bytes >= 4 &&
+#if defined(HAS_INTERPOLATEROW_16_MIPS_DSPR2)
+  if (TestCpuFlag(kCpuHasMIPS_DSPR2) &&
       IS_ALIGNED(src_argb, 4) && IS_ALIGNED(src_stride, 4) &&
       IS_ALIGNED(dst_argb, 4) && IS_ALIGNED(dst_stride, 4)) {
     InterpolateRow = InterpolateRow_Any_16_MIPS_DSPR2;
