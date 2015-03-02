@@ -34,6 +34,24 @@
       "revId": "fe85fabbac668b2426ce56387906b34539edbf64",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Fys\u003d",
+        "filename": "vp9/encoder/vp9_extend.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-03-02T17:23:12Z",
+      "side": 1,
+      "message": "Right, I assume they meant extend to the right/bottom.\n\nAbout the extension part, there might be other ways to fill the pixels outside frame border, instead of a plain copy. For example, if the in-frame pixels are best predicted by D135 intra mode, but the reset pixels within the same block but outside frame are following vertical copy, the overall rate-distortion cost of D135 mode is likely to be higher than that of vertical mode. Similar situations apply to inter modes as well.",
+      "parentUuid": "AAAAdn//Fy4\u003d",
+      "revId": "fe85fabbac668b2426ce56387906b34539edbf64",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
