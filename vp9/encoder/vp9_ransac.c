@@ -740,7 +740,6 @@ void projectPointsHomography(double *mat, double *points,
 }
 
 int findTranslation(const int np, double *pts1, double *pts2, double *mat) {
-  const int np2 = np * 2;
   int i;
   double sx, sy, dx, dy;
   double sumx, sumy;

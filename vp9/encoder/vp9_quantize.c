@@ -81,8 +81,9 @@ static INLINE void quantize_dc_bigtx(const tran_low_t *coeff_ptr,
   int tmp, eob = -1;
 
   if (!skip_block) {
-
-    tmp = clamp(abs_coeff + round_ptr[rc != 0], INT16_MIN, INT16_MAX);
+    tmp = clamp(abs_coeff +
+                ROUND_POWER_OF_TWO(round_ptr[rc != 0], 1 + logsizeby32),
+                INT16_MIN, INT16_MAX);
     tmp = (tmp * quant) >> (15 - logsizeby32);
     qcoeff_ptr[rc]  = (tmp ^ coeff_sign) - coeff_sign;
     dqcoeff_ptr[rc] = qcoeff_ptr[rc] * dequant_ptr / (2 << logsizeby32);
@@ -121,16 +122,17 @@ static INLINE void highbd_quantize_dc_bigtx(const tran_low_t *coeff_ptr,
                                             uint16_t *eob_ptr,
                                             int logsizeby32) {
   int eob = -1;
-
   if (!skip_block) {
     const int rc = 0;
     const int coeff = coeff_ptr[rc];
     const int coeff_sign = (coeff >> 31);
     const int abs_coeff = (coeff ^ coeff_sign) - coeff_sign;
 
-    const int64_t tmp =
-        (clamp(abs_coeff + round_ptr[rc != 0], INT32_MIN, INT32_MAX) *
-         quant) >> (15 - logsizeby32);
+    int64_t tmp =
+        clamp(abs_coeff +
+              ROUND_POWER_OF_TWO(round_ptr[rc != 0], 1 + logsizeby32),
+              INT32_MIN, INT32_MAX);
+    tmp = (tmp * quant) >> (15 - logsizeby32);
     qcoeff_ptr[rc]  = (tmp ^ coeff_sign) - coeff_sign;
     dqcoeff_ptr[rc] = qcoeff_ptr[rc] * dequant_ptr / (2 << logsizeby32);
     if (tmp)
@@ -288,7 +290,7 @@ static INLINE void quantize_fp_bigtx(const tran_low_t *coeff_ptr,
       int abs_coeff = (coeff ^ coeff_sign) - coeff_sign;
 
       if (abs_coeff >= (dequant_ptr[rc != 0] >> (2 + logsizeby32))) {
-        abs_coeff += ROUND_POWER_OF_TWO(round_ptr[rc != 0], 1);
+        abs_coeff += ROUND_POWER_OF_TWO(round_ptr[rc != 0], 1 + logsizeby32);
         abs_coeff = clamp(abs_coeff, INT16_MIN, INT16_MAX);
         tmp = (abs_coeff * quant_ptr[rc != 0]) >> (15 - logsizeby32);
         qcoeff_ptr[rc] = (tmp ^ coeff_sign) - coeff_sign;
@@ -375,7 +377,8 @@ static INLINE void highbd_quantize_fp_bigtx(const tran_low_t *coeff_ptr,
       const int abs_coeff = (coeff ^ coeff_sign) - coeff_sign;
 
       if (abs_coeff >= (dequant_ptr[rc != 0] >> (2 + logsizeby32))) {
-        tmp = clamp(abs_coeff + ROUND_POWER_OF_TWO(round_ptr[rc != 0], 1),
+        tmp = clamp(abs_coeff + ROUND_POWER_OF_TWO(round_ptr[rc != 0],
+                                                   1 + logsizeby32),
                     INT32_MIN, INT32_MAX);
         tmp = (tmp * quant_ptr[rc != 0]) >> (15 - logsizeby32);
         qcoeff_ptr[rc] = (tmp ^ coeff_sign) - coeff_sign;
@@ -611,8 +614,8 @@ static INLINE void quantize_b_bigtx(const tran_low_t *coeff_ptr,
                                     const int16_t *scan,
                                     const int16_t *iscan,
                                     int logsizeby32) {
-  const int zbins[2] = {ROUND_POWER_OF_TWO(zbin_ptr[0], 1),
-                        ROUND_POWER_OF_TWO(zbin_ptr[1], 1)};
+  const int zbins[2] = {ROUND_POWER_OF_TWO(zbin_ptr[0], 1 + logsizeby32),
+                        ROUND_POWER_OF_TWO(zbin_ptr[1], 1 + logsizeby32)};
   const int nzbins[2] = {zbins[0] * -1, zbins[1] * -1};
 
   int idx = 0;
@@ -714,8 +717,8 @@ static INLINE void highbd_quantize_b_bigtx(const tran_low_t *coeff_ptr,
                                            const int16_t *scan,
                                            const int16_t *iscan,
                                            int logsizeby32) {
-  const int zbins[2] = {ROUND_POWER_OF_TWO(zbin_ptr[0], 1),
-                        ROUND_POWER_OF_TWO(zbin_ptr[1], 1)};
+  const int zbins[2] = {ROUND_POWER_OF_TWO(zbin_ptr[0], 1 + logsizeby32),
+                        ROUND_POWER_OF_TWO(zbin_ptr[1], 1 + logsizeby32)};
   const int nzbins[2] = {zbins[0] * -1, zbins[1] * -1};
 
   int idx = 0;
