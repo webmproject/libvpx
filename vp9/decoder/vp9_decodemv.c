@@ -457,7 +457,7 @@ static int read_is_inter_block(VP9_COMMON *const cm, MACROBLOCKD *const xd,
 
 static void fpm_sync(void *const data, int mi_row) {
   VP9Decoder *const pbi = (VP9Decoder *)data;
-  vp9_frameworker_wait(pbi->frame_worker_owner, pbi->prev_buf,
+  vp9_frameworker_wait(pbi->frame_worker_owner, pbi->common.prev_frame,
                        mi_row << MI_BLOCK_SIZE_LOG2);
 }
 

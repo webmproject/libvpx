@@ -55,7 +55,6 @@ typedef struct VP9Decoder {
   // TODO(hkuang): Combine this with cur_buf in macroblockd as they are
   // the same.
   RefCntBuffer *cur_buf;   //  Current decoding frame buffer.
-  RefCntBuffer *prev_buf;  //  Previous decoding frame buffer.
 
   VP9Worker *frame_worker_owner;   // frame_worker that owns this pbi.
   VP9Worker lf_worker;

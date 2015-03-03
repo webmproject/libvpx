@@ -150,24 +150,10 @@ void vp9_frameworker_copy_context(VP9Worker *const dst_worker,
         &src_worker_data->stats_mutex);
   }
 
-  // src worker may have already finished decoding a frame and swapped the mi.
-  // TODO(hkuang): Remove following code after implenment no ModeInfo decoding.
-  if (src_worker_data->frame_decoded) {
-    dst_cm->prev_mip = src_cm->prev_mip;
-    dst_cm->prev_mi = src_cm->prev_mi;
-  } else {
-    dst_cm->prev_mip = src_cm->mip;
-    dst_cm->prev_mi = src_cm->mi;
-  }
-
   dst_cm->last_frame_seg_map = src_cm->seg.enabled ?
       src_cm->current_frame_seg_map : src_cm->last_frame_seg_map;
   dst_worker_data->pbi->need_resync = src_worker_data->pbi->need_resync;
   vp9_frameworker_unlock_stats(src_worker);
-
-  dst_worker_data->pbi->prev_buf =
-      src_worker_data->pbi->common.show_existing_frame ?
-          NULL : src_worker_data->pbi->cur_buf;
 
   dst_cm->prev_frame = src_cm->show_existing_frame ?
                        src_cm->prev_frame : src_cm->cur_frame;
@@ -175,19 +161,11 @@ void vp9_frameworker_copy_context(VP9Worker *const dst_worker,
                        src_cm->width : src_cm->last_width;
   dst_cm->last_height = !src_cm->show_existing_frame ?
                         src_cm->height : src_cm->last_height;
-  dst_cm->display_width = src_cm->display_width;
-  dst_cm->display_height = src_cm->display_height;
   dst_cm->subsampling_x = src_cm->subsampling_x;
   dst_cm->subsampling_y = src_cm->subsampling_y;
+  dst_cm->frame_type = src_cm->frame_type;
   dst_cm->last_show_frame = !src_cm->show_existing_frame ?
                             src_cm->show_frame : src_cm->last_show_frame;
-  dst_cm->last_frame_type = src_cm->last_frame_type;
-  dst_cm->frame_type = src_cm->frame_type;
-  dst_cm->y_dc_delta_q = src_cm->y_dc_delta_q;
-  dst_cm->uv_dc_delta_q = src_cm->uv_dc_delta_q;
-  dst_cm->uv_ac_delta_q = src_cm->uv_ac_delta_q;
-  dst_cm->base_qindex = src_cm->base_qindex;
-
   for (i = 0; i < REF_FRAMES; ++i)
     dst_cm->ref_frame_map[i] = src_cm->next_ref_frame_map[i];
 
