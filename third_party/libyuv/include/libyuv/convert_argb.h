@@ -18,7 +18,6 @@
 #include "libyuv/rotate.h"
 
 // TODO(fbarchard): This set of functions should exactly match convert.h
-// Add missing Q420.
 // TODO(fbarchard): Add tests. Create random content of right size and convert
 // with C vs Opt and or to I420 and compare.
 // TODO(fbarchard): Some of these functions lack parameter setting.
@@ -104,13 +103,6 @@ int M420ToARGB(const uint8* src_m420, int src_stride_m420,
                uint8* dst_argb, int dst_stride_argb,
                int width, int height);
 
-// TODO(fbarchard): Convert Q420 to ARGB.
-// LIBYUV_API
-// int Q420ToARGB(const uint8* src_y, int src_stride_y,
-//                const uint8* src_yuy2, int src_stride_yuy2,
-//                uint8* dst_argb, int dst_stride_argb,
-//                int width, int height);
-
 // Convert YUY2 to ARGB.
 LIBYUV_API
 int YUY2ToARGB(const uint8* src_yuy2, int src_stride_yuy2,
@@ -120,6 +112,22 @@ int YUY2ToARGB(const uint8* src_yuy2, int src_stride_yuy2,
 // Convert UYVY to ARGB.
 LIBYUV_API
 int UYVYToARGB(const uint8* src_uyvy, int src_stride_uyvy,
+               uint8* dst_argb, int dst_stride_argb,
+               int width, int height);
+
+// Convert J420 to ARGB.
+LIBYUV_API
+int J420ToARGB(const uint8* src_y, int src_stride_y,
+               const uint8* src_u, int src_stride_u,
+               const uint8* src_v, int src_stride_v,
+               uint8* dst_argb, int dst_stride_argb,
+               int width, int height);
+
+// Convert J422 to ARGB.
+LIBYUV_API
+int J422ToARGB(const uint8* src_y, int src_stride_y,
+               const uint8* src_u, int src_stride_u,
+               const uint8* src_v, int src_stride_v,
                uint8* dst_argb, int dst_stride_argb,
                int width, int height);
 
@@ -183,8 +191,6 @@ int MJPGToARGB(const uint8* sample, size_t sample_size,
                int src_width, int src_height,
                int dst_width, int dst_height);
 #endif
-
-// Note Bayer formats (BGGR) to ARGB are in format_conversion.h.
 
 // Convert camera sample to ARGB with cropping, rotation and vertical flip.
 // "src_size" is needed to parse MJPG.

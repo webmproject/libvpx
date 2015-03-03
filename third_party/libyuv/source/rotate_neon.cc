@@ -17,7 +17,8 @@ namespace libyuv {
 extern "C" {
 #endif
 
-#if !defined(LIBYUV_DISABLE_NEON) && defined(__ARM_NEON__)
+#if !defined(LIBYUV_DISABLE_NEON) && defined(__ARM_NEON__) && \
+    !defined(__aarch64__)
 
 static uvec8 kVTbl4x4Transpose =
   { 0,  4,  8, 12,  1,  5,  9, 13,  2,  6, 10, 14,  3,  7, 11, 15 };
@@ -525,7 +526,7 @@ void TransposeUVWx8_NEON(const uint8* src, int src_stride,
       "q0", "q1", "q2", "q3", "q8", "q9", "q10", "q11"
   );
 }
-#endif
+#endif  // defined(__ARM_NEON__) && !defined(__aarch64__)
 
 #ifdef __cplusplus
 }  // extern "C"

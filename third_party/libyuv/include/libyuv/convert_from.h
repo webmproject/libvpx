@@ -57,7 +57,6 @@ int I400Copy(const uint8* src_y, int src_stride_y,
              int width, int height);
 
 // TODO(fbarchard): I420ToM420
-// TODO(fbarchard): I420ToQ420
 
 LIBYUV_API
 int I420ToNV12(const uint8* src_y, int src_stride_y,
@@ -151,8 +150,6 @@ int I420ToARGB4444(const uint8* src_y, int src_stride_y,
                    const uint8* src_v, int src_stride_v,
                    uint8* dst_frame, int dst_stride_frame,
                    int width, int height);
-
-// Note Bayer formats (BGGR) To I420 are in format_conversion.h.
 
 // Convert I420 to specified format.
 // "dst_sample_stride" is bytes in a row for the destination. Pass 0 if the

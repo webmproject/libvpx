@@ -16,7 +16,8 @@ extern "C" {
 #endif
 
 // This module is for GCC Neon.
-#if !defined(LIBYUV_DISABLE_NEON) && defined(__ARM_NEON__)
+#if !defined(LIBYUV_DISABLE_NEON) && defined(__ARM_NEON__) && \
+    !defined(__aarch64__)
 
 // NEON downscalers with interpolation.
 // Provided by Fritz Koenig
@@ -756,7 +757,7 @@ void ScaleARGBRowDownEvenBox_NEON(const uint8* src_argb, ptrdiff_t src_stride,
   );
 }
 
-#endif  // __ARM_NEON__
+#endif  // defined(__ARM_NEON__) && !defined(__aarch64__)
 
 #ifdef __cplusplus
 }  // extern "C"
