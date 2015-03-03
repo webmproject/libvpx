@@ -16,6 +16,24 @@
       "revId": "f4b576667dfcf42277ccdfea0cee6fa42b582010",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Fos\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2015-03-03T18:46:38Z",
+      "side": 1,
+      "message": "Yes. Originally want to delete the one in decode_frame which is wrong.",
+      "parentUuid": "AAAAdn//GmU\u003d",
+      "revId": "f4b576667dfcf42277ccdfea0cee6fa42b582010",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
