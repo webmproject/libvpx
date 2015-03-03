@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Fns\u003d",
+        "filename": "vp9/encoder/vp9_avg.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-03-03T19:30:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Fpk\u003d",
+      "revId": "eb8a0bb764f347b5f59d015fecc224eede651a23",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Fpg\u003d",
         "filename": "vp9/encoder/vp9_avg.c",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Fno\u003d",
+        "filename": "vp9/encoder/vp9_avg.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-03-03T19:30:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Fpg\u003d",
+      "revId": "eb8a0bb764f347b5f59d015fecc224eede651a23",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Fpo\u003d",
         "filename": "vp9/encoder/x86/vp9_avg_intrin_sse2.c",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2015-03-03T18:14:46Z",
       "side": 1,
       "message": "Is this same as: const int norm_factor \u003d 3 + (width \u003e\u003e 5)?",
+      "revId": "eb8a0bb764f347b5f59d015fecc224eede651a23",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//FnY\u003d",
+        "filename": "vp9/encoder/x86/vp9_avg_intrin_sse2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-03-03T19:30:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Fpo\u003d",
       "revId": "eb8a0bb764f347b5f59d015fecc224eede651a23",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
