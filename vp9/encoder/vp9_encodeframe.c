@@ -593,8 +593,8 @@ static const MV search_pos[9] = {
   {1, -1}, {1, 0}, {1, 1},
 };
 
-static void motion_estimation(VP9_COMP *cpi, MACROBLOCK *x,
-                              BLOCK_SIZE bsize) {
+static unsigned int motion_estimation(VP9_COMP *cpi, MACROBLOCK *x,
+                                      BLOCK_SIZE bsize) {
   MACROBLOCKD *xd = &x->e_mbd;
   DECLARE_ALIGNED(16, int16_t, hbuf[128]);
   DECLARE_ALIGNED(16, int16_t, vbuf[128]);
@@ -610,6 +610,7 @@ static void motion_estimation(VP9_COMP *cpi, MACROBLOCK *x,
   uint8_t const *ref_buf, *src_buf;
   MV *tmp_mv = &xd->mi[0].src_mi->mbmi.mv[0].as_mv;
   int best_sad;
+  unsigned int best_sse;
   MV this_mv;
 
   // Set up prediction 1-D reference set
@@ -659,10 +660,12 @@ static void motion_estimation(VP9_COMP *cpi, MACROBLOCK *x,
     }
   }
 
+  ref_buf = xd->plane[0].pre[0].buf + tmp_mv->row * ref_stride + tmp_mv->col;
+  cpi->fn_ptr[bsize].vf(src_buf, src_stride, ref_buf, ref_stride, &best_sse);
   tmp_mv->row *= 8;
   tmp_mv->col *= 8;
-
   x->pred_mv[LAST_FRAME] = *tmp_mv;
+  return best_sse;
 }
 #endif
 
@@ -709,7 +712,10 @@ static void choose_partitioning(VP9_COMP *cpi,
 
   if (!is_key_frame) {
     MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
-    unsigned int var = 0, sse;
+    unsigned int var = 0, uv_sse;
+#if GLOBAL_MOTION
+    unsigned int y_sse;
+#endif
     vp9_setup_pre_planes(xd, 0, yv12, mi_row, mi_col,
         &cm->frame_refs[LAST_FRAME - 1].sf);
     mbmi->ref_frame[0] = LAST_FRAME;
@@ -719,7 +725,7 @@ static void choose_partitioning(VP9_COMP *cpi,
     mbmi->interp_filter = BILINEAR;
 
 #if GLOBAL_MOTION
-    motion_estimation(cpi, x, BLOCK_64X64);
+    y_sse = motion_estimation(cpi, x, BLOCK_64X64);
 #endif
 
     vp9_build_inter_predictors_sb(xd, mi_row, mi_col, BLOCK_64X64);
@@ -729,9 +735,13 @@ static void choose_partitioning(VP9_COMP *cpi,
       struct macroblockd_plane *pd = &xd->plane[i];
       const BLOCK_SIZE bs = get_plane_block_size(BLOCK_64X64, pd);
       var += cpi->fn_ptr[bs].vf(p->src.buf, p->src.stride,
-                                pd->dst.buf, pd->dst.stride, &sse);
-      if (sse > 2048)
-        x->color_sensitivity[i - 1] = 1;
+                                pd->dst.buf, pd->dst.stride, &uv_sse);
+
+#if GLOBAL_MOTION
+      x->color_sensitivity[i - 1] = uv_sse * 6 > y_sse;
+#else
+      x->color_sensitivity[i - 1] = (uv_sse > 2048);
+#endif
     }
 
     d = xd->plane[0].dst.buf;
