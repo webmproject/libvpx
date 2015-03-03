@@ -3897,7 +3897,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   // Special case: set prev_mi to NULL when the previous mode info
   // context cannot be used.
   cm->prev_mi = cm->use_prev_frame_mvs ?
-                  cm->prev_mip + cm->mi_stride + 1 : NULL;
+                cm->prev_mip + cm->mi_stride + 1 : NULL;
 
   x->quant_fp = cpi->sf.use_quant_fp;
   vp9_zero(x->skip_txfm);
