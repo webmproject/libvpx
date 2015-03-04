@@ -20,6 +20,7 @@
 #include "vp9/common/vp9_common_data.h"
 #include "vp9/common/vp9_filter.h"
 #include "vp9/common/vp9_mv.h"
+#include "vp9/common/vp9_quant_common.h"
 #include "vp9/common/vp9_scale.h"
 
 #ifdef __cplusplus
@@ -306,6 +307,9 @@ struct macroblockd_plane {
   struct buf_2d dst;
   struct buf_2d pre[2];
   const int16_t *dequant;
+#if CONFIG_NEW_QUANT
+  const dequant_val_type_nuq *dequant_val_nuq;
+#endif
   ENTROPY_CONTEXT *above_context;
   ENTROPY_CONTEXT *left_context;
 #if CONFIG_PALETTE
@@ -547,6 +551,20 @@ static inline int get_wedge_bits(BLOCK_SIZE sb_type) {
     return WEDGE_BITS_BIG;
 }
 #endif  // CONFIG_WEDGE_PARTITION
+
+#if CONFIG_NEW_QUANT && CONFIG_TX_SKIP
+static inline int is_rect_quant_used(const MB_MODE_INFO *mbmi,
+                                     int plane) {
+  return
+      mbmi->tx_skip[plane != 0] &&
+      ((plane == 0 && (mbmi->mode == V_PRED ||
+                       mbmi->mode == H_PRED ||
+                       mbmi->mode == TM_PRED)) ||
+       (plane != 0 && (mbmi->uv_mode == V_PRED ||
+                       mbmi->uv_mode == H_PRED ||
+                       mbmi->uv_mode == TM_PRED)));
+}
+#endif
 
 #ifdef __cplusplus
 }  // extern "C"

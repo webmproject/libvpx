@@ -8,9 +8,144 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <stdio.h>
+#include <math.h>
 #include "vp9/common/vp9_common.h"
+#include "vp9/common/vp9_entropy.h"
 #include "vp9/common/vp9_quant_common.h"
 #include "vp9/common/vp9_seg_common.h"
+
+#if CONFIG_NEW_QUANT
+// Bin widths expressed as a fraction over 128 of the quant stepsize,
+// for the quantization bins 0-4.
+// So a value x indicates the bin is actually factor x/128 of the
+// nominal quantization step.  For the zero bin, the width is only
+// for one side of zero, so the actual width is twice that.
+// There are four sets of values for 4 different quantizer ranges.
+//
+// TODO(debargha): Optimize these tables
+static const uint8_t vp9_nuq_knotes_tiny[COEF_BANDS][NUQ_KNOTES] = {
+  {84, 124, 128, 128, 128},  // dc, band 0
+  {84, 124, 128, 128, 128},  // band 1
+  {84, 124, 128, 128, 128},  // band 2
+  {86, 124, 128, 128, 128},  // band 3
+  {86, 124, 128, 128, 128},  // band 4
+  {86, 124, 128, 128, 128},  // band 5
+};
+static const uint8_t vp9_nuq_knotes_low[COEF_BANDS][NUQ_KNOTES] = {
+  {84, 124, 128, 128, 128},  // dc, band 0
+  {84, 124, 128, 128, 128},  // band 1
+  {84, 124, 128, 128, 128},  // band 2
+  {86, 124, 128, 128, 128},  // band 3
+  {86, 124, 128, 128, 128},  // band 4
+  {86, 124, 128, 128, 128},  // band 5
+};
+static const uint8_t vp9_nuq_knotes_mid[COEF_BANDS][NUQ_KNOTES] = {
+  {84, 124, 128, 128, 128},  // dc, band 0
+  {84, 124, 128, 128, 128},  // band 1
+  {84, 124, 128, 128, 128},  // band 2
+  {86, 124, 128, 128, 128},  // band 3
+  {86, 124, 128, 128, 128},  // band 4
+  {86, 124, 128, 128, 128},  // band 5
+};
+static const uint8_t vp9_nuq_knotes_high[COEF_BANDS][NUQ_KNOTES] = {
+  {84, 124, 128, 128, 128},  // dc, band 0
+  {84, 124, 128, 128, 128},  // band 1
+  {84, 124, 128, 128, 128},  // band 2
+  {86, 124, 128, 128, 128},  // band 3
+  {86, 124, 128, 128, 128},  // band 4
+  {86, 124, 128, 128, 128},  // band 5
+};
+static const uint8_t vp9_nuq_knotes_huge[COEF_BANDS][NUQ_KNOTES] = {
+  {84, 124, 128, 128, 128},  // dc, band 0
+  {84, 124, 128, 128, 128},  // band 1
+  {84, 124, 128, 128, 128},  // band 2
+  {86, 124, 128, 128, 128},  // band 3
+  {86, 124, 128, 128, 128},  // band 4
+  {86, 124, 128, 128, 128},  // band 5
+};
+
+static const uint8_t vp9_nuq_doff_tiny[COEF_BANDS] = { 8, 16, 17, 22, 23, 24 };
+static const uint8_t vp9_nuq_doff_low[COEF_BANDS] =  { 8, 16, 17, 22, 23, 24 };
+static const uint8_t vp9_nuq_doff_mid[COEF_BANDS] =  { 8, 16, 17, 22, 23, 24 };
+static const uint8_t vp9_nuq_doff_high[COEF_BANDS] = { 8, 16, 17, 22, 23, 24 };
+static const uint8_t vp9_nuq_doff_huge[COEF_BANDS] = { 8, 16, 17, 22, 23, 24 };
+
+// Allow different quantization profiles in different q ranges,
+// to enable entropy-constraints in scalar quantization.
+
+static const uint8_t *get_nuq_knotes(int16_t quant, int band, int bd) {
+  const int shift = bd - 8;
+  if (quant > (512 << shift))
+    return vp9_nuq_knotes_huge[band];
+  else if (quant > (256 << shift))
+    return vp9_nuq_knotes_high[band];
+  else if (quant > (128 << shift))
+    return vp9_nuq_knotes_mid[band];
+  else if (quant > (64 << shift))
+    return vp9_nuq_knotes_low[band];
+  else
+    return vp9_nuq_knotes_tiny[band];
+}
+
+static INLINE int16_t quant_to_doff_fixed(int16_t quant, int band, int bd) {
+  const int shift = bd - 8;
+  if (quant > (512 << shift))
+    return vp9_nuq_doff_huge[band];
+  else if (quant > (256 << shift))
+    return vp9_nuq_doff_high[band];
+  else if (quant > (128 << shift))
+    return vp9_nuq_doff_mid[band];
+  else if (quant > (64 << shift))
+    return vp9_nuq_doff_low[band];
+  else
+    return vp9_nuq_doff_tiny[band];
+}
+
+static INLINE void get_cumbins_nuq(int q, int band, int bd,
+                                   tran_low_t *cumbins) {
+  const uint8_t *knotes = get_nuq_knotes(q, band, bd);
+  int16_t cumknotes[NUQ_KNOTES];
+  int i;
+  cumknotes[0] = knotes[0];
+  for (i = 1; i < NUQ_KNOTES; ++i)
+    cumknotes[i] = cumknotes[i - 1] + knotes[i];
+  for (i = 0; i < NUQ_KNOTES; ++i)
+    cumbins[i] = (cumknotes[i] * q + 64) >> 7;
+}
+
+void vp9_get_dequant_val_nuq(int q, int band, int bd,
+                             tran_low_t *dq, tran_low_t *cumbins) {
+  const uint8_t *knotes = get_nuq_knotes(q, band, bd);
+  tran_low_t cumbins_[NUQ_KNOTES], *cumbins_ptr;
+  tran_low_t doff;
+  int i;
+  cumbins_ptr = (cumbins ? cumbins : cumbins_);
+  get_cumbins_nuq(q, band, bd, cumbins_ptr);
+  dq[0] = 0;
+  for (i = 1; i < NUQ_KNOTES; ++i) {
+    const int16_t qstep = (knotes[i] * q + 64) >> 7;
+    doff = quant_to_doff_fixed(qstep, band, bd);
+    doff = (2 * doff * qstep + q) / (2 * q);
+    dq[i] = cumbins_ptr[i - 1] + (((knotes[i] - doff * 2) * q + 128) >> 8);
+  }
+  doff = quant_to_doff_fixed(q, band, bd);
+  dq[NUQ_KNOTES] =
+      cumbins_ptr[NUQ_KNOTES - 1] + (((64 - doff) * q + 64) >> 7);
+}
+
+tran_low_t vp9_dequant_abscoeff_nuq(int v, int q, const tran_low_t *dq) {
+  if (v <= NUQ_KNOTES)
+    return dq[v];
+  else
+    return dq[NUQ_KNOTES] + (v - NUQ_KNOTES) * q;
+}
+
+tran_low_t vp9_dequant_coeff_nuq(int v, int q, const tran_low_t *dq) {
+  tran_low_t dqmag = vp9_dequant_abscoeff_nuq(abs(v), q, dq);
+  return (v < 0 ? -dqmag : dqmag);
+}
+#endif  // CONFIG_NEW_QUANT
 
 static const int16_t dc_qlookup[QINDEX_RANGE] = {
   4,       8,    8,    9,   10,   11,   12,   12,
@@ -275,4 +410,3 @@ int vp9_get_qindex(const struct segmentation *seg, int segment_id,
     return base_qindex;
   }
 }
-

@@ -54,7 +54,11 @@ static const vp9_tree_index coeff_subtree_high[TREE_SIZE(ENTROPY_TOKENS)] = {
 };
 
 static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd, PLANE_TYPE type,
-                        tran_low_t *dqcoeff, TX_SIZE tx_size, const int16_t *dq,
+                        tran_low_t *dqcoeff, TX_SIZE tx_size,
+                        const int16_t *dq,
+#if CONFIG_NEW_QUANT
+                        const dequant_val_type_nuq *dq_val,
+#endif  // CONFIG_NEW_QUANT
                         int ctx, const int16_t *scan, const int16_t *nb,
                         vp9_reader *r) {
   const int max_eob = 16 << (tx_size << 1);
@@ -74,6 +78,12 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd, PLANE_TYPE type,
   const int dq_shift = (tx_size > TX_16X16) ? tx_size - TX_16X16 : 0;
   int v, token;
   int16_t dqv = dq[0];
+#if CONFIG_NEW_QUANT
+#if CONFIG_TX_SKIP
+  const int use_rect_quant = is_rect_quant_used(&xd->mi[0].src_mi->mbmi, type);
+#endif
+  const tran_low_t *dqv_val = &dq_val[0][0];
+#endif  // CONFIG_NEW_QUANT
   const uint8_t *cat1_prob;
   const uint8_t *cat2_prob;
   const uint8_t *cat3_prob;
@@ -125,6 +135,9 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd, PLANE_TYPE type,
       INCREMENT_COUNT(EOB_MODEL_TOKEN);
       break;
     }
+#if CONFIG_NEW_QUANT
+    dqv_val = &dq_val[band][0];
+#endif  // CONFIG_NEW_QUANT
 
     while (!vp9_read(r, prob[ZERO_CONTEXT_NODE])) {
       INCREMENT_COUNT(ZERO_TOKEN);
@@ -136,6 +149,9 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd, PLANE_TYPE type,
       ctx = get_coef_context(nb, token_cache, c);
       band = *band_translate++;
       prob = coef_probs[band][ctx];
+#if CONFIG_NEW_QUANT
+      dqv_val = &dq_val[band][0];
+#endif  // CONFIG_NEW_QUANT
     }
 
     if (!vp9_read(r, prob[ONE_CONTEXT_NODE])) {
@@ -191,7 +207,22 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd, PLANE_TYPE type,
           break;
       }
     }
+#if CONFIG_NEW_QUANT
+#if CONFIG_TX_SKIP
+    if (use_rect_quant) {
+      v = (val * dqv) >> dq_shift;
+    } else {
+      v = vp9_dequant_abscoeff_nuq(val, dqv, dqv_val);
+      v = dq_shift ? ROUND_POWER_OF_TWO(v, dq_shift) : v;
+    }
+#else
+    v = vp9_dequant_abscoeff_nuq(val, dqv, dqv_val);
+    v = dq_shift ? ROUND_POWER_OF_TWO(v, dq_shift) : v;
+#endif  // CONFIG_TX_SKIP
+#else   // CONFIG_NEW_QUANT
     v = (val * dqv) >> dq_shift;
+#endif  // CONFIG_NEW_QUANT
+
 #if CONFIG_COEFFICIENT_RANGE_CHECKING
     dqcoeff[scan[c]] = check_range(vp9_read_bit(r) ? -v : v);
 #else
@@ -213,9 +244,15 @@ int vp9_decode_block_tokens(VP9_COMMON *cm, MACROBLOCKD *xd,
   const int ctx = get_entropy_context(tx_size, pd->above_context + x,
                                                pd->left_context + y);
   const scan_order *so = get_scan(xd, tx_size, pd->plane_type, block);
-  const int eob = decode_coefs(cm, xd, pd->plane_type,
-                               BLOCK_OFFSET(pd->dqcoeff, block), tx_size,
-                               pd->dequant, ctx, so->scan, so->neighbors, r);
+  int eob;
+  eob = decode_coefs(cm, xd, pd->plane_type,
+                     BLOCK_OFFSET(pd->dqcoeff, block), tx_size,
+                     pd->dequant,
+#if CONFIG_NEW_QUANT
+                     pd->dequant_val_nuq,
+#endif
+                     ctx, so->scan,
+                     so->neighbors, r);
 #if CONFIG_TX64X64
   if (plane > 0) assert(tx_size != TX_64X64);
 #endif

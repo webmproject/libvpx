@@ -559,7 +559,17 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
   } else if (max_txsize_lookup[plane_bsize] == tx_size) {
     if (x->skip_txfm[(plane << 2) + (block >> (tx_size << 1))] == 0) {
       // full forward transform and quantization
-      vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
+#if CONFIG_NEW_QUANT
+      if (x->quant_fp)
+        vp9_xform_quant_fp_nuq(x, plane, block, plane_bsize, tx_size);
+      else
+        vp9_xform_quant_nuq(x, plane, block, plane_bsize, tx_size);
+#else
+      if (x->quant_fp)
+        vp9_xform_quant_fp(x, plane, block, plane_bsize, tx_size);
+      else
+        vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
+#endif
 #if CONFIG_VP9_HIGHBITDEPTH
       if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
         dist_block(plane, block, tx_size, args, xd->bd);
@@ -573,7 +583,14 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
       // compute DC coefficient
       tran_low_t *const coeff   = BLOCK_OFFSET(x->plane[plane].coeff, block);
       tran_low_t *const dqcoeff = BLOCK_OFFSET(xd->plane[plane].dqcoeff, block);
+#if CONFIG_NEW_QUANT
+      if (x->quant_fp)
+        vp9_xform_quant_dc_fp_nuq(x, plane, block, plane_bsize, tx_size);
+      else
+        vp9_xform_quant_dc_nuq(x, plane, block, plane_bsize, tx_size);
+#else
       vp9_xform_quant_dc(x, plane, block, plane_bsize, tx_size);
+#endif
       args->sse  = x->bsse[(plane << 2) + (block >> (tx_size << 1))] << 4;
       args->dist = args->sse;
       if (x->plane[plane].eobs[block]) {
@@ -598,7 +615,17 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
     }
   } else {
     // full forward transform and quantization
-    vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
+#if CONFIG_NEW_QUANT
+    if (x->quant_fp)
+      vp9_xform_quant_fp_nuq(x, plane, block, plane_bsize, tx_size);
+    else
+      vp9_xform_quant_nuq(x, plane, block, plane_bsize, tx_size);
+#else
+    if (x->quant_fp)
+      vp9_xform_quant_fp(x, plane, block, plane_bsize, tx_size);
+    else
+      vp9_xform_quant(x, plane, block, plane_bsize, tx_size);
+#endif  // CONFIG_NEW_QUANT
 #if CONFIG_VP9_HIGHBITDEPTH
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
       dist_block(plane, block, tx_size, args, xd->bd);

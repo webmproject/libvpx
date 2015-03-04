@@ -294,6 +294,7 @@ EXPERIMENT_LIST="
     global_motion
     palette
     newmvref_sub8x8
+    new_quant
 "
 CONFIG_LIST="
     external_build

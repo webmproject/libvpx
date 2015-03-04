@@ -38,6 +38,10 @@ struct macroblock_plane {
   int16_t *quant_shift;
   int16_t *zbin;
   int16_t *round;
+#if CONFIG_NEW_QUANT
+  dequant_val_type_nuq *dequant_val_nuq;
+  cumbins_type_nuq *cumbins_nuq;
+#endif
 
   int64_t quant_thred[2];
 };
