@@ -2022,6 +2022,8 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
   int_mv *const candidates = mi->mbmi.ref_mvs[ref_frame];
   const struct scale_factors *const sf = &cm->frame_refs[ref_frame - 1].sf;
 
+  assert(yv12 != NULL);
+
   // TODO(jkoleszar): Is the UV buffer ever used here? If so, need to make this
   // use the UV scaling factors.
   vp9_setup_pred_block(xd, yv12_mb[ref_frame], yv12, mi_row, mi_col, sf, sf);
@@ -2912,6 +2914,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
   for (ref_frame = LAST_FRAME; ref_frame <= ALTREF_FRAME; ++ref_frame) {
     x->pred_mv_sad[ref_frame] = INT_MAX;
     if (cpi->ref_frame_flags & flag_list[ref_frame]) {
+      assert(get_ref_frame_buffer(cpi, ref_frame) != NULL);
       setup_buffer_inter(cpi, x, tile_info, ref_frame, bsize, mi_row, mi_col,
                          frame_mv[NEARESTMV], frame_mv[NEARMV], yv12_mb);
     }
@@ -4238,4 +4241,3 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
   store_coding_context(x, ctx, best_ref_index,
                        best_pred_diff, best_tx_diff, best_filter_diff, 0);
 }
-

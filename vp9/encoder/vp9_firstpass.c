@@ -66,12 +66,6 @@
 unsigned int arf_count = 0;
 #endif
 
-static void swap_yv12(YV12_BUFFER_CONFIG *a, YV12_BUFFER_CONFIG *b) {
-  YV12_BUFFER_CONFIG temp = *a;
-  *a = *b;
-  *b = temp;
-}
-
 // Resets the first pass file to the given position using a relative seek from
 // the current position.
 static void reset_fpf_position(TWO_PASS *p,
@@ -465,12 +459,6 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
   int i;
 
   int recon_yoffset, recon_uvoffset;
-  YV12_BUFFER_CONFIG *const lst_yv12 = get_ref_frame_buffer(cpi, LAST_FRAME);
-  YV12_BUFFER_CONFIG *gld_yv12 = get_ref_frame_buffer(cpi, GOLDEN_FRAME);
-  YV12_BUFFER_CONFIG *const new_yv12 = get_frame_new_buffer(cm);
-  int recon_y_stride = lst_yv12->y_stride;
-  int recon_uv_stride = lst_yv12->uv_stride;
-  int uv_mb_height = 16 >> (lst_yv12->y_height > lst_yv12->uv_height);
   int64_t intra_error = 0;
   int64_t coded_error = 0;
   int64_t sr_coded_error = 0;
@@ -488,11 +476,26 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
   MV lastmv = {0, 0};
   TWO_PASS *twopass = &cpi->twopass;
   const MV zero_mv = {0, 0};
+  int recon_y_stride, recon_uv_stride, uv_mb_height;
+
+  YV12_BUFFER_CONFIG *const lst_yv12 = get_ref_frame_buffer(cpi, LAST_FRAME);
+  YV12_BUFFER_CONFIG *gld_yv12 = get_ref_frame_buffer(cpi, GOLDEN_FRAME);
+  YV12_BUFFER_CONFIG *const new_yv12 = get_frame_new_buffer(cm);
   const YV12_BUFFER_CONFIG *first_ref_buf = lst_yv12;
+
   LAYER_CONTEXT *const lc = is_two_pass_svc(cpi) ?
         &cpi->svc.layer_context[cpi->svc.spatial_layer_id] : NULL;
   double intra_factor;
   double brightness_factor;
+  BufferPool *const pool = cm->buffer_pool;
+
+  // First pass code requires valid last and new frame buffers.
+  assert(new_yv12 != NULL);
+  assert((lc != NULL) || frame_is_intra_only(cm) || (lst_yv12 != NULL));
+
+  recon_y_stride = new_yv12->y_stride;
+  recon_uv_stride = new_yv12->uv_stride;
+  uv_mb_height = 16 >> (new_yv12->y_height > new_yv12->uv_height);
 
 #if CONFIG_FP_MB_STATS
   if (cpi->use_fp_mb_stats) {
@@ -537,13 +540,10 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
     }
 
     if (cpi->ref_frame_flags & VP9_GOLD_FLAG) {
-      BufferPool *const pool = cm->buffer_pool;
-      const int ref_idx =
-          cm->ref_frame_map[get_ref_frame_idx(cpi, GOLDEN_FRAME)];
-      const int scaled_idx = cpi->scaled_ref_idx[GOLDEN_FRAME - 1];
-
-      gld_yv12 = (scaled_idx != ref_idx) ? &pool->frame_bufs[scaled_idx].buf :
-                 get_ref_frame_buffer(cpi, GOLDEN_FRAME);
+      gld_yv12 = vp9_get_scaled_ref_frame(cpi, GOLDEN_FRAME);
+      if (gld_yv12 == NULL) {
+        gld_yv12 = get_ref_frame_buffer(cpi, GOLDEN_FRAME);
+      }
     } else {
       gld_yv12 = NULL;
     }
@@ -563,8 +563,11 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
   vp9_setup_block_planes(&x->e_mbd, cm->subsampling_x, cm->subsampling_y);
 
   vp9_setup_src_planes(x, cpi->Source, 0, 0);
-  vp9_setup_pre_planes(xd, 0, first_ref_buf, 0, 0, NULL);
   vp9_setup_dst_planes(xd->plane, new_yv12, 0, 0);
+
+  if (!frame_is_intra_only(cm)) {
+    vp9_setup_pre_planes(xd, 0, first_ref_buf, 0, 0, NULL);
+  }
 
   xd->mi = cm->mi;
   xd->mi[0].src_mi = &xd->mi[0];
@@ -1020,7 +1023,8 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
        ((twopass->this_frame_stats.intra_error /
          DOUBLE_DIVIDE_CHECK(twopass->this_frame_stats.coded_error)) > 2.0))) {
     if (gld_yv12 != NULL) {
-      vp8_yv12_copy_frame(lst_yv12, gld_yv12);
+      ref_cnt_fb(pool->frame_bufs, &cm->ref_frame_map[cpi->gld_fb_idx],
+                 cm->ref_frame_map[cpi->lst_fb_idx]);
     }
     twopass->sr_update_lag = 1;
   } else {
@@ -1032,14 +1036,17 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
   if (lc != NULL) {
     vp9_update_reference_frames(cpi);
   } else {
-    // Swap frame pointers so last frame refers to the frame we just compressed.
-    swap_yv12(lst_yv12, new_yv12);
+    // The frame we just compressed now becomes the last frame.
+    ref_cnt_fb(pool->frame_bufs, &cm->ref_frame_map[cpi->lst_fb_idx],
+               cm->new_fb_idx);
   }
 
   // Special case for the first frame. Copy into the GF buffer as a second
   // reference.
-  if (cm->current_video_frame == 0 && gld_yv12 != NULL && lc == NULL) {
-    vp8_yv12_copy_frame(lst_yv12, gld_yv12);
+  if (cm->current_video_frame == 0 && cpi->gld_fb_idx != INVALID_IDX &&
+      lc == NULL) {
+    ref_cnt_fb(pool->frame_bufs, &cm->ref_frame_map[cpi->gld_fb_idx],
+               cm->ref_frame_map[cpi->lst_fb_idx]);
   }
 
   // Use this to see what the first pass reconstruction looks like.

@@ -144,12 +144,14 @@ static unsigned int get_sby_perpixel_diff_variance(VP9_COMP *cpi,
                                                    const struct buf_2d *ref,
                                                    int mi_row, int mi_col,
                                                    BLOCK_SIZE bs) {
+  unsigned int sse, var;
+  uint8_t *last_y;
   const YV12_BUFFER_CONFIG *last = get_ref_frame_buffer(cpi, LAST_FRAME);
-  const uint8_t* last_y = &last->y_buffer[mi_row * MI_SIZE * last->y_stride +
-                                              mi_col * MI_SIZE];
-  unsigned int sse;
-  const unsigned int var = cpi->fn_ptr[bs].vf(ref->buf, ref->stride,
-                                              last_y, last->y_stride, &sse);
+
+  assert(last != NULL);
+  last_y =
+      &last->y_buffer[mi_row * MI_SIZE * last->y_stride + mi_col * MI_SIZE];
+  var = cpi->fn_ptr[bs].vf(ref->buf, ref->stride, last_y, last->y_stride, &sse);
   return ROUND_POWER_OF_TWO(var, num_pels_log2_lookup[bs]);
 }
 
@@ -667,7 +669,7 @@ static unsigned int motion_estimation(VP9_COMP *cpi, MACROBLOCK *x,
 #endif
 
 // This function chooses partitioning based on the variance between source and
-// reconstructed last, where variance is computed for downs-sampled inputs.
+// reconstructed last, where variance is computed for down-sampled inputs.
 static void choose_partitioning(VP9_COMP *cpi,
                                 const TileInfo *const tile,
                                 MACROBLOCK *x,
@@ -682,7 +684,6 @@ static void choose_partitioning(VP9_COMP *cpi,
   int sp;
   int dp;
   int pixels_wide = 64, pixels_high = 64;
-  const YV12_BUFFER_CONFIG *yv12 = get_ref_frame_buffer(cpi, LAST_FRAME);
 
   // Always use 4x4 partition for key frame.
   const int is_key_frame = (cm->frame_type == KEY_FRAME);
@@ -714,6 +715,8 @@ static void choose_partitioning(VP9_COMP *cpi,
     unsigned int y_sad;
     BLOCK_SIZE bsize;
 #endif
+    const YV12_BUFFER_CONFIG *yv12 = get_ref_frame_buffer(cpi, LAST_FRAME);
+    assert(yv12 != NULL);
     vp9_setup_pre_planes(xd, 0, yv12, mi_row, mi_col,
         &cm->frame_refs[LAST_FRAME - 1].sf);
     mbmi->ref_frame[0] = LAST_FRAME;
@@ -4186,6 +4189,7 @@ static void encode_superblock(VP9_COMP *cpi, ThreadData *td,
     for (ref = 0; ref < 1 + is_compound; ++ref) {
       YV12_BUFFER_CONFIG *cfg = get_ref_frame_buffer(cpi,
                                                      mbmi->ref_frame[ref]);
+      assert(cfg != NULL);
       vp9_setup_pre_planes(xd, ref, cfg, mi_row, mi_col,
                            &xd->block_refs[ref]->sf);
     }

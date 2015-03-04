@@ -532,13 +532,14 @@ int16_t* vp9_raster_block_offset_int16(BLOCK_SIZE plane_bsize,
   return base + vp9_raster_block_offset(plane_bsize, raster_block, stride);
 }
 
-const YV12_BUFFER_CONFIG *vp9_get_scaled_ref_frame(const VP9_COMP *cpi,
-                                                   int ref_frame) {
+YV12_BUFFER_CONFIG *vp9_get_scaled_ref_frame(const VP9_COMP *cpi,
+                                             int ref_frame) {
   const VP9_COMMON *const cm = &cpi->common;
-  const int ref_idx = cm->ref_frame_map[get_ref_frame_idx(cpi, ref_frame)];
   const int scaled_idx = cpi->scaled_ref_idx[ref_frame - 1];
-  return (scaled_idx != ref_idx) ?
-      &cm->buffer_pool->frame_bufs[scaled_idx].buf : NULL;
+  const int ref_idx = get_ref_frame_buf_idx(cpi, ref_frame);
+  return
+      (scaled_idx != ref_idx && scaled_idx != INVALID_IDX) ?
+          &cm->buffer_pool->frame_bufs[scaled_idx].buf : NULL;
 }
 
 int vp9_get_switchable_rate(const VP9_COMP *cpi, const MACROBLOCKD *const xd) {
