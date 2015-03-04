@@ -580,7 +580,7 @@ static intra_high_pred_fn pred_high[INTRA_MODES][4];
 static intra_high_pred_fn dc_pred_high[2][2][4];
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-static void vp9_init_intra_predictors_internal() {
+static void vp9_init_intra_predictors_internal(void) {
 #define INIT_ALL_SIZES(p, type) \
   p[TX_4X4] = vp9_##type##_predictor_4x4; \
   p[TX_8X8] = vp9_##type##_predictor_8x8; \
