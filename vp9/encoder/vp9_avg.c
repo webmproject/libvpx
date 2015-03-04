@@ -32,12 +32,13 @@ unsigned int vp9_avg_4x4_c(const uint8_t *s, int p) {
 void vp9_int_pro_row_c(int16_t *hbuf, uint8_t const *ref,
                        const int ref_stride, const int height) {
   int idx;
+  const int norm_factor = MAX(8, height >> 1);
   for (idx = 0; idx < 16; ++idx) {
     int i;
     hbuf[idx] = 0;
     for (i = 0; i < height; ++i)
       hbuf[idx] += ref[i * ref_stride];
-    hbuf[idx] /= 32;
+    hbuf[idx] /= norm_factor;
     ++ref;
   }
 }
@@ -45,9 +46,10 @@ void vp9_int_pro_row_c(int16_t *hbuf, uint8_t const *ref,
 int16_t vp9_int_pro_col_c(uint8_t const *ref, const int width) {
   int idx;
   int16_t sum = 0;
+  const int norm_factor = MAX(8, width >> 1);
   for (idx = 0; idx < width; ++idx)
     sum += ref[idx];
-  return sum / 32;
+  return sum / norm_factor;
 }
 
 int vp9_vector_var_c(int16_t const *ref, int16_t const *src,
