@@ -1714,6 +1714,152 @@ int vp9_diamond_search_sad_c(const MACROBLOCK *x,
   return bestsad;
 }
 
+static int vector_match(int16_t *ref, int16_t *src, int bwl) {
+  int best_sad = INT_MAX;
+  int this_sad;
+  int d;
+  int center, offset = 0;
+  int bw = 4 << bwl;  // redundant variable, to be changed in the experiments.
+  for (d = 0; d <= bw; d += 16) {
+    this_sad = vp9_vector_var(&ref[d], src, bwl);
+    if (this_sad < best_sad) {
+      best_sad = this_sad;
+      offset = d;
+    }
+  }
+  center = offset;
+
+  for (d = -8; d <= 8; d += 16) {
+    int this_pos = offset + d;
+    // check limit
+    if (this_pos < 0 || this_pos > bw)
+      continue;
+    this_sad = vp9_vector_var(&ref[this_pos], src, bwl);
+    if (this_sad < best_sad) {
+      best_sad = this_sad;
+      center = this_pos;
+    }
+  }
+  offset = center;
+
+  for (d = -4; d <= 4; d += 8) {
+    int this_pos = offset + d;
+    // check limit
+    if (this_pos < 0 || this_pos > bw)
+      continue;
+    this_sad = vp9_vector_var(&ref[this_pos], src, bwl);
+    if (this_sad < best_sad) {
+      best_sad = this_sad;
+      center = this_pos;
+    }
+  }
+  offset = center;
+
+  for (d = -2; d <= 2; d += 4) {
+    int this_pos = offset + d;
+    // check limit
+    if (this_pos < 0 || this_pos > bw)
+      continue;
+    this_sad = vp9_vector_var(&ref[this_pos], src, bwl);
+    if (this_sad < best_sad) {
+      best_sad = this_sad;
+      center = this_pos;
+    }
+  }
+  offset = center;
+
+  for (d = -1; d <= 1; d += 2) {
+    int this_pos = offset + d;
+    // check limit
+    if (this_pos < 0 || this_pos > bw)
+      continue;
+    this_sad = vp9_vector_var(&ref[this_pos], src, bwl);
+    if (this_sad < best_sad) {
+      best_sad = this_sad;
+      center = this_pos;
+    }
+  }
+
+  return (center - (bw >> 1));
+}
+
+static const MV search_pos[9] = {
+  {-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 0}, {0, 1},
+  {1, -1}, {1, 0}, {1, 1},
+};
+
+unsigned int vp9_int_pro_motion_estimation(const VP9_COMP *cpi, MACROBLOCK *x,
+                                           BLOCK_SIZE bsize) {
+  MACROBLOCKD *xd = &x->e_mbd;
+  DECLARE_ALIGNED(16, int16_t, hbuf[128]);
+  DECLARE_ALIGNED(16, int16_t, vbuf[128]);
+  DECLARE_ALIGNED(16, int16_t, src_hbuf[64]);
+  DECLARE_ALIGNED(16, int16_t, src_vbuf[64]);
+  int idx;
+  const int bw = 4 << b_width_log2_lookup[bsize];
+  const int bh = 4 << b_height_log2_lookup[bsize];
+  const int search_width = bw << 1;
+  const int search_height = bh << 1;
+  const int src_stride = x->plane[0].src.stride;
+  const int ref_stride = xd->plane[0].pre[0].stride;
+  uint8_t const *ref_buf, *src_buf;
+  MV *tmp_mv = &xd->mi[0].src_mi->mbmi.mv[0].as_mv;
+  int best_sad;
+  MV this_mv;
+
+  // Set up prediction 1-D reference set
+  ref_buf = xd->plane[0].pre[0].buf - (bw >> 1);
+  for (idx = 0; idx < search_width; idx += 16) {
+    vp9_int_pro_row(&hbuf[idx], ref_buf, ref_stride, bh);
+    ref_buf += 16;
+  }
+
+  ref_buf = xd->plane[0].pre[0].buf - (bh >> 1) * ref_stride;
+  for (idx = 0; idx < search_height; ++idx) {
+    vbuf[idx] = vp9_int_pro_col(ref_buf, bw);
+    ref_buf += ref_stride;
+  }
+
+  // Set up src 1-D reference set
+  for (idx = 0; idx < bw; idx += 16) {
+    src_buf = x->plane[0].src.buf + idx;
+    vp9_int_pro_row(&src_hbuf[idx], src_buf, src_stride, bh);
+  }
+
+  src_buf = x->plane[0].src.buf;
+  for (idx = 0; idx < bh; ++idx) {
+    src_vbuf[idx] = vp9_int_pro_col(src_buf, bw);
+    src_buf += src_stride;
+  }
+
+  // Find the best match per 1-D search
+  tmp_mv->col = vector_match(hbuf, src_hbuf, b_width_log2_lookup[bsize]);
+  tmp_mv->row = vector_match(vbuf, src_vbuf, b_height_log2_lookup[bsize]);
+
+  best_sad = INT_MAX;
+  this_mv = *tmp_mv;
+  for (idx = 0; idx < 9; ++idx) {
+    int this_sad;
+    src_buf = x->plane[0].src.buf;
+    ref_buf = xd->plane[0].pre[0].buf +
+        (search_pos[idx].row + this_mv.row) * ref_stride +
+        (search_pos[idx].col + this_mv.col);
+
+    this_sad = cpi->fn_ptr[bsize].sdf(src_buf, src_stride,
+                                      ref_buf, ref_stride);
+    if (this_sad < best_sad) {
+      best_sad = this_sad;
+      tmp_mv->row = search_pos[idx].row + this_mv.row;
+      tmp_mv->col = search_pos[idx].col + this_mv.col;
+    }
+  }
+  tmp_mv->row *= 8;
+  tmp_mv->col *= 8;
+  x->pred_mv[LAST_FRAME] = *tmp_mv;
+
+  return best_sad;
+}
+
 /* do_refine: If last step (1-away) of n-step search doesn't pick the center
               point as the best match, we will do a final 1-away diamond
               refining search  */
