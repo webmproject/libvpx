@@ -476,19 +476,19 @@ void vp9_xform_quant_dc(MACROBLOCK *x, int plane, int block,
         break;
       case TX_16X16:
         vp9_highbd_fdct16x16_1(src_diff, coeff, diff_stride);
-        vp9_highbd_quantize_dc(coeff, x->skip_block, p->round,
+        vp9_highbd_quantize_dc(coeff, 256, x->skip_block, p->round,
                                p->quant_fp[0], qcoeff, dqcoeff,
                                pd->dequant[0], eob);
         break;
       case TX_8X8:
         vp9_highbd_fdct8x8_1(src_diff, coeff, diff_stride);
-        vp9_highbd_quantize_dc(coeff, x->skip_block, p->round,
+        vp9_highbd_quantize_dc(coeff, 64, x->skip_block, p->round,
                                p->quant_fp[0], qcoeff, dqcoeff,
                                pd->dequant[0], eob);
         break;
       case TX_4X4:
         x->fwd_txm4x4(src_diff, coeff, diff_stride);
-        vp9_highbd_quantize_dc(coeff, x->skip_block, p->round,
+        vp9_highbd_quantize_dc(coeff, 16, x->skip_block, p->round,
                                p->quant_fp[0], qcoeff, dqcoeff,
                                pd->dequant[0], eob);
         break;
@@ -508,19 +508,19 @@ void vp9_xform_quant_dc(MACROBLOCK *x, int plane, int block,
       break;
     case TX_16X16:
       vp9_fdct16x16_1(src_diff, coeff, diff_stride);
-      vp9_quantize_dc(coeff, x->skip_block, p->round,
+      vp9_quantize_dc(coeff, 256, x->skip_block, p->round,
                      p->quant_fp[0], qcoeff, dqcoeff,
                      pd->dequant[0], eob);
       break;
     case TX_8X8:
       vp9_fdct8x8_1(src_diff, coeff, diff_stride);
-      vp9_quantize_dc(coeff, x->skip_block, p->round,
+      vp9_quantize_dc(coeff, 64, x->skip_block, p->round,
                       p->quant_fp[0], qcoeff, dqcoeff,
                       pd->dequant[0], eob);
       break;
     case TX_4X4:
       x->fwd_txm4x4(src_diff, coeff, diff_stride);
-      vp9_quantize_dc(coeff, x->skip_block, p->round,
+      vp9_quantize_dc(coeff, 16, x->skip_block, p->round,
                       p->quant_fp[0], qcoeff, dqcoeff,
                       pd->dequant[0], eob);
       break;
