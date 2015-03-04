@@ -610,7 +610,6 @@ static unsigned int motion_estimation(VP9_COMP *cpi, MACROBLOCK *x,
   uint8_t const *ref_buf, *src_buf;
   MV *tmp_mv = &xd->mi[0].src_mi->mbmi.mv[0].as_mv;
   int best_sad;
-  unsigned int best_sse;
   MV this_mv;
 
   // Set up prediction 1-D reference set
@@ -659,13 +658,11 @@ static unsigned int motion_estimation(VP9_COMP *cpi, MACROBLOCK *x,
       tmp_mv->col = search_pos[idx].col + this_mv.col;
     }
   }
-
-  ref_buf = xd->plane[0].pre[0].buf + tmp_mv->row * ref_stride + tmp_mv->col;
-  cpi->fn_ptr[bsize].vf(src_buf, src_stride, ref_buf, ref_stride, &best_sse);
   tmp_mv->row *= 8;
   tmp_mv->col *= 8;
   x->pred_mv[LAST_FRAME] = *tmp_mv;
-  return best_sse;
+
+  return best_sad;
 }
 #endif
 
@@ -712,9 +709,9 @@ static void choose_partitioning(VP9_COMP *cpi,
 
   if (!is_key_frame) {
     MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
-    unsigned int var = 0, uv_sse;
+    unsigned int uv_sad;
 #if GLOBAL_MOTION
-    unsigned int y_sse;
+    unsigned int y_sad;
     BLOCK_SIZE bsize;
 #endif
     vp9_setup_pre_planes(xd, 0, yv12, mi_row, mi_col,
@@ -735,7 +732,7 @@ static void choose_partitioning(VP9_COMP *cpi,
     else
       bsize = BLOCK_32X32;
 
-    y_sse = motion_estimation(cpi, x, bsize);
+    y_sad = motion_estimation(cpi, x, bsize);
 #endif
 
     vp9_build_inter_predictors_sb(xd, mi_row, mi_col, BLOCK_64X64);
@@ -744,13 +741,13 @@ static void choose_partitioning(VP9_COMP *cpi,
       struct macroblock_plane  *p = &x->plane[i];
       struct macroblockd_plane *pd = &xd->plane[i];
       const BLOCK_SIZE bs = get_plane_block_size(BLOCK_64X64, pd);
-      var += cpi->fn_ptr[bs].vf(p->src.buf, p->src.stride,
-                                pd->dst.buf, pd->dst.stride, &uv_sse);
+      uv_sad = cpi->fn_ptr[bs].sdf(p->src.buf, p->src.stride,
+                                   pd->dst.buf, pd->dst.stride);
 
 #if GLOBAL_MOTION
-      x->color_sensitivity[i - 1] = uv_sse * 6 > y_sse;
+      x->color_sensitivity[i - 1] = uv_sad * 4 > y_sad;
 #else
-      x->color_sensitivity[i - 1] = (uv_sse > 2048);
+      x->color_sensitivity[i - 1] = (uv_sad > 512);
 #endif
     }
 
