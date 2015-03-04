@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//FOY\u003d",
+        "filename": "vp9/encoder/vp9_encodemv.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 302,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2015-03-04T22:02:34Z",
+      "side": 1,
+      "message": "will be more readable to make this into straight:\n#if CONFIG_NEWMVREF_SUB8X8\n...\n#else\n...\n#endif\nThere will be some duplication, but more readable.",
+      "revId": "be3a0f039a10bd804bc224a4d3ceec9b72d11eb7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//FOQ\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 2703,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2015-03-04T22:02:34Z",
+      "side": 1,
+      "message": "put the \u0026\u0026 in the line above.",
+      "revId": "be3a0f039a10bd804bc224a4d3ceec9b72d11eb7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//FOU\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 27
+      },
+      "lineNbr": 2792,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2015-03-04T22:02:34Z",
+      "side": 1,
+      "message": "can you make this a separate function here that can go in vp9_blockd.h\n#if CONFIG_NEWMVREF_SUB8X8\nif (vp9_has_newmv_in_compound(this_mode))\n  have_ref \u0026\u003d ...\n#endif",
+      "revId": "be3a0f039a10bd804bc224a4d3ceec9b72d11eb7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
