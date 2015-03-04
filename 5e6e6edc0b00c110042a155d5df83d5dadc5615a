@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//FdM\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 515,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2015-03-04T00:23:47Z",
+      "side": 1,
+      "message": "Could this actually pick up the noise since min/max is calculated by single pixel value?",
+      "revId": "5e6e6edc0b00c110042a155d5df83d5dadc5615a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
