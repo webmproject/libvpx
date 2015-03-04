@@ -257,7 +257,7 @@ static VP9_DENOISER_DECISION perform_motion_compensation(VP9_DENOISER *denoiser,
     if (has_second_ref(mbmi)) {
       mbmi->mode = ZERO_ZEROMV;
     } else {
-      mbmi->mode = ZERO_MV;
+      mbmi->mode = ZEROMV;
     }
 #else
     mbmi->mode = ZEROMV;
