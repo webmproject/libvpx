@@ -493,10 +493,6 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
   assert(new_yv12 != NULL);
   assert((lc != NULL) || frame_is_intra_only(cm) || (lst_yv12 != NULL));
 
-  recon_y_stride = new_yv12->y_stride;
-  recon_uv_stride = new_yv12->uv_stride;
-  uv_mb_height = 16 >> (new_yv12->y_height > new_yv12->uv_height);
-
 #if CONFIG_FP_MB_STATS
   if (cpi->use_fp_mb_stats) {
     vp9_zero_array(cpi->twopass.frame_mb_stats_buf, cm->initial_mbs);
@@ -548,10 +544,6 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
       gld_yv12 = NULL;
     }
 
-    recon_y_stride = new_yv12->y_stride;
-    recon_uv_stride = new_yv12->uv_stride;
-    uv_mb_height = 16 >> (new_yv12->y_height > new_yv12->uv_height);
-
     set_ref_ptrs(cm, xd,
                  (cpi->ref_frame_flags & VP9_LAST_FLAG) ? LAST_FRAME: NONE,
                  (cpi->ref_frame_flags & VP9_GOLD_FLAG) ? GOLDEN_FRAME : NONE);
@@ -587,6 +579,10 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
 
   // Tiling is ignored in the first pass.
   vp9_tile_init(&tile, cm, 0, 0);
+
+  recon_y_stride = new_yv12->y_stride;
+  recon_uv_stride = new_yv12->uv_stride;
+  uv_mb_height = 16 >> (new_yv12->y_height > new_yv12->uv_height);
 
   for (mb_row = 0; mb_row < cm->mb_rows; ++mb_row) {
     MV best_ref_mv = {0, 0};
