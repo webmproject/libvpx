@@ -838,7 +838,7 @@ static INLINE int assign_mv(VP9_COMMON *cm, PREDICTION_MODE mode,
       mv[1].as_int = 0;
       break;
     }
-#endif
+#endif  // CONFIG_COMPOUND_MODES
     default: {
       return 0;
     }
@@ -982,6 +982,9 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
     int idx, idy;
     PREDICTION_MODE b_mode;
     int_mv nearest_sub8x8[2], near_sub8x8[2];
+#if CONFIG_NEWMVREF_SUB8X8
+    int_mv ref_mv[2];
+#endif  // CONFIG_NEWMVREF_SUB8X8
     for (idy = 0; idy < 2; idy += num_4x4_h) {
       for (idx = 0; idx < 2; idx += num_4x4_w) {
         int_mv block[2];
@@ -997,19 +1000,59 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
 #endif
 #if CONFIG_COMPOUND_MODES
         if (b_mode == NEARESTMV || b_mode == NEARMV ||
+#if CONFIG_NEWMVREF_SUB8X8
+            b_mode == NEWMV || b_mode == NEW_NEWMV ||
+#endif  // CONFIG_NEWMVREF_SUB8X8
             b_mode == NEAREST_NEARESTMV || b_mode == NEAREST_NEARMV ||
             b_mode == NEAR_NEARESTMV || b_mode == NEAREST_NEWMV ||
             b_mode == NEW_NEARESTMV || b_mode == NEAR_NEWMV ||
             b_mode == NEW_NEARMV)
 #else
-        if (b_mode == NEARESTMV || b_mode == NEARMV)
-#endif
-          for (ref = 0; ref < 1 + is_compound; ++ref)
+        if (b_mode == NEARESTMV || b_mode == NEARMV
+#if CONFIG_NEWMVREF_SUB8X8
+            || b_mode == NEWMV
+#endif  // CONFIG_NEWMVREF_SUB8X8
+            )
+#endif  // CONFIG_COMPOUND_MODES
+        {
+          for (ref = 0; ref < 1 + is_compound; ++ref) {
+#if CONFIG_NEWMVREF_SUB8X8
+            int_mv mv_ref_list[MAX_MV_REF_CANDIDATES];
+            int_mv second_ref_mv;
+            vp9_update_mv_context(cm, xd, tile, mi, mbmi->ref_frame[ref],
+                                  mv_ref_list, j, mi_row, mi_col);
+#endif  // CONFIG_NEWMVREF_SUB8X8
             vp9_append_sub8x8_mvs_for_idx(cm, xd, tile, j, ref, mi_row, mi_col,
+#if CONFIG_NEWMVREF_SUB8X8
+                                          mv_ref_list,
+#endif  // CONFIG_NEWMVREF_SUB8X8
                                           &nearest_sub8x8[ref],
                                           &near_sub8x8[ref]);
+#if CONFIG_NEWMVREF_SUB8X8
+            if (b_mode == NEWMV
+#if CONFIG_COMPOUND_MODES
+                || b_mode == NEW_NEWMV ||
+                b_mode == NEAREST_NEWMV ||
+                b_mode == NEW_NEARESTMV ||
+                b_mode == NEAR_NEWMV ||
+                b_mode == NEW_NEARMV
+#endif  // CONFIG_COMPOUND_MODES
+                ) {
+              mv_ref_list[0].as_int = nearest_sub8x8[ref].as_int;
+              mv_ref_list[1].as_int = near_sub8x8[ref].as_int;
+              vp9_find_best_ref_mvs(xd, allow_hp, mv_ref_list,
+                                    &ref_mv[ref], &second_ref_mv);
+            }
+#endif  // CONFIG_NEWMVREF_SUB8X8
+          }
+        }
 
-        if (!assign_mv(cm, b_mode, block, nearestmv,
+        if (!assign_mv(cm, b_mode, block,
+#if CONFIG_NEWMVREF_SUB8X8
+                       ref_mv,
+#else
+                       nearestmv,
+#endif  // CONFIG_NEWMVREF_SUB8X8
                        nearest_sub8x8, near_sub8x8,
                        is_compound, allow_hp, r)) {
           xd->corrupted |= 1;

@@ -26,7 +26,9 @@ static void find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
   const MB_MODE_INFO *const prev_mbmi = prev_mi ? &prev_mi->mbmi : NULL;
   const POSITION *const mv_ref_search = mv_ref_blocks[mi->mbmi.sb_type];
   int different_ref_found = 0;
+#if !CONFIG_NEWMVREF_SUB8X8
   int context_counter = 0;
+#endif  // CONFIG_NEWMVREF_SUB8X8
 
   // Blank the reference vector list
   vpx_memset(mv_ref_list, 0, sizeof(*mv_ref_list) * MAX_MV_REF_CANDIDATES);
@@ -41,13 +43,16 @@ static void find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                                                    xd->mi_stride].src_mi;
       const MB_MODE_INFO *const candidate = &candidate_mi->mbmi;
       // Keep counts for entropy encoding.
+#if !CONFIG_NEWMVREF_SUB8X8
       context_counter += mode_2_counter[candidate->mode];
+#endif  // CONFIG_NEWMVREF_SUB8X8
       different_ref_found = 1;
 
-      if (candidate->ref_frame[0] == ref_frame)
+      if (candidate->ref_frame[0] == ref_frame) {
         ADD_MV_REF_LIST(get_sub_block_mv(candidate_mi, 0, mv_ref->col, block));
-      else if (candidate->ref_frame[1] == ref_frame)
+      } else if (candidate->ref_frame[1] == ref_frame) {
         ADD_MV_REF_LIST(get_sub_block_mv(candidate_mi, 1, mv_ref->col, block));
+      }
     }
   }
 
@@ -98,30 +103,66 @@ static void find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
 
  Done:
 
+#if !CONFIG_NEWMVREF_SUB8X8
   mi->mbmi.mode_context[ref_frame] = counter_to_context[context_counter];
+#endif  // CONFIG_NEWMVREF_SUB8X8
 
   // Clamp vectors
   for (i = 0; i < MAX_MV_REF_CANDIDATES; ++i)
     clamp_mv_ref(&mv_ref_list[i].as_mv, xd);
 }
 
+#if CONFIG_NEWMVREF_SUB8X8
+// This function keeps a mode count for a given MB/SB
+void vp9_update_mv_context(const VP9_COMMON *cm, const MACROBLOCKD *xd,
+                           const TileInfo *const tile,
+                           MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
+                           int_mv *mv_ref_list,
+                           int block, int mi_row, int mi_col) {
+  int i, refmv_count = 0;
+  const POSITION *const mv_ref_search = mv_ref_blocks[mi->mbmi.sb_type];
+  int context_counter = 0;
+
+  // Blank the reference vector list
+  vpx_memset(mv_ref_list, 0, sizeof(*mv_ref_list) * MAX_MV_REF_CANDIDATES);
+
+  // The nearest 2 blocks are examined only.
+  // If the size < 8x8, we get the mv from the bmi substructure;
+  for (i = 0; i < 2; ++i) {
+    const POSITION *const mv_ref = &mv_ref_search[i];
+    if (is_inside(tile, mi_col, mi_row, cm->mi_rows, mv_ref)) {
+      const MODE_INFO *const candidate_mi =
+          xd->mi[mv_ref->col + mv_ref->row * xd->mi_stride].src_mi;
+      const MB_MODE_INFO *const candidate = &candidate_mi->mbmi;
+
+      // Keep counts for entropy encoding.
+      context_counter += mode_2_counter[candidate->mode];
+
+      if (candidate->ref_frame[0] == ref_frame) {
+        ADD_MV_REF_LIST(get_sub_block_mv(candidate_mi, 0, mv_ref->col, block));
+      } else if (candidate->ref_frame[1] == ref_frame) {
+        ADD_MV_REF_LIST(get_sub_block_mv(candidate_mi, 1, mv_ref->col, block));
+      }
+    }
+  }
+
+ Done:
+
+  mi->mbmi.mode_context[ref_frame] = counter_to_context[context_counter];
+}
+#endif  // CONFIG_NEWMVREF_SUB8X8
+
 void vp9_find_mv_refs(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                       const TileInfo *const tile,
                       MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
                       int_mv *mv_ref_list,
                       int mi_row, int mi_col) {
+#if CONFIG_NEWMVREF_SUB8X8
+  vp9_update_mv_context(cm, xd, tile, mi, ref_frame, mv_ref_list, -1,
+                        mi_row, mi_col);
+#endif  // CONFIG_NEWMVREF_SUB8X8
   find_mv_refs_idx(cm, xd, tile, mi, ref_frame, mv_ref_list, -1,
                    mi_row, mi_col);
-}
-
-static void lower_mv_precision(MV *mv, int allow_hp) {
-  const int use_hp = allow_hp && vp9_use_mv_hp(mv);
-  if (!use_hp) {
-    if (mv->row & 1)
-      mv->row += (mv->row > 0 ? -1 : 1);
-    if (mv->col & 1)
-      mv->col += (mv->col > 0 ? -1 : 1);
-  }
 }
 
 void vp9_find_best_ref_mvs(MACROBLOCKD *xd, int allow_hp,
@@ -129,8 +170,10 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd, int allow_hp,
   int i;
   // Make sure all the candidates are properly clamped etc
   for (i = 0; i < MAX_MV_REF_CANDIDATES; ++i) {
-    lower_mv_precision(&mvlist[i].as_mv, allow_hp);
-    clamp_mv2(&mvlist[i].as_mv, xd);
+    MV *mv = &mvlist[i].as_mv;
+    const int usehp = allow_hp && vp9_use_mv_hp(mv);
+    vp9_lower_mv_precision(mv, usehp);
+    clamp_mv2(mv, xd);
   }
   *nearest = mvlist[0];
   *near = mvlist[1];
@@ -139,8 +182,13 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd, int allow_hp,
 void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
                                    const TileInfo *const tile,
                                    int block, int ref, int mi_row, int mi_col,
+#if CONFIG_NEWMVREF_SUB8X8
+                                   int_mv *mv_list,
+#endif  // CONFIG_NEWMVREF_SUB8X8
                                    int_mv *nearest, int_mv *near) {
+#if !CONFIG_NEWMVREF_SUB8X8
   int_mv mv_list[MAX_MV_REF_CANDIDATES];
+#endif  // CONFIG_NEWMVREF_SUB8X8
   MODE_INFO *const mi = xd->mi[0].src_mi;
   b_mode_info *bmi = mi->bmi;
   int n;

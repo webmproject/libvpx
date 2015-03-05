@@ -215,10 +215,28 @@ static INLINE void clamp_mv2(MV *mv, const MACROBLOCKD *xd) {
                xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN);
 }
 
+#if CONFIG_NEWMVREF_SUB8X8
+// This function keeps a mode count for a given MB/SB
+void vp9_update_mv_context(const VP9_COMMON *cm, const MACROBLOCKD *xd,
+                           const TileInfo *const tile,
+                           MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
+                           int_mv *mv_ref_list,
+                           int block, int mi_row, int mi_col);
+#endif  // CONFIG_NEWMVREF_SUB8X8
+
 void vp9_find_mv_refs(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                       const TileInfo *const tile,
                       MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
                       int_mv *mv_ref_list, int mi_row, int mi_col);
+
+static INLINE void vp9_lower_mv_precision(MV *mv, const int usehp) {
+  if (!usehp) {
+    if (mv->row & 1)
+      mv->row += (mv->row > 0 ? -1 : 1);
+    if (mv->col & 1)
+      mv->col += (mv->col > 0 ? -1 : 1);
+  }
+}
 
 // check a list of motion vectors by sad score using a number rows of pixels
 // above and a number cols of pixels in the left to select the one with best
@@ -229,6 +247,9 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd, int allow_hp,
 void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
                                    const TileInfo *const tile,
                                    int block, int ref, int mi_row, int mi_col,
+#if CONFIG_NEWMVREF_SUB8X8
+                                   int_mv *mv_list,
+#endif  // CONFIG_NEWMVREF_SUB8X8
                                    int_mv *nearest, int_mv *near);
 
 #if CONFIG_COPY_MODE

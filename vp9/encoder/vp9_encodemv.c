@@ -229,26 +229,24 @@ void vp9_build_nmv_cost_table(int *mvjoint, int *mvcost[2],
   build_nmv_component_cost_table(mvcost[1], &ctx->comps[1], usehp);
 }
 
-static void inc_mvs(const MB_MODE_INFO *mbmi, const int_mv mvs[2],
-                    nmv_context_counts *counts) {
+static void inc_mvs(const MB_MODE_INFO *mbmi, const int_mv mv[2],
+                    const int_mv ref_mv[2], nmv_context_counts *counts) {
   int i;
 
   for (i = 0; i < 1 + has_second_ref(mbmi); ++i) {
-    const MV *ref = &mbmi->ref_mvs[mbmi->ref_frame[i]][0].as_mv;
-    const MV diff = {mvs[i].as_mv.row - ref->row,
-                     mvs[i].as_mv.col - ref->col};
+    const MV diff = {mv[i].as_mv.row - ref_mv[i].as_mv.row,
+                     mv[i].as_mv.col - ref_mv[i].as_mv.col};
     vp9_inc_mv(&diff, counts);
   }
 }
 
 #if CONFIG_COMPOUND_MODES
-static void inc_compound_single_mv(const MB_MODE_INFO *mbmi,
-                                   int ref_idx,
-                                   const int_mv mvs[2],
+static void inc_compound_single_mv(int ref_idx,
+                                   const int_mv mv[2],
+                                   const int_mv ref_mv[2],
                                    nmv_context_counts *counts) {
-  const MV *ref = &mbmi->ref_mvs[mbmi->ref_frame[ref_idx]][0].as_mv;
-  const MV diff = {mvs[ref_idx].as_mv.row - ref->row,
-                   mvs[ref_idx].as_mv.col - ref->col};
+  const MV diff = {mv[ref_idx].as_mv.row - ref_mv[ref_idx].as_mv.row,
+                   mv[ref_idx].as_mv.col - ref_mv[ref_idx].as_mv.col};
   vp9_inc_mv(&diff, counts);
 }
 #endif
@@ -256,6 +254,11 @@ static void inc_compound_single_mv(const MB_MODE_INFO *mbmi,
 void vp9_update_mv_count(VP9_COMMON *cm, const MACROBLOCKD *xd) {
   const MODE_INFO *mi = xd->mi[0].src_mi;
   const MB_MODE_INFO *const mbmi = &mi->mbmi;
+  int i;
+  int_mv ref_mv[2];
+
+  for (i = 0; i < 1 + has_second_ref(mbmi); ++i)
+    ref_mv[i].as_int = mbmi->ref_mvs[mbmi->ref_frame[i]][0].as_int;
 
   if (mbmi->sb_type < BLOCK_8X8) {
     const int num_4x4_w = num_4x4_blocks_wide_lookup[mbmi->sb_type];
@@ -270,14 +273,32 @@ void vp9_update_mv_count(VP9_COMMON *cm, const MACROBLOCKD *xd) {
 #else
         if (mi->bmi[i].as_mode == NEWMV)
 #endif
-          inc_mvs(mbmi, mi->bmi[i].as_mv, &cm->counts.mv);
+          inc_mvs(mbmi, mi->bmi[i].as_mv,
+#if CONFIG_NEWMVREF_SUB8X8
+                  mi->bmi[i].ref_mv,
+#else
+                  ref_mv,
+#endif  // CONFIG_NEWMVREF_SUB8X8
+                  &cm->counts.mv);
 #if CONFIG_COMPOUND_MODES
         else if (mi->bmi[i].as_mode == NEAREST_NEWMV ||
                  mi->bmi[i].as_mode == NEAR_NEWMV)
-          inc_compound_single_mv(mbmi, 1, mi->bmi[i].as_mv, &cm->counts.mv);
+          inc_compound_single_mv(1, mi->bmi[i].as_mv,
+#if CONFIG_NEWMVREF_SUB8X8
+                                 mi->bmi[i].ref_mv,
+#else
+                                 ref_mv,
+#endif  // CONFIG_NEWMVREF_SUB8X8
+                                 &cm->counts.mv);
         else if (mi->bmi[i].as_mode == NEW_NEARESTMV ||
                  mi->bmi[i].as_mode == NEW_NEARMV)
-          inc_compound_single_mv(mbmi, 0, mi->bmi[i].as_mv, &cm->counts.mv);
+          inc_compound_single_mv(0, mi->bmi[i].as_mv,
+#if CONFIG_NEWMVREF_SUB8X8
+                                 mi->bmi[i].ref_mv,
+#else
+                                 ref_mv,
+#endif  // CONFIG_NEWMVREF_SUB8X8
+                                 &cm->counts.mv);
 #endif
       }
     }
@@ -287,12 +308,12 @@ void vp9_update_mv_count(VP9_COMMON *cm, const MACROBLOCKD *xd) {
 #else
     if (mbmi->mode == NEWMV)
 #endif
-      inc_mvs(mbmi, mbmi->mv, &cm->counts.mv);
+      inc_mvs(mbmi, mbmi->mv, ref_mv, &cm->counts.mv);
 #if CONFIG_COMPOUND_MODES
     else if (mbmi->mode == NEAREST_NEWMV || mbmi->mode == NEAR_NEWMV)
-      inc_compound_single_mv(mbmi, 1, mbmi->mv, &cm->counts.mv);
+      inc_compound_single_mv(1, mbmi->mv, ref_mv, &cm->counts.mv);
     else if (mbmi->mode == NEW_NEARESTMV || mbmi->mode == NEW_NEARMV)
-      inc_compound_single_mv(mbmi, 0, mbmi->mv, &cm->counts.mv);
+      inc_compound_single_mv(0, mbmi->mv, ref_mv, &cm->counts.mv);
 #endif
   }
 }
