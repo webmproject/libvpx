@@ -224,15 +224,6 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
   *var_y = var;
   *sse_y = sse;
 
-  x->skip_txfm[0] = 0;
-  // Check if all ac coefficients can be quantized to zero.
-  if (var < ac_thr || var == 0) {
-    x->skip_txfm[0] = 2;
-    // Check if dc coefficient can be quantized to zero.
-    if (sse - var < dc_thr || sse == var)
-      x->skip_txfm[0] = 1;
-  }
-
   if (cpi->common.tx_mode == TX_MODE_SELECT) {
     if (sse > (var << 2))
       xd->mi[0].src_mi->mbmi.tx_size =
@@ -252,6 +243,32 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
     xd->mi[0].src_mi->mbmi.tx_size =
         MIN(max_txsize_lookup[bsize],
             tx_mode_to_biggest_tx_size[cpi->common.tx_mode]);
+  }
+
+  // Evaluate if the partition block is a skippable block in Y plane.
+  {
+    const BLOCK_SIZE unit_size =
+        txsize_to_bsize[xd->mi[0].src_mi->mbmi.tx_size];
+    const unsigned int num_blk_log2 =
+        (b_width_log2_lookup[bsize] - b_width_log2_lookup[unit_size]) +
+        (b_height_log2_lookup[bsize] - b_height_log2_lookup[unit_size]);
+    const unsigned int sse_tx = sse >> num_blk_log2;
+    const unsigned int var_tx = var >> num_blk_log2;
+
+    x->skip_txfm[0] = 0;
+    // Check if all ac coefficients can be quantized to zero.
+    if (var_tx < ac_thr || var == 0) {
+      x->skip_txfm[0] = 2;
+      // Check if dc coefficient can be quantized to zero.
+      if (sse_tx - var_tx < dc_thr || sse == var)
+        x->skip_txfm[0] = 1;
+    }
+  }
+
+  if (x->skip_txfm[0] == 1) {
+    *out_rate_sum = 0;
+    *out_dist_sum = sse << 4;
+    return;
   }
 
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -285,9 +302,6 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
 
   *out_rate_sum += rate;
   *out_dist_sum += dist << 4;
-
-  if (*out_rate_sum == 0)
-    x->skip_txfm[0] = 1;
 }
 
 static void model_rd_for_sb_uv(VP9_COMP *cpi, BLOCK_SIZE bsize,
