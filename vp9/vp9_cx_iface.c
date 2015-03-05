@@ -51,7 +51,7 @@ static struct vp9_extracfg default_extra_cfg = {
   0,                          // noise_sensitivity
   0,                          // sharpness
   0,                          // static_thresh
-  0,                          // tile_columns
+  6,                          // tile_columns
   0,                          // tile_rows
   7,                          // arnr_max_frames
   5,                          // arnr_strength
@@ -61,7 +61,7 @@ static struct vp9_extracfg default_extra_cfg = {
   0,                          // rc_max_inter_bitrate_pct
   0,                          // gf_cbr_boost_pct
   0,                          // lossless
-  0,                          // frame_parallel_decoding_mode
+  1,                          // frame_parallel_decoding_mode
   NO_AQ,                      // aq_mode
   0,                          // frame_periodic_delta_q
   VPX_BITS_8,                 // Bit depth
