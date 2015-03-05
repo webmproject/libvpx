@@ -328,12 +328,12 @@ static const int16_t band_counts[TX_SIZES][8] = {
   { 1, 2, 3, 4, 11,  256 - 21, 0 },
   { 1, 2, 3, 4, 11, 1024 - 21, 0 },
 };
-static INLINE int cost_coeffs(MACROBLOCK *x,
-                              int plane, int block,
-                              ENTROPY_CONTEXT *A, ENTROPY_CONTEXT *L,
-                              TX_SIZE tx_size,
-                              const int16_t *scan, const int16_t *nb,
-                              int use_fast_coef_costing) {
+static int cost_coeffs(MACROBLOCK *x,
+                       int plane, int block,
+                       ENTROPY_CONTEXT *A, ENTROPY_CONTEXT *L,
+                       TX_SIZE tx_size,
+                       const int16_t *scan, const int16_t *nb,
+                       int use_fast_coef_costing) {
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
   const struct macroblock_plane *p = &x->plane[plane];
