@@ -24,6 +24,7 @@ class VP9EncoderThreadTest
  protected:
   VP9EncoderThreadTest()
       : EncoderTest(GET_PARAM(0)),
+        encoder_initialized_(false),
         tiles_(2),
         encoding_mode_(GET_PARAM(1)),
         set_cpu_used_(GET_PARAM(2)) {
@@ -57,9 +58,13 @@ class VP9EncoderThreadTest
     cfg_.rc_min_quantizer = 0;
   }
 
+  virtual void BeginPassHook(unsigned int /*pass*/) {
+    encoder_initialized_ = false;
+  }
+
   virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
                                   ::libvpx_test::Encoder *encoder) {
-    if (video->frame() == 0) {
+    if (!encoder_initialized_) {
       // Encode 4 column tiles.
       encoder->Control(VP9E_SET_TILE_COLUMNS, tiles_);
       encoder->Control(VP8E_SET_CPUUSED, set_cpu_used_);
@@ -71,6 +76,7 @@ class VP9EncoderThreadTest
       } else {
         encoder->Control(VP8E_SET_ENABLEAUTOALTREF, 0);
       }
+      encoder_initialized_ = true;
     }
   }
 
@@ -90,6 +96,7 @@ class VP9EncoderThreadTest
     }
   }
 
+  bool encoder_initialized_;
   int tiles_;
   ::libvpx_test::TestMode encoding_mode_;
   int set_cpu_used_;
