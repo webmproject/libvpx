@@ -743,7 +743,11 @@ static void choose_partitioning(VP9_COMP *cpi,
     for (i = 1; i <= 2; ++i) {
       struct macroblock_plane  *p = &x->plane[i];
       struct macroblockd_plane *pd = &xd->plane[i];
+#if GLOBAL_MOTION
+      const BLOCK_SIZE bs = get_plane_block_size(bsize, pd);
+#else
       const BLOCK_SIZE bs = get_plane_block_size(BLOCK_64X64, pd);
+#endif
       uv_sad = cpi->fn_ptr[bs].sdf(p->src.buf, p->src.stride,
                                    pd->dst.buf, pd->dst.stride);
 
