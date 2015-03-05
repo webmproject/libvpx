@@ -79,26 +79,26 @@ void vp9_encode_tiles_mt(VP9_COMP *cpi) {
       winterface->init(worker);
 
       if (i < num_workers - 1) {
-      thread_data->cpi = cpi;
+        thread_data->cpi = cpi;
 
-      // Allocate thread data.
-      CHECK_MEM_ERROR(cm, thread_data->td,
-                      vpx_memalign(32, sizeof(*thread_data->td)));
-      vp9_zero(*thread_data->td);
+        // Allocate thread data.
+        CHECK_MEM_ERROR(cm, thread_data->td,
+                        vpx_memalign(32, sizeof(*thread_data->td)));
+        vp9_zero(*thread_data->td);
 
-      // Set up pc_tree.
-      thread_data->td->leaf_tree = NULL;
-      thread_data->td->pc_tree = NULL;
-      vp9_setup_pc_tree(cm, thread_data->td);
+        // Set up pc_tree.
+        thread_data->td->leaf_tree = NULL;
+        thread_data->td->pc_tree = NULL;
+        vp9_setup_pc_tree(cm, thread_data->td);
 
-      // Allocate frame counters in thread data.
-      CHECK_MEM_ERROR(cm, thread_data->td->counts,
-                      vpx_calloc(1, sizeof(*thread_data->td->counts)));
+        // Allocate frame counters in thread data.
+        CHECK_MEM_ERROR(cm, thread_data->td->counts,
+                        vpx_calloc(1, sizeof(*thread_data->td->counts)));
 
-      // Create threads
-      if (!winterface->reset(worker))
-        vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
-                           "Tile encoder thread creation failed");
+        // Create threads
+        if (!winterface->reset(worker))
+          vpx_internal_error(&cm->error, VPX_CODEC_ERROR,
+                             "Tile encoder thread creation failed");
       } else {
         // Main thread acts as a worker and uses the thread data in cpi.
         thread_data->cpi = cpi;
