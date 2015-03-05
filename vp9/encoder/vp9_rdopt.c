@@ -2696,11 +2696,11 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
         // TODO(zoeliu): Further optimization work may be done for:
         // NEW_NEARESTMV, NEW_NEARMV, NEAREST_NEWMV, and NEAR_NEWMV, as the mv
         // ref may have changed in the compound mode as opposed to single ref.
-        if (has_second_rf
+        if (has_second_rf &&
 #if CONFIG_COMPOUND_MODES
-            && this_mode == NEW_NEWMV
+            this_mode == NEW_NEWMV
 #else
-            && this_mode == NEWMV
+            this_mode == NEWMV
 #endif  // CONFIG_COMPOUND_MODES
 #if !CONFIG_NEWMVREF_SUB8X8
             && mbmi->interp_filter == EIGHTTAP
@@ -2782,15 +2782,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
           for (ref = 0; ref < 1 + has_second_rf; ++ref) {
             subpelmv |= mv_has_subpel(&mode_mv[this_mode][ref].as_mv);
 #if CONFIG_NEWMVREF_SUB8X8
-            if (this_mode == NEWMV
-#if CONFIG_COMPOUND_MODES
-                || this_mode == NEW_NEWMV ||
-                this_mode == NEAREST_NEWMV ||
-                this_mode == NEW_NEARESTMV ||
-                this_mode == NEAR_NEWMV ||
-                this_mode == NEW_NEARMV
-#endif  // CONFIG_COMPOUND_MODES
-                )
+            if (have_newmv_in_prediction(this_mode))
               have_ref &= (
                   (mode_mv[this_mode][ref].as_int ==
                    ref_bsi->rdstat[i][mode_idx].mvs[ref].as_int) &&

@@ -128,6 +128,19 @@ static INLINE int is_inter_compound_mode(PREDICTION_MODE mode) {
 }
 #endif
 
+static INLINE int have_newmv_in_inter_mode(PREDICTION_MODE mode) {
+#if CONFIG_COMPOUND_MODES
+  return (mode == NEWMV ||
+          mode == NEW_NEWMV ||
+          mode == NEAREST_NEWMV ||
+          mode == NEW_NEARESTMV ||
+          mode == NEAR_NEWMV ||
+          mode == NEW_NEARMV);
+#else
+  return (mode == NEWMV);
+#endif  // CONFIG_COMPOUND_MODES
+}
+
 #define INTRA_MODES (TM_PRED + 1)
 
 #define INTER_MODES (1 + NEWMV - NEARESTMV)

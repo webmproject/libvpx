@@ -273,33 +273,39 @@ void vp9_update_mv_count(VP9_COMMON *cm, const MACROBLOCKD *xd) {
 #else
         if (mi->bmi[i].as_mode == NEWMV)
 #endif
-          inc_mvs(mbmi, mi->bmi[i].as_mv,
 #if CONFIG_NEWMVREF_SUB8X8
+          inc_mvs(mbmi, mi->bmi[i].as_mv,
                   mi->bmi[i].ref_mv,
-#else
-                  ref_mv,
-#endif  // CONFIG_NEWMVREF_SUB8X8
                   &cm->counts.mv);
+#else
+          inc_mvs(mbmi, mi->bmi[i].as_mv,
+                  ref_mv,
+                  &cm->counts.mv);
+#endif  // CONFIG_NEWMVREF_SUB8X8
 #if CONFIG_COMPOUND_MODES
         else if (mi->bmi[i].as_mode == NEAREST_NEWMV ||
                  mi->bmi[i].as_mode == NEAR_NEWMV)
-          inc_compound_single_mv(1, mi->bmi[i].as_mv,
 #if CONFIG_NEWMVREF_SUB8X8
+          inc_compound_single_mv(1, mi->bmi[i].as_mv,
                                  mi->bmi[i].ref_mv,
-#else
-                                 ref_mv,
-#endif  // CONFIG_NEWMVREF_SUB8X8
                                  &cm->counts.mv);
+#else
+          inc_compound_single_mv(1, mi->bmi[i].as_mv,
+                                 ref_mv,
+                                 &cm->counts.mv);
+#endif  // CONFIG_NEWMVREF_SUB8X8
         else if (mi->bmi[i].as_mode == NEW_NEARESTMV ||
                  mi->bmi[i].as_mode == NEW_NEARMV)
-          inc_compound_single_mv(0, mi->bmi[i].as_mv,
 #if CONFIG_NEWMVREF_SUB8X8
+          inc_compound_single_mv(0, mi->bmi[i].as_mv,
                                  mi->bmi[i].ref_mv,
-#else
-                                 ref_mv,
-#endif  // CONFIG_NEWMVREF_SUB8X8
                                  &cm->counts.mv);
-#endif
+#else
+          inc_compound_single_mv(0, mi->bmi[i].as_mv,
+                                 ref_mv,
+                                 &cm->counts.mv);
+#endif  // CONFIG_NEWMVREF_SUB8X8
+#endif  // CONFIG_COMPOUND_MODES
       }
     }
   } else {
