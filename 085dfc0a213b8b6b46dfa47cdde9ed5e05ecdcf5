@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//E+c\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-03-06T17:11:40Z",
+      "side": 1,
+      "message": "do you think the following would work?\n\nconst unsigned int num_blk_log2 \u003d (b_width_log2_lookup[bsize] - b_width_log2_lookup[unit_size])) \n       + (b_height_log2_lookup[bsize] - b_height_log2_lookup[unit_size]));\nconst unsigned int sse_tx \u003d sse \u003e\u003e num_blk_log2;\nconst unsigned int var_tx \u003d var \u003e\u003e num_blk_log2;",
+      "revId": "085dfc0a213b8b6b46dfa47cdde9ed5e05ecdcf5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
