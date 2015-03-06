@@ -62,7 +62,13 @@ void vp9_cyclic_refresh_update_segment(struct VP9_COMP *const cpi,
 void vp9_cyclic_refresh_update__map(struct VP9_COMP *const cpi);
 
 // Update the actual number of blocks that were applied the segment delta q.
-void vp9_cyclic_refresh_update_actual_count(struct VP9_COMP *const cpi);
+void vp9_cyclic_refresh_postencode(struct VP9_COMP *const cpi);
+
+// Set golden frame update interval, for non-svc 1 pass CBR mode.
+void vp9_cyclic_refresh_set_golden_update(struct VP9_COMP *cpi);
+
+// Check if we should not update golden reference, based on past refresh stats.
+void vp9_cyclic_refresh_check_golden_update(struct VP9_COMP *const cpi);
 
 // Set/update global/frame level refresh parameters.
 void vp9_cyclic_refresh_update_parameters(struct VP9_COMP *const cpi);
