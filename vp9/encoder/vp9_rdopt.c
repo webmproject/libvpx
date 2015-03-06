@@ -2782,7 +2782,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
           for (ref = 0; ref < 1 + has_second_rf; ++ref) {
             subpelmv |= mv_has_subpel(&mode_mv[this_mode][ref].as_mv);
 #if CONFIG_NEWMVREF_SUB8X8
-            if (have_newmv_in_prediction(this_mode))
+            if (have_newmv_in_inter_mode(this_mode))
               have_ref &= (
                   (mode_mv[this_mode][ref].as_int ==
                    ref_bsi->rdstat[i][mode_idx].mvs[ref].as_int) &&
@@ -2799,15 +2799,7 @@ static int64_t rd_pick_best_sub8x8_mode(VP9_COMP *cpi, MACROBLOCK *x,
             have_ref = 1;
             for (ref = 0; ref < 1 + has_second_rf; ++ref)
 #if CONFIG_NEWMVREF_SUB8X8
-              if (this_mode == NEWMV
-#if CONFIG_COMPOUND_MODES
-                  || this_mode == NEW_NEWMV ||
-                  this_mode == NEAREST_NEWMV ||
-                  this_mode == NEW_NEARESTMV ||
-                  this_mode == NEAR_NEWMV ||
-                  this_mode == NEW_NEARMV
-#endif  // CONFIG_COMPOUND_MODES
-                  )
+              if (have_newmv_in_inter_mode)
                 have_ref &= (
                     (mode_mv[this_mode][ref].as_int ==
                      ref_bsi->rdstat[i][mode_idx].mvs[ref].as_int) &&
