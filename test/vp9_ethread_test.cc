@@ -75,6 +75,7 @@ class VP9EncoderThreadTest
         encoder->Control(VP8E_SET_ARNR_TYPE, 3);
       } else {
         encoder->Control(VP8E_SET_ENABLEAUTOALTREF, 0);
+        encoder->Control(VP9E_SET_AQ_MODE, 3);
       }
       encoder_initialized_ = true;
     }
