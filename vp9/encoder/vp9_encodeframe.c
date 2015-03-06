@@ -99,9 +99,9 @@ static const uint16_t VP9_HIGH_VAR_OFFS_12[64] = {
 };
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-static unsigned int get_sby_perpixel_variance(VP9_COMP *cpi,
-                                              const struct buf_2d *ref,
-                                              BLOCK_SIZE bs) {
+unsigned int vp9_get_sby_perpixel_variance(VP9_COMP *cpi,
+                                           const struct buf_2d *ref,
+                                           BLOCK_SIZE bs) {
   unsigned int sse;
   const unsigned int var = cpi->fn_ptr[bs].vf(ref->buf, ref->stride,
                                               VP9_VAR_OFFS, 0, &sse);
@@ -109,7 +109,7 @@ static unsigned int get_sby_perpixel_variance(VP9_COMP *cpi,
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
-static unsigned int high_get_sby_perpixel_variance(
+unsigned int vp9_high_get_sby_perpixel_variance(
     VP9_COMP *cpi, const struct buf_2d *ref, BLOCK_SIZE bs, int bd) {
   unsigned int var, sse;
   switch (bd) {
@@ -1072,13 +1072,15 @@ static void rd_pick_sb_modes(VP9_COMP *cpi,
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
     x->source_variance =
-        high_get_sby_perpixel_variance(cpi, &x->plane[0].src, bsize, xd->bd);
+        vp9_high_get_sby_perpixel_variance(cpi, &x->plane[0].src,
+                                           bsize, xd->bd);
   } else {
     x->source_variance =
-        get_sby_perpixel_variance(cpi, &x->plane[0].src, bsize);
+      vp9_get_sby_perpixel_variance(cpi, &x->plane[0].src, bsize);
   }
 #else
-  x->source_variance = get_sby_perpixel_variance(cpi, &x->plane[0].src, bsize);
+  x->source_variance =
+    vp9_get_sby_perpixel_variance(cpi, &x->plane[0].src, bsize);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
   // Save rdmult before it might be changed, so it can be restored later.

@@ -50,6 +50,7 @@
 
 #define MIN_EARLY_TERM_INDEX    3
 #define NEW_MV_DISCOUNT_FACTOR  8
+#define SOURCE_VARIANCE_RD_ADJUSTMENT 0
 
 typedef struct {
   PREDICTION_MODE mode;
@@ -2824,6 +2825,55 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   rd_cost->rdcost = RDCOST(x->rdmult, x->rddiv, rd_cost->rate, rd_cost->dist);
 }
 
+#if SOURCE_VARIANCE_RD_ADJUSTMENT
+// This function is designed to apply a bias or adjustment to an rd value based
+// on the relative variance of the source and reconstruction.
+#define LOW_VAR_THRESH 16
+#define LOW_VAR_DIFF_THRESH 1
+#define VLOW_ADJ_MAX 25
+#define VHIGH_ADJ_MAX 10
+static void rd_variance_adjustment(VP9_COMP *cpi,
+                                   MACROBLOCK *x,
+                                   BLOCK_SIZE bsize,
+                                   int64_t *this_rd,
+                                   unsigned int source_variance) {
+  MACROBLOCKD *const xd = &x->e_mbd;
+  unsigned int recon_variance;
+  unsigned int var_diff;
+
+  if (*this_rd == INT64_MAX)
+    return;
+
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+    recon_variance =
+      vp9_high_get_sby_perpixel_variance(cpi, &xd->plane[0].dst, bsize, xd->bd);
+  } else {
+    recon_variance =
+      vp9_get_sby_perpixel_variance(cpi, &xd->plane[0].dst, bsize);
+  }
+#else
+  recon_variance =
+    vp9_get_sby_perpixel_variance(cpi, &xd->plane[0].dst, bsize);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
+  var_diff = (source_variance > recon_variance)
+    ? (source_variance - recon_variance) : (recon_variance - source_variance);
+
+  if ((source_variance > LOW_VAR_THRESH) && (var_diff > LOW_VAR_DIFF_THRESH)) {
+    unsigned int var_factor;
+    if (source_variance > recon_variance) {
+      var_factor =
+        MIN(VLOW_ADJ_MAX, (var_diff * VLOW_ADJ_MAX) / source_variance);
+    } else {
+      var_factor =
+        MIN(VHIGH_ADJ_MAX, (var_diff * VHIGH_ADJ_MAX) / source_variance);
+    }
+    *this_rd += (*this_rd * var_factor) / 100;
+  }
+}
+#endif
+
 void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
                                TileDataEnc *tile_data,
                                MACROBLOCK *x,
@@ -3279,6 +3329,12 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
       // Calculate the final RD estimate for this mode.
       this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
     }
+
+#if SOURCE_VARIANCE_RD_ADJUSTMENT
+    // Apply an adjustment to the rd value based on the similarity of the
+    // source variance and reconstructed variance.
+    rd_variance_adjustment(cpi, x, bsize, &this_rd, x->source_variance);
+#endif
 
     if (ref_frame == INTRA_FRAME) {
     // Keep record of best intra rd
