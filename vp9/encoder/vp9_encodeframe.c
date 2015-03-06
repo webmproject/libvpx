@@ -3766,7 +3766,7 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   vp9_frame_init_quantizer(cpi);
 
   vp9_initialize_rd_consts(cpi);
-  vp9_initialize_me_consts(cpi, cm->base_qindex);
+  vp9_initialize_me_consts(cpi, x, cm->base_qindex);
   init_encode_frame_mb_context(cpi);
   cm->use_prev_frame_mvs = !cm->error_resilient_mode &&
                            cm->width == cm->last_width &&

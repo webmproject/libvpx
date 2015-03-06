@@ -204,27 +204,28 @@ static int compute_rd_thresh_factor(int qindex, vpx_bit_depth_t bit_depth) {
   return MAX((int)(pow(q, RD_THRESH_POW) * 5.12), 8);
 }
 
-void vp9_initialize_me_consts(VP9_COMP *cpi, int qindex) {
+void vp9_initialize_me_consts(VP9_COMP *cpi, MACROBLOCK *x, int qindex) {
 #if CONFIG_VP9_HIGHBITDEPTH
   switch (cpi->common.bit_depth) {
     case VPX_BITS_8:
-      cpi->td.mb.sadperbit16 = sad_per_bit16lut_8[qindex];
-      cpi->td.mb.sadperbit4 = sad_per_bit4lut_8[qindex];
+      x->sadperbit16 = sad_per_bit16lut_8[qindex];
+      x->sadperbit4 = sad_per_bit4lut_8[qindex];
       break;
     case VPX_BITS_10:
-      cpi->td.mb.sadperbit16 = sad_per_bit16lut_10[qindex];
-      cpi->td.mb.sadperbit4 = sad_per_bit4lut_10[qindex];
+      x->sadperbit16 = sad_per_bit16lut_10[qindex];
+      x->sadperbit4 = sad_per_bit4lut_10[qindex];
       break;
     case VPX_BITS_12:
-      cpi->td.mb.sadperbit16 = sad_per_bit16lut_12[qindex];
-      cpi->td.mb.sadperbit4 = sad_per_bit4lut_12[qindex];
+      x->sadperbit16 = sad_per_bit16lut_12[qindex];
+      x->sadperbit4 = sad_per_bit4lut_12[qindex];
       break;
     default:
       assert(0 && "bit_depth should be VPX_BITS_8, VPX_BITS_10 or VPX_BITS_12");
   }
 #else
-  cpi->td.mb.sadperbit16 = sad_per_bit16lut_8[qindex];
-  cpi->td.mb.sadperbit4 = sad_per_bit4lut_8[qindex];
+  (void)cpi;
+  x->sadperbit16 = sad_per_bit16lut_8[qindex];
+  x->sadperbit4 = sad_per_bit4lut_8[qindex];
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 }
 
