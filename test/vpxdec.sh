@@ -16,7 +16,8 @@
 
 # Environment check: Make sure input is available.
 vpxdec_verify_environment() {
-  if [ ! -e "${VP8_IVF_FILE}" ] || [ ! -e "${VP9_WEBM_FILE}" ]; then
+  if [ ! -e "${VP8_IVF_FILE}" ] || [ ! -e "${VP9_WEBM_FILE}" ] || \
+    [ ! -e "${VP9_FPM_WEBM_FILE}" ] ; then
     elog "Libvpx test data must exist in LIBVPX_TEST_DATA_PATH."
     return 1
   fi
@@ -78,8 +79,20 @@ vpxdec_vp9_webm() {
   fi
 }
 
+vpxdec_vp9_webm_frame_parallel() {
+  if [ "$(vpxdec_can_decode_vp9)" = "yes" ] && \
+     [ "$(webm_io_available)" = "yes" ]; then
+    for threads in 2 3 4 5 6 7 8; do
+      vpxdec "${VP9_FPM_WEBM_FILE}" --summary --noblit --threads=$threads \
+        --frame-parallel
+    done
+  fi
+
+}
+
 vpxdec_tests="vpxdec_vp8_ivf
               vpxdec_vp8_ivf_pipe_input
-              vpxdec_vp9_webm"
+              vpxdec_vp9_webm
+              vpxdec_vp9_webm_frame_parallel"
 
 run_tests vpxdec_verify_environment "${vpxdec_tests}"
