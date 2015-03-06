@@ -16,6 +16,24 @@
       "revId": "085dfc0a213b8b6b46dfa47cdde9ed5e05ecdcf5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//E+I\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2015-03-06T17:17:30Z",
+      "side": 1,
+      "message": "Yes, this is better. Thanks.",
+      "parentUuid": "AAAAdn//E+c\u003d",
+      "revId": "085dfc0a213b8b6b46dfa47cdde9ed5e05ecdcf5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
