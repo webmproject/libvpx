@@ -1687,6 +1687,7 @@ void I422ToARGBRow_AVX2(const uint8* y_buf,
 }
 #endif  // HAS_I422TOARGBROW_AVX2
 
+#ifdef HAS_NV12TOARGBROW_AVX2
 // 16 pixels.
 // 8 UV values upsampled to 16 UV, mixed with 16 Y producing 16 ARGB (64 bytes).
 __declspec(naked) __declspec(align(16))
@@ -1714,7 +1715,9 @@ void NV12ToARGBRow_AVX2(const uint8* y_buf,
     ret
   }
 }
+#endif  // HAS_NV12TOARGBROW_AVX2
 
+#ifdef HAS_NV21TOARGBROW_AVX2
 // 16 pixels.
 // 8 VU values upsampled to 16 VU, mixed with 16 Y producing 16 ARGB (64 bytes).
 __declspec(naked) __declspec(align(16))
@@ -1742,6 +1745,7 @@ void NV21ToARGBRow_AVX2(const uint8* y_buf,
     ret
   }
 }
+#endif  // HAS_NV21TOARGBROW_AVX2
 
 #ifdef HAS_I422TOBGRAROW_AVX2
 // 16 pixels
