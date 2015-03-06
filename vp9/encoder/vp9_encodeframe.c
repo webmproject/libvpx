@@ -563,21 +563,11 @@ static void choose_partitioning(VP9_COMP *cpi,
   if (!is_key_frame) {
     MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
     unsigned int uv_sad;
-#if GLOBAL_MOTION
-    unsigned int y_sad;
-    BLOCK_SIZE bsize;
-#endif
     const YV12_BUFFER_CONFIG *yv12 = get_ref_frame_buffer(cpi, LAST_FRAME);
-    assert(yv12 != NULL);
-    vp9_setup_pre_planes(xd, 0, yv12, mi_row, mi_col,
-        &cm->frame_refs[LAST_FRAME - 1].sf);
-    mbmi->ref_frame[0] = LAST_FRAME;
-    mbmi->ref_frame[1] = NONE;
-    mbmi->sb_type = BLOCK_64X64;
-    mbmi->mv[0].as_int = 0;
-    mbmi->interp_filter = BILINEAR;
-
 #if GLOBAL_MOTION
+    const YV12_BUFFER_CONFIG *yv12_g = get_ref_frame_buffer(cpi, GOLDEN_FRAME);
+    unsigned int y_sad, y_sad_g;
+    BLOCK_SIZE bsize;
     if (mi_row + 4 < cm->mi_rows && mi_col + 4 < cm->mi_cols)
       bsize = BLOCK_64X64;
     else if (mi_row + 4 < cm->mi_rows && mi_col + 4 >= cm->mi_cols)
@@ -586,9 +576,38 @@ static void choose_partitioning(VP9_COMP *cpi,
       bsize = BLOCK_64X32;
     else
       bsize = BLOCK_32X32;
-
+#endif
+    assert(yv12 != NULL);
+#if GLOBAL_MOTION
+    if (yv12_g && yv12_g != yv12) {
+      vp9_setup_pre_planes(xd, 0, yv12_g, mi_row, mi_col,
+                           &cm->frame_refs[GOLDEN_FRAME - 1].sf);
+      y_sad_g = cpi->fn_ptr[bsize].sdf(x->plane[0].src.buf,
+                                       x->plane[0].src.stride,
+                                       xd->plane[0].pre[0].buf,
+                                       xd->plane[0].pre[0].stride);
+    } else {
+      y_sad_g = UINT_MAX;
+    }
+#endif
+    vp9_setup_pre_planes(xd, 0, yv12, mi_row, mi_col,
+                         &cm->frame_refs[LAST_FRAME - 1].sf);
+    mbmi->ref_frame[0] = LAST_FRAME;
+    mbmi->ref_frame[1] = NONE;
+    mbmi->sb_type = BLOCK_64X64;
+    mbmi->mv[0].as_int = 0;
+    mbmi->interp_filter = BILINEAR;
+#if GLOBAL_MOTION
     y_sad = vp9_int_pro_motion_estimation(cpi, x, bsize);
-    x->pred_mv[LAST_FRAME] = mbmi->mv[0].as_mv;
+    if (y_sad_g < y_sad) {
+      vp9_setup_pre_planes(xd, 0, yv12_g, mi_row, mi_col,
+                           &cm->frame_refs[GOLDEN_FRAME - 1].sf);
+      mbmi->ref_frame[0] = GOLDEN_FRAME;
+      mbmi->mv[0].as_int = 0;
+      y_sad = y_sad_g;
+    } else {
+      x->pred_mv[LAST_FRAME] = mbmi->mv[0].as_mv;
+    }
 #endif
 
     vp9_build_inter_predictors_sb(xd, mi_row, mi_col, BLOCK_64X64);
