@@ -60,6 +60,14 @@
 #define RC_FACTOR_MIN       0.75
 #define RC_FACTOR_MAX       1.75
 
+
+#define INTRA_WEIGHT_EXPERIMENT 0
+#if INTRA_WEIGHT_EXPERIMENT
+#define NCOUNT_INTRA_THRESH 8192
+#define NCOUNT_INTRA_FACTOR 3
+#define NCOUNT_FRAME_II_THRESH 5.0
+#endif
+
 #define DOUBLE_DIVIDE_CHECK(x) ((x) < 0 ? (x) - 0.000001 : (x) + 0.000001)
 
 #if ARF_STATS_OUTPUT
@@ -470,7 +478,7 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
   int intercount = 0;
   int second_ref_count = 0;
   const int intrapenalty = INTRA_MODE_PENALTY;
-  int neutral_count = 0;
+  double neutral_count;
   int new_mv_count = 0;
   int sum_in_vectors = 0;
   MV lastmv = {0, 0};
@@ -503,6 +511,7 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
 
   intra_factor = 0.0;
   brightness_factor = 0.0;
+  neutral_count = 0.0;
 
   set_first_pass_params(cpi);
   vp9_set_quantizer(cm, find_fp_qindex(cm->bit_depth));
@@ -818,12 +827,28 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
 #endif
 
         if (motion_error <= this_error) {
+          vp9_clear_system_state();
+
           // Keep a count of cases where the inter and intra were very close
           // and very low. This helps with scene cut detection for example in
           // cropped clips with black bars at the sides or top and bottom.
+#if INTRA_WEIGHT_EXPERIMENT
           if (((this_error - intrapenalty) * 9 <= motion_error * 10) &&
-              this_error < 2 * intrapenalty)
-            ++neutral_count;
+              (this_error < (2 * intrapenalty))) {
+            neutral_count += 1.0;
+          // Also track cases where the intra is not much worse than the inter
+          // and use this in limiting the GF/arf group length.
+          } else if ((this_error > NCOUNT_INTRA_THRESH) &&
+                     (this_error < (NCOUNT_INTRA_FACTOR * motion_error))) {
+            neutral_count += (double)motion_error /
+                             DOUBLE_DIVIDE_CHECK((double)this_error);
+          }
+#else
+          if (((this_error - intrapenalty) * 9 <= motion_error * 10) &&
+              (this_error < (2 * intrapenalty))) {
+            neutral_count += 1.0;
+          }
+#endif
 
           mv.row *= 8;
           mv.col *= 8;
@@ -1260,17 +1285,27 @@ static double get_sr_decay_rate(const VP9_COMP *cpi,
   double sr_diff =
       (frame->sr_coded_error - frame->coded_error) / num_mbs;
   double sr_decay = 1.0;
+  double modified_pct_inter;
+  double modified_pcnt_intra;
   const double motion_amplitude_factor =
     frame->pcnt_motion * ((frame->mvc_abs + frame->mvr_abs) / 2);
-  const double pcnt_intra = 100 * (1.0 - frame->pcnt_inter);
+
+  modified_pct_inter = frame->pcnt_inter;
+#if INTRA_WEIGHT_EXPERIMENT
+  if ((frame->intra_error / DOUBLE_DIVIDE_CHECK(frame->coded_error)) <
+      (double)NCOUNT_FRAME_II_THRESH)
+    modified_pct_inter = frame->pcnt_inter - frame->pcnt_neutral;
+#endif
+  modified_pcnt_intra = 100 * (1.0 - modified_pct_inter);
+
 
   if ((sr_diff > LOW_SR_DIFF_TRHESH)) {
     sr_diff = MIN(sr_diff, SR_DIFF_MAX);
     sr_decay = 1.0 - (SR_DIFF_PART * sr_diff) -
                (MOTION_AMP_PART * motion_amplitude_factor) -
-               (INTRA_PART * pcnt_intra);
+               (INTRA_PART * modified_pcnt_intra);
   }
-  return MAX(sr_decay, MIN(DEFAULT_DECAY_LIMIT, frame->pcnt_inter));
+  return MAX(sr_decay, MIN(DEFAULT_DECAY_LIMIT, modified_pct_inter));
 }
 
 // This function gives an estimate of how badly we believe the prediction
