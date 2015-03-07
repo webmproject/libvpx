@@ -224,8 +224,16 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
   mbmi->skip = read_skip(cm, xd, mbmi->segment_id, r);
 #if CONFIG_PALETTE
   if (bsize >= BLOCK_8X8 && cm->allow_palette_mode) {
-    mbmi->palette_enabled[0] = vp9_read_bit(r);
-    mbmi->palette_enabled[1] = vp9_read_bit(r);
+    int palette_ctx = 0;
+    if (above_mi)
+      palette_ctx += (above_mi->mbmi.palette_enabled[0] == 1);
+    if (left_mi)
+      palette_ctx += (left_mi->mbmi.palette_enabled[0] == 1);
+    mbmi->palette_enabled[0] =
+        vp9_read(r,
+                 cm->fc.palette_enabled_prob[bsize - BLOCK_8X8][palette_ctx]);
+    mbmi->palette_enabled[1] =
+        vp9_read(r, cm->fc.palette_uv_enabled_prob[mbmi->palette_enabled[0]]);
   } else {
     mbmi->palette_enabled[0] = 0;
     mbmi->palette_enabled[1] = 0;
@@ -260,7 +268,9 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
     mbmi->palette_run_length[0] =
         vp9_read_literal(r, get_bit_depth(palette_max_run(bsize)));
     mbmi->palette_run_length[0] = (mbmi->palette_run_length[0]) << 1;
-    mbmi->palette_scan_order[0] = vp9_read_literal(r, 2);
+    mbmi->palette_scan_order[0] =
+        vp9_read_tree(r, vp9_palette_scan_order_tree,
+                      cm->fc.palette_scan_order_prob[bsize - BLOCK_8X8]);
     m1 = mbmi->palette_indexed_size;
     m2 = mbmi->palette_literal_size;
 
@@ -311,7 +321,6 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
     palette_color_insertion(cm->current_palette_colors,
                             &cm ->current_palette_size,
                             cm->current_palette_count, mbmi);
-
     run_lengh_decoding(mbmi->palette_runs, mbmi->palette_run_length[0],
                        xd->palette_map_buffer);
     palette_iscan(xd->plane[0].color_index_map, xd->palette_map_buffer,
@@ -335,12 +344,14 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
     if (xd->plane[1].subsampling_x && xd->plane[1].subsampling_y) {
       mbmi->palette_size[1] =
           vp9_read_tree(r, vp9_palette_size_tree,
-                        cm->fc.palette_uv_size_prob[uv_bsize - BLOCK_4X4]);
+                        cm->fc.palette_uv_size_prob[bsize - BLOCK_8X8]);
       mbmi->palette_size[1] += 2;
       mbmi->palette_run_length[1] =
           vp9_read_literal(r, get_bit_depth(palette_max_run(uv_bsize)));
       mbmi->palette_run_length[1] = (mbmi->palette_run_length[1]) << 1;
-      mbmi->palette_scan_order[1] = vp9_read_literal(r, 2);
+      mbmi->palette_scan_order[1] =
+          vp9_read_tree(r, vp9_palette_scan_order_tree,
+                        cm->fc.palette_uv_scan_order_prob[bsize - BLOCK_8X8]);
     } else {
       mbmi->palette_size[1] = mbmi->palette_size[0];
     }
@@ -357,7 +368,7 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
             vp9_read_literal(r, get_bit_depth(mbmi->palette_size[1]));
         bits = vp9_read_tree(r, vp9_palette_run_length_tree,
                              cm->fc.
-                             palette_uv_run_length_prob[uv_bsize - BLOCK_4X4]);
+                             palette_uv_run_length_prob[bsize - BLOCK_8X8]);
         if (bits == MAX_BITS)
           mbmi->palette_runs[PALETTE_MAX_RUNS + i + 1] = vp9_read_literal(r, d);
         else
@@ -1247,13 +1258,27 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
     if (mbmi->copy_mode == NOREF)
 #endif
       inter_block = read_is_inter_block(cm, xd, mbmi->segment_id, r);
+
 #if CONFIG_PALETTE
     mbmi->palette_enabled[0] = 0;
     mbmi->palette_enabled[1] = 0;
 
     if (!inter_block && mbmi->sb_type >= BLOCK_8X8 && cm->allow_palette_mode) {
-      mbmi->palette_enabled[0] = vp9_read_bit(r);
-      mbmi->palette_enabled[1] = vp9_read_bit(r);
+      const MODE_INFO *above_mi = xd->up_available ?
+          xd->mi[-xd->mi_stride].src_mi : NULL;
+      const MODE_INFO *left_mi = xd->left_available ?
+          xd->mi[-1].src_mi : NULL;
+      int ctx = 0;
+
+      if (above_mi)
+        ctx += (above_mi->mbmi.palette_enabled[0] == 1);
+      if (left_mi)
+        ctx += (left_mi->mbmi.palette_enabled[0] == 1);
+      mbmi->palette_enabled[0] =
+          vp9_read(r,
+                   cm->fc.palette_enabled_prob[mbmi->sb_type - BLOCK_8X8][ctx]);
+      mbmi->palette_enabled[1] =
+          vp9_read(r, cm->fc.palette_uv_enabled_prob[mbmi->palette_enabled[0]]);
     }
 
     if (mbmi->palette_enabled[0]) {
@@ -1271,7 +1296,9 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
       mbmi->palette_run_length[0] =
           vp9_read_literal(r, get_bit_depth(palette_max_run(bsize)));
       mbmi->palette_run_length[0] = (mbmi->palette_run_length[0]) << 1;
-      mbmi->palette_scan_order[0] = vp9_read_literal(r, 2);
+      mbmi->palette_scan_order[0] =
+          vp9_read_tree(r, vp9_palette_scan_order_tree,
+                        cm->fc.palette_scan_order_prob[bsize - BLOCK_8X8]);
 
       for (i = 0; i < mbmi->palette_size[0]; i++) {
         mbmi->palette_colors[i] = vp9_read_literal(r, 8);
@@ -1308,7 +1335,7 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
       int rows = 4 * num_4x4_blocks_high_lookup[bsize] >>
           xd->plane[1].subsampling_y;
       int cols = 4 * num_4x4_blocks_wide_lookup[bsize] >>
-          xd->plane[1].subsampling_y;
+          xd->plane[1].subsampling_x;
       PALETTE_RUN_LENGTH bits;
       BLOCK_SIZE uv_bsize = get_plane_block_size(bsize, &xd->plane[1]);
 
@@ -1316,12 +1343,14 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
       if (xd->plane[1].subsampling_x && xd->plane[1].subsampling_y) {
         mbmi->palette_size[1] =
             vp9_read_tree(r, vp9_palette_size_tree,
-                          cm->fc.palette_uv_size_prob[uv_bsize - BLOCK_4X4]);
+                          cm->fc.palette_uv_size_prob[bsize - BLOCK_8X8]);
         mbmi->palette_size[1] += 2;
         mbmi->palette_run_length[1] =
             vp9_read_literal(r, get_bit_depth(palette_max_run(uv_bsize)));
         mbmi->palette_run_length[1] = (mbmi->palette_run_length[1]) << 1;
-        mbmi->palette_scan_order[1] = vp9_read_literal(r, 2);
+        mbmi->palette_scan_order[1] =
+            vp9_read_tree(r, vp9_palette_scan_order_tree,
+                          cm->fc.palette_uv_scan_order_prob[bsize - BLOCK_8X8]);
       } else {
         mbmi->palette_size[1] = mbmi->palette_size[0];
       }
@@ -1337,8 +1366,8 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
           mbmi->palette_runs[PALETTE_MAX_RUNS + i] =
               vp9_read_literal(r, get_bit_depth(mbmi->palette_size[1]));
           bits = vp9_read_tree(r, vp9_palette_run_length_tree,
-                               cm->fc.palette_uv_run_length_prob[uv_bsize -
-                                                                 BLOCK_4X4]);
+                               cm->fc.palette_uv_run_length_prob[bsize -
+                                                                 BLOCK_8X8]);
           if (bits == MAX_BITS)
             mbmi->palette_runs[PALETTE_MAX_RUNS + i + 1] =
                 vp9_read_literal(r, d);
@@ -1356,6 +1385,21 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
       }
     }
 
+    if (!inter_block && mbmi->sb_type >= BLOCK_8X8 && cm->allow_palette_mode) {
+      BLOCK_SIZE bsize = mbmi->sb_type;
+      int palette_ctx = 0;
+      const MODE_INFO *above_mi = xd->up_available ?
+          xd->mi[-xd->mi_stride].src_mi : NULL;
+      const MODE_INFO *left_mi = xd->left_available ?
+          xd->mi[-1].src_mi : NULL;
+
+      if (above_mi)
+        palette_ctx += (above_mi->mbmi.palette_enabled[0] == 1);
+      if (left_mi)
+        palette_ctx += (left_mi->mbmi.palette_enabled[0] == 1);
+      update_palette_counts(&cm->counts, mbmi, bsize, palette_ctx);
+    }
+
     if (!mbmi->palette_enabled[0]) {
       mbmi->tx_size = read_tx_size(cm, xd, cm->tx_mode, mbmi->sb_type,
                                    !mbmi->skip || !inter_block, r);
@@ -1363,7 +1407,7 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
 #else
     mbmi->tx_size = read_tx_size(cm, xd, cm->tx_mode, mbmi->sb_type,
                                      !mbmi->skip || !inter_block, r);
-#endif
+#endif  // CONFIG_PALETTE
 
 #if CONFIG_EXT_TX
     if (inter_block &&
@@ -1390,8 +1434,12 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
     if (!cm->frame_parallel_decoding_mode)
 #if CONFIG_COPY_MODE
       if (mbmi->copy_mode == NOREF)
-#endif
+#endif  // CONFIG_COPY_MODE
         ++cm->counts.intra_inter[ctx][1];
+#if CONFIG_PALETTE
+    mbmi->palette_enabled[0] = 0;
+    mbmi->palette_enabled[1] = 0;
+#endif  // CONFIG_PALETTE
   }
 #endif  // CONFIG_SUPERTX
 

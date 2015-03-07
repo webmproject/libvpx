@@ -1355,7 +1355,7 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int try_tx_skip = q_idx <= TX_SKIP_Q_THRESH_INTRA;
 #endif  // CONFIG_TX_SKIP
 #if CONFIG_PALETTE
-  int palette_selected = 0, best_n = 0, best_l = 0, colors;
+  int palette_selected = 0, best_n = 0, best_l = 0, colors, palette_ctx;
   int best_m1 = 0, best_m2 = 0, palette_delta_bitdepth = 0;
   int rows = 4 * num_4x4_blocks_high_lookup[bsize];
   int cols = 4 * num_4x4_blocks_wide_lookup[bsize];
@@ -1374,6 +1374,13 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
       tx_cache[i] = INT64_MAX;
 
   vpx_memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
+#if CONFIG_PALETTE
+  palette_ctx = 0;
+  if (above_mi)
+    palette_ctx += (above_mi->mbmi.palette_enabled[0] == 1);
+  if (left_mi)
+    palette_ctx += (left_mi->mbmi.palette_enabled[0] == 1);
+#endif  // CONFIG_PALETTE
   /* Y Search for intra prediction mode */
 #if CONFIG_FILTERINTRA
   for (mode_ext = 2 * DC_PRED; mode_ext <= 2 * TM_PRED + 1; mode_ext++) {
@@ -1415,7 +1422,9 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
 #endif
 #if CONFIG_PALETTE
     if (this_rate != INT_MAX && cpi->common.allow_palette_mode)
-      this_rate += vp9_cost_bit(128, 0);
+      this_rate +=
+          vp9_cost_bit(cpi->common.fc.
+                       palette_enabled_prob[bsize - BLOCK_8X8][palette_ctx], 0);
 #endif
     this_rd = RDCOST(x->rdmult, x->rddiv, this_rate, this_distortion);
 
@@ -1503,6 +1512,7 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
     int l, m1, m2, d = get_bit_depth(rows * cols);
     int bits, best_bits = 0, total_bits, best_total_bits;
     int palette_size_cost[PALETTE_SIZES];
+    int palette_scan_order_cost[PALETTE_SCAN_ORDERS];
     int palette_run_length_cost[PALETTE_RUN_LENGTHS];
     double centroids[PALETTE_MAX_SIZE];
     double lb = src[0], ub = src[0], val;
@@ -1521,6 +1531,9 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
     vp9_cost_tokens(palette_size_cost,
                     cpi->common.fc.palette_size_prob[bsize - BLOCK_8X8],
                     vp9_palette_size_tree);
+    vp9_cost_tokens(palette_scan_order_cost,
+                    cpi->common.fc.palette_scan_order_prob[bsize - BLOCK_8X8],
+                    vp9_palette_scan_order_tree);
     vp9_cost_tokens(palette_run_length_cost,
                     cpi->common.fc.palette_run_length_prob[bsize - BLOCK_8X8],
                     vp9_palette_run_length_tree);
@@ -1680,12 +1693,15 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
           continue;
 
         this_rate = this_rate_tokenonly +
-            (1 + vp9_encode_uniform_cost(MIN(k + 1, 8), m1) + PALETTE_DELTA_BIT
-                + get_bit_depth(palette_max_run(bsize)) + 2 +
+            (vp9_encode_uniform_cost(MIN(k + 1, 8), m1) + PALETTE_DELTA_BIT
+                + get_bit_depth(palette_max_run(bsize)) +
                 get_bit_depth(mic->mbmi.current_palette_size) * m1 +
                 best_bits * m1 +
                 8 * m2 + get_bit_depth(k) * (l >> 1)) * vp9_cost_bit(128, 0) +
-                palette_size_cost[k - 2];
+                vp9_cost_bit(cpi->common.fc.palette_enabled_prob
+                             [bsize - BLOCK_8X8][palette_ctx], 1) +
+                             palette_size_cost[k - 2] +
+                             palette_scan_order_cost[ps];
         for (i = 0; i < l; i += 2) {
           int bits = get_bit_depth(mic->mbmi.palette_runs[i + 1]);
           this_rate += palette_run_length_cost[bits > 6 ? 6 : bits - 1];
@@ -1909,7 +1925,8 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
     if (xd->mi[0].src_mi->mbmi.sb_type >= BLOCK_8X8 &&
         xd->plane[1].subsampling_x && xd->plane[1].subsampling_y &&
         cpi->common.allow_palette_mode)
-      this_rate += vp9_cost_bit(128, 0);
+      this_rate += vp9_cost_bit(cpi->common.fc.palette_uv_enabled_prob
+                                [mbmi->palette_enabled[0]], 0);
 #endif  // CONFIG_PALETTE
     this_rd = RDCOST(x->rdmult, x->rddiv, this_rate, this_distortion);
 
@@ -2001,6 +2018,7 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
     if (colors > 1 && colors <= 64) {
       int n, r, c, i, j, max_itr = 200;
       int l, d = get_bit_depth(rows * cols);
+      int palette_scan_order_cost[PALETTE_SCAN_ORDERS];
       int palette_run_length_cost[PALETTE_RUN_LENGTHS];
       int palette_size_cost[PALETTE_SIZES];
       double centroids[2 * PALETTE_MAX_SIZE];
@@ -2014,6 +2032,9 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
 #endif  // CONFIG_TX_SKIP
 
       i = uv_bsize - BLOCK_4X4;
+      vp9_cost_tokens(palette_scan_order_cost,
+                      cpi->common.fc.palette_uv_scan_order_prob[i],
+                      vp9_palette_scan_order_tree);
       vp9_cost_tokens(palette_size_cost,
                       cpi->common.fc.palette_uv_size_prob[i],
                       vp9_palette_size_tree);
@@ -2114,9 +2135,12 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
             continue;
 
           this_rate = this_rate_tokenonly +
-              (1 + get_bit_depth(palette_max_run(uv_bsize)) + 2 + 2 * 8 * n +
+              (get_bit_depth(palette_max_run(uv_bsize)) + 2 * 8 * n +
                   get_bit_depth(n) * (l >> 1)) * vp9_cost_bit(128, 0) +
-                  palette_size_cost[n - 2];
+                  vp9_cost_bit(cpi->common.fc.palette_uv_enabled_prob
+                               [mbmi->palette_enabled[0]], 1) +
+                               palette_size_cost[n - 2] +
+                               palette_scan_order_cost[ps];
           for (i = 0; i < l; i += 2) {
             int bits = get_bit_depth(
                 mbmi->palette_runs[PALETTE_MAX_RUNS + i + 1]);
@@ -5205,7 +5229,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int copy_mode_context = vp9_get_copy_mode_context(xd);
 #endif  // CONFIG_COPY_MODE
 #if CONFIG_PALETTE
-  int best_n = 0, best_l = 0, colors;
+  int best_n = 0, best_l = 0, colors, palette_ctx;
   int rows = 4 * num_4x4_blocks_high_lookup[bsize];
   int cols = 4 * num_4x4_blocks_wide_lookup[bsize];
   int src_stride = x->plane[0].src.stride;
@@ -5217,6 +5241,10 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   uint16_t best_runs[PALETTE_MAX_RUNS];
   uint16_t palette_runs_uv[TX_SIZES][PALETTE_MAX_RUNS];
   PALETTE_SCAN_ORDER best_ps = H_SCAN, ps_uv[TX_SIZES];
+  const MODE_INFO *above_mi = xd->up_available ?
+      xd->mi[-xd->mi_stride].src_mi : NULL;
+  const MODE_INFO *left_mi = xd->left_available ?
+      xd->mi[-1].src_mi : NULL;
 #endif  // CONFIG_PALETTE
   vp9_zero(best_mbmode);
 
@@ -5362,6 +5390,14 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     }
     midx = end_pos;
   }
+
+#if CONFIG_PALETTE
+  palette_ctx = 0;
+  if (above_mi)
+    palette_ctx += (above_mi->mbmi.palette_enabled[0] == 1);
+  if (left_mi)
+    palette_ctx += (left_mi->mbmi.palette_enabled[0] == 1);
+#endif  // CONFIG_PALETTE
 
   for (midx = 0; midx < MAX_MODES; ++midx) {
     int mode_index = mode_map[midx];
@@ -5773,8 +5809,11 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
            cm->fc.filterintra_prob[mbmi->tx_size][mbmi->mode], mbmi->filterbit);
 #endif  // CONFIG_FILTERINTRA
 #if CONFIG_PALETTE
-    if (cpi->common.allow_palette_mode && bsize >= BLOCK_8X8)
-      rate2 += vp9_cost_bit(128, 0);
+      if (cpi->common.allow_palette_mode && bsize >= BLOCK_8X8 &&
+          rate2 != INT_MAX)
+        rate2 +=
+            vp9_cost_bit(cm->fc.palette_enabled_prob[bsize - BLOCK_8X8]
+                                                     [palette_ctx], 0);
 #endif  // CONFIG_PALETTE
       if (this_mode != DC_PRED && this_mode != TM_PRED)
         rate2 += intra_cost_penalty;
@@ -6349,6 +6388,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       int l, d = get_bit_depth(rows * cols);
       int palette_size_cost[PALETTE_SIZES];
       int palette_run_length_cost[PALETTE_RUN_LENGTHS];
+      int palette_scan_order_cost[PALETTE_SCAN_ORDERS];
       double centroids[PALETTE_MAX_SIZE];
       double lb = src[0], ub = src[0], val;
       PALETTE_SCAN_ORDER ps;
@@ -6379,6 +6419,9 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       vp9_cost_tokens(palette_run_length_cost,
                       cpi->common.fc.palette_run_length_prob[bsize - BLOCK_8X8],
                       vp9_palette_run_length_tree);
+      vp9_cost_tokens(palette_scan_order_cost,
+                      cpi->common.fc.palette_scan_order_prob[bsize - BLOCK_8X8],
+                      vp9_palette_scan_order_tree);
       mbmi->ref_frame[0] = INTRA_FRAME;
       mbmi->mode = DC_PRED;
       for (r = 0; r < rows; r++) {
@@ -6477,9 +6520,12 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
             continue;
 
           total_rate_y = rate_y +
-              (1 + get_bit_depth(palette_max_run(bsize)) + 2 +
-                  8 * k + get_bit_depth(k) * (l >> 1)) * vp9_cost_bit(128, 0) +
-                  palette_size_cost[k - 2];
+              (get_bit_depth(palette_max_run(bsize)) + 8 * k +
+                  get_bit_depth(k) * (l >> 1)) * vp9_cost_bit(128, 0) +
+                  vp9_cost_bit(cm->fc.palette_enabled_prob
+                               [bsize - BLOCK_8X8][palette_ctx], 1) +
+                               palette_size_cost[k - 2] +
+                               palette_scan_order_cost[ps];
           for (i = 0; i < l; i += 2) {
             int bits = get_bit_depth(mbmi->palette_runs[i + 1]);
             total_rate_y += palette_run_length_cost[bits > 6 ? 6 : bits - 1];
