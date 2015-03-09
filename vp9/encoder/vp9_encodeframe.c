@@ -2697,10 +2697,12 @@ static void encode_rd_sb_row(VP9_COMP *cpi,
   // Code each SB in the row
   for (mi_col = tile_info->mi_col_start; mi_col < tile_info->mi_col_end;
        mi_col += MI_BLOCK_SIZE) {
+    const struct segmentation *const seg = &cm->seg;
     int dummy_rate;
     int64_t dummy_dist;
     RD_COST dummy_rdc;
     int i;
+    int seg_skip = 0;
 
     const int idx_str = cm->mi_stride * mi_row + mi_col;
     MODE_INFO *mi = cm->mi + idx_str;
@@ -2720,11 +2722,19 @@ static void encode_rd_sb_row(VP9_COMP *cpi,
     vp9_zero(x->pred_mv);
     td->pc_root->index = 0;
 
+    if (seg->enabled) {
+      const uint8_t *const map = seg->update_map ? cpi->segmentation_map
+                                                 : cm->last_frame_seg_map;
+      int segment_id = vp9_get_segment_id(cm, map, BLOCK_64X64, mi_row, mi_col);
+      seg_skip = vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP);
+    }
+
     x->source_variance = UINT_MAX;
-    if (sf->partition_search_type == FIXED_PARTITION) {
+    if (sf->partition_search_type == FIXED_PARTITION || seg_skip) {
+      const BLOCK_SIZE bsize =
+          seg_skip ? BLOCK_64X64 : sf->always_this_block_size;
       set_offsets(cpi, tile_info, x, mi_row, mi_col, BLOCK_64X64);
-      set_fixed_partitioning(cpi, tile_info, mi, mi_row, mi_col,
-                             sf->always_this_block_size);
+      set_fixed_partitioning(cpi, tile_info, mi, mi_row, mi_col, bsize);
       rd_use_partition(cpi, td, tile_data, mi, tp, mi_row, mi_col,
                        BLOCK_64X64, &dummy_rate, &dummy_dist, 1, td->pc_root);
     } else if (cpi->partition_search_skippable_frame) {
@@ -3449,18 +3459,31 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi,
   // Code each SB in the row
   for (mi_col = tile_info->mi_col_start; mi_col < tile_info->mi_col_end;
        mi_col += MI_BLOCK_SIZE) {
+    const struct segmentation *const seg = &cm->seg;
     RD_COST dummy_rdc;
     const int idx_str = cm->mi_stride * mi_row + mi_col;
     MODE_INFO *mi = cm->mi + idx_str;
-    BLOCK_SIZE bsize;
+    PARTITION_SEARCH_TYPE partition_search_type = sf->partition_search_type;
+    BLOCK_SIZE bsize = BLOCK_64X64;
+    int seg_skip = 0;
     x->source_variance = UINT_MAX;
     vp9_zero(x->pred_mv);
     vp9_rd_cost_init(&dummy_rdc);
     x->color_sensitivity[0] = 0;
     x->color_sensitivity[1] = 0;
 
+    if (seg->enabled) {
+      const uint8_t *const map = seg->update_map ? cpi->segmentation_map
+                                                 : cm->last_frame_seg_map;
+      int segment_id = vp9_get_segment_id(cm, map, BLOCK_64X64, mi_row, mi_col);
+      seg_skip = vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP);
+      if (seg_skip) {
+        partition_search_type = FIXED_PARTITION;
+      }
+    }
+
     // Set the partition type of the 64X64 block
-    switch (sf->partition_search_type) {
+    switch (partition_search_type) {
       case VAR_BASED_PARTITION:
         // TODO(jingning, marpan): The mode decision and encoding process
         // support both intra and inter sub8x8 block coding for RTC mode.
@@ -3476,9 +3499,8 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi,
                             BLOCK_64X64, 1, &dummy_rdc, td->pc_root);
         break;
       case FIXED_PARTITION:
-        bsize = sf->partition_search_type == FIXED_PARTITION ?
-                sf->always_this_block_size :
-                get_nonrd_var_based_fixed_partition(cpi, x, mi_row, mi_col);
+        if (!seg_skip)
+          bsize = sf->always_this_block_size;
         set_fixed_partitioning(cpi, tile_info, mi, mi_row, mi_col, bsize);
         nonrd_use_partition(cpi, td, tile_data, mi, tp, mi_row, mi_col,
                             BLOCK_64X64, 1, &dummy_rdc, td->pc_root);
