@@ -683,7 +683,7 @@ void vp9_init_plane_quantizers(VP9_COMP *cpi, MACROBLOCK *x) {
   x->errorperbit = rdmult >> 6;
   x->errorperbit += (x->errorperbit == 0);
 
-  vp9_initialize_me_consts(cpi, x->q_index);
+  vp9_initialize_me_consts(cpi, x, x->q_index);
 }
 
 void vp9_frame_init_quantizer(VP9_COMP *cpi) {

@@ -132,7 +132,7 @@ int vp9_compute_rd_mult(const struct VP9_COMP *cpi, int qindex);
 
 void vp9_initialize_rd_consts(struct VP9_COMP *cpi);
 
-void vp9_initialize_me_consts(struct VP9_COMP *cpi, int qindex);
+void vp9_initialize_me_consts(struct VP9_COMP *cpi, MACROBLOCK *x, int qindex);
 
 void vp9_model_rd_from_var_lapndz(unsigned int var, unsigned int n,
                                   unsigned int qstep, int *rate,
