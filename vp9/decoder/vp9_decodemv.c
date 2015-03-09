@@ -122,11 +122,10 @@ static void copy_segment_id(const VP9_COMMON *cm,
           last_segment_ids[mi_offset + y * cm->mi_cols + x] : 0;
 }
 
-static int read_intra_segment_id(VP9_COMMON *const cm, MACROBLOCKD *const xd,
+static int read_intra_segment_id(VP9_COMMON *const cm, BLOCK_SIZE bsize,
                                  int mi_row, int mi_col,
                                  vp9_reader *r) {
   struct segmentation *const seg = &cm->seg;
-  const BLOCK_SIZE bsize = xd->mi[0].src_mi->mbmi.sb_type;
   int segment_id;
 
   if (!seg->enabled)
@@ -199,7 +198,7 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
   const BLOCK_SIZE bsize = mbmi->sb_type;
   int i;
 
-  mbmi->segment_id = read_intra_segment_id(cm, xd, mi_row, mi_col, r);
+  mbmi->segment_id = read_intra_segment_id(cm, bsize, mi_row, mi_col, r);
   mbmi->skip = read_skip(cm, xd, counts, mbmi->segment_id, r);
   mbmi->tx_size = read_tx_size(cm, xd, counts, 1, r);
   mbmi->ref_frame[0] = INTRA_FRAME;
