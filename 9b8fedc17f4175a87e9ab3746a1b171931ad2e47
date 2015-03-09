@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Evc\u003d",
+        "filename": "vp9/encoder/vp9_aq_cyclicrefresh.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 294,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2015-03-09T15:56:35Z",
+      "side": 1,
+      "message": "const?",
+      "revId": "9b8fedc17f4175a87e9ab3746a1b171931ad2e47",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//EvY\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 2846,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2015-03-09T15:56:35Z",
+      "side": 1,
+      "message": "I\u0027m afraid this will affect non 1 pass realtime stuff.  Golden frame decisions, maybe add a check for one_pass",
+      "revId": "9b8fedc17f4175a87e9ab3746a1b171931ad2e47",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
