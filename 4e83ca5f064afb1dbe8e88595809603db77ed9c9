@@ -33,6 +33,23 @@
       "revId": "4e83ca5f064afb1dbe8e88595809603db77ed9c9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//EpM\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2850,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2015-03-09T22:43:32Z",
+      "side": 1,
+      "message": "why not formulate like ssim \n2 * source_variance * recon_variance / \nsource_variance*source_variance + recon_variance*recon_variance   \n\nThis gives you a value that\u0027s fixed regardless of magnitude?",
+      "revId": "4e83ca5f064afb1dbe8e88595809603db77ed9c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
