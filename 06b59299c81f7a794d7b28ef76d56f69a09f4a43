@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//ErY\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3478,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-03-09T19:35:43Z",
+      "side": 1,
+      "message": "segment_id can be assigned at block level smaller than 64x64. Would it be possible that a 64x64 block has partial blocks not of skip segment?",
+      "revId": "06b59299c81f7a794d7b28ef76d56f69a09f4a43",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
