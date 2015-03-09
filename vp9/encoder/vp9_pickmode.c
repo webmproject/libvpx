@@ -723,6 +723,9 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     }
   }
 
+  if (cpi->rc.frames_since_golden == 0)
+    ref_frame_skip_mask |= (1 << GOLDEN_FRAME);
+
   for (ref_frame = LAST_FRAME; ref_frame <= GOLDEN_FRAME; ++ref_frame) {
     PREDICTION_MODE this_mode;
     int i = (ref_frame == LAST_FRAME) ? GOLDEN_FRAME : LAST_FRAME;
