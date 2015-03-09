@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//EwY\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1298,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-03-09T15:29:17Z",
+      "side": 1,
+      "message": "would the following be equivalent with a few lines less?\n\nmodified_pct_inter \u003d frame-\u003epcnt_inter;\n#if INTRA_WEIGHT_EXPERIMENT\n  if ((frame-\u003eintra_error / DOUBLE_DIVIDE_CHECK(frame-\u003ecoded_error)) \u003c \n      (double)NCOUNT_FRAME_II_THRESH)\n    modified_pct_inter -\u003d frame-\u003epcnt_neutral;\n#endif",
+      "revId": "486142407dc8d6bc87228bb04e226945fe2511d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
