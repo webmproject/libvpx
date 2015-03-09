@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//EtE\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2835,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-03-09T17:53:39Z",
+      "side": 1,
+      "message": "static",
+      "revId": "4e83ca5f064afb1dbe8e88595809603db77ed9c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//EtA\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2850,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-03-09T17:53:39Z",
+      "side": 1,
+      "message": "The clang bot is going to complain about abs(unsigned) when this code is compiled. See the warnings from patch set 3.",
+      "revId": "4e83ca5f064afb1dbe8e88595809603db77ed9c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
