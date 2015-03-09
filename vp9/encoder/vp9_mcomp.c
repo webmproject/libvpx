@@ -1855,7 +1855,6 @@ unsigned int vp9_int_pro_motion_estimation(const VP9_COMP *cpi, MACROBLOCK *x,
   }
   tmp_mv->row *= 8;
   tmp_mv->col *= 8;
-  x->pred_mv[LAST_FRAME] = *tmp_mv;
 
   return best_sad;
 }

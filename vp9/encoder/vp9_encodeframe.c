@@ -588,6 +588,7 @@ static void choose_partitioning(VP9_COMP *cpi,
       bsize = BLOCK_32X32;
 
     y_sad = vp9_int_pro_motion_estimation(cpi, x, bsize);
+    x->pred_mv[LAST_FRAME] = mbmi->mv[0].as_mv;
 #endif
 
     vp9_build_inter_predictors_sb(xd, mi_row, mi_col, BLOCK_64X64);
