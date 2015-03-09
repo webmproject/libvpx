@@ -958,6 +958,22 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+#if CONFIG_FILTERINTRA
+    for (mode_ext = 2 * DC_PRED; mode_ext <= 2 * TM_PRED + 1; ++mode_ext) {
+      int64_t this_rd;
+      int ratey = 0;
+      int64_t distortion = 0;
+      int rate;
+
+      fbit = mode_ext & 1;
+      mode = mode_ext >> 1;
+      if (fbit && !is_filter_allowed(mode))
+        continue;
+
+      rate = bmode_costs[mode];
+      if (is_filter_allowed(mode))
+        rate += vp9_cost_bit(cpi->common.fc.filterintra_prob[0][mode], fbit);
+#else
     for (mode = DC_PRED; mode <= TM_PRED; ++mode) {
       int64_t this_rd;
       int ratey = 0;
@@ -973,6 +989,7 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
         if (conditional_skipintra(mode, *best_mode))
             continue;
       }
+#endif  // CONFIG_FILTERINTRA
 
       vpx_memcpy(tempa, ta, sizeof(ta));
       vpx_memcpy(templ, tl, sizeof(tl));
@@ -986,8 +1003,14 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
                                                               p->src_diff);
           tran_low_t *const coeff = BLOCK_OFFSET(x->plane[0].coeff, block);
           xd->mi[0].src_mi->bmi[block].as_mode = mode;
+#if CONFIG_FILTERINTRA
+          xd->mi[0].b_filter_info[block] = fbit;
+#endif
           vp9_predict_intra_block(xd, block, 1,
                                   TX_4X4, mode,
+#if CONFIG_FILTERINTRA
+                                  fbit,
+#endif
                                   x->skip_encode ? src : dst,
                                   x->skip_encode ? src_stride : dst_stride,
                                   dst, dst_stride, idx, idy, 0);
@@ -1034,6 +1057,9 @@ static int64_t rd_pick_intra4x4block(VP9_COMP *cpi, MACROBLOCK *x, int ib,
         *bestdistortion = distortion;
         best_rd = this_rd;
         *best_mode = mode;
+#if CONFIG_FILTERINTRA
+        *best_fbit = fbit;
+#endif
         vpx_memcpy(a, tempa, sizeof(tempa));
         vpx_memcpy(l, templ, sizeof(templ));
         for (idy = 0; idy < num_4x4_blocks_high * 4; ++idy) {

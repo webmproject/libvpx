@@ -391,10 +391,10 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
 
   switch (bsize) {
     case BLOCK_4X4:
-#if !CONFIG_FILTERINTRA
-      for (i = 0; i < 4; ++i)
-#else
+#if CONFIG_FILTERINTRA
       for (i = 0; i < 4; ++i) {
+#else
+      for (i = 0; i < 4; ++i)
 #endif
         mi->bmi[i].as_mode =
             read_intra_mode(r, get_y_mode_probs(mi, above_mi, left_mi, i));
@@ -619,10 +619,10 @@ static void read_intra_block_mode_info(VP9_COMMON *const cm, MODE_INFO *mi,
 
   switch (bsize) {
     case BLOCK_4X4:
-#if !CONFIG_FILTERINTRA
-      for (i = 0; i < 4; ++i)
-#else
+#if CONFIG_FILTERINTRA
       for (i = 0; i < 4; ++i) {
+#else
+      for (i = 0; i < 4; ++i)
 #endif
         mi->bmi[i].as_mode = read_intra_mode_y(cm, r, 0);
 #if CONFIG_FILTERINTRA
