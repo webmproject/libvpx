@@ -863,18 +863,17 @@ static void super_block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
                             int64_t *psse, BLOCK_SIZE bs,
                             int64_t txfm_cache[TX_MODES],
                             int64_t ref_best_rd) {
-#if !CONFIG_TX_SKIP
   MACROBLOCKD *xd = &x->e_mbd;
-#endif
   int64_t sse;
   int64_t *ret_sse = psse ? psse : &sse;
 
   assert(bs == xd->mi[0].src_mi->mbmi.sb_type);
 
 #if CONFIG_TX_SKIP
+  (void) xd;
   if (cpi->sf.tx_size_search_method == USE_LARGESTALL
 #if CONFIG_PALETTE
-      || x->e_mbd.mi[0].src_mi->mbmi.palette_enabled
+      || xd->mi[0].src_mi->mbmi.palette_enabled
 #endif  // CONFIG_PALETTE
       ) {
 #else
