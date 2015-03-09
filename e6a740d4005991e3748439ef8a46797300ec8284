@@ -34,6 +34,24 @@
       "revId": "e6a740d4005991e3748439ef8a46797300ec8284",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Enw\u003d",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-03-09T23:56:03Z",
+      "side": 1,
+      "message": "Weird. It definitely seems like the line should use CONFIG_ENCODERS (and the decode tests should use CONFIG_DECODERS)\n\nLIBVPX_TEST_SRCS-yes                   +\u003d encode_test_driver.cc",
+      "parentUuid": "AAAAdn//EoI\u003d",
+      "revId": "e6a740d4005991e3748439ef8a46797300ec8284",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
