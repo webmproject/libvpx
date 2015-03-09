@@ -16,6 +16,24 @@
       "revId": "06b59299c81f7a794d7b28ef76d56f69a09f4a43",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Eq4\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3478,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-03-09T19:58:18Z",
+      "side": 1,
+      "message": "vp9_get_segment_id() returns the lowest segment number found in a block. The only time the encoder uses SEG_LVL_SKIP is on segment 1, when segment zero is not-SKIP. \n\nSo this could be an issue for arbitrary usage of skip but not how we actually use it. \n\nhttp://git.chromium.org/gitweb/?p\u003dwebm/libvpx.git;a\u003dblob;f\u003dvp9/common/vp9_pred_common.c;hb\u003d9708f9d#l365",
+      "parentUuid": "AAAAdn//ErY\u003d",
+      "revId": "06b59299c81f7a794d7b28ef76d56f69a09f4a43",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
