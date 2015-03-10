@@ -457,7 +457,7 @@ static void estimate_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                           b_width_log2_lookup[plane_bsize],
                           tx_size, args->mode,
 #if CONFIG_FILTERINTRA
-                                  0,
+                          0,
 #endif
                           p->src.buf, src_stride,
                           pd->dst.buf, dst_stride,
