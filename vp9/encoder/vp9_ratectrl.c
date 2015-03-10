@@ -1595,11 +1595,12 @@ int vp9_compute_qdelta_by_rate(const RATE_CONTROL *rc, FRAME_TYPE frame_type,
 
   // Convert the q target to an index
   for (i = rc->best_quality; i < rc->worst_quality; ++i) {
-    target_index = i;
-    if (vp9_rc_bits_per_mb(frame_type, i, 1.0, bit_depth) <= target_bits_per_mb)
+    if (vp9_rc_bits_per_mb(frame_type, i, 1.0, bit_depth) <=
+        target_bits_per_mb) {
+      target_index = i;
       break;
+    }
   }
-
   return target_index - qindex;
 }
 
