@@ -214,14 +214,14 @@ void vp9_cyclic_refresh_update_segment(VP9_COMP *const cpi,
 
   // If this block is labeled for refresh, check if we should reset the
   // segment_id.
-  if (mbmi->segment_id != CR_SEGMENT_ID_BASE)
+  if (cyclic_refresh_segment_id_boosted(mbmi->segment_id))
     mbmi->segment_id = refresh_this_block;
 
   // Update the cyclic refresh map, to be used for setting segmentation map
   // for the next frame. If the block  will be refreshed this frame, mark it
   // as clean. The magnitude of the -ve influences how long before we consider
   // it for refresh again.
-  if (mbmi->segment_id != CR_SEGMENT_ID_BASE) {
+  if (cyclic_refresh_segment_id_boosted(mbmi->segment_id)) {
     new_map_value = -cr->time_for_refresh;
   } else if (refresh_this_block) {
     // Else if it is accepted as candidate for refresh, and has not already
@@ -252,10 +252,11 @@ void vp9_cyclic_refresh_postencode(VP9_COMP *const cpi) {
   int mi_row, mi_col;
   cr->actual_num_seg_blocks = 0;
   for (mi_row = 0; mi_row < cm->mi_rows; mi_row++)
-  for (mi_col = 0; mi_col < cm->mi_cols; mi_col++) {
-    if (seg_map[mi_row * cm->mi_cols + mi_col] != CR_SEGMENT_ID_BASE)
-      cr->actual_num_seg_blocks++;
-  }
+    for (mi_col = 0; mi_col < cm->mi_cols; mi_col++) {
+      if (cyclic_refresh_segment_id_boosted(
+              seg_map[mi_row * cm->mi_cols + mi_col]))
+        cr->actual_num_seg_blocks++;
+    }
 }
 
 // Set golden frame update interval, for non-svc 1 pass CBR mode.
