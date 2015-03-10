@@ -50,6 +50,42 @@
       "revId": "4e83ca5f064afb1dbe8e88595809603db77ed9c9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//EmM\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2850,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2015-03-10T14:54:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//EtA\u003d",
+      "revId": "4e83ca5f064afb1dbe8e88595809603db77ed9c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//EmQ\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2850,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2015-03-10T14:54:48Z",
+      "side": 1,
+      "message": "I can try that and other things to see how they compare in terms of effect. If something different works better it can be changed in another patch.",
+      "parentUuid": "AAAAdn//EpM\u003d",
+      "revId": "4e83ca5f064afb1dbe8e88595809603db77ed9c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
