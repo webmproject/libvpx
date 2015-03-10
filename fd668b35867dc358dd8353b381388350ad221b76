@@ -16,6 +16,24 @@
       "revId": "fd668b35867dc358dd8353b381388350ad221b76",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Ekg\u003d",
+        "filename": "test/test.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-03-10T17:22:54Z",
+      "side": 1,
+      "message": "It\u0027s because the test uses \u0027make dist\u0027 - otherwise, even though the files aren\u0027t listed they are still in the tree and available. If you unconditionally include the header then it still works:\n\nLIBVPX_TEST_SRCS-$(CONFIG_ENCODERS) +\u003d encode_test_driver.cc\nLIBVPX_TEST_SRCS-yes +\u003d encode_test_driver.h",
+      "parentUuid": "AAAAdn//ElE\u003d",
+      "revId": "fd668b35867dc358dd8353b381388350ad221b76",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
