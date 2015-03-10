@@ -52,6 +52,24 @@
       "revId": "e6a740d4005991e3748439ef8a46797300ec8284",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//EmY\u003d",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2015-03-10T14:22:33Z",
+      "side": 1,
+      "message": "That si what I thought too. I just wanted to make sure we weren\u0027t including it for some reason.",
+      "parentUuid": "AAAAdn//Enw\u003d",
+      "revId": "e6a740d4005991e3748439ef8a46797300ec8284",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
