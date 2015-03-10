@@ -1229,7 +1229,7 @@ void vp9_rc_postencode_update(VP9_COMP *cpi, uint64_t bytes_used) {
   const int qindex = cm->base_qindex;
 
   if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cm->seg.enabled) {
-    vp9_cyclic_refresh_update_actual_count(cpi);
+    vp9_cyclic_refresh_postencode(cpi);
   }
 
   // Update rate control heuristics
@@ -1535,7 +1535,10 @@ void vp9_rc_get_one_pass_cbr_params(VP9_COMP *cpi) {
     cm->frame_type = INTER_FRAME;
   }
   if (rc->frames_till_gf_update_due == 0) {
-    rc->baseline_gf_interval = DEFAULT_GF_INTERVAL;
+    if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ)
+      vp9_cyclic_refresh_set_golden_update(cpi);
+    else
+      rc->baseline_gf_interval = DEFAULT_GF_INTERVAL;
     rc->frames_till_gf_update_due = rc->baseline_gf_interval;
     // NOTE: frames_till_gf_update_due must be <= frames_to_key.
     if (rc->frames_till_gf_update_due > rc->frames_to_key)
