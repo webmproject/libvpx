@@ -868,7 +868,8 @@ static void update_state(VP9_COMP *cpi, ThreadData *td,
     // and then update the quantizer.
     if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) {
       vp9_cyclic_refresh_update_segment(cpi, &xd->mi[0].src_mi->mbmi, mi_row,
-                                        mi_col, bsize, ctx->rate, ctx->dist);
+                                        mi_col, bsize, ctx->rate, ctx->dist,
+                                        x->skip);
     }
   }
 
@@ -1557,7 +1558,7 @@ static void update_state_rt(VP9_COMP *cpi, ThreadData *td,
     } else {
     // Setting segmentation map for cyclic_refresh.
       vp9_cyclic_refresh_update_segment(cpi, mbmi, mi_row, mi_col, bsize,
-                                        ctx->rate, ctx->dist);
+                                        ctx->rate, ctx->dist, x->skip);
     }
     vp9_init_plane_quantizers(cpi, x);
   }

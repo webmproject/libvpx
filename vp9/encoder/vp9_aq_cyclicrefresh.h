@@ -55,7 +55,7 @@ int vp9_cyclic_refresh_rc_bits_per_mb(const struct VP9_COMP *cpi, int i,
 void vp9_cyclic_refresh_update_segment(struct VP9_COMP *const cpi,
                                        MB_MODE_INFO *const mbmi,
                                        int mi_row, int mi_col, BLOCK_SIZE bsize,
-                                       int64_t rate, int64_t dist);
+                                       int64_t rate, int64_t dist, int skip);
 
 // Update the segmentation map, and related quantities: cyclic refresh map,
 // refresh sb_index, and target number of blocks to be refreshed.
@@ -81,6 +81,15 @@ int vp9_cyclic_refresh_get_rdmult(const CYCLIC_REFRESH *cr);
 static INLINE int cyclic_refresh_segment_id_boosted(int segment_id) {
   return segment_id == CR_SEGMENT_ID_BOOST1 ||
          segment_id == CR_SEGMENT_ID_BOOST2;
+}
+
+static INLINE int cyclic_refresh_segment_id(int segment_id) {
+  if (segment_id == CR_SEGMENT_ID_BOOST1)
+    return CR_SEGMENT_ID_BOOST1;
+  else if (segment_id == CR_SEGMENT_ID_BOOST2)
+    return CR_SEGMENT_ID_BOOST2;
+  else
+    return CR_SEGMENT_ID_BASE;
 }
 
 #ifdef __cplusplus
