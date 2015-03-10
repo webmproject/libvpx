@@ -21,13 +21,9 @@
 #include "vp9_corner_match.h"
 #include "vp9_ransac.h"
 
-// Default is Harris
-#define USE_FAST_CORNER
-#define MAX_CORNERS 4096
-
 struct VP9_COMP;
 
-const int CONFIDENCE_THRESHOLD = 40;
+static const int CONFIDENCE_THRESHOLD = 10;
 
 typedef enum {
   UNKNOWN_TRANSFORM = -1,
@@ -44,13 +40,10 @@ inline ransacType get_ransacType(TransformationType type);
 inline projectPointsType get_projectPointsType(TransformationType type);
 
 // Returns number of models actually returned: 1 - if success, 0 - if failure
-int vp9_compute_global_motion_single_feature_based(TransformationType type,
-                                                   unsigned char *frm,
-                                                   unsigned char *ref,
-                                                   int width,
-                                                   int height,
-                                                   int frm_stride,
-                                                   int ref_stride,
+int vp9_compute_global_motion_single_feature_based(struct VP9_COMP *cpi,
+                                                   TransformationType type,
+                                                   YV12_BUFFER_CONFIG *frm,
+                                                   YV12_BUFFER_CONFIG *ref,
                                                    double *H);
 
 // Returns number of models actually returned: 1+ - #models, 0 - if failure
@@ -60,13 +53,10 @@ int vp9_compute_global_motion_single_feature_based(TransformationType type,
 // Ex. if max_models = 4, and inlier_prob = 0.8, and during the
 // process three models together already cover more than 80% of the
 // matching points, then only three models are returned.
-int vp9_compute_global_motion_multiple_feature_based(TransformationType type,
-                                                     unsigned char *frm,
-                                                     unsigned char *ref,
-                                                     int width,
-                                                     int height,
-                                                     int frm_stride,
-                                                     int ref_stride,
+int vp9_compute_global_motion_multiple_feature_based(struct VP9_COMP *cpi,
+                                                     TransformationType type,
+                                                     YV12_BUFFER_CONFIG *frm,
+                                                     YV12_BUFFER_CONFIG *ref,
                                                      int max_models,
                                                      double inlier_prob,
                                                      double *H);
@@ -79,7 +69,13 @@ int vp9_compute_global_motion_single_block_based(struct VP9_COMP *cpi,
                                                  int blocksize,
                                                  double *H);
 
-// Returns number of models actually returned: 1 - if success, 0 - if failure
+// Returns number of models actually returned: 1+ - #models, 0 - if failure
+// max_models is the maximum number of models returned
+// inlier_prob is the probability of being inlier over all the models
+// combined, beyond which no more models are computed.
+// Ex. if max_models = 4, and inlier_prob = 0.8, and during the
+// process three models together already cover more than 80% of the
+// matching points, then only three models are returned.
 int vp9_compute_global_motion_multiple_block_based(struct VP9_COMP *cpi,
                                                    TransformationType type,
                                                    YV12_BUFFER_CONFIG *frm,

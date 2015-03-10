@@ -161,25 +161,26 @@ static int compute_global_motion_single(TransformationType type,
 }
 
 // Returns number of models actually returned: 1 - if success, 0 - if failure
-int vp9_compute_global_motion_single_feature_based(TransformationType type,
-                                                   unsigned char *frmbuf,
-                                                   unsigned char *refbuf,
-                                                   int width,
-                                                   int height,
-                                                   int frm_stride,
-                                                   int ref_stride,
-                                                   double *H) {
+int vp9_compute_global_motion_single_feature_based(
+    struct VP9_COMP *cpi,
+    TransformationType type,
+    YV12_BUFFER_CONFIG *frm,
+    YV12_BUFFER_CONFIG *ref,
+    double *H) {
   int num_frm_corners, num_ref_corners;
   int num_correspondences;
   int *correspondences;
   int num_inliers;
   int *inlier_map = NULL;
   int frm_corners[2 * MAX_CORNERS], ref_corners[2 * MAX_CORNERS];
+  (void) cpi;
 
 #ifdef USE_FAST_CORNER
-  num_frm_corners = FastCornerDetect(frmbuf, width, height, frm_stride,
+  num_frm_corners = FastCornerDetect(frm->y_buffer, frm->y_width,
+                                     frm->y_height, frm->y_stride,
                                      frm_corners, MAX_CORNERS);
-  num_ref_corners = FastCornerDetect(refbuf, width, height, ref_stride,
+  num_ref_corners = FastCornerDetect(ref->y_buffer, ref->y_width,
+                                     ref->y_height, ref->y_stride,
                                      ref_corners, MAX_CORNERS);
 #else
   num_frm_corners = HarrisCornerDetect(frmbuf, width, height, frm_stride,
@@ -192,15 +193,17 @@ int vp9_compute_global_motion_single_feature_based(TransformationType type,
   printf("Reference corners = %d\n", num_ref_corners);
 #endif
 
-  correspondences = (int *)malloc(
-      num_frm_corners * 4 * sizeof(int));
+  correspondences = (int *) malloc(num_frm_corners * 4 *
+                                   sizeof(*correspondences));
 
-  num_correspondences = determine_correspondence(frmbuf, (int*)frm_corners,
+  num_correspondences = determine_correspondence(frm->y_buffer,
+                                                (int*)frm_corners,
                                                  num_frm_corners,
-                                                 refbuf, (int*)ref_corners,
+                                                 ref->y_buffer,
+                                                 (int*)ref_corners,
                                                  num_ref_corners,
-                                                 width, height,
-                                                 frm_stride, ref_stride,
+                                                 frm->y_width, frm->y_height,
+                                                 frm->y_stride, ref->y_stride,
                                                  correspondences);
 #ifdef VERBOSE
   printf("Number of correspondences = %d\n", num_correspondences);
@@ -289,16 +292,14 @@ static int compute_global_motion_multiple(TransformationType type,
 }
 
 // Returns number of models actually returned
-int vp9_compute_global_motion_multiple_feature_based(TransformationType type,
-                                                     unsigned char *frmbuf,
-                                                     unsigned char *refbuf,
-                                                     int width,
-                                                     int height,
-                                                     int frm_stride,
-                                                     int ref_stride,
-                                                     int max_models,
-                                                     double inlier_prob,
-                                                     double *H) {
+int vp9_compute_global_motion_multiple_feature_based(
+    struct VP9_COMP *cpi,
+    TransformationType type,
+    YV12_BUFFER_CONFIG *frm,
+    YV12_BUFFER_CONFIG *ref,
+    int max_models,
+    double inlier_prob,
+    double *H) {
   int num_frm_corners, num_ref_corners;
   int num_correspondences;
   int *correspondences;
@@ -306,11 +307,14 @@ int vp9_compute_global_motion_multiple_feature_based(TransformationType type,
   int frm_corners[2 * MAX_CORNERS], ref_corners[2 * MAX_CORNERS];
   int num_models = 0;
   int *inlier_map = NULL;
+  (void) cpi;
 
 #ifdef USE_FAST_CORNER
-  num_frm_corners = FastCornerDetect(frmbuf, width, height, frm_stride,
+  num_frm_corners = FastCornerDetect(frm->y_buffer, frm->y_width,
+                                     frm->y_height, frm->y_stride,
                                      frm_corners, MAX_CORNERS);
-  num_ref_corners = FastCornerDetect(refbuf, width, height, ref_stride,
+  num_ref_corners = FastCornerDetect(ref->y_buffer, ref->y_width,
+                                     ref->y_height, ref->y_stride,
                                      ref_corners, MAX_CORNERS);
 #else
   num_frm_corners = HarrisCornerDetect(frmbuf, width, height, frm_stride,
@@ -323,14 +327,17 @@ int vp9_compute_global_motion_multiple_feature_based(TransformationType type,
   printf("Reference corners = %d\n", num_ref_corners);
 #endif
 
-  correspondences = (int *)malloc(num_frm_corners * 4 * sizeof(int));
+  correspondences = (int *) malloc(num_frm_corners * 4 *
+                                   sizeof(*correspondences));
 
-  num_correspondences = determine_correspondence(frmbuf, (int*)frm_corners,
+  num_correspondences = determine_correspondence(frm->y_buffer,
+                                                 (int*)frm_corners,
                                                  num_frm_corners,
-                                                 refbuf, (int*)ref_corners,
+                                                 ref->y_buffer,
+                                                 (int*)ref_corners,
                                                  num_ref_corners,
-                                                 width, height,
-                                                 frm_stride, ref_stride,
+                                                 frm->y_width, frm->y_height,
+                                                 frm->y_stride, ref->y_stride,
                                                  correspondences);
 #ifdef VERBOSE
   printf("Number of correspondences = %d\n", num_correspondences);
@@ -371,8 +378,10 @@ int vp9_compute_global_motion_single_block_based(struct VP9_COMP *cpi,
   double confidence[4096];
 
   get_frame_motionfield(cpi, frm, ref, blocksize, motionfield, confidence);
+
   correspondences = (int *)malloc(4 * cm->mb_rows * cm->mb_cols *
                                   sizeof(*correspondences));
+
   for (i = 0; i < cm->mb_rows * cm->mb_cols; i ++) {
       int x = (i % cm->mb_cols) * blocksize + blocksize/2;
       int y = (i / cm->mb_cols) * blocksize + blocksize/2;
@@ -386,6 +395,7 @@ int vp9_compute_global_motion_single_block_based(struct VP9_COMP *cpi,
   }
 
   inlier_map = (int *)malloc(num_correspondences * sizeof(*inlier_map));
+
   num_inliers = compute_global_motion_single(type, correspondences,
                                              num_correspondences, H,
                                              inlier_map);
@@ -420,6 +430,7 @@ int vp9_compute_global_motion_multiple_block_based(struct VP9_COMP *cpi,
   MV motionfield[4096];
   double confidence[4096];
   get_frame_motionfield(cpi, frm, ref, blocksize, motionfield, confidence);
+
   correspondences = (int *)malloc(4 * cm->mb_rows * cm->mb_cols *
                                   sizeof(*correspondences));
 
