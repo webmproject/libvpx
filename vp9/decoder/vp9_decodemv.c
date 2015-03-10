@@ -875,6 +875,9 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
 
   int_mv nearestmv[2], nearmv[2];
   int inter_mode_ctx, ref, is_compound;
+#if CONFIG_SUPERTX
+  (void) supertx_enabled;
+#endif
 
 #if CONFIG_COPY_MODE
   if (mbmi->copy_mode == NOREF)
@@ -1111,6 +1114,9 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
 #if CONFIG_COPY_MODE
   int num_candidate = 0;
   MB_MODE_INFO *inter_ref_list[18] = {NULL};
+#endif
+#if CONFIG_SUPERTX
+  (void) supertx_enabled;
 #endif
 
   mbmi->mv[0].as_int = 0;

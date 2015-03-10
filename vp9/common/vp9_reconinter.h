@@ -99,6 +99,7 @@ void vp9_build_inter_predictors_sbuv_sub8x8_extend(MACROBLOCKD *xd,
                                                    int mi_col_ori,
                                                    BLOCK_SIZE top_bsize);
 void vp9_build_masked_inter_predictor_complex(
+    MACROBLOCKD *xd,
     uint8_t *dst, int dst_stride, uint8_t *dst2, int dst2_stride,
     const struct macroblockd_plane *pd, int mi_row, int mi_col,
     int mi_row_ori, int mi_col_ori, BLOCK_SIZE bsize, BLOCK_SIZE top_bsize,
