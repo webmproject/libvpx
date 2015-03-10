@@ -2621,11 +2621,13 @@ void vp9_twopass_postencode_update(VP9_COMP *cpi) {
   ++twopass->gf_group.index;
 
   // If the rate control is drifting consider adjustment to min or maxq.
-  if ((cpi->oxcf.rc_mode == VPX_VBR) &&
+  if ((cpi->oxcf.rc_mode != VPX_Q) &&
       (cpi->twopass.gf_zeromotion_pct < VLOW_MOTION_THRESHOLD) &&
       !cpi->rc.is_src_frame_alt_ref) {
     const int maxq_adj_limit =
       rc->worst_quality - twopass->active_worst_quality;
+    const int minq_adj_limit =
+      (cpi->oxcf.rc_mode == VPX_CQ) ? 0 : MINQ_ADJ_LIMIT;
 
     // Undershoot.
     if (rc->rate_error_estimate > cpi->oxcf.under_shoot_pct) {
@@ -2650,7 +2652,7 @@ void vp9_twopass_postencode_update(VP9_COMP *cpi) {
         --twopass->extend_maxq;
     }
 
-    twopass->extend_minq = clamp(twopass->extend_minq, 0, MINQ_ADJ_LIMIT);
+    twopass->extend_minq = clamp(twopass->extend_minq, 0, minq_adj_limit);
     twopass->extend_maxq = clamp(twopass->extend_maxq, 0, maxq_adj_limit);
   }
 }
