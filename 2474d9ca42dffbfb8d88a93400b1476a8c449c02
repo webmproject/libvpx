@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAdn//EfE\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 325,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2015-03-10T23:23:18Z",
+      "side": 1,
+      "message": "Is this true? In the sub-optimal case shouldn\u0027t frame_worker_data-\u003edata_end point to the end of the sub-optimal data?",
+      "revId": "2474d9ca42dffbfb8d88a93400b1476a8c449c02",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//EkU\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 3
@@ -19,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//EfM\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 330,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2015-03-10T23:23:18Z",
+      "side": 1,
+      "message": "How about? \"Some encoders may encode VP8/VP9 frames sub-optimally by adding one or more bytes of 0 at the end of the encoded frame data. In frame parallel decoding, a worker thread must successfully decode all of the encoded frame\u0027s data, including the sub-optimally encoded data at the end of the frame.\"",
+      "parentUuid": "AAAAdn//EkU\u003d",
+      "revId": "2474d9ca42dffbfb8d88a93400b1476a8c449c02",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//EkI\u003d",
         "filename": "vp9/vp9_dx_iface.c",
         "patchSetId": 3
@@ -30,6 +65,24 @@
       "writtenOn": "2015-03-10T17:30:25Z",
       "side": 1,
       "message": "What is this code doing? Parsing the super frame data for the next frame?",
+      "revId": "2474d9ca42dffbfb8d88a93400b1476a8c449c02",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//EfI\u003d",
+        "filename": "vp9/vp9_dx_iface.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 333,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2015-03-10T23:23:18Z",
+      "side": 1,
+      "message": "The for loop seems weird.\n\nHow about:\nint suboptimal_data_to_decode \u003d\n  (frame_worker_data-\u003edata + frame_worker_data-\u003edata_size - 1) - data;\n\nwhile(suboptimal_data_to_decode \u003e 0) {\n...\n--suboptimal_data_to_decode;\ndata++;\n}",
+      "parentUuid": "AAAAdn//EkI\u003d",
       "revId": "2474d9ca42dffbfb8d88a93400b1476a8c449c02",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
