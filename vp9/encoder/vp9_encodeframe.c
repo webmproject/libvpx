@@ -611,12 +611,12 @@ static void choose_partitioning(VP9_COMP *cpi,
       const BLOCK_SIZE bs = get_plane_block_size(bsize, pd);
 
       if (bs == BLOCK_INVALID)
-        uv_sad = INT_MAX;
+        uv_sad = UINT_MAX;
       else
         uv_sad = cpi->fn_ptr[bs].sdf(p->src.buf, p->src.stride,
                                      pd->dst.buf, pd->dst.stride);
 
-      x->color_sensitivity[i - 1] = uv_sad * 4 > y_sad;
+      x->color_sensitivity[i - 1] = uv_sad > (y_sad >> 2);
     }
 
     d = xd->plane[0].dst.buf;
