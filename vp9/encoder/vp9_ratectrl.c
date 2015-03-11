@@ -377,7 +377,7 @@ static double get_rate_correction_factor(const VP9_COMP *cpi) {
       rcf = rc->rate_correction_factors[INTER_NORMAL];
   }
   rcf *= rcf_mult[rc->frame_size_selector];
-  return rcf > MAX_BPB_FACTOR ? MAX_BPB_FACTOR : rcf;
+  return fclamp(rcf, MIN_BPB_FACTOR, MAX_BPB_FACTOR);
 }
 
 static void set_rate_correction_factor(VP9_COMP *cpi, double factor) {
@@ -385,6 +385,8 @@ static void set_rate_correction_factor(VP9_COMP *cpi, double factor) {
 
   // Normalize RCF to account for the size-dependent scaling factor.
   factor /= rcf_mult[cpi->rc.frame_size_selector];
+
+  factor = fclamp(factor, MIN_BPB_FACTOR, MAX_BPB_FACTOR);
 
   if (cpi->common.frame_type == KEY_FRAME) {
     rc->rate_correction_factors[KF_STD] = factor;
