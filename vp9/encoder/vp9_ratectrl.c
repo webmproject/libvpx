@@ -754,7 +754,7 @@ static int rc_pick_q_and_bounds_one_pass_cbr(const VP9_COMP *cpi,
 
 static int get_active_cq_level(const RATE_CONTROL *rc,
                                const VP9EncoderConfig *const oxcf) {
-  static const double cq_adjust_threshold = 0.5;
+  static const double cq_adjust_threshold = 0.1;
   int active_cq_level = oxcf->cq_level;
   if (oxcf->rc_mode == VPX_CQ &&
       rc->total_target_bits > 0) {
@@ -1687,7 +1687,7 @@ void vp9_set_target_rate(VP9_COMP *cpi) {
   int target_rate = rc->base_frame_target;
 
   // Correction to rate target based on prior over or under shoot.
-  if (cpi->oxcf.rc_mode == VPX_VBR)
+  if (cpi->oxcf.rc_mode == VPX_VBR || cpi->oxcf.rc_mode == VPX_CQ)
     vbr_rate_correction(cpi, &target_rate, rc->vbr_bits_off_target);
   vp9_rc_set_frame_target(cpi, target_rate);
 }
