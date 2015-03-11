@@ -221,6 +221,8 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
   const uint32_t ac_quant = pd->dequant[1];
   unsigned int var = cpi->fn_ptr[bsize].vf(p->src.buf, p->src.stride,
                                            pd->dst.buf, pd->dst.stride, &sse);
+  int skip_dc = 0;
+
   *var_y = var;
   *sse_y = sse;
 
@@ -262,6 +264,9 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
       // Check if dc coefficient can be quantized to zero.
       if (sse_tx - var_tx < dc_thr || sse == var)
         x->skip_txfm[0] = 1;
+    } else {
+      if (sse_tx - var_tx < dc_thr || sse == var)
+        skip_dc = 1;
     }
   }
 
@@ -271,21 +276,28 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
     return;
   }
 
+  if (!skip_dc) {
 #if CONFIG_VP9_HIGHBITDEPTH
-  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    vp9_model_rd_from_var_lapndz(sse - var, num_pels_log2_lookup[bsize],
-                                 dc_quant >> (xd->bd - 5), &rate, &dist);
-  } else {
+    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+      vp9_model_rd_from_var_lapndz(sse - var, num_pels_log2_lookup[bsize],
+                                   dc_quant >> (xd->bd - 5), &rate, &dist);
+    } else {
+      vp9_model_rd_from_var_lapndz(sse - var, num_pels_log2_lookup[bsize],
+                                   dc_quant >> 3, &rate, &dist);
+    }
+#else
     vp9_model_rd_from_var_lapndz(sse - var, num_pels_log2_lookup[bsize],
                                  dc_quant >> 3, &rate, &dist);
-  }
-#else
-  vp9_model_rd_from_var_lapndz(sse - var, num_pels_log2_lookup[bsize],
-                               dc_quant >> 3, &rate, &dist);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+  }
 
-  *out_rate_sum = rate >> 1;
-  *out_dist_sum = dist << 3;
+  if (!skip_dc) {
+    *out_rate_sum = rate >> 1;
+    *out_dist_sum = dist << 3;
+  } else {
+    *out_rate_sum = 0;
+    *out_dist_sum = (sse - var) << 4;
+  }
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
