@@ -137,10 +137,6 @@ static int combined_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   int cost_list[5];
   const YV12_BUFFER_CONFIG *scaled_ref_frame = vp9_get_scaled_ref_frame(cpi,
                                                                         ref);
-  if (cpi->common.show_frame &&
-      (x->pred_mv_sad[ref] >> 3) > x->pred_mv_sad[LAST_FRAME])
-    return rv;
-
   if (scaled_ref_frame) {
     int i;
     // Swap out the reference frame for a version that's been scaled to
