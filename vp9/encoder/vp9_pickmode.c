@@ -1052,6 +1052,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         mode_idx[INTRA_FRAME][mbmi->mode];
     PREDICTION_MODE this_mode;
     for (ref_frame = LAST_FRAME; ref_frame <= GOLDEN_FRAME; ++ref_frame) {
+      if (best_ref_frame != ref_frame) continue;
       for (this_mode = NEARESTMV; this_mode <= NEWMV; ++this_mode) {
         THR_MODES thr_mode_idx = mode_idx[ref_frame][INTER_OFFSET(this_mode)];
         int *freq_fact = &tile_data->thresh_freq_fact[bsize][thr_mode_idx];
