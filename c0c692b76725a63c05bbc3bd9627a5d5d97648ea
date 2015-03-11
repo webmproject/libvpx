@@ -16,6 +16,41 @@
       "revId": "c0c692b76725a63c05bbc3bd9627a5d5d97648ea",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//EbU\u003d",
+        "filename": "vp9/common/vp9_blockd.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2015-03-11T20:49:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Edw\u003d",
+      "revId": "c0c692b76725a63c05bbc3bd9627a5d5d97648ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//EbQ\u003d",
+        "filename": "vp9/common/vp9_blockd.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2015-03-11T20:49:35Z",
+      "side": 1,
+      "message": "Also now I only traverse the row inside the umv boarder which save one check per block.",
+      "revId": "c0c692b76725a63c05bbc3bd9627a5d5d97648ea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
