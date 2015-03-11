@@ -65,7 +65,7 @@ void vp9_cyclic_refresh_update__map(struct VP9_COMP *const cpi);
 void vp9_cyclic_refresh_postencode(struct VP9_COMP *const cpi);
 
 // Set golden frame update interval, for non-svc 1 pass CBR mode.
-void vp9_cyclic_refresh_set_golden_update(struct VP9_COMP *cpi);
+void vp9_cyclic_refresh_set_golden_update(struct VP9_COMP *const cpi);
 
 // Check if we should not update golden reference, based on past refresh stats.
 void vp9_cyclic_refresh_check_golden_update(struct VP9_COMP *const cpi);
