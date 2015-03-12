@@ -16,6 +16,40 @@
       "revId": "9371bfc7e6652385255ab5916fc26772175a49df",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ENM\u003d",
+        "filename": "test/vpxenc.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-03-12T19:12:56Z",
+      "side": 1,
+      "message": "looking at this now you only check for output file existence, but if this for example crashes midway through 2nd pass the test might succeed.",
+      "revId": "9371bfc7e6652385255ab5916fc26772175a49df",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ENQ\u003d",
+        "filename": "test/vpxenc.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-03-12T19:12:56Z",
+      "side": 1,
+      "message": "this isn\u0027t large enough to get 2 tiles (min: 512).",
+      "revId": "9371bfc7e6652385255ab5916fc26772175a49df",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
