@@ -102,99 +102,56 @@ void vp9_fdct8x8_quant_ssse3(const int16_t *input, int stride,
       const __m128i r2 = _mm_sub_epi16(q1, q2);
       const __m128i r3 = _mm_sub_epi16(q0, q3);
       // Interleave to do the multiply by constants which gets us into 32bits
-      const __m128i t0 = _mm_add_epi16(r0, r1);
-      const __m128i t1 = _mm_sub_epi16(r0, r1);
+      const __m128i t0 = _mm_unpacklo_epi16(r0, r1);
+      const __m128i t1 = _mm_unpackhi_epi16(r0, r1);
       const __m128i t2 = _mm_unpacklo_epi16(r2, r3);
       const __m128i t3 = _mm_unpackhi_epi16(r2, r3);
 
-      const __m128i u0 = _mm_mulhrs_epi16(t0, k__dual_p16_p16);
-      const __m128i u1 = _mm_mulhrs_epi16(t1, k__dual_p16_p16);
+      const __m128i u0 = _mm_madd_epi16(t0, k__cospi_p16_p16);
+      const __m128i u1 = _mm_madd_epi16(t1, k__cospi_p16_p16);
+      const __m128i u2 = _mm_madd_epi16(t0, k__cospi_p16_m16);
+      const __m128i u3 = _mm_madd_epi16(t1, k__cospi_p16_m16);
+
       const __m128i u4 = _mm_madd_epi16(t2, k__cospi_p24_p08);
       const __m128i u5 = _mm_madd_epi16(t3, k__cospi_p24_p08);
       const __m128i u6 = _mm_madd_epi16(t2, k__cospi_m08_p24);
       const __m128i u7 = _mm_madd_epi16(t3, k__cospi_m08_p24);
       // dct_const_round_shift
-      const __m128i v4 = _mm_add_epi32(u4, k__DCT_CONST_ROUNDING);
-      const __m128i v5 = _mm_add_epi32(u5, k__DCT_CONST_ROUNDING);
-      const __m128i v6 = _mm_add_epi32(u6, k__DCT_CONST_ROUNDING);
-      const __m128i v7 = _mm_add_epi32(u7, k__DCT_CONST_ROUNDING);
-      const __m128i w4 = _mm_srai_epi32(v4, DCT_CONST_BITS);
-      const __m128i w5 = _mm_srai_epi32(v5, DCT_CONST_BITS);
-      const __m128i w6 = _mm_srai_epi32(v6, DCT_CONST_BITS);
-      const __m128i w7 = _mm_srai_epi32(v7, DCT_CONST_BITS);
-      // Combine
-      res0 = u0;
-      res4 = u1;
-      res2 = _mm_packs_epi32(w4, w5);
-      res6 = _mm_packs_epi32(w6, w7);
-    }
-    // Work on next four results
-    if (pass == 1) {
-      // Interleave to do the multiply by constants which gets us into 32bits
-      const __m128i d0 = _mm_unpacklo_epi16(q6, q5);
-      const __m128i d1 = _mm_unpackhi_epi16(q6, q5);
-      const __m128i e0 = _mm_madd_epi16(d0, k__cospi_p16_m16);
-      const __m128i e1 = _mm_madd_epi16(d1, k__cospi_p16_m16);
-      const __m128i e2 = _mm_madd_epi16(d0, k__cospi_p16_p16);
-      const __m128i e3 = _mm_madd_epi16(d1, k__cospi_p16_p16);
-      // dct_const_round_shift
-      const __m128i f0 = _mm_add_epi32(e0, k__DCT_CONST_ROUNDING);
-      const __m128i f1 = _mm_add_epi32(e1, k__DCT_CONST_ROUNDING);
-      const __m128i f2 = _mm_add_epi32(e2, k__DCT_CONST_ROUNDING);
-      const __m128i f3 = _mm_add_epi32(e3, k__DCT_CONST_ROUNDING);
-      const __m128i s0 = _mm_srai_epi32(f0, DCT_CONST_BITS);
-      const __m128i s1 = _mm_srai_epi32(f1, DCT_CONST_BITS);
-      const __m128i s2 = _mm_srai_epi32(f2, DCT_CONST_BITS);
-      const __m128i s3 = _mm_srai_epi32(f3, DCT_CONST_BITS);
-      // Combine
-      const __m128i r0 = _mm_packs_epi32(s0, s1);
-      const __m128i r1 = _mm_packs_epi32(s2, s3);
-      // Add/subtract
-      const __m128i x0 = _mm_add_epi16(q4, r0);
-      const __m128i x1 = _mm_sub_epi16(q4, r0);
-      const __m128i x2 = _mm_sub_epi16(q7, r1);
-      const __m128i x3 = _mm_add_epi16(q7, r1);
-      // Interleave to do the multiply by constants which gets us into 32bits
-      const __m128i t0 = _mm_unpacklo_epi16(x0, x3);
-      const __m128i t1 = _mm_unpackhi_epi16(x0, x3);
-      const __m128i t2 = _mm_unpacklo_epi16(x1, x2);
-      const __m128i t3 = _mm_unpackhi_epi16(x1, x2);
-      const __m128i u0 = _mm_madd_epi16(t0, k__cospi_p28_p04);
-      const __m128i u1 = _mm_madd_epi16(t1, k__cospi_p28_p04);
-      const __m128i u2 = _mm_madd_epi16(t0, k__cospi_m04_p28);
-      const __m128i u3 = _mm_madd_epi16(t1, k__cospi_m04_p28);
-      const __m128i u4 = _mm_madd_epi16(t2, k__cospi_p12_p20);
-      const __m128i u5 = _mm_madd_epi16(t3, k__cospi_p12_p20);
-      const __m128i u6 = _mm_madd_epi16(t2, k__cospi_m20_p12);
-      const __m128i u7 = _mm_madd_epi16(t3, k__cospi_m20_p12);
-      // dct_const_round_shift
+
       const __m128i v0 = _mm_add_epi32(u0, k__DCT_CONST_ROUNDING);
       const __m128i v1 = _mm_add_epi32(u1, k__DCT_CONST_ROUNDING);
       const __m128i v2 = _mm_add_epi32(u2, k__DCT_CONST_ROUNDING);
       const __m128i v3 = _mm_add_epi32(u3, k__DCT_CONST_ROUNDING);
+
       const __m128i v4 = _mm_add_epi32(u4, k__DCT_CONST_ROUNDING);
       const __m128i v5 = _mm_add_epi32(u5, k__DCT_CONST_ROUNDING);
       const __m128i v6 = _mm_add_epi32(u6, k__DCT_CONST_ROUNDING);
       const __m128i v7 = _mm_add_epi32(u7, k__DCT_CONST_ROUNDING);
+
       const __m128i w0 = _mm_srai_epi32(v0, DCT_CONST_BITS);
       const __m128i w1 = _mm_srai_epi32(v1, DCT_CONST_BITS);
       const __m128i w2 = _mm_srai_epi32(v2, DCT_CONST_BITS);
       const __m128i w3 = _mm_srai_epi32(v3, DCT_CONST_BITS);
+
       const __m128i w4 = _mm_srai_epi32(v4, DCT_CONST_BITS);
       const __m128i w5 = _mm_srai_epi32(v5, DCT_CONST_BITS);
       const __m128i w6 = _mm_srai_epi32(v6, DCT_CONST_BITS);
       const __m128i w7 = _mm_srai_epi32(v7, DCT_CONST_BITS);
       // Combine
-      res1 = _mm_packs_epi32(w0, w1);
-      res7 = _mm_packs_epi32(w2, w3);
-      res5 = _mm_packs_epi32(w4, w5);
-      res3 = _mm_packs_epi32(w6, w7);
-    } else {
+
+      res0 = _mm_packs_epi32(w0, w1);
+      res4 = _mm_packs_epi32(w2, w3);
+      res2 = _mm_packs_epi32(w4, w5);
+      res6 = _mm_packs_epi32(w6, w7);
+    }
+    // Work on next four results
+    {
       // Interleave to do the multiply by constants which gets us into 32bits
       const __m128i d0 = _mm_sub_epi16(q6, q5);
       const __m128i d1 = _mm_add_epi16(q6, q5);
       const __m128i r0 = _mm_mulhrs_epi16(d0, k__dual_p16_p16);
       const __m128i r1 = _mm_mulhrs_epi16(d1, k__dual_p16_p16);
+
       // Add/subtract
       const __m128i x0 = _mm_add_epi16(q4, r0);
       const __m128i x1 = _mm_sub_epi16(q4, r0);
