@@ -58,7 +58,7 @@ void vp9_foreach_transformed_block_in_plane(
   const int max_blocks_wide = num_4x4_w + (xd->mb_to_right_edge >= 0 ? 0 :
       xd->mb_to_right_edge >> (5 + pd->subsampling_x));
   const int max_blocks_high = num_4x4_h + (xd->mb_to_bottom_edge >= 0 ? 0 :
-      xd->mb_to_bottom_edge >> (5 + pd->subsampling_x));
+      xd->mb_to_bottom_edge >> (5 + pd->subsampling_y));
 
   // Keep track of the row and column of the blocks we use so that we know
   // if we are in the unrestricted motion border.
