@@ -34,6 +34,24 @@
       "revId": "fcb96b3afdcc74bd0868d8210a009c601cd958e5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//EKQ\u003d",
+        "filename": "vp9/encoder/x86/vp9_dct_ssse3.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2015-03-12T22:29:07Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "AAAAdn//EKY\u003d",
+      "revId": "fcb96b3afdcc74bd0868d8210a009c601cd958e5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
