@@ -16,6 +16,24 @@
       "revId": "0308e2ee6dbefa7558374b0470d2c3ea17786a04",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//EOM\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1690,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2015-03-12T18:12:32Z",
+      "side": 1,
+      "message": "I kept it as || precisely because I wasn\u0027t sure if it is called for cbr. Better to keep it as || anyways I think because it is more future-proof.",
+      "parentUuid": "AAAAdn//EP8\u003d",
+      "revId": "0308e2ee6dbefa7558374b0470d2c3ea17786a04",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
