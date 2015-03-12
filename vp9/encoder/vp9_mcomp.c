@@ -1783,9 +1783,8 @@ static int vector_match(int16_t *ref, int16_t *src, int bwl) {
   return (center - (bw >> 1));
 }
 
-static const MV search_pos[9] = {
-  {-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 0}, {0, 1},
-  {1, -1}, {1, 0}, {1, 1},
+static const MV search_pos[5] = {
+    {-1, 0}, {0, -1}, {0, 0}, {0, 1}, {1, 0},
 };
 
 unsigned int vp9_int_pro_motion_estimation(const VP9_COMP *cpi, MACROBLOCK *x,
@@ -1804,7 +1803,7 @@ unsigned int vp9_int_pro_motion_estimation(const VP9_COMP *cpi, MACROBLOCK *x,
   const int ref_stride = xd->plane[0].pre[0].stride;
   uint8_t const *ref_buf, *src_buf;
   MV *tmp_mv = &xd->mi[0].src_mi->mbmi.mv[0].as_mv;
-  int best_sad;
+  int best_sad, tmp_sad, this_sad[5];
   MV this_mv;
 
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -1845,21 +1844,40 @@ unsigned int vp9_int_pro_motion_estimation(const VP9_COMP *cpi, MACROBLOCK *x,
 
   best_sad = INT_MAX;
   this_mv = *tmp_mv;
-  for (idx = 0; idx < 9; ++idx) {
-    int this_sad;
+  for (idx = 0; idx < 5; ++idx) {
     src_buf = x->plane[0].src.buf;
     ref_buf = xd->plane[0].pre[0].buf +
         (search_pos[idx].row + this_mv.row) * ref_stride +
         (search_pos[idx].col + this_mv.col);
 
-    this_sad = cpi->fn_ptr[bsize].sdf(src_buf, src_stride,
-                                      ref_buf, ref_stride);
-    if (this_sad < best_sad) {
-      best_sad = this_sad;
+    this_sad[idx] = cpi->fn_ptr[bsize].sdf(src_buf, src_stride,
+                                           ref_buf, ref_stride);
+    if (this_sad[idx] < best_sad) {
+      best_sad = this_sad[idx];
       tmp_mv->row = search_pos[idx].row + this_mv.row;
       tmp_mv->col = search_pos[idx].col + this_mv.col;
     }
   }
+
+  if (this_sad[0] < this_sad[4])
+    this_mv.row -= 1;
+  else
+    this_mv.row += 1;
+
+  if (this_sad[1] < this_sad[3])
+    this_mv.col -= 1;
+  else
+    this_mv.col += 1;
+
+  ref_buf = xd->plane[0].pre[0].buf + this_mv.row * ref_stride + this_mv.col;
+
+  tmp_sad = cpi->fn_ptr[bsize].sdf(src_buf, src_stride,
+                                   ref_buf, ref_stride);
+  if (best_sad > tmp_sad) {
+    *tmp_mv = this_mv;
+    best_sad = tmp_sad;
+  }
+
   tmp_mv->row *= 8;
   tmp_mv->col *= 8;
 
