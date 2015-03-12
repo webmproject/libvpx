@@ -16,6 +16,23 @@
       "revId": "94401aff5c484e622cbb3dfbf48d5dfb28295880",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ENg\u003d",
+        "filename": "vp9/common/vp9_blockd.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-03-12T18:56:06Z",
+      "side": 1,
+      "message": "I missed the subsampling_x -\u003e subsampling_y switch between patchset 2 and 3.\n\nfixed:\nhttps://gerrit.chromium.org/gerrit/#/c/74059/",
+      "revId": "94401aff5c484e622cbb3dfbf48d5dfb28295880",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
