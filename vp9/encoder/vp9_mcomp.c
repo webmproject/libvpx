@@ -1807,6 +1807,13 @@ unsigned int vp9_int_pro_motion_estimation(const VP9_COMP *cpi, MACROBLOCK *x,
   int best_sad;
   MV this_mv;
 
+#if CONFIG_VP9_HIGHBITDEPTH
+  tmp_mv->row = 0;
+  tmp_mv->col = 0;
+  return cpi->fn_ptr[bsize].sdf(x->plane[0].src.buf, src_stride,
+                                xd->plane[0].pre[0].buf, ref_stride);
+#endif
+
   // Set up prediction 1-D reference set
   ref_buf = xd->plane[0].pre[0].buf - (bw >> 1);
   for (idx = 0; idx < search_width; idx += 16) {
