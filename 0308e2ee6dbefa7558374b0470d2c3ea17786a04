@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//EP8\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1690,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2015-03-12T17:48:09Z",
+      "side": 1,
+      "message": "perhaps as in my patch just !VPX_Q\n\nIs this ever called for cbr?\n\nAnyway looks like I missed one.",
+      "revId": "0308e2ee6dbefa7558374b0470d2c3ea17786a04",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
