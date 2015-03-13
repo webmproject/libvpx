@@ -77,10 +77,10 @@ static int apply_cyclic_refresh_bitrate(const VP9_COMMON *cm,
   // with number of seg blocks, so compare available bits to number of blocks.
   // Average bits available per frame = avg_frame_bandwidth
   // Number of (8x8) blocks in frame = mi_rows * mi_cols;
-  const float factor  = 0.5;
+  const float factor = 0.25;
   const int number_blocks = cm->mi_rows  * cm->mi_cols;
   // The condition below corresponds to turning off at target bitrates:
-  // ~24kbps for CIF, 72kbps for VGA (at 30fps).
+  // (at 30fps), ~12kbps for CIF, 36kbps for VGA, 100kps for HD/720p.
   // Also turn off at very small frame sizes, to avoid too large fraction of
   // superblocks to be refreshed per frame. Threshold below is less than QCIF.
   if (rc->avg_frame_bandwidth < factor * number_blocks ||
