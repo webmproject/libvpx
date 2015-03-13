@@ -266,6 +266,12 @@ typedef struct ThreadData {
 
 struct EncWorkerData;
 
+typedef struct ActiveMap {
+  int enabled;
+  int update;
+  unsigned char *map;
+} ActiveMap;
+
 typedef struct VP9_COMP {
   QUANTS quants;
   ThreadData td;
@@ -358,6 +364,7 @@ typedef struct VP9_COMP {
   int  segment_encode_breakout[MAX_SEGMENTS];
 
   CYCLIC_REFRESH *cyclic_refresh;
+  ActiveMap active_map;
 
   fractional_mv_step_fp *find_fractional_mv_step;
   vp9_full_search_fn_t full_search_sad;

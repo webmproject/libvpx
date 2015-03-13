@@ -416,7 +416,7 @@ static int set_vt_partitioning(VP9_COMP *cpi,
   tree_to_node(data, bsize, &vt);
 
   // No 64x64 blocks on segments other than base (un-boosted) segment.
-  if (segment_id != CR_SEGMENT_ID_BASE && bsize == BLOCK_64X64)
+  if (cyclic_refresh_segment_id_boosted(segment_id) && bsize == BLOCK_64X64)
     return 0;
 
   // For bsize=bsize_min (16x16/8x8 for 8x8/4x4 downsampling), select if

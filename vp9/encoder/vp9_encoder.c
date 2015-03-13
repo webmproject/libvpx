@@ -52,6 +52,8 @@
 #include "vp9/encoder/vp9_svc_layercontext.h"
 #include "vp9/encoder/vp9_skin_detection.h"
 
+#define AM_SEGMENT_ID_INACTIVE 7
+#define AM_SEGMENT_ID_ACTIVE 0
 
 #define SHARP_FILTER_QTHRESH 0          /* Q threshold for 8-tap sharp filter */
 
@@ -102,6 +104,71 @@ static INLINE void Scale2Ratio(VPX_SCALING mode, int *hr, int *hs) {
       *hs = 1;
        assert(0);
       break;
+  }
+}
+
+// Mark all inactive blocks as active. Other segmentation features may be set
+// so memset cannot be used, instead only inactive blocks should be reset.
+void vp9_suppress_active_map(VP9_COMP *cpi) {
+  unsigned char *const seg_map = cpi->segmentation_map;
+  int i;
+  if (cpi->active_map.enabled || cpi->active_map.update)
+    for (i = 0; i < cpi->common.mi_rows * cpi->common.mi_cols; ++i)
+      if (seg_map[i] == AM_SEGMENT_ID_INACTIVE)
+        seg_map[i] = AM_SEGMENT_ID_ACTIVE;
+}
+
+void vp9_apply_active_map(VP9_COMP *cpi) {
+  struct segmentation *const seg = &cpi->common.seg;
+  unsigned char *const seg_map = cpi->segmentation_map;
+  const unsigned char *const active_map = cpi->active_map.map;
+  int i;
+
+  assert(AM_SEGMENT_ID_ACTIVE == CR_SEGMENT_ID_BASE);
+
+  if (cpi->active_map.update) {
+    if (cpi->active_map.enabled) {
+      for (i = 0; i < cpi->common.mi_rows * cpi->common.mi_cols; ++i)
+        if (seg_map[i] == AM_SEGMENT_ID_ACTIVE) seg_map[i] = active_map[i];
+      vp9_enable_segmentation(seg);
+      vp9_enable_segfeature(seg, AM_SEGMENT_ID_INACTIVE, SEG_LVL_SKIP);
+    } else {
+      vp9_disable_segfeature(seg, AM_SEGMENT_ID_INACTIVE, SEG_LVL_SKIP);
+      if (seg->enabled) {
+        seg->update_data = 1;
+        seg->update_map = 1;
+      }
+    }
+    cpi->active_map.update = 0;
+  }
+}
+
+int vp9_set_active_map(VP9_COMP* cpi,
+                       unsigned char* new_map_16x16,
+                       int rows,
+                       int cols) {
+  if (rows == cpi->common.mb_rows && cols == cpi->common.mb_cols) {
+    unsigned char *const active_map_8x8 = cpi->active_map.map;
+    const int mi_rows = cpi->common.mi_rows;
+    const int mi_cols = cpi->common.mi_cols;
+    cpi->active_map.update = 1;
+    if (new_map_16x16) {
+      int r, c;
+      for (r = 0; r < mi_rows; ++r) {
+        for (c = 0; c < mi_cols; ++c) {
+          active_map_8x8[r * mi_cols + c] =
+              new_map_16x16[(r >> 1) * cols + (c >> 1)]
+                  ? AM_SEGMENT_ID_ACTIVE
+                  : AM_SEGMENT_ID_INACTIVE;
+        }
+      }
+      cpi->active_map.enabled = 1;
+    } else {
+      cpi->active_map.enabled = 0;
+    }
+    return 0;
+  } else {
+    return -1;
   }
 }
 
@@ -232,6 +299,9 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
 
   vp9_cyclic_refresh_free(cpi->cyclic_refresh);
   cpi->cyclic_refresh = NULL;
+
+  vpx_free(cpi->active_map.map);
+  cpi->active_map.map = NULL;
 
   vp9_free_ref_frame_buffers(cm);
   vp9_free_context_buffers(cm);
@@ -1429,6 +1499,7 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
   cpi->partition_search_skippable_frame = 0;
   cpi->tile_data = NULL;
 
+  // TODO(aconverse): Realloc these tables on frame resize
   // Create the encoder segmentation map and set all entries to 0
   CHECK_MEM_ERROR(cm, cpi->segmentation_map,
                   vpx_calloc(cm->mi_rows * cm->mi_cols, 1));
@@ -1436,6 +1507,9 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
   // Create a map used for cyclic background refresh.
   CHECK_MEM_ERROR(cm, cpi->cyclic_refresh,
                   vp9_cyclic_refresh_alloc(cm->mi_rows, cm->mi_cols));
+
+  CHECK_MEM_ERROR(cm, cpi->active_map.map,
+                  vpx_calloc(cm->mi_rows * cm->mi_cols, 1));
 
   // And a place holder structure is the coding context
   // for use if we want to save and restore it
@@ -2831,6 +2905,7 @@ static void encode_without_recode_loop(VP9_COMP *cpi) {
 
   setup_frame(cpi);
 
+  vp9_suppress_active_map(cpi);
   // Variance adaptive and in frame q adjustment experiments are mutually
   // exclusive.
   if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
@@ -2840,6 +2915,8 @@ static void encode_without_recode_loop(VP9_COMP *cpi) {
   } else if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) {
     vp9_cyclic_refresh_setup(cpi);
   }
+  vp9_apply_active_map(cpi);
+
   // transform / motion compensation build reconstruction frame
   vp9_encode_frame(cpi);
 
@@ -4083,29 +4160,6 @@ int vp9_get_preview_raw_frame(VP9_COMP *cpi, YV12_BUFFER_CONFIG *dest,
 #endif  // !CONFIG_VP9_POSTPROC
     vp9_clear_system_state();
     return ret;
-  }
-}
-
-int vp9_set_active_map(VP9_COMP *cpi, unsigned char *map, int rows, int cols) {
-  if (rows == cpi->common.mb_rows && cols == cpi->common.mb_cols) {
-    const int mi_rows = cpi->common.mi_rows;
-    const int mi_cols = cpi->common.mi_cols;
-    if (map) {
-      int r, c;
-      for (r = 0; r < mi_rows; r++) {
-        for (c = 0; c < mi_cols; c++) {
-          cpi->segmentation_map[r * mi_cols + c] =
-              !map[(r >> 1) * cols + (c >> 1)];
-        }
-      }
-      vp9_enable_segfeature(&cpi->common.seg, 1, SEG_LVL_SKIP);
-      vp9_enable_segmentation(&cpi->common.seg);
-    } else {
-      vp9_disable_segmentation(&cpi->common.seg);
-    }
-    return 0;
-  } else {
-    return -1;
   }
 }
 

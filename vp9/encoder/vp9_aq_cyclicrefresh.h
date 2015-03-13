@@ -78,6 +78,11 @@ void vp9_cyclic_refresh_setup(struct VP9_COMP *const cpi);
 
 int vp9_cyclic_refresh_get_rdmult(const CYCLIC_REFRESH *cr);
 
+static INLINE int cyclic_refresh_segment_id_boosted(int segment_id) {
+  return segment_id == CR_SEGMENT_ID_BOOST1 ||
+         segment_id == CR_SEGMENT_ID_BOOST2;
+}
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

@@ -232,7 +232,7 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
 
     if (cpi->sf.partition_search_type == VAR_BASED_PARTITION) {
       if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ &&
-          xd->mi[0].src_mi->mbmi.segment_id != CR_SEGMENT_ID_BASE)
+          cyclic_refresh_segment_id_boosted(xd->mi[0].src_mi->mbmi.segment_id))
         xd->mi[0].src_mi->mbmi.tx_size = TX_8X8;
       else if (xd->mi[0].src_mi->mbmi.tx_size > TX_16X16)
         xd->mi[0].src_mi->mbmi.tx_size = TX_16X16;
