@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAdn//D8Y\u003d",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-03-13T21:59:09Z",
+      "side": 1,
+      "message": "could be const",
+      "revId": "89df6d1ab04e32ec7869e4ed07ca503b7efbf027",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//D8k\u003d",
         "filename": "test/encode_test_driver.cc",
         "patchSetId": 8
@@ -13,6 +30,24 @@
       "writtenOn": "2015-03-13T21:53:19Z",
       "side": 1,
       "message": "If we end up having more of these it would make sense to have vp8/vp9 specific functions to set these. but this seems like a workable start.",
+      "revId": "89df6d1ab04e32ec7869e4ed07ca503b7efbf027",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//D8c\u003d",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-03-13T21:59:09Z",
+      "side": 1,
+      "message": "there should be an else with an ASSERT that gives some protection against a rename.\nanother, probably better fix, would be to make CodecInterface static in each class then request it from VP9Encoder directly.\nthat could be done in another change.",
+      "parentUuid": "AAAAdn//D8k\u003d",
       "revId": "89df6d1ab04e32ec7869e4ed07ca503b7efbf027",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
