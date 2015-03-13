@@ -124,9 +124,9 @@ extern vpx_codec_iface_t *vpx_codec_vp9_cx(void);
 #define VP8_EFLAG_NO_UPD_ENTROPY   (1<<20)
 
 
-/*!\brief VP8 encoder control functions
+/*!\brief VPx encoder control functions
  *
- * This set of macros define the control functions available for the VP8
+ * This set of macros define the control functions available for VPx
  * encoder interface.
  *
  * \sa #vpx_codec_control
@@ -223,8 +223,9 @@ enum vp8e_enc_control_id {
    * For example, to allow 100% more bits, i.e, 2X, in a golden frame
    * than average frame, set this to 100.
    *
+   * Supported in codecs: VP9
    */
-  VP8E_SET_GF_CBR_BOOST_PCT,
+  VP9E_SET_GF_CBR_BOOST_PCT,
 
   /*!\brief Codec control function to set the temporal layer id
    *
@@ -531,9 +532,9 @@ VPX_CTRL_USE_TYPE(VP9E_GET_SVC_LAYER_ID,  vpx_svc_layer_id_t *)
 VPX_CTRL_USE_TYPE(VP8E_SET_MAX_INTRA_BITRATE_PCT, unsigned int)
 VPX_CTRL_USE_TYPE(VP8E_SET_MAX_INTER_BITRATE_PCT, unsigned int)
 
-VPX_CTRL_USE_TYPE(VP8E_SET_GF_CBR_BOOST_PCT, unsigned int)
-
 VPX_CTRL_USE_TYPE(VP8E_SET_SCREEN_CONTENT_MODE, unsigned int)
+
+VPX_CTRL_USE_TYPE(VP9E_SET_GF_CBR_BOOST_PCT, unsigned int)
 
 VPX_CTRL_USE_TYPE(VP9E_SET_LOSSLESS, unsigned int)
 

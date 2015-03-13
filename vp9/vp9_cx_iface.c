@@ -694,7 +694,7 @@ static vpx_codec_err_t ctrl_set_rc_gf_cbr_boost_pct(
     vpx_codec_alg_priv_t *ctx, va_list args) {
   struct vp9_extracfg extra_cfg = ctx->extra_cfg;
   extra_cfg.gf_cbr_boost_pct =
-      CAST(VP8E_SET_GF_CBR_BOOST_PCT, args);
+      CAST(VP9E_SET_GF_CBR_BOOST_PCT, args);
   return update_extra_cfg(ctx, &extra_cfg);
 }
 
@@ -1387,7 +1387,7 @@ static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   {VP8E_SET_CQ_LEVEL,                 ctrl_set_cq_level},
   {VP8E_SET_MAX_INTRA_BITRATE_PCT,    ctrl_set_rc_max_intra_bitrate_pct},
   {VP8E_SET_MAX_INTER_BITRATE_PCT,    ctrl_set_rc_max_inter_bitrate_pct},
-  {VP8E_SET_GF_CBR_BOOST_PCT,         ctrl_set_rc_gf_cbr_boost_pct},
+  {VP9E_SET_GF_CBR_BOOST_PCT,         ctrl_set_rc_gf_cbr_boost_pct},
   {VP9E_SET_LOSSLESS,                 ctrl_set_lossless},
   {VP9E_SET_FRAME_PARALLEL_DECODING,  ctrl_set_frame_parallel_decoding_mode},
   {VP9E_SET_AQ_MODE,                  ctrl_set_aq_mode},
