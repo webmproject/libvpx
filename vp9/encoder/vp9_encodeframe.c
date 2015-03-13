@@ -1592,7 +1592,8 @@ static void encode_b_rt(VP9_COMP *cpi, ThreadData *td,
   update_state_rt(cpi, td, ctx, mi_row, mi_col, bsize);
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
-  if (cpi->oxcf.noise_sensitivity > 0 && output_enabled) {
+  if (cpi->oxcf.noise_sensitivity > 0 && output_enabled &&
+      cpi->common.frame_type != KEY_FRAME) {
     vp9_denoiser_denoise(&cpi->denoiser, x, mi_row, mi_col,
                          MAX(BLOCK_8X8, bsize), ctx);
   }
