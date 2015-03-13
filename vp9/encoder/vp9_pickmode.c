@@ -602,13 +602,27 @@ void vp9_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *rd_cost,
   *rd_cost = best_rdc;
 }
 
-static const PREDICTION_MODE inter_mode_set[INTER_MODES] = {
-    ZEROMV, NEARESTMV, NEARMV, NEWMV,
-};
-
 static const int ref_frame_cost[MAX_REF_FRAMES] = {
     1235, 229, 530, 615,
 };
+
+typedef struct {
+  MV_REFERENCE_FRAME ref_frame;
+  PREDICTION_MODE pred_mode;
+} REF_MODE;
+
+#define RT_INTER_MODES 8
+static const REF_MODE ref_mode_set[RT_INTER_MODES] = {
+    {LAST_FRAME, ZEROMV},
+    {LAST_FRAME, NEARESTMV},
+    {LAST_FRAME, NEARMV},
+    {LAST_FRAME, NEWMV},
+    {GOLDEN_FRAME, ZEROMV},
+    {GOLDEN_FRAME, NEARESTMV},
+    {GOLDEN_FRAME, NEARMV},
+    {GOLDEN_FRAME, NEWMV}
+};
+
 // TODO(jingning) placeholder for inter-frame non-RD mode decision.
 // this needs various further optimizations. to be continued..
 void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
@@ -665,6 +679,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   const int pixels_in_block = bh * bw;
   int reuse_inter_pred = cpi->sf.reuse_inter_pred_sby && ctx->pred_pixel_ready;
   int ref_frame_skip_mask = 0;
+  int idx;
 
   if (reuse_inter_pred) {
     int i;
@@ -748,9 +763,17 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   if (cpi->rc.frames_since_golden == 0)
     ref_frame_skip_mask |= (1 << GOLDEN_FRAME);
 
-  for (ref_frame = LAST_FRAME; ref_frame <= GOLDEN_FRAME; ++ref_frame) {
-    PREDICTION_MODE this_mode;
-    int i = (ref_frame == LAST_FRAME) ? GOLDEN_FRAME : LAST_FRAME;
+  for (idx = 0; idx < RT_INTER_MODES; ++idx) {
+    int rate_mv = 0;
+    int mode_rd_thresh;
+    int mode_index;
+    int i;
+    PREDICTION_MODE this_mode = ref_mode_set[idx].pred_mode;
+
+    ref_frame = ref_mode_set[idx].ref_frame;
+    mode_index = mode_idx[ref_frame][INTER_OFFSET(this_mode)];
+
+    i = (ref_frame == LAST_FRAME) ? GOLDEN_FRAME : LAST_FRAME;
 
     if (!(cpi->ref_frame_flags & flag_list[ref_frame]))
       continue;
@@ -772,211 +795,193 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     mbmi->ref_frame[0] = ref_frame;
     set_ref_ptrs(cm, xd, ref_frame, NONE);
 
-    for (i = 0; i < INTER_MODES; ++i) {
-      int rate_mv = 0;
-      int mode_rd_thresh;
-      int mode_index;
-      this_mode = inter_mode_set[i];
-      mode_index = mode_idx[ref_frame][INTER_OFFSET(this_mode)];
+    if (const_motion[ref_frame] && this_mode == NEARMV)
+      continue;
 
-      if (const_motion[ref_frame] && this_mode == NEARMV)
+    if (!(cpi->sf.inter_mode_mask[bsize] & (1 << this_mode)))
+      continue;
+
+    mode_rd_thresh = best_mode_skip_txfm ?
+            rd_threshes[mode_index] << 1 : rd_threshes[mode_index];
+    if (rd_less_than_thresh(best_rdc.rdcost, mode_rd_thresh,
+                            rd_thresh_freq_fact[mode_index]))
+      continue;
+
+    if (this_mode == NEWMV) {
+      if (cpi->sf.partition_search_type != VAR_BASED_PARTITION
+          && best_rdc.rdcost < (int64_t) (1 << num_pels_log2_lookup[bsize]))
         continue;
+      if (ref_frame > LAST_FRAME) {
+        int tmp_sad;
+        int dis, cost_list[5];
 
-      if (!(cpi->sf.inter_mode_mask[bsize] & (1 << this_mode)))
-        continue;
-
-      mode_rd_thresh = best_mode_skip_txfm ? rd_threshes[mode_index] << 1 :
-                                             rd_threshes[mode_index];
-      if (rd_less_than_thresh(best_rdc.rdcost, mode_rd_thresh,
-                              rd_thresh_freq_fact[mode_index]))
-        continue;
-
-      if (this_mode == NEWMV) {
-        if (cpi->sf.partition_search_type != VAR_BASED_PARTITION &&
-            best_rdc.rdcost < (int64_t)(1 << num_pels_log2_lookup[bsize]))
+        if (bsize < BLOCK_16X16)
           continue;
 
-        if (ref_frame > LAST_FRAME) {
-          int tmp_sad;
-          int dis, cost_list[5];
-
-          if (bsize < BLOCK_16X16)
-            continue;
-
-          tmp_sad = vp9_int_pro_motion_estimation(cpi, x, bsize);
-          if (tmp_sad > x->pred_mv_sad[LAST_FRAME])
-            continue;
-
-          frame_mv[NEWMV][ref_frame].as_int = mbmi->mv[0].as_int;
-          rate_mv = vp9_mv_bit_cost(&frame_mv[NEWMV][ref_frame].as_mv,
-                                    &mbmi->ref_mvs[ref_frame][0].as_mv,
-                                    x->nmvjointcost, x->mvcost, MV_COST_WEIGHT);
-          frame_mv[NEWMV][ref_frame].as_mv.row >>= 3;
-          frame_mv[NEWMV][ref_frame].as_mv.col >>= 3;
-
-          cpi->find_fractional_mv_step(x, &frame_mv[NEWMV][ref_frame].as_mv,
-                                       &mbmi->ref_mvs[ref_frame][0].as_mv,
-                                       cpi->common.allow_high_precision_mv,
-                                       x->errorperbit,
-                                       &cpi->fn_ptr[bsize],
-                                       cpi->sf.mv.subpel_force_stop,
-                                       cpi->sf.mv.subpel_iters_per_step,
-                                       cond_cost_list(cpi, cost_list),
-                                       x->nmvjointcost, x->mvcost, &dis,
-                                       &x->pred_sse[ref_frame], NULL, 0, 0);
-        } else if (!combined_motion_search(cpi, x, bsize, mi_row, mi_col,
-                                           &frame_mv[NEWMV][ref_frame],
-                                           &rate_mv, best_rdc.rdcost)) {
+        tmp_sad = vp9_int_pro_motion_estimation(cpi, x, bsize);
+        if (tmp_sad > x->pred_mv_sad[LAST_FRAME])
           continue;
-        }
-      }
 
-      if (this_mode != NEARESTMV &&
-          frame_mv[this_mode][ref_frame].as_int ==
-              frame_mv[NEARESTMV][ref_frame].as_int)
+        frame_mv[NEWMV][ref_frame].as_int = mbmi->mv[0].as_int;
+        rate_mv = vp9_mv_bit_cost(&frame_mv[NEWMV][ref_frame].as_mv,
+          &mbmi->ref_mvs[ref_frame][0].as_mv,
+          x->nmvjointcost, x->mvcost, MV_COST_WEIGHT);
+        frame_mv[NEWMV][ref_frame].as_mv.row >>= 3;
+        frame_mv[NEWMV][ref_frame].as_mv.col >>= 3;
+
+        cpi->find_fractional_mv_step(x, &frame_mv[NEWMV][ref_frame].as_mv,
+          &mbmi->ref_mvs[ref_frame][0].as_mv,
+          cpi->common.allow_high_precision_mv,
+          x->errorperbit,
+          &cpi->fn_ptr[bsize],
+          cpi->sf.mv.subpel_force_stop,
+          cpi->sf.mv.subpel_iters_per_step,
+          cond_cost_list(cpi, cost_list),
+          x->nmvjointcost, x->mvcost, &dis,
+          &x->pred_sse[ref_frame], NULL, 0, 0);
+      } else if (!combined_motion_search(cpi, x, bsize, mi_row, mi_col,
+        &frame_mv[NEWMV][ref_frame], &rate_mv, best_rdc.rdcost)) {
         continue;
-
-      mbmi->mode = this_mode;
-      mbmi->mv[0].as_int = frame_mv[this_mode][ref_frame].as_int;
-
-      // Search for the best prediction filter type, when the resulting
-      // motion vector is at sub-pixel accuracy level for luma component, i.e.,
-      // the last three bits are all zeros.
-      if (reuse_inter_pred) {
-        if (!this_mode_pred) {
-          this_mode_pred = &tmp[3];
-        } else {
-          this_mode_pred = &tmp[get_pred_buffer(tmp, 3)];
-          pd->dst.buf = this_mode_pred->data;
-          pd->dst.stride = bw;
-        }
       }
+    }
 
-      if ((this_mode == NEWMV || filter_ref == SWITCHABLE) &&
-          pred_filter_search && (ref_frame == LAST_FRAME) &&
-          ((mbmi->mv[0].as_mv.row & 0x07) != 0 ||
-           (mbmi->mv[0].as_mv.col & 0x07) != 0)) {
-        int pf_rate[3];
-        int64_t pf_dist[3];
-        unsigned int pf_var[3];
-        unsigned int pf_sse[3];
-        TX_SIZE pf_tx_size[3];
-        int64_t best_cost = INT64_MAX;
-        INTERP_FILTER best_filter = SWITCHABLE, filter;
-        PRED_BUFFER *current_pred = this_mode_pred;
+    if (this_mode != NEARESTMV && frame_mv[this_mode][ref_frame].as_int ==
+        frame_mv[NEARESTMV][ref_frame].as_int)
+      continue;
 
-        for (filter = EIGHTTAP; filter <= EIGHTTAP_SHARP; ++filter) {
-          int64_t cost;
-          mbmi->interp_filter = filter;
-          vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
-          model_rd_for_sb_y(cpi, bsize, x, xd, &pf_rate[filter],
-                            &pf_dist[filter], &pf_var[filter], &pf_sse[filter]);
-          pf_rate[filter] += vp9_get_switchable_rate(cpi, xd);
-          cost = RDCOST(x->rdmult, x->rddiv, pf_rate[filter], pf_dist[filter]);
-          pf_tx_size[filter] = mbmi->tx_size;
-          if (cost < best_cost) {
-            best_filter = filter;
-            best_cost = cost;
-            skip_txfm = x->skip_txfm[0];
+    mbmi->mode = this_mode;
+    mbmi->mv[0].as_int = frame_mv[this_mode][ref_frame].as_int;
 
-            if (reuse_inter_pred) {
-              if (this_mode_pred != current_pred) {
-                free_pred_buffer(this_mode_pred);
-                this_mode_pred = current_pred;
-              }
+    // Search for the best prediction filter type, when the resulting
+    // motion vector is at sub-pixel accuracy level for luma component, i.e.,
+    // the last three bits are all zeros.
+    if (reuse_inter_pred) {
+      if (!this_mode_pred) {
+        this_mode_pred = &tmp[3];
+      } else {
+        this_mode_pred = &tmp[get_pred_buffer(tmp, 3)];
+        pd->dst.buf = this_mode_pred->data;
+        pd->dst.stride = bw;
+      }
+    }
 
-              if (filter < EIGHTTAP_SHARP) {
-                current_pred = &tmp[get_pred_buffer(tmp, 3)];
-                pd->dst.buf = current_pred->data;
-                pd->dst.stride = bw;
-              }
+    if ((this_mode == NEWMV || filter_ref == SWITCHABLE) && pred_filter_search
+        && (ref_frame == LAST_FRAME)
+        && (((mbmi->mv[0].as_mv.row | mbmi->mv[0].as_mv.col) & 0x07) != 0)) {
+      int pf_rate[3];
+      int64_t pf_dist[3];
+      unsigned int pf_var[3];
+      unsigned int pf_sse[3];
+      TX_SIZE pf_tx_size[3];
+      int64_t best_cost = INT64_MAX;
+      INTERP_FILTER best_filter = SWITCHABLE, filter;
+      PRED_BUFFER *current_pred = this_mode_pred;
+
+      for (filter = EIGHTTAP; filter <= EIGHTTAP_SHARP; ++filter) {
+        int64_t cost;
+        mbmi->interp_filter = filter;
+        vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
+        model_rd_for_sb_y(cpi, bsize, x, xd, &pf_rate[filter], &pf_dist[filter],
+                          &pf_var[filter], &pf_sse[filter]);
+        pf_rate[filter] += vp9_get_switchable_rate(cpi, xd);
+        cost = RDCOST(x->rdmult, x->rddiv, pf_rate[filter], pf_dist[filter]);
+        pf_tx_size[filter] = mbmi->tx_size;
+        if (cost < best_cost) {
+          best_filter = filter;
+          best_cost = cost;
+          skip_txfm = x->skip_txfm[0];
+
+          if (reuse_inter_pred) {
+            if (this_mode_pred != current_pred) {
+              free_pred_buffer(this_mode_pred);
+              this_mode_pred = current_pred;
+            }
+
+            if (filter < EIGHTTAP_SHARP) {
+              current_pred = &tmp[get_pred_buffer(tmp, 3)];
+              pd->dst.buf = current_pred->data;
+              pd->dst.stride = bw;
             }
           }
         }
-
-        if (reuse_inter_pred && this_mode_pred != current_pred)
-          free_pred_buffer(current_pred);
-
-        mbmi->interp_filter = best_filter;
-        mbmi->tx_size = pf_tx_size[mbmi->interp_filter];
-        this_rdc.rate = pf_rate[mbmi->interp_filter];
-        this_rdc.dist = pf_dist[mbmi->interp_filter];
-        var_y = pf_var[mbmi->interp_filter];
-        sse_y = pf_sse[mbmi->interp_filter];
-        x->skip_txfm[0] = skip_txfm;
-      } else {
-        mbmi->interp_filter = (filter_ref == SWITCHABLE) ? EIGHTTAP: filter_ref;
-        vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
-        model_rd_for_sb_y(cpi, bsize, x, xd, &this_rdc.rate, &this_rdc.dist,
-                          &var_y, &sse_y);
-        this_rdc.rate += cm->interp_filter == SWITCHABLE ?
-            vp9_get_switchable_rate(cpi, xd) : 0;
       }
 
-      // chroma component rate-distortion cost modeling
-      if (x->color_sensitivity[0] || x->color_sensitivity[1]) {
-        int uv_rate = 0;
-        int64_t uv_dist = 0;
-        if (x->color_sensitivity[0])
-          vp9_build_inter_predictors_sbp(xd, mi_row, mi_col, bsize, 1);
-        if (x->color_sensitivity[1])
-          vp9_build_inter_predictors_sbp(xd, mi_row, mi_col, bsize, 2);
-        model_rd_for_sb_uv(cpi, bsize, x, xd, &uv_rate, &uv_dist,
-                           &var_y, &sse_y);
-        this_rdc.rate += uv_rate;
-        this_rdc.dist += uv_dist;
-      }
+      if (reuse_inter_pred && this_mode_pred != current_pred)
+        free_pred_buffer(current_pred);
 
-      this_rdc.rate += rate_mv;
-      this_rdc.rate += cpi->inter_mode_cost[mbmi->mode_context[ref_frame]]
-                                  [INTER_OFFSET(this_mode)];
-      this_rdc.rate += ref_frame_cost[ref_frame];
-      this_rdc.rdcost = RDCOST(x->rdmult, x->rddiv,
-                               this_rdc.rate, this_rdc.dist);
-
-      // Skipping checking: test to see if this block can be reconstructed by
-      // prediction only.
-      if (cpi->allow_encode_breakout) {
-        encode_breakout_test(cpi, x, bsize, mi_row, mi_col, ref_frame,
-                             this_mode, var_y, sse_y, yv12_mb,
-                             &this_rdc.rate, &this_rdc.dist);
-        if (x->skip) {
-          this_rdc.rate += rate_mv;
-          this_rdc.rdcost = RDCOST(x->rdmult, x->rddiv,
-                                   this_rdc.rate, this_rdc.dist);
-        }
-      }
-
-#if CONFIG_VP9_TEMPORAL_DENOISING
-      if (cpi->oxcf.noise_sensitivity > 0)
-        vp9_denoiser_update_frame_stats(mbmi, sse_y, this_mode, ctx);
-#else
-      (void)ctx;
-#endif
-
-      if (this_rdc.rdcost < best_rdc.rdcost || x->skip) {
-        best_rdc = this_rdc;
-        best_mode = this_mode;
-        best_pred_filter = mbmi->interp_filter;
-        best_tx_size = mbmi->tx_size;
-        best_ref_frame = ref_frame;
-        best_mode_skip_txfm = x->skip_txfm[0];
-
-        if (reuse_inter_pred) {
-          free_pred_buffer(best_pred);
-          best_pred = this_mode_pred;
-        }
-      } else {
-        if (reuse_inter_pred)
-          free_pred_buffer(this_mode_pred);
-      }
-
-      if (x->skip)
-        break;
+      mbmi->interp_filter = best_filter;
+      mbmi->tx_size = pf_tx_size[mbmi->interp_filter];
+      this_rdc.rate = pf_rate[mbmi->interp_filter];
+      this_rdc.dist = pf_dist[mbmi->interp_filter];
+      var_y = pf_var[mbmi->interp_filter];
+      sse_y = pf_sse[mbmi->interp_filter];
+      x->skip_txfm[0] = skip_txfm;
+    } else {
+      mbmi->interp_filter = (filter_ref == SWITCHABLE) ? EIGHTTAP : filter_ref;
+      vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
+      model_rd_for_sb_y(cpi, bsize, x, xd, &this_rdc.rate, &this_rdc.dist,
+                        &var_y, &sse_y);
+      this_rdc.rate +=
+          cm->interp_filter == SWITCHABLE ?
+              vp9_get_switchable_rate(cpi, xd) : 0;
     }
 
-    // Check that a prediction mode has been selected.
-    assert(best_rdc.rdcost < INT64_MAX);
+    // chroma component rate-distortion cost modeling
+    if (x->color_sensitivity[0] || x->color_sensitivity[1]) {
+      int uv_rate = 0;
+      int64_t uv_dist = 0;
+      if (x->color_sensitivity[0])
+        vp9_build_inter_predictors_sbp(xd, mi_row, mi_col, bsize, 1);
+      if (x->color_sensitivity[1])
+        vp9_build_inter_predictors_sbp(xd, mi_row, mi_col, bsize, 2);
+      model_rd_for_sb_uv(cpi, bsize, x, xd, &uv_rate, &uv_dist, &var_y, &sse_y);
+      this_rdc.rate += uv_rate;
+      this_rdc.dist += uv_dist;
+    }
+
+    this_rdc.rate += rate_mv;
+    this_rdc.rate +=
+        cpi->inter_mode_cost[mbmi->mode_context[ref_frame]][INTER_OFFSET(
+            this_mode)];
+    this_rdc.rate += ref_frame_cost[ref_frame];
+    this_rdc.rdcost = RDCOST(x->rdmult, x->rddiv, this_rdc.rate, this_rdc.dist);
+
+    // Skipping checking: test to see if this block can be reconstructed by
+    // prediction only.
+    if (cpi->allow_encode_breakout) {
+      encode_breakout_test(cpi, x, bsize, mi_row, mi_col, ref_frame, this_mode,
+                           var_y, sse_y, yv12_mb, &this_rdc.rate,
+                           &this_rdc.dist);
+      if (x->skip) {
+        this_rdc.rate += rate_mv;
+        this_rdc.rdcost = RDCOST(x->rdmult, x->rddiv, this_rdc.rate,
+                                 this_rdc.dist);
+      }
+    }
+
+#if CONFIG_VP9_TEMPORAL_DENOISING
+    if (cpi->oxcf.noise_sensitivity > 0)
+      vp9_denoiser_update_frame_stats(mbmi, sse_y, this_mode, ctx);
+#else
+    (void)ctx;
+#endif
+
+    if (this_rdc.rdcost < best_rdc.rdcost || x->skip) {
+      best_rdc = this_rdc;
+      best_mode = this_mode;
+      best_pred_filter = mbmi->interp_filter;
+      best_tx_size = mbmi->tx_size;
+      best_ref_frame = ref_frame;
+      best_mode_skip_txfm = x->skip_txfm[0];
+
+      if (reuse_inter_pred) {
+        free_pred_buffer(best_pred);
+        best_pred = this_mode_pred;
+      }
+    } else {
+      if (reuse_inter_pred)
+        free_pred_buffer(this_mode_pred);
+    }
 
     if (x->skip)
       break;
