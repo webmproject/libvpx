@@ -124,9 +124,9 @@ extern vpx_codec_iface_t *vpx_codec_vp9_cx(void);
 #define VP8_EFLAG_NO_UPD_ENTROPY   (1<<20)
 
 
-/*!\brief VP8 encoder control functions
+/*!\brief VPx encoder control functions
  *
- * This set of macros define the control functions available for the VP8
+ * This set of macros define the control functions available for VPx
  * encoder interface.
  *
  * \sa #vpx_codec_control
@@ -223,8 +223,9 @@ enum vp8e_enc_control_id {
    * For example, to allow 100% more bits, i.e, 2X, in a golden frame
    * than average frame, set this to 100.
    *
+   * Supported in codecs: VP9
    */
-  VP8E_SET_GF_CBR_BOOST_PCT,
+  VP9E_SET_GF_CBR_BOOST_PCT,
 
   /*!\brief Codec control function to set the temporal layer id
    *
@@ -247,6 +248,8 @@ enum vp8e_enc_control_id {
    *                          1 = lossless coding mode
    *
    *  By default, encoder operates in normal coding mode (maybe lossy).
+   *
+   * Supported in codecs: VP9
    */
   VP9E_SET_LOSSLESS,
 
@@ -268,6 +271,8 @@ enum vp8e_enc_control_id {
    * is 4096).
    *
    * By default, the value is 0, i.e. one single column tile for entire image.
+   *
+   * Supported in codecs: VP9
    */
   VP9E_SET_TILE_COLUMNS,
 
@@ -286,6 +291,8 @@ enum vp8e_enc_control_id {
    *            2 = 4 tile rows
    *
    * By default, the value is 0, i.e. one single row tile for entire image.
+   *
+   * Supported in codecs: VP9
    */
   VP9E_SET_TILE_ROWS,
 
@@ -298,6 +305,8 @@ enum vp8e_enc_control_id {
    * turn this feature on or off for bitstreams produced by encoder.
    *
    * By default, this feature is off.
+   *
+   * Supported in codecs: VP9
    */
   VP9E_SET_FRAME_PARALLEL_DECODING,
 
@@ -309,6 +318,8 @@ enum vp8e_enc_control_id {
    * several AQ_modes supported.
    *
    * By default, encoder operates with AQ_Mode 0(adaptive quantization off).
+   *
+   * Supported in codecs: VP9
    */
   VP9E_SET_AQ_MODE,
 
@@ -322,12 +333,16 @@ enum vp8e_enc_control_id {
    *
    * By default, the encoder is allowed to use this feature for appropriate
    * encoding modes.
+   *
+   * Supported in codecs: VP9
    */
   VP9E_SET_FRAME_PERIODIC_BOOST,
 
   /*!\brief control function to set noise sensitivity
    *
    *  0: off, 1: OnYOnly
+   *
+   * Supported in codecs: VP9
    */
   VP9E_SET_NOISE_SENSITIVITY,
 
@@ -335,12 +350,16 @@ enum vp8e_enc_control_id {
    * \note Return value is VPX_CODEC_INVALID_PARAM if the encoder does not
    *       support SVC in its current encoding mode
    *  0: off, 1: on
+   *
+   * Supported in codecs: VP9
    */
   VP9E_SET_SVC,
 
   /*!\brief control function to set parameters for SVC.
    * \note Parameters contain min_q, max_q, scaling factor for each of the
    *       SVC layers.
+   *
+   * Supported in codecs: VP9
    */
   VP9E_SET_SVC_PARAMETERS,
 
@@ -348,6 +367,8 @@ enum vp8e_enc_control_id {
    * \note Valid ranges: 0..#vpx_codec_enc_cfg::ss_number_layers for spatial
    *                     layer and 0..#vpx_codec_enc_cfg::ts_number_layers for
    *                     temporal layer.
+   *
+   * Supported in codecs: VP9
    */
   VP9E_SET_SVC_LAYER_ID,
 
@@ -355,12 +376,16 @@ enum vp8e_enc_control_id {
    * \note Valid parameter range:
    *              VP9E_CONTENT_DEFAULT = Regular video content (Default)
    *              VP9E_CONTENT_SCREEN  = Screen capture content
+   *
+   * Supported in codecs: VP9
    */
   VP9E_SET_TUNE_CONTENT,
 
   /*!\brief control function to get svc layer ID.
    * \note The layer ID returned is for the data packet from the registered
    *       callback function.
+   *
+   * Supported in codecs: VP9
    */
   VP9E_GET_SVC_LAYER_ID,
 
@@ -380,6 +405,8 @@ enum vp8e_enc_control_id {
    *                     5 = BT_2020
    *                     6 = RESERVED
    *                     7 = SRGB
+   *
+   * Supported in codecs: VP9
    */
   VP9E_SET_COLOR_SPACE,
 };
@@ -531,9 +558,9 @@ VPX_CTRL_USE_TYPE(VP9E_GET_SVC_LAYER_ID,  vpx_svc_layer_id_t *)
 VPX_CTRL_USE_TYPE(VP8E_SET_MAX_INTRA_BITRATE_PCT, unsigned int)
 VPX_CTRL_USE_TYPE(VP8E_SET_MAX_INTER_BITRATE_PCT, unsigned int)
 
-VPX_CTRL_USE_TYPE(VP8E_SET_GF_CBR_BOOST_PCT, unsigned int)
-
 VPX_CTRL_USE_TYPE(VP8E_SET_SCREEN_CONTENT_MODE, unsigned int)
+
+VPX_CTRL_USE_TYPE(VP9E_SET_GF_CBR_BOOST_PCT, unsigned int)
 
 VPX_CTRL_USE_TYPE(VP9E_SET_LOSSLESS, unsigned int)
 
