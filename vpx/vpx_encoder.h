@@ -827,9 +827,9 @@ extern "C" {
    * be called by all applications to initialize the configuration structure
    * before specializing the configuration with application specific values.
    *
-   * \param[in]    iface   Pointer to the algorithm interface to use.
-   * \param[out]   cfg     Configuration buffer to populate
-   * \param[in]    usage   End usage. Set to 0 or use codec specific values.
+   * \param[in]    iface     Pointer to the algorithm interface to use.
+   * \param[out]   cfg       Configuration buffer to populate.
+   * \param[in]    reserved  Must set to 0 for VP8 and VP9.
    *
    * \retval #VPX_CODEC_OK
    *     The configuration was populated.
@@ -840,7 +840,7 @@ extern "C" {
    */
   vpx_codec_err_t  vpx_codec_enc_config_default(vpx_codec_iface_t    *iface,
                                                 vpx_codec_enc_cfg_t  *cfg,
-                                                unsigned int          usage);
+                                                unsigned int          reserved);
 
 
   /*!\brief Set or change configuration
