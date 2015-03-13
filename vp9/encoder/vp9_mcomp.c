@@ -1844,8 +1844,8 @@ unsigned int vp9_int_pro_motion_estimation(const VP9_COMP *cpi, MACROBLOCK *x,
 
   best_sad = INT_MAX;
   this_mv = *tmp_mv;
+  src_buf = x->plane[0].src.buf;
   for (idx = 0; idx < 5; ++idx) {
-    src_buf = x->plane[0].src.buf;
     ref_buf = xd->plane[0].pre[0].buf +
         (search_pos[idx].row + this_mv.row) * ref_stride +
         (search_pos[idx].col + this_mv.col);
