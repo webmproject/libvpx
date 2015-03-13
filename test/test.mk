@@ -46,7 +46,7 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP9_ENCODER) += vp9_ethread_test.cc
 
 LIBVPX_TEST_SRCS-yes                   += decode_test_driver.cc
 LIBVPX_TEST_SRCS-yes                   += decode_test_driver.h
-LIBVPX_TEST_SRCS-yes                   += encode_test_driver.cc
+LIBVPX_TEST_SRCS-$(CONFIG_ENCODERS)    += encode_test_driver.cc
 LIBVPX_TEST_SRCS-yes                   += encode_test_driver.h
 
 ## IVF writing.
