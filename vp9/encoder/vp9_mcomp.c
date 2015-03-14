@@ -1783,8 +1783,8 @@ static int vector_match(int16_t *ref, int16_t *src, int bwl) {
   return (center - (bw >> 1));
 }
 
-static const MV search_pos[5] = {
-    {-1, 0}, {0, -1}, {0, 0}, {0, 1}, {1, 0},
+static const MV search_pos[4] = {
+    {-1, 0}, {0, -1}, {0, 1}, {1, 0},
 };
 
 unsigned int vp9_int_pro_motion_estimation(const VP9_COMP *cpi, MACROBLOCK *x,
