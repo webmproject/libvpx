@@ -12,13 +12,13 @@
     - \ref usage_init
     - \ref usage_errors
 
-    Fore more information on decoder and encoder specific usage, see the
+    For more information on decoder and encoder specific usage, see the
     following pages:
     \if decoder
-    - \subpage usage_decode
+    \li \subpage usage_decode
     \endif
-    \if decoder
-    - \subpage usage_encode
+    \if encoder
+    \li \subpage usage_encode
     \endif
 
     \section usage_types Important Data Types
