@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Dyk\u003d",
+        "filename": "vp9/common/vp9_quant_common.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-03-16T23:52:31Z",
+      "side": 1,
+      "message": "Are you intentionally keeping these commented lines?",
+      "revId": "249fe9d6c145ef48b32dd69c0cd6913ad2d32cf7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//DyM\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-03-16T23:52:31Z",
+      "side": 1,
+      "message": "Maybe can rename it as something like use_rect_quant.",
+      "revId": "249fe9d6c145ef48b32dd69c0cd6913ad2d32cf7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//DyE\u003d",
+        "filename": "vp9/encoder/vp9_quantize.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 1698,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-03-16T23:52:31Z",
+      "side": 1,
+      "message": "Why is this removed/modified? There are a few others like this.",
+      "revId": "249fe9d6c145ef48b32dd69c0cd6913ad2d32cf7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
