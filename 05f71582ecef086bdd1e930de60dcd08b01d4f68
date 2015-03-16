@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//D2Q\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1169,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2015-03-16T17:32:14Z",
+      "side": 1,
+      "message": "\u003e\u003e2 this seems quite drastic tightening of tolerance in scaled case?\n\nI assume this is experimentally derived?",
+      "revId": "05f71582ecef086bdd1e930de60dcd08b01d4f68",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//D2M\u003d",
+        "filename": "vp9/encoder/vp9_ratectrl.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2015-03-16T17:32:14Z",
+      "side": 1,
+      "message": "I assume this is based on a fixed scaling factor for now?",
+      "revId": "05f71582ecef086bdd1e930de60dcd08b01d4f68",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
