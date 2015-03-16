@@ -808,9 +808,6 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       continue;
 
     if (this_mode == NEWMV) {
-      if (cpi->sf.partition_search_type != VAR_BASED_PARTITION
-          && best_rdc.rdcost < (int64_t) (1 << num_pels_log2_lookup[bsize]))
-        continue;
       if (ref_frame > LAST_FRAME) {
         int tmp_sad;
         int dis, cost_list[5];
@@ -845,8 +842,9 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       }
     }
 
-    if (this_mode != NEARESTMV && frame_mv[this_mode][ref_frame].as_int ==
-        frame_mv[NEARESTMV][ref_frame].as_int)
+    if (this_mode != NEARESTMV &&
+        frame_mv[this_mode][ref_frame].as_int ==
+            frame_mv[NEARESTMV][ref_frame].as_int)
       continue;
 
     mbmi->mode = this_mode;
