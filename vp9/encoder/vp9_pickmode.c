@@ -910,11 +910,11 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         free_pred_buffer(current_pred);
 
       mbmi->interp_filter = best_filter;
-      mbmi->tx_size = pf_tx_size[mbmi->interp_filter];
-      this_rdc.rate = pf_rate[mbmi->interp_filter];
-      this_rdc.dist = pf_dist[mbmi->interp_filter];
-      var_y = pf_var[mbmi->interp_filter];
-      sse_y = pf_sse[mbmi->interp_filter];
+      mbmi->tx_size = pf_tx_size[best_filter];
+      this_rdc.rate = pf_rate[best_filter];
+      this_rdc.dist = pf_dist[best_filter];
+      var_y = pf_var[best_filter];
+      sse_y = pf_sse[best_filter];
       x->skip_txfm[0] = skip_txfm;
     } else {
       mbmi->interp_filter = (filter_ref == SWITCHABLE) ? EIGHTTAP : filter_ref;
