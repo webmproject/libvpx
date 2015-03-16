@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//D0w\u003d",
+        "filename": "vpxdec.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 911,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-03-16T19:39:40Z",
+      "side": 1,
+      "message": "you can just treat flush_decoder as a boolean-like here -\u003e if (flush_decoder)",
+      "revId": "00ecb9b151a09ddc003ec8f4368951b28658bc3c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
