@@ -112,7 +112,6 @@ int16_t vp9_int_pro_col_sse2(uint8_t const *ref, const int width) {
   __m128i s0 = _mm_sad_epu8(src_line, zero);
   __m128i s1;
   int i;
-  const int norm_factor = 3 + (width >> 5);
 
   for (i = 16; i < width; i += 16) {
     ref += 16;
@@ -124,7 +123,7 @@ int16_t vp9_int_pro_col_sse2(uint8_t const *ref, const int width) {
   s1 = _mm_srli_si128(s0, 8);
   s0 = _mm_adds_epu16(s0, s1);
 
-  return _mm_extract_epi16(s0, 0) >> norm_factor;
+  return _mm_extract_epi16(s0, 0);
 }
 
 int vp9_vector_var_sse2(int16_t const *ref, int16_t const *src,

@@ -1805,6 +1805,7 @@ unsigned int vp9_int_pro_motion_estimation(const VP9_COMP *cpi, MACROBLOCK *x,
   MV *tmp_mv = &xd->mi[0].src_mi->mbmi.mv[0].as_mv;
   unsigned int best_sad, tmp_sad, this_sad[4];
   MV this_mv;
+  const int norm_factor = 3 + (bw >> 5);
 
 #if CONFIG_VP9_HIGHBITDEPTH
   tmp_mv->row = 0;
@@ -1822,7 +1823,7 @@ unsigned int vp9_int_pro_motion_estimation(const VP9_COMP *cpi, MACROBLOCK *x,
 
   ref_buf = xd->plane[0].pre[0].buf - (bh >> 1) * ref_stride;
   for (idx = 0; idx < search_height; ++idx) {
-    vbuf[idx] = vp9_int_pro_col(ref_buf, bw);
+    vbuf[idx] = vp9_int_pro_col(ref_buf, bw) >> norm_factor;
     ref_buf += ref_stride;
   }
 
@@ -1834,7 +1835,7 @@ unsigned int vp9_int_pro_motion_estimation(const VP9_COMP *cpi, MACROBLOCK *x,
 
   src_buf = x->plane[0].src.buf;
   for (idx = 0; idx < bh; ++idx) {
-    src_vbuf[idx] = vp9_int_pro_col(src_buf, bw);
+    src_vbuf[idx] = vp9_int_pro_col(src_buf, bw) >> norm_factor;
     src_buf += src_stride;
   }
 
