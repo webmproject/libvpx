@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//D2s\u003d",
+        "filename": "vpxdec.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 647,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2015-03-16T18:15:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//D5g\u003d",
+      "revId": "24e67bf40b5af39a3b3731b84f3aee9eae76c9c4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//D5c\u003d",
         "filename": "vpxdec.c",
         "patchSetId": 2
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//D2g\u003d",
+        "filename": "vpxdec.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 902,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2015-03-16T18:15:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//D5c\u003d",
+      "revId": "24e67bf40b5af39a3b3731b84f3aee9eae76c9c4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//D5Y\u003d",
         "filename": "vpxdec.c",
         "patchSetId": 2
@@ -47,6 +83,24 @@
       "writtenOn": "2015-03-14T02:52:43Z",
       "side": 1,
       "message": "is this necessary? will it always fail with frame parallel or just have a delayed return?",
+      "revId": "24e67bf40b5af39a3b3731b84f3aee9eae76c9c4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//D2c\u003d",
+        "filename": "vpxdec.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 932,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2015-03-16T18:15:34Z",
+      "side": 1,
+      "message": "Yes. This will fail for at least the first several frames and the result also does not make sense in frame parallel decode.",
+      "parentUuid": "AAAAdn//D5Y\u003d",
       "revId": "24e67bf40b5af39a3b3731b84f3aee9eae76c9c4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
