@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//D3A\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-03-16T15:26:47Z",
+      "side": 1,
+      "message": "64x64?",
+      "revId": "8ae79b1b3416815faecb0336d02887b2237ad28b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
