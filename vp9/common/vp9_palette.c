@@ -71,7 +71,7 @@ int run_lengh_encoding(uint8_t *seq, int n, uint16_t *runs, int max_run) {
     runs[l++] = symbol;
     this_run = 1;
     i++;
-    while (seq[i] == symbol && i < n) {
+    while (i < n && seq[i] == symbol) {
       i++;
       this_run++;
     }
