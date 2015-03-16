@@ -258,7 +258,7 @@ ARCH_EXT_LIST="
 
     mips32
     dspr2
-
+    msa
     mips64
 
     mmx

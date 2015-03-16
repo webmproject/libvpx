@@ -376,6 +376,10 @@ if ($opts{arch} eq 'x86') {
       @ALL_ARCHS = filter("$opts{arch}", qw/dspr2/);
       last;
     }
+    if (/HAVE_MSA=yes/) {
+      @ALL_ARCHS = filter("$opts{arch}", qw/msa/);
+      last;
+    }
   }
   close CONFIG_FILE;
   mips;

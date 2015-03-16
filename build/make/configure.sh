@@ -1041,6 +1041,31 @@ EOF
         check_add_cflags -mips32r2 -mdspr2
         disable_feature fast_unaligned
       fi
+
+      if [ -n "${tune_cpu}" ]; then
+        case ${tune_cpu} in
+          p5600)
+            add_cflags -mips32r5 -funroll-loops -mload-store-pairs
+            add_cflags -msched-weight -mhard-float
+            add_asflags -mips32r5 -mhard-float
+            ;;
+          i6400)
+            add_cflags -mips64r6 -mabi=64 -funroll-loops -mload-store-pairs
+            add_cflags -msched-weight -mhard-float
+            add_asflags -mips64r6 -mabi=64 -mhard-float
+            add_ldflags -mips64r6 -mabi=64
+            ;;
+        esac
+
+        if enabled msa; then
+          add_cflags -mmsa -mfp64 -flax-vector-conversions
+          add_asflags -mmsa -mfp64 -flax-vector-conversions
+          add_ldflags -mmsa -mfp64 -flax-vector-conversions
+
+          disable_feature fast_unaligned
+        fi
+      fi
+
       check_add_cflags -march=${tgt_isa}
       check_add_asflags -march=${tgt_isa}
       check_add_asflags -KPIC
