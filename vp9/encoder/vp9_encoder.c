@@ -1323,6 +1323,32 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
+static void realloc_segmentation_maps(VP9_COMP *cpi) {
+  VP9_COMMON *const cm = &cpi->common;
+
+  // Create the encoder segmentation map and set all entries to 0
+  vpx_free(cpi->segmentation_map);
+  CHECK_MEM_ERROR(cm, cpi->segmentation_map,
+                  vpx_calloc(cm->mi_rows * cm->mi_cols, 1));
+
+  // Create a map used for cyclic background refresh.
+  if (cpi->cyclic_refresh)
+    vp9_cyclic_refresh_free(cpi->cyclic_refresh);
+  CHECK_MEM_ERROR(cm, cpi->cyclic_refresh,
+                  vp9_cyclic_refresh_alloc(cm->mi_rows, cm->mi_cols));
+
+  // Create a map used to mark inactive areas.
+  vpx_free(cpi->active_map.map);
+  CHECK_MEM_ERROR(cm, cpi->active_map.map,
+                  vpx_calloc(cm->mi_rows * cm->mi_cols, 1));
+
+  // And a place holder structure is the coding context
+  // for use if we want to save and restore it
+  vpx_free(cpi->coding_context.last_frame_seg_map_copy);
+  CHECK_MEM_ERROR(cm, cpi->coding_context.last_frame_seg_map_copy,
+                  vpx_calloc(cm->mi_rows * cm->mi_cols, 1));
+}
+
 void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
@@ -1384,7 +1410,8 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   if (cpi->initial_width) {
     if (cm->width > cpi->initial_width || cm->height > cpi->initial_height) {
       vp9_free_context_buffers(cm);
-      vp9_alloc_context_buffers(cm, cm->width, cm->height);
+      vp9_alloc_compressor_data(cpi);
+      realloc_segmentation_maps(cpi);
       cpi->initial_width = cpi->initial_height = 0;
     }
   }
@@ -1499,22 +1526,7 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
   cpi->partition_search_skippable_frame = 0;
   cpi->tile_data = NULL;
 
-  // TODO(aconverse): Realloc these tables on frame resize
-  // Create the encoder segmentation map and set all entries to 0
-  CHECK_MEM_ERROR(cm, cpi->segmentation_map,
-                  vpx_calloc(cm->mi_rows * cm->mi_cols, 1));
-
-  // Create a map used for cyclic background refresh.
-  CHECK_MEM_ERROR(cm, cpi->cyclic_refresh,
-                  vp9_cyclic_refresh_alloc(cm->mi_rows, cm->mi_cols));
-
-  CHECK_MEM_ERROR(cm, cpi->active_map.map,
-                  vpx_calloc(cm->mi_rows * cm->mi_cols, 1));
-
-  // And a place holder structure is the coding context
-  // for use if we want to save and restore it
-  CHECK_MEM_ERROR(cm, cpi->coding_context.last_frame_seg_map_copy,
-                  vpx_calloc(cm->mi_rows * cm->mi_cols, 1));
+  realloc_segmentation_maps(cpi);
 
   CHECK_MEM_ERROR(cm, cpi->nmvcosts[0],
                   vpx_calloc(MV_VALS, sizeof(*cpi->nmvcosts[0])));
