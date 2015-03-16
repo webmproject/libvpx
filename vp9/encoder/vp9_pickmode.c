@@ -755,8 +755,6 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       vp9_find_best_ref_mvs(xd, cm->allow_high_precision_mv, candidates,
                             &frame_mv[NEARESTMV][ref_frame],
                             &frame_mv[NEARMV][ref_frame]);
-      clamp_mv2(&frame_mv[NEARESTMV][ref_frame].as_mv, xd);
-      clamp_mv2(&frame_mv[NEARMV][ref_frame].as_mv, xd);
 
       if (!vp9_is_scaled(sf) && bsize >= BLOCK_8X8)
         vp9_mv_pred(cpi, x, yv12_mb[ref_frame][0].buf, yv12->y_stride,
