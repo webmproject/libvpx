@@ -116,6 +116,9 @@ static vpx_codec_err_t decoder_destroy(vpx_codec_alg_priv_t *ctx) {
           (FrameWorkerData *)worker->data1;
       vp9_get_worker_interface()->end(worker);
       vp9_remove_common(&frame_worker_data->pbi->common);
+#if CONFIG_VP9_POSTPROC
+      vp9_free_postproc_buffers(&frame_worker_data->pbi->common);
+#endif
       vp9_decoder_remove(frame_worker_data->pbi);
       vpx_free(frame_worker_data->scratch_buffer);
 #if CONFIG_MULTITHREAD
@@ -129,8 +132,10 @@ static vpx_codec_err_t decoder_destroy(vpx_codec_alg_priv_t *ctx) {
 #endif
   }
 
-  if (ctx->buffer_pool)
+  if (ctx->buffer_pool) {
+    vp9_free_ref_frame_buffers(ctx->buffer_pool);
     vp9_free_internal_frame_buffers(&ctx->buffer_pool->int_frame_buffers);
+  }
 
   vpx_free(ctx->frame_workers);
   vpx_free(ctx->buffer_pool);

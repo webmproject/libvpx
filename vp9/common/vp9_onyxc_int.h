@@ -88,7 +88,7 @@ typedef struct {
   int col;
 } RefCntBuffer;
 
-typedef struct {
+typedef struct BufferPool {
   // Protect BufferPool from being accessed by several FrameWorkers at
   // the same time during frame parallel decode.
   // TODO(hkuang): Try to use atomic variable instead of locking the whole pool.

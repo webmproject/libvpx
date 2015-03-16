@@ -303,7 +303,10 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   vpx_free(cpi->active_map.map);
   cpi->active_map.map = NULL;
 
-  vp9_free_ref_frame_buffers(cm);
+  vp9_free_ref_frame_buffers(cm->buffer_pool);
+#if CONFIG_VP9_POSTPROC
+  vp9_free_postproc_buffers(cm);
+#endif
   vp9_free_context_buffers(cm);
 
   vp9_free_frame_buffer(&cpi->last_frame_uf);
@@ -1896,6 +1899,10 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
 #endif
 
   vp9_remove_common(cm);
+  vp9_free_ref_frame_buffers(cm->buffer_pool);
+#if CONFIG_VP9_POSTPROC
+  vp9_free_postproc_buffers(cm);
+#endif
   vpx_free(cpi);
 
 #if CONFIG_VP9_TEMPORAL_DENOISING
