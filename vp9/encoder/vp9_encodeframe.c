@@ -658,29 +658,29 @@ static void choose_partitioning(VP9_COMP *cpi,
         for (k = 0; k < 4; k++) {
           int x8_idx = x16_idx + ((k & 1) << 3);
           int y8_idx = y16_idx + ((k >> 1) << 3);
-            unsigned int sse = 0;
-            int sum = 0;
-            if (x8_idx < pixels_wide && y8_idx < pixels_high) {
-              int s_avg, d_avg;
+          unsigned int sse = 0;
+          int sum = 0;
+          if (x8_idx < pixels_wide && y8_idx < pixels_high) {
+            int s_avg, d_avg;
 #if CONFIG_VP9_HIGHBITDEPTH
-              if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-                s_avg = vp9_highbd_avg_8x8(s + y8_idx * sp + x8_idx, sp);
-                d_avg = vp9_highbd_avg_8x8(d + y8_idx * dp + x8_idx, dp);
-              } else {
-                s_avg = vp9_avg_8x8(s + y8_idx * sp + x8_idx, sp);
-                d_avg = vp9_avg_8x8(d + y8_idx * dp + x8_idx, dp);
-             }
-#else
+            if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+              s_avg = vp9_highbd_avg_8x8(s + y8_idx * sp + x8_idx, sp);
+              d_avg = vp9_highbd_avg_8x8(d + y8_idx * dp + x8_idx, dp);
+            } else {
               s_avg = vp9_avg_8x8(s + y8_idx * sp + x8_idx, sp);
               d_avg = vp9_avg_8x8(d + y8_idx * dp + x8_idx, dp);
-#endif
-              sum = s_avg - d_avg;
-              sse = sum * sum;
             }
-            // If variance is based on 8x8 downsampling, we stop here and have
-            // one sample for 8x8 block (so use 1 for count in fill_variance),
-            // which of course means variance = 0 for 8x8 block.
-            fill_variance(sse, sum, 0, &vst->split[k].part_variances.none);
+#else
+            s_avg = vp9_avg_8x8(s + y8_idx * sp + x8_idx, sp);
+            d_avg = vp9_avg_8x8(d + y8_idx * dp + x8_idx, dp);
+#endif
+            sum = s_avg - d_avg;
+            sse = sum * sum;
+          }
+          // If variance is based on 8x8 downsampling, we stop here and have
+          // one sample for 8x8 block (so use 1 for count in fill_variance),
+          // which of course means variance = 0 for 8x8 block.
+          fill_variance(sse, sum, 0, &vst->split[k].part_variances.none);
         }
         fill_variance_tree(&vt.split[i].split[j], BLOCK_16X16);
         // For low-resolution, compute the variance based on 8x8 down-sampling,
