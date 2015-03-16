@@ -12,13 +12,13 @@
     - \ref usage_init
     - \ref usage_errors
 
-    Fore more information on decoder and encoder specific usage, see the
+    For more information on decoder and encoder specific usage, see the
     following pages:
     \if decoder
-    - \subpage usage_decode
+    \li \subpage usage_decode
     \endif
-    \if decoder
-    - \subpage usage_encode
+    \if encoder
+    \li \subpage usage_encode
     \endif
 
     \section usage_types Important Data Types
@@ -81,12 +81,12 @@
 
     The available initialization methods are:
     \if encoder
-     - #vpx_codec_enc_init (calls vpx_codec_enc_init_ver())
-     - #vpx_codec_enc_init_multi (calls vpx_codec_enc_init_multi_ver())
-     .
+    \li #vpx_codec_enc_init (calls vpx_codec_enc_init_ver())
+    \li #vpx_codec_enc_init_multi (calls vpx_codec_enc_init_multi_ver())
     \endif
-    \if decoder - #vpx_codec_dec_init (calls vpx_codec_dec_init_ver()) \endif
-
+    \if decoder
+    \li #vpx_codec_dec_init (calls vpx_codec_dec_init_ver())
+    \endif
 
 
     \section usage_errors Error Handling
