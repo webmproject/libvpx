@@ -1721,8 +1721,9 @@ static void combine_interintra(PREDICTION_MODE mode,
 #if CONFIG_WEDGE_PARTITION
                                int use_wedge_interintra,
                                int wedge_index,
-#endif  // CONFIG_WEDGE_PARTITION
                                BLOCK_SIZE bsize,
+#endif  // CONFIG_WEDGE_PARTITION
+                               BLOCK_SIZE plane_bsize,
                                uint8_t *comppred,
                                int compstride,
                                uint8_t *interpred,
@@ -1742,8 +1743,8 @@ static void combine_interintra(PREDICTION_MODE mode,
        70,  70,  69,  69,  69,  69,  68,  68,
        68,  68,  68,  67,  67,  67,  67,  67,
   };
-  const int bw = 4 << b_width_log2_lookup[bsize];
-  const int bh = 4 << b_height_log2_lookup[bsize];
+  const int bw = 4 << b_width_log2_lookup[plane_bsize];
+  const int bh = 4 << b_height_log2_lookup[plane_bsize];
 
   int size = MAX(bw, bh);
   int size_scale = (size >= 64 ? 1 :
@@ -2066,6 +2067,7 @@ void vp9_build_interintra_predictors_sby(MACROBLOCKD *xd,
 #if CONFIG_WEDGE_PARTITION
                      xd->mi[0].src_mi->mbmi.use_wedge_interintra,
                      xd->mi[0].src_mi->mbmi.interintra_wedge_index,
+                     bsize,
 #endif  // CONFIG_WEDGE_PARTITION
                      bsize,
                      xd->plane[0].dst.buf, xd->plane[0].dst.stride,
@@ -2096,6 +2098,7 @@ void vp9_build_interintra_predictors_sbuv(MACROBLOCKD *xd,
 #if CONFIG_WEDGE_PARTITION
                      xd->mi[0].src_mi->mbmi.use_wedge_interintra,
                      xd->mi[0].src_mi->mbmi.interintra_uv_wedge_index,
+                     bsize,
 #endif  // CONFIG_WEDGE_PARTITION
                      uvbsize,
                      xd->plane[1].dst.buf, xd->plane[1].dst.stride,
@@ -2104,6 +2107,7 @@ void vp9_build_interintra_predictors_sbuv(MACROBLOCKD *xd,
 #if CONFIG_WEDGE_PARTITION
                      xd->mi[0].src_mi->mbmi.use_wedge_interintra,
                      xd->mi[0].src_mi->mbmi.interintra_uv_wedge_index,
+                     bsize,
 #endif  // CONFIG_WEDGE_PARTITION
                      uvbsize,
                      xd->plane[2].dst.buf, xd->plane[2].dst.stride,
