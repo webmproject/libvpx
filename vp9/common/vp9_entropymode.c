@@ -242,6 +242,16 @@ static const vp9_prob default_partition_probs[PARTITION_CONTEXTS]
 
 static const vp9_prob default_inter_mode_probs[INTER_MODE_CONTEXTS]
                                               [INTER_MODES - 1] = {
+#if CONFIG_NEWMVREF
+  // TODO(zoeliu): To adjust the initial default probs
+  {2,       173,   34,   192},  // 0 = both zero mv
+  {7,       145,   85,   192},  // 1 = one zero mv + one a predicted mv
+  {7,       166,   63,   192},  // 2 = two predicted mvs
+  {7,       94,    66,   192},  // 3 = one predicted/zero and one new mv
+  {8,       64,    46,   192},  // 4 = two new mvs
+  {17,      81,    31,   192},  // 5 = one intra neighbour + x
+  {25,      29,    30,   192},  // 6 = two intra neighbours
+#else
   {2,       173,   34},  // 0 = both zero mv
   {7,       145,   85},  // 1 = one zero mv + one a predicted mv
   {7,       166,   63},  // 2 = two predicted mvs
@@ -249,6 +259,7 @@ static const vp9_prob default_inter_mode_probs[INTER_MODE_CONTEXTS]
   {8,       64,    46},  // 4 = two new mvs
   {17,      81,    31},  // 5 = one intra neighbour + x
   {25,      29,    30},  // 6 = two intra neighbours
+#endif  // CONFIG_NEWMVREF
 };
 
 #if CONFIG_COMPOUND_MODES
@@ -280,7 +291,12 @@ const vp9_tree_index vp9_intra_mode_tree[TREE_SIZE(INTRA_MODES)] = {
 const vp9_tree_index vp9_inter_mode_tree[TREE_SIZE(INTER_MODES)] = {
   -INTER_OFFSET(ZEROMV), 2,
   -INTER_OFFSET(NEARESTMV), 4,
+#if CONFIG_NEWMVREF
+  -INTER_OFFSET(NEARMV), 6,
+  -INTER_OFFSET(NEWMV), -INTER_OFFSET(NEAR_FORNEWMV)
+#else
   -INTER_OFFSET(NEARMV), -INTER_OFFSET(NEWMV)
+#endif  // CONFIG_NEWMVREF
 };
 
 #if CONFIG_COMPOUND_MODES
