@@ -34,6 +34,42 @@
       "revId": "1bcdf3ee3ae7859fa6cab1b4b041990dc0273200",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//DrU\u003d",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2015-03-17T19:33:32Z",
+      "side": 1,
+      "message": "Yes this will break when a new codec is added. Luckily they are not added that frequently.",
+      "parentUuid": "AAAAdn//D0E\u003d",
+      "revId": "1bcdf3ee3ae7859fa6cab1b4b041990dc0273200",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//DrQ\u003d",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2015-03-17T19:33:32Z",
+      "side": 1,
+      "message": "So I changed it up to check the pointers of the vp8 and vp9 interface structure. I think it is in the spirit of what you want without changing the interface. Check it out.",
+      "parentUuid": "AAAAdn//Dz8\u003d",
+      "revId": "1bcdf3ee3ae7859fa6cab1b4b041990dc0273200",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
