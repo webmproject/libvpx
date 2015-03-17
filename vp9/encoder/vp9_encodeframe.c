@@ -44,12 +44,6 @@
 #include "vp9/encoder/vp9_segmentation.h"
 #include "vp9/encoder/vp9_tokenize.h"
 
-#define GF_ZEROMV_ZBIN_BOOST 0
-#define LF_ZEROMV_ZBIN_BOOST 0
-#define MV_ZBIN_BOOST        0
-#define SPLIT_MV_ZBIN_BOOST  0
-#define INTRA_ZBIN_BOOST     0
-
 static void encode_superblock(VP9_COMP *cpi, ThreadData * td,
                               TOKENEXTRA **t, int output_enabled,
                               int mi_row, int mi_col, BLOCK_SIZE bsize,
