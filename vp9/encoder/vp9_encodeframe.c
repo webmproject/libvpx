@@ -486,32 +486,34 @@ void vp9_set_vbp_thresholds(VP9_COMP *cpi, int q) {
     return;
   } else {
     VP9_COMMON *const cm = &cpi->common;
-    const VP9EncoderConfig *const oxcf = &cpi->oxcf;
     const int is_key_frame = (cm->frame_type == KEY_FRAME);
-    const int use_4x4_partition = is_key_frame;
-    const int low_res = (cm->width <= 352 && cm->height <= 288);
     const int threshold_multiplier = is_key_frame ? 80 : 4;
     const int64_t threshold_base = (int64_t)(threshold_multiplier *
         vp9_convert_qindex_to_q(q, cm->bit_depth));
-    cpi->vbp_threshold = threshold_base;
-    cpi->vbp_threshold_bsize_min = threshold_base << oxcf->speed;
-    cpi->vbp_threshold_bsize_max = threshold_base;
 
-    if (is_key_frame) {
-      cpi->vbp_threshold = threshold_base >> 2;
-      cpi->vbp_threshold_bsize_min = threshold_base << 2;
-    } else if (low_res) {
-      cpi->vbp_threshold_bsize_min = threshold_base << 3;
-      cpi->vbp_threshold_bsize_max = threshold_base >> 2;
-    }
     // TODO(marpan): Allow 4x4 partitions for inter-frames.
     // use_4x4_partition = (variance4x4downsample[i2 + j] == 1);
     // If 4x4 partition is not used, then 8x8 partition will be selected
     // if variance of 16x16 block is very high, so use larger threshold
     // for 16x16 (threshold_bsize_min) in that case.
-    cpi->vbp_threshold_16x16 = (use_4x4_partition) ?
-      cpi->vbp_threshold : cpi->vbp_threshold_bsize_min;
-    cpi->vbp_bsize_min = (use_4x4_partition) ? BLOCK_8X8 : BLOCK_16X16;
+    if (is_key_frame) {
+      cpi->vbp_threshold = threshold_base >> 2;
+      cpi->vbp_threshold_bsize_max = threshold_base;
+      cpi->vbp_threshold_bsize_min = threshold_base << 2;
+      cpi->vbp_threshold_16x16 = cpi->vbp_threshold;
+      cpi->vbp_bsize_min = BLOCK_8X8;
+    } else {
+      cpi->vbp_threshold = threshold_base;
+      if (cm->width <= 352 && cm->height <= 288) {
+        cpi->vbp_threshold_bsize_max = threshold_base >> 2;
+        cpi->vbp_threshold_bsize_min = threshold_base << 3;
+      } else {
+        cpi->vbp_threshold_bsize_max = threshold_base;
+        cpi->vbp_threshold_bsize_min = threshold_base << cpi->oxcf.speed;
+      }
+      cpi->vbp_threshold_16x16 = cpi->vbp_threshold_bsize_min;
+      cpi->vbp_bsize_min = BLOCK_16X16;
+    }
   }
 }
 
