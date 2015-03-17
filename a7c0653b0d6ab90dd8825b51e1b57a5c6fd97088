@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Duw\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-03-17T05:39:26Z",
+      "side": 1,
+      "message": "for reference add a note in the body showing the use of the new configure targets",
+      "revId": "a7c0653b0d6ab90dd8825b51e1b57a5c6fd97088",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Du4\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 1047,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-03-17T05:39:26Z",
+      "side": 1,
+      "message": "indent 2 spaces from the case.\n\nnew code should mostly follow the formatting recommendations here:\n\nhttps://google-styleguide.googlecode.com/svn/trunk/shell.xml",
+      "revId": "a7c0653b0d6ab90dd8825b51e1b57a5c6fd97088",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Du0\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 1048,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-03-17T05:39:26Z",
+      "side": 1,
+      "message": "break this at 80 columns please",
+      "revId": "a7c0653b0d6ab90dd8825b51e1b57a5c6fd97088",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Du8\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 1052,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-03-17T05:39:26Z",
+      "side": 1,
+      "message": "ditto",
+      "revId": "a7c0653b0d6ab90dd8825b51e1b57a5c6fd97088",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
