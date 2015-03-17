@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Dsk\u003d",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 17
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-03-17T18:14:53Z",
+      "side": 1,
+      "message": "if type \u003d\u003d 1, should compare uv_mode.",
+      "revId": "28854a6ca0b39f9e8da0ae2b9e08cb8c6b9b3e5d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
