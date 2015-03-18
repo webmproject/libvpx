@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Dno\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-03-18T01:14:52Z",
+      "side": 1,
+      "message": "always put a blank line after the subject line otherwise subsequent lines will be joined in git log output.",
+      "revId": "445deba3b25dc9ca4858c96b0bac009c77383cd7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Dns\u003d",
+        "filename": "configure",
+        "patchSetId": 4
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-03-18T01:14:52Z",
+      "side": 1,
+      "message": "no update need for this change and ARCH_MIPS* isn\u0027t tested in the code anywhere, but I think mips32/64 would be better in ARCH_LIST; the other 2 are extensions to that base.",
+      "revId": "445deba3b25dc9ca4858c96b0bac009c77383cd7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
