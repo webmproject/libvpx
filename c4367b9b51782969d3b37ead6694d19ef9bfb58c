@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Dgo\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 518,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-03-18T21:42:00Z",
+      "side": 1,
+      "message": "these could use some checks",
+      "revId": "c4367b9b51782969d3b37ead6694d19ef9bfb58c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Dgs\u003d",
+        "filename": "vp9/encoder/vp9_resize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 529,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-03-18T21:42:00Z",
+      "side": 1,
+      "message": "note there\u0027s one remaining here with, for example, width\u003dheight\u003d1 and width2\u003dheight2\u003d2. it seems resize_multistep/interpolate confuse analyzer a bit",
+      "revId": "c4367b9b51782969d3b37ead6694d19ef9bfb58c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
