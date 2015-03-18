@@ -8,6 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <assert.h>
 #if defined(_MSC_VER) && _MSC_VER <= 1500
 // Need to include math.h before calling tmmintrin.h/intrin.h
 // in certain versions of MSVS.
@@ -374,6 +375,7 @@ void vp9_fdct8x8_quant_ssse3(const int16_t *input, int stride,
         __m128i qcoeff0, qcoeff1;
         __m128i qtmp0, qtmp1;
 
+        assert(index < (int)(sizeof(in) / sizeof(in[0])) - 1);
         coeff0 = *in[index];
         coeff1 = *in[index + 1];
 
