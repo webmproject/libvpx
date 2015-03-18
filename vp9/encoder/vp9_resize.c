@@ -516,6 +516,10 @@ void vp9_resize_plane(const uint8_t *const input,
   uint8_t *tmpbuf = (uint8_t *)malloc(sizeof(uint8_t) *
                                       (width < height ? height : width));
   uint8_t *arrbuf = (uint8_t *)malloc(sizeof(uint8_t) * (height + height2));
+  assert(width > 0);
+  assert(height > 0);
+  assert(width2 > 0);
+  assert(height2 > 0);
   for (i = 0; i < height; ++i)
     resize_multistep(input + in_stride * i, width,
                         intbuf + width2 * i, width2, tmpbuf);
