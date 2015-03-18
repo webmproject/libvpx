@@ -33,6 +33,24 @@
       "revId": "6a4e85a1d6c47133065fc148ce2c82ec8d569987",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Djc\u003d",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2015-03-18T16:51:05Z",
+      "side": 1,
+      "message": "I think the lint warning is fine. Otherwise the code could get fairly ugly with all of the flags.",
+      "parentUuid": "AAAAdn//DpE\u003d",
+      "revId": "6a4e85a1d6c47133065fc148ce2c82ec8d569987",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
