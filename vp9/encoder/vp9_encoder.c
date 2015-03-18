@@ -35,22 +35,22 @@
 #include "vp9/encoder/vp9_context_tree.h"
 #include "vp9/encoder/vp9_encodeframe.h"
 #include "vp9/encoder/vp9_encodemv.h"
+#include "vp9/encoder/vp9_encoder.h"
 #include "vp9/encoder/vp9_ethread.h"
 #include "vp9/encoder/vp9_firstpass.h"
 #include "vp9/encoder/vp9_mbgraph.h"
-#include "vp9/encoder/vp9_encoder.h"
 #include "vp9/encoder/vp9_picklpf.h"
 #include "vp9/encoder/vp9_ratectrl.h"
 #include "vp9/encoder/vp9_rd.h"
+#include "vp9/encoder/vp9_resize.h"
 #include "vp9/encoder/vp9_segmentation.h"
+#include "vp9/encoder/vp9_skin_detection.h"
 #include "vp9/encoder/vp9_speed_features.h"
 #if CONFIG_INTERNAL_STATS
 #include "vp9/encoder/vp9_ssim.h"
 #endif
-#include "vp9/encoder/vp9_temporal_filter.h"
-#include "vp9/encoder/vp9_resize.h"
 #include "vp9/encoder/vp9_svc_layercontext.h"
-#include "vp9/encoder/vp9_skin_detection.h"
+#include "vp9/encoder/vp9_temporal_filter.h"
 
 #define AM_SEGMENT_ID_INACTIVE 7
 #define AM_SEGMENT_ID_ACTIVE 0
