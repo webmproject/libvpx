@@ -44,7 +44,6 @@
 /ivfenc.dox
 /libvpx.so*
 /libvpx.ver
-/obj_int_extract
 /samples.dox
 /test_libvpx
 /vp8_api1_migration.dox

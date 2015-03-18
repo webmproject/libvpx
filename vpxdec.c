@@ -875,7 +875,7 @@ int main_loop(int argc, const char **argv_) {
     vpx_codec_iter_t  iter = NULL;
     vpx_image_t    *img;
     struct vpx_usec_timer timer;
-    int                   corrupted;
+    int                   corrupted = 0;
 
     frame_avail = 0;
     if (!stop_after || frame_in < stop_after) {

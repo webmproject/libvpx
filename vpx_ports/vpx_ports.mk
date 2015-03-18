@@ -11,7 +11,6 @@
 
 PORTS_SRCS-yes += vpx_ports.mk
 
-PORTS_SRCS-$(BUILD_LIBVPX) += asm_offsets.h
 PORTS_SRCS-$(BUILD_LIBVPX) += mem.h
 PORTS_SRCS-$(BUILD_LIBVPX) += vpx_timer.h
 
