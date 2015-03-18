@@ -61,12 +61,9 @@
 #define RC_FACTOR_MAX       1.75
 
 
-#define INTRA_WEIGHT_EXPERIMENT 0
-#if INTRA_WEIGHT_EXPERIMENT
 #define NCOUNT_INTRA_THRESH 8192
 #define NCOUNT_INTRA_FACTOR 3
 #define NCOUNT_FRAME_II_THRESH 5.0
-#endif
 
 #define DOUBLE_DIVIDE_CHECK(x) ((x) < 0 ? (x) - 0.000001 : (x) + 0.000001)
 
@@ -832,7 +829,6 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
           // Keep a count of cases where the inter and intra were very close
           // and very low. This helps with scene cut detection for example in
           // cropped clips with black bars at the sides or top and bottom.
-#if INTRA_WEIGHT_EXPERIMENT
           if (((this_error - intrapenalty) * 9 <= motion_error * 10) &&
               (this_error < (2 * intrapenalty))) {
             neutral_count += 1.0;
@@ -843,12 +839,6 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
             neutral_count += (double)motion_error /
                              DOUBLE_DIVIDE_CHECK((double)this_error);
           }
-#else
-          if (((this_error - intrapenalty) * 9 <= motion_error * 10) &&
-              (this_error < (2 * intrapenalty))) {
-            neutral_count += 1.0;
-          }
-#endif
 
           mv.row *= 8;
           mv.col *= 8;
@@ -1291,11 +1281,10 @@ static double get_sr_decay_rate(const VP9_COMP *cpi,
     frame->pcnt_motion * ((frame->mvc_abs + frame->mvr_abs) / 2);
 
   modified_pct_inter = frame->pcnt_inter;
-#if INTRA_WEIGHT_EXPERIMENT
   if ((frame->intra_error / DOUBLE_DIVIDE_CHECK(frame->coded_error)) <
-      (double)NCOUNT_FRAME_II_THRESH)
+      (double)NCOUNT_FRAME_II_THRESH) {
     modified_pct_inter = frame->pcnt_inter - frame->pcnt_neutral;
-#endif
+  }
   modified_pcnt_intra = 100 * (1.0 - modified_pct_inter);
 
 
