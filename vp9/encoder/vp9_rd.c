@@ -467,6 +467,7 @@ void vp9_mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
   pred_mv[0] = mbmi->ref_mvs[ref_frame][0].as_mv;
   pred_mv[1] = mbmi->ref_mvs[ref_frame][1].as_mv;
   pred_mv[2] = x->pred_mv[ref_frame];
+  assert(num_mv_refs <= (int)(sizeof(pred_mv) / sizeof(pred_mv[0])));
 
   // Get the sad for each candidate reference mv.
   for (i = 0; i < num_mv_refs; ++i) {
