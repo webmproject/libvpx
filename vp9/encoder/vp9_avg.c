@@ -46,10 +46,9 @@ void vp9_int_pro_row_c(int16_t *hbuf, uint8_t const *ref,
 int16_t vp9_int_pro_col_c(uint8_t const *ref, const int width) {
   int idx;
   int16_t sum = 0;
-  const int norm_factor = MAX(8, width >> 1);
   for (idx = 0; idx < width; ++idx)
     sum += ref[idx];
-  return sum / norm_factor;
+  return sum;
 }
 
 int vp9_vector_var_c(int16_t const *ref, int16_t const *src,
