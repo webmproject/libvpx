@@ -958,7 +958,6 @@ void vp9_highbd_quantize_nuq_c(const tran_low_t *coeff_ptr,
                                const int16_t *scan,
                                const uint8_t *band) {
   int eob = -1;
-  (void)iscan;
   vpx_memset(qcoeff_ptr, 0, n_coeffs * sizeof(*qcoeff_ptr));
   vpx_memset(dqcoeff_ptr, 0, n_coeffs * sizeof(*dqcoeff_ptr));
   if (!skip_block) {
@@ -992,7 +991,6 @@ void vp9_highbd_quantize_fp_nuq_c(const tran_low_t *coeff_ptr,
                                   const int16_t *scan,
                                   const uint8_t *band) {
   int eob = -1;
-  (void)iscan;
   vpx_memset(qcoeff_ptr, 0, n_coeffs * sizeof(*qcoeff_ptr));
   vpx_memset(dqcoeff_ptr, 0, n_coeffs * sizeof(*dqcoeff_ptr));
   if (!skip_block) {
