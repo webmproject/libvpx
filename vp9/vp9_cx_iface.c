@@ -924,22 +924,26 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
   vpx_codec_err_t res = VPX_CODEC_OK;
   VP9_COMP *const cpi = ctx->cpi;
   const vpx_rational_t *const timebase = &ctx->cfg.g_timebase;
+  size_t data_sz;
 
   if (img != NULL) {
     res = validate_img(ctx, img);
     // TODO(jzern) the checks related to cpi's validity should be treated as a
     // failure condition, encoder setup is done fully in init() currently.
-    if (res == VPX_CODEC_OK && cpi != NULL && ctx->cx_data == NULL) {
+    if (res == VPX_CODEC_OK && cpi != NULL) {
       // There's no codec control for multiple alt-refs so check the encoder
       // instance for its status to determine the compressed data size.
-      ctx->cx_data_sz = ctx->cfg.g_w * ctx->cfg.g_h *
-                        get_image_bps(img) / 8 *
-                        (cpi->multi_arf_allowed ? 8 : 2);
-      if (ctx->cx_data_sz < 4096) ctx->cx_data_sz = 4096;
-
-      ctx->cx_data = (unsigned char *)malloc(ctx->cx_data_sz);
-      if (ctx->cx_data == NULL) {
-        return VPX_CODEC_MEM_ERROR;
+      data_sz = ctx->cfg.g_w * ctx->cfg.g_h * get_image_bps(img) / 8 *
+                (cpi->multi_arf_allowed ? 8 : 2);
+      if (data_sz < 4096)
+        data_sz = 4096;
+      if (ctx->cx_data == NULL || ctx->cx_data_sz < data_sz) {
+        ctx->cx_data_sz = data_sz;
+        free(ctx->cx_data);
+        ctx->cx_data = (unsigned char*)malloc(ctx->cx_data_sz);
+        if (ctx->cx_data == NULL) {
+          return VPX_CODEC_MEM_ERROR;
+        }
       }
     }
   }
