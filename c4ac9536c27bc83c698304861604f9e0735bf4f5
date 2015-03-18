@@ -138,6 +138,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Djo\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 6400,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-03-18T16:41:21Z",
+      "side": 1,
+      "message": "I mean vpx_memset() or vp9_zero_array()",
+      "parentUuid": "AAAAdn//DkM\u003d",
+      "revId": "c4ac9536c27bc83c698304861604f9e0735bf4f5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//DkI\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 6
@@ -166,6 +184,23 @@
       "writtenOn": "2015-03-18T15:33:39Z",
       "side": 1,
       "message": "Highly duplicated from above. Please refactor.",
+      "revId": "c4ac9536c27bc83c698304861604f9e0735bf4f5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Djk\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 6730,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-03-18T16:41:21Z",
+      "side": 1,
+      "message": "CONFIG_PALETTE",
       "revId": "c4ac9536c27bc83c698304861604f9e0735bf4f5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
