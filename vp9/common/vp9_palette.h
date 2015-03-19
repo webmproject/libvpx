@@ -15,28 +15,26 @@
 #include "vp9/common/vp9_entropymode.h"
 
 #if CONFIG_PALETTE
-int count_colors(const uint8_t *src, int stride, int rows, int cols);
-void insertion_sort(double *data, int n);
-int run_lengh_encoding(uint8_t *seq, int n, uint16_t *runs, int max_run);
-int run_lengh_decoding(uint16_t *runs, int l, uint8_t *seq);
-void transpose_block(uint8_t *seq_in, uint8_t *seq_out, int rows, int cols);
-void palette_color_insertion(uint8_t *old_colors, int *m, int *count,
-                             MB_MODE_INFO *mbmi);
-int palette_color_lookup(uint8_t *dic, int n, uint8_t val, int bits);
-int palette_max_run(BLOCK_SIZE bsize);
-int get_bit_depth(int n);
-int k_means(double *data, double *centroids, int *indices,
-             int n, int k, int dim, int max_itr);
-void calc_indices(double *data, double *centroids, int *indices,
-                  int n, int k, int dim);
-void zz_scan_order(int *order, int rows, int cols);
-void spiral_scan_order(int *order, int rows, int cols);
-void palette_scan(uint8_t *color_index_map, uint8_t *sequence,
-                  int rows, int cols, PALETTE_SCAN_ORDER ps, int *scan_order);
-void palette_iscan(uint8_t *color_index_map, uint8_t *sequence,
-                   int rows, int cols, PALETTE_SCAN_ORDER ps, int *scan_order);
-void update_palette_counts(FRAME_COUNTS *counts, MB_MODE_INFO *mbmi,
-                           BLOCK_SIZE bsize, int palette_ctx);
+int vp9_count_colors(const uint8_t *src, int stride, int rows, int cols);
+void vp9_insertion_sort(double *data, int n);
+int vp9_run_lengh_encoding(uint8_t *seq, int n, uint16_t *runs, int max_run);
+int vp9_run_lengh_decoding(uint16_t *runs, int l, uint8_t *seq);
+void vp9_palette_color_insertion(uint8_t *old_colors, int *m, int *count,
+                                 MB_MODE_INFO *mbmi);
+int vp9_palette_color_lookup(uint8_t *dic, int n, uint8_t val, int bits);
+int vp9_get_bit_depth(int n);
+int vp9_k_means(double *data, double *centroids, int *indices,
+                int n, int k, int dim, int max_itr);
+void vp9_calc_indices(double *data, double *centroids, int *indices,
+                      int n, int k, int dim);
+void vp9_palette_scan(uint8_t *color_index_map, uint8_t *sequence, int rows,
+                      int cols, PALETTE_SCAN_ORDER ps, int *scan_order);
+void vp9_palette_iscan(uint8_t *color_index_map, uint8_t *sequence, int rows,
+                       int cols, PALETTE_SCAN_ORDER ps, int *scan_order);
+void vp9_update_palette_counts(FRAME_COUNTS *counts, MB_MODE_INFO *mbmi,
+                               BLOCK_SIZE bsize, int palette_ctx);
+int vp9_get_palette_color_context(uint8_t *color_map, int cols,
+                                  int r, int c, int n, int *color_order);
 #endif
 
 #endif  // VP9_COMMON_VP9_PALETTE_H_

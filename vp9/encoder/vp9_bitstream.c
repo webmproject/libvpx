@@ -22,7 +22,7 @@
 #include "vp9/common/vp9_mvref_common.h"
 #if CONFIG_PALETTE
 #include "vp9/common/vp9_palette.h"
-#endif
+#endif  // CONFIG_PALETTE
 #include "vp9/common/vp9_pred_common.h"
 #include "vp9/common/vp9_seg_common.h"
 #include "vp9/common/vp9_systemdependent.h"
@@ -48,7 +48,8 @@ static struct vp9_token ext_tx_encodings[EXT_TX_TYPES];
 static struct vp9_token palette_size_encodings[PALETTE_SIZES];
 static struct vp9_token palette_scan_order_encodings[PALETTE_SCAN_ORDERS];
 static struct vp9_token palette_run_length_encodings[PALETTE_RUN_LENGTHS];
-#endif
+static struct vp9_token palette_color_encodings[PALETTE_COLORS];
+#endif  // CONFIG_PALETTE
 #if CONFIG_COPY_MODE
 static struct vp9_token copy_mode_encodings_l2[2];
 static struct vp9_token copy_mode_encodings[COPY_MODE_COUNT - 1];
@@ -83,7 +84,8 @@ void vp9_entropy_mode_init() {
                        vp9_palette_scan_order_tree);
   vp9_tokens_from_tree(palette_run_length_encodings,
                        vp9_palette_run_length_tree);
-#endif
+  vp9_tokens_from_tree(palette_color_encodings, vp9_palette_color_tree);
+#endif  // CONFIG_PALETTE
 #if CONFIG_COMPOUND_MODES
   vp9_tokens_from_tree(inter_compound_mode_encodings,
                        vp9_inter_compound_mode_tree);
@@ -467,75 +469,70 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
 
 #if CONFIG_PALETTE
   if (!is_inter && bsize >= BLOCK_8X8 && cm->allow_palette_mode) {
-    int l, n, i, d, bits, ctx;
-    BLOCK_SIZE uv_bsize = get_plane_block_size(bsize, &xd->plane[1]);
+    int n, i, j, k, rows, cols, palette_ctx, color_ctx;
+    int color_new_idx = -1, color_order[PALETTE_MAX_SIZE];
+    uint8_t buffer[4096];
     const MODE_INFO *above_mi = xd->up_available ?
         xd->mi[-xd->mi_stride].src_mi : NULL;
     const MODE_INFO *left_mi = xd->left_available ?
         xd->mi[-1].src_mi : NULL;
 
-    ctx = 0;
+    palette_ctx = 0;
     if (above_mi)
-      ctx += (above_mi->mbmi.palette_enabled[0] == 1);
+      palette_ctx += (above_mi->mbmi.palette_enabled[0] == 1);
     if (left_mi)
-      ctx += (left_mi->mbmi.palette_enabled[0] == 1);
+      palette_ctx += (left_mi->mbmi.palette_enabled[0] == 1);
     vp9_write(w, mbmi->palette_enabled[0],
-              cm->fc.palette_enabled_prob[bsize - BLOCK_8X8][ctx]);
+              cm->fc.palette_enabled_prob[bsize - BLOCK_8X8][palette_ctx]);
     vp9_write(w, mbmi->palette_enabled[1],
               cm->fc.palette_uv_enabled_prob[mbmi->palette_enabled[0]]);
 
     if (mbmi->palette_enabled[0]) {
-      int rows = 4 * num_4x4_blocks_high_lookup[bsize];
-      int cols = 4 * num_4x4_blocks_wide_lookup[bsize];
+      rows = 4 * num_4x4_blocks_high_lookup[bsize];
+      cols = 4 * num_4x4_blocks_wide_lookup[bsize];
       n = mbmi->palette_size[0];
-      l = mbmi->palette_run_length[0];
 
       vp9_write_token(w, vp9_palette_size_tree,
                       cm->fc.palette_size_prob[bsize - BLOCK_8X8],
                       &palette_size_encodings[n - 2]);
-      vp9_write_literal(w, (l >> 1),
-                        get_bit_depth(palette_max_run(bsize)));
-      vp9_write_token(w, vp9_palette_scan_order_tree,
-                      cm->fc.palette_scan_order_prob[bsize - BLOCK_8X8],
-                      &palette_scan_order_encodings
-                      [mbmi->palette_scan_order[0]]);
 
       for (i = 0; i < n; i++)
         vp9_write_literal(w, mbmi->palette_colors[i], 8);
 
-      d = get_bit_depth(rows * cols);
-      for (i = 0; i < l; i += 2) {
-        vp9_write_literal(w, mbmi->palette_runs[i],
-                          get_bit_depth(n));
-        bits = get_bit_depth(mbmi->palette_runs[i + 1]);
-        vp9_write_token(w, vp9_palette_run_length_tree,
-                        cm->fc.palette_run_length_prob[bsize - BLOCK_8X8],
-                        &palette_run_length_encodings[bits > 6 ?
-                            6 : bits - 1]);
-        vp9_write_literal(w, mbmi->palette_runs[i + 1] - 1,
-                          bits > 6 ? d : bits);
+      vp9_run_lengh_decoding(cpi->mb.e_mbd.mi->mbmi.palette_runs,
+                             mbmi->palette_run_length[0],
+                             cpi->mb.e_mbd.palette_map_buffer);
+      vp9_palette_iscan(buffer, cpi->mb.e_mbd.palette_map_buffer, rows, cols,
+                        mbmi->palette_scan_order[0],
+                        cpi->mb.e_mbd.palette_scan_buffer);
+      vp9_write_literal(w, buffer[0], vp9_get_bit_depth(n));
+      for (i = 0; i < rows; i++) {
+        for (j = (i == 0 ? 1 : 0); j < cols; j++) {
+          color_ctx = vp9_get_palette_color_context(buffer, cols, i, j, n,
+                                                    color_order);
+          for (k = 0; k < n; k++)
+            if (buffer[i * cols + j] == color_order[k]) {
+              color_new_idx = k;
+              break;
+            }
+          vp9_write_token(w, vp9_palette_color_tree,
+                          cm->fc.palette_color_prob[n - 2][color_ctx],
+                          &palette_color_encodings[color_new_idx]);
+        }
       }
     }
 
     if (mbmi->palette_enabled[1]) {
-      const uint16_t *runs = mbmi->palette_runs + PALETTE_MAX_RUNS;
-      int rows = 4 * num_4x4_blocks_high_lookup[bsize] >>
+      rows = 4 * num_4x4_blocks_high_lookup[bsize] >>
           xd->plane[1].subsampling_y;
-      int cols = 4 * num_4x4_blocks_wide_lookup[bsize] >>
+      cols = 4 * num_4x4_blocks_wide_lookup[bsize] >>
           xd->plane[1].subsampling_x;
       n = mbmi->palette_size[1];
-      l = mbmi->palette_run_length[1];
 
       if (xd->plane[1].subsampling_x && xd->plane[1].subsampling_y) {
         vp9_write_token(w, vp9_palette_size_tree,
                         cm->fc.palette_uv_size_prob[bsize - BLOCK_8X8],
                         &palette_size_encodings[n - 2]);
-        vp9_write_literal(w, (l >> 1),
-                          get_bit_depth(palette_max_run(uv_bsize)));
-        vp9_write_token(w, vp9_palette_scan_order_tree,
-                        cm->fc.palette_uv_scan_order_prob[bsize - BLOCK_8X8],
-                        &palette_scan_order_encodings
-                        [mbmi->palette_scan_order[1]]);
       }
 
       for (i = 0; i < n; i++)
@@ -544,17 +541,27 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
         vp9_write_literal(w, mbmi->palette_colors[2 * PALETTE_MAX_SIZE + i], 8);
 
       if (xd->plane[1].subsampling_x && xd->plane[1].subsampling_y) {
-        d = get_bit_depth(rows * cols);
-        for (i = 0; i < l; i += 2) {
-          vp9_write_literal(w, runs[i],
-                            get_bit_depth(mbmi->palette_size[1]));
-          bits = get_bit_depth(runs[i + 1]);
-          vp9_write_token(w, vp9_palette_run_length_tree,
-                          cm->fc.palette_uv_run_length_prob[bsize - BLOCK_8X8],
-                                      &palette_run_length_encodings[bits > 6 ?
-                                                                6 : bits - 1]);
-          vp9_write_literal(w, runs[i + 1] - 1,
-                            bits > 6 ? d : bits);
+        vp9_run_lengh_decoding(cpi->mb.e_mbd.mi->mbmi.palette_runs +
+                               PALETTE_MAX_RUNS,
+                               mbmi->palette_run_length[1],
+                               cpi->mb.e_mbd.palette_map_buffer);
+        vp9_palette_iscan(buffer, cpi->mb.e_mbd.palette_map_buffer, rows,
+                          cols, mbmi->palette_scan_order[1],
+                          cpi->mb.e_mbd.palette_scan_buffer);
+        vp9_write_literal(w, buffer[0], vp9_get_bit_depth(n));
+        for (i = 0; i < rows; i++) {
+          for (j = (i == 0 ? 1 : 0); j < cols; j++) {
+            color_ctx = vp9_get_palette_color_context(buffer, cols, i, j, n,
+                                                      color_order);
+            for (k = 0; k < n; k++)
+              if (buffer[i * cols + j] == color_order[k]) {
+                color_new_idx = k;
+                break;
+              }
+            vp9_write_token(w, vp9_palette_color_tree,
+                            cm->fc.palette_uv_color_prob[n - 2][color_ctx],
+                            &palette_color_encodings[color_new_idx]);
+          }
         }
       }
     }
@@ -836,7 +843,12 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
   }
 }
 
-static void write_mb_modes_kf(const VP9_COMMON *cm, const MACROBLOCKD *xd,
+static void write_mb_modes_kf(const VP9_COMMON *cm,
+#if CONFIG_PALETTE
+                              MACROBLOCKD *xd,
+#else
+                              const MACROBLOCKD *xd,
+#endif  // CONFIG_PALETTE
                               MODE_INFO *mi_8x8, vp9_writer *w) {
   const struct segmentation *const seg = &cm->seg;
   const MODE_INFO *const mi = mi_8x8;
@@ -853,25 +865,26 @@ static void write_mb_modes_kf(const VP9_COMMON *cm, const MACROBLOCKD *xd,
 
 #if CONFIG_PALETTE
   if (bsize >= BLOCK_8X8 && cm->allow_palette_mode) {
-    int l, m1, m2, i, d, bits, ctx;
-    BLOCK_SIZE uv_bsize = get_plane_block_size(bsize, &xd->plane[1]);
+    int n, m1, m2, i, j, k, rows, cols, palette_ctx, color_ctx;
+    int color_new_idx = -1, color_order[PALETTE_MAX_SIZE];
+    uint8_t buffer[4096];
 
-    ctx = 0;
+    palette_ctx = 0;
     if (above_mi)
-      ctx += (above_mi->mbmi.palette_enabled[0] == 1);
+      palette_ctx += (above_mi->mbmi.palette_enabled[0] == 1);
     if (left_mi)
-      ctx += (left_mi->mbmi.palette_enabled[0] == 1);
+      palette_ctx += (left_mi->mbmi.palette_enabled[0] == 1);
     vp9_write(w, mbmi->palette_enabled[0],
-              cm->fc.palette_enabled_prob[bsize - BLOCK_8X8][ctx]);
+              cm->fc.palette_enabled_prob[bsize - BLOCK_8X8][palette_ctx]);
     vp9_write(w, mbmi->palette_enabled[1],
               cm->fc.palette_uv_enabled_prob[mbmi->palette_enabled[0]]);
 
     if (mbmi->palette_enabled[0]) {
-      int rows = 4 * num_4x4_blocks_high_lookup[bsize];
-      int cols = 4 * num_4x4_blocks_wide_lookup[bsize];
+      rows = 4 * num_4x4_blocks_high_lookup[bsize];
+      cols = 4 * num_4x4_blocks_wide_lookup[bsize];
+      n = mbmi->palette_size[0];
       m1 = mbmi->palette_indexed_size;
       m2 = mbmi->palette_literal_size;
-      l = mbmi->palette_run_length[0];
 
       vp9_write_token(w, vp9_palette_size_tree,
                       cm->fc.palette_size_prob[bsize - BLOCK_8X8],
@@ -880,20 +893,13 @@ static void write_mb_modes_kf(const VP9_COMMON *cm, const MACROBLOCKD *xd,
           || !mbmi->palette_enabled[1])
         vp9_encode_uniform(w, MIN(mbmi->palette_size[0] + 1, 8),
                            mbmi->palette_indexed_size);
-
       if (PALETTE_DELTA_BIT)
         vp9_write_literal(w, mbmi->palette_delta_bitdepth, PALETTE_DELTA_BIT);
-      vp9_write_literal(w, (l >> 1),
-                        get_bit_depth(palette_max_run(bsize)));
-      vp9_write_token(w, vp9_palette_scan_order_tree,
-                      cm->fc.palette_scan_order_prob[bsize - BLOCK_8X8],
-                      &palette_scan_order_encodings
-                      [mbmi->palette_scan_order[0]]);
 
       if (m1 > 0) {
         for (i = 0; i < m1; i++)
           vp9_write_literal(w, mbmi->palette_indexed_colors[i],
-                            get_bit_depth(mbmi->current_palette_size));
+                            vp9_get_bit_depth(mbmi->current_palette_size));
         if (mbmi->palette_delta_bitdepth > 0) {
           for (i = 0; i < m1; i++) {
             vp9_write_bit(w, mbmi->palette_color_delta[i] < 0);
@@ -907,57 +913,67 @@ static void write_mb_modes_kf(const VP9_COMMON *cm, const MACROBLOCKD *xd,
           vp9_write_literal(w, mbmi->palette_literal_colors[i], 8);
       }
 
-      d = get_bit_depth(rows * cols);
-      for (i = 0; i < l; i += 2) {
-        vp9_write_literal(w, mbmi->palette_runs[i],
-                          get_bit_depth(m1 + m2));
-        bits = get_bit_depth(mbmi->palette_runs[i + 1]);
-        vp9_write_token(w, vp9_palette_run_length_tree,
-                        cm->fc.palette_run_length_prob[bsize - BLOCK_8X8],
-                        &palette_run_length_encodings[bits > 6 ?
-                            6 : bits - 1]);
-        vp9_write_literal(w, mbmi->palette_runs[i + 1] - 1,
-                          bits > 6 ? d : bits);
+      vp9_run_lengh_decoding(mi_8x8->mbmi.palette_runs,
+                             mbmi->palette_run_length[0],
+                             xd->palette_map_buffer);
+      vp9_palette_iscan(buffer, xd->palette_map_buffer, rows, cols,
+                        mbmi->palette_scan_order[0], xd->palette_scan_buffer);
+      vp9_write_literal(w, buffer[0], vp9_get_bit_depth(n));
+      for (i = 0; i < rows; i++) {
+        for (j = (i == 0 ? 1 : 0); j < cols; j++) {
+          color_ctx = vp9_get_palette_color_context(buffer, cols, i, j, n,
+                                                    color_order);
+          for (k = 0; k < n; k++)
+            if (buffer[i * cols + j] == color_order[k]) {
+              color_new_idx = k;
+              break;
+            }
+          vp9_write_token(w, vp9_palette_color_tree,
+                          cm->fc.palette_color_prob[n - 2][color_ctx],
+                          &palette_color_encodings[color_new_idx]);
+        }
       }
     }
 
     if (mbmi->palette_enabled[1]) {
-      const uint16_t *runs = mbmi->palette_runs + PALETTE_MAX_RUNS;
-      int rows = 4 * num_4x4_blocks_high_lookup[bsize] >>
+      rows = 4 * num_4x4_blocks_high_lookup[bsize] >>
           xd->plane[1].subsampling_y;
-      int cols = 4 * num_4x4_blocks_wide_lookup[bsize] >>
+      cols = 4 * num_4x4_blocks_wide_lookup[bsize] >>
           xd->plane[1].subsampling_x;
-      l = mbmi->palette_run_length[1];
+      n = mbmi->palette_size[1];
 
       if (xd->plane[1].subsampling_x && xd->plane[1].subsampling_y) {
         vp9_write_token(w, vp9_palette_size_tree,
                         cm->fc.palette_uv_size_prob[bsize - BLOCK_8X8],
-                        &palette_size_encodings[mbmi->palette_size[1] - 2]);
-        vp9_write_literal(w, (l >> 1),
-                          get_bit_depth(palette_max_run(uv_bsize)));
-        vp9_write_token(w, vp9_palette_scan_order_tree,
-                        cm->fc.palette_uv_scan_order_prob[bsize - BLOCK_8X8],
-                        &palette_scan_order_encodings
-                        [mbmi->palette_scan_order[1]]);
+                        &palette_size_encodings[n - 2]);
       }
 
-      for (i = 0; i < mbmi->palette_size[1]; i++)
+      for (i = 0; i < n; i++)
         vp9_write_literal(w, mbmi->palette_colors[PALETTE_MAX_SIZE + i], 8);
-      for (i = 0; i < mbmi->palette_size[1]; i++)
+      for (i = 0; i < n; i++)
         vp9_write_literal(w, mbmi->palette_colors[2 * PALETTE_MAX_SIZE + i], 8);
 
       if (xd->plane[1].subsampling_x && xd->plane[1].subsampling_y) {
-        d = get_bit_depth(rows * cols);
-        for (i = 0; i < l; i += 2) {
-          vp9_write_literal(w, runs[i],
-                            get_bit_depth(mbmi->palette_size[1]));
-          bits = get_bit_depth(runs[i + 1]);
-          vp9_write_token(w, vp9_palette_run_length_tree,
-                          cm->fc.palette_uv_run_length_prob[bsize - BLOCK_8X8],
-                                        &palette_run_length_encodings[bits > 6 ?
-                                                                 6 : bits - 1]);
-          vp9_write_literal(w, runs[i + 1] - 1,
-                            bits > 6 ? d : bits);
+        vp9_run_lengh_decoding(mi_8x8->mbmi.palette_runs + PALETTE_MAX_RUNS,
+                               mbmi->palette_run_length[1],
+                               xd->palette_map_buffer);
+        vp9_palette_iscan(buffer, xd->palette_map_buffer, rows,
+                          cols, mbmi->palette_scan_order[1],
+                          xd->palette_scan_buffer);
+        vp9_write_literal(w, buffer[0], vp9_get_bit_depth(n));
+        for (i = 0; i < rows; i++) {
+          for (j = (i == 0 ? 1 : 0); j < cols; j++) {
+            color_ctx = vp9_get_palette_color_context(buffer, cols, i, j, n,
+                                                      color_order);
+            for (k = 0; k < n; k++)
+              if (buffer[i * cols + j] == color_order[k]) {
+                color_new_idx = k;
+                break;
+              }
+            vp9_write_token(w, vp9_palette_color_tree,
+                            cm->fc.palette_uv_color_prob[n - 2][color_ctx],
+                            &palette_color_encodings[color_new_idx]);
+          }
         }
       }
     }

@@ -39,7 +39,8 @@ extern "C" {
 #define PALETTE_BUF_SIZE 16
 #define PALETTE_MAX_SIZE 8
 #define PALETTE_DELTA_BIT 0
-#define PALETTE_MAX_RUNS 128
+#define PALETTE_MAX_RUNS 512
+#define PALETTE_COLOR_CONTEXTS 16
 #endif  // CONFIG_PALETTE
 
 /* Segment Feature Masks */
@@ -357,7 +358,7 @@ typedef struct macroblockd {
   DECLARE_ALIGNED(16, uint8_t, color_index_map[2][64 * 64]);
   DECLARE_ALIGNED(16, int, palette_scan_buffer[64 * 64]);
   DECLARE_ALIGNED(16, uint8_t, palette_map_buffer[64 * 64]);
-#endif
+#endif  // CONFIG_PALETTE
 
   ENTROPY_CONTEXT *above_context[MAX_MB_PLANE];
   ENTROPY_CONTEXT left_context[MAX_MB_PLANE][16];

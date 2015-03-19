@@ -795,7 +795,7 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   for (i = 0; i < 2; i++) {
     pd[i].color_index_map = ctx->color_index_map[i];
   }
-#endif
+#endif  // CONFIG_PALETTE
 
   // Restore the coding context of the MB to that that was in place
   // when the mode was picked for it
@@ -4989,9 +4989,9 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
     vp9_tokenize_sb(cpi, t, !output_enabled, MAX(bsize, BLOCK_8X8));
 #if CONFIG_PALETTE
     if (mbmi->palette_enabled[0] && output_enabled) {
-      palette_color_insertion(cm->current_palette_colors,
-                              &cm ->current_palette_size,
-                              cm->current_palette_count, mbmi);
+      vp9_palette_color_insertion(cm->current_palette_colors,
+                                  &cm ->current_palette_size,
+                                  cm->current_palette_count, mbmi);
     }
     if (frame_is_intra_only(cm) && output_enabled && bsize >= BLOCK_8X8) {
       cm->block_counter++;
@@ -5080,7 +5080,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
           palette_ctx += (above_mi->mbmi.palette_enabled[0] == 1);
         if (left_mi)
           palette_ctx += (left_mi->mbmi.palette_enabled[0] == 1);
-        update_palette_counts(&cm->counts, mbmi, bsize, palette_ctx);
+        vp9_update_palette_counts(&cm->counts, mbmi, bsize, palette_ctx);
       }
 #endif  // CONFIG_PALETTE
   }

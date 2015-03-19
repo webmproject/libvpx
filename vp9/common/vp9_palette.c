@@ -16,7 +16,7 @@
 #include "vp9/common/vp9_palette.h"
 
 #if CONFIG_PALETTE
-void insertion_sort(double *data, int n) {
+void vp9_insertion_sort(double *data, int n) {
   int i, j, k;
   double val;
 
@@ -38,7 +38,7 @@ void insertion_sort(double *data, int n) {
   }
 }
 
-int count_colors(const uint8_t *src, int stride, int rows, int cols) {
+int vp9_count_colors(const uint8_t *src, int stride, int rows, int cols) {
   int n = 0, r, c, i, val_count[256];
   uint8_t val;
   vpx_memset(val_count, 0, sizeof(val_count));
@@ -59,7 +59,7 @@ int count_colors(const uint8_t *src, int stride, int rows, int cols) {
     return n;
 }
 
-int run_lengh_encoding(uint8_t *seq, int n, uint16_t *runs, int max_run) {
+int vp9_run_lengh_encoding(uint8_t *seq, int n, uint16_t *runs, int max_run) {
   int this_run, i, l = 0;
   uint8_t symbol;
 
@@ -81,7 +81,7 @@ int run_lengh_encoding(uint8_t *seq, int n, uint16_t *runs, int max_run) {
   return l;
 }
 
-int run_lengh_decoding(uint16_t *runs, int l, uint8_t *seq) {
+int vp9_run_lengh_decoding(uint16_t *runs, int l, uint8_t *seq) {
   int i, j = 0;
 
   for (i = 0; i < l; i += 2) {
@@ -92,7 +92,8 @@ int run_lengh_decoding(uint16_t *runs, int l, uint8_t *seq) {
   return j;
 }
 
-void transpose_block(uint8_t *seq_in, uint8_t *seq_out, int rows, int cols) {
+static void transpose_block(uint8_t *seq_in, uint8_t *seq_out, int rows,
+                            int cols) {
   int r, c;
 
   for (r = 0; r < cols; r++)
@@ -100,8 +101,8 @@ void transpose_block(uint8_t *seq_in, uint8_t *seq_out, int rows, int cols) {
       seq_out[r * rows + c] = seq_in[c * cols + r];
 }
 
-void palette_color_insertion(uint8_t *old_colors, int *m, int *count,
-                             MB_MODE_INFO *mbmi) {
+void vp9_palette_color_insertion(uint8_t *old_colors, int *m, int *count,
+                                 MB_MODE_INFO *mbmi) {
   int k = *m, n = mbmi->palette_literal_size;
   int i, j, l, min_idx = -1;
   uint8_t *new_colors = mbmi->palette_literal_colors;
@@ -149,7 +150,7 @@ void palette_color_insertion(uint8_t *old_colors, int *m, int *count,
   *m = k;
 }
 
-int palette_color_lookup(uint8_t *dic, int n, uint8_t val, int bits) {
+int vp9_palette_color_lookup(uint8_t *dic, int n, uint8_t val, int bits) {
   int j, min, arg_min = 0, i = 1;
 
   if (n < 1)
@@ -172,7 +173,7 @@ int palette_color_lookup(uint8_t *dic, int n, uint8_t val, int bits) {
     return -1;
 }
 
-int get_bit_depth(int n) {
+int vp9_get_bit_depth(int n) {
   int i = 1, p = 2;
   while (p < n) {
     i++;
@@ -182,18 +183,7 @@ int get_bit_depth(int n) {
   return i;
 }
 
-int palette_max_run(BLOCK_SIZE bsize) {
-  int table[BLOCK_SIZES] = {
-      32, 32, 32, 32,  // BLOCK_4X4,   BLOCK_4X8,   BLOCK_8X4,   BLOCK_8X8
-      64, 64, 64, 64,  // BLOCK_8X16,  BLOCK_16X8,  BLOCK_16X16, BLOCK_16X32
-      64, 64, 64, 64,  // BLOCK_32X16, BLOCK_32X32, BLOCK_32X64, BLOCK_64X32
-      64               // BLOCK_64X64
-  };
-
-  return table[bsize];
-}
-
-double calc_dist(double *p1, double *p2, int dim) {
+static double calc_dist(double *p1, double *p2, int dim) {
   double dist = 0;
   int i = 0;
 
@@ -203,8 +193,8 @@ double calc_dist(double *p1, double *p2, int dim) {
   return dist;
 }
 
-void calc_indices(double *data, double *centroids, int *indices,
-                  int n, int k, int dim) {
+void vp9_calc_indices(double *data, double *centroids, int *indices,
+                      int n, int k, int dim) {
   int i, j;
   double min_dist, this_dist;
 
@@ -260,21 +250,21 @@ double calc_total_dist(double *data, double *centroids, int *indices,
   return dist;
 }
 
-int k_means(double *data, double *centroids, int *indices,
-             int n, int k, int dim, int max_itr) {
+int vp9_k_means(double *data, double *centroids, int *indices,
+                int n, int k, int dim, int max_itr) {
   int i = 0;
   int *pre_indices;
   double pre_total_dist, cur_total_dist;
   double pre_centroids[256];
 
   pre_indices = vpx_memalign(16, n * sizeof(indices[0]));
-  calc_indices(data, centroids, indices, n, k, dim);
+  vp9_calc_indices(data, centroids, indices, n, k, dim);
   pre_total_dist = calc_total_dist(data, centroids, indices, n, k, dim);
   vpx_memcpy(pre_centroids, centroids, sizeof(pre_centroids[0]) * k * dim);
   vpx_memcpy(pre_indices, indices, sizeof(pre_indices[0]) * n);
   while (i < max_itr) {
     calc_centroids(data, centroids, indices, n, k, dim);
-    calc_indices(data, centroids, indices, n, k, dim);
+    vp9_calc_indices(data, centroids, indices, n, k, dim);
     cur_total_dist = calc_total_dist(data, centroids, indices, n, k, dim);
 
     if (cur_total_dist > pre_total_dist && 0) {
@@ -295,13 +285,13 @@ int k_means(double *data, double *centroids, int *indices,
   return i;
 }
 
-int is_in_boundary(int rows, int cols, int r, int c) {
+static int is_in_boundary(int rows, int cols, int r, int c) {
   if (r < 0 || r >= rows || c < 0 || c >= cols)
     return 0;
   return 1;
 }
 
-void zz_scan_order(int *order, int rows, int cols) {
+static void zz_scan_order(int *order, int rows, int cols) {
   int r, c, dir, idx;
 
   vpx_memset(order, 0, sizeof(order[0]) * rows * cols);
@@ -338,8 +328,8 @@ void zz_scan_order(int *order, int rows, int cols) {
   order[idx] = (rows - 1) * cols + cols - 1;
 }
 
-void spiral_order(int *order, int cols, int r_start, int c_start,
-                int h, int w, int idx) {
+static void spiral_order(int *order, int cols, int r_start, int c_start,
+                         int h, int w, int idx) {
   int r, c;
 
   if (h <= 0 && w <= 0) {
@@ -369,12 +359,12 @@ void spiral_order(int *order, int cols, int r_start, int c_start,
   spiral_order(order, cols, r_start + 1, c_start + 1, h - 2, w - 2, idx);
 }
 
-void spiral_scan_order(int *order, int rows, int cols) {
+static void spiral_scan_order(int *order, int rows, int cols) {
   spiral_order(order, cols, 0, 0, rows - 1, cols - 1, 0);
 }
 
-void palette_scan(uint8_t *color_index_map, uint8_t *sequence,
-                  int rows, int cols, PALETTE_SCAN_ORDER ps, int *scan_order) {
+void vp9_palette_scan(uint8_t *color_index_map, uint8_t *sequence, int rows,
+                      int cols, PALETTE_SCAN_ORDER ps, int *scan_order) {
   int i;
 
   switch (ps) {
@@ -399,8 +389,8 @@ void palette_scan(uint8_t *color_index_map, uint8_t *sequence,
   }
 }
 
-void palette_iscan(uint8_t *color_index_map, uint8_t *sequence,
-                   int rows, int cols, PALETTE_SCAN_ORDER ps, int *scan_order) {
+void vp9_palette_iscan(uint8_t *color_index_map, uint8_t *sequence, int rows,
+                       int cols, PALETTE_SCAN_ORDER ps, int *scan_order) {
   int i;
 
   switch (ps) {
@@ -425,21 +415,97 @@ void palette_iscan(uint8_t *color_index_map, uint8_t *sequence,
   }
 }
 
-void update_palette_counts(FRAME_COUNTS *counts, MB_MODE_INFO *mbmi,
-                           BLOCK_SIZE bsize, int palette_ctx) {
+void vp9_update_palette_counts(FRAME_COUNTS *counts, MB_MODE_INFO *mbmi,
+                               BLOCK_SIZE bsize, int palette_ctx) {
   int idx = bsize - BLOCK_8X8;
 
   counts->y_palette_enabled[idx][palette_ctx][mbmi->palette_enabled[0]]++;
   counts->uv_palette_enabled[mbmi->palette_enabled[0]]
                             [mbmi->palette_enabled[1]]++;
-  if (mbmi->palette_enabled[0]) {
-    counts->y_palette_scan_order[idx][mbmi->palette_scan_order[0]]++;
+  if (mbmi->palette_enabled[0])
     counts->y_palette_size[idx][mbmi->palette_size[0] - 2]++;
+  if (mbmi->palette_enabled[1])
+    counts->uv_palette_size[idx][mbmi->palette_size[1] - 2]++;
+}
+
+static const int palette_color_context_lookup[PALETTE_COLOR_CONTEXTS] = {
+    3993,  4235,  4378,  4380,  // (3, 0, 0, 0), (3, 2, 0, 0),
+                                // (3, 3, 2, 0), (3, 3, 2, 2),
+    5720,  6655,  7018,  7040,  // (4, 3, 3, 0), (5, 0, 0, 0),
+                                // (5, 3, 0, 0), (5, 3, 2, 0),
+    7260,  8228,  8250,  8470,  // (5, 5, 0, 0), (6, 2, 0, 0),
+                                // (6, 2, 2, 0), (6, 4, 0, 0),
+    9680, 10648, 10890, 13310   // (7, 3, 0, 0), (8, 0, 0, 0),
+                                // (8, 2, 0, 0), (10, 0, 0, 0)
+};
+
+int vp9_get_palette_color_context(uint8_t *color_map, int cols,
+                                  int r, int c, int n, int *color_order) {
+  int i, j, max, max_idx, temp;
+  int scores[PALETTE_MAX_SIZE];
+  int weights[4] = {3, 2, 3, 2};
+  int color_ctx = 0;
+  int color_neighbors[4];
+
+  assert(n <= PALETTE_MAX_SIZE);
+
+  if (c - 1 >= 0)
+    color_neighbors[0] = color_map[r * cols + c - 1];
+  else
+    color_neighbors[0] = -1;
+  if (c - 1 >= 0 && r - 1 >= 0)
+    color_neighbors[1] = color_map[(r - 1) * cols + c - 1];
+  else
+    color_neighbors[1] = -1;
+  if (r - 1 >= 0)
+    color_neighbors[2] = color_map[(r - 1) * cols + c];
+  else
+    color_neighbors[2] = -1;
+  if (r - 1 >= 0 && c + 1 <= cols - 1)
+    color_neighbors[3] = color_map[(r - 1) * cols + c + 1];
+  else
+    color_neighbors[3] = -1;
+
+  for (i = 0; i < PALETTE_MAX_SIZE; i++)
+    color_order[i] = i;
+  memset(scores, 0, PALETTE_MAX_SIZE * sizeof(scores[0]));
+  for (i = 0; i < 4; i++) {
+    if (color_neighbors[i] >= 0)
+      scores[color_neighbors[i]] += weights[i];
   }
 
-  if (mbmi->palette_enabled[1]) {
-    counts->uv_palette_scan_order[idx][mbmi->palette_scan_order[1]]++;
-    counts->uv_palette_size[idx][mbmi->palette_size[1] - 2]++;
+  for (i = 0; i < 4; i++) {
+    max = scores[i];
+    max_idx = i;
+    j = i + 1;
+    while (j < n) {
+      if (scores[j] > max) {
+        max = scores[j];
+        max_idx = j;
+      }
+      j++;
+    }
+
+    if (max_idx != i) {
+      temp = scores[i];
+      scores[i] = scores[max_idx];
+      scores[max_idx] = temp;
+
+      temp = color_order[i];
+      color_order[i] = color_order[max_idx];
+      color_order[max_idx] = temp;
+    }
   }
+
+  for (i = 0; i < 4; i++)
+    color_ctx = color_ctx * 11 + scores[i];
+
+  for (i = 0; i < PALETTE_COLOR_CONTEXTS; i++)
+    if (color_ctx == palette_color_context_lookup[i]) {
+      color_ctx = i;
+      break;
+    }
+
+  return color_ctx;
 }
 #endif  // CONFIG_PALETTE
