@@ -723,12 +723,14 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_VP9_TEMPORAL_DENOISING
   vp9_denoiser_reset_frame_stats(ctx);
 #endif
+
   if (cpi->rc.frames_since_golden == 0) {
-    ref_frame_skip_mask |= (1 << GOLDEN_FRAME);
+    cpi->ref_frame_flags &= (~VP9_GOLD_FLAG);
     usable_ref_frame = LAST_FRAME;
   } else {
     usable_ref_frame = GOLDEN_FRAME;
   }
+
   for (ref_frame = LAST_FRAME; ref_frame <= usable_ref_frame; ++ref_frame) {
     const YV12_BUFFER_CONFIG *yv12 = get_ref_frame_buffer(cpi, ref_frame);
 
