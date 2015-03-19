@@ -681,6 +681,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int reuse_inter_pred = cpi->sf.reuse_inter_pred_sby && ctx->pred_pixel_ready;
   int ref_frame_skip_mask = 0;
   int idx;
+  int best_pred_sad = INT_MAX;
 
   if (reuse_inter_pred) {
     int i;
@@ -811,7 +812,10 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           continue;
 
         tmp_sad = vp9_int_pro_motion_estimation(cpi, x, bsize);
+
         if (tmp_sad > x->pred_mv_sad[LAST_FRAME])
+          continue;
+        if (tmp_sad + (num_pels_log2_lookup[bsize] << 4) > best_pred_sad)
           continue;
 
         frame_mv[NEWMV][ref_frame].as_int = mbmi->mv[0].as_int;
@@ -835,6 +839,17 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         &frame_mv[NEWMV][ref_frame], &rate_mv, best_rdc.rdcost)) {
         continue;
       }
+    }
+
+    if (this_mode == NEWMV && ref_frame == LAST_FRAME &&
+        frame_mv[NEWMV][LAST_FRAME].as_int != INVALID_MV) {
+      const int pre_stride = xd->plane[0].pre[0].stride;
+      const uint8_t * const pre_buf = xd->plane[0].pre[0].buf +
+          (frame_mv[NEWMV][LAST_FRAME].as_mv.row >> 3) * pre_stride +
+          (frame_mv[NEWMV][LAST_FRAME].as_mv.col >> 3);
+      best_pred_sad = cpi->fn_ptr[bsize].sdf(x->plane[0].src.buf,
+                                   x->plane[0].src.stride,
+                                   pre_buf, pre_stride);
     }
 
     if (this_mode != NEARESTMV &&
