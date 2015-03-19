@@ -8,6 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <assert.h>
 #include <emmintrin.h>  // SSE2
 #include "vp9/common/vp9_idct.h"  // for cospi constants
 #include "vp9/encoder/vp9_dct.h"
@@ -610,6 +611,7 @@ void vp9_fdct8x8_quant_sse2(const int16_t *input, int stride,
         __m128i qcoeff0, qcoeff1;
         __m128i qtmp0, qtmp1;
 
+        assert(index < (int)(sizeof(in) / sizeof(in[0])) - 1);
         coeff0 = *in[index];
         coeff1 = *in[index + 1];
 
