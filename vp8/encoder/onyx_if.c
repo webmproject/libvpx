@@ -2270,9 +2270,6 @@ void vp8_remove_compressor(VP8_COMP **ptr)
 
             if (cpi->b_calculate_psnr)
             {
-                YV12_BUFFER_CONFIG *lst_yv12 =
-                              &cpi->common.yv12_fb[cpi->common.lst_fb_idx];
-
                 if (cpi->oxcf.number_of_layers > 1)
                 {
                     int i;
@@ -2284,7 +2281,7 @@ void vp8_remove_compressor(VP8_COMP **ptr)
                         double dr = (double)cpi->bytes_in_layer[i] *
                                               8.0 / 1000.0  / time_encoded;
                         double samples = 3.0 / 2 * cpi->frames_in_layer[i] *
-                                         lst_yv12->y_width * lst_yv12->y_height;
+                                         cpi->common.Width * cpi->common.Height;
                         double total_psnr =
                             vpx_sse_to_psnr(samples, 255.0,
                                             cpi->total_error2[i]);
@@ -2306,7 +2303,7 @@ void vp8_remove_compressor(VP8_COMP **ptr)
                 else
                 {
                     double samples = 3.0 / 2 * cpi->count *
-                                        lst_yv12->y_width * lst_yv12->y_height;
+                                     cpi->common.Width * cpi->common.Height;
                     double total_psnr = vpx_sse_to_psnr(samples, 255.0,
                                                         cpi->total_sq_error);
                     double total_psnr2 = vpx_sse_to_psnr(samples, 255.0,
@@ -5673,19 +5670,23 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
                 double frame_psnr;
                 YV12_BUFFER_CONFIG      *orig = cpi->Source;
                 YV12_BUFFER_CONFIG      *recon = cpi->common.frame_to_show;
-                int y_samples = orig->y_height * orig->y_width ;
-                int uv_samples = orig->uv_height * orig->uv_width ;
+                unsigned int y_width = cpi->common.Width;
+                unsigned int y_height = cpi->common.Height;
+                unsigned int uv_width = (y_width + 1) / 2;
+                unsigned int uv_height = (y_height + 1) / 2;
+                int y_samples = y_height * y_width;
+                int uv_samples = uv_height * uv_width;
                 int t_samples = y_samples + 2 * uv_samples;
                 double sq_error;
 
                 ye = calc_plane_error(orig->y_buffer, orig->y_stride,
-                  recon->y_buffer, recon->y_stride, orig->y_width, orig->y_height);
+                  recon->y_buffer, recon->y_stride, y_width, y_height);
 
                 ue = calc_plane_error(orig->u_buffer, orig->uv_stride,
-                  recon->u_buffer, recon->uv_stride, orig->uv_width, orig->uv_height);
+                  recon->u_buffer, recon->uv_stride, uv_width, uv_height);
 
                 ve = calc_plane_error(orig->v_buffer, orig->uv_stride,
-                  recon->v_buffer, recon->uv_stride, orig->uv_width, orig->uv_height);
+                  recon->v_buffer, recon->uv_stride, uv_width, uv_height);
 
                 sq_error = (double)(ye + ue + ve);
 
@@ -5707,13 +5708,13 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
                     vp8_clear_system_state();
 
                     ye = calc_plane_error(orig->y_buffer, orig->y_stride,
-                      pp->y_buffer, pp->y_stride, orig->y_width, orig->y_height);
+                      pp->y_buffer, pp->y_stride, y_width, y_height);
 
                     ue = calc_plane_error(orig->u_buffer, orig->uv_stride,
-                      pp->u_buffer, pp->uv_stride, orig->uv_width, orig->uv_height);
+                      pp->u_buffer, pp->uv_stride, uv_width, uv_height);
 
                     ve = calc_plane_error(orig->v_buffer, orig->uv_stride,
-                      pp->v_buffer, pp->uv_stride, orig->uv_width, orig->uv_height);
+                      pp->v_buffer, pp->uv_stride, uv_width, uv_height);
 
                     sq_error2 = (double)(ye + ue + ve);
 
