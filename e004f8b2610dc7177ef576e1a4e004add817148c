@@ -16,6 +16,24 @@
       "revId": "e004f8b2610dc7177ef576e1a4e004add817148c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//DSE\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1597,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-03-19T23:19:22Z",
+      "side": 1,
+      "message": "Good catch! :-)",
+      "parentUuid": "AAAAdn//DSk\u003d",
+      "revId": "e004f8b2610dc7177ef576e1a4e004add817148c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
