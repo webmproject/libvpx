@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//DSk\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1597,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2015-03-19T23:02:30Z",
+      "side": 1,
+      "message": "I think we still need to copy them like the original code did since pre[0] will be modified later.",
+      "revId": "e004f8b2610dc7177ef576e1a4e004add817148c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
