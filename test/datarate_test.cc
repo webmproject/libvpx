@@ -370,8 +370,10 @@ class DatarateTestVP9Large : public ::libvpx_test::EncoderTest,
       if (video->frame() == 0) {
         encoder->Control(VP9E_SET_SVC, 1);
       }
-      vpx_svc_layer_id_t layer_id = {0, 0};
+      vpx_svc_layer_id_t layer_id;
+#if VPX_ENCODER_ABI_VERSION > (4 + VPX_CODEC_ABI_VERSION)
       layer_id.spatial_layer_id = 0;
+#endif
       frame_flags_ = SetFrameFlags(video->frame(), cfg_.ts_number_layers);
       layer_id.temporal_layer_id = SetLayerId(video->frame(),
                                               cfg_.ts_number_layers);
