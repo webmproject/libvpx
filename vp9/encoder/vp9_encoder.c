@@ -126,6 +126,11 @@ void vp9_apply_active_map(VP9_COMP *cpi) {
 
   assert(AM_SEGMENT_ID_ACTIVE == CR_SEGMENT_ID_BASE);
 
+  if (frame_is_intra_only(&cpi->common)) {
+    cpi->active_map.enabled = 0;
+    cpi->active_map.update = 1;
+  }
+
   if (cpi->active_map.update) {
     if (cpi->active_map.enabled) {
       for (i = 0; i < cpi->common.mi_rows * cpi->common.mi_cols; ++i)
