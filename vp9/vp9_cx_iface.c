@@ -1450,10 +1450,8 @@ static vpx_codec_enc_cfg_map_t encoder_usage_cfg_map[] = {
       30,                 // rc_resize_up_thresold
 
       VPX_VBR,            // rc_end_usage
-#if VPX_ENCODER_ABI_VERSION > (1 + VPX_CODEC_ABI_VERSION)
       {NULL, 0},          // rc_twopass_stats_in
       {NULL, 0},          // rc_firstpass_mb_stats_in
-#endif
       256,                // rc_target_bandwidth
       0,                  // rc_min_quantizer
       63,                 // rc_max_quantizer
@@ -1481,9 +1479,6 @@ static vpx_codec_enc_cfg_map_t encoder_usage_cfg_map[] = {
       {0},                    // ts_rate_decimator
       0,                      // ts_periodicity
       {0},                    // ts_layer_id
-#if VPX_ENCODER_ABI_VERSION == (1 + VPX_CODEC_ABI_VERSION)
-      "vp8.fpf"           // first pass filename
-#endif
     }
   },
 };
