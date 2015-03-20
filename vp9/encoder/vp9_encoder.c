@@ -132,8 +132,14 @@ void vp9_apply_active_map(VP9_COMP *cpi) {
         if (seg_map[i] == AM_SEGMENT_ID_ACTIVE) seg_map[i] = active_map[i];
       vp9_enable_segmentation(seg);
       vp9_enable_segfeature(seg, AM_SEGMENT_ID_INACTIVE, SEG_LVL_SKIP);
+      vp9_enable_segfeature(seg, AM_SEGMENT_ID_INACTIVE, SEG_LVL_ALT_LF);
+      // Setting the data to -MAX_LOOP_FILTER will result in the computed loop
+      // filter level being zero regardless of the value of seg->abs_delta.
+      vp9_set_segdata(seg, AM_SEGMENT_ID_INACTIVE,
+                      SEG_LVL_ALT_LF, -MAX_LOOP_FILTER);
     } else {
       vp9_disable_segfeature(seg, AM_SEGMENT_ID_INACTIVE, SEG_LVL_SKIP);
+      vp9_disable_segfeature(seg, AM_SEGMENT_ID_INACTIVE, SEG_LVL_ALT_LF);
       if (seg->enabled) {
         seg->update_data = 1;
         seg->update_map = 1;
