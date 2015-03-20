@@ -2153,27 +2153,27 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
 
     add_proto qw/void vp9_highbd_quantize_b_64x64/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *zbin_ptr, const int16_t *round_ptr, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, const int16_t *dequant_ptr, uint16_t *eob_ptr, const int16_t *scan, const int16_t *iscan";
     specialize qw/vp9_highbd_quantize_b_64x64/;
+  }
 
-    if (vpx_config("CONFIG_NEW_QUANT") eq "yes") {
-      add_proto qw/void vp9_highbd_quantize_nuq/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, const int16_t *dequant_ptr, const cumbins_type_nuq *cumbins_ptr, const dequant_val_type_nuq *dequant_val, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr, const int16_t *scan, const uint8_t *band";
-      specialize qw/vp9_highbd_quantize_nuq/;
+  if (vpx_config("CONFIG_NEW_QUANT") eq "yes") {
+    add_proto qw/void vp9_highbd_quantize_nuq/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, const int16_t *dequant_ptr, const cumbins_type_nuq *cumbins_ptr, const dequant_val_type_nuq *dequant_val, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr, const int16_t *scan, const uint8_t *band";
+    specialize qw/vp9_highbd_quantize_nuq/;
 
-      add_proto qw/void vp9_highbd_quantize_fp_nuq/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *quant_ptr, const int16_t *dequant_ptr, const cumbins_type_nuq *cumbins_ptr, const dequant_val_type_nuq *dequant_val, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr, const int16_t *scan, const uint8_t *band";
-      specialize qw/vp9_highbd_quantize_fp_nuq/;
+    add_proto qw/void vp9_highbd_quantize_fp_nuq/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *quant_ptr, const int16_t *dequant_ptr, const cumbins_type_nuq *cumbins_ptr, const dequant_val_type_nuq *dequant_val, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr, const int16_t *scan, const uint8_t *band";
+    specialize qw/vp9_highbd_quantize_fp_nuq/;
 
-      add_proto qw/void vp9_highbd_quantize_32x32_nuq/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, const int16_t *dequant_ptr, const cumbins_type_nuq *cumbins_ptr, const dequant_val_type_nuq *dequant_val, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr, const int16_t *scan, const uint8_t *band";
-      specialize qw/vp9_highbd_quantize_32x32_nuq/;
+    add_proto qw/void vp9_highbd_quantize_32x32_nuq/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, const int16_t *dequant_ptr, const cumbins_type_nuq *cumbins_ptr, const dequant_val_type_nuq *dequant_val, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr, const int16_t *scan, const uint8_t *band";
+    specialize qw/vp9_highbd_quantize_32x32_nuq/;
 
-      add_proto qw/void vp9_highbd_quantize_32x32_fp_nuq/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *quant_ptr, const int16_t *dequant_ptr, const cumbins_type_nuq *cumbins_ptr, const dequant_val_type_nuq *dequant_val, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr, const int16_t *scan, const uint8_t *band";
-      specialize qw/vp9_highbd_quantize_32x32_fp_nuq/;
+    add_proto qw/void vp9_highbd_quantize_32x32_fp_nuq/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *quant_ptr, const int16_t *dequant_ptr, const cumbins_type_nuq *cumbins_ptr, const dequant_val_type_nuq *dequant_val, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr, const int16_t *scan, const uint8_t *band";
+    specialize qw/vp9_highbd_quantize_32x32_fp_nuq/;
 
-      if (vpx_config("CONFIG_TX64X64") eq "yes") {
-        add_proto qw/void vp9_highbd_quantize_64x64_nuq/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, const int16_t *dequant_ptr, const cumbins_type_nuq *cumbins_ptr, const dequant_val_type_nuq *dequant_val, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr, const int16_t *scan, const uint8_t *band";
-        specialize qw/vp9_highbd_quantize_64x64_nuq/;
+    if (vpx_config("CONFIG_TX64X64") eq "yes") {
+      add_proto qw/void vp9_highbd_quantize_64x64_nuq/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *quant_ptr, const int16_t *quant_shift_ptr, const int16_t *dequant_ptr, const cumbins_type_nuq *cumbins_ptr, const dequant_val_type_nuq *dequant_val, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr, const int16_t *scan, const uint8_t *band";
+      specialize qw/vp9_highbd_quantize_64x64_nuq/;
 
-        add_proto qw/void vp9_highbd_quantize_64x64_fp_nuq/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *quant_ptr, const int16_t *dequant_ptr, const cumbins_type_nuq *cumbins_ptr, const dequant_val_type_nuq *dequant_val, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr, const int16_t *scan, const uint8_t *band";
-        specialize qw/vp9_highbd_quantize_64x64_fp_nuq/;
-      }
+      add_proto qw/void vp9_highbd_quantize_64x64_fp_nuq/, "const tran_low_t *coeff_ptr, intptr_t n_coeffs, int skip_block, const int16_t *quant_ptr, const int16_t *dequant_ptr, const cumbins_type_nuq *cumbins_ptr, const dequant_val_type_nuq *dequant_val, tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr, uint16_t *eob_ptr, const int16_t *scan, const uint8_t *band";
+      specialize qw/vp9_highbd_quantize_64x64_fp_nuq/;
     }
   }
 

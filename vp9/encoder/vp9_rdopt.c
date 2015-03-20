@@ -4039,7 +4039,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 #else
   if (this_mode == NEWMV) {
 #endif
-    int rate_mv;
+    int rate_mv = 0;
     if (is_comp_pred) {
 #if CONFIG_COMPOUND_MODES
       if (this_mode == NEW_NEWMV) {

@@ -300,6 +300,7 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
   int shift = mbmi->tx_skip_shift;
   PREDICTION_MODE mode = (plane == 0) ? get_y_mode(xd->mi[0].src_mi, block):
                                         mbmi->uv_mode;
+  (void) mode;
 #endif
   if (eob > 0) {
     TX_TYPE tx_type = DCT_DCT;
@@ -462,7 +463,9 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
         }
       }
     }
-#else
+
+#else  // CONFIG_VP9_HIGHBITDEPTH
+
 #if CONFIG_TX_SKIP
     if (xd->lossless && !mbmi->tx_skip[plane != 0]) {
 #else
