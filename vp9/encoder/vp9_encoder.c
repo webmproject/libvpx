@@ -183,6 +183,33 @@ int vp9_set_active_map(VP9_COMP* cpi,
   }
 }
 
+int vp9_get_active_map(VP9_COMP* cpi,
+                       unsigned char* new_map_16x16,
+                       int rows,
+                       int cols) {
+  if (rows == cpi->common.mb_rows && cols == cpi->common.mb_cols &&
+      new_map_16x16) {
+    unsigned char* const seg_map_8x8 = cpi->segmentation_map;
+    const int mi_rows = cpi->common.mi_rows;
+    const int mi_cols = cpi->common.mi_cols;
+    vpx_memset(new_map_16x16, !cpi->active_map.enabled, rows * cols);
+    if (cpi->active_map.enabled) {
+      int r, c;
+      for (r = 0; r < mi_rows; ++r) {
+        for (c = 0; c < mi_cols; ++c) {
+          // Cyclic refresh segments are considered active despite not having
+          // AM_SEGMENT_ID_ACTIVE
+          new_map_16x16[(r >> 1) * cols + (c >> 1)] |=
+              seg_map_8x8[r * mi_cols + c] != AM_SEGMENT_ID_INACTIVE;
+        }
+      }
+    }
+    return 0;
+  } else {
+    return -1;
+  }
+}
+
 void vp9_set_high_precision_mv(VP9_COMP *cpi, int allow_high_precision_mv) {
   MACROBLOCK *const mb = &cpi->td.mb;
   cpi->common.allow_high_precision_mv = allow_high_precision_mv;
