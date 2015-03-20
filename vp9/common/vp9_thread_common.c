@@ -13,6 +13,7 @@
 #include "vp9/common/vp9_entropymode.h"
 #include "vp9/common/vp9_thread_common.h"
 #include "vp9/common/vp9_reconinter.h"
+#include "vp9/common/vp9_loopfilter.h"
 
 #if CONFIG_MULTITHREAD
 static INLINE void mutex_lock(pthread_mutex_t *const mutex) {
@@ -92,10 +93,17 @@ void thread_loop_filter_rows(const YV12_BUFFER_CONFIG *const frame_buffer,
                              int start, int stop, int y_only,
                              VP9LfSync *const lf_sync) {
   const int num_planes = y_only ? 1 : MAX_MB_PLANE;
-  const int use_420 = y_only || (planes[1].subsampling_y == 1 &&
-                                 planes[1].subsampling_x == 1);
   const int sb_cols = mi_cols_aligned_to_sb(cm->mi_cols) >> MI_BLOCK_SIZE_LOG2;
   int mi_row, mi_col;
+  enum lf_path path;
+  if (y_only)
+    path = LF_PATH_444;
+  else if (planes[1].subsampling_y == 1 && planes[1].subsampling_x == 1)
+    path = LF_PATH_420;
+  else if (planes[1].subsampling_y == 0 && planes[1].subsampling_x == 0)
+    path = LF_PATH_444;
+  else
+    path = LF_PATH_SLOW;
 
   for (mi_row = start; mi_row < stop;
        mi_row += lf_sync->num_workers * MI_BLOCK_SIZE) {
@@ -112,16 +120,23 @@ void thread_loop_filter_rows(const YV12_BUFFER_CONFIG *const frame_buffer,
       vp9_setup_dst_planes(planes, frame_buffer, mi_row, mi_col);
 
       // TODO(JBB): Make setup_mask work for non 420.
-      if (use_420)
-        vp9_setup_mask(cm, mi_row, mi_col, mi + mi_col, cm->mi_stride,
-                       &lfm);
+      vp9_setup_mask(cm, mi_row, mi_col, mi + mi_col, cm->mi_stride,
+                     &lfm);
 
-      for (plane = 0; plane < num_planes; ++plane) {
-        if (use_420)
-          vp9_filter_block_plane(cm, &planes[plane], mi_row, &lfm);
-        else
-          vp9_filter_block_plane_non420(cm, &planes[plane], mi + mi_col,
-                                        mi_row, mi_col);
+      vp9_filter_block_plane_ss00(cm, &planes[0], mi_row, &lfm);
+      for (plane = 1; plane < num_planes; ++plane) {
+        switch (path) {
+          case LF_PATH_420:
+            vp9_filter_block_plane_ss11(cm, &planes[plane], mi_row, &lfm);
+            break;
+          case LF_PATH_444:
+            vp9_filter_block_plane_ss00(cm, &planes[plane], mi_row, &lfm);
+            break;
+          case LF_PATH_SLOW:
+            vp9_filter_block_plane_non420(cm, &planes[plane], mi + mi_col,
+                                          mi_row, mi_col);
+            break;
+        }
       }
 
       sync_write(lf_sync, r, c, sb_cols);

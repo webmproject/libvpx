@@ -29,6 +29,12 @@ extern "C" {
 #define MAX_REF_LF_DELTAS       4
 #define MAX_MODE_LF_DELTAS      2
 
+enum lf_path {
+  LF_PATH_420,
+  LF_PATH_444,
+  LF_PATH_SLOW,
+};
+
 struct loopfilter {
   int filter_level;
 
@@ -92,10 +98,15 @@ void vp9_setup_mask(struct VP9Common *const cm,
                     MODE_INFO *mi_8x8, const int mode_info_stride,
                     LOOP_FILTER_MASK *lfm);
 
-void vp9_filter_block_plane(struct VP9Common *const cm,
-                            struct macroblockd_plane *const plane,
-                            int mi_row,
-                            LOOP_FILTER_MASK *lfm);
+void vp9_filter_block_plane_ss00(struct VP9Common *const cm,
+                                 struct macroblockd_plane *const plane,
+                                 int mi_row,
+                                 LOOP_FILTER_MASK *lfm);
+
+void vp9_filter_block_plane_ss11(struct VP9Common *const cm,
+                                 struct macroblockd_plane *const plane,
+                                 int mi_row,
+                                 LOOP_FILTER_MASK *lfm);
 
 void vp9_filter_block_plane_non420(struct VP9Common *cm,
                                    struct macroblockd_plane *plane,
