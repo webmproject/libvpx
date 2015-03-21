@@ -850,6 +850,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       best_pred_sad = cpi->fn_ptr[bsize].sdf(x->plane[0].src.buf,
                                    x->plane[0].src.stride,
                                    pre_buf, pre_stride);
+      x->pred_mv_sad[LAST_FRAME] = best_pred_sad;
     }
 
     if (this_mode != NEARESTMV &&
