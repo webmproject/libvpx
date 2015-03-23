@@ -230,25 +230,27 @@ $(BUILD_PFX)libvpx_g.a: $(LIBVPX_OBJS)
 
 BUILD_LIBVPX_SO         := $(if $(BUILD_LIBVPX),$(CONFIG_SHARED))
 
+SO_VERSION_MAJOR := 2
+SO_VERSION_MINOR := 0
+SO_VERSION_PATCH := 0
 ifeq ($(filter darwin%,$(TGT_OS)),$(TGT_OS))
-LIBVPX_SO               := libvpx.$(VERSION_MAJOR).dylib
+LIBVPX_SO               := libvpx.$(SO_VERSION_MAJOR).dylib
 EXPORT_FILE             := libvpx.syms
 LIBVPX_SO_SYMLINKS      := $(addprefix $(LIBSUBDIR)/, \
                              libvpx.dylib  )
 else
-LIBVPX_SO               := libvpx.so.$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH)
+LIBVPX_SO               := libvpx.so.$(SO_VERSION_MAJOR).$(SO_VERSION_MINOR).$(SO_VERSION_PATCH)
 EXPORT_FILE             := libvpx.ver
-SYM_LINK                := libvpx.so
 LIBVPX_SO_SYMLINKS      := $(addprefix $(LIBSUBDIR)/, \
-                             libvpx.so libvpx.so.$(VERSION_MAJOR) \
-                             libvpx.so.$(VERSION_MAJOR).$(VERSION_MINOR))
+                             libvpx.so libvpx.so.$(SO_VERSION_MAJOR) \
+                             libvpx.so.$(SO_VERSION_MAJOR).$(SO_VERSION_MINOR))
 endif
 
 LIBS-$(BUILD_LIBVPX_SO) += $(BUILD_PFX)$(LIBVPX_SO)\
                            $(notdir $(LIBVPX_SO_SYMLINKS))
 $(BUILD_PFX)$(LIBVPX_SO): $(LIBVPX_OBJS) $(EXPORT_FILE)
 $(BUILD_PFX)$(LIBVPX_SO): extralibs += -lm
-$(BUILD_PFX)$(LIBVPX_SO): SONAME = libvpx.so.$(VERSION_MAJOR)
+$(BUILD_PFX)$(LIBVPX_SO): SONAME = libvpx.so.$(SO_VERSION_MAJOR)
 $(BUILD_PFX)$(LIBVPX_SO): EXPORTS_FILE = $(EXPORT_FILE)
 
 libvpx.ver: $(call enabled,CODEC_EXPORTS)
