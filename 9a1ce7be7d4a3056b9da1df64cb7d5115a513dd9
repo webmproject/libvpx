@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//C24\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 2861,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-03-23T16:57:17Z",
+      "side": 1,
+      "message": "abs(source_variance - recon_variance) ?",
+      "revId": "9a1ce7be7d4a3056b9da1df64cb7d5115a513dd9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
