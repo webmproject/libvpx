@@ -16,7 +16,7 @@
  * @{
  */
 #include "./vp8.h"
-#include "vpx/vpx_encoder.h"
+#include "./vpx_encoder.h"
 
 /*!\file
  * \brief Provides definitions for using VP8 or VP9 encoder algorithm within the
