@@ -38,7 +38,7 @@
 #define OUTPUT_FPF          0
 #define ARF_STATS_OUTPUT    0
 
-#define GROUP_ADAPTIVE_MAXQ 0
+#define GROUP_ADAPTIVE_MAXQ 1
 
 #define BOOST_BREAKOUT      12.5
 #define BOOST_FACTOR        12.5
