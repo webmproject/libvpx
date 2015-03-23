@@ -268,8 +268,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
     vp9_write(w, is_inter, vp9_get_intra_inter_prob(cm, xd));
 
   if (bsize >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT &&
-      !(is_inter &&
-        (skip || vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP)))) {
+      !(is_inter && skip)) {
     write_selected_tx_size(cm, xd, w);
   }
 
