@@ -4095,8 +4095,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                              &tmp_mv, &rate_mv);
         if (tmp_mv.as_int == INVALID_MV)
           return INT64_MAX;
-        frame_mv[refs[0]].as_int =
-            xd->mi[0].src_mi->bmi[0].as_mv[0].as_int = tmp_mv.as_int;
+        frame_mv[refs[0]].as_int = tmp_mv.as_int;
         single_newmv[refs[0]].as_int = tmp_mv.as_int;
         single_newmv_rate[refs[0]] = rate_mv;
       } else {
@@ -4114,8 +4113,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 #if !CONFIG_WEDGE_PARTITION
       *rate2 += rate_mv;
 #endif
-      frame_mv[refs[0]].as_int =
-          xd->mi[0].src_mi->bmi[0].as_mv[0].as_int = tmp_mv.as_int;
+      frame_mv[refs[0]].as_int = tmp_mv.as_int;
       single_newmv[refs[0]].as_int = tmp_mv.as_int;
 #endif  // CONFIG_INTERINTRA
     }
