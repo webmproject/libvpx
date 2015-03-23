@@ -87,6 +87,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//C2s\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 5244,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-03-23T17:01:40Z",
+      "side": 1,
+      "message": "I still don\u0027t understand why they are risky. In the updated patch, I moved large arrays to MACROBLOCK or MACROBLOCKD. Should I allocate memory for them dynamically (so that they are on the heap)?",
+      "parentUuid": "AAAAdn//Dkk\u003d",
+      "revId": "c4ac9536c27bc83c698304861604f9e0735bf4f5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//DkU\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 6
