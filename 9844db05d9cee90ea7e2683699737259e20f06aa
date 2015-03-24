@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Cvk\u003d",
+        "filename": "CHANGELOG",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-03-24T00:19:39Z",
+      "side": 1,
+      "message": "you could just label this v1.4.0 to avoid any churn; since any binary builds will be done from a git tree the version should work out correctly",
+      "revId": "9844db05d9cee90ea7e2683699737259e20f06aa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//CvI\u003d",
+        "filename": "CHANGELOG",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-03-24T00:19:39Z",
+      "side": 1,
+      "message": "should note that /tile/ threading is enabled by default; frame threading can be considered finalized from the api level, but is still considered experimental for this release",
+      "revId": "9844db05d9cee90ea7e2683699737259e20f06aa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
