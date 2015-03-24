@@ -1540,6 +1540,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                 int mi_row, int mi_col,
                                 int_mv single_newmv[MAX_REF_FRAMES],
                                 int *rate_mv) {
+  const VP9_COMMON *const cm = &cpi->common;
   const int pw = 4 * num_4x4_blocks_wide_lookup[bsize];
   const int ph = 4 * num_4x4_blocks_high_lookup[bsize];
   MACROBLOCKD *xd = &x->e_mbd;
@@ -1556,6 +1557,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   uint8_t *second_pred = vpx_memalign(16, pw * ph * sizeof(uint8_t));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   const InterpKernel *kernel = vp9_get_interp_kernel(mbmi->interp_filter);
+  struct scale_factors sf;
 
   // Do joint motion search in compound mode to get more accurate mv.
   struct buf_2d backup_yv12[2][MAX_MB_PLANE];
@@ -1591,6 +1593,17 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
     frame_mv[refs[ref]].as_int = single_newmv[refs[ref]].as_int;
   }
 
+  // Since we have scaled the reference frames to match the size of the current
+  // frame we must use a unit scaling factor during mode selection.
+#if CONFIG_VP9_HIGHBITDEPTH
+  vp9_setup_scale_factors_for_frame(&sf, cm->width, cm->height,
+                                    cm->width, cm->height,
+                                    cm->use_highbitdepth);
+#else
+  vp9_setup_scale_factors_for_frame(&sf, cm->width, cm->height,
+                                    cm->width, cm->height);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
   // Allow joint search multiple times iteratively for each reference frame
   // and break out of the search loop if it couldn't find a better mv.
   for (ite = 0; ite < 4; ite++) {
@@ -1619,8 +1632,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                        ref_yv12[!id].stride,
                                        second_pred, pw,
                                        &frame_mv[refs[!id]].as_mv,
-                                       &xd->block_refs[!id]->sf,
-                                       pw, ph, 0,
+                                       &sf, pw, ph, 0,
                                        kernel, MV_PRECISION_Q3,
                                        mi_col * MI_SIZE, mi_row * MI_SIZE,
                                        xd->bd);
@@ -1629,8 +1641,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                 ref_yv12[!id].stride,
                                 second_pred, pw,
                                 &frame_mv[refs[!id]].as_mv,
-                                &xd->block_refs[!id]->sf,
-                                pw, ph, 0,
+                                &sf, pw, ph, 0,
                                 kernel, MV_PRECISION_Q3,
                                 mi_col * MI_SIZE, mi_row * MI_SIZE);
     }
@@ -1639,8 +1650,7 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                               ref_yv12[!id].stride,
                               second_pred, pw,
                               &frame_mv[refs[!id]].as_mv,
-                              &xd->block_refs[!id]->sf,
-                              pw, ph, 0,
+                              &sf, pw, ph, 0,
                               kernel, MV_PRECISION_Q3,
                               mi_col * MI_SIZE, mi_row * MI_SIZE);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
