@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Clw\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-03-24T20:24:28Z",
+      "side": 0,
+      "message": "please use DECLARE_ALIGNED[_ARRAY] from this file instead of the vpx_mem internal one.",
+      "revId": "37426b87ff7adbce09e2d24e2ce203d950e82a59",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
