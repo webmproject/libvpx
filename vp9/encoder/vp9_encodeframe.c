@@ -1105,8 +1105,9 @@ static void rd_pick_sb_modes(VP9_COMP *cpi,
   } else if (aq_mode == CYCLIC_REFRESH_AQ) {
     const uint8_t *const map = cm->seg.update_map ? cpi->segmentation_map
                                                   : cm->last_frame_seg_map;
-    // If segment 1, use rdmult for that segment.
-    if (vp9_get_segment_id(cm, map, bsize, mi_row, mi_col))
+    // If segment is boosted, use rdmult for that segment.
+    if (cyclic_refresh_segment_id_boosted(
+            vp9_get_segment_id(cm, map, bsize, mi_row, mi_col)))
       x->rdmult = vp9_cyclic_refresh_get_rdmult(cpi->cyclic_refresh);
   }
 
@@ -2879,7 +2880,7 @@ static void nonrd_pick_sb_modes(VP9_COMP *cpi,
   mbmi->sb_type = bsize;
 
   if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cm->seg.enabled)
-    if (mbmi->segment_id)
+    if (cyclic_refresh_segment_id_boosted(mbmi->segment_id))
       x->rdmult = vp9_cyclic_refresh_get_rdmult(cpi->cyclic_refresh);
 
   if (cm->frame_type == KEY_FRAME)
