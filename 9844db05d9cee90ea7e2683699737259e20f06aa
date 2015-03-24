@@ -69,6 +69,24 @@
       "revId": "9844db05d9cee90ea7e2683699737259e20f06aa",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Cs0\u003d",
+        "filename": "CHANGELOG",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-03-24T02:53:03Z",
+      "side": 1,
+      "message": "actually is tile-based decoding on by default; yes the files may be, but did this get the same change as the encoder?\n\nmaybe change the decode line to say that vp9 files are now created to allow multi-threaded decoding by default. tile decoding was in the last release actually, though improvements may have been added afterward (loopfilter and otherwise)",
+      "parentUuid": "AAAAdn//Cuc\u003d",
+      "revId": "9844db05d9cee90ea7e2683699737259e20f06aa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
