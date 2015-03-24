@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//CiA\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-03-24T22:19:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Dno\u003d",
+      "revId": "445deba3b25dc9ca4858c96b0bac009c77383cd7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Dns\u003d",
         "filename": "configure",
         "patchSetId": 4
