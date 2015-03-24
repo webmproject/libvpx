@@ -16,6 +16,24 @@
       "revId": "a8b968857452875e342821ecfaeadaf77c2b8523",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//CsI\u003d",
+        "filename": "libs.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 233,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-03-24T05:41:00Z",
+      "side": 1,
+      "message": "either way; if there were other libs being installed the template and other portions of the build would need some work.",
+      "parentUuid": "AAAAdn//CsQ\u003d",
+      "revId": "a8b968857452875e342821ecfaeadaf77c2b8523",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
