@@ -457,6 +457,7 @@ void vp9_mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
   int best_sad = INT_MAX;
   int this_sad = INT_MAX;
   int max_mv = 0;
+  int near_same_nearest;
   uint8_t *src_y_ptr = x->plane[0].src.buf;
   uint8_t *ref_y_ptr;
   const int num_mv_refs = MAX_MV_REF_CANDIDATES +
@@ -469,23 +470,27 @@ void vp9_mv_pred(VP9_COMP *cpi, MACROBLOCK *x,
   pred_mv[2] = x->pred_mv[ref_frame];
   assert(num_mv_refs <= (int)(sizeof(pred_mv) / sizeof(pred_mv[0])));
 
+  near_same_nearest =
+      mbmi->ref_mvs[ref_frame][0].as_int == mbmi->ref_mvs[ref_frame][1].as_int;
   // Get the sad for each candidate reference mv.
   for (i = 0; i < num_mv_refs; ++i) {
     const MV *this_mv = &pred_mv[i];
+    int fp_row, fp_col;
 
-    max_mv = MAX(max_mv, MAX(abs(this_mv->row), abs(this_mv->col)) >> 3);
-    if (is_zero_mv(this_mv) && zero_seen)
+    if (i == 1 && near_same_nearest)
       continue;
+    fp_row = (this_mv->row + 3 + (this_mv->row >= 0)) >> 3;
+    fp_col = (this_mv->col + 3 + (this_mv->col >= 0)) >> 3;
+    max_mv = MAX(max_mv, MAX(abs(this_mv->row), abs(this_mv->col)) >> 3);
 
-    zero_seen |= is_zero_mv(this_mv);
+    if (fp_row ==0 && fp_col == 0 && zero_seen)
+      continue;
+    zero_seen |= (fp_row ==0 && fp_col == 0);
 
-    ref_y_ptr =
-        &ref_y_buffer[ref_y_stride * (this_mv->row >> 3) + (this_mv->col >> 3)];
-
+    ref_y_ptr =&ref_y_buffer[ref_y_stride * fp_row + fp_col];
     // Find sad for current vector.
     this_sad = cpi->fn_ptr[block_size].sdf(src_y_ptr, x->plane[0].src.stride,
                                            ref_y_ptr, ref_y_stride);
-
     // Note if it is the best so far.
     if (this_sad < best_sad) {
       best_sad = this_sad;
