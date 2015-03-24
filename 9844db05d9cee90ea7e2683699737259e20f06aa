@@ -87,6 +87,24 @@
       "revId": "9844db05d9cee90ea7e2683699737259e20f06aa",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Csk\u003d",
+        "filename": "CHANGELOG",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-03-24T03:37:12Z",
+      "side": 1,
+      "message": "Good point. I\u0027ve removed the \"by default\" from the decoder line. I can\u0027t think of a good way to clarify that the encoder is setting the correct flags, so I\u0027ll leave that information to the email where there is some more room.\n\nTrue about the tile based MT being in 1.3 - again, it seems more verbiage would be necessary for real clarity here and it\u0027s under \"Enhancements\" so I\u0027ll leave it alone.",
+      "parentUuid": "AAAAdn//Cs0\u003d",
+      "revId": "9844db05d9cee90ea7e2683699737259e20f06aa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
