@@ -54,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//CcQ\u003d",
+        "filename": "vp9/common/vp9_entropymode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 453,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-03-25T23:21:41Z",
+      "side": 1,
+      "message": "I don\u0027t follow, the convention here is to name after the left mode.",
+      "parentUuid": "AAAAdn//D5M\u003d",
+      "revId": "0c93a17c3d5a8923a6ef542cca3c9596c41a1b5e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//D7s\u003d",
         "filename": "vp9/decoder/vp9_decodemv.c",
         "patchSetId": 1
@@ -89,6 +107,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Cb0\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 596,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-03-25T23:21:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//D1E\u003d",
+      "revId": "0c93a17c3d5a8923a6ef542cca3c9596c41a1b5e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//D4s\u003d",
         "filename": "vp9/encoder/vp9_bitstream.c",
         "patchSetId": 1
@@ -100,6 +136,24 @@
       "writtenOn": "2015-03-16T19:46:50Z",
       "side": 1,
       "message": "add #if CONFIG_INTRABC",
+      "revId": "0c93a17c3d5a8923a6ef542cca3c9596c41a1b5e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//CcM\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 566,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-03-25T23:21:41Z",
+      "side": 1,
+      "message": "These braces don\u0027t add any semantic change. Adding another set of ifdefs just makes the code more brittle",
+      "parentUuid": "AAAAdn//D4s\u003d",
       "revId": "0c93a17c3d5a8923a6ef542cca3c9596c41a1b5e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -123,6 +177,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//CcE\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 727,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-03-25T23:21:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//D4o\u003d",
+      "revId": "0c93a17c3d5a8923a6ef542cca3c9596c41a1b5e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//D4g\u003d",
         "filename": "vp9/encoder/vp9_bitstream.c",
         "patchSetId": 1
@@ -134,6 +206,24 @@
       "writtenOn": "2015-03-16T19:46:50Z",
       "side": 1,
       "message": "add #if CONFIG_INTRABC",
+      "revId": "0c93a17c3d5a8923a6ef542cca3c9596c41a1b5e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//CcA\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 959,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-03-25T23:21:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//D4g\u003d",
       "revId": "0c93a17c3d5a8923a6ef542cca3c9596c41a1b5e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -157,6 +247,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Cb8\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1374,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-03-25T23:21:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//D48\u003d",
+      "revId": "0c93a17c3d5a8923a6ef542cca3c9596c41a1b5e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//D40\u003d",
         "filename": "vp9/encoder/vp9_encodemb.c",
         "patchSetId": 1
@@ -168,6 +276,24 @@
       "writtenOn": "2015-03-16T19:46:50Z",
       "side": 1,
       "message": "Unnecessary change.",
+      "revId": "0c93a17c3d5a8923a6ef542cca3c9596c41a1b5e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Cbs\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1174,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-03-25T23:21:41Z",
+      "side": 1,
+      "message": "zcoeff_blk doesn\u0027t get set for intrabc when plane !\u003d 0. This gives a valgrind error.",
+      "parentUuid": "AAAAdn//D40\u003d",
       "revId": "0c93a17c3d5a8923a6ef542cca3c9596c41a1b5e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -191,6 +317,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Cbo\u003d",
+        "filename": "vp9/encoder/vp9_rd.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 298,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-03-25T23:21:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//D44\u003d",
+      "revId": "0c93a17c3d5a8923a6ef542cca3c9596c41a1b5e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//D4w\u003d",
         "filename": "vp9/encoder/vp9_rdopt.h",
         "patchSetId": 1
@@ -202,6 +346,24 @@
       "writtenOn": "2015-03-16T19:46:50Z",
       "side": 1,
       "message": "add #if CONFIG_INTRABC",
+      "revId": "0c93a17c3d5a8923a6ef542cca3c9596c41a1b5e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Cbk\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-03-25T23:21:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//D4w\u003d",
       "revId": "0c93a17c3d5a8923a6ef542cca3c9596c41a1b5e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
