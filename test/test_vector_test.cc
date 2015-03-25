@@ -29,7 +29,7 @@ namespace {
 
 enum DecodeMode {
   kSerialMode,
-  kFrameParallMode
+  kFrameParallelMode
 };
 
 const int kDecodeMode = 0;
@@ -95,7 +95,7 @@ TEST_P(TestVectorTest, MD5Match) {
   vpx_codec_dec_cfg_t cfg = {0};
   char str[256];
 
-  if (mode == kFrameParallMode) {
+  if (mode == kFrameParallelMode) {
     flags |= VPX_CODEC_USE_FRAME_THREADING;
   }
 
