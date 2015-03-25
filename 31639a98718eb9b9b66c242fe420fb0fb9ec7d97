@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Cck\u003d",
+        "filename": "vp9/common/mips/msa/vp9_types_msa.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-03-25T18:59:35Z",
+      "side": 1,
+      "message": "you should include vpx_config.h since you rely on it here; this allows the headers to be organized freely",
+      "revId": "31639a98718eb9b9b66c242fe420fb0fb9ec7d97",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Ccg\u003d",
+        "filename": "vp9/common/mips/msa/vp9_types_msa.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-03-25T18:59:35Z",
+      "side": 1,
+      "message": "changing a simple type to a vector is a bit strange; if they\u0027re all local you should name the type something clearer.",
+      "revId": "31639a98718eb9b9b66c242fe420fb0fb9ec7d97",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Cco\u003d",
+        "filename": "vp9/common/mips/msa/vp9_types_msa.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-03-25T18:59:35Z",
+      "side": 1,
+      "message": "these look fairly symmetric; could you just define a macro that transforms the instruction and use it in place",
+      "revId": "31639a98718eb9b9b66c242fe420fb0fb9ec7d97",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Ccc\u003d",
+        "filename": "vp9/common/mips/msa/vp9_types_msa.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 466,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-03-25T18:59:35Z",
+      "side": 1,
+      "message": "// HAVE_MSA",
+      "revId": "31639a98718eb9b9b66c242fe420fb0fb9ec7d97",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
