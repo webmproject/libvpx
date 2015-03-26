@@ -16,6 +16,24 @@
       "revId": "e18b1044629c86ef5a8ca50c20a4021f2a2236ed",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//CWc\u003d",
+        "filename": "vp9/common/vp9_palette.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-03-26T16:15:14Z",
+      "side": 1,
+      "message": "Done in the next CL.",
+      "parentUuid": "AAAAdn//CdM\u003d",
+      "revId": "e18b1044629c86ef5a8ca50c20a4021f2a2236ed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
