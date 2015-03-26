@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//CTg\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2015-03-26T22:11:03Z",
+      "side": 0,
+      "message": "it may be better to:\n1. define a palette info structure and put all the information in there, and\n2. either dynamically allocate the palette info structure when needed, or  have a pre-allocated palette info pool.\n\nThat will get rid of the run length encoding stuff, and also be more space saving. YOu can do this in a separate refactoring.",
+      "revId": "070d635657cfc7a579248a0d6779afe0247eef81",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
