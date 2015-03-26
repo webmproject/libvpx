@@ -113,7 +113,7 @@ typedef enum {
 typedef enum {
   H_SCAN,
   V_SCAN,
-  SPIN_SCAN,
+  SPIRAL_SCAN,
   ZZ_SCAN,
   PALETTE_SCAN_ORDERS
 } PALETTE_SCAN_ORDER;
@@ -365,6 +365,8 @@ typedef struct macroblockd {
   DECLARE_ALIGNED(16, tran_low_t, dqcoeff[MAX_MB_PLANE][64 * 64]);
 #if CONFIG_PALETTE
   DECLARE_ALIGNED(16, uint8_t, color_index_map[2][64 * 64]);
+  DECLARE_ALIGNED(16, int, palette_scan_buffer[64 * 64]);
+  DECLARE_ALIGNED(16, uint8_t, palette_map_buffer[64 * 64]);
 #endif
 
   ENTROPY_CONTEXT *above_context[MAX_MB_PLANE];

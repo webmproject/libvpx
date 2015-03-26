@@ -41,7 +41,7 @@ void insertion_sort(double *data, int n) {
 int count_colors(const uint8_t *src, int stride, int rows, int cols) {
   int n = 0, r, c, i, val_count[256];
   uint8_t val;
-  memset(val_count, 0, sizeof(val_count));
+  vpx_memset(val_count, 0, sizeof(val_count));
 
   for (r = 0; r < rows; r++) {
       for (c = 0; c < cols; c++) {
@@ -85,7 +85,7 @@ int run_lengh_decoding(uint16_t *runs, int l, uint8_t *seq) {
   int i, j = 0;
 
   for (i = 0; i < l; i += 2) {
-    memset(seq + j, runs[i], runs[i + 1]);
+    vpx_memset(seq + j, runs[i], runs[i + 1]);
     j += runs[i + 1];
   }
 
@@ -94,14 +94,10 @@ int run_lengh_decoding(uint16_t *runs, int l, uint8_t *seq) {
 
 void transpose_block(uint8_t *seq_in, uint8_t *seq_out, int rows, int cols) {
   int r, c;
-  uint8_t seq_dup[4096];
-  memcpy(seq_dup, seq_in, rows * cols);
 
-  for (r = 0; r < cols; r++) {
-    for (c = 0; c < rows; c++) {
-      seq_out[r * rows + c] = seq_dup[c * cols + r];
-    }
-  }
+  for (r = 0; r < cols; r++)
+    for (c = 0; c < rows; c++)
+      seq_out[r * rows + c] = seq_in[c * cols + r];
 }
 
 void palette_color_insertion(uint8_t *old_colors, int *m, int *count,
@@ -230,8 +226,8 @@ void calc_centroids(double *data, double *centroids, int *indices,
   int i, j, index;
   int count[256];
   unsigned int seed = time(NULL);
-  memset(count, 0, sizeof(count[0]) * k);
-  memset(centroids, 0, sizeof(centroids[0]) * k * dim);
+  vpx_memset(count, 0, sizeof(count[0]) * k);
+  vpx_memset(centroids, 0, sizeof(centroids[0]) * k * dim);
 
   for (i = 0; i < n; i++) {
     index = indices[i];
@@ -243,8 +239,8 @@ void calc_centroids(double *data, double *centroids, int *indices,
 
   for (i = 0; i < k; i++) {
     if (!count[i])
-      memcpy(centroids + i * dim, data + (rand_r(&seed) % n) * dim,
-             sizeof(centroids[0]) * dim);
+      vpx_memcpy(centroids + i * dim, data + (rand_r(&seed) % n) * dim,
+                 sizeof(centroids[0]) * dim);
     else
       for (j = 0; j < dim; j++)
         centroids[i * dim + j] /= count[i];
@@ -267,32 +263,35 @@ double calc_total_dist(double *data, double *centroids, int *indices,
 int k_means(double *data, double *centroids, int *indices,
              int n, int k, int dim, int max_itr) {
   int i = 0;
-  int pre_indices[4096];
+  int *pre_indices;
   double pre_total_dist, cur_total_dist;
   double pre_centroids[256];
 
+  pre_indices = vpx_memalign(16, n * sizeof(indices[0]));
   calc_indices(data, centroids, indices, n, k, dim);
   pre_total_dist = calc_total_dist(data, centroids, indices, n, k, dim);
-  memcpy(pre_centroids, centroids, sizeof(pre_centroids[0]) * k * dim);
-  memcpy(pre_indices, indices, sizeof(pre_indices[0]) * n);
+  vpx_memcpy(pre_centroids, centroids, sizeof(pre_centroids[0]) * k * dim);
+  vpx_memcpy(pre_indices, indices, sizeof(pre_indices[0]) * n);
   while (i < max_itr) {
     calc_centroids(data, centroids, indices, n, k, dim);
     calc_indices(data, centroids, indices, n, k, dim);
     cur_total_dist = calc_total_dist(data, centroids, indices, n, k, dim);
 
     if (cur_total_dist > pre_total_dist && 0) {
-      memcpy(centroids, pre_centroids, sizeof(pre_centroids[0]) * k * dim);
-      memcpy(indices, pre_indices, sizeof(pre_indices[0]) * n);
+      vpx_memcpy(centroids, pre_centroids, sizeof(pre_centroids[0]) * k * dim);
+      vpx_memcpy(indices, pre_indices, sizeof(pre_indices[0]) * n);
       break;
     }
     if (!memcmp(centroids, pre_centroids, sizeof(pre_centroids[0]) * k * dim))
       break;
 
-    memcpy(pre_centroids, centroids, sizeof(pre_centroids[0]) * k * dim);
-    memcpy(pre_indices, indices, sizeof(pre_indices[0]) * n);
+    vpx_memcpy(pre_centroids, centroids, sizeof(pre_centroids[0]) * k * dim);
+    vpx_memcpy(pre_indices, indices, sizeof(pre_indices[0]) * n);
     pre_total_dist = cur_total_dist;
     i++;
   }
+
+  vpx_free(pre_indices);
   return i;
 }
 
@@ -305,7 +304,7 @@ int is_in_boundary(int rows, int cols, int r, int c) {
 void zz_scan_order(int *order, int rows, int cols) {
   int r, c, dir, idx;
 
-  memset(order, 0, sizeof(order[0]) * rows * cols);
+  vpx_memset(order, 0, sizeof(order[0]) * rows * cols);
   r = 0;
   c = 0;
   dir = 1;
@@ -339,7 +338,7 @@ void zz_scan_order(int *order, int rows, int cols) {
   order[idx] = (rows - 1) * cols + cols - 1;
 }
 
-void spin_order(int *order, int cols, int r_start, int c_start,
+void spiral_order(int *order, int cols, int r_start, int c_start,
                 int h, int w, int idx) {
   int r, c;
 
@@ -367,10 +366,62 @@ void spin_order(int *order, int cols, int r_start, int c_start,
   for (c = 0; c < w; c++)
     order[idx++] = r_start * cols + w - c + c_start;
 
-  spin_order(order, cols, r_start + 1, c_start + 1, h - 2, w - 2, idx);
+  spiral_order(order, cols, r_start + 1, c_start + 1, h - 2, w - 2, idx);
 }
 
-void spin_scan_order(int *order, int rows, int cols) {
-  spin_order(order, cols, 0, 0, rows - 1, cols - 1, 0);
+void spiral_scan_order(int *order, int rows, int cols) {
+  spiral_order(order, cols, 0, 0, rows - 1, cols - 1, 0);
+}
+
+void palette_scan(uint8_t *color_index_map, uint8_t *sequence,
+                  int rows, int cols, PALETTE_SCAN_ORDER ps, int *scan_order) {
+  int i;
+
+  switch (ps) {
+    case H_SCAN:
+      vpx_memcpy(sequence, color_index_map, rows * cols);
+      break;
+    case V_SCAN:
+      transpose_block(color_index_map, sequence, rows, cols);
+      break;
+    case SPIRAL_SCAN:
+      spiral_scan_order(scan_order, rows, cols);
+      for (i = 0; i < rows * cols; i++)
+        sequence[i] = color_index_map[scan_order[i]];
+      break;
+    case ZZ_SCAN:
+      zz_scan_order(scan_order, rows, cols);
+      for (i = 0; i < rows * cols; i++)
+        sequence[i] = color_index_map[scan_order[i]];
+      break;
+    default:
+      break;
+  }
+}
+
+void palette_iscan(uint8_t *color_index_map, uint8_t *sequence,
+                   int rows, int cols, PALETTE_SCAN_ORDER ps, int *scan_order) {
+  int i;
+
+  switch (ps) {
+    case H_SCAN:
+      vpx_memcpy(color_index_map, sequence, rows * cols);
+      break;
+    case V_SCAN:
+      transpose_block(sequence, color_index_map, cols, rows);
+      break;
+    case SPIRAL_SCAN:
+      spiral_scan_order(scan_order, rows, cols);
+      for (i = 0; i < rows * cols; i++)
+        color_index_map[scan_order[i]] = sequence[i];
+      break;
+    case ZZ_SCAN:
+      zz_scan_order(scan_order, rows, cols);
+      for (i = 0; i < rows * cols; i++)
+        color_index_map[scan_order[i]] = sequence[i];
+      break;
+    default:
+      break;
+  }
 }
 #endif

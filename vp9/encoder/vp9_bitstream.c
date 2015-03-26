@@ -462,10 +462,92 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
   }
 #endif
 
+#if CONFIG_PALETTE
+  if (!is_inter && bsize >= BLOCK_8X8 && cm->allow_palette_mode) {
+    int l, n, i, d, bits;
+
+    vp9_write_bit(w, mbmi->palette_enabled[0]);
+    vp9_write_bit(w, mbmi->palette_enabled[1]);
+
+    if (mbmi->palette_enabled[0]) {
+      int rows = 4 * num_4x4_blocks_high_lookup[bsize];
+      int cols = 4 * num_4x4_blocks_wide_lookup[bsize];
+      n = mbmi->palette_size[0];
+      l = mbmi->palette_run_length[0];
+
+      vp9_write_token(w, vp9_palette_size_tree,
+                      cm->fc.palette_size_prob[bsize - BLOCK_8X8],
+                      &palette_size_encodings[n - 2]);
+      vp9_write_literal(w, (l >> 1),
+                        get_bit_depth(palette_max_run(bsize)));
+      vp9_write_literal(w, mbmi->palette_scan_order[0], 2);
+
+      for (i = 0; i < n; i++)
+        vp9_write_literal(w, mbmi->palette_colors[i], 8);
+
+      d = get_bit_depth(rows * cols);
+      for (i = 0; i < l; i += 2) {
+        vp9_write_literal(w, mbmi->palette_runs[i],
+                          get_bit_depth(n));
+        bits = get_bit_depth(mbmi->palette_runs[i + 1]);
+        vp9_write_token(w, vp9_palette_run_length_tree,
+                        cm->fc.palette_run_length_prob[bsize - BLOCK_8X8],
+                        &palette_run_length_encodings[bits > 6 ?
+                            6 : bits - 1]);
+        vp9_write_literal(w, mbmi->palette_runs[i + 1] - 1,
+                          bits > 6 ? d : bits);
+      }
+    }
+
+    if (mbmi->palette_enabled[1]) {
+      const uint16_t *runs = mbmi->palette_runs + PALETTE_MAX_RUNS;
+      int rows = 4 * num_4x4_blocks_high_lookup[bsize] >>
+          xd->plane[1].subsampling_y;
+      int cols = 4 * num_4x4_blocks_wide_lookup[bsize] >>
+          xd->plane[1].subsampling_x;
+      BLOCK_SIZE uv_bsize = get_plane_block_size(bsize, &xd->plane[1]);
+      n = mbmi->palette_size[1];
+      l = mbmi->palette_run_length[1];
+
+      if (xd->plane[1].subsampling_x && xd->plane[1].subsampling_y) {
+        vp9_write_token(w, vp9_palette_size_tree,
+                        cm->fc.palette_uv_size_prob[uv_bsize - BLOCK_4X4],
+                        &palette_size_encodings[n - 2]);
+        vp9_write_literal(w, (l >> 1),
+                          get_bit_depth(palette_max_run(uv_bsize)));
+        vp9_write_literal(w, mbmi->palette_scan_order[1], 2);
+      }
+
+      for (i = 0; i < n; i++)
+        vp9_write_literal(w, mbmi->palette_colors[PALETTE_MAX_SIZE + i], 8);
+      for (i = 0; i < n; i++)
+        vp9_write_literal(w, mbmi->palette_colors[2 * PALETTE_MAX_SIZE + i], 8);
+
+      if (xd->plane[1].subsampling_x && xd->plane[1].subsampling_y) {
+        d = get_bit_depth(rows * cols);
+        for (i = 0; i < l; i += 2) {
+          vp9_write_literal(w, runs[i],
+                            get_bit_depth(mbmi->palette_size[1]));
+          bits = get_bit_depth(runs[i + 1]);
+          vp9_write_token(w, vp9_palette_run_length_tree,
+                          cm->fc.palette_uv_run_length_prob[uv_bsize -
+                                                            BLOCK_4X4],
+                                      &palette_run_length_encodings[bits > 6 ?
+                                                                6 : bits - 1]);
+          vp9_write_literal(w, runs[i + 1] - 1,
+                            bits > 6 ? d : bits);
+        }
+      }
+    }
+  }
+#endif
   if (bsize >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT &&
 #if CONFIG_SUPERTX
       !supertx_enabled &&
-#endif
+#endif  // CONFIG_SUPERTX
+#if CONFIG_PALETTE
+      !mbmi->palette_enabled[0] &&
+#endif  // CONFIG_PALETTE
       !(is_inter &&
         (skip || vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP)))) {
     write_selected_tx_size(cm, xd, mbmi->tx_size, bsize, w);
@@ -527,13 +609,22 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
 
   if (!is_inter) {
     if (bsize >= BLOCK_8X8) {
+#if CONFIG_PALETTE
+      if (!mbmi->palette_enabled[0])
+        write_intra_mode(w, mode, cm->fc.y_mode_prob[size_group_lookup[bsize]]);
+#else
       write_intra_mode(w, mode, cm->fc.y_mode_prob[size_group_lookup[bsize]]);
+#endif  // CONFIG_PALETTE
 #if CONFIG_FILTERINTRA
-      if (is_filter_allowed(mode) && is_filter_enabled(mbmi->tx_size)) {
+      if (is_filter_allowed(mode) && is_filter_enabled(mbmi->tx_size)
+#if CONFIG_PALETTE
+          && !mbmi->palette_enabled[0]
+#endif  // CONFIG_PALETTE
+      ) {
         vp9_write(w, mbmi->filterbit,
                   cm->fc.filterintra_prob[mbmi->tx_size][mode]);
       }
-#endif
+#endif  // CONFIG_FILTERINTRA
     } else {
       int idx, idy;
       const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];
@@ -547,29 +638,38 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
             vp9_write(w, mi->b_filter_info[idy * 2 + idx],
                       cm->fc.filterintra_prob[0][b_mode]);
           }
-#endif
+#endif  // CONFIG_FILTERINTRA
         }
       }
     }
+#if CONFIG_PALETTE
+    if (!mbmi->palette_enabled[1])
+      write_intra_mode(w, mbmi->uv_mode, cm->fc.uv_mode_prob[mode]);
+#else
     write_intra_mode(w, mbmi->uv_mode, cm->fc.uv_mode_prob[mode]);
+#endif  // CONFIG_PALETTE
 #if CONFIG_FILTERINTRA
     if (is_filter_allowed(mbmi->uv_mode) &&
-        is_filter_enabled(get_uv_tx_size(mbmi, &xd->plane[1]))) {
+        is_filter_enabled(get_uv_tx_size(mbmi, &xd->plane[1]))
+#if CONFIG_PALETTE
+        && !mbmi->palette_enabled[1]
+#endif  // CONFIG_PALETTE
+    ) {
       vp9_write(w, mbmi->uv_filterbit,
                 cm->fc.filterintra_prob[get_uv_tx_size(mbmi, &xd->plane[1])][mbmi->uv_mode]);
     }
-#endif
+#endif  // CONFIG_FILTERINTRA
 #if CONFIG_COPY_MODE
   } else if (mbmi->copy_mode == NOREF) {
 #else
   } else {
-#endif
+#endif  // CONFIG_COPY_MODE
     const int mode_ctx = mbmi->mode_context[mbmi->ref_frame[0]];
     const vp9_prob *const inter_probs = cm->fc.inter_mode_probs[mode_ctx];
 #if CONFIG_COMPOUND_MODES
     const vp9_prob *const inter_compound_probs =
         cm->fc.inter_compound_mode_probs[mode_ctx];
-#endif
+#endif  // CONFIG_COMPOUND_MODES
     write_ref_frames(cm, xd, w);
 
     // If segment skip is not enabled code the mode.
@@ -602,7 +702,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
         is_inter_mode(mode) &&
 #if CONFIG_SUPERTX
         !supertx_enabled &&
-#endif
+#endif  // CONFIG_SUPERTX
         mbmi->ref_frame[1] <= INTRA_FRAME) {
       vp9_write(w, mbmi->ref_frame[1] == INTRA_FRAME,
                 cm->fc.interintra_prob[bsize]);
@@ -645,7 +745,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
           if (b_mode == NEWMV || b_mode == NEW_NEWMV) {
 #else
           if (b_mode == NEWMV) {
-#endif
+#endif  // CONFIG_COMPOUND_MODES
             for (ref = 0; ref < 1 + is_compound; ++ref) {
               vp9_encode_mv(cpi, w, &mi->bmi[j].as_mv[ref].as_mv,
 #if CONFIG_NEWMVREF_SUB8X8
@@ -682,7 +782,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
       if (mode == NEWMV || mode == NEW_NEWMV) {
 #else
       if (mode == NEWMV) {
-#endif
+#endif  // CONFIG_COMPOUND_MODES
         for (ref = 0; ref < 1 + is_compound; ++ref)
           vp9_encode_mv(cpi, w, &mbmi->mv[ref].as_mv,
                         &mbmi->ref_mvs[mbmi->ref_frame[ref]][0].as_mv, nmvc,
@@ -698,7 +798,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
                       &mbmi->ref_mvs[mbmi->ref_frame[0]][0].as_mv, nmvc,
                       allow_hp);
       }
-#endif
+#endif  // CONFIG_COMPOUND_MODES
     }
 #if CONFIG_WEDGE_PARTITION
     if (cm->reference_mode != SINGLE_REFERENCE &&

@@ -271,11 +271,11 @@ static void vp9_intra_dpcm_add_nocoeff(uint8_t *dst, int stride,
   switch (mode) {
     case H_PRED:
       for (r = 0; r < bs; r++)
-        memset(dst + r * stride + 1, dst[r * stride], bs - 1);
+        vpx_memset(dst + r * stride + 1, dst[r * stride], bs - 1);
       break;
     case V_PRED:
       for (r = 1; r < bs; r++)
-        memcpy(dst + r * stride, dst, bs * sizeof(*dst));
+        vpx_memcpy(dst + r * stride, dst, bs * sizeof(*dst));
       break;
     case TM_PRED:
       for (r = 1; r < bs; r++)
