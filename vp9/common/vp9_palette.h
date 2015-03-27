@@ -17,8 +17,6 @@
 #if CONFIG_PALETTE
 int vp9_count_colors(const uint8_t *src, int stride, int rows, int cols);
 void vp9_insertion_sort(double *data, int n);
-int vp9_run_lengh_encoding(uint8_t *seq, int n, uint16_t *runs, int max_run);
-int vp9_run_lengh_decoding(uint16_t *runs, int l, uint8_t *seq);
 void vp9_palette_color_insertion(uint8_t *old_colors, int *m, int *count,
                                  MB_MODE_INFO *mbmi);
 int vp9_palette_color_lookup(uint8_t *dic, int n, uint8_t val, int bits);
@@ -27,10 +25,6 @@ int vp9_k_means(double *data, double *centroids, int *indices,
                 int n, int k, int dim, int max_itr);
 void vp9_calc_indices(double *data, double *centroids, int *indices,
                       int n, int k, int dim);
-void vp9_palette_scan(uint8_t *color_index_map, uint8_t *sequence, int rows,
-                      int cols, PALETTE_SCAN_ORDER ps, int *scan_order);
-void vp9_palette_iscan(uint8_t *color_index_map, uint8_t *sequence, int rows,
-                       int cols, PALETTE_SCAN_ORDER ps, int *scan_order);
 void vp9_update_palette_counts(FRAME_COUNTS *counts, MB_MODE_INFO *mbmi,
                                BLOCK_SIZE bsize, int palette_ctx);
 int vp9_get_palette_color_context(uint8_t *color_map, int cols,

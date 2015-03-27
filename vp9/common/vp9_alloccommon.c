@@ -71,8 +71,33 @@ static int alloc_mi(VP9_COMMON *cm, int mi_size) {
   return 0;
 }
 
+#if CONFIG_PALETTE
+void vp9_free_palette_map(VP9_COMMON *cm) {
+  int i, j;
+  MODE_INFO *mi;
+
+  for (i = 0; i < cm->mi_rows; i++)
+    for (j = 0; j < cm->mi_cols; j++) {
+      mi = cm->mip + cm->mi_stride + 1 + (i * cm->mi_stride + j);
+      if (mi->mbmi.palette_color_map != NULL) {
+        vpx_free(mi->mbmi.palette_color_map);
+        mi->mbmi.palette_color_map = NULL;
+      }
+      if (mi->mbmi.palette_uv_color_map != NULL) {
+        vpx_free(mi->mbmi.palette_uv_color_map);
+        mi->mbmi.palette_uv_color_map = NULL;
+      }
+    }
+}
+#endif  // CONFIG_PALETTE
+
 static void free_mi(VP9_COMMON *cm) {
   int i;
+
+#if CONFIG_PALETTE
+  if (cm && cm->mip)
+    vp9_free_palette_map(cm);
+#endif  // CONFIG_PALETTE
 
   for (i = 0; i < 2; ++i) {
     vpx_free(cm->mip_array[i]);

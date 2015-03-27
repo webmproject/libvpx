@@ -399,51 +399,6 @@ static const vp9_prob default_palette_uv_size_prob[10][PALETTE_SIZES - 1] = {
     {  72,  55,  66,  68,  79, 107},
 };
 
-const vp9_tree_index vp9_palette_run_length_tree[TREE_SIZE(PALETTE_RUN_LENGTHS)]
-                                                 = {
-  -ONE_BITS, 2,
-  -TWO_BITS, 4,
-  -THREE_BITS, 6,
-  -FOUR_BITS, 8,
-  -FIVE_BITS, 10,
-  -SIX_BITS, -MAX_BITS
-};
-
-static const vp9_prob
-default_palette_run_length_prob[10][PALETTE_RUN_LENGTHS - 1] = {
-    {  10,  91, 148,  95, 121, 254},
-    { 170,  70, 110, 125, 120, 130},
-    { 170,  70, 110, 125, 120, 130},
-    { 153,  33,  43, 147,  60,  67},
-    {  90,  18,  21,  75,  85,  65},
-    {  90,  18,  21,  75,  85,  65},
-    {  44,  38,  17,  30, 125,  18},
-    {  30,  12,  14,  18,  75,  75},
-    {  30,  12,  14,  18,  75,  75},
-    {  72,  34,  32,  42,  42, 108},
-};
-
-static const vp9_prob
-default_palette_uv_run_length_prob[10][PALETTE_RUN_LENGTHS - 1] = {
-    {  81, 107, 112, 254, 128, 128},
-    { 120, 108, 130, 105, 250, 128},
-    { 120, 108, 130, 105, 250, 128},
-    { 107, 107, 143,  80,  60, 254},
-    { 110,  65,  80, 120,  50,  42},
-    { 110,  65,  80, 120,  50,  42},
-    {  95,   5,  15, 127,  15,  56},
-    {   5,   5,   5,  70,  75,  18},
-    {   5,   5,   5,  70,  75,  18},
-    {   5,   5,   5,   5, 157,   5},
-};
-
-const vp9_tree_index vp9_palette_scan_order_tree
-[TREE_SIZE(PALETTE_SCAN_ORDERS)] = {
-  -H_SCAN, 2,
-  -V_SCAN, 4,
-  -SPIRAL_SCAN, -ZZ_SCAN,
-};
-
 static const vp9_prob default_palette_enabled_prob[10][3] = {
     { 240,  180,  100, },
     { 240,  180,  100, },
@@ -855,9 +810,7 @@ void vp9_init_mode_probs(FRAME_CONTEXT *fc) {
   vp9_copy(fc->palette_size_prob, default_palette_size_prob);
   vp9_copy(fc->palette_enabled_prob, default_palette_enabled_prob);
   vp9_copy(fc->palette_uv_enabled_prob, default_uv_palette_enabled_prob);
-  vp9_copy(fc->palette_run_length_prob, default_palette_run_length_prob);
   vp9_copy(fc->palette_uv_size_prob, default_palette_uv_size_prob);
-  vp9_copy(fc->palette_uv_run_length_prob, default_palette_uv_run_length_prob);
   vp9_copy(fc->palette_color_prob, default_palette_color_prob);
   vp9_copy(fc->palette_uv_color_prob, default_palette_uv_color_prob);
 #endif  // CONFIG_PALETTE

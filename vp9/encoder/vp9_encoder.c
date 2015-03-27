@@ -2565,6 +2565,7 @@ static void encode_without_recode_loop(VP9_COMP *cpi,
   } else if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) {
     vp9_cyclic_refresh_setup(cpi);
   }
+
   // transform / motion compensation build reconstruction frame
   vp9_encode_frame(cpi);
 
@@ -2616,6 +2617,9 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
       vp9_setup_in_frame_q_adj(cpi);
     }
 
+#if CONFIG_PALETTE
+    vp9_free_palette_map(cm);
+#endif  // CONFIG_PALETTE
     // transform / motion compensation build reconstruction frame
     vp9_encode_frame(cpi);
 
@@ -3155,6 +3159,10 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
 
   // build the bitstream
   vp9_pack_bitstream(cpi, dest, size);
+
+#if CONFIG_PALETTE
+  vp9_free_palette_map(cm);
+#endif  // CONFIG_PALETTE
 
   if (cm->seg.update_map)
     update_reference_segmentation_map(cpi);

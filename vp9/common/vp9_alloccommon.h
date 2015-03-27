@@ -37,4 +37,8 @@ void vp9_swap_mi_and_prev_mi(struct VP9Common *cm);
 }  // extern "C"
 #endif
 
+#if CONFIG_PALETTE
+void vp9_free_palette_map(struct VP9Common *cm);
+#endif  // CONFIG_PALETTE
+
 #endif  // VP9_COMMON_VP9_ALLOCCOMMON_H_

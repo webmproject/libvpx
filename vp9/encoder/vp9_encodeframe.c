@@ -4988,11 +4988,35 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
         mi);
     vp9_tokenize_sb(cpi, t, !output_enabled, MAX(bsize, BLOCK_8X8));
 #if CONFIG_PALETTE
-    if (mbmi->palette_enabled[0] && output_enabled) {
-      vp9_palette_color_insertion(cm->current_palette_colors,
-                                  &cm ->current_palette_size,
-                                  cm->current_palette_count, mbmi);
+    if (bsize >= BLOCK_8X8 && output_enabled) {
+      if (mbmi->palette_enabled[0]) {
+        int rows = 4 * num_4x4_blocks_high_lookup[bsize];
+        int cols = 4 * num_4x4_blocks_wide_lookup[bsize];
+
+        vp9_palette_color_insertion(cm->current_palette_colors,
+                                    &cm ->current_palette_size,
+                                    cm->current_palette_count, mbmi);
+        CHECK_MEM_ERROR(cm, mbmi->palette_color_map,
+                        vpx_memalign(16, rows * cols *
+                                     sizeof(xd->plane[0].color_index_map[0])));
+        memcpy(mbmi->palette_color_map, xd->plane[0].color_index_map,
+               rows * cols * sizeof(xd->plane[0].color_index_map[0]));
+      }
+
+      if (mbmi->palette_enabled[1]) {
+        int rows = 4 * num_4x4_blocks_high_lookup[bsize] >>
+            xd->plane[1].subsampling_y;
+        int cols = 4 * num_4x4_blocks_wide_lookup[bsize] >>
+            xd->plane[1].subsampling_x;
+
+        CHECK_MEM_ERROR(cm, mbmi->palette_uv_color_map,
+                        vpx_memalign(16, rows * cols *
+                                     sizeof(xd->plane[1].color_index_map[0])));
+        memcpy(mbmi->palette_uv_color_map, xd->plane[1].color_index_map,
+               rows * cols * sizeof(xd->plane[1].color_index_map[0]));
+      }
     }
+
     if (frame_is_intra_only(cm) && output_enabled && bsize >= BLOCK_8X8) {
       cm->block_counter++;
       if (mbmi->palette_enabled[0])

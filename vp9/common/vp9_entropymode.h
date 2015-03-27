@@ -70,9 +70,7 @@ typedef struct frame_contexts {
   vp9_prob palette_enabled_prob[10][3];
   vp9_prob palette_uv_enabled_prob[2];
   vp9_prob palette_size_prob[10][PALETTE_SIZES - 1];
-  vp9_prob palette_run_length_prob[10][PALETTE_RUN_LENGTHS - 1];
   vp9_prob palette_uv_size_prob[10][PALETTE_SIZES - 1];
-  vp9_prob palette_uv_run_length_prob[10][PALETTE_RUN_LENGTHS - 1];
   vp9_prob palette_color_prob[PALETTE_MAX_SIZE - 1][PALETTE_COLOR_CONTEXTS]
                                                     [PALETTE_COLORS - 1];
   vp9_prob palette_uv_color_prob[PALETTE_MAX_SIZE - 1][PALETTE_COLOR_CONTEXTS]
@@ -152,8 +150,6 @@ typedef struct {
 #if CONFIG_PALETTE
   unsigned int y_palette_enabled[10][3][2];
   unsigned int uv_palette_enabled[2][2];
-  unsigned int y_palette_scan_order[10][PALETTE_SCAN_ORDERS];
-  unsigned int uv_palette_scan_order[10][PALETTE_SCAN_ORDERS];
   unsigned int y_palette_size[10][PALETTE_SIZES];
   unsigned int uv_palette_size[10][PALETTE_SIZES];
 #endif  // CONFIG_PALETTE
@@ -174,10 +170,6 @@ extern const vp9_tree_index vp9_ext_tx_tree[TREE_SIZE(EXT_TX_TYPES)];
 #endif  // CONFIG_EXT_TX
 #if CONFIG_PALETTE
 extern const vp9_tree_index vp9_palette_size_tree[TREE_SIZE(PALETTE_SIZES)];
-extern const vp9_tree_index
-vp9_palette_scan_order_tree[TREE_SIZE(PALETTE_SCAN_ORDERS)];
-extern const vp9_tree_index
-vp9_palette_run_length_tree[TREE_SIZE(PALETTE_RUN_LENGTHS)];
 extern const vp9_tree_index vp9_palette_color_tree[TREE_SIZE(PALETTE_COLORS)];
 #endif  // CONFIG_PALETTE
 #if CONFIG_COPY_MODE

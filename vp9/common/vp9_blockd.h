@@ -39,7 +39,6 @@ extern "C" {
 #define PALETTE_BUF_SIZE 16
 #define PALETTE_MAX_SIZE 8
 #define PALETTE_DELTA_BIT 0
-#define PALETTE_MAX_RUNS 512
 #define PALETTE_COLOR_CONTEXTS 16
 #endif  // CONFIG_PALETTE
 
@@ -229,15 +228,14 @@ typedef struct {
   int palette_size[2];
   int palette_indexed_size;
   int palette_literal_size;
-  int palette_run_length[2];
   int current_palette_size;
   int palette_delta_bitdepth;
   uint8_t palette_colors[3 * PALETTE_MAX_SIZE];
   uint8_t palette_indexed_colors[PALETTE_MAX_SIZE];
   int8_t palette_color_delta[PALETTE_MAX_SIZE];
   uint8_t palette_literal_colors[PALETTE_MAX_SIZE];
-  uint16_t palette_runs[2 * PALETTE_MAX_RUNS];
-  PALETTE_SCAN_ORDER palette_scan_order[2];
+  uint8_t *palette_color_map;
+  uint8_t *palette_uv_color_map;
 #endif  // CONFIG_PALETTE
 } MB_MODE_INFO;
 
@@ -356,7 +354,6 @@ typedef struct macroblockd {
   DECLARE_ALIGNED(16, tran_low_t, dqcoeff[MAX_MB_PLANE][64 * 64]);
 #if CONFIG_PALETTE
   DECLARE_ALIGNED(16, uint8_t, color_index_map[2][64 * 64]);
-  DECLARE_ALIGNED(16, int, palette_scan_buffer[64 * 64]);
   DECLARE_ALIGNED(16, uint8_t, palette_map_buffer[64 * 64]);
 #endif  // CONFIG_PALETTE
 
@@ -557,7 +554,7 @@ static inline int is_rect_quant_used(const MB_MODE_INFO *mbmi,
                        mbmi->uv_mode == H_PRED ||
                        mbmi->uv_mode == TM_PRED)));
 }
-#endif
+#endif  // CONFIG_NEW_QUANT && CONFIG_TX_SKIP
 
 #ifdef __cplusplus
 }  // extern "C"

@@ -46,8 +46,6 @@ static struct vp9_token ext_tx_encodings[EXT_TX_TYPES];
 #endif
 #if CONFIG_PALETTE
 static struct vp9_token palette_size_encodings[PALETTE_SIZES];
-static struct vp9_token palette_scan_order_encodings[PALETTE_SCAN_ORDERS];
-static struct vp9_token palette_run_length_encodings[PALETTE_RUN_LENGTHS];
 static struct vp9_token palette_color_encodings[PALETTE_COLORS];
 #endif  // CONFIG_PALETTE
 #if CONFIG_COPY_MODE
@@ -80,10 +78,6 @@ void vp9_entropy_mode_init() {
 #endif
 #if CONFIG_PALETTE
   vp9_tokens_from_tree(palette_size_encodings, vp9_palette_size_tree);
-  vp9_tokens_from_tree(palette_scan_order_encodings,
-                       vp9_palette_scan_order_tree);
-  vp9_tokens_from_tree(palette_run_length_encodings,
-                       vp9_palette_run_length_tree);
   vp9_tokens_from_tree(palette_color_encodings, vp9_palette_color_tree);
 #endif  // CONFIG_PALETTE
 #if CONFIG_COMPOUND_MODES
@@ -495,16 +489,11 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
       vp9_write_token(w, vp9_palette_size_tree,
                       cm->fc.palette_size_prob[bsize - BLOCK_8X8],
                       &palette_size_encodings[n - 2]);
-
       for (i = 0; i < n; i++)
         vp9_write_literal(w, mbmi->palette_colors[i], 8);
 
-      vp9_run_lengh_decoding(cpi->mb.e_mbd.mi->mbmi.palette_runs,
-                             mbmi->palette_run_length[0],
-                             cpi->mb.e_mbd.palette_map_buffer);
-      vp9_palette_iscan(buffer, cpi->mb.e_mbd.palette_map_buffer, rows, cols,
-                        mbmi->palette_scan_order[0],
-                        cpi->mb.e_mbd.palette_scan_buffer);
+      memcpy(buffer, mbmi->palette_color_map,
+             rows * cols * sizeof(buffer[0]));
       vp9_write_literal(w, buffer[0], vp9_get_bit_depth(n));
       for (i = 0; i < rows; i++) {
         for (j = (i == 0 ? 1 : 0); j < cols; j++) {
@@ -541,13 +530,8 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
         vp9_write_literal(w, mbmi->palette_colors[2 * PALETTE_MAX_SIZE + i], 8);
 
       if (xd->plane[1].subsampling_x && xd->plane[1].subsampling_y) {
-        vp9_run_lengh_decoding(cpi->mb.e_mbd.mi->mbmi.palette_runs +
-                               PALETTE_MAX_RUNS,
-                               mbmi->palette_run_length[1],
-                               cpi->mb.e_mbd.palette_map_buffer);
-        vp9_palette_iscan(buffer, cpi->mb.e_mbd.palette_map_buffer, rows,
-                          cols, mbmi->palette_scan_order[1],
-                          cpi->mb.e_mbd.palette_scan_buffer);
+        memcpy(buffer, mbmi->palette_uv_color_map,
+               rows * cols * sizeof(buffer[0]));
         vp9_write_literal(w, buffer[0], vp9_get_bit_depth(n));
         for (i = 0; i < rows; i++) {
           for (j = (i == 0 ? 1 : 0); j < cols; j++) {
@@ -913,11 +897,8 @@ static void write_mb_modes_kf(const VP9_COMMON *cm,
           vp9_write_literal(w, mbmi->palette_literal_colors[i], 8);
       }
 
-      vp9_run_lengh_decoding(mi_8x8->mbmi.palette_runs,
-                             mbmi->palette_run_length[0],
-                             xd->palette_map_buffer);
-      vp9_palette_iscan(buffer, xd->palette_map_buffer, rows, cols,
-                        mbmi->palette_scan_order[0], xd->palette_scan_buffer);
+      memcpy(buffer, mbmi->palette_color_map,
+             rows * cols * sizeof(buffer[0]));
       vp9_write_literal(w, buffer[0], vp9_get_bit_depth(n));
       for (i = 0; i < rows; i++) {
         for (j = (i == 0 ? 1 : 0); j < cols; j++) {
@@ -954,12 +935,8 @@ static void write_mb_modes_kf(const VP9_COMMON *cm,
         vp9_write_literal(w, mbmi->palette_colors[2 * PALETTE_MAX_SIZE + i], 8);
 
       if (xd->plane[1].subsampling_x && xd->plane[1].subsampling_y) {
-        vp9_run_lengh_decoding(mi_8x8->mbmi.palette_runs + PALETTE_MAX_RUNS,
-                               mbmi->palette_run_length[1],
-                               xd->palette_map_buffer);
-        vp9_palette_iscan(buffer, xd->palette_map_buffer, rows,
-                          cols, mbmi->palette_scan_order[1],
-                          xd->palette_scan_buffer);
+        memcpy(buffer, mbmi->palette_uv_color_map,
+               rows * cols * sizeof(buffer[0]));
         vp9_write_literal(w, buffer[0], vp9_get_bit_depth(n));
         for (i = 0; i < rows; i++) {
           for (j = (i == 0 ? 1 : 0); j < cols; j++) {
