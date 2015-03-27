@@ -85,7 +85,17 @@ static void fill_mode_costs(VP9_COMP *cpi) {
 #if CONFIG_EXT_TX
   for (i = TX_4X4; i <= TX_16X16; ++i)
     vp9_cost_tokens(cpi->ext_tx_costs[i], fc->ext_tx_prob[i], vp9_ext_tx_tree);
-#endif
+#endif  // CONFIG_EXT_TX
+#if CONFIG_PALETTE
+  for (i = 0; i < PALETTE_MAX_SIZE - 1; ++i)
+    for (j = 0; j < PALETTE_COLOR_CONTEXTS; ++j)
+      vp9_cost_tokens(cpi->palette_color_costs[i][j],
+                      fc->palette_color_prob[i][j], vp9_palette_color_tree);
+  for (i = 0; i < PALETTE_MAX_SIZE - 1; ++i)
+    for (j = 0; j < PALETTE_COLOR_CONTEXTS; ++j)
+      vp9_cost_tokens(cpi->palette_uv_color_costs[i][j],
+                      fc->palette_uv_color_prob[i][j], vp9_palette_color_tree);
+#endif  // CONFIG_PALETTE
 }
 
 static void fill_token_costs(vp9_coeff_cost *c,
