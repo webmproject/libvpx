@@ -12,6 +12,7 @@
 #define VP9_COMMON_VP9_PALETTE_H_
 
 #include "vp9/common/vp9_blockd.h"
+#include "vp9/common/vp9_entropymode.h"
 
 #if CONFIG_PALETTE
 int count_colors(const uint8_t *src, int stride, int rows, int cols);
@@ -34,6 +35,8 @@ void palette_scan(uint8_t *color_index_map, uint8_t *sequence,
                   int rows, int cols, PALETTE_SCAN_ORDER ps, int *scan_order);
 void palette_iscan(uint8_t *color_index_map, uint8_t *sequence,
                    int rows, int cols, PALETTE_SCAN_ORDER ps, int *scan_order);
+void update_palette_counts(FRAME_COUNTS *counts, MB_MODE_INFO *mbmi,
+                           BLOCK_SIZE bsize, int palette_ctx);
 #endif
 
 #endif  // VP9_COMMON_VP9_PALETTE_H_

@@ -4628,20 +4628,20 @@ static void encode_frame_internal(VP9_COMP *cpi) {
     vpx_usec_timer_start(&emr_timer);
 
 #if CONFIG_FP_MB_STATS
-  if (cpi->use_fp_mb_stats) {
-    input_fpmb_stats(&cpi->twopass.firstpass_mb_stats, cm,
-                     &cpi->twopass.this_frame_mb_stats);
-  }
+    if (cpi->use_fp_mb_stats) {
+      input_fpmb_stats(&cpi->twopass.firstpass_mb_stats, cm,
+                       &cpi->twopass.this_frame_mb_stats);
+    }
 #endif
 
 #if CONFIG_PALETTE
-  if (frame_is_intra_only(cm)) {
-    cm->current_palette_size = 0;
-    vpx_memset(cm->current_palette_count, 0,
-               PALETTE_BUF_SIZE * sizeof(cm->current_palette_count[0]));
-    cm->palette_counter = 0;
-    cm->block_counter = 0;
-  }
+    if (frame_is_intra_only(cm)) {
+      cm->current_palette_size = 0;
+      vpx_memset(cm->current_palette_count, 0,
+                 PALETTE_BUF_SIZE * sizeof(cm->current_palette_count[0]));
+      cm->palette_counter = 0;
+      cm->block_counter = 0;
+    }
 #endif
 
     encode_tiles(cpi);
@@ -5047,7 +5047,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
         !vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
       ++cm->counts.ext_tx[mbmi->tx_size][mbmi->ext_txfrm];
     }
-#endif
+#endif  // CONFIG_EXT_TX
 #if CONFIG_TX_SKIP
     if (bsize >= BLOCK_8X8) {
       int q_idx = vp9_get_qindex(&cm->seg, mbmi->segment_id, cm->base_qindex);
@@ -5062,12 +5062,27 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
       if (try_tx_skip) {
 #else
       if (try_tx_skip && (!(mbmi->skip || seg_skip) || !is_inter_block(mbmi))) {
-#endif
+#endif  // CONFIG_SUPERTX
         ++cm->counts.y_tx_skip[is_inter_block(mbmi)][mbmi->tx_skip[0]];
         ++cm->counts.uv_tx_skip[mbmi->tx_skip[0]][mbmi->tx_skip[1]];
       }
     }
-#endif
+#endif  // CONFIG_TX_SKIP
+#if CONFIG_PALETTE
+      if (!frame_is_intra_only(cm) && !is_inter_block(mbmi) &&
+          bsize >= BLOCK_8X8 && cm->allow_palette_mode) {
+        int palette_ctx = 0;
+        const MODE_INFO *above_mi = xd->up_available ?
+            xd->mi[-xd->mi_stride].src_mi : NULL;
+        const MODE_INFO *left_mi = xd->left_available ?
+            xd->mi[-1].src_mi : NULL;
+        if (above_mi)
+          palette_ctx += (above_mi->mbmi.palette_enabled[0] == 1);
+        if (left_mi)
+          palette_ctx += (left_mi->mbmi.palette_enabled[0] == 1);
+        update_palette_counts(&cm->counts, mbmi, bsize, palette_ctx);
+      }
+#endif  // CONFIG_PALETTE
   }
 }
 

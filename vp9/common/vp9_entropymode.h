@@ -67,6 +67,10 @@ typedef struct frame_contexts {
   vp9_prob ext_tx_prob[3][EXT_TX_TYPES - 1];
 #endif  // CONFIG_EXT_TX
 #if CONFIG_PALETTE
+  vp9_prob palette_enabled_prob[10][3];
+  vp9_prob palette_uv_enabled_prob[2];
+  vp9_prob palette_scan_order_prob[10][PALETTE_SCAN_ORDERS - 1];
+  vp9_prob palette_uv_scan_order_prob[10][PALETTE_SCAN_ORDERS - 1];
   vp9_prob palette_size_prob[10][PALETTE_SIZES - 1];
   vp9_prob palette_run_length_prob[10][PALETTE_RUN_LENGTHS - 1];
   vp9_prob palette_uv_size_prob[10][PALETTE_SIZES - 1];
@@ -117,18 +121,18 @@ typedef struct {
   nmv_context_counts mv;
 #if CONFIG_FILTERINTRA
   unsigned int filterintra[TX_SIZES][INTRA_MODES][2];
-#endif
+#endif  // CONFIG_FILTERINTRA
 #if CONFIG_EXT_TX
   unsigned int ext_tx[3][EXT_TX_TYPES];
-#endif
+#endif  // CONFIG_EXT_TX
 #if CONFIG_SUPERTX
   unsigned int supertx[PARTITION_SUPERTX_CONTEXTS][TX_SIZES][2];
   unsigned int supertx_size[BLOCK_SIZES];
-#endif
+#endif  // CONFIG_SUPERTX
 #if CONFIG_TX_SKIP
   unsigned int y_tx_skip[2][2];
   unsigned int uv_tx_skip[2][2];
-#endif
+#endif  // CONFIG_TX_SKIP
 #if CONFIG_COPY_MODE
   unsigned int copy_noref[COPY_MODE_CONTEXTS][BLOCK_SIZES][2];
   unsigned int copy_mode_l2[COPY_MODE_CONTEXTS][2];
@@ -143,6 +147,14 @@ typedef struct {
 #if CONFIG_WEDGE_PARTITION
   unsigned int wedge_interinter[BLOCK_SIZES][2];
 #endif  // CONFIG_WEDGE_PARTITION
+#if CONFIG_PALETTE
+  unsigned int y_palette_enabled[10][3][2];
+  unsigned int uv_palette_enabled[2][2];
+  unsigned int y_palette_scan_order[10][PALETTE_SCAN_ORDERS];
+  unsigned int uv_palette_scan_order[10][PALETTE_SCAN_ORDERS];
+  unsigned int y_palette_size[10][PALETTE_SIZES];
+  unsigned int uv_palette_size[10][PALETTE_SIZES];
+#endif  // CONFIG_PALETTE
 } FRAME_COUNTS;
 
 extern const vp9_prob vp9_kf_uv_mode_prob[INTRA_MODES][INTRA_MODES - 1];
@@ -160,6 +172,8 @@ extern const vp9_tree_index vp9_ext_tx_tree[TREE_SIZE(EXT_TX_TYPES)];
 #endif
 #if CONFIG_PALETTE
 extern const vp9_tree_index vp9_palette_size_tree[TREE_SIZE(PALETTE_SIZES)];
+extern const vp9_tree_index
+vp9_palette_scan_order_tree[TREE_SIZE(PALETTE_SCAN_ORDERS)];
 extern const vp9_tree_index
 vp9_palette_run_length_tree[TREE_SIZE(PALETTE_RUN_LENGTHS)];
 #endif

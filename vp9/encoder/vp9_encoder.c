@@ -2606,7 +2606,7 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
 #if CONFIG_PALETTE
     if (loop_count == 0 && frame_is_intra_only(cm))
       cm->allow_palette_mode = 1;
-#endif
+#endif  // CONFIG_PALETTE
 
     // Variance adaptive and in frame q adjustment experiments are mutually
     // exclusive.

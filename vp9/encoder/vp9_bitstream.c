@@ -46,6 +46,7 @@ static struct vp9_token ext_tx_encodings[EXT_TX_TYPES];
 #endif
 #if CONFIG_PALETTE
 static struct vp9_token palette_size_encodings[PALETTE_SIZES];
+static struct vp9_token palette_scan_order_encodings[PALETTE_SCAN_ORDERS];
 static struct vp9_token palette_run_length_encodings[PALETTE_RUN_LENGTHS];
 #endif
 #if CONFIG_COPY_MODE
@@ -78,6 +79,8 @@ void vp9_entropy_mode_init() {
 #endif
 #if CONFIG_PALETTE
   vp9_tokens_from_tree(palette_size_encodings, vp9_palette_size_tree);
+  vp9_tokens_from_tree(palette_scan_order_encodings,
+                       vp9_palette_scan_order_tree);
   vp9_tokens_from_tree(palette_run_length_encodings,
                        vp9_palette_run_length_tree);
 #endif
@@ -464,10 +467,22 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
 
 #if CONFIG_PALETTE
   if (!is_inter && bsize >= BLOCK_8X8 && cm->allow_palette_mode) {
-    int l, n, i, d, bits;
+    int l, n, i, d, bits, ctx;
+    BLOCK_SIZE uv_bsize = get_plane_block_size(bsize, &xd->plane[1]);
+    const MODE_INFO *above_mi = xd->up_available ?
+        xd->mi[-xd->mi_stride].src_mi : NULL;
+    const MODE_INFO *left_mi = xd->left_available ?
+        xd->mi[-1].src_mi : NULL;
 
-    vp9_write_bit(w, mbmi->palette_enabled[0]);
-    vp9_write_bit(w, mbmi->palette_enabled[1]);
+    ctx = 0;
+    if (above_mi)
+      ctx += (above_mi->mbmi.palette_enabled[0] == 1);
+    if (left_mi)
+      ctx += (left_mi->mbmi.palette_enabled[0] == 1);
+    vp9_write(w, mbmi->palette_enabled[0],
+              cm->fc.palette_enabled_prob[bsize - BLOCK_8X8][ctx]);
+    vp9_write(w, mbmi->palette_enabled[1],
+              cm->fc.palette_uv_enabled_prob[mbmi->palette_enabled[0]]);
 
     if (mbmi->palette_enabled[0]) {
       int rows = 4 * num_4x4_blocks_high_lookup[bsize];
@@ -480,7 +495,10 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
                       &palette_size_encodings[n - 2]);
       vp9_write_literal(w, (l >> 1),
                         get_bit_depth(palette_max_run(bsize)));
-      vp9_write_literal(w, mbmi->palette_scan_order[0], 2);
+      vp9_write_token(w, vp9_palette_scan_order_tree,
+                      cm->fc.palette_scan_order_prob[bsize - BLOCK_8X8],
+                      &palette_scan_order_encodings
+                      [mbmi->palette_scan_order[0]]);
 
       for (i = 0; i < n; i++)
         vp9_write_literal(w, mbmi->palette_colors[i], 8);
@@ -505,17 +523,19 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
           xd->plane[1].subsampling_y;
       int cols = 4 * num_4x4_blocks_wide_lookup[bsize] >>
           xd->plane[1].subsampling_x;
-      BLOCK_SIZE uv_bsize = get_plane_block_size(bsize, &xd->plane[1]);
       n = mbmi->palette_size[1];
       l = mbmi->palette_run_length[1];
 
       if (xd->plane[1].subsampling_x && xd->plane[1].subsampling_y) {
         vp9_write_token(w, vp9_palette_size_tree,
-                        cm->fc.palette_uv_size_prob[uv_bsize - BLOCK_4X4],
+                        cm->fc.palette_uv_size_prob[bsize - BLOCK_8X8],
                         &palette_size_encodings[n - 2]);
         vp9_write_literal(w, (l >> 1),
                           get_bit_depth(palette_max_run(uv_bsize)));
-        vp9_write_literal(w, mbmi->palette_scan_order[1], 2);
+        vp9_write_token(w, vp9_palette_scan_order_tree,
+                        cm->fc.palette_uv_scan_order_prob[bsize - BLOCK_8X8],
+                        &palette_scan_order_encodings
+                        [mbmi->palette_scan_order[1]]);
       }
 
       for (i = 0; i < n; i++)
@@ -530,8 +550,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
                             get_bit_depth(mbmi->palette_size[1]));
           bits = get_bit_depth(runs[i + 1]);
           vp9_write_token(w, vp9_palette_run_length_tree,
-                          cm->fc.palette_uv_run_length_prob[uv_bsize -
-                                                            BLOCK_4X4],
+                          cm->fc.palette_uv_run_length_prob[bsize - BLOCK_8X8],
                                       &palette_run_length_encodings[bits > 6 ?
                                                                 6 : bits - 1]);
           vp9_write_literal(w, runs[i + 1] - 1,
@@ -834,10 +853,18 @@ static void write_mb_modes_kf(const VP9_COMMON *cm, const MACROBLOCKD *xd,
 
 #if CONFIG_PALETTE
   if (bsize >= BLOCK_8X8 && cm->allow_palette_mode) {
-    int l, m1, m2, i, d, bits;
+    int l, m1, m2, i, d, bits, ctx;
+    BLOCK_SIZE uv_bsize = get_plane_block_size(bsize, &xd->plane[1]);
 
-    vp9_write_bit(w, mbmi->palette_enabled[0]);
-    vp9_write_bit(w, mbmi->palette_enabled[1]);
+    ctx = 0;
+    if (above_mi)
+      ctx += (above_mi->mbmi.palette_enabled[0] == 1);
+    if (left_mi)
+      ctx += (left_mi->mbmi.palette_enabled[0] == 1);
+    vp9_write(w, mbmi->palette_enabled[0],
+              cm->fc.palette_enabled_prob[bsize - BLOCK_8X8][ctx]);
+    vp9_write(w, mbmi->palette_enabled[1],
+              cm->fc.palette_uv_enabled_prob[mbmi->palette_enabled[0]]);
 
     if (mbmi->palette_enabled[0]) {
       int rows = 4 * num_4x4_blocks_high_lookup[bsize];
@@ -858,7 +885,10 @@ static void write_mb_modes_kf(const VP9_COMMON *cm, const MACROBLOCKD *xd,
         vp9_write_literal(w, mbmi->palette_delta_bitdepth, PALETTE_DELTA_BIT);
       vp9_write_literal(w, (l >> 1),
                         get_bit_depth(palette_max_run(bsize)));
-      vp9_write_literal(w, mbmi->palette_scan_order[0], 2);
+      vp9_write_token(w, vp9_palette_scan_order_tree,
+                      cm->fc.palette_scan_order_prob[bsize - BLOCK_8X8],
+                      &palette_scan_order_encodings
+                      [mbmi->palette_scan_order[0]]);
 
       if (m1 > 0) {
         for (i = 0; i < m1; i++)
@@ -897,16 +927,18 @@ static void write_mb_modes_kf(const VP9_COMMON *cm, const MACROBLOCKD *xd,
           xd->plane[1].subsampling_y;
       int cols = 4 * num_4x4_blocks_wide_lookup[bsize] >>
           xd->plane[1].subsampling_x;
-      BLOCK_SIZE uv_bsize = get_plane_block_size(bsize, &xd->plane[1]);
       l = mbmi->palette_run_length[1];
 
       if (xd->plane[1].subsampling_x && xd->plane[1].subsampling_y) {
         vp9_write_token(w, vp9_palette_size_tree,
-                        cm->fc.palette_uv_size_prob[uv_bsize - BLOCK_4X4],
+                        cm->fc.palette_uv_size_prob[bsize - BLOCK_8X8],
                         &palette_size_encodings[mbmi->palette_size[1] - 2]);
         vp9_write_literal(w, (l >> 1),
                           get_bit_depth(palette_max_run(uv_bsize)));
-        vp9_write_literal(w, mbmi->palette_scan_order[1], 2);
+        vp9_write_token(w, vp9_palette_scan_order_tree,
+                        cm->fc.palette_uv_scan_order_prob[bsize - BLOCK_8X8],
+                        &palette_scan_order_encodings
+                        [mbmi->palette_scan_order[1]]);
       }
 
       for (i = 0; i < mbmi->palette_size[1]; i++)
@@ -921,8 +953,7 @@ static void write_mb_modes_kf(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                             get_bit_depth(mbmi->palette_size[1]));
           bits = get_bit_depth(runs[i + 1]);
           vp9_write_token(w, vp9_palette_run_length_tree,
-                          cm->fc.palette_uv_run_length_prob[uv_bsize -
-                                                            BLOCK_4X4],
+                          cm->fc.palette_uv_run_length_prob[bsize - BLOCK_8X8],
                                         &palette_run_length_encodings[bits > 6 ?
                                                                  6 : bits - 1]);
           vp9_write_literal(w, runs[i + 1] - 1,

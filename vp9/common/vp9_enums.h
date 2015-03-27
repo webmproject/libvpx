@@ -149,7 +149,15 @@ typedef enum {
   MAX_BITS,
   PALETTE_RUN_LENGTHS
 } PALETTE_RUN_LENGTH;
-#endif
+
+typedef enum {
+  H_SCAN,
+  V_SCAN,
+  SPIRAL_SCAN,
+  ZZ_SCAN,
+  PALETTE_SCAN_ORDERS
+} PALETTE_SCAN_ORDER;
+#endif  // CONFIG_PALETTE
 
 typedef enum {
   VP9_LAST_FLAG = 1 << 0,

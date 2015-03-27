@@ -373,6 +373,32 @@ const vp9_tree_index vp9_palette_size_tree[TREE_SIZE(PALETTE_SIZES)] = {
   -SEVEN_COLORS, -EIGHT_COLORS
 };
 
+static const vp9_prob default_palette_size_prob[10][PALETTE_SIZES - 1] = {
+    {  96,  89, 100,  64,  77, 130},
+    {  22,  15,  44,  16,  34,  82},
+    {  30,  19,  57,  18,  38,  86},
+    {  94,  36, 104,  23,  43,  92},
+    { 116,  76, 107,  46,  65, 105},
+    { 112,  82,  94,  40,  70, 112},
+    { 147, 124, 123,  58,  69, 103},
+    { 180, 113, 136,  49,  45, 114},
+    { 107,  70,  87,  49, 154, 156},
+    {  98, 105, 142,  63,  64, 152},
+};
+
+static const vp9_prob default_palette_uv_size_prob[10][PALETTE_SIZES - 1] = {
+    { 160, 196, 228, 213, 175, 230},
+    {  87, 148, 208, 141, 166, 163},
+    {  72, 151, 204, 139, 155, 161},
+    {  78, 135, 171, 104, 120, 173},
+    {  59,  92, 131,  78,  92, 142},
+    {  75, 118, 149,  84,  90, 128},
+    {  89,  87,  92,  66,  66, 128},
+    {  67,  53,  54,  55,  66,  93},
+    { 120, 130,  83, 171,  75, 214},
+    {  72,  55,  66,  68,  79, 107},
+};
+
 const vp9_tree_index vp9_palette_run_length_tree[TREE_SIZE(PALETTE_RUN_LENGTHS)]
                                                  = {
   -ONE_BITS, 2,
@@ -381,19 +407,6 @@ const vp9_tree_index vp9_palette_run_length_tree[TREE_SIZE(PALETTE_RUN_LENGTHS)]
   -FOUR_BITS, 8,
   -FIVE_BITS, 10,
   -SIX_BITS, -MAX_BITS
-};
-
-static const vp9_prob default_palette_size_prob[10][PALETTE_SIZES - 1] = {
-    {  54,  82,  96, 100, 117, 139},
-    {  11,  10,  30,  20,  45,  82},
-    {  11,  10,  30,  20,  45,  82},
-    {  16,  13,  29,   9,  34,  93},
-    { 128,  40,  50,  46,  62,  77},
-    { 128,  40,  50,  46,  62,  77},
-    {  92, 177, 193,  78,  28,  40},
-    { 160,  30, 228,  64, 105, 180},
-    { 160,  30, 228,  64, 105, 180},
-    {  32,  84, 227,  45,  12, 232},
 };
 
 static const vp9_prob
@@ -410,19 +423,6 @@ default_palette_run_length_prob[10][PALETTE_RUN_LENGTHS - 1] = {
     {  72,  34,  32,  42,  42, 108},
 };
 
-static const vp9_prob default_palette_uv_size_prob[10][PALETTE_SIZES - 1] = {
-    { 180, 192, 207, 221,  55, 254},
-    { 128, 185, 235, 148, 180, 128},
-    { 128, 185, 235, 148, 180, 128},
-    { 150, 180, 211,  77, 147, 179},
-    { 128,  60, 195,  68, 120, 228},
-    { 128,  60, 195,  68, 120, 228},
-    { 228,  15,  17, 178,  47, 197},
-    { 103, 210, 145, 250, 190, 128},
-    { 103, 210, 145, 250, 190, 128},
-    {   5,  76, 230, 148, 239, 254},
-};
-
 static const vp9_prob
 default_palette_uv_run_length_prob[10][PALETTE_RUN_LENGTHS - 1] = {
     {  81, 107, 112, 254, 128, 128},
@@ -435,6 +435,59 @@ default_palette_uv_run_length_prob[10][PALETTE_RUN_LENGTHS - 1] = {
     {   5,   5,   5,  70,  75,  18},
     {   5,   5,   5,  70,  75,  18},
     {   5,   5,   5,   5, 157,   5},
+};
+
+const vp9_tree_index vp9_palette_scan_order_tree
+[TREE_SIZE(PALETTE_SCAN_ORDERS)] = {
+  -H_SCAN, 2,
+  -V_SCAN, 4,
+  -SPIRAL_SCAN, -ZZ_SCAN,
+};
+
+static const vp9_prob
+default_palette_scan_order_prob[10][PALETTE_SCAN_ORDERS - 1] = {
+    {  95, 152, 184},
+    {  79, 102, 219},
+    { 114, 143, 201},
+    { 121, 133, 178},
+    {  80, 163, 180},
+    { 147, 124, 192},
+    { 140, 202, 142},
+    {  91, 238, 206},
+    { 214, 203, 180},
+    {  85, 223,  29},
+};
+
+static const vp9_prob
+default_palette_uv_scan_order_prob[10][PALETTE_SCAN_ORDERS - 1] = {
+    { 131, 171, 112},
+    {  29, 133, 213},
+    { 159, 147, 196},
+    {  86, 113, 173},
+    {  36, 210, 119},
+    { 148, 156, 160},
+    { 104, 209,  72},
+    {  37, 253, 232},
+    { 198, 240, 153},
+    {  61, 253, 109},
+};
+
+static const vp9_prob default_palette_enabled_prob[10][3] = {
+    { 240,  180,  100, },
+    { 240,  180,  100, },
+    { 240,  180,  100, },
+    { 240,  180,  100, },
+    { 240,  180,  100, },
+    { 240,  180,  100, },
+    { 240,  180,  100, },
+    { 240,  180,  100, },
+    { 240,  180,  100, },
+    { 240,  180,  100, },
+};
+
+
+static const vp9_prob default_uv_palette_enabled_prob[2] = {
+    253, 229
 };
 #endif  // CONFIG_PALETTE
 
@@ -570,6 +623,10 @@ void vp9_init_mode_probs(FRAME_CONTEXT *fc) {
 #endif  // CONFIG_EXT_TX
 #if CONFIG_PALETTE
   vp9_copy(fc->palette_size_prob, default_palette_size_prob);
+  vp9_copy(fc->palette_enabled_prob, default_palette_enabled_prob);
+  vp9_copy(fc->palette_uv_enabled_prob, default_uv_palette_enabled_prob);
+  vp9_copy(fc->palette_scan_order_prob, default_palette_scan_order_prob);
+  vp9_copy(fc->palette_uv_scan_order_prob, default_palette_uv_scan_order_prob);
   vp9_copy(fc->palette_run_length_prob, default_palette_run_length_prob);
   vp9_copy(fc->palette_uv_size_prob, default_palette_uv_size_prob);
   vp9_copy(fc->palette_uv_run_length_prob, default_palette_uv_run_length_prob);
@@ -768,6 +825,41 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
            counts->wedge_interinter[i]);
   }
 #endif  // CONFIG_WEDGE_PARTITION
+
+#if CONFIG_PALETTE
+  for (i = 0; i < 10; i++) {
+    adapt_probs(vp9_palette_scan_order_tree,
+                pre_fc->palette_scan_order_prob[i],
+                counts->y_palette_scan_order[i],
+                fc->palette_scan_order_prob[i]);
+  }
+  for (i = 0; i < 10; i++) {
+    adapt_probs(vp9_palette_scan_order_tree,
+                pre_fc->palette_uv_scan_order_prob[i],
+                counts->uv_palette_scan_order[i],
+                fc->palette_uv_scan_order_prob[i]);
+  }
+  for (i = 0; i < 10; i++) {
+    adapt_probs(vp9_palette_size_tree, pre_fc->palette_size_prob[i],
+                counts->y_palette_size[i],
+                fc->palette_size_prob[i]);
+  }
+  for (i = 0; i < 10; i++) {
+    adapt_probs(vp9_palette_size_tree, pre_fc->palette_uv_size_prob[i],
+                counts->uv_palette_size[i],
+                fc->palette_uv_size_prob[i]);
+  }
+  for (i = 0; i < 10; i++) {
+    for (j = 0; j < 3; j++)
+      fc->palette_enabled_prob[i][j] =
+          adapt_prob(pre_fc->palette_enabled_prob[i][j],
+                     counts->y_palette_enabled[i][j]);
+  }
+  for (i = 0; i < 2; i++)
+    fc->palette_uv_enabled_prob[i] =
+        adapt_prob(pre_fc->palette_uv_enabled_prob[i],
+                   counts->uv_palette_enabled[i]);
+#endif  // CONFIG_PALETTE
 }
 
 static void set_default_lf_deltas(struct loopfilter *lf) {

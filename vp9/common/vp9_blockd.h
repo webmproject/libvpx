@@ -109,16 +109,6 @@ typedef enum {
 } COPY_MODE;
 #endif  // CONFIG_COPY_MODE
 
-#if CONFIG_PALETTE
-typedef enum {
-  H_SCAN,
-  V_SCAN,
-  SPIRAL_SCAN,
-  ZZ_SCAN,
-  PALETTE_SCAN_ORDERS
-} PALETTE_SCAN_ORDER;
-#endif
-
 static INLINE int is_inter_mode(PREDICTION_MODE mode) {
   return mode >= NEARESTMV && mode <= NEWMV;
 }
