@@ -91,10 +91,7 @@ void vp9_post_proc_down_and_across_c(const uint8_t *src_ptr,
                                      int flimit) {
   uint8_t const *p_src;
   uint8_t *p_dst;
-  int row;
-  int col;
-  int i;
-  int v;
+  int row, col, i, v, kernel;
   int pitch = src_pixels_per_line;
   uint8_t d[8];
   (void)dst_pixels_per_line;
@@ -105,8 +102,8 @@ void vp9_post_proc_down_and_across_c(const uint8_t *src_ptr,
     p_dst = dst_ptr;
 
     for (col = 0; col < cols; col++) {
-      int kernel = 4;
-      int v = p_src[col];
+      kernel = 4;
+      v = p_src[col];
 
       for (i = -2; i <= 2; i++) {
         if (abs(v - p_src[col + i * pitch]) > flimit)
@@ -128,7 +125,7 @@ void vp9_post_proc_down_and_across_c(const uint8_t *src_ptr,
       d[i] = p_src[i];
 
     for (col = 0; col < cols; col++) {
-      int kernel = 4;
+      kernel = 4;
       v = p_src[col];
 
       d[col & 7] = v;
@@ -168,10 +165,7 @@ void vp9_highbd_post_proc_down_and_across_c(const uint16_t *src_ptr,
                                             int flimit) {
   uint16_t const *p_src;
   uint16_t *p_dst;
-  int row;
-  int col;
-  int i;
-  int v;
+  int row, col, i, v, kernel;
   int pitch = src_pixels_per_line;
   uint16_t d[8];
 
@@ -181,8 +175,8 @@ void vp9_highbd_post_proc_down_and_across_c(const uint16_t *src_ptr,
     p_dst = dst_ptr;
 
     for (col = 0; col < cols; col++) {
-      int kernel = 4;
-      int v = p_src[col];
+      kernel = 4;
+      v = p_src[col];
 
       for (i = -2; i <= 2; i++) {
         if (abs(v - p_src[col + i * pitch]) > flimit)
@@ -205,7 +199,7 @@ void vp9_highbd_post_proc_down_and_across_c(const uint16_t *src_ptr,
       d[i] = p_src[i];
 
     for (col = 0; col < cols; col++) {
-      int kernel = 4;
+      kernel = 4;
       v = p_src[col];
 
       d[col & 7] = v;
@@ -518,22 +512,24 @@ void vp9_denoise(const YV12_BUFFER_CONFIG *src, YV12_BUFFER_CONFIG *dst,
     assert((src->flags & YV12_FLAG_HIGHBITDEPTH) ==
            (dst->flags & YV12_FLAG_HIGHBITDEPTH));
     if (src->flags & YV12_FLAG_HIGHBITDEPTH) {
-      const uint16_t *const src = CONVERT_TO_SHORTPTR(srcs[i] + 2 * src_stride
-                                                      + 2);
-      uint16_t *const dst = CONVERT_TO_SHORTPTR(dsts[i] + 2 * dst_stride + 2);
-      vp9_highbd_post_proc_down_and_across(src, dst, src_stride, dst_stride,
-                                           src_height, src_width, ppl);
+      const uint16_t *const src_plane = CONVERT_TO_SHORTPTR(
+          srcs[i] + 2 * src_stride + 2);
+      uint16_t *const dst_plane = CONVERT_TO_SHORTPTR(
+          dsts[i] + 2 * dst_stride + 2);
+      vp9_highbd_post_proc_down_and_across(src_plane, dst_plane, src_stride,
+                                           dst_stride, src_height, src_width,
+                                           ppl);
     } else {
-      const uint8_t *const src = srcs[i] + 2 * src_stride + 2;
-      uint8_t *const dst = dsts[i] + 2 * dst_stride + 2;
+      const uint8_t *const src_plane = srcs[i] + 2 * src_stride + 2;
+      uint8_t *const dst_plane = dsts[i] + 2 * dst_stride + 2;
 
-      vp9_post_proc_down_and_across(src, dst, src_stride, dst_stride,
-                                    src_height, src_width, ppl);
+      vp9_post_proc_down_and_across(src_plane, dst_plane, src_stride,
+                                    dst_stride, src_height, src_width, ppl);
     }
 #else
-    const uint8_t *const src = srcs[i] + 2 * src_stride + 2;
-    uint8_t *const dst = dsts[i] + 2 * dst_stride + 2;
-    vp9_post_proc_down_and_across(src, dst, src_stride, dst_stride,
+    const uint8_t *const src_plane = srcs[i] + 2 * src_stride + 2;
+    uint8_t *const dst_plane = dsts[i] + 2 * dst_stride + 2;
+    vp9_post_proc_down_and_across(src_plane, dst_plane, src_stride, dst_stride,
                                   src_height, src_width, ppl);
 #endif
   }
@@ -558,16 +554,15 @@ static void fillrd(struct postproc_state *state, int q, int a) {
    * a gaussian distribution with sigma determined by q.
    */
   {
-    double i;
     int next, j;
 
     next = 0;
 
     for (i = -32; i < 32; i++) {
-      int a = (int)(0.5 + 256 * gaussian(sigma, 0, i));
+      int a_i = (int)(0.5 + 256 * gaussian(sigma, 0, i));
 
-      if (a) {
-        for (j = 0; j < a; j++) {
+      if (a_i) {
+        for (j = 0; j < a_i; j++) {
           char_dist[next + j] = (char) i;
         }
 
