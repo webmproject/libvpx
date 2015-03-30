@@ -213,7 +213,7 @@ typedef struct VP9Common {
   int allow_palette_mode;
   int palette_counter;
   int block_counter;
-#endif
+#endif  // CONFIG_PALETTE
 } VP9_COMMON;
 
 static INLINE YV12_BUFFER_CONFIG *get_ref_frame(VP9_COMMON *cm, int index) {

@@ -125,6 +125,11 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd, PLANE_TYPE type,
   cat6_prob = vp9_cat6_prob;
 #endif
 
+#if CONFIG_TX_SKIP
+    if (xd->mi[0].src_mi->mbmi.tx_skip[type])
+      band_translate = vp9_coefband_tx_skip;
+#endif  // CONFIG_TX_SKIP
+
   while (c < max_eob) {
     int val = -1;
     band = *band_translate++;
@@ -250,12 +255,12 @@ int vp9_decode_block_tokens(VP9_COMMON *cm, MACROBLOCKD *xd,
                      pd->dequant,
 #if CONFIG_NEW_QUANT
                      pd->dequant_val_nuq,
-#endif
+#endif  // CONFIG_NEW_QUANT
                      ctx, so->scan,
                      so->neighbors, r);
 #if CONFIG_TX64X64
   if (plane > 0) assert(tx_size != TX_64X64);
-#endif
+#endif  // CONFIG_TX64X64
   vp9_set_contexts(xd, pd, plane_bsize, tx_size, eob > 0, x, y);
   return eob;
 }

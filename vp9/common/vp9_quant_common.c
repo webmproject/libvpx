@@ -31,6 +31,9 @@ static const uint8_t vp9_nuq_knotes_tiny[COEF_BANDS][NUQ_KNOTES] = {
   {86, 124, 128, 128, 128},  // band 3
   {86, 124, 128, 128, 128},  // band 4
   {86, 124, 128, 128, 128},  // band 5
+#if CONFIG_TX_SKIP
+  {84, 124, 128, 128, 128},  // band 6
+#endif  // CONFIG_TX_SKIP
 };
 static const uint8_t vp9_nuq_knotes_low[COEF_BANDS][NUQ_KNOTES] = {
   {84, 124, 128, 128, 128},  // dc, band 0
@@ -39,6 +42,9 @@ static const uint8_t vp9_nuq_knotes_low[COEF_BANDS][NUQ_KNOTES] = {
   {86, 124, 128, 128, 128},  // band 3
   {86, 124, 128, 128, 128},  // band 4
   {86, 124, 128, 128, 128},  // band 5
+#if CONFIG_TX_SKIP
+  {84, 124, 128, 128, 128},  // band 6
+#endif  // CONFIG_TX_SKIP
 };
 static const uint8_t vp9_nuq_knotes_mid[COEF_BANDS][NUQ_KNOTES] = {
   {84, 124, 128, 128, 128},  // dc, band 0
@@ -47,6 +53,9 @@ static const uint8_t vp9_nuq_knotes_mid[COEF_BANDS][NUQ_KNOTES] = {
   {86, 124, 128, 128, 128},  // band 3
   {86, 124, 128, 128, 128},  // band 4
   {86, 124, 128, 128, 128},  // band 5
+#if CONFIG_TX_SKIP
+  {84, 124, 128, 128, 128},  // band 6
+#endif  // CONFIG_TX_SKIP
 };
 static const uint8_t vp9_nuq_knotes_high[COEF_BANDS][NUQ_KNOTES] = {
   {84, 124, 128, 128, 128},  // dc, band 0
@@ -55,6 +64,9 @@ static const uint8_t vp9_nuq_knotes_high[COEF_BANDS][NUQ_KNOTES] = {
   {86, 124, 128, 128, 128},  // band 3
   {86, 124, 128, 128, 128},  // band 4
   {86, 124, 128, 128, 128},  // band 5
+#if CONFIG_TX_SKIP
+  {84, 124, 128, 128, 128},  // band 6
+#endif  // CONFIG_TX_SKIP
 };
 static const uint8_t vp9_nuq_knotes_huge[COEF_BANDS][NUQ_KNOTES] = {
   {84, 124, 128, 128, 128},  // dc, band 0
@@ -63,13 +75,36 @@ static const uint8_t vp9_nuq_knotes_huge[COEF_BANDS][NUQ_KNOTES] = {
   {86, 124, 128, 128, 128},  // band 3
   {86, 124, 128, 128, 128},  // band 4
   {86, 124, 128, 128, 128},  // band 5
+#if CONFIG_TX_SKIP
+  {84, 124, 128, 128, 128},  // band 6
+#endif  // CONFIG_TX_SKIP
 };
 
-static const uint8_t vp9_nuq_doff_tiny[COEF_BANDS] = { 8, 16, 17, 22, 23, 24 };
-static const uint8_t vp9_nuq_doff_low[COEF_BANDS] =  { 8, 16, 17, 22, 23, 24 };
-static const uint8_t vp9_nuq_doff_mid[COEF_BANDS] =  { 8, 16, 17, 22, 23, 24 };
-static const uint8_t vp9_nuq_doff_high[COEF_BANDS] = { 8, 16, 17, 22, 23, 24 };
-static const uint8_t vp9_nuq_doff_huge[COEF_BANDS] = { 8, 16, 17, 22, 23, 24 };
+static const uint8_t vp9_nuq_doff_tiny[COEF_BANDS] = { 8, 16, 17, 22, 23, 24
+#if CONFIG_TX_SKIP
+    , 8
+#endif  // CONFIG_TX_SKIP
+};
+static const uint8_t vp9_nuq_doff_low[COEF_BANDS] =  { 8, 16, 17, 22, 23, 24
+#if CONFIG_TX_SKIP
+    , 8
+#endif  // CONFIG_TX_SKIP
+};
+static const uint8_t vp9_nuq_doff_mid[COEF_BANDS] =  { 8, 16, 17, 22, 23, 24
+#if CONFIG_TX_SKIP
+    , 8
+#endif  // CONFIG_TX_SKIP
+};
+static const uint8_t vp9_nuq_doff_high[COEF_BANDS] = { 8, 16, 17, 22, 23, 24
+#if CONFIG_TX_SKIP
+    , 8
+#endif  // CONFIG_TX_SKIP
+};
+static const uint8_t vp9_nuq_doff_huge[COEF_BANDS] = { 8, 16, 17, 22, 23, 24
+#if CONFIG_TX_SKIP
+    , 8
+#endif  // CONFIG_TX_SKIP
+};
 
 // Allow different quantization profiles in different q ranges,
 // to enable entropy-constraints in scalar quantization.

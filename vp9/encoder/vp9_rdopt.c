@@ -430,11 +430,19 @@ static INLINE int cost_coeffs(MACROBLOCK *x,
   uint8_t token_cache[MAX_NUM_COEFS];
   int pt = combine_entropy_contexts(*A, *L);
   int c, cost;
+#if CONFIG_TX_SKIP
+  int tx_skip = mbmi->tx_skip[plane != 0];
+#endif  // CONFIG_TX_SKIP
   // Check for consistency of tx_size with mode info
 #if !CONFIG_SUPERTX
   assert(type == PLANE_TYPE_Y ? mbmi->tx_size == tx_size
                               : get_uv_tx_size(mbmi, pd) == tx_size);
-#endif
+#endif  // CONFIG_SUPERTX
+#if CONFIG_TX_SKIP
+  if (tx_skip)
+    token_costs = &x->token_costs[tx_size][type][is_inter_block(mbmi)]
+                                                 [TX_SKIP_COEFF_BAND];
+#endif  // CONFIG_TX_SKIP
 
   if (eob == 0) {
     // single eob token
@@ -448,6 +456,9 @@ static INLINE int cost_coeffs(MACROBLOCK *x,
     int prev_t = vp9_dct_value_tokens_ptr[v].token;
     cost = (*token_costs)[0][pt][prev_t] + vp9_dct_value_cost_ptr[v];
     token_cache[0] = vp9_pt_energy_class[prev_t];
+#if CONFIG_TX_SKIP
+    if (!tx_skip)
+#endif  // CONFIG_TX_SKIP
     ++token_costs;
 
     // ac tokens
@@ -467,6 +478,9 @@ static INLINE int cost_coeffs(MACROBLOCK *x,
       prev_t = t;
       if (!--band_left) {
         band_left = *band_count++;
+#if CONFIG_TX_SKIP
+        if (!tx_skip)
+#endif  // CONFIG_TX_SKIP
         ++token_costs;
       }
     }

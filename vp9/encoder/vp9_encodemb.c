@@ -150,10 +150,16 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
 #if CONFIG_NEW_QUANT
 #if CONFIG_TX_SKIP
   const int use_rect_quant = is_rect_quant_used(&xd->mi[0].src_mi->mbmi, plane);
-#endif
+#endif  // CONFIG_TX_SKIP
   const dequant_val_type_nuq *dequant_val = pd->dequant_val_nuq;
 #endif  // CONFIG_NEW_QUANT
+#if CONFIG_TX_SKIP
+  const uint8_t *const band_translate =
+      xd->mi[0].src_mi->mbmi.tx_skip[plane != 0] ?
+      vp9_coefband_tx_skip : get_band_translate(tx_size);
+#else
   const uint8_t *const band_translate = get_band_translate(tx_size);
+#endif  // CONFIG_TX_SKIP
   const scan_order *const so = get_scan(xd, tx_size, type, block);
   const int16_t *const scan = so->scan;
   const int16_t *const nb = so->neighbors;
@@ -709,6 +715,7 @@ void vp9_xform_quant_nuq(MACROBLOCK *x, int plane, int block,
 
 #if CONFIG_TX_SKIP
   if (mbmi->tx_skip[plane != 0]) {
+    band = vp9_coefband_tx_skip;
     switch (tx_size) {
 #if CONFIG_TX64X64
       case TX_64X64:
@@ -931,6 +938,7 @@ void vp9_xform_quant_fp_nuq(MACROBLOCK *x, int plane, int block,
 
 #if CONFIG_TX_SKIP
   if (mbmi->tx_skip[plane != 0]) {
+    band = vp9_coefband_tx_skip;
     switch (tx_size) {
 #if CONFIG_TX64X64
       case TX_64X64:
@@ -2508,7 +2516,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
   PREDICTION_MODE mode;
 #if CONFIG_FILTERINTRA
   int fbit = 0;
-#endif
+#endif  // CONFIG_FILTERINTRA
   const int bwl = b_width_log2_lookup[plane_bsize];
   const int diff_stride = 4 * (1 << bwl);
   uint8_t *src, *dst;
@@ -2519,7 +2527,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
   int i, j;
 #if CONFIG_NEW_QUANT
   const uint8_t* band = get_band_translate(tx_size);
-#endif
+#endif  // CONFIG_NEW_QUANT
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &i, &j);
   dst = &pd->dst.buf[4 * (j * dst_stride + i)];
   src = &p->src.buf[4 * (j * src_stride + i)];
@@ -2534,6 +2542,9 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
 #if CONFIG_TX_SKIP
   if (mbmi->tx_skip[plane != 0]) {
     int shift = mbmi->tx_skip_shift;
+#if CONFIG_NEW_QUANT
+    band = vp9_coefband_tx_skip;
+#endif  // CONFIG_NEW_QUANT
     switch (tx_size) {
 #if CONFIG_TX64X64
       case TX_64X64:

@@ -318,7 +318,12 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
       cpi->common.fc.coef_probs[tx_size][type][ref];
   unsigned int (*const eob_branch)[COEFF_CONTEXTS] =
       cpi->common.counts.eob_branch[tx_size][type][ref];
+#if CONFIG_TX_SKIP
+  const uint8_t *const band = mbmi->tx_skip[plane != 0] ?
+      vp9_coefband_tx_skip : get_band_translate(tx_size);
+#else
   const uint8_t *const band = get_band_translate(tx_size);
+#endif  // CONFIG_TX_SKIP
   const int seg_eob = get_tx_eob(&cpi->common.seg, segment_id, tx_size);
   const TOKENVALUE *dct_value_tokens;
 
@@ -341,7 +346,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   }
 #else
   dct_value_tokens = vp9_dct_value_tokens_ptr;
-#endif
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
   while (c < eob) {
     int v = 0;
