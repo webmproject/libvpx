@@ -57,6 +57,141 @@ unsigned int vp9_avg_4x4_sse2(const uint8_t *s, int p) {
   return (avg + 8) >> 4;
 }
 
+static void hadamard_col8_sse2(__m128i *in, int iter) {
+  __m128i a0 = in[0];
+  __m128i a1 = in[1];
+  __m128i a2 = in[2];
+  __m128i a3 = in[3];
+  __m128i a4 = in[4];
+  __m128i a5 = in[5];
+  __m128i a6 = in[6];
+  __m128i a7 = in[7];
+
+  __m128i b0 = _mm_add_epi16(a0, a1);
+  __m128i b1 = _mm_sub_epi16(a0, a1);
+  __m128i b2 = _mm_add_epi16(a2, a3);
+  __m128i b3 = _mm_sub_epi16(a2, a3);
+  __m128i b4 = _mm_add_epi16(a4, a5);
+  __m128i b5 = _mm_sub_epi16(a4, a5);
+  __m128i b6 = _mm_add_epi16(a6, a7);
+  __m128i b7 = _mm_sub_epi16(a6, a7);
+
+  a0 = _mm_add_epi16(b0, b2);
+  a1 = _mm_add_epi16(b1, b3);
+  a2 = _mm_sub_epi16(b0, b2);
+  a3 = _mm_sub_epi16(b1, b3);
+  a4 = _mm_add_epi16(b4, b6);
+  a5 = _mm_add_epi16(b5, b7);
+  a6 = _mm_sub_epi16(b4, b6);
+  a7 = _mm_sub_epi16(b5, b7);
+
+  if (iter == 0) {
+    b0 = _mm_add_epi16(a0, a4);
+    b1 = _mm_add_epi16(a1, a5);
+    b2 = _mm_add_epi16(a2, a6);
+    b3 = _mm_add_epi16(a3, a7);
+    b4 = _mm_sub_epi16(a0, a4);
+    b5 = _mm_sub_epi16(a1, a5);
+    b6 = _mm_sub_epi16(a2, a6);
+    b7 = _mm_sub_epi16(a3, a7);
+
+    a0 = _mm_unpacklo_epi16(b0, b1);
+    a1 = _mm_unpacklo_epi16(b2, b3);
+    a2 = _mm_unpackhi_epi16(b0, b1);
+    a3 = _mm_unpackhi_epi16(b2, b3);
+    a4 = _mm_unpacklo_epi16(b4, b5);
+    a5 = _mm_unpacklo_epi16(b6, b7);
+    a6 = _mm_unpackhi_epi16(b4, b5);
+    a7 = _mm_unpackhi_epi16(b6, b7);
+
+    b0 = _mm_unpacklo_epi32(a0, a1);
+    b1 = _mm_unpacklo_epi32(a4, a5);
+    b2 = _mm_unpackhi_epi32(a0, a1);
+    b3 = _mm_unpackhi_epi32(a4, a5);
+    b4 = _mm_unpacklo_epi32(a2, a3);
+    b5 = _mm_unpacklo_epi32(a6, a7);
+    b6 = _mm_unpackhi_epi32(a2, a3);
+    b7 = _mm_unpackhi_epi32(a6, a7);
+
+    in[0] = _mm_unpacklo_epi64(b0, b1);
+    in[7] = _mm_unpackhi_epi64(b0, b1);
+    in[3] = _mm_unpacklo_epi64(b2, b3);
+    in[4] = _mm_unpackhi_epi64(b2, b3);
+    in[2] = _mm_unpacklo_epi64(b4, b5);
+    in[6] = _mm_unpackhi_epi64(b4, b5);
+    in[1] = _mm_unpacklo_epi64(b6, b7);
+    in[5] = _mm_unpackhi_epi64(b6, b7);
+  } else {
+    in[0] = _mm_add_epi16(a0, a4);
+    in[7] = _mm_add_epi16(a1, a5);
+    in[3] = _mm_add_epi16(a2, a6);
+    in[4] = _mm_add_epi16(a3, a7);
+    in[2] = _mm_sub_epi16(a0, a4);
+    in[6] = _mm_sub_epi16(a1, a5);
+    in[1] = _mm_sub_epi16(a2, a6);
+    in[5] = _mm_sub_epi16(a3, a7);
+  }
+}
+
+void vp9_hadamard_8x8_sse2(int16_t const *src_diff, int src_stride,
+                           int16_t *coeff) {
+  __m128i src[8];
+  src[0] = _mm_load_si128((const __m128i *)src_diff);
+  src[1] = _mm_load_si128((const __m128i *)(src_diff += src_stride));
+  src[2] = _mm_load_si128((const __m128i *)(src_diff += src_stride));
+  src[3] = _mm_load_si128((const __m128i *)(src_diff += src_stride));
+  src[4] = _mm_load_si128((const __m128i *)(src_diff += src_stride));
+  src[5] = _mm_load_si128((const __m128i *)(src_diff += src_stride));
+  src[6] = _mm_load_si128((const __m128i *)(src_diff += src_stride));
+  src[7] = _mm_load_si128((const __m128i *)(src_diff += src_stride));
+
+  hadamard_col8_sse2(src, 0);
+  hadamard_col8_sse2(src, 1);
+
+  _mm_storeu_si128((__m128i *)coeff, src[0]);
+  coeff += 8;
+  _mm_storeu_si128((__m128i *)coeff, src[1]);
+  coeff += 8;
+  _mm_storeu_si128((__m128i *)coeff, src[2]);
+  coeff += 8;
+  _mm_storeu_si128((__m128i *)coeff, src[3]);
+  coeff += 8;
+  _mm_storeu_si128((__m128i *)coeff, src[4]);
+  coeff += 8;
+  _mm_storeu_si128((__m128i *)coeff, src[5]);
+  coeff += 8;
+  _mm_storeu_si128((__m128i *)coeff, src[6]);
+  coeff += 8;
+  _mm_storeu_si128((__m128i *)coeff, src[7]);
+}
+
+int16_t vp9_satd_sse2(const int16_t *coeff, int length) {
+  int i;
+  __m128i sum = _mm_load_si128((const __m128i *)coeff);
+  __m128i sign = _mm_srai_epi16(sum, 15);
+  __m128i val = _mm_xor_si128(sum, sign);
+  sum = _mm_sub_epi16(val, sign);
+  coeff += 8;
+
+  for (i = 8; i < length; i += 8) {
+    __m128i src_line = _mm_load_si128((const __m128i *)coeff);
+    sign = _mm_srai_epi16(src_line, 15);
+    val = _mm_xor_si128(src_line, sign);
+    val = _mm_sub_epi16(val, sign);
+    sum = _mm_add_epi16(sum, val);
+    coeff += 8;
+  }
+
+  val = _mm_srli_si128(sum, 8);
+  sum = _mm_add_epi16(sum, val);
+  val = _mm_srli_epi64(sum, 32);
+  sum = _mm_add_epi16(sum, val);
+  val = _mm_srli_epi32(sum, 16);
+  sum = _mm_add_epi16(sum, val);
+
+  return _mm_extract_epi16(sum, 0);
+}
+
 void vp9_int_pro_row_sse2(int16_t *hbuf, uint8_t const*ref,
                           const int ref_stride, const int height) {
   int idx;
