@@ -87,13 +87,13 @@ static void hadamard_col8_sse2(__m128i *in, int iter) {
 
   if (iter == 0) {
     b0 = _mm_add_epi16(a0, a4);
-    b1 = _mm_add_epi16(a1, a5);
-    b2 = _mm_add_epi16(a2, a6);
-    b3 = _mm_add_epi16(a3, a7);
-    b4 = _mm_sub_epi16(a0, a4);
-    b5 = _mm_sub_epi16(a1, a5);
-    b6 = _mm_sub_epi16(a2, a6);
-    b7 = _mm_sub_epi16(a3, a7);
+    b7 = _mm_add_epi16(a1, a5);
+    b3 = _mm_add_epi16(a2, a6);
+    b4 = _mm_add_epi16(a3, a7);
+    b2 = _mm_sub_epi16(a0, a4);
+    b6 = _mm_sub_epi16(a1, a5);
+    b1 = _mm_sub_epi16(a2, a6);
+    b5 = _mm_sub_epi16(a3, a7);
 
     a0 = _mm_unpacklo_epi16(b0, b1);
     a1 = _mm_unpacklo_epi16(b2, b3);
@@ -114,13 +114,13 @@ static void hadamard_col8_sse2(__m128i *in, int iter) {
     b7 = _mm_unpackhi_epi32(a6, a7);
 
     in[0] = _mm_unpacklo_epi64(b0, b1);
-    in[7] = _mm_unpackhi_epi64(b0, b1);
-    in[3] = _mm_unpacklo_epi64(b2, b3);
-    in[4] = _mm_unpackhi_epi64(b2, b3);
-    in[2] = _mm_unpacklo_epi64(b4, b5);
-    in[6] = _mm_unpackhi_epi64(b4, b5);
-    in[1] = _mm_unpacklo_epi64(b6, b7);
-    in[5] = _mm_unpackhi_epi64(b6, b7);
+    in[1] = _mm_unpackhi_epi64(b0, b1);
+    in[2] = _mm_unpacklo_epi64(b2, b3);
+    in[3] = _mm_unpackhi_epi64(b2, b3);
+    in[4] = _mm_unpacklo_epi64(b4, b5);
+    in[5] = _mm_unpackhi_epi64(b4, b5);
+    in[6] = _mm_unpacklo_epi64(b6, b7);
+    in[7] = _mm_unpackhi_epi64(b6, b7);
   } else {
     in[0] = _mm_add_epi16(a0, a4);
     in[7] = _mm_add_epi16(a1, a5);
