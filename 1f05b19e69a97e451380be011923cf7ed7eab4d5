@@ -52,6 +52,24 @@
       "revId": "1f05b19e69a97e451380be011923cf7ed7eab4d5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//CE8\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2015-03-30T21:38:01Z",
+      "side": 1,
+      "message": "the sequence of checks here is non-trivial. so i thought it\u0027s better to not complicate it further and ended up simply adding a flag. i can rework the sequence of checks if you strongly feel otherwise. please let me know.",
+      "parentUuid": "AAAAdn//CFk\u003d",
+      "revId": "1f05b19e69a97e451380be011923cf7ed7eab4d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
