@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//CHc\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 15
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-03-30T21:00:47Z",
+      "side": 1,
+      "message": "is the value of rate_mv only useful when rv !\u003d 0? If yes, this can move into the if(){} just above.",
+      "revId": "917368bbf9181f1e07ebf443a737f3f30ce99cac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
