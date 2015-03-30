@@ -16,6 +16,24 @@
       "revId": "1f05b19e69a97e451380be011923cf7ed7eab4d5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//CGg\u003d",
+        "filename": "webmdec.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2015-03-30T21:10:55Z",
+      "side": 1,
+      "message": "segment-\u003eGetNext() doesn\u0027t seem to like it if i pass a cluster that has already eos\u0027ed.",
+      "parentUuid": "AAAAdn//CG4\u003d",
+      "revId": "1f05b19e69a97e451380be011923cf7ed7eab4d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
