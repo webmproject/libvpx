@@ -165,6 +165,44 @@ void vp9_hadamard_8x8_sse2(int16_t const *src_diff, int src_stride,
   _mm_storeu_si128((__m128i *)coeff, src[7]);
 }
 
+void vp9_hadamard_16x16_sse2(int16_t const *src_diff, int src_stride,
+                             int16_t *coeff) {
+  int idx;
+  for (idx = 0; idx < 4; ++idx) {
+    int16_t const *src_ptr = src_diff + (idx >> 1) * 8 * src_stride
+                                + (idx & 0x01) * 8;
+    vp9_hadamard_8x8_sse2(src_ptr, src_stride, coeff + idx * 64);
+  }
+
+  for (idx = 0; idx < 64; idx += 8) {
+    __m128i coeff0 = _mm_load_si128((const __m128i *)coeff);
+    __m128i coeff1 = _mm_load_si128((const __m128i *)(coeff + 64));
+    __m128i coeff2 = _mm_load_si128((const __m128i *)(coeff + 128));
+    __m128i coeff3 = _mm_load_si128((const __m128i *)(coeff + 192));
+
+    __m128i b0 = _mm_add_epi16(coeff0, coeff1);
+    __m128i b1 = _mm_sub_epi16(coeff0, coeff1);
+    __m128i b2 = _mm_add_epi16(coeff2, coeff3);
+    __m128i b3 = _mm_sub_epi16(coeff2, coeff3);
+
+    coeff0 = _mm_add_epi16(b0, b2);
+    coeff1 = _mm_add_epi16(b1, b3);
+    coeff0 = _mm_srai_epi16(coeff0, 1);
+    coeff1 = _mm_srai_epi16(coeff1, 1);
+    _mm_store_si128((__m128i *)coeff, coeff0);
+    _mm_store_si128((__m128i *)(coeff + 64), coeff1);
+
+    coeff2 = _mm_sub_epi16(b0, b2);
+    coeff3 = _mm_sub_epi16(b1, b3);
+    coeff2 = _mm_srai_epi16(coeff2, 1);
+    coeff3 = _mm_srai_epi16(coeff3, 1);
+    _mm_store_si128((__m128i *)(coeff + 128), coeff2);
+    _mm_store_si128((__m128i *)(coeff + 192), coeff3);
+
+    coeff += 8;
+  }
+}
+
 int16_t vp9_satd_sse2(const int16_t *coeff, int length) {
   int i;
   __m128i sum = _mm_load_si128((const __m128i *)coeff);

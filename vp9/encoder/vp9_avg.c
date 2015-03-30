@@ -78,8 +78,15 @@ void vp9_hadamard_8x8_c(int16_t const *src_diff, int src_stride,
 }
 
 // In place 16x16 2D Hadamard transform
-void vp9_hadamard_16x16_c(int16_t *coeff) {
+void vp9_hadamard_16x16_c(int16_t const *src_diff, int src_stride,
+                          int16_t *coeff) {
   int idx;
+  for (idx = 0; idx < 4; ++idx) {
+    int16_t const *src_ptr = src_diff + (idx >> 1) * 8 * src_stride
+                                + (idx & 0x01) * 8;
+    vp9_hadamard_8x8_c(src_ptr, src_stride, coeff + idx * 64);
+  }
+
   for (idx = 0; idx < 64; ++idx) {
     int16_t a0 = coeff[0];
     int16_t a1 = coeff[64];
