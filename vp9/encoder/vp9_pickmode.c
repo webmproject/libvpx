@@ -639,13 +639,18 @@ static void estimate_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                           i, j, 0);
 
   // TODO(jingning): This needs further refactoring.
-  block_yrd(cpi, x, &rate, &dist, &is_skippable, &this_sse, 0,
-            bsize_tx, tx_size);
-  x->skip_txfm[0] = is_skippable;
-  if (is_skippable)
-    rate = vp9_cost_bit(vp9_get_skip_prob(&cpi->common, xd), 1);
-  else
-    rate += vp9_cost_bit(vp9_get_skip_prob(&cpi->common, xd), 0);
+  if (plane_bsize <= BLOCK_16X16) {
+    block_yrd(cpi, x, &rate, &dist, &is_skippable, &this_sse, 0,
+              bsize_tx, tx_size);
+    x->skip_txfm[0] = is_skippable;
+    if (is_skippable)
+      rate = vp9_cost_bit(vp9_get_skip_prob(&cpi->common, xd), 1);
+    else
+      rate += vp9_cost_bit(vp9_get_skip_prob(&cpi->common, xd), 0);
+  } else {
+    unsigned int var_y, sse_y;
+    model_rd_for_sb_y(cpi, bsize_tx, x, xd, &rate, &dist, &var_y, &sse_y);
+  }
 
   p->src.buf = src_buf_base;
   pd->dst.buf = dst_buf_base;
@@ -1064,39 +1069,39 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
               vp9_get_switchable_rate(cpi, xd) : 0;
     }
 
-    // TODO(jingning): disable color operations temporarily.
-    // chroma component rate-distortion cost modeling
-//    if (x->color_sensitivity[0] || x->color_sensitivity[1]) {
-//      int uv_rate = 0;
-//      int64_t uv_dist = 0;
-//      if (x->color_sensitivity[0])
-//        vp9_build_inter_predictors_sbp(xd, mi_row, mi_col, bsize, 1);
-//      if (x->color_sensitivity[1])
-//        vp9_build_inter_predictors_sbp(xd, mi_row, mi_col, bsize, 2);
-//      model_rd_for_sb_uv(cpi, bsize, x, xd, &uv_rate, &uv_dist,
-//                         &var_y, &sse_y);
-//      this_rdc.rate += uv_rate;
-//      this_rdc.dist += uv_dist;
-//    }
-
-    block_yrd(cpi, x, &this_rdc.rate, &this_rdc.dist, &is_skippable, &this_sse,
-              0, bsize, mbmi->tx_size);
-    x->skip_txfm[0] = is_skippable;
-    if (is_skippable) {
-      this_rdc.rate = vp9_cost_bit(vp9_get_skip_prob(cm, xd), 1);
-    } else {
-      if (RDCOST(x->rdmult, x->rddiv, this_rdc.rate, this_rdc.dist) <
-          RDCOST(x->rdmult, x->rddiv, 0, this_sse)) {
-        this_rdc.rate += vp9_cost_bit(vp9_get_skip_prob(cm, xd), 0);
-      } else {
+    if (bsize <= BLOCK_16X16) {
+      block_yrd(cpi, x, &this_rdc.rate, &this_rdc.dist, &is_skippable,
+                &this_sse, 0, bsize, mbmi->tx_size);
+      x->skip_txfm[0] = is_skippable;
+      if (is_skippable) {
         this_rdc.rate = vp9_cost_bit(vp9_get_skip_prob(cm, xd), 1);
-        this_rdc.dist = this_sse;
+      } else {
+        if (RDCOST(x->rdmult, x->rddiv, this_rdc.rate, this_rdc.dist) <
+            RDCOST(x->rdmult, x->rddiv, 0, this_sse)) {
+          this_rdc.rate += vp9_cost_bit(vp9_get_skip_prob(cm, xd), 0);
+        } else {
+          this_rdc.rate = vp9_cost_bit(vp9_get_skip_prob(cm, xd), 1);
+          this_rdc.dist = this_sse;
+        }
+      }
+
+      if (cm->interp_filter == SWITCHABLE) {
+        if ((mbmi->mv[0].as_mv.row | mbmi->mv[0].as_mv.col) & 0x07)
+          this_rdc.rate += vp9_get_switchable_rate(cpi, xd);
       }
     }
 
-    if (cm->interp_filter == SWITCHABLE) {
-      if ((mbmi->mv[0].as_mv.row | mbmi->mv[0].as_mv.col) & 0x07)
-        this_rdc.rate += vp9_get_switchable_rate(cpi, xd);
+    if (x->color_sensitivity[0] || x->color_sensitivity[1]) {
+      int uv_rate = 0;
+      int64_t uv_dist = 0;
+      if (x->color_sensitivity[0])
+        vp9_build_inter_predictors_sbp(xd, mi_row, mi_col, bsize, 1);
+      if (x->color_sensitivity[1])
+        vp9_build_inter_predictors_sbp(xd, mi_row, mi_col, bsize, 2);
+      model_rd_for_sb_uv(cpi, bsize, x, xd, &uv_rate, &uv_dist,
+                         &var_y, &sse_y);
+      this_rdc.rate += uv_rate;
+      this_rdc.dist += uv_dist;
     }
 
     this_rdc.rate += rate_mv;
