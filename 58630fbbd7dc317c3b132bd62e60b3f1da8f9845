@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//B4I\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-03-31T23:34:11Z",
+      "side": 1,
+      "message": "1. unsigned char -\u003e uint8_t\n2. block_variance is only for 8x8 block? so maybe make 8x8 explicit here in name too.",
+      "revId": "58630fbbd7dc317c3b132bd62e60b3f1da8f9845",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//B4E\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-03-31T23:34:11Z",
+      "side": 1,
+      "message": "uint8_t",
+      "revId": "58630fbbd7dc317c3b132bd62e60b3f1da8f9845",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//B3s\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 268,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-03-31T23:34:11Z",
+      "side": 1,
+      "message": "const?",
+      "revId": "58630fbbd7dc317c3b132bd62e60b3f1da8f9845",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//B3o\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-03-31T23:34:11Z",
+      "side": 1,
+      "message": "const?",
+      "revId": "58630fbbd7dc317c3b132bd62e60b3f1da8f9845",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//B3c\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-03-31T23:34:11Z",
+      "side": 1,
+      "message": "const?",
+      "revId": "58630fbbd7dc317c3b132bd62e60b3f1da8f9845",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//B3w\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-03-31T23:34:11Z",
+      "side": 1,
+      "message": "this sum*sum may out-range 32 bit unsigned int? I am thinking for a 32x32 block, with 255 each pixel, sum is 1024*255, the sum * sum would need more than 32 bits.",
+      "revId": "58630fbbd7dc317c3b132bd62e60b3f1da8f9845",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//B3g\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 318,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-03-31T23:34:11Z",
+      "side": 1,
+      "message": "const?",
+      "revId": "58630fbbd7dc317c3b132bd62e60b3f1da8f9845",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//B3U\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 378,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-03-31T23:34:11Z",
+      "side": 1,
+      "message": "const? actually, 6-sf is a const?",
+      "revId": "58630fbbd7dc317c3b132bd62e60b3f1da8f9845",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
