@@ -16,6 +16,24 @@
       "revId": "26d3d3af6ace50ee20c474771a580e38f86c7864",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//B5w\u003d",
+        "filename": "vp9/encoder/x86/vp9_avg_intrin_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-03-31T22:19:31Z",
+      "side": 1,
+      "message": "*coeff should be 16-byte aligned and (coeff +\u003d 8) would offset the address by 16 bytes. so this should be ok.",
+      "parentUuid": "AAAAdn//B6A\u003d",
+      "revId": "26d3d3af6ace50ee20c474771a580e38f86c7864",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
