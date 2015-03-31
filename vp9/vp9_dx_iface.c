@@ -755,6 +755,8 @@ static vpx_image_t *decoder_get_frame(vpx_codec_alg_priv_t *ctx,
           (FrameWorkerData *)worker->data1;
       ctx->next_output_worker_id =
           (ctx->next_output_worker_id + 1) % ctx->num_frame_workers;
+      if (ctx->base.init_flags & VPX_CODEC_USE_POSTPROC)
+        set_ppflags(ctx, &flags);
       // Wait for the frame from worker thread.
       if (winterface->sync(worker)) {
         // Check if worker has received any frames.
