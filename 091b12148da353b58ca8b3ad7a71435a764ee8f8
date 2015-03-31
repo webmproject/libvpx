@@ -33,6 +33,23 @@
       "revId": "091b12148da353b58ca8b3ad7a71435a764ee8f8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//B7M\u003d",
+        "filename": "test/decode_test_driver.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-03-31T19:49:34Z",
+      "side": 1,
+      "message": "I thought one of the codecs had the possibility of \u0027hidden frames\u0027 - or maybe I\u0027m just thinking of alt-ref frames  which, iirc, ended up getting bundled with another frame.",
+      "revId": "091b12148da353b58ca8b3ad7a71435a764ee8f8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
