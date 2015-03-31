@@ -482,9 +482,9 @@ void vp9_set_vbp_thresholds(VP9_COMP *cpi, int q) {
   } else {
     VP9_COMMON *const cm = &cpi->common;
     const int is_key_frame = (cm->frame_type == KEY_FRAME);
-    const int threshold_multiplier = is_key_frame ? 80 : 4;
+    const int threshold_multiplier = is_key_frame ? 20 : 1;
     const int64_t threshold_base = (int64_t)(threshold_multiplier *
-        vp9_convert_qindex_to_q(q, cm->bit_depth));
+        cpi->y_dequant[q][1]);
 
     // TODO(marpan): Allow 4x4 partitions for inter-frames.
     // use_4x4_partition = (variance4x4downsample[i2 + j] == 1);
@@ -492,21 +492,20 @@ void vp9_set_vbp_thresholds(VP9_COMP *cpi, int q) {
     // if variance of 16x16 block is very high, so use larger threshold
     // for 16x16 (threshold_bsize_min) in that case.
     if (is_key_frame) {
-      cpi->vbp_threshold = threshold_base >> 2;
-      cpi->vbp_threshold_bsize_max = threshold_base;
-      cpi->vbp_threshold_bsize_min = threshold_base << 2;
-      cpi->vbp_threshold_16x16 = cpi->vbp_threshold;
+      cpi->vbp_threshold_64x64 = threshold_base;
+      cpi->vbp_threshold_32x32 = threshold_base >> 2;
+      cpi->vbp_threshold_16x16 = threshold_base >> 2;
+      cpi->vbp_threshold_8x8 = threshold_base << 2;
       cpi->vbp_bsize_min = BLOCK_8X8;
     } else {
-      cpi->vbp_threshold = threshold_base;
+      cpi->vbp_threshold_32x32 = threshold_base;
       if (cm->width <= 352 && cm->height <= 288) {
-        cpi->vbp_threshold_bsize_max = threshold_base >> 2;
-        cpi->vbp_threshold_bsize_min = threshold_base << 3;
+        cpi->vbp_threshold_64x64 = threshold_base >> 2;
+        cpi->vbp_threshold_16x16 = threshold_base << 3;
       } else {
-        cpi->vbp_threshold_bsize_max = threshold_base;
-        cpi->vbp_threshold_bsize_min = threshold_base << cpi->oxcf.speed;
+        cpi->vbp_threshold_64x64 = threshold_base;
+        cpi->vbp_threshold_16x16 = threshold_base << cpi->oxcf.speed;
       }
-      cpi->vbp_threshold_16x16 = cpi->vbp_threshold_bsize_min;
       cpi->vbp_bsize_min = BLOCK_16X16;
     }
   }
@@ -692,7 +691,7 @@ static void choose_partitioning(VP9_COMP *cpi,
       }
       if (is_key_frame || (low_res &&
           vt.split[i].split[j].part_variances.none.variance >
-          (cpi->vbp_threshold << 1))) {
+          (cpi->vbp_threshold_32x32 << 1))) {
         // Go down to 4x4 down-sampling for variance.
         variance4x4downsample[i2 + j] = 1;
         for (k = 0; k < 4; k++) {
@@ -757,7 +756,7 @@ static void choose_partitioning(VP9_COMP *cpi,
     // If variance of this 32x32 block is above the threshold, force the block
     // to split. This also forces a split on the upper (64x64) level.
     get_variance(&vt.split[i].part_variances.none);
-    if (vt.split[i].part_variances.none.variance > cpi->vbp_threshold) {
+    if (vt.split[i].part_variances.none.variance > cpi->vbp_threshold_32x32) {
       force_split[i + 1] = 1;
       force_split[0] = 1;
     }
@@ -769,7 +768,7 @@ static void choose_partitioning(VP9_COMP *cpi,
   // we get to one that's got a variance lower than our threshold.
   if ( mi_col + 8 > cm->mi_cols || mi_row + 8 > cm->mi_rows ||
       !set_vt_partitioning(cpi, xd, &vt, BLOCK_64X64, mi_row, mi_col,
-                           cpi->vbp_threshold_bsize_max, BLOCK_16X16,
+                           cpi->vbp_threshold_64x64, BLOCK_16X16,
                            force_split[0])) {
     for (i = 0; i < 4; ++i) {
       const int x32_idx = ((i & 1) << 2);
@@ -777,7 +776,7 @@ static void choose_partitioning(VP9_COMP *cpi,
       const int i2 = i << 2;
       if (!set_vt_partitioning(cpi, xd, &vt.split[i], BLOCK_32X32,
                                (mi_row + y32_idx), (mi_col + x32_idx),
-                               cpi->vbp_threshold,
+                               cpi->vbp_threshold_32x32,
                                BLOCK_16X16, force_split[i + 1])) {
         for (j = 0; j < 4; ++j) {
           const int x16_idx = ((j & 1) << 1);
@@ -801,7 +800,7 @@ static void choose_partitioning(VP9_COMP *cpi,
                                          BLOCK_8X8,
                                          mi_row + y32_idx + y16_idx + y8_idx,
                                          mi_col + x32_idx + x16_idx + x8_idx,
-                                         cpi->vbp_threshold_bsize_min,
+                                         cpi->vbp_threshold_8x8,
                                          BLOCK_8X8, 0)) {
                   set_block_size(cpi, xd,
                                  (mi_row + y32_idx + y16_idx + y8_idx),
