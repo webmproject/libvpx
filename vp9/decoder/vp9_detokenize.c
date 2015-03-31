@@ -45,17 +45,6 @@ static INLINE int read_coeff(const vp9_prob *probs, int n, vp9_reader *r) {
   return val;
 }
 
-static const vp9_tree_index coeff_subtree_high[TREE_SIZE(ENTROPY_TOKENS)] = {
-  2, 6,                                         /* 0 = LOW_VAL */
-  -TWO_TOKEN, 4,                                /* 1 = TWO */
-  -THREE_TOKEN, -FOUR_TOKEN,                    /* 2 = THREE */
-  8, 10,                                        /* 3 = HIGH_LOW */
-  -CATEGORY1_TOKEN, -CATEGORY2_TOKEN,           /* 4 = CAT_ONE */
-  12, 14,                                       /* 5 = CAT_THREEFOUR */
-  -CATEGORY3_TOKEN, -CATEGORY4_TOKEN,           /* 6 = CAT_THREE */
-  -CATEGORY5_TOKEN, -CATEGORY6_TOKEN            /* 7 = CAT_FIVE */
-};
-
 static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
                         FRAME_COUNTS *counts, PLANE_TYPE type,
                         tran_low_t *dqcoeff, TX_SIZE tx_size, const int16_t *dq,
@@ -147,7 +136,7 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
       val = 1;
     } else {
       INCREMENT_COUNT(TWO_TOKEN);
-      token = vp9_read_tree(r, coeff_subtree_high,
+      token = vp9_read_tree(r, vp9_coef_con_tree,
                             vp9_pareto8_full[prob[PIVOT_NODE] - 1]);
       switch (token) {
         case TWO_TOKEN:

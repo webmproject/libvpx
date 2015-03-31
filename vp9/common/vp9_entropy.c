@@ -15,6 +15,18 @@
 #include "vpx_mem/vpx_mem.h"
 #include "vpx/vpx_integer.h"
 
+// Unconstrained Node Tree
+const vp9_tree_index vp9_coef_con_tree[TREE_SIZE(ENTROPY_TOKENS)] = {
+  2, 6,                                // 0 = LOW_VAL
+  -TWO_TOKEN, 4,                       // 1 = TWO
+  -THREE_TOKEN, -FOUR_TOKEN,           // 2 = THREE
+  8, 10,                               // 3 = HIGH_LOW
+  -CATEGORY1_TOKEN, -CATEGORY2_TOKEN,  // 4 = CAT_ONE
+  12, 14,                              // 5 = CAT_THREEFOUR
+  -CATEGORY3_TOKEN, -CATEGORY4_TOKEN,  // 6 = CAT_THREE
+  -CATEGORY5_TOKEN, -CATEGORY6_TOKEN   // 7 = CAT_FIVE
+};
+
 const vp9_prob vp9_cat1_prob[] = { 159 };
 const vp9_prob vp9_cat2_prob[] = { 165, 145 };
 const vp9_prob vp9_cat3_prob[] = { 173, 148, 140 };
