@@ -508,6 +508,8 @@ int vp9_update_entropy(VP9_COMP *cpi, int update);
 
 int vp9_set_active_map(VP9_COMP *cpi, unsigned char *map, int rows, int cols);
 
+int vp9_get_active_map(VP9_COMP *cpi, unsigned char *map, int rows, int cols);
+
 int vp9_set_internal_size(VP9_COMP *cpi,
                           VPX_SCALING horiz_mode, VPX_SCALING vert_mode);
 

@@ -1260,6 +1260,21 @@ static vpx_codec_err_t ctrl_set_active_map(vpx_codec_alg_priv_t *ctx,
   }
 }
 
+static vpx_codec_err_t ctrl_get_active_map(vpx_codec_alg_priv_t *ctx,
+                                           va_list args) {
+  vpx_active_map_t *const map = va_arg(args, vpx_active_map_t *);
+
+  if (map) {
+    if (!vp9_get_active_map(ctx->cpi, map->active_map,
+                            (int)map->rows, (int)map->cols))
+      return VPX_CODEC_OK;
+    else
+      return VPX_CODEC_INVALID_PARAM;
+  } else {
+    return VPX_CODEC_INVALID_PARAM;
+  }
+}
+
 static vpx_codec_err_t ctrl_set_scale_mode(vpx_codec_alg_priv_t *ctx,
                                            va_list args) {
   vpx_scaling_mode_t *const mode = va_arg(args, vpx_scaling_mode_t *);
@@ -1417,6 +1432,7 @@ static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
 #if VPX_ENCODER_ABI_VERSION > (4 + VPX_CODEC_ABI_VERSION)
   {VP9E_GET_SVC_LAYER_ID,             ctrl_get_svc_layer_id},
 #endif
+  {VP9E_GET_ACTIVEMAP,                ctrl_get_active_map},
 
   { -1, NULL},
 };
