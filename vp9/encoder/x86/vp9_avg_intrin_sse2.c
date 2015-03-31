@@ -148,21 +148,21 @@ void vp9_hadamard_8x8_sse2(int16_t const *src_diff, int src_stride,
   hadamard_col8_sse2(src, 0);
   hadamard_col8_sse2(src, 1);
 
-  _mm_storeu_si128((__m128i *)coeff, src[0]);
+  _mm_store_si128((__m128i *)coeff, src[0]);
   coeff += 8;
-  _mm_storeu_si128((__m128i *)coeff, src[1]);
+  _mm_store_si128((__m128i *)coeff, src[1]);
   coeff += 8;
-  _mm_storeu_si128((__m128i *)coeff, src[2]);
+  _mm_store_si128((__m128i *)coeff, src[2]);
   coeff += 8;
-  _mm_storeu_si128((__m128i *)coeff, src[3]);
+  _mm_store_si128((__m128i *)coeff, src[3]);
   coeff += 8;
-  _mm_storeu_si128((__m128i *)coeff, src[4]);
+  _mm_store_si128((__m128i *)coeff, src[4]);
   coeff += 8;
-  _mm_storeu_si128((__m128i *)coeff, src[5]);
+  _mm_store_si128((__m128i *)coeff, src[5]);
   coeff += 8;
-  _mm_storeu_si128((__m128i *)coeff, src[6]);
+  _mm_store_si128((__m128i *)coeff, src[6]);
   coeff += 8;
-  _mm_storeu_si128((__m128i *)coeff, src[7]);
+  _mm_store_si128((__m128i *)coeff, src[7]);
 }
 
 void vp9_hadamard_16x16_sse2(int16_t const *src_diff, int src_stride,
