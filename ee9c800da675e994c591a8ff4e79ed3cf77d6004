@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//B+Q\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1078,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2015-03-31T17:22:04Z",
+      "side": 1,
+      "message": "you may just get rid of this from here and just call free_palette_map outside.",
+      "revId": "ee9c800da675e994c591a8ff4e79ed3cf77d6004",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
