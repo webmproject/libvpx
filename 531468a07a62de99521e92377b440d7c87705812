@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//B8M\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 408,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-03-31T19:10:50Z",
+      "side": 1,
+      "message": "Can this be simplified to a if -\u003e else, instead of if else if? for example: \n\nif (*eob \u003c\u003d1) {} else {}\n\nor \n\nif(*eob \u003e 1) {} else {}",
+      "revId": "531468a07a62de99521e92377b440d7c87705812",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
