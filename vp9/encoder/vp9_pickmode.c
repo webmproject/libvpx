@@ -401,7 +401,11 @@ static void block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate, int64_t *dist,
         }
 
         *dist += vp9_block_error(coeff, dqcoeff, step << 4, &this_sse) >> shift;
-        *rate += (int)vp9_satd((const int16_t *)qcoeff, step << 4);
+
+        if (*eob == 1)
+          *rate += (int)abs(qcoeff[0]);
+        else if (*eob > 1)
+          *rate += (int)vp9_satd((const int16_t *)qcoeff, step << 4);
 
         *sse += (this_sse >> shift);
         *skippable &= (*eob == 0);
