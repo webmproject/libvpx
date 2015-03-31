@@ -1082,6 +1082,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         } else {
           this_rdc.rate = vp9_cost_bit(vp9_get_skip_prob(cm, xd), 1);
           this_rdc.dist = this_sse;
+          x->skip_txfm[0] = 1;
         }
       }
 
