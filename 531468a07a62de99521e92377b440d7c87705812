@@ -16,6 +16,24 @@
       "revId": "531468a07a62de99521e92377b440d7c87705812",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//B7o\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 408,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-03-31T19:31:37Z",
+      "side": 1,
+      "message": "There is a hidden branch condition tested here such that if *eob \u003d\u003d 0, skip adding *rate.",
+      "parentUuid": "AAAAdn//B8M\u003d",
+      "revId": "531468a07a62de99521e92377b440d7c87705812",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
