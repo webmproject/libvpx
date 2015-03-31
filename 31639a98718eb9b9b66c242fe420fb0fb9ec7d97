@@ -125,6 +125,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//B5I\u003d",
+        "filename": "vp9/common/mips/msa/vp9_types_msa.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-03-31T22:39:00Z",
+      "side": 1,
+      "message": "for compatibility and to keep the size of this change down would something like the following work?\n\n    #if \u003ctoolchain version check\u003e\n    #if HAVE_MSA\n    #define MSA_BUILTIN(instr) __builtin_msa_ ## instr\n    #else\n    #define MSA_BUILTIN(instr) __ ## instr\n    #endif\n    #else\n    // new style transform or define MSA_BUILTIN away\n    #endif",
+      "parentUuid": "AAAAdn//CJ0\u003d",
+      "revId": "31639a98718eb9b9b66c242fe420fb0fb9ec7d97",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Ccc\u003d",
         "filename": "vp9/common/mips/msa/vp9_types_msa.h",
         "patchSetId": 1
