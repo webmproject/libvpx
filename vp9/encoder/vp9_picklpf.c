@@ -32,14 +32,14 @@ static int get_max_filter_level(const VP9_COMP *cpi) {
   }
 }
 
-
 static int try_filter_frame(const YV12_BUFFER_CONFIG *sd, VP9_COMP *const cpi,
-                            int filt_level, int partial_frame) {
+                            int filt_level,
+                            int partial_frame) {
   VP9_COMMON *const cm = &cpi->common;
   int filt_err;
 
-  vp9_loop_filter_frame(cm->frame_to_show, cm, &cpi->mb.e_mbd, filt_level, 1,
-                        partial_frame);
+  vp9_loop_filter_frame(cm->frame_to_show, cm, &cpi->mb.e_mbd, filt_level,
+                        1, partial_frame);
 #if CONFIG_VP9_HIGHBITDEPTH
   if (cm->use_highbitdepth) {
     filt_err = vp9_highbd_get_y_sse(sd, cm->frame_to_show, cm->bit_depth);
@@ -55,6 +55,170 @@ static int try_filter_frame(const YV12_BUFFER_CONFIG *sd, VP9_COMP *const cpi,
 
   return filt_err;
 }
+
+#if CONFIG_LOOP_POSTFILTER
+#define JOINT_FILTER_BILATERAL_SEARCH
+static int try_bilateral_frame(const YV12_BUFFER_CONFIG *sd,
+                               VP9_COMP *const cpi,
+                               int filt_level,
+                               int bilateral_level,
+                               int partial_frame) {
+  VP9_COMMON *const cm = &cpi->common;
+  int filt_err;
+
+  vp9_loop_filter_gen_frame(cm->frame_to_show, cm, &cpi->mb.e_mbd, filt_level,
+                            bilateral_level, 1, partial_frame);
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (cm->use_highbitdepth) {
+    filt_err = vp9_highbd_get_y_sse(sd, cm->frame_to_show, cm->bit_depth);
+  } else {
+    filt_err = vp9_get_y_sse(sd, cm->frame_to_show);
+  }
+#else
+  filt_err = vp9_get_y_sse(sd, cm->frame_to_show);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
+  // Re-instate the unfiltered frame
+  vpx_yv12_copy_y(&cpi->last_frame_uf, cm->frame_to_show);
+
+  return filt_err;
+}
+
+// #define USE_RD_BILATERAL_SEARCH
+static int64_t search_bilateral_level(const YV12_BUFFER_CONFIG *sd,
+                                      VP9_COMP *cpi,
+                                      int filter_level, int partial_frame,
+                                      int64_t *best_cost_ret) {
+  int i, bilateral_best, err;
+  int64_t best_cost;
+  int64_t cost[BILATERAL_LEVELS_KF];
+  const int bilateral_level_bits = vp9_bilateral_level_bits(&cpi->common);
+  const int bilateral_levels = 1 << bilateral_level_bits;
+#ifdef USE_RD_BILATERAL_SEARCH
+  MACROBLOCK *x = &cpi->mb;
+#endif
+
+  bilateral_best = 0;
+  err = try_bilateral_frame(sd, cpi, filter_level, 0, partial_frame);
+#ifdef USE_RD_BILATERAL_SEARCH
+  cost[0] = RDCOST(x->rdmult, x->rddiv, 0, err);
+#else
+  cost[0] = err;
+#endif
+  best_cost = cost[0];
+  for (i = 1; i <= bilateral_levels; ++i) {
+    err = try_bilateral_frame(sd, cpi, filter_level, i, partial_frame);
+#ifdef USE_RD_BILATERAL_SEARCH
+    // Normally the rate is rate in bits * 256 and dist is sum sq err * 64
+    // when RDCOST is used.  However below we just scale both in the correct
+    // ratios appropriately but not exactly by these values.
+    cost[i] = RDCOST(x->rdmult, x->rddiv,
+                     bilateral_level_bits << 2, err);
+#else
+    cost[i] = err;
+#endif
+    if (cost[i] < best_cost) {
+      bilateral_best = i;
+      best_cost = cost[i];
+    }
+  }
+  if (best_cost_ret) *best_cost_ret = best_cost;
+  return bilateral_best;
+}
+
+static int search_filter_bilateral_level(const YV12_BUFFER_CONFIG *sd,
+                                         VP9_COMP *cpi,
+                                         int partial_frame,
+                                         int *bilateral_level) {
+  const VP9_COMMON *const cm = &cpi->common;
+  const struct loopfilter *const lf = &cm->lf;
+  const int min_filter_level = 0;
+  const int max_filter_level = get_max_filter_level(cpi);
+  int filt_direction = 0;
+  int filt_best, bilateral_best;
+  int64_t best_err;
+
+  // Start the search at the previous frame filter level unless it is now out of
+  // range.
+  int filt_mid = clamp(lf->filter_level, min_filter_level, max_filter_level);
+  int filter_step = filt_mid < 16 ? 4 : filt_mid / 4;
+  // Sum squared error at each filter level
+  int64_t ss_err[MAX_LOOP_FILTER + 1];
+  int bilateral;
+
+  // Set each entry to -1
+  vpx_memset(ss_err, 0xFF, sizeof(ss_err));
+
+  //  Make a copy of the unfiltered / processed recon buffer
+  vpx_yv12_copy_y(cm->frame_to_show, &cpi->last_frame_uf);
+
+  bilateral = search_bilateral_level(sd, cpi, filt_mid,
+                                     partial_frame, &best_err);
+  filt_best = filt_mid;
+  bilateral_best = bilateral;
+  ss_err[filt_mid] = best_err;
+
+  while (filter_step > 0) {
+    const int filt_high = MIN(filt_mid + filter_step, max_filter_level);
+    const int filt_low = MAX(filt_mid - filter_step, min_filter_level);
+
+    // Bias against raising loop filter in favor of lowering it.
+    int64_t bias = (best_err >> (15 - (filt_mid / 8))) * filter_step;
+
+    if ((cpi->oxcf.pass == 2) && (cpi->twopass.section_intra_rating < 20))
+      bias = (bias * cpi->twopass.section_intra_rating) / 20;
+
+    // yx, bias less for large block size
+    if (cm->tx_mode != ONLY_4X4)
+      bias >>= 1;
+
+    if (filt_direction <= 0 && filt_low != filt_mid) {
+      // Get Low filter error score
+      if (ss_err[filt_low] < 0) {
+        bilateral = search_bilateral_level(sd, cpi, filt_low,
+                                           partial_frame,
+                                           &ss_err[filt_low]);
+      }
+      // If value is close to the best so far then bias towards a lower loop
+      // filter value.
+      if ((ss_err[filt_low] - bias) < best_err) {
+        // Was it actually better than the previous best?
+        if (ss_err[filt_low] < best_err) {
+          best_err = ss_err[filt_low];
+        }
+
+        filt_best = filt_low;
+        bilateral_best = bilateral;
+      }
+    }
+
+    // Now look at filt_high
+    if (filt_direction >= 0 && filt_high != filt_mid) {
+      if (ss_err[filt_high] < 0) {
+        bilateral = search_bilateral_level(sd, cpi, filt_high, partial_frame,
+                                           &ss_err[filt_high]);
+      }
+      // Was it better than the previous best?
+      if (ss_err[filt_high] < (best_err - bias)) {
+        best_err = ss_err[filt_high];
+        filt_best = filt_high;
+        bilateral_best = bilateral;
+      }
+    }
+
+    // Half the step distance if the best filter value was the same as last time
+    if (filt_best == filt_mid) {
+      filter_step /= 2;
+      filt_direction = 0;
+    } else {
+      filt_direction = (filt_best < filt_mid) ? -1 : 1;
+      filt_mid = filt_best;
+    }
+  }
+  *bilateral_level = bilateral_best;
+  return filt_best;
+}
+#endif  // CONFIG_LOOP_POSTFILTER
 
 static int search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
                                int partial_frame) {
@@ -78,10 +242,10 @@ static int search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
   //  Make a copy of the unfiltered / processed recon buffer
   vpx_yv12_copy_y(cm->frame_to_show, &cpi->last_frame_uf);
 
-  best_err = try_filter_frame(sd, cpi, filt_mid, partial_frame);
+  best_err = try_filter_frame(sd, cpi, filt_mid,
+                              partial_frame);
   filt_best = filt_mid;
   ss_err[filt_mid] = best_err;
-
 
   while (filter_step > 0) {
     const int filt_high = MIN(filt_mid + filter_step, max_filter_level);
@@ -100,7 +264,8 @@ static int search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
     if (filt_direction <= 0 && filt_low != filt_mid) {
       // Get Low filter error score
       if (ss_err[filt_low] < 0) {
-        ss_err[filt_low] = try_filter_frame(sd, cpi, filt_low, partial_frame);
+        ss_err[filt_low] = try_filter_frame(sd, cpi, filt_low,
+                                            partial_frame);
       }
       // If value is close to the best so far then bias towards a lower loop
       // filter value.
@@ -116,7 +281,8 @@ static int search_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
     // Now look at filt_high
     if (filt_direction >= 0 && filt_high != filt_mid) {
       if (ss_err[filt_high] < 0) {
-        ss_err[filt_high] = try_filter_frame(sd, cpi, filt_high, partial_frame);
+        ss_err[filt_high] = try_filter_frame(sd, cpi, filt_high,
+                                             partial_frame);
       }
       // Was it better than the previous best?
       if (ss_err[filt_high] < (best_err - bias)) {
@@ -176,8 +342,24 @@ void vp9_pick_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
     if (cm->frame_type == KEY_FRAME)
       filt_guess -= 4;
     lf->filter_level = clamp(filt_guess, min_filter_level, max_filter_level);
+#if CONFIG_LOOP_POSTFILTER
+    lf->bilateral_level = search_bilateral_level(
+        sd, cpi, lf->filter_level, method == LPF_PICK_FROM_SUBIMAGE, NULL);
+#endif  // CONFIG_LOOP_POSTFILTER
   } else {
-    lf->filter_level = search_filter_level(sd, cpi,
-                                           method == LPF_PICK_FROM_SUBIMAGE);
+#if CONFIG_LOOP_POSTFILTER
+#ifdef JOINT_FILTER_BILATERAL_SEARCH
+    lf->filter_level = search_filter_bilateral_level(
+        sd, cpi, method == LPF_PICK_FROM_SUBIMAGE, &lf->bilateral_level);
+#else
+    lf->filter_level = search_filter_level(
+        sd, cpi, method == LPF_PICK_FROM_SUBIMAGE);
+    lf->bilateral_level = search_bilateral_level(
+        sd, cpi, lf->filter_level, method == LPF_PICK_FROM_SUBIMAGE, NULL);
+#endif  // JOINT_FILTER_BILATERAL_SEARCH
+#else
+    lf->filter_level = search_filter_level(
+        sd, cpi, method == LPF_PICK_FROM_SUBIMAGE);
+#endif  // CONFIG_LOOP_POSTFILTER
   }
 }

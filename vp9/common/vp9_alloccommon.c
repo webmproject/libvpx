@@ -122,6 +122,9 @@ void vp9_free_ref_frame_buffers(VP9_COMMON *cm) {
   }
 
   vp9_free_frame_buffer(&cm->post_proc_buffer);
+#if CONFIG_LOOP_POSTFILTER
+  vp9_free_frame_buffer(&cm->tmp_loop_buf);
+#endif
 }
 
 void vp9_free_context_buffers(VP9_COMMON *cm) {
