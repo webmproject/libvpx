@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//B9w\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1226,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-03-31T18:12:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//CV0\u003d",
+      "revId": "d614b673bbd676eba5aeb338b905063cb459befe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//CNs\u003d",
         "filename": "vp9/encoder/vp9_bitstream.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2015-03-27T17:03:50Z",
       "side": 1,
       "message": "Do the same thing for signaling of mbmi-\u003efilterbit.\nSimilarly, in intrabc mode tx_skip[0] and tx_skip[1] are always 0, so we don\u0027t need to signal them.",
+      "revId": "d614b673bbd676eba5aeb338b905063cb459befe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//B9A\u003d",
+        "filename": "vp9/encoder/vp9_bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 930,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-03-31T18:12:56Z",
+      "side": 1,
+      "message": "!is_filter_allowed() returns false for intrabc. I had this check in here because at some point we may want to be lazy about setting uv_mode when it is implied (like we do for vp9 inter) but I\u0027ll remove it.\n\ntx_skip is allowed.",
+      "parentUuid": "AAAAdn//CNs\u003d",
       "revId": "d614b673bbd676eba5aeb338b905063cb459befe",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//B9s\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1345,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-03-31T18:12:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//CVw\u003d",
+      "revId": "d614b673bbd676eba5aeb338b905063cb459befe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//CVo\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 2
@@ -64,6 +118,24 @@
       "writtenOn": "2015-03-26T19:27:52Z",
       "side": 1,
       "message": "// CONFIG_INTRABC",
+      "revId": "d614b673bbd676eba5aeb338b905063cb459befe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//B9o\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1673,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-03-31T18:12:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//CVo\u003d",
       "revId": "d614b673bbd676eba5aeb338b905063cb459befe",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//B9Q\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2237,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-03-31T18:12:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//CNw\u003d",
+      "revId": "d614b673bbd676eba5aeb338b905063cb459befe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//CN0\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 2
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//B9g\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2260,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-03-31T18:12:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//CN0\u003d",
+      "revId": "d614b673bbd676eba5aeb338b905063cb459befe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//CVs\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 2
@@ -115,6 +223,24 @@
       "writtenOn": "2015-03-26T19:27:52Z",
       "side": 1,
       "message": "// CONFIG_INTRABC everywhere",
+      "revId": "d614b673bbd676eba5aeb338b905063cb459befe",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//B9k\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2264,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-03-31T18:12:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//CVs\u003d",
       "revId": "d614b673bbd676eba5aeb338b905063cb459befe",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
