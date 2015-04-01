@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//BzM\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 585,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2015-04-01T15:02:04Z",
+      "side": 1,
+      "message": "This CL wasn\u0027t ready for review. But the idea was to move these calculations from the functions that get called more often. (I.e. read_segment, copy segment. ) up. Hopefully doing less calculations as well as removing VP9_COMMON to help with caching.",
+      "parentUuid": "AAAAdn//Bzs\u003d",
+      "revId": "40de464178a5e402786089416631aafddffd4208",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Bzo\u003d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-04-01T14:41:14Z",
       "side": 1,
       "message": "duplicate code to calculate this consider replacing with single copy in a separate function",
+      "revId": "40de464178a5e402786089416631aafddffd4208",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//BzI\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2015-04-01T15:02:04Z",
+      "side": 1,
+      "message": "I was just testing some decode perf. If this CL looks promising for the decoder I will rework the encoder.",
+      "parentUuid": "AAAAdn//Bzo\u003d",
       "revId": "40de464178a5e402786089416631aafddffd4208",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
