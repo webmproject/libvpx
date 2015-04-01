@@ -143,6 +143,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//B0Q\u003d",
+        "filename": "vp9/common/mips/msa/vp9_types_msa.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1003209
+      },
+      "writtenOn": "2015-04-01T07:05:41Z",
+      "side": 1,
+      "message": "We think following solution is more suitable in long term\n\n__extension__ static __inline v16i8 __attribute__ ((__always_inline__))\nadd_a_b(v16i8 __a, v16i8 __b)\n{\n  return (v16i8) __builtin_msa_add_a_b(__a, __b);\n}\n\nThis will be done for each instruction.",
+      "parentUuid": "AAAAdn//B5I\u003d",
+      "revId": "31639a98718eb9b9b66c242fe420fb0fb9ec7d97",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Ccc\u003d",
         "filename": "vp9/common/mips/msa/vp9_types_msa.h",
         "patchSetId": 1
