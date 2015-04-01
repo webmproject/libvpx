@@ -78,7 +78,7 @@ cglobal block_error, 3, 3, 8, uqc, dqc, size, ssz
 ;                            intptr_t block_size)
 
 INIT_XMM sse2
-cglobal block_error_fp, 3, 3, 8, uqc, dqc, size
+cglobal block_error_fp, 3, 3, 6, uqc, dqc, size
   pxor      m4, m4                 ; sse accumulator
   pxor      m5, m5                 ; dedicated zero register
   lea     uqcq, [uqcq+sizeq*2]
@@ -96,13 +96,13 @@ cglobal block_error_fp, 3, 3, 8, uqc, dqc, size
   pmaddwd   m0, m0
   pmaddwd   m1, m1
   ; accumulate in 64bit
-  punpckldq m7, m0, m5
+  punpckldq m3, m0, m5
   punpckhdq m0, m5
-  paddq     m4, m7
-  punpckldq m7, m1, m5
+  paddq     m4, m3
+  punpckldq m3, m1, m5
   paddq     m4, m0
   punpckhdq m1, m5
-  paddq     m4, m7
+  paddq     m4, m3
   paddq     m4, m1
   add    sizeq, mmsize
   jl .loop
