@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Bzs\u003d",
+        "filename": "vp9/decoder/vp9_decodemv.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 585,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2015-04-01T14:41:14Z",
+      "side": 1,
+      "message": "duplicate code block to calculate offset and xy mis.   consider replacing with something to call it once.",
+      "revId": "40de464178a5e402786089416631aafddffd4208",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Bzo\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2015-04-01T14:41:14Z",
+      "side": 1,
+      "message": "duplicate code to calculate this consider replacing with single copy in a separate function",
+      "revId": "40de464178a5e402786089416631aafddffd4208",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Bzk\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 873,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2015-04-01T14:41:14Z",
+      "side": 1,
+      "message": "ditto above",
+      "revId": "40de464178a5e402786089416631aafddffd4208",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Bzg\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1063,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2015-04-01T14:41:14Z",
+      "side": 1,
+      "message": "duplicate code again.",
+      "revId": "40de464178a5e402786089416631aafddffd4208",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Bzc\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1577,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2015-04-01T14:41:14Z",
+      "side": 1,
+      "message": "again?",
+      "revId": "40de464178a5e402786089416631aafddffd4208",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//BzY\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2778,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2015-04-01T14:41:14Z",
+      "side": 1,
+      "message": "again.",
+      "revId": "40de464178a5e402786089416631aafddffd4208",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//BzU\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3533,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2015-04-01T14:41:14Z",
+      "side": 1,
+      "message": "again.",
+      "revId": "40de464178a5e402786089416631aafddffd4208",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
