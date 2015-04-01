@@ -292,6 +292,18 @@ int64_t vp9_block_error_c(const tran_low_t *coeff, const tran_low_t *dqcoeff,
   return error;
 }
 
+int64_t vp9_block_error_fp_c(const int16_t *coeff, const int16_t *dqcoeff,
+                             int block_size) {
+  int i;
+  int64_t error = 0;
+
+  for (i = 0; i < block_size; i++) {
+    const int diff = coeff[i] - dqcoeff[i];
+    error +=  diff * diff;
+  }
+
+  return error;
+}
 
 #if CONFIG_VP9_HIGHBITDEPTH
 int64_t vp9_highbd_block_error_c(const tran_low_t *coeff,
