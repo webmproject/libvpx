@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Btw\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-04-01T19:07:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//Bu4\u003d",
+      "revId": "1d10a6bbc6a3888950f427dc47bce6500c19f26a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Bus\u003d",
         "filename": "vp9/encoder/vp9_pickmode.c",
         "patchSetId": 3
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Bt8\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 349,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-04-01T19:07:31Z",
+      "side": 1,
+      "message": "This is for the high bit depth version above, where we need block_yrd subsume to regular variance based model.",
+      "parentUuid": "AAAAdn//Bus\u003d",
+      "revId": "1d10a6bbc6a3888950f427dc47bce6500c19f26a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Buo\u003d",
         "filename": "vp9/encoder/vp9_pickmode.c",
         "patchSetId": 3
@@ -47,6 +83,24 @@
       "writtenOn": "2015-04-01T18:30:46Z",
       "side": 1,
       "message": "simply accumulating eob and check the sum can save the check of each individual eob?",
+      "revId": "1d10a6bbc6a3888950f427dc47bce6500c19f26a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Bt0\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 401,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-04-01T19:07:31Z",
+      "side": 1,
+      "message": "We need to store eob for each individual block and reuse it in the next loop to skip satd computation if possible.",
+      "parentUuid": "AAAAdn//Buo\u003d",
       "revId": "1d10a6bbc6a3888950f427dc47bce6500c19f26a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
