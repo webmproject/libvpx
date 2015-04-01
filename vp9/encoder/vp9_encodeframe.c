@@ -559,18 +559,10 @@ static void choose_partitioning(VP9_COMP *cpi,
 
     const YV12_BUFFER_CONFIG *yv12_g = get_ref_frame_buffer(cpi, GOLDEN_FRAME);
     unsigned int y_sad, y_sad_g;
-    BLOCK_SIZE bsize;
-    if (mi_row + 4 < cm->mi_rows && mi_col + 4 < cm->mi_cols)
-      bsize = BLOCK_64X64;
-    else if (mi_row + 4 < cm->mi_rows && mi_col + 4 >= cm->mi_cols)
-      bsize = BLOCK_32X64;
-    else if (mi_row + 4 >= cm->mi_rows && mi_col + 4 < cm->mi_cols)
-      bsize = BLOCK_64X32;
-    else
-      bsize = BLOCK_32X32;
+    const BLOCK_SIZE bsize = BLOCK_32X32
+        + (mi_col + 4 < cm->mi_cols) * 2 + (mi_row + 4 < cm->mi_rows);
 
     assert(yv12 != NULL);
-
     if (yv12_g && yv12_g != yv12) {
       vp9_setup_pre_planes(xd, 0, yv12_g, mi_row, mi_col,
                            &cm->frame_refs[GOLDEN_FRAME - 1].sf);
