@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//B2c\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1177,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-04-01T00:03:22Z",
+      "side": 1,
+      "message": "cm-\u003ebase_qindex -\u003e !xd-\u003elossless (?)",
+      "revId": "19c4c38a28c5fc3a1e584585f43e2880fd0505c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//B2g\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1178,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-04-01T00:03:22Z",
+      "side": 1,
+      "message": "This function is called only if we skip prediction filter search. Is this what expected?",
+      "revId": "19c4c38a28c5fc3a1e584585f43e2880fd0505c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//B2Y\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 1238,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-04-01T00:03:22Z",
+      "side": 1,
+      "message": "seems you don\u0027t need best_early_term here, since when this_early_term \u003d\u003d 1 the for-loop will terminate immediately(?)",
+      "revId": "19c4c38a28c5fc3a1e584585f43e2880fd0505c9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
