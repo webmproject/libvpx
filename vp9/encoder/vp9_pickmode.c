@@ -360,10 +360,8 @@ static void block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate, int64_t *dist,
         tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
         uint16_t *const eob = &p->eobs[block];
         const int diff_stride = 4 * num_4x4_blocks_wide_lookup[bsize];
-        int i, j;
         const int16_t *src_diff;
-        txfrm_block_to_raster_xy(bsize, tx_size, block, &i, &j);
-        src_diff = &p->src_diff[4 * (j * diff_stride + i)];
+        src_diff = &p->src_diff[(r * diff_stride + c) << 2];
 
         switch (tx_size) {
           case TX_32X32:
