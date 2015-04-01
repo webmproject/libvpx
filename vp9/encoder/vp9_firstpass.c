@@ -1849,7 +1849,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   int64_t gf_group_bits;
   double gf_group_error_left;
   int gf_arf_bits;
-  int is_key_frame = frame_is_intra_only(cm);
+  const int is_key_frame = frame_is_intra_only(cm);
+  const int kf_or_arf_active = is_key_frame || rc->source_alt_ref_active;
 
   // Reset the GF group data structures unless this is a key
   // frame in which case it will already have been done.
@@ -1902,7 +1903,10 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
       // bits to spare and are better with a smaller interval and smaller boost.
       // At high Q when there are few bits to spare we are better with a longer
       // interval to spread the cost of the GF.
-      active_max_gf_interval = 12 + MIN(4, (int_lbq / 6));
+      active_max_gf_interval = rc->max_gf_interval - 4 + MIN(4, (int_lbq / 6));
+      if (active_max_gf_interval < active_min_gf_interval)
+        active_max_gf_interval = active_min_gf_interval;
+
       if (active_max_gf_interval > rc->max_gf_interval)
         active_max_gf_interval = rc->max_gf_interval;
       if (active_max_gf_interval < active_min_gf_interval)
@@ -1964,10 +1968,11 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     // Break out conditions.
     if (
       // Break at active_max_gf_interval unless almost totally static.
-      (i >= active_max_gf_interval && (zero_motion_accumulator < 0.995)) ||
+      ((i >= active_max_gf_interval + kf_or_arf_active) &&
+       (zero_motion_accumulator < 0.995)) ||
       (
         // Don't break out with a very short interval.
-        (i > active_min_gf_interval) &&
+        (i >= active_min_gf_interval + kf_or_arf_active) &&
         (!flash_detected) &&
         ((mv_ratio_accumulator > mv_ratio_accumulator_thresh) ||
          (abs_mv_in_out_accumulator > 3.0) ||

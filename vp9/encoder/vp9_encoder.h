@@ -50,8 +50,6 @@
 extern "C" {
 #endif
 
-#define DEFAULT_GF_INTERVAL         10
-
 typedef struct {
   int nmvjointcost[MV_JOINTS];
   int nmvcosts[2][MV_VALS];
@@ -218,6 +216,9 @@ typedef struct VP9EncoderConfig {
 
   int arnr_max_frames;
   int arnr_strength;
+
+  int min_gf_interval;
+  int max_gf_interval;
 
   int tile_columns;
   int tile_rows;

@@ -276,6 +276,27 @@ static void update_buffer_level(VP9_COMP *cpi, int encoded_frame_size) {
   }
 }
 
+int vp9_rc_get_default_min_gf_interval(
+    int width, int height, double framerate) {
+  // Assume we do not need any constraint lower than 4K 20 fps
+  static const double factor_safe = 3840 * 2160 * 20.0;
+  const double factor = width * height * framerate;
+
+  if (factor <= factor_safe)
+    return MIN_GF_INTERVAL;
+  else
+    return (int)(MIN_GF_INTERVAL * factor / factor_safe + 0.5);
+  // Note this logic makes:
+  // 4K24: 5
+  // 4K30: 6
+  // 4K60: 12
+}
+
+int vp9_rc_get_default_max_gf_interval(double framerate, int min_gf_interval) {
+  int interval = MIN(MAX_GF_INTERVAL, (int)(framerate * 0.75));
+  return MAX(interval, min_gf_interval);
+}
+
 void vp9_rc_init(const VP9EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
   int i;
 
@@ -284,9 +305,9 @@ void vp9_rc_init(const VP9EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
     rc->avg_frame_qindex[INTER_FRAME] = oxcf->worst_allowed_q;
   } else {
     rc->avg_frame_qindex[KEY_FRAME] = (oxcf->worst_allowed_q +
-                                           oxcf->best_allowed_q) / 2;
+                                       oxcf->best_allowed_q) / 2;
     rc->avg_frame_qindex[INTER_FRAME] = (oxcf->worst_allowed_q +
-                                           oxcf->best_allowed_q) / 2;
+                                         oxcf->best_allowed_q) / 2;
   }
 
   rc->last_q[KEY_FRAME] = oxcf->best_allowed_q;
@@ -304,7 +325,6 @@ void vp9_rc_init(const VP9EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
   rc->total_target_bits = 0;
   rc->total_target_vs_actual = 0;
 
-  rc->baseline_gf_interval = DEFAULT_GF_INTERVAL;
   rc->frames_since_key = 8;  // Sensible default for first frame.
   rc->this_key_frame_forced = 0;
   rc->next_key_frame_forced = 0;
@@ -322,6 +342,16 @@ void vp9_rc_init(const VP9EncoderConfig *oxcf, int pass, RATE_CONTROL *rc) {
   for (i = 0; i < RATE_FACTOR_LEVELS; ++i) {
     rc->rate_correction_factors[i] = 1.0;
   }
+
+  rc->min_gf_interval = oxcf->min_gf_interval;
+  rc->max_gf_interval = oxcf->max_gf_interval;
+  if (rc->min_gf_interval == 0)
+    rc->min_gf_interval = vp9_rc_get_default_min_gf_interval(
+        oxcf->width, oxcf->height, oxcf->init_framerate);
+  if (rc->max_gf_interval == 0)
+    rc->max_gf_interval = vp9_rc_get_default_max_gf_interval(
+        oxcf->init_framerate, rc->min_gf_interval);
+  rc->baseline_gf_interval = (rc->min_gf_interval + rc->max_gf_interval) / 2;
 }
 
 int vp9_rc_drop_frame(VP9_COMP *cpi) {
@@ -1382,7 +1412,7 @@ void vp9_rc_get_one_pass_vbr_params(VP9_COMP *cpi) {
     cm->frame_type = INTER_FRAME;
   }
   if (rc->frames_till_gf_update_due == 0) {
-    rc->baseline_gf_interval = DEFAULT_GF_INTERVAL;
+    rc->baseline_gf_interval = (rc->min_gf_interval + rc->max_gf_interval) / 2;
     rc->frames_till_gf_update_due = rc->baseline_gf_interval;
     // NOTE: frames_till_gf_update_due must be <= frames_to_key.
     if (rc->frames_till_gf_update_due > rc->frames_to_key) {
@@ -1576,7 +1606,8 @@ void vp9_rc_get_one_pass_cbr_params(VP9_COMP *cpi) {
     if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ)
       vp9_cyclic_refresh_set_golden_update(cpi);
     else
-      rc->baseline_gf_interval = DEFAULT_GF_INTERVAL;
+      rc->baseline_gf_interval =
+          (rc->min_gf_interval + rc->max_gf_interval) / 2;
     rc->frames_till_gf_update_due = rc->baseline_gf_interval;
     // NOTE: frames_till_gf_update_due must be <= frames_to_key.
     if (rc->frames_till_gf_update_due > rc->frames_to_key)
@@ -1649,20 +1680,19 @@ int vp9_compute_qdelta_by_rate(const RATE_CONTROL *rc, FRAME_TYPE frame_type,
   return target_index - qindex;
 }
 
-#define MIN_GF_INTERVAL     4
-#define MAX_GF_INTERVAL     16
 void vp9_rc_set_gf_interval_range(const VP9_COMP *const cpi,
                                   RATE_CONTROL *const rc) {
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
 
-  // Set a minimum interval.
-  rc->min_gf_interval =
-    MIN(MAX_GF_INTERVAL, MAX(MIN_GF_INTERVAL, (int)(cpi->framerate * 0.125)));
-
-  // Set Maximum gf/arf interval.
-  rc->max_gf_interval =
-    MIN(MAX_GF_INTERVAL, (int)(cpi->framerate * 0.75));
-  // Round up to next even number if odd.
+  // Set Maximum gf/arf interval
+  rc->max_gf_interval = oxcf->max_gf_interval;
+  rc->min_gf_interval = oxcf->min_gf_interval;
+  if (rc->min_gf_interval == 0)
+    rc->min_gf_interval = vp9_rc_get_default_min_gf_interval(
+        oxcf->width, oxcf->height, cpi->framerate);
+  if (rc->max_gf_interval == 0)
+    rc->max_gf_interval = vp9_rc_get_default_max_gf_interval(
+        cpi->framerate, rc->min_gf_interval);
   rc->max_gf_interval += (rc->max_gf_interval & 0x01);
 
   // Extended interval for genuinely static scenes

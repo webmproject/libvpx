@@ -396,6 +396,12 @@ static const arg_def_t gf_cbr_boost_pct = ARG_DEF(
     NULL, "gf-cbr-boost", 1, "Boost for Golden Frame in CBR mode (pct)");
 static const arg_def_t max_inter_rate_pct = ARG_DEF(
     NULL, "max-inter-rate", 1, "Max P-frame bitrate (pct)");
+static const arg_def_t min_gf_interval = ARG_DEF(
+    NULL, "min-gf-interval", 1,
+    "min gf/arf frame interval (default 0, indicating in-built behavior)");
+static const arg_def_t max_gf_interval = ARG_DEF(
+    NULL, "max-gf-interval", 1,
+    "max gf/arf frame interval (default 0, indicating in-built behavior)");
 
 static const struct arg_enum_list color_space_enum[] = {
   { "unknown", VPX_CS_UNKNOWN },
@@ -445,6 +451,7 @@ static const arg_def_t *vp9_args[] = {
   &gf_cbr_boost_pct, &lossless,
   &frame_parallel_decoding, &aq_mode, &frame_periodic_boost,
   &noise_sens, &tune_content, &input_color_space,
+  &min_gf_interval, &max_gf_interval,
 #if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
   &bitdeptharg, &inbitdeptharg,
 #endif
@@ -460,6 +467,7 @@ static const int vp9_arg_ctrl_map[] = {
   VP9E_SET_LOSSLESS, VP9E_SET_FRAME_PARALLEL_DECODING, VP9E_SET_AQ_MODE,
   VP9E_SET_FRAME_PERIODIC_BOOST, VP9E_SET_NOISE_SENSITIVITY,
   VP9E_SET_TUNE_CONTENT, VP9E_SET_COLOR_SPACE,
+  VP9E_SET_MIN_GF_INTERVAL, VP9E_SET_MAX_GF_INTERVAL,
   0
 };
 #endif

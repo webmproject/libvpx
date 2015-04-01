@@ -1447,7 +1447,7 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
   cpi->td.mb.e_mbd.bd = (int)cm->bit_depth;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-  rc->baseline_gf_interval = DEFAULT_GF_INTERVAL;
+  rc->baseline_gf_interval = (MIN_GF_INTERVAL + MAX_GF_INTERVAL) / 2;
 
   cpi->refresh_golden_frame = 0;
   cpi->refresh_last_frame = 1;
