@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//BwM\u003d",
+        "filename": "build/make/x86Android.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-04-01T17:45:25Z",
+      "side": 1,
+      "message": "What is the difference between this file and the current Android.mk? If the changes are minor, they should be in the current file. If the changes are major/incompatible, it might be a good idea to create a new file. However, the new file should have the bare minimum of x86-specific code (no arm anywhere)",
+      "revId": "00a80301d14d64304d95d18495c25fb49f8cd109",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//BwI\u003d",
+        "filename": "test/android/README",
+        "patchSetId": 1
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-04-01T17:45:25Z",
+      "side": 1,
+      "message": "why does x86 need to be configured inside the folder, when arm is built from the parent?",
+      "revId": "00a80301d14d64304d95d18495c25fb49f8cd109",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//BwE\u003d",
+        "filename": "test/android/README",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-04-01T17:45:25Z",
+      "side": 1,
+      "message": "why doesn\u0027t this work like the arm build?",
+      "revId": "00a80301d14d64304d95d18495c25fb49f8cd109",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//BwA\u003d",
+        "filename": "test/android/x86AndroidDec.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-04-01T17:45:25Z",
+      "side": 1,
+      "message": "i don\u0027t think this builds libvpx_test? if the file is new just for the parts below, it should be possible to add them to the existing Makefile. There can be multiple BUILD_EXECUTABLE targets.",
+      "revId": "00a80301d14d64304d95d18495c25fb49f8cd109",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
