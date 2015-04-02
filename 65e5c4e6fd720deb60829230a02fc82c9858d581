@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//BmM\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1852,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2015-04-02T10:11:49Z",
+      "side": 1,
+      "message": "This will create some odd behaviour where active max can end up less than min, For example if you set the rc-\u003emax and rc-\u003emin to the same value.\n\nAlso the behaviour will be a little odd in regard to transitions between arf groups (which will be one shorter than expected and gf only groups. I will submit a rvised patch that should fix the behaviour for you to check.",
+      "revId": "65e5c4e6fd720deb60829230a02fc82c9858d581",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
