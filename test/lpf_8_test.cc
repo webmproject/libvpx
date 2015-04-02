@@ -52,7 +52,7 @@ typedef void (*dual_loop_op_t)(uint8_t *s, int p, const uint8_t *blimit0,
                                const uint8_t *thresh1);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-typedef std::tr1::tuple<loop_op_t, loop_op_t, int> loop8_param_t;
+typedef std::tr1::tuple<loop_op_t, loop_op_t, int, int> loop8_param_t;
 typedef std::tr1::tuple<dual_loop_op_t, dual_loop_op_t, int> dualloop8_param_t;
 
 #if HAVE_SSE2
@@ -144,6 +144,7 @@ class Loop8Test6Param : public ::testing::TestWithParam<loop8_param_t> {
     loopfilter_op_ = GET_PARAM(0);
     ref_loopfilter_op_ = GET_PARAM(1);
     bit_depth_ = GET_PARAM(2);
+    count_ = GET_PARAM(3);
     mask_ = (1 << bit_depth_) - 1;
   }
 
@@ -151,6 +152,7 @@ class Loop8Test6Param : public ::testing::TestWithParam<loop8_param_t> {
 
  protected:
   int bit_depth_;
+  int count_;
   int mask_;
   loop_op_t loopfilter_op_;
   loop_op_t ref_loopfilter_op_;
@@ -206,7 +208,6 @@ TEST_P(Loop8Test6Param, OperationCheck) {
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp
     };
     int32_t p = kNumCoeffs/32;
-    int count = 1;
 
     uint16_t tmp_s[kNumCoeffs];
     int j = 0;
@@ -238,13 +239,13 @@ TEST_P(Loop8Test6Param, OperationCheck) {
       ref_s[j] = s[j];
     }
 #if CONFIG_VP9_HIGHBITDEPTH
-    ref_loopfilter_op_(ref_s + 8 + p * 8, p, blimit, limit, thresh, count, bd);
+    ref_loopfilter_op_(ref_s + 8 + p * 8, p, blimit, limit, thresh, count_, bd);
     ASM_REGISTER_STATE_CHECK(
-        loopfilter_op_(s + 8 + p * 8, p, blimit, limit, thresh, count, bd));
+        loopfilter_op_(s + 8 + p * 8, p, blimit, limit, thresh, count_, bd));
 #else
-    ref_loopfilter_op_(ref_s+8+p*8, p, blimit, limit, thresh, count);
+    ref_loopfilter_op_(ref_s+8+p*8, p, blimit, limit, thresh, count_);
     ASM_REGISTER_STATE_CHECK(
-        loopfilter_op_(s + 8 + p * 8, p, blimit, limit, thresh, count));
+        loopfilter_op_(s + 8 + p * 8, p, blimit, limit, thresh, count_));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
     for (int j = 0; j < kNumCoeffs; ++j) {
@@ -305,19 +306,18 @@ TEST_P(Loop8Test6Param, ValueCheck) {
         tmp, tmp, tmp, tmp, tmp, tmp, tmp, tmp
     };
     int32_t p = kNumCoeffs / 32;
-    int count = 1;
     for (int j = 0; j < kNumCoeffs; ++j) {
       s[j] = rnd.Rand16() & mask_;
       ref_s[j] = s[j];
     }
 #if CONFIG_VP9_HIGHBITDEPTH
-    ref_loopfilter_op_(ref_s + 8 + p * 8, p, blimit, limit, thresh, count, bd);
+    ref_loopfilter_op_(ref_s + 8 + p * 8, p, blimit, limit, thresh, count_, bd);
     ASM_REGISTER_STATE_CHECK(
-        loopfilter_op_(s + 8 + p * 8, p, blimit, limit, thresh, count, bd));
+        loopfilter_op_(s + 8 + p * 8, p, blimit, limit, thresh, count_, bd));
 #else
-    ref_loopfilter_op_(ref_s+8+p*8, p, blimit, limit, thresh, count);
+    ref_loopfilter_op_(ref_s+8+p*8, p, blimit, limit, thresh, count_);
     ASM_REGISTER_STATE_CHECK(
-        loopfilter_op_(s + 8 + p * 8, p, blimit, limit, thresh, count));
+        loopfilter_op_(s + 8 + p * 8, p, blimit, limit, thresh, count_));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
     for (int j = 0; j < kNumCoeffs; ++j) {
       err_count += ref_s[j] != s[j];
@@ -521,55 +521,62 @@ INSTANTIATE_TEST_CASE_P(
     SSE2, Loop8Test6Param,
     ::testing::Values(
         make_tuple(&vp9_highbd_lpf_horizontal_4_sse2,
-                   &vp9_highbd_lpf_horizontal_4_c, 8),
+                   &vp9_highbd_lpf_horizontal_4_c, 8, 1),
         make_tuple(&vp9_highbd_lpf_vertical_4_sse2,
-                   &vp9_highbd_lpf_vertical_4_c, 8),
+                   &vp9_highbd_lpf_vertical_4_c, 8, 1),
         make_tuple(&vp9_highbd_lpf_horizontal_8_sse2,
-                   &vp9_highbd_lpf_horizontal_8_c, 8),
+                   &vp9_highbd_lpf_horizontal_8_c, 8, 1),
         make_tuple(&vp9_highbd_lpf_horizontal_16_sse2,
-                   &vp9_highbd_lpf_horizontal_16_c, 8),
+                   &vp9_highbd_lpf_horizontal_16_c, 8, 1),
+        make_tuple(&vp9_highbd_lpf_horizontal_16_sse2,
+                   &vp9_highbd_lpf_horizontal_16_c, 8, 2),
         make_tuple(&vp9_highbd_lpf_vertical_8_sse2,
-                   &vp9_highbd_lpf_vertical_8_c, 8),
+                   &vp9_highbd_lpf_vertical_8_c, 8, 1),
         make_tuple(&wrapper_vertical_16_sse2,
-                   &wrapper_vertical_16_c, 8),
+                   &wrapper_vertical_16_c, 8, 1),
         make_tuple(&vp9_highbd_lpf_horizontal_4_sse2,
-                   &vp9_highbd_lpf_horizontal_4_c, 10),
+                   &vp9_highbd_lpf_horizontal_4_c, 10, 1),
         make_tuple(&vp9_highbd_lpf_vertical_4_sse2,
-                   &vp9_highbd_lpf_vertical_4_c, 10),
+                   &vp9_highbd_lpf_vertical_4_c, 10, 1),
         make_tuple(&vp9_highbd_lpf_horizontal_8_sse2,
-                   &vp9_highbd_lpf_horizontal_8_c, 10),
+                   &vp9_highbd_lpf_horizontal_8_c, 10, 1),
         make_tuple(&vp9_highbd_lpf_horizontal_16_sse2,
-                   &vp9_highbd_lpf_horizontal_16_c, 10),
+                   &vp9_highbd_lpf_horizontal_16_c, 10, 1),
+        make_tuple(&vp9_highbd_lpf_horizontal_16_sse2,
+                   &vp9_highbd_lpf_horizontal_16_c, 10, 2),
         make_tuple(&vp9_highbd_lpf_vertical_8_sse2,
-                   &vp9_highbd_lpf_vertical_8_c, 10),
+                   &vp9_highbd_lpf_vertical_8_c, 10, 1),
         make_tuple(&wrapper_vertical_16_sse2,
-                   &wrapper_vertical_16_c, 10),
+                   &wrapper_vertical_16_c, 10, 1),
         make_tuple(&vp9_highbd_lpf_horizontal_4_sse2,
-                   &vp9_highbd_lpf_horizontal_4_c, 12),
+                   &vp9_highbd_lpf_horizontal_4_c, 12, 1),
         make_tuple(&vp9_highbd_lpf_vertical_4_sse2,
-                   &vp9_highbd_lpf_vertical_4_c, 12),
+                   &vp9_highbd_lpf_vertical_4_c, 12, 1),
         make_tuple(&vp9_highbd_lpf_horizontal_8_sse2,
-                   &vp9_highbd_lpf_horizontal_8_c, 12),
+                   &vp9_highbd_lpf_horizontal_8_c, 12, 1),
         make_tuple(&vp9_highbd_lpf_horizontal_16_sse2,
-                   &vp9_highbd_lpf_horizontal_16_c, 12),
+                   &vp9_highbd_lpf_horizontal_16_c, 12, 1),
+        make_tuple(&vp9_highbd_lpf_horizontal_16_sse2,
+                   &vp9_highbd_lpf_horizontal_16_c, 12, 2),
         make_tuple(&vp9_highbd_lpf_vertical_8_sse2,
-                   &vp9_highbd_lpf_vertical_8_c, 12),
+                   &vp9_highbd_lpf_vertical_8_c, 12, 1),
         make_tuple(&wrapper_vertical_16_sse2,
-                   &wrapper_vertical_16_c, 12),
+                   &wrapper_vertical_16_c, 12, 1),
         make_tuple(&wrapper_vertical_16_dual_sse2,
-                   &wrapper_vertical_16_dual_c, 8),
+                   &wrapper_vertical_16_dual_c, 8, 1),
         make_tuple(&wrapper_vertical_16_dual_sse2,
-                   &wrapper_vertical_16_dual_c, 10),
+                   &wrapper_vertical_16_dual_c, 10, 1),
         make_tuple(&wrapper_vertical_16_dual_sse2,
-                   &wrapper_vertical_16_dual_c, 12)));
+                   &wrapper_vertical_16_dual_c, 12, 1)));
 #else
 INSTANTIATE_TEST_CASE_P(
     SSE2, Loop8Test6Param,
     ::testing::Values(
-        make_tuple(&vp9_lpf_horizontal_8_sse2, &vp9_lpf_horizontal_8_c, 8),
-        make_tuple(&vp9_lpf_horizontal_16_sse2, &vp9_lpf_horizontal_16_c, 8),
-        make_tuple(&vp9_lpf_vertical_8_sse2, &vp9_lpf_vertical_8_c, 8),
-        make_tuple(&wrapper_vertical_16_sse2, &wrapper_vertical_16_c, 8)));
+        make_tuple(&vp9_lpf_horizontal_8_sse2, &vp9_lpf_horizontal_8_c, 8, 1),
+        make_tuple(&vp9_lpf_horizontal_16_sse2, &vp9_lpf_horizontal_16_c, 8, 1),
+        make_tuple(&vp9_lpf_horizontal_16_sse2, &vp9_lpf_horizontal_16_c, 8, 2),
+        make_tuple(&vp9_lpf_vertical_8_sse2, &vp9_lpf_vertical_8_c, 8, 1),
+        make_tuple(&wrapper_vertical_16_sse2, &wrapper_vertical_16_c, 8, 1)));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif
 
@@ -577,7 +584,9 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     AVX2, Loop8Test6Param,
     ::testing::Values(
-        make_tuple(&vp9_lpf_horizontal_16_avx2, &vp9_lpf_horizontal_16_c, 8)));
+        make_tuple(&vp9_lpf_horizontal_16_avx2, &vp9_lpf_horizontal_16_c, 8, 1),
+        make_tuple(&vp9_lpf_horizontal_16_avx2, &vp9_lpf_horizontal_16_c, 8,
+                   2)));
 #endif
 
 #if HAVE_SSE2
@@ -635,20 +644,22 @@ INSTANTIATE_TEST_CASE_P(
 // Using #if inside the macro is unsupported on MSVS but the tests are not
 // currently built for MSVS with ARM and NEON.
         make_tuple(&vp9_lpf_horizontal_16_neon,
-                   &vp9_lpf_horizontal_16_c, 8),
+                   &vp9_lpf_horizontal_16_c, 8, 1),
+        make_tuple(&vp9_lpf_horizontal_16_neon,
+                   &vp9_lpf_horizontal_16_c, 8, 2),
         make_tuple(&wrapper_vertical_16_neon,
-                   &wrapper_vertical_16_c, 8),
+                   &wrapper_vertical_16_c, 8, 1),
         make_tuple(&wrapper_vertical_16_dual_neon,
-                   &wrapper_vertical_16_dual_c, 8),
+                   &wrapper_vertical_16_dual_c, 8, 1),
         make_tuple(&vp9_lpf_horizontal_8_neon,
-                   &vp9_lpf_horizontal_8_c, 8),
+                   &vp9_lpf_horizontal_8_c, 8, 1),
         make_tuple(&vp9_lpf_vertical_8_neon,
-                   &vp9_lpf_vertical_8_c, 8),
+                   &vp9_lpf_vertical_8_c, 8, 1),
 #endif  // HAVE_NEON_ASM
         make_tuple(&vp9_lpf_horizontal_4_neon,
-                   &vp9_lpf_horizontal_4_c, 8),
+                   &vp9_lpf_horizontal_4_c, 8, 1),
         make_tuple(&vp9_lpf_vertical_4_neon,
-                   &vp9_lpf_vertical_4_c, 8)));
+                   &vp9_lpf_vertical_4_c, 8, 1)));
 INSTANTIATE_TEST_CASE_P(
     NEON, Loop8Test9Param,
     ::testing::Values(
