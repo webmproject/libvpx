@@ -16,6 +16,24 @@
       "revId": "65e5c4e6fd720deb60829230a02fc82c9858d581",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Bjg\u003d",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1852,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2015-04-02T16:54:10Z",
+      "side": 1,
+      "message": "Before making this change I actually ran a borg job with an wothout on derflr. The difference came out to be 0.0. But your change seems fine.",
+      "parentUuid": "AAAAdn//BmM\u003d",
+      "revId": "65e5c4e6fd720deb60829230a02fc82c9858d581",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
