@@ -37,6 +37,74 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Bfw\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2015-04-02T22:49:49Z",
+      "side": 1,
+      "message": "may be it will be convenient to use a different macro\nUVINTRA_MODES for uv, and refactor the rest of the code to be compatible with INTRA_MODES and UVINTRA_MODES being different.",
+      "revId": "7afa92cdaefc7e0807e5aa5c6613f64d270a89fb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Bf4\u003d",
+        "filename": "vp9/common/vp9_entropymode.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2015-04-02T22:49:49Z",
+      "side": 1,
+      "message": "suggest using a higher value rather than 128 for the last node prob. try 224 or something like that.",
+      "revId": "7afa92cdaefc7e0807e5aa5c6613f64d270a89fb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//BfU\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1345,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2015-04-02T22:49:49Z",
+      "side": 1,
+      "message": "what is the purpose of not allowing odd pel displacement? Allowing it always will be better always, isn\u0027t it?",
+      "revId": "7afa92cdaefc7e0807e5aa5c6613f64d270a89fb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Bfg\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1407,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2015-04-02T22:49:49Z",
+      "side": 1,
+      "message": "are you going to try adding subpel? Currently mv encoding is inefficient without it.",
+      "revId": "7afa92cdaefc7e0807e5aa5c6613f64d270a89fb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//BgI\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 4
