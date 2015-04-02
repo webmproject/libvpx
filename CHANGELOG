@@ -1,4 +1,4 @@
-2015-03-23 v1.4.0 "Indian Runner Duck"
+2015-04-03 v1.4.0 "Indian Runner Duck"
   This release includes significant improvements to the VP9 codec.
 
   - Upgrading:
@@ -17,6 +17,9 @@
   - Bug Fixes:
     Fixes a VP9 bitstream issue in Profile 1. This only affected non-YUV 4:2:0
     files.
+
+  - Known Issues:
+    Frame Parallel decoding fails for segmented and non-420 files.
 
 2013-11-15 v1.3.0 "Forest"
   This release introduces the VP9 codec in a backward-compatible way.
