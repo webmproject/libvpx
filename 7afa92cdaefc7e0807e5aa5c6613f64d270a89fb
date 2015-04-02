@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Bfk\u003d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-04-02T22:47:17Z",
+      "side": 1,
+      "message": "DV \u003d displacement vector\nNEWDV because the vector is coded like NEWMV\nI\u0027d like to experiment with displacement fields and possibly add a NEARESTDV\n\nTo see if the mode is intrabc \"int is_intrabc_mode()\" should be used, not mode \u003d\u003d NEWDV. \n\ncomment added.",
+      "parentUuid": "AAAAdn//BgE\u003d",
+      "revId": "7afa92cdaefc7e0807e5aa5c6613f64d270a89fb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//BgI\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2015-04-02T22:33:27Z",
       "side": 1,
       "message": "do  you need this for intra bc? since it seems you are using DCT_DCT by default",
+      "revId": "7afa92cdaefc7e0807e5aa5c6613f64d270a89fb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Bf0\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1571,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-04-02T22:47:17Z",
+      "side": 1,
+      "message": "Removed",
+      "parentUuid": "AAAAdn//BgI\u003d",
       "revId": "7afa92cdaefc7e0807e5aa5c6613f64d270a89fb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
