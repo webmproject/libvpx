@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Be0\u003d",
+        "filename": "configure",
+        "patchSetId": 1
+      },
+      "lineNbr": 265,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-04-02T23:16:26Z",
+      "side": 1,
+      "message": "dead. -maltivec could be added via cflags if someone wanted to build the c-code with it",
+      "revId": "bc98e93b53e417392a5044b7c6441c640e9cc850",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
