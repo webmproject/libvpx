@@ -965,6 +965,24 @@ void vp9_pick_intra_mode(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *rd_cost,
   *rd_cost = best_rdc;
 }
 
+static void init_ref_frame_cost(VP9_COMMON *const cm,
+                                MACROBLOCKD *const xd,
+                                int ref_frame_cost[MAX_REF_FRAMES]) {
+  vp9_prob intra_inter_p = vp9_get_intra_inter_prob(cm, xd);
+  vp9_prob ref_single_p1 = vp9_get_pred_prob_single_ref_p1(cm, xd);
+  vp9_prob ref_single_p2 = vp9_get_pred_prob_single_ref_p2(cm, xd);
+
+  ref_frame_cost[INTRA_FRAME] = vp9_cost_bit(intra_inter_p, 0);
+  ref_frame_cost[LAST_FRAME] = ref_frame_cost[GOLDEN_FRAME] =
+    ref_frame_cost[ALTREF_FRAME] = vp9_cost_bit(intra_inter_p, 1);
+
+  ref_frame_cost[LAST_FRAME] += vp9_cost_bit(ref_single_p1, 0);
+  ref_frame_cost[GOLDEN_FRAME] += vp9_cost_bit(ref_single_p1, 1);
+  ref_frame_cost[ALTREF_FRAME] += vp9_cost_bit(ref_single_p1, 1);
+  ref_frame_cost[GOLDEN_FRAME] += vp9_cost_bit(ref_single_p2, 0);
+  ref_frame_cost[ALTREF_FRAME] += vp9_cost_bit(ref_single_p2, 1);
+}
+
 typedef struct {
   MV_REFERENCE_FRAME ref_frame;
   PREDICTION_MODE pred_mode;
@@ -1043,19 +1061,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int best_pred_sad = INT_MAX;
   int best_early_term = 0;
   int ref_frame_cost[MAX_REF_FRAMES];
-  vp9_prob intra_inter_p = vp9_get_intra_inter_prob(cm, xd);
-  vp9_prob ref_single_p1 = vp9_get_pred_prob_single_ref_p1(cm, xd);
-  vp9_prob ref_single_p2 = vp9_get_pred_prob_single_ref_p2(cm, xd);
 
-  ref_frame_cost[INTRA_FRAME] = vp9_cost_bit(intra_inter_p, 0);
-  ref_frame_cost[LAST_FRAME] = ref_frame_cost[GOLDEN_FRAME] =
-      ref_frame_cost[ALTREF_FRAME] = vp9_cost_bit(intra_inter_p, 1);
-
-  ref_frame_cost[LAST_FRAME]   += vp9_cost_bit(ref_single_p1, 0);
-  ref_frame_cost[GOLDEN_FRAME] += vp9_cost_bit(ref_single_p1, 1);
-  ref_frame_cost[ALTREF_FRAME] += vp9_cost_bit(ref_single_p1, 1);
-  ref_frame_cost[GOLDEN_FRAME] += vp9_cost_bit(ref_single_p2, 0);
-  ref_frame_cost[ALTREF_FRAME] += vp9_cost_bit(ref_single_p2, 1);
+  init_ref_frame_cost(cm, xd, ref_frame_cost);
 
   if (reuse_inter_pred) {
     int i;
