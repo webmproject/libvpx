@@ -88,6 +88,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Bek\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1345,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-04-02T23:29:21Z",
+      "side": 1,
+      "message": "Disallowing it gave better last time I did metrics on it. I don\u0027t have a good understanding as to why.",
+      "parentUuid": "AAAAdn//BfU\u003d",
+      "revId": "7afa92cdaefc7e0807e5aa5c6613f64d270a89fb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Bfg\u003d",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 4
@@ -99,6 +117,24 @@
       "writtenOn": "2015-04-02T22:49:49Z",
       "side": 1,
       "message": "are you going to try adding subpel? Currently mv encoding is inefficient without it.",
+      "revId": "7afa92cdaefc7e0807e5aa5c6613f64d270a89fb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Beg\u003d",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1407,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-04-02T23:29:21Z",
+      "side": 1,
+      "message": "Current dv encoding doesn\u0027t write subpel to the bitstream. See the changes to encodemv.",
+      "parentUuid": "AAAAdn//Bfg\u003d",
       "revId": "7afa92cdaefc7e0807e5aa5c6613f64d270a89fb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
