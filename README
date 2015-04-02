@@ -62,12 +62,6 @@ COMPILING THE APPLICATIONS/LIBRARIES:
     armv7s-darwin-gcc
     mips32-linux-gcc
     mips64-linux-gcc
-    ppc32-darwin8-gcc
-    ppc32-darwin9-gcc
-    ppc32-linux-gcc
-    ppc64-darwin8-gcc
-    ppc64-darwin9-gcc
-    ppc64-linux-gcc
     sparc-solaris-gcc
     x86-android-gcc
     x86-darwin8-gcc

@@ -640,12 +640,6 @@ process_common_toolchain() {
       *i[3456]86*)
         tgt_isa=x86
         ;;
-      *powerpc64*)
-        tgt_isa=ppc64
-        ;;
-      *powerpc*)
-        tgt_isa=ppc32
-        ;;
       *sparc*)
         tgt_isa=sparc
         ;;
@@ -1069,29 +1063,6 @@ EOF
       check_add_cflags -march=${tgt_isa}
       check_add_asflags -march=${tgt_isa}
       check_add_asflags -KPIC
-      ;;
-    ppc*)
-      enable_feature ppc
-      bits=${tgt_isa##ppc}
-      link_with_cc=gcc
-      setup_gnu_toolchain
-      add_asflags -force_cpusubtype_ALL -I"\$(dir \$<)darwin"
-      soft_enable altivec
-      enabled altivec && add_cflags -maltivec
-
-      case "$tgt_os" in
-        linux*)
-          add_asflags -maltivec -mregnames -I"\$(dir \$<)linux"
-          ;;
-        darwin*)
-          darwin_arch="-arch ppc"
-          enabled ppc64 && darwin_arch="${darwin_arch}64"
-          add_cflags  ${darwin_arch} -m${bits} -fasm-blocks
-          add_asflags ${darwin_arch} -force_cpusubtype_ALL -I"\$(dir \$<)darwin"
-          add_ldflags ${darwin_arch} -m${bits}
-          enabled altivec && add_cflags -faltivec
-          ;;
-      esac
       ;;
     x86*)
       case  ${tgt_os} in
