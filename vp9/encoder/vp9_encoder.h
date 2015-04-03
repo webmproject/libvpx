@@ -460,10 +460,9 @@ typedef struct VP9_COMP {
   int resize_pending;
 
   // VAR_BASED_PARTITION thresholds
-  int64_t vbp_threshold_64x64;
-  int64_t vbp_threshold_32x32;
-  int64_t vbp_threshold_16x16;
-  int64_t vbp_threshold_8x8;
+  // 0 - threshold_64x64; 1 - threshold_32x32;
+  // 2 - threshold_16x16; 3 - vbp_threshold_8x8;
+  int64_t vbp_thresholds[4];
   BLOCK_SIZE vbp_bsize_min;
 
   // Multi-threading

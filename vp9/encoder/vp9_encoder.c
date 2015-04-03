@@ -2958,7 +2958,7 @@ static void encode_without_recode_loop(VP9_COMP *cpi) {
   set_size_dependent_vars(cpi, &q, &bottom_index, &top_index);
 
   vp9_set_quantizer(cm, q);
-  vp9_set_vbp_thresholds(cpi, q);
+  vp9_set_vbp_thresholds(cpi, cpi->vbp_thresholds, q);
 
   setup_frame(cpi);
 
