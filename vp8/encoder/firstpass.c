@@ -2969,7 +2969,6 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
      */
     decay_accumulator = 1.0;
     boost_score = 0.0;
-    loop_decay_rate = 1.00;       /* Starting decay rate */
 
     for (i = 0 ; i < cpi->twopass.frames_to_key ; i++)
     {
@@ -3213,7 +3212,7 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         int new_width = cpi->oxcf.Width;
         int new_height = cpi->oxcf.Height;
 
-        int projected_buffer_level = (int)cpi->buffer_level;
+        int projected_buffer_level;
         int tmp_q;
 
         double projected_bits_perframe;
