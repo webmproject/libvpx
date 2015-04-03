@@ -219,6 +219,7 @@ int webm_guess_framerate(struct WebmInputContext *webm_ctx,
   webm_ctx->block_entry = NULL;
   webm_ctx->block_frame_index = 0;
   webm_ctx->timestamp_ns = 0;
+  webm_ctx->reached_eos = 0;
 
   return 0;
 }
