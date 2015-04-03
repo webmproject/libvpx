@@ -511,6 +511,84 @@ void vp9_set_vbp_thresholds(VP9_COMP *cpi, int q) {
   }
 }
 
+static void fill_variance_4x4avg(const uint8_t *s, int sp, const uint8_t *d,
+                                 int dp, int x8_idx, int y8_idx, v8x8 *vst,
+#if CONFIG_VP9_HIGHBITDEPTH
+                                 int highbd_flag,
+#endif
+                                 int pixels_wide,
+                                 int pixels_high,
+                                 int is_key_frame) {
+  int k;
+  for (k = 0; k < 4; k++) {
+    int x4_idx = x8_idx + ((k & 1) << 2);
+    int y4_idx = y8_idx + ((k >> 1) << 2);
+    unsigned int sse = 0;
+    int sum = 0;
+    if (x4_idx < pixels_wide && y4_idx < pixels_high) {
+      int s_avg;
+      int d_avg = 128;
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (highbd_flag & YV12_FLAG_HIGHBITDEPTH) {
+        s_avg = vp9_highbd_avg_4x4(s + y4_idx * sp + x4_idx, sp);
+        if (!is_key_frame)
+          d_avg = vp9_highbd_avg_4x4(d + y4_idx * dp + x4_idx, dp);
+      } else {
+        s_avg = vp9_avg_4x4(s + y4_idx * sp + x4_idx, sp);
+        if (!is_key_frame)
+          d_avg = vp9_avg_4x4(d + y4_idx * dp + x4_idx, dp);
+      }
+#else
+      s_avg = vp9_avg_4x4(s + y4_idx * sp + x4_idx, sp);
+      if (!is_key_frame)
+        d_avg = vp9_avg_4x4(d + y4_idx * dp + x4_idx, dp);
+#endif
+      sum = s_avg - d_avg;
+      sse = sum * sum;
+    }
+    fill_variance(sse, sum, 0, &vst->split[k].part_variances.none);
+  }
+}
+
+static void fill_variance_8x8avg(const uint8_t *s, int sp, const uint8_t *d,
+                                 int dp, int x16_idx, int y16_idx, v16x16 *vst,
+#if CONFIG_VP9_HIGHBITDEPTH
+                                 int highbd_flag,
+#endif
+                                 int pixels_wide,
+                                 int pixels_high,
+                                 int is_key_frame) {
+  int k;
+  for (k = 0; k < 4; k++) {
+    int x8_idx = x16_idx + ((k & 1) << 3);
+    int y8_idx = y16_idx + ((k >> 1) << 3);
+    unsigned int sse = 0;
+    int sum = 0;
+    if (x8_idx < pixels_wide && y8_idx < pixels_high) {
+      int s_avg;
+      int d_avg = 128;
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (highbd_flag & YV12_FLAG_HIGHBITDEPTH) {
+        s_avg = vp9_highbd_avg_8x8(s + y8_idx * sp + x8_idx, sp);
+        if (!is_key_frame)
+          d_avg = vp9_highbd_avg_8x8(d + y8_idx * dp + x8_idx, dp);
+      } else {
+        s_avg = vp9_avg_8x8(s + y8_idx * sp + x8_idx, sp);
+        if (!is_key_frame)
+          d_avg = vp9_avg_8x8(d + y8_idx * dp + x8_idx, dp);
+      }
+#else
+      s_avg = vp9_avg_8x8(s + y8_idx * sp + x8_idx, sp);
+      if (!is_key_frame)
+        d_avg = vp9_avg_8x8(d + y8_idx * dp + x8_idx, dp);
+#endif
+      sum = s_avg - d_avg;
+      sse = sum * sum;
+    }
+    fill_variance(sse, sum, 0, &vst->split[k].part_variances.none);
+  }
+}
+
 // This function chooses partitioning based on the variance between source and
 // reconstructed last, where variance is computed for down-sampled inputs.
 static void choose_partitioning(VP9_COMP *cpi,
@@ -647,33 +725,13 @@ static void choose_partitioning(VP9_COMP *cpi,
       v16x16 *vst = &vt.split[i].split[j];
       variance4x4downsample[i2 + j] = 0;
       if (!is_key_frame) {
-        for (k = 0; k < 4; k++) {
-          int x8_idx = x16_idx + ((k & 1) << 3);
-          int y8_idx = y16_idx + ((k >> 1) << 3);
-          unsigned int sse = 0;
-          int sum = 0;
-          if (x8_idx < pixels_wide && y8_idx < pixels_high) {
-            int s_avg, d_avg;
+        fill_variance_8x8avg(s, sp, d, dp, x16_idx, y16_idx, vst,
 #if CONFIG_VP9_HIGHBITDEPTH
-            if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-              s_avg = vp9_highbd_avg_8x8(s + y8_idx * sp + x8_idx, sp);
-              d_avg = vp9_highbd_avg_8x8(d + y8_idx * dp + x8_idx, dp);
-            } else {
-              s_avg = vp9_avg_8x8(s + y8_idx * sp + x8_idx, sp);
-              d_avg = vp9_avg_8x8(d + y8_idx * dp + x8_idx, dp);
-            }
-#else
-            s_avg = vp9_avg_8x8(s + y8_idx * sp + x8_idx, sp);
-            d_avg = vp9_avg_8x8(d + y8_idx * dp + x8_idx, dp);
+                            xd->cur_buf->flags,
 #endif
-            sum = s_avg - d_avg;
-            sse = sum * sum;
-          }
-          // If variance is based on 8x8 downsampling, we stop here and have
-          // one sample for 8x8 block (so use 1 for count in fill_variance),
-          // which of course means variance = 0 for 8x8 block.
-          fill_variance(sse, sum, 0, &vst->split[k].part_variances.none);
-        }
+                            pixels_wide,
+                            pixels_high,
+                            is_key_frame);
         fill_variance_tree(&vt.split[i].split[j], BLOCK_16X16);
         // For low-resolution, compute the variance based on 8x8 down-sampling,
         // and if it is large (above the threshold) we go down for 4x4.
@@ -691,37 +749,13 @@ static void choose_partitioning(VP9_COMP *cpi,
           int y8_idx = y16_idx + ((k >> 1) << 3);
           v8x8 *vst2 = is_key_frame ? &vst->split[k] :
               &vt2[i2 + j].split[k];
-          for (m = 0; m < 4; m++) {
-            int x4_idx = x8_idx + ((m & 1) << 2);
-            int y4_idx = y8_idx + ((m >> 1) << 2);
-            unsigned int sse = 0;
-            int sum = 0;
-            if (x4_idx < pixels_wide && y4_idx < pixels_high) {
-              int d_avg = 128;
+          fill_variance_4x4avg(s, sp, d, dp, x8_idx, y8_idx, vst2,
 #if CONFIG_VP9_HIGHBITDEPTH
-              int s_avg;
-              if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-                s_avg = vp9_highbd_avg_4x4(s + y4_idx * sp + x4_idx, sp);
-                if (cm->frame_type != KEY_FRAME)
-                  d_avg = vp9_highbd_avg_4x4(d + y4_idx * dp + x4_idx, dp);
-              } else {
-                s_avg = vp9_avg_4x4(s + y4_idx * sp + x4_idx, sp);
-                if (cm->frame_type != KEY_FRAME)
-                  d_avg = vp9_avg_4x4(d + y4_idx * dp + x4_idx, dp);
-              }
-#else
-              int s_avg = vp9_avg_4x4(s + y4_idx * sp + x4_idx, sp);
-              if (!is_key_frame)
-                d_avg = vp9_avg_4x4(d + y4_idx * dp + x4_idx, dp);
+                               xd->cur_buf->flags,
 #endif
-              sum = s_avg - d_avg;
-              sse = sum * sum;
-            }
-            // If variance is based on 4x4 down-sampling, we stop here and have
-            // one sample for 4x4 block (so use 1 for count in fill_variance),
-            // which of course means variance = 0 for 4x4 block.
-            fill_variance(sse, sum, 0, &vst2->split[m].part_variances.none);
-          }
+                               pixels_wide,
+                               pixels_high,
+                               is_key_frame);
         }
       }
     }
