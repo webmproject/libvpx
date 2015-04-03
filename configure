@@ -261,8 +261,6 @@ ARCH_EXT_LIST="
     sse4_1
     avx
     avx2
-
-    altivec
 "
 HAVE_LIST="
     ${ARCH_EXT_LIST}
