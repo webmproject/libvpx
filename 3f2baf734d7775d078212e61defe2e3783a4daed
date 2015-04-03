@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//BUk\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 915,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-04-03T23:47:18Z",
+      "side": 1,
+      "message": "rate was set to 0 in block_yrd() when is_skippable is true, would this: \n\nrate +\u003d vp9_cost_bit(vp9_get_skip_prob(\u0026cpi-\u003ecommon, xd), is_skippable); \n\ncover both if and else, therefore removing the branch here?",
+      "revId": "3f2baf734d7775d078212e61defe2e3783a4daed",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
