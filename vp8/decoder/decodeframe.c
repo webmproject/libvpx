@@ -1069,7 +1069,6 @@ int vp8_decode_frame(VP8D_COMP *pbi)
                 pc->vert_scale = clear[6] >> 6;
             }
             data += 7;
-            clear += 7;
         }
         else
         {
