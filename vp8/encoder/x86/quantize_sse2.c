@@ -35,7 +35,7 @@
 void vp8_regular_quantize_b_sse2(BLOCK *b, BLOCKD *d)
 {
     char eob = 0;
-    short *zbin_boost_ptr  = b->zrun_zbin_boost;
+    short *zbin_boost_ptr;
     short *qcoeff_ptr      = d->qcoeff;
     DECLARE_ALIGNED_ARRAY(16, short, x, 16);
     DECLARE_ALIGNED_ARRAY(16, short, y, 16);
