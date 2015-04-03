@@ -587,6 +587,7 @@ static void block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate, int64_t *dist,
       xd->mb_to_right_edge >> (5 + pd->subsampling_x));
   const int max_blocks_high = num_4x4_h + (xd->mb_to_bottom_edge >= 0 ? 0 :
       xd->mb_to_bottom_edge >> (5 + pd->subsampling_y));
+  int eob_cost = 0;
 
   (void)cpi;
   vp9_subtract_plane(x, bsize, plane);
@@ -639,12 +640,14 @@ static void block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate, int64_t *dist,
             break;
         }
         *skippable &= (*eob == 0);
+        eob_cost += 1;
       }
       block += step;
     }
   }
 
   if (*skippable && *sse < INT64_MAX) {
+    *rate = 0;
     *dist = (*sse << 6) >> shift;
     *sse = *dist;
     return;
@@ -673,8 +676,8 @@ static void block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate, int64_t *dist,
     }
   }
 
-  *rate <<= 8;
-  *rate *= 6;
+  *rate <<= 10;
+  *rate += (eob_cost << 8);
 }
 #endif
 
@@ -903,9 +906,9 @@ static void estimate_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                           i, j, 0);
 
   // TODO(jingning): This needs further refactoring.
-  if (plane_bsize <= BLOCK_16X16) {
+  if (plane_bsize <= BLOCK_32X32) {
     block_yrd(cpi, x, &rate, &dist, &is_skippable, &this_sse, 0,
-              bsize_tx, tx_size);
+              bsize_tx, MIN(tx_size, TX_16X16));
     x->skip_txfm[0] = is_skippable;
     if (is_skippable)
       rate = vp9_cost_bit(vp9_get_skip_prob(&cpi->common, xd), 1);
@@ -1345,10 +1348,10 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
               vp9_get_switchable_rate(cpi, xd) : 0;
     }
 
-    if (bsize <= BLOCK_16X16) {
+    if (bsize <= BLOCK_32X32) {
       this_sse = (int64_t)sse_y;
       block_yrd(cpi, x, &this_rdc.rate, &this_rdc.dist, &is_skippable,
-                &this_sse, 0, bsize, mbmi->tx_size);
+                &this_sse, 0, bsize, MIN(mbmi->tx_size, TX_16X16));
       x->skip_txfm[0] = is_skippable;
       if (is_skippable) {
         this_rdc.rate = vp9_cost_bit(vp9_get_skip_prob(cm, xd), 1);
