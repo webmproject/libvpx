@@ -1110,7 +1110,7 @@ add_proto qw/unsigned int vp9_avg_4x4/, "const uint8_t *, int p";
 specialize qw/vp9_avg_4x4 sse2/;
 
 add_proto qw/void vp9_hadamard_8x8/, "int16_t const *src_diff, int src_stride, int16_t *coeff";
-specialize qw/vp9_hadamard_8x8 sse2/;
+specialize qw/vp9_hadamard_8x8 sse2/, "$ssse3_x86_64";
 
 add_proto qw/void vp9_hadamard_16x16/, "int16_t const *src_diff, int src_stride, int16_t *coeff";
 specialize qw/vp9_hadamard_16x16 sse2/;
