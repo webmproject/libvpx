@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//BPA\u003d",
+        "filename": "test/vpxdec.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-04-06T21:46:20Z",
+      "side": 1,
+      "message": "you can drop --md5 now.",
+      "revId": "a350c6dba089379f09a9fd0091dc6abbb9997e7e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
