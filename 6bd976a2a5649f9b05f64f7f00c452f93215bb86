@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//BPI\u003d",
+        "filename": "test/vpxdec.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2015-04-06T21:28:31Z",
+      "side": 1,
+      "message": "this has nothing to do with the threading. it just tests if eof was reached in webm_guess_framerate then actual calls to webm_read_frame does not return eof as well.",
+      "parentUuid": "AAAAdn//BPk\u003d",
+      "revId": "6bd976a2a5649f9b05f64f7f00c452f93215bb86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//BPo\u003d",
         "filename": "test/vpxdec.sh",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//BPY\u003d",
+        "filename": "test/vpxdec.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2015-04-06T21:28:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//BPo\u003d",
+      "revId": "6bd976a2a5649f9b05f64f7f00c452f93215bb86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//BPg\u003d",
         "filename": "test/vpxdec.sh",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2015-04-06T21:15:06Z",
       "side": 1,
       "message": "why not an exact frame count test?",
+      "revId": "6bd976a2a5649f9b05f64f7f00c452f93215bb86",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//BPU\u003d",
+        "filename": "test/vpxdec.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2015-04-06T21:28:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//BPg\u003d",
       "revId": "6bd976a2a5649f9b05f64f7f00c452f93215bb86",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
