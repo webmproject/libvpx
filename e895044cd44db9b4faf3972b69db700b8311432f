@@ -16,6 +16,24 @@
       "revId": "e895044cd44db9b4faf3972b69db700b8311432f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//BK4\u003d",
+        "filename": "test/vpxdec.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1002174
+      },
+      "writtenOn": "2015-04-07T18:05:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//BOY\u003d",
+      "revId": "e895044cd44db9b4faf3972b69db700b8311432f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
