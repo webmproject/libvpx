@@ -153,11 +153,11 @@ static void multiframe_quality_enhance_block
         actd = (vp8_variance16x16(yd, yd_stride, VP8_ZEROS, 0, &sse)+128)>>8;
         act = (vp8_variance16x16(y, y_stride, VP8_ZEROS, 0, &sse)+128)>>8;
 #ifdef USE_SSD
-        sad = (vp8_variance16x16(y, y_stride, yd, yd_stride, &sse));
+        vp8_variance16x16(y, y_stride, yd, yd_stride, &sse);
         sad = (sse + 128)>>8;
-        usad = (vp8_variance8x8(u, uv_stride, ud, uvd_stride, &sse));
+        vp8_variance8x8(u, uv_stride, ud, uvd_stride, &sse);
         usad = (sse + 32)>>6;
-        vsad = (vp8_variance8x8(v, uv_stride, vd, uvd_stride, &sse));
+        vp8_variance8x8(v, uv_stride, vd, uvd_stride, &sse);
         vsad = (sse + 32)>>6;
 #else
         sad = (vp8_sad16x16(y, y_stride, yd, yd_stride, UINT_MAX) + 128) >> 8;
@@ -170,11 +170,11 @@ static void multiframe_quality_enhance_block
         actd = (vp8_variance8x8(yd, yd_stride, VP8_ZEROS, 0, &sse)+32)>>6;
         act = (vp8_variance8x8(y, y_stride, VP8_ZEROS, 0, &sse)+32)>>6;
 #ifdef USE_SSD
-        sad = (vp8_variance8x8(y, y_stride, yd, yd_stride, &sse));
+        vp8_variance8x8(y, y_stride, yd, yd_stride, &sse);
         sad = (sse + 32)>>6;
-        usad = (vp8_variance4x4(u, uv_stride, ud, uvd_stride, &sse));
+        vp8_variance4x4(u, uv_stride, ud, uvd_stride, &sse);
         usad = (sse + 8)>>4;
-        vsad = (vp8_variance4x4(v, uv_stride, vd, uvd_stride, &sse));
+        vp8_variance4x4(v, uv_stride, vd, uvd_stride, &sse);
         vsad = (sse + 8)>>4;
 #else
         sad = (vp8_sad8x8(y, y_stride, yd, yd_stride, UINT_MAX) + 32) >> 6;

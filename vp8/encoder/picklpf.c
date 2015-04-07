@@ -142,7 +142,7 @@ void vp8cx_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
     int min_filter_level = get_min_filter_level(cpi, cm->base_qindex);
     int max_filter_level = get_max_filter_level(cpi, cm->base_qindex);
     int filt_val;
-    int best_filt_val = cm->filter_level;
+    int best_filt_val;
     YV12_BUFFER_CONFIG * saved_frame = cm->frame_to_show;
 
     /* Replace unfiltered frame buffer with a new one */
@@ -274,8 +274,7 @@ void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
 
     int filter_step;
     int filt_high = 0;
-    /* Start search at previous frame filter level */
-    int filt_mid = cm->filter_level;
+    int filt_mid;
     int filt_low = 0;
     int filt_best;
     int filt_direction = 0;

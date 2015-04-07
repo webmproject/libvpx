@@ -1661,7 +1661,6 @@ void vp8_mv_pred
             mv.as_mv.row = mvx[vcnt/2];
             mv.as_mv.col = mvy[vcnt/2];
 
-            find = 1;
             /* sr is set to 0 to allow calling function to decide the search
              * range.
              */
@@ -2293,7 +2292,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
                 mode_mv[NEWMV].as_int = d->bmi.mv.as_int;
 
                 /* Further step/diamond searches as necessary */
-                n = 0;
                 further_steps = (cpi->sf.max_step_search_steps - 1) - step_param;
 
                 n = num00;
@@ -2560,8 +2558,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
                                                intra_rd_penalty, cpi, x);
             if (this_rd < best_mode.rd || x->skip)
             {
-                /* Note index of best mode so far */
-                best_mode_index = mode_index;
                 *returnrate = rd.rate2;
                 *returndistortion = rd.distortion2;
                 update_best_mode(&best_mode, this_rd, &rd, other_cost, x);
