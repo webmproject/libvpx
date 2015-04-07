@@ -2017,15 +2017,16 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
   }
 
   for (tile_row = 0; tile_row < tile_rows; ++tile_row) {
-    TileInfo tile;
-    vp9_tile_set_row(&tile, cm, tile_row);
-    for (mi_row = tile.mi_row_start; mi_row < tile.mi_row_end;
-         mi_row += MI_BLOCK_SIZE) {
-      for (tile_col = 0; tile_col < tile_cols; ++tile_col) {
+    for (tile_col = 0; tile_col < tile_cols; ++tile_col) {
+      TileInfo tile;
+      vp9_tile_set_row(&tile, cm, tile_row);
+      vp9_tile_set_col(&tile, cm, tile_col);
+
+      for (mi_row = tile.mi_row_start; mi_row < tile.mi_row_end;
+           mi_row += MI_BLOCK_SIZE) {
         const int col = pbi->inv_tile_order ?
                         tile_cols - tile_col - 1 : tile_col;
         tile_data = pbi->tile_data + tile_cols * tile_row + col;
-        vp9_tile_set_col(&tile, tile_data->cm, col);
         vp9_zero(tile_data->xd.left_context);
         vp9_zero(tile_data->xd.left_seg_context);
         for (mi_col = tile.mi_col_start; mi_col < tile.mi_col_end;
@@ -2039,39 +2040,14 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
         }
         pbi->mb.corrupted |= tile_data->xd.corrupted;
       }
-#if !CONFIG_INTRABC
-      // Loopfilter one row.
-      if (!pbi->mb.corrupted && cm->lf.filter_level) {
-        const int lf_start = mi_row - MI_BLOCK_SIZE;
-        LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
-
-        // delay the loopfilter by 1 macroblock row.
-        if (lf_start < 0) continue;
-
-        // decoding has completed: finish up the loop filter in this thread.
-        if (mi_row + MI_BLOCK_SIZE >= cm->mi_rows) continue;
-
-        winterface->sync(&pbi->lf_worker);
-        lf_data->start = lf_start;
-        lf_data->stop = mi_row;
-        if (pbi->max_threads > 1) {
-          winterface->launch(&pbi->lf_worker);
-        } else {
-          winterface->execute(&pbi->lf_worker);
-        }
-      }
-#endif  // !CONFIG_INTRABC
     }
   }
 
-  // Loopfilter remaining rows in the frame.
-  if (!pbi->mb.corrupted && cm->lf.filter_level) {
-    LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
-    winterface->sync(&pbi->lf_worker);
-    lf_data->start = lf_data->stop;
-    lf_data->stop = cm->mi_rows;
-    winterface->execute(&pbi->lf_worker);
-  }
+#if !CONFIG_INTRABC
+  if (cm->lf.filter_level > 0)
+    vp9_loop_filter_frame(get_frame_new_buffer(cm), cm,
+                          &pbi->mb, cm->lf.filter_level, 0, 0);
+#endif
 
   // Get last tile data.
   tile_data = pbi->tile_data + tile_cols * tile_rows - 1;

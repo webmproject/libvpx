@@ -297,6 +297,7 @@ EXPERIMENT_LIST="
     newmvref
     intrabc
     loop_postfilter
+    row_tile
 "
 CONFIG_LIST="
     external_build
