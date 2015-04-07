@@ -391,10 +391,11 @@ static void model_rd_for_sb_y_large(VP9_COMP *cpi, BLOCK_SIZE bsize,
       var_uv[j] = cpi->fn_ptr[uv_bsize].vf(p->src.buf, p->src.stride,
           pd->dst.buf, pd->dst.stride, &sse_uv[j]);
 
-      if (var_uv[j] < uv_ac_thr || var_uv[j] == 0) {
-        if (sse_uv[j] - var_uv[j] < uv_dc_thr || sse_uv[j] == var_uv[j])
-          skip_uv[j] = 1;
-      }
+      if ((var_uv[j] < uv_ac_thr || var_uv[j] == 0) &&
+          (sse_uv[j] - var_uv[j] < uv_dc_thr || sse_uv[j] == var_uv[j]))
+        skip_uv[j] = 1;
+      else
+        break;
     }
 
     // If the transform in YUV planes are skippable, the mode search checks
