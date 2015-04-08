@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//BD4\u003d",
+        "filename": "vp9/common/vp9_loopfilter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2015-04-08T00:26:20Z",
+      "side": 1,
+      "message": "This function has changed substantially in the second patch.",
+      "parentUuid": "AAAAdn//BVQ\u003d",
+      "revId": "2c6d555911ae480bb3a23d88952dccc53e5e7cfd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//BVM\u003d",
         "filename": "vp9/common/vp9_loopfilter.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2015-04-03T23:12:01Z",
       "side": 1,
       "message": "The difference between the statements under if and else is only a \"-1\", not sure if it\u0027s what you intended.",
+      "revId": "2c6d555911ae480bb3a23d88952dccc53e5e7cfd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//BCk\u003d",
+        "filename": "vp9/common/vp9_loopfilter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 324,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2015-04-08T00:26:20Z",
+      "side": 1,
+      "message": "ditto.",
+      "parentUuid": "AAAAdn//BVM\u003d",
       "revId": "2c6d555911ae480bb3a23d88952dccc53e5e7cfd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
