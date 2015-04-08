@@ -2612,6 +2612,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
 }
 
 #define MINQ_ADJ_LIMIT 48
+#define MINQ_ADJ_LIMIT_CQ 20
 void vp9_twopass_postencode_update(VP9_COMP *cpi) {
   TWO_PASS *const twopass = &cpi->twopass;
   RATE_CONTROL *const rc = &cpi->rc;
@@ -2651,7 +2652,7 @@ void vp9_twopass_postencode_update(VP9_COMP *cpi) {
     const int maxq_adj_limit =
       rc->worst_quality - twopass->active_worst_quality;
     const int minq_adj_limit =
-      (cpi->oxcf.rc_mode == VPX_CQ) ? 0 : MINQ_ADJ_LIMIT;
+        (cpi->oxcf.rc_mode == VPX_CQ ? MINQ_ADJ_LIMIT_CQ : MINQ_ADJ_LIMIT);
 
     // Undershoot.
     if (rc->rate_error_estimate > cpi->oxcf.under_shoot_pct) {
