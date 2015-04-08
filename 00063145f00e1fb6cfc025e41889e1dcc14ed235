@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//BCQ\u003d",
+        "filename": "vp9/common/mips/msa/vp9_macros_msa.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-04-08T06:28:15Z",
+      "side": 1,
+      "message": "2015",
+      "revId": "00063145f00e1fb6cfc025e41889e1dcc14ed235",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//BCI\u003d",
+        "filename": "vp9/common/mips/msa/vp9_macros_msa.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-04-08T06:28:15Z",
+      "side": 1,
+      "message": "usually we use vpx_integer.h for compatibility, but moving forward with gcc-like toolchains I suppose we can expect this header",
+      "revId": "00063145f00e1fb6cfc025e41889e1dcc14ed235",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//BCA\u003d",
+        "filename": "vp9/common/mips/msa/vp9_macros_msa.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-04-08T06:28:15Z",
+      "side": 1,
+      "message": "it\u0027d be better to add the basics and introduce the more involved ones as needed.\n\nnote we\u0027ve got a slightly different style that may reduce the size of the macros here:\n\nhttps://gerrit.chromium.org/gerrit/gitweb?p\u003dwebm/libwebp.git;a\u003dblob;f\u003dsrc/dsp/mips_macro.h;h\u003d4cfb23c4a29b7c68e7c86857bffd4f2a448688cf;hb\u003ddb12250fd1b10841d389c16aa3de7478296badb4\n\nwould something like that work?",
+      "revId": "00063145f00e1fb6cfc025e41889e1dcc14ed235",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//BCM\u003d",
+        "filename": "vp9/common/mips/msa/vp9_macros_msa.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-04-08T06:28:15Z",
+      "side": 1,
+      "message": "why not just one line? or just expose it in the code, a visible type cast can help in understanding",
+      "revId": "00063145f00e1fb6cfc025e41889e1dcc14ed235",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//BCE\u003d",
+        "filename": "vp9/common/mips/msa/vp9_macros_msa.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-04-08T06:28:15Z",
+      "side": 1,
+      "message": "no space after the cast",
+      "revId": "00063145f00e1fb6cfc025e41889e1dcc14ed235",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
