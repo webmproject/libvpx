@@ -52,6 +52,24 @@
       "revId": "b815f3a977c83ccb1c2733b27bf6ab6612a7f6f5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//A1w\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-04-09T15:45:15Z",
+      "side": 1,
+      "message": "Oh wait I was reading wrong. Yeah to default to shared you could use CONFIG_SHARED and --enable-shared, but it would not be default.",
+      "parentUuid": "AAAAdn//A14\u003d",
+      "revId": "b815f3a977c83ccb1c2733b27bf6ab6612a7f6f5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
