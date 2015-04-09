@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//A04\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1287,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2015-04-09T19:34:58Z",
+      "side": 1,
+      "message": "If the filter cost is added at the end, should the above line be removed also?",
+      "revId": "25206e7b7fd9e342ed2af0aeb404ec0aecc3040c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
