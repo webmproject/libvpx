@@ -16,6 +16,24 @@
       "revId": "b815f3a977c83ccb1c2733b27bf6ab6612a7f6f5",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//A2E\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-04-09T15:24:35Z",
+      "side": 1,
+      "message": "If it was inverted you could use CONFIG_SHARED, but again that doesn\u0027t get the default behaviour that you want. And it\u0027d need to include vpx_config",
+      "parentUuid": "AAAAdn//A5U\u003d",
+      "revId": "b815f3a977c83ccb1c2733b27bf6ab6612a7f6f5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
