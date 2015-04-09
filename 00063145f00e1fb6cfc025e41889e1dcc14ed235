@@ -125,6 +125,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//A3I\u003d",
+        "filename": "vp9/common/mips/msa/vp9_macros_msa.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1003209
+      },
+      "writtenOn": "2015-04-09T06:26:05Z",
+      "side": 1,
+      "message": "Intrinsics are available and efficient.\nSimple \u0027C\u0027 syntax can be used for common vector operations like load-store, +, -, * etc. (This is one of the MIPS USP.)\nMips compiler will generate vector instructions for such operations if there are vector datatypes.",
+      "parentUuid": "AAAAdn//A40\u003d",
+      "revId": "00063145f00e1fb6cfc025e41889e1dcc14ed235",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//BCM\u003d",
         "filename": "vp9/common/mips/msa/vp9_macros_msa.h",
         "patchSetId": 3
