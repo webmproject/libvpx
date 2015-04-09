@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Axw\u003d",
+        "filename": "libs.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 464,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-04-09T22:41:37Z",
+      "side": 1,
+      "message": "can you put the suffix in a var and define it once someplace? something like:\n\nSHARED_SUFFIX \u003d (if $(filter os2%,$(TGT_OS)),_dll.a,.so)\n\nand then use SHARED_SUFFIX here and the other places where you need it. This would be similar to the use of $ASM suffix",
+      "revId": "e72d550b6ddc68061ac6728935fa16bfdf6f50f8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
