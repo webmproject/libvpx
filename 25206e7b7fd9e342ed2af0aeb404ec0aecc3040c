@@ -16,6 +16,24 @@
       "revId": "25206e7b7fd9e342ed2af0aeb404ec0aecc3040c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//A0g\u003d",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1287,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-04-09T19:42:13Z",
+      "side": 1,
+      "message": "We still need the pred filter type cost in the filter search loop to select which filter type gives minimum overall cost. Once the prediction filter type is decided, we run the satd based estimation to get a more precise rate distortion cost estimate, which resets this_rdc value for mode selection.",
+      "parentUuid": "AAAAdn//A04\u003d",
+      "revId": "25206e7b7fd9e342ed2af0aeb404ec0aecc3040c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
