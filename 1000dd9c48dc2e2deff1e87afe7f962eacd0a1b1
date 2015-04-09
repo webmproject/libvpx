@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//A4s\u003d",
+        "filename": "vp9/common/mips/msa/vp9_macros_msa.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-04-09T05:41:03Z",
+      "side": 1,
+      "message": "blocks like this should be do {} while (0) to avoid unintended side effects",
+      "revId": "1000dd9c48dc2e2deff1e87afe7f962eacd0a1b1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//A4o\u003d",
+        "filename": "vp9/common/mips/msa/vp9_macros_msa.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-04-09T05:41:03Z",
+      "side": 1,
+      "message": "why not specify the required alignment directly? note there\u0027s a similar DECLARE_ALIGNED in vpx_ports/mem.h; this one isn\u0027t exactly alloc\u0027ing anything",
+      "revId": "1000dd9c48dc2e2deff1e87afe7f962eacd0a1b1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//A4k\u003d",
+        "filename": "vp9/common/mips/msa/vp9_macros_msa.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-04-09T05:41:03Z",
+      "side": 1,
+      "message": "keep \u0027#\u0027s in column zero adding whitespace afterword if desired",
+      "revId": "1000dd9c48dc2e2deff1e87afe7f962eacd0a1b1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//A4g\u003d",
+        "filename": "vp9/common/mips/msa/vp9_macros_msa.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-04-09T05:41:03Z",
+      "side": 1,
+      "message": "\u003ctwo spaces\u003e// !cond",
+      "revId": "1000dd9c48dc2e2deff1e87afe7f962eacd0a1b1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//A4c\u003d",
+        "filename": "vp9/common/mips/msa/vp9_macros_msa.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-04-09T05:41:03Z",
+      "side": 1,
+      "message": "\u003ctwo spaces\u003e// cond\n\nhere and everywhere unless they\u0027re 1 or 2 line blocks",
+      "revId": "1000dd9c48dc2e2deff1e87afe7f962eacd0a1b1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//A4Y\u003d",
+        "filename": "vp9/common/mips/msa/vp9_macros_msa.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-04-09T05:41:03Z",
+      "side": 1,
+      "message": "these can be marked const",
+      "revId": "1000dd9c48dc2e2deff1e87afe7f962eacd0a1b1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
