@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//A5U\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-04-09T04:05:32Z",
+      "side": 1,
+      "message": "I could invert this, but I\u0027d think in most cases you\u0027d need a wrapper lib anyway or are building executables...",
+      "revId": "b815f3a977c83ccb1c2733b27bf6ab6612a7f6f5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
