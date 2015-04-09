@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//A2w\u003d",
+        "filename": "vp9/common/mips/msa/vp9_macros_msa.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1003209
+      },
+      "writtenOn": "2015-04-09T06:38:11Z",
+      "side": 1,
+      "message": "I thought you wanted this to be one liner.\nWill you please elaborate?\nIs it expected to be like -\n#define STORE_UB(vec, pdest) {  \\\n  *((v16u8 *)(pdest)) \u003d (vec);  \\\n}",
+      "parentUuid": "AAAAdn//A4s\u003d",
+      "revId": "1000dd9c48dc2e2deff1e87afe7f962eacd0a1b1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//A4o\u003d",
         "filename": "vp9/common/mips/msa/vp9_macros_msa.h",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2015-04-09T05:41:03Z",
       "side": 1,
       "message": "why not specify the required alignment directly? note there\u0027s a similar DECLARE_ALIGNED in vpx_ports/mem.h; this one isn\u0027t exactly alloc\u0027ing anything",
+      "revId": "1000dd9c48dc2e2deff1e87afe7f962eacd0a1b1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//A2s\u003d",
+        "filename": "vp9/common/mips/msa/vp9_macros_msa.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1003209
+      },
+      "writtenOn": "2015-04-09T06:38:11Z",
+      "side": 1,
+      "message": "OK. We will use DECLARE_ALIGNED.",
+      "parentUuid": "AAAAdn//A4o\u003d",
       "revId": "1000dd9c48dc2e2deff1e87afe7f962eacd0a1b1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//A3A\u003d",
+        "filename": "vp9/common/mips/msa/vp9_macros_msa.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1003209
+      },
+      "writtenOn": "2015-04-09T06:38:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//A4k\u003d",
+      "revId": "1000dd9c48dc2e2deff1e87afe7f962eacd0a1b1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//A4g\u003d",
         "filename": "vp9/common/mips/msa/vp9_macros_msa.h",
         "patchSetId": 4
@@ -64,6 +118,24 @@
       "writtenOn": "2015-04-09T05:41:03Z",
       "side": 1,
       "message": "\u003ctwo spaces\u003e// !cond",
+      "revId": "1000dd9c48dc2e2deff1e87afe7f962eacd0a1b1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//A28\u003d",
+        "filename": "vp9/common/mips/msa/vp9_macros_msa.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1003209
+      },
+      "writtenOn": "2015-04-09T06:38:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//A4g\u003d",
       "revId": "1000dd9c48dc2e2deff1e87afe7f962eacd0a1b1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//A24\u003d",
+        "filename": "vp9/common/mips/msa/vp9_macros_msa.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1003209
+      },
+      "writtenOn": "2015-04-09T06:38:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//A4c\u003d",
+      "revId": "1000dd9c48dc2e2deff1e87afe7f962eacd0a1b1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//A4Y\u003d",
         "filename": "vp9/common/mips/msa/vp9_macros_msa.h",
         "patchSetId": 4
@@ -98,6 +188,24 @@
       "writtenOn": "2015-04-09T05:41:03Z",
       "side": 1,
       "message": "these can be marked const",
+      "revId": "1000dd9c48dc2e2deff1e87afe7f962eacd0a1b1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//A20\u003d",
+        "filename": "vp9/common/mips/msa/vp9_macros_msa.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1003209
+      },
+      "writtenOn": "2015-04-09T06:38:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//A4Y\u003d",
       "revId": "1000dd9c48dc2e2deff1e87afe7f962eacd0a1b1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
