@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//A2g\u003d",
+        "filename": "vp9/common/mips/msa/vp9_macros_msa.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-04-09T06:49:05Z",
+      "side": 1,
+      "message": "to avoid side effects in conditionals one usually does:\n\n    do {\n      op;\n    } while (0);\n\nyour use may be all right now, but code moves around. as for one line I meant the use of {(var; var\u003d...; var)} seemed excessive in the loads for instance",
+      "parentUuid": "AAAAdn//A2w\u003d",
+      "revId": "1000dd9c48dc2e2deff1e87afe7f962eacd0a1b1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//A4o\u003d",
         "filename": "vp9/common/mips/msa/vp9_macros_msa.h",
         "patchSetId": 4
