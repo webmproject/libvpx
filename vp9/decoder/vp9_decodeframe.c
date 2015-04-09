@@ -1816,9 +1816,6 @@ void dec_build_inter_predictors(VP9Decoder *const pbi, MACROBLOCKD *xd,
                                 int is_scaled, int ref) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
   uint8_t *const dst = dst_buf->buf + dst_buf->stride * y + x;
-  const MV mv_q4 = clamp_mv_to_umv_border_sb(xd, mv, bw, bh,
-                                             pd->subsampling_x,
-                                             pd->subsampling_y);
   MV32 scaled_mv;
   int xs, ys, x0, y0, x0_16, y0_16, frame_width, frame_height,
       buf_stride, subpel_x, subpel_y;
@@ -1837,6 +1834,9 @@ void dec_build_inter_predictors(VP9Decoder *const pbi, MACROBLOCKD *xd,
   }
 
   if (is_scaled) {
+    const MV mv_q4 = clamp_mv_to_umv_border_sb(xd, mv, bw, bh,
+                                               pd->subsampling_x,
+                                               pd->subsampling_y);
     // Co-ordinate of containing block to pixel precision.
     int x_start = (-xd->mb_to_left_edge >> (3 + pd->subsampling_x));
     int y_start = (-xd->mb_to_top_edge >> (3 + pd->subsampling_y));
@@ -1868,8 +1868,8 @@ void dec_build_inter_predictors(VP9Decoder *const pbi, MACROBLOCKD *xd,
     x0_16 = x0 << SUBPEL_BITS;
     y0_16 = y0 << SUBPEL_BITS;
 
-    scaled_mv.row = mv_q4.row;
-    scaled_mv.col = mv_q4.col;
+    scaled_mv.row = mv->row * (1 << (1 - pd->subsampling_y));
+    scaled_mv.col = mv->col * (1 << (1 - pd->subsampling_x));
     xs = ys = 16;
   }
   subpel_x = scaled_mv.col & SUBPEL_MASK;
