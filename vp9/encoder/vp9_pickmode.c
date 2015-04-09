@@ -1347,9 +1347,6 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         model_rd_for_sb_y(cpi, bsize, x, xd, &this_rdc.rate, &this_rdc.dist,
                           &var_y, &sse_y);
       }
-      this_rdc.rate +=
-          cm->interp_filter == SWITCHABLE ?
-              vp9_get_switchable_rate(cpi, xd) : 0;
     }
 
     if (!this_early_term) {
@@ -1375,6 +1372,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           this_rdc.rate += vp9_get_switchable_rate(cpi, xd);
       }
     } else {
+      this_rdc.rate += cm->interp_filter == SWITCHABLE ?
+          vp9_get_switchable_rate(cpi, xd) : 0;
       this_rdc.rate += vp9_cost_bit(vp9_get_skip_prob(cm, xd), 1);
     }
 
