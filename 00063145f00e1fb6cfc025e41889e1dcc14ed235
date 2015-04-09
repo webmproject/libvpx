@@ -107,6 +107,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//A40\u003d",
+        "filename": "vp9/common/mips/msa/vp9_macros_msa.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-04-09T05:28:14Z",
+      "side": 1,
+      "message": "for the styling it\u0027s OK, though in the load cases I don\u0027t see the benefit. with the style in webp these macros can use used in existing asm blocks and are a bit more concise.\nwhat about intrinsics? are they unavailable or is the performance extremely poor?",
+      "parentUuid": "AAAAdn//BBw\u003d",
+      "revId": "00063145f00e1fb6cfc025e41889e1dcc14ed235",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//BCM\u003d",
         "filename": "vp9/common/mips/msa/vp9_macros_msa.h",
         "patchSetId": 3
