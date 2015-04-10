@@ -2122,33 +2122,30 @@ static int64_t rd_pick_intrabc_sb_mode(VP9_COMP *cpi, MACROBLOCK *x,
   PREDICTION_MODE mode;
   MACROBLOCKD *const xd = &x->e_mbd;
   MODE_INFO *const mic = xd->mi[0].src_mi;
-  PREDICTION_MODE mode_selected = mic->mbmi.mode;
-  PREDICTION_MODE mode_selected_uv = mic->mbmi.uv_mode;
-  int filter_selected = mic->mbmi.interp_filter;
-  TX_SIZE best_tx = mic->mbmi.tx_size;
   const MODE_INFO *above_mi = xd->mi[-xd->mi_stride].src_mi;
   const MODE_INFO *left_mi = xd->left_available ? xd->mi[-1].src_mi : NULL;
   const PREDICTION_MODE A = vp9_above_block_mode(mic, above_mi, 0);
   const PREDICTION_MODE L = vp9_left_block_mode(mic, left_mi, 0);
+  MB_MODE_INFO *mbmi = &mic->mbmi;
+  MB_MODE_INFO mbmi_selected = *mbmi;
   const int *bmode_costs = cpi->y_mode_costs[A][L];
   struct buf_2d yv12_mb[MAX_MB_PLANE];
   int_mv frame_dv[MB_MODE_COUNT][MAX_REF_FRAMES];
   int i;
 #if CONFIG_TX_SKIP
-  int q_idx = vp9_get_qindex(&cpi->common.seg, mic->mbmi.segment_id,
+  int q_idx = vp9_get_qindex(&cpi->common.seg, mbmi->segment_id,
                              cpi->common.base_qindex);
   int try_tx_skip = q_idx <= TX_SKIP_Q_THRESH_INTRA;
-  int tx_skipped_y = mic->mbmi.tx_skip[0];
-  int tx_skipped_uv = mic->mbmi.tx_skip[1];
+  mbmi->tx_skip[0] = 0;
+  mbmi->tx_skip[1] = 0;
 #endif  // CONFIG_TX_SKIP
 #if CONFIG_FILTERINTRA
-  int filterbit = mic->mbmi.filterbit;
-  int uv_filterbit = mic->mbmi.uv_filterbit;
-#endif  // CONFIG_FILTER_INTRA
+  mbmi->filterbit = 0;
+  mbmi->uv_filterbit = 0;
+#endif  // CONFIG_FILTERINTRA
 #if CONFIG_PALETTE
-  int palette_enabled[2];
-  palette_enabled[0] = mic->mbmi.palette_enabled[0];
-  palette_enabled[1] = mic->mbmi.palette_enabled[1];
+  mbmi->palette_enabled[0] = 0;
+  mbmi->palette_enabled[1] = 0;
 #endif  // CONFIG_PALETTE
 
   if (cpi->sf.tx_size_search_method == USE_FULL_RD)
@@ -2175,8 +2172,9 @@ static int64_t rd_pick_intrabc_sb_mode(VP9_COMP *cpi, MACROBLOCK *x,
     int this_rate_tokenonly = 0;
     int64_t this_distortion = 0;
     int64_t this_rd;
-    mic->mbmi.mode = mode;
-    assert(mic->mbmi.sb_type >= BLOCK_8X8);
+    mbmi->mode = mode;
+    mbmi->uv_mode = mode;
+    assert(mbmi->sb_type >= BLOCK_8X8);
     cpi->common.interp_filter = BILINEAR;
     this_rd = handle_intrabc_mode(cpi, x, bsize,
                                   tx_cache,
@@ -2197,46 +2195,16 @@ static int64_t rd_pick_intrabc_sb_mode(VP9_COMP *cpi, MACROBLOCK *x,
 #endif  // CONFIG_TX_SKIP
     this_rd = RDCOST(x->rdmult, x->rddiv, this_rate, this_distortion);
     if (this_rd < best_rd) {
-      mode_selected    = mode;
-      mode_selected_uv = mode;
-      filter_selected  = mic->mbmi.interp_filter;
+      mbmi_selected   = *mbmi;
       best_rd          = this_rd;
-      best_tx          = mic->mbmi.tx_size;
       *rate            = this_rate;
       *rate_tokenonly  = this_rate_tokenonly;
       *distortion      = this_distortion;
       *skippable       = this_skippable;
-#if CONFIG_TX_SKIP
-      tx_skipped_y = mic->mbmi.tx_skip[0];
-      tx_skipped_uv = mic->mbmi.tx_skip[1];
-#endif  // CONFIG_TX_SKIP
-#if CONFIG_PALETTE
-      palette_enabled[0] = 0;
-      palette_enabled[1] = 0;
-#endif  // CONFIG_PALETTE
-#if CONFIG_FILTERINTRA
-      filterbit = 0;
-      uv_filterbit = 0;
-#endif  // CONFIG_FILTERINTRA
     }
   }
 
-  mic->mbmi.mode = mode_selected;
-  mic->mbmi.uv_mode = mode_selected_uv;
-  mic->mbmi.tx_size = best_tx;
-  mic->mbmi.interp_filter = filter_selected;
-#if CONFIG_TX_SKIP
-  mic->mbmi.tx_skip[0] = tx_skipped_y;
-  mic->mbmi.tx_skip[1] = tx_skipped_uv;
-#endif  // CONFIG_TX_SKIP
-#if CONFIG_PALETTE
-  mic->mbmi.palette_enabled[0] = palette_enabled[0];
-  mic->mbmi.palette_enabled[1] = palette_enabled[1];
-#endif  // CONFIG_PALETTE
-#if CONFIG_FILTERINTRA
-  mic->mbmi.filterbit = filterbit;
-  mic->mbmi.uv_filterbit = uv_filterbit;
-#endif  // CONFIG_FILTERINTRA
+  *mbmi = mbmi_selected;
 
   return best_rd;
 }
@@ -5700,23 +5668,20 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 #endif  // CONFIG_PALETTE
 
 #if CONFIG_INTRABC
-  rd_cost->rdcost = RDCOST(x->rdmult, x->rddiv, rd_cost->rate, rd_cost->dist);
-
   if (bsize >= BLOCK_8X8) {
     best_rd = MIN(best_rd, rd_cost->rdcost);
     if (rd_pick_intrabc_sb_mode(cpi, x, mi_row, mi_col, &rate_y,
                                 &rate_y_tokenonly, &dist_y, &y_skip, bsize,
                                 tx_cache, best_rd) < best_rd) {
-      if (y_skip && uv_skip) {
-        rd_cost->rate = rate_y + rate_uv - rate_y_tokenonly +
+      if (y_skip) {
+        rd_cost->rate = rate_y - rate_y_tokenonly +
                         vp9_cost_bit(vp9_get_skip_prob(cm, xd), 1);
-        rd_cost->dist = dist_y + dist_uv;
+        rd_cost->dist = dist_y;
         vp9_zero(ctx->tx_rd_diff);
       } else {
         int i;
-        rd_cost->rate =
-            rate_y + rate_uv + vp9_cost_bit(vp9_get_skip_prob(cm, xd), 0);
-        rd_cost->dist = dist_y + dist_uv;
+        rd_cost->rate = rate_y + vp9_cost_bit(vp9_get_skip_prob(cm, xd), 0);
+        rd_cost->dist = dist_y;
         if (cpi->sf.tx_size_search_method == USE_FULL_RD)
           for (i = 0; i < TX_MODES; i++) {
             if (tx_cache[i] < INT64_MAX && tx_cache[cm->tx_mode] < INT64_MAX)
@@ -5725,9 +5690,10 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
               ctx->tx_rd_diff[i] = 0;
           }
       }
+      ctx->mic = *xd->mi[0].src_mi;
+      rd_cost->rdcost =
+          RDCOST(x->rdmult, x->rddiv, rd_cost->rate, rd_cost->dist);
     }
-    ctx->mic = *xd->mi[0].src_mi;
-    rd_cost->rdcost = RDCOST(x->rdmult, x->rddiv, rd_cost->rate, rd_cost->dist);
   }
 #endif  // CONFIG_INTRABC
 
