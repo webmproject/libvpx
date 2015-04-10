@@ -1487,9 +1487,10 @@ static void update_coef_probs(VP9_COMP *cpi, vp9_writer* w) {
                              frame_coef_probs[tx_size]);
 }
 
-static void encode_loopfilter(struct loopfilter *lf,
+static void encode_loopfilter(VP9_COMMON *cm,
                               struct vp9_write_bit_buffer *wb) {
   int i;
+  struct loopfilter *lf = &cm->lf;
 
   // Encode the loop filter level and type
   vp9_wb_write_literal(wb, lf->filter_level, 6);
@@ -1525,6 +1526,12 @@ static void encode_loopfilter(struct loopfilter *lf,
       }
     }
   }
+#if CONFIG_LOOP_POSTFILTER
+  vp9_wb_write_bit(wb, lf->bilateral_level > 0);
+  if (lf->bilateral_level > 0)
+    vp9_wb_write_literal(wb, lf->bilateral_level - 1,
+                         vp9_bilateral_level_bits(cm));
+#endif
 }
 
 static void write_delta_q(struct vp9_write_bit_buffer *wb, int delta_q) {
@@ -1968,7 +1975,7 @@ static void write_uncompressed_header(VP9_COMP *cpi,
 
   vp9_wb_write_literal(wb, cm->frame_context_idx, FRAME_CONTEXTS_LOG2);
 
-  encode_loopfilter(&cm->lf, wb);
+  encode_loopfilter(cm, wb);
   encode_quantization(cm, wb);
   encode_segmentation(cm, &cpi->mb.e_mbd, wb);
 

@@ -1586,8 +1586,9 @@ static void setup_segmentation(struct segmentation *seg,
   }
 }
 
-static void setup_loopfilter(struct loopfilter *lf,
+static void setup_loopfilter(VP9_COMMON *cm,
                              struct vp9_read_bit_buffer *rb) {
+  struct loopfilter *lf = &cm->lf;
   lf->filter_level = vp9_rb_read_literal(rb, 6);
   lf->sharpness_level = vp9_rb_read_literal(rb, 3);
 
@@ -1610,6 +1611,13 @@ static void setup_loopfilter(struct loopfilter *lf,
           lf->mode_deltas[i] = vp9_rb_read_signed_literal(rb, 6);
     }
   }
+#if CONFIG_LOOP_POSTFILTER
+  lf->bilateral_level = vp9_rb_read_bit(rb);
+  if (lf->bilateral_level) {
+    lf->bilateral_level += vp9_rb_read_literal(
+        rb, vp9_bilateral_level_bits(cm));
+  }
+#endif
 }
 
 static int read_delta_q(struct vp9_read_bit_buffer *rb, int *delta_q) {
@@ -1976,7 +1984,7 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
       }
 #if !CONFIG_INTRABC
       // Loopfilter one row.
-      if (cm->lf.filter_level && !pbi->mb.corrupted) {
+      if (!pbi->mb.corrupted && cm->lf.filter_level) {
         const int lf_start = mi_row - MI_BLOCK_SIZE;
         LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
 
@@ -2000,7 +2008,7 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
   }
 
   // Loopfilter remaining rows in the frame.
-  if (cm->lf.filter_level && !pbi->mb.corrupted) {
+  if (!pbi->mb.corrupted && cm->lf.filter_level) {
     LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
     winterface->sync(&pbi->lf_worker);
     lf_data->start = lf_data->stop;
@@ -2377,7 +2385,7 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
   if (frame_is_intra_only(cm) || cm->error_resilient_mode)
     vp9_setup_past_independence(cm);
 
-  setup_loopfilter(&cm->lf, rb);
+  setup_loopfilter(cm, rb);
   setup_quantization(cm, &pbi->mb, rb);
   setup_segmentation(&cm->seg, rb);
 
@@ -2683,6 +2691,13 @@ void vp9_decode_frame(VP9Decoder *pbi,
   } else {
     *p_data_end = decode_tiles(pbi, data + first_partition_size, data_end);
   }
+#if CONFIG_LOOP_POSTFILTER
+  vp9_loop_bilateral_init(&cm->lf_info, cm->lf.bilateral_level,
+                          cm->frame_type == KEY_FRAME);
+  if (cm->lf_info.bilateral_used) {
+    vp9_loop_bilateral_rows(new_fb, cm, 0, cm->mi_rows, 0);
+  }
+#endif  // CONFIG_LOOP_POSTFILTER
 
   new_fb->corrupted |= xd->corrupted;
   if (!new_fb->corrupted) {

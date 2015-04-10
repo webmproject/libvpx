@@ -108,6 +108,9 @@ typedef struct VP9Common {
   int new_fb_idx;
 
   YV12_BUFFER_CONFIG post_proc_buffer;
+#if CONFIG_LOOP_POSTFILTER
+  YV12_BUFFER_CONFIG tmp_loop_buf;
+#endif
 
   FRAME_TYPE last_frame_type;  /* last frame's frame type for motion search.*/
   FRAME_TYPE frame_type;

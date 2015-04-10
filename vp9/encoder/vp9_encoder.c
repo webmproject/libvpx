@@ -2449,8 +2449,16 @@ static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
   }
 
   if (lf->filter_level > 0) {
-    vp9_loop_filter_frame(cm->frame_to_show, cm, xd, lf->filter_level, 0, 0);
+    vp9_loop_filter_frame(cm->frame_to_show, cm, xd, lf->filter_level,
+                          0, 0);
   }
+#if CONFIG_LOOP_POSTFILTER
+  vp9_loop_bilateral_init(&cm->lf_info, cm->lf.bilateral_level,
+                          cm->frame_type == KEY_FRAME);
+  if (cm->lf_info.bilateral_used) {
+    vp9_loop_bilateral_rows(cm->frame_to_show, cm, 0, cm->mi_rows, 0);
+  }
+#endif  // CONFIG_LOOP_POSTFILTER
 
   vp9_extend_frame_inner_borders(cm->frame_to_show);
 }
