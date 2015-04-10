@@ -632,7 +632,7 @@ static void predict_and_reconstruct_intra_block(int plane, int block,
 
 #if CONFIG_TX_SKIP && CONFIG_FILTERINTRA
   if ((mi->mbmi.skip || no_coeff) && mi->mbmi.tx_skip[plane != 0] &&
-      (mode == H_PRED || mode == V_PRED) && fbit) {
+      (mode == H_PRED || mode == V_PRED) && fbit && tx_size <= TX_32X32) {
     int bs = 4 * (1 << tx_size);
     vp9_intra_dpcm_add_nocoeff(dst, pd->dst.stride, mode, bs);
   }
