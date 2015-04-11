@@ -317,4 +317,53 @@ MASKSADMxN(8, 8)
 MASKSADMxN(8, 4)
 MASKSADMxN(4, 8)
 MASKSADMxN(4, 4)
+
+#if CONFIG_VP9_HIGHBITDEPTH
+static INLINE unsigned int highbd_masked_sad(const uint8_t *a8, int a_stride,
+                                             const uint8_t *b8, int b_stride,
+                                             const uint8_t *m, int m_stride,
+                                             int width, int height) {
+  int y, x;
+  unsigned int sad = 0;
+  const uint16_t *a = CONVERT_TO_SHORTPTR(a8);
+  const uint16_t *b = CONVERT_TO_SHORTPTR(b8);
+
+  for (y = 0; y < height; y++) {
+    for (x = 0; x < width; x++)
+      sad += m[x] * abs(a[x] - b[x]);
+
+    a += a_stride;
+    b += b_stride;
+    m += m_stride;
+  }
+  sad = (sad + 31) >> 6;
+
+  return sad;
+}
+
+#define highbd_MASKSADMxN(m, n) \
+unsigned int vp9_highbd_masked_sad##m##x##n##_c(const uint8_t *src, \
+                                                int src_stride, \
+                                                const uint8_t *ref, \
+                                                int ref_stride, \
+                                                const uint8_t *msk, \
+                                                int msk_stride) { \
+  return highbd_masked_sad(src, src_stride, ref, ref_stride, \
+                           msk, msk_stride, m, n); \
+}
+
+highbd_MASKSADMxN(64, 64)
+highbd_MASKSADMxN(64, 32)
+highbd_MASKSADMxN(32, 64)
+highbd_MASKSADMxN(32, 32)
+highbd_MASKSADMxN(32, 16)
+highbd_MASKSADMxN(16, 32)
+highbd_MASKSADMxN(16, 16)
+highbd_MASKSADMxN(16, 8)
+highbd_MASKSADMxN(8, 16)
+highbd_MASKSADMxN(8, 8)
+highbd_MASKSADMxN(8, 4)
+highbd_MASKSADMxN(4, 8)
+highbd_MASKSADMxN(4, 4)
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // CONFIG_WEDGE_PARTITION

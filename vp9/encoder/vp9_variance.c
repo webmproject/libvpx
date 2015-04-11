@@ -743,4 +743,213 @@ MASK_SUBPIX_VAR(64, 32)
 
 MASK_VAR(64, 64)
 MASK_SUBPIX_VAR(64, 64)
+
+#if CONFIG_VP9_HIGHBITDEPTH
+void highbd_masked_variance64(const uint8_t *a8, int  a_stride,
+                              const uint8_t *b8, int  b_stride,
+                              const uint8_t *m, int  m_stride,
+                              int  w, int  h,
+                              uint64_t *sse, int64_t *sum) {
+  int i, j;
+  uint16_t *a = CONVERT_TO_SHORTPTR(a8);
+  uint16_t *b = CONVERT_TO_SHORTPTR(b8);
+
+  *sum = 0;
+  *sse = 0;
+
+  for (i = 0; i < h; i++) {
+    for (j = 0; j < w; j++) {
+      const int diff = (a[j] - b[j]) * (m[j]);
+      *sum += diff;
+      *sse += diff * diff;
+    }
+
+    a += a_stride;
+    b += b_stride;
+    m += m_stride;
+  }
+  *sum = (*sum >= 0) ? ((*sum + 31) >> 6) : -((-*sum + 31) >> 6);
+  *sse = (*sse + 2047) >> 12;
+}
+
+void highbd_masked_variance(const uint8_t *a8, int  a_stride,
+                            const uint8_t *b8, int  b_stride,
+                            const uint8_t *m, int  m_stride,
+                            int  w, int  h,
+                            unsigned int *sse, int *sum) {
+  uint64_t sse_long = 0;
+  int64_t sum_long = 0;
+  highbd_masked_variance64(a8, a_stride, b8, b_stride, m, m_stride,
+                           w, h, &sse_long, &sum_long);
+  *sse = sse_long;
+  *sum = sum_long;
+}
+
+void highbd_10_masked_variance(const uint8_t *a8, int  a_stride,
+                               const uint8_t *b8, int  b_stride,
+                               const uint8_t *m, int  m_stride,
+                               int  w, int  h,
+                               unsigned int *sse, int *sum) {
+  uint64_t sse_long = 0;
+  int64_t sum_long = 0;
+  highbd_masked_variance64(a8, a_stride, b8, b_stride, m, m_stride,
+                           w, h, &sse_long, &sum_long);
+  *sum = ROUND_POWER_OF_TWO(sum_long, 2);
+  *sse = ROUND_POWER_OF_TWO(sse_long, 4);
+}
+
+void highbd_12_masked_variance(const uint8_t *a8, int  a_stride,
+                               const uint8_t *b8, int  b_stride,
+                               const uint8_t *m, int  m_stride,
+                               int  w, int  h,
+                               unsigned int *sse, int *sum) {
+  uint64_t sse_long = 0;
+  int64_t sum_long = 0;
+  highbd_masked_variance64(a8, a_stride, b8, b_stride, m, m_stride,
+                           w, h, &sse_long, &sum_long);
+  *sum = ROUND_POWER_OF_TWO(sum_long, 4);
+  *sse = ROUND_POWER_OF_TWO(sse_long, 8);
+}
+
+#define HIGHBD_MASK_VAR(W, H) \
+unsigned int vp9_highbd_masked_variance##W##x##H##_c(const uint8_t *a, \
+                                                     int a_stride, \
+                                                     const uint8_t *b, \
+                                                     int b_stride, \
+                                                     const uint8_t *m, \
+                                                     int m_stride, \
+                                                     unsigned int *sse) { \
+  int sum; \
+  highbd_masked_variance(a, a_stride, b, b_stride, m, m_stride, \
+                         W, H, sse, &sum); \
+  return *sse - (((int64_t)sum * sum) / (W * H)); \
+} \
+\
+unsigned int vp9_highbd_10_masked_variance##W##x##H##_c(const uint8_t *a, \
+                                                        int a_stride, \
+                                                        const uint8_t *b, \
+                                                        int b_stride, \
+                                                        const uint8_t *m, \
+                                                        int m_stride, \
+                                                        unsigned int *sse) { \
+  int sum; \
+  highbd_10_masked_variance(a, a_stride, b, b_stride, m, m_stride, \
+                            W, H, sse, &sum); \
+  return *sse - (((int64_t)sum * sum) / (W * H)); \
+} \
+\
+unsigned int vp9_highbd_12_masked_variance##W##x##H##_c(const uint8_t *a, \
+                                                        int a_stride, \
+                                                        const uint8_t *b, \
+                                                        int b_stride, \
+                                                        const uint8_t *m, \
+                                                        int m_stride, \
+                                                        unsigned int *sse) { \
+  int sum; \
+  highbd_12_masked_variance(a, a_stride, b, b_stride, m, m_stride, \
+                            W, H, sse, &sum); \
+  return *sse - (((int64_t)sum * sum) / (W * H)); \
+}
+
+#define HIGHBD_MASK_SUBPIX_VAR(W, H) \
+unsigned int vp9_highbd_masked_sub_pixel_variance##W##x##H##_c( \
+  const uint8_t *src, int  src_stride, \
+  int xoffset, int  yoffset, \
+  const uint8_t *dst, int dst_stride, \
+  const uint8_t *msk, int msk_stride, \
+  unsigned int *sse) { \
+  uint16_t fdata3[(H + 1) * W]; \
+  uint16_t temp2[H * W]; \
+\
+  highbd_var_filter_block2d_bil_first_pass(src, fdata3, src_stride, 1, \
+                                           H + 1, W, \
+                                           BILINEAR_FILTERS_2TAP(xoffset)); \
+  highbd_var_filter_block2d_bil_second_pass(fdata3, temp2, W, W, H, W, \
+                                            BILINEAR_FILTERS_2TAP(yoffset)); \
+\
+  return vp9_highbd_masked_variance##W##x##H##_c(CONVERT_TO_BYTEPTR(temp2), \
+                                                 W, dst, dst_stride, \
+                                                 msk, msk_stride, sse); \
+} \
+\
+unsigned int vp9_highbd_10_masked_sub_pixel_variance##W##x##H##_c( \
+  const uint8_t *src, int  src_stride, \
+  int xoffset, int  yoffset, \
+  const uint8_t *dst, int dst_stride, \
+  const uint8_t *msk, int msk_stride, \
+  unsigned int *sse) { \
+  uint16_t fdata3[(H + 1) * W]; \
+  uint16_t temp2[H * W]; \
+\
+  highbd_var_filter_block2d_bil_first_pass(src, fdata3, src_stride, 1, \
+                                           H + 1, W, \
+                                           BILINEAR_FILTERS_2TAP(xoffset)); \
+  highbd_var_filter_block2d_bil_second_pass(fdata3, temp2, W, W, H, W, \
+                                            BILINEAR_FILTERS_2TAP(yoffset)); \
+\
+  return vp9_highbd_10_masked_variance##W##x##H##_c(CONVERT_TO_BYTEPTR(temp2), \
+                                                    W, dst, dst_stride, \
+                                                    msk, msk_stride, sse); \
+} \
+\
+unsigned int vp9_highbd_12_masked_sub_pixel_variance##W##x##H##_c( \
+  const uint8_t *src, int  src_stride, \
+  int xoffset, int  yoffset, \
+  const uint8_t *dst, int dst_stride, \
+  const uint8_t *msk, int msk_stride, \
+  unsigned int *sse) { \
+  uint16_t fdata3[(H + 1) * W]; \
+  uint16_t temp2[H * W]; \
+\
+  highbd_var_filter_block2d_bil_first_pass(src, fdata3, src_stride, 1, \
+                                           H + 1, W, \
+                                           BILINEAR_FILTERS_2TAP(xoffset)); \
+  highbd_var_filter_block2d_bil_second_pass(fdata3, temp2, W, W, H, W, \
+                                            BILINEAR_FILTERS_2TAP(yoffset)); \
+\
+  return vp9_highbd_12_masked_variance##W##x##H##_c(CONVERT_TO_BYTEPTR(temp2), \
+                                                    W, dst, dst_stride, \
+                                                    msk, msk_stride, sse); \
+}
+
+HIGHBD_MASK_VAR(4, 4)
+HIGHBD_MASK_SUBPIX_VAR(4, 4)
+
+HIGHBD_MASK_VAR(4, 8)
+HIGHBD_MASK_SUBPIX_VAR(4, 8)
+
+HIGHBD_MASK_VAR(8, 4)
+HIGHBD_MASK_SUBPIX_VAR(8, 4)
+
+HIGHBD_MASK_VAR(8, 8)
+HIGHBD_MASK_SUBPIX_VAR(8, 8)
+
+HIGHBD_MASK_VAR(8, 16)
+HIGHBD_MASK_SUBPIX_VAR(8, 16)
+
+HIGHBD_MASK_VAR(16, 8)
+HIGHBD_MASK_SUBPIX_VAR(16, 8)
+
+HIGHBD_MASK_VAR(16, 16)
+HIGHBD_MASK_SUBPIX_VAR(16, 16)
+
+HIGHBD_MASK_VAR(16, 32)
+HIGHBD_MASK_SUBPIX_VAR(16, 32)
+
+HIGHBD_MASK_VAR(32, 16)
+HIGHBD_MASK_SUBPIX_VAR(32, 16)
+
+HIGHBD_MASK_VAR(32, 32)
+HIGHBD_MASK_SUBPIX_VAR(32, 32)
+
+HIGHBD_MASK_VAR(32, 64)
+HIGHBD_MASK_SUBPIX_VAR(32, 64)
+
+HIGHBD_MASK_VAR(64, 32)
+HIGHBD_MASK_SUBPIX_VAR(64, 32)
+
+HIGHBD_MASK_VAR(64, 64)
+HIGHBD_MASK_SUBPIX_VAR(64, 64)
+
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // CONFIG_WEDGE_PARTITION
