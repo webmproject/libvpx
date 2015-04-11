@@ -1044,6 +1044,10 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
   const int allow_hp = cm->allow_high_precision_mv;
 
   int_mv nearestmv[2], nearmv[2];
+  int_mv ref_mv[2];
+#if CONFIG_NEWMVREF
+  int mv_idx;
+#endif  // CONFIG_NEWMVREF
   int inter_mode_ctx, ref, is_compound;
 #if CONFIG_SUPERTX
   (void) supertx_enabled;
@@ -1089,14 +1093,11 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
   } else {
     if (bsize >= BLOCK_8X8) {
 #if CONFIG_COMPOUND_MODES
-      if (is_compound) {
+      if (is_compound)
         mbmi->mode = read_inter_compound_mode(cm, r, inter_mode_ctx);
-      } else {
-        mbmi->mode = read_inter_mode(cm, r, inter_mode_ctx);
-      }
-#else
-      mbmi->mode = read_inter_mode(cm, r, inter_mode_ctx);
+      else
 #endif
+      mbmi->mode = read_inter_mode(cm, r, inter_mode_ctx);
     }
   }
 
@@ -1109,6 +1110,7 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
     for (ref = 0; ref < 1 + is_compound; ++ref) {
       vp9_find_best_ref_mvs(xd, allow_hp, mbmi->ref_mvs[mbmi->ref_frame[ref]],
                             &nearestmv[ref], &nearmv[ref]);
+      ref_mv[ref].as_int = nearestmv[ref].as_int;
     }
   }
 
@@ -1160,17 +1162,19 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
 #endif  // CONFIG_NEWMVREF
     for (idy = 0; idy < 2; idy += num_4x4_h) {
       for (idx = 0; idx < 2; idx += num_4x4_w) {
-        int_mv block[2];
+        int_mv mv_sub8x8[2];
         const int j = idy * 2 + idx;
 #if CONFIG_COMPOUND_MODES
-        if (is_compound) {
+        if (is_compound)
           b_mode = read_inter_compound_mode(cm, r, inter_mode_ctx);
-        } else {
-          b_mode = read_inter_mode(cm, r, inter_mode_ctx);
-        }
-#else
-        b_mode = read_inter_mode(cm, r, inter_mode_ctx);
+        else
 #endif
+        b_mode = read_inter_mode(cm, r, inter_mode_ctx);
+
+#if CONFIG_NEWMVREF
+        mv_idx = (b_mode == NEAR_FORNEWMV) ? 1 : 0;
+#endif  // CONFIG_NEWMVREF
+
 #if CONFIG_COMPOUND_MODES
         if (b_mode == NEARESTMV || b_mode == NEARMV ||
 #if CONFIG_NEWMVREF
@@ -1215,26 +1219,23 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
               mv_ref_list[1].as_int = near_sub8x8[ref].as_int;
               vp9_find_best_ref_mvs(xd, allow_hp, mv_ref_list,
                                     &ref_mvs[0][ref], &ref_mvs[1][ref]);
+              ref_mv[ref].as_int = ref_mvs[mv_idx][ref].as_int;
             }
 #endif  // CONFIG_NEWMVREF
           }
         }
 
-        if (!assign_mv(cm, b_mode, mbmi->ref_frame, block,
-#if CONFIG_NEWMVREF
-                       (b_mode == NEAR_FORNEWMV) ? ref_mvs[1] : ref_mvs[0],
-#else
-                       nearestmv,
-#endif  // CONFIG_NEWMVREF
+        if (!assign_mv(cm, b_mode, mbmi->ref_frame,
+                       mv_sub8x8, ref_mv,
                        nearest_sub8x8, near_sub8x8,
                        is_compound, allow_hp, r)) {
           xd->corrupted |= 1;
           break;
         }
 
-        mi->bmi[j].as_mv[0].as_int = block[0].as_int;
+        mi->bmi[j].as_mv[0].as_int = mv_sub8x8[0].as_int;
         if (is_compound)
-          mi->bmi[j].as_mv[1].as_int = block[1].as_int;
+          mi->bmi[j].as_mv[1].as_int = mv_sub8x8[1].as_int;
 
         if (num_4x4_h == 2)
           mi->bmi[j + 2] = mi->bmi[j];
@@ -1243,19 +1244,18 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
       }
     }
 
-    mi->mbmi.mode = b_mode;
+    mbmi->mode = b_mode;
     mbmi->mv[0].as_int = mi->bmi[3].as_mv[0].as_int;
     mbmi->mv[1].as_int = mi->bmi[3].as_mv[1].as_int;
   } else {
 #if CONFIG_NEWMVREF
-    if (mbmi->mode == NEAR_FORNEWMV)
-      xd->corrupted |= !assign_mv(cm, mbmi->mode, mbmi->ref_frame, mbmi->mv,
-                                  nearmv, nearestmv, nearmv, is_compound,
-                                  allow_hp, r);
-    else
+    if (mbmi->mode == NEAR_FORNEWMV) {
+      for (ref = 0; ref < 1 + is_compound; ++ref)
+        ref_mv[ref].as_int = nearmv[ref].as_int;
+    }
 #endif  // CONFIG_NEWMVREF
     xd->corrupted |= !assign_mv(cm, mbmi->mode, mbmi->ref_frame, mbmi->mv,
-                                nearestmv, nearestmv, nearmv, is_compound,
+                                ref_mv, nearestmv, nearmv, is_compound,
                                 allow_hp, r);
   }
 #if CONFIG_TX_SKIP

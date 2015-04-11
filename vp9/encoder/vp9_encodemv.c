@@ -313,16 +313,16 @@ static void inc_compound_single_mv(int ref_idx,
 void vp9_update_mv_count(VP9_COMMON *cm, const MACROBLOCKD *xd) {
   const MODE_INFO *mi = xd->mi[0].src_mi;
   const MB_MODE_INFO *const mbmi = &mi->mbmi;
-  int i;
+  int ref;
   int_mv ref_mv[2];
 
-  for (i = 0; i < 1 + has_second_ref(mbmi); ++i) {
+  for (ref = 0; ref < 1 + has_second_ref(mbmi); ++ref) {
 #if CONFIG_NEWMVREF
     if (mbmi->sb_type >= BLOCK_8X8 && mbmi->mode == NEAR_FORNEWMV)
-      ref_mv[i].as_int = mbmi->ref_mvs[mbmi->ref_frame[i]][1].as_int;
+      ref_mv[ref].as_int = mbmi->ref_mvs[mbmi->ref_frame[ref]][1].as_int;
     else
 #endif  // CONFIG_NEWMVREF
-      ref_mv[i].as_int = mbmi->ref_mvs[mbmi->ref_frame[i]][0].as_int;
+    ref_mv[ref].as_int = mbmi->ref_mvs[mbmi->ref_frame[ref]][0].as_int;
   }
 
   if (mbmi->sb_type < BLOCK_8X8) {
@@ -333,6 +333,12 @@ void vp9_update_mv_count(VP9_COMMON *cm, const MACROBLOCKD *xd) {
     for (idy = 0; idy < 2; idy += num_4x4_h) {
       for (idx = 0; idx < 2; idx += num_4x4_w) {
         const int i = idy * 2 + idx;
+
+#if CONFIG_NEWMVREF
+        for (ref = 0; ref < 1 + has_second_ref(mbmi); ++ref)
+          ref_mv[ref].as_int = mi->bmi[i].ref_mv[ref].as_int;
+#endif  // CONFIG_NEWMVREF
+
 #if CONFIG_COMPOUND_MODES
         if (mi->bmi[i].as_mode == NEWMV ||
 #if CONFIG_NEWMVREF
@@ -346,39 +352,18 @@ void vp9_update_mv_count(VP9_COMMON *cm, const MACROBLOCKD *xd) {
 #else
         if (mi->bmi[i].as_mode == NEWMV)
 #endif  // CONFIG_NEWMVREF
-#endif
-#if CONFIG_NEWMVREF
+#endif  // CONFIG_COMPOUND_MODES
           inc_mvs(mbmi, mi->bmi[i].as_mv,
-                  mi->bmi[i].ref_mv,
-                  &cm->counts.mv);
-#else
-          inc_mvs(mbmi, mi->bmi[i].as_mv,
-                  ref_mv,
-                  &cm->counts.mv);
-#endif  // CONFIG_NEWMVREF
+                  ref_mv, &cm->counts.mv);
 #if CONFIG_COMPOUND_MODES
         else if (mi->bmi[i].as_mode == NEAREST_NEWMV ||
                  mi->bmi[i].as_mode == NEAR_NEWMV)
-#if CONFIG_NEWMVREF
           inc_compound_single_mv(1, mi->bmi[i].as_mv,
-                                 mi->bmi[i].ref_mv,
-                                 &cm->counts.mv);
-#else
-          inc_compound_single_mv(1, mi->bmi[i].as_mv,
-                                 ref_mv,
-                                 &cm->counts.mv);
-#endif  // CONFIG_NEWMVREF
+                                 ref_mv, &cm->counts.mv);
         else if (mi->bmi[i].as_mode == NEW_NEARESTMV ||
                  mi->bmi[i].as_mode == NEW_NEARMV)
-#if CONFIG_NEWMVREF
           inc_compound_single_mv(0, mi->bmi[i].as_mv,
-                                 mi->bmi[i].ref_mv,
-                                 &cm->counts.mv);
-#else
-          inc_compound_single_mv(0, mi->bmi[i].as_mv,
-                                 ref_mv,
-                                 &cm->counts.mv);
-#endif  // CONFIG_NEWMVREF
+                                 ref_mv, &cm->counts.mv);
 #endif  // CONFIG_COMPOUND_MODES
       }
     }

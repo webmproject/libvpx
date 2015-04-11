@@ -702,14 +702,11 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
     if (!vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP)) {
       if (bsize >= BLOCK_8X8) {
 #if CONFIG_COMPOUND_MODES
-        if (is_inter_compound_mode(mode)) {
+        if (is_inter_compound_mode(mode))
           write_inter_compound_mode(w, mode, inter_compound_probs);
-        } else if (is_inter_mode(mode)) {
-          write_inter_mode(w, mode, inter_probs);
-        }
-#else
-        write_inter_mode(w, mode, inter_probs);
+        else if (is_inter_mode(mode))
 #endif  // CONFIG_COMPOUND_MODES
+        write_inter_mode(w, mode, inter_probs);
       }
     }
 
@@ -758,14 +755,11 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
           const int j = idy * 2 + idx;
           const PREDICTION_MODE b_mode = mi->bmi[j].as_mode;
 #if CONFIG_COMPOUND_MODES
-          if (is_inter_compound_mode(b_mode)) {
+          if (is_inter_compound_mode(b_mode))
             write_inter_compound_mode(w, b_mode, inter_compound_probs);
-          } else if (is_inter_mode(b_mode)) {
-            write_inter_mode(w, b_mode, inter_probs);
-          }
-#else
-          write_inter_mode(w, b_mode, inter_probs);
+          else if (is_inter_mode(b_mode))
 #endif  // CONFIG_COMPOUND_MODES
+          write_inter_mode(w, b_mode, inter_probs);
 
 #if CONFIG_COMPOUND_MODES
           if (b_mode == NEWMV ||

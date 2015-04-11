@@ -776,17 +776,14 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
       this_rdc.rate += rate_mv;
 #if CONFIG_COMPOUND_MODES
-      if (has_second_ref(mbmi)) {
+      if (has_second_ref(mbmi))
         this_rdc.rate += cpi->inter_compound_mode_cost
                                   [mbmi->mode_context[ref_frame]]
                                   [INTER_COMPOUND_OFFSET(this_mode)];
-      } else {
+      else
 #endif
       this_rdc.rate += cpi->inter_mode_cost[mbmi->mode_context[ref_frame]]
                                   [INTER_OFFSET(this_mode)];
-#if CONFIG_COMPOUND_MODES
-      }
-#endif
       this_rdc.rdcost = RDCOST(x->rdmult, x->rddiv,
                                this_rdc.rate, this_rdc.dist);
 

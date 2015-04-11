@@ -416,13 +416,13 @@ static const vp9_prob default_inter_mode_probs[INTER_MODE_CONTEXTS]
                                               [INTER_MODES - 1] = {
 #if CONFIG_NEWMVREF
   // TODO(zoeliu): To adjust the initial default probs
-  {2,       173,   34,   192},  // 0 = both zero mv
-  {7,       145,   85,   192},  // 1 = one zero mv + one a predicted mv
-  {7,       166,   63,   192},  // 2 = two predicted mvs
-  {7,       94,    66,   192},  // 3 = one predicted/zero and one new mv
-  {8,       64,    46,   192},  // 4 = two new mvs
-  {17,      81,    31,   192},  // 5 = one intra neighbour + x
-  {25,      29,    30,   192},  // 6 = two intra neighbours
+  {2,       173,   34,   173},  // 0 = both zero mv
+  {7,       145,   85,   145},  // 1 = one zero mv + one a predicted mv
+  {7,       166,   63,   166},  // 2 = two predicted mvs
+  {7,       94,    66,   128},  // 3 = one predicted/zero and one new mv
+  {8,       64,    46,   128},  // 4 = two new mvs
+  {17,      81,    31,   128},  // 5 = one intra neighbour + x
+  {25,      29,    30,    96},  // 6 = two intra neighbours
 #else
   {2,       173,   34},  // 0 = both zero mv
   {7,       145,   85},  // 1 = one zero mv + one a predicted mv
