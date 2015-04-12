@@ -16,6 +16,24 @@
       "revId": "e72d550b6ddc68061ac6728935fa16bfdf6f50f8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Apw\u003d",
+        "filename": "libs.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 464,
+      "author": {
+        "id": 1001311
+      },
+      "writtenOn": "2015-04-12T06:26:07Z",
+      "side": 1,
+      "message": "Ok. I\u0027ll add SHARED_LIB_SUF like examples.mk.",
+      "parentUuid": "AAAAdn//Axw\u003d",
+      "revId": "e72d550b6ddc68061ac6728935fa16bfdf6f50f8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
