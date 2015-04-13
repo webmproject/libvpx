@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Aog\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 764,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-04-13T15:48:48Z",
+      "side": 1,
+      "message": "Prefer to have following format:\n#if CONFIG_VP9_HIGHBITDEPTH\n    if ()\n    else\n#endif\n    build_masked_compound(); ...",
+      "revId": "b03dd96e61903ad2be99a0e2c1f3d98b2e956e0f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Aoc\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 779,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-04-13T15:48:48Z",
+      "side": 1,
+      "message": "Ditto.",
+      "revId": "b03dd96e61903ad2be99a0e2c1f3d98b2e956e0f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//AoY\u003d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1517,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-04-13T15:48:48Z",
+      "side": 1,
+      "message": "Ditto.",
+      "revId": "b03dd96e61903ad2be99a0e2c1f3d98b2e956e0f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
