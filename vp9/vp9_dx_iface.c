@@ -462,7 +462,6 @@ static INLINE void check_resync(vpx_codec_alg_priv_t *const ctx,
 static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t *ctx,
                                   const uint8_t **data, unsigned int data_sz,
                                   void *user_priv, int64_t deadline) {
-  vp9_ppflags_t flags = {0, 0, 0};
   const VP9WorkerInterface *const winterface = vp9_get_worker_interface();
   (void)deadline;
 
@@ -546,9 +545,6 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t *ctx,
     worker->had_error = 0;
     winterface->launch(worker);
   }
-
-  if (ctx->base.init_flags & VPX_CODEC_USE_POSTPROC)
-    set_ppflags(ctx, &flags);
 
   return VPX_CODEC_OK;
 }
