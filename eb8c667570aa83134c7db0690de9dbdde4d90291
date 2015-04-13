@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Akk\u003d",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 32
+      },
+      "lineNbr": 740,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2015-04-13T23:42:21Z",
+      "side": 1,
+      "message": "Can cpi-\u003evbp_threshold_sad be derived from cpi-\u003evbp_threshold_64x64?",
+      "revId": "eb8c667570aa83134c7db0690de9dbdde4d90291",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
