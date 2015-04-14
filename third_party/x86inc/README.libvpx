@@ -9,3 +9,4 @@ defines that help automatically allow assembly to work cross-platform.
 
 Local Modifications:
 Some modifications to allow PIC to work with x86inc.
+Conditionally define program_name to allow overriding.
