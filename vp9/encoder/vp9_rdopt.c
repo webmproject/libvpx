@@ -1294,6 +1294,9 @@ static int64_t rd_pick_intra_sub_8x8_y_mode(VP9_COMP *cpi, MACROBLOCK *mb,
 
   vpx_memcpy(t_above, xd->plane[0].above_context, sizeof(t_above));
   vpx_memcpy(t_left, xd->plane[0].left_context, sizeof(t_left));
+#if CONFIG_TX_SKIP
+  mic->mbmi.tx_skip[0] = 0;
+#endif  // CONFIG_TX_SKIP
 #if CONFIG_PALETTE
   mic->mbmi.palette_enabled[0] = 0;
 #endif  // CONFIG_PALETTE
@@ -2311,7 +2314,7 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int q_idx = vp9_get_qindex(&cpi->common.seg,
                              xd->mi[0].src_mi->mbmi.segment_id,
                              cpi->common.base_qindex);
-  int try_tx_skip = q_idx <= TX_SKIP_Q_THRESH_INTRA;
+  int try_tx_skip = q_idx <= TX_SKIP_Q_THRESH_INTRA && bsize >= BLOCK_8X8;
 #endif  // CONFIG_TX_SKIP
 #if CONFIG_PALETTE
   int palette_selected = 0, best_n = 0;
