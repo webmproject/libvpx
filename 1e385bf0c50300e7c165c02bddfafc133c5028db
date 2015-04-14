@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Afo\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-04-14T23:27:57Z",
+      "side": 1,
+      "message": "break this after the first comma; the subject should be kept short.\n\nyou could also make the first portion a bit more concise by saying \u0027disable mips msa..\u0027 instead of repeating msa",
+      "revId": "1e385bf0c50300e7c165c02bddfafc133c5028db",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Afk\u003d",
+        "filename": "build/make/rtcd.pl",
+        "patchSetId": 1
+      },
+      "lineNbr": 381,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-04-14T23:27:57Z",
+      "side": 1,
+      "message": "I don\u0027t think this is necessary, given HAVE_MSA is set; I\u0027m also not sure --require-* is used meaningfully by configure at this point. was something breaking without this?",
+      "revId": "1e385bf0c50300e7c165c02bddfafc133c5028db",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
