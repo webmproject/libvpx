@@ -29,8 +29,6 @@ void Encoder::InitEncoder(VideoSource *video) {
     cfg_.g_timebase = video->timebase();
     cfg_.rc_twopass_stats_in = stats_->buf();
 
-    // Default to 1 thread.
-    cfg_.g_threads = 1;
     res = vpx_codec_enc_init(&encoder_, CodecInterface(), &cfg_,
                              init_flags_);
     ASSERT_EQ(VPX_CODEC_OK, res) << EncoderError();
