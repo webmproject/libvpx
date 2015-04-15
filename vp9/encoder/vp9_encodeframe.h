@@ -40,7 +40,7 @@ void vp9_init_tile_data(struct VP9_COMP *cpi);
 void vp9_encode_tile(struct VP9_COMP *cpi, struct ThreadData *td,
                      int tile_row, int tile_col);
 
-void vp9_set_vbp_thresholds(struct VP9_COMP *cpi, int64_t thresholds[], int q);
+void vp9_set_vbp_thresholds(struct VP9_COMP *cpi, int q);
 
 #ifdef __cplusplus
 }  // extern "C"
