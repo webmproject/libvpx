@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//Ads\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-04-15T05:36:57Z",
+      "side": 1,
+      "message": "you need a blank line between the subject and the body of the message otherwise it will be joined; try \u0027git log --oneline\u0027",
+      "revId": "b7b28cad2d9a4063ef8bcc3688dd78f749c47166",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
