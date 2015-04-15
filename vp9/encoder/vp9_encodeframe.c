@@ -2821,6 +2821,9 @@ static MV_REFERENCE_FRAME get_frame_type(const VP9_COMP *cpi) {
 static TX_MODE select_tx_mode(const VP9_COMP *cpi, MACROBLOCKD *const xd) {
   if (xd->lossless)
     return ONLY_4X4;
+
+  return TX_MODE_SELECT;
+
   if (cpi->common.frame_type == KEY_FRAME &&
       cpi->sf.use_nonrd_pick_mode &&
       cpi->sf.partition_search_type == VAR_BASED_PARTITION)
@@ -3962,40 +3965,40 @@ void vp9_encode_frame(VP9_COMP *cpi) {
       }
     }
 
-    if (cm->tx_mode == TX_MODE_SELECT) {
-      int count4x4 = 0;
-      int count8x8_lp = 0, count8x8_8x8p = 0;
-      int count16x16_16x16p = 0, count16x16_lp = 0;
-      int count32x32 = 0;
-
-      for (i = 0; i < TX_SIZE_CONTEXTS; ++i) {
-        count4x4 += counts->tx.p32x32[i][TX_4X4];
-        count4x4 += counts->tx.p16x16[i][TX_4X4];
-        count4x4 += counts->tx.p8x8[i][TX_4X4];
-
-        count8x8_lp += counts->tx.p32x32[i][TX_8X8];
-        count8x8_lp += counts->tx.p16x16[i][TX_8X8];
-        count8x8_8x8p += counts->tx.p8x8[i][TX_8X8];
-
-        count16x16_16x16p += counts->tx.p16x16[i][TX_16X16];
-        count16x16_lp += counts->tx.p32x32[i][TX_16X16];
-        count32x32 += counts->tx.p32x32[i][TX_32X32];
-      }
-      if (count4x4 == 0 && count16x16_lp == 0 && count16x16_16x16p == 0 &&
-          count32x32 == 0) {
-        cm->tx_mode = ALLOW_8X8;
-        reset_skip_tx_size(cm, TX_8X8);
-      } else if (count8x8_8x8p == 0 && count16x16_16x16p == 0 &&
-                 count8x8_lp == 0 && count16x16_lp == 0 && count32x32 == 0) {
-        cm->tx_mode = ONLY_4X4;
-        reset_skip_tx_size(cm, TX_4X4);
-      } else if (count8x8_lp == 0 && count16x16_lp == 0 && count4x4 == 0) {
-        cm->tx_mode = ALLOW_32X32;
-      } else if (count32x32 == 0 && count8x8_lp == 0 && count4x4 == 0) {
-        cm->tx_mode = ALLOW_16X16;
-        reset_skip_tx_size(cm, TX_16X16);
-      }
-    }
+//    if (cm->tx_mode == TX_MODE_SELECT) {
+//      int count4x4 = 0;
+//      int count8x8_lp = 0, count8x8_8x8p = 0;
+//      int count16x16_16x16p = 0, count16x16_lp = 0;
+//      int count32x32 = 0;
+//
+//      for (i = 0; i < TX_SIZE_CONTEXTS; ++i) {
+//        count4x4 += counts->tx.p32x32[i][TX_4X4];
+//        count4x4 += counts->tx.p16x16[i][TX_4X4];
+//        count4x4 += counts->tx.p8x8[i][TX_4X4];
+//
+//        count8x8_lp += counts->tx.p32x32[i][TX_8X8];
+//        count8x8_lp += counts->tx.p16x16[i][TX_8X8];
+//        count8x8_8x8p += counts->tx.p8x8[i][TX_8X8];
+//
+//        count16x16_16x16p += counts->tx.p16x16[i][TX_16X16];
+//        count16x16_lp += counts->tx.p32x32[i][TX_16X16];
+//        count32x32 += counts->tx.p32x32[i][TX_32X32];
+//      }
+//      if (count4x4 == 0 && count16x16_lp == 0 && count16x16_16x16p == 0 &&
+//          count32x32 == 0) {
+//        cm->tx_mode = ALLOW_8X8;
+//        reset_skip_tx_size(cm, TX_8X8);
+//      } else if (count8x8_8x8p == 0 && count16x16_16x16p == 0 &&
+//                 count8x8_lp == 0 && count16x16_lp == 0 && count32x32 == 0) {
+//        cm->tx_mode = ONLY_4X4;
+//        reset_skip_tx_size(cm, TX_4X4);
+//      } else if (count8x8_lp == 0 && count16x16_lp == 0 && count4x4 == 0) {
+//        cm->tx_mode = ALLOW_32X32;
+//      } else if (count32x32 == 0 && count8x8_lp == 0 && count4x4 == 0) {
+//        cm->tx_mode = ALLOW_16X16;
+//        reset_skip_tx_size(cm, TX_16X16);
+//      }
+//    }
   } else {
     cm->reference_mode = SINGLE_REFERENCE;
     encode_frame_internal(cpi);
@@ -4087,8 +4090,9 @@ static void encode_superblock(VP9_COMP *cpi, ThreadData *td,
     if (cm->tx_mode == TX_MODE_SELECT &&
         mbmi->sb_type >= BLOCK_8X8  &&
         !(is_inter_block(mbmi) && (mbmi->skip || seg_skip))) {
-      ++get_tx_counts(max_txsize_lookup[bsize], vp9_get_tx_size_context(xd),
-                      &td->counts->tx)[mbmi->tx_size];
+      if (!is_inter_block(mbmi))
+        ++get_tx_counts(max_txsize_lookup[bsize], vp9_get_tx_size_context(xd),
+                        &td->counts->tx)[mbmi->tx_size];
     } else {
       int x, y;
       TX_SIZE tx_size;

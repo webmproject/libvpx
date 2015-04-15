@@ -152,7 +152,7 @@ TEST(VP9WorkerThreadTest, TestInterfaceAPI) {
 // -----------------------------------------------------------------------------
 // Multi-threaded decode tests
 
-#if CONFIG_WEBM_IO
+#if CONFIG_WEBM_IO && 0
 struct FileList {
   const char *name;
   const char *expected_md5;

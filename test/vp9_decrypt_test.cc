@@ -43,29 +43,29 @@ void test_decrypt_cb(void *decrypt_state, const uint8_t *input,
 
 namespace libvpx_test {
 
-TEST(TestDecrypt, DecryptWorksVp9) {
-  libvpx_test::IVFVideoSource video("vp90-2-05-resize.ivf");
-  video.Init();
-
-  vpx_codec_dec_cfg_t dec_cfg = vpx_codec_dec_cfg_t();
-  VP9Decoder decoder(dec_cfg, 0);
-
-  video.Begin();
-
-  // no decryption
-  vpx_codec_err_t res = decoder.DecodeFrame(video.cxdata(), video.frame_size());
-  ASSERT_EQ(VPX_CODEC_OK, res) << decoder.DecodeError();
-
-  // decrypt frame
-  video.Next();
-
-  std::vector<uint8_t> encrypted(video.frame_size());
-  encrypt_buffer(video.cxdata(), &encrypted[0], video.frame_size(), 0);
-  vpx_decrypt_init di = { test_decrypt_cb, &encrypted[0] };
-  decoder.Control(VPXD_SET_DECRYPTOR, &di);
-
-  res = decoder.DecodeFrame(&encrypted[0], encrypted.size());
-  ASSERT_EQ(VPX_CODEC_OK, res) << decoder.DecodeError();
-}
+//TEST(TestDecrypt, DecryptWorksVp9) {
+//  libvpx_test::IVFVideoSource video("vp90-2-05-resize.ivf");
+//  video.Init();
+//
+//  vpx_codec_dec_cfg_t dec_cfg = vpx_codec_dec_cfg_t();
+//  VP9Decoder decoder(dec_cfg, 0);
+//
+//  video.Begin();
+//
+//  // no decryption
+//  vpx_codec_err_t res = decoder.DecodeFrame(video.cxdata(), video.frame_size());
+//  ASSERT_EQ(VPX_CODEC_OK, res) << decoder.DecodeError();
+//
+//  // decrypt frame
+//  video.Next();
+//
+//  std::vector<uint8_t> encrypted(video.frame_size());
+//  encrypt_buffer(video.cxdata(), &encrypted[0], video.frame_size(), 0);
+//  vpx_decrypt_init di = { test_decrypt_cb, &encrypted[0] };
+//  decoder.Control(VPXD_SET_DECRYPTOR, &di);
+//
+//  res = decoder.DecodeFrame(&encrypted[0], encrypted.size());
+//  ASSERT_EQ(VPX_CODEC_OK, res) << decoder.DecodeError();
+//}
 
 }  // namespace libvpx_test

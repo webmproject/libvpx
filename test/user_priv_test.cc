@@ -30,7 +30,7 @@ namespace {
 using std::string;
 using libvpx_test::ACMRandom;
 
-#if CONFIG_WEBM_IO
+#if CONFIG_WEBM_IO && 0
 
 void CheckUserPrivateData(void *user_priv, int *target) {
   // actual pointer value should be the same as expected.

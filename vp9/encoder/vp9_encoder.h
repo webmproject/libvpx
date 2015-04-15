@@ -417,6 +417,7 @@ typedef struct VP9_COMP {
 
   int b_calculate_ssimg;
 #endif
+  int dummy_writing;
   int b_calculate_psnr;
 
   int droppable;

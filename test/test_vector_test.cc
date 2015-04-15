@@ -145,28 +145,28 @@ VP8_INSTANTIATE_TEST_CASE(
                                 libvpx_test::kNumVP8TestVectors)));
 
 // Test VP9 decode in serial mode with single thread.
-VP9_INSTANTIATE_TEST_CASE(
-    TestVectorTest,
-    ::testing::Combine(
-        ::testing::Values(0),  // Serial Mode.
-        ::testing::Values(1),  // Single thread.
-        ::testing::ValuesIn(libvpx_test::kVP9TestVectors,
-                            libvpx_test::kVP9TestVectors +
-                                libvpx_test::kNumVP9TestVectors)));
+//VP9_INSTANTIATE_TEST_CASE(
+//    TestVectorTest,
+//    ::testing::Combine(
+//        ::testing::Values(0),  // Serial Mode.
+//        ::testing::Values(1),  // Single thread.
+//        ::testing::ValuesIn(libvpx_test::kVP9TestVectors,
+//                            libvpx_test::kVP9TestVectors +
+//                                libvpx_test::kNumVP9TestVectors)));
 
 
-#if CONFIG_VP9_DECODER
-// Test VP9 decode in frame parallel mode with different number of threads.
-INSTANTIATE_TEST_CASE_P(
-    VP9MultiThreadedFrameParallel, TestVectorTest,
-    ::testing::Combine(
-        ::testing::Values(
-            static_cast<const libvpx_test::CodecFactory *>(&libvpx_test::kVP9)),
-        ::testing::Combine(
-            ::testing::Values(1),        // Frame Parallel mode.
-            ::testing::Range(2, 9),      // With 2 ~ 8 threads.
-            ::testing::ValuesIn(libvpx_test::kVP9TestVectors,
-                                libvpx_test::kVP9TestVectors +
-                                    libvpx_test::kNumVP9TestVectors))));
-#endif
+//#if CONFIG_VP9_DECODER
+//// Test VP9 decode in frame parallel mode with different number of threads.
+//INSTANTIATE_TEST_CASE_P(
+//    VP9MultiThreadedFrameParallel, TestVectorTest,
+//    ::testing::Combine(
+//        ::testing::Values(
+//            static_cast<const libvpx_test::CodecFactory *>(&libvpx_test::kVP9)),
+//        ::testing::Combine(
+//            ::testing::Values(1),        // Frame Parallel mode.
+//            ::testing::Range(2, 9),      // With 2 ~ 8 threads.
+//            ::testing::ValuesIn(libvpx_test::kVP9TestVectors,
+//                                libvpx_test::kVP9TestVectors +
+//                                    libvpx_test::kNumVP9TestVectors))));
+//#endif
 }  // namespace

@@ -27,7 +27,7 @@ namespace {
 
 using std::string;
 
-#if CONFIG_WEBM_IO
+#if CONFIG_WEBM_IO && 0
 
 struct FileList {
   const char *name;

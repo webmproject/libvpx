@@ -76,6 +76,35 @@ static void prob_diff_update(const vp9_tree_index *tree,
     vp9_cond_prob_diff_update(w, &probs[i], branch_ct[i]);
 }
 
+static void write_tx_size_inter(const VP9_COMMON *cm, const MACROBLOCKD *xd,
+                                TX_SIZE tx_size, int mi_row, int mi_col,
+                                vp9_writer *w) {
+  MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
+
+  // TODO(jingning): this assumes support of the possible 64x64 transform.
+  if (tx_size == mbmi->tx_size) {
+    vp9_write_bit(w, 0);
+  } else {  // further split
+    BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
+    int bh = num_8x8_blocks_high_lookup[bsize];
+    int i;
+
+    vp9_write_bit(w, 1);
+
+    if (tx_size == TX_8X8)
+      return;
+
+    for (i = 0; i < 4; ++i) {
+      int offsetr = (i >> 1) * bh / 2;
+      int offsetc = (i & 0x01) * bh / 2;
+      if ((mi_row + offsetr < cm->mi_rows) &&
+          (mi_col + offsetc < cm->mi_cols))
+        write_tx_size_inter(cm, xd, tx_size - 1,
+                            mi_row + offsetr, mi_col + offsetc, w);
+    }
+  }
+}
+
 static void write_selected_tx_size(const VP9_COMMON *cm,
                                    const MACROBLOCKD *xd, vp9_writer *w) {
   TX_SIZE tx_size = xd->mi[0].src_mi->mbmi.tx_size;
@@ -235,6 +264,7 @@ static void write_ref_frames(const VP9_COMMON *cm, const MACROBLOCKD *xd,
 }
 
 static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
+                                int mi_row, int mi_col,
                                 vp9_writer *w) {
   VP9_COMMON *const cm = &cpi->common;
   const nmv_context *nmvc = &cm->fc->nmvc;
@@ -269,7 +299,19 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
 
   if (bsize >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT &&
       !(is_inter && skip)) {
-    write_selected_tx_size(cm, xd, w);
+    if (!is_inter) {
+      write_selected_tx_size(cm, xd, w);
+    } else {
+      int txb_size = txsize_to_bsize[max_txsize_lookup[bsize]];
+      int bh = num_8x8_blocks_wide_lookup[txb_size];
+      int width  = num_8x8_blocks_wide_lookup[bsize];
+      int height = num_8x8_blocks_high_lookup[bsize];
+      int idx, idy;
+      for (idy = 0; idy < height; idy += bh)
+        for (idx = 0; idx < width; idx += bh)
+          write_tx_size_inter(cm, xd, max_txsize_lookup[bsize],
+                              mi_row + idy, mi_col + idx, w);
+    }
   }
 
   if (!is_inter) {
@@ -391,7 +433,7 @@ static void write_modes_b(VP9_COMP *cpi, const TileInfo *const tile,
   if (frame_is_intra_only(cm)) {
     write_mb_modes_kf(cm, xd, xd->mi, w);
   } else {
-    pack_inter_mode_mvs(cpi, m, w);
+    pack_inter_mode_mvs(cpi, m, mi_row, mi_col, w);
   }
 
   assert(*tok < tok_end);
