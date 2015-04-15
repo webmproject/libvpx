@@ -2821,6 +2821,9 @@ static MV_REFERENCE_FRAME get_frame_type(const VP9_COMP *cpi) {
 static TX_MODE select_tx_mode(const VP9_COMP *cpi, MACROBLOCKD *const xd) {
   if (xd->lossless)
     return ONLY_4X4;
+
+  return TX_MODE_SELECT;
+
   if (cpi->common.frame_type == KEY_FRAME &&
       cpi->sf.use_nonrd_pick_mode &&
       cpi->sf.partition_search_type == VAR_BASED_PARTITION)
@@ -4087,8 +4090,9 @@ static void encode_superblock(VP9_COMP *cpi, ThreadData *td,
     if (cm->tx_mode == TX_MODE_SELECT &&
         mbmi->sb_type >= BLOCK_8X8  &&
         !(is_inter_block(mbmi) && (mbmi->skip || seg_skip))) {
-      ++get_tx_counts(max_txsize_lookup[bsize], vp9_get_tx_size_context(xd),
-                      &td->counts->tx)[mbmi->tx_size];
+      if (!is_inter_block(mbmi))
+        ++get_tx_counts(max_txsize_lookup[bsize], vp9_get_tx_size_context(xd),
+                        &td->counts->tx)[mbmi->tx_size];
     } else {
       int x, y;
       TX_SIZE tx_size;
