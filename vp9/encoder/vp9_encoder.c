@@ -692,9 +692,14 @@ static void set_tile_limits(VP9_COMP *cpi) {
   int min_log2_tile_cols, max_log2_tile_cols;
   vp9_get_tile_n_bits(cm->mi_cols, &min_log2_tile_cols, &max_log2_tile_cols);
 
-  cm->log2_tile_cols = clamp(cpi->oxcf.tile_columns,
-                             min_log2_tile_cols, max_log2_tile_cols);
-  cm->log2_tile_rows = cpi->oxcf.tile_rows;
+  if (is_two_pass_svc(cpi) && cpi->svc.encode_empty_frame_state == ENCODING) {
+    cm->log2_tile_cols = 0;
+    cm->log2_tile_rows = 0;
+  } else {
+    cm->log2_tile_cols = clamp(cpi->oxcf.tile_columns,
+                               min_log2_tile_cols, max_log2_tile_cols);
+    cm->log2_tile_rows = cpi->oxcf.tile_rows;
+  }
 }
 
 static void init_buffer_indices(VP9_COMP *cpi) {

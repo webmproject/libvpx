@@ -63,6 +63,9 @@ class SvcTest : public ::testing::Test {
     vpx_codec_dec_cfg_t dec_cfg = vpx_codec_dec_cfg_t();
     VP9CodecFactory codec_factory;
     decoder_ = codec_factory.CreateDecoder(dec_cfg, 0);
+
+    tile_columns_ = 0;
+    tile_rows_ = 0;
   }
 
   virtual void TearDown() {
@@ -75,6 +78,8 @@ class SvcTest : public ::testing::Test {
         vpx_svc_init(&svc_, &codec_, vpx_codec_vp9_cx(), &codec_enc_);
     EXPECT_EQ(VPX_CODEC_OK, res);
     vpx_codec_control(&codec_, VP8E_SET_CPUUSED, 4);  // Make the test faster
+    vpx_codec_control(&codec_, VP9E_SET_TILE_COLUMNS, tile_columns_);
+    vpx_codec_control(&codec_, VP9E_SET_TILE_ROWS, tile_rows_);
     codec_initialized_ = true;
   }
 
@@ -108,7 +113,8 @@ class SvcTest : public ::testing::Test {
     codec_enc_.g_pass = VPX_RC_FIRST_PASS;
     InitializeEncoder();
 
-    libvpx_test::I420VideoSource video(test_file_name_, kWidth, kHeight,
+    libvpx_test::I420VideoSource video(test_file_name_,
+                                       codec_enc_.g_w, codec_enc_.g_h,
                                        codec_enc_.g_timebase.den,
                                        codec_enc_.g_timebase.num, 0, 30);
     video.Begin();
@@ -176,7 +182,8 @@ class SvcTest : public ::testing::Test {
     }
     InitializeEncoder();
 
-    libvpx_test::I420VideoSource video(test_file_name_, kWidth, kHeight,
+    libvpx_test::I420VideoSource video(test_file_name_,
+                                       codec_enc_.g_w, codec_enc_.g_h,
                                        codec_enc_.g_timebase.den,
                                        codec_enc_.g_timebase.num, 0, 30);
     video.Begin();
@@ -310,6 +317,8 @@ class SvcTest : public ::testing::Test {
   std::string test_file_name_;
   bool codec_initialized_;
   Decoder *decoder_;
+  int tile_columns_;
+  int tile_rows_;
 };
 
 TEST_F(SvcTest, SvcInit) {
@@ -734,6 +743,53 @@ TEST_F(SvcTest,
     base_layer[i] = outputs[i * 2];
 
   DecodeNFrames(&base_layer[0], 5);
+  FreeBitstreamBuffers(&outputs[0], 10);
+}
+
+TEST_F(SvcTest, TwoPassEncode2TemporalLayersWithTiles) {
+  // First pass encode
+  std::string stats_buf;
+  vpx_svc_set_options(&svc_, "scale-factors=1/1");
+  svc_.temporal_layers = 2;
+  Pass1EncodeNFrames(10, 1, &stats_buf);
+
+  // Second pass encode
+  codec_enc_.g_pass = VPX_RC_LAST_PASS;
+  svc_.temporal_layers = 2;
+  vpx_svc_set_options(&svc_, "auto-alt-refs=1 scale-factors=1/1");
+  codec_enc_.g_w = 704;
+  codec_enc_.g_h = 144;
+  tile_columns_ = 1;
+  tile_rows_ = 1;
+  vpx_fixed_buf outputs[10];
+  memset(&outputs[0], 0, sizeof(outputs));
+  Pass2EncodeNFrames(&stats_buf, 10, 1, &outputs[0]);
+  DecodeNFrames(&outputs[0], 10);
+  FreeBitstreamBuffers(&outputs[0], 10);
+}
+
+TEST_F(SvcTest,
+       TwoPassEncode2TemporalLayersWithMultipleFrameContextsAndTiles) {
+  // First pass encode
+  std::string stats_buf;
+  vpx_svc_set_options(&svc_, "scale-factors=1/1");
+  svc_.temporal_layers = 2;
+  Pass1EncodeNFrames(10, 1, &stats_buf);
+
+  // Second pass encode
+  codec_enc_.g_pass = VPX_RC_LAST_PASS;
+  svc_.temporal_layers = 2;
+  codec_enc_.g_error_resilient = 0;
+  codec_enc_.g_w = 704;
+  codec_enc_.g_h = 144;
+  tile_columns_ = 1;
+  tile_rows_ = 1;
+  vpx_svc_set_options(&svc_, "auto-alt-refs=1 scale-factors=1/1 "
+                      "multi-frame-contexts=1");
+  vpx_fixed_buf outputs[10];
+  memset(&outputs[0], 0, sizeof(outputs));
+  Pass2EncodeNFrames(&stats_buf, 10, 1, &outputs[0]);
+  DecodeNFrames(&outputs[0], 10);
   FreeBitstreamBuffers(&outputs[0], 10);
 }
 
