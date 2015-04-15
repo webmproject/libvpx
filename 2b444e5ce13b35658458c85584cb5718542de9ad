@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//AcY\u003d",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2015-04-15T13:22:02Z",
+      "side": 1,
+      "message": "not sure if it will help but  this can be expanded in line to avoid the double if statement..  \n\ninside we adjust range and start val differently depending on whether we get a 0 or 1.   so by pulling the code out we can avoid one more if statement for each vp9_read.",
+      "revId": "2b444e5ce13b35658458c85584cb5718542de9ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
