@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//Aek\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1003209
+      },
+      "writtenOn": "2015-04-15T03:10:51Z",
+      "side": 1,
+      "message": "Ok. I will take care in future patches.",
+      "parentUuid": "AAAAdn//Afo\u003d",
+      "revId": "1e385bf0c50300e7c165c02bddfafc133c5028db",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Afk\u003d",
         "filename": "build/make/rtcd.pl",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-04-14T23:27:57Z",
       "side": 1,
       "message": "I don\u0027t think this is necessary, given HAVE_MSA is set; I\u0027m also not sure --require-* is used meaningfully by configure at this point. was something breaking without this?",
+      "revId": "1e385bf0c50300e7c165c02bddfafc133c5028db",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Aeo\u003d",
+        "filename": "build/make/rtcd.pl",
+        "patchSetId": 1
+      },
+      "lineNbr": 381,
+      "author": {
+        "id": 1003209
+      },
+      "writtenOn": "2015-04-15T03:10:51Z",
+      "side": 1,
+      "message": "1. with CONFIG_RUNTIME_CPU_DETECT\u003d0 (no --enable-runtime-cpu-detect option)  HAVE_MSA is sufficient.\n2. with CONFIG_RUNTIME_CPU_DETECT\u003d1 (--enable-runtime-cpu-detect option) and no --require-*, $${fn}_indirect\u003dtrue is set in determine_indirection function (rtcd.pl file) which in turn sets RTCD_EXTERN rtype in vp9_rtcd.pl (line 163 rtcd.pl). To set direct function pointer defines to msa functions --require-* is added.",
+      "parentUuid": "AAAAdn//Afk\u003d",
       "revId": "1e385bf0c50300e7c165c02bddfafc133c5028db",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
