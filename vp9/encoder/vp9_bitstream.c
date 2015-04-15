@@ -1531,7 +1531,7 @@ static void encode_loopfilter(VP9_COMMON *cm,
   if (lf->bilateral_level > 0)
     vp9_wb_write_literal(wb, lf->bilateral_level - 1,
                          vp9_bilateral_level_bits(cm));
-#endif
+#endif  // CONFIG_LOOP_POSTFILTER
 }
 
 static void write_delta_q(struct vp9_write_bit_buffer *wb, int delta_q) {

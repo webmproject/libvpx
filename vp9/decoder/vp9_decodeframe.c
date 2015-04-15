@@ -1584,7 +1584,7 @@ static void setup_loopfilter(VP9_COMMON *cm,
     lf->bilateral_level += vp9_rb_read_literal(
         rb, vp9_bilateral_level_bits(cm));
   }
-#endif
+#endif  // CONFIG_LOOP_POSTFILTER
 }
 
 static int read_delta_q(struct vp9_read_bit_buffer *rb, int *delta_q) {

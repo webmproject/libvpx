@@ -246,11 +246,11 @@ int vp9_loop_bilateral_used(int level, int kf) {
 }
 
 void vp9_loop_bilateral_init(loop_filter_info_n *lfi, int level, int kf) {
-  if (level != lfi->bilateral_level_set ||
-      kf != lfi->bilateral_kf_set) {
-    lfi->bilateral_used = vp9_loop_bilateral_used(level, kf);
-    if (lfi->bilateral_used) {
-      const bilateral_params_t param = vp9_bilateral_level_to_params(level, kf);
+  const bilateral_params_t param = vp9_bilateral_level_to_params(level, kf);
+  lfi->bilateral_used = vp9_loop_bilateral_used(level, kf);
+  if (lfi->bilateral_used) {
+    if (param.sigma_x != lfi->bilateral_sigma_x_set ||
+        param.sigma_r != lfi->bilateral_sigma_r_set) {
       const int sigma_x = param.sigma_x;
       const int sigma_r = param.sigma_r;
       const double sigma_r_d = (double)sigma_r / BILATERAL_PRECISION;
@@ -267,9 +267,9 @@ void vp9_loop_bilateral_init(loop_filter_info_n *lfi, int level, int kf) {
           wx_lut_[y * BILATERAL_WIN + x] =
               exp(-(x * x + y * y) / (2 * sigma_x_d * sigma_x_d));
         }
+      lfi->bilateral_sigma_x_set = sigma_x;
+      lfi->bilateral_sigma_r_set = sigma_r;
     }
-    lfi->bilateral_level_set = level;
-    lfi->bilateral_kf_set = kf;
   }
 }
 
@@ -1855,15 +1855,14 @@ void vp9_loop_filter_frame(YV12_BUFFER_CONFIG *frame,
 }
 
 #if CONFIG_LOOP_POSTFILTER
-void vp9_loop_filter_gen_frame(YV12_BUFFER_CONFIG *frame,
-                               VP9_COMMON *cm, MACROBLOCKD *xd,
-                               int frame_filter_level,
-                               int bilateral_level,
-                               int y_only, int partial_frame) {
+void vp9_loop_bilateral_frame(YV12_BUFFER_CONFIG *frame,
+                              VP9_COMMON *cm,
+                              int bilateral_level,
+                              int y_only, int partial_frame) {
   int start_mi_row, end_mi_row, mi_rows_to_filter;
   const int loop_bilateral_used = vp9_loop_bilateral_used(
       bilateral_level, cm->frame_type == KEY_FRAME);
-  if (!frame_filter_level && !loop_bilateral_used)
+  if (!loop_bilateral_used)
     return;
   start_mi_row = 0;
   mi_rows_to_filter = cm->mi_rows;
@@ -1873,12 +1872,6 @@ void vp9_loop_filter_gen_frame(YV12_BUFFER_CONFIG *frame,
     mi_rows_to_filter = MAX(cm->mi_rows / 8, 8);
   }
   end_mi_row = start_mi_row + mi_rows_to_filter;
-  if (frame_filter_level) {
-    vp9_loop_filter_frame_init(cm, frame_filter_level);
-    vp9_loop_filter_rows(frame, cm, xd->plane,
-                         start_mi_row, end_mi_row,
-                         y_only);
-  }
   if (loop_bilateral_used) {
     vp9_loop_bilateral_init(&cm->lf_info, bilateral_level,
                             cm->frame_type == KEY_FRAME);
