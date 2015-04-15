@@ -1125,7 +1125,6 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 #endif
 
   if (cpi->rc.frames_since_golden == 0) {
-    cpi->ref_frame_flags &= (~VP9_GOLD_FLAG);
     usable_ref_frame = LAST_FRAME;
   } else {
     usable_ref_frame = GOLDEN_FRAME;

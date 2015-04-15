@@ -458,8 +458,7 @@ static int set_vt_partitioning(VP9_COMP *cpi,
   return 0;
 }
 
-
-void vp9_set_vbp_thresholds(VP9_COMP *cpi, int64_t thresholds[], int q) {
+void vp9_set_vbp_thresholds(VP9_COMP *cpi, int q) {
   SPEED_FEATURES *const sf = &cpi->sf;
   if (sf->partition_search_type != VAR_BASED_PARTITION &&
       sf->partition_search_type != REFERENCE_PARTITION) {
@@ -480,22 +479,38 @@ void vp9_set_vbp_thresholds(VP9_COMP *cpi, int64_t thresholds[], int q) {
     // Array index: 0 - threshold_64x64; 1 - threshold_32x32;
     // 2 - threshold_16x16; 3 - vbp_threshold_8x8;
     if (is_key_frame) {
-      thresholds[0] = threshold_base;
-      thresholds[1] = threshold_base >> 2;
-      thresholds[2] = threshold_base >> 2;
-      thresholds[3] = threshold_base << 2;
+      cpi->vbp_thresholds[0] = threshold_base;
+      cpi->vbp_thresholds[1] = threshold_base >> 2;
+      cpi->vbp_thresholds[2] = threshold_base >> 2;
+      cpi->vbp_thresholds[3] = threshold_base << 2;
       cpi->vbp_bsize_min = BLOCK_8X8;
     } else {
-      thresholds[1] = threshold_base;
+      cpi->vbp_thresholds[1] = threshold_base;
       if (cm->width <= 352 && cm->height <= 288) {
-        thresholds[0] = threshold_base >> 2;
-        thresholds[2] = threshold_base << 3;
+        cpi->vbp_thresholds[0] = threshold_base >> 2;
+        cpi->vbp_thresholds[2] = threshold_base << 3;
       } else {
-        thresholds[0] = threshold_base;
-        thresholds[2] = threshold_base << cpi->oxcf.speed;
+        cpi->vbp_thresholds[0] = threshold_base;
+        cpi->vbp_thresholds[2] = threshold_base << cpi->oxcf.speed;
       }
       cpi->vbp_bsize_min = BLOCK_16X16;
     }
+  }
+}
+
+static void modify_vbp_thresholds(VP9_COMP *cpi, int64_t thresholds[], int q) {
+  VP9_COMMON *const cm = &cpi->common;
+  const int64_t threshold_base = (int64_t)(cpi->y_dequant[q][1]);
+
+  // Array index: 0 - threshold_64x64; 1 - threshold_32x32;
+  // 2 - threshold_16x16; 3 - vbp_threshold_8x8;
+  thresholds[1] = threshold_base;
+  if (cm->width <= 352 && cm->height <= 288) {
+    thresholds[0] = threshold_base >> 2;
+    thresholds[2] = threshold_base << 3;
+  } else {
+    thresholds[0] = threshold_base;
+    thresholds[2] = threshold_base << cpi->oxcf.speed;
   }
 }
 
@@ -611,7 +626,7 @@ static void choose_partitioning(VP9_COMP *cpi,
 
     if (cyclic_refresh_segment_id_boosted(segment_id)) {
       int q = vp9_get_qindex(&cm->seg, segment_id, cm->base_qindex);
-      vp9_set_vbp_thresholds(cpi, thresholds, q);
+      modify_vbp_thresholds(cpi, thresholds, q);
     }
   }
 
@@ -3853,6 +3868,9 @@ static void encode_frame_internal(VP9_COMP *cpi) {
       p[i].eobs = ctx->eobs_pbuf[i][0];
     }
     vp9_zero(x->zcoeff_blk);
+
+    if (cm->frame_type != KEY_FRAME && cpi->rc.frames_since_golden == 0)
+      cpi->ref_frame_flags &= (~VP9_GOLD_FLAG);
 
     if (sf->partition_search_type == SOURCE_VAR_BASED_PARTITION)
       source_var_based_partition_search_method(cpi);
