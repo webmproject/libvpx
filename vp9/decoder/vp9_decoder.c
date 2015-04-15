@@ -12,6 +12,7 @@
 #include <limits.h>
 #include <stdio.h>
 
+#include "./vp9_rtcd.h"
 #include "./vpx_scale_rtcd.h"
 
 #include "vpx_mem/vpx_mem.h"
@@ -39,6 +40,7 @@ static void initialize_dec(void) {
 
   if (!init_done) {
     vp9_rtcd();
+    vpx_scale_rtcd();
     vp9_init_intra_predictors();
     init_done = 1;
   }

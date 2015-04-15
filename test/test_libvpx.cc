@@ -14,11 +14,12 @@
 #endif
 extern "C" {
 #if CONFIG_VP8
-extern void vp8_rtcd();
-#endif
+#include "./vp8_rtcd.h"
+#endif  // CONFIG_VP8
 #if CONFIG_VP9
-extern void vp9_rtcd();
-#endif
+#include "./vp9_rtcd.h"
+#endif  // CONFIG_VP9
+#include "./vpx_scale_rtcd.h"
 }
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
@@ -59,11 +60,12 @@ int main(int argc, char **argv) {
 
 #if CONFIG_VP8
   vp8_rtcd();
-#endif
+#endif  // CONFIG_VP8
 #if CONFIG_VP9
   vp9_rtcd();
-#endif
-#endif
+#endif  // CONFIG_VP9
+  vpx_scale_rtcd();
+#endif  // !CONFIG_SHARED
 
   return RUN_ALL_TESTS();
 }
