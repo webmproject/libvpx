@@ -141,6 +141,24 @@
       "revId": "1e385bf0c50300e7c165c02bddfafc133c5028db",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Ad0\u003d",
+        "filename": "build/make/rtcd.pl",
+        "patchSetId": 1
+      },
+      "lineNbr": 381,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-04-15T05:36:04Z",
+      "side": 1,
+      "message": "runtime-cpu-detect is meant to optionally enable the assembly at runtime based on the cpu. in this case you\u0027re setting flags that will affect general c-code, so I\u0027d think you\u0027d want to disable runtime-cpu-detect in that case.",
+      "parentUuid": "AAAAdn//Aeo\u003d",
+      "revId": "1e385bf0c50300e7c165c02bddfafc133c5028db",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
