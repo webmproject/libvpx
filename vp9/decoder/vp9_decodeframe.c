@@ -1509,7 +1509,7 @@ static int read_compressed_header(VP9Decoder *pbi, const uint8_t *data,
   if (vp9_reader_init(&r, data, partition_size, pbi->decrypt_cb,
                       pbi->decrypt_state))
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
-                       "Failed to allocate bool decoder 0");
+                       "Failed to allocate boon decoder 0");
 
   cm->tx_mode = xd->lossless ? ONLY_4X4 : read_tx_mode(&r);
   if (cm->tx_mode == TX_MODE_SELECT)

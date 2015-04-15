@@ -416,6 +416,7 @@ typedef struct VP9_COMP {
   double total_ssimg_all;
 
   int b_calculate_ssimg;
+  int dummy_writing;
 #endif
   int b_calculate_psnr;
 
