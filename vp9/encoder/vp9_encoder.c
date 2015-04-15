@@ -13,6 +13,7 @@
 #include <limits.h>
 
 #include "./vpx_config.h"
+#include "./vp9_rtcd.h"
 #include "./vpx_scale_rtcd.h"
 #include "vpx/internal/vpx_psnr.h"
 #include "vpx_ports/vpx_timer.h"
@@ -293,6 +294,7 @@ void vp9_initialize_enc(void) {
 
   if (!init_done) {
     vp9_rtcd();
+    vpx_scale_rtcd();
     vp9_init_intra_predictors();
     vp9_init_me_luts();
     vp9_rc_init_minq_luts();
