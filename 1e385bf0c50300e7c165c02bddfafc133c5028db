@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//AeM\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1003209
+      },
+      "writtenOn": "2015-04-15T04:32:35Z",
+      "side": 1,
+      "message": "ok. I will modify the existing message",
+      "parentUuid": "AAAAdn//Aec\u003d",
+      "revId": "1e385bf0c50300e7c165c02bddfafc133c5028db",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Afk\u003d",
         "filename": "build/make/rtcd.pl",
         "patchSetId": 1
@@ -102,6 +120,24 @@
       "side": 1,
       "message": "was a specialization for the function added in vp9_rtcd.pl?  let me take a closer look, I wonder why dspr2 doesn\u0027t have this.",
       "parentUuid": "AAAAdn//Aeo\u003d",
+      "revId": "1e385bf0c50300e7c165c02bddfafc133c5028db",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//AeQ\u003d",
+        "filename": "build/make/rtcd.pl",
+        "patchSetId": 1
+      },
+      "lineNbr": 381,
+      "author": {
+        "id": 1003209
+      },
+      "writtenOn": "2015-04-15T04:32:35Z",
+      "side": 1,
+      "message": "for dspr2 no specific cpus are added so no need for --enable-runtime-cpu-detect option. For msa, we have added specific cpus.",
+      "parentUuid": "AAAAdn//AeY\u003d",
       "revId": "1e385bf0c50300e7c165c02bddfafc133c5028db",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
