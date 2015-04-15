@@ -159,6 +159,24 @@
       "revId": "1e385bf0c50300e7c165c02bddfafc133c5028db",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//Adc\u003d",
+        "filename": "build/make/rtcd.pl",
+        "patchSetId": 1
+      },
+      "lineNbr": 381,
+      "author": {
+        "id": 1003209
+      },
+      "writtenOn": "2015-04-15T06:24:12Z",
+      "side": 1,
+      "message": "Yes. runtime-cpu-detect is not required in msa. I will update configure.sh to disable runtime-cpu-detect feature if found enabled.",
+      "parentUuid": "AAAAdn//Ad0\u003d",
+      "revId": "1e385bf0c50300e7c165c02bddfafc133c5028db",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
