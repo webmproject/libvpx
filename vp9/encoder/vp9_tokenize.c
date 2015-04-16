@@ -613,7 +613,6 @@ void vp9_tokenize_sb(VP9_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
   MACROBLOCK *const x = &td->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0].src_mi->mbmi;
-  TOKENEXTRA *t_backup = *t;
   const int ctx = vp9_get_skip_context(xd);
   const int skip_inc = !vp9_segfeature_active(&cm->seg, mbmi->segment_id,
                                               SEG_LVL_SKIP);
@@ -622,8 +621,6 @@ void vp9_tokenize_sb(VP9_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
     if (!dry_run)
       td->counts->skip[ctx][1] += skip_inc;
     reset_skip_context(xd, bsize);
-    if (dry_run)
-      *t = t_backup;
     return;
   }
 
@@ -632,6 +629,5 @@ void vp9_tokenize_sb(VP9_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
     vp9_foreach_transformed_block(xd, bsize, tokenize_b, &arg);
   } else {
     vp9_foreach_transformed_block(xd, bsize, set_entropy_context_b, &arg);
-    *t = t_backup;
   }
 }
