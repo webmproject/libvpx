@@ -158,8 +158,6 @@ LOCAL_CFLAGS += \
 
 LOCAL_MODULE := libvpx
 
-LOCAL_LDLIBS := -llog
-
 ifeq ($(CONFIG_RUNTIME_CPU_DETECT),yes)
   LOCAL_STATIC_LIBRARIES := cpufeatures
 endif
