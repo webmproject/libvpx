@@ -322,84 +322,16 @@ void xvpx_free(void *p_address, char *file, int line) {
 
 #endif /*CONFIG_MEM_TRACKER*/
 
-#if CONFIG_MEM_CHECKS
-#if defined(VXWORKS)
-#include <task_lib.h> /*for task_delay()*/
-/* This function is only used to get a stack trace of the player
-object so we can se where we are having a problem. */
-static int get_my_tt(int task) {
-  tt(task);
-
-  return 0;
-}
-
-static void vx_sleep(int msec) {
-  int ticks_to_sleep = 0;
-
-  if (msec) {
-    int msec_per_tick = 1000 / sys_clk_rate_get();
-
-    if (msec < msec_per_tick)
-      ticks_to_sleep++;
-    else
-      ticks_to_sleep = msec / msec_per_tick;
-  }
-
-  task_delay(ticks_to_sleep);
-}
-#endif
-#endif
-
 void *vpx_memcpy(void *dest, const void *source, size_t length) {
-#if CONFIG_MEM_CHECKS
-
-  if (((int)dest < 0x4000) || ((int)source < 0x4000)) {
-    _P(printf("WARNING: vpx_memcpy dest:0x%x source:0x%x len:%d\n", (int)dest, (int)source, length);)
-
-#if defined(VXWORKS)
-    sp(get_my_tt, task_id_self(), 0, 0, 0, 0, 0, 0, 0, 0);
-
-    vx_sleep(10000);
-#endif
-  }
-
-#endif
-
   return VPX_MEMCPY_L(dest, source, length);
 }
 
 void *vpx_memset(void *dest, int val, size_t length) {
-#if CONFIG_MEM_CHECKS
-
-  if ((int)dest < 0x4000) {
-    _P(printf("WARNING: vpx_memset dest:0x%x val:%d len:%d\n", (int)dest, val, length);)
-
-#if defined(VXWORKS)
-    sp(get_my_tt, task_id_self(), 0, 0, 0, 0, 0, 0, 0, 0);
-
-    vx_sleep(10000);
-#endif
-  }
-
-#endif
-
   return VPX_MEMSET_L(dest, val, length);
 }
 
 #if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
 void *vpx_memset16(void *dest, int val, size_t length) {
-#if CONFIG_MEM_CHECKS
-  if ((int)dest < 0x4000) {
-    _P(printf("WARNING: vpx_memset dest:0x%x val:%d len:%d\n",
-              (int)dest, val, length);)
-
-#if defined(VXWORKS)
-    sp(get_my_tt, task_id_self(), 0, 0, 0, 0, 0, 0, 0, 0);
-
-    vx_sleep(10000);
-#endif
-  }
-#endif
   int i;
   void *orig = dest;
   uint16_t *dest16 = dest;
@@ -410,20 +342,6 @@ void *vpx_memset16(void *dest, int val, size_t length) {
 #endif  // CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
 
 void *vpx_memmove(void *dest, const void *src, size_t count) {
-#if CONFIG_MEM_CHECKS
-
-  if (((int)dest < 0x4000) || ((int)src < 0x4000)) {
-    _P(printf("WARNING: vpx_memmove dest:0x%x src:0x%x count:%d\n", (int)dest, (int)src, count);)
-
-#if defined(VXWORKS)
-    sp(get_my_tt, task_id_self(), 0, 0, 0, 0, 0, 0, 0, 0);
-
-    vx_sleep(10000);
-#endif
-  }
-
-#endif
-
   return VPX_MEMMOVE_L(dest, src, count);
 }
 

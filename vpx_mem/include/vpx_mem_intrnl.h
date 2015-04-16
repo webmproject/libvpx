@@ -17,11 +17,6 @@
 # define CONFIG_MEM_TRACKER     1 /*include xvpx_* calls in the lib*/
 #endif
 
-#ifndef CONFIG_MEM_CHECKS
-# define CONFIG_MEM_CHECKS      0 /*include some basic safety checks in
-vpx_memcpy, _memset, and _memmove*/
-#endif
-
 #ifndef USE_GLOBAL_FUNCTION_POINTERS
 # define USE_GLOBAL_FUNCTION_POINTERS   0  /*use function pointers instead of compiled functions.*/
 #endif
