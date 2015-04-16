@@ -1814,4 +1814,27 @@ INSTANTIATE_TEST_CASE_P(DSPR2, ConvolveTest, ::testing::Values(
     make_tuple(32, 64, &convolve8_dspr2),
     make_tuple(64, 64, &convolve8_dspr2)));
 #endif
+
+#if HAVE_MSA
+const ConvolveFunctions convolve8_msa(
+    vp9_convolve_copy_c, vp9_convolve_avg_c,
+    vp9_convolve8_horiz_c, vp9_convolve8_avg_horiz_c,
+    vp9_convolve8_vert_msa, vp9_convolve8_avg_vert_c,
+    vp9_convolve8_c, vp9_convolve8_avg_c, 0);
+
+INSTANTIATE_TEST_CASE_P(MSA, ConvolveTest, ::testing::Values(
+    make_tuple(4, 4, &convolve8_msa),
+    make_tuple(8, 4, &convolve8_msa),
+    make_tuple(4, 8, &convolve8_msa),
+    make_tuple(8, 8, &convolve8_msa),
+    make_tuple(16, 8, &convolve8_msa),
+    make_tuple(8, 16, &convolve8_msa),
+    make_tuple(16, 16, &convolve8_msa),
+    make_tuple(32, 16, &convolve8_msa),
+    make_tuple(16, 32, &convolve8_msa),
+    make_tuple(32, 32, &convolve8_msa),
+    make_tuple(64, 32, &convolve8_msa),
+    make_tuple(32, 64, &convolve8_msa),
+    make_tuple(64, 64, &convolve8_msa)));
+#endif  // HAVE_MSA
 }  // namespace
