@@ -40,7 +40,6 @@ Advanced options:
   ${toggle_vp8}                   VP8 codec support
   ${toggle_vp9}                   VP9 codec support
   ${toggle_internal_stats}        output of encoder internal stats for debug, if supported (encoders)
-  ${toggle_mem_tracker}           track memory usage
   ${toggle_postproc}              postprocessing
   ${toggle_vp9_postproc}          vp9 specific postprocessing
   ${toggle_multithread}           multithreaded encoding and decoding
@@ -296,7 +295,6 @@ CONFIG_LIST="
     codec_srcs
     debug_libs
     fast_unaligned
-    mem_tracker
 
     dequant_tokens
     dc_recon
@@ -371,7 +369,6 @@ CMDLINE_SELECT="
     ${CODECS}
     ${CODEC_FAMILIES}
     static_msvcrt
-    mem_tracker
     spatial_resampling
     realtime_only
     onthefly_bitpacking

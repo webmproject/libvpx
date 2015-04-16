@@ -18,15 +18,6 @@
 #include "include/vpx_mem_intrnl.h"
 #include "vpx/vpx_integer.h"
 
-#if CONFIG_MEM_TRACKER
-#ifndef VPX_NO_GLOBALS
-static unsigned long g_alloc_count = 0;
-#else
-#include "vpx_global_handling.h"
-#define g_alloc_count vpxglobalm(vpxmem,g_alloc_count)
-#endif
-#endif
-
 #if USE_GLOBAL_FUNCTION_POINTERS
 struct GLOBAL_FUNC_POINTERS {
   g_malloc_func g_malloc;
@@ -134,194 +125,6 @@ void vpx_free(void *memblk) {
   }
 }
 
-#if CONFIG_MEM_TRACKER
-void *xvpx_memalign(size_t align, size_t size, char *file, int line) {
-#if TRY_BOUNDS_CHECK
-  unsigned char *x_bounds;
-#endif
-
-  void *x;
-
-  if (g_alloc_count == 0) {
-#if TRY_BOUNDS_CHECK
-    int i_rv = vpx_memory_tracker_init(BOUNDS_CHECK_PAD_SIZE, BOUNDS_CHECK_VALUE);
-#else
-    int i_rv = vpx_memory_tracker_init(0, 0);
-#endif
-
-    if (i_rv < 0) {
-      _P(printf("ERROR xvpx_malloc MEM_TRACK_USAGE error vpx_memory_tracker_init().\n");)
-    }
-  }
-
-#if TRY_BOUNDS_CHECK
-  {
-    int i;
-    unsigned int tempme = BOUNDS_CHECK_VALUE;
-
-    x_bounds = vpx_memalign(align, size + (BOUNDS_CHECK_PAD_SIZE * 2));
-
-    if (x_bounds) {
-      /*we're aligning the address twice here but to keep things
-        consistent we want to have the padding come before the stored
-        address so no matter what free function gets called we will
-        attempt to free the correct address*/
-      x_bounds = (unsigned char *)(((size_t *)x_bounds)[-1]);
-      x = align_addr(x_bounds + BOUNDS_CHECK_PAD_SIZE + ADDRESS_STORAGE_SIZE,
-                     (int)align);
-      /* save the actual malloc address */
-      ((size_t *)x)[-1] = (size_t)x_bounds;
-
-      for (i = 0; i < BOUNDS_CHECK_PAD_SIZE; i += sizeof(unsigned int)) {
-        VPX_MEMCPY_L(x_bounds + i, &tempme, sizeof(unsigned int));
-        VPX_MEMCPY_L((unsigned char *)x + size + i,
-                     &tempme, sizeof(unsigned int));
-      }
-    } else
-      x = NULL;
-  }
-#else
-  x = vpx_memalign(align, size);
-#endif /*TRY_BOUNDS_CHECK*/
-
-  g_alloc_count++;
-
-  vpx_memory_tracker_add((size_t)x, (unsigned int)size, file, line, 1);
-
-  return x;
-}
-
-void *xvpx_malloc(size_t size, char *file, int line) {
-  return xvpx_memalign(DEFAULT_ALIGNMENT, size, file, line);
-}
-
-void *xvpx_calloc(size_t num, size_t size, char *file, int line) {
-  void *x = xvpx_memalign(DEFAULT_ALIGNMENT, num * size, file, line);
-
-  if (x)
-    VPX_MEMSET_L(x, 0, num * size);
-
-  return x;
-}
-
-void *xvpx_realloc(void *memblk, size_t size, char *file, int line) {
-  struct mem_block *p = NULL;
-  int orig_size = 0,
-      orig_line = 0;
-  char *orig_file = NULL;
-
-#if TRY_BOUNDS_CHECK
-  unsigned char *x_bounds = memblk ?
-                            (unsigned char *)(((size_t *)memblk)[-1]) :
-                            NULL;
-#endif
-
-  void *x;
-
-  if (g_alloc_count == 0) {
-#if TRY_BOUNDS_CHECK
-
-    if (!vpx_memory_tracker_init(BOUNDS_CHECK_PAD_SIZE, BOUNDS_CHECK_VALUE))
-#else
-    if (!vpx_memory_tracker_init(0, 0))
-#endif
-    {
-      _P(printf("ERROR xvpx_malloc MEM_TRACK_USAGE error vpx_memory_tracker_init().\n");)
-    }
-  }
-
-  if ((p = vpx_memory_tracker_find((size_t)memblk))) {
-    orig_size = p->size;
-    orig_file = p->file;
-    orig_line = p->line;
-  }
-
-#if TRY_BOUNDS_CHECK_ON_FREE
-  vpx_memory_tracker_check_integrity(file, line);
-#endif
-
-  /* have to do this regardless of success, because
-   * the memory that does get realloc'd may change
-   * the bounds values of this block
-   */
-  vpx_memory_tracker_remove((size_t)memblk);
-
-#if TRY_BOUNDS_CHECK
-  {
-    int i;
-    unsigned int tempme = BOUNDS_CHECK_VALUE;
-
-    x_bounds = vpx_realloc(memblk, size + (BOUNDS_CHECK_PAD_SIZE * 2));
-
-    if (x_bounds) {
-      x_bounds = (unsigned char *)(((size_t *)x_bounds)[-1]);
-      x = align_addr(x_bounds + BOUNDS_CHECK_PAD_SIZE + ADDRESS_STORAGE_SIZE,
-                     (int)DEFAULT_ALIGNMENT);
-      /* save the actual malloc address */
-      ((size_t *)x)[-1] = (size_t)x_bounds;
-
-      for (i = 0; i < BOUNDS_CHECK_PAD_SIZE; i += sizeof(unsigned int)) {
-        VPX_MEMCPY_L(x_bounds + i, &tempme, sizeof(unsigned int));
-        VPX_MEMCPY_L((unsigned char *)x + size + i,
-                     &tempme, sizeof(unsigned int));
-      }
-    } else
-      x = NULL;
-  }
-#else
-  x = vpx_realloc(memblk, size);
-#endif /*TRY_BOUNDS_CHECK*/
-
-  if (!memblk) ++g_alloc_count;
-
-  if (x)
-    vpx_memory_tracker_add((size_t)x, (unsigned int)size, file, line, 1);
-  else
-    vpx_memory_tracker_add((size_t)memblk, orig_size, orig_file, orig_line, 1);
-
-  return x;
-}
-
-void xvpx_free(void *p_address, char *file, int line) {
-#if TRY_BOUNDS_CHECK
-  unsigned char *p_bounds_address = (unsigned char *)p_address;
-  /*p_bounds_address -= BOUNDS_CHECK_PAD_SIZE;*/
-#endif
-
-#if !TRY_BOUNDS_CHECK_ON_FREE
-  (void)file;
-  (void)line;
-#endif
-
-  if (p_address) {
-#if TRY_BOUNDS_CHECK_ON_FREE
-    vpx_memory_tracker_check_integrity(file, line);
-#endif
-
-    /* if the addr isn't found in the list, assume it was allocated via
-     * vpx_ calls not xvpx_, therefore it does not contain any padding
-     */
-    if (vpx_memory_tracker_remove((size_t)p_address) == -2) {
-      p_bounds_address = p_address;
-      _P(fprintf(stderr, "[vpx_mem][xvpx_free] addr: %p not found in"
-                 " list; freed from file:%s"
-                 " line:%d\n", p_address, file, line));
-    } else
-      --g_alloc_count;
-
-#if TRY_BOUNDS_CHECK
-    vpx_free(p_bounds_address);
-#else
-    vpx_free(p_address);
-#endif
-
-    if (!g_alloc_count)
-      vpx_memory_tracker_destroy();
-  }
-}
-
-#endif /*CONFIG_MEM_TRACKER*/
-
 void *vpx_memcpy(void *dest, const void *source, size_t length) {
   return VPX_MEMCPY_L(dest, source, length);
 }
@@ -345,17 +148,6 @@ void *vpx_memmove(void *dest, const void *src, size_t count) {
   return VPX_MEMMOVE_L(dest, src, count);
 }
 
-#if USE_GLOBAL_FUNCTION_POINTERS
-# if CONFIG_MEM_TRACKER
-extern int vpx_memory_tracker_set_functions(g_malloc_func g_malloc_l
-, g_calloc_func g_calloc_l
-, g_realloc_func g_realloc_l
-, g_free_func g_free_l
-, g_memcpy_func g_memcpy_l
-, g_memset_func g_memset_l
-, g_memmove_func g_memmove_l);
-# endif
-#endif /*USE_GLOBAL_FUNCTION_POINTERS*/
 int vpx_mem_set_functions(g_malloc_func g_malloc_l
 , g_calloc_func g_calloc_l
 , g_realloc_func g_realloc_l
@@ -377,23 +169,6 @@ int vpx_mem_set_functions(g_malloc_func g_malloc_l
       return -1;
     }
   }
-
-#if CONFIG_MEM_TRACKER
-  {
-    int rv = 0;
-    rv = vpx_memory_tracker_set_functions(g_malloc_l
-, g_calloc_l
-, g_realloc_l
-, g_free_l
-, g_memcpy_l
-, g_memset_l
-, g_memmove_l);
-
-    if (rv < 0) {
-      return rv;
-    }
-  }
-#endif
 
   g_func->g_malloc  = g_malloc_l;
   g_func->g_calloc  = g_calloc_l;
