@@ -11,6 +11,83 @@
 #include <emmintrin.h>
 #include "vpx_ports/mem.h"
 
+void vp9_minmax_8x8_sse2(const uint8_t *s, int p, const uint8_t *d, int dp,
+                         int *min, int *max) {
+  __m128i u0, s0, d0, diff, maxabsdiff, minabsdiff, negdiff, absdiff0, absdiff;
+  u0  = _mm_setzero_si128();
+  // Row 0
+  s0 = _mm_unpacklo_epi8(_mm_loadl_epi64((const __m128i *)(s)), u0);
+  d0 = _mm_unpacklo_epi8(_mm_loadl_epi64((const __m128i *)(d)), u0);
+  diff = _mm_subs_epi16(s0, d0);
+  negdiff = _mm_subs_epi16(u0, diff);
+  absdiff0 = _mm_max_epi16(diff, negdiff);
+  // Row 1
+  s0 = _mm_unpacklo_epi8(_mm_loadl_epi64((const __m128i *)(s + p)), u0);
+  d0 = _mm_unpacklo_epi8(_mm_loadl_epi64((const __m128i *)(d + dp)), u0);
+  diff = _mm_subs_epi16(s0, d0);
+  negdiff = _mm_subs_epi16(u0, diff);
+  absdiff = _mm_max_epi16(diff, negdiff);
+  maxabsdiff = _mm_max_epi16(absdiff0, absdiff);
+  minabsdiff = _mm_min_epi16(absdiff0, absdiff);
+  // Row 2
+  s0 = _mm_unpacklo_epi8(_mm_loadl_epi64((const __m128i *)(s + 2 * p)), u0);
+  d0 = _mm_unpacklo_epi8(_mm_loadl_epi64((const __m128i *)(d + 2 * dp)), u0);
+  diff = _mm_subs_epi16(s0, d0);
+  negdiff = _mm_subs_epi16(u0, diff);
+  absdiff = _mm_max_epi16(diff, negdiff);
+  maxabsdiff = _mm_max_epi16(maxabsdiff, absdiff);
+  minabsdiff = _mm_min_epi16(minabsdiff, absdiff);
+  // Row 3
+  s0 = _mm_unpacklo_epi8(_mm_loadl_epi64((const __m128i *)(s + 3 * p)), u0);
+  d0 = _mm_unpacklo_epi8(_mm_loadl_epi64((const __m128i *)(d + 3 * dp)), u0);
+  diff = _mm_subs_epi16(s0, d0);
+  negdiff = _mm_subs_epi16(u0, diff);
+  absdiff = _mm_max_epi16(diff, negdiff);
+  maxabsdiff = _mm_max_epi16(maxabsdiff, absdiff);
+  minabsdiff = _mm_min_epi16(minabsdiff, absdiff);
+  // Row 4
+  s0 = _mm_unpacklo_epi8(_mm_loadl_epi64((const __m128i *)(s + 4 * p)), u0);
+  d0 = _mm_unpacklo_epi8(_mm_loadl_epi64((const __m128i *)(d + 4 * dp)), u0);
+  diff = _mm_subs_epi16(s0, d0);
+  negdiff = _mm_subs_epi16(u0, diff);
+  absdiff = _mm_max_epi16(diff, negdiff);
+  maxabsdiff = _mm_max_epi16(maxabsdiff, absdiff);
+  minabsdiff = _mm_min_epi16(minabsdiff, absdiff);
+  // Row 5
+  s0 = _mm_unpacklo_epi8(_mm_loadl_epi64((const __m128i *)(s + 5 * p)), u0);
+  d0 = _mm_unpacklo_epi8(_mm_loadl_epi64((const __m128i *)(d + 5 * dp)), u0);
+  diff = _mm_subs_epi16(s0, d0);
+  negdiff = _mm_subs_epi16(u0, diff);
+  absdiff = _mm_max_epi16(diff, negdiff);
+  maxabsdiff = _mm_max_epi16(maxabsdiff, absdiff);
+  minabsdiff = _mm_min_epi16(minabsdiff, absdiff);
+  // Row 6
+  s0 = _mm_unpacklo_epi8(_mm_loadl_epi64((const __m128i *)(s + 6 * p)), u0);
+  d0 = _mm_unpacklo_epi8(_mm_loadl_epi64((const __m128i *)(d + 6 * dp)), u0);
+  diff = _mm_subs_epi16(s0, d0);
+  negdiff = _mm_subs_epi16(u0, diff);
+  absdiff = _mm_max_epi16(diff, negdiff);
+  maxabsdiff = _mm_max_epi16(maxabsdiff, absdiff);
+  minabsdiff = _mm_min_epi16(minabsdiff, absdiff);
+  // Row 7
+  s0 = _mm_unpacklo_epi8(_mm_loadl_epi64((const __m128i *)(s + 7 * p)), u0);
+  d0 = _mm_unpacklo_epi8(_mm_loadl_epi64((const __m128i *)(d + 7 * dp)), u0);
+  diff = _mm_subs_epi16(s0, d0);
+  negdiff = _mm_subs_epi16(u0, diff);
+  absdiff = _mm_max_epi16(diff, negdiff);
+  maxabsdiff = _mm_max_epi16(maxabsdiff, absdiff);
+  minabsdiff = _mm_min_epi16(minabsdiff, absdiff);
+
+  maxabsdiff = _mm_max_epi16(maxabsdiff, _mm_srli_si128(maxabsdiff, 8));
+  maxabsdiff = _mm_max_epi16(maxabsdiff, _mm_srli_epi64(maxabsdiff, 32));
+  maxabsdiff = _mm_max_epi16(maxabsdiff, _mm_srli_epi64(maxabsdiff, 16));
+  *max = _mm_extract_epi16(maxabsdiff, 0);
+
+  minabsdiff = _mm_min_epi16(minabsdiff, _mm_srli_si128(minabsdiff, 8));
+  minabsdiff = _mm_min_epi16(minabsdiff, _mm_srli_epi64(minabsdiff, 32));
+  minabsdiff = _mm_min_epi16(minabsdiff, _mm_srli_epi64(minabsdiff, 16));
+  *min = _mm_extract_epi16(minabsdiff, 0);
+}
 
 unsigned int vp9_avg_8x8_sse2(const uint8_t *s, int p) {
   __m128i s0, s1, u0;
