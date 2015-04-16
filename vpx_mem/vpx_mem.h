@@ -53,18 +53,6 @@ extern "C" {
   */
   unsigned int vpx_mem_get_version(void);
 
-  /*
-      vpx_mem_set_heap_size(size_t size)
-        size - size in bytes for the memory manager to allocate for its heap
-      Sets the memory manager's initial heap size
-      Return:
-        0: on success
-        -1: if memory manager calls have not been included in the vpx_mem lib
-        -2: if the memory manager has been compiled to use static memory
-        -3: if the memory manager has already allocated its heap
-  */
-  int vpx_mem_set_heap_size(size_t size);
-
   void *vpx_memalign(size_t align, size_t size);
   void *vpx_malloc(size_t size);
   void *vpx_calloc(size_t num, size_t size);

@@ -13,15 +13,6 @@
 #define VPX_MEM_INCLUDE_VPX_MEM_INTRNL_H_
 #include "./vpx_config.h"
 
-#ifndef CONFIG_MEM_MANAGER
-# if defined(VXWORKS)
-#  define CONFIG_MEM_MANAGER  1 /*include heap manager functionality,*/
-/*default: enabled on vxworks*/
-# else
-#  define CONFIG_MEM_MANAGER  0 /*include heap manager functionality*/
-# endif
-#endif /*CONFIG_MEM_MANAGER*/
-
 #ifndef CONFIG_MEM_TRACKER
 # define CONFIG_MEM_TRACKER     1 /*include xvpx_* calls in the lib*/
 #endif

@@ -296,7 +296,6 @@ CONFIG_LIST="
     codec_srcs
     debug_libs
     fast_unaligned
-    mem_manager
     mem_tracker
     mem_checks
 

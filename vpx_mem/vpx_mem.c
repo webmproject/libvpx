@@ -27,30 +27,6 @@ static unsigned long g_alloc_count = 0;
 #endif
 #endif
 
-#if CONFIG_MEM_MANAGER
-# include "heapmm.h"
-# include "hmm_intrnl.h"
-
-# define SHIFT_HMM_ADDR_ALIGN_UNIT 5
-# define TOTAL_MEMORY_TO_ALLOCATE  20971520 /* 20 * 1024 * 1024 */
-
-# define MM_DYNAMIC_MEMORY 1
-# if MM_DYNAMIC_MEMORY
-static unsigned char *g_p_mng_memory_raw = NULL;
-static unsigned char *g_p_mng_memory     = NULL;
-# else
-static unsigned char g_p_mng_memory[TOTAL_MEMORY_TO_ALLOCATE];
-# endif
-
-static size_t g_mm_memory_size = TOTAL_MEMORY_TO_ALLOCATE;
-
-static hmm_descriptor hmm_d;
-static int g_mng_memory_allocated = 0;
-
-static int vpx_mm_create_heap_memory();
-static void *vpx_mm_realloc(void *memblk, size_t size);
-#endif /*CONFIG_MEM_MANAGER*/
-
 #if USE_GLOBAL_FUNCTION_POINTERS
 struct GLOBAL_FUNC_POINTERS {
   g_malloc_func g_malloc;
@@ -85,46 +61,11 @@ unsigned int vpx_mem_get_version() {
   return ver;
 }
 
-int vpx_mem_set_heap_size(size_t size) {
-  int ret = -1;
-
-#if CONFIG_MEM_MANAGER
-#if MM_DYNAMIC_MEMORY
-
-  if (!g_mng_memory_allocated && size) {
-    g_mm_memory_size = size;
-    ret = 0;
-  } else
-    ret = -3;
-
-#else
-  ret = -2;
-#endif
-#else
-  (void)size;
-#endif
-
-  return ret;
-}
-
 void *vpx_memalign(size_t align, size_t size) {
   void *addr,
        * x = NULL;
 
-#if CONFIG_MEM_MANAGER
-  int number_aau;
-
-  if (vpx_mm_create_heap_memory() < 0) {
-    _P(printf("[vpx][mm] ERROR vpx_memalign() Couldn't create memory for Heap.\n");)
-  }
-
-  number_aau = ((size + align - 1 + ADDRESS_STORAGE_SIZE) >>
-                SHIFT_HMM_ADDR_ALIGN_UNIT) + 1;
-
-  addr = hmm_alloc(&hmm_d, number_aau);
-#else
   addr = VPX_MALLOC_L(size + align - 1 + ADDRESS_STORAGE_SIZE);
-#endif /*CONFIG_MEM_MANAGER*/
 
   if (addr) {
     x = align_addr((unsigned char *)addr + ADDRESS_STORAGE_SIZE, (int)align);
@@ -171,11 +112,7 @@ void *vpx_realloc(void *memblk, size_t size) {
     addr   = (void *)(((size_t *)memblk)[-1]);
     memblk = NULL;
 
-#if CONFIG_MEM_MANAGER
-    new_addr = vpx_mm_realloc(addr, size + align + ADDRESS_STORAGE_SIZE);
-#else
     new_addr = VPX_REALLOC_L(addr, size + align + ADDRESS_STORAGE_SIZE);
-#endif
 
     if (new_addr) {
       addr = new_addr;
@@ -193,11 +130,7 @@ void *vpx_realloc(void *memblk, size_t size) {
 void vpx_free(void *memblk) {
   if (memblk) {
     void *addr = (void *)(((size_t *)memblk)[-1]);
-#if CONFIG_MEM_MANAGER
-    hmm_free(&hmm_d, addr);
-#else
     VPX_FREE_L(addr);
-#endif
   }
 }
 
@@ -493,108 +426,6 @@ void *vpx_memmove(void *dest, const void *src, size_t count) {
 
   return VPX_MEMMOVE_L(dest, src, count);
 }
-
-#if CONFIG_MEM_MANAGER
-
-static int vpx_mm_create_heap_memory() {
-  int i_rv = 0;
-
-  if (!g_mng_memory_allocated) {
-#if MM_DYNAMIC_MEMORY
-    g_p_mng_memory_raw =
-      (unsigned char *)malloc(g_mm_memory_size + HMM_ADDR_ALIGN_UNIT);
-
-    if (g_p_mng_memory_raw) {
-      g_p_mng_memory = (unsigned char *)((((unsigned int)g_p_mng_memory_raw) +
-                                          HMM_ADDR_ALIGN_UNIT - 1) &
-                                         -(int)HMM_ADDR_ALIGN_UNIT);
-
-      _P(printf("[vpx][mm] total memory size:%d g_p_mng_memory_raw:0x%x g_p_mng_memory:0x%x\n"
-, g_mm_memory_size + HMM_ADDR_ALIGN_UNIT
-, (unsigned int)g_p_mng_memory_raw
-, (unsigned int)g_p_mng_memory);)
-    } else {
-      _P(printf("[vpx][mm] Couldn't allocate memory:%d for vpx memory manager.\n"
-, g_mm_memory_size);)
-
-      i_rv = -1;
-    }
-
-    if (g_p_mng_memory)
-#endif
-    {
-      int chunk_size = 0;
-
-      g_mng_memory_allocated = 1;
-
-      hmm_init(&hmm_d);
-
-      chunk_size = g_mm_memory_size >> SHIFT_HMM_ADDR_ALIGN_UNIT;
-
-      chunk_size -= DUMMY_END_BLOCK_BAUS;
-
-      _P(printf("[vpx][mm] memory size:%d for vpx memory manager. g_p_mng_memory:0x%x  chunk_size:%d\n"
-, g_mm_memory_size
-, (unsigned int)g_p_mng_memory
-, chunk_size);)
-
-      hmm_new_chunk(&hmm_d, (void *)g_p_mng_memory, chunk_size);
-    }
-
-#if MM_DYNAMIC_MEMORY
-    else {
-      _P(printf("[vpx][mm] Couldn't allocate memory:%d for vpx memory manager.\n"
-, g_mm_memory_size);)
-
-      i_rv = -1;
-    }
-
-#endif
-  }
-
-  return i_rv;
-}
-
-static void *vpx_mm_realloc(void *memblk, size_t size) {
-  void *p_ret = NULL;
-
-  if (vpx_mm_create_heap_memory() < 0) {
-    _P(printf("[vpx][mm] ERROR vpx_mm_realloc() Couldn't create memory for Heap.\n");)
-  } else {
-    int i_rv = 0;
-    int old_num_aaus;
-    int new_num_aaus;
-
-    old_num_aaus = hmm_true_size(memblk);
-    new_num_aaus = (size >> SHIFT_HMM_ADDR_ALIGN_UNIT) + 1;
-
-    if (old_num_aaus == new_num_aaus) {
-      p_ret = memblk;
-    } else {
-      i_rv = hmm_resize(&hmm_d, memblk, new_num_aaus);
-
-      if (i_rv == 0) {
-        p_ret = memblk;
-      } else {
-        /* Error. Try to malloc and then copy data. */
-        void *p_from_malloc;
-
-        new_num_aaus = (size >> SHIFT_HMM_ADDR_ALIGN_UNIT) + 1;
-        p_from_malloc  = hmm_alloc(&hmm_d, new_num_aaus);
-
-        if (p_from_malloc) {
-          vpx_memcpy(p_from_malloc, memblk, size);
-          hmm_free(&hmm_d, memblk);
-
-          p_ret = p_from_malloc;
-        }
-      }
-    }
-  }
-
-  return p_ret;
-}
-#endif /*CONFIG_MEM_MANAGER*/
 
 #if USE_GLOBAL_FUNCTION_POINTERS
 # if CONFIG_MEM_TRACKER
