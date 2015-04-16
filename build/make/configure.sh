@@ -1036,25 +1036,30 @@ EOF
         disable_feature fast_unaligned
       fi
 
+      if enabled runtime_cpu_detect; then
+        disable_feature runtime_cpu_detect
+      fi
+
       if [ -n "${tune_cpu}" ]; then
         case ${tune_cpu} in
           p5600)
-            add_cflags -mips32r5 -funroll-loops -mload-store-pairs
-            add_cflags -msched-weight -mhard-float
-            add_asflags -mips32r5 -mhard-float
+            check_add_cflags -mips32r5 -funroll-loops -mload-store-pairs
+            check_add_cflags -msched-weight -mhard-float -mfp64
+            check_add_asflags -mips32r5 -mhard-float -mfp64
+            check_add_ldflags -mfp64
             ;;
           i6400)
-            add_cflags -mips64r6 -mabi=64 -funroll-loops -mload-store-pairs
-            add_cflags -msched-weight -mhard-float
-            add_asflags -mips64r6 -mabi=64 -mhard-float
-            add_ldflags -mips64r6 -mabi=64
+            check_add_cflags -mips64r6 -mabi=64 -funroll-loops -msched-weight 
+            check_add_cflags  -mload-store-pairs -mhard-float -mfp64
+            check_add_asflags -mips64r6 -mabi=64 -mhard-float -mfp64
+            check_add_ldflags -mips64r6 -mabi=64 -mfp64
             ;;
         esac
 
         if enabled msa; then
-          add_cflags -mmsa -mfp64 -flax-vector-conversions
-          add_asflags -mmsa -mfp64 -flax-vector-conversions
-          add_ldflags -mmsa -mfp64 -flax-vector-conversions
+          add_cflags -mmsa
+          add_asflags -mmsa
+          add_ldflags -mmsa
 
           disable_feature fast_unaligned
         fi
@@ -1300,10 +1305,14 @@ EOF
   # only for MIPS platforms
   case ${toolchain} in
     mips*)
-      if enabled dspr2; then
-        if enabled big_endian; then
+      if enabled big_endian; then
+        if enabled dspr2; then
           echo "dspr2 optimizations are available only for little endian platforms"
           disable_feature dspr2
+        fi
+        if enabled msa; then
+          echo "msa optimizations are available only for little endian platforms"
+          disable_feature msa
         fi
       fi
       ;;
