@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//AH8\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 1494,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-04-16T22:47:50Z",
+      "side": 1,
+      "message": "The above \"#if CONFIG_TX64X64\" may move up by one line to be above the closing brace \"}\", such that following \"else if\" may stay in the same line as this closing brace.\n\nThen combined with the following change to move \"#endif  // CONFIG_TX64X64\" up also by one line, leave the next closing brace \"}\" to be outside the \"#if - #endif  // CONFIG_TX64X64\" loop.\n\nThis way, the closing brace format issue may be gone.",
+      "revId": "b69152db79b5f9a3d0f94d615dc2c6fc35f33f1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//AH4\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 1683,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-04-16T22:47:50Z",
+      "side": 1,
+      "message": "Ditto.",
+      "revId": "b69152db79b5f9a3d0f94d615dc2c6fc35f33f1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//AHw\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 1861,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-04-16T22:47:50Z",
+      "side": 1,
+      "message": "Ditto.",
+      "revId": "b69152db79b5f9a3d0f94d615dc2c6fc35f33f1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//AHs\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 2796,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-04-16T22:47:50Z",
+      "side": 1,
+      "message": "Ditto.",
+      "revId": "b69152db79b5f9a3d0f94d615dc2c6fc35f33f1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
