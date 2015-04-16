@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//APk\u003d",
+        "filename": "vpx/exports_dec",
+        "patchSetId": 3
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-04-16T15:35:04Z",
+      "side": 0,
+      "message": "Hmm. Ok, I don\u0027t think the people using this are building shared libraries. Will look into that. but it might work to just remove them from these files.",
+      "parentUuid": "AAAAdn//Aps\u003d",
+      "revId": "0c8571895421782b6b0ae2e6388a86e3652d2aa2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//Axk\u003d",
         "filename": "vpx/exports_enc",
         "patchSetId": 3
