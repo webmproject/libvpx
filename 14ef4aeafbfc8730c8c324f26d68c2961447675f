@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//AQM\u003d",
+        "filename": "test/test_libvpx.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-04-16T14:37:50Z",
+      "side": 1,
+      "message": "I was wondering what was going on in this file. The tests all specify the opt level, so they don\u0027t care if the pointers are set up. The only things that do (should?) go through the encoder/decoder, which make the calls to set these up.",
+      "parentUuid": "AAAAdn//ARQ\u003d",
+      "revId": "14ef4aeafbfc8730c8c324f26d68c2961447675f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//AYk\u003d",
         "filename": "vp9/common/vp9_rtcd.c",
         "patchSetId": 2
