@@ -14,12 +14,12 @@
 #endif
 extern "C" {
 #if CONFIG_VP8
-#include "./vp8_rtcd.h"
+extern void vp8_rtcd();
 #endif  // CONFIG_VP8
 #if CONFIG_VP9
-#include "./vp9_rtcd.h"
+extern void vp9_rtcd();
 #endif  // CONFIG_VP9
-#include "./vpx_scale_rtcd.h"
+extern void vpx_scale_rtcd();
 }
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
