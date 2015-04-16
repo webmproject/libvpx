@@ -2459,7 +2459,7 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
 #if CONFIG_PALETTE
   if (xd->mi[0].src_mi->mbmi.sb_type >= BLOCK_8X8 &&
-      xd->plane[1].subsampling_x && xd->plane[1].subsampling_y &&
+      (xd->plane[1].subsampling_x || xd->plane[1].subsampling_y) &&
       cpi->common.allow_palette_mode) {
     int colors_u = vp9_count_colors(src_u, src_stride, rows, cols);
     int colors_v = vp9_count_colors(src_v, src_stride, rows, cols);
