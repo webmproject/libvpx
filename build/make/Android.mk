@@ -184,7 +184,11 @@ clean:
 	@$(RM) -r $(ASM_CNV_PATH)
 	@$(RM) $(CLEAN-OBJS)
 
-include $(BUILD_SHARED_LIBRARY)
+ifeq ($(ENABLE_SHARED),1)
+  include $(BUILD_SHARED_LIBRARY)
+else
+  include $(BUILD_STATIC_LIBRARY)
+endif
 
 ifeq ($(CONFIG_RUNTIME_CPU_DETECT),yes)
 $(call import-module,cpufeatures)
