@@ -1,0 +1,174 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//APY\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1476,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-04-16T15:55:48Z",
+      "side": 1,
+      "message": "Prefer to use the following format, to avoid duplicate code to the maximum extent:\n\n#if CONFIG_VP9_HIGHBITDEPTH\n  if (...)\n    ...\n  else\n#endif  // CONFIG_VP9_HIGHBITDEPTH\n  vp9_quantize_fp()\n  ...",
+      "revId": "8998515a560ea002d61320b1641d1a278d3ca1e2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//APU\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1494,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-04-16T15:55:48Z",
+      "side": 1,
+      "message": "Ditto.",
+      "revId": "8998515a560ea002d61320b1641d1a278d3ca1e2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//APQ\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1514,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-04-16T15:55:48Z",
+      "side": 1,
+      "message": "Ditto.",
+      "revId": "8998515a560ea002d61320b1641d1a278d3ca1e2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//APM\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1678,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-04-16T15:55:48Z",
+      "side": 1,
+      "message": "Ditto.",
+      "revId": "8998515a560ea002d61320b1641d1a278d3ca1e2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//API\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1693,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-04-16T15:55:48Z",
+      "side": 1,
+      "message": "Ditto.",
+      "revId": "8998515a560ea002d61320b1641d1a278d3ca1e2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//APE\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1710,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-04-16T15:55:48Z",
+      "side": 1,
+      "message": "Ditto.",
+      "revId": "8998515a560ea002d61320b1641d1a278d3ca1e2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//AO8\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1863,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-04-16T15:55:48Z",
+      "side": 1,
+      "message": "Ditto.",
+      "revId": "8998515a560ea002d61320b1641d1a278d3ca1e2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//AOw\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1881,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-04-16T15:55:48Z",
+      "side": 1,
+      "message": "Ditto.",
+      "revId": "8998515a560ea002d61320b1641d1a278d3ca1e2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//AOs\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1901,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-04-16T15:55:48Z",
+      "side": 1,
+      "message": "Ditto.",
+      "revId": "8998515a560ea002d61320b1641d1a278d3ca1e2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//AN4\u003d",
+        "filename": "vp9/encoder/vp9_encodemb.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 2125,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-04-16T15:55:48Z",
+      "side": 1,
+      "message": "It\u0027s a good code cleaning effort through the use of \"bs\".",
+      "revId": "8998515a560ea002d61320b1641d1a278d3ca1e2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
