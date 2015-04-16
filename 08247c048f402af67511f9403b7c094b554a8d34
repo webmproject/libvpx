@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//AKM\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 4158,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2015-04-16T21:12:06Z",
+      "side": 1,
+      "message": "can you add a TODO to add this for CONFIG_VP9_HIGHBITDEPTH later.",
+      "revId": "08247c048f402af67511f9403b7c094b554a8d34",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//AKI\u003d",
+        "filename": "vp9/encoder/vp9_fastssim.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2015-04-16T21:12:06Z",
+      "side": 1,
+      "message": "TODO to create high bitdepth versions later.",
+      "revId": "08247c048f402af67511f9403b7c094b554a8d34",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
