@@ -820,6 +820,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
   const int src_stride = p->src.stride;
   const int dst_stride = pd->dst.stride;
   int i, j;
+
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &i, &j);
   dst = &pd->dst.buf[4 * (j * dst_stride + i)];
   src = &p->src.buf[4 * (j * src_stride + i)];

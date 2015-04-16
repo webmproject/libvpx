@@ -425,7 +425,13 @@ static void decode_block(VP9Decoder *const pbi, MACROBLOCKD *const xd,
       int eobtotal = 0;
       struct inter_args arg = {cm, xd, r, counts, &eobtotal, y_dequant,
                                uv_dequant};
-      vp9_foreach_transformed_block(xd, bsize, reconstruct_inter_block, &arg);
+      int plane = 0;
+//      vp9_foreach_transformed_block(xd, bsize, reconstruct_inter_block, &arg);
+
+      for (plane = 0; plane < MAX_MB_PLANE; ++plane)
+        vp9_foreach_transformed_block_in_plane(xd, bsize, plane,
+                                               reconstruct_inter_block, &arg);
+
       if (!less8x8 && eobtotal == 0)
         mbmi->skip = 1;  // skip loopfilter
     }
