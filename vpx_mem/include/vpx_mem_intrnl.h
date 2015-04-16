@@ -13,10 +13,6 @@
 #define VPX_MEM_INCLUDE_VPX_MEM_INTRNL_H_
 #include "./vpx_config.h"
 
-#ifndef USE_GLOBAL_FUNCTION_POINTERS
-# define USE_GLOBAL_FUNCTION_POINTERS   0  /*use function pointers instead of compiled functions.*/
-#endif
-
 #define ADDRESS_STORAGE_SIZE      sizeof(size_t)
 
 #ifndef DEFAULT_ALIGNMENT

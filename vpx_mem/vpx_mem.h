@@ -17,15 +17,6 @@
 # include <lddk.h>
 #endif
 
-/* vpx_mem version info */
-#define vpx_mem_version "2.2.1.5"
-
-#define VPX_MEM_VERSION_CHIEF 2
-#define VPX_MEM_VERSION_MAJOR 2
-#define VPX_MEM_VERSION_MINOR 1
-#define VPX_MEM_VERSION_PATCH 5
-/* end - vpx_mem version info */
-
 #ifndef REPLACE_BUILTIN_FUNCTIONS
 # define REPLACE_BUILTIN_FUNCTIONS 0  /* replace builtin functions with their
 vpx_ equivalents */
@@ -37,14 +28,6 @@ vpx_ equivalents */
 #if defined(__cplusplus)
 extern "C" {
 #endif
-
-  /*
-      vpx_mem_get_version()
-      provided for runtime version checking. Returns an unsigned int of the form
-      CHIEF | MAJOR | MINOR | PATCH, where the chief version number is the high
-      order byte.
-  */
-  unsigned int vpx_mem_get_version(void);
 
   void *vpx_memalign(size_t align, size_t size);
   void *vpx_malloc(size_t size);
@@ -58,25 +41,6 @@ extern "C" {
   void *vpx_memset16(void *dest, int val, size_t length);
 #endif
   void *vpx_memmove(void *dest, const void *src, size_t count);
-
-  /* Wrappers to standard library functions. */
-  typedef void *(* g_malloc_func)(size_t);
-  typedef void *(* g_calloc_func)(size_t, size_t);
-  typedef void *(* g_realloc_func)(void *, size_t);
-  typedef void (* g_free_func)(void *);
-  typedef void *(* g_memcpy_func)(void *, const void *, size_t);
-  typedef void *(* g_memset_func)(void *, int, size_t);
-  typedef void *(* g_memmove_func)(void *, const void *, size_t);
-
-  int vpx_mem_set_functions(g_malloc_func g_malloc_l
-, g_calloc_func g_calloc_l
-, g_realloc_func g_realloc_l
-, g_free_func g_free_l
-, g_memcpy_func g_memcpy_l
-, g_memset_func g_memset_l
-, g_memmove_func g_memmove_l);
-  int vpx_mem_unset_functions(void);
-
 
   /* some defines for backward compatibility */
 #define DMEM_GENERAL 0
