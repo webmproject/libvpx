@@ -1608,7 +1608,27 @@ void vp9_tx_identity_add(const tran_low_t *input, uint8_t *dest,
                          int stride, int bs, int shift) {
   vp9_tx_identity_add_rect(input, dest, bs, bs, bs, stride, shift);
 }
-#endif
+
+#if CONFIG_VP9_HIGHBITDEPTH
+void vp9_highbd_tx_identity_add_rect(const tran_low_t *input, uint8_t *dest8,
+                                     int row, int col, int stride_in,
+                                     int stride_out, int shift, int bd) {
+  int r, c;
+  uint16_t *dest = CONVERT_TO_SHORTPTR(dest8);
+  for (r = 0; r < row; r++)
+    for (c = 0; c < col; c++) {
+      dest[r * stride_out + c] =
+          highbd_clip_pixel_add(dest[r * stride_out + c],
+                                input[r * stride_in + c] >> shift, bd);
+    }
+}
+
+void vp9_highbd_tx_identity_add(const tran_low_t *input, uint8_t *dest8,
+                                int stride, int bs, int shift, int bd) {
+  vp9_highbd_tx_identity_add_rect(input, dest8, bs, bs, bs, stride, shift, bd);
+}
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_TX_SKIP
 
 #if CONFIG_TX64X64
 #define DownshiftMultiplyBy2(x) x * 2

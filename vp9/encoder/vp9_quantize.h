@@ -231,7 +231,7 @@ void vp9_quantize_rect(const tran_low_t *coeff_ptr, int row, int col,
                        const int16_t *quant_ptr, const int16_t *quant_shift_ptr,
                        tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
                        const int16_t *dequant_ptr,
-                       int logsizeby32, int stride, int has_dc);
+                       int logsizeby32, int stride, int has_dc, int hbd);
 #if CONFIG_NEW_QUANT
 void vp9_quantize_rect_nuq(const tran_low_t *coeff_ptr,
                            int row,

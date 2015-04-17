@@ -1526,7 +1526,7 @@ void vp9_quantize_rect(const tran_low_t *coeff_ptr, int row, int col,
                        const int16_t *quant_shift_ptr,
                        tran_low_t *qcoeff_ptr, tran_low_t *dqcoeff_ptr,
                        const int16_t *dequant_ptr,
-                       int logsizeby32, int stride, int has_dc) {
+                       int logsizeby32, int stride, int has_dc, int hbd) {
   int r, c;
   int zbins[2] = {ROUND_POWER_OF_TWO(zbin_ptr[0],
                                      1 + (logsizeby32 < 0 ? -1 : logsizeby32)),
@@ -1552,7 +1552,10 @@ void vp9_quantize_rect(const tran_low_t *coeff_ptr, int row, int col,
           abs_coeff += round_ptr[idx];
         else
           abs_coeff += ROUND_POWER_OF_TWO(round_ptr[idx], (1 + logsizeby32));
-        abs_coeff = clamp(abs_coeff, INT16_MIN, INT16_MAX);
+        if (hbd)
+          abs_coeff = clamp(abs_coeff, INT32_MIN, INT32_MAX);
+        else
+          abs_coeff = clamp(abs_coeff, INT16_MIN, INT16_MAX);
         tmp = ((((abs_coeff * quant_ptr[idx]) >> 16) + abs_coeff) *
               quant_shift_ptr[idx]) >> (15 - logsizeby32);
 

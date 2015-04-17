@@ -175,4 +175,11 @@ void vp9_tx_identity_add_rect(const tran_low_t *input, uint8_t *dest,
                               int stride_out, int shift);
 void vp9_tx_identity_add(const tran_low_t *input, uint8_t *dest,
                          int stride, int bs, int shift);
-#endif
+#if CONFIG_VP9_HIGHBITDEPTH
+void vp9_highbd_tx_identity_add_rect(const tran_low_t *input, uint8_t *dest,
+                                     int row, int col, int stride_in,
+                                     int stride_out, int shift, int bd);
+void vp9_highbd_tx_identity_add(const tran_low_t *input, uint8_t *dest,
+                                int stride, int bs, int shift, int bd);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_TX_SKIP
