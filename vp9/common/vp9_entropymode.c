@@ -1239,6 +1239,28 @@ static void set_default_lf_deltas(struct loopfilter *lf) {
   lf->mode_deltas[1] = 0;
 }
 
+#if CONFIG_TX_SKIP
+static void init_pxd_scan_orders(int16_t *scan, int16_t *iscan,
+                                 int16_t *neighbors, int bs) {
+  int i;
+  scan[0] = iscan[0] = 0;
+  vpx_memset(neighbors, 0, MAX_NEIGHBORS * sizeof(neighbors[0]));
+
+  for (i = 1; i < bs * bs; i++) {
+    scan[i] = i;
+    iscan[i] = i;
+    if (i < bs) {
+      neighbors[MAX_NEIGHBORS * i] = neighbors[MAX_NEIGHBORS * i + 1] = i - 1;
+    } else if (i % bs == 0) {
+      neighbors[MAX_NEIGHBORS * i] = neighbors[MAX_NEIGHBORS * i + 1] = i - bs;
+    } else {
+      neighbors[MAX_NEIGHBORS * i] = i - bs;
+      neighbors[MAX_NEIGHBORS * i + 1] = i - 1;
+    }
+  }
+}
+#endif  // CONFIG_TX_SKIP
+
 void vp9_setup_past_independence(VP9_COMMON *cm) {
   // Reset the segment feature data to the default stats:
   // Features disabled, 0, with delta coding (Default state).
@@ -1281,4 +1303,23 @@ void vp9_setup_past_independence(VP9_COMMON *cm) {
   vp9_zero(cm->ref_frame_sign_bias);
 
   cm->frame_context_idx = 0;
+
+#if CONFIG_TX_SKIP
+  memset(vp9_coefband_tx_skip, TX_SKIP_COEFF_BAND,
+         sizeof(vp9_coefband_tx_skip[0]) * MAX_NUM_COEFS);
+
+  init_pxd_scan_orders(vp9_default_scan_pxd_4x4, vp9_default_iscan_pxd_4x4,
+                       vp9_default_scan_pxd_4x4_neighbors, 4);
+  init_pxd_scan_orders(vp9_default_scan_pxd_8x8, vp9_default_iscan_pxd_8x8,
+                       vp9_default_scan_pxd_8x8_neighbors, 8);
+  init_pxd_scan_orders(vp9_default_scan_pxd_16x16, vp9_default_iscan_pxd_16x16,
+                       vp9_default_scan_pxd_16x16_neighbors, 16);
+  init_pxd_scan_orders(vp9_default_scan_pxd_32x32, vp9_default_iscan_pxd_32x32,
+                       vp9_default_scan_pxd_32x32_neighbors, 32);
+
+#if CONFIG_TX64X64
+  init_pxd_scan_orders(vp9_default_scan_pxd_64x64, vp9_default_iscan_pxd_64x64,
+                       vp9_default_scan_pxd_64x64_neighbors, 64);
+#endif  // CONFIG_TX64X64
+#endif  // CONFIG_TX_SKIP
 }

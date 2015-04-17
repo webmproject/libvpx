@@ -2759,6 +2759,49 @@ DECLARE_ALIGNED(16, static const int16_t, vp9_default_iscan_64x64[4096]) = {
 };
 #endif  // CONFIG_TX64X64
 
+#if CONFIG_TX_SKIP
+DECLARE_ALIGNED(16, int16_t, vp9_default_scan_pxd_4x4[16]);
+DECLARE_ALIGNED(16, int16_t, vp9_default_scan_pxd_8x8[64]);
+DECLARE_ALIGNED(16, int16_t, vp9_default_scan_pxd_16x16[256]);
+DECLARE_ALIGNED(16, int16_t, vp9_default_scan_pxd_32x32[1024]);
+
+DECLARE_ALIGNED(16, int16_t, vp9_default_iscan_pxd_4x4[16]);
+DECLARE_ALIGNED(16, int16_t, vp9_default_iscan_pxd_8x8[64]);
+DECLARE_ALIGNED(16, int16_t, vp9_default_iscan_pxd_16x16[256]);
+DECLARE_ALIGNED(16, int16_t, vp9_default_iscan_pxd_32x32[1024]);
+
+DECLARE_ALIGNED(16, int16_t,
+                vp9_default_scan_pxd_4x4_neighbors[17 * MAX_NEIGHBORS]);
+DECLARE_ALIGNED(16, int16_t,
+                vp9_default_scan_pxd_8x8_neighbors[65 * MAX_NEIGHBORS]);
+DECLARE_ALIGNED(16, int16_t,
+                vp9_default_scan_pxd_16x16_neighbors[257 * MAX_NEIGHBORS]);
+DECLARE_ALIGNED(16, int16_t,
+                vp9_default_scan_pxd_32x32_neighbors[1025 * MAX_NEIGHBORS]);
+
+#if CONFIG_TX64X64
+DECLARE_ALIGNED(16, int16_t, vp9_default_scan_pxd_64x64[4096]);
+DECLARE_ALIGNED(16, int16_t, vp9_default_iscan_pxd_64x64[4096]);
+DECLARE_ALIGNED(16, int16_t,
+                vp9_default_scan_pxd_64x64_neighbors[4097 * MAX_NEIGHBORS]);
+#endif  // CONFIG_TX64X64
+
+const scan_order vp9_default_scan_orders_pxd[TX_SIZES] = {
+  {vp9_default_scan_pxd_4x4,   vp9_default_iscan_pxd_4x4,
+      vp9_default_scan_pxd_4x4_neighbors},
+  {vp9_default_scan_pxd_8x8,   vp9_default_iscan_pxd_8x8,
+      vp9_default_scan_pxd_8x8_neighbors},
+  {vp9_default_scan_pxd_16x16, vp9_default_iscan_pxd_16x16,
+      vp9_default_scan_pxd_16x16_neighbors},
+  {vp9_default_scan_pxd_32x32, vp9_default_iscan_pxd_32x32,
+      vp9_default_scan_pxd_32x32_neighbors},
+#if CONFIG_TX64X64
+  {vp9_default_scan_pxd_64x64, vp9_default_iscan_pxd_64x64,
+      vp9_default_scan_pxd_64x64_neighbors},
+#endif
+};
+#endif  // CONFIG_TX_SKIP
+
 const scan_order vp9_default_scan_orders[TX_SIZES] = {
   {default_scan_4x4,   vp9_default_iscan_4x4,   default_scan_4x4_neighbors},
   {default_scan_8x8,   vp9_default_iscan_8x8,   default_scan_8x8_neighbors},

@@ -32,6 +32,32 @@ typedef struct {
 extern const scan_order vp9_default_scan_orders[TX_SIZES];
 extern const scan_order vp9_scan_orders[TX_SIZES][TX_TYPES];
 
+#if CONFIG_TX_SKIP
+// pixel domain default scan orders
+extern const scan_order vp9_default_scan_orders_pxd[TX_SIZES];
+
+extern int16_t vp9_default_scan_pxd_4x4[16];
+extern int16_t vp9_default_scan_pxd_8x8[64];
+extern int16_t vp9_default_scan_pxd_16x16[256];
+extern int16_t vp9_default_scan_pxd_32x32[1024];
+
+extern int16_t vp9_default_iscan_pxd_4x4[16];
+extern int16_t vp9_default_iscan_pxd_8x8[64];
+extern int16_t vp9_default_iscan_pxd_16x16[256];
+extern int16_t vp9_default_iscan_pxd_32x32[1024];
+
+extern int16_t vp9_default_scan_pxd_4x4_neighbors[17 * MAX_NEIGHBORS];
+extern int16_t vp9_default_scan_pxd_8x8_neighbors[65 * MAX_NEIGHBORS];
+extern int16_t vp9_default_scan_pxd_16x16_neighbors[257 * MAX_NEIGHBORS];
+extern int16_t vp9_default_scan_pxd_32x32_neighbors[1025 * MAX_NEIGHBORS];
+
+#if CONFIG_TX64X64
+extern int16_t vp9_default_scan_pxd_64x64[4096];
+extern int16_t vp9_default_iscan_pxd_64x64[4096];
+extern int16_t vp9_default_scan_pxd_64x64_neighbors[4097 * MAX_NEIGHBORS];
+#endif  // CONFIG_TX64X64
+#endif  // CONFIG_TX_SKIP
+
 static INLINE int get_coef_context(const int16_t *neighbors,
                                    const uint8_t *token_cache, int c) {
   return (1 + token_cache[neighbors[MAX_NEIGHBORS * c + 0]] +

@@ -696,7 +696,15 @@ void vp9_xform_quant_nuq(MACROBLOCK *x, int plane, int block,
   MACROBLOCKD *const xd = &x->e_mbd;
   const struct macroblock_plane *const p = &x->plane[plane];
   const struct macroblockd_plane *const pd = &xd->plane[plane];
+#if CONFIG_TX_SKIP
+  MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
+  int shift = mbmi->tx_skip_shift;
+  const scan_order *const scan_order =
+      mbmi->tx_skip[plane != 0] ? &vp9_default_scan_orders_pxd[tx_size] :
+          &vp9_default_scan_orders[tx_size];
+#else
   const scan_order *const scan_order = &vp9_default_scan_orders[tx_size];
+#endif  // CONFIG_TX_SKIP
   tran_low_t *const coeff = BLOCK_OFFSET(p->coeff, block);
   tran_low_t *const qcoeff = BLOCK_OFFSET(p->qcoeff, block);
   tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
@@ -704,10 +712,6 @@ void vp9_xform_quant_nuq(MACROBLOCK *x, int plane, int block,
   const int diff_stride = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
   int i, j;
   const int16_t *src_diff;
-#if CONFIG_TX_SKIP
-  MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
-  int shift = mbmi->tx_skip_shift;
-#endif
   const uint8_t* band = get_band_translate(tx_size);
 
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &i, &j);
@@ -895,7 +899,15 @@ void vp9_xform_quant_fp_nuq(MACROBLOCK *x, int plane, int block,
   MACROBLOCKD *const xd = &x->e_mbd;
   const struct macroblock_plane *const p = &x->plane[plane];
   const struct macroblockd_plane *const pd = &xd->plane[plane];
+#if CONFIG_TX_SKIP
+  MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
+  int shift = mbmi->tx_skip_shift;
+  const scan_order *const scan_order =
+      mbmi->tx_skip[plane != 0] ? &vp9_default_scan_orders_pxd[tx_size] :
+          &vp9_default_scan_orders[tx_size];
+#else
   const scan_order *const scan_order = &vp9_default_scan_orders[tx_size];
+#endif  // CONFIG_TX_SKIP
   tran_low_t *const coeff = BLOCK_OFFSET(p->coeff, block);
   tran_low_t *const qcoeff = BLOCK_OFFSET(p->qcoeff, block);
   tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
@@ -903,10 +915,6 @@ void vp9_xform_quant_fp_nuq(MACROBLOCK *x, int plane, int block,
   const int diff_stride = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
   int i, j;
   const int16_t *src_diff;
-#if CONFIG_TX_SKIP
-  MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
-  int shift = mbmi->tx_skip_shift;
-#endif
   const uint8_t* band = get_band_translate(tx_size);
 
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &i, &j);
@@ -1441,7 +1449,15 @@ void vp9_xform_quant_fp(MACROBLOCK *x, int plane, int block,
   MACROBLOCKD *const xd = &x->e_mbd;
   const struct macroblock_plane *const p = &x->plane[plane];
   const struct macroblockd_plane *const pd = &xd->plane[plane];
+#if CONFIG_TX_SKIP
+  MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
+  int shift = mbmi->tx_skip_shift;
+  const scan_order *const scan_order =
+      mbmi->tx_skip[plane != 0] ? &vp9_default_scan_orders_pxd[tx_size] :
+          &vp9_default_scan_orders[tx_size];
+#else
   const scan_order *const scan_order = &vp9_default_scan_orders[tx_size];
+#endif  // CONFIG_TX_SKIP
   tran_low_t *const coeff = BLOCK_OFFSET(p->coeff, block);
   tran_low_t *const qcoeff = BLOCK_OFFSET(p->qcoeff, block);
   tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
@@ -1449,10 +1465,6 @@ void vp9_xform_quant_fp(MACROBLOCK *x, int plane, int block,
   const int diff_stride = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
   int i, j;
   const int16_t *src_diff;
-#if CONFIG_TX_SKIP
-  MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
-  int shift = mbmi->tx_skip_shift;
-#endif
 
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &i, &j);
   src_diff = &p->src_diff[4 * (j * diff_stride + i)];
@@ -1808,7 +1820,15 @@ void vp9_xform_quant(MACROBLOCK *x, int plane, int block,
   MACROBLOCKD *const xd = &x->e_mbd;
   const struct macroblock_plane *const p = &x->plane[plane];
   const struct macroblockd_plane *const pd = &xd->plane[plane];
+#if CONFIG_TX_SKIP
+  MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
+  int shift = mbmi->tx_skip_shift;
+  const scan_order *const scan_order =
+      mbmi->tx_skip[plane != 0] ? &vp9_default_scan_orders_pxd[tx_size] :
+          &vp9_default_scan_orders[tx_size];
+#else
   const scan_order *const scan_order = &vp9_default_scan_orders[tx_size];
+#endif  // CONFIG_TX_SKIP
   tran_low_t *const coeff = BLOCK_OFFSET(p->coeff, block);
   tran_low_t *const qcoeff = BLOCK_OFFSET(p->qcoeff, block);
   tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
@@ -1816,10 +1836,6 @@ void vp9_xform_quant(MACROBLOCK *x, int plane, int block,
   const int diff_stride = 4 * num_4x4_blocks_wide_lookup[plane_bsize];
   int i, j;
   const int16_t *src_diff;
-#if CONFIG_TX_SKIP
-  MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
-  int shift = mbmi->tx_skip_shift;
-#endif
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &i, &j);
   src_diff = &p->src_diff[4 * (j * diff_stride + i)];
 
@@ -2574,17 +2590,7 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
     band = vp9_coefband_tx_skip;
 #endif  // CONFIG_NEW_QUANT
     mode = plane == 0 ? mbmi->mode : mbmi->uv_mode;
-    if (tx_size == TX_4X4) {
-      tx_type = get_tx_type_4x4(pd->plane_type, xd, block);
-      scan_order = &vp9_scan_orders[TX_4X4][tx_type];
-      mode = plane == 0 ?
-          get_y_mode(xd->mi[0].src_mi, block) : mbmi->uv_mode;
-    } else if (tx_size <= TX_16X16) {
-      tx_type = get_tx_type(pd->plane_type, xd);
-      scan_order = &vp9_scan_orders[tx_size][tx_type];
-    } else {
-      scan_order = &vp9_default_scan_orders[tx_size];
-    }
+    scan_order = &vp9_default_scan_orders_pxd[tx_size];
 
     vp9_predict_intra_block(xd, block >> (2 * tx_size), bwl, tx_size, mode,
 #if CONFIG_FILTERINTRA

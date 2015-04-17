@@ -1172,10 +1172,6 @@ void vp9_default_coef_probs(VP9_COMMON *cm) {
 #if CONFIG_TX64X64
   vp9_copy(cm->fc.coef_probs[TX_64X64], default_coef_probs_64x64);
 #endif  // CONFIG_TX64X64
-#if CONFIG_TX_SKIP
-  memset(vp9_coefband_tx_skip, TX_SKIP_COEFF_BAND,
-         sizeof(vp9_coefband_tx_skip[0]) * MAX_NUM_COEFS);
-#endif  // CONFIG_TX_SKIP
 }
 
 #define COEF_COUNT_SAT 24
