@@ -8,6 +8,8 @@
 ;  be found in the AUTHORS file in the root of the source tree.
 ;
 
+%define program_name vpx
+
 %include "third_party/x86inc/x86inc.asm"
 
 SECTION .text
@@ -209,9 +211,9 @@ SECTION .text
   HIGH_PROCESS_32x2x4  0, %4, %5, (%4 + 32), (%5 + 32), %6
 %endmacro
 
-; void vp9_highbd_sadNxNx4d_sse2(uint8_t *src,    int src_stride,
+; void vpx_highbd_sadNxNx4d_sse2(uint8_t *src,    int src_stride,
 ;                         uint8_t *ref[4], int ref_stride,
-;                         unsigned int res[4]);
+;                         uint32_t res[4]);
 ; where NxN = 64x64, 32x32, 16x16, 16x8, 8x16 or 8x8
 %macro HIGH_SADNXN4D 2
 %if UNIX64

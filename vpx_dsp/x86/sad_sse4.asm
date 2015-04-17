@@ -154,15 +154,25 @@
         paddw           xmm1,       xmm5
 %endmacro
 
+%macro WRITE_AS_INTS 0
+    mov             rdi,        arg(4)           ;Results
+    pxor            xmm0, xmm0
+    movdqa          xmm2, xmm1
+    punpcklwd       xmm1, xmm0
+    punpckhwd       xmm2, xmm0
 
-;void vp8_sad16x16x8_sse4(
+    movdqa          [rdi],    xmm1
+    movdqa          [rdi + 16],    xmm2
+%endmacro
+
+;void vpx_sad16x16x8_sse4_1(
 ;    const unsigned char *src_ptr,
 ;    int  src_stride,
 ;    const unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    unsigned short *sad_array);
-global sym(vp8_sad16x16x8_sse4) PRIVATE
-sym(vp8_sad16x16x8_sse4):
+global sym(vpx_sad16x16x8_sse4_1) PRIVATE
+sym(vpx_sad16x16x8_sse4_1):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 5
@@ -170,23 +180,22 @@ sym(vp8_sad16x16x8_sse4):
     push        rdi
     ; end prolog
 
-        mov             rsi,        arg(0)           ;src_ptr
-        mov             rdi,        arg(2)           ;ref_ptr
+    mov             rsi,        arg(0)           ;src_ptr
+    mov             rdi,        arg(2)           ;ref_ptr
 
-        movsxd          rax,        dword ptr arg(1) ;src_stride
-        movsxd          rdx,        dword ptr arg(3) ;ref_stride
+    movsxd          rax,        dword ptr arg(1) ;src_stride
+    movsxd          rdx,        dword ptr arg(3) ;ref_stride
 
-        PROCESS_16X2X8 1
-        PROCESS_16X2X8 0
-        PROCESS_16X2X8 0
-        PROCESS_16X2X8 0
-        PROCESS_16X2X8 0
-        PROCESS_16X2X8 0
-        PROCESS_16X2X8 0
-        PROCESS_16X2X8 0
+    PROCESS_16X2X8 1
+    PROCESS_16X2X8 0
+    PROCESS_16X2X8 0
+    PROCESS_16X2X8 0
+    PROCESS_16X2X8 0
+    PROCESS_16X2X8 0
+    PROCESS_16X2X8 0
+    PROCESS_16X2X8 0
 
-        mov             rdi,        arg(4)           ;Results
-        movdqa          XMMWORD PTR [rdi],    xmm1
+    WRITE_AS_INTS
 
     ; begin epilog
     pop         rdi
@@ -196,15 +205,15 @@ sym(vp8_sad16x16x8_sse4):
     ret
 
 
-;void vp8_sad16x8x8_sse4(
+;void vpx_sad16x8x8_sse4_1(
 ;    const unsigned char *src_ptr,
 ;    int  src_stride,
 ;    const unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    unsigned short *sad_array
 ;);
-global sym(vp8_sad16x8x8_sse4) PRIVATE
-sym(vp8_sad16x8x8_sse4):
+global sym(vpx_sad16x8x8_sse4_1) PRIVATE
+sym(vpx_sad16x8x8_sse4_1):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 5
@@ -212,19 +221,18 @@ sym(vp8_sad16x8x8_sse4):
     push        rdi
     ; end prolog
 
-        mov             rsi,        arg(0)           ;src_ptr
-        mov             rdi,        arg(2)           ;ref_ptr
+    mov             rsi,        arg(0)           ;src_ptr
+    mov             rdi,        arg(2)           ;ref_ptr
 
-        movsxd          rax,        dword ptr arg(1) ;src_stride
-        movsxd          rdx,        dword ptr arg(3) ;ref_stride
+    movsxd          rax,        dword ptr arg(1) ;src_stride
+    movsxd          rdx,        dword ptr arg(3) ;ref_stride
 
-        PROCESS_16X2X8 1
-        PROCESS_16X2X8 0
-        PROCESS_16X2X8 0
-        PROCESS_16X2X8 0
+    PROCESS_16X2X8 1
+    PROCESS_16X2X8 0
+    PROCESS_16X2X8 0
+    PROCESS_16X2X8 0
 
-        mov             rdi,        arg(4)           ;Results
-        movdqa          XMMWORD PTR [rdi],    xmm1
+    WRITE_AS_INTS
 
     ; begin epilog
     pop         rdi
@@ -234,15 +242,15 @@ sym(vp8_sad16x8x8_sse4):
     ret
 
 
-;void vp8_sad8x8x8_sse4(
+;void vpx_sad8x8x8_sse4_1(
 ;    const unsigned char *src_ptr,
 ;    int  src_stride,
 ;    const unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    unsigned short *sad_array
 ;);
-global sym(vp8_sad8x8x8_sse4) PRIVATE
-sym(vp8_sad8x8x8_sse4):
+global sym(vpx_sad8x8x8_sse4_1) PRIVATE
+sym(vpx_sad8x8x8_sse4_1):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 5
@@ -250,19 +258,18 @@ sym(vp8_sad8x8x8_sse4):
     push        rdi
     ; end prolog
 
-        mov             rsi,        arg(0)           ;src_ptr
-        mov             rdi,        arg(2)           ;ref_ptr
+    mov             rsi,        arg(0)           ;src_ptr
+    mov             rdi,        arg(2)           ;ref_ptr
 
-        movsxd          rax,        dword ptr arg(1) ;src_stride
-        movsxd          rdx,        dword ptr arg(3) ;ref_stride
+    movsxd          rax,        dword ptr arg(1) ;src_stride
+    movsxd          rdx,        dword ptr arg(3) ;ref_stride
 
-        PROCESS_8X2X8 1
-        PROCESS_8X2X8 0
-        PROCESS_8X2X8 0
-        PROCESS_8X2X8 0
+    PROCESS_8X2X8 1
+    PROCESS_8X2X8 0
+    PROCESS_8X2X8 0
+    PROCESS_8X2X8 0
 
-        mov             rdi,        arg(4)           ;Results
-        movdqa          XMMWORD PTR [rdi],    xmm1
+    WRITE_AS_INTS
 
     ; begin epilog
     pop         rdi
@@ -272,15 +279,15 @@ sym(vp8_sad8x8x8_sse4):
     ret
 
 
-;void vp8_sad8x16x8_sse4(
+;void vpx_sad8x16x8_sse4_1(
 ;    const unsigned char *src_ptr,
 ;    int  src_stride,
 ;    const unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    unsigned short *sad_array
 ;);
-global sym(vp8_sad8x16x8_sse4) PRIVATE
-sym(vp8_sad8x16x8_sse4):
+global sym(vpx_sad8x16x8_sse4_1) PRIVATE
+sym(vpx_sad8x16x8_sse4_1):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 5
@@ -288,22 +295,22 @@ sym(vp8_sad8x16x8_sse4):
     push        rdi
     ; end prolog
 
-        mov             rsi,        arg(0)           ;src_ptr
-        mov             rdi,        arg(2)           ;ref_ptr
+    mov             rsi,        arg(0)           ;src_ptr
+    mov             rdi,        arg(2)           ;ref_ptr
 
-        movsxd          rax,        dword ptr arg(1) ;src_stride
-        movsxd          rdx,        dword ptr arg(3) ;ref_stride
+    movsxd          rax,        dword ptr arg(1) ;src_stride
+    movsxd          rdx,        dword ptr arg(3) ;ref_stride
 
-        PROCESS_8X2X8 1
-        PROCESS_8X2X8 0
-        PROCESS_8X2X8 0
-        PROCESS_8X2X8 0
-        PROCESS_8X2X8 0
-        PROCESS_8X2X8 0
-        PROCESS_8X2X8 0
-        PROCESS_8X2X8 0
-        mov             rdi,        arg(4)           ;Results
-        movdqa          XMMWORD PTR [rdi],    xmm1
+    PROCESS_8X2X8 1
+    PROCESS_8X2X8 0
+    PROCESS_8X2X8 0
+    PROCESS_8X2X8 0
+    PROCESS_8X2X8 0
+    PROCESS_8X2X8 0
+    PROCESS_8X2X8 0
+    PROCESS_8X2X8 0
+
+    WRITE_AS_INTS
 
     ; begin epilog
     pop         rdi
@@ -313,15 +320,15 @@ sym(vp8_sad8x16x8_sse4):
     ret
 
 
-;void vp8_sad4x4x8_c(
+;void vpx_sad4x4x8_sse4_1(
 ;    const unsigned char *src_ptr,
 ;    int  src_stride,
 ;    const unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    unsigned short *sad_array
 ;);
-global sym(vp8_sad4x4x8_sse4) PRIVATE
-sym(vp8_sad4x4x8_sse4):
+global sym(vpx_sad4x4x8_sse4_1) PRIVATE
+sym(vpx_sad4x4x8_sse4_1):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 5
@@ -329,17 +336,16 @@ sym(vp8_sad4x4x8_sse4):
     push        rdi
     ; end prolog
 
-        mov             rsi,        arg(0)           ;src_ptr
-        mov             rdi,        arg(2)           ;ref_ptr
+    mov             rsi,        arg(0)           ;src_ptr
+    mov             rdi,        arg(2)           ;ref_ptr
 
-        movsxd          rax,        dword ptr arg(1) ;src_stride
-        movsxd          rdx,        dword ptr arg(3) ;ref_stride
+    movsxd          rax,        dword ptr arg(1) ;src_stride
+    movsxd          rdx,        dword ptr arg(3) ;ref_stride
 
-        PROCESS_4X2X8 1
-        PROCESS_4X2X8 0
+    PROCESS_4X2X8 1
+    PROCESS_4X2X8 0
 
-        mov             rdi,        arg(4)           ;Results
-        movdqa          XMMWORD PTR [rdi],    xmm1
+    WRITE_AS_INTS
 
     ; begin epilog
     pop         rdi

@@ -17,10 +17,11 @@
  * higher quality.
  */
 
-#include "postproc.h"
-#include "variance.h"
+#include "./vp8_rtcd.h"
+#include "./vpx_dsp_rtcd.h"
+#include "vp8/common/postproc.h"
+#include "vp8/common/variance.h"
 #include "vpx_mem/vpx_mem.h"
-#include "vp8_rtcd.h"
 #include "vpx_scale/yv12config.h"
 
 #include <limits.h>
@@ -160,9 +161,9 @@ static void multiframe_quality_enhance_block
         vp8_variance8x8(v, uv_stride, vd, uvd_stride, &sse);
         vsad = (sse + 32)>>6;
 #else
-        sad = (vp8_sad16x16(y, y_stride, yd, yd_stride, UINT_MAX) + 128) >> 8;
-        usad = (vp8_sad8x8(u, uv_stride, ud, uvd_stride, UINT_MAX) + 32) >> 6;
-        vsad = (vp8_sad8x8(v, uv_stride, vd, uvd_stride, UINT_MAX)+ 32) >> 6;
+        sad = (vpx_sad16x16(y, y_stride, yd, yd_stride) + 128) >> 8;
+        usad = (vpx_sad8x8(u, uv_stride, ud, uvd_stride) + 32) >> 6;
+        vsad = (vpx_sad8x8(v, uv_stride, vd, uvd_stride)+ 32) >> 6;
 #endif
     }
     else /* if (blksize == 8) */
@@ -177,9 +178,9 @@ static void multiframe_quality_enhance_block
         vp8_variance4x4(v, uv_stride, vd, uvd_stride, &sse);
         vsad = (sse + 8)>>4;
 #else
-        sad = (vp8_sad8x8(y, y_stride, yd, yd_stride, UINT_MAX) + 32) >> 6;
-        usad = (vp8_sad4x4(u, uv_stride, ud, uvd_stride, UINT_MAX) + 8) >> 4;
-        vsad = (vp8_sad4x4(v, uv_stride, vd, uvd_stride, UINT_MAX) + 8) >> 4;
+        sad = (vpx_sad8x8(y, y_stride, yd, yd_stride) + 32) >> 6;
+        usad = (vpx_sad4x4(u, uv_stride, ud, uvd_stride) + 8) >> 4;
+        vsad = (vpx_sad4x4(v, uv_stride, vd, uvd_stride) + 8) >> 4;
 #endif
     }
 

@@ -11,6 +11,7 @@
 
 #include "./vpx_config.h"
 #include "./vp8_rtcd.h"
+#include "./vpx_dsp_rtcd.h"
 #include "./vpx_scale_rtcd.h"
 #include "vpx/vpx_codec.h"
 #include "vpx/internal/vpx_codec_internal.h"
@@ -650,6 +651,7 @@ static vpx_codec_err_t vp8e_init(vpx_codec_ctx_t *ctx,
 
 
     vp8_rtcd();
+    vpx_dsp_rtcd();
     vpx_scale_rtcd();
 
     if (!ctx->priv)

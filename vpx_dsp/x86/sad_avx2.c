@@ -11,7 +11,7 @@
 #include "vpx_ports/mem.h"
 
 #define FSAD64_H(h) \
-unsigned int vp9_sad64x##h##_avx2(const uint8_t *src_ptr, \
+unsigned int vpx_sad64x##h##_avx2(const uint8_t *src_ptr, \
                                   int src_stride, \
                                   const uint8_t *ref_ptr, \
                                   int ref_stride) { \
@@ -40,7 +40,7 @@ unsigned int vp9_sad64x##h##_avx2(const uint8_t *src_ptr, \
 }
 
 #define FSAD32_H(h) \
-unsigned int vp9_sad32x##h##_avx2(const uint8_t *src_ptr, \
+unsigned int vpx_sad32x##h##_avx2(const uint8_t *src_ptr, \
                                   int src_stride, \
                                   const uint8_t *ref_ptr, \
                                   int ref_stride) { \
@@ -89,7 +89,7 @@ FSAD32;
 #undef FSAD32_H
 
 #define FSADAVG64_H(h) \
-unsigned int vp9_sad64x##h##_avg_avx2(const uint8_t *src_ptr, \
+unsigned int vpx_sad64x##h##_avg_avx2(const uint8_t *src_ptr, \
                                       int src_stride, \
                                       const uint8_t *ref_ptr, \
                                       int  ref_stride, \
@@ -124,7 +124,7 @@ unsigned int vp9_sad64x##h##_avg_avx2(const uint8_t *src_ptr, \
 }
 
 #define FSADAVG32_H(h) \
-unsigned int vp9_sad32x##h##_avg_avx2(const uint8_t *src_ptr, \
+unsigned int vpx_sad32x##h##_avg_avx2(const uint8_t *src_ptr, \
                                       int src_stride, \
                                       const uint8_t *ref_ptr, \
                                       int  ref_stride, \
