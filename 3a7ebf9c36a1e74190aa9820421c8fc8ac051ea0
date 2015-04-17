@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn/+//g\u003d",
+        "filename": "test/android/Android.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-04-17T18:18:35Z",
+      "side": 1,
+      "message": "LOCAL_STATIC might be enough in either case, but it\u0027s OK to be explicit here",
+      "revId": "3a7ebf9c36a1e74190aa9820421c8fc8ac051ea0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
