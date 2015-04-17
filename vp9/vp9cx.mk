@@ -34,6 +34,7 @@ VP9_CX_SRCS-yes += encoder/vp9_encodemv.c
 VP9_CX_SRCS-yes += encoder/vp9_ethread.h
 VP9_CX_SRCS-yes += encoder/vp9_ethread.c
 VP9_CX_SRCS-yes += encoder/vp9_extend.c
+VP9_CX_SRCS-$(CONFIG_INTERNAL_STATS) += encoder/vp9_fastssim.c
 VP9_CX_SRCS-yes += encoder/vp9_firstpass.c
 VP9_CX_SRCS-yes += encoder/vp9_block.h
 VP9_CX_SRCS-yes += encoder/vp9_writer.h

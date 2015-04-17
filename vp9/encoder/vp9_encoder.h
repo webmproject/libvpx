@@ -415,6 +415,11 @@ typedef struct VP9_COMP {
   double total_ssimg_v;
   double total_ssimg_all;
 
+  double total_fastssim_y;
+  double total_fastssim_u;
+  double total_fastssim_v;
+  double total_fastssim_all;
+
   int b_calculate_ssimg;
 #endif
   int b_calculate_psnr;
