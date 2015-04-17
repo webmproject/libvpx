@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//ABM\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 4158,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2015-04-17T17:16:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//AKM\u003d",
+      "revId": "08247c048f402af67511f9403b7c094b554a8d34",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//AKI\u003d",
         "filename": "vp9/encoder/vp9_fastssim.c",
         "patchSetId": 5
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn//ABE\u003d",
+        "filename": "vp9/encoder/vp9_fastssim.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2015-04-17T17:16:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn//AKI\u003d",
+      "revId": "08247c048f402af67511f9403b7c094b554a8d34",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//ANk\u003d",
         "filename": "vp9/encoder/vp9_fastssim.c",
         "patchSetId": 5
@@ -47,6 +83,24 @@
       "writtenOn": "2015-04-16T21:19:07Z",
       "side": 1,
       "message": "shall we reuse the MIN and MAX macros in vp9_common.h?",
+      "revId": "08247c048f402af67511f9403b7c094b554a8d34",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ABI\u003d",
+        "filename": "vp9/encoder/vp9_fastssim.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2015-04-17T17:16:31Z",
+      "side": 1,
+      "message": "my hope was to keep the code as close to the daala code as possible.. so we could plug in any new version we need in case they find a bug.   As such I\u0027d rather not.",
+      "parentUuid": "AAAAdn//ANk\u003d",
       "revId": "08247c048f402af67511f9403b7c094b554a8d34",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
