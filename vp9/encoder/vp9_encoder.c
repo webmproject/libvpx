@@ -205,6 +205,9 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   vp9_free_context_buffers(cm);
 
   vp9_free_frame_buffer(&cpi->last_frame_uf);
+#if CONFIG_LOOP_POSTFILTER
+  vp9_free_frame_buffer(&cpi->last_frame_db);
+#endif  // CONFIG_LOOP_POSTFILTER
   vp9_free_frame_buffer(&cpi->scaled_source);
   vp9_free_frame_buffer(&cpi->scaled_last_source);
   vp9_free_frame_buffer(&cpi->alt_ref_buffer);
@@ -491,6 +494,18 @@ static void alloc_util_frame_buffers(VP9_COMP *cpi) {
                                VP9_ENC_BORDER_IN_PIXELS, NULL, NULL, NULL))
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate last frame buffer");
+
+#if CONFIG_LOOP_POSTFILTER
+  if (vp9_realloc_frame_buffer(&cpi->last_frame_db,
+                               cm->width, cm->height,
+                               cm->subsampling_x, cm->subsampling_y,
+#if CONFIG_VP9_HIGHBITDEPTH
+                               cm->use_highbitdepth,
+#endif
+                               VP9_ENC_BORDER_IN_PIXELS, NULL, NULL, NULL))
+    vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+                       "Failed to allocate last frame deblocked buffer");
+#endif  // CONFIG_LOOP_POSTFILTER
 
   if (vp9_realloc_frame_buffer(&cpi->scaled_source,
                                cm->width, cm->height,
@@ -2670,9 +2685,8 @@ static void loopfilter_frame(VP9_COMP *cpi, VP9_COMMON *cm) {
 #if CONFIG_LOOP_POSTFILTER
   vp9_loop_bilateral_init(&cm->lf_info, cm->lf.bilateral_level,
                           cm->frame_type == KEY_FRAME);
-  if (cm->lf_info.bilateral_used) {
+  if (cm->lf_info.bilateral_used)
     vp9_loop_bilateral_rows(cm->frame_to_show, cm, 0, cm->mi_rows, 0);
-  }
 #endif  // CONFIG_LOOP_POSTFILTER
 
   vp9_extend_frame_inner_borders(cm->frame_to_show);

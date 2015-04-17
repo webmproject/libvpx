@@ -263,6 +263,9 @@ typedef struct VP9_COMP {
   int ext_refresh_frame_context;
 
   YV12_BUFFER_CONFIG last_frame_uf;
+#if CONFIG_LOOP_POSTFILTER
+  YV12_BUFFER_CONFIG last_frame_db;
+#endif  // CONFIG_LOOP_POSTFILTER
 
   TOKENEXTRA *tok;
   unsigned int tok_count[4][1 << 6];
