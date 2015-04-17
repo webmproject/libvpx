@@ -420,6 +420,11 @@ typedef struct VP9_COMP {
   double total_fastssim_v;
   double total_fastssim_all;
 
+  double total_psnrhvs_y;
+  double total_psnrhvs_u;
+  double total_psnrhvs_v;
+  double total_psnrhvs_all;
+
   int b_calculate_ssimg;
 #endif
   int b_calculate_psnr;
