@@ -146,7 +146,13 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
   const int default_eob = 16 << (tx_size << 1);
   const int shift = (tx_size >= TX_32X32 ? tx_size - TX_16X16 : 0);
   const int mul = 1 << shift;
+#if CONFIG_TX_SKIP
+  const int16_t *dequant_ptr =
+      xd->mi[0].src_mi->mbmi.tx_skip[plane != 0] ?
+          pd->dequant_pxd : pd->dequant;
+#else
   const int16_t *dequant_ptr = pd->dequant;
+#endif  // CONFIG_TX_SKIP
 #if CONFIG_NEW_QUANT
 #if CONFIG_TX_SKIP
   const int use_rect_quant = is_rect_quant_used(&xd->mi[0].src_mi->mbmi, plane);
@@ -173,6 +179,11 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
 
   assert((!type && !plane) || (type && plane));
   assert(eob <= default_eob);
+
+#if CONFIG_TX_SKIP && CONFIG_NEW_QUANT
+  if (xd->mi[0].src_mi->mbmi.tx_skip[plane != 0])
+    dequant_val = pd->dequant_val_nuq_pxd;
+#endif  // CONFIG_TX_SKIP && CONFIG_NEW_QUANT
 
   /* Now set up a Viterbi trellis to evaluate alternative roundings. */
   if (!ref)
@@ -723,30 +734,70 @@ void vp9_xform_quant_nuq(MACROBLOCK *x, int plane, int block,
     band = vp9_coefband_tx_skip;
     vp9_tx_identity(src_diff, coeff, diff_stride, bs, shift);
     if (tx_size <= TX_16X16) {
-      vp9_quantize_nuq(coeff, bs * bs, x->skip_block,
-                       p->quant, p->quant_shift, pd->dequant,
-                       (const cumbins_type_nuq *)p->cumbins_nuq,
-                       (const dequant_val_type_nuq *)pd->dequant_val_nuq,
-                       qcoeff, dqcoeff, eob,
-                       scan_order->scan, band);
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
+        vp9_highbd_quantize_nuq(coeff, bs * bs, x->skip_block,
+                                p->quant_pxd, p->quant_shift_pxd,
+                                pd->dequant_pxd,
+                                (const cumbins_type_nuq *)p->cumbins_nuq_pxd,
+                                (const dequant_val_type_nuq *)
+                                pd->dequant_val_nuq_pxd,
+                                qcoeff, dqcoeff, eob,
+                                scan_order->scan, band);
+      else
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+        vp9_quantize_nuq(coeff, bs * bs, x->skip_block,
+                         p->quant_pxd, p->quant_shift_pxd, pd->dequant_pxd,
+                         (const cumbins_type_nuq *)p->cumbins_nuq_pxd,
+                         (const dequant_val_type_nuq *)pd->dequant_val_nuq_pxd,
+                         qcoeff, dqcoeff, eob,
+                         scan_order->scan, band);
     } else if (tx_size == TX_32X32) {
-      vp9_quantize_32x32_nuq(coeff, bs * bs, x->skip_block,
-                             p->quant, p->quant_shift, pd->dequant,
-                             (const cumbins_type_nuq *)p->cumbins_nuq,
-                             (const dequant_val_type_nuq *)
-                             pd->dequant_val_nuq,
-                             qcoeff, dqcoeff, eob,
-                             scan_order->scan, band);
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
+        vp9_highbd_quantize_32x32_nuq(coeff, bs * bs, x->skip_block,
+                                      p->quant_pxd, p->quant_shift_pxd,
+                                      pd->dequant_pxd,
+                                      (const cumbins_type_nuq *)
+                                      p->cumbins_nuq_pxd,
+                                      (const dequant_val_type_nuq *)
+                                      pd->dequant_val_nuq,
+                                      qcoeff, dqcoeff, eob,
+                                      scan_order->scan, band);
+      else
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+        vp9_quantize_32x32_nuq(coeff, bs * bs, x->skip_block,
+                               p->quant_pxd, p->quant_shift_pxd,
+                               pd->dequant_pxd,
+                               (const cumbins_type_nuq *)p->cumbins_nuq_pxd,
+                               (const dequant_val_type_nuq *)
+                               pd->dequant_val_nuq,
+                               qcoeff, dqcoeff, eob,
+                               scan_order->scan, band);
     }
 #if CONFIG_TX64X64
     else if (tx_size == TX_64X64) {
-      vp9_quantize_64x64_nuq(coeff, bs * bs, x->skip_block,
-                             p->quant, p->quant_shift, pd->dequant,
-                             (const cumbins_type_nuq *)p->cumbins_nuq,
-                             (const dequant_val_type_nuq *)
-                             pd->dequant_val_nuq,
-                             qcoeff, dqcoeff, eob,
-                             scan_order->scan, band);
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
+        vp9_highbd_quantize_64x64_nuq(coeff, bs * bs, x->skip_block,
+                                      p->quant_pxd, p->quant_shift_pxd,
+                                      pd->dequant_pxd,
+                                      (const cumbins_type_nuq *)
+                                      p->cumbins_nuq_pxd,
+                                      (const dequant_val_type_nuq *)
+                                      pd->dequant_val_nuq,
+                                      qcoeff, dqcoeff, eob,
+                                      scan_order->scan, band);
+      else
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+        vp9_quantize_64x64_nuq(coeff, bs * bs, x->skip_block,
+                               p->quant_pxd, p->quant_shift_pxd,
+                               pd->dequant_pxd,
+                               (const cumbins_type_nuq *)p->cumbins_nuq_pxd,
+                               (const dequant_val_type_nuq *)
+                               pd->dequant_val_nuq,
+                               qcoeff, dqcoeff, eob,
+                               scan_order->scan, band);
     }
 #endif  // CONFIG_TX64X64
 
@@ -926,30 +977,66 @@ void vp9_xform_quant_fp_nuq(MACROBLOCK *x, int plane, int block,
     band = vp9_coefband_tx_skip;
     vp9_tx_identity(src_diff, coeff, diff_stride, bs, shift);
     if (tx_size <= TX_16X16) {
-      vp9_quantize_fp_nuq(coeff, bs * bs, x->skip_block,
-                          p->quant_fp, pd->dequant,
-                          (const cumbins_type_nuq *)p->cumbins_nuq,
-                          (const dequant_val_type_nuq *)pd->dequant_val_nuq,
-                          qcoeff, dqcoeff, eob,
-                          scan_order->scan, band);
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
+        vp9_highbd_quantize_fp_nuq(coeff, bs * bs, x->skip_block,
+                                   p->quant_pxd_fp, pd->dequant_pxd,
+                                   (const cumbins_type_nuq *)p->cumbins_nuq_pxd,
+                                   (const dequant_val_type_nuq *)
+                                   pd->dequant_val_nuq_pxd,
+                                   qcoeff, dqcoeff, eob,
+                                   scan_order->scan, band);
+      else
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+        vp9_quantize_fp_nuq(coeff, bs * bs, x->skip_block,
+                            p->quant_pxd_fp, pd->dequant_pxd,
+                            (const cumbins_type_nuq *)p->cumbins_nuq_pxd,
+                            (const dequant_val_type_nuq *)
+                            pd->dequant_val_nuq_pxd,
+                            qcoeff, dqcoeff, eob,
+                            scan_order->scan, band);
     } else if (tx_size == TX_32X32) {
-      vp9_quantize_32x32_fp_nuq(coeff, bs * bs, x->skip_block,
-                                p->quant_fp, pd->dequant,
-                                (const cumbins_type_nuq *)p->cumbins_nuq,
-                                (const dequant_val_type_nuq *)
-                                pd->dequant_val_nuq,
-                                qcoeff, dqcoeff, eob,
-                                scan_order->scan, band);
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
+        vp9_highbd_quantize_32x32_fp_nuq(coeff, bs * bs, x->skip_block,
+                                         p->quant_pxd_fp, pd->dequant_pxd,
+                                         (const cumbins_type_nuq *)
+                                         p->cumbins_nuq_pxd,
+                                         (const dequant_val_type_nuq *)
+                                         pd->dequant_val_nuq_pxd,
+                                         qcoeff, dqcoeff, eob,
+                                         scan_order->scan, band);
+      else
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+        vp9_quantize_32x32_fp_nuq(coeff, bs * bs, x->skip_block,
+                                  p->quant_pxd_fp, pd->dequant_pxd,
+                                  (const cumbins_type_nuq *)p->cumbins_nuq_pxd,
+                                  (const dequant_val_type_nuq *)
+                                  pd->dequant_val_nuq_pxd,
+                                  qcoeff, dqcoeff, eob,
+                                  scan_order->scan, band);
     }
 #if CONFIG_TX64X64
     else if (tx_size == TX_64X64) {
-      vp9_quantize_64x64_fp_nuq(coeff, bs * bs, x->skip_block,
-                                p->quant_fp, pd->dequant,
-                                (const cumbins_type_nuq *)p->cumbins_nuq,
-                                (const dequant_val_type_nuq *)
-                                pd->dequant_val_nuq,
-                                qcoeff, dqcoeff, eob,
-                                scan_order->scan, band);
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
+        vp9_highbd_quantize_64x64_fp_nuq(coeff, bs * bs, x->skip_block,
+                                         p->quant_pxd_fp, pd->dequant_pxd,
+                                         (const cumbins_type_nuq *)
+                                         p->cumbins_nuq_pxd,
+                                         (const dequant_val_type_nuq *)
+                                         pd->dequant_val_nuq_pxd,
+                                         qcoeff, dqcoeff, eob,
+                                         scan_order->scan, band);
+      else
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+        vp9_quantize_64x64_fp_nuq(coeff, bs * bs, x->skip_block,
+                                  p->quant_pxd_fp, pd->dequant_pxd,
+                                  (const cumbins_type_nuq *)p->cumbins_nuq_pxd,
+                                  (const dequant_val_type_nuq *)
+                                  pd->dequant_val_nuq_pxd,
+                                  qcoeff, dqcoeff, eob,
+                                  scan_order->scan, band);
     }
 #endif  // CONFIG_TX64X64
     return;
@@ -1125,23 +1212,55 @@ void vp9_xform_quant_dc_nuq(MACROBLOCK *x, int plane, int block,
     int bs = 4 << tx_size;
     vp9_tx_identity(src_diff, coeff, diff_stride, bs, shift);
     if (tx_size <= TX_16X16) {
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
+        vp9_highbd_quantize_dc_nuq(coeff, x->skip_block,
+                                   p->quant_pxd[0], p->quant_shift_pxd[0],
+                                   pd->dequant_pxd[0],
+                                   p->cumbins_nuq_pxd[0],
+                                   pd->dequant_val_nuq_pxd[0],
+                                   qcoeff, dqcoeff, eob);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
       vp9_quantize_dc_nuq(coeff, x->skip_block,
-                          p->quant[0], p->quant_shift[0], pd->dequant[0],
-                          p->cumbins_nuq[0], pd->dequant_val_nuq[0],
+                          p->quant_pxd[0], p->quant_shift_pxd[0],
+                          pd->dequant_pxd[0],
+                          p->cumbins_nuq_pxd[0], pd->dequant_val_nuq_pxd[0],
                           qcoeff, dqcoeff, eob);
     } else if (tx_size == TX_32X32) {
-      vp9_quantize_dc_32x32_nuq(coeff, x->skip_block,
-                                p->quant[0], p->quant_shift[0],
-                                pd->dequant[0],
-                                p->cumbins_nuq[0], pd->dequant_val_nuq[0],
-                                qcoeff, dqcoeff, eob);
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
+        vp9_highbd_quantize_dc_32x32_nuq(coeff, x->skip_block,
+                                         p->quant_pxd[0], p->quant_shift_pxd[0],
+                                         pd->dequant_pxd[0],
+                                         p->cumbins_nuq_pxd[0],
+                                         pd->dequant_val_nuq_pxd[0],
+                                         qcoeff, dqcoeff, eob);
+      else
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+        vp9_quantize_dc_32x32_nuq(coeff, x->skip_block,
+                                  p->quant_pxd[0], p->quant_shift_pxd[0],
+                                  pd->dequant_pxd[0],
+                                  p->cumbins_nuq_pxd[0],
+                                  pd->dequant_val_nuq_pxd[0],
+                                  qcoeff, dqcoeff, eob);
     }
 #if CONFIG_TX64X64
     else if (tx_size == TX_64X64) {
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
+        vp9_highbd_quantize_dc_64x64_nuq(coeff, x->skip_block,
+                                         p->quant_pxd[0], p->quant_shift_pxd[0],
+                                         pd->dequant_pxd[0],
+                                         p->cumbins_nuq_pxd[0],
+                                         pd->dequant_val_nuq_pxd[0],
+                                         qcoeff, dqcoeff, eob);
+      else
+#endif  // CONFIG_VP9_HIGHBITDEPTH
         vp9_quantize_dc_64x64_nuq(coeff, x->skip_block,
-                                  p->quant[0], p->quant_shift[0],
-                                  pd->dequant[0],
-                                  p->cumbins_nuq[0], pd->dequant_val_nuq[0],
+                                  p->quant_pxd[0], p->quant_shift_pxd[0],
+                                  pd->dequant_pxd[0],
+                                  p->cumbins_nuq_pxd[0],
+                                  pd->dequant_val_nuq_pxd[0],
                                   qcoeff, dqcoeff, eob);
     }
 #endif  // CONFIG_TX64X64
@@ -1300,22 +1419,54 @@ void vp9_xform_quant_dc_fp_nuq(MACROBLOCK *x, int plane, int block,
     int bs = 4 << tx_size;
     vp9_tx_identity(src_diff, coeff, diff_stride, bs, shift);
     if (tx_size <= TX_16X16) {
-      vp9_quantize_dc_fp_nuq(coeff, x->skip_block,
-                             p->quant_fp[0], pd->dequant[0],
-                             p->cumbins_nuq[0], pd->dequant_val_nuq[0],
-                             qcoeff, dqcoeff, eob);
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
+        vp9_highbd_quantize_dc_fp_nuq(coeff, x->skip_block,
+                                      p->quant_pxd_fp[0], pd->dequant_pxd[0],
+                                      p->cumbins_nuq_pxd[0],
+                                      pd->dequant_val_nuq_pxd[0],
+                                      qcoeff, dqcoeff, eob);
+      else
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+        vp9_quantize_dc_fp_nuq(coeff, x->skip_block,
+                               p->quant_pxd_fp[0], pd->dequant_pxd[0],
+                               p->cumbins_nuq_pxd[0],
+                               pd->dequant_val_nuq_pxd[0],
+                               qcoeff, dqcoeff, eob);
     } else if (tx_size == TX_32X32) {
-      vp9_quantize_dc_32x32_fp_nuq(coeff, x->skip_block,
-                                   p->quant_fp[0], pd->dequant[0],
-                                   p->cumbins_nuq[0], pd->dequant_val_nuq[0],
-                                   qcoeff, dqcoeff, eob);
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
+        vp9_highbd_quantize_dc_32x32_fp_nuq(coeff, x->skip_block,
+                                            p->quant_pxd_fp[0],
+                                            pd->dequant_pxd[0],
+                                            p->cumbins_nuq_pxd[0],
+                                            pd->dequant_val_nuq_pxd[0],
+                                            qcoeff, dqcoeff, eob);
+      else
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+        vp9_quantize_dc_32x32_fp_nuq(coeff, x->skip_block,
+                                     p->quant_pxd_fp[0], pd->dequant_pxd[0],
+                                     p->cumbins_nuq_pxd[0],
+                                     pd->dequant_val_nuq_pxd[0],
+                                     qcoeff, dqcoeff, eob);
     }
 #if CONFIG_TX64X64
     else if (tx_size == TX_64X64) {
-      vp9_quantize_dc_64x64_fp_nuq(coeff, x->skip_block,
-                                   p->quant_fp[0], pd->dequant[0],
-                                   p->cumbins_nuq[0], pd->dequant_val_nuq[0],
-                                   qcoeff, dqcoeff, eob);
+#if CONFIG_VP9_HIGHBITDEPTH
+      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH)
+        vp9_highbd_quantize_dc_64x64_fp_nuq(coeff, x->skip_block,
+                                            p->quant_pxd_fp[0],
+                                            pd->dequant_pxd[0],
+                                            p->cumbins_nuq_pxd[0],
+                                            pd->dequant_val_nuq_pxd[0],
+                                            qcoeff, dqcoeff, eob);
+      else
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+        vp9_quantize_dc_64x64_fp_nuq(coeff, x->skip_block,
+                                     p->quant_pxd_fp[0], pd->dequant_pxd[0],
+                                     p->cumbins_nuq_pxd[0],
+                                     pd->dequant_val_nuq_pxd[0],
+                                     qcoeff, dqcoeff, eob);
     }
 #endif  // CONFIG_TX64X64
 
@@ -1479,44 +1630,46 @@ void vp9_xform_quant_fp(MACROBLOCK *x, int plane, int block,
     if (tx_size <= TX_16X16) {
 #if CONFIG_VP9_HIGHBITDEPTH
       if (use_hbd)
-        vp9_highbd_quantize_fp(coeff, bs * bs, x->skip_block, p->zbin, p->round,
-                               p->quant, p->quant_shift, qcoeff, dqcoeff,
-                               pd->dequant, eob,
+        vp9_highbd_quantize_fp(coeff, bs * bs, x->skip_block, p->zbin_pxd,
+                               p->round_pxd, p->quant_pxd, p->quant_shift_pxd,
+                               qcoeff, dqcoeff, pd->dequant_pxd, eob,
                                scan_order->scan, scan_order->iscan);
       else
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-        vp9_quantize_fp(coeff, bs * bs, x->skip_block, p->zbin, p->round,
-                        p->quant, p->quant_shift, qcoeff, dqcoeff,
-                        pd->dequant, eob,
+        vp9_quantize_fp(coeff, bs * bs, x->skip_block, p->zbin_pxd,
+                        p->round_pxd, p->quant_pxd, p->quant_shift_pxd, qcoeff,
+                        dqcoeff, pd->dequant_pxd, eob,
                         scan_order->scan, scan_order->iscan);
     } else if (tx_size == TX_32X32) {
 #if CONFIG_VP9_HIGHBITDEPTH
       if (use_hbd)
-        vp9_highbd_quantize_fp_32x32(coeff, bs * bs, x->skip_block, p->zbin,
-                                     p->round, p->quant, p->quant_shift,
-                                     qcoeff, dqcoeff, pd->dequant, eob,
+        vp9_highbd_quantize_fp_32x32(coeff, bs * bs, x->skip_block, p->zbin_pxd,
+                                     p->round_pxd, p->quant_pxd,
+                                     p->quant_shift_pxd,
+                                     qcoeff, dqcoeff, pd->dequant_pxd, eob,
                                      scan_order->scan, scan_order->iscan);
       else
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-        vp9_quantize_fp_32x32(coeff, bs * bs, x->skip_block, p->zbin, p->round,
-                              p->quant, p->quant_shift, qcoeff, dqcoeff,
-                              pd->dequant, eob, scan_order->scan,
-                              scan_order->iscan);
+        vp9_quantize_fp_32x32(coeff, bs * bs, x->skip_block, p->zbin_pxd,
+                              p->round_pxd, p->quant_pxd, p->quant_shift_pxd,
+                              qcoeff, dqcoeff, pd->dequant_pxd, eob,
+                              scan_order->scan, scan_order->iscan);
     }
 #if CONFIG_TX64X64
     else if (tx_size == TX_64X64) {
 #if CONFIG_VP9_HIGHBITDEPTH
       if (use_hbd)
-        vp9_highbd_quantize_fp_64x64(coeff, bs * bs, x->skip_block, p->zbin,
-                                     p->round, p->quant, p->quant_shift,
-                                     qcoeff, dqcoeff, pd->dequant, eob,
+        vp9_highbd_quantize_fp_64x64(coeff, bs * bs, x->skip_block, p->zbin_pxd,
+                                     p->round_pxd, p->quant_pxd,
+                                     p->quant_shift_pxd, qcoeff, dqcoeff,
+                                     pd->dequant_pxd, eob,
                                      scan_order->scan, scan_order->iscan);
       else
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-        vp9_quantize_fp_64x64(coeff, bs * bs, x->skip_block, p->zbin, p->round,
-                              p->quant, p->quant_shift, qcoeff, dqcoeff,
-                              pd->dequant, eob, scan_order->scan,
-                              scan_order->iscan);
+        vp9_quantize_fp_64x64(coeff, bs * bs, x->skip_block, p->zbin_pxd,
+                              p->round_pxd, p->quant_pxd, p->quant_shift_pxd,
+                              qcoeff, dqcoeff, pd->dequant_pxd, eob,
+                              scan_order->scan, scan_order->iscan);
     }
 #endif  // CONFIG_TX64X64
 
@@ -1671,38 +1824,38 @@ void vp9_xform_quant_dc(MACROBLOCK *x, int plane, int block,
     if (tx_size <= TX_16X16) {
 #if CONFIG_VP9_HIGHBITDEPTH
       if (use_hbd)
-        vp9_highbd_quantize_dc(coeff, x->skip_block, p->round,
-                               p->quant_fp[0], qcoeff, dqcoeff,
-                               pd->dequant[0], eob);
+        vp9_highbd_quantize_dc(coeff, x->skip_block, p->round_pxd,
+                               p->quant_pxd_fp[0], qcoeff, dqcoeff,
+                               pd->dequant_pxd[0], eob);
       else
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-        vp9_quantize_dc(coeff, x->skip_block, p->round,
-                        p->quant_fp[0], qcoeff, dqcoeff,
-                        pd->dequant[0], eob);
+        vp9_quantize_dc(coeff, x->skip_block, p->round_pxd,
+                        p->quant_pxd_fp[0], qcoeff, dqcoeff,
+                        pd->dequant_pxd[0], eob);
     } else if (tx_size == TX_32X32) {
 #if CONFIG_VP9_HIGHBITDEPTH
       if (use_hbd)
-        vp9_highbd_quantize_dc_32x32(coeff, x->skip_block, p->round,
-                                     p->quant_fp[0], qcoeff, dqcoeff,
-                                     pd->dequant[0], eob);
+        vp9_highbd_quantize_dc_32x32(coeff, x->skip_block, p->round_pxd,
+                                     p->quant_pxd_fp[0], qcoeff, dqcoeff,
+                                     pd->dequant_pxd[0], eob);
       else
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-        vp9_quantize_dc_32x32(coeff, x->skip_block, p->round,
-                              p->quant_fp[0], qcoeff, dqcoeff,
-                              pd->dequant[0], eob);
+        vp9_quantize_dc_32x32(coeff, x->skip_block, p->round_pxd,
+                              p->quant_pxd_fp[0], qcoeff, dqcoeff,
+                              pd->dequant_pxd[0], eob);
     }
 #if CONFIG_TX64X64
     else if (tx_size == TX_64X64) {
 #if CONFIG_VP9_HIGHBITDEPTH
       if (use_hbd)
-        vp9_highbd_quantize_dc_64x64(coeff, x->skip_block, p->round,
-                                     p->quant_fp[0], qcoeff, dqcoeff,
-                                     pd->dequant[0], eob);
+        vp9_highbd_quantize_dc_64x64(coeff, x->skip_block, p->round_pxd,
+                                     p->quant_pxd_fp[0], qcoeff, dqcoeff,
+                                     pd->dequant_pxd[0], eob);
       else
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-        vp9_quantize_dc_64x64(coeff, x->skip_block, p->round,
-                              p->quant_fp[0], qcoeff, dqcoeff,
-                              pd->dequant[0], eob);
+        vp9_quantize_dc_64x64(coeff, x->skip_block, p->round_pxd,
+                              p->quant_pxd_fp[0], qcoeff, dqcoeff,
+                              pd->dequant_pxd[0], eob);
     }
 #endif  // CONFIG_TX64X64
 
@@ -1849,44 +2002,46 @@ void vp9_xform_quant(MACROBLOCK *x, int plane, int block,
     if (tx_size <= TX_16X16) {
 #if CONFIG_VP9_HIGHBITDEPTH
       if (use_hbd)
-        vp9_highbd_quantize_b(coeff, bs * bs, x->skip_block, p->zbin, p->round,
-                              p->quant, p->quant_shift, qcoeff, dqcoeff,
-                              pd->dequant, eob,
+        vp9_highbd_quantize_b(coeff, bs * bs, x->skip_block, p->zbin_pxd,
+                              p->round_pxd, p->quant_pxd, p->quant_shift_pxd,
+                              qcoeff, dqcoeff, pd->dequant_pxd, eob,
                               scan_order->scan, scan_order->iscan);
       else
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-        vp9_quantize_b(coeff, bs * bs, x->skip_block, p->zbin, p->round,
-                       p->quant, p->quant_shift, qcoeff, dqcoeff,
-                       pd->dequant, eob,
+        vp9_quantize_b(coeff, bs * bs, x->skip_block, p->zbin_pxd, p->round_pxd,
+                       p->quant_pxd, p->quant_shift_pxd, qcoeff, dqcoeff,
+                       pd->dequant_pxd, eob,
                        scan_order->scan, scan_order->iscan);
     } else if (tx_size == TX_32X32) {
 #if CONFIG_VP9_HIGHBITDEPTH
       if (use_hbd)
-        vp9_highbd_quantize_b_32x32(coeff, bs * bs, x->skip_block, p->zbin,
-                                    p->round, p->quant, p->quant_shift,
-                                    qcoeff, dqcoeff, pd->dequant, eob,
+        vp9_highbd_quantize_b_32x32(coeff, bs * bs, x->skip_block, p->zbin_pxd,
+                                    p->round_pxd, p->quant_pxd,
+                                    p->quant_shift_pxd, qcoeff, dqcoeff,
+                                    pd->dequant_pxd, eob,
                                     scan_order->scan, scan_order->iscan);
       else
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-        vp9_quantize_b_32x32(coeff, bs * bs, x->skip_block, p->zbin, p->round,
-                             p->quant, p->quant_shift, qcoeff, dqcoeff,
-                             pd->dequant, eob, scan_order->scan,
-                             scan_order->iscan);
+        vp9_quantize_b_32x32(coeff, bs * bs, x->skip_block, p->zbin_pxd,
+                             p->round_pxd, p->quant_pxd, p->quant_shift_pxd,
+                             qcoeff, dqcoeff, pd->dequant_pxd, eob,
+                             scan_order->scan, scan_order->iscan);
     }
 #if CONFIG_TX64X64
     else if (tx_size == TX_64X64) {
 #if CONFIG_VP9_HIGHBITDEPTH
       if (use_hbd)
-        vp9_highbd_quantize_b_64x64(coeff, bs * bs, x->skip_block, p->zbin,
-                                    p->round, p->quant, p->quant_shift, qcoeff,
-                                    dqcoeff, pd->dequant, eob, scan_order->scan,
+        vp9_highbd_quantize_b_64x64(coeff, bs * bs, x->skip_block, p->zbin_pxd,
+                                    p->round_pxd, p->quant_pxd,
+                                    p->quant_shift_pxd, qcoeff, dqcoeff,
+                                    pd->dequant_pxd, eob, scan_order->scan,
                                     scan_order->iscan);
       else
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-        vp9_quantize_b_64x64(coeff, bs * bs, x->skip_block, p->zbin, p->round,
-                             p->quant, p->quant_shift, qcoeff, dqcoeff,
-                             pd->dequant, eob, scan_order->scan,
-                             scan_order->iscan);
+        vp9_quantize_b_64x64(coeff, bs * bs, x->skip_block, p->zbin_pxd,
+                             p->round_pxd, p->quant_pxd, p->quant_shift_pxd,
+                             qcoeff, dqcoeff, pd->dequant_pxd, eob,
+                             scan_order->scan, scan_order->iscan);
     }
 #endif  // CONFIG_TX64X64
 
@@ -2350,9 +2505,10 @@ static int vp9_dpcm_intra(uint8_t *src, int src_stride,
                              dst + i, dst_stride);
         vp9_tx_identity_rect(src_diff + i, coeff + i, bs, 1,
                              diff_stride, bs, shift);
-        vp9_quantize_rect(coeff + i, bs, 1, p->zbin, p->round, p->quant,
-                          p->quant_shift, qcoeff + i, dqcoeff + i,
-                          pd->dequant, logsizeby32, bs, i == 0, 0);
+        vp9_quantize_rect(coeff + i, bs, 1, p->zbin_pxd, p->round_pxd,
+                          p->quant_pxd,
+                          p->quant_shift_pxd, qcoeff + i, dqcoeff + i,
+                          pd->dequant_pxd, logsizeby32, bs, i == 0, 0);
         vp9_tx_identity_add_rect(dqcoeff + i, dst + i, bs, 1,
                                  bs, dst_stride, shift);
         if (i < bs - 1)
@@ -2370,9 +2526,10 @@ static int vp9_dpcm_intra(uint8_t *src, int src_stride,
         vp9_tx_identity_rect(src_diff + diff_stride * i,
                              coeff + bs * i, 1, bs,
                              diff_stride, bs, shift);
-        vp9_quantize_rect(coeff + bs * i, 1, bs, p->zbin, p->round, p->quant,
-                          p->quant_shift, qcoeff + bs * i, dqcoeff + bs * i,
-                          pd->dequant, logsizeby32, bs, i == 0, 0);
+        vp9_quantize_rect(coeff + bs * i, 1, bs, p->zbin_pxd, p->round_pxd,
+                          p->quant_pxd,
+                          p->quant_shift_pxd, qcoeff + bs * i, dqcoeff + bs * i,
+                          pd->dequant_pxd, logsizeby32, bs, i == 0, 0);
         vp9_tx_identity_add_rect(dqcoeff + bs * i, dst + dst_stride * i,
                                  1, bs, bs, dst_stride, shift);
         if (i < bs - 1)
@@ -2384,8 +2541,8 @@ static int vp9_dpcm_intra(uint8_t *src, int src_stride,
       vp9_subtract_block_c(1, bs, src_diff, diff_stride, src, src_stride,
                            dst, dst_stride);
       vp9_tx_identity_rect(src_diff, coeff, 1, bs, diff_stride, bs, shift);
-      vp9_quantize_rect(coeff, 1, bs, p->zbin, p->round, p->quant,
-                        p->quant_shift, qcoeff, dqcoeff, pd->dequant,
+      vp9_quantize_rect(coeff, 1, bs, p->zbin_pxd, p->round_pxd, p->quant_pxd,
+                        p->quant_shift_pxd, qcoeff, dqcoeff, pd->dequant_pxd,
                         logsizeby32, bs, 1, 0);
       vp9_tx_identity_add_rect(dqcoeff, dst, 1, bs, bs, dst_stride, shift);
 
@@ -2394,9 +2551,10 @@ static int vp9_dpcm_intra(uint8_t *src, int src_stride,
                            dst + dst_stride, dst_stride);
       vp9_tx_identity_rect(src_diff + diff_stride, coeff + bs, bs - 1, 1,
                            diff_stride, bs, shift);
-      vp9_quantize_rect(coeff + bs, bs - 1, 1, p->zbin, p->round, p->quant,
-                        p->quant_shift, qcoeff + bs, dqcoeff + bs,
-                        pd->dequant, logsizeby32, bs, 0, 0);
+      vp9_quantize_rect(coeff + bs, bs - 1, 1, p->zbin_pxd, p->round_pxd,
+                        p->quant_pxd,
+                        p->quant_shift_pxd, qcoeff + bs, dqcoeff + bs,
+                        pd->dequant_pxd, logsizeby32, bs, 0, 0);
       vp9_tx_identity_add_rect(dqcoeff + bs, dst + dst_stride, bs - 1, 1,
                                bs, dst_stride, shift);
 
@@ -2413,10 +2571,10 @@ static int vp9_dpcm_intra(uint8_t *src, int src_stride,
           vp9_tx_identity_rect(src_diff + i * diff_stride + j,
                                coeff + bs * i + j, 1, 1, diff_stride,
                                bs, shift);
-          vp9_quantize_rect(coeff + bs * i + j, 1, 1, p->zbin, p->round,
-                            p->quant, p->quant_shift, qcoeff + bs * i + j,
-                            dqcoeff + bs * i + j, pd->dequant,
-                            logsizeby32, bs, 0, 0);
+          vp9_quantize_rect(coeff + bs * i + j, 1, 1, p->zbin_pxd, p->round_pxd,
+                            p->quant_pxd, p->quant_shift_pxd,
+                            qcoeff + bs * i + j, dqcoeff + bs * i + j,
+                            pd->dequant_pxd, logsizeby32, bs, 0, 0);
           vp9_tx_identity_add_rect(dqcoeff + bs * i + j,
                                    dst + dst_stride * i + j, 1, 1, bs,
                                    dst_stride, shift);
@@ -2457,9 +2615,10 @@ static int vp9_highbd_dpcm_intra(uint8_t *src, int src_stride,
                                     dst_stride, bd);
         vp9_tx_identity_rect(src_diff + i, coeff + i, bs, 1,
                              diff_stride, bs, shift);
-        vp9_quantize_rect(coeff + i, bs, 1, p->zbin, p->round, p->quant,
-                          p->quant_shift, qcoeff + i, dqcoeff + i,
-                          pd->dequant, logsizeby32, bs, i == 0, 1);
+        vp9_quantize_rect(coeff + i, bs, 1, p->zbin_pxd, p->round_pxd,
+                          p->quant_pxd, p->quant_shift_pxd, qcoeff + i,
+                          dqcoeff + i, pd->dequant_pxd, logsizeby32, bs,
+                          i == 0, 1);
         vp9_highbd_tx_identity_add_rect(dqcoeff + i, dst + i, bs, 1,
                                         bs, dst_stride, shift, bd);
         if (i < bs - 1)
@@ -2476,9 +2635,10 @@ static int vp9_highbd_dpcm_intra(uint8_t *src, int src_stride,
                                     dst_stride, bd);
         vp9_tx_identity_rect(src_diff + diff_stride * i, coeff + bs * i, 1, bs,
                              diff_stride, bs, shift);
-        vp9_quantize_rect(coeff + bs * i, 1, bs, p->zbin, p->round, p->quant,
-                          p->quant_shift, qcoeff + bs * i, dqcoeff + bs * i,
-                          pd->dequant, logsizeby32, bs, i == 0, 1);
+        vp9_quantize_rect(coeff + bs * i, 1, bs, p->zbin_pxd, p->round_pxd,
+                          p->quant_pxd, p->quant_shift_pxd, qcoeff + bs * i,
+                          dqcoeff + bs * i, pd->dequant_pxd, logsizeby32, bs,
+                          i == 0, 1);
         vp9_highbd_tx_identity_add_rect(dqcoeff + bs * i, dst + dst_stride * i,
                                         1, bs, bs, dst_stride, shift, bd);
         if (i < bs - 1)
@@ -2490,8 +2650,8 @@ static int vp9_highbd_dpcm_intra(uint8_t *src, int src_stride,
       vp9_highbd_subtract_block_c(1, bs, src_diff, diff_stride, src, src_stride,
                                   dst, dst_stride, bd);
       vp9_tx_identity_rect(src_diff, coeff, 1, bs, diff_stride, bs, shift);
-      vp9_quantize_rect(coeff, 1, bs, p->zbin, p->round, p->quant,
-                        p->quant_shift, qcoeff, dqcoeff, pd->dequant,
+      vp9_quantize_rect(coeff, 1, bs, p->zbin_pxd, p->round_pxd, p->quant_pxd,
+                        p->quant_shift_pxd, qcoeff, dqcoeff, pd->dequant_pxd,
                         logsizeby32, bs, 1, 1);
       vp9_highbd_tx_identity_add_rect(dqcoeff, dst, 1, bs, bs, dst_stride,
                                       shift, bd);
@@ -2500,9 +2660,9 @@ static int vp9_highbd_dpcm_intra(uint8_t *src, int src_stride,
                                   dst + dst_stride, dst_stride, bd);
       vp9_tx_identity_rect(src_diff + diff_stride, coeff + bs, bs - 1, 1,
                            diff_stride, bs, shift);
-      vp9_quantize_rect(coeff + bs, bs - 1, 1, p->zbin, p->round, p->quant,
-                        p->quant_shift, qcoeff + bs, dqcoeff + bs,
-                        pd->dequant, logsizeby32, bs, 0, 1);
+      vp9_quantize_rect(coeff + bs, bs - 1, 1, p->zbin_pxd, p->round_pxd,
+                        p->quant_pxd, p->quant_shift_pxd, qcoeff + bs,
+                        dqcoeff + bs, pd->dequant_pxd, logsizeby32, bs, 0, 1);
       vp9_highbd_tx_identity_add_rect(dqcoeff + bs, dst + dst_stride, bs - 1, 1,
                                       bs, dst_stride, shift, bd);
 
@@ -2519,9 +2679,10 @@ static int vp9_highbd_dpcm_intra(uint8_t *src, int src_stride,
           vp9_tx_identity_rect(src_diff + i * diff_stride + j,
                                coeff + bs * i + j, 1, 1, diff_stride,
                                bs, shift);
-          vp9_quantize_rect(coeff + bs * i + j, 1, 1, p->zbin, p->round,
-                            p->quant, p->quant_shift, qcoeff + bs * i + j,
-                            dqcoeff + bs * i + j, pd->dequant,
+          vp9_quantize_rect(coeff + bs * i + j, 1, 1, p->zbin_pxd, p->round_pxd,
+                            p->quant_pxd, p->quant_shift_pxd,
+                            qcoeff + bs * i + j, dqcoeff + bs * i + j,
+                            pd->dequant_pxd,
                             logsizeby32, bs, 0, 1);
           vp9_highbd_tx_identity_add_rect(dqcoeff + bs * i + j,
                                           dst + dst_stride * i + j, 1, 1, bs,
@@ -2610,18 +2771,13 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
                                      scan_order, mode, tx_size, shift,
                                      tx_size > TX_16X16 ? 0 : -1, xd->bd);
       else
+#endif  // CONFIG_VP9_HIGHBITDEPTH
         *eob = vp9_dpcm_intra(src, src_stride, dst, dst_stride,
                               src_diff, diff_stride,
                               coeff, qcoeff, dqcoeff, p, pd,
                               scan_order, mode, tx_size, shift,
                               tx_size > TX_16X16 ? 0 : -1);
-#else
-      *eob = vp9_dpcm_intra(src, src_stride, dst, dst_stride,
-                            src_diff, diff_stride,
-                            coeff, qcoeff, dqcoeff, p, pd,
-                            scan_order, mode, tx_size, shift,
-                            tx_size > TX_16X16 ? 0 : -1);
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+
       if (*eob)
         *(args->skip) = 0;
       return;
@@ -2651,74 +2807,72 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
         if (use_hbd) {
           if (x->quant_fp)
             vp9_highbd_quantize_fp_nuq(coeff, bs * bs, x->skip_block,
-                                       p->quant_fp, pd->dequant,
-                                       (const cumbins_type_nuq *)p->cumbins_nuq,
+                                       p->quant_pxd_fp, pd->dequant_pxd,
+                                       (const cumbins_type_nuq *)
+                                       p->cumbins_nuq_pxd,
                                        (const dequant_val_type_nuq *)
-                                       pd->dequant_val_nuq,
+                                       pd->dequant_val_nuq_pxd,
                                        qcoeff, dqcoeff, eob,
                                        scan_order->scan, band);
           else
             vp9_highbd_quantize_nuq(coeff, bs * bs, x->skip_block,
-                                    p->quant, p->quant_shift, pd->dequant,
-                                    (const cumbins_type_nuq *)p->cumbins_nuq,
+                                    p->quant_pxd, p->quant_shift_pxd,
+                                    pd->dequant_pxd,
+                                    (const cumbins_type_nuq *)
+                                    p->cumbins_nuq_pxd,
                                     (const dequant_val_type_nuq *)
-                                    pd->dequant_val_nuq,
+                                    pd->dequant_val_nuq_pxd,
                                     qcoeff, dqcoeff, eob,
                                     scan_order->scan, band);
         } else {
           if (x->quant_fp)
             vp9_quantize_fp_nuq(coeff, bs * bs, x->skip_block,
-                                p->quant_fp, pd->dequant,
-                                (const cumbins_type_nuq *)p->cumbins_nuq,
+                                p->quant_pxd_fp, pd->dequant_pxd,
+                                (const cumbins_type_nuq *)p->cumbins_nuq_pxd,
                                 (const dequant_val_type_nuq *)
-                                pd->dequant_val_nuq,
+                                pd->dequant_val_nuq_pxd,
                                 qcoeff, dqcoeff, eob,
                                 scan_order->scan, band);
           else
             vp9_quantize_nuq(coeff, bs * bs, x->skip_block,
-                             p->quant, p->quant_shift, pd->dequant,
-                             (const cumbins_type_nuq *)p->cumbins_nuq,
+                             p->quant_pxd, p->quant_shift_pxd, pd->dequant_pxd,
+                             (const cumbins_type_nuq *)p->cumbins_nuq_pxd,
                              (const dequant_val_type_nuq *)
-                             pd->dequant_val_nuq,
+                             pd->dequant_val_nuq_pxd,
                              qcoeff, dqcoeff, eob,
                              scan_order->scan, band);
         }
 #else  // CONFIG_VP9_HIGHBITDEPTH
         if (x->quant_fp)
           vp9_quantize_fp_nuq(coeff, bs * bs, x->skip_block,
-                              p->quant_fp, pd->dequant,
-                              (const cumbins_type_nuq *)p->cumbins_nuq,
+                              p->quant_pxd_fp, pd->dequant_pxd,
+                              (const cumbins_type_nuq *)p->cumbins_nuq_pxd,
                               (const dequant_val_type_nuq *)
-                              pd->dequant_val_nuq,
+                              pd->dequant_val_nuq_pxd,
                               qcoeff, dqcoeff, eob,
                               scan_order->scan, band);
         else
           vp9_quantize_nuq(coeff, bs * bs, x->skip_block,
-                           p->quant, p->quant_shift, pd->dequant,
-                           (const cumbins_type_nuq *)p->cumbins_nuq,
+                           p->quant_pxd, p->quant_shift_pxd, pd->dequant_pxd,
+                           (const cumbins_type_nuq *)p->cumbins_nuq_pxd,
                            (const dequant_val_type_nuq *)
-                           pd->dequant_val_nuq,
+                           pd->dequant_val_nuq_pxd,
                            qcoeff, dqcoeff, eob,
                            scan_order->scan, band);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #else  // CONFIG_NEW_QUANT
 #if CONFIG_VP9_HIGHBITDEPTH
         if (use_hbd)
-          vp9_highbd_quantize_b(coeff, bs * bs, x->skip_block, p->zbin,
-                                p->round, p->quant, p->quant_shift, qcoeff,
-                                dqcoeff, pd->dequant, eob,
+          vp9_highbd_quantize_b(coeff, bs * bs, x->skip_block, p->zbin_pxd,
+                                p->round_pxd, p->quant_pxd, p->quant_shift_pxd,
+                                qcoeff, dqcoeff, pd->dequant_pxd, eob,
                                 scan_order->scan, scan_order->iscan);
         else
-          vp9_quantize_b(coeff, bs * bs, x->skip_block, p->zbin, p->round,
-                         p->quant, p->quant_shift, qcoeff, dqcoeff,
-                         pd->dequant, eob, scan_order->scan,
-                         scan_order->iscan);
-#else  // CONFIG_VP9_HIGHBITDEPTH
-        vp9_quantize_b(coeff, bs * bs, x->skip_block, p->zbin, p->round,
-                       p->quant, p->quant_shift, qcoeff, dqcoeff,
-                       pd->dequant, eob, scan_order->scan,
-                       scan_order->iscan);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+          vp9_quantize_b(coeff, bs * bs, x->skip_block, p->zbin_pxd,
+                         p->round_pxd, p->quant_pxd, p->quant_shift_pxd,
+                         qcoeff, dqcoeff, pd->dequant_pxd, eob,
+                         scan_order->scan, scan_order->iscan);
 #endif  // CONFIG_NEW_QUANT
       } else if (tx_size == TX_32X32) {
 #if CONFIG_NEW_QUANT
@@ -2726,76 +2880,77 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
         if (use_hbd) {
           if (x->quant_fp)
             vp9_highbd_quantize_32x32_fp_nuq(coeff, bs * bs, x->skip_block,
-                                             p->quant_fp, pd->dequant,
+                                             p->quant_pxd_fp, pd->dequant_pxd,
                                              (const cumbins_type_nuq *)p->
-                                             cumbins_nuq,
+                                             cumbins_nuq_pxd,
                                              (const dequant_val_type_nuq *)
-                                             pd->dequant_val_nuq,
+                                             pd->dequant_val_nuq_pxd,
                                              qcoeff, dqcoeff, eob,
                                              scan_order->scan, band);
           else
             vp9_highbd_quantize_32x32_nuq(coeff, bs * bs, x->skip_block,
-                                          p->quant, p->quant_shift, pd->dequant,
+                                          p->quant_pxd, p->quant_shift_pxd,
+                                          pd->dequant_pxd,
                                           (const cumbins_type_nuq *)
-                                          p->cumbins_nuq,
+                                          p->cumbins_nuq_pxd,
                                           (const dequant_val_type_nuq *)
-                                          pd->dequant_val_nuq,
+                                          pd->dequant_val_nuq_pxd,
                                           qcoeff, dqcoeff, eob,
                                           scan_order->scan, band);
         } else {
           if (x->quant_fp)
             vp9_quantize_32x32_fp_nuq(coeff, bs * bs, x->skip_block,
-                                      p->quant_fp, pd->dequant,
-                                      (const cumbins_type_nuq *)p->cumbins_nuq,
+                                      p->quant_pxd_fp, pd->dequant_pxd,
+                                      (const cumbins_type_nuq *)
+                                      p->cumbins_nuq_pxd,
                                       (const dequant_val_type_nuq *)
-                                      pd->dequant_val_nuq,
+                                      pd->dequant_val_nuq_pxd,
                                       qcoeff, dqcoeff, eob,
                                       scan_order->scan, band);
           else
             vp9_quantize_32x32_nuq(coeff, bs * bs, x->skip_block,
-                                   p->quant, p->quant_shift, pd->dequant,
-                                   (const cumbins_type_nuq *)p->cumbins_nuq,
+                                   p->quant_pxd, p->quant_shift_pxd,
+                                   pd->dequant_pxd,
+                                   (const cumbins_type_nuq *)p->cumbins_nuq_pxd,
                                    (const dequant_val_type_nuq *)
-                                   pd->dequant_val_nuq,
+                                   pd->dequant_val_nuq_pxd,
                                    qcoeff, dqcoeff, eob,
                                    scan_order->scan, band);
         }
 #else  // CONFIG_VP9_HIGHBITDEPTH
         if (x->quant_fp)
           vp9_quantize_32x32_fp_nuq(coeff, bs * bs, x->skip_block,
-                                    p->quant_fp, pd->dequant,
-                                    (const cumbins_type_nuq *)p->cumbins_nuq,
+                                    p->quant_pxd_fp, pd->dequant_pxd,
+                                    (const cumbins_type_nuq *)
+                                    p->cumbins_nuq_pxd,
                                     (const dequant_val_type_nuq *)
-                                    pd->dequant_val_nuq,
+                                    pd->dequant_val_nuq_pxd,
                                     qcoeff, dqcoeff, eob,
                                     scan_order->scan, band);
         else
           vp9_quantize_32x32_nuq(coeff, bs * bs, x->skip_block,
-                                 p->quant, p->quant_shift, pd->dequant,
-                                 (const cumbins_type_nuq *)p->cumbins_nuq,
+                                 p->quant_pxd, p->quant_shift_pxd,
+                                 pd->dequant_pxd,
+                                 (const cumbins_type_nuq *)p->cumbins_nuq_pxd,
                                  (const dequant_val_type_nuq *)
-                                 pd->dequant_val_nuq,
+                                 pd->dequant_val_nuq_pxd,
                                  qcoeff, dqcoeff, eob,
-                                 scan_order->scan, band);
+                                 scan_order->scan, band);/**/
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #else  // CONFIG_NEW_QUANT
 #if CONFIG_VP9_HIGHBITDEPTH
         if (use_hbd)
-          vp9_highbd_quantize_b_32x32(coeff, bs * bs, x->skip_block, p->zbin,
-                                      p->round, p->quant, p->quant_shift,
-                                      qcoeff, dqcoeff, pd->dequant, eob,
+          vp9_highbd_quantize_b_32x32(coeff, bs * bs, x->skip_block,
+                                      p->zbin_pxd, p->round_pxd, p->quant_pxd,
+                                      p->quant_shift_pxd, qcoeff, dqcoeff,
+                                      pd->dequant_pxd, eob,
                                       scan_order->scan, scan_order->iscan);
         else
-          vp9_quantize_b_32x32(coeff, bs * bs, x->skip_block, p->zbin,
-                               p->round, p->quant, p->quant_shift, qcoeff,
-                               dqcoeff, pd->dequant, eob,
-                               scan_order->scan, scan_order->iscan);
-#else  // CONFIG_VP9_HIGHBITDEPTH
-        vp9_quantize_b_32x32(coeff, bs * bs, x->skip_block, p->zbin,
-                             p->round, p->quant, p->quant_shift, qcoeff,
-                             dqcoeff, pd->dequant, eob,
-                             scan_order->scan, scan_order->iscan);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+          vp9_quantize_b_32x32(coeff, bs * bs, x->skip_block, p->zbin_pxd,
+                               p->round_pxd, p->quant_pxd, p->quant_shift_pxd,
+                               qcoeff, dqcoeff, pd->dequant_pxd, eob,
+                               scan_order->scan, scan_order->iscan);
 #endif  // CONFIG_NEW_QUANT
       }
 #if CONFIG_TX64X64
@@ -2805,78 +2960,79 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
         if (use_hbd) {
           if (x->quant_fp)
             vp9_highbd_quantize_64x64_fp_nuq(coeff, bs * bs, x->skip_block,
-                                             p->quant_fp, pd->dequant,
+                                             p->quant_pxd_fp, pd->dequant_pxd,
                                              (const cumbins_type_nuq *)
-                                             p->cumbins_nuq,
+                                             p->cumbins_nuq_pxd,
                                              (const dequant_val_type_nuq *)
-                                             pd->dequant_val_nuq,
+                                             pd->dequant_val_nuq_pxd,
                                              qcoeff, dqcoeff, eob,
                                              scan_order->scan, band);
           else
             vp9_highbd_quantize_64x64_nuq(coeff, bs * bs, x->skip_block,
-                                          p->quant, p->quant_shift, pd->dequant,
+                                          p->quant_pxd, p->quant_shift_pxd,
+                                          pd->dequant_pxd,
                                           (const cumbins_type_nuq *)
-                                          p->cumbins_nuq,
+                                          p->cumbins_nuq_pxd,
                                           (const dequant_val_type_nuq *)
-                                          pd->dequant_val_nuq,
+                                          pd->dequant_val_nuq_pxd,
                                           qcoeff, dqcoeff, eob,
                                           scan_order->scan, band);
         } else {
           if (x->quant_fp)
             vp9_quantize_64x64_fp_nuq(coeff, bs * bs, x->skip_block,
-                                      p->quant_fp, pd->dequant,
+                                      p->quant_pxd_fp, pd->dequant_pxd,
                                       (const cumbins_type_nuq *)
-                                      p->cumbins_nuq,
+                                      p->cumbins_nuq_pxd,
                                       (const dequant_val_type_nuq *)
-                                      pd->dequant_val_nuq,
+                                      pd->dequant_val_nuq_pxd,
                                       qcoeff, dqcoeff, eob,
                                       scan_order->scan, band);
           else
             vp9_quantize_64x64_nuq(coeff, bs * bs, x->skip_block,
-                                   p->quant, p->quant_shift, pd->dequant,
-                                   (const cumbins_type_nuq *)p->cumbins_nuq,
+                                   p->quant_pxd, p->quant_shift_pxd,
+                                   pd->dequant_pxd,
+                                   (const cumbins_type_nuq *)
+                                   p->cumbins_nuq_pxd,
                                    (const dequant_val_type_nuq *)
-                                   pd->dequant_val_nuq,
+                                   pd->dequant_val_nuq_pxd,
                                    qcoeff, dqcoeff, eob,
                                    scan_order->scan, band);
         }
 #else
         if (x->quant_fp)
           vp9_quantize_64x64_fp_nuq(coeff, bs * bs, x->skip_block,
-                                    p->quant_fp, pd->dequant,
+                                    p->quant_pxd_fp, pd->dequant_pxd,
                                     (const cumbins_type_nuq *)
-                                    p->cumbins_nuq,
+                                    p->cumbins_nuq_pxd,
                                     (const dequant_val_type_nuq *)
-                                    pd->dequant_val_nuq,
+                                    pd->dequant_val_nuq_pxd,
                                     qcoeff, dqcoeff, eob,
                                     scan_order->scan, band);
         else
           vp9_quantize_64x64_nuq(coeff, bs * bs, x->skip_block,
-                                 p->quant, p->quant_shift, pd->dequant,
-                                 (const cumbins_type_nuq *)p->cumbins_nuq,
+                                 p->quant_pxd, p->quant_shift_pxd,
+                                 pd->dequant_pxd,
+                                 (const cumbins_type_nuq *)p->cumbins_nuq_pxd,
                                  (const dequant_val_type_nuq *)
-                                 pd->dequant_val_nuq,
+                                 pd->dequant_val_nuq_pxd,
                                  qcoeff, dqcoeff, eob,
                                  scan_order->scan, band);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #else  // CONFIG_NEW_QUANT
 #if CONFIG_VP9_HIGHBITDEPTH
         if (use_hbd)
-          vp9_highbd_quantize_b_64x64(coeff, bs * bs, x->skip_block, p->zbin,
-                                      p->round, p->quant, p->quant_shift,
-                                      qcoeff, dqcoeff, pd->dequant, eob,
+          vp9_highbd_quantize_b_64x64(coeff, bs * bs, x->skip_block,
+                                      p->zbin_pxd, p->round_pxd, p->quant_pxd,
+                                      p->quant_shift_pxd, qcoeff, dqcoeff,
+                                      pd->dequant_pxd, eob,
                                       scan_order->scan,  scan_order->iscan);
         else
-          vp9_quantize_b_64x64(coeff, bs * bs, x->skip_block, p->zbin,
-                               p->round, p->quant, p->quant_shift, qcoeff,
-                               dqcoeff, pd->dequant, eob,
-                               scan_order->scan,  scan_order->iscan);
-#else  // CONFIG_VP9_HIGHBITDEPTH
-        vp9_quantize_b_64x64(coeff, bs * bs, x->skip_block, p->zbin,
-                             p->round, p->quant, p->quant_shift, qcoeff,
-                             dqcoeff, pd->dequant, eob,
-                             scan_order->scan,  scan_order->iscan);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+        vp9_quantize_b_64x64(coeff, bs * bs, x->skip_block, p->zbin_pxd,
+                             p->round_pxd, p->quant_pxd, p->quant_shift_pxd,
+                             qcoeff, dqcoeff, pd->dequant_pxd, eob,
+                             scan_order->scan,  scan_order->iscan);
+
 #endif  // CONFIG_NEW_QUANT
       }
 #endif  // CONFIG_TX64X64
@@ -2888,10 +3044,8 @@ static void encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
         vp9_highbd_tx_identity_add(dqcoeff, dst, dst_stride, 4 << tx_size,
                                    shift, xd->bd);
       else
-        vp9_tx_identity_add(dqcoeff, dst, dst_stride, 4 << tx_size, shift);
-#else
-      vp9_tx_identity_add(dqcoeff, dst, dst_stride, 4 << tx_size, shift);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+        vp9_tx_identity_add(dqcoeff, dst, dst_stride, 4 << tx_size, shift);
     }
 
     if (*eob)

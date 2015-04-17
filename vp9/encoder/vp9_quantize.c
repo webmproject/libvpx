@@ -2018,6 +2018,40 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
       quants->uv_round[q][i] = quants->uv_round[q][1];
       cm->uv_dequant[q][i] = cm->uv_dequant[q][1];
     }
+#if CONFIG_TX_SKIP
+    for (i = 0; i < 8; i++) {
+      quants->y_quant_pxd[q][i] = quants->y_quant[q][PXD_QUANT_INDEX];
+      quants->y_quant_pxd_fp[q][i] = quants->y_quant_fp[q][PXD_QUANT_INDEX];
+      quants->y_round_pxd_fp[q][i] = quants->y_round_fp[q][PXD_QUANT_INDEX];
+      quants->y_quant_shift_pxd[q][i] =
+          quants->y_quant_shift[q][PXD_QUANT_INDEX];
+      quants->y_zbin_pxd[q][i] = quants->y_zbin[q][PXD_QUANT_INDEX];
+      quants->y_round_pxd[q][i] = quants->y_round[q][PXD_QUANT_INDEX];
+      cm->y_dequant_pxd[q][i] = cm->y_dequant[q][PXD_QUANT_INDEX];
+
+      quants->uv_quant_pxd[q][i] = quants->uv_quant[q][PXD_QUANT_INDEX];
+      quants->uv_quant_pxd_fp[q][i] = quants->uv_quant_fp[q][PXD_QUANT_INDEX];
+      quants->uv_round_pxd_fp[q][i] = quants->uv_round_fp[q][PXD_QUANT_INDEX];
+      quants->uv_quant_shift_pxd[q][i] =
+          quants->uv_quant_shift[q][PXD_QUANT_INDEX];
+      quants->uv_zbin_pxd[q][i] = quants->uv_zbin[q][PXD_QUANT_INDEX];
+      quants->uv_round_pxd[q][i] = quants->uv_round[q][PXD_QUANT_INDEX];
+      cm->uv_dequant_pxd[q][i] = cm->uv_dequant[q][PXD_QUANT_INDEX];
+    }
+
+#if CONFIG_NEW_QUANT
+    for (i = 0; i < COEF_BANDS; i++) {
+      const int quant = cm->y_dequant_pxd[q][i != 0];
+      const int uvquant = cm->uv_dequant_pxd[q][i != 0];
+      vp9_get_dequant_val_nuq(quant, i, cm->bit_depth,
+                              cm->y_dequant_val_nuq_pxd[q][i],
+                              quants->y_cumbins_nuq_pxd[q][i]);
+      vp9_get_dequant_val_nuq(uvquant, i, cm->bit_depth,
+                              cm->uv_dequant_val_nuq_pxd[q][i],
+                              quants->uv_cumbins_nuq_pxd[q][i]);
+    }
+#endif  // CONFIG_NEW_QUANT
+#endif  // CONFIG_TX_SKIP
   }
 }
 
@@ -2041,7 +2075,20 @@ void vp9_init_plane_quantizers(VP9_COMP *cpi, MACROBLOCK *x) {
 #if CONFIG_NEW_QUANT
   x->plane[0].cumbins_nuq = quants->y_cumbins_nuq[qindex];
   xd->plane[0].dequant_val_nuq = cm->y_dequant_val_nuq[qindex];
-#endif
+#endif  // CONFIG_NEW_QUANT
+#if CONFIG_TX_SKIP
+  x->plane[0].quant_pxd = quants->y_quant_pxd[qindex];
+  x->plane[0].quant_pxd_fp = quants->y_quant_pxd_fp[qindex];
+  x->plane[0].round_pxd_fp = quants->y_round_pxd_fp[qindex];
+  x->plane[0].quant_shift_pxd = quants->y_quant_shift_pxd[qindex];
+  x->plane[0].zbin_pxd = quants->y_zbin_pxd[qindex];
+  x->plane[0].round_pxd = quants->y_round_pxd[qindex];
+  xd->plane[0].dequant_pxd = cm->y_dequant_pxd[qindex];
+#if CONFIG_NEW_QUANT
+  x->plane[0].cumbins_nuq_pxd = quants->y_cumbins_nuq_pxd[qindex];
+  xd->plane[0].dequant_val_nuq_pxd = cm->y_dequant_val_nuq_pxd[qindex];
+#endif  // CONFIG_NEW_QUANT
+#endif  // CONFIG_TX_SKIP
 
   x->plane[0].quant_thred[0] = x->plane[0].zbin[0] * x->plane[0].zbin[0];
   x->plane[0].quant_thred[1] = x->plane[0].zbin[1] * x->plane[0].zbin[1];
@@ -2058,7 +2105,20 @@ void vp9_init_plane_quantizers(VP9_COMP *cpi, MACROBLOCK *x) {
 #if CONFIG_NEW_QUANT
     x->plane[i].cumbins_nuq = quants->uv_cumbins_nuq[qindex];
     xd->plane[i].dequant_val_nuq = cm->uv_dequant_val_nuq[qindex];
-#endif
+#endif  // CONFIG_NEW_QUANT
+#if CONFIG_TX_SKIP
+    x->plane[i].quant_pxd = quants->uv_quant_pxd[qindex];
+    x->plane[i].quant_pxd_fp = quants->uv_quant_pxd_fp[qindex];
+    x->plane[i].round_pxd_fp = quants->uv_round_pxd_fp[qindex];
+    x->plane[i].quant_shift_pxd = quants->uv_quant_shift_pxd[qindex];
+    x->plane[i].zbin_pxd = quants->uv_zbin_pxd[qindex];
+    x->plane[i].round_pxd = quants->uv_round_pxd[qindex];
+    xd->plane[i].dequant_pxd = cm->uv_dequant_pxd[qindex];
+#if CONFIG_NEW_QUANT
+    x->plane[i].cumbins_nuq_pxd = quants->uv_cumbins_nuq_pxd[qindex];
+    xd->plane[i].dequant_val_nuq_pxd = cm->uv_dequant_val_nuq_pxd[qindex];
+#endif  // CONFIG_NEW_QUANT
+#endif  // CONFIG_TX_SKIP
 
     x->plane[i].quant_thred[0] = x->plane[i].zbin[0] * x->plane[i].zbin[0];
     x->plane[i].quant_thred[1] = x->plane[i].zbin[1] * x->plane[i].zbin[1];

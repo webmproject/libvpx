@@ -28,6 +28,7 @@ extern "C" {
 #define TX_SKIP_Q_THRESH_INTER 64
 #define TX_SKIP_Q_THRESH_INTRA 255
 #define TX_SKIP_SHIFT_THRESH 0
+#define PXD_QUANT_INDEX 0
 #endif  // CONFIG_TX_SKIP
 
 int16_t vp9_dc_quant(int qindex, int delta, vpx_bit_depth_t bit_depth);

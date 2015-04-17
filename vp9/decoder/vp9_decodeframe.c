@@ -201,6 +201,13 @@ static void setup_plane_dequants(VP9_COMMON *cm, MACROBLOCKD *xd, int q_index) {
   xd->plane[0].dequant_val_nuq =
       (const dequant_val_type_nuq *)cm->y_dequant_val_nuq[q_index];
 #endif  // CONFIG_NEW_QUANT
+#if CONFIG_TX_SKIP
+  xd->plane[0].dequant_pxd = cm->y_dequant_pxd[q_index];
+#if CONFIG_NEW_QUANT
+  xd->plane[0].dequant_val_nuq_pxd =
+      (const dequant_val_type_nuq *)cm->y_dequant_val_nuq_pxd[q_index];
+#endif  // CONFIG_NEW_QUANT
+#endif  // CONFIG_TX_SKIP
 
   for (i = 1; i < MAX_MB_PLANE; i++) {
     xd->plane[i].dequant = cm->uv_dequant[q_index];
@@ -208,6 +215,13 @@ static void setup_plane_dequants(VP9_COMMON *cm, MACROBLOCKD *xd, int q_index) {
     xd->plane[i].dequant_val_nuq =
         (const dequant_val_type_nuq *)cm->uv_dequant_val_nuq[q_index];
 #endif  // CONFIG_NEW_QUANT
+#if CONFIG_TX_SKIP
+    xd->plane[i].dequant_pxd = cm->uv_dequant_pxd[q_index];
+#if CONFIG_NEW_QUANT
+    xd->plane[i].dequant_val_nuq_pxd =
+        (const dequant_val_type_nuq *)cm->uv_dequant_val_nuq_pxd[q_index];
+#endif  // CONFIG_NEW_QUANT
+#endif  // CONFIG_TX_SKIP
   }
 }
 
@@ -2588,6 +2602,24 @@ void vp9_init_dequantizer(VP9_COMMON *cm) {
           cm->uv_dequant_val_nuq[q][b], NULL);
     }
 #endif  // CONFIG_NEW_QUANT
+
+#if CONFIG_TX_SKIP
+    cm->y_dequant_pxd[q][0] = cm->y_dequant[q][PXD_QUANT_INDEX];
+    cm->y_dequant_pxd[q][1] = cm->y_dequant[q][PXD_QUANT_INDEX];
+
+    cm->uv_dequant_pxd[q][0] = cm->uv_dequant[q][PXD_QUANT_INDEX];
+    cm->uv_dequant_pxd[q][1] = cm->uv_dequant[q][PXD_QUANT_INDEX];
+#if CONFIG_NEW_QUANT
+    for (b = 0; b < COEF_BANDS; ++b) {
+      vp9_get_dequant_val_nuq(
+          cm->y_dequant_pxd[q][b != 0], b, cm->bit_depth,
+          cm->y_dequant_val_nuq_pxd[q][b], NULL);
+      vp9_get_dequant_val_nuq(
+          cm->uv_dequant_pxd[q][b != 0], b, cm->bit_depth,
+          cm->uv_dequant_val_nuq_pxd[q][b], NULL);
+    }
+#endif  // CONFIG_NEW_QUANT
+#endif  // CONFIG_TX_SKIP
     (void) b;
   }
 }

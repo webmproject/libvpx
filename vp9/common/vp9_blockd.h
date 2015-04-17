@@ -331,7 +331,13 @@ struct macroblockd_plane {
   const int16_t *dequant;
 #if CONFIG_NEW_QUANT
   const dequant_val_type_nuq *dequant_val_nuq;
-#endif
+#endif  // CONFIG_NEW_QUANT
+#if CONFIG_TX_SKIP
+  const int16_t *dequant_pxd;
+#if CONFIG_NEW_QUANT
+  const dequant_val_type_nuq *dequant_val_nuq_pxd;
+#endif  // CONFIG_NEW_QUANT
+#endif  // CONFIG_TX_SKIP
   ENTROPY_CONTEXT *above_context;
   ENTROPY_CONTEXT *left_context;
 #if CONFIG_PALETTE
