@@ -1617,6 +1617,8 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
   cpi->b_calculate_psnr = CONFIG_INTERNAL_STATS;
 #if CONFIG_INTERNAL_STATS
   cpi->b_calculate_ssimg = 0;
+  cpi->b_calculate_blockiness = 1;
+
 
   cpi->count = 0;
   cpi->bytes = 0;
@@ -1658,6 +1660,15 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
   cpi->total_psnrhvs_u = 0;
   cpi->total_psnrhvs_v = 0;
   cpi->total_psnrhvs_all = 0;
+
+  if (cpi->b_calculate_blockiness) {
+    cpi->total_blockiness = 0;
+  }
+
+  if (cpi->b_calculate_blockiness) {
+    cpi->total_blockiness = 0;
+  }
+
 #endif
 
   cpi->first_time_stamp_ever = INT64_MAX;
@@ -1865,7 +1876,6 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
 
   if (cpi && (cm->current_video_frame > 0)) {
 #if CONFIG_INTERNAL_STATS
-
     vp9_clear_system_state();
 
     // printf("\n8x8-4x4:%d-%d\n", cpi->t8x8_count, cpi->t4x4_count);
@@ -1888,19 +1898,28 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
                             (double)cpi->totalp_sq_error);
         const double total_ssim = 100 * pow(cpi->summed_quality /
                                                 cpi->summed_weights, 8.0);
-        const double totalp_ssim = 100 * pow(cpi->summedp_quality /
-                                                cpi->summedp_weights, 8.0);
-
-
-        fprintf(f, "Bitrate\tAVGPsnr\tGLBPsnr\tAVPsnrP\tGLPsnrP\t"
+        if (cpi->b_calculate_blockiness) {
+          fprintf(f, "Bitrate\tAVGPsnr\tGLBPsnr\tAVPsnrP\tGLPsnrP\t"
                 "VPXSSIM\tVPSSIMP\tFASTSSIM\tPSNRHVS\tTime(ms)\n");
-        fprintf(f, "%7.2f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t"
-                "%7.3f\t%7.3f\t%7.3f\t%8.0f\n",
-                dr, cpi->total / cpi->count, total_psnr,
-                cpi->totalp / cpi->count, totalp_psnr, total_ssim, totalp_ssim,
+          fprintf(f, "%7.2f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t"
+                "%7.3f\t%7.3f\t%8.0f\n",
+                  dr, cpi->total / cpi->count, total_psnr,
+                  cpi->totalp / cpi->count, totalp_psnr, total_ssim,
                 cpi->total_fastssim_all / cpi->count,
                 cpi->total_psnrhvs_all / cpi->count,
                 total_encode_time);
+        } else {
+          fprintf(f, "Bitrate\tAVGPsnr\tGLBPsnr\tAVPsnrP\tGLPsnrP\t"
+                "VPXSSIM\tVPSSIMP\tBlockiness\tFASTSSIM\tPSNRHVS\tTime(ms)\n");
+          fprintf(f, "%7.2f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t"
+                  "%7.3f\t%7.3f\t%7.3f\t%8.0f\n",
+                  dr, cpi->total / cpi->count, total_psnr,
+                  cpi->totalp / cpi->count, totalp_psnr, total_ssim,
+                  cpi->total_blockiness / cpi->count,
+                  cpi->total_fastssim_all / cpi->count,
+                  cpi->total_psnrhvs_all / cpi->count,
+                  total_encode_time);
+        }
       }
 
 
@@ -3820,6 +3839,12 @@ static void check_src_altref(VP9_COMP *cpi,
   }
 }
 
+#if CONFIG_INTERNAL_STATS
+extern double vp9_get_blockiness(const unsigned char *img1, int img1_pitch,
+                                 const unsigned char *img2, int img2_pitch,
+                                 int width, int height);
+#endif
+
 int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
                             size_t *size, uint8_t *dest,
                             int64_t *time_stamp, int64_t *time_end, int flush) {
@@ -4169,7 +4194,12 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 #endif
         }
       }
-
+      if (cpi->b_calculate_blockiness)
+        cpi->total_blockiness +=
+            vp9_get_blockiness(cpi->Source->y_buffer, cpi->Source->y_stride,
+                               cm->frame_to_show->y_buffer,
+                               cm->frame_to_show->y_stride,
+                               cpi->Source->y_width, cpi->Source->y_height);
 
       if (cpi->b_calculate_ssimg) {
         double y, u, v, frame_all;
