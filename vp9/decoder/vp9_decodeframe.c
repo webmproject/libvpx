@@ -338,6 +338,52 @@ struct inter_args {
   const int16_t *const uv_dequant;
 };
 
+static void decode_reconstruct_tx(int mi_row, int mi_col,
+                                  int plane, int block,
+                                  TX_SIZE tx_size, BLOCK_SIZE plane_bsize,
+                                  void *arg) {
+  struct inter_args *args = (struct inter_args *)arg;
+  VP9_COMMON *const cm = args->cm;
+  MACROBLOCKD *const xd = args->xd;
+  MB_MODE_INFO *const mbmi = &xd->mi[0].src_mi->mbmi;
+  struct macroblockd_plane *const pd = &xd->plane[plane];
+  TX_SIZE plane_tx_size = plane ?
+      get_uv_tx_size_impl(mbmi->tx_size, plane_bsize,
+                          0, 0) : mbmi->tx_size;
+
+  if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
+    return;
+
+  if (tx_size == plane_tx_size) {
+    const int16_t *const dequant = (plane == 0) ? args->y_dequant
+                                                : args->uv_dequant;
+    int x, y, eob;
+    txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &x, &y);
+    eob = vp9_decode_block_tokens(cm, xd, args->counts, plane, block,
+                                  plane_bsize, x, y, tx_size, args->r, dequant);
+    inverse_transform_block(xd, plane, block, tx_size,
+                            &pd->dst.buf[4 * y * pd->dst.stride + 4 * x],
+                            pd->dst.stride, eob);
+    *args->eobtotal += eob;
+  } else {
+    BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
+    int bh = num_8x8_blocks_high_lookup[bsize];
+    int max_blocks_high = cm->mi_rows;
+    int max_blocks_wide = cm->mi_cols;
+    int step = 1 << (2 *(tx_size - 1));
+    int i;
+    for (i = 0; i < 4; ++i) {
+      int offsetr = (i >> 1) * bh / 2;
+      int offsetc = (i & 0x01) * bh / 2;
+      if ((mi_row + offsetr < max_blocks_high) &&
+          (mi_col + offsetc < max_blocks_wide))
+        decode_reconstruct_tx(mi_row + offsetr, mi_col + offsetc,
+                              plane, block + i * step, tx_size - 1,
+                              plane_bsize, arg);
+    }
+  }
+}
+
 static void reconstruct_inter_block(int plane, int block,
                                     BLOCK_SIZE plane_bsize,
                                     TX_SIZE tx_size, void *arg) {
@@ -425,18 +471,32 @@ static void decode_block(VP9Decoder *const pbi, MACROBLOCKD *const xd,
       int eobtotal = 0;
       struct inter_args arg = {cm, xd, r, counts, &eobtotal, y_dequant,
                                uv_dequant};
-      int plane = 0;
-//      vp9_foreach_transformed_block(xd, bsize, reconstruct_inter_block, &arg);
+      int plane;
+      for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
+        const struct macroblockd_plane *const pd = &xd->plane[plane];
+        const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize, pd);
+        const int mi_width = num_4x4_blocks_wide_lookup[plane_bsize];
+        const int mi_height = num_4x4_blocks_high_lookup[plane_bsize];
+        int txb_size = txsize_to_bsize[max_txsize_lookup[plane_bsize]];
+        int bh = num_4x4_blocks_wide_lookup[txb_size];
+        int idx, idy;
+        int block = 0;
+        int step = 1 << (max_txsize_lookup[plane_bsize] * 2);
 
-      for (plane = 0; plane < MAX_MB_PLANE; ++plane)
-        vp9_foreach_transformed_block_in_plane(xd, bsize, plane,
-                                               reconstruct_inter_block, &arg);
+        for (idy = 0; idy < mi_height; idy += bh) {
+          for (idx = 0; idx < mi_width; idx += bh) {
+            decode_reconstruct_tx(mi_row + idy / 2, mi_col + idx / 2,
+                                  plane, block, max_txsize_lookup[plane_bsize],
+                                  plane_bsize, &arg);
+            block += step;
+          }
+        }
+      }
 
       if (!less8x8 && eobtotal == 0)
         mbmi->skip = 1;  // skip loopfilter
     }
   }
-
   xd->corrupted |= vp9_reader_has_error(r);
 }
 

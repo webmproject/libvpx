@@ -4086,6 +4086,7 @@ static void encode_superblock(VP9_COMP *cpi, ThreadData *td,
 
     vp9_tokenize_sb_inter(cpi, td, t, !output_enabled, mi_row, mi_col,
                           MAX(bsize, BLOCK_8X8));
+//    vp9_tokenize_sb(cpi, td, t, !output_enabled, MAX(bsize, BLOCK_8X8));
   }
 
   if (output_enabled) {

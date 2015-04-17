@@ -580,7 +580,6 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
     mb_y_offset += 16 * (f->y_stride - mb_cols);
     mb_uv_offset += mb_uv_height * f->uv_stride - mb_uv_width * mb_cols;
   }
-
   // Restore input state
   for (i = 0; i < MAX_MB_PLANE; i++)
     mbd->plane[i].pre[0].buf = input_buffer[i];

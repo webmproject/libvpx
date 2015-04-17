@@ -608,21 +608,21 @@ int vp9_has_high_freq_in_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
 }
 
 void tokenize_tx(VP9_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
-                 int dry_run, TX_SIZE tx_size,
+                 int dry_run, TX_SIZE tx_size, BLOCK_SIZE plane_bsize,
                  int mi_row, int mi_col, int block, int plane,
                  void *arg) {
   VP9_COMMON *cm = &cpi->common;
   MACROBLOCK *const x = &td->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0].src_mi->mbmi;
-  const struct macroblockd_plane *const pd = &xd->plane[plane];
   TX_SIZE plane_tx_size = plane ?
-      get_uv_tx_size_impl(mbmi->tx_size, mbmi->sb_type,
-                          pd->subsampling_x, pd->subsampling_y) : mbmi->tx_size;
+      get_uv_tx_size_impl(mbmi->tx_size, plane_bsize,
+                          0, 0) : mbmi->tx_size;
+
+  if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
+    return;
 
   if (tx_size == plane_tx_size) {
-    const struct macroblockd_plane *const pd = &xd->plane[plane];
-    BLOCK_SIZE plane_bsize = get_plane_block_size(mbmi->sb_type, pd);
     if (!dry_run)
       tokenize_b(plane, block, plane_bsize, tx_size, arg);
     else
@@ -630,8 +630,8 @@ void tokenize_tx(VP9_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
   } else {
     BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
     int bh = num_8x8_blocks_high_lookup[bsize];
-    int max_blocks_high = cm->mi_rows >> pd->subsampling_y;
-    int max_blocks_wide = cm->mi_cols >> pd->subsampling_x;
+    int max_blocks_high = cm->mi_rows;
+    int max_blocks_wide = cm->mi_cols;
     int i;
 
     for (i = 0; i < 4; ++i) {
@@ -640,7 +640,7 @@ void tokenize_tx(VP9_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
       int step = 1 << (2 *(tx_size - 1));
       if ((mi_row + offsetr < max_blocks_high) &&
           (mi_col + offsetc < max_blocks_wide))
-        tokenize_tx(cpi, td, t, dry_run, tx_size - 1,
+        tokenize_tx(cpi, td, t, dry_run, tx_size - 1, plane_bsize,
                     mi_row + offsetr, mi_col + offsetc,
                     block + i * step, plane, arg);
     }
@@ -660,8 +660,6 @@ void vp9_tokenize_sb_inter(VP9_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
                                               SEG_LVL_SKIP);
   struct tokenize_b_args arg = {cpi, td, t};
   int plane;
-  if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
-    return;
 
   if (mbmi->skip) {
     if (!dry_run)
@@ -681,10 +679,10 @@ void vp9_tokenize_sb_inter(VP9_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
   for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
     const struct macroblockd_plane *const pd = &xd->plane[plane];
     const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize, pd);
-    const int mi_width = num_8x8_blocks_wide_lookup[plane_bsize];
-    const int mi_height = num_8x8_blocks_high_lookup[plane_bsize];
+    const int mi_width = num_4x4_blocks_wide_lookup[plane_bsize];
+    const int mi_height = num_4x4_blocks_high_lookup[plane_bsize];
     int txb_size = txsize_to_bsize[max_txsize_lookup[plane_bsize]];
-    int bh = num_8x8_blocks_wide_lookup[txb_size];
+    int bh = num_4x4_blocks_wide_lookup[txb_size];
     int idx, idy;
     int block = 0;
     int step = 1 << (max_txsize_lookup[plane_bsize] * 2);
@@ -692,7 +690,8 @@ void vp9_tokenize_sb_inter(VP9_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
     for (idy = 0; idy < mi_height; idy += bh) {
       for (idx = 0; idx < mi_width; idx += bh) {
         tokenize_tx(cpi, td, t, dry_run, max_txsize_lookup[plane_bsize],
-                    mi_row, mi_col, block, plane, &arg);
+                    plane_bsize, mi_row + idy / 2, mi_col + idx / 2,
+                    block, plane, &arg);
         block += step;
       }
     }
