@@ -26,6 +26,9 @@ double vp9_calc_ssimg(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest,
 double vp9_calc_fastssim(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest,
                          double *ssim_y, double *ssim_u, double *ssim_v);
 
+double vp9_psnrhvs(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest,
+                   double *ssim_y, double *ssim_u, double *ssim_v);
+
 #if CONFIG_VP9_HIGHBITDEPTH
 double vp9_highbd_calc_ssim(YV12_BUFFER_CONFIG *source,
                             YV12_BUFFER_CONFIG *dest,

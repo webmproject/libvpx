@@ -63,6 +63,7 @@ VP9_CX_SRCS-yes += encoder/vp9_mcomp.c
 VP9_CX_SRCS-yes += encoder/vp9_encoder.c
 VP9_CX_SRCS-yes += encoder/vp9_picklpf.c
 VP9_CX_SRCS-yes += encoder/vp9_picklpf.h
+VP9_CX_SRCS-$(CONFIG_INTERNAL_STATS) += encoder/vp9_psnrhvs.c
 VP9_CX_SRCS-yes += encoder/vp9_quantize.c
 VP9_CX_SRCS-yes += encoder/vp9_ratectrl.c
 VP9_CX_SRCS-yes += encoder/vp9_rd.c

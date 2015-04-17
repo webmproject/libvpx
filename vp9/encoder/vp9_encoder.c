@@ -1615,7 +1615,15 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
     cpi->total_ssimg_v = 0;
     cpi->total_ssimg_all = 0;
   }
+  cpi->total_fastssim_y = 0;
+  cpi->total_fastssim_u = 0;
+  cpi->total_fastssim_v = 0;
   cpi->total_fastssim_all = 0;
+
+  cpi->total_psnrhvs_y = 0;
+  cpi->total_psnrhvs_u = 0;
+  cpi->total_psnrhvs_v = 0;
+  cpi->total_psnrhvs_all = 0;
 #endif
 
   cpi->first_time_stamp_ever = INT64_MAX;
@@ -1851,12 +1859,13 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
 
 
         fprintf(f, "Bitrate\tAVGPsnr\tGLBPsnr\tAVPsnrP\tGLPsnrP\t"
-                "VPXSSIM\tVPSSIMP\tFASTSSIM  Time(ms)\n");
+                "VPXSSIM\tVPSSIMP\tFASTSSIM\tPSNRHVS\tTime(ms)\n");
         fprintf(f, "%7.2f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t"
-                "%7.3f\t%7.3f\t%8.0f\n",
+                "%7.3f\t%7.3f\t%7.3f\t%8.0f\n",
                 dr, cpi->total / cpi->count, total_psnr,
                 cpi->totalp / cpi->count, totalp_psnr, total_ssim, totalp_ssim,
                 cpi->total_fastssim_all / cpi->count,
+                cpi->total_psnrhvs_all / cpi->count,
                 total_encode_time);
       }
 
@@ -4156,6 +4165,15 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
         cpi->total_fastssim_v += v;
         cpi->total_fastssim_all += frame_all;
         /* TODO(JBB): add 10/12 bit support */
+      }
+      {
+        double y, u, v, frame_all;
+        frame_all = vp9_psnrhvs(cpi->Source, cm->frame_to_show, &y, &u, &v);
+
+        cpi->total_psnrhvs_y += y;
+        cpi->total_psnrhvs_u += u;
+        cpi->total_psnrhvs_v += v;
+        cpi->total_psnrhvs_all += frame_all;
       }
     }
   }
