@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn//AC0\u003d",
+        "filename": "vp9/common/mips/msa/vp9_convolve8_vert_msa.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-04-17T07:40:56Z",
+      "side": 1,
+      "message": "you\u0027re selecting this file in the .mk based on this configure, it\u0027s unnecessary here. we use this style in webp, which simplifies the build, but you\u0027d need a dummy symbol in this module to avoid warnings on all platforms...",
+      "revId": "381b3d7dab720b5d85a25481dac10d4418014407",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ACs\u003d",
+        "filename": "vp9/common/mips/msa/vp9_convolve_msa.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-04-17T07:40:56Z",
+      "side": 1,
+      "message": "you should have an include guard",
+      "revId": "381b3d7dab720b5d85a25481dac10d4418014407",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ACo\u003d",
+        "filename": "vp9/common/mips/msa/vp9_convolve_msa.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-04-17T07:40:56Z",
+      "side": 1,
+      "message": "once you drop the HAVE try to keep the includes in the header to a minimum, i.e., those that are needed by the definitions in it",
+      "revId": "381b3d7dab720b5d85a25481dac10d4418014407",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn//ACw\u003d",
+        "filename": "vp9/common/mips/msa/vp9_convolve_msa.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-04-17T07:40:56Z",
+      "side": 1,
+      "message": "same here",
+      "revId": "381b3d7dab720b5d85a25481dac10d4418014407",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
