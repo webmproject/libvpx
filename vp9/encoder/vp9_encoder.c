@@ -1649,7 +1649,7 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
     cpi->total_ssimg_v = 0;
     cpi->total_ssimg_all = 0;
   }
-
+  cpi->total_fastssim_all = 0;
 #endif
 
   cpi->first_time_stamp_ever = INT64_MAX;
@@ -1883,13 +1883,17 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
         const double totalp_ssim = 100 * pow(cpi->summedp_quality /
                                                 cpi->summedp_weights, 8.0);
 
+
         fprintf(f, "Bitrate\tAVGPsnr\tGLBPsnr\tAVPsnrP\tGLPsnrP\t"
-                "VPXSSIM\tVPSSIMP\t  Time(ms)\n");
-        fprintf(f, "%7.2f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t%8.0f\n",
+                "VPXSSIM\tVPSSIMP\tFASTSSIM  Time(ms)\n");
+        fprintf(f, "%7.2f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t"
+                "%7.3f\t%7.3f\t%8.0f\n",
                 dr, cpi->total / cpi->count, total_psnr,
                 cpi->totalp / cpi->count, totalp_psnr, total_ssim, totalp_ssim,
+                cpi->total_fastssim_all / cpi->count,
                 total_encode_time);
       }
+
 
       if (cpi->b_calculate_ssimg) {
         fprintf(f, "BitRate\tSSIM_Y\tSSIM_U\tSSIM_V\tSSIM_A\t  Time(ms)\n");
@@ -4175,6 +4179,17 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
         cpi->total_ssimg_u += u;
         cpi->total_ssimg_v += v;
         cpi->total_ssimg_all += frame_all;
+      }
+      {
+        double y, u, v, frame_all;
+        frame_all = vp9_calc_fastssim(cpi->Source, cm->frame_to_show, &y, &u,
+                                      &v);
+
+        cpi->total_fastssim_y += y;
+        cpi->total_fastssim_u += u;
+        cpi->total_fastssim_v += v;
+        cpi->total_fastssim_all += frame_all;
+        /* TODO(JBB): add 10/12 bit support */
       }
     }
   }
