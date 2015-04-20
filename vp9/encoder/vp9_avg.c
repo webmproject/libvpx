@@ -193,10 +193,10 @@ unsigned int vp9_highbd_avg_4x4_c(const uint8_t *s8, int p) {
 void vp9_highbd_minmax_8x8_c(const uint8_t *s8, int p, const uint8_t *d8,
                              int dp, int *min, int *max) {
   int i, j;
-  *min = 255;
-  *max = 0;
   const uint16_t* s = CONVERT_TO_SHORTPTR(s8);
   const uint16_t* d = CONVERT_TO_SHORTPTR(d8);
+  *min = 255;
+  *max = 0;
   for (i = 0; i < 8; ++i, s += p, d += dp) {
     for (j = 0; j < 8; ++j) {
       int diff = abs(s[j]-d[j]);
