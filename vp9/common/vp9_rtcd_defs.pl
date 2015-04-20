@@ -292,7 +292,7 @@ add_proto qw/void vp9_convolve_avg/, "const uint8_t *src, ptrdiff_t src_stride, 
 specialize qw/vp9_convolve_avg neon dspr2/, "$sse2_x86inc";
 
 add_proto qw/void vp9_convolve8/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h";
-specialize qw/vp9_convolve8 sse2 ssse3 neon dspr2/, "$avx2_ssse3";
+specialize qw/vp9_convolve8 sse2 ssse3 neon dspr2 msa/, "$avx2_ssse3";
 
 add_proto qw/void vp9_convolve8_horiz/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h";
 specialize qw/vp9_convolve8_horiz sse2 ssse3 neon dspr2/, "$avx2_ssse3";

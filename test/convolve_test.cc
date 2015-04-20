@@ -1820,7 +1820,7 @@ const ConvolveFunctions convolve8_msa(
     vp9_convolve_copy_c, vp9_convolve_avg_c,
     vp9_convolve8_horiz_c, vp9_convolve8_avg_horiz_c,
     vp9_convolve8_vert_msa, vp9_convolve8_avg_vert_c,
-    vp9_convolve8_c, vp9_convolve8_avg_c, 0);
+    vp9_convolve8_msa, vp9_convolve8_avg_c, 0);
 
 INSTANTIATE_TEST_CASE_P(MSA, ConvolveTest, ::testing::Values(
     make_tuple(4, 4, &convolve8_msa),
