@@ -29,6 +29,9 @@ void vp9_xform_quant_fp(MACROBLOCK *x, int plane, int block,
                         BLOCK_SIZE plane_bsize, TX_SIZE tx_size);
 void vp9_xform_quant_dc(MACROBLOCK *x, int plane, int block,
                         BLOCK_SIZE plane_bsize, TX_SIZE tx_size);
+void vp9_xform_quant_inter(MACROBLOCK *x, int plane, int block,
+                           int blk_row, int blk_col,
+                           BLOCK_SIZE plane_bsize, TX_SIZE tx_size);
 void vp9_xform_quant(MACROBLOCK *x, int plane, int block,
                      BLOCK_SIZE plane_bsize, TX_SIZE tx_size);
 

@@ -338,7 +338,7 @@ struct inter_args {
   const int16_t *const uv_dequant;
 };
 
-static void decode_reconstruct_tx(int mi_row, int mi_col,
+static void decode_reconstruct_tx(int blk_row, int blk_col,
                                   int plane, int block,
                                   TX_SIZE tx_size, BLOCK_SIZE plane_bsize,
                                   void *arg) {
@@ -351,35 +351,40 @@ static void decode_reconstruct_tx(int mi_row, int mi_col,
       get_uv_tx_size_impl(mbmi->tx_size, plane_bsize,
                           0, 0) : mbmi->tx_size;
 
-  if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
+  int max_blocks_high = num_4x4_blocks_high_lookup[plane_bsize];
+  int max_blocks_wide = num_4x4_blocks_wide_lookup[plane_bsize];
+
+  if (xd->mb_to_bottom_edge < 0)
+    max_blocks_high += xd->mb_to_bottom_edge >> (5 + pd->subsampling_y);
+  if (xd->mb_to_right_edge < 0)
+    max_blocks_wide += xd->mb_to_right_edge >> (5 + pd->subsampling_x);
+
+  if (blk_row >= max_blocks_high || blk_col >= max_blocks_wide)
     return;
 
   if (tx_size == plane_tx_size) {
     const int16_t *const dequant = (plane == 0) ? args->y_dequant
                                                 : args->uv_dequant;
-    int x, y, eob;
-    txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &x, &y);
+    int eob;
     eob = vp9_decode_block_tokens(cm, xd, args->counts, plane, block,
-                                  plane_bsize, x, y, tx_size, args->r, dequant);
+                                  plane_bsize, blk_col, blk_row,
+                                  tx_size, args->r, dequant);
     inverse_transform_block(xd, plane, block, tx_size,
-                            &pd->dst.buf[4 * y * pd->dst.stride + 4 * x],
+                            &pd->dst.buf[4 * blk_row * pd->dst.stride +
+                                         4 * blk_col],
                             pd->dst.stride, eob);
     *args->eobtotal += eob;
   } else {
     BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
-    int bh = num_8x8_blocks_high_lookup[bsize];
-    int max_blocks_high = cm->mi_rows;
-    int max_blocks_wide = cm->mi_cols;
+    int bh = num_4x4_blocks_high_lookup[bsize];
     int step = 1 << (2 *(tx_size - 1));
     int i;
     for (i = 0; i < 4; ++i) {
       int offsetr = (i >> 1) * bh / 2;
       int offsetc = (i & 0x01) * bh / 2;
-      if ((mi_row + offsetr < max_blocks_high) &&
-          (mi_col + offsetc < max_blocks_wide))
-        decode_reconstruct_tx(mi_row + offsetr, mi_col + offsetc,
-                              plane, block + i * step, tx_size - 1,
-                              plane_bsize, arg);
+      decode_reconstruct_tx(blk_row + offsetr, blk_col + offsetc,
+                            plane, block + i * step, tx_size - 1,
+                            plane_bsize, arg);
     }
   }
 }
@@ -485,8 +490,8 @@ static void decode_block(VP9Decoder *const pbi, MACROBLOCKD *const xd,
 
         for (idy = 0; idy < mi_height; idy += bh) {
           for (idx = 0; idx < mi_width; idx += bh) {
-            decode_reconstruct_tx(mi_row + idy / 2, mi_col + idx / 2,
-                                  plane, block, max_txsize_lookup[plane_bsize],
+            decode_reconstruct_tx(idy, idx, plane, block,
+                                  max_txsize_lookup[plane_bsize],
                                   plane_bsize, &arg);
             block += step;
           }

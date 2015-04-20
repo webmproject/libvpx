@@ -300,7 +300,7 @@ void vp9_foreach_transformed_block(
     const MACROBLOCKD* const xd, BLOCK_SIZE bsize,
     foreach_transformed_block_visitor visit, void *arg);
 
-static INLINE void txfrm_block_to_raster_xy(BLOCK_SIZE plane_bsize,
+static void txfrm_block_to_raster_xy(BLOCK_SIZE plane_bsize,
                                             TX_SIZE tx_size, int block,
                                             int *x, int *y) {
   const int bwl = b_width_log2_lookup[plane_bsize];

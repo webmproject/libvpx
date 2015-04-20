@@ -52,8 +52,7 @@ struct VP9_COMP;
 struct ThreadData;
 
 void vp9_tokenize_sb_inter(struct VP9_COMP *cpi, struct ThreadData *td,
-                           TOKENEXTRA **t, int dry_run,
-                           int mi_row, int mi_col, BLOCK_SIZE bsize);
+                           TOKENEXTRA **t, int dry_run, BLOCK_SIZE bsize);
 
 void vp9_tokenize_sb(struct VP9_COMP *cpi, struct ThreadData *td,
                      TOKENEXTRA **t, int dry_run, BLOCK_SIZE bsize);

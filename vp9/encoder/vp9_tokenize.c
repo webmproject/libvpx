@@ -442,6 +442,20 @@ struct tokenize_b_args {
   TOKENEXTRA **tp;
 };
 
+static void set_entropy_context_b_inter(int plane, int block,
+                                        BLOCK_SIZE plane_bsize,
+                                        int blk_row, int blk_col,
+                                        TX_SIZE tx_size, void *arg) {
+  struct tokenize_b_args* const args = arg;
+  ThreadData *const td = args->td;
+  MACROBLOCK *const x = &td->mb;
+  MACROBLOCKD *const xd = &x->e_mbd;
+  struct macroblock_plane *p = &x->plane[plane];
+  struct macroblockd_plane *pd = &xd->plane[plane];
+  vp9_set_contexts(xd, pd, plane_bsize, tx_size, p->eobs[block] > 0,
+                   blk_col, blk_row);
+}
+
 static void set_entropy_context_b(int plane, int block, BLOCK_SIZE plane_bsize,
                                   TX_SIZE tx_size, void *arg) {
   struct tokenize_b_args* const args = arg;
@@ -484,6 +498,85 @@ static INLINE int get_tx_eob(const struct segmentation *seg, int segment_id,
                              TX_SIZE tx_size) {
   const int eob_max = 16 << (tx_size << 1);
   return vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP) ? 0 : eob_max;
+}
+
+static void tokenize_b_inter(int plane, int block, BLOCK_SIZE plane_bsize,
+                             int blk_row, int blk_col,
+                             TX_SIZE tx_size, void *arg) {
+  struct tokenize_b_args* const args = arg;
+  VP9_COMP *cpi = args->cpi;
+  ThreadData *const td = args->td;
+  MACROBLOCK *const x = &td->mb;
+  MACROBLOCKD *const xd = &x->e_mbd;
+  TOKENEXTRA **tp = args->tp;
+  uint8_t token_cache[32 * 32];
+  struct macroblock_plane *p = &x->plane[plane];
+  struct macroblockd_plane *pd = &xd->plane[plane];
+  MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
+  int pt; /* near block/prev token context index */
+  int c;
+  TOKENEXTRA *t = *tp;        /* store tokens starting here */
+  int eob = p->eobs[block];
+  const PLANE_TYPE type = pd->plane_type;
+  const tran_low_t *qcoeff = BLOCK_OFFSET(p->qcoeff, block);
+  const int segment_id = mbmi->segment_id;
+  const int16_t *scan, *nb;
+  const scan_order *so;
+  const int ref = is_inter_block(mbmi);
+  unsigned int (*const counts)[COEFF_CONTEXTS][ENTROPY_TOKENS] =
+      td->rd_counts.coef_counts[tx_size][type][ref];
+  vp9_prob (*const coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
+      cpi->common.fc->coef_probs[tx_size][type][ref];
+  unsigned int (*const eob_branch)[COEFF_CONTEXTS] =
+      td->counts->eob_branch[tx_size][type][ref];
+  const uint8_t *const band = get_band_translate(tx_size);
+  const int seg_eob = get_tx_eob(&cpi->common.seg, segment_id, tx_size);
+  int16_t token;
+  EXTRABIT extra;
+
+  pt = get_entropy_context(tx_size, pd->above_context + blk_col,
+                           pd->left_context + blk_row);
+  so = get_scan(xd, tx_size, type, block);
+  scan = so->scan;
+  nb = so->neighbors;
+  c = 0;
+
+  while (c < eob) {
+    int v = 0;
+    int skip_eob = 0;
+    v = qcoeff[scan[c]];
+
+    while (!v) {
+      add_token_no_extra(&t, coef_probs[band[c]][pt], ZERO_TOKEN, skip_eob,
+                         counts[band[c]][pt]);
+      eob_branch[band[c]][pt] += !skip_eob;
+
+      skip_eob = 1;
+      token_cache[scan[c]] = 0;
+      ++c;
+      pt = get_coef_context(nb, token_cache, c);
+      v = qcoeff[scan[c]];
+    }
+
+    vp9_get_token_extra(v, &token, &extra);
+
+    add_token(&t, coef_probs[band[c]][pt], extra, (uint8_t)token,
+              (uint8_t)skip_eob, counts[band[c]][pt]);
+    eob_branch[band[c]][pt] += !skip_eob;
+
+    token_cache[scan[c]] = vp9_pt_energy_class[token];
+    ++c;
+    pt = get_coef_context(nb, token_cache, c);
+  }
+  if (c < seg_eob) {
+    add_token_no_extra(&t, coef_probs[band[c]][pt], EOB_TOKEN, 0,
+                       counts[band[c]][pt]);
+    ++eob_branch[band[c]][pt];
+  }
+
+  *tp = t;
+
+  vp9_set_contexts(xd, pd, plane_bsize, tx_size, c > 0, blk_col, blk_row);
 }
 
 static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
@@ -609,47 +702,55 @@ int vp9_has_high_freq_in_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
 
 void tokenize_tx(VP9_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
                  int dry_run, TX_SIZE tx_size, BLOCK_SIZE plane_bsize,
-                 int mi_row, int mi_col, int block, int plane,
+                 int blk_row, int blk_col, int block, int plane,
                  void *arg) {
-  VP9_COMMON *cm = &cpi->common;
   MACROBLOCK *const x = &td->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0].src_mi->mbmi;
+  const struct macroblockd_plane *const pd = &xd->plane[plane];
   TX_SIZE plane_tx_size = plane ?
       get_uv_tx_size_impl(mbmi->tx_size, plane_bsize,
                           0, 0) : mbmi->tx_size;
 
-  if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
+  int max_blocks_high = num_4x4_blocks_high_lookup[plane_bsize];
+  int max_blocks_wide = num_4x4_blocks_wide_lookup[plane_bsize];
+
+  if (xd->mb_to_bottom_edge < 0)
+    max_blocks_high += xd->mb_to_bottom_edge >> (5 + pd->subsampling_y);
+  if (xd->mb_to_right_edge < 0)
+    max_blocks_wide += xd->mb_to_right_edge >> (5 + pd->subsampling_x);
+
+  if (blk_row >= max_blocks_high || blk_col >= max_blocks_wide)
     return;
 
   if (tx_size == plane_tx_size) {
     if (!dry_run)
-      tokenize_b(plane, block, plane_bsize, tx_size, arg);
+      tokenize_b_inter(plane, block, plane_bsize,
+                       blk_row, blk_col, tx_size, arg);
     else
-      set_entropy_context_b(plane, block, plane_bsize, tx_size, arg);
+      set_entropy_context_b_inter(plane, block, plane_bsize,
+                                  blk_row, blk_col, tx_size, arg);
   } else {
     BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
-    int bh = num_8x8_blocks_high_lookup[bsize];
-    int max_blocks_high = cm->mi_rows;
-    int max_blocks_wide = cm->mi_cols;
+    int bh = num_4x4_blocks_wide_lookup[bsize];
     int i;
+
+    assert(num_4x4_blocks_high_lookup[bsize] ==
+           num_4x4_blocks_wide_lookup[bsize]);
 
     for (i = 0; i < 4; ++i) {
       int offsetr = (i >> 1) * bh / 2;
       int offsetc = (i & 0x01) * bh / 2;
       int step = 1 << (2 *(tx_size - 1));
-      if ((mi_row + offsetr < max_blocks_high) &&
-          (mi_col + offsetc < max_blocks_wide))
-        tokenize_tx(cpi, td, t, dry_run, tx_size - 1, plane_bsize,
-                    mi_row + offsetr, mi_col + offsetc,
-                    block + i * step, plane, arg);
+      tokenize_tx(cpi, td, t, dry_run, tx_size - 1, plane_bsize,
+                  blk_row + offsetr, blk_col + offsetc,
+                  block + i * step, plane, arg);
     }
   }
 }
 
 void vp9_tokenize_sb_inter(VP9_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
-                           int dry_run, int mi_row, int mi_col,
-                           BLOCK_SIZE bsize) {
+                           int dry_run, BLOCK_SIZE bsize) {
   VP9_COMMON *const cm = &cpi->common;
   MACROBLOCK *const x = &td->mb;
   MACROBLOCKD *const xd = &x->e_mbd;
@@ -690,8 +791,7 @@ void vp9_tokenize_sb_inter(VP9_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
     for (idy = 0; idy < mi_height; idy += bh) {
       for (idx = 0; idx < mi_width; idx += bh) {
         tokenize_tx(cpi, td, t, dry_run, max_txsize_lookup[plane_bsize],
-                    plane_bsize, mi_row + idy / 2, mi_col + idx / 2,
-                    block, plane, &arg);
+                    plane_bsize, idy, idx, block, plane, &arg);
         block += step;
       }
     }
