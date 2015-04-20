@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAdn/+/3Y\u003d",
+        "filename": "vp9/common/vp9_loopfilter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 869,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-04-20T19:16:51Z",
+      "side": 1,
+      "message": "these common access could be simplified moving forward, but best to keep the revert as simple as possible",
+      "revId": "8106442cbab8d60379e6868c69c158b2967a54bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//AB0\u003d",
         "filename": "vp9/common/vp9_onyxc_int.h",
         "patchSetId": 2
@@ -37,6 +54,41 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn/+/3U\u003d",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-04-20T19:16:51Z",
+      "side": 1,
+      "message": "where? did you forget to push the update or were you going to do it in a follow-up?",
+      "parentUuid": "AAAAdn//ABU\u003d",
+      "revId": "8106442cbab8d60379e6868c69c158b2967a54bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn/+/3Q\u003d",
+        "filename": "vp9/decoder/vp9_decoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-04-20T19:16:51Z",
+      "side": 1,
+      "message": "this alignment is weird, you could break after the last comma probably",
+      "revId": "8106442cbab8d60379e6868c69c158b2967a54bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn//ABw\u003d",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 2
@@ -66,6 +118,40 @@
       "side": 1,
       "message": "yes",
       "parentUuid": "AAAAdn//ABw\u003d",
+      "revId": "8106442cbab8d60379e6868c69c158b2967a54bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn/+/3M\u003d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 265,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-04-20T19:16:51Z",
+      "side": 1,
+      "message": "same weird alignment here",
+      "revId": "8106442cbab8d60379e6868c69c158b2967a54bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn/+/3I\u003d",
+        "filename": "vp9/encoder/vp9_temporal_filter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 727,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-04-20T19:16:51Z",
+      "side": 1,
+      "message": "drop this line",
       "revId": "8106442cbab8d60379e6868c69c158b2967a54bc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
