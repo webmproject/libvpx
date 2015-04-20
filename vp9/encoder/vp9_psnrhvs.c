@@ -23,11 +23,7 @@
 #endif
 #include <string.h>
 
-typedef int16_t od_coeff;
-typedef int16_t tran_low_t;
-extern void vp9_fdct8x8_c(const int16_t *input, tran_low_t *output, int stride);
-
-void od_bin_fdct8x8(od_coeff *y, int ystride, const od_coeff *x, int xstride) {
+void od_bin_fdct8x8(tran_low_t *y, int ystride, const int16_t *x, int xstride) {
   (void) xstride;
   vp9_fdct8x8_c(x, y, ystride);
 }
@@ -95,8 +91,8 @@ static double calc_psnrhvs(const unsigned char *_src, int _systride,
                            double _par, int _w, int _h, int _step,
                            float _csf[8][8]) {
   float ret;
-  od_coeff dct_s[8 * 8];
-  od_coeff dct_d[8 * 8];
+  int16_t dct_s[8 * 8], dct_d[8 * 8];
+  tran_low_t dct_s_coef[8 * 8], dct_d_coef[8 * 8];
   float mask[8][8];
   int pixels;
   int x;
@@ -177,14 +173,14 @@ static double calc_psnrhvs(const unsigned char *_src, int _systride,
         s_gvar = (s_vars[0] + s_vars[1] + s_vars[2] + s_vars[3]) / s_gvar;
       if (d_gvar > 0)
         d_gvar = (d_vars[0] + d_vars[1] + d_vars[2] + d_vars[3]) / d_gvar;
-      od_bin_fdct8x8(dct_s, 8, dct_s, 8);
-      od_bin_fdct8x8(dct_d, 8, dct_d, 8);
+      od_bin_fdct8x8(dct_s_coef, 8, dct_s, 8);
+      od_bin_fdct8x8(dct_d_coef, 8, dct_d, 8);
       for (i = 0; i < 8; i++)
         for (j = (i == 0); j < 8; j++)
-          s_mask += dct_s[i * 8 + j] * dct_s[i * 8 + j] * mask[i][j];
+          s_mask += dct_s_coef[i * 8 + j] * dct_s_coef[i * 8 + j] * mask[i][j];
       for (i = 0; i < 8; i++)
         for (j = (i == 0); j < 8; j++)
-          d_mask += dct_d[i * 8 + j] * dct_d[i * 8 + j] * mask[i][j];
+          d_mask += dct_d_coef[i * 8 + j] * dct_d_coef[i * 8 + j] * mask[i][j];
       s_mask = sqrt(s_mask * s_gvar) / 32.f;
       d_mask = sqrt(d_mask * d_gvar) / 32.f;
       if (d_mask > s_mask)
@@ -192,7 +188,7 @@ static double calc_psnrhvs(const unsigned char *_src, int _systride,
       for (i = 0; i < 8; i++) {
         for (j = 0; j < 8; j++) {
           float err;
-          err = fabs(dct_s[i * 8 + j] - dct_d[i * 8 + j]);
+          err = fabs(dct_s_coef[i * 8 + j] - dct_d_coef[i * 8 + j]);
           if (i != 0 || j != 0)
             err = err < s_mask / mask[i][j] ? 0 : err - s_mask / mask[i][j];
           ret += (err * _csf[i][j]) * (err * _csf[i][j]);
