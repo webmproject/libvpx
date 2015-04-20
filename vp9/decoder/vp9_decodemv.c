@@ -61,16 +61,27 @@ static int read_segment_id(vp9_reader *r, const struct segmentation *seg) {
 }
 
 static void read_tx_size_inter(VP9_COMMON *cm, MACROBLOCKD *xd,
-                               TX_SIZE tx_size, int mi_row, int mi_col,
+                               TX_SIZE tx_size, int blk_row, int blk_col,
                                vp9_reader *r) {
   MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
-  int is_split = vp9_read_bit(r);
+  int is_split = 0;
+  int max_blocks_high = num_4x4_blocks_high_lookup[mbmi->sb_type];
+  int max_blocks_wide = num_4x4_blocks_wide_lookup[mbmi->sb_type];
+  if (xd->mb_to_bottom_edge < 0)
+    max_blocks_high += xd->mb_to_bottom_edge >> 5;
+  if (xd->mb_to_right_edge < 0)
+    max_blocks_wide += xd->mb_to_right_edge >> 5;
+
+  if (blk_row >= max_blocks_high || blk_col >= max_blocks_wide)
+    return;
+
+  is_split = vp9_read_bit(r);
 
   if (!is_split) {
     mbmi->tx_size = tx_size;
   } else {
     BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
-    int bh = num_8x8_blocks_high_lookup[bsize];
+    int bh = num_4x4_blocks_high_lookup[bsize];
     int i;
 
     if (tx_size == TX_8X8) {
@@ -81,10 +92,8 @@ static void read_tx_size_inter(VP9_COMMON *cm, MACROBLOCKD *xd,
     for (i = 0; i < 4; ++i) {
       int offsetr = (i >> 1) * bh / 2;
       int offsetc = (i & 0x01) * bh / 2;
-      if ((mi_row + offsetr < cm->mi_rows) &&
-          (mi_col + offsetc < cm->mi_cols))
-        read_tx_size_inter(cm, xd, tx_size - 1,
-                           mi_row + offsetr, mi_col + offsetc, r);
+      read_tx_size_inter(cm, xd, tx_size - 1,
+                         blk_row + offsetr, blk_col + offsetc, r);
     }
   }
 }
@@ -608,15 +617,15 @@ static void read_inter_frame_mode_info(VP9Decoder *const pbi,
 
   if (mbmi->sb_type >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT &&
       !mbmi->skip && inter_block) {
-    int txb_size = txsize_to_bsize[max_txsize_lookup[bsize]];
-    int bh = num_8x8_blocks_wide_lookup[txb_size];
-    int width  = num_8x8_blocks_wide_lookup[bsize];
-    int height = num_8x8_blocks_high_lookup[bsize];
+    BLOCK_SIZE txb_size = txsize_to_bsize[max_txsize_lookup[bsize]];
+    int bh = num_4x4_blocks_wide_lookup[txb_size];
+    int width  = num_4x4_blocks_wide_lookup[bsize];
+    int height = num_4x4_blocks_high_lookup[bsize];
     int idx, idy;
     for (idy = 0; idy < height; idy += bh)
       for (idx = 0; idx < width; idx += bh)
         read_tx_size_inter(cm, xd, max_txsize_lookup[mbmi->sb_type],
-                           mi_row + idy, mi_col + idx, r);
+                           idy, idx, r);
   } else {
     mbmi->tx_size = read_tx_size(cm, xd, counts,
                                  !mbmi->skip || !inter_block, r);
