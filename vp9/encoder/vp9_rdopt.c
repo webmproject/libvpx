@@ -2728,6 +2728,10 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     super_block_yrd(cpi, x, rate_y, &distortion_y, &skippable_y, psse,
                     bsize, txfm_cache, ref_best_rd);
 
+    // sudo load
+    for (i = 0; i < 64; ++i)
+      mbmi->inter_tx_size[i] = mbmi->tx_size;
+
     if (*rate_y == INT_MAX) {
       *rate2 = INT_MAX;
       *distortion = INT64_MAX;
@@ -3898,6 +3902,10 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
                                                           : cm->interp_filter;
     x->skip = 0;
     set_ref_ptrs(cm, xd, ref_frame, second_ref_frame);
+
+    // sudo load
+    for (i = 0; i < 64; ++i)
+      mbmi->inter_tx_size[i] = mbmi->tx_size;
 
     // Select prediction reference frames.
     for (i = 0; i < MAX_MB_PLANE; i++) {

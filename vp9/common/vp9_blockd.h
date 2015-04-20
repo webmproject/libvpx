@@ -113,6 +113,7 @@ typedef struct {
   BLOCK_SIZE sb_type;
   PREDICTION_MODE mode;
   TX_SIZE tx_size;
+  TX_SIZE inter_tx_size[64];  // Assume maximum of 64x64 block size.
   int8_t skip;
   int8_t segment_id;
   int8_t seg_id_predicted;  // valid only when temporal_update is enabled

@@ -482,7 +482,7 @@ static void decode_block(VP9Decoder *const pbi, MACROBLOCKD *const xd,
         const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize, pd);
         const int mi_width = num_4x4_blocks_wide_lookup[plane_bsize];
         const int mi_height = num_4x4_blocks_high_lookup[plane_bsize];
-        int txb_size = txsize_to_bsize[max_txsize_lookup[plane_bsize]];
+        BLOCK_SIZE txb_size = txsize_to_bsize[max_txsize_lookup[plane_bsize]];
         int bh = num_4x4_blocks_wide_lookup[txb_size];
         int idx, idy;
         int block = 0;

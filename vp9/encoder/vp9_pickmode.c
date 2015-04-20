@@ -1521,6 +1521,12 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   mbmi->ref_frame[0] = best_ref_frame;
   x->skip_txfm[0] = best_mode_skip_txfm;
 
+  {
+    int i;
+    for (i = 0; i < 64; ++i)
+      mbmi->inter_tx_size[i] = mbmi->tx_size;
+  }
+
   if (reuse_inter_pred && best_pred != NULL) {
     if (best_pred->data != orig_dst.buf && is_inter_mode(mbmi->mode)) {
 #if CONFIG_VP9_HIGHBITDEPTH

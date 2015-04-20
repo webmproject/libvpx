@@ -708,9 +708,11 @@ void tokenize_tx(VP9_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0].src_mi->mbmi;
   const struct macroblockd_plane *const pd = &xd->plane[plane];
+  int blk_idx = (blk_row / 2) * 8 + (blk_col / 2);
   TX_SIZE plane_tx_size = plane ?
-      get_uv_tx_size_impl(mbmi->tx_size, plane_bsize,
-                          0, 0) : mbmi->tx_size;
+      get_uv_tx_size_impl(mbmi->inter_tx_size[blk_idx],
+                          plane_bsize, 0, 0) :
+      mbmi->inter_tx_size[blk_idx];
 
   int max_blocks_high = num_4x4_blocks_high_lookup[plane_bsize];
   int max_blocks_wide = num_4x4_blocks_wide_lookup[plane_bsize];
@@ -776,13 +778,12 @@ void vp9_tokenize_sb_inter(VP9_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
   else
     *t = t_backup;
 
-
   for (plane = 0; plane < MAX_MB_PLANE; ++plane) {
     const struct macroblockd_plane *const pd = &xd->plane[plane];
     const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize, pd);
     const int mi_width = num_4x4_blocks_wide_lookup[plane_bsize];
     const int mi_height = num_4x4_blocks_high_lookup[plane_bsize];
-    int txb_size = txsize_to_bsize[max_txsize_lookup[plane_bsize]];
+    BLOCK_SIZE txb_size = txsize_to_bsize[max_txsize_lookup[plane_bsize]];
     int bh = num_4x4_blocks_wide_lookup[txb_size];
     int idx, idy;
     int block = 0;
