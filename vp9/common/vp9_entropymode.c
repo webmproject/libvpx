@@ -1257,6 +1257,10 @@ void vp9_setup_past_independence(VP9_COMMON *cm) {
 
   // To force update of the sharpness
   lf->last_sharpness_level = -1;
+#if CONFIG_LOOP_POSTFILTER
+  lf->bilateral_level = 0;
+  lf->last_bilateral_level = 0;
+#endif
 
   vp9_default_coef_probs(cm);
   vp9_init_mode_probs(&cm->fc);

@@ -87,15 +87,16 @@ static int try_bilateral_frame(const YV12_BUFFER_CONFIG *sd,
 static int64_t search_bilateral_level(const YV12_BUFFER_CONFIG *sd,
                                       VP9_COMP *cpi,
                                       int filter_level, int partial_frame,
-                                      int64_t *best_cost_ret) {
+                                      double *best_cost_ret) {
   VP9_COMMON *const cm = &cpi->common;
   int i, bilateral_best, err;
-  int64_t best_cost;
-  int64_t cost[BILATERAL_LEVELS_KF];
+  double best_cost;
+  double cost[BILATERAL_LEVELS_KF];
   const int bilateral_level_bits = vp9_bilateral_level_bits(&cpi->common);
   const int bilateral_levels = 1 << bilateral_level_bits;
 #ifdef USE_RD_LOOP_POSTFILTER_SEARCH
   MACROBLOCK *x = &cpi->mb;
+  int bits;
 #endif
 
   //  Make a copy of the unfiltered / processed recon buffer
@@ -107,9 +108,10 @@ static int64_t search_bilateral_level(const YV12_BUFFER_CONFIG *sd,
   bilateral_best = 0;
   err = try_bilateral_frame(sd, cpi, 0, partial_frame);
 #ifdef USE_RD_LOOP_POSTFILTER_SEARCH
-  cost[0] = RDCOST(x->rdmult, x->rddiv, 0, err);
+  bits = cm->lf.last_bilateral_level == 0 ? 0 : bilateral_level_bits;
+  cost[0] = RDCOST_DBL(x->rdmult, x->rddiv, (bits << 2), err);
 #else
-  cost[0] = err;
+  cost[0] = (double)err;
 #endif
   best_cost = cost[0];
   for (i = 1; i <= bilateral_levels; ++i) {
@@ -118,10 +120,10 @@ static int64_t search_bilateral_level(const YV12_BUFFER_CONFIG *sd,
     // Normally the rate is rate in bits * 256 and dist is sum sq err * 64
     // when RDCOST is used.  However below we just scale both in the correct
     // ratios appropriately but not exactly by these values.
-    cost[i] = RDCOST(x->rdmult, x->rddiv,
-                     bilateral_level_bits << 2, err);
+    bits = cm->lf.last_bilateral_level == i ? 0 : bilateral_level_bits;
+    cost[i] = RDCOST_DBL(x->rdmult, x->rddiv, (bits << 2), err);
 #else
-    cost[i] = err;
+    cost[i] = (double)err;
 #endif
     if (cost[i] < best_cost) {
       bilateral_best = i;
@@ -144,18 +146,19 @@ static int search_filter_bilateral_level(const YV12_BUFFER_CONFIG *sd,
   const int max_filter_level = get_max_filter_level(cpi);
   int filt_direction = 0;
   int filt_best, bilateral_best;
-  int64_t best_err;
+  double best_err;
+  int i;
 
   // Start the search at the previous frame filter level unless it is now out of
   // range.
   int filt_mid = clamp(lf->filter_level, min_filter_level, max_filter_level);
   int filter_step = filt_mid < 16 ? 4 : filt_mid / 4;
-  // Sum squared error at each filter level
-  int64_t ss_err[MAX_LOOP_FILTER + 1];
+  double ss_err[MAX_LOOP_FILTER + 1];
   int bilateral;
 
   // Set each entry to -1
-  vpx_memset(ss_err, 0xFF, sizeof(ss_err));
+  for (i = 0; i <= MAX_LOOP_FILTER; ++i)
+    ss_err[i] = -1.0;
 
   bilateral = search_bilateral_level(sd, cpi, filt_mid,
                                      partial_frame, &best_err);
@@ -168,14 +171,14 @@ static int search_filter_bilateral_level(const YV12_BUFFER_CONFIG *sd,
     const int filt_low = MAX(filt_mid - filter_step, min_filter_level);
 
     // Bias against raising loop filter in favor of lowering it.
-    int64_t bias = (best_err >> (15 - (filt_mid / 8))) * filter_step;
+    double bias = (best_err / (1 << (15 - (filt_mid / 8)))) * filter_step;
 
     if ((cpi->oxcf.pass == 2) && (cpi->twopass.section_intra_rating < 20))
       bias = (bias * cpi->twopass.section_intra_rating) / 20;
 
     // yx, bias less for large block size
     if (cm->tx_mode != ONLY_4X4)
-      bias >>= 1;
+      bias /= 2;
 
     if (filt_direction <= 0 && filt_low != filt_mid) {
       // Get Low filter error score

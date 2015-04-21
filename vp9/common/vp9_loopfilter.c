@@ -242,7 +242,7 @@ int vp9_bilateral_level_bits(const VP9_COMMON *const cm) {
 
 int vp9_loop_bilateral_used(int level, int kf) {
   const bilateral_params_t param = vp9_bilateral_level_to_params(level, kf);
-  return (param.sigma_x && param.sigma_r);
+  return (param.sigma_x && param.sigma_y && param.sigma_r);
 }
 
 void vp9_loop_bilateral_init(loop_filter_info_n *lfi, int level, int kf) {
@@ -250,11 +250,14 @@ void vp9_loop_bilateral_init(loop_filter_info_n *lfi, int level, int kf) {
   lfi->bilateral_used = vp9_loop_bilateral_used(level, kf);
   if (lfi->bilateral_used) {
     if (param.sigma_x != lfi->bilateral_sigma_x_set ||
+        param.sigma_y != lfi->bilateral_sigma_y_set ||
         param.sigma_r != lfi->bilateral_sigma_r_set) {
       const int sigma_x = param.sigma_x;
+      const int sigma_y = param.sigma_y;
       const int sigma_r = param.sigma_r;
       const double sigma_r_d = (double)sigma_r / BILATERAL_PRECISION;
       const double sigma_x_d = (double)sigma_x / BILATERAL_PRECISION;
+      const double sigma_y_d = (double)sigma_y / BILATERAL_PRECISION;
       double *wr_lut_ = lfi->wr_lut + 255;
       double *wx_lut_ = lfi->wx_lut + BILATERAL_HALFWIN * (1 + BILATERAL_WIN);
       int i, x, y;
@@ -265,9 +268,11 @@ void vp9_loop_bilateral_init(loop_filter_info_n *lfi, int level, int kf) {
       for (y = -BILATERAL_HALFWIN; y <= BILATERAL_HALFWIN; y++)
         for (x = -BILATERAL_HALFWIN; x <= BILATERAL_HALFWIN; x++) {
           wx_lut_[y * BILATERAL_WIN + x] =
-              exp(-(x * x + y * y) / (2 * sigma_x_d * sigma_x_d));
+              exp(-(x * x) / (2 * sigma_x_d * sigma_x_d) -
+                   (y * y) / (2 * sigma_y_d * sigma_y_d));
         }
       lfi->bilateral_sigma_x_set = sigma_x;
+      lfi->bilateral_sigma_y_set = sigma_y;
       lfi->bilateral_sigma_r_set = sigma_r;
     }
   }

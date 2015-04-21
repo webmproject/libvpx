@@ -1527,10 +1527,13 @@ static void encode_loopfilter(VP9_COMMON *cm,
     }
   }
 #if CONFIG_LOOP_POSTFILTER
-  vp9_wb_write_bit(wb, lf->bilateral_level > 0);
-  if (lf->bilateral_level > 0)
-    vp9_wb_write_literal(wb, lf->bilateral_level - 1,
+  vp9_wb_write_bit(wb, lf->bilateral_level != lf->last_bilateral_level);
+  if (lf->bilateral_level != lf->last_bilateral_level) {
+    int level = lf->bilateral_level -
+                (lf->bilateral_level > lf->last_bilateral_level);
+    vp9_wb_write_literal(wb, level,
                          vp9_bilateral_level_bits(cm));
+  }
 #endif  // CONFIG_LOOP_POSTFILTER
 }
 

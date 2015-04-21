@@ -38,49 +38,50 @@ struct VP9Common;
 #define BILATERAL_LEVELS        (1 << BILATERAL_LEVEL_BITS)
 #define DEF_BILATERAL_LEVEL     2
 
-#define BILATERAL_PRECISION     8
+#define BILATERAL_PRECISION     16
 #define BILATERAL_HALFWIN       3
 #define BILATERAL_WIN           (2 * BILATERAL_HALFWIN + 1)
 
 typedef struct bilateral_params {
-  int sigma_x;  // spatial variance
+  int sigma_x;  // spatial variance x
+  int sigma_y;  // spatial variance y
   int sigma_r;  // range variance
 } bilateral_params_t;
 
 static bilateral_params_t
     bilateral_level_to_params_arr[BILATERAL_LEVELS + 1] = {
-  // Values are rounded to 1/8 th precision
-  {0, 0},    // 0 - default
-  {4, 16},
-  {5, 16},
-  {6, 16},
-  {7, 16},
-  {9, 18},
-  {12, 20},
-  {16, 20},
-  {20, 20},
+  // Values are rounded to 1/16 th precision
+  {0, 0, 0},    // 0 - default
+  {8, 9, 30},
+  {9, 8, 30},
+  {9, 11, 32},
+  {11, 9, 32},
+  {14, 14, 32},
+  {18, 18, 36},
+  {24, 24, 40},
+  {32, 32, 40},
 };
 
 static bilateral_params_t
     bilateral_level_to_params_arr_kf[BILATERAL_LEVELS_KF + 1] = {
-  // Values are rounded to 1/8 th precision
-  {0, 0},    // 0 - default
-  {4, 16},
-  {5, 16},
-  {6, 16},
-  {7, 16},
-  {9, 18},
-  {12, 20},
-  {15, 22},
-  {18, 24},
-  {21, 24},
-  {24, 24},
-  {24, 28},
-  {28, 24},
-  {28, 28},
-  {28, 32},
-  {32, 24},
-  {32, 28},
+  // Values are rounded to 1/16 th precision
+  {0, 0, 0},    // 0 - default
+  {8, 8, 30},
+  {9, 9, 32},
+  {10, 10, 32},
+  {12, 12, 32},
+  {14, 14, 32},
+  {18, 18, 36},
+  {24, 24, 40},
+  {30, 30, 44},
+  {36, 36, 48},
+  {42, 42, 48},
+  {48, 48, 48},
+  {48, 48, 56},
+  {56, 56, 48},
+  {56, 56, 56},
+  {56, 56, 64},
+  {64, 64, 48},
 };
 
 int vp9_bilateral_level_bits(const struct VP9Common *const cm);
@@ -112,6 +113,7 @@ struct loopfilter {
 
 #if CONFIG_LOOP_POSTFILTER
   int bilateral_level;
+  int last_bilateral_level;
 #endif
 };
 
@@ -130,6 +132,7 @@ typedef struct {
   double wx_lut[BILATERAL_WIN * BILATERAL_WIN];
   double wr_lut[512];
   int bilateral_sigma_x_set;
+  int bilateral_sigma_y_set;
   int bilateral_sigma_r_set;
   int bilateral_used;
 #endif
