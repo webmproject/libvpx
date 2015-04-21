@@ -147,9 +147,8 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
   const int shift = (tx_size >= TX_32X32 ? tx_size - TX_16X16 : 0);
   const int mul = 1 << shift;
 #if CONFIG_TX_SKIP
-  const int16_t *dequant_ptr =
-      xd->mi[0].src_mi->mbmi.tx_skip[plane != 0] ?
-          pd->dequant_pxd : pd->dequant;
+  int tx_skip = xd->mi[0].src_mi->mbmi.tx_skip[plane != 0];
+  const int16_t *dequant_ptr = tx_skip ? pd->dequant_pxd : pd->dequant;
 #else
   const int16_t *dequant_ptr = pd->dequant;
 #endif  // CONFIG_TX_SKIP
@@ -160,8 +159,7 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
   const dequant_val_type_nuq *dequant_val = pd->dequant_val_nuq;
 #endif  // CONFIG_NEW_QUANT
 #if CONFIG_TX_SKIP
-  const uint8_t *const band_translate =
-      xd->mi[0].src_mi->mbmi.tx_skip[plane != 0] ?
+  const uint8_t *const band_translate = tx_skip ?
       vp9_coefband_tx_skip : get_band_translate(tx_size);
 #else
   const uint8_t *const band_translate = get_band_translate(tx_size);
@@ -211,7 +209,7 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
 #else
   dct_value_tokens = vp9_dct_value_tokens_ptr;
   dct_value_cost = vp9_dct_value_cost_ptr;
-#endif
+#endif  // CONFIG_VP9_HIGHBITDEPTH
   for (i = 0; i < eob; i++)
     token_cache[scan[i]] =
         vp9_pt_energy_class[dct_value_tokens[qcoeff[scan[i]]].token];
@@ -233,11 +231,23 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
       if (next < default_eob) {
         band = band_translate[i + 1];
         pt = trellis_get_coeff_context(scan, nb, i, t0, token_cache);
-        rate0 += mb->token_costs[tx_size][type][ref][band][0][pt]
-                                [tokens[next][0].token];
-        rate1 += mb->token_costs[tx_size][type][ref][band][0][pt]
-                                [tokens[next][1].token];
+#if CONFIG_TX_SKIP
+        if (tx_skip && FOR_SCREEN_CONTENT) {
+          rate0 += mb->token_costs_pxd[tx_size][type][ref][0][pt]
+                                      [tokens[next][0].token];
+          rate1 += mb->token_costs_pxd[tx_size][type][ref][0][pt]
+                                      [tokens[next][1].token];
+        } else {
+#endif  // CONFIG_TX_SKIP
+          rate0 += mb->token_costs[tx_size][type][ref][band][0][pt]
+                                  [tokens[next][0].token];
+          rate1 += mb->token_costs[tx_size][type][ref][band][0][pt]
+                                  [tokens[next][1].token];
+#if CONFIG_TX_SKIP
+        }
+#endif  // CONFIG_TX_SKIP
       }
+
       UPDATE_RD_COST();
       /* And pick the best. */
       best = rd_cost1 < rd_cost0;
@@ -308,13 +318,25 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
         band = band_translate[i + 1];
         if (t0 != EOB_TOKEN) {
           pt = trellis_get_coeff_context(scan, nb, i, t0, token_cache);
-          rate0 += mb->token_costs[tx_size][type][ref][band][!x][pt]
-                                  [tokens[next][0].token];
+#if CONFIG_TX_SKIP
+          if (tx_skip && FOR_SCREEN_CONTENT)
+            rate0 += mb->token_costs_pxd[tx_size][type][ref][!x][pt]
+                                        [tokens[next][0].token];
+          else
+#endif  // CONFIG_TX_SKIP
+            rate0 += mb->token_costs[tx_size][type][ref][band][!x][pt]
+                                    [tokens[next][0].token];
         }
         if (t1 != EOB_TOKEN) {
           pt = trellis_get_coeff_context(scan, nb, i, t1, token_cache);
-          rate1 += mb->token_costs[tx_size][type][ref][band][!x][pt]
-                                  [tokens[next][1].token];
+#if CONFIG_TX_SKIP
+          if (tx_skip && FOR_SCREEN_CONTENT)
+            rate0 += mb->token_costs_pxd[tx_size][type][ref][!x][pt]
+                                        [tokens[next][1].token];
+          else
+#endif  // CONFIG_TX_SKIP
+            rate1 += mb->token_costs[tx_size][type][ref][band][!x][pt]
+                                    [tokens[next][1].token];
         }
       }
 
@@ -386,13 +408,25 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
       t1 = tokens[next][1].token;
       /* Update the cost of each path if we're past the EOB token. */
       if (t0 != EOB_TOKEN) {
-        tokens[next][0].rate +=
-            mb->token_costs[tx_size][type][ref][band][1][0][t0];
+#if CONFIG_TX_SKIP
+          if (tx_skip && FOR_SCREEN_CONTENT)
+            tokens[next][0].rate +=
+                mb->token_costs_pxd[tx_size][type][ref][1][0][t0];
+          else
+#endif  // CONFIG_TX_SKIP
+            tokens[next][0].rate +=
+                mb->token_costs[tx_size][type][ref][band][1][0][t0];
         tokens[next][0].token = ZERO_TOKEN;
       }
       if (t1 != EOB_TOKEN) {
-        tokens[next][1].rate +=
-            mb->token_costs[tx_size][type][ref][band][1][0][t1];
+#if CONFIG_TX_SKIP
+        if (tx_skip && FOR_SCREEN_CONTENT)
+          tokens[next][1].rate +=
+              mb->token_costs_pxd[tx_size][type][ref][1][0][t1];
+        else
+#endif  // CONFIG_TX_SKIP
+          tokens[next][1].rate +=
+              mb->token_costs[tx_size][type][ref][band][1][0][t1];
         tokens[next][1].token = ZERO_TOKEN;
       }
       best_index[i][0] = best_index[i][1] = 0;
@@ -408,8 +442,17 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
   error1 = tokens[next][1].error;
   t0 = tokens[next][0].token;
   t1 = tokens[next][1].token;
-  rate0 += mb->token_costs[tx_size][type][ref][band][0][ctx][t0];
-  rate1 += mb->token_costs[tx_size][type][ref][band][0][ctx][t1];
+#if CONFIG_TX_SKIP
+  if (tx_skip && FOR_SCREEN_CONTENT) {
+    rate0 += mb->token_costs_pxd[tx_size][type][ref][0][ctx][t0];
+    rate1 += mb->token_costs_pxd[tx_size][type][ref][0][ctx][t1];
+  } else {
+#endif  // CONFIG_TX_SKIP
+    rate0 += mb->token_costs[tx_size][type][ref][band][0][ctx][t0];
+    rate1 += mb->token_costs[tx_size][type][ref][band][0][ctx][t1];
+#if CONFIG_TX_SKIP
+  }
+#endif  // CONFIG_TX_SKIP
   UPDATE_RD_COST();
   best = rd_cost1 < rd_cost0;
   final_eob = -1;

@@ -502,6 +502,82 @@ static INLINE int cost_coeffs(MACROBLOCK *x,
   return cost;
 }
 
+#if CONFIG_TX_SKIP
+static INLINE int cost_coeffs_pxd(MACROBLOCK *x,
+                                  int plane, int block,
+                                  ENTROPY_CONTEXT *A, ENTROPY_CONTEXT *L,
+                                  TX_SIZE tx_size,
+                                  const int16_t *scan, const int16_t *nb,
+                                  int use_fast_coef_costing) {
+  MACROBLOCKD *const xd = &x->e_mbd;
+  MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
+  const struct macroblock_plane *p = &x->plane[plane];
+  const struct macroblockd_plane *pd = &xd->plane[plane];
+  const PLANE_TYPE type = pd->plane_type;
+  const int16_t *band_count = &band_counts[tx_size][1];
+  const int eob = p->eobs[block];
+  const tran_low_t *const qcoeff = BLOCK_OFFSET(p->qcoeff, block);
+  unsigned int (*token_costs)[COEFF_CONTEXTS][ENTROPY_TOKENS] =
+      x->token_costs_pxd[tx_size][type][is_inter_block(mbmi)];
+  uint8_t token_cache[MAX_NUM_COEFS];
+  int pt = combine_entropy_contexts(*A, *L);
+  int c, cost;
+  // Check for consistency of tx_size with mode info
+#if !CONFIG_SUPERTX
+  assert(type == PLANE_TYPE_Y ? mbmi->tx_size == tx_size
+      : get_uv_tx_size(mbmi, pd) == tx_size);
+#endif  // CONFIG_SUPERTX
+
+  if (eob == 0) {
+    // single eob token
+    cost = token_costs[0][pt][EOB_TOKEN];
+    c = 0;
+  } else {
+    int band_left = *band_count++;
+    // dc token
+    int v = qcoeff[0];
+    int prev_t = vp9_dct_value_tokens_ptr[v].token;
+    cost = token_costs[0][pt][prev_t] + vp9_dct_value_cost_ptr[v];
+    token_cache[0] = vp9_pt_energy_class[prev_t];
+
+    // ac tokens
+    for (c = 1; c < eob; c++) {
+      const int rc = scan[c];
+      int t;
+
+      v = qcoeff[rc];
+      t = vp9_dct_value_tokens_ptr[v].token;
+      if (use_fast_coef_costing) {
+        cost += token_costs[!prev_t][!prev_t][t] + vp9_dct_value_cost_ptr[v];
+      } else {
+        pt = get_coef_context(nb, token_cache, c);
+        cost += token_costs[!prev_t][pt][t] + vp9_dct_value_cost_ptr[v];
+        token_cache[rc] = vp9_pt_energy_class[t];
+      }
+      prev_t = t;
+      if (!--band_left) {
+        band_left = *band_count++;
+      }
+    }
+
+    // eob token
+    if (band_left) {
+      if (use_fast_coef_costing) {
+        cost += token_costs[0][!prev_t][EOB_TOKEN];
+      } else {
+        pt = get_coef_context(nb, token_cache, c);
+        cost += token_costs[0][pt][EOB_TOKEN];
+      }
+    }
+  }
+
+  // is eob first coefficient;
+  *A = *L = (c > 0);
+
+  return cost;
+}
+#endif  // CONFIG_TX_SKIP
+
 #define right_shift_signed(x, s) ((s) < 0 ? (x) << (-(s)) : (x) >> (s))
 
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -558,10 +634,19 @@ static void rate_block(int plane, int block, BLOCK_SIZE plane_bsize,
   int x_idx, y_idx;
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &x_idx, &y_idx);
 
-  args->rate = cost_coeffs(args->x, plane, block, args->t_above + x_idx,
-                           args->t_left + y_idx, tx_size,
-                           args->so->scan, args->so->neighbors,
-                           args->use_fast_coef_costing);
+#if CONFIG_TX_SKIP
+  if (args->x->e_mbd.mi[0].src_mi->mbmi.tx_skip[plane != 0] &&
+      FOR_SCREEN_CONTENT)
+    args->rate = cost_coeffs_pxd(args->x, plane, block, args->t_above + x_idx,
+                                 args->t_left + y_idx, tx_size,
+                                 args->so->scan, args->so->neighbors,
+                                 args->use_fast_coef_costing);
+  else
+#endif  // CONFIG_TX_SKIP
+    args->rate = cost_coeffs(args->x, plane, block, args->t_above + x_idx,
+                             args->t_left + y_idx, tx_size,
+                             args->so->scan, args->so->neighbors,
+                             args->use_fast_coef_costing);
 }
 
 static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
@@ -1695,7 +1780,7 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int tx_skipped = 0;
   int q_idx = vp9_get_qindex(&cpi->common.seg, mic->mbmi.segment_id,
                              cpi->common.base_qindex);
-  int try_tx_skip = q_idx <= TX_SKIP_Q_THRESH_INTRA;
+  int try_tx_skip = q_idx <= tx_skip_q_thresh_intra;
 #endif  // CONFIG_TX_SKIP
 #if CONFIG_PALETTE
   int palette_selected = 0, best_n = 0, colors, palette_ctx;
@@ -2137,7 +2222,7 @@ static int64_t rd_pick_intrabc_sb_mode(VP9_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_TX_SKIP
   int q_idx = vp9_get_qindex(&cpi->common.seg, mbmi->segment_id,
                              cpi->common.base_qindex);
-  int try_tx_skip = q_idx <= TX_SKIP_Q_THRESH_INTRA;
+  int try_tx_skip = q_idx <= tx_skip_q_thresh_intra;
   mbmi->tx_skip[0] = 0;
   mbmi->tx_skip[1] = 0;
 #endif  // CONFIG_TX_SKIP
@@ -2284,7 +2369,7 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int q_idx = vp9_get_qindex(&cpi->common.seg,
                              xd->mi[0].src_mi->mbmi.segment_id,
                              cpi->common.base_qindex);
-  int try_tx_skip = q_idx <= TX_SKIP_Q_THRESH_INTRA && bsize >= BLOCK_8X8;
+  int try_tx_skip = q_idx <= tx_skip_q_thresh_intra && bsize >= BLOCK_8X8;
 #endif  // CONFIG_TX_SKIP
 #if CONFIG_PALETTE
   int palette_selected = 0, best_n = 0;
@@ -5251,7 +5336,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
                     bsize, txfm_cache, ref_best_rd);
 #if CONFIG_TX_SKIP
     if (vp9_get_qindex(&cm->seg, mbmi->segment_id, cm->base_qindex) <=
-        TX_SKIP_Q_THRESH_INTER) {
+        tx_skip_q_thresh_inter) {
       mbmi->tx_skip[0] = 1;
       super_block_yrd(cpi, x, &rate_s, &distortion_s, &skippable_s, &psse_s,
                       bsize, tx_cache_s, ref_best_rd);
@@ -5291,7 +5376,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
 #if CONFIG_TX_SKIP
     if (vp9_get_qindex(&cm->seg, mbmi->segment_id, cm->base_qindex) <=
-        TX_SKIP_Q_THRESH_INTER) {
+        tx_skip_q_thresh_inter) {
       super_block_uvrd(cpi, x, rate_uv, &distortion_uv, &skippable_uv,
                        &sseuv, bsize, ref_best_rd - rdcosty);
       mbmi->tx_skip[1] = 1;
@@ -5322,7 +5407,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     }
 #if CONFIG_TX_SKIP
     if (vp9_get_qindex(&cm->seg, mbmi->segment_id, cm->base_qindex) <=
-        TX_SKIP_Q_THRESH_INTER)
+        tx_skip_q_thresh_inter)
       *rate_uv += vp9_cost_bit(cpi->common.fc.uv_tx_skip_prob[mbmi->tx_skip[0]],
                                mbmi->tx_skip[1]);
 #endif
@@ -5387,7 +5472,7 @@ static void rd_pick_palette_444(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *rd_cost,
 #if CONFIG_TX_SKIP
     int q_idx = vp9_get_qindex(&cpi->common.seg, mbmi->segment_id,
                                cpi->common.base_qindex);
-    int try_tx_skip = q_idx <= TX_SKIP_Q_THRESH_INTRA;
+    int try_tx_skip = q_idx <= tx_skip_q_thresh_intra;
     int this_rate_tokenonly_s, s_s;
     int tx_skipped = 0, tx_skipped_uv = 0;
     int64_t this_distortion_s;
@@ -5815,7 +5900,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_TX_SKIP
   int tx_skipped_uv[TX_SIZES];
   int q_idx = vp9_get_qindex(seg, segment_id, cm->base_qindex);
-  int try_tx_skip = q_idx <= TX_SKIP_Q_THRESH_INTRA;
+  int try_tx_skip = q_idx <= tx_skip_q_thresh_intra;
 #endif  // CONFIG_TX_SKIP
 #if CONFIG_COPY_MODE
   COPY_MODE copy_mode;

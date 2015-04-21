@@ -322,16 +322,24 @@ static void pack_mb_tokens(vp9_writer *w,
     // is split into two treed writes.  The first treed write takes care of the
     // unconstrained nodes.  The second treed write takes care of the
     // constrained nodes.
-    if (t >= TWO_TOKEN && t < EOB_TOKEN) {
-      int len = UNCONSTRAINED_NODES - p->skip_eob_node;
-      int bits = v >> (n - len);
-      vp9_write_tree(w, vp9_coef_tree, p->context_tree, bits, len, i);
-      vp9_write_tree(w, vp9_coef_con_tree,
-                     vp9_pareto8_full[p->context_tree[PIVOT_NODE] - 1],
-                     v, n - len, 0);
-    } else {
+#if CONFIG_TX_SKIP
+    if (p->is_pxd_token && FOR_SCREEN_CONTENT) {
       vp9_write_tree(w, vp9_coef_tree, p->context_tree, v, n, i);
+    } else {
+#endif  // CONFIG_TX_SKIP
+      if (t >= TWO_TOKEN && t < EOB_TOKEN) {
+        int len = UNCONSTRAINED_NODES - p->skip_eob_node;
+        int bits = v >> (n - len);
+        vp9_write_tree(w, vp9_coef_tree, p->context_tree, bits, len, i);
+        vp9_write_tree(w, vp9_coef_con_tree,
+                       vp9_pareto8_full[p->context_tree[PIVOT_NODE] - 1],
+                       v, n - len, 0);
+      } else {
+        vp9_write_tree(w, vp9_coef_tree, p->context_tree, v, n, i);
+      }
+#if CONFIG_TX_SKIP
     }
+#endif  // CONFIG_TX_SKIP
 
     if (b->base_val) {
       const int e = p->extra, l = b->len;
@@ -580,8 +588,8 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
 #if CONFIG_TX_SKIP
   if (bsize >= BLOCK_8X8) {
     int q_idx = vp9_get_qindex(seg, segment_id, cm->base_qindex);
-    int try_tx_skip = is_inter ? q_idx <= TX_SKIP_Q_THRESH_INTER :
-                                 q_idx <= TX_SKIP_Q_THRESH_INTRA;
+    int try_tx_skip = is_inter ? q_idx <= tx_skip_q_thresh_inter :
+                                 q_idx <= tx_skip_q_thresh_intra;
 
 #if CONFIG_COPY_MODE
     if (mbmi->copy_mode != NOREF) {
@@ -999,7 +1007,7 @@ static void write_mb_modes_kf(const VP9_COMMON *cm,
 #if CONFIG_TX_SKIP
   if (bsize >= BLOCK_8X8) {
     int q_idx = vp9_get_qindex(seg, mbmi->segment_id, cm->base_qindex);
-    int try_tx_skip = q_idx <= TX_SKIP_Q_THRESH_INTRA;
+    int try_tx_skip = q_idx <= tx_skip_q_thresh_intra;
     if (try_tx_skip) {
       if (xd->lossless) {
         if (mbmi->tx_size == TX_4X4)
@@ -1471,12 +1479,165 @@ static void update_coef_probs_common(vp9_writer* const bc, VP9_COMP *cpi,
   }
 }
 
+#if CONFIG_TX_SKIP
+static void build_tree_distribution_pxd(VP9_COMP *cpi, TX_SIZE tx_size,
+                                        vp9_coeff_stats_pxd *coef_branch_ct,
+                                        vp9_coeff_probs_pxd *coef_probs) {
+  vp9_coeff_counts_pxd *coef_counts = cpi->common.counts.coef_pxd[tx_size];
+  unsigned int (*eob_branch_ct)[REF_TYPES][COEFF_CONTEXTS] =
+      cpi->common.counts.eob_branch_pxd[tx_size];
+  int i, j, l, m;
+
+  for (i = 0; i < PLANE_TYPES; ++i) {
+    for (j = 0; j < REF_TYPES; ++j) {
+      for (l = 0; l < COEFF_CONTEXTS; ++l) {
+        vp9_tree_probs_from_distribution(vp9_coef_tree,
+                                         coef_branch_ct[i][j][l],
+                                         coef_counts[i][j][l]);
+        coef_branch_ct[i][j][l][0][1] = eob_branch_ct[i][j][l] -
+            coef_branch_ct[i][j][l][0][0];
+        for (m = 0; m < ENTROPY_NODES; ++m)
+          coef_probs[i][j][l][m] = get_binary_prob(
+              coef_branch_ct[i][j][l][m][0],
+              coef_branch_ct[i][j][l][m][1]);
+      }
+    }
+  }
+}
+
+static void update_coef_probs_common_pxd(vp9_writer* const bc, VP9_COMP *cpi,
+                                         TX_SIZE tx_size,
+                                         vp9_coeff_stats_pxd *frame_branch_ct,
+                                         vp9_coeff_probs_pxd *new_coef_probs) {
+  vp9_coeff_probs_pxd *old_coef_probs = cpi->common.fc.coef_probs_pxd[tx_size];
+  const vp9_prob upd = DIFF_UPDATE_PROB;
+  const int entropy_nodes_update = ENTROPY_NODES;
+  int i, j, l, t;
+
+  switch (cpi->sf.use_fast_coef_updates) {
+    case TWO_LOOP: {
+      /* dry run to see if there is any update at all needed */
+      int savings = 0;
+      int update[2] = {0, 0};
+      for (i = 0; i < PLANE_TYPES; ++i) {
+        for (j = 0; j < REF_TYPES; ++j) {
+          for (l = 0; l < COEFF_CONTEXTS; ++l) {
+            for (t = 0; t < entropy_nodes_update; ++t) {
+              vp9_prob newp = new_coef_probs[i][j][l][t];
+              const vp9_prob oldp = old_coef_probs[i][j][l][t];
+              int s;
+              int u = 0;
+              s = vp9_prob_diff_update_savings_search(
+                  frame_branch_ct[i][j][l][t], oldp, &newp, upd);
+              if (s > 0 && newp != oldp)
+                u = 1;
+              if (u)
+                savings += s - (int)(vp9_cost_zero(upd));
+              else
+                savings -= (int)(vp9_cost_zero(upd));
+              update[u]++;
+            }
+          }
+        }
+      }
+
+      if (update[1] == 0 || savings < 0) {
+        vp9_write_bit(bc, 0);
+        return;
+      }
+      vp9_write_bit(bc, 1);
+      for (i = 0; i < PLANE_TYPES; ++i) {
+        for (j = 0; j < REF_TYPES; ++j) {
+          for (l = 0; l < COEFF_CONTEXTS; ++l) {
+            // calc probs and branch cts for this frame only
+            for (t = 0; t < entropy_nodes_update; ++t) {
+              vp9_prob newp = new_coef_probs[i][j][l][t];
+              vp9_prob *oldp = old_coef_probs[i][j][l] + t;
+              const vp9_prob upd = DIFF_UPDATE_PROB;
+              int s;
+              int u = 0;
+              s = vp9_prob_diff_update_savings_search(
+                  frame_branch_ct[i][j][l][t],
+                  *oldp, &newp, upd);
+              if (s > 0 && newp != *oldp)
+                u = 1;
+              vp9_write(bc, u, upd);
+              if (u) {
+                /* send/use new probability */
+                vp9_write_prob_diff_update(bc, newp, *oldp);
+                *oldp = newp;
+              }
+            }
+          }
+        }
+      }
+      return;
+    }
+
+    case ONE_LOOP:
+    case ONE_LOOP_REDUCED: {
+      int updates = 0;
+      int noupdates_before_first = 0;
+      for (i = 0; i < PLANE_TYPES; ++i) {
+        for (j = 0; j < REF_TYPES; ++j) {
+          for (l = 0; l < COEFF_CONTEXTS; ++l) {
+            // calc probs and branch cts for this frame only
+            for (t = 0; t < entropy_nodes_update; ++t) {
+              vp9_prob newp = new_coef_probs[i][j][l][t];
+              vp9_prob *oldp = old_coef_probs[i][j][l] + t;
+              int s;
+              int u = 0;
+
+              s = vp9_prob_diff_update_savings_search(
+                  frame_branch_ct[i][j][l][t],
+                  *oldp, &newp, upd);
+              if (s > 0 && newp != *oldp)
+                u = 1;
+
+              updates += u;
+              if (u == 0 && updates == 0) {
+                noupdates_before_first++;
+                continue;
+              }
+              if (u == 1 && updates == 1) {
+                int v;
+                // first update
+                vp9_write_bit(bc, 1);
+                for (v = 0; v < noupdates_before_first; ++v)
+                  vp9_write(bc, 0, upd);
+              }
+              vp9_write(bc, u, upd);
+              if (u) {
+                // send/use new probability
+                vp9_write_prob_diff_update(bc, newp, *oldp);
+                *oldp = newp;
+              }
+            }
+          }
+        }
+      }
+      if (updates == 0) {
+        vp9_write_bit(bc, 0);  // no updates
+      }
+      return;
+    }
+
+    default:
+      assert(0);
+  }
+}
+#endif  // CONFIG_TX_SKIP
+
 static void update_coef_probs(VP9_COMP *cpi, vp9_writer* w) {
   const TX_MODE tx_mode = cpi->common.tx_mode;
   const TX_SIZE max_tx_size = tx_mode_to_biggest_tx_size[tx_mode];
   TX_SIZE tx_size;
   vp9_coeff_stats frame_branch_ct[TX_SIZES][PLANE_TYPES];
   vp9_coeff_probs_model frame_coef_probs[TX_SIZES][PLANE_TYPES];
+#if CONFIG_TX_SKIP
+  vp9_coeff_stats_pxd frame_branch_ct_pxd[TX_SIZES][PLANE_TYPES];
+  vp9_coeff_probs_pxd frame_coef_probs_pxd[TX_SIZES][PLANE_TYPES];
+#endif  // CONFIG_TX_SKIP
 
   for (tx_size = TX_4X4; tx_size <= max_tx_size; ++tx_size)
     build_tree_distribution(cpi, tx_size, frame_branch_ct[tx_size],
@@ -1485,6 +1646,19 @@ static void update_coef_probs(VP9_COMP *cpi, vp9_writer* w) {
   for (tx_size = TX_4X4; tx_size <= max_tx_size; ++tx_size)
     update_coef_probs_common(w, cpi, tx_size, frame_branch_ct[tx_size],
                              frame_coef_probs[tx_size]);
+
+#if CONFIG_TX_SKIP
+  if (FOR_SCREEN_CONTENT) {
+    for (tx_size = TX_4X4; tx_size <= max_tx_size; ++tx_size)
+      build_tree_distribution_pxd(cpi, tx_size, frame_branch_ct_pxd[tx_size],
+                                  frame_coef_probs_pxd[tx_size]);
+
+    for (tx_size = TX_4X4; tx_size <= max_tx_size; ++tx_size)
+      update_coef_probs_common_pxd(w, cpi, tx_size,
+                                   frame_branch_ct_pxd[tx_size],
+                                   frame_coef_probs_pxd[tx_size]);
+  }
+#endif  // CONFIG_TX_SKIP
 }
 
 static void encode_loopfilter(VP9_COMMON *cm,

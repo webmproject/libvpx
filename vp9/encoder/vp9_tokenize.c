@@ -164,7 +164,7 @@ const vp9_extra_bit vp9_extra_bits_high12[ENTROPY_TOKENS] = {
                                                            // CATEGORY6_TOKEN
   {0, 0, 0, 0}                                             // EOB_TOKEN
 };
-#endif
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
 struct vp9_token vp9_coef_encodings[ENTROPY_TOKENS];
 
@@ -241,7 +241,7 @@ void vp9_tokenize_initialize() {
                     vp9_extra_bits_high12,
                     dct_value_cost_high12 + DCT_MAX_VALUE_HIGH12,
                     DCT_MAX_VALUE_HIGH12);
-#endif
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 }
 
 struct tokenize_b_args {
@@ -319,7 +319,8 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   unsigned int (*const eob_branch)[COEFF_CONTEXTS] =
       cpi->common.counts.eob_branch[tx_size][type][ref];
 #if CONFIG_TX_SKIP
-  const uint8_t *const band = mbmi->tx_skip[plane != 0] ?
+  int tx_skip = mbmi->tx_skip[plane != 0];
+  const uint8_t *const band = tx_skip ?
       vp9_coefband_tx_skip : get_band_translate(tx_size);
 #else
   const uint8_t *const band = get_band_translate(tx_size);
@@ -357,7 +358,6 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
       add_token_no_extra(&t, coef_probs[band[c]][pt], ZERO_TOKEN, skip_eob,
                          counts[band[c]][pt]);
       eob_branch[band[c]][pt] += !skip_eob;
-
       skip_eob = 1;
       token_cache[scan[c]] = 0;
       ++c;
@@ -365,13 +365,15 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
       v = qcoeff[scan[c]];
     }
 
+#if CONFIG_TX_SKIP
+    t->is_pxd_token = tx_skip;
+#endif  // CONFIG_TX_SKIP
     add_token(&t, coef_probs[band[c]][pt],
               dct_value_tokens[v].extra,
               (uint8_t)dct_value_tokens[v].token,
               (uint8_t)skip_eob,
               counts[band[c]][pt]);
     eob_branch[band[c]][pt] += !skip_eob;
-
     token_cache[scan[c]] = vp9_pt_energy_class[dct_value_tokens[v].token];
     ++c;
     pt = get_coef_context(nb, token_cache, c);
@@ -385,6 +387,94 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
 
   vp9_set_contexts(xd, pd, plane_bsize, tx_size, c > 0, aoff, loff);
 }
+
+#if CONFIG_TX_SKIP
+static void tokenize_b_pxd(int plane, int block, BLOCK_SIZE plane_bsize,
+                           TX_SIZE tx_size, void *arg) {
+  struct tokenize_b_args* const args = arg;
+  VP9_COMP *cpi = args->cpi;
+  MACROBLOCKD *xd = args->xd;
+  TOKENEXTRA **tp = args->tp;
+  uint8_t token_cache[MAX_NUM_COEFS];
+  struct macroblock_plane *p = &cpi->mb.plane[plane];
+  struct macroblockd_plane *pd = &xd->plane[plane];
+  MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
+  int pt; /* near block/prev token context index */
+  int c;
+  int tx_skip = mbmi->tx_skip[plane != 0];
+  TOKENEXTRA *t = *tp;        /* store tokens starting here */
+  int eob = p->eobs[block];
+  const PLANE_TYPE type = pd->plane_type;
+  const tran_low_t *qcoeff = BLOCK_OFFSET(p->qcoeff, block);
+  const int segment_id = mbmi->segment_id;
+  const int16_t *scan, *nb;
+  const scan_order *so;
+  const int ref = is_inter_block(mbmi);
+  vp9_prob (*const coef_probs_pxd)[ENTROPY_TOKENS - 1] =
+      cpi->common.fc.coef_probs_pxd[tx_size][type][ref];
+  unsigned int (*const counts_pxd)[ENTROPY_TOKENS] =
+      cpi->common.counts.coef_pxd[tx_size][type][ref];
+  unsigned int *const eob_branch_pxd =
+      cpi->common.counts.eob_branch_pxd[tx_size][type][ref];
+  const int seg_eob = get_tx_eob(&cpi->common.seg, segment_id, tx_size);
+  const TOKENVALUE *dct_value_tokens;
+  int aoff, loff;
+
+  txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &aoff, &loff);
+  pt = get_entropy_context(tx_size, pd->above_context + aoff,
+                           pd->left_context + loff);
+  so = get_scan(xd, tx_size, type, block);
+  scan = so->scan;
+  nb = so->neighbors;
+  c = 0;
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (cpi->common.profile >= PROFILE_2) {
+    dct_value_tokens = (cpi->common.bit_depth == VPX_BITS_10 ?
+                        vp9_dct_value_tokens_high10_ptr :
+                        vp9_dct_value_tokens_high12_ptr);
+  } else {
+    dct_value_tokens = vp9_dct_value_tokens_ptr;
+  }
+#else
+  dct_value_tokens = vp9_dct_value_tokens_ptr;
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
+  while (c < eob) {
+    int v = 0;
+    int skip_eob = 0;
+    v = qcoeff[scan[c]];
+
+    while (!v) {
+      add_token_no_extra(&t, coef_probs_pxd[pt], ZERO_TOKEN, skip_eob,
+                         counts_pxd[pt]);
+      eob_branch_pxd[pt] += !skip_eob;
+      skip_eob = 1;
+      token_cache[scan[c]] = 0;
+      ++c;
+      pt = get_coef_context(nb, token_cache, c);
+      v = qcoeff[scan[c]];
+    }
+    t->is_pxd_token = tx_skip;
+    add_token(&t, coef_probs_pxd[pt],
+              dct_value_tokens[v].extra,
+              (uint8_t)dct_value_tokens[v].token,
+              (uint8_t)skip_eob,
+              counts_pxd[pt]);
+    eob_branch_pxd[pt] += !skip_eob;
+    token_cache[scan[c]] = vp9_pt_energy_class[dct_value_tokens[v].token];
+    ++c;
+    pt = get_coef_context(nb, token_cache, c);
+  }
+  if (c < seg_eob) {
+    add_token_no_extra(&t, coef_probs_pxd[pt], EOB_TOKEN, 0,
+                       counts_pxd[pt]);
+    ++eob_branch_pxd[pt];
+  }
+  *tp = t;
+
+  vp9_set_contexts(xd, pd, plane_bsize, tx_size, c > 0, aoff, loff);
+}
+#endif  // CONFIG_TX_SKIP
 
 struct is_skippable_args {
   MACROBLOCK *x;
@@ -436,6 +526,9 @@ void vp9_tokenize_sb(VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,
   const int ctx = vp9_get_skip_context(xd);
   const int skip_inc = !vp9_segfeature_active(&cm->seg, mbmi->segment_id,
                                               SEG_LVL_SKIP);
+#if CONFIG_TX_SKIP
+  int plane;
+#endif  // CONFIG_TX_SKIP
   struct tokenize_b_args arg = {cpi, xd, t};
   if (mbmi->skip) {
     if (!dry_run)
@@ -448,7 +541,25 @@ void vp9_tokenize_sb(VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,
 
   if (!dry_run) {
     cm->counts.skip[ctx][0] += skip_inc;
-    vp9_foreach_transformed_block(xd, bsize, tokenize_b, &arg);
+#if CONFIG_TX_SKIP
+    if (mbmi->tx_skip[0] && FOR_SCREEN_CONTENT)
+      vp9_foreach_transformed_block_in_plane(xd, bsize, 0,
+                                             tokenize_b_pxd, &arg);
+    else
+      vp9_foreach_transformed_block_in_plane(xd, bsize, 0, tokenize_b, &arg);
+
+    if (mbmi->tx_skip[1] && FOR_SCREEN_CONTENT) {
+      for (plane = 1; plane < MAX_MB_PLANE; ++plane)
+        vp9_foreach_transformed_block_in_plane(xd, bsize, plane,
+                                               tokenize_b_pxd, &arg);
+    } else {
+      for (plane = 1; plane < MAX_MB_PLANE; ++plane)
+        vp9_foreach_transformed_block_in_plane(xd, bsize, plane,
+                                               tokenize_b, &arg);
+    }
+#else
+      vp9_foreach_transformed_block(xd, bsize, tokenize_b, &arg);
+#endif
   } else {
     vp9_foreach_transformed_block(xd, bsize, set_entropy_context_b, &arg);
     *t = t_backup;

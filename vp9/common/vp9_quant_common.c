@@ -15,6 +15,11 @@
 #include "vp9/common/vp9_quant_common.h"
 #include "vp9/common/vp9_seg_common.h"
 
+#if CONFIG_TX_SKIP
+int tx_skip_q_thresh_inter = FOR_SCREEN_CONTENT ? 255 : 64;
+int tx_skip_q_thresh_intra = 255;
+#endif  // CONFIG_TX_SKIP
+
 #if CONFIG_NEW_QUANT
 // Bin widths expressed as a fraction over 128 of the quant stepsize,
 // for the quantization bins 0-4.

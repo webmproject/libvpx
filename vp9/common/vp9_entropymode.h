@@ -85,6 +85,7 @@ typedef struct frame_contexts {
 #if CONFIG_TX_SKIP
   vp9_prob y_tx_skip_prob[2];
   vp9_prob uv_tx_skip_prob[2];
+  vp9_coeff_probs_pxd coef_probs_pxd[TX_SIZES][PLANE_TYPES];
 #endif  // CONFIG_TX_SKIP
 #if CONFIG_COPY_MODE
   vp9_prob copy_noref_prob[COPY_MODE_CONTEXTS][BLOCK_SIZES];
@@ -138,6 +139,8 @@ typedef struct {
 #if CONFIG_TX_SKIP
   unsigned int y_tx_skip[2][2];
   unsigned int uv_tx_skip[2][2];
+  vp9_coeff_counts_pxd coef_pxd[TX_SIZES][PLANE_TYPES];
+  unsigned int eob_branch_pxd[TX_SIZES][PLANE_TYPES][REF_TYPES][COEFF_CONTEXTS];
 #endif  // CONFIG_TX_SKIP
 #if CONFIG_COPY_MODE
   unsigned int copy_noref[COPY_MODE_CONTEXTS][BLOCK_SIZES][2];

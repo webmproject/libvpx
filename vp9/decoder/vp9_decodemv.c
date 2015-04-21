@@ -412,7 +412,7 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
 #if CONFIG_TX_SKIP
   if (mbmi->sb_type >= BLOCK_8X8) {
     int q_idx = vp9_get_qindex(&cm->seg, mbmi->segment_id, cm->base_qindex);
-    int try_tx_skip = q_idx <= TX_SKIP_Q_THRESH_INTRA;
+    int try_tx_skip = q_idx <= tx_skip_q_thresh_intra;
     if (try_tx_skip) {
       if (xd->lossless) {
         if (mbmi->tx_size == TX_4X4)
@@ -1510,8 +1510,8 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
 #if CONFIG_TX_SKIP
   if (mbmi->sb_type >= BLOCK_8X8) {
     int q_idx = vp9_get_qindex(&cm->seg, mbmi->segment_id, cm->base_qindex);
-    int try_tx_skip = inter_block ? q_idx <= TX_SKIP_Q_THRESH_INTER :
-                                    q_idx <= TX_SKIP_Q_THRESH_INTRA;
+    int try_tx_skip = inter_block ? q_idx <= tx_skip_q_thresh_inter :
+                                    q_idx <= tx_skip_q_thresh_intra;
 #if CONFIG_COPY_MODE
     if (mbmi->copy_mode != NOREF)
       try_tx_skip = 0;
