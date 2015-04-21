@@ -156,9 +156,9 @@ VP9_COMMON_SRCS-$(HAVE_NEON) += common/arm/neon/vp9_loopfilter_neon.c
 # neon with assembly and intrinsics implementations. If both are available
 # prefer assembly.
 ifeq ($(HAVE_NEON_ASM), yes)
-VP9_COMMON_SRCS-yes += common/arm/neon/vp9_avg_neon_asm$(ASM)
 VP9_COMMON_SRCS-yes += common/arm/neon/vp9_convolve8_avg_neon_asm$(ASM)
 VP9_COMMON_SRCS-yes += common/arm/neon/vp9_convolve8_neon_asm$(ASM)
+VP9_COMMON_SRCS-yes += common/arm/neon/vp9_convolve_avg_neon_asm$(ASM)
 VP9_COMMON_SRCS-yes += common/arm/neon/vp9_convolve_neon.c
 VP9_COMMON_SRCS-yes += common/arm/neon/vp9_copy_neon_asm$(ASM)
 VP9_COMMON_SRCS-yes += common/arm/neon/vp9_idct16x16_1_add_neon_asm$(ASM)
@@ -174,9 +174,9 @@ VP9_COMMON_SRCS-yes += common/arm/neon/vp9_loopfilter_4_neon_asm$(ASM)
 VP9_COMMON_SRCS-yes += common/arm/neon/vp9_reconintra_neon_asm$(ASM)
 else
 ifeq ($(HAVE_NEON), yes)
-VP9_COMMON_SRCS-yes += common/arm/neon/vp9_avg_neon.c
 VP9_COMMON_SRCS-yes += common/arm/neon/vp9_convolve8_avg_neon.c
 VP9_COMMON_SRCS-yes += common/arm/neon/vp9_convolve8_neon.c
+VP9_COMMON_SRCS-yes += common/arm/neon/vp9_convolve_avg_neon.c
 VP9_COMMON_SRCS-yes += common/arm/neon/vp9_convolve_neon.c
 VP9_COMMON_SRCS-yes += common/arm/neon/vp9_copy_neon.c
 VP9_COMMON_SRCS-yes += common/arm/neon/vp9_idct16x16_1_add_neon.c
