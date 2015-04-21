@@ -107,7 +107,7 @@ void thread_loop_filter_rows(const YV12_BUFFER_CONFIG *const frame_buffer,
 
   for (mi_row = start; mi_row < stop;
        mi_row += lf_sync->num_workers * MI_BLOCK_SIZE) {
-    MODE_INFO *const mi = cm->mi + mi_row * cm->mi_stride;
+    MODE_INFO **const mi = cm->mi_grid_visible + mi_row * cm->mi_stride;
 
     for (mi_col = 0; mi_col < cm->mi_cols; mi_col += MI_BLOCK_SIZE) {
       const int r = mi_row >> MI_BLOCK_SIZE_LOG2;

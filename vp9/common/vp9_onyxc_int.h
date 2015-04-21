@@ -201,6 +201,12 @@ typedef struct VP9Common {
   void (*free_mi)(struct VP9Common *cm);
   void (*setup_mi)(struct VP9Common *cm);
 
+  // Grid of pointers to 8x8 MODE_INFO structs.  Any 8x8 not in the visible
+  // area will be NULL.
+  MODE_INFO **mi_grid_base;
+  MODE_INFO **mi_grid_visible;
+  MODE_INFO **prev_mi_grid_base;
+  MODE_INFO **prev_mi_grid_visible;
 
   // Whether to use previous frame's motion vectors for prediction.
   int use_prev_frame_mvs;
@@ -371,7 +377,7 @@ static INLINE void set_mi_row_col(MACROBLOCKD *xd, const TileInfo *const tile,
   xd->up_available    = (mi_row != 0);
   xd->left_available  = (mi_col > tile->mi_col_start);
   if (xd->up_available) {
-    xd->above_mi = xd->mi[-xd->mi_stride].src_mi;
+    xd->above_mi = xd->mi[-xd->mi_stride];
     xd->above_mbmi = xd->above_mi ? &xd->above_mi->mbmi : NULL;
   } else {
     xd->above_mi = NULL;
@@ -379,7 +385,7 @@ static INLINE void set_mi_row_col(MACROBLOCKD *xd, const TileInfo *const tile,
   }
 
   if (xd->left_available) {
-    xd->left_mi = xd->mi[-1].src_mi;
+    xd->left_mi = xd->mi[-1];
     xd->left_mbmi = xd->left_mi ? &xd->left_mi->mbmi : NULL;
   } else {
     xd->left_mi = NULL;

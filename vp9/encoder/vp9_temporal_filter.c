@@ -44,7 +44,7 @@ static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
   const int which_mv = 0;
   const MV mv = { mv_row, mv_col };
   const InterpKernel *const kernel =
-    vp9_get_interp_kernel(xd->mi[0].src_mi->mbmi.interp_filter);
+    vp9_get_interp_kernel(xd->mi[0]->mbmi.interp_filter);
 
   enum mv_precision mv_precision_uv;
   int uv_stride;
@@ -225,7 +225,7 @@ static int temporal_filter_find_matching_mb_c(VP9_COMP *cpi,
 
   MV best_ref_mv1 = {0, 0};
   MV best_ref_mv1_full; /* full-pixel value of best_ref_mv1 */
-  MV *ref_mv = &x->e_mbd.mi[0].src_mi->bmi[0].as_mv[0].as_mv;
+  MV *ref_mv = &x->e_mbd.mi[0]->bmi[0].as_mv[0].as_mv;
 
   // Save input state
   struct buf_2d src = x->plane[0].src;
@@ -343,8 +343,8 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
         if (frames[frame] == NULL)
           continue;
 
-        mbd->mi[0].src_mi->bmi[0].as_mv[0].as_mv.row = 0;
-        mbd->mi[0].src_mi->bmi[0].as_mv[0].as_mv.col = 0;
+        mbd->mi[0]->bmi[0].as_mv[0].as_mv.row = 0;
+        mbd->mi[0]->bmi[0].as_mv[0].as_mv.col = 0;
 
         if (frame == alt_ref_index) {
           filter_weight = 2;
@@ -370,8 +370,8 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
               frames[frame]->v_buffer + mb_uv_offset,
               frames[frame]->y_stride,
               mb_uv_width, mb_uv_height,
-              mbd->mi[0].src_mi->bmi[0].as_mv[0].as_mv.row,
-              mbd->mi[0].src_mi->bmi[0].as_mv[0].as_mv.col,
+              mbd->mi[0]->bmi[0].as_mv[0].as_mv.row,
+              mbd->mi[0]->bmi[0].as_mv[0].as_mv.col,
               predictor, scale,
               mb_col * 16, mb_row * 16);
 
@@ -722,8 +722,8 @@ void vp9_temporal_filter(VP9_COMP *cpi, int distance) {
         }
       }
       cm->mi = cm->mip + cm->mi_stride + 1;
-      xd->mi = cm->mi;
-      xd->mi[0].src_mi = &xd->mi[0];
+      xd->mi = cm->mi_grid_visible;
+      xd->mi[0] = cm->mi;
     } else {
       // ARF is produced at the native frame size and resized when coded.
 #if CONFIG_VP9_HIGHBITDEPTH

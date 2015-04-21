@@ -35,7 +35,7 @@ static void print_mi_data(VP9_COMMON *cm, FILE *file, const char *descriptor,
     fprintf(file, "%c ", prefix);
     for (mi_col = 0; mi_col < cols; mi_col++) {
       fprintf(file, "%2d ",
-              *((int*) ((char *) (&mi->src_mi->mbmi) +
+              *((int*) ((char *) (&mi->mbmi) +
                                   member_offset)));
       mi++;
     }
@@ -64,7 +64,7 @@ void vp9_print_modes_and_motion_vectors(VP9_COMMON *cm, const char *file) {
   for (mi_row = 0; mi_row < rows; mi_row++) {
     fprintf(mvs, "S ");
     for (mi_col = 0; mi_col < cols; mi_col++) {
-      fprintf(mvs, "%2d ", mi->src_mi->mbmi.skip);
+      fprintf(mvs, "%2d ", mi->mbmi.skip);
       mi++;
     }
     fprintf(mvs, "\n");
@@ -78,8 +78,8 @@ void vp9_print_modes_and_motion_vectors(VP9_COMMON *cm, const char *file) {
   for (mi_row = 0; mi_row < rows; mi_row++) {
     fprintf(mvs, "V ");
     for (mi_col = 0; mi_col < cols; mi_col++) {
-      fprintf(mvs, "%4d:%4d ", mi->src_mi->mbmi.mv[0].as_mv.row,
-                               mi->src_mi->mbmi.mv[0].as_mv.col);
+      fprintf(mvs, "%4d:%4d ", mi->mbmi.mv[0].as_mv.row,
+                               mi->mbmi.mv[0].as_mv.col);
       mi++;
     }
     fprintf(mvs, "\n");

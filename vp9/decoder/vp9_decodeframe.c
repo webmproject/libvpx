@@ -304,7 +304,7 @@ static void predict_and_reconstruct_intra_block(int plane, int block,
   VP9_COMMON *const cm = args->cm;
   MACROBLOCKD *const xd = args->xd;
   struct macroblockd_plane *const pd = &xd->plane[plane];
-  MODE_INFO *const mi = xd->mi[0].src_mi;
+  MODE_INFO *const mi = xd->mi[0];
   const PREDICTION_MODE mode = (plane == 0) ? get_y_mode(mi, block)
                                             : mi->mbmi.uv_mode;
   const int16_t *const dequant = (plane == 0) ? args->y_dequant
@@ -367,13 +367,12 @@ static MB_MODE_INFO *set_offsets(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   const int offset = mi_row * cm->mi_stride + mi_col;
   int x, y;
 
-  xd->mi = cm->mi + offset;
-  xd->mi[0].src_mi = &xd->mi[0];  // Point to self.
-  xd->mi[0].mbmi.sb_type = bsize;
-
+  xd->mi = cm->mi_grid_visible + offset;
+  xd->mi[0] = &cm->mi[offset];
+  xd->mi[0]->mbmi.sb_type = bsize;
   for (y = 0; y < y_mis; ++y)
     for (x = !y; x < x_mis; ++x) {
-      xd->mi[y * cm->mi_stride + x].src_mi = &xd->mi[0];
+      xd->mi[y * cm->mi_stride + x] = xd->mi[0];
     }
 
   set_skip_context(xd, mi_row, mi_col);
@@ -383,7 +382,7 @@ static MB_MODE_INFO *set_offsets(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   set_mi_row_col(xd, tile, mi_row, bh, mi_col, bw, cm->mi_rows, cm->mi_cols);
 
   vp9_setup_dst_planes(xd->plane, get_frame_new_buffer(cm), mi_row, mi_col);
-  return &xd->mi[0].mbmi;
+  return &xd->mi[0]->mbmi;
 }
 
 static void decode_block(VP9Decoder *const pbi, MACROBLOCKD *const xd,
@@ -1992,7 +1991,7 @@ void vp9_dec_build_inter_predictors_sb(VP9Decoder *const pbi, MACROBLOCKD *xd,
   int plane;
   const int mi_x = mi_col * MI_SIZE;
   const int mi_y = mi_row * MI_SIZE;
-  const MODE_INFO *mi = xd->mi[0].src_mi;
+  const MODE_INFO *mi = xd->mi[0];
   const InterpKernel *kernel = vp9_get_interp_kernel(mi->mbmi.interp_filter);
   const BLOCK_SIZE sb_type = mi->mbmi.sb_type;
   const int is_compound = has_second_ref(&mi->mbmi);

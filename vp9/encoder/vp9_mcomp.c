@@ -1802,7 +1802,7 @@ unsigned int vp9_int_pro_motion_estimation(const VP9_COMP *cpi, MACROBLOCK *x,
   const int src_stride = x->plane[0].src.stride;
   const int ref_stride = xd->plane[0].pre[0].stride;
   uint8_t const *ref_buf, *src_buf;
-  MV *tmp_mv = &xd->mi[0].src_mi->mbmi.mv[0].as_mv;
+  MV *tmp_mv = &xd->mi[0]->mbmi.mv[0].as_mv;
   unsigned int best_sad, tmp_sad, this_sad[4];
   MV this_mv;
   const int norm_factor = 3 + (bw >> 5);

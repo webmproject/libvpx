@@ -258,6 +258,12 @@ static void vp9_enc_setup_mi(VP9_COMMON *cm) {
   // Clear left border column
   for (i = 1; i < cm->mi_rows + 1; ++i)
     vpx_memset(&cm->prev_mip[i * cm->mi_stride], 0, sizeof(*cm->prev_mip));
+
+  cm->mi_grid_visible = cm->mi_grid_base + cm->mi_stride + 1;
+  cm->prev_mi_grid_visible = cm->prev_mi_grid_base + cm->mi_stride + 1;
+
+  vpx_memset(cm->mi_grid_base, 0,
+             cm->mi_stride * (cm->mi_rows + 1) * sizeof(*cm->mi_grid_base));
 }
 
 static int vp9_enc_alloc_mi(VP9_COMMON *cm, int mi_size) {
@@ -268,6 +274,14 @@ static int vp9_enc_alloc_mi(VP9_COMMON *cm, int mi_size) {
   if (!cm->prev_mip)
     return 1;
   cm->mi_alloc_size = mi_size;
+
+  cm->mi_grid_base = (MODE_INFO **)vpx_calloc(mi_size, sizeof(MODE_INFO*));
+  if (!cm->mi_grid_base)
+    return 1;
+  cm->prev_mi_grid_base = (MODE_INFO **)vpx_calloc(mi_size, sizeof(MODE_INFO*));
+  if (!cm->prev_mi_grid_base)
+    return 1;
+
   return 0;
 }
 
@@ -276,10 +290,15 @@ static void vp9_enc_free_mi(VP9_COMMON *cm) {
   cm->mip = NULL;
   vpx_free(cm->prev_mip);
   cm->prev_mip = NULL;
+  vpx_free(cm->mi_grid_base);
+  cm->mi_grid_base = NULL;
+  vpx_free(cm->prev_mi_grid_base);
+  cm->prev_mi_grid_base = NULL;
 }
 
 static void vp9_swap_mi_and_prev_mi(VP9_COMMON *cm) {
   // Current mip will be the prev_mip for the next frame.
+  MODE_INFO **temp_base = cm->prev_mi_grid_base;
   MODE_INFO *temp = cm->prev_mip;
   cm->prev_mip = cm->mip;
   cm->mip = temp;
@@ -287,6 +306,11 @@ static void vp9_swap_mi_and_prev_mi(VP9_COMMON *cm) {
   // Update the upper left visible macroblock ptrs.
   cm->mi = cm->mip + cm->mi_stride + 1;
   cm->prev_mi = cm->prev_mip + cm->mi_stride + 1;
+
+  cm->prev_mi_grid_base = cm->mi_grid_base;
+  cm->mi_grid_base = temp_base;
+  cm->mi_grid_visible = cm->mi_grid_base + cm->mi_stride + 1;
+  cm->prev_mi_grid_visible = cm->prev_mi_grid_base + cm->mi_stride + 1;
 }
 
 void vp9_initialize_enc(void) {
@@ -567,15 +591,15 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
 
 static void update_reference_segmentation_map(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
-  MODE_INFO *mi_8x8_ptr = cm->mi;
+  MODE_INFO **mi_8x8_ptr = cm->mi_grid_visible;
   uint8_t *cache_ptr = cm->last_frame_seg_map;
   int row, col;
 
   for (row = 0; row < cm->mi_rows; row++) {
-    MODE_INFO *mi_8x8 = mi_8x8_ptr;
+    MODE_INFO **mi_8x8 = mi_8x8_ptr;
     uint8_t *cache = cache_ptr;
     for (col = 0; col < cm->mi_cols; col++, mi_8x8++, cache++)
-      cache[0] = mi_8x8[0].src_mi->mbmi.segment_id;
+      cache[0] = mi_8x8[0]->mbmi.segment_id;
     mi_8x8_ptr += cm->mi_stride;
     cache_ptr += cm->mi_cols;
   }

@@ -358,7 +358,7 @@ static void first_pass_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   MV tmp_mv = {0, 0};
   MV ref_mv_full = {ref_mv->row >> 3, ref_mv->col >> 3};
   int num00, tmp_err, n;
-  const BLOCK_SIZE bsize = xd->mi[0].src_mi->mbmi.sb_type;
+  const BLOCK_SIZE bsize = xd->mi[0]->mbmi.sb_type;
   vp9_variance_fn_ptr_t v_fn_ptr = cpi->fn_ptr[bsize];
   const int new_mv_mode_penalty = NEW_MV_MODE_PENALTY;
 
@@ -567,8 +567,8 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
     vp9_setup_pre_planes(xd, 0, first_ref_buf, 0, 0, NULL);
   }
 
-  xd->mi = cm->mi;
-  xd->mi[0].src_mi = &xd->mi[0];
+  xd->mi = cm->mi_grid_visible;
+  xd->mi[0] = cm->mi;
 
   vp9_frame_init_quantizer(cpi);
 
@@ -621,8 +621,8 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
       xd->plane[1].dst.buf = new_yv12->u_buffer + recon_uvoffset;
       xd->plane[2].dst.buf = new_yv12->v_buffer + recon_uvoffset;
       xd->left_available = (mb_col != 0);
-      xd->mi[0].src_mi->mbmi.sb_type = bsize;
-      xd->mi[0].src_mi->mbmi.ref_frame[0] = INTRA_FRAME;
+      xd->mi[0]->mbmi.sb_type = bsize;
+      xd->mi[0]->mbmi.ref_frame[0] = INTRA_FRAME;
       set_mi_row_col(xd, &tile,
                      mb_row << 1, num_8x8_blocks_high_lookup[bsize],
                      mb_col << 1, num_8x8_blocks_wide_lookup[bsize],
@@ -630,8 +630,8 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
 
       // Do intra 16x16 prediction.
       x->skip_encode = 0;
-      xd->mi[0].src_mi->mbmi.mode = DC_PRED;
-      xd->mi[0].src_mi->mbmi.tx_size = use_dc_pred ?
+      xd->mi[0]->mbmi.mode = DC_PRED;
+      xd->mi[0]->mbmi.tx_size = use_dc_pred ?
          (bsize >= BLOCK_16X16 ? TX_16X16 : TX_8X8) : TX_4X4;
       vp9_encode_intra_block_plane(x, bsize, 0);
       this_error = vp9_get_mb_ss(x->plane[0].src_diff);
@@ -843,11 +843,11 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
           mv.row *= 8;
           mv.col *= 8;
           this_error = motion_error;
-          xd->mi[0].src_mi->mbmi.mode = NEWMV;
-          xd->mi[0].src_mi->mbmi.mv[0].as_mv = mv;
-          xd->mi[0].src_mi->mbmi.tx_size = TX_4X4;
-          xd->mi[0].src_mi->mbmi.ref_frame[0] = LAST_FRAME;
-          xd->mi[0].src_mi->mbmi.ref_frame[1] = NONE;
+          xd->mi[0]->mbmi.mode = NEWMV;
+          xd->mi[0]->mbmi.mv[0].as_mv = mv;
+          xd->mi[0]->mbmi.tx_size = TX_4X4;
+          xd->mi[0]->mbmi.ref_frame[0] = LAST_FRAME;
+          xd->mi[0]->mbmi.ref_frame[1] = NONE;
           vp9_build_inter_predictors_sby(xd, mb_row << 1, mb_col << 1, bsize);
           vp9_encode_sby_pass1(x, bsize);
           sum_mvr += mv.row;

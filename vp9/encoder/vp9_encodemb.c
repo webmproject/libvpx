@@ -128,7 +128,7 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
   MACROBLOCKD *const xd = &mb->e_mbd;
   struct macroblock_plane *const p = &mb->plane[plane];
   struct macroblockd_plane *const pd = &xd->plane[plane];
-  const int ref = is_inter_block(&xd->mi[0].src_mi->mbmi);
+  const int ref = is_inter_block(&xd->mi[0]->mbmi);
   vp9_token_state tokens[1025][2];
   unsigned best_index[1025][2];
   uint8_t token_cache[1024];
@@ -773,7 +773,7 @@ void vp9_encode_sby_pass1(MACROBLOCK *x, BLOCK_SIZE bsize) {
 void vp9_encode_sb(MACROBLOCK *x, BLOCK_SIZE bsize) {
   MACROBLOCKD *const xd = &x->e_mbd;
   struct optimize_ctx ctx;
-  MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
+  MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
   struct encode_b_args arg = {x, &ctx, &mbmi->skip};
   int plane;
 
@@ -803,7 +803,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
   struct encode_b_args* const args = arg;
   MACROBLOCK *const x = args->x;
   MACROBLOCKD *const xd = &x->e_mbd;
-  MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
+  MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
   struct macroblock_plane *const p = &x->plane[plane];
   struct macroblockd_plane *const pd = &xd->plane[plane];
   tran_low_t *coeff = BLOCK_OFFSET(p->coeff, block);
@@ -895,7 +895,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
       case TX_4X4:
         tx_type = get_tx_type_4x4(pd->plane_type, xd, block);
         scan_order = &vp9_scan_orders[TX_4X4][tx_type];
-        mode = plane == 0 ? get_y_mode(xd->mi[0].src_mi, block) : mbmi->uv_mode;
+        mode = plane == 0 ? get_y_mode(xd->mi[0], block) : mbmi->uv_mode;
         vp9_predict_intra_block(xd, block, bwl, TX_4X4, mode,
                                 x->skip_encode ? src : dst,
                                 x->skip_encode ? src_stride : dst_stride,
@@ -998,7 +998,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
     case TX_4X4:
       tx_type = get_tx_type_4x4(pd->plane_type, xd, block);
       scan_order = &vp9_scan_orders[TX_4X4][tx_type];
-      mode = plane == 0 ? get_y_mode(xd->mi[0].src_mi, block) : mbmi->uv_mode;
+      mode = plane == 0 ? get_y_mode(xd->mi[0], block) : mbmi->uv_mode;
       vp9_predict_intra_block(xd, block, bwl, TX_4X4, mode,
                               x->skip_encode ? src : dst,
                               x->skip_encode ? src_stride : dst_stride,
@@ -1037,7 +1037,7 @@ void vp9_encode_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
 
 void vp9_encode_intra_block_plane(MACROBLOCK *x, BLOCK_SIZE bsize, int plane) {
   const MACROBLOCKD *const xd = &x->e_mbd;
-  struct encode_b_args arg = {x, NULL, &xd->mi[0].src_mi->mbmi.skip};
+  struct encode_b_args arg = {x, NULL, &xd->mi[0]->mbmi.skip};
 
   vp9_foreach_transformed_block_in_plane(xd, bsize, plane,
                                          vp9_encode_block_intra, &arg);

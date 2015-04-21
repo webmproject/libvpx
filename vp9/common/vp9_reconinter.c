@@ -172,7 +172,7 @@ void build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
                                    int x, int y, int w, int h,
                                    int mi_x, int mi_y) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
-  const MODE_INFO *mi = xd->mi[0].src_mi;
+  const MODE_INFO *mi = xd->mi[0];
   const int is_compound = has_second_ref(&mi->mbmi);
   const InterpKernel *kernel = vp9_get_interp_kernel(mi->mbmi.interp_filter);
   int ref;
@@ -246,7 +246,7 @@ static void build_inter_predictors_for_planes(MACROBLOCKD *xd, BLOCK_SIZE bsize,
     const int bw = 4 * num_4x4_w;
     const int bh = 4 * num_4x4_h;
 
-    if (xd->mi[0].src_mi->mbmi.sb_type < BLOCK_8X8) {
+    if (xd->mi[0]->mbmi.sb_type < BLOCK_8X8) {
       int i = 0, x, y;
       assert(bsize == BLOCK_8X8);
       for (y = 0; y < num_4x4_h; ++y)
