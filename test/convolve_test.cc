@@ -1818,7 +1818,7 @@ INSTANTIATE_TEST_CASE_P(DSPR2, ConvolveTest, ::testing::Values(
 #if HAVE_MSA
 const ConvolveFunctions convolve8_msa(
     vp9_convolve_copy_c, vp9_convolve_avg_c,
-    vp9_convolve8_horiz_c, vp9_convolve8_avg_horiz_c,
+    vp9_convolve8_horiz_msa, vp9_convolve8_avg_horiz_c,
     vp9_convolve8_vert_msa, vp9_convolve8_avg_vert_c,
     vp9_convolve8_msa, vp9_convolve8_avg_c, 0);
 
