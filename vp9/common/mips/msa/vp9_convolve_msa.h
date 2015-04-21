@@ -14,7 +14,7 @@
 #include "vp9/common/vp9_filter.h"
 #include "vp9/common/mips/msa/vp9_macros_msa.h"
 
-extern uint8_t mc_filt_mask_arr[16 * 3];
+extern const uint8_t mc_filt_mask_arr[16 * 3];
 
 #define HORIZ_8TAP_FILT(src, mask0, mask1, mask2, mask3,                   \
                         filt_h0, filt_h1, filt_h2, filt_h3) ({             \
