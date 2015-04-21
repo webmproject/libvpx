@@ -347,9 +347,11 @@ static void decode_reconstruct_tx(int blk_row, int blk_col,
   MACROBLOCKD *const xd = args->xd;
   MB_MODE_INFO *const mbmi = &xd->mi[0].src_mi->mbmi;
   struct macroblockd_plane *const pd = &xd->plane[plane];
+  int tx_idx = (blk_row >> (1 - pd->subsampling_y)) * 8 +
+               (blk_col >> (1 - pd->subsampling_x));
   TX_SIZE plane_tx_size = plane ?
-      get_uv_tx_size_impl(mbmi->tx_size, plane_bsize,
-                          0, 0) : mbmi->tx_size;
+      get_uv_tx_size_impl(mbmi->inter_tx_size[tx_idx], plane_bsize, 0, 0) :
+      mbmi->inter_tx_size[tx_idx];
 
   int max_blocks_high = num_4x4_blocks_high_lookup[plane_bsize];
   int max_blocks_wide = num_4x4_blocks_wide_lookup[plane_bsize];
@@ -502,6 +504,7 @@ static void decode_block(VP9Decoder *const pbi, MACROBLOCKD *const xd,
         mbmi->skip = 1;  // skip loopfilter
     }
   }
+
   xd->corrupted |= vp9_reader_has_error(r);
 }
 

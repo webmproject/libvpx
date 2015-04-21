@@ -80,6 +80,7 @@ static void write_tx_size_inter(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                                 TX_SIZE tx_size, int blk_row, int blk_col,
                                 vp9_writer *w) {
   MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
+  int tx_idx = (blk_row / 2) * 8 + (blk_col / 2);
   int max_blocks_high = num_4x4_blocks_high_lookup[mbmi->sb_type];
   int max_blocks_wide = num_4x4_blocks_wide_lookup[mbmi->sb_type];
   if (xd->mb_to_bottom_edge < 0)
@@ -91,7 +92,7 @@ static void write_tx_size_inter(const VP9_COMMON *cm, const MACROBLOCKD *xd,
     return;
 
   // TODO(jingning): this assumes support of the possible 64x64 transform.
-  if (tx_size == mbmi->tx_size) {
+  if (tx_size == mbmi->inter_tx_size[tx_idx]) {
     vp9_write_bit(w, 0);
   } else {  // further split
     BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
