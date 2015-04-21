@@ -34,6 +34,9 @@
 #include "vp9/encoder/vp9_quantize.h"
 #include "vp9/encoder/vp9_ratectrl.h"
 #include "vp9/encoder/vp9_rd.h"
+#if CONFIG_INTERNAL_STATS
+#include "vp9/encoder/vp9_ssim.h"
+#endif
 #include "vp9/encoder/vp9_speed_features.h"
 #include "vp9/encoder/vp9_svc_layercontext.h"
 #include "vp9/encoder/vp9_tokenize.h"
@@ -429,6 +432,10 @@ typedef struct VP9_COMP {
 
   int b_calculate_ssimg;
   int b_calculate_blockiness;
+  int b_calculate_consistency;
+  double total_inconsistency;
+  Ssimv *ssim_vars;
+  Metrics metrics;
 #endif
   int b_calculate_psnr;
 

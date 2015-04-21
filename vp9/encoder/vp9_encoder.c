@@ -1618,7 +1618,8 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
 #if CONFIG_INTERNAL_STATS
   cpi->b_calculate_ssimg = 0;
   cpi->b_calculate_blockiness = 1;
-
+  cpi->b_calculate_consistency = 1;
+  cpi->total_inconsistency = 0;
 
   cpi->count = 0;
   cpi->bytes = 0;
@@ -1667,6 +1668,10 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
 
   if (cpi->b_calculate_blockiness) {
     cpi->total_blockiness = 0;
+  }
+
+  if (cpi->b_calculate_consistency) {
+    cpi->ssim_vars = vpx_malloc(sizeof(*cpi->ssim_vars)*720*480);
   }
 
 #endif
@@ -1865,6 +1870,12 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
 
   return cpi;
 }
+#define SNPRINT(H, T) \
+  snprintf((H) + strlen(H), sizeof(H) - strlen(H), (T))
+
+#define SNPRINT2(H, T, V) \
+  snprintf((H) + strlen(H), sizeof(H) - strlen(H), (T), (V))
+
 
 void vp9_remove_compressor(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
@@ -1878,8 +1889,9 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
 #if CONFIG_INTERNAL_STATS
     vp9_clear_system_state();
 
-    // printf("\n8x8-4x4:%d-%d\n", cpi->t8x8_count, cpi->t4x4_count);
     if (cpi->oxcf.pass != 1) {
+      char headings[512] = {0};
+      char results[512] = {0};
       FILE *f = fopen("opsnr.stt", "a");
       double time_encoded = (cpi->last_end_time_stamp_seen
                              - cpi->first_time_stamp_ever) / 10000000.000;
@@ -1897,39 +1909,39 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
             vpx_sse_to_psnr((double)cpi->totalp_samples, peak,
                             (double)cpi->totalp_sq_error);
         const double total_ssim = 100 * pow(cpi->summed_quality /
-                                                cpi->summed_weights, 8.0);
+                                            cpi->summed_weights, 8.0);
+
+        snprintf(headings, sizeof(headings),
+                 "Bitrate\tAVGPsnr\tGLBPsnr\tAVPsnrP\tGLPsnrP\t"
+                 "VPXSSIM\tFASTSIM\tPSNRHVS");
+        snprintf(results, sizeof(results),
+                 "%7.2f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t"
+                 "%7.3f\t%7.3f\t%7.3f", dr,
+                 cpi->total / cpi->count, total_psnr,
+                 cpi->totalp / cpi->count, totalp_psnr, total_ssim,
+                 cpi->total_fastssim_all / cpi->count,
+                 cpi->total_psnrhvs_all / cpi->count);
         if (cpi->b_calculate_blockiness) {
-          fprintf(f, "Bitrate\tAVGPsnr\tGLBPsnr\tAVPsnrP\tGLPsnrP\t"
-                "VPXSSIM\tVPSSIMP\tFASTSSIM\tPSNRHVS\tTime(ms)\n");
-          fprintf(f, "%7.2f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t"
-                "%7.3f\t%7.3f\t%8.0f\n",
-                  dr, cpi->total / cpi->count, total_psnr,
-                  cpi->totalp / cpi->count, totalp_psnr, total_ssim,
-                cpi->total_fastssim_all / cpi->count,
-                cpi->total_psnrhvs_all / cpi->count,
-                total_encode_time);
-        } else {
-          fprintf(f, "Bitrate\tAVGPsnr\tGLBPsnr\tAVPsnrP\tGLPsnrP\t"
-                "VPXSSIM\tVPSSIMP\tBlockiness\tFASTSSIM\tPSNRHVS\tTime(ms)\n");
-          fprintf(f, "%7.2f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t"
-                  "%7.3f\t%7.3f\t%7.3f\t%8.0f\n",
-                  dr, cpi->total / cpi->count, total_psnr,
-                  cpi->totalp / cpi->count, totalp_psnr, total_ssim,
-                  cpi->total_blockiness / cpi->count,
-                  cpi->total_fastssim_all / cpi->count,
-                  cpi->total_psnrhvs_all / cpi->count,
-                  total_encode_time);
+          SNPRINT(headings, "\t  Block");
+          SNPRINT2(results, "\t%7.3f", cpi->total_blockiness / cpi->count);
         }
-      }
 
+        if (cpi->b_calculate_consistency) {
+          double consistency =
+              vpx_sse_to_psnr((double)cpi->totalp_samples, peak,
+                              (double)cpi->total_inconsistency);
 
-      if (cpi->b_calculate_ssimg) {
-        fprintf(f, "BitRate\tSSIM_Y\tSSIM_U\tSSIM_V\tSSIM_A\t  Time(ms)\n");
-        fprintf(f, "%7.2f\t%6.4f\t%6.4f\t%6.4f\t%6.4f\t%8.0f\n", dr,
-                cpi->total_ssimg_y / cpi->count,
-                cpi->total_ssimg_u / cpi->count,
-                cpi->total_ssimg_v / cpi->count,
-                cpi->total_ssimg_all / cpi->count, total_encode_time);
+          SNPRINT(headings, "\tConsist");
+          SNPRINT2(results, "\t%7.3f", consistency);
+        }
+
+        if (cpi->b_calculate_ssimg) {
+          SNPRINT(headings, "\t  SSIMG");
+          SNPRINT2(results, "\t%7.3f", cpi->total_ssimg_all / cpi->count);
+        }
+
+        fprintf(f, "%s\t    Time\n", headings);
+        fprintf(f, "%s\t%8.0f\n", results, total_encode_time);
       }
 
       fclose(f);
@@ -4200,6 +4212,16 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
                                cm->frame_to_show->y_buffer,
                                cm->frame_to_show->y_stride,
                                cpi->Source->y_width, cpi->Source->y_height);
+
+      if (cpi->b_calculate_consistency)
+        cpi->total_inconsistency += vp9_get_ssim_metrics(cpi->Source->y_buffer,
+                                                   cpi->Source->y_stride,
+                                                   cm->frame_to_show->y_buffer,
+                                                   cm->frame_to_show->y_stride,
+                                                   cpi->Source->y_width,
+                                                   cpi->Source->y_height,
+                                                   cpi->ssim_vars,
+                                                   &cpi->metrics, 1);
 
       if (cpi->b_calculate_ssimg) {
         double y, u, v, frame_all;
