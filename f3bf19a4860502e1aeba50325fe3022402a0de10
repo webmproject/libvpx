@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAdn/+/rM\u003d",
+        "filename": "test/consistency_test.cc",
+        "patchSetId": 11
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2015-04-21T17:05:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn/+/xY\u003d",
+      "revId": "f3bf19a4860502e1aeba50325fe3022402a0de10",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAdn/+/xU\u003d",
         "filename": "test/test.mk",
         "patchSetId": 11
@@ -30,6 +48,24 @@
       "writtenOn": "2015-04-20T23:55:26Z",
       "side": 1,
       "message": "remove extra blank line here",
+      "revId": "f3bf19a4860502e1aeba50325fe3022402a0de10",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn/+/rQ\u003d",
+        "filename": "test/test.mk",
+        "patchSetId": 11
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2015-04-21T17:05:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAdn/+/xU\u003d",
       "revId": "f3bf19a4860502e1aeba50325fe3022402a0de10",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
