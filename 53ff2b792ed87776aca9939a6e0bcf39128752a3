@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAdn/+/iY\u003d",
+        "filename": "vpx_mem/vpx_mem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-04-22T19:09:36Z",
+      "side": 0,
+      "message": "since these are all now just wrappers, should they be removed entirely? or should that be a followup?",
+      "revId": "53ff2b792ed87776aca9939a6e0bcf39128752a3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAdn/+/iU\u003d",
+        "filename": "vpx_mem/vpx_mem.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-04-22T19:09:36Z",
+      "side": 0,
+      "message": "this seems unnecessary or like a terrible idea (maybe another level of cleanup though?)",
+      "revId": "53ff2b792ed87776aca9939a6e0bcf39128752a3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
