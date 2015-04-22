@@ -275,6 +275,18 @@ typedef struct ActiveMap {
   unsigned char *map;
 } ActiveMap;
 
+typedef enum {
+  Y,
+  U,
+  V,
+  ALL
+} STAT_TYPE;
+
+typedef struct IMAGE_STAT {
+  double stat[ALL+1];
+  double worst;
+} ImageStat;
+
 typedef struct VP9_COMP {
   QUANTS quants;
   ThreadData td;
@@ -391,21 +403,16 @@ typedef struct VP9_COMP {
   unsigned int mode_chosen_counts[MAX_MODES];
 
   int    count;
-  double total_y;
-  double total_u;
-  double total_v;
-  double total;
   uint64_t total_sq_error;
   uint64_t total_samples;
+  ImageStat psnr;
 
-  double totalp_y;
-  double totalp_u;
-  double totalp_v;
-  double totalp;
   uint64_t totalp_sq_error;
   uint64_t totalp_samples;
+  ImageStat psnrp;
 
   double total_blockiness;
+  double worst_blockiness;
 
   int    bytes;
   double summed_quality;
@@ -413,27 +420,19 @@ typedef struct VP9_COMP {
   double summedp_quality;
   double summedp_weights;
   unsigned int tot_recode_hits;
+  double worst_ssim;
 
-
-  double total_ssimg_y;
-  double total_ssimg_u;
-  double total_ssimg_v;
-  double total_ssimg_all;
-
-  double total_fastssim_y;
-  double total_fastssim_u;
-  double total_fastssim_v;
-  double total_fastssim_all;
-
-  double total_psnrhvs_y;
-  double total_psnrhvs_u;
-  double total_psnrhvs_v;
-  double total_psnrhvs_all;
+  ImageStat ssimg;
+  ImageStat fastssim;
+  ImageStat psnrhvs;
 
   int b_calculate_ssimg;
   int b_calculate_blockiness;
+
   int b_calculate_consistency;
+
   double total_inconsistency;
+  double worst_consistency;
   Ssimv *ssim_vars;
   Metrics metrics;
 #endif

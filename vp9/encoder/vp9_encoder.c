@@ -1644,22 +1644,16 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
   cpi->b_calculate_blockiness = 1;
   cpi->b_calculate_consistency = 1;
   cpi->total_inconsistency = 0;
+  cpi->psnr.worst = 100.0;
+  cpi->worst_ssim = 100.0;
 
   cpi->count = 0;
   cpi->bytes = 0;
 
   if (cpi->b_calculate_psnr) {
-    cpi->total_y = 0.0;
-    cpi->total_u = 0.0;
-    cpi->total_v = 0.0;
-    cpi->total = 0.0;
     cpi->total_sq_error = 0;
     cpi->total_samples = 0;
 
-    cpi->totalp_y = 0.0;
-    cpi->totalp_u = 0.0;
-    cpi->totalp_v = 0.0;
-    cpi->totalp = 0.0;
     cpi->totalp_sq_error = 0;
     cpi->totalp_samples = 0;
 
@@ -1671,31 +1665,20 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
   }
 
   if (cpi->b_calculate_ssimg) {
-    cpi->total_ssimg_y = 0;
-    cpi->total_ssimg_u = 0;
-    cpi->total_ssimg_v = 0;
-    cpi->total_ssimg_all = 0;
+    cpi->ssimg.worst= 100.0;
   }
-  cpi->total_fastssim_y = 0;
-  cpi->total_fastssim_u = 0;
-  cpi->total_fastssim_v = 0;
-  cpi->total_fastssim_all = 0;
+  cpi->fastssim.worst = 100.0;
 
-  cpi->total_psnrhvs_y = 0;
-  cpi->total_psnrhvs_u = 0;
-  cpi->total_psnrhvs_v = 0;
-  cpi->total_psnrhvs_all = 0;
+  cpi->psnrhvs.worst = 100.0;
 
   if (cpi->b_calculate_blockiness) {
     cpi->total_blockiness = 0;
-  }
-
-  if (cpi->b_calculate_blockiness) {
-    cpi->total_blockiness = 0;
+    cpi->worst_blockiness = 0.0;
   }
 
   if (cpi->b_calculate_consistency) {
     cpi->ssim_vars = vpx_malloc(sizeof(*cpi->ssim_vars)*720*480);
+    cpi->worst_consistency = 100.0;
   }
 
 #endif
@@ -1900,7 +1883,6 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
 #define SNPRINT2(H, T, V) \
   snprintf((H) + strlen(H), sizeof(H) - strlen(H), (T), (V))
 
-
 void vp9_remove_compressor(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   unsigned int i;
@@ -1934,20 +1916,29 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
                             (double)cpi->totalp_sq_error);
         const double total_ssim = 100 * pow(cpi->summed_quality /
                                             cpi->summed_weights, 8.0);
+        const double totalp_ssim = 100 * pow(cpi->summedp_quality /
+                                             cpi->summedp_weights, 8.0);
 
         snprintf(headings, sizeof(headings),
                  "Bitrate\tAVGPsnr\tGLBPsnr\tAVPsnrP\tGLPsnrP\t"
-                 "VPXSSIM\tFASTSIM\tPSNRHVS");
+                 "VPXSSIM\tVPSSIMP\tFASTSIM\tPSNRHVS\t"
+                 "WstPsnr\tWstSsim\tWstFast\tWstHVS");
         snprintf(results, sizeof(results),
                  "%7.2f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t"
-                 "%7.3f\t%7.3f\t%7.3f", dr,
-                 cpi->total / cpi->count, total_psnr,
-                 cpi->totalp / cpi->count, totalp_psnr, total_ssim,
-                 cpi->total_fastssim_all / cpi->count,
-                 cpi->total_psnrhvs_all / cpi->count);
+                 "%7.3f\t%7.3f\t%7.3f\t%7.3f"
+                 "%7.3f\t%7.3f\t%7.3f\t%7.3f",
+                 dr, cpi->psnr.stat[ALL] / cpi->count, total_psnr,
+                 cpi->psnrp.stat[ALL] / cpi->count, totalp_psnr,
+                 total_ssim, totalp_ssim,
+                 cpi->fastssim.stat[ALL] / cpi->count,
+                 cpi->psnrhvs.stat[ALL] / cpi->count,
+                 cpi->psnr.worst, cpi->worst_ssim, cpi->fastssim.worst,
+                 cpi->psnrhvs.worst);
+
         if (cpi->b_calculate_blockiness) {
-          SNPRINT(headings, "\t  Block");
+          SNPRINT(headings, "\t  Block\tWstBlck");
           SNPRINT2(results, "\t%7.3f", cpi->total_blockiness / cpi->count);
+          SNPRINT2(results, "\t%7.3f", cpi->worst_blockiness);
         }
 
         if (cpi->b_calculate_consistency) {
@@ -1955,13 +1946,15 @@ void vp9_remove_compressor(VP9_COMP *cpi) {
               vpx_sse_to_psnr((double)cpi->totalp_samples, peak,
                               (double)cpi->total_inconsistency);
 
-          SNPRINT(headings, "\tConsist");
+          SNPRINT(headings, "\tConsist\tWstCons");
           SNPRINT2(results, "\t%7.3f", consistency);
+          SNPRINT2(results, "\t%7.3f", cpi->worst_consistency);
         }
 
         if (cpi->b_calculate_ssimg) {
-          SNPRINT(headings, "\t  SSIMG");
-          SNPRINT2(results, "\t%7.3f", cpi->total_ssimg_all / cpi->count);
+          SNPRINT(headings, "\t  SSIMG\tWtSSIMG");
+          SNPRINT2(results, "\t%7.3f", cpi->ssimg.stat[ALL] / cpi->count);
+          SNPRINT2(results, "\t%7.3f", cpi->ssimg.worst);
         }
 
         fprintf(f, "%s\t    Time\n", headings);
@@ -3881,6 +3874,14 @@ extern double vp9_get_blockiness(const unsigned char *img1, int img1_pitch,
                                  int width, int height);
 #endif
 
+void adjust_image_stat(double y, double u, double v, double all, ImageStat *s) {
+  s->stat[Y] += y;
+  s->stat[U] += u;
+  s->stat[V] += v;
+  s->stat[ALL] += all;
+  s->worst = MIN(s->worst, all);
+}
+
 int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
                             size_t *size, uint8_t *dest,
                             int64_t *time_stamp, int64_t *time_end, int flush) {
@@ -4133,6 +4134,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 #if CONFIG_INTERNAL_STATS
 
   if (oxcf->pass != 1) {
+    double samples;
     cpi->bytes += (int)(*size);
 
     if (cm->show_frame) {
@@ -4150,12 +4152,11 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
         calc_psnr(orig, recon, &psnr);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-        cpi->total += psnr.psnr[0];
-        cpi->total_y += psnr.psnr[1];
-        cpi->total_u += psnr.psnr[2];
-        cpi->total_v += psnr.psnr[3];
+        adjust_image_stat(psnr.psnr[1], psnr.psnr[2], psnr.psnr[3],
+                          psnr.psnr[0], &cpi->psnr);
         cpi->total_sq_error += psnr.sse[0];
         cpi->total_samples += psnr.samples[0];
+        samples = psnr.samples[0];
 
         {
           PSNR_STATS psnr2;
@@ -4185,12 +4186,10 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
           calc_psnr(orig, pp, &psnr2);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-          cpi->totalp += psnr2.psnr[0];
-          cpi->totalp_y += psnr2.psnr[1];
-          cpi->totalp_u += psnr2.psnr[2];
-          cpi->totalp_v += psnr2.psnr[3];
           cpi->totalp_sq_error += psnr2.sse[0];
           cpi->totalp_samples += psnr2.samples[0];
+          adjust_image_stat(psnr2.psnr[1], psnr2.psnr[2], psnr2.psnr[3],
+                            psnr2.psnr[0], &cpi->psnrp);
 
 #if CONFIG_VP9_HIGHBITDEPTH
           if (cm->use_highbitdepth) {
@@ -4203,6 +4202,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
           frame_ssim2 = vp9_calc_ssim(orig, recon, &weight);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
+          cpi->worst_ssim= MIN(cpi->worst_ssim, frame_ssim2);
           cpi->summed_quality += frame_ssim2 * weight;
           cpi->summed_weights += weight;
 
@@ -4230,22 +4230,33 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 #endif
         }
       }
-      if (cpi->b_calculate_blockiness)
-        cpi->total_blockiness +=
-            vp9_get_blockiness(cpi->Source->y_buffer, cpi->Source->y_stride,
-                               cm->frame_to_show->y_buffer,
-                               cm->frame_to_show->y_stride,
-                               cpi->Source->y_width, cpi->Source->y_height);
+      if (cpi->b_calculate_blockiness) {
+        double frame_blockiness = vp9_get_blockiness(
+            cpi->Source->y_buffer, cpi->Source->y_stride,
+            cm->frame_to_show->y_buffer, cm->frame_to_show->y_stride,
+            cpi->Source->y_width, cpi->Source->y_height);
+        cpi->worst_blockiness = MAX(cpi->worst_blockiness, frame_blockiness);
+        cpi->total_blockiness += frame_blockiness;
+      }
 
-      if (cpi->b_calculate_consistency)
-        cpi->total_inconsistency += vp9_get_ssim_metrics(cpi->Source->y_buffer,
-                                                   cpi->Source->y_stride,
-                                                   cm->frame_to_show->y_buffer,
-                                                   cm->frame_to_show->y_stride,
-                                                   cpi->Source->y_width,
-                                                   cpi->Source->y_height,
-                                                   cpi->ssim_vars,
-                                                   &cpi->metrics, 1);
+      if (cpi->b_calculate_consistency) {
+        double this_inconsistency = vp9_get_ssim_metrics(
+            cpi->Source->y_buffer, cpi->Source->y_stride,
+            cm->frame_to_show->y_buffer, cm->frame_to_show->y_stride,
+            cpi->Source->y_width, cpi->Source->y_height, cpi->ssim_vars,
+            &cpi->metrics, 1);
+
+        const double peak = (double)((1 << cpi->oxcf.input_bit_depth) - 1);
+
+
+        double consistency = vpx_sse_to_psnr(samples, peak,
+                                             (double)cpi->total_inconsistency);
+
+        if (consistency > 0.0)
+          cpi->worst_consistency = MIN(cpi->worst_consistency,
+                                       consistency);
+        cpi->total_inconsistency += this_inconsistency;
+      }
 
       if (cpi->b_calculate_ssimg) {
         double y, u, v, frame_all;
@@ -4260,30 +4271,19 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 #else
         frame_all = vp9_calc_ssimg(cpi->Source, cm->frame_to_show, &y, &u, &v);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
-        cpi->total_ssimg_y += y;
-        cpi->total_ssimg_u += u;
-        cpi->total_ssimg_v += v;
-        cpi->total_ssimg_all += frame_all;
+        adjust_image_stat(y, u, v, frame_all, &cpi->ssimg);
       }
       {
         double y, u, v, frame_all;
         frame_all = vp9_calc_fastssim(cpi->Source, cm->frame_to_show, &y, &u,
                                       &v);
-
-        cpi->total_fastssim_y += y;
-        cpi->total_fastssim_u += u;
-        cpi->total_fastssim_v += v;
-        cpi->total_fastssim_all += frame_all;
+        adjust_image_stat(y, u, v, frame_all, &cpi->fastssim);
         /* TODO(JBB): add 10/12 bit support */
       }
       {
         double y, u, v, frame_all;
         frame_all = vp9_psnrhvs(cpi->Source, cm->frame_to_show, &y, &u, &v);
-
-        cpi->total_psnrhvs_y += y;
-        cpi->total_psnrhvs_u += u;
-        cpi->total_psnrhvs_v += v;
-        cpi->total_psnrhvs_all += frame_all;
+        adjust_image_stat(y, u, v, frame_all, &cpi->psnrhvs);
       }
     }
   }
