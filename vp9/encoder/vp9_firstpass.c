@@ -2049,29 +2049,61 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   }
 }
 
-// TODO(PGW) Re-examine the use of II ration in this code in the light of#
-// changes elsewhere
+// Threshold for use of the lagging second reference frame. High second ref
+// usage may point to a transient event like a flash or occlusion rather than
+// a real scene cut.
+#define SECOND_REF_USEAGE_THRESH 0.1
+// Minimum % intra coding observed in first pass (1.0 = 100%)
+#define MIN_INTRA_LEVEL 0.25
+// Minimum ratio between the % of intra coding and inter coding in the first
+// pass after discounting neutral blocks (discounting neutral blocks in this
+// way helps catch scene cuts in clips with very flat areas or letter box
+// format clips with image padding.
+#define INTRA_VS_INTER_THRESH 2.0
+// Hard threshold where the first pass chooses intra for almost all blocks.
+// In such a case even if the frame is not a scene cut coding a key frame
+// may be a good option.
+#define VERY_LOW_INTER_THRESH 0.05
+// Maximum threshold for the relative ratio of intra error score vs best
+// inter error score.
+#define KF_II_ERR_THRESHOLD 2.5
+// In real scene cuts there is almost always a sharp change in the intra
+// or inter error score.
+#define ERR_CHANGE_THRESHOLD 0.4
+// For real scene cuts we expect an improvment in the intra inter error
+// ratio in the next frame.
+#define II_IMPROVEMENT_THRESHOLD 3.5
 #define KF_II_MAX 128.0
+
 static int test_candidate_kf(TWO_PASS *twopass,
                              const FIRSTPASS_STATS *last_frame,
                              const FIRSTPASS_STATS *this_frame,
                              const FIRSTPASS_STATS *next_frame) {
   int is_viable_kf = 0;
+  double pcnt_intra = 1.0 - this_frame->pcnt_inter;
+  double modified_pcnt_inter =
+    this_frame->pcnt_inter - this_frame->pcnt_neutral;
 
   // Does the frame satisfy the primary criteria of a key frame?
+  // See above for an explanation of the test criteria.
   // If so, then examine how well it predicts subsequent frames.
-  if ((this_frame->pcnt_second_ref < 0.10) &&
-      (next_frame->pcnt_second_ref < 0.10) &&
-      ((this_frame->pcnt_inter < 0.05) ||
-       (((this_frame->pcnt_inter - this_frame->pcnt_neutral) < 0.35) &&
+  if ((this_frame->pcnt_second_ref < SECOND_REF_USEAGE_THRESH) &&
+      (next_frame->pcnt_second_ref < SECOND_REF_USEAGE_THRESH) &&
+      ((this_frame->pcnt_inter < VERY_LOW_INTER_THRESH) ||
+       ((pcnt_intra > MIN_INTRA_LEVEL) &&
+        (pcnt_intra > (INTRA_VS_INTER_THRESH * modified_pcnt_inter)) &&
         ((this_frame->intra_error /
-          DOUBLE_DIVIDE_CHECK(this_frame->coded_error)) < 2.5) &&
+          DOUBLE_DIVIDE_CHECK(this_frame->coded_error)) <
+          KF_II_ERR_THRESHOLD) &&
         ((fabs(last_frame->coded_error - this_frame->coded_error) /
-              DOUBLE_DIVIDE_CHECK(this_frame->coded_error) > 0.40) ||
+          DOUBLE_DIVIDE_CHECK(this_frame->coded_error) >
+          ERR_CHANGE_THRESHOLD) ||
          (fabs(last_frame->intra_error - this_frame->intra_error) /
-              DOUBLE_DIVIDE_CHECK(this_frame->intra_error) > 0.40) ||
+          DOUBLE_DIVIDE_CHECK(this_frame->intra_error) >
+          ERR_CHANGE_THRESHOLD) ||
          ((next_frame->intra_error /
-           DOUBLE_DIVIDE_CHECK(next_frame->coded_error)) > 3.5))))) {
+          DOUBLE_DIVIDE_CHECK(next_frame->coded_error)) >
+          II_IMPROVEMENT_THRESHOLD))))) {
     int i;
     const FIRSTPASS_STATS *start_pos = twopass->stats_in;
     FIRSTPASS_STATS local_next_frame = *next_frame;
