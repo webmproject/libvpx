@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "90b566fa_d914d479",
+        "filename": "README",
+        "patchSetId": 1
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2015-04-22T23:33:48Z",
+      "side": 1,
+      "message": "Just Test",
+      "range": {
+        "startLine": 5,
+        "startChar": 13,
+        "endLine": 5,
+        "endChar": 16
+      },
+      "revId": "e673d3e45e516a0d253b0b28ac29b27bfd6129fd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
