@@ -1136,6 +1136,66 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
   return best_rd;
 }
 
+static void tx_block_rd_b(MACROBLOCK *x, TX_SIZE tx_size,
+                          int blk_row, int blk_col, int plane, int block,
+                          int plane_bsize, ENTROPY_CONTEXT *above_ctx,
+                          ENTROPY_CONTEXT *left_ctx,
+                          int *rate, int64_t *dist, int64_t *bsse, int *skip) {
+  MACROBLOCKD *const xd = &x->e_mbd;
+  struct macroblockd_plane *const pd = &xd->plane[plane];
+  const int ss_txfrm_size = tx_size << 1;
+  const struct macroblock_plane *const p = &x->plane[plane];
+  int64_t this_sse;
+  int shift = tx_size == TX_32X32 ? 0 : 2;
+  tran_low_t *const coeff = BLOCK_OFFSET(p->coeff, block);
+  tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
+  ENTROPY_CONTEXT *ta = above_ctx + blk_col;
+  ENTROPY_CONTEXT *tl = left_ctx + blk_row;
+  scan_order const *sc = get_scan(xd, tx_size, pd->plane_type, 0);
+  int i;
+
+  vp9_xform_quant_inter(x, plane, block, blk_row, blk_col,
+                        plane_bsize, tx_size);
+
+#if CONFIG_VP9_HIGHBITDEPTH
+  *dist += vp9_highbd_block_error(coeff, dqcoeff, 16 << ss_txfrm_size,
+                                  &this_sse, xd->bd) >> shift;
+#else
+  *dist += vp9_block_error(coeff, dqcoeff, 16 << ss_txfrm_size,
+                           &this_sse) >> shift;
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+  *bsse += this_sse >> shift;
+
+  switch (tx_size) {
+    case TX_4X4:
+      break;
+    case TX_8X8:
+      ta[0] = !!*(const uint16_t *)&ta[0];
+      tl[0] = !!*(const uint16_t *)&tl[0];
+      break;
+    case TX_16X16:
+      ta[0] = !!*(const uint32_t *)&ta[0];
+      tl[0] = !!*(const uint32_t *)&tl[0];
+      break;
+    case TX_32X32:
+      ta[0] = !!*(const uint64_t *)&ta[0];
+      tl[0] = !!*(const uint64_t *)&tl[0];
+      break;
+    default:
+      assert(0 && "Invalid transform size.");
+      break;
+  }
+
+  *rate += cost_coeffs(x, plane, block, ta, tl, tx_size,
+                       sc->scan, sc->neighbors, 0);
+
+  for (i = 0; i < (1 << tx_size); ++i) {
+    ta[i] = ta[0];
+    tl[i] = tl[0];
+  }
+  *skip &= (p->eobs[block] == 0);
+}
+
 static void tx_block_rd(const VP9_COMP *cpi, MACROBLOCK *x,
                         int blk_row, int blk_col, int plane, int block,
                         TX_SIZE tx_size, BLOCK_SIZE plane_bsize,
@@ -1162,57 +1222,8 @@ static void tx_block_rd(const VP9_COMP *cpi, MACROBLOCK *x,
     return;
 
   if (tx_size == plane_tx_size) {
-    const int ss_txfrm_size = tx_size << 1;
-    const struct macroblock_plane *const p = &x->plane[plane];
-    int64_t this_sse;
-    int shift = tx_size == TX_32X32 ? 0 : 2;
-    tran_low_t *const coeff = BLOCK_OFFSET(p->coeff, block);
-    tran_low_t *const dqcoeff = BLOCK_OFFSET(pd->dqcoeff, block);
-    ENTROPY_CONTEXT *ta = above_ctx + blk_col;
-    ENTROPY_CONTEXT *tl = left_ctx + blk_row;
-    scan_order const *sc = get_scan(xd, tx_size, pd->plane_type, 0);
-    int i;
-
-    vp9_xform_quant_inter(x, plane, block, blk_row, blk_col,
-                          plane_bsize, tx_size);
-
-#if CONFIG_VP9_HIGHBITDEPTH
-    *dist += vp9_highbd_block_error(coeff, dqcoeff, 16 << ss_txfrm_size,
-                                    &this_sse, xd->bd) >> shift;
-#else
-    *dist += vp9_block_error(coeff, dqcoeff, 16 << ss_txfrm_size,
-                             &this_sse) >> shift;
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-    *bsse += this_sse >> shift;
-
-    switch (tx_size) {
-      case TX_4X4:
-        break;
-      case TX_8X8:
-        ta[0] = !!*(const uint16_t *)&ta[0];
-        tl[0] = !!*(const uint16_t *)&tl[0];
-        break;
-      case TX_16X16:
-        ta[0] = !!*(const uint32_t *)&ta[0];
-        tl[0] = !!*(const uint32_t *)&tl[0];
-        break;
-      case TX_32X32:
-        ta[0] = !!*(const uint64_t *)&ta[0];
-        tl[0] = !!*(const uint64_t *)&tl[0];
-        break;
-      default:
-        assert(0 && "Invalid transform size.");
-        break;
-    }
-
-    *rate += cost_coeffs(x, plane, block, ta, tl, tx_size,
-                         sc->scan, sc->neighbors, 0);
-
-    for (i = 0; i < (1 << tx_size); ++i) {
-      ta[i] = ta[0];
-      tl[i] = tl[0];
-    }
-    *skip &= (p->eobs[block] == 0);
+    tx_block_rd_b(x, tx_size, blk_row, blk_col, plane, block,
+                  plane_bsize, above_ctx, left_ctx, rate, dist, bsse, skip);
   } else {
     BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
     int bh = num_4x4_blocks_high_lookup[bsize];
