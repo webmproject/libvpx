@@ -297,7 +297,6 @@ CONFIG_LIST="
     debug_libs
     fast_unaligned
     mem_tracker
-    mem_checks
 
     dequant_tokens
     dc_recon

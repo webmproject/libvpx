@@ -29,10 +29,6 @@
 #ifndef VPX_TRACK_MEM_USAGE
 # define VPX_TRACK_MEM_USAGE       0  /* enable memory tracking/integrity checks */
 #endif
-#ifndef VPX_CHECK_MEM_FUNCTIONS
-# define VPX_CHECK_MEM_FUNCTIONS   0  /* enable basic safety checks in _memcpy,
-_memset, and _memmove */
-#endif
 #ifndef REPLACE_BUILTIN_FUNCTIONS
 # define REPLACE_BUILTIN_FUNCTIONS 0  /* replace builtin functions with their
 vpx_ equivalents */
@@ -144,13 +140,11 @@ extern "C" {
 # endif
 #endif
 
-#if !VPX_CHECK_MEM_FUNCTIONS
-# ifndef __VPX_MEM_C__
-#  include <string.h>
-#  define vpx_memcpy  memcpy
-#  define vpx_memset  memset
-#  define vpx_memmove memmove
-# endif
+#ifndef __VPX_MEM_C__
+# include <string.h>
+# define vpx_memcpy  memcpy
+# define vpx_memset  memset
+# define vpx_memmove memmove
 #endif
 
 #ifdef VPX_MEM_PLTFRM
