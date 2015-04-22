@@ -1612,8 +1612,11 @@ int vp9_compute_qdelta_by_rate(const RATE_CONTROL *rc, FRAME_TYPE frame_type,
 void vp9_rc_set_gf_max_interval(const VP9_COMP *const cpi,
                                 RATE_CONTROL *const rc) {
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
-  // Set Maximum gf/arf interval
-  rc->max_gf_interval = 16;
+  // Set Maximum gf/arf interval.
+  rc->max_gf_interval =
+    MIN(16, (int)(cpi->framerate / 2.0));
+  // Round up to next even number if odd.
+  rc->max_gf_interval += (rc->max_gf_interval & 0x01);
 
   // Extended interval for genuinely static scenes
   rc->static_scene_max_gf_interval = MAX_LAG_BUFFERS * 2;
