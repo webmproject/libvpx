@@ -311,7 +311,7 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
     if (m1 > 0) {
       for (i = 0; i < m1; i++)
         mbmi->palette_indexed_colors[i] =
-            vp9_read_literal(r, vp9_get_bit_depth(cm->current_palette_size));
+            vp9_read_literal(r, vp9_ceil_log2(cm->current_palette_size));
       if (mbmi->palette_delta_bitdepth > 0) {
         int s;
         for (i = 0; i < m1; i++) {
@@ -343,7 +343,7 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
                                 cm->current_palette_count, mbmi);
 
     color_map[0] = vp9_read_literal(r,
-                                    vp9_get_bit_depth(mbmi->palette_size[0]));
+                                    vp9_ceil_log2(mbmi->palette_size[0]));
     for (i = 0; i < rows; i++) {
       for (j = (i == 0 ? 1 : 0); j < cols; j++) {
         color_ctx = vp9_get_palette_color_context(color_map, cols, i, j, n,
@@ -387,7 +387,7 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
       int color_order[PALETTE_MAX_SIZE];
       uint8_t *color_map = xd->plane[1].color_index_map;
 
-      color_map[0] = vp9_read_literal(r, vp9_get_bit_depth(n));
+      color_map[0] = vp9_read_literal(r, vp9_ceil_log2(n));
       for (i = 0; i < rows; i++) {
         for (j = (i == 0 ? 1 : 0); j < cols; j++) {
           color_ctx = vp9_get_palette_color_context(color_map, cols, i, j, n,
@@ -1386,7 +1386,7 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
         mbmi->palette_colors[i] = vp9_read_literal(r, 8);
 
       color_map[0] = vp9_read_literal(r,
-                                      vp9_get_bit_depth(mbmi->palette_size[0]));
+                                      vp9_ceil_log2(mbmi->palette_size[0]));
       for (i = 0; i < rows; i++) {
         for (j = (i == 0 ? 1 : 0); j < cols; j++) {
           color_ctx = vp9_get_palette_color_context(color_map, cols, i, j, n,
@@ -1435,7 +1435,7 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
         int color_order[PALETTE_MAX_SIZE];
         uint8_t *color_map = xd->plane[1].color_index_map;
 
-        color_map[0] = vp9_read_literal(r, vp9_get_bit_depth(n));
+        color_map[0] = vp9_read_literal(r, vp9_ceil_log2(n));
         for (i = 0; i < rows; i++) {
           for (j = (i == 0 ? 1 : 0); j < cols; j++) {
             color_ctx = vp9_get_palette_color_context(color_map, cols, i, j, n,

@@ -494,7 +494,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
 
       memcpy(buffer, mbmi->palette_color_map,
              rows * cols * sizeof(buffer[0]));
-      vp9_write_literal(w, buffer[0], vp9_get_bit_depth(n));
+      vp9_write_literal(w, buffer[0], vp9_ceil_log2(n));
       for (i = 0; i < rows; i++) {
         for (j = (i == 0 ? 1 : 0); j < cols; j++) {
           color_ctx = vp9_get_palette_color_context(buffer, cols, i, j, n,
@@ -532,7 +532,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
       if (xd->plane[1].subsampling_x && xd->plane[1].subsampling_y) {
         memcpy(buffer, mbmi->palette_uv_color_map,
                rows * cols * sizeof(buffer[0]));
-        vp9_write_literal(w, buffer[0], vp9_get_bit_depth(n));
+        vp9_write_literal(w, buffer[0], vp9_ceil_log2(n));
         for (i = 0; i < rows; i++) {
           for (j = (i == 0 ? 1 : 0); j < cols; j++) {
             color_ctx = vp9_get_palette_color_context(buffer, cols, i, j, n,
@@ -916,7 +916,7 @@ static void write_mb_modes_kf(const VP9_COMMON *cm,
       if (m1 > 0) {
         for (i = 0; i < m1; i++)
           vp9_write_literal(w, mbmi->palette_indexed_colors[i],
-                            vp9_get_bit_depth(mbmi->current_palette_size));
+                            vp9_ceil_log2(mbmi->current_palette_size));
         if (mbmi->palette_delta_bitdepth > 0) {
           for (i = 0; i < m1; i++) {
             vp9_write_bit(w, mbmi->palette_color_delta[i] < 0);
@@ -932,7 +932,7 @@ static void write_mb_modes_kf(const VP9_COMMON *cm,
 
       memcpy(buffer, mbmi->palette_color_map,
              rows * cols * sizeof(buffer[0]));
-      vp9_write_literal(w, buffer[0], vp9_get_bit_depth(n));
+      vp9_write_literal(w, buffer[0], vp9_ceil_log2(n));
       for (i = 0; i < rows; i++) {
         for (j = (i == 0 ? 1 : 0); j < cols; j++) {
           color_ctx = vp9_get_palette_color_context(buffer, cols, i, j, n,
@@ -970,7 +970,7 @@ static void write_mb_modes_kf(const VP9_COMMON *cm,
       if (xd->plane[1].subsampling_x && xd->plane[1].subsampling_y) {
         memcpy(buffer, mbmi->palette_uv_color_map,
                rows * cols * sizeof(buffer[0]));
-        vp9_write_literal(w, buffer[0], vp9_get_bit_depth(n));
+        vp9_write_literal(w, buffer[0], vp9_ceil_log2(n));
         for (i = 0; i < rows; i++) {
           for (j = (i == 0 ? 1 : 0); j < cols; j++) {
             color_ctx = vp9_get_palette_color_context(buffer, cols, i, j, n,

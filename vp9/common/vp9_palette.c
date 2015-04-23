@@ -131,7 +131,7 @@ int vp9_palette_color_lookup(uint8_t *dic, int n, uint8_t val, int bits) {
     return -1;
 }
 
-int vp9_get_bit_depth(int n) {
+int vp9_ceil_log2(int n) {
   int i = 1, p = 2;
   while (p < n) {
     i++;

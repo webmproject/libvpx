@@ -20,7 +20,7 @@ void vp9_insertion_sort(double *data, int n);
 void vp9_palette_color_insertion(uint8_t *old_colors, int *m, int *count,
                                  MB_MODE_INFO *mbmi);
 int vp9_palette_color_lookup(uint8_t *dic, int n, uint8_t val, int bits);
-int vp9_get_bit_depth(int n);
+int vp9_ceil_log2(int n);
 int vp9_k_means(double *data, double *centroids, int *indices,
                 int n, int k, int dim, int max_itr);
 void vp9_calc_indices(double *data, double *centroids, int *indices,

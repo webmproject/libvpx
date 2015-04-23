@@ -1932,7 +1932,7 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
             m2++;
           }
         }
-        total_bits = m1 * vp9_get_bit_depth(cpi->common.current_palette_size) +
+        total_bits = m1 * vp9_ceil_log2(cpi->common.current_palette_size) +
             m1 * (bits == 0 ? 0 : bits + 1) + m2 * 8;
         if (total_bits <= best_total_bits) {
           best_total_bits = total_bits;
@@ -2020,11 +2020,11 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
       this_rate = this_rate_tokenonly +
           (1 + vp9_encode_uniform_cost(MIN(k + 1, 8), m1) + PALETTE_DELTA_BIT
-              + vp9_get_bit_depth(mic->mbmi.current_palette_size) * m1 +
+              + vp9_ceil_log2(mic->mbmi.current_palette_size) * m1 +
               best_bits * m1 + 8 * m2) * vp9_cost_bit(128, 0) +
               palette_size_cost[k - 2];
       color_map = xd->plane[0].color_index_map;
-      this_rate +=  vp9_get_bit_depth(k) * vp9_cost_bit(128, 0);
+      this_rate +=  vp9_ceil_log2(k) * vp9_cost_bit(128, 0);
       for (i = 0; i < rows; i++) {
         for (j = (i == 0 ? 1 : 0); j < cols; j++) {
           color_ctx = vp9_get_palette_color_context(color_map, cols, i, j, n,
@@ -2539,7 +2539,7 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
         this_rate = this_rate_tokenonly +
             (1 + 2 * 8 * n) * vp9_cost_bit(128, 0) +
             palette_size_cost[n - 2];
-        this_rate +=  vp9_get_bit_depth(n) * vp9_cost_bit(128, 0);
+        this_rate +=  vp9_ceil_log2(n) * vp9_cost_bit(128, 0);
         for (i = 0; i < rows; i++) {
           for (j = (i == 0 ? 1 : 0); j < cols; j++) {
             color_ctx = vp9_get_palette_color_context(color_map, cols, i, j, n,
@@ -5571,7 +5571,7 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
             (1 + PALETTE_DELTA_BIT + n * m2) * vp9_cost_bit(128, 0) +
                 palette_size_cost[n - 2];
         color_map = xd->plane[0].color_index_map;
-        rate_y +=  vp9_get_bit_depth(n) * vp9_cost_bit(128, 0);
+        rate_y +=  vp9_ceil_log2(n) * vp9_cost_bit(128, 0);
 
         for (i = 0; i < rows; i++) {
           for (j = (i == 0 ? 1 : 0); j < cols; j++) {
@@ -7110,7 +7110,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
             vp9_cost_bit(cm->fc.palette_enabled_prob
                          [bsize - BLOCK_8X8][palette_ctx], 1);
         color_map = xd->plane[0].color_index_map;
-        total_rate_y +=  vp9_get_bit_depth(k) * vp9_cost_bit(128, 0);
+        total_rate_y +=  vp9_ceil_log2(k) * vp9_cost_bit(128, 0);
         for (i = 0; i < rows; i++) {
           for (j = (i == 0 ? 1 : 0); j < cols; j++) {
             color_ctx = vp9_get_palette_color_context(color_map, cols, i, j, n,
