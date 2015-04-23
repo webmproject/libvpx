@@ -8,6 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <math.h>
+
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_entropymv.h"
 
@@ -118,6 +120,61 @@ static const uint8_t log_in_base_2[] = {
   9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 10
 };
 
+#if CONFIG_GLOBAL_MOTION
+const vp9_tree_index vp9_global_motion_types_tree
+          [TREE_SIZE(GLOBAL_MOTION_TYPES)] = {
+  -GLOBAL_ZERO, 2,
+  -GLOBAL_TRANSLATION, -GLOBAL_ROTZOOM
+};
+
+static const vp9_prob default_global_motion_types_prob
+                 [GLOBAL_MOTION_TYPES - 1] = {
+  // Currently only translation is used, so make the second prob very high.
+  240, 255
+};
+
+static void convert_params_to_rotzoom(double *H, Global_Motion_Params *model) {
+  double z = 1.0 + (double) model->zoom / (1 << ZOOM_PRECISION_BITS);
+  double r = (double) model->rotation / (1 << ROTATION_PRECISION_BITS);
+  H[0] =  (1 + z) * cos(r * M_PI / 180.0);
+  H[1] = -(1 + z) * sin(r * M_PI / 180.0);
+  H[2] = (double) model->mv.as_mv.col / 8.0;
+  H[3] = (double) model->mv.as_mv.row / 8.0;
+}
+
+static int_mv get_global_mv(int col, int row, Global_Motion_Params *model) {
+  int_mv mv;
+  double H[4];
+  double x, y;
+  convert_params_to_rotzoom(H, model);
+  x =  H[0] * col + H[1] * row + H[2];
+  y = -H[1] * col + H[0] * row + H[3];
+  mv.as_mv.col = (int)floor(x * 8 + 0.5) - col;
+  mv.as_mv.row = (int)floor(y * 8 + 0.5) - row;
+  return mv;
+}
+
+int_mv vp9_get_global_sb_center_mv(int col, int row, BLOCK_SIZE bsize,
+                                   Global_Motion_Params *model) {
+  col += num_4x4_blocks_wide_lookup[bsize] * 2;
+  row += num_4x4_blocks_high_lookup[bsize] * 2;
+  return get_global_mv(col, row, model);
+}
+
+int_mv vp9_get_global_sub8x8_center_mv(int col, int row, int block,
+                                       Global_Motion_Params *model) {
+  if (block == 0 || block == 2)
+    col += 2;
+  else
+    col += 6;
+  if (block == 0 || block == 1)
+    row += 2;
+  else
+    row += 6;
+  return get_global_mv(col, row, model);
+}
+#endif  // CONFIG_GLOBAL_MOTION
+
 static INLINE int mv_class_base(MV_CLASS_TYPE c) {
   return c ? CLASS0_SIZE << (c + 2) : 0;
 }
@@ -142,7 +199,7 @@ int vp9_get_mv_mag(MV_CLASS_TYPE c, int offset) {
 static void inc_mv_component(int v, nmv_component_counts *comp_counts,
                              int incr, int usehp) {
   int s, z, c, o, d, e, f;
-  assert(v != 0);            /* should not be zero */
+  assert(v != 0);             /* should not be zero */
   s = v < 0;
   comp_counts->sign[s] += incr;
   z = (s ? -v : v) - 1;       /* magnitude - 1 */
@@ -233,4 +290,7 @@ void vp9_init_mv_probs(VP9_COMMON *cm) {
 #if CONFIG_INTRABC
   cm->fc.ndvc = default_nmv_context;
 #endif  // CONFIG_INTRABC
+#if CONFIG_GLOBAL_MOTION
+  vp9_copy(cm->fc.global_motion_types_prob, default_global_motion_types_prob);
+#endif  // CONFIG_GLOBAL_MOTION
 }

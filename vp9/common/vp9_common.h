@@ -118,6 +118,17 @@ typedef int16_t tran_low_t;
 
 #define VP9_FRAME_MARKER 0x2
 
+static INLINE int get_unsigned_bits_gen(unsigned int num_values) {
+  int cat = 0;
+  if (num_values <= 1)
+    return 0;
+  num_values--;
+  while (num_values > 0) {
+    cat++;
+    num_values >>= 1;
+  }
+  return cat;
+}
 
 #ifdef __cplusplus
 }  // extern "C"

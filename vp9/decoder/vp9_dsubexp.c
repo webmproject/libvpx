@@ -74,3 +74,42 @@ void vp9_diff_update_prob(vp9_reader *r, vp9_prob* p) {
     *p = (vp9_prob)inv_remap_prob(delp, *p);
   }
 }
+
+int vp9_read_primitive_uniform(vp9_reader *r, unsigned int num_values) {
+  const int l = get_unsigned_bits_gen(num_values);
+  int m, v;
+  if (l == 0)
+    return 0;
+  m = (1 << l) - num_values;
+  v = vp9_read_literal(r, l - 1);
+  if (v < m)
+    return v;
+  else
+    return (v << 1) + vp9_read_bit(r) - m;
+}
+
+int vp9_read_primitive_subexp(vp9_reader *r, unsigned int k) {
+  int mk = (1 << k);
+  int i = 0;
+  int word;
+  while (vp9_read_bit(r)) {
+    mk <<= 1;
+    ++i;
+  }
+  if (i == 0) {
+    word = vp9_read_literal(r, k);
+  } else {
+    word = vp9_read_literal(r, k + i - 1) + (mk >> 1);
+  }
+  return word;
+}
+
+int vp9_read_primitive_symmetric(vp9_reader *r, unsigned int mag_bits) {
+  if (vp9_read_bit(r)) {
+    int s = vp9_read_bit(r);
+    int x = vp9_read_literal(r, mag_bits) + 1;
+    return (s > 0 ? -x : x);
+  } else {
+    return 0;
+  }
+}

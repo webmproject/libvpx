@@ -2721,11 +2721,21 @@ static int set_and_cost_bmi_mvs(VP9_COMP *cpi, MACROBLOCKD *xd, int i,
 #endif
       break;
     case ZEROMV:
+#if CONFIG_GLOBAL_MOTION
+      this_mv[0].as_int =
+          cpi->common.global_motion[mbmi->ref_frame[0]][0].mv.as_int;
+#if !CONFIG_COMPOUND_MODES
+      if (is_compound)
+        this_mv[1].as_int =
+            cpi->common.global_motion[mbmi->ref_frame[1]][0].mv.as_int;
+#endif
+#else   // CONFIG_GLOBAL_MOTION
       this_mv[0].as_int = 0;
 #if !CONFIG_COMPOUND_MODES
       if (is_compound)
         this_mv[1].as_int = 0;
 #endif
+#endif  // CONFIG_GLOBAL_MOTION
       break;
 #if CONFIG_COMPOUND_MODES
     case NEW_NEWMV:
@@ -2771,8 +2781,15 @@ static int set_and_cost_bmi_mvs(VP9_COMP *cpi, MACROBLOCKD *xd, int i,
       this_mv[1].as_int = frame_mv[mbmi->ref_frame[1]].as_int;
       break;
     case ZERO_ZEROMV:
+#if CONFIG_GLOBAL_MOTION
+      this_mv[0].as_int =
+          cpi->common.global_motion[mbmi->ref_frame[0]][0].mv.as_int;
+      this_mv[1].as_int =
+          cpi->common.global_motion[mbmi->ref_frame[1]][0].mv.as_int;
+#else
       this_mv[0].as_int = 0;
       this_mv[1].as_int = 0;
+#endif  // CONFIG_GLOBAL_MOTION
       break;
 #endif
     default:
@@ -2827,23 +2844,23 @@ static int64_t encode_inter_mb_segment(VP9_COMP *cpi,
     const uint8_t *pre = &pd->pre[ref].buf[raster_block_offset(
         BLOCK_8X8, i, pd->pre[ref].stride)];
 #if CONFIG_VP9_HIGHBITDEPTH
-  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-    vp9_highbd_build_inter_predictor(pre, pd->pre[ref].stride,
-                                     dst, pd->dst.stride,
-                                     &mi->bmi[i].as_mv[ref].as_mv,
-                                     &xd->block_refs[ref]->sf, width, height,
-                                     ref, kernel, MV_PRECISION_Q3,
-                                     mi_col * MI_SIZE + 4 * (i % 2),
-                                     mi_row * MI_SIZE + 4 * (i / 2), xd->bd);
-  } else {
-    vp9_build_inter_predictor(pre, pd->pre[ref].stride,
-                              dst, pd->dst.stride,
-                              &mi->bmi[i].as_mv[ref].as_mv,
-                              &xd->block_refs[ref]->sf, width, height, ref,
-                              kernel, MV_PRECISION_Q3,
-                              mi_col * MI_SIZE + 4 * (i % 2),
-                              mi_row * MI_SIZE + 4 * (i / 2));
-  }
+    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+      vp9_highbd_build_inter_predictor(pre, pd->pre[ref].stride,
+                                       dst, pd->dst.stride,
+                                       &mi->bmi[i].as_mv[ref].as_mv,
+                                       &xd->block_refs[ref]->sf, width, height,
+                                       ref, kernel, MV_PRECISION_Q3,
+                                       mi_col * MI_SIZE + 4 * (i % 2),
+                                       mi_row * MI_SIZE + 4 * (i / 2), xd->bd);
+    } else {
+      vp9_build_inter_predictor(pre, pd->pre[ref].stride,
+                                dst, pd->dst.stride,
+                                &mi->bmi[i].as_mv[ref].as_mv,
+                                &xd->block_refs[ref]->sf, width, height, ref,
+                                kernel, MV_PRECISION_Q3,
+                                mi_col * MI_SIZE + 4 * (i % 2),
+                                mi_row * MI_SIZE + 4 * (i / 2));
+    }
 #else
     vp9_build_inter_predictor(pre, pd->pre[ref].stride,
                               dst, pd->dst.stride,
@@ -3266,7 +3283,11 @@ static int64_t rd_pick_best_sub8x8_mode(
         vp9_update_mv_context(cm, xd, tile, mi, frame, mv_ref_list,
                               i, mi_row, mi_col);
 #endif  // CONFIG_NEWMVREF
+#if CONFIG_GLOBAL_MOTION
+        frame_mv[ZEROMV][frame].as_int = cm->global_motion[frame][0].mv.as_int;
+#else
         frame_mv[ZEROMV][frame].as_int = 0;
+#endif  // CONFIG_GLOBAL_MOTION
         vp9_append_sub8x8_mvs_for_idx(cm, xd, tile, i, ref, mi_row, mi_col,
 #if CONFIG_NEWMVREF
                                       mv_ref_list,
@@ -3280,7 +3301,12 @@ static int64_t rd_pick_best_sub8x8_mode(
                               &ref_mvs_sub8x8[0][ref], &ref_mvs_sub8x8[1][ref]);
 #endif  // CONFIG_NEWMVREF
 #if CONFIG_COMPOUND_MODES
+#if CONFIG_GLOBAL_MOTION
+        frame_mv[ZERO_ZEROMV][frame].as_int =
+            cm->global_motion[frame][0].mv.as_int;
+#else
         frame_mv[ZERO_ZEROMV][frame].as_int = 0;
+#endif  // CONFIG_GLOBAL_MOTION
         frame_mv[NEAREST_NEARESTMV][frame].as_int =
             frame_mv[NEARESTMV][frame].as_int;
         if (ref == 0) {
@@ -3306,7 +3332,7 @@ static int64_t rd_pick_best_sub8x8_mode(
           frame_mv[NEW_NEARMV][frame].as_int =
               frame_mv[NEARMV][frame].as_int;
         }
-#endif
+#endif  // CONFIG_COMPOUND_MODES
       }
 
       // search for the best motion vector on this segment
@@ -3349,9 +3375,11 @@ static int64_t rd_pick_best_sub8x8_mode(
         if (!(inter_mode_mask & (1 << this_mode)))
           continue;
 
+#if !CONFIG_GLOBAL_MOTION
         if (!check_best_zero_mv(cpi, mbmi->mode_context, frame_mv,
                                 this_mode, mbmi->ref_frame))
           continue;
+#endif
 
         vpx_memcpy(orig_pre, pd->pre, sizeof(orig_pre));
         vpx_memcpy(bsi->rdstat[i][mode_idx].ta, t_above,
@@ -5839,6 +5867,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   const MODE_INFO *left_mi = xd->left_available ?
       xd->mi[-1].src_mi : NULL;
 #endif  // CONFIG_PALETTE
+
   vp9_zero(best_mbmode);
 
   x->skip_encode = sf->skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
@@ -5883,10 +5912,20 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_NEWMVREF
     frame_mv[NEAR_FORNEWMV][ref_frame].as_int = INVALID_MV;
 #endif  // CONFIG_NEWMVREF
+#if CONFIG_GLOBAL_MOTION
+    frame_mv[ZEROMV][ref_frame].as_int =
+        cm->global_motion[ref_frame][0].mv.as_int;
+#else
     frame_mv[ZEROMV][ref_frame].as_int = 0;
+#endif  // CONFIG_GLOBAL_MOTION
 #if CONFIG_COMPOUND_MODES
     frame_mv[NEW_NEWMV][ref_frame].as_int = INVALID_MV;
+#if CONFIG_GLOBAL_MOTION
+    frame_mv[ZERO_ZEROMV][ref_frame].as_int =
+        cm->global_motion[ref_frame][0].mv.as_int;
+#else
     frame_mv[ZERO_ZEROMV][ref_frame].as_int = 0;
+#endif  // CONFIG_GLOBAL_MOTION
 #endif  // CONFIG_COMPOUND_MODES
   }
 
@@ -5924,19 +5963,25 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     // an unfiltered alternative. We allow near/nearest as well
     // because they may result in zero-zero MVs but be cheaper.
     if (cpi->rc.is_src_frame_alt_ref && (cpi->oxcf.arnr_max_frames == 0)) {
+      int_mv zmv;
       ref_frame_skip_mask[0] = (1 << LAST_FRAME) | (1 << GOLDEN_FRAME);
       ref_frame_skip_mask[1] = SECOND_REF_FRAME_MASK;
       mode_skip_mask[ALTREF_FRAME] = ~INTER_NEAREST_NEAR_ZERO;
-      if (frame_mv[NEARMV][ALTREF_FRAME].as_int != 0)
+#if CONFIG_GLOBAL_MOTION
+      zmv.as_int = cm->global_motion[ALTREF_FRAME][0].mv.as_int;
+#else
+      zmv.as_int = 0;
+#endif
+      if (frame_mv[NEARMV][ALTREF_FRAME].as_int != zmv.as_int)
         mode_skip_mask[ALTREF_FRAME] |= (1 << NEARMV);
-      if (frame_mv[NEARESTMV][ALTREF_FRAME].as_int != 0)
+      if (frame_mv[NEARESTMV][ALTREF_FRAME].as_int != zmv.as_int)
         mode_skip_mask[ALTREF_FRAME] |= (1 << NEARESTMV);
 #if CONFIG_COMPOUND_MODES
-      if (frame_mv[NEAREST_NEARESTMV][ALTREF_FRAME].as_int != 0)
+      if (frame_mv[NEAREST_NEARESTMV][ALTREF_FRAME].as_int != zmv.as_int)
         mode_skip_mask[ALTREF_FRAME] |= (1 << NEAREST_NEARESTMV);
-      if (frame_mv[NEAREST_NEARMV][ALTREF_FRAME].as_int != 0)
+      if (frame_mv[NEAREST_NEARMV][ALTREF_FRAME].as_int != zmv.as_int)
         mode_skip_mask[ALTREF_FRAME] |= (1 << NEAREST_NEARMV);
-      if (frame_mv[NEAR_NEARESTMV][ALTREF_FRAME].as_int != 0)
+      if (frame_mv[NEAR_NEARESTMV][ALTREF_FRAME].as_int != zmv.as_int)
         mode_skip_mask[ALTREF_FRAME] |= (1 << NEAR_NEARESTMV);
 #endif  // CONFIG_COMPOUND_MODES
     }
@@ -6161,12 +6206,16 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
             continue;
 
       if (const_motion)
+#if CONFIG_GLOBAL_MOTION
+        if (this_mode == NEARMV)
+#else   // CONFIG_GLOBAL_MOTION
 #if CONFIG_COMPOUND_MODES
         if (this_mode == NEARMV || this_mode == ZEROMV ||
             this_mode == ZERO_ZEROMV)
-#else
+#else   // CONFIG_COMPOUND_MODES
         if (this_mode == NEARMV || this_mode == ZEROMV)
 #endif  // CONFIG_COMPOUND_MODES
+#endif  // CONFIG_GLOBAL_MOTION
           continue;
     }
 
@@ -6220,11 +6269,13 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
               continue;
         }
       }
+#if !CONFIG_GLOBAL_MOTION
     } else {
       const MV_REFERENCE_FRAME ref_frames[2] = {ref_frame, second_ref_frame};
       if (!check_best_zero_mv(cpi, mbmi->mode_context, frame_mv,
                               this_mode, ref_frames))
         continue;
+#endif  // !CONFIG_GLOBAL_MOTION
     }
 #if CONFIG_INTERINTRA
     if (ref_frame > INTRA_FRAME && second_ref_frame == INTRA_FRAME &&
@@ -6667,6 +6718,14 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     const MV_REFERENCE_FRAME refs[2] = {best_mbmode.ref_frame[0],
         best_mbmode.ref_frame[1]};
     int comp_pred_mode = refs[1] > INTRA_FRAME;
+    int_mv zmv[2];
+#if CONFIG_GLOBAL_MOTION
+    zmv[0].as_int = cm->global_motion[refs[0]][0].mv.as_int;
+    zmv[1].as_int = cm->global_motion[refs[1]][0].mv.as_int;
+#else
+    zmv[0].as_int = 0;
+    zmv[1].as_int = 0;
+#endif
 
     if (frame_mv[NEARESTMV][refs[0]].as_int == best_mbmode.mv[0].as_int &&
         ((comp_pred_mode && frame_mv[NEARESTMV][refs[1]].as_int ==
@@ -6676,8 +6735,8 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
         ((comp_pred_mode && frame_mv[NEARMV][refs[1]].as_int ==
             best_mbmode.mv[1].as_int) || !comp_pred_mode))
       best_mbmode.mode = NEARMV;
-    else if (best_mbmode.mv[0].as_int == 0 &&
-        ((comp_pred_mode && best_mbmode.mv[1].as_int == 0) ||
+    else if (best_mbmode.mv[0].as_int == zmv[0].as_int &&
+        ((comp_pred_mode && best_mbmode.mv[1].as_int == zmv[1].as_int) ||
           !comp_pred_mode))
       best_mbmode.mode = ZEROMV;
   }
@@ -6687,6 +6746,14 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
     const MV_REFERENCE_FRAME refs[2] = {best_mbmode.ref_frame[0],
         best_mbmode.ref_frame[1]};
     int comp_pred_mode = refs[1] > INTRA_FRAME;
+    int_mv zmv[2];
+#if CONFIG_GLOBAL_MOTION
+    zmv[0].as_int = cm->global_motion[refs[0]][0].mv.as_int;
+    zmv[1].as_int = cm->global_motion[refs[1]][0].mv.as_int;
+#else
+    zmv[0].as_int = 0;
+    zmv[1].as_int = 0;
+#endif
 
     if (frame_mv[NEAREST_NEARESTMV][refs[0]].as_int == best_mbmode.mv[0].as_int
         && ((comp_pred_mode && frame_mv[NEAREST_NEARESTMV][refs[1]].as_int ==
@@ -6702,8 +6769,9 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
              ((comp_pred_mode && frame_mv[NEAR_NEARESTMV][refs[1]].as_int ==
                best_mbmode.mv[1].as_int) || !comp_pred_mode))
       best_mbmode.mode = NEAR_NEARESTMV;
-    else if (best_mbmode.mv[0].as_int == 0 &&
-        ((comp_pred_mode && best_mbmode.mv[1].as_int == 0) || !comp_pred_mode))
+    else if (best_mbmode.mv[0].as_int == zmv[0].as_int &&
+        ((comp_pred_mode && best_mbmode.mv[1].as_int == zmv[1].as_int) ||
+         !comp_pred_mode))
       best_mbmode.mode = ZERO_ZEROMV;
   }
 #endif
@@ -7272,7 +7340,11 @@ void vp9_rd_pick_inter_mode_sb_seg_skip(VP9_COMP *cpi, MACROBLOCK *x,
   mbmi->uv_mode = DC_PRED;
   mbmi->ref_frame[0] = LAST_FRAME;
   mbmi->ref_frame[1] = NONE;
+#if CONFIG_GLOBAL_MOTION
+  mbmi->mv[0].as_int = cm->global_motion[mbmi->ref_frame[0]][0].mv.as_int;
+#else
   mbmi->mv[0].as_int = 0;
+#endif
   x->skip = 1;
 
   // Search for best switchable filter by checking the variance of
@@ -7457,10 +7529,20 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       ref_frame_skip_mask[1] |= SECOND_REF_FRAME_MASK;
     }
     frame_mv[NEWMV][ref_frame].as_int = INVALID_MV;
+#if CONFIG_GLOBAL_MOTION
+    frame_mv[ZEROMV][ref_frame].as_int =
+        cm->global_motion[ref_frame][0].mv.as_int;
+#else
     frame_mv[ZEROMV][ref_frame].as_int = 0;
+#endif  // CONFIG_GLOBAL_MOTION
 #if CONFIG_COMPOUND_MODES
     frame_mv[NEW_NEWMV][ref_frame].as_int = INVALID_MV;
+#if CONFIG_GLOBAL_MOTION
+    frame_mv[ZERO_ZEROMV][ref_frame].as_int =
+        cm->global_motion[ref_frame][0].mv.as_int;
+#else
     frame_mv[ZERO_ZEROMV][ref_frame].as_int = 0;
+#endif  // CONFIG_GLOBAL_MOTION
 #endif
   }
 

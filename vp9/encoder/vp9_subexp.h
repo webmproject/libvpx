@@ -34,6 +34,20 @@ int vp9_prob_diff_update_savings_search_model(const unsigned int *ct,
                                               vp9_prob *bestp,
                                               vp9_prob upd);
 
+// num_values is the number of values word can take
+void vp9_write_primitive_uniform(vp9_writer *w, int word,
+                                 unsigned int num_values);
+
+// k is the parameter of the subexponential code
+void vp9_write_primitive_subexp(vp9_writer *w, int word,
+                                unsigned int k);
+//
+// mag_bits is number of bits for magnitude. The alphabet is of size
+// 2 * 2^mag_bits + 1, symmetric around 0, where one bit is used to
+// indicate 0 or non-zero, mag_bits bits are used to indicate magnitide
+// and 1 more bit for the sign if non-zero.
+void vp9_write_primitive_symmetric(vp9_writer *w, int word,
+                                   unsigned int mag_bits);
 #ifdef __cplusplus
 }  // extern "C"
 #endif

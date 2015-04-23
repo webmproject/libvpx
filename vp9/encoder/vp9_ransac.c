@@ -20,6 +20,9 @@
 #define MAX_PARAMDIM 9
 #define MAX_MINPTS   4
 
+#define MAX_DEGENERATE_ITER 10
+#define MINPTS_MULTIPLIER   5
+
 // svdcmp
 // Adopted from Numerical Recipes in C
 
@@ -364,6 +367,30 @@ typedef int  (*findTransformationType)(int points,
                                        double *points2,
                                        double *H);
 
+static int get_rand_indices(int npoints, int minpts, int *indices) {
+  int i, j;
+  int ptr = rand() % npoints;
+  if (minpts > npoints)
+    return 0;
+  indices[0] = ptr;
+  ptr = (ptr == npoints - 1 ? 0 : ptr + 1);
+  i = 1;
+  while (i < minpts) {
+    int index = rand() % npoints;
+    while (index) {
+      ptr = (ptr == npoints - 1 ? 0 : ptr + 1);
+      for (j = 0; j < i; ++j) {
+        if (indices[j] == ptr)
+          break;
+      }
+      if (j == i)
+        index--;
+    }
+    indices[i++] = ptr;
+  }
+  return 1;
+}
+
 int ransac_(double *matched_points,
             int npoints,
             int *number_of_inliers,
@@ -378,7 +405,7 @@ int ransac_(double *matched_points,
             projectPointsType projectPoints) {
 
   static const double INLIER_THRESHOLD_NORMALIZED = 0.1;
-  static const double INLIER_THRESHOLD_UNNORMALIZED = 1.5;
+  static const double INLIER_THRESHOLD_UNNORMALIZED = 0.5;
   static const double PROBABILITY_REQUIRED = 0.9;
   static const double EPS = 1e-12;
   static const int MIN_TRIALS = 20;
@@ -387,13 +414,15 @@ int ransac_(double *matched_points,
                                    INLIER_THRESHOLD_NORMALIZED :
                                    INLIER_THRESHOLD_UNNORMALIZED);
   int N = 10000, trial_count = 0;
-  int i, j;
+  int i;
+  int ret_val = 0;
 
   int max_inliers = 0;
   double best_variance = 0.0;
   double H[MAX_PARAMDIM];
   double points1[2 * MAX_MINPTS];
   double points2[2 * MAX_MINPTS];
+  int indices[MAX_MINPTS];
 
   double *best_inlier_set1;
   double *best_inlier_set2;
@@ -408,11 +437,12 @@ int ransac_(double *matched_points,
   double *cnp1, *cnp2;
   double T1[9], T2[9];
 
-  srand((unsigned)time(NULL)) ;
-  // srand( 12345 ) ;
-  //
+  // srand((unsigned)time(NULL)) ;
+  // better to make this deterministic for a given sequence for ease of testing
+  srand(npoints);
+
   *number_of_inliers = 0;
-  if (npoints < minpts) {
+  if (npoints < minpts * MINPTS_MULTIPLIER) {
     printf("Cannot find motion with %d matches\n", npoints);
     return 1;
   }
@@ -446,19 +476,16 @@ int ransac_(double *matched_points,
     double sum_distance_squared = 0.0;
 
     int degenerate = 1;
+    int num_degenerate_iter = 0;
     while (degenerate) {
+      num_degenerate_iter++;
+      if (!get_rand_indices(npoints, minpts, indices)) {
+        ret_val = 1;
+        goto finish_ransac;
+      }
       i = 0;
       while (i < minpts) {
-        int index = rand() % npoints;
-        int duplicate = 0;
-        for (j = 0; j < i; ++j) {
-          if (points1[j*2] == corners1[index*2] &&
-              points1[j*2+1] == corners1[index*2+1]) {
-            duplicate = 1;
-            break;
-          }
-        }
-        if(duplicate) continue;
+        int index = indices[i];
         // add to list
         points1[i*2] = corners1[index*2];
         points1[i*2+1] = corners1[index*2+1];
@@ -467,6 +494,10 @@ int ransac_(double *matched_points,
         i++;
       }
       degenerate = isDegenerate(points1);
+      if (num_degenerate_iter > MAX_DEGENERATE_ITER) {
+        ret_val = 1;
+        goto finish_ransac;
+      }
     }
 
     if (findTransformation(minpts, points1, points2, H)) {
@@ -539,6 +570,7 @@ int ransac_(double *matched_points,
                        npoints, bestH,
                        best_inlier_mask));
   */
+finish_ransac:
   free(best_inlier_set1);
   free(best_inlier_set2);
   free(inlier_set1);
@@ -548,7 +580,7 @@ int ransac_(double *matched_points,
   free(image1_coord);
   free(image2_coord);
   free(inlier_mask);
-  return 0;
+  return ret_val;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////

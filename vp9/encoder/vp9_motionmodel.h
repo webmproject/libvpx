@@ -17,15 +17,18 @@ extern "C" {
 
 struct VP9_COMP;
 
-void get_frame_motionfield(struct VP9_COMP *cpi,
-                           YV12_BUFFER_CONFIG *buf,
-                           YV12_BUFFER_CONFIG *ref,
-                           int blocksize,
-                           MV *motionfield,
-                           double *confidence);
+void vp9_get_frame_motionfield(struct VP9_COMP *cpi,
+                               YV12_BUFFER_CONFIG *buf,
+                               YV12_BUFFER_CONFIG *ref,
+                               BLOCK_SIZE bsize,
+                               MV *motionfield,
+                               double *confidence);
 
-void vp9_get_motionfield(struct VP9_COMP *cpi, int ref,
-                         int blocksize, MV *motionfield, double *confidence);
+void vp9_get_ref_motionfield(struct VP9_COMP *cpi,
+                             int ref,
+                             BLOCK_SIZE bsize,
+                             MV *motionfield,
+                             double *confidence);
 
 #ifdef __cplusplus
 }  // extern "C"
