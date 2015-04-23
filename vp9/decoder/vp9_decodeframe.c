@@ -1631,9 +1631,15 @@ static void setup_loopfilter(VP9_COMMON *cm,
 #if CONFIG_LOOP_POSTFILTER
   lf->bilateral_level = vp9_rb_read_bit(rb);
   if (lf->bilateral_level) {
-    lf->bilateral_level += vp9_rb_read_literal(
-        rb, vp9_bilateral_level_bits(cm));
+    int level = vp9_rb_read_literal(rb, vp9_bilateral_level_bits(cm));
+    lf->bilateral_level = level + (level >= lf->last_bilateral_level);
+  } else {
+    lf->bilateral_level = lf->last_bilateral_level;
   }
+  if (cm->frame_type != KEY_FRAME)
+    cm->lf.last_bilateral_level = cm->lf.bilateral_level;
+  else
+    cm->lf.last_bilateral_level = 0;
 #endif  // CONFIG_LOOP_POSTFILTER
 }
 
@@ -2377,6 +2383,7 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
       }
     }
   }
+
 #if CONFIG_VP9_HIGHBITDEPTH
   get_frame_new_buffer(cm)->bit_depth = cm->bit_depth;
 #endif

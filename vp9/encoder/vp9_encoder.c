@@ -3423,6 +3423,8 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   // Pick the loop filter level for the frame.
   loopfilter_frame(cpi, cm);
 
+  // printf("Bilateral level: %d\n", cm->lf.bilateral_level);
+
   // build the bitstream
   vp9_pack_bitstream(cpi, dest, size);
 
@@ -3462,6 +3464,13 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   cpi->ref_frame_flags = get_ref_frame_flags(cpi);
 
   cm->last_frame_type = cm->frame_type;
+
+#if CONFIG_LOOP_POSTFILTER
+  if (cm->frame_type != KEY_FRAME)
+    cm->lf.last_bilateral_level = cm->lf.bilateral_level;
+  else
+    cm->lf.last_bilateral_level = 0;
+#endif
 
   if (!(is_two_pass_svc(cpi) && cpi->svc.encode_empty_frame_state == ENCODING))
     vp9_rc_postencode_update(cpi, *size);

@@ -25,10 +25,10 @@ extern "C" {
 #define RDDIV_BITS          7
 
 #define RDCOST(RM, DM, R, D) \
-  (((128 + ((int64_t)R) * (RM)) >> 8) + (D << DM))
+  (((128 + ((int64_t)R) * (RM)) >> 8) + ((D) << (DM)))
 
 #define RDCOST_DBL(RM, DM, R, D) \
-  (((((double)R) * (RM)) / 256.0) + ((double)D  * (1 << DM)))
+  (((((double)(R)) * (RM)) / 256.0) + ((double)(D)  * (1 << (DM))))
 
 #define QIDX_SKIP_THRESH     115
 
