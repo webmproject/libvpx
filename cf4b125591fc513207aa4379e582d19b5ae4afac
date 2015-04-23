@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "10a416b9_6596a24c",
+        "filename": "stdhd.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2015-04-23T00:19:14Z",
+      "side": 1,
+      "message": "this is clearly stupid and wrong",
+      "range": {
+        "startLine": 11,
+        "startChar": 16,
+        "endLine": 11,
+        "endChar": 19
+      },
+      "revId": "cf4b125591fc513207aa4379e582d19b5ae4afac",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
