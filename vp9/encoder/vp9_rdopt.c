@@ -1321,8 +1321,7 @@ static int set_and_cost_bmi_mvs(VP9_COMP *cpi, MACROBLOCKD *xd, int i,
 
   for (idy = 0; idy < num_4x4_blocks_high; ++idy)
     for (idx = 0; idx < num_4x4_blocks_wide; ++idx)
-      vpx_memmove(&mic->bmi[i + idy * 2 + idx],
-                  &mic->bmi[i], sizeof(mic->bmi[i]));
+      memmove(&mic->bmi[i + idy * 2 + idx], &mic->bmi[i], sizeof(mic->bmi[i]));
 
   return cost_mv_ref(cpi, mode, mbmi->mode_context[mbmi->ref_frame[0]]) +
             thismvcost;

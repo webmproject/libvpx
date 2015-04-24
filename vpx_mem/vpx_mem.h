@@ -35,13 +35,11 @@ extern "C" {
 #if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
   void *vpx_memset16(void *dest, int val, size_t length);
 #endif
-  void *vpx_memmove(void *dest, const void *src, size_t count);
 
 #ifndef __VPX_MEM_C__
 # include <string.h>
 # define vpx_memcpy  memcpy
 # define vpx_memset  memset
-# define vpx_memmove memmove
 #endif
 
 #ifdef VPX_MEM_PLTFRM

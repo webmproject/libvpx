@@ -109,7 +109,3 @@ void *vpx_memset16(void *dest, int val, size_t length) {
   return orig;
 }
 #endif  // CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
-
-void *vpx_memmove(void *dest, const void *src, size_t count) {
-  return memmove(dest, src, count);
-}

@@ -1620,7 +1620,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned char * dest
             /* concatenate partition buffers */
             for(i = 0; i < num_part; i++)
             {
-                vpx_memmove(dp, cpi->partition_d[i+1], cpi->partition_sz[i+1]);
+                memmove(dp, cpi->partition_d[i+1], cpi->partition_sz[i+1]);
                 cpi->partition_d[i+1] = dp;
                 dp += cpi->partition_sz[i+1];
             }
