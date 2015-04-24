@@ -432,11 +432,12 @@ static int set_vt_partitioning(VP9_COMP *cpi,
 
     // Check vertical split.
     if (mi_row + block_height / 2 < cm->mi_rows) {
+      BLOCK_SIZE subsize = get_subsize(bsize, PARTITION_VERT);
       get_variance(&vt.part_variances->vert[0]);
       get_variance(&vt.part_variances->vert[1]);
       if (vt.part_variances->vert[0].variance < threshold &&
-          vt.part_variances->vert[1].variance < threshold) {
-        BLOCK_SIZE subsize = get_subsize(bsize, PARTITION_VERT);
+          vt.part_variances->vert[1].variance < threshold &&
+          get_plane_block_size(subsize, &xd->plane[1]) < BLOCK_INVALID) {
         set_block_size(cpi, xd, mi_row, mi_col, subsize);
         set_block_size(cpi, xd, mi_row, mi_col + block_width / 2, subsize);
         return 1;
@@ -444,11 +445,12 @@ static int set_vt_partitioning(VP9_COMP *cpi,
     }
     // Check horizontal split.
     if (mi_col + block_width / 2 < cm->mi_cols) {
+      BLOCK_SIZE subsize = get_subsize(bsize, PARTITION_HORZ);
       get_variance(&vt.part_variances->horz[0]);
       get_variance(&vt.part_variances->horz[1]);
       if (vt.part_variances->horz[0].variance < threshold &&
-          vt.part_variances->horz[1].variance < threshold) {
-        BLOCK_SIZE subsize = get_subsize(bsize, PARTITION_HORZ);
+          vt.part_variances->horz[1].variance < threshold &&
+          get_plane_block_size(subsize, &xd->plane[1]) < BLOCK_INVALID) {
         set_block_size(cpi, xd, mi_row, mi_col, subsize);
         set_block_size(cpi, xd, mi_row + block_height / 2, mi_col, subsize);
         return 1;
