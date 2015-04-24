@@ -5693,16 +5693,18 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
       ctx->mic = *xd->mi[0].src_mi;
       rd_cost->rdcost =
           RDCOST(x->rdmult, x->rddiv, rd_cost->rate, rd_cost->dist);
+      vpx_memcpy(ctx->zcoeff_blk, x->zcoeff_blk[ctx->mic.mbmi.tx_size],
+                 sizeof(uint8_t) * ctx->num_4x4_blk);
     }
   }
 #endif  // CONFIG_INTRABC
 
 #if CONFIG_PALETTE
-  if (xd->mi[0].src_mi->mbmi.palette_enabled[0]) {
+  if (ctx->mic.mbmi.palette_enabled[0]) {
     vp9_palette_color_insertion(ctx->palette_colors_buf,
                                 &ctx->palette_buf_size,
                                 ctx->palette_count_buf,
-                                &(xd->mi[0].src_mi->mbmi));
+                                &(ctx->mic.mbmi));
   }
 #endif  // CONFIG_PALETTE
 }
