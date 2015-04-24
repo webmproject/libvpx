@@ -357,7 +357,7 @@ static void copy_frame(YV12_BUFFER_CONFIG dest, const YV12_BUFFER_CONFIG src) {
   assert(dest.y_height == src.y_height);
 
   for (r = 0; r < dest.y_height; ++r) {
-    vpx_memcpy(destbuf, srcbuf, dest.y_width);
+    memcpy(destbuf, srcbuf, dest.y_width);
     destbuf += dest.y_stride;
     srcbuf += src.y_stride;
   }

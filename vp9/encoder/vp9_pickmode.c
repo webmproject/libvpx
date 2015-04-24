@@ -1669,7 +1669,7 @@ void vp9_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
         const struct buf_2d orig_src = p->src;
         const struct buf_2d orig_dst = pd->dst;
         struct buf_2d orig_pre[2];
-        vpx_memcpy(orig_pre, xd->plane[0].pre, sizeof(orig_pre));
+        memcpy(orig_pre, xd->plane[0].pre, sizeof(orig_pre));
 
         // set buffer pointers for sub8x8 motion search.
         p->src.buf =

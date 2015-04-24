@@ -1603,7 +1603,7 @@ void vp9_loop_filter_data_reset(
   lf_data->start = 0;
   lf_data->stop = 0;
   lf_data->y_only = 0;
-  vpx_memcpy(lf_data->planes, planes, sizeof(lf_data->planes));
+  memcpy(lf_data->planes, planes, sizeof(lf_data->planes));
 }
 
 int vp9_loop_filter_worker(LFWorkerData *const lf_data, void *unused) {

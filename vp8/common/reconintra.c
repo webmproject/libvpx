@@ -217,8 +217,8 @@ void vp8_build_intra_predictors_mbuv_s_c(MACROBLOCKD *x,
     {
         for (i = 0; i < 8; i++)
         {
-            vpx_memcpy(upred_ptr, uabove_row, 8);
-            vpx_memcpy(vpred_ptr, vabove_row, 8);
+            memcpy(upred_ptr, uabove_row, 8);
+            memcpy(vpred_ptr, vabove_row, 8);
             upred_ptr += pred_stride;
             vpred_ptr += pred_stride;
         }

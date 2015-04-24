@@ -36,13 +36,13 @@ extern "C" {
 // Only need this for fixed-size arrays, for structs just assign.
 #define vp9_copy(dest, src) {            \
     assert(sizeof(dest) == sizeof(src)); \
-    vpx_memcpy(dest, src, sizeof(src));  \
+    memcpy(dest, src, sizeof(src));  \
   }
 
 // Use this for variably-sized arrays.
 #define vp9_copy_array(dest, src, n) {       \
     assert(sizeof(*dest) == sizeof(*src));   \
-    vpx_memcpy(dest, src, n * sizeof(*src)); \
+    memcpy(dest, src, n * sizeof(*src)); \
   }
 
 #define vp9_zero(dest) vpx_memset(&(dest), 0, sizeof(dest))

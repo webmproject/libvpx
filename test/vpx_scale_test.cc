@@ -101,13 +101,13 @@ class VpxScaleBase {
 
     // The first row was already extended to the left and right. Copy it up.
     for (int y = 0; y < padding; ++y) {
-      vpx_memcpy(top, left, extend_width);
+      memcpy(top, left, extend_width);
       top += stride;
     }
 
     uint8_t *bottom = left + (crop_height * stride);
     for (int y = 0; y <  bottom_extend; ++y) {
-      vpx_memcpy(bottom, left + (crop_height - 1) * stride, extend_width);
+      memcpy(bottom, left + (crop_height - 1) * stride, extend_width);
       bottom += stride;
     }
   }

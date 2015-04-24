@@ -1036,8 +1036,8 @@ static void update_state(VP9_COMP *cpi, ThreadData *td,
   }
 
   x->skip = ctx->skip;
-  vpx_memcpy(x->zcoeff_blk[mbmi->tx_size], ctx->zcoeff_blk,
-             sizeof(uint8_t) * ctx->num_4x4_blk);
+  memcpy(x->zcoeff_blk[mbmi->tx_size], ctx->zcoeff_blk,
+         sizeof(uint8_t) * ctx->num_4x4_blk);
 
   if (!output_enabled)
     return;
@@ -1341,22 +1341,22 @@ static void restore_context(MACROBLOCK *const x, int mi_row, int mi_col,
   int mi_width = num_8x8_blocks_wide_lookup[bsize];
   int mi_height = num_8x8_blocks_high_lookup[bsize];
   for (p = 0; p < MAX_MB_PLANE; p++) {
-    vpx_memcpy(
+    memcpy(
         xd->above_context[p] + ((mi_col * 2) >> xd->plane[p].subsampling_x),
         a + num_4x4_blocks_wide * p,
         (sizeof(ENTROPY_CONTEXT) * num_4x4_blocks_wide) >>
         xd->plane[p].subsampling_x);
-    vpx_memcpy(
+    memcpy(
         xd->left_context[p]
             + ((mi_row & MI_MASK) * 2 >> xd->plane[p].subsampling_y),
         l + num_4x4_blocks_high * p,
         (sizeof(ENTROPY_CONTEXT) * num_4x4_blocks_high) >>
         xd->plane[p].subsampling_y);
   }
-  vpx_memcpy(xd->above_seg_context + mi_col, sa,
-             sizeof(*xd->above_seg_context) * mi_width);
-  vpx_memcpy(xd->left_seg_context + (mi_row & MI_MASK), sl,
-             sizeof(xd->left_seg_context[0]) * mi_height);
+  memcpy(xd->above_seg_context + mi_col, sa,
+         sizeof(*xd->above_seg_context) * mi_width);
+  memcpy(xd->left_seg_context + (mi_row & MI_MASK), sl,
+         sizeof(xd->left_seg_context[0]) * mi_height);
 }
 
 static void save_context(MACROBLOCK *const x, int mi_row, int mi_col,
@@ -1373,22 +1373,22 @@ static void save_context(MACROBLOCK *const x, int mi_row, int mi_col,
 
   // buffer the above/left context information of the block in search.
   for (p = 0; p < MAX_MB_PLANE; ++p) {
-    vpx_memcpy(
+    memcpy(
         a + num_4x4_blocks_wide * p,
         xd->above_context[p] + (mi_col * 2 >> xd->plane[p].subsampling_x),
         (sizeof(ENTROPY_CONTEXT) * num_4x4_blocks_wide) >>
         xd->plane[p].subsampling_x);
-    vpx_memcpy(
+    memcpy(
         l + num_4x4_blocks_high * p,
         xd->left_context[p]
             + ((mi_row & MI_MASK) * 2 >> xd->plane[p].subsampling_y),
         (sizeof(ENTROPY_CONTEXT) * num_4x4_blocks_high) >>
         xd->plane[p].subsampling_y);
   }
-  vpx_memcpy(sa, xd->above_seg_context + mi_col,
-             sizeof(*xd->above_seg_context) * mi_width);
-  vpx_memcpy(sl, xd->left_seg_context + (mi_row & MI_MASK),
-             sizeof(xd->left_seg_context[0]) * mi_height);
+  memcpy(sa, xd->above_seg_context + mi_col,
+         sizeof(*xd->above_seg_context) * mi_width);
+  memcpy(sl, xd->left_seg_context + (mi_row & MI_MASK),
+         sizeof(xd->left_seg_context[0]) * mi_height);
 }
 
 static void encode_b(VP9_COMP *cpi, const TileInfo *const tile,
@@ -2353,11 +2353,11 @@ static void set_partition_range(VP9_COMMON *cm, MACROBLOCKD *xd,
 }
 
 static INLINE void store_pred_mv(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx) {
-  vpx_memcpy(ctx->pred_mv, x->pred_mv, sizeof(x->pred_mv));
+  memcpy(ctx->pred_mv, x->pred_mv, sizeof(x->pred_mv));
 }
 
 static INLINE void load_pred_mv(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx) {
-  vpx_memcpy(x->pred_mv, ctx->pred_mv, sizeof(x->pred_mv));
+  memcpy(x->pred_mv, ctx->pred_mv, sizeof(x->pred_mv));
 }
 
 #if CONFIG_FP_MB_STATS

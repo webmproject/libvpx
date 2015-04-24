@@ -94,12 +94,12 @@ static void extend_plane(uint8_t *const src, int src_stride,
   linesize = extend_left + extend_right + width;
 
   for (i = 0; i < extend_top; i++) {
-    vpx_memcpy(top_dst, top_src, linesize);
+    memcpy(top_dst, top_src, linesize);
     top_dst += src_stride;
   }
 
   for (i = 0; i < extend_bottom; i++) {
-    vpx_memcpy(bot_dst, bot_src, linesize);
+    memcpy(bot_dst, bot_src, linesize);
     bot_dst += src_stride;
   }
 }

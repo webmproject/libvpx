@@ -155,8 +155,8 @@ static void calc_av_activity( VP8_COMP *cpi, int64_t activity_sum )
                         cpi->common.MBs));
 
         /* Copy map to sort list */
-        vpx_memcpy( sortlist, cpi->mb_activity_map,
-                    sizeof(unsigned int) * cpi->common.MBs );
+        memcpy( sortlist, cpi->mb_activity_map,
+                sizeof(unsigned int) * cpi->common.MBs );
 
 
         /* Ripple each value down to its correct position */

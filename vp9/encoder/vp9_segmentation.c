@@ -36,7 +36,7 @@ void vp9_set_segment_data(struct segmentation *seg,
                           unsigned char abs_delta) {
   seg->abs_delta = abs_delta;
 
-  vpx_memcpy(seg->feature_data, feature_data, sizeof(seg->feature_data));
+  memcpy(seg->feature_data, feature_data, sizeof(seg->feature_data));
 }
 void vp9_disable_segfeature(struct segmentation *seg, int segment_id,
                             SEG_LVL_FEATURES feature_id) {
@@ -263,11 +263,11 @@ void vp9_choose_segmap_coding_method(VP9_COMMON *cm, MACROBLOCKD *xd) {
   // Now choose which coding method to use.
   if (t_pred_cost < no_pred_cost) {
     seg->temporal_update = 1;
-    vpx_memcpy(seg->tree_probs, t_pred_tree, sizeof(t_pred_tree));
-    vpx_memcpy(seg->pred_probs, t_nopred_prob, sizeof(t_nopred_prob));
+    memcpy(seg->tree_probs, t_pred_tree, sizeof(t_pred_tree));
+    memcpy(seg->pred_probs, t_nopred_prob, sizeof(t_nopred_prob));
   } else {
     seg->temporal_update = 0;
-    vpx_memcpy(seg->tree_probs, no_pred_tree, sizeof(no_pred_tree));
+    memcpy(seg->tree_probs, no_pred_tree, sizeof(no_pred_tree));
   }
 }
 

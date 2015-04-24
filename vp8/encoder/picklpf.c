@@ -49,7 +49,7 @@ static void yv12_copy_partial_frame(YV12_BUFFER_CONFIG *src_ybc,
     src_y = src_ybc->y_buffer + yoffset;
     dst_y = dst_ybc->y_buffer + yoffset;
 
-    vpx_memcpy(dst_y, src_y, ystride * linestocopy);
+    memcpy(dst_y, src_y, ystride * linestocopy);
 }
 
 static int calc_partial_ssl_err(YV12_BUFFER_CONFIG *source,

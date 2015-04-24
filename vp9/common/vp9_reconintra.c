@@ -245,7 +245,7 @@ static INLINE void highbd_v_predictor(uint16_t *dst, ptrdiff_t stride,
   (void) left;
   (void) bd;
   for (r = 0; r < bs; r++) {
-    vpx_memcpy(dst, above, bs * sizeof(uint16_t));
+    memcpy(dst, above, bs * sizeof(uint16_t));
     dst += stride;
   }
 }
@@ -488,7 +488,7 @@ static INLINE void v_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
   (void) left;
 
   for (r = 0; r < bs; r++) {
-    vpx_memcpy(dst, above, bs);
+    memcpy(dst, above, bs);
     dst += stride;
   }
 }
@@ -718,24 +718,24 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
       /* slower path if the block needs border extension */
       if (x0 + 2 * bs <= frame_width) {
         if (right_available && bs == 4) {
-          vpx_memcpy(above_row, above_ref, 2 * bs * sizeof(uint16_t));
+          memcpy(above_row, above_ref, 2 * bs * sizeof(uint16_t));
         } else {
-          vpx_memcpy(above_row, above_ref, bs * sizeof(uint16_t));
+          memcpy(above_row, above_ref, bs * sizeof(uint16_t));
           vpx_memset16(above_row + bs, above_row[bs - 1], bs);
         }
       } else if (x0 + bs <= frame_width) {
         const int r = frame_width - x0;
         if (right_available && bs == 4) {
-          vpx_memcpy(above_row, above_ref, r * sizeof(uint16_t));
+          memcpy(above_row, above_ref, r * sizeof(uint16_t));
           vpx_memset16(above_row + r, above_row[r - 1],
                        x0 + 2 * bs - frame_width);
         } else {
-          vpx_memcpy(above_row, above_ref, bs * sizeof(uint16_t));
+          memcpy(above_row, above_ref, bs * sizeof(uint16_t));
           vpx_memset16(above_row + bs, above_row[bs - 1], bs);
         }
       } else if (x0 <= frame_width) {
         const int r = frame_width - x0;
-        vpx_memcpy(above_row, above_ref, r * sizeof(uint16_t));
+        memcpy(above_row, above_ref, r * sizeof(uint16_t));
         vpx_memset16(above_row + r, above_row[r - 1],
                        x0 + 2 * bs - frame_width);
       }
@@ -746,9 +746,9 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
       if (bs == 4 && right_available && left_available) {
         const_above_row = above_ref;
       } else {
-        vpx_memcpy(above_row, above_ref, bs * sizeof(uint16_t));
+        memcpy(above_row, above_ref, bs * sizeof(uint16_t));
         if (bs == 4 && right_available)
-          vpx_memcpy(above_row + bs, above_ref + bs, bs * sizeof(uint16_t));
+          memcpy(above_row + bs, above_ref + bs, bs * sizeof(uint16_t));
         else
           vpx_memset16(above_row + bs, above_row[bs - 1], bs);
         // TODO(Peter): this value should probably change for high bitdepth
@@ -841,10 +841,10 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
       if (xd->mb_to_right_edge < 0) {
         /* slower path if the block needs border extension */
         if (x0 + bs <= frame_width) {
-          vpx_memcpy(above_row, above_ref, bs);
+          memcpy(above_row, above_ref, bs);
         } else if (x0 <= frame_width) {
           const int r = frame_width - x0;
-          vpx_memcpy(above_row, above_ref, r);
+          memcpy(above_row, above_ref, r);
           vpx_memset(above_row + r, above_row[r - 1],
                      x0 + bs - frame_width);
         }
@@ -853,7 +853,7 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
         if (bs == 4 && right_available && left_available) {
           const_above_row = above_ref;
         } else {
-          vpx_memcpy(above_row, above_ref, bs);
+          memcpy(above_row, above_ref, bs);
         }
       }
       above_row[-1] = left_available ? above_ref[-1] : 129;
@@ -871,24 +871,24 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
         /* slower path if the block needs border extension */
         if (x0 + 2 * bs <= frame_width) {
           if (right_available && bs == 4) {
-            vpx_memcpy(above_row, above_ref, 2 * bs);
+            memcpy(above_row, above_ref, 2 * bs);
           } else {
-            vpx_memcpy(above_row, above_ref, bs);
+            memcpy(above_row, above_ref, bs);
             vpx_memset(above_row + bs, above_row[bs - 1], bs);
           }
         } else if (x0 + bs <= frame_width) {
           const int r = frame_width - x0;
           if (right_available && bs == 4) {
-            vpx_memcpy(above_row, above_ref, r);
+            memcpy(above_row, above_ref, r);
             vpx_memset(above_row + r, above_row[r - 1],
                        x0 + 2 * bs - frame_width);
           } else {
-            vpx_memcpy(above_row, above_ref, bs);
+            memcpy(above_row, above_ref, bs);
             vpx_memset(above_row + bs, above_row[bs - 1], bs);
           }
         } else if (x0 <= frame_width) {
           const int r = frame_width - x0;
-          vpx_memcpy(above_row, above_ref, r);
+          memcpy(above_row, above_ref, r);
           vpx_memset(above_row + r, above_row[r - 1],
                      x0 + 2 * bs - frame_width);
         }
@@ -897,9 +897,9 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
         if (bs == 4 && right_available && left_available) {
           const_above_row = above_ref;
         } else {
-          vpx_memcpy(above_row, above_ref, bs);
+          memcpy(above_row, above_ref, bs);
           if (bs == 4 && right_available)
-            vpx_memcpy(above_row + bs, above_ref + bs, bs);
+            memcpy(above_row + bs, above_ref + bs, bs);
           else
             vpx_memset(above_row + bs, above_row[bs - 1], bs);
         }

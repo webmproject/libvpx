@@ -416,14 +416,13 @@ static void setup_mbby_copy(MACROBLOCK *mbdst, MACROBLOCK *mbsrc)
         zd->subpixel_predict16x16    = xd->subpixel_predict16x16;
         zd->segmentation_enabled     = xd->segmentation_enabled;
         zd->mb_segement_abs_delta      = xd->mb_segement_abs_delta;
-        vpx_memcpy(zd->segment_feature_data, xd->segment_feature_data,
-                   sizeof(xd->segment_feature_data));
+        memcpy(zd->segment_feature_data, xd->segment_feature_data,
+               sizeof(xd->segment_feature_data));
 
-        vpx_memcpy(zd->dequant_y1_dc, xd->dequant_y1_dc,
-                   sizeof(xd->dequant_y1_dc));
-        vpx_memcpy(zd->dequant_y1, xd->dequant_y1, sizeof(xd->dequant_y1));
-        vpx_memcpy(zd->dequant_y2, xd->dequant_y2, sizeof(xd->dequant_y2));
-        vpx_memcpy(zd->dequant_uv, xd->dequant_uv, sizeof(xd->dequant_uv));
+        memcpy(zd->dequant_y1_dc, xd->dequant_y1_dc, sizeof(xd->dequant_y1_dc));
+        memcpy(zd->dequant_y1, xd->dequant_y1, sizeof(xd->dequant_y1));
+        memcpy(zd->dequant_y2, xd->dequant_y2, sizeof(xd->dequant_y2));
+        memcpy(zd->dequant_uv, xd->dequant_uv, sizeof(xd->dequant_uv));
 
 #if 1
         /*TODO:  Remove dequant from BLOCKD.  This is a temporary solution until
@@ -438,9 +437,8 @@ static void setup_mbby_copy(MACROBLOCK *mbdst, MACROBLOCK *mbsrc)
 #endif
 
 
-        vpx_memcpy(z->rd_threshes, x->rd_threshes, sizeof(x->rd_threshes));
-        vpx_memcpy(z->rd_thresh_mult, x->rd_thresh_mult,
-                   sizeof(x->rd_thresh_mult));
+        memcpy(z->rd_threshes, x->rd_threshes, sizeof(x->rd_threshes));
+        memcpy(z->rd_thresh_mult, x->rd_thresh_mult, sizeof(x->rd_thresh_mult));
 
         z->zbin_over_quant = x->zbin_over_quant;
         z->zbin_mode_boost_enabled = x->zbin_mode_boost_enabled;

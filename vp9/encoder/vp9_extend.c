@@ -28,7 +28,7 @@ static void copy_and_extend_plane(const uint8_t *src, int src_pitch,
 
   for (i = 0; i < h; i++) {
     vpx_memset(dst_ptr1, src_ptr1[0], extend_left);
-    vpx_memcpy(dst_ptr1 + extend_left, src_ptr1, w);
+    memcpy(dst_ptr1 + extend_left, src_ptr1, w);
     vpx_memset(dst_ptr2, src_ptr2[0], extend_right);
     src_ptr1 += src_pitch;
     src_ptr2 += src_pitch;
@@ -45,12 +45,12 @@ static void copy_and_extend_plane(const uint8_t *src, int src_pitch,
   linesize = extend_left + extend_right + w;
 
   for (i = 0; i < extend_top; i++) {
-    vpx_memcpy(dst_ptr1, src_ptr1, linesize);
+    memcpy(dst_ptr1, src_ptr1, linesize);
     dst_ptr1 += dst_pitch;
   }
 
   for (i = 0; i < extend_bottom; i++) {
-    vpx_memcpy(dst_ptr2, src_ptr2, linesize);
+    memcpy(dst_ptr2, src_ptr2, linesize);
     dst_ptr2 += dst_pitch;
   }
 }
@@ -73,7 +73,7 @@ static void highbd_copy_and_extend_plane(const uint8_t *src8, int src_pitch,
 
   for (i = 0; i < h; i++) {
     vpx_memset16(dst_ptr1, src_ptr1[0], extend_left);
-    vpx_memcpy(dst_ptr1 + extend_left, src_ptr1, w * sizeof(uint16_t));
+    memcpy(dst_ptr1 + extend_left, src_ptr1, w * sizeof(uint16_t));
     vpx_memset16(dst_ptr2, src_ptr2[0], extend_right);
     src_ptr1 += src_pitch;
     src_ptr2 += src_pitch;
@@ -90,12 +90,12 @@ static void highbd_copy_and_extend_plane(const uint8_t *src8, int src_pitch,
   linesize = extend_left + extend_right + w;
 
   for (i = 0; i < extend_top; i++) {
-    vpx_memcpy(dst_ptr1, src_ptr1, linesize * sizeof(uint16_t));
+    memcpy(dst_ptr1, src_ptr1, linesize * sizeof(uint16_t));
     dst_ptr1 += dst_pitch;
   }
 
   for (i = 0; i < extend_bottom; i++) {
-    vpx_memcpy(dst_ptr2, src_ptr2, linesize * sizeof(uint16_t));
+    memcpy(dst_ptr2, src_ptr2, linesize * sizeof(uint16_t));
     dst_ptr2 += dst_pitch;
   }
 }

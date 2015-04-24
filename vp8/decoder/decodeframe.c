@@ -323,7 +323,7 @@ static void yv12_extend_frame_top_c(YV12_BUFFER_CONFIG *ybf)
 
     for (i = 0; i < (int)Border; i++)
     {
-        vpx_memcpy(dest_ptr1, src_ptr1, plane_stride);
+        memcpy(dest_ptr1, src_ptr1, plane_stride);
         dest_ptr1 += plane_stride;
     }
 
@@ -338,7 +338,7 @@ static void yv12_extend_frame_top_c(YV12_BUFFER_CONFIG *ybf)
 
     for (i = 0; i < (int)(Border); i++)
     {
-        vpx_memcpy(dest_ptr1, src_ptr1, plane_stride);
+        memcpy(dest_ptr1, src_ptr1, plane_stride);
         dest_ptr1 += plane_stride;
     }
 
@@ -351,7 +351,7 @@ static void yv12_extend_frame_top_c(YV12_BUFFER_CONFIG *ybf)
 
     for (i = 0; i < (int)(Border); i++)
     {
-        vpx_memcpy(dest_ptr1, src_ptr1, plane_stride);
+        memcpy(dest_ptr1, src_ptr1, plane_stride);
         dest_ptr1 += plane_stride;
     }
 }
@@ -379,7 +379,7 @@ static void yv12_extend_frame_bottom_c(YV12_BUFFER_CONFIG *ybf)
 
     for (i = 0; i < (int)Border; i++)
     {
-        vpx_memcpy(dest_ptr2, src_ptr2, plane_stride);
+        memcpy(dest_ptr2, src_ptr2, plane_stride);
         dest_ptr2 += plane_stride;
     }
 
@@ -397,7 +397,7 @@ static void yv12_extend_frame_bottom_c(YV12_BUFFER_CONFIG *ybf)
 
     for (i = 0; i < (int)(Border); i++)
     {
-        vpx_memcpy(dest_ptr2, src_ptr2, plane_stride);
+        memcpy(dest_ptr2, src_ptr2, plane_stride);
         dest_ptr2 += plane_stride;
     }
 
@@ -411,7 +411,7 @@ static void yv12_extend_frame_bottom_c(YV12_BUFFER_CONFIG *ybf)
 
     for (i = 0; i < (int)(Border); i++)
     {
-        vpx_memcpy(dest_ptr2, src_ptr2, plane_stride);
+        memcpy(dest_ptr2, src_ptr2, plane_stride);
         dest_ptr2 += plane_stride;
     }
 }
@@ -918,7 +918,7 @@ static void init_frame(VP8D_COMP *pbi)
     if (pc->frame_type == KEY_FRAME)
     {
         /* Various keyframe initializations */
-        vpx_memcpy(pc->fc.mvc, vp8_default_mv_context, sizeof(vp8_default_mv_context));
+        memcpy(pc->fc.mvc, vp8_default_mv_context, sizeof(vp8_default_mv_context));
 
         vp8_init_mbmode_probs(pc);
 
@@ -1072,8 +1072,8 @@ int vp8_decode_frame(VP8D_COMP *pbi)
         }
         else
         {
-          vpx_memcpy(&xd->pre, yv12_fb_new, sizeof(YV12_BUFFER_CONFIG));
-          vpx_memcpy(&xd->dst, yv12_fb_new, sizeof(YV12_BUFFER_CONFIG));
+          memcpy(&xd->pre, yv12_fb_new, sizeof(YV12_BUFFER_CONFIG));
+          memcpy(&xd->dst, yv12_fb_new, sizeof(YV12_BUFFER_CONFIG));
         }
     }
     if ((!pbi->decoded_key_frame && pc->frame_type != KEY_FRAME))
@@ -1278,7 +1278,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 #endif
     if (pc->refresh_entropy_probs == 0)
     {
-        vpx_memcpy(&pc->lfc, &pc->fc, sizeof(pc->fc));
+        memcpy(&pc->lfc, &pc->fc, sizeof(pc->fc));
     }
 
     pc->refresh_last_frame = pc->frame_type == KEY_FRAME  ||  vp8_read_bit(bc);
@@ -1380,7 +1380,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 
     if (pc->refresh_entropy_probs == 0)
     {
-        vpx_memcpy(&pc->fc, &pc->lfc, sizeof(pc->fc));
+        memcpy(&pc->fc, &pc->lfc, sizeof(pc->fc));
         pbi->independent_partitions = prev_independent_partitions;
     }
 

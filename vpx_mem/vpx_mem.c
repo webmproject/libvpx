@@ -91,10 +91,6 @@ void vpx_free(void *memblk) {
   }
 }
 
-void *vpx_memcpy(void *dest, const void *source, size_t length) {
-  return memcpy(dest, source, length);
-}
-
 void *vpx_memset(void *dest, int val, size_t length) {
   return memset(dest, val, length);
 }

@@ -508,7 +508,7 @@ static void disable_segmentation(VP8_COMP *cpi)
 static void set_segmentation_map(VP8_COMP *cpi, unsigned char *segmentation_map)
 {
     /* Copy in the new segmentation map */
-    vpx_memcpy(cpi->segmentation_map, segmentation_map, (cpi->common.mb_rows * cpi->common.mb_cols));
+    memcpy(cpi->segmentation_map, segmentation_map, (cpi->common.mb_rows * cpi->common.mb_cols));
 
     /* Signal that the map should be updated. */
     cpi->mb.e_mbd.update_mb_segmentation_map = 1;
@@ -530,7 +530,7 @@ static void set_segmentation_map(VP8_COMP *cpi, unsigned char *segmentation_map)
 static void set_segment_data(VP8_COMP *cpi, signed char *feature_data, unsigned char abs_delta)
 {
     cpi->mb.e_mbd.mb_segement_abs_delta = abs_delta;
-    vpx_memcpy(cpi->segment_feature_data, feature_data, sizeof(cpi->segment_feature_data));
+    memcpy(cpi->segment_feature_data, feature_data, sizeof(cpi->segment_feature_data));
 }
 
 
@@ -4387,7 +4387,7 @@ static void encode_frame_to_data_rate
             if (cm->refresh_entropy_probs == 0)
             {
                 /* save a copy for later refresh */
-                vpx_memcpy(&cm->lfc, &cm->fc, sizeof(cm->fc));
+                memcpy(&cm->lfc, &cm->fc, sizeof(cm->fc));
             }
 
             vp8_update_coef_context(cpi);
@@ -5613,19 +5613,19 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
 
     if (cm->refresh_entropy_probs == 0)
     {
-        vpx_memcpy(&cm->fc, &cm->lfc, sizeof(cm->fc));
+        memcpy(&cm->fc, &cm->lfc, sizeof(cm->fc));
     }
 
     /* Save the contexts separately for alt ref, gold and last. */
     /* (TODO jbb -> Optimize this with pointers to avoid extra copies. ) */
     if(cm->refresh_alt_ref_frame)
-        vpx_memcpy(&cpi->lfc_a, &cm->fc, sizeof(cm->fc));
+        memcpy(&cpi->lfc_a, &cm->fc, sizeof(cm->fc));
 
     if(cm->refresh_golden_frame)
-        vpx_memcpy(&cpi->lfc_g, &cm->fc, sizeof(cm->fc));
+        memcpy(&cpi->lfc_g, &cm->fc, sizeof(cm->fc));
 
     if(cm->refresh_last_frame)
-        vpx_memcpy(&cpi->lfc_n, &cm->fc, sizeof(cm->fc));
+        memcpy(&cpi->lfc_n, &cm->fc, sizeof(cm->fc));
 
     /* if its a dropped frame honor the requests on subsequent frames */
     if (*size > 0)
@@ -5934,7 +5934,7 @@ int vp8_set_active_map(VP8_COMP *cpi, unsigned char *map, unsigned int rows, uns
     {
         if (map)
         {
-            vpx_memcpy(cpi->active_map, map, rows * cols);
+            memcpy(cpi->active_map, map, rows * cols);
             cpi->active_map_enabled = 1;
         }
         else

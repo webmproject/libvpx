@@ -48,12 +48,12 @@ static void extend_plane(uint8_t *const src, int src_stride,
   dst_ptr2 = src + src_stride * height - extend_left;
 
   for (i = 0; i < extend_top; ++i) {
-    vpx_memcpy(dst_ptr1, src_ptr1, linesize);
+    memcpy(dst_ptr1, src_ptr1, linesize);
     dst_ptr1 += src_stride;
   }
 
   for (i = 0; i < extend_bottom; ++i) {
-    vpx_memcpy(dst_ptr2, src_ptr2, linesize);
+    memcpy(dst_ptr2, src_ptr2, linesize);
     dst_ptr2 += src_stride;
   }
 }
@@ -91,12 +91,12 @@ static void extend_plane_high(uint8_t *const src8, int src_stride,
   dst_ptr2 = src + src_stride * height - extend_left;
 
   for (i = 0; i < extend_top; ++i) {
-    vpx_memcpy(dst_ptr1, src_ptr1, linesize * sizeof(uint16_t));
+    memcpy(dst_ptr1, src_ptr1, linesize * sizeof(uint16_t));
     dst_ptr1 += src_stride;
   }
 
   for (i = 0; i < extend_bottom; ++i) {
-    vpx_memcpy(dst_ptr2, src_ptr2, linesize * sizeof(uint16_t));
+    memcpy(dst_ptr2, src_ptr2, linesize * sizeof(uint16_t));
     dst_ptr2 += src_stride;
   }
 }
@@ -212,7 +212,7 @@ void vp9_extend_frame_inner_borders_c(YV12_BUFFER_CONFIG *ybf) {
 void memcpy_short_addr(uint8_t *dst8, const uint8_t *src8, int num) {
   uint16_t *dst = CONVERT_TO_SHORTPTR(dst8);
   uint16_t *src = CONVERT_TO_SHORTPTR(src8);
-  vpx_memcpy(dst, src, num * sizeof(uint16_t));
+  memcpy(dst, src, num * sizeof(uint16_t));
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // CONFIG_VP9
@@ -269,7 +269,7 @@ void vp8_yv12_copy_frame_c(const YV12_BUFFER_CONFIG *src_ybc,
 #endif
 
   for (row = 0; row < src_ybc->y_height; ++row) {
-    vpx_memcpy(dst, src, src_ybc->y_width);
+    memcpy(dst, src, src_ybc->y_width);
     src += src_ybc->y_stride;
     dst += dst_ybc->y_stride;
   }
@@ -278,7 +278,7 @@ void vp8_yv12_copy_frame_c(const YV12_BUFFER_CONFIG *src_ybc,
   dst = dst_ybc->u_buffer;
 
   for (row = 0; row < src_ybc->uv_height; ++row) {
-    vpx_memcpy(dst, src, src_ybc->uv_width);
+    memcpy(dst, src, src_ybc->uv_width);
     src += src_ybc->uv_stride;
     dst += dst_ybc->uv_stride;
   }
@@ -287,7 +287,7 @@ void vp8_yv12_copy_frame_c(const YV12_BUFFER_CONFIG *src_ybc,
   dst = dst_ybc->v_buffer;
 
   for (row = 0; row < src_ybc->uv_height; ++row) {
-    vpx_memcpy(dst, src, src_ybc->uv_width);
+    memcpy(dst, src, src_ybc->uv_width);
     src += src_ybc->uv_stride;
     dst += dst_ybc->uv_stride;
   }
@@ -306,7 +306,7 @@ void vpx_yv12_copy_y_c(const YV12_BUFFER_CONFIG *src_ybc,
     const uint16_t *src16 = CONVERT_TO_SHORTPTR(src);
     uint16_t *dst16 = CONVERT_TO_SHORTPTR(dst);
     for (row = 0; row < src_ybc->y_height; ++row) {
-      vpx_memcpy(dst16, src16, src_ybc->y_width * sizeof(uint16_t));
+      memcpy(dst16, src16, src_ybc->y_width * sizeof(uint16_t));
       src16 += src_ybc->y_stride;
       dst16 += dst_ybc->y_stride;
     }
@@ -315,7 +315,7 @@ void vpx_yv12_copy_y_c(const YV12_BUFFER_CONFIG *src_ybc,
 #endif
 
   for (row = 0; row < src_ybc->y_height; ++row) {
-    vpx_memcpy(dst, src, src_ybc->y_width);
+    memcpy(dst, src, src_ybc->y_width);
     src += src_ybc->y_stride;
     dst += dst_ybc->y_stride;
   }

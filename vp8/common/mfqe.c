@@ -231,9 +231,9 @@ static void multiframe_quality_enhance_block
         {
             vp8_copy_mem8x8(y, y_stride, yd, yd_stride);
             for (up = u, udp = ud, i = 0; i < uvblksize; ++i, up += uv_stride, udp += uvd_stride)
-                vpx_memcpy(udp, up, uvblksize);
+                memcpy(udp, up, uvblksize);
             for (vp = v, vdp = vd, i = 0; i < uvblksize; ++i, vp += uv_stride, vdp += uvd_stride)
-                vpx_memcpy(vdp, vp, uvblksize);
+                memcpy(vdp, vp, uvblksize);
         }
     }
 }
@@ -341,8 +341,8 @@ void vp8_multiframe_quality_enhance
                                 for (k = 0; k < 4; ++k, up += show->uv_stride, udp += dest->uv_stride,
                                                         vp += show->uv_stride, vdp += dest->uv_stride)
                                 {
-                                    vpx_memcpy(udp, up, 4);
-                                    vpx_memcpy(vdp, vp, 4);
+                                    memcpy(udp, up, 4);
+                                    memcpy(vdp, vp, 4);
                                 }
                             }
                         }

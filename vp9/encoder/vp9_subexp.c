@@ -146,7 +146,7 @@ int vp9_prob_diff_update_savings_search_model(const unsigned int *ct,
   int newp;
   vp9_prob bestnewp, newplist[ENTROPY_NODES], oldplist[ENTROPY_NODES];
   vp9_model_to_full_probs(oldp, oldplist);
-  vpx_memcpy(newplist, oldp, sizeof(vp9_prob) * UNCONSTRAINED_NODES);
+  memcpy(newplist, oldp, sizeof(vp9_prob) * UNCONSTRAINED_NODES);
   for (i = UNCONSTRAINED_NODES, old_b = 0; i < ENTROPY_NODES; ++i)
     old_b += cost_branch256(ct + 2 * i, oldplist[i]);
   old_b += cost_branch256(ct + 2 * PIVOT_NODE, oldplist[PIVOT_NODE]);
