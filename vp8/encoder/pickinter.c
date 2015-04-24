@@ -862,8 +862,8 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 
     mode_mv = mode_mv_sb[sign_bias];
     best_ref_mv.as_int = 0;
-    vpx_memset(mode_mv_sb, 0, sizeof(mode_mv_sb));
-    vpx_memset(&best_mbmode, 0, sizeof(best_mbmode));
+    memset(mode_mv_sb, 0, sizeof(mode_mv_sb));
+    memset(&best_mbmode, 0, sizeof(best_mbmode));
 
     /* Setup search priorities */
 #if CONFIG_MULTI_RES_ENCODING

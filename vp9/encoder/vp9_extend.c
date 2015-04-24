@@ -27,9 +27,9 @@ static void copy_and_extend_plane(const uint8_t *src, int src_pitch,
   uint8_t *dst_ptr2 = dst + w;
 
   for (i = 0; i < h; i++) {
-    vpx_memset(dst_ptr1, src_ptr1[0], extend_left);
+    memset(dst_ptr1, src_ptr1[0], extend_left);
     memcpy(dst_ptr1 + extend_left, src_ptr1, w);
-    vpx_memset(dst_ptr2, src_ptr2[0], extend_right);
+    memset(dst_ptr2, src_ptr2[0], extend_right);
     src_ptr1 += src_pitch;
     src_ptr2 += src_pitch;
     dst_ptr1 += dst_pitch;

@@ -33,10 +33,10 @@ class VpxScaleBase {
   void ResetImage(int width, int height) {
     width_ = width;
     height_ = height;
-    vpx_memset(&img_, 0, sizeof(img_));
+    memset(&img_, 0, sizeof(img_));
     ASSERT_EQ(0, vp8_yv12_alloc_frame_buffer(&img_, width_, height_,
                                              VP8BORDERINPIXELS));
-    vpx_memset(img_.buffer_alloc, kBufFiller, img_.frame_size);
+    memset(img_.buffer_alloc, kBufFiller, img_.frame_size);
     FillPlane(img_.y_buffer, img_.y_crop_width, img_.y_crop_height,
               img_.y_stride);
     FillPlane(img_.u_buffer, img_.uv_crop_width, img_.uv_crop_height,
@@ -44,15 +44,15 @@ class VpxScaleBase {
     FillPlane(img_.v_buffer, img_.uv_crop_width, img_.uv_crop_height,
               img_.uv_stride);
 
-    vpx_memset(&ref_img_, 0, sizeof(ref_img_));
+    memset(&ref_img_, 0, sizeof(ref_img_));
     ASSERT_EQ(0, vp8_yv12_alloc_frame_buffer(&ref_img_, width_, height_,
                                              VP8BORDERINPIXELS));
-    vpx_memset(ref_img_.buffer_alloc, kBufFiller, ref_img_.frame_size);
+    memset(ref_img_.buffer_alloc, kBufFiller, ref_img_.frame_size);
 
-    vpx_memset(&cpy_img_, 0, sizeof(cpy_img_));
+    memset(&cpy_img_, 0, sizeof(cpy_img_));
     ASSERT_EQ(0, vp8_yv12_alloc_frame_buffer(&cpy_img_, width_, height_,
                                              VP8BORDERINPIXELS));
-    vpx_memset(cpy_img_.buffer_alloc, kBufFiller, cpy_img_.frame_size);
+    memset(cpy_img_.buffer_alloc, kBufFiller, cpy_img_.frame_size);
     ReferenceCopyFrame();
   }
 
@@ -87,8 +87,8 @@ class VpxScaleBase {
 
     // Fill the border pixels from the nearest image pixel.
     for (int y = 0; y < crop_height; ++y) {
-      vpx_memset(left, left[padding], padding);
-      vpx_memset(right, right[-1], right_extend);
+      memset(left, left[padding], padding);
+      memset(right, right[-1], right_extend);
       left += stride;
       right += stride;
     }

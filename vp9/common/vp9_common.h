@@ -45,8 +45,8 @@ extern "C" {
     memcpy(dest, src, n * sizeof(*src)); \
   }
 
-#define vp9_zero(dest) vpx_memset(&(dest), 0, sizeof(dest))
-#define vp9_zero_array(dest, n) vpx_memset(dest, 0, n * sizeof(*dest))
+#define vp9_zero(dest) memset(&(dest), 0, sizeof(dest))
+#define vp9_zero_array(dest, n) memset(dest, 0, n * sizeof(*dest))
 
 static INLINE uint8_t clip_pixel(int val) {
   return (val > 255) ? 255 : (val < 0) ? 0 : val;

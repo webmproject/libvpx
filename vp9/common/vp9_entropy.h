@@ -142,10 +142,10 @@ static INLINE void reset_skip_context(MACROBLOCKD *xd, BLOCK_SIZE bsize) {
   for (i = 0; i < MAX_MB_PLANE; i++) {
     struct macroblockd_plane *const pd = &xd->plane[i];
     const BLOCK_SIZE plane_bsize = get_plane_block_size(bsize, pd);
-    vpx_memset(pd->above_context, 0, sizeof(ENTROPY_CONTEXT) *
-                   num_4x4_blocks_wide_lookup[plane_bsize]);
-    vpx_memset(pd->left_context, 0, sizeof(ENTROPY_CONTEXT) *
-                   num_4x4_blocks_high_lookup[plane_bsize]);
+    memset(pd->above_context, 0,
+           sizeof(ENTROPY_CONTEXT) * num_4x4_blocks_wide_lookup[plane_bsize]);
+    memset(pd->left_context, 0,
+           sizeof(ENTROPY_CONTEXT) * num_4x4_blocks_high_lookup[plane_bsize]);
   }
 }
 

@@ -500,7 +500,7 @@ static INLINE void h_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
   (void) above;
 
   for (r = 0; r < bs; r++) {
-    vpx_memset(dst, left[r], bs);
+    memset(dst, left[r], bs);
     dst += stride;
   }
 }
@@ -526,7 +526,7 @@ static INLINE void dc_128_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
   (void) left;
 
   for (r = 0; r < bs; r++) {
-    vpx_memset(dst, 128, bs);
+    memset(dst, 128, bs);
     dst += stride;
   }
 }
@@ -543,7 +543,7 @@ static INLINE void dc_left_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
   expected_dc = (sum + (bs >> 1)) / bs;
 
   for (r = 0; r < bs; r++) {
-    vpx_memset(dst, expected_dc, bs);
+    memset(dst, expected_dc, bs);
     dst += stride;
   }
 }
@@ -559,7 +559,7 @@ static INLINE void dc_top_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
   expected_dc = (sum + (bs >> 1)) / bs;
 
   for (r = 0; r < bs; r++) {
-    vpx_memset(dst, expected_dc, bs);
+    memset(dst, expected_dc, bs);
     dst += stride;
   }
 }
@@ -578,7 +578,7 @@ static INLINE void dc_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
   expected_dc = (sum + (count >> 1)) / count;
 
   for (r = 0; r < bs; r++) {
-    vpx_memset(dst, expected_dc, bs);
+    memset(dst, expected_dc, bs);
     dst += stride;
   }
 }
@@ -830,7 +830,7 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
           left_col[i] = ref[i * ref_stride - 1];
       }
     } else {
-      vpx_memset(left_col, 129, bs);
+      memset(left_col, 129, bs);
     }
   }
 
@@ -845,8 +845,7 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
         } else if (x0 <= frame_width) {
           const int r = frame_width - x0;
           memcpy(above_row, above_ref, r);
-          vpx_memset(above_row + r, above_row[r - 1],
-                     x0 + bs - frame_width);
+          memset(above_row + r, above_row[r - 1], x0 + bs - frame_width);
         }
       } else {
         /* faster path if the block does not need extension */
@@ -858,7 +857,7 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
       }
       above_row[-1] = left_available ? above_ref[-1] : 129;
     } else {
-      vpx_memset(above_row, 127, bs);
+      memset(above_row, 127, bs);
       above_row[-1] = 127;
     }
   }
@@ -874,23 +873,21 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
             memcpy(above_row, above_ref, 2 * bs);
           } else {
             memcpy(above_row, above_ref, bs);
-            vpx_memset(above_row + bs, above_row[bs - 1], bs);
+            memset(above_row + bs, above_row[bs - 1], bs);
           }
         } else if (x0 + bs <= frame_width) {
           const int r = frame_width - x0;
           if (right_available && bs == 4) {
             memcpy(above_row, above_ref, r);
-            vpx_memset(above_row + r, above_row[r - 1],
-                       x0 + 2 * bs - frame_width);
+            memset(above_row + r, above_row[r - 1], x0 + 2 * bs - frame_width);
           } else {
             memcpy(above_row, above_ref, bs);
-            vpx_memset(above_row + bs, above_row[bs - 1], bs);
+            memset(above_row + bs, above_row[bs - 1], bs);
           }
         } else if (x0 <= frame_width) {
           const int r = frame_width - x0;
           memcpy(above_row, above_ref, r);
-          vpx_memset(above_row + r, above_row[r - 1],
-                     x0 + 2 * bs - frame_width);
+          memset(above_row + r, above_row[r - 1], x0 + 2 * bs - frame_width);
         }
       } else {
         /* faster path if the block does not need extension */
@@ -901,12 +898,12 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
           if (bs == 4 && right_available)
             memcpy(above_row + bs, above_ref + bs, bs);
           else
-            vpx_memset(above_row + bs, above_row[bs - 1], bs);
+            memset(above_row + bs, above_row[bs - 1], bs);
         }
       }
       above_row[-1] = left_available ? above_ref[-1] : 129;
     } else {
-      vpx_memset(above_row, 127, bs * 2);
+      memset(above_row, 127, bs * 2);
       above_row[-1] = 127;
     }
   }

@@ -30,15 +30,11 @@ extern "C" {
   void *vpx_realloc(void *memblk, size_t size);
   void vpx_free(void *memblk);
 
-  void *vpx_memset(void *dest, int val, size_t length);
 #if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
   void *vpx_memset16(void *dest, int val, size_t length);
 #endif
 
-#ifndef __VPX_MEM_C__
-# include <string.h>
-# define vpx_memset  memset
-#endif
+#include <string.h>
 
 #ifdef VPX_MEM_PLTFRM
 # include VPX_MEM_PLTFRM

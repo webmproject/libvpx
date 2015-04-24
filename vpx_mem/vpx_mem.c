@@ -91,10 +91,6 @@ void vpx_free(void *memblk) {
   }
 }
 
-void *vpx_memset(void *dest, int val, size_t length) {
-  return memset(dest, val, length);
-}
-
 #if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
 void *vpx_memset16(void *dest, int val, size_t length) {
   int i;

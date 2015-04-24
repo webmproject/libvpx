@@ -222,9 +222,9 @@ static void update_sharpness(loop_filter_info_n *lfi, int sharpness_lvl) {
     if (block_inside_limit < 1)
       block_inside_limit = 1;
 
-    vpx_memset(lfi->lfthr[lvl].lim, block_inside_limit, SIMD_WIDTH);
-    vpx_memset(lfi->lfthr[lvl].mblim, (2 * (lvl + 2) + block_inside_limit),
-               SIMD_WIDTH);
+    memset(lfi->lfthr[lvl].lim, block_inside_limit, SIMD_WIDTH);
+    memset(lfi->lfthr[lvl].mblim, (2 * (lvl + 2) + block_inside_limit),
+           SIMD_WIDTH);
   }
 }
 
@@ -245,7 +245,7 @@ void vp9_loop_filter_init(VP9_COMMON *cm) {
 
   // init hev threshold const vectors
   for (lvl = 0; lvl <= MAX_LOOP_FILTER; lvl++)
-    vpx_memset(lfi->lfthr[lvl].hev_thr, (lvl >> 4), SIMD_WIDTH);
+    memset(lfi->lfthr[lvl].hev_thr, (lvl >> 4), SIMD_WIDTH);
 }
 
 void vp9_loop_filter_frame_init(VP9_COMMON *cm, int default_filt_lvl) {
@@ -276,7 +276,7 @@ void vp9_loop_filter_frame_init(VP9_COMMON *cm, int default_filt_lvl) {
     if (!lf->mode_ref_delta_enabled) {
       // we could get rid of this if we assume that deltas are set to
       // zero when not in use; encoder always uses deltas
-      vpx_memset(lfi->lvl[seg_id], lvl_seg, sizeof(lfi->lvl[seg_id]));
+      memset(lfi->lvl[seg_id], lvl_seg, sizeof(lfi->lvl[seg_id]));
     } else {
       int ref, mode;
       const int intra_lvl = lvl_seg + lf->ref_deltas[INTRA_FRAME] * scale;
@@ -727,7 +727,7 @@ static void build_masks(const loop_filter_info_n *const lfi_n,
     const int h = num_8x8_blocks_high_lookup[block_size];
     int index = shift_y;
     for (i = 0; i < h; i++) {
-      vpx_memset(&lfm->lfl_y[index], filter_level, w);
+      memset(&lfm->lfl_y[index], filter_level, w);
       index += 8;
     }
   }
@@ -801,7 +801,7 @@ static void build_y_mask(const loop_filter_info_n *const lfi_n,
     const int h = num_8x8_blocks_high_lookup[block_size];
     int index = shift_y;
     for (i = 0; i < h; i++) {
-      vpx_memset(&lfm->lfl_y[index], filter_level, w);
+      memset(&lfm->lfl_y[index], filter_level, w);
       index += 8;
     }
   }

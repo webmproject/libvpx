@@ -498,7 +498,7 @@ void vpx_scale_frame
 
   if (dw < (int)dst->y_width)
     for (i = 0; i < dh; i++)
-      vpx_memset(dst->y_buffer + i * dst->y_stride + dw - 1, dst->y_buffer[i * dst->y_stride + dw - 2], dst->y_width - dw + 1);
+      memset(dst->y_buffer + i * dst->y_stride + dw - 1, dst->y_buffer[i * dst->y_stride + dw - 2], dst->y_width - dw + 1);
 
   if (dh < (int)dst->y_height)
     for (i = dh - 1; i < (int)dst->y_height; i++)
@@ -510,7 +510,7 @@ void vpx_scale_frame
 
   if (dw / 2 < (int)dst->uv_width)
     for (i = 0; i < dst->uv_height; i++)
-      vpx_memset(dst->u_buffer + i * dst->uv_stride + dw / 2 - 1, dst->u_buffer[i * dst->uv_stride + dw / 2 - 2], dst->uv_width - dw / 2 + 1);
+      memset(dst->u_buffer + i * dst->uv_stride + dw / 2 - 1, dst->u_buffer[i * dst->uv_stride + dw / 2 - 2], dst->uv_width - dw / 2 + 1);
 
   if (dh / 2 < (int)dst->uv_height)
     for (i = dh / 2 - 1; i < (int)dst->y_height / 2; i++)
@@ -522,7 +522,7 @@ void vpx_scale_frame
 
   if (dw / 2 < (int)dst->uv_width)
     for (i = 0; i < dst->uv_height; i++)
-      vpx_memset(dst->v_buffer + i * dst->uv_stride + dw / 2 - 1, dst->v_buffer[i * dst->uv_stride + dw / 2 - 2], dst->uv_width - dw / 2 + 1);
+      memset(dst->v_buffer + i * dst->uv_stride + dw / 2 - 1, dst->v_buffer[i * dst->uv_stride + dw / 2 - 2], dst->uv_width - dw / 2 + 1);
 
   if (dh / 2 < (int) dst->uv_height)
     for (i = dh / 2 - 1; i < (int)dst->y_height / 2; i++)

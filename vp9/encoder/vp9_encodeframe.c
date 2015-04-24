@@ -1595,7 +1595,7 @@ static void set_source_var_based_partition(VP9_COMP *cpi,
     int use32x32 = 0;
     unsigned int thr = cpi->source_var_thresh;
 
-    vpx_memset(d32, 0, 4 * sizeof(diff));
+    memset(d32, 0, 4 * sizeof(diff));
 
     for (i = 0; i < 4; i++) {
       diff *d16[4];
@@ -2832,8 +2832,8 @@ static void encode_rd_sb_row(VP9_COMP *cpi,
   int mi_col;
 
   // Initialize the left context for the new SB row
-  vpx_memset(&xd->left_context, 0, sizeof(xd->left_context));
-  vpx_memset(xd->left_seg_context, 0, sizeof(xd->left_seg_context));
+  memset(&xd->left_context, 0, sizeof(xd->left_context));
+  memset(xd->left_seg_context, 0, sizeof(xd->left_seg_context));
 
   // Code each SB in the row
   for (mi_col = tile_info->mi_col_start; mi_col < tile_info->mi_col_end;
@@ -2917,11 +2917,11 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
 
   // Note: this memset assumes above_context[0], [1] and [2]
   // are allocated as part of the same buffer.
-  vpx_memset(xd->above_context[0], 0,
-             sizeof(*xd->above_context[0]) *
-             2 * aligned_mi_cols * MAX_MB_PLANE);
-  vpx_memset(xd->above_seg_context, 0,
-             sizeof(*xd->above_seg_context) * aligned_mi_cols);
+  memset(xd->above_context[0], 0,
+         sizeof(*xd->above_context[0]) *
+         2 * aligned_mi_cols * MAX_MB_PLANE);
+  memset(xd->above_seg_context, 0,
+         sizeof(*xd->above_seg_context) * aligned_mi_cols);
 }
 
 static int check_dual_ref_flags(VP9_COMP *cpi) {
@@ -3594,8 +3594,8 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi,
   int mi_col;
 
   // Initialize the left context for the new SB row
-  vpx_memset(&xd->left_context, 0, sizeof(xd->left_context));
-  vpx_memset(xd->left_seg_context, 0, sizeof(xd->left_seg_context));
+  memset(&xd->left_context, 0, sizeof(xd->left_context));
+  memset(xd->left_seg_context, 0, sizeof(xd->left_seg_context));
 
   // Code each SB in the row
   for (mi_col = tile_info->mi_col_start; mi_col < tile_info->mi_col_end;
@@ -3689,7 +3689,7 @@ static int set_var_thresh_from_histogram(VP9_COMP *cpi) {
   int sum = 0;
   int i, j;
 
-  vpx_memset(hist, 0, VAR_HIST_BINS * sizeof(hist[0]));
+  memset(hist, 0, VAR_HIST_BINS * sizeof(hist[0]));
 
   for (i = 0; i < cm->mb_rows; i++) {
     for (j = 0; j < cm->mb_cols; j++) {
@@ -4187,7 +4187,7 @@ static void encode_superblock(VP9_COMP *cpi, ThreadData *td,
                    cpi->sf.allow_skip_recode;
 
   if (!x->skip_recode && !cpi->sf.use_nonrd_pick_mode)
-    vpx_memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
+    memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
 
   x->skip_optimize = ctx->is_coded;
   ctx->is_coded = 1;

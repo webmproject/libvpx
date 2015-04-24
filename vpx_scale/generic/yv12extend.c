@@ -31,8 +31,8 @@ static void extend_plane(uint8_t *const src, int src_stride,
   uint8_t *dst_ptr2 = src + width;
 
   for (i = 0; i < height; ++i) {
-    vpx_memset(dst_ptr1, src_ptr1[0], extend_left);
-    vpx_memset(dst_ptr2, src_ptr2[0], extend_right);
+    memset(dst_ptr1, src_ptr1[0], extend_left);
+    memset(dst_ptr2, src_ptr2[0], extend_right);
     src_ptr1 += src_stride;
     src_ptr2 += src_stride;
     dst_ptr1 += src_stride;

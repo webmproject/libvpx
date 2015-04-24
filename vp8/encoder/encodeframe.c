@@ -665,8 +665,7 @@ static void init_encode_frame_mb_context(VP8_COMP *cpi)
 
     x->mvc = cm->fc.mvc;
 
-    vpx_memset(cm->above_context, 0,
-               sizeof(ENTROPY_CONTEXT_PLANES) * cm->mb_cols);
+    memset(cm->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * cm->mb_cols);
 
     /* Special case treatment when GF and ARF are not sensible options
      * for reference
@@ -744,7 +743,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
     const int num_part = (1 << cm->multi_token_partition);
 #endif
 
-    vpx_memset(segment_counts, 0, sizeof(segment_counts));
+    memset(segment_counts, 0, sizeof(segment_counts));
     totalrate = 0;
 
     if (cpi->compressor_speed == 2)
@@ -974,7 +973,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
         int i;
 
         /* Set to defaults */
-        vpx_memset(xd->mb_segment_tree_probs, 255 , sizeof(xd->mb_segment_tree_probs));
+        memset(xd->mb_segment_tree_probs, 255 , sizeof(xd->mb_segment_tree_probs));
 
         tot_count = segment_counts[0] + segment_counts[1] + segment_counts[2] + segment_counts[3];
 

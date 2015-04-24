@@ -408,8 +408,8 @@ static INLINE void update_partition_context(MACROBLOCKD *xd,
   // update the partition context at the end notes. set partition bits
   // of block sizes larger than the current one to be one, and partition
   // bits of smaller block sizes to be zero.
-  vpx_memset(above_ctx, partition_context_lookup[subsize].above, bs);
-  vpx_memset(left_ctx, partition_context_lookup[subsize].left, bs);
+  memset(above_ctx, partition_context_lookup[subsize].above, bs);
+  memset(left_ctx, partition_context_lookup[subsize].left, bs);
 }
 
 static INLINE int partition_plane_context(const MACROBLOCKD *xd,

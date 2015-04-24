@@ -39,9 +39,9 @@ extern "C" {
         memcpy( Dest, Src, N * sizeof( *Src)); \
     }
 
-#define vp8_zero( Dest)  vpx_memset( &Dest, 0, sizeof( Dest));
+#define vp8_zero( Dest)  memset( &Dest, 0, sizeof( Dest));
 
-#define vp8_zero_array( Dest, N)  vpx_memset( Dest, 0, N * sizeof( *Dest));
+#define vp8_zero_array( Dest, N)  memset( Dest, 0, N * sizeof( *Dest));
 
 
 #ifdef __cplusplus

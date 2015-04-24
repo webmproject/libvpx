@@ -288,8 +288,8 @@ update_fragments(vpx_codec_alg_priv_t  *ctx,
     if (ctx->fragments.count == 0)
     {
         /* New frame, reset fragment pointers and sizes */
-        vpx_memset((void*)ctx->fragments.ptrs, 0, sizeof(ctx->fragments.ptrs));
-        vpx_memset(ctx->fragments.sizes, 0, sizeof(ctx->fragments.sizes));
+        memset((void*)ctx->fragments.ptrs, 0, sizeof(ctx->fragments.ptrs));
+        memset(ctx->fragments.sizes, 0, sizeof(ctx->fragments.sizes));
     }
     if (ctx->fragments.enabled && !(data == NULL && data_sz == 0))
     {

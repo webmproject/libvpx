@@ -213,8 +213,8 @@ void vp9_choose_segmap_coding_method(VP9_COMMON *cm, MACROBLOCKD *xd) {
 
   // Set default state for the segment tree probabilities and the
   // temporal coding probabilities
-  vpx_memset(seg->tree_probs, 255, sizeof(seg->tree_probs));
-  vpx_memset(seg->pred_probs, 255, sizeof(seg->pred_probs));
+  memset(seg->tree_probs, 255, sizeof(seg->tree_probs));
+  memset(seg->pred_probs, 255, sizeof(seg->pred_probs));
 
   // First of all generate stats regarding how well the last segment map
   // predicts this one
@@ -276,6 +276,6 @@ void vp9_reset_segment_features(struct segmentation *seg) {
   seg->enabled = 0;
   seg->update_map = 0;
   seg->update_data = 0;
-  vpx_memset(seg->tree_probs, 255, sizeof(seg->tree_probs));
+  memset(seg->tree_probs, 255, sizeof(seg->tree_probs));
   vp9_clearall_segfeatures(seg);
 }

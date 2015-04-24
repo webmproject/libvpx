@@ -286,7 +286,7 @@ void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
 
     YV12_BUFFER_CONFIG * saved_frame = cm->frame_to_show;
 
-    vpx_memset(ss_err, 0, sizeof(ss_err));
+    memset(ss_err, 0, sizeof(ss_err));
 
     /* Replace unfiltered frame buffer with a new one */
     cm->frame_to_show = &cpi->pick_lf_lvl_frame;

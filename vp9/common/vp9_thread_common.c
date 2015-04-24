@@ -175,7 +175,7 @@ static void loop_filter_rows_mt(YV12_BUFFER_CONFIG *frame,
   }
 
   // Initialize cur_sb_col to -1 for all SB rows.
-  vpx_memset(lf_sync->cur_sb_col, -1, sizeof(*lf_sync->cur_sb_col) * sb_rows);
+  memset(lf_sync->cur_sb_col, -1, sizeof(*lf_sync->cur_sb_col) * sb_rows);
 
   // Set up loopfilter thread data.
   // The decoder is capping num_workers because it has been observed that using

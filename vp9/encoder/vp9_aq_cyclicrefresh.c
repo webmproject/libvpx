@@ -324,7 +324,7 @@ void vp9_cyclic_refresh_update_map(VP9_COMP *const cpi) {
   unsigned char *const seg_map = cpi->segmentation_map;
   int i, block_count, bl_index, sb_rows, sb_cols, sbs_in_frame;
   int xmis, ymis, x, y;
-  vpx_memset(seg_map, CR_SEGMENT_ID_BASE, cm->mi_rows * cm->mi_cols);
+  memset(seg_map, CR_SEGMENT_ID_BASE, cm->mi_rows * cm->mi_cols);
   sb_cols = (cm->mi_cols + MI_BLOCK_SIZE - 1) / MI_BLOCK_SIZE;
   sb_rows = (cm->mi_rows + MI_BLOCK_SIZE - 1) / MI_BLOCK_SIZE;
   sbs_in_frame = sb_cols * sb_rows;
@@ -411,7 +411,7 @@ void vp9_cyclic_refresh_setup(VP9_COMP *const cpi) {
       (cpi->svc.spatial_layer_id > 0)) {
     // Set segmentation map to 0 and disable.
     unsigned char *const seg_map = cpi->segmentation_map;
-    vpx_memset(seg_map, 0, cm->mi_rows * cm->mi_cols);
+    memset(seg_map, 0, cm->mi_rows * cm->mi_cols);
     vp9_disable_segmentation(&cm->seg);
     if (cm->frame_type == KEY_FRAME)
       cr->sb_index = 0;

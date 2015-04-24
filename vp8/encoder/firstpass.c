@@ -1779,7 +1779,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 
     start_pos = cpi->twopass.stats_in;
 
-    vpx_memset(&next_frame, 0, sizeof(next_frame)); /* assure clean */
+    memset(&next_frame, 0, sizeof(next_frame)); /* assure clean */
 
     /* Load stats for the current frame. */
     mod_frame_err = calculate_modified_err(cpi, this_frame);
@@ -2735,7 +2735,7 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     double kf_group_coded_err = 0.0;
     double recent_loop_decay[8] = {1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0};
 
-    vpx_memset(&next_frame, 0, sizeof(next_frame));
+    memset(&next_frame, 0, sizeof(next_frame));
 
     vp8_clear_system_state();
     start_position = cpi->twopass.stats_in;

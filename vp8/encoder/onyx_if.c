@@ -428,10 +428,10 @@ static void setup_features(VP8_COMP *cpi)
 
     cpi->mb.e_mbd.mode_ref_lf_delta_enabled = 0;
     cpi->mb.e_mbd.mode_ref_lf_delta_update = 0;
-    vpx_memset(cpi->mb.e_mbd.ref_lf_deltas, 0, sizeof(cpi->mb.e_mbd.ref_lf_deltas));
-    vpx_memset(cpi->mb.e_mbd.mode_lf_deltas, 0, sizeof(cpi->mb.e_mbd.mode_lf_deltas));
-    vpx_memset(cpi->mb.e_mbd.last_ref_lf_deltas, 0, sizeof(cpi->mb.e_mbd.ref_lf_deltas));
-    vpx_memset(cpi->mb.e_mbd.last_mode_lf_deltas, 0, sizeof(cpi->mb.e_mbd.mode_lf_deltas));
+    memset(cpi->mb.e_mbd.ref_lf_deltas, 0, sizeof(cpi->mb.e_mbd.ref_lf_deltas));
+    memset(cpi->mb.e_mbd.mode_lf_deltas, 0, sizeof(cpi->mb.e_mbd.mode_lf_deltas));
+    memset(cpi->mb.e_mbd.last_ref_lf_deltas, 0, sizeof(cpi->mb.e_mbd.ref_lf_deltas));
+    memset(cpi->mb.e_mbd.last_mode_lf_deltas, 0, sizeof(cpi->mb.e_mbd.mode_lf_deltas));
 
     set_default_lf_deltas(cpi);
 
@@ -602,7 +602,7 @@ static void cyclic_background_refresh(VP8_COMP *cpi, int Q, int lf_adjustment)
 
     // Set every macroblock to be eligible for update.
     // For key frame this will reset seg map to 0.
-    vpx_memset(cpi->segmentation_map, 0, mbs_in_frame);
+    memset(cpi->segmentation_map, 0, mbs_in_frame);
 
     if (cpi->common.frame_type != KEY_FRAME && block_count > 0)
     {
@@ -686,8 +686,8 @@ static void set_default_lf_deltas(VP8_COMP *cpi)
     cpi->mb.e_mbd.mode_ref_lf_delta_enabled = 1;
     cpi->mb.e_mbd.mode_ref_lf_delta_update = 1;
 
-    vpx_memset(cpi->mb.e_mbd.ref_lf_deltas, 0, sizeof(cpi->mb.e_mbd.ref_lf_deltas));
-    vpx_memset(cpi->mb.e_mbd.mode_lf_deltas, 0, sizeof(cpi->mb.e_mbd.mode_lf_deltas));
+    memset(cpi->mb.e_mbd.ref_lf_deltas, 0, sizeof(cpi->mb.e_mbd.ref_lf_deltas));
+    memset(cpi->mb.e_mbd.mode_lf_deltas, 0, sizeof(cpi->mb.e_mbd.mode_lf_deltas));
 
     /* Test of ref frame deltas */
     cpi->mb.e_mbd.ref_lf_deltas[INTRA_FRAME] = 2;
@@ -1087,7 +1087,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         if (Speed >= 15)
             sf->half_pixel_search = 0;
 
-        vpx_memset(cpi->mb.error_bins, 0, sizeof(cpi->mb.error_bins));
+        memset(cpi->mb.error_bins, 0, sizeof(cpi->mb.error_bins));
 
     }; /* switch */
 
@@ -1298,7 +1298,7 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
     CHECK_MEM_ERROR(cpi->active_map,
                     vpx_calloc(cm->mb_rows * cm->mb_cols,
                     sizeof(*cpi->active_map)));
-    vpx_memset(cpi->active_map , 1, (cm->mb_rows * cm->mb_cols));
+    memset(cpi->active_map , 1, (cm->mb_rows * cm->mb_cols));
 
 #if CONFIG_MULTITHREAD
     if (width < 640)
@@ -1891,7 +1891,7 @@ struct VP8_COMP* vp8_create_compressor(VP8_CONFIG *oxcf)
 
     cm = &cpi->common;
 
-    vpx_memset(cpi, 0, sizeof(VP8_COMP));
+    memset(cpi, 0, sizeof(VP8_COMP));
 
     if (setjmp(cm->error.jmp))
     {
@@ -2867,7 +2867,7 @@ static void update_alt_ref_frame_stats(VP8_COMP *cpi)
     }
 
     /* Update data structure that monitors level of reference to last GF */
-    vpx_memset(cpi->gf_active_flags, 1, (cm->mb_rows * cm->mb_cols));
+    memset(cpi->gf_active_flags, 1, (cm->mb_rows * cm->mb_cols));
     cpi->gf_active_count = cm->mb_rows * cm->mb_cols;
 
     /* this frame refreshes means next frames don't unless specified by user */
@@ -2916,7 +2916,7 @@ static void update_golden_frame_stats(VP8_COMP *cpi)
         }
 
         /* Update data structure that monitors level of reference to last GF */
-        vpx_memset(cpi->gf_active_flags, 1, (cm->mb_rows * cm->mb_cols));
+        memset(cpi->gf_active_flags, 1, (cm->mb_rows * cm->mb_cols));
         cpi->gf_active_count = cm->mb_rows * cm->mb_cols;
 
         /* this frame refreshes means next frames don't unless specified by
@@ -3830,9 +3830,9 @@ static void encode_frame_to_data_rate
         }
 
         // Reset the zero_last counter to 0 on key frame.
-        vpx_memset(cpi->consec_zero_last, 0, cm->mb_rows * cm->mb_cols);
-        vpx_memset(cpi->consec_zero_last_mvbias, 0,
-                   (cpi->common.mb_rows * cpi->common.mb_cols));
+        memset(cpi->consec_zero_last, 0, cm->mb_rows * cm->mb_cols);
+        memset(cpi->consec_zero_last_mvbias, 0,
+               (cpi->common.mb_rows * cpi->common.mb_cols));
     }
 
 #if 0
@@ -4362,9 +4362,9 @@ static void encode_frame_to_data_rate
                   disable_segmentation(cpi);
               }
               // Reset the zero_last counter to 0 on key frame.
-              vpx_memset(cpi->consec_zero_last, 0, cm->mb_rows * cm->mb_cols);
-              vpx_memset(cpi->consec_zero_last_mvbias, 0,
-                         (cpi->common.mb_rows * cpi->common.mb_cols));
+              memset(cpi->consec_zero_last, 0, cm->mb_rows * cm->mb_cols);
+              memset(cpi->consec_zero_last_mvbias, 0,
+                     (cpi->common.mb_rows * cpi->common.mb_cols));
               vp8_set_quantizer(cpi, Q);
             }
 

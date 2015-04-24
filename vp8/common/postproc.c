@@ -355,8 +355,8 @@ void vp8_deblock(VP8_COMMON                 *cm,
                 else
                     mb_ppl = (unsigned char)ppl;
 
-                vpx_memset(ylptr, mb_ppl, 16);
-                vpx_memset(uvlptr, mb_ppl, 8);
+                memset(ylptr, mb_ppl, 16);
+                memset(uvlptr, mb_ppl, 8);
 
                 ylptr += 16;
                 uvlptr += 8;
@@ -403,7 +403,7 @@ void vp8_de_noise(VP8_COMMON                 *cm,
     (void) low_var_thresh;
     (void) flag;
 
-    vpx_memset(limits, (unsigned char)ppl, 16 * mb_cols);
+    memset(limits, (unsigned char)ppl, 16 * mb_cols);
 
     /* TODO: The original code don't filter the 2 outer rows and columns. */
     for (mbr = 0; mbr < mb_rows; mbr++)
@@ -763,7 +763,7 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
             /* insure that postproc is set to all 0's so that post proc
              * doesn't pull random data in from edge
              */
-            vpx_memset((&oci->post_proc_buffer_int)->buffer_alloc,128,(&oci->post_proc_buffer)->frame_size);
+            memset((&oci->post_proc_buffer_int)->buffer_alloc,128,(&oci->post_proc_buffer)->frame_size);
 
         }
     }

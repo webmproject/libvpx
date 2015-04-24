@@ -728,7 +728,7 @@ static void super_block_yrd(VP9_COMP *cpi, MACROBLOCK *x, int *rate,
   assert(bs == xd->mi[0]->mbmi.sb_type);
 
   if (cpi->sf.tx_size_search_method == USE_LARGESTALL || xd->lossless) {
-    vpx_memset(txfm_cache, 0, TX_MODES * sizeof(int64_t));
+    memset(txfm_cache, 0, TX_MODES * sizeof(int64_t));
     choose_largest_tx_size(cpi, x, rate, distortion, skip, ret_sse, ref_best_rd,
                            bs);
   } else {
@@ -1084,7 +1084,7 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
     for (i = 0; i < TX_MODES; i++)
       tx_cache[i] = INT64_MAX;
 
-  vpx_memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
+  memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
   /* Y Search for intra prediction mode */
   for (mode = DC_PRED; mode <= TM_PRED; mode++) {
     int64_t local_tx_cache[TX_MODES];
@@ -1201,7 +1201,7 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int this_rate_tokenonly, this_rate, s;
   int64_t this_distortion, this_sse;
 
-  vpx_memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
+  memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
   for (mode = DC_PRED; mode <= TM_PRED; ++mode) {
     if (!(cpi->sf.intra_uv_mode_mask[max_tx_size] & (1 << mode)))
       continue;
@@ -1239,7 +1239,7 @@ static int64_t rd_sbuv_dcpred(const VP9_COMP *cpi, MACROBLOCK *x,
   int64_t unused;
 
   x->e_mbd.mi[0]->mbmi.uv_mode = DC_PRED;
-  vpx_memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
+  memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
   super_block_uvrd(cpi, x, rate_tokenonly, distortion,
                    skippable, &unused, bsize, INT64_MAX);
   *rate = *rate_tokenonly + cpi->intra_uv_mode_cost[cm->frame_type][DC_PRED];
@@ -2120,8 +2120,8 @@ static void estimate_ref_frame_costs(const VP9_COMMON *cm,
   int seg_ref_active = vp9_segfeature_active(&cm->seg, segment_id,
                                              SEG_LVL_REF_FRAME);
   if (seg_ref_active) {
-    vpx_memset(ref_costs_single, 0, MAX_REF_FRAMES * sizeof(*ref_costs_single));
-    vpx_memset(ref_costs_comp,   0, MAX_REF_FRAMES * sizeof(*ref_costs_comp));
+    memset(ref_costs_single, 0, MAX_REF_FRAMES * sizeof(*ref_costs_single));
+    memset(ref_costs_comp,   0, MAX_REF_FRAMES * sizeof(*ref_costs_comp));
     *comp_mode_p = 128;
   } else {
     vp9_prob intra_inter_p = vp9_get_intra_inter_prob(cm, xd);
@@ -2700,7 +2700,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     if (is_comp_pred)
       if (single_skippable[this_mode][refs[0]] &&
           single_skippable[this_mode][refs[1]])
-        vpx_memset(skip_txfm, 1, sizeof(skip_txfm));
+        memset(skip_txfm, 1, sizeof(skip_txfm));
 
   if (cpi->sf.use_rd_breakout && ref_best_rd < INT64_MAX) {
     // if current pred_error modeled rd is substantially more than the best
@@ -3265,7 +3265,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
     if (ref_frame == INTRA_FRAME) {
       TX_SIZE uv_tx;
       struct macroblockd_plane *const pd = &xd->plane[1];
-      vpx_memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
+      memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
       super_block_yrd(cpi, x, &rate_y, &distortion_y, &skippable,
                       NULL, bsize, tx_cache, best_rd);
       if (rate_y == INT_MAX)
@@ -3750,7 +3750,7 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
   int64_t filter_cache[SWITCHABLE_FILTER_CONTEXTS];
 
   x->skip_encode = sf->skip_encode_frame && x->q_index < QIDX_SKIP_THRESH;
-  vpx_memset(x->zcoeff_blk[TX_4X4], 0, 4);
+  memset(x->zcoeff_blk[TX_4X4], 0, 4);
   vp9_zero(best_mbmode);
 
   for (i = 0; i < SWITCHABLE_FILTER_CONTEXTS; ++i)
@@ -4074,7 +4074,7 @@ void vp9_rd_pick_inter_mode_sub8x8(VP9_COMP *cpi,
         // then dont bother looking at UV
         vp9_build_inter_predictors_sbuv(&x->e_mbd, mi_row, mi_col,
                                         BLOCK_8X8);
-        vpx_memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
+        memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
         if (!super_block_uvrd(cpi, x, &rate_uv, &distortion_uv, &uv_skippable,
                               &uv_sse, BLOCK_8X8, tmp_best_rdu))
           continue;
