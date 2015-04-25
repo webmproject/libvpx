@@ -573,14 +573,14 @@ void vp9_idct8x8_64_add_sse2(const int16_t *input, uint8_t *dest, int stride) {
   in6 = _mm_srai_epi16(in6, 5);
   in7 = _mm_srai_epi16(in7, 5);
 
-  RECON_AND_STORE(dest, in0);
-  RECON_AND_STORE(dest, in1);
-  RECON_AND_STORE(dest, in2);
-  RECON_AND_STORE(dest, in3);
-  RECON_AND_STORE(dest, in4);
-  RECON_AND_STORE(dest, in5);
-  RECON_AND_STORE(dest, in6);
-  RECON_AND_STORE(dest, in7);
+  RECON_AND_STORE(dest + 0 * stride, in0);
+  RECON_AND_STORE(dest + 1 * stride, in1);
+  RECON_AND_STORE(dest + 2 * stride, in2);
+  RECON_AND_STORE(dest + 3 * stride, in3);
+  RECON_AND_STORE(dest + 4 * stride, in4);
+  RECON_AND_STORE(dest + 5 * stride, in5);
+  RECON_AND_STORE(dest + 6 * stride, in6);
+  RECON_AND_STORE(dest + 7 * stride, in7);
 }
 
 void vp9_idct8x8_1_add_sse2(const int16_t *input, uint8_t *dest, int stride) {
@@ -594,14 +594,14 @@ void vp9_idct8x8_1_add_sse2(const int16_t *input, uint8_t *dest, int stride) {
 
   dc_value = _mm_set1_epi16(a);
 
-  RECON_AND_STORE(dest, dc_value);
-  RECON_AND_STORE(dest, dc_value);
-  RECON_AND_STORE(dest, dc_value);
-  RECON_AND_STORE(dest, dc_value);
-  RECON_AND_STORE(dest, dc_value);
-  RECON_AND_STORE(dest, dc_value);
-  RECON_AND_STORE(dest, dc_value);
-  RECON_AND_STORE(dest, dc_value);
+  RECON_AND_STORE(dest + 0 * stride, dc_value);
+  RECON_AND_STORE(dest + 1 * stride, dc_value);
+  RECON_AND_STORE(dest + 2 * stride, dc_value);
+  RECON_AND_STORE(dest + 3 * stride, dc_value);
+  RECON_AND_STORE(dest + 4 * stride, dc_value);
+  RECON_AND_STORE(dest + 5 * stride, dc_value);
+  RECON_AND_STORE(dest + 6 * stride, dc_value);
+  RECON_AND_STORE(dest + 7 * stride, dc_value);
 }
 
 static void idct8_sse2(__m128i *in) {
@@ -915,14 +915,14 @@ void vp9_iht8x8_64_add_sse2(const int16_t *input, uint8_t *dest, int stride,
   in[6] = _mm_srai_epi16(in[6], 5);
   in[7] = _mm_srai_epi16(in[7], 5);
 
-  RECON_AND_STORE(dest, in[0]);
-  RECON_AND_STORE(dest, in[1]);
-  RECON_AND_STORE(dest, in[2]);
-  RECON_AND_STORE(dest, in[3]);
-  RECON_AND_STORE(dest, in[4]);
-  RECON_AND_STORE(dest, in[5]);
-  RECON_AND_STORE(dest, in[6]);
-  RECON_AND_STORE(dest, in[7]);
+  RECON_AND_STORE(dest + 0 * stride, in[0]);
+  RECON_AND_STORE(dest + 1 * stride, in[1]);
+  RECON_AND_STORE(dest + 2 * stride, in[2]);
+  RECON_AND_STORE(dest + 3 * stride, in[3]);
+  RECON_AND_STORE(dest + 4 * stride, in[4]);
+  RECON_AND_STORE(dest + 5 * stride, in[5]);
+  RECON_AND_STORE(dest + 6 * stride, in[6]);
+  RECON_AND_STORE(dest + 7 * stride, in[7]);
 }
 
 void vp9_idct8x8_12_add_sse2(const int16_t *input, uint8_t *dest, int stride) {
@@ -1055,14 +1055,14 @@ void vp9_idct8x8_12_add_sse2(const int16_t *input, uint8_t *dest, int stride) {
   in6 = _mm_srai_epi16(in6, 5);
   in7 = _mm_srai_epi16(in7, 5);
 
-  RECON_AND_STORE(dest, in0);
-  RECON_AND_STORE(dest, in1);
-  RECON_AND_STORE(dest, in2);
-  RECON_AND_STORE(dest, in3);
-  RECON_AND_STORE(dest, in4);
-  RECON_AND_STORE(dest, in5);
-  RECON_AND_STORE(dest, in6);
-  RECON_AND_STORE(dest, in7);
+  RECON_AND_STORE(dest + 0 * stride, in0);
+  RECON_AND_STORE(dest + 1 * stride, in1);
+  RECON_AND_STORE(dest + 2 * stride, in2);
+  RECON_AND_STORE(dest + 3 * stride, in3);
+  RECON_AND_STORE(dest + 4 * stride, in4);
+  RECON_AND_STORE(dest + 5 * stride, in5);
+  RECON_AND_STORE(dest + 6 * stride, in6);
+  RECON_AND_STORE(dest + 7 * stride, in7);
 }
 
 #define IDCT16 \
@@ -1391,6 +1391,7 @@ void vp9_idct16x16_256_add_sse2(const int16_t *input, uint8_t *dest,
       input += 128;
   }
   for (i = 0; i < 2; i++) {
+      int j;
       // 1-D idct
       array_transpose_8x8(l+i*8, in);
       array_transpose_8x8(r+i*8, in+8);
@@ -1415,59 +1416,14 @@ void vp9_idct16x16_256_add_sse2(const int16_t *input, uint8_t *dest,
       in[14] = _mm_sub_epi16(stp2_1, stp1_14);
       in[15] = _mm_sub_epi16(stp2_0, stp1_15);
 
-      // Final rounding and shift
-      in[0] = _mm_adds_epi16(in[0], final_rounding);
-      in[1] = _mm_adds_epi16(in[1], final_rounding);
-      in[2] = _mm_adds_epi16(in[2], final_rounding);
-      in[3] = _mm_adds_epi16(in[3], final_rounding);
-      in[4] = _mm_adds_epi16(in[4], final_rounding);
-      in[5] = _mm_adds_epi16(in[5], final_rounding);
-      in[6] = _mm_adds_epi16(in[6], final_rounding);
-      in[7] = _mm_adds_epi16(in[7], final_rounding);
-      in[8] = _mm_adds_epi16(in[8], final_rounding);
-      in[9] = _mm_adds_epi16(in[9], final_rounding);
-      in[10] = _mm_adds_epi16(in[10], final_rounding);
-      in[11] = _mm_adds_epi16(in[11], final_rounding);
-      in[12] = _mm_adds_epi16(in[12], final_rounding);
-      in[13] = _mm_adds_epi16(in[13], final_rounding);
-      in[14] = _mm_adds_epi16(in[14], final_rounding);
-      in[15] = _mm_adds_epi16(in[15], final_rounding);
+      for (j = 0; j < 16; ++j) {
+        // Final rounding and shift
+        in[j] = _mm_adds_epi16(in[j], final_rounding);
+        in[j] = _mm_srai_epi16(in[j], 6);
+        RECON_AND_STORE(dest + j * stride, in[j]);
+      }
 
-      in[0] = _mm_srai_epi16(in[0], 6);
-      in[1] = _mm_srai_epi16(in[1], 6);
-      in[2] = _mm_srai_epi16(in[2], 6);
-      in[3] = _mm_srai_epi16(in[3], 6);
-      in[4] = _mm_srai_epi16(in[4], 6);
-      in[5] = _mm_srai_epi16(in[5], 6);
-      in[6] = _mm_srai_epi16(in[6], 6);
-      in[7] = _mm_srai_epi16(in[7], 6);
-      in[8] = _mm_srai_epi16(in[8], 6);
-      in[9] = _mm_srai_epi16(in[9], 6);
-      in[10] = _mm_srai_epi16(in[10], 6);
-      in[11] = _mm_srai_epi16(in[11], 6);
-      in[12] = _mm_srai_epi16(in[12], 6);
-      in[13] = _mm_srai_epi16(in[13], 6);
-      in[14] = _mm_srai_epi16(in[14], 6);
-      in[15] = _mm_srai_epi16(in[15], 6);
-
-      RECON_AND_STORE(dest, in[0]);
-      RECON_AND_STORE(dest, in[1]);
-      RECON_AND_STORE(dest, in[2]);
-      RECON_AND_STORE(dest, in[3]);
-      RECON_AND_STORE(dest, in[4]);
-      RECON_AND_STORE(dest, in[5]);
-      RECON_AND_STORE(dest, in[6]);
-      RECON_AND_STORE(dest, in[7]);
-      RECON_AND_STORE(dest, in[8]);
-      RECON_AND_STORE(dest, in[9]);
-      RECON_AND_STORE(dest, in[10]);
-      RECON_AND_STORE(dest, in[11]);
-      RECON_AND_STORE(dest, in[12]);
-      RECON_AND_STORE(dest, in[13]);
-      RECON_AND_STORE(dest, in[14]);
-      RECON_AND_STORE(dest, in[15]);
-
-      dest += 8 - (stride * 16);
+      dest += 8;
   }
 }
 
@@ -1483,23 +1439,23 @@ void vp9_idct16x16_1_add_sse2(const int16_t *input, uint8_t *dest, int stride) {
   dc_value = _mm_set1_epi16(a);
 
   for (i = 0; i < 2; ++i) {
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    dest += 8 - (stride * 16);
+    RECON_AND_STORE(dest +  0 * stride, dc_value);
+    RECON_AND_STORE(dest +  1 * stride, dc_value);
+    RECON_AND_STORE(dest +  2 * stride, dc_value);
+    RECON_AND_STORE(dest +  3 * stride, dc_value);
+    RECON_AND_STORE(dest +  4 * stride, dc_value);
+    RECON_AND_STORE(dest +  5 * stride, dc_value);
+    RECON_AND_STORE(dest +  6 * stride, dc_value);
+    RECON_AND_STORE(dest +  7 * stride, dc_value);
+    RECON_AND_STORE(dest +  8 * stride, dc_value);
+    RECON_AND_STORE(dest +  9 * stride, dc_value);
+    RECON_AND_STORE(dest + 10 * stride, dc_value);
+    RECON_AND_STORE(dest + 11 * stride, dc_value);
+    RECON_AND_STORE(dest + 12 * stride, dc_value);
+    RECON_AND_STORE(dest + 13 * stride, dc_value);
+    RECON_AND_STORE(dest + 14 * stride, dc_value);
+    RECON_AND_STORE(dest + 15 * stride, dc_value);
+    dest += 8;
   }
 }
 
@@ -2567,6 +2523,7 @@ void vp9_idct16x16_10_add_sse2(const int16_t *input, uint8_t *dest,
 
   // Second 1-D inverse transform, performed per 8x16 block
   for (i = 0; i < 2; i++) {
+    int j;
     array_transpose_4X8(l + 8*i, in);
 
     IDCT16_10
@@ -2589,59 +2546,14 @@ void vp9_idct16x16_10_add_sse2(const int16_t *input, uint8_t *dest,
     in[14] = _mm_sub_epi16(stp2_1, stp1_14);
     in[15] = _mm_sub_epi16(stp2_0, stp1_15);
 
-    // Final rounding and shift
-    in[0] = _mm_adds_epi16(in[0], final_rounding);
-    in[1] = _mm_adds_epi16(in[1], final_rounding);
-    in[2] = _mm_adds_epi16(in[2], final_rounding);
-    in[3] = _mm_adds_epi16(in[3], final_rounding);
-    in[4] = _mm_adds_epi16(in[4], final_rounding);
-    in[5] = _mm_adds_epi16(in[5], final_rounding);
-    in[6] = _mm_adds_epi16(in[6], final_rounding);
-    in[7] = _mm_adds_epi16(in[7], final_rounding);
-    in[8] = _mm_adds_epi16(in[8], final_rounding);
-    in[9] = _mm_adds_epi16(in[9], final_rounding);
-    in[10] = _mm_adds_epi16(in[10], final_rounding);
-    in[11] = _mm_adds_epi16(in[11], final_rounding);
-    in[12] = _mm_adds_epi16(in[12], final_rounding);
-    in[13] = _mm_adds_epi16(in[13], final_rounding);
-    in[14] = _mm_adds_epi16(in[14], final_rounding);
-    in[15] = _mm_adds_epi16(in[15], final_rounding);
+    for (j = 0; j < 16; ++j) {
+      // Final rounding and shift
+      in[j] = _mm_adds_epi16(in[j], final_rounding);
+      in[j] = _mm_srai_epi16(in[j], 6);
+      RECON_AND_STORE(dest + j * stride, in[j]);
+    }
 
-    in[0] = _mm_srai_epi16(in[0], 6);
-    in[1] = _mm_srai_epi16(in[1], 6);
-    in[2] = _mm_srai_epi16(in[2], 6);
-    in[3] = _mm_srai_epi16(in[3], 6);
-    in[4] = _mm_srai_epi16(in[4], 6);
-    in[5] = _mm_srai_epi16(in[5], 6);
-    in[6] = _mm_srai_epi16(in[6], 6);
-    in[7] = _mm_srai_epi16(in[7], 6);
-    in[8] = _mm_srai_epi16(in[8], 6);
-    in[9] = _mm_srai_epi16(in[9], 6);
-    in[10] = _mm_srai_epi16(in[10], 6);
-    in[11] = _mm_srai_epi16(in[11], 6);
-    in[12] = _mm_srai_epi16(in[12], 6);
-    in[13] = _mm_srai_epi16(in[13], 6);
-    in[14] = _mm_srai_epi16(in[14], 6);
-    in[15] = _mm_srai_epi16(in[15], 6);
-
-    RECON_AND_STORE(dest, in[0]);
-    RECON_AND_STORE(dest, in[1]);
-    RECON_AND_STORE(dest, in[2]);
-    RECON_AND_STORE(dest, in[3]);
-    RECON_AND_STORE(dest, in[4]);
-    RECON_AND_STORE(dest, in[5]);
-    RECON_AND_STORE(dest, in[6]);
-    RECON_AND_STORE(dest, in[7]);
-    RECON_AND_STORE(dest, in[8]);
-    RECON_AND_STORE(dest, in[9]);
-    RECON_AND_STORE(dest, in[10]);
-    RECON_AND_STORE(dest, in[11]);
-    RECON_AND_STORE(dest, in[12]);
-    RECON_AND_STORE(dest, in[13]);
-    RECON_AND_STORE(dest, in[14]);
-    RECON_AND_STORE(dest, in[15]);
-
-    dest += 8 - (stride * 16);
+    dest += 8;
   }
 }
 
@@ -3427,6 +3339,7 @@ void vp9_idct32x32_34_add_sse2(const int16_t *input, uint8_t *dest,
   col[30] = _mm_sub_epi16(stp1_1, stp1_30);
   col[31] = _mm_sub_epi16(stp1_0, stp1_31);
   for (i = 0; i < 4; i++) {
+      int j;
       const __m128i zero = _mm_setzero_si128();
       // Transpose 32x8 block to 8x32 block
       array_transpose_8x8(col+i*8, in);
@@ -3466,107 +3379,14 @@ void vp9_idct32x32_34_add_sse2(const int16_t *input, uint8_t *dest,
       in[30] = _mm_sub_epi16(stp1_1, stp1_30);
       in[31] = _mm_sub_epi16(stp1_0, stp1_31);
 
-      // Final rounding and shift
-      in[0] = _mm_adds_epi16(in[0], final_rounding);
-      in[1] = _mm_adds_epi16(in[1], final_rounding);
-      in[2] = _mm_adds_epi16(in[2], final_rounding);
-      in[3] = _mm_adds_epi16(in[3], final_rounding);
-      in[4] = _mm_adds_epi16(in[4], final_rounding);
-      in[5] = _mm_adds_epi16(in[5], final_rounding);
-      in[6] = _mm_adds_epi16(in[6], final_rounding);
-      in[7] = _mm_adds_epi16(in[7], final_rounding);
-      in[8] = _mm_adds_epi16(in[8], final_rounding);
-      in[9] = _mm_adds_epi16(in[9], final_rounding);
-      in[10] = _mm_adds_epi16(in[10], final_rounding);
-      in[11] = _mm_adds_epi16(in[11], final_rounding);
-      in[12] = _mm_adds_epi16(in[12], final_rounding);
-      in[13] = _mm_adds_epi16(in[13], final_rounding);
-      in[14] = _mm_adds_epi16(in[14], final_rounding);
-      in[15] = _mm_adds_epi16(in[15], final_rounding);
-      in[16] = _mm_adds_epi16(in[16], final_rounding);
-      in[17] = _mm_adds_epi16(in[17], final_rounding);
-      in[18] = _mm_adds_epi16(in[18], final_rounding);
-      in[19] = _mm_adds_epi16(in[19], final_rounding);
-      in[20] = _mm_adds_epi16(in[20], final_rounding);
-      in[21] = _mm_adds_epi16(in[21], final_rounding);
-      in[22] = _mm_adds_epi16(in[22], final_rounding);
-      in[23] = _mm_adds_epi16(in[23], final_rounding);
-      in[24] = _mm_adds_epi16(in[24], final_rounding);
-      in[25] = _mm_adds_epi16(in[25], final_rounding);
-      in[26] = _mm_adds_epi16(in[26], final_rounding);
-      in[27] = _mm_adds_epi16(in[27], final_rounding);
-      in[28] = _mm_adds_epi16(in[28], final_rounding);
-      in[29] = _mm_adds_epi16(in[29], final_rounding);
-      in[30] = _mm_adds_epi16(in[30], final_rounding);
-      in[31] = _mm_adds_epi16(in[31], final_rounding);
+      for (j = 0; j < 32; ++j) {
+        // Final rounding and shift
+        in[j] = _mm_adds_epi16(in[j], final_rounding);
+        in[j] = _mm_srai_epi16(in[j], 6);
+        RECON_AND_STORE(dest + j * stride, in[j]);
+      }
 
-      in[0] = _mm_srai_epi16(in[0], 6);
-      in[1] = _mm_srai_epi16(in[1], 6);
-      in[2] = _mm_srai_epi16(in[2], 6);
-      in[3] = _mm_srai_epi16(in[3], 6);
-      in[4] = _mm_srai_epi16(in[4], 6);
-      in[5] = _mm_srai_epi16(in[5], 6);
-      in[6] = _mm_srai_epi16(in[6], 6);
-      in[7] = _mm_srai_epi16(in[7], 6);
-      in[8] = _mm_srai_epi16(in[8], 6);
-      in[9] = _mm_srai_epi16(in[9], 6);
-      in[10] = _mm_srai_epi16(in[10], 6);
-      in[11] = _mm_srai_epi16(in[11], 6);
-      in[12] = _mm_srai_epi16(in[12], 6);
-      in[13] = _mm_srai_epi16(in[13], 6);
-      in[14] = _mm_srai_epi16(in[14], 6);
-      in[15] = _mm_srai_epi16(in[15], 6);
-      in[16] = _mm_srai_epi16(in[16], 6);
-      in[17] = _mm_srai_epi16(in[17], 6);
-      in[18] = _mm_srai_epi16(in[18], 6);
-      in[19] = _mm_srai_epi16(in[19], 6);
-      in[20] = _mm_srai_epi16(in[20], 6);
-      in[21] = _mm_srai_epi16(in[21], 6);
-      in[22] = _mm_srai_epi16(in[22], 6);
-      in[23] = _mm_srai_epi16(in[23], 6);
-      in[24] = _mm_srai_epi16(in[24], 6);
-      in[25] = _mm_srai_epi16(in[25], 6);
-      in[26] = _mm_srai_epi16(in[26], 6);
-      in[27] = _mm_srai_epi16(in[27], 6);
-      in[28] = _mm_srai_epi16(in[28], 6);
-      in[29] = _mm_srai_epi16(in[29], 6);
-      in[30] = _mm_srai_epi16(in[30], 6);
-      in[31] = _mm_srai_epi16(in[31], 6);
-
-      RECON_AND_STORE(dest, in[0]);
-      RECON_AND_STORE(dest, in[1]);
-      RECON_AND_STORE(dest, in[2]);
-      RECON_AND_STORE(dest, in[3]);
-      RECON_AND_STORE(dest, in[4]);
-      RECON_AND_STORE(dest, in[5]);
-      RECON_AND_STORE(dest, in[6]);
-      RECON_AND_STORE(dest, in[7]);
-      RECON_AND_STORE(dest, in[8]);
-      RECON_AND_STORE(dest, in[9]);
-      RECON_AND_STORE(dest, in[10]);
-      RECON_AND_STORE(dest, in[11]);
-      RECON_AND_STORE(dest, in[12]);
-      RECON_AND_STORE(dest, in[13]);
-      RECON_AND_STORE(dest, in[14]);
-      RECON_AND_STORE(dest, in[15]);
-      RECON_AND_STORE(dest, in[16]);
-      RECON_AND_STORE(dest, in[17]);
-      RECON_AND_STORE(dest, in[18]);
-      RECON_AND_STORE(dest, in[19]);
-      RECON_AND_STORE(dest, in[20]);
-      RECON_AND_STORE(dest, in[21]);
-      RECON_AND_STORE(dest, in[22]);
-      RECON_AND_STORE(dest, in[23]);
-      RECON_AND_STORE(dest, in[24]);
-      RECON_AND_STORE(dest, in[25]);
-      RECON_AND_STORE(dest, in[26]);
-      RECON_AND_STORE(dest, in[27]);
-      RECON_AND_STORE(dest, in[28]);
-      RECON_AND_STORE(dest, in[29]);
-      RECON_AND_STORE(dest, in[30]);
-      RECON_AND_STORE(dest, in[31]);
-
-      dest += 8 - (stride * 32);
+      dest += 8;
     }
   }
 
@@ -3835,107 +3655,14 @@ void vp9_idct32x32_1024_add_sse2(const int16_t *input, uint8_t *dest,
       in[30] = _mm_sub_epi16(stp1_1, stp1_30);
       in[31] = _mm_sub_epi16(stp1_0, stp1_31);
 
-      // Final rounding and shift
-      in[0] = _mm_adds_epi16(in[0], final_rounding);
-      in[1] = _mm_adds_epi16(in[1], final_rounding);
-      in[2] = _mm_adds_epi16(in[2], final_rounding);
-      in[3] = _mm_adds_epi16(in[3], final_rounding);
-      in[4] = _mm_adds_epi16(in[4], final_rounding);
-      in[5] = _mm_adds_epi16(in[5], final_rounding);
-      in[6] = _mm_adds_epi16(in[6], final_rounding);
-      in[7] = _mm_adds_epi16(in[7], final_rounding);
-      in[8] = _mm_adds_epi16(in[8], final_rounding);
-      in[9] = _mm_adds_epi16(in[9], final_rounding);
-      in[10] = _mm_adds_epi16(in[10], final_rounding);
-      in[11] = _mm_adds_epi16(in[11], final_rounding);
-      in[12] = _mm_adds_epi16(in[12], final_rounding);
-      in[13] = _mm_adds_epi16(in[13], final_rounding);
-      in[14] = _mm_adds_epi16(in[14], final_rounding);
-      in[15] = _mm_adds_epi16(in[15], final_rounding);
-      in[16] = _mm_adds_epi16(in[16], final_rounding);
-      in[17] = _mm_adds_epi16(in[17], final_rounding);
-      in[18] = _mm_adds_epi16(in[18], final_rounding);
-      in[19] = _mm_adds_epi16(in[19], final_rounding);
-      in[20] = _mm_adds_epi16(in[20], final_rounding);
-      in[21] = _mm_adds_epi16(in[21], final_rounding);
-      in[22] = _mm_adds_epi16(in[22], final_rounding);
-      in[23] = _mm_adds_epi16(in[23], final_rounding);
-      in[24] = _mm_adds_epi16(in[24], final_rounding);
-      in[25] = _mm_adds_epi16(in[25], final_rounding);
-      in[26] = _mm_adds_epi16(in[26], final_rounding);
-      in[27] = _mm_adds_epi16(in[27], final_rounding);
-      in[28] = _mm_adds_epi16(in[28], final_rounding);
-      in[29] = _mm_adds_epi16(in[29], final_rounding);
-      in[30] = _mm_adds_epi16(in[30], final_rounding);
-      in[31] = _mm_adds_epi16(in[31], final_rounding);
+      for (j = 0; j < 32; ++j) {
+        // Final rounding and shift
+        in[j] = _mm_adds_epi16(in[j], final_rounding);
+        in[j] = _mm_srai_epi16(in[j], 6);
+        RECON_AND_STORE(dest + j * stride, in[j]);
+      }
 
-      in[0] = _mm_srai_epi16(in[0], 6);
-      in[1] = _mm_srai_epi16(in[1], 6);
-      in[2] = _mm_srai_epi16(in[2], 6);
-      in[3] = _mm_srai_epi16(in[3], 6);
-      in[4] = _mm_srai_epi16(in[4], 6);
-      in[5] = _mm_srai_epi16(in[5], 6);
-      in[6] = _mm_srai_epi16(in[6], 6);
-      in[7] = _mm_srai_epi16(in[7], 6);
-      in[8] = _mm_srai_epi16(in[8], 6);
-      in[9] = _mm_srai_epi16(in[9], 6);
-      in[10] = _mm_srai_epi16(in[10], 6);
-      in[11] = _mm_srai_epi16(in[11], 6);
-      in[12] = _mm_srai_epi16(in[12], 6);
-      in[13] = _mm_srai_epi16(in[13], 6);
-      in[14] = _mm_srai_epi16(in[14], 6);
-      in[15] = _mm_srai_epi16(in[15], 6);
-      in[16] = _mm_srai_epi16(in[16], 6);
-      in[17] = _mm_srai_epi16(in[17], 6);
-      in[18] = _mm_srai_epi16(in[18], 6);
-      in[19] = _mm_srai_epi16(in[19], 6);
-      in[20] = _mm_srai_epi16(in[20], 6);
-      in[21] = _mm_srai_epi16(in[21], 6);
-      in[22] = _mm_srai_epi16(in[22], 6);
-      in[23] = _mm_srai_epi16(in[23], 6);
-      in[24] = _mm_srai_epi16(in[24], 6);
-      in[25] = _mm_srai_epi16(in[25], 6);
-      in[26] = _mm_srai_epi16(in[26], 6);
-      in[27] = _mm_srai_epi16(in[27], 6);
-      in[28] = _mm_srai_epi16(in[28], 6);
-      in[29] = _mm_srai_epi16(in[29], 6);
-      in[30] = _mm_srai_epi16(in[30], 6);
-      in[31] = _mm_srai_epi16(in[31], 6);
-
-      RECON_AND_STORE(dest, in[0]);
-      RECON_AND_STORE(dest, in[1]);
-      RECON_AND_STORE(dest, in[2]);
-      RECON_AND_STORE(dest, in[3]);
-      RECON_AND_STORE(dest, in[4]);
-      RECON_AND_STORE(dest, in[5]);
-      RECON_AND_STORE(dest, in[6]);
-      RECON_AND_STORE(dest, in[7]);
-      RECON_AND_STORE(dest, in[8]);
-      RECON_AND_STORE(dest, in[9]);
-      RECON_AND_STORE(dest, in[10]);
-      RECON_AND_STORE(dest, in[11]);
-      RECON_AND_STORE(dest, in[12]);
-      RECON_AND_STORE(dest, in[13]);
-      RECON_AND_STORE(dest, in[14]);
-      RECON_AND_STORE(dest, in[15]);
-      RECON_AND_STORE(dest, in[16]);
-      RECON_AND_STORE(dest, in[17]);
-      RECON_AND_STORE(dest, in[18]);
-      RECON_AND_STORE(dest, in[19]);
-      RECON_AND_STORE(dest, in[20]);
-      RECON_AND_STORE(dest, in[21]);
-      RECON_AND_STORE(dest, in[22]);
-      RECON_AND_STORE(dest, in[23]);
-      RECON_AND_STORE(dest, in[24]);
-      RECON_AND_STORE(dest, in[25]);
-      RECON_AND_STORE(dest, in[26]);
-      RECON_AND_STORE(dest, in[27]);
-      RECON_AND_STORE(dest, in[28]);
-      RECON_AND_STORE(dest, in[29]);
-      RECON_AND_STORE(dest, in[30]);
-      RECON_AND_STORE(dest, in[31]);
-
-      dest += 8 - (stride * 32);
+      dest += 8;
     }
 }  //NOLINT
 
@@ -3951,39 +3678,11 @@ void vp9_idct32x32_1_add_sse2(const int16_t *input, uint8_t *dest, int stride) {
   dc_value = _mm_set1_epi16(a);
 
   for (i = 0; i < 4; ++i) {
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    RECON_AND_STORE(dest, dc_value);
-    dest += 8 - (stride * 32);
+    int j;
+    for (j = 0; j < 32; ++j) {
+      RECON_AND_STORE(dest + j * stride, dc_value);
+    }
+    dest += 8;
   }
 }
 
