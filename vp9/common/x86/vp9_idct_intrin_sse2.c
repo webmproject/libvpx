@@ -17,8 +17,7 @@
   d0 = _mm_unpacklo_epi8(d0, zero); \
   d0 = _mm_add_epi16(in_x, d0); \
   d0 = _mm_packus_epi16(d0, d0); \
-  *(int *)dest = _mm_cvtsi128_si32(d0); \
-  dest += stride; \
+  *(int *)(dest) = _mm_cvtsi128_si32(d0); \
 }
 
 void vp9_idct4x4_16_add_sse2(const int16_t *input, uint8_t *dest, int stride) {
@@ -162,10 +161,10 @@ void vp9_idct4x4_1_add_sse2(const int16_t *input, uint8_t *dest, int stride) {
 
   dc_value = _mm_set1_epi16(a);
 
-  RECON_AND_STORE4X4(dest, dc_value);
-  RECON_AND_STORE4X4(dest, dc_value);
-  RECON_AND_STORE4X4(dest, dc_value);
-  RECON_AND_STORE4X4(dest, dc_value);
+  RECON_AND_STORE4X4(dest + 0 * stride, dc_value);
+  RECON_AND_STORE4X4(dest + 1 * stride, dc_value);
+  RECON_AND_STORE4X4(dest + 2 * stride, dc_value);
+  RECON_AND_STORE4X4(dest + 3 * stride, dc_value);
 }
 
 static INLINE void transpose_4x4(__m128i *res) {
