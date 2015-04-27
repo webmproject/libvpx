@@ -254,6 +254,9 @@ static INLINE int assign_dv(VP9_COMMON *cm, PREDICTION_MODE mode,
 
 static void read_intra_frame_mode_info(VP9_COMMON *const cm,
                                        MACROBLOCKD *const xd,
+#if CONFIG_INTRABC
+                                       const TileInfo *const tile,
+#endif
                                        int mi_row, int mi_col, vp9_reader *r) {
   MODE_INFO *const mi = xd->mi[0].src_mi;
   MB_MODE_INFO *const mbmi = &mi->mbmi;
@@ -275,7 +278,6 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
 #endif
 
 #if CONFIG_INTRABC
-  vp9_find_ref_dv(&dv_ref, mi_row, mi_col);
   if (bsize >= BLOCK_8X8 && cm->allow_intrabc_mode) {
     use_intrabc = vp9_read(r, INTRABC_PROB);
     if (use_intrabc) {
@@ -472,6 +474,15 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
 
 #if CONFIG_INTRABC
   if (use_intrabc) {
+    int_mv nearestmv, nearmv;
+    vp9_find_mv_refs(cm, xd, tile, mi, INTRA_FRAME, mbmi->ref_mvs[INTRA_FRAME],
+                     mi_row, mi_col);
+    vp9_find_best_ref_mvs(xd, cm->allow_high_precision_mv,
+                          mbmi->ref_mvs[INTRA_FRAME],
+                          &nearestmv, &nearmv);
+    if (nearestmv.as_int == 0)
+      vp9_find_ref_dv(&nearestmv, mi_row, mi_col);
+    dv_ref = nearestmv;
     xd->corrupted |= !assign_dv(cm, mbmi->mode, &mbmi->mv[0], &dv_ref, r);
   } else
 #endif  // CONFIG_INTRABC
@@ -1609,7 +1620,11 @@ void vp9_read_mode_info(VP9_COMMON *cm, MACROBLOCKD *xd,
 #endif
                         int mi_row, int mi_col, vp9_reader *r) {
   if (frame_is_intra_only(cm))
-    read_intra_frame_mode_info(cm, xd, mi_row, mi_col, r);
+    read_intra_frame_mode_info(cm, xd,
+#if CONFIG_INTRABC
+                               tile,
+#endif  // CONFIG_INTRABC
+                               mi_row, mi_col, r);
   else
     read_inter_frame_mode_info(cm, xd, tile,
 #if CONFIG_SUPERTX

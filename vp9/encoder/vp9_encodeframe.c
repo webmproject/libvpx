@@ -1454,7 +1454,7 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
 #endif
     vp9_rd_pick_intra_mode_sb(cpi, x,
 #if CONFIG_INTRABC
-                              mi_row, mi_col,
+                              tile, mi_row, mi_col,
 #endif  // CONFIG_INTRABC
                               rd_cost, bsize, ctx, best_rd);
 #if CONFIG_PALETTE

@@ -1462,11 +1462,12 @@ static void intrabc_search(VP9_COMP *cpi, MACROBLOCK *x,
                            int_mv *tmp_mv, int *rate_mv) {
   const VP9_COMMON *cm = &cpi->common;
   struct macroblockd_plane *pd = x->e_mbd.plane;
+  MB_MODE_INFO *mbmi = &x->e_mbd.mi[0].src_mi->mbmi;
   int bestsme = INT_MAX;
   int step_param;
   int sadpb = x->sadperbit16;
   MV mvp_full;
-  MV ref_mv;
+  MV ref_mv = mbmi->ref_mvs[INTRA_FRAME][0].as_mv;
 
   int tmp_col_min = x->mv_col_min;
   int tmp_col_max = x->mv_col_max;
@@ -1482,7 +1483,6 @@ static void intrabc_search(VP9_COMP *cpi, MACROBLOCK *x,
 
   tmp_mv->as_int = INVALID_MV;
   *rate_mv = 0;  // compiler bug?
-  vp9_find_ref_dv((int_mv*)&ref_mv, mi_row, mi_col);
 
   vp9_set_mv_search_range(x, &ref_mv);
 
@@ -2209,8 +2209,18 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
 }
 
 #if CONFIG_INTRABC
+static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
+                               const TileInfo *const tile,
+                               MV_REFERENCE_FRAME ref_frame,
+                               BLOCK_SIZE block_size,
+                               int mi_row, int mi_col,
+                               int_mv frame_nearest_mv[MAX_REF_FRAMES],
+                               int_mv frame_near_mv[MAX_REF_FRAMES],
+                               struct buf_2d yv12_mb[4][MAX_MB_PLANE]);
+
 // This function is used only for intra_only frames
 static int64_t rd_pick_intrabc_sb_mode(VP9_COMP *cpi, MACROBLOCK *x,
+                                       const TileInfo *const tile,
                                        int mi_row, int mi_col,
                                        int *rate,
                                        int64_t *distortion, int *skippable,
@@ -2222,6 +2232,7 @@ static int64_t rd_pick_intrabc_sb_mode(VP9_COMP *cpi, MACROBLOCK *x,
   MODE_INFO *const mic = xd->mi[0].src_mi;
   MB_MODE_INFO *mbmi = &mic->mbmi;
   MB_MODE_INFO mbmi_selected = *mbmi;
+  int_mv frame_dv[2][MAX_REF_FRAMES];
   int best_skip = x->skip;
   struct buf_2d yv12_mb[MAX_MB_PLANE];
   int i;
@@ -2242,8 +2253,11 @@ static int64_t rd_pick_intrabc_sb_mode(VP9_COMP *cpi, MACROBLOCK *x,
     for (i = 0; i < TX_MODES; i++)
       tx_cache[i] = INT64_MAX;
 
-  vp9_setup_pred_block(xd, yv12_mb, xd->cur_buf, mi_row, mi_col,
-                       NULL, NULL);
+  setup_buffer_inter(cpi, x, tile, INTRA_FRAME, bsize, mi_row, mi_col,
+                     frame_dv[0], frame_dv[1], &yv12_mb);
+  if (mic->mbmi.ref_mvs[INTRA_FRAME][0].as_int == 0)
+    vp9_find_ref_dv(&mic->mbmi.ref_mvs[INTRA_FRAME][0], mi_row, mi_col);
+
   for (i = 0; i < MAX_MB_PLANE; i++) {
     xd->plane[i].pre[0] = yv12_mb[i];
   }
@@ -2262,6 +2276,7 @@ static int64_t rd_pick_intrabc_sb_mode(VP9_COMP *cpi, MACROBLOCK *x,
     int64_t this_rd;
     mbmi->mode = mode;
     mbmi->uv_mode = mode;
+    mbmi->mv[0].as_mv = mic->mbmi.ref_mvs[INTRA_FRAME][0].as_mv;
     assert(mbmi->sb_type >= BLOCK_8X8);
     cpi->common.interp_filter = BILINEAR;
     this_rd = handle_intrabc_mode(cpi, x, bsize,
@@ -3911,11 +3926,19 @@ static void setup_buffer_inter(VP9_COMP *cpi, MACROBLOCK *x,
                                int_mv frame_near_mv[MAX_REF_FRAMES],
                                struct buf_2d yv12_mb[4][MAX_MB_PLANE]) {
   const VP9_COMMON *cm = &cpi->common;
-  const YV12_BUFFER_CONFIG *yv12 = get_ref_frame_buffer(cpi, ref_frame);
   MACROBLOCKD *const xd = &x->e_mbd;
+  const YV12_BUFFER_CONFIG *yv12 =
+#if CONFIG_INTRABC
+      ref_frame == INTRA_FRAME ? xd->cur_buf :
+#endif  // CONFIG_INTRABC
+      get_ref_frame_buffer(cpi, ref_frame);
   MODE_INFO *const mi = xd->mi[0].src_mi;
   int_mv *const candidates = mi->mbmi.ref_mvs[ref_frame];
-  const struct scale_factors *const sf = &cm->frame_refs[ref_frame - 1].sf;
+  const struct scale_factors *const sf =
+#if CONFIG_INTRABC
+      ref_frame == INTRA_FRAME ? NULL :
+#endif  // CONFIG_INTRABC
+      &cm->frame_refs[ref_frame - 1].sf;
 
   // TODO(jkoleszar): Is the UV buffer ever used here? If so, need to make this
   // use the UV scaling factors.
@@ -5716,6 +5739,7 @@ static void rd_pick_palette_444(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *rd_cost,
 
 void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_INTRABC
+                               const TileInfo *const tile,
                                int mi_row, int mi_col,
 #endif  // CONFIG_INTRABC
                                RD_COST *rd_cost,
@@ -5732,6 +5756,9 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   x->skip_encode = 0;
   ctx->skip = 0;
   xd->mi[0].src_mi->mbmi.ref_frame[0] = INTRA_FRAME;
+#if CONFIG_INTRABC
+  xd->mi[0].src_mi->mbmi.mv[0].as_int = 0;
+#endif  // CONFIG_INTRABC
   vp9_rd_cost_reset(rd_cost);
 
   if (bsize >= BLOCK_8X8) {
@@ -5783,7 +5810,7 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_INTRABC
   if (bsize >= BLOCK_8X8 && cm->allow_intrabc_mode) {
     best_rd = MIN(best_rd, rd_cost->rdcost);
-    if (rd_pick_intrabc_sb_mode(cpi, x, mi_row, mi_col, &rate_y,
+    if (rd_pick_intrabc_sb_mode(cpi, x, tile, mi_row, mi_col, &rate_y,
                                 &dist_y, &y_skip, bsize,
                                 tx_cache, best_rd) < best_rd) {
       rd_cost->rate = rate_y;
