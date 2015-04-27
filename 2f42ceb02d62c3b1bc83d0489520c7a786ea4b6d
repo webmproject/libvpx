@@ -46,6 +46,54 @@
       "revId": "2f42ceb02d62c3b1bc83d0489520c7a786ea4b6d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b0d42a38_ded703c2",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 5710,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-04-27T21:56:53Z",
+      "side": 1,
+      "message": "Yes, this fixes the problem on tennis. I\u0027m running borg tests to see if there are other issues; Do this once here seems to be enough. We can also move this into #CONFIG_INTRABC, as newdv is currently the only mode needing this update.",
+      "parentUuid": "f0f222e5_1bfa3ef4",
+      "range": {
+        "startLine": 5710,
+        "startChar": 47,
+        "endLine": 5710,
+        "endChar": 49
+      },
+      "revId": "2f42ceb02d62c3b1bc83d0489520c7a786ea4b6d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b0d42a38_7e8a4fed",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 5710,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-04-27T21:56:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f0f222e5_bbb3324b",
+      "range": {
+        "startLine": 5710,
+        "startChar": 47,
+        "endLine": 5710,
+        "endChar": 49
+      },
+      "revId": "2f42ceb02d62c3b1bc83d0489520c7a786ea4b6d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
