@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d0d99e70_9852ba69",
+        "filename": "test/quantize_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-04-27T18:45:30Z",
+      "side": 1,
+      "message": "i suppose the tests were always good",
+      "range": {
+        "startLine": 72,
+        "startChar": 11,
+        "endLine": 72,
+        "endChar": 27
+      },
+      "revId": "8f22014d06187a8c07240c5f7eff1724271de90b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b0d42a38_2f1c98ea",
+        "filename": "vp8/common/entropy.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-04-27T18:45:30Z",
+      "side": 1,
+      "message": "but vp8 wasn\u0027t",
+      "range": {
+        "startLine": 186,
+        "startChar": 10,
+        "endLine": 186,
+        "endChar": 11
+      },
+      "revId": "8f22014d06187a8c07240c5f7eff1724271de90b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
