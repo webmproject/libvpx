@@ -1382,7 +1382,6 @@ static void select_tx_block(const VP9_COMP *cpi, MACROBLOCK *x,
       *dist = sum_dist;
       *bsse = sum_bsse;
       *skip = all_skip;
-
       vpx_memcpy(pta, ctxa + (blk_col >> pd->subsampling_x),
           sizeof(ENTROPY_CONTEXT) * num_4x4_blocks_wide_lookup[txb_bsize]);
       vpx_memcpy(ptl, ctxl + (blk_row >> pd->subsampling_y),
@@ -3749,8 +3748,7 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi,
         rate2 += intra_cost_penalty;
       distortion2 = distortion_y + distortion_uv;
     } else {
-      this_rd = handle_inter_mode(cpi, x, bsize,
-                                  tx_cache,
+      this_rd = handle_inter_mode(cpi, x, bsize, tx_cache,
                                   &rate2, &distortion2, &skippable,
                                   &rate_y, &rate_uv,
                                   &disable_skip, frame_mv,

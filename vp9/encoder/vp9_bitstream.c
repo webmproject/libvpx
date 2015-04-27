@@ -76,13 +76,14 @@ static void prob_diff_update(const vp9_tree_index *tree,
     vp9_cond_prob_diff_update(w, &probs[i], branch_ct[i]);
 }
 
-static void write_tx_size_inter(const VP9_COMMON *cm, const MACROBLOCKD *xd,
+static void write_tx_size_inter(const VP9_COMMON *cm, MACROBLOCKD *xd,
                                 TX_SIZE tx_size, int blk_row, int blk_col,
                                 vp9_writer *w) {
   MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
   int tx_idx = (blk_row / 2) * 8 + (blk_col / 2);
   int max_blocks_high = num_4x4_blocks_high_lookup[mbmi->sb_type];
   int max_blocks_wide = num_4x4_blocks_wide_lookup[mbmi->sb_type];
+  int ctx = txfm_partition_context(xd, blk_row, blk_col, tx_size);
   if (xd->mb_to_bottom_edge < 0)
     max_blocks_high += xd->mb_to_bottom_edge >> 5;
   if (xd->mb_to_right_edge < 0)
@@ -93,16 +94,21 @@ static void write_tx_size_inter(const VP9_COMMON *cm, const MACROBLOCKD *xd,
 
   // TODO(jingning): this assumes support of the possible 64x64 transform.
   if (tx_size == mbmi->inter_tx_size[tx_idx]) {
-    vp9_write_bit(w, 0);
+    vp9_write(w, 0, cm->fc->txfm_partition_prob[ctx]);
+    txfm_partition_update(xd, blk_row, blk_col, tx_size);
+//    vp9_write_bit(w, 0);
   } else {  // further split
     BLOCK_SIZE bsize = txsize_to_bsize[tx_size];
     int bh = num_4x4_blocks_high_lookup[bsize];
     int i;
 
-    vp9_write_bit(w, 1);
+    vp9_write(w, 1, cm->fc->txfm_partition_prob[ctx]);
+//    vp9_write_bit(w, 1);
 
-    if (tx_size == TX_8X8)
+    if (tx_size == TX_8X8) {
+      txfm_partition_update(xd, blk_row, blk_col, TX_4X4);
       return;
+    }
 
     for (i = 0; i < 4; ++i) {
       int offsetr = (i >> 1) * bh / 2;
@@ -126,6 +132,14 @@ static void write_selected_tx_size(const VP9_COMMON *cm,
     if (tx_size != TX_8X8 && max_tx_size >= TX_32X32)
       vp9_write(w, tx_size != TX_16X16, tx_probs[2]);
   }
+}
+
+static void update_txfm_partition_probs(VP9_COMMON *cm, vp9_writer *w,
+                                        FRAME_COUNTS *counts) {
+  int k;
+  for (k = 0; k < TXFM_PARTITION_CONTEXTS; ++k)
+    vp9_cond_prob_diff_update(w, &cm->fc->txfm_partition_prob[k],
+                              counts->txfm_partition[k]);
 }
 
 static int write_skip(const VP9_COMMON *cm, const MACROBLOCKD *xd,
@@ -275,8 +289,8 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
                                 vp9_writer *w) {
   VP9_COMMON *const cm = &cpi->common;
   const nmv_context *nmvc = &cm->fc->nmvc;
-  const MACROBLOCK *const x = &cpi->td.mb;
-  const MACROBLOCKD *const xd = &x->e_mbd;
+  MACROBLOCK *x = &cpi->td.mb;
+  MACROBLOCKD *xd = &x->e_mbd;
   const struct segmentation *const seg = &cm->seg;
   const MB_MODE_INFO *const mbmi = &mi->mbmi;
   const PREDICTION_MODE mode = mbmi->mode;
@@ -439,6 +453,8 @@ static void write_modes_b(VP9_COMP *cpi, const TileInfo *const tile,
   if (frame_is_intra_only(cm)) {
     write_mb_modes_kf(cm, xd, xd->mi, w);
   } else {
+    xd->above_txfm_context = cm->above_txfm_context + mi_col;
+    xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & 0x07);
     pack_inter_mode_mvs(cpi, m, w);
   }
 
@@ -535,6 +551,7 @@ static void write_modes(VP9_COMP *cpi,
   for (mi_row = tile->mi_row_start; mi_row < tile->mi_row_end;
        mi_row += MI_BLOCK_SIZE) {
     vp9_zero(xd->left_seg_context);
+    vp9_zero(xd->left_txfm_context_buffer);
     for (mi_col = tile->mi_col_start; mi_col < tile->mi_col_end;
          mi_col += MI_BLOCK_SIZE)
       write_modes_sb(cpi, tile, w, tok, tok_end, mi_row, mi_col,
@@ -978,6 +995,8 @@ static size_t encode_tiles(VP9_COMP *cpi, uint8_t *data_ptr) {
 
   vpx_memset(cm->above_seg_context, 0, sizeof(*cm->above_seg_context) *
              mi_cols_aligned_to_sb(cm->mi_cols));
+  vpx_memset(cm->above_txfm_context, 0, sizeof(*cm->above_txfm_context) *
+             mi_cols_aligned_to_sb(cm->mi_cols));
 
   for (tile_row = 0; tile_row < tile_rows; tile_row++) {
     for (tile_col = 0; tile_col < tile_cols; tile_col++) {
@@ -1206,6 +1225,7 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
     encode_txfm_probs(cm, &header_bc, counts);
 
   update_coef_probs(cpi, &header_bc);
+  update_txfm_partition_probs(cm, &header_bc, counts);
   update_skip_probs(cm, &header_bc, counts);
 
   if (!frame_is_intra_only(cm)) {

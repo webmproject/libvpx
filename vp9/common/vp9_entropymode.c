@@ -302,6 +302,11 @@ void tx_counts_to_branch_counts_8x8(const unsigned int *tx_count_8x8p,
   ct_8x8p[0][1] = tx_count_8x8p[TX_8X8];
 }
 
+static const vp9_prob default_txfm_partition_probs[TXFM_PARTITION_CONTEXTS] = {
+    // 64, 128, 192, 64, 128, 192, 64, 128, 192,
+    192, 128, 64, 192, 128, 64, 192, 128, 64,
+};
+
 static const vp9_prob default_skip_probs[SKIP_CONTEXTS] = {
   192, 128, 64
 };
@@ -324,6 +329,7 @@ void vp9_init_mode_probs(FRAME_CONTEXT *fc) {
   vp9_copy(fc->comp_ref_prob, default_comp_ref_p);
   vp9_copy(fc->single_ref_prob, default_single_ref_p);
   fc->tx_probs = default_tx_probs;
+  vp9_copy(fc->txfm_partition_prob, default_txfm_partition_probs);
   vp9_copy(fc->skip_probs, default_skip_probs);
   vp9_copy(fc->inter_mode_probs, default_inter_mode_probs);
 }
@@ -401,6 +407,11 @@ void vp9_adapt_mode_probs(VP9_COMMON *cm) {
             pre_fc->tx_probs.p32x32[i][j], branch_ct_32x32p[j]);
     }
   }
+
+  for (i = 0; i < TXFM_PARTITION_CONTEXTS; ++i)
+    fc->txfm_partition_prob[i] =
+        mode_mv_merge_probs(pre_fc->txfm_partition_prob[i],
+                            counts->txfm_partition[i]);
 
   for (i = 0; i < SKIP_CONTEXTS; ++i)
     fc->skip_probs[i] = mode_mv_merge_probs(

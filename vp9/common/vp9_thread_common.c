@@ -400,6 +400,10 @@ void vp9_accumulate_frame_counts(VP9_COMMON *cm, FRAME_COUNTS *counts,
   for (i = 0; i < TX_SIZES; i++)
     cm->counts.tx.tx_totals[i] += counts->tx.tx_totals[i];
 
+  for (i = 0; i < TXFM_PARTITION_CONTEXTS; ++i)
+    for (j = 0; j < 2; ++j)
+      cm->counts.txfm_partition[i][j] += counts->txfm_partition[i][j];
+
   for (i = 0; i < SKIP_CONTEXTS; i++)
     for (j = 0; j < 2; j++)
       cm->counts.skip[i][j] += counts->skip[i][j];

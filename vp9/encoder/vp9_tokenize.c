@@ -743,7 +743,7 @@ void tokenize_tx(VP9_COMP *cpi, ThreadData *td, TOKENEXTRA **t,
     for (i = 0; i < 4; ++i) {
       int offsetr = (i >> 1) * bh / 2;
       int offsetc = (i & 0x01) * bh / 2;
-      int step = 1 << (2 *(tx_size - 1));
+      int step = 1 << (2 * (tx_size - 1));
       tokenize_tx(cpi, td, t, dry_run, tx_size - 1, plane_bsize,
                   blk_row + offsetr, blk_col + offsetc,
                   block + i * step, plane, arg);

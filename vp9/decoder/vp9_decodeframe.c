@@ -504,7 +504,6 @@ static void decode_block(VP9Decoder *const pbi, MACROBLOCKD *const xd,
         mbmi->skip = 1;  // skip loopfilter
     }
   }
-
   xd->corrupted |= vp9_reader_has_error(r);
 }
 
@@ -1017,9 +1016,10 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
   // are allocated as part of the same buffer.
   vpx_memset(cm->above_context, 0,
              sizeof(*cm->above_context) * MAX_MB_PLANE * 2 * aligned_cols);
-
   vpx_memset(cm->above_seg_context, 0,
              sizeof(*cm->above_seg_context) * aligned_cols);
+  vpx_memset(cm->above_txfm_context, 0,
+             sizeof(*cm->above_txfm_context) * aligned_cols);
 
   get_tile_buffers(pbi, data, data_end, tile_cols, tile_rows, tile_buffers);
 
@@ -1062,6 +1062,7 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
         vp9_tile_set_col(&tile, tile_data->cm, col);
         vp9_zero(tile_data->xd.left_context);
         vp9_zero(tile_data->xd.left_seg_context);
+        vp9_zero(tile_data->xd.left_txfm_context_buffer);
         for (mi_col = tile.mi_col_start; mi_col < tile.mi_col_end;
              mi_col += MI_BLOCK_SIZE) {
           decode_partition(pbi, &tile_data->xd, &cm->counts, &tile, mi_row,
@@ -1135,6 +1136,7 @@ static int tile_worker_hook(TileWorkerData *const tile_data,
        mi_row += MI_BLOCK_SIZE) {
     vp9_zero(tile_data->xd.left_context);
     vp9_zero(tile_data->xd.left_seg_context);
+    vp9_zero(tile_data->xd.left_txfm_context_buffer);
     for (mi_col = tile->mi_col_start; mi_col < tile->mi_col_end;
          mi_col += MI_BLOCK_SIZE) {
       decode_partition(tile_data->pbi, &tile_data->xd, &tile_data->counts,
@@ -1220,6 +1222,8 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
              sizeof(*cm->above_context) * MAX_MB_PLANE * 2 * aligned_mi_cols);
   vpx_memset(cm->above_seg_context, 0,
              sizeof(*cm->above_seg_context) * aligned_mi_cols);
+  vpx_memset(cm->above_txfm_context, 0,
+             sizeof(*cm->above_txfm_context) * aligned_mi_cols);
 
   // Load tile data into tile_buffers
   get_tile_buffers(pbi, data, data_end, tile_cols, tile_rows, tile_buffers);
@@ -1589,6 +1593,9 @@ static int read_compressed_header(VP9Decoder *pbi, const uint8_t *data,
   if (cm->tx_mode == TX_MODE_SELECT)
     read_tx_mode_probs(&fc->tx_probs, &r);
   read_coef_probs(fc, cm->tx_mode, &r);
+
+  for (k = 0; k < TXFM_PARTITION_CONTEXTS; ++k)
+    vp9_diff_update_prob(&r, &fc->txfm_partition_prob[k]);
 
   for (k = 0; k < SKIP_CONTEXTS; ++k)
     vp9_diff_update_prob(&r, &fc->skip_probs[k]);

@@ -29,6 +29,7 @@ extern "C" {
 #define BLOCK_SIZE_GROUPS 4
 #define SKIP_CONTEXTS 3
 #define INTER_MODE_CONTEXTS 7
+#define TXFM_PARTITION_CONTEXTS 9
 
 /* Segment Feature Masks */
 #define MAX_MV_REF_CANDIDATES 2
@@ -46,6 +47,7 @@ typedef enum {
 #define MAX_MB_PLANE 3
 
 typedef char ENTROPY_CONTEXT;
+typedef TX_SIZE TXFM_CONTEXT;
 
 static INLINE int combine_entropy_contexts(ENTROPY_CONTEXT a,
                                            ENTROPY_CONTEXT b) {
@@ -218,6 +220,10 @@ typedef struct macroblockd {
 
   PARTITION_CONTEXT *above_seg_context;
   PARTITION_CONTEXT left_seg_context[8];
+
+  TXFM_CONTEXT *above_txfm_context;
+  TXFM_CONTEXT *left_txfm_context;
+  TXFM_CONTEXT left_txfm_context_buffer[8];
 
   /* mc buffer */
   DECLARE_ALIGNED(16, uint8_t, mc_buf[80 * 2 * 80 * 2]);
