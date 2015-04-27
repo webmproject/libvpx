@@ -499,7 +499,8 @@ void vp9_set_vbp_thresholds(VP9_COMP *cpi, int q) {
         cpi->vbp_thresholds[0] = threshold_base;
         cpi->vbp_thresholds[1] = (5 * threshold_base) >> 2;
         cpi->vbp_thresholds[2] = threshold_base << cpi->oxcf.speed;
-        cpi->vbp_threshold_sad = 1000;
+        cpi->vbp_threshold_sad = (cpi->y_dequant[q][1] << 1) > 1000 ?
+            (cpi->y_dequant[q][1] << 1) : 1000;
       }
       cpi->vbp_bsize_min = BLOCK_16X16;
     }
