@@ -22,6 +22,30 @@
       "revId": "2f42ceb02d62c3b1bc83d0489520c7a786ea4b6d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f0f222e5_bbb3324b",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 5710,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-04-27T21:47:00Z",
+      "side": 1,
+      "message": "Also ctx-\u003emic should be the correct MODE_INFO here and is a lot shorter.",
+      "parentUuid": "f0f222e5_1bfa3ef4",
+      "range": {
+        "startLine": 5710,
+        "startChar": 47,
+        "endLine": 5710,
+        "endChar": 49
+      },
+      "revId": "2f42ceb02d62c3b1bc83d0489520c7a786ea4b6d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
