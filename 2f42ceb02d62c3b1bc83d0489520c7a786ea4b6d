@@ -94,6 +94,30 @@
       "revId": "2f42ceb02d62c3b1bc83d0489520c7a786ea4b6d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f0f222e5_ce9e3639",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 5710,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-04-27T22:13:49Z",
+      "side": 1,
+      "message": "I\u0027m worried about the opposite case. Where we try NEWDV and don\u0027t pick it, but now replace the valid zcoeff_blk with the values computed for NEWDV.",
+      "parentUuid": "b0d42a38_ded703c2",
+      "range": {
+        "startLine": 5710,
+        "startChar": 47,
+        "endLine": 5710,
+        "endChar": 49
+      },
+      "revId": "2f42ceb02d62c3b1bc83d0489520c7a786ea4b6d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
