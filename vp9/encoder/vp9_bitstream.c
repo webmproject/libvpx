@@ -334,6 +334,9 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
     }
   }
 
+  if (bsize < BLOCK_8X8)
+    txfm_partition_update(xd, 0, 0, TX_4X4);
+
   if (!is_inter) {
     if (bsize >= BLOCK_8X8) {
       write_intra_mode(w, mode, cm->fc->y_mode_prob[size_group_lookup[bsize]]);

@@ -627,6 +627,8 @@ static void read_inter_frame_mode_info(VP9Decoder *const pbi,
   mbmi->segment_id = read_inter_segment_id(cm, xd, mi_row, mi_col, r);
   mbmi->skip = read_skip(cm, xd, counts, mbmi->segment_id, r);
   inter_block = read_is_inter_block(cm, xd, counts, mbmi->segment_id, r);
+  xd->above_txfm_context = cm->above_txfm_context + mi_col;
+  xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & 0x07);
 
   if (mbmi->sb_type >= BLOCK_8X8 && cm->tx_mode == TX_MODE_SELECT &&
       !mbmi->skip && inter_block) {
@@ -635,8 +637,6 @@ static void read_inter_frame_mode_info(VP9Decoder *const pbi,
     int width  = num_4x4_blocks_wide_lookup[bsize];
     int height = num_4x4_blocks_high_lookup[bsize];
     int idx, idy;
-    xd->above_txfm_context = cm->above_txfm_context + mi_col;
-    xd->left_txfm_context = xd->left_txfm_context_buffer + (mi_row & 0x07);
     for (idy = 0; idy < height; idy += bh)
       for (idx = 0; idx < width; idx += bh)
         read_tx_size_inter(cm, xd, counts, max_txsize_lookup[mbmi->sb_type],
@@ -648,6 +648,9 @@ static void read_inter_frame_mode_info(VP9Decoder *const pbi,
     for (i = 0; i < 64; ++i)
       mbmi->inter_tx_size[i] = mbmi->tx_size;
   }
+
+  if (mbmi->sb_type < BLOCK_8X8)
+    txfm_partition_update(xd, 0, 0, TX_4X4);
 
   if (inter_block)
     read_inter_block_mode_info(pbi, xd, counts, tile, mi, mi_row, mi_col, r);
