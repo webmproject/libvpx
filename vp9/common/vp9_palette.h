@@ -18,16 +18,16 @@
 int vp9_count_colors(const uint8_t *src, int stride, int rows, int cols);
 void vp9_insertion_sort(double *data, int n);
 void vp9_palette_color_insertion(uint8_t *old_colors, int *m, int *count,
-                                 MB_MODE_INFO *mbmi);
+                                 const MB_MODE_INFO *mbmi);
 int vp9_palette_color_lookup(uint8_t *dic, int n, uint8_t val, int bits);
 int vp9_ceil_log2(int n);
-int vp9_k_means(double *data, double *centroids, int *indices,
+int vp9_k_means(const double *data, double *centroids, int *indices,
                 int n, int k, int dim, int max_itr);
-void vp9_calc_indices(double *data, double *centroids, int *indices,
+void vp9_calc_indices(const double *data, const double *centroids, int *indices,
                       int n, int k, int dim);
-void vp9_update_palette_counts(FRAME_COUNTS *counts, MB_MODE_INFO *mbmi,
+void vp9_update_palette_counts(FRAME_COUNTS *counts, const MB_MODE_INFO *mbmi,
                                BLOCK_SIZE bsize, int palette_ctx);
-int vp9_get_palette_color_context(uint8_t *color_map, int cols,
+int vp9_get_palette_color_context(const uint8_t *color_map, int cols,
                                   int r, int c, int n, int *color_order);
 #endif
 

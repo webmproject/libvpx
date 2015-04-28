@@ -60,10 +60,10 @@ int vp9_count_colors(const uint8_t *src, int stride, int rows, int cols) {
 }
 
 void vp9_palette_color_insertion(uint8_t *old_colors, int *m, int *count,
-                                 MB_MODE_INFO *mbmi) {
+                                 const MB_MODE_INFO *mbmi) {
   int k = *m, n = mbmi->palette_literal_size;
   int i, j, l, min_idx = -1;
-  uint8_t *new_colors = mbmi->palette_literal_colors;
+  const uint8_t *new_colors = mbmi->palette_literal_colors;
   uint8_t val;
 
   if (mbmi->palette_indexed_size > 0) {
@@ -141,7 +141,7 @@ int vp9_ceil_log2(int n) {
   return i;
 }
 
-static double calc_dist(double *p1, double *p2, int dim) {
+static double calc_dist(const double *p1, const double *p2, int dim) {
   double dist = 0;
   int i = 0;
 
@@ -151,7 +151,7 @@ static double calc_dist(double *p1, double *p2, int dim) {
   return dist;
 }
 
-void vp9_calc_indices(double *data, double *centroids, int *indices,
+void vp9_calc_indices(const double *data, const double *centroids, int *indices,
                       int n, int k, int dim) {
   int i, j;
   double min_dist, this_dist;
@@ -169,8 +169,8 @@ void vp9_calc_indices(double *data, double *centroids, int *indices,
   }
 }
 
-static void calc_centroids(double *data, double *centroids, int *indices,
-                           int n, int k, int dim) {
+static void calc_centroids(const double *data, double *centroids,
+                           const int *indices, int n, int k, int dim) {
   int i, j, index;
   int count[256];
   unsigned int seed = time(NULL);
@@ -195,8 +195,8 @@ static void calc_centroids(double *data, double *centroids, int *indices,
   }
 }
 
-double calc_total_dist(double *data, double *centroids, int *indices,
-                       int n, int k, int dim) {
+double calc_total_dist(const double *data, const double *centroids,
+                       const int *indices, int n, int k, int dim) {
   double dist = 0;
   int i;
   (void) k;
@@ -208,7 +208,7 @@ double calc_total_dist(double *data, double *centroids, int *indices,
   return dist;
 }
 
-int vp9_k_means(double *data, double *centroids, int *indices,
+int vp9_k_means(const double *data, double *centroids, int *indices,
                 int n, int k, int dim, int max_itr) {
   int i = 0;
   int *pre_indices;
@@ -243,7 +243,7 @@ int vp9_k_means(double *data, double *centroids, int *indices,
   return i;
 }
 
-void vp9_update_palette_counts(FRAME_COUNTS *counts, MB_MODE_INFO *mbmi,
+void vp9_update_palette_counts(FRAME_COUNTS *counts, const MB_MODE_INFO *mbmi,
                                BLOCK_SIZE bsize, int palette_ctx) {
   int idx = bsize - BLOCK_8X8;
 
@@ -267,7 +267,7 @@ static const int palette_color_context_lookup[PALETTE_COLOR_CONTEXTS] = {
                                 // (8, 2, 0, 0), (10, 0, 0, 0)
 };
 
-int vp9_get_palette_color_context(uint8_t *color_map, int cols,
+int vp9_get_palette_color_context(const uint8_t *color_map, int cols,
                                   int r, int c, int n, int *color_order) {
   int i, j, max, max_idx, temp;
   int scores[PALETTE_MAX_SIZE];

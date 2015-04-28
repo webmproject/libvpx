@@ -5350,9 +5350,9 @@ static void rd_pick_palette_444(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *rd_cost,
   int rate_y, rate_uv, rate_y_tokenonly, rate_uv_tokenonly, y_skip, uv_skip;
   int64_t dist_y, dist_uv;
 
-  uint8_t *src_y = x->plane[0].src.buf;
-  uint8_t *src_u = x->plane[1].src.buf;
-  uint8_t *src_v = x->plane[2].src.buf;
+  const uint8_t *src_y = x->plane[0].src.buf;
+  const uint8_t *src_u = x->plane[1].src.buf;
+  const uint8_t *src_v = x->plane[2].src.buf;
   uint8_t palette_color_map_copy[4096];
   int rows = 4 * num_4x4_blocks_high_lookup[bsize];
   int cols = 4 * num_4x4_blocks_wide_lookup[bsize];
