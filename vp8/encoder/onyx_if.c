@@ -587,7 +587,8 @@ static void cyclic_background_refresh(VP8_COMP *cpi, int Q, int lf_adjustment)
       // Turn-off under certain conditions (i.e., away from key frame, and if
       // we are at good quality (low Q) and most of the blocks were skipped-encoded
       // in previous frame.
-      if (Q >= 100) {
+      int qp_thresh = (cpi->oxcf.screen_content_mode == 2) ? 80 : 100;
+      if (Q >= qp_thresh) {
         cpi->cyclic_refresh_mode_max_mbs_perframe =
             (cpi->common.mb_rows * cpi->common.mb_cols) / 10;
       } else if (cpi->frames_since_key > 250 &&
@@ -2010,6 +2011,8 @@ struct VP8_COMP* vp8_create_compressor(VP8_CONFIG *oxcf)
     cpi->source_alt_ref_pending = 0;
     cpi->source_alt_ref_active = 0;
     cpi->common.refresh_alt_ref_frame = 0;
+
+    cpi->force_maxqp = 0;
 
     cpi->b_calculate_psnr = CONFIG_INTERNAL_STATS;
 #if CONFIG_INTERNAL_STATS
@@ -4184,7 +4187,10 @@ static void encode_frame_to_data_rate
     */
     if (cpi->cyclic_refresh_mode_enabled)
     {
-      if (cpi->current_layer==0)
+      // Special case for screen_content_mode with golden frame updates.
+      int disable_cr_gf = (cpi->oxcf.screen_content_mode == 2 &&
+                           cm->refresh_golden_frame);
+      if (cpi->current_layer == 0 && cpi->force_maxqp == 0 && !disable_cr_gf)
         cyclic_background_refresh(cpi, Q, 0);
       else
         disable_segmentation(cpi);
@@ -4405,6 +4411,11 @@ static void encode_frame_to_data_rate
 #else
         /* transform / motion compensation build reconstruction frame */
         vp8_encode_frame(cpi);
+
+        if (cpi->oxcf.screen_content_mode == 2) {
+          if (vp8_drop_encodedframe_overshoot(cpi, Q))
+            return;
+        }
 
         cpi->projected_frame_size -= vp8_estimate_entropy_savings(cpi);
         cpi->projected_frame_size = (cpi->projected_frame_size > 0) ? cpi->projected_frame_size : 0;

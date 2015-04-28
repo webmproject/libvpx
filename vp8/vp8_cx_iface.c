@@ -199,7 +199,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
     RANGE_CHECK_HI(vp8_cfg, arnr_strength,   6);
     RANGE_CHECK(vp8_cfg, arnr_type,       1, 3);
     RANGE_CHECK(vp8_cfg, cq_level, 0, 63);
-    RANGE_CHECK_BOOL(vp8_cfg, screen_content_mode);
+    RANGE_CHECK_HI(vp8_cfg, screen_content_mode, 2);
     if (finalize && (cfg->rc_end_usage == VPX_CQ || cfg->rc_end_usage == VPX_Q))
         RANGE_CHECK(vp8_cfg, cq_level,
                     cfg->rc_min_quantizer, cfg->rc_max_quantizer);

@@ -327,6 +327,8 @@ enum vp8e_enc_control_id {
 
   /*!\brief Codec control function to set encoder screen content mode.
    *
+   * 0: off, 1: On, 2: On with more aggressive rate control.
+   *
    * Supported in codecs: VP8
    */
   VP8E_SET_SCREEN_CONTENT_MODE,

@@ -1215,6 +1215,11 @@ int vp8_regulate_q(VP8_COMP *cpi, int target_bits_per_frame)
 {
     int Q = cpi->active_worst_quality;
 
+    if (cpi->force_maxqp == 1) {
+      cpi->active_worst_quality = cpi->worst_quality;
+      return cpi->worst_quality;
+    }
+
     /* Reset Zbin OQ value */
     cpi->mb.zbin_over_quant = 0;
 
@@ -1558,4 +1563,45 @@ int vp8_pick_frame_size(VP8_COMP *cpi)
         }
     }
     return 1;
+}
+// If this just encoded frame (mcomp/transform/quant, but before loopfilter and
+// pack_bitstream) has large overshoot, and was not being encoded close to the
+// max QP, then drop this frame and force next frame to be encoded at max QP.
+// Condition this on 1 pass CBR with screen content mode and frame dropper off.
+// TODO(marpan): Should do this exit condition during the encode_frame
+// (i.e., halfway during the encoding of the frame) to save cycles.
+int vp8_drop_encodedframe_overshoot(VP8_COMP *cpi, int Q) {
+  if (cpi->pass == 0 &&
+      cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER &&
+      cpi->drop_frames_allowed == 0 &&
+      cpi->common.frame_type != KEY_FRAME) {
+    // Note: the "projected_frame_size" from encode_frame() only gives estimate
+    // of mode/motion vector rate (in non-rd mode): so below we only require
+    // that projected_frame_size is somewhat greater than per-frame-bandwidth,
+    // but add additional condition with high threshold on prediction residual.
+
+    // QP threshold: only allow dropping if we are not close to qp_max.
+    int thresh_qp = 3 * cpi->worst_quality >> 2;
+    // Rate threshold, in bytes.
+    int thresh_rate = 2 * (cpi->av_per_frame_bandwidth >> 3);
+    // Threshold for the average (over all macroblocks) of the pixel-sum
+    // residual error over 16x16 block. Should add QP dependence on threshold?
+    int thresh_pred_err_mb = (256 << 4);
+    int pred_err_mb = cpi->mb.prediction_error / cpi->common.MBs;
+    if (Q < thresh_qp &&
+        cpi->projected_frame_size > thresh_rate &&
+        pred_err_mb > thresh_pred_err_mb) {
+      // Drop this frame: advance frame counters, and set force_maxqp flag.
+      cpi->common.current_video_frame++;
+      cpi->frames_since_key++;
+      // Flag to indicate we will force next frame to be encoded at max QP.
+      cpi->force_maxqp = 1;
+      return 1;
+    } else {
+      cpi->force_maxqp = 0;
+      return 0;
+    }
+    return 0;
+  }
+  return 0;
 }
