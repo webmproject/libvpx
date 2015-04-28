@@ -14,7 +14,9 @@
 #include "vp9/common/vp9_blockd.h"
 #include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_entropy.h"
-
+#if CONFIG_COEFFICIENT_RANGE_CHECKING
+#include "vp9/common/vp9_idct.h"
+#endif
 #include "vp9/decoder/vp9_detokenize.h"
 
 #define EOB_CONTEXT_NODE            0
