@@ -205,8 +205,10 @@ int vp9_decode_block_tokens(VP9_COMMON *cm, MACROBLOCKD *xd,
                             FRAME_COUNTS *counts, int plane, int block,
                             BLOCK_SIZE plane_bsize, int x, int y,
                             TX_SIZE tx_size, vp9_reader *r,
-                            const int16_t *const dequant) {
+                            int seg_id) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
+  const int16_t *const dequant = (plane == 0) ? cm->y_dequant[seg_id]
+                                              : cm->uv_dequant[seg_id];
   const int ctx = get_entropy_context(tx_size, pd->above_context + x,
                                                pd->left_context + y);
   const scan_order *so = get_scan(xd, tx_size, pd->plane_type, block);
