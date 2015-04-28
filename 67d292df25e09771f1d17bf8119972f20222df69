@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "b0fd0ac2_ee31f31e",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-04-28T11:42:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f0f222e5_5d0f9633",
+      "range": {
+        "startLine": 24,
+        "startChar": 1,
+        "endLine": 24,
+        "endChar": 8
+      },
+      "revId": "67d292df25e09771f1d17bf8119972f20222df69",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b0d42a38_e790eb1b",
         "filename": "vp9/common/vp9_onyxc_int.h",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2015-04-28T05:00:28Z",
       "side": 1,
       "message": "#include vp9_seg_common.h",
+      "range": {
+        "startLine": 187,
+        "startChar": 20,
+        "endLine": 187,
+        "endChar": 32
+      },
+      "revId": "67d292df25e09771f1d17bf8119972f20222df69",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d0027e8c_4de80a27",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-04-28T11:42:06Z",
+      "side": 1,
+      "message": "Is included in vp9_quant_common.h.",
+      "parentUuid": "b0d42a38_e790eb1b",
       "range": {
         "startLine": 187,
         "startChar": 20,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "d0027e8c_2de5ce4c",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 643,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-04-28T11:42:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f0f222e5_3d0cd23c",
+      "range": {
+        "startLine": 643,
+        "startChar": 9,
+        "endLine": 643,
+        "endChar": 11
+      },
+      "revId": "67d292df25e09771f1d17bf8119972f20222df69",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d0d99e70_90a046a0",
         "filename": "vp9/decoder/vp9_decodeframe.c",
         "patchSetId": 1
@@ -82,6 +154,30 @@
       "writtenOn": "2015-04-28T05:00:28Z",
       "side": 1,
       "message": "Should you just put this block in the\n\nif (!cm-\u003eseg.enabled) {\n}",
+      "range": {
+        "startLine": 646,
+        "startChar": 2,
+        "endLine": 649,
+        "endChar": 80
+      },
+      "revId": "67d292df25e09771f1d17bf8119972f20222df69",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d0027e8c_0da57203",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 649,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-04-28T11:42:06Z",
+      "side": 1,
+      "message": "No.  The seg id is always 0 when segmentation is disabled.  We need this first value for the decode_block.",
+      "parentUuid": "d0d99e70_90a046a0",
       "range": {
         "startLine": 646,
         "startChar": 2,
