@@ -293,8 +293,7 @@ struct intra_args {
   MACROBLOCKD *xd;
   FRAME_COUNTS *counts;
   vp9_reader *r;
-  const int16_t *const y_dequant;
-  const int16_t *const uv_dequant;
+  int seg_id;
 };
 
 static void predict_and_reconstruct_intra_block(int plane, int block,
@@ -307,8 +306,6 @@ static void predict_and_reconstruct_intra_block(int plane, int block,
   MODE_INFO *const mi = xd->mi[0];
   const PREDICTION_MODE mode = (plane == 0) ? get_y_mode(mi, block)
                                             : mi->mbmi.uv_mode;
-  const int16_t *const dequant = (plane == 0) ? args->y_dequant
-                                              : args->uv_dequant;
   int x, y;
   uint8_t *dst;
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &x, &y);
@@ -322,7 +319,7 @@ static void predict_and_reconstruct_intra_block(int plane, int block,
   if (!mi->mbmi.skip) {
     const int eob = vp9_decode_block_tokens(cm, xd, args->counts, plane, block,
                                             plane_bsize, x, y, tx_size,
-                                            args->r, dequant);
+                                            args->r, args->seg_id);
     inverse_transform_block(xd, plane, block, tx_size, dst, pd->dst.stride,
                             eob);
   }
@@ -334,8 +331,7 @@ struct inter_args {
   vp9_reader *r;
   FRAME_COUNTS *counts;
   int *eobtotal;
-  const int16_t *const y_dequant;
-  const int16_t *const uv_dequant;
+  int seg_id;
 };
 
 static void reconstruct_inter_block(int plane, int block,
@@ -345,12 +341,10 @@ static void reconstruct_inter_block(int plane, int block,
   VP9_COMMON *const cm = args->cm;
   MACROBLOCKD *const xd = args->xd;
   struct macroblockd_plane *const pd = &xd->plane[plane];
-  const int16_t *const dequant = (plane == 0) ? args->y_dequant
-                                              : args->uv_dequant;
   int x, y, eob;
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &x, &y);
   eob = vp9_decode_block_tokens(cm, xd, args->counts, plane, block, plane_bsize,
-                                x, y, tx_size, args->r, dequant);
+                                x, y, tx_size, args->r, args->seg_id);
   inverse_transform_block(xd, plane, block, tx_size,
                           &pd->dst.buf[4 * y * pd->dst.stride + 4 * x],
                           pd->dst.stride, eob);
@@ -392,8 +386,6 @@ static void decode_block(VP9Decoder *const pbi, MACROBLOCKD *const xd,
                          vp9_reader *r, BLOCK_SIZE bsize) {
   VP9_COMMON *const cm = &pbi->common;
   const int less8x8 = bsize < BLOCK_8X8;
-  int16_t y_dequant[2], uv_dequant[2];
-  int qindex = cm->base_qindex;
   MB_MODE_INFO *mbmi = set_offsets(cm, xd, tile, bsize, mi_row, mi_col);
   vp9_read_mode_info(pbi, xd, counts, tile, mi_row, mi_col, r);
 
@@ -402,17 +394,10 @@ static void decode_block(VP9Decoder *const pbi, MACROBLOCKD *const xd,
 
   if (mbmi->skip) {
     reset_skip_context(xd, bsize);
-  } else if (cm->seg.enabled) {
-    qindex = vp9_get_qindex(&cm->seg, mbmi->segment_id, cm->base_qindex);
   }
 
-  y_dequant[0] = vp9_dc_quant(qindex, cm->y_dc_delta_q, cm->bit_depth);
-  y_dequant[1] = vp9_ac_quant(qindex, 0, cm->bit_depth);
-  uv_dequant[0] = vp9_dc_quant(qindex, cm->uv_dc_delta_q, cm->bit_depth);
-  uv_dequant[1] = vp9_ac_quant(qindex, cm->uv_ac_delta_q, cm->bit_depth);
-
   if (!is_inter_block(mbmi)) {
-    struct intra_args arg = {cm, xd, counts, r , y_dequant, uv_dequant};
+    struct intra_args arg = {cm, xd, counts, r, mbmi->segment_id};
     vp9_foreach_transformed_block(xd, bsize,
                                   predict_and_reconstruct_intra_block, &arg);
   } else {
@@ -422,8 +407,7 @@ static void decode_block(VP9Decoder *const pbi, MACROBLOCKD *const xd,
     // Reconstruction
     if (!mbmi->skip) {
       int eobtotal = 0;
-      struct inter_args arg = {cm, xd, r, counts, &eobtotal, y_dequant,
-                               uv_dequant};
+      struct inter_args arg = {cm, xd, r, counts, &eobtotal, mbmi->segment_id};
       vp9_foreach_transformed_block(xd, bsize, reconstruct_inter_block, &arg);
       if (!less8x8 && eobtotal == 0)
         mbmi->skip = 1;  // skip loopfilter
@@ -647,9 +631,37 @@ static void setup_quantization(VP9_COMMON *const cm, MACROBLOCKD *const xd,
                  cm->y_dc_delta_q == 0 &&
                  cm->uv_dc_delta_q == 0 &&
                  cm->uv_ac_delta_q == 0;
+
 #if CONFIG_VP9_HIGHBITDEPTH
   xd->bd = (int)cm->bit_depth;
 #endif
+}
+
+static void setup_segmentation_dequant(VP9_COMMON *const cm) {
+  // Build y/uv dequant values based on segmentation.
+  if (cm->seg.enabled) {
+    int i;
+    for (i = 0; i < MAX_SEGMENTS; ++i) {
+      const int qindex = vp9_get_qindex(&cm->seg, i, cm->base_qindex);
+      cm->y_dequant[i][0] = vp9_dc_quant(qindex, cm->y_dc_delta_q,
+                                         cm->bit_depth);
+      cm->y_dequant[i][1] = vp9_ac_quant(qindex, 0, cm->bit_depth);
+      cm->uv_dequant[i][0] = vp9_dc_quant(qindex, cm->uv_dc_delta_q,
+                                          cm->bit_depth);
+      cm->uv_dequant[i][1] = vp9_ac_quant(qindex, cm->uv_ac_delta_q,
+                                          cm->bit_depth);
+    }
+  } else {
+    const int qindex = cm->base_qindex;
+    // When segmentation is disabled, only the first value is used.  The
+    // remaining are don't cares.
+    cm->y_dequant[0][0] = vp9_dc_quant(qindex, cm->y_dc_delta_q, cm->bit_depth);
+    cm->y_dequant[0][1] = vp9_ac_quant(qindex, 0, cm->bit_depth);
+    cm->uv_dequant[0][0] = vp9_dc_quant(qindex, cm->uv_dc_delta_q,
+                                        cm->bit_depth);
+    cm->uv_dequant[0][1] = vp9_ac_quant(qindex, cm->uv_ac_delta_q,
+                                        cm->bit_depth);
+  }
 }
 
 static INTERP_FILTER read_interp_filter(struct vp9_read_bit_buffer *rb) {
@@ -1486,6 +1498,7 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
   setup_loopfilter(&cm->lf, rb);
   setup_quantization(cm, &pbi->mb, rb);
   setup_segmentation(&cm->seg, rb);
+  setup_segmentation_dequant(cm);
 
   setup_tile_info(cm, rb);
   sz = vp9_rb_read_literal(rb, 16);

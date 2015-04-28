@@ -184,6 +184,8 @@ typedef struct VP9Common {
   int y_dc_delta_q;
   int uv_dc_delta_q;
   int uv_ac_delta_q;
+  int16_t y_dequant[MAX_SEGMENTS][2];
+  int16_t uv_dequant[MAX_SEGMENTS][2];
 
   /* We allocate a MODE_INFO struct for each macroblock, together with
      an extra row on top and column on the left to simplify prediction. */
