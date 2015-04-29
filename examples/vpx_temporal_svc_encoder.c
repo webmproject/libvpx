@@ -675,7 +675,7 @@ int main(int argc, char **argv) {
   if (strncmp(encoder->name, "vp8", 3) == 0) {
     vpx_codec_control(&codec, VP8E_SET_CPUUSED, -speed);
     vpx_codec_control(&codec, VP8E_SET_NOISE_SENSITIVITY, kDenoiserOff);
-    vpx_codec_control(&codec, VP8E_SET_STATIC_THRESHOLD, 1);
+    vpx_codec_control(&codec, VP8E_SET_STATIC_THRESHOLD, 0);
   } else if (strncmp(encoder->name, "vp9", 3) == 0) {
       vpx_codec_control(&codec, VP8E_SET_CPUUSED, speed);
       vpx_codec_control(&codec, VP9E_SET_AQ_MODE, 3);
