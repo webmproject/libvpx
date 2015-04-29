@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "70f8f2fa_7b305f94",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1372,
+      "author": {
+        "id": 1128335
+      },
+      "writtenOn": "2015-04-29T20:25:42Z",
+      "side": 1,
+      "message": "I would suggest to move the #if/#endif loop outside\n\"if (!frame_is_intra_only(cm))\"\n, since for the none CONFIG_COPY_MODE scenario, there is no need to check the \"if\" condition.",
+      "range": {
+        "startLine": 1372,
+        "startChar": 11,
+        "endLine": 1372,
+        "endChar": 27
+      },
+      "revId": "6e64363d68d6e8c01b3d633933307143e3bda0d9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
