@@ -527,7 +527,7 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t *ctx,
       frame_worker_data->scratch_buffer_size = data_sz;
     }
     frame_worker_data->data_size = data_sz;
-    vpx_memcpy(frame_worker_data->scratch_buffer, *data, data_sz);
+    memcpy(frame_worker_data->scratch_buffer, *data, data_sz);
 
     frame_worker_data->frame_decoded = 0;
     frame_worker_data->frame_context_ready = 0;

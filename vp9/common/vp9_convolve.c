@@ -256,7 +256,7 @@ void vp9_convolve_copy_c(const uint8_t *src, ptrdiff_t src_stride,
   (void)filter_y;  (void)filter_y_stride;
 
   for (r = h; r > 0; --r) {
-    vpx_memcpy(dst, src, w);
+    memcpy(dst, src, w);
     src += src_stride;
     dst += dst_stride;
   }
@@ -526,7 +526,7 @@ void vp9_highbd_convolve_copy_c(const uint8_t *src8, ptrdiff_t src_stride,
   (void)bd;
 
   for (r = h; r > 0; --r) {
-    vpx_memcpy(dst, src, w * sizeof(uint16_t));
+    memcpy(dst, src, w * sizeof(uint16_t));
     src += src_stride;
     dst += dst_stride;
   }

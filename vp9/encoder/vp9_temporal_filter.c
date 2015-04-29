@@ -329,8 +329,8 @@ static void temporal_filter_iterate_c(VP9_COMP *cpi,
       int i, j, k;
       int stride;
 
-      vpx_memset(accumulator, 0, 16 * 16 * 3 * sizeof(accumulator[0]));
-      vpx_memset(count, 0, 16 * 16 * 3 * sizeof(count[0]));
+      memset(accumulator, 0, 16 * 16 * 3 * sizeof(accumulator[0]));
+      memset(count, 0, 16 * 16 * 3 * sizeof(count[0]));
 
       cpi->td.mb.mv_col_min = -((mb_col * 16) + (17 - 2 * VP9_INTERP_EXTEND));
       cpi->td.mb.mv_col_max = ((mb_cols - 1 - mb_col) * 16)

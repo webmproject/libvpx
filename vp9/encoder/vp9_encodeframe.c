@@ -1036,8 +1036,8 @@ static void update_state(VP9_COMP *cpi, ThreadData *td,
   }
 
   x->skip = ctx->skip;
-  vpx_memcpy(x->zcoeff_blk[mbmi->tx_size], ctx->zcoeff_blk,
-             sizeof(uint8_t) * ctx->num_4x4_blk);
+  memcpy(x->zcoeff_blk[mbmi->tx_size], ctx->zcoeff_blk,
+         sizeof(uint8_t) * ctx->num_4x4_blk);
 
   if (!output_enabled)
     return;
@@ -1341,22 +1341,22 @@ static void restore_context(MACROBLOCK *const x, int mi_row, int mi_col,
   int mi_width = num_8x8_blocks_wide_lookup[bsize];
   int mi_height = num_8x8_blocks_high_lookup[bsize];
   for (p = 0; p < MAX_MB_PLANE; p++) {
-    vpx_memcpy(
+    memcpy(
         xd->above_context[p] + ((mi_col * 2) >> xd->plane[p].subsampling_x),
         a + num_4x4_blocks_wide * p,
         (sizeof(ENTROPY_CONTEXT) * num_4x4_blocks_wide) >>
         xd->plane[p].subsampling_x);
-    vpx_memcpy(
+    memcpy(
         xd->left_context[p]
             + ((mi_row & MI_MASK) * 2 >> xd->plane[p].subsampling_y),
         l + num_4x4_blocks_high * p,
         (sizeof(ENTROPY_CONTEXT) * num_4x4_blocks_high) >>
         xd->plane[p].subsampling_y);
   }
-  vpx_memcpy(xd->above_seg_context + mi_col, sa,
-             sizeof(*xd->above_seg_context) * mi_width);
-  vpx_memcpy(xd->left_seg_context + (mi_row & MI_MASK), sl,
-             sizeof(xd->left_seg_context[0]) * mi_height);
+  memcpy(xd->above_seg_context + mi_col, sa,
+         sizeof(*xd->above_seg_context) * mi_width);
+  memcpy(xd->left_seg_context + (mi_row & MI_MASK), sl,
+         sizeof(xd->left_seg_context[0]) * mi_height);
 }
 
 static void save_context(MACROBLOCK *const x, int mi_row, int mi_col,
@@ -1373,22 +1373,22 @@ static void save_context(MACROBLOCK *const x, int mi_row, int mi_col,
 
   // buffer the above/left context information of the block in search.
   for (p = 0; p < MAX_MB_PLANE; ++p) {
-    vpx_memcpy(
+    memcpy(
         a + num_4x4_blocks_wide * p,
         xd->above_context[p] + (mi_col * 2 >> xd->plane[p].subsampling_x),
         (sizeof(ENTROPY_CONTEXT) * num_4x4_blocks_wide) >>
         xd->plane[p].subsampling_x);
-    vpx_memcpy(
+    memcpy(
         l + num_4x4_blocks_high * p,
         xd->left_context[p]
             + ((mi_row & MI_MASK) * 2 >> xd->plane[p].subsampling_y),
         (sizeof(ENTROPY_CONTEXT) * num_4x4_blocks_high) >>
         xd->plane[p].subsampling_y);
   }
-  vpx_memcpy(sa, xd->above_seg_context + mi_col,
-             sizeof(*xd->above_seg_context) * mi_width);
-  vpx_memcpy(sl, xd->left_seg_context + (mi_row & MI_MASK),
-             sizeof(xd->left_seg_context[0]) * mi_height);
+  memcpy(sa, xd->above_seg_context + mi_col,
+         sizeof(*xd->above_seg_context) * mi_width);
+  memcpy(sl, xd->left_seg_context + (mi_row & MI_MASK),
+         sizeof(xd->left_seg_context[0]) * mi_height);
 }
 
 static void encode_b(VP9_COMP *cpi, const TileInfo *const tile,
@@ -1595,7 +1595,7 @@ static void set_source_var_based_partition(VP9_COMP *cpi,
     int use32x32 = 0;
     unsigned int thr = cpi->source_var_thresh;
 
-    vpx_memset(d32, 0, 4 * sizeof(diff));
+    memset(d32, 0, 4 * sizeof(diff));
 
     for (i = 0; i < 4; i++) {
       diff *d16[4];
@@ -2353,11 +2353,11 @@ static void set_partition_range(VP9_COMMON *cm, MACROBLOCKD *xd,
 }
 
 static INLINE void store_pred_mv(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx) {
-  vpx_memcpy(ctx->pred_mv, x->pred_mv, sizeof(x->pred_mv));
+  memcpy(ctx->pred_mv, x->pred_mv, sizeof(x->pred_mv));
 }
 
 static INLINE void load_pred_mv(MACROBLOCK *x, PICK_MODE_CONTEXT *ctx) {
-  vpx_memcpy(x->pred_mv, ctx->pred_mv, sizeof(x->pred_mv));
+  memcpy(x->pred_mv, ctx->pred_mv, sizeof(x->pred_mv));
 }
 
 #if CONFIG_FP_MB_STATS
@@ -2832,8 +2832,8 @@ static void encode_rd_sb_row(VP9_COMP *cpi,
   int mi_col;
 
   // Initialize the left context for the new SB row
-  vpx_memset(&xd->left_context, 0, sizeof(xd->left_context));
-  vpx_memset(xd->left_seg_context, 0, sizeof(xd->left_seg_context));
+  memset(&xd->left_context, 0, sizeof(xd->left_context));
+  memset(xd->left_seg_context, 0, sizeof(xd->left_seg_context));
 
   // Code each SB in the row
   for (mi_col = tile_info->mi_col_start; mi_col < tile_info->mi_col_end;
@@ -2917,11 +2917,11 @@ static void init_encode_frame_mb_context(VP9_COMP *cpi) {
 
   // Note: this memset assumes above_context[0], [1] and [2]
   // are allocated as part of the same buffer.
-  vpx_memset(xd->above_context[0], 0,
-             sizeof(*xd->above_context[0]) *
-             2 * aligned_mi_cols * MAX_MB_PLANE);
-  vpx_memset(xd->above_seg_context, 0,
-             sizeof(*xd->above_seg_context) * aligned_mi_cols);
+  memset(xd->above_context[0], 0,
+         sizeof(*xd->above_context[0]) *
+         2 * aligned_mi_cols * MAX_MB_PLANE);
+  memset(xd->above_seg_context, 0,
+         sizeof(*xd->above_seg_context) * aligned_mi_cols);
 }
 
 static int check_dual_ref_flags(VP9_COMP *cpi) {
@@ -3594,8 +3594,8 @@ static void encode_nonrd_sb_row(VP9_COMP *cpi,
   int mi_col;
 
   // Initialize the left context for the new SB row
-  vpx_memset(&xd->left_context, 0, sizeof(xd->left_context));
-  vpx_memset(xd->left_seg_context, 0, sizeof(xd->left_seg_context));
+  memset(&xd->left_context, 0, sizeof(xd->left_context));
+  memset(xd->left_seg_context, 0, sizeof(xd->left_seg_context));
 
   // Code each SB in the row
   for (mi_col = tile_info->mi_col_start; mi_col < tile_info->mi_col_end;
@@ -3689,7 +3689,7 @@ static int set_var_thresh_from_histogram(VP9_COMP *cpi) {
   int sum = 0;
   int i, j;
 
-  vpx_memset(hist, 0, VAR_HIST_BINS * sizeof(hist[0]));
+  memset(hist, 0, VAR_HIST_BINS * sizeof(hist[0]));
 
   for (i = 0; i < cm->mb_rows; i++) {
     for (j = 0; j < cm->mb_cols; j++) {
@@ -4187,7 +4187,7 @@ static void encode_superblock(VP9_COMP *cpi, ThreadData *td,
                    cpi->sf.allow_skip_recode;
 
   if (!x->skip_recode && !cpi->sf.use_nonrd_pick_mode)
-    vpx_memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
+    memset(x->skip_txfm, 0, sizeof(x->skip_txfm));
 
   x->skip_optimize = ctx->is_coded;
   ctx->is_coded = 1;

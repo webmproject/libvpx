@@ -46,8 +46,8 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
                            "Failed to allocate empty frame for multiple frame "
                            "contexts");
 
-      vpx_memset(cpi->svc.empty_frame.img.buffer_alloc, 0x80,
-                 cpi->svc.empty_frame.img.buffer_alloc_sz);
+      memset(cpi->svc.empty_frame.img.buffer_alloc, 0x80,
+             cpi->svc.empty_frame.img.buffer_alloc_sz);
       cpi->svc.empty_frame_width = cpi->common.width;
       cpi->svc.empty_frame_height = cpi->common.height;
     }

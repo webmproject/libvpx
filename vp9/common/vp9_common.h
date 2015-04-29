@@ -36,17 +36,17 @@ extern "C" {
 // Only need this for fixed-size arrays, for structs just assign.
 #define vp9_copy(dest, src) {            \
     assert(sizeof(dest) == sizeof(src)); \
-    vpx_memcpy(dest, src, sizeof(src));  \
+    memcpy(dest, src, sizeof(src));  \
   }
 
 // Use this for variably-sized arrays.
 #define vp9_copy_array(dest, src, n) {       \
     assert(sizeof(*dest) == sizeof(*src));   \
-    vpx_memcpy(dest, src, n * sizeof(*src)); \
+    memcpy(dest, src, n * sizeof(*src)); \
   }
 
-#define vp9_zero(dest) vpx_memset(&(dest), 0, sizeof(dest))
-#define vp9_zero_array(dest, n) vpx_memset(dest, 0, n * sizeof(*dest))
+#define vp9_zero(dest) memset(&(dest), 0, sizeof(dest))
+#define vp9_zero_array(dest, n) memset(dest, 0, n * sizeof(*dest))
 
 static INLINE uint8_t clip_pixel(int val) {
   return (val > 255) ? 255 : (val < 0) ? 0 : val;

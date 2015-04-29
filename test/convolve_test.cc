@@ -398,9 +398,9 @@ class ConvolveTest : public ::testing::TestWithParam<ConvolveParam> {
   }
 
   void CopyOutputToRef() {
-    vpx_memcpy(output_ref_, output_, kOutputBufferSize);
+    memcpy(output_ref_, output_, kOutputBufferSize);
 #if CONFIG_VP9_HIGHBITDEPTH
-    vpx_memcpy(output16_ref_, output16_, kOutputBufferSize);
+    memcpy(output16_ref_, output16_, kOutputBufferSize);
 #endif
   }
 

@@ -274,8 +274,8 @@ static void vp8_temporal_filter_iterate_c
             int i, j, k;
             int stride;
 
-            vpx_memset(accumulator, 0, 384*sizeof(unsigned int));
-            vpx_memset(count, 0, 384*sizeof(unsigned short));
+            memset(accumulator, 0, 384*sizeof(unsigned int));
+            memset(count, 0, 384*sizeof(unsigned short));
 
 #if ALT_REF_MC_ENABLED
             cpi->mb.mv_col_min = -((mb_col * 16) + (16 - 5));
@@ -502,7 +502,7 @@ void vp8_temporal_filter_prepare_c
     start_frame = distance + frames_to_blur_forward;
 
     /* Setup frame pointers, NULL indicates frame not included in filter */
-    vpx_memset(cpi->frames, 0, max_frames*sizeof(YV12_BUFFER_CONFIG *));
+    memset(cpi->frames, 0, max_frames*sizeof(YV12_BUFFER_CONFIG *));
     for (frame = 0; frame < frames_to_blur; frame++)
     {
         int which_buffer =  start_frame - frame;

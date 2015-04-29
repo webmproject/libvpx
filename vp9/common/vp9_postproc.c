@@ -651,8 +651,8 @@ int vp9_post_proc_frame(struct VP9Common *cm,
       return 1;
     }
     ppstate->prev_mi = ppstate->prev_mip + cm->mi_stride + 1;
-    vpx_memset(ppstate->prev_mip, 0,
-               cm->mi_stride * (cm->mi_rows + 1) * sizeof(*cm->mip));
+    memset(ppstate->prev_mip, 0,
+           cm->mi_stride * (cm->mi_rows + 1) * sizeof(*cm->mip));
   }
 
   // Allocate post_proc_buffer_int if needed.
@@ -674,8 +674,8 @@ int vp9_post_proc_frame(struct VP9Common *cm,
 
       // Ensure that postproc is set to all 0s so that post proc
       // doesn't pull random data in from edge.
-      vpx_memset(cm->post_proc_buffer_int.buffer_alloc, 128,
-                 cm->post_proc_buffer.frame_size);
+      memset(cm->post_proc_buffer_int.buffer_alloc, 128,
+             cm->post_proc_buffer.frame_size);
     }
   }
 

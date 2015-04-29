@@ -319,8 +319,8 @@ static int optimize_b(MACROBLOCK *mb, int plane, int block,
   UPDATE_RD_COST();
   best = rd_cost1 < rd_cost0;
   final_eob = -1;
-  vpx_memset(qcoeff, 0, sizeof(*qcoeff) * (16 << (tx_size * 2)));
-  vpx_memset(dqcoeff, 0, sizeof(*dqcoeff) * (16 << (tx_size * 2)));
+  memset(qcoeff, 0, sizeof(*qcoeff) * (16 << (tx_size * 2)));
+  memset(dqcoeff, 0, sizeof(*dqcoeff) * (16 << (tx_size * 2)));
   for (i = next; i < eob; i = next) {
     const int x = tokens[i][best].qc;
     const int rc = scan[i];

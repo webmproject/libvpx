@@ -502,11 +502,11 @@ class Trans16x16TestBase {
       fwd_txfm_ref(input_extreme_block, output_ref_block, pitch_, tx_type_);
 
       // clear reconstructed pixel buffers
-      vpx_memset(dst, 0, kNumCoeffs * sizeof(uint8_t));
-      vpx_memset(ref, 0, kNumCoeffs * sizeof(uint8_t));
+      memset(dst, 0, kNumCoeffs * sizeof(uint8_t));
+      memset(ref, 0, kNumCoeffs * sizeof(uint8_t));
 #if CONFIG_VP9_HIGHBITDEPTH
-      vpx_memset(dst16, 0, kNumCoeffs * sizeof(uint16_t));
-      vpx_memset(ref16, 0, kNumCoeffs * sizeof(uint16_t));
+      memset(dst16, 0, kNumCoeffs * sizeof(uint16_t));
+      memset(ref16, 0, kNumCoeffs * sizeof(uint16_t));
 #endif
 
       // quantization with maximum allowed step sizes

@@ -63,12 +63,12 @@ TEST_P(VP8PostProcessingFilterTest, FilterOutputCheck) {
   uint8_t *const dst_image_ptr = dst_image + 8;
   uint8_t *const flimits =
       reinterpret_cast<uint8_t *>(vpx_memalign(16, block_width));
-  (void)vpx_memset(flimits, 255, block_width);
+  (void)memset(flimits, 255, block_width);
 
   // Initialize pixels in the input:
   //   block pixels to value 1,
   //   border pixels to value 10.
-  (void)vpx_memset(src_image, 10, input_size);
+  (void)memset(src_image, 10, input_size);
   uint8_t *pixel_ptr = src_image_ptr;
   for (int i = 0; i < block_height; ++i) {
     for (int j = 0; j < block_width; ++j) {
@@ -78,7 +78,7 @@ TEST_P(VP8PostProcessingFilterTest, FilterOutputCheck) {
   }
 
   // Initialize pixels in the output to 99.
-  (void)vpx_memset(dst_image, 99, output_size);
+  (void)memset(dst_image, 99, output_size);
 
   ASM_REGISTER_STATE_CHECK(
       GetParam()(src_image_ptr, dst_image_ptr, input_stride,

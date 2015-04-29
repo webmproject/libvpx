@@ -48,10 +48,10 @@ static void initialize_dec(void) {
 
 static void vp9_dec_setup_mi(VP9_COMMON *cm) {
   cm->mi = cm->mip + cm->mi_stride + 1;
-  vpx_memset(cm->mip, 0, cm->mi_stride * (cm->mi_rows + 1) * sizeof(*cm->mip));
+  memset(cm->mip, 0, cm->mi_stride * (cm->mi_rows + 1) * sizeof(*cm->mip));
   cm->mi_grid_visible = cm->mi_grid_base + cm->mi_stride + 1;
-  vpx_memset(cm->mi_grid_base, 0,
-             cm->mi_stride * (cm->mi_rows + 1) * sizeof(*cm->mi_grid_base));
+  memset(cm->mi_grid_base, 0,
+         cm->mi_stride * (cm->mi_rows + 1) * sizeof(*cm->mi_grid_base));
 }
 
 static int vp9_dec_alloc_mi(VP9_COMMON *cm, int mi_size) {
@@ -99,8 +99,8 @@ VP9Decoder *vp9_decoder_create(BufferPool *const pool) {
   once(initialize_dec);
 
   // Initialize the references to not point to any frame buffers.
-  vpx_memset(&cm->ref_frame_map, -1, sizeof(cm->ref_frame_map));
-  vpx_memset(&cm->next_ref_frame_map, -1, sizeof(cm->next_ref_frame_map));
+  memset(&cm->ref_frame_map, -1, sizeof(cm->ref_frame_map));
+  memset(&cm->next_ref_frame_map, -1, sizeof(cm->next_ref_frame_map));
 
   cm->current_video_frame = 0;
   pbi->ready_for_new_data = 1;

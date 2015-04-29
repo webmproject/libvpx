@@ -193,7 +193,7 @@ int vp9_get_active_map(VP9_COMP* cpi,
     unsigned char* const seg_map_8x8 = cpi->segmentation_map;
     const int mi_rows = cpi->common.mi_rows;
     const int mi_cols = cpi->common.mi_cols;
-    vpx_memset(new_map_16x16, !cpi->active_map.enabled, rows * cols);
+    memset(new_map_16x16, !cpi->active_map.enabled, rows * cols);
     if (cpi->active_map.enabled) {
       int r, c;
       for (r = 0; r < mi_rows; ++r) {
@@ -251,19 +251,19 @@ static void setup_frame(VP9_COMP *cpi) {
 static void vp9_enc_setup_mi(VP9_COMMON *cm) {
   int i;
   cm->mi = cm->mip + cm->mi_stride + 1;
-  vpx_memset(cm->mip, 0, cm->mi_stride * (cm->mi_rows + 1) * sizeof(*cm->mip));
+  memset(cm->mip, 0, cm->mi_stride * (cm->mi_rows + 1) * sizeof(*cm->mip));
   cm->prev_mi = cm->prev_mip + cm->mi_stride + 1;
   // Clear top border row
-  vpx_memset(cm->prev_mip, 0, sizeof(*cm->prev_mip) * cm->mi_stride);
+  memset(cm->prev_mip, 0, sizeof(*cm->prev_mip) * cm->mi_stride);
   // Clear left border column
   for (i = 1; i < cm->mi_rows + 1; ++i)
-    vpx_memset(&cm->prev_mip[i * cm->mi_stride], 0, sizeof(*cm->prev_mip));
+    memset(&cm->prev_mip[i * cm->mi_stride], 0, sizeof(*cm->prev_mip));
 
   cm->mi_grid_visible = cm->mi_grid_base + cm->mi_stride + 1;
   cm->prev_mi_grid_visible = cm->prev_mi_grid_base + cm->mi_stride + 1;
 
-  vpx_memset(cm->mi_grid_base, 0,
-             cm->mi_stride * (cm->mi_rows + 1) * sizeof(*cm->mi_grid_base));
+  memset(cm->mi_grid_base, 0,
+         cm->mi_stride * (cm->mi_rows + 1) * sizeof(*cm->mi_grid_base));
 }
 
 static int vp9_enc_alloc_mi(VP9_COMMON *cm, int mi_size) {
@@ -399,11 +399,11 @@ static void dealloc_compressor_data(VP9_COMP *cpi) {
   for (i = 0; i < MAX_LAG_BUFFERS; ++i) {
     vp9_free_frame_buffer(&cpi->svc.scaled_frames[i]);
   }
-  vpx_memset(&cpi->svc.scaled_frames[0], 0,
-             MAX_LAG_BUFFERS * sizeof(cpi->svc.scaled_frames[0]));
+  memset(&cpi->svc.scaled_frames[0], 0,
+         MAX_LAG_BUFFERS * sizeof(cpi->svc.scaled_frames[0]));
 
   vp9_free_frame_buffer(&cpi->svc.empty_frame.img);
-  vpx_memset(&cpi->svc.empty_frame, 0, sizeof(cpi->svc.empty_frame));
+  memset(&cpi->svc.empty_frame, 0, sizeof(cpi->svc.empty_frame));
 }
 
 static void save_coding_context(VP9_COMP *cpi) {
@@ -416,19 +416,19 @@ static void save_coding_context(VP9_COMP *cpi) {
   // quantizer value is adjusted between loop iterations.
   vp9_copy(cc->nmvjointcost,  cpi->td.mb.nmvjointcost);
 
-  vpx_memcpy(cc->nmvcosts[0], cpi->nmvcosts[0],
-             MV_VALS * sizeof(*cpi->nmvcosts[0]));
-  vpx_memcpy(cc->nmvcosts[1], cpi->nmvcosts[1],
-             MV_VALS * sizeof(*cpi->nmvcosts[1]));
-  vpx_memcpy(cc->nmvcosts_hp[0], cpi->nmvcosts_hp[0],
-             MV_VALS * sizeof(*cpi->nmvcosts_hp[0]));
-  vpx_memcpy(cc->nmvcosts_hp[1], cpi->nmvcosts_hp[1],
-             MV_VALS * sizeof(*cpi->nmvcosts_hp[1]));
+  memcpy(cc->nmvcosts[0], cpi->nmvcosts[0],
+         MV_VALS * sizeof(*cpi->nmvcosts[0]));
+  memcpy(cc->nmvcosts[1], cpi->nmvcosts[1],
+         MV_VALS * sizeof(*cpi->nmvcosts[1]));
+  memcpy(cc->nmvcosts_hp[0], cpi->nmvcosts_hp[0],
+         MV_VALS * sizeof(*cpi->nmvcosts_hp[0]));
+  memcpy(cc->nmvcosts_hp[1], cpi->nmvcosts_hp[1],
+         MV_VALS * sizeof(*cpi->nmvcosts_hp[1]));
 
   vp9_copy(cc->segment_pred_probs, cm->seg.pred_probs);
 
-  vpx_memcpy(cpi->coding_context.last_frame_seg_map_copy,
-             cm->last_frame_seg_map, (cm->mi_rows * cm->mi_cols));
+  memcpy(cpi->coding_context.last_frame_seg_map_copy,
+         cm->last_frame_seg_map, (cm->mi_rows * cm->mi_cols));
 
   vp9_copy(cc->last_ref_lf_deltas, cm->lf.last_ref_deltas);
   vp9_copy(cc->last_mode_lf_deltas, cm->lf.last_mode_deltas);
@@ -444,20 +444,18 @@ static void restore_coding_context(VP9_COMP *cpi) {
   // previous call to vp9_save_coding_context.
   vp9_copy(cpi->td.mb.nmvjointcost, cc->nmvjointcost);
 
-  vpx_memcpy(cpi->nmvcosts[0], cc->nmvcosts[0],
-             MV_VALS * sizeof(*cc->nmvcosts[0]));
-  vpx_memcpy(cpi->nmvcosts[1], cc->nmvcosts[1],
-             MV_VALS * sizeof(*cc->nmvcosts[1]));
-  vpx_memcpy(cpi->nmvcosts_hp[0], cc->nmvcosts_hp[0],
-             MV_VALS * sizeof(*cc->nmvcosts_hp[0]));
-  vpx_memcpy(cpi->nmvcosts_hp[1], cc->nmvcosts_hp[1],
-             MV_VALS * sizeof(*cc->nmvcosts_hp[1]));
+  memcpy(cpi->nmvcosts[0], cc->nmvcosts[0], MV_VALS * sizeof(*cc->nmvcosts[0]));
+  memcpy(cpi->nmvcosts[1], cc->nmvcosts[1], MV_VALS * sizeof(*cc->nmvcosts[1]));
+  memcpy(cpi->nmvcosts_hp[0], cc->nmvcosts_hp[0],
+         MV_VALS * sizeof(*cc->nmvcosts_hp[0]));
+  memcpy(cpi->nmvcosts_hp[1], cc->nmvcosts_hp[1],
+         MV_VALS * sizeof(*cc->nmvcosts_hp[1]));
 
   vp9_copy(cm->seg.pred_probs, cc->segment_pred_probs);
 
-  vpx_memcpy(cm->last_frame_seg_map,
-             cpi->coding_context.last_frame_seg_map_copy,
-             (cm->mi_rows * cm->mi_cols));
+  memcpy(cm->last_frame_seg_map,
+         cpi->coding_context.last_frame_seg_map_copy,
+         (cm->mi_rows * cm->mi_cols));
 
   vp9_copy(cm->lf.last_ref_deltas, cc->last_ref_lf_deltas);
   vp9_copy(cm->lf.last_mode_deltas, cc->last_mode_lf_deltas);
@@ -476,7 +474,7 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
   // Disable and clear down for KF
   if (cm->frame_type == KEY_FRAME) {
     // Clear down the global segmentation map
-    vpx_memset(cpi->segmentation_map, 0, cm->mi_rows * cm->mi_cols);
+    memset(cpi->segmentation_map, 0, cm->mi_rows * cm->mi_cols);
     seg->update_map = 0;
     seg->update_data = 0;
     cpi->static_mb_pct = 0;
@@ -489,7 +487,7 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
   } else if (cpi->refresh_alt_ref_frame) {
     // If this is an alt ref frame
     // Clear down the global segmentation map
-    vpx_memset(cpi->segmentation_map, 0, cm->mi_rows * cm->mi_cols);
+    memset(cpi->segmentation_map, 0, cm->mi_rows * cm->mi_cols);
     seg->update_map = 0;
     seg->update_data = 0;
     cpi->static_mb_pct = 0;
@@ -550,7 +548,7 @@ static void configure_static_seg_features(VP9_COMP *cpi) {
 
         vp9_disable_segmentation(seg);
 
-        vpx_memset(cpi->segmentation_map, 0, cm->mi_rows * cm->mi_cols);
+        memset(cpi->segmentation_map, 0, cm->mi_rows * cm->mi_cols);
 
         seg->update_map = 0;
         seg->update_data = 0;
@@ -2606,22 +2604,22 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
 
       ref_cnt_fb(pool->frame_bufs,
                  &cm->ref_frame_map[arf_idx], cm->new_fb_idx);
-      vpx_memcpy(cpi->interp_filter_selected[ALTREF_FRAME],
-                 cpi->interp_filter_selected[0],
-                 sizeof(cpi->interp_filter_selected[0]));
+      memcpy(cpi->interp_filter_selected[ALTREF_FRAME],
+             cpi->interp_filter_selected[0],
+             sizeof(cpi->interp_filter_selected[0]));
     }
 
     if (cpi->refresh_golden_frame) {
       ref_cnt_fb(pool->frame_bufs,
                  &cm->ref_frame_map[cpi->gld_fb_idx], cm->new_fb_idx);
       if (!cpi->rc.is_src_frame_alt_ref)
-        vpx_memcpy(cpi->interp_filter_selected[GOLDEN_FRAME],
-                   cpi->interp_filter_selected[0],
-                   sizeof(cpi->interp_filter_selected[0]));
+        memcpy(cpi->interp_filter_selected[GOLDEN_FRAME],
+               cpi->interp_filter_selected[0],
+               sizeof(cpi->interp_filter_selected[0]));
       else
-        vpx_memcpy(cpi->interp_filter_selected[GOLDEN_FRAME],
-                   cpi->interp_filter_selected[ALTREF_FRAME],
-                   sizeof(cpi->interp_filter_selected[ALTREF_FRAME]));
+        memcpy(cpi->interp_filter_selected[GOLDEN_FRAME],
+               cpi->interp_filter_selected[ALTREF_FRAME],
+               sizeof(cpi->interp_filter_selected[ALTREF_FRAME]));
     }
   }
 
@@ -2629,9 +2627,9 @@ void vp9_update_reference_frames(VP9_COMP *cpi) {
     ref_cnt_fb(pool->frame_bufs,
                &cm->ref_frame_map[cpi->lst_fb_idx], cm->new_fb_idx);
     if (!cpi->rc.is_src_frame_alt_ref)
-      vpx_memcpy(cpi->interp_filter_selected[LAST_FRAME],
-                 cpi->interp_filter_selected[0],
-                 sizeof(cpi->interp_filter_selected[0]));
+      memcpy(cpi->interp_filter_selected[LAST_FRAME],
+             cpi->interp_filter_selected[0],
+             sizeof(cpi->interp_filter_selected[0]));
   }
 #if CONFIG_VP9_TEMPORAL_DENOISING
   if (cpi->oxcf.noise_sensitivity > 0) {
@@ -3517,8 +3515,8 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
   vp9_clear_system_state();
 
 #if CONFIG_INTERNAL_STATS
-  vpx_memset(cpi->mode_chosen_counts, 0,
-             MAX_MODES * sizeof(*cpi->mode_chosen_counts));
+  memset(cpi->mode_chosen_counts, 0,
+         MAX_MODES * sizeof(*cpi->mode_chosen_counts));
 #endif
 
   if (cpi->sf.recode_loop == DISALLOW_RECODE) {

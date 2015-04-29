@@ -749,13 +749,13 @@ static const vp9_coeff_probs_model default_coef_probs_32x32[PLANE_TYPES] = {
 };
 
 static void extend_to_full_distribution(vp9_prob *probs, vp9_prob p) {
-  vpx_memcpy(probs, vp9_pareto8_full[p = 0 ? 0 : p - 1],
-             MODEL_NODES * sizeof(vp9_prob));
+  memcpy(probs, vp9_pareto8_full[p = 0 ? 0 : p - 1],
+         MODEL_NODES * sizeof(vp9_prob));
 }
 
 void vp9_model_to_full_probs(const vp9_prob *model, vp9_prob *full) {
   if (full != model)
-    vpx_memcpy(full, model, sizeof(vp9_prob) * UNCONSTRAINED_NODES);
+    memcpy(full, model, sizeof(vp9_prob) * UNCONSTRAINED_NODES);
   extend_to_full_distribution(&full[UNCONSTRAINED_NODES], model[PIVOT_NODE]);
 }
 

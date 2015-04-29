@@ -419,8 +419,8 @@ void vp9_get_entropy_contexts(BLOCK_SIZE bsize, TX_SIZE tx_size,
   int i;
   switch (tx_size) {
     case TX_4X4:
-      vpx_memcpy(t_above, above, sizeof(ENTROPY_CONTEXT) * num_4x4_w);
-      vpx_memcpy(t_left, left, sizeof(ENTROPY_CONTEXT) * num_4x4_h);
+      memcpy(t_above, above, sizeof(ENTROPY_CONTEXT) * num_4x4_w);
+      memcpy(t_left, left, sizeof(ENTROPY_CONTEXT) * num_4x4_h);
       break;
     case TX_8X8:
       for (i = 0; i < num_4x4_w; i += 2)
@@ -616,8 +616,7 @@ void vp9_set_rd_speed_thresholds_sub8x8(VP9_COMP *cpi) {
        {2000, 2000, 2000, 4000, 4000, 2000}};
   RD_OPT *const rd = &cpi->rd;
   const int idx = cpi->oxcf.mode == BEST;
-  vpx_memcpy(rd->thresh_mult_sub8x8, thresh_mult[idx],
-             sizeof(thresh_mult[idx]));
+  memcpy(rd->thresh_mult_sub8x8, thresh_mult[idx], sizeof(thresh_mult[idx]));
 }
 
 void vp9_update_rd_thresh_fact(int (*factor_buf)[MAX_MODES], int rd_thresh,

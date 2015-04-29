@@ -276,14 +276,14 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
     if (eob == 1) {
-      vpx_memset(dqcoeff, 0, 2 * sizeof(dqcoeff[0]));
+      memset(dqcoeff, 0, 2 * sizeof(dqcoeff[0]));
     } else {
       if (tx_type == DCT_DCT && tx_size <= TX_16X16 && eob <= 10)
-        vpx_memset(dqcoeff, 0, 4 * (4 << tx_size) * sizeof(dqcoeff[0]));
+        memset(dqcoeff, 0, 4 * (4 << tx_size) * sizeof(dqcoeff[0]));
       else if (tx_size == TX_32X32 && eob <= 34)
-        vpx_memset(dqcoeff, 0, 256 * sizeof(dqcoeff[0]));
+        memset(dqcoeff, 0, 256 * sizeof(dqcoeff[0]));
       else
-        vpx_memset(dqcoeff, 0, (16 << (tx_size << 1)) * sizeof(dqcoeff[0]));
+        memset(dqcoeff, 0, (16 << (tx_size << 1)) * sizeof(dqcoeff[0]));
     }
   }
 }
@@ -952,11 +952,11 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
 
   // Note: this memset assumes above_context[0], [1] and [2]
   // are allocated as part of the same buffer.
-  vpx_memset(cm->above_context, 0,
-             sizeof(*cm->above_context) * MAX_MB_PLANE * 2 * aligned_cols);
+  memset(cm->above_context, 0,
+         sizeof(*cm->above_context) * MAX_MB_PLANE * 2 * aligned_cols);
 
-  vpx_memset(cm->above_seg_context, 0,
-             sizeof(*cm->above_seg_context) * aligned_cols);
+  memset(cm->above_seg_context, 0,
+         sizeof(*cm->above_seg_context) * aligned_cols);
 
   get_tile_buffers(pbi, data, data_end, tile_cols, tile_rows, tile_buffers);
 
@@ -1153,10 +1153,10 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
 
   // Note: this memset assumes above_context[0], [1] and [2]
   // are allocated as part of the same buffer.
-  vpx_memset(cm->above_context, 0,
-             sizeof(*cm->above_context) * MAX_MB_PLANE * 2 * aligned_mi_cols);
-  vpx_memset(cm->above_seg_context, 0,
-             sizeof(*cm->above_seg_context) * aligned_mi_cols);
+  memset(cm->above_context, 0,
+         sizeof(*cm->above_context) * MAX_MB_PLANE * 2 * aligned_mi_cols);
+  memset(cm->above_seg_context, 0,
+         sizeof(*cm->above_seg_context) * aligned_mi_cols);
 
   // Load tile data into tile_buffers
   get_tile_buffers(pbi, data, data_end, tile_cols, tile_rows, tile_buffers);
@@ -1378,7 +1378,7 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
 
     setup_frame_size(cm, rb);
     if (pbi->need_resync) {
-      vpx_memset(&cm->ref_frame_map, -1, sizeof(cm->ref_frame_map));
+      memset(&cm->ref_frame_map, -1, sizeof(cm->ref_frame_map));
       pbi->need_resync = 0;
     }
   } else {
@@ -1409,7 +1409,7 @@ static size_t read_uncompressed_header(VP9Decoder *pbi,
       pbi->refresh_frame_flags = vp9_rb_read_literal(rb, REF_FRAMES);
       setup_frame_size(cm, rb);
       if (pbi->need_resync) {
-        vpx_memset(&cm->ref_frame_map, -1, sizeof(cm->ref_frame_map));
+        memset(&cm->ref_frame_map, -1, sizeof(cm->ref_frame_map));
         pbi->need_resync = 0;
       }
     } else if (pbi->need_resync != 1) {  /* Skip if need resync */

@@ -366,9 +366,9 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
     if (oxcf->number_of_layers > 1)
     {
         memcpy (oxcf->target_bitrate, cfg.ts_target_bitrate,
-                          sizeof(cfg.ts_target_bitrate));
+                sizeof(cfg.ts_target_bitrate));
         memcpy (oxcf->rate_decimator, cfg.ts_rate_decimator,
-                          sizeof(cfg.ts_rate_decimator));
+                sizeof(cfg.ts_rate_decimator));
         memcpy (oxcf->layer_id, cfg.ts_layer_id, sizeof(cfg.ts_layer_id));
     }
 

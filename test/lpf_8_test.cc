@@ -280,8 +280,8 @@ TEST_P(Loop8Test6Param, ValueCheck) {
   // function of sharpness_lvl and the loopfilter lvl as:
   // block_inside_limit = lvl >> ((sharpness_lvl > 0) + (sharpness_lvl > 4));
   // ...
-  // vpx_memset(lfi->lfthr[lvl].mblim, (2 * (lvl + 2) + block_inside_limit),
-  //            SIMD_WIDTH);
+  // memset(lfi->lfthr[lvl].mblim, (2 * (lvl + 2) + block_inside_limit),
+  //        SIMD_WIDTH);
   // This means that the largest value for mblim will occur when sharpness_lvl
   // is equal to 0, and lvl is equal to its greatest value (MAX_LOOP_FILTER).
   // In this case block_inside_limit will be equal to MAX_LOOP_FILTER and

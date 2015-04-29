@@ -1978,8 +1978,8 @@ void print_mode_context(void)
 #ifdef VP8_ENTROPY_STATS
 void init_mv_ref_counts()
 {
-    vpx_memset(mv_ref_ct, 0, sizeof(mv_ref_ct));
-    vpx_memset(mv_mode_cts, 0, sizeof(mv_mode_cts));
+    memset(mv_ref_ct, 0, sizeof(mv_ref_ct));
+    memset(mv_mode_cts, 0, sizeof(mv_mode_cts));
 }
 
 void accum_mv_refs(MB_PREDICTION_MODE m, const int ct[4])
