@@ -1333,43 +1333,47 @@ static INLINE void transpose8x16(unsigned char *in0, unsigned char *in1,
   __m128i x0, x1, x2, x3, x4, x5, x6, x7;
   __m128i x8, x9, x10, x11, x12, x13, x14, x15;
 
-  // Read in 16 lines
-  x0 = _mm_loadl_epi64((__m128i *)in0);
-  x8 = _mm_loadl_epi64((__m128i *)in1);
-  x1 = _mm_loadl_epi64((__m128i *)(in0 + in_p));
-  x9 = _mm_loadl_epi64((__m128i *)(in1 + in_p));
-  x2 = _mm_loadl_epi64((__m128i *)(in0 + 2 * in_p));
-  x10 = _mm_loadl_epi64((__m128i *)(in1 + 2 * in_p));
-  x3 = _mm_loadl_epi64((__m128i *)(in0 + 3*in_p));
-  x11 = _mm_loadl_epi64((__m128i *)(in1 + 3*in_p));
-  x4 = _mm_loadl_epi64((__m128i *)(in0 + 4*in_p));
-  x12 = _mm_loadl_epi64((__m128i *)(in1 + 4*in_p));
-  x5 = _mm_loadl_epi64((__m128i *)(in0 + 5*in_p));
-  x13 = _mm_loadl_epi64((__m128i *)(in1 + 5*in_p));
-  x6 = _mm_loadl_epi64((__m128i *)(in0 + 6*in_p));
-  x14 = _mm_loadl_epi64((__m128i *)(in1 + 6*in_p));
-  x7 = _mm_loadl_epi64((__m128i *)(in0 + 7*in_p));
-  x15 = _mm_loadl_epi64((__m128i *)(in1 + 7*in_p));
+  // 2-way interleave w/hoisting of unpacks
+  x0 = _mm_loadl_epi64((__m128i *)in0);  // 1
+  x1 = _mm_loadl_epi64((__m128i *)(in0 + in_p));  // 3
+  x0 = _mm_unpacklo_epi8(x0, x1);  // 1
 
-  x0 = _mm_unpacklo_epi8(x0, x1);
-  x1 = _mm_unpacklo_epi8(x2, x3);
-  x2 = _mm_unpacklo_epi8(x4, x5);
-  x3 = _mm_unpacklo_epi8(x6, x7);
+  x2 = _mm_loadl_epi64((__m128i *)(in0 + 2 * in_p));  // 5
+  x3 = _mm_loadl_epi64((__m128i *)(in0 + 3*in_p));  // 7
+  x1 = _mm_unpacklo_epi8(x2, x3);  // 2
 
-  x8 = _mm_unpacklo_epi8(x8, x9);
-  x9 = _mm_unpacklo_epi8(x10, x11);
-  x10 = _mm_unpacklo_epi8(x12, x13);
-  x11 = _mm_unpacklo_epi8(x14, x15);
+  x4 = _mm_loadl_epi64((__m128i *)(in0 + 4*in_p));  // 9
+  x5 = _mm_loadl_epi64((__m128i *)(in0 + 5*in_p));  // 11
+  x2 = _mm_unpacklo_epi8(x4, x5);  // 3
 
-  x4 = _mm_unpacklo_epi16(x0, x1);
-  x5 = _mm_unpacklo_epi16(x2, x3);
-  x12 = _mm_unpacklo_epi16(x8, x9);
-  x13 = _mm_unpacklo_epi16(x10, x11);
+  x6 = _mm_loadl_epi64((__m128i *)(in0 + 6*in_p));  // 13
+  x7 = _mm_loadl_epi64((__m128i *)(in0 + 7*in_p));  // 15
+  x3 = _mm_unpacklo_epi8(x6, x7);  // 4
+  x4 = _mm_unpacklo_epi16(x0, x1);  // 9
 
-  x6 = _mm_unpacklo_epi32(x4, x5);
-  x7 = _mm_unpackhi_epi32(x4, x5);
-  x14 = _mm_unpacklo_epi32(x12, x13);
-  x15 = _mm_unpackhi_epi32(x12, x13);
+  x8 = _mm_loadl_epi64((__m128i *)in1);  // 2
+  x9 = _mm_loadl_epi64((__m128i *)(in1 + in_p));  // 4
+  x8 = _mm_unpacklo_epi8(x8, x9);  // 5
+  x5 = _mm_unpacklo_epi16(x2, x3);  // 10
+
+  x10 = _mm_loadl_epi64((__m128i *)(in1 + 2 * in_p));  // 6
+  x11 = _mm_loadl_epi64((__m128i *)(in1 + 3*in_p));  // 8
+  x9 = _mm_unpacklo_epi8(x10, x11);  // 6
+
+  x12 = _mm_loadl_epi64((__m128i *)(in1 + 4*in_p));  // 10
+  x13 = _mm_loadl_epi64((__m128i *)(in1 + 5*in_p));  // 12
+  x10 = _mm_unpacklo_epi8(x12, x13);  // 7
+  x12 = _mm_unpacklo_epi16(x8, x9);  // 11
+
+  x14 = _mm_loadl_epi64((__m128i *)(in1 + 6*in_p));  // 14
+  x15 = _mm_loadl_epi64((__m128i *)(in1 + 7*in_p));  // 16
+  x11 = _mm_unpacklo_epi8(x14, x15);  // 8
+  x13 = _mm_unpacklo_epi16(x10, x11);  // 12
+
+  x6 = _mm_unpacklo_epi32(x4, x5);  // 13
+  x7 = _mm_unpackhi_epi32(x4, x5);  // 14
+  x14 = _mm_unpacklo_epi32(x12, x13);  // 15
+  x15 = _mm_unpackhi_epi32(x12, x13);  // 16
 
   // Store first 4-line result
   _mm_storeu_si128((__m128i *)out, _mm_unpacklo_epi64(x6, x14));
@@ -1405,33 +1409,36 @@ static INLINE void transpose(unsigned char *src[], int in_p,
 
     x0 = _mm_loadl_epi64((__m128i *)(in + 0*in_p));  // 00 01 02 03 04 05 06 07
     x1 = _mm_loadl_epi64((__m128i *)(in + 1*in_p));  // 10 11 12 13 14 15 16 17
-    x2 = _mm_loadl_epi64((__m128i *)(in + 2*in_p));  // 20 21 22 23 24 25 26 27
-    x3 = _mm_loadl_epi64((__m128i *)(in + 3*in_p));  // 30 31 32 33 34 35 36 37
-    x4 = _mm_loadl_epi64((__m128i *)(in + 4*in_p));  // 40 41 42 43 44 45 46 47
-    x5 = _mm_loadl_epi64((__m128i *)(in + 5*in_p));  // 50 51 52 53 54 55 56 57
-    x6 = _mm_loadl_epi64((__m128i *)(in + 6*in_p));  // 60 61 62 63 64 65 66 67
-    x7 = _mm_loadl_epi64((__m128i *)(in + 7*in_p));  // 70 71 72 73 74 75 76 77
     // 00 10 01 11 02 12 03 13 04 14 05 15 06 16 07 17
     x0 = _mm_unpacklo_epi8(x0, x1);
+
+    x2 = _mm_loadl_epi64((__m128i *)(in + 2*in_p));  // 20 21 22 23 24 25 26 27
+    x3 = _mm_loadl_epi64((__m128i *)(in + 3*in_p));  // 30 31 32 33 34 35 36 37
     // 20 30 21 31 22 32 23 33 24 34 25 35 26 36 27 37
     x1 = _mm_unpacklo_epi8(x2, x3);
+
+    x4 = _mm_loadl_epi64((__m128i *)(in + 4*in_p));  // 40 41 42 43 44 45 46 47
+    x5 = _mm_loadl_epi64((__m128i *)(in + 5*in_p));  // 50 51 52 53 54 55 56 57
     // 40 50 41 51 42 52 43 53 44 54 45 55 46 56 47 57
     x2 = _mm_unpacklo_epi8(x4, x5);
+
+    x6 = _mm_loadl_epi64((__m128i *)(in + 6*in_p));  // 60 61 62 63 64 65 66 67
+    x7 = _mm_loadl_epi64((__m128i *)(in + 7*in_p));  // 70 71 72 73 74 75 76 77
     // 60 70 61 71 62 72 63 73 64 74 65 75 66 76 67 77
     x3 = _mm_unpacklo_epi8(x6, x7);
+
     // 00 10 20 30 01 11 21 31 02 12 22 32 03 13 23 33
     x4 = _mm_unpacklo_epi16(x0, x1);
     // 40 50 60 70 41 51 61 71 42 52 62 72 43 53 63 73
     x5 = _mm_unpacklo_epi16(x2, x3);
     // 00 10 20 30 40 50 60 70 01 11 21 31 41 51 61 71
     x6 = _mm_unpacklo_epi32(x4, x5);
-    // 02 12 22 32 42 52 62 72 03 13 23 33 43 53 63 73
-    x7 = _mm_unpackhi_epi32(x4, x5);
-
     _mm_storel_pd((double *)(out + 0*out_p),
                   _mm_castsi128_pd(x6));  // 00 10 20 30 40 50 60 70
     _mm_storeh_pd((double *)(out + 1*out_p),
                   _mm_castsi128_pd(x6));  // 01 11 21 31 41 51 61 71
+    // 02 12 22 32 42 52 62 72 03 13 23 33 43 53 63 73
+    x7 = _mm_unpackhi_epi32(x4, x5);
     _mm_storel_pd((double *)(out + 2*out_p),
                   _mm_castsi128_pd(x7));  // 02 12 22 32 42 52 62 72
     _mm_storeh_pd((double *)(out + 3*out_p),
@@ -1443,13 +1450,13 @@ static INLINE void transpose(unsigned char *src[], int in_p,
     x5 = _mm_unpackhi_epi16(x2, x3);
     // 04 14 24 34 44 54 64 74 05 15 25 35 45 55 65 75
     x6 = _mm_unpacklo_epi32(x4, x5);
-    // 06 16 26 36 46 56 66 76 07 17 27 37 47 57 67 77
-    x7 = _mm_unpackhi_epi32(x4, x5);
-
     _mm_storel_pd((double *)(out + 4*out_p),
                   _mm_castsi128_pd(x6));  // 04 14 24 34 44 54 64 74
     _mm_storeh_pd((double *)(out + 5*out_p),
                   _mm_castsi128_pd(x6));  // 05 15 25 35 45 55 65 75
+    // 06 16 26 36 46 56 66 76 07 17 27 37 47 57 67 77
+    x7 = _mm_unpackhi_epi32(x4, x5);
+
     _mm_storel_pd((double *)(out + 6*out_p),
                   _mm_castsi128_pd(x7));  // 06 16 26 36 46 56 66 76
     _mm_storeh_pd((double *)(out + 7*out_p),
