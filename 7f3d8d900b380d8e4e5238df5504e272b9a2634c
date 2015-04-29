@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b0fd0ac2_f943ff72",
+        "filename": "vp9/common/mips/msa/vp9_convolve_avg_msa.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 298,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-04-29T06:50:36Z",
+      "side": 1,
+      "message": "these are usually kept 1 per line",
+      "revId": "7f3d8d900b380d8e4e5238df5504e272b9a2634c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f00b02a7_568d3a02",
+        "filename": "vp9/common/mips/msa/vp9_convolve_avg_msa.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-04-29T06:50:36Z",
+      "side": 1,
+      "message": "break is indented, put it within the braces in a case like this",
+      "revId": "7f3d8d900b380d8e4e5238df5504e272b9a2634c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f00b02a7_f6666ed7",
+        "filename": "vp9/common/mips/msa/vp9_convolve_copy_msa.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 257,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-04-29T06:50:36Z",
+      "side": 1,
+      "message": "one per line",
+      "revId": "7f3d8d900b380d8e4e5238df5504e272b9a2634c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d0027e8c_3c2dfe3d",
+        "filename": "vp9/common/mips/msa/vp9_convolve_copy_msa.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 271,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-04-29T06:50:36Z",
+      "side": 1,
+      "message": "like the other file, place these within the braces",
+      "revId": "7f3d8d900b380d8e4e5238df5504e272b9a2634c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f00b02a7_368ac6ec",
+        "filename": "vp9/common/mips/msa/vp9_convolve_copy_msa.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 291,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-04-29T06:50:36Z",
+      "side": 1,
+      "message": "just make this memcpy and include string.h directly; I\u0027m making a set of changes to drop this",
+      "revId": "7f3d8d900b380d8e4e5238df5504e272b9a2634c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
