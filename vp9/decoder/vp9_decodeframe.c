@@ -1812,6 +1812,60 @@ static void high_build_mc_border(const uint8_t *src8, int src_stride,
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
+#if CONFIG_VP9_HIGHBITDEPTH
+static void extend_and_predict(const uint8_t *buf_ptr1, int pre_buf_stride,
+                               int x0, int y0, int b_w, int b_h,
+                               int frame_width, int frame_height,
+                               int border_offset,
+                               uint8_t *const dst, int dst_buf_stride,
+                               int subpel_x, int subpel_y,
+                               const InterpKernel *kernel,
+                               const struct scale_factors *sf,
+                               MACROBLOCKD *xd,
+                               int w, int h, int ref, int xs, int ys) {
+  DECLARE_ALIGNED(16, uint16_t, mc_buf_high[80 * 2 * 80 * 2]);
+  const uint8_t *buf_ptr;
+
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+    high_build_mc_border(buf_ptr1, pre_buf_stride, mc_buf_high, b_w,
+                         x0, y0, b_w, b_h, frame_width, frame_height);
+    buf_ptr = CONVERT_TO_BYTEPTR(mc_buf_high) + border_offset;
+  } else {
+    build_mc_border(buf_ptr1, pre_buf_stride, (uint8_t *)mc_buf_high, b_w,
+                    x0, y0, b_w, b_h, frame_width, frame_height);
+    buf_ptr = ((uint8_t *)mc_buf_high) + border_offset;
+  }
+
+  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+    high_inter_predictor(buf_ptr, b_w, dst, dst_buf_stride, subpel_x,
+                         subpel_y, sf, w, h, ref, kernel, xs, ys, xd->bd);
+  } else {
+    inter_predictor(buf_ptr, b_w, dst, dst_buf_stride, subpel_x,
+                    subpel_y, sf, w, h, ref, kernel, xs, ys);
+  }
+}
+#else
+static void extend_and_predict(const uint8_t *buf_ptr1, int pre_buf_stride,
+                               int x0, int y0, int b_w, int b_h,
+                               int frame_width, int frame_height,
+                               int border_offset,
+                               uint8_t *const dst, int dst_buf_stride,
+                               int subpel_x, int subpel_y,
+                               const InterpKernel *kernel,
+                               const struct scale_factors *sf,
+                               int w, int h, int ref, int xs, int ys) {
+  DECLARE_ALIGNED(16, uint8_t, mc_buf[80 * 2 * 80 * 2]);
+  const uint8_t *buf_ptr;
+
+  build_mc_border(buf_ptr1, pre_buf_stride, mc_buf, b_w,
+                  x0, y0, b_w, b_h, frame_width, frame_height);
+  buf_ptr = mc_buf + border_offset;
+
+  inter_predictor(buf_ptr, b_w, dst, dst_buf_stride, subpel_x,
+                  subpel_y, sf, w, h, ref, kernel, xs, ys);
+}
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
 void dec_build_inter_predictors(VP9Decoder *const pbi, MACROBLOCKD *xd,
                                 int plane, int bw, int bh, int x,
                                 int y, int w, int h, int mi_x, int mi_y,
@@ -1923,51 +1977,21 @@ void dec_build_inter_predictors(VP9Decoder *const pbi, MACROBLOCKD *xd,
     // Skip border extension if block is inside the frame.
     if (x0 < 0 || x0 > frame_width - 1 || x1 < 0 || x1 > frame_width - 1 ||
         y0 < 0 || y0 > frame_height - 1 || y1 < 0 || y1 > frame_height - 1) {
-      uint8_t *buf_ptr1 = ref_frame + y0 * pre_buf->stride + x0;
       // Extend the border.
+      const uint8_t *const buf_ptr1 = ref_frame + y0 * buf_stride + x0;
+      const int b_w = x1 - x0 + 1;
+      const int b_h = y1 - y0 + 1;
+      const int border_offset = y_pad * 3 * b_w + x_pad * 3;
+
+      return extend_and_predict(buf_ptr1, buf_stride, x0, y0, b_w, b_h,
+                                frame_width, frame_height, border_offset,
+                                dst, dst_buf->stride,
+                                subpel_x, subpel_y,
+                                kernel, sf,
 #if CONFIG_VP9_HIGHBITDEPTH
-      if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-        high_build_mc_border(buf_ptr1,
-                             pre_buf->stride,
-                             xd->mc_buf_high,
-                             x1 - x0 + 1,
-                             x0,
-                             y0,
-                             x1 - x0 + 1,
-                             y1 - y0 + 1,
-                             frame_width,
-                             frame_height);
-        buf_stride = x1 - x0 + 1;
-        buf_ptr = CONVERT_TO_BYTEPTR(xd->mc_buf_high) +
-            y_pad * 3 * buf_stride + x_pad * 3;
-      } else {
-        build_mc_border(buf_ptr1,
-                        pre_buf->stride,
-                        xd->mc_buf,
-                        x1 - x0 + 1,
-                        x0,
-                        y0,
-                        x1 - x0 + 1,
-                        y1 - y0 + 1,
-                        frame_width,
-                        frame_height);
-        buf_stride = x1 - x0 + 1;
-        buf_ptr = xd->mc_buf + y_pad * 3 * buf_stride + x_pad * 3;
-      }
-#else
-      build_mc_border(buf_ptr1,
-                      pre_buf->stride,
-                      xd->mc_buf,
-                      x1 - x0 + 1,
-                      x0,
-                      y0,
-                      x1 - x0 + 1,
-                      y1 - y0 + 1,
-                      frame_width,
-                      frame_height);
-      buf_stride = x1 - x0 + 1;
-      buf_ptr = xd->mc_buf + y_pad * 3 * buf_stride + x_pad * 3;
-#endif  // CONFIG_VP9_HIGHBITDEPTH
+                                xd,
+#endif
+                                w, h, ref, xs, ys);
     }
   } else {
     // Wait until reference block is ready. Pad 7 more pixels as last 7
