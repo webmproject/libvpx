@@ -867,55 +867,6 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   }
 #endif
   if (!frame_is_intra_only(cm)) {
-#if CONFIG_COPY_MODE
-    COPY_MODE copy_mode = mbmi->copy_mode;
-    if (mbmi->sb_type >= BLOCK_8X8) {
-      int copy_mode_context = vp9_get_copy_mode_context(xd);
-      if (mbmi->inter_ref_count > 0) {
-        ++cm->counts.copy_noref[copy_mode_context][mbmi->sb_type]
-                               [copy_mode != NOREF];
-        if (copy_mode != NOREF) {
-          if (mbmi->inter_ref_count == 2)
-            ++cm->counts.copy_mode_l2[copy_mode_context][copy_mode - REF0];
-          else if (mbmi->inter_ref_count > 2)
-            ++cm->counts.copy_mode[copy_mode_context][copy_mode - REF0];
-        }
-      }
-    }
-    if (is_inter_block(mbmi) && copy_mode == NOREF) {
-#else
-    if (is_inter_block(mbmi)) {
-#endif  // CONFIG_COPY_MODE
-      vp9_update_mv_count(cm, xd);
-
-      if (cm->interp_filter == SWITCHABLE) {
-        const int ctx = vp9_get_pred_context_switchable_interp(xd);
-        ++cm->counts.switchable_interp[ctx][mbmi->interp_filter];
-      }
-#if CONFIG_INTERINTRA
-      if (is_interintra_allowed(bsize) &&
-          is_inter_mode(mbmi->mode) &&
-          (mbmi->ref_frame[1] <= INTRA_FRAME)) {
-        if (mbmi->ref_frame[1] == INTRA_FRAME) {
-          ++cm->counts.y_mode[size_group_lookup[bsize]][mbmi->interintra_mode];
-          ++cm->counts.interintra[bsize][1];
-#if CONFIG_WEDGE_PARTITION
-          if (get_wedge_bits(bsize))
-            ++cm->counts.wedge_interintra[bsize][mbmi->use_wedge_interintra];
-#endif  // CONFIG_WEDGE_PARTITION
-        } else {
-          ++cm->counts.interintra[bsize][0];
-        }
-      }
-#endif  // CONFIG_INTERINTRA
-#if CONFIG_WEDGE_PARTITION
-      if (cm->reference_mode != SINGLE_REFERENCE &&
-          get_wedge_bits(bsize) &&
-          mbmi->ref_frame[1] > INTRA_FRAME)
-        ++cm->counts.wedge_interinter[bsize][mbmi->use_wedge_interinter];
-#endif  // CONFIG_WEDGE_PARTITION
-    }
-
     rd_opt->comp_pred_diff[SINGLE_REFERENCE] += ctx->single_pred_diff;
     rd_opt->comp_pred_diff[COMPOUND_REFERENCE] += ctx->comp_pred_diff;
     rd_opt->comp_pred_diff[REFERENCE_MODE_SELECT] += ctx->hybrid_pred_diff;
@@ -988,39 +939,6 @@ static void update_state_supertx(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
     return;
 
   if (!frame_is_intra_only(cm)) {
-#if CONFIG_COPY_MODE
-    COPY_MODE copy_mode = mbmi->copy_mode;
-    if (mbmi->sb_type >= BLOCK_8X8) {
-      int copy_mode_context = vp9_get_copy_mode_context(xd);
-      if (mbmi->inter_ref_count > 0) {
-        ++cm->counts.copy_noref[copy_mode_context][mbmi->sb_type]
-                               [copy_mode != NOREF];
-        if (copy_mode != NOREF) {
-          if (mbmi->inter_ref_count == 2)
-            ++cm->counts.copy_mode_l2[copy_mode_context][copy_mode - REF0];
-          else if (mbmi->inter_ref_count > 2)
-            ++cm->counts.copy_mode[copy_mode_context][copy_mode - REF0];
-        }
-      }
-    }
-    if (is_inter_block(mbmi) && copy_mode == NOREF) {
-#else
-    if (is_inter_block(mbmi)) {
-#endif  // CONFIG_COPY_MODE
-      vp9_update_mv_count(cm, xd);
-
-      if (cm->interp_filter == SWITCHABLE) {
-        const int ctx = vp9_get_pred_context_switchable_interp(xd);
-        ++cm->counts.switchable_interp[ctx][mbmi->interp_filter];
-      }
-#if CONFIG_WEDGE_PARTITION
-      if (cm->reference_mode != SINGLE_REFERENCE &&
-          get_wedge_bits(bsize) &&
-          mbmi->ref_frame[1] > INTRA_FRAME)
-        ++cm->counts.wedge_interinter[bsize][mbmi->use_wedge_interinter];
-#endif  // CONFIG_WEDGE_PARTITION
-    }
-
     rd_opt->comp_pred_diff[SINGLE_REFERENCE] += ctx->single_pred_diff;
     rd_opt->comp_pred_diff[COMPOUND_REFERENCE] += ctx->comp_pred_diff;
     rd_opt->comp_pred_diff[REFERENCE_MODE_SELECT] += ctx->hybrid_pred_diff;
@@ -1436,10 +1354,26 @@ static void update_stats(VP9_COMMON *cm, const MACROBLOCK *x) {
   const BLOCK_SIZE bsize = mbmi->sb_type;
 
 #if CONFIG_COPY_MODE
+  if (!frame_is_intra_only(cm)) {
+    COPY_MODE copy_mode = mbmi->copy_mode;
+    if (mbmi->sb_type >= BLOCK_8X8) {
+      int copy_mode_context = vp9_get_copy_mode_context(xd);
+      if (mbmi->inter_ref_count > 0) {
+        ++cm->counts.copy_noref[copy_mode_context][mbmi->sb_type]
+                               [copy_mode != NOREF];
+        if (copy_mode != NOREF) {
+          if (mbmi->inter_ref_count == 2)
+            ++cm->counts.copy_mode_l2[copy_mode_context][copy_mode - REF0];
+          else if (mbmi->inter_ref_count > 2)
+            ++cm->counts.copy_mode[copy_mode_context][copy_mode - REF0];
+        }
+      }
+    }
+  }
   if (!frame_is_intra_only(cm) && mbmi->copy_mode == NOREF) {
 #else
   if (!frame_is_intra_only(cm)) {
-#endif
+#endif  // CONFIG_COPY_MODE
     FRAME_COUNTS *const counts = &cm->counts;
     const int inter_block = is_inter_block(mbmi);
     const int seg_ref_active = vp9_segfeature_active(&cm->seg, mbmi->segment_id,
@@ -1470,8 +1404,43 @@ static void update_stats(VP9_COMMON *cm, const MACROBLOCK *x) {
         }
       }
     }
+    if (inter_block) {
+      vp9_update_mv_count(cm, xd);
+
+      if (cm->interp_filter == SWITCHABLE) {
+        const int ctx = vp9_get_pred_context_switchable_interp(xd);
+        ++cm->counts.switchable_interp[ctx][mbmi->interp_filter];
+      }
+#if CONFIG_INTERINTRA
+      if (is_interintra_allowed(bsize) &&
+          is_inter_mode(mbmi->mode) &&
+#if CONFIG_SUPERTX
+          mbmi->tx_size <= max_txsize_lookup[bsize] &&
+#endif  // CONFIG_SUPERTX
+          (mbmi->ref_frame[1] <= INTRA_FRAME)) {
+        if (mbmi->ref_frame[1] == INTRA_FRAME) {
+          ++cm->counts.y_mode[size_group_lookup[bsize]][mbmi->interintra_mode];
+          ++cm->counts.interintra[bsize][1];
+#if CONFIG_WEDGE_PARTITION
+          if (get_wedge_bits(bsize))
+            ++cm->counts.wedge_interintra[bsize][mbmi->use_wedge_interintra];
+#endif  // CONFIG_WEDGE_PARTITION
+        } else {
+          ++cm->counts.interintra[bsize][0];
+        }
+      }
+#endif  // CONFIG_INTERINTRA
+#if CONFIG_WEDGE_PARTITION
+      if (cm->reference_mode != SINGLE_REFERENCE &&
+          get_wedge_bits(bsize) &&
+          mbmi->ref_frame[1] > INTRA_FRAME) {
+        ++cm->counts.wedge_interinter[bsize][mbmi->use_wedge_interinter];
+      }
+#endif  // CONFIG_WEDGE_PARTITION
+    }
+
     if (inter_block &&
-            !vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
+        !vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP)) {
       const int mode_ctx = mbmi->mode_context[mbmi->ref_frame[0]];
       if (bsize >= BLOCK_8X8) {
         const PREDICTION_MODE mode = mbmi->mode;
@@ -1966,15 +1935,6 @@ static void update_state_rt(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
       vp9_cyclic_refresh_update_segment(cpi, mbmi, mi_row, mi_col, bsize, 1);
     }
     vp9_init_plane_quantizers(cpi, x);
-  }
-
-  if (is_inter_block(mbmi)) {
-    vp9_update_mv_count(cm, xd);
-
-    if (cm->interp_filter == SWITCHABLE) {
-      const int pred_ctx = vp9_get_pred_context_switchable_interp(xd);
-      ++cm->counts.switchable_interp[pred_ctx][mbmi->interp_filter];
-    }
   }
 
   x->skip = ctx->skip;
