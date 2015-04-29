@@ -5619,58 +5619,55 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   int rate_y = 0, rate_uv = 0, rate_y_tokenonly = 0, rate_uv_tokenonly = 0;
   int y_skip = 0, uv_skip = 0;
   int64_t dist_y = 0, dist_uv = 0, tx_cache[TX_MODES] = { 0 };
+  int64_t cost_y;
   TX_SIZE max_uv_tx_size;
   x->skip_encode = 0;
   ctx->skip = 0;
   xd->mi[0].src_mi->mbmi.ref_frame[0] = INTRA_FRAME;
+  vp9_rd_cost_reset(rd_cost);
 
   if (bsize >= BLOCK_8X8) {
-    if (rd_pick_intra_sby_mode(cpi, x, &rate_y,
-                               &rate_y_tokenonly,
-                               &dist_y, &y_skip, bsize, tx_cache,
-                               best_rd) >= best_rd) {
-      rd_cost->rate = INT_MAX;
-      return;
-    }
+    cost_y = rd_pick_intra_sby_mode(cpi, x, &rate_y, &rate_y_tokenonly,
+                                    &dist_y, &y_skip, bsize, tx_cache,
+                                    best_rd);
   } else {
     y_skip = 0;
-    if (rd_pick_intra_sub_8x8_y_mode(cpi, x, &rate_y, &rate_y_tokenonly,
-                                     &dist_y, best_rd) >= best_rd) {
-      rd_cost->rate = INT_MAX;
-      return;
+    cost_y = rd_pick_intra_sub_8x8_y_mode(cpi, x, &rate_y, &rate_y_tokenonly,
+                                          &dist_y, best_rd);
+  }
+  if (cost_y < best_rd) {
+    max_uv_tx_size =
+        get_uv_tx_size_impl(xd->mi[0].src_mi->mbmi.tx_size, bsize,
+                            pd[1].subsampling_x, pd[1].subsampling_y);
+    rd_pick_intra_sbuv_mode(cpi, x, ctx, &rate_uv, &rate_uv_tokenonly, &dist_uv,
+                            &uv_skip, MAX(BLOCK_8X8, bsize), max_uv_tx_size);
+
+    if (y_skip && uv_skip) {
+      rd_cost->rate = rate_y + rate_uv - rate_y_tokenonly - rate_uv_tokenonly +
+                      vp9_cost_bit(vp9_get_skip_prob(cm, xd), 1);
+      rd_cost->dist = dist_y + dist_uv;
+      vp9_zero(ctx->tx_rd_diff);
+    } else {
+      int i;
+      rd_cost->rate =
+          rate_y + rate_uv + vp9_cost_bit(vp9_get_skip_prob(cm, xd), 0);
+      rd_cost->dist = dist_y + dist_uv;
+      if (cpi->sf.tx_size_search_method == USE_FULL_RD)
+        for (i = 0; i < TX_MODES; i++) {
+          if (tx_cache[i] < INT64_MAX && tx_cache[cm->tx_mode] < INT64_MAX)
+            ctx->tx_rd_diff[i] = tx_cache[i] - tx_cache[cm->tx_mode];
+          else
+            ctx->tx_rd_diff[i] = 0;
+        }
     }
-  }
-  max_uv_tx_size = get_uv_tx_size_impl(xd->mi[0].src_mi->mbmi.tx_size, bsize,
-                                       pd[1].subsampling_x,
-                                       pd[1].subsampling_y);
-  rd_pick_intra_sbuv_mode(cpi, x, ctx, &rate_uv, &rate_uv_tokenonly,
-                          &dist_uv, &uv_skip, MAX(BLOCK_8X8, bsize),
-                          max_uv_tx_size);
 
-  if (y_skip && uv_skip) {
-    rd_cost->rate = rate_y + rate_uv - rate_y_tokenonly - rate_uv_tokenonly +
-                    vp9_cost_bit(vp9_get_skip_prob(cm, xd), 1);
-    rd_cost->dist = dist_y + dist_uv;
-    vp9_zero(ctx->tx_rd_diff);
-  } else {
-    int i;
-    rd_cost->rate = rate_y + rate_uv +
-                      vp9_cost_bit(vp9_get_skip_prob(cm, xd), 0);
-    rd_cost->dist = dist_y + dist_uv;
-    if (cpi->sf.tx_size_search_method == USE_FULL_RD)
-      for (i = 0; i < TX_MODES; i++) {
-        if (tx_cache[i] < INT64_MAX && tx_cache[cm->tx_mode] < INT64_MAX)
-          ctx->tx_rd_diff[i] = tx_cache[i] - tx_cache[cm->tx_mode];
-        else
-          ctx->tx_rd_diff[i] = 0;
-      }
+    ctx->mic = *xd->mi[0].src_mi;
+    rd_cost->rdcost = RDCOST(x->rdmult, x->rddiv, rd_cost->rate, rd_cost->dist);
   }
-
-  ctx->mic = *xd->mi[0].src_mi;
-  rd_cost->rdcost = RDCOST(x->rdmult, x->rddiv, rd_cost->rate, rd_cost->dist);
 
 #if CONFIG_PALETTE
   if (bsize >= BLOCK_8X8 && !pd[1].subsampling_x && !pd[1].subsampling_y) {
+    best_rd = MIN(best_rd, rd_cost->rdcost);
     rd_pick_palette_444(cpi, x, rd_cost, bsize, ctx, best_rd);
   }
 #endif  // CONFIG_PALETTE
@@ -5708,7 +5705,7 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 #endif  // CONFIG_INTRABC
 
 #if CONFIG_PALETTE
-  if (ctx->mic.mbmi.palette_enabled[0]) {
+  if (rd_cost->rate < INT_MAX && ctx->mic.mbmi.palette_enabled[0]) {
     vp9_palette_color_insertion(ctx->palette_colors_buf,
                                 &ctx->palette_buf_size,
                                 ctx->palette_count_buf,
