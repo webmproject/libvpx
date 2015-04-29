@@ -933,12 +933,4 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&idct16x16_12,
                    &idct16x16_256_add_12_sse2, 3167, VPX_BITS_12)));
 #endif  // HAVE_SSE2 && CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
-
-#if HAVE_SSSE3 && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
-INSTANTIATE_TEST_CASE_P(
-    SSSE3, Trans16x16DCT,
-    ::testing::Values(
-        make_tuple(&vp9_fdct16x16_c, &vp9_idct16x16_256_add_ssse3, 0,
-                   VPX_BITS_8)));
-#endif  // HAVE_SSSE3 && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 }  // namespace
