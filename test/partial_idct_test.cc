@@ -305,13 +305,4 @@ INSTANTIATE_TEST_CASE_P(
                    TX_8X8, 12)));
 #endif
 
-#if HAVE_SSSE3 && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
-INSTANTIATE_TEST_CASE_P(
-    SSSE3, PartialIDctTest,
-    ::testing::Values(
-        make_tuple(&vp9_fdct16x16_c,
-                   &vp9_idct16x16_256_add_c,
-                   &vp9_idct16x16_10_add_ssse3,
-                   TX_16X16, 10)));
-#endif
 }  // namespace
