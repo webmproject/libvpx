@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "300cbaed_4410fdd2",
+        "filename": "vp9/common/x86/vp9_idct_intrin_ssse3.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 709,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2015-04-30T23:27:01Z",
+      "side": 1,
+      "message": "If there are not enough registers to do all 16, maybe separate them in 2 or 4 groups, and still interleave the instructions. Also, not sure how much branching cost is added by for-loop.",
+      "range": {
+        "startLine": 709,
+        "startChar": 29,
+        "endLine": 709,
+        "endChar": 30
+      },
+      "revId": "9309f50909e770ecd41db01b3f3f5e8310c1ac39",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
