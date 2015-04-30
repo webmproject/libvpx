@@ -340,6 +340,10 @@ typedef struct SPEED_FEATURES {
   int intra_y_mode_mask[TX_SIZES];
   int intra_uv_mode_mask[TX_SIZES];
 
+  // These bit masks allow you to enable or disable intra modes for each
+  // prediction block size separately.
+  int intra_y_mode_bsize_mask[BLOCK_SIZES];
+
   // This variable enables an early break out of mode testing if the model for
   // rd built from the prediction signal indicates a value that's much
   // higher than the best rd we've seen so far.

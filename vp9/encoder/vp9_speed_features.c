@@ -318,11 +318,15 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
     if (!is_keyframe) {
       int i;
       if (content == VP9E_CONTENT_SCREEN) {
-        for (i = 0; i < TX_SIZES; ++i)
-          sf->intra_y_mode_mask[i] = INTRA_DC_TM_H_V;
+        for (i = 0; i < BLOCK_SIZES; ++i)
+          sf->intra_y_mode_bsize_mask[i] = INTRA_DC_TM_H_V;
       } else {
-        for (i = 0; i < TX_SIZES; i++)
-          sf->intra_y_mode_mask[i] = INTRA_DC;
+        for (i = 0; i < BLOCK_SIZES; ++i)
+          if (i >= BLOCK_16X16)
+            sf->intra_y_mode_bsize_mask[i] = INTRA_DC;
+          else
+            // Use H and V intra mode for block sizes <= 16X16.
+            sf->intra_y_mode_bsize_mask[i] = INTRA_DC_H_V;
       }
     }
   }
