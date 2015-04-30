@@ -279,29 +279,68 @@ void vp9_cyclic_refresh_set_golden_update(VP9_COMP *const cpi) {
   // period. Depending on past encoding stats, GF flag may be reset and update
   // may not occur until next baseline_gf_interval.
   if (cr->percent_refresh > 0)
-    rc->baseline_gf_interval = 2 * (100 / cr->percent_refresh);
+    rc->baseline_gf_interval = 4 * (100 / cr->percent_refresh);
   else
-    rc->baseline_gf_interval = 20;
+    rc->baseline_gf_interval = 40;
 }
 
-// Update some encoding stats (from the just encoded frame), and if the golden
-// reference is to be updated check if we should NOT update the golden ref.
+// Update some encoding stats (from the just encoded frame). If this frame's
+// background has high motion, refresh the golden frame. Otherwise, if the
+// golden reference is to be updated check if we should NOT update the golden
+// ref.
 void vp9_cyclic_refresh_check_golden_update(VP9_COMP *const cpi) {
   VP9_COMMON *const cm = &cpi->common;
   CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
   int mi_row, mi_col;
   double fraction_low = 0.0;
   int low_content_frame = 0;
-  for (mi_row = 0; mi_row < cm->mi_rows; mi_row++)
-    for (mi_col = 0; mi_col < cm->mi_cols; mi_col++) {
-      if (cr->map[mi_row * cm->mi_cols + mi_col] < 1)
+
+  MODE_INFO **mi = cm->mi_grid_visible;
+  RATE_CONTROL *const rc = &cpi->rc;
+  const int rows = cm->mi_rows, cols = cm->mi_cols;
+  int cnt1 = 0, cnt2 = 0;
+  int force_gf_refresh = 0;
+
+  for (mi_row = 0; mi_row < rows; mi_row++) {
+    for (mi_col = 0; mi_col < cols; mi_col++) {
+      int16_t abs_mvr = mi[0]->mbmi.mv[0].as_mv.row >= 0 ?
+          mi[0]->mbmi.mv[0].as_mv.row : -1 * mi[0]->mbmi.mv[0].as_mv.row;
+      int16_t abs_mvc = mi[0]->mbmi.mv[0].as_mv.col >= 0 ?
+          mi[0]->mbmi.mv[0].as_mv.col : -1 * mi[0]->mbmi.mv[0].as_mv.col;
+
+      // Calculate the motion of the background.
+      if (abs_mvr <= 16 && abs_mvc <= 16) {
+        cnt1++;
+        if (abs_mvr == 0 && abs_mvc == 0)
+          cnt2++;
+      }
+      mi++;
+
+      // Accumulate low_content_frame.
+      if (cr->map[mi_row * cols + mi_col] < 1)
         low_content_frame++;
     }
+    mi += 8;
+  }
+
+  // For video conference clips, if the background has high motion in current
+  // frame because of the camera movement, set this frame as the golden frame.
+  // Use 70% and 5% as the thresholds for golden frame refreshing.
+  if (cnt1 * 10 > (70 * rows * cols) && cnt2 * 20 < cnt1) {
+    vp9_cyclic_refresh_set_golden_update(cpi);
+    rc->frames_till_gf_update_due = rc->baseline_gf_interval;
+
+    if (rc->frames_till_gf_update_due > rc->frames_to_key)
+      rc->frames_till_gf_update_due = rc->frames_to_key;
+    cpi->refresh_golden_frame = 1;
+    force_gf_refresh = 1;
+  }
+
   fraction_low =
-      (double)low_content_frame / (cm->mi_rows * cm->mi_cols);
+      (double)low_content_frame / (rows * cols);
   // Update average.
   cr->low_content_avg = (fraction_low + 3 * cr->low_content_avg) / 4;
-  if (cpi->refresh_golden_frame == 1) {
+  if (!force_gf_refresh && cpi->refresh_golden_frame == 1) {
     // Don't update golden reference if the amount of low_content for the
     // current encoded frame is small, or if the recursive average of the
     // low_content over the update interval window falls below threshold.
