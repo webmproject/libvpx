@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b017cafa_2968551f",
+        "filename": "test/dct16x16_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 937,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-04-30T20:19:21Z",
+      "side": 0,
+      "message": "#if 0 with a TODO to fix it?",
+      "range": {
+        "startLine": 937,
+        "startChar": 19,
+        "endLine": 937,
+        "endChar": 42
+      },
+      "revId": "6686e4411db8c20dca5f315a55cc0db071892846",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
