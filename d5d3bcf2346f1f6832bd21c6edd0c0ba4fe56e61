@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d01c3e21_d65ce481",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-04-30T11:02:07Z",
+      "side": 1,
+      "message": "You can eliminate the vp9_pt_energy_class lookup.  Just use the value from the table instead.",
+      "revId": "d5d3bcf2346f1f6832bd21c6edd0c0ba4fe56e61",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
