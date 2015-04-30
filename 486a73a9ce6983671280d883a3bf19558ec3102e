@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b017cafa_0958f98b",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 308,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-04-30T20:22:29Z",
+      "side": 0,
+      "message": "If it\u0027s going to be coming back, #if 0 with a TODO to fix it? Otherwise I think it might get lost entirely. If the code is not going to get fixed, fine to delete it.",
+      "range": {
+        "startLine": 308,
+        "startChar": 47,
+        "endLine": 308,
+        "endChar": 70
+      },
+      "revId": "486a73a9ce6983671280d883a3bf19558ec3102e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
