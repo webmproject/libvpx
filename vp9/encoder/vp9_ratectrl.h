@@ -73,6 +73,7 @@ typedef struct {
 
   int frames_since_golden;
   int frames_till_gf_update_due;
+  int min_gf_interval;
   int max_gf_interval;
   int static_scene_max_gf_interval;
   int baseline_gf_interval;
@@ -238,8 +239,8 @@ int vp9_frame_type_qdelta(const struct VP9_COMP *cpi, int rf_level, int q);
 
 void vp9_rc_update_framerate(struct VP9_COMP *cpi);
 
-void vp9_rc_set_gf_max_interval(const struct VP9_COMP *const cpi,
-                                RATE_CONTROL *const rc);
+void vp9_rc_set_gf_interval_range(const struct VP9_COMP *const cpi,
+                                  RATE_CONTROL *const rc);
 
 void vp9_set_target_rate(struct VP9_COMP *cpi);
 
