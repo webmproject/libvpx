@@ -1447,7 +1447,7 @@ void vp9_tx_identity_rect(const int16_t *input, tran_low_t *out,
   int r, c;
   for (r = 0; r < row; r++)
     for (c = 0; c < col; c++) {
-      out[stride_out * r + c] = input[stride_in * r + c] << shift;
+      out[stride_out * r + c] = input[stride_in * r + c] * (1 << shift);
     }
 }
 

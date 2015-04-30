@@ -1528,14 +1528,15 @@ void vp9_quantize_rect(const tran_low_t *coeff_ptr, int row, int col,
                        const int16_t *dequant_ptr,
                        int logsizeby32, int stride, int has_dc, int hbd) {
   int r, c;
-  int zbins[2] = {ROUND_POWER_OF_TWO(zbin_ptr[0],
-                                     1 + (logsizeby32 < 0 ? -1 : logsizeby32)),
-                  ROUND_POWER_OF_TWO(zbin_ptr[1],
-                                     1 + (logsizeby32 < 0 ? -1 : logsizeby32))};
+  int zbins[2];
+
   if (logsizeby32 < 0) {
     logsizeby32 = -1;
     zbins[0] = zbin_ptr[0];
     zbins[1] = zbin_ptr[1];
+  } else {
+    zbins[0] = ROUND_POWER_OF_TWO(zbin_ptr[0], 1 + logsizeby32);
+    zbins[1] = ROUND_POWER_OF_TWO(zbin_ptr[1], 1 + logsizeby32);
   }
 
   for (r = 0; r < row; r++)
