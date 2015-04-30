@@ -1575,7 +1575,7 @@ static int64_t handle_intrabc_mode(VP9_COMP *cpi, MACROBLOCK *x,
     super_block_yrd(cpi, x, &rate_s, &distortion_s, &skippable_s, &psse_s,
                     bsize, tx_cache_s, ref_best_rd);
 
-    if (mbmi->tx_size < TX_32X32)
+    if (mbmi->tx_size < TX_32X32 && distortion_s != INT64_MAX)
       distortion_s = distortion_s << 2;
 
     if (rate_s != INT_MAX) {
@@ -1997,15 +1997,17 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
         mic->mbmi.tx_skip[0] = 1;
         super_block_yrd(cpi, x, &this_rate_tokenonly_s, &this_distortion_s,
                         &s_s, NULL, bsize, local_tx_cache, best_rd);
-        if (this_rate_tokenonly_s != INT_MAX)
+        if (this_rate_tokenonly_s != INT_MAX) {
           this_rate_tokenonly_s +=
               vp9_cost_bit(cpi->common.fc.y_tx_skip_prob[0], 1);
-        if ((this_rate_tokenonly_s != INT_MAX &&
-            this_rate_tokenonly == INT_MAX) ||
-            (RDCOST(x->rdmult, x->rddiv, this_rate_tokenonly, this_distortion)
-                >  RDCOST(x->rdmult, x->rddiv, this_rate_tokenonly_s,
-                          this_distortion_s))) {
-          mic->mbmi.tx_skip[0] = 1;
+          if (this_rate_tokenonly == INT_MAX ||
+            RDCOST(x->rdmult, x->rddiv, this_rate_tokenonly, this_distortion) >
+            RDCOST(x->rdmult, x->rddiv, this_rate_tokenonly_s,
+                   this_distortion_s)) {
+            mic->mbmi.tx_skip[0] = 1;
+          } else {
+            mic->mbmi.tx_skip[0] = 0;
+          }
         } else {
           mic->mbmi.tx_skip[0] = 0;
         }
@@ -2513,16 +2515,19 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
           mbmi->tx_skip[1] = 1;
           super_block_uvrd(cpi, x, &this_rate_tokenonly_s, &this_distortion_s,
                            &s_s, &this_sse, bsize, best_rd);
-          if (this_rate_tokenonly_s != INT_MAX)
+          if (this_rate_tokenonly_s != INT_MAX) {
             this_rate_tokenonly_s +=
                 vp9_cost_bit(cpi->common.fc.
                              uv_tx_skip_prob[mbmi->tx_skip[0]], 1);
-          if ((this_rate_tokenonly_s != INT_MAX &&
-              this_rate_tokenonly == INT_MAX) ||
-              (RDCOST(x->rdmult, x->rddiv, this_rate_tokenonly, this_distortion)
-                  >  RDCOST(x->rdmult, x->rddiv, this_rate_tokenonly_s,
-                            this_distortion_s))) {
-            mbmi->tx_skip[1] = 1;
+            if (this_rate_tokenonly == INT_MAX ||
+                RDCOST(x->rdmult, x->rddiv,
+                       this_rate_tokenonly, this_distortion) >
+                RDCOST(x->rdmult, x->rddiv,
+                       this_rate_tokenonly_s, this_distortion_s)) {
+              mbmi->tx_skip[1] = 1;
+            } else {
+              mbmi->tx_skip[1] = 0;
+            }
           } else {
             mbmi->tx_skip[1] = 0;
           }
