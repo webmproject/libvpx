@@ -134,6 +134,8 @@ VP9_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/vp9_macros_msa.h
 VP9_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/vp9_convolve8_horiz_msa.c
 VP9_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/vp9_convolve8_msa.c
 VP9_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/vp9_convolve8_vert_msa.c
+VP9_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/vp9_convolve_avg_msa.c
+VP9_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/vp9_convolve_copy_msa.c
 VP9_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/vp9_convolve_msa.h
 
 VP9_COMMON_SRCS-$(HAVE_SSE2) += common/x86/vp9_idct_intrin_sse2.c
