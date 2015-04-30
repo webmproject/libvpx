@@ -205,7 +205,9 @@ void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
       near->as_int = mv_list[1].as_int;
       break;
     case 1:
+#if !CONFIG_NEWMVREF
     case 2:
+#endif  // !CONFIG_NEWMVREF
       nearest->as_int = bmi[0].as_mv[ref].as_int;
       for (n = 0; n < MAX_MV_REF_CANDIDATES; ++n)
         if (nearest->as_int != mv_list[n].as_int) {
@@ -213,6 +215,22 @@ void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
           break;
         }
       break;
+#if CONFIG_NEWMVREF
+    case 2: {
+      int_mv candidates[1 + MAX_MV_REF_CANDIDATES];
+      candidates[0] = bmi[1].as_mv[ref];
+      candidates[1] = mv_list[0];
+      candidates[2] = mv_list[1];
+
+      nearest->as_int = bmi[0].as_mv[ref].as_int;
+      for (n = 0; n < 1 + MAX_MV_REF_CANDIDATES; ++n)
+        if (nearest->as_int != candidates[n].as_int) {
+          near->as_int = candidates[n].as_int;
+          break;
+        }
+      break;
+    }
+#endif  // CONFIG_NEWMVREF
     case 3: {
       int_mv candidates[2 + MAX_MV_REF_CANDIDATES];
       candidates[0] = bmi[1].as_mv[ref];
