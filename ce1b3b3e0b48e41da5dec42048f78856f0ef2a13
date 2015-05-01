@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "105fb6fa_784fa192",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1499,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2015-05-01T17:29:11Z",
+      "side": 1,
+      "message": "Look like intra_y_mode_mask has nothing to do with TX size in non-rd mode (speed 5 and 6). Maybe only use intra_y_mode_bsize_mask here instead of 2 masks.",
+      "range": {
+        "startLine": 1499,
+        "startChar": 6,
+        "endLine": 1499,
+        "endChar": 7
+      },
+      "revId": "ce1b3b3e0b48e41da5dec42048f78856f0ef2a13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
