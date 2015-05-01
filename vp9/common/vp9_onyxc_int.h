@@ -417,20 +417,11 @@ static INLINE int partition_plane_context(const MACROBLOCKD *xd,
                                           BLOCK_SIZE bsize) {
   const PARTITION_CONTEXT *above_ctx = xd->above_seg_context + mi_col;
   const PARTITION_CONTEXT *left_ctx = xd->left_seg_context + (mi_row & MI_MASK);
-
   const int bsl = mi_width_log2_lookup[bsize];
-  const int bs = 1 << bsl;
-  int above = 0, left = 0, i;
+  int above = (*above_ctx >> bsl) & 1 , left = (*left_ctx >> bsl) & 1;
 
   assert(b_width_log2_lookup[bsize] == b_height_log2_lookup[bsize]);
   assert(bsl >= 0);
-
-  for (i = 0; i < bs; i++) {
-    above |= above_ctx[i];
-    left |= left_ctx[i];
-  }
-  above = (above & bs) > 0;
-  left  = (left & bs) > 0;
 
   return (left * 2 + above) + bsl * PARTITION_PLOFFSET;
 }
