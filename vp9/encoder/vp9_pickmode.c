@@ -1046,7 +1046,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   // Reduce the intra cost penalty for small blocks (<=16x16).
   const int reduction_fac =
       (cpi->sf.partition_search_type == VAR_BASED_PARTITION &&
-       bsize <= BLOCK_16X16) ? 2 : 0;
+       bsize <= BLOCK_16X16) ? ((bsize <= BLOCK_8X8) ? 4 : 2) : 0;
   const int intra_cost_penalty = vp9_get_intra_cost_penalty(
       cm->base_qindex, cm->y_dc_delta_q, cm->bit_depth) >> reduction_fac;
   const int64_t inter_mode_thresh = RDCOST(x->rdmult, x->rddiv,
