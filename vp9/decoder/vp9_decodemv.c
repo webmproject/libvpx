@@ -193,8 +193,8 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
                                        int mi_row, int mi_col, vp9_reader *r) {
   MODE_INFO *const mi = xd->mi[0];
   MB_MODE_INFO *const mbmi = &mi->mbmi;
-  const MODE_INFO *above_mi = xd->mi[-cm->mi_stride];
-  const MODE_INFO *left_mi  = xd->left_available ? xd->mi[-1] : NULL;
+  const MODE_INFO *above_mi = xd->above_mi;
+  const MODE_INFO *left_mi  = xd->left_mi;
   const BLOCK_SIZE bsize = mbmi->sb_type;
   int i;
 
