@@ -119,13 +119,13 @@ TEST_P(Trans32x32Test, AccuracyCheck) {
   uint32_t max_error = 0;
   int64_t total_error = 0;
   const int count_test_block = 10000;
-  DECLARE_ALIGNED_ARRAY(16, int16_t, test_input_block, kNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(16, tran_low_t, test_temp_block, kNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(16, uint8_t, dst, kNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(16, uint8_t, src, kNumCoeffs);
+  DECLARE_ALIGNED(16, int16_t, test_input_block[kNumCoeffs]);
+  DECLARE_ALIGNED(16, tran_low_t, test_temp_block[kNumCoeffs]);
+  DECLARE_ALIGNED(16, uint8_t, dst[kNumCoeffs]);
+  DECLARE_ALIGNED(16, uint8_t, src[kNumCoeffs]);
 #if CONFIG_VP9_HIGHBITDEPTH
-  DECLARE_ALIGNED_ARRAY(16, uint16_t, dst16, kNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(16, uint16_t, src16, kNumCoeffs);
+  DECLARE_ALIGNED(16, uint16_t, dst16[kNumCoeffs]);
+  DECLARE_ALIGNED(16, uint16_t, src16[kNumCoeffs]);
 #endif
 
   for (int i = 0; i < count_test_block; ++i) {
@@ -184,9 +184,9 @@ TEST_P(Trans32x32Test, CoeffCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   const int count_test_block = 1000;
 
-  DECLARE_ALIGNED_ARRAY(16, int16_t, input_block, kNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(16, tran_low_t, output_ref_block, kNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(16, tran_low_t, output_block, kNumCoeffs);
+  DECLARE_ALIGNED(16, int16_t, input_block[kNumCoeffs]);
+  DECLARE_ALIGNED(16, tran_low_t, output_ref_block[kNumCoeffs]);
+  DECLARE_ALIGNED(16, tran_low_t, output_block[kNumCoeffs]);
 
   for (int i = 0; i < count_test_block; ++i) {
     for (int j = 0; j < kNumCoeffs; ++j)
@@ -212,15 +212,13 @@ TEST_P(Trans32x32Test, MemCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   const int count_test_block = 2000;
 
-  DECLARE_ALIGNED_ARRAY(16, int16_t, input_block, kNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(16, int16_t, input_extreme_block, kNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(16, tran_low_t, output_ref_block, kNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(16, tran_low_t, output_block, kNumCoeffs);
+  DECLARE_ALIGNED(16, int16_t, input_extreme_block[kNumCoeffs]);
+  DECLARE_ALIGNED(16, tran_low_t, output_ref_block[kNumCoeffs]);
+  DECLARE_ALIGNED(16, tran_low_t, output_block[kNumCoeffs]);
 
   for (int i = 0; i < count_test_block; ++i) {
     // Initialize a test block with input range [-mask_, mask_].
     for (int j = 0; j < kNumCoeffs; ++j) {
-      input_block[j] = (rnd.Rand16() & mask_) - (rnd.Rand16() & mask_);
       input_extreme_block[j] = rnd.Rand8() & 1 ? mask_ : -mask_;
     }
     if (i == 0) {
@@ -257,13 +255,13 @@ TEST_P(Trans32x32Test, MemCheck) {
 TEST_P(Trans32x32Test, InverseAccuracy) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   const int count_test_block = 1000;
-  DECLARE_ALIGNED_ARRAY(16, int16_t, in, kNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(16, tran_low_t, coeff, kNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(16, uint8_t, dst, kNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(16, uint8_t, src, kNumCoeffs);
+  DECLARE_ALIGNED(16, int16_t, in[kNumCoeffs]);
+  DECLARE_ALIGNED(16, tran_low_t, coeff[kNumCoeffs]);
+  DECLARE_ALIGNED(16, uint8_t, dst[kNumCoeffs]);
+  DECLARE_ALIGNED(16, uint8_t, src[kNumCoeffs]);
 #if CONFIG_VP9_HIGHBITDEPTH
-  DECLARE_ALIGNED_ARRAY(16, uint16_t, dst16, kNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(16, uint16_t, src16, kNumCoeffs);
+  DECLARE_ALIGNED(16, uint16_t, dst16[kNumCoeffs]);
+  DECLARE_ALIGNED(16, uint16_t, src16[kNumCoeffs]);
 #endif
 
   for (int i = 0; i < count_test_block; ++i) {

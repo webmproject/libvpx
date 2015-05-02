@@ -950,7 +950,7 @@ void vp9_convolve8_dspr2(const uint8_t *src, ptrdiff_t src_stride,
                          const int16_t *filter_x, int x_step_q4,
                          const int16_t *filter_y, int y_step_q4,
                          int w, int h) {
-  DECLARE_ALIGNED_ARRAY(32, uint8_t, temp, 64 * 135);
+  DECLARE_ALIGNED(32, uint8_t, temp[64 * 135]);
   int32_t intermediate_height = ((h * y_step_q4) >> 4) + 7;
   uint32_t pos = 38;
 

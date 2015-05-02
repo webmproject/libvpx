@@ -145,7 +145,7 @@ unsigned int vp9_sub_pixel_avg_variance##W##x##H##_c( \
   const uint8_t *second_pred) { \
   uint16_t fdata3[(H + 1) * W]; \
   uint8_t temp2[H * W]; \
-  DECLARE_ALIGNED_ARRAY(16, uint8_t, temp3, H * W); \
+  DECLARE_ALIGNED(16, uint8_t, temp3[H * W]); \
 \
   var_filter_block2d_bil_first_pass(src, fdata3, src_stride, 1, H + 1, W, \
                                     BILINEAR_FILTERS_2TAP(xoffset)); \
@@ -464,7 +464,7 @@ unsigned int vp9_highbd_sub_pixel_avg_variance##W##x##H##_c( \
   const uint8_t *second_pred) { \
   uint16_t fdata3[(H + 1) * W]; \
   uint16_t temp2[H * W]; \
-  DECLARE_ALIGNED_ARRAY(16, uint16_t, temp3, H * W); \
+  DECLARE_ALIGNED(16, uint16_t, temp3[H * W]); \
 \
   highbd_var_filter_block2d_bil_first_pass(src, fdata3, src_stride, 1, H + 1, \
                                            W, BILINEAR_FILTERS_2TAP(xoffset)); \
@@ -486,7 +486,7 @@ unsigned int vp9_highbd_10_sub_pixel_avg_variance##W##x##H##_c( \
   const uint8_t *second_pred) { \
   uint16_t fdata3[(H + 1) * W]; \
   uint16_t temp2[H * W]; \
-  DECLARE_ALIGNED_ARRAY(16, uint16_t, temp3, H * W); \
+  DECLARE_ALIGNED(16, uint16_t, temp3[H * W]); \
 \
   highbd_var_filter_block2d_bil_first_pass(src, fdata3, src_stride, 1, H + 1, \
                                            W, BILINEAR_FILTERS_2TAP(xoffset)); \
@@ -508,7 +508,7 @@ unsigned int vp9_highbd_12_sub_pixel_avg_variance##W##x##H##_c( \
   const uint8_t *second_pred) { \
   uint16_t fdata3[(H + 1) * W]; \
   uint16_t temp2[H * W]; \
-  DECLARE_ALIGNED_ARRAY(16, uint16_t, temp3, H * W); \
+  DECLARE_ALIGNED(16, uint16_t, temp3[H * W]); \
 \
   highbd_var_filter_block2d_bil_first_pass(src, fdata3, src_stride, 1, H + 1, \
                                            W, BILINEAR_FILTERS_2TAP(xoffset)); \

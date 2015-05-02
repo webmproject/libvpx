@@ -139,8 +139,8 @@ class FwdTrans8x8TestBase {
 
   void RunSignBiasCheck() {
     ACMRandom rnd(ACMRandom::DeterministicSeed());
-    DECLARE_ALIGNED_ARRAY(16, int16_t, test_input_block, 64);
-    DECLARE_ALIGNED_ARRAY(16, tran_low_t, test_output_block, 64);
+    DECLARE_ALIGNED(16, int16_t, test_input_block[64]);
+    DECLARE_ALIGNED(16, tran_low_t, test_output_block[64]);
     int count_sign_block[64][2];
     const int count_test_block = 100000;
 
@@ -210,13 +210,13 @@ class FwdTrans8x8TestBase {
     int max_error = 0;
     int total_error = 0;
     const int count_test_block = 100000;
-    DECLARE_ALIGNED_ARRAY(16, int16_t, test_input_block, 64);
-    DECLARE_ALIGNED_ARRAY(16, tran_low_t, test_temp_block, 64);
-    DECLARE_ALIGNED_ARRAY(16, uint8_t, dst, 64);
-    DECLARE_ALIGNED_ARRAY(16, uint8_t, src, 64);
+    DECLARE_ALIGNED(16, int16_t, test_input_block[64]);
+    DECLARE_ALIGNED(16, tran_low_t, test_temp_block[64]);
+    DECLARE_ALIGNED(16, uint8_t, dst[64]);
+    DECLARE_ALIGNED(16, uint8_t, src[64]);
 #if CONFIG_VP9_HIGHBITDEPTH
-    DECLARE_ALIGNED_ARRAY(16, uint16_t, dst16, 64);
-    DECLARE_ALIGNED_ARRAY(16, uint16_t, src16, 64);
+    DECLARE_ALIGNED(16, uint16_t, dst16[64]);
+    DECLARE_ALIGNED(16, uint16_t, src16[64]);
 #endif
 
     for (int i = 0; i < count_test_block; ++i) {
@@ -287,14 +287,14 @@ class FwdTrans8x8TestBase {
     int total_error = 0;
     int total_coeff_error = 0;
     const int count_test_block = 100000;
-    DECLARE_ALIGNED_ARRAY(16, int16_t, test_input_block, 64);
-    DECLARE_ALIGNED_ARRAY(16, tran_low_t, test_temp_block, 64);
-    DECLARE_ALIGNED_ARRAY(16, tran_low_t, ref_temp_block, 64);
-    DECLARE_ALIGNED_ARRAY(16, uint8_t, dst, 64);
-    DECLARE_ALIGNED_ARRAY(16, uint8_t, src, 64);
+    DECLARE_ALIGNED(16, int16_t, test_input_block[64]);
+    DECLARE_ALIGNED(16, tran_low_t, test_temp_block[64]);
+    DECLARE_ALIGNED(16, tran_low_t, ref_temp_block[64]);
+    DECLARE_ALIGNED(16, uint8_t, dst[64]);
+    DECLARE_ALIGNED(16, uint8_t, src[64]);
 #if CONFIG_VP9_HIGHBITDEPTH
-    DECLARE_ALIGNED_ARRAY(16, uint16_t, dst16, 64);
-    DECLARE_ALIGNED_ARRAY(16, uint16_t, src16, 64);
+    DECLARE_ALIGNED(16, uint16_t, dst16[64]);
+    DECLARE_ALIGNED(16, uint16_t, src16[64]);
 #endif
 
     for (int i = 0; i < count_test_block; ++i) {
@@ -376,13 +376,13 @@ class FwdTrans8x8TestBase {
   void RunInvAccuracyCheck() {
     ACMRandom rnd(ACMRandom::DeterministicSeed());
     const int count_test_block = 1000;
-    DECLARE_ALIGNED_ARRAY(16, int16_t, in, kNumCoeffs);
-    DECLARE_ALIGNED_ARRAY(16, tran_low_t, coeff, kNumCoeffs);
-    DECLARE_ALIGNED_ARRAY(16, uint8_t, dst, kNumCoeffs);
-    DECLARE_ALIGNED_ARRAY(16, uint8_t, src, kNumCoeffs);
+    DECLARE_ALIGNED(16, int16_t, in[kNumCoeffs]);
+    DECLARE_ALIGNED(16, tran_low_t, coeff[kNumCoeffs]);
+    DECLARE_ALIGNED(16, uint8_t, dst[kNumCoeffs]);
+    DECLARE_ALIGNED(16, uint8_t, src[kNumCoeffs]);
 #if CONFIG_VP9_HIGHBITDEPTH
-    DECLARE_ALIGNED_ARRAY(16, uint16_t, src16, kNumCoeffs);
-    DECLARE_ALIGNED_ARRAY(16, uint16_t, dst16, kNumCoeffs);
+    DECLARE_ALIGNED(16, uint16_t, src16[kNumCoeffs]);
+    DECLARE_ALIGNED(16, uint16_t, dst16[kNumCoeffs]);
 #endif
 
     for (int i = 0; i < count_test_block; ++i) {
@@ -434,9 +434,9 @@ class FwdTrans8x8TestBase {
   void RunFwdAccuracyCheck() {
     ACMRandom rnd(ACMRandom::DeterministicSeed());
     const int count_test_block = 1000;
-    DECLARE_ALIGNED_ARRAY(16, int16_t, in, kNumCoeffs);
-    DECLARE_ALIGNED_ARRAY(16, tran_low_t, coeff_r, kNumCoeffs);
-    DECLARE_ALIGNED_ARRAY(16, tran_low_t, coeff, kNumCoeffs);
+    DECLARE_ALIGNED(16, int16_t, in[kNumCoeffs]);
+    DECLARE_ALIGNED(16, tran_low_t, coeff_r[kNumCoeffs]);
+    DECLARE_ALIGNED(16, tran_low_t, coeff[kNumCoeffs]);
 
     for (int i = 0; i < count_test_block; ++i) {
       double out_r[kNumCoeffs];
@@ -464,12 +464,12 @@ void CompareInvReference(IdctFunc ref_txfm, int thresh) {
     ACMRandom rnd(ACMRandom::DeterministicSeed());
     const int count_test_block = 10000;
     const int eob = 12;
-    DECLARE_ALIGNED_ARRAY(16, tran_low_t, coeff, kNumCoeffs);
-    DECLARE_ALIGNED_ARRAY(16, uint8_t, dst, kNumCoeffs);
-    DECLARE_ALIGNED_ARRAY(16, uint8_t, ref, kNumCoeffs);
+    DECLARE_ALIGNED(16, tran_low_t, coeff[kNumCoeffs]);
+    DECLARE_ALIGNED(16, uint8_t, dst[kNumCoeffs]);
+    DECLARE_ALIGNED(16, uint8_t, ref[kNumCoeffs]);
 #if CONFIG_VP9_HIGHBITDEPTH
-    DECLARE_ALIGNED_ARRAY(16, uint16_t, dst16, kNumCoeffs);
-    DECLARE_ALIGNED_ARRAY(16, uint16_t, ref16, kNumCoeffs);
+    DECLARE_ALIGNED(16, uint16_t, dst16[kNumCoeffs]);
+    DECLARE_ALIGNED(16, uint16_t, ref16[kNumCoeffs]);
 #endif
     const int16_t *scan = vp9_default_scan_orders[TX_8X8].scan;
 

@@ -3657,7 +3657,7 @@ static int set_var_thresh_from_histogram(VP9_COMP *cpi) {
   const int cutoff = (MIN(cm->width, cm->height) >= 720) ?
       (cm->MBs * VAR_HIST_LARGE_CUT_OFF / 100) :
       (cm->MBs * VAR_HIST_SMALL_CUT_OFF / 100);
-  DECLARE_ALIGNED_ARRAY(16, int, hist, VAR_HIST_BINS);
+  DECLARE_ALIGNED(16, int, hist[VAR_HIST_BINS]);
   diff *var16 = cpi->source_diff_var;
 
   int sum = 0;

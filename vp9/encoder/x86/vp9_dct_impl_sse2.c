@@ -578,7 +578,7 @@ void FDCT16x16_2D(const int16_t *input, tran_low_t *output, int stride) {
   // in normal/row positions).
   int pass;
   // We need an intermediate buffer between passes.
-  DECLARE_ALIGNED_ARRAY(16, int16_t, intermediate, 256);
+  DECLARE_ALIGNED(16, int16_t, intermediate[256]);
   const int16_t *in = input;
   int16_t *out0 = intermediate;
   tran_low_t *out1 = output;

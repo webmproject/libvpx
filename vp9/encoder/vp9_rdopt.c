@@ -1573,10 +1573,10 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
 
   // Prediction buffer from second frame.
 #if CONFIG_VP9_HIGHBITDEPTH
-  DECLARE_ALIGNED_ARRAY(16, uint16_t, second_pred_alloc_16, 64 * 64);
+  DECLARE_ALIGNED(16, uint16_t, second_pred_alloc_16[64 * 64]);
   uint8_t *second_pred;
 #else
-  DECLARE_ALIGNED_ARRAY(16, uint8_t, second_pred, 64 * 64);
+  DECLARE_ALIGNED(16, uint8_t, second_pred[64 * 64]);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
   for (ref = 0; ref < 2; ++ref) {
@@ -2420,10 +2420,10 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     (mbmi->ref_frame[1] < 0 ? 0 : mbmi->ref_frame[1]) };
   int_mv cur_mv[2];
 #if CONFIG_VP9_HIGHBITDEPTH
-  DECLARE_ALIGNED_ARRAY(16, uint16_t, tmp_buf16, MAX_MB_PLANE * 64 * 64);
+  DECLARE_ALIGNED(16, uint16_t, tmp_buf16[MAX_MB_PLANE * 64 * 64]);
   uint8_t *tmp_buf;
 #else
-  DECLARE_ALIGNED_ARRAY(16, uint8_t, tmp_buf, MAX_MB_PLANE * 64 * 64);
+  DECLARE_ALIGNED(16, uint8_t, tmp_buf[MAX_MB_PLANE * 64 * 64]);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   int pred_exists = 0;
   int intpel_mv;

@@ -24,17 +24,6 @@
 #define DECLARE_ALIGNED(n,typ,val)  typ val
 #endif
 
-
-/* Declare an aligned array on the stack, for situations where the stack
- * pointer may not have the alignment we expect. Creates an array with a
- * modified name, then defines val to be a pointer, and aligns that pointer
- * within the array.
- */
-#define DECLARE_ALIGNED_ARRAY(a,typ,val,n)\
-  typ val##_[(n)+(a)/sizeof(typ)+1];\
-  typ *val = (typ*)((((intptr_t)val##_)+(a)-1)&((intptr_t)-(a)))
-
-
 /* Indicates that the usage of the specified variable has been audited to assure
  * that it's safe to use uninitialized. Silences 'may be used uninitialized'
  * warnings on gcc.

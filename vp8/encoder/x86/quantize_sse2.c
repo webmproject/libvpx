@@ -37,8 +37,8 @@ void vp8_regular_quantize_b_sse2(BLOCK *b, BLOCKD *d)
     char eob = 0;
     short *zbin_boost_ptr;
     short *qcoeff_ptr      = d->qcoeff;
-    DECLARE_ALIGNED_ARRAY(16, short, x, 16);
-    DECLARE_ALIGNED_ARRAY(16, short, y, 16);
+    DECLARE_ALIGNED(16, short, x[16]);
+    DECLARE_ALIGNED(16, short, y[16]);
 
     __m128i sz0, x0, sz1, x1, y0, y1, x_minus_zbin0, x_minus_zbin1;
     __m128i quant_shift0 = _mm_load_si128((__m128i *)(b->quant_shift));

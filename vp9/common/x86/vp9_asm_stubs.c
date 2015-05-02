@@ -118,7 +118,7 @@ void vp9_convolve8_##avg##opt(const uint8_t *src, ptrdiff_t src_stride, \
   if (x_step_q4 == 16 && y_step_q4 == 16) { \
     if (filter_x[0] || filter_x[1] || filter_x[2] || filter_x[3] == 128 || \
         filter_y[0] || filter_y[1] || filter_y[2] || filter_y[3] == 128) { \
-      DECLARE_ALIGNED_ARRAY(16, unsigned char, fdata2, 64 * 71); \
+      DECLARE_ALIGNED(16, unsigned char, fdata2[64 * 71]); \
       vp9_convolve8_horiz_##opt(src - 3 * src_stride, src_stride, fdata2, 64, \
                                 filter_x, x_step_q4, filter_y, y_step_q4, \
                                 w, h + 7); \
@@ -126,7 +126,7 @@ void vp9_convolve8_##avg##opt(const uint8_t *src, ptrdiff_t src_stride, \
                                       filter_x, x_step_q4, filter_y, \
                                       y_step_q4, w, h); \
     } else { \
-      DECLARE_ALIGNED_ARRAY(16, unsigned char, fdata2, 64 * 65); \
+      DECLARE_ALIGNED(16, unsigned char, fdata2[64 * 65]); \
       vp9_convolve8_horiz_##opt(src, src_stride, fdata2, 64, \
                                 filter_x, x_step_q4, filter_y, y_step_q4, \
                                 w, h + 1); \
@@ -259,7 +259,7 @@ void vp9_highbd_convolve8_##avg##opt(const uint8_t *src, ptrdiff_t src_stride, \
   if (x_step_q4 == 16 && y_step_q4 == 16) { \
     if (filter_x[0] || filter_x[1] || filter_x[2] || filter_x[3] == 128 || \
         filter_y[0] || filter_y[1] || filter_y[2] || filter_y[3] == 128) { \
-      DECLARE_ALIGNED_ARRAY(16, uint16_t, fdata2, 64 * 71); \
+      DECLARE_ALIGNED(16, uint16_t, fdata2[64 * 71]); \
       vp9_highbd_convolve8_horiz_##opt(src - 3 * src_stride, src_stride, \
                                        CONVERT_TO_BYTEPTR(fdata2), 64, \
                                        filter_x, x_step_q4, \
@@ -271,7 +271,7 @@ void vp9_highbd_convolve8_##avg##opt(const uint8_t *src, ptrdiff_t src_stride, \
                                              filter_y, y_step_q4, \
                                              w, h, bd); \
     } else { \
-      DECLARE_ALIGNED_ARRAY(16, uint16_t, fdata2, 64 * 65); \
+      DECLARE_ALIGNED(16, uint16_t, fdata2[64 * 65]); \
       vp9_highbd_convolve8_horiz_##opt(src, src_stride, \
                                        CONVERT_TO_BYTEPTR(fdata2), 64, \
                                        filter_x, x_step_q4, \

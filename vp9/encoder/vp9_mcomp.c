@@ -301,13 +301,13 @@ static INLINE unsigned int setup_center_error(const MACROBLOCKD *xd,
 #if CONFIG_VP9_HIGHBITDEPTH
   if (second_pred != NULL) {
     if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-      DECLARE_ALIGNED_ARRAY(16, uint16_t, comp_pred16, 64 * 64);
+      DECLARE_ALIGNED(16, uint16_t, comp_pred16[64 * 64]);
       vp9_highbd_comp_avg_pred(comp_pred16, second_pred, w, h, y + offset,
                                y_stride);
       besterr = vfp->vf(CONVERT_TO_BYTEPTR(comp_pred16), w, src, src_stride,
                         sse1);
     } else {
-      DECLARE_ALIGNED_ARRAY(16, uint8_t, comp_pred, 64 * 64);
+      DECLARE_ALIGNED(16, uint8_t, comp_pred[64 * 64]);
       vp9_comp_avg_pred(comp_pred, second_pred, w, h, y + offset, y_stride);
       besterr = vfp->vf(comp_pred, w, src, src_stride, sse1);
     }
@@ -319,7 +319,7 @@ static INLINE unsigned int setup_center_error(const MACROBLOCKD *xd,
 #else
   (void) xd;
   if (second_pred != NULL) {
-    DECLARE_ALIGNED_ARRAY(16, uint8_t, comp_pred, 64 * 64);
+    DECLARE_ALIGNED(16, uint8_t, comp_pred[64 * 64]);
     vp9_comp_avg_pred(comp_pred, second_pred, w, h, y + offset, y_stride);
     besterr = vfp->vf(comp_pred, w, src, src_stride, sse1);
   } else {

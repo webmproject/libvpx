@@ -182,11 +182,11 @@ TEST_P(Loop8Test6Param, OperationCheck) {
   const int count_test_block = number_of_iterations;
 #if CONFIG_VP9_HIGHBITDEPTH
   int32_t bd = bit_depth_;
-  DECLARE_ALIGNED_ARRAY(16, uint16_t, s, kNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(16, uint16_t, ref_s, kNumCoeffs);
+  DECLARE_ALIGNED(16, uint16_t, s[kNumCoeffs]);
+  DECLARE_ALIGNED(16, uint16_t, ref_s[kNumCoeffs]);
 #else
-  DECLARE_ALIGNED_ARRAY(8, uint8_t, s, kNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(8, uint8_t, ref_s, kNumCoeffs);
+  DECLARE_ALIGNED(8, uint8_t, s[kNumCoeffs]);
+  DECLARE_ALIGNED(8, uint8_t, ref_s[kNumCoeffs]);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   int err_count_total = 0;
   int first_failure = -1;
@@ -267,11 +267,11 @@ TEST_P(Loop8Test6Param, ValueCheck) {
   const int count_test_block = number_of_iterations;
 #if CONFIG_VP9_HIGHBITDEPTH
   const int32_t bd = bit_depth_;
-  DECLARE_ALIGNED_ARRAY(16, uint16_t, s, kNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(16, uint16_t, ref_s, kNumCoeffs);
+  DECLARE_ALIGNED(16, uint16_t, s[kNumCoeffs]);
+  DECLARE_ALIGNED(16, uint16_t, ref_s[kNumCoeffs]);
 #else
-  DECLARE_ALIGNED_ARRAY(8, uint8_t, s, kNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(8, uint8_t, ref_s, kNumCoeffs);
+  DECLARE_ALIGNED(8, uint8_t, s[kNumCoeffs]);
+  DECLARE_ALIGNED(8, uint8_t, ref_s[kNumCoeffs]);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   int err_count_total = 0;
   int first_failure = -1;
@@ -338,11 +338,11 @@ TEST_P(Loop8Test9Param, OperationCheck) {
   const int count_test_block = number_of_iterations;
 #if CONFIG_VP9_HIGHBITDEPTH
   const int32_t bd = bit_depth_;
-  DECLARE_ALIGNED_ARRAY(16, uint16_t, s, kNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(16, uint16_t, ref_s, kNumCoeffs);
+  DECLARE_ALIGNED(16, uint16_t, s[kNumCoeffs]);
+  DECLARE_ALIGNED(16, uint16_t, ref_s[kNumCoeffs]);
 #else
-  DECLARE_ALIGNED_ARRAY(8,  uint8_t,  s, kNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(8,  uint8_t,  ref_s, kNumCoeffs);
+  DECLARE_ALIGNED(8,  uint8_t,  s[kNumCoeffs]);
+  DECLARE_ALIGNED(8,  uint8_t,  ref_s[kNumCoeffs]);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   int err_count_total = 0;
   int first_failure = -1;
@@ -440,11 +440,11 @@ TEST_P(Loop8Test9Param, ValueCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
   const int count_test_block = number_of_iterations;
 #if CONFIG_VP9_HIGHBITDEPTH
-  DECLARE_ALIGNED_ARRAY(16, uint16_t, s, kNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(16, uint16_t, ref_s, kNumCoeffs);
+  DECLARE_ALIGNED(16, uint16_t, s[kNumCoeffs]);
+  DECLARE_ALIGNED(16, uint16_t, ref_s[kNumCoeffs]);
 #else
-  DECLARE_ALIGNED_ARRAY(8,  uint8_t, s, kNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(8,  uint8_t, ref_s, kNumCoeffs);
+  DECLARE_ALIGNED(8,  uint8_t, s[kNumCoeffs]);
+  DECLARE_ALIGNED(8,  uint8_t, ref_s[kNumCoeffs]);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
   int err_count_total = 0;
   int first_failure = -1;

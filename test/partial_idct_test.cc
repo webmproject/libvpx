@@ -74,16 +74,16 @@ TEST_P(PartialIDctTest, RunQuantCheck) {
       FAIL() << "Wrong Size!";
       break;
   }
-  DECLARE_ALIGNED_ARRAY(16, tran_low_t, test_coef_block1, kMaxNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(16, tran_low_t, test_coef_block2, kMaxNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(16, uint8_t, dst1, kMaxNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(16, uint8_t, dst2, kMaxNumCoeffs);
+  DECLARE_ALIGNED(16, tran_low_t, test_coef_block1[kMaxNumCoeffs]);
+  DECLARE_ALIGNED(16, tran_low_t, test_coef_block2[kMaxNumCoeffs]);
+  DECLARE_ALIGNED(16, uint8_t, dst1[kMaxNumCoeffs]);
+  DECLARE_ALIGNED(16, uint8_t, dst2[kMaxNumCoeffs]);
 
   const int count_test_block = 1000;
   const int block_size = size * size;
 
-  DECLARE_ALIGNED_ARRAY(16, int16_t, input_extreme_block, kMaxNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(16, tran_low_t, output_ref_block, kMaxNumCoeffs);
+  DECLARE_ALIGNED(16, int16_t, input_extreme_block[kMaxNumCoeffs]);
+  DECLARE_ALIGNED(16, tran_low_t, output_ref_block[kMaxNumCoeffs]);
 
   int max_error = 0;
   for (int i = 0; i < count_test_block; ++i) {
@@ -153,10 +153,10 @@ TEST_P(PartialIDctTest, ResultsMatch) {
       FAIL() << "Wrong Size!";
       break;
   }
-  DECLARE_ALIGNED_ARRAY(16, tran_low_t, test_coef_block1, kMaxNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(16, tran_low_t, test_coef_block2, kMaxNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(16, uint8_t, dst1, kMaxNumCoeffs);
-  DECLARE_ALIGNED_ARRAY(16, uint8_t, dst2, kMaxNumCoeffs);
+  DECLARE_ALIGNED(16, tran_low_t, test_coef_block1[kMaxNumCoeffs]);
+  DECLARE_ALIGNED(16, tran_low_t, test_coef_block2[kMaxNumCoeffs]);
+  DECLARE_ALIGNED(16, uint8_t, dst1[kMaxNumCoeffs]);
+  DECLARE_ALIGNED(16, uint8_t, dst2[kMaxNumCoeffs]);
   const int count_test_block = 1000;
   const int max_coeff = 32766 / 4;
   const int block_size = size * size;

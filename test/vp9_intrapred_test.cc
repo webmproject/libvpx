@@ -120,10 +120,10 @@ class VP9IntraPredTest
 
 TEST_P(VP9IntraPredTest, IntraPredTests) {
   // max block size is 32
-  DECLARE_ALIGNED_ARRAY(16, uint16_t, left_col, 2*32);
-  DECLARE_ALIGNED_ARRAY(16, uint16_t, above_data, 2*32+32);
-  DECLARE_ALIGNED_ARRAY(16, uint16_t, dst, 3 * 32 * 32);
-  DECLARE_ALIGNED_ARRAY(16, uint16_t, ref_dst, 3 * 32 * 32);
+  DECLARE_ALIGNED(16, uint16_t, left_col[2*32]);
+  DECLARE_ALIGNED(16, uint16_t, above_data[2*32+32]);
+  DECLARE_ALIGNED(16, uint16_t, dst[3 * 32 * 32]);
+  DECLARE_ALIGNED(16, uint16_t, ref_dst[3 * 32 * 32]);
   RunTest(left_col, above_data, dst, ref_dst);
 }
 

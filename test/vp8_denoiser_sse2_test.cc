@@ -52,13 +52,13 @@ TEST_P(VP8DenoiserTest, BitexactCheck) {
   // mc_avg_block is the denoised reference block,
   // avg_block_c is the denoised result from C code,
   // avg_block_sse2 is the denoised result from SSE2 code.
-  DECLARE_ALIGNED_ARRAY(16, uint8_t, sig_block_c, kNumPixels);
+  DECLARE_ALIGNED(16, uint8_t, sig_block_c[kNumPixels]);
   // Since in VP8 denoiser, the source signal will be changed,
   // we need another copy of the source signal as the input of sse2 code.
-  DECLARE_ALIGNED_ARRAY(16, uint8_t, sig_block_sse2, kNumPixels);
-  DECLARE_ALIGNED_ARRAY(16, uint8_t, mc_avg_block, kNumPixels);
-  DECLARE_ALIGNED_ARRAY(16, uint8_t, avg_block_c, kNumPixels);
-  DECLARE_ALIGNED_ARRAY(16, uint8_t, avg_block_sse2, kNumPixels);
+  DECLARE_ALIGNED(16, uint8_t, sig_block_sse2[kNumPixels]);
+  DECLARE_ALIGNED(16, uint8_t, mc_avg_block[kNumPixels]);
+  DECLARE_ALIGNED(16, uint8_t, avg_block_c[kNumPixels]);
+  DECLARE_ALIGNED(16, uint8_t, avg_block_sse2[kNumPixels]);
 
   for (int i = 0; i < count_test_block; ++i) {
     // Generate random motion magnitude, 20% of which exceed the threshold.

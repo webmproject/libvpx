@@ -238,12 +238,12 @@ static void vp8_temporal_filter_iterate_c
     int mb_rows = cpi->common.mb_rows;
     int mb_y_offset = 0;
     int mb_uv_offset = 0;
-    DECLARE_ALIGNED_ARRAY(16, unsigned int, accumulator, 16*16 + 8*8 + 8*8);
-    DECLARE_ALIGNED_ARRAY(16, unsigned short, count, 16*16 + 8*8 + 8*8);
+    DECLARE_ALIGNED(16, unsigned int, accumulator[16*16 + 8*8 + 8*8]);
+    DECLARE_ALIGNED(16, unsigned short, count[16*16 + 8*8 + 8*8]);
     MACROBLOCKD *mbd = &cpi->mb.e_mbd;
     YV12_BUFFER_CONFIG *f = cpi->frames[alt_ref_index];
     unsigned char *dst1, *dst2;
-    DECLARE_ALIGNED_ARRAY(16, unsigned char,  predictor, 16*16 + 8*8 + 8*8);
+    DECLARE_ALIGNED(16, unsigned char,  predictor[16*16 + 8*8 + 8*8]);
 
     /* Save input state */
     unsigned char *y_buffer = mbd->pre.y_buffer;

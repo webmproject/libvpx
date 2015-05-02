@@ -80,18 +80,18 @@ class VP9Quantize32Test : public ::testing::TestWithParam<QuantizeParam> {
 
 TEST_P(VP9QuantizeTest, OperationCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
-  DECLARE_ALIGNED_ARRAY(16, tran_low_t, coeff_ptr, 256);
-  DECLARE_ALIGNED_ARRAY(16, int16_t, zbin_ptr, 2);
-  DECLARE_ALIGNED_ARRAY(16, int16_t, round_ptr, 2);
-  DECLARE_ALIGNED_ARRAY(16, int16_t, quant_ptr, 2);
-  DECLARE_ALIGNED_ARRAY(16, int16_t, quant_shift_ptr, 2);
-  DECLARE_ALIGNED_ARRAY(16, tran_low_t, qcoeff_ptr, 256);
-  DECLARE_ALIGNED_ARRAY(16, tran_low_t, dqcoeff_ptr, 256);
-  DECLARE_ALIGNED_ARRAY(16, tran_low_t, ref_qcoeff_ptr, 256);
-  DECLARE_ALIGNED_ARRAY(16, tran_low_t, ref_dqcoeff_ptr, 256);
-  DECLARE_ALIGNED_ARRAY(16, int16_t, dequant_ptr, 2);
-  DECLARE_ALIGNED_ARRAY(16, uint16_t, eob_ptr, 1);
-  DECLARE_ALIGNED_ARRAY(16, uint16_t, ref_eob_ptr, 1);
+  DECLARE_ALIGNED(16, tran_low_t, coeff_ptr[256]);
+  DECLARE_ALIGNED(16, int16_t, zbin_ptr[2]);
+  DECLARE_ALIGNED(16, int16_t, round_ptr[2]);
+  DECLARE_ALIGNED(16, int16_t, quant_ptr[2]);
+  DECLARE_ALIGNED(16, int16_t, quant_shift_ptr[2]);
+  DECLARE_ALIGNED(16, tran_low_t, qcoeff_ptr[256]);
+  DECLARE_ALIGNED(16, tran_low_t, dqcoeff_ptr[256]);
+  DECLARE_ALIGNED(16, tran_low_t, ref_qcoeff_ptr[256]);
+  DECLARE_ALIGNED(16, tran_low_t, ref_dqcoeff_ptr[256]);
+  DECLARE_ALIGNED(16, int16_t, dequant_ptr[2]);
+  DECLARE_ALIGNED(16, uint16_t, eob_ptr[1]);
+  DECLARE_ALIGNED(16, uint16_t, ref_eob_ptr[1]);
   int err_count_total = 0;
   int first_failure = -1;
   for (int i = 0; i < number_of_iterations; ++i) {
@@ -139,18 +139,18 @@ TEST_P(VP9QuantizeTest, OperationCheck) {
 
 TEST_P(VP9Quantize32Test, OperationCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
-  DECLARE_ALIGNED_ARRAY(16, tran_low_t, coeff_ptr, 1024);
-  DECLARE_ALIGNED_ARRAY(16, int16_t, zbin_ptr, 2);
-  DECLARE_ALIGNED_ARRAY(16, int16_t, round_ptr, 2);
-  DECLARE_ALIGNED_ARRAY(16, int16_t, quant_ptr, 2);
-  DECLARE_ALIGNED_ARRAY(16, int16_t, quant_shift_ptr, 2);
-  DECLARE_ALIGNED_ARRAY(16, tran_low_t, qcoeff_ptr, 1024);
-  DECLARE_ALIGNED_ARRAY(16, tran_low_t, dqcoeff_ptr, 1024);
-  DECLARE_ALIGNED_ARRAY(16, tran_low_t, ref_qcoeff_ptr, 1024);
-  DECLARE_ALIGNED_ARRAY(16, tran_low_t, ref_dqcoeff_ptr, 1024);
-  DECLARE_ALIGNED_ARRAY(16, int16_t, dequant_ptr, 2);
-  DECLARE_ALIGNED_ARRAY(16, uint16_t, eob_ptr, 1);
-  DECLARE_ALIGNED_ARRAY(16, uint16_t, ref_eob_ptr, 1);
+  DECLARE_ALIGNED(16, tran_low_t, coeff_ptr[1024]);
+  DECLARE_ALIGNED(16, int16_t, zbin_ptr[2]);
+  DECLARE_ALIGNED(16, int16_t, round_ptr[2]);
+  DECLARE_ALIGNED(16, int16_t, quant_ptr[2]);
+  DECLARE_ALIGNED(16, int16_t, quant_shift_ptr[2]);
+  DECLARE_ALIGNED(16, tran_low_t, qcoeff_ptr[1024]);
+  DECLARE_ALIGNED(16, tran_low_t, dqcoeff_ptr[1024]);
+  DECLARE_ALIGNED(16, tran_low_t, ref_qcoeff_ptr[1024]);
+  DECLARE_ALIGNED(16, tran_low_t, ref_dqcoeff_ptr[1024]);
+  DECLARE_ALIGNED(16, int16_t, dequant_ptr[2]);
+  DECLARE_ALIGNED(16, uint16_t, eob_ptr[1]);
+  DECLARE_ALIGNED(16, uint16_t, ref_eob_ptr[1]);
   int err_count_total = 0;
   int first_failure = -1;
   for (int i = 0; i < number_of_iterations; ++i) {
@@ -198,18 +198,18 @@ TEST_P(VP9Quantize32Test, OperationCheck) {
 
 TEST_P(VP9QuantizeTest, EOBCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
-  DECLARE_ALIGNED_ARRAY(16, tran_low_t, coeff_ptr, 256);
-  DECLARE_ALIGNED_ARRAY(16, int16_t, zbin_ptr, 2);
-  DECLARE_ALIGNED_ARRAY(16, int16_t, round_ptr, 2);
-  DECLARE_ALIGNED_ARRAY(16, int16_t, quant_ptr, 2);
-  DECLARE_ALIGNED_ARRAY(16, int16_t, quant_shift_ptr, 2);
-  DECLARE_ALIGNED_ARRAY(16, tran_low_t, qcoeff_ptr, 256);
-  DECLARE_ALIGNED_ARRAY(16, tran_low_t, dqcoeff_ptr, 256);
-  DECLARE_ALIGNED_ARRAY(16, tran_low_t, ref_qcoeff_ptr, 256);
-  DECLARE_ALIGNED_ARRAY(16, tran_low_t, ref_dqcoeff_ptr, 256);
-  DECLARE_ALIGNED_ARRAY(16, int16_t, dequant_ptr, 2);
-  DECLARE_ALIGNED_ARRAY(16, uint16_t, eob_ptr, 1);
-  DECLARE_ALIGNED_ARRAY(16, uint16_t, ref_eob_ptr, 1);
+  DECLARE_ALIGNED(16, tran_low_t, coeff_ptr[256]);
+  DECLARE_ALIGNED(16, int16_t, zbin_ptr[2]);
+  DECLARE_ALIGNED(16, int16_t, round_ptr[2]);
+  DECLARE_ALIGNED(16, int16_t, quant_ptr[2]);
+  DECLARE_ALIGNED(16, int16_t, quant_shift_ptr[2]);
+  DECLARE_ALIGNED(16, tran_low_t, qcoeff_ptr[256]);
+  DECLARE_ALIGNED(16, tran_low_t, dqcoeff_ptr[256]);
+  DECLARE_ALIGNED(16, tran_low_t, ref_qcoeff_ptr[256]);
+  DECLARE_ALIGNED(16, tran_low_t, ref_dqcoeff_ptr[256]);
+  DECLARE_ALIGNED(16, int16_t, dequant_ptr[2]);
+  DECLARE_ALIGNED(16, uint16_t, eob_ptr[1]);
+  DECLARE_ALIGNED(16, uint16_t, ref_eob_ptr[1]);
   int err_count_total = 0;
   int first_failure = -1;
   for (int i = 0; i < number_of_iterations; ++i) {
@@ -262,18 +262,18 @@ TEST_P(VP9QuantizeTest, EOBCheck) {
 
 TEST_P(VP9Quantize32Test, EOBCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());
-  DECLARE_ALIGNED_ARRAY(16, tran_low_t, coeff_ptr, 1024);
-  DECLARE_ALIGNED_ARRAY(16, int16_t, zbin_ptr, 2);
-  DECLARE_ALIGNED_ARRAY(16, int16_t, round_ptr, 2);
-  DECLARE_ALIGNED_ARRAY(16, int16_t, quant_ptr, 2);
-  DECLARE_ALIGNED_ARRAY(16, int16_t, quant_shift_ptr, 2);
-  DECLARE_ALIGNED_ARRAY(16, tran_low_t, qcoeff_ptr, 1024);
-  DECLARE_ALIGNED_ARRAY(16, tran_low_t, dqcoeff_ptr, 1024);
-  DECLARE_ALIGNED_ARRAY(16, tran_low_t, ref_qcoeff_ptr, 1024);
-  DECLARE_ALIGNED_ARRAY(16, tran_low_t, ref_dqcoeff_ptr, 1024);
-  DECLARE_ALIGNED_ARRAY(16, int16_t, dequant_ptr, 2);
-  DECLARE_ALIGNED_ARRAY(16, uint16_t, eob_ptr, 1);
-  DECLARE_ALIGNED_ARRAY(16, uint16_t, ref_eob_ptr, 1);
+  DECLARE_ALIGNED(16, tran_low_t, coeff_ptr[1024]);
+  DECLARE_ALIGNED(16, int16_t, zbin_ptr[2]);
+  DECLARE_ALIGNED(16, int16_t, round_ptr[2]);
+  DECLARE_ALIGNED(16, int16_t, quant_ptr[2]);
+  DECLARE_ALIGNED(16, int16_t, quant_shift_ptr[2]);
+  DECLARE_ALIGNED(16, tran_low_t, qcoeff_ptr[1024]);
+  DECLARE_ALIGNED(16, tran_low_t, dqcoeff_ptr[1024]);
+  DECLARE_ALIGNED(16, tran_low_t, ref_qcoeff_ptr[1024]);
+  DECLARE_ALIGNED(16, tran_low_t, ref_dqcoeff_ptr[1024]);
+  DECLARE_ALIGNED(16, int16_t, dequant_ptr[2]);
+  DECLARE_ALIGNED(16, uint16_t, eob_ptr[1]);
+  DECLARE_ALIGNED(16, uint16_t, ref_eob_ptr[1]);
   int err_count_total = 0;
   int first_failure = -1;
   for (int i = 0; i < number_of_iterations; ++i) {

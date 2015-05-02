@@ -650,8 +650,8 @@ static int rd_pick_intra4x4block(
      * a temp buffer that meets the stride requirements, but we are only
      * interested in the left 4x4 block
      * */
-    DECLARE_ALIGNED_ARRAY(16, unsigned char,  best_predictor, 16*4);
-    DECLARE_ALIGNED_ARRAY(16, short, best_dqcoeff, 16);
+    DECLARE_ALIGNED(16, unsigned char,  best_predictor[16*4]);
+    DECLARE_ALIGNED(16, short, best_dqcoeff[16]);
     int dst_stride = x->e_mbd.dst.y_stride;
     unsigned char *dst = x->e_mbd.dst.y_buffer + b->offset;
 

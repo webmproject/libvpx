@@ -102,13 +102,13 @@ class Trans4x4TestBase {
     int64_t total_error = 0;
     const int count_test_block = 10000;
     for (int i = 0; i < count_test_block; ++i) {
-      DECLARE_ALIGNED_ARRAY(16, int16_t, test_input_block, kNumCoeffs);
-      DECLARE_ALIGNED_ARRAY(16, tran_low_t, test_temp_block, kNumCoeffs);
-      DECLARE_ALIGNED_ARRAY(16, uint8_t, dst, kNumCoeffs);
-      DECLARE_ALIGNED_ARRAY(16, uint8_t, src, kNumCoeffs);
+      DECLARE_ALIGNED(16, int16_t, test_input_block[kNumCoeffs]);
+      DECLARE_ALIGNED(16, tran_low_t, test_temp_block[kNumCoeffs]);
+      DECLARE_ALIGNED(16, uint8_t, dst[kNumCoeffs]);
+      DECLARE_ALIGNED(16, uint8_t, src[kNumCoeffs]);
 #if CONFIG_VP9_HIGHBITDEPTH
-      DECLARE_ALIGNED_ARRAY(16, uint16_t, dst16, kNumCoeffs);
-      DECLARE_ALIGNED_ARRAY(16, uint16_t, src16, kNumCoeffs);
+      DECLARE_ALIGNED(16, uint16_t, dst16[kNumCoeffs]);
+      DECLARE_ALIGNED(16, uint16_t, src16[kNumCoeffs]);
 #endif
 
       // Initialize a test block with input range [-255, 255].
@@ -142,6 +142,7 @@ class Trans4x4TestBase {
         const uint32_t diff =
             bit_depth_ == VPX_BITS_8 ? dst[j] - src[j] : dst16[j] - src16[j];
 #else
+        ASSERT_EQ(VPX_BITS_8, bit_depth_);
         const uint32_t diff = dst[j] - src[j];
 #endif
         const uint32_t error = diff * diff;
@@ -163,9 +164,9 @@ class Trans4x4TestBase {
   void RunCoeffCheck() {
     ACMRandom rnd(ACMRandom::DeterministicSeed());
     const int count_test_block = 5000;
-    DECLARE_ALIGNED_ARRAY(16, int16_t, input_block, kNumCoeffs);
-    DECLARE_ALIGNED_ARRAY(16, tran_low_t, output_ref_block, kNumCoeffs);
-    DECLARE_ALIGNED_ARRAY(16, tran_low_t, output_block, kNumCoeffs);
+    DECLARE_ALIGNED(16, int16_t, input_block[kNumCoeffs]);
+    DECLARE_ALIGNED(16, tran_low_t, output_ref_block[kNumCoeffs]);
+    DECLARE_ALIGNED(16, tran_low_t, output_block[kNumCoeffs]);
 
     for (int i = 0; i < count_test_block; ++i) {
       // Initialize a test block with input range [-mask_, mask_].
@@ -184,15 +185,13 @@ class Trans4x4TestBase {
   void RunMemCheck() {
     ACMRandom rnd(ACMRandom::DeterministicSeed());
     const int count_test_block = 5000;
-    DECLARE_ALIGNED_ARRAY(16, int16_t, input_block, kNumCoeffs);
-    DECLARE_ALIGNED_ARRAY(16, int16_t, input_extreme_block, kNumCoeffs);
-    DECLARE_ALIGNED_ARRAY(16, tran_low_t, output_ref_block, kNumCoeffs);
-    DECLARE_ALIGNED_ARRAY(16, tran_low_t, output_block, kNumCoeffs);
+    DECLARE_ALIGNED(16, int16_t, input_extreme_block[kNumCoeffs]);
+    DECLARE_ALIGNED(16, tran_low_t, output_ref_block[kNumCoeffs]);
+    DECLARE_ALIGNED(16, tran_low_t, output_block[kNumCoeffs]);
 
     for (int i = 0; i < count_test_block; ++i) {
       // Initialize a test block with input range [-mask_, mask_].
       for (int j = 0; j < kNumCoeffs; ++j) {
-        input_block[j] = (rnd.Rand16() & mask_) - (rnd.Rand16() & mask_);
         input_extreme_block[j] = rnd.Rand8() % 2 ? mask_ : -mask_;
       }
       if (i == 0) {
@@ -219,13 +218,13 @@ class Trans4x4TestBase {
   void RunInvAccuracyCheck(int limit) {
     ACMRandom rnd(ACMRandom::DeterministicSeed());
     const int count_test_block = 1000;
-    DECLARE_ALIGNED_ARRAY(16, int16_t, in, kNumCoeffs);
-    DECLARE_ALIGNED_ARRAY(16, tran_low_t, coeff, kNumCoeffs);
-    DECLARE_ALIGNED_ARRAY(16, uint8_t, dst, kNumCoeffs);
-    DECLARE_ALIGNED_ARRAY(16, uint8_t, src, kNumCoeffs);
+    DECLARE_ALIGNED(16, int16_t, in[kNumCoeffs]);
+    DECLARE_ALIGNED(16, tran_low_t, coeff[kNumCoeffs]);
+    DECLARE_ALIGNED(16, uint8_t, dst[kNumCoeffs]);
+    DECLARE_ALIGNED(16, uint8_t, src[kNumCoeffs]);
 #if CONFIG_VP9_HIGHBITDEPTH
-    DECLARE_ALIGNED_ARRAY(16, uint16_t, dst16, kNumCoeffs);
-    DECLARE_ALIGNED_ARRAY(16, uint16_t, src16, kNumCoeffs);
+    DECLARE_ALIGNED(16, uint16_t, dst16[kNumCoeffs]);
+    DECLARE_ALIGNED(16, uint16_t, src16[kNumCoeffs]);
 #endif
 
     for (int i = 0; i < count_test_block; ++i) {

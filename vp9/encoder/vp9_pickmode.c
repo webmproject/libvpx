@@ -1099,9 +1099,9 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   // process.
   // tmp[3] points to dst buffer, and the other 3 point to allocated buffers.
   PRED_BUFFER tmp[4];
-  DECLARE_ALIGNED_ARRAY(16, uint8_t, pred_buf, 3 * 64 * 64);
+  DECLARE_ALIGNED(16, uint8_t, pred_buf[3 * 64 * 64]);
 #if CONFIG_VP9_HIGHBITDEPTH
-  DECLARE_ALIGNED_ARRAY(16, uint16_t, pred_buf_16, 3 * 64 * 64);
+  DECLARE_ALIGNED(16, uint16_t, pred_buf_16[3 * 64 * 64]);
 #endif
   struct buf_2d orig_dst = pd->dst;
   PRED_BUFFER *best_pred = NULL;

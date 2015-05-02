@@ -20,21 +20,6 @@
 
 #include "vp9/encoder/vp9_variance.h"
 
-enum { kWidth8 = 8 };
-enum { kHeight8 = 8 };
-enum { kHeight8PlusOne = 9 };
-enum { kWidth16 = 16 };
-enum { kHeight16 = 16 };
-enum { kHeight16PlusOne = 17 };
-enum { kWidth32 = 32 };
-enum { kHeight32 = 32 };
-enum { kHeight32PlusOne = 33 };
-enum { kWidth64 = 64 };
-enum { kHeight64 = 64 };
-enum { kHeight64PlusOne = 65 };
-enum { kPixelStepOne = 1 };
-enum { kAlign16 = 16 };
-
 static INLINE int horizontal_add_s16x8(const int16x8_t v_16x8) {
   const int32x4_t a = vpaddlq_s16(v_16x8);
   const int64x2_t b = vpaddlq_s32(a);
@@ -84,30 +69,30 @@ static void variance_neon_w8(const uint8_t *a, int a_stride,
 void vp9_get8x8var_neon(const uint8_t *src_ptr, int source_stride,
                         const uint8_t *ref_ptr, int ref_stride,
                         unsigned int *sse, int *sum) {
-  variance_neon_w8(src_ptr, source_stride, ref_ptr, ref_stride, kWidth8,
-                   kHeight8, sse, sum);
+  variance_neon_w8(src_ptr, source_stride, ref_ptr, ref_stride, 8,
+                   8, sse, sum);
 }
 
 unsigned int vp9_variance8x8_neon(const uint8_t *a, int a_stride,
                                   const uint8_t *b, int b_stride,
                                   unsigned int *sse) {
   int sum;
-  variance_neon_w8(a, a_stride, b, b_stride, kWidth8, kHeight8, sse, &sum);
+  variance_neon_w8(a, a_stride, b, b_stride, 8, 8, sse, &sum);
   return *sse - (((int64_t)sum * sum) >> 6);  //  >> 6 = / 8 * 8
 }
 
 void vp9_get16x16var_neon(const uint8_t *src_ptr, int source_stride,
                           const uint8_t *ref_ptr, int ref_stride,
                           unsigned int *sse, int *sum) {
-  variance_neon_w8(src_ptr, source_stride, ref_ptr, ref_stride, kWidth16,
-                   kHeight16, sse, sum);
+  variance_neon_w8(src_ptr, source_stride, ref_ptr, ref_stride, 16,
+                   16, sse, sum);
 }
 
 unsigned int vp9_variance16x16_neon(const uint8_t *a, int a_stride,
                                     const uint8_t *b, int b_stride,
                                     unsigned int *sse) {
   int sum;
-  variance_neon_w8(a, a_stride, b, b_stride, kWidth16, kHeight16, sse, &sum);
+  variance_neon_w8(a, a_stride, b, b_stride, 16, 16, sse, &sum);
   return *sse - (((int64_t)sum * sum) >> 8);  //  >> 8 = / 16 * 16
 }
 
@@ -169,15 +154,15 @@ unsigned int vp9_sub_pixel_variance8x8_neon(const uint8_t *src,
                                             const uint8_t *dst,
                                             int dst_stride,
                                             unsigned int *sse) {
-  DECLARE_ALIGNED_ARRAY(kAlign16, uint8_t, temp2, kHeight8 * kWidth8);
-  DECLARE_ALIGNED_ARRAY(kAlign16, uint8_t, fdata3, kHeight8PlusOne * kWidth8);
+  DECLARE_ALIGNED(16, uint8_t, temp2[8 * 8]);
+  DECLARE_ALIGNED(16, uint8_t, fdata3[9 * 8]);
 
-  var_filter_block2d_bil_w8(src, fdata3, src_stride, kPixelStepOne,
-                            kHeight8PlusOne, kWidth8,
+  var_filter_block2d_bil_w8(src, fdata3, src_stride, 1,
+                            9, 8,
                             BILINEAR_FILTERS_2TAP(xoffset));
-  var_filter_block2d_bil_w8(fdata3, temp2, kWidth8, kWidth8, kHeight8,
-                            kWidth8, BILINEAR_FILTERS_2TAP(yoffset));
-  return vp9_variance8x8_neon(temp2, kWidth8, dst, dst_stride, sse);
+  var_filter_block2d_bil_w8(fdata3, temp2, 8, 8, 8,
+                            8, BILINEAR_FILTERS_2TAP(yoffset));
+  return vp9_variance8x8_neon(temp2, 8, dst, dst_stride, sse);
 }
 
 unsigned int vp9_sub_pixel_variance16x16_neon(const uint8_t *src,
@@ -187,29 +172,29 @@ unsigned int vp9_sub_pixel_variance16x16_neon(const uint8_t *src,
                                               const uint8_t *dst,
                                               int dst_stride,
                                               unsigned int *sse) {
-  DECLARE_ALIGNED_ARRAY(kAlign16, uint8_t, temp2, kHeight16 * kWidth16);
-  DECLARE_ALIGNED_ARRAY(kAlign16, uint8_t, fdata3, kHeight16PlusOne * kWidth16);
+  DECLARE_ALIGNED(16, uint8_t, temp2[16 * 16]);
+  DECLARE_ALIGNED(16, uint8_t, fdata3[17 * 16]);
 
-  var_filter_block2d_bil_w16(src, fdata3, src_stride, kPixelStepOne,
-                             kHeight16PlusOne, kWidth16,
+  var_filter_block2d_bil_w16(src, fdata3, src_stride, 1,
+                             17, 16,
                              BILINEAR_FILTERS_2TAP(xoffset));
-  var_filter_block2d_bil_w16(fdata3, temp2, kWidth16, kWidth16, kHeight16,
-                             kWidth16, BILINEAR_FILTERS_2TAP(yoffset));
-  return vp9_variance16x16_neon(temp2, kWidth16, dst, dst_stride, sse);
+  var_filter_block2d_bil_w16(fdata3, temp2, 16, 16, 16,
+                             16, BILINEAR_FILTERS_2TAP(yoffset));
+  return vp9_variance16x16_neon(temp2, 16, dst, dst_stride, sse);
 }
 
 void vp9_get32x32var_neon(const uint8_t *src_ptr, int source_stride,
                           const uint8_t *ref_ptr, int ref_stride,
                           unsigned int *sse, int *sum) {
-  variance_neon_w8(src_ptr, source_stride, ref_ptr, ref_stride, kWidth32,
-                   kHeight32, sse, sum);
+  variance_neon_w8(src_ptr, source_stride, ref_ptr, ref_stride, 32,
+                   32, sse, sum);
 }
 
 unsigned int vp9_variance32x32_neon(const uint8_t *a, int a_stride,
                                     const uint8_t *b, int b_stride,
                                     unsigned int *sse) {
   int sum;
-  variance_neon_w8(a, a_stride, b, b_stride, kWidth32, kHeight32, sse, &sum);
+  variance_neon_w8(a, a_stride, b, b_stride, 32, 32, sse, &sum);
   return *sse - (((int64_t)sum * sum) >> 10);  // >> 10 = / 32 * 32
 }
 
@@ -218,9 +203,9 @@ unsigned int vp9_variance32x64_neon(const uint8_t *a, int a_stride,
                                     unsigned int *sse) {
   int sum1, sum2;
   uint32_t sse1, sse2;
-  variance_neon_w8(a, a_stride, b, b_stride, kWidth32, kHeight32, &sse1, &sum1);
-  variance_neon_w8(a + (kHeight32 * a_stride), a_stride,
-                   b + (kHeight32 * b_stride), b_stride, kWidth32, kHeight32,
+  variance_neon_w8(a, a_stride, b, b_stride, 32, 32, &sse1, &sum1);
+  variance_neon_w8(a + (32 * a_stride), a_stride,
+                   b + (32 * b_stride), b_stride, 32, 32,
                    &sse2, &sum2);
   *sse = sse1 + sse2;
   sum1 += sum2;
@@ -232,9 +217,9 @@ unsigned int vp9_variance64x32_neon(const uint8_t *a, int a_stride,
                                     unsigned int *sse) {
   int sum1, sum2;
   uint32_t sse1, sse2;
-  variance_neon_w8(a, a_stride, b, b_stride, kWidth64, kHeight16, &sse1, &sum1);
-  variance_neon_w8(a + (kHeight16 * a_stride), a_stride,
-                   b + (kHeight16 * b_stride), b_stride, kWidth64, kHeight16,
+  variance_neon_w8(a, a_stride, b, b_stride, 64, 16, &sse1, &sum1);
+  variance_neon_w8(a + (16 * a_stride), a_stride,
+                   b + (16 * b_stride), b_stride, 64, 16,
                    &sse2, &sum2);
   *sse = sse1 + sse2;
   sum1 += sum2;
@@ -247,22 +232,22 @@ unsigned int vp9_variance64x64_neon(const uint8_t *a, int a_stride,
   int sum1, sum2;
   uint32_t sse1, sse2;
 
-  variance_neon_w8(a, a_stride, b, b_stride, kWidth64, kHeight16, &sse1, &sum1);
-  variance_neon_w8(a + (kHeight16 * a_stride), a_stride,
-                   b + (kHeight16 * b_stride), b_stride, kWidth64, kHeight16,
+  variance_neon_w8(a, a_stride, b, b_stride, 64, 16, &sse1, &sum1);
+  variance_neon_w8(a + (16 * a_stride), a_stride,
+                   b + (16 * b_stride), b_stride, 64, 16,
                    &sse2, &sum2);
   sse1 += sse2;
   sum1 += sum2;
 
-  variance_neon_w8(a + (kHeight16 * 2 * a_stride), a_stride,
-                   b + (kHeight16 * 2 * b_stride), b_stride,
-                   kWidth64, kHeight16, &sse2, &sum2);
+  variance_neon_w8(a + (16 * 2 * a_stride), a_stride,
+                   b + (16 * 2 * b_stride), b_stride,
+                   64, 16, &sse2, &sum2);
   sse1 += sse2;
   sum1 += sum2;
 
-  variance_neon_w8(a + (kHeight16 * 3 * a_stride), a_stride,
-                   b + (kHeight16 * 3 * b_stride), b_stride,
-                   kWidth64, kHeight16, &sse2, &sum2);
+  variance_neon_w8(a + (16 * 3 * a_stride), a_stride,
+                   b + (16 * 3 * b_stride), b_stride,
+                   64, 16, &sse2, &sum2);
   *sse = sse1 + sse2;
   sum1 += sum2;
   return *sse - (((int64_t)sum1 * sum1) >> 12);  // >> 12 = / 64 * 64
@@ -275,15 +260,15 @@ unsigned int vp9_sub_pixel_variance32x32_neon(const uint8_t *src,
                                               const uint8_t *dst,
                                               int dst_stride,
                                               unsigned int *sse) {
-  DECLARE_ALIGNED_ARRAY(kAlign16, uint8_t, temp2, kHeight32 * kWidth32);
-  DECLARE_ALIGNED_ARRAY(kAlign16, uint8_t, fdata3, kHeight32PlusOne * kWidth32);
+  DECLARE_ALIGNED(16, uint8_t, temp2[32 * 32]);
+  DECLARE_ALIGNED(16, uint8_t, fdata3[33 * 32]);
 
-  var_filter_block2d_bil_w16(src, fdata3, src_stride, kPixelStepOne,
-                             kHeight32PlusOne, kWidth32,
+  var_filter_block2d_bil_w16(src, fdata3, src_stride, 1,
+                             33, 32,
                              BILINEAR_FILTERS_2TAP(xoffset));
-  var_filter_block2d_bil_w16(fdata3, temp2, kWidth32, kWidth32, kHeight32,
-                             kWidth32, BILINEAR_FILTERS_2TAP(yoffset));
-  return vp9_variance32x32_neon(temp2, kWidth32, dst, dst_stride, sse);
+  var_filter_block2d_bil_w16(fdata3, temp2, 32, 32, 32,
+                             32, BILINEAR_FILTERS_2TAP(yoffset));
+  return vp9_variance32x32_neon(temp2, 32, dst, dst_stride, sse);
 }
 
 unsigned int vp9_sub_pixel_variance64x64_neon(const uint8_t *src,
@@ -293,13 +278,13 @@ unsigned int vp9_sub_pixel_variance64x64_neon(const uint8_t *src,
                                               const uint8_t *dst,
                                               int dst_stride,
                                               unsigned int *sse) {
-  DECLARE_ALIGNED_ARRAY(kAlign16, uint8_t, temp2, kHeight64 * kWidth64);
-  DECLARE_ALIGNED_ARRAY(kAlign16, uint8_t, fdata3, kHeight64PlusOne * kWidth64);
+  DECLARE_ALIGNED(16, uint8_t, temp2[64 * 64]);
+  DECLARE_ALIGNED(16, uint8_t, fdata3[65 * 64]);
 
-  var_filter_block2d_bil_w16(src, fdata3, src_stride, kPixelStepOne,
-                             kHeight64PlusOne, kWidth64,
+  var_filter_block2d_bil_w16(src, fdata3, src_stride, 1,
+                             65, 64,
                              BILINEAR_FILTERS_2TAP(xoffset));
-  var_filter_block2d_bil_w16(fdata3, temp2, kWidth64, kWidth64, kHeight64,
-                             kWidth64, BILINEAR_FILTERS_2TAP(yoffset));
-  return vp9_variance64x64_neon(temp2, kWidth64, dst, dst_stride, sse);
+  var_filter_block2d_bil_w16(fdata3, temp2, 64, 64, 64,
+                             64, BILINEAR_FILTERS_2TAP(yoffset));
+  return vp9_variance64x64_neon(temp2, 64, dst, dst_stride, sse);
 }
