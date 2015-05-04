@@ -1322,7 +1322,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       INTERP_FILTER best_filter = SWITCHABLE, filter;
       PRED_BUFFER *current_pred = this_mode_pred;
 
-      for (filter = EIGHTTAP; filter <= EIGHTTAP_SHARP; ++filter) {
+      for (filter = EIGHTTAP; filter <= EIGHTTAP_SMOOTH; ++filter) {
         int64_t cost;
         mbmi->interp_filter = filter;
         vp9_build_inter_predictors_sby(xd, mi_row, mi_col, bsize);
