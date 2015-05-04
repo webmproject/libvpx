@@ -4365,8 +4365,7 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int i;
   int refs[2] = { mbmi->ref_frame[0],
     (mbmi->ref_frame[1] < 0 ? 0 : mbmi->ref_frame[1]) };
-  int_mv ref_mv[2] =
-    { mbmi->ref_mvs[refs[0]][0], mbmi->ref_mvs[refs[1]][0] };
+  int_mv ref_mv[2];
   int_mv cur_mv[2];
 #if CONFIG_VP9_HIGHBITDEPTH
   DECLARE_ALIGNED_ARRAY(16, uint16_t, tmp_buf16, MAX_MB_PLANE * 64 * 64);
@@ -4406,6 +4405,9 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   mbmi->use_wedge_interintra = 0;
 #endif  // CONFIG_WEDGE_PARTITION
 #endif  // CONFIG_INTERINTRA
+
+  ref_mv[0] = mbmi->ref_mvs[refs[0]][0];
+  ref_mv[1] = mbmi->ref_mvs[refs[1]][0];
 
 #if CONFIG_WEDGE_PARTITION
   mbmi->use_wedge_interinter = 0;
