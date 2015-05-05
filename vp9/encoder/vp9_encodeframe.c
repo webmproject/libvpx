@@ -2158,7 +2158,6 @@ static void rd_auto_partition_range(VP9_COMP *cpi, const TileInfo *const tile,
   int bh, bw;
   BLOCK_SIZE min_size = BLOCK_4X4;
   BLOCK_SIZE max_size = BLOCK_64X64;
-  int i = 0;
   int bs_hist[BLOCK_SIZES] = {0};
 
   // Trap case where we do not have a prediction.
@@ -2188,36 +2187,10 @@ static void rd_auto_partition_range(VP9_COMP *cpi, const TileInfo *const tile,
                                   bs_hist);
     }
 
-    // adjust observed min and max
+    // Adjust observed min and max for "relaxed" auto partition case.
     if (cpi->sf.auto_min_max_partition_size == RELAXED_NEIGHBORING_MIN_MAX) {
       min_size = min_partition_size[min_size];
       max_size = max_partition_size[max_size];
-    } else if (cpi->sf.auto_min_max_partition_size ==
-               CONSTRAIN_NEIGHBORING_MIN_MAX) {
-      // adjust the search range based on the histogram of the observed
-      // partition sizes from left, above the previous co-located blocks
-      int sum = 0;
-      int first_moment = 0;
-      int second_moment = 0;
-      int var_unnormalized = 0;
-
-      for (i = 0; i < BLOCK_SIZES; i++) {
-        sum += bs_hist[i];
-        first_moment += bs_hist[i] * i;
-        second_moment += bs_hist[i] * i * i;
-      }
-
-      // if variance is small enough,
-      // adjust the range around its mean size, which gives a tighter range
-      var_unnormalized = second_moment - first_moment * first_moment / sum;
-      if (var_unnormalized <= 4 * sum) {
-        int mean = first_moment / sum;
-        min_size = min_partition_size[mean];
-        max_size = max_partition_size[mean];
-      } else {
-        min_size = min_partition_size[min_size];
-        max_size = max_partition_size[max_size];
-      }
     }
   }
 
