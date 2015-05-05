@@ -51,7 +51,6 @@
 #define KF_MAX_BOOST        128.0
 #define MIN_ARF_GF_BOOST    240
 #define MIN_DECAY_FACTOR    0.01
-#define MIN_GF_INTERVAL     4
 #define MIN_KF_BOOST        300
 #define NEW_MV_MODE_PENALTY 32
 #define SVC_FACTOR_PT_LOW   0.45
@@ -1323,14 +1322,17 @@ static double get_prediction_decay_rate(const VP9_COMP *cpi,
 // Function to test for a condition where a complex transition is followed
 // by a static section. For example in slide shows where there is a fade
 // between slides. This is to help with more optimal kf and gf positioning.
-static int detect_transition_to_still(const TWO_PASS *twopass,
+static int detect_transition_to_still(VP9_COMP *cpi,
                                       int frame_interval, int still_interval,
                                       double loop_decay_rate,
                                       double last_decay_rate) {
+  TWO_PASS *const twopass = &cpi->twopass;
+  RATE_CONTROL *const rc = &cpi->rc;
+
   // Break clause to detect very still sections after motion
   // For example a static image after a fade or other transition
   // instead of a clean scene cut.
-  if (frame_interval > MIN_GF_INTERVAL &&
+  if (frame_interval > rc->min_gf_interval &&
       loop_decay_rate >= 0.999 &&
       last_decay_rate < 0.9) {
     int j;
@@ -1838,7 +1840,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     int int_lbq =
       (int)(vp9_convert_qindex_to_q(rc->last_boosted_qindex,
                                    cpi->common.bit_depth));
-    active_min_gf_interval = MIN_GF_INTERVAL + MIN(2, int_max_q / 200);
+    active_min_gf_interval = rc->min_gf_interval + MIN(2, int_max_q / 200);
     if (active_min_gf_interval > rc->max_gf_interval)
       active_min_gf_interval = rc->max_gf_interval;
 
@@ -1894,7 +1896,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
       // Break clause to detect very still sections after motion. For example,
       // a static image after a fade or other transition.
-      if (detect_transition_to_still(twopass, i, 5, loop_decay_rate,
+      if (detect_transition_to_still(cpi, i, 5, loop_decay_rate,
                                      last_loop_decay_rate)) {
         allow_alt_ref = 0;
         break;
@@ -1960,7 +1962,7 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // Should we use the alternate reference frame.
   if (allow_alt_ref &&
       (i < cpi->oxcf.lag_in_frames) &&
-      (i >= MIN_GF_INTERVAL)) {
+      (i >= rc->min_gf_interval)) {
     // Calculate the boost for alt ref.
     rc->gfu_boost = calc_arf_boost(cpi, 0, (i - 1), (i - 1), &f_boost,
                                    &b_boost);
@@ -2239,7 +2241,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 
       // Special check for transition or high motion followed by a
       // static scene.
-      if (detect_transition_to_still(twopass, i, cpi->oxcf.key_freq - i,
+      if (detect_transition_to_still(cpi, i, cpi->oxcf.key_freq - i,
                                      loop_decay_rate, decay_accumulator))
         break;
 
