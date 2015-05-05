@@ -263,14 +263,14 @@ cglobal dc_top_predictor_16x16, 4, 5, 3, dst, stride, above, left, goffset
   REP_RET
 
 
-INIT_MMX sse
+INIT_XMM sse2
 cglobal dc_128_predictor_16x16, 4, 5, 3, dst, stride, above, left, goffset
   GET_GOT     goffsetq
 
   DEFINE_ARGS dst, stride, stride3, lines4
   lea             stride3q, [strideq*3]
   mov              lines4d, 4
-  movq    m0,        [GLOBAL(dc_128)]
+  mova    m0,        [GLOBAL(dc_128)]
 .loop:
   mova    [dstq          ], m0
   mova    [dstq+strideq  ], m0
