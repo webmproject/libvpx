@@ -168,7 +168,7 @@ add_proto qw/void vp9_dc_top_predictor_16x16/, "uint8_t *dst, ptrdiff_t y_stride
 specialize qw/vp9_dc_top_predictor_16x16/, "$sse2_x86inc";
 
 add_proto qw/void vp9_dc_left_predictor_16x16/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
-specialize qw/vp9_dc_left_predictor_16x16/;
+specialize qw/vp9_dc_left_predictor_16x16/, "$sse2_x86inc";
 
 add_proto qw/void vp9_dc_128_predictor_16x16/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
 specialize qw/vp9_dc_128_predictor_16x16/, "$sse2_x86inc";
@@ -204,13 +204,13 @@ add_proto qw/void vp9_dc_predictor_32x32/, "uint8_t *dst, ptrdiff_t y_stride, co
 specialize qw/vp9_dc_predictor_32x32/, "$sse2_x86inc";
 
 add_proto qw/void vp9_dc_top_predictor_32x32/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
-specialize qw/vp9_dc_top_predictor_32x32/;
+specialize qw/vp9_dc_top_predictor_32x32/, "$sse2_x86inc";
 
 add_proto qw/void vp9_dc_left_predictor_32x32/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
-specialize qw/vp9_dc_left_predictor_32x32/;
+specialize qw/vp9_dc_left_predictor_32x32/, "$sse2_x86inc";
 
 add_proto qw/void vp9_dc_128_predictor_32x32/, "uint8_t *dst, ptrdiff_t y_stride, const uint8_t *above, const uint8_t *left";
-specialize qw/vp9_dc_128_predictor_32x32/;
+specialize qw/vp9_dc_128_predictor_32x32/, "$sse2_x86inc";
 
 #
 # Loopfilter

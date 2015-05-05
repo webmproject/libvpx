@@ -19,6 +19,7 @@ dc_128: times 16 db 128
 pw2_4:  times 8 dw 2
 pw2_8:  times 8 dw 4
 pw2_16:  times 8 dw 8
+pw2_32:  times 8 dw 16
 
 SECTION .text
 
@@ -262,6 +263,37 @@ cglobal dc_top_predictor_16x16, 4, 5, 3, dst, stride, above, left, goffset
   RESTORE_GOT
   REP_RET
 
+INIT_XMM sse2
+cglobal dc_left_predictor_16x16, 4, 5, 3, dst, stride, above, left, goffset
+  GET_GOT     goffsetq
+
+  pxor                  m1, m1
+  pxor                  m2, m2
+  mova                  m0, [leftq]
+  DEFINE_ARGS dst, stride, stride3, lines4
+  lea             stride3q, [strideq*3]
+  mov              lines4d, 4
+  psadbw                m0, m1
+  psadbw                m2, m1
+  paddw                 m0, m2
+  movhlps               m2, m0
+  paddw                 m0, m2
+  paddw                 m0, [GLOBAL(pw2_16)]
+  psraw                 m0, 4
+  pshuflw               m0, m0, 0x0
+  punpcklqdq            m0, m0
+  packuswb              m0, m0
+.loop:
+  mova    [dstq          ], m0
+  mova    [dstq+strideq  ], m0
+  mova    [dstq+strideq*2], m0
+  mova    [dstq+stride3q ], m0
+  lea                 dstq, [dstq+strideq*4]
+  dec              lines4d
+  jnz .loop
+
+  RESTORE_GOT
+  REP_RET
 
 INIT_XMM sse2
 cglobal dc_128_predictor_16x16, 4, 5, 3, dst, stride, above, left, goffset
@@ -324,6 +356,101 @@ cglobal dc_predictor_32x32, 4, 5, 5, dst, stride, above, left, goffset
 
   RESTORE_GOT
   REP_RET
+
+INIT_XMM sse2
+cglobal dc_top_predictor_32x32, 4, 5, 5, dst, stride, above, left, goffset
+  GET_GOT     goffsetq
+
+  pxor                  m1, m1
+  mova                  m0, [aboveq]
+  mova                  m2, [aboveq+16]
+  DEFINE_ARGS dst, stride, stride3, lines4
+  lea             stride3q, [strideq*3]
+  mov              lines4d, 8
+  psadbw                m0, m1
+  psadbw                m2, m1
+  paddw                 m0, m2
+  movhlps               m2, m0
+  paddw                 m0, m2
+  paddw                 m0, [GLOBAL(pw2_32)]
+  psraw                 m0, 5
+  pshuflw               m0, m0, 0x0
+  punpcklqdq            m0, m0
+  packuswb              m0, m0
+.loop:
+  mova [dstq             ], m0
+  mova [dstq          +16], m0
+  mova [dstq+strideq     ], m0
+  mova [dstq+strideq  +16], m0
+  mova [dstq+strideq*2   ], m0
+  mova [dstq+strideq*2+16], m0
+  mova [dstq+stride3q    ], m0
+  mova [dstq+stride3q +16], m0
+  lea                 dstq, [dstq+strideq*4]
+  dec              lines4d
+  jnz .loop
+
+  RESTORE_GOT
+  REP_RET
+
+INIT_XMM sse2
+cglobal dc_left_predictor_32x32, 4, 5, 5, dst, stride, above, left, goffset
+  GET_GOT     goffsetq
+
+  pxor                  m1, m1
+  mova                  m0, [leftq]
+  mova                  m2, [leftq+16]
+  DEFINE_ARGS dst, stride, stride3, lines4
+  lea             stride3q, [strideq*3]
+  mov              lines4d, 8
+  psadbw                m0, m1
+  psadbw                m2, m1
+  paddw                 m0, m2
+  movhlps               m2, m0
+  paddw                 m0, m2
+  paddw                 m0, [GLOBAL(pw2_32)]
+  psraw                 m0, 5
+  pshuflw               m0, m0, 0x0
+  punpcklqdq            m0, m0
+  packuswb              m0, m0
+.loop:
+  mova [dstq             ], m0
+  mova [dstq          +16], m0
+  mova [dstq+strideq     ], m0
+  mova [dstq+strideq  +16], m0
+  mova [dstq+strideq*2   ], m0
+  mova [dstq+strideq*2+16], m0
+  mova [dstq+stride3q    ], m0
+  mova [dstq+stride3q +16], m0
+  lea                 dstq, [dstq+strideq*4]
+  dec              lines4d
+  jnz .loop
+
+  RESTORE_GOT
+  REP_RET
+
+INIT_XMM sse2
+cglobal dc_128_predictor_32x32, 4, 5, 3, dst, stride, above, left, goffset
+  GET_GOT     goffsetq
+
+  DEFINE_ARGS dst, stride, stride3, lines4
+  lea             stride3q, [strideq*3]
+  mov              lines4d, 8
+  mova    m0,        [GLOBAL(dc_128)]
+.loop:
+  mova [dstq             ], m0
+  mova [dstq          +16], m0
+  mova [dstq+strideq     ], m0
+  mova [dstq+strideq  +16], m0
+  mova [dstq+strideq*2   ], m0
+  mova [dstq+strideq*2+16], m0
+  mova [dstq+stride3q    ], m0
+  mova [dstq+stride3q +16], m0
+  lea                 dstq, [dstq+strideq*4]
+  dec              lines4d
+  jnz .loop
+  RESTORE_GOT
+  RET
 
 INIT_MMX sse
 cglobal v_predictor_4x4, 3, 3, 1, dst, stride, above
