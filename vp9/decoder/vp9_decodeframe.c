@@ -381,6 +381,15 @@ static void decode_block(VP9Decoder *const pbi, MACROBLOCKD *const xd,
   VP9_COMMON *const cm = &pbi->common;
   const int less8x8 = bsize < BLOCK_8X8;
   MB_MODE_INFO *mbmi = set_offsets(cm, xd, tile, bsize, mi_row, mi_col);
+
+  if (bsize >= BLOCK_8X8 && (cm->subsampling_x || cm->subsampling_y)) {
+    const BLOCK_SIZE uv_subsize =
+        ss_size_lookup[bsize][cm->subsampling_x][cm->subsampling_y];
+    if (uv_subsize == BLOCK_INVALID)
+      vpx_internal_error(xd->error_info,
+                         VPX_CODEC_CORRUPT_FRAME, "Invalid block size.");
+  }
+
   vp9_read_mode_info(pbi, xd, tile, mi_row, mi_col, r);
 
   if (less8x8)
@@ -444,18 +453,14 @@ static void decode_partition(VP9Decoder *const pbi, MACROBLOCKD *const xd,
   VP9_COMMON *const cm = &pbi->common;
   const int hbs = num_8x8_blocks_wide_lookup[bsize] / 2;
   PARTITION_TYPE partition;
-  BLOCK_SIZE subsize, uv_subsize;
+  BLOCK_SIZE subsize;
 
   if (mi_row >= cm->mi_rows || mi_col >= cm->mi_cols)
     return;
 
   partition = read_partition(cm, xd, hbs, mi_row, mi_col, bsize, r);
   subsize = get_subsize(bsize, partition);
-  uv_subsize = ss_size_lookup[subsize][cm->subsampling_x][cm->subsampling_y];
-  if (subsize >= BLOCK_8X8 && uv_subsize == BLOCK_INVALID)
-    vpx_internal_error(xd->error_info,
-                       VPX_CODEC_CORRUPT_FRAME, "Invalid block size.");
-  if (subsize < BLOCK_8X8) {
+  if (bsize == BLOCK_8X8) {
     decode_block(pbi, xd, tile, mi_row, mi_col, r, subsize);
   } else {
     switch (partition) {
