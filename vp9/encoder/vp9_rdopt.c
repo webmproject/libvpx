@@ -1642,6 +1642,9 @@ static int64_t handle_intrabc_mode(VP9_COMP *cpi, MACROBLOCK *x,
     int64_t distortion_s, psse_s;
     MB_MODE_INFO mbmi_temp;
     int64_t tx_cache_s[TX_MODES];
+    int q_idx = vp9_get_qindex(&cpi->common.seg, mbmi->segment_id,
+                             cpi->common.base_qindex);
+    int try_tx_skip = q_idx <= tx_skip_q_thresh_intra;
 #endif  // CONFIG_TX_SKIP
 
     vp9_subtract_plane(x, bsize, 0);
@@ -1650,29 +1653,30 @@ static int64_t handle_intrabc_mode(VP9_COMP *cpi, MACROBLOCK *x,
     super_block_yrd(cpi, x, rate_y, &distortion_y, &skippable_y, psse,
                     bsize, txfm_cache, ref_best_rd);
 #if CONFIG_TX_SKIP
-    mbmi_temp = *(mbmi);
-    mbmi->tx_skip[0] = 1;
-    super_block_yrd(cpi, x, &rate_s, &distortion_s, &skippable_s, &psse_s,
-                    bsize, tx_cache_s, ref_best_rd);
+    if (try_tx_skip) {
+      if (*rate_y != INT_MAX)
+        *rate_y += vp9_cost_bit(cpi->common.fc.y_tx_skip_prob[0], 0);
 
-    if (mbmi->tx_size < TX_32X32 && distortion_s != INT64_MAX)
-      distortion_s = distortion_s << 2;
+      mbmi_temp = *mbmi;
+      mbmi->tx_skip[0] = 1;
+      super_block_yrd(cpi, x, &rate_s, &distortion_s, &skippable_s, &psse_s,
+                      bsize, tx_cache_s, ref_best_rd);
 
-    if (rate_s != INT_MAX) {
-      if (*rate_y == INT_MAX ||
-          RDCOST(x->rdmult, x->rddiv, *rate_y, distortion_y) >
-      RDCOST(x->rdmult, x->rddiv, rate_s, distortion_s)) {
-        *rate_y = rate_s;
-        distortion_y = distortion_s;
-        *skippable = skippable_s;
-        *psse = psse_s;
+      if (rate_s != INT_MAX) {
+        rate_s += vp9_cost_bit(cpi->common.fc.y_tx_skip_prob[0], 1);
+        if (*rate_y == INT_MAX ||
+            RDCOST(x->rdmult, x->rddiv, *rate_y, distortion_y) >
+                RDCOST(x->rdmult, x->rddiv, rate_s, distortion_s)) {
+          *rate_y = rate_s;
+          distortion_y = distortion_s;
+          *skippable = skippable_s;
+          *psse = psse_s;
+        } else {
+          *mbmi = mbmi_temp;
+        }
       } else {
-        *(mbmi) = mbmi_temp;
-        mbmi->tx_skip[0] = 0;
+        *mbmi = mbmi_temp;
       }
-    } else {
-      *(mbmi) = mbmi_temp;
-      mbmi->tx_skip[0] = 0;
     }
 #endif  // CONFIG_TX_SKIP
 
@@ -1688,47 +1692,42 @@ static int64_t handle_intrabc_mode(VP9_COMP *cpi, MACROBLOCK *x,
     rdcosty = RDCOST(x->rdmult, x->rddiv, *rate2, *distortion);
     rdcosty = MIN(rdcosty, RDCOST(x->rdmult, x->rddiv, 0, *psse));
 
-#if CONFIG_TX_SKIP
     super_block_uvrd(cpi, x, rate_uv, &distortion_uv, &skippable_uv,
                      &sseuv, bsize, ref_best_rd - rdcosty);
-    mbmi->tx_skip[1] = 1;
-    mbmi_temp = *(mbmi);
-    super_block_uvrd(cpi, x, &rate_s, &distortion_s, &skippable_s,
-                     &psse_s, bsize, ref_best_rd - rdcosty);
+#if CONFIG_TX_SKIP
+    if (try_tx_skip) {
+      if (*rate_uv != INT_MAX)
+        *rate_uv +=
+            vp9_cost_bit(cpi->common.fc.uv_tx_skip_prob[mbmi->tx_skip[0]], 0);
 
-    if (rate_s != INT_MAX) {
-      if (get_uv_tx_size(mbmi, &xd->plane[1]) < TX_32X32)
-        distortion_s = distortion_s << 2;
+      mbmi_temp = *mbmi;
+      mbmi->tx_skip[1] = 1;
+      super_block_uvrd(cpi, x, &rate_s, &distortion_s, &skippable_s, &psse_s,
+                       bsize, ref_best_rd - rdcosty);
 
-      if (*rate_uv == INT_MAX ||
-          RDCOST(x->rdmult, x->rddiv, *rate_uv, distortion_uv) >
-      RDCOST(x->rdmult, x->rddiv, rate_s, distortion_s)) {
-        *rate_uv = rate_s;
-        distortion_uv = distortion_s;
-        skippable_uv = skippable_s;
-        sseuv = psse_s;
+      if (rate_s != INT_MAX) {
+        rate_s +=
+            vp9_cost_bit(cpi->common.fc.uv_tx_skip_prob[mbmi->tx_skip[0]], 1);
+        if (*rate_uv == INT_MAX ||
+            RDCOST(x->rdmult, x->rddiv, *rate_uv, distortion_uv) >
+                RDCOST(x->rdmult, x->rddiv, rate_s, distortion_s)) {
+          *rate_uv = rate_s;
+          distortion_uv = distortion_s;
+          skippable_uv = skippable_s;
+          sseuv = psse_s;
+        } else {
+          *mbmi = mbmi_temp;
+        }
       } else {
-        *(mbmi) = mbmi_temp;
-        mbmi->tx_skip[1] = 0;
+        *mbmi = mbmi_temp;
       }
-    } else {
-      *(mbmi) = mbmi_temp;
-      mbmi->tx_skip[1] = 0;
     }
-
+#endif  // CONFIG_TX_SKIP
     if (*rate_uv == INT_MAX) {
       *rate2 = INT_MAX;
       *distortion = INT64_MAX;
       return INT64_MAX;
     }
-#else
-    if (!super_block_uvrd(cpi, x, rate_uv, &distortion_uv, &skippable_uv,
-                          &sseuv, bsize, ref_best_rd - rdcosty)) {
-      *rate2 = INT_MAX;
-      *distortion = INT64_MAX;
-      return INT64_MAX;
-    }
-#endif  // CONFIG_TX_SKIP
 
     *psse += sseuv;
     *rate2 += *rate_uv;
@@ -2218,9 +2217,6 @@ static int64_t rd_pick_intrabc_sb_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int_mv frame_dv[MB_MODE_COUNT][MAX_REF_FRAMES];
   int i;
 #if CONFIG_TX_SKIP
-  int q_idx = vp9_get_qindex(&cpi->common.seg, mbmi->segment_id,
-                             cpi->common.base_qindex);
-  int try_tx_skip = q_idx <= tx_skip_q_thresh_intra;
   mbmi->tx_skip[0] = 0;
   mbmi->tx_skip[1] = 0;
 #endif  // CONFIG_TX_SKIP
@@ -2271,11 +2267,6 @@ static int64_t rd_pick_intrabc_sb_mode(VP9_COMP *cpi, MACROBLOCK *x,
     if (this_rd == INT64_MAX)
       continue;
     this_rate += bmode_costs[mode];
-#if CONFIG_TX_SKIP
-    if (try_tx_skip)
-      this_rate += vp9_cost_bit(cpi->common.fc.y_tx_skip_prob[0], 0) +
-                   vp9_cost_bit(cpi->common.fc.uv_tx_skip_prob[0], 0);
-#endif  // CONFIG_TX_SKIP
     this_rd = RDCOST(x->rdmult, x->rddiv, this_rate, this_distortion);
     if (this_rd < best_rd) {
       mbmi_selected = *mbmi;
