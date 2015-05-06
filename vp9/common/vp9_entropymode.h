@@ -19,6 +19,10 @@
 extern "C" {
 #endif
 
+#if CONFIG_INTRABC
+#define INTRABC_PROB 128
+#endif  // CONFIG_INTRABC
+
 #define TX_SIZE_CONTEXTS 2
 
 struct VP9Common;
@@ -218,8 +222,12 @@ static INLINE const vp9_prob *get_y_mode_probs(const MODE_INFO *mi,
                                                const MODE_INFO *above_mi,
                                                const MODE_INFO *left_mi,
                                                int block) {
-  const PREDICTION_MODE above = vp9_above_block_mode(mi, above_mi, block);
-  const PREDICTION_MODE left = vp9_left_block_mode(mi, left_mi, block);
+  PREDICTION_MODE above = vp9_above_block_mode(mi, above_mi, block);
+  PREDICTION_MODE left = vp9_left_block_mode(mi, left_mi, block);
+#if CONFIG_INTRABC
+  if (is_intrabc_mode(above)) above = DC_PRED;
+  if (is_intrabc_mode(left)) left = DC_PRED;
+#endif
   return vp9_kf_y_mode_prob[above][left];
 }
 

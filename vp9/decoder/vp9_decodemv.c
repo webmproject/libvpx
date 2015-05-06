@@ -263,8 +263,8 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
   const BLOCK_SIZE bsize = mbmi->sb_type;
   int i;
 #if CONFIG_INTRABC
+  int use_intrabc;
   int_mv dv_ref;
-  vp9_find_ref_dv(&dv_ref, mi_row, mi_col);
 #endif  // CONFIG_INTRABC
 
   mbmi->segment_id = read_intra_segment_id(cm, xd, mi_row, mi_col, r);
@@ -273,8 +273,25 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
 #else
   mbmi->skip = read_skip(cm, xd, mbmi->segment_id, r);
 #endif
+
+#if CONFIG_INTRABC
+  vp9_find_ref_dv(&dv_ref, mi_row, mi_col);
+  if (bsize >= BLOCK_8X8 /* && cm->allow_intrabc*/) {
+    use_intrabc = vp9_read(r, INTRABC_PROB);
+    if (use_intrabc) {
+      mbmi->mode = mbmi->uv_mode = NEWDV;
+      mbmi->interp_filter = BILINEAR;
+    }
+  } else {
+    use_intrabc = 0;
+  }
+#endif  // CONFIG_INTRABC
 #if CONFIG_PALETTE
-  if (bsize >= BLOCK_8X8 && cm->allow_palette_mode) {
+  if (bsize >= BLOCK_8X8 && cm->allow_palette_mode
+#if CONFIG_INTRABC
+      && !use_intrabc
+#endif  // CONFIG_INTRABC
+      ) {
     int palette_ctx = 0;
     if (above_mi)
       palette_ctx += (above_mi->mbmi.palette_enabled[0] == 1);
@@ -453,6 +470,11 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
   }
 #endif
 
+#if CONFIG_INTRABC
+  if (use_intrabc) {
+    xd->corrupted |= !assign_dv(cm, mbmi->mode, &mbmi->mv[0], &dv_ref, r);
+  } else
+#endif  // CONFIG_INTRABC
   switch (bsize) {
     case BLOCK_4X4:
 #if CONFIG_FILTERINTRA
@@ -471,9 +493,6 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
       }
       mbmi->filterbit = mi->b_filter_info[3];
 #endif
-#if CONFIG_INTRABC
-      xd->corrupted |= !assign_dv(cm, mbmi->mode, &mbmi->mv[0], &dv_ref, r);
-#endif  // CONFIG_INTRABC
       mbmi->mode = mi->bmi[3].as_mode;
       break;
     case BLOCK_4X8:
@@ -486,9 +505,6 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
       else
         mi->b_filter_info[0] = mi->b_filter_info[2] = 0;
 #endif
-#if CONFIG_INTRABC
-      xd->corrupted |= !assign_dv(cm, mbmi->mode, &mbmi->mv[0], &dv_ref, r);
-#endif  // CONFIG_INTRABC
       mi->bmi[1].as_mode = mi->bmi[3].as_mode = mbmi->mode =
           read_intra_mode(r, get_y_mode_probs(mi, above_mi, left_mi, 1));
 #if CONFIG_FILTERINTRA
@@ -498,9 +514,6 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
       else
         mi->b_filter_info[1] = mi->b_filter_info[3] = mbmi->filterbit = 0;
 #endif
-#if CONFIG_INTRABC
-      xd->corrupted |= !assign_dv(cm, mbmi->mode, &mbmi->mv[0], &dv_ref, r);
-#endif  // CONFIG_INTRABC
       break;
     case BLOCK_8X4:
       mi->bmi[0].as_mode = mi->bmi[1].as_mode =
@@ -512,9 +525,6 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
       else
         mi->b_filter_info[0] = mi->b_filter_info[1] = 0;
 #endif
-#if CONFIG_INTRABC
-      xd->corrupted |= !assign_dv(cm, mbmi->mode, &mbmi->mv[0], &dv_ref, r);
-#endif  // CONFIG_INTRABC
       mi->bmi[2].as_mode = mi->bmi[3].as_mode = mbmi->mode =
           read_intra_mode(r, get_y_mode_probs(mi, above_mi, left_mi, 2));
 #if CONFIG_FILTERINTRA
@@ -524,9 +534,6 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
       else
         mi->b_filter_info[2] = mi->b_filter_info[3] = mbmi->filterbit = 0;
 #endif
-#if CONFIG_INTRABC
-      xd->corrupted |= !assign_dv(cm, mbmi->mode, &mbmi->mv[0], &dv_ref, r);
-#endif  // CONFIG_INTRABC
       break;
     default:
 #if CONFIG_PALETTE
@@ -548,16 +555,10 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
       else
         mbmi->filterbit = 0;
 #endif  // CONFIG_FILTERINTRA
-#if CONFIG_INTRABC
-      xd->corrupted |= !assign_dv(cm, mbmi->mode, &mbmi->mv[0], &dv_ref, r);
-#endif  // CONFIG_INTRABC
   }
 
 #if CONFIG_INTRABC
-  if (is_intrabc_mode(mbmi->mode)) {
-    mbmi->uv_mode = mbmi->mode;
-    mbmi->interp_filter = BILINEAR;
-  } else
+  if (!use_intrabc)
 #endif  // CONFIG_INTRABC
 #if CONFIG_PALETTE
   if (!mbmi->palette_enabled[1])

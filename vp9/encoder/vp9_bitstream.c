@@ -99,6 +99,9 @@ void vp9_entropy_mode_init() {
 
 static void write_intra_mode(vp9_writer *w, PREDICTION_MODE mode,
                              const vp9_prob *probs) {
+#if CONFIG_INTRABC
+  assert(!is_intrabc_mode(mode));
+#endif  // CONFIG_INTRABC
   vp9_write_token(w, vp9_intra_mode_tree, probs, &intra_mode_encodings[mode]);
 }
 
@@ -685,9 +688,6 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
 #if CONFIG_PALETTE
     if (!mbmi->palette_enabled[1])
 #endif  // CONFIG_PALETTE
-#if CONFIG_INTRABC
-    if (!is_intrabc_mode(mode))
-#endif  // CONFIG_INTRABC
     write_intra_mode(w, mbmi->uv_mode, cm->fc.uv_mode_prob[mode]);
 #if CONFIG_FILTERINTRA
     if (is_filter_allowed(mbmi->uv_mode) &&
@@ -880,8 +880,18 @@ static void write_mb_modes_kf(const VP9_COMMON *cm,
 #if !CONFIG_MISC_ENTROPY
   write_skip(cm, xd, mbmi->segment_id, mi, w);
 #endif
+
+#if CONFIG_INTRABC
+  if (bsize >= BLOCK_8X8 /*&& cm->allow_palette_mode*/) {
+    vp9_write(w, is_intrabc_mode(mbmi->mode), INTRABC_PROB);
+  }
+#endif  // CONFIG_INTRABC
 #if CONFIG_PALETTE
-  if (bsize >= BLOCK_8X8 && cm->allow_palette_mode) {
+  if (bsize >= BLOCK_8X8 && cm->allow_palette_mode
+#if CONFIG_INTRABC
+      && !is_intrabc_mode(mbmi->mode)
+#endif  // CONFIG_INTRABC
+      ) {
     int n, m1, m2, i, j, k, rows, cols, palette_ctx, color_ctx;
     int color_new_idx = -1, color_order[PALETTE_MAX_SIZE];
     uint8_t buffer[4096];
@@ -1019,11 +1029,11 @@ static void write_mb_modes_kf(const VP9_COMMON *cm,
   if (bsize >= BLOCK_8X8) {
 #if CONFIG_PALETTE
     if (!mbmi->palette_enabled[0])
-      write_intra_mode(w, mbmi->mode,
-                       get_y_mode_probs(mi, above_mi, left_mi, 0));
-#else
-    write_intra_mode(w, mbmi->mode, get_y_mode_probs(mi, above_mi, left_mi, 0));
 #endif  // CONFIG_PALETTE
+#if CONFIG_INTRABC
+    if (!is_intrabc_mode(mbmi->mode))
+#endif  // CONFIG_INTRABC
+    write_intra_mode(w, mbmi->mode, get_y_mode_probs(mi, above_mi, left_mi, 0));
 #if CONFIG_FILTERINTRA
     if (is_filter_allowed(mbmi->mode) && is_filter_enabled(mbmi->tx_size)
 #if CONFIG_PALETTE

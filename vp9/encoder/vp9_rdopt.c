@@ -1394,9 +1394,12 @@ static int64_t rd_pick_intra_sub_8x8_y_mode(VP9_COMP *cpi, MACROBLOCK *mb,
       int64_t d = INT64_MAX, this_rd = INT64_MAX;
       i = idy * 2 + idx;
       if (cpi->common.frame_type == KEY_FRAME) {
-        const PREDICTION_MODE A = vp9_above_block_mode(mic, above_mi, i);
-        const PREDICTION_MODE L = vp9_left_block_mode(mic, left_mi, i);
-
+        PREDICTION_MODE A = vp9_above_block_mode(mic, above_mi, i);
+        PREDICTION_MODE L = vp9_left_block_mode(mic, left_mi, i);
+#if CONFIG_INTRABC
+        if (is_intrabc_mode(A)) A = DC_PRED;
+        if (is_intrabc_mode(L)) L = DC_PRED;
+#endif  // CONFIG_INTRABC
         bmode_costs  = cpi->y_mode_costs[A][L];
       }
 
@@ -1575,7 +1578,6 @@ static int64_t handle_intrabc_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t distortion_y = 0, distortion_uv = 0;
 
   assert(mbmi->ref_frame[0] == INTRA_FRAME);
-  assert(this_mode == NEWDV);
 
   if (this_mode == NEWDV) {
     int rate_mv;
@@ -1760,15 +1762,15 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int64_t this_distortion, this_rd;
   TX_SIZE best_tx = TX_4X4;
   int i;
-  int *bmode_costs;
+  const int *bmode_costs;
 #if CONFIG_FILTERINTRA
     int mode_ext, fbit, fbit_selected = 0;
 #endif  // CONFIG_FILTERINTRA
   const MODE_INFO *above_mi = xd->up_available ?
       xd->mi[-xd->mi_stride].src_mi : NULL;
   const MODE_INFO *left_mi = xd->left_available ? xd->mi[-1].src_mi : NULL;
-  const PREDICTION_MODE A = vp9_above_block_mode(mic, above_mi, 0);
-  const PREDICTION_MODE L = vp9_left_block_mode(mic, left_mi, 0);
+  PREDICTION_MODE A = vp9_above_block_mode(mic, above_mi, 0);
+  PREDICTION_MODE L = vp9_left_block_mode(mic, left_mi, 0);
 #if CONFIG_TX_SKIP
   int tx_skipped = 0;
   int q_idx = vp9_get_qindex(&cpi->common.seg, mic->mbmi.segment_id,
@@ -1786,6 +1788,10 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
   uint8_t best_index[PALETTE_MAX_SIZE], best_literal[PALETTE_MAX_SIZE];
   int8_t palette_color_delta[PALETTE_MAX_SIZE];
 #endif  // CONFIG_PALETTE
+#if CONFIG_INTRABC
+  if (is_intrabc_mode(A)) A = DC_PRED;
+  if (is_intrabc_mode(L)) L = DC_PRED;
+#endif  // CONFIG_INTRABC
   bmode_costs = cpi->y_mode_costs[A][L];
 
   if (cpi->sf.tx_size_search_method == USE_FULL_RD)
@@ -1834,6 +1840,9 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
     if (try_tx_skip)
       this_rate += vp9_cost_bit(cpi->common.fc.y_tx_skip_prob[0], 0);
 #endif
+#if CONFIG_INTRABC
+    this_rate += vp9_cost_bit(INTRABC_PROB, 0);
+#endif  // CONFIG_INTRABC
 #if CONFIG_FILTERINTRA
     if (is_filter_allowed(mode) && is_filter_enabled(mic->mbmi.tx_size))
       this_rate += vp9_cost_bit(cpi->common.fc.filterintra_prob
@@ -1900,6 +1909,9 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
     this_rate = this_rate_tokenonly + bmode_costs[mode];
     this_rate += vp9_cost_bit(cpi->common.fc.y_tx_skip_prob[0], 1);
+#if CONFIG_INTRABC
+    this_rate += vp9_cost_bit(INTRABC_PROB, 0);
+#endif  // CONFIG_INTRABC
 #if CONFIG_FILTERINTRA
     if (is_filter_allowed(mode) && is_filter_enabled(mic->mbmi.tx_size))
       this_rate += vp9_cost_bit(cpi->common.fc.filterintra_prob
@@ -2121,6 +2133,9 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
       this_rate += vp9_cost_bit(cpi->common.fc.y_tx_skip_prob[0],
                                 mic->mbmi.tx_skip[0]);
 #endif  // CONFIG_TX_SKIP
+#if CONFIG_INTRABC
+      this_rate += vp9_cost_bit(INTRABC_PROB, 0);
+#endif  // CONFIG_INTRABC
       this_rd = RDCOST(x->rdmult, x->rddiv, this_rate, this_distortion);
       if (this_rd < best_rd) {
         mode_selected   = DC_PRED;
@@ -2202,14 +2217,9 @@ static int64_t rd_pick_intrabc_sb_mode(VP9_COMP *cpi, MACROBLOCK *x,
   PREDICTION_MODE mode;
   MACROBLOCKD *const xd = &x->e_mbd;
   MODE_INFO *const mic = xd->mi[0].src_mi;
-  const MODE_INFO *above_mi = xd->mi[-xd->mi_stride].src_mi;
-  const MODE_INFO *left_mi = xd->left_available ? xd->mi[-1].src_mi : NULL;
-  const PREDICTION_MODE A = vp9_above_block_mode(mic, above_mi, 0);
-  const PREDICTION_MODE L = vp9_left_block_mode(mic, left_mi, 0);
   MB_MODE_INFO *mbmi = &mic->mbmi;
   MB_MODE_INFO mbmi_selected = *mbmi;
   int best_skip = x->skip;
-  const int *bmode_costs = cpi->y_mode_costs[A][L];
   struct buf_2d yv12_mb[MAX_MB_PLANE];
   int i;
 #if CONFIG_TX_SKIP
@@ -2261,7 +2271,7 @@ static int64_t rd_pick_intrabc_sb_mode(VP9_COMP *cpi, MACROBLOCK *x,
     cpi->common.interp_filter = saved_interp_filter;
     if (this_rd == INT64_MAX)
       continue;
-    this_rate += bmode_costs[mode];
+    this_rate += vp9_cost_bit(INTRABC_PROB, 1);
     this_rd = RDCOST(x->rdmult, x->rddiv, this_rate, this_distortion);
     if (this_rd < best_rd) {
       mbmi_selected = *mbmi;
@@ -5614,6 +5624,9 @@ static void rd_pick_palette_444(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *rd_cost,
         }
       }
       rate_uv = rate_uv_tokenonly + (1 + 8 * 2 * n) * vp9_cost_bit(128, 0);
+#if CONFIG_INTRABC
+      rate_y += vp9_cost_bit(INTRABC_PROB, 0);
+#endif  // CONFIG_INTRABC
 #if CONFIG_TX_SKIP
       rate_y +=
           vp9_cost_bit(cpi->common.fc.y_tx_skip_prob[0], mbmi->tx_skip[0]);
