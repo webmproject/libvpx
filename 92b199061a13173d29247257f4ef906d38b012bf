@@ -22,6 +22,30 @@
       "revId": "92b199061a13173d29247257f4ef906d38b012bf",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8d1e2d58_8fb8bfd8",
+        "filename": "test/dct16x16_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 489,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-05-06T23:09:05Z",
+      "side": 0,
+      "message": "these were dead variables, but the indirection added by DECLARE_ALIGNED_ARRAY hid the warning",
+      "parentUuid": "8d1e2d58_06e6dcb3",
+      "range": {
+        "startLine": 489,
+        "startChar": 26,
+        "endLine": 489,
+        "endChar": 36
+      },
+      "revId": "92b199061a13173d29247257f4ef906d38b012bf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
