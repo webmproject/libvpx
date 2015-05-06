@@ -1896,10 +1896,10 @@ void dec_build_inter_predictors(VP9Decoder *const pbi, MACROBLOCKD *xd,
   // width/height is not a multiple of 8 pixels.
   if (is_scaled || scaled_mv.col || scaled_mv.row ||
       (frame_width & 0x7) || (frame_height & 0x7)) {
-    int y1 = ((y0_16 + (h - 1) * ys) >> SUBPEL_BITS) + 1;
+    int y1 = (y0_16 + (h - 1) * ys) >> SUBPEL_BITS;
 
     // Get reference block bottom right horizontal coordinate.
-    int x1 = ((x0_16 + (w - 1) * xs) >> SUBPEL_BITS) + 1;
+    int x1 = (x0_16 + (w - 1) * xs) >> SUBPEL_BITS;
     int x_pad = 0, y_pad = 0;
 
     if (subpel_x || (sf->x_step_q4 != SUBPEL_SHIFTS)) {
