@@ -380,7 +380,7 @@ static INLINE void set_mi_row_col(MACROBLOCKD *xd, const TileInfo *const tile,
   xd->left_available  = (mi_col > tile->mi_col_start);
   if (xd->up_available) {
     xd->above_mi = xd->mi[-xd->mi_stride];
-    xd->above_mbmi = xd->above_mi ? &xd->above_mi->mbmi : NULL;
+    xd->above_mbmi = &xd->above_mi->mbmi;
   } else {
     xd->above_mi = NULL;
     xd->above_mbmi = NULL;
@@ -388,7 +388,7 @@ static INLINE void set_mi_row_col(MACROBLOCKD *xd, const TileInfo *const tile,
 
   if (xd->left_available) {
     xd->left_mi = xd->mi[-1];
-    xd->left_mbmi = xd->left_mi ? &xd->left_mi->mbmi : NULL;
+    xd->left_mbmi = &xd->left_mi->mbmi;
   } else {
     xd->left_mi = NULL;
     xd->left_mbmi = NULL;
