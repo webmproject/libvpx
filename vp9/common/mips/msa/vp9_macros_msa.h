@@ -358,6 +358,14 @@
   src = (v16u8)__msa_insert_d((v2i64)(src), 1, (src1));  \
 }
 
+#define STORE_4VECS_SH(ptr, stride,           \
+                       in0, in1, in2, in3) {  \
+  STORE_SH(in0, ((ptr) + 0 * stride));        \
+  STORE_SH(in1, ((ptr) + 1 * stride));        \
+  STORE_SH(in2, ((ptr) + 2 * stride));        \
+  STORE_SH(in3, ((ptr) + 3 * stride));        \
+}
+
 #define STORE_8VECS_SH(ptr, stride,           \
                        in0, in1, in2, in3,    \
                        in4, in5, in6, in7) {  \
