@@ -295,6 +295,40 @@
                 (out4), (out5), (out6), (out7));  \
 }
 
+#define LOAD_2VECS_SH(psrc, stride,       \
+                      val0, val1) {       \
+  val0 = LOAD_SH((psrc) + 0 * (stride));  \
+  val1 = LOAD_SH((psrc) + 1 * (stride));  \
+}
+
+#define LOAD_4VECS_SH(psrc, stride,                          \
+                      val0, val1, val2, val3) {              \
+  LOAD_2VECS_SH((psrc), (stride), val0, val1);               \
+  LOAD_2VECS_SH((psrc + 2 * stride), (stride), val2, val3);  \
+}
+
+#define LOAD_8VECS_SH(psrc, stride,              \
+                      val0, val1, val2, val3,    \
+                      val4, val5, val6, val7) {  \
+  LOAD_4VECS_SH((psrc), (stride),                \
+                val0, val1, val2, val3);         \
+  LOAD_4VECS_SH((psrc + 4 * stride), (stride),   \
+                val4, val5, val6, val7);         \
+}
+
+#define LOAD_16VECS_SH(psrc, stride,                  \
+                       val0, val1, val2, val3,        \
+                       val4, val5, val6, val7,        \
+                       val8, val9, val10, val11,      \
+                       val12, val13, val14, val15) {  \
+  LOAD_8VECS_SH((psrc), (stride),                     \
+                val0, val1, val2, val3,               \
+                val4, val5, val6, val7);              \
+  LOAD_8VECS_SH((psrc + 8 * (stride)), (stride),      \
+                val8, val9, val10, val11,             \
+                val12, val13, val14, val15);          \
+}
+
 #define STORE_4VECS_UB(dst_out, pitch,         \
                        in0, in1, in2, in3) {   \
   STORE_UB((in0), (dst_out));                  \
@@ -324,6 +358,67 @@
   src = (v16u8)__msa_insert_d((v2i64)(src), 1, (src1));  \
 }
 
+#define STORE_8VECS_SH(ptr, stride,           \
+                       in0, in1, in2, in3,    \
+                       in4, in5, in6, in7) {  \
+  STORE_SH(in0, ((ptr) + 0 * stride));        \
+  STORE_SH(in1, ((ptr) + 1 * stride));        \
+  STORE_SH(in2, ((ptr) + 2 * stride));        \
+  STORE_SH(in3, ((ptr) + 3 * stride));        \
+  STORE_SH(in4, ((ptr) + 4 * stride));        \
+  STORE_SH(in5, ((ptr) + 5 * stride));        \
+  STORE_SH(in6, ((ptr) + 6 * stride));        \
+  STORE_SH(in7, ((ptr) + 7 * stride));        \
+}
+
+#define CLIP_UNSIGNED_CHAR_H(in) ({                   \
+  v8i16 max_m = __msa_ldi_h(255);                     \
+  v8i16 out_m;                                        \
+                                                      \
+  out_m = __msa_maxi_s_h((v8i16)(in), 0);             \
+  out_m = __msa_min_s_h((v8i16)max_m, (v8i16)out_m);  \
+  out_m;                                              \
+})
+
+/* halfword 8x8 transpose macro */
+#define TRANSPOSE8x8_H_SH(in0, in1, in2, in3,                 \
+                          in4, in5, in6, in7,                 \
+                          out0, out1, out2, out3,             \
+                          out4, out5, out6, out7) {           \
+  v8i16 s0_m, s1_m;                                           \
+  v8i16 tmp0_m, tmp1_m, tmp2_m, tmp3_m;                       \
+  v8i16 tmp4_m, tmp5_m, tmp6_m, tmp7_m;                       \
+                                                              \
+  s0_m = __msa_ilvr_h((v8i16)(in6), (v8i16)(in4));            \
+  s1_m = __msa_ilvr_h((v8i16)(in7), (v8i16)(in5));            \
+  tmp0_m = __msa_ilvr_h((v8i16)s1_m, (v8i16)s0_m);            \
+  tmp1_m = __msa_ilvl_h((v8i16)s1_m, (v8i16)s0_m);            \
+                                                              \
+  s0_m = __msa_ilvl_h((v8i16)(in6), (v8i16)(in4));            \
+  s1_m = __msa_ilvl_h((v8i16)(in7), (v8i16)(in5));            \
+  tmp2_m = __msa_ilvr_h((v8i16)s1_m, (v8i16)s0_m);            \
+  tmp3_m = __msa_ilvl_h((v8i16)s1_m, (v8i16)s0_m);            \
+                                                              \
+  s0_m = __msa_ilvr_h((v8i16)(in2), (v8i16)(in0));            \
+  s1_m = __msa_ilvr_h((v8i16)(in3), (v8i16)(in1));            \
+  tmp4_m = __msa_ilvr_h((v8i16)s1_m, (v8i16)s0_m);            \
+  tmp5_m = __msa_ilvl_h((v8i16)s1_m, (v8i16)s0_m);            \
+                                                              \
+  s0_m = __msa_ilvl_h((v8i16)(in2), (v8i16)(in0));            \
+  s1_m = __msa_ilvl_h((v8i16)(in3), (v8i16)(in1));            \
+  tmp6_m = __msa_ilvr_h((v8i16)s1_m, (v8i16)s0_m);            \
+  tmp7_m = __msa_ilvl_h((v8i16)s1_m, (v8i16)s0_m);            \
+                                                              \
+  out0 = (v8i16)__msa_pckev_d((v2i64)tmp0_m, (v2i64)tmp4_m);  \
+  out1 = (v8i16)__msa_pckod_d((v2i64)tmp0_m, (v2i64)tmp4_m);  \
+  out2 = (v8i16)__msa_pckev_d((v2i64)tmp1_m, (v2i64)tmp5_m);  \
+  out3 = (v8i16)__msa_pckod_d((v2i64)tmp1_m, (v2i64)tmp5_m);  \
+  out4 = (v8i16)__msa_pckev_d((v2i64)tmp2_m, (v2i64)tmp6_m);  \
+  out5 = (v8i16)__msa_pckod_d((v2i64)tmp2_m, (v2i64)tmp6_m);  \
+  out6 = (v8i16)__msa_pckev_d((v2i64)tmp3_m, (v2i64)tmp7_m);  \
+  out7 = (v8i16)__msa_pckod_d((v2i64)tmp3_m, (v2i64)tmp7_m);  \
+}
+
 /* interleave macros */
 /* no in-place support */
 #define ILV_B_LRLR_UB(in0, in1, in2, in3,                  \
@@ -332,6 +427,19 @@
   out1 = (v16u8)__msa_ilvr_b((v16i8)(in1), (v16i8)(in0));  \
   out2 = (v16u8)__msa_ilvl_b((v16i8)(in3), (v16i8)(in2));  \
   out3 = (v16u8)__msa_ilvr_b((v16i8)(in3), (v16i8)(in2));  \
+}
+
+#define ILV_H_LRLR_SH(in0, in1, in2, in3,           \
+                      out0, out1, out2, out3) {     \
+  out0 = __msa_ilvl_h((v8i16)(in1), (v8i16)(in0));  \
+  out1 = __msa_ilvr_h((v8i16)(in1), (v8i16)(in0));  \
+  out2 = __msa_ilvl_h((v8i16)(in3), (v8i16)(in2));  \
+  out3 = __msa_ilvr_h((v8i16)(in3), (v8i16)(in2));  \
+}
+
+#define ILV_H_LR_SH(in0, in1, out0, out1) {         \
+  out0 = __msa_ilvl_h((v8i16)(in1), (v8i16)(in0));  \
+  out1 = __msa_ilvr_h((v8i16)(in1), (v8i16)(in0));  \
 }
 
 #define ILVR_B_2VECS_UB(in0_r, in1_r, in0_l, in1_l,            \
@@ -447,6 +555,21 @@
                   out3, in3_l, in3_r);         \
 }
 
+#define DOTP_S_W_4VECS_SW(m0, c0, m1, c1,            \
+                          m2, c2, m3, c3,            \
+                          out0, out1, out2, out3) {  \
+  out0 = __msa_dotp_s_w((v8i16)(m0), (v8i16)(c0));   \
+  out1 = __msa_dotp_s_w((v8i16)(m1), (v8i16)(c1));   \
+  out2 = __msa_dotp_s_w((v8i16)(m2), (v8i16)(c2));   \
+  out3 = __msa_dotp_s_w((v8i16)(m3), (v8i16)(c3));   \
+}
+
+#define PCKEV_H_2VECS_SH(in0_l, in0_r, in1_l, in1_r,     \
+                         out0, out1) {                   \
+  out0 = __msa_pckev_h((v8i16)(in0_l), (v8i16)(in0_r));  \
+  out1 = __msa_pckev_h((v8i16)(in1_l), (v8i16)(in1_r));  \
+}
+
 #define XORI_B_2VECS_UB(val0, val1,               \
                         out0, out1, xor_val) {    \
   out0 = __msa_xori_b((v16u8)(val0), (xor_val));  \
@@ -497,6 +620,24 @@
   out1 = (v8u16)__msa_srari_h((v8i16)(val1), (shift_right_val));  \
   out2 = (v8u16)__msa_srari_h((v8i16)(val2), (shift_right_val));  \
   out3 = (v8u16)__msa_srari_h((v8i16)(val3), (shift_right_val));  \
+}
+
+#define SRARI_H_4VECS_SH(val0, val1, val2, val3,           \
+                         out0, out1, out2, out3,           \
+                         shift_right_val) {                \
+  out0 = __msa_srari_h((v8i16)(val0), (shift_right_val));  \
+  out1 = __msa_srari_h((v8i16)(val1), (shift_right_val));  \
+  out2 = __msa_srari_h((v8i16)(val2), (shift_right_val));  \
+  out3 = __msa_srari_h((v8i16)(val3), (shift_right_val));  \
+}
+
+#define SRARI_W_4VECS_SW(val0, val1, val2, val3,           \
+                         out0, out1, out2, out3,           \
+                         shift_right_val) {                \
+  out0 = __msa_srari_w((v4i32)(val0), (shift_right_val));  \
+  out1 = __msa_srari_w((v4i32)(val1), (shift_right_val));  \
+  out2 = __msa_srari_w((v4i32)(val2), (shift_right_val));  \
+  out3 = __msa_srari_w((v4i32)(val3), (shift_right_val));  \
 }
 
 #define SRARI_SATURATE_UNSIGNED_H(input, right_shift_val, sat_val) ({  \
@@ -687,6 +828,32 @@
   tmp_m = (v16u8)__msa_pckev_b((v16i8)(in1), (v16i8)(in2));  \
   tmp_m = __msa_aver_u_b(tmp_m, (v16u8)(dst));               \
   STORE_UB(tmp_m, (pdest));                                  \
+}
+
+/* Generic for Vector types and GP operations */
+#define BUTTERFLY_4(in0, in1, in2, in3,        \
+                    out0, out1, out2, out3) {  \
+  out0 = (in0) + (in3);                        \
+  out1 = (in1) + (in2);                        \
+                                               \
+  out2 = (in1) - (in2);                        \
+  out3 = (in0) - (in3);                        \
+}
+
+/* Generic for Vector types and GP operations */
+#define BUTTERFLY_8(in0, in1, in2, in3,        \
+                    in4, in5, in6, in7,        \
+                    out0, out1, out2, out3,    \
+                    out4, out5, out6, out7) {  \
+  out0 = (in0) + (in7);                        \
+  out1 = (in1) + (in6);                        \
+  out2 = (in2) + (in5);                        \
+  out3 = (in3) + (in4);                        \
+                                               \
+  out4 = (in3) - (in4);                        \
+  out5 = (in2) - (in5);                        \
+  out6 = (in1) - (in6);                        \
+  out7 = (in0) - (in7);                        \
 }
 #endif  /* HAVE_MSA */
 #endif  /* VP9_COMMON_MIPS_MSA_VP9_MACROS_MSA_H_ */

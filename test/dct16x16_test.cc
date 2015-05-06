@@ -933,4 +933,19 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&idct16x16_12,
                    &idct16x16_256_add_12_sse2, 3167, VPX_BITS_12)));
 #endif  // HAVE_SSE2 && CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+
+#if HAVE_MSA && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+INSTANTIATE_TEST_CASE_P(
+    MSA, Trans16x16DCT,
+    ::testing::Values(
+        make_tuple(&vp9_fdct16x16_c,
+                   &vp9_idct16x16_256_add_msa, 0, VPX_BITS_8)));
+INSTANTIATE_TEST_CASE_P(
+    MSA, Trans16x16HT,
+    ::testing::Values(
+        make_tuple(&vp9_fht16x16_c, &vp9_iht16x16_256_add_msa, 0, VPX_BITS_8),
+        make_tuple(&vp9_fht16x16_c, &vp9_iht16x16_256_add_msa, 1, VPX_BITS_8),
+        make_tuple(&vp9_fht16x16_c, &vp9_iht16x16_256_add_msa, 2, VPX_BITS_8),
+        make_tuple(&vp9_fht16x16_c, &vp9_iht16x16_256_add_msa, 3, VPX_BITS_8)));
+#endif  // HAVE_MSA && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 }  // namespace
