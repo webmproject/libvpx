@@ -2796,8 +2796,9 @@ static void output_frame_level_debug_stats(VP9_COMP *cpi) {
 
   if (cpi->twopass.total_left_stats.coded_error != 0.0)
     fprintf(f, "%10u %dx%d %d %d %10d %10d %10d %10d"
-        "%10"PRId64" %10"PRId64" %10"PRId64" %10"PRId64" %10d "
-        "%7.2lf %7.2lf %7.2lf %7.2lf %7.2lf"
+       "%10"PRId64" %10"PRId64" %5d %5d %10"PRId64" "
+       "%10"PRId64" %10"PRId64" %10d "
+       "%7.2lf %7.2lf %7.2lf %7.2lf %7.2lf"
         "%6d %6d %5d %5d %5d "
         "%10"PRId64" %10.3lf"
         "%10lf %8u %10"PRId64" %10d %10d\n",
@@ -2810,6 +2811,9 @@ static void output_frame_level_debug_stats(VP9_COMP *cpi) {
         cpi->rc.projected_frame_size / cpi->common.MBs,
         (cpi->rc.projected_frame_size - cpi->rc.this_frame_target),
         cpi->rc.vbr_bits_off_target,
+        cpi->rc.vbr_bits_off_target_fast,
+        cpi->twopass.extend_minq,
+        cpi->twopass.extend_minq_fast,
         cpi->rc.total_target_vs_actual,
         (cpi->rc.starting_buffer_level - cpi->rc.bits_off_target),
         cpi->rc.total_actual_bits, cm->base_qindex,

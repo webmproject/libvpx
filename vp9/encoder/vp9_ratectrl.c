@@ -1061,10 +1061,12 @@ static int rc_pick_q_and_bounds_two_pass(const VP9_COMP *cpi,
     if (frame_is_intra_only(cm) ||
         (!rc->is_src_frame_alt_ref &&
          (cpi->refresh_golden_frame || cpi->refresh_alt_ref_frame))) {
-      active_best_quality -= cpi->twopass.extend_minq;
+      active_best_quality -=
+        (cpi->twopass.extend_minq + cpi->twopass.extend_minq_fast);
       active_worst_quality += (cpi->twopass.extend_maxq / 2);
     } else {
-      active_best_quality -= cpi->twopass.extend_minq / 2;
+      active_best_quality -=
+        (cpi->twopass.extend_minq + cpi->twopass.extend_minq_fast) / 2;
       active_worst_quality += cpi->twopass.extend_maxq;
     }
   }
@@ -1671,9 +1673,9 @@ void vp9_rc_update_framerate(VP9_COMP *cpi) {
 
 #define VBR_PCT_ADJUSTMENT_LIMIT 50
 // For VBR...adjustment to the frame target based on error from previous frames
-static void vbr_rate_correction(VP9_COMP *cpi,
-                                int *this_frame_target,
-                                int64_t vbr_bits_off_target) {
+static void vbr_rate_correction(VP9_COMP *cpi, int *this_frame_target) {
+  RATE_CONTROL *const rc = &cpi->rc;
+  int64_t vbr_bits_off_target = rc->vbr_bits_off_target;
   int max_delta;
   double position_factor = 1.0;
 
@@ -1697,6 +1699,20 @@ static void vbr_rate_correction(VP9_COMP *cpi,
       (vbr_bits_off_target < -max_delta) ? max_delta
                                          : (int)-vbr_bits_off_target;
   }
+
+  // Fast redistribution of bits arising from massive local undershoot.
+  // Dont do it for kf,arf,gf or overlay frames.
+  if (!frame_is_kf_gf_arf(cpi) && !rc->is_src_frame_alt_ref &&
+      rc->vbr_bits_off_target_fast) {
+    int one_frame_bits = MAX(rc->avg_frame_bandwidth, *this_frame_target);
+    int fast_extra_bits;
+    fast_extra_bits =
+      (int)MIN(rc->vbr_bits_off_target_fast, one_frame_bits);
+    fast_extra_bits = (int)MIN(fast_extra_bits,
+      MAX(one_frame_bits / 8, rc->vbr_bits_off_target_fast / 8));
+    *this_frame_target += (int)fast_extra_bits;
+    rc->vbr_bits_off_target_fast -= fast_extra_bits;
+  }
 }
 
 void vp9_set_target_rate(VP9_COMP *cpi) {
@@ -1705,6 +1721,6 @@ void vp9_set_target_rate(VP9_COMP *cpi) {
 
   // Correction to rate target based on prior over or under shoot.
   if (cpi->oxcf.rc_mode == VPX_VBR || cpi->oxcf.rc_mode == VPX_CQ)
-    vbr_rate_correction(cpi, &target_rate, rc->vbr_bits_off_target);
+    vbr_rate_correction(cpi, &target_rate);
   vp9_rc_set_frame_target(cpi, target_rate);
 }

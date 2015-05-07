@@ -1247,8 +1247,9 @@ void vp9_init_second_pass(VP9_COMP *cpi) {
     twopass->modified_error_left = modified_error_total;
   }
 
-  // Reset the vbr bits off target counter
+  // Reset the vbr bits off target counters
   cpi->rc.vbr_bits_off_target = 0;
+  cpi->rc.vbr_bits_off_target_fast = 0;
 
   cpi->rc.rate_error_estimate = 0;
 
@@ -2650,6 +2651,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
 
 #define MINQ_ADJ_LIMIT 48
 #define MINQ_ADJ_LIMIT_CQ 20
+#define HIGH_UNDERSHOOT_RATIO 2
 void vp9_twopass_postencode_update(VP9_COMP *cpi) {
   TWO_PASS *const twopass = &cpi->twopass;
   RATE_CONTROL *const rc = &cpi->rc;
@@ -2716,5 +2718,32 @@ void vp9_twopass_postencode_update(VP9_COMP *cpi) {
 
     twopass->extend_minq = clamp(twopass->extend_minq, 0, minq_adj_limit);
     twopass->extend_maxq = clamp(twopass->extend_maxq, 0, maxq_adj_limit);
+
+    // If there is a big and undexpected undershoot then feed the extra
+    // bits back in quickly. One situation where this may happen is if a
+    // frame is unexpectedly almost perfectly predicted by the ARF or GF
+    // but not very well predcited by the previous frame.
+    if (!frame_is_kf_gf_arf(cpi) && !cpi->rc.is_src_frame_alt_ref) {
+      int fast_extra_thresh = rc->base_frame_target / HIGH_UNDERSHOOT_RATIO;
+      if (rc->projected_frame_size < fast_extra_thresh) {
+        rc->vbr_bits_off_target_fast +=
+          fast_extra_thresh - rc->projected_frame_size;
+        rc->vbr_bits_off_target_fast =
+          MIN(rc->vbr_bits_off_target_fast, (4 * rc->avg_frame_bandwidth));
+
+        // Fast adaptation of minQ if necessary to use up the extra bits.
+        if (rc->avg_frame_bandwidth) {
+          twopass->extend_minq_fast =
+            (int)(rc->vbr_bits_off_target_fast * 8 / rc->avg_frame_bandwidth);
+        }
+        twopass->extend_minq_fast = MIN(twopass->extend_minq_fast,
+                                        minq_adj_limit - twopass->extend_minq);
+      } else if (rc->vbr_bits_off_target_fast) {
+        twopass->extend_minq_fast = MIN(twopass->extend_minq_fast,
+                                        minq_adj_limit - twopass->extend_minq);
+      } else {
+        twopass->extend_minq_fast = 0;
+      }
+    }
   }
 }
