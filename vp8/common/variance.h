@@ -14,16 +14,17 @@
 
 #include "vpx_config.h"
 
+#include "vpx/vpx_integer.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef unsigned int(*vp8_sad_fn_t)(
-    const unsigned char *src_ptr,
+typedef unsigned int(*vpx_sad_fn_t)(
+    const uint8_t *src_ptr,
     int source_stride,
-    const unsigned char *ref_ptr,
-    int ref_stride,
-    unsigned int max_sad);
+    const uint8_t *ref_ptr,
+    int ref_stride);
 
 typedef void (*vp8_copy32xn_fn_t)(
     const unsigned char *src_ptr,
@@ -32,27 +33,17 @@ typedef void (*vp8_copy32xn_fn_t)(
     int ref_stride,
     int n);
 
-typedef void (*vp8_sad_multi_fn_t)(
+typedef void (*vpx_sad_multi_fn_t)(
     const unsigned char *src_ptr,
     int source_stride,
-    const unsigned char *ref_ptr,
+    const unsigned char *ref_array,
     int  ref_stride,
     unsigned int *sad_array);
-
-typedef void (*vp8_sad_multi1_fn_t)
+typedef void (*vpx_sad_multi_d_fn_t)
     (
      const unsigned char *src_ptr,
      int source_stride,
-     const unsigned char *ref_ptr,
-     int  ref_stride,
-     unsigned short *sad_array
-    );
-
-typedef void (*vp8_sad_multi_d_fn_t)
-    (
-     const unsigned char *src_ptr,
-     int source_stride,
-     const unsigned char * const ref_ptr[],
+     const unsigned char * const ref_array[],
      int  ref_stride,
      unsigned int *sad_array
     );
@@ -102,15 +93,15 @@ typedef unsigned int (*vp8_get16x16prederror_fn_t)
 
 typedef struct variance_vtable
 {
-    vp8_sad_fn_t            sdf;
+    vpx_sad_fn_t            sdf;
     vp8_variance_fn_t       vf;
     vp8_subpixvariance_fn_t svf;
     vp8_variance_fn_t       svf_halfpix_h;
     vp8_variance_fn_t       svf_halfpix_v;
     vp8_variance_fn_t       svf_halfpix_hv;
-    vp8_sad_multi_fn_t      sdx3f;
-    vp8_sad_multi1_fn_t     sdx8f;
-    vp8_sad_multi_d_fn_t    sdx4df;
+    vpx_sad_multi_fn_t      sdx3f;
+    vpx_sad_multi_fn_t      sdx8f;
+    vpx_sad_multi_d_fn_t    sdx4df;
 #if ARCH_X86 || ARCH_X86_64
     vp8_copy32xn_fn_t       copymem;
 #endif

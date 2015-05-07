@@ -8,6 +8,8 @@
 ;  be found in the AUTHORS file in the root of the source tree.
 ;
 
+%define program_name vpx
+
 %include "third_party/x86inc/x86inc.asm"
 
 SECTION .text
@@ -44,7 +46,7 @@ cglobal sad%1x%2_avg, 5, ARCH_X86_64 + %3, 5, src, src_stride, \
 %endif ; %3 == 7
 %endmacro
 
-; unsigned int vp9_sad64x64_sse2(uint8_t *src, int src_stride,
+; unsigned int vpx_sad64x64_sse2(uint8_t *src, int src_stride,
 ;                                uint8_t *ref, int ref_stride);
 %macro SAD64XN 1-2 0
   SAD_FN 64, %1, 5, %2
@@ -87,7 +89,7 @@ SAD64XN 32 ; sad64x32_sse2
 SAD64XN 64, 1 ; sad64x64_avg_sse2
 SAD64XN 32, 1 ; sad64x32_avg_sse2
 
-; unsigned int vp9_sad32x32_sse2(uint8_t *src, int src_stride,
+; unsigned int vpx_sad32x32_sse2(uint8_t *src, int src_stride,
 ;                                uint8_t *ref, int ref_stride);
 %macro SAD32XN 1-2 0
   SAD_FN 32, %1, 5, %2
@@ -132,7 +134,7 @@ SAD32XN 64, 1 ; sad32x64_avg_sse2
 SAD32XN 32, 1 ; sad32x32_avg_sse2
 SAD32XN 16, 1 ; sad32x16_avg_sse2
 
-; unsigned int vp9_sad16x{8,16}_sse2(uint8_t *src, int src_stride,
+; unsigned int vpx_sad16x{8,16}_sse2(uint8_t *src, int src_stride,
 ;                                    uint8_t *ref, int ref_stride);
 %macro SAD16XN 1-2 0
   SAD_FN 16, %1, 7, %2
@@ -178,7 +180,7 @@ SAD16XN 32, 1 ; sad16x32_avg_sse2
 SAD16XN 16, 1 ; sad16x16_avg_sse2
 SAD16XN  8, 1 ; sad16x8_avg_sse2
 
-; unsigned int vp9_sad8x{8,16}_sse2(uint8_t *src, int src_stride,
+; unsigned int vpx_sad8x{8,16}_sse2(uint8_t *src, int src_stride,
 ;                                   uint8_t *ref, int ref_stride);
 %macro SAD8XN 1-2 0
   SAD_FN 8, %1, 7, %2
@@ -222,7 +224,7 @@ SAD8XN 16, 1 ; sad8x16_avg_sse2
 SAD8XN  8, 1 ; sad8x8_avg_sse2
 SAD8XN  4, 1 ; sad8x4_avg_sse2
 
-; unsigned int vp9_sad4x{4, 8}_sse(uint8_t *src, int src_stride,
+; unsigned int vpx_sad4x{4, 8}_sse(uint8_t *src, int src_stride,
 ;                                  uint8_t *ref, int ref_stride);
 %macro SAD4XN 1-2 0
   SAD_FN 4, %1, 7, %2

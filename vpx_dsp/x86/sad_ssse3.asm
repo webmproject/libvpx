@@ -146,14 +146,14 @@
 
 %endmacro
 
-;void int vp9_sad16x16x3_ssse3(
+;void int vpx_sad16x16x3_ssse3(
 ;    unsigned char *src_ptr,
 ;    int  src_stride,
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    int  *results)
-global sym(vp9_sad16x16x3_ssse3) PRIVATE
-sym(vp9_sad16x16x3_ssse3):
+global sym(vpx_sad16x16x3_ssse3) PRIVATE
+sym(vpx_sad16x16x3_ssse3):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 5
@@ -169,31 +169,31 @@ sym(vp9_sad16x16x3_ssse3):
         mov             rdx,        0xf
         and             rdx,        rdi
 
-        jmp .vp9_sad16x16x3_ssse3_skiptable
-.vp9_sad16x16x3_ssse3_jumptable:
-        dd .vp9_sad16x16x3_ssse3_aligned_by_0  - .vp9_sad16x16x3_ssse3_do_jump
-        dd .vp9_sad16x16x3_ssse3_aligned_by_1  - .vp9_sad16x16x3_ssse3_do_jump
-        dd .vp9_sad16x16x3_ssse3_aligned_by_2  - .vp9_sad16x16x3_ssse3_do_jump
-        dd .vp9_sad16x16x3_ssse3_aligned_by_3  - .vp9_sad16x16x3_ssse3_do_jump
-        dd .vp9_sad16x16x3_ssse3_aligned_by_4  - .vp9_sad16x16x3_ssse3_do_jump
-        dd .vp9_sad16x16x3_ssse3_aligned_by_5  - .vp9_sad16x16x3_ssse3_do_jump
-        dd .vp9_sad16x16x3_ssse3_aligned_by_6  - .vp9_sad16x16x3_ssse3_do_jump
-        dd .vp9_sad16x16x3_ssse3_aligned_by_7  - .vp9_sad16x16x3_ssse3_do_jump
-        dd .vp9_sad16x16x3_ssse3_aligned_by_8  - .vp9_sad16x16x3_ssse3_do_jump
-        dd .vp9_sad16x16x3_ssse3_aligned_by_9  - .vp9_sad16x16x3_ssse3_do_jump
-        dd .vp9_sad16x16x3_ssse3_aligned_by_10 - .vp9_sad16x16x3_ssse3_do_jump
-        dd .vp9_sad16x16x3_ssse3_aligned_by_11 - .vp9_sad16x16x3_ssse3_do_jump
-        dd .vp9_sad16x16x3_ssse3_aligned_by_12 - .vp9_sad16x16x3_ssse3_do_jump
-        dd .vp9_sad16x16x3_ssse3_aligned_by_13 - .vp9_sad16x16x3_ssse3_do_jump
-        dd .vp9_sad16x16x3_ssse3_aligned_by_14 - .vp9_sad16x16x3_ssse3_do_jump
-        dd .vp9_sad16x16x3_ssse3_aligned_by_15 - .vp9_sad16x16x3_ssse3_do_jump
-.vp9_sad16x16x3_ssse3_skiptable:
+        jmp .vpx_sad16x16x3_ssse3_skiptable
+.vpx_sad16x16x3_ssse3_jumptable:
+        dd .vpx_sad16x16x3_ssse3_aligned_by_0  - .vpx_sad16x16x3_ssse3_do_jump
+        dd .vpx_sad16x16x3_ssse3_aligned_by_1  - .vpx_sad16x16x3_ssse3_do_jump
+        dd .vpx_sad16x16x3_ssse3_aligned_by_2  - .vpx_sad16x16x3_ssse3_do_jump
+        dd .vpx_sad16x16x3_ssse3_aligned_by_3  - .vpx_sad16x16x3_ssse3_do_jump
+        dd .vpx_sad16x16x3_ssse3_aligned_by_4  - .vpx_sad16x16x3_ssse3_do_jump
+        dd .vpx_sad16x16x3_ssse3_aligned_by_5  - .vpx_sad16x16x3_ssse3_do_jump
+        dd .vpx_sad16x16x3_ssse3_aligned_by_6  - .vpx_sad16x16x3_ssse3_do_jump
+        dd .vpx_sad16x16x3_ssse3_aligned_by_7  - .vpx_sad16x16x3_ssse3_do_jump
+        dd .vpx_sad16x16x3_ssse3_aligned_by_8  - .vpx_sad16x16x3_ssse3_do_jump
+        dd .vpx_sad16x16x3_ssse3_aligned_by_9  - .vpx_sad16x16x3_ssse3_do_jump
+        dd .vpx_sad16x16x3_ssse3_aligned_by_10 - .vpx_sad16x16x3_ssse3_do_jump
+        dd .vpx_sad16x16x3_ssse3_aligned_by_11 - .vpx_sad16x16x3_ssse3_do_jump
+        dd .vpx_sad16x16x3_ssse3_aligned_by_12 - .vpx_sad16x16x3_ssse3_do_jump
+        dd .vpx_sad16x16x3_ssse3_aligned_by_13 - .vpx_sad16x16x3_ssse3_do_jump
+        dd .vpx_sad16x16x3_ssse3_aligned_by_14 - .vpx_sad16x16x3_ssse3_do_jump
+        dd .vpx_sad16x16x3_ssse3_aligned_by_15 - .vpx_sad16x16x3_ssse3_do_jump
+.vpx_sad16x16x3_ssse3_skiptable:
 
-        call .vp9_sad16x16x3_ssse3_do_jump
-.vp9_sad16x16x3_ssse3_do_jump:
+        call .vpx_sad16x16x3_ssse3_do_jump
+.vpx_sad16x16x3_ssse3_do_jump:
         pop             rcx                         ; get the address of do_jump
-        mov             rax,  .vp9_sad16x16x3_ssse3_jumptable - .vp9_sad16x16x3_ssse3_do_jump
-        add             rax,  rcx  ; get the absolute address of vp9_sad16x16x3_ssse3_jumptable
+        mov             rax,  .vpx_sad16x16x3_ssse3_jumptable - .vpx_sad16x16x3_ssse3_do_jump
+        add             rax,  rcx  ; get the absolute address of vpx_sad16x16x3_ssse3_jumptable
 
         movsxd          rax,  dword [rax + 4*rdx]   ; get the 32 bit offset from the jumptable
         add             rcx,        rax
@@ -203,23 +203,23 @@ sym(vp9_sad16x16x3_ssse3):
 
         jmp             rcx
 
-        PROCESS_16X16X3_OFFSET 0,  .vp9_sad16x16x3_ssse3
-        PROCESS_16X16X3_OFFSET 1,  .vp9_sad16x16x3_ssse3
-        PROCESS_16X16X3_OFFSET 2,  .vp9_sad16x16x3_ssse3
-        PROCESS_16X16X3_OFFSET 3,  .vp9_sad16x16x3_ssse3
-        PROCESS_16X16X3_OFFSET 4,  .vp9_sad16x16x3_ssse3
-        PROCESS_16X16X3_OFFSET 5,  .vp9_sad16x16x3_ssse3
-        PROCESS_16X16X3_OFFSET 6,  .vp9_sad16x16x3_ssse3
-        PROCESS_16X16X3_OFFSET 7,  .vp9_sad16x16x3_ssse3
-        PROCESS_16X16X3_OFFSET 8,  .vp9_sad16x16x3_ssse3
-        PROCESS_16X16X3_OFFSET 9,  .vp9_sad16x16x3_ssse3
-        PROCESS_16X16X3_OFFSET 10, .vp9_sad16x16x3_ssse3
-        PROCESS_16X16X3_OFFSET 11, .vp9_sad16x16x3_ssse3
-        PROCESS_16X16X3_OFFSET 12, .vp9_sad16x16x3_ssse3
-        PROCESS_16X16X3_OFFSET 13, .vp9_sad16x16x3_ssse3
-        PROCESS_16X16X3_OFFSET 14, .vp9_sad16x16x3_ssse3
+        PROCESS_16X16X3_OFFSET 0,  .vpx_sad16x16x3_ssse3
+        PROCESS_16X16X3_OFFSET 1,  .vpx_sad16x16x3_ssse3
+        PROCESS_16X16X3_OFFSET 2,  .vpx_sad16x16x3_ssse3
+        PROCESS_16X16X3_OFFSET 3,  .vpx_sad16x16x3_ssse3
+        PROCESS_16X16X3_OFFSET 4,  .vpx_sad16x16x3_ssse3
+        PROCESS_16X16X3_OFFSET 5,  .vpx_sad16x16x3_ssse3
+        PROCESS_16X16X3_OFFSET 6,  .vpx_sad16x16x3_ssse3
+        PROCESS_16X16X3_OFFSET 7,  .vpx_sad16x16x3_ssse3
+        PROCESS_16X16X3_OFFSET 8,  .vpx_sad16x16x3_ssse3
+        PROCESS_16X16X3_OFFSET 9,  .vpx_sad16x16x3_ssse3
+        PROCESS_16X16X3_OFFSET 10, .vpx_sad16x16x3_ssse3
+        PROCESS_16X16X3_OFFSET 11, .vpx_sad16x16x3_ssse3
+        PROCESS_16X16X3_OFFSET 12, .vpx_sad16x16x3_ssse3
+        PROCESS_16X16X3_OFFSET 13, .vpx_sad16x16x3_ssse3
+        PROCESS_16X16X3_OFFSET 14, .vpx_sad16x16x3_ssse3
 
-.vp9_sad16x16x3_ssse3_aligned_by_15:
+.vpx_sad16x16x3_ssse3_aligned_by_15:
         PROCESS_16X2X3 1
         PROCESS_16X2X3 0
         PROCESS_16X2X3 0
@@ -229,7 +229,7 @@ sym(vp9_sad16x16x3_ssse3):
         PROCESS_16X2X3 0
         PROCESS_16X2X3 0
 
-.vp9_sad16x16x3_ssse3_store_off:
+.vpx_sad16x16x3_ssse3_store_off:
         mov             rdi,        arg(4) ;Results
 
         movq            xmm0,       xmm5
@@ -259,14 +259,14 @@ sym(vp9_sad16x16x3_ssse3):
     pop         rbp
     ret
 
-;void int vp9_sad16x8x3_ssse3(
+;void int vpx_sad16x8x3_ssse3(
 ;    unsigned char *src_ptr,
 ;    int  src_stride,
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    int  *results)
-global sym(vp9_sad16x8x3_ssse3) PRIVATE
-sym(vp9_sad16x8x3_ssse3):
+global sym(vpx_sad16x8x3_ssse3) PRIVATE
+sym(vpx_sad16x8x3_ssse3):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 5
@@ -282,31 +282,31 @@ sym(vp9_sad16x8x3_ssse3):
         mov             rdx,        0xf
         and             rdx,        rdi
 
-        jmp .vp9_sad16x8x3_ssse3_skiptable
-.vp9_sad16x8x3_ssse3_jumptable:
-        dd .vp9_sad16x8x3_ssse3_aligned_by_0  - .vp9_sad16x8x3_ssse3_do_jump
-        dd .vp9_sad16x8x3_ssse3_aligned_by_1  - .vp9_sad16x8x3_ssse3_do_jump
-        dd .vp9_sad16x8x3_ssse3_aligned_by_2  - .vp9_sad16x8x3_ssse3_do_jump
-        dd .vp9_sad16x8x3_ssse3_aligned_by_3  - .vp9_sad16x8x3_ssse3_do_jump
-        dd .vp9_sad16x8x3_ssse3_aligned_by_4  - .vp9_sad16x8x3_ssse3_do_jump
-        dd .vp9_sad16x8x3_ssse3_aligned_by_5  - .vp9_sad16x8x3_ssse3_do_jump
-        dd .vp9_sad16x8x3_ssse3_aligned_by_6  - .vp9_sad16x8x3_ssse3_do_jump
-        dd .vp9_sad16x8x3_ssse3_aligned_by_7  - .vp9_sad16x8x3_ssse3_do_jump
-        dd .vp9_sad16x8x3_ssse3_aligned_by_8  - .vp9_sad16x8x3_ssse3_do_jump
-        dd .vp9_sad16x8x3_ssse3_aligned_by_9  - .vp9_sad16x8x3_ssse3_do_jump
-        dd .vp9_sad16x8x3_ssse3_aligned_by_10 - .vp9_sad16x8x3_ssse3_do_jump
-        dd .vp9_sad16x8x3_ssse3_aligned_by_11 - .vp9_sad16x8x3_ssse3_do_jump
-        dd .vp9_sad16x8x3_ssse3_aligned_by_12 - .vp9_sad16x8x3_ssse3_do_jump
-        dd .vp9_sad16x8x3_ssse3_aligned_by_13 - .vp9_sad16x8x3_ssse3_do_jump
-        dd .vp9_sad16x8x3_ssse3_aligned_by_14 - .vp9_sad16x8x3_ssse3_do_jump
-        dd .vp9_sad16x8x3_ssse3_aligned_by_15 - .vp9_sad16x8x3_ssse3_do_jump
-.vp9_sad16x8x3_ssse3_skiptable:
+        jmp .vpx_sad16x8x3_ssse3_skiptable
+.vpx_sad16x8x3_ssse3_jumptable:
+        dd .vpx_sad16x8x3_ssse3_aligned_by_0  - .vpx_sad16x8x3_ssse3_do_jump
+        dd .vpx_sad16x8x3_ssse3_aligned_by_1  - .vpx_sad16x8x3_ssse3_do_jump
+        dd .vpx_sad16x8x3_ssse3_aligned_by_2  - .vpx_sad16x8x3_ssse3_do_jump
+        dd .vpx_sad16x8x3_ssse3_aligned_by_3  - .vpx_sad16x8x3_ssse3_do_jump
+        dd .vpx_sad16x8x3_ssse3_aligned_by_4  - .vpx_sad16x8x3_ssse3_do_jump
+        dd .vpx_sad16x8x3_ssse3_aligned_by_5  - .vpx_sad16x8x3_ssse3_do_jump
+        dd .vpx_sad16x8x3_ssse3_aligned_by_6  - .vpx_sad16x8x3_ssse3_do_jump
+        dd .vpx_sad16x8x3_ssse3_aligned_by_7  - .vpx_sad16x8x3_ssse3_do_jump
+        dd .vpx_sad16x8x3_ssse3_aligned_by_8  - .vpx_sad16x8x3_ssse3_do_jump
+        dd .vpx_sad16x8x3_ssse3_aligned_by_9  - .vpx_sad16x8x3_ssse3_do_jump
+        dd .vpx_sad16x8x3_ssse3_aligned_by_10 - .vpx_sad16x8x3_ssse3_do_jump
+        dd .vpx_sad16x8x3_ssse3_aligned_by_11 - .vpx_sad16x8x3_ssse3_do_jump
+        dd .vpx_sad16x8x3_ssse3_aligned_by_12 - .vpx_sad16x8x3_ssse3_do_jump
+        dd .vpx_sad16x8x3_ssse3_aligned_by_13 - .vpx_sad16x8x3_ssse3_do_jump
+        dd .vpx_sad16x8x3_ssse3_aligned_by_14 - .vpx_sad16x8x3_ssse3_do_jump
+        dd .vpx_sad16x8x3_ssse3_aligned_by_15 - .vpx_sad16x8x3_ssse3_do_jump
+.vpx_sad16x8x3_ssse3_skiptable:
 
-        call .vp9_sad16x8x3_ssse3_do_jump
-.vp9_sad16x8x3_ssse3_do_jump:
+        call .vpx_sad16x8x3_ssse3_do_jump
+.vpx_sad16x8x3_ssse3_do_jump:
         pop             rcx                         ; get the address of do_jump
-        mov             rax,  .vp9_sad16x8x3_ssse3_jumptable - .vp9_sad16x8x3_ssse3_do_jump
-        add             rax,  rcx  ; get the absolute address of vp9_sad16x8x3_ssse3_jumptable
+        mov             rax,  .vpx_sad16x8x3_ssse3_jumptable - .vpx_sad16x8x3_ssse3_do_jump
+        add             rax,  rcx  ; get the absolute address of vpx_sad16x8x3_ssse3_jumptable
 
         movsxd          rax,  dword [rax + 4*rdx]   ; get the 32 bit offset from the jumptable
         add             rcx,        rax
@@ -316,30 +316,30 @@ sym(vp9_sad16x8x3_ssse3):
 
         jmp             rcx
 
-        PROCESS_16X8X3_OFFSET 0,  .vp9_sad16x8x3_ssse3
-        PROCESS_16X8X3_OFFSET 1,  .vp9_sad16x8x3_ssse3
-        PROCESS_16X8X3_OFFSET 2,  .vp9_sad16x8x3_ssse3
-        PROCESS_16X8X3_OFFSET 3,  .vp9_sad16x8x3_ssse3
-        PROCESS_16X8X3_OFFSET 4,  .vp9_sad16x8x3_ssse3
-        PROCESS_16X8X3_OFFSET 5,  .vp9_sad16x8x3_ssse3
-        PROCESS_16X8X3_OFFSET 6,  .vp9_sad16x8x3_ssse3
-        PROCESS_16X8X3_OFFSET 7,  .vp9_sad16x8x3_ssse3
-        PROCESS_16X8X3_OFFSET 8,  .vp9_sad16x8x3_ssse3
-        PROCESS_16X8X3_OFFSET 9,  .vp9_sad16x8x3_ssse3
-        PROCESS_16X8X3_OFFSET 10, .vp9_sad16x8x3_ssse3
-        PROCESS_16X8X3_OFFSET 11, .vp9_sad16x8x3_ssse3
-        PROCESS_16X8X3_OFFSET 12, .vp9_sad16x8x3_ssse3
-        PROCESS_16X8X3_OFFSET 13, .vp9_sad16x8x3_ssse3
-        PROCESS_16X8X3_OFFSET 14, .vp9_sad16x8x3_ssse3
+        PROCESS_16X8X3_OFFSET 0,  .vpx_sad16x8x3_ssse3
+        PROCESS_16X8X3_OFFSET 1,  .vpx_sad16x8x3_ssse3
+        PROCESS_16X8X3_OFFSET 2,  .vpx_sad16x8x3_ssse3
+        PROCESS_16X8X3_OFFSET 3,  .vpx_sad16x8x3_ssse3
+        PROCESS_16X8X3_OFFSET 4,  .vpx_sad16x8x3_ssse3
+        PROCESS_16X8X3_OFFSET 5,  .vpx_sad16x8x3_ssse3
+        PROCESS_16X8X3_OFFSET 6,  .vpx_sad16x8x3_ssse3
+        PROCESS_16X8X3_OFFSET 7,  .vpx_sad16x8x3_ssse3
+        PROCESS_16X8X3_OFFSET 8,  .vpx_sad16x8x3_ssse3
+        PROCESS_16X8X3_OFFSET 9,  .vpx_sad16x8x3_ssse3
+        PROCESS_16X8X3_OFFSET 10, .vpx_sad16x8x3_ssse3
+        PROCESS_16X8X3_OFFSET 11, .vpx_sad16x8x3_ssse3
+        PROCESS_16X8X3_OFFSET 12, .vpx_sad16x8x3_ssse3
+        PROCESS_16X8X3_OFFSET 13, .vpx_sad16x8x3_ssse3
+        PROCESS_16X8X3_OFFSET 14, .vpx_sad16x8x3_ssse3
 
-.vp9_sad16x8x3_ssse3_aligned_by_15:
+.vpx_sad16x8x3_ssse3_aligned_by_15:
 
         PROCESS_16X2X3 1
         PROCESS_16X2X3 0
         PROCESS_16X2X3 0
         PROCESS_16X2X3 0
 
-.vp9_sad16x8x3_ssse3_store_off:
+.vpx_sad16x8x3_ssse3_store_off:
         mov             rdi,        arg(4) ;Results
 
         movq            xmm0,       xmm5

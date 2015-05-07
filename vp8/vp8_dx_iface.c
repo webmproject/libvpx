@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "./vp8_rtcd.h"
+#include "./vpx_dsp_rtcd.h"
 #include "./vpx_scale_rtcd.h"
 #include "vpx/vpx_decoder.h"
 #include "vpx/vp8dx.h"
@@ -107,6 +108,7 @@ static vpx_codec_err_t vp8_init(vpx_codec_ctx_t *ctx,
     (void) data;
 
     vp8_rtcd();
+    vpx_dsp_rtcd();
     vpx_scale_rtcd();
 
     /* This function only allocates space for the vpx_codec_alg_priv_t

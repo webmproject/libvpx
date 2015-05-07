@@ -19,7 +19,6 @@
   %define     end_ptr       rcx
   %define     ret_var       rbx
   %define     result_ptr    arg(4)
-  %define     max_err       arg(4)
   %define     height        dword ptr arg(4)
     push        rbp
     mov         rbp,        rsp
@@ -42,7 +41,6 @@
     %define     end_ptr     r10
     %define     ret_var     r11
     %define     result_ptr  [rsp+xmm_stack_space+8+4*8]
-    %define     max_err     [rsp+xmm_stack_space+8+4*8]
     %define     height      dword ptr [rsp+xmm_stack_space+8+4*8]
   %else
     %define     src_ptr     rdi
@@ -52,7 +50,6 @@
     %define     end_ptr     r9
     %define     ret_var     r10
     %define     result_ptr  r8
-    %define     max_err     r8
     %define     height      r8
   %endif
 %endif
@@ -67,7 +64,6 @@
   %define     end_ptr
   %define     ret_var
   %define     result_ptr
-  %define     max_err
   %define     height
 
 %if ABI_IS_32BIT
@@ -169,14 +165,14 @@
         paddw           mm7,       mm3
 %endmacro
 
-;void int vp9_sad16x16x3_sse3(
+;void int vpx_sad16x16x3_sse3(
 ;    unsigned char *src_ptr,
 ;    int  src_stride,
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    int  *results)
-global sym(vp9_sad16x16x3_sse3) PRIVATE
-sym(vp9_sad16x16x3_sse3):
+global sym(vpx_sad16x16x3_sse3) PRIVATE
+sym(vpx_sad16x16x3_sse3):
 
     STACK_FRAME_CREATE_X3
 
@@ -211,14 +207,14 @@ sym(vp9_sad16x16x3_sse3):
 
     STACK_FRAME_DESTROY_X3
 
-;void int vp9_sad16x8x3_sse3(
+;void int vpx_sad16x8x3_sse3(
 ;    unsigned char *src_ptr,
 ;    int  src_stride,
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    int  *results)
-global sym(vp9_sad16x8x3_sse3) PRIVATE
-sym(vp9_sad16x8x3_sse3):
+global sym(vpx_sad16x8x3_sse3) PRIVATE
+sym(vpx_sad16x8x3_sse3):
 
     STACK_FRAME_CREATE_X3
 
@@ -249,14 +245,14 @@ sym(vp9_sad16x8x3_sse3):
 
     STACK_FRAME_DESTROY_X3
 
-;void int vp9_sad8x16x3_sse3(
+;void int vpx_sad8x16x3_sse3(
 ;    unsigned char *src_ptr,
 ;    int  src_stride,
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    int  *results)
-global sym(vp9_sad8x16x3_sse3) PRIVATE
-sym(vp9_sad8x16x3_sse3):
+global sym(vpx_sad8x16x3_sse3) PRIVATE
+sym(vpx_sad8x16x3_sse3):
 
     STACK_FRAME_CREATE_X3
 
@@ -278,14 +274,14 @@ sym(vp9_sad8x16x3_sse3):
 
     STACK_FRAME_DESTROY_X3
 
-;void int vp9_sad8x8x3_sse3(
+;void int vpx_sad8x8x3_sse3(
 ;    unsigned char *src_ptr,
 ;    int  src_stride,
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    int  *results)
-global sym(vp9_sad8x8x3_sse3) PRIVATE
-sym(vp9_sad8x8x3_sse3):
+global sym(vpx_sad8x8x3_sse3) PRIVATE
+sym(vpx_sad8x8x3_sse3):
 
     STACK_FRAME_CREATE_X3
 
@@ -303,14 +299,14 @@ sym(vp9_sad8x8x3_sse3):
 
     STACK_FRAME_DESTROY_X3
 
-;void int vp9_sad4x4x3_sse3(
+;void int vpx_sad4x4x3_sse3(
 ;    unsigned char *src_ptr,
 ;    int  src_stride,
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    int  *results)
-global sym(vp9_sad4x4x3_sse3) PRIVATE
-sym(vp9_sad4x4x3_sse3):
+global sym(vpx_sad4x4x3_sse3) PRIVATE
+sym(vpx_sad4x4x3_sse3):
 
     STACK_FRAME_CREATE_X3
 

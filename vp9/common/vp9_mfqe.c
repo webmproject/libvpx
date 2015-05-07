@@ -9,8 +9,9 @@
  */
 
 #include "./vpx_config.h"
-#include "./vpx_scale_rtcd.h"
 #include "./vp9_rtcd.h"
+#include "./vpx_dsp_rtcd.h"
+#include "./vpx_scale_rtcd.h"
 
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_postproc.h"
@@ -171,13 +172,13 @@ static void mfqe_block(BLOCK_SIZE bs, const uint8_t *y, const uint8_t *u,
 
   if (bs == BLOCK_16X16) {
     vdiff = (vp9_variance16x16(y, y_stride, yd, yd_stride, &sse) + 128) >> 8;
-    sad = (vp9_sad16x16(y, y_stride, yd, yd_stride) + 128) >> 8;
+    sad = (vpx_sad16x16(y, y_stride, yd, yd_stride) + 128) >> 8;
   } else if (bs == BLOCK_32X32) {
     vdiff = (vp9_variance32x32(y, y_stride, yd, yd_stride, &sse) + 512) >> 10;
-    sad = (vp9_sad32x32(y, y_stride, yd, yd_stride) + 512) >> 10;
+    sad = (vpx_sad32x32(y, y_stride, yd, yd_stride) + 512) >> 10;
   } else /* if (bs == BLOCK_64X64) */ {
     vdiff = (vp9_variance64x64(y, y_stride, yd, yd_stride, &sse) + 2048) >> 12;
-    sad = (vp9_sad64x64(y, y_stride, yd, yd_stride) + 2048) >> 12;
+    sad = (vpx_sad64x64(y, y_stride, yd, yd_stride) + 2048) >> 12;
   }
 
   // vdiff > sad * 3 means vdiff should not be too small, otherwise,

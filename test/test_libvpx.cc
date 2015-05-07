@@ -19,6 +19,7 @@ extern void vp8_rtcd();
 #if CONFIG_VP9
 extern void vp9_rtcd();
 #endif  // CONFIG_VP9
+extern void vpx_dsp_rtcd();
 extern void vpx_scale_rtcd();
 }
 #include "third_party/googletest/src/include/gtest/gtest.h"
@@ -64,6 +65,7 @@ int main(int argc, char **argv) {
 #if CONFIG_VP9
   vp9_rtcd();
 #endif  // CONFIG_VP9
+  vpx_dsp_rtcd();
   vpx_scale_rtcd();
 #endif  // !CONFIG_SHARED
 

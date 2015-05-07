@@ -10,11 +10,11 @@
 #include <immintrin.h>  // AVX2
 #include "vpx/vpx_integer.h"
 
-void vp9_sad32x32x4d_avx2(uint8_t *src,
+void vpx_sad32x32x4d_avx2(uint8_t *src,
                           int src_stride,
                           uint8_t *ref[4],
                           int ref_stride,
-                          unsigned int res[4]) {
+                          uint32_t res[4]) {
   __m256i src_reg, ref0_reg, ref1_reg, ref2_reg, ref3_reg;
   __m256i sum_ref0, sum_ref1, sum_ref2, sum_ref3;
   __m256i sum_mlow, sum_mhigh;
@@ -80,11 +80,11 @@ void vp9_sad32x32x4d_avx2(uint8_t *src,
   }
 }
 
-void vp9_sad64x64x4d_avx2(uint8_t *src,
+void vpx_sad64x64x4d_avx2(uint8_t *src,
                           int src_stride,
                           uint8_t *ref[4],
                           int ref_stride,
-                          unsigned int res[4]) {
+                          uint32_t res[4]) {
   __m256i src_reg, srcnext_reg, ref0_reg, ref0next_reg;
   __m256i ref1_reg, ref1next_reg, ref2_reg, ref2next_reg;
   __m256i ref3_reg, ref3next_reg;
