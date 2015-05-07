@@ -789,7 +789,6 @@ process_common_toolchain() {
   case ${toolchain} in
     sparc-solaris-*)
       add_extralibs -lposix4
-      disable_feature fast_unaligned
       ;;
     *-solaris-*)
       add_extralibs -lposix4
@@ -813,11 +812,9 @@ process_common_toolchain() {
             die "Disabling neon while keeping neon-asm is not supported"
           fi
           soft_enable media
-          soft_enable fast_unaligned
           ;;
         armv6)
           soft_enable media
-          soft_enable fast_unaligned
           ;;
       esac
 
@@ -1033,7 +1030,6 @@ EOF
       tune_cflags="-mtune="
       if enabled dspr2; then
         check_add_cflags -mips32r2 -mdspr2
-        disable_feature fast_unaligned
       fi
 
       if enabled runtime_cpu_detect; then
@@ -1060,8 +1056,6 @@ EOF
           add_cflags -mmsa
           add_asflags -mmsa
           add_ldflags -mmsa
-
-          disable_feature fast_unaligned
         fi
       fi
 

@@ -31,8 +31,6 @@ Advanced options:
   --size-limit=WxH                max size to allow in the decoder
   --as={yasm|nasm|auto}           use specified assembler [auto, yasm preferred]
   --sdk-path=PATH                 path to root of sdk (android builds only)
-  ${toggle_fast_unaligned}        don't use unaligned accesses, even when
-                                  supported by hardware [auto]
   ${toggle_codec_srcs}            in/exclude codec library source code
   ${toggle_debug_libs}            in/exclude debug version of libraries
   ${toggle_static_msvcrt}         use static MSVCRT (VS builds only)
@@ -203,7 +201,6 @@ enable_feature install_libs
 enable_feature static
 enable_feature optimizations
 enable_feature dependency_tracking
-enable_feature fast_unaligned #allow unaligned accesses, if supported by hw
 enable_feature spatial_resampling
 enable_feature multithread
 enable_feature os_support
@@ -294,7 +291,6 @@ CONFIG_LIST="
 
     codec_srcs
     debug_libs
-    fast_unaligned
 
     dequant_tokens
     dc_recon
@@ -356,7 +352,6 @@ CMDLINE_SELECT="
     libc
     as
     size_limit
-    fast_unaligned
     codec_srcs
     debug_libs
 
