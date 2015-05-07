@@ -34,6 +34,24 @@
       "revId": "37d63c0e318adf2ba4e07d3b48114520753b06cb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cd24a5a6_99712960",
+        "filename": "vp8/common/copy_c.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-05-07T21:45:48Z",
+      "side": 1,
+      "message": "yes you can drop it in other locations if it\u0027s a pointer. might be safe to leave it with a fixed size array if it isn\u0027t readily apparent.",
+      "parentUuid": "cd24a5a6_f9fedd2f",
+      "revId": "37d63c0e318adf2ba4e07d3b48114520753b06cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
