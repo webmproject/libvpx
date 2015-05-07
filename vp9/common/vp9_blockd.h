@@ -318,6 +318,9 @@ enum mv_precision {
 
 struct buf_2d {
   uint8_t *buf;
+  uint8_t *buf0;
+  int width;
+  int height;
   int stride;
 };
 
@@ -401,6 +404,9 @@ typedef struct macroblockd {
 
   PARTITION_CONTEXT *above_seg_context;
   PARTITION_CONTEXT left_seg_context[8];
+#if CONFIG_GLOBAL_MOTION
+  Global_Motion_Params (*global_motion)[MAX_GLOBAL_MOTION_MODELS];
+#endif  // CONFIG_GLOBAL_MOTION
 } MACROBLOCKD;
 
 static INLINE BLOCK_SIZE get_subsize(BLOCK_SIZE bsize,

@@ -3455,11 +3455,15 @@ static int64_t rd_pick_best_sub8x8_mode(
         if (!(inter_mode_mask & (1 << this_mode)))
           continue;
 
-#if !CONFIG_GLOBAL_MOTION
-        if (!check_best_zero_mv(cpi, mbmi->mode_context, frame_mv,
-                                this_mode, mbmi->ref_frame))
-          continue;
+#if CONFIG_GLOBAL_MOTION
+        if (get_gmtype(&cm->global_motion[mbmi->ref_frame[0]][0]) ==
+            GLOBAL_ZERO &&
+            get_gmtype(&cm->global_motion[mbmi->ref_frame[1]][0]) ==
+            GLOBAL_ZERO)
 #endif
+          if (!check_best_zero_mv(cpi, mbmi->mode_context, frame_mv,
+                                  this_mode, mbmi->ref_frame))
+            continue;
 
         vpx_memcpy(orig_pre, pd->pre, sizeof(orig_pre));
         vpx_memcpy(bsi->rdstat[i][mode_idx].ta, t_above,
@@ -3939,7 +3943,7 @@ static void single_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   MACROBLOCKD *xd = &x->e_mbd;
   const VP9_COMMON *cm = &cpi->common;
   MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
-  struct buf_2d backup_yv12[MAX_MB_PLANE] = {{0, 0}};
+  struct buf_2d backup_yv12[MAX_MB_PLANE] = {{0, 0, 0, 0, 0}};
   int bestsme = INT_MAX;
   int step_param;
   int sadpb = x->sadperbit16;
@@ -4268,7 +4272,7 @@ static void do_masked_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
   MACROBLOCKD *xd = &x->e_mbd;
   const VP9_COMMON *cm = &cpi->common;
   MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
-  struct buf_2d backup_yv12[MAX_MB_PLANE] = {{0, 0}};
+  struct buf_2d backup_yv12[MAX_MB_PLANE] = {{0, 0, 0, 0, 0}};
   int bestsme = INT_MAX;
   int step_param;
   int sadpb = x->sadperbit16;
@@ -6351,13 +6355,18 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
               continue;
         }
       }
-#if !CONFIG_GLOBAL_MOTION
+#if CONFIG_GLOBAL_MOTION
+    } else if (get_gmtype(&cm->global_motion[ref_frame][0]) ==
+               GLOBAL_ZERO &&
+               get_gmtype(&cm->global_motion[second_ref_frame][0]) ==
+               GLOBAL_ZERO) {
+#else
     } else {
+#endif  // CONFIG_GLOBAL_MOTION
       const MV_REFERENCE_FRAME ref_frames[2] = {ref_frame, second_ref_frame};
       if (!check_best_zero_mv(cpi, mbmi->mode_context, frame_mv,
                               this_mode, ref_frames))
         continue;
-#endif  // !CONFIG_GLOBAL_MOTION
     }
 #if CONFIG_INTERINTRA
     if (ref_frame > INTRA_FRAME && second_ref_frame == INTRA_FRAME &&

@@ -1477,6 +1477,9 @@ void vp9_change_config(struct VP9_COMP *cpi, const VP9EncoderConfig *oxcf) {
 #if CONFIG_VP9_HIGHBITDEPTH
   cpi->mb.e_mbd.bd = (int)cm->bit_depth;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
+#if CONFIG_GLOBAL_MOTION
+  cpi->mb.e_mbd.global_motion = cm->global_motion;
+#endif
 
   rc->baseline_gf_interval = DEFAULT_GF_INTERVAL;
 

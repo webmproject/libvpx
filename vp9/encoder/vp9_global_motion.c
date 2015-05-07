@@ -22,11 +22,12 @@
 #include "vp9/common/vp9_reconinter.h"
 #include "vp9/common/vp9_reconintra.h"
 #include "vp9/common/vp9_systemdependent.h"
+#include "vp9/common/vp9_motion_model.h"
 #include "vp9/encoder/vp9_corner_detect.h"
 #include "vp9/encoder/vp9_corner_match.h"
 #include "vp9/encoder/vp9_ransac.h"
 #include "vp9/encoder/vp9_global_motion.h"
-#include "vp9/encoder/vp9_motionmodel.h"
+#include "vp9/encoder/vp9_motion_field.h"
 
 // #define VERBOSE
 
@@ -47,22 +48,6 @@ INLINE ransacType get_ransacType(TransformationType type) {
       return ransacRotZoom;
     case TRANSLATION:
       return ransacTranslation;
-    default:
-      assert(0);
-      return NULL;
-  }
-}
-
-INLINE projectPointsType get_projectPointsType(TransformationType type) {
-  switch (type) {
-    case HOMOGRAPHY:
-      return projectPointsHomography;
-    case AFFINE:
-      return projectPointsAffine;
-    case ROTZOOM:
-      return projectPointsRotZoom;
-    case TRANSLATION:
-      return projectPointsTranslation;
     default:
       assert(0);
       return NULL;

@@ -16,12 +16,11 @@
 #include <math.h>
 #include <memory.h>
 
+#include "vp9/common/vp9_motion_model.h"
+
 typedef int (*ransacType)(double *matched_points, int npoints,
                           int *number_of_inliers, int *best_inlier_mask,
                           double *bestH);
-typedef void (*projectPointsType)(double *mat, double *points, double *proj,
-                                  const int n, const int stride_points,
-                                  const int stride_proj);
 
 int ransacHomography(double *matched_points, int npoints,
                      int *number_of_inliers, int *best_inlier_indices,
@@ -35,18 +34,5 @@ int ransacRotZoom(double *matched_points, int npoints,
 int ransacTranslation(double *matched_points, int npoints,
                       int *number_of_inliers, int *best_inlier_indices,
                       double *bestH);
-
-void projectPointsHomography(double *mat, double *points, double *proj,
-                             const int n, const int stride_points,
-                             const int stride_proj);
-void projectPointsAffine(double *mat, double *points, double *proj,
-                         const int n, const int stride_points,
-                         const int stride_proj);
-void projectPointsRotZoom(double *mat, double *points, double *proj,
-                          const int n, const int stride_points,
-                          const int stride_proj);
-void projectPointsTranslation(double *mat, double *points, double *proj,
-                              const int n, const int stride_points,
-                              const int stride_proj);
 
 #endif  // VP9_ENCODER_VP9_RANSAC_H

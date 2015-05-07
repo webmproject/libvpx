@@ -84,10 +84,10 @@ static int try_bilateral_frame(const YV12_BUFFER_CONFIG *sd,
   return filt_err;
 }
 
-static int64_t search_bilateral_level(const YV12_BUFFER_CONFIG *sd,
-                                      VP9_COMP *cpi,
-                                      int filter_level, int partial_frame,
-                                      double *best_cost_ret) {
+static int search_bilateral_level(const YV12_BUFFER_CONFIG *sd,
+                                  VP9_COMP *cpi,
+                                  int filter_level, int partial_frame,
+                                  double *best_cost_ret) {
   VP9_COMMON *const cm = &cpi->common;
   int i, bilateral_best, err;
   double best_cost;
