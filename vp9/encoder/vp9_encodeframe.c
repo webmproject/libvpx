@@ -2198,7 +2198,7 @@ static void rd_auto_partition_range(VP9_COMP *cpi, const TileInfo *const tile,
   max_size = find_partition_size(max_size,
                                  row8x8_remaining, col8x8_remaining,
                                  &bh, &bw);
-  min_size = MIN(min_size, max_size);
+  min_size = MIN(cpi->sf.rd_auto_partition_min_limit, MIN(min_size, max_size));
 
   // When use_square_partition_only is true, make sure at least one square
   // partition is allowed by selecting the next smaller square size as

@@ -271,6 +271,9 @@ typedef struct SPEED_FEATURES {
   // Sets min and max partition sizes for this 64x64 region based on the
   // same 64x64 in last encoded frame, and the left and above neighbor.
   AUTO_MIN_MAX_MODE auto_min_max_partition_size;
+  // Ensures the rd based auto partition search will always
+  // go down at least to the specified level.
+  BLOCK_SIZE rd_auto_partition_min_limit;
 
   // Min and max partition size we enable (block_size) as per auto
   // min max, but also used by adjust partitioning, and pick_partitioning.
