@@ -10,6 +10,260 @@
 
 #include "vp9/common/vp9_mvref_common.h"
 
+#if CONFIG_NEW_INTER && CONFIG_NEWMVREF
+// This function returns either the appropriate subblock or block's mv,
+// depending on whether block_size < 8x8 for both current block and the
+// examined candidate block.
+static int_mv get_subblock_mv(const MODE_INFO *candidate,
+                              const MODE_INFO *current,
+                              int curr_blk_idx, int ref,
+                              int search_row, int search_col) {
+  int candidate_type = candidate->mbmi.sb_type;
+
+  if (curr_blk_idx >= 0 && candidate_type < BLOCK_8X8) {
+    int candidate_blk_idx = 0;
+    assert(current->mbmi.sb_type < BLOCK_8X8);
+
+    // Both current block and the candidate block are in sub8x8 mode
+    if ((search_row == -1 && search_col == 0) ||  // top
+        (search_row == 0 && search_col == -1)) {  // left
+      int i = curr_blk_idx + current->mbmi.sb_type * 4;
+      int j = (search_row == 0);  // top: 0; left: 1
+
+      candidate_blk_idx = idx_to_subblock_top_left[i][j][candidate_type];
+      return (candidate_blk_idx >= 0) ?
+          candidate->bmi[candidate_blk_idx].as_mv[ref] :
+          candidate->mbmi.mv[ref];
+    } else if ((search_row == -1 && search_col ==  1) ||  // top_right
+               (search_row == -1 && search_col == -1)) {  // top_left
+      candidate_blk_idx =
+          idx_to_subblock_topright_topleft[search_col == -1][candidate_type];
+      return candidate->bmi[candidate_blk_idx].as_mv[ref];
+    }
+  }
+
+  return candidate->mbmi.mv[ref];
+}
+
+static int get_mvref_zone_idx(const TileInfo *const tile, int bsize,
+                              int mi_row, int mi_col) {
+  int mvref_zone_idx = 0;
+  int row_8x8 = mi_row % 8;
+  int col_8x8 = mi_col % 8;
+
+  switch (bsize) {
+    case BLOCK_4X4:
+    case BLOCK_4X8:
+    case BLOCK_8X4:
+    case BLOCK_8X8:
+      mvref_zone_idx =
+          (mi_col >= (tile->mi_col_end - 1) ||  // right-most column
+           (mv_ref_topright_avail_8x8[row_8x8][col_8x8] == 0)) ? 1 : 0;
+      break;
+    default:
+      // Only <= BLOCK_8X8 are supported currently
+      assert(0);
+      break;
+  }
+  return mvref_zone_idx;
+}
+
+// This function searches the neighbourhood of a given MB/SB
+// to try to find candidate reference vectors.
+static void find_mv_refs_idx_8x8(const VP9_COMMON *cm, const MACROBLOCKD *xd,
+                                 const TileInfo *const tile,
+                                 MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
+                                 int_mv *mv_ref_list,
+                                 int block, int mi_row, int mi_col) {
+  int_mv mv_ref_candidates[MAX_MV_REF_CANDIDATES + 1];
+  const int *ref_sign_bias = cm->ref_frame_sign_bias;
+  int i;
+  int refmv_count = 0;
+  int different_ref_found = 0;
+
+  int zone_idx = get_mvref_zone_idx(tile, mi->mbmi.sb_type, mi_row, mi_col);
+  int max_nearest_blks = (zone_idx == 0) ? 4 : 3;
+  const POSITION *mv_ref_search = mv_ref_blocks_8x8[zone_idx];
+
+  // Zero out the mv reference vector list
+  vpx_memset(mv_ref_list, 0, sizeof(*mv_ref_list) * MAX_MV_REF_CANDIDATES);
+  vpx_memset(mv_ref_candidates, 0,
+             sizeof(*mv_ref_candidates) * (MAX_MV_REF_CANDIDATES + 1));
+
+  // The nearest 4 (when top right is available) or 3 neighboring blocks
+  // are treated differently:
+  //   If their block size < 8x8, we get the mv from the bmi substructure.
+  for (i = 0; i < max_nearest_blks; ++i) {
+    const POSITION *const mv_ref = &mv_ref_search[i];
+    if (is_inside(tile, mi_col, mi_row, cm->mi_rows, mv_ref)) {
+      const MODE_INFO *const candidate_mi =
+          xd->mi[mv_ref->col + mv_ref->row * xd->mi_stride].src_mi;
+      const MB_MODE_INFO *const candidate = &candidate_mi->mbmi;
+
+      different_ref_found = 1;
+
+      if (candidate->ref_frame[0] == ref_frame) {
+        ADD_MV_REF_CANDIDATE(get_subblock_mv(
+            candidate_mi, mi, block, 0, mv_ref->row, mv_ref->col));
+      } else if (candidate->ref_frame[1] == ref_frame) {
+        ADD_MV_REF_CANDIDATE(get_subblock_mv(
+            candidate_mi, mi, block, 1, mv_ref->row, mv_ref->col));
+      }
+    }
+  }
+
+  // Check the rest of the neighbors in much the same way as before
+  // except we don't need to keep track of subblocks.
+  for (; i < MVREF_NEIGHBOURS; ++i) {
+    const POSITION *const mv_ref = &mv_ref_search[i];
+    if (is_inside(tile, mi_col, mi_row, cm->mi_rows, mv_ref)) {
+      const MB_MODE_INFO *const candidate =
+          &xd->mi[mv_ref->col + mv_ref->row * xd->mi_stride].src_mi->mbmi;
+
+      different_ref_found = 1;
+
+      if (candidate->ref_frame[0] == ref_frame)
+        ADD_MV_REF_CANDIDATE(candidate->mv[0]);
+      else if (candidate->ref_frame[1] == ref_frame)
+        ADD_MV_REF_CANDIDATE(candidate->mv[1]);
+    }
+  }
+
+  // Since we couldn't find 3 mvs from the same reference frame,
+  // go back through the neighbors and find motion vectors from
+  // different reference frames.
+  if (different_ref_found) {
+    for (i = 0; i < MVREF_NEIGHBOURS; ++i) {
+      const POSITION *mv_ref = &mv_ref_search[i];
+      if (is_inside(tile, mi_col, mi_row, cm->mi_rows, mv_ref)) {
+        const MB_MODE_INFO *const candidate =
+            &xd->mi[mv_ref->col + mv_ref->row * xd->mi_stride].src_mi->mbmi;
+
+        // If the candidate is INTRA we don't want to consider its mv.
+        IF_DIFF_REF_FRAME_ADD_MV_CANDIDATE(candidate);
+      }
+    }
+  }
+
+ Done:
+
+  if (refmv_count == 2) {
+    mv_ref_list[0].as_mv.row =
+        (mv_ref_candidates[0].as_mv.row + mv_ref_candidates[1].as_mv.row) >> 1;
+    mv_ref_list[0].as_mv.col =
+        (mv_ref_candidates[0].as_mv.col + mv_ref_candidates[1].as_mv.col) >> 1;
+    mv_ref_list[1].as_int = mv_ref_candidates[2].as_int;
+  } else {
+    for (i = 0; i < 2; ++i) {
+      mv_ref_list[i].as_int = mv_ref_candidates[i].as_int;
+    }
+  }
+
+  // Clamp vectors
+  for (i = 0; i < MAX_MV_REF_CANDIDATES; ++i)
+    clamp_mv_ref(&mv_ref_list[i].as_mv, xd);
+}
+
+typedef enum MV_SEARCH_POS {
+  TOP            = 0,
+  LEFT           = 1,
+  TOPLEFT        = 2,
+  TOPRIGHT       = 3,
+  TOPRIGHT_ALT   = 4,
+  NUM_SEARCH_POS = 5
+} MV_SEARCH_POS;
+
+// Adaptive median
+static int get_adaptive_median(int topright, int left, int topleft) {
+  int a = topright;
+  int b = left;
+  int c = topright + left - topleft;
+
+  if (a >= b) {
+    if (b >= c)      return b;
+    else if (a >= c) return c;
+    else             return a;
+  } else {
+    if (b < c)       return b;
+    else if (a >= c) return a;
+    else             return c;
+  }
+}
+
+// This function searches the neighbourhood of a given MB/SB to try
+// to find the nearestmv through adaptive median filtering.
+static int find_best_mvref_8x8(const VP9_COMMON *cm, const MACROBLOCKD *xd,
+                               const TileInfo *const tile,
+                               MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
+                               int_mv *best_mvref,
+                               int block, int mi_row, int mi_col) {
+  int i;
+  int zone_idx = get_mvref_zone_idx(tile, mi->mbmi.sb_type, mi_row, mi_col);
+  int max_nearest_blks = (zone_idx == 0) ? 4 : 3;
+
+  const POSITION adapt_median_neighbor_pos[NUM_SEARCH_POS - 1] = {
+    // TOP, LEFT, TOPLEFT, TOPRIGHT
+    {-1, 0}, {0, -1}, {-1, -1}, {-1, 1}
+  };
+  int_mv mv_ref_mvs[NUM_SEARCH_POS];
+  int is_avail[NUM_SEARCH_POS] = { 0, 0, 0, 0, 0 };
+
+  vpx_memset(mv_ref_mvs, 0, sizeof(mv_ref_mvs[0]) * NUM_SEARCH_POS);
+
+  // If the neighboring block size < 8x8, the mv is obtained from
+  // the bmi substructure.
+  for (i = 0; i < max_nearest_blks; ++i) {
+    const POSITION *const mv_ref_pos = &adapt_median_neighbor_pos[i];
+
+    if (is_inside(tile, mi_col, mi_row, cm->mi_rows, mv_ref_pos)) {
+      const MODE_INFO *const candidate_mi =
+          xd->mi[mv_ref_pos->col + mv_ref_pos->row * xd->mi_stride].src_mi;
+      const MB_MODE_INFO *const candidate = &candidate_mi->mbmi;
+
+      if (candidate->ref_frame[0] == ref_frame) {
+        mv_ref_mvs[i] = get_subblock_mv(candidate_mi, mi, block, 0,
+                                        mv_ref_pos->row, mv_ref_pos->col);
+        is_avail[i] = 1;
+      } else if (candidate->ref_frame[1] == ref_frame) {
+        mv_ref_mvs[i] = get_subblock_mv(candidate_mi, mi, block, 1,
+                                        mv_ref_pos->row, mv_ref_pos->col);
+        is_avail[i] = 1;
+      }
+    }
+  }
+
+  if (is_avail[TOP] && is_avail[TOPRIGHT]) {
+    mv_ref_mvs[TOPRIGHT_ALT].as_mv.row =
+        (mv_ref_mvs[TOP].as_mv.row + mv_ref_mvs[TOPRIGHT].as_mv.row) >> 1;
+    mv_ref_mvs[TOPRIGHT_ALT].as_mv.col =
+        (mv_ref_mvs[TOP].as_mv.col + mv_ref_mvs[TOPRIGHT].as_mv.col) >> 1;
+  } else if (is_avail[TOP]) {
+    mv_ref_mvs[TOPRIGHT_ALT].as_int = mv_ref_mvs[TOP].as_int;
+  } else if (is_avail[TOPRIGHT]) {
+    mv_ref_mvs[TOPRIGHT_ALT].as_int = mv_ref_mvs[TOPRIGHT].as_int;
+  }
+
+  if (is_avail[TOP] || is_avail[LEFT] || is_avail[TOPLEFT] ||
+      is_avail[TOPRIGHT]) {
+    best_mvref->as_mv.row = get_adaptive_median(
+        mv_ref_mvs[TOPRIGHT_ALT].as_mv.row,
+        mv_ref_mvs[LEFT].as_mv.row,
+        mv_ref_mvs[TOPLEFT].as_mv.row);
+    best_mvref->as_mv.col = get_adaptive_median(
+        mv_ref_mvs[TOPRIGHT_ALT].as_mv.col,
+        mv_ref_mvs[LEFT].as_mv.col,
+        mv_ref_mvs[TOPLEFT].as_mv.col);
+
+    // Clamp vectors
+    clamp_mv_ref(&(best_mvref->as_mv), xd);
+    return 1;
+  } else {
+    best_mvref->as_int = 0;
+    return 0;
+  }
+}
+#endif  // CONFIG_NEW_INTER && CONFIG_NEWMVREF
+
 // This function searches the neighbourhood of a given MB/SB
 // to try and find candidate reference vectors.
 static void find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
@@ -159,9 +413,25 @@ void vp9_find_mv_refs(const VP9_COMMON *cm, const MACROBLOCKD *xd,
 #if CONFIG_NEW_INTER
   vp9_update_mv_context(cm, xd, tile, mi, ref_frame, mv_ref_list, -1,
                         mi_row, mi_col);
+#if CONFIG_NEWMVREF
+  if (mi->mbmi.sb_type <= BLOCK_8X8) {
+    int_mv best_mvref;
+    find_best_mvref_8x8(cm, xd, tile, mi, ref_frame, &best_mvref,
+                        -1, mi_row, mi_col);
+    find_mv_refs_idx_8x8(cm, xd, tile, mi, ref_frame, mv_ref_list,
+                         -1, mi_row, mi_col);
+    if (best_mvref.as_int != 0) {
+      mv_ref_list[1].as_int = mv_ref_list[0].as_int;
+      mv_ref_list[0].as_int = best_mvref.as_int;
+    }
+  } else {
+#endif  // CONFIG_NEWMVREF
 #endif  // CONFIG_NEW_INTER
   find_mv_refs_idx(cm, xd, tile, mi, ref_frame, mv_ref_list, -1,
                    mi_row, mi_col);
+#if CONFIG_NEW_INTER && CONFIG_NEWMVREF
+  }
+#endif  // CONFIG_NEW_INTER && CONFIG_NEWMVREF
 }
 
 void vp9_find_best_ref_mvs(MACROBLOCKD *xd, int allow_hp,
@@ -185,7 +455,11 @@ void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
                                    int_mv *mv_list,
 #endif  // CONFIG_NEW_INTER
                                    int_mv *nearest, int_mv *near) {
-#if !CONFIG_NEW_INTER
+#if CONFIG_NEW_INTER
+#if CONFIG_NEWMVREF
+  int_mv best_mvref;
+#endif  // CONFIG_NEWMVREF
+#else
   int_mv mv_list[MAX_MV_REF_CANDIDATES];
 #endif  // !CONFIG_NEW_INTER
   MODE_INFO *const mi = xd->mi[0].src_mi;
@@ -194,20 +468,46 @@ void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
 
   assert(MAX_MV_REF_CANDIDATES == 2);
 
-  find_mv_refs_idx(cm, xd, tile, mi, mi->mbmi.ref_frame[ref], mv_list, block,
-                   mi_row, mi_col);
+#if CONFIG_NEW_INTER && CONFIG_NEWMVREF
+  find_best_mvref_8x8(cm, xd, tile, mi, mi->mbmi.ref_frame[ref],
+                      &best_mvref, block, mi_row, mi_col);
+  find_mv_refs_idx_8x8(cm, xd, tile, mi, mi->mbmi.ref_frame[ref],
+                       mv_list, block, mi_row, mi_col);
+#else
+  find_mv_refs_idx(cm, xd, tile, mi, mi->mbmi.ref_frame[ref],
+                   mv_list, block, mi_row, mi_col);
+#endif  // CONFIG_NEW_INTER && CONFIG_NEWMVREF
 
   near->as_int = 0;
+
   switch (block) {
     case 0:
-      nearest->as_int = mv_list[0].as_int;
-      near->as_int = mv_list[1].as_int;
+#if CONFIG_NEW_INTER && CONFIG_NEWMVREF
+      if (best_mvref.as_int != 0) {
+        nearest->as_int = best_mvref.as_int;
+        if (best_mvref.as_int != mv_list[0].as_int)
+          near->as_int = mv_list[0].as_int;
+        else
+          near->as_int = mv_list[1].as_int;
+      } else {
+#endif  // CONFIG_NEW_INTER && CONFIG_NEWMVREF
+        nearest->as_int = mv_list[0].as_int;
+        near->as_int = mv_list[1].as_int;
+#if CONFIG_NEW_INTER && CONFIG_NEWMVREF
+      }
+#endif  // CONFIG_NEW_INTER && CONFIG_NEWMVREF
       break;
     case 1:
 #if !CONFIG_NEW_INTER
     case 2:
 #endif  // !CONFIG_NEW_INTER
       nearest->as_int = bmi[0].as_mv[ref].as_int;
+#if CONFIG_NEW_INTER && CONFIG_NEWMVREF
+      if (best_mvref.as_int != 0 &&
+          best_mvref.as_int != nearest->as_int)
+        near->as_int = best_mvref.as_int;
+      else
+#endif  // CONFIG_NEW_INTER && CONFIG_NEWMVREF
       for (n = 0; n < MAX_MV_REF_CANDIDATES; ++n)
         if (nearest->as_int != mv_list[n].as_int) {
           near->as_int = mv_list[n].as_int;
@@ -216,6 +516,31 @@ void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
       break;
 #if CONFIG_NEW_INTER
     case 2: {
+#if CONFIG_NEWMVREF
+      if (bmi[0].as_mv[ref].as_int !=
+          bmi[1].as_mv[ref].as_int) {
+        // Average of TOP and TOPRIGHT
+        nearest->as_mv.row = (
+            bmi[0].as_mv[ref].as_mv.row +
+            bmi[1].as_mv[ref].as_mv.row) >> 1;
+        nearest->as_mv.col = (
+            bmi[0].as_mv[ref].as_mv.col +
+            bmi[1].as_mv[ref].as_mv.col) >> 1;
+        near->as_int = bmi[0].as_mv[ref].as_int;
+      } else {
+        nearest->as_int = bmi[0].as_mv[ref].as_int;
+        if (best_mvref.as_int != 0 &&
+            best_mvref.as_int != nearest->as_int) {
+          near->as_int = best_mvref.as_int;
+        } else {
+          for (n = 0; n < MAX_MV_REF_CANDIDATES; ++n)
+            if (nearest->as_int != mv_list[n].as_int) {
+              near->as_int = mv_list[n].as_int;
+              break;
+            }
+        }
+      }
+#else
       int_mv candidates[1 + MAX_MV_REF_CANDIDATES];
       candidates[0] = bmi[1].as_mv[ref];
       candidates[1] = mv_list[0];
@@ -227,10 +552,50 @@ void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
           near->as_int = candidates[n].as_int;
           break;
         }
+#endif  // CONFIG_NEWMVREF
       break;
     }
 #endif  // CONFIG_NEW_INTER
     case 3: {
+#if CONFIG_NEW_INTER && CONFIG_NEWMVREF
+      if (bmi[0].as_mv[ref].as_int != bmi[1].as_mv[ref].as_int ||
+          bmi[0].as_mv[ref].as_int != bmi[2].as_mv[ref].as_int ||
+          bmi[1].as_mv[ref].as_int != bmi[2].as_mv[ref].as_int) {
+        nearest->as_mv.row = get_adaptive_median(
+            bmi[1].as_mv[ref].as_mv.row,
+            bmi[2].as_mv[ref].as_mv.row,
+            bmi[0].as_mv[ref].as_mv.row);
+        nearest->as_mv.col = get_adaptive_median(
+            bmi[1].as_mv[ref].as_mv.col,
+            bmi[2].as_mv[ref].as_mv.col,
+            bmi[0].as_mv[ref].as_mv.col);
+        /*nearest->as_mv.row =
+            (bmi[0].as_mv[ref].as_mv.row +
+             bmi[1].as_mv[ref].as_mv.row +
+             (bmi[2].as_mv[ref].as_mv.row << 1)) >> 2;
+        nearest->as_mv.col =
+            (bmi[0].as_mv[ref].as_mv.col +
+             bmi[1].as_mv[ref].as_mv.col +
+             (bmi[2].as_mv[ref].as_mv.col << 1)) >> 2;*/
+        for (n = 2; n >= 0; --n)
+          if (nearest->as_int != bmi[n].as_mv[ref].as_int) {
+            near->as_int = bmi[n].as_mv[ref].as_int;
+            break;
+          }
+      } else {
+        nearest->as_int = bmi[2].as_mv[ref].as_int;
+        if (best_mvref.as_int != 0 &&
+            best_mvref.as_int != nearest->as_int) {
+          near->as_int = best_mvref.as_int;
+        } else {
+          for (n = 0; n < MAX_MV_REF_CANDIDATES; ++n)
+            if (nearest->as_int != mv_list[n].as_int) {
+              near->as_int = mv_list[n].as_int;
+              break;
+          }
+        }
+      }
+#else
       int_mv candidates[2 + MAX_MV_REF_CANDIDATES];
       candidates[0] = bmi[1].as_mv[ref];
       candidates[1] = bmi[0].as_mv[ref];
@@ -243,6 +608,7 @@ void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
           near->as_int = candidates[n].as_int;
           break;
         }
+#endif  // CONFIG_NEW_INTER && CONFIG_NEWMREF
       break;
     }
     default:

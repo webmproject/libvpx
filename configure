@@ -298,6 +298,7 @@ EXPERIMENT_LIST="
     row_tile
     new_inter
     bitstream_fixes
+    newmvref
 "
 CONFIG_LIST="
     external_build
