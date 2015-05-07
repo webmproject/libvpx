@@ -858,11 +858,13 @@ static void read_intra_block_mode_info(VP9_COMMON *const cm, MODE_INFO *mi,
 }
 
 static INLINE int assign_mv(VP9_COMMON *cm, PREDICTION_MODE mode,
+                            MV_REFERENCE_FRAME ref_frame[2],
                             int_mv mv[2], int_mv ref_mv[2],
                             int_mv nearest_mv[2], int_mv near_mv[2],
                             int is_compound, int allow_hp, vp9_reader *r) {
   int i;
   int ret = 1;
+  (void) ref_frame;
 #if CONFIG_COMPOUND_MODES
   assert(is_inter_mode(mode) || is_inter_compound_mode(mode));
 #else
@@ -899,9 +901,15 @@ static INLINE int assign_mv(VP9_COMMON *cm, PREDICTION_MODE mode,
       break;
     }
     case ZEROMV: {
+#if CONFIG_GLOBAL_MOTION
+      mv[0].as_int = cm->global_motion[ref_frame[0]][0].mv.as_int;
+      if (is_compound)
+        mv[1].as_int = cm->global_motion[ref_frame[1]][0].mv.as_int;
+#else
       mv[0].as_int = 0;
       if (is_compound)
         mv[1].as_int = 0;
+#endif
       break;
     }
 #if CONFIG_COMPOUND_MODES
@@ -991,8 +999,13 @@ static INLINE int assign_mv(VP9_COMMON *cm, PREDICTION_MODE mode,
     }
     case ZERO_ZEROMV: {
       assert(is_compound);
+#if CONFIG_GLOBAL_MOTION
+      mv[0].as_int = cm->global_motion[ref_frame[0]][0].mv.as_int;
+      mv[1].as_int = cm->global_motion[ref_frame[1]][0].mv.as_int;
+#else
       mv[0].as_int = 0;
       mv[1].as_int = 0;
+#endif  // CONFIG_GLOBAL_MOTION
       break;
     }
 #endif  // CONFIG_COMPOUND_MODES
@@ -1207,7 +1220,7 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
           }
         }
 
-        if (!assign_mv(cm, b_mode, block,
+        if (!assign_mv(cm, b_mode, mbmi->ref_frame, block,
 #if CONFIG_NEWMVREF
                        (b_mode == NEAR_FORNEWMV) ? ref_mvs[1] : ref_mvs[0],
 #else
@@ -1236,12 +1249,14 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
   } else {
 #if CONFIG_NEWMVREF
     if (mbmi->mode == NEAR_FORNEWMV)
-      xd->corrupted |= !assign_mv(cm, mbmi->mode, mbmi->mv, nearmv,
-                                  nearestmv, nearmv, is_compound, allow_hp, r);
+      xd->corrupted |= !assign_mv(cm, mbmi->mode, mbmi->ref_frame, mbmi->mv,
+                                  nearmv, nearestmv, nearmv, is_compound,
+                                  allow_hp, r);
     else
 #endif  // CONFIG_NEWMVREF
-    xd->corrupted |= !assign_mv(cm, mbmi->mode, mbmi->mv, nearestmv,
-                                nearestmv, nearmv, is_compound, allow_hp, r);
+    xd->corrupted |= !assign_mv(cm, mbmi->mode, mbmi->ref_frame, mbmi->mv,
+                                nearestmv, nearestmv, nearmv, is_compound,
+                                allow_hp, r);
   }
 #if CONFIG_TX_SKIP
   mbmi->uv_mode = mbmi->mode;

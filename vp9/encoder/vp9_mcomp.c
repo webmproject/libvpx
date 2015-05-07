@@ -93,8 +93,8 @@ static int mvsad_err_cost(const MACROBLOCK *x, const MV *mv, const MV *ref,
   if (x->nmvsadcost) {
     const MV diff = { mv->row - ref->row,
                       mv->col - ref->col };
-    return ROUND_POWER_OF_TWO(mv_cost(&diff, x->nmvjointsadcost,
-                                      x->nmvsadcost) * error_per_bit, 8);
+    const int cost = mv_cost(&diff, x->nmvjointsadcost, x->nmvsadcost);
+    return ROUND_POWER_OF_TWO(cost * error_per_bit, 8);
   }
   return 0;
 }
@@ -694,6 +694,7 @@ static INLINE void calc_int_cost_list(const MACROBLOCK *x,
                                       int sadpb,
                                       const vp9_variance_fn_ptr_t *fn_ptr,
                                       const MV *best_mv,
+                                      int use_mvcost,
                                       int *cost_list) {
   static const MV neighbors[4] = {{0, -1}, {1, 0}, {0, 1}, {-1, 0}};
   const struct buf_2d *const what = &x->plane[0].src;
@@ -710,7 +711,7 @@ static INLINE void calc_int_cost_list(const MACROBLOCK *x,
   cost_list[0] = fn_ptr->vf(what->buf, what->stride,
                             get_buf_from_mv(in_what, &this_mv),
                             in_what->stride, &sse) +
-      mvsad_err_cost(x, &this_mv, &fcenter_mv, sadpb);
+      (use_mvcost ? mvsad_err_cost(x, &this_mv, &fcenter_mv, sadpb) : 0);
   if (check_bounds(x, br, bc, 1)) {
     for (i = 0; i < 4; i++) {
       const MV this_mv = {br + neighbors[i].row,
@@ -718,9 +719,9 @@ static INLINE void calc_int_cost_list(const MACROBLOCK *x,
       cost_list[i + 1] = fn_ptr->vf(what->buf, what->stride,
                                     get_buf_from_mv(in_what, &this_mv),
                                     in_what->stride, &sse) +
-          // mvsad_err_cost(x, &this_mv, &fcenter_mv, sadpb);
-          mv_err_cost(&this_mv, &fcenter_mv, x->nmvjointcost, x->mvcost,
-                      x->errorperbit);
+          (use_mvcost ? mv_err_cost(&this_mv, &fcenter_mv,
+                                    x->nmvjointcost, x->mvcost,
+                                    x->errorperbit) : 0);
     }
   } else {
     for (i = 0; i < 4; i++) {
@@ -732,9 +733,9 @@ static INLINE void calc_int_cost_list(const MACROBLOCK *x,
         cost_list[i + 1] = fn_ptr->vf(what->buf, what->stride,
                                       get_buf_from_mv(in_what, &this_mv),
                                       in_what->stride, &sse) +
-            // mvsad_err_cost(x, &this_mv, &fcenter_mv, sadpb);
-            mv_err_cost(&this_mv, &fcenter_mv, x->nmvjointcost, x->mvcost,
-                        x->errorperbit);
+            (use_mvcost ? mv_err_cost(&this_mv, &fcenter_mv,
+                                      x->nmvjointcost, x->mvcost,
+                                      x->errorperbit) : 0);
     }
   }
 }
@@ -777,8 +778,9 @@ static int vp9_pattern_search(const MACROBLOCK *x,
 
   // Work out the start point for the search
   bestsad = vfp->sdf(what->buf, what->stride,
-                     get_buf_from_mv(in_what, ref_mv), in_what->stride) +
-      mvsad_err_cost(x, ref_mv, &fcenter_mv, sad_per_bit);
+                     get_buf_from_mv(in_what, ref_mv), in_what->stride);
+  if (use_mvcost)
+    bestsad += mvsad_err_cost(x, ref_mv, &fcenter_mv, sad_per_bit);
 
   // Search all possible scales upto the search param around the center point
   // pick the scale of the point that is best as the starting scale of
@@ -908,7 +910,8 @@ static int vp9_pattern_search(const MACROBLOCK *x,
   // cost_list[4]: cost at delta {-1, 0} (top)    from the best integer pel
   if (cost_list) {
     const MV best_mv = { br, bc };
-    calc_int_cost_list(x, &fcenter_mv, sad_per_bit, vfp, &best_mv, cost_list);
+    calc_int_cost_list(x, &fcenter_mv, sad_per_bit, vfp, &best_mv,
+                       use_mvcost, cost_list);
   }
   best_mv->row = br;
   best_mv->col = bc;
@@ -956,8 +959,9 @@ static int vp9_pattern_search_sad(const MACROBLOCK *x,
 
   // Work out the start point for the search
   bestsad = vfp->sdf(what->buf, what->stride,
-                     get_buf_from_mv(in_what, ref_mv), in_what->stride) +
-      mvsad_err_cost(x, ref_mv, &fcenter_mv, sad_per_bit);
+                     get_buf_from_mv(in_what, ref_mv), in_what->stride);
+  if (use_mvcost)
+    bestsad += mvsad_err_cost(x, ref_mv, &fcenter_mv, sad_per_bit);
 
   // Search all possible scales upto the search param around the center point
   // pick the scale of the point that is best as the starting scale of
@@ -1172,8 +1176,10 @@ static int vp9_pattern_search_sad(const MACROBLOCK *x,
           const MV this_mv = { br + neighbors[i].row,
                                bc + neighbors[i].col };
           cost_list[i + 1] = vfp->sdf(what->buf, what->stride,
-                                     get_buf_from_mv(in_what, &this_mv),
-                                     in_what->stride);
+                                      get_buf_from_mv(in_what, &this_mv),
+                                      in_what->stride) +
+              (use_mvcost ?
+               mvsad_err_cost(x, &this_mv, &fcenter_mv, sad_per_bit) : 0);
         }
       } else {
         for (i = 0; i < 4; i++) {
@@ -1184,7 +1190,9 @@ static int vp9_pattern_search_sad(const MACROBLOCK *x,
           else
             cost_list[i + 1] = vfp->sdf(what->buf, what->stride,
                                        get_buf_from_mv(in_what, &this_mv),
-                                       in_what->stride);
+                                       in_what->stride) +
+                (use_mvcost ?
+                 mvsad_err_cost(x, &this_mv, &fcenter_mv, sad_per_bit) : 0);
         }
       }
     } else {
@@ -1668,7 +1676,7 @@ int vp9_full_pixel_diamond(const VP9_COMP *cpi, MACROBLOCK *x,
 
   // Return cost list.
   if (cost_list) {
-    calc_int_cost_list(x, ref_mv, sadpb, fn_ptr, dst_mv, cost_list);
+    calc_int_cost_list(x, ref_mv, sadpb, fn_ptr, dst_mv, 1, cost_list);
   }
   return bestsme;
 }

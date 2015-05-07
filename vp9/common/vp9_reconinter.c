@@ -1381,7 +1381,7 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
     // Do border extension if there is motion or the
     // width/height is not a multiple of 8 pixels.
     if (is_scaled || scaled_mv.col || scaled_mv.row ||
-        (frame_width & 0x7) || (frame_height & 0x7)) {
+         (frame_width & 0x7) || (frame_height & 0x7)) {
       // Get reference block bottom right coordinate.
       int x1 = ((x0_16 + (w - 1) * xs) >> SUBPEL_BITS) + 1;
       int y1 = ((y0_16 + (h - 1) * ys) >> SUBPEL_BITS) + 1;

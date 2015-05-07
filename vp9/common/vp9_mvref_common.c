@@ -1,4 +1,3 @@
-
 /*
  *  Copyright (c) 2012 The WebM project authors. All Rights Reserved.
  *

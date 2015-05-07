@@ -48,6 +48,7 @@
 #include <stdio.h>
 #include <memory.h>
 #include <math.h>
+#include <assert.h>
 
 #include "vp9_corner_detect.h"
 
@@ -2877,10 +2878,15 @@ int NonmaxSuppression(unsigned char *frmbuf, int width, int height, int stride,
   frm_corners_nonmax_xy = fast_nonmax(frmbuf, width, height, stride,
                                       (xy *)frm_corners, num_frm_corners,
                                       NONMAX_BARRIER, &num_frm_corners_nonmax);
-  memcpy(frm_corners, frm_corners_nonmax_xy,
-         sizeof(int) * 2 * num_frm_corners_nonmax);
-  free(frm_corners_nonmax_xy);
-  return num_frm_corners_nonmax;
+  if (frm_corners_nonmax_xy &&
+      num_frm_corners_nonmax <= num_frm_corners) {
+    memcpy(frm_corners, frm_corners_nonmax_xy,
+           sizeof(xy) * num_frm_corners_nonmax);
+    free(frm_corners_nonmax_xy);
+    return num_frm_corners_nonmax;
+  } else {
+    return num_frm_corners;
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -2895,9 +2901,13 @@ int FastCornerDetect(unsigned char *buf, int width, int height, int stride,
                                         FAST_BARRIER, &num_points);
   num_points =
       (num_points <= max_points ? num_points : max_points);
-  memcpy(points, frm_corners_xy, sizeof(int) * num_points * 2);
-  free(frm_corners_xy);
-  return NonmaxSuppression(buf, width, height, stride, points, num_points);
+  if (num_points > 0 && frm_corners_xy) {
+    memcpy(points, frm_corners_xy, sizeof(xy) * num_points);
+    free(frm_corners_xy);
+    return NonmaxSuppression(buf, width, height, stride, points, num_points);
+  } else {
+    return 0;
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////////////

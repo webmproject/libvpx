@@ -580,7 +580,12 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
     PREDICTION_MODE this_mode;
     x->pred_mv_sad[ref_frame] = INT_MAX;
     frame_mv[NEWMV][ref_frame].as_int = INVALID_MV;
+#if CONFIG_GLOBAL_MOTION
+    frame_mv[ZEROMV][ref_frame].as_int =
+        cm->global_motion[ref_frame][0].mv.as_int;
+#else
     frame_mv[ZEROMV][ref_frame].as_int = 0;
+#endif  // CONFIG_GLOBAL_MOTION
 
     if (xd->up_available)
       filter_ref = xd->mi[-xd->mi_stride].src_mi->mbmi.interp_filter;
@@ -628,7 +633,9 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 #endif
       int rate_mv = 0;
       int mode_rd_thresh;
-
+#if CONFIG_GLOBAL_MOTION
+      if (const_motion[ref_frame] && this_mode == NEARMV)
+#else   // CONFIG_GLOBAL_MOTION
 #if CONFIG_COMPOUND_MODES
       if (const_motion[ref_frame] &&
           (this_mode == NEARMV || this_mode == ZEROMV ||
@@ -637,6 +644,7 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       if (const_motion[ref_frame] &&
           (this_mode == NEARMV || this_mode == ZEROMV))
 #endif
+#endif  // CONFIG_GLOBAL_MOTION
         continue;
 
       if (!(cpi->sf.inter_mode_mask[bsize] & (1 << this_mode)))

@@ -37,23 +37,7 @@
 
 #define MAX_CORNERS 4096
 
-inline int get_numparams(TransformationType type) {
-  switch (type) {
-    case HOMOGRAPHY:
-      return 9;
-    case AFFINE:
-      return 6;
-    case ROTZOOM:
-      return 4;
-    case TRANSLATION:
-      return 2;
-    default:
-      assert(0);
-      return 0;
-  }
-}
-
-inline ransacType get_ransacType(TransformationType type) {
+INLINE ransacType get_ransacType(TransformationType type) {
   switch (type) {
     case HOMOGRAPHY:
       return ransacHomography;
@@ -69,7 +53,7 @@ inline ransacType get_ransacType(TransformationType type) {
   }
 }
 
-inline projectPointsType get_projectPointsType(TransformationType type) {
+INLINE projectPointsType get_projectPointsType(TransformationType type) {
   switch (type) {
     case HOMOGRAPHY:
       return projectPointsHomography;
@@ -365,31 +349,34 @@ int vp9_compute_global_motion_single_block_based(struct VP9_COMP *cpi,
                                                  TransformationType type,
                                                  YV12_BUFFER_CONFIG *frm,
                                                  YV12_BUFFER_CONFIG *ref,
-                                                 int blocksize,
+                                                 BLOCK_SIZE bsize,
                                                  double *H) {
   VP9_COMMON *const cm = &cpi->common;
   int num_correspondences = 0;
   int *correspondences;
   int num_inliers;
   int *inlier_map = NULL;
-
+  int bwidth = num_4x4_blocks_wide_lookup[bsize] << 2;
+  int bheight = num_4x4_blocks_high_lookup[bsize] << 2;
   int i;
   MV motionfield[4096];
   double confidence[4096];
 
-  get_frame_motionfield(cpi, frm, ref, blocksize, motionfield, confidence);
+  vp9_get_frame_motionfield(cpi, frm, ref, bsize, motionfield, confidence);
 
   correspondences = (int *)malloc(4 * cm->mb_rows * cm->mb_cols *
                                   sizeof(*correspondences));
 
   for (i = 0; i < cm->mb_rows * cm->mb_cols; i ++) {
-      int x = (i % cm->mb_cols) * blocksize + blocksize/2;
-      int y = (i / cm->mb_cols) * blocksize + blocksize/2;
+      int x = (i % cm->mb_cols) * bwidth + bwidth / 2;
+      int y = (i / cm->mb_cols) * bheight + bheight / 2;
       if (confidence[i] > CONFIDENCE_THRESHOLD) {
-        correspondences[num_correspondences*4]   = x;
-        correspondences[num_correspondences*4+1] = y;
-        correspondences[num_correspondences*4+2] = motionfield[i].col + x;
-        correspondences[num_correspondences*4+3] = motionfield[i].row + y;
+        correspondences[num_correspondences * 4]   = x;
+        correspondences[num_correspondences * 4 + 1] = y;
+        correspondences[num_correspondences * 4 + 2] =
+            (double)motionfield[i].col / 8 + x;
+        correspondences[num_correspondences * 4 + 3] =
+            (double)motionfield[i].row / 8 + y;
         num_correspondences++;
       }
   }
@@ -415,7 +402,7 @@ int vp9_compute_global_motion_multiple_block_based(struct VP9_COMP *cpi,
                                                    TransformationType type,
                                                    YV12_BUFFER_CONFIG *frm,
                                                    YV12_BUFFER_CONFIG *ref,
-                                                   int blocksize,
+                                                   BLOCK_SIZE bsize,
                                                    int max_models,
                                                    double inlier_prob,
                                                    double *H) {
@@ -425,23 +412,27 @@ int vp9_compute_global_motion_multiple_block_based(struct VP9_COMP *cpi,
   int num_inliers;
   int num_models = 0;
   int *inlier_map = NULL;
+  int bwidth = num_4x4_blocks_wide_lookup[bsize] << 2;
+  int bheight = num_4x4_blocks_high_lookup[bsize] << 2;
 
   int i;
   MV motionfield[4096];
   double confidence[4096];
-  get_frame_motionfield(cpi, frm, ref, blocksize, motionfield, confidence);
+  vp9_get_frame_motionfield(cpi, frm, ref, bsize, motionfield, confidence);
 
   correspondences = (int *)malloc(4 * cm->mb_rows * cm->mb_cols *
                                   sizeof(*correspondences));
 
   for (i = 0; i < cm->mb_rows * cm->mb_cols; i ++) {
-      int x = (i % cm->mb_cols) * blocksize + blocksize/2;
-      int y = (i / cm->mb_cols) * blocksize + blocksize/2;
+      int x = (i % cm->mb_cols) * bwidth + bwidth / 2;
+      int y = (i / cm->mb_cols) * bheight + bheight / 2;
       if (confidence[i] > CONFIDENCE_THRESHOLD) {
-        correspondences[num_correspondences*4]   = x;
-        correspondences[num_correspondences*4+1] = y;
-        correspondences[num_correspondences*4+2] = motionfield[i].col + x;
-        correspondences[num_correspondences*4+3] = motionfield[i].row + y;
+        correspondences[num_correspondences * 4]   = x;
+        correspondences[num_correspondences * 4 + 1] = y;
+        correspondences[num_correspondences * 4 + 2] =
+            (double)motionfield[i].col / 8 + x;
+        correspondences[num_correspondences * 4 + 3] =
+            (double)motionfield[i].row / 8 + y;
         num_correspondences++;
       }
   }

@@ -84,6 +84,7 @@ static int prob_diff_update_cost(vp9_prob newp, vp9_prob oldp) {
 }
 
 static void encode_uniform(vp9_writer *w, int v) {
+  // NOTE: this is equivalent to vp9_encode_primitive_uniform(w, v, 191);
   const int l = 8;
   const int m = (1 << l) - 191;
   if (v < m) {
@@ -198,4 +199,56 @@ int vp9_cond_prob_diff_update_savings(vp9_prob *oldp,
   const int savings = vp9_prob_diff_update_savings_search(ct, *oldp, &newp,
                                                           upd);
   return savings;
+}
+
+void vp9_write_primitive_uniform(vp9_writer *w, int word,
+                                 unsigned int num_values) {
+  const int l = get_unsigned_bits_gen(num_values);
+  int m;
+  if (l == 0)
+    return;
+  m = (1 << l) - num_values;
+  if (word < m) {
+    vp9_write_literal(w, word, l - 1);
+  } else {
+    vp9_write_literal(w, m + ((word - m) >> 1), l - 1);
+    vp9_write_bit(w, (word - m) & 1);
+  }
+}
+
+void vp9_write_primitive_subexp(vp9_writer *w, int word,
+                                unsigned int k) {
+  int mk = (1 << k);
+  int i = 0, j;
+  int tail;
+  while (word >= mk) {
+    mk <<= 1;
+    ++i;
+  }
+  if (i == 0) {
+    tail = word;
+    vp9_write_bit(w, 0);
+    if (k > 0)
+      vp9_write_literal(w, tail, k);
+  } else {
+    tail = word - (mk >> 1);
+    for (j = 0; j < i; j++)
+      vp9_write_bit(w, 1);
+    vp9_write_bit(w, 0);
+    if (k + i - 1 > 0)
+      vp9_write_literal(w, tail, k + i - 1);
+  }
+}
+
+void vp9_write_primitive_symmetric(vp9_writer *w, int word,
+                                   int abs_bits) {
+  if (word == 0) {
+    vp9_write_bit(w, 0);
+  } else {
+    const int x = abs(word);
+    const int s = word < 0;
+    vp9_write_bit(w, 1);
+    vp9_write_bit(w, s);
+    vp9_write_literal(w, x - 1, abs_bits);
+  }
 }

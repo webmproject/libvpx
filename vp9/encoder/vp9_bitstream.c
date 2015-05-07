@@ -55,6 +55,9 @@ static struct vp9_token copy_mode_encodings[COPY_MODE_COUNT - 1];
 #if CONFIG_COMPOUND_MODES
 static struct vp9_token inter_compound_mode_encodings[INTER_COMPOUND_MODES];
 #endif  // CONFIG_COMPOUND_MODES
+#if CONFIG_GLOBAL_MOTION
+static struct vp9_token global_motion_types_encodings[GLOBAL_MOTION_TYPES];
+#endif  // CONFIG_GLOBAL_MOTION
 
 #if CONFIG_SUPERTX
 static int vp9_check_supertx(VP9_COMMON *cm, int mi_row, int mi_col,
@@ -88,6 +91,10 @@ void vp9_entropy_mode_init() {
   vp9_tokens_from_tree(copy_mode_encodings_l2, vp9_copy_mode_tree_l2);
   vp9_tokens_from_tree(copy_mode_encodings, vp9_copy_mode_tree);
 #endif  // CONFIG_COPY_MODE
+#if CONFIG_GLOBAL_MOTION
+  vp9_tokens_from_tree(global_motion_types_encodings,
+                       vp9_global_motion_types_tree);
+#endif  // CONFIG_GLOBAL_MOTION
 }
 
 static void write_intra_mode(vp9_writer *w, PREDICTION_MODE mode,
@@ -1985,6 +1992,66 @@ static void write_uncompressed_header(VP9_COMP *cpi,
   write_tile_info(cm, wb);
 }
 
+#if CONFIG_GLOBAL_MOTION
+static void write_global_motion_params(Global_Motion_Params *params,
+                                       vp9_prob *probs,
+                                       vp9_writer *w) {
+  GLOBAL_MOTION_TYPE gmtype;
+  if (params->zoom == 0 && params->rotation == 0) {
+    if (params->mv.as_int == 0)
+      gmtype = GLOBAL_ZERO;
+    else
+      gmtype = GLOBAL_TRANSLATION;
+  } else {
+      gmtype = GLOBAL_ROTZOOM;
+  }
+  vp9_write_token(w, vp9_global_motion_types_tree, probs,
+                  &global_motion_types_encodings[gmtype]);
+  switch (gmtype) {
+    case GLOBAL_ZERO:
+      break;
+    case GLOBAL_TRANSLATION:
+      vp9_write_primitive_symmetric(w, params->mv.as_mv.col,
+                                    ABS_TRANSLATION_BITS);
+      vp9_write_primitive_symmetric(w, params->mv.as_mv.row,
+                                    ABS_TRANSLATION_BITS);
+      break;
+    case GLOBAL_ROTZOOM:
+      vp9_write_primitive_symmetric(w, params->mv.as_mv.col,
+                                    ABS_TRANSLATION_BITS);
+      vp9_write_primitive_symmetric(w, params->mv.as_mv.row,
+                                    ABS_TRANSLATION_BITS);
+      vp9_write_primitive_symmetric(w, params->zoom, ABS_ZOOM_BITS);
+      vp9_write_primitive_symmetric(w, params->rotation, ABS_ROTATION_BITS);
+      break;
+    default:
+      assert(0);
+  }
+}
+
+static void write_global_motion(VP9_COMP *cpi, vp9_writer *w) {
+  VP9_COMMON *const cm = &cpi->common;
+  int frame, i;
+  for (frame = LAST_FRAME; frame <= ALTREF_FRAME; ++frame) {
+    for (i = 0; i < cm->num_global_motion[frame]; ++i) {
+      if (!cpi->global_motion_used[frame]) {
+        vpx_memset(
+            cm->global_motion[frame], 0,
+            MAX_GLOBAL_MOTION_MODELS * sizeof(*cm->global_motion[frame]));
+      }
+      write_global_motion_params(
+          cm->global_motion[frame], cm->fc.global_motion_types_prob, w);
+      printf("Ref %d [%d] (used %d): %d %d %d %d\n",
+             frame, cm->current_video_frame, cpi->global_motion_used[frame],
+             cm->global_motion[frame][i].zoom,
+             cm->global_motion[frame][i].rotation,
+             cm->global_motion[frame][i].mv.as_mv.col,
+             cm->global_motion[frame][i].mv.as_mv.row);
+    }
+  }
+}
+#endif
+
 static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
   VP9_COMMON *const cm = &cpi->common;
 #if !CONFIG_TX_SKIP || CONFIG_SUPERTX
@@ -2116,6 +2183,9 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
                                     cm->counts.wedge_interinter[i]);
     }
 #endif  // CONFIG_WEDGE_PARTITION
+#if CONFIG_GLOBAL_MOTION
+    write_global_motion(cpi, &header_bc);
+#endif  // CONFIG_GLOBAL_MOTION
   }
 
 #if CONFIG_PALETTE

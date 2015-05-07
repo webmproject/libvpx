@@ -429,6 +429,9 @@ typedef struct VP9_COMP {
 #if CONFIG_VP9_TEMPORAL_DENOISING
   VP9_DENOISER denoiser;
 #endif
+#if CONFIG_GLOBAL_MOTION
+  int global_motion_used[MAX_REF_FRAMES];
+#endif
 } VP9_COMP;
 
 void vp9_initialize_enc();

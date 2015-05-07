@@ -2472,6 +2472,50 @@ static void read_inter_compound_mode_probs(FRAME_CONTEXT *fc, vp9_reader *r) {
 }
 #endif  // CONFIG_COMPOUND_MODES
 
+#if CONFIG_GLOBAL_MOTION
+static void read_global_motion_params(Global_Motion_Params *params,
+                                      vp9_prob *probs,
+                                      vp9_reader *r) {
+  GLOBAL_MOTION_TYPE gmtype = vp9_read_tree(r, vp9_global_motion_types_tree,
+                                            probs);
+  switch (gmtype) {
+    case GLOBAL_ZERO:
+      break;
+    case GLOBAL_TRANSLATION:
+      params->mv.as_mv.col =
+          vp9_read_primitive_symmetric(r, ABS_TRANSLATION_BITS);
+      params->mv.as_mv.row =
+          vp9_read_primitive_symmetric(r, ABS_TRANSLATION_BITS);
+      break;
+    case GLOBAL_ROTZOOM:
+      params->mv.as_mv.col =
+          vp9_read_primitive_symmetric(r, ABS_TRANSLATION_BITS);
+      params->mv.as_mv.row =
+          vp9_read_primitive_symmetric(r, ABS_TRANSLATION_BITS);
+      params->zoom =
+          vp9_read_primitive_symmetric(r, ABS_ZOOM_BITS);
+      params->rotation =
+          vp9_read_primitive_symmetric(r, ABS_ROTATION_BITS);
+      break;
+    default:
+      assert(0);
+  }
+}
+
+static void read_global_motion(VP9_COMMON *cm, vp9_reader *r) {
+  int frame, i;
+  vpx_memset(cm->num_global_motion, 0, sizeof(cm->num_global_motion));
+  vpx_memset(cm->global_motion, 0, sizeof(cm->global_motion));
+  for (frame = LAST_FRAME; frame <= ALTREF_FRAME; ++frame) {
+    cm->num_global_motion[frame] = 1;
+    for (i = 0; i < cm->num_global_motion[frame]; ++i) {
+      read_global_motion_params(
+          cm->global_motion[frame], cm->fc.global_motion_types_prob, r);
+    }
+  }
+}
+#endif  // CONFIG_GLOBAL_MOTION
+
 static int read_compressed_header(VP9Decoder *pbi, const uint8_t *data,
                                   size_t partition_size) {
   VP9_COMMON *const cm = &pbi->common;
@@ -2572,6 +2616,9 @@ static int read_compressed_header(VP9Decoder *pbi, const uint8_t *data,
       }
     }
 #endif  // CONFIG_WEDGE_PARTITION
+#if CONFIG_GLOBAL_MOTION
+    read_global_motion(cm, &r);
+#endif  // CONFIG_GLOBAL_MOTION
   }
 #if CONFIG_PALETTE
   if (frame_is_intra_only(cm))

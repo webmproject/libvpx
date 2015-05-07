@@ -39,6 +39,9 @@
 #if CONFIG_SUPERTX
 #include "vp9/encoder/vp9_cost.h"
 #endif
+#if CONFIG_GLOBAL_MOTION
+#include "vp9/encoder/vp9_global_motion.h"
+#endif  // CONFIG_GLOBAL_MOTION
 #include "vp9/encoder/vp9_encodeframe.h"
 #include "vp9/encoder/vp9_encodemb.h"
 #include "vp9/encoder/vp9_encodemv.h"
@@ -155,17 +158,24 @@ static const uint16_t VP9_HIGH_VAR_OFFS_12[64] = {
 };
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-static unsigned int get_sby_perpixel_variance(VP9_COMP *cpi,
-                                              const struct buf_2d *ref,
-                                              BLOCK_SIZE bs) {
+unsigned int get_sby_perpixel_ssd(VP9_COMP *cpi,
+                                  const struct buf_2d *ref,
+                                  BLOCK_SIZE bs) {
   unsigned int sse;
   const unsigned int var = cpi->fn_ptr[bs].vf(ref->buf, ref->stride,
                                               VP9_VAR_OFFS, 0, &sse);
+  return var;
+}
+
+unsigned int get_sby_perpixel_variance(VP9_COMP *cpi,
+                                       const struct buf_2d *ref,
+                                       BLOCK_SIZE bs) {
+  const unsigned int var = get_sby_perpixel_ssd(cpi, ref, bs);
   return ROUND_POWER_OF_TWO(var, num_pels_log2_lookup[bs]);
 }
 
 #if CONFIG_VP9_HIGHBITDEPTH
-static unsigned int high_get_sby_perpixel_variance(
+unsigned int high_get_sby_perpixel_ssd(
     VP9_COMP *cpi, const struct buf_2d *ref, BLOCK_SIZE bs, int bd) {
   unsigned int var, sse;
   switch (bd) {
@@ -186,6 +196,12 @@ static unsigned int high_get_sby_perpixel_variance(
                                0, &sse);
       break;
   }
+  return var;
+}
+
+unsigned int high_get_sby_perpixel_variance(
+    VP9_COMP *cpi, const struct buf_2d *ref, BLOCK_SIZE bs, int bd) {
+  const unsigned int var = high_get_sby_perpixel_ssd(cpi, ref, bs, bd);
   return ROUND_POWER_OF_TWO(var, num_pels_log2_lookup[bs]);
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
@@ -867,6 +883,53 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
   }
 #endif
   if (!frame_is_intra_only(cm)) {
+#if CONFIG_COPY_MODE
+    if (is_inter_block(mbmi) && mbmi->copy_mode == NOREF) {
+#else
+    if (is_inter_block(mbmi)) {
+#endif  // CONFIG_COPY_MODE
+#if CONFIG_GLOBAL_MOTION
+      if (bsize >= BLOCK_8X8) {
+#if CONFIG_COMPOUND_MODES
+        if (mbmi->mode == ZEROMV || mbmi->mode == ZERO_ZEROMV) {
+          ++cpi->global_motion_used[mbmi->ref_frame[0]];
+          if (mbmi->mode == ZERO_ZEROMV)
+            ++cpi->global_motion_used[mbmi->ref_frame[1]];
+        }
+#else
+        if (mbmi->mode == ZEROMV) {
+          ++cpi->global_motion_used[mbmi->ref_frame[0]];
+          if (has_second_ref(mbmi))
+            ++cpi->global_motion_used[mbmi->ref_frame[1]];
+        }
+#endif  // CONFIG_COMPOUND_MODES
+      } else {
+        const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];
+        const int num_4x4_h = num_4x4_blocks_high_lookup[bsize];
+        int idx, idy;
+        for (idy = 0; idy < 2; idy += num_4x4_h) {
+          for (idx = 0; idx < 2; idx += num_4x4_w) {
+            const int j = idy * 2 + idx;
+            const PREDICTION_MODE b_mode = mi->bmi[j].as_mode;
+#if CONFIG_COMPOUND_MODES
+            if (b_mode == ZEROMV || b_mode == ZERO_ZEROMV) {
+              ++cpi->global_motion_used[mbmi->ref_frame[0]];
+              if (b_mode == ZERO_ZEROMV)
+                ++cpi->global_motion_used[mbmi->ref_frame[1]];
+            }
+#else
+            if (b_mode == ZEROMV) {
+              ++cpi->global_motion_used[mbmi->ref_frame[0]];
+              if (has_second_ref(mbmi))
+                ++cpi->global_motion_used[mbmi->ref_frame[1]];
+            }
+#endif  // CONFIG_COMPOUND_MODES
+          }
+        }
+      }
+#endif  // CONFIG_GLOBAL_MOTION
+    }
+
     rd_opt->comp_pred_diff[SINGLE_REFERENCE] += ctx->single_pred_diff;
     rd_opt->comp_pred_diff[COMPOUND_REFERENCE] += ctx->comp_pred_diff;
     rd_opt->comp_pred_diff[REFERENCE_MODE_SELECT] += ctx->hybrid_pred_diff;
@@ -1142,8 +1205,9 @@ void vp9_setup_src_planes(MACROBLOCK *x, const YV12_BUFFER_CONFIG *src,
                      x->e_mbd.plane[i].subsampling_y);
 }
 
-static void set_mode_info_seg_skip(MACROBLOCK *x, TX_MODE tx_mode,
+static void set_mode_info_seg_skip(VP9_COMMON *cm, MACROBLOCK *x,
                                    RD_COST *rd_cost, BLOCK_SIZE bsize) {
+  TX_MODE tx_mode = cm->tx_mode;
   MACROBLOCKD *const xd = &x->e_mbd;
   MB_MODE_INFO *const mbmi = &xd->mi[0].src_mi->mbmi;
   INTERP_FILTER filter_ref;
@@ -1163,10 +1227,16 @@ static void set_mode_info_seg_skip(MACROBLOCK *x, TX_MODE tx_mode,
   mbmi->uv_mode = DC_PRED;
   mbmi->ref_frame[0] = LAST_FRAME;
   mbmi->ref_frame[1] = NONE;
-  mbmi->mv[0].as_int = 0;
   mbmi->interp_filter = filter_ref;
 
+#if CONFIG_GLOBAL_MOTION
+  mbmi->mv[0].as_int = cm->global_motion[mbmi->ref_frame[0]][0].mv.as_int;
+  xd->mi[0].src_mi->bmi[0].as_mv[0].as_int =
+      cm->global_motion[mbmi->ref_frame[0]][0].mv.as_int;
+#else
+  mbmi->mv[0].as_int = 0;
   xd->mi[0].src_mi->bmi[0].as_mv[0].as_int = 0;
+#endif  // CONFIG_GLOBAL_MOTION
   x->skip = 1;
 
   vp9_rd_cost_init(rd_cost);
@@ -3754,7 +3824,7 @@ static void nonrd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
       x->rdmult = vp9_cyclic_refresh_get_rdmult(cpi->cyclic_refresh);
 
   if (vp9_segfeature_active(&cm->seg, mbmi->segment_id, SEG_LVL_SKIP))
-    set_mode_info_seg_skip(x, cm->tx_mode, rd_cost, bsize);
+    set_mode_info_seg_skip(cm, x, rd_cost, bsize);
   else
     vp9_pick_inter_mode(cpi, x, tile, mi_row, mi_col, rd_cost, bsize, ctx);
 
@@ -4517,6 +4587,54 @@ static int input_fpmb_stats(FIRSTPASS_MB_STATS *firstpass_mb_stats,
 }
 #endif
 
+#if CONFIG_GLOBAL_MOTION
+#define MIN_TRANSLATION_THRESH  4
+static void convert_translation_to_params(
+    double *H, Global_Motion_Params *model) {
+  model->mv.as_mv.col = (int) floor(H[0] * 8 + 0.5);
+  model->mv.as_mv.row = (int) floor(H[1] * 8 + 0.5);
+  if (abs(model->mv.as_mv.col) < MIN_TRANSLATION_THRESH &&
+      abs(model->mv.as_mv.row) < MIN_TRANSLATION_THRESH) {
+    model->mv.as_int = 0;
+  }
+  model->mv.as_mv.col =
+      clamp(model->mv.as_mv.col,
+            -(1 << ABS_TRANSLATION_BITS), (1 << ABS_TRANSLATION_BITS));
+  model->mv.as_mv.row =
+      clamp(model->mv.as_mv.row,
+            -(1 << ABS_TRANSLATION_BITS), (1 << ABS_TRANSLATION_BITS));
+}
+
+static void convert_rotzoom_to_params(double *H, Global_Motion_Params *model) {
+  double z = sqrt(H[0] * H[0] + H[1] * H[1]) - 1.0;
+  double r = atan2(-H[1], H[0]) * 180.0 / M_PI;
+  assert(abs(H[0] - (1 + z) * cos(r * M_PI / 180.0)) < 1e-10);
+  assert(abs(H[1] + (1 + z) * sin(r * M_PI / 180.0)) < 1e-10);
+  model->zoom = (int) floor(z * (1 << ZOOM_PRECISION_BITS) + 0.5);
+  model->rotation = (int) floor(r * (1 << ROTATION_PRECISION_BITS) + 0.5);
+  model->zoom = clamp(
+      model->zoom, -(1 << ABS_ZOOM_BITS), (1 << ABS_ZOOM_BITS));
+  model->rotation = clamp(
+      model->rotation, -(1 << ABS_ROTATION_BITS), (1 << ABS_ROTATION_BITS));
+
+  convert_translation_to_params(H + 2, model);
+}
+
+static void convert_model_to_params(double *H, TransformationType type,
+                                    Global_Motion_Params *model) {
+  switch (type) {
+    case ROTZOOM:
+      convert_rotzoom_to_params(H, model);
+      break;
+    case TRANSLATION:
+      convert_translation_to_params(H, model);
+      break;
+    default:
+      break;
+  }
+}
+#endif  // CONFIG_GLOBAL_MOTION
+
 static void encode_frame_internal(VP9_COMP *cpi) {
   SPEED_FEATURES *const sf = &cpi->sf;
   RD_OPT *const rd_opt = &cpi->rd;
@@ -4541,13 +4659,58 @@ static void encode_frame_internal(VP9_COMP *cpi) {
 
   cm->tx_mode = select_tx_mode(cpi);
 
+#if CONFIG_GLOBAL_MOTION
+#define GLOBAL_MOTION_MODEL   TRANSLATION
+  vp9_zero(cpi->global_motion_used);
+  vpx_memset(cm->num_global_motion, 0, sizeof(cm->num_global_motion));
+  cm->num_global_motion[LAST_FRAME] = 1;
+  cm->num_global_motion[GOLDEN_FRAME] = 1;
+  cm->num_global_motion[ALTREF_FRAME] = 1;
+  if (cpi->common.frame_type == INTER_FRAME && cpi->Source) {
+    YV12_BUFFER_CONFIG *ref_buf;
+    int num, frame;
+    double global_motion[9 * MAX_GLOBAL_MOTION_MODELS];
+    for (frame = LAST_FRAME; frame <= ALTREF_FRAME; ++frame) {
+      ref_buf = get_ref_frame_buffer(cpi, frame);
+      if (ref_buf) {
+        if ((num =
+             vp9_compute_global_motion_multiple_block_based(
+                 cpi, GLOBAL_MOTION_MODEL, cpi->Source, ref_buf,
+                 BLOCK_16X16, MAX_GLOBAL_MOTION_MODELS, 0.5, global_motion))) {
+          /*
+             vp9_compute_global_motion_multiple_feature_based(
+                 cpi, GLOBAL_MOTION_MODEL, cpi->Source, ref_buf,
+                 MAX_GLOBAL_MOTION_MODELS, 0.5, global_motion))) {
+                 */
+          int i;
+          for (i = 0; i < num; i++) {
+            convert_model_to_params(
+                global_motion + i * get_numparams(GLOBAL_MOTION_MODEL),
+                GLOBAL_MOTION_MODEL,
+                &cm->global_motion[frame][i]);
+            /*
+            printf("Ref %d [%d]: %d %d %d %d\n",
+                   frame, cm->current_video_frame,
+                   cm->global_motion[frame][i].zoom,
+                   cm->global_motion[frame][i].rotation,
+                   cm->global_motion[frame][i].mv.as_mv.col,
+                   cm->global_motion[frame][i].mv.as_mv.row);
+                   */
+          }
+          cm->num_global_motion[frame] = num;
+        }
+      }
+    }
+  }
+#endif  // CONFIG_GLOBAL_MOTION
+
 #if CONFIG_VP9_HIGHBITDEPTH
   if (cm->use_highbitdepth)
     x->fwd_txm4x4 = xd->lossless ? vp9_highbd_fwht4x4 : vp9_highbd_fdct4x4;
   else
     x->fwd_txm4x4 = xd->lossless ? vp9_fwht4x4 : vp9_fdct4x4;
   x->highbd_itxm_add = xd->lossless ? vp9_highbd_iwht4x4_add :
-                                      vp9_highbd_idct4x4_add;
+      vp9_highbd_idct4x4_add;
 #else
   x->fwd_txm4x4 = xd->lossless ? vp9_fwht4x4 : vp9_fdct4x4;
 #endif  // CONFIG_VP9_HIGHBITDEPTH
