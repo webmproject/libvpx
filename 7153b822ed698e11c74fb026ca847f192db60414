@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0d8ebdef_26c22288",
+        "filename": "vp9/common/x86/vp9_intrapred_sse2.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 361,
+      "author": {
+        "id": 1002054
+      },
+      "writtenOn": "2015-05-07T17:52:19Z",
+      "side": 1,
+      "message": "Do you think you can refactor these 2 functions somehow?",
+      "revId": "7153b822ed698e11c74fb026ca847f192db60414",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
