@@ -16,6 +16,24 @@
       "revId": "baf4445402fbae6fa3012ec04d4063d96c0cc3e0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cd290587_54f5c498",
+        "filename": "test/partial_idct_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 317,
+      "author": {
+        "id": 1003209
+      },
+      "writtenOn": "2015-05-07T07:05:47Z",
+      "side": 1,
+      "message": "ok. I will remove this test.",
+      "parentUuid": "4d8435cc_b37bc7ec",
+      "revId": "baf4445402fbae6fa3012ec04d4063d96c0cc3e0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
