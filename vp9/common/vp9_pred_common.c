@@ -416,7 +416,7 @@ int vp9_get_copy_mode_context(const MACROBLOCKD *xd) {
     if (ref_intra) {
       return 3;
     } else {
-     const int ref_predict = ref_mbmi != NOREF;
+     const int ref_predict = ref_mbmi->copy_mode != NOREF;
       if (ref_predict)
         return 0;
       else
