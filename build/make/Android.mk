@@ -170,6 +170,7 @@ ifeq ($(CONFIG_VP9), yes)
 $(foreach file, $(LOCAL_SRC_FILES), $(LOCAL_PATH)/$(file)): vp9_rtcd.h
 endif
 $(foreach file, $(LOCAL_SRC_FILES), $(LOCAL_PATH)/$(file)): vpx_scale_rtcd.h
+$(foreach file, $(LOCAL_SRC_FILES), $(LOCAL_PATH)/$(file)): vpx_dsp_rtcd.h
 
 ifeq ($(TARGET_ARCH_ABI),x86)
 $(foreach file, $(LOCAL_SRC_FILES), $(LOCAL_PATH)/$(file)): vpx_config.asm
