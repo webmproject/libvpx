@@ -425,13 +425,13 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
     specialize qw/vp9_idct4x4_16_add sse2 neon dspr2/;
 
     add_proto qw/void vp9_idct8x8_1_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
-    specialize qw/vp9_idct8x8_1_add sse2 neon dspr2/;
+    specialize qw/vp9_idct8x8_1_add sse2 neon dspr2 msa/;
 
     add_proto qw/void vp9_idct8x8_64_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
-    specialize qw/vp9_idct8x8_64_add sse2 neon dspr2/, "$ssse3_x86_64";
+    specialize qw/vp9_idct8x8_64_add sse2 neon dspr2 msa/, "$ssse3_x86_64";
 
     add_proto qw/void vp9_idct8x8_12_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
-    specialize qw/vp9_idct8x8_12_add sse2 neon dspr2/, "$ssse3_x86_64";
+    specialize qw/vp9_idct8x8_12_add sse2 neon dspr2 msa/, "$ssse3_x86_64";
 
     add_proto qw/void vp9_idct16x16_1_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
     specialize qw/vp9_idct16x16_1_add sse2 neon dspr2 msa/;
@@ -457,7 +457,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
     specialize qw/vp9_iht4x4_16_add sse2 neon dspr2/;
 
     add_proto qw/void vp9_iht8x8_64_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int tx_type";
-    specialize qw/vp9_iht8x8_64_add sse2 neon dspr2/;
+    specialize qw/vp9_iht8x8_64_add sse2 neon dspr2 msa/;
 
     add_proto qw/void vp9_iht16x16_256_add/, "const tran_low_t *input, uint8_t *output, int pitch, int tx_type";
     specialize qw/vp9_iht16x16_256_add sse2 dspr2 msa/;

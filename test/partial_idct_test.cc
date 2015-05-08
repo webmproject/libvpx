@@ -324,7 +324,15 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_fdct16x16_c,
                    &vp9_idct16x16_256_add_c,
                    &vp9_idct16x16_1_add_msa,
-                   TX_16X16, 1)));
+                   TX_16X16, 1),
+        make_tuple(&vp9_fdct8x8_c,
+                   &vp9_idct8x8_64_add_c,
+                   &vp9_idct8x8_12_add_msa,
+                   TX_8X8, 10),
+        make_tuple(&vp9_fdct8x8_c,
+                   &vp9_idct8x8_64_add_c,
+                   &vp9_idct8x8_1_add_msa,
+                   TX_8X8, 1)));
 #endif  // HAVE_MSA && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 
 }  // namespace
