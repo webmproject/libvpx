@@ -121,6 +121,7 @@ extern const vp9_extra_bit vp9_extra_bits_high12[ENTROPY_TOKENS];
 
 /* Middle dimension reflects the coefficient position within the transform. */
 #if CONFIG_TX_SKIP
+#define FOR_SCREEN_CONTENT 0
 #define COEF_BANDS 7
 #define TX_SKIP_COEFF_BAND 6
 #else
@@ -152,6 +153,10 @@ typedef unsigned int vp9_coeff_count[REF_TYPES][COEF_BANDS][COEFF_CONTEXTS]
                                     [ENTROPY_TOKENS];
 typedef unsigned int vp9_coeff_stats[REF_TYPES][COEF_BANDS][COEFF_CONTEXTS]
                                     [ENTROPY_NODES][2];
+#if CONFIG_TX_SKIP
+typedef unsigned int vp9_coeff_stats_pxd[REF_TYPES][COEFF_CONTEXTS]
+                                        [ENTROPY_NODES][2];
+#endif  // CONFIG_TX_SKIP
 
 #define SUBEXP_PARAM                4   /* Subexponential code parameter */
 #define MODULUS_PARAM               13  /* Modulus parameter */
@@ -217,6 +222,12 @@ typedef unsigned int vp9_coeff_count_model[REF_TYPES][COEF_BANDS]
                                           [UNCONSTRAINED_NODES + 1];
 
 void vp9_model_to_full_probs(const vp9_prob *model, vp9_prob *full);
+
+#if CONFIG_TX_SKIP
+typedef vp9_prob vp9_coeff_probs_pxd[REF_TYPES][COEFF_CONTEXTS][ENTROPY_NODES];
+typedef unsigned int vp9_coeff_counts_pxd[REF_TYPES][COEFF_CONTEXTS]
+                                                     [ENTROPY_TOKENS];
+#endif  // CONFIG_TX_SKIP
 
 static INLINE int get_entropy_context(TX_SIZE tx_size, const ENTROPY_CONTEXT *a,
                                       const ENTROPY_CONTEXT *l) {

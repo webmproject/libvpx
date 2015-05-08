@@ -118,6 +118,27 @@ static void fill_token_costs(vp9_coeff_cost *c,
           }
 }
 
+#if CONFIG_TX_SKIP
+static void fill_token_costs_pxd(vp9_coeff_cost_pxd *c,
+                                 vp9_coeff_probs_pxd (*p)[PLANE_TYPES]) {
+  int i, j, l;
+  TX_SIZE t;
+  for (t = TX_4X4; t < TX_SIZES; ++t)
+    for (i = 0; i < PLANE_TYPES; ++i)
+      for (j = 0; j < REF_TYPES; ++j)
+          for (l = 0; l < COEFF_CONTEXTS; ++l) {
+            vp9_prob *probs;
+            probs = p[t][i][j][l];
+            vp9_cost_tokens((int *)c[t][i][j][0][l], probs,
+                            vp9_coef_tree);
+            vp9_cost_tokens_skip((int *)c[t][i][j][1][l], probs,
+                                 vp9_coef_tree);
+            assert(c[t][i][j][0][l][EOB_TOKEN] ==
+                   c[t][i][j][1][l][EOB_TOKEN]);
+          }
+}
+#endif  // CONFIG_TX_SKIP
+
 // Values are now correlated to quantizer.
 static int sad_per_bit16lut_8[QINDEX_RANGE];
 static int sad_per_bit4lut_8[QINDEX_RANGE];
@@ -295,6 +316,10 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
 
   if (!cpi->sf.use_nonrd_pick_mode || cm->frame_type == KEY_FRAME) {
     fill_token_costs(x->token_costs, cm->fc.coef_probs);
+#if CONFIG_TX_SKIP
+    if (FOR_SCREEN_CONTENT)
+      fill_token_costs_pxd(x->token_costs_pxd, cm->fc.coef_probs_pxd);
+#endif  // CONFIG_TX_SKIP
 
     for (i = 0; i < PARTITION_CONTEXTS; ++i)
       vp9_cost_tokens(cpi->partition_cost[i], get_partition_probs(cm, i),

@@ -61,6 +61,11 @@ struct macroblock_plane {
 typedef unsigned int vp9_coeff_cost[PLANE_TYPES][REF_TYPES][COEF_BANDS][2]
                                    [COEFF_CONTEXTS][ENTROPY_TOKENS];
 
+#if CONFIG_TX_SKIP
+typedef unsigned int vp9_coeff_cost_pxd[PLANE_TYPES][REF_TYPES][2]
+                                       [COEFF_CONTEXTS][ENTROPY_TOKENS];
+#endif  // CONFIG_TX_SKIP
+
 typedef struct macroblock MACROBLOCK;
 struct macroblock {
   struct macroblock_plane plane[MAX_MB_PLANE];
@@ -110,6 +115,10 @@ struct macroblock {
 
   // note that token_costs is the cost when eob node is skipped
   vp9_coeff_cost token_costs[TX_SIZES];
+
+#if CONFIG_TX_SKIP
+  vp9_coeff_cost_pxd token_costs_pxd[TX_SIZES];
+#endif  // CONFIG_TX_SKIP
 
   int in_static_area;
 
