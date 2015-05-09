@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2d70e1c2_8ef5479c",
+        "filename": "vp9/common/vp9_systemdependent.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-05-09T00:05:53Z",
+      "side": 1,
+      "message": "of course now i need to consider bringing this whole block into msvc.h - or renaming it compilers.h and putting gcc stuff in too?",
+      "range": {
+        "startLine": 52,
+        "startChar": 7,
+        "endLine": 52,
+        "endChar": 25
+      },
+      "revId": "791e225a6f031fa73a004a9cc6eb46e438b4f952",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
