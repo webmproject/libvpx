@@ -116,7 +116,7 @@ typedef struct {
 
 static const char *exec_name;
 
-void usage_exit() {
+void usage_exit(void) {
   fprintf(stderr, "Usage: %s <options> input_filename output_filename\n",
           exec_name);
   fprintf(stderr, "Options:\n");

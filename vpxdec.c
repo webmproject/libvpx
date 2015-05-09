@@ -169,7 +169,7 @@ static INLINE int libyuv_scale(vpx_image_t *src, vpx_image_t *dst,
 }
 #endif
 
-void usage_exit() {
+void usage_exit(void) {
   int i;
 
   fprintf(stderr, "Usage: %s <options> filename\n\n"

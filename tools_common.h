@@ -119,7 +119,7 @@ void warn(const char *fmt, ...);
 void die_codec(vpx_codec_ctx_t *ctx, const char *s) VPX_NO_RETURN;
 
 /* The tool including this file must define usage_exit() */
-void usage_exit() VPX_NO_RETURN;
+void usage_exit(void) VPX_NO_RETURN;
 
 #undef VPX_NO_RETURN
 

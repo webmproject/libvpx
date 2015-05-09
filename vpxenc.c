@@ -467,7 +467,7 @@ static const int vp9_arg_ctrl_map[] = {
 
 static const arg_def_t *no_args[] = { NULL };
 
-void usage_exit() {
+void usage_exit(void) {
   int i;
 
   fprintf(stderr, "Usage: %s <options> -o dst_filename src_filename \n",
