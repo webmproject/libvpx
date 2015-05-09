@@ -131,7 +131,7 @@ typedef struct VpxInterface {
   vpx_codec_iface_t *(*const codec_interface)();
 } VpxInterface;
 
-int get_vpx_encoder_count();
+int get_vpx_encoder_count(void);
 const VpxInterface *get_vpx_encoder_by_index(int i);
 const VpxInterface *get_vpx_encoder_by_name(const char *name);
 

@@ -140,7 +140,7 @@ static const VpxInterface vpx_encoders[] = {
 #endif
 };
 
-int get_vpx_encoder_count() {
+int get_vpx_encoder_count(void) {
   return sizeof(vpx_encoders) / sizeof(vpx_encoders[0]);
 }
 
