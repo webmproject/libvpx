@@ -99,7 +99,7 @@ static void warn_or_exit_on_error(vpx_codec_ctx_t *ctx, int fatal,
   va_end(ap);
 }
 
-int read_frame(struct VpxInputContext *input_ctx, vpx_image_t *img) {
+static int read_frame(struct VpxInputContext *input_ctx, vpx_image_t *img) {
   FILE *f = input_ctx->file;
   y4m_input *y4m = &input_ctx->y4m;
   int shortread = 0;
@@ -114,14 +114,14 @@ int read_frame(struct VpxInputContext *input_ctx, vpx_image_t *img) {
   return !shortread;
 }
 
-int file_is_y4m(const char detect[4]) {
+static int file_is_y4m(const char detect[4]) {
   if (memcmp(detect, "YUV4", 4) == 0) {
     return 1;
   }
   return 0;
 }
 
-int fourcc_is_ivf(const char detect[4]) {
+static int fourcc_is_ivf(const char detect[4]) {
   if (memcmp(detect, "DKIF", 4) == 0) {
     return 1;
   }
@@ -793,8 +793,8 @@ struct stream_state {
 };
 
 
-void validate_positive_rational(const char          *msg,
-                                struct vpx_rational *rat) {
+static void validate_positive_rational(const char          *msg,
+                                       struct vpx_rational *rat) {
   if (rat->den < 0) {
     rat->num *= -1;
     rat->den *= -1;
@@ -919,7 +919,7 @@ static void parse_global_config(struct VpxEncoderConfig *global, char **argv) {
 }
 
 
-void open_input_file(struct VpxInputContext *input) {
+static void open_input_file(struct VpxInputContext *input) {
   /* Parse certain options from the input file, if possible */
   input->file = strcmp(input->filename, "-")
       ? fopen(input->filename, "rb") : set_binary_mode(stdin);
