@@ -312,7 +312,7 @@ static void write_image_file(const vpx_image_t *img, const int planes[3],
   }
 }
 
-int file_is_raw(struct VpxInputContext *input) {
+static int file_is_raw(struct VpxInputContext *input) {
   uint8_t buf[32];
   int is_raw = 0;
   vpx_codec_stream_info_t si;
@@ -343,7 +343,7 @@ int file_is_raw(struct VpxInputContext *input) {
   return is_raw;
 }
 
-void show_progress(int frame_in, int frame_out, uint64_t dx_time) {
+static void show_progress(int frame_in, int frame_out, uint64_t dx_time) {
   fprintf(stderr,
           "%d decoded frames/%d showed frames in %"PRId64" us (%.2f fps)\r",
           frame_in, frame_out, dx_time,
@@ -365,8 +365,8 @@ struct ExternalFrameBufferList {
 // Application private data passed into the set function. |min_size| is the
 // minimum size in bytes needed to decode the next frame. |fb| pointer to the
 // frame buffer.
-int get_vp9_frame_buffer(void *cb_priv, size_t min_size,
-                         vpx_codec_frame_buffer_t *fb) {
+static int get_vp9_frame_buffer(void *cb_priv, size_t min_size,
+                                vpx_codec_frame_buffer_t *fb) {
   int i;
   struct ExternalFrameBufferList *const ext_fb_list =
       (struct ExternalFrameBufferList *)cb_priv;
@@ -403,8 +403,8 @@ int get_vp9_frame_buffer(void *cb_priv, size_t min_size,
 // Callback used by libvpx when there are no references to the frame buffer.
 // |cb_priv| user private data passed into the set function. |fb| pointer
 // to the frame buffer.
-int release_vp9_frame_buffer(void *cb_priv,
-                             vpx_codec_frame_buffer_t *fb) {
+static int release_vp9_frame_buffer(void *cb_priv,
+                                    vpx_codec_frame_buffer_t *fb) {
   struct ExternalFrameBuffer *const ext_fb =
       (struct ExternalFrameBuffer *)fb->priv;
   (void)cb_priv;
@@ -412,9 +412,9 @@ int release_vp9_frame_buffer(void *cb_priv,
   return 0;
 }
 
-void generate_filename(const char *pattern, char *out, size_t q_len,
-                       unsigned int d_w, unsigned int d_h,
-                       unsigned int frame_in) {
+static void generate_filename(const char *pattern, char *out, size_t q_len,
+                              unsigned int d_w, unsigned int d_h,
+                              unsigned int frame_in) {
   const char *p = pattern;
   char *q = out;
 
@@ -536,7 +536,7 @@ static int img_shifted_realloc_required(const vpx_image_t *img,
 }
 #endif
 
-int main_loop(int argc, const char **argv_) {
+static int main_loop(int argc, const char **argv_) {
   vpx_codec_ctx_t       decoder;
   char                  *fn = NULL;
   int                    i;
