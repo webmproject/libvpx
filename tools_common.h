@@ -135,7 +135,7 @@ int get_vpx_encoder_count(void);
 const VpxInterface *get_vpx_encoder_by_index(int i);
 const VpxInterface *get_vpx_encoder_by_name(const char *name);
 
-int get_vpx_decoder_count();
+int get_vpx_decoder_count(void);
 const VpxInterface *get_vpx_decoder_by_index(int i);
 const VpxInterface *get_vpx_decoder_by_name(const char *name);
 const VpxInterface *get_vpx_decoder_by_fourcc(uint32_t fourcc);
