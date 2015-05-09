@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4d6d15ec_37c24f88",
+        "filename": "vpx_ports/msvc.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-05-09T00:00:52Z",
+      "side": 1,
+      "message": "_INTRIN; I probably should have spelled this out -\u003e _INTRINSICS could be a follow-up",
+      "revId": "8d19231dfe87b1cad0797e5ec176bb7950c787a3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d679d0f_47d158fe",
+        "filename": "vpx_ports/msvc.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-05-09T00:00:52Z",
+      "side": 1,
+      "message": "snprintf",
+      "revId": "8d19231dfe87b1cad0797e5ec176bb7950c787a3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
