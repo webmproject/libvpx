@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4d6d15ec_5204a318",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 392,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-05-11T21:21:52Z",
+      "side": 1,
+      "message": "const",
+      "revId": "f0ab1dd12c47b9b4cb046e91ed49ddad2cbf5fe3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2d70e1c2_b0f18068",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 393,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-05-11T21:21:52Z",
+      "side": 1,
+      "message": "indent 4",
+      "revId": "f0ab1dd12c47b9b4cb046e91ed49ddad2cbf5fe3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2d70e1c2_90423cfd",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 469,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-05-11T21:21:52Z",
+      "side": 1,
+      "message": "previously this check was subsize \u003c BLOCK_8x8; is this change and the logical change in the new check in decode_block equivalent?",
+      "revId": "f0ab1dd12c47b9b4cb046e91ed49ddad2cbf5fe3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
