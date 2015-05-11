@@ -1973,7 +1973,7 @@ void dec_build_inter_predictors(VP9Decoder *const pbi, MACROBLOCKD *xd,
     // Wait until reference block is ready. Pad 7 more pixels as last 7
     // pixels of each superblock row can be changed by next superblock row.
      if (pbi->frame_parallel_decode) {
-       const int y1 = ((y0_16 + (h - 1) * ys) >> SUBPEL_BITS) + 1;
+       const int y1 = (y0_16 + (h - 1) * ys) >> SUBPEL_BITS;
        vp9_frameworker_wait(pbi->frame_worker_owner, ref_frame_buf,
                             MAX(0, (y1 + 7)) << (plane == 0 ? 0 : 1));
      }
