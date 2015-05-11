@@ -658,7 +658,7 @@ static void build_intra_predictors_high(const MACROBLOCKD *xd,
   uint16_t *dst = CONVERT_TO_SHORTPTR(dst8);
   uint16_t *ref = CONVERT_TO_SHORTPTR(ref8);
   DECLARE_ALIGNED(16, uint16_t, left_col[32]);
-  DECLARE_ALIGNED(16, uint16_t, above_data[128 + 16]);
+  DECLARE_ALIGNED(16, uint16_t, above_data[64 + 16]);
   uint16_t *above_row = above_data + 16;
   const uint16_t *const_above_row = above_row;
   const int bs = 4 << tx_size;
@@ -781,7 +781,7 @@ static void build_intra_predictors(const MACROBLOCKD *xd, const uint8_t *ref,
                                    int plane) {
   int i;
   DECLARE_ALIGNED(16, uint8_t, left_col[32]);
-  DECLARE_ALIGNED(16, uint8_t, above_data[128 + 16]);
+  DECLARE_ALIGNED(16, uint8_t, above_data[64 + 16]);
   uint8_t *above_row = above_data + 16;
   const uint8_t *const_above_row = above_row;
   const int bs = 4 << tx_size;
