@@ -3420,6 +3420,32 @@ int setup_interp_filter_search_mask(VP9_COMP *cpi) {
   return mask;
 }
 
+#define EXTREME_UNDERSHOOT_RATIO 10
+#define LOW_ABSOLUTE_RATE_PER_MB 2
+static int frame_repeat_detected(VP9_COMP *cpi) {
+  RATE_CONTROL *const rc = &cpi->rc;
+  int repeat_detected = 0;
+  int low_rate = LOW_ABSOLUTE_RATE_PER_MB * cpi->common.MBs;
+
+  // Detects an "unexpected frame buffer repeat".
+  // This status is not strictly a frame repeat but is triggered when
+  // a frame hugely undershoots the expected first pass target and in
+  // absolute terms the rate is very low. A typical situation where this may
+  // occurr is if the frame, whilst not matching the previous frame, DOES very
+  // closely match the contents of one of the other frame buffers. A genuinely
+  // static scene should not normally trigger this case as the last frame
+  // will also match and the predicted rate will thus be low.
+  if (!frame_is_kf_gf_arf(cpi) && !cpi->rc.is_src_frame_alt_ref &&
+      rc->projected_frame_size) {
+    if ((rc->projected_frame_size < low_rate) &&
+        ((rc->base_frame_target / rc->projected_frame_size) >=
+         EXTREME_UNDERSHOOT_RATIO)) {
+      repeat_detected = 1;
+    }
+  }
+  return repeat_detected;
+}
+
 static void encode_frame_to_data_rate(VP9_COMP *cpi,
                                       size_t *size,
                                       uint8_t *dest,
@@ -3562,6 +3588,14 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     cpi->refresh_last_frame = 1;
 
   cm->frame_to_show = get_frame_new_buffer(cm);
+
+  // Test for special case where the frame appears to be a repeat of an earlier
+  // encoded frame buffer but this was not predicted by the first pass.
+  // In this case do not update the last frame buffer.
+  if ((cpi->oxcf.pass == 2) && (frame_is_intra_only(cm) == 0) &&
+      frame_repeat_detected(cpi)) {
+    cpi->refresh_last_frame = 0;
+  }
 
   // Pick the loop filter level for the frame.
   loopfilter_frame(cpi, cm);
