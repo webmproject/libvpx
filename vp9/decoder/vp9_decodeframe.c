@@ -1311,8 +1311,8 @@ static void read_bitdepth_colorspace_sampling(
 static size_t read_uncompressed_header(VP9Decoder *pbi,
                                        struct vp9_read_bit_buffer *rb) {
   VP9_COMMON *const cm = &pbi->common;
-  RefCntBuffer *const frame_bufs = cm->buffer_pool->frame_bufs;
-  BufferPool *const pool = pbi->common.buffer_pool;
+  BufferPool *const pool = cm->buffer_pool;
+  RefCntBuffer *const frame_bufs = pool->frame_bufs;
   int i, mask, ref_index = 0;
   size_t sz;
 
