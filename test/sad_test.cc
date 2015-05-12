@@ -16,22 +16,7 @@
 #include "./vpx_config.h"
 #include "./vpx_dsp_rtcd.h"
 #include "vpx_mem/vpx_mem.h"
-
-/* Needed for ROUND_POWER_OF_TWO and CONVERT_TO* macros, both of which should be
- * moved to a more generic location. Alternatively the *avg functions could be
- * restricted to VP9 builds, but it would be better to avoid that sort of
- * specificity.
- * TODO(johannkoenig): move these macros to a common location.
- */
-#if CONFIG_VP9_HIGHBITDEPTH
-#include "vp9/common/vp9_common.h"
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-
-#ifndef ROUND_POWER_OF_TWO
-#define ROUND_POWER_OF_TWO(value, n) \
-     (((value) + (1 << ((n) - 1))) >> (n))
-#endif  // ROUND_POWER_OF_TWO
-
+#include "vpx_ports/mem.h"
 
 #include "test/acm_random.h"
 #include "test/clear_system_state.h"

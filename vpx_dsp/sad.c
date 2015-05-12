@@ -14,13 +14,7 @@
 #include "./vpx_dsp_rtcd.h"
 
 #include "vpx/vpx_integer.h"
-
-#if CONFIG_VP9_HIGHBITDEPTH
-#include "vp9/common/vp9_common.h"
-#endif  // CONFIG_VP9_HIGHBITDEPTH
-// Temporary ...
-#define ROUND_POWER_OF_TWO(value, n) \
-     (((value) + (1 << ((n) - 1))) >> (n))
+#include "vpx_ports/mem.h"
 
 /* Sum the difference between every corresponding element of the buffers. */
 static INLINE unsigned int sad(const uint8_t *a, int a_stride,

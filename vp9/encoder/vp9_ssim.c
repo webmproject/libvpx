@@ -10,6 +10,7 @@
 
 #include <math.h>
 #include "./vp9_rtcd.h"
+#include "vpx_ports/mem.h"
 #include "vp9/encoder/vp9_ssim.h"
 
 void vp9_ssim_parms_16x16_c(uint8_t *s, int sp, uint8_t *r,
