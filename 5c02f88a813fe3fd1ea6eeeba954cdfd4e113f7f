@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2d338121_038845ef",
+        "filename": "vp9/encoder/vp9_pickmode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1613,
+      "author": {
+        "id": 1128439
+      },
+      "writtenOn": "2015-05-12T21:46:53Z",
+      "side": 0,
+      "message": "Alternate fix would be to move the this_mode declaration at line 1597 to here. This would avoid the variable shadowing and would keep the declarations as close as possible to their use.",
+      "revId": "5c02f88a813fe3fd1ea6eeeba954cdfd4e113f7f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
