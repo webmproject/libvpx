@@ -1594,7 +1594,6 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
   if (cpi->sf.adaptive_rd_thresh) {
     THR_MODES best_mode_idx = mode_idx[best_ref_frame][mode_offset(mbmi->mode)];
-    PREDICTION_MODE this_mode;
 
     if (best_ref_frame == INTRA_FRAME) {
       // Only consider the modes that are included in the intra_mode_list.
@@ -1604,12 +1603,12 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       // TODO(yunqingwang): Check intra mode mask and only update freq_fact
       // for those valid modes.
       for (i = 0; i < intra_modes; i++) {
-        PREDICTION_MODE this_mode = intra_mode_list[i];
         update_thresh_freq_fact(cpi, tile_data, bsize, INTRA_FRAME,
-                                best_mode_idx, this_mode);
+                                best_mode_idx, intra_mode_list[i]);
       }
     } else {
       for (ref_frame = LAST_FRAME; ref_frame <= GOLDEN_FRAME; ++ref_frame) {
+        PREDICTION_MODE this_mode;
         if (best_ref_frame != ref_frame) continue;
         for (this_mode = NEARESTMV; this_mode <= NEWMV; ++this_mode) {
           update_thresh_freq_fact(cpi, tile_data, bsize, ref_frame,
