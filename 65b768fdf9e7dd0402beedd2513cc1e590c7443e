@@ -16,6 +16,24 @@
       "revId": "65b768fdf9e7dd0402beedd2513cc1e590c7443e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2d338121_b66c3e04",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 709,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-05-12T17:49:09Z",
+      "side": 1,
+      "message": "I moved update_frame_size below set_tile_limits to avoid the need for a forward declaration.",
+      "parentUuid": "cd43c57f_258bcdef",
+      "revId": "65b768fdf9e7dd0402beedd2513cc1e590c7443e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
