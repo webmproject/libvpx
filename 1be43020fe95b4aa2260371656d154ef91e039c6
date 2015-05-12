@@ -16,6 +16,24 @@
       "revId": "1be43020fe95b4aa2260371656d154ef91e039c6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ad3e91ea_fccce0e6",
+        "filename": "examples/resize_util.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-05-12T15:49:26Z",
+      "side": 1,
+      "message": "But shouldn\u0027t in be including from the top level? I feel like the weird thing here is the other include path, it should use vp9/encoder instead of ../vp9/encoder",
+      "parentUuid": "cd43c57f_12d09c77",
+      "revId": "1be43020fe95b4aa2260371656d154ef91e039c6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
