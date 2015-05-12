@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "cd43c57f_59bd24f8",
+        "filename": "test/test_dsp_speed.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-05-12T20:10:40Z",
+      "side": 1,
+      "message": "renamed",
+      "parentUuid": "ad3e91ea_d5873713",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 2
+      },
+      "revId": "e52b6d0f302b8aab27c38fefb128a3ba6af3d17d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2d338121_60b8270a",
         "filename": "test/test_dsp_speed.cc",
         "patchSetId": 5
@@ -60,6 +84,24 @@
       "writtenOn": "2015-05-12T20:09:27Z",
       "side": 1,
       "message": "forgot to update this to STREQ; I was using a string with a separate md5 implementation...\nthis will need to be integrated to jenkins at some point",
+      "revId": "e52b6d0f302b8aab27c38fefb128a3ba6af3d17d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ad3e91ea_31d30a56",
+        "filename": "test/test_dsp_speed.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-05-12T20:10:40Z",
+      "side": 1,
+      "message": "fixed the check, passes on desktop -- I didn\u0027t test the mips / neon",
+      "parentUuid": "2d338121_60b8270a",
       "revId": "e52b6d0f302b8aab27c38fefb128a3ba6af3d17d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
