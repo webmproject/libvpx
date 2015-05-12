@@ -37,7 +37,6 @@
 #include <unistd.h>
 #endif
 #include "vpx_ports/vpx_timer.h"
-#define VPX_CODEC_DISABLE_COMPAT 1
 #include "vpx/vpx_encoder.h"
 #include "vpx/vp8cx.h"
 #include "vpx_ports/mem_ops.h"
