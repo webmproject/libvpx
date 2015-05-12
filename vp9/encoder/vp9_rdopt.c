@@ -2369,7 +2369,8 @@ static int64_t rd_pick_intra_sbuv_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int q_idx = vp9_get_qindex(&cpi->common.seg,
                              xd->mi[0].src_mi->mbmi.segment_id,
                              cpi->common.base_qindex);
-  int try_tx_skip = q_idx <= tx_skip_q_thresh_intra && bsize >= BLOCK_8X8;
+  int try_tx_skip = q_idx <= tx_skip_q_thresh_intra &&
+      xd->mi[0].src_mi->mbmi.sb_type >= BLOCK_8X8;
 #endif  // CONFIG_TX_SKIP
 #if CONFIG_PALETTE
   int palette_selected = 0, best_n = 0;
