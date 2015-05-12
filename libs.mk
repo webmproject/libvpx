@@ -354,7 +354,7 @@ LIBVPX_TEST_DATA_PATH ?= .
 
 include $(SRC_PATH_BARE)/test/test.mk
 LIBVPX_TEST_SRCS=$(addprefix test/,$(call enabled,LIBVPX_TEST_SRCS))
-LIBVPX_TEST_BINS=./test_libvpx$(EXE_SFX)
+LIBVPX_TEST_BIN=./test_libvpx$(EXE_SFX)
 LIBVPX_TEST_DATA=$(addprefix $(LIBVPX_TEST_DATA_PATH)/,\
                      $(call enabled,LIBVPX_TEST_DATA))
 libvpx_test_data_url=http://downloads.webmproject.org/test_data/libvpx/$(1)
@@ -422,7 +422,7 @@ test_libvpx.$(VCPROJ_SFX): $(LIBVPX_TEST_SRCS) vpx.$(VCPROJ_SFX) gtest.$(VCPROJ_
 
 PROJECTS-$(CONFIG_MSVS) += test_libvpx.$(VCPROJ_SFX)
 
-LIBVPX_TEST_BINS := $(addprefix $(TGT_OS:win64=x64)/Release/,$(notdir $(LIBVPX_TEST_BINS)))
+LIBVPX_TEST_BIN := $(addprefix $(TGT_OS:win64=x64)/Release/,$(notdir $(LIBVPX_TEST_BIN)))
 endif
 else
 
@@ -443,20 +443,19 @@ LIBVPX_TEST_OBJS=$(sort $(call objs,$(LIBVPX_TEST_SRCS)))
 $(LIBVPX_TEST_OBJS) $(LIBVPX_TEST_OBJS:.o=.d): CXXFLAGS += -I$(SRC_PATH_BARE)/third_party/googletest/src
 $(LIBVPX_TEST_OBJS) $(LIBVPX_TEST_OBJS:.o=.d): CXXFLAGS += -I$(SRC_PATH_BARE)/third_party/googletest/src/include
 OBJS-$(BUILD_LIBVPX) += $(LIBVPX_TEST_OBJS)
-BINS-$(BUILD_LIBVPX) += $(LIBVPX_TEST_BINS)
+BINS-$(BUILD_LIBVPX) += $(LIBVPX_TEST_BIN)
 
 CODEC_LIB=$(if $(CONFIG_DEBUG_LIBS),vpx_g,vpx)
 CODEC_LIB_SUF=$(if $(CONFIG_SHARED),.so,.a)
-$(foreach bin,$(LIBVPX_TEST_BINS),\
-    $(if $(BUILD_LIBVPX),$(eval $(bin): \
-        lib$(CODEC_LIB)$(CODEC_LIB_SUF) libgtest.a ))\
-    $(if $(BUILD_LIBVPX),$(eval $(call linkerxx_template,$(bin),\
-        $(LIBVPX_TEST_OBJS) \
-        -L. -lvpx -lgtest $(extralibs) -lm)\
-        )))\
-    $(if $(LIPO_LIBS),$(eval $(call lipo_bin_template,$(bin))))\
+ifeq ($(BUILD_LIBVPX),yes)
+$(LIBVPX_TEST_BIN): lib$(CODEC_LIB)$(CODEC_LIB_SUF) libgtest.a
+$(eval $(call linkerxx_template,$(LIBVPX_TEST_BIN), \
+              $(LIBVPX_TEST_OBJS) \
+              -L. -lvpx -lgtest $(extralibs) -lm))
+$(if $(LIPO_LIBS),$(eval $(call lipo_bin_template,$(LIBVPX_TEST_BIN))))
+endif  # BUILD_LIBVPX=yes
 
-endif
+endif  # CONFIG_UNIT_TESTS
 
 # Install test sources only if codec source is included
 INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += $(patsubst $(SRC_PATH_BARE)/%,%,\
@@ -465,13 +464,11 @@ INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += $(LIBVPX_TEST_SRCS)
 
 define test_shard_template
 test:: test_shard.$(1)
-test_shard.$(1): $(LIBVPX_TEST_BINS) testdata
+test_shard.$(1): $(LIBVPX_TEST_BIN) testdata
 	@set -e; \
-	 for t in $(LIBVPX_TEST_BINS); do \
-	   export GTEST_SHARD_INDEX=$(1); \
-	   export GTEST_TOTAL_SHARDS=$(2); \
-	   $$$$t; \
-	 done
+	 export GTEST_SHARD_INDEX=$(1); \
+	 export GTEST_TOTAL_SHARDS=$(2); \
+	 $(LIBVPX_TEST_BIN)
 .PHONY: test_shard.$(1)
 endef
 
