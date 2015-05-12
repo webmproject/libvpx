@@ -46,6 +46,23 @@
       "revId": "e52b6d0f302b8aab27c38fefb128a3ba6af3d17d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2d338121_60b8270a",
+        "filename": "test/test_dsp_speed.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-05-12T20:09:27Z",
+      "side": 1,
+      "message": "forgot to update this to STREQ; I was using a string with a separate md5 implementation...\nthis will need to be integrated to jenkins at some point",
+      "revId": "e52b6d0f302b8aab27c38fefb128a3ba6af3d17d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
