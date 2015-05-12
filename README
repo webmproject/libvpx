@@ -101,13 +101,6 @@ COMPILING THE APPLICATIONS/LIBRARIES:
     x86_64-win64-vs10
     x86_64-win64-vs11
     x86_64-win64-vs12
-    universal-darwin8-gcc
-    universal-darwin9-gcc
-    universal-darwin10-gcc
-    universal-darwin11-gcc
-    universal-darwin12-gcc
-    universal-darwin13-gcc
-    universal-darwin14-gcc
     generic-gnu
 
   The generic-gnu target, in conjunction with the CROSS environment variable,
