@@ -685,28 +685,6 @@ void vp9_alloc_compressor_data(VP9_COMP *cpi) {
   vp9_setup_pc_tree(&cpi->common, &cpi->td);
 }
 
-static void update_frame_size(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
-  MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
-
-  vp9_set_mb_mi(cm, cm->width, cm->height);
-  vp9_init_context_buffers(cm);
-  init_macroblockd(cm, xd);
-
-  if (is_two_pass_svc(cpi)) {
-    if (vp9_realloc_frame_buffer(&cpi->alt_ref_buffer,
-                                 cm->width, cm->height,
-                                 cm->subsampling_x, cm->subsampling_y,
-#if CONFIG_VP9_HIGHBITDEPTH
-                                 cm->use_highbitdepth,
-#endif
-                                 VP9_ENC_BORDER_IN_PIXELS, cm->byte_alignment,
-                                 NULL, NULL, NULL))
-      vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
-                         "Failed to reallocate alt_ref_buffer");
-  }
-}
-
 void vp9_new_framerate(VP9_COMP *cpi, double framerate) {
   cpi->framerate = framerate < 0.1 ? 30 : framerate;
   vp9_rc_update_framerate(cpi);
@@ -725,6 +703,30 @@ static void set_tile_limits(VP9_COMP *cpi) {
     cm->log2_tile_cols = clamp(cpi->oxcf.tile_columns,
                                min_log2_tile_cols, max_log2_tile_cols);
     cm->log2_tile_rows = cpi->oxcf.tile_rows;
+  }
+}
+
+static void update_frame_size(VP9_COMP *cpi) {
+  VP9_COMMON *const cm = &cpi->common;
+  MACROBLOCKD *const xd = &cpi->td.mb.e_mbd;
+
+  vp9_set_mb_mi(cm, cm->width, cm->height);
+  vp9_init_context_buffers(cm);
+  init_macroblockd(cm, xd);
+
+  set_tile_limits(cpi);
+
+  if (is_two_pass_svc(cpi)) {
+    if (vp9_realloc_frame_buffer(&cpi->alt_ref_buffer,
+                                 cm->width, cm->height,
+                                 cm->subsampling_x, cm->subsampling_y,
+#if CONFIG_VP9_HIGHBITDEPTH
+                                 cm->use_highbitdepth,
+#endif
+                                 VP9_ENC_BORDER_IN_PIXELS, cm->byte_alignment,
+                                 NULL, NULL, NULL))
+      vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
+                         "Failed to reallocate alt_ref_buffer");
   }
 }
 
