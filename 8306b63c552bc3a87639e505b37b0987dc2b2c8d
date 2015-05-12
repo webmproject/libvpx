@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "cd43c57f_287444f8",
+        "filename": "tools_common.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-05-12T18:42:47Z",
+      "side": 1,
+      "message": "I\u0027m not terribly familiar with Windows so I was keeping it down to just the snprintf issue. If these have the same problem, they can definitely be moved over as well.",
+      "parentUuid": "cd43c57f_080b4826",
+      "range": {
+        "startLine": 38,
+        "startChar": 8,
+        "endLine": 38,
+        "endChar": 14
+      },
+      "revId": "8306b63c552bc3a87639e505b37b0987dc2b2c8d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ad3e91ea_70fbd1f6",
         "filename": "vpx_ports/msvc.h",
         "patchSetId": 6
@@ -36,6 +60,24 @@
       "writtenOn": "2015-05-12T18:17:07Z",
       "side": 1,
       "message": "Note that this will continue to be insecure in VC++ 2013 and below. See https://codereview.chromium.org/1077903002 for pdfium\u0027s full-on fix for this.",
+      "revId": "8306b63c552bc3a87639e505b37b0987dc2b2c8d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2d338121_aad20ed3",
+        "filename": "vpx_ports/msvc.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-05-12T18:42:47Z",
+      "side": 1,
+      "message": "Our usage is pretty minimal - most locations are printing out debug information (which is not enabled for most users, including chromium). The one I think might be interesting in vpx/src/vpx_codec.c is just printing out an error message. I\u0027m not sure we need the full treatment for these cases.",
+      "parentUuid": "ad3e91ea_70fbd1f6",
       "revId": "8306b63c552bc3a87639e505b37b0987dc2b2c8d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
