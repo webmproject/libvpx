@@ -872,7 +872,7 @@ static INLINE int assign_mv(VP9_COMMON *cm, PREDICTION_MODE mode,
 #endif  // CONFIG_NEW_INTER
   switch (mode) {
 #if CONFIG_NEW_INTER
-    case NEAR_FORNEWMV:
+    case NEW2MV:
 #endif  // CONFIG_NEW_INTER
     case NEWMV: {
       nmv_context_counts *const mv_counts = cm->frame_parallel_decoding_mode ?
@@ -1172,12 +1172,12 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
         b_mode = read_inter_mode(cm, r, inter_mode_ctx);
 
 #if CONFIG_NEW_INTER
-        mv_idx = (b_mode == NEAR_FORNEWMV) ? 1 : 0;
+        mv_idx = (b_mode == NEW2MV) ? 1 : 0;
 #endif  // CONFIG_NEW_INTER
 
 #if CONFIG_NEW_INTER
         if (b_mode == NEARESTMV || b_mode == NEARMV ||
-            b_mode == NEWMV || b_mode == NEAR_FORNEWMV ||
+            b_mode == NEWMV || b_mode == NEW2MV ||
             b_mode == NEW_NEWMV ||
             b_mode == NEAREST_NEARESTMV ||
             b_mode == NEAREST_NEARMV || b_mode == NEAR_NEARESTMV ||
@@ -1199,7 +1199,7 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
                                           &nearest_sub8x8[ref],
                                           &near_sub8x8[ref]);
 #if CONFIG_NEW_INTER
-            if (b_mode == NEWMV || b_mode == NEAR_FORNEWMV ||
+            if (b_mode == NEWMV || b_mode == NEW2MV ||
                 b_mode == NEW_NEWMV ||
                 b_mode == NEAREST_NEWMV || b_mode == NEW_NEARESTMV ||
                 b_mode == NEAR_NEWMV || b_mode == NEW_NEARMV) {
@@ -1237,7 +1237,7 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
     mbmi->mv[1].as_int = mi->bmi[3].as_mv[1].as_int;
   } else {
 #if CONFIG_NEW_INTER
-    if (mbmi->mode == NEAR_FORNEWMV) {
+    if (mbmi->mode == NEW2MV) {
       for (ref = 0; ref < 1 + is_compound; ++ref)
         ref_mv[ref].as_int = nearmv[ref].as_int;
     }

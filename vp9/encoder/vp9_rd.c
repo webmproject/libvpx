@@ -634,16 +634,16 @@ void vp9_set_rd_speed_thresholds(VP9_COMP *cpi) {
   rd->thresh_mult[THR_NEWG] += 1000;
 
 #if CONFIG_NEW_INTER
-  rd->thresh_mult[THR_NEAR_FORNEWMV] += 1000;
-  rd->thresh_mult[THR_NEAR_FORNEWA] += 1000;
-  rd->thresh_mult[THR_NEAR_FORNEWG] += 1000;
+  rd->thresh_mult[THR_NEW2MV] += 1000;
+  rd->thresh_mult[THR_NEW2A] += 1000;
+  rd->thresh_mult[THR_NEW2G] += 1000;
 #endif  // CONFIG_NEW_INTER
 
   // Adjust threshold only in real time mode, which only uses last
   // reference frame.
   rd->thresh_mult[THR_NEWMV] += sf->elevate_newmv_thresh;
 #if CONFIG_NEW_INTER
-  rd->thresh_mult[THR_NEAR_FORNEWMV] += sf->elevate_newmv_thresh;
+  rd->thresh_mult[THR_NEW2MV] += sf->elevate_newmv_thresh;
 #endif  // CONFIG_NEW_INTER
 
   rd->thresh_mult[THR_NEARMV] += 1000;

@@ -762,7 +762,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
           write_inter_mode(w, b_mode, inter_probs);
 
 #if CONFIG_NEW_INTER
-          if (b_mode == NEWMV || b_mode == NEAR_FORNEWMV ||
+          if (b_mode == NEWMV || b_mode == NEW2MV ||
               b_mode == NEW_NEWMV) {
 #else
           if (b_mode == NEWMV) {
@@ -790,13 +790,13 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
       }
     } else {
 #if CONFIG_NEW_INTER
-      if (mode == NEWMV || mode == NEAR_FORNEWMV || mode == NEW_NEWMV) {
+      if (mode == NEWMV || mode == NEW2MV || mode == NEW_NEWMV) {
 #else
       if (mode == NEWMV) {
 #endif  // CONFIG_NEW_INTER
         for (ref = 0; ref < 1 + is_compound; ++ref) {
 #if CONFIG_NEW_INTER
-          if (mode == NEAR_FORNEWMV)
+          if (mode == NEW2MV)
             vp9_encode_mv(cpi, w, &mbmi->mv[ref].as_mv,
                           &mbmi->ref_mvs[mbmi->ref_frame[ref]][1].as_mv, nmvc,
                           allow_hp);

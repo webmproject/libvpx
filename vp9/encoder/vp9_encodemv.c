@@ -318,7 +318,7 @@ void vp9_update_mv_count(VP9_COMMON *cm, const MACROBLOCKD *xd) {
 
   for (ref = 0; ref < 1 + has_second_ref(mbmi); ++ref) {
 #if CONFIG_NEW_INTER
-    if (mbmi->sb_type >= BLOCK_8X8 && mbmi->mode == NEAR_FORNEWMV)
+    if (mbmi->sb_type >= BLOCK_8X8 && mbmi->mode == NEW2MV)
       ref_mv[ref].as_int = mbmi->ref_mvs[mbmi->ref_frame[ref]][1].as_int;
     else
 #endif  // CONFIG_NEW_INTER
@@ -341,7 +341,7 @@ void vp9_update_mv_count(VP9_COMMON *cm, const MACROBLOCKD *xd) {
 
 #if CONFIG_NEW_INTER
         if (mi->bmi[i].as_mode == NEWMV ||
-            mi->bmi[i].as_mode == NEAR_FORNEWMV ||
+            mi->bmi[i].as_mode == NEW2MV ||
             mi->bmi[i].as_mode == NEW_NEWMV)
 #else
         if (mi->bmi[i].as_mode == NEWMV)
@@ -362,7 +362,7 @@ void vp9_update_mv_count(VP9_COMMON *cm, const MACROBLOCKD *xd) {
     }
   } else {
 #if CONFIG_NEW_INTER
-    if (mbmi->mode == NEWMV || mbmi->mode == NEAR_FORNEWMV ||
+    if (mbmi->mode == NEWMV || mbmi->mode == NEW2MV ||
         mbmi->mode == NEW_NEWMV)
 #else
     if (mbmi->mode == NEWMV)

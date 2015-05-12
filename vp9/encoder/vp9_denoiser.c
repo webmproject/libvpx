@@ -420,7 +420,7 @@ void vp9_denoiser_update_frame_stats(MB_MODE_INFO *mbmi, unsigned int sse,
     ctx->best_zeromv_reference_frame = mbmi->ref_frame[0];
   }
 #if CONFIG_NEW_INTER
-  if (mode == NEW_NEWMV || mode == NEWMV || mode == NEAR_FORNEWMV ||
+  if (mode == NEW_NEWMV || mode == NEWMV || mode == NEW2MV ||
       mode == NEW_NEARESTMV || mode == NEAREST_NEWMV) {
 #else
   if (mode == NEWMV) {
