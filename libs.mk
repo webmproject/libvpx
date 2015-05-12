@@ -346,6 +346,9 @@ LIBVPX_TEST_DATA=$(addprefix $(LIBVPX_TEST_DATA_PATH)/,\
                      $(call enabled,LIBVPX_TEST_DATA))
 libvpx_test_data_url=http://downloads.webmproject.org/test_data/libvpx/$(1)
 
+TEST_INTRA_PRED_SPEED_BIN=./test_intra_pred_speed$(EXE_SFX)
+TEST_INTRA_PRED_SPEED_SRCS=$(addprefix test/,$(call enabled,TEST_INTRA_PRED_SPEED_SRCS))
+
 libvpx_test_srcs.txt:
 	@echo "    [CREATE] $@"
 	@echo $(LIBVPX_TEST_SRCS) | xargs -n1 echo | LC_ALL=C sort -u > $@
@@ -410,6 +413,24 @@ test_libvpx.$(VCPROJ_SFX): $(LIBVPX_TEST_SRCS) vpx.$(VCPROJ_SFX) gtest.$(VCPROJ_
 PROJECTS-$(CONFIG_MSVS) += test_libvpx.$(VCPROJ_SFX)
 
 LIBVPX_TEST_BIN := $(addprefix $(TGT_OS:win64=x64)/Release/,$(notdir $(LIBVPX_TEST_BIN)))
+
+ifneq ($(strip $(TEST_INTRA_PRED_SPEED_OBJS)),)
+PROJECTS-$(CONFIG_MSVS) += test_intra_pred_speed.$(VCPROJ_SFX)
+test_intra_pred_speed.$(VCPROJ_SFX): $(TEST_INTRA_PRED_SPEED_SRCS) vpx.$(VCPROJ_SFX) gtest.$(VCPROJ_SFX)
+	@echo "    [CREATE] $@"
+	$(qexec)$(GEN_VCPROJ) \
+            --exe \
+            --target=$(TOOLCHAIN) \
+            --name=test_intra_pred_speed \
+            -D_VARIADIC_MAX=10 \
+            --proj-guid=CD837F5F-52D8-4314-A370-895D614166A7 \
+            --ver=$(CONFIG_VS_VERSION) \
+            --src-path-bare="$(SRC_PATH_BARE)" \
+            $(if $(CONFIG_STATIC_MSVCRT),--static-crt) \
+            --out=$@ $(INTERNAL_CFLAGS) $(CFLAGS) \
+            -I. -I"$(SRC_PATH_BARE)/third_party/googletest/src/include" \
+            -L. -l$(CODEC_LIB) -l$(GTEST_LIB) $^
+endif  # TEST_INTRA_PRED_SPEED
 endif
 else
 
@@ -420,24 +441,37 @@ ifeq ($(filter win%,$(TGT_OS)),$(TGT_OS))
 # Disabling pthreads globally will cause issues on darwin and possibly elsewhere
 $(GTEST_OBJS) $(GTEST_OBJS:.o=.d): CXXFLAGS += -DGTEST_HAS_PTHREAD=0
 endif
-$(GTEST_OBJS) $(GTEST_OBJS:.o=.d): CXXFLAGS += -I$(SRC_PATH_BARE)/third_party/googletest/src
-$(GTEST_OBJS) $(GTEST_OBJS:.o=.d): CXXFLAGS += -I$(SRC_PATH_BARE)/third_party/googletest/src/include
+GTEST_INCLUDES := -I$(SRC_PATH_BARE)/third_party/googletest/src
+GTEST_INCLUDES += -I$(SRC_PATH_BARE)/third_party/googletest/src/include
+$(GTEST_OBJS) $(GTEST_OBJS:.o=.d): CXXFLAGS += $(GTEST_INCLUDES)
 OBJS-yes += $(GTEST_OBJS)
 LIBS-yes += $(BUILD_PFX)libgtest.a $(BUILD_PFX)libgtest_g.a
 $(BUILD_PFX)libgtest_g.a: $(GTEST_OBJS)
 
 LIBVPX_TEST_OBJS=$(sort $(call objs,$(LIBVPX_TEST_SRCS)))
-$(LIBVPX_TEST_OBJS) $(LIBVPX_TEST_OBJS:.o=.d): CXXFLAGS += -I$(SRC_PATH_BARE)/third_party/googletest/src
-$(LIBVPX_TEST_OBJS) $(LIBVPX_TEST_OBJS:.o=.d): CXXFLAGS += -I$(SRC_PATH_BARE)/third_party/googletest/src/include
+$(LIBVPX_TEST_OBJS) $(LIBVPX_TEST_OBJS:.o=.d): CXXFLAGS += $(GTEST_INCLUDES)
 OBJS-yes += $(LIBVPX_TEST_OBJS)
 BINS-yes += $(LIBVPX_TEST_BIN)
 
 CODEC_LIB=$(if $(CONFIG_DEBUG_LIBS),vpx_g,vpx)
 CODEC_LIB_SUF=$(if $(CONFIG_SHARED),.so,.a)
-$(LIBVPX_TEST_BIN): lib$(CODEC_LIB)$(CODEC_LIB_SUF) libgtest.a
+TEST_LIBS := lib$(CODEC_LIB)$(CODEC_LIB_SUF) libgtest.a
+$(LIBVPX_TEST_BIN): $(TEST_LIBS)
 $(eval $(call linkerxx_template,$(LIBVPX_TEST_BIN), \
               $(LIBVPX_TEST_OBJS) \
               -L. -lvpx -lgtest $(extralibs) -lm))
+
+TEST_INTRA_PRED_SPEED_OBJS := $(sort $(call objs,$(TEST_INTRA_PRED_SPEED_SRCS)))
+ifneq ($(strip $(TEST_INTRA_PRED_SPEED_OBJS)),)
+$(TEST_INTRA_PRED_SPEED_OBJS) $(TEST_INTRA_PRED_SPEED_OBJS:.o=.d): CXXFLAGS += $(GTEST_INCLUDES)
+OBJS-yes += $(TEST_INTRA_PRED_SPEED_OBJS)
+BINS-yes += $(TEST_INTRA_PRED_SPEED_BIN)
+
+$(TEST_INTRA_PRED_SPEED_BIN): $(TEST_LIBS)
+$(eval $(call linkerxx_template,$(TEST_INTRA_PRED_SPEED_BIN), \
+              $(TEST_INTRA_PRED_SPEED_OBJS) \
+              -L. -lvpx -lgtest $(extralibs) -lm))
+endif  # TEST_INTRA_PRED_SPEED
 
 endif  # CONFIG_UNIT_TESTS
 
@@ -445,6 +479,7 @@ endif  # CONFIG_UNIT_TESTS
 INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += $(patsubst $(SRC_PATH_BARE)/%,%,\
     $(shell find $(SRC_PATH_BARE)/third_party/googletest -type f))
 INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += $(LIBVPX_TEST_SRCS)
+INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += $(TEST_INTRA_PRED_SPEED_SRCS)
 
 define test_shard_template
 test:: test_shard.$(1)
