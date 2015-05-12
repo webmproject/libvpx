@@ -592,14 +592,17 @@ void vp9_tokenize_sb_supertx(VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,
     for (plane = 0; plane < MAX_MB_PLANE; plane++) {
       const BLOCK_SIZE plane_size =
           get_plane_block_size(bsize, &xd->plane[plane]);
-      tokenize_b(plane, 0, plane_size, b_width_log2_lookup[plane_size], &arg);
+      const struct macroblockd_plane* const pd = &xd->plane[plane];
+      const TX_SIZE tx_size = plane ? get_uv_tx_size(mbmi, pd) : mbmi->tx_size;
+      tokenize_b(plane, 0, plane_size, tx_size, &arg);
     }
   } else {
     for (plane = 0; plane < MAX_MB_PLANE; plane++) {
       const BLOCK_SIZE plane_size =
           get_plane_block_size(bsize, &xd->plane[plane]);
-      set_entropy_context_b(plane, 0, plane_size,
-                            b_width_log2_lookup[plane_size], &arg);
+      const struct macroblockd_plane* const pd = &xd->plane[plane];
+      const TX_SIZE tx_size = plane ? get_uv_tx_size(mbmi, pd) : mbmi->tx_size;
+      set_entropy_context_b(plane, 0, plane_size, tx_size, &arg);
     }
     *t = t_backup;
   }
