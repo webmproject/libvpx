@@ -43,10 +43,8 @@ extern "C" {
 
 #if CONFIG_NEWMVREF
 #define MAX_MODES 55
-#define INTERINTRA_START_MODE 43
 #else
 #define MAX_MODES 52
-#define INTERINTRA_START_MODE 40
 #endif  // CONFIG_NEWMVREF
 
 #else  // CONFIG_INTERINTRA
@@ -65,10 +63,8 @@ extern "C" {
 
 #if CONFIG_NEWMVREF
 #define MAX_MODES 47
-#define INTERINTRA_START_MODE 35
 #else
 #define MAX_MODES 42
-#define INTERINTRA_START_MODE 30
 #endif  // CONFIG_NEWMVREF
 
 #else  // CONFIG_INTERINTRA
