@@ -22,6 +22,30 @@
       "revId": "59e7a47c418c77089afb6dfc28b8a178d8b9f1e3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cd43c57f_c5db0914",
+        "filename": "examples/vp8_multi_resolution_encoder.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-05-12T17:37:06Z",
+      "side": 1,
+      "message": "yes but for these in examples they reference local to the source; this just normalizes them. If we want to enforce the top-level style (probably) it would be better to do a sweep for this and the other includes there (or relocate them to their own dir).",
+      "parentUuid": "ad3e91ea_5cfb54f6",
+      "range": {
+        "startLine": 44,
+        "startChar": 13,
+        "endLine": 44,
+        "endChar": 25
+      },
+      "revId": "59e7a47c418c77089afb6dfc28b8a178d8b9f1e3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
