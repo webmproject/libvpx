@@ -40,11 +40,11 @@
 #include "vpx/vpx_encoder.h"
 #include "vpx/vp8cx.h"
 #include "vpx_ports/mem_ops.h"
-#include "./tools_common.h"
+#include "../tools_common.h"
 #define interface (vpx_codec_vp8_cx())
 #define fourcc    0x30385056
 
-void usage_exit() {
+void usage_exit(void) {
   exit(EXIT_FAILURE);
 }
 

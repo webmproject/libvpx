@@ -28,7 +28,7 @@
 
 static const char *exec_name;
 
-void usage_exit() {
+void usage_exit(void) {
   exit(EXIT_FAILURE);
 }
 
