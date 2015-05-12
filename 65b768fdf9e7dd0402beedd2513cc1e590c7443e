@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cd43c57f_258bcdef",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 709,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-05-12T17:39:50Z",
+      "side": 1,
+      "message": "this move seems to be unrelated to the change and makes it difficult to diff",
+      "revId": "65b768fdf9e7dd0402beedd2513cc1e590c7443e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
