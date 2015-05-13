@@ -254,14 +254,6 @@ CODEC_EXTRA_LIBS=$(sort $(call enabled,CODEC_EXTRA_LIBS))
 $(foreach ex,$(ALL_EXAMPLES),$(eval $(notdir $(ex:.c=)).SRCS += $(ex) examples.mk))
 
 
-# If this is a universal (fat) binary, then all the subarchitectures have
-# already been built and our job is to stitch them together. The
-# BUILD_OBJS variable indicates whether we should be building
-# (compiling, linking) the library. The LIPO_OBJS variable indicates
-# that we're stitching.
-$(eval $(if $(filter universal%,$(TOOLCHAIN)),LIPO_OBJS,BUILD_OBJS):=yes)
-
-
 # Create build/install dependencies for all examples. The common case
 # is handled here. The MSVS case is handled below.
 NOT_MSVS = $(if $(CONFIG_MSVS),,yes)
@@ -269,7 +261,7 @@ DIST-BINS-$(NOT_MSVS)      += $(addprefix bin/,$(ALL_EXAMPLES:.c=$(EXE_SFX)))
 INSTALL-BINS-$(NOT_MSVS)   += $(addprefix bin/,$(UTILS:.c=$(EXE_SFX)))
 DIST-SRCS-yes              += $(ALL_SRCS)
 INSTALL-SRCS-yes           += $(UTIL_SRCS)
-OBJS-$(NOT_MSVS)           += $(if $(BUILD_OBJS),$(call objs,$(ALL_SRCS)))
+OBJS-$(NOT_MSVS)           += $(call objs,$(ALL_SRCS))
 BINS-$(NOT_MSVS)           += $(addprefix $(BUILD_PFX),$(ALL_EXAMPLES:.c=$(EXE_SFX)))
 
 
@@ -278,15 +270,11 @@ CODEC_LIB=$(if $(CONFIG_DEBUG_LIBS),vpx_g,vpx)
 SHARED_LIB_SUF=$(if $(filter darwin%,$(TGT_OS)),.dylib,.so)
 CODEC_LIB_SUF=$(if $(CONFIG_SHARED),$(SHARED_LIB_SUF),.a)
 $(foreach bin,$(BINS-yes),\
-    $(if $(BUILD_OBJS),$(eval $(bin):\
-        $(LIB_PATH)/lib$(CODEC_LIB)$(CODEC_LIB_SUF)))\
-    $(if $(BUILD_OBJS),$(eval $(call linker_template,$(bin),\
+    $(eval $(bin):$(LIB_PATH)/lib$(CODEC_LIB)$(CODEC_LIB_SUF))\
+    $(eval $(call linker_template,$(bin),\
         $(call objs,$($(notdir $(bin:$(EXE_SFX)=)).SRCS)) \
         -l$(CODEC_LIB) $(addprefix -l,$(CODEC_EXTRA_LIBS))\
-        )))\
-    $(if $(LIPO_OBJS),$(eval $(call lipo_bin_template,$(bin))))\
-    )
-
+        )))
 
 # The following pairs define a mapping of locations in the distribution
 # tree to locations in the source/build trees.

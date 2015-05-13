@@ -25,7 +25,7 @@ $$(BUILD_PFX)$(1).h: $$(SRC_PATH_BARE)/$(2)
 	@echo "    [CREATE] $$@"
 	$$(qexec)$$(SRC_PATH_BARE)/build/make/rtcd.pl --arch=$$(TGT_ISA) \
           --sym=$(1) \
-          --config=$$(CONFIG_DIR)$$(target)$$(if $$(FAT_ARCHS),,-$$(TOOLCHAIN)).mk \
+          --config=$$(CONFIG_DIR)$$(target)-$$(TOOLCHAIN).mk \
           $$(RTCD_OPTIONS) $$^ > $$@
 CLEAN-OBJS += $$(BUILD_PFX)$(1).h
 RTCD += $$(BUILD_PFX)$(1).h
@@ -34,12 +34,11 @@ endef
 CODEC_SRCS-yes += CHANGELOG
 CODEC_SRCS-yes += libs.mk
 
-# If this is a universal (fat) binary, then all the subarchitectures have
-# already been built and our job is to stitch them together. The
-# BUILD_LIBVPX variable indicates whether we should be building
-# (compiling, linking) the library. The LIPO_LIBVPX variable indicates
-# that we're stitching.
-$(eval $(if $(filter universal%,$(TOOLCHAIN)),LIPO_LIBVPX,BUILD_LIBVPX):=yes)
+# TODO(tomfinegan): Remove $BUILD_LIBVPX throughout. It's a vestigial piece of
+# universal Mac OS X build support from eons ago when universal meant fat
+# libraries containing PPC + X86. We now have build/make/iosbuild.sh that can
+# be used to build VPX.framework containing user selected targets instead.
+BUILD_LIBVPX := yes
 
 include $(SRC_PATH_BARE)/vpx/vpx_codec.mk
 CODEC_SRCS-yes += $(addprefix vpx/,$(call enabled,API_SRCS))
@@ -313,9 +312,6 @@ INSTALL_MAPS += $(LIBSUBDIR)/pkgconfig/%.pc %.pc
 CLEAN-OBJS += vpx.pc
 endif
 
-LIBS-$(LIPO_LIBVPX) += libvpx.a
-$(eval $(if $(LIPO_LIBVPX),$(call lipo_lib_template,libvpx.a)))
-
 #
 # Rule to make assembler configuration file from C configuration file
 #
@@ -447,13 +443,10 @@ BINS-$(BUILD_LIBVPX) += $(LIBVPX_TEST_BIN)
 
 CODEC_LIB=$(if $(CONFIG_DEBUG_LIBS),vpx_g,vpx)
 CODEC_LIB_SUF=$(if $(CONFIG_SHARED),.so,.a)
-ifeq ($(BUILD_LIBVPX),yes)
 $(LIBVPX_TEST_BIN): lib$(CODEC_LIB)$(CODEC_LIB_SUF) libgtest.a
 $(eval $(call linkerxx_template,$(LIBVPX_TEST_BIN), \
               $(LIBVPX_TEST_OBJS) \
               -L. -lvpx -lgtest $(extralibs) -lm))
-$(if $(LIPO_LIBS),$(eval $(call lipo_bin_template,$(LIBVPX_TEST_BIN))))
-endif  # BUILD_LIBVPX=yes
 
 endif  # CONFIG_UNIT_TESTS
 

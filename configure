@@ -148,13 +148,6 @@ all_platforms="${all_platforms} x86_64-win64-vs9"
 all_platforms="${all_platforms} x86_64-win64-vs10"
 all_platforms="${all_platforms} x86_64-win64-vs11"
 all_platforms="${all_platforms} x86_64-win64-vs12"
-all_platforms="${all_platforms} universal-darwin8-gcc"
-all_platforms="${all_platforms} universal-darwin9-gcc"
-all_platforms="${all_platforms} universal-darwin10-gcc"
-all_platforms="${all_platforms} universal-darwin11-gcc"
-all_platforms="${all_platforms} universal-darwin12-gcc"
-all_platforms="${all_platforms} universal-darwin13-gcc"
-all_platforms="${all_platforms} universal-darwin14-gcc"
 all_platforms="${all_platforms} generic-gnu"
 
 # all_targets is a list of all targets that can be configured
@@ -436,22 +429,8 @@ post_process_cmdline() {
 
 process_targets() {
     enabled child || write_common_config_banner
-    enabled universal || write_common_target_config_h  ${BUILD_PFX}vpx_config.h
-
-    # For fat binaries, call configure recursively to configure for each
-    # binary architecture to be included.
-    if enabled universal; then
-        # Call configure (ourselves) for each subarchitecture
-        for arch in $fat_bin_archs; do
-            BUILD_PFX=${arch}/ toolchain=${arch} $self --child $cmdline_args || exit $?
-        done
-    fi
-
-    # The write_common_config (config.mk) logic is deferred until after the
-    # recursive calls to configure complete, because we want our universal
-    # targets to be executed last.
+    write_common_target_config_h ${BUILD_PFX}vpx_config.h
     write_common_config_targets
-    enabled universal && echo "FAT_ARCHS=${fat_bin_archs}" >> config.mk
 
     # Calculate the default distribution name, based on the enabled features
     cf=""
@@ -596,24 +575,6 @@ EOF
 process_toolchain() {
     process_common_toolchain
 
-    # Handle universal binaries for this architecture
-    case $toolchain in
-        universal-darwin*)
-            darwin_ver=${tgt_os##darwin}
-
-            # Tiger (10.4/darwin8) brought support for x86
-            if [ $darwin_ver -ge 8 ]; then
-                fat_bin_archs="$fat_bin_archs x86-${tgt_os}-${tgt_cc}"
-            fi
-
-            # Leopard (10.5/darwin9) brought 64 bit support
-            if [ $darwin_ver -ge 9 ]; then
-                fat_bin_archs="$fat_bin_archs x86_64-${tgt_os}-${tgt_cc}"
-            fi
-            ;;
-    esac
-
-
     # Enable some useful compiler flags
     if enabled gcc; then
         enabled werror && check_add_cflags -Werror
@@ -701,7 +662,7 @@ process_toolchain() {
     esac
 
     # Other toolchain specific defaults
-    case $toolchain in x86*|universal*) soft_enable postproc;; esac
+    case $toolchain in x86*) soft_enable postproc;; esac
 
     if enabled postproc_visualizer; then
         enabled postproc || die "postproc_visualizer requires postproc to be enabled"

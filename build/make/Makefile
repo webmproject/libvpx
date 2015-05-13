@@ -56,14 +56,7 @@ dist:
         fi
 endif
 
-ifneq ($(target),)
-# Normally, we want to build the filename from the target and the toolchain.
-# This disambiguates from the $(target).mk file that exists in the source tree.
-# However, the toolchain is part of the target in universal builds, so we
-# don't want to include TOOLCHAIN in that case. FAT_ARCHS is used to test
-# if we're in the universal case.
-include $(target)$(if $(FAT_ARCHS),,-$(TOOLCHAIN)).mk
-endif
+include $(target)-$(TOOLCHAIN).mk
 BUILD_ROOT?=.
 VPATH=$(SRC_PATH_BARE)
 CFLAGS+=-I$(BUILD_PFX)$(BUILD_ROOT) -I$(SRC_PATH)
@@ -312,21 +305,6 @@ $(1):
         -o $$@ \
         $$(filter %.o,$$^) $$(extralibs)
 endef
-
-
-
-define lipo_lib_template
-$(1): $(addsuffix /$(1),$(FAT_ARCHS))
-	$(if $(quiet),@echo "    [LIPO] $$@")
-	$(qexec)libtool -static -o $$@ $$?
-endef
-
-define lipo_bin_template
-$(1): $(addsuffix /$(1),$(FAT_ARCHS))
-	$(if $(quiet),@echo "    [LIPO] $$@")
-	$(qexec)lipo -output $$@ -create $$?
-endef
-
 
 #
 # Get current configuration

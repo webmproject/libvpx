@@ -390,7 +390,7 @@ write_common_config_banner() {
 write_common_config_targets() {
   for t in ${all_targets}; do
     if enabled ${t}; then
-      if enabled universal || enabled child; then
+      if enabled child; then
         fwrite config.mk "ALL_TARGETS += ${t}-${toolchain}"
       else
         fwrite config.mk "ALL_TARGETS += ${t}"
@@ -647,14 +647,6 @@ process_common_toolchain() {
 
     # detect tgt_os
     case "$gcctarget" in
-      *darwin8*)
-        tgt_isa=universal
-        tgt_os=darwin8
-        ;;
-      *darwin9*)
-        tgt_isa=universal
-        tgt_os=darwin9
-        ;;
       *darwin10*)
         tgt_isa=x86_64
         tgt_os=darwin10
@@ -1215,7 +1207,7 @@ EOF
           ;;
       esac
       ;;
-    universal*|*-gcc|generic-gnu)
+    *-gcc|generic-gnu)
       link_with_cc=gcc
       enable_feature gcc
       setup_gnu_toolchain
