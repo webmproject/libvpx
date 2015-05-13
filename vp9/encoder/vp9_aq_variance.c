@@ -10,6 +10,8 @@
 
 #include <math.h>
 
+#include "vpx_ports/mem.h"
+
 #include "vp9/encoder/vp9_aq_variance.h"
 
 #include "vp9/common/vp9_seg_common.h"

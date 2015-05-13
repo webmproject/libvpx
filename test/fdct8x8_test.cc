@@ -22,6 +22,7 @@
 #include "vp9/common/vp9_entropy.h"
 #include "vpx/vpx_codec.h"
 #include "vpx/vpx_integer.h"
+#include "vpx_ports/mem.h"
 
 const int kNumCoeffs = 64;
 const double kPi = 3.141592653589793238462643383279502884;

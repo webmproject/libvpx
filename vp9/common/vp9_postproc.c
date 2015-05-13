@@ -16,12 +16,10 @@
 #include "./vpx_scale_rtcd.h"
 #include "./vp9_rtcd.h"
 
+#include "vpx_ports/mem.h"
 #include "vpx_scale/vpx_scale.h"
 #include "vpx_scale/yv12config.h"
 
-#if CONFIG_VP9_HIGHBITDEPTH
-#include "vp9/common/vp9_common.h"
-#endif
 #include "vp9/common/vp9_onyxc_int.h"
 #include "vp9/common/vp9_postproc.h"
 #include "vp9/common/vp9_systemdependent.h"

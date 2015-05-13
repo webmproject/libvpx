@@ -23,6 +23,7 @@
 #include "vp9/common/vp9_entropy.h"
 #include "vpx/vpx_codec.h"
 #include "vpx/vpx_integer.h"
+#include "vpx_ports/mem.h"
 
 using libvpx_test::ACMRandom;
 

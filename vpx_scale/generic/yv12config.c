@@ -12,9 +12,7 @@
 
 #include "vpx_scale/yv12config.h"
 #include "vpx_mem/vpx_mem.h"
-#if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
-#include "vp9/common/vp9_common.h"
-#endif
+#include "vpx_ports/mem.h"
 
 /****************************************************************************
 *  Exports

@@ -17,6 +17,7 @@
 #include "./vpx_dsp_rtcd.h"
 #include "./vpx_scale_rtcd.h"
 #include "vpx/internal/vpx_psnr.h"
+#include "vpx_ports/mem.h"
 #include "vpx_ports/vpx_timer.h"
 
 #include "vp9/common/vp9_alloccommon.h"

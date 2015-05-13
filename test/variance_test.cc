@@ -20,6 +20,7 @@
 #include "vpx/vpx_codec.h"
 #include "vpx/vpx_integer.h"
 #include "vpx_mem/vpx_mem.h"
+#include "vpx_ports/mem.h"
 #if CONFIG_VP8_ENCODER
 # include "./vp8_rtcd.h"
 # include "vp8/common/variance.h"

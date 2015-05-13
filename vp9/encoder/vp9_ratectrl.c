@@ -16,6 +16,7 @@
 #include <string.h>
 
 #include "vpx_mem/vpx_mem.h"
+#include "vpx_ports/mem.h"
 
 #include "vp9/common/vp9_alloccommon.h"
 #include "vp9/encoder/vp9_aq_cyclicrefresh.h"

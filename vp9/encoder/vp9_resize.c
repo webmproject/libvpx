@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "vpx_ports/mem.h"
 #include "vp9/common/vp9_common.h"
 #include "vp9/encoder/vp9_resize.h"
 

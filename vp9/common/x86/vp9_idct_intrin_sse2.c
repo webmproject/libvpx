@@ -8,6 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include "vpx_ports/mem.h"
 #include "vp9/common/x86/vp9_idct_intrin_sse2.h"
 #include "vp9/common/vp9_idct.h"
 
