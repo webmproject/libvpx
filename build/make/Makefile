@@ -56,7 +56,11 @@ dist:
         fi
 endif
 
+# Since we invoke make recursively for multiple targets we need to include the
+# .mk file for the correct target, but only when $(target) is non-empty.
+ifneq ($(target),)
 include $(target)-$(TOOLCHAIN).mk
+endif
 BUILD_ROOT?=.
 VPATH=$(SRC_PATH_BARE)
 CFLAGS+=-I$(BUILD_PFX)$(BUILD_ROOT) -I$(SRC_PATH)
