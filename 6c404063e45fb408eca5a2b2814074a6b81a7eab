@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ad15b184_c4ee5334",
+        "filename": "libs.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-05-13T19:35:27Z",
+      "side": 1,
+      "message": "potential cleanup - replace BUILD_LIVPX_SO with CONFIG_SHARED",
+      "range": {
+        "startLine": 227,
+        "startChar": 15,
+        "endLine": 227,
+        "endChar": 24
+      },
+      "revId": "6c404063e45fb408eca5a2b2814074a6b81a7eab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
