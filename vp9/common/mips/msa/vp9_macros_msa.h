@@ -388,6 +388,44 @@
   out_m;                                              \
 })
 
+#define TRANSPOSE4X8_H(in0, in1, in2, in3,                   \
+                       in4, in5, in6, in7,                   \
+                       out0, out1, out2, out3,               \
+                       out4, out5, out6, out7) {             \
+  v8i16 tmp0_m, tmp1_m, tmp2_m, tmp3_m;                      \
+  v8i16 tmp0_n, tmp1_n, tmp2_n, tmp3_n;                      \
+  v8i16 zero_m = { 0 };                                      \
+                                                             \
+  tmp0_n = __msa_ilvr_h((v8i16)(in1), (v8i16)(in0));         \
+  tmp1_n = __msa_ilvr_h((v8i16)(in3), (v8i16)(in2));         \
+  tmp2_n = __msa_ilvr_h((v8i16)(in5), (v8i16)(in4));         \
+  tmp3_n = __msa_ilvr_h((v8i16)(in7), (v8i16)(in6));         \
+                                                             \
+  ILV_W_LRLR_SH((tmp0_n), (tmp1_n), (tmp2_n), (tmp3_n),      \
+                tmp2_m, tmp0_m, tmp3_m, tmp1_m);             \
+                                                             \
+  out1 = (v8i16)__msa_ilvl_d((v2i64)tmp1_m, (v2i64)tmp0_m);  \
+  out0 = (v8i16)__msa_ilvr_d((v2i64)tmp1_m, (v2i64)tmp0_m);  \
+  out3 = (v8i16)__msa_ilvl_d((v2i64)tmp3_m, (v2i64)tmp2_m);  \
+  out2 = (v8i16)__msa_ilvr_d((v2i64)tmp3_m, (v2i64)tmp2_m);  \
+                                                             \
+  out4 = zero_m;                                             \
+  out5 = zero_m;                                             \
+  out6 = zero_m;                                             \
+  out7 = zero_m;                                             \
+}
+
+#define TRANSPOSE8X4_H(in0, in1, in2, in3,        \
+                       out0, out1, out2, out3) {  \
+  v8i16 tmp0_m, tmp1_m, tmp2_m, tmp3_m;           \
+                                                  \
+  ILV_H_LRLR_SH((in0), (in1), (in2), (in3),       \
+                tmp2_m, tmp0_m, tmp3_m, tmp1_m);  \
+                                                  \
+  ILV_W_LRLR_SH(tmp0_m, tmp1_m, tmp2_m, tmp3_m,   \
+                out1, out0, out3, out2);          \
+}
+
 /* halfword 8x8 transpose macro */
 #define TRANSPOSE8x8_H_SH(in0, in1, in2, in3,                 \
                           in4, in5, in6, in7,                 \
@@ -443,6 +481,14 @@
   out1 = __msa_ilvr_h((v8i16)(in1), (v8i16)(in0));  \
   out2 = __msa_ilvl_h((v8i16)(in3), (v8i16)(in2));  \
   out3 = __msa_ilvr_h((v8i16)(in3), (v8i16)(in2));  \
+}
+
+#define ILV_W_LRLR_SH(in0, in1, in2, in3,                  \
+                      out0, out1, out2, out3) {            \
+  out0 = (v8i16)__msa_ilvl_w((v4i32)(in1), (v4i32)(in0));  \
+  out1 = (v8i16)__msa_ilvr_w((v4i32)(in1), (v4i32)(in0));  \
+  out2 = (v8i16)__msa_ilvl_w((v4i32)(in3), (v4i32)(in2));  \
+  out3 = (v8i16)__msa_ilvr_w((v4i32)(in3), (v4i32)(in2));  \
 }
 
 #define ILV_H_LR_SH(in0, in1, out0, out1) {         \
@@ -572,10 +618,27 @@
   out3 = __msa_dotp_s_w((v8i16)(m3), (v8i16)(c3));   \
 }
 
+#define SPLATI_H_4VECS_SH(coeff, val0, val1, val2, val3,  \
+                          out0, out1, out2, out3) {       \
+  out0 = __msa_splati_h((v8i16)(coeff), (val0));          \
+  out1 = __msa_splati_h((v8i16)(coeff), (val1));          \
+  out2 = __msa_splati_h((v8i16)(coeff), (val2));          \
+  out3 = __msa_splati_h((v8i16)(coeff), (val3));          \
+}
+
 #define PCKEV_H_2VECS_SH(in0_l, in0_r, in1_l, in1_r,     \
                          out0, out1) {                   \
   out0 = __msa_pckev_h((v8i16)(in0_l), (v8i16)(in0_r));  \
   out1 = __msa_pckev_h((v8i16)(in1_l), (v8i16)(in1_r));  \
+}
+
+#define PCKEV_H_4VECS_SH(in0_l, in0_r, in1_l, in1_r,     \
+                         in2_l, in2_r, in3_l, in3_r,     \
+                         out0, out1, out2, out3) {       \
+  out0 = __msa_pckev_h((v8i16)(in0_l), (v8i16)(in0_r));  \
+  out1 = __msa_pckev_h((v8i16)(in1_l), (v8i16)(in1_r));  \
+  out2 = __msa_pckev_h((v8i16)(in2_l), (v8i16)(in2_r));  \
+  out3 = __msa_pckev_h((v8i16)(in3_l), (v8i16)(in3_r));  \
 }
 
 #define XORI_B_2VECS_UB(val0, val1,               \
