@@ -223,9 +223,6 @@ OBJS-yes += $(LIBVPX_OBJS)
 LIBS-$(if yes,$(CONFIG_STATIC)) += $(BUILD_PFX)libvpx.a $(BUILD_PFX)libvpx_g.a
 $(BUILD_PFX)libvpx_g.a: $(LIBVPX_OBJS)
 
-
-BUILD_LIBVPX_SO         := $(if yes,$(CONFIG_SHARED))
-
 SO_VERSION_MAJOR := 2
 SO_VERSION_MINOR := 0
 SO_VERSION_PATCH := 0
@@ -242,7 +239,7 @@ LIBVPX_SO_SYMLINKS      := $(addprefix $(LIBSUBDIR)/, \
                              libvpx.so.$(SO_VERSION_MAJOR).$(SO_VERSION_MINOR))
 endif
 
-LIBS-$(BUILD_LIBVPX_SO) += $(BUILD_PFX)$(LIBVPX_SO)\
+LIBS-$(CONFIG_SHARED) += $(BUILD_PFX)$(LIBVPX_SO)\
                            $(notdir $(LIBVPX_SO_SYMLINKS))
 $(BUILD_PFX)$(LIBVPX_SO): $(LIBVPX_OBJS) $(EXPORT_FILE)
 $(BUILD_PFX)$(LIBVPX_SO): extralibs += -lm
@@ -276,8 +273,8 @@ $(eval $(call libvpx_symlink_template,\
     $(LIBVPX_SO)))
 
 
-INSTALL-LIBS-$(BUILD_LIBVPX_SO) += $(LIBVPX_SO_SYMLINKS)
-INSTALL-LIBS-$(BUILD_LIBVPX_SO) += $(LIBSUBDIR)/$(LIBVPX_SO)
+INSTALL-LIBS-$(CONFIG_SHARED) += $(LIBVPX_SO_SYMLINKS)
+INSTALL-LIBS-$(CONFIG_SHARED) += $(LIBSUBDIR)/$(LIBVPX_SO)
 
 
 LIBS-yes += vpx.pc
