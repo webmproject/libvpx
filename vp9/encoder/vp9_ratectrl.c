@@ -1207,11 +1207,9 @@ static void update_golden_frame_stats(VP9_COMP *cpi) {
     // this frame refreshes means next frames don't unless specified by user
     rc->frames_since_golden = 0;
 
-    if (cpi->oxcf.pass == 2) {
-      if (!rc->source_alt_ref_pending &&
-          cpi->twopass.gf_group.rf_level[0] == GF_ARF_STD)
-      rc->source_alt_ref_active = 0;
-    } else if (!rc->source_alt_ref_pending) {
+    // If we are not using alt ref in the up and coming group clear the arf
+    // active flag.
+    if (!rc->source_alt_ref_pending) {
       rc->source_alt_ref_active = 0;
     }
 

@@ -1696,7 +1696,7 @@ static void allocate_gf_group_bits(VP9_COMP *cpi, int64_t gf_group_bits,
   mid_frame_idx = frame_index + (rc->baseline_gf_interval >> 1) - 1;
 
   // Allocate bits to the other frames in the group.
-  for (i = 0; i < rc->baseline_gf_interval - 1; ++i) {
+  for (i = 0; i < rc->baseline_gf_interval - rc->source_alt_ref_pending; ++i) {
     int arf_idx = 0;
     if (EOF == input_stats(twopass, &frame_stats))
       break;
@@ -1934,8 +1934,26 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   // Was the group length constrained by the requirement for a new KF?
   rc->constrained_gf_group = (i >= rc->frames_to_key) ? 1 : 0;
 
+  // Should we use the alternate reference frame.
+  if (allow_alt_ref &&
+    (i < cpi->oxcf.lag_in_frames) &&
+    (i >= rc->min_gf_interval)) {
+    // Calculate the boost for alt ref.
+    rc->gfu_boost = calc_arf_boost(cpi, 0, (i - 1), (i - 1), &f_boost,
+      &b_boost);
+    rc->source_alt_ref_pending = 1;
+
+    // Test to see if multi arf is appropriate.
+    cpi->multi_arf_enabled =
+      (cpi->multi_arf_allowed && (rc->baseline_gf_interval >= 6) &&
+      (zero_motion_accumulator < 0.995)) ? 1 : 0;
+  } else {
+    rc->gfu_boost = MAX((int)boost_score, MIN_ARF_GF_BOOST);
+    rc->source_alt_ref_pending = 0;
+  }
+
   // Set the interval until the next gf.
-  if (is_key_frame || rc->source_alt_ref_active)
+  if (is_key_frame || rc->source_alt_ref_pending)
     rc->baseline_gf_interval = i - 1;
   else
     rc->baseline_gf_interval = i;
@@ -1959,24 +1977,6 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
   }
 
   rc->frames_till_gf_update_due = rc->baseline_gf_interval;
-
-  // Should we use the alternate reference frame.
-  if (allow_alt_ref &&
-      (i < cpi->oxcf.lag_in_frames) &&
-      (i >= rc->min_gf_interval)) {
-    // Calculate the boost for alt ref.
-    rc->gfu_boost = calc_arf_boost(cpi, 0, (i - 1), (i - 1), &f_boost,
-                                   &b_boost);
-    rc->source_alt_ref_pending = 1;
-
-    // Test to see if multi arf is appropriate.
-    cpi->multi_arf_enabled =
-      (cpi->multi_arf_allowed && (rc->baseline_gf_interval >= 6) &&
-      (zero_motion_accumulator < 0.995)) ? 1 : 0;
-  } else {
-    rc->gfu_boost = MAX((int)boost_score, MIN_ARF_GF_BOOST);
-    rc->source_alt_ref_pending = 0;
-  }
 
   // Reset the file position.
   reset_fpf_position(twopass, start_pos);
