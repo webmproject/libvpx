@@ -22,6 +22,30 @@
       "revId": "556ff27e2e7ee34f1864da26ff6623a5e30580f7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eda6c9c2_e430e096",
+        "filename": "libs.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 242,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-05-14T19:23:50Z",
+      "side": 1,
+      "message": "I like this. It gets rid of the variable that isn\u0027t being used for anything else.",
+      "parentUuid": "8dc2ad55_5df5efff",
+      "range": {
+        "startLine": 242,
+        "startChar": 7,
+        "endLine": 242,
+        "endChar": 20
+      },
+      "revId": "556ff27e2e7ee34f1864da26ff6623a5e30580f7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
