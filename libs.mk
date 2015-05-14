@@ -34,12 +34,6 @@ endef
 CODEC_SRCS-yes += CHANGELOG
 CODEC_SRCS-yes += libs.mk
 
-# TODO(tomfinegan): Remove $BUILD_LIBVPX throughout. It's a vestigial piece of
-# universal Mac OS X build support from eons ago when universal meant fat
-# libraries containing PPC + X86. We now have build/make/iosbuild.sh that can
-# be used to build VPX.framework containing user selected targets instead.
-BUILD_LIBVPX := yes
-
 include $(SRC_PATH_BARE)/vpx/vpx_codec.mk
 CODEC_SRCS-yes += $(addprefix vpx/,$(call enabled,API_SRCS))
 CODEC_DOC_SRCS += $(addprefix vpx/,$(call enabled,API_DOC_SRCS))
@@ -139,18 +133,18 @@ INSTALL_MAPS += $(foreach p,$(VS_PLATFORMS),$(LIBSUBDIR)/$(p)/%  $(p)/Release/%)
 INSTALL_MAPS += $(foreach p,$(VS_PLATFORMS),$(LIBSUBDIR)/$(p)/%  $(p)/Debug/%)
 endif
 
-CODEC_SRCS-$(BUILD_LIBVPX) += build/make/version.sh
-CODEC_SRCS-$(BUILD_LIBVPX) += build/make/rtcd.pl
-CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/emmintrin_compat.h
-CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/mem_ops.h
-CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/mem_ops_aligned.h
-CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/vpx_once.h
-CODEC_SRCS-$(BUILD_LIBVPX) += $(BUILD_PFX)vpx_config.c
+CODEC_SRCS-yes += build/make/version.sh
+CODEC_SRCS-yes += build/make/rtcd.pl
+CODEC_SRCS-yes += vpx_ports/emmintrin_compat.h
+CODEC_SRCS-yes += vpx_ports/mem_ops.h
+CODEC_SRCS-yes += vpx_ports/mem_ops_aligned.h
+CODEC_SRCS-yes += vpx_ports/vpx_once.h
+CODEC_SRCS-yes += $(BUILD_PFX)vpx_config.c
 INSTALL-SRCS-no += $(BUILD_PFX)vpx_config.c
 ifeq ($(ARCH_X86)$(ARCH_X86_64),yes)
 INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += third_party/x86inc/x86inc.asm
 endif
-CODEC_EXPORTS-$(BUILD_LIBVPX) += vpx/exports_com
+CODEC_EXPORTS-yes += vpx/exports_com
 CODEC_EXPORTS-$(CONFIG_ENCODERS) += vpx/exports_enc
 CODEC_EXPORTS-$(CONFIG_DECODERS) += vpx/exports_dec
 
@@ -217,7 +211,7 @@ vpx.$(VCPROJ_SFX): $(CODEC_SRCS) vpx.def
             $(filter-out $(addprefix %, $(ASM_INCLUDES)), $^) \
             --src-path-bare="$(SRC_PATH_BARE)" \
 
-PROJECTS-$(BUILD_LIBVPX) += vpx.$(VCPROJ_SFX)
+PROJECTS-yes += vpx.$(VCPROJ_SFX)
 
 vpx.$(VCPROJ_SFX): vpx_config.asm
 vpx.$(VCPROJ_SFX): $(RTCD)
@@ -225,12 +219,12 @@ vpx.$(VCPROJ_SFX): $(RTCD)
 endif
 else
 LIBVPX_OBJS=$(call objs,$(CODEC_SRCS))
-OBJS-$(BUILD_LIBVPX) += $(LIBVPX_OBJS)
-LIBS-$(if $(BUILD_LIBVPX),$(CONFIG_STATIC)) += $(BUILD_PFX)libvpx.a $(BUILD_PFX)libvpx_g.a
+OBJS-yes += $(LIBVPX_OBJS)
+LIBS-$(if yes,$(CONFIG_STATIC)) += $(BUILD_PFX)libvpx.a $(BUILD_PFX)libvpx_g.a
 $(BUILD_PFX)libvpx_g.a: $(LIBVPX_OBJS)
 
 
-BUILD_LIBVPX_SO         := $(if $(BUILD_LIBVPX),$(CONFIG_SHARED))
+BUILD_LIBVPX_SO         := $(if yes,$(CONFIG_SHARED))
 
 SO_VERSION_MAJOR := 2
 SO_VERSION_MINOR := 0
@@ -286,7 +280,7 @@ INSTALL-LIBS-$(BUILD_LIBVPX_SO) += $(LIBVPX_SO_SYMLINKS)
 INSTALL-LIBS-$(BUILD_LIBVPX_SO) += $(LIBSUBDIR)/$(LIBVPX_SO)
 
 
-LIBS-$(BUILD_LIBVPX) += vpx.pc
+LIBS-yes += vpx.pc
 vpx.pc: config.mk libs.mk
 	@echo "    [CREATE] $@"
 	$(qexec)echo '# pkg-config file from libvpx $(VERSION_STRING)' > $@
@@ -431,15 +425,15 @@ $(GTEST_OBJS) $(GTEST_OBJS:.o=.d): CXXFLAGS += -DGTEST_HAS_PTHREAD=0
 endif
 $(GTEST_OBJS) $(GTEST_OBJS:.o=.d): CXXFLAGS += -I$(SRC_PATH_BARE)/third_party/googletest/src
 $(GTEST_OBJS) $(GTEST_OBJS:.o=.d): CXXFLAGS += -I$(SRC_PATH_BARE)/third_party/googletest/src/include
-OBJS-$(BUILD_LIBVPX) += $(GTEST_OBJS)
-LIBS-$(BUILD_LIBVPX) += $(BUILD_PFX)libgtest.a $(BUILD_PFX)libgtest_g.a
+OBJS-yes += $(GTEST_OBJS)
+LIBS-yes += $(BUILD_PFX)libgtest.a $(BUILD_PFX)libgtest_g.a
 $(BUILD_PFX)libgtest_g.a: $(GTEST_OBJS)
 
 LIBVPX_TEST_OBJS=$(sort $(call objs,$(LIBVPX_TEST_SRCS)))
 $(LIBVPX_TEST_OBJS) $(LIBVPX_TEST_OBJS:.o=.d): CXXFLAGS += -I$(SRC_PATH_BARE)/third_party/googletest/src
 $(LIBVPX_TEST_OBJS) $(LIBVPX_TEST_OBJS:.o=.d): CXXFLAGS += -I$(SRC_PATH_BARE)/third_party/googletest/src/include
-OBJS-$(BUILD_LIBVPX) += $(LIBVPX_TEST_OBJS)
-BINS-$(BUILD_LIBVPX) += $(LIBVPX_TEST_BIN)
+OBJS-yes += $(LIBVPX_TEST_OBJS)
+BINS-yes += $(LIBVPX_TEST_BIN)
 
 CODEC_LIB=$(if $(CONFIG_DEBUG_LIBS),vpx_g,vpx)
 CODEC_LIB_SUF=$(if $(CONFIG_SHARED),.so,.a)
