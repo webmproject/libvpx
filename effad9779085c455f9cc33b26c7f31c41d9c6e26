@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eda6c9c2_c768396a",
+        "filename": "libs.mk",
+        "patchSetId": 7
+      },
+      "lineNbr": 472,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-05-14T23:19:16Z",
+      "side": 1,
+      "message": "TEST_LIBS got lost in the rebase...",
+      "revId": "effad9779085c455f9cc33b26c7f31c41d9c6e26",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
