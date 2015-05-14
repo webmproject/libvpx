@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8dc2ad55_5df5efff",
+        "filename": "libs.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 242,
+      "author": {
+        "id": 1002431
+      },
+      "writtenOn": "2015-05-14T19:20:57Z",
+      "side": 1,
+      "message": "So, like this, or should I just go the less noisy route and do BUILD_LIBVPX_SO :\u003d $(CONFIG_SHARED) up above?",
+      "range": {
+        "startLine": 242,
+        "startChar": 7,
+        "endLine": 242,
+        "endChar": 20
+      },
+      "revId": "556ff27e2e7ee34f1864da26ff6623a5e30580f7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
