@@ -24,8 +24,27 @@
 #include "vpx/vpx_integer.h"
 #include "vpx_ports/mem.h"
 
+using libvpx_test::ACMRandom;
+
+namespace {
+
 const int kNumCoeffs = 64;
 const double kPi = 3.141592653589793238462643383279502884;
+
+const int kSignBiasMaxDiff255 = 1500;
+const int kSignBiasMaxDiff15 = 10000;
+
+typedef void (*FdctFunc)(const int16_t *in, tran_low_t *out, int stride);
+typedef void (*IdctFunc)(const tran_low_t *in, uint8_t *out, int stride);
+typedef void (*FhtFunc)(const int16_t *in, tran_low_t *out, int stride,
+                        int tx_type);
+typedef void (*IhtFunc)(const tran_low_t *in, uint8_t *out, int stride,
+                        int tx_type);
+
+typedef std::tr1::tuple<FdctFunc, IdctFunc, int, vpx_bit_depth_t> Dct8x8Param;
+typedef std::tr1::tuple<FhtFunc, IhtFunc, int, vpx_bit_depth_t> Ht8x8Param;
+typedef std::tr1::tuple<IdctFunc, IdctFunc, int, vpx_bit_depth_t> Idct8x8Param;
+
 void reference_8x8_dct_1d(const double in[8], double out[8], int stride) {
   const double kInvSqrt2 = 0.707106781186547524400844362104;
   for (int k = 0; k < 8; k++) {
@@ -60,23 +79,6 @@ void reference_8x8_dct_2d(const int16_t input[kNumCoeffs],
   }
 }
 
-using libvpx_test::ACMRandom;
-
-namespace {
-
-const int kSignBiasMaxDiff255 = 1500;
-const int kSignBiasMaxDiff15 = 10000;
-
-typedef void (*FdctFunc)(const int16_t *in, tran_low_t *out, int stride);
-typedef void (*IdctFunc)(const tran_low_t *in, uint8_t *out, int stride);
-typedef void (*FhtFunc)(const int16_t *in, tran_low_t *out, int stride,
-                        int tx_type);
-typedef void (*IhtFunc)(const tran_low_t *in, uint8_t *out, int stride,
-                        int tx_type);
-
-typedef std::tr1::tuple<FdctFunc, IdctFunc, int, vpx_bit_depth_t> Dct8x8Param;
-typedef std::tr1::tuple<FhtFunc, IhtFunc, int, vpx_bit_depth_t> Ht8x8Param;
-typedef std::tr1::tuple<IdctFunc, IdctFunc, int, vpx_bit_depth_t> Idct8x8Param;
 
 void fdct8x8_ref(const int16_t *in, tran_low_t *out, int stride, int tx_type) {
   vp9_fdct8x8_c(in, out, stride);
