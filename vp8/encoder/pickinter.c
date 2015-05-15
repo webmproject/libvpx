@@ -29,16 +29,12 @@
 #include "denoising.h"
 #endif
 
-extern int VP8_UVSSE(MACROBLOCK *x);
-
 #ifdef SPEEDSTATS
 extern unsigned int cnt_pm;
 #endif
 
 extern const int vp8_ref_frame_order[MAX_MODES];
 extern const MB_PREDICTION_MODE vp8_mode_order[MAX_MODES];
-
-extern int vp8_cost_mv_ref(MB_PREDICTION_MODE m, const int near_mv_ref_ct[4]);
 
 // Fixed point implementation of a skin color classifier. Skin color
 // is model by a Gaussian distribution in the CbCr color space.
