@@ -969,7 +969,7 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
   specialize qw/vp9_highbd_avg_8x8/;
   add_proto qw/unsigned int vp9_highbd_avg_4x4/, "const uint8_t *, int p";
   specialize qw/vp9_highbd_avg_4x4/;
-  add_proto qw/unsigned int vp9_highbd_minmax_8x8/, "const uint8_t *s, int p, const uint8_t *d, int dp, int *min, int *max";
+  add_proto qw/void vp9_highbd_minmax_8x8/, "const uint8_t *s, int p, const uint8_t *d, int dp, int *min, int *max";
   specialize qw/vp9_highbd_minmax_8x8/;
 }
 

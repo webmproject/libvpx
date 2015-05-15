@@ -10,6 +10,8 @@
 
 #include <assert.h>
 #include <emmintrin.h>  // SSE2
+
+#include "./vp9_rtcd.h"
 #include "vp9/common/vp9_idct.h"  // for cospi constants
 #include "vp9/encoder/vp9_dct.h"
 #include "vp9/encoder/x86/vp9_dct_sse2.h"
@@ -2334,7 +2336,7 @@ void vp9_highbd_fht8x8_sse2(const int16_t *input, tran_low_t *output,
   }
 }
 
-void vp9_highbd_fht16x16_sse2(int16_t *input, tran_low_t *output,
+void vp9_highbd_fht16x16_sse2(const int16_t *input, tran_low_t *output,
                               int stride, int tx_type) {
   if (tx_type == DCT_DCT) {
     vp9_highbd_fdct16x16_sse2(input, output, stride);

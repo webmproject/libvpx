@@ -9,6 +9,8 @@
  */
 
 #include <emmintrin.h>
+
+#include "./vp9_rtcd.h"
 #include "vpx_ports/mem.h"
 
 void vp9_minmax_8x8_sse2(const uint8_t *s, int p, const uint8_t *d, int dp,

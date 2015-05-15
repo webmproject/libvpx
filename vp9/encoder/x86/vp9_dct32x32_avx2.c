@@ -9,6 +9,8 @@
  */
 
 #include <immintrin.h>  // AVX2
+
+#include "./vp9_rtcd.h"
 #include "vp9/common/vp9_idct.h"  // for cospi constants
 #include "vpx_ports/mem.h"
 

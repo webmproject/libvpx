@@ -11,6 +11,7 @@
 #include <emmintrin.h>
 #include <xmmintrin.h>
 
+#include "./vp9_rtcd.h"
 #include "vpx/vpx_integer.h"
 
 void vp9_quantize_b_sse2(const int16_t* coeff_ptr, intptr_t n_coeffs,
