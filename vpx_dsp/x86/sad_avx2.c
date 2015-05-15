@@ -8,6 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 #include <immintrin.h>
+#include "./vpx_dsp_rtcd.h"
 #include "vpx_ports/mem.h"
 
 #define FSAD64_H(h) \
