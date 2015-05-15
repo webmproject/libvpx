@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cd8d8546_d6f466d5",
+        "filename": "vp8/common/variance.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-05-15T05:40:14Z",
+      "side": 1,
+      "message": "this belongs in the previous commit",
+      "revId": "d1367d0ea64fc662610c32359de731e494bf42d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
