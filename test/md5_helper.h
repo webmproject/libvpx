@@ -42,6 +42,10 @@ class MD5 {
     }
   }
 
+  void Add(const uint8_t *data, size_t size) {
+    MD5Update(&md5_, data, size);
+  }
+
   const char *Get(void) {
     static const char hex[16] = {
       '0', '1', '2', '3', '4', '5', '6', '7',
