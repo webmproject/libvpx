@@ -9,8 +9,9 @@
  */
 
 
-#include "variance.h"
+#include "./vp8_rtcd.h"
 #include "filter.h"
+#include "variance.h"
 
 
 unsigned int vp8_get_mb_ss_c
