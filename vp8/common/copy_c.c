@@ -11,11 +11,11 @@
 
 #include <string.h>
 
-#include "vpx_config.h"
+#include "./vp8_rtcd.h"
 #include "vpx/vpx_integer.h"
 
 /* Copy 2 macroblocks to a buffer */
-void vp8_copy32xn_c(unsigned char *src_ptr, int src_stride,
+void vp8_copy32xn_c(const unsigned char *src_ptr, int src_stride,
                     unsigned char *dst_ptr, int dst_stride,
                     int height)
 {

@@ -333,7 +333,7 @@ specialize qw/vp8_get4x4sse_cs mmx neon/;
 # Block copy
 #
 if ($opts{arch} =~ /x86/) {
-    add_proto qw/void vp8_copy32xn/, "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, int n";
+    add_proto qw/void vp8_copy32xn/, "const unsigned char *src_ptr, int source_stride, unsigned char *dst_ptr, int dst_stride, int n";
     specialize qw/vp8_copy32xn sse2 sse3/;
 }
 
