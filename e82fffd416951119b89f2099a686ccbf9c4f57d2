@@ -16,6 +16,24 @@
       "revId": "e82fffd416951119b89f2099a686ccbf9c4f57d2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0da4fdb8_a8dce198",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2074,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2015-05-15T20:06:48Z",
+      "side": 1,
+      "message": "This is roughly how the code was before the rowtile patch. I just kept the same framework.",
+      "parentUuid": "eda6c9c2_aa4f7515",
+      "revId": "e82fffd416951119b89f2099a686ccbf9c4f57d2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
