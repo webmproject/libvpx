@@ -357,7 +357,7 @@ void vp9_cyclic_refresh_check_golden_update(VP9_COMP *const cpi) {
 // 1/CR_SEGMENT_ID_BOOST1 (refresh) for each superblock.
 // Blocks labeled as BOOST1 may later get set to BOOST2 (during the
 // encoding of the superblock).
-void vp9_cyclic_refresh_update_map(VP9_COMP *const cpi) {
+static void cyclic_refresh_update_map(VP9_COMP *const cpi) {
   VP9_COMMON *const cm = &cpi->common;
   CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
   unsigned char *const seg_map = cpi->segmentation_map;
@@ -510,7 +510,7 @@ void vp9_cyclic_refresh_setup(VP9_COMP *const cpi) {
     vp9_set_segdata(seg, CR_SEGMENT_ID_BOOST2, SEG_LVL_ALT_Q, qindex_delta);
 
     // Update the segmentation and refresh map.
-    vp9_cyclic_refresh_update_map(cpi);
+    cyclic_refresh_update_map(cpi);
   }
 }
 
