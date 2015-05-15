@@ -8,8 +8,8 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#ifndef VP9_ENCODER_VP9_MOTIONMODEL_H_
-#define VP9_ENCODER_VP9_MOTIONMODEL_H_
+#ifndef VP9_ENCODER_VP9_MOTION_FIELD_H_
+#define VP9_ENCODER_VP9_MOTION_FIELD_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,4 +34,4 @@ void vp9_get_ref_motionfield(struct VP9_COMP *cpi,
 }  // extern "C"
 #endif
 
-#endif  // VP9_ENCODER_VP9_MOTIONMODEL_H_
+#endif  // VP9_ENCODER_VP9_MOTION_FIELD_H_

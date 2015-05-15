@@ -1194,13 +1194,18 @@ void vp9_setup_src_planes(MACROBLOCK *x, const YV12_BUFFER_CONFIG *src,
                           int mi_row, int mi_col) {
   uint8_t *const buffers[3] = {src->y_buffer, src->u_buffer, src->v_buffer };
   const int strides[3] = {src->y_stride, src->uv_stride, src->uv_stride };
+  const int widths[3] = {src->y_crop_width, src->uv_crop_width,
+                        src->uv_crop_width};
+  const int heights[3] = {src->y_crop_height, src->uv_crop_height,
+                          src->uv_crop_height};
   int i;
 
   // Set current frame pointer.
   x->e_mbd.cur_buf = src;
 
   for (i = 0; i < MAX_MB_PLANE; i++)
-    setup_pred_plane(&x->plane[i].src, buffers[i], strides[i], mi_row, mi_col,
+    setup_pred_plane(&x->plane[i].src, widths[i], heights[i],
+                     buffers[i], strides[i], mi_row, mi_col,
                      NULL, x->e_mbd.plane[i].subsampling_x,
                      x->e_mbd.plane[i].subsampling_y);
 }
@@ -4588,7 +4593,7 @@ static int input_fpmb_stats(FIRSTPASS_MB_STATS *firstpass_mb_stats,
 #endif
 
 #if CONFIG_GLOBAL_MOTION
-#define MIN_TRANSLATION_THRESH  4
+#define MIN_TRANSLATION_THRESH 16
 static void convert_translation_to_params(
     double *H, Global_Motion_Params *model) {
   model->mv.as_mv.col = (int) floor(H[0] * 8 + 0.5);
@@ -4632,6 +4637,7 @@ static void convert_model_to_params(double *H, TransformationType type,
     default:
       break;
   }
+  model->gmtype = get_gmtype(model);
 }
 #endif  // CONFIG_GLOBAL_MOTION
 
@@ -4660,7 +4666,9 @@ static void encode_frame_internal(VP9_COMP *cpi) {
   cm->tx_mode = select_tx_mode(cpi);
 
 #if CONFIG_GLOBAL_MOTION
-#define GLOBAL_MOTION_MODEL   TRANSLATION
+#define GLOBAL_MOTION_MODEL TRANSLATION
+// #define USE_BLOCK_BASED_GLOBAL_MOTION_COMPUTATION
+  vp9_clear_system_state();
   vp9_zero(cpi->global_motion_used);
   vpx_memset(cm->num_global_motion, 0, sizeof(cm->num_global_motion));
   cm->num_global_motion[LAST_FRAME] = 1;
@@ -4674,28 +4682,33 @@ static void encode_frame_internal(VP9_COMP *cpi) {
       ref_buf = get_ref_frame_buffer(cpi, frame);
       if (ref_buf) {
         if ((num =
+#ifdef USE_BLOCK_BASED_GLOBAL_MOTION_COMPUTATION
              vp9_compute_global_motion_multiple_block_based(
                  cpi, GLOBAL_MOTION_MODEL, cpi->Source, ref_buf,
                  BLOCK_16X16, MAX_GLOBAL_MOTION_MODELS, 0.5, global_motion))) {
-          /*
+#else
              vp9_compute_global_motion_multiple_feature_based(
                  cpi, GLOBAL_MOTION_MODEL, cpi->Source, ref_buf,
                  MAX_GLOBAL_MOTION_MODELS, 0.5, global_motion))) {
-                 */
+#endif
           int i;
           for (i = 0; i < num; i++) {
+            /*
+            printf("Ref %d [%d]: %f %f\n",
+                   frame, cm->current_video_frame,
+                   global_motion[i * get_numparams(GLOBAL_MOTION_MODEL)],
+                   global_motion[i * get_numparams(GLOBAL_MOTION_MODEL) + 1]);
+                   */
             convert_model_to_params(
                 global_motion + i * get_numparams(GLOBAL_MOTION_MODEL),
                 GLOBAL_MOTION_MODEL,
                 &cm->global_motion[frame][i]);
-            /*
             printf("Ref %d [%d]: %d %d %d %d\n",
                    frame, cm->current_video_frame,
                    cm->global_motion[frame][i].zoom,
                    cm->global_motion[frame][i].rotation,
                    cm->global_motion[frame][i].mv.as_mv.col,
                    cm->global_motion[frame][i].mv.as_mv.row);
-                   */
           }
           cm->num_global_motion[frame] = num;
         }

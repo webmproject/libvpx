@@ -58,14 +58,18 @@ static INLINE int scaled_buffer_offset(int x_offset, int y_offset, int stride,
 }
 
 static INLINE void setup_pred_plane(struct buf_2d *dst,
+                                    int width, int height,
                                     uint8_t *src, int stride,
                                     int mi_row, int mi_col,
                                     const struct scale_factors *scale,
                                     int subsampling_x, int subsampling_y) {
   const int x = (MI_SIZE * mi_col) >> subsampling_x;
   const int y = (MI_SIZE * mi_row) >> subsampling_y;
+  dst->buf0 = src;
   dst->buf = src + scaled_buffer_offset(x, y, stride, scale);
   dst->stride = stride;
+  dst->width = width;
+  dst->height = height;
 }
 
 void vp9_setup_dst_planes(struct macroblockd_plane planes[MAX_MB_PLANE],

@@ -2474,6 +2474,7 @@ static void read_global_motion_params(Global_Motion_Params *params,
                                       vp9_reader *r) {
   GLOBAL_MOTION_TYPE gmtype = vp9_read_tree(r, vp9_global_motion_types_tree,
                                             probs);
+  params->gmtype = gmtype;
   switch (gmtype) {
     case GLOBAL_ZERO:
       break;
@@ -2748,6 +2749,9 @@ void vp9_decode_frame(VP9Decoder *pbi,
   const int tile_cols = 1 << cm->log2_tile_cols;
   YV12_BUFFER_CONFIG *const new_fb = get_frame_new_buffer(cm);
   xd->cur_buf = new_fb;
+#if CONFIG_GLOBAL_MOTION
+  xd->global_motion = cm->global_motion;
+#endif  // CONFIG_GLOBAL_MOTION
 
   if (!first_partition_size) {
     // showing a frame directly

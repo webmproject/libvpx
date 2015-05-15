@@ -48,6 +48,40 @@ static INLINE void clamp_mv(MV *mv, int min_col, int max_col,
   mv->row = clamp(mv->row, min_row, max_row);
 }
 
+#if CONFIG_GLOBAL_MOTION
+#define MAX_GLOBAL_MOTION_MODELS  1
+
+#define ZOOM_PRECISION_BITS       6
+#define ROTATION_PRECISION_BITS   4
+
+#define ABS_ZOOM_BITS             3
+#define ABS_ROTATION_BITS         4
+#define ABS_TRANSLATION_BITS      7
+
+typedef enum {
+  GLOBAL_ZERO = 0,
+  GLOBAL_TRANSLATION = 1,
+  GLOBAL_ROTZOOM = 2,
+  GLOBAL_MOTION_TYPES
+} GLOBAL_MOTION_TYPE;
+
+// Currently this is specialized for rotzoom model only
+typedef struct {
+  GLOBAL_MOTION_TYPE gmtype;
+  int rotation;   // positive or negative rotation angle in degrees
+  int zoom;       // this is actually the zoom multiplier minus 1
+  int_mv mv;
+} Global_Motion_Params;
+
+static INLINE GLOBAL_MOTION_TYPE get_gmtype(Global_Motion_Params *gm) {
+  if (gm->rotation == 0 && gm->zoom == 0) {
+    return (gm->mv.as_int == 0 ? GLOBAL_ZERO : GLOBAL_TRANSLATION);
+  } else {
+    return GLOBAL_ROTZOOM;
+  }
+}
+#endif  // CONFIG_GLOBAL_MOTION
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif

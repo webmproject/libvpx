@@ -132,47 +132,6 @@ static const vp9_prob default_global_motion_types_prob
   // Currently only translation is used, so make the second prob very high.
   240, 255
 };
-
-static void convert_params_to_rotzoom(double *H, Global_Motion_Params *model) {
-  double z = 1.0 + (double) model->zoom / (1 << ZOOM_PRECISION_BITS);
-  double r = (double) model->rotation / (1 << ROTATION_PRECISION_BITS);
-  H[0] =  (1 + z) * cos(r * M_PI / 180.0);
-  H[1] = -(1 + z) * sin(r * M_PI / 180.0);
-  H[2] = (double) model->mv.as_mv.col / 8.0;
-  H[3] = (double) model->mv.as_mv.row / 8.0;
-}
-
-static int_mv get_global_mv(int col, int row, Global_Motion_Params *model) {
-  int_mv mv;
-  double H[4];
-  double x, y;
-  convert_params_to_rotzoom(H, model);
-  x =  H[0] * col + H[1] * row + H[2];
-  y = -H[1] * col + H[0] * row + H[3];
-  mv.as_mv.col = (int)floor(x * 8 + 0.5) - col;
-  mv.as_mv.row = (int)floor(y * 8 + 0.5) - row;
-  return mv;
-}
-
-int_mv vp9_get_global_sb_center_mv(int col, int row, BLOCK_SIZE bsize,
-                                   Global_Motion_Params *model) {
-  col += num_4x4_blocks_wide_lookup[bsize] * 2;
-  row += num_4x4_blocks_high_lookup[bsize] * 2;
-  return get_global_mv(col, row, model);
-}
-
-int_mv vp9_get_global_sub8x8_center_mv(int col, int row, int block,
-                                       Global_Motion_Params *model) {
-  if (block == 0 || block == 2)
-    col += 2;
-  else
-    col += 6;
-  if (block == 0 || block == 1)
-    row += 2;
-  else
-    row += 6;
-  return get_global_mv(col, row, model);
-}
 #endif  // CONFIG_GLOBAL_MOTION
 
 static INLINE int mv_class_base(MV_CLASS_TYPE c) {

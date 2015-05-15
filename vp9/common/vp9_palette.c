@@ -270,7 +270,7 @@ static const int palette_color_context_lookup[PALETTE_COLOR_CONTEXTS] = {
 int vp9_get_palette_color_context(const uint8_t *color_map, int cols,
                                   int r, int c, int n, int *color_order) {
   int i, j, max, max_idx, temp;
-  int scores[PALETTE_MAX_SIZE];
+  int scores[PALETTE_MAX_SIZE + 10];
   int weights[4] = {3, 2, 3, 2};
   int color_ctx = 0;
   int color_neighbors[4];
