@@ -937,7 +937,8 @@ static vpx_codec_err_t ctrl_get_frame_corrupted(vpx_codec_alg_priv_t *ctx,
           frame_worker_data->pbi->common.buffer_pool->frame_bufs;
       if (frame_worker_data->pbi->common.frame_to_show == NULL)
         return VPX_CODEC_ERROR;
-      *corrupted = frame_bufs[ctx->last_show_frame].buf.corrupted;
+      if (ctx->last_show_frame >= 0)
+        *corrupted = frame_bufs[ctx->last_show_frame].buf.corrupted;
       return VPX_CODEC_OK;
     } else {
       return VPX_CODEC_ERROR;
