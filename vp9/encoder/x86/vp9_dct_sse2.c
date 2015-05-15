@@ -2370,7 +2370,7 @@ void vp9_highbd_fht16x16_sse2(const int16_t *input, tran_low_t *output,
 
 /*
  * The DCTnxn functions are defined using the macros below. The main code for
- * them is in separate files (vp9/encoder/x86/vp9_dct_impl_sse2.c &
+ * them is in separate files (vp9/encoder/x86/vp9_dct_sse2_impl.h &
  * vp9/encoder/x86/vp9_dct32x32_sse2_impl.h) which are used by both the 8 bit code
  * and the high bit depth code.
  */
@@ -2380,7 +2380,7 @@ void vp9_highbd_fht16x16_sse2(const int16_t *input, tran_low_t *output,
 #define FDCT4x4_2D vp9_fdct4x4_sse2
 #define FDCT8x8_2D vp9_fdct8x8_sse2
 #define FDCT16x16_2D vp9_fdct16x16_sse2
-#include "vp9/encoder/x86/vp9_dct_impl_sse2.c"
+#include "vp9/encoder/x86/vp9_dct_sse2_impl.h"
 #undef  FDCT4x4_2D
 #undef  FDCT8x8_2D
 #undef  FDCT16x16_2D
@@ -2407,7 +2407,7 @@ void vp9_highbd_fht16x16_sse2(const int16_t *input, tran_low_t *output,
 #define FDCT4x4_2D vp9_highbd_fdct4x4_sse2
 #define FDCT8x8_2D vp9_highbd_fdct8x8_sse2
 #define FDCT16x16_2D vp9_highbd_fdct16x16_sse2
-#include "vp9/encoder/x86/vp9_dct_impl_sse2.c" // NOLINT
+#include "vp9/encoder/x86/vp9_dct_sse2_impl.h" // NOLINT
 #undef  FDCT4x4_2D
 #undef  FDCT8x8_2D
 #undef  FDCT16x16_2D
