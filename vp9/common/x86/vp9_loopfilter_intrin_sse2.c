@@ -9,6 +9,8 @@
  */
 
 #include <emmintrin.h>  // SSE2
+
+#include "./vp9_rtcd.h"
 #include "vp9/common/vp9_loopfilter.h"
 #include "vpx_ports/emmintrin_compat.h"
 

@@ -152,7 +152,7 @@ int vp9_estimate_bits_at_q(FRAME_TYPE frame_kind, int q, int mbs,
 
 double vp9_convert_qindex_to_q(int qindex, vpx_bit_depth_t bit_depth);
 
-void vp9_rc_init_minq_luts();
+void vp9_rc_init_minq_luts(void);
 
 // Generally at the high level, the following flow is expected
 // to be enforced for rate control:

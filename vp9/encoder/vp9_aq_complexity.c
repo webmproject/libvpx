@@ -11,6 +11,7 @@
 #include <limits.h>
 #include <math.h>
 
+#include "vp9/encoder/vp9_aq_complexity.h"
 #include "vp9/encoder/vp9_aq_variance.h"
 #include "vp9/encoder/vp9_encodeframe.h"
 #include "vp9/common/vp9_seg_common.h"

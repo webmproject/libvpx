@@ -361,7 +361,7 @@ static void get_variance(var *v) {
       ((v->sum_error * v->sum_error) >> v->log2_count)) >> v->log2_count);
 }
 
-void sum_2_variances(const var *a, const var *b, var *r) {
+static void sum_2_variances(const var *a, const var *b, var *r) {
   assert(a->log2_count == b->log2_count);
   fill_variance(a->sum_square_error + b->sum_square_error,
                 a->sum_error + b->sum_error, a->log2_count + 1, r);

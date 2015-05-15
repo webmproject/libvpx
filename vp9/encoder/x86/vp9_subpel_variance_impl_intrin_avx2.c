@@ -9,6 +9,8 @@
  */
 
 #include <immintrin.h>  // AVX2
+
+#include "./vp9_rtcd.h"
 #include "vpx_ports/mem.h"
 #include "vp9/encoder/vp9_variance.h"
 

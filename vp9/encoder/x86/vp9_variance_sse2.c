@@ -10,14 +10,15 @@
 
 #include <emmintrin.h>  // SSE2
 
+#include "./vp9_rtcd.h"
 #include "./vpx_config.h"
 
 #include "vp9/encoder/vp9_variance.h"
 #include "vpx_ports/mem.h"
 
-typedef unsigned int (*variance_fn_t) (const unsigned char *src, int src_stride,
-                                       const unsigned char *ref, int ref_stride,
-                                       unsigned int *sse, int *sum);
+typedef void (*variance_fn_t)(const unsigned char *src, int src_stride,
+                              const unsigned char *ref, int ref_stride,
+                              unsigned int *sse, int *sum);
 
 unsigned int vp9_get_mb_ss_sse2(const int16_t *src) {
   __m128i vsum = _mm_setzero_si128();
@@ -38,9 +39,9 @@ unsigned int vp9_get_mb_ss_sse2(const int16_t *src) {
   _mm_unpacklo_epi8(_mm_cvtsi32_si128(*(const uint32_t *)(p + i * stride)), \
       _mm_cvtsi32_si128(*(const uint32_t *)(p + (i + 1) * stride)))
 
-unsigned int vp9_get4x4var_sse2(const uint8_t *src, int src_stride,
-                                const uint8_t *ref, int ref_stride,
-                                unsigned int *sse, int *sum) {
+static void get4x4var_sse2(const uint8_t *src, int src_stride,
+                           const uint8_t *ref, int ref_stride,
+                           unsigned int *sse, int *sum) {
   const __m128i zero = _mm_setzero_si128();
   const __m128i src0 = _mm_unpacklo_epi8(READ64(src, src_stride, 0), zero);
   const __m128i src1 = _mm_unpacklo_epi8(READ64(src, src_stride, 2), zero);
@@ -62,13 +63,11 @@ unsigned int vp9_get4x4var_sse2(const uint8_t *src, int src_stride,
   vsum = _mm_add_epi32(vsum, _mm_srli_si128(vsum, 8));
   vsum = _mm_add_epi32(vsum, _mm_srli_si128(vsum, 4));
   *sse = _mm_cvtsi128_si32(vsum);
-
-  return 0;
 }
 
-unsigned int vp9_get8x8var_sse2(const uint8_t *src, int src_stride,
-                                const uint8_t *ref, int ref_stride,
-                                unsigned int *sse, int *sum) {
+void vp9_get8x8var_sse2(const uint8_t *src, int src_stride,
+                        const uint8_t *ref, int ref_stride,
+                        unsigned int *sse, int *sum) {
   const __m128i zero = _mm_setzero_si128();
   __m128i vsum = _mm_setzero_si128();
   __m128i vsse = _mm_setzero_si128();
@@ -103,13 +102,11 @@ unsigned int vp9_get8x8var_sse2(const uint8_t *src, int src_stride,
   vsse = _mm_add_epi32(vsse, _mm_srli_si128(vsse, 8));
   vsse = _mm_add_epi32(vsse, _mm_srli_si128(vsse, 4));
   *sse = _mm_cvtsi128_si32(vsse);
-
-  return 0;
 }
 
-unsigned int vp9_get16x16var_sse2(const uint8_t *src, int src_stride,
-                                  const uint8_t *ref, int ref_stride,
-                                  unsigned int *sse, int *sum) {
+void vp9_get16x16var_sse2(const uint8_t *src, int src_stride,
+                          const uint8_t *ref, int ref_stride,
+                          unsigned int *sse, int *sum) {
   const __m128i zero = _mm_setzero_si128();
   __m128i vsum = _mm_setzero_si128();
   __m128i vsse = _mm_setzero_si128();
@@ -146,8 +143,6 @@ unsigned int vp9_get16x16var_sse2(const uint8_t *src, int src_stride,
   vsse = _mm_add_epi32(vsse, _mm_srli_si128(vsse, 8));
   vsse = _mm_add_epi32(vsse, _mm_srli_si128(vsse, 4));
   *sse = _mm_cvtsi128_si32(vsse);
-
-  return 0;
 }
 
 
@@ -176,7 +171,7 @@ unsigned int vp9_variance4x4_sse2(const unsigned char *src, int src_stride,
                                   const unsigned char *ref, int ref_stride,
                                   unsigned int *sse) {
   int sum;
-  vp9_get4x4var_sse2(src, src_stride, ref, ref_stride, sse, &sum);
+  get4x4var_sse2(src, src_stride, ref, ref_stride, sse, &sum);
   return *sse - (((unsigned int)sum * sum) >> 4);
 }
 
@@ -185,7 +180,7 @@ unsigned int vp9_variance8x4_sse2(const uint8_t *src, int src_stride,
                                   unsigned int *sse) {
   int sum;
   variance_sse2(src, src_stride, ref, ref_stride, 8, 4,
-                sse, &sum, vp9_get4x4var_sse2, 4);
+                sse, &sum, get4x4var_sse2, 4);
   return *sse - (((unsigned int)sum * sum) >> 5);
 }
 
@@ -194,7 +189,7 @@ unsigned int vp9_variance4x8_sse2(const uint8_t *src, int src_stride,
                                   unsigned int *sse) {
   int sum;
   variance_sse2(src, src_stride, ref, ref_stride, 4, 8,
-                sse, &sum, vp9_get4x4var_sse2, 4);
+                sse, &sum, get4x4var_sse2, 4);
   return *sse - (((unsigned int)sum * sum) >> 5);
 }
 

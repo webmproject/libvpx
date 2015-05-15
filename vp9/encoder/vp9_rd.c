@@ -129,7 +129,7 @@ static void init_me_luts_bd(int *bit16lut, int *bit4lut, int range,
   }
 }
 
-void vp9_init_me_luts() {
+void vp9_init_me_luts(void) {
   init_me_luts_bd(sad_per_bit16lut_8, sad_per_bit4lut_8, QINDEX_RANGE,
                   VPX_BITS_8);
 #if CONFIG_VP9_HIGHBITDEPTH

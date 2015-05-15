@@ -1867,14 +1867,15 @@ static void extend_and_predict(const uint8_t *buf_ptr1, int pre_buf_stride,
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-void dec_build_inter_predictors(VP9Decoder *const pbi, MACROBLOCKD *xd,
-                                int plane, int bw, int bh, int x,
-                                int y, int w, int h, int mi_x, int mi_y,
-                                const InterpKernel *kernel,
-                                const struct scale_factors *sf,
-                                struct buf_2d *pre_buf, struct buf_2d *dst_buf,
-                                const MV* mv, RefCntBuffer *ref_frame_buf,
-                                int is_scaled, int ref) {
+static void dec_build_inter_predictors(VP9Decoder *const pbi, MACROBLOCKD *xd,
+                                       int plane, int bw, int bh, int x,
+                                       int y, int w, int h, int mi_x, int mi_y,
+                                       const InterpKernel *kernel,
+                                       const struct scale_factors *sf,
+                                       struct buf_2d *pre_buf,
+                                       struct buf_2d *dst_buf, const MV* mv,
+                                       RefCntBuffer *ref_frame_buf,
+                                       int is_scaled, int ref) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
   uint8_t *const dst = dst_buf->buf + dst_buf->stride * y + x;
   MV32 scaled_mv;

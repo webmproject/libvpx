@@ -10,6 +10,8 @@
 
 #include <immintrin.h>  // AVX2
 
+#include "./vp9_rtcd.h"
+
 void vp9_get16x16var_avx2(const unsigned char *src_ptr,
                           int source_stride,
                           const unsigned char *ref_ptr,

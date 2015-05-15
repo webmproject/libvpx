@@ -9,6 +9,8 @@
  */
 
 #include <tmmintrin.h>
+
+#include "./vp9_rtcd.h"
 #include "vpx_ports/mem.h"
 #include "vpx_ports/emmintrin_compat.h"
 

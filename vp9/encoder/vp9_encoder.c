@@ -112,7 +112,7 @@ static INLINE void Scale2Ratio(VPX_SCALING mode, int *hr, int *hs) {
 
 // Mark all inactive blocks as active. Other segmentation features may be set
 // so memset cannot be used, instead only inactive blocks should be reset.
-void vp9_suppress_active_map(VP9_COMP *cpi) {
+static void suppress_active_map(VP9_COMP *cpi) {
   unsigned char *const seg_map = cpi->segmentation_map;
   int i;
   if (cpi->active_map.enabled || cpi->active_map.update)
@@ -121,7 +121,7 @@ void vp9_suppress_active_map(VP9_COMP *cpi) {
         seg_map[i] = AM_SEGMENT_ID_ACTIVE;
 }
 
-void vp9_apply_active_map(VP9_COMP *cpi) {
+static void apply_active_map(VP9_COMP *cpi) {
   struct segmentation *const seg = &cpi->common.seg;
   unsigned char *const seg_map = cpi->segmentation_map;
   const unsigned char *const active_map = cpi->active_map.map;
@@ -2936,7 +2936,7 @@ static void init_motion_estimation(VP9_COMP *cpi) {
   }
 }
 
-void set_frame_size(VP9_COMP *cpi) {
+static void set_frame_size(VP9_COMP *cpi) {
   int ref_frame;
   VP9_COMMON *const cm = &cpi->common;
   VP9EncoderConfig *const oxcf = &cpi->oxcf;
@@ -3033,7 +3033,7 @@ static void encode_without_recode_loop(VP9_COMP *cpi) {
 
   setup_frame(cpi);
 
-  vp9_suppress_active_map(cpi);
+  suppress_active_map(cpi);
   // Variance adaptive and in frame q adjustment experiments are mutually
   // exclusive.
   if (cpi->oxcf.aq_mode == VARIANCE_AQ) {
@@ -3043,7 +3043,7 @@ static void encode_without_recode_loop(VP9_COMP *cpi) {
   } else if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ) {
     vp9_cyclic_refresh_setup(cpi);
   }
-  vp9_apply_active_map(cpi);
+  apply_active_map(cpi);
 
   // transform / motion compensation build reconstruction frame
   vp9_encode_frame(cpi);
@@ -3397,7 +3397,7 @@ static void set_arf_sign_bias(VP9_COMP *cpi) {
   cm->ref_frame_sign_bias[ALTREF_FRAME] = arf_sign_bias;
 }
 
-int setup_interp_filter_search_mask(VP9_COMP *cpi) {
+static int setup_interp_filter_search_mask(VP9_COMP *cpi) {
   INTERP_FILTER ifilter;
   int ref_total[MAX_REF_FRAMES] = {0};
   MV_REFERENCE_FRAME ref;
@@ -3791,8 +3791,8 @@ static int frame_is_reference(const VP9_COMP *cpi) {
          cm->seg.update_data;
 }
 
-void adjust_frame_rate(VP9_COMP *cpi,
-                       const struct lookahead_entry *source) {
+static void adjust_frame_rate(VP9_COMP *cpi,
+                              const struct lookahead_entry *source) {
   int64_t this_duration;
   int step = 0;
 
@@ -3877,7 +3877,8 @@ extern double vp9_get_blockiness(const unsigned char *img1, int img1_pitch,
                                  int width, int height);
 #endif
 
-void adjust_image_stat(double y, double u, double v, double all, ImageStat *s) {
+static void adjust_image_stat(double y, double u, double v, double all,
+                              ImageStat *s) {
   s->stat[Y] += y;
   s->stat[U] += u;
   s->stat[V] += v;

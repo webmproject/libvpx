@@ -2414,7 +2414,7 @@ static void find_next_key_frame(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 }
 
 // Define the reference buffers that will be updated post encode.
-void configure_buffer_updates(VP9_COMP *cpi) {
+static void configure_buffer_updates(VP9_COMP *cpi) {
   TWO_PASS *const twopass = &cpi->twopass;
 
   cpi->rc.is_src_frame_alt_ref = 0;
@@ -2461,7 +2461,7 @@ void configure_buffer_updates(VP9_COMP *cpi) {
   }
 }
 
-int is_skippable_frame(const VP9_COMP *cpi) {
+static int is_skippable_frame(const VP9_COMP *cpi) {
   // If the current frame does not have non-zero motion vector detected in the
   // first  pass, and so do its previous and forward frames, then this frame
   // can be skipped for partition check, and the partition size is assigned
