@@ -17,6 +17,7 @@ DSP_SRCS-$(HAVE_MEDIA)  += arm/sad_media$(ASM)
 DSP_SRCS-$(HAVE_NEON)   += arm/sad4d_neon.c
 DSP_SRCS-$(HAVE_NEON)   += arm/sad_neon.c
 
+
 DSP_SRCS-$(HAVE_MMX)    += x86/sad_mmx.asm
 DSP_SRCS-$(HAVE_SSE2)   += x86/sad4d_sse2.asm
 DSP_SRCS-$(HAVE_SSE2)   += x86/sad_sse2.asm
@@ -29,8 +30,27 @@ DSP_SRCS-$(HAVE_AVX2)   += x86/sad_avx2.c
 ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
 DSP_SRCS-$(HAVE_SSE2) += x86/highbd_sad4d_sse2.asm
 DSP_SRCS-$(HAVE_SSE2) += x86/highbd_sad_sse2.asm
+
 endif  # CONFIG_VP9_HIGHBITDEPTH
 endif  # CONFIG_ENCODERS
+
+ifneq ($(filter yes,$(CONFIG_ENCODERS) $(CONFIG_POSTPROC) $(CONFIG_VP9_POSTPROC)),)
+DSP_SRCS-yes            += variance.c
+
+DSP_SRCS-$(HAVE_MEDIA)  += arm/variance_media$(ASM)
+DSP_SRCS-$(HAVE_NEON)   += arm/variance_neon.c
+
+DSP_SRCS-$(HAVE_MMX)    += x86/variance_mmx.c
+DSP_SRCS-$(HAVE_MMX)    += x86/variance_impl_mmx.asm
+DSP_SRCS-$(HAVE_SSE2)   += x86/variance_sse2.c
+DSP_SRCS-$(HAVE_AVX2)   += x86/variance_avx2.c
+DSP_SRCS-$(HAVE_AVX2)   += x86/variance_impl_avx2.c
+
+ifeq ($(CONFIG_VP9_HIGHBITDEPTH),yes)
+DSP_SRCS-$(HAVE_SSE2)   += x86/highbd_variance_sse2.c
+DSP_SRCS-$(HAVE_SSE2)   += x86/highbd_variance_impl_sse2.asm
+endif  # CONFIG_VP9_HIGHBITDEPTH
+endif  # CONFIG_ENCODERS || CONFIG_POSTPROC || CONFIG_VP9_POSTPROC
 
 DSP_SRCS-no += $(DSP_SRCS_REMOVE-yes)
 

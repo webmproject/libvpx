@@ -13,6 +13,7 @@
 #include <stdio.h>
 
 #include "./vp9_rtcd.h"
+#include "./vpx_dsp_rtcd.h"
 #include "./vpx_config.h"
 
 #include "vpx_ports/mem.h"
@@ -3672,15 +3673,15 @@ static int set_var_thresh_from_histogram(VP9_COMP *cpi) {
       if (cm->use_highbitdepth) {
         switch (cm->bit_depth) {
           case VPX_BITS_8:
-            vp9_highbd_get16x16var(src, src_stride, last_src, last_stride,
+            vpx_highbd_8_get16x16var(src, src_stride, last_src, last_stride,
                                    &var16->sse, &var16->sum);
             break;
           case VPX_BITS_10:
-            vp9_highbd_10_get16x16var(src, src_stride, last_src, last_stride,
+            vpx_highbd_10_get16x16var(src, src_stride, last_src, last_stride,
                                     &var16->sse, &var16->sum);
             break;
           case VPX_BITS_12:
-            vp9_highbd_12_get16x16var(src, src_stride, last_src, last_stride,
+            vpx_highbd_12_get16x16var(src, src_stride, last_src, last_stride,
                                       &var16->sse, &var16->sum);
             break;
           default:
@@ -3689,11 +3690,11 @@ static int set_var_thresh_from_histogram(VP9_COMP *cpi) {
             return -1;
         }
       } else {
-        vp9_get16x16var(src, src_stride, last_src, last_stride,
+        vpx_get16x16var(src, src_stride, last_src, last_stride,
                         &var16->sse, &var16->sum);
       }
 #else
-      vp9_get16x16var(src, src_stride, last_src, last_stride,
+      vpx_get16x16var(src, src_stride, last_src, last_stride,
                       &var16->sse, &var16->sum);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
       var16->var = var16->sse -

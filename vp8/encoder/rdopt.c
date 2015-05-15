@@ -15,6 +15,7 @@
 #include <assert.h>
 #include "vpx_config.h"
 #include "vp8_rtcd.h"
+#include "./vpx_dsp_rtcd.h"
 #include "tokenize.h"
 #include "treewriter.h"
 #include "onyx_int.h"
@@ -507,9 +508,9 @@ int VP8_UVSSE(MACROBLOCK *x)
     }
     else
     {
-        vp8_variance8x8(uptr, pre_stride,
+        vpx_variance8x8(uptr, pre_stride,
             upred_ptr, uv_stride, &sse2);
-        vp8_variance8x8(vptr, pre_stride,
+        vpx_variance8x8(vptr, pre_stride,
             vpred_ptr, uv_stride, &sse1);
         sse2 += sse1;
     }
@@ -1783,7 +1784,7 @@ static int evaluate_inter_mode_rd(int mdcounts[4],
         if(threshold < x->encode_breakout)
             threshold = x->encode_breakout;
 
-        var = vp8_variance16x16
+        var = vpx_variance16x16
                 (*(b->base_src), b->src_stride,
                 x->e_mbd.predictor, 16, &sse);
 

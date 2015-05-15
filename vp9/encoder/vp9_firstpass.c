@@ -12,6 +12,7 @@
 #include <math.h>
 #include <stdio.h>
 
+#include "./vpx_dsp_rtcd.h"
 #include "./vpx_scale_rtcd.h"
 
 #include "vpx_mem/vpx_mem.h"
@@ -267,13 +268,13 @@ void vp9_end_first_pass(VP9_COMP *cpi) {
 static vp9_variance_fn_t get_block_variance_fn(BLOCK_SIZE bsize) {
   switch (bsize) {
     case BLOCK_8X8:
-      return vp9_mse8x8;
+      return vpx_mse8x8;
     case BLOCK_16X8:
-      return vp9_mse16x8;
+      return vpx_mse16x8;
     case BLOCK_8X16:
-      return vp9_mse8x16;
+      return vpx_mse8x16;
     default:
-      return vp9_mse16x16;
+      return vpx_mse16x16;
   }
 }
 
@@ -293,37 +294,37 @@ static vp9_variance_fn_t highbd_get_block_variance_fn(BLOCK_SIZE bsize,
     default:
       switch (bsize) {
         case BLOCK_8X8:
-          return vp9_highbd_mse8x8;
+          return vpx_highbd_8_mse8x8;
         case BLOCK_16X8:
-          return vp9_highbd_mse16x8;
+          return vpx_highbd_8_mse16x8;
         case BLOCK_8X16:
-          return vp9_highbd_mse8x16;
+          return vpx_highbd_8_mse8x16;
         default:
-          return vp9_highbd_mse16x16;
+          return vpx_highbd_8_mse16x16;
       }
       break;
     case 10:
       switch (bsize) {
         case BLOCK_8X8:
-          return vp9_highbd_10_mse8x8;
+          return vpx_highbd_10_mse8x8;
         case BLOCK_16X8:
-          return vp9_highbd_10_mse16x8;
+          return vpx_highbd_10_mse16x8;
         case BLOCK_8X16:
-          return vp9_highbd_10_mse8x16;
+          return vpx_highbd_10_mse8x16;
         default:
-          return vp9_highbd_10_mse16x16;
+          return vpx_highbd_10_mse16x16;
       }
       break;
     case 12:
       switch (bsize) {
         case BLOCK_8X8:
-          return vp9_highbd_12_mse8x8;
+          return vpx_highbd_12_mse8x8;
         case BLOCK_16X8:
-          return vp9_highbd_12_mse16x8;
+          return vpx_highbd_12_mse16x8;
         case BLOCK_8X16:
-          return vp9_highbd_12_mse8x16;
+          return vpx_highbd_12_mse8x16;
         default:
-          return vp9_highbd_12_mse16x16;
+          return vpx_highbd_12_mse16x16;
       }
       break;
   }
@@ -634,7 +635,7 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
       xd->mi[0]->mbmi.tx_size = use_dc_pred ?
          (bsize >= BLOCK_16X16 ? TX_16X16 : TX_8X8) : TX_4X4;
       vp9_encode_intra_block_plane(x, bsize, 0);
-      this_error = vp9_get_mb_ss(x->plane[0].src_diff);
+      this_error = vpx_get_mb_ss(x->plane[0].src_diff);
 #if CONFIG_VP9_HIGHBITDEPTH
       if (cm->use_highbitdepth) {
         switch (cm->bit_depth) {
