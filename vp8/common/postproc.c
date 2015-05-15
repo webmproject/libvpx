@@ -427,7 +427,7 @@ void vp8_de_noise(VP8_COMMON                 *cm,
     }
 }
 
-double vp8_gaussian(double sigma, double mu, double x)
+static double gaussian(double sigma, double mu, double x)
 {
     return 1 / (sigma * sqrt(2.0 * 3.14159265)) *
            (exp(-(x - mu) * (x - mu) / (2 * sigma * sigma)));
@@ -455,7 +455,7 @@ static void fillrd(struct postproc_state *state, int q, int a)
 
         for (i = -32; i < 32; i++)
         {
-            const int v = (int)(.5 + 256 * vp8_gaussian(sigma, 0, i));
+            const int v = (int)(.5 + 256 * gaussian(sigma, 0, i));
 
             if (v)
             {

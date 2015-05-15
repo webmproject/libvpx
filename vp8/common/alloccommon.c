@@ -10,6 +10,7 @@
 
 
 #include "vpx_config.h"
+#include "alloccommon.h"
 #include "blockd.h"
 #include "vpx_mem/vpx_mem.h"
 #include "onyxc_int.h"

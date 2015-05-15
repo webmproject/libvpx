@@ -29,7 +29,7 @@ typedef unsigned int(*vpx_sad_fn_t)(
 typedef void (*vp8_copy32xn_fn_t)(
     const unsigned char *src_ptr,
     int source_stride,
-    const unsigned char *ref_ptr,
+    unsigned char *ref_ptr,
     int ref_stride,
     int n);
 

@@ -478,8 +478,6 @@ static vpx_codec_err_t vp8e_set_config(vpx_codec_alg_priv_t       *ctx,
     return res;
 }
 
-int vp8_reverse_trans(int);
-
 static vpx_codec_err_t get_quantizer(vpx_codec_alg_priv_t *ctx, va_list args)
 {
   int *const arg = va_arg(args, int *);

@@ -34,8 +34,6 @@
 /* #define OUTPUT_FPF 1 */
 
 extern void vp8cx_frame_init_quantizer(VP8_COMP *cpi);
-extern void vp8_set_mbmode_and_mvs(MACROBLOCK *x, MB_PREDICTION_MODE mb, int_mv *mv);
-extern void vp8_alloc_compressor_data(VP8_COMP *cpi);
 
 #define GFQ_ADJUSTMENT vp8_gf_boost_qadjustment[Q]
 extern int vp8_kf_boost_qadjustment[QINDEX_RANGE];
@@ -1328,8 +1326,6 @@ static int estimate_kf_group_q(VP8_COMP *cpi, double section_err, int section_ta
 
     return Q;
 }
-
-extern void vp8_new_framerate(VP8_COMP *cpi, double framerate);
 
 void vp8_init_second_pass(VP8_COMP *cpi)
 {

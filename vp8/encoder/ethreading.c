@@ -19,8 +19,6 @@
 
 extern void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x, int ok_to_skip);
 
-extern void vp8_loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm);
-
 static THREAD_FUNCTION thread_loopfilter(void *p_data)
 {
     VP8_COMP *cpi = (VP8_COMP *)(((LPFTHREAD_DATA *)p_data)->ptr1);
