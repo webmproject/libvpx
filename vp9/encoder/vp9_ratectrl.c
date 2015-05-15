@@ -137,7 +137,7 @@ static void init_minq_luts(int *kf_low_m, int *kf_high_m,
   }
 }
 
-void vp9_rc_init_minq_luts() {
+void vp9_rc_init_minq_luts(void) {
   init_minq_luts(kf_low_motion_minq_8, kf_high_motion_minq_8,
                  arfgf_low_motion_minq_8, arfgf_high_motion_minq_8,
                  inter_minq_8, rtc_minq_8, VPX_BITS_8);

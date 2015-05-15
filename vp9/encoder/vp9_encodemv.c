@@ -22,7 +22,7 @@ static struct vp9_token mv_class_encodings[MV_CLASSES];
 static struct vp9_token mv_fp_encodings[MV_FP_SIZE];
 static struct vp9_token mv_class0_encodings[CLASS0_SIZE];
 
-void vp9_entropy_mv_init() {
+void vp9_entropy_mv_init(void) {
   vp9_tokens_from_tree(mv_joint_encodings, vp9_mv_joint_tree);
   vp9_tokens_from_tree(mv_class_encodings, vp9_mv_class_tree);
   vp9_tokens_from_tree(mv_class0_encodings, vp9_mv_class0_tree);

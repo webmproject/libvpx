@@ -110,7 +110,7 @@ static void temporal_filter_predictors_mb_c(MACROBLOCKD *xd,
                             kernel, mv_precision_uv, x, y);
 }
 
-void vp9_temporal_filter_init() {
+void vp9_temporal_filter_init(void) {
   int i;
 
   fixed_divide[0] = 0;

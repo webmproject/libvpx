@@ -944,6 +944,6 @@ void vp9_predict_intra_block(const MACROBLOCKD *xd, int block_idx, int bwl_in,
                          have_top, have_left, have_right, x, y, plane);
 }
 
-void vp9_init_intra_predictors() {
+void vp9_init_intra_predictors(void) {
   once(vp9_init_intra_predictors_internal);
 }
