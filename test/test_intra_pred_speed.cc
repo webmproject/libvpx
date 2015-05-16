@@ -332,4 +332,4 @@ INTRA_PRED_TEST(NEON, TestIntraPred32, NULL, NULL, NULL, NULL,
                 NULL, NULL, NULL, NULL, NULL, vp9_tm_predictor_32x32_neon)
 #endif  // HAVE_NEON
 
-#include "third_party/googletest/src/src/gtest_main.cc"
+#include "test/test_libvpx.cc"
