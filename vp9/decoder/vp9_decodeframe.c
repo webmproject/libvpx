@@ -1985,15 +1985,16 @@ static void dec_build_inter_predictors(VP9Decoder *const pbi, MACROBLOCKD *xd,
       const int b_h = y1 - y0 + 1;
       const int border_offset = y_pad * 3 * b_w + x_pad * 3;
 
-      return extend_and_predict(buf_ptr1, buf_stride, x0, y0, b_w, b_h,
-                                frame_width, frame_height, border_offset,
-                                dst, dst_buf->stride,
-                                subpel_x, subpel_y,
-                                kernel, sf,
+      extend_and_predict(buf_ptr1, buf_stride, x0, y0, b_w, b_h,
+                         frame_width, frame_height, border_offset,
+                         dst, dst_buf->stride,
+                         subpel_x, subpel_y,
+                         kernel, sf,
 #if CONFIG_VP9_HIGHBITDEPTH
-                                xd,
+                         xd,
 #endif
-                                w, h, ref, xs, ys);
+                         w, h, ref, xs, ys);
+      return;
     }
   } else {
     // Wait until reference block is ready. Pad 7 more pixels as last 7
