@@ -43,7 +43,7 @@ class MD5 {
   }
 
   void Add(const uint8_t *data, size_t size) {
-    MD5Update(&md5_, data, size);
+    MD5Update(&md5_, data, static_cast<uint32_t>(size));
   }
 
   const char *Get(void) {
