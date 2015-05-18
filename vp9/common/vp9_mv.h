@@ -51,11 +51,11 @@ static INLINE void clamp_mv(MV *mv, int min_col, int max_col,
 #if CONFIG_GLOBAL_MOTION
 #define MAX_GLOBAL_MOTION_MODELS  1
 
-#define ZOOM_PRECISION_BITS       6
-#define ROTATION_PRECISION_BITS   4
+#define ZOOM_PRECISION_BITS       11
+#define ROTATION_PRECISION_BITS   8
 
-#define ABS_ZOOM_BITS             3
-#define ABS_ROTATION_BITS         4
+#define ABS_ZOOM_BITS             6
+#define ABS_ROTATION_BITS         6
 #define ABS_TRANSLATION_BITS      7
 
 typedef enum {
@@ -73,7 +73,7 @@ typedef struct {
   int_mv mv;
 } Global_Motion_Params;
 
-static INLINE GLOBAL_MOTION_TYPE get_gmtype(Global_Motion_Params *gm) {
+static INLINE GLOBAL_MOTION_TYPE get_gmtype(const Global_Motion_Params *gm) {
   if (gm->rotation == 0 && gm->zoom == 0) {
     return (gm->mv.as_int == 0 ? GLOBAL_ZERO : GLOBAL_TRANSLATION);
   } else {

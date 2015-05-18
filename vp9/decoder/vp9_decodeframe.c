@@ -2623,6 +2623,14 @@ static void read_global_motion(VP9_COMMON *cm, vp9_reader *r) {
     for (i = 0; i < cm->num_global_motion[frame]; ++i) {
       read_global_motion_params(
           cm->global_motion[frame], cm->fc.global_motion_types_prob, r);
+      /*
+      printf("Dec Ref %d [%d]: %d %d %d %d\n",
+             frame, cm->current_video_frame,
+             cm->global_motion[frame][i].zoom,
+             cm->global_motion[frame][i].rotation,
+             cm->global_motion[frame][i].mv.as_mv.col,
+             cm->global_motion[frame][i].mv.as_mv.row);
+      */
     }
   }
 }

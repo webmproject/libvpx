@@ -64,6 +64,8 @@ void projectPointsTranslation(double *mat, double *points, double *proj,
                               const int n, const int stride_points,
                               const int stride_proj);
 
+void vp9_convert_params_to_rotzoom(Global_Motion_Params *model, double *H);
+
 void vp9_warp_plane(Global_Motion_Params *gm,
                     unsigned char *ref,
                     int width, int height, int stride,
@@ -72,6 +74,23 @@ void vp9_warp_plane(Global_Motion_Params *gm,
                     int p_width, int p_height, int p_stride,
                     int subsampling_col, int subsampling_row,
                     int x_scale, int y_scale);
+
+double vp9_warp_erroradv(Global_Motion_Params *gm,
+                         unsigned char *ref,
+                         int width, int height, int stride,
+                         unsigned char *src,
+                         int p_col, int p_row,
+                         int p_width, int p_height, int p_stride,
+                         int subsampling_col, int subsampling_row,
+                         int x_scale, int y_scale);
+double vp9_warp_erroradv_unq(TransformationType type, double *H,
+                             unsigned char *ref,
+                             int width, int height, int stride,
+                             unsigned char *src,
+                             int p_col, int p_row,
+                             int p_width, int p_height, int p_stride,
+                             int subsampling_col, int subsampling_row,
+                             int x_scale, int y_scale);
 
 int_mv vp9_get_global_sb_center_mv(int col, int row, int bw, int bh,
                                    Global_Motion_Params *model);

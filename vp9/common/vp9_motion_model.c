@@ -163,9 +163,67 @@ static void WarpImage(TransformationType type, double *H,
   }
 }
 
-static void convert_params_to_rotzoom(Global_Motion_Params *model,
-                                      double *H) {
-  double z = 1.0 + (double) model->zoom / (1 << ZOOM_PRECISION_BITS);
+// Computes the ratio of the warp error to the zero motion error
+double vp9_warp_erroradv_unq(TransformationType type, double *H,
+                             unsigned char *ref,
+                             int width, int height, int stride,
+                             unsigned char *src,
+                             int p_col, int p_row,
+                             int p_width, int p_height, int p_stride,
+                             int subsampling_col, int subsampling_row,
+                             int x_scale, int y_scale) {
+  double H_z_translation[] = {0, 0};
+  double H_z_rotzoom[] = {1, 0, 0, 0};
+  double H_z_affine[] = {1, 0, 0, 1, 0, 0};
+  double H_z_homography[] = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+  double *H_z = H_z_rotzoom;
+  int i, j;
+  int64_t sumerr = 0;
+  int64_t sumerr_z = 0;
+  projectPointsType projectPoints = get_projectPointsType(type);
+  if (type == TRANSLATION)
+    H_z = H_z_translation;
+  else if (type == ROTZOOM)
+    H_z = H_z_rotzoom;
+  else if (type == AFFINE)
+    H_z = H_z_affine;
+  else if (type == HOMOGRAPHY)
+    H_z = H_z_homography;
+  else
+    assert(0 && "Unknown TransformationType");
+  if (projectPoints == NULL)
+    return -1;
+  for (i = p_row; i < p_row + p_height; ++i) {
+    for (j = p_col; j < p_col + p_width; ++j) {
+      double in[2], out[2], out_z[2];
+      uint8_t pred, pred_z;
+      int err, err_z;
+      in[0] = subsampling_col ? 2 * j + 0.5 : j;
+      in[1] = subsampling_row ? 2 * i + 0.5 : i;
+      projectPoints(H, in, out, 1, 2, 2);
+      out[0] = subsampling_col ? (out[0] - 0.5) / 2.0 : out[0];
+      out[1] = subsampling_row ? (out[1] - 0.5) / 2.0 : out[1];
+      out[0] *= x_scale / 16.0;
+      out[1] *= y_scale / 16.0;
+      pred = bilinear(ref, out[0], out[1], width, height, stride);
+      err = pred - src[(j - p_col) + (i - p_row) * p_stride];
+      sumerr += err * err;
+      projectPoints(H_z, in, out_z, 1, 2, 2);
+      out_z[0] = subsampling_col ? (out_z[0] - 0.5) / 2.0 : out_z[0];
+      out_z[1] = subsampling_row ? (out_z[1] - 0.5) / 2.0 : out_z[1];
+      out_z[0] *= x_scale / 16.0;
+      out_z[1] *= y_scale / 16.0;
+      pred_z = bilinear(ref, out_z[0], out_z[1], width, height, stride);
+      err_z = pred_z - src[(j - p_col) + (i - p_row) * p_stride];
+      sumerr_z += err_z * err_z;
+    }
+  }
+  return (double)sumerr / sumerr_z;
+}
+
+void vp9_convert_params_to_rotzoom(Global_Motion_Params *model,
+                                   double *H) {
+  double z = (double) model->zoom / (1 << ZOOM_PRECISION_BITS);
   double r = (double) model->rotation / (1 << ROTATION_PRECISION_BITS);
   H[0] =  (1 + z) * cos(r * M_PI / 180.0);
   H[1] = -(1 + z) * sin(r * M_PI / 180.0);
@@ -182,7 +240,7 @@ void vp9_warp_plane(Global_Motion_Params *gm,
                     int subsampling_col, int subsampling_row,
                     int x_scale, int y_scale) {
   double H[9];
-  convert_params_to_rotzoom(gm, H);
+  vp9_convert_params_to_rotzoom(gm, H);
   WarpImage(ROTZOOM, H,
             ref, width, height, stride,
             pred, p_col, p_row, p_width, p_height, p_stride,
@@ -190,11 +248,28 @@ void vp9_warp_plane(Global_Motion_Params *gm,
             x_scale, y_scale);
 }
 
+double vp9_warp_erroradv(Global_Motion_Params *gm,
+                         unsigned char *ref,
+                         int width, int height, int stride,
+                         unsigned char *src,
+                         int p_col, int p_row,
+                         int p_width, int p_height, int p_stride,
+                         int subsampling_col, int subsampling_row,
+                         int x_scale, int y_scale) {
+  double H[9];
+  vp9_convert_params_to_rotzoom(gm, H);
+  return vp9_warp_erroradv_unq(ROTZOOM, H,
+                               ref, width, height, stride,
+                               src, p_col, p_row, p_width, p_height, p_stride,
+                               subsampling_col,  subsampling_row,
+                               x_scale, y_scale);
+}
+
 static int_mv vp9_get_global_mv(int col, int row, Global_Motion_Params *model) {
-  int_mv mv;
+    int_mv mv;
   double H[4];
   double x, y;
-  convert_params_to_rotzoom(model, H);
+  vp9_convert_params_to_rotzoom(model, H);
   x =  H[0] * col + H[1] * row + H[2];
   y = -H[1] * col + H[0] * row + H[3];
   mv.as_mv.col = (int)floor(x * 8 + 0.5) - col;

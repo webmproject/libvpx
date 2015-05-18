@@ -2741,6 +2741,27 @@ static void joint_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
                                 int_mv single_newmv[MAX_REF_FRAMES],
                                 int *rate_mv);
 
+#if CONFIG_GLOBAL_MOTION
+static int get_gmbitcost(const Global_Motion_Params *gm,
+                         const vp9_prob *probs) {
+  int gmtype_cost[GLOBAL_MOTION_TYPES];
+  int bits;
+  vp9_cost_tokens(gmtype_cost, probs, vp9_global_motion_types_tree);
+  if (gm->rotation == 0 && gm->zoom == 0) {
+    bits = (gm->mv.as_int == 0 ?  0 : (ABS_TRANSLATION_BITS + 1) * 2);
+  } else {
+    bits = (ABS_TRANSLATION_BITS + 1) * 2 +
+           ABS_ZOOM_BITS + ABS_ROTATION_BITS + 2;
+  }
+  return bits * 256 + gmtype_cost[gm->gmtype];
+}
+
+#define GLOBAL_MOTION_RATE(ref)                           \
+    (cpi->global_motion_used[ref] >= 2 ? 0 :              \
+     get_gmbitcost(&cm->global_motion[(ref)][0],          \
+                   cm->fc.global_motion_types_prob) / 2);
+#endif  // CONFIG_GLOBAL_MOTION
+
 static int set_and_cost_bmi_mvs(VP9_COMP *cpi, MACROBLOCKD *xd, int i,
                                 PREDICTION_MODE mode, int_mv this_mv[2],
                                 int_mv frame_mv[MAX_REF_FRAMES],
@@ -2750,6 +2771,9 @@ static int set_and_cost_bmi_mvs(VP9_COMP *cpi, MACROBLOCKD *xd, int i,
 #endif  // CONFIG_NEW_INTER
                                 int_mv *ref_mv[2],
                                 const int *mvjcost, int *mvcost[2]) {
+#if CONFIG_GLOBAL_MOTION
+  const VP9_COMMON *cm = &cpi->common;
+#endif  // CONFIG_GLOBAL_MOTION
   MODE_INFO *const mic = xd->mi[0].src_mi;
   const MB_MODE_INFO *const mbmi = &mic->mbmi;
   int thismvcost = 0;
@@ -2793,10 +2817,15 @@ static int set_and_cost_bmi_mvs(VP9_COMP *cpi, MACROBLOCKD *xd, int i,
 #if CONFIG_GLOBAL_MOTION
       this_mv[0].as_int =
           cpi->common.global_motion[mbmi->ref_frame[0]][0].mv.as_int;
+      thismvcost +=
+          GLOBAL_MOTION_RATE(mbmi->ref_frame[0]);
 #if !CONFIG_NEW_INTER
-      if (is_compound)
+      if (is_compound) {
         this_mv[1].as_int =
             cpi->common.global_motion[mbmi->ref_frame[1]][0].mv.as_int;
+        thismvcost +=
+            GLOBAL_MOTION_RATE(mbmi->ref_frame[1]);
+      }
 #endif  // !CONFIG_NEW_INTER
 #else   // CONFIG_GLOBAL_MOTION
       this_mv[0].as_int = 0;
@@ -2851,6 +2880,9 @@ static int set_and_cost_bmi_mvs(VP9_COMP *cpi, MACROBLOCKD *xd, int i,
           cpi->common.global_motion[mbmi->ref_frame[0]][0].mv.as_int;
       this_mv[1].as_int =
           cpi->common.global_motion[mbmi->ref_frame[1]][0].mv.as_int;
+      thismvcost +=
+          GLOBAL_MOTION_RATE(mbmi->ref_frame[0]) +
+          GLOBAL_MOTION_RATE(mbmi->ref_frame[1]);
 #else
       this_mv[0].as_int = 0;
       this_mv[1].as_int = 0;
@@ -3423,8 +3455,9 @@ static int64_t rd_pick_best_sub8x8_mode(
 #if CONFIG_GLOBAL_MOTION
         if (get_gmtype(&cm->global_motion[mbmi->ref_frame[0]][0]) ==
             GLOBAL_ZERO &&
-            get_gmtype(&cm->global_motion[mbmi->ref_frame[1]][0]) ==
-            GLOBAL_ZERO)
+            (!has_second_rf ||
+             get_gmtype(&cm->global_motion[mbmi->ref_frame[1]][0]) ==
+             GLOBAL_ZERO))
 #endif
           if (!check_best_zero_mv(cpi, mbmi->mode_context, frame_mv,
                                   this_mode, mbmi->ref_frame))
@@ -5377,6 +5410,17 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
     *distortion = skip_sse_sb;
   }
+#if CONFIG_GLOBAL_MOTION
+  if (this_mode == ZEROMV
+#if CONFIG_NEW_INTER
+      || this_mode == ZERO_ZEROMV
+#endif
+      ) {
+    *rate2 += GLOBAL_MOTION_RATE(mbmi->ref_frame[0]);
+    if (is_comp_pred)
+      *rate2 += GLOBAL_MOTION_RATE(mbmi->ref_frame[1]);
+  }
+#endif  // CONFIG_GLOBAL_MOTION
 
   if (!is_comp_pred)
     single_skippable[this_mode][refs[0]] = *skippable;
@@ -6271,8 +6315,9 @@ void vp9_rd_pick_inter_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_GLOBAL_MOTION
     } else if (get_gmtype(&cm->global_motion[ref_frame][0]) ==
                GLOBAL_ZERO &&
-               get_gmtype(&cm->global_motion[second_ref_frame][0]) ==
-               GLOBAL_ZERO) {
+               (!comp_pred ||
+                get_gmtype(&cm->global_motion[second_ref_frame][0]) ==
+                GLOBAL_ZERO)) {
 #else
     } else {
 #endif  // CONFIG_GLOBAL_MOTION

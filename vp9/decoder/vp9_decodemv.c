@@ -1221,6 +1221,7 @@ static void read_inter_block_mode_info(VP9_COMMON *const cm,
           break;
         }
 
+        mi->bmi[j].as_mode = b_mode;
         mi->bmi[j].as_mv[0].as_int = mv_sub8x8[0].as_int;
         if (is_compound)
           mi->bmi[j].as_mv[1].as_int = mv_sub8x8[1].as_int;

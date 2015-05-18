@@ -129,8 +129,7 @@ const vp9_tree_index vp9_global_motion_types_tree
 
 static const vp9_prob default_global_motion_types_prob
                  [GLOBAL_MOTION_TYPES - 1] = {
-  // Currently only translation is used, so make the second prob very high.
-  240, 255
+  224, 128
 };
 #endif  // CONFIG_GLOBAL_MOTION
 
