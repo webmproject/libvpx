@@ -577,7 +577,6 @@ void vp9_tokenize_sb_supertx(VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,
   const int skip_inc = !vp9_segfeature_active(&cm->seg, mbmi->segment_id,
                                               SEG_LVL_SKIP);
   struct tokenize_b_args arg = {cpi, xd, t};
-  int plane;
   if (mbmi->skip) {
     if (!dry_run)
       cm->counts.skip[ctx][1] += skip_inc;
@@ -589,21 +588,9 @@ void vp9_tokenize_sb_supertx(VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,
 
   if (!dry_run) {
     cm->counts.skip[ctx][0] += skip_inc;
-    for (plane = 0; plane < MAX_MB_PLANE; plane++) {
-      const BLOCK_SIZE plane_size =
-          get_plane_block_size(bsize, &xd->plane[plane]);
-      const struct macroblockd_plane* const pd = &xd->plane[plane];
-      const TX_SIZE tx_size = plane ? get_uv_tx_size(mbmi, pd) : mbmi->tx_size;
-      tokenize_b(plane, 0, plane_size, tx_size, &arg);
-    }
+    vp9_foreach_transformed_block(xd, bsize, tokenize_b, &arg);
   } else {
-    for (plane = 0; plane < MAX_MB_PLANE; plane++) {
-      const BLOCK_SIZE plane_size =
-          get_plane_block_size(bsize, &xd->plane[plane]);
-      const struct macroblockd_plane* const pd = &xd->plane[plane];
-      const TX_SIZE tx_size = plane ? get_uv_tx_size(mbmi, pd) : mbmi->tx_size;
-      set_entropy_context_b(plane, 0, plane_size, tx_size, &arg);
-    }
+    vp9_foreach_transformed_block(xd, bsize, set_entropy_context_b, &arg);
     *t = t_backup;
   }
 }
