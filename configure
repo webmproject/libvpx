@@ -290,11 +290,9 @@ EXPERIMENT_LIST="
     copy_mode
     interintra
     wedge_partition
-    compound_modes
     global_motion
     palette
     new_quant
-    newmvref
     intrabc
     loop_postfilter
     row_tile
