@@ -49,10 +49,10 @@ typedef struct frame_contexts {
   vp9_prob switchable_interp_prob[SWITCHABLE_FILTER_CONTEXTS]
                                  [SWITCHABLE_FILTERS - 1];
   vp9_prob inter_mode_probs[INTER_MODE_CONTEXTS][INTER_MODES - 1];
-#if CONFIG_COMPOUND_MODES
+#if CONFIG_NEW_INTER
   vp9_prob inter_compound_mode_probs[INTER_MODE_CONTEXTS]
                                     [INTER_COMPOUND_MODES - 1];
-#endif  // CONFIG_COMPOUND_MODES
+#endif  // CONFIG_NEW_INTER
   vp9_prob intra_inter_prob[INTRA_INTER_CONTEXTS];
   vp9_prob comp_inter_prob[COMP_INTER_CONTEXTS];
   vp9_prob single_ref_prob[REF_CONTEXTS][2];
@@ -116,9 +116,9 @@ typedef struct {
   unsigned int switchable_interp[SWITCHABLE_FILTER_CONTEXTS]
                                 [SWITCHABLE_FILTERS];
   unsigned int inter_mode[INTER_MODE_CONTEXTS][INTER_MODES];
-#if CONFIG_COMPOUND_MODES
+#if CONFIG_NEW_INTER
   unsigned int inter_compound_mode[INTER_MODE_CONTEXTS][INTER_COMPOUND_MODES];
-#endif  // CONFIG_COMPOUND_MODES
+#endif  // CONFIG_NEW_INTER
   unsigned int intra_inter[INTRA_INTER_CONTEXTS][2];
   unsigned int comp_inter[COMP_INTER_CONTEXTS][2];
   unsigned int single_ref[REF_CONTEXTS][2][2];
@@ -192,10 +192,10 @@ extern const vp9_tree_index vp9_copy_mode_tree_l2[TREE_SIZE(2)];
 extern const vp9_tree_index vp9_copy_mode_tree[TREE_SIZE(COPY_MODE_COUNT - 1)];
 #endif  // CONFIG_COPY_MODE
 
-#if CONFIG_COMPOUND_MODES
+#if CONFIG_NEW_INTER
 extern const vp9_tree_index vp9_inter_compound_mode_tree
                                 [TREE_SIZE(INTER_COMPOUND_MODES)];
-#endif
+#endif  // CONFIG_NEW_INTER
 
 void vp9_setup_past_independence(struct VP9Common *cm);
 

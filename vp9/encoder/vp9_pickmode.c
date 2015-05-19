@@ -174,17 +174,14 @@ static int combined_motion_search(VP9_COMP *cpi, MACROBLOCK *x,
 
   *rate_mv = vp9_mv_bit_cost(&mvp_full, &ref_mv,
                              x->nmvjointcost, x->mvcost, MV_COST_WEIGHT);
-#if CONFIG_COMPOUND_MODES
-  if (has_second_ref(mbmi)) {
+#if CONFIG_NEW_INTER
+  if (has_second_ref(mbmi))
     rate_mode = cpi->inter_compound_mode_cost[mbmi->mode_context[ref]]
                                              [INTER_COMPOUND_OFFSET(NEW_NEWMV)];
-  } else {
-#endif
+  else
+#endif  // CONFIG_NEW_INTER
   rate_mode = cpi->inter_mode_cost[mbmi->mode_context[ref]]
                                   [INTER_OFFSET(NEWMV)];
-#if CONFIG_COMPOUND_MODES
-  }
-#endif
   rv = !(RDCOST(x->rdmult, x->rddiv, (*rate_mv + rate_mode), 0) >
          best_rd_sofar);
 
@@ -394,18 +391,15 @@ static void encode_breakout_test(VP9_COMP *cpi, MACROBLOCK *x,
         x->skip = 1;
 
         // The cost of skip bit needs to be added.
-#if CONFIG_COMPOUND_MODES
-        if (has_second_ref(mbmi)) {
+#if CONFIG_NEW_INTER
+        if (has_second_ref(mbmi))
           *rate = cpi->inter_compound_mode_cost[mbmi->mode_context[ref_frame]]
               [INTER_COMPOUND_OFFSET(this_mode)];
 
-        } else {
-#endif
+        else
+#endif  // CONFIG_NEW_INTER
         *rate = cpi->inter_mode_cost[mbmi->mode_context[ref_frame]]
                                     [INTER_OFFSET(this_mode)];
-#if CONFIG_COMPOUND_MODES
-        }
-#endif
         // More on this part of rate
         // rate += vp9_cost_bit(vp9_get_skip_prob(cm, xd), 1);
 
@@ -471,7 +465,7 @@ static void estimate_block_intra(int plane, int block, BLOCK_SIZE plane_bsize,
 }
 
 static const THR_MODES mode_idx[MAX_REF_FRAMES - 1][INTER_MODES] = {
-#if CONFIG_NEWMVREF
+#if CONFIG_NEW_INTER
   {THR_NEARESTMV, THR_NEARMV, THR_ZEROMV, THR_NEWMV, THR_NEAR_FORNEWMV},
   {THR_NEARESTG, THR_NEARG, THR_ZEROG, THR_NEWG, THR_NEAR_FORNEWG},
   {THR_NEARESTA, THR_NEARA, THR_ZEROA, THR_NEWA, THR_NEAR_FORNEWA},
@@ -479,7 +473,7 @@ static const THR_MODES mode_idx[MAX_REF_FRAMES - 1][INTER_MODES] = {
   {THR_NEARESTMV, THR_NEARMV, THR_ZEROMV, THR_NEWMV},
   {THR_NEARESTG, THR_NEARG, THR_ZEROG, THR_NEWG},
   {THR_NEARESTA, THR_NEARA, THR_ZEROA, THR_NEWA},
-#endif  // CONFIG_NEWMVREF
+#endif  // CONFIG_NEW_INTER
 };
 
 // TODO(jingning) placeholder for inter-frame non-RD mode decision.
@@ -626,51 +620,48 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
     mbmi->ref_frame[0] = ref_frame;
 
-#if CONFIG_COMPOUND_MODES
+#if CONFIG_NEW_INTER
     for (this_mode = NEARESTMV; this_mode <= NEW_NEWMV; ++this_mode) {
 #else
     for (this_mode = NEARESTMV; this_mode <= NEWMV; ++this_mode) {
-#endif
+#endif  // CONFIG_NEW_INTER
       int rate_mv = 0;
       int mode_rd_thresh;
 #if CONFIG_GLOBAL_MOTION
       if (const_motion[ref_frame] && this_mode == NEARMV)
 #else   // CONFIG_GLOBAL_MOTION
-#if CONFIG_COMPOUND_MODES
+#if CONFIG_NEW_INTER
       if (const_motion[ref_frame] &&
           (this_mode == NEARMV || this_mode == ZEROMV ||
            this_mode == ZERO_ZEROMV))
 #else
       if (const_motion[ref_frame] &&
           (this_mode == NEARMV || this_mode == ZEROMV))
-#endif
+#endif  // CONFIG_NEW_INTER
 #endif  // CONFIG_GLOBAL_MOTION
         continue;
 
       if (!(cpi->sf.inter_mode_mask[bsize] & (1 << this_mode)))
         continue;
-#if CONFIG_COMPOUND_MODES
-     if (has_second_ref(mbmi)) {
+#if CONFIG_NEW_INTER
+     if (has_second_ref(mbmi))
        mode_rd_thresh =
            rd_threshes[mode_idx[ref_frame - LAST_FRAME]
                                [INTER_COMPOUND_OFFSET(this_mode)]];
-     } else {
-#endif
-      mode_rd_thresh =
-          rd_threshes[mode_idx[ref_frame -
-                               LAST_FRAME][INTER_OFFSET(this_mode)]];
-#if CONFIG_COMPOUND_MODES
-    }
-#endif
-      if (rd_less_than_thresh(best_rdc.rdcost, mode_rd_thresh,
-                              rd_thresh_freq_fact[this_mode]))
-        continue;
+     else
+#endif  // CONFIG_NEW_INTER
+     mode_rd_thresh =
+         rd_threshes[mode_idx[ref_frame - LAST_FRAME]
+                             [INTER_OFFSET(this_mode)]];
+     if (rd_less_than_thresh(best_rdc.rdcost, mode_rd_thresh,
+                             rd_thresh_freq_fact[this_mode]))
+       continue;
 
-#if CONFIG_COMPOUND_MODES
+#if CONFIG_NEW_INTER
       if (this_mode == NEWMV || this_mode == NEW_NEWMV) {
 #else
       if (this_mode == NEWMV) {
-#endif
+#endif  // CONFIG_NEW_INTER
         if (cpi->sf.partition_search_type != VAR_BASED_PARTITION &&
             this_rdc.rdcost < (int64_t)(1 << num_pels_log2_lookup[bsize]))
           continue;
@@ -680,11 +671,11 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
           continue;
       }
 
-#if CONFIG_COMPOUND_MODES
+#if CONFIG_NEW_INTER
       if (this_mode != NEARESTMV && this_mode != NEAREST_NEARESTMV &&
 #else
       if (this_mode != NEARESTMV &&
-#endif
+#endif  // CONFIG_NEW_INTER
           frame_mv[this_mode][ref_frame].as_int ==
               frame_mv[NEARESTMV][ref_frame].as_int)
         continue;
@@ -696,11 +687,11 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       // motion vector is at sub-pixel accuracy level for luma component, i.e.,
       // the last three bits are all zeros.
       if (cpi->sf.reuse_inter_pred_sby) {
-#if CONFIG_COMPOUND_MODES
+#if CONFIG_NEW_INTER
         if (this_mode == NEARESTMV || this_mode == NEAREST_NEARESTMV) {
 #else
         if (this_mode == NEARESTMV) {
-#endif
+#endif  // CONFIG_NEW_INTER
           this_mode_pred = &tmp[3];
         } else {
           this_mode_pred = &tmp[get_pred_buffer(tmp, 3)];
@@ -709,12 +700,12 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
         }
       }
 
-#if CONFIG_COMPOUND_MODES
+#if CONFIG_NEW_INTER
       if ((this_mode == NEWMV || this_mode == NEW_NEWMV ||
            filter_ref == SWITCHABLE) &&
 #else
       if ((this_mode == NEWMV || filter_ref == SWITCHABLE) &&
-#endif
+#endif  // CONFIG_NEW_INTER
           pred_filter_search &&
           ((mbmi->mv[0].as_mv.row & 0x07) != 0 ||
            (mbmi->mv[0].as_mv.col & 0x07) != 0)) {
@@ -775,13 +766,13 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
       }
 
       this_rdc.rate += rate_mv;
-#if CONFIG_COMPOUND_MODES
+#if CONFIG_NEW_INTER
       if (has_second_ref(mbmi))
         this_rdc.rate += cpi->inter_compound_mode_cost
                                   [mbmi->mode_context[ref_frame]]
                                   [INTER_COMPOUND_OFFSET(this_mode)];
       else
-#endif
+#endif  // CONFIG_NEW_INTER
       this_rdc.rate += cpi->inter_mode_cost[mbmi->mode_context[ref_frame]]
                                   [INTER_OFFSET(this_mode)];
       this_rdc.rdcost = RDCOST(x->rdmult, x->rddiv,

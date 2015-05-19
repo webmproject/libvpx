@@ -344,12 +344,12 @@ void vp9_initialize_rd_consts(VP9_COMP *cpi) {
         vp9_cost_tokens((int *)cpi->inter_mode_cost[i],
                         cm->fc.inter_mode_probs[i], vp9_inter_mode_tree);
 
-#if CONFIG_COMPOUND_MODES
+#if CONFIG_NEW_INTER
       for (i = 0; i < INTER_MODE_CONTEXTS; ++i)
         vp9_cost_tokens((int *)cpi->inter_compound_mode_cost[i],
                         cm->fc.inter_compound_mode_probs[i],
                         vp9_inter_compound_mode_tree);
-#endif
+#endif  // CONFIG_NEW_INTER
 #if CONFIG_INTRABC
     } else {
       vp9_build_nmv_cost_table(x->nmvjointcost,
@@ -633,18 +633,18 @@ void vp9_set_rd_speed_thresholds(VP9_COMP *cpi) {
   rd->thresh_mult[THR_NEWA] += 1000;
   rd->thresh_mult[THR_NEWG] += 1000;
 
-#if CONFIG_NEWMVREF
+#if CONFIG_NEW_INTER
   rd->thresh_mult[THR_NEAR_FORNEWMV] += 1000;
   rd->thresh_mult[THR_NEAR_FORNEWA] += 1000;
   rd->thresh_mult[THR_NEAR_FORNEWG] += 1000;
-#endif  // CONFIG_NEWMVREF
+#endif  // CONFIG_NEW_INTER
 
   // Adjust threshold only in real time mode, which only uses last
   // reference frame.
   rd->thresh_mult[THR_NEWMV] += sf->elevate_newmv_thresh;
-#if CONFIG_NEWMVREF
+#if CONFIG_NEW_INTER
   rd->thresh_mult[THR_NEAR_FORNEWMV] += sf->elevate_newmv_thresh;
-#endif  // CONFIG_NEWMVREF
+#endif  // CONFIG_NEW_INTER
 
   rd->thresh_mult[THR_NEARMV] += 1000;
   rd->thresh_mult[THR_NEARA] += 1000;
@@ -656,7 +656,7 @@ void vp9_set_rd_speed_thresholds(VP9_COMP *cpi) {
   rd->thresh_mult[THR_ZEROG] += 2000;
   rd->thresh_mult[THR_ZEROA] += 2000;
 
-#if CONFIG_COMPOUND_MODES
+#if CONFIG_NEW_INTER
   rd->thresh_mult[THR_COMP_NEAREST_NEARESTLA] += 1000;
   rd->thresh_mult[THR_COMP_NEAREST_NEARESTGA] += 1000;
   rd->thresh_mult[THR_COMP_NEAREST_NEARLA] += 1200;
@@ -682,13 +682,9 @@ void vp9_set_rd_speed_thresholds(VP9_COMP *cpi) {
   rd->thresh_mult[THR_COMP_NEARGA] += 1500;
   rd->thresh_mult[THR_COMP_NEWLA] += 2000;
   rd->thresh_mult[THR_COMP_NEWGA] += 2000;
-#if CONFIG_NEWMVREF
-  rd->thresh_mult[THR_COMP_NEAR_FORNEWLA] += 2000;
-  rd->thresh_mult[THR_COMP_NEAR_FORNEWGA] += 2000;
-#endif  // CONFIG_NEWMVREF
   rd->thresh_mult[THR_COMP_ZEROLA] += 2500;
   rd->thresh_mult[THR_COMP_ZEROGA] += 2500;
-#endif  // CONFIG_COMPOUND_MODES
+#endif  // CONFIG_NEW_INTER
 
   rd->thresh_mult[THR_H_PRED] += 2000;
   rd->thresh_mult[THR_V_PRED] += 2000;

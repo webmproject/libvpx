@@ -25,9 +25,9 @@ static void find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
   const MB_MODE_INFO *const prev_mbmi = prev_mi ? &prev_mi->mbmi : NULL;
   const POSITION *const mv_ref_search = mv_ref_blocks[mi->mbmi.sb_type];
   int different_ref_found = 0;
-#if !CONFIG_NEWMVREF
+#if !CONFIG_NEW_INTER
   int context_counter = 0;
-#endif  // CONFIG_NEWMVREF
+#endif  // !CONFIG_NEW_INTER
 
   // Blank the reference vector list
   vpx_memset(mv_ref_list, 0, sizeof(*mv_ref_list) * MAX_MV_REF_CANDIDATES);
@@ -42,9 +42,9 @@ static void find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                                                    xd->mi_stride].src_mi;
       const MB_MODE_INFO *const candidate = &candidate_mi->mbmi;
       // Keep counts for entropy encoding.
-#if !CONFIG_NEWMVREF
+#if !CONFIG_NEW_INTER
       context_counter += mode_2_counter[candidate->mode];
-#endif  // CONFIG_NEWMVREF
+#endif  // !CONFIG_NEW_INTER
       different_ref_found = 1;
 
       if (candidate->ref_frame[0] == ref_frame) {
@@ -102,16 +102,16 @@ static void find_mv_refs_idx(const VP9_COMMON *cm, const MACROBLOCKD *xd,
 
  Done:
 
-#if !CONFIG_NEWMVREF
+#if !CONFIG_NEW_INTER
   mi->mbmi.mode_context[ref_frame] = counter_to_context[context_counter];
-#endif  // CONFIG_NEWMVREF
+#endif  // !CONFIG_NEW_INTER
 
   // Clamp vectors
   for (i = 0; i < MAX_MV_REF_CANDIDATES; ++i)
     clamp_mv_ref(&mv_ref_list[i].as_mv, xd);
 }
 
-#if CONFIG_NEWMVREF
+#if CONFIG_NEW_INTER
 // This function keeps a mode count for a given MB/SB
 void vp9_update_mv_context(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                            const TileInfo *const tile,
@@ -149,17 +149,17 @@ void vp9_update_mv_context(const VP9_COMMON *cm, const MACROBLOCKD *xd,
 
   mi->mbmi.mode_context[ref_frame] = counter_to_context[context_counter];
 }
-#endif  // CONFIG_NEWMVREF
+#endif  // CONFIG_NEW_INTER
 
 void vp9_find_mv_refs(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                       const TileInfo *const tile,
                       MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
                       int_mv *mv_ref_list,
                       int mi_row, int mi_col) {
-#if CONFIG_NEWMVREF
+#if CONFIG_NEW_INTER
   vp9_update_mv_context(cm, xd, tile, mi, ref_frame, mv_ref_list, -1,
                         mi_row, mi_col);
-#endif  // CONFIG_NEWMVREF
+#endif  // CONFIG_NEW_INTER
   find_mv_refs_idx(cm, xd, tile, mi, ref_frame, mv_ref_list, -1,
                    mi_row, mi_col);
 }
@@ -181,13 +181,13 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd, int allow_hp,
 void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
                                    const TileInfo *const tile,
                                    int block, int ref, int mi_row, int mi_col,
-#if CONFIG_NEWMVREF
+#if CONFIG_NEW_INTER
                                    int_mv *mv_list,
-#endif  // CONFIG_NEWMVREF
+#endif  // CONFIG_NEW_INTER
                                    int_mv *nearest, int_mv *near) {
-#if !CONFIG_NEWMVREF
+#if !CONFIG_NEW_INTER
   int_mv mv_list[MAX_MV_REF_CANDIDATES];
-#endif  // CONFIG_NEWMVREF
+#endif  // !CONFIG_NEW_INTER
   MODE_INFO *const mi = xd->mi[0].src_mi;
   b_mode_info *bmi = mi->bmi;
   int n;
@@ -204,9 +204,9 @@ void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
       near->as_int = mv_list[1].as_int;
       break;
     case 1:
-#if !CONFIG_NEWMVREF
+#if !CONFIG_NEW_INTER
     case 2:
-#endif  // !CONFIG_NEWMVREF
+#endif  // !CONFIG_NEW_INTER
       nearest->as_int = bmi[0].as_mv[ref].as_int;
       for (n = 0; n < MAX_MV_REF_CANDIDATES; ++n)
         if (nearest->as_int != mv_list[n].as_int) {
@@ -214,7 +214,7 @@ void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
           break;
         }
       break;
-#if CONFIG_NEWMVREF
+#if CONFIG_NEW_INTER
     case 2: {
       int_mv candidates[1 + MAX_MV_REF_CANDIDATES];
       candidates[0] = bmi[1].as_mv[ref];
@@ -229,7 +229,7 @@ void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
         }
       break;
     }
-#endif  // CONFIG_NEWMVREF
+#endif  // CONFIG_NEW_INTER
     case 3: {
       int_mv candidates[2 + MAX_MV_REF_CANDIDATES];
       candidates[0] = bmi[1].as_mv[ref];

@@ -253,26 +253,20 @@ static VP9_DENOISER_DECISION perform_motion_compensation(VP9_DENOISER *denoiser,
     frame = ctx->best_zeromv_reference_frame;
 
     mbmi->ref_frame[0] = ctx->best_zeromv_reference_frame;
-#if CONFIG_COMPOUND_MODES
-    if (has_second_ref(mbmi)) {
+#if CONFIG_NEW_INTER
+    if (has_second_ref(mbmi))
       mbmi->mode = ZERO_ZEROMV;
-    } else {
-      mbmi->mode = ZEROMV;
-    }
-#else
+    else
+#endif  // CONFIG_NEW_INTER
     mbmi->mode = ZEROMV;
-#endif
     mbmi->mv[0].as_int = 0;
 
-#if CONFIG_COMPOUND_MODES
-    if (has_second_ref(mbmi)) {
+#if CONFIG_NEW_INTER
+    if (has_second_ref(mbmi))
       ctx->best_sse_inter_mode = ZERO_ZEROMV;
-    } else {
-      ctx->best_sse_inter_mode = ZEROMV;
-    }
-#else
+    else
+#endif  // CONFIG_NEW_INTER
     ctx->best_sse_inter_mode = ZEROMV;
-#endif
     ctx->best_sse_mv.as_int = 0;
     ctx->newmv_sse = ctx->zeromv_sse;
   }
@@ -425,19 +419,12 @@ void vp9_denoiser_update_frame_stats(MB_MODE_INFO *mbmi, unsigned int sse,
     ctx->zeromv_sse = sse;
     ctx->best_zeromv_reference_frame = mbmi->ref_frame[0];
   }
-#if CONFIG_COMPOUND_MODES
-  if (mode == NEW_NEWMV || mode == NEWMV ||
-#if CONFIG_NEWMVREF
-      mode == NEAR_FORNEWMV ||
-#endif  // CONFIG_NEWMVREF
+#if CONFIG_NEW_INTER
+  if (mode == NEW_NEWMV || mode == NEWMV || mode == NEAR_FORNEWMV ||
       mode == NEW_NEARESTMV || mode == NEAREST_NEWMV) {
 #else
-#if CONFIG_NEWMVREF
-  if (mode == NEWMV || mode == NEAR_FORNEWMV) {
-#else
   if (mode == NEWMV) {
-#endif  // CONFIG_NEWMVREF
-#endif  // CONFIG_COMPOUND_MODES
+#endif  // CONFIG_NEW_INTER
     ctx->newmv_sse = sse;
     ctx->best_sse_inter_mode = mode;
     ctx->best_sse_mv = mbmi->mv[0];

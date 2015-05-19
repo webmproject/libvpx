@@ -59,10 +59,8 @@ static const int mode_2_counter[MB_MODE_COUNT] = {
   0,  // NEARMV
   3,  // ZEROMV
   1,  // NEWMV
-#if CONFIG_NEWMVREF
+#if CONFIG_NEW_INTER
   1,  // NEAR_FORNEWMV
-#endif  // CONFIG_NEWMVREF
-#if CONFIG_COMPOUND_MODES
   0,  // NEAREST_NEARESTMV
   0,  // NEAREST_NEARMV
   0,  // NEAR_NEARESTMV
@@ -72,7 +70,7 @@ static const int mode_2_counter[MB_MODE_COUNT] = {
   1,  // NEW_NEARMV
   3,  // ZERO_ZEROMV
   1,  // NEW_NEWMV
-#endif
+#endif  // CONFIG_NEW_INTER
 };
 
 // There are 3^3 different combinations of 3 counts that can be either 0,1 or
@@ -226,14 +224,14 @@ static INLINE void clamp_mv2(MV *mv, const MACROBLOCKD *xd) {
                xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN);
 }
 
-#if CONFIG_NEWMVREF
+#if CONFIG_NEW_INTER
 // This function keeps a mode count for a given MB/SB
 void vp9_update_mv_context(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                            const TileInfo *const tile,
                            MODE_INFO *mi, MV_REFERENCE_FRAME ref_frame,
                            int_mv *mv_ref_list,
                            int block, int mi_row, int mi_col);
-#endif  // CONFIG_NEWMVREF
+#endif  // CONFIG_NEW_INTER
 
 void vp9_find_mv_refs(const VP9_COMMON *cm, const MACROBLOCKD *xd,
                       const TileInfo *const tile,
@@ -258,9 +256,9 @@ void vp9_find_best_ref_mvs(MACROBLOCKD *xd, int allow_hp,
 void vp9_append_sub8x8_mvs_for_idx(VP9_COMMON *cm, MACROBLOCKD *xd,
                                    const TileInfo *const tile,
                                    int block, int ref, int mi_row, int mi_col,
-#if CONFIG_NEWMVREF
+#if CONFIG_NEW_INTER
                                    int_mv *mv_list,
-#endif  // CONFIG_NEWMVREF
+#endif  // CONFIG_NEW_INTER
                                    int_mv *nearest, int_mv *near);
 
 #if CONFIG_COPY_MODE

@@ -890,7 +890,7 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
 #endif  // CONFIG_COPY_MODE
 #if CONFIG_GLOBAL_MOTION
       if (bsize >= BLOCK_8X8) {
-#if CONFIG_COMPOUND_MODES
+#if CONFIG_NEW_INTER
         if (mbmi->mode == ZEROMV || mbmi->mode == ZERO_ZEROMV) {
           ++cpi->global_motion_used[mbmi->ref_frame[0]];
           if (mbmi->mode == ZERO_ZEROMV)
@@ -902,7 +902,7 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
           if (has_second_ref(mbmi))
             ++cpi->global_motion_used[mbmi->ref_frame[1]];
         }
-#endif  // CONFIG_COMPOUND_MODES
+#endif  // CONFIG_NEW_INTER
       } else {
         const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];
         const int num_4x4_h = num_4x4_blocks_high_lookup[bsize];
@@ -911,7 +911,7 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
           for (idx = 0; idx < 2; idx += num_4x4_w) {
             const int j = idy * 2 + idx;
             const PREDICTION_MODE b_mode = mi->bmi[j].as_mode;
-#if CONFIG_COMPOUND_MODES
+#if CONFIG_NEW_INTER
             if (b_mode == ZEROMV || b_mode == ZERO_ZEROMV) {
               ++cpi->global_motion_used[mbmi->ref_frame[0]];
               if (b_mode == ZERO_ZEROMV)
@@ -923,7 +923,7 @@ static void update_state(VP9_COMP *cpi, PICK_MODE_CONTEXT *ctx,
               if (has_second_ref(mbmi))
                 ++cpi->global_motion_used[mbmi->ref_frame[1]];
             }
-#endif  // CONFIG_COMPOUND_MODES
+#endif  // CONFIG_NEW_INTER
           }
         }
       }
@@ -1519,15 +1519,12 @@ static void update_stats(VP9_COMMON *cm, const MACROBLOCK *x) {
       const int mode_ctx = mbmi->mode_context[mbmi->ref_frame[0]];
       if (bsize >= BLOCK_8X8) {
         const PREDICTION_MODE mode = mbmi->mode;
-#if CONFIG_COMPOUND_MODES
-        if (is_inter_compound_mode(mode)) {
+#if CONFIG_NEW_INTER
+        if (is_inter_compound_mode(mode))
           ++counts->inter_compound_mode[mode_ctx][INTER_COMPOUND_OFFSET(mode)];
-        } else {
-          ++counts->inter_mode[mode_ctx][INTER_OFFSET(mode)];
-        }
-#else
+        else
+#endif  // CONFIG_NEW_INTER
         ++counts->inter_mode[mode_ctx][INTER_OFFSET(mode)];
-#endif
       } else {
         const int num_4x4_w = num_4x4_blocks_wide_lookup[bsize];
         const int num_4x4_h = num_4x4_blocks_high_lookup[bsize];
@@ -1536,16 +1533,13 @@ static void update_stats(VP9_COMMON *cm, const MACROBLOCK *x) {
           for (idx = 0; idx < 2; idx += num_4x4_w) {
             const int j = idy * 2 + idx;
             const PREDICTION_MODE b_mode = mi->bmi[j].as_mode;
-#if CONFIG_COMPOUND_MODES
-            if (is_inter_compound_mode(b_mode)) {
+#if CONFIG_NEW_INTER
+            if (is_inter_compound_mode(b_mode))
               ++counts->inter_compound_mode[mode_ctx]
                                            [INTER_COMPOUND_OFFSET(b_mode)];
-            } else {
-              ++counts->inter_mode[mode_ctx][INTER_OFFSET(b_mode)];
-            }
-#else
+            else
+#endif  // CONFIG_NEW_INTER
             ++counts->inter_mode[mode_ctx][INTER_OFFSET(b_mode)];
-#endif
           }
         }
       }
@@ -3125,12 +3119,12 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
             0);
         sum_rdc.rdcost =
             RDCOST(x->rdmult, x->rddiv, sum_rdc.rate, sum_rdc.dist);
-#if CONFIG_COMPOUND_MODES
+#if CONFIG_NEW_INTER
         if (is_inter_mode(pc_tree->leaf_split[0]->mic.mbmi.mode) ||
             is_inter_compound_mode(pc_tree->leaf_split[0]->mic.mbmi.mode)) {
 #else
         if (is_inter_mode(pc_tree->leaf_split[0]->mic.mbmi.mode)) {
-#endif
+#endif  // CONFIG_NEW_INTER
 #if CONFIG_EXT_TX
           EXT_TX_TYPE best_tx = NORM;
 #endif
@@ -5256,7 +5250,7 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
 
 #if CONFIG_SUPERTX
 static int check_intra_b(PICK_MODE_CONTEXT *ctx) {
-#if CONFIG_COMPOUND_MODES
+#if CONFIG_NEW_INTER
 #if CONFIG_INTERINTRA
   return (!is_inter_mode((&ctx->mic)->mbmi.mode) &&
           !is_inter_compound_mode((&ctx->mic)->mbmi.mode)) ||
@@ -5265,14 +5259,14 @@ static int check_intra_b(PICK_MODE_CONTEXT *ctx) {
   return !is_inter_mode((&ctx->mic)->mbmi.mode) &&
          !is_inter_compound_mode((&ctx->mic)->mbmi.mode);
 #endif  // CONFIG_INTERINTRA
-#else   // CONFIG_COMPOUND_MODES
+#else   // CONFIG_NEW_INTER
 #if CONFIG_INTERINTRA
   return !is_inter_mode((&ctx->mic)->mbmi.mode) ||
          (ctx->mic.mbmi.ref_frame[1] == INTRA_FRAME);
 #else
   return !is_inter_mode((&ctx->mic)->mbmi.mode);
 #endif  // CONFIG_INTERINTRA
-#endif  // CONFIG_COMPOUND_MODES
+#endif  // CONFIG_NEW_INTER
 }
 
 static int check_intra_sb(VP9_COMP *cpi, const TileInfo *const tile,

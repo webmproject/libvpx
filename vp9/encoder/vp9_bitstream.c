@@ -52,9 +52,9 @@ static struct vp9_token palette_color_encodings[PALETTE_COLORS];
 static struct vp9_token copy_mode_encodings_l2[2];
 static struct vp9_token copy_mode_encodings[COPY_MODE_COUNT - 1];
 #endif
-#if CONFIG_COMPOUND_MODES
+#if CONFIG_NEW_INTER
 static struct vp9_token inter_compound_mode_encodings[INTER_COMPOUND_MODES];
-#endif  // CONFIG_COMPOUND_MODES
+#endif  // CONFIG_NEW_INTER
 #if CONFIG_GLOBAL_MOTION
 static struct vp9_token global_motion_types_encodings[GLOBAL_MOTION_TYPES];
 #endif  // CONFIG_GLOBAL_MOTION
@@ -83,10 +83,10 @@ void vp9_entropy_mode_init() {
   vp9_tokens_from_tree(palette_size_encodings, vp9_palette_size_tree);
   vp9_tokens_from_tree(palette_color_encodings, vp9_palette_color_tree);
 #endif  // CONFIG_PALETTE
-#if CONFIG_COMPOUND_MODES
+#if CONFIG_NEW_INTER
   vp9_tokens_from_tree(inter_compound_mode_encodings,
                        vp9_inter_compound_mode_tree);
-#endif  // CONFIG_COMPOUND_MODES
+#endif  // CONFIG_NEW_INTER
 #if CONFIG_COPY_MODE
   vp9_tokens_from_tree(copy_mode_encodings_l2, vp9_copy_mode_tree_l2);
   vp9_tokens_from_tree(copy_mode_encodings, vp9_copy_mode_tree);
@@ -124,14 +124,14 @@ static void write_copy_mode(VP9_COMMON *cm, vp9_writer *w, COPY_MODE mode,
 }
 #endif  // CONFIG_COPY_MODE
 
-#if CONFIG_COMPOUND_MODES
+#if CONFIG_NEW_INTER
 static void write_inter_compound_mode(vp9_writer *w, PREDICTION_MODE mode,
                                       const vp9_prob *probs) {
   assert(is_inter_compound_mode(mode));
   vp9_write_token(w, vp9_inter_compound_mode_tree, probs,
                   &inter_compound_mode_encodings[INTER_COMPOUND_OFFSET(mode)]);
 }
-#endif  // CONFIG_COMPOUND_MODES
+#endif  // CONFIG_NEW_INTER
 
 static void encode_unsigned_max(struct vp9_write_bit_buffer *wb,
                                 int data, int max) {
@@ -265,7 +265,7 @@ static void update_supertx_probs(VP9_COMMON *cm, vp9_writer *w) {
 }
 #endif  // CONFIG_SUPERTX
 
-#if CONFIG_COMPOUND_MODES
+#if CONFIG_NEW_INTER
 static void update_inter_compound_mode_probs(VP9_COMMON *cm, vp9_writer *w) {
   const int savings_thresh = vp9_cost_one(GROUP_DIFF_UPDATE_PROB) -
                              vp9_cost_zero(GROUP_DIFF_UPDATE_PROB);
@@ -289,7 +289,7 @@ static void update_inter_compound_mode_probs(VP9_COMMON *cm, vp9_writer *w) {
     }
   }
 }
-#endif  // CONFIG_COMPOUND_MODES
+#endif  // CONFIG_NEW_INTER
 
 static void pack_mb_tokens(vp9_writer *w,
                            TOKENEXTRA **tp, const TOKENEXTRA *const stop,
@@ -692,20 +692,20 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
 #endif  // CONFIG_COPY_MODE
     const int mode_ctx = mbmi->mode_context[mbmi->ref_frame[0]];
     const vp9_prob *const inter_probs = cm->fc.inter_mode_probs[mode_ctx];
-#if CONFIG_COMPOUND_MODES
+#if CONFIG_NEW_INTER
     const vp9_prob *const inter_compound_probs =
         cm->fc.inter_compound_mode_probs[mode_ctx];
-#endif  // CONFIG_COMPOUND_MODES
+#endif  // CONFIG_NEW_INTER
     write_ref_frames(cm, xd, w);
 
     // If segment skip is not enabled code the mode.
     if (!vp9_segfeature_active(seg, segment_id, SEG_LVL_SKIP)) {
       if (bsize >= BLOCK_8X8) {
-#if CONFIG_COMPOUND_MODES
+#if CONFIG_NEW_INTER
         if (is_inter_compound_mode(mode))
           write_inter_compound_mode(w, mode, inter_compound_probs);
         else if (is_inter_mode(mode))
-#endif  // CONFIG_COMPOUND_MODES
+#endif  // CONFIG_NEW_INTER
         write_inter_mode(w, mode, inter_probs);
       }
     }
@@ -754,85 +754,60 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
         for (idx = 0; idx < 2; idx += num_4x4_w) {
           const int j = idy * 2 + idx;
           const PREDICTION_MODE b_mode = mi->bmi[j].as_mode;
-#if CONFIG_COMPOUND_MODES
+#if CONFIG_NEW_INTER
           if (is_inter_compound_mode(b_mode))
             write_inter_compound_mode(w, b_mode, inter_compound_probs);
           else if (is_inter_mode(b_mode))
-#endif  // CONFIG_COMPOUND_MODES
+#endif  // CONFIG_NEW_INTER
           write_inter_mode(w, b_mode, inter_probs);
 
-#if CONFIG_COMPOUND_MODES
-          if (b_mode == NEWMV ||
-#if CONFIG_NEWMVREF
-              b_mode == NEAR_FORNEWMV ||
-#endif  // CONFIG_NEWMVREF
+#if CONFIG_NEW_INTER
+          if (b_mode == NEWMV || b_mode == NEAR_FORNEWMV ||
               b_mode == NEW_NEWMV) {
 #else
-#if CONFIG_NEWMVREF
-          if (b_mode == NEWMV || b_mode == NEAR_FORNEWMV) {
-#else
           if (b_mode == NEWMV) {
-#endif  // CONFIG_NEWMVREF
-#endif  // CONFIG_COMPOUND_MODES
+#endif  // CONFIG_NEW_INTER
             for (ref = 0; ref < 1 + is_compound; ++ref) {
               vp9_encode_mv(cpi, w, &mi->bmi[j].as_mv[ref].as_mv,
-#if CONFIG_NEWMVREF
+#if CONFIG_NEW_INTER
                             &mi->bmi[j].ref_mv[ref].as_mv,
 #else
                             &mbmi->ref_mvs[mbmi->ref_frame[ref]][0].as_mv,
-#endif  // CONFIG_NEWMVREF
+#endif  // CONFIG_NEW_INTER
                             nmvc, allow_hp);
             }
           }
-#if CONFIG_COMPOUND_MODES
+#if CONFIG_NEW_INTER
           else if (b_mode == NEAREST_NEWMV || b_mode == NEAR_NEWMV) {
             vp9_encode_mv(cpi, w, &mi->bmi[j].as_mv[1].as_mv,
-#if CONFIG_NEWMVREF
-                          &mi->bmi[j].ref_mv[1].as_mv,
-#else
-                          &mbmi->ref_mvs[mbmi->ref_frame[1]][0].as_mv,
-#endif  // CONFIG_NEWMVREF
-                          nmvc, allow_hp);
+                          &mi->bmi[j].ref_mv[1].as_mv, nmvc, allow_hp);
           } else if (b_mode == NEW_NEARESTMV || b_mode == NEW_NEARMV) {
             vp9_encode_mv(cpi, w, &mi->bmi[j].as_mv[0].as_mv,
-#if CONFIG_NEWMVREF
-                          &mi->bmi[j].ref_mv[0].as_mv,
-#else
-                          &mbmi->ref_mvs[mbmi->ref_frame[0]][0].as_mv,
-#endif  // CONFIG_NEWMVREF
-                          nmvc, allow_hp);
+                          &mi->bmi[j].ref_mv[0].as_mv, nmvc, allow_hp);
           }
-#endif  // CONFIG_COMPOUND_MODES
+#endif  // CONFIG_NEW_INTER
         }
       }
     } else {
-#if CONFIG_COMPOUND_MODES
-      if (mode == NEWMV ||
-#if CONFIG_NEWMVREF
-          mode == NEAR_FORNEWMV ||
-#endif  // CONFIG_NEWMVREF
-          mode == NEW_NEWMV) {
-#else  // CONFIG_COMPOUND_MODES
-#if CONFIG_NEWMVREF
-      if (mode == NEWMV || mode == NEAR_FORNEWMV) {
+#if CONFIG_NEW_INTER
+      if (mode == NEWMV || mode == NEAR_FORNEWMV || mode == NEW_NEWMV) {
 #else
       if (mode == NEWMV) {
-#endif  // CONFIG_NEWMVREF
-#endif  // CONFIG_COMPOUND_MODES
+#endif  // CONFIG_NEW_INTER
         for (ref = 0; ref < 1 + is_compound; ++ref) {
-#if CONFIG_NEWMVREF
+#if CONFIG_NEW_INTER
           if (mode == NEAR_FORNEWMV)
             vp9_encode_mv(cpi, w, &mbmi->mv[ref].as_mv,
                           &mbmi->ref_mvs[mbmi->ref_frame[ref]][1].as_mv, nmvc,
                           allow_hp);
           else
-#endif  // CONFIG_NEWMVREF
+#endif  // CONFIG_NEW_INTER
           vp9_encode_mv(cpi, w, &mbmi->mv[ref].as_mv,
                         &mbmi->ref_mvs[mbmi->ref_frame[ref]][0].as_mv, nmvc,
                         allow_hp);
         }
       }
-#if CONFIG_COMPOUND_MODES
+#if CONFIG_NEW_INTER
       else if (mode == NEAREST_NEWMV || mode == NEAR_NEWMV) {
         vp9_encode_mv(cpi, w, &mbmi->mv[1].as_mv,
                       &mbmi->ref_mvs[mbmi->ref_frame[1]][0].as_mv, nmvc,
@@ -842,13 +817,13 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
                       &mbmi->ref_mvs[mbmi->ref_frame[0]][0].as_mv, nmvc,
                       allow_hp);
       }
-#endif  // CONFIG_COMPOUND_MODES
+#endif  // CONFIG_NEW_INTER
     }
 #if CONFIG_WEDGE_PARTITION
     if (cm->reference_mode != SINGLE_REFERENCE &&
-#if CONFIG_COMPOUND_MODES
+#if CONFIG_NEW_INTER
         is_inter_compound_mode(mode) &&
-#endif  // CONFIG_COMPOUND_MODES
+#endif  // CONFIG_NEW_INTER
         get_wedge_bits(bsize) &&
         mbmi->ref_frame[1] > INTRA_FRAME) {
       vp9_write(w, mbmi->use_wedge_interinter,
@@ -857,7 +832,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
         vp9_write_literal(w, mbmi->interinter_wedge_index,
                           get_wedge_bits(bsize));
     }
-#endif  // CONFIG_WEDGE_PARTITION
+#endif  // CONFIG_NEW_INTER
   }
 }
 
@@ -2257,9 +2232,9 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
                        cm->counts.inter_mode[i], INTER_MODES, &header_bc);
     }
 
-#if CONFIG_COMPOUND_MODES
+#if CONFIG_NEW_INTER
     update_inter_compound_mode_probs(cm, &header_bc);
-#endif
+#endif  // CONFIG_NEW_INTER
 
     if (cm->interp_filter == SWITCHABLE)
       update_switchable_interp_probs(cm, &header_bc);

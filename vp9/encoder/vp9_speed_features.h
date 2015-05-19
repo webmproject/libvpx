@@ -31,13 +31,11 @@ enum {
                     (1 << H_PRED)
 };
 
-#if CONFIG_COMPOUND_MODES
+#if CONFIG_NEW_INTER
 enum {
   INTER_ALL =
-      (1 << NEARESTMV) | (1 << NEARMV) | (1 << ZEROMV) | (1 << NEWMV) |
-#if CONFIG_NEWMVREF
-      (1 << NEAR_FORNEWMV) |
-#endif  // CONFIG_NEWMVREF
+      (1 << NEARESTMV) | (1 << NEARMV) | (1 << ZEROMV) |
+      (1 << NEWMV) | (1 << NEAR_FORNEWMV) |
       (1 << NEAREST_NEARESTMV) | (1 << ZERO_ZEROMV) | (1 << NEAREST_NEARMV) |
       (1 << NEAR_NEARESTMV) | (1 << NEW_NEWMV) | (1 << NEAREST_NEWMV) |
       (1 << NEAR_NEWMV) | (1 << NEW_NEARMV) | (1 << NEW_NEARESTMV),
@@ -74,12 +72,7 @@ enum {
 };
 #else
 enum {
-  INTER_ALL = (1 << NEARESTMV) | (1 << NEARMV) | (1 << ZEROMV) |
-#if CONFIG_NEWMVREF
-      (1 << NEWMV) | (1 << NEAR_FORNEWMV),
-#else
-      (1 << NEWMV),
-#endif  // CONFIG_NEWMVREF
+  INTER_ALL = (1 << NEARESTMV) | (1 << NEARMV) | (1 << ZEROMV) | (1 << NEWMV),
   INTER_NEAREST = (1 << NEARESTMV),
   INTER_NEAREST_NEW = (1 << NEARESTMV) | (1 << NEWMV),
   INTER_NEAREST_ZERO = (1 << NEARESTMV) | (1 << ZEROMV),
@@ -87,7 +80,7 @@ enum {
   INTER_NEAREST_NEAR_NEW = (1 << NEARESTMV) | (1 << NEARMV) | (1 << NEWMV),
   INTER_NEAREST_NEAR_ZERO = (1 << NEARESTMV) | (1 << NEARMV) | (1 << ZEROMV),
 };
-#endif  // CONFIG_COMPOUND_MODES
+#endif  // CONFIG_NEW_INTER
 
 enum {
   DISABLE_ALL_INTER_SPLIT   = (1 << THR_COMP_GA) |

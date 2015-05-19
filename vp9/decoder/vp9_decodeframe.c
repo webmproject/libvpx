@@ -2486,7 +2486,7 @@ static void read_supertx_probs(FRAME_CONTEXT *fc, vp9_reader *r) {
 }
 #endif  // CONFIG_SUPERTX
 
-#if CONFIG_COMPOUND_MODES
+#if CONFIG_NEW_INTER
 static void read_inter_compound_mode_probs(FRAME_CONTEXT *fc, vp9_reader *r) {
   int i, j;
   if (vp9_read(r, GROUP_DIFF_UPDATE_PROB)) {
@@ -2495,7 +2495,7 @@ static void read_inter_compound_mode_probs(FRAME_CONTEXT *fc, vp9_reader *r) {
         vp9_diff_update_prob(r, &fc->inter_compound_mode_probs[j][i]);
   }
 }
-#endif  // CONFIG_COMPOUND_MODES
+#endif  // CONFIG_NEW_INTER
 
 #if CONFIG_GLOBAL_MOTION
 static void read_global_motion_params(Global_Motion_Params *params,
@@ -2574,9 +2574,9 @@ static int read_compressed_header(VP9Decoder *pbi, const uint8_t *data,
     int i, j;
 
     read_inter_mode_probs(fc, &r);
-#if CONFIG_COMPOUND_MODES
+#if CONFIG_NEW_INTER
     read_inter_compound_mode_probs(fc, &r);
-#endif
+#endif  // CONFIG_NEW_INTER
 
     if (cm->interp_filter == SWITCHABLE)
       read_switchable_interp_probs(fc, &r);
@@ -2735,11 +2735,11 @@ static void debug_check_frame_counts(const VP9_COMMON *const cm) {
   assert(!memcmp(cm->counts.ext_tx, zero_counts.ext_tx,
                  sizeof(cm->counts.ext_tx)));
 #endif
-#if CONFIG_COMPOUND_MODES
+#if CONFIG_NEW_INTER
   assert(!memcmp(cm->counts.inter_compound_mode,
                  zero_counts.inter_compound_mode,
                  sizeof(cm->counts.inter_compound_mode)));
-#endif
+#endif  // CONFIG_NEW_INTER
 }
 #endif  // NDEBUG
 

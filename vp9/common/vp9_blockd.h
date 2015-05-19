@@ -88,10 +88,8 @@ typedef enum {
   NEARMV,
   ZEROMV,
   NEWMV,
-#if CONFIG_NEWMVREF
+#if CONFIG_NEW_INTER
   NEAR_FORNEWMV,
-#endif  // CONFIG_NEWMVREF
-#if CONFIG_COMPOUND_MODES
   NEAREST_NEARESTMV,
   NEAREST_NEARMV,
   NEAR_NEARESTMV,
@@ -101,7 +99,7 @@ typedef enum {
   NEW_NEARMV,
   ZERO_ZEROMV,
   NEW_NEWMV,
-#endif
+#endif  // CONFIG_NEW_INTER
   MB_MODE_COUNT
 } PREDICTION_MODE;
 
@@ -116,38 +114,31 @@ typedef enum {
 #endif  // CONFIG_COPY_MODE
 
 static INLINE int is_inter_mode(PREDICTION_MODE mode) {
-#if CONFIG_NEWMVREF
+#if CONFIG_NEW_INTER
   return mode >= NEARESTMV && mode <= NEAR_FORNEWMV;
 #else
   return mode >= NEARESTMV && mode <= NEWMV;
-#endif  // CONFIG_NEWMVREF
+#endif  // CONFIG_NEW_INTER
 }
 
-#if CONFIG_COMPOUND_MODES
+#if CONFIG_NEW_INTER
 static INLINE int is_inter_compound_mode(PREDICTION_MODE mode) {
   return mode >= NEAREST_NEARESTMV && mode <= NEW_NEWMV;
 }
-#endif
+#endif  // CONFIG_NEW_INTER
 
 static INLINE int have_newmv_in_inter_mode(PREDICTION_MODE mode) {
-#if CONFIG_COMPOUND_MODES
+#if CONFIG_NEW_INTER
   return (mode == NEWMV ||
-#if CONFIG_NEWMVREF
           mode == NEAR_FORNEWMV ||
-#endif  // CONFIG_NEWMVREF
           mode == NEW_NEWMV ||
           mode == NEAREST_NEWMV ||
           mode == NEW_NEARESTMV ||
           mode == NEAR_NEWMV ||
           mode == NEW_NEARMV);
 #else
-#if CONFIG_NEWMVREF
-  return (mode == NEWMV ||
-          mode == NEAR_FORNEWMV);
-#else
   return (mode == NEWMV);
-#endif  // CONFIG_NEWMVREF
-#endif  // CONFIG_COMPOUND_MODES
+#endif  // CONFIG_NEW_INTER
 }
 
 #if CONFIG_INTRABC
@@ -159,21 +150,21 @@ static INLINE int is_intrabc_mode(PREDICTION_MODE mode) {
 #define INTRA_MODES (TM_PRED + 1)  // XXX
 #endif  // CONFIG_INTRABC
 
-#if CONFIG_NEWMVREF
+#if CONFIG_NEW_INTER
 #define INTER_MODES (1 + NEAR_FORNEWMV - NEARESTMV)
 #else
 #define INTER_MODES (1 + NEWMV - NEARESTMV)
-#endif  // CONFIG_NEWMVREF
+#endif  // CONFIG_NEW_INTER
 
 #define INTER_OFFSET(mode) ((mode) - NEARESTMV)
 
-#if CONFIG_COMPOUND_MODES
+#if CONFIG_NEW_INTER
 
 #define INTER_COMPOUND_MODES (1 + NEW_NEWMV - NEAREST_NEARESTMV)
 
 #define INTER_COMPOUND_OFFSET(mode) ((mode) - NEAREST_NEARESTMV)
 
-#endif
+#endif  // CONFIG_NEW_INTER
 
 #if CONFIG_TX64X64
 #define MAXTXLEN 64
@@ -188,9 +179,9 @@ static INLINE int is_intrabc_mode(PREDICTION_MODE mode) {
 typedef struct {
   PREDICTION_MODE as_mode;
   int_mv as_mv[2];  // first, second inter predictor motion vectors
-#if CONFIG_NEWMVREF
+#if CONFIG_NEW_INTER
   int_mv ref_mv[2];
-#endif  // CONFIG_NEWMVREF
+#endif  // CONFIG_NEW_INTER
 } b_mode_info;
 
 // Note that the rate-distortion optimization loop, bit-stream writer, and
