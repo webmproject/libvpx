@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2d37016d_ca31771d",
+        "filename": "vp8/encoder/ratectrl.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1586,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-05-19T16:40:16Z",
+      "side": 1,
+      "message": "Couldn\u0027t this just be:\nint thresh_rate \u003d cpi-\u003eav_per_frame_bandwidth \u003e\u003e 2;",
+      "range": {
+        "startLine": 1586,
+        "startChar": 8,
+        "endLine": 1586,
+        "endChar": 19
+      },
+      "revId": "976f7f42c1ad1ff3cc0792572f9c4f41f05bb375",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
