@@ -141,7 +141,7 @@ ifeq ($(CONFIG_VP9_TEMPORAL_DENOISING),yes)
 VP9_CX_SRCS-$(HAVE_SSE2) += encoder/x86/vp9_denoiser_sse2.c
 endif
 
-VP9_CX_SRCS-$(HAVE_AVX2) += encoder/x86/vp9_dct32x32_avx2.c
+VP9_CX_SRCS-$(HAVE_AVX2) += encoder/x86/vp9_dct32x32_avx2_impl.h
 VP9_CX_SRCS-$(HAVE_AVX2) += encoder/x86/vp9_dct_avx2.c
 VP9_CX_SRCS-$(HAVE_AVX2) += encoder/x86/vp9_error_intrin_avx2.c
 VP9_CX_SRCS-$(HAVE_AVX2) += encoder/x86/vp9_variance_avx2.c
