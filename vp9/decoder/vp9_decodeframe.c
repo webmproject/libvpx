@@ -1862,12 +1862,12 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
 }
 
 static void setup_tile_info(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
-  int min_log2_tile_cols, max_log2_tile_cols, max_ones;
-  vp9_get_tile_n_bits(cm->mi_cols, &min_log2_tile_cols, &max_log2_tile_cols);
+  int min_log2_tiles, max_log2_tiles, max_ones;
+  vp9_get_tile_n_bits(cm->mi_cols, &min_log2_tiles, &max_log2_tiles);
 
   // columns
-  max_ones = max_log2_tile_cols - min_log2_tile_cols;
-  cm->log2_tile_cols = min_log2_tile_cols;
+  max_ones = max_log2_tiles - min_log2_tiles;
+  cm->log2_tile_cols = min_log2_tiles;
   while (max_ones-- && vp9_rb_read_bit(rb))
     cm->log2_tile_cols++;
 
