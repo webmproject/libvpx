@@ -20,7 +20,7 @@ extern "C" {
 #endif
 
 #if CONFIG_INTRABC
-#define INTRABC_PROB 128
+#define INTRABC_PROB 192
 #endif  // CONFIG_INTRABC
 
 #define TX_SIZE_CONTEXTS 2

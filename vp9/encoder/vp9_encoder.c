@@ -2906,6 +2906,10 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
     if (loop_count == 0 && frame_is_intra_only(cm))
       cm->allow_palette_mode = 1;
 #endif  // CONFIG_PALETTE
+#if CONFIG_INTRABC
+    if (loop_count == 0 && frame_is_intra_only(cm))
+      cm->allow_intrabc_mode = 1;
+#endif  // CONFIG_INTRABC
 
     // Variance adaptive and in frame q adjustment experiments are mutually
     // exclusive.
@@ -3083,11 +3087,18 @@ static void encode_with_recode_loop(VP9_COMP *cpi,
 
 #if CONFIG_PALETTE
     if (frame_is_intra_only(cm) && cm->allow_palette_mode &&
-        cm->palette_counter * 100 < cm->block_counter) {
+        cm->palette_counter * 100 < cm->palette_blocks_signalled) {
       cm->allow_palette_mode = 0;
       loop = 1;
     }
-#endif
+#endif  // CONFIG_PALETTE
+#if CONFIG_INTRABC
+    if (frame_is_intra_only(cm) && cm->allow_intrabc_mode &&
+        cm->intrabc_counter * 100 < cm->intrabc_blocks_signalled) {
+      cm->allow_intrabc_mode = 0;
+      loop = 1;
+    }
+#endif  // CONFIG_INTRABC
 
     if (loop) {
       loop_count++;

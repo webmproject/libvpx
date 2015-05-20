@@ -882,7 +882,7 @@ static void write_mb_modes_kf(const VP9_COMMON *cm,
 #endif
 
 #if CONFIG_INTRABC
-  if (bsize >= BLOCK_8X8 /*&& cm->allow_palette_mode*/) {
+  if (bsize >= BLOCK_8X8 && cm->allow_intrabc_mode) {
     vp9_write(w, is_intrabc_mode(mbmi->mode), INTRABC_PROB);
   }
 #endif  // CONFIG_INTRABC
@@ -2409,10 +2409,14 @@ static size_t write_compressed_header(VP9_COMP *cpi, uint8_t *data) {
 #endif  // CONFIG_GLOBAL_MOTION
   }
 
+#if CONFIG_INTRABC
+  if (frame_is_intra_only(cm))
+    vp9_write_bit(&header_bc, cm->allow_intrabc_mode);
+#endif  // CONFIG_INTRABC
 #if CONFIG_PALETTE
   if (frame_is_intra_only(cm))
     vp9_write_bit(&header_bc, cm->allow_palette_mode);
-#endif
+#endif  // CONFIG_PALETTE
 
   vp9_stop_encode(&header_bc);
   assert(header_bc.pos <= 0xffff);

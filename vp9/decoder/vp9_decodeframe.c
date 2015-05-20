@@ -2825,10 +2825,14 @@ static int read_compressed_header(VP9Decoder *pbi, const uint8_t *data,
     read_global_motion(cm, &r);
 #endif  // CONFIG_GLOBAL_MOTION
   }
+#if CONFIG_INTRABC
+  if (frame_is_intra_only(cm))
+    cm->allow_intrabc_mode = vp9_read_bit(&r);
+#endif  // CONFIG_INTRABC
 #if CONFIG_PALETTE
   if (frame_is_intra_only(cm))
     cm->allow_palette_mode = vp9_read_bit(&r);
-#endif
+#endif  // CONFIG_PALETTE
 
   return vp9_reader_has_error(&r);
 }

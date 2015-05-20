@@ -4844,9 +4844,15 @@ static void encode_frame_internal(VP9_COMP *cpi) {
       vpx_memset(cm->current_palette_count, 0,
                  PALETTE_BUF_SIZE * sizeof(cm->current_palette_count[0]));
       cm->palette_counter = 0;
-      cm->block_counter = 0;
+      cm->palette_blocks_signalled = 0;
     }
-#endif
+#endif  // CONFIG_PALETTE
+#if CONFIG_INTRABC
+    if (frame_is_intra_only(cm)) {
+      cm->intrabc_counter = 0;
+      cm->intrabc_blocks_signalled = 0;
+    }
+#endif  // CONFIG_INTRABC
 
     encode_tiles(cpi);
 
@@ -5228,13 +5234,14 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
                rows * cols * sizeof(xd->plane[1].color_index_map[0]));
       }
     }
-
+#endif  // CONFIG_PALETTE
+#if CONFIG_PALETTE
     if (frame_is_intra_only(cm) && output_enabled && bsize >= BLOCK_8X8) {
-      cm->block_counter++;
+      cm->palette_blocks_signalled++;
       if (mbmi->palette_enabled[0])
         cm->palette_counter++;
     }
-#endif
+#endif  // CONFIG_PALETTE
   } else {
     int ref;
     const int is_compound = has_second_ref(mbmi);
@@ -5251,6 +5258,13 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
     vp9_encode_sb(x, MAX(bsize, BLOCK_8X8));
     vp9_tokenize_sb(cpi, t, !output_enabled, MAX(bsize, BLOCK_8X8));
   }
+#if CONFIG_INTRABC
+  if (frame_is_intra_only(cm) && output_enabled && bsize >= BLOCK_8X8) {
+    cm->intrabc_blocks_signalled++;
+    if (is_intrabc_mode(mbmi->mode))
+      cm->intrabc_counter++;
+  }
+#endif  // CONFIG_INTRABC
 
   if (output_enabled) {
     if (cm->tx_mode == TX_MODE_SELECT &&

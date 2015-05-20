@@ -276,7 +276,7 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
 
 #if CONFIG_INTRABC
   vp9_find_ref_dv(&dv_ref, mi_row, mi_col);
-  if (bsize >= BLOCK_8X8 /* && cm->allow_intrabc*/) {
+  if (bsize >= BLOCK_8X8 && cm->allow_intrabc_mode) {
     use_intrabc = vp9_read(r, INTRABC_PROB);
     if (use_intrabc) {
       mbmi->mode = mbmi->uv_mode = NEWDV;

@@ -1841,7 +1841,8 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
       this_rate += vp9_cost_bit(cpi->common.fc.y_tx_skip_prob[0], 0);
 #endif
 #if CONFIG_INTRABC
-    this_rate += vp9_cost_bit(INTRABC_PROB, 0);
+    if (cpi->common.allow_intrabc_mode)
+      this_rate += vp9_cost_bit(INTRABC_PROB, 0);
 #endif  // CONFIG_INTRABC
 #if CONFIG_FILTERINTRA
     if (is_filter_allowed(mode) && is_filter_enabled(mic->mbmi.tx_size))
@@ -1910,7 +1911,8 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
     this_rate = this_rate_tokenonly + bmode_costs[mode];
     this_rate += vp9_cost_bit(cpi->common.fc.y_tx_skip_prob[0], 1);
 #if CONFIG_INTRABC
-    this_rate += vp9_cost_bit(INTRABC_PROB, 0);
+    if (cpi->common.allow_intrabc_mode)
+      this_rate += vp9_cost_bit(INTRABC_PROB, 0);
 #endif  // CONFIG_INTRABC
 #if CONFIG_FILTERINTRA
     if (is_filter_allowed(mode) && is_filter_enabled(mic->mbmi.tx_size))
@@ -2134,7 +2136,8 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                 mic->mbmi.tx_skip[0]);
 #endif  // CONFIG_TX_SKIP
 #if CONFIG_INTRABC
-      this_rate += vp9_cost_bit(INTRABC_PROB, 0);
+      if (cpi->common.allow_intrabc_mode)
+        this_rate += vp9_cost_bit(INTRABC_PROB, 0);
 #endif  // CONFIG_INTRABC
       this_rd = RDCOST(x->rdmult, x->rddiv, this_rate, this_distortion);
       if (this_rd < best_rd) {
@@ -5625,7 +5628,8 @@ static void rd_pick_palette_444(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *rd_cost,
       }
       rate_uv = rate_uv_tokenonly + (1 + 8 * 2 * n) * vp9_cost_bit(128, 0);
 #if CONFIG_INTRABC
-      rate_y += vp9_cost_bit(INTRABC_PROB, 0);
+      if (cm->allow_intrabc_mode)
+        rate_y += vp9_cost_bit(INTRABC_PROB, 0);
 #endif  // CONFIG_INTRABC
 #if CONFIG_TX_SKIP
       rate_y +=
@@ -5777,7 +5781,7 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
 #endif  // CONFIG_PALETTE
 
 #if CONFIG_INTRABC
-  if (bsize >= BLOCK_8X8) {
+  if (bsize >= BLOCK_8X8 && cm->allow_intrabc_mode) {
     best_rd = MIN(best_rd, rd_cost->rdcost);
     if (rd_pick_intrabc_sb_mode(cpi, x, mi_row, mi_col, &rate_y,
                                 &dist_y, &y_skip, bsize,
