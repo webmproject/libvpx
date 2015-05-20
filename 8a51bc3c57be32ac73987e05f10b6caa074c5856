@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "adfdb1c1_1daebe98",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1672,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-05-20T16:37:33Z",
+      "side": 1,
+      "message": "Why is the distortion adjusted like this? It is already taken care of in dist_block.",
+      "range": {
+        "startLine": 1672,
+        "startChar": 42,
+        "endLine": 1672,
+        "endChar": 43
+      },
+      "revId": "8a51bc3c57be32ac73987e05f10b6caa074c5856",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2d37016d_bbd31454",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1718,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-05-20T16:37:33Z",
+      "side": 1,
+      "message": "ditto",
+      "range": {
+        "startLine": 1718,
+        "startChar": 42,
+        "endLine": 1718,
+        "endChar": 43
+      },
+      "revId": "8a51bc3c57be32ac73987e05f10b6caa074c5856",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
