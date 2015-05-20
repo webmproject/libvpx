@@ -57,8 +57,7 @@ typedef struct {
     NEED_TO_ENCODE
   }encode_empty_frame_state;
   struct lookahead_entry empty_frame;
-  int empty_frame_width;
-  int empty_frame_height;
+  int encode_intra_empty_frame;
 
   // Store scaled source frames to be used for temporal filter to generate
   // a alt ref frame.

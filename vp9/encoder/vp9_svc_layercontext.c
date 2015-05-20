@@ -15,6 +15,8 @@
 #include "vp9/encoder/vp9_extend.h"
 
 #define SMALL_FRAME_FB_IDX 7
+#define SMALL_FRAME_WIDTH  16
+#define SMALL_FRAME_HEIGHT 16
 
 void vp9_init_layer_context(VP9_COMP *const cpi) {
   SVC *const svc = &cpi->svc;
@@ -33,7 +35,7 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
 
     if (cpi->oxcf.error_resilient_mode == 0 && cpi->oxcf.pass == 2) {
       if (vp9_realloc_frame_buffer(&cpi->svc.empty_frame.img,
-                                   cpi->common.width, cpi->common.height,
+                                   SMALL_FRAME_WIDTH, SMALL_FRAME_HEIGHT,
                                    cpi->common.subsampling_x,
                                    cpi->common.subsampling_y,
 #if CONFIG_VP9_HIGHBITDEPTH
@@ -48,8 +50,6 @@ void vp9_init_layer_context(VP9_COMP *const cpi) {
 
       memset(cpi->svc.empty_frame.img.buffer_alloc, 0x80,
              cpi->svc.empty_frame.img.buffer_alloc_sz);
-      cpi->svc.empty_frame_width = cpi->common.width;
-      cpi->svc.empty_frame_height = cpi->common.height;
     }
   }
 
@@ -362,20 +362,11 @@ int vp9_svc_start_frame(VP9_COMP *const cpi) {
         cpi->lst_fb_idx =
             cpi->gld_fb_idx = cpi->alt_fb_idx = SMALL_FRAME_FB_IDX;
 
-        // Gradually make the empty frame smaller to save bits. Make it half of
-        // its previous size because of the scaling factor restriction.
-        cpi->svc.empty_frame_width >>= 1;
-        cpi->svc.empty_frame_width = (cpi->svc.empty_frame_width + 1) & ~1;
-        if (cpi->svc.empty_frame_width < 16)
-          cpi->svc.empty_frame_width = 16;
+        if (cpi->svc.encode_intra_empty_frame != 0)
+          cpi->common.intra_only = 1;
 
-        cpi->svc.empty_frame_height >>= 1;
-        cpi->svc.empty_frame_height = (cpi->svc.empty_frame_height + 1) & ~1;
-        if (cpi->svc.empty_frame_height < 16)
-          cpi->svc.empty_frame_height = 16;
-
-        width = cpi->svc.empty_frame_width;
-        height = cpi->svc.empty_frame_height;
+        width = SMALL_FRAME_WIDTH;
+        height = SMALL_FRAME_HEIGHT;
       }
     }
   }

@@ -3474,11 +3474,18 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
     }
   }
   if (is_two_pass_svc(cpi) && cm->error_resilient_mode == 0) {
-    // Use the last frame context for the empty frame.
+    // Use context 0 for intra only empty frame, but the last frame context
+    // for other empty frames.
+    if (cpi->svc.encode_empty_frame_state == ENCODING) {
+      if (cpi->svc.encode_intra_empty_frame != 0)
+        cm->frame_context_idx = 0;
+      else
+        cm->frame_context_idx = FRAME_CONTEXTS - 1;
+    } else {
     cm->frame_context_idx =
-        (cpi->svc.encode_empty_frame_state == ENCODING) ? FRAME_CONTEXTS - 1 :
         cpi->svc.spatial_layer_id * cpi->svc.number_temporal_layers +
         cpi->svc.temporal_layer_id;
+    }
 
     // The probs will be updated based on the frame type of its previous
     // frame if frame_parallel_decoding_mode is 0. The type may vary for
@@ -3966,6 +3973,7 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
       }
 
       cm->show_frame = 0;
+      cm->intra_only = 0;
       cpi->refresh_alt_ref_frame = 1;
       cpi->refresh_golden_frame = 0;
       cpi->refresh_last_frame = 0;
@@ -4308,8 +4316,10 @@ int vp9_get_compressed_data(VP9_COMP *cpi, unsigned int *frame_flags,
 #endif
 
   if (is_two_pass_svc(cpi)) {
-    if (cpi->svc.encode_empty_frame_state == ENCODING)
+    if (cpi->svc.encode_empty_frame_state == ENCODING) {
       cpi->svc.encode_empty_frame_state = ENCODED;
+      cpi->svc.encode_intra_empty_frame = 0;
+    }
 
     if (cm->show_frame) {
       ++cpi->svc.spatial_layer_to_encode;
