@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ad4211dc_570bd425",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-05-20T22:15:37Z",
+      "side": 1,
+      "message": "When I included vp9_entropymode.h, errors were reported by the compiler.  This was my way of quieting the compiler.",
+      "parentUuid": "6d7ad934_17cd5736",
+      "revId": "385190ffaaedfbb05ce10e99ab53d6a4bbd0598f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2d6e217b_23ef0600",
         "filename": "vp9/common/vp9_onyxc_int.h",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2015-05-20T21:21:13Z",
       "side": 1,
       "message": "seg_dequant seems oversized for the decoder if only [0][0] is used...",
+      "revId": "385190ffaaedfbb05ce10e99ab53d6a4bbd0598f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed4089d5_a848bf3e",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 338,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-05-20T22:15:37Z",
+      "side": 1,
+      "message": "It is copying 32 bytes to the beginning of seg_dequant.  Changed for easier reading.",
+      "parentUuid": "2d6e217b_23ef0600",
       "revId": "385190ffaaedfbb05ce10e99ab53d6a4bbd0598f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "ad4211dc_97887c24",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-05-20T22:15:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2d6e217b_f863dd3e",
+      "revId": "385190ffaaedfbb05ce10e99ab53d6a4bbd0598f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6d7ad934_f77c4b6f",
         "filename": "vp9/common/vp9_onyxc_int.h",
         "patchSetId": 4
@@ -64,6 +118,24 @@
       "writtenOn": "2015-05-20T21:21:13Z",
       "side": 1,
       "message": "align this with the \u0027(\u0027",
+      "revId": "385190ffaaedfbb05ce10e99ab53d6a4bbd0598f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed4089d5_c84d034e",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 342,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-05-20T22:15:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6d7ad934_f77c4b6f",
       "revId": "385190ffaaedfbb05ce10e99ab53d6a4bbd0598f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "ed67a99d_e7bca2fe",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 353,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-05-20T22:15:37Z",
+      "side": 1,
+      "message": "This was done to fix build errors.",
+      "parentUuid": "6d7ad934_37b2d3c6",
+      "revId": "385190ffaaedfbb05ce10e99ab53d6a4bbd0598f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6d7ad934_d774af7d",
         "filename": "vp9/decoder/vp9_detokenize.c",
         "patchSetId": 4
@@ -98,6 +188,24 @@
       "writtenOn": "2015-05-20T21:21:13Z",
       "side": 1,
       "message": "is this cast necessary? const should be OK implicitly apply",
+      "revId": "385190ffaaedfbb05ce10e99ab53d6a4bbd0598f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ad4211dc_17c78c49",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-05-20T22:15:37Z",
+      "side": 1,
+      "message": "Quiets compiler warning.",
+      "parentUuid": "6d7ad934_d774af7d",
       "revId": "385190ffaaedfbb05ce10e99ab53d6a4bbd0598f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
