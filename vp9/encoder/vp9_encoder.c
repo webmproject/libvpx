@@ -572,12 +572,18 @@ void vp9_new_framerate(VP9_COMP *cpi, double framerate) {
 static void set_tile_limits(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
 
-  int min_log2_tile_cols, max_log2_tile_cols;
-  vp9_get_tile_n_bits(cm->mi_cols, &min_log2_tile_cols, &max_log2_tile_cols);
+  int min_log2_tiles, max_log2_tiles;
+  vp9_get_tile_n_bits(cm->mi_cols, &min_log2_tiles, &max_log2_tiles);
 
   cm->log2_tile_cols = clamp(cpi->oxcf.tile_columns,
-                             min_log2_tile_cols, max_log2_tile_cols);
+                             min_log2_tiles, max_log2_tiles);
+#if CONFIG_ROW_TILE
+  vp9_get_tile_n_bits(cm->mi_rows, &min_log2_tiles, &max_log2_tiles);
+  cm->log2_tile_rows = clamp(cpi->oxcf.tile_rows,
+                             min_log2_tiles, max_log2_tiles);
+#else
   cm->log2_tile_rows = cpi->oxcf.tile_rows;
+#endif
 }
 
 static void init_buffer_indices(VP9_COMP *cpi) {

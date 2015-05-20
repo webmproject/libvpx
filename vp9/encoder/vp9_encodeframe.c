@@ -4536,8 +4536,13 @@ static void encode_tiles(VP9_COMP *cpi) {
   const int tile_rows = 1 << cm->log2_tile_rows;
 
   int tile_col, tile_row;
+#if CONFIG_ROW_TILE
+  TileInfo tile[64][64];
+  TOKENEXTRA *tok[64][64];
+#else
   TileInfo tile[4][1 << 6];
   TOKENEXTRA *tok[4][1 << 6];
+#endif
   TOKENEXTRA *pre_tok = cpi->tok;
   int tile_tok = 0;
 
