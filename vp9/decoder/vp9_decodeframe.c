@@ -1893,12 +1893,6 @@ static void setup_tile_info(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
 #endif
 }
 
-typedef struct TileBuffer {
-  const uint8_t *data;
-  size_t size;
-  int col;  // only used with multi-threaded decoding
-} TileBuffer;
-
 // Reads the next tile returning its size and adjusting '*data' accordingly
 // based on 'is_last'.
 static void get_tile_buffer(const uint8_t *const data_end,
@@ -1939,7 +1933,7 @@ static void get_tile_buffer(const uint8_t *const data_end,
 static void get_tile_buffers(VP9Decoder *pbi,
                              const uint8_t *data, const uint8_t *data_end,
                              int tile_cols, int tile_rows,
-                             TileBuffer (*tile_buffers)[1 << 6]) {
+                             TileBuffer (*tile_buffers)[1024]) {
   int r, c;
 
   for (r = 0; r < tile_rows; ++r) {
@@ -1962,9 +1956,9 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
   const int tile_cols = 1 << cm->log2_tile_cols;
   const int tile_rows = 1 << cm->log2_tile_rows;
 #if CONFIG_ROW_TILE
-  TileBuffer tile_buffers[64][64];
+  TileBuffer (*tile_buffers)[1024] = pbi->tile_buffers;
 #else
-  TileBuffer tile_buffers[4][1 << 6];
+  TileBuffer tile_buffers[4][1024];
 #endif
   int tile_row, tile_col;
   int mi_row, mi_col;
@@ -2138,6 +2132,8 @@ static int compare_tile_buffers(const void *a, const void *b) {
   }
 }
 
+// TODO(jingning): Multi-thread tile decoding is not supporting
+// arbitrary row/column tile numbers yet.
 static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
                                       const uint8_t *data,
                                       const uint8_t *data_end) {
@@ -2148,7 +2144,7 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
   const int tile_cols = 1 << cm->log2_tile_cols;
   const int tile_rows = 1 << cm->log2_tile_rows;
   const int num_workers = MIN(pbi->max_threads & ~1, tile_cols);
-  TileBuffer tile_buffers[1][1 << 6];
+  TileBuffer tile_buffers[1][1024];
   int n;
   int final_worker = -1;
 

@@ -426,6 +426,11 @@ typedef struct VP9_COMP {
   int multi_arf_enabled;
   int multi_arf_last_grp_enabled;
 
+#if CONFIG_ROW_TILE
+  TileInfo tile_info[1024][1024];
+  TOKENEXTRA *tile_tok[1024][1024];
+#endif
+
 #if CONFIG_VP9_TEMPORAL_DENOISING
   VP9_DENOISER denoiser;
 #endif
