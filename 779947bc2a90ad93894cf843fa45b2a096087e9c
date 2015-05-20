@@ -16,6 +16,24 @@
       "revId": "779947bc2a90ad93894cf843fa45b2a096087e9c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cd4745eb_c44df24d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-05-20T19:05:07Z",
+      "side": 1,
+      "message": "It was intentional, but I agree, it should be in its own commit.  Will fix.",
+      "parentUuid": "adfdb1c1_b3411bfc",
+      "revId": "779947bc2a90ad93894cf843fa45b2a096087e9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
