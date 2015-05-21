@@ -208,7 +208,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t *ctx,
   RANGE_CHECK(extra_cfg, cpu_used, -16, 16);
   RANGE_CHECK_HI(extra_cfg, noise_sensitivity, 6);
   RANGE_CHECK(extra_cfg, tile_columns, 0, 6);
-  RANGE_CHECK(extra_cfg, tile_rows, 0, 2);
+  RANGE_CHECK(extra_cfg, tile_rows, 0, 6);
   RANGE_CHECK_HI(extra_cfg, sharpness, 7);
   RANGE_CHECK(extra_cfg, arnr_max_frames, 0, 15);
   RANGE_CHECK_HI(extra_cfg, arnr_strength, 6);

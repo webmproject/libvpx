@@ -1885,7 +1885,7 @@ static void setup_tile_info(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
 
   if (cm->log2_tile_rows > 10)
     vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
-                       "Invalid number of tile columns");
+                       "Invalid number of tile rows");
 #else
   cm->log2_tile_rows = vp9_rb_read_bit(rb);
   if (cm->log2_tile_rows)
@@ -1961,7 +1961,11 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
   const int aligned_cols = mi_cols_aligned_to_sb(cm->mi_cols);
   const int tile_cols = 1 << cm->log2_tile_cols;
   const int tile_rows = 1 << cm->log2_tile_rows;
+#if CONFIG_ROW_TILE
+  TileBuffer tile_buffers[64][64];
+#else
   TileBuffer tile_buffers[4][1 << 6];
+#endif
   int tile_row, tile_col;
   int mi_row, mi_col;
   TileData *tile_data = NULL;
@@ -1988,8 +1992,13 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
     vp9_loop_filter_frame_init(cm, cm->lf.filter_level);
   }
 
+#if CONFIG_ROW_TILE
+  assert(tile_rows <= (1 << 6));
+  assert(tile_cols <= (1 << 6));
+#else
   assert(tile_rows <= 4);
   assert(tile_cols <= (1 << 6));
+#endif
 
   // Note: this memset assumes above_context[0], [1] and [2]
   // are allocated as part of the same buffer.
