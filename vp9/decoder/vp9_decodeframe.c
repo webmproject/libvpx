@@ -1311,8 +1311,11 @@ static void decode_block(VP9_COMMON *const cm, MACROBLOCKD *const xd,
       struct inter_args arg = { cm, xd, r, &eobtotal };
 
       vp9_foreach_transformed_block(xd, bsize, reconstruct_inter_block, &arg);
+#if CONFIG_BITSTREAM_FIXES
+#else
       if (!less8x8 && eobtotal == 0)
         mbmi->skip = 1;  // skip loopfilter
+#endif
     }
   }
 #if CONFIG_SUPERTX
