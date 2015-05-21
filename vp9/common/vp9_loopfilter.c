@@ -317,6 +317,48 @@ void loop_bilateral_filter(uint8_t *data, int width, int height,
   }
 }
 
+#if CONFIG_VP9_HIGHBITDEPTH
+void loop_bilateral_filter_highbd(uint8_t *data8, int width, int height,
+                           int stride, loop_filter_info_n *lfi,
+                           uint8_t *tmpdata8, int tmpstride, int bit_depth) {
+  int i, j;
+  const double *wr_lut_ = lfi->wr_lut + 255;
+  const double *wx_lut_ = lfi->wx_lut + BILATERAL_HALFWIN * (1 + BILATERAL_WIN);
+  uint16_t *data = CONVERT_TO_SHORTPTR(data8);
+  uint16_t *tmpdata = CONVERT_TO_SHORTPTR(tmpdata8);
+  for (i = 0; i < height; ++i) {
+    for (j = 0; j < width; ++j) {
+      int x, y;
+      double wt;
+      double flsum = 0;
+      double wtsum = 0;
+      uint16_t *v = data + i * stride + j;
+      uint16_t *z = tmpdata + i * tmpstride + j;
+      uint16_t *d;
+      for (y = -BILATERAL_HALFWIN; y <= BILATERAL_HALFWIN; ++y) {
+        for (x = -BILATERAL_HALFWIN; x <= BILATERAL_HALFWIN; ++x) {
+          if (!is_in_image(j + x, i + y, width, height))
+            continue;
+          d = data + (i + y) * stride + (j + x);
+          wt = wr_lut_[(d[0] - v[0]) >> (bit_depth - 8)] *
+               wx_lut_[y * BILATERAL_WIN + x];
+          wtsum += wt;
+          flsum += wt * d[0];
+        }
+      }
+      if (wtsum > 0)
+        z[0] = (int)(flsum / wtsum + 0.5);
+      else
+        z[0] = v[0];
+    }
+  }
+  for (i = 0; i < height; ++i) {
+    vpx_memcpy(data + i * stride, tmpdata + i * tmpstride,
+               width * sizeof(*data));
+  }
+}
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
 void vp9_loop_bilateral_rows(YV12_BUFFER_CONFIG *frame,
                              VP9_COMMON *cm,
                              int start_mi_row, int end_mi_row,
@@ -337,18 +379,38 @@ void vp9_loop_bilateral_rows(YV12_BUFFER_CONFIG *frame,
                                cm->subsampling_x, cm->subsampling_y,
 #if CONFIG_VP9_HIGHBITDEPTH
                                cm->use_highbitdepth,
-#endif
+#endif  // CONFIG_VP9_HIGHBITDEPTH
                                0, NULL, NULL, NULL) < 0)
     vpx_internal_error(&cm->error, VPX_CODEC_MEM_ERROR,
                        "Failed to allocate post-processing buffer");
 
   tmp_buf = &cm->tmp_loop_buf;
 
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (cm->use_highbitdepth)
+    loop_bilateral_filter_highbd(frame->y_buffer + ystart * ystride,
+                        ywidth, yend - ystart, ystride, &cm->lf_info,
+                        tmp_buf->y_buffer + ystart * tmp_buf->y_stride,
+                        tmp_buf->y_stride, cm->bit_depth);
+  else
+#endif  // CONFIG_VP9_HIGHBITDEPTH
   loop_bilateral_filter(frame->y_buffer + ystart * ystride,
                         ywidth, yend - ystart, ystride, &cm->lf_info,
                         tmp_buf->y_buffer + ystart * tmp_buf->y_stride,
                         tmp_buf->y_stride);
   if (!y_only) {
+#if CONFIG_VP9_HIGHBITDEPTH
+  if (cm->use_highbitdepth) {
+    loop_bilateral_filter_highbd(frame->u_buffer + uvstart * uvstride,
+                          uvwidth, uvend - uvstart, uvstride, &cm->lf_info,
+                          tmp_buf->u_buffer + uvstart * tmp_buf->uv_stride,
+                          tmp_buf->uv_stride, cm->bit_depth);
+    loop_bilateral_filter_highbd(frame->v_buffer + uvstart * uvstride,
+                          uvwidth, uvend - uvstart, uvstride, &cm->lf_info,
+                          tmp_buf->v_buffer + uvstart * tmp_buf->uv_stride,
+                          tmp_buf->uv_stride, cm->bit_depth);
+    } else {
+#endif  // CONFIG_VP9_HIGHBITDEPTH
     loop_bilateral_filter(frame->u_buffer + uvstart * uvstride,
                           uvwidth, uvend - uvstart, uvstride, &cm->lf_info,
                           tmp_buf->u_buffer + uvstart * tmp_buf->uv_stride,
@@ -357,6 +419,9 @@ void vp9_loop_bilateral_rows(YV12_BUFFER_CONFIG *frame,
                           uvwidth, uvend - uvstart, uvstride, &cm->lf_info,
                           tmp_buf->v_buffer + uvstart * tmp_buf->uv_stride,
                           tmp_buf->uv_stride);
+#if CONFIG_VP9_HIGHBITDEPTH
+    }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
   }
 }
 #endif  // CONFIG_LOOP_POSTFILTER
