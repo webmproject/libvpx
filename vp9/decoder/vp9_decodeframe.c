@@ -921,7 +921,8 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
   int mi_row, mi_col;
   TileData *tile_data = NULL;
 
-  if (cm->lf.filter_level && pbi->lf_worker.data1 == NULL) {
+  if (cm->lf.filter_level && !cm->skip_loop_filter &&
+      pbi->lf_worker.data1 == NULL) {
     CHECK_MEM_ERROR(cm, pbi->lf_worker.data1,
                     vpx_memalign(32, sizeof(LFWorkerData)));
     pbi->lf_worker.hook = (VP9WorkerHook)vp9_loop_filter_worker;
@@ -931,7 +932,7 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
     }
   }
 
-  if (cm->lf.filter_level) {
+  if (cm->lf.filter_level && !cm->skip_loop_filter) {
     LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
     // Be sure to sync as we might be resuming after a failed frame decode.
     winterface->sync(&pbi->lf_worker);
@@ -1004,7 +1005,7 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
                                "Failed to decode tile data");
       }
       // Loopfilter one row.
-      if (cm->lf.filter_level) {
+      if (cm->lf.filter_level && !cm->skip_loop_filter) {
         const int lf_start = mi_row - MI_BLOCK_SIZE;
         LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
 
@@ -1033,7 +1034,7 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
   }
 
   // Loopfilter remaining rows in the frame.
-  if (cm->lf.filter_level) {
+  if (cm->lf.filter_level && !cm->skip_loop_filter) {
     LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
     winterface->sync(&pbi->lf_worker);
     lf_data->start = lf_data->stop;
@@ -1657,7 +1658,7 @@ void vp9_decode_frame(VP9Decoder *pbi,
     vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
                        "Decode failed. Frame data header is corrupted.");
 
-  if (cm->lf.filter_level) {
+  if (cm->lf.filter_level && !cm->skip_loop_filter) {
     vp9_loop_filter_frame_init(cm, cm->lf.filter_level);
   }
 
@@ -1683,11 +1684,13 @@ void vp9_decode_frame(VP9Decoder *pbi,
     // Multi-threaded tile decoder
     *p_data_end = decode_tiles_mt(pbi, data + first_partition_size, data_end);
     if (!xd->corrupted) {
-      // If multiple threads are used to decode tiles, then we use those threads
-      // to do parallel loopfiltering.
-      vp9_loop_filter_frame_mt(new_fb, cm, pbi->mb.plane, cm->lf.filter_level,
-                               0, 0, pbi->tile_workers, pbi->num_tile_workers,
-                               &pbi->lf_row_sync);
+      if (!cm->skip_loop_filter) {
+        // If multiple threads are used to decode tiles, then we use those
+        // threads to do parallel loopfiltering.
+        vp9_loop_filter_frame_mt(new_fb, cm, pbi->mb.plane,
+                                 cm->lf.filter_level, 0, 0, pbi->tile_workers,
+                                 pbi->num_tile_workers, &pbi->lf_row_sync);
+      }
     } else {
       vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
                          "Decode failed. Frame data is corrupted.");

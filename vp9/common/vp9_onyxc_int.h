@@ -264,6 +264,7 @@ typedef struct VP9Common {
 
   int log2_tile_cols, log2_tile_rows;
   int byte_alignment;
+  int skip_loop_filter;
 
   // Private data associated with the frame buffer callbacks.
   void *cb_priv;
