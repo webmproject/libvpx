@@ -22,6 +22,30 @@
       "revId": "50731e25c1b6280590bb306d59e790ba8ea0647f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2d20e12c_c2fe387b",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1951,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2015-05-21T12:06:48Z",
+      "side": 1,
+      "message": "Yes sorry the latest version of VS keeps reformatting behind my back.",
+      "parentUuid": "0d8cfd85_d3ada69c",
+      "range": {
+        "startLine": 1951,
+        "startChar": 2,
+        "endLine": 1951,
+        "endChar": 6
+      },
+      "revId": "50731e25c1b6280590bb306d59e790ba8ea0647f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
