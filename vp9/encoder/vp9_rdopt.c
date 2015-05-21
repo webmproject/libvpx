@@ -1554,7 +1554,6 @@ static int64_t handle_intrabc_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                    int *rate2, int64_t *distortion,
                                    int *skippable,
                                    int *rate_y, int *rate_uv,
-                                   int_mv (*mode_mv)[MAX_REF_FRAMES],
                                    int mi_row, int mi_col,
                                    int64_t *psse,
                                    const int64_t ref_best_rd) {
@@ -1563,9 +1562,8 @@ static int64_t handle_intrabc_mode(VP9_COMP *cpi, MACROBLOCK *x,
   MACROBLOCKD *xd = &x->e_mbd;
   MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
   const int this_mode = mbmi->mode;
-  int_mv *frame_mv = mode_mv[this_mode];
   int i;
-  int_mv cur_mv[2];
+  int_mv cur_dv;
   int64_t rd;
   uint8_t skip_txfm[MAX_MB_PLANE << 2] = {0};
   int64_t bsse[MAX_MB_PLANE << 2] = {0};
@@ -1579,24 +1577,20 @@ static int64_t handle_intrabc_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
   if (this_mode == NEWDV) {
     int rate_mv;
-      int_mv tmp_mv;
-      intrabc_search(cpi, x, bsize, mi_row, mi_col,
-                           &tmp_mv, &rate_mv);
-      if (tmp_mv.as_int == INVALID_MV)
-        return INT64_MAX;
-      *rate2 += rate_mv;
-      frame_mv[INTRA_FRAME].as_int =
-          xd->mi[0].src_mi->bmi[0].as_mv[0].as_int = tmp_mv.as_int;
+    int_mv tmp_mv;
+    intrabc_search(cpi, x, bsize, mi_row, mi_col, &tmp_mv, &rate_mv);
+    if (tmp_mv.as_int == INVALID_MV)
+      return INT64_MAX;
+    *rate2 += rate_mv;
+    cur_dv.as_int = xd->mi[0].src_mi->bmi[0].as_mv[0].as_int = tmp_mv.as_int;
+  } else {
+    cur_dv.as_int = INVALID_MV;
+    // clamp_mv2(&cur_dv.as_mv, xd);
   }
 
-  cur_mv[0] = frame_mv[INTRA_FRAME];
-  // Clip "next_nearest" so that it does not extend to far out of image
-  if (this_mode != NEWDV)
-    clamp_mv2(&cur_mv[0].as_mv, xd);
-
-  if (mv_check_bounds(x, &cur_mv[0].as_mv))
+  if (mv_check_bounds(x, &cur_dv.as_mv))
     return INT64_MAX;
-  mbmi->mv[0].as_int = cur_mv[0].as_int;
+  mbmi->mv[0].as_int = cur_dv.as_int;
 
   if (RDCOST(x->rdmult, x->rddiv, *rate2, 0) > ref_best_rd &&
       mbmi->mode != NEARESTMV)
@@ -2214,7 +2208,6 @@ static int64_t rd_pick_intrabc_sb_mode(VP9_COMP *cpi, MACROBLOCK *x,
   int best_skip = x->skip;
   const int *bmode_costs = cpi->y_mode_costs[A][L];
   struct buf_2d yv12_mb[MAX_MB_PLANE];
-  int_mv frame_dv[MB_MODE_COUNT][MAX_REF_FRAMES];
   int i;
 #if CONFIG_TX_SKIP
   mbmi->tx_skip[0] = 0;
@@ -2260,7 +2253,6 @@ static int64_t rd_pick_intrabc_sb_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                   &this_rate, &this_distortion,
                                   &this_skippable,
                                   &rate_y, &rate_uv,
-                                  frame_dv,
                                   mi_row, mi_col,
                                   &total_sse, best_rd);
     cpi->common.interp_filter = saved_interp_filter;
