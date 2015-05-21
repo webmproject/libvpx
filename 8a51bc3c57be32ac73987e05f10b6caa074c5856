@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "adfdb1c1_bd844a5a",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1672,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-05-21T16:54:24Z",
+      "side": 1,
+      "message": "I missed it when propagating 5de9280 into my branch",
+      "parentUuid": "adfdb1c1_1daebe98",
+      "range": {
+        "startLine": 1672,
+        "startChar": 42,
+        "endLine": 1672,
+        "endChar": 43
+      },
+      "revId": "8a51bc3c57be32ac73987e05f10b6caa074c5856",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2d37016d_bbd31454",
         "filename": "vp9/encoder/vp9_rdopt.c",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2015-05-20T16:37:33Z",
       "side": 1,
       "message": "ditto",
+      "range": {
+        "startLine": 1718,
+        "startChar": 42,
+        "endLine": 1718,
+        "endChar": 43
+      },
+      "revId": "8a51bc3c57be32ac73987e05f10b6caa074c5856",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2d6e217b_ba11cfd7",
+        "filename": "vp9/encoder/vp9_rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1718,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-05-21T16:54:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2d37016d_bbd31454",
       "range": {
         "startLine": 1718,
         "startChar": 42,
