@@ -1587,7 +1587,7 @@ int vp8_drop_encodedframe_overshoot(VP8_COMP *cpi, int Q) {
     // Threshold for the average (over all macroblocks) of the pixel-sum
     // residual error over 16x16 block. Should add QP dependence on threshold?
     int thresh_pred_err_mb = (256 << 4);
-    int pred_err_mb = cpi->mb.prediction_error / cpi->common.MBs;
+    int pred_err_mb = (int)(cpi->mb.prediction_error / cpi->common.MBs);
     if (Q < thresh_qp &&
         cpi->projected_frame_size > thresh_rate &&
         pred_err_mb > thresh_pred_err_mb) {
