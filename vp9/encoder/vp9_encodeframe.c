@@ -464,46 +464,53 @@ static int set_vt_partitioning(VP9_COMP *cpi,
   return 0;
 }
 
-void vp9_set_vbp_thresholds(VP9_COMP *cpi, int q) {
+// Set the variance split thresholds for following the block sizes:
+// 0 - threshold_64x64, 1 - threshold_32x32, 2 - threshold_16x16,
+// 3 - vbp_threshold_8x8. vbp_threshold_8x8 (to split to 4x4 partition) is
+// currently only used on key frame.
+static void set_vbp_thresholds(VP9_COMP *cpi, int64_t thresholds[], int q) {
+  VP9_COMMON *const cm = &cpi->common;
+  const int is_key_frame = (cm->frame_type == KEY_FRAME);
+  const int threshold_multiplier = is_key_frame ? 20 : 1;
+  const int64_t threshold_base = (int64_t)(threshold_multiplier *
+      cpi->y_dequant[q][1]);
+  if (is_key_frame) {
+    thresholds[0] = threshold_base;
+    thresholds[1] = threshold_base >> 2;
+    thresholds[2] = threshold_base >> 2;
+    thresholds[3] = threshold_base << 2;
+  } else {
+    thresholds[1] = threshold_base;
+    if (cm->width <= 352 && cm->height <= 288) {
+      thresholds[0] = threshold_base >> 2;
+      thresholds[2] = threshold_base << 3;
+    } else {
+      thresholds[0] = threshold_base;
+      thresholds[1] = (5 * threshold_base) >> 2;
+      thresholds[2] = threshold_base << cpi->oxcf.speed;
+    }
+  }
+}
+
+void vp9_set_variance_partition_thresholds(VP9_COMP *cpi, int q) {
+  VP9_COMMON *const cm = &cpi->common;
   SPEED_FEATURES *const sf = &cpi->sf;
+  const int is_key_frame = (cm->frame_type == KEY_FRAME);
   if (sf->partition_search_type != VAR_BASED_PARTITION &&
       sf->partition_search_type != REFERENCE_PARTITION) {
     return;
   } else {
-    VP9_COMMON *const cm = &cpi->common;
-    const int is_key_frame = (cm->frame_type == KEY_FRAME);
-    const int threshold_multiplier = is_key_frame ? 20 : 1;
-    const int64_t threshold_base = (int64_t)(threshold_multiplier *
-        cpi->y_dequant[q][1]);
-
-    // TODO(marpan): Allow 4x4 partitions for inter-frames.
-    // use_4x4_partition = (variance4x4downsample[i2 + j] == 1);
-    // If 4x4 partition is not used, then 8x8 partition will be selected
-    // if variance of 16x16 block is very high, so use larger threshold
-    // for 16x16 (threshold_bsize_min) in that case.
-
-    // Array index: 0 - threshold_64x64; 1 - threshold_32x32;
-    // 2 - threshold_16x16; 3 - vbp_threshold_8x8;
+    set_vbp_thresholds(cpi, cpi->vbp_thresholds, q);
+    // The thresholds below are not changed locally.
     if (is_key_frame) {
-      cpi->vbp_thresholds[0] = threshold_base;
-      cpi->vbp_thresholds[1] = threshold_base >> 2;
-      cpi->vbp_thresholds[2] = threshold_base >> 2;
-      cpi->vbp_thresholds[3] = threshold_base << 2;
       cpi->vbp_threshold_sad = 0;
       cpi->vbp_bsize_min = BLOCK_8X8;
     } else {
-      cpi->vbp_thresholds[1] = threshold_base;
-      if (cm->width <= 352 && cm->height <= 288) {
-        cpi->vbp_thresholds[0] = threshold_base >> 2;
-        cpi->vbp_thresholds[2] = threshold_base << 3;
+      if (cm->width <= 352 && cm->height <= 288)
         cpi->vbp_threshold_sad = 100;
-      } else {
-        cpi->vbp_thresholds[0] = threshold_base;
-        cpi->vbp_thresholds[1] = (5 * threshold_base) >> 2;
-        cpi->vbp_thresholds[2] = threshold_base << cpi->oxcf.speed;
+      else
         cpi->vbp_threshold_sad = (cpi->y_dequant[q][1] << 1) > 1000 ?
             (cpi->y_dequant[q][1] << 1) : 1000;
-      }
       cpi->vbp_bsize_min = BLOCK_16X16;
     }
     cpi->vbp_threshold_minmax = 15 + (q >> 3);
@@ -550,23 +557,6 @@ static int compute_minmax_8x8(const uint8_t *s, int sp, const uint8_t *d,
     }
   }
   return (minmax_max - minmax_min);
-}
-
-static void modify_vbp_thresholds(VP9_COMP *cpi, int64_t thresholds[], int q) {
-  VP9_COMMON *const cm = &cpi->common;
-  const int64_t threshold_base = (int64_t)(cpi->y_dequant[q][1]);
-
-  // Array index: 0 - threshold_64x64; 1 - threshold_32x32;
-  // 2 - threshold_16x16; 3 - vbp_threshold_8x8;
-  thresholds[1] = threshold_base;
-  if (cm->width <= 352 && cm->height <= 288) {
-    thresholds[0] = threshold_base >> 2;
-    thresholds[2] = threshold_base << 3;
-  } else {
-    thresholds[0] = threshold_base;
-    thresholds[1] = (5 * threshold_base) >> 2;
-    thresholds[2] = threshold_base << cpi->oxcf.speed;
-  }
 }
 
 static void fill_variance_4x4avg(const uint8_t *s, int sp, const uint8_t *d,
@@ -681,7 +671,7 @@ static int choose_partitioning(VP9_COMP *cpi,
 
     if (cyclic_refresh_segment_id_boosted(segment_id)) {
       int q = vp9_get_qindex(&cm->seg, segment_id, cm->base_qindex);
-      modify_vbp_thresholds(cpi, thresholds, q);
+      set_vbp_thresholds(cpi, thresholds, q);
     }
   }
 
