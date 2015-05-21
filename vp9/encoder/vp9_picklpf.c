@@ -373,4 +373,8 @@ void vp9_pick_filter_level(const YV12_BUFFER_CONFIG *sd, VP9_COMP *cpi,
         sd, cpi, method == LPF_PICK_FROM_SUBIMAGE);
 #endif  // CONFIG_LOOP_POSTFILTER
   }
+
+#if CONFIG_ROW_TILE
+  lf->filter_level = 0;
+#endif
 }
