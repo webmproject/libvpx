@@ -31,10 +31,19 @@ void vp9_tile_set_col(TileInfo *tile, const VP9_COMMON *cm, int col) {
   tile->mi_col_end = get_tile_offset(col + 1, cm->mi_cols, cm->log2_tile_cols);
 }
 
+#if CONFIG_ROW_TILE
+void vp9_tile_init(TileInfo *tile, const VP9_COMMON *cm, int row, int col) {
+  tile->mi_row_start = row * cm->tile_height;
+  tile->mi_row_end   = MIN(tile->mi_row_start + cm->tile_height, cm->mi_rows);
+  tile->mi_col_start = col * cm->tile_width;
+  tile->mi_col_end   = MIN(tile->mi_col_start + cm->tile_width, cm->mi_cols);
+}
+#else
 void vp9_tile_init(TileInfo *tile, const VP9_COMMON *cm, int row, int col) {
   vp9_tile_set_row(tile, cm, row);
   vp9_tile_set_col(tile, cm, col);
 }
+#endif
 
 void vp9_get_tile_n_bits(int mi_cols,
                          int *min_log2_tile_cols, int *max_log2_tile_cols) {

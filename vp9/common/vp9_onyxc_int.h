@@ -208,6 +208,8 @@ typedef struct VP9Common {
   int frame_parallel_decoding_mode;
 
   int log2_tile_cols, log2_tile_rows;
+  int tile_cols, tile_rows;
+  int tile_width, tile_height;
 
   // Private data associated with the frame buffer callbacks.
   void *cb_priv;

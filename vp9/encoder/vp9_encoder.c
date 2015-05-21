@@ -584,6 +584,15 @@ static void set_tile_limits(VP9_COMP *cpi) {
 #else
   cm->log2_tile_rows = cpi->oxcf.tile_rows;
 #endif
+
+  cm->tile_cols = 1 << cm->log2_tile_cols;
+  cm->tile_rows = 1 << cm->log2_tile_rows;
+
+  cm->tile_width = (mi_cols_aligned_to_sb(cm->mi_cols) >> cm->log2_tile_cols);
+  cm->tile_height = (mi_cols_aligned_to_sb(cm->mi_rows) >> cm->log2_tile_rows);
+  // round to integer multiples of 8
+  cm->tile_width  = mi_cols_aligned_to_sb(cm->tile_width);
+  cm->tile_height = mi_cols_aligned_to_sb(cm->tile_height);
 }
 
 static void init_buffer_indices(VP9_COMP *cpi) {

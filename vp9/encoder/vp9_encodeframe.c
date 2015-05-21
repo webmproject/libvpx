@@ -4532,8 +4532,8 @@ static int get_skip_encode_frame(const VP9_COMMON *cm) {
 
 static void encode_tiles(VP9_COMP *cpi) {
   const VP9_COMMON *const cm = &cpi->common;
-  const int tile_cols = 1 << cm->log2_tile_cols;
-  const int tile_rows = 1 << cm->log2_tile_rows;
+  const int tile_cols = cm->tile_cols;
+  const int tile_rows = cm->tile_rows;
 
   int tile_col, tile_row;
 #if CONFIG_ROW_TILE
@@ -4549,7 +4549,6 @@ static void encode_tiles(VP9_COMP *cpi) {
   for (tile_row = 0; tile_row < tile_rows; ++tile_row) {
     for (tile_col = 0; tile_col < tile_cols; ++tile_col) {
       vp9_tile_init(&tile[tile_row][tile_col], cm, tile_row, tile_col);
-
       tok[tile_row][tile_col] = pre_tok + tile_tok;
       pre_tok = tok[tile_row][tile_col];
       tile_tok = allocated_tokens(tile[tile_row][tile_col]);
