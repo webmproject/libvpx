@@ -1866,6 +1866,13 @@ static void fix_interp_filter(VP9_COMMON *cm) {
 
 static void write_tile_info(const VP9_COMMON *const cm,
                             struct vp9_write_bit_buffer *wb) {
+#if CONFIG_ROW_TILE
+  int tile_width  = mi_cols_aligned_to_sb(cm->tile_width) >> MI_BLOCK_SIZE_LOG2;
+  int tile_height =
+      mi_cols_aligned_to_sb(cm->tile_height) >> MI_BLOCK_SIZE_LOG2;
+  vp9_wb_write_literal(wb, tile_width, 6);
+  vp9_wb_write_literal(wb, tile_height, 6);
+#else
   int min_log2_tiles, max_log2_tiles, ones;
   vp9_get_tile_n_bits(cm->mi_cols, &min_log2_tiles, &max_log2_tiles);
 
@@ -1878,15 +1885,6 @@ static void write_tile_info(const VP9_COMMON *const cm,
     vp9_wb_write_bit(wb, 0);
 
   // rows
-#if CONFIG_ROW_TILE
-  vp9_get_tile_n_bits(cm->mi_rows, &min_log2_tiles, &max_log2_tiles);
-  ones = cm->log2_tile_rows - min_log2_tiles;
-  while (ones--)
-    vp9_wb_write_bit(wb, 1);
-
-  if (cm->log2_tile_rows < max_log2_tiles)
-    vp9_wb_write_bit(wb, 0);
-#else
   vp9_wb_write_bit(wb, cm->log2_tile_rows != 0);
   if (cm->log2_tile_rows != 0)
     vp9_wb_write_bit(wb, cm->log2_tile_rows != 1);
@@ -1924,11 +1922,17 @@ static size_t encode_tiles(VP9_COMP *cpi, uint8_t *data_ptr) {
   vp9_writer residual_bc;
 
   int tile_row, tile_col;
-  TOKENEXTRA *tok[4][1 << 6], *tok_end;
+#if CONFIG_ROW_TILE
+  TOKENEXTRA *(*tok)[1024] = cpi->tile_tok;
+  TileInfo (*tile)[1024] = cpi->tile_info;
+#else
+  TOKENEXTRA *tok[4][1 << 6];
+  TileInfo tile[4][1 << 6];
+#endif
+  TOKENEXTRA *tok_end;
   size_t total_size = 0;
   const int tile_cols = cm->tile_cols;
   const int tile_rows = cm->tile_rows;
-  TileInfo tile[4][1 << 6];
   TOKENEXTRA *pre_tok = cpi->tok;
   int tile_tok = 0;
 
