@@ -85,13 +85,13 @@ static void set_rate_control_metrics(struct RateControlMetrics *rc,
   // per-frame-bandwidth, for the rate control encoding stats below.
   const double framerate = cfg->g_timebase.den / cfg->g_timebase.num;
   rc->layer_framerate[0] = framerate / cfg->ts_rate_decimator[0];
-  rc->layer_pfb[0] = 1000.0 * cfg->ts_target_bitrate[0] /
+  rc->layer_pfb[0] = 1000.0 * cfg->layer_target_bitrate[0] /
       rc->layer_framerate[0];
   for (i = 0; i < cfg->ts_number_layers; ++i) {
     if (i > 0) {
       rc->layer_framerate[i] = framerate / cfg->ts_rate_decimator[i];
       rc->layer_pfb[i] = 1000.0 *
-          (cfg->ts_target_bitrate[i] - cfg->ts_target_bitrate[i - 1]) /
+          (cfg->layer_target_bitrate[i] - cfg->layer_target_bitrate[i - 1]) /
           (rc->layer_framerate[i] - rc->layer_framerate[i - 1]);
     }
     rc->layer_input_frames[i] = 0;
@@ -128,7 +128,7 @@ static void printout_rate_control_summary(struct RateControlMetrics *rc,
     rc->layer_avg_rate_mismatch[i] = 100.0 * rc->layer_avg_rate_mismatch[i] /
         rc->layer_enc_frames[i];
     printf("For layer#: %d \n", i);
-    printf("Bitrate (target vs actual): %d %f \n", cfg->ts_target_bitrate[i],
+    printf("Bitrate (target vs actual): %d %f \n", cfg->layer_target_bitrate[i],
            rc->layer_encoding_bitrate[i]);
     printf("Average frame size (target vs actual): %f %f \n", rc->layer_pfb[i],
            rc->layer_avg_frame_size[i]);
@@ -597,7 +597,7 @@ int main(int argc, char **argv) {
   for (i = min_args_base;
        (int)i < min_args_base + mode_to_num_layers[layering_mode];
        ++i) {
-    cfg.ts_target_bitrate[i - 11] = strtol(argv[i], NULL, 0);
+    cfg.layer_target_bitrate[i - 11] = strtol(argv[i], NULL, 0);
   }
 
   // Real time parameters.
@@ -625,6 +625,8 @@ int main(int argc, char **argv) {
   // Disable automatic keyframe placement.
   cfg.kf_min_dist = cfg.kf_max_dist = 3000;
 
+  cfg.temporal_layering_mode = VP9E_TEMPORAL_LAYERING_MODE_BYPASS;
+
   set_temporal_layer_pattern(layering_mode,
                              &cfg,
                              layer_flags,
@@ -633,8 +635,8 @@ int main(int argc, char **argv) {
   set_rate_control_metrics(&rc, &cfg);
 
   // Target bandwidth for the whole stream.
-  // Set to ts_target_bitrate for highest layer (total bitrate).
-  cfg.rc_target_bitrate = cfg.ts_target_bitrate[cfg.ts_number_layers - 1];
+  // Set to layer_target_bitrate for highest layer (total bitrate).
+  cfg.rc_target_bitrate = cfg.layer_target_bitrate[cfg.ts_number_layers - 1];
 
   // Open input file.
   if (!(infile = fopen(argv[1], "rb"))) {
@@ -677,6 +679,9 @@ int main(int argc, char **argv) {
     vpx_codec_control(&codec, VP8E_SET_NOISE_SENSITIVITY, kDenoiserOff);
     vpx_codec_control(&codec, VP8E_SET_STATIC_THRESHOLD, 0);
   } else if (strncmp(encoder->name, "vp9", 3) == 0) {
+#if VPX_ENCODER_ABI_VERSION > (4 + VPX_CODEC_ABI_VERSION)
+    vpx_svc_extra_cfg_t svc_params;
+#endif
       vpx_codec_control(&codec, VP8E_SET_CPUUSED, speed);
       vpx_codec_control(&codec, VP9E_SET_AQ_MODE, 3);
       vpx_codec_control(&codec, VP9E_SET_FRAME_PERIODIC_BOOST, 0);
@@ -685,6 +690,15 @@ int main(int argc, char **argv) {
       vpx_codec_control(&codec, VP9E_SET_TILE_COLUMNS, (cfg.g_threads >> 1));
       if (vpx_codec_control(&codec, VP9E_SET_SVC, layering_mode > 0 ? 1: 0)) {
         die_codec(&codec, "Failed to set SVC");
+#if VPX_ENCODER_ABI_VERSION > (4 + VPX_CODEC_ABI_VERSION)
+      for (i = 0; i < cfg.ts_number_layers; ++i) {
+        svc_params.max_quantizers[i] = cfg.rc_max_quantizer;
+        svc_params.min_quantizers[i] = cfg.rc_min_quantizer;
+      }
+      svc_params.scaling_factor_num[0] = cfg.g_h;
+      svc_params.scaling_factor_den[0] = cfg.g_h;
+      vpx_codec_control(&codec, VP9E_SET_SVC_PARAMETERS, &svc_params);
+#endif
     }
   }
   if (strncmp(encoder->name, "vp8", 3) == 0) {

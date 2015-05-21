@@ -453,6 +453,7 @@ TEST_F(SvcTest, OnePassEncodeOneFrame) {
 
 TEST_F(SvcTest, OnePassEncodeThreeFrames) {
   codec_enc_.g_pass = VPX_RC_ONE_PASS;
+  codec_enc_.g_lag_in_frames = 0;
   vpx_fixed_buf outputs[3];
   memset(&outputs[0], 0, sizeof(outputs));
   Pass2EncodeNFrames(NULL, 3, 2, &outputs[0]);

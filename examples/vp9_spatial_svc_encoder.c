@@ -14,10 +14,12 @@
  * that benefit from a scalable bitstream.
  */
 
+#include <math.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+
 
 #include "../args.h"
 #include "../tools_common.h"
@@ -27,11 +29,18 @@
 #include "vpx/vp8cx.h"
 #include "vpx/vpx_encoder.h"
 #include "../vpxstats.h"
+#define OUTPUT_RC_STATS 1
 
 static const arg_def_t skip_frames_arg =
     ARG_DEF("s", "skip-frames", 1, "input frames to skip");
 static const arg_def_t frames_arg =
     ARG_DEF("f", "frames", 1, "number of frames to encode");
+static const arg_def_t threads_arg =
+    ARG_DEF("th", "threads", 1, "number of threads to use");
+#if OUTPUT_RC_STATS
+static const arg_def_t output_rc_stats_arg =
+    ARG_DEF("rcstat", "output_rc_stats", 1, "output rc stats");
+#endif
 static const arg_def_t width_arg = ARG_DEF("w", "width", 1, "source width");
 static const arg_def_t height_arg = ARG_DEF("h", "height", 1, "source height");
 static const arg_def_t timebase_arg =
@@ -42,6 +51,9 @@ static const arg_def_t spatial_layers_arg =
     ARG_DEF("sl", "spatial-layers", 1, "number of spatial SVC layers");
 static const arg_def_t temporal_layers_arg =
     ARG_DEF("tl", "temporal-layers", 1, "number of temporal SVC layers");
+static const arg_def_t temporal_layering_mode_arg =
+    ARG_DEF("tlm", "temporal-layering-mode", 1, "temporal layering scheme."
+        "VP9E_TEMPORAL_LAYERING_MODE");
 static const arg_def_t kf_dist_arg =
     ARG_DEF("k", "kf-dist", 1, "number of frames between keyframes");
 static const arg_def_t scale_factors_arg =
@@ -65,6 +77,8 @@ static const arg_def_t lag_in_frame_arg =
         "generating any outputs");
 static const arg_def_t rc_end_usage_arg =
     ARG_DEF(NULL, "rc-end-usage", 1, "0 - 3: VBR, CBR, CQ, Q");
+static const arg_def_t speed_arg =
+    ARG_DEF("sp", "speed", 1, "speed configuration");
 
 #if CONFIG_VP9_HIGHBITDEPTH
 static const struct arg_enum_list bitdepth_enum[] = {
@@ -85,10 +99,16 @@ static const arg_def_t *svc_args[] = {
   &timebase_arg,      &bitrate_arg,       &skip_frames_arg, &spatial_layers_arg,
   &kf_dist_arg,       &scale_factors_arg, &passes_arg,      &pass_arg,
   &fpf_name_arg,      &min_q_arg,         &max_q_arg,       &min_bitrate_arg,
-  &max_bitrate_arg,   &temporal_layers_arg,                 &lag_in_frame_arg,
+  &max_bitrate_arg,   &temporal_layers_arg, &temporal_layering_mode_arg,
+  &lag_in_frame_arg,  &threads_arg,
+#if OUTPUT_RC_STATS
+  &output_rc_stats_arg,
+#endif
+
 #if CONFIG_VP9_HIGHBITDEPTH
   &bitdepth_arg,
 #endif
+  &speed_arg,
   &rc_end_usage_arg,  NULL
 };
 
@@ -102,6 +122,10 @@ static const uint32_t default_bitrate = 1000;
 static const uint32_t default_spatial_layers = 5;
 static const uint32_t default_temporal_layers = 1;
 static const uint32_t default_kf_dist = 100;
+static const uint32_t default_temporal_layering_mode = 0;
+static const uint32_t default_output_rc_stats = 0;
+static const int32_t default_speed = -1;  // -1 means use library default.
+static const uint32_t default_threads = 0;  // zero means use library default.
 
 typedef struct {
   const char *input_filename;
@@ -143,6 +167,12 @@ static void parse_command_line(int argc, const char **argv_,
   svc_ctx->log_level = SVC_LOG_DEBUG;
   svc_ctx->spatial_layers = default_spatial_layers;
   svc_ctx->temporal_layers = default_temporal_layers;
+  svc_ctx->temporal_layering_mode = default_temporal_layering_mode;
+#if OUTPUT_RC_STATS
+  svc_ctx->output_rc_stat = default_output_rc_stats;
+#endif
+  svc_ctx->speed = default_speed;
+  svc_ctx->threads = default_threads;
 
   // start with default encoder configuration
   res = vpx_codec_enc_config_default(vpx_codec_vp9_cx(), enc_cfg, 0);
@@ -184,6 +214,20 @@ static void parse_command_line(int argc, const char **argv_,
       svc_ctx->spatial_layers = arg_parse_uint(&arg);
     } else if (arg_match(&arg, &temporal_layers_arg, argi)) {
       svc_ctx->temporal_layers = arg_parse_uint(&arg);
+#if OUTPUT_RC_STATS
+    } else if (arg_match(&arg, &output_rc_stats_arg, argi)) {
+      svc_ctx->output_rc_stat = arg_parse_uint(&arg);
+#endif
+    } else if (arg_match(&arg, &speed_arg, argi)) {
+      svc_ctx->speed = arg_parse_uint(&arg);
+    } else if (arg_match(&arg, &threads_arg, argi)) {
+      svc_ctx->threads = arg_parse_uint(&arg);
+    } else if (arg_match(&arg, &temporal_layering_mode_arg, argi)) {
+      svc_ctx->temporal_layering_mode =
+          enc_cfg->temporal_layering_mode = arg_parse_int(&arg);
+      if (svc_ctx->temporal_layering_mode) {
+        enc_cfg->g_error_resilient = 1;
+      }
     } else if (arg_match(&arg, &kf_dist_arg, argi)) {
       enc_cfg->kf_min_dist = arg_parse_uint(&arg);
       enc_cfg->kf_max_dist = enc_cfg->kf_min_dist;
@@ -316,6 +360,185 @@ static void parse_command_line(int argc, const char **argv_,
       enc_cfg->rc_target_bitrate, enc_cfg->kf_max_dist);
 }
 
+#if OUTPUT_RC_STATS
+// For rate control encoding stats.
+struct RateControlStats {
+  // Number of input frames per layer.
+  int layer_input_frames[VPX_MAX_LAYERS];
+  // Total (cumulative) number of encoded frames per layer.
+  int layer_tot_enc_frames[VPX_MAX_LAYERS];
+  // Number of encoded non-key frames per layer.
+  int layer_enc_frames[VPX_MAX_LAYERS];
+  // Framerate per layer (cumulative).
+  double layer_framerate[VPX_MAX_LAYERS];
+  // Target average frame size per layer (per-frame-bandwidth per layer).
+  double layer_pfb[VPX_MAX_LAYERS];
+  // Actual average frame size per layer.
+  double layer_avg_frame_size[VPX_MAX_LAYERS];
+  // Average rate mismatch per layer (|target - actual| / target).
+  double layer_avg_rate_mismatch[VPX_MAX_LAYERS];
+  // Actual encoding bitrate per layer (cumulative).
+  double layer_encoding_bitrate[VPX_MAX_LAYERS];
+  // Average of the short-time encoder actual bitrate.
+  // TODO(marpan): Should we add these short-time stats for each layer?
+  double avg_st_encoding_bitrate;
+  // Variance of the short-time encoder actual bitrate.
+  double variance_st_encoding_bitrate;
+  // Window (number of frames) for computing short-time encoding bitrate.
+  int window_size;
+  // Number of window measurements.
+  int window_count;
+};
+
+// Note: these rate control stats assume only 1 key frame in the
+// sequence (i.e., first frame only).
+static void set_rate_control_stats(struct RateControlStats *rc,
+                                     vpx_codec_enc_cfg_t *cfg) {
+  unsigned int sl, tl;
+  // Set the layer (cumulative) framerate and the target layer (non-cumulative)
+  // per-frame-bandwidth, for the rate control encoding stats below.
+  const double framerate = cfg->g_timebase.den / cfg->g_timebase.num;
+
+  for (sl = 0; sl < cfg->ss_number_layers; ++sl) {
+    for (tl = 0; tl < cfg->ts_number_layers; ++tl) {
+      const int layer = sl * cfg->ts_number_layers + tl;
+      const int tlayer0 = sl * cfg->ts_number_layers;
+      rc->layer_framerate[layer] =
+          framerate / cfg->ts_rate_decimator[tl];
+      if (tl > 0) {
+        rc->layer_pfb[layer] = 1000.0 *
+            (cfg->layer_target_bitrate[layer] -
+                cfg->layer_target_bitrate[layer - 1]) /
+            (rc->layer_framerate[layer] -
+                rc->layer_framerate[layer - 1]);
+      } else {
+        rc->layer_pfb[tlayer0] = 1000.0 *
+            cfg->layer_target_bitrate[tlayer0] /
+            rc->layer_framerate[tlayer0];
+      }
+      rc->layer_input_frames[layer] = 0;
+      rc->layer_enc_frames[layer] = 0;
+      rc->layer_tot_enc_frames[layer] = 0;
+      rc->layer_encoding_bitrate[layer] = 0.0;
+      rc->layer_avg_frame_size[layer] = 0.0;
+      rc->layer_avg_rate_mismatch[layer] = 0.0;
+    }
+  }
+  rc->window_count = 0;
+  rc->window_size = 15;
+  rc->avg_st_encoding_bitrate = 0.0;
+  rc->variance_st_encoding_bitrate = 0.0;
+}
+
+static void printout_rate_control_summary(struct RateControlStats *rc,
+                                          vpx_codec_enc_cfg_t *cfg,
+                                          int frame_cnt) {
+  unsigned int sl, tl;
+  int tot_num_frames = 0;
+  double perc_fluctuation = 0.0;
+  printf("Total number of processed frames: %d\n\n", frame_cnt - 1);
+  printf("Rate control layer stats for sl%d tl%d layer(s):\n\n",
+      cfg->ss_number_layers, cfg->ts_number_layers);
+  for (sl = 0; sl < cfg->ss_number_layers; ++sl) {
+    for (tl = 0; tl < cfg->ts_number_layers; ++tl) {
+      const int layer = sl * cfg->ts_number_layers + tl;
+      const int num_dropped = (tl > 0) ?
+          (rc->layer_input_frames[layer] - rc->layer_enc_frames[layer]) :
+          (rc->layer_input_frames[layer] - rc->layer_enc_frames[layer] - 1);
+      if (!sl)
+        tot_num_frames += rc->layer_input_frames[layer];
+      rc->layer_encoding_bitrate[layer] = 0.001 * rc->layer_framerate[layer] *
+          rc->layer_encoding_bitrate[layer] / tot_num_frames;
+      rc->layer_avg_frame_size[layer] = rc->layer_avg_frame_size[layer] /
+          rc->layer_enc_frames[layer];
+      rc->layer_avg_rate_mismatch[layer] =
+          100.0 * rc->layer_avg_rate_mismatch[layer] /
+          rc->layer_enc_frames[layer];
+      printf("For layer#: sl%d tl%d \n", sl, tl);
+      printf("Bitrate (target vs actual): %d %f.0 kbps\n",
+             cfg->layer_target_bitrate[layer],
+             rc->layer_encoding_bitrate[layer]);
+      printf("Average frame size (target vs actual): %f %f bits\n",
+             rc->layer_pfb[layer], rc->layer_avg_frame_size[layer]);
+      printf("Average rate_mismatch: %f\n",
+             rc->layer_avg_rate_mismatch[layer]);
+      printf("Number of input frames, encoded (non-key) frames, "
+          "and percent dropped frames: %d %d %f.0 \n",
+          rc->layer_input_frames[layer], rc->layer_enc_frames[layer],
+          100.0 * num_dropped / rc->layer_input_frames[layer]);
+      printf("\n");
+    }
+  }
+  rc->avg_st_encoding_bitrate = rc->avg_st_encoding_bitrate / rc->window_count;
+  rc->variance_st_encoding_bitrate =
+      rc->variance_st_encoding_bitrate / rc->window_count -
+      (rc->avg_st_encoding_bitrate * rc->avg_st_encoding_bitrate);
+  perc_fluctuation = 100.0 * sqrt(rc->variance_st_encoding_bitrate) /
+      rc->avg_st_encoding_bitrate;
+  printf("Short-time stats, for window of %d frames: \n", rc->window_size);
+  printf("Average, rms-variance, and percent-fluct: %f %f %f \n",
+         rc->avg_st_encoding_bitrate,
+         sqrt(rc->variance_st_encoding_bitrate),
+         perc_fluctuation);
+  if (frame_cnt != tot_num_frames)
+    die("Error: Number of input frames not equal to output encoded frames != "
+        "%d tot_num_frames = %d\n", frame_cnt, tot_num_frames);
+}
+
+vpx_codec_err_t parse_superframe_index(const uint8_t *data,
+                                       size_t data_sz,
+                                       uint32_t sizes[8], int *count) {
+  // A chunk ending with a byte matching 0xc0 is an invalid chunk unless
+  // it is a super frame index. If the last byte of real video compression
+  // data is 0xc0 the encoder must add a 0 byte. If we have the marker but
+  // not the associated matching marker byte at the front of the index we have
+  // an invalid bitstream and need to return an error.
+
+  uint8_t marker;
+
+  marker = *(data + data_sz - 1);
+  *count = 0;
+
+
+  if ((marker & 0xe0) == 0xc0) {
+    const uint32_t frames = (marker & 0x7) + 1;
+    const uint32_t mag = ((marker >> 3) & 0x3) + 1;
+    const size_t index_sz = 2 + mag * frames;
+
+    // This chunk is marked as having a superframe index but doesn't have
+    // enough data for it, thus it's an invalid superframe index.
+    if (data_sz < index_sz)
+      return VPX_CODEC_CORRUPT_FRAME;
+
+    {
+      const uint8_t marker2 = *(data + data_sz - index_sz);
+
+      // This chunk is marked as having a superframe index but doesn't have
+      // the matching marker byte at the front of the index therefore it's an
+      // invalid chunk.
+      if (marker != marker2)
+        return VPX_CODEC_CORRUPT_FRAME;
+    }
+
+    {
+      // Found a valid superframe index.
+      uint32_t i, j;
+      const uint8_t *x = &data[data_sz - index_sz + 1];
+
+      for (i = 0; i < frames; ++i) {
+        uint32_t this_sz = 0;
+
+        for (j = 0; j < mag; ++j)
+          this_sz |= (*x++) << (j * 8);
+        sizes[i] = this_sz;
+      }
+      *count = frames;
+    }
+  }
+  return VPX_CODEC_OK;
+}
+#endif
+
 int main(int argc, const char **argv) {
   AppInput app_input = {0};
   VpxVideoWriter *writer = NULL;
@@ -332,7 +555,15 @@ int main(int argc, const char **argv) {
   FILE *infile = NULL;
   int end_of_stream = 0;
   int frames_received = 0;
-
+#if OUTPUT_RC_STATS
+  VpxVideoWriter *outfile[VPX_TS_MAX_LAYERS] = {NULL};
+  struct RateControlStats rc;
+  vpx_svc_layer_id_t layer_id;
+  int sl, tl;
+  double sum_bitrate = 0.0;
+  double sum_bitrate2 = 0.0;
+  double framerate  = 30.0;
+#endif
   memset(&svc_ctx, 0, sizeof(svc_ctx));
   svc_ctx.log_print = 1;
   exec_name = argv[0];
@@ -359,6 +590,13 @@ int main(int argc, const char **argv) {
       VPX_CODEC_OK)
     die("Failed to initialize encoder\n");
 
+#if OUTPUT_RC_STATS
+  if (svc_ctx.output_rc_stat) {
+    set_rate_control_stats(&rc, &enc_cfg);
+    framerate = enc_cfg.g_timebase.den / enc_cfg.g_timebase.num;
+  }
+#endif
+
   info.codec_fourcc = VP9_FOURCC;
   info.time_base.numerator = enc_cfg.g_timebase.num;
   info.time_base.denominator = enc_cfg.g_timebase.den;
@@ -370,10 +608,29 @@ int main(int argc, const char **argv) {
     if (!writer)
       die("Failed to open %s for writing\n", app_input.output_filename);
   }
+#if OUTPUT_RC_STATS
+  // For now, just write temporal layer streams.
+  // TODO(wonkap): do spatial by re-writing superframe.
+  if (svc_ctx.output_rc_stat) {
+    for (tl = 0; tl < enc_cfg.ts_number_layers; ++tl) {
+      char file_name[PATH_MAX];
+
+      snprintf(file_name, sizeof(file_name), "%s_t%d.ivf",
+               app_input.output_filename, tl);
+      outfile[tl] = vpx_video_writer_open(file_name, kContainerIVF, &info);
+      if (!outfile[tl])
+        die("Failed to open %s for writing", file_name);
+    }
+  }
+#endif
 
   // skip initial frames
   for (i = 0; i < app_input.frames_to_skip; ++i)
     vpx_img_read(&raw, infile);
+
+  if (svc_ctx.speed != -1)
+    vpx_codec_control(&codec, VP8E_SET_CPUUSED, svc_ctx.speed);
+  vpx_codec_control(&codec, VP9E_SET_TILE_COLUMNS, 0);
 
   // Encode frames
   while (!end_of_stream) {
@@ -386,7 +643,9 @@ int main(int argc, const char **argv) {
     }
 
     res = vpx_svc_encode(&svc_ctx, &codec, (end_of_stream ? NULL : &raw),
-                         pts, frame_duration, VPX_DL_GOOD_QUALITY);
+                         pts, frame_duration, svc_ctx.speed >= 5 ?
+                         VPX_DL_REALTIME : VPX_DL_GOOD_QUALITY);
+
     printf("%s", vpx_svc_get_message(&svc_ctx));
     if (res != VPX_CODEC_OK) {
       die_codec(&codec, "Failed to encode frame");
@@ -395,11 +654,90 @@ int main(int argc, const char **argv) {
     while ((cx_pkt = vpx_codec_get_cx_data(&codec, &iter)) != NULL) {
       switch (cx_pkt->kind) {
         case VPX_CODEC_CX_FRAME_PKT: {
-          if (cx_pkt->data.frame.sz > 0)
+          if (cx_pkt->data.frame.sz > 0) {
+#if OUTPUT_RC_STATS
+            uint32_t sizes[8];
+            int count = 0;
+#endif
             vpx_video_writer_write_frame(writer,
                                          cx_pkt->data.frame.buf,
                                          cx_pkt->data.frame.sz,
                                          cx_pkt->data.frame.pts);
+#if OUTPUT_RC_STATS
+            // TODO(marpan/wonkap): Put this (to line728) in separate function.
+            if (svc_ctx.output_rc_stat) {
+              vpx_codec_control(&codec, VP9E_GET_SVC_LAYER_ID, &layer_id);
+              parse_superframe_index(cx_pkt->data.frame.buf,
+                                     cx_pkt->data.frame.sz, sizes, &count);
+              for (sl = 0; sl < enc_cfg.ss_number_layers; ++sl) {
+                ++rc.layer_input_frames[sl * enc_cfg.ts_number_layers +
+                                        layer_id.temporal_layer_id];
+              }
+              for (tl = layer_id.temporal_layer_id;
+                  tl < enc_cfg.ts_number_layers; ++tl) {
+                vpx_video_writer_write_frame(outfile[tl],
+                                             cx_pkt->data.frame.buf,
+                                             cx_pkt->data.frame.sz,
+                                             cx_pkt->data.frame.pts);
+              }
+
+              for (sl = 0; sl < enc_cfg.ss_number_layers; ++sl) {
+                for (tl = layer_id.temporal_layer_id;
+                    tl < enc_cfg.ts_number_layers; ++tl) {
+                  const int layer = sl * enc_cfg.ts_number_layers + tl;
+                  ++rc.layer_tot_enc_frames[layer];
+                  rc.layer_encoding_bitrate[layer] += 8.0 * sizes[sl];
+                  // Keep count of rate control stats per layer, for non-key
+                  // frames.
+                  if (tl == layer_id.temporal_layer_id &&
+                      !(cx_pkt->data.frame.flags & VPX_FRAME_IS_KEY)) {
+                    rc.layer_avg_frame_size[layer] += 8.0 * sizes[sl];
+                    rc.layer_avg_rate_mismatch[layer] +=
+                        fabs(8.0 * sizes[sl] - rc.layer_pfb[layer]) /
+                        rc.layer_pfb[layer];
+                    ++rc.layer_enc_frames[layer];
+                  }
+                }
+              }
+
+              // Update for short-time encoding bitrate states, for moving
+              // window of size rc->window, shifted by rc->window / 2.
+              // Ignore first window segment, due to key frame.
+              if (frame_cnt > rc.window_size) {
+                tl = layer_id.temporal_layer_id;
+                for (sl = 0; sl < enc_cfg.ss_number_layers; ++sl) {
+                  sum_bitrate += 0.001 * 8.0 * sizes[sl] * framerate;
+                }
+                if (frame_cnt % rc.window_size == 0) {
+                  rc.window_count += 1;
+                  rc.avg_st_encoding_bitrate += sum_bitrate / rc.window_size;
+                  rc.variance_st_encoding_bitrate +=
+                      (sum_bitrate / rc.window_size) *
+                      (sum_bitrate / rc.window_size);
+                  sum_bitrate = 0.0;
+                }
+              }
+
+              // Second shifted window.
+              if (frame_cnt > rc.window_size + rc.window_size / 2) {
+               tl = layer_id.temporal_layer_id;
+               for (sl = 0; sl < enc_cfg.ss_number_layers; ++sl) {
+                 sum_bitrate2 += 0.001 * 8.0 * sizes[sl] * framerate;
+               }
+
+               if (frame_cnt > 2 * rc.window_size &&
+                  frame_cnt % rc.window_size == 0) {
+                 rc.window_count += 1;
+                 rc.avg_st_encoding_bitrate += sum_bitrate2 / rc.window_size;
+                 rc.variance_st_encoding_bitrate +=
+                    (sum_bitrate2 / rc.window_size) *
+                    (sum_bitrate2 / rc.window_size);
+                 sum_bitrate2 = 0.0;
+               }
+              }
+            }
+#endif
+          }
 
           printf("SVC frame: %d, kf: %d, size: %d, pts: %d\n", frames_received,
                  !!(cx_pkt->data.frame.flags & VPX_FRAME_IS_KEY),
@@ -424,25 +762,30 @@ int main(int argc, const char **argv) {
       pts += frame_duration;
     }
   }
-
   printf("Processed %d frames\n", frame_cnt);
-
   fclose(infile);
+#if OUTPUT_RC_STATS
+  if (svc_ctx.output_rc_stat) {
+    printout_rate_control_summary(&rc, &enc_cfg, frame_cnt);
+    printf("\n");
+  }
+#endif
   if (vpx_codec_destroy(&codec)) die_codec(&codec, "Failed to destroy codec");
-
   if (app_input.passes == 2)
     stats_close(&app_input.rc_stats, 1);
-
   if (writer) {
     vpx_video_writer_close(writer);
   }
-
+#if OUTPUT_RC_STATS
+  if (svc_ctx.output_rc_stat) {
+    for (tl = 0; tl < enc_cfg.ts_number_layers; ++tl) {
+      vpx_video_writer_close(outfile[tl]);
+    }
+  }
+#endif
   vpx_img_free(&raw);
-
   // display average size, psnr
   printf("%s", vpx_svc_dump_statistics(&svc_ctx));
-
   vpx_svc_release(&svc_ctx);
-
   return EXIT_SUCCESS;
 }

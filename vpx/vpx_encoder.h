@@ -42,8 +42,11 @@ extern "C" {
   /*!\deprecated Use #VPX_TS_MAX_PERIODICITY instead. */
 #define MAX_PERIODICITY VPX_TS_MAX_PERIODICITY
 
-  /*!\deprecated Use #VPX_TS_MAX_LAYERS instead. */
-#define MAX_LAYERS      VPX_TS_MAX_LAYERS
+/*! Temporal+Spatial Scalability: Maximum number of coding layers */
+#define VPX_MAX_LAYERS  12  // 3 temporal + 4 spatial layers are allowed.
+
+/*!\deprecated Use #VPX_MAX_LAYERS instead. */
+#define MAX_LAYERS    VPX_MAX_LAYERS  // 3 temporal + 4 spatial layers allowed.
 
 /*! Spatial Scalability: Maximum number of coding layers */
 #define VPX_SS_MAX_LAYERS       5
@@ -729,6 +732,22 @@ extern "C" {
      * ts_periodicity=8, then ts_layer_id = (0,1,0,1,0,1,0,1).
     */
     unsigned int           ts_layer_id[VPX_TS_MAX_PERIODICITY];
+
+    /*!\brief Target bitrate for each spatial/temporal layer.
+     *
+     * These values specify the target coding bitrate to be used for each
+     * spatial/temporal layer.
+     *
+     */
+    unsigned int           layer_target_bitrate[VPX_MAX_LAYERS];
+
+    /*!\brief Temporal layering mode indicating which temporal layering scheme to use.
+     *
+     * The value (refer to VP9E_TEMPORAL_LAYERING_MODE) specifies the
+     * temporal layering mode to use.
+     *
+     */
+    int                    temporal_layering_mode;
   } vpx_codec_enc_cfg_t; /**< alias for struct vpx_codec_enc_cfg */
 
   /*!\brief  vp9 svc extra configure parameters
@@ -737,10 +756,11 @@ extern "C" {
    *
    */
   typedef struct vpx_svc_parameters {
-    int max_quantizers[VPX_SS_MAX_LAYERS]; /**< Max Q for each layer */
-    int min_quantizers[VPX_SS_MAX_LAYERS]; /**< Min Q for each layer */
-    int scaling_factor_num[VPX_SS_MAX_LAYERS]; /**< Scaling factor-numerator*/
-    int scaling_factor_den[VPX_SS_MAX_LAYERS]; /**< Scaling factor-denominator*/
+    int max_quantizers[VPX_MAX_LAYERS]; /**< Max Q for each layer */
+    int min_quantizers[VPX_MAX_LAYERS]; /**< Min Q for each layer */
+    int scaling_factor_num[VPX_MAX_LAYERS]; /**< Scaling factor-numerator */
+    int scaling_factor_den[VPX_MAX_LAYERS]; /**< Scaling factor-denominator */
+    int temporal_layering_mode; /**< Temporal layering mode */
   } vpx_svc_extra_cfg_t;
 
 

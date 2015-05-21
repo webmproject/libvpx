@@ -234,13 +234,16 @@ int vp9_rc_clamp_iframe_target_size(const VP9_COMP *const cpi, int target) {
   return target;
 }
 
-// Update the buffer level for higher layers, given the encoded current layer.
+// Update the buffer level for higher temporal layers, given the encoded current
+// temporal layer.
 static void update_layer_buffer_level(SVC *svc, int encoded_frame_size) {
-  int temporal_layer = 0;
+  int i = 0;
   int current_temporal_layer = svc->temporal_layer_id;
-  for (temporal_layer = current_temporal_layer + 1;
-      temporal_layer < svc->number_temporal_layers; ++temporal_layer) {
-    LAYER_CONTEXT *lc = &svc->layer_context[temporal_layer];
+  for (i = current_temporal_layer + 1;
+      i < svc->number_temporal_layers; ++i) {
+    const int layer = LAYER_IDS_TO_IDX(svc->spatial_layer_id, i,
+                                       svc->number_temporal_layers);
+    LAYER_CONTEXT *lc = &svc->layer_context[layer];
     RATE_CONTROL *lrc = &lc->rc;
     int bits_off_for_this_layer = (int)(lc->target_bandwidth / lc->framerate -
         encoded_frame_size);
@@ -268,7 +271,7 @@ static void update_buffer_level(VP9_COMP *cpi, int encoded_frame_size) {
   rc->bits_off_target = MIN(rc->bits_off_target, rc->maximum_buffer_size);
   rc->buffer_level = rc->bits_off_target;
 
-  if (cpi->use_svc && cpi->oxcf.rc_mode == VPX_CBR) {
+  if (is_one_pass_cbr_svc(cpi)) {
     update_layer_buffer_level(&cpi->svc, encoded_frame_size);
   }
 }
@@ -1418,13 +1421,14 @@ static int calc_pframe_target_size_one_pass_cbr(const VP9_COMP *cpi) {
   } else {
     target = rc->avg_frame_bandwidth;
   }
-  if (svc->number_temporal_layers > 1 &&
-      oxcf->rc_mode == VPX_CBR) {
+  if (is_one_pass_cbr_svc(cpi)) {
     // Note that for layers, avg_frame_bandwidth is the cumulative
     // per-frame-bandwidth. For the target size of this frame, use the
     // layer average frame size (i.e., non-cumulative per-frame-bw).
-    int current_temporal_layer = svc->temporal_layer_id;
-    const LAYER_CONTEXT *lc = &svc->layer_context[current_temporal_layer];
+    int layer =
+        LAYER_IDS_TO_IDX(svc->spatial_layer_id,
+            svc->temporal_layer_id, svc->number_temporal_layers);
+    const LAYER_CONTEXT *lc = &svc->layer_context[layer];
     target = lc->avg_frame_size;
     min_frame_target = MAX(lc->avg_frame_size >> 4, FRAME_OVERHEAD_BITS);
   }
@@ -1459,7 +1463,9 @@ static int calc_iframe_target_size_one_pass_cbr(const VP9_COMP *cpi) {
     if (svc->number_temporal_layers > 1 &&
         oxcf->rc_mode == VPX_CBR) {
       // Use the layer framerate for temporal layers CBR mode.
-      const LAYER_CONTEXT *lc = &svc->layer_context[svc->temporal_layer_id];
+      const int layer = LAYER_IDS_TO_IDX(svc->spatial_layer_id,
+          svc->temporal_layer_id, svc->number_temporal_layers);
+      const LAYER_CONTEXT *lc = &svc->layer_context[layer];
       framerate = lc->framerate;
     }
     kf_boost = MAX(kf_boost, (int)(2 * framerate - 16));
@@ -1472,10 +1478,27 @@ static int calc_iframe_target_size_one_pass_cbr(const VP9_COMP *cpi) {
   return vp9_rc_clamp_iframe_target_size(cpi, target);
 }
 
+// Reset information needed to set proper reference frames and buffer updates
+// for temporal layering. This is called when a key frame is encoded.
+static void reset_temporal_layer_to_zero(VP9_COMP *cpi) {
+  int sl;
+  LAYER_CONTEXT *lc = NULL;
+  cpi->svc.temporal_layer_id = 0;
+
+  for (sl = 0; sl < cpi->svc.number_spatial_layers; ++sl) {
+    lc = &cpi->svc.layer_context[sl * cpi->svc.number_temporal_layers];
+    lc->current_video_frame_in_layer = 0;
+    lc->frames_from_key_frame = 0;
+  }
+}
+
 void vp9_rc_get_svc_params(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
   RATE_CONTROL *const rc = &cpi->rc;
   int target = rc->avg_frame_bandwidth;
+  const int layer = LAYER_IDS_TO_IDX(cpi->svc.spatial_layer_id,
+      cpi->svc.temporal_layer_id, cpi->svc.number_temporal_layers);
+
   if ((cm->current_video_frame == 0) ||
       (cpi->frame_flags & FRAMEFLAGS_KEY) ||
       (cpi->oxcf.auto_key && (rc->frames_since_key %
@@ -1484,30 +1507,39 @@ void vp9_rc_get_svc_params(VP9_COMP *cpi) {
     rc->source_alt_ref_active = 0;
 
     if (is_two_pass_svc(cpi)) {
-      cpi->svc.layer_context[cpi->svc.spatial_layer_id].is_key_frame = 1;
+      cpi->svc.layer_context[layer].is_key_frame = 1;
       cpi->ref_frame_flags &=
           (~VP9_LAST_FLAG & ~VP9_GOLD_FLAG & ~VP9_ALT_FLAG);
-    }
-
-    if (cpi->oxcf.pass == 0 && cpi->oxcf.rc_mode == VPX_CBR) {
+    } else if (is_one_pass_cbr_svc(cpi)) {
+      cpi->svc.layer_context[layer].is_key_frame = 1;
+      reset_temporal_layer_to_zero(cpi);
+      cpi->ref_frame_flags &=
+                (~VP9_LAST_FLAG & ~VP9_GOLD_FLAG & ~VP9_ALT_FLAG);
+      // Assumption here is that LAST_FRAME is being updated for a keyframe.
+      // Thus no change in update flags.
       target = calc_iframe_target_size_one_pass_cbr(cpi);
     }
   } else {
     cm->frame_type = INTER_FRAME;
-
     if (is_two_pass_svc(cpi)) {
-      LAYER_CONTEXT *lc = &cpi->svc.layer_context[cpi->svc.spatial_layer_id];
+      LAYER_CONTEXT *lc = &cpi->svc.layer_context[layer];
       if (cpi->svc.spatial_layer_id == 0) {
         lc->is_key_frame = 0;
       } else {
-        lc->is_key_frame = cpi->svc.layer_context[0].is_key_frame;
+        lc->is_key_frame =
+            cpi->svc.layer_context[cpi->svc.temporal_layer_id].is_key_frame;
         if (lc->is_key_frame)
           cpi->ref_frame_flags &= (~VP9_LAST_FLAG);
       }
       cpi->ref_frame_flags &= (~VP9_ALT_FLAG);
-    }
-
-    if (cpi->oxcf.pass == 0 && cpi->oxcf.rc_mode == VPX_CBR) {
+    } else if (is_one_pass_cbr_svc(cpi)) {
+      LAYER_CONTEXT *lc = &cpi->svc.layer_context[layer];
+      if (cpi->svc.spatial_layer_id == 0) {
+        lc->is_key_frame = 0;
+      } else {
+        lc->is_key_frame =
+            cpi->svc.layer_context[cpi->svc.temporal_layer_id].is_key_frame;
+      }
       target = calc_pframe_target_size_one_pass_cbr(cpi);
     }
   }

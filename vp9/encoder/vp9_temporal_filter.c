@@ -682,7 +682,7 @@ void vp9_temporal_filter(VP9_COMP *cpi, int distance) {
   if (frames_to_blur > 0) {
     // Setup scaling factors. Scaling on each of the arnr frames is not
     // supported.
-    if (is_two_pass_svc(cpi)) {
+    if (cpi->use_svc) {
       // In spatial svc the scaling factors might be less then 1/2.
       // So we will use non-normative scaling.
       int frame_used = 0;

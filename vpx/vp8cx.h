@@ -511,6 +511,17 @@ enum vp8e_enc_control_id {
    */
   VP9E_SET_COLOR_SPACE,
 
+  /*!\brief Codec control function to set temporal layering mode.
+   * \note Valid ranges: 0..3, default is "0" (VP9E_TEMPORAL_LAYERING_MODE_NOLAYERING).
+   *                     0 = VP9E_TEMPORAL_LAYERING_MODE_NOLAYERING
+   *                     1 = VP9E_TEMPORAL_LAYERING_MODE_BYPASS
+   *                     2 = VP9E_TEMPORAL_LAYERING_MODE_0101
+   *                     3 = VP9E_TEMPORAL_LAYERING_MODE_0212
+   *
+   * Supported in codecs: VP9
+   */
+  VP9E_SET_TEMPORAL_LAYERING_MODE,
+
   /*!\brief Codec control function to get an Active map back from the encoder.
    *
    * Supported in codecs: VP9
@@ -529,6 +540,32 @@ typedef enum vpx_scaling_mode_1d {
   VP8E_ONETWO      = 3
 } VPX_SCALING_MODE;
 
+/*!\brief Temporal layering mode enum for VP9 SVC.
+ *
+ * This set of macros define the different temporal layering modes.
+ * Supported codecs: VP9 (in SVC mode)
+ *
+ */
+typedef enum vp9e_temporal_layering_mode {
+  /*!\brief No temporal layering.
+   * Used when only spatial layering is used.
+   */
+  VP9E_TEMPORAL_LAYERING_MODE_NOLAYERING   = 0,
+
+  /*!\brief Bypass mode.
+   * Used when application needs to control temporal layering.
+   * This will only work when the number of spatial layers equals 1.
+   */
+  VP9E_TEMPORAL_LAYERING_MODE_BYPASS       = 1,
+
+  /*!\brief 0-1-0-1... temporal layering scheme with two temporal layers.
+   */
+  VP9E_TEMPORAL_LAYERING_MODE_0101         = 2,
+
+  /*!\brief 0-2-1-2... temporal layering scheme with three temporal layers.
+   */
+  VP9E_TEMPORAL_LAYERING_MODE_0212         = 3
+} VP9E_TEMPORAL_LAYERING_MODE;
 
 /*!\brief  vpx region of interest map
  *
