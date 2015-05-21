@@ -1554,7 +1554,6 @@ static int64_t handle_intrabc_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                    int *rate2, int64_t *distortion,
                                    int *skippable,
                                    int *rate_y, int *rate_uv,
-                                   int *disable_skip,
                                    int_mv (*mode_mv)[MAX_REF_FRAMES],
                                    int mi_row, int mi_col,
                                    int64_t *psse,
@@ -1735,13 +1734,15 @@ static int64_t handle_intrabc_mode(VP9_COMP *cpi, MACROBLOCK *x,
     *rate2 += *rate_uv;
     *distortion += distortion_uv;
     *skippable = skippable_y && skippable_uv;
+
+    *rate2 += vp9_cost_bit(vp9_get_skip_prob(cm, xd), *skippable);
+    x->skip = *skippable;
+    if (*skippable) {
+      *rate2 -= *rate_y + *rate_uv;
+    }
   } else {
     x->skip = 1;
-    *disable_skip = 1;
-
-    // The cost of skip bit needs to be added.
     *rate2 += vp9_cost_bit(vp9_get_skip_prob(cm, xd), 1);
-
     *distortion = skip_sse_sb;
   }
 
@@ -2197,7 +2198,7 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
 // This function is used only for intra_only frames
 static int64_t rd_pick_intrabc_sb_mode(VP9_COMP *cpi, MACROBLOCK *x,
                                        int mi_row, int mi_col,
-                                       int *rate, int *rate_tokenonly,
+                                       int *rate,
                                        int64_t *distortion, int *skippable,
                                        BLOCK_SIZE bsize,
                                        int64_t tx_cache[TX_MODES],
@@ -2211,6 +2212,7 @@ static int64_t rd_pick_intrabc_sb_mode(VP9_COMP *cpi, MACROBLOCK *x,
   const PREDICTION_MODE L = vp9_left_block_mode(mic, left_mi, 0);
   MB_MODE_INFO *mbmi = &mic->mbmi;
   MB_MODE_INFO mbmi_selected = *mbmi;
+  int best_skip = x->skip;
   const int *bmode_costs = cpi->y_mode_costs[A][L];
   struct buf_2d yv12_mb[MAX_MB_PLANE];
   int_mv frame_dv[MB_MODE_COUNT][MAX_REF_FRAMES];
@@ -2249,10 +2251,8 @@ static int64_t rd_pick_intrabc_sb_mode(VP9_COMP *cpi, MACROBLOCK *x,
     int rate_uv = 0;
     int64_t tx_cache[TX_MODES];
     int64_t total_sse;
-    int disable_skip = 0;
     const int saved_interp_filter = cpi->common.interp_filter;
-    int this_rate;
-    int this_rate_tokenonly = 0;
+    int this_rate = 0;
     int64_t this_distortion = 0;
     int64_t this_rd;
     mbmi->mode = mode;
@@ -2261,16 +2261,16 @@ static int64_t rd_pick_intrabc_sb_mode(VP9_COMP *cpi, MACROBLOCK *x,
     cpi->common.interp_filter = BILINEAR;
     this_rd = handle_intrabc_mode(cpi, x, bsize,
                                   tx_cache,
-                                  &this_rate_tokenonly, &this_distortion,
+                                  &this_rate, &this_distortion,
                                   &this_skippable,
                                   &rate_y, &rate_uv,
-                                  &disable_skip, frame_dv,
+                                  frame_dv,
                                   mi_row, mi_col,
                                   &total_sse, best_rd);
     cpi->common.interp_filter = saved_interp_filter;
     if (this_rd == INT64_MAX)
       continue;
-    this_rate = this_rate_tokenonly + bmode_costs[mode];
+    this_rate += bmode_costs[mode];
 #if CONFIG_TX_SKIP
     if (try_tx_skip)
       this_rate += vp9_cost_bit(cpi->common.fc.y_tx_skip_prob[0], 0) +
@@ -2278,15 +2278,16 @@ static int64_t rd_pick_intrabc_sb_mode(VP9_COMP *cpi, MACROBLOCK *x,
 #endif  // CONFIG_TX_SKIP
     this_rd = RDCOST(x->rdmult, x->rddiv, this_rate, this_distortion);
     if (this_rd < best_rd) {
-      mbmi_selected   = *mbmi;
-      best_rd          = this_rd;
-      *rate            = this_rate;
-      *rate_tokenonly  = this_rate_tokenonly;
-      *distortion      = this_distortion;
-      *skippable       = this_skippable;
+      mbmi_selected = *mbmi;
+      best_skip = x->skip;
+      best_rd = this_rd;
+      *rate = this_rate;
+      *distortion = this_distortion;
+      *skippable = this_skippable;
     }
   }
 
+  x->skip = best_skip;
   *mbmi = mbmi_selected;
 
   return best_rd;
@@ -5731,17 +5732,12 @@ void vp9_rd_pick_intra_mode_sb(VP9_COMP *cpi, MACROBLOCK *x,
   if (bsize >= BLOCK_8X8) {
     best_rd = MIN(best_rd, rd_cost->rdcost);
     if (rd_pick_intrabc_sb_mode(cpi, x, mi_row, mi_col, &rate_y,
-                                &rate_y_tokenonly, &dist_y, &y_skip, bsize,
+                                &dist_y, &y_skip, bsize,
                                 tx_cache, best_rd) < best_rd) {
-      if (y_skip) {
-        rd_cost->rate = rate_y - rate_y_tokenonly +
-                        vp9_cost_bit(vp9_get_skip_prob(cm, xd), 1);
-        rd_cost->dist = dist_y;
-        vp9_zero(ctx->tx_rd_diff);
-      } else {
+      rd_cost->rate = rate_y;
+      rd_cost->dist = dist_y;
+      if (!y_skip) {
         int i;
-        rd_cost->rate = rate_y + vp9_cost_bit(vp9_get_skip_prob(cm, xd), 0);
-        rd_cost->dist = dist_y;
         if (cpi->sf.tx_size_search_method == USE_FULL_RD)
           for (i = 0; i < TX_MODES; i++) {
             if (tx_cache[i] < INT64_MAX && tx_cache[cm->tx_mode] < INT64_MAX)
