@@ -1862,6 +1862,27 @@ static void setup_frame_size_with_refs(VP9_COMMON *cm,
 }
 
 static void setup_tile_info(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
+#if CONFIG_ROW_TILE
+  cm->tile_width  = vp9_rb_read_literal(rb, 6);
+  cm->tile_height = vp9_rb_read_literal(rb, 6);
+
+  cm->tile_width  = clamp(cm->tile_width,
+                          1, 64) << MI_BLOCK_SIZE_LOG2;
+  cm->tile_height = clamp(cm->tile_height,
+                          1, 64) << MI_BLOCK_SIZE_LOG2;
+
+  cm->tile_width  = MIN(cm->tile_width, cm->mi_cols);
+  cm->tile_height = MIN(cm->tile_height, cm->mi_rows);
+
+  // Get tile numbers
+  cm->tile_cols = 1;
+  while (cm->tile_cols * cm->tile_width < cm->mi_cols)
+    ++cm->tile_cols;
+
+  cm->tile_rows = 1;
+  while (cm->tile_rows * cm->tile_height < cm->mi_rows)
+    ++cm->tile_rows;
+#else
   int min_log2_tiles, max_log2_tiles, max_ones;
   vp9_get_tile_n_bits(cm->mi_cols, &min_log2_tiles, &max_log2_tiles);
 
@@ -1876,21 +1897,9 @@ static void setup_tile_info(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
                        "Invalid number of tile columns");
 
   // rows
-#if CONFIG_ROW_TILE
-  vp9_get_tile_n_bits(cm->mi_rows, &min_log2_tiles, &max_log2_tiles);
-  max_ones = max_log2_tiles - min_log2_tiles;
-  cm->log2_tile_rows = min_log2_tiles;
-  while (max_ones-- && vp9_rb_read_bit(rb))
-    ++cm->log2_tile_rows;
-
-  if (cm->log2_tile_rows > 10)
-    vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
-                       "Invalid number of tile rows");
-#else
   cm->log2_tile_rows = vp9_rb_read_bit(rb);
   if (cm->log2_tile_rows)
     cm->log2_tile_rows += vp9_rb_read_bit(rb);
-#endif
 
   cm->tile_cols = 1 << cm->log2_tile_cols;
   cm->tile_rows = 1 << cm->log2_tile_rows;
@@ -1900,6 +1909,7 @@ static void setup_tile_info(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
   // round to integer multiples of 8
   cm->tile_width  = mi_cols_aligned_to_sb(cm->tile_width);
   cm->tile_height = mi_cols_aligned_to_sb(cm->tile_height);
+#endif
 }
 
 // Reads the next tile returning its size and adjusting '*data' accordingly

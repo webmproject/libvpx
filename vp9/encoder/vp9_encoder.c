@@ -572,19 +572,32 @@ void vp9_new_framerate(VP9_COMP *cpi, double framerate) {
 static void set_tile_limits(VP9_COMP *cpi) {
   VP9_COMMON *const cm = &cpi->common;
 
+#if CONFIG_ROW_TILE
+  cm->tile_width  = clamp(cpi->oxcf.tile_columns + 1,
+                          1, 64) << MI_BLOCK_SIZE_LOG2;
+  cm->tile_height = clamp(cpi->oxcf.tile_rows + 1,
+                          1, 64) << MI_BLOCK_SIZE_LOG2;
+
+  cm->tile_width  = MIN(cm->tile_width, cm->mi_cols);
+  cm->tile_height = MIN(cm->tile_height, cm->mi_rows);
+
+  // Get tile numbers
+  cm->tile_cols = 1;
+  while (cm->tile_cols * cm->tile_width < cm->mi_cols)
+    ++cm->tile_cols;
+
+  cm->tile_rows = 1;
+  while (cm->tile_rows * cm->tile_height < cm->mi_rows)
+    ++cm->tile_rows;
+
+#else
   int min_log2_tiles, max_log2_tiles;
   vp9_get_tile_n_bits(cm->mi_cols, &min_log2_tiles, &max_log2_tiles);
 
   cm->log2_tile_cols = clamp(cpi->oxcf.tile_columns,
                              min_log2_tiles, max_log2_tiles);
-#if CONFIG_ROW_TILE
-  vp9_get_tile_n_bits(cm->mi_rows, &min_log2_tiles, &max_log2_tiles);
-  cm->log2_tile_rows = clamp(cpi->oxcf.tile_rows,
-                             min_log2_tiles, max_log2_tiles);
-#else
-  cm->log2_tile_rows = cpi->oxcf.tile_rows;
-#endif
 
+  cm->log2_tile_rows = cpi->oxcf.tile_rows;
   cm->tile_cols = 1 << cm->log2_tile_cols;
   cm->tile_rows = 1 << cm->log2_tile_rows;
 
@@ -593,6 +606,7 @@ static void set_tile_limits(VP9_COMP *cpi) {
   // round to integer multiples of 8
   cm->tile_width  = mi_cols_aligned_to_sb(cm->tile_width);
   cm->tile_height = mi_cols_aligned_to_sb(cm->tile_height);
+#endif
 }
 
 static void init_buffer_indices(VP9_COMP *cpi) {
