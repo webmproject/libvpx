@@ -33,6 +33,12 @@ typedef struct TileData {
   DECLARE_ALIGNED(16, MACROBLOCKD, xd);
 } TileData;
 
+typedef struct TileBuffer {
+  const uint8_t *data;
+  size_t size;
+  int col;  // only used with multi-threaded decoding
+} TileBuffer;
+
 typedef struct VP9Decoder {
   DECLARE_ALIGNED(16, MACROBLOCKD, mb);
 
@@ -59,6 +65,10 @@ typedef struct VP9Decoder {
   int max_threads;
   int inv_tile_order;
   int need_resync;  // wait for key/intra-only frame
+
+#if CONFIG_ROW_TILE
+  TileBuffer tile_buffers[1024][1024];
+#endif
 } VP9Decoder;
 
 int vp9_receive_compressed_data(struct VP9Decoder *pbi,
