@@ -141,7 +141,7 @@ void vp9_loop_filter_frame_mt(YV12_BUFFER_CONFIG *frame,
   const VP9WorkerInterface *const winterface = vp9_get_worker_interface();
   // Number of superblock rows and cols
   const int sb_rows = mi_cols_aligned_to_sb(cm->mi_rows) >> MI_BLOCK_SIZE_LOG2;
-  const int tile_cols = 1 << cm->log2_tile_cols;
+  const int tile_cols = cm->tile_cols;
   const int num_workers = MIN(pbi->max_threads & ~1, tile_cols);
   int i;
 

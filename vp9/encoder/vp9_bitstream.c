@@ -1926,8 +1926,8 @@ static size_t encode_tiles(VP9_COMP *cpi, uint8_t *data_ptr) {
   int tile_row, tile_col;
   TOKENEXTRA *tok[4][1 << 6], *tok_end;
   size_t total_size = 0;
-  const int tile_cols = 1 << cm->log2_tile_cols;
-  const int tile_rows = 1 << cm->log2_tile_rows;
+  const int tile_cols = cm->tile_cols;
+  const int tile_rows = cm->tile_rows;
   TileInfo tile[4][1 << 6];
   TOKENEXTRA *pre_tok = cpi->tok;
   int tile_tok = 0;

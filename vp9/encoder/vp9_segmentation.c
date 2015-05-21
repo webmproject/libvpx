@@ -222,7 +222,7 @@ void vp9_choose_segmap_coding_method(VP9_COMMON *cm, MACROBLOCKD *xd) {
 
   // First of all generate stats regarding how well the last segment map
   // predicts this one
-  for (tile_col = 0; tile_col < 1 << cm->log2_tile_cols; tile_col++) {
+  for (tile_col = 0; tile_col < cm->tile_cols; tile_col++) {
     TileInfo tile;
     MODE_INFO *mi_ptr;
     vp9_tile_init(&tile, cm, 0, tile_col);

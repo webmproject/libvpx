@@ -1891,6 +1891,15 @@ static void setup_tile_info(VP9_COMMON *cm, struct vp9_read_bit_buffer *rb) {
   if (cm->log2_tile_rows)
     cm->log2_tile_rows += vp9_rb_read_bit(rb);
 #endif
+
+  cm->tile_cols = 1 << cm->log2_tile_cols;
+  cm->tile_rows = 1 << cm->log2_tile_rows;
+
+  cm->tile_width = (mi_cols_aligned_to_sb(cm->mi_cols) >> cm->log2_tile_cols);
+  cm->tile_height = (mi_cols_aligned_to_sb(cm->mi_rows) >> cm->log2_tile_rows);
+  // round to integer multiples of 8
+  cm->tile_width  = mi_cols_aligned_to_sb(cm->tile_width);
+  cm->tile_height = mi_cols_aligned_to_sb(cm->tile_height);
 }
 
 // Reads the next tile returning its size and adjusting '*data' accordingly
@@ -1953,8 +1962,8 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
   VP9_COMMON *const cm = &pbi->common;
   const VP9WorkerInterface *const winterface = vp9_get_worker_interface();
   const int aligned_cols = mi_cols_aligned_to_sb(cm->mi_cols);
-  const int tile_cols = 1 << cm->log2_tile_cols;
-  const int tile_rows = 1 << cm->log2_tile_rows;
+  const int tile_cols = cm->tile_cols;
+  const int tile_rows = cm->tile_rows;
 #if CONFIG_ROW_TILE
   TileBuffer (*tile_buffers)[1024] = pbi->tile_buffers;
 #else
@@ -2037,10 +2046,15 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
 
   for (tile_row = 0; tile_row < tile_rows; ++tile_row) {
     TileInfo tile;
+#if !CONFIG_ROW_TILE
     vp9_tile_set_row(&tile, cm, tile_row);
+#endif
     for (tile_col = 0; tile_col < tile_cols; ++tile_col) {
+#if CONFIG_ROW_TILE
+      vp9_tile_init(&tile, cm, tile_row, tile_col);
+#else
       vp9_tile_set_col(&tile, cm, tile_col);
-
+#endif
       for (mi_row = tile.mi_row_start; mi_row < tile.mi_row_end;
            mi_row += MI_BLOCK_SIZE) {
         const int col = pbi->inv_tile_order ?
@@ -2141,8 +2155,8 @@ static const uint8_t *decode_tiles_mt(VP9Decoder *pbi,
   const VP9WorkerInterface *const winterface = vp9_get_worker_interface();
   const uint8_t *bit_reader_end = NULL;
   const int aligned_mi_cols = mi_cols_aligned_to_sb(cm->mi_cols);
-  const int tile_cols = 1 << cm->log2_tile_cols;
-  const int tile_rows = 1 << cm->log2_tile_rows;
+  const int tile_cols = cm->tile_cols;
+  const int tile_rows = cm->tile_rows;
   const int num_workers = MIN(pbi->max_threads & ~1, tile_cols);
   TileBuffer tile_buffers[1][1024];
   int n;
@@ -2791,8 +2805,8 @@ void vp9_decode_frame(VP9Decoder *pbi,
   uint8_t clear_data[MAX_VP9_HEADER_SIZE];
   const size_t first_partition_size = read_uncompressed_header(pbi,
       init_read_bit_buffer(pbi, &rb, data, data_end, clear_data));
-  const int tile_rows = 1 << cm->log2_tile_rows;
-  const int tile_cols = 1 << cm->log2_tile_cols;
+  const int tile_rows = cm->tile_rows;
+  const int tile_cols = cm->tile_cols;
   YV12_BUFFER_CONFIG *const new_fb = get_frame_new_buffer(cm);
   xd->cur_buf = new_fb;
 #if CONFIG_GLOBAL_MOTION
