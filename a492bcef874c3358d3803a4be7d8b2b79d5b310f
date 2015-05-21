@@ -22,6 +22,30 @@
       "revId": "a492bcef874c3358d3803a4be7d8b2b79d5b310f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d7ad934_40c79248",
+        "filename": "vp9/common/x86/vp9_asm_stubs.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 295,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-05-21T05:57:48Z",
+      "side": 0,
+      "message": "the real set of functions are vp9_convolve* which are in the rtcd. this while loop only exists on the desktop, neon and others implement the convolve functions directly.\nso given they\u0027re not really top-level functions I don\u0027t know that they\u0027ll end up there. it\u0027s entirely possible to rework the code to do away with all this trampolining.",
+      "parentUuid": "ed4089d5_f3c1d835",
+      "range": {
+        "startLine": 295,
+        "startChar": 19,
+        "endLine": 295,
+        "endChar": 47
+      },
+      "revId": "a492bcef874c3358d3803a4be7d8b2b79d5b310f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
