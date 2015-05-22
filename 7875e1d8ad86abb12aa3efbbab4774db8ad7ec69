@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4d0995dc_77b98756",
+        "filename": "configure",
+        "patchSetId": 3
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-05-22T18:37:05Z",
+      "side": 1,
+      "message": "I think this gets the best of both worlds. Accepts --disable-vp9 twice (in the dist reconfigure) and auto-disables when the directory does not exist.",
+      "range": {
+        "startLine": 188,
+        "startChar": 19,
+        "endLine": 188,
+        "endChar": 21
+      },
+      "revId": "7875e1d8ad86abb12aa3efbbab4774db8ad7ec69",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
