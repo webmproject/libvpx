@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "0d031dc0_9f1545f2",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1337,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2015-05-22T21:33:32Z",
+      "side": 1,
+      "message": "can we use:\n(xd-\u003ecur_buf-\u003eflags \u0026 YV12_FLAG_HIGHBITDEPTH) instead of passsing the use_highbitdepth flag?",
+      "range": {
+        "startLine": 1337,
+        "startChar": 11,
+        "endLine": 1337,
+        "endChar": 34
+      },
+      "revId": "976c2c0a86aa11eb5c3b78bb2274b938d20f7ca3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d031dc0_64af0810",
         "filename": "vp9/common/vp9_reconinter.c",
         "patchSetId": 1
