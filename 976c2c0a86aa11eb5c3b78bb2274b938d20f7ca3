@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0d031dc0_64af0810",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1355,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-05-22T20:58:42Z",
+      "side": 1,
+      "message": "It would be substatially cleaner to just set these up once at frame init like we do for the real inter scale factors in |read_uncompressed_header|. Then we don\u0027t need to plumb a use_highbitdepth parameter all the way down here.",
+      "revId": "976c2c0a86aa11eb5c3b78bb2274b938d20f7ca3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
