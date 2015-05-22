@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4d0995dc_e475e3fb",
+        "filename": "configure",
+        "patchSetId": 2
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-05-22T18:09:01Z",
+      "side": 1,
+      "message": "I think this fixes the issue of --disable-vp8; make dist; --disable-vp8. However, since we had workarounds for that it might break them.",
+      "range": {
+        "startLine": 203,
+        "startChar": 4,
+        "endLine": 203,
+        "endChar": 15
+      },
+      "revId": "b9e2332110151e8b30708d05d14da8c082ce8a3d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
