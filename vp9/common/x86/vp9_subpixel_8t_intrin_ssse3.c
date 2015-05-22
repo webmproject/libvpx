@@ -8,9 +8,13 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+// Due to a header conflict between math.h and intrinsics includes with ceil()
+// in certain configurations under vs9 this include needs to precede
+// tmmintrin.h.
+#include "./vp9_rtcd.h"
+
 #include <tmmintrin.h>
 
-#include "./vp9_rtcd.h"
 #include "vpx_ports/mem.h"
 #include "vpx_ports/emmintrin_compat.h"
 
