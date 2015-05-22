@@ -22,6 +22,30 @@
       "revId": "dadcbf37533d5d786f7ceabd22e7bf1dccbcd7de",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "adc5b1ce_f9d1ffd1",
+        "filename": "vp9/encoder/x86/vp9_avg_intrin_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 363,
+      "author": {
+        "id": 1001914
+      },
+      "writtenOn": "2015-05-22T22:43:20Z",
+      "side": 1,
+      "message": "Right. We should scale the reference frame instead. Fixed in the latest version.",
+      "parentUuid": "4d0995dc_6bdfde02",
+      "range": {
+        "startLine": 363,
+        "startChar": 21,
+        "endLine": 363,
+        "endChar": 36
+      },
+      "revId": "dadcbf37533d5d786f7ceabd22e7bf1dccbcd7de",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
