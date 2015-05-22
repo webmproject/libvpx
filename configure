@@ -184,6 +184,10 @@ if [ ${doxy_major:-0} -ge 1 ]; then
     [ $doxy_minor -eq 5 ] && [ $doxy_patch -ge 3 ] && enable_feature doxygen
 fi
 
+# disable codecs when their source directory does not exist
+[ -d "${source_path}/vp8" ] || disable_feature vp8
+[ -d "${source_path}/vp9" ] || disable_feature vp9
+
 # install everything except the sources, by default. sources will have
 # to be enabled when doing dist builds, since that's no longer a common
 # case.
@@ -199,31 +203,16 @@ enable_feature multithread
 enable_feature os_support
 enable_feature temporal_denoising
 
-[ -d "${source_path}/../include" ] && enable_feature alt_tree_layout
-for d in vp8 vp9; do
-    [ -d "${source_path}/${d}" ] && disable_feature alt_tree_layout;
-done
-
-if ! enabled alt_tree_layout; then
-# development environment
-[ -d "${source_path}/vp8" ] && CODECS="${CODECS} vp8_encoder vp8_decoder"
-[ -d "${source_path}/vp9" ] && CODECS="${CODECS} vp9_encoder vp9_decoder"
-else
-# customer environment
-[ -f "${source_path}/../include/vpx/vp8cx.h" ] && CODECS="${CODECS} vp8_encoder"
-[ -f "${source_path}/../include/vpx/vp8dx.h" ] && CODECS="${CODECS} vp8_decoder"
-[ -f "${source_path}/../include/vpx/vp9cx.h" ] && CODECS="${CODECS} vp9_encoder"
-[ -f "${source_path}/../include/vpx/vp9dx.h" ] && CODECS="${CODECS} vp9_decoder"
-[ -f "${source_path}/../include/vpx/vp8cx.h" ] || disable_feature vp8_encoder
-[ -f "${source_path}/../include/vpx/vp8dx.h" ] || disable_feature vp8_decoder
-[ -f "${source_path}/../include/vpx/vp9cx.h" ] || disable_feature vp9_encoder
-[ -f "${source_path}/../include/vpx/vp9dx.h" ] || disable_feature vp9_decoder
-
-[ -f "${source_path}/../lib/*/*mt.lib" ] && soft_enable static_msvcrt
-fi
-
-CODECS="$(echo ${CODECS} | tr ' ' '\n')"
-CODEC_FAMILIES="$(for c in ${CODECS}; do echo ${c%_*}; done | sort | uniq)"
+CODECS="
+    vp8_encoder
+    vp8_decoder
+    vp9_encoder
+    vp9_decoder
+"
+CODEC_FAMILIES="
+    vp8
+    vp9
+"
 
 ARCH_LIST="
     arm
@@ -255,7 +244,6 @@ HAVE_LIST="
     ${ARCH_EXT_LIST}
     vpx_ports
     stdint_h
-    alt_tree_layout
     pthread_h
     sys_mman_h
     unistd_h
