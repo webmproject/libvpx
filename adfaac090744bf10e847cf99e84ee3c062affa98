@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4d0995dc_cfd1dd84",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 472,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-05-22T15:52:28Z",
+      "side": 1,
+      "message": "For additional settings, VAR_LIST could be reintroduced to concatenate additional options.",
+      "range": {
+        "startLine": 472,
+        "startChar": 34,
+        "endLine": 472,
+        "endChar": 35
+      },
+      "revId": "adfaac090744bf10e847cf99e84ee3c062affa98",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cda1050e_388ee6ff",
+        "filename": "configure",
+        "patchSetId": 1
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-05-22T15:52:28Z",
+      "side": 1,
+      "message": "70% confident of 64kx64k",
+      "range": {
+        "startLine": 203,
+        "startChar": 26,
+        "endLine": 203,
+        "endChar": 33
+      },
+      "revId": "adfaac090744bf10e847cf99e84ee3c062affa98",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
