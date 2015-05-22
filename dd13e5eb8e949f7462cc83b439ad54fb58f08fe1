@@ -1111,6 +1111,29 @@
     },
     {
       "key": {
+        "uuid": "4d0995dc_55f27be7",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-05-22T19:53:08Z",
+      "side": 1,
+      "message": "is this assuming there are 3 temporal layers?",
+      "range": {
+        "startLine": 131,
+        "startChar": 50,
+        "endLine": 131,
+        "endChar": 52
+      },
+      "revId": "dd13e5eb8e949f7462cc83b439ad54fb58f08fe1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d031dc0_84bfc30a",
         "filename": "vp9/encoder/vp9_svc_layercontext.c",
         "patchSetId": 9
