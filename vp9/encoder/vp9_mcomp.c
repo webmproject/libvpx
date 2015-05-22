@@ -18,6 +18,7 @@
 #include "vpx_ports/mem.h"
 
 #include "vp9/common/vp9_common.h"
+#include "vp9/common/vp9_reconinter.h"
 
 #include "vp9/encoder/vp9_encoder.h"
 #include "vp9/encoder/vp9_mcomp.h"
@@ -1789,8 +1790,11 @@ static const MV search_pos[4] = {
 };
 
 unsigned int vp9_int_pro_motion_estimation(const VP9_COMP *cpi, MACROBLOCK *x,
-                                           BLOCK_SIZE bsize) {
+                                           BLOCK_SIZE bsize,
+                                           int mi_row, int mi_col) {
   MACROBLOCKD *xd = &x->e_mbd;
+  MB_MODE_INFO *mbmi = &xd->mi[0]->mbmi;
+  struct buf_2d backup_yv12[MAX_MB_PLANE] = {{0, 0}};
   DECLARE_ALIGNED(16, int16_t, hbuf[128]);
   DECLARE_ALIGNED(16, int16_t, vbuf[128]);
   DECLARE_ALIGNED(16, int16_t, src_hbuf[64]);
@@ -1807,12 +1811,34 @@ unsigned int vp9_int_pro_motion_estimation(const VP9_COMP *cpi, MACROBLOCK *x,
   unsigned int best_sad, tmp_sad, this_sad[4];
   MV this_mv;
   const int norm_factor = 3 + (bw >> 5);
+  const YV12_BUFFER_CONFIG *scaled_ref_frame =
+      vp9_get_scaled_ref_frame(cpi, mbmi->ref_frame[0]);
+
+  if (scaled_ref_frame) {
+    int i;
+    // Swap out the reference frame for a version that's been scaled to
+    // match the resolution of the current frame, allowing the existing
+    // motion search code to be used without additional modifications.
+    for (i = 0; i < MAX_MB_PLANE; i++)
+      backup_yv12[i] = xd->plane[i].pre[0];
+    vp9_setup_pre_planes(xd, 0, scaled_ref_frame, mi_row, mi_col, NULL);
+  }
 
 #if CONFIG_VP9_HIGHBITDEPTH
-  tmp_mv->row = 0;
-  tmp_mv->col = 0;
-  return cpi->fn_ptr[bsize].sdf(x->plane[0].src.buf, src_stride,
-                                xd->plane[0].pre[0].buf, ref_stride);
+  {
+    unsigned int this_sad;
+    tmp_mv->row = 0;
+    tmp_mv->col = 0;
+    this_sad = cpi->fn_ptr[bsize].sdf(x->plane[0].src.buf, src_stride,
+                                      xd->plane[0].pre[0].buf, ref_stride);
+
+    if (scaled_ref_frame) {
+      int i;
+      for (i = 0; i < MAX_MB_PLANE; i++)
+        xd->plane[i].pre[0] = backup_yv12[i];
+    }
+    return this_sad;
+  }
 #endif
 
   // Set up prediction 1-D reference set
@@ -1889,6 +1915,12 @@ unsigned int vp9_int_pro_motion_estimation(const VP9_COMP *cpi, MACROBLOCK *x,
 
   tmp_mv->row *= 8;
   tmp_mv->col *= 8;
+
+  if (scaled_ref_frame) {
+    int i;
+    for (i = 0; i < MAX_MB_PLANE; i++)
+      xd->plane[i].pre[0] = backup_yv12[i];
+  }
 
   return best_sad;
 }
