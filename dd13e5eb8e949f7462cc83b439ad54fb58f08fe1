@@ -1917,6 +1917,30 @@
     },
     {
       "key": {
+        "uuid": "4d0995dc_c1fff1df",
+        "filename": "vpx/vpx_encoder.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-05-22T17:07:18Z",
+      "side": 1,
+      "message": "OK. So do we test to make sure that for a particular configuration the number of layers is \u003c\u003d 12?\nSo, if I introduce a 5 spatial, 5 temporal layer configuration at a later date then we trap this somewhere.",
+      "parentUuid": "4daef5fa_1bc967a7",
+      "range": {
+        "startLine": 46,
+        "startChar": 8,
+        "endLine": 46,
+        "endChar": 18
+      },
+      "revId": "dd13e5eb8e949f7462cc83b439ad54fb58f08fe1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cda1050e_980efa34",
         "filename": "vpx/vpx_encoder.h",
         "patchSetId": 9
