@@ -319,8 +319,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
   unsigned int (*const eob_branch)[COEFF_CONTEXTS] =
       cpi->common.counts.eob_branch[tx_size][type][ref];
 #if CONFIG_TX_SKIP
-  int tx_skip = mbmi->tx_skip[plane != 0];
-  const uint8_t *const band = tx_skip ?
+  const uint8_t *const band = mbmi->tx_skip[plane != 0] ?
       vp9_coefband_tx_skip : get_band_translate(tx_size);
 #else
   const uint8_t *const band = get_band_translate(tx_size);
@@ -366,7 +365,7 @@ static void tokenize_b(int plane, int block, BLOCK_SIZE plane_bsize,
     }
 
 #if CONFIG_TX_SKIP
-    t->is_pxd_token = tx_skip;
+    t->is_pxd_token = 0;
 #endif  // CONFIG_TX_SKIP
     add_token(&t, coef_probs[band[c]][pt],
               dct_value_tokens[v].extra,
@@ -401,7 +400,6 @@ static void tokenize_b_pxd(int plane, int block, BLOCK_SIZE plane_bsize,
   MB_MODE_INFO *mbmi = &xd->mi[0].src_mi->mbmi;
   int pt; /* near block/prev token context index */
   int c;
-  int tx_skip = mbmi->tx_skip[plane != 0];
   TOKENEXTRA *t = *tp;        /* store tokens starting here */
   int eob = p->eobs[block];
   const PLANE_TYPE type = pd->plane_type;
@@ -454,7 +452,7 @@ static void tokenize_b_pxd(int plane, int block, BLOCK_SIZE plane_bsize,
       pt = get_coef_context(nb, token_cache, c);
       v = qcoeff[scan[c]];
     }
-    t->is_pxd_token = tx_skip;
+    t->is_pxd_token = 1;
     add_token(&t, coef_probs_pxd[pt],
               dct_value_tokens[v].extra,
               (uint8_t)dct_value_tokens[v].token,
