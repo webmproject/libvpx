@@ -17,6 +17,7 @@
 #if CONFIG_COEFFICIENT_RANGE_CHECKING
 #include "vp9/common/vp9_idct.h"
 #endif
+#include "vp9/common/vp9_scan.h"
 
 #include "vp9/decoder/vp9_detokenize.h"
 

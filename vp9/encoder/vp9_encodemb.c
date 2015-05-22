@@ -18,6 +18,7 @@
 #include "vp9/common/vp9_idct.h"
 #include "vp9/common/vp9_reconinter.h"
 #include "vp9/common/vp9_reconintra.h"
+#include "vp9/common/vp9_scan.h"
 #include "vp9/common/vp9_systemdependent.h"
 
 #include "vp9/encoder/vp9_encodemb.h"
