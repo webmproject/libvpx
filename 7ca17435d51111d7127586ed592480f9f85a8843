@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0d031dc0_3096ee48",
+        "filename": "configure",
+        "patchSetId": 1
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-05-22T17:58:46Z",
+      "side": 0,
+      "message": "you want this portion",
+      "revId": "7ca17435d51111d7127586ed592480f9f85a8843",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
