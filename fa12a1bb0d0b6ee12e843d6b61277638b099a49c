@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "6d11f908_7664eeca",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-05-22T18:20:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0d031dc0_1045aa78",
+      "revId": "fa12a1bb0d0b6ee12e843d6b61277638b099a49c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4d0995dc_841507f2",
         "filename": "vp9/common/vp9_blockd.h",
         "patchSetId": 10
@@ -30,6 +48,24 @@
       "writtenOn": "2015-05-22T17:57:33Z",
       "side": 1,
       "message": "this relocation is unrelated",
+      "revId": "fa12a1bb0d0b6ee12e843d6b61277638b099a49c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8d162dff_9a044d9d",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-05-22T18:20:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4d0995dc_841507f2",
       "revId": "fa12a1bb0d0b6ee12e843d6b61277638b099a49c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "4daef5fa_bbc77b18",
+        "filename": "vp9/common/vp9_entropy.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-05-22T18:20:33Z",
+      "side": 1,
+      "message": "Tried, but just a little too long.  Leaving as is.",
+      "parentUuid": "0d031dc0_9059ba60",
+      "revId": "fa12a1bb0d0b6ee12e843d6b61277638b099a49c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d031dc0_10ae4a98",
         "filename": "vp9/decoder/vp9_detokenize.c",
         "patchSetId": 10
@@ -64,6 +118,24 @@
       "writtenOn": "2015-05-22T17:57:33Z",
       "side": 1,
       "message": "seem unrelated",
+      "revId": "fa12a1bb0d0b6ee12e843d6b61277638b099a49c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8d162dff_fa0901b3",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 10
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-05-22T18:20:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0d031dc0_10ae4a98",
       "revId": "fa12a1bb0d0b6ee12e843d6b61277638b099a49c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
