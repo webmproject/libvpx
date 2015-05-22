@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "8d162dff_5a1e358c",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-05-22T11:44:18Z",
+      "side": 1,
+      "message": "Correct.  I missed that one.",
+      "parentUuid": "cd1ca521_c21ecf18",
+      "revId": "ad1c7d47fa127545b2b895f4c7750d205aa731cc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4d0995dc_e3fe807a",
         "filename": "vp9/decoder/vp9_decodeframe.c",
         "patchSetId": 9
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "4daef5fa_58349557",
+        "filename": "vp9/decoder/vp9_decodeframe.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 343,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-05-22T11:44:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4d0995dc_e3fe807a",
+      "revId": "ad1c7d47fa127545b2b895f4c7750d205aa731cc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4d0995dc_232a3878",
         "filename": "vp9/decoder/vp9_detokenize.c",
         "patchSetId": 9
@@ -47,6 +83,24 @@
       "writtenOn": "2015-05-21T23:09:41Z",
       "side": 1,
       "message": "seems unrelated",
+      "revId": "ad1c7d47fa127545b2b895f4c7750d205aa731cc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4daef5fa_b8d14185",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-05-22T11:44:18Z",
+      "side": 1,
+      "message": "Another missed one.  It is set to the value of cm-\u003ebit_depth in setup_quantization().  Will fix.",
+      "parentUuid": "4d0995dc_232a3878",
       "revId": "ad1c7d47fa127545b2b895f4c7750d205aa731cc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
