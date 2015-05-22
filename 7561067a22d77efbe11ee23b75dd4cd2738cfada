@@ -54,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "0d031dc0_33d718c6",
+        "filename": "vp9/common/x86/vp9_subpixel_8t_intrin_avx2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-05-22T18:33:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6da65929_d427b230",
+      "revId": "7561067a22d77efbe11ee23b75dd4cd2738cfada",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d031dc0_5349ec40",
         "filename": "vp9/common/x86/vp9_subpixel_8t_intrin_avx2.c",
         "patchSetId": 1
@@ -65,6 +83,24 @@
       "writtenOn": "2015-05-22T18:32:06Z",
       "side": 1,
       "message": "should be ptrdiff (and probably removed later)",
+      "revId": "7561067a22d77efbe11ee23b75dd4cd2738cfada",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d031dc0_b3e328a2",
+        "filename": "vp9/common/x86/vp9_subpixel_8t_intrin_avx2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 316,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-05-22T18:33:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0d031dc0_5349ec40",
       "revId": "7561067a22d77efbe11ee23b75dd4cd2738cfada",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
