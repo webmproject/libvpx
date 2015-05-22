@@ -508,6 +508,30 @@
     },
     {
       "key": {
+        "uuid": "8d162dff_fa48e13f",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 1125425
+      },
+      "writtenOn": "2015-05-22T16:58:52Z",
+      "side": 1,
+      "message": "I put this here since I could not understand the code here. Could someone explain what this piece of code does?",
+      "parentUuid": "cda1050e_1877aa8a",
+      "range": {
+        "startLine": 243,
+        "startChar": 13,
+        "endLine": 243,
+        "endChar": 14
+      },
+      "revId": "dd13e5eb8e949f7462cc83b439ad54fb58f08fe1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cda1050e_78886ef1",
         "filename": "vp9/encoder/vp9_encoder.c",
         "patchSetId": 9
@@ -519,6 +543,30 @@
       "writtenOn": "2015-05-22T16:22:29Z",
       "side": 1,
       "message": "Don\u0027t we have an \"is_svc\" variable (name?).",
+      "range": {
+        "startLine": 2269,
+        "startChar": 30,
+        "endLine": 2269,
+        "endChar": 49
+      },
+      "revId": "dd13e5eb8e949f7462cc83b439ad54fb58f08fe1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d11f908_362d5690",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 2269,
+      "author": {
+        "id": 1125425
+      },
+      "writtenOn": "2015-05-22T16:58:52Z",
+      "side": 1,
+      "message": "cpi-\u003euse_svc.. yes it seems this might be enough for this condition.",
+      "parentUuid": "cda1050e_78886ef1",
       "range": {
         "startLine": 2269,
         "startChar": 30,
@@ -715,6 +763,30 @@
     },
     {
       "key": {
+        "uuid": "8d162dff_9acc4d3c",
+        "filename": "vp9/encoder/vp9_lookahead.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1125425
+      },
+      "writtenOn": "2015-05-22T16:58:52Z",
+      "side": 1,
+      "message": "weird.. I did not mean to change this... but it looks like the includes are not necessary?",
+      "parentUuid": "0d031dc0_a4d64743",
+      "range": {
+        "startLine": 17,
+        "startChar": 4,
+        "endLine": 17,
+        "endChar": 5
+      },
+      "revId": "dd13e5eb8e949f7462cc83b439ad54fb58f08fe1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2d0c61ed_dcf9a1fc",
         "filename": "vp9/encoder/vp9_ratectrl.c",
         "patchSetId": 9
@@ -795,6 +867,30 @@
       "writtenOn": "2015-05-22T16:22:29Z",
       "side": 1,
       "message": "Maybe define a macro to map from spatial, temporal layer ids to layer_idx:\n\n#define LAYER_IDS_TO_IDX(sl, tl, num_tl) ((sl) * (num_tl) + (tl))\nThis could then be used throughout the code.",
+      "range": {
+        "startLine": 1424,
+        "startChar": 29,
+        "endLine": 1424,
+        "endChar": 45
+      },
+      "revId": "dd13e5eb8e949f7462cc83b439ad54fb58f08fe1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4daef5fa_3bcc2bb7",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 1424,
+      "author": {
+        "id": 1125425
+      },
+      "writtenOn": "2015-05-22T16:58:52Z",
+      "side": 1,
+      "message": "sounds good",
+      "parentUuid": "0d031dc0_e46b1f6f",
       "range": {
         "startLine": 1424,
         "startChar": 29,
@@ -1797,6 +1893,30 @@
     },
     {
       "key": {
+        "uuid": "4daef5fa_1bc967a7",
+        "filename": "vpx/vpx_encoder.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1125425
+      },
+      "writtenOn": "2015-05-22T16:58:52Z",
+      "side": 1,
+      "message": "VPX_TS_MAX_LAYERS and VPX_SS_MAX_LAYERS indicate how many layers can be achieved individually, not in combination. So, if you multiply them, it will be too large. 12 is a number I came up with to allow 3 temporal/4 spatial layers... 16 is a number I used before changing the way I was doing the temporal layering. I think 12 is the right number. we should change this to 12.",
+      "parentUuid": "cda1050e_78050e41",
+      "range": {
+        "startLine": 46,
+        "startChar": 8,
+        "endLine": 46,
+        "endChar": 18
+      },
+      "revId": "dd13e5eb8e949f7462cc83b439ad54fb58f08fe1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cda1050e_980efa34",
         "filename": "vpx/vpx_encoder.h",
         "patchSetId": 9
@@ -1808,6 +1928,30 @@
       "writtenOn": "2015-05-22T16:22:29Z",
       "side": 1,
       "message": "Why 16 and not (VPX_TS_MAX_LAYERS * VPX_SS_MAX_LAYERS)?",
+      "range": {
+        "startLine": 49,
+        "startChar": 8,
+        "endLine": 49,
+        "endChar": 22
+      },
+      "revId": "dd13e5eb8e949f7462cc83b439ad54fb58f08fe1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8d162dff_7ae691b4",
+        "filename": "vpx/vpx_encoder.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1125425
+      },
+      "writtenOn": "2015-05-22T16:58:52Z",
+      "side": 1,
+      "message": "see comment above.",
+      "parentUuid": "cda1050e_980efa34",
       "range": {
         "startLine": 49,
         "startChar": 8,
