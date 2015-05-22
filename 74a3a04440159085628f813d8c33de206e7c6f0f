@@ -2,6 +2,74 @@
   "comments": [
     {
       "key": {
+        "uuid": "0d031dc0_c79893c1",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 691,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-05-22T23:58:08Z",
+      "side": 1,
+      "message": "make this one VpxSseFunc to match the others + use uint8_t for convenience",
+      "revId": "74a3a04440159085628f813d8c33de206e7c6f0f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4d0995dc_661433c7",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 694,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-05-22T23:58:08Z",
+      "side": 1,
+      "message": "go with Vpx for types, VPX/8/9 in prose",
+      "revId": "74a3a04440159085628f813d8c33de206e7c6f0f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4d0995dc_e6284306",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 1042,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-05-22T23:58:08Z",
+      "side": 1,
+      "message": "join this and the next line",
+      "revId": "74a3a04440159085628f813d8c33de206e7c6f0f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4d0995dc_46c3efb8",
+        "filename": "vp8/common/variance_c.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-05-22T23:58:08Z",
+      "side": 1,
+      "message": "what are you trying to do here? decide log2 of the width / height?\nwhile not 31 ^ clz?",
+      "revId": "74a3a04440159085628f813d8c33de206e7c6f0f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6d7ad934_8d66189b",
         "filename": "vpx_dsp/vpx_dsp_rtcd_defs.pl",
         "patchSetId": 6
