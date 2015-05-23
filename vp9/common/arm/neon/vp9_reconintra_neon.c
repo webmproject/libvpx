@@ -23,7 +23,6 @@ void vp9_v_predictor_4x4_neon(
     d0u32 = vld1_lane_u32((const uint32_t *)above, d0u32, 0);
     for (i = 0; i < 4; i++, dst += y_stride)
         vst1_lane_u32((uint32_t *)dst, d0u32, 0);
-    return;
 }
 
 void vp9_v_predictor_8x8_neon(
@@ -38,7 +37,6 @@ void vp9_v_predictor_8x8_neon(
     d0u8 = vld1_u8(above);
     for (i = 0; i < 8; i++, dst += y_stride)
         vst1_u8(dst, d0u8);
-    return;
 }
 
 void vp9_v_predictor_16x16_neon(
@@ -53,7 +51,6 @@ void vp9_v_predictor_16x16_neon(
     q0u8 = vld1q_u8(above);
     for (i = 0; i < 16; i++, dst += y_stride)
         vst1q_u8(dst, q0u8);
-    return;
 }
 
 void vp9_v_predictor_32x32_neon(
@@ -72,7 +69,6 @@ void vp9_v_predictor_32x32_neon(
         vst1q_u8(dst, q0u8);
         vst1q_u8(dst + 16, q1u8);
     }
-    return;
 }
 
 void vp9_h_predictor_4x4_neon(
@@ -97,7 +93,6 @@ void vp9_h_predictor_4x4_neon(
     dst += y_stride;
     d0u8 = vdup_lane_u8(vreinterpret_u8_u32(d1u32), 3);
     vst1_lane_u32((uint32_t *)dst, vreinterpret_u32_u8(d0u8), 0);
-    return;
 }
 
 void vp9_h_predictor_8x8_neon(
@@ -134,7 +129,6 @@ void vp9_h_predictor_8x8_neon(
     dst += y_stride;
     d0u8 = vdup_lane_u8(vreinterpret_u8_u64(d1u64), 7);
     vst1_u8(dst, d0u8);
-    return;
 }
 
 void vp9_h_predictor_16x16_neon(
@@ -176,7 +170,6 @@ void vp9_h_predictor_16x16_neon(
         vst1q_u8(dst, q0u8);
         dst += y_stride;
     }
-    return;
 }
 
 void vp9_h_predictor_32x32_neon(
@@ -228,7 +221,6 @@ void vp9_h_predictor_32x32_neon(
             dst += y_stride;
         }
     }
-    return;
 }
 
 void vp9_tm_predictor_4x4_neon(
@@ -252,7 +244,6 @@ void vp9_tm_predictor_4x4_neon(
         d0u8 = vqmovun_s16(q1s16);
         vst1_lane_u32((uint32_t *)dst, vreinterpret_u32_u8(d0u8), 0);
     }
-    return;
 }
 
 void vp9_tm_predictor_8x8_neon(
@@ -298,7 +289,6 @@ void vp9_tm_predictor_8x8_neon(
         vst1_u64((uint64_t *)dst, vreinterpret_u64_u8(d0u8));
         dst += y_stride;
     }
-    return;
 }
 
 void vp9_tm_predictor_16x16_neon(
@@ -365,7 +355,6 @@ void vp9_tm_predictor_16x16_neon(
             dst += y_stride;
         }
     }
-    return;
 }
 
 void vp9_tm_predictor_32x32_neon(
@@ -469,5 +458,4 @@ void vp9_tm_predictor_32x32_neon(
             dst += y_stride;
         }
     }
-    return;
 }
