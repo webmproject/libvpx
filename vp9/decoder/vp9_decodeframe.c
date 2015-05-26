@@ -1952,6 +1952,47 @@ static void get_tile_buffer(const uint8_t *const data_end,
   *data += size;
 }
 
+#if CONFIG_ROW_TILE
+static void get_tile_buffers(VP9Decoder *pbi,
+                             const uint8_t *data, const uint8_t *data_end,
+                             int tile_cols, int tile_rows,
+                             TileBuffer (*tile_buffers)[1024]) {
+  int r, c;
+  const uint8_t *orig_data = data;
+  const uint8_t *tile_end_col[1024];
+  size_t tile_col_size;
+
+  for (c = 0; c < tile_cols; ++c) {
+    if (c < tile_cols - 1) {
+      tile_col_size = mem_get_be32(data);
+      data += 4;
+      tile_end_col[c] = data + tile_col_size;
+    } else {
+      tile_col_size = data_end - data;
+      tile_end_col[c] = data_end;
+    }
+    data += tile_col_size;
+  }
+
+  data = orig_data;
+  for (c = 0; c < tile_cols; ++c) {
+    if (c > 0)
+      data = tile_end_col[c - 1];
+
+    if (c < tile_cols - 1)
+      data += 4;
+
+    for (r = 0; r < tile_rows; ++r) {
+      const int is_last = (r == tile_rows - 1);
+      TileBuffer *const buf = &tile_buffers[r][c];
+      buf->col = c;
+      get_tile_buffer(tile_end_col[c], is_last,
+                      &pbi->common.error, &data,
+                      pbi->decrypt_cb, pbi->decrypt_state, buf);
+    }
+  }
+}
+#else
 static void get_tile_buffers(VP9Decoder *pbi,
                              const uint8_t *data, const uint8_t *data_end,
                              int tile_cols, int tile_rows,
@@ -1968,6 +2009,7 @@ static void get_tile_buffers(VP9Decoder *pbi,
     }
   }
 }
+#endif
 
 static const uint8_t *decode_tiles(VP9Decoder *pbi,
                                    const uint8_t *data,

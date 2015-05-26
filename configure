@@ -296,6 +296,7 @@ EXPERIMENT_LIST="
     intrabc
     loop_postfilter
     row_tile
+    key_frame_tile
     new_inter
     bitstream_fixes
     newmvref
