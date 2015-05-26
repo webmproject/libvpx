@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "6d9499c1_a1181a77",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 691,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-05-26T18:59:34Z",
+      "side": 1,
+      "message": "Called it Get4x4SSEFunc",
+      "parentUuid": "0d031dc0_c79893c1",
+      "revId": "74a3a04440159085628f813d8c33de206e7c6f0f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4d0995dc_661433c7",
         "filename": "test/variance_test.cc",
         "patchSetId": 6
@@ -30,6 +48,24 @@
       "writtenOn": "2015-05-22T23:58:08Z",
       "side": 1,
       "message": "go with Vpx for types, VPX/8/9 in prose",
+      "revId": "74a3a04440159085628f813d8c33de206e7c6f0f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4d0995dc_97bff00a",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 694,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-05-26T18:59:34Z",
+      "side": 1,
+      "message": "I think I\u0027ll drop the vpx prefix from these tests when the remaining ones move.",
+      "parentUuid": "4d0995dc_661433c7",
       "revId": "74a3a04440159085628f813d8c33de206e7c6f0f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "6d9499c1_e19dc23c",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 1042,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-05-26T18:59:34Z",
+      "side": 1,
+      "message": "woops, i moved it to off to do sort!n and forgot to put it back.",
+      "parentUuid": "4d0995dc_e6284306",
+      "revId": "74a3a04440159085628f813d8c33de206e7c6f0f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4d0995dc_46c3efb8",
         "filename": "vp8/common/variance_c.c",
         "patchSetId": 6
@@ -64,6 +118,24 @@
       "writtenOn": "2015-05-22T23:58:08Z",
       "side": 1,
       "message": "what are you trying to do here? decide log2 of the width / height?\nwhile not 31 ^ clz?",
+      "revId": "74a3a04440159085628f813d8c33de206e7c6f0f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8d99cdfb_451120d5",
+        "filename": "vp8/common/variance_c.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-05-26T18:59:34Z",
+      "side": 1,
+      "message": "yeah, trying to get log2.\n\ni feel like the ^ is more esoteric than ctz - at least the definition is clear and the code is readable. i had to do one of the ^ to figure out how it worked.\n\nand it\u0027ll be gone when i merge the subpel functions",
+      "parentUuid": "4d0995dc_46c3efb8",
       "revId": "74a3a04440159085628f813d8c33de206e7c6f0f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
