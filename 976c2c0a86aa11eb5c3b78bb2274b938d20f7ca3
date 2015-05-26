@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6d9499c1_4759215d",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1337,
+      "author": {
+        "id": 1108009
+      },
+      "writtenOn": "2015-05-26T22:47:34Z",
+      "side": 1,
+      "message": "I guess that would work for now. Building the scale factors less often seems cleaner though.",
+      "parentUuid": "0d031dc0_9f1545f2",
+      "range": {
+        "startLine": 1337,
+        "startChar": 11,
+        "endLine": 1337,
+        "endChar": 34
+      },
+      "revId": "976c2c0a86aa11eb5c3b78bb2274b938d20f7ca3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d031dc0_64af0810",
         "filename": "vp9/common/vp9_reconinter.c",
         "patchSetId": 1
