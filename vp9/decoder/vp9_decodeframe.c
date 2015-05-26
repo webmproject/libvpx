@@ -2009,8 +2009,8 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
   }
 
 #if CONFIG_ROW_TILE
-  assert(tile_rows <= (1 << 6));
-  assert(tile_cols <= (1 << 6));
+  assert(tile_rows <= (1 << 10));
+  assert(tile_cols <= (1 << 10));
 #else
   assert(tile_rows <= 4);
   assert(tile_cols <= (1 << 6));
