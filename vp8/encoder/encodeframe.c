@@ -11,6 +11,7 @@
 
 #include "vpx_config.h"
 #include "vp8_rtcd.h"
+#include "./vpx_dsp_rtcd.h"
 #include "encodemb.h"
 #include "encodemv.h"
 #include "vp8/common/common.h"
@@ -90,7 +91,7 @@ static unsigned int tt_activity_measure( VP8_COMP *cpi, MACROBLOCK *x )
      *  lambda using a non-linear combination (e.g., the smallest, or second
      *  smallest, etc.).
      */
-    act =  vp8_variance16x16(x->src.y_buffer,
+    act =  vpx_variance16x16(x->src.y_buffer,
                     x->src.y_stride, VP8_VAR_OFFS, 0, &sse);
     act = act<<4;
 

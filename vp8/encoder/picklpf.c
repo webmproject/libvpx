@@ -9,6 +9,7 @@
  */
 
 
+#include "./vpx_dsp_rtcd.h"
 #include "./vpx_scale_rtcd.h"
 #include "vp8/common/onyxc_int.h"
 #include "onyx_int.h"
@@ -83,7 +84,7 @@ static int calc_partial_ssl_err(YV12_BUFFER_CONFIG *source,
         for (j = 0; j < source->y_width; j += 16)
         {
             unsigned int sse;
-            Total += vp8_mse16x16(src + j, source->y_stride,
+            Total += vpx_mse16x16(src + j, source->y_stride,
                                                      dst + j, dest->y_stride,
                                                      &sse);
         }

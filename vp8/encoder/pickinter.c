@@ -11,6 +11,7 @@
 
 #include <limits.h>
 #include "vpx_config.h"
+#include "./vpx_dsp_rtcd.h"
 #include "onyx_int.h"
 #include "modecosts.h"
 #include "encodeintra.h"
@@ -215,33 +216,6 @@ int vp8_get_inter_mbpred_error(MACROBLOCK *mb,
 
 }
 
-
-unsigned int vp8_get4x4sse_cs_c
-(
-    const unsigned char *src_ptr,
-    int  source_stride,
-    const unsigned char *ref_ptr,
-    int  recon_stride
-)
-{
-    int distortion = 0;
-    int r, c;
-
-    for (r = 0; r < 4; r++)
-    {
-        for (c = 0; c < 4; c++)
-        {
-            int diff = src_ptr[c] - ref_ptr[c];
-            distortion += diff * diff;
-        }
-
-        src_ptr += source_stride;
-        ref_ptr += recon_stride;
-    }
-
-    return distortion;
-}
-
 static int get_prediction_error(BLOCK *be, BLOCKD *b)
 {
     unsigned char *sptr;
@@ -249,7 +223,7 @@ static int get_prediction_error(BLOCK *be, BLOCKD *b)
     sptr = (*(be->base_src) + be->src);
     dptr = b->predictor;
 
-    return vp8_get4x4sse_cs(sptr, be->src_stride, dptr, 16);
+    return vpx_get4x4sse_cs(sptr, be->src_stride, dptr, 16);
 
 }
 
@@ -1037,7 +1011,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             else
             {
                 rate2 += rate;
-                distortion2 = vp8_variance16x16(
+                distortion2 = vpx_variance16x16(
                                     *(b->base_src), b->src_stride,
                                     x->e_mbd.predictor, 16, &sse);
                 this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
@@ -1066,7 +1040,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
                                              xd->dst.y_stride,
                                              xd->predictor,
                                              16);
-            distortion2 = vp8_variance16x16
+            distortion2 = vpx_variance16x16
                                           (*(b->base_src), b->src_stride,
                                           x->e_mbd.predictor, 16, &sse);
             rate2 += x->mbmode_cost[x->e_mbd.frame_type][x->e_mbd.mode_info_context->mbmi.mode];
@@ -1547,7 +1521,7 @@ void vp8_pick_intra_mode(MACROBLOCK *x, int *rate_)
                                          xd->dst.y_stride,
                                          xd->predictor,
                                          16);
-        distortion = vp8_variance16x16
+        distortion = vpx_variance16x16
             (*(b->base_src), b->src_stride, xd->predictor, 16, &sse);
         rate = x->mbmode_cost[xd->frame_type][mode];
         this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);

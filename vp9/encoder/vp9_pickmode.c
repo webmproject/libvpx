@@ -14,6 +14,7 @@
 #include <stdio.h>
 
 #include "./vp9_rtcd.h"
+#include "./vpx_dsp_rtcd.h"
 
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
@@ -215,7 +216,7 @@ static void block_variance(const uint8_t *src, int src_stride,
 
   for (i = 0; i < h; i += block_size) {
     for (j = 0; j < w; j += block_size) {
-      vp9_get8x8var(src + src_stride * i + j, src_stride,
+      vpx_get8x8var(src + src_stride * i + j, src_stride,
                     ref + ref_stride * i + j, ref_stride,
                     &sse8x8[k], &sum8x8[k]);
       *sse += sse8x8[k];

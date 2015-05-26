@@ -12,31 +12,64 @@
 #define VP9_ENCODER_VP9_VARIANCE_H_
 
 #include "vpx/vpx_integer.h"
+#include "vpx_ports/mem.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void variance(const uint8_t *a, int a_stride,
-              const uint8_t *b, int b_stride,
-              int  w, int  h,
-              unsigned int *sse, int *sum);
+// TODO(johannkoenig): All functions which depend on
+// [highbd_][8|10|12_]variance should be refactored or moved to vpx_dsp.
+static void variance(const uint8_t *a, int a_stride,
+                     const uint8_t *b, int b_stride,
+                     int  w, int  h, unsigned int *sse, int *sum) {
+  int i, j;
+
+  *sum = 0;
+  *sse = 0;
+
+  for (i = 0; i < h; i++) {
+    for (j = 0; j < w; j++) {
+      const int diff = a[j] - b[j];
+      *sum += diff;
+      *sse += diff * diff;
+    }
+
+    a += a_stride;
+    b += b_stride;
+  }
+}
 
 #if CONFIG_VP9_HIGHBITDEPTH
-void highbd_variance(const uint8_t *a8, int a_stride,
-                     const uint8_t *b8, int b_stride,
-                     int w, int h,
-                     unsigned int *sse, int *sum);
+static void highbd_variance64(const uint8_t *a8, int  a_stride,
+                              const uint8_t *b8, int  b_stride,
+                              int w, int h, uint64_t *sse, uint64_t *sum) {
+  int i, j;
 
-void highbd_10_variance(const uint8_t *a8, int a_stride,
-                        const uint8_t *b8, int b_stride,
-                        int w, int h,
-                        unsigned int *sse, int *sum);
+  uint16_t *a = CONVERT_TO_SHORTPTR(a8);
+  uint16_t *b = CONVERT_TO_SHORTPTR(b8);
+  *sum = 0;
+  *sse = 0;
 
-void highbd_12_variance(const uint8_t *a8, int a_stride,
-                        const uint8_t *b8, int b_stride,
-                        int w, int h,
-                        unsigned int *sse, int *sum);
+  for (i = 0; i < h; i++) {
+    for (j = 0; j < w; j++) {
+      const int diff = a[j] - b[j];
+      *sum += diff;
+      *sse += diff * diff;
+    }
+    a += a_stride;
+    b += b_stride;
+  }
+}
+static void highbd_8_variance(const uint8_t *a8, int a_stride,
+                              const uint8_t *b8, int b_stride,
+                              int w, int h, unsigned int *sse, int *sum) {
+  uint64_t sse_long = 0;
+  uint64_t sum_long = 0;
+  highbd_variance64(a8, a_stride, b8, b_stride, w, h, &sse_long, &sum_long);
+  *sse = (unsigned int)sse_long;
+  *sum = (int)sum_long;
+}
 #endif
 
 typedef unsigned int(*vp9_sad_fn_t)(const uint8_t *src_ptr,
@@ -94,15 +127,6 @@ typedef struct vp9_variance_vtable {
   vp9_sad_multi_fn_t         sdx8f;
   vp9_sad_multi_d_fn_t       sdx4df;
 } vp9_variance_fn_ptr_t;
-
-void vp9_comp_avg_pred(uint8_t *comp_pred, const uint8_t *pred, int width,
-                       int height, const uint8_t *ref, int ref_stride);
-
-#if CONFIG_VP9_HIGHBITDEPTH
-void vp9_highbd_comp_avg_pred(uint16_t *comp_pred, const uint8_t *pred,
-                              int width, int height,
-                              const uint8_t *ref, int ref_stride);
-#endif
 
 #ifdef __cplusplus
 }  // extern "C"
