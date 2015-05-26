@@ -3482,28 +3482,28 @@ static void encode_frame_to_data_rate(VP9_COMP *cpi,
         cpi->svc.spatial_layer_id * cpi->svc.number_temporal_layers +
         cpi->svc.temporal_layer_id;
 
+    cm->frame_parallel_decoding_mode = oxcf->frame_parallel_decoding_mode;
+
     // The probs will be updated based on the frame type of its previous
     // frame if frame_parallel_decoding_mode is 0. The type may vary for
     // the frame after a key frame in base layer since we may drop enhancement
     // layers. So set frame_parallel_decoding_mode to 1 in this case.
-    if (cpi->svc.number_temporal_layers == 1) {
-      if (cpi->svc.spatial_layer_id == 0 &&
-          cpi->svc.layer_context[0].last_frame_type == KEY_FRAME)
-        cm->frame_parallel_decoding_mode = 1;
-      else
-        cm->frame_parallel_decoding_mode = 0;
-    } else if (cpi->svc.spatial_layer_id == 0) {
-      // Find the 2nd frame in temporal base layer and 1st frame in temporal
-      // enhancement layers from the key frame.
-      int i;
-      for (i = 0; i < cpi->svc.number_temporal_layers; ++i) {
-        if (cpi->svc.layer_context[0].frames_from_key_frame == 1 << i) {
+    if (cm->frame_parallel_decoding_mode == 0) {
+      if (cpi->svc.number_temporal_layers == 1) {
+        if (cpi->svc.spatial_layer_id == 0 &&
+            cpi->svc.layer_context[0].last_frame_type == KEY_FRAME)
           cm->frame_parallel_decoding_mode = 1;
-          break;
+      } else if (cpi->svc.spatial_layer_id == 0) {
+        // Find the 2nd frame in temporal base layer and 1st frame in temporal
+        // enhancement layers from the key frame.
+        int i;
+        for (i = 0; i < cpi->svc.number_temporal_layers; ++i) {
+          if (cpi->svc.layer_context[0].frames_from_key_frame == 1 << i) {
+            cm->frame_parallel_decoding_mode = 1;
+            break;
+          }
         }
       }
-      if (i == cpi->svc.number_temporal_layers)
-        cm->frame_parallel_decoding_mode = 0;
     }
   }
 
