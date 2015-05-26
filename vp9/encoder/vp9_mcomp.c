@@ -162,9 +162,9 @@ void vp9_init3smotion_compensation(search_site_config *cfg, int stride) {
       error_per_bit + 4096) >> 13 : 0)
 
 
-// convert motion vector component to offset for svf calc
+// convert motion vector component to offset for sv[a]f calc
 static INLINE int sp(int x) {
-  return (x & 7) << 1;
+  return x & 7;
 }
 
 static INLINE const uint8_t *pre(const uint8_t *buf, int stride, int r, int c) {
@@ -679,16 +679,14 @@ int vp9_find_best_sub_pixel_tree(const MACROBLOCK *x,
       tc = bc + search_step[idx].col;
       if (tc >= minc && tc <= maxc && tr >= minr && tr <= maxr) {
         const uint8_t *const pre_address = y + (tr >> 3) * y_stride + (tc >> 3);
-        int row_offset = (tr & 0x07) << 1;
-        int col_offset = (tc & 0x07) << 1;
         MV this_mv;
         this_mv.row = tr;
         this_mv.col = tc;
         if (second_pred == NULL)
-          thismse = vfp->svf(pre_address, y_stride, col_offset, row_offset,
+          thismse = vfp->svf(pre_address, y_stride, sp(tc), sp(tr),
                              src_address, src_stride, &sse);
         else
-          thismse = vfp->svaf(pre_address, y_stride, col_offset, row_offset,
+          thismse = vfp->svaf(pre_address, y_stride, sp(tc), sp(tr),
                               src_address, src_stride, &sse, second_pred);
         cost_array[idx] = thismse +
             mv_err_cost(&this_mv, ref_mv, mvjcost, mvcost, error_per_bit);
@@ -709,14 +707,12 @@ int vp9_find_best_sub_pixel_tree(const MACROBLOCK *x,
     tr = br + (cost_array[2] < cost_array[3] ? -hstep : hstep);
     if (tc >= minc && tc <= maxc && tr >= minr && tr <= maxr) {
       const uint8_t *const pre_address = y + (tr >> 3) * y_stride + (tc >> 3);
-      int row_offset = (tr & 0x07) << 1;
-      int col_offset = (tc & 0x07) << 1;
       MV this_mv = {tr, tc};
       if (second_pred == NULL)
-        thismse = vfp->svf(pre_address, y_stride, col_offset, row_offset,
+        thismse = vfp->svf(pre_address, y_stride, sp(tc), sp(tr),
                            src_address, src_stride, &sse);
       else
-        thismse = vfp->svaf(pre_address, y_stride, col_offset, row_offset,
+        thismse = vfp->svaf(pre_address, y_stride, sp(tc), sp(tr),
                             src_address, src_stride, &sse, second_pred);
       cost_array[4] = thismse +
           mv_err_cost(&this_mv, ref_mv, mvjcost, mvcost, error_per_bit);
