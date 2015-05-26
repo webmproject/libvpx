@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0d031dc0_37e6d630",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 573,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-05-26T16:07:19Z",
+      "side": 1,
+      "message": "the else branch here is duplicate of the line above? maybe remove one for them?",
+      "range": {
+        "startLine": 573,
+        "startChar": 47,
+        "endLine": 573,
+        "endChar": 48
+      },
+      "revId": "152f8fb0f2313ccdd135285b2fbdd048ceb82c12",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
