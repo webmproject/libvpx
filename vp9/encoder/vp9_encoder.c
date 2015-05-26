@@ -2714,7 +2714,10 @@ void vp9_scale_references(VP9_COMP *cpi) {
 #if CONFIG_VP9_HIGHBITDEPTH
       if (ref->y_crop_width != cm->width || ref->y_crop_height != cm->height) {
         const int new_fb = get_free_fb(cm);
-        RefCntBuffer *const new_fb_ptr = &pool->frame_bufs[new_fb];
+        RefCntBuffer *new_fb_ptr = NULL;
+        if (cm->new_fb_idx == INVALID_IDX)
+          return;
+        new_fb_ptr = &pool->frame_bufs[new_fb];
         cm->cur_frame = &pool->frame_bufs[new_fb];
         vp9_realloc_frame_buffer(&pool->frame_bufs[new_fb].buf,
                                  cm->width, cm->height,
@@ -2726,7 +2729,10 @@ void vp9_scale_references(VP9_COMP *cpi) {
 #else
       if (ref->y_crop_width != cm->width || ref->y_crop_height != cm->height) {
         const int new_fb = get_free_fb(cm);
-        RefCntBuffer *const new_fb_ptr = &pool->frame_bufs[new_fb];
+        RefCntBuffer *new_fb_ptr = NULL;
+        if (cm->new_fb_idx == INVALID_IDX)
+          return;
+        new_fb_ptr = &pool->frame_bufs[new_fb];
         vp9_realloc_frame_buffer(&new_fb_ptr->buf,
                                  cm->width, cm->height,
                                  cm->subsampling_x, cm->subsampling_y,
