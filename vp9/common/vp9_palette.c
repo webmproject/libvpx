@@ -159,7 +159,7 @@ void vp9_calc_indices(const double *data, const double *centroids, int *indices,
   for (i = 0; i < n; i++) {
     min_dist = calc_dist(data + i * dim, centroids, dim);
     indices[i] = 0;
-    for (j = 0; j < k; j++) {
+    for (j = 1; j < k; j++) {
       this_dist = calc_dist(data + i * dim, centroids + j * dim, dim);
       if (this_dist < min_dist) {
         min_dist = this_dist;
@@ -197,8 +197,8 @@ static void calc_centroids(const double *data, double *centroids,
   }
 }
 
-double calc_total_dist(const double *data, const double *centroids,
-                       const int *indices, int n, int k, int dim) {
+static double calc_total_dist(const double *data, const double *centroids,
+                              const int *indices, int n, int k, int dim) {
   double dist = 0;
   int i;
   (void) k;
