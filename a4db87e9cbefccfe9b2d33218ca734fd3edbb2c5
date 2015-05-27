@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "cd782572_dce425d9",
+        "filename": "vp9/common/vp9_palette.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-05-27T16:31:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4daef5fa_322a8578",
+      "range": {
+        "startLine": 189,
+        "startChar": 19,
+        "endLine": 189,
+        "endChar": 20
+      },
+      "revId": "a4db87e9cbefccfe9b2d33218ca734fd3edbb2c5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4daef5fa_9227f1ae",
         "filename": "vp9/common/vp9_palette.c",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "cd782572_fce9e1ad",
+        "filename": "vp9/common/vp9_palette.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-05-27T16:31:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4daef5fa_9227f1ae",
+      "range": {
+        "startLine": 192,
+        "startChar": 6,
+        "endLine": 192,
+        "endChar": 10
+      },
+      "revId": "a4db87e9cbefccfe9b2d33218ca734fd3edbb2c5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8d162dff_8ed9af1e",
         "filename": "vp9/common/vp9_palette.c",
         "patchSetId": 1
@@ -59,6 +107,30 @@
       "writtenOn": "2015-05-27T14:27:30Z",
       "side": 1,
       "message": "prefer:\n\nconst double norm \u003d 1. / count[i];\nfor (...) {\n  centroids[...] *\u003d norm;\n}",
+      "range": {
+        "startLine": 196,
+        "startChar": 8,
+        "endLine": 196,
+        "endChar": 17
+      },
+      "revId": "a4db87e9cbefccfe9b2d33218ca734fd3edbb2c5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed6169bc_bd70475b",
+        "filename": "vp9/common/vp9_palette.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-05-27T16:31:35Z",
+      "side": 1,
+      "message": "Done. Thanks!",
+      "parentUuid": "8d162dff_8ed9af1e",
       "range": {
         "startLine": 196,
         "startChar": 8,
