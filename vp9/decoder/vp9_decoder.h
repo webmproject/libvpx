@@ -68,6 +68,7 @@ typedef struct VP9Decoder {
 
 #if CONFIG_ROW_TILE
   TileBuffer tile_buffers[1024][1024];
+  int dec_tile_row, dec_tile_col;
 #endif
 } VP9Decoder;
 
