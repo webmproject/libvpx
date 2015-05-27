@@ -152,9 +152,6 @@ loop16x16
 
     ENDP
 
-    END
-
-
 ; r0    unsigned char *src_ptr
 ; r1    int source_stride
 ; r2    unsigned char *ref_ptr
@@ -237,8 +234,6 @@ loop8x8
     pop     {r4-r10, pc}
 
     ENDP
-
-    END
 
 ; r0    unsigned char *src_ptr
 ; r1    int source_stride
