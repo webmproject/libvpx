@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "6d9499c1_f35bc660",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 691,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-05-27T17:50:44Z",
+      "side": 1,
+      "message": "it should be Get4x4SseFunc (SSE in prose, but Sse in code for readability).",
+      "parentUuid": "6d9499c1_a1181a77",
+      "revId": "74a3a04440159085628f813d8c33de206e7c6f0f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4d0995dc_661433c7",
         "filename": "test/variance_test.cc",
         "patchSetId": 6
