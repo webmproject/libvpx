@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cd3d85a0_983a9a92",
+        "filename": "test/test_vectors.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-05-27T22:35:36Z",
+      "side": 1,
+      "message": "fix alignment",
+      "revId": "10b7b0fee83f3d8286fb42c7af660e9211ef9641",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cd3d85a0_58403214",
+        "filename": "test/test_vectors.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-05-27T22:35:36Z",
+      "side": 1,
+      "message": "this comment is overkill for the size of the ifdef, alternatively you could summarize it",
+      "revId": "10b7b0fee83f3d8286fb42c7af660e9211ef9641",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
