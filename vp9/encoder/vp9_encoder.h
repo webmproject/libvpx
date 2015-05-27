@@ -268,7 +268,11 @@ typedef struct VP9_COMP {
 #endif  // CONFIG_LOOP_POSTFILTER
 
   TOKENEXTRA *tok;
+#if CONFIG_ROW_TILE
+  unsigned int tok_count[1024][1024];
+#else
   unsigned int tok_count[4][1 << 6];
+#endif
 
   // Ambient reconstruction err target for force key frames
   int ambient_err;
