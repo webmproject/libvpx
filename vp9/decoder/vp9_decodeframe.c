@@ -1961,8 +1961,12 @@ static void get_tile_buffers(VP9Decoder *pbi,
   const uint8_t *orig_data = data;
   const uint8_t *tile_end_col[1024];
   size_t tile_col_size;
+  int tile_col_limit = (pbi->dec_tile_col == -1) ? INT_MAX :
+                                 MIN(pbi->dec_tile_col, tile_cols);
+  int tile_row_limit = (pbi->dec_tile_row == -1) ? INT_MAX :
+                                 MIN(pbi->dec_tile_row, tile_rows);
 
-  for (c = 0; c < tile_cols; ++c) {
+  for (c = 0; c < tile_cols && c <= tile_col_limit; ++c) {
     if (c < tile_cols - 1) {
       tile_col_size = mem_get_be32(data);
       data += 4;
@@ -1975,14 +1979,33 @@ static void get_tile_buffers(VP9Decoder *pbi,
   }
 
   data = orig_data;
-  for (c = 0; c < tile_cols; ++c) {
+
+  if (tile_row_limit != INT_MAX && tile_col_limit != INT_MAX) {
+    // Decode a single tile
+    if (tile_col_limit > 0)
+      data = tile_end_col[tile_col_limit - 1];
+    if (tile_col_limit < tile_cols - 1)
+      data += 4;
+
+    for (r = 0; r <= tile_row_limit; ++r) {
+      const int is_last = (r == tile_rows - 1);
+      TileBuffer *const buf = &tile_buffers[r][tile_col_limit];
+      buf->col = tile_col_limit;
+      get_tile_buffer(tile_end_col[tile_col_limit], is_last,
+                      &pbi->common.error, &data,
+                      pbi->decrypt_cb, pbi->decrypt_state, buf);
+    }
+    return;
+  }
+
+  for (c = 0; c < tile_cols && c <= tile_col_limit; ++c) {
     if (c > 0)
       data = tile_end_col[c - 1];
 
     if (c < tile_cols - 1)
       data += 4;
 
-    for (r = 0; r < tile_rows; ++r) {
+    for (r = 0; r < tile_rows && r <= tile_row_limit; ++r) {
       const int is_last = (r == tile_rows - 1);
       TileBuffer *const buf = &tile_buffers[r][c];
       buf->col = c;
@@ -2021,8 +2044,14 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
   const int tile_rows = cm->tile_rows;
 #if CONFIG_ROW_TILE
   TileBuffer (*tile_buffers)[1024] = pbi->tile_buffers;
+  const int tile_col_limit = (pbi->dec_tile_col == -1) ? INT_MAX :
+                                 MIN(pbi->dec_tile_col, tile_cols);
+  const int tile_row_limit = (pbi->dec_tile_row == -1) ? INT_MAX :
+                                 MIN(pbi->dec_tile_row, tile_rows);
 #else
   TileBuffer tile_buffers[4][1024];
+  const int tile_col_limit = INT_MAX;
+  const int tile_row_limit = INT_MAX;
 #endif
   int tile_row, tile_col;
   int mi_row, mi_col;
@@ -2078,79 +2107,131 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
     pbi->total_tiles = tile_rows * tile_cols;
   }
 
-  // Load all tile information into tile_data.
-  for (tile_row = 0; tile_row < tile_rows; ++tile_row) {
-    for (tile_col = 0; tile_col < tile_cols; ++tile_col) {
-      TileInfo tile;
-      const TileBuffer *const buf = &tile_buffers[tile_row][tile_col];
-      tile_data = pbi->tile_data + tile_cols * tile_row + tile_col;
-      tile_data->cm = cm;
-      tile_data->xd = pbi->mb;
-      tile_data->xd.corrupted = 0;
-      vp9_tile_init(&tile, tile_data->cm, tile_row, tile_col);
+  if (tile_row_limit != INT_MAX && tile_col_limit != INT_MAX) {
+    TileInfo tile;
+    const TileBuffer *const buf = &tile_buffers[tile_row_limit][tile_col_limit];
+    tile_data = pbi->tile_data + tile_cols * tile_row_limit + tile_col_limit;
+    tile_data->cm = cm;
+    tile_data->xd = pbi->mb;
+    tile_data->xd.corrupted = 0;
+    vp9_tile_init(&tile, tile_data->cm, tile_row_limit, tile_col_limit);
+    setup_token_decoder(buf->data, data_end, buf->size, &cm->error,
+                        &tile_data->bit_reader, pbi->decrypt_cb,
+                        pbi->decrypt_state);
+    init_macroblockd(cm, &tile_data->xd);
+    vp9_zero(tile_data->xd.dqcoeff);
+  } else {
+    // Load all tile information into tile_data.
+    for (tile_row = 0; tile_row < tile_rows; ++tile_row) {
+      for (tile_col = 0; tile_col < tile_cols; ++tile_col) {
+        TileInfo tile;
+        const TileBuffer *const buf = &tile_buffers[tile_row][tile_col];
 
-      setup_token_decoder(buf->data, data_end, buf->size, &cm->error,
-                          &tile_data->bit_reader, pbi->decrypt_cb,
-                          pbi->decrypt_state);
+        if (tile_row > tile_row_limit || tile_col > tile_col_limit)
+          continue;
 
-      init_macroblockd(cm, &tile_data->xd);
+        tile_data = pbi->tile_data + tile_cols * tile_row + tile_col;
+        tile_data->cm = cm;
+        tile_data->xd = pbi->mb;
+        tile_data->xd.corrupted = 0;
+        vp9_tile_init(&tile, tile_data->cm, tile_row, tile_col);
 
-      vp9_zero(tile_data->xd.dqcoeff);
+        setup_token_decoder(buf->data, data_end, buf->size, &cm->error,
+                            &tile_data->bit_reader, pbi->decrypt_cb,
+                            pbi->decrypt_state);
+
+        init_macroblockd(cm, &tile_data->xd);
+
+        vp9_zero(tile_data->xd.dqcoeff);
+      }
     }
   }
 
-  for (tile_row = 0; tile_row < tile_rows; ++tile_row) {
+  if (tile_row_limit != INT_MAX && tile_col_limit != INT_MAX) {
     TileInfo tile;
-#if !CONFIG_ROW_TILE
-    vp9_tile_set_row(&tile, cm, tile_row);
-#endif
-    for (tile_col = 0; tile_col < tile_cols; ++tile_col) {
-#if CONFIG_ROW_TILE
-      vp9_tile_init(&tile, cm, tile_row, tile_col);
-#else
-      vp9_tile_set_col(&tile, cm, tile_col);
-#endif
-      for (mi_row = tile.mi_row_start; mi_row < tile.mi_row_end;
-           mi_row += MI_BLOCK_SIZE) {
-        const int col = pbi->inv_tile_order ?
-                        tile_cols - tile_col - 1 : tile_col;
-        tile_data = pbi->tile_data + tile_cols * tile_row + col;
-        vp9_zero(tile_data->xd.left_context);
-        vp9_zero(tile_data->xd.left_seg_context);
-        for (mi_col = tile.mi_col_start; mi_col < tile.mi_col_end;
-             mi_col += MI_BLOCK_SIZE) {
-          decode_partition(tile_data->cm, &tile_data->xd, &tile,
+    vp9_tile_init(&tile, cm, tile_row_limit, tile_col_limit);
+
+    for (mi_row = tile.mi_row_start; mi_row < tile.mi_row_end;
+         mi_row += MI_BLOCK_SIZE) {
+      tile_data = pbi->tile_data + tile_cols * tile_row_limit + tile_col_limit;
+      vp9_zero(tile_data->xd.left_context);
+      vp9_zero(tile_data->xd.left_seg_context);
+      for (mi_col = tile.mi_col_start; mi_col < tile.mi_col_end;
+           mi_col += MI_BLOCK_SIZE) {
+        decode_partition(tile_data->cm, &tile_data->xd, &tile,
 #if CONFIG_SUPERTX
-                           0,
+                         0,
 #endif
-                           mi_row, mi_col,
-                           &tile_data->bit_reader, BLOCK_64X64);
+                         mi_row, mi_col,
+                         &tile_data->bit_reader, BLOCK_64X64);
+      }
+      pbi->mb.corrupted |= tile_data->xd.corrupted;
+    }
+    return data_end;
+  } else {
+    for (tile_row = 0; tile_row < tile_rows; ++tile_row) {
+      TileInfo tile;
+#if CONFIG_ROW_TILE
+      if (tile_row_limit != INT_MAX && tile_row != tile_row_limit)
+        continue;
+#else
+      vp9_tile_set_row(&tile, cm, tile_row);
+#endif
+      for (tile_col = 0; tile_col < tile_cols; ++tile_col) {
+#if CONFIG_ROW_TILE
+        if (tile_col_limit != INT_MAX && tile_col != tile_col_limit)
+          continue;
+        vp9_tile_init(&tile, cm, tile_row, tile_col);
+        vpx_memset(cm->above_context, 0, sizeof(*cm->above_context) *
+                   MAX_MB_PLANE * 2 * aligned_cols);
+        vpx_memset(&cm->above_seg_context[tile.mi_col_start], 0,
+                   sizeof(*cm->above_seg_context) *
+                 mi_cols_aligned_to_sb(tile.mi_col_end - tile.mi_col_start));
+#else
+        vp9_tile_set_col(&tile, cm, tile_col);
+#endif
+        for (mi_row = tile.mi_row_start; mi_row < tile.mi_row_end;
+             mi_row += MI_BLOCK_SIZE) {
+          const int col = pbi->inv_tile_order ?
+                          tile_cols - tile_col - 1 : tile_col;
+          tile_data = pbi->tile_data + tile_cols * tile_row + col;
+          vp9_zero(tile_data->xd.left_context);
+          vp9_zero(tile_data->xd.left_seg_context);
+          for (mi_col = tile.mi_col_start; mi_col < tile.mi_col_end;
+               mi_col += MI_BLOCK_SIZE) {
+            decode_partition(tile_data->cm, &tile_data->xd, &tile,
+#if CONFIG_SUPERTX
+                             0,
+#endif
+                             mi_row, mi_col,
+                             &tile_data->bit_reader, BLOCK_64X64);
+          }
+          pbi->mb.corrupted |= tile_data->xd.corrupted;
         }
-        pbi->mb.corrupted |= tile_data->xd.corrupted;
       }
-    }
 #if !CONFIG_INTRABC
-    // Loopfilter one row.
-    if (!pbi->mb.corrupted && cm->lf.filter_level) {
-      const int lf_start = tile.mi_row_start - MI_BLOCK_SIZE;
-      LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
+      // Loopfilter one row.
+      if (!pbi->mb.corrupted && cm->lf.filter_level) {
+        const int lf_start = tile.mi_row_start - MI_BLOCK_SIZE;
+        LFWorkerData *const lf_data = (LFWorkerData*)pbi->lf_worker.data1;
 
-      // delay the loopfilter by 1 macroblock row.
-      if (lf_start < 0) continue;
+        // delay the loopfilter by 1 macroblock row.
+        if (lf_start < 0) continue;
 
-      // decoding has completed: finish up the loop filter in this thread.
-      if (tile.mi_row_end >= cm->mi_rows) continue;
+        // decoding has completed: finish up the loop filter in this thread.
+        if (tile.mi_row_end >= cm->mi_rows) continue;
 
-      winterface->sync(&pbi->lf_worker);
-      lf_data->start = lf_start;
-      lf_data->stop = tile.mi_row_end - MI_BLOCK_SIZE;;
-      if (pbi->max_threads > 1) {
-        winterface->launch(&pbi->lf_worker);
-      } else {
-        winterface->execute(&pbi->lf_worker);
+        winterface->sync(&pbi->lf_worker);
+        lf_data->start = lf_start;
+        lf_data->stop = tile.mi_row_end - MI_BLOCK_SIZE;;
+        if (pbi->max_threads > 1) {
+          winterface->launch(&pbi->lf_worker);
+        } else {
+          winterface->execute(&pbi->lf_worker);
+        }
       }
-    }
 #endif  // !CONFIG_INTRABC
+    }
   }
 
   // Loopfilter remaining rows in the frame.
@@ -2161,6 +2242,10 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
     lf_data->stop = cm->mi_rows;
     winterface->execute(&pbi->lf_worker);
   }
+
+#if CONFIG_ROW_TILE && CONFIG_KEY_FRAME_TILE
+  return data_end;
+#endif
 
   // Get last tile data.
   tile_data = pbi->tile_data + tile_cols * tile_rows - 1;

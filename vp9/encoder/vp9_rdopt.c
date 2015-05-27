@@ -1360,7 +1360,8 @@ static int64_t rd_pick_intra_sub_8x8_y_mode(VP9_COMP *cpi, MACROBLOCK *mb,
   int i, j;
   const MACROBLOCKD *const xd = &mb->e_mbd;
   MODE_INFO *const mic = xd->mi[0].src_mi;
-  const MODE_INFO *above_mi = xd->mi[-xd->mi_stride].src_mi;
+  const MODE_INFO *above_mi = xd->up_available ?
+      xd->mi[-xd->mi_stride].src_mi : NULL;
   const MODE_INFO *left_mi = xd->left_available ? xd->mi[-1].src_mi : NULL;
   const BLOCK_SIZE bsize = xd->mi[0].src_mi->mbmi.sb_type;
   const int num_4x4_blocks_wide = num_4x4_blocks_wide_lookup[bsize];
@@ -1762,7 +1763,8 @@ static int64_t rd_pick_intra_sby_mode(VP9_COMP *cpi, MACROBLOCK *x,
 #if CONFIG_FILTERINTRA
     int mode_ext, fbit, fbit_selected = 0;
 #endif  // CONFIG_FILTERINTRA
-  const MODE_INFO *above_mi = xd->mi[-xd->mi_stride].src_mi;
+  const MODE_INFO *above_mi = xd->up_available ?
+      xd->mi[-xd->mi_stride].src_mi : NULL;
   const MODE_INFO *left_mi = xd->left_available ? xd->mi[-1].src_mi : NULL;
   const PREDICTION_MODE A = vp9_above_block_mode(mic, above_mi, 0);
   const PREDICTION_MODE L = vp9_left_block_mode(mic, left_mi, 0);

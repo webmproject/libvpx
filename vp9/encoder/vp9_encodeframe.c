@@ -4561,6 +4561,15 @@ static void encode_tiles(VP9_COMP *cpi) {
       TOKENEXTRA * const old_tok = tok[tile_row][tile_col];
       int mi_row;
 
+#if CONFIG_ROW_TILE
+      int col_width =
+          mi_cols_aligned_to_sb(ptile->mi_col_end - ptile->mi_col_start);
+      vpx_memset(cm->above_context, 0, sizeof(*cm->above_context) *
+                 MAX_MB_PLANE * 2 * mi_cols_aligned_to_sb(cm->mi_cols));
+      vpx_memset(&cm->above_seg_context[ptile->mi_col_start], 0,
+                 sizeof(*cm->above_seg_context) * col_width);
+#endif
+
       for (mi_row = ptile->mi_row_start; mi_row < ptile->mi_row_end;
            mi_row += MI_BLOCK_SIZE) {
         if (cpi->sf.use_nonrd_pick_mode && !frame_is_intra_only(cm))

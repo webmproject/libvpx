@@ -848,7 +848,8 @@ static void write_mb_modes_kf(const VP9_COMMON *cm,
                               MODE_INFO *mi_8x8, vp9_writer *w) {
   const struct segmentation *const seg = &cm->seg;
   const MODE_INFO *const mi = mi_8x8;
-  const MODE_INFO *const above_mi = mi_8x8[-xd->mi_stride].src_mi;
+  const MODE_INFO *const above_mi = xd->up_available ?
+      mi_8x8[-xd->mi_stride].src_mi : NULL;
   const MODE_INFO *const left_mi =
       xd->left_available ? mi_8x8[-1].src_mi : NULL;
   const MB_MODE_INFO *const mbmi = &mi->mbmi;
@@ -1261,7 +1262,12 @@ static void write_modes(VP9_COMP *cpi,
                         const TileInfo *const tile, vp9_writer *w,
                         TOKENEXTRA **tok, const TOKENEXTRA *const tok_end) {
   int mi_row, mi_col;
-
+#if CONFIG_ROW_TILE
+  VP9_COMMON *cm = &cpi->common;
+  vpx_memset(&cm->above_seg_context[tile->mi_col_start], 0,
+             sizeof(*cm->above_seg_context) *
+             mi_cols_aligned_to_sb(tile->mi_col_end - tile->mi_col_start));
+#endif
   for (mi_row = tile->mi_row_start; mi_row < tile->mi_row_end;
        mi_row += MI_BLOCK_SIZE) {
     vp9_zero(cpi->mb.e_mbd.left_seg_context);

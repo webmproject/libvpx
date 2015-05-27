@@ -320,7 +320,7 @@ static INLINE int calc_mi_size(int len) {
   return len + MI_BLOCK_SIZE;
 }
 
-static INLINE void set_mi_row_col(MACROBLOCKD *xd, const TileInfo *const tile,
+static void set_mi_row_col(MACROBLOCKD *xd, const TileInfo *const tile,
                                   int mi_row, int bh,
                                   int mi_col, int bw,
                                   int mi_rows, int mi_cols) {
@@ -330,7 +330,7 @@ static INLINE void set_mi_row_col(MACROBLOCKD *xd, const TileInfo *const tile,
   xd->mb_to_right_edge  = ((mi_cols - bw - mi_col) * MI_SIZE) * 8;
 
   // Are edges available for intra prediction?
-#if VP9_ROW_TILE
+#if CONFIG_ROW_TILE
   xd->up_available    = (mi_row > tile->mi_row_start);
 #else
   xd->up_available    = (mi_row != 0);

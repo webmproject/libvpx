@@ -670,9 +670,9 @@ int main_loop(int argc, const char **argv_) {
 #endif
 #if CONFIG_ROW_TILE && CONFIG_KEY_FRAME_TILE
     else if (arg_match(&arg, &tiler, argi))
-      tile_row = arg_parse_uint(&arg);
+      tile_row = arg_parse_int(&arg);
     else if (arg_match(&arg, &tilec, argi))
-      tile_col = arg_parse_uint(&arg);
+      tile_col = arg_parse_int(&arg);
 #endif
 #if CONFIG_VP8_DECODER
     else if (arg_match(&arg, &addnoise_level, argi)) {
