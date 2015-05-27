@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6d9499c1_9d4a96b0",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-05-27T01:35:03Z",
+      "side": 1,
+      "message": "replace ts_target_bitrate with layer_target_bitrate",
+      "range": {
+        "startLine": 88,
+        "startChar": 35,
+        "endLine": 88,
+        "endChar": 52
+      },
+      "revId": "ae433b248f3ca3ddf1c8514646732650615ac547",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d5f9dfa_6ec7b748",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-05-27T01:35:03Z",
+      "side": 1,
+      "message": "replace ts_target_bitrate with layer_target_bitrate",
+      "range": {
+        "startLine": 94,
+        "startChar": 16,
+        "endLine": 94,
+        "endChar": 33
+      },
+      "revId": "ae433b248f3ca3ddf1c8514646732650615ac547",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d9499c1_98ef04fe",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 626,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-05-27T01:35:03Z",
+      "side": 1,
+      "message": "add: cfg.temporal_layering_mode \u003d VP9E_TEMPORAL_LAYERING_MODE_BYPASS;",
+      "range": {
+        "startLine": 626,
+        "startChar": 20,
+        "endLine": 626,
+        "endChar": 23
+      },
+      "revId": "ae433b248f3ca3ddf1c8514646732650615ac547",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d9499c1_98d62444",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 637,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-05-27T01:35:03Z",
+      "side": 1,
+      "message": "replace ts_target_bitrate with layer_target_bitrate",
+      "range": {
+        "startLine": 637,
+        "startChar": 30,
+        "endLine": 637,
+        "endChar": 47
+      },
+      "revId": "ae433b248f3ca3ddf1c8514646732650615ac547",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d9499c1_d8326c23",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-05-27T01:35:03Z",
+      "side": 1,
+      "message": "add: lrc-\u003eavg_frame_qindex[KEY_FRAME] \u003d oxcf-\u003eworst_allowed_q;",
+      "range": {
+        "startLine": 77,
+        "startChar": 13,
+        "endLine": 77,
+        "endChar": 29
+      },
+      "revId": "ae433b248f3ca3ddf1c8514646732650615ac547",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4d0995dc_c32403ac",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-05-27T01:35:03Z",
+      "side": 1,
+      "message": "these lines (setting of start/optimal/max, 96 - 103) should not be needed here, so we can remove?",
+      "range": {
+        "startLine": 96,
+        "startChar": 11,
+        "endLine": 96,
+        "endChar": 32
+      },
+      "revId": "ae433b248f3ca3ddf1c8514646732650615ac547",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d9499c1_786dd8fd",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 489,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-05-27T01:35:03Z",
+      "side": 1,
+      "message": "this overwrites the ref_frame_flags that the user may supply from outside, so we should have here:\nif (cpi-\u003esvc.temporal_layering_mode !\u003d VP9E_TEMPORAL_LAYERING_MODE_BYPASS) {\n  cpi-\u003eref_frame_flags \u003d VP9_ALT_FLAG | VP9_GOLD_FLAG | VP9_LAST_FLAG;\n}",
+      "range": {
+        "startLine": 489,
+        "startChar": 25,
+        "endLine": 489,
+        "endChar": 37
+      },
+      "revId": "ae433b248f3ca3ddf1c8514646732650615ac547",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
