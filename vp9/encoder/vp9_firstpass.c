@@ -113,8 +113,8 @@ static void output_stats(FIRSTPASS_STATS *stats,
     fpfile = fopen("firstpass.stt", "a");
 
     fprintf(fpfile, "%12.0lf %12.4lf %12.0lf %12.0lf %12.0lf %12.4lf %12.4lf"
-            "%12.4lf %12.4lf %12.4lf %12.4lf %12.4lf %12.4lf %12.4lf"
-            "%12.4lf %12.0lf %12.0lf %12.0lf %12.4lf\n",
+            "%12.4lf %12.4lf %12.4lf %12.4lf %12.4lf %12.4lf %12.4lf %12.4lf"
+            "%12.4lf %12.4lf %12.0lf %12.0lf %12.0lf %12.4lf\n",
             stats->frame,
             stats->weight,
             stats->intra_error,
@@ -124,6 +124,8 @@ static void output_stats(FIRSTPASS_STATS *stats,
             stats->pcnt_motion,
             stats->pcnt_second_ref,
             stats->pcnt_neutral,
+            stats->ul_intra_pct,
+            stats->image_start_row,
             stats->MVr,
             stats->mvr_abs,
             stats->MVc,
@@ -160,7 +162,9 @@ static void zero_stats(FIRSTPASS_STATS *section) {
   section->pcnt_motion  = 0.0;
   section->pcnt_second_ref = 0.0;
   section->pcnt_neutral = 0.0;
-  section->MVr        = 0.0;
+  section->ul_intra_pct = 0.0;
+  section->image_start_row = 0.0;
+  section->MVr = 0.0;
   section->mvr_abs     = 0.0;
   section->MVc        = 0.0;
   section->mvc_abs     = 0.0;
@@ -185,7 +189,9 @@ static void accumulate_stats(FIRSTPASS_STATS *section,
   section->pcnt_motion += frame->pcnt_motion;
   section->pcnt_second_ref += frame->pcnt_second_ref;
   section->pcnt_neutral += frame->pcnt_neutral;
-  section->MVr        += frame->MVr;
+  section->ul_intra_pct += frame->ul_intra_pct;
+  section->image_start_row += frame->image_start_row;
+  section->MVr += frame->MVr;
   section->mvr_abs     += frame->mvr_abs;
   section->MVc        += frame->MVc;
   section->mvc_abs     += frame->mvc_abs;
@@ -208,7 +214,9 @@ static void subtract_stats(FIRSTPASS_STATS *section,
   section->pcnt_motion -= frame->pcnt_motion;
   section->pcnt_second_ref -= frame->pcnt_second_ref;
   section->pcnt_neutral -= frame->pcnt_neutral;
-  section->MVr        -= frame->MVr;
+  section->ul_intra_pct -= frame->ul_intra_pct;
+  section->image_start_row -= frame->image_start_row;
+  section->MVr -= frame->MVr;
   section->mvr_abs     -= frame->mvr_abs;
   section->MVc        -= frame->MVc;
   section->mvc_abs     -= frame->mvc_abs;
@@ -453,6 +461,8 @@ static void set_first_pass_params(VP9_COMP *cpi) {
   cpi->rc.frames_to_key = INT_MAX;
 }
 
+#define UL_INTRA_THRESH 50
+#define INVALID_ROW -1
 void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
   int mb_row, mb_col;
   MACROBLOCK *const x = &cpi->td.mb;
@@ -477,6 +487,8 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
   int second_ref_count = 0;
   const int intrapenalty = INTRA_MODE_PENALTY;
   double neutral_count;
+  int ul_intra_count = 0;
+  int image_data_start_row = INVALID_ROW;
   int new_mv_count = 0;
   int sum_in_vectors = 0;
   MV lastmv = {0, 0};
@@ -636,6 +648,18 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
          (bsize >= BLOCK_16X16 ? TX_16X16 : TX_8X8) : TX_4X4;
       vp9_encode_intra_block_plane(x, bsize, 0);
       this_error = vpx_get_mb_ss(x->plane[0].src_diff);
+
+      // Keep a record of blocks that have almost no intra error residual
+      // (i.e. are in effect completely flat and untextured in the intra
+      // domain). In natural videos this is uncommon, but it is much more
+      // common in animations, graphics and screen content, so may be used
+      // as a signal to detect these types of content.
+      if (this_error < UL_INTRA_THRESH) {
+        ++ul_intra_count;
+      } else if ((mb_col > 0) && (image_data_start_row == INVALID_ROW)) {
+        image_data_start_row = mb_row;
+      }
+
 #if CONFIG_VP9_HIGHBITDEPTH
       if (cm->use_highbitdepth) {
         switch (cm->bit_depth) {
@@ -963,6 +987,18 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
     vp9_clear_system_state();
   }
 
+  // Clamp the image start to rows/2. This number of rows is discarded top
+  // and bottom as dead data so rows / 2 means the frame is blank.
+  if ((image_data_start_row > cm->mb_rows / 2) ||
+      (image_data_start_row == INVALID_ROW)) {
+    image_data_start_row = cm->mb_rows / 2;
+  }
+  // Exclude any image dead zone
+  if (image_data_start_row > 0) {
+    ul_intra_count =
+      MAX(0, ul_intra_count - (image_data_start_row * cm->mb_cols * 2));
+  }
+
   {
     FIRSTPASS_STATS fps;
     // The minimum error here insures some bit allocation to frames even
@@ -987,6 +1023,8 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
     fps.pcnt_inter = (double)intercount / num_mbs;
     fps.pcnt_second_ref = (double)second_ref_count / num_mbs;
     fps.pcnt_neutral = (double)neutral_count / num_mbs;
+    fps.ul_intra_pct = (double)ul_intra_count / num_mbs;
+    fps.image_start_row = (double)image_data_start_row;
 
     if (mvcount > 0) {
       fps.MVr = (double)sum_mvr / mvcount;
