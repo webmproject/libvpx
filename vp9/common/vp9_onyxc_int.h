@@ -220,6 +220,7 @@ typedef struct VP9Common {
   uint8_t *seg_map_array[NUM_PING_PONG_BUFFERS];
   uint8_t *last_frame_seg_map;
   uint8_t *current_frame_seg_map;
+  int seg_map_alloc_size;
 
   INTERP_FILTER interp_filter;
 
@@ -276,6 +277,7 @@ typedef struct VP9Common {
 
   PARTITION_CONTEXT *above_seg_context;
   ENTROPY_CONTEXT *above_context;
+  int above_context_alloc_cols;
 } VP9_COMMON;
 
 // TODO(hkuang): Don't need to lock the whole pool after implementing atomic
