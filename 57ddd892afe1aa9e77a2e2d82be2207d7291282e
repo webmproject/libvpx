@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6d9499c1_adac7f9a",
+        "filename": "vp9/common/vp9_reconinter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1342,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2015-05-27T16:35:30Z",
+      "side": 1,
+      "message": "alignment - align to:\nvp9_setup_scale_factors_for_frame(\u0026sf1, 64, 64, 64, 64,\n                                  (xd-\u003ecur_buf-\u003eflags \u0026 YV12_FLAG_HIGHBITDEPTH));",
+      "revId": "57ddd892afe1aa9e77a2e2d82be2207d7291282e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
