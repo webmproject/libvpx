@@ -5397,7 +5397,7 @@ static void rd_pick_palette_444(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *rd_cost,
   const uint8_t *src_y = x->plane[0].src.buf;
   const uint8_t *src_u = x->plane[1].src.buf;
   const uint8_t *src_v = x->plane[2].src.buf;
-  uint8_t palette_color_map_copy[4096];
+  uint8_t palette_color_map_copy[4096], best_palette_color_map[4096];
   int rows = 4 * num_4x4_blocks_high_lookup[bsize];
   int cols = 4 * num_4x4_blocks_wide_lookup[bsize];
   int src_stride_y = x->plane[0].src.stride;
@@ -5545,7 +5545,8 @@ static void rd_pick_palette_444(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *rd_cost,
       super_block_uvrd(cpi, x, &rate_uv_tokenonly, &dist_uv, &uv_skip, &sse,
                        bsize, best_rd);
 #endif  // CONFIG_TX_SKIP
-      if (rate_uv_tokenonly == INT_MAX) continue;
+      if (rate_uv_tokenonly == INT_MAX)
+        continue;
 
       rate_y = rate_y_tokenonly +
                (1 + PALETTE_DELTA_BIT + n * m2) * vp9_cost_bit(128, 0) +
@@ -5594,7 +5595,8 @@ static void rd_pick_palette_444(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *rd_cost,
         tx_skipped = mbmi->tx_skip[0];
         tx_skipped_uv = mbmi->tx_skip[1];
 #endif  // CONFIG_TX_SKIP
-
+        memcpy(best_palette_color_map, xd->plane[0].color_index_map,
+               rows * cols * sizeof(best_palette_color_map[0]));
         vpx_memcpy(best_palette, mbmi->palette_colors,
                    PALETTE_MAX_SIZE * 3 * sizeof(best_palette[0]));
         vpx_memcpy(best_index, mbmi->palette_indexed_colors,
@@ -5610,12 +5612,15 @@ static void rd_pick_palette_444(VP9_COMP *cpi, MACROBLOCK *x, RD_COST *rd_cost,
       *rd_cost = palette_best_rd;
       mbmi->mode = DC_PRED;
       mbmi->uv_mode = DC_PRED;
-      for (i = 0; i < 2; i++) mbmi->palette_enabled[i] = 1;
-      mbmi->palette_size[0] = best_n;
-      mbmi->palette_size[1] = best_n;
+      for (i = 0; i < 2; i++) {
+        mbmi->palette_enabled[i] = 1;
+        mbmi->palette_size[i] = best_n;
+      }
       mbmi->palette_indexed_size = best_m1;
       mbmi->palette_literal_size = best_m2;
       mbmi->palette_delta_bitdepth = palette_delta_bitdepth;
+      memcpy(xd->plane[0].color_index_map, best_palette_color_map,
+             rows * cols * sizeof(best_palette_color_map[0]));
       vpx_memcpy(mbmi->palette_colors, best_palette,
                  PALETTE_MAX_SIZE * 3 * sizeof(best_palette[0]));
       vpx_memcpy(mbmi->palette_indexed_colors, best_index,
