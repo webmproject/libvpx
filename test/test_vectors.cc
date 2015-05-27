@@ -165,7 +165,10 @@ const char *const kVP9TestVectors[] = {
   "vp90-2-11-size-351x287.webm", "vp90-2-11-size-351x288.webm",
   "vp90-2-11-size-352x287.webm", "vp90-2-12-droppable_1.ivf",
   "vp90-2-12-droppable_2.ivf", "vp90-2-12-droppable_3.ivf",
+#if !CONFIG_SIZE_LIMIT || \
+    (DECODE_WIDTH_LIMIT >= 20400 && DECODE_HEIGHT_LIMIT >= 120)
   "vp90-2-13-largescaling.webm",
+#endif
   "vp90-2-14-resize-fp-tiles-1-16.webm",
   "vp90-2-14-resize-fp-tiles-1-2-4-8-16.webm",
   "vp90-2-14-resize-fp-tiles-1-2.webm", "vp90-2-14-resize-fp-tiles-1-4.webm",

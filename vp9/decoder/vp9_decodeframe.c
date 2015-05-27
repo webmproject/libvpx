@@ -699,7 +699,8 @@ static void resize_context_buffers(VP9_COMMON *cm, int width, int height) {
 #if CONFIG_SIZE_LIMIT
   if (width > DECODE_WIDTH_LIMIT || height > DECODE_HEIGHT_LIMIT)
     vpx_internal_error(&cm->error, VPX_CODEC_CORRUPT_FRAME,
-                       "Width and height beyond allowed size.");
+                       "Dimensions of %dx%d beyond allowed size of %dx%d.",
+                       width, height, DECODE_WIDTH_LIMIT, DECODE_HEIGHT_LIMIT);
 #endif
   if (cm->width != width || cm->height != height) {
     const int new_mi_rows =
