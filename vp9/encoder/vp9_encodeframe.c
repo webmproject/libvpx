@@ -487,6 +487,8 @@ static void set_vbp_thresholds(VP9_COMP *cpi, int64_t thresholds[], int q) {
     } else {
       thresholds[0] = threshold_base;
       thresholds[1] = (5 * threshold_base) >> 2;
+      if (cm->width >= 1920 && cm->height >= 1080)
+        thresholds[1] = (7 * threshold_base) >> 2;
       thresholds[2] = threshold_base << cpi->oxcf.speed;
     }
   }
