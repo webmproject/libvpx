@@ -32,7 +32,7 @@ namespace {
 typedef unsigned int (*VarianceMxNFunc)(const uint8_t *a, int a_stride,
                                         const uint8_t *b, int b_stride,
                                         unsigned int *sse);
-typedef unsigned int (*Get4x4SSEFunc)(const uint8_t *a, int a_stride,
+typedef unsigned int (*Get4x4SseFunc)(const uint8_t *a, int a_stride,
                                       const uint8_t *b, int b_stride);
 
 
@@ -691,7 +691,7 @@ void SubpelVarianceTest<vp9_subp_avg_variance_fn_t>::RefTest() {
 }
 #endif  // CONFIG_VP9_ENCODER
 
-typedef MseTest<Get4x4SSEFunc> VpxSseTest;
+typedef MseTest<Get4x4SseFunc> VpxSseTest;
 typedef MseTest<VarianceMxNFunc> VpxMseTest;
 typedef VarianceTest<VarianceMxNFunc> VpxVarianceTest;
 
@@ -709,7 +709,7 @@ TEST_P(SumOfSquaresTest, Ref) { RefTest(); }
 INSTANTIATE_TEST_CASE_P(C, SumOfSquaresTest,
                         ::testing::Values(vpx_get_mb_ss_c));
 
-const Get4x4SSEFunc get4x4sse_cs_c = vpx_get4x4sse_cs_c;
+const Get4x4SseFunc get4x4sse_cs_c = vpx_get4x4sse_cs_c;
 INSTANTIATE_TEST_CASE_P(C, VpxSseTest,
                         ::testing::Values(make_tuple(2, 2, get4x4sse_cs_c)));
 
@@ -1839,7 +1839,7 @@ INSTANTIATE_TEST_CASE_P(
 #endif  // HAVE_AVX2
 
 #if HAVE_NEON
-const Get4x4SSEFunc get4x4sse_cs_neon = vpx_get4x4sse_cs_neon;
+const Get4x4SseFunc get4x4sse_cs_neon = vpx_get4x4sse_cs_neon;
 INSTANTIATE_TEST_CASE_P(NEON, VpxSseTest,
                         ::testing::Values(make_tuple(2, 2, get4x4sse_cs_neon)));
 
