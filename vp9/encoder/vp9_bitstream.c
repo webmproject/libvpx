@@ -1949,6 +1949,38 @@ static size_t encode_tiles(VP9_COMP *cpi, uint8_t *data_ptr) {
     }
   }
 
+#if CONFIG_ROW_TILE
+  for (tile_col = 0; tile_col < tile_cols; tile_col++) {
+    int is_last_col = (tile_col == tile_cols - 1);
+    size_t col_offset = total_size;
+
+    if (!is_last_col)
+      total_size += 4;
+
+    for (tile_row = 0; tile_row < tile_rows; tile_row++) {
+      const TileInfo * const ptile = &tile[tile_row][tile_col];
+      tok_end = tok[tile_row][tile_col] + cpi->tok_count[tile_row][tile_col];
+
+      if (tile_row < tile_rows - 1)
+        vp9_start_encode(&residual_bc, data_ptr + total_size + 4);
+      else
+        vp9_start_encode(&residual_bc, data_ptr + total_size);
+
+      write_modes(cpi, ptile, &residual_bc, &tok[tile_row][tile_col], tok_end);
+      assert(tok[tile_row][tile_col] == tok_end);
+      vp9_stop_encode(&residual_bc);
+      if (tile_row < tile_rows - 1) {
+        // size of this tile
+        mem_put_be32(data_ptr + total_size, residual_bc.pos);
+        total_size += 4;
+      }
+      total_size += residual_bc.pos;
+    }
+
+    if (!is_last_col)
+      mem_put_be32(data_ptr + col_offset, total_size - col_offset - 4);
+  }
+#else
   for (tile_row = 0; tile_row < tile_rows; tile_row++) {
     for (tile_col = 0; tile_col < tile_cols; tile_col++) {
       const TileInfo * const ptile = &tile[tile_row][tile_col];
@@ -1972,6 +2004,7 @@ static size_t encode_tiles(VP9_COMP *cpi, uint8_t *data_ptr) {
       total_size += residual_bc.pos;
     }
   }
+#endif
 
   return total_size;
 }
