@@ -17,6 +17,7 @@
 
 #include "vp9/common/vp9_entropy.h"
 #include "vp9/common/vp9_pred_common.h"
+#include "vp9/common/vp9_scan.h"
 #include "vp9/common/vp9_seg_common.h"
 
 #include "vp9/encoder/vp9_cost.h"
