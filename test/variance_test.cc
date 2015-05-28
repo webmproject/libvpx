@@ -1862,8 +1862,8 @@ INSTANTIATE_TEST_CASE_P(
                       make_tuple(5, 6, variance32x64_neon, 0),
                       make_tuple(5, 5, variance32x32_neon, 0),
                       make_tuple(4, 4, variance16x16_neon, 0),
-                      make_tuple(4, 4, variance16x8_neon, 0),
-                      make_tuple(4, 4, variance8x16_neon, 0),
+                      make_tuple(4, 3, variance16x8_neon, 0),
+                      make_tuple(3, 4, variance8x16_neon, 0),
                       make_tuple(3, 3, variance8x8_neon, 0)));
 
 #if CONFIG_VP9_ENCODER
