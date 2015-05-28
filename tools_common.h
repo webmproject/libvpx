@@ -16,6 +16,7 @@
 #include "vpx/vpx_codec.h"
 #include "vpx/vpx_image.h"
 #include "vpx/vpx_integer.h"
+#include "vpx_ports/msvc.h"
 
 #if CONFIG_ENCODERS
 #include "./y4minput.h"
@@ -34,7 +35,6 @@
 #if CONFIG_OS_SUPPORT
 #if defined(_MSC_VER)
 #include <io.h>  /* NOLINT */
-#define snprintf _snprintf
 #define isatty   _isatty
 #define fileno   _fileno
 #else
