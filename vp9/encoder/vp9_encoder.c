@@ -697,7 +697,9 @@ static void set_tile_limits(VP9_COMP *cpi) {
   int min_log2_tile_cols, max_log2_tile_cols;
   vp9_get_tile_n_bits(cm->mi_cols, &min_log2_tile_cols, &max_log2_tile_cols);
 
-  if (is_two_pass_svc(cpi) && cpi->svc.encode_empty_frame_state == ENCODING) {
+  if (is_two_pass_svc(cpi) &&
+      (cpi->svc.encode_empty_frame_state == ENCODING ||
+      cpi->svc.number_spatial_layers > 1)) {
     cm->log2_tile_cols = 0;
     cm->log2_tile_rows = 0;
   } else {
