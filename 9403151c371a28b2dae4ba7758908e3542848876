@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "6d1bb95b_e37a1237",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-05-28T00:55:20Z",
+      "side": 1,
+      "message": "woops, was following the style of the other \"reference\" code",
+      "parentUuid": "ed56c9ec_1b4e9e49",
+      "revId": "9403151c371a28b2dae4ba7758908e3542848876",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d54fde2_2aa87357",
         "filename": "test/variance_test.cc",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2015-05-28T00:43:22Z",
       "side": 1,
       "message": "this is too busy, just add the rounder and note what the function is meant for",
+      "revId": "9403151c371a28b2dae4ba7758908e3542848876",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d54fde2_6a635b8c",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-05-28T00:55:20Z",
+      "side": 1,
+      "message": "woops, sorry should have simplified that.",
+      "parentUuid": "0d54fde2_2aa87357",
       "revId": "9403151c371a28b2dae4ba7758908e3542848876",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
