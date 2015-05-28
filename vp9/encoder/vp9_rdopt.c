@@ -1457,6 +1457,7 @@ static void intrabc_search(VP9_COMP *cpi, MACROBLOCK *x,
                            int mi_row, int mi_col,
                            int_mv *tmp_mv, int *rate_mv) {
   const VP9_COMMON *cm = &cpi->common;
+  struct macroblockd_plane *pd = x->e_mbd.plane;
   int bestsme = INT_MAX;
   int step_param;
   int sadpb = x->sadperbit16;
@@ -1518,26 +1519,27 @@ static void intrabc_search(VP9_COMP *cpi, MACROBLOCK *x,
   assert(tmp_mv->as_int != 0);
 
   if (bestsme < INT_MAX) {
+    if (pd[1].subsampling_x != 0 || pd[1].subsampling_y != 0) {
 #if ODD_PEL_DV
-    if (tmp_mv->as_mv.col > -w) {
-      assert(tmp_mv->as_mv.row <= -h);
-      if (tmp_mv->as_mv.row == -h - 1) {
-        tmp_mv->as_mv.row = tmp_mv->as_mv.row / 2 * 2;
+      if (tmp_mv->as_mv.col > -w) {
+        assert(tmp_mv->as_mv.row <= -h);
+        if (tmp_mv->as_mv.row == -h - 1) {
+          tmp_mv->as_mv.row = tmp_mv->as_mv.row / 2 * 2;
+        }
+      } else {
+        assert(tmp_mv->as_mv.row <= 8 * 8 - h);
+        if (tmp_mv->as_mv.row == 8 * 8 - h - 1) {
+          tmp_mv->as_mv.row = tmp_mv->as_mv.row / 2 * 2;
+        }
       }
-    } else {
-      assert(tmp_mv->as_mv.row <= 8*8 - h);
-      if (tmp_mv->as_mv.row == 8*8 - h - 1) {
-        tmp_mv->as_mv.row = tmp_mv->as_mv.row / 2 * 2;
-      }
-    }
-    tmp_mv->as_mv.row *= 8;
-    tmp_mv->as_mv.col *= 8;
 #else
-    tmp_mv->as_mv.row /= 2;
-    tmp_mv->as_mv.col /= 2;
-    tmp_mv->as_mv.row *= 16;
-    tmp_mv->as_mv.col *= 16;
+      tmp_mv->as_mv.row = tmp_mv->as_mv.row / 2 * 2;
+      tmp_mv->as_mv.col = tmp_mv->as_mv.col / 2 * 2;
 #endif  // ODD_PEL_DV
+    } else {
+      tmp_mv->as_mv.row *= 8;
+      tmp_mv->as_mv.col *= 8;
+    }
   }
   *rate_mv = vp9_mv_bit_cost(&tmp_mv->as_mv, &ref_mv,
                              x->nmvjointcost, x->ndvcost, MV_COST_WEIGHT);
