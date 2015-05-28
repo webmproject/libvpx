@@ -199,8 +199,9 @@ VP9_COMMON_SRCS-yes += common/arm/neon/vp9_loopfilter_4_neon.c
 # TODO(johannkoenig): re-enable when chromium build is fixed
 # # https://code.google.com/p/chromium/issues/detail?id=443839
 #VP9_COMMON_SRCS-yes += common/arm/neon/vp9_loopfilter_8_neon.c
-VP9_COMMON_SRCS-yes += common/arm/neon/vp9_reconintra_neon.c
 endif  # HAVE_NEON
 endif  # HAVE_NEON_ASM
+
+VP9_COMMON_SRCS-$(HAVE_NEON) += common/arm/neon/vp9_reconintra_neon.c
 
 $(eval $(call rtcd_h_template,vp9_rtcd,vp9/common/vp9_rtcd_defs.pl))

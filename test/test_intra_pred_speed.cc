@@ -248,9 +248,11 @@ INTRA_PRED_TEST(DSPR2, TestIntraPred8, vp9_dc_predictor_8x8_dspr2, NULL, NULL,
 #endif  // HAVE_DSPR2
 
 #if HAVE_NEON
-INTRA_PRED_TEST(NEON, TestIntraPred8, NULL, NULL, NULL, NULL,
-                vp9_v_predictor_8x8_neon, vp9_h_predictor_8x8_neon, NULL, NULL,
-                NULL, NULL, NULL, NULL, vp9_tm_predictor_8x8_neon)
+INTRA_PRED_TEST(NEON, TestIntraPred8, vp9_dc_predictor_8x8_neon,
+                vp9_dc_left_predictor_8x8_neon, vp9_dc_top_predictor_8x8_neon,
+                vp9_dc_128_predictor_8x8_neon, vp9_v_predictor_8x8_neon,
+                vp9_h_predictor_8x8_neon, NULL, NULL, NULL, NULL, NULL, NULL,
+                vp9_tm_predictor_8x8_neon)
 
 #endif  // HAVE_NEON
 
