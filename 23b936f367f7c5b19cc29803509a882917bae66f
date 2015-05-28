@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6d1bb95b_f71808ad",
+        "filename": "configure",
+        "patchSetId": 3
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-05-28T05:44:55Z",
+      "side": 1,
+      "message": "this could be limited further for 32-bit builds 4Kx4K or 4096x2160 and perhaps to something more reasonable for 64-bit 8Kx8K?",
+      "revId": "23b936f367f7c5b19cc29803509a882917bae66f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
