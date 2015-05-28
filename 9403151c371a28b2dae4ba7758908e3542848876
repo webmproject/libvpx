@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ed56c9ec_1b4e9e49",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-05-28T00:43:22Z",
+      "side": 1,
+      "message": "note static is unnecessary in an anonymous namespace -- this is consistent though so leave it as is for now.\nsame goes for the naming, functions are meant to be mixed cases with the exception of accessors:\n\nhttp://google-styleguide.googlecode.com/svn/trunk/cppguide.html#Function_Names",
+      "revId": "9403151c371a28b2dae4ba7758908e3542848876",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d54fde2_2aa87357",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-05-28T00:43:22Z",
+      "side": 1,
+      "message": "this is too busy, just add the rounder and note what the function is meant for",
+      "revId": "9403151c371a28b2dae4ba7758908e3542848876",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
