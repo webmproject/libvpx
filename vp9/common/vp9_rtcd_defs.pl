@@ -286,19 +286,19 @@ specialize qw/vp9_filter_by_weight8x8 sse2/;
 # Sub Pixel Filters
 #
 add_proto qw/void vp9_convolve_copy/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h";
-specialize qw/vp9_convolve_copy neon dspr2 msa/, "$sse2_x86inc";
+specialize qw/vp9_convolve_copy neon dspr2/, "$sse2_x86inc";
 
 add_proto qw/void vp9_convolve_avg/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h";
-specialize qw/vp9_convolve_avg neon dspr2 msa/, "$sse2_x86inc";
+specialize qw/vp9_convolve_avg neon dspr2/, "$sse2_x86inc";
 
 add_proto qw/void vp9_convolve8/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h";
-specialize qw/vp9_convolve8 sse2 ssse3 neon dspr2 msa/, "$avx2_ssse3";
+specialize qw/vp9_convolve8 sse2 ssse3 neon dspr2/, "$avx2_ssse3";
 
 add_proto qw/void vp9_convolve8_horiz/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h";
-specialize qw/vp9_convolve8_horiz sse2 ssse3 neon dspr2 msa/, "$avx2_ssse3";
+specialize qw/vp9_convolve8_horiz sse2 ssse3 neon dspr2/, "$avx2_ssse3";
 
 add_proto qw/void vp9_convolve8_vert/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h";
-specialize qw/vp9_convolve8_vert sse2 ssse3 neon dspr2 msa/, "$avx2_ssse3";
+specialize qw/vp9_convolve8_vert sse2 ssse3 neon dspr2/, "$avx2_ssse3";
 
 add_proto qw/void vp9_convolve8_avg/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h";
 specialize qw/vp9_convolve8_avg sse2 ssse3 neon dspr2/;
@@ -425,42 +425,42 @@ if (vpx_config("CONFIG_VP9_HIGHBITDEPTH") eq "yes") {
     specialize qw/vp9_idct4x4_16_add sse2 neon dspr2/;
 
     add_proto qw/void vp9_idct8x8_1_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
-    specialize qw/vp9_idct8x8_1_add sse2 neon dspr2 msa/;
+    specialize qw/vp9_idct8x8_1_add sse2 neon dspr2/;
 
     add_proto qw/void vp9_idct8x8_64_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
-    specialize qw/vp9_idct8x8_64_add sse2 neon dspr2 msa/, "$ssse3_x86_64";
+    specialize qw/vp9_idct8x8_64_add sse2 neon dspr2/, "$ssse3_x86_64";
 
     add_proto qw/void vp9_idct8x8_12_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
-    specialize qw/vp9_idct8x8_12_add sse2 neon dspr2 msa/, "$ssse3_x86_64";
+    specialize qw/vp9_idct8x8_12_add sse2 neon dspr2/, "$ssse3_x86_64";
 
     add_proto qw/void vp9_idct16x16_1_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
-    specialize qw/vp9_idct16x16_1_add sse2 neon dspr2 msa/;
+    specialize qw/vp9_idct16x16_1_add sse2 neon dspr2/;
 
     add_proto qw/void vp9_idct16x16_256_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
-    specialize qw/vp9_idct16x16_256_add sse2 neon dspr2 msa/;
+    specialize qw/vp9_idct16x16_256_add sse2 neon dspr2/;
 
     add_proto qw/void vp9_idct16x16_10_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
-    specialize qw/vp9_idct16x16_10_add sse2 neon dspr2 msa/;
+    specialize qw/vp9_idct16x16_10_add sse2 neon dspr2/;
 
     add_proto qw/void vp9_idct32x32_1024_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
-    specialize qw/vp9_idct32x32_1024_add sse2 neon dspr2 msa/;
+    specialize qw/vp9_idct32x32_1024_add sse2 neon dspr2/;
 
     add_proto qw/void vp9_idct32x32_34_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
-    specialize qw/vp9_idct32x32_34_add sse2 neon_asm dspr2 msa/;
+    specialize qw/vp9_idct32x32_34_add sse2 neon_asm dspr2/;
     #is this a typo?
     $vp9_idct32x32_34_add_neon_asm=vp9_idct32x32_1024_add_neon;
 
     add_proto qw/void vp9_idct32x32_1_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride";
-    specialize qw/vp9_idct32x32_1_add sse2 neon dspr2 msa/;
+    specialize qw/vp9_idct32x32_1_add sse2 neon dspr2/;
 
     add_proto qw/void vp9_iht4x4_16_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int tx_type";
     specialize qw/vp9_iht4x4_16_add sse2 neon dspr2/;
 
     add_proto qw/void vp9_iht8x8_64_add/, "const tran_low_t *input, uint8_t *dest, int dest_stride, int tx_type";
-    specialize qw/vp9_iht8x8_64_add sse2 neon dspr2 msa/;
+    specialize qw/vp9_iht8x8_64_add sse2 neon dspr2/;
 
     add_proto qw/void vp9_iht16x16_256_add/, "const tran_low_t *input, uint8_t *output, int pitch, int tx_type";
-    specialize qw/vp9_iht16x16_256_add sse2 dspr2 msa/;
+    specialize qw/vp9_iht16x16_256_add sse2 dspr2/;
 
     # dct and add
 
