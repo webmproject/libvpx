@@ -2192,15 +2192,7 @@ static void write_uncompressed_header(VP9_COMP *cpi,
 static void write_global_motion_params(Global_Motion_Params *params,
                                        vp9_prob *probs,
                                        vp9_writer *w) {
-  GLOBAL_MOTION_TYPE gmtype;
-  if (params->zoom == 0 && params->rotation == 0) {
-    if (params->mv.as_int == 0)
-      gmtype = GLOBAL_ZERO;
-    else
-      gmtype = GLOBAL_TRANSLATION;
-  } else {
-      gmtype = GLOBAL_ROTZOOM;
-  }
+  GLOBAL_MOTION_TYPE gmtype = get_gmtype(params);
   vp9_write_token(w, vp9_global_motion_types_tree, probs,
                   &global_motion_types_encodings[gmtype]);
   switch (gmtype) {
@@ -2236,9 +2228,9 @@ static void write_global_motion(VP9_COMP *cpi, vp9_writer *w) {
             MAX_GLOBAL_MOTION_MODELS * sizeof(*cm->global_motion[frame]));
       }
       write_global_motion_params(
-          cm->global_motion[frame], cm->fc.global_motion_types_prob, w);
+          &cm->global_motion[frame][0], cm->fc.global_motion_types_prob, w);
       /*
-      printf("Ref %d [%d] (used %d): %d %d %d %d\n",
+      printf("Enc Ref %d [%d] (used %d): %d %d %d %d\n",
              frame, cm->current_video_frame, cpi->global_motion_used[frame],
              cm->global_motion[frame][i].zoom,
              cm->global_motion[frame][i].rotation,

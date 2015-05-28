@@ -183,9 +183,17 @@ int vp9_compute_global_motion_single_feature_based(
                                              inlier_map);
 #ifdef VERBOSE
   printf("Inliers = %d\n", num_inliers);
-  printf("Error Score (inliers) = %g\n",
-         compute_error_score(type, correspondences, 4, correspondences + 2, 4,
-                             num_correspondences, H, inlier_map));
+  if (num_inliers) {
+    printf("Error Score (inliers) = %g\n",
+           compute_error_score(type, correspondences, 4, correspondences + 2, 4,
+                               num_correspondences, H, inlier_map));
+    printf("Warp error score = %g\n",
+           vp9_warp_error_unq(ROTZOOM, H, ref->y_buffer, ref->y_crop_width,
+                              ref->y_crop_height, ref->y_stride,
+                              frm->y_buffer, 0, 0,
+                              frm->y_crop_width, frm->y_crop_height,
+                              frm->y_stride, 0, 0, 16, 16));
+  }
 #endif
   free(correspondences);
   free(inlier_map);
@@ -322,6 +330,12 @@ int vp9_compute_global_motion_multiple_feature_based(
     printf("Error Score (inliers) = %g\n",
            compute_error_score(type, correspondences, 4, correspondences + 2, 4,
                                num_correspondences, H, inlier_map));
+    printf("Warp error score = %g\n",
+           vp9_warp_error_unq(ROTZOOM, H, ref->y_buffer, ref->y_crop_width,
+                              ref->y_crop_height, ref->y_stride,
+                              frm->y_buffer, 0, 0,
+                              frm->y_crop_width, frm->y_crop_height,
+                              frm->y_stride, 0, 0, 16, 16));
 #endif
   (void) num_inliers;
   free(correspondences);
