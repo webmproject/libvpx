@@ -14,6 +14,7 @@
 #include "./vpx_config.h"
 #include "vpx/internal/vpx_codec_internal.h"
 #include "./vp9_rtcd.h"
+#include "vp9/common/vp9_alloccommon.h"
 #include "vp9/common/vp9_loopfilter.h"
 #include "vp9/common/vp9_entropymv.h"
 #include "vp9/common/vp9_entropy.h"
@@ -307,8 +308,13 @@ static INLINE int get_free_fb(VP9_COMMON *cm) {
     if (frame_bufs[i].ref_count == 0)
       break;
 
-  assert(i < FRAME_BUFFERS);
-  frame_bufs[i].ref_count = 1;
+  if (i != FRAME_BUFFERS) {
+    frame_bufs[i].ref_count = 1;
+  } else {
+    // Reset i to be INVALID_IDX to indicate no free buffer found.
+    i = INVALID_IDX;
+  }
+
   unlock_buffer_pool(cm->buffer_pool);
   return i;
 }
