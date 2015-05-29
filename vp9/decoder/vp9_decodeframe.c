@@ -1962,9 +1962,9 @@ static void get_tile_buffers(VP9Decoder *pbi,
   const uint8_t *tile_end_col[1024];
   size_t tile_col_size;
   int tile_col_limit = (pbi->dec_tile_col == -1) ? INT_MAX :
-                                 MIN(pbi->dec_tile_col, tile_cols);
+                                 MIN(pbi->dec_tile_col, tile_cols - 1);
   int tile_row_limit = (pbi->dec_tile_row == -1) ? INT_MAX :
-                                 MIN(pbi->dec_tile_row, tile_rows);
+                                 MIN(pbi->dec_tile_row, tile_rows - 1);
 
   for (c = 0; c < tile_cols && c <= tile_col_limit; ++c) {
     if (c < tile_cols - 1) {
@@ -2045,9 +2045,9 @@ static const uint8_t *decode_tiles(VP9Decoder *pbi,
 #if CONFIG_ROW_TILE
   TileBuffer (*tile_buffers)[1024] = pbi->tile_buffers;
   const int tile_col_limit = (pbi->dec_tile_col == -1) ? INT_MAX :
-                                 MIN(pbi->dec_tile_col, tile_cols);
+                                 MIN(pbi->dec_tile_col, tile_cols - 1);
   const int tile_row_limit = (pbi->dec_tile_row == -1) ? INT_MAX :
-                                 MIN(pbi->dec_tile_row, tile_rows);
+                                 MIN(pbi->dec_tile_row, tile_rows - 1);
 #else
   TileBuffer tile_buffers[4][1024];
   const int tile_col_limit = INT_MAX;
