@@ -329,6 +329,33 @@ static vpx_codec_err_t decode_one(vpx_codec_alg_priv_t *ctx,
     return update_error_state(ctx, &cm->error);
 
   yuvconfig2image(&ctx->img, &sd, user_priv);
+
+#if CONFIG_ROW_TILE
+  if (ctx->pbi->dec_tile_row >= 0) {
+    VP9_COMMON *cm = &ctx->pbi->common;
+    int tile_row = MIN(ctx->pbi->dec_tile_row, cm->tile_rows - 1);
+    int plane;
+    ctx->img.planes[0] += tile_row * cm->tile_height * 8 * ctx->img.stride[0];
+    for (plane = 1; plane < MAX_MB_PLANE; ++plane)
+      ctx->img.planes[plane] += tile_row * (8 >> ctx->img.y_chroma_shift) *
+                                cm->tile_height * ctx->img.stride[plane];
+    ctx->img.d_h = MIN(cm->tile_height * 8,
+                       (cm->mi_rows - tile_row * cm->tile_height) * 8);
+  }
+
+  if (ctx->pbi->dec_tile_col >= 0) {
+    VP9_COMMON *cm = &ctx->pbi->common;
+    int tile_col = MIN(ctx->pbi->dec_tile_col, cm->tile_cols - 1);
+    int plane;
+    ctx->img.planes[0] += tile_col * cm->tile_width * 8;
+    for (plane = 1; plane < MAX_MB_PLANE; ++plane)
+      ctx->img.planes[plane] += tile_col * cm->tile_width *
+                                (8 >> ctx->img.x_chroma_shift);
+    ctx->img.d_w = MIN(cm->tile_width * 8,
+                       (cm->mi_cols - tile_col * cm->tile_width) * 8);
+  }
+#endif
+
   ctx->img.fb_priv = cm->frame_bufs[cm->new_fb_idx].raw_frame_buffer.priv;
   ctx->img_avail = 1;
 

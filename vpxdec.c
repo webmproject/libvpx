@@ -1014,6 +1014,11 @@ int main_loop(int argc, const char **argv_) {
       }
 #endif
 
+#if CONFIG_ROW_TILE && CONFIG_KEY_FRAME_TILE
+      vpx_input_ctx.width = img->d_w;
+      vpx_input_ctx.height = img->d_h;
+#endif
+
       if (single_file) {
         if (use_y4m) {
           char buf[Y4M_BUFFER_SIZE] = {0};
