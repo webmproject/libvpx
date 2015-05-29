@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ed56c9ec_d48e8efe",
+        "filename": "vp9/common/arm/neon/vp9_reconintra_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-05-29T17:42:18Z",
+      "side": 1,
+      "message": "Strange. I had hoped the \u0027inline\u0027 and NULL usage would force the compiler. However, obviously, above and left could be null as well so it still keeps the checks when above/left are passed in and only omits them when NULL is used. Can the non-null-ness of above/left be hinted at? asserts?",
+      "parentUuid": "0d54fde2_b7af585c",
+      "revId": "af9bb19f90433ee350acb9a1810dd2ccb2d6f2b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d54fde2_b7bd98a4",
         "filename": "vp9/common/arm/neon/vp9_reconintra_neon.c",
         "patchSetId": 1
