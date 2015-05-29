@@ -297,13 +297,11 @@ static void model_rd_for_sb_y_large(VP9_COMP *cpi, BLOCK_SIZE bsize,
     else
       tx_size = TX_8X8;
 
-    if (cpi->sf.partition_search_type == VAR_BASED_PARTITION) {
-      if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ &&
-          cyclic_refresh_segment_id_boosted(xd->mi[0]->mbmi.segment_id))
-        tx_size = TX_8X8;
-      else if (tx_size > TX_16X16)
-        tx_size = TX_16X16;
-    }
+    if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ &&
+        cyclic_refresh_segment_id_boosted(xd->mi[0]->mbmi.segment_id))
+      tx_size = TX_8X8;
+    else if (tx_size > TX_16X16)
+      tx_size = TX_16X16;
   } else {
     tx_size = MIN(max_txsize_lookup[bsize],
                   tx_mode_to_biggest_tx_size[cpi->common.tx_mode]);
@@ -481,13 +479,11 @@ static void model_rd_for_sb_y(VP9_COMP *cpi, BLOCK_SIZE bsize,
     else
       xd->mi[0]->mbmi.tx_size = TX_8X8;
 
-    if (cpi->sf.partition_search_type == VAR_BASED_PARTITION) {
-      if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ &&
-          cyclic_refresh_segment_id_boosted(xd->mi[0]->mbmi.segment_id))
-        xd->mi[0]->mbmi.tx_size = TX_8X8;
-      else if (xd->mi[0]->mbmi.tx_size > TX_16X16)
-        xd->mi[0]->mbmi.tx_size = TX_16X16;
-    }
+    if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ &&
+        cyclic_refresh_segment_id_boosted(xd->mi[0]->mbmi.segment_id))
+      xd->mi[0]->mbmi.tx_size = TX_8X8;
+    else if (xd->mi[0]->mbmi.tx_size > TX_16X16)
+      xd->mi[0]->mbmi.tx_size = TX_16X16;
   } else {
     xd->mi[0]->mbmi.tx_size =
         MIN(max_txsize_lookup[bsize],
@@ -1081,9 +1077,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
   unsigned int var_y = UINT_MAX;
   unsigned int sse_y = UINT_MAX;
   // Reduce the intra cost penalty for small blocks (<=16x16).
-  const int reduction_fac =
-      (cpi->sf.partition_search_type == VAR_BASED_PARTITION &&
-       bsize <= BLOCK_16X16) ? ((bsize <= BLOCK_8X8) ? 4 : 2) : 0;
+  const int reduction_fac = (bsize <= BLOCK_16X16) ?
+      ((bsize <= BLOCK_8X8) ? 4 : 2) : 0;
   const int intra_cost_penalty = vp9_get_intra_cost_penalty(
       cm->base_qindex, cm->y_dc_delta_q, cm->bit_depth) >> reduction_fac;
   const int64_t inter_mode_thresh = RDCOST(x->rdmult, x->rddiv,
