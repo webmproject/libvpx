@@ -16,6 +16,24 @@
       "revId": "c3bdffb0a508ad08d5dfa613c029f368d4293d4c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed56c9ec_9432461f",
+        "filename": "vpx_dsp/arm/variance_neon.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-05-29T17:28:04Z",
+      "side": 1,
+      "message": "Argh I lost then when concatenating files",
+      "parentUuid": "b9f6d849_526dc27b",
+      "revId": "c3bdffb0a508ad08d5dfa613c029f368d4293d4c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
