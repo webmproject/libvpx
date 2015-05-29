@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "b91fb853_be0f38e4",
+        "filename": "vp9/common/arm/neon/vp9_reconintra_neon.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-05-29T21:26:13Z",
+      "side": 1,
+      "message": "there is a __builtin_expect for gcc, but it\u0027ll probably be easier (and more compatible) to add the ints back in addition to the extra pointers. thanks for mentioning it, I was just doing a blind port...",
+      "parentUuid": "ed56c9ec_d48e8efe",
+      "revId": "af9bb19f90433ee350acb9a1810dd2ccb2d6f2b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d54fde2_b7bd98a4",
         "filename": "vp9/common/arm/neon/vp9_reconintra_neon.c",
         "patchSetId": 1
