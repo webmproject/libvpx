@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b9f6d849_9d3003f2",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-05-29T01:23:17Z",
+      "side": 1,
+      "message": "s/because//",
+      "revId": "8de18eb0ce67512e4faee88e74ed1df7861ba391",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b9f6d849_3dd7afec",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-05-29T01:23:17Z",
+      "side": 1,
+      "message": "did you run this locally?",
+      "revId": "8de18eb0ce67512e4faee88e74ed1df7861ba391",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed56c9ec_19f05491",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 663,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-05-29T01:23:17Z",
+      "side": 1,
+      "message": "it probably makes sense to scale these as well, no?",
+      "revId": "8de18eb0ce67512e4faee88e74ed1df7861ba391",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d54fde2_cb243fac",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 1166,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-05-29T01:23:17Z",
+      "side": 1,
+      "message": "you can join some of these lines now",
+      "revId": "8de18eb0ce67512e4faee88e74ed1df7861ba391",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed56c9ec_39499842",
+        "filename": "vp9/common/vp9_filter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-05-29T01:23:17Z",
+      "side": 1,
+      "message": "this should be a TODO if you intend to remove it in a follow-up",
+      "revId": "8de18eb0ce67512e4faee88e74ed1df7861ba391",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d54fde2_eb7ca36f",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-05-29T01:23:17Z",
+      "side": 1,
+      "message": "no change necessary now, but sp is pretty undescriptive",
+      "revId": "8de18eb0ce67512e4faee88e74ed1df7861ba391",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
