@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "0d54fde2_78a23cab",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-05-29T23:44:48Z",
+      "side": 1,
+      "message": "Removing because made the rest nonsensical, so there were more modifications.",
+      "parentUuid": "b9f6d849_9d3003f2",
+      "revId": "8de18eb0ce67512e4faee88e74ed1df7861ba391",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b9f6d849_3dd7afec",
         "filename": "test/variance_test.cc",
         "patchSetId": 3
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "b91fb853_c8e11294",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-05-29T23:44:48Z",
+      "side": 1,
+      "message": "yup. no build warnings, all variance tests pass.",
+      "parentUuid": "b9f6d849_3dd7afec",
+      "revId": "8de18eb0ce67512e4faee88e74ed1df7861ba391",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ed56c9ec_19f05491",
         "filename": "test/variance_test.cc",
         "patchSetId": 3
@@ -47,6 +83,24 @@
       "writtenOn": "2015-05-29T01:23:17Z",
       "side": 1,
       "message": "it probably makes sense to scale these as well, no?",
+      "revId": "8de18eb0ce67512e4faee88e74ed1df7861ba391",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b91fb853_2802c6c6",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 663,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-05-29T23:44:48Z",
+      "side": 1,
+      "message": "moved the calculation to the function to avoid confusion between \"well it was xoffset \u003d 2 in the assembly, why doesn\u0027t that match xoffset \u003d 2 in the C\"",
+      "parentUuid": "ed56c9ec_19f05491",
       "revId": "8de18eb0ce67512e4faee88e74ed1df7861ba391",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +141,24 @@
     },
     {
       "key": {
+        "uuid": "ed56c9ec_63660129",
+        "filename": "vp9/common/vp9_filter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-05-29T23:44:48Z",
+      "side": 1,
+      "message": "It\u0027s more of a note in case someone stumbles across the code and is thinking of using it for something.",
+      "parentUuid": "ed56c9ec_39499842",
+      "revId": "8de18eb0ce67512e4faee88e74ed1df7861ba391",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d54fde2_eb7ca36f",
         "filename": "vp9/encoder/vp9_mcomp.c",
         "patchSetId": 3
@@ -98,6 +170,24 @@
       "writtenOn": "2015-05-29T01:23:17Z",
       "side": 1,
       "message": "no change necessary now, but sp is pretty undescriptive",
+      "revId": "8de18eb0ce67512e4faee88e74ed1df7861ba391",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d54fde2_38b8b4d7",
+        "filename": "vp9/encoder/vp9_mcomp.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-05-29T23:44:48Z",
+      "side": 1,
+      "message": "Absolutely agree.",
+      "parentUuid": "0d54fde2_eb7ca36f",
       "revId": "8de18eb0ce67512e4faee88e74ed1df7861ba391",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
