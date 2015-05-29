@@ -14,6 +14,7 @@
 #include "./vpx_config.h"
 
 #include "vpx/vpx_integer.h"
+#include "vpx_ports/mem.h"
 
 static INLINE int horizontal_add_s16x8(const int16x8_t v_16x8) {
   const int32x4_t a = vpaddlq_s16(v_16x8);
