@@ -2603,6 +2603,12 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
   if (EOF == input_stats(twopass, &this_frame))
     return;
 
+  // Set the frame content type flag.
+  if (this_frame.ul_intra_pct >= FC_ANIMATION_THRESH)
+    twopass->fr_content_type = FC_GRAPHICS_ANIMATION;
+  else
+    twopass->fr_content_type = FC_NORMAL;
+
   // Keyframe and section processing.
   if (rc->frames_to_key == 0 || (cpi->frame_flags & FRAMEFLAGS_KEY)) {
     FIRSTPASS_STATS this_frame_copy;

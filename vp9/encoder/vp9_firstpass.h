@@ -75,6 +75,13 @@ typedef enum {
   FRAME_UPDATE_TYPES = 5
 } FRAME_UPDATE_TYPE;
 
+#define FC_ANIMATION_THRESH 0.15
+typedef enum {
+  FC_NORMAL = 0,
+  FC_GRAPHICS_ANIMATION = 1,
+  FRAME_CONTENT_TYPES = 2
+} FRAME_CONTENT_TYPE;
+
 typedef struct {
   unsigned char index;
   RATE_FACTOR_LEVEL rf_level[(MAX_LAG_BUFFERS * 2) + 1];
@@ -105,6 +112,8 @@ typedef struct {
   uint8_t *this_frame_mb_stats;
   FIRSTPASS_MB_STATS firstpass_mb_stats;
 #endif
+  // An indication of the content type of the current frame
+  FRAME_CONTENT_TYPE fr_content_type;
 
   // Projected total bits available for a key frame group of frames
   int64_t kf_group_bits;

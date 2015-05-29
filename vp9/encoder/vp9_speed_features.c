@@ -41,9 +41,11 @@ static BLOCK_SIZE set_partition_min_limit(VP9_COMMON *const cm) {
   }
 }
 
-static void set_good_speed_feature_framesize_dependent(VP9_COMMON *cm,
+static void set_good_speed_feature_framesize_dependent(VP9_COMP *cpi,
                                                        SPEED_FEATURES *sf,
                                                        int speed) {
+  VP9_COMMON *const cm = &cpi->common;
+
   if (speed >= 1) {
     if (MIN(cm->width, cm->height) >= 720) {
       sf->disable_split_mask = cm->show_frame ? DISABLE_ALL_SPLIT
@@ -83,6 +85,13 @@ static void set_good_speed_feature_framesize_dependent(VP9_COMMON *cm,
       sf->partition_search_breakout_dist_thr = (1 << 23);
       sf->partition_search_breakout_rate_thr = 120;
     }
+  }
+
+  // If this is a two pass clip that fits the criteria for animated or
+  // graphics content then reset disable_split_mask for speeds 1-4.
+  if ((speed >= 1) && (cpi->oxcf.pass == 2) &&
+      (cpi->twopass.fr_content_type == FC_GRAPHICS_ANIMATION)) {
+    sf->disable_split_mask = DISABLE_COMPOUND_SPLIT;
   }
 
   if (speed >= 4) {
@@ -382,7 +391,6 @@ static void set_rt_speed_feature(VP9_COMP *cpi, SPEED_FEATURES *sf,
 
 void vp9_set_speed_features_framesize_dependent(VP9_COMP *cpi) {
   SPEED_FEATURES *const sf = &cpi->sf;
-  VP9_COMMON *const cm = &cpi->common;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
   RD_OPT *const rd = &cpi->rd;
   int i;
@@ -390,7 +398,7 @@ void vp9_set_speed_features_framesize_dependent(VP9_COMP *cpi) {
   if (oxcf->mode == REALTIME) {
     set_rt_speed_feature_framesize_dependent(cpi, sf, oxcf->speed);
   } else if (oxcf->mode == GOOD) {
-    set_good_speed_feature_framesize_dependent(cm, sf, oxcf->speed);
+    set_good_speed_feature_framesize_dependent(cpi, sf, oxcf->speed);
   }
 
   if (sf->disable_split_mask == DISABLE_ALL_SPLIT) {
