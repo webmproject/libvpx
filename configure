@@ -300,6 +300,7 @@ EXPERIMENT_LIST="
     new_inter
     bitstream_fixes
     newmvref
+    misc_entropy
 "
 CONFIG_LIST="
     external_build
