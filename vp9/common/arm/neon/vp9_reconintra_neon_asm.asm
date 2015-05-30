@@ -345,8 +345,7 @@ loop_h
 |vp9_tm_predictor_8x8_neon| PROC
     ; Load ytop_left = above[-1];
     sub                 r12, r2, #1
-    ldrb                r12, [r12]
-    vdup.u8             d0, r12
+    vld1.8              {d0[]}, [r12]
 
     ; preload 8 left
     vld1.8              {d30}, [r3]
@@ -418,8 +417,7 @@ loop_h
 |vp9_tm_predictor_16x16_neon| PROC
     ; Load ytop_left = above[-1];
     sub                 r12, r2, #1
-    ldrb                r12, [r12]
-    vdup.u8             q0, r12
+    vld1.8              {d0[]}, [r12]
 
     ; Load above 8 pixels
     vld1.8              {q1}, [r2]
@@ -429,7 +427,7 @@ loop_h
 
     ; Compute above - ytop_left
     vsubl.u8            q2, d2, d0
-    vsubl.u8            q3, d3, d1
+    vsubl.u8            q3, d3, d0
 
     vmovl.u8            q10, d18
 
@@ -512,8 +510,7 @@ loop_16x16_neon
 |vp9_tm_predictor_32x32_neon| PROC
     ; Load ytop_left = above[-1];
     sub                 r12, r2, #1
-    ldrb                r12, [r12]
-    vdup.u8             q0, r12
+    vld1.8              {d0[]}, [r12]
 
     ; Load above 32 pixels
     vld1.8              {q1}, [r2]!
@@ -524,9 +521,9 @@ loop_16x16_neon
 
     ; Compute above - ytop_left
     vsubl.u8            q8, d2, d0
-    vsubl.u8            q9, d3, d1
+    vsubl.u8            q9, d3, d0
     vsubl.u8            q10, d4, d0
-    vsubl.u8            q11, d5, d1
+    vsubl.u8            q11, d5, d0
 
     vmovl.u8            q3, d26
 
