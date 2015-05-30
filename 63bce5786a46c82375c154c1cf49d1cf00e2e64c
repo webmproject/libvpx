@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ed56c9ec_dd4225fe",
+        "filename": "vp9/common/vp9_reconintra.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 405,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-05-30T19:53:02Z",
+      "side": 1,
+      "message": "note there are a few extra calculations here. this is a faithful translation from the rfc, but in practice E-H \u003d\u003d D",
+      "revId": "63bce5786a46c82375c154c1cf49d1cf00e2e64c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
