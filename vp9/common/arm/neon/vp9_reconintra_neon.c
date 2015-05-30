@@ -359,7 +359,7 @@ void vp9_tm_predictor_4x4_neon(uint8_t *dst, ptrdiff_t stride,
   uint8x8_t d0u8 = vdup_n_u8(0);
   uint32x2_t d2u32 = vdup_n_u32(0);
 
-  d0u8 = vdup_n_u8(above[-1]);
+  d0u8 = vld1_dup_u8(above - 1);
   d2u32 = vld1_lane_u32((const uint32_t *)above, d2u32, 0);
   q3u16 = vsubl_u8(vreinterpret_u8_u32(d2u32), d0u8);
   for (i = 0; i < 4; i++, dst += stride) {
@@ -379,7 +379,7 @@ void vp9_tm_predictor_8x8_neon(uint8_t *dst, ptrdiff_t stride,
   uint16x4_t d20u16;
   uint8x8_t d0u8, d2u8, d30u8;
 
-  d0u8 = vdup_n_u8(above[-1]);
+  d0u8 = vld1_dup_u8(above - 1);
   d30u8 = vld1_u8(left);
   d2u8 = vld1_u8(above);
   q10u16 = vmovl_u8(d30u8);
@@ -422,7 +422,7 @@ void vp9_tm_predictor_16x16_neon(uint8_t *dst, ptrdiff_t stride,
   uint16x4_t d20u16;
   uint8x8_t d2u8, d3u8, d18u8, d22u8, d23u8;
 
-  q0u8 = vdupq_n_u8(above[-1]);
+  q0u8 = vld1q_dup_u8(above - 1);
   q1u8 = vld1q_u8(above);
   q2u16 = vsubl_u8(vget_low_u8(q1u8), vget_low_u8(q0u8));
   q3u16 = vsubl_u8(vget_high_u8(q1u8), vget_high_u8(q0u8));
@@ -485,7 +485,7 @@ void vp9_tm_predictor_32x32_neon(uint8_t *dst, ptrdiff_t stride,
   uint16x4_t d6u16;
   uint8x8_t d0u8, d1u8, d2u8, d3u8, d26u8;
 
-  q0u8 = vdupq_n_u8(above[-1]);
+  q0u8 = vld1q_dup_u8(above - 1);
   q1u8 = vld1q_u8(above);
   q2u8 = vld1q_u8(above + 16);
   q8u16 = vsubl_u8(vget_low_u8(q1u8), vget_low_u8(q0u8));
