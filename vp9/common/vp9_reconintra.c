@@ -79,10 +79,24 @@ static const uint8_t extend_modes[INTRA_MODES] = {
   intra_pred_highbd_sized(type, 16) \
   intra_pred_highbd_sized(type, 32)
 
+#define intra_pred_no_4x4(type) \
+  intra_pred_sized(type, 8) \
+  intra_pred_sized(type, 16) \
+  intra_pred_sized(type, 32) \
+  intra_pred_highbd_sized(type, 4) \
+  intra_pred_highbd_sized(type, 8) \
+  intra_pred_highbd_sized(type, 16) \
+  intra_pred_highbd_sized(type, 32)
+
 #else
 
 #define intra_pred_allsizes(type) \
   intra_pred_sized(type, 4) \
+  intra_pred_sized(type, 8) \
+  intra_pred_sized(type, 16) \
+  intra_pred_sized(type, 32)
+
+#define intra_pred_no_4x4(type) \
   intra_pred_sized(type, 8) \
   intra_pred_sized(type, 16) \
   intra_pred_sized(type, 32)
@@ -345,6 +359,9 @@ static INLINE void highbd_dc_predictor(uint16_t *dst, ptrdiff_t stride,
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
+#define DST(x, y) dst[(x) + (y) * stride]
+#define AVG3(a, b, c) (((a) + 2 * (b) + (c) + 2) >> 2)
+
 static INLINE void d207_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
                                   const uint8_t *above, const uint8_t *left) {
   int r, c;
@@ -390,6 +407,27 @@ static INLINE void d63_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
 }
 intra_pred_allsizes(d63)
 
+void vp9_d45_predictor_4x4_c(uint8_t *dst, ptrdiff_t stride,
+                             const uint8_t *above, const uint8_t *left) {
+  const int A = above[0];
+  const int B = above[1];
+  const int C = above[2];
+  const int D = above[3];
+  const int E = above[4];
+  const int F = above[5];
+  const int G = above[6];
+  const int H = above[7];
+  (void)stride;
+  (void)left;
+  DST(0, 0)                                     = AVG3(A, B, C);
+  DST(1, 0) = DST(0, 1)                         = AVG3(B, C, D);
+  DST(2, 0) = DST(1, 1) = DST(0, 2)             = AVG3(C, D, E);
+  DST(3, 0) = DST(2, 1) = DST(1, 2) = DST(0, 3) = AVG3(D, E, F);
+              DST(3, 1) = DST(2, 2) = DST(1, 3) = AVG3(E, F, G);
+                          DST(3, 2) = DST(2, 3) = AVG3(F, G, H);
+                                      DST(3, 3) = AVG3(G, H, H);
+}
+
 static INLINE void d45_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
                                  const uint8_t *above, const uint8_t *left) {
   int r, c;
@@ -403,7 +441,7 @@ static INLINE void d45_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
     dst += stride;
   }
 }
-intra_pred_allsizes(d45)
+intra_pred_no_4x4(d45)
 
 static INLINE void d117_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
                                   const uint8_t *above, const uint8_t *left) {
