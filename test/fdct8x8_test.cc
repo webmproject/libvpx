@@ -782,7 +782,8 @@ INSTANTIATE_TEST_CASE_P(
                    VPX_BITS_8)));
 #endif
 
-#if HAVE_MSA && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+#if 0  // HAVE_MSA && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
+// TODO(parag): enable when function hooks are added
 INSTANTIATE_TEST_CASE_P(
     MSA, FwdTrans8x8DCT,
     ::testing::Values(
