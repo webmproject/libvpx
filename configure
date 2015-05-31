@@ -303,6 +303,7 @@ EXPERIMENT_LIST="
     misc_entropy
     wavelets
     ext_partition
+    qctx_tprobs
 "
 CONFIG_LIST="
     external_build
