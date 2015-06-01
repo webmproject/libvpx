@@ -469,6 +469,7 @@ static const arg_def_t *no_args[] = { NULL };
 
 void usage_exit(void) {
   int i;
+  const int num_encoder = get_vpx_encoder_count();
 
   fprintf(stderr, "Usage: %s <options> -o dst_filename src_filename \n",
           exec_name);
@@ -496,11 +497,15 @@ void usage_exit(void) {
           "  in fractional seconds. Default is 1/1000.\n");
   fprintf(stderr, "\nIncluded encoders:\n\n");
 
-  for (i = 0; i < get_vpx_encoder_count(); ++i) {
+  for (i = 0; i < num_encoder; ++i) {
     const VpxInterface *const encoder = get_vpx_encoder_by_index(i);
-    fprintf(stderr, "    %-6s - %s\n",
-            encoder->name, vpx_codec_iface_name(encoder->codec_interface()));
+    const char* defstr = (i == (num_encoder - 1)) ? "(default)" : "";
+      fprintf(stderr, "    %-6s - %s %s\n",
+              encoder->name, vpx_codec_iface_name(encoder->codec_interface()),
+              defstr);
   }
+  fprintf(stderr, "\n        ");
+  fprintf(stderr, "Use --codec to switch to a non-default encoder.\n\n");
 
   exit(EXIT_FAILURE);
 }
@@ -811,10 +816,14 @@ static void validate_positive_rational(const char          *msg,
 static void parse_global_config(struct VpxEncoderConfig *global, char **argv) {
   char       **argi, **argj;
   struct arg   arg;
+  const int num_encoder = get_vpx_encoder_count();
+
+  if (num_encoder < 1)
+    die("Error: no valid encoder available\n");
 
   /* Initialize default parameters */
   memset(global, 0, sizeof(*global));
-  global->codec = get_vpx_encoder_by_index(0);
+  global->codec = get_vpx_encoder_by_index(num_encoder - 1);
   global->passes = 0;
   global->color_type = I420;
   /* Assign default deadline to good quality */
