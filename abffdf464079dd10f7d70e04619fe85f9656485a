@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3914a832_0296d01c",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-06-01T15:17:55Z",
+      "side": 1,
+      "message": "Yes, it would seem so.  Done.\n\nProbably can do the same with cm-\u003euse_highbitdepth.  But not in this patch.  :-)",
+      "parentUuid": "b91fb853_e6abde0a",
+      "revId": "abffdf464079dd10f7d70e04619fe85f9656485a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d54fde2_7305fdcb",
         "filename": "vp9/common/vp9_onyxc_int.h",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2015-05-30T02:28:51Z",
       "side": 1,
       "message": "this assumption is certainly used elsewhere, but I think you can check the plane_type here for clarity (though that itself might be unnecessary if we codify 0\u003dY).",
+      "revId": "abffdf464079dd10f7d70e04619fe85f9656485a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3914a832_8269c0a4",
+        "filename": "vp9/common/vp9_onyxc_int.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 337,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-06-01T15:17:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0d54fde2_7305fdcb",
       "revId": "abffdf464079dd10f7d70e04619fe85f9656485a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
