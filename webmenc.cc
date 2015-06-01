@@ -24,7 +24,8 @@ void write_webm_file_header(struct EbmlGlobal *glob,
                             const vpx_codec_enc_cfg_t *cfg,
                             const struct vpx_rational *fps,
                             stereo_format_t stereo_fmt,
-                            unsigned int fourcc) {
+                            unsigned int fourcc,
+                            const struct VpxRational *par) {
   mkvmuxer::MkvWriter *const writer = new mkvmuxer::MkvWriter(glob->stream);
   mkvmuxer::Segment *const segment = new mkvmuxer::Segment();
   segment->Init(writer);
@@ -49,6 +50,15 @@ void write_webm_file_header(struct EbmlGlobal *glob,
           segment->GetTrackByNumber(video_track_id));
   video_track->SetStereoMode(stereo_fmt);
   video_track->set_codec_id(fourcc == VP8_FOURCC ? "V_VP8" : "V_VP9");
+  if (par->numerator > 1 || par->denominator > 1) {
+    // TODO(fgalligan): Add support of DisplayUnit, Display Aspect Ratio type
+    // to WebM format.
+    const uint64_t display_width =
+        static_cast<uint64_t>(((cfg->g_w * par->numerator * 1.0) /
+                               par->denominator) + .5);
+    video_track->set_display_width(display_width);
+    video_track->set_display_height(cfg->g_h);
+  }
   if (glob->debug) {
     video_track->set_uid(kDebugTrackUid);
   }

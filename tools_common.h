@@ -89,6 +89,7 @@ struct VpxInputContext {
   enum VideoFileType file_type;
   uint32_t width;
   uint32_t height;
+  struct VpxRational pixel_aspect_ratio;
   vpx_img_fmt_t fmt;
   vpx_bit_depth_t bit_depth;
   int only_i420;

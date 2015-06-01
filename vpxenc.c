@@ -944,6 +944,10 @@ static void open_input_file(struct VpxInputContext *input) {
     rewind(input->file);
   }
 
+  /* Default to 1:1 pixel aspect ratio. */
+  input->pixel_aspect_ratio.numerator = 1;
+  input->pixel_aspect_ratio.denominator = 1;
+
   /* For RAW input sources, these bytes will applied on the first frame
    *  in read_frame().
    */
@@ -957,6 +961,8 @@ static void open_input_file(struct VpxInputContext *input) {
       input->file_type = FILE_TYPE_Y4M;
       input->width = input->y4m.pic_w;
       input->height = input->y4m.pic_h;
+      input->pixel_aspect_ratio.numerator = input->y4m.par_n;
+      input->pixel_aspect_ratio.denominator = input->y4m.par_d;
       input->framerate.numerator = input->y4m.fps_n;
       input->framerate.denominator = input->y4m.fps_d;
       input->fmt = input->y4m.vpx_fmt;
@@ -1390,7 +1396,8 @@ static void show_stream_config(struct stream_state *stream,
 
 
 static void open_output_file(struct stream_state *stream,
-                             struct VpxEncoderConfig *global) {
+                             struct VpxEncoderConfig *global,
+                             const struct VpxRational *pixel_aspect_ratio) {
   const char *fn = stream->config.out_fn;
   const struct vpx_codec_enc_cfg *const cfg = &stream->config.cfg;
 
@@ -1411,7 +1418,8 @@ static void open_output_file(struct stream_state *stream,
     write_webm_file_header(&stream->ebml, cfg,
                            &global->framerate,
                            stream->config.stereo_fmt,
-                           global->codec->fourcc);
+                           global->codec->fourcc,
+                           pixel_aspect_ratio);
   }
 #endif
 
@@ -2044,7 +2052,8 @@ int main(int argc, const char **argv_) {
     }
 
     FOREACH_STREAM(setup_pass(stream, &global, pass));
-    FOREACH_STREAM(open_output_file(stream, &global));
+    FOREACH_STREAM(open_output_file(stream, &global,
+                                    &input.pixel_aspect_ratio));
     FOREACH_STREAM(initialize_encoder(stream, &global));
 
 #if CONFIG_VP9 && CONFIG_VP9_HIGHBITDEPTH
