@@ -1,0 +1,544 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0d54fde2_2feb09aa",
+        "filename": "examples/vp9_spatial_svc_encoder.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 483,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-01T20:02:52Z",
+      "side": 1,
+      "message": "spacing",
+      "range": {
+        "startLine": 483,
+        "startChar": 43,
+        "endLine": 483,
+        "endChar": 49
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b91fb853_3da6810f",
+        "filename": "examples/vp9_spatial_svc_encoder.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 636,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-01T20:02:52Z",
+      "side": 1,
+      "message": "spacing. this (switch to real-time) should also be condition on one-pass",
+      "range": {
+        "startLine": 636,
+        "startChar": 53,
+        "endLine": 636,
+        "endChar": 54
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d54fde2_efd9011d",
+        "filename": "examples/vp9_spatial_svc_encoder.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 656,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-01T20:02:52Z",
+      "side": 1,
+      "message": "maybe put this code (656 - 728) into separate function?\ncan leave it as TODO for now.",
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b91fb853_384a0fd8",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 693,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-01T20:02:52Z",
+      "side": 1,
+      "message": "align comment spacing",
+      "range": {
+        "startLine": 693,
+        "startChar": 48,
+        "endLine": 693,
+        "endChar": 57
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d54fde2_0f99e5c2",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 708,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-01T20:02:52Z",
+      "side": 1,
+      "message": "fix comment",
+      "range": {
+        "startLine": 708,
+        "startChar": 30,
+        "endLine": 708,
+        "endChar": 33
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d54fde2_321a8c27",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-01T20:02:52Z",
+      "side": 1,
+      "message": "remove this or add TODO?",
+      "range": {
+        "startLine": 243,
+        "startChar": 7,
+        "endLine": 243,
+        "endChar": 13
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d54fde2_924258fd",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 770,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-01T20:02:52Z",
+      "side": 1,
+      "message": "can we remove this first condition: (cpi-\u003esvc.number_temporal_layers \u003e 1 \u0026\u0026 cpi-\u003eoxcf.rc_mode \u003d\u003d VPX_CBR)",
+      "range": {
+        "startLine": 770,
+        "startChar": 16,
+        "endLine": 770,
+        "endChar": 38
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b91fb853_4cce2cd4",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 2273,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-01T20:02:52Z",
+      "side": 1,
+      "message": "spacing",
+      "range": {
+        "startLine": 2273,
+        "startChar": 7,
+        "endLine": 2273,
+        "endChar": 9
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7919c071_0d4a85d7",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 2273,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-01T20:02:52Z",
+      "side": 1,
+      "message": "should this be the spatio-temporal layer \u003d LAYER_IDS_TO_IDX().?",
+      "range": {
+        "startLine": 2273,
+        "startChar": 13,
+        "endLine": 2273,
+        "endChar": 35
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d9fb8c32_fba1482d",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 3671,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-01T20:02:52Z",
+      "side": 1,
+      "message": "should this be: layer_id \u003d LAYER_IDS_TO_IDX(..)",
+      "range": {
+        "startLine": 3671,
+        "startChar": 36,
+        "endLine": 3671,
+        "endChar": 52
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b91fb853_0f002631",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 1461,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-01T20:02:52Z",
+      "side": 1,
+      "message": "use layer \u003d LAYER_IDS_TO_IDX()...",
+      "range": {
+        "startLine": 1461,
+        "startChar": 37,
+        "endLine": 1461,
+        "endChar": 45
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed56c9ec_ec8bb91e",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 1512,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-01T20:02:52Z",
+      "side": 1,
+      "message": "this is common to both one and two pass, so can pull it out.",
+      "range": {
+        "startLine": 1512,
+        "startChar": 18,
+        "endLine": 1512,
+        "endChar": 31
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d54fde2_b253dc6e",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 1531,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-01T20:02:52Z",
+      "side": 1,
+      "message": "the lines 1531-1537 are common to both one and two pass, so can pull it out",
+      "range": {
+        "startLine": 1531,
+        "startChar": 32,
+        "endLine": 1531,
+        "endChar": 35
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d54fde2_40ae5a99",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-01T20:02:52Z",
+      "side": 1,
+      "message": "can this be just: return \u0026cpi-\u003esvc.layer_context[cpi-\u003esvc.spatial_layer_id];",
+      "range": {
+        "startLine": 203,
+        "startChar": 30,
+        "endLine": 203,
+        "endChar": 32
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d929cc86_91de9ef9",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 295,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-01T20:02:52Z",
+      "side": 1,
+      "message": "should this be: spatio-temporal \"layer_id\"",
+      "range": {
+        "startLine": 295,
+        "startChar": 39,
+        "endLine": 295,
+        "endChar": 61
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f942104b_5255d2c9",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 503,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-01T20:02:52Z",
+      "side": 1,
+      "message": "add assert here that #spatial_layers \u003d 1",
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d54fde2_6f70b189",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 908,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-01T20:02:52Z",
+      "side": 1,
+      "message": "spacing",
+      "range": {
+        "startLine": 908,
+        "startChar": 42,
+        "endLine": 908,
+        "endChar": 58
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed56c9ec_066a9e60",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 909,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-01T20:02:52Z",
+      "side": 1,
+      "message": "check: should this be: cpi-\u003esvc.layer_context[cpi-\u003esvc.number_temporal_layers] ?",
+      "range": {
+        "startLine": 909,
+        "startChar": 42,
+        "endLine": 909,
+        "endChar": 64
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed56c9ec_06b37e7c",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 1028,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-01T20:02:52Z",
+      "side": 1,
+      "message": "check: should this be: cpi-\u003esvc.layer_context[cpi-\u003esvc.spatial_layer_id * cpi-\u003esvc.number_temporal_layers + cpi-\u003esvc.temporal_layer_id] ?",
+      "range": {
+        "startLine": 1028,
+        "startChar": 23,
+        "endLine": 1028,
+        "endChar": 45
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d9fb8c32_9b8244d9",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 1034,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-01T20:02:52Z",
+      "side": 1,
+      "message": "spacing",
+      "range": {
+        "startLine": 1034,
+        "startChar": 51,
+        "endLine": 1034,
+        "endChar": 72
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed56c9ec_86768e05",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 418,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-01T20:02:52Z",
+      "side": 1,
+      "message": "should be? if (svc_ctx-\u003etemporal_layering_mode \u003d\u003d 3)",
+      "range": {
+        "startLine": 418,
+        "startChar": 15,
+        "endLine": 418,
+        "endChar": 37
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b91fb853_98b6c37a",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 422,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-01T20:02:52Z",
+      "side": 1,
+      "message": "add case for temporal_layering_mode \u003d\u003d 1",
+      "range": {
+        "startLine": 422,
+        "startChar": 2,
+        "endLine": 422,
+        "endChar": 3
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed56c9ec_a6cd5238",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 24
+      },
+      "lineNbr": 514,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-01T20:02:52Z",
+      "side": 1,
+      "message": "the control function for this has been put in this patch, so we can remove this here. It is currently set through the cfg.",
+      "range": {
+        "startLine": 514,
+        "startChar": 34,
+        "endLine": 514,
+        "endChar": 35
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b91fb853_b805ff4b",
+        "filename": "vpx/vpx_encoder.h",
+        "patchSetId": 24
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-01T20:02:52Z",
+      "side": 1,
+      "message": "order: put VPX_MAX_LAYERS before MAX_LAYERS, and change comment to: /*!\\deprecated Use #VPX_MAX_LAYERS instead. */",
+      "range": {
+        "startLine": 45,
+        "startChar": 22,
+        "endLine": 45,
+        "endChar": 39
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
