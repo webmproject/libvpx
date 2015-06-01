@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0d54fde2_60543eda",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-01T19:46:58Z",
+      "side": 1,
+      "message": "this is better written as static_cast\u003cuint32_t\u003e(). also in general no space after the cast",
+      "revId": "fdc549994a5f6eb3ba24fd18d3b1712199ee4755",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d54fde2_e0402e16",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-01T19:46:58Z",
+      "side": 1,
+      "message": "maybe change the signature to use uint32_t for consistency; there are others here too...",
+      "revId": "fdc549994a5f6eb3ba24fd18d3b1712199ee4755",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
