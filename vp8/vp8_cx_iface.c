@@ -135,7 +135,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
     RANGE_CHECK(cfg, g_w,                   1, 16383); /* 14 bits available */
     RANGE_CHECK(cfg, g_h,                   1, 16383); /* 14 bits available */
     RANGE_CHECK(cfg, g_timebase.den,        1, 1000000000);
-    RANGE_CHECK(cfg, g_timebase.num,        1, cfg->g_timebase.den);
+    RANGE_CHECK(cfg, g_timebase.num,        1, 1000000000);
     RANGE_CHECK_HI(cfg, g_profile,          3);
     RANGE_CHECK_HI(cfg, rc_max_quantizer,   63);
     RANGE_CHECK_HI(cfg, rc_min_quantizer,   cfg->rc_max_quantizer);
