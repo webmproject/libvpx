@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d929cc86_82508adc",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 475,
+      "author": {
+        "id": 1129385
+      },
+      "writtenOn": "2015-06-01T21:32:27Z",
+      "side": 0,
+      "message": "Please keep this. We will use extra_cfg-\u003eenable_auto_alt_ref for two pass temporal svc settings.",
+      "range": {
+        "startLine": 475,
+        "startChar": 4,
+        "endLine": 475,
+        "endChar": 64
+      },
+      "revId": "71e88f903d04693b18bf0eff3917544525452649",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
