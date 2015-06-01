@@ -68,11 +68,11 @@ static unsigned int mb_ss_ref(const int16_t *src) {
   return res;
 }
 
-static unsigned int variance_ref(const uint8_t *src, const uint8_t *ref,
-                                 int l2w, int l2h, int src_stride_coeff,
-                                 int ref_stride_coeff, uint32_t *sse_ptr,
-                                 bool use_high_bit_depth_,
-                                 vpx_bit_depth_t bit_depth) {
+static uint32_t variance_ref(const uint8_t *src, const uint8_t *ref,
+                             int l2w, int l2h, int src_stride_coeff,
+                             int ref_stride_coeff, uint32_t *sse_ptr,
+                             bool use_high_bit_depth_,
+                             vpx_bit_depth_t bit_depth) {
   int64_t se = 0;
   uint64_t sse = 0;
   const int w = 1 << l2w;
@@ -96,15 +96,17 @@ static unsigned int variance_ref(const uint8_t *src, const uint8_t *ref,
     }
   }
   RoundHighBitDepth(bit_depth, &se, &sse);
-  *sse_ptr = (uint32_t) sse;
-  return (unsigned int) (sse - (((int64_t) se * se) >> (l2w + l2h)));
+  *sse_ptr = static_cast<uint32_t>(sse);
+  return static_cast<uint32_t>(sse -
+                               ((static_cast<int64_t>(se) * se) >>
+                                (l2w + l2h)));
 }
 
-static unsigned int subpel_variance_ref(const uint8_t *ref, const uint8_t *src,
-                                        int l2w, int l2h, int xoff, int yoff,
-                                        unsigned int *sse_ptr,
-                                        bool use_high_bit_depth_,
-                                        vpx_bit_depth_t bit_depth) {
+static uint32_t subpel_variance_ref(const uint8_t *ref, const uint8_t *src,
+                                    int l2w, int l2h, int xoff, int yoff,
+                                    uint32_t *sse_ptr,
+                                    bool use_high_bit_depth_,
+                                    vpx_bit_depth_t bit_depth) {
   int64_t se = 0;
   uint64_t sse = 0;
   const int w = 1 << l2w;
@@ -142,8 +144,10 @@ static unsigned int subpel_variance_ref(const uint8_t *ref, const uint8_t *src,
     }
   }
   RoundHighBitDepth(bit_depth, &se, &sse);
-  *sse_ptr = (unsigned int) sse;
-  return (unsigned int) (sse - (((int64_t) se * se) >> (l2w + l2h)));
+  *sse_ptr = static_cast<uint32_t>(sse);
+  return static_cast<uint32_t>(sse -
+                               ((static_cast<int64_t>(se) * se) >>
+                                (l2w + l2h)));
 }
 
 typedef unsigned int (*SumOfSquaresFunction)(const int16_t *src);
@@ -464,14 +468,14 @@ void MseTest<MseFunctionType>::MaxTest_sse() {
   EXPECT_EQ(expected, var);
 }
 
-unsigned int subpel_avg_variance_ref(const uint8_t *ref,
-                                     const uint8_t *src,
-                                     const uint8_t *second_pred,
-                                     int l2w, int l2h,
-                                     int xoff, int yoff,
-                                     unsigned int *sse_ptr,
-                                     bool use_high_bit_depth,
-                                     vpx_bit_depth_t bit_depth) {
+static uint32_t subpel_avg_variance_ref(const uint8_t *ref,
+                                        const uint8_t *src,
+                                        const uint8_t *second_pred,
+                                        int l2w, int l2h,
+                                        int xoff, int yoff,
+                                        uint32_t *sse_ptr,
+                                        bool use_high_bit_depth,
+                                        vpx_bit_depth_t bit_depth) {
   int64_t se = 0;
   uint64_t sse = 0;
   const int w = 1 << l2w;
@@ -510,8 +514,10 @@ unsigned int subpel_avg_variance_ref(const uint8_t *ref,
     }
   }
   RoundHighBitDepth(bit_depth, &se, &sse);
-  *sse_ptr = (unsigned int) sse;
-  return (unsigned int) (sse - (((int64_t) se * se) >> (l2w + l2h)));
+  *sse_ptr = static_cast<uint32_t>(sse);
+  return static_cast<uint32_t>(sse -
+                               ((static_cast<int64_t>(se) * se) >>
+                                (l2w + l2h)));
 }
 
 template<typename SubpelVarianceFunctionType>
