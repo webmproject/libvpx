@@ -96,8 +96,8 @@ static unsigned int variance_ref(const uint8_t *src, const uint8_t *ref,
     }
   }
   RoundHighBitDepth(bit_depth, &se, &sse);
-  *sse_ptr = sse;
-  return sse - (((int64_t) se * se) >> (l2w + l2h));
+  *sse_ptr = (uint32_t) sse;
+  return (unsigned int) (sse - (((int64_t) se * se) >> (l2w + l2h)));
 }
 
 static unsigned int subpel_variance_ref(const uint8_t *ref, const uint8_t *src,
@@ -142,8 +142,8 @@ static unsigned int subpel_variance_ref(const uint8_t *ref, const uint8_t *src,
     }
   }
   RoundHighBitDepth(bit_depth, &se, &sse);
-  *sse_ptr = sse;
-  return sse - (((int64_t) se * se) >> (l2w + l2h));
+  *sse_ptr = (unsigned int) sse;
+  return (unsigned int) (sse - (((int64_t) se * se) >> (l2w + l2h)));
 }
 
 typedef unsigned int (*SumOfSquaresFunction)(const int16_t *src);
@@ -510,8 +510,8 @@ unsigned int subpel_avg_variance_ref(const uint8_t *ref,
     }
   }
   RoundHighBitDepth(bit_depth, &se, &sse);
-  *sse_ptr = sse;
-  return sse - (((int64_t) se * se) >> (l2w + l2h));
+  *sse_ptr = (unsigned int) sse;
+  return (unsigned int) (sse - (((int64_t) se * se) >> (l2w + l2h)));
 }
 
 template<typename SubpelVarianceFunctionType>
