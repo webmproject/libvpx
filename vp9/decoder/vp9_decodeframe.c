@@ -290,7 +290,6 @@ static void inverse_transform_block(MACROBLOCKD* xd, int plane, int block,
 }
 
 struct intra_args {
-  VP9_COMMON *cm;
   MACROBLOCKD *xd;
   vp9_reader *r;
   int seg_id;
@@ -300,7 +299,6 @@ static void predict_and_reconstruct_intra_block(int plane, int block,
                                                 BLOCK_SIZE plane_bsize,
                                                 TX_SIZE tx_size, void *arg) {
   struct intra_args *const args = (struct intra_args *)arg;
-  VP9_COMMON *const cm = args->cm;
   MACROBLOCKD *const xd = args->xd;
   struct macroblockd_plane *const pd = &xd->plane[plane];
   MODE_INFO *const mi = xd->mi[0];
@@ -317,7 +315,7 @@ static void predict_and_reconstruct_intra_block(int plane, int block,
                           x, y, plane);
 
   if (!mi->mbmi.skip) {
-    const int eob = vp9_decode_block_tokens(cm, xd, plane, block,
+    const int eob = vp9_decode_block_tokens(xd, plane, block,
                                             plane_bsize, x, y, tx_size,
                                             args->r, args->seg_id);
     inverse_transform_block(xd, plane, block, tx_size, dst, pd->dst.stride,
@@ -326,7 +324,6 @@ static void predict_and_reconstruct_intra_block(int plane, int block,
 }
 
 struct inter_args {
-  VP9_COMMON *cm;
   MACROBLOCKD *xd;
   vp9_reader *r;
   int *eobtotal;
@@ -337,12 +334,11 @@ static void reconstruct_inter_block(int plane, int block,
                                     BLOCK_SIZE plane_bsize,
                                     TX_SIZE tx_size, void *arg) {
   struct inter_args *args = (struct inter_args *)arg;
-  VP9_COMMON *const cm = args->cm;
   MACROBLOCKD *const xd = args->xd;
   struct macroblockd_plane *const pd = &xd->plane[plane];
   int x, y, eob;
   txfrm_block_to_raster_xy(plane_bsize, tx_size, block, &x, &y);
-  eob = vp9_decode_block_tokens(cm, xd, plane, block, plane_bsize,
+  eob = vp9_decode_block_tokens(xd, plane, block, plane_bsize,
                                 x, y, tx_size, args->r, args->seg_id);
   inverse_transform_block(xd, plane, block, tx_size,
                           &pd->dst.buf[4 * y * pd->dst.stride + 4 * x],
@@ -395,7 +391,7 @@ static void decode_block(VP9Decoder *const pbi, MACROBLOCKD *const xd,
   }
 
   if (!is_inter_block(mbmi)) {
-    struct intra_args arg = {cm, xd, r, mbmi->segment_id};
+    struct intra_args arg = {xd, r, mbmi->segment_id};
     vp9_foreach_transformed_block(xd, bsize,
                                   predict_and_reconstruct_intra_block, &arg);
   } else {
@@ -405,7 +401,7 @@ static void decode_block(VP9Decoder *const pbi, MACROBLOCKD *const xd,
     // Reconstruction
     if (!mbmi->skip) {
       int eobtotal = 0;
-      struct inter_args arg = {cm, xd, r, &eobtotal, mbmi->segment_id};
+      struct inter_args arg = {xd, r, &eobtotal, mbmi->segment_id};
       vp9_foreach_transformed_block(xd, bsize, reconstruct_inter_block, &arg);
       if (!less8x8 && eobtotal == 0)
         mbmi->skip = 1;  // skip loopfilter

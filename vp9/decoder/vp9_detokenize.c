@@ -46,14 +46,14 @@ static INLINE int read_coeff(const vp9_prob *probs, int n, vp9_reader *r) {
   return val;
 }
 
-static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
+static int decode_coefs(const MACROBLOCKD *xd,
                         PLANE_TYPE type,
                         tran_low_t *dqcoeff, TX_SIZE tx_size, const int16_t *dq,
                         int ctx, const int16_t *scan, const int16_t *nb,
                         vp9_reader *r) {
   FRAME_COUNTS *counts = xd->counts;
   const int max_eob = 16 << (tx_size << 1);
-  const FRAME_CONTEXT *const fc = cm->fc;
+  const FRAME_CONTEXT *const fc = xd->fc;
   const int ref = is_inter_block(&xd->mi[0]->mbmi);
   int band, c = 0;
   const vp9_prob (*coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
@@ -76,8 +76,8 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
   const uint8_t *cat6_prob;
 
 #if CONFIG_VP9_HIGHBITDEPTH
-  if (cm->use_highbitdepth) {
-    if (cm->bit_depth == VPX_BITS_10) {
+  if (xd->bd > VPX_BITS_8) {
+    if (xd->bd == VPX_BITS_10) {
       cat1_prob = vp9_cat1_prob_high10;
       cat2_prob = vp9_cat2_prob_high10;
       cat3_prob = vp9_cat3_prob_high10;
@@ -163,7 +163,7 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
           break;
         case CATEGORY6_TOKEN:
 #if CONFIG_VP9_HIGHBITDEPTH
-          switch (cm->bit_depth) {
+          switch (xd->bd) {
             case VPX_BITS_8:
               val = CAT6_MIN_VAL + read_coeff(cat6_prob, 14, r);
               break;
@@ -187,7 +187,7 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
 #if CONFIG_COEFFICIENT_RANGE_CHECKING
 #if CONFIG_VP9_HIGHBITDEPTH
     dqcoeff[scan[c]] = highbd_check_range((vp9_read_bit(r) ? -v : v),
-                                          cm->bit_depth);
+                                          xd->bd);
 #else
     dqcoeff[scan[c]] = check_range(vp9_read_bit(r) ? -v : v);
 #endif  // CONFIG_VP9_HIGHBITDEPTH
@@ -203,18 +203,17 @@ static int decode_coefs(VP9_COMMON *cm, const MACROBLOCKD *xd,
   return c;
 }
 
-int vp9_decode_block_tokens(VP9_COMMON *cm, MACROBLOCKD *xd,
+int vp9_decode_block_tokens(MACROBLOCKD *xd,
                             int plane, int block,
                             BLOCK_SIZE plane_bsize, int x, int y,
                             TX_SIZE tx_size, vp9_reader *r,
                             int seg_id) {
   struct macroblockd_plane *const pd = &xd->plane[plane];
-  const int16_t *const dequant = (plane == 0) ? cm->y_dequant[seg_id]
-                                              : cm->uv_dequant[seg_id];
+  const int16_t *const dequant = pd->seg_dequant[seg_id];
   const int ctx = get_entropy_context(tx_size, pd->above_context + x,
                                                pd->left_context + y);
   const scan_order *so = get_scan(xd, tx_size, pd->plane_type, block);
-  const int eob = decode_coefs(cm, xd, pd->plane_type,
+  const int eob = decode_coefs(xd, pd->plane_type,
                                BLOCK_OFFSET(pd->dqcoeff, block), tx_size,
                                dequant, ctx, so->scan, so->neighbors, r);
   vp9_set_contexts(xd, pd, plane_bsize, tx_size, eob > 0, x, y);
