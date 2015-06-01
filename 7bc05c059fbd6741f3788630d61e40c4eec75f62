@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ed56c9ec_23c4f4be",
+        "filename": "examples.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-06-01T15:44:38Z",
+      "side": 1,
+      "message": "This has enough conditions it should switch to:\nif darwin\n SHARED_LIB_SUF\u003d.dylib\nelse if os2\n SHARED_LIB_SUF\u003d_dll.a\nelse\n SHARED_LIB_SUF\u003d.so",
+      "range": {
+        "startLine": 284,
+        "startChar": 28,
+        "endLine": 284,
+        "endChar": 29
+      },
+      "revId": "7bc05c059fbd6741f3788630d61e40c4eec75f62",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b91fb853_3d67a11c",
+        "filename": "libs.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-06-01T15:44:38Z",
+      "side": 1,
+      "message": "Set SHARED_LIB_SUF here",
+      "range": {
+        "startLine": 238,
+        "startChar": 9,
+        "endLine": 238,
+        "endChar": 24
+      },
+      "revId": "7bc05c059fbd6741f3788630d61e40c4eec75f62",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
