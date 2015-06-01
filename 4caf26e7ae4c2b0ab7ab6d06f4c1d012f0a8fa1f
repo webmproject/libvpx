@@ -2,6 +2,75 @@
   "comments": [
     {
       "key": {
+        "uuid": "5984fccb_e253c662",
+        "filename": "examples/vp9_spatial_svc_encoder.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 398,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-06-01T23:57:11Z",
+      "side": 1,
+      "message": "space around \"*\" (same comment below).",
+      "range": {
+        "startLine": 398,
+        "startChar": 27,
+        "endLine": 398,
+        "endChar": 30
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f990500b_a21940ac",
+        "filename": "examples/vp9_spatial_svc_encoder.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 433,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-06-01T23:57:11Z",
+      "side": 1,
+      "message": "space around \"-\"",
+      "range": {
+        "startLine": 433,
+        "startChar": 64,
+        "endLine": 433,
+        "endChar": 65
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "198e04f0_e3398ce1",
+        "filename": "examples/vp9_spatial_svc_encoder.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 478,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-06-01T23:57:11Z",
+      "side": 1,
+      "message": "This statement does not seem to make sense to me.",
+      "range": {
+        "startLine": 478,
+        "startChar": 43,
+        "endLine": 478,
+        "endChar": 48
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d54fde2_2feb09aa",
         "filename": "examples/vp9_spatial_svc_encoder.c",
         "patchSetId": 24
@@ -59,6 +128,98 @@
       "writtenOn": "2015-06-01T20:02:52Z",
       "side": 1,
       "message": "maybe put this code (656 - 728) into separate function?\ncan leave it as TODO for now.",
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b97b38ac_b5e8a0f0",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 600,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-06-01T23:57:11Z",
+      "side": 1,
+      "message": "What is 11?",
+      "range": {
+        "startLine": 600,
+        "startChar": 33,
+        "endLine": 600,
+        "endChar": 35
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f990500b_e208a8e0",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 683,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-06-01T23:57:11Z",
+      "side": 1,
+      "message": "indent wrong (and in lines below).",
+      "range": {
+        "startLine": 683,
+        "startChar": 6,
+        "endLine": 683,
+        "endChar": 25
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b97b38ac_18d8a961",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 24
+      },
+      "lineNbr": 857,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-06-01T23:57:11Z",
+      "side": 1,
+      "message": "define locally as const and use below.",
+      "range": {
+        "startLine": 857,
+        "startChar": 36,
+        "endLine": 857,
+        "endChar": 56
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "39d588cf_71e2384f",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 24
+      },
+      "lineNbr": 899,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-06-01T23:57:11Z",
+      "side": 1,
+      "message": "indent",
+      "range": {
+        "startLine": 899,
+        "startChar": 0,
+        "endLine": 899,
+        "endChar": 2
+      },
       "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -226,6 +387,52 @@
     },
     {
       "key": {
+        "uuid": "b97b38ac_182669f1",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 24
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-06-01T23:57:11Z",
+      "side": 1,
+      "message": "indent",
+      "range": {
+        "startLine": 240,
+        "startChar": 0,
+        "endLine": 240,
+        "endChar": 27
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "39d588cf_1183ac55",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-06-01T23:57:11Z",
+      "side": 1,
+      "message": "Use LAYER_IDS_TO_IDX() ?",
+      "range": {
+        "startLine": 244,
+        "startChar": 44,
+        "endLine": 245,
+        "endChar": 75
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b91fb853_0f002631",
         "filename": "vp9/encoder/vp9_ratectrl.c",
         "patchSetId": 24
@@ -242,6 +449,29 @@
         "startChar": 37,
         "endLine": 1461,
         "endChar": 45
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "59d23ce8_35f33a9b",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 1477,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-06-01T23:57:11Z",
+      "side": 1,
+      "message": "add period at end of line.",
+      "range": {
+        "startLine": 1477,
+        "startChar": 61,
+        "endLine": 1477,
+        "endChar": 68
       },
       "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
@@ -295,6 +525,121 @@
     },
     {
       "key": {
+        "uuid": "59d23ce8_d5ae6e6f",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-06-01T23:57:11Z",
+      "side": 1,
+      "message": "Use LAYER_IDS_TO_IDX() ?",
+      "range": {
+        "startLine": 52,
+        "startChar": 39,
+        "endLine": 52,
+        "endChar": 41
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b97b38ac_18098934",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-06-01T23:57:11Z",
+      "side": 1,
+      "message": "Use LAYER_IDS_TO_IDX() ?\nMove this definition up \u0026 use in definition of lc above.",
+      "range": {
+        "startLine": 55,
+        "startChar": 16,
+        "endLine": 55,
+        "endChar": 17
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "59d23ce8_15d156c5",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-06-01T23:57:11Z",
+      "side": 1,
+      "message": "Use LAYER_IDS_TO_IDX() ?",
+      "range": {
+        "startLine": 133,
+        "startChar": 32,
+        "endLine": 133,
+        "endChar": 64
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "59d23ce8_b5e16a94",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-06-01T23:57:11Z",
+      "side": 1,
+      "message": "indent",
+      "range": {
+        "startLine": 199,
+        "startChar": 2,
+        "endLine": 199,
+        "endChar": 8
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "59d23ce8_75f3026c",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-06-01T23:57:11Z",
+      "side": 1,
+      "message": "Use LAYER_IDS_TO_IDX() ?",
+      "range": {
+        "startLine": 199,
+        "startChar": 33,
+        "endLine": 200,
+        "endChar": 66
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d54fde2_40ae5a99",
         "filename": "vp9/encoder/vp9_svc_layercontext.c",
         "patchSetId": 24
@@ -318,6 +663,29 @@
     },
     {
       "key": {
+        "uuid": "b97b38ac_38aa455d",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-06-01T23:57:11Z",
+      "side": 1,
+      "message": "Use LAYER_IDS_TO_IDX() ?",
+      "range": {
+        "startLine": 214,
+        "startChar": 21,
+        "endLine": 215,
+        "endChar": 28
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d929cc86_91de9ef9",
         "filename": "vp9/encoder/vp9_svc_layercontext.c",
         "patchSetId": 24
@@ -334,6 +702,29 @@
         "startChar": 39,
         "endLine": 295,
         "endChar": 61
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b97b38ac_5882a1db",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 305,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-06-01T23:57:11Z",
+      "side": 1,
+      "message": "Use LAYER_IDS_TO_IDX() ?",
+      "range": {
+        "startLine": 303,
+        "startChar": 32,
+        "endLine": 305,
+        "endChar": 59
       },
       "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
