@@ -16,6 +16,24 @@
       "revId": "c3da3d6088f7c366dd8f161e509360abc323f06b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d9ae2c65_da4d3590",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-06-02T22:15:49Z",
+      "side": 1,
+      "message": "maybe i got it this time ...",
+      "parentUuid": "39d588cf_227c4e98",
+      "revId": "c3da3d6088f7c366dd8f161e509360abc323f06b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
