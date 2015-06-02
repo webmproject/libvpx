@@ -156,7 +156,7 @@ void vp9_idct32x32_add(const tran_low_t *input, uint8_t *dest, int stride,
 #if CONFIG_TX64X64
 void vp9_idct64x64_add(const tran_low_t *input, uint8_t *dest, int stride,
                        int eob);
-#endif
+#endif  // CONFIG_TX64X64
 void vp9_iht4x4_add(TX_TYPE tx_type, const tran_low_t *input, uint8_t *dest,
                     int stride, int eob);
 void vp9_iht8x8_add(TX_TYPE tx_type, const tran_low_t *input, uint8_t *dest,

@@ -70,6 +70,8 @@ VP9_COMMON_SRCS-yes += common/vp9_scan.c
 VP9_COMMON_SRCS-yes += common/vp9_scan.h
 VP9_COMMON_SRCS-$(CONFIG_GLOBAL_MOTION) += common/vp9_motion_model.c
 VP9_COMMON_SRCS-$(CONFIG_GLOBAL_MOTION) += common/vp9_motion_model.h
+VP9_COMMON_SRCS-$(CONFIG_WAVELETS) += common/vp9_idwt.c
+VP9_COMMON_SRCS-$(CONFIG_WAVELETS) += common/vp9_idwt.h
 
 VP9_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/vp9_asm_stubs.c
 VP9_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/vp9_loopfilter_intrin_sse2.c

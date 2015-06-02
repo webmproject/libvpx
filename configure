@@ -301,6 +301,7 @@ EXPERIMENT_LIST="
     bitstream_fixes
     newmvref
     misc_entropy
+    wavelets
 "
 CONFIG_LIST="
     external_build

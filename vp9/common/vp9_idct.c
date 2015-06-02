@@ -709,6 +709,33 @@ void vp9_idct16x16_256_add_c(const tran_low_t *input, uint8_t *dest,
   }
 }
 
+#if CONFIG_WAVELETS
+void vp9_idct16x16_noscale_c(const tran_low_t *input, int16_t *dest,
+                             int stride) {
+  tran_low_t out[16 * 16];
+  tran_low_t *outptr = out;
+  int i, j;
+  tran_low_t temp_in[16], temp_out[16];
+
+  // First transform rows
+  for (i = 0; i < 16; ++i) {
+    idct16(input, outptr);
+    input += 16;
+    outptr += 16;
+  }
+
+  // Then transform columns
+  for (i = 0; i < 16; ++i) {
+    for (j = 0; j < 16; ++j)
+      temp_in[j] = out[j * 16 + i];
+    idct16(temp_in, temp_out);
+    for (j = 0; j < 16; ++j) {
+      dest[j * stride + i] = ROUND_POWER_OF_TWO(temp_out[j], 3);
+    }
+  }
+}
+#endif  // CONFIG_WAVELETS
+
 static void iadst16(const tran_low_t *input, tran_low_t *output) {
   tran_high_t s0, s1, s2, s3, s4, s5, s6, s7, s8;
   tran_high_t s9, s10, s11, s12, s13, s14, s15;
@@ -1360,6 +1387,46 @@ void vp9_idct32x32_1024_add_c(const tran_low_t *input, uint8_t *dest,
     }
   }
 }
+
+#if CONFIG_WAVELETS
+void vp9_idct32x32_noscale_c(const tran_low_t *input, int16_t *dest,
+                             int stride) {
+  tran_low_t out[32 * 32];
+  tran_low_t *outptr = out;
+  int i, j;
+  tran_low_t temp_in[32], temp_out[32];
+
+  // Rows
+  for (i = 0; i < 32; ++i) {
+    int16_t zero_coeff[16];
+    for (j = 0; j < 16; ++j)
+      zero_coeff[j] = input[2 * j] | input[2 * j + 1];
+    for (j = 0; j < 8; ++j)
+      zero_coeff[j] = zero_coeff[2 * j] | zero_coeff[2 * j + 1];
+    for (j = 0; j < 4; ++j)
+      zero_coeff[j] = zero_coeff[2 * j] | zero_coeff[2 * j + 1];
+    for (j = 0; j < 2; ++j)
+      zero_coeff[j] = zero_coeff[2 * j] | zero_coeff[2 * j + 1];
+
+    if (zero_coeff[0] | zero_coeff[1])
+      idct32(input, outptr);
+    else
+      vpx_memset(outptr, 0, sizeof(tran_low_t) * 32);
+    input += 32;
+    outptr += 32;
+  }
+
+  // Columns
+  for (i = 0; i < 32; ++i) {
+    for (j = 0; j < 32; ++j)
+      temp_in[j] = out[j * 32 + i];
+    idct32(temp_in, temp_out);
+    for (j = 0; j < 32; ++j) {
+      dest[j * stride + i] = ROUND_POWER_OF_TWO(temp_out[j], 4);
+    }
+  }
+}
+#endif  // CONFIG_WAVELETS
 
 void vp9_idct32x32_34_add_c(const tran_low_t *input, uint8_t *dest,
                             int stride) {
