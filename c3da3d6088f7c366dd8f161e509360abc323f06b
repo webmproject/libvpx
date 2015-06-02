@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "39d588cf_227c4e98",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-02T22:09:07Z",
+      "side": 1,
+      "message": "treat it like a function and leave \u0027(\u0027 on the previous line",
+      "revId": "c3da3d6088f7c366dd8f161e509360abc323f06b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
