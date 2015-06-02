@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "59d23ce8_66b11683",
+        "filename": "configure",
+        "patchSetId": 2
+      },
+      "lineNbr": 497,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-02T03:51:26Z",
+      "side": 1,
+      "message": "hmm I wonder if the dylib support got forgotten about...",
+      "revId": "16220b530c7d4107c00bd860fc8f4bd49e0656e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b97b38ac_5e9b6951",
+        "filename": "configure",
+        "patchSetId": 2
+      },
+      "lineNbr": 501,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-02T03:51:26Z",
+      "side": 1,
+      "message": "this is all right unless you want to mention OS/2 here",
+      "revId": "16220b530c7d4107c00bd860fc8f4bd49e0656e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "59d23ce8_e6a42640",
+        "filename": "examples.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-02T03:51:26Z",
+      "side": 1,
+      "message": "darwin",
+      "revId": "16220b530c7d4107c00bd860fc8f4bd49e0656e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b97b38ac_1ea5f18b",
+        "filename": "examples.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 286,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-02T03:51:26Z",
+      "side": 1,
+      "message": "this syntax requires 3.81 may be best to do an inner ifneq/endif for compatibility",
+      "revId": "16220b530c7d4107c00bd860fc8f4bd49e0656e4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
