@@ -5185,7 +5185,11 @@ static void encode_superblock(VP9_COMP *cpi, TOKENEXTRA **t, int output_enabled,
 #endif  // CONFIG_INTRABC
       ) {
     int plane;
+#if CONFIG_MISC_ENTROPY
+    mbmi->skip = 0;
+#else
     mbmi->skip = 1;
+#endif
     for (plane = 0; plane < MAX_MB_PLANE; ++plane)
       vp9_encode_intra_block_plane(x, MAX(bsize, BLOCK_8X8), plane);
     if (output_enabled)

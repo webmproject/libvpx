@@ -196,11 +196,19 @@ static int read_inter_segment_id(VP9_COMMON *const cm, MACROBLOCKD *const xd,
   set_segment_id(cm, bsize, mi_row, mi_col, segment_id);
   return segment_id;
 }
-
+#if CONFIG_MISC_ENTROPY
 static int read_skip(VP9_COMMON *cm, const MACROBLOCKD *xd,
-                     int segment_id, vp9_reader *r) {
+                     int segment_id, int is_inter, vp9_reader *r) {
+#else
+  static int read_skip(VP9_COMMON *cm, const MACROBLOCKD *xd,
+                       int segment_id, vp9_reader *r) {
+#endif
   if (vp9_segfeature_active(&cm->seg, segment_id, SEG_LVL_SKIP)) {
     return 1;
+#if CONFIG_MISC_ENTROPY
+  } else if (!is_inter) {
+    return 0;
+#endif
   } else {
     const int ctx = vp9_get_skip_context(xd);
     const int skip = vp9_read(r, cm->fc.skip_probs[ctx]);
@@ -260,7 +268,11 @@ static void read_intra_frame_mode_info(VP9_COMMON *const cm,
 #endif  // CONFIG_INTRABC
 
   mbmi->segment_id = read_intra_segment_id(cm, xd, mi_row, mi_col, r);
+#if CONFIG_MISC_ENTROPY
+  mbmi->skip = 0;
+#else
   mbmi->skip = read_skip(cm, xd, mbmi->segment_id, r);
+#endif
 #if CONFIG_PALETTE
   if (bsize >= BLOCK_8X8 && cm->allow_palette_mode) {
     int palette_ctx = 0;
@@ -1344,11 +1356,16 @@ static void read_inter_frame_mode_info(VP9_COMMON *const cm,
 #if CONFIG_SUPERTX
   if (!supertx_enabled) {
 #endif
+#if !CONFIG_MISC_ENTROPY
     mbmi->skip = read_skip(cm, xd, mbmi->segment_id, r);
+#endif
 #if CONFIG_COPY_MODE
     if (mbmi->copy_mode == NOREF)
 #endif
       inter_block = read_is_inter_block(cm, xd, mbmi->segment_id, r);
+#if CONFIG_MISC_ENTROPY
+    mbmi->skip = read_skip(cm, xd, mbmi->segment_id, inter_block, r);
+#endif
 
 #if CONFIG_PALETTE
     mbmi->palette_enabled[0] = 0;

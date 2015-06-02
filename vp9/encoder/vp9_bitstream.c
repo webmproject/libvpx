@@ -190,11 +190,20 @@ static void write_selected_tx_size(const VP9_COMMON *cm,
     }
   }
 }
-
+#if CONFIG_MISC_ENTROPY
 static int write_skip(const VP9_COMMON *cm, const MACROBLOCKD *xd,
-                      int segment_id, const MODE_INFO *mi, vp9_writer *w) {
+                      int segment_id, const MODE_INFO *mi, int is_inter,
+                      vp9_writer *w) {
+#else
+  static int write_skip(const VP9_COMMON *cm, const MACROBLOCKD *xd,
+                        int segment_id, const MODE_INFO *mi, vp9_writer *w) {
+#endif
   if (vp9_segfeature_active(&cm->seg, segment_id, SEG_LVL_SKIP)) {
     return 1;
+#if CONFIG_MISC_ENTROPY
+  } else if (!is_inter && cm->frame_type == INTER_FRAME) {
+    return 0;
+#endif
   } else {
     const int skip = mi->mbmi.skip;
     vp9_write(w, skip, vp9_get_skip_prob(cm, xd));
@@ -454,14 +463,16 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
       write_segment_id(w, seg, segment_id);
     }
   }
-
 #if CONFIG_SUPERTX
   if (supertx_enabled)
     skip = mbmi->skip;
   else
     skip = write_skip(cm, xd, segment_id, mi, w);
 #else
+#if !CONFIG_MISC_ENTROPY
   skip = write_skip(cm, xd, segment_id, mi, w);
+#endif
+
 #endif  // CONFIG_SUPERTX
 
 #if CONFIG_SUPERTX
@@ -474,6 +485,10 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
       vp9_write(w, is_inter, vp9_get_intra_inter_prob(cm, xd));
 #if CONFIG_SUPERTX
   }
+#endif
+
+#if CONFIG_MISC_ENTROPY
+  skip = write_skip(cm, xd, segment_id, mi, is_inter, w);
 #endif
 
 #if CONFIG_PALETTE
@@ -862,9 +877,9 @@ static void write_mb_modes_kf(const VP9_COMMON *cm,
 
   if (seg->update_map)
     write_segment_id(w, seg, mbmi->segment_id);
-
+#if !CONFIG_MISC_ENTROPY
   write_skip(cm, xd, mbmi->segment_id, mi, w);
-
+#endif
 #if CONFIG_PALETTE
   if (bsize >= BLOCK_8X8 && cm->allow_palette_mode) {
     int n, m1, m2, i, j, k, rows, cols, palette_ctx, color_ctx;

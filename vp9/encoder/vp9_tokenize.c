@@ -530,6 +530,9 @@ void vp9_tokenize_sb(VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,
   struct tokenize_b_args arg = {cpi, xd, t};
   if (mbmi->skip) {
     if (!dry_run)
+#if CONFIG_MISC_ENTROPY
+      if (is_inter_block(mbmi))
+#endif
       cm->counts.skip[ctx][1] += skip_inc;
     reset_skip_context(xd, bsize);
     if (dry_run)
@@ -538,6 +541,9 @@ void vp9_tokenize_sb(VP9_COMP *cpi, TOKENEXTRA **t, int dry_run,
   }
 
   if (!dry_run) {
+#if CONFIG_MISC_ENTROPY
+    if (is_inter_block(mbmi))
+#endif
     cm->counts.skip[ctx][0] += skip_inc;
 #if CONFIG_TX_SKIP
     if (mbmi->tx_skip[0] && FOR_SCREEN_CONTENT)
