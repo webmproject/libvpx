@@ -1,3 +1,6 @@
+xxxx-yy-zz v1.4.0 "Changes for next release"
+  Encoder controls added for 1 pass SVC.
+
 2015-04-03 v1.4.0 "Indian Runner Duck"
   This release includes significant improvements to the VP9 codec.
 

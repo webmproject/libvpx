@@ -372,9 +372,7 @@ class DatarateTestVP9Large : public ::libvpx_test::EncoderTest,
         encoder->Control(VP9E_SET_SVC, 1);
       }
       vpx_svc_layer_id_t layer_id;
-#if VPX_ENCODER_ABI_VERSION > (4 + VPX_CODEC_ABI_VERSION)
       layer_id.spatial_layer_id = 0;
-#endif
       frame_flags_ = SetFrameFlags(video->frame(), cfg_.ts_number_layers);
       layer_id.temporal_layer_id = SetLayerId(video->frame(),
                                               cfg_.ts_number_layers);
@@ -779,9 +777,7 @@ class DatarateOnePassCbrSvc : public ::libvpx_test::EncoderTest,
       svc_params_.scaling_factor_num[1] = 288;
       svc_params_.scaling_factor_den[1] = 288;
       encoder->Control(VP9E_SET_SVC, 1);
-#if VPX_ENCODER_ABI_VERSION > (4 + VPX_CODEC_ABI_VERSION)
       encoder->Control(VP9E_SET_SVC_PARAMETERS, &svc_params_);
-#endif
       encoder->Control(VP8E_SET_CPUUSED, speed_setting_);
       encoder->Control(VP9E_SET_TILE_COLUMNS, 0);
       encoder->Control(VP8E_SET_MAX_INTRA_BITRATE_PCT, 300);
@@ -869,7 +865,7 @@ static void assign_layer_bitrates(vpx_codec_enc_cfg_t *const enc_cfg,
     }
   }
 }
-#if VPX_ENCODER_ABI_VERSION > (4 + VPX_CODEC_ABI_VERSION)
+
 // Check basic rate targeting for 1 pass CBR SVC: 2 spatial layers and
 // 3 temporal layers.
 TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc) {
@@ -911,7 +907,7 @@ TEST_P(DatarateOnePassCbrSvc, OnePassCbrSvc) {
         << " The datarate for the file is lower than the target by too much!";
   }
 }
-#endif
+
 VP8_INSTANTIATE_TEST_CASE(DatarateTestLarge, ALL_TEST_MODES);
 VP9_INSTANTIATE_TEST_CASE(DatarateTestVP9Large,
                           ::testing::Values(::libvpx_test::kOnePassGood,

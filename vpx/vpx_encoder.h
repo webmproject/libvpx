@@ -62,7 +62,7 @@ extern "C" {
    * types, removing or reassigning enums, adding/removing/rearranging
    * fields to structures
    */
-#define VPX_ENCODER_ABI_VERSION (4 + VPX_CODEC_ABI_VERSION) /**<\hideinitializer*/
+#define VPX_ENCODER_ABI_VERSION (5 + VPX_CODEC_ABI_VERSION) /**<\hideinitializer*/
 
 
   /*! \brief Encoder capabilities bitfield
@@ -166,7 +166,7 @@ extern "C" {
     VPX_CODEC_PSNR_PKT,        /**< PSNR statistics for this frame */
     // Spatial SVC is still experimental and may be removed before the next ABI
     // bump.
-#if VPX_ENCODER_ABI_VERSION > (4 + VPX_CODEC_ABI_VERSION)
+#if VPX_ENCODER_ABI_VERSION > (5 + VPX_CODEC_ABI_VERSION)
     VPX_CODEC_SPATIAL_SVC_LAYER_SIZES, /**< Sizes for each layer in this frame*/
     VPX_CODEC_SPATIAL_SVC_LAYER_PSNR, /**< PSNR for each layer in this frame*/
 #endif
@@ -208,7 +208,7 @@ extern "C" {
       vpx_fixed_buf_t raw;     /**< data for arbitrary packets */
       // Spatial SVC is still experimental and may be removed before the next
       // ABI bump.
-#if VPX_ENCODER_ABI_VERSION > (4 + VPX_CODEC_ABI_VERSION)
+#if VPX_ENCODER_ABI_VERSION > (5 + VPX_CODEC_ABI_VERSION)
       size_t layer_sizes[VPX_SS_MAX_LAYERS];
       struct vpx_psnr_pkt layer_psnr[VPX_SS_MAX_LAYERS];
 #endif
