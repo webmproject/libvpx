@@ -382,8 +382,7 @@ INSTANTIATE_TEST_CASE_P(
                    &vp9_idct32x32_1024_add_sse2, 1, VPX_BITS_8)));
 #endif  // HAVE_AVX2 && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 
-#if 0  // HAVE_MSA && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
-// TODO(parag): enable when function hooks are added
+#if HAVE_MSA && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 INSTANTIATE_TEST_CASE_P(
     MSA, Trans32x32Test,
     ::testing::Values(
