@@ -59,12 +59,47 @@ int vp9_count_colors(const uint8_t *src, int stride, int rows, int cols) {
     return n;
 }
 
+#if CONFIG_VP9_HIGHBITDEPTH
+int vp9_count_colors_highbd(const uint8_t *src8, int stride, int rows, int cols,
+                            int bit_depth) {
+  int n = 0, r, c, i;
+  uint16_t val;
+  uint16_t *src = CONVERT_TO_SHORTPTR(src8);
+  int* val_count = vpx_calloc(1 << bit_depth, sizeof(*val_count));
+
+  for (r = 0; r < rows; r++) {
+      for (c = 0; c < cols; c++) {
+        val = src[r * stride + c];
+        val_count[val]++;
+      }
+    }
+
+    for (i = 0; i < (1 << bit_depth); i++) {
+      if (val_count[i]) {
+        n++;
+      }
+    }
+
+    vpx_free(val_count);
+
+    return n;
+}
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+
+
+#if CONFIG_VP9_HIGHBITDEPTH
+void vp9_palette_color_insertion(uint16_t *old_colors, int *m, int *count,
+                                 const MB_MODE_INFO *mbmi) {
+  const uint16_t *new_colors = mbmi->palette_literal_colors;
+  uint16_t val;
+#else
 void vp9_palette_color_insertion(uint8_t *old_colors, int *m, int *count,
                                  const MB_MODE_INFO *mbmi) {
-  int k = *m, n = mbmi->palette_literal_size;
-  int i, j, l, min_idx = -1;
   const uint8_t *new_colors = mbmi->palette_literal_colors;
   uint8_t val;
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+  int k = *m, n = mbmi->palette_literal_size;
+  int i, j, l, min_idx = -1;
 
   if (mbmi->palette_indexed_size > 0) {
     for (i = 0; i < mbmi->palette_indexed_size; i++)
@@ -108,7 +143,11 @@ void vp9_palette_color_insertion(uint8_t *old_colors, int *m, int *count,
   *m = k;
 }
 
+#if CONFIG_VP9_HIGHBITDEPTH
+int vp9_palette_color_lookup(uint16_t *dic, int n, uint16_t val, int bits) {
+#else
 int vp9_palette_color_lookup(uint8_t *dic, int n, uint8_t val, int bits) {
+#endif  // CONFIG_VP9_HIGHBITDEPTH
   int j, min, arg_min = 0, i = 1;
 
   if (n < 1)

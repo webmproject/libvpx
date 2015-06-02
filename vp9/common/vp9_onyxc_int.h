@@ -223,7 +223,11 @@ typedef struct VP9Common {
   ENTROPY_CONTEXT *above_context;
 
 #if CONFIG_PALETTE
+#if CONFIG_VP9_HIGHBITDEPTH
+  uint16_t current_palette_colors[PALETTE_BUF_SIZE];
+#else
   uint8_t current_palette_colors[PALETTE_BUF_SIZE];
+#endif
   int current_palette_size;
   int current_palette_count[PALETTE_BUF_SIZE];
   int allow_palette_mode;

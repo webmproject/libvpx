@@ -1359,37 +1359,22 @@ void vp9_predict_intra_block(const MACROBLOCKD *xd, int block_idx, int bwl_in,
 #endif  // CONFIG_FILTERINTRA
 
   assert(bwl >= 0);
-#if CONFIG_VP9_HIGHBITDEPTH
-  if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
-#if CONFIG_FILTERINTRA
-    if (!filterflag) {
-#endif
-      build_intra_predictors_highbd(xd, ref, ref_stride, dst, dst_stride,
-                                    mode, tx_size, have_top,
-                                    have_left, have_right, x, y,
-                                    plane, xd->bd);
-#if CONFIG_FILTERINTRA
-    } else {
-      build_filter_intra_predictors_highbd(xd, ref, ref_stride, dst, dst_stride,
-                                           mode, tx_size, have_top,
-                                           have_left, have_right, x, y,
-                                           plane, xd->bd);
-    }
-#endif
-    return;
-  }
-#endif  // CONFIG_VP9_HIGHBITDEPTH
 #if CONFIG_FILTERINTRA
   if (!filterflag) {
 #endif  // CONFIG_FILTERINTRA
 #if CONFIG_PALETTE
     if (xd->mi[0].src_mi->mbmi.palette_enabled[plane !=0]) {
-      uint8_t *palette = xd->mi[0].src_mi->mbmi.palette_colors +
-          plane * PALETTE_MAX_SIZE;
       int bs = 4 * (1 << tx_size);
       int stride = 4 * (1 << bwl_in);
       int r, c;
       uint8_t *map = NULL;
+#if CONFIG_VP9_HIGHBITDEPTH
+      uint16_t *palette = xd->mi[0].src_mi->mbmi.palette_colors +
+          plane * PALETTE_MAX_SIZE;
+#else
+      uint8_t *palette = xd->mi[0].src_mi->mbmi.palette_colors +
+          plane * PALETTE_MAX_SIZE;
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
       if (xd->plane[1].subsampling_x || xd->plane[1].subsampling_y)
         map = xd->plane[plane != 0].color_index_map;
@@ -1398,16 +1383,43 @@ void vp9_predict_intra_block(const MACROBLOCKD *xd, int block_idx, int bwl_in,
 
       for (r = 0; r < bs; r++) {
         for (c = 0; c < bs; c++) {
+#if CONFIG_VP9_HIGHBITDEPTH
+          if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+            uint16_t *dst16 = CONVERT_TO_SHORTPTR(dst);
+            dst16[r * dst_stride + c] = palette[map[(r + y) * stride + c + x]];
+          } else {
+#endif  // CONFIG_VP9_HIGHBITDEPTH
           dst[r * dst_stride + c] = palette[map[(r + y) * stride + c + x]];
+#if CONFIG_VP9_HIGHBITDEPTH
+          }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
         }
       }
       return;
     }
 #endif  // CONFIG_PALETTE
+#if CONFIG_VP9_HIGHBITDEPTH
+    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+      build_intra_predictors_highbd(xd, ref, ref_stride, dst, dst_stride,
+                                    mode, tx_size, have_top,
+                                    have_left, have_right, x, y,
+                                    plane, xd->bd);
+      return;
+    }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
     build_intra_predictors(xd, ref, ref_stride, dst, dst_stride, mode, tx_size,
                            have_top, have_left, have_right, x, y, plane);
 #if CONFIG_FILTERINTRA
   } else {
+#if CONFIG_VP9_HIGHBITDEPTH
+    if (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH) {
+      build_filter_intra_predictors_highbd(xd, ref, ref_stride, dst, dst_stride,
+                                           mode, tx_size, have_top,
+                                           have_left, have_right, x, y,
+                                           plane, xd->bd);
+      return;
+    }
+#endif  // CONFIG_VP9_HIGHBITDEPTH
     build_filter_intra_predictors(xd, ref, ref_stride, dst, dst_stride, mode,
                                   tx_size, have_top, have_left, have_right,
                                   x, y, plane);

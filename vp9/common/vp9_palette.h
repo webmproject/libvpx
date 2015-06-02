@@ -16,10 +16,18 @@
 
 #if CONFIG_PALETTE
 int vp9_count_colors(const uint8_t *src, int stride, int rows, int cols);
-void vp9_insertion_sort(double *data, int n);
+#if CONFIG_VP9_HIGHBITDEPTH
+int vp9_count_colors_highbd(const uint8_t *src8, int stride, int rows, int cols,
+                            int bit_depth);
+void vp9_palette_color_insertion(uint16_t *old_colors, int *m, int *count,
+                                 const MB_MODE_INFO *mbmi);
+int vp9_palette_color_lookup(uint16_t *dic, int n, uint16_t val, int bits);
+#else
 void vp9_palette_color_insertion(uint8_t *old_colors, int *m, int *count,
                                  const MB_MODE_INFO *mbmi);
 int vp9_palette_color_lookup(uint8_t *dic, int n, uint8_t val, int bits);
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+void vp9_insertion_sort(double *data, int n);
 int vp9_ceil_log2(int n);
 int vp9_k_means(const double *data, double *centroids, int *indices,
                 int n, int k, int dim, int max_itr);

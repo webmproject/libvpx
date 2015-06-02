@@ -1439,8 +1439,12 @@ static void rd_pick_sb_modes(VP9_COMP *cpi, const TileInfo *const tile,
   if (frame_is_intra_only(cm)) {
 #if CONFIG_PALETTE
     int n = cpi->common.current_palette_size;
-    uint8_t palette[PALETTE_BUF_SIZE];
     int count[PALETTE_BUF_SIZE];
+#if CONFIG_VP9_HIGHBITDEPTH
+    uint16_t palette[PALETTE_BUF_SIZE];
+#else
+    uint8_t palette[PALETTE_BUF_SIZE];
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 
     vpx_memcpy(palette, cpi->common.current_palette_colors,
                n * sizeof(palette[0]));
@@ -1540,7 +1544,6 @@ static void update_stats(VP9_COMMON *cm, const MACROBLOCK *x) {
     const int seg_ref_active = vp9_segfeature_active(&cm->seg, mbmi->segment_id,
                                                      SEG_LVL_REF_FRAME);
     if (!seg_ref_active) {
-
       counts->intra_inter[vp9_get_intra_inter_context(xd)][inter_block]++;
 
       // If the segment reference feature is enabled we have only a single
@@ -3211,8 +3214,12 @@ static void rd_pick_partition(VP9_COMP *cpi, const TileInfo *const tile,
 #if CONFIG_PALETTE
   PICK_MODE_CONTEXT *c, *p;
   int previous_size, previous_count[PALETTE_BUF_SIZE];
+#if CONFIG_VP9_HIGHBITDEPTH
+  uint16_t previous_colors[PALETTE_BUF_SIZE];
+#else
   uint8_t previous_colors[PALETTE_BUF_SIZE];
-#endif
+#endif  // CONFIG_VP9_HIGHBITDEPTH
+#endif  // CONFIG_PALETTE
   (void) *tp_orig;
 
   assert(num_8x8_blocks_wide_lookup[bsize] ==
@@ -5539,7 +5546,7 @@ static void sum_intra_stats(FRAME_COUNTS *counts,
 #if CONFIG_FILTERINTRA
   const MACROBLOCKD* xd,
 #endif
- const MODE_INFO *mi) {
+  const MODE_INFO *mi) {
   const PREDICTION_MODE y_mode = mi->mbmi.mode;
   const PREDICTION_MODE uv_mode = mi->mbmi.uv_mode;
   const BLOCK_SIZE bsize = mi->mbmi.sb_type;

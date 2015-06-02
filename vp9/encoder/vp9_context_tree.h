@@ -32,10 +32,14 @@ typedef struct {
   uint16_t *eobs_pbuf[MAX_MB_PLANE][3];
 #if CONFIG_PALETTE
   uint8_t *color_index_map[2];
+#if CONFIG_VP9_HIGHBITDEPTH
+  uint16_t palette_colors_buf[PALETTE_BUF_SIZE];
+#else
   uint8_t palette_colors_buf[PALETTE_BUF_SIZE];
+#endif  // CONFIG_VP9_HIGHBITDEPTH
   int palette_buf_size;
   int palette_count_buf[PALETTE_BUF_SIZE];
-#endif
+#endif  // CONFIG_PALETTE
 
   int is_coded;
   int num_4x4_blk;
@@ -92,4 +96,4 @@ typedef struct PC_TREE {
 void vp9_setup_pc_tree(struct VP9Common *cm, struct VP9_COMP *cpi);
 void vp9_free_pc_tree(struct VP9_COMP *cpi);
 
-#endif /* VP9_ENCODER_VP9_CONTEXT_TREE_H_ */
+#endif  // VP9_ENCODER_VP9_CONTEXT_TREE_H_

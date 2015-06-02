@@ -531,7 +531,7 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
                       cm->fc.palette_size_prob[bsize - BLOCK_8X8],
                       &palette_size_encodings[n - 2]);
       for (i = 0; i < n; i++)
-        vp9_write_literal(w, mbmi->palette_colors[i], 8);
+        vp9_write_literal(w, mbmi->palette_colors[i], cm->bit_depth);
 
       memcpy(buffer, mbmi->palette_color_map,
              rows * cols * sizeof(buffer[0]));
@@ -566,9 +566,11 @@ static void pack_inter_mode_mvs(VP9_COMP *cpi, const MODE_INFO *mi,
       }
 
       for (i = 0; i < n; i++)
-        vp9_write_literal(w, mbmi->palette_colors[PALETTE_MAX_SIZE + i], 8);
+        vp9_write_literal(w, mbmi->palette_colors[PALETTE_MAX_SIZE + i],
+                          cm->bit_depth);
       for (i = 0; i < n; i++)
-        vp9_write_literal(w, mbmi->palette_colors[2 * PALETTE_MAX_SIZE + i], 8);
+        vp9_write_literal(w, mbmi->palette_colors[2 * PALETTE_MAX_SIZE + i],
+                          cm->bit_depth);
 
       if (xd->plane[1].subsampling_x && xd->plane[1].subsampling_y) {
         memcpy(buffer, mbmi->palette_uv_color_map,
@@ -945,7 +947,7 @@ static void write_mb_modes_kf(const VP9_COMMON *cm,
       }
       if (m2 > 0) {
         for (i = 0; i < m2; i++)
-          vp9_write_literal(w, mbmi->palette_literal_colors[i], 8);
+          vp9_write_literal(w, mbmi->palette_literal_colors[i], cm->bit_depth);
       }
 
       memcpy(buffer, mbmi->palette_color_map,
@@ -981,9 +983,11 @@ static void write_mb_modes_kf(const VP9_COMMON *cm,
       }
 
       for (i = 0; i < n; i++)
-        vp9_write_literal(w, mbmi->palette_colors[PALETTE_MAX_SIZE + i], 8);
+        vp9_write_literal(w, mbmi->palette_colors[PALETTE_MAX_SIZE + i],
+                          cm->bit_depth);
       for (i = 0; i < n; i++)
-        vp9_write_literal(w, mbmi->palette_colors[2 * PALETTE_MAX_SIZE + i], 8);
+        vp9_write_literal(w, mbmi->palette_colors[2 * PALETTE_MAX_SIZE + i],
+                          cm->bit_depth);
 
       if (xd->plane[1].subsampling_x && xd->plane[1].subsampling_y) {
         memcpy(buffer, mbmi->palette_uv_color_map,

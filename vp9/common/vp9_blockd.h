@@ -248,12 +248,17 @@ typedef struct {
   int palette_literal_size;
   int current_palette_size;
   int palette_delta_bitdepth;
-  uint8_t palette_colors[3 * PALETTE_MAX_SIZE];
   uint8_t palette_indexed_colors[PALETTE_MAX_SIZE];
   int8_t palette_color_delta[PALETTE_MAX_SIZE];
-  uint8_t palette_literal_colors[PALETTE_MAX_SIZE];
   uint8_t *palette_color_map;
   uint8_t *palette_uv_color_map;
+#if CONFIG_VP9_HIGHBITDEPTH
+  uint16_t palette_colors[3 * PALETTE_MAX_SIZE];
+  uint16_t palette_literal_colors[PALETTE_MAX_SIZE];
+#else
+  uint8_t palette_colors[3 * PALETTE_MAX_SIZE];
+  uint8_t palette_literal_colors[PALETTE_MAX_SIZE];
+#endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // CONFIG_PALETTE
 } MB_MODE_INFO;
 
