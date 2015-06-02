@@ -3205,34 +3205,20 @@ void vp9_idct32x32_34_add_sse2(const int16_t *input, uint8_t *dest,
   // idct constants for each stage
   const __m128i stg1_0 = pair_set_epi16(cospi_31_64, -cospi_1_64);
   const __m128i stg1_1 = pair_set_epi16(cospi_1_64, cospi_31_64);
-  const __m128i stg1_2 = pair_set_epi16(cospi_15_64, -cospi_17_64);
-  const __m128i stg1_3 = pair_set_epi16(cospi_17_64, cospi_15_64);
-  const __m128i stg1_4 = pair_set_epi16(cospi_23_64, -cospi_9_64);
-  const __m128i stg1_5 = pair_set_epi16(cospi_9_64, cospi_23_64);
   const __m128i stg1_6 = pair_set_epi16(cospi_7_64, -cospi_25_64);
   const __m128i stg1_7 = pair_set_epi16(cospi_25_64, cospi_7_64);
   const __m128i stg1_8 = pair_set_epi16(cospi_27_64, -cospi_5_64);
   const __m128i stg1_9 = pair_set_epi16(cospi_5_64, cospi_27_64);
-  const __m128i stg1_10 = pair_set_epi16(cospi_11_64, -cospi_21_64);
-  const __m128i stg1_11 = pair_set_epi16(cospi_21_64, cospi_11_64);
-  const __m128i stg1_12 = pair_set_epi16(cospi_19_64, -cospi_13_64);
-  const __m128i stg1_13 = pair_set_epi16(cospi_13_64, cospi_19_64);
   const __m128i stg1_14 = pair_set_epi16(cospi_3_64, -cospi_29_64);
   const __m128i stg1_15 = pair_set_epi16(cospi_29_64, cospi_3_64);
 
   const __m128i stg2_0 = pair_set_epi16(cospi_30_64, -cospi_2_64);
   const __m128i stg2_1 = pair_set_epi16(cospi_2_64, cospi_30_64);
-  const __m128i stg2_2 = pair_set_epi16(cospi_14_64, -cospi_18_64);
-  const __m128i stg2_3 = pair_set_epi16(cospi_18_64, cospi_14_64);
-  const __m128i stg2_4 = pair_set_epi16(cospi_22_64, -cospi_10_64);
-  const __m128i stg2_5 = pair_set_epi16(cospi_10_64, cospi_22_64);
   const __m128i stg2_6 = pair_set_epi16(cospi_6_64, -cospi_26_64);
   const __m128i stg2_7 = pair_set_epi16(cospi_26_64, cospi_6_64);
 
   const __m128i stg3_0 = pair_set_epi16(cospi_28_64, -cospi_4_64);
   const __m128i stg3_1 = pair_set_epi16(cospi_4_64, cospi_28_64);
-  const __m128i stg3_2 = pair_set_epi16(cospi_12_64, -cospi_20_64);
-  const __m128i stg3_3 = pair_set_epi16(cospi_20_64, cospi_12_64);
   const __m128i stg3_4 = pair_set_epi16(-cospi_4_64, cospi_28_64);
   const __m128i stg3_5 = pair_set_epi16(cospi_28_64, cospi_4_64);
   const __m128i stg3_6 = pair_set_epi16(-cospi_28_64, -cospi_4_64);
@@ -3242,8 +3228,6 @@ void vp9_idct32x32_34_add_sse2(const int16_t *input, uint8_t *dest,
 
   const __m128i stg4_0 = pair_set_epi16(cospi_16_64, cospi_16_64);
   const __m128i stg4_1 = pair_set_epi16(cospi_16_64, -cospi_16_64);
-  const __m128i stg4_2 = pair_set_epi16(cospi_24_64, -cospi_8_64);
-  const __m128i stg4_3 = pair_set_epi16(cospi_8_64, cospi_24_64);
   const __m128i stg4_4 = pair_set_epi16(-cospi_8_64, cospi_24_64);
   const __m128i stg4_5 = pair_set_epi16(cospi_24_64, cospi_8_64);
   const __m128i stg4_6 = pair_set_epi16(-cospi_24_64, -cospi_8_64);
@@ -3263,47 +3247,29 @@ void vp9_idct32x32_34_add_sse2(const int16_t *input, uint8_t *dest,
           stp2_30, stp2_31;
   __m128i tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
   int i;
-  // Load input data.
-  LOAD_DQCOEFF(in[0], input);
-  LOAD_DQCOEFF(in[8], input);
-  LOAD_DQCOEFF(in[16], input);
-  LOAD_DQCOEFF(in[24], input);
-  LOAD_DQCOEFF(in[1], input);
-  LOAD_DQCOEFF(in[9], input);
-  LOAD_DQCOEFF(in[17], input);
-  LOAD_DQCOEFF(in[25], input);
-  LOAD_DQCOEFF(in[2], input);
-  LOAD_DQCOEFF(in[10], input);
-  LOAD_DQCOEFF(in[18], input);
-  LOAD_DQCOEFF(in[26], input);
-  LOAD_DQCOEFF(in[3], input);
-  LOAD_DQCOEFF(in[11], input);
-  LOAD_DQCOEFF(in[19], input);
-  LOAD_DQCOEFF(in[27], input);
 
-  LOAD_DQCOEFF(in[4], input);
-  LOAD_DQCOEFF(in[12], input);
-  LOAD_DQCOEFF(in[20], input);
-  LOAD_DQCOEFF(in[28], input);
-  LOAD_DQCOEFF(in[5], input);
-  LOAD_DQCOEFF(in[13], input);
-  LOAD_DQCOEFF(in[21], input);
-  LOAD_DQCOEFF(in[29], input);
-  LOAD_DQCOEFF(in[6], input);
-  LOAD_DQCOEFF(in[14], input);
-  LOAD_DQCOEFF(in[22], input);
-  LOAD_DQCOEFF(in[30], input);
-  LOAD_DQCOEFF(in[7], input);
-  LOAD_DQCOEFF(in[15], input);
-  LOAD_DQCOEFF(in[23], input);
-  LOAD_DQCOEFF(in[31], input);
+  // Load input data. Only need to load the top left 8x8 block.
+  in[0] = _mm_load_si128((const __m128i *)input);
+  in[1] = _mm_load_si128((const __m128i *)(input + 32));
+  in[2] = _mm_load_si128((const __m128i *)(input + 64));
+  in[3] = _mm_load_si128((const __m128i *)(input + 96));
+  in[4] = _mm_load_si128((const __m128i *)(input + 128));
+  in[5] = _mm_load_si128((const __m128i *)(input + 160));
+  in[6] = _mm_load_si128((const __m128i *)(input + 192));
+  in[7] = _mm_load_si128((const __m128i *)(input + 224));
+
+  for (i = 8; i < 32; ++i) {
+    in[i] = _mm_setzero_si128();
+  }
 
   array_transpose_8x8(in, in);
+  // TODO(hkuang): Following transposes are unnecessary. But remove them will
+  // lead to performance drop on some devices.
   array_transpose_8x8(in + 8, in + 8);
   array_transpose_8x8(in + 16, in + 16);
   array_transpose_8x8(in + 24, in + 24);
 
-  IDCT32
+  IDCT32_34
 
   // 1_D: Store 32 intermediate results for each 8x32 block.
   col[0] = _mm_add_epi16(stp1_0, stp1_31);
