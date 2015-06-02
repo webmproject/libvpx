@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b97b38ac_be195d83",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-02T03:16:48Z",
+      "side": 1,
+      "message": "this could be a static_cast too",
+      "range": {
+        "startLine": 100,
+        "startChar": 40,
+        "endLine": 100,
+        "endChar": 47
+      },
+      "revId": "3424e2061021f55e6c1cf304a035de10b7c1dd28",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "39d588cf_60f49c84",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 514,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-02T03:16:48Z",
+      "side": 1,
+      "message": "here too",
+      "range": {
+        "startLine": 514,
+        "startChar": 40,
+        "endLine": 514,
+        "endChar": 47
+      },
+      "revId": "3424e2061021f55e6c1cf304a035de10b7c1dd28",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
