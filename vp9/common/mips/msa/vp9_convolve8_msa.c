@@ -26,93 +26,68 @@ static void common_hv_8ht_8vt_4w_msa(const uint8_t *src, int32_t src_stride,
                                      int32_t height) {
   uint32_t loop_cnt;
   v16i8 src0, src1, src2, src3, src4, src5, src6, src7, src8, src9, src10;
-  v16i8 filt_horiz0, filt_horiz1, filt_horiz2, filt_horiz3;
-  v16u8 mask0, mask1, mask2, mask3;
-  v8i16 filt_horiz;
-  v8i16 horiz_out0, horiz_out1, horiz_out2, horiz_out3, horiz_out4;
-  v8i16 horiz_out5, horiz_out6, horiz_out7, horiz_out8, horiz_out9;
-  v8i16 tmp0, tmp1, out0, out1, out2, out3, out4;
-  v8i16 filt, filt_vert0, filt_vert1, filt_vert2, filt_vert3;
+  v16i8 filt_hz0, filt_hz1, filt_hz2, filt_hz3;
+  v16u8 mask0, mask1, mask2, mask3, out;
+  v8i16 hz_out0, hz_out1, hz_out2, hz_out3, hz_out4, hz_out5, hz_out6;
+  v8i16 hz_out7, hz_out8, hz_out9, tmp0, tmp1, out0, out1, out2, out3, out4;
+  v8i16 filt, filt_vt0, filt_vt1, filt_vt2, filt_vt3;
 
-  mask0 = LOAD_UB(&mc_filt_mask_arr[16]);
-
+  mask0 = LD_UB(&mc_filt_mask_arr[16]);
   src -= (3 + 3 * src_stride);
 
   /* rearranging filter */
-  filt_horiz = LOAD_SH(filter_horiz);
-  filt_horiz0 = (v16i8)__msa_splati_h(filt_horiz, 0);
-  filt_horiz1 = (v16i8)__msa_splati_h(filt_horiz, 1);
-  filt_horiz2 = (v16i8)__msa_splati_h(filt_horiz, 2);
-  filt_horiz3 = (v16i8)__msa_splati_h(filt_horiz, 3);
+  filt = LD_SH(filter_horiz);
+  SPLATI_H4_SB(filt, 0, 1, 2, 3, filt_hz0, filt_hz1, filt_hz2, filt_hz3);
 
   mask1 = mask0 + 2;
   mask2 = mask0 + 4;
   mask3 = mask0 + 6;
 
-  LOAD_7VECS_SB(src, src_stride, src0, src1, src2, src3, src4, src5, src6);
+  LD_SB7(src, src_stride, src0, src1, src2, src3, src4, src5, src6);
+  XORI_B7_128_SB(src0, src1, src2, src3, src4, src5, src6);
   src += (7 * src_stride);
 
-  XORI_B_7VECS_SB(src0, src1, src2, src3, src4, src5, src6,
-                  src0, src1, src2, src3, src4, src5, src6, 128);
+  hz_out0 = HORIZ_8TAP_FILT(src0, src1, mask0, mask1, mask2, mask3, filt_hz0,
+                            filt_hz1, filt_hz2, filt_hz3);
+  hz_out2 = HORIZ_8TAP_FILT(src2, src3, mask0, mask1, mask2, mask3, filt_hz0,
+                            filt_hz1, filt_hz2, filt_hz3);
+  hz_out4 = HORIZ_8TAP_FILT(src4, src5, mask0, mask1, mask2, mask3, filt_hz0,
+                            filt_hz1, filt_hz2, filt_hz3);
+  hz_out5 = HORIZ_8TAP_FILT(src5, src6, mask0, mask1, mask2, mask3, filt_hz0,
+                            filt_hz1, filt_hz2, filt_hz3);
+  SLDI_B2_SH(hz_out2, hz_out4, hz_out0, hz_out2, hz_out1, hz_out3, 8);
 
-  horiz_out0 = HORIZ_8TAP_FILT_2VECS(src0, src1, mask0, mask1, mask2, mask3,
-                                     filt_horiz0, filt_horiz1, filt_horiz2,
-                                     filt_horiz3);
-  horiz_out2 = HORIZ_8TAP_FILT_2VECS(src2, src3, mask0, mask1, mask2, mask3,
-                                     filt_horiz0, filt_horiz1, filt_horiz2,
-                                     filt_horiz3);
-  horiz_out4 = HORIZ_8TAP_FILT_2VECS(src4, src5, mask0, mask1, mask2, mask3,
-                                     filt_horiz0, filt_horiz1, filt_horiz2,
-                                     filt_horiz3);
-  horiz_out5 = HORIZ_8TAP_FILT_2VECS(src5, src6, mask0, mask1, mask2, mask3,
-                                     filt_horiz0, filt_horiz1, filt_horiz2,
-                                     filt_horiz3);
-  horiz_out1 = (v8i16)__msa_sldi_b((v16i8)horiz_out2, (v16i8)horiz_out0, 8);
-  horiz_out3 = (v8i16)__msa_sldi_b((v16i8)horiz_out4, (v16i8)horiz_out2, 8);
+  filt = LD_SH(filter_vert);
+  SPLATI_H4_SH(filt, 0, 1, 2, 3, filt_vt0, filt_vt1, filt_vt2, filt_vt3);
 
-  filt = LOAD_SH(filter_vert);
-  filt_vert0 = __msa_splati_h(filt, 0);
-  filt_vert1 = __msa_splati_h(filt, 1);
-  filt_vert2 = __msa_splati_h(filt, 2);
-  filt_vert3 = __msa_splati_h(filt, 3);
-
-  out0 = (v8i16)__msa_ilvev_b((v16i8)horiz_out1, (v16i8)horiz_out0);
-  out1 = (v8i16)__msa_ilvev_b((v16i8)horiz_out3, (v16i8)horiz_out2);
-  out2 = (v8i16)__msa_ilvev_b((v16i8)horiz_out5, (v16i8)horiz_out4);
+  ILVEV_B2_SH(hz_out0, hz_out1, hz_out2, hz_out3, out0, out1);
+  out2 = (v8i16)__msa_ilvev_b((v16i8)hz_out5, (v16i8)hz_out4);
 
   for (loop_cnt = (height >> 2); loop_cnt--;) {
-    LOAD_4VECS_SB(src, src_stride, src7, src8, src9, src10);
+    LD_SB4(src, src_stride, src7, src8, src9, src10);
+    XORI_B4_128_SB(src7, src8, src9, src10);
     src += (4 * src_stride);
 
-    XORI_B_4VECS_SB(src7, src8, src9, src10, src7, src8, src9, src10, 128);
+    hz_out7 = HORIZ_8TAP_FILT(src7, src8, mask0, mask1, mask2, mask3,
+                              filt_hz0, filt_hz1, filt_hz2, filt_hz3);
+    hz_out6 = (v8i16)__msa_sldi_b((v16i8)hz_out7, (v16i8)hz_out5, 8);
+    out3 = (v8i16)__msa_ilvev_b((v16i8)hz_out7, (v16i8)hz_out6);
+    tmp0 = FILT_8TAP_DPADD_S_H(out0, out1, out2, out3, filt_vt0, filt_vt1,
+                               filt_vt2, filt_vt3);
 
-    horiz_out7 = HORIZ_8TAP_FILT_2VECS(src7, src8, mask0, mask1, mask2, mask3,
-                                       filt_horiz0, filt_horiz1, filt_horiz2,
-                                       filt_horiz3);
-    horiz_out6 = (v8i16)__msa_sldi_b((v16i8)horiz_out7, (v16i8)horiz_out5, 8);
-
-    out3 = (v8i16)__msa_ilvev_b((v16i8)horiz_out7, (v16i8)horiz_out6);
-
-    tmp0 = FILT_8TAP_DPADD_S_H(out0, out1, out2, out3, filt_vert0, filt_vert1,
-                               filt_vert2, filt_vert3);
-
-    horiz_out9 = HORIZ_8TAP_FILT_2VECS(src9, src10, mask0, mask1, mask2, mask3,
-                                       filt_horiz0, filt_horiz1, filt_horiz2,
-                                       filt_horiz3);
-    horiz_out8 = (v8i16)__msa_sldi_b((v16i8)horiz_out9, (v16i8)horiz_out7, 8);
-
-    out4 = (v8i16)__msa_ilvev_b((v16i8)horiz_out9, (v16i8)horiz_out8);
-
-    tmp1 = FILT_8TAP_DPADD_S_H(out1, out2, out3, out4, filt_vert0, filt_vert1,
-                               filt_vert2, filt_vert3);
-    tmp0 = SRARI_SATURATE_SIGNED_H(tmp0, FILTER_BITS, 7);
-    tmp1 = SRARI_SATURATE_SIGNED_H(tmp1, FILTER_BITS, 7);
-
-    PCKEV_2B_XORI128_STORE_4_BYTES_4(tmp0, tmp1, dst, dst_stride);
+    hz_out9 = HORIZ_8TAP_FILT(src9, src10, mask0, mask1, mask2, mask3,
+                              filt_hz0, filt_hz1, filt_hz2, filt_hz3);
+    hz_out8 = (v8i16)__msa_sldi_b((v16i8)hz_out9, (v16i8)hz_out7, 8);
+    out4 = (v8i16)__msa_ilvev_b((v16i8)hz_out9, (v16i8)hz_out8);
+    tmp1 = FILT_8TAP_DPADD_S_H(out1, out2, out3, out4, filt_vt0, filt_vt1,
+                               filt_vt2, filt_vt3);
+    SRARI_H2_SH(tmp0, tmp1, FILTER_BITS);
+    SAT_SH2_SH(tmp0, tmp1, 7);
+    out = PCKEV_XORI128_UB(tmp0, tmp1);
+    ST4x4_UB(out, out, 0, 1, 2, 3, dst, dst_stride);
     dst += (4 * dst_stride);
 
-    horiz_out5 = horiz_out9;
-
+    hz_out5 = hz_out9;
     out0 = out2;
     out1 = out3;
     out2 = out4;
@@ -125,108 +100,87 @@ static void common_hv_8ht_8vt_8w_msa(const uint8_t *src, int32_t src_stride,
                                      int32_t height) {
   uint32_t loop_cnt;
   v16i8 src0, src1, src2, src3, src4, src5, src6, src7, src8, src9, src10;
-  v16i8 filt_horiz0, filt_horiz1, filt_horiz2, filt_horiz3;
-  v8i16 filt_horiz, filt, filt_vert0, filt_vert1, filt_vert2, filt_vert3;
-  v16u8 mask0, mask1, mask2, mask3;
-  v8i16 horiz_out0, horiz_out1, horiz_out2, horiz_out3;
-  v8i16 horiz_out4, horiz_out5, horiz_out6, horiz_out7;
-  v8i16 horiz_out8, horiz_out9, horiz_out10;
+  v16i8 filt_hz0, filt_hz1, filt_hz2, filt_hz3;
+  v16u8 mask0, mask1, mask2, mask3, vec0, vec1;
+  v8i16 filt, filt_vt0, filt_vt1, filt_vt2, filt_vt3;
+  v8i16 hz_out0, hz_out1, hz_out2, hz_out3, hz_out4, hz_out5, hz_out6;
+  v8i16 hz_out7, hz_out8, hz_out9, hz_out10, tmp0, tmp1, tmp2, tmp3;
   v8i16 out0, out1, out2, out3, out4, out5, out6, out7, out8, out9;
-  v8i16 tmp0, tmp1, tmp2, tmp3;
 
-  mask0 = LOAD_UB(&mc_filt_mask_arr[0]);
-
+  mask0 = LD_UB(&mc_filt_mask_arr[0]);
   src -= (3 + 3 * src_stride);
 
   /* rearranging filter */
-  filt_horiz = LOAD_SH(filter_horiz);
-  filt_horiz0 = (v16i8)__msa_splati_h(filt_horiz, 0);
-  filt_horiz1 = (v16i8)__msa_splati_h(filt_horiz, 1);
-  filt_horiz2 = (v16i8)__msa_splati_h(filt_horiz, 2);
-  filt_horiz3 = (v16i8)__msa_splati_h(filt_horiz, 3);
+  filt = LD_SH(filter_horiz);
+  SPLATI_H4_SB(filt, 0, 1, 2, 3, filt_hz0, filt_hz1, filt_hz2, filt_hz3);
 
   mask1 = mask0 + 2;
   mask2 = mask0 + 4;
   mask3 = mask0 + 6;
 
-  LOAD_7VECS_SB(src, src_stride, src0, src1, src2, src3, src4, src5, src6);
+  LD_SB7(src, src_stride, src0, src1, src2, src3, src4, src5, src6);
   src += (7 * src_stride);
 
-  XORI_B_7VECS_SB(src0, src1, src2, src3, src4, src5, src6,
-                  src0, src1, src2, src3, src4, src5, src6, 128);
+  XORI_B7_128_SB(src0, src1, src2, src3, src4, src5, src6);
+  hz_out0 = HORIZ_8TAP_FILT(src0, src0, mask0, mask1, mask2, mask3, filt_hz0,
+                            filt_hz1, filt_hz2, filt_hz3);
+  hz_out1 = HORIZ_8TAP_FILT(src1, src1, mask0, mask1, mask2, mask3, filt_hz0,
+                            filt_hz1, filt_hz2, filt_hz3);
+  hz_out2 = HORIZ_8TAP_FILT(src2, src2, mask0, mask1, mask2, mask3, filt_hz0,
+                            filt_hz1, filt_hz2, filt_hz3);
+  hz_out3 = HORIZ_8TAP_FILT(src3, src3, mask0, mask1, mask2, mask3, filt_hz0,
+                            filt_hz1, filt_hz2, filt_hz3);
+  hz_out4 = HORIZ_8TAP_FILT(src4, src4, mask0, mask1, mask2, mask3, filt_hz0,
+                            filt_hz1, filt_hz2, filt_hz3);
+  hz_out5 = HORIZ_8TAP_FILT(src5, src5, mask0, mask1, mask2, mask3, filt_hz0,
+                            filt_hz1, filt_hz2, filt_hz3);
+  hz_out6 = HORIZ_8TAP_FILT(src6, src6, mask0, mask1, mask2, mask3, filt_hz0,
+                            filt_hz1, filt_hz2, filt_hz3);
 
-  horiz_out0 = HORIZ_8TAP_FILT(src0, mask0, mask1, mask2, mask3, filt_horiz0,
-                               filt_horiz1, filt_horiz2, filt_horiz3);
-  horiz_out1 = HORIZ_8TAP_FILT(src1, mask0, mask1, mask2, mask3, filt_horiz0,
-                               filt_horiz1, filt_horiz2, filt_horiz3);
-  horiz_out2 = HORIZ_8TAP_FILT(src2, mask0, mask1, mask2, mask3, filt_horiz0,
-                               filt_horiz1, filt_horiz2, filt_horiz3);
-  horiz_out3 = HORIZ_8TAP_FILT(src3, mask0, mask1, mask2, mask3, filt_horiz0,
-                               filt_horiz1, filt_horiz2, filt_horiz3);
-  horiz_out4 = HORIZ_8TAP_FILT(src4, mask0, mask1, mask2, mask3, filt_horiz0,
-                               filt_horiz1, filt_horiz2, filt_horiz3);
-  horiz_out5 = HORIZ_8TAP_FILT(src5, mask0, mask1, mask2, mask3, filt_horiz0,
-                               filt_horiz1, filt_horiz2, filt_horiz3);
-  horiz_out6 = HORIZ_8TAP_FILT(src6, mask0, mask1, mask2, mask3, filt_horiz0,
-                               filt_horiz1, filt_horiz2, filt_horiz3);
+  filt = LD_SH(filter_vert);
+  SPLATI_H4_SH(filt, 0, 1, 2, 3, filt_vt0, filt_vt1, filt_vt2, filt_vt3);
 
-  filt = LOAD_SH(filter_vert);
-  filt_vert0 = __msa_splati_h(filt, 0);
-  filt_vert1 = __msa_splati_h(filt, 1);
-  filt_vert2 = __msa_splati_h(filt, 2);
-  filt_vert3 = __msa_splati_h(filt, 3);
-
-  out0 = (v8i16)__msa_ilvev_b((v16i8)horiz_out1, (v16i8)horiz_out0);
-  out1 = (v8i16)__msa_ilvev_b((v16i8)horiz_out3, (v16i8)horiz_out2);
-  out2 = (v8i16)__msa_ilvev_b((v16i8)horiz_out5, (v16i8)horiz_out4);
-  out4 = (v8i16)__msa_ilvev_b((v16i8)horiz_out2, (v16i8)horiz_out1);
-  out5 = (v8i16)__msa_ilvev_b((v16i8)horiz_out4, (v16i8)horiz_out3);
-  out6 = (v8i16)__msa_ilvev_b((v16i8)horiz_out6, (v16i8)horiz_out5);
+  ILVEV_B2_SH(hz_out0, hz_out1, hz_out2, hz_out3, out0, out1);
+  ILVEV_B2_SH(hz_out4, hz_out5, hz_out1, hz_out2, out2, out4);
+  ILVEV_B2_SH(hz_out3, hz_out4, hz_out5, hz_out6, out5, out6);
 
   for (loop_cnt = (height >> 2); loop_cnt--;) {
-    LOAD_4VECS_SB(src, src_stride, src7, src8, src9, src10);
+    LD_SB4(src, src_stride, src7, src8, src9, src10);
     src += (4 * src_stride);
 
-    XORI_B_4VECS_SB(src7, src8, src9, src10, src7, src8, src9, src10, 128);
+    XORI_B4_128_SB(src7, src8, src9, src10);
 
-    horiz_out7 = HORIZ_8TAP_FILT(src7, mask0, mask1, mask2, mask3, filt_horiz0,
-                                 filt_horiz1, filt_horiz2, filt_horiz3);
+    hz_out7 = HORIZ_8TAP_FILT(src7, src7, mask0, mask1, mask2, mask3,
+                              filt_hz0, filt_hz1, filt_hz2, filt_hz3);
+    out3 = (v8i16)__msa_ilvev_b((v16i8)hz_out7, (v16i8)hz_out6);
+    tmp0 = FILT_8TAP_DPADD_S_H(out0, out1, out2, out3, filt_vt0, filt_vt1,
+                               filt_vt2, filt_vt3);
 
-    out3 = (v8i16)__msa_ilvev_b((v16i8)horiz_out7, (v16i8)horiz_out6);
-    tmp0 = FILT_8TAP_DPADD_S_H(out0, out1, out2, out3, filt_vert0, filt_vert1,
-                               filt_vert2, filt_vert3);
-    tmp0 = SRARI_SATURATE_SIGNED_H(tmp0, FILTER_BITS, 7);
+    hz_out8 = HORIZ_8TAP_FILT(src8, src8, mask0, mask1, mask2, mask3,
+                              filt_hz0, filt_hz1, filt_hz2, filt_hz3);
+    out7 = (v8i16)__msa_ilvev_b((v16i8)hz_out8, (v16i8)hz_out7);
+    tmp1 = FILT_8TAP_DPADD_S_H(out4, out5, out6, out7, filt_vt0, filt_vt1,
+                               filt_vt2, filt_vt3);
 
-    horiz_out8 = HORIZ_8TAP_FILT(src8, mask0, mask1, mask2, mask3, filt_horiz0,
-                                 filt_horiz1, filt_horiz2, filt_horiz3);
+    hz_out9 = HORIZ_8TAP_FILT(src9, src9, mask0, mask1, mask2, mask3,
+                              filt_hz0, filt_hz1, filt_hz2, filt_hz3);
+    out8 = (v8i16)__msa_ilvev_b((v16i8)hz_out9, (v16i8)hz_out8);
+    tmp2 = FILT_8TAP_DPADD_S_H(out1, out2, out3, out8, filt_vt0, filt_vt1,
+                               filt_vt2, filt_vt3);
 
-    out7 = (v8i16)__msa_ilvev_b((v16i8)horiz_out8, (v16i8)horiz_out7);
-    tmp1 = FILT_8TAP_DPADD_S_H(out4, out5, out6, out7, filt_vert0, filt_vert1,
-                               filt_vert2, filt_vert3);
-    tmp1 = SRARI_SATURATE_SIGNED_H(tmp1, FILTER_BITS, 7);
-
-    horiz_out9 = HORIZ_8TAP_FILT(src9, mask0, mask1, mask2, mask3, filt_horiz0,
-                                 filt_horiz1, filt_horiz2, filt_horiz3);
-
-    out8 = (v8i16)__msa_ilvev_b((v16i8)horiz_out9, (v16i8)horiz_out8);
-    tmp2 = FILT_8TAP_DPADD_S_H(out1, out2, out3, out8, filt_vert0, filt_vert1,
-                               filt_vert2, filt_vert3);
-    tmp2 = SRARI_SATURATE_SIGNED_H(tmp2, FILTER_BITS, 7);
-
-    horiz_out10 = HORIZ_8TAP_FILT(src10, mask0, mask1, mask2, mask3,
-                                  filt_horiz0, filt_horiz1, filt_horiz2,
-                                  filt_horiz3);
-
-    out9 = (v8i16)__msa_ilvev_b((v16i8)horiz_out10, (v16i8)horiz_out9);
-    tmp3 = FILT_8TAP_DPADD_S_H(out5, out6, out7, out9, filt_vert0, filt_vert1,
-                               filt_vert2, filt_vert3);
-    tmp3 = SRARI_SATURATE_SIGNED_H(tmp3, FILTER_BITS, 7);
-
-    PCKEV_B_4_XORI128_STORE_8_BYTES_4(tmp0, tmp1, tmp2, tmp3, dst, dst_stride);
+    hz_out10 = HORIZ_8TAP_FILT(src10, src10, mask0, mask1, mask2, mask3,
+                               filt_hz0, filt_hz1, filt_hz2, filt_hz3);
+    out9 = (v8i16)__msa_ilvev_b((v16i8)hz_out10, (v16i8)hz_out9);
+    tmp3 = FILT_8TAP_DPADD_S_H(out5, out6, out7, out9, filt_vt0, filt_vt1,
+                               filt_vt2, filt_vt3);
+    SRARI_H4_SH(tmp0, tmp1, tmp2, tmp3, FILTER_BITS);
+    SAT_SH4_SH(tmp0, tmp1, tmp2, tmp3, 7);
+    vec0 = PCKEV_XORI128_UB(tmp0, tmp1);
+    vec1 = PCKEV_XORI128_UB(tmp2, tmp3);
+    ST8x4_UB(vec0, vec1, dst, dst_stride);
     dst += (4 * dst_stride);
 
-    horiz_out6 = horiz_out10;
-
+    hz_out6 = hz_out10;
     out0 = out2;
     out1 = out3;
     out2 = out8;
@@ -279,175 +233,89 @@ static void common_hv_2ht_2vt_4x4_msa(const uint8_t *src, int32_t src_stride,
                                       uint8_t *dst, int32_t dst_stride,
                                       int8_t *filter_horiz,
                                       int8_t *filter_vert) {
-  uint32_t out0, out1, out2, out3;
   v16i8 src0, src1, src2, src3, src4, mask;
-  v16u8 res0, res1, horiz_vec;
-  v16u8 filt_vert, filt_horiz, vec0, vec1;
-  v8u16 filt, tmp0, tmp1;
-  v8u16 horiz_out0, horiz_out1, horiz_out2, horiz_out3, horiz_out4;
+  v16u8 filt_vt, filt_hz, vec0, vec1, res0, res1;
+  v8u16 hz_out0, hz_out1, hz_out2, hz_out3, hz_out4, filt, tmp0, tmp1;
 
-  mask = LOAD_SB(&mc_filt_mask_arr[16]);
+  mask = LD_SB(&mc_filt_mask_arr[16]);
 
   /* rearranging filter */
-  filt = LOAD_UH(filter_horiz);
-  filt_horiz = (v16u8)__msa_splati_h((v8i16)filt, 0);
+  filt = LD_UH(filter_horiz);
+  filt_hz = (v16u8)__msa_splati_h((v8i16)filt, 0);
 
-  filt = LOAD_UH(filter_vert);
-  filt_vert = (v16u8)__msa_splati_h((v8i16)filt, 0);
+  filt = LD_UH(filter_vert);
+  filt_vt = (v16u8)__msa_splati_h((v8i16)filt, 0);
 
-  LOAD_5VECS_SB(src, src_stride, src0, src1, src2, src3, src4);
+  LD_SB5(src, src_stride, src0, src1, src2, src3, src4);
+  hz_out0 = HORIZ_2TAP_FILT_UH(src0, src1, mask, filt_hz, FILTER_BITS);
+  hz_out2 = HORIZ_2TAP_FILT_UH(src2, src3, mask, filt_hz, FILTER_BITS);
+  hz_out4 = HORIZ_2TAP_FILT_UH(src4, src4, mask, filt_hz, FILTER_BITS);
+  hz_out1 = (v8u16)__msa_sldi_b((v16i8)hz_out2, (v16i8)hz_out0, 8);
+  hz_out3 = (v8u16)__msa_pckod_d((v2i64)hz_out4, (v2i64)hz_out2);
 
-  horiz_vec = (v16u8)__msa_vshf_b(mask, src1, src0);
-  horiz_out0 = __msa_dotp_u_h(horiz_vec, filt_horiz);
-  horiz_out0 = SRARI_SATURATE_UNSIGNED_H(horiz_out0, FILTER_BITS, 7);
-
-  horiz_vec = (v16u8)__msa_vshf_b(mask, src3, src2);
-  horiz_out2 = __msa_dotp_u_h(horiz_vec, filt_horiz);
-  horiz_out2 = SRARI_SATURATE_UNSIGNED_H(horiz_out2, FILTER_BITS, 7);
-
-  horiz_vec = (v16u8)__msa_vshf_b(mask, src4, src4);
-  horiz_out4 = __msa_dotp_u_h(horiz_vec, filt_horiz);
-  horiz_out4 = SRARI_SATURATE_UNSIGNED_H(horiz_out4, FILTER_BITS, 7);
-
-  horiz_out1 = (v8u16)__msa_sldi_b((v16i8)horiz_out2, (v16i8)horiz_out0, 8);
-  horiz_out3 = (v8u16)__msa_pckod_d((v2i64)horiz_out4, (v2i64)horiz_out2);
-
-  vec0 = (v16u8)__msa_ilvev_b((v16i8)horiz_out1, (v16i8)horiz_out0);
-  vec1 = (v16u8)__msa_ilvev_b((v16i8)horiz_out3, (v16i8)horiz_out2);
-
-  tmp0 = __msa_dotp_u_h(vec0, filt_vert);
-  tmp1 = __msa_dotp_u_h(vec1, filt_vert);
-  tmp0 = SRARI_SATURATE_UNSIGNED_H(tmp0, FILTER_BITS, 7);
-  tmp1 = SRARI_SATURATE_UNSIGNED_H(tmp1, FILTER_BITS, 7);
-
-  res0 = (v16u8)__msa_pckev_b((v16i8)tmp0, (v16i8)tmp0);
-  res1 = (v16u8)__msa_pckev_b((v16i8)tmp1, (v16i8)tmp1);
-
-  out0 = __msa_copy_u_w((v4i32)res0, 0);
-  out1 = __msa_copy_u_w((v4i32)res0, 1);
-  out2 = __msa_copy_u_w((v4i32)res1, 0);
-  out3 = __msa_copy_u_w((v4i32)res1, 1);
-
-  STORE_WORD(dst, out0);
-  dst += dst_stride;
-  STORE_WORD(dst, out1);
-  dst += dst_stride;
-  STORE_WORD(dst, out2);
-  dst += dst_stride;
-  STORE_WORD(dst, out3);
+  ILVEV_B2_UB(hz_out0, hz_out1, hz_out2, hz_out3, vec0, vec1);
+  DOTP_UB2_UH(vec0, vec1, filt_vt, filt_vt, tmp0, tmp1);
+  SRARI_H2_UH(tmp0, tmp1, FILTER_BITS);
+  SAT_UH2_UH(tmp0, tmp1, 7);
+  PCKEV_B2_UB(tmp0, tmp0, tmp1, tmp1, res0, res1);
+  ST4x4_UB(res0, res1, 0, 1, 0, 1, dst, dst_stride);
 }
 
 static void common_hv_2ht_2vt_4x8_msa(const uint8_t *src, int32_t src_stride,
                                       uint8_t *dst, int32_t dst_stride,
                                       int8_t *filter_horiz,
                                       int8_t *filter_vert) {
-  uint32_t out0, out1, out2, out3;
   v16i8 src0, src1, src2, src3, src4, src5, src6, src7, src8, mask;
-  v16u8 filt_horiz, filt_vert, horiz_vec;
-  v16u8 vec0, vec1, vec2, vec3;
-  v8u16 horiz_out0, horiz_out1, horiz_out2, horiz_out3;
-  v8u16 vec4, vec5, vec6, vec7, filt;
-  v8u16 horiz_out4, horiz_out5, horiz_out6, horiz_out7, horiz_out8;
   v16i8 res0, res1, res2, res3;
+  v16u8 filt_hz, filt_vt, vec0, vec1, vec2, vec3;
+  v8u16 hz_out0, hz_out1, hz_out2, hz_out3, hz_out4, hz_out5, hz_out6;
+  v8u16 hz_out7, hz_out8, vec4, vec5, vec6, vec7, filt;
 
-  mask = LOAD_SB(&mc_filt_mask_arr[16]);
+  mask = LD_SB(&mc_filt_mask_arr[16]);
 
   /* rearranging filter */
-  filt = LOAD_UH(filter_horiz);
-  filt_horiz = (v16u8)__msa_splati_h((v8i16)filt, 0);
+  filt = LD_UH(filter_horiz);
+  filt_hz = (v16u8)__msa_splati_h((v8i16)filt, 0);
 
-  filt = LOAD_UH(filter_vert);
-  filt_vert = (v16u8)__msa_splati_h((v8i16)filt, 0);
+  filt = LD_UH(filter_vert);
+  filt_vt = (v16u8)__msa_splati_h((v8i16)filt, 0);
 
-  LOAD_8VECS_SB(src, src_stride,
-                src0, src1, src2, src3, src4, src5, src6, src7);
+  LD_SB8(src, src_stride, src0, src1, src2, src3, src4, src5, src6, src7);
   src += (8 * src_stride);
-  src8 = LOAD_SB(src);
+  src8 = LD_SB(src);
 
-  horiz_vec = (v16u8)__msa_vshf_b(mask, src1, src0);
-  horiz_out0 = __msa_dotp_u_h(horiz_vec, filt_horiz);
-  horiz_out0 = SRARI_SATURATE_UNSIGNED_H(horiz_out0, FILTER_BITS, 7);
+  hz_out0 = HORIZ_2TAP_FILT_UH(src0, src1, mask, filt_hz, FILTER_BITS);
+  hz_out2 = HORIZ_2TAP_FILT_UH(src2, src3, mask, filt_hz, FILTER_BITS);
+  hz_out4 = HORIZ_2TAP_FILT_UH(src4, src5, mask, filt_hz, FILTER_BITS);
+  hz_out6 = HORIZ_2TAP_FILT_UH(src6, src7, mask, filt_hz, FILTER_BITS);
+  hz_out8 = HORIZ_2TAP_FILT_UH(src8, src8, mask, filt_hz, FILTER_BITS);
+  SLDI_B3_UH(hz_out2, hz_out4, hz_out6, hz_out0, hz_out2, hz_out4, hz_out1,
+             hz_out3, hz_out5, 8);
+  hz_out7 = (v8u16)__msa_pckod_d((v2i64)hz_out8, (v2i64)hz_out6);
 
-  horiz_vec = (v16u8)__msa_vshf_b(mask, src3, src2);
-  horiz_out2 = __msa_dotp_u_h(horiz_vec, filt_horiz);
-  horiz_out2 = SRARI_SATURATE_UNSIGNED_H(horiz_out2, FILTER_BITS, 7);
-
-  horiz_vec = (v16u8)__msa_vshf_b(mask, src5, src4);
-  horiz_out4 = __msa_dotp_u_h(horiz_vec, filt_horiz);
-  horiz_out4 = SRARI_SATURATE_UNSIGNED_H(horiz_out4, FILTER_BITS, 7);
-
-  horiz_vec = (v16u8)__msa_vshf_b(mask, src7, src6);
-  horiz_out6 = __msa_dotp_u_h(horiz_vec, filt_horiz);
-  horiz_out6 = SRARI_SATURATE_UNSIGNED_H(horiz_out6, FILTER_BITS, 7);
-
-  horiz_vec = (v16u8)__msa_vshf_b(mask, src8, src8);
-  horiz_out8 = __msa_dotp_u_h(horiz_vec, filt_horiz);
-  horiz_out8 = SRARI_SATURATE_UNSIGNED_H(horiz_out8, FILTER_BITS, 7);
-
-  horiz_out1 = (v8u16)__msa_sldi_b((v16i8)horiz_out2, (v16i8)horiz_out0, 8);
-  horiz_out3 = (v8u16)__msa_sldi_b((v16i8)horiz_out4, (v16i8)horiz_out2, 8);
-  horiz_out5 = (v8u16)__msa_sldi_b((v16i8)horiz_out6, (v16i8)horiz_out4, 8);
-  horiz_out7 = (v8u16)__msa_pckod_d((v2i64)horiz_out8, (v2i64)horiz_out6);
-
-  vec0 = (v16u8)__msa_ilvev_b((v16i8)horiz_out1, (v16i8)horiz_out0);
-  vec1 = (v16u8)__msa_ilvev_b((v16i8)horiz_out3, (v16i8)horiz_out2);
-  vec2 = (v16u8)__msa_ilvev_b((v16i8)horiz_out5, (v16i8)horiz_out4);
-  vec3 = (v16u8)__msa_ilvev_b((v16i8)horiz_out7, (v16i8)horiz_out6);
-
-  vec4 = __msa_dotp_u_h(vec0, filt_vert);
-  vec5 = __msa_dotp_u_h(vec1, filt_vert);
-  vec6 = __msa_dotp_u_h(vec2, filt_vert);
-  vec7 = __msa_dotp_u_h(vec3, filt_vert);
-
-  vec4 = SRARI_SATURATE_UNSIGNED_H(vec4, FILTER_BITS, 7);
-  vec5 = SRARI_SATURATE_UNSIGNED_H(vec5, FILTER_BITS, 7);
-  vec6 = SRARI_SATURATE_UNSIGNED_H(vec6, FILTER_BITS, 7);
-  vec7 = SRARI_SATURATE_UNSIGNED_H(vec7, FILTER_BITS, 7);
-
-  res0 = __msa_pckev_b((v16i8)vec4, (v16i8)vec4);
-  res1 = __msa_pckev_b((v16i8)vec5, (v16i8)vec5);
-  res2 = __msa_pckev_b((v16i8)vec6, (v16i8)vec6);
-  res3 = __msa_pckev_b((v16i8)vec7, (v16i8)vec7);
-
-  out0 = __msa_copy_u_w((v4i32)res0, 0);
-  out1 = __msa_copy_u_w((v4i32)res0, 1);
-  out2 = __msa_copy_u_w((v4i32)res1, 0);
-  out3 = __msa_copy_u_w((v4i32)res1, 1);
-
-  STORE_WORD(dst, out0);
-  dst += dst_stride;
-  STORE_WORD(dst, out1);
-  dst += dst_stride;
-  STORE_WORD(dst, out2);
-  dst += dst_stride;
-  STORE_WORD(dst, out3);
-  dst += dst_stride;
-
-  out0 = __msa_copy_u_w((v4i32)res2, 0);
-  out1 = __msa_copy_u_w((v4i32)res2, 1);
-  out2 = __msa_copy_u_w((v4i32)res3, 0);
-  out3 = __msa_copy_u_w((v4i32)res3, 1);
-
-  STORE_WORD(dst, out0);
-  dst += dst_stride;
-  STORE_WORD(dst, out1);
-  dst += dst_stride;
-  STORE_WORD(dst, out2);
-  dst += dst_stride;
-  STORE_WORD(dst, out3);
+  ILVEV_B2_UB(hz_out0, hz_out1, hz_out2, hz_out3, vec0, vec1);
+  ILVEV_B2_UB(hz_out4, hz_out5, hz_out6, hz_out7, vec2, vec3);
+  DOTP_UB4_UH(vec0, vec1, vec2, vec3, filt_vt, filt_vt, filt_vt, filt_vt,
+              vec4, vec5, vec6, vec7);
+  SRARI_H4_UH(vec4, vec5, vec6, vec7, FILTER_BITS);
+  SAT_UH4_UH(vec4, vec5, vec6, vec7, 7);
+  PCKEV_B4_SB(vec4, vec4, vec5, vec5, vec6, vec6, vec7, vec7, res0, res1,
+              res2, res3);
+  ST4x4_UB(res0, res1, 0, 1, 0, 1, dst, dst_stride);
+  dst += (4 * dst_stride);
+  ST4x4_UB(res2, res3, 0, 1, 0, 1, dst, dst_stride);
 }
 
 static void common_hv_2ht_2vt_4w_msa(const uint8_t *src, int32_t src_stride,
                                      uint8_t *dst, int32_t dst_stride,
-                                     int8_t *filter_horiz,
-                                     int8_t *filter_vert,
+                                     int8_t *filter_horiz, int8_t *filter_vert,
                                      int32_t height) {
   if (4 == height) {
-    common_hv_2ht_2vt_4x4_msa(src, src_stride, dst, dst_stride,
-                              filter_horiz, filter_vert);
+    common_hv_2ht_2vt_4x4_msa(src, src_stride, dst, dst_stride, filter_horiz,
+                              filter_vert);
   } else if (8 == height) {
-    common_hv_2ht_2vt_4x8_msa(src, src_stride, dst, dst_stride,
-                              filter_horiz, filter_vert);
+    common_hv_2ht_2vt_4x8_msa(src, src_stride, dst, dst_stride, filter_horiz,
+                              filter_vert);
   }
 }
 
@@ -455,63 +323,43 @@ static void common_hv_2ht_2vt_8x4_msa(const uint8_t *src, int32_t src_stride,
                                       uint8_t *dst, int32_t dst_stride,
                                       int8_t *filter_horiz,
                                       int8_t *filter_vert) {
-  v16i8 src0, src1, src2, src3, src4, mask;
-  v16u8 filt_horiz, filt_vert, horiz_vec;
-  v16u8 vec0, vec1, vec2, vec3;
-  v8u16 horiz_out0, horiz_out1;
-  v8u16 tmp0, tmp1, tmp2, tmp3;
+  v16i8 src0, src1, src2, src3, src4, mask, out0, out1;
+  v16u8 filt_hz, filt_vt, vec0, vec1, vec2, vec3;
+  v8u16 hz_out0, hz_out1, tmp0, tmp1, tmp2, tmp3;
   v8i16 filt;
 
-  mask = LOAD_SB(&mc_filt_mask_arr[0]);
+  mask = LD_SB(&mc_filt_mask_arr[0]);
 
   /* rearranging filter */
-  filt = LOAD_SH(filter_horiz);
-  filt_horiz = (v16u8)__msa_splati_h(filt, 0);
+  filt = LD_SH(filter_horiz);
+  filt_hz = (v16u8)__msa_splati_h(filt, 0);
 
-  filt = LOAD_SH(filter_vert);
-  filt_vert = (v16u8)__msa_splati_h(filt, 0);
+  filt = LD_SH(filter_vert);
+  filt_vt = (v16u8)__msa_splati_h(filt, 0);
 
-  LOAD_5VECS_SB(src, src_stride, src0, src1, src2, src3, src4);
-  src += (5 * src_stride);
+  LD_SB5(src, src_stride, src0, src1, src2, src3, src4);
 
-  horiz_vec = (v16u8)__msa_vshf_b(mask, src0, src0);
-  horiz_out0 = __msa_dotp_u_h(horiz_vec, filt_horiz);
-  horiz_out0 = SRARI_SATURATE_UNSIGNED_H(horiz_out0, FILTER_BITS, 7);
+  hz_out0 = HORIZ_2TAP_FILT_UH(src0, src0, mask, filt_hz, FILTER_BITS);
+  hz_out1 = HORIZ_2TAP_FILT_UH(src1, src1, mask, filt_hz, FILTER_BITS);
+  vec0 = (v16u8)__msa_ilvev_b((v16i8)hz_out1, (v16i8)hz_out0);
+  tmp0 = __msa_dotp_u_h(vec0, filt_vt);
 
-  horiz_vec = (v16u8)__msa_vshf_b(mask, src1, src1);
-  horiz_out1 = __msa_dotp_u_h(horiz_vec, filt_horiz);
-  horiz_out1 = SRARI_SATURATE_UNSIGNED_H(horiz_out1, FILTER_BITS, 7);
+  hz_out0 = HORIZ_2TAP_FILT_UH(src2, src2, mask, filt_hz, FILTER_BITS);
+  vec1 = (v16u8)__msa_ilvev_b((v16i8)hz_out0, (v16i8)hz_out1);
+  tmp1 = __msa_dotp_u_h(vec1, filt_vt);
 
-  vec0 = (v16u8)__msa_ilvev_b((v16i8)horiz_out1, (v16i8)horiz_out0);
-  tmp0 = __msa_dotp_u_h(vec0, filt_vert);
+  hz_out1 = HORIZ_2TAP_FILT_UH(src3, src3, mask, filt_hz, FILTER_BITS);
+  vec2 = (v16u8)__msa_ilvev_b((v16i8)hz_out1, (v16i8)hz_out0);
+  tmp2 = __msa_dotp_u_h(vec2, filt_vt);
 
-  horiz_vec = (v16u8)__msa_vshf_b(mask, src2, src2);
-  horiz_out0 = __msa_dotp_u_h(horiz_vec, filt_horiz);
-  horiz_out0 = SRARI_SATURATE_UNSIGNED_H(horiz_out0, FILTER_BITS, 7);
+  hz_out0 = HORIZ_2TAP_FILT_UH(src4, src4, mask, filt_hz, FILTER_BITS);
+  vec3 = (v16u8)__msa_ilvev_b((v16i8)hz_out0, (v16i8)hz_out1);
+  tmp3 = __msa_dotp_u_h(vec3, filt_vt);
 
-  vec1 = (v16u8)__msa_ilvev_b((v16i8)horiz_out0, (v16i8)horiz_out1);
-  tmp1 = __msa_dotp_u_h(vec1, filt_vert);
-
-  horiz_vec = (v16u8)__msa_vshf_b(mask, src3, src3);
-  horiz_out1 = __msa_dotp_u_h(horiz_vec, filt_horiz);
-  horiz_out1 = SRARI_SATURATE_UNSIGNED_H(horiz_out1, FILTER_BITS, 7);
-
-  vec2 = (v16u8)__msa_ilvev_b((v16i8)horiz_out1, (v16i8)horiz_out0);
-  tmp2 = __msa_dotp_u_h(vec2, filt_vert);
-
-  horiz_vec = (v16u8)__msa_vshf_b(mask, src4, src4);
-  horiz_out0 = __msa_dotp_u_h(horiz_vec, filt_horiz);
-  horiz_out0 = SRARI_SATURATE_UNSIGNED_H(horiz_out0, FILTER_BITS, 7);
-
-  vec3 = (v16u8)__msa_ilvev_b((v16i8)horiz_out0, (v16i8)horiz_out1);
-  tmp3 = __msa_dotp_u_h(vec3, filt_vert);
-
-  tmp0 = SRARI_SATURATE_UNSIGNED_H(tmp0, FILTER_BITS, 7);
-  tmp1 = SRARI_SATURATE_UNSIGNED_H(tmp1, FILTER_BITS, 7);
-  tmp2 = SRARI_SATURATE_UNSIGNED_H(tmp2, FILTER_BITS, 7);
-  tmp3 = SRARI_SATURATE_UNSIGNED_H(tmp3, FILTER_BITS, 7);
-
-  PCKEV_B_STORE_8_BYTES_4(tmp0, tmp1, tmp2, tmp3, dst, dst_stride);
+  SRARI_H4_UH(tmp0, tmp1, tmp2, tmp3, FILTER_BITS);
+  SAT_UH4_UH(tmp0, tmp1, tmp2, tmp3, 7);
+  PCKEV_B2_SB(tmp1, tmp0, tmp3, tmp2, out0, out1);
+  ST8x4_UB(out0, out1, dst, dst_stride);
 }
 
 static void common_hv_2ht_2vt_8x8mult_msa(const uint8_t *src,
@@ -522,106 +370,76 @@ static void common_hv_2ht_2vt_8x8mult_msa(const uint8_t *src,
                                           int8_t *filter_vert,
                                           int32_t height) {
   uint32_t loop_cnt;
-  v16i8 src0, src1, src2, src3, src4, mask;
-  v16u8 filt_horiz, filt_vert, vec0, horiz_vec;
-  v8u16 horiz_out0, horiz_out1;
-  v8u16 tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8;
+  v16i8 src0, src1, src2, src3, src4, mask, out0, out1;
+  v16u8 filt_hz, filt_vt, vec0;
+  v8u16 hz_out0, hz_out1, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7, tmp8;
   v8i16 filt;
 
-  mask = LOAD_SB(&mc_filt_mask_arr[0]);
+  mask = LD_SB(&mc_filt_mask_arr[0]);
 
   /* rearranging filter */
-  filt = LOAD_SH(filter_horiz);
-  filt_horiz = (v16u8)__msa_splati_h(filt, 0);
+  filt = LD_SH(filter_horiz);
+  filt_hz = (v16u8)__msa_splati_h(filt, 0);
 
-  filt = LOAD_SH(filter_vert);
-  filt_vert = (v16u8)__msa_splati_h(filt, 0);
+  filt = LD_SH(filter_vert);
+  filt_vt = (v16u8)__msa_splati_h(filt, 0);
 
-  src0 = LOAD_SB(src);
+  src0 = LD_SB(src);
   src += src_stride;
 
-  horiz_vec = (v16u8)__msa_vshf_b(mask, src0, src0);
-  horiz_out0 = __msa_dotp_u_h(horiz_vec, filt_horiz);
-  horiz_out0 = SRARI_SATURATE_UNSIGNED_H(horiz_out0, FILTER_BITS, 7);
+  hz_out0 = HORIZ_2TAP_FILT_UH(src0, src0, mask, filt_hz, FILTER_BITS);
 
   for (loop_cnt = (height >> 3); loop_cnt--;) {
-    LOAD_4VECS_SB(src, src_stride, src1, src2, src3, src4);
+    LD_SB4(src, src_stride, src1, src2, src3, src4);
     src += (4 * src_stride);
 
-    horiz_vec = (v16u8)__msa_vshf_b(mask, src1, src1);
-    horiz_out1 = __msa_dotp_u_h(horiz_vec, filt_horiz);
-    horiz_out1 = SRARI_SATURATE_UNSIGNED_H(horiz_out1, FILTER_BITS, 7);
+    hz_out1 = HORIZ_2TAP_FILT_UH(src1, src1, mask, filt_hz, FILTER_BITS);
+    vec0 = (v16u8)__msa_ilvev_b((v16i8)hz_out1, (v16i8)hz_out0);
+    tmp1 = __msa_dotp_u_h(vec0, filt_vt);
 
-    vec0 = (v16u8)__msa_ilvev_b((v16i8)horiz_out1, (v16i8)horiz_out0);
-    tmp1 = __msa_dotp_u_h(vec0, filt_vert);
+    hz_out0 = HORIZ_2TAP_FILT_UH(src2, src2, mask, filt_hz, FILTER_BITS);
+    vec0 = (v16u8)__msa_ilvev_b((v16i8)hz_out0, (v16i8)hz_out1);
+    tmp2 = __msa_dotp_u_h(vec0, filt_vt);
 
-    horiz_vec = (v16u8)__msa_vshf_b(mask, src2, src2);
-    horiz_out0 = __msa_dotp_u_h(horiz_vec, filt_horiz);
-    horiz_out0 = SRARI_SATURATE_UNSIGNED_H(horiz_out0, FILTER_BITS, 7);
+    SRARI_H2_UH(tmp1, tmp2, FILTER_BITS);
+    SAT_UH2_UH(tmp1, tmp2, 7);
 
-    vec0 = (v16u8)__msa_ilvev_b((v16i8)horiz_out0, (v16i8)horiz_out1);
-    tmp2 = (v8u16)__msa_dotp_u_h(vec0, filt_vert);
+    hz_out1 = HORIZ_2TAP_FILT_UH(src3, src3, mask, filt_hz, FILTER_BITS);
+    vec0 = (v16u8)__msa_ilvev_b((v16i8)hz_out1, (v16i8)hz_out0);
+    tmp3 = __msa_dotp_u_h(vec0, filt_vt);
 
-    tmp1 = SRARI_SATURATE_UNSIGNED_H(tmp1, FILTER_BITS, 7);
-    tmp2 = SRARI_SATURATE_UNSIGNED_H(tmp2, FILTER_BITS, 7);
-
-    horiz_vec = (v16u8)__msa_vshf_b(mask, src3, src3);
-    horiz_out1 = __msa_dotp_u_h(horiz_vec, filt_horiz);
-    horiz_out1 = SRARI_SATURATE_UNSIGNED_H(horiz_out1, FILTER_BITS, 7);
-
-    vec0 = (v16u8)__msa_ilvev_b((v16i8)horiz_out1, (v16i8)horiz_out0);
-    tmp3 = __msa_dotp_u_h(vec0, filt_vert);
-
-    horiz_vec = (v16u8)__msa_vshf_b(mask, src4, src4);
-    horiz_out0 = __msa_dotp_u_h(horiz_vec, filt_horiz);
-    horiz_out0 = SRARI_SATURATE_UNSIGNED_H(horiz_out0, FILTER_BITS, 7);
-
-    LOAD_4VECS_SB(src, src_stride, src1, src2, src3, src4);
+    hz_out0 = HORIZ_2TAP_FILT_UH(src4, src4, mask, filt_hz, FILTER_BITS);
+    LD_SB4(src, src_stride, src1, src2, src3, src4);
     src += (4 * src_stride);
+    vec0 = (v16u8)__msa_ilvev_b((v16i8)hz_out0, (v16i8)hz_out1);
+    tmp4 = __msa_dotp_u_h(vec0, filt_vt);
 
-    vec0 = (v16u8)__msa_ilvev_b((v16i8)horiz_out0, (v16i8)horiz_out1);
-    tmp4 = __msa_dotp_u_h(vec0, filt_vert);
-
-    tmp3 = SRARI_SATURATE_UNSIGNED_H(tmp3, FILTER_BITS, 7);
-    tmp4 = SRARI_SATURATE_UNSIGNED_H(tmp4, FILTER_BITS, 7);
-
-    PCKEV_B_STORE_8_BYTES_4(tmp1, tmp2, tmp3, tmp4, dst, dst_stride);
+    SRARI_H2_UH(tmp3, tmp4, FILTER_BITS);
+    SAT_UH2_UH(tmp3, tmp4, 7);
+    PCKEV_B2_SB(tmp2, tmp1, tmp4, tmp3, out0, out1);
+    ST8x4_UB(out0, out1, dst, dst_stride);
     dst += (4 * dst_stride);
 
-    horiz_vec = (v16u8)__msa_vshf_b(mask, src1, src1);
-    horiz_out1 = __msa_dotp_u_h(horiz_vec, filt_horiz);
-    horiz_out1 = SRARI_SATURATE_UNSIGNED_H(horiz_out1, FILTER_BITS, 7);
+    hz_out1 = HORIZ_2TAP_FILT_UH(src1, src1, mask, filt_hz, FILTER_BITS);
+    vec0 = (v16u8)__msa_ilvev_b((v16i8)hz_out1, (v16i8)hz_out0);
+    tmp5 = __msa_dotp_u_h(vec0, filt_vt);
 
-    vec0 = (v16u8)__msa_ilvev_b((v16i8)horiz_out1, (v16i8)horiz_out0);
-    tmp5 = __msa_dotp_u_h(vec0, filt_vert);
+    hz_out0 = HORIZ_2TAP_FILT_UH(src2, src2, mask, filt_hz, FILTER_BITS);
+    vec0 = (v16u8)__msa_ilvev_b((v16i8)hz_out0, (v16i8)hz_out1);
+    tmp6 = __msa_dotp_u_h(vec0, filt_vt);
 
-    horiz_vec = (v16u8)__msa_vshf_b(mask, src2, src2);
-    horiz_out0 = __msa_dotp_u_h(horiz_vec, filt_horiz);
-    horiz_out0 = SRARI_SATURATE_UNSIGNED_H(horiz_out0, FILTER_BITS, 7);
+    hz_out1 = HORIZ_2TAP_FILT_UH(src3, src3, mask, filt_hz, FILTER_BITS);
+    vec0 = (v16u8)__msa_ilvev_b((v16i8)hz_out1, (v16i8)hz_out0);
+    tmp7 = __msa_dotp_u_h(vec0, filt_vt);
 
-    vec0 = (v16u8)__msa_ilvev_b((v16i8)horiz_out0, (v16i8)horiz_out1);
-    tmp6 = __msa_dotp_u_h(vec0, filt_vert);
+    hz_out0 = HORIZ_2TAP_FILT_UH(src4, src4, mask, filt_hz, FILTER_BITS);
+    vec0 = (v16u8)__msa_ilvev_b((v16i8)hz_out0, (v16i8)hz_out1);
+    tmp8 = __msa_dotp_u_h(vec0, filt_vt);
 
-    horiz_vec = (v16u8)__msa_vshf_b(mask, src3, src3);
-    horiz_out1 = __msa_dotp_u_h(horiz_vec, filt_horiz);
-    horiz_out1 = SRARI_SATURATE_UNSIGNED_H(horiz_out1, FILTER_BITS, 7);
-
-    vec0 = (v16u8)__msa_ilvev_b((v16i8)horiz_out1, (v16i8)horiz_out0);
-    tmp7 = __msa_dotp_u_h(vec0, filt_vert);
-
-    horiz_vec = (v16u8)__msa_vshf_b(mask, src4, src4);
-    horiz_out0 = __msa_dotp_u_h(horiz_vec, filt_horiz);
-    horiz_out0 = SRARI_SATURATE_UNSIGNED_H(horiz_out0, FILTER_BITS, 7);
-
-    vec0 = (v16u8)__msa_ilvev_b((v16i8)horiz_out0, (v16i8)horiz_out1);
-    tmp8 = __msa_dotp_u_h(vec0, filt_vert);
-
-    tmp5 = SRARI_SATURATE_UNSIGNED_H(tmp5, FILTER_BITS, 7);
-    tmp6 = SRARI_SATURATE_UNSIGNED_H(tmp6, FILTER_BITS, 7);
-    tmp7 = SRARI_SATURATE_UNSIGNED_H(tmp7, FILTER_BITS, 7);
-    tmp8 = SRARI_SATURATE_UNSIGNED_H(tmp8, FILTER_BITS, 7);
-
-    PCKEV_B_STORE_8_BYTES_4(tmp5, tmp6, tmp7, tmp8, dst, dst_stride);
+    SRARI_H4_UH(tmp5, tmp6, tmp7, tmp8, FILTER_BITS);
+    SAT_UH4_UH(tmp5, tmp6, tmp7, tmp8, 7);
+    PCKEV_B2_SB(tmp6, tmp5, tmp8, tmp7, out0, out1);
+    ST8x4_UB(out0, out1, dst, dst_stride);
     dst += (4 * dst_stride);
   }
 }
@@ -645,108 +463,64 @@ static void common_hv_2ht_2vt_16w_msa(const uint8_t *src, int32_t src_stride,
                                       int32_t height) {
   uint32_t loop_cnt;
   v16i8 src0, src1, src2, src3, src4, src5, src6, src7, mask;
-  v16u8 filt_horiz, filt_vert, vec0, horiz_vec;
-  v8u16 horiz_vec0, horiz_vec1, tmp1, tmp2;
-  v8u16 horiz_out0, horiz_out1, horiz_out2, horiz_out3;
+  v16u8 filt_hz, filt_vt, vec0, vec1;
+  v8u16 tmp1, tmp2, hz_out0, hz_out1, hz_out2, hz_out3;
   v8i16 filt;
 
-  mask = LOAD_SB(&mc_filt_mask_arr[0]);
+  mask = LD_SB(&mc_filt_mask_arr[0]);
 
   /* rearranging filter */
-  filt = LOAD_SH(filter_horiz);
-  filt_horiz = (v16u8)__msa_splati_h(filt, 0);
+  filt = LD_SH(filter_horiz);
+  filt_hz = (v16u8)__msa_splati_h(filt, 0);
 
-  filt = LOAD_SH(filter_vert);
-  filt_vert = (v16u8)__msa_splati_h(filt, 0);
+  filt = LD_SH(filter_vert);
+  filt_vt = (v16u8)__msa_splati_h(filt, 0);
 
-  src0 = LOAD_SB(src);
-  src1 = LOAD_SB(src + 8);
-
-  horiz_vec = (v16u8)__msa_vshf_b(mask, src0, src0);
-  horiz_vec0 = __msa_dotp_u_h(horiz_vec, filt_horiz);
-  horiz_out0 = SRARI_SATURATE_UNSIGNED_H(horiz_vec0, FILTER_BITS, 7);
-
-  horiz_vec = (v16u8)__msa_vshf_b(mask, src1, src1);
-  horiz_vec1 = __msa_dotp_u_h(horiz_vec, filt_horiz);
-  horiz_out2 = SRARI_SATURATE_UNSIGNED_H(horiz_vec1, FILTER_BITS, 7);
-
+  LD_SB2(src, 8, src0, src1);
   src += src_stride;
 
+  hz_out0 = HORIZ_2TAP_FILT_UH(src0, src0, mask, filt_hz, FILTER_BITS);
+  hz_out2 = HORIZ_2TAP_FILT_UH(src1, src1, mask, filt_hz, FILTER_BITS);
+
   for (loop_cnt = (height >> 2); loop_cnt--;) {
-    LOAD_4VECS_SB(src, src_stride, src0, src2, src4, src6);
-    LOAD_4VECS_SB(src + 8, src_stride, src1, src3, src5, src7);
+    LD_SB4(src, src_stride, src0, src2, src4, src6);
+    LD_SB4(src + 8, src_stride, src1, src3, src5, src7);
     src += (4 * src_stride);
 
-    horiz_vec = (v16u8)__msa_vshf_b(mask, src0, src0);
-    horiz_vec0 = __msa_dotp_u_h(horiz_vec, filt_horiz);
-    horiz_out1 = SRARI_SATURATE_UNSIGNED_H(horiz_vec0, FILTER_BITS, 7);
-
-    horiz_vec = (v16u8)__msa_vshf_b(mask, src1, src1);
-    horiz_vec1 = __msa_dotp_u_h(horiz_vec, filt_horiz);
-    horiz_out3 = SRARI_SATURATE_UNSIGNED_H(horiz_vec1, FILTER_BITS, 7);
-
-    vec0 = (v16u8)__msa_ilvev_b((v16i8)horiz_out1, (v16i8)horiz_out0);
-    tmp1 = __msa_dotp_u_h(vec0, filt_vert);
-    vec0 = (v16u8)__msa_ilvev_b((v16i8)horiz_out3, (v16i8)horiz_out2);
-    tmp2 = __msa_dotp_u_h(vec0, filt_vert);
-    tmp1 = SRARI_SATURATE_UNSIGNED_H(tmp1, FILTER_BITS, 7);
-    tmp2 = SRARI_SATURATE_UNSIGNED_H(tmp2, FILTER_BITS, 7);
-
-    PCKEV_B_STORE_VEC(tmp2, tmp1, dst);
+    hz_out1 = HORIZ_2TAP_FILT_UH(src0, src0, mask, filt_hz, FILTER_BITS);
+    hz_out3 = HORIZ_2TAP_FILT_UH(src1, src1, mask, filt_hz, FILTER_BITS);
+    ILVEV_B2_UB(hz_out0, hz_out1, hz_out2, hz_out3, vec0, vec1);
+    DOTP_UB2_UH(vec0, vec1, filt_vt, filt_vt, tmp1, tmp2);
+    SRARI_H2_UH(tmp1, tmp2, FILTER_BITS);
+    SAT_UH2_UH(tmp1, tmp2, 7);
+    PCKEV_ST_SB(tmp1, tmp2, dst);
     dst += dst_stride;
 
-    horiz_vec = (v16u8)__msa_vshf_b(mask, src2, src2);
-    horiz_vec0 = __msa_dotp_u_h(horiz_vec, filt_horiz);
-    horiz_out0 = SRARI_SATURATE_UNSIGNED_H(horiz_vec0, FILTER_BITS, 7);
-
-    horiz_vec = (v16u8)__msa_vshf_b(mask, src3, src3);
-    horiz_vec1 = __msa_dotp_u_h(horiz_vec, filt_horiz);
-    horiz_out2 = SRARI_SATURATE_UNSIGNED_H(horiz_vec1, FILTER_BITS, 7);
-
-    vec0 = (v16u8)__msa_ilvev_b((v16i8)horiz_out0, (v16i8)horiz_out1);
-    tmp1 = __msa_dotp_u_h(vec0, filt_vert);
-    vec0 = (v16u8)__msa_ilvev_b((v16i8)horiz_out2, (v16i8)horiz_out3);
-    tmp2 = __msa_dotp_u_h(vec0, filt_vert);
-    tmp1 = SRARI_SATURATE_UNSIGNED_H(tmp1, FILTER_BITS, 7);
-    tmp2 = SRARI_SATURATE_UNSIGNED_H(tmp2, FILTER_BITS, 7);
-
-    PCKEV_B_STORE_VEC(tmp2, tmp1, dst);
+    hz_out0 = HORIZ_2TAP_FILT_UH(src2, src2, mask, filt_hz, FILTER_BITS);
+    hz_out2 = HORIZ_2TAP_FILT_UH(src3, src3, mask, filt_hz, FILTER_BITS);
+    ILVEV_B2_UB(hz_out1, hz_out0, hz_out3, hz_out2, vec0, vec1);
+    DOTP_UB2_UH(vec0, vec1, filt_vt, filt_vt, tmp1, tmp2);
+    SRARI_H2_UH(tmp1, tmp2, FILTER_BITS);
+    SAT_UH2_UH(tmp1, tmp2, 7);
+    PCKEV_ST_SB(tmp1, tmp2, dst);
     dst += dst_stride;
 
-    horiz_vec = (v16u8)__msa_vshf_b(mask, src4, src4);
-    horiz_vec0 = __msa_dotp_u_h(horiz_vec, filt_horiz);
-    horiz_out1 = SRARI_SATURATE_UNSIGNED_H(horiz_vec0, FILTER_BITS, 7);
-
-    horiz_vec = (v16u8)__msa_vshf_b(mask, src5, src5);
-    horiz_vec1 = __msa_dotp_u_h(horiz_vec, filt_horiz);
-    horiz_out3 = SRARI_SATURATE_UNSIGNED_H(horiz_vec1, FILTER_BITS, 7);
-
-    vec0 = (v16u8)__msa_ilvev_b((v16i8)horiz_out1, (v16i8)horiz_out0);
-    tmp1 = __msa_dotp_u_h(vec0, filt_vert);
-    vec0 = (v16u8)__msa_ilvev_b((v16i8)horiz_out3, (v16i8)horiz_out2);
-    tmp2 = __msa_dotp_u_h(vec0, filt_vert);
-    tmp1 = SRARI_SATURATE_UNSIGNED_H(tmp1, FILTER_BITS, 7);
-    tmp2 = SRARI_SATURATE_UNSIGNED_H(tmp2, FILTER_BITS, 7);
-
-    PCKEV_B_STORE_VEC(tmp2, tmp1, dst);
+    hz_out1 = HORIZ_2TAP_FILT_UH(src4, src4, mask, filt_hz, FILTER_BITS);
+    hz_out3 = HORIZ_2TAP_FILT_UH(src5, src5, mask, filt_hz, FILTER_BITS);
+    ILVEV_B2_UB(hz_out0, hz_out1, hz_out2, hz_out3, vec0, vec1);
+    DOTP_UB2_UH(vec0, vec1, filt_vt, filt_vt, tmp1, tmp2);
+    SRARI_H2_UH(tmp1, tmp2, FILTER_BITS);
+    SAT_UH2_UH(tmp1, tmp2, 7);
+    PCKEV_ST_SB(tmp1, tmp2, dst);
     dst += dst_stride;
 
-    horiz_vec = (v16u8)__msa_vshf_b(mask, src6, src6);
-    horiz_vec0 = __msa_dotp_u_h(horiz_vec, filt_horiz);
-    horiz_out0 = SRARI_SATURATE_UNSIGNED_H(horiz_vec0, FILTER_BITS, 7);
-
-    horiz_vec = (v16u8)__msa_vshf_b(mask, src7, src7);
-    horiz_vec1 = __msa_dotp_u_h(horiz_vec, filt_horiz);
-    horiz_out2 = SRARI_SATURATE_UNSIGNED_H(horiz_vec1, FILTER_BITS, 7);
-
-    vec0 = (v16u8)__msa_ilvev_b((v16i8)horiz_out0, (v16i8)horiz_out1);
-    tmp1 = __msa_dotp_u_h(vec0, filt_vert);
-    vec0 = (v16u8)__msa_ilvev_b((v16i8)horiz_out2, (v16i8)horiz_out3);
-    tmp2 = __msa_dotp_u_h(vec0, filt_vert);
-    tmp1 = SRARI_SATURATE_UNSIGNED_H(tmp1, FILTER_BITS, 7);
-    tmp2 = SRARI_SATURATE_UNSIGNED_H(tmp2, FILTER_BITS, 7);
-
-    PCKEV_B_STORE_VEC(tmp2, tmp1, dst);
+    hz_out0 = HORIZ_2TAP_FILT_UH(src6, src6, mask, filt_hz, FILTER_BITS);
+    hz_out2 = HORIZ_2TAP_FILT_UH(src7, src7, mask, filt_hz, FILTER_BITS);
+    ILVEV_B2_UB(hz_out1, hz_out0, hz_out3, hz_out2, vec0, vec1);
+    DOTP_UB2_UH(vec0, vec1, filt_vt, filt_vt, tmp1, tmp2);
+    SRARI_H2_UH(tmp1, tmp2, FILTER_BITS);
+    SAT_UH2_UH(tmp1, tmp2, 7);
+    PCKEV_ST_SB(tmp1, tmp2, dst);
     dst += dst_stride;
   }
 }

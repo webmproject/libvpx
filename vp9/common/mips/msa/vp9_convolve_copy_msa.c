@@ -12,16 +12,14 @@
 #include "vp9/common/mips/msa/vp9_macros_msa.h"
 
 static void copy_width8_msa(const uint8_t *src, int32_t src_stride,
-                            uint8_t *dst, int32_t dst_stride,
-                            int32_t height) {
+                            uint8_t *dst, int32_t dst_stride, int32_t height) {
   int32_t cnt;
   uint64_t out0, out1, out2, out3, out4, out5, out6, out7;
   v16u8 src0, src1, src2, src3, src4, src5, src6, src7;
 
   if (0 == height % 12) {
     for (cnt = (height / 12); cnt--;) {
-      LOAD_8VECS_UB(src, src_stride,
-                    src0, src1, src2, src3, src4, src5, src6, src7);
+      LD_UB8(src, src_stride, src0, src1, src2, src3, src4, src5, src6, src7);
       src += (8 * src_stride);
 
       out0 = __msa_copy_u_d((v2i64)src0, 0);
@@ -33,44 +31,24 @@ static void copy_width8_msa(const uint8_t *src, int32_t src_stride,
       out6 = __msa_copy_u_d((v2i64)src6, 0);
       out7 = __msa_copy_u_d((v2i64)src7, 0);
 
-      STORE_DWORD(dst, out0);
-      dst += dst_stride;
-      STORE_DWORD(dst, out1);
-      dst += dst_stride;
-      STORE_DWORD(dst, out2);
-      dst += dst_stride;
-      STORE_DWORD(dst, out3);
-      dst += dst_stride;
-      STORE_DWORD(dst, out4);
-      dst += dst_stride;
-      STORE_DWORD(dst, out5);
-      dst += dst_stride;
-      STORE_DWORD(dst, out6);
-      dst += dst_stride;
-      STORE_DWORD(dst, out7);
-      dst += dst_stride;
+      SD4(out0, out1, out2, out3, dst, dst_stride);
+      dst += (4 * dst_stride);
+      SD4(out4, out5, out6, out7, dst, dst_stride);
+      dst += (4 * dst_stride);
 
-      LOAD_4VECS_UB(src, src_stride, src0, src1, src2, src3);
+      LD_UB4(src, src_stride, src0, src1, src2, src3);
       src += (4 * src_stride);
 
       out0 = __msa_copy_u_d((v2i64)src0, 0);
       out1 = __msa_copy_u_d((v2i64)src1, 0);
       out2 = __msa_copy_u_d((v2i64)src2, 0);
       out3 = __msa_copy_u_d((v2i64)src3, 0);
-
-      STORE_DWORD(dst, out0);
-      dst += dst_stride;
-      STORE_DWORD(dst, out1);
-      dst += dst_stride;
-      STORE_DWORD(dst, out2);
-      dst += dst_stride;
-      STORE_DWORD(dst, out3);
-      dst += dst_stride;
+      SD4(out0, out1, out2, out3, dst, dst_stride);
+      dst += (4 * dst_stride);
     }
   } else if (0 == height % 8) {
     for (cnt = height >> 3; cnt--;) {
-      LOAD_8VECS_UB(src, src_stride,
-                    src0, src1, src2, src3, src4, src5, src6, src7);
+      LD_UB8(src, src_stride, src0, src1, src2, src3, src4, src5, src6, src7);
       src += (8 * src_stride);
 
       out0 = __msa_copy_u_d((v2i64)src0, 0);
@@ -82,53 +60,33 @@ static void copy_width8_msa(const uint8_t *src, int32_t src_stride,
       out6 = __msa_copy_u_d((v2i64)src6, 0);
       out7 = __msa_copy_u_d((v2i64)src7, 0);
 
-      STORE_DWORD(dst, out0);
-      dst += dst_stride;
-      STORE_DWORD(dst, out1);
-      dst += dst_stride;
-      STORE_DWORD(dst, out2);
-      dst += dst_stride;
-      STORE_DWORD(dst, out3);
-      dst += dst_stride;
-      STORE_DWORD(dst, out4);
-      dst += dst_stride;
-      STORE_DWORD(dst, out5);
-      dst += dst_stride;
-      STORE_DWORD(dst, out6);
-      dst += dst_stride;
-      STORE_DWORD(dst, out7);
-      dst += dst_stride;
+      SD4(out0, out1, out2, out3, dst, dst_stride);
+      dst += (4 * dst_stride);
+      SD4(out4, out5, out6, out7, dst, dst_stride);
+      dst += (4 * dst_stride);
     }
   } else if (0 == height % 4) {
     for (cnt = (height / 4); cnt--;) {
-      LOAD_4VECS_UB(src, src_stride, src0, src1, src2, src3);
+      LD_UB4(src, src_stride, src0, src1, src2, src3);
       src += (4 * src_stride);
-
       out0 = __msa_copy_u_d((v2i64)src0, 0);
       out1 = __msa_copy_u_d((v2i64)src1, 0);
       out2 = __msa_copy_u_d((v2i64)src2, 0);
       out3 = __msa_copy_u_d((v2i64)src3, 0);
 
-      STORE_DWORD(dst, out0);
-      dst += dst_stride;
-      STORE_DWORD(dst, out1);
-      dst += dst_stride;
-      STORE_DWORD(dst, out2);
-      dst += dst_stride;
-      STORE_DWORD(dst, out3);
-      dst += dst_stride;
+      SD4(out0, out1, out2, out3, dst, dst_stride);
+      dst += (4 * dst_stride);
     }
   } else if (0 == height % 2) {
     for (cnt = (height / 2); cnt--;) {
-      LOAD_2VECS_UB(src, src_stride, src0, src1);
+      LD_UB2(src, src_stride, src0, src1);
       src += (2 * src_stride);
-
       out0 = __msa_copy_u_d((v2i64)src0, 0);
       out1 = __msa_copy_u_d((v2i64)src1, 0);
 
-      STORE_DWORD(dst, out0);
+      SD(out0, dst);
       dst += dst_stride;
-      STORE_DWORD(dst, out1);
+      SD(out1, dst);
       dst += dst_stride;
     }
   }
@@ -147,12 +105,12 @@ static void copy_16multx8mult_msa(const uint8_t *src, int32_t src_stride,
     dst_tmp = dst;
 
     for (loop_cnt = (height >> 3); loop_cnt--;) {
-      LOAD_8VECS_UB(src_tmp, src_stride,
-                    src0, src1, src2, src3, src4, src5, src6, src7);
+      LD_UB8(src_tmp, src_stride,
+             src0, src1, src2, src3, src4, src5, src6, src7);
       src_tmp += (8 * src_stride);
 
-      STORE_8VECS_UB(dst_tmp, dst_stride,
-                     src0, src1, src2, src3, src4, src5, src6, src7);
+      ST_UB8(src0, src1, src2, src3, src4, src5, src6, src7,
+             dst_tmp, dst_stride);
       dst_tmp += (8 * dst_stride);
     }
 
@@ -162,90 +120,79 @@ static void copy_16multx8mult_msa(const uint8_t *src, int32_t src_stride,
 }
 
 static void copy_width16_msa(const uint8_t *src, int32_t src_stride,
-                             uint8_t *dst, int32_t dst_stride,
-                             int32_t height) {
+                             uint8_t *dst, int32_t dst_stride, int32_t height) {
   int32_t cnt;
   v16u8 src0, src1, src2, src3, src4, src5, src6, src7;
 
   if (0 == height % 12) {
     for (cnt = (height / 12); cnt--;) {
-      LOAD_8VECS_UB(src, src_stride,
-                    src0, src1, src2, src3, src4, src5, src6, src7);
+      LD_UB8(src, src_stride, src0, src1, src2, src3, src4, src5, src6, src7);
       src += (8 * src_stride);
-
-      STORE_8VECS_UB(dst, dst_stride,
-                     src0, src1, src2, src3, src4, src5, src6, src7);
+      ST_UB8(src0, src1, src2, src3, src4, src5, src6, src7, dst, dst_stride);
       dst += (8 * dst_stride);
 
-      LOAD_4VECS_UB(src, src_stride, src0, src1, src2, src3);
+      LD_UB4(src, src_stride, src0, src1, src2, src3);
       src += (4 * src_stride);
-
-      STORE_4VECS_UB(dst, dst_stride, src0, src1, src2, src3);
+      ST_UB4(src0, src1, src2, src3, dst, dst_stride);
       dst += (4 * dst_stride);
     }
   } else if (0 == height % 8) {
     copy_16multx8mult_msa(src, src_stride, dst, dst_stride, height, 16);
   } else if (0 == height % 4) {
     for (cnt = (height >> 2); cnt--;) {
-      LOAD_4VECS_UB(src, src_stride, src0, src1, src2, src3);
+      LD_UB4(src, src_stride, src0, src1, src2, src3);
       src += (4 * src_stride);
 
-      STORE_4VECS_UB(dst, dst_stride, src0, src1, src2, src3);
+      ST_UB4(src0, src1, src2, src3, dst, dst_stride);
       dst += (4 * dst_stride);
     }
   }
 }
 
 static void copy_width32_msa(const uint8_t *src, int32_t src_stride,
-                             uint8_t *dst, int32_t dst_stride,
-                             int32_t height) {
+                             uint8_t *dst, int32_t dst_stride, int32_t height) {
   int32_t cnt;
   v16u8 src0, src1, src2, src3, src4, src5, src6, src7;
 
   if (0 == height % 12) {
     for (cnt = (height / 12); cnt--;) {
-      LOAD_4VECS_UB(src, src_stride, src0, src1, src2, src3);
-      LOAD_4VECS_UB(src + 16, src_stride, src4, src5, src6, src7);
+      LD_UB4(src, src_stride, src0, src1, src2, src3);
+      LD_UB4(src + 16, src_stride, src4, src5, src6, src7);
       src += (4 * src_stride);
-
-      STORE_4VECS_UB(dst, dst_stride, src0, src1, src2, src3);
-      STORE_4VECS_UB(dst + 16, dst_stride, src4, src5, src6, src7);
+      ST_UB4(src0, src1, src2, src3, dst, dst_stride);
+      ST_UB4(src4, src5, src6, src7, dst + 16, dst_stride);
       dst += (4 * dst_stride);
 
-      LOAD_4VECS_UB(src, src_stride, src0, src1, src2, src3);
-      LOAD_4VECS_UB(src + 16, src_stride, src4, src5, src6, src7);
+      LD_UB4(src, src_stride, src0, src1, src2, src3);
+      LD_UB4(src + 16, src_stride, src4, src5, src6, src7);
       src += (4 * src_stride);
-
-      STORE_4VECS_UB(dst, dst_stride, src0, src1, src2, src3);
-      STORE_4VECS_UB(dst + 16, dst_stride, src4, src5, src6, src7);
+      ST_UB4(src0, src1, src2, src3, dst, dst_stride);
+      ST_UB4(src4, src5, src6, src7, dst + 16, dst_stride);
       dst += (4 * dst_stride);
 
-      LOAD_4VECS_UB(src, src_stride, src0, src1, src2, src3);
-      LOAD_4VECS_UB(src + 16, src_stride, src4, src5, src6, src7);
+      LD_UB4(src, src_stride, src0, src1, src2, src3);
+      LD_UB4(src + 16, src_stride, src4, src5, src6, src7);
       src += (4 * src_stride);
-
-      STORE_4VECS_UB(dst, dst_stride, src0, src1, src2, src3);
-      STORE_4VECS_UB(dst + 16, dst_stride, src4, src5, src6, src7);
+      ST_UB4(src0, src1, src2, src3, dst, dst_stride);
+      ST_UB4(src4, src5, src6, src7, dst + 16, dst_stride);
       dst += (4 * dst_stride);
     }
   } else if (0 == height % 8) {
     copy_16multx8mult_msa(src, src_stride, dst, dst_stride, height, 32);
   } else if (0 == height % 4) {
     for (cnt = (height >> 2); cnt--;) {
-      LOAD_4VECS_UB(src, src_stride, src0, src1, src2, src3);
-      LOAD_4VECS_UB(src + 16, src_stride, src4, src5, src6, src7);
+      LD_UB4(src, src_stride, src0, src1, src2, src3);
+      LD_UB4(src + 16, src_stride, src4, src5, src6, src7);
       src += (4 * src_stride);
-
-      STORE_4VECS_UB(dst, dst_stride, src0, src1, src2, src3);
-      STORE_4VECS_UB(dst + 16, dst_stride, src4, src5, src6, src7);
+      ST_UB4(src0, src1, src2, src3, dst, dst_stride);
+      ST_UB4(src4, src5, src6, src7, dst + 16, dst_stride);
       dst += (4 * dst_stride);
     }
   }
 }
 
 static void copy_width64_msa(const uint8_t *src, int32_t src_stride,
-                             uint8_t *dst, int32_t dst_stride,
-                             int32_t height) {
+                             uint8_t *dst, int32_t dst_stride, int32_t height) {
   copy_16multx8mult_msa(src, src_stride, dst, dst_stride, height, 64);
 }
 
@@ -264,8 +211,8 @@ void vp9_convolve_copy_msa(const uint8_t *src, ptrdiff_t src_stride,
       uint32_t cnt, tmp;
       /* 1 word storage */
       for (cnt = h; cnt--;) {
-        tmp = LOAD_WORD(src);
-        STORE_WORD(dst, tmp);
+        tmp = LW(src);
+        SW(tmp, dst);
         src += src_stride;
         dst += dst_stride;
       }

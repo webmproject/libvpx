@@ -1815,8 +1815,7 @@ INSTANTIATE_TEST_CASE_P(DSPR2, ConvolveTest, ::testing::Values(
     make_tuple(64, 64, &convolve8_dspr2)));
 #endif
 
-#if 0  // HAVE_MSA
-// TODO(parag): enable when function hooks are added
+#if HAVE_MSA
 const ConvolveFunctions convolve8_msa(
     vp9_convolve_copy_msa, vp9_convolve_avg_msa,
     vp9_convolve8_horiz_msa, vp9_convolve8_avg_horiz_c,
