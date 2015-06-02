@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "39d588cf_3787c019",
+        "filename": "examples/vp9_spatial_svc_encoder.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 398,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-02T02:10:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5984fccb_e253c662",
+      "range": {
+        "startLine": 398,
+        "startChar": 27,
+        "endLine": 398,
+        "endChar": 30
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f990500b_a21940ac",
         "filename": "examples/vp9_spatial_svc_encoder.c",
         "patchSetId": 24
@@ -36,6 +60,30 @@
       "writtenOn": "2015-06-01T23:57:11Z",
       "side": 1,
       "message": "space around \"-\"",
+      "range": {
+        "startLine": 433,
+        "startChar": 64,
+        "endLine": 433,
+        "endChar": 65
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "59d23ce8_98125d0d",
+        "filename": "examples/vp9_spatial_svc_encoder.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 433,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-02T02:10:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f990500b_a21940ac",
       "range": {
         "startLine": 433,
         "startChar": 64,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "b97b38ac_3bc6bf8c",
+        "filename": "examples/vp9_spatial_svc_encoder.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 478,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-02T02:10:22Z",
+      "side": 1,
+      "message": "means there were frame drops. leave comment as is for now.",
+      "parentUuid": "198e04f0_e3398ce1",
+      "range": {
+        "startLine": 478,
+        "startChar": 43,
+        "endLine": 478,
+        "endChar": 48
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d54fde2_2feb09aa",
         "filename": "examples/vp9_spatial_svc_encoder.c",
         "patchSetId": 24
@@ -82,6 +154,30 @@
       "writtenOn": "2015-06-01T20:02:52Z",
       "side": 1,
       "message": "spacing",
+      "range": {
+        "startLine": 483,
+        "startChar": 43,
+        "endLine": 483,
+        "endChar": 49
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b97b38ac_dbca2b8f",
+        "filename": "examples/vp9_spatial_svc_encoder.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 483,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-02T02:10:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0d54fde2_2feb09aa",
       "range": {
         "startLine": 483,
         "startChar": 43,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "39d588cf_f70ff834",
+        "filename": "examples/vp9_spatial_svc_encoder.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 636,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-02T02:10:22Z",
+      "side": 1,
+      "message": "leave as is for now...",
+      "parentUuid": "b91fb853_3da6810f",
+      "range": {
+        "startLine": 636,
+        "startChar": 53,
+        "endLine": 636,
+        "endChar": 54
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d54fde2_efd9011d",
         "filename": "examples/vp9_spatial_svc_encoder.c",
         "patchSetId": 24
@@ -134,6 +254,24 @@
     },
     {
       "key": {
+        "uuid": "39d588cf_971c6c74",
+        "filename": "examples/vp9_spatial_svc_encoder.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 656,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-02T02:10:22Z",
+      "side": 1,
+      "message": "added TODO",
+      "parentUuid": "0d54fde2_efd9011d",
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b97b38ac_b5e8a0f0",
         "filename": "examples/vpx_temporal_svc_encoder.c",
         "patchSetId": 24
@@ -145,6 +283,30 @@
       "writtenOn": "2015-06-01T23:57:11Z",
       "side": 1,
       "message": "What is 11?",
+      "range": {
+        "startLine": 600,
+        "startChar": 33,
+        "endLine": 600,
+        "endChar": 35
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b97b38ac_5b05bb48",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 600,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-02T02:10:22Z",
+      "side": 1,
+      "message": "existing code, leave it as is.",
+      "parentUuid": "b97b38ac_b5e8a0f0",
       "range": {
         "startLine": 600,
         "startChar": 33,
@@ -180,6 +342,30 @@
     },
     {
       "key": {
+        "uuid": "39d588cf_f7bdb8b4",
+        "filename": "examples/vpx_temporal_svc_encoder.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 683,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-02T02:10:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f990500b_e208a8e0",
+      "range": {
+        "startLine": 683,
+        "startChar": 6,
+        "endLine": 683,
+        "endChar": 25
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b97b38ac_18d8a961",
         "filename": "test/datarate_test.cc",
         "patchSetId": 24
@@ -191,6 +377,30 @@
       "writtenOn": "2015-06-01T23:57:11Z",
       "side": 1,
       "message": "define locally as const and use below.",
+      "range": {
+        "startLine": 857,
+        "startChar": 36,
+        "endLine": 857,
+        "endChar": 56
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "39d588cf_f7e4d8ce",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 24
+      },
+      "lineNbr": 857,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-02T02:10:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b97b38ac_18d8a961",
       "range": {
         "startLine": 857,
         "startChar": 36,
@@ -226,6 +436,30 @@
     },
     {
       "key": {
+        "uuid": "39d588cf_37f3409b",
+        "filename": "test/datarate_test.cc",
+        "patchSetId": 24
+      },
+      "lineNbr": 899,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-02T02:10:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "39d588cf_71e2384f",
+      "range": {
+        "startLine": 899,
+        "startChar": 0,
+        "endLine": 899,
+        "endChar": 2
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b91fb853_384a0fd8",
         "filename": "vp9/encoder/vp9_encodeframe.c",
         "patchSetId": 24
@@ -237,6 +471,30 @@
       "writtenOn": "2015-06-01T20:02:52Z",
       "side": 1,
       "message": "align comment spacing",
+      "range": {
+        "startLine": 693,
+        "startChar": 48,
+        "endLine": 693,
+        "endChar": 57
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "59d23ce8_b8aba10b",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 693,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-02T02:10:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b91fb853_384a0fd8",
       "range": {
         "startLine": 693,
         "startChar": 48,
@@ -272,6 +530,30 @@
     },
     {
       "key": {
+        "uuid": "59d23ce8_789d39eb",
+        "filename": "vp9/encoder/vp9_encodeframe.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 708,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-02T02:10:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0d54fde2_0f99e5c2",
+      "range": {
+        "startLine": 708,
+        "startChar": 30,
+        "endLine": 708,
+        "endChar": 33
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d54fde2_321a8c27",
         "filename": "vp9/encoder/vp9_encoder.c",
         "patchSetId": 24
@@ -295,6 +577,30 @@
     },
     {
       "key": {
+        "uuid": "59d23ce8_98da5d8e",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-02T02:10:22Z",
+      "side": 1,
+      "message": "removed. done",
+      "parentUuid": "0d54fde2_321a8c27",
+      "range": {
+        "startLine": 243,
+        "startChar": 7,
+        "endLine": 243,
+        "endChar": 13
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d54fde2_924258fd",
         "filename": "vp9/encoder/vp9_encoder.c",
         "patchSetId": 24
@@ -306,6 +612,30 @@
       "writtenOn": "2015-06-01T20:02:52Z",
       "side": 1,
       "message": "can we remove this first condition: (cpi-\u003esvc.number_temporal_layers \u003e 1 \u0026\u0026 cpi-\u003eoxcf.rc_mode \u003d\u003d VPX_CBR)",
+      "range": {
+        "startLine": 770,
+        "startChar": 16,
+        "endLine": 770,
+        "endChar": 38
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "59d23ce8_7bf3f36b",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 770,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-02T02:10:22Z",
+      "side": 1,
+      "message": "leave as is for now",
+      "parentUuid": "0d54fde2_924258fd",
       "range": {
         "startLine": 770,
         "startChar": 16,
@@ -364,6 +694,30 @@
     },
     {
       "key": {
+        "uuid": "b97b38ac_9b7593ac",
+        "filename": "vp9/encoder/vp9_encoder.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 2273,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-02T02:10:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b91fb853_4cce2cd4",
+      "range": {
+        "startLine": 2273,
+        "startChar": 7,
+        "endLine": 2273,
+        "endChar": 9
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d9fb8c32_fba1482d",
         "filename": "vp9/encoder/vp9_encoder.c",
         "patchSetId": 24
@@ -410,6 +764,30 @@
     },
     {
       "key": {
+        "uuid": "39d588cf_778788ea",
+        "filename": "vp9/encoder/vp9_encoder.h",
+        "patchSetId": 24
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-02T02:10:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b97b38ac_182669f1",
+      "range": {
+        "startLine": 240,
+        "startChar": 0,
+        "endLine": 240,
+        "endChar": 27
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "39d588cf_1183ac55",
         "filename": "vp9/encoder/vp9_ratectrl.c",
         "patchSetId": 24
@@ -421,6 +799,30 @@
       "writtenOn": "2015-06-01T23:57:11Z",
       "side": 1,
       "message": "Use LAYER_IDS_TO_IDX() ?",
+      "range": {
+        "startLine": 244,
+        "startChar": 44,
+        "endLine": 245,
+        "endChar": 75
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b97b38ac_1bee63b2",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-02T02:10:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "39d588cf_1183ac55",
       "range": {
         "startLine": 244,
         "startChar": 44,
@@ -456,6 +858,30 @@
     },
     {
       "key": {
+        "uuid": "39d588cf_fa783da5",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 1461,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-02T02:10:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b91fb853_0f002631",
+      "range": {
+        "startLine": 1461,
+        "startChar": 37,
+        "endLine": 1461,
+        "endChar": 45
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "59d23ce8_35f33a9b",
         "filename": "vp9/encoder/vp9_ratectrl.c",
         "patchSetId": 24
@@ -467,6 +893,30 @@
       "writtenOn": "2015-06-01T23:57:11Z",
       "side": 1,
       "message": "add period at end of line.",
+      "range": {
+        "startLine": 1477,
+        "startChar": 61,
+        "endLine": 1477,
+        "endChar": 68
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "39d588cf_fa911d5b",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 1477,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-02T02:10:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "59d23ce8_35f33a9b",
       "range": {
         "startLine": 1477,
         "startChar": 61,
@@ -502,6 +952,30 @@
     },
     {
       "key": {
+        "uuid": "39d588cf_5acdc959",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 1512,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-02T02:10:22Z",
+      "side": 1,
+      "message": "leave it as is for now",
+      "parentUuid": "ed56c9ec_ec8bb91e",
+      "range": {
+        "startLine": 1512,
+        "startChar": 18,
+        "endLine": 1512,
+        "endChar": 31
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d54fde2_b253dc6e",
         "filename": "vp9/encoder/vp9_ratectrl.c",
         "patchSetId": 24
@@ -513,6 +987,30 @@
       "writtenOn": "2015-06-01T20:02:52Z",
       "side": 1,
       "message": "the lines 1531-1537 are common to both one and two pass, so can pull it out",
+      "range": {
+        "startLine": 1531,
+        "startChar": 32,
+        "endLine": 1531,
+        "endChar": 35
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b97b38ac_bbde4ff9",
+        "filename": "vp9/encoder/vp9_ratectrl.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 1531,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-02T02:10:22Z",
+      "side": 1,
+      "message": "leave it as is for now.",
+      "parentUuid": "0d54fde2_b253dc6e",
       "range": {
         "startLine": 1531,
         "startChar": 32,
@@ -548,6 +1046,30 @@
     },
     {
       "key": {
+        "uuid": "b97b38ac_3b81dfd2",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-02T02:10:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "59d23ce8_d5ae6e6f",
+      "range": {
+        "startLine": 52,
+        "startChar": 39,
+        "endLine": 52,
+        "endChar": 41
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b97b38ac_18098934",
         "filename": "vp9/encoder/vp9_svc_layercontext.c",
         "patchSetId": 24
@@ -559,6 +1081,30 @@
       "writtenOn": "2015-06-01T23:57:11Z",
       "side": 1,
       "message": "Use LAYER_IDS_TO_IDX() ?\nMove this definition up \u0026 use in definition of lc above.",
+      "range": {
+        "startLine": 55,
+        "startChar": 16,
+        "endLine": 55,
+        "endChar": 17
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b97b38ac_1b7c236a",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-02T02:10:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b97b38ac_18098934",
       "range": {
         "startLine": 55,
         "startChar": 16,
@@ -594,6 +1140,30 @@
     },
     {
       "key": {
+        "uuid": "39d588cf_c516ba79",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-02T02:10:22Z",
+      "side": 1,
+      "message": "leave it as is",
+      "parentUuid": "59d23ce8_15d156c5",
+      "range": {
+        "startLine": 133,
+        "startChar": 32,
+        "endLine": 133,
+        "endChar": 64
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "59d23ce8_b5e16a94",
         "filename": "vp9/encoder/vp9_svc_layercontext.c",
         "patchSetId": 24
@@ -605,6 +1175,30 @@
       "writtenOn": "2015-06-01T23:57:11Z",
       "side": 1,
       "message": "indent",
+      "range": {
+        "startLine": 199,
+        "startChar": 2,
+        "endLine": 199,
+        "endChar": 8
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "59d23ce8_7ba693cb",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-02T02:10:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "59d23ce8_b5e16a94",
       "range": {
         "startLine": 199,
         "startChar": 2,
@@ -640,6 +1234,30 @@
     },
     {
       "key": {
+        "uuid": "b97b38ac_bb63afba",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-02T02:10:22Z",
+      "side": 1,
+      "message": "leave it as is",
+      "parentUuid": "59d23ce8_75f3026c",
+      "range": {
+        "startLine": 199,
+        "startChar": 33,
+        "endLine": 200,
+        "endChar": 66
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d54fde2_40ae5a99",
         "filename": "vp9/encoder/vp9_svc_layercontext.c",
         "patchSetId": 24
@@ -663,6 +1281,30 @@
     },
     {
       "key": {
+        "uuid": "39d588cf_0593622c",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-02T02:10:22Z",
+      "side": 1,
+      "message": "leave as is for now",
+      "parentUuid": "0d54fde2_40ae5a99",
+      "range": {
+        "startLine": 203,
+        "startChar": 30,
+        "endLine": 203,
+        "endChar": 32
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b97b38ac_38aa455d",
         "filename": "vp9/encoder/vp9_svc_layercontext.c",
         "patchSetId": 24
@@ -674,6 +1316,30 @@
       "writtenOn": "2015-06-01T23:57:11Z",
       "side": 1,
       "message": "Use LAYER_IDS_TO_IDX() ?",
+      "range": {
+        "startLine": 214,
+        "startChar": 21,
+        "endLine": 215,
+        "endChar": 28
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b97b38ac_7b5517ca",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-02T02:10:22Z",
+      "side": 1,
+      "message": "leave it as is",
+      "parentUuid": "b97b38ac_38aa455d",
       "range": {
         "startLine": 214,
         "startChar": 21,
@@ -732,6 +1398,30 @@
     },
     {
       "key": {
+        "uuid": "b97b38ac_fb404706",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 305,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-02T02:10:22Z",
+      "side": 1,
+      "message": "leave as is",
+      "parentUuid": "b97b38ac_5882a1db",
+      "range": {
+        "startLine": 303,
+        "startChar": 32,
+        "endLine": 305,
+        "endChar": 59
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f942104b_5255d2c9",
         "filename": "vp9/encoder/vp9_svc_layercontext.c",
         "patchSetId": 24
@@ -749,6 +1439,24 @@
     },
     {
       "key": {
+        "uuid": "59d23ce8_bb72bbbf",
+        "filename": "vp9/encoder/vp9_svc_layercontext.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 503,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-02T02:10:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f942104b_5255d2c9",
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d54fde2_6f70b189",
         "filename": "vp9/vp9_cx_iface.c",
         "patchSetId": 24
@@ -760,6 +1468,30 @@
       "writtenOn": "2015-06-01T20:02:52Z",
       "side": 1,
       "message": "spacing",
+      "range": {
+        "startLine": 908,
+        "startChar": 42,
+        "endLine": 908,
+        "endChar": 58
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "59d23ce8_5b9b8f51",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 908,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-02T02:10:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0d54fde2_6f70b189",
       "range": {
         "startLine": 908,
         "startChar": 42,
@@ -841,6 +1573,30 @@
     },
     {
       "key": {
+        "uuid": "59d23ce8_3baa4b5d",
+        "filename": "vp9/vp9_cx_iface.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 1034,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-02T02:10:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d9fb8c32_9b8244d9",
+      "range": {
+        "startLine": 1034,
+        "startChar": 51,
+        "endLine": 1034,
+        "endChar": 72
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ed56c9ec_86768e05",
         "filename": "vpx/src/svc_encodeframe.c",
         "patchSetId": 24
@@ -852,6 +1608,30 @@
       "writtenOn": "2015-06-01T20:02:52Z",
       "side": 1,
       "message": "should be? if (svc_ctx-\u003etemporal_layering_mode \u003d\u003d 3)",
+      "range": {
+        "startLine": 418,
+        "startChar": 15,
+        "endLine": 418,
+        "endChar": 37
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "59d23ce8_bbb5dbba",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 418,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-02T02:10:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ed56c9ec_86768e05",
       "range": {
         "startLine": 418,
         "startChar": 15,
@@ -887,6 +1667,30 @@
     },
     {
       "key": {
+        "uuid": "39d588cf_05f5a2fa",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 422,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-02T02:10:22Z",
+      "side": 1,
+      "message": "leave as is...",
+      "parentUuid": "b91fb853_98b6c37a",
+      "range": {
+        "startLine": 422,
+        "startChar": 2,
+        "endLine": 422,
+        "endChar": 3
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d54fde2_fb8b7fec",
         "filename": "vpx/src/svc_encodeframe.c",
         "patchSetId": 24
@@ -898,6 +1702,30 @@
       "writtenOn": "2015-06-01T21:32:27Z",
       "side": 1,
       "message": "Please move these to the test app. Otherwise ffmpeg will be affected. It will set those params after initialization.",
+      "range": {
+        "startLine": 502,
+        "startChar": 2,
+        "endLine": 504,
+        "endChar": 47
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "39d588cf_05a362fe",
+        "filename": "vpx/src/svc_encodeframe.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 504,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-02T02:10:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0d54fde2_fb8b7fec",
       "range": {
         "startLine": 502,
         "startChar": 2,
@@ -933,6 +1761,30 @@
     },
     {
       "key": {
+        "uuid": "39d588cf_25a5468c",
+        "filename": "vpx/vp8cx.h",
+        "patchSetId": 24
+      },
+      "lineNbr": 514,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-02T02:10:22Z",
+      "side": 1,
+      "message": "leave it as is for now",
+      "parentUuid": "ed56c9ec_a6cd5238",
+      "range": {
+        "startLine": 514,
+        "startChar": 34,
+        "endLine": 514,
+        "endChar": 35
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b91fb853_b805ff4b",
         "filename": "vpx/vpx_encoder.h",
         "patchSetId": 24
@@ -944,6 +1796,30 @@
       "writtenOn": "2015-06-01T20:02:52Z",
       "side": 1,
       "message": "order: put VPX_MAX_LAYERS before MAX_LAYERS, and change comment to: /*!\\deprecated Use #VPX_MAX_LAYERS instead. */",
+      "range": {
+        "startLine": 45,
+        "startChar": 22,
+        "endLine": 45,
+        "endChar": 39
+      },
+      "revId": "4caf26e7ae4c2b0ab7ab6d06f4c1d012f0a8fa1f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "59d23ce8_bb3abba0",
+        "filename": "vpx/vpx_encoder.h",
+        "patchSetId": 24
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1126910
+      },
+      "writtenOn": "2015-06-02T02:10:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b91fb853_b805ff4b",
       "range": {
         "startLine": 45,
         "startChar": 22,
