@@ -16,6 +16,24 @@
       "revId": "002c59a8cd24543b91b1ab0ab8b9d33f783ec9e7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "99a8345d_a49b8279",
+        "filename": "vp9/common/mips/msa/vp9_convolve8_vert_msa.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 292,
+      "author": {
+        "id": 1003209
+      },
+      "writtenOn": "2015-06-02T06:37:45Z",
+      "side": 1,
+      "message": "ok.",
+      "parentUuid": "59d23ce8_813f44e8",
+      "revId": "002c59a8cd24543b91b1ab0ab8b9d33f783ec9e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
