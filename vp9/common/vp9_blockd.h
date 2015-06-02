@@ -141,7 +141,7 @@ typedef struct RefBuffer {
 
 typedef struct macroblockd {
   struct macroblockd_plane plane[MAX_MB_PLANE];
-
+  FRAME_COUNTS *counts;
   int mi_stride;
 
   MODE_INFO **mi;
