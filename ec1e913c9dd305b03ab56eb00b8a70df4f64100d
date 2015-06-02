@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "59d23ce8_00aca422",
+        "filename": "CHANGELOG",
+        "patchSetId": 6
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-02T23:11:37Z",
+      "side": 1,
+      "message": "I think XXXX-YY-ZZ v1.5.0 \"next release\" or \"WIP\" will be OK or just leave the version as is and note this is for the next release",
+      "revId": "ec1e913c9dd305b03ab56eb00b8a70df4f64100d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
