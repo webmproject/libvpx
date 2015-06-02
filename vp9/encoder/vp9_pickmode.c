@@ -1178,7 +1178,8 @@ void vp9_pick_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
       if (cm->use_prev_frame_mvs)
         vp9_find_mv_refs(cm, xd, tile_info, xd->mi[0], ref_frame,
-                         candidates, mi_row, mi_col, NULL, NULL);
+                         candidates, mi_row, mi_col, NULL, NULL,
+                         xd->mi[0]->mbmi.mode_context);
       else
         const_motion[ref_frame] = mv_refs_rt(cm, xd, tile_info,
                                              xd->mi[0],
@@ -1657,7 +1658,8 @@ void vp9_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
       vp9_setup_pred_block(xd, yv12_mb[ref_frame], yv12, mi_row, mi_col,
                            sf, sf);
       vp9_find_mv_refs(cm, xd, tile_info, xd->mi[0], ref_frame,
-                       candidates, mi_row, mi_col, NULL, NULL);
+                       candidates, mi_row, mi_col, NULL, NULL,
+                       xd->mi[0]->mbmi.mode_context);
 
       vp9_find_best_ref_mvs(xd, cm->allow_high_precision_mv, candidates,
                             &dummy_mv[0], &dummy_mv[1]);
@@ -1731,7 +1733,8 @@ void vp9_pick_inter_mode_sub8x8(VP9_COMP *cpi, MACROBLOCK *x,
         b_mv[NEWMV].as_int = INVALID_MV;
         vp9_append_sub8x8_mvs_for_idx(cm, xd, tile_info, i, 0, mi_row, mi_col,
                                       &b_mv[NEARESTMV],
-                                      &b_mv[NEARMV]);
+                                      &b_mv[NEARMV],
+                                      xd->mi[0]->mbmi.mode_context);
 
         for (this_mode = NEARESTMV; this_mode <= NEWMV; ++this_mode) {
           int b_rate = 0;

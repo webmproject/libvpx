@@ -50,16 +50,16 @@ typedef struct {
 } b_mode_info;
 
 // Note that the rate-distortion optimization loop, bit-stream writer, and
-// decoder implementation modules critically rely on the enum entry values
+// decoder implementation modules critically rely on the defined entry values
 // specified herein. They should be refactored concurrently.
-typedef enum {
-  NONE = -1,
-  INTRA_FRAME = 0,
-  LAST_FRAME = 1,
-  GOLDEN_FRAME = 2,
-  ALTREF_FRAME = 3,
-  MAX_REF_FRAMES = 4
-} MV_REFERENCE_FRAME;
+
+#define NONE           -1
+#define INTRA_FRAME     0
+#define LAST_FRAME      1
+#define GOLDEN_FRAME    2
+#define ALTREF_FRAME    3
+#define MAX_REF_FRAMES  4
+typedef int8_t MV_REFERENCE_FRAME;
 
 // This structure now relates to 8x8 block regions.
 typedef struct {
@@ -75,12 +75,17 @@ typedef struct {
   PREDICTION_MODE uv_mode;
 
   // Only for INTER blocks
+  INTERP_FILTER interp_filter;
   MV_REFERENCE_FRAME ref_frame[2];
+
+  // TODO(slavarnway): Delete and use bmi[3].as_mv[] instead.
   int_mv mv[2];
+
+#if CONFIG_VP9_ENCODER
+  // TODO(slavarnway): Move to encoder
   int_mv ref_mvs[MAX_REF_FRAMES][MAX_MV_REF_CANDIDATES];
   uint8_t mode_context[MAX_REF_FRAMES];
-  INTERP_FILTER interp_filter;
-
+#endif
 } MB_MODE_INFO;
 
 typedef struct MODE_INFO {
