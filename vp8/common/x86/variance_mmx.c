@@ -147,20 +147,6 @@ unsigned int vp8_sub_pixel_variance16x16_mmx
 
 }
 
-unsigned int vp8_sub_pixel_mse16x16_mmx(
-    const unsigned char  *src_ptr,
-    int  src_pixels_per_line,
-    int  xoffset,
-    int  yoffset,
-    const unsigned char *dst_ptr,
-    int dst_pixels_per_line,
-    unsigned int *sse
-)
-{
-    vp8_sub_pixel_variance16x16_mmx(src_ptr, src_pixels_per_line, xoffset, yoffset, dst_ptr, dst_pixels_per_line, sse);
-    return *sse;
-}
-
 unsigned int vp8_sub_pixel_variance16x8_mmx
 (
     const unsigned char  *src_ptr,

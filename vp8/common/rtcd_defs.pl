@@ -285,13 +285,6 @@ $vp8_variance_halfpixvar16x16_hv_media=vp8_variance_halfpixvar16x16_hv_armv6;
 if (vpx_config("CONFIG_VP8_ENCODER") eq "yes") {
 
 #
-# SSE (Sum Squared Error)
-#
-add_proto qw/unsigned int vp8_sub_pixel_mse16x16/, "const unsigned char  *src_ptr, int  source_stride, int  xoffset, int  yoffset, const unsigned char *ref_ptr, int Refstride, unsigned int *sse";
-specialize qw/vp8_sub_pixel_mse16x16 mmx sse2/;
-$vp8_sub_pixel_mse16x16_sse2=vp8_sub_pixel_mse16x16_wmt;
-
-#
 # Block copy
 #
 if ($opts{arch} =~ /x86/) {
