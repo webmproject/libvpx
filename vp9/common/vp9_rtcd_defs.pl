@@ -307,7 +307,7 @@ add_proto qw/void vp9_convolve8_avg_horiz/, "const uint8_t *src, ptrdiff_t src_s
 specialize qw/vp9_convolve8_avg_horiz sse2 ssse3 neon dspr2/;
 
 add_proto qw/void vp9_convolve8_avg_vert/, "const uint8_t *src, ptrdiff_t src_stride, uint8_t *dst, ptrdiff_t dst_stride, const int16_t *filter_x, int x_step_q4, const int16_t *filter_y, int y_step_q4, int w, int h";
-specialize qw/vp9_convolve8_avg_vert sse2 ssse3 neon dspr2/;
+specialize qw/vp9_convolve8_avg_vert sse2 ssse3 neon dspr2 msa/;
 
 #
 # dct
