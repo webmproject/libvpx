@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "f955b039_3db13784",
+        "filename": "CHANGELOG",
+        "patchSetId": 7
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-03T20:00:00Z",
+      "side": 1,
+      "message": "I figured the format would be necessary; you can try the build locally with something like XXXX-YY-ZZ as a placeholder",
+      "parentUuid": "59595c72_a391a85c",
+      "revId": "161b3796d7ad025772b692d091e7e42f360e4994",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "39d588cf_48540c4c",
         "filename": "tools_common.c",
         "patchSetId": 7
