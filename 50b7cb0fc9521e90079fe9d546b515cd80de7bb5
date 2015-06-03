@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f955b039_86d114c8",
+        "filename": "vp9/common/x86/vp9_idct_intrin_sse2.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 3280,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-03T23:25:44Z",
+      "side": 1,
+      "message": "a possible followup might be to investigate halving in \u0026 col given they\u0027re symmetric, i.e., 0-15 \u003d\u003d 16-31",
+      "revId": "50b7cb0fc9521e90079fe9d546b515cd80de7bb5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
