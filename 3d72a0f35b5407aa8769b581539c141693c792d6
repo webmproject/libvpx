@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "395ca863_6d62dd0c",
+        "filename": "vp9/common/x86/vp9_idct_intrin_sse2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 3262,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2015-06-03T17:52:56Z",
+      "side": 1,
+      "message": "No. Do I still need to set them then? I tried not to set and it seems still working.",
+      "parentUuid": "59d23ce8_cf19e7ab",
+      "revId": "3d72a0f35b5407aa8769b581539c141693c792d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "19b524ac_0b34e108",
         "filename": "vp9/common/x86/vp9_idct_intrin_sse2.c",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2015-06-03T13:22:50Z",
       "side": 1,
       "message": "Only one transpose is required.  The rest are zeros.",
+      "revId": "3d72a0f35b5407aa8769b581539c141693c792d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "395ca863_ad63550c",
+        "filename": "vp9/common/x86/vp9_idct_intrin_sse2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 3265,
+      "author": {
+        "id": 1002802
+      },
+      "writtenOn": "2015-06-03T17:52:56Z",
+      "side": 1,
+      "message": "Thanks. Even better now.",
+      "parentUuid": "19b524ac_0b34e108",
       "revId": "3d72a0f35b5407aa8769b581539c141693c792d6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
