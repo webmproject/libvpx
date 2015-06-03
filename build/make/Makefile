@@ -310,6 +310,18 @@ $(1):
         $$(filter %.o,$$^) $$(extralibs)
 endef
 
+define dll_template
+# Not using a pattern rule here because we don't want to generate empty
+# archives when they are listed as a dependency in files not responsible
+# for creating them.
+$(1):
+	$(if $(quiet),@echo "    [LD] $$@")
+	$(qexec)$$(LD) -Zdll $$(LDFLAGS) \
+        -o $$@ \
+        $$(filter %.o,$$^) $$(extralibs) $$(EXPORTS_FILE)
+endef
+
+
 #
 # Get current configuration
 #
@@ -367,6 +379,7 @@ LIBS=$(call enabled,LIBS)
 $(foreach lib,$(filter %_g.a,$(LIBS)),$(eval $(call archive_template,$(lib))))
 $(foreach lib,$(filter %so.$(SO_VERSION_MAJOR).$(SO_VERSION_MINOR).$(SO_VERSION_PATCH),$(LIBS)),$(eval $(call so_template,$(lib))))
 $(foreach lib,$(filter %$(SO_VERSION_MAJOR).dylib,$(LIBS)),$(eval $(call dl_template,$(lib))))
+$(foreach lib,$(filter %$(SO_VERSION_MAJOR).dll,$(LIBS)),$(eval $(call dll_template,$(lib))))
 
 INSTALL-LIBS=$(call cond_enabled,CONFIG_INSTALL_LIBS,INSTALL-LIBS)
 ifeq ($(MAKECMDGOALS),dist)
