@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "59595c72_a391a85c",
+        "filename": "CHANGELOG",
+        "patchSetId": 7
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-06-03T17:44:08Z",
+      "side": 1,
+      "message": "I had to put the date back in, otherwise, the patch will fail in jenkins build",
+      "parentUuid": "b9a97860_3f88f76e",
+      "revId": "161b3796d7ad025772b692d091e7e42f360e4994",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "39d588cf_48540c4c",
         "filename": "tools_common.c",
         "patchSetId": 7
