@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "39d588cf_a8ba582c",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-03T03:08:51Z",
+      "side": 1,
+      "message": "s/differs/differ/",
+      "revId": "9d91921bca2d1cdd4ca9d596c2f28b87dadc7568",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b97b38ac_08afea6c",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 1137,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-03T03:08:51Z",
+      "side": 1,
+      "message": "some of these lines can be joined (in a follow-up)",
+      "revId": "9d91921bca2d1cdd4ca9d596c2f28b87dadc7568",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b97b38ac_28ac2675",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 1478,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-03T03:08:51Z",
+      "side": 1,
+      "message": "delete this line",
+      "revId": "9d91921bca2d1cdd4ca9d596c2f28b87dadc7568",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "59d23ce8_146dc62a",
+        "filename": "vp9/common/vp9_filter.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-03T03:08:51Z",
+      "side": 1,
+      "message": "I still think this sounds more like a TODO or something to get answered before committing.",
+      "revId": "9d91921bca2d1cdd4ca9d596c2f28b87dadc7568",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
