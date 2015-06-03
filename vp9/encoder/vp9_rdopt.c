@@ -1537,10 +1537,9 @@ static void intrabc_search(VP9_COMP *cpi, MACROBLOCK *x,
       tmp_mv->as_mv.row = tmp_mv->as_mv.row / 2 * 2;
       tmp_mv->as_mv.col = tmp_mv->as_mv.col / 2 * 2;
 #endif  // ODD_PEL_DV
-    } else {
-      tmp_mv->as_mv.row *= 8;
-      tmp_mv->as_mv.col *= 8;
     }
+    tmp_mv->as_mv.row *= 8;
+    tmp_mv->as_mv.col *= 8;
   }
   *rate_mv = vp9_mv_bit_cost(&tmp_mv->as_mv, &ref_mv,
                              x->nmvjointcost, x->ndvcost, MV_COST_WEIGHT);
