@@ -124,8 +124,8 @@ static void output_stats(FIRSTPASS_STATS *stats,
             stats->pcnt_motion,
             stats->pcnt_second_ref,
             stats->pcnt_neutral,
-            stats->ul_intra_pct,
-            stats->image_start_row,
+            stats->intra_skip_pct,
+            stats->inactive_zone_rows,
             stats->MVr,
             stats->mvr_abs,
             stats->MVc,
@@ -162,8 +162,8 @@ static void zero_stats(FIRSTPASS_STATS *section) {
   section->pcnt_motion  = 0.0;
   section->pcnt_second_ref = 0.0;
   section->pcnt_neutral = 0.0;
-  section->ul_intra_pct = 0.0;
-  section->image_start_row = 0.0;
+  section->intra_skip_pct = 0.0;
+  section->inactive_zone_rows = 0.0;
   section->MVr = 0.0;
   section->mvr_abs     = 0.0;
   section->MVc        = 0.0;
@@ -189,8 +189,8 @@ static void accumulate_stats(FIRSTPASS_STATS *section,
   section->pcnt_motion += frame->pcnt_motion;
   section->pcnt_second_ref += frame->pcnt_second_ref;
   section->pcnt_neutral += frame->pcnt_neutral;
-  section->ul_intra_pct += frame->ul_intra_pct;
-  section->image_start_row += frame->image_start_row;
+  section->intra_skip_pct += frame->intra_skip_pct;
+  section->inactive_zone_rows += frame->inactive_zone_rows;
   section->MVr += frame->MVr;
   section->mvr_abs     += frame->mvr_abs;
   section->MVc        += frame->MVc;
@@ -214,8 +214,8 @@ static void subtract_stats(FIRSTPASS_STATS *section,
   section->pcnt_motion -= frame->pcnt_motion;
   section->pcnt_second_ref -= frame->pcnt_second_ref;
   section->pcnt_neutral -= frame->pcnt_neutral;
-  section->ul_intra_pct -= frame->ul_intra_pct;
-  section->image_start_row -= frame->image_start_row;
+  section->intra_skip_pct -= frame->intra_skip_pct;
+  section->inactive_zone_rows -= frame->inactive_zone_rows;
   section->MVr -= frame->MVr;
   section->mvr_abs     -= frame->mvr_abs;
   section->MVc        -= frame->MVc;
@@ -487,7 +487,7 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
   int second_ref_count = 0;
   const int intrapenalty = INTRA_MODE_PENALTY;
   double neutral_count;
-  int ul_intra_count = 0;
+  int intra_skip_count = 0;
   int image_data_start_row = INVALID_ROW;
   int new_mv_count = 0;
   int sum_in_vectors = 0;
@@ -655,7 +655,7 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
       // common in animations, graphics and screen content, so may be used
       // as a signal to detect these types of content.
       if (this_error < UL_INTRA_THRESH) {
-        ++ul_intra_count;
+        ++intra_skip_count;
       } else if ((mb_col > 0) && (image_data_start_row == INVALID_ROW)) {
         image_data_start_row = mb_row;
       }
@@ -995,8 +995,8 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
   }
   // Exclude any image dead zone
   if (image_data_start_row > 0) {
-    ul_intra_count =
-      MAX(0, ul_intra_count - (image_data_start_row * cm->mb_cols * 2));
+    intra_skip_count =
+      MAX(0, intra_skip_count - (image_data_start_row * cm->mb_cols * 2));
   }
 
   {
@@ -1023,8 +1023,8 @@ void vp9_first_pass(VP9_COMP *cpi, const struct lookahead_entry *source) {
     fps.pcnt_inter = (double)intercount / num_mbs;
     fps.pcnt_second_ref = (double)second_ref_count / num_mbs;
     fps.pcnt_neutral = (double)neutral_count / num_mbs;
-    fps.ul_intra_pct = (double)ul_intra_count / num_mbs;
-    fps.image_start_row = (double)image_data_start_row;
+    fps.intra_skip_pct = (double)intra_skip_count / num_mbs;
+    fps.inactive_zone_rows = (double)image_data_start_row;
 
     if (mvcount > 0) {
       fps.MVr = (double)sum_mvr / mvcount;
@@ -1146,21 +1146,25 @@ static double calc_correction_factor(double err_per_mb,
 
 static int get_twopass_worst_quality(const VP9_COMP *cpi,
                                      const double section_err,
+                                     double inactive_zone,
                                      int section_target_bandwidth,
                                      double group_weight_factor) {
   const RATE_CONTROL *const rc = &cpi->rc;
   const VP9EncoderConfig *const oxcf = &cpi->oxcf;
+
+  inactive_zone = fclamp(inactive_zone, 0.0, 1.0);
 
   if (section_target_bandwidth <= 0) {
     return rc->worst_quality;  // Highest value allowed
   } else {
     const int num_mbs = (cpi->oxcf.resize_mode != RESIZE_NONE)
                         ? cpi->initial_mbs : cpi->common.MBs;
-    const double err_per_mb = section_err / num_mbs;
+    const int active_mbs = MAX(1, num_mbs - (int)(num_mbs * inactive_zone));
+    const double av_err_per_mb = section_err / active_mbs;
     const double speed_term = 1.0 + 0.04 * oxcf->speed;
-    const double ediv_size_correction = num_mbs / EDIV_SIZE_FACTOR;
+    const double ediv_size_correction = (double)num_mbs / EDIV_SIZE_FACTOR;
     const int target_norm_bits_per_mb = ((uint64_t)section_target_bandwidth <<
-                                         BPER_MB_NORMBITS) / num_mbs;
+                                         BPER_MB_NORMBITS) / active_mbs;
 
     int q;
     int is_svc_upper_layer = 0;
@@ -1173,7 +1177,7 @@ static int get_twopass_worst_quality(const VP9_COMP *cpi,
     // content at the given rate.
     for (q = rc->best_quality; q < rc->worst_quality; ++q) {
       const double factor =
-          calc_correction_factor(err_per_mb,
+          calc_correction_factor(av_err_per_mb,
                                  ERR_DIVISOR - ediv_size_correction,
                                  is_svc_upper_layer ? SVC_FACTOR_PT_LOW :
                                  FACTOR_PT_LOW, FACTOR_PT_HIGH, q,
@@ -1451,6 +1455,8 @@ static double calc_frame_boost(VP9_COMP *cpi,
   const double boost_q_correction = MIN((0.5 + (lq * 0.015)), 1.5);
   const int num_mbs = (cpi->oxcf.resize_mode != RESIZE_NONE)
                       ? cpi->initial_mbs : cpi->common.MBs;
+
+  // TODO(paulwilkins): correct for dead zone
 
   // Underlying boost factor is based on inter error ratio.
   frame_boost = (BASELINE_ERR_PER_MB * num_mbs) /
@@ -1817,6 +1823,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 #if GROUP_ADAPTIVE_MAXQ
   double gf_group_raw_error = 0.0;
 #endif
+  double gf_group_skip_pct = 0.0;
+  double gf_group_inactive_zone_rows = 0.0;
   double gf_first_frame_err = 0.0;
   double mod_frame_err = 0.0;
 
@@ -1866,6 +1874,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 #if GROUP_ADAPTIVE_MAXQ
     gf_group_raw_error -= this_frame->coded_error;
 #endif
+    gf_group_skip_pct -= this_frame->intra_skip_pct;
+    gf_group_inactive_zone_rows -= this_frame->inactive_zone_rows;
   }
 
   // Motion breakout threshold for loop below depends on image size.
@@ -1910,6 +1920,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 #if GROUP_ADAPTIVE_MAXQ
     gf_group_raw_error += this_frame->coded_error;
 #endif
+    gf_group_skip_pct += this_frame->intra_skip_pct;
+    gf_group_inactive_zone_rows += this_frame->inactive_zone_rows;
 
     if (EOF == input_stats(twopass, &next_frame))
       break;
@@ -2012,6 +2024,8 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
 #if GROUP_ADAPTIVE_MAXQ
       gf_group_raw_error += this_frame->coded_error;
 #endif
+      gf_group_skip_pct += this_frame->intra_skip_pct;
+      gf_group_inactive_zone_rows += this_frame->inactive_zone_rows;
     }
     rc->baseline_gf_interval = new_gf_interval;
   }
@@ -2034,6 +2048,12 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
     const int vbr_group_bits_per_frame =
       (int)(gf_group_bits / rc->baseline_gf_interval);
     const double group_av_err = gf_group_raw_error  / rc->baseline_gf_interval;
+    const double group_av_skip_pct =
+      gf_group_skip_pct / rc->baseline_gf_interval;
+    const double group_av_inactive_zone =
+      ((gf_group_inactive_zone_rows * 2) /
+       (rc->baseline_gf_interval * (double)cm->mb_rows));
+
     int tmp_q;
     // rc factor is a weight factor that corrects for local rate control drift.
     double rc_factor = 1.0;
@@ -2045,7 +2065,9 @@ static void define_gf_group(VP9_COMP *cpi, FIRSTPASS_STATS *this_frame) {
                       (double)(100 - rc->rate_error_estimate) / 100.0);
     }
     tmp_q =
-      get_twopass_worst_quality(cpi, group_av_err, vbr_group_bits_per_frame,
+      get_twopass_worst_quality(cpi, group_av_err,
+                                (group_av_skip_pct + group_av_inactive_zone),
+                                vbr_group_bits_per_frame,
                                 twopass->kfgroup_inter_fraction * rc_factor);
     twopass->active_worst_quality =
       MAX(tmp_q, twopass->active_worst_quality >> 1);
@@ -2584,10 +2606,17 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
     // Special case code for first frame.
     const int section_target_bandwidth = (int)(twopass->bits_left /
                                                frames_left);
+    const double section_length = twopass->total_left_stats.count;
     const double section_error =
-      twopass->total_left_stats.coded_error / twopass->total_left_stats.count;
+      twopass->total_left_stats.coded_error / section_length;
+    const double section_intra_skip =
+      twopass->total_left_stats.intra_skip_pct / section_length;
+    const double section_inactive_zone =
+      (twopass->total_left_stats.inactive_zone_rows * 2) /
+      ((double)cm->mb_rows * section_length);
     const int tmp_q =
       get_twopass_worst_quality(cpi, section_error,
+                                section_intra_skip + section_inactive_zone,
                                 section_target_bandwidth, DEFAULT_GRP_WEIGHT);
 
     twopass->active_worst_quality = tmp_q;
@@ -2604,7 +2633,7 @@ void vp9_rc_get_second_pass_params(VP9_COMP *cpi) {
     return;
 
   // Set the frame content type flag.
-  if (this_frame.ul_intra_pct >= FC_ANIMATION_THRESH)
+  if (this_frame.intra_skip_pct >= FC_ANIMATION_THRESH)
     twopass->fr_content_type = FC_GRAPHICS_ANIMATION;
   else
     twopass->fr_content_type = FC_NORMAL;
