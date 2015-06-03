@@ -870,6 +870,13 @@
 #define ILVR_W2_UB(...) ILVR_W2(v16u8, __VA_ARGS__)
 #define ILVR_W2_SH(...) ILVR_W2(v8i16, __VA_ARGS__)
 
+#define ILVR_W4(RTYPE, in0, in1, in2, in3, in4, in5, in6, in7,  \
+                out0, out1, out2, out3) {                       \
+  ILVR_W2(RTYPE, in0, in1, in2, in3, out0, out1);               \
+  ILVR_W2(RTYPE, in4, in5, in6, in7, out2, out3);               \
+}
+#define ILVR_W4_UB(...) ILVR_W4(v16u8, __VA_ARGS__)
+
 /* Description : Interleave right half of double word elements from vectors
    Arguments   : Inputs  - in0, in1, in2, in3, in4, in5, in6, in7
                  Outputs - out0, out1, out2, out3
@@ -1445,6 +1452,23 @@
   out_m = (v16u8)__msa_xori_b((v16u8)out_m, 128);        \
   out_m;                                                 \
 })
+
+/* Description : Converts inputs to unsigned bytes, interleave, average & store
+                 as 8x4 unsigned byte block
+   Arguments   : Inputs  - in0, in1, in2, in3, dst0, dst1, dst2, dst3,
+                           pdst, stride
+*/
+#define CONVERT_UB_AVG_ST8x4_UB(in0, in1, in2, in3,                      \
+                                dst0, dst1, dst2, dst3, pdst, stride) {  \
+  v16u8 tmp0_m, tmp1_m, tmp2_m, tmp3_m;                                  \
+  uint8_t *pdst_m = (uint8_t *)(pdst);                                   \
+                                                                         \
+  tmp0_m = PCKEV_XORI128_UB(in0, in1);                                   \
+  tmp1_m = PCKEV_XORI128_UB(in2, in3);                                   \
+  ILVR_D2_UB(dst1, dst0, dst3, dst2, tmp2_m, tmp3_m);                    \
+  AVER_UB2_UB(tmp0_m, tmp2_m, tmp1_m, tmp3_m, tmp0_m, tmp1_m);           \
+  ST8x4_UB(tmp0_m, tmp1_m, pdst_m, stride);                              \
+}
 
 /* Description : Pack even byte elements and store byte vector in destination
                  memory
