@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "b9a97860_3f88f76e",
+        "filename": "CHANGELOG",
+        "patchSetId": 7
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-06-03T04:21:54Z",
+      "side": 1,
+      "message": "Done, removed date.",
+      "parentUuid": "59d23ce8_d44dfebd",
+      "revId": "161b3796d7ad025772b692d091e7e42f360e4994",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "39d588cf_48540c4c",
         "filename": "tools_common.c",
         "patchSetId": 7
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "d9ae2c65_b57dea2b",
+        "filename": "tools_common.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-06-03T04:21:54Z",
+      "side": 1,
+      "message": "Done, restored the order to natural order.",
+      "parentUuid": "39d588cf_48540c4c",
+      "revId": "161b3796d7ad025772b692d091e7e42f360e4994",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "39d588cf_686a3014",
         "filename": "vpxenc.c",
         "patchSetId": 7
@@ -47,6 +83,24 @@
       "writtenOn": "2015-06-03T03:29:10Z",
       "side": 1,
       "message": "just add another %s and check (i\u003d\u003d0) ? \" (default)\" : \"\";",
+      "revId": "161b3796d7ad025772b692d091e7e42f360e4994",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b9a97860_9f76cbfd",
+        "filename": "vpxenc.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 502,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-06-03T04:21:54Z",
+      "side": 1,
+      "message": "Done as suggested.",
+      "parentUuid": "39d588cf_686a3014",
       "revId": "161b3796d7ad025772b692d091e7e42f360e4994",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
