@@ -16,6 +16,23 @@
       "revId": "3d72a0f35b5407aa8769b581539c141693c792d6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "19b524ac_0b34e108",
+        "filename": "vp9/common/x86/vp9_idct_intrin_sse2.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 3265,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-06-03T13:22:50Z",
+      "side": 1,
+      "message": "Only one transpose is required.  The rest are zeros.",
+      "revId": "3d72a0f35b5407aa8769b581539c141693c792d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
