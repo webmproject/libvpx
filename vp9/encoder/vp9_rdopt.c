@@ -1233,7 +1233,8 @@ static void select_tx_block(const VP9_COMP *cpi, MACROBLOCK *x,
   if (cpi->common.tx_mode == TX_MODE_SELECT || tx_size == TX_4X4) {
     tx_block_rd_b(x, tx_size, blk_row, blk_col, plane, block,
                   plane_bsize, ta, tl, rate, dist, bsse, skip);
-    *rate += 256;
+    if (tx_size > TX_4X4)
+      *rate += 256;
     this_rd = RDCOST(x->rdmult, x->rddiv, *rate, *dist);
   }
 
