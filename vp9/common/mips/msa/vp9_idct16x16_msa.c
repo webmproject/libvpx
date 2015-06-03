@@ -8,6 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <assert.h>
 #include "vp9/common/mips/msa/vp9_idct_msa.h"
 
 void vp9_idct16_1d_rows_msa(const int16_t *input, int16_t *output) {

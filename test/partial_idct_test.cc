@@ -332,7 +332,11 @@ INSTANTIATE_TEST_CASE_P(
         make_tuple(&vp9_fdct8x8_c,
                    &vp9_idct8x8_64_add_c,
                    &vp9_idct8x8_1_add_msa,
-                   TX_8X8, 1)));
+                   TX_8X8, 1),
+        make_tuple(&vp9_fdct4x4_c,
+                   &vp9_idct4x4_16_add_c,
+                   &vp9_idct4x4_1_add_msa,
+                   TX_4X4, 1)));
 #endif  // HAVE_MSA && !CONFIG_VP9_HIGHBITDEPTH && !CONFIG_EMULATE_HARDWARE
 
 }  // namespace

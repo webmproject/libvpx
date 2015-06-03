@@ -11,8 +11,6 @@
 #ifndef VP9_COMMON_MIPS_MSA_VP9_IDCT_MSA_H_
 #define VP9_COMMON_MIPS_MSA_VP9_IDCT_MSA_H_
 
-#include <assert.h>
-
 #include "vpx_ports/mem.h"
 #include "vp9/common/vp9_idct.h"
 #include "vp9/common/mips/msa/vp9_macros_msa.h"
