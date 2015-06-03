@@ -3096,15 +3096,18 @@ static int64_t handle_inter_mode(VP9_COMP *cpi, MACROBLOCK *x,
 
     // Y cost and distortion
     vp9_subtract_plane(x, bsize, 0);
-    inter_block_yrd(cpi, x, rate_y, &distortion_y, &skippable_y, psse,
-                    bsize, ref_best_rd);
 
-//    super_block_yrd(cpi, x, rate_y, &distortion_y, &skippable_y, psse,
-//                    bsize, txfm_cache, ref_best_rd);
+    if (cm->tx_mode == TX_MODE_SELECT) {
+      inter_block_yrd(cpi, x, rate_y, &distortion_y, &skippable_y, psse,
+                      bsize, ref_best_rd);
+    } else {
+      super_block_yrd(cpi, x, rate_y, &distortion_y, &skippable_y, psse,
+                      bsize, txfm_cache, ref_best_rd);
 
-//    // sudo load
-//    for (i = 0; i < 64; ++i)
-//      mbmi->inter_tx_size[i] = mbmi->tx_size;
+      // sudo load
+      for (i = 0; i < 64; ++i)
+        mbmi->inter_tx_size[i] = mbmi->tx_size;
+    }
 
     if (*rate_y == INT_MAX) {
       *rate2 = INT_MAX;
