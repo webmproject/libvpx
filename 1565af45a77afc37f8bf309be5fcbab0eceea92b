@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d96c6c17_f373670b",
+        "filename": "test/variance_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-04T00:44:37Z",
+      "side": 1,
+      "message": "they calculate",
+      "revId": "1565af45a77afc37f8bf309be5fcbab0eceea92b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
