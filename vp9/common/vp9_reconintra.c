@@ -418,19 +418,18 @@ void vp9_d63_predictor_4x4_c(uint8_t *dst, ptrdiff_t stride,
   const int E = above[4];
   const int F = above[5];
   const int G = above[6];
-  const int H = above[7];
   (void)left;
   DST(0, 0) =             AVG2(A, B);
   DST(1, 0) = DST(0, 2) = AVG2(B, C);
   DST(2, 0) = DST(1, 2) = AVG2(C, D);
   DST(3, 0) = DST(2, 2) = AVG2(D, E);
+              DST(3, 2) = AVG2(E, F);  // differs from vp8
 
   DST(0, 1) =             AVG3(A, B, C);
   DST(1, 1) = DST(0, 3) = AVG3(B, C, D);
   DST(2, 1) = DST(1, 3) = AVG3(C, D, E);
   DST(3, 1) = DST(2, 3) = AVG3(D, E, F);
-              DST(3, 2) = AVG3(E, F, G);
-              DST(3, 3) = AVG3(F, G, H);
+              DST(3, 3) = AVG3(E, F, G);  // differs from vp8
 }
 
 static INLINE void d63_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
@@ -467,7 +466,7 @@ void vp9_d45_predictor_4x4_c(uint8_t *dst, ptrdiff_t stride,
   DST(3, 0) = DST(2, 1) = DST(1, 2) = DST(0, 3) = AVG3(D, E, F);
               DST(3, 1) = DST(2, 2) = DST(1, 3) = AVG3(E, F, G);
                           DST(3, 2) = DST(2, 3) = AVG3(F, G, H);
-                                      DST(3, 3) = AVG3(G, H, H);
+                                      DST(3, 3) = H;  // differs from vp8
 }
 
 static INLINE void d45_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
