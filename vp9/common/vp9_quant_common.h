@@ -14,6 +14,7 @@
 #include <stdio.h>
 
 #include "vpx/vpx_codec.h"
+#include "vp9/common/vp9_common.h"
 #include "vp9/common/vp9_seg_common.h"
 
 #ifdef __cplusplus
@@ -46,7 +47,7 @@ static INLINE int16_t vp9_round_factor_to_round(int16_t quant,
 #define NUQ_KNOTES 5
 typedef tran_low_t dequant_val_type_nuq[NUQ_KNOTES + 1];
 typedef tran_low_t cumbins_type_nuq[NUQ_KNOTES];
-void vp9_get_dequant_val_nuq(int q, int band, int bd,
+void vp9_get_dequant_val_nuq(int q, int lossless, int band, int bd,
                              tran_low_t *dq, tran_low_t *cumbins);
 tran_low_t vp9_dequant_abscoeff_nuq(int v, int q, const tran_low_t *dq);
 tran_low_t vp9_dequant_coeff_nuq(int v, int q, const tran_low_t *dq);

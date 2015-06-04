@@ -1964,8 +1964,7 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
       const int qrounding_factor_fp = q == 0 ? 64 : (i == 0 ? 48 : 42);
 
       // y
-      quant = i == 0 ? vp9_dc_quant(q, cm->y_dc_delta_q, cm->bit_depth)
-                     : vp9_ac_quant(q, 0, cm->bit_depth);
+      quant = vp9_get_quant(cm, q, 0, i > 0);
       invert_quant(&quants->y_quant[q][i], &quants->y_quant_shift[q][i], quant);
       quants->y_quant_fp[q][i] = (1 << 16) / quant;
       quants->y_round_fp[q][i] =
@@ -1976,8 +1975,7 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
       cm->y_dequant[q][i] = quant;
 
       // uv
-      quant = i == 0 ? vp9_dc_quant(q, cm->uv_dc_delta_q, cm->bit_depth)
-                     : vp9_ac_quant(q, cm->uv_ac_delta_q, cm->bit_depth);
+      quant = vp9_get_quant(cm, q, 1, i > 0);
       invert_quant(&quants->uv_quant[q][i],
                    &quants->uv_quant_shift[q][i], quant);
       quants->uv_quant_fp[q][i] = (1 << 16) / quant;
@@ -1993,10 +1991,10 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
     for (i = 0; i < COEF_BANDS; i++) {
       const int quant = cm->y_dequant[q][i != 0];
       const int uvquant = cm->uv_dequant[q][i != 0];
-      vp9_get_dequant_val_nuq(quant, i, cm->bit_depth,
+      vp9_get_dequant_val_nuq(quant, q == 0, i, cm->bit_depth,
                               cm->y_dequant_val_nuq[q][i],
                               quants->y_cumbins_nuq[q][i]);
-      vp9_get_dequant_val_nuq(uvquant, i, cm->bit_depth,
+      vp9_get_dequant_val_nuq(uvquant, q == 0, i, cm->bit_depth,
                               cm->uv_dequant_val_nuq[q][i],
                               quants->uv_cumbins_nuq[q][i]);
     }
@@ -2044,10 +2042,10 @@ void vp9_init_quantizer(VP9_COMP *cpi) {
     for (i = 0; i < COEF_BANDS; i++) {
       const int quant = cm->y_dequant_pxd[q][i != 0];
       const int uvquant = cm->uv_dequant_pxd[q][i != 0];
-      vp9_get_dequant_val_nuq(quant, i, cm->bit_depth,
+      vp9_get_dequant_val_nuq(quant, q == 0, i, cm->bit_depth,
                               cm->y_dequant_val_nuq_pxd[q][i],
                               quants->y_cumbins_nuq_pxd[q][i]);
-      vp9_get_dequant_val_nuq(uvquant, i, cm->bit_depth,
+      vp9_get_dequant_val_nuq(uvquant, q == 0, i, cm->bit_depth,
                               cm->uv_dequant_val_nuq_pxd[q][i],
                               quants->uv_cumbins_nuq_pxd[q][i]);
     }

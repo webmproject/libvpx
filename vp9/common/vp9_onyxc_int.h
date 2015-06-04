@@ -389,6 +389,18 @@ static INLINE int partition_plane_context(const MACROBLOCKD *xd,
   return (left * 2 + above) + bsl * PARTITION_PLOFFSET;
 }
 
+static INLINE int16_t vp9_get_quant(VP9_COMMON *const cm,
+                                    int qindex, int isuv, int isac) {
+  int quant;
+  if (!isuv) {
+    quant = isac == 0 ? vp9_dc_quant(qindex, cm->y_dc_delta_q, cm->bit_depth)
+        : vp9_ac_quant(qindex, 0, cm->bit_depth);
+  } else {
+    quant = isac == 0 ? vp9_dc_quant(qindex, cm->uv_dc_delta_q, cm->bit_depth)
+        : vp9_ac_quant(qindex, cm->uv_ac_delta_q, cm->bit_depth);
+  }
+  return quant;
+}
 #ifdef __cplusplus
 }  // extern "C"
 #endif

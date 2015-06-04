@@ -2847,10 +2847,10 @@ void vp9_init_dequantizer(VP9_COMMON *cm) {
 #if CONFIG_NEW_QUANT
     for (b = 0; b < COEF_BANDS; ++b) {
       vp9_get_dequant_val_nuq(
-          cm->y_dequant[q][b != 0], b, cm->bit_depth,
+          cm->y_dequant[q][b != 0], q == 0, b, cm->bit_depth,
           cm->y_dequant_val_nuq[q][b], NULL);
       vp9_get_dequant_val_nuq(
-          cm->uv_dequant[q][b != 0], b, cm->bit_depth,
+          cm->uv_dequant[q][b != 0], q == 0, b, cm->bit_depth,
           cm->uv_dequant_val_nuq[q][b], NULL);
     }
 #endif  // CONFIG_NEW_QUANT
@@ -2864,10 +2864,10 @@ void vp9_init_dequantizer(VP9_COMMON *cm) {
 #if CONFIG_NEW_QUANT
     for (b = 0; b < COEF_BANDS; ++b) {
       vp9_get_dequant_val_nuq(
-          cm->y_dequant_pxd[q][b != 0], b, cm->bit_depth,
+          cm->y_dequant_pxd[q][b != 0], q == 0, b, cm->bit_depth,
           cm->y_dequant_val_nuq_pxd[q][b], NULL);
       vp9_get_dequant_val_nuq(
-          cm->uv_dequant_pxd[q][b != 0], b, cm->bit_depth,
+          cm->uv_dequant_pxd[q][b != 0], q == 0, b, cm->bit_depth,
           cm->uv_dequant_val_nuq_pxd[q][b], NULL);
     }
 #endif  // CONFIG_NEW_QUANT

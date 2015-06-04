@@ -1336,9 +1336,8 @@ static void dec_build_inter_predictors(MACROBLOCKD *xd, int plane, int block,
 #if CONFIG_INTRABC
   const int is_intrabc = is_intrabc_mode(mi->mbmi.mode);
   struct scale_factors sf1;
-  int use_highbitdepth = (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH);
-
 #if CONFIG_VP9_HIGHBITDEPTH
+  int use_highbitdepth = (xd->cur_buf->flags & YV12_FLAG_HIGHBITDEPTH);
   vp9_setup_scale_factors_for_frame(&sf1, 64, 64, 64, 64, use_highbitdepth);
 #else
   vp9_setup_scale_factors_for_frame(&sf1, 64, 64, 64, 64);
