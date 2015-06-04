@@ -79,10 +79,24 @@ static const uint8_t extend_modes[INTRA_MODES] = {
   intra_pred_highbd_sized(type, 16) \
   intra_pred_highbd_sized(type, 32)
 
+#define intra_pred_no_4x4(type) \
+  intra_pred_sized(type, 8) \
+  intra_pred_sized(type, 16) \
+  intra_pred_sized(type, 32) \
+  intra_pred_highbd_sized(type, 4) \
+  intra_pred_highbd_sized(type, 8) \
+  intra_pred_highbd_sized(type, 16) \
+  intra_pred_highbd_sized(type, 32)
+
 #else
 
 #define intra_pred_allsizes(type) \
   intra_pred_sized(type, 4) \
+  intra_pred_sized(type, 8) \
+  intra_pred_sized(type, 16) \
+  intra_pred_sized(type, 32)
+
+#define intra_pred_no_4x4(type) \
   intra_pred_sized(type, 8) \
   intra_pred_sized(type, 16) \
   intra_pred_sized(type, 32)
@@ -345,6 +359,27 @@ static INLINE void highbd_dc_predictor(uint16_t *dst, ptrdiff_t stride,
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
+#define DST(x, y) dst[(x) + (y) * stride]
+#define AVG3(a, b, c) (((a) + 2 * (b) + (c) + 2) >> 2)
+#define AVG2(a, b) (((a) + (b) + 1) >> 1)
+
+void vp9_d207_predictor_4x4_c(uint8_t *dst, ptrdiff_t stride,
+                              const uint8_t *above, const uint8_t *left) {
+  const int I = left[0];
+  const int J = left[1];
+  const int K = left[2];
+  const int L = left[3];
+  (void)above;
+  DST(0, 0) =             AVG2(I, J);
+  DST(2, 0) = DST(0, 1) = AVG2(J, K);
+  DST(2, 1) = DST(0, 2) = AVG2(K, L);
+  DST(1, 0) =             AVG3(I, J, K);
+  DST(3, 0) = DST(1, 1) = AVG3(J, K, L);
+  DST(3, 1) = DST(1, 2) = AVG3(K, L, L);
+  DST(3, 2) = DST(2, 2) =
+      DST(0, 3) = DST(1, 3) = DST(2, 3) = DST(3, 3) = L;
+}
+
 static INLINE void d207_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
                                   const uint8_t *above, const uint8_t *left) {
   int r, c;
@@ -372,7 +407,31 @@ static INLINE void d207_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
     for (c = 0; c < bs - 2; ++c)
       dst[r * stride + c] = dst[(r + 1) * stride + c - 2];
 }
-intra_pred_allsizes(d207)
+intra_pred_no_4x4(d207)
+
+void vp9_d63_predictor_4x4_c(uint8_t *dst, ptrdiff_t stride,
+                             const uint8_t *above, const uint8_t *left) {
+  const int A = above[0];
+  const int B = above[1];
+  const int C = above[2];
+  const int D = above[3];
+  const int E = above[4];
+  const int F = above[5];
+  const int G = above[6];
+  const int H = above[7];
+  (void)left;
+  DST(0, 0) =             AVG2(A, B);
+  DST(1, 0) = DST(0, 2) = AVG2(B, C);
+  DST(2, 0) = DST(1, 2) = AVG2(C, D);
+  DST(3, 0) = DST(2, 2) = AVG2(D, E);
+
+  DST(0, 1) =             AVG3(A, B, C);
+  DST(1, 1) = DST(0, 3) = AVG3(B, C, D);
+  DST(2, 1) = DST(1, 3) = AVG3(C, D, E);
+  DST(3, 1) = DST(2, 3) = AVG3(D, E, F);
+              DST(3, 2) = AVG3(E, F, G);
+              DST(3, 3) = AVG3(F, G, H);
+}
 
 static INLINE void d63_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
                                  const uint8_t *above, const uint8_t *left) {
@@ -388,7 +447,28 @@ static INLINE void d63_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
     dst += stride;
   }
 }
-intra_pred_allsizes(d63)
+intra_pred_no_4x4(d63)
+
+void vp9_d45_predictor_4x4_c(uint8_t *dst, ptrdiff_t stride,
+                             const uint8_t *above, const uint8_t *left) {
+  const int A = above[0];
+  const int B = above[1];
+  const int C = above[2];
+  const int D = above[3];
+  const int E = above[4];
+  const int F = above[5];
+  const int G = above[6];
+  const int H = above[7];
+  (void)stride;
+  (void)left;
+  DST(0, 0)                                     = AVG3(A, B, C);
+  DST(1, 0) = DST(0, 1)                         = AVG3(B, C, D);
+  DST(2, 0) = DST(1, 1) = DST(0, 2)             = AVG3(C, D, E);
+  DST(3, 0) = DST(2, 1) = DST(1, 2) = DST(0, 3) = AVG3(D, E, F);
+              DST(3, 1) = DST(2, 2) = DST(1, 3) = AVG3(E, F, G);
+                          DST(3, 2) = DST(2, 3) = AVG3(F, G, H);
+                                      DST(3, 3) = AVG3(G, H, H);
+}
 
 static INLINE void d45_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
                                  const uint8_t *above, const uint8_t *left) {
@@ -403,7 +483,30 @@ static INLINE void d45_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
     dst += stride;
   }
 }
-intra_pred_allsizes(d45)
+intra_pred_no_4x4(d45)
+
+void vp9_d117_predictor_4x4_c(uint8_t *dst, ptrdiff_t stride,
+                              const uint8_t *above, const uint8_t *left) {
+  const int I = left[0];
+  const int J = left[1];
+  const int K = left[2];
+  const int X = above[-1];
+  const int A = above[0];
+  const int B = above[1];
+  const int C = above[2];
+  const int D = above[3];
+  DST(0, 0) = DST(1, 2) = AVG2(X, A);
+  DST(1, 0) = DST(2, 2) = AVG2(A, B);
+  DST(2, 0) = DST(3, 2) = AVG2(B, C);
+  DST(3, 0)             = AVG2(C, D);
+
+  DST(0, 3) =             AVG3(K, J, I);
+  DST(0, 2) =             AVG3(J, I, X);
+  DST(0, 1) = DST(1, 3) = AVG3(I, X, A);
+  DST(1, 1) = DST(2, 3) = AVG3(X, A, B);
+  DST(2, 1) = DST(3, 3) = AVG3(A, B, C);
+  DST(3, 1) =             AVG3(B, C, D);
+}
 
 static INLINE void d117_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
                                   const uint8_t *above, const uint8_t *left) {
@@ -433,7 +536,28 @@ static INLINE void d117_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
     dst += stride;
   }
 }
-intra_pred_allsizes(d117)
+intra_pred_no_4x4(d117)
+
+void vp9_d135_predictor_4x4(uint8_t *dst, ptrdiff_t stride,
+                            const uint8_t *above, const uint8_t *left) {
+  const int I = left[0];
+  const int J = left[1];
+  const int K = left[2];
+  const int L = left[3];
+  const int X = above[-1];
+  const int A = above[0];
+  const int B = above[1];
+  const int C = above[2];
+  const int D = above[3];
+  (void)stride;
+  DST(0, 3)                                     = AVG3(J, K, L);
+  DST(1, 3) = DST(0, 2)                         = AVG3(I, J, K);
+  DST(2, 3) = DST(1, 2) = DST(0, 1)             = AVG3(X, I, J);
+  DST(3, 3) = DST(2, 2) = DST(1, 1) = DST(0, 0) = AVG3(A, X, I);
+              DST(3, 2) = DST(2, 1) = DST(1, 0) = AVG3(B, A, X);
+                          DST(3, 1) = DST(2, 0) = AVG3(C, B, A);
+                                      DST(3, 0) = AVG3(D, C, B);
+}
 
 static INLINE void d135_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
                                   const uint8_t *above, const uint8_t *left) {
@@ -454,7 +578,31 @@ static INLINE void d135_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
     dst += stride;
   }
 }
-intra_pred_allsizes(d135)
+intra_pred_no_4x4(d135)
+
+void vp9_d153_predictor_4x4_c(uint8_t *dst, ptrdiff_t stride,
+                              const uint8_t *above, const uint8_t *left) {
+  const int I = left[0];
+  const int J = left[1];
+  const int K = left[2];
+  const int L = left[3];
+  const int X = above[-1];
+  const int A = above[0];
+  const int B = above[1];
+  const int C = above[2];
+
+  DST(0, 0) = DST(2, 1) = AVG2(I, X);
+  DST(0, 1) = DST(2, 2) = AVG2(J, I);
+  DST(0, 2) = DST(2, 3) = AVG2(K, J);
+  DST(0, 3)             = AVG2(L, K);
+
+  DST(3, 0)             = AVG3(A, B, C);
+  DST(2, 0)             = AVG3(X, A, B);
+  DST(1, 0) = DST(3, 1) = AVG3(I, X, A);
+  DST(1, 1) = DST(3, 2) = AVG3(J, I, X);
+  DST(1, 2) = DST(3, 3) = AVG3(K, J, I);
+  DST(1, 3)             = AVG3(L, K, J);
+}
 
 static INLINE void d153_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
                                   const uint8_t *above, const uint8_t *left) {
@@ -481,7 +629,7 @@ static INLINE void d153_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
     dst += stride;
   }
 }
-intra_pred_allsizes(d153)
+intra_pred_no_4x4(d153)
 
 static INLINE void v_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
                                const uint8_t *above, const uint8_t *left) {
