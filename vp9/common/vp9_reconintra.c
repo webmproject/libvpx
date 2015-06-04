@@ -102,6 +102,10 @@ static const uint8_t extend_modes[INTRA_MODES] = {
   intra_pred_sized(type, 32)
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
+#define DST(x, y) dst[(x) + (y) * stride]
+#define AVG3(a, b, c) (((a) + 2 * (b) + (c) + 2) >> 2)
+#define AVG2(a, b) (((a) + (b) + 1) >> 1)
+
 #if CONFIG_VP9_HIGHBITDEPTH
 static INLINE void highbd_d207_predictor(uint16_t *dst, ptrdiff_t stride,
                                          int bs, const uint16_t *above,
@@ -112,18 +116,16 @@ static INLINE void highbd_d207_predictor(uint16_t *dst, ptrdiff_t stride,
 
   // First column.
   for (r = 0; r < bs - 1; ++r) {
-    dst[r * stride] = ROUND_POWER_OF_TWO(left[r] + left[r + 1], 1);
+    dst[r * stride] = AVG2(left[r], left[r + 1]);
   }
   dst[(bs - 1) * stride] = left[bs - 1];
   dst++;
 
   // Second column.
   for (r = 0; r < bs - 2; ++r) {
-    dst[r * stride] = ROUND_POWER_OF_TWO(left[r] + left[r + 1] * 2 +
-                                         left[r + 2], 2);
+    dst[r * stride] = AVG3(left[r], left[r + 1], left[r + 2]);
   }
-  dst[(bs - 2) * stride] = ROUND_POWER_OF_TWO(left[bs - 2] +
-                                              left[bs - 1] * 3, 2);
+  dst[(bs - 2) * stride] = AVG3(left[bs - 2], left[bs - 1], left[bs - 1]);
   dst[(bs - 1) * stride] = left[bs - 1];
   dst++;
 
@@ -145,11 +147,9 @@ static INLINE void highbd_d63_predictor(uint16_t *dst, ptrdiff_t stride,
   (void) bd;
   for (r = 0; r < bs; ++r) {
     for (c = 0; c < bs; ++c) {
-      dst[c] = r & 1 ? ROUND_POWER_OF_TWO(above[r/2 + c] +
-                                          above[r/2 + c + 1] * 2 +
-                                          above[r/2 + c + 2], 2)
-                     : ROUND_POWER_OF_TWO(above[r/2 + c] +
-                                          above[r/2 + c + 1], 1);
+      dst[c] = r & 1 ? AVG3(above[(r >> 1) + c], above[(r >> 1) + c + 1],
+                            above[(r >> 1) + c + 2])
+                     : AVG2(above[(r >> 1) + c], above[(r >> 1) + c + 1]);
     }
     dst += stride;
   }
@@ -163,9 +163,8 @@ static INLINE void highbd_d45_predictor(uint16_t *dst, ptrdiff_t stride, int bs,
   (void) bd;
   for (r = 0; r < bs; ++r) {
     for (c = 0; c < bs; ++c) {
-      dst[c] = r + c + 2 < bs * 2 ?  ROUND_POWER_OF_TWO(above[r + c] +
-                                                        above[r + c + 1] * 2 +
-                                                        above[r + c + 2], 2)
+      dst[c] = r + c + 2 < bs * 2 ? AVG3(above[r + c], above[r + c + 1],
+                                         above[r + c + 2])
                                   : above[bs * 2 - 1];
     }
     dst += stride;
@@ -180,20 +179,19 @@ static INLINE void highbd_d117_predictor(uint16_t *dst, ptrdiff_t stride,
 
   // first row
   for (c = 0; c < bs; c++)
-    dst[c] = ROUND_POWER_OF_TWO(above[c - 1] + above[c], 1);
+    dst[c] = AVG2(above[c - 1], above[c]);
   dst += stride;
 
   // second row
-  dst[0] = ROUND_POWER_OF_TWO(left[0] + above[-1] * 2 + above[0], 2);
+  dst[0] = AVG3(left[0], above[-1], above[0]);
   for (c = 1; c < bs; c++)
-    dst[c] = ROUND_POWER_OF_TWO(above[c - 2] + above[c - 1] * 2 + above[c], 2);
+    dst[c] = AVG3(above[c - 2], above[c - 1], above[c]);
   dst += stride;
 
   // the rest of first col
-  dst[0] = ROUND_POWER_OF_TWO(above[-1] + left[0] * 2 + left[1], 2);
+  dst[0] = AVG3(above[-1], left[0], left[1]);
   for (r = 3; r < bs; ++r)
-    dst[(r - 2) * stride] = ROUND_POWER_OF_TWO(left[r - 3] + left[r - 2] * 2 +
-                                               left[r - 1], 2);
+    dst[(r - 2) * stride] = AVG3(left[r - 3], left[r - 2], left[r - 1]);
 
   // the rest of the block
   for (r = 2; r < bs; ++r) {
@@ -208,14 +206,13 @@ static INLINE void highbd_d135_predictor(uint16_t *dst, ptrdiff_t stride,
                                          const uint16_t *left, int bd) {
   int r, c;
   (void) bd;
-  dst[0] = ROUND_POWER_OF_TWO(left[0] + above[-1] * 2 + above[0], 2);
+  dst[0] = AVG3(left[0], above[-1], above[0]);
   for (c = 1; c < bs; c++)
-    dst[c] = ROUND_POWER_OF_TWO(above[c - 2] + above[c - 1] * 2 + above[c], 2);
+    dst[c] = AVG3(above[c - 2], above[c - 1], above[c]);
 
-  dst[stride] = ROUND_POWER_OF_TWO(above[-1] + left[0] * 2 + left[1], 2);
+  dst[stride] = AVG3(above[-1], left[0], left[1]);
   for (r = 2; r < bs; ++r)
-    dst[r * stride] = ROUND_POWER_OF_TWO(left[r - 2] + left[r - 1] * 2 +
-                                         left[r], 2);
+    dst[r * stride] = AVG3(left[r - 2], left[r - 1], left[r]);
 
   dst += stride;
   for (r = 1; r < bs; ++r) {
@@ -230,20 +227,19 @@ static INLINE void highbd_d153_predictor(uint16_t *dst, ptrdiff_t stride,
                                          const uint16_t *left, int bd) {
   int r, c;
   (void) bd;
-  dst[0] = ROUND_POWER_OF_TWO(above[-1] + left[0], 1);
+  dst[0] = AVG2(above[-1], left[0]);
   for (r = 1; r < bs; r++)
-    dst[r * stride] = ROUND_POWER_OF_TWO(left[r - 1] + left[r], 1);
+    dst[r * stride] = AVG2(left[r - 1], left[r]);
   dst++;
 
-  dst[0] = ROUND_POWER_OF_TWO(left[0] + above[-1] * 2 + above[0], 2);
-  dst[stride] = ROUND_POWER_OF_TWO(above[-1] + left[0] * 2 + left[1], 2);
+  dst[0] = AVG3(left[0], above[-1], above[0]);
+  dst[stride] = AVG3(above[-1], left[0], left[1]);
   for (r = 2; r < bs; r++)
-    dst[r * stride] = ROUND_POWER_OF_TWO(left[r - 2] + left[r - 1] * 2 +
-                                         left[r], 2);
+    dst[r * stride] = AVG3(left[r - 2], left[r - 1], left[r]);
   dst++;
 
   for (c = 0; c < bs - 2; c++)
-    dst[c] = ROUND_POWER_OF_TWO(above[c - 1] + above[c] * 2 + above[c + 1], 2);
+    dst[c] = AVG3(above[c - 1], above[c], above[c + 1]);
   dst += stride;
 
   for (r = 1; r < bs; ++r) {
@@ -359,10 +355,6 @@ static INLINE void highbd_dc_predictor(uint16_t *dst, ptrdiff_t stride,
 }
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 
-#define DST(x, y) dst[(x) + (y) * stride]
-#define AVG3(a, b, c) (((a) + 2 * (b) + (c) + 2) >> 2)
-#define AVG2(a, b) (((a) + (b) + 1) >> 1)
-
 void vp9_d207_predictor_4x4_c(uint8_t *dst, ptrdiff_t stride,
                               const uint8_t *above, const uint8_t *left) {
   const int I = left[0];
@@ -386,16 +378,14 @@ static INLINE void d207_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
   (void) above;
   // first column
   for (r = 0; r < bs - 1; ++r)
-    dst[r * stride] = ROUND_POWER_OF_TWO(left[r] + left[r + 1], 1);
+    dst[r * stride] = AVG2(left[r], left[r + 1]);
   dst[(bs - 1) * stride] = left[bs - 1];
   dst++;
 
   // second column
   for (r = 0; r < bs - 2; ++r)
-    dst[r * stride] = ROUND_POWER_OF_TWO(left[r] + left[r + 1] * 2 +
-                                         left[r + 2], 2);
-  dst[(bs - 2) * stride] = ROUND_POWER_OF_TWO(left[bs - 2] +
-                                              left[bs - 1] * 3, 2);
+    dst[r * stride] = AVG3(left[r], left[r + 1], left[r + 2]);
+  dst[(bs - 2) * stride] = AVG3(left[bs - 2], left[bs - 1], left[bs - 1]);
   dst[(bs - 1) * stride] = left[bs - 1];
   dst++;
 
@@ -439,11 +429,9 @@ static INLINE void d63_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
   (void) left;
   for (r = 0; r < bs; ++r) {
     for (c = 0; c < bs; ++c)
-      dst[c] = r & 1 ? ROUND_POWER_OF_TWO(above[r/2 + c] +
-                                          above[r/2 + c + 1] * 2 +
-                                          above[r/2 + c + 2], 2)
-                     : ROUND_POWER_OF_TWO(above[r/2 + c] +
-                                          above[r/2 + c + 1], 1);
+      dst[c] = r & 1 ? AVG3(above[(r >> 1) + c], above[(r >> 1) + c + 1],
+                            above[(r >> 1) + c + 2])
+                     : AVG2(above[(r >> 1) + c], above[(r >> 1) + c + 1]);
     dst += stride;
   }
 }
@@ -517,20 +505,19 @@ static INLINE void d117_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
 
   // first row
   for (c = 0; c < bs; c++)
-    dst[c] = ROUND_POWER_OF_TWO(above[c - 1] + above[c], 1);
+    dst[c] = AVG2(above[c - 1], above[c]);
   dst += stride;
 
   // second row
-  dst[0] = ROUND_POWER_OF_TWO(left[0] + above[-1] * 2 + above[0], 2);
+  dst[0] = AVG3(left[0], above[-1], above[0]);
   for (c = 1; c < bs; c++)
-    dst[c] = ROUND_POWER_OF_TWO(above[c - 2] + above[c - 1] * 2 + above[c], 2);
+    dst[c] = AVG3(above[c - 2], above[c - 1], above[c]);
   dst += stride;
 
   // the rest of first col
-  dst[0] = ROUND_POWER_OF_TWO(above[-1] + left[0] * 2 + left[1], 2);
+  dst[0] = AVG3(above[-1], left[0], left[1]);
   for (r = 3; r < bs; ++r)
-    dst[(r - 2) * stride] = ROUND_POWER_OF_TWO(left[r - 3] + left[r - 2] * 2 +
-                                               left[r - 1], 2);
+    dst[(r - 2) * stride] = AVG3(left[r - 3], left[r - 2], left[r - 1]);
 
   // the rest of the block
   for (r = 2; r < bs; ++r) {
@@ -565,14 +552,13 @@ void vp9_d135_predictor_4x4(uint8_t *dst, ptrdiff_t stride,
 static INLINE void d135_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
                                   const uint8_t *above, const uint8_t *left) {
   int r, c;
-  dst[0] = ROUND_POWER_OF_TWO(left[0] + above[-1] * 2 + above[0], 2);
+  dst[0] = AVG3(left[0], above[-1], above[0]);
   for (c = 1; c < bs; c++)
-    dst[c] = ROUND_POWER_OF_TWO(above[c - 2] + above[c - 1] * 2 + above[c], 2);
+    dst[c] = AVG3(above[c - 2], above[c - 1], above[c]);
 
-  dst[stride] = ROUND_POWER_OF_TWO(above[-1] + left[0] * 2 + left[1], 2);
+  dst[stride] = AVG3(above[-1], left[0], left[1]);
   for (r = 2; r < bs; ++r)
-    dst[r * stride] = ROUND_POWER_OF_TWO(left[r - 2] + left[r - 1] * 2 +
-                                         left[r], 2);
+    dst[r * stride] = AVG3(left[r - 2], left[r - 1], left[r]);
 
   dst += stride;
   for (r = 1; r < bs; ++r) {
@@ -610,20 +596,19 @@ void vp9_d153_predictor_4x4_c(uint8_t *dst, ptrdiff_t stride,
 static INLINE void d153_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
                                   const uint8_t *above, const uint8_t *left) {
   int r, c;
-  dst[0] = ROUND_POWER_OF_TWO(above[-1] + left[0], 1);
+  dst[0] = AVG2(above[-1], left[0]);
   for (r = 1; r < bs; r++)
-    dst[r * stride] = ROUND_POWER_OF_TWO(left[r - 1] + left[r], 1);
+    dst[r * stride] = AVG2(left[r - 1], left[r]);
   dst++;
 
-  dst[0] = ROUND_POWER_OF_TWO(left[0] + above[-1] * 2 + above[0], 2);
-  dst[stride] = ROUND_POWER_OF_TWO(above[-1] + left[0] * 2 + left[1], 2);
+  dst[0] = AVG3(left[0], above[-1], above[0]);
+  dst[stride] = AVG3(above[-1], left[0], left[1]);
   for (r = 2; r < bs; r++)
-    dst[r * stride] = ROUND_POWER_OF_TWO(left[r - 2] + left[r - 1] * 2 +
-                                         left[r], 2);
+    dst[r * stride] = AVG3(left[r - 2], left[r - 1], left[r]);
   dst++;
 
   for (c = 0; c < bs - 2; c++)
-    dst[c] = ROUND_POWER_OF_TWO(above[c - 1] + above[c] * 2 + above[c + 1], 2);
+    dst[c] = AVG3(above[c - 1], above[c], above[c + 1]);
   dst += stride;
 
   for (r = 1; r < bs; ++r) {
