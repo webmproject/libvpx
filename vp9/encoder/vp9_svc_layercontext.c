@@ -131,7 +131,6 @@ void vp9_update_layer_context_change_config(VP9_COMP *const cpi,
         LAYER_CONTEXT *const lc =
             &svc->layer_context[sl * oxcf->ts_number_layers + tl];
         RATE_CONTROL *const lrc = &lc->rc;
-        layer = LAYER_IDS_TO_IDX(sl, tl, oxcf->ts_number_layers);
 
         lc->spatial_layer_target_bandwidth = spatial_layer_target;
         bitrate_alloc = (float)lc->target_bandwidth / spatial_layer_target;
@@ -144,7 +143,7 @@ void vp9_update_layer_context_change_config(VP9_COMP *const cpi,
         lrc->bits_off_target =
             MIN(lrc->bits_off_target, lrc->maximum_buffer_size);
         lrc->buffer_level = MIN(lrc->buffer_level, lrc->maximum_buffer_size);
-        lc->framerate = cpi->framerate / oxcf->ts_rate_decimator[layer];
+        lc->framerate = cpi->framerate / oxcf->ts_rate_decimator[tl];
         lrc->avg_frame_bandwidth = (int)(lc->target_bandwidth / lc->framerate);
         lrc->max_frame_bandwidth = rc->max_frame_bandwidth;
         lrc->worst_quality = rc->worst_quality;
