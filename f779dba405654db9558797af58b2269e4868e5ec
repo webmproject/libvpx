@@ -16,6 +16,24 @@
       "revId": "f779dba405654db9558797af58b2269e4868e5ec",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "392ae8bf_e902553b",
+        "filename": "vp9/common/vp9_blockd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2015-06-04T13:45:29Z",
+      "side": 1,
+      "message": "I didn\u0027t want to place it below dqcoeff[] because of the size. (8k bytes)  The left/above are used often around counts in the read modes.  For now, it is probably ok, but I agree that we will have to review the layouts of these structures.",
+      "parentUuid": "f923f0e9_3bde6f52",
+      "revId": "f779dba405654db9558797af58b2269e4868e5ec",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
