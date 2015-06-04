@@ -777,7 +777,7 @@ static void block_rd_txfm(int plane, int block, BLOCK_SIZE plane_bsize,
 void txfm_rd_in_plane(MACROBLOCK *x,
 #else
 static void txfm_rd_in_plane(MACROBLOCK *x,
-#endif
+#endif  // CONFIG_SUPERTX
                              int *rate, int64_t *distortion,
                              int *skippable, int64_t *sse,
                              int64_t ref_best_rd, int plane,
@@ -792,15 +792,15 @@ static void txfm_rd_in_plane(MACROBLOCK *x,
   args.use_fast_coef_costing = use_fast_coef_casting;
 
 #if CONFIG_TX_SKIP
-  if (xd->lossless && (tx_size == TX_32X32 ||
-      (tx_size != TX_4X4 && !xd->mi[0].src_mi->mbmi.tx_skip[plane != 0]))) {
+  if (xd->lossless && tx_size != TX_4X4 &&
+      !xd->mi[0].src_mi->mbmi.tx_skip[plane != 0]) {
     *rate       = INT_MAX;
     *distortion = INT64_MAX;
     *sse        = INT64_MAX;
     *skippable  = 0;
     return;
   }
-#endif
+#endif  // CONFIG_TX_SKIP
 
   if (plane == 0)
     xd->mi[0].src_mi->mbmi.tx_size = tx_size;
