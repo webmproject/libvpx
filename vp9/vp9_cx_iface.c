@@ -1103,6 +1103,7 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
 
         cx_data += size;
         cx_data_sz -= size;
+#if VPX_ENCODER_ABI_VERSION > (5 + VPX_CODEC_ABI_VERSION)
 #if CONFIG_SPATIAL_SVC
         if (cpi->use_svc && !ctx->output_cx_pkt_cb.output_cx_pkt) {
           vpx_codec_cx_pkt_t pkt_sizes, pkt_psnr;
@@ -1123,6 +1124,7 @@ static vpx_codec_err_t encoder_encode(vpx_codec_alg_priv_t  *ctx,
 
           vpx_codec_pkt_list_add(&ctx->pkt_list.head, &pkt_psnr);
         }
+#endif
 #endif
         if (is_one_pass_cbr_svc(cpi) &&
             (cpi->svc.spatial_layer_id == cpi->svc.number_spatial_layers - 1)) {
@@ -1331,9 +1333,7 @@ static vpx_codec_err_t ctrl_set_svc_layer_id(vpx_codec_alg_priv_t *ctx,
   VP9_COMP *const cpi = (VP9_COMP *)ctx->cpi;
   SVC *const svc = &cpi->svc;
 
-#if VPX_ENCODER_ABI_VERSION > (4 + VPX_CODEC_ABI_VERSION)
   svc->spatial_layer_id = data->spatial_layer_id;
-#endif
   svc->temporal_layer_id = data->temporal_layer_id;
   // Checks on valid layer_id input.
   if (svc->temporal_layer_id < 0 ||
@@ -1353,9 +1353,7 @@ static vpx_codec_err_t ctrl_get_svc_layer_id(vpx_codec_alg_priv_t *ctx,
   VP9_COMP *const cpi = (VP9_COMP *)ctx->cpi;
   SVC *const svc = &cpi->svc;
 
-#if VPX_ENCODER_ABI_VERSION > (4 + VPX_CODEC_ABI_VERSION)
   data->spatial_layer_id = svc->spatial_layer_id;
-#endif
   data->temporal_layer_id = svc->temporal_layer_id;
 
   return VPX_CODEC_OK;
@@ -1440,10 +1438,8 @@ static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   {VP9E_SET_AQ_MODE,                  ctrl_set_aq_mode},
   {VP9E_SET_FRAME_PERIODIC_BOOST,     ctrl_set_frame_periodic_boost},
   {VP9E_SET_SVC,                      ctrl_set_svc},
-#if VPX_ENCODER_ABI_VERSION > (4 + VPX_CODEC_ABI_VERSION)
   {VP9E_SET_SVC_PARAMETERS,           ctrl_set_svc_parameters},
   {VP9E_REGISTER_CX_CALLBACK,         ctrl_register_cx_callback},
-#endif
   {VP9E_SET_SVC_LAYER_ID,             ctrl_set_svc_layer_id},
   {VP9E_SET_TUNE_CONTENT,             ctrl_set_tune_content},
   {VP9E_SET_COLOR_SPACE,              ctrl_set_color_space},
@@ -1453,9 +1449,7 @@ static vpx_codec_ctrl_fn_map_t encoder_ctrl_maps[] = {
   {VP8E_GET_LAST_QUANTIZER,           ctrl_get_quantizer},
   {VP8E_GET_LAST_QUANTIZER_64,        ctrl_get_quantizer64},
   {VP9_GET_REFERENCE,                 ctrl_get_reference},
-#if VPX_ENCODER_ABI_VERSION > (4 + VPX_CODEC_ABI_VERSION)
   {VP9E_GET_SVC_LAYER_ID,             ctrl_get_svc_layer_id},
-#endif
   {VP9E_GET_ACTIVEMAP,                ctrl_get_active_map},
 
   { -1, NULL},

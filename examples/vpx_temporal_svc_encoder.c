@@ -684,27 +684,22 @@ int main(int argc, char **argv) {
     vpx_codec_control(&codec, VP8E_SET_NOISE_SENSITIVITY, kDenoiserOff);
     vpx_codec_control(&codec, VP8E_SET_STATIC_THRESHOLD, 0);
   } else if (strncmp(encoder->name, "vp9", 3) == 0) {
-#if VPX_ENCODER_ABI_VERSION > (4 + VPX_CODEC_ABI_VERSION)
     vpx_svc_extra_cfg_t svc_params;
-#endif
-      vpx_codec_control(&codec, VP8E_SET_CPUUSED, speed);
-      vpx_codec_control(&codec, VP9E_SET_AQ_MODE, 3);
-      vpx_codec_control(&codec, VP9E_SET_FRAME_PERIODIC_BOOST, 0);
-      vpx_codec_control(&codec, VP9E_SET_NOISE_SENSITIVITY, 0);
-      vpx_codec_control(&codec, VP8E_SET_STATIC_THRESHOLD, 0);
-      vpx_codec_control(&codec, VP9E_SET_TILE_COLUMNS, (cfg.g_threads >> 1));
-      if (vpx_codec_control(&codec, VP9E_SET_SVC, layering_mode > 0 ? 1: 0)) {
-        die_codec(&codec, "Failed to set SVC");
-#if VPX_ENCODER_ABI_VERSION > (4 + VPX_CODEC_ABI_VERSION)
-      for (i = 0; i < cfg.ts_number_layers; ++i) {
-        svc_params.max_quantizers[i] = cfg.rc_max_quantizer;
-        svc_params.min_quantizers[i] = cfg.rc_min_quantizer;
-      }
-      svc_params.scaling_factor_num[0] = cfg.g_h;
-      svc_params.scaling_factor_den[0] = cfg.g_h;
-      vpx_codec_control(&codec, VP9E_SET_SVC_PARAMETERS, &svc_params);
-#endif
+    vpx_codec_control(&codec, VP8E_SET_CPUUSED, speed);
+    vpx_codec_control(&codec, VP9E_SET_AQ_MODE, 3);
+    vpx_codec_control(&codec, VP9E_SET_FRAME_PERIODIC_BOOST, 0);
+    vpx_codec_control(&codec, VP9E_SET_NOISE_SENSITIVITY, 0);
+    vpx_codec_control(&codec, VP8E_SET_STATIC_THRESHOLD, 0);
+    vpx_codec_control(&codec, VP9E_SET_TILE_COLUMNS, (cfg.g_threads >> 1));
+    if (vpx_codec_control(&codec, VP9E_SET_SVC, layering_mode > 0 ? 1: 0))
+      die_codec(&codec, "Failed to set SVC");
+    for (i = 0; i < cfg.ts_number_layers; ++i) {
+      svc_params.max_quantizers[i] = cfg.rc_max_quantizer;
+      svc_params.min_quantizers[i] = cfg.rc_min_quantizer;
     }
+    svc_params.scaling_factor_num[0] = cfg.g_h;
+    svc_params.scaling_factor_den[0] = cfg.g_h;
+    vpx_codec_control(&codec, VP9E_SET_SVC_PARAMETERS, &svc_params);
   }
   if (strncmp(encoder->name, "vp8", 3) == 0) {
     vpx_codec_control(&codec, VP8E_SET_SCREEN_CONTENT_MODE, 0);
