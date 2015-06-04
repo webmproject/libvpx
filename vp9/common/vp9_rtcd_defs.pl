@@ -216,11 +216,11 @@ specialize qw/vp9_dc_128_predictor_32x32/, "$sse2_x86inc";
 # Loopfilter
 #
 add_proto qw/void vp9_lpf_vertical_16/, "uint8_t *s, int pitch, const uint8_t *blimit, const uint8_t *limit, const uint8_t *thresh";
-specialize qw/vp9_lpf_vertical_16 sse2 neon_asm dspr2/;
+specialize qw/vp9_lpf_vertical_16 sse2 neon_asm dspr2 msa/;
 $vp9_lpf_vertical_16_neon_asm=vp9_lpf_vertical_16_neon;
 
 add_proto qw/void vp9_lpf_vertical_16_dual/, "uint8_t *s, int pitch, const uint8_t *blimit, const uint8_t *limit, const uint8_t *thresh";
-specialize qw/vp9_lpf_vertical_16_dual sse2 neon_asm dspr2/;
+specialize qw/vp9_lpf_vertical_16_dual sse2 neon_asm dspr2 msa/;
 $vp9_lpf_vertical_16_dual_neon_asm=vp9_lpf_vertical_16_dual_neon;
 
 add_proto qw/void vp9_lpf_vertical_8/, "uint8_t *s, int pitch, const uint8_t *blimit, const uint8_t *limit, const uint8_t *thresh, int count";
@@ -238,7 +238,7 @@ add_proto qw/void vp9_lpf_vertical_4_dual/, "uint8_t *s, int pitch, const uint8_
 specialize qw/vp9_lpf_vertical_4_dual sse2 neon dspr2/;
 
 add_proto qw/void vp9_lpf_horizontal_16/, "uint8_t *s, int pitch, const uint8_t *blimit, const uint8_t *limit, const uint8_t *thresh, int count";
-specialize qw/vp9_lpf_horizontal_16 sse2 avx2 neon_asm dspr2/;
+specialize qw/vp9_lpf_horizontal_16 sse2 avx2 neon_asm dspr2 msa/;
 $vp9_lpf_horizontal_16_neon_asm=vp9_lpf_horizontal_16_neon;
 
 add_proto qw/void vp9_lpf_horizontal_8/, "uint8_t *s, int pitch, const uint8_t *blimit, const uint8_t *limit, const uint8_t *thresh, int count";
