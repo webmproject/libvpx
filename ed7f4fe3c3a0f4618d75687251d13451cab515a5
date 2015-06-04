@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d9f1cca3_94d76cb7",
+        "filename": "vp9/common/vp9_filter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2015-06-04T05:20:50Z",
+      "side": 1,
+      "message": "my mistake. it does fail a test vector:\n/usr/local/google/home/johannkoenig/libvpx-sad/test/test_vector_test.cc:76: Failure\nValue of: actual_md5\n  Actual: \"5f60a6fc486d9fec2a157a26c1ec0a38\"\nExpected: expected_md5\nWhich is: \"f863f8c68b5c87c721d345c5a894336d\"\nMd5 checksums don\u0027t match: frame number \u003d 5\nGoogle Test trace:\n/usr/local/google/home/johannkoenig/libvpx-sad/test/test_vector_test.cc:107: file: vp90-2-06-bilinear.webm  mode: Parallel threads: 5\n/usr/local/google/home/johannkoenig/libvpx-sad/test/test_vector_test.cc:132: Failure\nExpected: RunLoop(video, cfg) doesn\u0027t generate new fatal failures in the current thread.\n  Actual: it does.\nGoogle Test trace:\n/usr/local/google/home/johannkoenig/libvpx-sad/test/test_vector_test.cc:107: file: vp90-2-06-bilinear.webm  mode: Parallel threads: 5\n[  FAILED  ] VP9MultiThreadedFrameParallel/TestVectorTest.MD5Match/978, where GetParam() \u003d (0xa24548, (1, 5, 0x766f18 pointing to \"vp90-2-06-bilinear.webm\")) (6 ms)",
+      "range": {
+        "startLine": 15,
+        "startChar": 11,
+        "endLine": 15,
+        "endChar": 22
+      },
+      "revId": "ed7f4fe3c3a0f4618d75687251d13451cab515a5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
