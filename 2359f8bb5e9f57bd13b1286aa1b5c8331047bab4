@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "19d6040d_86880e71",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-05T05:49:38Z",
+      "side": 1,
+      "message": "why is this necessary?",
+      "revId": "2359f8bb5e9f57bd13b1286aa1b5c8331047bab4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "19d6040d_c669361f",
+        "filename": "test/android/README",
+        "patchSetId": 1
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-05T05:49:38Z",
+      "side": 1,
+      "message": "I don\u0027t know why we need to differentiate between the two. If the current setup expects to be configured outside the libvpx folder then I\u0027d expect x86 to work that way too.",
+      "revId": "2359f8bb5e9f57bd13b1286aa1b5c8331047bab4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
