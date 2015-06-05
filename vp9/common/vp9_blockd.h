@@ -566,7 +566,7 @@ static INLINE int is_interintra_allowed(BLOCK_SIZE sb_type) {
 
 #define WEDGE_WEIGHT_BITS 6
 
-static inline int get_wedge_bits(BLOCK_SIZE sb_type) {
+static INLINE int get_wedge_bits(BLOCK_SIZE sb_type) {
   if (sb_type < BLOCK_8X8)
     return 0;
   if (sb_type <= BLOCK_8X8)
@@ -579,7 +579,7 @@ static inline int get_wedge_bits(BLOCK_SIZE sb_type) {
 #endif  // CONFIG_WEDGE_PARTITION
 
 #if CONFIG_NEW_QUANT && CONFIG_TX_SKIP
-static inline int is_rect_quant_used(const MB_MODE_INFO *mbmi,
+static INLINE int is_rect_quant_used(const MB_MODE_INFO *mbmi,
                                      int plane) {
   return
       mbmi->tx_skip[plane != 0] &&
