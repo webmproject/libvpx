@@ -1,6 +1,7 @@
 xxxx-yy-zz v1.4.0 "Changes for next release"
   vpxenc is changed to use VP9 by default.
   Encoder controls added for 1 pass SVC.
+  Decoder control to toggle on/off loopfilter.
 
 2015-04-03 v1.4.0 "Indian Runner Duck"
   This release includes significant improvements to the VP9 codec.

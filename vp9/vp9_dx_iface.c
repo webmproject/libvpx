@@ -55,6 +55,7 @@ struct vpx_codec_alg_priv {
   int                     invert_tile_order;
   int                     last_show_frame;  // Index of last output frame.
   int                     byte_alignment;
+  int                     skip_loop_filter;
 
   // Frame parallel related.
   int                     frame_parallel_decode;  // frame-based threading.
@@ -285,6 +286,7 @@ static void init_buffer_callbacks(vpx_codec_alg_priv_t *ctx) {
 
     cm->new_fb_idx = INVALID_IDX;
     cm->byte_alignment = ctx->byte_alignment;
+    cm->skip_loop_filter = ctx->skip_loop_filter;
 
     if (ctx->get_ext_fb_cb != NULL && ctx->release_ext_fb_cb != NULL) {
       pool->get_fb_cb = ctx->get_ext_fb_cb;
@@ -1059,6 +1061,19 @@ static vpx_codec_err_t ctrl_set_byte_alignment(vpx_codec_alg_priv_t *ctx,
   return VPX_CODEC_OK;
 }
 
+static vpx_codec_err_t ctrl_set_skip_loop_filter(vpx_codec_alg_priv_t *ctx,
+                                                 va_list args) {
+  ctx->skip_loop_filter = va_arg(args, int);
+
+  if (ctx->frame_workers) {
+    VP9Worker *const worker = ctx->frame_workers;
+    FrameWorkerData *const frame_worker_data = (FrameWorkerData *)worker->data1;
+    frame_worker_data->pbi->common.skip_loop_filter = ctx->skip_loop_filter;
+  }
+
+  return VPX_CODEC_OK;
+}
+
 static vpx_codec_ctrl_fn_map_t decoder_ctrl_maps[] = {
   {VP8_COPY_REFERENCE,            ctrl_copy_reference},
 
@@ -1072,6 +1087,7 @@ static vpx_codec_ctrl_fn_map_t decoder_ctrl_maps[] = {
   {VP9_INVERT_TILE_DECODE_ORDER,  ctrl_set_invert_tile_order},
   {VPXD_SET_DECRYPTOR,            ctrl_set_decryptor},
   {VP9_SET_BYTE_ALIGNMENT,        ctrl_set_byte_alignment},
+  {VP9_SET_SKIP_LOOP_FILTER,      ctrl_set_skip_loop_filter},
 
   // Getters
   {VP8D_GET_LAST_REF_UPDATES,     ctrl_get_last_ref_updates},
