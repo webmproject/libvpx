@@ -694,9 +694,23 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     MSA, Loop8Test6Param,
     ::testing::Values(
+        make_tuple(&vp9_lpf_horizontal_8_msa, &vp9_lpf_horizontal_8_c, 8, 1),
         make_tuple(&vp9_lpf_horizontal_16_msa, &vp9_lpf_horizontal_16_c, 8, 1),
         make_tuple(&vp9_lpf_horizontal_16_msa, &vp9_lpf_horizontal_16_c, 8, 2),
+        make_tuple(&vp9_lpf_vertical_8_msa, &vp9_lpf_vertical_8_c, 8, 1),
         make_tuple(&wrapper_vertical_16_msa, &wrapper_vertical_16_c, 8, 1)));
+
+INSTANTIATE_TEST_CASE_P(
+    MSA, Loop8Test9Param,
+    ::testing::Values(
+        make_tuple(&vp9_lpf_horizontal_4_dual_msa,
+                   &vp9_lpf_horizontal_4_dual_c, 8),
+        make_tuple(&vp9_lpf_horizontal_8_dual_msa,
+                   &vp9_lpf_horizontal_8_dual_c, 8),
+        make_tuple(&vp9_lpf_vertical_4_dual_msa,
+                   &vp9_lpf_vertical_4_dual_c, 8),
+        make_tuple(&vp9_lpf_vertical_8_dual_msa,
+                   &vp9_lpf_vertical_8_dual_c, 8)));
 #endif  // HAVE_MSA && (!CONFIG_VP9_HIGHBITDEPTH)
 
 }  // namespace
