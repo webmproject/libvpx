@@ -146,6 +146,8 @@ VP9_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/vp9_idct8x8_msa.c
 VP9_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/vp9_idct16x16_msa.c
 VP9_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/vp9_idct32x32_msa.c
 VP9_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/vp9_idct_msa.h
+VP9_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/vp9_loopfilter_4_msa.c
+VP9_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/vp9_loopfilter_8_msa.c
 VP9_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/vp9_loopfilter_16_msa.c
 VP9_COMMON_SRCS-$(HAVE_MSA) += common/mips/msa/vp9_loopfilter_msa.h
 
