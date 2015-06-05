@@ -464,15 +464,17 @@ void vp9_d45_predictor_4x4_c(uint8_t *dst, ptrdiff_t stride,
 static INLINE void d45_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
                                  const uint8_t *above, const uint8_t *left) {
   const uint8_t above_right = above[bs - 1];
+  const uint8_t *const dst_row0 = dst;
   int x, size;
-  uint8_t avg[31];  // TODO(jzern): this could be block size specific
   (void)left;
 
   for (x = 0; x < bs - 1; ++x) {
-    avg[x] = AVG3(above[x], above[x + 1], above[x + 2]);
+    dst[x] = AVG3(above[x], above[x + 1], above[x + 2]);
   }
-  for (x = 0, size = bs - 1; x < bs; ++x, --size) {
-    memcpy(dst, avg + x, size);
+  dst[bs - 1] = above_right;
+  dst += stride;
+  for (x = 1, size = bs - 2; x < bs; ++x, --size) {
+    memcpy(dst, dst_row0 + x, size);
     memset(dst + size, above_right, x + 1);
     dst += stride;
   }
