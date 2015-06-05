@@ -263,8 +263,8 @@ case "$target" in
     ;;
     arm*)
         platforms[0]="ARM"
-        asm_Debug_cmdline="armasm -nologo &quot;%(FullPath)&quot;"
-        asm_Release_cmdline="armasm -nologo &quot;%(FullPath)&quot;"
+        asm_Debug_cmdline="armasm -nologo -oldit &quot;%(FullPath)&quot;"
+        asm_Release_cmdline="armasm -nologo -oldit &quot;%(FullPath)&quot;"
     ;;
     *) die "Unsupported target $target!"
     ;;
