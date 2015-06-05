@@ -23,6 +23,13 @@ vpxenc_verify_environment() {
     elog "The file ${YUV_RAW_INPUT##*/} must exist in LIBVPX_TEST_DATA_PATH."
     return 1
   fi
+  if [ "$(vpxenc_can_encode_vp9)" = "yes" ]; then
+    if [ ! -e "${Y4M_NOSQ_PAR_INPUT}" ]; then
+      elog "The file ${Y4M_NOSQ_PAR_INPUT##*/} must exist in"
+      elog "LIBVPX_TEST_DATA_PATH."
+      return 1
+    fi
+  fi
   if [ -z "$(vpx_tool_path vpxenc)" ]; then
     elog "vpxenc not found. It must exist in LIBVPX_BIN_PATH or its parent."
     return 1
@@ -47,6 +54,10 @@ yuv_input_hantro_collage() {
   echo ""${YUV_RAW_INPUT}"
        --width="${YUV_RAW_INPUT_WIDTH}"
        --height="${YUV_RAW_INPUT_HEIGHT}""
+}
+
+y4m_input_non_square_par() {
+  echo ""${Y4M_NOSQ_PAR_INPUT}""
 }
 
 # Echo default vpxenc real time encoding params. $1 is the codec, which defaults
@@ -320,6 +331,23 @@ vpxenc_vp9_webm_lag10_frames20() {
   fi
 }
 
+# TODO(fgalligan): Test that DisplayWidth is different than video width.
+vpxenc_vp9_webm_non_square_par() {
+  if [ "$(vpxenc_can_encode_vp9)" = "yes" ] && \
+     [ "$(webm_io_available)" = "yes" ]; then
+    local readonly output="${VPX_TEST_OUTPUT_DIR}/vp9_non_square_par.webm"
+    vpxenc $(y4m_input_non_square_par) \
+      --codec=vp9 \
+      --limit="${TEST_FRAMES}" \
+      --output="${output}"
+
+    if [ ! -e "${output}" ]; then
+      elog "Output file does not exist."
+      return 1
+    fi
+  fi
+}
+
 vpxenc_tests="vpxenc_vp8_ivf
               vpxenc_vp8_webm
               vpxenc_vp8_webm_rt
@@ -332,6 +360,7 @@ vpxenc_tests="vpxenc_vp8_ivf
               vpxenc_vp9_webm_2pass
               vpxenc_vp9_ivf_lossless
               vpxenc_vp9_ivf_minq0_maxq0
-              vpxenc_vp9_webm_lag10_frames20"
+              vpxenc_vp9_webm_lag10_frames20
+              vpxenc_vp9_webm_non_square_par"
 
 run_tests vpxenc_verify_environment "${vpxenc_tests}"

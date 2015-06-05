@@ -42,7 +42,8 @@ void write_webm_file_header(struct EbmlGlobal *glob,
                             const vpx_codec_enc_cfg_t *cfg,
                             const struct vpx_rational *fps,
                             stereo_format_t stereo_fmt,
-                            unsigned int fourcc);
+                            unsigned int fourcc,
+                            const struct VpxRational *par);
 
 void write_webm_block(struct EbmlGlobal *glob,
                       const vpx_codec_enc_cfg_t *cfg,

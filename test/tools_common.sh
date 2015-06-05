@@ -408,6 +408,8 @@ YUV_RAW_INPUT="${LIBVPX_TEST_DATA_PATH}/hantro_collage_w352h288.yuv"
 YUV_RAW_INPUT_WIDTH=352
 YUV_RAW_INPUT_HEIGHT=288
 
+Y4M_NOSQ_PAR_INPUT="${LIBVPX_TEST_DATA_PATH}/park_joy_90p_8_420_a10-1.y4m"
+
 # Setup a trap function to clean up after tests complete.
 trap cleanup EXIT
 
@@ -429,6 +431,7 @@ vlog "$(basename "${0%.*}") test configuration:
   VPX_TEST_VERBOSE_OUTPUT=${VPX_TEST_VERBOSE_OUTPUT}
   YUV_RAW_INPUT=${YUV_RAW_INPUT}
   YUV_RAW_INPUT_WIDTH=${YUV_RAW_INPUT_WIDTH}
-  YUV_RAW_INPUT_HEIGHT=${YUV_RAW_INPUT_HEIGHT}"
+  YUV_RAW_INPUT_HEIGHT=${YUV_RAW_INPUT_HEIGHT}
+  Y4M_NOSQ_PAR_INPUT=${Y4M_NOSQ_PAR_INPUT}"
 
 fi  # End $VPX_TEST_TOOLS_COMMON_SH pseudo include guard.
