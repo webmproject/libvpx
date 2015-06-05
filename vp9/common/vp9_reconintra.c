@@ -425,13 +425,17 @@ void vp9_d63_predictor_4x4_c(uint8_t *dst, ptrdiff_t stride,
 static INLINE void d63_predictor(uint8_t *dst, ptrdiff_t stride, int bs,
                                  const uint8_t *above, const uint8_t *left) {
   int r, c;
-  (void) left;
-  for (r = 0; r < bs; ++r) {
-    for (c = 0; c < bs; ++c)
-      dst[c] = r & 1 ? AVG3(above[(r >> 1) + c], above[(r >> 1) + c + 1],
-                            above[(r >> 1) + c + 2])
-                     : AVG2(above[(r >> 1) + c], above[(r >> 1) + c + 1]);
-    dst += stride;
+  int size;
+  (void)left;
+  for (c = 0; c < bs; ++c) {
+    dst[c] = AVG2(above[c], above[c + 1]);
+    dst[stride + c] = AVG3(above[c], above[c + 1], above[c + 2]);
+  }
+  for (r = 2, size = bs - 2; r < bs; r += 2, --size) {
+    memcpy(dst + (r + 0) * stride, dst + (r >> 1), size);
+    memset(dst + (r + 0) * stride + size, above[bs - 1], bs - size);
+    memcpy(dst + (r + 1) * stride, dst + stride + (r >> 1), size);
+    memset(dst + (r + 1) * stride + size, above[bs - 1], bs - size);
   }
 }
 intra_pred_no_4x4(d63)
