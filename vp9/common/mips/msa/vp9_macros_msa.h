@@ -413,6 +413,33 @@
 }
 #define ST_SH8(...) ST_H8(v8i16, __VA_ARGS__)
 
+/* Description : Store as 2x4 byte block to destination memory from input vector
+   Arguments   : Inputs  - in, stidx, pdst, stride
+                 Return Type - unsigned byte
+   Details     : Index stidx halfword element from 'in' vector is copied and
+                 stored on first line
+                 Index stidx+1 halfword element from 'in' vector is copied and
+                 stored on second line
+                 Index stidx+2 halfword element from 'in' vector is copied and
+                 stored on third line
+                 Index stidx+3 halfword element from 'in' vector is copied and
+                 stored on fourth line
+*/
+#define ST2x4_UB(in, stidx, pdst, stride) {         \
+  uint16_t out0_m, out1_m, out2_m, out3_m;          \
+  uint8_t *pblk_2x4_m = (uint8_t *)(pdst);          \
+                                                    \
+  out0_m = __msa_copy_u_h((v8i16)in, (stidx));      \
+  out1_m = __msa_copy_u_h((v8i16)in, (stidx + 1));  \
+  out2_m = __msa_copy_u_h((v8i16)in, (stidx + 2));  \
+  out3_m = __msa_copy_u_h((v8i16)in, (stidx + 3));  \
+                                                    \
+  SH(out0_m, pblk_2x4_m);                           \
+  SH(out1_m, pblk_2x4_m + stride);                  \
+  SH(out2_m, pblk_2x4_m + 2 * stride);              \
+  SH(out3_m, pblk_2x4_m + 3 * stride);              \
+}
+
 /* Description : Store as 4x4 byte block to destination memory from input vector
    Arguments   : Inputs  - in0, in1, pdst, stride
                  Return Type - unsigned byte
@@ -517,6 +544,13 @@
   out1 = (RTYPE)__msa_sldi_b((v16i8)zero_m, (v16i8)in1, slide_val);  \
 }
 #define SLDI_B2_0_SW(...) SLDI_B2_0(v4i32, __VA_ARGS__)
+
+#define SLDI_B4_0(RTYPE, in0, in1, in2, in3,            \
+                  out0, out1, out2, out3, slide_val) {  \
+  SLDI_B2_0(RTYPE, in0, in1, out0, out1, slide_val);    \
+  SLDI_B2_0(RTYPE, in2, in3, out2, out3, slide_val);    \
+}
+#define SLDI_B4_0_UB(...) SLDI_B4_0(v16u8, __VA_ARGS__)
 
 /* Description : Immediate number of columns to slide
    Arguments   : Inputs  - in0_0, in0_1, in1_0, in1_1, slide_val
@@ -754,6 +788,21 @@
 #define ILVEV_H2_SH(...) ILVEV_H2(v8i16, __VA_ARGS__)
 #define ILVEV_H2_SW(...) ILVEV_H2(v4i32, __VA_ARGS__)
 
+/* Description : Interleave even double word elements from vectors
+   Arguments   : Inputs  - in0, in1, in2, in3
+                 Outputs - out0, out1
+                 Return Type - as per RTYPE
+   Details     : Even double word elements of 'in0' and even double word
+                 elements of 'in1' are interleaved and copied to 'out0'
+                 Even double word elements of 'in2' and even double word
+                 elements of 'in3' are interleaved and copied to 'out1'
+*/
+#define ILVEV_D2(RTYPE, in0, in1, in2, in3, out0, out1) {  \
+  out0 = (RTYPE)__msa_ilvev_d((v2i64)in1, (v2i64)in0);     \
+  out1 = (RTYPE)__msa_ilvev_d((v2i64)in3, (v2i64)in2);     \
+}
+#define ILVEV_D2_UB(...) ILVEV_D2(v16u8, __VA_ARGS__)
+
 /* Description : Interleave left half of byte elements from vectors
    Arguments   : Inputs  - in0, in1, in2, in3
                  Outputs - out0, out1
@@ -839,6 +888,16 @@
 #define ILVR_B4_SB(...) ILVR_B4(v16i8, __VA_ARGS__)
 #define ILVR_B4_UH(...) ILVR_B4(v8u16, __VA_ARGS__)
 #define ILVR_B4_SH(...) ILVR_B4(v8i16, __VA_ARGS__)
+
+#define ILVR_B8(RTYPE, in0, in1, in2, in3, in4, in5, in6, in7,     \
+                in8, in9, in10, in11, in12, in13, in14, in15,      \
+                out0, out1, out2, out3, out4, out5, out6, out7) {  \
+  ILVR_B4(RTYPE, in0, in1, in2, in3, in4, in5, in6, in7,           \
+          out0, out1, out2, out3);                                 \
+  ILVR_B4(RTYPE, in8, in9, in10, in11, in12, in13, in14, in15,     \
+          out4, out5, out6, out7);                                 \
+}
+#define ILVR_B8_UH(...) ILVR_B8(v8u16, __VA_ARGS__)
 
 /* Description : Interleave right half of halfword elements from vectors
    Arguments   : Inputs  - in0, in1, in2, in3, in4, in5, in6, in7
@@ -1299,6 +1358,78 @@
   out5 = in2 - in5;                                                    \
   out6 = in1 - in6;                                                    \
   out7 = in0 - in7;                                                    \
+}
+
+/* Description : Transposes input 8x8 byte block
+   Arguments   : Inputs  - in0, in1, in2, in3, in4, in5, in6, in7
+                           (input 8x8 byte block)
+                 Outputs - out0, out1, out2, out3, out4, out5, out6, out7
+                           (output 8x8 byte block)
+                 Return Type - unsigned byte
+   Details     :
+*/
+#define TRANSPOSE8x8_UB(RTYPE, in0, in1, in2, in3, in4, in5, in6, in7,     \
+                        out0, out1, out2, out3, out4, out5, out6, out7) {  \
+  v16i8 tmp0_m, tmp1_m, tmp2_m, tmp3_m;                                    \
+  v16i8 tmp4_m, tmp5_m, tmp6_m, tmp7_m;                                    \
+                                                                           \
+  ILVR_B4_SB(in2, in0, in3, in1, in6, in4, in7, in5,                       \
+             tmp0_m, tmp1_m, tmp2_m, tmp3_m);                              \
+  ILVRL_B2_SB(tmp1_m, tmp0_m, tmp4_m, tmp5_m);                             \
+  ILVRL_B2_SB(tmp3_m, tmp2_m, tmp6_m, tmp7_m);                             \
+  ILVRL_W2(RTYPE, tmp6_m, tmp4_m, out0, out2);                             \
+  ILVRL_W2(RTYPE, tmp7_m, tmp5_m, out4, out6);                             \
+  SLDI_B2_0(RTYPE, out0, out2, out1, out3, 8);                             \
+  SLDI_B2_0(RTYPE, out4, out6, out5, out7, 8);                             \
+}
+#define TRANSPOSE8x8_UB_UB(...) TRANSPOSE8x8_UB(v16u8, __VA_ARGS__)
+
+/* Description : Transposes 16x8 block into 8x16 with byte elements in vectors
+   Arguments   : Inputs  - in0, in1, in2, in3, in4, in5, in6, in7,
+                           in8, in9, in10, in11, in12, in13, in14, in15
+                 Outputs - out0, out1, out2, out3, out4, out5, out6, out7
+                 Return Type - unsigned byte
+   Details     :
+*/
+#define TRANSPOSE16x8_UB_UB(in0, in1, in2, in3, in4, in5, in6, in7,            \
+                            in8, in9, in10, in11, in12, in13, in14, in15,      \
+                            out0, out1, out2, out3, out4, out5, out6, out7) {  \
+  v16u8 tmp0_m, tmp1_m, tmp2_m, tmp3_m;                                        \
+  v16u8 tmp4_m, tmp5_m, tmp6_m, tmp7_m;                                        \
+                                                                               \
+  ILVEV_D2_UB(in0, in8, in1, in9, out7, out6);                                 \
+  ILVEV_D2_UB(in2, in10, in3, in11, out5, out4);                               \
+  ILVEV_D2_UB(in4, in12, in5, in13, out3, out2);                               \
+  ILVEV_D2_UB(in6, in14, in7, in15, out1, out0);                               \
+                                                                               \
+  tmp0_m = (v16u8)__msa_ilvev_b((v16i8)out6, (v16i8)out7);                     \
+  tmp4_m = (v16u8)__msa_ilvod_b((v16i8)out6, (v16i8)out7);                     \
+  tmp1_m = (v16u8)__msa_ilvev_b((v16i8)out4, (v16i8)out5);                     \
+  tmp5_m = (v16u8)__msa_ilvod_b((v16i8)out4, (v16i8)out5);                     \
+  out5 = (v16u8)__msa_ilvev_b((v16i8)out2, (v16i8)out3);                       \
+  tmp6_m = (v16u8)__msa_ilvod_b((v16i8)out2, (v16i8)out3);                     \
+  out7 = (v16u8)__msa_ilvev_b((v16i8)out0, (v16i8)out1);                       \
+  tmp7_m = (v16u8)__msa_ilvod_b((v16i8)out0, (v16i8)out1);                     \
+                                                                               \
+  ILVEV_H2_UB(tmp0_m, tmp1_m, out5, out7, tmp2_m, tmp3_m);                     \
+  out0 = (v16u8)__msa_ilvev_w((v4i32)tmp3_m, (v4i32)tmp2_m);                   \
+  out4 = (v16u8)__msa_ilvod_w((v4i32)tmp3_m, (v4i32)tmp2_m);                   \
+                                                                               \
+  tmp2_m = (v16u8)__msa_ilvod_h((v8i16)tmp1_m, (v8i16)tmp0_m);                 \
+  tmp3_m = (v16u8)__msa_ilvod_h((v8i16)out7, (v8i16)out5);                     \
+  out2 = (v16u8)__msa_ilvev_w((v4i32)tmp3_m, (v4i32)tmp2_m);                   \
+  out6 = (v16u8)__msa_ilvod_w((v4i32)tmp3_m, (v4i32)tmp2_m);                   \
+                                                                               \
+  ILVEV_H2_UB(tmp4_m, tmp5_m, tmp6_m, tmp7_m, tmp2_m, tmp3_m);                 \
+  out1 = (v16u8)__msa_ilvev_w((v4i32)tmp3_m, (v4i32)tmp2_m);                   \
+  out5 = (v16u8)__msa_ilvod_w((v4i32)tmp3_m, (v4i32)tmp2_m);                   \
+                                                                               \
+  tmp2_m = (v16u8)__msa_ilvod_h((v8i16)tmp5_m, (v8i16)tmp4_m);                 \
+  tmp2_m = (v16u8)__msa_ilvod_h((v8i16)tmp5_m, (v8i16)tmp4_m);                 \
+  tmp3_m = (v16u8)__msa_ilvod_h((v8i16)tmp7_m, (v8i16)tmp6_m);                 \
+  tmp3_m = (v16u8)__msa_ilvod_h((v8i16)tmp7_m, (v8i16)tmp6_m);                 \
+  out3 = (v16u8)__msa_ilvev_w((v4i32)tmp3_m, (v4i32)tmp2_m);                   \
+  out7 = (v16u8)__msa_ilvod_w((v4i32)tmp3_m, (v4i32)tmp2_m);                   \
 }
 
 /* Description : Transposes 4x4 block with half word elements in vectors

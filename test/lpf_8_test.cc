@@ -137,6 +137,20 @@ void wrapper_vertical_16_dual_c(uint8_t *s, int p, const uint8_t *blimit,
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // HAVE_NEON_ASM
 
+#if HAVE_MSA && (!CONFIG_VP9_HIGHBITDEPTH)
+void wrapper_vertical_16_msa(uint8_t *s, int p, const uint8_t *blimit,
+                             const uint8_t *limit, const uint8_t *thresh,
+                             int count) {
+  vp9_lpf_vertical_16_msa(s, p, blimit, limit, thresh);
+}
+
+void wrapper_vertical_16_c(uint8_t *s, int p, const uint8_t *blimit,
+                           const uint8_t *limit, const uint8_t *thresh,
+                           int count) {
+  vp9_lpf_vertical_16_c(s, p, blimit, limit, thresh);
+}
+#endif  // HAVE_MSA && (!CONFIG_VP9_HIGHBITDEPTH)
+
 class Loop8Test6Param : public ::testing::TestWithParam<loop8_param_t> {
  public:
   virtual ~Loop8Test6Param() {}
@@ -675,5 +689,14 @@ INSTANTIATE_TEST_CASE_P(
                    &vp9_lpf_vertical_4_dual_c, 8)));
 #endif  // CONFIG_VP9_HIGHBITDEPTH
 #endif  // HAVE_NEON
+
+#if HAVE_MSA && (!CONFIG_VP9_HIGHBITDEPTH)
+INSTANTIATE_TEST_CASE_P(
+    MSA, Loop8Test6Param,
+    ::testing::Values(
+        make_tuple(&vp9_lpf_horizontal_16_msa, &vp9_lpf_horizontal_16_c, 8, 1),
+        make_tuple(&vp9_lpf_horizontal_16_msa, &vp9_lpf_horizontal_16_c, 8, 2),
+        make_tuple(&wrapper_vertical_16_msa, &wrapper_vertical_16_c, 8, 1)));
+#endif  // HAVE_MSA && (!CONFIG_VP9_HIGHBITDEPTH)
 
 }  // namespace
