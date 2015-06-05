@@ -2132,17 +2132,17 @@ struct VP8_COMP* vp8_create_compressor(VP8_CONFIG *oxcf)
 
     cpi->fn_ptr[BLOCK_16X16].sdf            = vpx_sad16x16;
     cpi->fn_ptr[BLOCK_16X16].vf             = vpx_variance16x16;
-    cpi->fn_ptr[BLOCK_16X16].svf            = vp8_sub_pixel_variance16x16;
-    cpi->fn_ptr[BLOCK_16X16].svf_halfpix_h  = vp8_variance_halfpixvar16x16_h;
-    cpi->fn_ptr[BLOCK_16X16].svf_halfpix_v  = vp8_variance_halfpixvar16x16_v;
-    cpi->fn_ptr[BLOCK_16X16].svf_halfpix_hv = vp8_variance_halfpixvar16x16_hv;
+    cpi->fn_ptr[BLOCK_16X16].svf            = vpx_sub_pixel_variance16x16;
+    cpi->fn_ptr[BLOCK_16X16].svf_halfpix_h  = vpx_variance_halfpixvar16x16_h;
+    cpi->fn_ptr[BLOCK_16X16].svf_halfpix_v  = vpx_variance_halfpixvar16x16_v;
+    cpi->fn_ptr[BLOCK_16X16].svf_halfpix_hv = vpx_variance_halfpixvar16x16_hv;
     cpi->fn_ptr[BLOCK_16X16].sdx3f          = vpx_sad16x16x3;
     cpi->fn_ptr[BLOCK_16X16].sdx8f          = vpx_sad16x16x8;
     cpi->fn_ptr[BLOCK_16X16].sdx4df         = vpx_sad16x16x4d;
 
     cpi->fn_ptr[BLOCK_16X8].sdf            = vpx_sad16x8;
     cpi->fn_ptr[BLOCK_16X8].vf             = vpx_variance16x8;
-    cpi->fn_ptr[BLOCK_16X8].svf            = vp8_sub_pixel_variance16x8;
+    cpi->fn_ptr[BLOCK_16X8].svf            = vpx_sub_pixel_variance16x8;
     cpi->fn_ptr[BLOCK_16X8].svf_halfpix_h  = NULL;
     cpi->fn_ptr[BLOCK_16X8].svf_halfpix_v  = NULL;
     cpi->fn_ptr[BLOCK_16X8].svf_halfpix_hv = NULL;
@@ -2152,7 +2152,7 @@ struct VP8_COMP* vp8_create_compressor(VP8_CONFIG *oxcf)
 
     cpi->fn_ptr[BLOCK_8X16].sdf            = vpx_sad8x16;
     cpi->fn_ptr[BLOCK_8X16].vf             = vpx_variance8x16;
-    cpi->fn_ptr[BLOCK_8X16].svf            = vp8_sub_pixel_variance8x16;
+    cpi->fn_ptr[BLOCK_8X16].svf            = vpx_sub_pixel_variance8x16;
     cpi->fn_ptr[BLOCK_8X16].svf_halfpix_h  = NULL;
     cpi->fn_ptr[BLOCK_8X16].svf_halfpix_v  = NULL;
     cpi->fn_ptr[BLOCK_8X16].svf_halfpix_hv = NULL;
@@ -2162,7 +2162,7 @@ struct VP8_COMP* vp8_create_compressor(VP8_CONFIG *oxcf)
 
     cpi->fn_ptr[BLOCK_8X8].sdf            = vpx_sad8x8;
     cpi->fn_ptr[BLOCK_8X8].vf             = vpx_variance8x8;
-    cpi->fn_ptr[BLOCK_8X8].svf            = vp8_sub_pixel_variance8x8;
+    cpi->fn_ptr[BLOCK_8X8].svf            = vpx_sub_pixel_variance8x8;
     cpi->fn_ptr[BLOCK_8X8].svf_halfpix_h  = NULL;
     cpi->fn_ptr[BLOCK_8X8].svf_halfpix_v  = NULL;
     cpi->fn_ptr[BLOCK_8X8].svf_halfpix_hv = NULL;
@@ -2172,7 +2172,7 @@ struct VP8_COMP* vp8_create_compressor(VP8_CONFIG *oxcf)
 
     cpi->fn_ptr[BLOCK_4X4].sdf            = vpx_sad4x4;
     cpi->fn_ptr[BLOCK_4X4].vf             = vpx_variance4x4;
-    cpi->fn_ptr[BLOCK_4X4].svf            = vp8_sub_pixel_variance4x4;
+    cpi->fn_ptr[BLOCK_4X4].svf            = vpx_sub_pixel_variance4x4;
     cpi->fn_ptr[BLOCK_4X4].svf_halfpix_h  = NULL;
     cpi->fn_ptr[BLOCK_4X4].svf_halfpix_v  = NULL;
     cpi->fn_ptr[BLOCK_4X4].svf_halfpix_hv = NULL;

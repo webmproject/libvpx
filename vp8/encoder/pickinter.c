@@ -22,7 +22,7 @@
 #include "encodemb.h"
 #include "vp8/common/reconinter.h"
 #include "vp8/common/reconintra4x4.h"
-#include "vp8/common/variance.h"
+#include "vpx_dsp/variance.h"
 #include "mcomp.h"
 #include "rdopt.h"
 #include "vpx_mem/vpx_mem.h"

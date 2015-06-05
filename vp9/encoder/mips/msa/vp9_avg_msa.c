@@ -9,7 +9,7 @@
  */
 
 #include "./vp9_rtcd.h"
-#include "vp9/common/mips/msa/vp9_macros_msa.h"
+#include "vpx_dsp/mips/macros_msa.h"
 
 uint32_t vp9_avg_8x8_msa(const uint8_t *src, int32_t src_stride) {
   uint32_t sum_out;

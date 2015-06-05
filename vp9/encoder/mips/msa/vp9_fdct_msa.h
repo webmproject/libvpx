@@ -13,7 +13,7 @@
 
 #include "vpx_ports/mem.h"
 #include "vp9/common/vp9_idct.h"
-#include "vp9/common/mips/msa/vp9_macros_msa.h"
+#include "vpx_dsp/mips/macros_msa.h"
 
 #define VP9_DOTP_CONST_PAIR(reg0, reg1, cnst0, cnst1, out0, out1) {  \
   v8i16 k0_m = __msa_fill_h(cnst0);                                  \

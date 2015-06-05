@@ -238,47 +238,6 @@ specialize qw/vp8_bilinear_predict4x4 mmx media/;
 $vp8_bilinear_predict4x4_media=vp8_bilinear_predict4x4_armv6;
 
 #
-# Sub-pixel Variance
-#
-add_proto qw/unsigned int vp8_sub_pixel_variance4x4/, "const unsigned char  *src_ptr, int  source_stride, int  xoffset, int  yoffset, const unsigned char *ref_ptr, int Refstride, unsigned int *sse";
-specialize qw/vp8_sub_pixel_variance4x4 mmx sse2/;
-$vp8_sub_pixel_variance4x4_sse2=vp8_sub_pixel_variance4x4_wmt;
-
-add_proto qw/unsigned int vp8_sub_pixel_variance8x8/, "const unsigned char  *src_ptr, int  source_stride, int  xoffset, int  yoffset, const unsigned char *ref_ptr, int Refstride, unsigned int *sse";
-specialize qw/vp8_sub_pixel_variance8x8 mmx sse2 media/;
-$vp8_sub_pixel_variance8x8_sse2=vp8_sub_pixel_variance8x8_wmt;
-$vp8_sub_pixel_variance8x8_media=vp8_sub_pixel_variance8x8_armv6;
-
-add_proto qw/unsigned int vp8_sub_pixel_variance8x16/, "const unsigned char  *src_ptr, int  source_stride, int  xoffset, int  yoffset, const unsigned char *ref_ptr, int Refstride, unsigned int *sse";
-specialize qw/vp8_sub_pixel_variance8x16 mmx sse2/;
-$vp8_sub_pixel_variance8x16_sse2=vp8_sub_pixel_variance8x16_wmt;
-
-add_proto qw/unsigned int vp8_sub_pixel_variance16x8/, "const unsigned char  *src_ptr, int  source_stride, int  xoffset, int  yoffset, const unsigned char *ref_ptr, int Refstride, unsigned int *sse";
-specialize qw/vp8_sub_pixel_variance16x8 mmx sse2 ssse3/;
-$vp8_sub_pixel_variance16x8_sse2=vp8_sub_pixel_variance16x8_wmt;
-
-add_proto qw/unsigned int vp8_sub_pixel_variance16x16/, "const unsigned char  *src_ptr, int  source_stride, int  xoffset, int  yoffset, const unsigned char *ref_ptr, int Refstride, unsigned int *sse";
-specialize qw/vp8_sub_pixel_variance16x16 mmx sse2 ssse3 media neon_asm/;
-$vp8_sub_pixel_variance16x16_sse2=vp8_sub_pixel_variance16x16_wmt;
-$vp8_sub_pixel_variance16x16_media=vp8_sub_pixel_variance16x16_armv6;
-$vp8_sub_pixel_variance16x16_neon_asm=vp8_sub_pixel_variance16x16_neon;
-
-add_proto qw/unsigned int vp8_variance_halfpixvar16x16_h/, "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int *sse";
-specialize qw/vp8_variance_halfpixvar16x16_h mmx sse2 media neon/;
-$vp8_variance_halfpixvar16x16_h_sse2=vp8_variance_halfpixvar16x16_h_wmt;
-$vp8_variance_halfpixvar16x16_h_media=vp8_variance_halfpixvar16x16_h_armv6;
-
-add_proto qw/unsigned int vp8_variance_halfpixvar16x16_v/, "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int *sse";
-specialize qw/vp8_variance_halfpixvar16x16_v mmx sse2 media neon/;
-$vp8_variance_halfpixvar16x16_v_sse2=vp8_variance_halfpixvar16x16_v_wmt;
-$vp8_variance_halfpixvar16x16_v_media=vp8_variance_halfpixvar16x16_v_armv6;
-
-add_proto qw/unsigned int vp8_variance_halfpixvar16x16_hv/, "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int *sse";
-specialize qw/vp8_variance_halfpixvar16x16_hv mmx sse2 media neon/;
-$vp8_variance_halfpixvar16x16_hv_sse2=vp8_variance_halfpixvar16x16_hv_wmt;
-$vp8_variance_halfpixvar16x16_hv_media=vp8_variance_halfpixvar16x16_hv_armv6;
-
-#
 # Encoder functions below this point.
 #
 if (vpx_config("CONFIG_VP8_ENCODER") eq "yes") {

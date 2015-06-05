@@ -91,3 +91,93 @@ unsigned int vpx_variance64x32_avx2(const uint8_t *src, int src_stride,
                 sse, &sum, vpx_get32x32var_avx2, 32);
   return *sse - (((int64_t)sum * sum) >> 11);
 }
+
+unsigned int vpx_sub_pixel_variance32xh_avx2(const uint8_t *src, int src_stride,
+                                             int x_offset, int y_offset,
+                                             const uint8_t *dst, int dst_stride,
+                                             int height,
+                                             unsigned int *sse);
+
+unsigned int vpx_sub_pixel_avg_variance32xh_avx2(const uint8_t *src,
+                                                 int src_stride,
+                                                 int x_offset,
+                                                 int y_offset,
+                                                 const uint8_t *dst,
+                                                 int dst_stride,
+                                                 const uint8_t *sec,
+                                                 int sec_stride,
+                                                 int height,
+                                                 unsigned int *sseptr);
+
+unsigned int vpx_sub_pixel_variance64x64_avx2(const uint8_t *src,
+                                              int src_stride,
+                                              int x_offset,
+                                              int y_offset,
+                                              const uint8_t *dst,
+                                              int dst_stride,
+                                              unsigned int *sse) {
+  unsigned int sse1;
+  const int se1 = vpx_sub_pixel_variance32xh_avx2(src, src_stride, x_offset,
+                                                  y_offset, dst, dst_stride,
+                                                  64, &sse1);
+  unsigned int sse2;
+  const int se2 = vpx_sub_pixel_variance32xh_avx2(src + 32, src_stride,
+                                                  x_offset, y_offset,
+                                                  dst + 32, dst_stride,
+                                                  64, &sse2);
+  const int se = se1 + se2;
+  *sse = sse1 + sse2;
+  return *sse - (((int64_t)se * se) >> 12);
+}
+
+unsigned int vpx_sub_pixel_variance32x32_avx2(const uint8_t *src,
+                                              int src_stride,
+                                              int x_offset,
+                                              int y_offset,
+                                              const uint8_t *dst,
+                                              int dst_stride,
+                                              unsigned int *sse) {
+  const int se = vpx_sub_pixel_variance32xh_avx2(src, src_stride, x_offset,
+                                                 y_offset, dst, dst_stride,
+                                                 32, sse);
+  return *sse - (((int64_t)se * se) >> 10);
+}
+
+unsigned int vpx_sub_pixel_avg_variance64x64_avx2(const uint8_t *src,
+                                                  int src_stride,
+                                                  int x_offset,
+                                                  int y_offset,
+                                                  const uint8_t *dst,
+                                                  int dst_stride,
+                                                  unsigned int *sse,
+                                                  const uint8_t *sec) {
+  unsigned int sse1;
+  const int se1 = vpx_sub_pixel_avg_variance32xh_avx2(src, src_stride, x_offset,
+                                                      y_offset, dst, dst_stride,
+                                                      sec, 64, 64, &sse1);
+  unsigned int sse2;
+  const int se2 =
+    vpx_sub_pixel_avg_variance32xh_avx2(src + 32, src_stride, x_offset,
+                                        y_offset, dst + 32, dst_stride,
+                                        sec + 32, 64, 64, &sse2);
+  const int se = se1 + se2;
+
+  *sse = sse1 + sse2;
+
+  return *sse - (((int64_t)se * se) >> 12);
+}
+
+unsigned int vpx_sub_pixel_avg_variance32x32_avx2(const uint8_t *src,
+                                                  int src_stride,
+                                                  int x_offset,
+                                                  int y_offset,
+                                                  const uint8_t *dst,
+                                                  int dst_stride,
+                                                  unsigned int *sse,
+                                                  const uint8_t *sec) {
+  // Process 32 elements in parallel.
+  const int se = vpx_sub_pixel_avg_variance32xh_avx2(src, src_stride, x_offset,
+                                                     y_offset, dst, dst_stride,
+                                                     sec, 32, 32, sse);
+  return *sse - (((int64_t)se * se) >> 10);
+}

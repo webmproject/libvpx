@@ -1023,8 +1023,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad32x16_bits8,
                    vpx_highbd_sad32x16_avg_bits8,
                    vpx_highbd_8_variance32x16,
-                   vp9_highbd_sub_pixel_variance32x16,
-                   vp9_highbd_sub_pixel_avg_variance32x16,
+                   vpx_highbd_8_sub_pixel_variance32x16,
+                   vpx_highbd_8_sub_pixel_avg_variance32x16,
                    NULL,
                    NULL,
                    vpx_highbd_sad32x16x4d_bits8)
@@ -1033,8 +1033,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad16x32_bits8,
                    vpx_highbd_sad16x32_avg_bits8,
                    vpx_highbd_8_variance16x32,
-                   vp9_highbd_sub_pixel_variance16x32,
-                   vp9_highbd_sub_pixel_avg_variance16x32,
+                   vpx_highbd_8_sub_pixel_variance16x32,
+                   vpx_highbd_8_sub_pixel_avg_variance16x32,
                    NULL,
                    NULL,
                    vpx_highbd_sad16x32x4d_bits8)
@@ -1043,8 +1043,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad64x32_bits8,
                    vpx_highbd_sad64x32_avg_bits8,
                    vpx_highbd_8_variance64x32,
-                   vp9_highbd_sub_pixel_variance64x32,
-                   vp9_highbd_sub_pixel_avg_variance64x32,
+                   vpx_highbd_8_sub_pixel_variance64x32,
+                   vpx_highbd_8_sub_pixel_avg_variance64x32,
                    NULL,
                    NULL,
                    vpx_highbd_sad64x32x4d_bits8)
@@ -1053,8 +1053,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad32x64_bits8,
                    vpx_highbd_sad32x64_avg_bits8,
                    vpx_highbd_8_variance32x64,
-                   vp9_highbd_sub_pixel_variance32x64,
-                   vp9_highbd_sub_pixel_avg_variance32x64,
+                   vpx_highbd_8_sub_pixel_variance32x64,
+                   vpx_highbd_8_sub_pixel_avg_variance32x64,
                    NULL,
                    NULL,
                    vpx_highbd_sad32x64x4d_bits8)
@@ -1063,8 +1063,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad32x32_bits8,
                    vpx_highbd_sad32x32_avg_bits8,
                    vpx_highbd_8_variance32x32,
-                   vp9_highbd_sub_pixel_variance32x32,
-                   vp9_highbd_sub_pixel_avg_variance32x32,
+                   vpx_highbd_8_sub_pixel_variance32x32,
+                   vpx_highbd_8_sub_pixel_avg_variance32x32,
                    vpx_highbd_sad32x32x3_bits8,
                    vpx_highbd_sad32x32x8_bits8,
                    vpx_highbd_sad32x32x4d_bits8)
@@ -1073,8 +1073,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad64x64_bits8,
                    vpx_highbd_sad64x64_avg_bits8,
                    vpx_highbd_8_variance64x64,
-                   vp9_highbd_sub_pixel_variance64x64,
-                   vp9_highbd_sub_pixel_avg_variance64x64,
+                   vpx_highbd_8_sub_pixel_variance64x64,
+                   vpx_highbd_8_sub_pixel_avg_variance64x64,
                    vpx_highbd_sad64x64x3_bits8,
                    vpx_highbd_sad64x64x8_bits8,
                    vpx_highbd_sad64x64x4d_bits8)
@@ -1083,8 +1083,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad16x16_bits8,
                    vpx_highbd_sad16x16_avg_bits8,
                    vpx_highbd_8_variance16x16,
-                   vp9_highbd_sub_pixel_variance16x16,
-                   vp9_highbd_sub_pixel_avg_variance16x16,
+                   vpx_highbd_8_sub_pixel_variance16x16,
+                   vpx_highbd_8_sub_pixel_avg_variance16x16,
                    vpx_highbd_sad16x16x3_bits8,
                    vpx_highbd_sad16x16x8_bits8,
                    vpx_highbd_sad16x16x4d_bits8)
@@ -1093,8 +1093,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad16x8_bits8,
                    vpx_highbd_sad16x8_avg_bits8,
                    vpx_highbd_8_variance16x8,
-                   vp9_highbd_sub_pixel_variance16x8,
-                   vp9_highbd_sub_pixel_avg_variance16x8,
+                   vpx_highbd_8_sub_pixel_variance16x8,
+                   vpx_highbd_8_sub_pixel_avg_variance16x8,
                    vpx_highbd_sad16x8x3_bits8,
                    vpx_highbd_sad16x8x8_bits8,
                    vpx_highbd_sad16x8x4d_bits8)
@@ -1103,8 +1103,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad8x16_bits8,
                    vpx_highbd_sad8x16_avg_bits8,
                    vpx_highbd_8_variance8x16,
-                   vp9_highbd_sub_pixel_variance8x16,
-                   vp9_highbd_sub_pixel_avg_variance8x16,
+                   vpx_highbd_8_sub_pixel_variance8x16,
+                   vpx_highbd_8_sub_pixel_avg_variance8x16,
                    vpx_highbd_sad8x16x3_bits8,
                    vpx_highbd_sad8x16x8_bits8,
                    vpx_highbd_sad8x16x4d_bits8)
@@ -1113,8 +1113,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad8x8_bits8,
                    vpx_highbd_sad8x8_avg_bits8,
                    vpx_highbd_8_variance8x8,
-                   vp9_highbd_sub_pixel_variance8x8,
-                   vp9_highbd_sub_pixel_avg_variance8x8,
+                   vpx_highbd_8_sub_pixel_variance8x8,
+                   vpx_highbd_8_sub_pixel_avg_variance8x8,
                    vpx_highbd_sad8x8x3_bits8,
                    vpx_highbd_sad8x8x8_bits8,
                    vpx_highbd_sad8x8x4d_bits8)
@@ -1123,8 +1123,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad8x4_bits8,
                    vpx_highbd_sad8x4_avg_bits8,
                    vpx_highbd_8_variance8x4,
-                   vp9_highbd_sub_pixel_variance8x4,
-                   vp9_highbd_sub_pixel_avg_variance8x4,
+                   vpx_highbd_8_sub_pixel_variance8x4,
+                   vpx_highbd_8_sub_pixel_avg_variance8x4,
                    NULL,
                    vpx_highbd_sad8x4x8_bits8,
                    vpx_highbd_sad8x4x4d_bits8)
@@ -1133,8 +1133,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad4x8_bits8,
                    vpx_highbd_sad4x8_avg_bits8,
                    vpx_highbd_8_variance4x8,
-                   vp9_highbd_sub_pixel_variance4x8,
-                   vp9_highbd_sub_pixel_avg_variance4x8,
+                   vpx_highbd_8_sub_pixel_variance4x8,
+                   vpx_highbd_8_sub_pixel_avg_variance4x8,
                    NULL,
                    vpx_highbd_sad4x8x8_bits8,
                    vpx_highbd_sad4x8x4d_bits8)
@@ -1143,8 +1143,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad4x4_bits8,
                    vpx_highbd_sad4x4_avg_bits8,
                    vpx_highbd_8_variance4x4,
-                   vp9_highbd_sub_pixel_variance4x4,
-                   vp9_highbd_sub_pixel_avg_variance4x4,
+                   vpx_highbd_8_sub_pixel_variance4x4,
+                   vpx_highbd_8_sub_pixel_avg_variance4x4,
                    vpx_highbd_sad4x4x3_bits8,
                    vpx_highbd_sad4x4x8_bits8,
                    vpx_highbd_sad4x4x4d_bits8)
@@ -1155,8 +1155,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad32x16_bits10,
                    vpx_highbd_sad32x16_avg_bits10,
                    vpx_highbd_10_variance32x16,
-                   vp9_highbd_10_sub_pixel_variance32x16,
-                   vp9_highbd_10_sub_pixel_avg_variance32x16,
+                   vpx_highbd_10_sub_pixel_variance32x16,
+                   vpx_highbd_10_sub_pixel_avg_variance32x16,
                    NULL,
                    NULL,
                    vpx_highbd_sad32x16x4d_bits10)
@@ -1165,8 +1165,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad16x32_bits10,
                    vpx_highbd_sad16x32_avg_bits10,
                    vpx_highbd_10_variance16x32,
-                   vp9_highbd_10_sub_pixel_variance16x32,
-                   vp9_highbd_10_sub_pixel_avg_variance16x32,
+                   vpx_highbd_10_sub_pixel_variance16x32,
+                   vpx_highbd_10_sub_pixel_avg_variance16x32,
                    NULL,
                    NULL,
                    vpx_highbd_sad16x32x4d_bits10)
@@ -1175,8 +1175,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad64x32_bits10,
                    vpx_highbd_sad64x32_avg_bits10,
                    vpx_highbd_10_variance64x32,
-                   vp9_highbd_10_sub_pixel_variance64x32,
-                   vp9_highbd_10_sub_pixel_avg_variance64x32,
+                   vpx_highbd_10_sub_pixel_variance64x32,
+                   vpx_highbd_10_sub_pixel_avg_variance64x32,
                    NULL,
                    NULL,
                    vpx_highbd_sad64x32x4d_bits10)
@@ -1185,8 +1185,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad32x64_bits10,
                    vpx_highbd_sad32x64_avg_bits10,
                    vpx_highbd_10_variance32x64,
-                   vp9_highbd_10_sub_pixel_variance32x64,
-                   vp9_highbd_10_sub_pixel_avg_variance32x64,
+                   vpx_highbd_10_sub_pixel_variance32x64,
+                   vpx_highbd_10_sub_pixel_avg_variance32x64,
                    NULL,
                    NULL,
                    vpx_highbd_sad32x64x4d_bits10)
@@ -1195,8 +1195,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad32x32_bits10,
                    vpx_highbd_sad32x32_avg_bits10,
                    vpx_highbd_10_variance32x32,
-                   vp9_highbd_10_sub_pixel_variance32x32,
-                   vp9_highbd_10_sub_pixel_avg_variance32x32,
+                   vpx_highbd_10_sub_pixel_variance32x32,
+                   vpx_highbd_10_sub_pixel_avg_variance32x32,
                    vpx_highbd_sad32x32x3_bits10,
                    vpx_highbd_sad32x32x8_bits10,
                    vpx_highbd_sad32x32x4d_bits10)
@@ -1205,8 +1205,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad64x64_bits10,
                    vpx_highbd_sad64x64_avg_bits10,
                    vpx_highbd_10_variance64x64,
-                   vp9_highbd_10_sub_pixel_variance64x64,
-                   vp9_highbd_10_sub_pixel_avg_variance64x64,
+                   vpx_highbd_10_sub_pixel_variance64x64,
+                   vpx_highbd_10_sub_pixel_avg_variance64x64,
                    vpx_highbd_sad64x64x3_bits10,
                    vpx_highbd_sad64x64x8_bits10,
                    vpx_highbd_sad64x64x4d_bits10)
@@ -1215,8 +1215,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad16x16_bits10,
                    vpx_highbd_sad16x16_avg_bits10,
                    vpx_highbd_10_variance16x16,
-                   vp9_highbd_10_sub_pixel_variance16x16,
-                   vp9_highbd_10_sub_pixel_avg_variance16x16,
+                   vpx_highbd_10_sub_pixel_variance16x16,
+                   vpx_highbd_10_sub_pixel_avg_variance16x16,
                    vpx_highbd_sad16x16x3_bits10,
                    vpx_highbd_sad16x16x8_bits10,
                    vpx_highbd_sad16x16x4d_bits10)
@@ -1225,8 +1225,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad16x8_bits10,
                    vpx_highbd_sad16x8_avg_bits10,
                    vpx_highbd_10_variance16x8,
-                   vp9_highbd_10_sub_pixel_variance16x8,
-                   vp9_highbd_10_sub_pixel_avg_variance16x8,
+                   vpx_highbd_10_sub_pixel_variance16x8,
+                   vpx_highbd_10_sub_pixel_avg_variance16x8,
                    vpx_highbd_sad16x8x3_bits10,
                    vpx_highbd_sad16x8x8_bits10,
                    vpx_highbd_sad16x8x4d_bits10)
@@ -1235,8 +1235,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad8x16_bits10,
                    vpx_highbd_sad8x16_avg_bits10,
                    vpx_highbd_10_variance8x16,
-                   vp9_highbd_10_sub_pixel_variance8x16,
-                   vp9_highbd_10_sub_pixel_avg_variance8x16,
+                   vpx_highbd_10_sub_pixel_variance8x16,
+                   vpx_highbd_10_sub_pixel_avg_variance8x16,
                    vpx_highbd_sad8x16x3_bits10,
                    vpx_highbd_sad8x16x8_bits10,
                    vpx_highbd_sad8x16x4d_bits10)
@@ -1245,8 +1245,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad8x8_bits10,
                    vpx_highbd_sad8x8_avg_bits10,
                    vpx_highbd_10_variance8x8,
-                   vp9_highbd_10_sub_pixel_variance8x8,
-                   vp9_highbd_10_sub_pixel_avg_variance8x8,
+                   vpx_highbd_10_sub_pixel_variance8x8,
+                   vpx_highbd_10_sub_pixel_avg_variance8x8,
                    vpx_highbd_sad8x8x3_bits10,
                    vpx_highbd_sad8x8x8_bits10,
                    vpx_highbd_sad8x8x4d_bits10)
@@ -1255,8 +1255,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad8x4_bits10,
                    vpx_highbd_sad8x4_avg_bits10,
                    vpx_highbd_10_variance8x4,
-                   vp9_highbd_10_sub_pixel_variance8x4,
-                   vp9_highbd_10_sub_pixel_avg_variance8x4,
+                   vpx_highbd_10_sub_pixel_variance8x4,
+                   vpx_highbd_10_sub_pixel_avg_variance8x4,
                    NULL,
                    vpx_highbd_sad8x4x8_bits10,
                    vpx_highbd_sad8x4x4d_bits10)
@@ -1265,8 +1265,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad4x8_bits10,
                    vpx_highbd_sad4x8_avg_bits10,
                    vpx_highbd_10_variance4x8,
-                   vp9_highbd_10_sub_pixel_variance4x8,
-                   vp9_highbd_10_sub_pixel_avg_variance4x8,
+                   vpx_highbd_10_sub_pixel_variance4x8,
+                   vpx_highbd_10_sub_pixel_avg_variance4x8,
                    NULL,
                    vpx_highbd_sad4x8x8_bits10,
                    vpx_highbd_sad4x8x4d_bits10)
@@ -1275,8 +1275,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad4x4_bits10,
                    vpx_highbd_sad4x4_avg_bits10,
                    vpx_highbd_10_variance4x4,
-                   vp9_highbd_10_sub_pixel_variance4x4,
-                   vp9_highbd_10_sub_pixel_avg_variance4x4,
+                   vpx_highbd_10_sub_pixel_variance4x4,
+                   vpx_highbd_10_sub_pixel_avg_variance4x4,
                    vpx_highbd_sad4x4x3_bits10,
                    vpx_highbd_sad4x4x8_bits10,
                    vpx_highbd_sad4x4x4d_bits10)
@@ -1287,8 +1287,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad32x16_bits12,
                    vpx_highbd_sad32x16_avg_bits12,
                    vpx_highbd_12_variance32x16,
-                   vp9_highbd_12_sub_pixel_variance32x16,
-                   vp9_highbd_12_sub_pixel_avg_variance32x16,
+                   vpx_highbd_12_sub_pixel_variance32x16,
+                   vpx_highbd_12_sub_pixel_avg_variance32x16,
                    NULL,
                    NULL,
                    vpx_highbd_sad32x16x4d_bits12)
@@ -1297,8 +1297,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad16x32_bits12,
                    vpx_highbd_sad16x32_avg_bits12,
                    vpx_highbd_12_variance16x32,
-                   vp9_highbd_12_sub_pixel_variance16x32,
-                   vp9_highbd_12_sub_pixel_avg_variance16x32,
+                   vpx_highbd_12_sub_pixel_variance16x32,
+                   vpx_highbd_12_sub_pixel_avg_variance16x32,
                    NULL,
                    NULL,
                    vpx_highbd_sad16x32x4d_bits12)
@@ -1307,8 +1307,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad64x32_bits12,
                    vpx_highbd_sad64x32_avg_bits12,
                    vpx_highbd_12_variance64x32,
-                   vp9_highbd_12_sub_pixel_variance64x32,
-                   vp9_highbd_12_sub_pixel_avg_variance64x32,
+                   vpx_highbd_12_sub_pixel_variance64x32,
+                   vpx_highbd_12_sub_pixel_avg_variance64x32,
                    NULL,
                    NULL,
                    vpx_highbd_sad64x32x4d_bits12)
@@ -1317,8 +1317,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad32x64_bits12,
                    vpx_highbd_sad32x64_avg_bits12,
                    vpx_highbd_12_variance32x64,
-                   vp9_highbd_12_sub_pixel_variance32x64,
-                   vp9_highbd_12_sub_pixel_avg_variance32x64,
+                   vpx_highbd_12_sub_pixel_variance32x64,
+                   vpx_highbd_12_sub_pixel_avg_variance32x64,
                    NULL,
                    NULL,
                    vpx_highbd_sad32x64x4d_bits12)
@@ -1327,8 +1327,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad32x32_bits12,
                    vpx_highbd_sad32x32_avg_bits12,
                    vpx_highbd_12_variance32x32,
-                   vp9_highbd_12_sub_pixel_variance32x32,
-                   vp9_highbd_12_sub_pixel_avg_variance32x32,
+                   vpx_highbd_12_sub_pixel_variance32x32,
+                   vpx_highbd_12_sub_pixel_avg_variance32x32,
                    vpx_highbd_sad32x32x3_bits12,
                    vpx_highbd_sad32x32x8_bits12,
                    vpx_highbd_sad32x32x4d_bits12)
@@ -1337,8 +1337,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad64x64_bits12,
                    vpx_highbd_sad64x64_avg_bits12,
                    vpx_highbd_12_variance64x64,
-                   vp9_highbd_12_sub_pixel_variance64x64,
-                   vp9_highbd_12_sub_pixel_avg_variance64x64,
+                   vpx_highbd_12_sub_pixel_variance64x64,
+                   vpx_highbd_12_sub_pixel_avg_variance64x64,
                    vpx_highbd_sad64x64x3_bits12,
                    vpx_highbd_sad64x64x8_bits12,
                    vpx_highbd_sad64x64x4d_bits12)
@@ -1347,8 +1347,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad16x16_bits12,
                    vpx_highbd_sad16x16_avg_bits12,
                    vpx_highbd_12_variance16x16,
-                   vp9_highbd_12_sub_pixel_variance16x16,
-                   vp9_highbd_12_sub_pixel_avg_variance16x16,
+                   vpx_highbd_12_sub_pixel_variance16x16,
+                   vpx_highbd_12_sub_pixel_avg_variance16x16,
                    vpx_highbd_sad16x16x3_bits12,
                    vpx_highbd_sad16x16x8_bits12,
                    vpx_highbd_sad16x16x4d_bits12)
@@ -1357,8 +1357,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad16x8_bits12,
                    vpx_highbd_sad16x8_avg_bits12,
                    vpx_highbd_12_variance16x8,
-                   vp9_highbd_12_sub_pixel_variance16x8,
-                   vp9_highbd_12_sub_pixel_avg_variance16x8,
+                   vpx_highbd_12_sub_pixel_variance16x8,
+                   vpx_highbd_12_sub_pixel_avg_variance16x8,
                    vpx_highbd_sad16x8x3_bits12,
                    vpx_highbd_sad16x8x8_bits12,
                    vpx_highbd_sad16x8x4d_bits12)
@@ -1367,8 +1367,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad8x16_bits12,
                    vpx_highbd_sad8x16_avg_bits12,
                    vpx_highbd_12_variance8x16,
-                   vp9_highbd_12_sub_pixel_variance8x16,
-                   vp9_highbd_12_sub_pixel_avg_variance8x16,
+                   vpx_highbd_12_sub_pixel_variance8x16,
+                   vpx_highbd_12_sub_pixel_avg_variance8x16,
                    vpx_highbd_sad8x16x3_bits12,
                    vpx_highbd_sad8x16x8_bits12,
                    vpx_highbd_sad8x16x4d_bits12)
@@ -1377,8 +1377,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad8x8_bits12,
                    vpx_highbd_sad8x8_avg_bits12,
                    vpx_highbd_12_variance8x8,
-                   vp9_highbd_12_sub_pixel_variance8x8,
-                   vp9_highbd_12_sub_pixel_avg_variance8x8,
+                   vpx_highbd_12_sub_pixel_variance8x8,
+                   vpx_highbd_12_sub_pixel_avg_variance8x8,
                    vpx_highbd_sad8x8x3_bits12,
                    vpx_highbd_sad8x8x8_bits12,
                    vpx_highbd_sad8x8x4d_bits12)
@@ -1387,8 +1387,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad8x4_bits12,
                    vpx_highbd_sad8x4_avg_bits12,
                    vpx_highbd_12_variance8x4,
-                   vp9_highbd_12_sub_pixel_variance8x4,
-                   vp9_highbd_12_sub_pixel_avg_variance8x4,
+                   vpx_highbd_12_sub_pixel_variance8x4,
+                   vpx_highbd_12_sub_pixel_avg_variance8x4,
                    NULL,
                    vpx_highbd_sad8x4x8_bits12,
                    vpx_highbd_sad8x4x4d_bits12)
@@ -1397,8 +1397,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad4x8_bits12,
                    vpx_highbd_sad4x8_avg_bits12,
                    vpx_highbd_12_variance4x8,
-                   vp9_highbd_12_sub_pixel_variance4x8,
-                   vp9_highbd_12_sub_pixel_avg_variance4x8,
+                   vpx_highbd_12_sub_pixel_variance4x8,
+                   vpx_highbd_12_sub_pixel_avg_variance4x8,
                    NULL,
                    vpx_highbd_sad4x8x8_bits12,
                    vpx_highbd_sad4x8x4d_bits12)
@@ -1407,8 +1407,8 @@ static void  highbd_set_var_fns(VP9_COMP *const cpi) {
                    vpx_highbd_sad4x4_bits12,
                    vpx_highbd_sad4x4_avg_bits12,
                    vpx_highbd_12_variance4x4,
-                   vp9_highbd_12_sub_pixel_variance4x4,
-                   vp9_highbd_12_sub_pixel_avg_variance4x4,
+                   vpx_highbd_12_sub_pixel_variance4x4,
+                   vpx_highbd_12_sub_pixel_avg_variance4x4,
                    vpx_highbd_sad4x4x3_bits12,
                    vpx_highbd_sad4x4x8_bits12,
                    vpx_highbd_sad4x4x4d_bits12)
@@ -1832,62 +1832,62 @@ VP9_COMP *vp9_create_compressor(VP9EncoderConfig *oxcf,
     cpi->fn_ptr[BT].sdx4df         = SDX4DF;
 
   BFP(BLOCK_32X16, vpx_sad32x16, vpx_sad32x16_avg,
-      vpx_variance32x16, vp9_sub_pixel_variance32x16,
-      vp9_sub_pixel_avg_variance32x16, NULL, NULL, vpx_sad32x16x4d)
+      vpx_variance32x16, vpx_sub_pixel_variance32x16,
+      vpx_sub_pixel_avg_variance32x16, NULL, NULL, vpx_sad32x16x4d)
 
   BFP(BLOCK_16X32, vpx_sad16x32, vpx_sad16x32_avg,
-      vpx_variance16x32, vp9_sub_pixel_variance16x32,
-      vp9_sub_pixel_avg_variance16x32, NULL, NULL, vpx_sad16x32x4d)
+      vpx_variance16x32, vpx_sub_pixel_variance16x32,
+      vpx_sub_pixel_avg_variance16x32, NULL, NULL, vpx_sad16x32x4d)
 
   BFP(BLOCK_64X32, vpx_sad64x32, vpx_sad64x32_avg,
-      vpx_variance64x32, vp9_sub_pixel_variance64x32,
-      vp9_sub_pixel_avg_variance64x32, NULL, NULL, vpx_sad64x32x4d)
+      vpx_variance64x32, vpx_sub_pixel_variance64x32,
+      vpx_sub_pixel_avg_variance64x32, NULL, NULL, vpx_sad64x32x4d)
 
   BFP(BLOCK_32X64, vpx_sad32x64, vpx_sad32x64_avg,
-      vpx_variance32x64, vp9_sub_pixel_variance32x64,
-      vp9_sub_pixel_avg_variance32x64, NULL, NULL, vpx_sad32x64x4d)
+      vpx_variance32x64, vpx_sub_pixel_variance32x64,
+      vpx_sub_pixel_avg_variance32x64, NULL, NULL, vpx_sad32x64x4d)
 
   BFP(BLOCK_32X32, vpx_sad32x32, vpx_sad32x32_avg,
-      vpx_variance32x32, vp9_sub_pixel_variance32x32,
-      vp9_sub_pixel_avg_variance32x32, vpx_sad32x32x3, vpx_sad32x32x8,
+      vpx_variance32x32, vpx_sub_pixel_variance32x32,
+      vpx_sub_pixel_avg_variance32x32, vpx_sad32x32x3, vpx_sad32x32x8,
       vpx_sad32x32x4d)
 
   BFP(BLOCK_64X64, vpx_sad64x64, vpx_sad64x64_avg,
-      vpx_variance64x64, vp9_sub_pixel_variance64x64,
-      vp9_sub_pixel_avg_variance64x64, vpx_sad64x64x3, vpx_sad64x64x8,
+      vpx_variance64x64, vpx_sub_pixel_variance64x64,
+      vpx_sub_pixel_avg_variance64x64, vpx_sad64x64x3, vpx_sad64x64x8,
       vpx_sad64x64x4d)
 
   BFP(BLOCK_16X16, vpx_sad16x16, vpx_sad16x16_avg,
-      vpx_variance16x16, vp9_sub_pixel_variance16x16,
-      vp9_sub_pixel_avg_variance16x16, vpx_sad16x16x3, vpx_sad16x16x8,
+      vpx_variance16x16, vpx_sub_pixel_variance16x16,
+      vpx_sub_pixel_avg_variance16x16, vpx_sad16x16x3, vpx_sad16x16x8,
       vpx_sad16x16x4d)
 
   BFP(BLOCK_16X8, vpx_sad16x8, vpx_sad16x8_avg,
-      vpx_variance16x8, vp9_sub_pixel_variance16x8,
-      vp9_sub_pixel_avg_variance16x8,
+      vpx_variance16x8, vpx_sub_pixel_variance16x8,
+      vpx_sub_pixel_avg_variance16x8,
       vpx_sad16x8x3, vpx_sad16x8x8, vpx_sad16x8x4d)
 
   BFP(BLOCK_8X16, vpx_sad8x16, vpx_sad8x16_avg,
-      vpx_variance8x16, vp9_sub_pixel_variance8x16,
-      vp9_sub_pixel_avg_variance8x16,
+      vpx_variance8x16, vpx_sub_pixel_variance8x16,
+      vpx_sub_pixel_avg_variance8x16,
       vpx_sad8x16x3, vpx_sad8x16x8, vpx_sad8x16x4d)
 
   BFP(BLOCK_8X8, vpx_sad8x8, vpx_sad8x8_avg,
-      vpx_variance8x8, vp9_sub_pixel_variance8x8,
-      vp9_sub_pixel_avg_variance8x8,
+      vpx_variance8x8, vpx_sub_pixel_variance8x8,
+      vpx_sub_pixel_avg_variance8x8,
       vpx_sad8x8x3, vpx_sad8x8x8, vpx_sad8x8x4d)
 
   BFP(BLOCK_8X4, vpx_sad8x4, vpx_sad8x4_avg,
-      vpx_variance8x4, vp9_sub_pixel_variance8x4,
-      vp9_sub_pixel_avg_variance8x4, NULL, vpx_sad8x4x8, vpx_sad8x4x4d)
+      vpx_variance8x4, vpx_sub_pixel_variance8x4,
+      vpx_sub_pixel_avg_variance8x4, NULL, vpx_sad8x4x8, vpx_sad8x4x4d)
 
   BFP(BLOCK_4X8, vpx_sad4x8, vpx_sad4x8_avg,
-      vpx_variance4x8, vp9_sub_pixel_variance4x8,
-      vp9_sub_pixel_avg_variance4x8, NULL, vpx_sad4x8x8, vpx_sad4x8x4d)
+      vpx_variance4x8, vpx_sub_pixel_variance4x8,
+      vpx_sub_pixel_avg_variance4x8, NULL, vpx_sad4x8x8, vpx_sad4x8x4d)
 
   BFP(BLOCK_4X4, vpx_sad4x4, vpx_sad4x4_avg,
-      vpx_variance4x4, vp9_sub_pixel_variance4x4,
-      vp9_sub_pixel_avg_variance4x4,
+      vpx_variance4x4, vpx_sub_pixel_variance4x4,
+      vpx_sub_pixel_avg_variance4x4,
       vpx_sad4x4x3, vpx_sad4x4x8, vpx_sad4x4x4d)
 
 #if CONFIG_VP9_HIGHBITDEPTH

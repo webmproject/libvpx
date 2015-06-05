@@ -9,7 +9,7 @@
 ;
 
 
-    EXPORT  |vp8_variance_halfpixvar16x16_h_armv6|
+    EXPORT  |vpx_variance_halfpixvar16x16_v_media|
 
     ARM
     REQUIRE8
@@ -22,7 +22,7 @@
 ; r2    unsigned char *ref_ptr
 ; r3    int  recon_stride
 ; stack unsigned int *sse
-|vp8_variance_halfpixvar16x16_h_armv6| PROC
+|vpx_variance_halfpixvar16x16_v_media| PROC
 
     stmfd   sp!, {r4-r12, lr}
 
@@ -35,9 +35,10 @@
     mov     r12, #16            ; set loop counter to 16 (=block height)
     mov     lr, #0              ; constant zero
 loop
+    add     r9, r0, r1          ; set src pointer to next row
     ; 1st 4 pixels
     ldr     r4, [r0, #0]        ; load 4 src pixels
-    ldr     r6, [r0, #1]        ; load 4 src pixels with 1 byte offset
+    ldr     r6, [r9, #0]        ; load 4 src pixels from next row
     ldr     r5, [r2, #0]        ; load 4 ref pixels
 
     ; bilinear interpolation
@@ -67,7 +68,7 @@ loop
 
     ; 2nd 4 pixels
     ldr     r4, [r0, #4]        ; load 4 src pixels
-    ldr     r6, [r0, #5]        ; load 4 src pixels with 1 byte offset
+    ldr     r6, [r9, #4]        ; load 4 src pixels from next row
     ldr     r5, [r2, #4]        ; load 4 ref pixels
 
     ; bilinear interpolation
@@ -98,7 +99,7 @@ loop
 
     ; 3rd 4 pixels
     ldr     r4, [r0, #8]        ; load 4 src pixels
-    ldr     r6, [r0, #9]        ; load 4 src pixels with 1 byte offset
+    ldr     r6, [r9, #8]        ; load 4 src pixels from next row
     ldr     r5, [r2, #8]        ; load 4 ref pixels
 
     ; bilinear interpolation
@@ -106,7 +107,7 @@ loop
     uhsub8  r4, r4, r6
     eor     r4, r4, r10
 
-    smlad   r11, r7, r7, r11  ; dual signed multiply, add and accumulate (2)
+    smlad   r11, r7, r7, r11    ; dual signed multiply, add and accumulate (2)
 
     usub8   r6, r4, r5          ; calculate difference
     sel     r7, r6, lr          ; select bytes with positive difference
@@ -129,7 +130,7 @@ loop
 
     ; 4th 4 pixels
     ldr     r4, [r0, #12]       ; load 4 src pixels
-    ldr     r6, [r0, #13]       ; load 4 src pixels with 1 byte offset
+    ldr     r6, [r9, #12]       ; load 4 src pixels from next row
     ldr     r5, [r2, #12]       ; load 4 ref pixels
 
     ; bilinear interpolation
@@ -160,6 +161,7 @@ loop
     uxtb16  r7, r6, ror #8      ; another two pixels to halfwords
     smlad   r11, r5, r5, r11    ; dual signed multiply, add and accumulate (1)
     smlad   r11, r7, r7, r11    ; dual signed multiply, add and accumulate (2)
+
 
     subs    r12, r12, #1
 

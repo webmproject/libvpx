@@ -12,7 +12,7 @@
 #define VP9_COMMON_MIPS_MSA_VP9_CONVOLVE_MSA_H_
 
 #include "vp9/common/vp9_filter.h"
-#include "vp9/common/mips/msa/vp9_macros_msa.h"
+#include "vpx_dsp/mips/macros_msa.h"
 
 extern const uint8_t mc_filt_mask_arr[16 * 3];
 

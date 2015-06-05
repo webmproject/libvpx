@@ -29,7 +29,7 @@
 #include "vp8/common/quant_common.h"
 #include "encodemb.h"
 #include "quantize.h"
-#include "vp8/common/variance.h"
+#include "vpx_dsp/variance.h"
 #include "mcomp.h"
 #include "rdopt.h"
 #include "vpx_mem/vpx_mem.h"
@@ -500,9 +500,9 @@ int VP8_UVSSE(MACROBLOCK *x)
 
     if ((mv_row | mv_col) & 7)
     {
-        vp8_sub_pixel_variance8x8(uptr, pre_stride,
+        vpx_sub_pixel_variance8x8(uptr, pre_stride,
             mv_col & 7, mv_row & 7, upred_ptr, uv_stride, &sse2);
-        vp8_sub_pixel_variance8x8(vptr, pre_stride,
+        vpx_sub_pixel_variance8x8(vptr, pre_stride,
             mv_col & 7, mv_row & 7, vpred_ptr, uv_stride, &sse1);
         sse2 += sse1;
     }

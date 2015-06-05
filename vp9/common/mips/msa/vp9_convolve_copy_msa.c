@@ -9,7 +9,7 @@
  */
 
 #include <string.h>
-#include "vp9/common/mips/msa/vp9_macros_msa.h"
+#include "vpx_dsp/mips/macros_msa.h"
 
 static void copy_width8_msa(const uint8_t *src, int32_t src_stride,
                             uint8_t *dst, int32_t dst_stride, int32_t height) {

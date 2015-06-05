@@ -8,6 +8,8 @@
 ;  be found in the AUTHORS file in the root of the source tree.
 ;
 
+%define program_name vpx
+
 %include "third_party/x86inc/x86inc.asm"
 
 SECTION_RODATA
@@ -39,7 +41,7 @@ bilin_filter_m_ssse3: times  8 db 16,  0
 
 SECTION .text
 
-; int vp9_sub_pixel_varianceNxh(const uint8_t *src, ptrdiff_t src_stride,
+; int vpx_sub_pixel_varianceNxh(const uint8_t *src, ptrdiff_t src_stride,
 ;                               int x_offset, int y_offset,
 ;                               const uint8_t *dst, ptrdiff_t dst_stride,
 ;                               int height, unsigned int *sse);
