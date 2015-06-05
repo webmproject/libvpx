@@ -330,10 +330,6 @@ static const arg_def_t sharpness = ARG_DEF(
     NULL, "sharpness", 1, "Loop filter sharpness (0..7)");
 static const arg_def_t static_thresh = ARG_DEF(
     NULL, "static-thresh", 1, "Motion detection threshold");
-static const arg_def_t cpu_used_vp8 = ARG_DEF(
-    NULL, "cpu-used", 1, "CPU Used (-16..16)");
-static const arg_def_t cpu_used_vp9 = ARG_DEF(
-    NULL, "cpu-used", 1, "CPU Used (-8..8)");
 static const arg_def_t auto_altref = ARG_DEF(
     NULL, "auto-alt-ref", 1, "Enable automatic alt reference frames");
 static const arg_def_t arnr_maxframes = ARG_DEF(
@@ -353,17 +349,14 @@ static const arg_def_t cq_level = ARG_DEF(
     NULL, "cq-level", 1, "Constant/Constrained Quality level");
 static const arg_def_t max_intra_rate_pct = ARG_DEF(
     NULL, "max-intra-rate", 1, "Max I-frame bitrate (pct)");
-static const arg_def_t max_inter_rate_pct = ARG_DEF(
-    NULL, "max-inter-rate", 1, "Max P-frame bitrate (pct)");
-static const arg_def_t gf_cbr_boost_pct = ARG_DEF(
-    NULL, "gf-cbr-boost", 1, "Boost for Golden Frame in CBR mode (pct)");
-
-static const arg_def_t screen_content_mode = ARG_DEF(NULL, "screen-content-mode", 1,
-                                                     "Screen content mode");
 
 #if CONFIG_VP8_ENCODER
+static const arg_def_t cpu_used_vp8 = ARG_DEF(
+    NULL, "cpu-used", 1, "CPU Used (-16..16)");
 static const arg_def_t token_parts = ARG_DEF(
     NULL, "token-parts", 1, "Number of token partitions to use, log2");
+static const arg_def_t screen_content_mode = ARG_DEF(
+    NULL, "screen-content-mode", 1, "Screen content mode");
 static const arg_def_t *vp8_args[] = {
   &cpu_used_vp8, &auto_altref, &noise_sens, &sharpness, &static_thresh,
   &token_parts, &arnr_maxframes, &arnr_strength, &arnr_type,
@@ -382,6 +375,8 @@ static const int vp8_arg_ctrl_map[] = {
 #endif
 
 #if CONFIG_VP9_ENCODER
+static const arg_def_t cpu_used_vp9 = ARG_DEF(
+    NULL, "cpu-used", 1, "CPU Used (-8..8)");
 static const arg_def_t tile_cols = ARG_DEF(
     NULL, "tile-columns", 1, "Number of tile columns to use, log2");
 static const arg_def_t tile_rows = ARG_DEF(
@@ -397,6 +392,10 @@ static const arg_def_t aq_mode = ARG_DEF(
 static const arg_def_t frame_periodic_boost = ARG_DEF(
     NULL, "frame-boost", 1,
     "Enable frame periodic boost (0: off (default), 1: on)");
+static const arg_def_t gf_cbr_boost_pct = ARG_DEF(
+    NULL, "gf-cbr-boost", 1, "Boost for Golden Frame in CBR mode (pct)");
+static const arg_def_t max_inter_rate_pct = ARG_DEF(
+    NULL, "max-inter-rate", 1, "Max P-frame bitrate (pct)");
 
 static const struct arg_enum_list color_space_enum[] = {
   { "unknown", VPX_CS_UNKNOWN },
