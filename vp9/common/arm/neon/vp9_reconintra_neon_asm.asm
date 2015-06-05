@@ -298,8 +298,7 @@ loop_h
 |vp9_tm_predictor_4x4_neon| PROC
     ; Load ytop_left = above[-1];
     sub                 r12, r2, #1
-    ldrb                r12, [r12]
-    vdup.u8             d0, r12
+    vld1.u8             {d0[]}, [r12]
 
     ; Load above 4 pixels
     vld1.32             {d2[0]}, [r2]
@@ -309,10 +308,10 @@ loop_h
 
     ; Load left row by row and compute left + (above - ytop_left)
     ; 1st row and 2nd row
-    ldrb                r12, [r3], #1
-    ldrb                r2, [r3], #1
-    vdup.u16            q1, r12
-    vdup.u16            q2, r2
+    vld1.u8             {d2[]}, [r3]!
+    vld1.u8             {d4[]}, [r3]!
+    vmovl.u8            q1, d2
+    vmovl.u8            q2, d4
     vadd.s16            q1, q1, q3
     vadd.s16            q2, q2, q3
     vqmovun.s16         d0, q1
@@ -321,10 +320,10 @@ loop_h
     vst1.32             {d1[0]}, [r0], r1
 
     ; 3rd row and 4th row
-    ldrb                r12, [r3], #1
-    ldrb                r2, [r3], #1
-    vdup.u16            q1, r12
-    vdup.u16            q2, r2
+    vld1.u8             {d2[]}, [r3]!
+    vld1.u8             {d4[]}, [r3]
+    vmovl.u8            q1, d2
+    vmovl.u8            q2, d4
     vadd.s16            q1, q1, q3
     vadd.s16            q2, q2, q3
     vqmovun.s16         d0, q1
