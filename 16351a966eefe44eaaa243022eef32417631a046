@@ -22,6 +22,29 @@
       "revId": "16351a966eefe44eaaa243022eef32417631a046",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d9df0c22_2573adc6",
+        "filename": "vp9/encoder/vp9_firstpass.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-06-05T18:45:46Z",
+      "side": 1,
+      "message": "\"dead zone\" is terminology usually associated with the quantizer and may be confusing. Could we use \"inactive zone\" or some other descriptor.",
+      "range": {
+        "startLine": 55,
+        "startChar": 9,
+        "endLine": 55,
+        "endChar": 23
+      },
+      "revId": "16351a966eefe44eaaa243022eef32417631a046",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
