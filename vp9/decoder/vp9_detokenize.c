@@ -59,10 +59,8 @@ static int decode_coefs(const MACROBLOCKD *xd,
   const vp9_prob (*coef_probs)[COEFF_CONTEXTS][UNCONSTRAINED_NODES] =
       fc->coef_probs[tx_size][type][ref];
   const vp9_prob *prob;
-  unsigned int (*coef_counts)[COEFF_CONTEXTS][UNCONSTRAINED_NODES + 1] =
-      counts->coef[tx_size][type][ref];
-  unsigned int (*eob_branch_count)[COEFF_CONTEXTS] =
-      counts->eob_branch[tx_size][type][ref];
+  unsigned int (*coef_counts)[COEFF_CONTEXTS][UNCONSTRAINED_NODES + 1];
+  unsigned int (*eob_branch_count)[COEFF_CONTEXTS];
   uint8_t token_cache[32 * 32];
   const uint8_t *band_translate = get_band_translate(tx_size);
   const int dq_shift = (tx_size == TX_32X32);
@@ -74,6 +72,11 @@ static int decode_coefs(const MACROBLOCKD *xd,
   const uint8_t *cat4_prob;
   const uint8_t *cat5_prob;
   const uint8_t *cat6_prob;
+
+  if (counts) {
+    coef_counts = counts->coef[tx_size][type][ref];
+    eob_branch_count = counts->eob_branch[tx_size][type][ref];
+  }
 
 #if CONFIG_VP9_HIGHBITDEPTH
   if (xd->bd > VPX_BITS_8) {
