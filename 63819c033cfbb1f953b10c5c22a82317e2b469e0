@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d9df0c22_880f3869",
+        "filename": "vp9/decoder/vp9_detokenize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-05T19:23:39Z",
+      "side": 1,
+      "message": "could probably do a cleanup pass later and access the members directly since you\u0027re checking counts everywhere",
+      "revId": "63819c033cfbb1f953b10c5c22a82317e2b469e0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
