@@ -211,6 +211,14 @@ INTRA_PRED_TEST(NEON, TestIntraPred4, NULL, NULL, NULL, NULL,
                 NULL, NULL, NULL, NULL, vp9_tm_predictor_4x4_neon)
 #endif  // HAVE_NEON
 
+#if HAVE_MSA
+INTRA_PRED_TEST(MSA, TestIntraPred4, vp9_dc_predictor_4x4_msa,
+                vp9_dc_left_predictor_4x4_msa, vp9_dc_top_predictor_4x4_msa,
+                vp9_dc_128_predictor_4x4_msa, vp9_v_predictor_4x4_msa,
+                vp9_h_predictor_4x4_msa, NULL, NULL, NULL, NULL, NULL,
+                NULL, vp9_tm_predictor_4x4_msa)
+#endif  // HAVE_MSA
+
 // -----------------------------------------------------------------------------
 // 8x8
 
@@ -256,6 +264,14 @@ INTRA_PRED_TEST(NEON, TestIntraPred8, vp9_dc_predictor_8x8_neon,
 
 #endif  // HAVE_NEON
 
+#if HAVE_MSA
+INTRA_PRED_TEST(MSA, TestIntraPred8, vp9_dc_predictor_8x8_msa,
+                vp9_dc_left_predictor_8x8_msa, vp9_dc_top_predictor_8x8_msa,
+                vp9_dc_128_predictor_8x8_msa, vp9_v_predictor_8x8_msa,
+                vp9_h_predictor_8x8_msa, NULL, NULL, NULL, NULL, NULL,
+                NULL, vp9_tm_predictor_8x8_msa)
+#endif  // HAVE_MSA
+
 // -----------------------------------------------------------------------------
 // 16x16
 
@@ -299,6 +315,14 @@ INTRA_PRED_TEST(NEON, TestIntraPred16, vp9_dc_predictor_16x16_neon,
                 vp9_tm_predictor_16x16_neon)
 #endif  // HAVE_NEON
 
+#if HAVE_MSA
+INTRA_PRED_TEST(MSA, TestIntraPred16, vp9_dc_predictor_16x16_msa,
+                vp9_dc_left_predictor_16x16_msa, vp9_dc_top_predictor_16x16_msa,
+                vp9_dc_128_predictor_16x16_msa, vp9_v_predictor_16x16_msa,
+                vp9_h_predictor_16x16_msa, NULL, NULL, NULL, NULL, NULL,
+                NULL, vp9_tm_predictor_16x16_msa)
+#endif  // HAVE_MSA
+
 // -----------------------------------------------------------------------------
 // 32x32
 
@@ -336,5 +360,13 @@ INTRA_PRED_TEST(NEON, TestIntraPred32, NULL, NULL, NULL, NULL,
                 vp9_v_predictor_32x32_neon, vp9_h_predictor_32x32_neon, NULL,
                 NULL, NULL, NULL, NULL, NULL, vp9_tm_predictor_32x32_neon)
 #endif  // HAVE_NEON
+
+#if HAVE_MSA
+INTRA_PRED_TEST(MSA, TestIntraPred32, vp9_dc_predictor_32x32_msa,
+                vp9_dc_left_predictor_32x32_msa, vp9_dc_top_predictor_32x32_msa,
+                vp9_dc_128_predictor_32x32_msa, vp9_v_predictor_32x32_msa,
+                vp9_h_predictor_32x32_msa, NULL, NULL, NULL, NULL, NULL,
+                NULL, vp9_tm_predictor_32x32_msa)
+#endif  // HAVE_MSA
 
 #include "test/test_libvpx.cc"
