@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f9a690c2_b569a81f",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-06-05T18:42:07Z",
+      "side": 1,
+      "message": "You can remove cm as a parameter and extract it from cpi in the function body.",
+      "range": {
+        "startLine": 45,
+        "startChar": 66,
+        "endLine": 45,
+        "endChar": 67
+      },
+      "revId": "d936403ce559c7ac41794b6b87f3abaec70e49b9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "99e914d2_c34da590",
+        "filename": "vp9/encoder/vp9_speed_features.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2015-06-05T18:42:07Z",
+      "side": 1,
+      "message": "\"...then reset disable_split_mask for speeds 1-4.\"",
+      "range": {
+        "startLine": 90,
+        "startChar": 37,
+        "endLine": 90,
+        "endChar": 55
+      },
+      "revId": "d936403ce559c7ac41794b6b87f3abaec70e49b9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
