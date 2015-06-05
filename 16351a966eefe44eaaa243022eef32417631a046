@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d9df0c22_b27b88a0",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1155,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2015-06-05T15:39:00Z",
+      "side": 1,
+      "message": "how about reuse fclamp() defined in vp9_common.h, so it will be something like: \n dead_zone \u003d fclamp(dead_zone, 0.0, 1.0);",
+      "range": {
+        "startLine": 1155,
+        "startChar": 75,
+        "endLine": 1155,
+        "endChar": 76
+      },
+      "revId": "16351a966eefe44eaaa243022eef32417631a046",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
