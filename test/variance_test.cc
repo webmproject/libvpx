@@ -1976,12 +1976,9 @@ INSTANTIATE_TEST_CASE_P(
 #if HAVE_NEON_ASM
 const SubpixVarMxNFunc vp8_subpel_variance16x16_neon =
     vp8_sub_pixel_variance16x16_neon;
-const SubpixVarMxNFunc vp8_subpel_variance8x8_neon =
-    vp8_sub_pixel_variance8x8_neon;
 INSTANTIATE_TEST_CASE_P(
     NEON, VP8SubpelVarianceTest,
-    ::testing::Values(make_tuple(3, 3, vp8_subpel_variance8x8_neon, 0),
-                      make_tuple(4, 4, vp8_subpel_variance16x16_neon, 0)));
+    ::testing::Values(make_tuple(4, 4, vp8_subpel_variance16x16_neon, 0)));
 #endif  // HAVE_NEON_ASM
 #endif  // CONFIG_VP8
 

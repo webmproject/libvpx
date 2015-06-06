@@ -245,10 +245,9 @@ specialize qw/vp8_sub_pixel_variance4x4 mmx sse2/;
 $vp8_sub_pixel_variance4x4_sse2=vp8_sub_pixel_variance4x4_wmt;
 
 add_proto qw/unsigned int vp8_sub_pixel_variance8x8/, "const unsigned char  *src_ptr, int  source_stride, int  xoffset, int  yoffset, const unsigned char *ref_ptr, int Refstride, unsigned int *sse";
-specialize qw/vp8_sub_pixel_variance8x8 mmx sse2 media neon_asm/;
+specialize qw/vp8_sub_pixel_variance8x8 mmx sse2 media/;
 $vp8_sub_pixel_variance8x8_sse2=vp8_sub_pixel_variance8x8_wmt;
 $vp8_sub_pixel_variance8x8_media=vp8_sub_pixel_variance8x8_armv6;
-$vp8_sub_pixel_variance8x8_neon_asm=vp8_sub_pixel_variance8x8_neon;
 
 add_proto qw/unsigned int vp8_sub_pixel_variance8x16/, "const unsigned char  *src_ptr, int  source_stride, int  xoffset, int  yoffset, const unsigned char *ref_ptr, int Refstride, unsigned int *sse";
 specialize qw/vp8_sub_pixel_variance8x16 mmx sse2/;
