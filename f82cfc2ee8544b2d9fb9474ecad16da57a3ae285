@@ -22,6 +22,30 @@
       "revId": "f82cfc2ee8544b2d9fb9474ecad16da57a3ae285",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "796b8031_464454ec",
+        "filename": "vpxenc.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 379,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2015-06-06T01:44:23Z",
+      "side": 1,
+      "message": "maybe, but not in this change. that could be done with a pass through any docs that might exist...\nffmpeg\u0027s still accepting a larger range, so the encoder itself should be tolerant even if it caps it.",
+      "parentUuid": "59831c1d_9094bc4d",
+      "range": {
+        "startLine": 379,
+        "startChar": 11,
+        "endLine": 379,
+        "endChar": 14
+      },
+      "revId": "f82cfc2ee8544b2d9fb9474ecad16da57a3ae285",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
