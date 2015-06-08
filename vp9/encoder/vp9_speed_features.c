@@ -19,6 +19,28 @@ static int frame_is_boosted(const VP9_COMP *cpi) {
   return frame_is_kf_gf_arf(cpi) || vp9_is_upper_layer_key_frame(cpi);
 }
 
+// Sets a partition size down to which the auto partition code will always
+// search (can go lower), based on the image dimensions. The logic here
+// is that the extent to which ringing artefacts are offensive, depends
+// partly on the screen area that over which they propogate. Propogation is
+// limited by transform block size but the screen area take up by a given block
+// size will be larger for a small image format stretched to full screen.
+static BLOCK_SIZE set_partition_min_limit(VP9_COMMON *const cm) {
+  unsigned int screen_area = (cm->width * cm->height);
+
+  // Select block size based on image format size.
+  if (screen_area < 1280 * 720) {
+    // Formats smaller in area than 720P
+    return BLOCK_4X4;
+  } else if (screen_area < 1920 * 1080) {
+    // Format >= 720P and < 1080P
+    return BLOCK_8X8;
+  } else {
+    // Formats 1080P and up
+    return BLOCK_16X16;
+  }
+}
+
 static void set_good_speed_feature_framesize_dependent(VP9_COMMON *cm,
                                                        SPEED_FEATURES *sf,
                                                        int speed) {
@@ -45,6 +67,7 @@ static void set_good_speed_feature_framesize_dependent(VP9_COMMON *cm,
       sf->partition_search_breakout_dist_thr = (1 << 22);
       sf->partition_search_breakout_rate_thr = 100;
     }
+    sf->rd_auto_partition_min_limit = set_partition_min_limit(cm);
   }
 
   if (speed >= 3) {
@@ -69,29 +92,6 @@ static void set_good_speed_feature_framesize_dependent(VP9_COMMON *cm,
       sf->partition_search_breakout_dist_thr = (1 << 24);
     }
     sf->disable_split_mask = DISABLE_ALL_SPLIT;
-  }
-}
-
-// Sets a partition size down to which the auto partition code will always
-// search (can go lower), based on the image dimensions. The logic here
-// is that the extent to which ringing artefacts are offensive, depends
-// partly on the screen area that over which they propogate. Propogation is
-// limited by transform block size but the screen area take up by a given block
-// size will be larger for a small image format stretched to full screen.
-static BLOCK_SIZE set_partition_min_limit(VP9_COMP *cpi) {
-  VP9_COMMON *const cm = &cpi->common;
-  unsigned int screen_area = (cm->width * cm->height);
-
-  // Select block size based on image format size.
-  if (screen_area < 1280 * 720) {
-    // Formats smaller in area than 720P
-    return BLOCK_4X4;
-  } else if (screen_area < 1920 * 1080) {
-    // Format >= 720P and < 1080P
-    return BLOCK_8X8;
-  } else {
-    // Formats 1080P and up
-    return BLOCK_16X16;
   }
 }
 
@@ -139,7 +139,6 @@ static void set_good_speed_feature(VP9_COMP *cpi, VP9_COMMON *cm,
     sf->disable_filter_search_var_thresh = 100;
     sf->comp_inter_joint_search_thresh = BLOCK_SIZES;
     sf->auto_min_max_partition_size = RELAXED_NEIGHBORING_MIN_MAX;
-    sf->rd_auto_partition_min_limit = set_partition_min_limit(cpi);
     sf->allow_partition_search_skip = 1;
   }
 
