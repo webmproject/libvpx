@@ -608,7 +608,6 @@ int main(int argc, char **argv) {
   // Real time parameters.
   cfg.rc_dropframe_thresh = strtol(argv[9], NULL, 0);
   cfg.rc_end_usage = VPX_CBR;
-  cfg.rc_resize_allowed = 0;
   cfg.rc_min_quantizer = 2;
   cfg.rc_max_quantizer = 56;
   if (strncmp(encoder->name, "vp9", 3) == 0)
@@ -618,6 +617,9 @@ int main(int argc, char **argv) {
   cfg.rc_buf_initial_sz = 500;
   cfg.rc_buf_optimal_sz = 600;
   cfg.rc_buf_sz = 1000;
+
+  // Disable dynamic resizing by default.
+  cfg.rc_resize_allowed = 0;
 
   // Use 1 thread as default.
   cfg.g_threads = 1;

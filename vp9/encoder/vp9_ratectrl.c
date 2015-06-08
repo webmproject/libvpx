@@ -1596,6 +1596,7 @@ void vp9_rc_get_one_pass_cbr_params(VP9_COMP *cpi) {
     target = calc_pframe_target_size_one_pass_cbr(cpi);
 
   vp9_rc_set_frame_target(cpi, target);
+  cpi->resize_state = vp9_resize_one_pass_cbr(cpi);
 }
 
 int vp9_compute_qdelta(const RATE_CONTROL *rc, double qstart, double qtarget,
@@ -1755,4 +1756,93 @@ void vp9_set_target_rate(VP9_COMP *cpi) {
   if (cpi->oxcf.rc_mode == VPX_VBR || cpi->oxcf.rc_mode == VPX_CQ)
     vbr_rate_correction(cpi, &target_rate);
   vp9_rc_set_frame_target(cpi, target_rate);
+}
+
+// Check if we should resize, based on average QP from past x frames.
+// Only allow for resize at most one scale down for now, scaling factor is 2.
+int vp9_resize_one_pass_cbr(VP9_COMP *cpi) {
+  const VP9_COMMON *const cm = &cpi->common;
+  RATE_CONTROL *const rc = &cpi->rc;
+  int resize_now = 0;
+  cpi->resize_scale_num = 1;
+  cpi->resize_scale_den = 1;
+  // Don't resize on key frame; reset the counters on key frame.
+  if (cm->frame_type == KEY_FRAME) {
+    cpi->resize_avg_qp = 0;
+    cpi->resize_count = 0;
+    return 0;
+  }
+  // Resize based on average QP over some window.
+  // Ignore samples close to key frame, since QP is usually high after key.
+  if (cpi->rc.frames_since_key > 2 * cpi->framerate) {
+    const int window = 5 * cpi->framerate;
+    cpi->resize_avg_qp += cm->base_qindex;
+    if (cpi->rc.buffer_level < 0)
+      ++cpi->resize_buffer_underflow;
+    ++cpi->resize_count;
+    // Check for resize action every "window" frames.
+    if (cpi->resize_count == window) {
+      int avg_qp = cpi->resize_avg_qp / cpi->resize_count;
+      // Resize down if buffer level has underflowed sufficent amount in past
+      // window, and we are at original resolution.
+      // Resize back up if average QP is low, and we are currently in a resized
+      // down state.
+      if (cpi->resize_state == 0 &&
+          cpi->resize_buffer_underflow > (cpi->resize_count >> 3)) {
+        resize_now = 1;
+      } else if (cpi->resize_state == 1 &&
+                 avg_qp < 40 * cpi->rc.worst_quality / 100) {
+        resize_now = -1;
+      }
+      // Reset for next window measurement.
+      cpi->resize_avg_qp = 0;
+      cpi->resize_count = 0;
+      cpi->resize_buffer_underflow = 0;
+    }
+  }
+  // If decision is to resize, reset some quantities, and check is we should
+  // reduce rate correction factor,
+  if (resize_now != 0) {
+    int target_bits_per_frame;
+    int active_worst_quality;
+    int qindex;
+    int tot_scale_change;
+    // For now, resize is by 1/2 x 1/2.
+    cpi->resize_scale_num = 1;
+    cpi->resize_scale_den = 2;
+    tot_scale_change = (cpi->resize_scale_den * cpi->resize_scale_den) /
+        (cpi->resize_scale_num * cpi->resize_scale_num);
+    // Reset buffer level to optimal, update target size.
+    rc->buffer_level = rc->optimal_buffer_level;
+    rc->bits_off_target = rc->optimal_buffer_level;
+    rc->this_frame_target = calc_pframe_target_size_one_pass_cbr(cpi);
+    // Reset cyclic refresh parameters.
+    if (cpi->oxcf.aq_mode == CYCLIC_REFRESH_AQ && cm->seg.enabled)
+      vp9_cyclic_refresh_reset_resize(cpi);
+    // Get the projected qindex, based on the scaled target frame size (scaled
+    // so target_bits_per_mb in vp9_rc_regulate_q will be correct target).
+    target_bits_per_frame = (resize_now == 1) ?
+        rc->this_frame_target * tot_scale_change :
+        rc->this_frame_target / tot_scale_change;
+    active_worst_quality = calc_active_worst_quality_one_pass_cbr(cpi);
+    qindex = vp9_rc_regulate_q(cpi,
+                               target_bits_per_frame,
+                               rc->best_quality,
+                               active_worst_quality);
+    // If resize is down, check if projected q index is close to worst_quality,
+    // and if so, reduce the rate correction factor (since likely can afford
+    // lower q for resized frame).
+    if (resize_now == 1 &&
+        qindex > 90 * cpi->rc.worst_quality / 100) {
+      rc->rate_correction_factors[INTER_NORMAL] *= 0.85;
+    }
+    // If resize is back up, check if projected q index is too much above the
+    // current base_qindex, and if so, reduce the rate correction factor
+    // (since prefer to keep q for resized frame at least close to previous q).
+    if (resize_now == -1 &&
+       qindex > 130 * cm->base_qindex / 100) {
+      rc->rate_correction_factors[INTER_NORMAL] *= 0.9;
+    }
+  }
+  return resize_now;
 }
