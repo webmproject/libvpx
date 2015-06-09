@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "b9cfb89d_1e459162",
+        "filename": "vp9/encoder/vp9_firstpass.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1155,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2015-06-09T14:34:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d9df0c22_b27b88a0",
+      "range": {
+        "startLine": 1155,
+        "startChar": 75,
+        "endLine": 1155,
+        "endChar": 76
+      },
+      "revId": "16351a966eefe44eaaa243022eef32417631a046",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d9df0c22_2573adc6",
         "filename": "vp9/encoder/vp9_firstpass.h",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2015-06-05T18:45:46Z",
       "side": 1,
       "message": "\"dead zone\" is terminology usually associated with the quantizer and may be confusing. Could we use \"inactive zone\" or some other descriptor.",
+      "range": {
+        "startLine": 55,
+        "startChar": 9,
+        "endLine": 55,
+        "endChar": 23
+      },
+      "revId": "16351a966eefe44eaaa243022eef32417631a046",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b9cfb89d_9b87735f",
+        "filename": "vp9/encoder/vp9_firstpass.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2015-06-09T14:34:50Z",
+      "side": 1,
+      "message": "I think this is a good idea and will change all names accordingly.",
+      "parentUuid": "d9df0c22_2573adc6",
       "range": {
         "startLine": 55,
         "startChar": 9,
