@@ -48,6 +48,8 @@ struct CYCLIC_REFRESH {
   int16_t motion_thresh;
   // Rate target ratio to set q delta.
   double rate_ratio_qdelta;
+  // Boost factor for rate target ratio, for segment CR_SEGMENT_ID_BOOST2.
+  double rate_boost_fac;
   double low_content_avg;
   int qindex_delta_seg1;
   int qindex_delta_seg2;
@@ -91,6 +93,19 @@ static int apply_cyclic_refresh_bitrate(const VP9_COMMON *cm,
     return 0;
   else
     return 1;
+}
+
+static void adjust_cyclic_refresh_parameters(VP9_COMP *const cpi) {
+  const VP9_COMMON *const cm = &cpi->common;
+  const RATE_CONTROL *const rc = &cpi->rc;
+  CYCLIC_REFRESH *const cr = cpi->cyclic_refresh;
+  // Adjust some parameters, currently only for low resolutions at low bitrates.
+  if (cm->width <= 352 &&
+      cm->height <= 288 &&
+      rc->avg_frame_bandwidth < 3400) {
+      cr->motion_thresh = 4;
+      cr->rate_boost_fac = 1.25;
+  }
 }
 
 // Check if this coding block, of size bsize, should be considered for refresh
@@ -462,6 +477,7 @@ void vp9_cyclic_refresh_setup(VP9_COMP *const cpi) {
     vp9_clear_system_state();
     cr->max_qdelta_perc = 50;
     cr->time_for_refresh = 0;
+    cr->rate_boost_fac = 1.7;
     // Set rate threshold to some multiple (set to 2 for now) of the target
     // rate (target is given by sb64_target_rate and scaled by 256).
     cr->thresh_rate_sb = ((int64_t)(rc->sb64_target_rate) << 8) << 2;
@@ -470,6 +486,9 @@ void vp9_cyclic_refresh_setup(VP9_COMP *const cpi) {
     // vp9_convert_qindex_to_q(), vp9_ac_quant(), ac_qlookup*[].
     cr->thresh_dist_sb = ((int64_t)(q * q)) << 2;
     cr->motion_thresh = 32;
+
+    adjust_cyclic_refresh_parameters(cpi);
+
     // Set up segmentation.
     // Clear down the segment map.
     vp9_enable_segmentation(&cm->seg);
@@ -505,7 +524,7 @@ void vp9_cyclic_refresh_setup(VP9_COMP *const cpi) {
     // Set a more aggressive (higher) q delta for segment BOOST2.
     qindex_delta = compute_deltaq(cpi, cm->base_qindex,
                                   MIN(CR_MAX_RATE_TARGET_RATIO,
-                                      CR_BOOST2_FAC * cr->rate_ratio_qdelta));
+                                  cr->rate_boost_fac * cr->rate_ratio_qdelta));
     cr->qindex_delta_seg2 = qindex_delta;
     vp9_set_segdata(seg, CR_SEGMENT_ID_BOOST2, SEG_LVL_ALT_Q, qindex_delta);
 
