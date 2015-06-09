@@ -302,6 +302,7 @@ EXPERIMENT_LIST="
     newmvref
     misc_entropy
     wavelets
+    ext_partition
 "
 CONFIG_LIST="
     external_build
