@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "39c4a87c_c8819705",
+        "filename": "vp9/encoder/vp9_dct.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 527,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2015-06-09T06:35:26Z",
+      "side": 1,
+      "message": "vp9_fdct16x16 uses a scaling of 8 from unitary. See the function above. Here we want a unitary transform. Hence the function is different. But the only difference is the scaling of the input. Everything else is identical.",
+      "parentUuid": "b9d41838_a141b80a",
+      "range": {
+        "startLine": 527,
+        "startChar": 41,
+        "endLine": 527,
+        "endChar": 42
+      },
+      "revId": "0e538e4a5b65fada1e041e537d27f88178c4170c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "796b8031_56b6b57c",
         "filename": "vp9/encoder/vp9_dct.c",
         "patchSetId": 8
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "39c4a87c_a8866319",
+        "filename": "vp9/encoder/vp9_dct.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 1601,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2015-06-09T06:35:26Z",
+      "side": 1,
+      "message": "vp9_fdct32 row dct is 4 times unitary. So this 2D transform is unitary (has no scaling). That is why this is a noscale version.",
+      "parentUuid": "796b8031_56b6b57c",
+      "range": {
+        "startLine": 1601,
+        "startChar": 0,
+        "endLine": 1601,
+        "endChar": 1
+      },
+      "revId": "0e538e4a5b65fada1e041e537d27f88178c4170c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "796b8031_d6a1c52d",
         "filename": "vp9/encoder/vp9_dwt.c",
         "patchSetId": 8
@@ -59,6 +107,30 @@
       "writtenOn": "2015-06-09T00:45:45Z",
       "side": 1,
       "message": "why is it 3-bit scaled? It is the noscale version.",
+      "range": {
+        "startLine": 290,
+        "startChar": 55,
+        "endLine": 290,
+        "endChar": 65
+      },
+      "revId": "0e538e4a5b65fada1e041e537d27f88178c4170c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b9a6d8d3_4c1a47a1",
+        "filename": "vp9/encoder/vp9_dwt.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 290,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2015-06-09T06:35:26Z",
+      "side": 1,
+      "message": "Changed to using a unitary 16x16 implementation, which obviates the need for the scaling above. Fixed comments.",
+      "parentUuid": "796b8031_d6a1c52d",
       "range": {
         "startLine": 290,
         "startChar": 55,
