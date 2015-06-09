@@ -91,7 +91,7 @@ static int search_bilateral_level(const YV12_BUFFER_CONFIG *sd,
   VP9_COMMON *const cm = &cpi->common;
   int i, bilateral_best, err;
   double best_cost;
-  double cost[BILATERAL_LEVELS_KF];
+  double cost;
   const int bilateral_level_bits = vp9_bilateral_level_bits(&cpi->common);
   const int bilateral_levels = 1 << bilateral_level_bits;
 #ifdef USE_RD_LOOP_POSTFILTER_SEARCH
@@ -109,11 +109,11 @@ static int search_bilateral_level(const YV12_BUFFER_CONFIG *sd,
   err = try_bilateral_frame(sd, cpi, 0, partial_frame);
 #ifdef USE_RD_LOOP_POSTFILTER_SEARCH
   bits = cm->lf.last_bilateral_level == 0 ? 0 : bilateral_level_bits;
-  cost[0] = RDCOST_DBL(x->rdmult, x->rddiv, (bits << 2), err);
+  cost = RDCOST_DBL(x->rdmult, x->rddiv, (bits << 2), err);
 #else
-  cost[0] = (double)err;
+  cost = (double)err;
 #endif
-  best_cost = cost[0];
+  best_cost = cost;
   for (i = 1; i <= bilateral_levels; ++i) {
     err = try_bilateral_frame(sd, cpi, i, partial_frame);
 #ifdef USE_RD_LOOP_POSTFILTER_SEARCH
@@ -121,13 +121,13 @@ static int search_bilateral_level(const YV12_BUFFER_CONFIG *sd,
     // when RDCOST is used.  However below we just scale both in the correct
     // ratios appropriately but not exactly by these values.
     bits = cm->lf.last_bilateral_level == i ? 0 : bilateral_level_bits;
-    cost[i] = RDCOST_DBL(x->rdmult, x->rddiv, (bits << 2), err);
+    cost = RDCOST_DBL(x->rdmult, x->rddiv, (bits << 2), err);
 #else
-    cost[i] = (double)err;
+    cost = (double)err;
 #endif
-    if (cost[i] < best_cost) {
+    if (cost < best_cost) {
       bilateral_best = i;
-      best_cost = cost[i];
+      best_cost = cost;
     }
   }
   if (best_cost_ret) *best_cost_ret = best_cost;
