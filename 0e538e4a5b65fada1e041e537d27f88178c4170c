@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b9d41838_a141b80a",
+        "filename": "vp9/encoder/vp9_dct.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 527,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-06-09T00:45:45Z",
+      "side": 1,
+      "message": "why not use vp9_fdct16x16 as building components, as in the 32x32 version below?",
+      "range": {
+        "startLine": 527,
+        "startChar": 41,
+        "endLine": 527,
+        "endChar": 42
+      },
+      "revId": "0e538e4a5b65fada1e041e537d27f88178c4170c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "796b8031_56b6b57c",
+        "filename": "vp9/encoder/vp9_dct.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 1601,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-06-09T00:45:45Z",
+      "side": 1,
+      "message": "so the total shift is 2 + 2 \u003d 4. I think the overall shift in vp9_fdct32x32 is 2. Are we shifting to much here?\n\nAlso, can we combine the column and row left shift operations?",
+      "range": {
+        "startLine": 1601,
+        "startChar": 0,
+        "endLine": 1601,
+        "endChar": 1
+      },
+      "revId": "0e538e4a5b65fada1e041e537d27f88178c4170c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "796b8031_d6a1c52d",
+        "filename": "vp9/encoder/vp9_dwt.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 290,
+      "author": {
+        "id": 1003005
+      },
+      "writtenOn": "2015-06-09T00:45:45Z",
+      "side": 1,
+      "message": "why is it 3-bit scaled? It is the noscale version.",
+      "range": {
+        "startLine": 290,
+        "startChar": 55,
+        "endLine": 290,
+        "endChar": 65
+      },
+      "revId": "0e538e4a5b65fada1e041e537d27f88178c4170c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
